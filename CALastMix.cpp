@@ -464,7 +464,7 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 					}
 				else if(ret>0)
 					{
-						ret=pMuxSocket->receive(pMixPacket);
+						ret=pMuxSocket->receive(pMixPacket); //receives a whol MixPacket
 						#ifdef LOG_PACKET_TIMES
 							getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_start);
 						#endif

@@ -166,13 +166,6 @@ typedef struct t_queue_entry tQueueEntry;
 
 //for that we store in our pool
 //normaly this is just the packet
-/*struct t_pool_entry:tQueueEntry;
-	{
-		#ifdef LOG_PACKET_TIMES
-			UINT64 pool_timestamp;
-		#endif	
-	};
-*/	
 typedef tQueueEntry tPoolEntry; 	
 
 #endif

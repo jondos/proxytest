@@ -45,6 +45,7 @@ extern CACmdLnOptions options;
 			diff_time,pChannelListEntry->trafficInFromUser,pChannelListEntry->trafficOutToUser,\
 			pChannelListEntry->packetsDataInFromUser,pChannelListEntry->packetsDataOutToUser); 
 #endif
+
 SINT32 CALastMixA::loop()
 	{
 #ifndef NEW_MIX_TYPE
@@ -57,22 +58,13 @@ SINT32 CALastMixA::loop()
 		CASocketGroup osocketgroupCacheRead(false);
 		CASocketGroup osocketgroupCacheWrite(true);
 #endif
-	/*	#ifdef LOG_PACKET_TIMES
-			tPoolEntry* pPoolEntry=new tPoolEntry;
-			MIXPACKET* pMixPacket=&pPoolEntry->mixpacket;
-		#else
-		*/	tQueueEntry* pQueueEntry=new tQueueEntry;
-			MIXPACKET* pMixPacket=&pQueueEntry->packet;
-		//#endif	
+		tQueueEntry* pQueueEntry=new tQueueEntry;
+		MIXPACKET* pMixPacket=&pQueueEntry->packet;
 		SINT32 ret;
 		SINT32 countRead;
 		lmChannelListEntry* pChannelListEntry;
 		UINT8 rsaBuff[RSA_SIZE];
-		//CONNECTION* tmpCon;
-//		HCHANNEL tmpID;
 		UINT8* tmpBuff=new UINT8[MIXPACKET_SIZE];
-		//osocketgroupMixIn.add(*m_pMuxIn);
-		//((CASocket*)*m_pMuxIn)->setNonBlocking(true);
 		bool bAktiv;
 		m_logUploadedPackets=m_logDownloadedPackets=0;
 		set64((UINT64&)m_logUploadedBytes,(UINT32)0);
@@ -166,7 +158,7 @@ SINT32 CALastMixA::loop()
 															m_logDownloadedPackets++;	
 													}
 												else
-														{    
+														{ //connection to proxy successfull
 															UINT16 payLen=ntohs(pMixPacket->payload.len);
 															#ifdef _DEBUG1
 																UINT8 c=pMixPacket->payload.data[30];
