@@ -293,7 +293,9 @@ THREAD_RETURN fm_loopSendToMix(void* param)
 							{
 								getcurrentTimeMicros(tmpU64);
 								pFirstMix->addToTimeingStats(diff64(tmpU64,timestamp),((MIXPACKET*)buff)->flags,true);
-								CAMsg::printMsg(LOG_CRIT,"Upload Packet processing time (arrival <--> send): %u µs\n",diff64(tmpU64,timestamp));
+								#ifdef _DEBUG
+									CAMsg::printMsg(LOG_CRIT,"Upload Packet processing time (arrival <--> send): %u µs\n",diff64(tmpU64,timestamp));
+								#endif
 							}	
 					}
 #endif					
