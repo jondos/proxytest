@@ -35,12 +35,20 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		{
 			public:
 				CASocketAddrUnix();
+				CASocketAddrUnix(const CASocketAddrUnix& addr);
 				
 				/**Returns the type (family) of the socket this address is for (always AF_LOCAL)
 					* @return AF_LOCAL
 					*/
 				int getType(){return AF_LOCAL;}
 				
+
+				CASocketAddr* clone()
+					{
+						return new CASocketAddrUnix(*this);
+					}
+			
+
 				/** Resturns the size of the SOCKADDR struct used.
 					* return sizeof(sockaddr_un)
 					*/
