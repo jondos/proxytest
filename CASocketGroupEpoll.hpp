@@ -39,24 +39,26 @@ class CASocketGroupEpoll
 			~CASocketGroupEpoll();
 			SINT32 setPoolForWrite(bool bWrite);
 			
-			SINT32 add(CASocket&s)
+			SINT32 add(CASocket&s,void * datapointer)
 				{
 					SINT32 ret=E_SUCCESS;
 					m_csFD_SET.lock();
 					SOCKET socket=(SOCKET)s;
 					m_pEpollEvent->data.fd=socket;
+					m_pEpollEvent->data.ptr=datapointer;
 					if(epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,socket,m_pEpollEvent)!=0)
 						ret=E_UNKNOWN;
 					m_csFD_SET.unlock();
 					return ret;
 				}
 
-			SINT32 add(CAMuxSocket&s)
+			SINT32 add(CAMuxSocket&s,void * datapointer)
 				{
 					SINT32 ret=E_SUCCESS;
 					m_csFD_SET.lock();
 					SOCKET socket=s.getSocket();
 					m_pEpollEvent->data.fd=socket;
+					m_pEpollEvent->data.ptr=datapointer;
 					if(epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,socket,m_pEpollEvent)!=0)
 						ret=E_UNKNOWN;
 					m_csFD_SET.unlock();
@@ -154,11 +156,28 @@ class CASocketGroupEpoll
 					return false;
 				}
 		
+			void * getFirstSignaledSocketData()
+				{
+					m_iAktSignaledSocket=0;
+					if(m_iNumOfReadyFD>0)
+						return m_pEvents[0].data.ptr;
+					return NULL;
+				}
+
+			void * getNextSignaledSocketData()
+				{
+					m_iAktSignaledSocket++;
+					if(m_iNumOfReadyFD>m_iAktSignaledSocket)
+						return m_pEvents[m_iAktSignaledSocket].data.ptr;
+					return NULL;
+				}
+
 		private:
 			SINT32 m_hEPFD; //the EPoll file descriptor
 			struct epoll_event* m_pEvents;
 			struct epoll_event* m_pEpollEvent;
 			SINT32 m_iNumOfReadyFD;
+			SINT32 m_iAktSignaledSocket;
 			CAMutex m_csFD_SET;
 	};
 #endif

@@ -32,7 +32,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "../CAInfoService.hpp"
 #include "../CAPool.hpp"
 #include "../CACmdLnOptions.hpp"
-
+#ifdef HAVE_EPOLL
+	#include "../CASocketGroupEpoll.hpp"
+#endif
 extern CACmdLnOptions options;
 
 SINT32 CAFirstMixA::loop()
@@ -82,16 +84,23 @@ SINT32 CAFirstMixA::loop()
 #define MAX_NEXT_MIX_QUEUE_SIZE 10000000 //10 MByte
 				if(m_pQueueSendToMix->getSize()<MAX_NEXT_MIX_QUEUE_SIZE)
 					{
-						fmHashTableEntry* pHashEntry=m_pChannelList->getFirst();
 						countRead=m_psocketgroupUsersRead->select(/*false,*/0);				// how many JAP<->mix connections have received data from their coresponding JAP
 						if(countRead>0)
 							bAktiv=true;
+						#ifdef HAVE_EPOLL
+						fmHashTableEntry* pHashEntry=(fmHashTableEntry*)m_psocketgroupUsersRead->getFirstSignaledSocketData();
+						while(pHashEntry!=NULL)
+							{
+								CAMuxSocket* pMuxSocket=pHashEntry->pMuxSocket;
+						#else
+						fmHashTableEntry* pHashEntry=m_pChannelList->getFirst();
 						while(pHashEntry!=NULL&&countRead>0)											// iterate through all connections as long as there is at least one active left
 							{
 								CAMuxSocket* pMuxSocket=pHashEntry->pMuxSocket;
 								if(m_psocketgroupUsersRead->isSignaled(*pMuxSocket))	// if this one seems to have data
 									{
 										countRead--;
+						#endif
 										ret=pMuxSocket->receive(pMixPacket,0);
 										#if defined LOG_PACKET_TIMES||defined(LOG_CHANNEL)
 											getcurrentTimeMicros(upload_packet_timestamp);
@@ -267,8 +276,12 @@ SINT32 CAFirstMixA::loop()
 															}
 													}
 											}
-									}
+								#ifdef HAVE_EPOLL
+									pHashEntry=(fmHashTableEntry*)m_psocketgroupUsersRead->getNextSignaledSocketData();
+								#else
+									}//if is signaled
 									pHashEntry=m_pChannelList->getNext();
+								#endif
 							}
 					}
 //Third step
