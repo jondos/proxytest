@@ -5,32 +5,84 @@
 #include "xml/xmloutput.h"
 #include "CACmdLnOptions.hpp"
 extern CACmdLnOptions options;
-class SocketOutputStream:public XML::OutputStream,public CASocket
+/*class SocketOutputStream:public XML::OutputStream,public CASocket
 	{
 		public:
 			int write(const char *buf, size_t bufLen)
 				{
 					return send((char*)buf,bufLen);
 				}
+	};
+*/
+class BufferOutputStream:public XML::OutputStream
+	{
+		public:
+			BufferOutputStream(unsigned int initsize,unsigned int g)
+				{
+					buffer=(char*)malloc(initsize);
+					size=initsize;
+					used=0;
+					grow=g;
+				}
+			
+			~BufferOutputStream()
+				{
+					free(buffer);
+				}
+			
+			int write(const char *buf, size_t bufLen)
+				{
+					if(size-used<bufLen)
+						{
+							size+=grow;
+							buffer=(char*)realloc(buffer,size);
+						}
+					memcpy(buffer+used,buf,bufLen);
+					used+=bufLen;
+					return bufLen;
+				}
 
+			char* getBuff()
+				{
+					return buffer;
+				}
+			
+			unsigned int getBufferSize()
+				{
+					return used;	
+				}
+
+			int reset()
+				{
+					used=0;
+					return 0;
+				}
+
+		private:
+			char* buffer;
+			unsigned int size;
+			unsigned int used;
+			unsigned int grow;
 	};
 THREAD_RETURN InfoLoop(void *p)
 	{
 		CAInfoService* pInfoService=(CAInfoService*)p;
-		SocketOutputStream oSocket;
+		CASocket oSocket;
 		CASocketAddr oAddr;
-		char* buff=new char[255];
-		options.getInfoServerHost(buff,255);
+		CASignature* pSignature=pInfoService->getSignature();
+		char* buff=new char[1024];
+		options.getInfoServerHost(buff,1024);
 		oAddr.setAddr(buff,options.getInfoServerPort());
-		delete buff;
-		XML::Output oxmlOut(oSocket);
+		BufferOutputStream oBufferStream(1024,1024);
+		XML::Output oxmlOut(oBufferStream);
 		int nUser,nRisk,nTraffic;
+		unsigned int buffLen;
 		while(pInfoService->getRun())
 			{
 				if(oSocket.connect(&oAddr)==E_SUCCESS)
 					{
-						oSocket.send("POST /feedback HTTP/1.0\r\n\r\n",27);
-						oxmlOut.BeginDocument();
+						oBufferStream.reset();
+						oxmlOut.BeginDocument("1.0","UTF-8",true);
 						oxmlOut.BeginElementAttrs("status");
 						oxmlOut.WriteAttr("anonServer","anon.inf.tu-dresden.de%3A6544");
 						pInfoService->getLevel(&nUser,&nRisk,&nTraffic);
@@ -40,11 +92,18 @@ THREAD_RETURN InfoLoop(void *p)
 						oxmlOut.EndAttrs();
 						oxmlOut.EndElement();
 						oxmlOut.EndDocument();
+						buffLen=1024;
+						pSignature->signXML(oBufferStream.getBuff(),oBufferStream.getBufferSize(),buff,&buffLen);
+						oSocket.send("POST /feedback HTTP/1.0\r\n\r\n",27);
+						buff[buffLen]=0;
+						printf(buff);
+						oSocket.send(buff,buffLen);
 	//					oSocket.close();
 					}
 				oSocket.close();	
 				sleep(60);
 			}
+		delete buff;
 	}
 
 CAInfoService::CAInfoService()
@@ -52,6 +111,7 @@ CAInfoService::CAInfoService()
 		InitializeCriticalSection(&csLevel);
 		nUser=nRisk=nTraffic=-1;
 		bRun=false;
+		pSignature=NULL;
 	}
 
 CAInfoService::~CAInfoService()
@@ -70,6 +130,12 @@ int CAInfoService::setLevel(int user,int risk,int traffic)
 		return 0;
 	}
 
+int CAInfoService::setSignature(CASignature* pSig)
+	{
+		pSignature=pSig;
+		return 0;
+	}
+
 int CAInfoService::getLevel(int* puser,int* prisk,int* ptraffic)
 	{
 		EnterCriticalSection(&csLevel);
@@ -85,6 +151,8 @@ int CAInfoService::getLevel(int* puser,int* prisk,int* ptraffic)
 
 int CAInfoService::start()
 	{
+		if(pSignature==NULL)
+			return -1;
 		bRun=true;
 		#ifdef _WIN32
 		 _beginthread(InfoLoop,0,this);

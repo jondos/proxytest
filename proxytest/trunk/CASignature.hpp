@@ -1,3 +1,5 @@
+#ifndef __CASIGNATURE__
+#define __CASIGNATURE__
 #define SIGKEY_XML 1
 class CASignature
 	{
@@ -14,3 +16,4 @@ class CASignature
 			int parseSignKeyXML(char* buff,int len);
 			int makeXMLCanonical(char* in,unsigned int len,char* out,unsigned int *outlen);
 	};
+#endif

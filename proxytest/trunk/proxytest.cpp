@@ -567,6 +567,23 @@ THREAD_RETURN fmIO(void *v)
 		 CAMsg::printMsg(LOG_DEBUG,"Pointer: %p,%p,%p,%p\n",&oMuxPacket.channel,&oMuxPacket.len,&oMuxPacket.type,&oMuxPacket.data);
 		#endif
 		CAInfoService oInfoService;
+		// reading SingKey....
+		char* fileBuff=new char[MAX_PATH];
+		options.getKeyFileName(fileBuff,MAX_PATH);
+		int handle=open(fileBuff,O_BINARY|O_RDONLY);
+		if(handle==-1)
+			THREAD_RETURN_ERROR;
+		len=filelength(handle);
+		read(handle,fileBuff,len);
+		close(handle);
+		CASignature oSignature;
+		if(oSignature.setSignKey(fileBuff,len,SIGKEY_XML)==-1)
+			{
+				delete fileBuff;
+				THREAD_RETURN_ERROR;
+			}
+		delete fileBuff;
+		oInfoService.setSignature(&oSignature);
 		oInfoService.setLevel(0,0,0);
 		oInfoService.start();
 		int nUser=0;
@@ -1054,7 +1071,7 @@ int main(int argc, const char* argv[])
  #endif
 #endif
 // Test!!!
-		CASignature oSig;
+/*		CASignature oSig;
 		char* in="<JAP><HJ>gh</HJ></JAP>"	;	
 		char buff[1000];
 		int handle=open("g:\\projects\\InfoService\\jap.priv.xml",O_BINARY|O_RDONLY);
@@ -1069,7 +1086,7 @@ int main(int argc, const char* argv[])
 		write(handle,buff,l);
 		close(handle);
 		exit(0);
-/*		CAASymCipher oRSA;
+*//*		CAASymCipher oRSA;
 		int handle=open("g:\\jap\\classes\\plain.bytes",O_BINARY|O_RDWR,S_IWRITE);
 		int MAX=filelength(handle);
 		unsigned char * buff=new unsigned char[MAX];
