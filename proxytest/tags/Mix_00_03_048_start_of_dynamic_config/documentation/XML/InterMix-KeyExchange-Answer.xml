@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<EncryptedKey>
+  <EncryptionMethod Algorithm="RSA" />
+  <CipherData>
+    <CipherValue>...</CipherValue>
+  </CipherData>
+  <Nonce>...</Nonce>
+  <Signature>...</Signature>
+</EncryptedKey>
