@@ -15,7 +15,8 @@
     #include <conio.h>
     #include <process.h>
     #define THREAD_RETURN void
-		#define THREAD_RETURN_ERROR return
+    #define THREAD_RETURN_ERROR return
+    #define THREAD_RETURN_SUCCESS return
 #else
     #include <sys/socket.h>
     #include <netinet/in.h>
@@ -40,6 +41,7 @@
     #define LeaveCriticalSection(p) pthread_mutex_unlock(p)
     #define THREAD_RETURN void*
     #define THREAD_RETURN_ERROR return(NULL)
+    #define THREAD_RETURN_SUCCESS return (NULL)
 #endif
 #include <stdio.h>
 #include <time.h>

@@ -14,7 +14,9 @@ typedef struct
 } log;
 
 CASocketAddr socketAddrSquid;
+#ifdef _DEBUG
 int sockets;
+#endif
 typedef struct 
 	{
 		CASocket* in;
@@ -235,7 +237,10 @@ THREAD_RETURN proxytomix(void* tmpPair)
 			delete outSocket;
 		delete (CASocketToMix*)tmpPair;
 		LeaveCriticalSection(&csClose);
+#ifdef _DEBUG
 		printf("Thread terminated\n");
+#endif
+		THREAD_RETURN_SUCCESS;
 	}
 
 THREAD_RETURN mixtoproxy(void* tmpPair)
@@ -266,14 +271,19 @@ THREAD_RETURN mixtoproxy(void* tmpPair)
 			delete outSocket;
 		delete (CAMixToSocket*)tmpPair;
 		LeaveCriticalSection(&csClose);
+#ifdef _DEBUG
 		printf("Thread terminated\n");
+#endif
+		THREAD_RETURN_SUCCESS;
 	}
 
 int main(int argc, char* argv[])
 	{
+#ifdef _DEBUG
 		sockets=0;
-		int err=0;
+#endif
 		#ifdef _WIN32
+    		int err=0;
 		WSADATA wsadata;
 		err=WSAStartup(0x0202,&wsadata);
 		#endif
@@ -334,7 +344,9 @@ int main(int argc, char* argv[])
 					    exit(-2);
 					}
 				#endif
+#ifdef _DEBUG
 				printf("%i\n",sockets);
+#endif
 			}
 		socketIn.close();
 //	close(handle);

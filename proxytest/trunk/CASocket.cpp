@@ -1,8 +1,9 @@
 #include "StdAfx.h"
 #include "CASocketAddr.hpp"
 #include "CASocket.hpp"
+#ifdef _DEBUG
 extern int sockets;
-
+#endif
 #define CLOSE_SEND		0x01
 #define CLOSE_RECEIVE 0x02
 #define CLOSE_BOTH		0x03
@@ -26,7 +27,9 @@ int CASocket::listen(LPSOCKETADDR psa)
 int CASocket::accept(CASocket &s)
 	{
 		s.m_Socket=::accept(m_Socket,NULL,NULL);
+#ifdef _DEBUG
 		sockets++;
+#endif
 		return 0;
 	}
 			
@@ -34,7 +37,9 @@ int CASocket::connect(LPSOCKETADDR psa)
 	{
 		if(m_Socket==0)
 			m_Socket=socket(AF_INET,SOCK_STREAM,0);
+#ifdef _DEBUG
 		sockets++;
+#endif
 		if(::connect(m_Socket,(LPSOCKADDR)psa,sizeof(*psa))!=0)
 		    return SOCKET_ERROR;
 		else
@@ -48,7 +53,9 @@ int CASocket::close()
 		if(m_Socket!=0)
 			{
 				::closesocket(m_Socket);
+#ifdef _DEBUG
 				sockets--;
+#endif
 				m_Socket=0;
 				ret=0;
 			}
