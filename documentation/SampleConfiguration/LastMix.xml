@@ -1,39 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MixConfiguration version="0.4">
-	<General>
-		<MixID>mixTwo</MixID>
-		<MixType>LastMix</MixType>
-		<MixName>LastMix</MixName>
-		<CascadeName>TestCascade</CascadeName>
-		<Daemon>False</Daemon>
-	</General>
-	<Network>
-		<ListenerInterfaces>
-			<ListenerInterface hidden="True">
-				<NetworkProtocol>RAW/TCP</NetworkProtocol>
-				<Host>localhost</Host>
-				<IP>127.0.0.1</IP>
-				<Port>3002</Port>
-			</ListenerInterface>
-		</ListenerInterfaces>
-		<Proxies>
-			<Proxy>
-				<ProxyType>HTTP</ProxyType>
-				<NetworkProtocol>RAW/TCP</NetworkProtocol>
-				<Host>localhost</Host>
-				<IP>127.0.0.1</IP>
-				<Port>3128</Port>
-			</Proxy>
-		</Proxies>
-		<InfoService>
-			<Host/>
-			<IP>127.0.0.1</IP>
-			<Port>6543</Port>
-		</InfoService>
-	</Network>
-	<Certificates>
-		<OwnCertificate>
-			<X509PKCS12 xml:space="preserve">MIACAQMwgAYJKoZIhvcNAQcBoIAkgASCBWcwggVjMIICCQYJKoZIhvcNAQcBoIIB+gSCAfYwggHy
+    <General>
+        <MixID>mixTwo</MixID>
+        <MixType>LastMix</MixType>
+        <MixName>LastMix</MixName>
+        <CascadeName>TestCascade</CascadeName>
+        <Daemon>False</Daemon>
+    </General>
+    <Network>
+        <ListenerInterfaces>
+            <ListenerInterface hidden="True">
+                <NetworkProtocol>RAW/TCP</NetworkProtocol>
+                <Host>localhost</Host>
+                <IP>127.0.0.1</IP>
+                <Port>3002</Port>
+            </ListenerInterface>
+        </ListenerInterfaces>
+        <Proxies>
+            <Proxy>
+                <ProxyType>HTTP</ProxyType>
+                <NetworkProtocol>RAW/TCP</NetworkProtocol>
+                <Host>localhost</Host>
+                <IP>127.0.0.1</IP>
+                <Port>80</Port>
+            </Proxy>
+        </Proxies>
+        <InfoService>
+            <Host/>
+            <IP>127.0.0.1</IP>
+            <Port>3000</Port>
+        </InfoService>
+    </Network>
+    <Certificates>
+        <OwnCertificate>
+            <X509PKCS12 xml:space="preserve">MIACAQMwgAYJKoZIhvcNAQcBoIAkgASCBWcwggVjMIICCQYJKoZIhvcNAQcBoIIB+gSCAfYwggHy
 MIIB7gYLKoZIhvcNAQwKAQKgggGBMIIBfTAnBgoqhkiG9w0BDAEDMBkEFFefuQi7r6XoDH8sEkse
 qB6ThDTuAgFkBIIBUJ2fhKctplmY/qRRERAgt+89v3cgePagW/8pldTWIj3hojn96rb7ygShPByY
 sugm6dSJt387tUkEJIK5dqcx6kPsQUy5wfNCweSDhQhVGi9rHyOES7q0WwNkiycXbJdI7/bl+9Vl
@@ -59,7 +59,7 @@ wkdC4B9tkFScHmfK7aaEB8NAnNFKTGg3GV5Q+wIXdK5sGzyIlpP5RiWOp+ZWU+GdkQ+QKYJOYYOX
 WyOlRgxCdQWwhYdkpIrK/ANQWqEcr8vX1iTV4TAJSbslmcCk32NbLEwCpIbPDbBBeZHEVqZnXSxC
 dQVqfyMCOvGnb+CD0WkjQtL7o+MW5AWh2N1M+uAmzx8+9Hpd3yBdHF4AAAAAAAAwPDAhMAkGBSsO
 AwIaBQAEFGk14MQDIpBYRdyxspATa64pRky2BBTqME1NyMUTFlTtt84GK7VExP5XdAIBZAAA</X509PKCS12>
-			<X509Certificate xml:space="preserve">MIICZzCCAiegAwIBAgIBATAJBgcqhkjOOAQDMBsxGTAXBgNVBAMTEDxNaXggaWQ9bWl4VHdvLz4w
+            <X509Certificate xml:space="preserve">MIICZzCCAiegAwIBAgIBATAJBgcqhkjOOAQDMBsxGTAXBgNVBAMTEDxNaXggaWQ9bWl4VHdvLz4w
 HhcNMDQwNDAxMDQxODIyWhcNMDUwNDAxMDQxODIyWjAbMRkwFwYDVQQDExA8TWl4IGlkPW1peFR3
 by8+MIIBtjCCASsGByqGSM44BAEwggEeAoGBAIEn46rGKeeoshD9+sc090M36u4n/TKWEdDCFGVG
 aPpodanucy8IbxbsYZ1CsVgHyobuGS7SjkN6XyirQ/poFmogQwn4q0QUjwLmJ+QWPBC+yfvT73ZK
@@ -70,9 +70,9 @@ yIaEVlgid9DF0eEKRyacUnepzlXRgfFu0wOBhAACgYBfL1mZoyZF9rqpmFq3AUnsjNpEx/N4M4xO
 fx2SYR6JZE1V44Xrs+bIVnDYEDC1SnLqzpqhWL7YtoTpR0nmmyV4yDod+PB98Neort91YlvOHzkw
 Yoea8EqMXakF0mjOaA8getMgBPatoD/VzZElAW4XF9V1bQZCapN9/Rex0IlTgDAJBgcqhkjOOAQD
 Ay8AMCwCFGXH1m2gLqk9Z9+I5CKOqY3mglfIAhQlEKmuOC7F98lQefPzSG/pxoCP8w==</X509Certificate>
-		</OwnCertificate>
-		<PrevMixCertificate>
-			<X509Certificate xml:space="preserve">MIICaDCCAiigAwIBAgIBATAJBgcqhkjOOAQDMBsxGTAXBgNVBAMTEDxNaXggaWQ9bWl4T25lLz4w
+        </OwnCertificate>
+        <PrevMixCertificate>
+            <X509Certificate xml:space="preserve">MIICaDCCAiigAwIBAgIBATAJBgcqhkjOOAQDMBsxGTAXBgNVBAMTEDxNaXggaWQ9bWl4T25lLz4w
 HhcNMDQwNDAxMDQxNDI4WhcNMDUwNDAxMDQxNDI4WjAbMRkwFwYDVQQDExA8TWl4IGlkPW1peE9u
 ZS8+MIIBtzCCASwGByqGSM44BAEwggEfAoGBAJh4h92mCHN/BXehkFEzCLYe2PBkRmnUYPyeE+74
 mHmeJo0KPMOC0BwBJ47OLvTrKVi8uw3/mYMeiAWXK963UpRAdLjKFH2AD8oJNlCnTGA2Wag/ceBS
@@ -83,22 +83,22 @@ JLOqO4ayDf472VxuWWDpJ2VCPrqdaANHrAgDgYQAAoGAKxdoifoOuL9N528lu52BeeBPytD51Fke
 +1pDjRELZ+CqXceMay6eHs7HqkpJzRCWJi85gEuMWGwEm/MvJJEBxCYYGt8IP4fBIeHOn0e1rOt/
 Do38OiJIXhqgLcFPYSOifwFcudYgU1FikxqTG4lCfb7vA+TuS/gx8Q8WaJd77hgwCQYHKoZIzjgE
 AwMvADAsAhRFHuthu41ylPvmihHlQB7J1kJ2bgIUF7PL5kprHZrs+atUZXgTHlWdCKk=</X509Certificate>
-		</PrevMixCertificate>
-	</Certificates>
-	<Description>
-		<Location>
-			<City/>
-			<Country/>
-			<Position>
-				<Geo>
-					<Longitude/>
-					<Latitude/>
-				</Geo>
-			</Position>
-		</Location>
-		<Operator>
-			<Organisation/>
-			<URL/>
-		</Operator>
-	</Description>
+        </PrevMixCertificate>
+    </Certificates>
+    <Description>
+        <Location>
+            <City/>
+            <Country/>
+            <Position>
+                <Geo>
+                    <Longitude/>
+                    <Latitude/>
+                </Geo>
+            </Position>
+        </Location>
+        <Operator>
+            <Organisation/>
+            <URL/>
+        </Operator>
+    </Description>
 </MixConfiguration>
