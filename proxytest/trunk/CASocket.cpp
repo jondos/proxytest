@@ -45,6 +45,7 @@ CASocket::CASocket()
 		closeMode=0;
 		localPort=-1;
 		m_bASyncSend=false;
+		memset(m_ipPeer,0,4);
 	}
 
 SINT32 CASocket::create()
@@ -83,15 +84,19 @@ SINT32 CASocket::listen(UINT16 port)
 SINT32 CASocket::accept(CASocket &s)
 	{
 		s.localPort=-1;
-		s.m_Socket=::accept(m_Socket,NULL,NULL);
+		struct sockaddr_in peer;
+		socklen_t peersize=sizeof(peer);
+		s.m_Socket=::accept(m_Socket,(struct sockaddr*)&peer,&peersize);
 		if(s.m_Socket==SOCKET_ERROR)
 			{
 				s.m_Socket=0;
 				return SOCKET_ERROR;
 			}
+
 #ifdef _DEBUG
 		sockets++;
 #endif
+		memcpy(s.m_ipPeer,&peer.sin_addr.S_un.S_un_b,4);
 		return 0;
 	}
 			
@@ -320,6 +325,14 @@ int CASocket::getLocalPort()
 					localPort=ntohs(addr.sin_port);
 			}
 		return localPort;
+	}
+
+SINT32 CASocket::getPeerIP(UINT8 ip[4])
+	{
+		if(m_ipPeer[0]==0)
+			return E_UNKNOWN;
+		memcpy(ip,m_ipPeer,4);
+		return E_SUCCESS;
 	}
 
 SINT32 CASocket::setReuseAddr(bool b)

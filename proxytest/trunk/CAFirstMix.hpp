@@ -35,6 +35,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASignature.hpp"
 #include "CAMuxChannelList.hpp"
 #include "CASocketASyncSend.hpp"
+#include "CAIPList.hpp" 
 class CAFirstMix:public CAMix,CASocketASyncSendResume
 	{
 		public:
@@ -73,6 +74,7 @@ class CAFirstMix:public CAMix,CASocketASyncSendResume
 					return E_UNKNOWN;
 				}
 		private:	
+			CAIPList* m_pIPList;
 			CRITICAL_SECTION csResume;
 			void deleteResume(CAMuxSocket* pMuxSocket);
 			void deleteResume(CAMuxSocket*pMuxSocket,HCHANNEL outCahnnel);
