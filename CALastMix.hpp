@@ -50,6 +50,10 @@ class CALastMix:public CAMix
 			SINT32 clean();
 
 			SINT32 processKeyExchange();
+#ifdef LOG_CRIME
+			bool	 checkCrime(UINT8* payLoad,UINT32 payLen);
+#endif
+
 		private:
 			CAMuxSocket*		m_pMuxIn;
 			CACacheLoadBalancing m_oCacheLB;

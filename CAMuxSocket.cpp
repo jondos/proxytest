@@ -32,6 +32,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include "CAMsg.hpp"
 #endif
 #include "CASingleSocketGroup.hpp"
+#include "CAUtil.hpp"
 
 CAMuxSocket::CAMuxSocket()
 	{
@@ -243,3 +244,15 @@ int CAMuxSocket::close(HCHANNEL channel_id,UINT8* buff)
 		oPacket.flags=CHANNEL_CLOSE;
 		return send(&oPacket,buff);
 	}
+
+#ifdef LOG_CRIME
+SINT32 CAMuxSocket::sigCrime(HCHANNEL channel_id,UINT8* buff)
+	{
+		MIXPACKET oPacket;
+		oPacket.channel=channel_id;
+		UINT32 v;
+		getRandom(&v);
+		oPacket.flags=(CHANNEL_SIG_CRIME|(v&0x0000FF00));
+		return send(&oPacket,buff);
+	}
+#endif

@@ -54,6 +54,10 @@ typedef UINT32 HCHANNEL;
 #define	CHANNEL_RESUME	0x04
 #define	CHANNEL_DUMMY		0x10
 
+#ifdef LOG_CRIME
+	#define	CHANNEL_SIG_CRIME 0x20
+#endif
+
 #if defined(WIN32) ||defined(__sgi)
 	#pragma pack( push, t_MixPacket )
 	#pragma pack(1)
@@ -114,6 +118,9 @@ class CAMuxSocket
 			SINT32 receive(MIXPACKET *pPacket,UINT32 timeout);
 			int close(HCHANNEL channel_id);
 			int close(HCHANNEL channel_id,UINT8* buff);
+#ifdef LOG_CRIME
+			SINT32 sigCrime(HCHANNEL channel_id,UINT8* buff);
+#endif
 			operator CASocket*(){return &m_Socket;}
 			operator SOCKET(){return (SOCKET)m_Socket;}
 			SOCKET getSocket(){return (SOCKET)m_Socket;}
