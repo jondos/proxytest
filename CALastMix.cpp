@@ -437,8 +437,10 @@ SINT32 CALastMix::loop()
 		osocketgroupMixIn.add(muxIn);
 		((CASocket*)muxIn)->setNonBlocking(true);
 		muxIn.setCrypt(true);
+		bool bAktiv;
 		for(;;)
 			{
+				bAktiv=false;
 //Step one.. reading from previous Mix
 // reading maximal number of current channels packets
 				UINT32 channels=oSocketList.getSize()+1;
@@ -449,6 +451,7 @@ SINT32 CALastMix::loop()
 							break;
 						else
 							{
+								bAktiv=true;
 								ret=muxIn.receive(pMixPacket,0);
 								if(ret==SOCKET_ERROR)
 									{
@@ -579,6 +582,7 @@ SINT32 CALastMix::loop()
 				countRead=osocketgroupCacheWrite.select(true,0);
 				if(countRead>0)
 					{
+						bAktiv=true;
 						tmpCon=oSocketList.getFirst();
 						while(tmpCon!=NULL&&countRead>0)
 							{
@@ -622,6 +626,7 @@ SINT32 CALastMix::loop()
 				countRead=osocketgroupCacheRead.select(false,0);
 				if(countRead>0)
 					{
+						bAktiv=true;
 						tmpCon=oSocketList.getFirst();
 						while(tmpCon!=NULL&&countRead>0)
 							{
@@ -667,6 +672,7 @@ SINT32 CALastMix::loop()
 				countRead=oSocketList.getSize()+1;
 				while(countRead>0&&!oqueueMixIn.isEmpty()&&osocketgroupMixIn.select(true,0)==1)
 					{
+						bAktiv=true;
 						countRead--;
 						UINT32 len=MIXPACKET_SIZE;
 						oqueueMixIn.peek(tmpBuff,&len);
@@ -681,6 +687,8 @@ SINT32 CALastMix::loop()
 							goto ERR;
 					}
 //end step 4
+				if(!bAktiv)
+					msleep(100);
 			}
 
 

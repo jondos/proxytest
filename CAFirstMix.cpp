@@ -587,14 +587,18 @@ SINT32 CAFirstMix::loop()
 		UINT8 ip[4];
 		UINT8* tmpBuff=new UINT8[MIXPACKET_SIZE];
 		CAMsg::printMsg(LOG_DEBUG,"Starting Message Loop... \n");
+		bool bAktiv;
 		for(;;)
 			{
+				bAktiv=false;
 //LOOP_START:
 
 //First Step
 //Checking for new connections		
 				countRead=osocketgroupAccept.select(false,0);
 				UINT32 i=0;
+				if(countRead>0)
+					bAktiv=true;
 				while(countRead>0&&i<maxSocketsIn)
 					{						
 						if(osocketgroupAccept.isSignaled(*socketsIn[i]))
@@ -645,6 +649,8 @@ SINT32 CAFirstMix::loop()
 // Checking for data from users
 				tmpMuxListEntry=oMuxChannelList.getFirst();
 				countRead=osocketgroupUsersRead.select(false,0);
+				if(countRead>0)
+					bAktiv=true;
 				while(tmpMuxListEntry!=NULL&&countRead>0)
 					{
 						if(osocketgroupUsersRead.isSignaled(*(tmpMuxListEntry->pMuxSocket)))
@@ -733,6 +739,7 @@ SINT32 CAFirstMix::loop()
 				countRead=nUser+1;
 				while(countRead>0&&!oqueueMixOut.isEmpty()&&osocketgroupMixOut.select(true,0)==1)
 					{
+						bAktiv=true;
 						countRead--;
 						UINT32 len=MIXPACKET_SIZE;
 						oqueueMixOut.peek(tmpBuff,&len);
@@ -752,6 +759,7 @@ SINT32 CAFirstMix::loop()
 				countRead=nUser+1;
 				while(countRead>0&&osocketgroupMixOut.select(false,0)==1)
 					{
+						bAktiv=true;
 						countRead--;
 						ret=muxOut.receive(&oMixPacket,0);
 						if(ret==SOCKET_ERROR)
@@ -830,6 +838,8 @@ SINT32 CAFirstMix::loop()
 //Writing to users...
 				tmpMuxListEntry=oMuxChannelList.getFirst();
 				countRead=osocketgroupUsersWrite.select(true,0);
+				if(countRead>0)
+					bAktiv=true;
 				while(countRead>0&&tmpMuxListEntry!=NULL)
 					{
 						if(osocketgroupUsersWrite.isSignaled(*tmpMuxListEntry->pMuxSocket))
@@ -851,6 +861,8 @@ SINT32 CAFirstMix::loop()
 							}
 						tmpMuxListEntry=oMuxChannelList.getNext();
 					}
+				if(!bAktiv)
+					msleep(100);
 			}
 ERR:
 		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
