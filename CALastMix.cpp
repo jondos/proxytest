@@ -348,7 +348,6 @@ SINT32 CALastMix::loop()
 				countRead=osocketgroupCacheRead.select(false,0);
 				if(countRead>0)
 					{
-						bAktiv=true;
 						tmpCon=oSocketList.getFirst();
 						while(tmpCon!=NULL&&countRead>0)
 							{
@@ -357,6 +356,7 @@ SINT32 CALastMix::loop()
 										countRead--;
 										if(oqueueMixIn.getSize()<MAX_MIXIN_SEND_QUEUE_SIZE)
 											{
+												bAktiv=true;
 												ret=tmpCon->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE);
 												if(ret==SOCKET_ERROR||ret==0)
 													{
