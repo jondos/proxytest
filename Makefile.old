@@ -24,7 +24,7 @@ OBJS_ALL=CASocket.o\
 	CACmdLnOptions.o\
 	CAMsg.o\
 	CAMuxSocket.o\
-	CAMuxChannelList.o\
+	CAFirstMixChannelList.o\
 	CAIPList.o\
 	CASymCipher.o\
 	CAASymCipher.o\
