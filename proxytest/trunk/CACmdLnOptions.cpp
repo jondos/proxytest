@@ -125,7 +125,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 				else
 					{
 						cntTargets=1;
-						int i;
+						UINT32 i;
 						for(i=0;i<strlen(target);i++)
 							{
 								if(target[i]==';')
