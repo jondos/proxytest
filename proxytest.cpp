@@ -408,7 +408,12 @@ Debug(dc::malloc.on());
 			{
 				#ifndef _WIN32
 					if(options.getLogDir(buff,255)==E_SUCCESS)
-						CAMsg::setOptions(MSG_FILE);
+						{
+							if(options.getCompressLogs())
+								CAMsg::setOptions(MSG_COMPRESSED_FILE);
+							else
+								CAMsg::setOptions(MSG_FILE);
+						}
 					else
 						CAMsg::setOptions(MSG_LOG);
 					pid_t pid;
@@ -425,7 +430,12 @@ Debug(dc::malloc.on());
 		else
 			{
 				if(options.getLogDir((UINT8*)buff,255)==E_SUCCESS)
-					CAMsg::setOptions(MSG_FILE);
+					{
+						if(options.getCompressLogs())
+							CAMsg::setOptions(MSG_COMPRESSED_FILE);
+						else
+							CAMsg::setOptions(MSG_FILE);
+					}
 			}
 		CAMsg::printMsg(LOG_INFO,"Anon proxy started!\n");
 		CAMsg::printMsg(LOG_INFO,"Version: %s\n",MIX_VERSION);

@@ -271,4 +271,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include <mysql.h>
 #endif
 
+//Compressed Logs
+#ifdef COMPRESSED_LOGS
+#include <zlib.h>
+#endif
 #endif // !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
