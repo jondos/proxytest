@@ -350,13 +350,10 @@ THREAD_RETURN lm_loopSendToMix(void* param)
 				if(pMuxSocket->send(pMixPacket)!=MIXPACKET_SIZE)
 					break;
 #ifdef LOG_PACKET_TIMES
- 				if(!isZero64(pQueueEntry->timestamp))
+ 				if(!isZero64(pQueueEntry->timestamp_proccessing_start))
 					{
-						getcurrentTimeMicros(tmpU64);
-						pLastMix->m_pLogPacketStats->addToTimeingStats(diff64(tmpU64,pQueueEntry->timestamp),CHANNEL_DATA,false);
-						#ifdef _DEBUG
-							CAMsg::printMsg(LOG_CRIT,"Download Packet processing time (arrival <--> send): %u µs\n",diff64(tmpU64,pQueueEntry->timestamp));
-						#endif
+						getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
+						pLastMix->m_pLogPacketStats->addToTimeingStats(*pQueueEntry,CHANNEL_DATA,false);
 					}
 #endif					
 			}
@@ -375,7 +372,7 @@ THREAD_RETURN lm_loopSendToMix(void* param)
 						pMixPacket->channel=DUMMY_CHANNEL;
 						getRandom(pMixPacket->data,DATA_SIZE);
 						#ifdef LOG_PACKET_TIMES
-							setZero64(pPoolEntry->timestamp);
+							setZero64(pPoolEntry->timestamp_proccessing_start);
 						#endif
 					}
 				else if(ret!=E_SUCCESS||len!=sizeof(tQueueEntry))
@@ -390,13 +387,10 @@ THREAD_RETURN lm_loopSendToMix(void* param)
 				if(pMuxSocket->send(pMixPacket)!=MIXPACKET_SIZE)
 					break;
 #ifdef LOG_PACKET_TIMES
- 				if(!isZero64(pPoolEntry->timestamp))
+ 				if(!isZero64(pPoolEntry->timestamp_proccessing_start))
 					{
-						getcurrentTimeMicros(tmpU64);
-						pLastMix->m_pLogPacketStats->addToTimeingStats(diff64(tmpU64,pPoolEntry->timestamp),CHANNEL_DATA,false);
-						#ifdef _DEBUG
-							CAMsg::printMsg(LOG_CRIT,"Download Packet processing time (arrival <--> send): %u µs\n",diff64(tmpU64,pPoolEntry->timestamp));
-						#endif
+						getcurrentTimeMicros(pPoolEntry->timestamp_proccessing_end);
+						pLastMix->m_pLogPacketStats->addToTimeingStats(*pPoolEntry,CHANNEL_DATA,false);
 					}
 #endif					
 			}
@@ -439,7 +433,7 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 							pMixPacket->channel=DUMMY_CHANNEL;
 							getRandom(pMixPacket->data,DATA_SIZE);
 							#ifdef LOG_PACKET_TIMES
-								setZero64(pQueueEntry->timestamp);
+								setZero64(pQueueEntry->timestamp_proccessing_start);
 							#endif
 						#else
 							continue;	
@@ -449,7 +443,7 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 					{
 						ret=pMuxSocket->receive(pMixPacket);
 						#ifdef LOG_PACKET_TIMES
-							getcurrentTimeMicros(pQueueEntry->timestamp);
+							getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_start);
 						#endif
 						if(ret!=MIXPACKET_SIZE)
 							{

@@ -40,7 +40,7 @@ CAPool::CAPool(UINT32 poolsize)
 		m_pPoolList->poolentry.packet.flags=CHANNEL_DUMMY;
 		m_pPoolList->poolentry.packet.channel=DUMMY_CHANNEL;
 #ifdef LOG_PACKET_TIMES
-		setZero64(m_pPoolList->poolentry.timestamp);
+		setZero64(m_pPoolList->poolentry.timestamp_proccessing_start);
 		setZero64(m_pPoolList->poolentry.pool_timestamp_in);
 #endif				
 		m_pPoolList->next=NULL;
@@ -54,7 +54,7 @@ CAPool::CAPool(UINT32 poolsize)
 				tmpEntry->poolentry.packet.flags=CHANNEL_DUMMY;
 				tmpEntry->poolentry.packet.channel=DUMMY_CHANNEL;
 				#ifdef LOG_PACKET_TIMES
-					setZero64(tmpEntry->poolentry.timestamp);
+					setZero64(tmpEntry->poolentry.timestamp_proccessing_start);
 					setZero64(tmpEntry->poolentry.pool_timestamp_in);
 				#endif				
 				tmpEntry->next=m_pPoolList;

@@ -126,7 +126,7 @@ inline void inc64(UINT64& op1)
 #endif
 	}
 
-inline UINT32 diff64(UINT64& bigop,UINT64& smallop)
+inline UINT32 diff64(const UINT64& bigop,const UINT64& smallop)
 	{
 		#if !defined(HAVE_NATIVE_UINT64)
 			return (UINT32) -1; //TODO!!!

@@ -151,7 +151,8 @@ struct t_queue_entry
 	{
 		MIXPACKET packet;
 		#ifdef LOG_PACKET_TIMES
-			UINT64 timestamp;
+			UINT64 timestamp_proccessing_start;
+			UINT64 timestamp_proccessing_end;
 			#ifdef USE_POOL
 				UINT64 pool_timestamp_in;
 				UINT64 pool_timestamp_out;
