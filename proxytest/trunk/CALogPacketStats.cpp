@@ -2,7 +2,7 @@
 #include "CALogPacketStats.hpp"
 #include "CAUtil.hpp"
 #include "CAMuxSocket.hpp"
-#include "CAMSg.hpp"
+#include "CAMsg.hpp"
 
 #ifdef LOG_PACKET_TIMES
 /** How to end this thread
