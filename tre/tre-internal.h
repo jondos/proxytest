@@ -116,7 +116,7 @@ struct tnfa_transition {
   int *tags;
   int assertions;
   union {
-    tre_ctype_t class;
+    tre_ctype_t o_class;
     int backref;
   } u;
   tre_ctype_t *neg_classes;

@@ -3885,7 +3885,7 @@ TrioGetCollation(void)
  * FIXME:
  *  multibyte
  */
-TRIO_PRIVATE int
+/*TRIO_PRIVATE int
 TrioGetCharacterClass(TRIO_CONST char *format,
 		      int *indexPointer,
 		      unsigned long *flagsPointer,
@@ -3904,55 +3904,55 @@ TrioGetCharacterClass(TRIO_CONST char *format,
       *flagsPointer |= FLAGS_EXCLUDE;
       index++;
     }
-  /*
-   * If the ungroup character is at the beginning of the scanlist,
-   * it will be part of the class, and a second ungroup character
-   * must follow to end the group.
-   */
+  //
+   // If the ungroup character is at the beginning of the scanlist,
+   // it will be part of the class, and a second ungroup character
+   // must follow to end the group.
+   //
   if (format[index] == SPECIFIER_UNGROUP)
     {
       characterclass[(int)SPECIFIER_UNGROUP]++;
       index++;
     }
-  /*
-   * Minus is used to specify ranges. To include minus in the class,
-   * it must be at the beginning of the list
-   */
+  //
+   // Minus is used to specify ranges. To include minus in the class,
+   // it must be at the beginning of the list
+   //
   if (format[index] == QUALIFIER_MINUS)
     {
       characterclass[(int)QUALIFIER_MINUS]++;
       index++;
     }
-  /* Collect characters */
+  // Collect characters 
   for (ch = format[index];
        (ch != SPECIFIER_UNGROUP) && (ch != NIL);
        ch = format[++index])
     {
       switch (ch)
 	{
-	case QUALIFIER_MINUS: /* Scanlist ranges */
+	case QUALIFIER_MINUS: // Scanlist ranges 
 	  
-	  /*
-	   * Both C99 and UNIX98 describes ranges as implementation-
-	   * defined.
-	   *
-	   * We support the following behaviour (although this may
-	   * change as we become wiser)
-	   * - only increasing ranges, ie. [a-b] but not [b-a]
-	   * - transitive ranges, ie. [a-b-c] == [a-c]
-	   * - trailing minus, ie. [a-] is interpreted as an 'a'
-	   *   and a '-'
-	   * - duplicates (although we can easily convert these
-	   *   into errors)
-	   */
+	  //
+	   // Both C99 and UNIX98 describes ranges as implementation-
+	   // defined.
+	   //
+	   // We support the following behaviour (although this may
+	   // change as we become wiser)
+	   // - only increasing ranges, ie. [a-b] but not [b-a]
+	   // - transitive ranges, ie. [a-b-c] == [a-c]
+	   // - trailing minus, ie. [a-] is interpreted as an 'a'
+	   //   and a '-'
+	   // - duplicates (although we can easily convert these
+	   //   into errors)
+	   //
 	  range_begin = format[index - 1];
 	  range_end = format[++index];
 	  if (range_end == SPECIFIER_UNGROUP)
 	    {
-	      /* Trailing minus is included */
+	      // Trailing minus is included 
 	      characterclass[(int)ch]++;
 	      ch = range_end;
-	      break; /* for */
+	      break; // for 
 	    }
 	  if (range_end == NIL)
 	    return TRIO_ERROR_RETURN(TRIO_EINVAL, index);
@@ -3971,19 +3971,17 @@ TrioGetCharacterClass(TRIO_CONST char *format,
 	  
 	  switch (format[index + 1])
 	    {
-	    case QUALIFIER_DOT: /* Collating symbol */
-	      /*
-	       * FIXME: This will be easier to implement when multibyte
-	       * characters have been implemented. Until now, we ignore
-	       * this feature.
-	       */
+	    case QUALIFIER_DOT: // Collating symbol 
+	      //
+	       // this feature.
+	       ///
 	      for (i = index + 2; ; i++)
 		{
 		  if (format[i] == NIL)
-		    /* Error in syntax */
+		    // Error in syntax 
 		    return -1;
 		  else if (format[i] == QUALIFIER_DOT)
-		    break; /* for */
+		    break; // for 
 		}
 	      if (format[++i] != SPECIFIER_UNGROUP)
 		return -1;
@@ -3991,27 +3989,27 @@ TrioGetCharacterClass(TRIO_CONST char *format,
 	      index = i;
 	      break;
 	  
-	    case QUALIFIER_EQUAL: /* Equivalence class expressions */
+	    case QUALIFIER_EQUAL: // Equivalence class expressions 
 	      {
 		unsigned int j;
 		unsigned int k;
 	    
 		if (internalCollationUnconverted)
 		  {
-		    /* Lazy evalutation of collation array */
+		    // Lazy evalutation of collation array 
 		    TrioGetCollation();
 		    internalCollationUnconverted = FALSE;
 		  }
 		for (i = index + 2; ; i++)
 		  {
 		    if (format[i] == NIL)
-		      /* Error in syntax */
+		      // Error in syntax 
 		      return -1;
 		    else if (format[i] == QUALIFIER_EQUAL)
-		      break; /* for */
+		      break; // for 
 		    else
 		      {
-			/* Mark any equivalent character */
+			// Mark any equivalent character 
 			k = (unsigned int)format[i];
 			for (j = 0; internalCollationArray[k][j] != NIL; j++)
 			  characterclass[(int)internalCollationArray[k][j]]++;
@@ -4024,7 +4022,7 @@ TrioGetCharacterClass(TRIO_CONST char *format,
 	      }
 	      break;
 	  
-	    case QUALIFIER_COLON: /* Character class expressions */
+	    case QUALIFIER_COLON: // Character class expressions 
 	  
 	      if (trio_equal_max(CLASS_ALNUM, sizeof(CLASS_ALNUM) - 1,
 				 &format[index]))
@@ -4126,7 +4124,7 @@ TrioGetCharacterClass(TRIO_CONST char *format,
 	    }
 	  break;
 	  
-#endif /* TRIO_EXTENSION */
+#endif // TRIO_EXTENSION 
 	  
 	default:
 	  characterclass[(int)ch]++;
@@ -4135,14 +4133,14 @@ TrioGetCharacterClass(TRIO_CONST char *format,
     }
   return 0;
 }
-
+*/
 /*************************************************************************
  * TrioReadNumber
  *
  * We implement our own number conversion in preference of strtol and
  * strtoul, because we must handle 'long long' and thousand separators.
  */
-TRIO_PRIVATE BOOLEAN_T
+/*TRIO_PRIVATE BOOLEAN_T
 TrioReadNumber(trio_class_t *self,
 	       trio_uintmax_t *target,
 	       unsigned long flags,
@@ -4161,7 +4159,7 @@ TrioReadNumber(trio_class_t *self,
 
   if (internalDigitsUnconverted)
     {
-      /* Lazy evaluation of digits array */
+      // Lazy evaluation of digits array 
       memset(internalDigitArray, -1, sizeof(internalDigitArray));
       for (j = 0; j < (int)sizeof(internalDigitsLower) - 1; j++)
 	{
@@ -4175,7 +4173,7 @@ TrioReadNumber(trio_class_t *self,
   
   if (!(flags & FLAGS_UNSIGNED))
     {
-      /* Leading sign */
+      // Leading sign 
       if (self->current == '+')
 	{
 	  self->InStream(self, NULL);
@@ -4228,13 +4226,13 @@ TrioReadNumber(trio_class_t *self,
       if (isascii(self->current))
 	{
 	  digit = internalDigitArray[self->current];
-	  /* Abort if digit is not allowed in the specified base */
+	  // Abort if digit is not allowed in the specified base
 	  if ((digit == -1) || (digit >= base))
 	    break;
 	}
       else if (flags & FLAGS_QUOTE)
 	{
-	  /* Compare with thousands separator */
+	  // Compare with thousands separator 
 	  for (j = 0; internalThousandSeparator[j] && self->current; j++)
 	    {
 	      if (internalThousandSeparator[j] != self->current)
@@ -4243,9 +4241,9 @@ TrioReadNumber(trio_class_t *self,
 	      self->InStream(self, NULL);
 	    }
 	  if (internalThousandSeparator[j])
-	    break; /* Mismatch */
+	    break; // Mismatch 
 	  else
-	    continue; /* Match */
+	    continue; // Match 
 	}
       else
 	break;
@@ -4256,7 +4254,7 @@ TrioReadNumber(trio_class_t *self,
       self->InStream(self, NULL);
     }
 
-  /* Was anything read at all? */
+  // Was anything read at all? 
   if (self->processed == count)
     return FALSE;
   
@@ -4264,11 +4262,11 @@ TrioReadNumber(trio_class_t *self,
     *target = (isNegative) ? -number : number;
   return TRUE;
 }
-
+*/
 /*************************************************************************
  * TrioReadChar
  */
-TRIO_PRIVATE int
+/*TRIO_PRIVATE int
 TrioReadChar(trio_class_t *self,
 	     char *target,
 	     unsigned long flags,
@@ -4302,14 +4300,14 @@ TrioReadChar(trio_class_t *self,
 	    default:
 	      if (isdigit(self->current))
 		{
-		  /* Read octal number */
+		  // Read octal number 
 		  if (!TrioReadNumber(self, &number, 0, 3, BASE_OCTAL))
 		    return 0;
 		  ch = (char)number;
 		}
 	      else if (toupper(self->current) == 'X')
 		{
-		  /* Read hexadecimal number */
+		  // Read hexadecimal number 
 		  self->InStream(self, NULL);
 		  if (!TrioReadNumber(self, &number, 0, 2, BASE_HEX))
 		    return 0;
@@ -4328,11 +4326,11 @@ TrioReadChar(trio_class_t *self,
     }
   return i + 1;
 }
-
+*/
 /*************************************************************************
  * TrioReadString
  */
-TRIO_PRIVATE BOOLEAN_T
+/*TRIO_PRIVATE BOOLEAN_T
 TrioReadString(trio_class_t *self,
 	       char *target,
 	       unsigned long flags,
@@ -4345,23 +4343,23 @@ TrioReadString(trio_class_t *self,
 
   TrioSkipWhitespaces(self);
     
-  /*
-   * Continue until end of string is reached, a whitespace is encountered,
-   * or width is exceeded
-   */
+  //
+   // Continue until end of string is reached, a whitespace is encountered,
+   // or width is exceeded
+   //
   for (i = 0;
        ((width == NO_WIDTH) || (i < width)) &&
        (! ((self->current == EOF) || isspace(self->current)));
        i++)
     {
       if (TrioReadChar(self, &target[i], flags, 1) == 0)
-	break; /* for */
+	break; // for 
     }
   if (target)
     target[i] = NIL;
   return TRUE;
 }
-
+*/
 /*************************************************************************
  * TrioReadWideChar
  */
@@ -4469,7 +4467,7 @@ TrioReadWideString(trio_class_t *self,
  *
  * FIXME: characterclass does not work with multibyte characters
  */
-TRIO_PRIVATE BOOLEAN_T
+/*TRIO_PRIVATE BOOLEAN_T
 TrioReadGroup(trio_class_t *self,
 	      char *target,
 	      int *characterclass,
@@ -4498,14 +4496,14 @@ TrioReadGroup(trio_class_t *self,
     target[i] = NIL;
   return TRUE;
 }
-
+*/
 /*************************************************************************
  * TrioReadDouble
  *
  * FIXME:
  *  add long double
  */
-TRIO_PRIVATE BOOLEAN_T
+/*TRIO_PRIVATE BOOLEAN_T
 TrioReadDouble(trio_class_t *self,
 	       double *target,
 	       unsigned long flags,
@@ -4523,11 +4521,11 @@ TrioReadDouble(trio_class_t *self,
   
   TrioSkipWhitespaces(self);
   
-  /*
-   * Read entire double number from stream. trio_to_double requires
-   * a string as input, but InStream can be anything, so we have to
-   * collect all characters.
-   */
+  //
+   // Read entire double number from stream. trio_to_double requires
+   // a string as input, but InStream can be anything, so we have to
+   // collect all characters.
+   //
   ch = self->current;
   if ((ch == '+') || (ch == '-'))
     {
@@ -4541,13 +4539,13 @@ TrioReadDouble(trio_class_t *self,
     {
     case 'n':
     case 'N':
-      /* Not-a-number */
+      // Not-a-number 
       if (index != 0)
 	break;
-      /* FALLTHROUGH */
+      // FALLTHROUGH 
     case 'i':
     case 'I':
-      /* Infinity */
+      // Infinity 
       while (isalpha(ch) && (index - start < width))
 	{
 	  doubleString[index++] = (char)ch;
@@ -4555,7 +4553,7 @@ TrioReadDouble(trio_class_t *self,
 	}
       doubleString[index] = NIL;
 
-      /* Case insensitive string comparison */
+      // Case insensitive string comparison 
       if (trio_equal(&doubleString[start], INFINITE_UPPER) ||
 	  trio_equal(&doubleString[start], LONG_INFINITE_UPPER))
 	{
@@ -4566,7 +4564,7 @@ TrioReadDouble(trio_class_t *self,
 	}
       if (trio_equal(doubleString, NAN_UPPER))
 	{
-	  /* NaN must not have a preceeding + nor - */
+	  // NaN must not have a preceeding + nor - 
 	  *target = trio_nan();
 	  return TRUE;
 	}
@@ -4589,7 +4587,7 @@ TrioReadDouble(trio_class_t *self,
     }
   while ((ch != EOF) && (index - start < width))
     {
-      /* Integer part */
+      // Integer part 
       if (isHex ? isxdigit(ch) : isdigit(ch))
 	{
 	  doubleString[index++] = (char)ch;
@@ -4597,7 +4595,7 @@ TrioReadDouble(trio_class_t *self,
 	}
       else if (flags & FLAGS_QUOTE)
 	{
-	  /* Compare with thousands separator */
+	  // Compare with thousands separator 
 	  for (j = 0; internalThousandSeparator[j] && self->current; j++)
 	    {
 	      if (internalThousandSeparator[j] != self->current)
@@ -4606,16 +4604,16 @@ TrioReadDouble(trio_class_t *self,
 	      self->InStream(self, &ch);
 	    }
 	  if (internalThousandSeparator[j])
-	    break; /* Mismatch */
+	    break; // Mismatch 
 	  else
-	    continue; /* Match */
+	    continue; // Match 
 	}
       else
-	break; /* while */
+	break; // while 
     }
   if (ch == '.')
     {
-      /* Decimal part */
+      // Decimal part 
       doubleString[index++] = (char)ch;
       self->InStream(self, &ch);
       while ((isHex ? isxdigit(ch) : isdigit(ch)) &&
@@ -4626,7 +4624,7 @@ TrioReadDouble(trio_class_t *self,
 	}
       if (isHex ? (toupper(ch) == 'P') : (toupper(ch) == 'E'))
 	{
-	  /* Exponent */
+	  // Exponent 
 	  doubleString[index++] = (char)ch;
 	  self->InStream(self, &ch);
 	  if ((ch == '+') || (ch == '-'))
@@ -4647,19 +4645,20 @@ TrioReadDouble(trio_class_t *self,
     return FALSE;
   
   if (flags & FLAGS_LONGDOUBLE)
-/*     *longdoublePointer = trio_to_long_double()*/
-    return FALSE; /* FIXME: Remove when long double is implemented */
+//     *longdoublePointer = trio_to_long_double()
+    return FALSE; // FIXME: Remove when long double is implemented 
   else
     {
       *target = trio_to_double(doubleString, NULL);
     }
   return TRUE;
 }
+*/
 
 /*************************************************************************
  * TrioReadPointer
  */
-TRIO_PRIVATE BOOLEAN_T
+/*TRIO_PRIVATE BOOLEAN_T
 TrioReadPointer(trio_class_t *self,
 		void **target,
 		unsigned long flags)
@@ -4675,10 +4674,10 @@ TrioReadPointer(trio_class_t *self,
 		     POINTER_WIDTH,
 		     BASE_HEX))
     {
-      /*
-       * The strange assignment of number is a workaround for a compiler
-       * warning
-       */
+      //
+       // The strange assignment of number is a workaround for a compiler
+       // warning
+       //
       if (target)
 	*target = (char *)0 + number;
       return TRUE;
@@ -4699,7 +4698,7 @@ TrioReadPointer(trio_class_t *self,
     }
   return FALSE;
 }
-
+*/
 /*************************************************************************
  * TrioScanProcess
  *//*
