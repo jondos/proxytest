@@ -29,6 +29,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CALastMixA.hpp"
 #include "../CALastMixChannelList.hpp"
 #include "../CASingleSocketGroup.hpp"
+#include "../CAPool.hpp"
 
 SINT32 CALastMixA::loop()
 	{

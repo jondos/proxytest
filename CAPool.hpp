@@ -51,7 +51,7 @@ class CAPool
 			tPoolListEntry* m_pPoolList;
 			tPoolListEntry* m_pLastEntry;
 			tPoolListEntry* m_pEntry;
-			UINT32 m_uPoolSize;
-		
+			HCHANNEL* m_arChannelIDs;
+			UINT32 m_uPoolSize;		
 	};
 #endif

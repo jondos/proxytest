@@ -30,6 +30,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "../CAThread.hpp"
 #include "../CASingleSocketGroup.hpp"
 #include "../CAInfoService.hpp"
+#include "../CAPool.hpp"
 
 
 SINT32 CAFirstMixA::loop()

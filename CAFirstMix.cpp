@@ -239,13 +239,6 @@ THREAD_RETURN fm_loopSendToMix(void* param)
 		CAMuxSocket* pMuxSocket=((CAFirstMix*)param)->m_pMuxOut;
 		
 		UINT32 len;
-/*		for(;;)
-			{
-				len=0xFFFF;
-				pQueue->getOrWait(buff,&len);
-				if(pSocket->sendFully(buff,len)!=E_SUCCESS)
-					break;
-			}*/
 #ifndef USE_POOL
 		UINT8* buff=new UINT8[0xFFFF];
 		for(;;)
