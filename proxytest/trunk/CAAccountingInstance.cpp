@@ -705,7 +705,7 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 	//m_Mutex.lock();
 	// check signature
 	CASignature * sigTester = pHashEntry->pAccountingInfo->pPublicKey;
-	#warning Signature verifying must be implemented here !!!!!!!!!!
+		#pragma message Signature verifying must be implemented here !!!!!!!!!!
 	//sigTester->decodeRS( decodeBuffer, decodeBufferLen, pDsaSig );
 	/// TODO: Really do signature checking here...
 /*	if ( sigTester->verifyDER( pHashEntry->pAccountingInfo->pChallenge, 222, decodeBuffer, decodeBufferLen ) 
