@@ -21,6 +21,7 @@
 */
 
 #include "../StdAfx.h"
+#include "xmlstream.h"
 #include "xmlinputp.h"
 //#include <assert.h>
 //#include <string.h>
@@ -523,20 +524,20 @@ XML_Error XML_InputGetError(const XML_Input *input)
 
 static XML_Error elementHandler(XML_Input *input, XML_Element *elem, const XML_Handler *handler, void *userData)
 {
-	if (handler->size > 0 && handler->Element.userData == NULL)
+	if (handler->size > 0 && handler->u.Element.userData == NULL)
 	{
 		/* compute user-data from offset */
 		userData = (void *)((char *)userData + handler->offset);
 	}
-	else if (handler->Element.userData)
-		userData = handler->Element.userData;
+	else if (handler->u.Element.userData)
+		userData = handler->u.Element.userData;
 
-	return (*handler->Element.proc)(elem, userData);
+	return (*handler->u.Element.proc)(elem, userData);
 }
 
 static XML_Error dataHandler(XML_Input *input, const XML_Char *data, size_t len, const XML_Handler *handler, void *userData)
 {
-	return (*handler->Data.proc)(data, len, userData);
+	return (*handler->u.Data.proc)(data, len, userData);
 }
 
 static XML_Error intHandler(XML_Input *input, XML_Element *elem, const XML_Handler *handler, void *userData)
@@ -548,14 +549,14 @@ static XML_Error intHandler(XML_Input *input, XML_Element *elem, const XML_Handl
 	if (error == XML_Error_None)
 	{
 		int value = (int)atol(tmp);
-		int *result = handler->Int.result ? handler->Int.result : (int *)((char *)userData + handler->offset);
-		if (handler->Int.maxVal != 0 || handler->Int.minVal != 0)
+		int *result = handler->u.Int.result ? handler->u.Int.result : (int *)((char *)userData + handler->offset);
+		if (handler->u.Int.maxVal != 0 || handler->u.Int.minVal != 0)
 		{
 			/* do range checking */
-			if (value < handler->Int.minVal)
-				value = handler->Int.minVal;
-			else if (value > handler->Int.maxVal)
-				value = handler->Int.maxVal;
+			if (value < handler->u.Int.minVal)
+				value = handler->u.Int.minVal;
+			else if (value > handler->u.Int.maxVal)
+				value = handler->u.Int.maxVal;
 		}
 		*result = value;
 	}
@@ -571,14 +572,14 @@ static XML_Error uintHandler(XML_Input *input, XML_Element *elem, const XML_Hand
 	if (error == XML_Error_None)
 	{
 		unsigned int value = (unsigned int)atol(tmp);
-		unsigned int *result = handler->UInt.result ? handler->UInt.result : (unsigned int *)((char *)userData + handler->offset);
-		if (handler->UInt.maxVal != 0 || handler->UInt.minVal != 0)
+		unsigned int *result = handler->u.UInt.result ? handler->u.UInt.result : (unsigned int *)((char *)userData + handler->offset);
+		if (handler->u.UInt.maxVal != 0 || handler->u.UInt.minVal != 0)
 		{
 			/* do range checking */
-			if (value < handler->UInt.minVal)
-				value = handler->UInt.minVal;
-			else if (value > handler->UInt.maxVal)
-				value = handler->UInt.maxVal;
+			if (value < handler->u.UInt.minVal)
+				value = handler->u.UInt.minVal;
+			else if (value > handler->u.UInt.maxVal)
+				value = handler->u.UInt.maxVal;
 		}
 		*result = value;
 	}
@@ -594,14 +595,14 @@ static XML_Error floatHandler(XML_Input *input, XML_Element *elem, const XML_Han
 	if (error == XML_Error_None)
 	{
 		float value = (float)atof(tmp);
-		float *result = handler->Float.result ? handler->Float.result : (float *)((char *)userData + handler->offset);
-		if (handler->Float.maxVal != 0 || handler->Float.minVal != 0)
+		float *result = handler->u.Float.result ? handler->u.Float.result : (float *)((char *)userData + handler->offset);
+		if (handler->u.Float.maxVal != 0 || handler->u.Float.minVal != 0)
 		{
 			/* do range checking */
-			if (value < handler->Float.minVal)
-				value = handler->Float.minVal;
-			else if (value > handler->Float.maxVal)
-				value = handler->Float.maxVal;
+			if (value < handler->u.Float.minVal)
+				value = handler->u.Float.minVal;
+			else if (value > handler->u.Float.maxVal)
+				value = handler->u.Float.maxVal;
 		}
 		*result = value;
 	}
@@ -617,17 +618,17 @@ static XML_Error doubleHandler(XML_Input *input, XML_Element *elem, const XML_Ha
 	if (error == XML_Error_None)
 	{
 		double value = atof(tmp);
-		double *result = handler->Double.result ? handler->Double.result : (double *)((char *)userData + handler->offset);
+		double *result = handler->u.Double.result ? handler->u.Double.result : (double *)((char *)userData + handler->offset);
 		/* minVal and maxVal are POINTERS to doubles */
-		if (handler->Double.minVal != NULL)
+		if (handler->u.Double.minVal != NULL)
 		{
-			if (value < *(handler->Double.minVal))
-				value = (*handler->Double.minVal);
+			if (value < *(handler->u.Double.minVal))
+				value = (*handler->u.Double.minVal);
 		}
-		if (handler->Double.maxVal != NULL)
+		if (handler->u.Double.maxVal != NULL)
 		{
-			if (value > *(handler->Double.maxVal))
-				value = (*handler->Double.maxVal);
+			if (value > *(handler->u.Double.maxVal))
+				value = (*handler->u.Double.maxVal);
 		}
 		*result = value;
 	}
@@ -636,8 +637,8 @@ static XML_Error doubleHandler(XML_Input *input, XML_Element *elem, const XML_Ha
 
 static XML_Error stringHandler(XML_Input *input, XML_Element *elem, const XML_Handler *handler, void *userData)
 {
-	size_t len = handler->CString.maxLen / sizeof(XML_Char);
-	XML_Char *str = handler->CString.result ? handler->CString.result : (XML_Char *)((char *)userData + handler->offset);
+	size_t len = handler->u.CString.maxLen / sizeof(XML_Char);
+	XML_Char *str = handler->u.CString.result ? handler->u.CString.result : (XML_Char *)((char *)userData + handler->offset);
 	XML_Error error = XML_ElementReadData(elem, str, &len);
 	str[len] = 0;
 	return error;
@@ -674,7 +675,7 @@ static XML_Error boolHandler(XML_Input *input, XML_Element *elem, const XML_Hand
 	if (error == XML_Error_None)
 	{
 		int value = XML_stringsMatch(tmp, "True") != 0 || XML_stringsMatch(tmp, "true") != 0;
-		void *result = handler->Bool.result ? handler->Bool.result : (void *)((char *)userData + handler->offset);
+		void *result = handler->u.Bool.result ? handler->u.Bool.result : (void *)((char *)userData + handler->offset);
 		setValue(result, value, handler->size);
 	}
 	return error;
@@ -689,11 +690,11 @@ static XML_Error listHandler(XML_Input *input, XML_Element *elem, const XML_Hand
 	if (error == XML_Error_None)
 	{
 		/* loop over list entries and compare */
-		void *result = handler->List.result ? handler->List.result : (void *)((char *)userData + handler->offset);
+		void *result = handler->u.List.result ? handler->u.List.result : (void *)((char *)userData + handler->offset);
 		int i;
-		for (i = 0; i < handler->List.listSize; i++)
+		for (i = 0; i < handler->u.List.listSize; i++)
 		{
-			if (XML_stringsMatch(tmp, handler->List.list[i]))
+			if (XML_stringsMatch(tmp, handler->u.List.list[i]))
 			{
 				setValue(result, i, handler->size);
 				break;
@@ -889,14 +890,14 @@ static const XML_Handler *findHandler(const XML_Char *name, const XML_Handler ha
 		/* deal with chains */
 		if (handlers[i].type == XML_Handler_Chain)
 		{
-			const XML_Handler *handler = findHandler(name, handlers[i].Chain.handlers, userData);
+			const XML_Handler *handler = findHandler(name, handlers[i].u.Chain.handlers, userData);
 			if (handler)
 			{
 				/* return user-data specific to the handler chain */
 				if (handlers[i].size > 0)
 					*userData = (void *)((char *)(*userData) + handlers[i].offset);
-				else if (handlers[i].Chain.userData)
-					*userData = handlers[i].Chain.userData;
+				else if (handlers[i].u.Chain.userData)
+					*userData = handlers[i].u.Chain.userData;
 				return handler;
 			}
 		}
@@ -925,14 +926,14 @@ static const XML_Handler *findDataHandler(const XML_Handler handlers[], void **u
 		/* deal with chains */
 		if (handlers[i].type == XML_Handler_Chain)
 		{
-			const XML_Handler *handler = findDataHandler(handlers[i].Chain.handlers, userData, type);
+			const XML_Handler *handler = findDataHandler(handlers[i].u.Chain.handlers, userData, type);
 			if (handler)
 			{
 				/* return user-data specific to the handler chain */
 				if (handlers[i].size > 0)
 					*userData = (void *)((char *)(*userData) + handlers[i].offset);
-				else if (handlers[i].Chain.userData)
-					*userData = handlers[i].Chain.userData;
+				else if (handlers[i].u.Chain.userData)
+					*userData = handlers[i].u.Chain.userData;
 				return handler;
 			}
 		}

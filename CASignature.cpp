@@ -2,8 +2,8 @@
 #include "CASignature.hpp"
 #include "CABase64.hpp"
 #include "CAUtil.hpp"
+#include "xml/xmlstream.h"
 #include "xml/xmlinput.h"
-#include "xml/xmlfile.h"
 class BufferInputStream:public XML::InputStream
 	{
 		public:
@@ -47,7 +47,7 @@ CASignature::~CASignature()
 		DSA_free(dsa);
 	}
 
-CASignature::setSignKey(char* buff,int len,int type)
+int CASignature::setSignKey(char* buff,int len,int type)
 	{
 		if(buff==NULL||len<1||type!=SIGKEY_XML)
 			return -1;
@@ -207,7 +207,8 @@ int CASignature::signXML(char* in,unsigned int inlen,char* out,unsigned int *out
 		
 		//Making Base64-Encode r and s
 		STACK* a=NULL;
-		d2i_ASN1_SET(&a,&c,sigSize,(char *(__cdecl *)(void))d2i_ASN1_INTEGER,NULL,V_ASN1_SEQUENCE,V_ASN1_UNIVERSAL);
+//		d2i_ASN1_SET(&a,&c,sigSize,(char *(__cdecl *)(void))d2i_ASN1_INTEGER,NULL,V_ASN1_SEQUENCE,V_ASN1_UNIVERSAL);
+		d2i_ASN1_SET(&a,&c,sigSize,(char *(*)(void))d2i_ASN1_INTEGER,NULL,V_ASN1_SEQUENCE,V_ASN1_UNIVERSAL);
 		BIGNUM* s =BN_new();
 		ASN1_INTEGER* i=(ASN1_INTEGER*)sk_pop(a);
 		ASN1_INTEGER_to_BN(i,s);
@@ -260,7 +261,7 @@ typedef struct
 		char* out;
 		unsigned int outlen;
 		unsigned int pos;
-		unsigned int err;
+		int err;
 	} XMLCanonicalHandlerData;
 
 static void smakeXMLCanonicalDataHandler(const XML_Char *data, size_t len, void *userData)

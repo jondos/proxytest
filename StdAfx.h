@@ -36,7 +36,6 @@
 			#define STRING std::string
 			#define VECTOR std::vector
 		#endif
-		#include <assert.h>
 #else
     #include <sys/ioctl.h>
     #include <sys/socket.h>
@@ -51,6 +50,12 @@
     #include <syslog.h>
     #include <stdarg.h>
     #include <memory.h>       
+    #ifndef O_BINARY
+	#define O_BINARY 0
+    #endif
+    #ifndef MAX_PATH
+	#define MAX_PATH 4096
+    #endif
     typedef struct sockaddr* LPSOCKADDR;
     #define SOCKET int
     typedef struct hostent HOSTENT;
@@ -115,7 +120,7 @@
 #endif
 
 #define E_SUCCESS 0		
-
+#include <assert.h>
 #include <stdio.h>
 #include <time.h>
 #include <sys/types.h>

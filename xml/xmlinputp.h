@@ -43,15 +43,16 @@ typedef struct XML_Attribute_
 
 typedef struct XML_Element_
 {
-	XML_Input *input;
+	struct XML_Input_ *input;
 	XML_Char name[XML_ELEM_NAME_MAX];
 	XML_Attribute *attrs;		/* attribute list */
 	int level;					/* element level (0 is root) */
 	int empty;					/* "empty" element */
 } XML_Element;
 
-typedef XML_Error (*ElementHandlerProc)(XML_Input *input, XML_Element *elem, const XML_Handler *handler, void *userData);
-typedef XML_Error (*DataHandlerProc)(XML_Input *input, const XML_Char *data, size_t len, const XML_Handler *handler, void *userData);
+
+typedef XML_Error (*ElementHandlerProc)(struct XML_Input_ *input, XML_Element *elem, const XML_Handler *handler, void *userData);
+typedef XML_Error (*DataHandlerProc)(struct XML_Input_ *input, const XML_Char *data, size_t len, const XML_Handler *handler, void *userData);
 
 typedef struct XML_Input_
 {
