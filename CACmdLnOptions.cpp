@@ -659,7 +659,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		TargetInterface* targetInterfaceNextMix=NULL;
 		//NextMix --> only one!!
 		DOM_Element elemNextMix;
-		getDOMChildByName(elemRoot,(UINT8*)"NextMix",elemNextMix,false);
+		getDOMChildByName(elemNetwork,(UINT8*)"NextMix",elemNextMix,false);
 		if(elemNextMix!=NULL)
 			{
 				UINT32 type;
@@ -731,7 +731,7 @@ SKIP_NEXT_MIX:
 		
 		//Next Proxies
 		DOM_Element elemProxies;
-		getDOMChildByName(elemRoot,(UINT8*)"Proxies",elemProxies,false);
+		getDOMChildByName(elemNetwork,(UINT8*)"Proxies",elemProxies,false);
 		if(elemProxies!=NULL)
 			{
 				DOM_NodeList nlTargetInterfaces;
@@ -778,7 +778,7 @@ SKIP_NEXT_MIX:
 								if(strcmp((char*)tmpBuff,"SOCKS")==0)
 									proxy_type=TARGET_SOCKS_PROXY;
 								else if(strcmp((char*)tmpBuff,"HTTP")==0)
-									type=TARGET_HTTP_PROXY;
+									proxy_type=TARGET_HTTP_PROXY;
 								else
 									continue;
 								
