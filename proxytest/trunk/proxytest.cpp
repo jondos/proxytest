@@ -205,6 +205,7 @@ int doLocalProxy()
 		int ret;	
 		CASocketAddr socketAddrIn("127.0.0.1",options.getServerPort());
 		LPPair* lpIOPair=new LPPair;
+		lpIOPair->socketIn.create();
 		lpIOPair->socketIn.setReuseAddr(true);
 		if(lpIOPair->socketIn.listen(&socketAddrIn)==SOCKET_ERROR)
 		    {
@@ -214,6 +215,7 @@ int doLocalProxy()
 		if(options.getSOCKSServerPort()!=-1)
 			{
 				socketAddrIn.setAddr("127.0.0.1",options.getSOCKSServerPort());
+				lpIOPair->socketSOCKSIn.create();
 				lpIOPair->socketSOCKSIn.setReuseAddr(true);
 				if(lpIOPair->socketSOCKSIn.listen(&socketAddrIn)==SOCKET_ERROR)
 						{
@@ -226,6 +228,9 @@ int doLocalProxy()
 		options.getTargetHost(strTarget,255);
 		addrNext.setAddr(strTarget,options.getTargetPort());
 		CAMsg::printMsg(LOG_INFO,"Try connectiong to next Mix...");
+		((CASocket*)lpIOPair->muxOut)->create();
+		((CASocket*)lpIOPair->muxOut)->setSendBuff(sizeof(MUXPACKET)*50);
+		((CASocket*)lpIOPair->muxOut)->setRecvBuff(sizeof(MUXPACKET)*50);
 		if(lpIOPair->muxOut.connect(&addrNext)!=SOCKET_ERROR)
 			{
 				CAMsg::printMsg(LOG_INFO," connected!\n");
@@ -339,6 +344,9 @@ int doMiddleMix()
 		char strTarget[255];
 		options.getTargetHost(strTarget,255);
 		nextMix.setAddr(strTarget,options.getTargetPort());
+		((CASocket*)mmIOPair->muxOut)->create();
+		((CASocket*)mmIOPair->muxOut)->setRecvBuff(50*sizeof(MUXPACKET));
+		((CASocket*)mmIOPair->muxOut)->setSendBuff(50*sizeof(MUXPACKET));
 		if(mmIOPair->muxOut.connect(&nextMix)==SOCKET_ERROR)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Cannot connect to next Mix -- Exiting!\n");
@@ -351,6 +359,8 @@ int doMiddleMix()
 				delete mmIOPair;
 				return SOCKET_ERROR;
 			}
+		((CASocket*)mmIOPair->muxIn)->setRecvBuff(50*sizeof(MUXPACKET));
+		((CASocket*)mmIOPair->muxIn)->setSendBuff(50*sizeof(MUXPACKET));
 		mmIO(mmIOPair);
 		delete mmIOPair;
 		return 0;
@@ -536,6 +546,9 @@ int doFirstMix()
 		options.getTargetHost(strTarget,255);
 		addrNext.setAddr(strTarget,options.getTargetPort());
 		CAMsg::printMsg(LOG_INFO,"Try connectiong to next Mix...");
+		((CASocket*)fmIOPair->muxOut)->create();
+		((CASocket*)fmIOPair->muxOut)->setSendBuff(50*sizeof(MUXPACKET));
+		((CASocket*)fmIOPair->muxOut)->setRecvBuff(50*sizeof(MUXPACKET));
 		if(fmIOPair->muxOut.connect(&addrNext)!=SOCKET_ERROR)
 			{
 				CAMsg::printMsg(LOG_INFO," connected!\n");
@@ -703,6 +716,9 @@ int doLastMix()
 					delete lmIOPair;
 					return -1;
 		    }
+		((CASocket*)lmIOPair->muxIn)->setRecvBuff(50*sizeof(MUXPACKET));
+		((CASocket*)lmIOPair->muxIn)->setSendBuff(50*sizeof(MUXPACKET));
+
 		CAMsg::printMsg(LOG_INFO,"connected!\n");
 		char strTarget[255];
 		options.getTargetHost(strTarget,255);

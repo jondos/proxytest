@@ -7,6 +7,7 @@ class CASocket
 		public:
 			CASocket();
 			~CASocket(){close();DeleteCriticalSection(&csClose);}
+			int create();
 			int listen(LPSOCKETADDR psa);
 			int listen(unsigned short port);
 			int accept(CASocket &s);
@@ -22,6 +23,8 @@ class CASocket
 			int getLocalPort();
 			int setReuseAddr(bool b);
 			int setRecvLowWat(int r);
+			int setRecvBuff(int r);
+			int setSendBuff(int r);
 		private:
 			SOCKET m_Socket;
 			#ifdef _REENTRANT

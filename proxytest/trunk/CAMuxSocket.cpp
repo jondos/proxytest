@@ -13,6 +13,7 @@ CAMuxSocket::CAMuxSocket()
 int CAMuxSocket::accept(unsigned short port)
 	{
 		CASocket oSocket;
+		oSocket.create();
 		oSocket.setReuseAddr(true);
 		if(oSocket.listen(port)==SOCKET_ERROR)
 			return SOCKET_ERROR;

@@ -15,11 +15,18 @@ CASocket::CASocket()
 		InitializeCriticalSection(&csClose);
 		closeMode=0;
 	}
-
-int CASocket::listen(LPSOCKETADDR psa)
+int CASocket::create()
 	{
 		if(m_Socket==0)
 			m_Socket=socket(AF_INET,SOCK_STREAM,0);
+		if(m_Socket==INVALID_SOCKET)
+			return SOCKET_ERROR;
+		return 0;
+	}
+int CASocket::listen(LPSOCKETADDR psa)
+	{
+		if(m_Socket==0&&create()==SOCKET_ERROR)
+			return SOCKET_ERROR;
 		if(::bind(m_Socket,(LPSOCKADDR)psa,sizeof(*psa))==SOCKET_ERROR)
 		    return SOCKET_ERROR;
 		return ::listen(m_Socket,SOMAXCONN);
@@ -47,11 +54,9 @@ int CASocket::accept(CASocket &s)
 			
 int CASocket::connect(LPSOCKETADDR psa)
 	{
-		if(m_Socket==0)
+		if(m_Socket==0&&create()==SOCKET_ERROR)
 			{
-				m_Socket=socket(AF_INET,SOCK_STREAM,0);
-				if(m_Socket==-1)
-					return SOCKET_ERROR;
+				return SOCKET_ERROR;
 			}
 #ifdef _DEBUG
 		sockets++;
@@ -147,5 +152,17 @@ int CASocket::setRecvLowWat(int r)
 	{
 		int val=r;
 		return setsockopt(m_Socket,SOL_SOCKET,SO_RCVLOWAT,(char*)&val,sizeof(val));
+	}
+
+int CASocket::setRecvBuff(int r)
+	{
+		int val=r;
+		return setsockopt(m_Socket,SOL_SOCKET,SO_RCVBUF,(char*)&val,sizeof(val));	
+	}
+
+int CASocket::setSendBuff(int r)
+	{
+		int val=r;
+		return setsockopt(m_Socket,SOL_SOCKET,SO_SNDBUF,(char*)&val,sizeof(val));	
 	}
 
