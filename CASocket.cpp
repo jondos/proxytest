@@ -128,7 +128,7 @@ int CASocket::receive(char* buff,int len)
 int CASocket::getLocalPort()
 	{
 		struct sockaddr_in addr;
-		int namelen=sizeof(struct sockaddr_in);
+		socklen_t namelen=sizeof(struct sockaddr_in);
 		if(getsockname(m_Socket,(struct sockaddr*)&addr,&namelen)==SOCKET_ERROR)
 			return SOCKET_ERROR;
 		else
