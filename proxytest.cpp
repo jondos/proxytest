@@ -1066,7 +1066,7 @@ int main(int argc, const char* argv[])
 			err=WSAStartup(0x0202,&wsadata);
 		#endif
 		//low-water receive-test
-		CASocket oSocket;
+/*		CASocket oSocket;
 		oSocket.listen(9000);
 		CASocket cSocket;
 		oSocket.accept(cSocket);
@@ -1082,7 +1082,7 @@ int main(int argc, const char* argv[])
 		printf("Can read: %i\n",cSocket.available());
 		oSocket.close();
 		exit(0);
-
+*/
 		//initalize Random..
 		#if _WIN32
 			RAND_screen();
