@@ -28,8 +28,9 @@ SINT32 CAMiddleMixChannelList::add(HCHANNEL channelIn,CASymCipher* pCipher,HCHAN
 		pEntry->next=m_pChannelList;
 		do
 			{
-				getRandom(&pEntry->channelOut);
-			}while(getOutToIn_intern_without_lock(NULL,pEntry->channelOut,NULL)==E_SUCCESS);
+				getRandom(&channelOut);
+			}while(getOutToIn_intern_without_lock(NULL,*channelOut,NULL)==E_SUCCESS);
+		pEntry->channelOut=channelOut;
 		if(m_pChannelList!=NULL)
 			m_pChannelList->prev=pEntry;
 		m_pChannelList=pEntry;
