@@ -128,7 +128,7 @@ SINT32 CAFirstMix::init()
 				return E_UNKNOWN;
 			}
 		CAMsg::printMsg(LOG_CRIT,"Received Key Info lenght %u\n",ntohs(len));
-		UINT8* recvBuff=new unsigned char[ntohs(len)+2];
+		UINT8* recvBuff=new UINT8[ntohs(len)+2];
 		memcpy(recvBuff,&len,2);
 
 		if(((CASocket*)(*m_pMuxOut))->receiveFully(recvBuff+2,ntohs(len))!=E_SUCCESS)
@@ -822,8 +822,7 @@ ERR:
 		fmHashTableEntry* pHashEntry=m_pChannelList->getFirst();
 		while(pHashEntry!=NULL)
 			{
-				pHashEntry->pMuxSocket->close();
-				delete pHashEntry->pMuxSocket;
+				CAMuxSocket * pMuxSocket=pHashEntry->pMuxSocket;
 				delete pHashEntry->pQueueSend;
 
 				fmChannelListEntry* pEntry=m_pChannelList->getFirstChannelForSocket(pHashEntry->pMuxSocket);
@@ -833,9 +832,13 @@ ERR:
 	
 						pEntry=m_pChannelList->getNextChannel(pEntry);
 					}
+				m_pChannelList->remove(pHashEntry->pMuxSocket);
+				pMuxSocket->close();
+				delete pMuxSocket;
 				pHashEntry=m_pChannelList->getNext();
 			}
 		delete pMixPacket;
+		delete tmpBuff;
 		CAMsg::printMsg(LOG_CRIT,"Main Loop exited!!\n");
 		return E_UNKNOWN;
 	}
@@ -880,6 +883,9 @@ SINT32 CAFirstMix::clean()
 		if(m_pRSA!=NULL)
 			delete m_pRSA;
 		m_pRSA=NULL;
+		if(m_KeyInfoBuff!=NULL)
+			delete m_KeyInfoBuff;
+		m_KeyInfoBuff=NULL;
 		#ifdef _DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"CAFirstMix::clean() finished\n");
 		#endif

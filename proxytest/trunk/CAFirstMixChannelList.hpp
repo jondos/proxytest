@@ -108,6 +108,7 @@ class CAFirstMixChannelList
 			fmChannelListEntry* getFirstChannelForSocket(CAMuxSocket* pMuxSocket);
 			fmChannelListEntry* getNextChannel(fmChannelListEntry* pEntry);
 		
+			static SINT32 test();
 		private:
 			fmChannelListEntry* get_intern_without_lock(HCHANNEL channelOut)
 				{
@@ -135,7 +136,7 @@ class CAFirstMixChannelList
 			LP_fmHashTableEntry* m_HashTable;
 			LP_fmChannelListEntry* m_HashTableOutChannels;
 			fmHashTableEntry* m_listHashTableHead;
-			fmHashTableEntry* m_listHashTableCurrent;
+			fmHashTableEntry* m_listHashTableNext;
 			CAMutex m_Mutex;
 
 	};

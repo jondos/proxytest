@@ -34,7 +34,8 @@ class CACmdLnOptions
 	public:
 	    CACmdLnOptions();
 	    ~CACmdLnOptions();
-	    int parse(int argc,const char** arg);
+			void clean();
+			int parse(int argc,const char** arg);
 	    bool getDaemon();
       bool getProxySupport();
 	   

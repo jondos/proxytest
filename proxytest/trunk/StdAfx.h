@@ -39,6 +39,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
     #if _MSC_VER > 1000
     #pragma once
     #endif // _MSC_VER > 1000
+		#include <crtdbg.h>
     #include <winsock2.h>
 		#define socklen_t int
 		#define MSG_NOSIGNAL 0 

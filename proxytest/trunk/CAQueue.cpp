@@ -303,7 +303,7 @@ SINT32 CAQueue::test()
 		#define TEST_SIZE 1000000
 		UINT8* source=new UINT8[TEST_SIZE];
 		UINT8* target=new UINT8[TEST_SIZE];
-		RAND_pseudo_bytes(source,TEST_SIZE);
+		getRandom(source,TEST_SIZE);
 		UINT32 count=0;
 		UINT32 aktSize;
 		
@@ -359,5 +359,7 @@ SINT32 CAQueue::test()
 		if(memcmp(source,target,TEST_SIZE)!=0)
 			return E_UNKNOWN;
 		
+		delete source;
+		delete target;
 		return E_SUCCESS;
 	}

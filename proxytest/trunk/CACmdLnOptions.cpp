@@ -38,8 +38,12 @@ CACmdLnOptions::CACmdLnOptions()
 		pTargets=NULL;
 		cntTargets=0;
   }
-
 CACmdLnOptions::~CACmdLnOptions()
+	{
+		clean();
+	}
+
+void CACmdLnOptions::clean()
   {
 		if(strTargetHost!=NULL)
 			{
@@ -67,7 +71,7 @@ CACmdLnOptions::~CACmdLnOptions()
 			delete strUser;
 		if(pTargets!=NULL)
 			{
-				delete pTargets;
+				delete[] pTargets;
 			}
   }
     
@@ -262,7 +266,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 		bMiddleMix=true;
 	else 
 		bLastMix=true;
-	return 0;
+		return E_SUCCESS;
 	
     }
 

@@ -33,6 +33,12 @@ class CAThread
 	{
 		public:
 			CAThread();
+			~CAThread()
+				{
+					if(m_pThread!=NULL)
+						delete m_pThread;
+				}
+
 			SINT32 setMainLoop(THREAD_MAIN_TYP fnc)
 				{
 					m_fncMainLoop=fnc;
@@ -42,8 +48,14 @@ class CAThread
 			SINT32 start(void* param);
 			SINT32 join()
 				{
-					if(pthread_join(*m_pThread,NULL)==0)
+					if(m_pThread==NULL)
 						return E_SUCCESS;
+					if(pthread_join(*m_pThread,NULL)==0)
+						{
+							delete m_pThread;
+							m_pThread=NULL;
+							return E_SUCCESS;
+						}
 					else
 						return E_UNKNOWN;
 				}

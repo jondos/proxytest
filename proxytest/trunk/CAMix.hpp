@@ -30,6 +30,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 class CAMix
 	{
 		public:
+			virtual ~CAMix(){}
 			SINT32 start();
 		protected:
 			virtual SINT32 clean()=0;

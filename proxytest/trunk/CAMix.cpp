@@ -32,11 +32,12 @@ SINT32 CAMix::start()
 	{
 		if(initOnce()!=E_SUCCESS)
 			return E_UNKNOWN;
-		while(true)
+		//while(true)
 			{
 				if(init()==E_SUCCESS)
 					loop();
 				clean();
 				sSleep(60);
 			}
+		return E_UNKNOWN;
 	}

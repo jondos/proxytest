@@ -64,6 +64,7 @@ CAIPList::~CAIPList()
 						delete tmpEntry;
 					}
 			}
+		delete m_HashTable;
 	}
 
 /** Inserts the IP-Address into the list. 
