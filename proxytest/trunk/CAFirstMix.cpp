@@ -671,7 +671,7 @@ SINT32 CAFirstMix::loop()
 								if(oSocketGroup.isSignaled(*tmpMuxListEntry->pMuxSocket))
 									{
 										countRead--;
-										ret=tmpMuxListEntry->pMuxSocket->receive(&oMuxPacket,1000);
+										ret=tmpMuxListEntry->pMuxSocket->receive(&oMuxPacket,100);
 										if(ret==SOCKET_ERROR)
 											{
 												deleteResume(tmpMuxListEntry->pMuxSocket);
@@ -693,7 +693,7 @@ SINT32 CAFirstMix::loop()
 												nUser--;
 												oInfoService.setLevel(nUser,-1,-1);
 											}
-										else if(ret==E_TIMEDOUT)
+										else if(ret==E_AGAIN)
 											{
 												tmpMuxListEntry=oMuxChannelList.getNext();
 												continue;

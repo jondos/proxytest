@@ -211,6 +211,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define E_UNKNOWN -1
 #define E_UNSPECIFIED -100 // A Parameter was not specified/not set
 #define E_QUEUEFULL -200 // If a Send Queue contains more data then a defined number
+#define E_AGAIN -300 //If something was'nt completed und should request again later..
 #include <assert.h>
 #include <stdio.h>
 #include <time.h>

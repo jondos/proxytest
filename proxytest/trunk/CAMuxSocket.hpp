@@ -101,7 +101,7 @@ class CAMuxSocket
 	{
 		public:
 			CAMuxSocket();
-			~CAMuxSocket(){}
+			~CAMuxSocket(){delete m_Buff;}
 //			int useTunnel(char* proxyhost,UINT16 proxyport);
 			int accept(UINT16 port);
 			SINT32 connect(LPCASOCKETADDR psa);
@@ -119,6 +119,8 @@ class CAMuxSocket
 													}
 			private:
 				CASocket m_Socket;
+				UINT32 m_aktBuffPos;
+				UINT8* m_Buff;
 	//		bool bIsTunneld;
 	//		Tunnel* m_pTunnel;
 	//		char *m_szTunnelHost;
