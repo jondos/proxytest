@@ -60,6 +60,10 @@ static THREAD_RETURN InfoLoop(void *p)
 									{
                     CAMsg::printMsg(LOG_ERR,"InfoService: Error: Could not send Cascade Information.\n");
 									}
+								else
+									{
+                    CAMsg::printMsg(LOG_DEBUG,"InfoService: Successfull send Cascade Information.\n");
+									}
 							}
             pInfoService->sendMixHelo();
 						helocount=10;
