@@ -186,23 +186,6 @@ int main(int argc, const char* argv[])
 			#endif
 		#endif
 
-			UINT8 key[16];
-			UINT8* in=new UINT8[1024];
-			memset(key,0,16);
-			memset(in,0,1024);
-			CASymCipher* oSymCipher=new CASymCipher;
-			oSymCipher->setKeyAES(key);
-			unsigned long start=clock();
-			printf("Starting...\n");
-			for(int i=0;i<100000;i++)
-				{
-					oSymCipher->encryptAES(in,in,1024);
-				}
-			start=clock()-start;
-			printf("Neede Time: %u\n",start);
-			printf("Out: %02X %02X %02X %02X %02X %02X %02X %02X\n",in[0],in[1],in[2],in[3],in[4],in[5],in[6],in[7]);
-			exit(0);
-	
 		options.parse(argc,argv);
 		if(options.getDaemon())
 			{
