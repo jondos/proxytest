@@ -558,6 +558,9 @@ Debug(dc::malloc.on());
 		delete a;
 		int z=3;
 */
+#ifdef _DEBUG
+			UINT32 start;
+#endif
 		#if _WIN32
 			RAND_screen();
 		#else
@@ -636,7 +639,7 @@ Debug(dc::malloc.on());
 		//exit(0);
 		//Testing msSleep
 		CAMsg::printMsg(LOG_DEBUG,"Should sleep now for aprox 2 seconds....\n");
-		UINT32 start=time(NULL);
+		start=time(NULL);
 		for(i=0;i<10;i++)
 			msSleep(200);
 		start=time(NULL)-start;
