@@ -96,6 +96,7 @@
 		#define E_TIMEDOUT ETIMEDOUT
 		#define E_CONNREFUSED ECONNREFUSED
 		#ifdef __sgi
+			#define HAVE_VSYSLOG 1
 			#include <alloca.h>
 			#include <ctype.h>
 		#endif
