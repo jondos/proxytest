@@ -36,6 +36,7 @@ class CASocketAddr/*:public sockaddr_in*/
 			~CASocketAddr();
 			
 			SINT32 getType(){return m_Type;}
+			SINT32 getSize();
 			/*TCP/IP*/
 			CASocketAddr(char* szIP,UINT16 port);
 			CASocketAddr(UINT16 port);

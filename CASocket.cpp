@@ -76,7 +76,7 @@ SINT32 CASocket::listen(LPCASOCKETADDR psa)
 		int type=psa->getType();
 		if(m_Socket==0&&create(type)==SOCKET_ERROR)
 			return SOCKET_ERROR;
-		if(::bind(m_Socket,(LPSOCKADDR)psa,sizeof(*psa))==SOCKET_ERROR)
+		if(::bind(m_Socket,(LPSOCKADDR)(*psa),psa->getSize())==SOCKET_ERROR)
 		    return SOCKET_ERROR;
 		return ::listen(m_Socket,SOMAXCONN);
 	}
@@ -124,8 +124,8 @@ SINT32 CASocket::connect(LPCASOCKETADDR psa,UINT retry,UINT32 time)
 		sockets++;
 #endif
 		int err=0;
-		LPSOCKADDR addr=(LPSOCKADDR)psa;
-		int addr_len=sizeof(*addr);
+		LPSOCKADDR addr=(LPSOCKADDR)(*psa);
+		int addr_len=psa->getSize();
 		for(UINT i=0;i<retry;i++)
 			{
 //				CAMsg::printMsg(LOG_DEBUG,"Socket:connect-connect\n");
@@ -165,8 +165,8 @@ SINT32 CASocket::connect(LPCASOCKETADDR psa,UINT msTimeOut)
 		getNonBlocking(&bWasNonBlocking);
 		setNonBlocking(true);
 		int err=0;
-		LPSOCKADDR addr=(LPSOCKADDR)psa;
-		int addr_len=sizeof(*addr);
+		LPSOCKADDR addr=(LPSOCKADDR)(*psa);
+		int addr_len=psa->getSize();
 		
 		err=::connect(m_Socket,addr,addr_len);
 		if(err==0)
