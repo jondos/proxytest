@@ -62,6 +62,7 @@ class CAMsg
 			static CAMsg* pMsg;
 		public:
 			~CAMsg();
+			static SINT32 init(){pMsg=new CAMsg();return E_SUCCESS;}
 			static SINT32 setLogOptions(UINT32 options);
 			static SINT32 printMsg(UINT32 typ,char* format,...);
 			static SINT32 openEncryptedLog();
@@ -75,7 +76,7 @@ class CAMsg
 			char *m_strMsgBuff;
 			char *m_strLogFile; 
 			static const char* const m_strMsgTypes[5];
-			CAMutex m_csPrint;
+			CAMutex* m_pcsPrint;
 #ifdef COMPRESSED_LOGS
 			gzFile m_gzFileInfo;
 #endif

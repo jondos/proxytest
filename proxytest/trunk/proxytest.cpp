@@ -152,6 +152,24 @@ void checkSizesOfBaseTypes()
 		#endif
 	}
 
+/**do necessary initialisations of libraries etc.*/
+void init()
+	{
+		XMLPlatformUtils::Initialize();
+		OpenSSL_add_all_algorithms();
+		pOpenSSLMutexes=new CAMutex[CRYPTO_num_locks()];
+		CRYPTO_set_locking_callback((void (*)(int,int,const char *,int))openssl_locking_callback);
+		CAMsg::init();
+		CASocketAddrINet::init();
+		//startup
+		#ifdef _WIN32
+			int err=0;
+			WSADATA wsadata;
+			err=WSAStartup(0x0202,&wsadata);
+		#endif
+		initRandom();
+	}
+
 /** \mainpage
 
 \section docCommProto Description of the system and communication protocol
@@ -330,16 +348,9 @@ See \ref XMLMixCascadeStatus "[XML]" for a description of the XML struct send.
 int main(int argc, const char* argv[])
 	{
 		pMix=NULL;
-
 		int i;
 		SINT32 maxFiles;
-		//Setup Routines
-XMLPlatformUtils::Initialize();
-
-OpenSSL_add_all_algorithms();
-		pOpenSSLMutexes=new CAMutex[CRYPTO_num_locks()];
-		CRYPTO_set_locking_callback((void (*)(int,int,const char *,int))openssl_locking_callback);
-
+		init();
 #if defined(HAVE_CRTDBG)
 //			_CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_FILE );
 //			_CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDOUT );
@@ -387,18 +398,10 @@ Debug(dc::malloc.on());
 #ifdef LOG_CRIME
 			testTre();
 #endif
-		//startup
-		#ifdef _WIN32
-			int err=0;
-			WSADATA wsadata;
-			err=WSAStartup(0x0202,&wsadata);
-		#endif
-		//initalize Random..
 
 #ifdef _DEBUG
 			UINT32 start;
 #endif
-		initRandom();
 
 		//temp
 		/*for(;;){

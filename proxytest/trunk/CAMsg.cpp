@@ -47,6 +47,7 @@ const char* const CAMsg::m_strMsgTypes[5]={", error   ] ",", critical] ",", info
 
 CAMsg::CAMsg()
     {
+			m_pcsPrint=new CAMutex();
 			m_strMsgBuff=new char[MAX_MSG_SIZE+1+20+STRMSGTYPES_SIZE];
 			m_uLogType=MSG_STDOUT;
 			m_hFileInfo=-1;
@@ -65,6 +66,7 @@ CAMsg::~CAMsg()
 			closeEncryptedLog();
 			delete[] m_strMsgBuff;
 			delete[] m_strLogFile;
+			delete m_pcsPrint;
 		}
     
 SINT32 CAMsg::setLogOptions(UINT32 opt)
@@ -82,7 +84,7 @@ SINT32 CAMsg::setLogOptions(UINT32 opt)
 
 SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 	{
-		pMsg->m_csPrint.lock();
+		pMsg->m_pcsPrint->lock();
 		va_list ap;
 		va_start(ap,format);
 		SINT32 ret=E_SUCCESS;
@@ -109,7 +111,7 @@ SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 				break;
 				default:
 					va_end(ap);
-					pMsg->m_csPrint.unlock();
+					pMsg->m_pcsPrint->unlock();
 					return E_UNKNOWN;
 			}
 #ifdef HAVE_VSNPRINTF
@@ -178,7 +180,7 @@ SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 						ret=E_UNKNOWN;
 					}
 			}
-		pMsg->m_csPrint.unlock();
+		pMsg->m_pcsPrint->unlock();
 		return ret;
   }
 

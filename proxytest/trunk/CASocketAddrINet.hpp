@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 class CASocketAddrINet:private sockaddr_in,public CASocketAddr
 	{
 		public:
-			//static SINT32 init();
+			static SINT32 init(){m_pcsGet=new CAMutex();return E_SUCCESS;}
 			//static SINT32 destroy();
 			int getType()const
 				{
