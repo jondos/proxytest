@@ -133,6 +133,7 @@ SINT32 CALocalProxy::init()
 				((CASocket*)m_muxOut)->receiveFully((UINT8*)&size,2);
 				((CASocket*)m_muxOut)->receiveFully((UINT8*)&byte,1);
 				CAMsg::printMsg(LOG_INFO,"Received Key Info!\n");
+				size=ntohs(size);
 #ifdef _DEBUG
 				CAMsg::printMsg(LOG_INFO,"Key Info size is:%u\n",size);
 #endif
@@ -141,7 +142,6 @@ SINT32 CALocalProxy::init()
 #ifdef _DEBUG
 						CAMsg::printMsg(LOG_INFO,"Key Info is XML!\n");
 #endif
-						size=ntohs(size);
 						UINT8* buff=new UINT8[size+1];
 						buff[0]=byte;
 						((CASocket*)m_muxOut)->receiveFully(buff+1,size-1);
