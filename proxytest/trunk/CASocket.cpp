@@ -45,6 +45,7 @@ CASocket::CASocket()
 		InitializeCriticalSection(&m_csClose);
 		m_closeMode=0;
 		m_localPort=-1;
+		m_aktSendBuffer=-1;
 		m_bASyncSend=false;
 		memset(m_ipPeer,0,4);
 	}
@@ -56,6 +57,7 @@ SINT32 CASocket::create()
 
 SINT32 CASocket::create(int type)
 	{
+		m_aktSendBuffer=-1;
 		if(m_Socket==0)
 			m_Socket=socket(type,SOCK_STREAM,0);
 		if(m_Socket==INVALID_SOCKET)
@@ -345,7 +347,13 @@ SINT32 CASocket::getSendSpace()
 	{
 #ifdef HAVE_TIOCOUTQ
 		UINT32 ul;
-		SINT32 sl=getSendBuff();
+		SINT32 sl=m_aktSendBuff;
+		if(sl<=0)
+			{
+				sl=getSendBuff();
+				if(sl<=0)
+					return E_UNKNOWN;
+			}
 		if(ioctlsocket(m_Socket,TIOCOUTQ,&ul)==SOCKET_ERROR)
 			return SOCKET_ERROR;
 		else
@@ -497,21 +505,30 @@ SINT32 CASocket::getRecvBuff()
 		else
 			return val;
 	}
-
-SINT32 CASocket::setSendBuff(UINT32 r)
+/** Returuns < 0 on error, otherwise the new sendbuffersize (which may be less than r)*/
+SINT32 CASocket::setSendBuff(SINT32 r)
 	{
-		int val=r;
-		return setsockopt(m_Socket,SOL_SOCKET,SO_SNDBUF,(char*)&val,sizeof(val));	
+		if(r<0)
+			return E_UNKNOWN;
+		m_aktSendBuffer=-1;
+		SINT32 val=r;
+		SINT32 ret=setsockopt(m_Socket,SOL_SOCKET,SO_SNDBUF,(char*)&val,sizeof(val));	
+		if(ret!=0)
+			return E_UNKNOWN;
+		return getSendBuff();
 	}
 
 SINT32 CASocket::getSendBuff()
 	{
-		int val;
+		SINT32 val;
 		socklen_t size=sizeof(val);
 		if(getsockopt(m_Socket,SOL_SOCKET,SO_SNDBUF,(char*)&val,&size)==SOCKET_ERROR)
 			return E_UNKNOWN;
 		else
-			return val;
+			{
+				m_aktSendBuffer=val;
+				return val;
+			}
 	}
 
 SINT32 CASocket::setSendTimeOut(UINT32 msTimeOut)

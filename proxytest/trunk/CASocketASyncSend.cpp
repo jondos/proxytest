@@ -60,6 +60,7 @@ THREAD_RETURN SocketASyncSendLoop(void* p)
 								SINT32 sendSpace=akt->pSocket->getSendSpace();
 								if(sendSpace>0)
 									{
+										CAMsg::printMsg(LOG_DEBUG,"Send space now: %u\n",sendSpace);
 										len=min(sendSpace,len);
 									}
 								if(akt->pQueue->getNext(buff,&len)==E_SUCCESS)
