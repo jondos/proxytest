@@ -185,7 +185,8 @@ UINT32 getMemoryUsage()
 	{
 #ifndef _WIN32
 		struct rusage usage;
-		getrusage(RUSAGE_BOTH,&usage);
+		if(getrusage(RUSAGE_BOTH,&usage)==-1)
+			return 0;
 		return usage.ru_idrss;
 #else
 	return 0;
