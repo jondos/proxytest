@@ -297,8 +297,7 @@ SINT32 CAInfoService::sendHelo()
 //*>> Beginn very ugly hack for anon.inf.tu-dresden.de --> new Concepts needed!!!!!1
 				if(strncmp((char*)hostname,"ithif46",7)==0)
 				    strcpy((char*)hostname,"mix.inf.tu-dresden.de");
-				sprintf((char*)buff,"%s%%3A%u",hostname,options.getServerPort());
-				oxmlOut.WriteElement("IP",(char*)buff);
+				oxmlOut.WriteElement("IP",(char*)hostname);
 				oxmlOut.WriteElement("Port",(int)options.getServerPort());
         if(options.getProxySupport())
         	oxmlOut.WriteElement("ProxyPort",(int)443);
