@@ -479,23 +479,24 @@ UINT8* readFile(UINT8* name,UINT32* size)
 	Adds TIMESTAMP_SIZE bytes of timestamp at the parameter
 	and returns this timestamp.
 */
-UINT16 currentTimestamp(UINT8* buff)
+void currentTimestamp(UINT8* buff,bool bInNetworkByteOrder)
 	{
 		// Assume 366 days per year to be on the safe side with leap years.
 		time_t seconds_per_year = 60 * 60 * 24 * 366;
 		time_t now = time(NULL);
 
 		// January 1 of every year is the start of the epoch.
-		struct tm tm_epoch = *localtime(&now);
+		struct tm tm_epoch = *gmtime(&now);
 		tm_epoch.tm_sec = tm_epoch.tm_min = tm_epoch.tm_hour = tm_epoch.tm_mday = tm_epoch.tm_mon = 0;
 		time_t epoch = mktime(&tm_epoch);
 
 		// timestamp = (seconds_passed_in_this_year / seconds_per_year) * 2^16
 		// That is 0x0000 on January 1, 0:00; 0x0001 on January 1, 0:10; 0xFFFF on December 31, 23:59 (leap year)
 		UINT16 timestamp = (UINT16) ((((double) (now - epoch)) / ((double) seconds_per_year)) * 0xFFFF);
+		if(bInNetworkByteOrder)
+			timestamp=htons(timestamp);
 		if(buff != NULL)
 			memcpy(buff, &timestamp, TIMESTAMP_SIZE);
-		return timestamp;
 	}
 
 /**
@@ -540,7 +541,8 @@ bool initialized = false;
 
 bool validTimestampAndFingerprint(UINT8* fingerprint, UINT16 len, UINT8* timestamp_buff)
 	{
-		UINT16 current_timestamp = currentTimestamp(NULL);
+		UINT16 current_timestamp;
+		currentTimestamp((UINT8*)&current_timestamp);
 		if(!initialized)
 			{
 				// Initialize hashes and lists on first call.
@@ -579,6 +581,7 @@ bool validTimestampAndFingerprint(UINT8* fingerprint, UINT16 len, UINT8* timesta
 
 		UINT16 timestamp = 0;
 		memcpy(&timestamp, timestamp_buff, TIMESTAMP_SIZE);
+		timestamp=ntohs(timestamp);
 		if(timestamp == hash_current_timestamp)
 			// Timestamp is OK, check for duplicates.
 			return checkAndInsert(CURRENT_HASH, fingerprint);

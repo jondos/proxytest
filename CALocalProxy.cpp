@@ -377,7 +377,7 @@ SINT32 CALocalProxy::loop()
 																	packet (from 8 to 7).
 																*/
 																#ifdef WITH_TIMESTAMP
-																	currentTimestamp(buff+KEY_SIZE);
+																	currentTimestamp(buff+KEY_SIZE,true);
 																#endif
 																memcpy(buff+KEY_SIZE+TIMESTAMP_SIZE,pMixPacket->data,size);
 																m_arRSA[c].encrypt(buff,buff);
