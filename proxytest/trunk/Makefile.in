@@ -85,8 +85,8 @@ am_proxytest_OBJECTS = CAAbstractControlChannel.$(OBJEXT) \
 	CASocketAddrINet.$(OBJEXT) CASocketAddrUnix.$(OBJEXT) \
 	CASocketGroup.$(OBJEXT) CASocketList.$(OBJEXT) \
 	CASSLClientSocket.$(OBJEXT) CASSLContext.$(OBJEXT) \
-	CASymCipher.$(OBJEXT) CAThread.$(OBJEXT) \
-	CAThreadPool.$(OBJEXT) CAUtil.$(OBJEXT) \
+	CASymCipher.$(OBJEXT) CATempIPBlockList.$(OBJEXT) \
+	CAThread.$(OBJEXT) CAThreadPool.$(OBJEXT) CAUtil.$(OBJEXT) \
 	CAXMLErrorMessage.$(OBJEXT) StdAfx.$(OBJEXT) \
 	proxytest.$(OBJEXT)
 proxytest_OBJECTS = $(am_proxytest_OBJECTS)
@@ -265,6 +265,7 @@ proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CASSLClientSocket.cpp\
 		    CASSLContext.cpp\
 		    CASymCipher.cpp \
+		    CATempIPBlockList.cpp\
 		    CAThread.cpp \
 		    CAThreadPool.cpp\
 		    CAUtil.cpp \
@@ -319,6 +320,7 @@ proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CASSLClientSocket.hpp\
 		    CASSLContext.hpp\
 		    CASymCipher.hpp \
+		    CATempIPBlockList.hpp\
 		    CAThread.hpp \
 		    CAThreadPool.hpp\
 		    CAUtil.hpp \
@@ -468,6 +470,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASocketGroup.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASocketList.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASymCipher.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CATempIPBlockList.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAThread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAThreadPool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAUtil.Po@am__quote@
