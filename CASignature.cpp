@@ -1,7 +1,35 @@
 #include "StdAfx.h"
 #include "CASignature.hpp"
+#include "CABase64.hpp"
+#include "CAUtil.hpp"
 #include "xml/xmlinput.h"
 #include "xml/xmlfile.h"
+class BufferInputStream:public XML::InputStream
+	{
+		public:
+			BufferInputStream(char* buff,unsigned int l)
+				{
+					buffer=buff;
+					len=l;
+					pos=0;
+				}
+		int read(XML_Char *buf, size_t bufLen)
+			{
+				unsigned int size=min(bufLen,len-pos);
+				if(size==0)
+					return 0;
+				memcpy(buf,buffer+pos,size);
+				pos+=size;
+				return size;
+			}
+
+		private:
+			char* buffer;
+			unsigned int pos;
+			unsigned int len;
+	};
+
+
 CASignature::CASignature()
 	{
 /*		dsa=DSA_new();
@@ -33,16 +61,45 @@ CASignature::setSignKey(char* buff,int len,int type)
 static void sDSAKeyParamValueHandler(XML::Element &elem, void *userData)
 {
 	char buff[4096];
-	printf("KeyName: %s found!\n",elem.GetName());
-	memset(buff,0,4096);
-	elem.ReadData(buff,4096);
-	printf("KeyValue: %s found!\n",buff);
+	int len=elem.ReadData(buff,4096);
+	
+	unsigned int decLen=4096;
+	char decBuff[4096];
+	CABase64::decode(buff,len,decBuff,&decLen);
 	
 	DSA* tmpDSA=(DSA*)userData;
 	switch(elem.GetName()[0])
 		{
 			case 'P':
-				break;
+				if(tmpDSA->p!=NULL)
+					BN_free(tmpDSA->p);
+				tmpDSA->p=BN_bin2bn((unsigned char*)decBuff,decLen,NULL);
+				printf("P: %s\n",BN_bn2dec(tmpDSA->p));
+			break;
+			case 'Q':
+				if(tmpDSA->q!=NULL)
+					BN_free(tmpDSA->q);
+				tmpDSA->q=BN_bin2bn((unsigned char*)decBuff,decLen,NULL);
+				printf("Q: %s\n",BN_bn2dec(tmpDSA->q));
+			break;
+			case 'G':
+				if(tmpDSA->g!=NULL)
+					BN_free(tmpDSA->g);
+				tmpDSA->g=BN_bin2bn((unsigned char*)decBuff,decLen,NULL);
+				printf("G: %s\n",BN_bn2dec(tmpDSA->g));
+			break;
+			case 'X':
+				if(tmpDSA->priv_key!=NULL)
+					BN_free(tmpDSA->priv_key);
+				tmpDSA->priv_key=BN_bin2bn((unsigned char*)decBuff,decLen,NULL);
+				printf("X: %s\n",BN_bn2dec(tmpDSA->priv_key));
+			break;
+			case 'Y':
+				if(tmpDSA->pub_key!=NULL)
+					BN_free(tmpDSA->pub_key);
+				tmpDSA->pub_key=BN_bin2bn((unsigned char*)decBuff,decLen,NULL);
+				printf("Y: %s\n",BN_bn2dec(tmpDSA->pub_key));
+			break;
 		}
 	
 }
@@ -58,7 +115,7 @@ static void sDSAKeyValueHandler(XML::Element &elem, void *userData)
 	XML::Handler("X",sDSAKeyParamValueHandler),
 	XML::Handler("Y",sDSAKeyParamValueHandler),
 	XML::Handler::END};
-		elem.Process(handlers, NULL);
+		elem.Process(handlers, userData);
 }
 
 
@@ -69,7 +126,7 @@ static void sKeyValueHandler(XML::Element &elem, void *userData)
 		XML::Handler handlers[] = {
 		XML::Handler("DSAKeyValue",sDSAKeyValueHandler),
 			XML::Handler::END};
-		elem.Process(handlers, NULL);
+		elem.Process(handlers, userData);
 }
 
 static void sKeyInfoHandler(XML::Element &elem, void *userData)
@@ -79,28 +136,34 @@ static void sKeyInfoHandler(XML::Element &elem, void *userData)
 		XML::Handler handlers[] = {
 		XML::Handler("KeyValue",sKeyValueHandler),
 			XML::Handler::END};
-		elem.Process(handlers, NULL);
+		elem.Process(handlers, userData);
 }
 
 int CASignature::parseSignKeyXML(char* buff,int len)
 {
-	XML::FileInputStream file("g:\\projects\\InfoService\\jap.priv.xml");
-	XML::Input input(file);
+	BufferInputStream oStream(buff,len);
+	XML::Input input(oStream);
 
 	// set up initial handler for Document
 		XML::Handler handlers[] = {
 		XML::Handler("KeyInfo",sKeyInfoHandler),
 		XML::Handler::END
 	};
-
+	
+	DSA* tmpDSA=DSA_new();
 	try {
-		DSA* tmpDSA=DSA_new();
 		input.Process(handlers, tmpDSA);
 	}
 	catch (const XML::ParseException &e)
 	{
 		printf("ERROR: %s (line %d, column %d)\n", e.What(), e.GetLine(), e.GetColumn());
 	}
+	if(DSA_sign_setup(tmpDSA,NULL,&tmpDSA->kinv,&tmpDSA->r)!=1)
+		{
+			DSA_free(tmpDSA);
+			return -1;
+		}
+	dsa=tmpDSA;
 	return 0;
 }
 
@@ -115,4 +178,193 @@ int CASignature::sign(unsigned char* in,int inlen,unsigned char* sig,unsigned in
 int CASignature::getSignatureSize()
 	{
 		return DSA_size(dsa);
+	}
+
+const char *XMLSIGINFO_TEMPLATE=
+"<SignedInfo>\n\t\t<Reference URI=\"\">\n\t\t<DigestValue>%s</DigestValue>\n\t</Reference>\n\t</SignedInfo>";
+const char *XMLSIG_TEMPLATE=
+"<Signature>\n\t%s\n<SignatureValue>%s</SignatureValue>\n</Signature>";
+
+int CASignature::signXML(char* in,unsigned int inlen,char* out,unsigned int *outlen)
+	{
+		if(in==NULL||inlen<1||out==NULL||*outlen<inlen+getXMLSignatureSize())
+			return -1;
+		
+		//Calculating the Digest...
+		unsigned int len=*outlen;
+		makeXMLCanonical(in,inlen,out,&len);
+		unsigned char dgst[SHA_DIGEST_LENGTH];
+		SHA1((unsigned char*)out,len,dgst);
+		char tmpBuff[1024];
+		len=1024;
+		CABase64::encode((char*)dgst,SHA_DIGEST_LENGTH,tmpBuff,&len);
+		tmpBuff[len]=0;
+
+		//Creating the Sig-InfoBlock....
+		sprintf(out,XMLSIGINFO_TEMPLATE,tmpBuff);
+		
+		// Signing the SignInfo block....
+		len=1024;//*outlen;
+		makeXMLCanonical(out,strlen(out),tmpBuff,&len);
+		unsigned int sigSize=255;
+		unsigned char sig[255];
+		unsigned char* c=sig;
+		sign((unsigned char*)tmpBuff,len,sig,&sigSize);
+		
+		//Making Base64-Encode r and s
+		STACK* a=NULL;
+		d2i_ASN1_SET(&a,&c,sigSize,(char *(__cdecl *)(void))d2i_ASN1_INTEGER,NULL,V_ASN1_SEQUENCE,V_ASN1_UNIVERSAL);
+		BIGNUM* r =BN_new();
+		ASN1_INTEGER* i=(ASN1_INTEGER*)sk_pop(a);
+		ASN1_INTEGER_to_BN(i,r);
+		ASN1_INTEGER_free(i);
+		BIGNUM* s =BN_new();
+		i=(ASN1_INTEGER*)sk_pop(a);
+		ASN1_INTEGER_to_BN(i,s);
+		ASN1_INTEGER_free(i);
+		sk_free(a);
+
+		BN_bn2bin(r,(unsigned char*)tmpBuff);
+		len=BN_num_bytes(r);
+		BN_bn2bin(s,(unsigned char*)tmpBuff+len);
+		len+=BN_num_bytes(r);
+		sigSize=255;
+		CABase64::encode(tmpBuff,len,(char*)sig,&sigSize);
+		sig[sigSize]=0;
+
+		//Makeing the hole Signature-Block....
+		sprintf(tmpBuff,XMLSIG_TEMPLATE,out,sig);
+		BN_free(r);
+		BN_free(s);
+
+		/* Find the last closing tag (</...>) and insert the <Signature> Element just before*/
+		int pos=inlen-1;
+		while(pos>=0&&in[pos]!='<')
+			pos--;
+		if(pos<0)
+			return -1;
+		*outlen=pos;
+		memcpy(out,in,*outlen);
+		memcpy(out+(*outlen),tmpBuff,strlen(tmpBuff));
+		*outlen+=strlen(tmpBuff);
+		memcpy(out+(*outlen),in+pos,inlen-pos);
+		(*outlen)+=inlen-pos;
+		return 0;
+	}
+
+int CASignature::getXMLSignatureSize()
+	{
+		return strlen(XMLSIG_TEMPLATE)+strlen(XMLSIGINFO_TEMPLATE)+/*size of DigestValue*/+20+/*sizeof SignatureValue*/+40;
+	}
+
+typedef struct
+	{
+		char* out;
+		unsigned int outlen;
+		unsigned int pos;
+		unsigned int err;
+	} XMLCanonicalHandlerData;
+
+static void smakeXMLCanonicalDataHandler(const XML_Char *data, size_t len, void *userData)
+	{
+		XMLCanonicalHandlerData* pData=(XMLCanonicalHandlerData*)userData;
+		if(pData->err!=0)
+			return;
+		char* buff=new char[len];
+		len=memtrim(data,buff,len);
+		if(len==0)
+			{
+				delete buff;
+				return;
+			}
+
+		if(pData->outlen-pData->pos<len)
+			{
+				pData->err=-1;
+				delete buff;
+				return;
+			}
+		memcpy(pData->out+pData->pos,buff,len);
+		pData->pos+=len;
+		delete buff;
+	}
+
+static void smakeXMLCanonicalElementHandler(XML::Element &elem, void *userData)
+	{
+		XMLCanonicalHandlerData* pData=(XMLCanonicalHandlerData*)userData;
+		if(pData->err!=0)
+			return;
+		char* name=(char*)elem.GetName();
+		int namelen=strlen(name);
+		if(pData->outlen-pData->pos<2*namelen+5)
+			{
+				pData->err=-1;
+				return;
+			}
+		pData->out[pData->pos++]='<';
+		memcpy(pData->out+pData->pos,name,namelen);
+		pData->pos+=namelen;
+		if(elem.NumAttributes()>0)
+			{
+				XML::Attribute attr=elem.GetAttrList();
+				while(attr)
+					{
+						char* attrname=(char*)attr.GetName();
+						char* attrvalue=(char*)attr.GetValue();
+						pData->out[pData->pos++]=' ';
+						int len=strlen(attrname);
+						memcpy(pData->out+pData->pos,attrname,len);
+						pData->pos+=len;
+						pData->out[pData->pos++]='=';
+						pData->out[pData->pos++]='\"';
+						len=strlen(attrvalue);
+						memcpy(pData->out+pData->pos,attrvalue,len);
+						pData->pos+=len;
+						pData->out[pData->pos++]='\"';
+						attr=attr.GetNext();
+					}
+			}
+		pData->out[pData->pos++]='>';
+		//procces children...
+		static XML::Handler handlers[] = {
+		XML::Handler(smakeXMLCanonicalElementHandler),
+		XML::Handler(smakeXMLCanonicalDataHandler),
+		XML::Handler::END
+		};
+		elem.Process(handlers,userData);
+		//closing tag...
+		pData->out[pData->pos++]='<';
+		pData->out[pData->pos++]='/';
+		memcpy(pData->out+pData->pos,name,namelen);
+		pData->pos+=namelen;
+		pData->out[pData->pos++]='>';
+
+	}
+
+int CASignature::makeXMLCanonical(char* in,unsigned int inlen,char* out,unsigned int* outlen)
+	{
+		BufferInputStream oStream(in,inlen);
+		XML::Input input(oStream);
+
+	// set up initial handler for Document
+		XML::Handler handlers[] = {
+		XML::Handler(smakeXMLCanonicalElementHandler),
+		XML::Handler(smakeXMLCanonicalDataHandler),
+		XML::Handler::END
+	};
+	
+	XMLCanonicalHandlerData oData;
+	oData.out=out;
+	oData.outlen=*outlen;
+	oData.pos=0;
+	oData.err=0;
+	try {
+		input.Process(handlers, &oData);
+	}
+	catch (const XML::ParseException &e)
+	{
+		printf("ERROR: %s (line %d, column %d)\n", e.What(), e.GetLine(), e.GetColumn());
+	}
+		*outlen=oData.pos;
+		return oData.err;
 	}
