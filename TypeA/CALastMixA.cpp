@@ -31,6 +31,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "../CASingleSocketGroup.hpp"
 #include "../CAPool.hpp"
 #include "../CACmdLnOptions.hpp"
+#ifdef HAVE_EPOLL
+#include "CASocketGroupEpoll.hpp"
+#endif
 
 extern CACmdLnOptions options;
 #ifdef LOG_CHANNEL
@@ -47,9 +50,13 @@ SINT32 CALastMixA::loop()
 #ifndef NEW_MIX_TYPE
 		//CASocketList  oSocketList;
 		CALastMixChannelList* pChannelList=new CALastMixChannelList;
+#ifdef HAVE_EPOLL	
+		CASocketGroupEpoll osocketgroupCacheRead(false);
+		CASocketGroupEpoll osocketgroupCacheWrite(true);
+#else
 		CASocketGroup osocketgroupCacheRead(false);
 		CASocketGroup osocketgroupCacheWrite(true);
-		//CASingleSocketGroup osocketgroupMixIn;
+#endif
 		#ifdef LOG_PACKET_TIMES
 			tPoolEntry* pPoolEntry=new tPoolEntry;
 			MIXPACKET* pMixPacket=&pPoolEntry->mixpacket;
@@ -206,13 +213,17 @@ SINT32 CALastMixA::loop()
 															else
 																{
 																	tmpSocket->setNonBlocking(true);
-																	osocketgroupCacheRead.add(*tmpSocket);
 																	#ifdef LOG_CHANNEL
 																		getcurrentTimeMillis(current_millis);
 																		pChannelList->add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue(),current_millis,payLen);
 																	#else
 																		pChannelList->add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue(PAYLOAD_SIZE));
 																	#endif
+#ifdef HAVE_EPOLL
+																	osocketgroupCacheRead.add(*tmpSocket,pChannelList->get(pMixPacket->channel));
+#else
+																	osocketgroupCacheRead.add(*tmpSocket);
+#endif
 																	#ifdef LOG_PACKET_TIMES
 																		UINT64 tmpU64;
 																		getcurrentTimeMicros(tmpU64);
@@ -257,7 +268,11 @@ SINT32 CALastMixA::loop()
 											}
 										else if(pMixPacket->flags==CHANNEL_RESUME)
 											{
+#ifdef HAVE_EPOLL
+												osocketgroupCacheRead.add(*(pChannelListEntry->pSocket),pChannelListEntry);
+#else
 												osocketgroupCacheRead.add(*(pChannelListEntry->pSocket));
+#endif
 											}
 										else if(pMixPacket->flags==CHANNEL_DATA)
 											{
@@ -299,7 +314,11 @@ SINT32 CALastMixA::loop()
 													}
 												else
 													{
+#ifdef HAVE_EPOLL
+														osocketgroupCacheWrite.add(*(pChannelListEntry->pSocket),pChannelListEntry);
+#else
 														osocketgroupCacheWrite.add(*(pChannelListEntry->pSocket));
+#endif
 														#ifdef LOG_PACKET_TIMES
 															UINT64 tmpU64;
 															getcurrentTimeMicros(tmpU64);
@@ -316,16 +335,22 @@ SINT32 CALastMixA::loop()
 //end Step 1
 
 //Step 2 Sending to Cache...
-				countRead=osocketgroupCacheWrite.select(/*true,*/0 );
+				countRead=osocketgroupCacheWrite.select(0);
 				if(countRead>0)
 					{
 						bAktiv=true;
+#ifdef HAVE_EPOLL
+						pChannelListEntry=(lmChannelListEntry*)osocketgroupCacheWrite.getFirstSignaledSocketData();
+						while(pChannelListEntry!=NULL)
+							{
+#else
 						pChannelListEntry=pChannelList->getFirstSocket();
 						while(pChannelListEntry!=NULL&&countRead>0)
 							{
 								if(osocketgroupCacheWrite.isSignaled(*(pChannelListEntry->pSocket)))
 									{
 										countRead--;
+#endif
 										SINT32 len=MIXPACKET_SIZE;
 										pChannelListEntry->pQueueSend->peek(tmpBuff,(UINT32*)&len);
 										len=pChannelListEntry->pSocket->send(tmpBuff,len);
@@ -364,27 +389,37 @@ SINT32 CALastMixA::loop()
 														pChannelList->removeChannel(pChannelListEntry->channelIn);											 
 													}
 											}
+#ifdef HAVE_EPOLL
+								pChannelListEntry=(lmChannelListEntry*)osocketgroupCacheWrite.getNextSignaledSocketData();
+#else
 									}
 								pChannelListEntry=pChannelList->getNextSocket();
+#endif
 							}
 					}
 //End Step 2
 
 //Step 3 Reading from Cache....
 #define MAX_MIXIN_SEND_QUEUE_SIZE 1000000
-				countRead=osocketgroupCacheRead.select(/*false,*/0);
+				countRead=osocketgroupCacheRead.select(0);
 				if(countRead>0)
 					{
 						#ifdef DELAY_CHANNELS
 							UINT64 aktTime;
 							getcurrentTimeMillis(aktTime);
 						#endif
+#ifdef HAVE_EPOLL
+						pChannelListEntry=(lmChannelListEntry*)osocketgroupCacheRead.getFirstSignaledSocketData();
+						while(pChannelListEntry!=NULL)
+							{
+#else
 						pChannelListEntry=pChannelList->getFirstSocket();
 						while(pChannelListEntry!=NULL&&countRead>0)
 							{
 								if(osocketgroupCacheRead.isSignaled(*(pChannelListEntry->pSocket)))
 									{
 										countRead--;
+#endif
 										if(m_pQueueSendToMix->getSize()<MAX_MIXIN_SEND_QUEUE_SIZE
 												#ifdef DELAY_CHANNELS
 													&&(pChannelListEntry->trafficOutToUser<DELAY_CHANNEL_TRAFFIC||isGreater64(aktTime,pChannelListEntry->timeNextSend))
@@ -448,8 +483,12 @@ SINT32 CALastMixA::loop()
 											}
 										else
 											break;
+#ifdef HAVE_EPOLL
+								pChannelListEntry=(lmChannelListEntry*)osocketgroupCacheRead.getNextSignaledSocketData();
+#else
 									}
 								pChannelListEntry=pChannelList->getNextSocket();
+#endif
 							}
 					}
 //end Step 3
