@@ -111,7 +111,7 @@ class CAMuxSocket
 													//return tunnel_pollin_fd(m_pTunnel);
 													}
 			private:
-			CASocket m_Socket;
+				CASocket m_Socket;
 	//		bool bIsTunneld;
 	//		Tunnel* m_pTunnel;
 	//		char *m_szTunnelHost;

@@ -46,7 +46,7 @@ class CAFirstMix:public CAMix
 			SINT32 initOnce();
 #endif
 		private:
-			CASocket socketIn;
+			CASocket		socketIn;
 			CAMuxSocket muxOut;
 #ifndef PROT2
 			UINT8* recvBuff;
