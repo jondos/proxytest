@@ -239,10 +239,10 @@ THREAD_RETURN loopLog(void* param)
 			{
 				if(countLog==0)
 					{
-						CAMsg::printMsg(LOG_DEBUG,"Uploadaed  Packets: %u\n",pLastMix->m_logUploadedPackets);
+						CAMsg::printMsg(LOG_DEBUG,"Uploaded  Packets: %u\n",pLastMix->m_logUploadedPackets);
 						CAMsg::printMsg(LOG_DEBUG,"Downloaded Packets: %u\n",pLastMix->m_logDownloadedPackets);
 						print64(buff,(UINT64&)pLastMix->m_logUploadedBytes);
-						CAMsg::printMsg(LOG_DEBUG,"Uploadaed  Bytes  : %s\n",buff);
+						CAMsg::printMsg(LOG_DEBUG,"Uploaded  Bytes  : %s\n",buff);
 						print64(buff,(UINT64&)pLastMix->m_logDownloadedBytes);
 						CAMsg::printMsg(LOG_DEBUG,"Downloaded Bytes  : %s\n",buff);
 						countLog=30;

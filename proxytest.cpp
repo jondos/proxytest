@@ -358,8 +358,9 @@ Debug(dc::malloc.on());
 		options.parse(argc,argv);
 		if(!(options.isFirstMix()||options.isMiddleMix()||options.isLastMix()||options.isLocalProxy()))
 			{
-				CAMsg::printMsg(LOG_CRIT,"You must specifiy, whcih kind of Mix you want to run!\n");
+				CAMsg::printMsg(LOG_CRIT,"You must specifiy, which kind of Mix you want to run!\n");
 				CAMsg::printMsg(LOG_CRIT,"Use -j or -c\n");
+				CAMsg::printMsg(LOG_CRIT,"Or try --help for more options.\n");
 				CAMsg::printMsg(LOG_CRIT,"Exiting...\n");
 				goto EXIT;
 			}
