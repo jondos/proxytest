@@ -402,10 +402,10 @@ SINT32 CALastMix::loop()
 												ret=ntohs(pMixPacket->payload.len);
 												if(ret>=0&&ret<=PAYLOAD_SIZE)
 													{
-														ret=pChannelListEntry->pQueueSend->add(pMixPacket->payload.data,ret);
 														#ifdef LOG_CHANNEL
 															pChannelListEntry->trafficIn+=ret;
 														#endif
+														ret=pChannelListEntry->pQueueSend->add(pMixPacket->payload.data,ret);
 													}
 												else
 													ret=SOCKET_ERROR;
