@@ -510,7 +510,7 @@ SINT32 CAFirstMixA::loop()
 									}
 								//todo error handling
 #ifdef HAVE_EPOLL
-						pfmHashEntry=m_psocketgroupUsersWrite->getNextSignaledSocketData();
+						pfmHashEntry=(fmHashTableEntry*)m_psocketgroupUsersWrite->getNextSignaledSocketData();
 #else
 							}//if is socket signaled
 						pfmHashEntry=m_pChannelList->getNext();
