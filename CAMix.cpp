@@ -99,6 +99,7 @@ SINT32 CAMix::start()
     }
 }
 
+
 /**
 * This method checks if target interfaces (network adress and port of next mix)
 * have been specified in the config file. A return value of true means that necessary
