@@ -39,7 +39,7 @@ SINT32 CASingleSocketGroup::select(bool bWrite,UINT32 time_ms)
 			m_pollfd->events=POLLOUT;
 		else
 			m_pollfd->events=POLLIN;
-		int ret=::poll(m_pollfd,1,ms);
+		int ret=::poll(m_pollfd,1,time_ms);
 		if(ret==0)
 			{
 				return E_TIMEDOUT;
