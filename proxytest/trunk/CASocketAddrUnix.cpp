@@ -38,7 +38,7 @@ CASocketAddrUnix::CASocketAddrUnix()
 	}
 
 /**Constructs an Unix Adress from an other Unix-Address */
-CASocketAddrUnix::CASocketAddrUnix(const CASocketUnix& addr)
+CASocketAddrUnix::CASocketAddrUnix(const CASocketAddrUnix& addr)
 	{
 		sun_family=AF_LOCAL;
 		memcpy(sun_path,addr.sun_path,sizeof(sun_path));
