@@ -162,8 +162,6 @@ dnl Checks for Headers
 AC_HEADER_STDC
 AC_CHECK_HEADERS(sys/filio.h)
 AC_CHECK_HEADERS(sys/epoll.h)
-AC_CHECK_HEADERS(sys/stat.h)
-AC_CHECK_HEADERS(fcntl.h)
 
 dnl Check for some "standard" libraries
 AC_CHECK_LIB(epoll,epoll_ctl)
@@ -197,8 +195,10 @@ AC_CHECK_DECL(MSG_NOSIGNAL,[],[AC_DEFINE(MSG_NOSIGNAL,0,[This is a flag to read(
 AC_CHECK_DECL(MSG_DONTWAIT,[],[AC_DEFINE(MSG_DONTWAIT,0,[This is a flag to read(), to tell the os does not wait for any bytes to arrive])],[
 #include <sys/types.h>
 #include <sys/socket.h>])
-AC_CHECK_DECL(O_SYNC,[AC_DEFINE(HAVE_O_SYNC,,[This is a flag to open() to do synchronized I/O])],[],[])
-AC_CHECK_DECL(O_FSYNC,[AC_DEFINE(HAVE_O_FSYNC,,[This is a flag to open() to do synchronized I/O])],[],[])
+AC_CHECK_DECL(O_SYNC,[AC_DEFINE(HAVE_O_SYNC,,[This is a flag to open() to do synchronized I/O])],[],[#include <sys/stat.h>
+#include <fcntl.h>])
+AC_CHECK_DECL(O_FSYNC,[AC_DEFINE(HAVE_O_FSYNC,,[This is a flag to open() to do synchronized I/O])],[],[#include <sys/stat.h>
+#include <fcntl.h>])
 
 dnl Checks for types
 AC_CHECK_TYPE(socklen_t,[AC_DEFINE(HAVE_SOCKLEN_T,,[Define if the type socklen_t is available])],[],[

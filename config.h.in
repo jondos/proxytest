@@ -21,9 +21,6 @@
 /* Define if your OS support the epoll() syscall */
 #undef HAVE_EPOLL
 
-/* Define to 1 if you have the <fcntl.h> header file. */
-#undef HAVE_FCNTL_H
-
 /* This is a flag to ioctl() to get the number of available bytes on a socket
    */
 #undef HAVE_FIONREAD
