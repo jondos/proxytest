@@ -56,15 +56,31 @@ SINT32 CAMiddleMix::initOnce()
 		return E_SUCCESS;
 	}
 
+/** Processes key exchange with Mix \e n+1 and Mix \e n-1.
+	* \li Step 1: Opens TCP/IP-Connection to Mix \e n+1. \n
+	* \li Step 2: Receives info about Mix \e n+1 .. LastMix as XML struct 
+	*         (see \ref  XMLInterMixInitSendFromLast "XML struct") \n
+  * \li Step 3: Verfies signature, generates symetric Keys used for link encryption
+	*         with Mix \n+1. \n
+	* \li Step 4: Sends symetric Key to Mix \e n+1, encrypted with PubKey of Mix \e n+1
+	*         (see \ref XMLInterMixInitAnswer "XML struct") \n
+	* \li Step 5: Sends info about Mix \e n .. LastMix as XML struct 
+	*         (see \ref  XMLInterMixInitSendFromLast "XML struct")to Mix \e n-1 \n
+	* \li Step 6: Recevies symetric Key used for link encrpytion with Mix \e n-1 
+	*					(see \ref XMLInterMixInitAnswer "XML struct") \n
+	*
+	* @retval E_SUCCESS if KeyExchange with Mix \e n+1 and Mix \e n-1 was succesful
+	*	@retval E_UNKNOWN otherwise
+	*/
 SINT32 CAMiddleMix::proccessKeyExchange()
 	{
-		UINT8* recvBuff=NULL;
-//		UINT8* infoBuff=NULL;
-		
+		UINT8* recvBuff=NULL;		
 		UINT16 len;
+		SINT32 ret;
+
 		if(((CASocket*)*m_pMuxOut)->receiveFully((UINT8*)&len,2)!=E_SUCCESS)
 			{
-				CAMsg::printMsg(LOG_INFO,"Error receiving Key Info lenght!\n");
+				CAMsg::printMsg(LOG_INFO,"Error receiving Key Info lenght from Mix n+1!\n");
 				return E_UNKNOWN;
 			}
 		len=ntohs(len);
@@ -74,24 +90,30 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 			return E_UNKNOWN;
 		if(((CASocket*)*m_pMuxOut)->receiveFully(recvBuff,len)!=E_SUCCESS)
 			{
+				CAMsg::printMsg(LOG_INFO,"Error receiving Key Info from Mix n+1!\n");
 				delete []recvBuff;
 				return E_UNKNOWN;
 			}
 		recvBuff[len]=0; //make a string
-
 		CAMsg::printMsg(LOG_INFO,"Received Key Info...\n");
-		
-				
 		CAMsg::printMsg(LOG_INFO,"%s\n",recvBuff);
+		
+		//Parsing KeyInfo received from Mix n+1
 		MemBufInputSource oInput(recvBuff,len,"tmpID");
 		DOMParser oParser;
 		oParser.parse(oInput);		
 		DOM_Document doc=oParser.getDocument();
 		delete []recvBuff;
+		if(doc.isNull())
+			{
+				CAMsg::printMsg(LOG_INFO,"Error parsing Key Info from Mix n+1!\n");
+				return E_UNKNOWN;
+			}
 
 		DOM_Element root=doc.getDocumentElement();
 		
-		//Sending symetric key...
+		//Finding first <Mix> entry and sending symetric key...
+		bool bFoundNextMix=false;
 		DOM_Node child=root.getFirstChild();
 		while(child!=NULL)
 			{
@@ -101,46 +123,50 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 						CASignature oSig;
 						CACertificate* nextCert=options.getNextMixTestCertificate();
 						oSig.setVerifyKey(nextCert);
-						SINT32 ret=oSig.verifyXML(child,NULL);
+						ret=oSig.verifyXML(child,NULL);
 						delete nextCert;
 						if(ret!=E_SUCCESS)
-							return E_UNKNOWN;
+							{
+								CAMsg::printMsg(LOG_INFO,"Could not verify Key Info from Mix n+1!\n");
+								return E_UNKNOWN;
+							}
+						//extracting Nonce and computing Hash of them
 						DOM_Element elemNonce;
 						getDOMChildByName(child,(UINT8*)"Nonce",elemNonce,false);
+						UINT32 lenNonce=1024;
 						UINT8 arNonce[1024];
-						if(elemNonce!=NULL)
+						UINT32 tmpLen=1024;
+						if(elemNonce==NULL)
 							{
-								UINT32 lenNonce=1024;
-								UINT32 tmpLen=1024;
-								getDOMElementValue(elemNonce,arNonce,&lenNonce);
-								CABase64::decode(arNonce,lenNonce,arNonce,&tmpLen);
-								lenNonce=tmpLen;
-								tmpLen=1024;
-								CABase64::encode(SHA1(arNonce,lenNonce,NULL),SHA_DIGEST_LENGTH,
-																	arNonce,&tmpLen);
-								arNonce[tmpLen]=0;
+								CAMsg::printMsg(LOG_INFO,"No nonce found in Key Info from Mix n+1!\n");
+								return E_UNKNOWN;
 							}
+						getDOMElementValue(elemNonce,arNonce,&lenNonce);
+						CABase64::decode(arNonce,lenNonce,arNonce,&tmpLen);
+						lenNonce=tmpLen;
+						tmpLen=1024;
+						CABase64::encode(SHA1(arNonce,lenNonce,NULL),SHA_DIGEST_LENGTH,
+																	arNonce,&tmpLen);
+						arNonce[tmpLen]=0;
+						
+						//Extracting PubKey of Mix n+1, generating SymKey for lin encryption
+						//with Mix n+1, encrypt and send them
 						DOM_Node rsaKey=child.getFirstChild();
 						CAASymCipher oRSA;
 						oRSA.setPublicKeyAsDOMNode(rsaKey);
 						UINT8 key[64];
 						getRandom(key,64);
-						UINT8 buff[4000];
-						UINT32 outlen=5000;
-						UINT8* out=new UINT8[outlen];
 						DOM_DocumentFragment docfragSymKey;
 						encodeXMLEncryptedKey(key,64,docfragSymKey,&oRSA);
 						DOM_Document docSymKey=DOM_Document::createDocument();
 						docSymKey.appendChild(docSymKey.importNode(docfragSymKey,true));
-						if(elemNonce!=NULL)
-							{
-								DOM_Element elemNonceHash=docSymKey.createElement("Nonce");
-								setDOMElementValue(elemNonceHash,arNonce);
-								docSymKey.getDocumentElement().appendChild(elemNonceHash);
-							}
+						DOM_Element elemNonceHash=docSymKey.createElement("Nonce");
+						setDOMElementValue(elemNonceHash,arNonce);
+						docSymKey.getDocumentElement().appendChild(elemNonceHash);
 						m_pSignature->signXML(docSymKey.getDocumentElement());
 						m_pMuxOut->setKey(key,64);
-						DOM_Output::dumpToMem(docSymKey,out,&outlen);
+						UINT32 outlen=0;
+						UINT8* out=DOM_Output::dumpToMem(docSymKey,&outlen);
 						UINT16 size=htons(outlen);
 						((CASocket*)m_pMuxOut)->send((UINT8*)&size,2);
 						((CASocket*)m_pMuxOut)->send(out,outlen);
@@ -149,12 +175,19 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 					}
 				child=child.getNextSibling();
 			}
-		
-
+		if(!bFoundNextMix)
+			{
+				CAMsg::printMsg(LOG_INFO,"Error -- no Key Info from Mix n+1 found!\n");
+				return E_UNKNOWN;
+			}
+		// -----------------------------------------
+		// ---- Start exchange with Mix n-1 --------
+		// -----------------------------------------		
+		//Inserting own (key) info
 		DOMString tmpDOMStr=root.getAttribute("count");
 		char* tmpStr=tmpDOMStr.transcode();
 		if(tmpStr==NULL)
-			{//TODO all deletes...
+			{
 				return E_UNKNOWN;
 			}
 		UINT32 count=atol(tmpStr);
@@ -166,6 +199,10 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 		UINT8 tmpBuff[50];
 		options.getMixId(tmpBuff,50); //the mix id...
 		mixNode.setAttribute("id",DOMString((char*)tmpBuff));
+		//Supported Mix Protocol -->currently "0.3"
+		DOM_Element elemMixProtocolVersion=doc.createElement("MixProtocolVersion");
+		mixNode.appendChild(elemMixProtocolVersion);
+		setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.3");
 
 		DOM_DocumentFragment pDocFragment;
 		m_pRSA->getPublicKeyAsDocumentFragment(pDocFragment); //the key
@@ -184,53 +221,59 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 		m_pSignature->signXML(mixNode);
 		
 		root.insertBefore(mixNode,root.getFirstChild());
-//		root.appendChild(mixNode);
-//		delete mixNode;
 
-		recvBuff=new UINT8[2048];
-		UINT32 outlen=2048;
-		DOM_Output::dumpToMem(doc,recvBuff+2,&outlen);
+		UINT8* out=new UINT8[0xFFFF];
+		UINT32 outlen=0xFFFD;
+		DOM_Output::dumpToMem(doc,out+2,&outlen);
 		#ifdef _DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"New Key Info size: %u\n",outlen);
 		#endif
 		len=htons(outlen);
-		memcpy(recvBuff,&len,2);
-		if(((CASocket*)*m_pMuxIn)->send(recvBuff,outlen+2)==-1)
+		memcpy(out,&len,2);
+		ret=((CASocket*)*m_pMuxIn)->send(out,outlen+2);
+		delete[] out;
+		if(ret!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_DEBUG,"Error sending new New Key Info\n");
 				return E_UNKNOWN;
 			}
-		else
-			CAMsg::printMsg(LOG_DEBUG,"Sending new New Key Info succeded\n");
+		CAMsg::printMsg(LOG_DEBUG,"Sending new New Key Info succeded\n");
 		
-			//Now receiving the symmetric key
+			//Now receiving the symmetric key form Mix n-1
 		((CASocket*)*m_pMuxIn)->receive((UINT8*)&len,2);
 		len=ntohs(len);
+		recvBuff=new UINT8[len+1]; //for \0 at the end
 		if(((CASocket*)*m_pMuxIn)->receive(recvBuff,len)!=len)
 			{
-				CAMsg::printMsg(LOG_ERR,"Error receiving symetric key!\n");
+				CAMsg::printMsg(LOG_ERR,"Error receiving symetric key from Mix n-1!\n");
 				delete []recvBuff;
 				return E_UNKNOWN;
 			}
 		recvBuff[len]=0;
 		CAMsg::printMsg(LOG_INFO,"Symmetric Key Info received is:\n");
 		CAMsg::printMsg(LOG_INFO,"%s\n",(char*)recvBuff);		
+		//Parsing doc received
+		MemBufInputSource oInput1(recvBuff,len,"tmp");
+		oParser.parse(oInput1);
+		doc=oParser.getDocument();
+		delete[] recvBuff;
+		if(doc.isNull())
+			{
+				CAMsg::printMsg(LOG_INFO,"Error parsing Key Info from Mix n-1!\n");
+				return E_UNKNOWN;
+			}
+		DOM_Element elemRoot=doc.getDocumentElement();
 		//verify signature
 		CASignature oSig;
 		CACertificate* pCert=options.getPrevMixTestCertificate();
 		oSig.setVerifyKey(pCert);
 		delete pCert;
-		if(oSig.verifyXML(recvBuff,len)!=E_SUCCESS)
+		if(oSig.verifyXML(elemRoot)!=E_SUCCESS)
 			{
-				CAMsg::printMsg(LOG_CRIT,"Couldt not verify the symetric key!\n");		
-				delete []recvBuff;
+				CAMsg::printMsg(LOG_CRIT,"Couldt not verify the symetric key form Mix n-1!\n");		
 				return E_UNKNOWN;
 			}
 		//Verifying nonce
-		MemBufInputSource oInput1(recvBuff,len,"tmp");
-		oParser.parse(oInput1);
-		doc=oParser.getDocument();
-		DOM_Element elemRoot=doc.getDocumentElement();
 		elemNonce=NULL;
 		getDOMChildByName(elemRoot,(UINT8*)"Nonce",elemNonce,false);
 		tmpLen=50;
@@ -242,10 +285,8 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 			)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Couldt not verify the Nonce!\n");		
-				delete []recvBuff;
 				return E_UNKNOWN;
 			}
-
 		CAMsg::printMsg(LOG_INFO,"Verified the symetric key!\n");		
 
 		UINT8 key[150];
@@ -254,10 +295,8 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 		if(m_pMuxIn->setKey(key,keySize)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Couldt not set the symetric key to be used by the MuxSocket!\n");		
-				delete []recvBuff;
 				return E_UNKNOWN;
 			}
-		delete [] recvBuff;
 		return E_SUCCESS;
 	}
 

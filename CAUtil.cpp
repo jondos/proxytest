@@ -428,6 +428,11 @@ SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, const UINT8* const xml, 
 		oParser.parse(oInput);
 		DOM_Document doc=oParser.getDocument();
 		DOM_Element root=doc.getDocumentElement();
+		return decodeXMLEncryptedKey(key,keylen,root,pRSA);
+	}
+
+SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, DOM_Node & root,CAASymCipher* pRSA)
+	{
 		DOM_Element elemCipherValue;
 		if(getDOMChildByName(root,(UINT8*)"CipherValue",elemCipherValue,true)!=E_SUCCESS)
 			return E_UNKNOWN;

@@ -971,71 +971,8 @@ SINT32 CAFirstMix::clean()
 		#endif
 		return E_SUCCESS;
 	}
-/*
- struct internal_mix_handler_data_struct
-	{
-		UINT32 mixcount;
-		UINT32 aktMix;
-		UINT8* cascadeInfo;
-		BufferInputStream* input;
-		CAASymCipher* m_arRSA; 
-	};
-	
-typedef struct internal_mix_handler_data_struct INTERNAL_MIX_HANDLER_STRUCT;
 
-static void sMixHandler(XMLElement &elem, void *userData)
-	{
-		INTERNAL_MIX_HANDLER_STRUCT* data=(INTERNAL_MIX_HANDLER_STRUCT*)userData;
-		UINT32 aktPos=elem.GetInput().GetOffset();
-		UINT32 size=data->input->getSize()-aktPos;
-		data->m_arRSA[data->aktMix++].setPublicKeyAsXML(data->input->getBuffer()+aktPos,size);
-		XMLAttribute attrs=elem.GetAttrList();
-		while(strcmp(attrs.GetName(),"id")!=0)
-			attrs=attrs.GetNext();
-		strcat((char*)data->cascadeInfo,"<Mix id=\"");
-		strcat((char*)data->cascadeInfo,attrs.GetValue());
-		strcat((char*)data->cascadeInfo,"\"></Mix>");
-	}
-
-static void sMixesHandler(XMLElement &elem, void *userData)
-	{	
-		INTERNAL_MIX_HANDLER_STRUCT* data=(INTERNAL_MIX_HANDLER_STRUCT*)userData;
-		// set up initial handler for RSA-Key
-		XMLHandler handlers[] = 
-			{
-				XMLHandler("Mix",sMixHandler),
-				XMLHandler::END
-			};
-		XMLAttribute attrs=elem.GetAttrList();
-		while(strcmp(attrs.GetName(),"count")!=0)
-			{
-				attrs=attrs.GetNext();
-			}
-		data->mixcount=atol(attrs.GetValue());
-		data->m_arRSA=new CAASymCipher[data->mixcount];
-		data->aktMix=0;
-		sprintf((char*)data->cascadeInfo,"<Mixes count=\"%u\">",data->mixcount+1);
-		UINT32 tmpBuffLen=5000;
-		UINT8 tmpBuff[5000];
-		options.getMixXml(tmpBuff,&tmpBuffLen);
-		tmpBuff[tmpBuffLen]=0; //make a string
-		//options.getMixId(tmpBuff,50);
-		//sprintf((char*)data->cascadeInfo+strlen((char*)data->cascadeInfo),"<Mix id=\"%s\"></Mix>",tmpBuff);
-		char* startpos=strstr((char*)tmpBuff,"<Mix");
-		if(startpos!=NULL)
-			{
-				strcpy((char*)data->cascadeInfo+strlen((char*)data->cascadeInfo),startpos);
-			}
-		else
-			{
-				options.getMixId(tmpBuff,50);
-				sprintf((char*)data->cascadeInfo+strlen((char*)data->cascadeInfo),"<Mix id=\"%s\"></Mix>",tmpBuff);
-			}
-		elem.Process(handlers,userData);
-		strcat((char*)data->cascadeInfo,"</Mixes>");
-	}
-*/
-/** This will initialize the XML Cascade Info send to the InfoService and
+	/** This will initialize the XML Cascade Info send to the InfoService and
   * the Key struct which is send to each user which connects
 	* This function is called from init()
 	*/
