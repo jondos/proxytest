@@ -585,13 +585,5 @@ SOURCE=.\CAUtil.hpp
 SOURCE=.\StdAfx.h
 # End Source File
 # End Group
-# Begin Group "Ressourcendateien"
-
-# PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
-# End Group
-# Begin Source File
-
-SOURCE=.\ReadMe.txt
-# End Source File
 # End Target
 # End Project

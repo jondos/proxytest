@@ -273,6 +273,7 @@ SINT32 CASocket::send(const UINT8* buff,UINT32 len)
 			{
 				if(ef==ERR_INTERN_WOULDBLOCK)
 					return E_AGAIN;
+				return E_UNKNOWN;
 			}
 	  return ret;	    	    
 	}
@@ -344,11 +345,11 @@ SINT32 CASocket::sendFully(const UINT8* buff,UINT32 len)
 						CASingleSocketGroup ossg;
 						ossg.add(*this);
 						ret=ossg.select(false,1000);
-						if(ret==1||ret==E_TIMEDOUT)
+						if(ret>=0||ret==E_TIMEDOUT)
 							continue;
 						return E_UNKNOWN;
 					}
-				else if(ret==E_UNKNOWN)
+				else if(ret<0)
 					{
 						return E_UNKNOWN;
 					}

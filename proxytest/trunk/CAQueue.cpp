@@ -97,7 +97,7 @@ SINT32 CAQueue::add(const UINT8* buff,UINT32 size)
 		m_nQueueSize+=size;
 	//	m_convarSize.unlock();
 		m_csQueue.unlock();
-		//m_convarSize.signal();
+		m_convarSize.signal();
 		return E_SUCCESS;
 	}
 

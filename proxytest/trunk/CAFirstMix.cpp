@@ -210,12 +210,9 @@ THREAD_RETURN loopSendToMix(void* param)
 		for(;;)
 			{
 				len=0xFFFF;
-				if(pQueue->isEmpty())
-					msSleep(1000);
-					else{
-				pQueue->get/*OrWait*/(buff,&len);
+				pQueue->getOrWait(buff,&len);
 				if(pSocket->sendFully(buff,len)!=E_SUCCESS)
-					break;}
+					break;
 			}
 		delete buff;
 		CAMsg::printMsg(LOG_DEBUG,"Exiting Thread SendToMix\n");
