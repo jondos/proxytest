@@ -32,7 +32,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "xml/xmlstream.h"
 #include "xml/xmlinput.h"
 
-class BufferInputStream:public XML::InputStream
+class BufferInputStream:public XMLInputStream
 	{
 		public:
 			BufferInputStream(UINT8* buff,UINT32 l)
@@ -80,7 +80,7 @@ SINT32 CASignature::setSignKey(UINT8* buff,UINT32 len,UINT32 type)
 
 
 //XML Decode...
-static void sDSAKeyParamValueHandler(XML::Element &elem, void *userData)
+static void sDSAKeyParamValueHandler(XMLElement &elem, void *userData)
 {
 	UINT8 buff[4096];
 	int len=(int)elem.ReadData((char*)buff,4096);
@@ -121,45 +121,45 @@ static void sDSAKeyParamValueHandler(XML::Element &elem, void *userData)
 	
 }
 
-static void sDSAKeyValueHandler(XML::Element &elem, void *userData)
+static void sDSAKeyValueHandler(XMLElement &elem, void *userData)
 {
-	XML::Handler handlers[] = {
-	XML::Handler("P",sDSAKeyParamValueHandler),
-	XML::Handler("Q",sDSAKeyParamValueHandler),
-	XML::Handler("G",sDSAKeyParamValueHandler),
-	XML::Handler("X",sDSAKeyParamValueHandler),
-	XML::Handler("Y",sDSAKeyParamValueHandler),
-	XML::Handler::END};
+	XMLHandler handlers[] = {
+	XMLHandler("P",sDSAKeyParamValueHandler),
+	XMLHandler("Q",sDSAKeyParamValueHandler),
+	XMLHandler("G",sDSAKeyParamValueHandler),
+	XMLHandler("X",sDSAKeyParamValueHandler),
+	XMLHandler("Y",sDSAKeyParamValueHandler),
+	XMLHandler::END};
 		elem.Process(handlers, userData);
 }
 
 
-static void sKeyValueHandler(XML::Element &elem, void *userData)
+static void sKeyValueHandler(XMLElement &elem, void *userData)
 {
-		XML::Handler handlers[] = {
-		XML::Handler("DSAKeyValue",sDSAKeyValueHandler),
-			XML::Handler::END};
+		XMLHandler handlers[] = {
+		XMLHandler("DSAKeyValue",sDSAKeyValueHandler),
+			XMLHandler::END};
 		elem.Process(handlers, userData);
 }
 
-static void sKeyInfoHandler(XML::Element &elem, void *userData)
+static void sKeyInfoHandler(XMLElement &elem, void *userData)
 {
-		XML::Handler handlers[] = {
-		XML::Handler("KeyValue",sKeyValueHandler),
-			XML::Handler::END};
+		XMLHandler handlers[] = {
+		XMLHandler("KeyValue",sKeyValueHandler),
+			XMLHandler::END};
 		elem.Process(handlers, userData);
 }
 
 SINT32 CASignature::parseSignKeyXML(UINT8* buff,UINT32 len)
 	{
 		BufferInputStream oStream(buff,len);
-		XML::Input input(oStream);
+		XMLInput input(oStream);
 
 	// set up initial handler for Document
-		XML::Handler handlers[] = 
+		XMLHandler handlers[] = 
 			{
-				XML::Handler("KeyInfo",sKeyInfoHandler),
-				XML::Handler::END
+				XMLHandler("KeyInfo",sKeyInfoHandler),
+				XMLHandler::END
 			};
 	
 		DSA* tmpDSA=DSA_new();
@@ -167,7 +167,7 @@ SINT32 CASignature::parseSignKeyXML(UINT8* buff,UINT32 len)
 			{
 				input.Process(handlers, tmpDSA);
 			}
-		catch (const XML::ParseException &e)
+		catch (const XMLParseException &e)
 			{
 				DSA_free(tmpDSA);
 				return E_UNKNOWN;
@@ -311,7 +311,7 @@ static void smakeXMLCanonicalDataHandler(const XML_Char *data, size_t len, void 
 		delete buff;
 	}
 
-static void smakeXMLCanonicalElementHandler(XML::Element &elem, void *userData)
+static void smakeXMLCanonicalElementHandler(XMLElement &elem, void *userData)
 	{
 		XMLCanonicalHandlerData* pData=(XMLCanonicalHandlerData*)userData;
 		if(pData->err!=0)
@@ -328,7 +328,7 @@ static void smakeXMLCanonicalElementHandler(XML::Element &elem, void *userData)
 		pData->pos+=namelen;
 		if(elem.NumAttributes()>0)
 			{
-				XML::Attribute attr=elem.GetAttrList();
+				XMLAttribute attr=elem.GetAttrList();
 				while(attr)
 					{
 						char* attrname=(char*)attr.GetName();
@@ -348,10 +348,10 @@ static void smakeXMLCanonicalElementHandler(XML::Element &elem, void *userData)
 			}
 		pData->out[pData->pos++]='>';
 		//procces children...
-		static XML::Handler handlers[] = {
-		XML::Handler(smakeXMLCanonicalElementHandler),
-		XML::Handler(smakeXMLCanonicalDataHandler),
-		XML::Handler::END
+		static XMLHandler handlers[] = {
+		XMLHandler(smakeXMLCanonicalElementHandler),
+		XMLHandler(smakeXMLCanonicalDataHandler),
+		XMLHandler::END
 		};
 		elem.Process(handlers,userData);
 		//closing tag...
@@ -366,14 +366,14 @@ static void smakeXMLCanonicalElementHandler(XML::Element &elem, void *userData)
 SINT32 CASignature::makeXMLCanonical(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen)
 	{
 		BufferInputStream oStream(in,inlen);
-		XML::Input input(oStream);
+		XMLInput input(oStream);
 
 	// set up initial handler for Document
-		XML::Handler handlers[] =
+		XMLHandler handlers[] =
 			{
-				XML::Handler(smakeXMLCanonicalElementHandler),
-				XML::Handler(smakeXMLCanonicalDataHandler),
-				XML::Handler::END
+				XMLHandler(smakeXMLCanonicalElementHandler),
+				XMLHandler(smakeXMLCanonicalDataHandler),
+				XMLHandler::END
 			};
 	
 		XMLCanonicalHandlerData oData;
@@ -385,7 +385,7 @@ SINT32 CASignature::makeXMLCanonical(UINT8* in,UINT32 inlen,UINT8* out,UINT32* o
 			{
 				input.Process(handlers, &oData);
 			}
-		catch (const XML::ParseException &e)
+		catch (const XMLParseException &e)
 			{
 				return E_UNKNOWN;
 			}

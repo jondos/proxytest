@@ -51,13 +51,13 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define ERR_INTERN_WOULDBLOCK	WSAEWOULDBLOCK
 		#define MSG_DONTWAIT 0
 		#define HAVE_FIONREAD
-		#ifdef __cplusplus
+/*		#ifdef __cplusplus
 			#include <string>
 			#include <vector>
 			#define STRING std::string
 			#define VECTOR std::vector
 		#endif
-
+*/
 		#define HAVE_VSNPRINTF
 		#define vsnprintf _vsnprintf
 
@@ -151,7 +151,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define ERR_INTERN_TIMEDOUT ETIMEDOUT
 		#define ERR_INTERN_CONNREFUSED ECONNREFUSED
 		#define ERR_INTERN_WOULDBLOCK EAGAIN
-		#ifdef __cplusplus
+/*		#ifdef __cplusplus
 		#ifdef __sgi	
 			#include <vector.h>
 			#include <mstring.h>
@@ -165,7 +165,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 			#define VECTOR std::vector
 		#endif
 		#endif
-    #ifndef min
+*/    #ifndef min
 	#define min(a,b) ((a<b)?(a):(b))
     #endif	
 	#if __linux

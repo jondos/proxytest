@@ -39,7 +39,7 @@ extern CACmdLnOptions options;
 	This class implements the Output Stream interface required by XML::Output. 
 	It stores all the data in a memory buffer.
 */
-class BufferOutputStream:public XML::OutputStream
+class BufferOutputStream:public XMLOutputStream
 	{
 		public:
 			/** Constructs a new buffered Output Stream.
@@ -137,7 +137,7 @@ THREAD_RETURN InfoLoop(void *p)
 		options.getInfoServerHost(buff,1024);
 		oAddr.setAddr(buff,options.getInfoServerPort());
 		BufferOutputStream oBufferStream(1024,1024);
-		XML::Output oxmlOut(oBufferStream);
+		XMLOutput oxmlOut(oBufferStream);
 		SINT32 tmpUser,tmpRisk,tmpTraffic;
 		UINT32 tmpPackets;
 		UINT32 buffLen;
@@ -309,7 +309,7 @@ SINT32 CAInfoService::sendHelo()
 				UINT8* buff=new UINT8[1024];
 				if(buff==NULL)
 					return E_UNKNOWN;
-				XML::Output oxmlOut(oBufferStream);
+				XMLOutput oxmlOut(oBufferStream);
 				oBufferStream.reset();
 				UINT buffLen;
 				oxmlOut.BeginDocument("1.0","UTF-8",true);

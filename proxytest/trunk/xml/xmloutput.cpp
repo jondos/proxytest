@@ -22,51 +22,53 @@
 
 	http://www.gnu.org/copyleft/lgpl.html
 */
-
 #include "../StdAfx.h"
 #include "xmloutput.h"
+//#include <stdio.h>
+//#include <assert.h>
 
+//XML_BEGIN_NAMESPACE
 
-XML_BEGIN_NAMESPACE
-
-Output::Output(OutputStream &stream) : mStream(stream)
+XMLOutput::XMLOutput(XMLOutputStream &stream) : mStream(stream)
 {
 	mLevel = 0;
 	mAttributes = false;
 }
 
-void Output::write(const char *str, size_t len)
+void XMLOutput::write(const char *str, size_t len)
 {
 	mStream.write(str, len);
 }
 
-void Output::writeString(const char *str)
+void XMLOutput::writeString(const char *str)
 {
 	assert(str);
 	write(str, strlen(str));
 }
 
-void Output::writeLine(const char *str)
+void XMLOutput::writeLine(const char *str)
 {
 	assert(str);
 	write(str, strlen(str));
 	write("\n", 1);
 }
 
-Output &Output::operator<<(const STRING &str)
+/*
+XMLOutput &XMLOutput::operator<<(const std::string &str)
 {
 	write(str.c_str(), str.size());
 	return *this;
 }
+*/
 
-Output &Output::operator<<(const char *str)
+XMLOutput &XMLOutput::operator<<(const char *str)
 {
 	assert(str);
 	writeString(str);
 	return *this;
 }
 
-Output &Output::operator<<(int value)
+XMLOutput &XMLOutput::operator<<(int value)
 {
 	char tmp[50];
 	sprintf(tmp, "%d", value);
@@ -74,7 +76,7 @@ Output &Output::operator<<(int value)
 	return *this;
 }
 
-Output &Output::operator<<(unsigned int value)
+XMLOutput &XMLOutput::operator<<(unsigned int value)
 {
 	char tmp[50];
 	sprintf(tmp, "%d", value);
@@ -82,7 +84,7 @@ Output &Output::operator<<(unsigned int value)
 	return *this;
 }
 
-Output &Output::operator<<(double value)
+XMLOutput &XMLOutput::operator<<(double value)
 {
 	char tmp[50];
 	sprintf(tmp, "%g", value);
@@ -90,13 +92,13 @@ Output &Output::operator<<(double value)
 	return *this;
 }
 
-Output &Output::operator<<(bool value)
+XMLOutput &XMLOutput::operator<<(bool value)
 {
 	writeString(value ? "True" : "False");
 	return *this;
 }
 
-void Output::BeginDocument(const char *version, const char *encoding, bool standalone)
+void XMLOutput::BeginDocument(const char *version, const char *encoding, bool standalone)
 {
 	assert(version);
 	assert(encoding);
@@ -105,19 +107,19 @@ void Output::BeginDocument(const char *version, const char *encoding, bool stand
 	(*this) << " standalone=\"" << (standalone ? "yes" : "no") << "\"?>\n";
 }
 
-void Output::EndDocument()
+void XMLOutput::EndDocument()
 {
 	assert(!mAttributes);
 	assert(mElements.empty());
 }
 
-void Output::Indent()
+void XMLOutput::Indent()
 {
 	for (int i = 0; i < mLevel; i++)
 		(*this) << "\t";
 }
 
-void Output::BeginElement(const char *name, Mode mode)
+void XMLOutput::BeginElement(const char *name, Mode mode)
 {
 	assert(name);
 	assert(!mAttributes);
@@ -130,7 +132,7 @@ void Output::BeginElement(const char *name, Mode mode)
 	mElements.push_back(name);
 }
 
-void Output::BeginElementAttrs(const char *name)
+void XMLOutput::BeginElementAttrs(const char *name)
 {
 	assert(name);
 	assert(!mAttributes);
@@ -142,7 +144,7 @@ void Output::BeginElementAttrs(const char *name)
 	mElements.push_back(name);
 }
 
-void Output::EndAttrs(Mode mode)
+void XMLOutput::EndAttrs(Mode mode)
 {
 	assert(mAttributes);
 	mAttributes = false;
@@ -151,7 +153,7 @@ void Output::EndAttrs(Mode mode)
 		(*this) << "\n";
 }
 
-void Output::EndElement(Mode mode)
+void XMLOutput::EndElement(Mode mode)
 {
 	assert(mElements.size() > 0);
 	assert(!mAttributes);
@@ -166,16 +168,16 @@ void Output::EndElement(Mode mode)
 
 	(*this) << "</" << name << ">" << "\n";
 }
-
-void Output::WriteElement(const char *name, const STRING &value)
+/*
+void XMLOutput::WriteElement(const char *name, const std::string &value)
 {
 	assert(name);
 	BeginElement(name, terse);
 	(*this) << value;
 	EndElement(terse);
 }
-
-void Output::WriteElement(const char *name, const char *value)
+*/
+void XMLOutput::WriteElement(const char *name, const char *value)
 {
 	assert(name);
 	assert(value);
@@ -184,7 +186,7 @@ void Output::WriteElement(const char *name, const char *value)
 	EndElement(terse);
 }
 
-void Output::WriteElement(const char *name, int value)
+void XMLOutput::WriteElement(const char *name, int value)
 {
 	assert(name);
 	BeginElement(name, terse);
@@ -192,7 +194,7 @@ void Output::WriteElement(const char *name, int value)
 	EndElement(terse);
 }
 
-void Output::WriteElement(const char *name, unsigned int value)
+void XMLOutput::WriteElement(const char *name, unsigned int value)
 {
 	assert(name);
 	BeginElement(name, terse);
@@ -200,7 +202,7 @@ void Output::WriteElement(const char *name, unsigned int value)
 	EndElement(terse);
 }
 
-void Output::WriteElement(const char *name, double value)
+void XMLOutput::WriteElement(const char *name, double value)
 {
 	assert(name);
 	BeginElement(name, terse);
@@ -208,7 +210,7 @@ void Output::WriteElement(const char *name, double value)
 	EndElement(terse);
 }
 
-void Output::WriteElement(const char *name, bool value)
+void XMLOutput::WriteElement(const char *name, bool value)
 {
 	assert(name);
 	BeginElement(name, terse);
@@ -216,14 +218,15 @@ void Output::WriteElement(const char *name, bool value)
 	EndElement(terse);
 }
 
-void Output::WriteAttr(const char *name, const STRING &value)
+/*
+void XMLOutput::WriteAttr(const char *name, const std::string &value)
 {
 	assert(mAttributes);
 	assert(name);
 	(*this) << " " << name << "=\"" << value << "\"";
 }
-
-void Output::WriteAttr(const char *name, const char *value)
+*/
+void XMLOutput::WriteAttr(const char *name, const char *value)
 {
 	assert(mAttributes);
 	assert(name);
@@ -232,7 +235,7 @@ void Output::WriteAttr(const char *name, const char *value)
 	(*this) << " " << name << "=\"" << value << "\"";
 }
 
-void Output::WriteAttr(const char *name, int value)
+void XMLOutput::WriteAttr(const char *name, int value)
 {
 	assert(mAttributes);
 	assert(name);
@@ -240,7 +243,7 @@ void Output::WriteAttr(const char *name, int value)
 	(*this) << " " << name << "=\"" << value << "\"";
 }
 
-void Output::WriteAttr(const char *name, double value)
+void XMLOutput::WriteAttr(const char *name, double value)
 {
 	assert(mAttributes);
 	assert(name);
@@ -248,7 +251,7 @@ void Output::WriteAttr(const char *name, double value)
 	(*this) << " " << name << "=\"" << value << "\"";
 }
 
-void Output::WriteAttr(const char *name, bool value)
+void XMLOutput::WriteAttr(const char *name, bool value)
 {
 	assert(mAttributes);
 	assert(name);
@@ -256,5 +259,5 @@ void Output::WriteAttr(const char *name, bool value)
 	(*this) << " " << name << "=\"" << value << "\"";
 }
 
-XML_END_NAMESPACE
+//XML_END_NAMESPACE
 

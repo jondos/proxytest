@@ -19,9 +19,7 @@
 
 	http://www.gnu.org/copyleft/lgpl.html
 */
-
 #include "../StdAfx.h"
-#include "xmlstream.h"
 #include "xmlinputp.h"
 //#include <assert.h>
 //#include <string.h>
@@ -33,7 +31,7 @@ typedef enum XmlToken_
 	XML_TOK_START_TAG,		/* <Tag> */
 	XML_TOK_END_TAG,		/* </Tag> */
 	XML_TOK_EMPTY_TAG_END,	/* /> */
-	XML_TOK_ATTRIBUTE,		/* name="value" */
+	XML_TOK_ATTRIBUTE,		/* name="value" or name='value' */
 	XML_TOK_TAG_END,		/* > */
 	XML_TOK_DATA,			/* element data */
 	XML_TOK_LINE,			/* a linefeed (LF, CR, CRLF) */
@@ -44,12 +42,12 @@ typedef enum XmlToken_
 	XML_TOK_COMMENT_END,	/* --> */
 	XML_TOK_CDATA_START,	/* <![CDATA[ */
 	XML_TOK_CDATA_END,		/* ]]> */
-	XML_TOK_DOCTYPE,		/* <!DOCTYPE xxx [ */
+	XML_TOK_DOCTYPE			/* <!DOCTYPE xxx [ */
 } XmlToken;
 
 
 /* return !0 if the strings match, 0 if not */
-static int XML_stringsMatch(const XML_Char *s1, const XML_Char *s2)
+int XML_StringsMatch(const XML_Char *s1, const XML_Char *s2)
 {
 	assert(s1);
 	assert(s2);
@@ -63,14 +61,14 @@ static int XML_stringsMatch(const XML_Char *s1, const XML_Char *s2)
 }
 
 /* return !0 if the character is whitespace */
-static int XML_isspace(XML_Char c)
+int XML_IsWhiteSpace(XML_Char c)
 {
 	return (c == ' ') || (c == '\t') || (c == '\r') || (c == '\n');
 }
 
 static XML_Char peekChar(XML_Input *input)
 {
-	if (input->bufPtr == input->buffer + input->bufSize)
+	if (input->bufPtr >= input->buffer + input->bufSize)
 	{
 		XML_InputStream *stream = input->stream;
 		input->bufSize = (*stream->readProc)(stream, input->buffer, input->maxBufSize);
@@ -83,7 +81,7 @@ static XML_Char peekChar(XML_Input *input)
 
 static XML_Char nextChar(XML_Input *input)
 {
- 	if (input->bufPtr == input->buffer + input->bufSize)
+ 	if (input->bufPtr >= input->buffer + input->bufSize)
 	{
 		XML_InputStream *stream = input->stream;
 		input->bufSize = (*stream->readProc)(stream, input->buffer, input->maxBufSize);
@@ -92,7 +90,8 @@ static XML_Char nextChar(XML_Input *input)
 		input->bufPtr = input->buffer;
 	}
 	input->offset++;
-	return *(input->bufPtr)++;
+	input->bufPtr++;
+	return input->bufPtr[-1];
 }
 
 static void ungetChar(XML_Input *input, XML_Char c)
@@ -109,6 +108,7 @@ static void ungetChar(XML_Input *input, XML_Char c)
 static XmlToken getNextToken(XML_Input *input, XML_Char *token, size_t *tokenLen, int expectAttrs)
 {
 	XML_Char *tptr = token;
+	/*	int attr = 0;   mwall jan01 */
 
 	/* look at first character to see if we're in whitespace */
 	XML_Char c = nextChar(input);
@@ -136,6 +136,12 @@ static XmlToken getNextToken(XML_Input *input, XML_Char *token, size_t *tokenLen
 		{
 			// check for CRLF
 			if (peekChar(input) == '\n')
+				*tptr++ = nextChar(input);
+		}
+		else if (c == '\n')
+		{
+			// check for LFCR
+			if (peekChar(input) == '\r')
 				*tptr++ = nextChar(input);
 		}
 		*tptr = 0;
@@ -180,6 +186,8 @@ static XmlToken getNextToken(XML_Input *input, XML_Char *token, size_t *tokenLen
 		}
 		else
 		{
+			XML_Char quote;
+
 			/* check for 'name="value"' */
 			while (c != '=')
 			{
@@ -190,12 +198,13 @@ static XmlToken getNextToken(XML_Input *input, XML_Char *token, size_t *tokenLen
 			}
 			// get first quote
 			c = nextChar(input);
-			if (c != '\"')
+			if (c != '\"' && c != '\'')
 				return XML_TOK_INVALID;
+			quote = c;
 			*tptr++ = c;
 			c = 0;
 			// read until next quote is grabbed
-			while (c != '\"')
+			while (c != quote)
 			{
 				c = nextChar(input);
 				if (c == XML_EOF)
@@ -220,7 +229,7 @@ static XmlToken getNextToken(XML_Input *input, XML_Char *token, size_t *tokenLen
 				c = nextChar(input);
 				if (c == XML_EOF)
 					return XML_TOK_EOF;
-				else if (XML_isspace(c))
+				else if (XML_IsWhiteSpace(c))
 					return XML_TOK_INVALID;
 				*tptr++ = c;
 				if (c == '>')
@@ -238,7 +247,7 @@ static XmlToken getNextToken(XML_Input *input, XML_Char *token, size_t *tokenLen
 				c = nextChar(input);
 				if (c == XML_EOF)
 					return XML_TOK_EOF;
-				if (XML_isspace(c))
+				if (XML_IsWhiteSpace(c))
 				{
 					ungetChar(input, c);
 					break;
@@ -301,7 +310,7 @@ static XmlToken getNextToken(XML_Input *input, XML_Char *token, size_t *tokenLen
 				c = nextChar(input);
 				if (c == XML_EOF)
 					return XML_TOK_EOF;
-				if (XML_isspace(c) || c == '/' || c == '>')
+				if (XML_IsWhiteSpace(c) || c == '/' || c == '>')
 				{
 					ungetChar(input, c);
 					break;
@@ -523,20 +532,20 @@ XML_Error XML_InputGetError(const XML_Input *input)
 
 static XML_Error elementHandler(XML_Input *input, XML_Element *elem, const XML_Handler *handler, void *userData)
 {
-	if (handler->size > 0 && handler->u.Element.userData == NULL)
+	if (handler->size > 0 && handler->info.Element.userData == NULL)
 	{
 		/* compute user-data from offset */
 		userData = (void *)((char *)userData + handler->offset);
 	}
-	else if (handler->u.Element.userData)
-		userData = handler->u.Element.userData;
+	else if (handler->info.Element.userData)
+		userData = handler->info.Element.userData;
 
-	return (*handler->u.Element.proc)(elem, userData);
+	return (*handler->info.Element.proc)(elem, userData);
 }
 
 static XML_Error dataHandler(XML_Input *input, const XML_Char *data, size_t len, const XML_Handler *handler, void *userData)
 {
-	return (*handler->u.Data.proc)(data, len, userData);
+	return (*handler->info.Data.proc)(data, len, userData);
 }
 
 static XML_Error intHandler(XML_Input *input, XML_Element *elem, const XML_Handler *handler, void *userData)
@@ -548,14 +557,14 @@ static XML_Error intHandler(XML_Input *input, XML_Element *elem, const XML_Handl
 	if (error == XML_Error_None)
 	{
 		int value = (int)atol(tmp);
-		int *result = handler->u.Int.result ? handler->u.Int.result : (int *)((char *)userData + handler->offset);
-		if (handler->u.Int.maxVal != 0 || handler->u.Int.minVal != 0)
+		int *result = handler->info.Int.result ? handler->info.Int.result : (int *)((char *)userData + handler->offset);
+		if (handler->info.Int.maxVal != 0 || handler->info.Int.minVal != 0)
 		{
 			/* do range checking */
-			if (value < handler->u.Int.minVal)
-				value = handler->u.Int.minVal;
-			else if (value > handler->u.Int.maxVal)
-				value = handler->u.Int.maxVal;
+			if (value < handler->info.Int.minVal)
+				value = handler->info.Int.minVal;
+			else if (value > handler->info.Int.maxVal)
+				value = handler->info.Int.maxVal;
 		}
 		*result = value;
 	}
@@ -571,14 +580,14 @@ static XML_Error uintHandler(XML_Input *input, XML_Element *elem, const XML_Hand
 	if (error == XML_Error_None)
 	{
 		unsigned int value = (unsigned int)atol(tmp);
-		unsigned int *result = handler->u.UInt.result ? handler->u.UInt.result : (unsigned int *)((char *)userData + handler->offset);
-		if (handler->u.UInt.maxVal != 0 || handler->u.UInt.minVal != 0)
+		unsigned int *result = handler->info.UInt.result ? handler->info.UInt.result : (unsigned int *)((char *)userData + handler->offset);
+		if (handler->info.UInt.maxVal != 0 || handler->info.UInt.minVal != 0)
 		{
 			/* do range checking */
-			if (value < handler->u.UInt.minVal)
-				value = handler->u.UInt.minVal;
-			else if (value > handler->u.UInt.maxVal)
-				value = handler->u.UInt.maxVal;
+			if (value < handler->info.UInt.minVal)
+				value = handler->info.UInt.minVal;
+			else if (value > handler->info.UInt.maxVal)
+				value = handler->info.UInt.maxVal;
 		}
 		*result = value;
 	}
@@ -594,14 +603,14 @@ static XML_Error floatHandler(XML_Input *input, XML_Element *elem, const XML_Han
 	if (error == XML_Error_None)
 	{
 		float value = (float)atof(tmp);
-		float *result = handler->u.Float.result ? handler->u.Float.result : (float *)((char *)userData + handler->offset);
-		if (handler->u.Float.maxVal != 0 || handler->u.Float.minVal != 0)
+		float *result = handler->info.Float.result ? handler->info.Float.result : (float *)((char *)userData + handler->offset);
+		if (handler->info.Float.maxVal != 0 || handler->info.Float.minVal != 0)
 		{
 			/* do range checking */
-			if (value < handler->u.Float.minVal)
-				value = handler->u.Float.minVal;
-			else if (value > handler->u.Float.maxVal)
-				value = handler->u.Float.maxVal;
+			if (value < handler->info.Float.minVal)
+				value = handler->info.Float.minVal;
+			else if (value > handler->info.Float.maxVal)
+				value = handler->info.Float.maxVal;
 		}
 		*result = value;
 	}
@@ -617,17 +626,17 @@ static XML_Error doubleHandler(XML_Input *input, XML_Element *elem, const XML_Ha
 	if (error == XML_Error_None)
 	{
 		double value = atof(tmp);
-		double *result = handler->u.Double.result ? handler->u.Double.result : (double *)((char *)userData + handler->offset);
+		double *result = handler->info.Double.result ? handler->info.Double.result : (double *)((char *)userData + handler->offset);
 		/* minVal and maxVal are POINTERS to doubles */
-		if (handler->u.Double.minVal != NULL)
+		if (handler->info.Double.minVal != NULL)
 		{
-			if (value < *(handler->u.Double.minVal))
-				value = (*handler->u.Double.minVal);
+			if (value < *(handler->info.Double.minVal))
+				value = (*handler->info.Double.minVal);
 		}
-		if (handler->u.Double.maxVal != NULL)
+		if (handler->info.Double.maxVal != NULL)
 		{
-			if (value > *(handler->u.Double.maxVal))
-				value = (*handler->u.Double.maxVal);
+			if (value > *(handler->info.Double.maxVal))
+				value = (*handler->info.Double.maxVal);
 		}
 		*result = value;
 	}
@@ -636,8 +645,8 @@ static XML_Error doubleHandler(XML_Input *input, XML_Element *elem, const XML_Ha
 
 static XML_Error stringHandler(XML_Input *input, XML_Element *elem, const XML_Handler *handler, void *userData)
 {
-	size_t len = handler->u.CString.maxLen / sizeof(XML_Char);
-	XML_Char *str = handler->u.CString.result ? handler->u.CString.result : (XML_Char *)((char *)userData + handler->offset);
+	size_t len = handler->info.CString.maxLen / sizeof(XML_Char);
+	XML_Char *str = handler->info.CString.result ? handler->info.CString.result : (XML_Char *)((char *)userData + handler->offset);
 	XML_Error error = XML_ElementReadData(elem, str, &len);
 	str[len] = 0;
 	return error;
@@ -673,8 +682,8 @@ static XML_Error boolHandler(XML_Input *input, XML_Element *elem, const XML_Hand
 	tmp[len] = 0;	/* must NULL-terminate */
 	if (error == XML_Error_None)
 	{
-		int value = XML_stringsMatch(tmp, "True") != 0 || XML_stringsMatch(tmp, "true") != 0;
-		void *result = handler->u.Bool.result ? handler->u.Bool.result : (void *)((char *)userData + handler->offset);
+		int value = XML_StringsMatch(tmp, "True") != 0 || XML_StringsMatch(tmp, "true") != 0;
+		void *result = handler->info.Bool.result ? handler->info.Bool.result : (void *)((char *)userData + handler->offset);
 		setValue(result, value, handler->size);
 	}
 	return error;
@@ -689,11 +698,11 @@ static XML_Error listHandler(XML_Input *input, XML_Element *elem, const XML_Hand
 	if (error == XML_Error_None)
 	{
 		/* loop over list entries and compare */
-		void *result = handler->u.List.result ? handler->u.List.result : (void *)((char *)userData + handler->offset);
+		void *result = handler->info.List.result ? handler->info.List.result : (void *)((char *)userData + handler->offset);
 		int i;
-		for (i = 0; i < handler->u.List.listSize; i++)
+		for (i = 0; i < handler->info.List.listSize; i++)
 		{
-			if (XML_stringsMatch(tmp, handler->u.List.list[i]))
+			if (XML_StringsMatch(tmp, handler->info.List.list[i]))
 			{
 				setValue(result, i, handler->size);
 				break;
@@ -740,6 +749,18 @@ static XML_Error handleHandler(XML_Input *input, XML_Element *elem, const XML_Ha
 		case XML_Handler_List:
 			error = listHandler(input, elem, handler, userData);
 			break;
+
+			/* mwall-begin jan01 */
+	        case XML_Handler_None:
+		case XML_Handler_Chain:
+	        case XML_Handler_Data:
+	        case XML_Handler_CDATA:
+	        case XML_Handler_Comment:
+	        case XML_Handler_Types:
+		  error = XML_Error_None;
+		  break;
+			/* mwall-end jan01 */
+
 	}
 	if (error == XML_Error_None)
 	{
@@ -889,19 +910,19 @@ static const XML_Handler *findHandler(const XML_Char *name, const XML_Handler ha
 		/* deal with chains */
 		if (handlers[i].type == XML_Handler_Chain)
 		{
-			const XML_Handler *handler = findHandler(name, handlers[i].u.Chain.handlers, userData);
+			const XML_Handler *handler = findHandler(name, handlers[i].info.Chain.handlers, userData);
 			if (handler)
 			{
 				/* return user-data specific to the handler chain */
 				if (handlers[i].size > 0)
 					*userData = (void *)((char *)(*userData) + handlers[i].offset);
-				else if (handlers[i].u.Chain.userData)
-					*userData = handlers[i].u.Chain.userData;
+				else if (handlers[i].info.Chain.userData)
+					*userData = handlers[i].info.Chain.userData;
 				return handler;
 			}
 		}
 
-		if (handlers[i].name && XML_stringsMatch(name, handlers[i].name))
+		if (handlers[i].name && XML_StringsMatch(name, handlers[i].name))
 			return &handlers[i];
 		i++;
 	}
@@ -925,14 +946,14 @@ static const XML_Handler *findDataHandler(const XML_Handler handlers[], void **u
 		/* deal with chains */
 		if (handlers[i].type == XML_Handler_Chain)
 		{
-			const XML_Handler *handler = findDataHandler(handlers[i].u.Chain.handlers, userData, type);
+			const XML_Handler *handler = findDataHandler(handlers[i].info.Chain.handlers, userData, type);
 			if (handler)
 			{
 				/* return user-data specific to the handler chain */
 				if (handlers[i].size > 0)
 					*userData = (void *)((char *)(*userData) + handlers[i].offset);
-				else if (handlers[i].u.Chain.userData)
-					*userData = handlers[i].u.Chain.userData;
+				else if (handlers[i].info.Chain.userData)
+					*userData = handlers[i].info.Chain.userData;
 				return handler;
 			}
 		}
@@ -977,23 +998,26 @@ static XML_Error handlePI(XML_Input *input, XML_Char *pi, const XML_Handler hand
 /* break the token of the form [name="value"] into separate components */
 static void getAttribute(const XML_Char *token, XML_Char *name, XML_Char *value)
 {
+#if defined(DEBUG)
 	const XML_Char *nameStart = name;
 	const XML_Char *valueStart = value;
+#endif
+	XML_Char quote;
 
 	/* copy up to '=' into name */
 	while (*token && *token != '=')
 		*name++ = *token++;
 	*name = 0;
-	assert(name - nameStart < XML_ATTR_NAME_MAX);
+//	assert(name - nameStart < XML_ATTR_NAME_MAX);
 
 	assert(*token == '=');
 	token++;
-	assert(*token == '\"');
-	token++;
-	while (*token && *token != '\"')
+	quote = *token++;
+	assert(quote == '\"' || quote == '\'');
+	while (*token && *token != quote)
 		*value++ = *token++;
 	*value = 0;
-	assert(value - valueStart < XML_ATTR_VALUE_MAX);
+//	assert(value - valueStart < XML_ATTR_VALUE_MAX);
 }
 
 static XML_Error handleData(XML_Input *input, const XML_Char *token, size_t len, const XML_Handler *handler, void *userData)
@@ -1026,7 +1050,7 @@ static XML_Error handleData(XML_Input *input, const XML_Char *token, size_t len,
 			else
 				*ptr++ = c;
 		}
-		if (handler)
+		if (!done && handler)
 			error = input->dataHandler(input, data, ptr - data, handler, userData);
 
 		/* reset pointer */
@@ -1454,10 +1478,11 @@ const XML_Char *XML_ElementGetAttrValue(const XML_Element *elem, int index)
 /* look for an Attribute with the given name and return the value */
 const XML_Attribute *XML_ElementFindAttr(const XML_Element *elem, const XML_Char *name)
 {
+  /*	int i = 0;  mwall jan01 */
 	const XML_Attribute *attr = elem->attrs;
 	while (attr)
 	{
-		if (XML_stringsMatch(attr->name, name))
+		if (XML_StringsMatch(attr->name, name))
 			return attr;
 		attr = attr->next;
 	}
@@ -1516,11 +1541,11 @@ int XML_AttrGetBoolean(const XML_Attribute *attr, int defValue)
 	if (attr)
 	{
 		const XML_Char *value = attr->value;
-		if (XML_stringsMatch(value, "true") ||
-			XML_stringsMatch(value, "True"))
+		if (XML_StringsMatch(value, "true") ||
+			XML_StringsMatch(value, "True"))
 			return 1;
-		else if (XML_stringsMatch(value, "false") ||
-			XML_stringsMatch(value, "False"))
+		else if (XML_StringsMatch(value, "false") ||
+			XML_StringsMatch(value, "False"))
 			return 0;
 	}
 	return defValue;
