@@ -116,7 +116,7 @@ static int maxArgWidth(const struct poptOption * opt,
     
     while (opt->longName || opt->shortName || opt->arg) {
 	if ((opt->argInfo & POPT_ARG_MASK) == POPT_ARG_INCLUDE_TABLE) {
-	    thiS = maxArgWidth((poptOption*)opt->arg, translation_domain);
+	    thiS = maxArgWidth((struct poptOption*)opt->arg, translation_domain);
 	    if (thiS > max) max = thiS;
 	} else if (!(opt->argInfo & POPT_ARGFLAG_DOC_HIDDEN)) {
 	    thiS = opt->shortName ? 2 : 0;
@@ -154,14 +154,14 @@ static void singleTableHelp(FILE * f, const struct poptOption * table,
     opt = table;
     while (opt->longName || opt->shortName || opt->arg) {
 	if ((opt->argInfo & POPT_ARG_MASK) == POPT_ARG_INCLUDE_TABLE) {
-	    sub_transdom = getTableTranslationDomain((poptOption*)opt->arg);
+	    sub_transdom = getTableTranslationDomain((struct poptOption*)opt->arg);
 	    if(!sub_transdom)
 		sub_transdom = translation_domain;
 	    
 	    if (opt->descrip)
 		fprintf(f, "\n%s\n", D_(sub_transdom, opt->descrip));
 
-	    singleTableHelp(f, (poptOption*)opt->arg, left, sub_transdom);
+	    singleTableHelp(f, (struct poptOption*)opt->arg, left, sub_transdom);
 	}
 	opt++;
     }
@@ -240,7 +240,7 @@ static int singleTableUsage(FILE * f, int cursor, const struct poptOption * tabl
         if ((opt->argInfo & POPT_ARG_MASK) == POPT_ARG_INTL_DOMAIN)
 	    translation_domain = (const char *)opt->arg;
 	else if ((opt->argInfo & POPT_ARG_MASK) == POPT_ARG_INCLUDE_TABLE) 
-	    cursor = singleTableUsage(f, cursor, (poptOption*)opt->arg,
+	    cursor = singleTableUsage(f, cursor, (struct poptOption*)opt->arg,
 				      translation_domain);
 	else if ((opt->longName || opt->shortName) && 
 		 !(opt->argInfo & POPT_ARGFLAG_DOC_HIDDEN))
@@ -267,7 +267,7 @@ static int showShortOptions(const struct poptOption * opt, FILE * f,
 	if (opt->shortName && !(opt->argInfo & POPT_ARG_MASK))
 	    str[strlen(str)] = opt->shortName;
 	else if ((opt->argInfo & POPT_ARG_MASK) == POPT_ARG_INCLUDE_TABLE)
-	    showShortOptions((poptOption*)opt->arg, f, str);
+	    showShortOptions((struct poptOption*)opt->arg, f, str);
 
 	opt++;
     } 

@@ -1,8 +1,8 @@
 .SUFFIXES:
 .SUFFIXES: .o .cpp	
 
-#CC=gcc
-CC=CC -mips4 -64
+CC=gcc
+#CC=CC -mips4 -64
 INCLUDE = -I. -I/home/imis/mix/openssl64/include -I/sun/ikt/sk13/openssl/include
 LIBS	= -L/usr/local/ssl/lib -L/home/imis/mix/openssl64/lib -L/sun/ikt/sk13/openssl/lib ./popt/popt.a ./httptunnel/httptunnel.a -lcrypto
 #-lpthread 
@@ -36,6 +36,7 @@ all_sun: $(OBJS) popt.a httptunnel.a
 	$(CC) -o proxytest $(OBJS) $(LIBS) -lsocket -lnsl
 
 all_sgi: $(OBJS) httptunnel.a popt.a
+	CC=CC -64 -mips4
 	$(CC) -o proxytest $(OBJS) $(LIBS) -lsocket -lnsl
 
 debug: $(OBJS) popt.a httptunnel.a
