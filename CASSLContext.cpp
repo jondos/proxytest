@@ -27,6 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 
 #include "StdAfx.h"
+#ifdef PAYMENT
 #include "CASSLContext.hpp"
 #include "CACertificate.hpp"
 #include "CACmdLnOptions.hpp"
@@ -142,3 +143,4 @@ SSL_CTX * CASSLContext::getSSLContext()
 	}
 	return m_pInstance->m_SSLCTX;
 }
+#endif
