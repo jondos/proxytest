@@ -103,7 +103,7 @@ class CALastMixChannelList
 					return akt;
 				}
 
-			SINT32 removeChannel(CASocket* pSocket);
+//			SINT32 removeChannel(CASocket* pSocket);
 			SINT32 removeChannel(HCHANNEL channelIn);
 			UINT32 getSize(){return m_nChannels;}		
 			static SINT32 test();
