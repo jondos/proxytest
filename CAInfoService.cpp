@@ -43,7 +43,7 @@ class BufferOutputStream:public XML::OutputStream
 					grow=g;
 				}
 			
-			~BufferOutputStream()
+			virtual ~BufferOutputStream()
 				{
 					free(buffer);
 				}
@@ -94,14 +94,14 @@ THREAD_RETURN InfoLoop(void *p)
 		oAddr.setAddr((char*)buff,options.getInfoServerPort());
 		BufferOutputStream oBufferStream(1024,1024);
 		XML::Output oxmlOut(oBufferStream);
-		UINT32 nUser,nRisk,nTraffic;
+		SINT32 tmpUser,tmpRisk,tmpTraffic;
 		UINT32 buffLen;
 		char strAnonServer[255];
 		CASocketAddr::getLocalHostName((UINT8*)buff,255);
 		
 //*>> Beginn very ugly hack for anon.inf.tu-dresden.de --> new Concepts needed!!!!!1		
-		if(strncmp(strAnonServer,"ithif46",7)==0)
-			strcpy(strAnonServer,"mix.inf.tu-dresden.de");
+		if(strncmp((char*)buff,"ithif46",7)==0)
+			strcpy((char*)buff,"mix.inf.tu-dresden.de");
 //end hack....
 		sprintf(strAnonServer,"%s%%3A%u",buff,options.getServerPort());
 		int helocount=10;
@@ -113,10 +113,10 @@ THREAD_RETURN InfoLoop(void *p)
 						oxmlOut.BeginDocument("1.0","UTF-8",true);
 						oxmlOut.BeginElementAttrs("MixCascadeStatus");
 						oxmlOut.WriteAttr("id",(char*)strAnonServer);
-						pInfoService->getLevel(&nUser,&nRisk,&nTraffic);
-						oxmlOut.WriteAttr("nrOfActiveUsers",(int)nUser);
-						oxmlOut.WriteAttr("currentRisk",(int)nRisk);
-						oxmlOut.WriteAttr("trafficSituation",(int)nTraffic);
+						pInfoService->getLevel(&tmpUser,&tmpRisk,&tmpTraffic);
+						oxmlOut.WriteAttr("nrOfActiveUsers",(int)tmpUser);
+						oxmlOut.WriteAttr("currentRisk",(int)tmpRisk);
+						oxmlOut.WriteAttr("trafficSituation",(int)tmpTraffic);
 						oxmlOut.EndAttrs();
 						oxmlOut.EndElement();
 						oxmlOut.EndDocument();
@@ -142,7 +142,7 @@ THREAD_RETURN InfoLoop(void *p)
 CAInfoService::CAInfoService()
 	{
 		InitializeCriticalSection(&csLevel);
-		nUser=nRisk=nTraffic=-1;
+		iUser=iRisk=iTraffic=-1;
 		bRun=false;
 		pSignature=NULL;
 	}
@@ -153,12 +153,12 @@ CAInfoService::~CAInfoService()
 		DeleteCriticalSection(&csLevel);
 	}
 
-SINT32 CAInfoService::setLevel(UINT32 user,UINT32 risk,UINT32 traffic)
+SINT32 CAInfoService::setLevel(SINT32 user,SINT32 risk,SINT32 traffic)
 	{
 		EnterCriticalSection(&csLevel);
-		nUser=user;
-		nRisk=risk;
-		nTraffic=traffic;
+		iUser=user;
+		iRisk=risk;
+		iTraffic=traffic;
 		LeaveCriticalSection(&csLevel);
 		return 0;
 	}
@@ -169,15 +169,15 @@ SINT32 CAInfoService::setSignature(CASignature* pSig)
 		return E_SUCCESS;
 	}
 
-SINT32 CAInfoService::getLevel(UINT32* puser,UINT32* prisk,UINT32* ptraffic)
+SINT32 CAInfoService::getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic)
 	{
 		EnterCriticalSection(&csLevel);
 		if(puser!=NULL)
-			*puser=nUser;
+			*puser=iUser;
 		if(ptraffic!=NULL)
-			*ptraffic=nTraffic;
+			*ptraffic=iTraffic;
 		if(prisk!=NULL)
-			*prisk=nRisk;
+			*prisk=iRisk;
 		LeaveCriticalSection(&csLevel);
 		return E_SUCCESS;
 	}

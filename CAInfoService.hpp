@@ -35,15 +35,15 @@ class CAInfoService
 			SINT32 sendHelo();
 			int start();
 			int stop();
-			SINT32 setLevel(UINT32 user,UINT32 risk,UINT32 traffic);
-			SINT32 getLevel(UINT32* puser,UINT32* prisk,UINT32* ptraffic);
+			SINT32 setLevel(SINT32 user,SINT32 risk,SINT32 traffic);
+			SINT32 getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic);
 			bool getRun(){return bRun;}
 			SINT32 setSignature(CASignature* pSignature);
 			CASignature* getSignature(){return pSignature;}
 		private:
-			UINT32 nUser;
-			UINT32 nRisk;
-			UINT32 nTraffic; 
+			SINT32 iUser;
+			SINT32 iRisk;
+			SINT32 iTraffic; 
 			bool bRun;
 			CRITICAL_SECTION csLevel;
 			CASignature* pSignature;
