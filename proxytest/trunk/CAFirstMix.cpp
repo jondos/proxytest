@@ -400,7 +400,7 @@ END:
 	}
 
 SINT32 CAFirstMix::init()
-	{		
+	{
 		CASocketAddr addrNext;
 		UINT8 strTarget[255];
 		options.getTargetHost(strTarget,255);
@@ -418,7 +418,7 @@ SINT32 CAFirstMix::init()
 		CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET RecvBuffSize: %i\n",((CASocket*)muxOut)->getRecvBuff());
 		CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET SendBuffSize: %i\n",((CASocket*)muxOut)->getSendBuff());
 		CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET SendLowWatSize: %i\n",((CASocket*)muxOut)->getSendLowWat());
-	
+
 
 		if(muxOut.connect(&addrNext,10,10)!=E_SUCCESS)
 			{
@@ -443,7 +443,7 @@ SINT32 CAFirstMix::init()
 		CAMsg::printMsg(LOG_CRIT,"Received Key Info lenght %u\n",ntohs(len));
 		UINT8* recvBuff=new unsigned char[ntohs(len)+2];
 		memcpy(recvBuff,&len,2);
-		
+
 		if(((CASocket*)muxOut)->receiveFully(recvBuff+2,ntohs(len))!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info!\n");
@@ -455,14 +455,14 @@ SINT32 CAFirstMix::init()
 		mRSA.generateKeyPair(1024);
 		UINT32 keySize=mRSA.getPublicKeySize();
 		mKeyInfoSize=ntohs((*(UINT16*)recvBuff))+2;
-		mKeyInfoBuff=new UINT8[mKeyInfoSize+keySize]; 
+		mKeyInfoBuff=new UINT8[mKeyInfoSize+keySize];
 		memcpy(mKeyInfoBuff,recvBuff,mKeyInfoSize);
 		delete recvBuff;
 		mKeyInfoBuff[2]++; //chainlen erhoehen
 		mRSA.getPublicKey(mKeyInfoBuff+mKeyInfoSize,&keySize);
 		mKeyInfoSize+=keySize;
 		(*(UINT16*)mKeyInfoBuff)=htons(mKeyInfoSize-2);
-		
+
 		CASocketAddr socketAddrIn(options.getServerPort());
 		socketIn.create();
 		socketIn.setReuseAddr(true);
@@ -471,7 +471,18 @@ SINT32 CAFirstMix::init()
 					CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
 					return E_UNKNOWN;
 		    }
-		return E_SUCCESS;
+    if(options.getProxySupport())
+    	{
+    		m_socketHttpsIn.create();
+        m_socketHttpsIn.setReuseAddr(true);
+        socketAddrIn.setPort(443);
+        if(m_socketHttpsIn.listen(&socketAddrIn)==SOCKET_ERROR)
+		    {
+					CAMsg::printMsg(LOG_CRIT,"Cannot listen on HTTPS-Port\n");
+					return E_UNKNOWN;
+		    }
+      }
+    return E_SUCCESS;
 	}
 
 
@@ -480,7 +491,7 @@ SINT32 CAFirstMix::loop()
 		CAMuxChannelList  oMuxChannelList;
 		REVERSEMUXLISTENTRY* tmpReverseEntry;
 		MUXLISTENTRY* tmpMuxListEntry;
-	
+
 		CASocketGroup oSocketGroup;
 		CASocketGroup oSocketGroupMuxOut;
 		CAMuxSocket* pnewMuxSocket;
@@ -494,7 +505,13 @@ SINT32 CAFirstMix::loop()
 		UINT8 rsaBuff[RSA_SIZE];
 
 		oSocketGroup.add(socketIn);
-		oSocketGroup.add(muxOut);
+    bool bProxySupport=false;
+    if(options.getProxySupport())
+    	{
+    		oSocketGroup.add(m_socketHttpsIn);
+      	bProxySupport=true;
+      }
+    oSocketGroup.add(muxOut);
 		oSocketGroupMuxOut.add(muxOut);
 		muxOut.setCrypt(true);
 
@@ -516,12 +533,12 @@ LOOP_START:
 					{
 						countRead--;
 						#ifdef _DEBUG
-							CAMsg::printMsg(LOG_DEBUG,"New Connection from Browser!\n");
+							CAMsg::printMsg(LOG_DEBUG,"New direct Connection from Browser!\n");
 						#endif
 						pnewMuxSocket=new CAMuxSocket;
 						if(socketIn.accept(*(CASocket*)pnewMuxSocket)==SOCKET_ERROR)
 							{
-								CAMsg::printMsg(LOG_ERR,"Accept Error %u - Connection from Browser!\n",errno);
+								CAMsg::printMsg(LOG_ERR,"Accept Error %u - direct Connection from Browser!\n",errno);
 								delete pnewMuxSocket;
 							}
 						else
@@ -544,7 +561,39 @@ LOOP_START:
 								oSocketGroup.add(*pnewMuxSocket);
 							}
 					}
-				if(oSocketGroup.isSignaled(muxOut))
+			if(bProxySupport&&oSocketGroup.isSignaled(m_socketHttpsIn))
+					{
+						countRead--;
+						#ifdef _DEBUG
+							CAMsg::printMsg(LOG_DEBUG,"New proxy Connection from Browser!\n");
+						#endif
+						pnewMuxSocket=new CAMuxSocket;
+						if(m_socketHttpsIn.accept(*(CASocket*)pnewMuxSocket)==SOCKET_ERROR)
+							{
+								CAMsg::printMsg(LOG_ERR,"Accept Error %u - proxy Connection from Browser!\n",errno);
+								delete pnewMuxSocket;
+							}
+						else
+							{
+								#ifdef _DEBUG
+									int ret=((CASocket*)pnewMuxSocket)->setKeepAlive(true);
+									if(ret!=E_SUCCESS)
+										CAMsg::printMsg(LOG_DEBUG,"Fehler bei KeepAlive!");
+								#else
+									((CASocket*)pnewMuxSocket)->setKeepAlive(true);
+								#endif
+#ifdef _ASYNC
+								((CASocket*)pnewMuxSocket)->setASyncSend(true,MUXPACKET_SIZE,this);
+#endif
+								((CASocket*)pnewMuxSocket)->send(mKeyInfoBuff,mKeyInfoSize);
+								oMuxChannelList.add(pnewMuxSocket);
+								nUser++;
+								oInfoService.setLevel(nUser,-1,-1);
+//								oInfoService.setMixedPackets(m_MixedPackets);
+								oSocketGroup.add(*pnewMuxSocket);
+							}
+					}
+			if(oSocketGroup.isSignaled(muxOut))
 					{
 						int countMuxOut=nUser;
 						do
@@ -794,7 +843,8 @@ ERR:
 SINT32 CAFirstMix::clean()
 	{
 		socketIn.close();
-		muxOut.close();
+    m_socketHttpsIn.close();
+    muxOut.close();
 		mRSA.destroy();
 		oSuspendList.clear();
 		return E_SUCCESS;
