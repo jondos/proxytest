@@ -52,9 +52,21 @@ SINT32 CAFirstMix::initOnce()
 		m_pSignature=options.getSignKey();
 		if(m_pSignature==NULL)
 			return E_UNKNOWN;
-		if(options.getListenerInterfaceCount()<1)
+		//Try to find out how many (real) ListenerInterfaces are specified
+		UINT32 tmpSocketsIn=options.getListenerInterfaceCount();
+		m_nSocketsIn=0;
+		for(UINT32 i=1;i<=tmpSocketsIn;i++)
 			{
-				CAMsg::printMsg(LOG_CRIT,"No ListenerInterfaces specified!\n");
+				ListenerInterface oListener;
+				if(options.getListenerInterface(oListener,i)!=E_SUCCESS)
+					continue;
+				if(!oListener.bVirtual)
+					m_nSocketsIn++;
+				delete oListener.addr;
+			}
+		if(m_nSocketsIn<1)
+			{
+				CAMsg::printMsg(LOG_CRIT,"No useable ListenerInterfaces specified (maybe wrong values or all are 'virtual'!\n");
 				return E_UNKNOWN;
 			}
 		return E_SUCCESS;
@@ -64,7 +76,6 @@ SINT32 CAFirstMix::init()
 	{
 		m_nMixedPackets=0; //reset to zero after each restart (at the moment neccessary for infoservice)
 		//Establishing all Listeners
-		m_nSocketsIn=options.getListenerInterfaceCount();
 		m_arrSocketsIn=new CASocket[m_nSocketsIn];
 		UINT32 i;
 		for(i=1;i<=m_nSocketsIn;i++)
@@ -75,10 +86,15 @@ SINT32 CAFirstMix::init()
 						CAMsg::printMsg(LOG_CRIT,"Cannot listen (1)\n");
 						return E_UNKNOWN;
 					}
+				if(oListener.bVirtual)
+					{
+						delete oListener.addr;
+						continue;
+					}
 				m_arrSocketsIn[i-1].create();
 				m_arrSocketsIn[i-1].setReuseAddr(true);
 #ifndef _WIN32
-        //we have to be a temporaly superuser if port <1024...
+				//we have to be a temporaly superuser if port <1024...
 				int old_uid=geteuid();
 				if(oListener.addr->getType()==AF_INET&&((CASocketAddrINet*)oListener.addr)->getPort()<1024)
 					{
@@ -1220,7 +1236,8 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		for(UINT32 i=1;i<=options.getListenerInterfaceCount();i++)
 			{
 				options.getListenerInterface(oListener,i);
-				if(oListener.type==RAW_TCP)
+				if(oListener.bVirtual){/*do nothing*/}
+				else if(oListener.type==RAW_TCP)
 					{
 						DOM_Element elemListenerInterface=m_docMixCascadeInfo.createElement("ListenerInterface");
 						elemListenerInterfaces.appendChild(elemListenerInterface);

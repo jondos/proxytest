@@ -45,9 +45,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 struct t_ListenerInterface
 	{
-		UINT32 type;
 		CASocketAddr* addr;
 		UINT8* hostname; 
+		UINT32 type;
+		bool	bHidden;
+		bool	bVirtual;
 	};
 
 typedef struct t_ListenerInterface ListenerInterface;
@@ -91,6 +93,8 @@ class CACmdLnOptions
 				{
 					if(nr>0&&nr<=m_cnListenerInterfaces)
 						{
+							oListenerInterface.bHidden=m_arListenerInterfaces[nr-1].bHidden;
+							oListenerInterface.bVirtual=m_arListenerInterfaces[nr-1].bVirtual;
 							oListenerInterface.type=m_arListenerInterfaces[nr-1].type;
 							oListenerInterface.hostname=m_arListenerInterfaces[nr-1].hostname;
 							oListenerInterface.addr=m_arListenerInterfaces[nr-1].addr->clone();
