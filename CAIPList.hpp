@@ -50,6 +50,7 @@ are accepted and the others are droped.
 The internal organisation is a hash-table with overrun lists. The hashtable has
 0x10000 buckets. The last two bytes of an IP-Address are the hash-key.
 @note This class only supports IPv4.
+@warning If there is less memory, CAIPList will crash!
 @warning This class is NOT thread safe.
  */
 	class CAIPList
