@@ -636,10 +636,13 @@ EXIT:
 		#ifdef _WIN32
 			WSACleanup();
 		#endif
+		options.clean();
 //OpenSSL Cleanup
 		CRYPTO_set_locking_callback(NULL);
 		delete []pOpenSSLMutexes;
 //XML Cleanup
+		//Note: We have to destroy all XML Objects and all objects that uses XML Objects BEFORE
+		//we terminate the XML lib!
 		XMLPlatformUtils::Terminate();
 		CAMsg::printMsg(LOG_CRIT,"Terminating Programm!\n");
 #if defined(HAVE_CRTDBG)
