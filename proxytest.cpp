@@ -308,7 +308,7 @@ Note: At the moment this is binary - but will use XML in the future.
 
 int main(int argc, const char* argv[])
 	{		
-		UINT64 h=18446744073709551615;
+	/*	UINT64 h=18446744073709551615;
 	//	UINT64 h=184004600;
 		UINT8 bg[255];
 		UINT64 t1,t2;
@@ -318,7 +318,7 @@ int main(int argc, const char* argv[])
 		getcurrentTimeMillis(t2);
 		printf("%u\n",diff64(t2,t1));
 		printf("%s\n",bg);
-		
+		*/
 		/*	CAQueue oQ;
 		UINT32 l,b;
 		l=4;
