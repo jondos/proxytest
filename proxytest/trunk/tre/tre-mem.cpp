@@ -27,12 +27,12 @@
 #include "../StdAfx.h"
 #ifdef LOG_CRIME
 #include "tre-config.h"
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif /* HAVE_CONFIG_H */
+//#ifdef HAVE_CONFIG_H
+//#include <config.h>
+//#endif /* HAVE_CONFIG_H */
 
-#include <stdlib.h>
-#include <string.h>
+//#include <stdlib.h>
+//#include <string.h>
 
 #include "tre-internal.h"
 #include "tre-mem.h"

@@ -21,7 +21,7 @@
 #ifndef TRE_MEM_H
 #define TRE_MEM_H 1
 
-#include <stdlib.h>
+//#include <stdlib.h>
 
 #define TRE_MEM_BLOCK_SIZE 1024
 
