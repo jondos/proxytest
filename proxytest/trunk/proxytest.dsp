@@ -344,6 +344,10 @@ SOURCE=.\CAASymCipher.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CABase64.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\CACmdLnOptions.cpp
 # End Source File
 # Begin Source File
@@ -388,6 +392,10 @@ SOURCE=.\CASymCipher.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CAUtil.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\proxytest.cpp
 # End Source File
 # Begin Source File
@@ -402,6 +410,10 @@ SOURCE=.\StdAfx.cpp
 # Begin Source File
 
 SOURCE=.\CAASymCipher.hpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CABase64.hpp
 # End Source File
 # Begin Source File
 
@@ -446,6 +458,10 @@ SOURCE=.\CASocketList.hpp
 # Begin Source File
 
 SOURCE=.\CASymCipher.hpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CAUtil.hpp
 # End Source File
 # Begin Source File
 

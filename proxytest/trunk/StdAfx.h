@@ -131,9 +131,7 @@
 #include <openssl/dsa.h>
 #include <openssl/sha.h>
 #include <openssl/rand.h>
-		// ZU ERLEDIGEN: Verweisen Sie hier auf zusätzliche Header-Dateien, die Ihr Programm benötigt
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ fügt zusätzliche Deklarationen unmittelbar vor der vorherigen Zeile ein.
+#include <openssl/evp.h>
+#include <openssl/asn1.h>
 
 #endif // !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)

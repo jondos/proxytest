@@ -13,6 +13,7 @@
 #include "CASymCipher.hpp"
 #include "CAASymCipher.hpp"
 #include "CAInfoService.hpp"
+#include "CASignature.hpp"
 //#ifdef _WIN32
 //HANDLE hEventThreadEnde;
 //#endif
@@ -602,7 +603,7 @@ THREAD_RETURN fmIO(void *v)
 								((CASocket*)newMuxSocket)->send((char*)infoBuff,infoSize);
 								oMuxChannelList.add(newMuxSocket);
 								nUser++;
-								oInfoService.setLevel(nUser,0,0);
+								oInfoService.setLevel(nUser,-1,-1);
 								oSocketGroup.add(*newMuxSocket);
 							}
 					}
@@ -1044,8 +1045,30 @@ int doLastMix()
 
 int main(int argc, const char* argv[])
 	{
-
+#ifdef _WIN32
+		RAND_screen();
+#else 
+ #ifndef __linux
+                 unsigned char randbuff[255];
+		RAND_seed(randbuff,sizeof(randbuff));
+ #endif
+#endif
 // Test!!!
+		CASignature oSig;
+		char* in="<JAP><HJ>gh</HJ></JAP>"	;	
+		char buff[1000];
+		int handle=open("g:\\projects\\InfoService\\jap.priv.xml",O_BINARY|O_RDONLY);
+		read(handle,buff,1000);
+		close(handle);
+		oSig.setSignKey(buff,1000,SIGKEY_XML);
+		unsigned int l=1000;
+		oSig.signXML(in,strlen(in),buff,&l);
+		buff[l]=0;
+
+		handle=open("g:\\projects\\InfoService\\jap.signed.xml",O_CREAT|O_BINARY|O_WRONLY);
+		write(handle,buff,l);
+		close(handle);
+		exit(0);
 /*		CAASymCipher oRSA;
 		int handle=open("g:\\jap\\classes\\plain.bytes",O_BINARY|O_RDWR,S_IWRITE);
 		int MAX=filelength(handle);
@@ -1099,14 +1122,6 @@ int main(int argc, const char* argv[])
 		// End TEst...
 
 		//initalize Random..
-#ifdef _WIN32
-		RAND_screen();
-#else 
- #ifndef __linux
-                 unsigned char randbuff[255];
-		RAND_seed(randbuff,sizeof(randbuff));
- #endif
-#endif
 		options.parse(argc,argv);
 #ifndef _WIN32
 			if(options.getDaemon())
