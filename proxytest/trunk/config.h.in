@@ -5,6 +5,7 @@
 
 #undef HAVE_OPENSSL
 #undef HAVE_STRERROR
+#undef HAVE_VSNPRINTF
 
 /* Name of package */
 #undef PACKAGE
