@@ -195,3 +195,13 @@ UINT32 getMemoryUsage()
 	return 0;
 #endif
 	}
+
+#ifndef _WIN32
+SINT32 filelength(int handle)
+	{
+		struct stat st;
+		if(fstat(handle,&st)==-1)
+			return -1;
+		return st.st_size;
+	}
+#endif
