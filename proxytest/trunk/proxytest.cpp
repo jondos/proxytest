@@ -100,6 +100,11 @@ void signal_interrupt( int sig)
 		exit(0);
 	}
 
+void signal_hup(int sig)
+	{
+		options.reread();
+	}
+
 
 //Callbackfunction for looking required by OpenSSL
 void openssl_locking_callback(int mode, int type, char *file, int line)
@@ -514,6 +519,7 @@ Debug(dc::malloc.on());
 	#else
 			signal(SIGPIPE,SIG_IGN);
 	#endif
+			signal(SIGHUP,signal_hup);
 #endif
 		signal(SIGINT,signal_interrupt);
 		signal(SIGTERM,signal_term);

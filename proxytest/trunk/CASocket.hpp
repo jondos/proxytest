@@ -55,7 +55,7 @@ class CASocket
 			/** Returns the number of the Socket used. Which will be always the same number,
 			** even after close(), until the Socket
 			** is recreated using create()
-			** @ret number of the associated socket
+			** @return number of the associated socket
 			**/
 			operator SOCKET(){return m_Socket;}
 			SINT32 getLocalPort();

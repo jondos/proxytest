@@ -1,3 +1,4 @@
+ret
 /*
 Copyright (c) 2000, The JAP-Team 
 All rights reserved.

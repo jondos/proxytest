@@ -63,9 +63,9 @@ class MemFormatTarget: public XMLFormatTarget
 				}
 
 			/** Returns a Copy of the XML-chars.
-				* @param size, on return contains the number of XML-Chars copied
+				* @param size on return contains the number of XML-Chars copied
 				* @return a pointer to a newls allocated buff, which must be delete[] by the caller
-				* @return NULL, if an error occurs
+				* @return NULL if an error occurs
 				*/
 			UINT8* dumpMem(UINT32* size)
 				{
@@ -94,12 +94,12 @@ class DOM_Output
 	{
 		public:
 			/** Dumps the node and all childs into buff.
-				* @param node, Node to dump
+				* @param node Node to dump
 				* @param buff buffer in which to copy the XML-chars
 				* @param size contains the size of buff, on return contains the number of XML-CHars copied
-				* @return E_SUCCESS, if successful
-				* @return E_SPACE, if buff is to small
-				* @return E_UNKNOWN, if an error occurs
+				* @return E_SUCCESS if successful
+				* @return E_SPACE if buff is to small
+				* @return E_UNKNOWN if an error occurs
 				*/
 			static SINT32 dumpToMem(DOM_Node& node,UINT8* buff, UINT32* size)
 				{
