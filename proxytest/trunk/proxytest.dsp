@@ -218,15 +218,12 @@ SOURCE=.\xml\xmlinput.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\xml\xmlinput_c.c
+SOURCE=.\xml\xmlinput_c.cpp
 
 !IF  "$(CFG)" == "proxytest - Win32 Release"
 
-# SUBTRACT CPP /YX /Yc /Yu
-
 !ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
 
-# ADD CPP /W3
 # SUBTRACT CPP /YX /Yc /Yu
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
