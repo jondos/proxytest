@@ -3445,12 +3445,13 @@ alpha*)
 	CXXFLAGS="$CXXFLAGS -mieee"
 	;;
 m68k*)
-	OFLAGS="-O0"
+        OFLAGS="-O0"
         ;;
 *)
-	OFLAGS="-O3"
+        OFLAGS="-O3"
 	;;
 esac
+
 
 case "$host_cpu" in
 i686)
