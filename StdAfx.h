@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.02.35"
+#define MIX_VERSION "00.02.37"
 
 
 //#define LOG_CHANNEL
@@ -52,6 +52,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define LOG_CRIME  
 //#define NO_PARKING //to disable control flow
 //#define USE_POOL
+//#define NEW_MIX_TYPE // to enable the new 1:x mix protocol
 
 //#define WITH_TIMESTAMP // Add timestamps to the channel-open packets.
 

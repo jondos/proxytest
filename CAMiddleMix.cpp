@@ -362,7 +362,6 @@ SINT32 CAMiddleMix::init()
 			{
 				m_pInfoService=new CAInfoService();
 				m_pInfoService->setSignature(m_pSignature);
-				m_pInfoService->sendHelo();
 				m_pInfoService->start();
 			}
 #define RETRIES 100
@@ -382,10 +381,16 @@ SINT32 CAMiddleMix::init()
 					CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
 			}
 		
-		ListenerInterface oListener;
-		options.getListenerInterface(oListener,1);
+		CAListenerInterface* pListener=NULL;
+		const CASocketAddr* pAddr=NULL;
+		pListener=options.getListenerInterface(1);
+		if(pListener!=NULL)
+			pAddr=pListener->getAddr();
+		delete pListener;
 		m_pMuxIn=new CAMuxSocket();
-		if(m_pMuxIn->accept(*oListener.addr)!=E_SUCCESS)
+		SINT32 ret=m_pMuxIn->accept(*pAddr);
+		delete pAddr;
+		if(ret!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Error waiting for previous Mix... -- Exiting!\n");				
 				return E_UNKNOWN;
@@ -415,6 +420,7 @@ SINT32 CAMiddleMix::init()
 	
 THREAD_RETURN mm_loopDownStream(void *p)
 	{
+#ifndef NEW_MIX_TYPE
 		CAMiddleMix* pMix=(CAMiddleMix*)p;
 		HCHANNEL channelIn;
 		CASymCipher* pCipher;
@@ -503,12 +509,14 @@ ERR:
 		#endif
 		pMix->m_pMuxIn->close();
 		pMix->m_pMuxOut->close();
+#endif //!NEW_MIX_TYPE
 		THREAD_RETURN_SUCCESS;		
 	}
 
 
 SINT32 CAMiddleMix::loop()
 	{
+#ifndef NEW_MIX_TYPE
 		MIXPACKET* pMixPacket=new MIXPACKET;
 		HCHANNEL channelOut;
 		CASymCipher* pCipher;
@@ -631,6 +639,7 @@ ERR:
 		#ifdef USE_POOL
 			delete pPool;
 		#endif
+#endif //!NEW_MIX_TYPE
 		return E_UNKNOWN;
 	}
 SINT32 CAMiddleMix::clean()

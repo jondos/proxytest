@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CACmdLnOptions.hpp"
 #include "CAUtil.hpp"
 #include "CASocketAddrINet.hpp"
-
+#ifndef NEW_MIX_TYPE
 extern CACmdLnOptions options;
 // signals the main loop whether to capture or replay packets
 bool CALocalProxy::bCapturePackets;
@@ -510,4 +510,4 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 		m_muxOut.setCrypt(true);
 		return E_SUCCESS;
 	}
-
+#endif //!NEW_MIX_TYPE

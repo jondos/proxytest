@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 // How many packets do you want to replay at a time?
 #define REPLAY_COUNT 16
-
+#ifndef NEW_MIX_TYPE
 class CALocalProxy:public CAMix
 	{
 		public:
@@ -60,5 +60,5 @@ class CALocalProxy:public CAMix
 			UINT8 m_chainlen;
 			CAASymCipher* m_arRSA;
 	};
-
+#endif //!NEW_MIX_TYPE
 #endif

@@ -87,8 +87,7 @@ SINT32 CACmdLnOptions::clearListenerInterfaces()
 			{
 				for(UINT32 i=0;i<m_cnListenerInterfaces;i++)
 					{
-						delete m_arListenerInterfaces[i].addr;
-						delete [] m_arListenerInterfaces[i].hostname;
+						delete m_arListenerInterfaces[i];
 					}
 				delete[] m_arListenerInterfaces;
 			}
@@ -270,17 +269,12 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 		m_bCompressedLogs=true;
 	if(serverPort!=NULL&&m_bLocalProxy)
 		{
-			m_arListenerInterfaces=new ListenerInterface[1]; 
+			m_arListenerInterfaces=new CAListenerInterface*[1]; 
 			m_cnListenerInterfaces=1;
 			char* tmpStr;
 			if(serverPort[0]=='/') //Unix Domain Socket
-			 {
-					m_arListenerInterfaces[0].type=RAW_UNIX;
-#ifdef HAVE_UNIX_DOMAIN_PROTOCOL
-					m_arListenerInterfaces[0].addr=new CASocketAddrUnix();
-					((CASocketAddrUnix*)m_arListenerInterfaces[0].addr)->setPath(serverPort);
-#endif
-					m_arListenerInterfaces[0].hostname=NULL;
+				{
+					m_arListenerInterfaces[0]=CAListenerInterface::getInstance(RAW_UNIX,(UINT8*)serverPort);
 				}
 			else //Internet Socket
 				{
@@ -297,10 +291,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 						{
 							iServerPort=(int)atol(serverPort);
 						}
-					m_arListenerInterfaces[0].type=RAW_TCP;
-					m_arListenerInterfaces[0].addr=new CASocketAddrINet;
-					((CASocketAddrINet*)m_arListenerInterfaces[0].addr)->setAddr((UINT8*)strServerHost,iServerPort);
-					m_arListenerInterfaces[0].hostname=(UINT8*)strServerHost;
+						m_arListenerInterfaces[0]=CAListenerInterface::getInstance(RAW_TCP,(UINT8*)strServerHost,iServerPort);
 					delete [] strServerHost;
 				}
 			free(serverPort);
@@ -730,101 +721,21 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 				m_cnListenerInterfaces=nlListenerInterfaces.getLength();
 				if(m_cnListenerInterfaces>0)
 					{
-						m_arListenerInterfaces=new ListenerInterface[m_cnListenerInterfaces]; 
+						m_arListenerInterfaces=new CAListenerInterface*[m_cnListenerInterfaces]; 
 						UINT32 aktInterface=0;
-						UINT32 type=0;
-						bool bHidden=false;
-						bool bVirtual=false;
-						CASocketAddr* addr=NULL;
+//						UINT32 type=0;
+//						bool bHidden=false;
+//						bool bVirtual=false;
+//						CASocketAddr* addr=NULL;
 //						UINT8* hostname=NULL;
-						UINT16 port;
+//						UINT16 port;
 						for(UINT32 i=0;i<m_cnListenerInterfaces;i++)
 							{
-								if(addr!=NULL)
-									delete addr;
-								addr=NULL;
 								DOM_Node elemListenerInterface;
 								elemListenerInterface=nlListenerInterfaces.item(i);
-								bHidden=false;
-								bVirtual=false;
-								getDOMElementAttribute(elemListenerInterface,"hidden",bHidden);
-								getDOMElementAttribute(elemListenerInterface,"virtual",bVirtual);
-								m_arListenerInterfaces[aktInterface].bHidden=bHidden;
-								m_arListenerInterfaces[aktInterface].bVirtual=bVirtual;
-								DOM_Element elemType;
-								getDOMChildByName(elemListenerInterface,(UINT8*)"NetworkProtocol",elemType,false);
-								tmpLen=255;
-								if(getDOMElementValue(elemType,tmpBuff,&tmpLen)!=E_SUCCESS)
-									continue;
-								strtrim(tmpBuff);
-								if(strcmp((char*)tmpBuff,"RAW/TCP")==0)
-									type=RAW_TCP;
-								else if(strcmp((char*)tmpBuff,"RAW/UNIX")==0)
-									type=RAW_UNIX;
-								else if(strcmp((char*)tmpBuff,"SSL/TCP")==0)
-									type=SSL_TCP;
-								else if(strcmp((char*)tmpBuff,"SSL/UNIX")==0)
-									type=SSL_UNIX;
-								else
-									continue;
-								if(type==SSL_TCP||type==RAW_TCP)
-									{
-										DOM_Element elemIP;
-										DOM_Element elemPort;
-										DOM_Element elemHost;
-										getDOMChildByName(elemListenerInterface,(UINT8*)"Port",elemPort,false);
-										if(getDOMElementValue(elemPort,&port)!=E_SUCCESS)
-											continue;
-
-										addr=new CASocketAddrINet;
-										getDOMChildByName(elemListenerInterface,(UINT8*)"IP",elemIP,false);
-										if(elemIP!=NULL)
-											{
-												UINT8 buffIP[50];
-												UINT32 buffIPLen=50;
-												if(getDOMElementValue(elemIP,buffIP,&buffIPLen)!=E_SUCCESS)
-													continue;
-												if(((CASocketAddrINet*)addr)->setAddr(buffIP,port)!=E_SUCCESS)
-													continue;
-											}
-										m_arListenerInterfaces[aktInterface].hostname=NULL;
-										getDOMChildByName(elemListenerInterface,(UINT8*)"Host",elemHost,false);
-										tmpLen=255;										
-										if(getDOMElementValue(elemHost,tmpBuff,&tmpLen)==E_SUCCESS)
-											{
-												tmpBuff[tmpLen]=0;
-												if(elemIP==NULL&&((CASocketAddrINet*)addr)->setAddr(tmpBuff,port)!=E_SUCCESS)
-													continue;
-												m_arListenerInterfaces[aktInterface].hostname=new UINT8[tmpLen+1];
-												memcpy(m_arListenerInterfaces[aktInterface].hostname,tmpBuff,tmpLen);
-												m_arListenerInterfaces[aktInterface].hostname[tmpLen]=0;
-											}
-										else if(elemIP==NULL)
-											continue;
-									}
-								else
-		#ifdef HAVE_UNIX_DOMAIN_PROTOCOL
-									{
-										DOM_Element elemFile;
-										getDOMChildByName(elemListenerInterface,(UINT8*)"File",elemFile,false);
-										tmpLen=255;
-										if(getDOMElementValue(elemFile,tmpBuff,&tmpLen)!=E_SUCCESS)
-											continue;
-										tmpBuff[tmpLen]=0;
-										strtrim(tmpBuff);
-										addr=new CASocketAddrUnix;
-										if(((CASocketAddrUnix*)addr)->setPath((char*)tmpBuff)!=E_SUCCESS)
-											continue;
-										m_arListenerInterfaces[aktInterface].hostname=NULL;
-									}
-		#else
-									continue;
-		#endif
-								m_arListenerInterfaces[aktInterface].type=type;
-								m_arListenerInterfaces[aktInterface].addr=addr->clone();
-								delete addr;
-								addr=NULL;
-								aktInterface++;
+								CAListenerInterface* pListener=CAListenerInterface::getInstance(elemListenerInterface);
+								if(pListener!=NULL)
+									m_arListenerInterfaces[aktInterface++]=pListener;
 							}
 						m_cnListenerInterfaces=aktInterface;
 					}
@@ -838,7 +749,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		getDOMChildByName(elemNetwork,(UINT8*)"NextMix",elemNextMix,false);
 		if(elemNextMix!=NULL)
 			{
-				UINT32 type;
+				NetworkType type;
 				CASocketAddr* addr=NULL;
 				DOM_Element elemType;
 				getDOMChildByName(elemNextMix,(UINT8*)"NetworkProtocol",elemType,false);
@@ -917,7 +828,7 @@ SKIP_NEXT_MIX:
 					{
 						m_arTargetInterfaces=new TargetInterface[m_cnTargets]; 
 						UINT32 aktInterface=0;
-						UINT32 type=0;
+						NetworkType type=UNKNOWN_NETWORKTYPE;
 						UINT32 proxy_type=0;
 						CASocketAddr* addr=NULL;
 						UINT16 port;

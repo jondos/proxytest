@@ -67,7 +67,7 @@ SINT32 CAMuxSocket::accept(UINT16 port)
 		return E_SUCCESS;
 	}
 
-SINT32 CAMuxSocket::accept(CASocketAddr& oAddr)
+SINT32 CAMuxSocket::accept(const CASocketAddr& oAddr)
 	{
 		CASocket oSocket;
 		oSocket.create(oAddr.getType());
@@ -99,7 +99,7 @@ SINT32 CAMuxSocket::close()
 		m_aktBuffPos=0;
 		return m_Socket.close();
 	}
-/** Sends a MixPacket over the Network. Will block until the whol packet is 
+/** Sends a MixPacket over the Network. Will block until the whole packet is 
 	* send.
 	* @param pPacket MixPacket to send
 	* @retval MIXPACKET_SIZE if MixPacket was successful send
@@ -112,7 +112,9 @@ SINT32 CAMuxSocket::send(MIXPACKET *pPacket)
 		UINT8 tmpBuff[16];
 		memcpy(tmpBuff,pPacket,16);
 		pPacket->channel=htonl(pPacket->channel);
+#ifndef NEW_MIX_TYPE
 		pPacket->flags=htons(pPacket->flags);
+#endif
 		if(m_bIsCrypted)
     	m_oCipherOut.encryptAES(((UINT8*)pPacket),((UINT8*)pPacket),16);
 		ret=m_Socket.sendFully(((UINT8*)pPacket),MIXPACKET_SIZE);
@@ -138,7 +140,9 @@ SINT32 CAMuxSocket::send(MIXPACKET *pPacket,UINT8* buff)
 		UINT8 tmpBuff[16];
 		memcpy(tmpBuff,pPacket,16);
 		pPacket->channel=htonl(pPacket->channel);
+#ifndef NEW_MIX_TYPE
 		pPacket->flags=htons(pPacket->flags);
+#endif
 		if(m_bIsCrypted)
 			m_oCipherOut.encryptAES(((UINT8*)pPacket),((UINT8*)pPacket),16);
 		memcpy(buff,((UINT8*)pPacket),MIXPACKET_SIZE);
@@ -159,7 +163,9 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket)
 		if(m_bIsCrypted)
     	m_oCipherIn.decryptAES((UINT8*)pPacket,(UINT8*)pPacket,16);
 		pPacket->channel=ntohl(pPacket->channel);
+#ifndef NEW_MIX_TYPE
 		pPacket->flags=ntohs(pPacket->flags);
+#endif
 		m_csReceive.unlock();
 		return MIXPACKET_SIZE;
 	}
@@ -185,7 +191,9 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 timeout)
 					m_oCipherIn.decryptAES(m_Buff,m_Buff,16);
 				memcpy(pPacket,m_Buff,MIXPACKET_SIZE);
 				pPacket->channel=ntohl(pPacket->channel);
+#ifndef NEW_MIX_TYPE
 				pPacket->flags=ntohs(pPacket->flags);
+#endif
 				m_aktBuffPos=0;
 				m_csReceive.unlock();
 				return MIXPACKET_SIZE;
@@ -221,7 +229,9 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 timeout)
 							m_oCipherIn.decryptAES(m_Buff,m_Buff,16);
 						memcpy(pPacket,m_Buff,MIXPACKET_SIZE);
 						pPacket->channel=ntohl(pPacket->channel);
+#ifndef NEW_MIX_TYPE
 						pPacket->flags=ntohs(pPacket->flags);
+#endif
 						m_aktBuffPos=0;
 						m_csReceive.unlock();
 						return MIXPACKET_SIZE;

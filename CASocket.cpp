@@ -69,7 +69,7 @@ SINT32 CASocket::create(int type)
 		return E_SUCCESS;
 	}
 
-SINT32 CASocket::listen(CASocketAddr & psa)
+SINT32 CASocket::listen(const CASocketAddr& psa)
 	{
 		int type=psa.getType();
 		if(m_bSocketIsClosed&&create(type)!=E_SUCCESS)

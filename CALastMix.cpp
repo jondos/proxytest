@@ -91,21 +91,24 @@ SINT32 CALastMix::init()
 			{
 				m_pInfoService=new CAInfoService();
 				m_pInfoService->setSignature(m_pSignature);
-				m_pInfoService->sendHelo();
 				m_pInfoService->start();
 			}
 
 		CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...\n");
-		ListenerInterface oListener;
-		options.getListenerInterface(oListener,1);
+		CAListenerInterface*  pListener=NULL;
+		pListener=options.getListenerInterface(1);
+		const CASocketAddr* pAddr=NULL;
+		if(pListener!=NULL)
+			pAddr=pListener->getAddr();
+		delete pListener;
 		m_pMuxIn=new CAMuxSocket();
-		if(m_pMuxIn->accept(*oListener.addr)!=E_SUCCESS)
+		SINT32 ret=m_pMuxIn->accept(*pAddr);
+		delete pAddr;
+		if(ret!=E_SUCCESS)
 		    {
-					delete oListener.addr;
 					CAMsg::printMsg(LOG_CRIT," failed!\n");
 					return E_UNKNOWN;
 		    }
-		delete oListener.addr;
 		((CASocket*)*m_pMuxIn)->setRecvBuff(500*MIXPACKET_SIZE);
 		((CASocket*)*m_pMuxIn)->setSendBuff(500*MIXPACKET_SIZE);
 		if(((CASocket*)*m_pMuxIn)->setSendLowWat(MIXPACKET_SIZE)!=E_SUCCESS)
@@ -344,9 +347,9 @@ THREAD_RETURN lm_loopSendToMix(void* param)
 		THREAD_RETURN_SUCCESS;
 	}
 
-
 SINT32 CALastMix::loop()
 	{
+#ifndef NEW_MIX_TYPE
 		//CASocketList  oSocketList;
 		CALastMixChannelList* pChannelList=new CALastMixChannelList;
 		CASocketGroup osocketgroupCacheRead;
@@ -742,6 +745,7 @@ ERR:
 			delete pPool;
 		#endif
 		oLogThread.join();
+#endif //! NEW_MIX_TYPE
 		return E_UNKNOWN;
 	}
 

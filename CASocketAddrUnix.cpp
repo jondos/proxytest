@@ -50,7 +50,7 @@ CASocketAddrUnix::CASocketAddrUnix(const CASocketAddrUnix& addr)
 	* @retval E_UNSPECIFIED if path was NULL
 	* @retval E_SPACE if path was to long
 	*/
-SINT32 CASocketAddrUnix::setPath(char* path)
+SINT32 CASocketAddrUnix::setPath(const char* path)
 	{
 		if(path==NULL)
 			return E_UNSPECIFIED;
