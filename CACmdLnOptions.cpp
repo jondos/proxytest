@@ -1,19 +1,20 @@
 #include "StdAfx.h"
 #include "CACmdLnOptions.hpp"
 CACmdLnOptions::CACmdLnOptions()
-    {
-	bDaemon=false;
-	bFirstMix=bLastMix=bMiddleMix=false;
-	iTargetPort=iServerPort=-1;
-	strTargetHost=NULL;
-    }
+  {
+		bDaemon=false;
+		bLocalProxy=bFirstMix=bLastMix=bMiddleMix=false;
+		iTargetPort=iServerPort=-1;
+		strTargetHost=NULL;
+  }
+
 CACmdLnOptions::~CACmdLnOptions()
-    {
-	if(strTargetHost!=NULL)
-	    {
-		delete strTargetHost;
+  {
+		if(strTargetHost!=NULL)
+			{
+				delete strTargetHost;
 	    }
-    }
+  }
     
 int CACmdLnOptions::parse(int argc,const char** argv)
     {
@@ -65,10 +66,12 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 	    }
 	iServerPort=port;
 	if(mix==0)
-		bFirstMix=true;
+		bLocalProxy=true;
 	else if(mix==1)
+		bFirstMix=true;
+	else if(mix==2)
 		bMiddleMix=true;
-	else
+	else 
 		bLastMix=true;
 	return 0;
 	
@@ -114,4 +117,9 @@ bool CACmdLnOptions::isMiddleMix()
 bool CACmdLnOptions::isLastMix()
     {
 			return bLastMix;
+    }
+
+bool CACmdLnOptions::isLocalProxy()
+    {
+			return bLocalProxy;
     }

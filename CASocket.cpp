@@ -25,7 +25,7 @@ int CASocket::listen(LPSOCKETADDR psa)
 		return ::listen(m_Socket,SOMAXCONN);
 	}
 			
-int CASocket::listen(int port)
+int CASocket::listen(unsigned short port)
 	{
 		CASocketAddr oSocketAddr(port);
 		return listen(&oSocketAddr);
@@ -110,7 +110,16 @@ int CASocket::send(char* buff,int len)
 	{
 		return ::send(m_Socket,buff,len,0);
 	}
-			
+
+int CASocket::available()
+	{
+		unsigned long ul;
+		if(ioctlsocket(m_Socket,FIONREAD,&ul)==SOCKET_ERROR)
+			return SOCKET_ERROR;
+		else
+			return ul;
+	}
+
 int CASocket::receive(char* buff,int len)
 	{
 		return ::recv(m_Socket,buff,len,0);

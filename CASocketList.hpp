@@ -1,3 +1,5 @@
+#ifndef __CASOCKETLIST__
+#define __CASOCKETLIST__
 #include "CASocket.hpp"
 #include "CAMuxSocket.hpp"
 
@@ -12,14 +14,11 @@ typedef struct connlist
 		connlist* next;
 	} CONNECTIONLIST,CONNECTION;
 		
-//typedef CONNECTIONLIST CONNECTION;
-
 class CASocketList
 	{
 		public:
 			CASocketList();
 			~CASocketList();
-//			int add(CASocket* pSocket);
 			int add(HCHANNEL id,CASocket* pSocket);
 			int add(HCHANNEL in,HCHANNEL out);
 			CASocket* get(HCHANNEL id);
@@ -34,3 +33,4 @@ class CASocketList
 			CRITICAL_SECTION cs;
 			CONNECTIONLIST* aktEnumPos;
 	};	
+#endif

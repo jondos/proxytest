@@ -78,8 +78,8 @@ int CAMuxSocket::receive(HCHANNEL* channel_id,char* buff,int bufflen)
 			{
 				#ifdef _DEBUG
 					CAMsg::printMsg(LOG_DEBUG,"MuxSocket-Receive - ungültiges Packet!\n");
-					CAMsg::printMsg(LOG_DEBUG,"Data-Len %i\n",len);
-					if(len==SOCKET_ERROR)
+					CAMsg::printMsg(LOG_DEBUG,"Data-Len %i\n",MuxPacket.len);
+					if(MuxPacket.len==SOCKET_ERROR)
 						CAMsg::printMsg(LOG_DEBUG,"SOCKET-ERROR: %i\n",WSAGetLastError());
 				#endif
 				return SOCKET_ERROR;
@@ -100,7 +100,7 @@ int CAMuxSocket::receive(MUXPACKET* pPacket)
 				MuxPacketSize-=len;
 				aktIndex+=len;
 			} while(len>0&&MuxPacketSize>0);
-		if(len==SOCKET_ERROR)
+		if(len==SOCKET_ERROR||len==0)
 			{
 				#ifdef _DEBUG
 					CAMsg::printMsg(LOG_DEBUG,"MuxSocket-Receive - ungültiges Packet!\n");

@@ -59,7 +59,8 @@
 #include <sys/stat.h>
 #include <signal.h>
 #include "popt/system.h"
-// ZU ERLEDIGEN: Verweisen Sie hier auf zusätzliche Header-Dateien, die Ihr Programm benötigt
+#include <openssl/blowfish.h>
+		// ZU ERLEDIGEN: Verweisen Sie hier auf zusätzliche Header-Dateien, die Ihr Programm benötigt
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ fügt zusätzliche Deklarationen unmittelbar vor der vorherigen Zeile ein.

@@ -23,6 +23,21 @@ CASocketList::CASocketList()
 
 CASocketList::~CASocketList()
 	{
+		CONNECTIONLIST* tmp;
+		tmp=pool;
+		while(tmp!=NULL)
+			{
+				pool=tmp;
+				tmp=tmp->next;
+				delete pool;
+			}
+		tmp=connections;
+		while(tmp!=NULL)
+			{
+				connections=tmp;
+				tmp=tmp->next;
+				delete connections;
+			}
 		DeleteCriticalSection(&cs);
 	}
 
