@@ -509,7 +509,7 @@ SINT32 CALastMixA::loop()
 			}
 		delete pChannelList;
 		delete []tmpBuff;
-		delete pMixPacket;
+		delete pQueueEntry;
 		oLogThread.join();
 #endif //! NEW_MIX_TYPE
 		return E_UNKNOWN;

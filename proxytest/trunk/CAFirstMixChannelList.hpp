@@ -29,7 +29,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define __CAFRISTMIXCHANNELLIST__
 #include "CAMuxSocket.hpp"
 #include "CAQueue.hpp"
-#include "CATimedQueue.hpp"
 #include "CASymCipher.hpp"
 #include "CAMutex.hpp"
 #include "CAMsg.hpp"
