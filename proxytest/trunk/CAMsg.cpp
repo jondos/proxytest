@@ -122,6 +122,11 @@ SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 						}
 					if(oMsg.m_hFileInfo!=-1)
 						{
+#ifdef PSEUDO_LOG
+							char buff[255];
+							sprintf(buff,"%.15s mix AnonMix: ",ctime(&currtime)+4);
+							write(oMsg.m_hFileInfo,buff,strlen(buff));
+#endif
 							if(write(oMsg.m_hFileInfo,oMsg.m_strMsgBuff,strlen(oMsg.m_strMsgBuff))==-1)
 							 ret=E_UNKNOWN;
 						}
