@@ -52,7 +52,14 @@ SINT32 CASocket::create()
 		if(m_Socket==0)
 			m_Socket=socket(AF_INET,SOCK_STREAM,0);
 		if(m_Socket==INVALID_SOCKET)
-			return SOCKET_ERROR;
+			{
+				int er=errno;
+				if(er==EMFILE)
+					CAMsg::printMsg(LOG_CRIT,"Couldt not create a new Socket!\n");
+				else
+					CAMsg::printMsg(LOG_CRIT,"Couldt not create a new Socket! - Error: %i\n",er);
+				return SOCKET_ERROR;
+			}
 		localPort=-1;
 		return E_SUCCESS;
 	}
