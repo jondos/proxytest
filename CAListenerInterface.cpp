@@ -28,7 +28,7 @@ CAListenerInterface* CAListenerInterface::getInstance(NetworkType type,const UIN
 			CAListenerInterface* pListener=new CAListenerInterface();
 			pListener->m_Type=type;
 			pListener->m_pAddr=new CASocketAddrUnix();
-			((CASocketAddrUnix*)pListener->m_pAddr)->setPath(file);
+			((CASocketAddrUnix*)pListener->m_pAddr)->setPath((const char*)file);
 			return pListener;
 		#else
 			return NULL;
