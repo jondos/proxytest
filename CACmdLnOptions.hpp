@@ -73,7 +73,7 @@ class CACmdLnOptions
 			SINT32 getCascadeName(UINT8* name,UINT32 len);
 			SINT32 getLogDir(UINT8* name,UINT32 len);
 			SINT32 getUser(UINT8* user,UINT32 len);
-			SINT32 getMixXml(UINT8* strxml,UINT32 len);
+			SINT32 getMixXml(UINT8* strxml,UINT32* len);
 			bool isLocalProxy();
 			bool isFirstMix();
 			bool isMiddleMix();

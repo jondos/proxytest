@@ -183,49 +183,43 @@ SINT32 CAInfoService::sendHelo()
 		CASocketAddrINet oAddr;
 		UINT8 hostname[255];
 		UINT8 buffHeader[255];
-		if(options.getInfoServerHost(hostname,255)!=E_SUCCESS)
-			return E_UNKNOWN;
+		UINT32 xmlBuffLen=2048;
+		UINT8* xmlBuff=new UINT8[xmlBuffLen];
+		UINT32 sendBuffLen=2048;
+		UINT8* sendBuff=new UINT8[sendBuffLen];
+		if(xmlBuff==NULL||sendBuff==NULL||options.getInfoServerHost(hostname,255)!=E_SUCCESS)
+			goto ERR;
 		oAddr.setAddr(hostname,options.getInfoServerPort());
 		if(oSocket.connect(oAddr)==E_SUCCESS)
 			{
-				UINT8* buff=new UINT8[2024];
-				if(buff==NULL)
-					return E_UNKNOWN;
-				UINT32 buffLen;
 				if(options.isFirstMix())
 					{
-					 //the following has to be moved to FirstMix...
-						UINT8* tmpBuff=new UINT8[2024];
-						UINT32 len=2024;
-						if(m_pFirstMix->getMixCascadeInfo(tmpBuff,&len)!=E_SUCCESS)
+						if(m_pFirstMix->getMixCascadeInfo(xmlBuff,&xmlBuffLen)!=E_SUCCESS)
 							{
-								delete [] tmpBuff;
-								return E_UNKNOWN;
+								goto ERR;
 							}
-						buffLen=2024;
-						if(m_pSignature->signXML(tmpBuff,strlen((char*)tmpBuff),(UINT8*)buff,&buffLen)!=E_SUCCESS)
-							{delete []buff;return E_UNKNOWN;}
 					}
-				else
+				else if(options.getMixXml(xmlBuff,&xmlBuffLen)!=E_SUCCESS)
 					{
-						buffLen=2024;
-						UINT8* tmpBuff=new UINT8[2024];
-						if(options.getMixXml(tmpBuff,2024)!=E_SUCCESS)
-							{
-								delete [] tmpBuff;
-								return E_UNKNOWN;
-							}
-						if(m_pSignature->signXML(tmpBuff,strlen((char*)tmpBuff),(UINT8*)buff,&buffLen)!=E_SUCCESS)
-							{delete []tmpBuff;delete []buff;return E_UNKNOWN;}
-						delete[] tmpBuff;
+						goto ERR;
 					}
-				sprintf((char*)buffHeader,"POST /helo HTTP/1.0\r\nContent-Length: %u\r\n\r\n",buffLen);
+				if(m_pSignature->signXML(xmlBuff,xmlBuffLen,sendBuff,&sendBuffLen)!=E_SUCCESS)
+					{
+						goto ERR;
+					}
+				sprintf((char*)buffHeader,"POST /helo HTTP/1.0\r\nContent-Length: %u\r\n\r\n",sendBuffLen);
 				oSocket.send(buffHeader,strlen((char*)buffHeader));
-				oSocket.send(buff,buffLen);
+				oSocket.send(sendBuff,sendBuffLen);
 				oSocket.close();
-				delete []buff;		
+				delete []sendBuff;
+				delete []xmlBuff;
 				return E_SUCCESS;	
 			}
+ERR:
+		if(xmlBuff!=NULL)
+			delete []xmlBuff;
+		if(sendBuff!=NULL)
+			delete []sendBuff;
 		return E_UNKNOWN;
 	}
 
