@@ -601,7 +601,7 @@ LOOP_START:
 								ret=muxOut.receive(&oMuxPacket);
 								if(ret==SOCKET_ERROR)
 									{
-										CAMsg::printMsg(LOG_CRIT,"Mux-Out-Channel Receiving Data Error - Exiting!\n");									
+										CAMsg::printMsg(LOG_CRIT,"Mux-Out-Channel Receiving Data Error - Exiting!\n");
 										goto ERR;
 									}
 								if(oMuxPacket.flags==CHANNEL_CLOSE) //close event
@@ -642,8 +642,13 @@ LOOP_START:
 																#ifdef _DEBUG
 																	CAMsg::printMsg(LOG_INFO,"Sending suspend for channel: %u\n",oMuxPacket.channel);
 																#endif
-																muxOut.send(&oMuxPacket);
-																if(pml==NULL)
+																if(muxOut.send(&oMuxPacket)==SOCKET_ERROR)
+                                	{
+                                		CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Restarting!\n");
+                                    LeaveCriticalSection(&csResume);
+                                    goto ERR;
+																	}
+                                if(pml==NULL)
 																	{
 																		oSuspendList.add(tmpReverseEntry->pMuxSocket);
 																		pml=oSuspendList.get(tmpReverseEntry->pMuxSocket);
@@ -657,7 +662,7 @@ LOOP_START:
 										else
 											{
 												#ifdef _DEBUG
-													CAMsg::printMsg(LOG_DEBUG,"Error Sending Data to Browser -- Channel-Id %u no valid!\n",oMuxPacket.channel);										
+													CAMsg::printMsg(LOG_DEBUG,"Error Sending Data to Browser -- Channel-Id %u no valid!\n",oMuxPacket.channel);
 												#endif
 											}
 							}
@@ -668,7 +673,7 @@ LOOP_START:
 			//		{
 			//			countRead--;
 			//			len=fmIOPair->muxHttpIn.receive(&oMuxPacket);
-			//			printf("Receivde Htpp-Packet - Len: %u Content %s",len,oMuxPacket.data); 
+			//			printf("Receivde Htpp-Packet - Len: %u Content %s",len,oMuxPacket.data);
 			/*			if(len==SOCKET_ERROR)
 							{
 								MUXLISTENTRY otmpEntry;
@@ -718,7 +723,7 @@ LOOP_START:
 											}
 										if(fmIOPair->muxOut.send(&oMuxPacket)==SOCKET_ERROR)
 											{
-												CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Exiting!\n");									
+												CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Exiting!\n");
 												exit(-1);
 											}
 								}
@@ -746,8 +751,12 @@ LOOP_START:
 														CONNECTION* tmpCon=otmpEntry.pSocketList->getFirst();
 														while(tmpCon!=NULL)
 															{
-																muxOut.close(tmpCon->outChannel);
-																delete tmpCon->pCipher;
+																if(muxOut.close(tmpCon->outChannel)==SOCKET_ERROR)
+  																{
+																		CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Restarting!\n");
+																		goto ERR;
+																	}
+                                delete tmpCon->pCipher;
 																tmpCon=otmpEntry.pSocketList->getNext();
 															}
 														otmpEntry.pMuxSocket->close();
@@ -769,8 +778,12 @@ LOOP_START:
 													{
 														if(oMuxChannelList.get(tmpMuxListEntry,oMuxPacket.channel,&oConnection))
 															{
-																muxOut.close(oConnection.outChannel);
-																oMuxChannelList.remove(oConnection.outChannel,NULL);
+																if(muxOut.close(oConnection.outChannel)==SOCKET_ERROR)
+               										{
+																		CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Restarting!\n");
+																		goto ERR;
+																	}
+                                oMuxChannelList.remove(oConnection.outChannel,NULL);
 																delete oConnection.pCipher;
 																deleteResume(tmpMuxListEntry->pMuxSocket,oConnection.outChannel);
 															}
@@ -799,7 +812,7 @@ LOOP_START:
 																								 oMuxPacket.data+RSA_SIZE-KEY_SIZE,
 																								 DATA_SIZE-RSA_SIZE);
 																memcpy(oMuxPacket.data,rsaBuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
-																
+
 																oMuxChannelList.add(tmpMuxListEntry,oMuxPacket.channel,lastChannelId,pCipher);
 																#ifdef _DEBUG
 																	CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",lastChannelId);
@@ -808,7 +821,7 @@ LOOP_START:
 															}
 														if(muxOut.send(&oMuxPacket)==SOCKET_ERROR)
 															{
-																CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Restarting!\n");									
+																CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Restarting!\n");
 																goto ERR;
 															}
 														m_MixedPackets++;

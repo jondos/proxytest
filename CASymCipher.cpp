@@ -108,13 +108,13 @@ SINT32 CASymCipher::setKeyAES(UINT8* key)
 		UINT32 i=0;
 		while(i<len-15)
 			{
-				blockEncrypt(&cipher,&keyEncAES,iv,16<<3,iv); 
+				blockEncrypt(&cipher,&keyEncAES,iv,16<<3,iv);
 				for(int k=0;k<16;k++)
 					in[i++]^=iv[k];
 			}
 		if(i<len)
 			{
-				blockEncrypt(&cipher,&keyEncAES,iv,16<<3,iv); 
+				blockEncrypt(&cipher,&keyEncAES,iv,16<<3,iv);
 				len-=i;
 				for(int k=0;k<len;k++)
 					in[i++]^=iv[k];
@@ -125,8 +125,9 @@ SINT32 CASymCipher::setKeyAES(UINT8* key)
 SINT32 CASymCipher::decryptAES(UINT8* in,UINT8* out,UINT32 len)
 	{
 		UINT32 i=0;
-		while(i<len-15)
-			{
+		//while(i<len-15)
+    while(i+15<len)
+    	{
 				rijndaelEncrypt (iv, iv, keyAES.keySched);
 				out[i]=in[i]^iv[0];
 				i++;
@@ -161,7 +162,7 @@ SINT32 CASymCipher::decryptAES(UINT8* in,UINT8* out,UINT32 len)
 				out[i]=in[i]^iv[15];
 				i++;
 			}
-		if(i<len)
+		if(i<len) //In this case len-i<16 !
 			{
 				rijndaelEncrypt (iv, iv, keyAES.keySched);
 				len-=i;
@@ -177,7 +178,7 @@ SINT32 CASymCipher::decryptAES(UINT8* in,UINT8* out,UINT32 len)
 SINT32 CASymCipher::decryptAES2(UINT8* in,UINT8* out,UINT32 len)
 	{
 		UINT32 i=0;
-		while(i<len-15)
+		while(i+15<len)
 			{
 				rijndaelEncrypt (iv2, iv2, keyAES.keySched);
 				out[i]=in[i]^iv2[0];
@@ -229,7 +230,7 @@ SINT32 CASymCipher::decryptAES2(UINT8* in,UINT8* out,UINT32 len)
 SINT32 CASymCipher::encryptAES(UINT8* in,UINT8* out,UINT32 len)
 	{
 		UINT32 i=0;
-		while(i<len-15)
+		while(i+15<len)
 			{
 				rijndaelEncrypt (iv, iv, keyAES.keySched);
 
