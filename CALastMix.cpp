@@ -33,9 +33,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMsg.hpp"
 #include "CACmdLnOptions.hpp"
 #include "CASocketAddrUnix.hpp"
-#include "CASocketAddrINet.hpp"
-#include "CAUtil.hpp"
-#include "CAInfoService.hpp"
 #include "CACertStore.hpp"
 #include "CABase64.hpp"
 #include "CAPool.hpp"
@@ -83,31 +80,22 @@ SINT32 CALastMix::initOnce()
 
 SINT32 CALastMix::init()
 	{
-		if(mRSA.generateKeyPair(1024)!=E_SUCCESS)
+		m_pRSA=new CAASymCipher();	
+		if(m_pRSA->generateKeyPair(1024)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Could not generate a valid key pair\n");
 				return E_UNKNOWN;
 			}
+		
+		if(m_pSignature!=NULL&&options.isInfoServiceEnabled())
+			{
+				m_pInfoService=new CAInfoService();
+				m_pInfoService->setSignature(m_pSignature);
+				m_pInfoService->sendHelo();
+				m_pInfoService->start();
+			}
 
 		CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...\n");
-/*		CASocketAddr* pAddrListen;
-		UINT8 path[255];
-		if(options.getServerHost(path,255)==E_SUCCESS&&path[0]=='/') //unix domain
-			{
-#ifdef HAVE_UNIX_DOMAIN_PROTOCOL
-				pAddrListen=new CASocketAddrUnix();
-				((CASocketAddrUnix*)pAddrListen)->setPath((char*)path);
-#else
-				CAMsg::printMsg(LOG_CRIT,"I do not understand the Unix Domain Protocol!\n");
-				return E_UNKNOWN;
-#endif
-			}
-		else
-			{
-				pAddrListen=new CASocketAddrINet();
-				((CASocketAddrINet*)pAddrListen)->setAddr(path,options.getServerPort());
-			}
-			*/
 		ListenerInterface oListener;
 		options.getListenerInterface(oListener,1);
 		m_pMuxIn=new CAMuxSocket();
@@ -166,7 +154,7 @@ SINT32 CALastMix::processKeyExchange()
 
 		//Inserting RSA-Key
 		DOM_DocumentFragment tmpDocFrag;
-		mRSA.getPublicKeyAsDocumentFragment(tmpDocFrag);
+		m_pRSA->getPublicKeyAsDocumentFragment(tmpDocFrag);
 		DOM_Node nodeRsaKey=doc.importNode(tmpDocFrag,true);
 		elemMix.appendChild(nodeRsaKey);
 		tmpDocFrag=0;
@@ -258,7 +246,7 @@ SINT32 CALastMix::processKeyExchange()
 		
 		UINT8 key[150];
 		UINT32 keySize=150;
-		SINT32 ret=decodeXMLEncryptedKey(key,&keySize,messageBuff,len,&mRSA);
+		SINT32 ret=decodeXMLEncryptedKey(key,&keySize,messageBuff,len,m_pRSA);
 		delete []messageBuff;
 		if(ret!=E_SUCCESS||keySize!=64)
 			{
@@ -378,14 +366,6 @@ SINT32 CALastMix::loop()
 		m_pMuxIn->setCrypt(true);
 		bool bAktiv;
 		UINT32 countCacheAddresses=m_oCacheLB.getElementCount();
-		CAInfoService* pInfoService=NULL;
-		if(m_pSignature!=NULL&&options.isInfoServiceEnabled())
-			{
-				pInfoService=new CAInfoService();
-				pInfoService->setSignature(m_pSignature);
-				pInfoService->sendHelo();
-				pInfoService->start();
-			}
 		m_logUploadedPackets=m_logDownloadedPackets=0;
 		set64((UINT64&)m_logUploadedBytes,(UINT32)0);
 		set64((UINT64&)m_logDownloadedBytes,(UINT32)0);
@@ -438,7 +418,7 @@ SINT32 CALastMix::loop()
 														CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
 												#endif
 												
-												mRSA.decrypt(pMixPacket->data,rsaBuff);
+												m_pRSA->decrypt(pMixPacket->data,rsaBuff);
 												#ifdef WITH_TIMESTAMP
 													//CAMsg::printMsg(LOG_DEBUG,"Timestamp is: %X %X\n", *(rsaBuff+KEY_SIZE), *(rsaBuff+KEY_SIZE+1));
 												#endif
@@ -744,10 +724,6 @@ ERR:
 		CAMsg::printMsg(LOG_CRIT,"Wait for LoopSendToMix!\n");
 		threadSendToMix.join(); //will not join if queue is empty (and so wating)!!!
 		m_bRunLog=false;
-		if(pInfoService!=NULL)
-			{
-				delete pInfoService;
-			}
 		pChannelListEntry=pChannelList->getFirstSocket();
 		while(pChannelListEntry!=NULL)
 			{
@@ -829,13 +805,20 @@ SINT32 CALastMix::setTargets()
 
 SINT32 CALastMix::clean()
 	{
+		if(m_pInfoService!=NULL)
+			{
+				delete m_pInfoService;
+			}
+		m_pInfoService=NULL;
 		if(m_pMuxIn!=NULL)
 			{
 				m_pMuxIn->close();
 				delete m_pMuxIn;
 			}
 		m_pMuxIn=NULL;
-		mRSA.destroy();
+		if(m_pRSA!=NULL)
+			delete m_pRSA;
+		m_pRSA=NULL;
 //		oSuspendList.clear();
 		return E_SUCCESS;
 	}

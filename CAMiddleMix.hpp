@@ -33,13 +33,18 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAASymCipher.hpp"
 #include "CAMiddleMixChannelList.hpp"
 #include "CASignature.hpp"
+#include "CAInfoService.hpp"
 
 class CAMiddleMix:public CAMix
 	{
 		public:
 			CAMiddleMix()
-				{m_pMiddleMixChannelList=NULL;m_pMuxOut=NULL;m_pMuxIn=NULL;m_pRSA=NULL;m_pSignature=NULL;}
-			virtual ~CAMiddleMix(){};
+				{
+					m_pMiddleMixChannelList=NULL;
+					m_pMuxOut=NULL;m_pMuxIn=NULL;m_pRSA=NULL;m_pSignature=NULL;
+					m_pInfoService=NULL;
+				}
+			virtual ~CAMiddleMix(){clean();};
 		private:
 			SINT32 loop();
 			SINT32 init();
@@ -53,6 +58,7 @@ class CAMiddleMix:public CAMix
 			CAASymCipher* m_pRSA;
 			CASignature* m_pSignature;
 			CAMiddleMixChannelList* m_pMiddleMixChannelList;
+			CAInfoService* m_pInfoService;
 			friend THREAD_RETURN mm_loopDownStream(void *p);
 	};
 
