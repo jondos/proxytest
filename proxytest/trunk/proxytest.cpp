@@ -156,6 +156,9 @@ for this channel will change to (because of the content format for the first pac
 
 For Upstream and Downstream different keys are used.
 */
+
+#define MIX_VERSION "00.01.11"
+
 int main(int argc, const char* argv[])
 	{		
 		CASocketAddrINet::init();
@@ -311,6 +314,7 @@ int main(int argc, const char* argv[])
 					CAMsg::setOptions(MSG_FILE);
 			}
 		CAMsg::printMsg(LOG_INFO,"Anon proxy started!\n");
+		CAMsg::printMsg(LOG_INFO,"Version: %s\n",MIX_VERSION);
 	  CAMsg::printMsg(LOG_INFO,"Using: %s!\n",OPENSSL_VERSION_TEXT);
 #ifdef _DEBUG
 		sockets=0;
