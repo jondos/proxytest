@@ -50,11 +50,50 @@ SINT32 CAFirstMix::initOnce()
 		m_pSignature=options.getSignKey();
 		if(m_pSignature==NULL)
 			return E_UNKNOWN;
+		if(options.getListenerInterfaceCount()<1)
+			{
+				CAMsg::printMsg(LOG_CRIT,"No ListenerInterfaces specified!\n");
+				return E_UNKNOWN;
+			}
 		return E_SUCCESS;
 	}
 
 SINT32 CAFirstMix::init()
 	{
+		//Establishing all Listeners
+		m_nSocketsIn=options.getListenerInterfaceCount();
+		m_arrSocketsIn=new CASocket[m_nSocketsIn];
+		for(UINT i=1;i<=m_nSocketsIn;i++)
+			{
+				ListenerInterface oListener;
+				if(options.getListenerInterface(oListener,i)!=E_SUCCESS)
+					{
+						CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
+						return E_UNKNOWN;
+					}
+				m_arrSocketsIn[i-1].create();
+				m_arrSocketsIn[i-1].setReuseAddr(true);
+#ifndef _WIN32
+        //we have to be a temporaly superuser if port <1024...
+				int old_uid=geteuid();
+				if(oListener.addr->getType==AF_INET&&((CASocketAddrINet*)oListener.addr)->getPort()<1024)
+					{
+						if(seteuid(0)==-1) //changing to root
+							CAMsg::printMsg(LOG_CRIT,"Setuid failed!\n");
+					}
+#endif				
+				SINT32 ret=m_arrSocketsIn[i-1].listen(*oListener.addr);
+				delete oListener.addr;
+#ifndef _WIN32
+				seteuid(old_uid);
+#endif
+				if(ret!=E_SUCCESS)
+					{
+						CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
+						return E_UNKNOWN;
+					}
+			}
+
 		CASocketAddr* pAddrNext=NULL;
 		UINT8 strTarget[255];
 		options.getTargetHost(strTarget,255);
@@ -126,50 +165,13 @@ SINT32 CAFirstMix::init()
 			}
 		CAMsg::printMsg(LOG_CRIT,"Received Key Info...\n");
 		recvBuff[len]=0; //get the Key's from the other mixes (and the Mix-Id's...!)
-		initMixCascadeInfo(recvBuff,len+1);			
-		
-		CASocketAddrINet socketAddrIn;
-		UINT8 serverHost[255];
-		if(options.getServerHost(serverHost,255)!=E_SUCCESS)
+		if(initMixCascadeInfo(recvBuff,len+1)!=E_SUCCESS)
 			{
-				socketAddrIn.setPort(options.getServerPort());
-			}
-		else
-			{
-				socketAddrIn.setAddr(serverHost,options.getServerPort());
-			}
-		m_nSocketsIn=1; //normal (and may be HTTPS)
-		m_arrSocketsIn=new CASocket[2];
+				CAMsg::printMsg(LOG_CRIT,"Error in establishing secure communication with next Mix!\n");
+				delete []recvBuff;
+				return E_UNKNOWN;
+			}			
 		
-		m_arrSocketsIn[0].create();
-		m_arrSocketsIn[0].setReuseAddr(true);
-		if(m_arrSocketsIn[0].listen(socketAddrIn)!=E_SUCCESS)
-		    {
-					CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
-					return E_UNKNOWN;
-		    }
-    if(options.getProxySupport())
-    	{
-    		m_nSocketsIn=2;
-				m_arrSocketsIn[1].create();
-        m_arrSocketsIn[1].setReuseAddr(true);
-				socketAddrIn.setPort(443);
-#ifndef _WIN32
-        //we have to be a temporaly superuser...
-				int old_uid=geteuid();
-				if(seteuid(0)==-1) //changing to root
-					CAMsg::printMsg(LOG_CRIT,"Setuid failed!\n");
-#endif				
-				SINT32 ret=m_arrSocketsIn[1].listen(socketAddrIn);
-#ifndef _WIN32
-				seteuid(old_uid);
-#endif
-				if(ret!=E_SUCCESS)
-					{
-						CAMsg::printMsg(LOG_CRIT,"Cannot listen on HTTPS-Port\n");
-						return E_UNKNOWN;
-					}
-      }
     m_pIPList=new CAIPList();
 		m_pQueueSendToMix=new CAQueue();
 		m_pChannelList=new CAFirstMixChannelList();
@@ -1133,20 +1135,22 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		setDOMElementAttribute(elemMixes,"count",count+1);
 		delete tmpBuff;
 
-	//CascadInfo		
+	//CascadeInfo		
 		DOM_Document docCascade=DOM_Document::createDocument();
 		DOM_Element elemRoot=docCascade.createElement("MixCascade");
 
 
-		UINT8 hostname[255];
 		UINT8 id[50];
-		if(options.getServerHost(hostname,255)!=E_SUCCESS)
-			{
-				CASocketAddrINet::getLocalHostName(hostname,255);
-			}
-		options.getMixId(id,50);
+		ListenerInterface oListener;
+//		CASocketAddrINet* pAddr;
 		
+		//if(options.getListenerInterface(oListener,1)!=E_SUCCESS||oListener.addr->getType()!=AF_INET)
+		//	return E_UNKNOWN;
+		//pAddr=(CASocketAddrINet*)oListener.addr;
+		
+		options.getMixId(id,50);
 		elemRoot.setAttribute(DOMString("id"),DOMString((char*)id));
+		
 		UINT8 name[255];
 		if(options.getCascadeName(name,255)!=E_SUCCESS)
 			{
@@ -1158,33 +1162,67 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		elem.appendChild(text);
 		elemRoot.appendChild(elem);
 		
+		UINT8 hostname[255];
+		UINT8 ip[255];
+	/*	if(oListener.hostname!=NULL)
+			strcpy((char*)hostname,(char*)oListener.hostname);
+		else if(pAddr->getIPAsStr(hostname,255)!=E_SUCCESS)
+			return E_UNKNOWN;
 		elem=docCascade.createElement("Host");
 		text=docCascade.createTextNode(DOMString((char*)hostname));
 		elem.appendChild(text);
 		elemRoot.appendChild(elem);
 		
 		UINT8 ip[255];
-		CASocketAddrINet oAddr;
-		oAddr.setAddr(hostname,1);
-		oAddr.getIPAsStr(ip,255);
-		
+		pAddr->getIPAsStr(ip,255);
 		elem=docCascade.createElement("IP");
 		text=docCascade.createTextNode(DOMString((char*)ip));
 		elem.appendChild(text);
 		elemRoot.appendChild(elem);
-	
 		
 		DOM_Element e=docCascade.createElement("Port");
 		elemRoot.appendChild(e);
-		setDOMElementValue(e,options.getServerPort());
+		setDOMElementValue(e,pAddr->getPort());
 
-		if(options.getProxySupport())
+		if(options.getListenerInterfaceCount()>1)
 			{
 				elem=docCascade.createElement(DOMString("ProxyPort"));
 				setDOMElementValue(elem,443);
 				elemRoot.appendChild(elem);
 			}
- 
+ */
+		elem=docCascade.createElement("Network");
+		elemRoot.appendChild(elem);
+		DOM_Element elemListenerInterfaces=docCascade.createElement("ListenerInterfaces");
+		elem.appendChild(elemListenerInterfaces);
+		
+		for(UINT32 i=1;i<=options.getListenerInterfaceCount();i++)
+			{
+				options.getListenerInterface(oListener,i);
+				if(oListener.type==RAW_TCP)
+					{
+						DOM_Element elemListenerInterface=docCascade.createElement("ListenerInterface");
+						elemListenerInterfaces.appendChild(elemListenerInterface);
+						elem=docCascade.createElement("Type");
+						elemListenerInterface.appendChild(elem);
+						setDOMElementValue(elem,(UINT8*)"RAW/TCP");
+						elem=docCascade.createElement("Port");
+						elemListenerInterface.appendChild(elem);
+						setDOMElementValue(elem,((CASocketAddrINet*)oListener.addr)->getPort());
+						if(oListener.hostname!=NULL)
+							strcpy((char*)hostname,(char*)oListener.hostname);
+						else 
+							((CASocketAddrINet*)oListener.addr)->getIPAsStr(hostname,255);
+						elem=docCascade.createElement("Host");
+						elemListenerInterface.appendChild(elem);
+						setDOMElementValue(elem,hostname);
+						elem=docCascade.createElement("IP");
+						elemListenerInterface.appendChild(elem);
+						((CASocketAddrINet*)oListener.addr)->getIPAsStr(ip,255);
+						setDOMElementValue(elem,ip);
+					}
+				delete oListener.addr;
+			}
 		
 		elemRoot.appendChild(docCascade.importNode(elemMixes,true));
 

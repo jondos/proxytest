@@ -75,6 +75,11 @@ SINT32 CALastMix::initOnce()
 		m_pSignature=options.getSignKey();
 		if(m_pSignature==NULL)
 			return E_UNKNOWN;
+		if(options.getListenerInterfaceCount()<1)
+			{
+				CAMsg::printMsg(LOG_CRIT,"No ListenerInterfaces specified!\n");
+				return E_UNKNOWN;
+			}
 		return E_SUCCESS;
 	}
 
@@ -87,7 +92,7 @@ SINT32 CALastMix::init()
 			}
 
 		CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...\n");
-		CASocketAddr* pAddrListen;
+/*		CASocketAddr* pAddrListen;
 		UINT8 path[255];
 		if(options.getServerHost(path,255)==E_SUCCESS&&path[0]=='/') //unix domain
 			{
@@ -104,14 +109,17 @@ SINT32 CALastMix::init()
 				pAddrListen=new CASocketAddrINet();
 				((CASocketAddrINet*)pAddrListen)->setAddr(path,options.getServerPort());
 			}
+			*/
+		ListenerInterface oListener;
+		options.getListenerInterface(oListener,1);
 		m_pMuxIn=new CAMuxSocket();
-		if(m_pMuxIn->accept(*pAddrListen)!=E_SUCCESS)
+		if(m_pMuxIn->accept(*oListener.addr)!=E_SUCCESS)
 		    {
-					delete pAddrListen;
+					delete oListener.addr;
 					CAMsg::printMsg(LOG_CRIT," failed!\n");
 					return E_UNKNOWN;
 		    }
-		delete pAddrListen;
+		delete oListener.addr;
 		((CASocket*)*m_pMuxIn)->setRecvBuff(500*MIXPACKET_SIZE);
 		((CASocket*)*m_pMuxIn)->setSendBuff(500*MIXPACKET_SIZE);
 		if(((CASocket*)*m_pMuxIn)->setSendLowWat(MIXPACKET_SIZE)!=E_SUCCESS)

@@ -32,6 +32,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 class CASocketAddr
 	{
 		public:
+			/**Creates a copy of the Address*/
+			virtual CASocketAddr* clone()=0;
+		
 			/** The type (family) of socket for which this address is useful. 
 			  * Must be overwritten in subclasses. **/		
 			virtual int  getType()=0;
@@ -42,6 +45,7 @@ class CASocketAddr
 			/** Casts to a SOCKADDR struct **/
 			virtual	::LPSOCKADDR LPSOCKADDR()=0;
 			//	virtual operator LPSOCKADDR()=0;
+
 	};
 
 typedef CASocketAddr* LPCASOCKETADDR;
