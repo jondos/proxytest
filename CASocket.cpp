@@ -338,7 +338,7 @@ SINT32 CASocket::sendFully(const UINT8* buff,UINT32 len)
 		for(;;)
 			{
 				ret=send(buff,len);
-				if(ret==len)
+				if((UINT32)ret==len)
 					return E_SUCCESS;
 				else if(ret==E_AGAIN)
 					{

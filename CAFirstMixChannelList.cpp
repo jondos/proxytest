@@ -44,7 +44,7 @@ CAFirstMixChannelList::CAFirstMixChannelList()
 		m_listHashTableHead=NULL;
 		m_listHashTableCurrent=NULL;
 		m_HashTableOutChannels=new LP_fmChannelListEntry[0x10000];
-		memset(m_HashTableOutChannels,0,sizeof(LP_fmChannelListEntry)*0x1000);
+		memset(m_HashTableOutChannels,0,sizeof(LP_fmChannelListEntry)*0x10000);
 	}
 
 CAFirstMixChannelList::~CAFirstMixChannelList()
@@ -99,7 +99,7 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,HCHANNEL channelIn,
 		do
 			{
 				getRandom(channelOut); //get new Random OUT-CHANNEL-ID
-			} while(get(*channelOut)==NULL); //until it is unused...
+			} while(get(*channelOut)!=NULL); //until it is unused...
 		pNewEntry->channelOut=*channelOut;
 		pNewEntry->bIsSuspended=false;
 		pNewEntry->pHead=pHashTableEntry;
