@@ -100,6 +100,21 @@ int CAMuxSocket::accept(UINT16 port)
 		m_Socket.setRecvLowWat(sizeof(MUXPACKET));
 		return E_SUCCESS;
 	}
+
+SINT32 CAMuxSocket::accept(CASocketAddr& oAddr)
+	{
+		CASocket oSocket;
+		oSocket.create();
+		oSocket.setReuseAddr(true);
+		if(oSocket.listen(&oAddr)==SOCKET_ERROR)
+			return SOCKET_ERROR;
+		if(oSocket.accept(m_Socket)==SOCKET_ERROR)
+			return SOCKET_ERROR;
+		oSocket.close();
+		m_Socket.setRecvLowWat(sizeof(MUXPACKET));
+		return E_SUCCESS;
+	}
+
 #endif
 
 SINT32 CAMuxSocket::connect(LPCASOCKETADDR psa)

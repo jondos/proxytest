@@ -258,7 +258,13 @@ SINT32 CALastMix::init()
 				return E_UNKNOWN;
 			}
 		CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...\n");
-		if(muxIn.accept(options.getServerPort())==SOCKET_ERROR)
+		CASocketAddr oAddrListen;
+		UINT8 path[255];
+		if(options.getServerPath(path,255)==E_SUCCESS) //unix domain
+			oAddrListen.setPath((char*)path);
+		else
+			oAddrListen.setPort(options.getServerPort());
+		if(muxIn.accept(oAddrListen)==SOCKET_ERROR)
 		    {
 					CAMsg::printMsg(LOG_CRIT," failed!\n");
 					return E_UNKNOWN;

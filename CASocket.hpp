@@ -37,6 +37,7 @@ class CASocket
 			~CASocket(){close();DeleteCriticalSection(&csClose);}
 
 			SINT32 create();
+			SINT32 create(int type);
 
 			SINT32 listen(LPCASOCKETADDR psa);
 			SINT32 listen(UINT16 port);

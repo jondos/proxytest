@@ -54,7 +54,7 @@ THREAD_RETURN RoundTripTimeLoop(void *p)
 		options.getTargetHost(buff,4096);
 		addrNextMix.setAddr((char*)buff,tmpPort);
 		CASocketAddr to;
-		to.sin_family=AF_INET;
+//		to.sin_family=AF_INET;
 		BIGNUM* bnTmp=BN_new();
 		BIGNUM* bnTmp2=BN_new();
 		memset(buff,0,4);
@@ -89,16 +89,26 @@ THREAD_RETURN RoundTripTimeLoop(void *p)
 										int bnSize=BN_num_bytes(bnTmp);
 										memset(buff+4,0,8); //clearing first '0' bits....
 										BN_bn2bin(bnTmp,buff+4+8-bnSize); //inserting Timestamp....										
-										memcpy(&to.sin_addr,buff+len-6,4);
-										memcpy(&to.sin_port,buff+len-2,2);
+										UINT16 port;
+										UINT8 ip[4];
+										char szip[20];										
+										memcpy(&ip,buff+len-6,4);
+										memcpy(&port,buff+len-2,2);
+										sprintf(szip,"%u.%u.%u.%u",ip[0],ip[1],ip[2],ip[3]);
+										to.setAddr(szip,port);
 										len-=6; // Removed return IP/Port
 										pRTT->m_oSocket.send(buff,len,&to);
 									}
 							}
 						else //what to do if last mix...
 							{
-								memcpy(&to.sin_addr,buff+8+len-6,4);
-								memcpy(&to.sin_port,buff+8+len-2,2);
+								UINT16 port;
+								UINT8 ip[4];
+								char szip[20];
+								memcpy(ip,buff+8+len-6,4);
+								memcpy(&port,buff+8+len-2,2);
+								sprintf(szip,"%u.%u.%u.%u",ip[0],ip[1],ip[2],ip[3]);
+								to.setAddr(szip,port);
 								len-=6; // Removed return IP/Port
 								buff[8]=0; // Cleared Header...
 								pRTT->m_oSocket.send(buff+8,len,&to);
