@@ -38,6 +38,7 @@ struct _t_queue
 #ifdef DO_TRACE
 		UINT32 allocSize;
 		_t_queue* shadow_this;
+		UINT8* shadow_pBuff;
 #endif
 	};
 
@@ -136,8 +137,12 @@ class CAQueue
 					return (UINT8*)new UINT8[size];
 				}
 
-			void deleteUINT8Buff(UINT8* entry,UINT32 size)
+			void deleteUINT8Buff(UINT8* entry,UINT8* shadow,UINT32 size)
 				{
+					if(entry!=shadow)
+						{
+							CAMsg::printMsg(LOG_CRIT,"CAQueue deleting QUEUE-Buff: pBuff!=shadow!!\n");
+						}
 					m_aktAlloc-=size;
 					delete[] entry;
 				}
