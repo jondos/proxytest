@@ -7,7 +7,7 @@
 
 #ifdef __ICC
 	#define HAVE_ALLOCA_H
-	#define alloca(size) _alloca(size)
+	//#define alloca(size) _alloca(size)
 #else
 /* AIX requires this to be the first thing in the file.  */ 
 	#ifndef __GNUC__

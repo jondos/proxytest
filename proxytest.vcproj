@@ -24,7 +24,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				OptimizeForProcessor="2"
-				AdditionalIncludeDirectories="g:\openssl-0.9.7\inc32,.\pthread\include,h:\xml-xerces\c\src\xercesc,h:\xml-xerces\c\src,n:\mysql\include,g:\zlib-1.1.4"
+				AdditionalIncludeDirectories="r:\;g:\openssl-0.9.7\inc32,.\pthread\include,h:\xml-xerces\c\src\xercesc,h:\xml-xerces\c\src,n:\mysql\include,g:\zlib-1.1.4"
 				PreprocessorDefinitions="WIN32;_CONSOLE;_DEBUG;_REENTRANT;__MIX_TEST;__CLEANUP_C"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -889,9 +889,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\CAFirstMixNewProtocol.cpp">
-			</File>
-			<File
 				RelativePath="CAInfoService.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -1082,9 +1079,6 @@
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\CALastMixNewProtocol.cpp">
 			</File>
 			<File
 				RelativePath=".\CAListenerInterface.cpp">
@@ -2791,6 +2785,50 @@
 					RelativePath="tre\xmalloc.h">
 				</File>
 			</Filter>
+			<Filter
+				Name="TypeA"
+				Filter="">
+				<File
+					RelativePath=".\TypeA\CAFirstMixA.cpp">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							PrecompiledHeaderThrough="../stdafx.h"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\TypeA\CALastMixA.cpp">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							PrecompiledHeaderThrough="../stdafx.h"/>
+					</FileConfiguration>
+				</File>
+			</Filter>
+			<Filter
+				Name="TypeB"
+				Filter="">
+				<File
+					RelativePath=".\TypeB\CAFirstMixB.cpp">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							PrecompiledHeaderThrough="../stdafx.h"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\TypeB\CALastMixB.cpp">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							PrecompiledHeaderThrough="../stdafx.h"/>
+					</FileConfiguration>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header-Dateien"
@@ -2835,9 +2873,6 @@
 				RelativePath="CAFirstMixChannelList.hpp">
 			</File>
 			<File
-				RelativePath=".\CAFirstMixNewProtocol.hpp">
-			</File>
-			<File
 				RelativePath="CAInfoService.hpp">
 			</File>
 			<File
@@ -2848,9 +2883,6 @@
 			</File>
 			<File
 				RelativePath="CALastMixChannelList.hpp">
-			</File>
-			<File
-				RelativePath=".\CALastMixNewProtocol.hpp">
 			</File>
 			<File
 				RelativePath=".\CAListenerInterface.hpp">
@@ -2930,6 +2962,26 @@
 			<File
 				RelativePath=".\typedefs.hpp">
 			</File>
+			<Filter
+				Name="TypeA"
+				Filter="">
+				<File
+					RelativePath=".\TypeA\CAFirstMixA.hpp">
+				</File>
+				<File
+					RelativePath=".\TypeA\CALastMixA.hpp">
+				</File>
+			</Filter>
+			<Filter
+				Name="TypeB"
+				Filter="">
+				<File
+					RelativePath=".\TypeB\CAFirstMixB.hpp">
+				</File>
+				<File
+					RelativePath=".\TypeB\CALastMixB.hpp">
+				</File>
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>
