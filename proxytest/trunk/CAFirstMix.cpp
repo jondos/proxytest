@@ -291,7 +291,7 @@ THREAD_RETURN fm_loopSendToMix(void* param)
 						if(!isZero64(timestamp))
 							{
 								getcurrentTimeMicros(tmpU64);
-								pFirstMix->addToTimeingStats(diff64(tmpU64,timestamp),(((MIXPACKET*)buff)->flags&CHANNEL_OPEN)==0,true);
+								pFirstMix->addToTimeingStats(diff64(tmpU64,timestamp),((MIXPACKET*)buff)->flags,true);
 								CAMsg::printMsg(LOG_CRIT,"Upload Packet processing time (arrival <--> send): %u µs\n",diff64(tmpU64,timestamp));
 							}	
 					}
@@ -1015,12 +1015,12 @@ THREAD_RETURN fm_loopLog(void* param)
 		THREAD_RETURN_SUCCESS;
 	}
 	
-SINT32 CAFirstMix::addToTimeingStats(UINT32 proccessingTime,bool bData,bool bUpstream)
+SINT32 CAFirstMix::addToTimeingStats(UINT32 proccessingTime,UINT32 uType,bool bUpstream)
 {
 	m_csTimeingStats.lock();
 	if(bUpstream)
 	{
-		if(bData)
+		if(uType==CHANNEL_DATA)
 			{
 				m_timingCountDataPacketsUpstream++;
 				add64(m_timingSumDataPacketUpstream,proccessingTime);
@@ -1028,6 +1028,15 @@ SINT32 CAFirstMix::addToTimeingStats(UINT32 proccessingTime,bool bData,bool bUps
 					m_timingMaxDataPacketUpstream=proccessingTime;
 				else if(m_timingMinDataPacketUpstream>proccessingTime)
 					m_timingMinDataPacketUpstream=proccessingTime;	
+			}
+		else if(uType==CHANNEL_CLOSE)
+			{
+				m_timingCountClosePacketsUpstream++;
+				add64(m_timingSumClosePacketUpstream,proccessingTime);
+				if(proccessingTime>m_timingMaxClosePacketUpstream)
+					m_timingMaxClosePacketUpstream=proccessingTime;
+				else if(m_timingMinClosePacketUpstream>proccessingTime)
+					m_timingMinClosePacketUpstream=proccessingTime;	
 			}
 		else
 			{//open
@@ -1040,13 +1049,25 @@ SINT32 CAFirstMix::addToTimeingStats(UINT32 proccessingTime,bool bData,bool bUps
 			}
 	}
 	else //downstream
-		{//only data packets
-				m_timingCountDataPacketsDownStream++;
-				add64(m_timingSumDataPacketDownStream,proccessingTime);
-				if(proccessingTime>m_timingMaxDataPacketDownStream)
-					m_timingMaxDataPacketDownStream=proccessingTime;
-				else if(m_timingMinDataPacketDownStream>proccessingTime)
-					m_timingMinDataPacketDownStream=proccessingTime;	
+		{
+			if(uType==CHANNEL_DATA)
+				{//data packets
+					m_timingCountDataPacketsDownStream++;
+					add64(m_timingSumDataPacketDownStream,proccessingTime);
+					if(proccessingTime>m_timingMaxDataPacketDownStream)
+						m_timingMaxDataPacketDownStream=proccessingTime;
+					else if(m_timingMinDataPacketDownStream>proccessingTime)
+						m_timingMinDataPacketDownStream=proccessingTime;	
+				}
+			else
+				{//close packets
+					m_timingCountClosePacketsDownStream++;
+					add64(m_timingSumClosePacketDownStream,proccessingTime);
+					if(proccessingTime>m_timingMaxClosePacketDownStream)
+						m_timingMaxClosePacketDownStream=proccessingTime;
+					else if(m_timingMinClosePacketDownStream>proccessingTime)
+						m_timingMinClosePacketDownStream=proccessingTime;	
+				}
 		}
 	m_csTimeingStats.unlock();
 	return E_SUCCESS;
@@ -1060,10 +1081,12 @@ SINT32 CAFirstMix::logTimeingStats()
 	UINT32 aveDataUpstream=0;
 	if(m_timingCountDataPacketsUpstream>0)
 			aveDataUpstream=div64(m_timingSumDataPacketUpstream,m_timingCountDataPacketsUpstream);
-	CAMsg::printMsg(LOG_DEBUG,"Packet timeing stats [µs] -- Data Packets Upstream (Min/Max/Ave): %u/%u/%u -- Open Packets Upstream: %u/%u/%u -- Data Packest Downstream: %u/%u/%u\n",
+	CAMsg::printMsg(LOG_DEBUG,"Packet timeing stats [µs] -- Data Packets Upstream (Min/Max/Ave): %u/%u/%u -- Open Packets Upstream: %u/%u/%u Close Packets Upstream %u/%u/%u -- Data Packets Downstream: %u/%u/%u -- Close Packets Downstream: %u/%u/%u\n",
 	m_timingMinDataPacketUpstream,m_timingMaxDataPacketUpstream,aveDataUpstream,
 	m_timingMinOpenPacketUpstream,m_timingMaxOpenPacketUpstream,div64(m_timingSumOpenPacketUpstream,m_timingCountOpenPacketsUpstream),
-	m_timingMinDataPacketDownStream,m_timingMaxDataPacketDownStream,div64(m_timingSumDataPacketDownStream,m_timingCountDataPacketsDownStream));
+	m_timingMinClosePacketUpstream,m_timingMaxClosePacketUpstream,div64(m_timingSumClosePacketUpstream,m_timingCountClosePacketsUpstream),
+	m_timingMinDataPacketDownStream,m_timingMaxDataPacketDownStream,div64(m_timingSumDataPacketDownStream,m_timingCountDataPacketsDownStream),
+	m_timingMinClosePacketDownStream,m_timingMaxClosePacketDownStream,div64(m_timingSumClosePacketDownStream,m_timingCountClosePacketsDownStream));
 	m_csTimeingStats.unlock();
 	return E_SUCCESS;
 }
@@ -1073,11 +1096,18 @@ SINT32 CAFirstMix::resetTimeingStats()
 		m_csTimeingStats.lock();
 		m_timingMaxDataPacketUpstream=0;
 		m_timingMaxDataPacketDownStream=0;
+		m_timingMaxClosePacketUpstream=0;
+		m_timingMaxClosePacketDownStream=0;
 		m_timingMinDataPacketUpstream=0xFFFFFFFF;
 		m_timingMinDataPacketDownStream=0xFFFFFFFF;
+		m_timingMinClosePacketUpstream=0xFFFFFFFF;
+		m_timingMinClosePacketDownStream=0xFFFFFFFF;
 		m_timingCountDataPacketsUpstream=m_timingCountDataPacketsDownStream=0;
+		m_timingCountClosePacketsUpstream=m_timingCountClosePacketsDownStream=0;
 		setZero64(m_timingSumDataPacketUpstream);
 		setZero64(m_timingSumDataPacketDownStream);
+		setZero64(m_timingSumClosePacketUpstream);
+		setZero64(m_timingSumClosePacketDownStream);
 		m_timingMaxOpenPacketUpstream=0;
 		m_timingMinOpenPacketUpstream=0xFFFFFFFF;
 		m_timingCountOpenPacketsUpstream=0;
