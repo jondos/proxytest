@@ -11,6 +11,7 @@
 #include "CASocketList.hpp"
 #include "CAMuxChannelList.hpp"
 #include "CASymCipher.hpp"
+#include "CAASymCipher.hpp"
 #ifdef _WIN32
 HANDLE hEventThreadEnde;
 #endif
@@ -57,13 +58,14 @@ THREAD_RETURN lpIO(void *v)
 		oSocketGroup.add(lpIOPair->muxOut);
 		HCHANNEL lastChannelId=1;
 		MUXPACKET oMuxPacket;
+		memset(&oMuxPacket,0,sizeof(oMuxPacket));
 		int len,ret;
 		CASocket* newSocket;//,*tmpSocket;
 		CASymCipher* newCipher;
+		CAASymCipher oRSA;
 		int countRead;
 		CONNECTION oConnection;		
 		unsigned char key[16];
-		memset(key,0,16);
 		unsigned char chainlen=lpIOPair->chainlen;
 		for(;;)
 			{
@@ -89,8 +91,6 @@ THREAD_RETURN lpIO(void *v)
 						else
 							{
 								newCipher=new CASymCipher();
-								newCipher->setDecryptionKey(key);
-								newCipher->setEncryptionKey(key);
 								oSocketList.add(lastChannelId++,newSocket,newCipher);
 								oSocketGroup.add(*newSocket);
 							}
@@ -112,8 +112,6 @@ THREAD_RETURN lpIO(void *v)
 						else
 							{
 								newCipher=new CASymCipher();
-								newCipher->setDecryptionKey(key);
-								newCipher->setEncryptionKey(key);
 								oSocketList.add(lastChannelId++,newSocket,newCipher);
 								oSocketGroup.add(*newSocket);
 							}
@@ -173,7 +171,10 @@ THREAD_RETURN lpIO(void *v)
 								if(oSocketGroup.isSignaled(*tmpCon->pSocket))
 									{
 										countRead--;
-										len=tmpCon->pSocket->receive(oMuxPacket.data,1000);
+										if(!tmpCon->pCipher->isEncyptionKeyValid())
+											len=tmpCon->pSocket->receive(oMuxPacket.data,DATA_SIZE-chainlen*16);
+										else
+											len=tmpCon->pSocket->receive(oMuxPacket.data,DATA_SIZE);
 										if(len==SOCKET_ERROR||len==0)
 											{
 												//TODO delete cipher..
@@ -198,8 +199,29 @@ THREAD_RETURN lpIO(void *v)
 													{
 														oMuxPacket.type=MUX_HTTP;
 													}
-												for(int c=0;c<chainlen;c++)
-													tmpCon->pCipher->encrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
+												if(!tmpCon->pCipher->isEncyptionKeyValid()) //First time --> rsa key
+													{
+														//Has to bee optimized!!!!
+														unsigned char buff[DATA_SIZE];
+														int size=DATA_SIZE-16;
+														for(int c=0;c<chainlen;c++)
+															{
+																memset(buff,0,KEY_SIZE); // generate key...
+																tmpCon->pCipher->setEncryptionKey(buff);
+																memcpy(buff+KEY_SIZE,oMuxPacket.data,size);
+																oRSA.encrypt(buff,buff);
+																tmpCon->pCipher->encrypt(buff+RSA_SIZE,DATA_SIZE-RSA_SIZE);
+																memcpy(oMuxPacket.data,buff,DATA_SIZE);
+																size-=KEY_SIZE;
+																len+=KEY_SIZE;
+															}
+														oMuxPacket.len=len;
+													}
+												else //sonst
+													{
+														for(int c=0;c<chainlen;c++)
+															tmpCon->pCipher->encrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
+													}
 												if(lpIOPair->muxOut.send(&oMuxPacket)==SOCKET_ERROR)
 													{
 														CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Exiting!\n");									
@@ -327,7 +349,7 @@ THREAD_RETURN mmIO(void* v)
 										newCipher->setEncryptionKey(key);
 										oSocketList.add(oMuxPacket.channel,lastId,newCipher);
 										oMuxPacket.channel=lastId;
-										newCipher->decrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
+										newCipher->decrypt((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
 										mmIOPair->muxOut.send(&oMuxPacket);
 										lastId++;
 									}
@@ -342,7 +364,7 @@ THREAD_RETURN mmIO(void* v)
 								else
 									{
 										oMuxPacket.channel=oConnection.outChannel;
-										oConnection.pCipher->decrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
+										oConnection.pCipher->decrypt((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
 										mmIOPair->muxOut.send(&oMuxPacket);
 									}
 							}
@@ -361,7 +383,7 @@ THREAD_RETURN mmIO(void* v)
 								if(len!=0)
 									{
 										oMuxPacket.channel=oConnection.id;
-										oConnection.pCipher->decrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
+										oConnection.pCipher->decrypt((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
 										mmIOPair->muxIn.send(&oMuxPacket);
 									}
 								else
@@ -432,10 +454,10 @@ THREAD_RETURN fmIO(void *v)
 		CAMuxSocket* newMuxSocket;
 		MUXLISTENTRY* tmpEntry;
 		REVERSEMUXLISTENTRY* tmpReverseEntry;
-		unsigned char key[16];
-		memset(key,0,sizeof(key));
+		unsigned char buff[RSA_SIZE];
 		int countRead=0;
 		unsigned char chainlen=fmIOPair->chainlen;
+		CAASymCipher oRSA;
 		for(;;)
 			{
 				if((countRead=oSocketGroup.select())==SOCKET_ERROR)
@@ -495,7 +517,7 @@ THREAD_RETURN fmIO(void *v)
 									if(tmpReverseEntry!=NULL)
 										{
 											oMuxPacket.channel=tmpReverseEntry->inChannel;
-											tmpReverseEntry->pCipher->decrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
+											tmpReverseEntry->pCipher->decrypt((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
 											tmpReverseEntry->pMuxSocket->send(&oMuxPacket);
 										}
 									else
@@ -614,19 +636,26 @@ THREAD_RETURN fmIO(void *v)
 															{
 																oMuxPacket.channel=oConnection.outChannel;
 																pCipher=oConnection.pCipher;
+																pCipher->decrypt((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
 															}
 														else
 															{
 																pCipher= new CASymCipher();
-																pCipher->setDecryptionKey(key);
-																pCipher->setEncryptionKey(key);
+																oRSA.decrypt((unsigned char*)oMuxPacket.data,buff);
+																pCipher->setDecryptionKey(buff);
+																pCipher->setEncryptionKey(buff);
+																pCipher->decrypt((unsigned char*)oMuxPacket.data+RSA_SIZE,
+																								 (unsigned char*)oMuxPacket.data+RSA_SIZE-KEY_SIZE,
+																								 DATA_SIZE-RSA_SIZE);
+																memcpy(oMuxPacket.data,buff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
+																
 																oMuxChannelList.add(tmpEntry,oMuxPacket.channel,lastChannelId,pCipher);
 																#ifdef _DEBUG
 																	CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",lastChannelId);
 																#endif
 																oMuxPacket.channel=lastChannelId++;
+																oMuxPacket.len=oMuxPacket.len-16;
 															}
-														pCipher->decrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
 														if(fmIOPair->muxOut.send(&oMuxPacket)==SOCKET_ERROR)
 															{
 																CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Exiting!\n");									
@@ -698,8 +727,8 @@ THREAD_RETURN lmIO(void *v)
 		int len;
 		int countRead;
 		CONNECTION oConnection;
-		unsigned char key[16];
-		memset(key,0,16);
+		unsigned char buff[RSA_SIZE];
+		CAASymCipher oRSA;
 		for(;;)
 			{
 				if((countRead=oSocketGroup.select())==SOCKET_ERROR)
@@ -740,10 +769,15 @@ THREAD_RETURN lmIO(void *v)
 										else
 										    {    
 													CASymCipher* newCipher=new CASymCipher();
-													newCipher->setDecryptionKey(key);
-													newCipher->setEncryptionKey(key);
-													newCipher->decrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
-													if(tmpSocket->send(oMuxPacket.data,len)==SOCKET_ERROR)
+													oRSA.decrypt((unsigned char*)oMuxPacket.data,buff);
+													newCipher->setDecryptionKey(buff);
+													newCipher->setEncryptionKey(buff);
+													newCipher->decrypt((unsigned char*)oMuxPacket.data+RSA_SIZE,
+																						 (unsigned char*)oMuxPacket.data+RSA_SIZE-KEY_SIZE,
+																						 DATA_SIZE-RSA_SIZE);
+													memcpy(oMuxPacket.data,buff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
+													
+													if(tmpSocket->send(oMuxPacket.data,len-KEY_SIZE)==SOCKET_ERROR)
 														{
 															tmpSocket->close();
 															lmIOPair->muxIn.close(oMuxPacket.channel);
@@ -771,7 +805,7 @@ THREAD_RETURN lmIO(void *v)
 									}
 								else
 									{
-										oConnection.pCipher->decrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
+										oConnection.pCipher->decrypt((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
 										len=oConnection.pSocket->send(oMuxPacket.data,len);
 										if(len==SOCKET_ERROR)
 											{
@@ -815,7 +849,7 @@ THREAD_RETURN lmIO(void *v)
 											{
 												oMuxPacket.channel=tmpCon->id;
 												oMuxPacket.len=(unsigned short)len;
-												tmpCon->pCipher->decrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
+												tmpCon->pCipher->decrypt((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
 												if(lmIOPair->muxIn.send(&oMuxPacket)==SOCKET_ERROR)
 													{
 														CAMsg::printMsg(LOG_CRIT,"Mux Data Sending Error - Exiting!\n");

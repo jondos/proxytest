@@ -4,7 +4,13 @@
 int CASymCipher::setEncryptionKey(unsigned char* key)
 	{
 		BF_set_key(&keyEnc,16,key);
+		bEncKeySet=true;
 		return 0;
+	}
+
+bool CASymCipher::isEncyptionKeyValid()
+	{
+		return bEncKeySet;
 	}
 
 int CASymCipher::setDecryptionKey(unsigned char* key)
@@ -23,13 +29,13 @@ int CASymCipher::encrypt(unsigned char* in,int len)
 		return 0;
 	}
 
-int CASymCipher::decrypt(unsigned char* in,int len)
+int CASymCipher::decrypt(unsigned char* in,unsigned char* out,int len)
 	{
 //		unsigned char ivec[16];
 //		memset(ivec,0,sizeof(ivec));
 //		BF_cbc_encrypt(in,in,len,&keyDec,ivec,0);
 		for(int i=0;i<len;i+=8)
-			BF_ecb_encrypt(in+i,in+i,&keyDec,BF_DECRYPT);
+			BF_ecb_encrypt(in+i,out+i,&keyDec,BF_DECRYPT);
 		return 0;
 	}
 	
