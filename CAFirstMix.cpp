@@ -209,7 +209,11 @@ SINT32 CAFirstMix::init()
 		m_pQueueReadFromMix=new CAQueue(MIXPACKET_SIZE);
 #endif		
 		m_pChannelList=new CAFirstMixChannelList();
+#ifdef HAVE_EPOLL
+		m_psocketgroupUsersRead=new CASocketGroupEpoll(false);
+#else
 		m_psocketgroupUsersRead=new CASocketGroup(false);
+#endif
 		m_psocketgroupUsersWrite=new CASocketGroup(true);
 		m_pInfoService=new CAInfoService(this);
 
