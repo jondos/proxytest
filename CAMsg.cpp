@@ -37,23 +37,28 @@ CAMsg CAMsg::oMsg;
 
 CAMsg::CAMsg()
     {
-			uLogType=MSG_STDOUT;
-			hFileErr=hFileInfo=-1;
-    }
+			m_uLogType=MSG_STDOUT;
+			m_hFileErr=m_hFileInfo=-1;
+			m_strMsgBuff[0]='[';
+		}
 
 CAMsg::~CAMsg()
     {
 			closeLog();
     }
-    
+  
+char* CAMsg::m_strMsgTypes[4]={", error   ] ",", critical] ",", info    ] ",", debug   ] "}; //all same size!
+#define STRMSGTYPES_SIZE 12
+
+  
 SINT32 CAMsg::setOptions(UINT32 opt)
     {
-			if(oMsg.uLogType==opt)
+			if(oMsg.m_uLogType==opt)
 					return E_SUCCESS;
 			if(oMsg.openLog(opt)==E_SUCCESS)
 				{
 					oMsg.closeLog();
-					oMsg.uLogType=opt;
+					oMsg.m_uLogType=opt;
 					return E_SUCCESS;
 				}
 			return E_UNKNOWN;
@@ -64,70 +69,55 @@ SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 		va_list ap;
 		va_start(ap,format);
 		SINT32 ret=E_SUCCESS;
-		switch(oMsg.uLogType)
+
+		//Date is: yyyy/mm/dd-hh:mm:ss   -- the size is: 19 
+		time_t currtime=time(NULL);
+		strftime(oMsg.m_strMsgBuff+1,255,"%Y/%m/%d-%H:%M:%S",localtime(&currtime));
+		strcat(oMsg.m_strMsgBuff,oMsg.m_strMsgTypes[type]);
+#ifdef HAVE_VSNPRINTF
+		vsnprintf(oMsg.m_strMsgBuff+20+STRMSGTYPES_SIZE,1024,format,ap);
+#else
+	  vsprintf(oMsg.m_strMsgBuff+20+STRMSGTYPES_SIZE,format,ap);
+#endif
+		va_end(ap);
+
+		switch(oMsg.m_uLogType)
 	    {
 				case MSG_LOG:
-					#ifndef _WIN32
-						#ifdef HAVE_VSYSLOG
-						 vsyslog(type,format,ap);
-						#else
-							char buff[1024];
-							vsnprintf(buff,1024,format,ap);
-							syslog(type,buff);
-						#endif	
-					#endif
+#ifndef _WIN32
+					syslog(type,oMsg.m_strMsgBuff);
+#endif
 				break;
 				case MSG_FILE:
 					if(type==LOG_ERR||type==LOG_CRIT)
 						{
-							if(oMsg.hFileErr!=-1)
+							if(oMsg.m_hFileErr!=-1)
 								{
-									char buff[1024];
-									#ifndef _WIN32
-									#ifndef __sgi
-										vsnprintf(buff,1024,format,ap);
-									#else
-									  vsprintf(buff,format,ap);
-									#endif	
-									#else
-										_vsnprintf(buff,1024,format,ap);
-									#endif
-									if(write(oMsg.hFileErr,buff,strlen(buff))==1)
+									if(write(oMsg.m_hFileErr,oMsg.m_strMsgBuff,strlen(oMsg.m_strMsgBuff))==1)
 									 ret=E_UNKNOWN;
 								}
 						}
 					else
 						{
-							if(oMsg.hFileErr!=-1)
+							if(oMsg.m_hFileInfo!=-1)
 								{
-									char buff[1024];
-									#ifndef _WIN32
-									#ifndef __sgi
-										vsnprintf(buff,1024,format,ap);
-									#else
-									  vsprintf(buff,format,ap);
-									#endif	
-									#else
-										_vsnprintf(buff,1024,format,ap);
-									#endif
-									if(write(oMsg.hFileInfo,buff,strlen(buff))==-1)
+									if(write(oMsg.m_hFileInfo,oMsg.m_strMsgBuff,strlen(oMsg.m_strMsgBuff))==-1)
 									 ret=E_UNKNOWN;
 								}
 						}
 				break;
 				case MSG_STDOUT:
-					vprintf(format,ap);
+					printf(oMsg.m_strMsgBuff);
 				break;
 				default:
 				 ret=E_UNKNOWN;
 			}
-		va_end(ap);
 		return ret;
   }
 
 SINT32 CAMsg::closeLog()
 	{
-		switch(uLogType)
+		switch(m_uLogType)
 			{
 				case MSG_LOG:
 					#ifndef _WIN32
@@ -135,12 +125,12 @@ SINT32 CAMsg::closeLog()
 					#endif
 				break;
 				case MSG_FILE:
-					if(hFileErr!=-1)
-						close(hFileErr);
-					hFileErr=-1;
-					if(hFileInfo!=-1)
-						close(hFileInfo);
-					hFileInfo=-1;
+					if(m_hFileErr!=-1)
+						close(m_hFileErr);
+					m_hFileErr=-1;
+					if(m_hFileInfo!=-1)
+						close(m_hFileInfo);
+					m_hFileInfo=-1;
 				break;
 			}
 		return E_SUCCESS;
@@ -162,10 +152,10 @@ SINT32 CAMsg::openLog(UINT32 type)
 						return E_UNKNOWN;
 					strcpy(buff,logdir);
 					strcat(buff,FILENAME_ERRORLOG);
-					hFileErr=open(buff,O_APPEND|O_CREAT|O_WRONLY,S_IREAD|S_IWRITE);
+					m_hFileErr=open(buff,O_APPEND|O_CREAT|O_WRONLY,S_IREAD|S_IWRITE);
 					strcpy(buff,logdir);
 					strcat(buff,FILENAME_INFOLOG);
-					hFileInfo=open(buff,O_APPEND|O_CREAT|O_WRONLY,S_IREAD|S_IWRITE);										
+					m_hFileInfo=open(buff,O_APPEND|O_CREAT|O_WRONLY,S_IREAD|S_IWRITE);										
 				break;
 			}
 		return E_SUCCESS;
