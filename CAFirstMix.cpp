@@ -438,45 +438,17 @@ END_THREAD:
 //#define NO_LOOP_SEND_TO_MIX
 SINT32 CAFirstMix::loop()
 	{
-//		CAFirstMixChannelList  oChannelList;
-
-		//CASocketGroup osocketgroupUsersRead;
-//		CASocketGroup osocketgroupUsersWrite;
 		CASingleSocketGroup osocketgroupMixOut;
-//		CAMuxSocket* pnewMuxSocket;
 		SINT32 countRead;
-		//HCHANNEL lastChannelId=1;
 		MIXPACKET* pMixPacket=new MIXPACKET;
-//		CAInfoService oInfoService(this);
 		m_nUser=0;
 		m_bRestart=false;
 		SINT32 ret;
-//		UINT32 maxSocketsIn;
-//		osocketgroupAccept.add(m_socketIn);
-//    CASocket** socketsIn;
-//		bool bProxySupport=false;
-/*    if(options.getProxySupport())
-    	{
-    		osocketgroupAccept.add(m_socketHttpsIn);
-      	bProxySupport=true;
-				socketsIn=new CASocket*[2];
-				maxSocketsIn=2;
-				socketsIn[0]=&m_socketIn;
-				socketsIn[1]=&m_socketHttpsIn;
-      }
-		else
-			{
-				socketsIn=new CASocket*[1];
-				maxSocketsIn=1;
-				socketsIn[0]=&m_socketIn;
-			}
-*/
 		osocketgroupMixOut.add(*m_pMuxOut);
 		m_pMuxOut->setCrypt(true);
 		
 		m_pInfoService->setSignature(m_pSignature);
 		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix InfoService - Signature set\n");
-//		m_pInfoService->setLevel(0,-1,-1);
 		m_pInfoService->sendHelo();
 		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix Helo sended\n");
 		m_pInfoService->start();
@@ -628,6 +600,32 @@ SINT32 CAFirstMix::loop()
 											}
 										else if(ret==MIXPACKET_SIZE)
 											{
+												#ifdef NEW_KEY2USER_PROTOCOL
+													if(!pEntry->pMuxSocket->getIsEncrypted())//Encryption is not set yet -> 
+																																	 //so we assume that this is
+																																	//the first packet of a connection
+																																	//which contains the key
+														{
+															m_pRSA->decrypt(pMixPacket->data,rsaBuff);
+															if(memcmp("KEYPACKET",pMixPacket->data,9)!=0)
+																{
+																	m_pIPList->removeIP(pHashEntry->peerIP);
+																	m_psocketgroupUsersRead->remove(*(CASocket*)pMuxSocket);
+																	m_psocketgroupUsersWrite->remove(*(CASocket*)pMuxSocket);
+																	delete pHashEntry->pQueueSend;
+																	m_pChannelList->remove(pMuxSocket);
+																	pMuxSocket->close();
+																	delete pMuxSocket;
+																	decUsers();
+																}
+															else
+																{
+																	pEntry->pMuxSocket->setKeyAES(rsaBuff,16);
+																	pEntry->pMuxSocket->setCrypted(true);
+																}
+															goto NEXT_USER_CONNECTION;
+														}
+												#endif
 												#ifdef LOG_CHANNEL
 													pHashEntry->trafficIn++;
 												#endif
@@ -696,7 +694,10 @@ SINT32 CAFirstMix::loop()
 													}
 											}
 									}
-								pHashEntry=m_pChannelList->getNext();
+#ifdef NEW_KEY2USER_PROTOCOL
+	NEXT_USER_CONNECTION:
+#endif
+									pHashEntry=m_pChannelList->getNext();
 							}
 					}
 //Third step
@@ -1122,7 +1123,7 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 						UINT32 outlen=bufflen+5000;
 						UINT8* out=new UINT8[outlen];
 						m_pSignature->signXML(buff,bufflen,out,&outlen);
-						m_pMuxOut->setKey(key);
+						m_pMuxOut->setKey(key,16);
 						UINT16 size=htons(outlen);
 						((CASocket*)m_pMuxOut)->send((UINT8*)&size,2);
 						((CASocket*)m_pMuxOut)->send(out,outlen);
