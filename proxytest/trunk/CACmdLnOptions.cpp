@@ -47,28 +47,28 @@ void CACmdLnOptions::clean()
   {
 		if(strTargetHost!=NULL)
 			{
-				delete strTargetHost;
+				delete[] strTargetHost;
 	    }
 		if(strServerHost!=NULL)
 			{
-				delete strServerHost;
+				delete[] strServerHost;
 	    }
 		if(strSOCKSHost!=NULL)
 			{
-				delete strSOCKSHost;
+				delete[] strSOCKSHost;
 	    }
 		if(strInfoServerHost!=NULL)
 			{
-				delete strInfoServerHost;
+				delete[] strInfoServerHost;
 	    }
 		if(strKeyFileName!=NULL)
-			delete strKeyFileName;
+			delete[] strKeyFileName;
 		if(strCascadeName!=NULL)
-			delete strCascadeName;
+			delete[] strCascadeName;
 		if(strLogDir!=NULL)
-			delete strLogDir;
+			delete[] strLogDir;
 		if(strUser!=NULL)
-			delete strUser;
+			delete[] strUser;
 		if(pTargets!=NULL)
 			{
 				delete[] pTargets;
