@@ -446,7 +446,7 @@ THREAD_RETURN loopDownStream(void *p)
 								pMixPacket->flags&=CHANNEL_ALLOWED_FLAGS;
 							}
 						#ifdef USE_POOL	
-							if(pMix->channel==DUMMY_CHANNEL)
+							if(pMixPacket->channel==DUMMY_CHANNEL)
 								{
 									pMixPacket->flags=CHANNEL_CLOSE;
 									getRandom(pMixPacket->data,DATA_SIZE);
