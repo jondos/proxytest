@@ -26,6 +26,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
+#include "trio/trio.hpp"
 #include "CAMsg.hpp"
 #include "CACmdLnOptions.hpp"
 #define FILENAME_ERRORLOG "/errors"
@@ -35,8 +36,12 @@ extern CACmdLnOptions options;
 
 CAMsg CAMsg::oMsg;
 
+const char* const CAMsg::m_strMsgTypes[4]={", error   ] ",", critical] ",", info    ] ",", debug   ] "}; //all same size!
+#define STRMSGTYPES_SIZE 12
+
 CAMsg::CAMsg()
     {
+			m_strMsgBuff=new char[1025+20+STRMSGTYPES_SIZE];
 			m_uLogType=MSG_STDOUT;
 			m_hFileErr=m_hFileInfo=-1;
 			m_strMsgBuff[0]='[';
@@ -45,12 +50,9 @@ CAMsg::CAMsg()
 CAMsg::~CAMsg()
     {
 			closeLog();
-    }
-  
-const char* const CAMsg::m_strMsgTypes[4]={", error   ] ",", critical] ",", info    ] ",", debug   ] "}; //all same size!
-#define STRMSGTYPES_SIZE 12
-
-  
+			delete[] m_strMsgBuff;
+		}
+    
 SINT32 CAMsg::setOptions(UINT32 opt)
     {
 			if(oMsg.m_uLogType==opt)
@@ -96,7 +98,7 @@ SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 #ifdef HAVE_VSNPRINTF
 		vsnprintf(oMsg.m_strMsgBuff+20+STRMSGTYPES_SIZE,1024,format,ap);
 #else
-	  vsprintf(oMsg.m_strMsgBuff+20+STRMSGTYPES_SIZE,format,ap);
+	  trio_vsnprintf(oMsg.m_strMsgBuff+20+STRMSGTYPES_SIZE,format,ap);
 #endif
 		va_end(ap);
 		switch(oMsg.m_uLogType)

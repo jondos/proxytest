@@ -56,7 +56,7 @@ class CAMsg
 			UINT32 m_uLogType;
 			int m_hFileErr;
 			int m_hFileInfo;
-			char m_strMsgBuff[1050];
+			char *m_strMsgBuff;
 			static const char* const m_strMsgTypes[4];
 			CAMutex m_csPrint;
    };
