@@ -390,6 +390,7 @@ SINT32 CAMiddleMix::init()
 				CAMsg::printMsg(LOG_CRIT,"Error waiting for previous Mix... -- Exiting!\n");				
 				return E_UNKNOWN;
 			}
+		CAMsg::printMsg(LOG_INFO," connected!\n");
 		((CASocket*)*m_pMuxIn)->setRecvBuff(50*MIXPACKET_SIZE);
 		((CASocket*)*m_pMuxIn)->setSendBuff(50*MIXPACKET_SIZE);
 		if(((CASocket*)*m_pMuxIn)->setKeepAlive((UINT32)1800)!=E_SUCCESS)
