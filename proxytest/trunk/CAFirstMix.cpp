@@ -136,15 +136,15 @@ SINT32 CAFirstMix::init()
 				return E_UNKNOWN;
 			}
 		CAMsg::printMsg(LOG_CRIT,"Received Key Info...\n");
-
-		mRSA.generateKeyPair(1024);
-		UINT32 keySize=mRSA.getPublicKeySize();
+		m_pRSA=new CAASymCipher;
+		m_pRSA->generateKeyPair(1024);
+		UINT32 keySize=m_pRSA->getPublicKeySize();
 		m_KeyInfoSize=ntohs((*(UINT16*)recvBuff))+2;
 		m_KeyInfoBuff=new UINT8[m_KeyInfoSize+keySize];
 		memcpy(m_KeyInfoBuff,recvBuff,m_KeyInfoSize);
 		delete recvBuff;
 		m_KeyInfoBuff[2]++; //chainlen erhoehen
-		mRSA.getPublicKey(m_KeyInfoBuff+m_KeyInfoSize,&keySize);
+		m_pRSA->getPublicKey(m_KeyInfoBuff+m_KeyInfoSize,&keySize);
 		m_KeyInfoSize+=keySize;
 		(*(UINT16*)m_KeyInfoBuff)=htons(m_KeyInfoSize-2);
 
@@ -246,7 +246,7 @@ THREAD_RETURN loopAcceptUsers(void* param)
 					break;
 				i=0;
 #ifdef _DEBUG
-				CAMsg::printMsg(LOG_DEBUG,"UserAcceptLoop: countRead=%i",countRead);
+				CAMsg::printMsg(LOG_DEBUG,"UserAcceptLoop: countRead=%i\n",countRead);
 #endif
 				while(countRead>0&&i<nSocketsIn)
 					{						
@@ -490,7 +490,7 @@ SINT32 CAFirstMix::loop()
 												else
 													{
 														pCipher= new CASymCipher();
-														mRSA.decrypt(pMixPacket->data,rsaBuff);
+														m_pRSA->decrypt(pMixPacket->data,rsaBuff);
 														pCipher->setKeyAES(rsaBuff);
 														pCipher->decryptAES(pMixPacket->data+RSA_SIZE,
 																						 pMixPacket->data+RSA_SIZE-KEY_SIZE,
@@ -670,18 +670,27 @@ ERR:
 
 SINT32 CAFirstMix::clean()
 	{
-		delete[] m_arrSocketsIn;
-		muxOut.close();
-		mRSA.destroy();
-		delete m_pIPList;
-		m_pIPList=NULL;
-		delete m_pQueueSendToMix;
-		m_pQueueSendToMix=NULL;
-		delete m_pChannelList;
-		m_pChannelList=NULL;
-		delete m_psocketgroupUsersRead;
-		m_psocketgroupUsersRead=NULL;
-		delete m_pInfoService;
+		if(m_pInfoService!=NULL)
+			delete m_pInfoService;
 		m_pInfoService=NULL;
+		if(m_arrSocketsIn!=NULL)
+			delete[] m_arrSocketsIn;
+		m_arrSocketsIn=NULL;
+		muxOut.close();
+		if(m_pIPList!=NULL)
+			delete m_pIPList;
+		m_pIPList=NULL;
+		if(m_pQueueSendToMix!=NULL)
+			delete m_pQueueSendToMix;
+		m_pQueueSendToMix=NULL;
+		if(m_pChannelList!=NULL)
+			delete m_pChannelList;
+		m_pChannelList=NULL;
+		if(m_psocketgroupUsersRead!=NULL)
+			delete m_psocketgroupUsersRead;
+		m_psocketgroupUsersRead=NULL;
+		if(m_pRSA!=NULL)
+			delete m_pRSA;
+		m_pRSA=NULL;
 		return E_SUCCESS;
 	}

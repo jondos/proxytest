@@ -31,7 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include "CASocketAddr.hpp"
 
 	/** This is a class for Unix Domain Protocol Sockat Addresses.*/
-	class CASocketAddrUnix:public CASocketAddr,sockaddr_un
+	class CASocketAddrUnix:public CASocketAddr,private sockaddr_un
 		{
 			public:
 				CASocketAddrUnix();

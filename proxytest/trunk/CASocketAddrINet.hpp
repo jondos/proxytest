@@ -30,7 +30,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketAddr.hpp"
 #include "CAMutex.hpp"
 /** This class represents a socket address for Internet (IP) connections. */
-class CASocketAddrINet:public CASocketAddr,sockaddr_in
+class CASocketAddrINet:public CASocketAddr,private sockaddr_in
 	{
 		public:
 			//static SINT32 init();

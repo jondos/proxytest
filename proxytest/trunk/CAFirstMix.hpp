@@ -45,7 +45,18 @@ class CAInfoService;
 class CAFirstMix:public CAMix
 	{
 		public:
-			CAFirstMix(){m_MixedPackets=0;}
+			CAFirstMix()
+				{
+					m_MixedPackets=0;m_nSocketsIn=0;
+					m_pQueueSendToMix=NULL;
+					m_pIPList=NULL;
+					m_arrSocketsIn=NULL;
+					m_KeyInfoBuff=NULL;
+					m_pRSA=NULL;
+					m_pInfoService=NULL;
+					m_psocketgroupUsersRead=NULL;
+					m_pChannelList=NULL;
+				}
 			virtual ~CAFirstMix(){}
 		private:
 			SINT32 loop();
@@ -79,7 +90,7 @@ class CAFirstMix:public CAMix
 			UINT8* m_KeyInfoBuff;
 			UINT16 m_KeyInfoSize;
 			UINT32 m_MixedPackets;
-			CAASymCipher mRSA;
+			CAASymCipher* m_pRSA;
 			CASignature mSignature;
 	};
 
