@@ -50,7 +50,7 @@ class CASocketAddrINet:public CASocketAddr,sockaddr_in
 					return sizeof(sockaddr_in);
 				}
 			
-			SINT32 setAddr(char* szIP,UINT16 port);
+			SINT32 setAddr(const UINT8* szIP,UINT16 port);
       SINT32 setPort(UINT16 port);
       UINT16 getPort();
 			SINT32 getHostName(UINT8* buff,UINT32 len);

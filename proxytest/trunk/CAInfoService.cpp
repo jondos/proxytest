@@ -134,13 +134,13 @@ THREAD_RETURN InfoLoop(void *p)
 		UINT8* buff=new UINT8[1024];
 		UINT8 buffHeader[255];
 		options.getInfoServerHost(buff,1024);
-		oAddr.setAddr((char*)buff,options.getInfoServerPort());
+		oAddr.setAddr(buff,options.getInfoServerPort());
 		BufferOutputStream oBufferStream(1024,1024);
 		XML::Output oxmlOut(oBufferStream);
 		SINT32 tmpUser,tmpRisk,tmpTraffic;
 		UINT32 tmpPackets;
 		UINT32 buffLen;
-		char strAnonServer[255];
+		UINT8 strAnonServer[255];
 		if(options.getServerHost((UINT8*)strAnonServer,255)!=E_SUCCESS)
 			CASocketAddrINet::getLocalHostIP(buff);
 		else
@@ -149,7 +149,7 @@ THREAD_RETURN InfoLoop(void *p)
 				oAddr.setAddr(strAnonServer,0);
 				oAddr.getIP(buff);
 			}
-		sprintf(strAnonServer,"%u.%u.%u.%u%%3A%u",buff[0],buff[1],buff[2],buff[3],options.getServerPort());
+		sprintf((char*)strAnonServer,"%u.%u.%u.%u%%3A%u",buff[0],buff[1],buff[2],buff[3],options.getServerPort());
 		int helocount=10;
 
 		//Must be changed to UINT64 ....
@@ -306,7 +306,7 @@ SINT32 CAInfoService::sendHelo()
 		UINT8 buffHeader[255];
 		if(options.getInfoServerHost(hostname,255)!=E_SUCCESS)
 			return E_UNKNOWN;
-		oAddr.setAddr((char*)hostname,options.getInfoServerPort());
+		oAddr.setAddr(hostname,options.getInfoServerPort());
 		if(oSocket.connect(oAddr)==E_SUCCESS)
 			{
 				BufferOutputStream oBufferStream(1024,1024);
@@ -327,7 +327,7 @@ SINT32 CAInfoService::sendHelo()
 				else
 					{
 						CASocketAddrINet oAddr;
-						oAddr.setAddr((char*)hostname,0);
+						oAddr.setAddr(hostname,0);
 						oAddr.getIP(buff);
 					}
 				sprintf((char*)id,"%u.%u.%u.%u%%3A%u",buff[0],buff[1],buff[2],buff[3],options.getServerPort());

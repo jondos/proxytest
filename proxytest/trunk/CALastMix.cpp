@@ -56,7 +56,7 @@ SINT32 CALastMix::initOnce()
 			}
 		UINT8 strTarget[255];
 		options.getSOCKSHost(strTarget,255);
-		maddrSocks.setAddr((char*)strTarget,options.getSOCKSPort());
+		maddrSocks.setAddr(strTarget,options.getSOCKSPort());
 		return E_SUCCESS;
 	}
 
@@ -83,7 +83,7 @@ SINT32 CALastMix::init()
 		else
 			{
 				pAddrListen=new CASocketAddrINet();
-				((CASocketAddrINet*)pAddrListen)->setAddr((char*)path,options.getServerPort());
+				((CASocketAddrINet*)pAddrListen)->setAddr(path,options.getServerPort());
 			}
 		if(muxIn.accept(*pAddrListen)==SOCKET_ERROR)
 		    {

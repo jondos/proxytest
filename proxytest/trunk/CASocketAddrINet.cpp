@@ -78,13 +78,13 @@ CASocketAddrINet::CASocketAddrINet(UINT16 port)
 	* @retval E_UNKNOWN_HOST if the hostname couldt not be resolved (or the ip is wrong). 
 	*                        In this case the old values are NOT changed.
 	*/
-SINT32 CASocketAddrINet::setAddr(char* szIP,UINT16 port)
+SINT32 CASocketAddrINet::setAddr(const UINT8* szIP,UINT16 port)
 	{
-		UINT32 newAddr=inet_addr(szIP); //is it a doted string (a.b.c.d) ?
+		UINT32 newAddr=inet_addr((const char*)szIP); //is it a doted string (a.b.c.d) ?
 		if(newAddr==INADDR_NONE) //if not try to find the hostname
 			{
 				EnterCriticalSection(&m_csGet);
-				HOSTENT* hostent=gethostbyname(szIP); //lookup
+				HOSTENT* hostent=gethostbyname((const char*)szIP); //lookup
 				if(hostent!=NULL) //get it!
 					memcpy(&sin_addr.s_addr,hostent->h_addr_list[0],hostent->h_length);
 				else

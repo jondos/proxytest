@@ -166,7 +166,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 												strcpy(tmpHostname,tmpStr);
 											}
 									}
-								pTargets[i].setAddr(tmpHostname,tmpPort);
+								pTargets[i].setAddr((UINT8*)tmpHostname,tmpPort);
 								if(i==0)
 									{
 										strTargetHost=new char[strlen(tmpHostname)+1];

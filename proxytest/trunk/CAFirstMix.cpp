@@ -84,7 +84,7 @@ SINT32 CAFirstMix::init()
 		else
 			{
 				pAddrNext=new CASocketAddrINet();
-				((CASocketAddrINet*)pAddrNext)->setAddr((char*)strTarget,options.getTargetPort());
+				((CASocketAddrINet*)pAddrNext)->setAddr(strTarget,options.getTargetPort());
 				CAMsg::printMsg(LOG_INFO,"Try connecting to next Mix: %s:%u ...\n",strTarget,options.getTargetPort());
 			}
 		if(((CASocket*)muxOut)->create(pAddrNext->getType())!=E_SUCCESS)
@@ -156,7 +156,7 @@ SINT32 CAFirstMix::init()
 			}
 		else
 			{
-				socketAddrIn.setAddr((char*)serverHost,options.getServerPort());
+				socketAddrIn.setAddr(serverHost,options.getServerPort());
 			}
 		m_socketIn.create();
 		m_socketIn.setReuseAddr(true);
