@@ -100,10 +100,8 @@ irix-64-cc-debug:
 	$(MAKE) 'CC=CC -r10000 -mips4 -64' 'CPPFLAGS=-D_REENTRANT' 'DEBUG=-g2 -D_DEBUG' 'LIBS=$(LIBS) -lpthread ' _all_aes 
 
 freebsd-x86-gcc-async:
-	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -fomit-frame-pointer -O3' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -llthread -lstdc++ ' 'LIBDIR=-L/usr/local/ssl/lib' _all_aes 
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -fomit-frame-pointer -O3' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -llthread -lstdc++ ' 'LIBDIR=-L/usr/local/lib' _all_aes 
 
-_all: $(OBJS) popt.a xml.a
-	$(CC) -o proxytest $(DEBUG) $(CPPFLAGS) $(OBJS) $(LIBDIR) $(LIBS) 
 
 _all_aes: $(OBJS) popt.a xml.a libaes.a
 	$(CC) -o proxytest $(DEBUG) $(CPPFLAGS) $(OBJS) $(LIBDIR) $(LIBS) 

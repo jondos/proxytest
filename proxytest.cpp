@@ -146,6 +146,9 @@ because each mix will perform a single encryption/decryption.
 \subsection Inter-Mix Encryption
 The stream of mix-packets between to mixes is encrypted using AES-128/128 in OFB-128 mode. Exactly only the
 first part of each mix-packet is encrpyted. (see Figure 3)
+
+\image html JAPInterMixEncryption.gif "Figure 3: Encryption between two mixes"
+	
 The encryption is done, so that an attacker could not see the channel-id and flags of a mix-packet. OFB is chosen, so that
 an attacker could not replay a mix-packed. If he replays a mix-packed, than at least the channel-id 
 changes after decrypting. If this mix-packed was the first packed of a channel, than the cryptographic keys
