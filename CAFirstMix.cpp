@@ -77,8 +77,8 @@ SINT32 CAFirstMix::init()
 		m_nMixedPackets=0; //reset to zero after each restart (at the moment neccessary for infoservice)
 		//Establishing all Listeners
 		m_arrSocketsIn=new CASocket[m_nSocketsIn];
-		UINT32 i;
-		for(i=1;i<=m_nSocketsIn;i++)
+		UINT32 i,aktSocket=0;
+		for(i=1;i<=options.getListenerInterfaceCount();i++)
 			{
 				ListenerInterface oListener;
 				if(options.getListenerInterface(oListener,i)!=E_SUCCESS)
@@ -91,8 +91,8 @@ SINT32 CAFirstMix::init()
 						delete oListener.addr;
 						continue;
 					}
-				m_arrSocketsIn[i-1].create();
-				m_arrSocketsIn[i-1].setReuseAddr(true);
+				m_arrSocketsIn[aktSocket].create();
+				m_arrSocketsIn[aktSocket].setReuseAddr(true);
 #ifndef _WIN32
 				//we have to be a temporaly superuser if port <1024...
 				int old_uid=geteuid();
@@ -102,7 +102,7 @@ SINT32 CAFirstMix::init()
 							CAMsg::printMsg(LOG_CRIT,"Setuid failed!\n");
 					}
 #endif				
-				SINT32 ret=m_arrSocketsIn[i-1].listen(*oListener.addr);
+				SINT32 ret=m_arrSocketsIn[aktSocket].listen(*oListener.addr);
 				delete oListener.addr;
 #ifndef _WIN32
 				seteuid(old_uid);
@@ -112,6 +112,7 @@ SINT32 CAFirstMix::init()
 						CAMsg::printMsg(LOG_CRIT,"Cannot listen (2)\n");
 						return E_UNKNOWN;
 					}
+				aktSocket++;
 			}
 
 		
