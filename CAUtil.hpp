@@ -132,7 +132,7 @@ inline void print64(UINT8* buff,UINT64& op)
 	{
 #if defined(_WIN32)
 		_ui64toa(op,(char*)buff,10);
-#elif defined(__linux)||defined(__sgi)
+#elif defined(__linux)||defined(__sgi)||defined(__FreeBSD__) //TODO: check if for FreeBSD it is correct
 		sprintf((char*)buff,"%Lu",op);
 #else
 		sprintf((char*)buff,"(%lu:%lu)",op.high,op.low);
