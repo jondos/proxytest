@@ -202,6 +202,7 @@ AC_ARG_WITH(debug,
 	[
 		if test "x$withval" != "$xno" ; then
 			CFLAGS="$CFLAGS -g -D_DEBUG"
+			OFLAGS=""
 		fi
 	]
 )
