@@ -422,11 +422,12 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 			}
 		pNewUser->setKey(oMixPacket.data+9,32);
 		pNewUser->setCrypt(true);
+		m_pChannelList->add(pNewUser,peerIP,new CAQueue); // adding user connection to mix->JAP channel list (stefan: sollte das nicht connection list sein? --> es handelt sich um eine Datenstruktu fŸr Connections/Channels ).
 #ifdef PAYMENT
 		// set AI encryption keys
+		fmHashTableEntry* pHashEntry=m_pChannelList->get(pNewUser);
 		m_pAccountingInstance->setJapKeys(pHashEntry, oMixPacket.data+41, oMixPacket.data+57); 
 #endif		
-		m_pChannelList->add(pNewUser,peerIP,new CAQueue); // adding user connection to mix->JAP channel list (stefan: sollte das nicht connection list sein? --> es handelt sich um eine Datenstruktu fŸr Connections/Channels ).
 		incUsers();																	// increment the user counter by one
 		m_psocketgroupUsersRead->add(*pNewUser); // add user socket to the established ones that we read data from.
 		return E_SUCCESS;

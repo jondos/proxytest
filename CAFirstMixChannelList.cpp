@@ -203,6 +203,25 @@ SINT32 CAFirstMixChannelList::addChannel(CAMuxSocket* pMuxSocket,HCHANNEL channe
 		return E_SUCCESS;
 	}
 
+
+/** Returns the general data stored for a given Socket (user)
+	* @param pMuxSocket the connection from the user
+	* @return general data for the given user
+	* @retval NULL if not found
+*/
+fmHashTableEntry* CAFirstMixChannelList::get(CAMuxSocket* pMuxSocket)
+	{
+		if(pMuxSocket==NULL)
+			return NULL;
+		SINT32 hashkey=pMuxSocket->getSocket();
+		if(hashkey>MAX_HASH_KEY-1||hashkey<0)
+			return NULL;
+		m_Mutex.lock();
+		fmHashTableEntry* pHashTableEntry=m_HashTable[hashkey];
+		m_Mutex.unlock();
+		return pHashTableEntry;
+	}
+
 /** Returns the information for a given Input-Channel-ID
 	* @param pMuxSocket the connection from the user
 	* @param channelIn the channel id
