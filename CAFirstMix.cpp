@@ -452,7 +452,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 									}
 								else
 									{
-										//Prüfen ob schon vorhanden..	
+										//Pruefen ob schon vorhanden..	
 										ret=((CASocket*)pNewMuxSocket)->getPeerIP(peerIP);
 										#ifdef PAYMENT
 											if(ret!=E_SUCCESS||pIPList->insertIP(peerIP)<0 ||
@@ -491,10 +491,10 @@ THREAD_RETURN fm_loopDoUserLogin(void* param)
 	}
 	
 /** Sends and receives all data neccessary for a User to "login".
-This is ending the public key of the Mixes and receiving the 
-sym keys of JAP. This is done in a thread on a per user basis
-@todo Cleanup of runing thread if mix restarts...
-*/
+	* This means sending the public key of the Mixes and receiving the 
+	* sym keys of JAP. This is done in a thread on a per user basis
+	* @todo Cleanup of runing thread if mix restarts...
+***/
 SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 	{
 		#ifdef _DEBUG
