@@ -350,6 +350,9 @@
 				RelativePath=".\CAAccountingBIInterface.cpp">
 			</File>
 			<File
+				RelativePath=".\CAAccountingControlChannel.cpp">
+			</File>
+			<File
 				RelativePath=".\CAAccountingDBInterface.cpp">
 			</File>
 			<File
@@ -2793,6 +2796,9 @@
 			</File>
 			<File
 				RelativePath=".\CAAccountingBIInterface.hpp">
+			</File>
+			<File
+				RelativePath=".\CAAccountingControlChannel.hpp">
 			</File>
 			<File
 				RelativePath=".\CAAccountingDBInterface.hpp">

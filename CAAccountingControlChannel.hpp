@@ -29,7 +29,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef CAACCOUNTINGCONTROLCHANNEL_HPP
 #define CAACCOUNTINGCONTROLCHANNEL_HPP
 
-#include "StdAfx.h"
 #include "CAAccountingInstance.hpp"
 #include "CASyncControlChannel.hpp"
 #include "CAFirstMixChannelList.hpp"
@@ -50,7 +49,7 @@ public:
 		
     virtual ~CAAccountingControlChannel();
 		
-		SINT32 processXmlMessage(DOM_Document &a_doc);
+		SINT32 processXMLMessage(DOM_Document &a_doc);
 
 private:
 		fmHashTableEntry * m_pHashEntry;

@@ -26,7 +26,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 
-
+#include "StdAfx.h"
 #include "CAAccountingControlChannel.hpp"
 #define ACCOUNT_CONTROL_CHANNEL_ID 2
 
@@ -52,7 +52,7 @@ CAAccountingControlChannel::~CAAccountingControlChannel()
 * processMessage - receives an XML msg and appends it to the AI message queue where it
 * will be processed asynchronously
 */
-SINT32 CAAccountingControlChannel::processXmlMessage(DOM_Document &a_doc)
+SINT32 CAAccountingControlChannel::processXMLMessage(DOM_Document &a_doc)
 {
 	aiQueueItem * pItem = new aiQueueItem;
 	pItem->pDomDoc = &a_doc;
