@@ -495,7 +495,7 @@ SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len,UINT32 msTimeOut)
 				if(ret==1)
 					{
 						ret=receive(buff+pos,len);
-						if(ret>=0)
+						if(ret<=0)
 							return E_UNKNOWN;
 						pos+=ret;
 						len-=ret;
