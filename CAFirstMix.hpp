@@ -85,7 +85,10 @@ class CAFirstMix:public CAMix
 					*ptraffic=-1;
 					return E_SUCCESS;
 				}
-			/** Retruns the Mix-Cascade info which should be send to tthe InfoService*/
+			
+			/** Returns the Mix-Cascade info which should be send to the InfoService.
+				* The status message ist an XML struct retruned in buff. There is not \0 after
+				* the XML (so it is not a string!*/
 			SINT32 getMixCascadeInfo(UINT8* buff,UINT32*len);
 					
 			

@@ -999,6 +999,7 @@ static void sMixesHandler(XMLElement &elem, void *userData)
 		UINT32 tmpBuffLen=5000;
 		UINT8 tmpBuff[5000];
 		options.getMixXml(tmpBuff,&tmpBuffLen);
+		tmpBuff[tmpBuffLen]=0; //make a string
 		//options.getMixId(tmpBuff,50);
 		//sprintf((char*)data->cascadeInfo+strlen((char*)data->cascadeInfo),"<Mix id=\"%s\"></Mix>",tmpBuff);
 		char* startpos=strstr((char*)tmpBuff,"<Mix");
@@ -1149,9 +1150,11 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 
 SINT32 CAFirstMix::getMixCascadeInfo(UINT8* buff,UINT32*len)
 	{
-		if(buff==NULL||len==NULL||*len<strlen((char*)m_strXmlMixCascadeInfo))
+		UINT32 xmlMixCascadeInfoLen=strlen((char*)m_strXmlMixCascadeInfo);
+		if(buff==NULL||len==NULL||*len<xmlMixCascadeInfoLen)
 			return E_UNKNOWN;
-		strcpy((char*)buff,(char*)m_strXmlMixCascadeInfo);
-		*len=strlen((char*)m_strXmlMixCascadeInfo)+1;
+		
+		memcpy(buff,m_strXmlMixCascadeInfo,xmlMixCascadeInfoLen);
+		*len=xmlMixCascadeInfoLen;
 		return E_SUCCESS;
 	}
