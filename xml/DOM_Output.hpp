@@ -111,10 +111,10 @@ class DOM_Output
 
 			
 			/** Dumps the Node an returns a pointer to the memory.
-				* @param node, Node to dump
-				* @param size, on return contains the number of XML-Chars copied
+				* @param node Node to dump
+				* @param size on return contains the number of XML-Chars copied
 				* @return a pointer to a newls allocated buff, which must be delete[] by the caller
-				* @return NULL, if an error occurs
+				* @return NULL if an error occurs
 				*/
 			static UINT8* dumpToMem(DOM_Node& node,UINT32* size)
 				{
@@ -126,12 +126,12 @@ class DOM_Output
 
 			
 			/** Dumps the node and all childs in a 'cannonical form' into buff.
-				* @param node, Node to dump
+				* @param node Node to dump
 				* @param buff buffer in which to copy the XML-chars
 				* @param size contains the size of buff, on return contains the number of XML-CHars copied
-				* @return E_SUCCESS, if successful
-				* @return E_SPACE, if buff is to small
-				* @return E_UNKNOWN, if an error occurs
+				* @return E_SUCCESS if successful
+				* @return E_SPACE if buff is to small
+				* @return E_UNKNOWN if an error occurs
 				*/
 			static SINT32 makeCanonical(DOM_Node& node,UINT8* buff,UINT32* size)
 				{
@@ -143,10 +143,10 @@ class DOM_Output
 
 		
 			/** Dumps the Node in a cannonical form and returns a pointer to the memory.
-				* @param node, Node to dump
-				* @param size, on return contains the number of XML-Chars copied
+				* @param node Node to dump
+				* @param size on return contains the number of XML-Chars copied
 				* @return a pointer to a newly allocated buff, which must be delete[] by the caller
-				* @return NULL, if an error occurs
+				* @return NULL if an error occurs
 				*/
 			static UINT8* makeCanonical(DOM_Node& node,UINT32* size)
 				{

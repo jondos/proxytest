@@ -214,8 +214,8 @@ SINT32 CAQueue::get(UINT8* pbuff,UINT32* psize)
 
 /** Gets data from the Queue or waits until some data is available, if the Queue is empty.
 	* The data is removed from the Queue
-  * @param pbuff, pointer to a buffer, there the data should be stored
-	* @param psize, on call contains the size of pbuff, on return contains 
+  * @param pbuff pointer to a buffer, there the data should be stored
+	* @param psize on call contains the size of pbuff, on return contains 
 	*								the size of returned data
 	* @retval E_SUCCESS if succesful
 	* @retval E_UNKNOWN in case of an error
