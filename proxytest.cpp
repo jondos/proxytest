@@ -187,7 +187,7 @@ int main(int argc, const char* argv[])
 		#endif
 
 			UINT8 key[16];
-			UINT8 in[1024];
+			UINT8* in=new UINT8[1024];
 			memset(key,0,16);
 			memset(in,0,1024);
 			CASymCipher* oSymCipher=new CASymCipher;
