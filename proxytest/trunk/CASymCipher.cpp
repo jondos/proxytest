@@ -4,6 +4,7 @@
 int CASymCipher::setEncryptionKey(unsigned char* key)
 	{
 		BF_set_key(&keyEnc,16,key);
+		memcpy(rawKeyEnc,key,16);
 		bEncKeySet=true;
 		return 0;
 	}
@@ -11,6 +12,24 @@ int CASymCipher::setEncryptionKey(unsigned char* key)
 bool CASymCipher::isEncyptionKeyValid()
 	{
 		return bEncKeySet;
+	}
+
+int CASymCipher::generateEncryptionKey()
+	{
+		unsigned char key[16];
+		RAND_bytes(key,16);
+		return setEncryptionKey(key);
+	}
+
+int CASymCipher::getEncryptionKey(unsigned char* key)
+	{
+		if(bEncKeySet)
+			{
+				memcpy(key,rawKeyEnc,16);		
+				return 0;
+			}
+		else
+			return -1;
 	}
 
 int CASymCipher::setDecryptionKey(unsigned char* key)
