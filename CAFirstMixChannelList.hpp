@@ -32,6 +32,31 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASymCipher.hpp"
 #include "CAMutex.hpp"
 #include "CAMsg.hpp"
+#ifdef PAYMENT
+/**
+ * Structure that holds all per-user payment information
+ * Included in CAFirstMixChannelList (struct fmHashTableEntry)
+ */
+struct t_accountinginfo
+{
+	UINT8 * pReceiveBuffer; //buffer for storing incoming msgs
+	UINT32  msgTotalSize;   //total size of the incoming msg
+	UINT32  msgCurrentSize; //number of bytes received
+
+	// for encrypting/decryptinh  payment packets
+	CASymCipher * pCipherIn; //decrypt JAP->AI packets
+	CASymCipher * pCipherOut; //encrypt AI->JAP packets
+
+	UINT8 * pLastXmlCostConfirmation;
+
+	UINT64 accountNumber;
+	UINT64 maxBalance;
+
+};
+typedef struct t_accountinginfo aiAccountingInfo;
+typedef aiAccountingInfo * LP_aiAccountingInfo;
+#endif
+
 struct t_fmhashtableentry
 	{
 		public:
@@ -43,6 +68,9 @@ struct t_fmhashtableentry
 			UINT32				trafficOut;
 			UINT64				timeCreated;
 			UINT64				id;
+#endif
+#ifdef PAYMENT
+	aiAccountingInfo * pAccountingInfo;
 #endif
 			UINT8					peerIP[4]; //needed for flooding control
 		private:
@@ -169,6 +197,9 @@ class CAFirstMixChannelList
 			fmHashTableEntry* m_listHashTableNext;
 			///This mutex is used in all functions and makes them thread safe.
 			CAMutex m_Mutex;
+//#ifdef PAYMENT
+//			CAAccountingInstance *m_pAccountingInstance;
+//#endif
 
 #ifdef DO_TRACE
 			UINT32 m_aktAlloc;

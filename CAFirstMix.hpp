@@ -151,6 +151,9 @@ class CAFirstMix:public CAMix
 			CASignature* m_pSignature;
 			CAMutex m_mutexUser;
 			CAMutex m_mutexMixedPackets;
+			#ifdef PAYMENT
+				CAAccountingInstance * m_pAccountingInstance;
+			#endif
 	};
 
 #endif

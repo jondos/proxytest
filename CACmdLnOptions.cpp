@@ -709,6 +709,33 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		getDOMChildByName(elemCertificates,(UINT8*)"PrevMixCertificate",elemPrevCert,false);
 		if(elemPrevCert!=NULL)
 			m_pPrevMixCertificate=CACertificate::decode(elemPrevCert.getFirstChild(),CERT_X509CERTIFICATE);
+/*
+#ifdef PAYMENT  // TODO: Make this code nicer
+		// get Accounting (payment) configuration
+		DOM_Element elemAccounting;
+		getDOMChildByName(elemRoot,(UINT8*)"Accounting",elemAccounting,false);
+		DOM_Element elemJPI;
+
+		// get JPI Address
+		getDOMChildByName(elemAccounting, (UINT8*)"PaymentInstance", elemJPI, false);
+
+		// get JPI Hostname
+		getDOMChildByName(elemJPI, (UINT8*)"Host", elem, false);
+		tmpLen = 255;
+		if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) {
+			
+			strtrim(tmpBuff);
+			m_strJPIHost = new char[strlen((char*)tmpBuff)+1];
+			strcpy(m_strJPIHost, (char *) tmpBuff);
+		}
+
+		// get JPI Port
+		getDOMChildByName(elemJPI, (UINT8*)"Port", elem, false);
+		if(getDOMElementValue(elem, &tmp)==E_SUCCESS) {
+			m_iJPIPort = tmp;
+		}
+
+#endif*/ /* PAYMENT */
 
 		//get InfoService data
 		DOM_Element elemNetwork;

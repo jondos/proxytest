@@ -29,6 +29,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAFirstMixChannelList.hpp"
 #include "CAUtil.hpp"
 #include "CAMsg.hpp"
+//#include "CAAccountingInstance.hpp"
 
 #define MAX_HASH_KEY 8113
 
@@ -48,6 +49,9 @@ CAFirstMixChannelList::CAFirstMixChannelList()
 #ifdef DO_TRACE
 	m_aktAlloc=m_maxAlloc=0;
 #endif
+//#ifdef PAYMENT
+//	m_pAccountingInstance = CAAccountingInstance::getInstance();
+//#endif
 	}
 
 CAFirstMixChannelList::~CAFirstMixChannelList()
@@ -106,6 +110,13 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,UINT8 peerIP[4],CAQueu
 				m_listHashTableHead->list_HashEntries.prev=pHashTableEntry;
 				m_listHashTableHead=pHashTableEntry;				
 			}
+#ifdef PAYMENT
+		// init accounting instance for this user
+		CAAccountingInstance *pAccInst;
+		pAccInst = CAAccountingInstance::getInstance();
+		pAccInst->initTableEntry(pHashTableEntry);
+//		m_pAccountingInstance->initTableEntry(pHashTableEntry);
+#endif
 		m_Mutex.unlock();
 		return E_SUCCESS;
 	}
@@ -316,6 +327,13 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 #endif
 				pEntry=pTmpEntry;
 			}
+#ifdef PAYMENT
+		// cleanup accounting information
+		CAAccountingInstance * pAccInst;
+		pAccInst = CAAccountingInstance::getInstance();
+		pAccInst->cleanupTableEntry(pHashTableEntry);
+	//	m_pAccountingInstance->cleanupTableEntry(pHashTableEntry);
+#endif
 		memset(pHashTableEntry,0,sizeof(fmHashTableEntry)); //'delete' the connection from the connection hash table 
 		m_Mutex.unlock();
 		return E_SUCCESS;
