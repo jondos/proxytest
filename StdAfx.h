@@ -83,8 +83,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
   #ifdef HAVE_CONFIG_H  
 	#include "config.h"
 	#endif
-	#define PROT2
-#define HAVE_VSNPRINTF
+	#define HAVE_VSNPRINTF
 		#include <sys/ioctl.h>
     #include <sys/socket.h>
     #include <sys/poll.h>
