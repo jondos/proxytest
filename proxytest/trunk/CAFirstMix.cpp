@@ -1089,15 +1089,17 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 						encodeXMLEncryptedKey(key,64,docfragSymKey,&oRSA);
 						DOM_Document docSymKey=DOM_Document::createDocument();
 						docSymKey.appendChild(docSymKey.importNode(docfragSymKey,true));
+						DOM_Element elemRoot=docSymKey.getDocumentElement();
 						if(elemNonce!=NULL)
 							{
 								DOM_Element elemNonceHash=docSymKey.createElement("Nonce");
 								setDOMElementValue(elemNonceHash,arNonce);
-								docSymKey.getDocumentElement().appendChild(elemNonceHash);
+								elemRoot.appendChild(elemNonceHash);
 							}
 						UINT32 outlen=5000;
 						UINT8* out=new UINT8[outlen];
-						m_pSignature->signXML(docSymKey.getDocumentElement());
+
+						m_pSignature->signXML(elemRoot);
 						DOM_Output::dumpToMem(docSymKey,out,&outlen);
 						m_pMuxOut->setKey(key,64);
 						UINT16 size=htons(outlen);
