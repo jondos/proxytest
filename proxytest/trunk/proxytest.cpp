@@ -333,11 +333,23 @@ THREAD_RETURN lmIO(void *v)
 							{
 								if(len!=0)
 									{
+										#ifdef _DEBUG
+										    CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!");
+										#endif
 										tmpSocket=new CASocket;
-										tmpSocket->connect(&lmIOPair->addrSquid);
-										oSocketList.add(channel,tmpSocket);
-										oSocketGroup.add(*tmpSocket);
-										tmpSocket->send(buff,len);
+										if(tmpSocket->connect(&lmIOPair->addrSquid)==SOCKET_ERROR)
+										    {
+	    										#ifdef _DEBUG
+											    CAMsg::printMsg(LOG_DEBUG,"Cannot connect to Squid!");
+											#endif
+											delete tmpSocket;
+										    }
+										else
+										    {    
+											oSocketList.add(channel,tmpSocket);
+											oSocketGroup.add(*tmpSocket);
+											tmpSocket->send(buff,len);
+										    }
 									}
 							}
 						else
@@ -372,6 +384,9 @@ THREAD_RETURN lmIO(void *v)
 							{
 								if(oSocketGroup.isSignaled(*(tmpCon->pSocket)))
 									{
+										#ifdef _DEBUG
+										    CAMsg::printMsg(LOG_DEBUG,"Receving Data from Squid!");
+										#endif
 										int len=tmpCon->pSocket->receive(buff,1000);
 										if(len==SOCKET_ERROR||len==0)
 											{
@@ -398,12 +413,14 @@ THREAD_RETURN lmIO(void *v)
 int doLastMix()
 	{
 		LMPair* lmIOPair=new LMPair;
+		CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...");
 		if(lmIOPair->muxIn.accept(options.getServerPort())==SOCKET_ERROR)
 		    {
-					CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
+					CAMsg::printMsg(LOG_CRIT," failed!\n");
 					delete lmIOPair;
 					return -1;
 		    }
+		CAMsg::printMsg(LOG_INFO,"connected!\n");
 		char strTarget[255];
 		options.getTargetHost(strTarget,255);
 		lmIOPair->addrSquid.setAddr(strTarget,options.getTargetPort());
