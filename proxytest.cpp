@@ -611,6 +611,7 @@ THREAD_RETURN fmIO(void *v)
 									if(oMuxChannelList.remove(oMuxPacket.channel,&otmpReverseEntry))
 										{
 											otmpReverseEntry.pMuxSocket->close(otmpReverseEntry.inChannel);
+											delete otmpReverseEntry.pCipher;
 											#ifdef _DEBUG
 												CAMsg::printMsg(LOG_DEBUG,"closed!\n");
 											#endif
@@ -719,6 +720,7 @@ THREAD_RETURN fmIO(void *v)
 														while(tmpCon!=NULL)
 															{
 																fmIOPair->muxOut.close(tmpCon->outChannel);
+																delete tmpCon->pCipher;
 																tmpCon=otmpEntry.pSocketList->getNext();
 															}
 														otmpEntry.pMuxSocket->close();
@@ -736,6 +738,7 @@ THREAD_RETURN fmIO(void *v)
 															{
 																fmIOPair->muxOut.close(oConnection.outChannel);
 																oMuxChannelList.remove(oConnection.outChannel,NULL);
+																delete oConnection.pCipher;
 															}
 														else
 															{

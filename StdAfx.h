@@ -30,6 +30,13 @@
 		#define GETERROR (WSAGetLastError())
 		#define E_TIMEDOUT WSAETIMEDOUT
 		#define E_CONNREFUSED WSAECONNREFUSED
+		#ifdef __cplusplus
+			#include <string>
+			#include <vector>
+			#define STRING std::string
+			#define VECTOR std::vector
+		#endif
+		#include <assert.h>
 #else
     #include <sys/ioctl.h>
     #include <sys/socket.h>
@@ -92,9 +99,13 @@
 			#include <vector.h>
 			#include <mstring.h>
 			extern "C++" {typedef basic_string <char> string;}
-    #else
+			#define STRING string
+			#define VECTOR vector
+		#else
 		 #include <string>
 		 #include <vector>
+			#define STRING std::string
+			#define VECTOR std::vector
 		#endif
 		#endif
     #ifndef min
