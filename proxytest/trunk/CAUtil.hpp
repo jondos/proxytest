@@ -45,6 +45,9 @@ SINT32 sSleep(UINT16 sec);
 
 UINT32 getMemoryUsage();
 
+#ifndef _WIN32
+SINT32 filelength(int handle)
+#endif
 
 /**
 	This class implements the Output Stream interface required by XML::Output. 
