@@ -110,7 +110,7 @@ SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 #endif
 				break;
 				case MSG_FILE:
-					if(type==LOG_ERR||type==LOG_CRIT)
+				/*	if(type==LOG_ERR||type==LOG_CRIT)
 						{
 							if(oMsg.m_hFileErr!=-1)
 								{
@@ -120,12 +120,12 @@ SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 						}
 					else
 						{
-							if(oMsg.m_hFileInfo!=-1)
+					*/		if(oMsg.m_hFileInfo!=-1)
 								{
 									if(write(oMsg.m_hFileInfo,oMsg.m_strMsgBuff,strlen(oMsg.m_strMsgBuff))==-1)
 									 ret=E_UNKNOWN;
 								}
-						}
+					//	}
 				break;
 				case MSG_STDOUT:
 					printf(oMsg.m_strMsgBuff);

@@ -267,6 +267,7 @@ SINT32 CALastMix::init()
 			}
 		
 		CAMsg::printMsg(LOG_INFO,"connected!\n");
+		sleep(1);
 		CAMsg::printMsg(LOG_INFO,"Sending Infos (chain length and RSA-Key, RSA-Keysize %u)\n",mRSA.getPublicKeySize());
 		UINT32 keySize=mRSA.getPublicKeySize();
 		UINT16 messageSize=keySize+1;
@@ -288,6 +289,7 @@ SINT32 CALastMix::init()
 		options.getSOCKSHost(strTarget,255);
 		maddrSocks.setAddr((char*)strTarget,options.getSOCKSPort());
 		delete buff;
+		sleep(1);
 		return E_SUCCESS;
 	}
 
