@@ -263,14 +263,21 @@ SINT32 setDOMElementValue(DOM_Element& elem,UINT32 text)
 	{
 		UINT8 tmp[10];
 		sprintf((char*)tmp,"%u",text);
-		DOM_Text t=elem.getOwnerDocument().createTextNode(DOMString((char*)tmp));
-		elem.appendChild(t);
+		setDOMElementValue(elem,tmp);
 		return E_SUCCESS;
 	}
 
 SINT32 setDOMElementValue(DOM_Element& elem,UINT8* value)
 	{
 		DOM_Text t=elem.getOwnerDocument().createTextNode(DOMString((char*)value));
+		//Remove all "old" text Elements...
+		DOM_Node child=elem.getFirstChild();
+		while(child!=NULL)
+			{
+				if(child.getNodeType()==DOM_Node::TEXT_NODE)
+					elem.removeChild(child);
+				child=child.getNextSibling();
+			}
 		elem.appendChild(t);
 		return E_SUCCESS;
 	}
