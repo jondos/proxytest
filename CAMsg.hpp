@@ -55,9 +55,10 @@ class CAMsg
 			SINT32 openLog(UINT32 type);
 			SINT32 closeLog();
 			UINT32 m_uLogType;
-			int m_hFileErr;
+//			int m_hFileErr;
 			int m_hFileInfo;
 			char *m_strMsgBuff;
+			char *m_strLogFile; 
 			static const char* const m_strMsgTypes[4];
 			CAMutex m_csPrint;
 #ifdef COMPRESSED_LOGS
