@@ -171,6 +171,16 @@ SINT32 CASocketAddrINet::getIP(UINT8 buff[4])
 		return E_SUCCESS;
 	}
 
+/** Sets the IP-Numbers for this address.
+	* @param ip buffer with the IP-Address (4 Bytes)
+	* @retval E_SUCCESS if no error occured
+	*/
+SINT32 CASocketAddrINet::setIP(UINT8 ip[4])
+	{
+		memcpy(&sin_addr.s_addr,ip,4);
+		return E_SUCCESS;
+	}
+
 /** Returns the IP-Number as an address string (doted-format).
 	* @param buff buffer for the returned IP-Address
 	* @param len buffer-space
