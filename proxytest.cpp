@@ -247,7 +247,7 @@ THREAD_RETURN lpIO(void *v)
 int doLocalProxy()
 	{
 		int ret;	
-		CASocketAddr socketAddrIn(options.getServerPort());
+		CASocketAddr socketAddrIn("127.0.0.1",options.getServerPort());
 		LPPair* lpIOPair=new LPPair;
 		if(lpIOPair->socketIn.listen(&socketAddrIn)==SOCKET_ERROR)
 		    {
@@ -552,7 +552,7 @@ THREAD_RETURN fmIO(void *v)
 int doFirstMix()
 	{
 		int ret;	
-		CASocketAddr socketAddrIn("127.0.0.1",options.getServerPort());
+		CASocketAddr socketAddrIn(options.getServerPort());
 		FMPair* fmIOPair=new FMPair;
 		if(fmIOPair->socketIn.listen(&socketAddrIn)==SOCKET_ERROR)
 		    {
