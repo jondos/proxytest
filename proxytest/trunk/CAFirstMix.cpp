@@ -411,7 +411,7 @@ SINT32 CAFirstMix::init()
 			{
 #ifdef HAVE_UNIX_DOMAIN_PROTOCOL
 				pAddrNext=new CASocketAddrUnix();
-				pAddrNext->setPath((char*)strTarget);
+				((CASocketAddrUnix*)pAddrNext)->setPath((char*)strTarget);
 				CAMsg::printMsg(LOG_INFO,"Try connecting to next Mix on Unix-Domain-Socket: %s\n");
 #else
 				CAMsg::printMsg(LOG_CRIT,"I do not understand the Unix Domain Protocol!\n");
