@@ -3,7 +3,9 @@
 #include "CAMixSocket.hpp"
 
 extern CAMixChannel oMixChannel;
+#ifdef _DEBUG
 extern int sockets;
+#endif
 CAMixSocket::CAMixSocket()
 	{
 		id=0;
@@ -18,7 +20,9 @@ CAMixSocket::~CAMixSocket()
 int CAMixSocket::connect(LPSOCKETADDR psa)
 	{
 		id=oMixChannel.connect(psa);
+#ifdef _DEBUG
 		sockets++;
+#endif
 		return 0;
 	}
 
@@ -57,7 +61,9 @@ int CAMixSocket::close(int mode)
 			{
 				if(oMixChannel.close(id,mode)==0)
 					{
+#ifdef _DEBUG
 						sockets--;
+#endif
 						id=0;
 						ret=0;
 					}
