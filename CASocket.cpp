@@ -449,6 +449,9 @@ SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len)
 	  do
 			{
 				ret=receive(buff+pos,len);
+#ifdef _DEBUG
+				CAMsg::printMsg(LOG_DEBUG,"CASocket::receiveFully - call to receive returned: %i\n",ret);
+#endif
 				if(ret<=0)
 					{
 						if(ret==E_AGAIN)
