@@ -526,7 +526,7 @@ int doMiddleMix()
 typedef struct t_FMPair
 	{
 		CASocket socketIn;
-		CAMuxSocket muxHttpIn;
+//		CAMuxSocket muxHttpIn;
 		CAMuxSocket muxOut;
 		unsigned char* recvBuff;
 	} FMPair;
@@ -629,11 +629,11 @@ THREAD_RETURN fmIO(void *v)
 										}
 								}
 						}
-				if(oSocketGroup.isSignaled(fmIOPair->muxHttpIn))
-					{
-						countRead--;
-						len=fmIOPair->muxHttpIn.receive(&oMuxPacket);
-						printf("Receivde Htpp-Packet - Len: %u Content %s",len,oMuxPacket.data); 
+			//	if(oSocketGroup.isSignaled(fmIOPair->muxHttpIn))
+			//		{
+			//			countRead--;
+			//			len=fmIOPair->muxHttpIn.receive(&oMuxPacket);
+			//			printf("Receivde Htpp-Packet - Len: %u Content %s",len,oMuxPacket.data); 
 			/*			if(len==SOCKET_ERROR)
 							{
 								MUXLISTENTRY otmpEntry;
@@ -689,7 +689,7 @@ THREAD_RETURN fmIO(void *v)
 								}
 						}
 						*/
-					}
+				//	}
 				if(countRead>0)
 					{
 						tmpEntry=oMuxChannelList.getFirst();
