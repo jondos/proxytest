@@ -1095,14 +1095,18 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 				if(child.getNodeName().equals("Mix"))
 					{
 						//check Signature....
+						CAMsg::printMsg(LOG_DEBUG,"Try to verify next mix signature...");
 						CASignature oSig;
 						CACertificate* nextCert=options.getNextMixTestCertificate();
 						oSig.setVerifyKey(nextCert);
 						SINT32 ret=oSig.verifyXML(child,NULL);
 						delete nextCert;
 						if(ret!=E_SUCCESS)
-							return E_UNKNOWN;
-
+							{
+								CAMsg::printMsg(LOG_DEBUG,"failed!\n");
+								return E_UNKNOWN;
+							}
+						CAMsg::printMsg(LOG_DEBUG,"success!\n");
 						DOM_Node rsaKey=child.getFirstChild();
 						CAASymCipher oRSA;
 						oRSA.setPublicKeyAsDOMNode(rsaKey);
