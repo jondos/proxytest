@@ -593,7 +593,7 @@ ast_add_tags(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree,
       if (status != REG_OK)
 	break;
 
-      symbol = (tre_addtags_symbol_t)(int)tre_stack_pop(stack);
+      symbol = (tre_addtags_symbol_t)tre_stack_pop_int(stack);
       switch (symbol)
 	{
 
