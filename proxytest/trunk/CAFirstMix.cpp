@@ -541,7 +541,9 @@ SINT32 CAFirstMix::loop()
 										}
 									else
 										{
-											CAMsg::printMsg(LOG_DEBUG,"Error Sending Data to Browser -- Channel-Id %u no valid!\n",oMuxPacket.channel);										
+											#ifdef _DEBUG
+												CAMsg::printMsg(LOG_DEBUG,"Error Sending Data to Browser -- Channel-Id %u no valid!\n",oMuxPacket.channel);										
+											#endif
 										}
 								}
 						}
@@ -679,7 +681,7 @@ SINT32 CAFirstMix::loop()
 															}
 														if(muxOut.send(&oMuxPacket)==SOCKET_ERROR)
 															{
-																CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Exiting!\n");									
+																CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Restarting!\n");									
 																goto ERR;
 															}
 												}

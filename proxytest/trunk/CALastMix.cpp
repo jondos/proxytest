@@ -302,7 +302,7 @@ SINT32 CALastMix::loop()
 						ret=muxIn.receive(&oMuxPacket);
 						if(ret==SOCKET_ERROR)
 							{
-								CAMsg::printMsg(LOG_CRIT,"Channel to previous mix closed -- Exiting!\n");
+								CAMsg::printMsg(LOG_CRIT,"Channel to previous mix closed -- Restarting!\n");
 								goto ERR;
 							}
 						if(!oSocketList.get(oMuxPacket.channel,&oConnection))
@@ -430,7 +430,7 @@ SINT32 CALastMix::loop()
 												tmpCon->pCipher->decryptAES(oMuxPacket.data,oMuxPacket.data,DATA_SIZE);
 												if(muxIn.send(&oMuxPacket)==SOCKET_ERROR)
 													{
-														CAMsg::printMsg(LOG_CRIT,"Mux Data Sending Error - Exiting!\n");
+														CAMsg::printMsg(LOG_CRIT,"Mux Data Sending Error - Restarting!\n");
 														goto ERR;
 													}
 											}
