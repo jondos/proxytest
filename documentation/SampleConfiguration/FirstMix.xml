@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MixConfiguration version="0.4">
     <General>
-        <MixID>mixOne</MixID>
+        <MixID>mixTestCascade</MixID>
         <MixType>FirstMix</MixType>
         <MixName>FirstMix</MixName>
         <CascadeName>TestCascade</CascadeName>
@@ -23,7 +23,7 @@
             <Port>3002</Port>
         </NextMix>
         <InfoService>
-            <Host/>
+            <Host>localhost</Host>
             <IP>127.0.0.1</IP>
             <Port>3000</Port>
         </InfoService>
