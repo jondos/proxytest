@@ -98,7 +98,7 @@ proxytest_SOURCES = CAASymCipher.cpp \
 		    CAInfoService.cpp \
 		    CAIPList.cpp \
 		    CALastMix.cpp \
-		    CALAstMixChannelList.cpp\
+		    CALastMixChannelList.cpp\
 		    CALocalProxy.cpp \
 		    CAMiddleMix.cpp \
 		    CAMiddleMixChannelList.cpp \
@@ -180,7 +180,7 @@ am_proxytest_OBJECTS = CAASymCipher.$(OBJEXT) CABase64.$(OBJEXT) \
 	CAConditionVariable.$(OBJEXT) CADatagramSocket.$(OBJEXT) \
 	CAFirstMix.$(OBJEXT) CAFirstMixChannelList.$(OBJEXT) \
 	CAInfoService.$(OBJEXT) CAIPList.$(OBJEXT) CALastMix.$(OBJEXT) \
-	CALAstMixChannelList.$(OBJEXT) CALocalProxy.$(OBJEXT) \
+	CALastMixChannelList.$(OBJEXT) CALocalProxy.$(OBJEXT) \
 	CAMiddleMix.$(OBJEXT) CAMiddleMixChannelList.$(OBJEXT) \
 	CAMix.$(OBJEXT) CAMsg.$(OBJEXT) CAMutex.$(OBJEXT) \
 	CAMuxSocket.$(OBJEXT) CAQueue.$(OBJEXT) \
@@ -215,8 +215,8 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/CAFirstMixChannelList.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CAIPList.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CAInfoService.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/CALAstMixChannelList.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CALastMix.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CALastMixChannelList.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CALocalProxy.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CAMiddleMix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CAMiddleMixChannelList.Po \
@@ -339,8 +339,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAFirstMixChannelList.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAIPList.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAInfoService.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CALAstMixChannelList.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CALastMix.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CALastMixChannelList.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CALocalProxy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMiddleMix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMiddleMixChannelList.Po@am__quote@

@@ -18,7 +18,7 @@ proxytest_SOURCES = CAASymCipher.cpp \
 		    CAInfoService.cpp \
 		    CAIPList.cpp \
 		    CALastMix.cpp \
-		    CALAstMixChannelList.cpp\
+		    CALastMixChannelList.cpp\
 		    CALocalProxy.cpp \
 		    CAMiddleMix.cpp \
 		    CAMiddleMixChannelList.cpp \
