@@ -520,7 +520,7 @@ ERR:
 SINT32 CAMiddleMix::loop()
 	{
 #ifndef NEW_MIX_TYPE
-		pPoolEntry* pPoolEntry=new tPoolEntry;
+		tPoolEntry* pPoolEntry=new tPoolEntry;
 		MIXPACKET* pMixPacket=&pPoolEntry->packet;
 		HCHANNEL channelOut;
 		CASymCipher* pCipher;
