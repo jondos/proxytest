@@ -33,19 +33,21 @@ int CAMsg::setOptions(int options)
     }
 
 int CAMsg::printMsg(int type,char* format,...)
-    {
-	va_list ap;
-	va_start(ap,format);
-	if(oMsg.isLog)
+	{
+		va_list ap;
+		va_start(ap,format);
+		if(oMsg.isLog)
 	    {
 				#ifndef _WIN32
-					syslog(type,format,ap);
+					char buff[1024];
+					snprintf(buff,1024,format,ap);
+					syslog(type,buff);
 				#endif
 	    }
-	else
+		else
 	    {
-		vprintf(format,ap);
+				vprintf(format,ap);
 	    }
-	va_end(ap);
-	return 0;
-    }
+		va_end(ap);
+		return 0;
+  }
