@@ -137,36 +137,14 @@ SINT32 CALastMix::init()
 	}
 
 /** Processes the startup communication with the preceeding mix.
-	* Step 1: Mix n-1 open a TCP/IP Connection
-	* Step 2: LastMix sends XML struct describing itself, 
-	*					containing PubKey of LastMix, signed by LastMix
-	* Step 3: Mix n-1 sends XML struct containing encrpyted (with PubKey) Symetric Key used for
-	*					interlink encryption between Mix n-1 <---> LastMix, signed by Mix n-1
-	*
-	* The XML struct send from LastMix to Mix n-1 has the following stucture:
-	* <XML version=1.0"/>
-	*	<Mixes count="1">
-	*		<Mix id="...">
-	*			<MixProtocolVersion>0.3</MixProtocolVersion> 			
-	*			<RSAKeyValue>
-	*				<Modulus></Modulus>
-	*				<Exponent></Exponent>
-	*			<RSAKeyValue>
-	*			<Nonce>...</Nonce>
-	*			<Signature>...</Signature>
-	*		</Mix>
-	*	</Mixes>
-	*
-	* The XML struct send from Mix n-1 to LastMix is:
-	* <XML version=1.0"/>
-	* <EncryptedKey>
-	*		<EncryptionMethod Algorithm="RSA"/>
-	*		<CipherData>
-	*			<CipherValue>...</CipherValue>
-	*		</CipherData>
-	*   <Nonce>...</Nonce>
-	*		<Signature>...</Signature>
-	*	</EncryptedKey>
+	* \li Step 1: Mix \e n-1 open a TCP/IP Connection\n
+	* \li Step 2: LastMix sends XML struct describing itself, 
+	*					containing PubKey of LastMix, signed by LastMix 
+	*					(see \ref XMLInterMixInitSendFromLast "XML structs")\n
+	* \li Step 3: Mix \e n-1 sends XML struct containing encrpyted (with PubKey) 
+	*					Symetric Key used for	interlink encryption between 
+	*         Mix \e n-1 <---> LastMix, signed by Mix \e n-1
+	*					(see \ref XMLInterMixInitAnswer "XML structs")\n
 	*/
 SINT32 CALastMix::processKeyExchange()
 	{
