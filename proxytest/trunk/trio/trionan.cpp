@@ -187,7 +187,7 @@ trio_make_double(TRIO_CONST unsigned char *values)
 
 /*
  * trio_examine_double
- */
+ *//*
 TRIO_PRIVATE int
 trio_is_special_quantity(double number,
 			 int *has_mantissa)
@@ -206,7 +206,7 @@ trio_is_special_quantity(double number,
   }
   return is_special_quantity;
 }
-
+*/
 #endif /* USE_IEEE_754 */
 
 
