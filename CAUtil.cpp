@@ -290,7 +290,7 @@ SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, UINT8* xml, UINT32 xmlle
 		UINT32 len=1024;
 		CABase64::decode((UINT8*)start,end-start,tmpBuff,&len);
 		pRSA->decrypt(tmpBuff,tmpBuff);
-		*keylen=32;
+		*keylen=16;
 		memcpy(key,tmpBuff+128-(*keylen),(*keylen));
 		return E_SUCCESS;
 	}
