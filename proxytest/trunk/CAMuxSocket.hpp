@@ -42,7 +42,7 @@ typedef UINT32 HCHANNEL;
 #define MIXPACKET_SIZE 	998
 
 #define CHANNEL_DATA		0x00
-#define CHANNEL_OPEN_OLD		0x08
+#define CHANNEL_OPEN_OLD		0x00
 #define CHANNEL_OPEN_NEW		0x08 //must be 8 in final version!!
 #define CHANNEL_CLOSE		0x01
 #define CHANNEL_SUSPEND 0x02
