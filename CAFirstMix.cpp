@@ -176,6 +176,7 @@ SINT32 CAFirstMix::init()
 		    }
       }
     m_pIPList=new CAIPList();
+		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix init() succeded\n");
 		return E_SUCCESS;
 	}
 
@@ -210,12 +211,15 @@ SINT32 CAFirstMix::loop()
 		muxOut.setCrypt(true);
 
 		oInfoService.setSignature(&mSignature);
+		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix InfoService - Signature set\n");
 		oInfoService.setLevel(0,-1,-1);
 		oInfoService.sendHelo();
+		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix Helo sended\n");
 		oInfoService.start();
+		CAMsg::printMsg(LOG_DEBUG,"InfoService Loop started\n");
 
 		UINT8 ip[4];
-
+		CAMsg::printMsg(LOG_DEBUG,"Starting Message Loop... \n");
 		for(;;)
 			{
 LOOP_START:
