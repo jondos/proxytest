@@ -34,13 +34,14 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketList.hpp"
 #include "CASocketAddrINet.hpp"
 #include "CACacheLoadBalancing.hpp"
+#include "CASignature.hpp"
 
 class CALastMix:public CAMix
 
 	{
 		public:
 			CALastMix(){}
-			virtual ~CALastMix(){}
+			virtual ~CALastMix(){if(m_pSignature!=NULL) delete m_pSignature;}
 		private:
 			SINT32 loop();
 			SINT32 init();
@@ -51,6 +52,7 @@ class CALastMix:public CAMix
 			CACacheLoadBalancing m_oCacheLB;
 			CASocketAddrINet	maddrSocks;
 			CAASymCipher mRSA;
+			CASignature* m_pSignature;
 		private:
 			CASocketList oSuspendList;
 

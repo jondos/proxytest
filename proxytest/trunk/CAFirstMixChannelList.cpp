@@ -57,11 +57,11 @@ CAFirstMixChannelList::~CAFirstMixChannelList()
 		delete []m_HashTableOutChannels;
 	}
 		
-/** Adds a new TCP/IP connection (a new user) to the channel list
+/** Adds a new TCP/IP connection (a new user) to the channel list.
 	* @param pMuxSocket the new connection (from a user)
 	* @param pQueueSend the send-queue to use for this connection
-	* @retval E_UNKNOWN, in case of an error
-	* @retval E_SUCCES, if successful
+	* @retval E_UNKNOWN in case of an error
+	* @retval E_SUCCESS if successful
 	*/
 SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,CAQueue* pQueueSend)
 	{
@@ -108,8 +108,8 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,CAQueue* pQueueSend)
 	* @param channelIn the channel, which should be added
 	* @param pCipher the symmetric cipher associated with this channel
 	* @param channelOut a pointer to the place, there the new generated out-channel id is stored
-	* @retval E_SUCCESS, if successful
-	* @retval E_UNKOWN, in case of an error
+	* @retval E_SUCCESS if successful
+	* @retval E_UNKNOWN in case of an error
 	*/
 SINT32 CAFirstMixChannelList::addChannel(CAMuxSocket* pMuxSocket,HCHANNEL channelIn,
 																	CASymCipher* pCipher,HCHANNEL* channelOut)
@@ -172,8 +172,8 @@ SINT32 CAFirstMixChannelList::addChannel(CAMuxSocket* pMuxSocket,HCHANNEL channe
 /** Returns the information for a given Input-Channel-ID
 	* @param pMuxSocket the connection from the user
 	* @param channelIn the channel id
-	* @ret all channel associated information (output-channel id, cipher etc.)
-	* @retval NULL, if not found
+	* @return all channel associated information (output-channel id, cipher etc.)
+	* @retval NULL if not found
 */
 fmChannelListEntry* CAFirstMixChannelList::get(CAMuxSocket* pMuxSocket,HCHANNEL channelIn)
 	{
@@ -201,8 +201,8 @@ fmChannelListEntry* CAFirstMixChannelList::get(CAMuxSocket* pMuxSocket,HCHANNEL 
 /** Removes all channels, which belongs to the given connection and the connection itself from the
 	* list.
 	* @param pMuxSocket the connection from the user
-	* @retval E_SUCCESS, if successful
-	* @retval E_UNKNOWN, in case of an error
+	* @retval E_SUCCESS if successful
+	* @retval E_UNKNOWN in case of an error
 	*/
 SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 	{
@@ -299,8 +299,8 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 /** Removes a single channel from the list.
 	* @param pMuxsocket the connection from the user
 	* @param channelIn the channel, which should be removed
-	* @retval E_SUCCESS, if successful
-	* @retval E_UNKNOWN, in case of an error
+	* @retval E_SUCCESS if successful
+	* @retval E_UNKNOWN in case of an error
 	*/
 SINT32 CAFirstMixChannelList::removeChannel(CAMuxSocket* pMuxSocket,HCHANNEL channelIn)
 	{
@@ -395,8 +395,8 @@ SINT32 CAFirstMixChannelList::removeChannel(CAMuxSocket* pMuxSocket,HCHANNEL cha
 
 /** Gets the first connection of all connections in the list.
 	* @see getNext()
-	* @ret first connection in the list
-	* @retval NULL, if no connection is in the list
+	* @return first connection in the list
+	* @retval NULL if no connection is in the list
 	*/
 fmHashTableEntry* CAFirstMixChannelList::getFirst()
 	{
@@ -409,8 +409,8 @@ fmHashTableEntry* CAFirstMixChannelList::getFirst()
 
 /** Gets the next entry in the connections-list.
 	* @see getFirst()
-	* @ret next entry in the connection list
-	* @retval NULL, in case of an error
+	* @return next entry in the connection list
+	* @retval NULL in case of an error
 	*/
 fmHashTableEntry* CAFirstMixChannelList::getNext()
 	{
@@ -420,11 +420,11 @@ fmHashTableEntry* CAFirstMixChannelList::getNext()
 		return tmpEntry;
 	}
 
-/** Gets the first channel for a given connection
+/** Gets the first channel for a given connection.
 	* @see getNextChannel()
 	* @param pMuxSocket the connection from the user
-	* @ret the channel and the associated information
-	* @retval NULL, if no channel for this connection exists at the moment
+	* @return the channel and the associated information
+	* @retval NULL if no channel for this connection exists at the moment
 	*/
 fmChannelListEntry* CAFirstMixChannelList::getFirstChannelForSocket(CAMuxSocket* pMuxSocket)
 	{
@@ -439,9 +439,9 @@ fmChannelListEntry* CAFirstMixChannelList::getFirstChannelForSocket(CAMuxSocket*
 
 /** Gets the next channel for a given connection.
 	* @see getFirstChannelForSocket()
-	* @param a entry returned by a previos call to getFirstChannelForSocket() or getNextChannel()
-	* @ret the next channel and all associated information
-	* @retval NULL, if there are no more channels for this connection
+	* @param pEntry a entry returned by a previos call to getFirstChannelForSocket() or getNextChannel()
+	* @return the next channel and all associated information
+	* @retval NULL if there are no more channels for this connection
 	*/
 fmChannelListEntry* CAFirstMixChannelList::getNextChannel(fmChannelListEntry* pEntry)
 	{

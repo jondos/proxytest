@@ -35,114 +35,25 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAUtil.hpp"
 extern CACmdLnOptions options;
 
-/**
-	This class implements the Output Stream interface required by XML::Output. 
-	It stores all the data in a memory buffer.
-*/
-class BufferOutputStream:public XMLOutputStream
-	{
-		public:
-			/** Constructs a new buffered Output Stream.
-			@param initsize	the inital size of the buffer that holds the streamed data
-							If initsize=0 then the default value is 1 kilo byte (so initsize=1024)
-			@param grow the number of bytes by which the buffer is increased, if needed. 
-									If grow=0 then the initial size is used (so grow=initsize)
-			**/
-			BufferOutputStream(UINT32 initsize=0,UINT32 grow=0)
-				{
-					if(initsize==0)
-						initsize=1024;
-					m_buffer=(UINT8*)malloc(initsize);
-					if(m_buffer==NULL)
-						m_size=0;
-					else
-						m_size=initsize;
-					m_used=0;
-					if(grow>0)
-						m_grow=grow;
-					else
-						m_grow=initsize;
-				}
-			
-			/** Releases the memory for the buffer.**/
-			virtual ~BufferOutputStream()
-				{
-					if(m_buffer!=NULL)
-						free(m_buffer);
-				}
 
-	/** write up to bufLen characters to an output source (memory buffer).
-		@param buf		source buffer
-		@param bufLen	number of characters to write
-		@return 		the number of characters actually written - if this
-						number is less than bufLen, there was an error (which is acctually E_UNKNOWN)
-	*/			
-			int write(const char *buf, size_t bufLen)
-				{
-					if(m_size-m_used<bufLen)
-						{
-							UINT8* tmp=(UINT8*)realloc(m_buffer,m_size+m_grow);
-							if(tmp==NULL)
-								{
-									return E_UNKNOWN;	
-								}
-							m_size+=m_grow;
-							m_buffer=tmp;
-						}
-					memcpy(m_buffer+m_used,buf,bufLen);
-					m_used+=bufLen;
-					return bufLen;
-				}
-
-			/** Gets the buffer.
-			@return a pointer to the buffer which holds the already streamed data. May be NULL.
-			*/
-			UINT8* getBuff()
-				{
-					return m_buffer;
-				}
-			
-			/** Gets the number of bytes which are stored in the output buffer.
-			@return number of bytes writen to the stream.
-			*/
-			UINT32 getBufferSize()
-				{
-					return m_used;	
-				}
-
-			/** Resets the stream. All data is trashed and the next output will be writen to the beginn of the buffer.
-			@return always E_SUCCESS
-			*/
-			SINT32 reset()
-				{
-					m_used=0;
-					return E_SUCCESS;
-				}
-
-		private:
-			UINT8* m_buffer; ///The buffer which stores the data
-			UINT32 m_size; ///The size of the buffer in which the streaming data is stored 
-			UINT32 m_used; ///The number of bytes already used of the buffer
-			UINT32 m_grow; ///The number of bytes by which the buffer should grow if neccesary
-	};
 
 THREAD_RETURN InfoLoop(void *p)
 	{
 		CAInfoService* pInfoService=(CAInfoService*)p;
-		CASocket oSocket;
-		CASocketAddrINet oAddr;
-		CASignature* pSignature=pInfoService->getSignature();
-		UINT8* buff=new UINT8[1024];
-		UINT8 buffHeader[255];
-		options.getInfoServerHost(buff,1024);
-		oAddr.setAddr(buff,options.getInfoServerPort());
-		BufferOutputStream oBufferStream(1024,1024);
-		XMLOutput oxmlOut(oBufferStream);
-		SINT32 tmpUser,tmpRisk,tmpTraffic;
-		UINT32 tmpPackets;
-		UINT32 buffLen;
-		UINT8 strAnonServer[255];
-		if(options.getServerHost((UINT8*)strAnonServer,255)!=E_SUCCESS)
+	//	CASocket oSocket;
+	//	CASocketAddrINet oAddr;
+	//	CASignature* pSignature=pInfoService->getSignature();
+	//	UINT8* buff=new UINT8[1024];
+//		UINT8 buffHeader[255];
+	//	options.getInfoServerHost(buff,1024);
+	//	oAddr.setAddr(buff,options.getInfoServerPort());
+	//	BufferOutputStream oBufferStream(1024,1024);
+	//	XMLOutput oxmlOut(oBufferStream);
+//		UINT32 buffLen;
+//		UINT8 strAnonServer[255];
+	//	UINT8 strMixId[255];
+//		options.getMixId(strMixId,255);
+/*		if(options.getServerHost((UINT8*)strAnonServer,255)!=E_SUCCESS)
 			CASocketAddrINet::getLocalHostIP(buff);
 		else
 			{
@@ -151,56 +62,15 @@ THREAD_RETURN InfoLoop(void *p)
 				oAddr.getIP(buff);
 			}
 		sprintf((char*)strAnonServer,"%u.%u.%u.%u%%3A%u",buff[0],buff[1],buff[2],buff[3],options.getServerPort());
-		int helocount=10;
+*/		int helocount=10;
 
 		//Must be changed to UINT64 ....
-		UINT32 avgTraffic=0;		
-		UINT32 lastMixedPackets=0;
-		UINT32 minuts=1;
-		UINT32 diffTraffic;
-		double dTmp;
+//		UINT32 avgTraffic=0;		
+//	UINT32 diffTraffic;
+//		double dTmp;
 		while(pInfoService->getRun())
 			{
-				if(oSocket.connect(oAddr)==E_SUCCESS)
-					{
-						oBufferStream.reset();
-						oxmlOut.BeginDocument("1.0","UTF-8",true);
-						oxmlOut.BeginElementAttrs("MixCascadeStatus");
-						oxmlOut.WriteAttr("id",(char*)strAnonServer);
-						tmpUser=tmpPackets=tmpRisk=tmpTraffic=-1;
-						pInfoService->getLevel(&tmpUser,&tmpRisk,&tmpTraffic);
-						pInfoService->getMixedPackets((UINT32*)&tmpPackets);
-						avgTraffic=tmpPackets/minuts;
-						minuts++;
-						diffTraffic=tmpPackets-lastMixedPackets;
-						if(avgTraffic==0)
-							{
-								if(diffTraffic==0)
-									tmpTraffic=0;
-								else
-									tmpTraffic=100;
-							}
-						else
-							{
-								dTmp=(double)diffTraffic/(double)avgTraffic;
-								tmpTraffic=min(SINT32(50.*dTmp),100);
-							}
-						lastMixedPackets=tmpPackets;
-					
-						oxmlOut.WriteAttr("nrOfActiveUsers",(int)tmpUser);
-						oxmlOut.WriteAttr("currentRisk",(int)tmpRisk);
-						oxmlOut.WriteAttr("trafficSituation",(int)tmpTraffic);
-						oxmlOut.WriteAttr("mixedPackets",(int)tmpPackets);
-						oxmlOut.EndAttrs();
-						oxmlOut.EndElement();
-						oxmlOut.EndDocument();
-						buffLen=1024;
-						pSignature->signXML(oBufferStream.getBuff(),oBufferStream.getBufferSize(),(UINT8*)buff,&buffLen);
-						sprintf((char*)buffHeader,"POST /feedback HTTP/1.0\r\nContent-Length: %u\r\n\r\n",buffLen);
-						oSocket.send(buffHeader,strlen((char*)buffHeader));
-						oSocket.send(buff,buffLen);
-					}
-				oSocket.close();	
+				pInfoService->sendStatus();
 				if(helocount==0)
 					{
 						pInfoService->sendHelo();
@@ -210,8 +80,16 @@ THREAD_RETURN InfoLoop(void *p)
 				 helocount--;
 				sSleep(60);
 			}
-		delete []buff;
+//		delete []buff;
 		THREAD_RETURN_SUCCESS;
+	}
+
+CAInfoService::CAInfoService()
+	{
+		m_pFirstMix=NULL;
+		m_NumberOfMixes=0;
+		m_bRun=false;
+		m_pSignature=NULL;
 	}
 
 CAInfoService::CAInfoService(CAFirstMix* pFirstMix,UINT32 numberOfMixes)
@@ -282,6 +160,8 @@ SINT32 CAInfoService::start()
 		if(m_pSignature==NULL)
 			return E_UNKNOWN;
 		m_bRun=true;
+		m_lastMixedPackets=0;
+		m_minuts=1;
 		m_threadRunLoop.setMainLoop(InfoLoop);
 		return m_threadRunLoop.start(this);
 	}
@@ -293,6 +173,68 @@ SINT32 CAInfoService::stop()
 				m_bRun=false;
 				m_threadRunLoop.join();
 			}
+		return E_SUCCESS;
+	}
+
+SINT32 CAInfoService::sendStatus()
+	{
+		if(!options.isFirstMix())
+			return E_SUCCESS;
+		CASocket oSocket;
+		CASocketAddrINet oAddr;
+		UINT8 hostname[255];
+		UINT8 buffHeader[255];
+		SINT32 tmpUser,tmpRisk,tmpTraffic;
+		UINT32 tmpPackets;
+		if(options.getInfoServerHost(hostname,255)!=E_SUCCESS)
+			return E_UNKNOWN;
+		oAddr.setAddr(hostname,options.getInfoServerPort());
+		if(oSocket.connect(oAddr)==E_SUCCESS)
+			{
+				BufferOutputStream oBufferStream(1024,1024);
+				XMLOutput oxmlOut(oBufferStream);
+				oBufferStream.reset();
+				oxmlOut.BeginDocument("1.0","UTF-8",true);
+				oxmlOut.BeginElementAttrs("MixCascadeStatus");
+				UINT8 strMixId[255];
+				options.getMixId(strMixId,255);
+				oxmlOut.WriteAttr("id",(char*)strMixId);
+				tmpUser=tmpPackets=tmpRisk=tmpTraffic=-1;
+				getLevel(&tmpUser,&tmpRisk,&tmpTraffic);
+				getMixedPackets((UINT32*)&tmpPackets);
+				UINT32 avgTraffic=tmpPackets/m_minuts;
+				m_minuts++;
+				UINT32 diffTraffic=tmpPackets-m_lastMixedPackets;
+				if(avgTraffic==0)
+					{
+						if(diffTraffic==0)
+							tmpTraffic=0;
+						else
+							tmpTraffic=100;
+					}
+				else
+					{
+						double dTmp=(double)diffTraffic/(double)avgTraffic;
+						tmpTraffic=min(SINT32(50.*dTmp),100);
+					}
+				m_lastMixedPackets=tmpPackets;
+			
+				oxmlOut.WriteAttr("nrOfActiveUsers",(int)tmpUser);
+				oxmlOut.WriteAttr("currentRisk",(int)tmpRisk);
+				oxmlOut.WriteAttr("trafficSituation",(int)tmpTraffic);
+				oxmlOut.WriteAttr("mixedPackets",(int)tmpPackets);
+				oxmlOut.EndAttrs();
+				oxmlOut.EndElement();
+				oxmlOut.EndDocument();
+				UINT32 buffLen=1024;
+				UINT8* buff=new UINT8[buffLen];
+				m_pSignature->signXML(oBufferStream.getBuff(),oBufferStream.getBufferSize(),(UINT8*)buff,&buffLen);
+				sprintf((char*)buffHeader,"POST /feedback HTTP/1.0\r\nContent-Length: %u\r\n\r\n",buffLen);
+				oSocket.send(buffHeader,strlen((char*)buffHeader));
+				oSocket.send(buff,buffLen);
+				delete[] buff;
+			}
+		oSocket.close();	
 		return E_SUCCESS;
 	}
 
@@ -308,60 +250,66 @@ SINT32 CAInfoService::sendHelo()
 		oAddr.setAddr(hostname,options.getInfoServerPort());
 		if(oSocket.connect(oAddr)==E_SUCCESS)
 			{
-				BufferOutputStream oBufferStream(1024,1024);
 				UINT8* buff=new UINT8[1024];
 				if(buff==NULL)
 					return E_UNKNOWN;
-				XMLOutput oxmlOut(oBufferStream);
-				oBufferStream.reset();
 				UINT buffLen;
-				oxmlOut.BeginDocument("1.0","UTF-8",true);
-				oxmlOut.BeginElementAttrs("MixCascade");
-				
-				if(options.getServerHost(hostname,255)!=E_SUCCESS)
+				if(options.isFirstMix())
 					{
-						CASocketAddrINet::getLocalHostIP(buff);
-						CASocketAddrINet::getLocalHostName(hostname,255);
+					 //the following has to be moved to CACmndLnOptions
+						BufferOutputStream oBufferStream(1024,1024);
+						XMLOutput oxmlOut(oBufferStream);
+						oBufferStream.reset();
+						oxmlOut.BeginDocument("1.0","UTF-8",true);
+						oxmlOut.BeginElementAttrs("MixCascade");
+						
+						if(options.getServerHost(hostname,255)!=E_SUCCESS)
+							{
+								CASocketAddrINet::getLocalHostName(hostname,255);
+							}
+						options.getMixId(id,50);
+						oxmlOut.WriteAttr("id",(char*)id);
+						oxmlOut.EndAttrs();
+						if(options.getCascadeName(buff,1024)!=E_SUCCESS)
+							{
+								delete []buff;
+								return E_UNKNOWN;
+							}
+						oxmlOut.WriteElement("Name",(char*)buff);
+						oxmlOut.WriteElement("IP",(char*)hostname);
+						oxmlOut.WriteElement("Port",(int)options.getServerPort());
+						if(options.getProxySupport())
+        			oxmlOut.WriteElement("ProxyPort",(int)443);
+						oxmlOut.BeginElementAttrs("Mixes");
+						oxmlOut.WriteAttr("count",(int)m_NumberOfMixes);
+						oxmlOut.EndAttrs();
+						oxmlOut.EndElement();
+						oxmlOut.EndElement();
+						oxmlOut.EndDocument();
+						buffLen=1024;
+						if(m_pSignature->signXML(oBufferStream.getBuff(),oBufferStream.getBufferSize(),(UINT8*)buff,&buffLen)!=E_SUCCESS)
+							{delete []buff;return E_UNKNOWN;}
 					}
 				else
 					{
-						CASocketAddrINet oAddr;
-						oAddr.setAddr(hostname,0);
-						oAddr.getIP(buff);
+						buffLen=1024;
+						UINT8* tmpBuff=new UINT8[1024];
+						if(options.getMixXml(tmpBuff,1024)!=E_SUCCESS)
+							{
+								delete [] tmpBuff;
+								return E_UNKNOWN;
+							}
+						if(m_pSignature->signXML(tmpBuff,strlen((char*)tmpBuff),(UINT8*)buff,&buffLen)!=E_SUCCESS)
+							{delete []tmpBuff;delete []buff;return E_UNKNOWN;}
+						delete[] tmpBuff;
 					}
-				sprintf((char*)id,"%u.%u.%u.%u%%3A%u",buff[0],buff[1],buff[2],buff[3],options.getServerPort());
-				oxmlOut.WriteAttr("id",(char*)id);
-				oxmlOut.EndAttrs();
-				if(options.getCascadeName(buff,1024)!=E_SUCCESS)
-					{
-						delete []buff;
-						return E_UNKNOWN;
-					}
-				oxmlOut.WriteElement("Name",(char*)buff);
-				oxmlOut.WriteElement("IP",(char*)hostname);
-				oxmlOut.WriteElement("Port",(int)options.getServerPort());
-        if(options.getProxySupport())
-        	oxmlOut.WriteElement("ProxyPort",(int)443);
-				oxmlOut.BeginElementAttrs("Mixes");
-				oxmlOut.WriteAttr("count",(int)m_NumberOfMixes);
-				oxmlOut.EndAttrs();
-				oxmlOut.EndElement();
-				oxmlOut.EndElement();
-				oxmlOut.EndDocument();
-				buffLen=1024;
-				if(m_pSignature->signXML(oBufferStream.getBuff(),oBufferStream.getBufferSize(),(UINT8*)buff,&buffLen)!=E_SUCCESS)
-					{delete []buff;return E_UNKNOWN;}
 				sprintf((char*)buffHeader,"POST /helo HTTP/1.0\r\nContent-Length: %u\r\n\r\n",buffLen);
 				oSocket.send(buffHeader,strlen((char*)buffHeader));
 				oSocket.send(buff,buffLen);
 				oSocket.close();
 				delete []buff;		
 				return E_SUCCESS;	
-/*_LABEL_ERROR:
-				if(buff!=NULL)
-					delete buff;
-				return E_UNKNOWN;
-*/			}
+			}
 		return E_UNKNOWN;
 	}
 

@@ -35,7 +35,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketAddrUnix.hpp"
 #include "CASocketAddrINet.hpp"
 #include "CAUtil.hpp"
-
+#include "CAInfoService.hpp"
 
 extern CACmdLnOptions options;
 
@@ -69,6 +69,28 @@ SINT32 CALastMix::initOnce()
 		UINT8 strTarget[255];
 		options.getSOCKSHost(strTarget,255);
 		maddrSocks.setAddr(strTarget,options.getSOCKSPort());
+
+		SINT32 ret=E_UNKNOWN;
+		int handle;
+		SINT32 len;
+		UINT8* fileBuff=new UINT8[2048];
+		if(fileBuff==NULL||options.getKeyFileName(fileBuff,2048)!=E_SUCCESS)
+			goto END;
+		handle=open((char*)fileBuff,O_BINARY|O_RDONLY);
+		if(handle==-1)
+			goto END;
+		len=read(handle,fileBuff,2048);
+		close(handle);
+		if(len<1)
+			goto END;
+		m_pSignature=new CASignature();
+		if(m_pSignature->setSignKey(fileBuff,len,SIGKEY_XML)!=E_SUCCESS)
+			{
+				delete m_pSignature;
+				m_pSignature=NULL;
+			}
+END:		
+		delete []fileBuff;
 		return E_SUCCESS;
 	}
 
@@ -157,6 +179,13 @@ SINT32 CALastMix::loop()
 		muxIn.setCrypt(true);
 		bool bAktiv;
 		UINT32 countCacheAddresses=m_oCacheLB.getElementCount();
+		CAInfoService* pInfoService=NULL;
+		if(m_pSignature!=NULL&&options.isInfoServiceEnabled())
+			{
+				pInfoService=new CAInfoService();
+				pInfoService->setSignature(m_pSignature);
+				pInfoService->start();
+			}
 		for(;;)
 			{
 				bAktiv=false;
@@ -421,6 +450,10 @@ SINT32 CALastMix::loop()
 
 ERR:
 		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
+		if(pInfoService!=NULL)
+			{
+				delete pInfoService;
+			}
 		tmpCon=oSocketList.getFirst();
 		while(tmpCon!=NULL)
 			{

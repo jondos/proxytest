@@ -33,9 +33,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 class CAInfoService
 	{
 		public:
+			CAInfoService();
 			CAInfoService(CAFirstMix* pFirstMix,UINT32 numberOfMixes);
 			~CAInfoService();
 			SINT32 sendHelo();
+			SINT32 sendStatus();
 			SINT32 start();
 			SINT32 stop();
 			//SINT32 setLevel(SINT32 user,SINT32 risk,SINT32 traffic);
@@ -53,4 +55,6 @@ class CAInfoService
 			CASignature*	m_pSignature;
 			CAFirstMix*		m_pFirstMix;
 			CAThread			m_threadRunLoop;
+			UINT32				m_lastMixedPackets;
+			UINT32				m_minuts;
 	};
