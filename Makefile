@@ -2,8 +2,8 @@
 .SUFFIXES: .o .cpp	
 
 #CC=gcc
-#CC=CC -mips4 -64
-CC=gcc -mcpu=ultrasparc
+CC=CC -mips4 -64
+#CC=gcc -mcpu=ultrasparc
 #INCLUDE = -I. -I/usr/local/ssl/include -I/usr/users/sya/sk13/openssl/include -I/home/imis/mix/openssl64/include -I/sun/ikt/sk13/openssl/include
 INCLUDE = -I. -I/usr/users/sya/sk13/openssl/include -I/home/imis/mix/openssl64/include -I/sun/ikt/sk13/openssl/include
 #LIBS	= -L/usr/local/ssl/lib -L/usr/users/sya/sk13/openssl/lib -L/home/imis/mix/openssl64/lib -L/sun/ikt/sk13/openssl/lib ./popt/popt.a ./httptunnel/httptunnel.a ./xml/xml.a -lcrypto -lpthread
@@ -50,13 +50,13 @@ debug: $(OBJS) popt.a httptunnel.a xml.a
 	$(CC) -o proxytest $(OBJS) $(LIBS)
 
 popt.a:
-	cd popt;$(MAKE)
+	cd popt;$(MAKE) 'CC=$(CC)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)'
 
 httptunnel.a:
-	cd httptunnel;$(MAKE);
+	cd httptunnel;$(MAKE) 'CC=$(CC)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)';
 
 xml.a: 
-	cd xml;$(MAKE);
+	cd xml;$(MAKE) 'CC=$(CC)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)';
 
 clean:
 	rm -f $(OBJS)

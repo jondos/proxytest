@@ -1,8 +1,8 @@
-CC=gcc
+#CC=gcc
 #CC=CC -mips4 -64
-INCLUDE = -I. -I/usr/local/ssl/include -I/usr/users/sya/sk13/openssl/include -I/home/imis/mix/openssl64/include -I/sun/ikt/sk13/openssl/include
+#INCLUDE = -I. -I/usr/local/ssl/include -I/usr/users/sya/sk13/openssl/include -I/home/imis/mix/openssl64/include -I/sun/ikt/sk13/openssl/include
 #CPPFLAGS =-O3 -Wall 
-CPPFLAGS =-O3 -D_REENTRANT
+#CPPFLAGS =-O3 -D_REENTRANT
 #DEBUG =-D_DEBUG -g
 
 xml.a: xmloutput.cpp xmlinput.cpp xmlinput_c.c  

@@ -39,9 +39,13 @@ int CAMsg::printMsg(int type,char* format,...)
 		if(oMsg.isLog)
 	    {
 				#ifndef _WIN32
+				#ifdef HAVE_VSYSLOG
+					vsyslog(type,format,ap);
+				#else
 					char buff[1024];
 					vsnprintf(buff,1024,format,ap);
 					syslog(type,buff);
+				#endif	
 				#endif
 	    }
 		else
