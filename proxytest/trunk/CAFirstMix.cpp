@@ -583,24 +583,26 @@ LOOP_START:
 										{
 											pnewMuxSocket->close();
 											delete pnewMuxSocket;
-											goto LOOP_START;
 										}
+									else
+										{
 //Weiter wie bisher...								
-								#ifdef _DEBUG
-									int ret=((CASocket*)pnewMuxSocket)->setKeepAlive(true);
-									if(ret!=E_SUCCESS)
-										CAMsg::printMsg(LOG_DEBUG,"Fehler bei KeepAlive!");
-								#else
-									((CASocket*)pnewMuxSocket)->setKeepAlive(true);
-								#endif
-#ifdef _ASYNC
-								((CASocket*)pnewMuxSocket)->setASyncSend(true,MUXPACKET_SIZE,0,0,this);
-#endif
-								((CASocket*)pnewMuxSocket)->send(mKeyInfoBuff,mKeyInfoSize);
-								oMuxChannelList.add(pnewMuxSocket);
-								nUser++;
-								oInfoService.setLevel(nUser,-1,-1);
-								oSocketGroup.add(*pnewMuxSocket);
+											#ifdef _DEBUG
+												int ret=((CASocket*)pnewMuxSocket)->setKeepAlive(true);
+												if(ret!=E_SUCCESS)
+													CAMsg::printMsg(LOG_DEBUG,"Fehler bei KeepAlive!");
+											#else
+												((CASocket*)pnewMuxSocket)->setKeepAlive(true);
+											#endif
+			#ifdef _ASYNC
+											((CASocket*)pnewMuxSocket)->setASyncSend(true,MUXPACKET_SIZE,0,0,this);
+			#endif
+											((CASocket*)pnewMuxSocket)->send(mKeyInfoBuff,mKeyInfoSize);
+											oMuxChannelList.add(pnewMuxSocket);
+											nUser++;
+											oInfoService.setLevel(nUser,-1,-1);
+											oSocketGroup.add(*pnewMuxSocket);
+										}
 							}
 					}
 			if(bProxySupport&&oSocketGroup.isSignaled(m_socketHttpsIn))
@@ -623,28 +625,31 @@ LOOP_START:
 									{
 										pnewMuxSocket->close();
 										delete pnewMuxSocket;
-										goto LOOP_START;
 									}
-//Weiter wie bisher...
-								#ifdef _DEBUG
-									int ret=((CASocket*)pnewMuxSocket)->setKeepAlive(true);
-									if(ret!=E_SUCCESS)
-										CAMsg::printMsg(LOG_DEBUG,"Fehler bei KeepAlive!");
-								#else
-									((CASocket*)pnewMuxSocket)->setKeepAlive(true);
-								#endif
-#ifdef _ASYNC
-								((CASocket*)pnewMuxSocket)->setASyncSend(true,MUXPACKET_SIZE,0,0,this);
-#endif
-								((CASocket*)pnewMuxSocket)->send(mKeyInfoBuff,mKeyInfoSize);
-								oMuxChannelList.add(pnewMuxSocket);
-								nUser++;
-								oInfoService.setLevel(nUser,-1,-1);
-								oSocketGroup.add(*pnewMuxSocket);
+								else
+									{
+		//Weiter wie bisher...
+										#ifdef _DEBUG
+											int ret=((CASocket*)pnewMuxSocket)->setKeepAlive(true);
+											if(ret!=E_SUCCESS)
+												CAMsg::printMsg(LOG_DEBUG,"Fehler bei KeepAlive!");
+										#else
+											((CASocket*)pnewMuxSocket)->setKeepAlive(true);
+										#endif
+		#ifdef _ASYNC
+										((CASocket*)pnewMuxSocket)->setASyncSend(true,MUXPACKET_SIZE,0,0,this);
+		#endif
+										((CASocket*)pnewMuxSocket)->send(mKeyInfoBuff,mKeyInfoSize);
+										oMuxChannelList.add(pnewMuxSocket);
+										nUser++;
+										oInfoService.setLevel(nUser,-1,-1);
+										oSocketGroup.add(*pnewMuxSocket);
+									}
 							}
 					}
 			if(oSocketGroup.isSignaled(muxOut))
 					{
+						countRead--;
 						int countMuxOut=nUser;
 						do
 							{
