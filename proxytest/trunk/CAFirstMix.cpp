@@ -608,6 +608,7 @@ SINT32 CAFirstMix::loop()
 											}
 										else if(ret==MIXPACKET_SIZE)
 											{
+												pHashEntry->trafficIn++;
 												if(pMixPacket->flags==CHANNEL_CLOSE)
 													{
 														fmChannelListEntry* pEntry;
@@ -638,7 +639,6 @@ SINT32 CAFirstMix::loop()
 																pCipher->decryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 																m_pMuxOut->send(pMixPacket,tmpBuff);
 																m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
-																pEntry->pHead->trafficIn++;
 																incMixedPackets();
 															}
 														else if(pEntry==NULL&&(pMixPacket->flags==CHANNEL_OPEN_OLD||pMixPacket->flags==CHANNEL_OPEN_NEW))
@@ -659,7 +659,6 @@ SINT32 CAFirstMix::loop()
 																	{
 																		m_pMuxOut->send(pMixPacket,tmpBuff);
 																		m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
-																		pHashEntry->trafficIn++;
 																		incMixedPackets();
 																		#ifdef _DEBUG
 																			CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",pMixPacket->channel);
