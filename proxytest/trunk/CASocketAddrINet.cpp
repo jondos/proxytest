@@ -81,7 +81,7 @@ CASocketAddrINet::CASocketAddrINet(UINT16 port)
 SINT32 CASocketAddrINet::setAddr(char* szIP,UINT16 port)
 	{
 		UINT32 newAddr=inet_addr(szIP); //is it a doted string (a.b.c.d) ?
-		if(sin_addr.s_addr==INADDR_NONE) //if not try to find the hostname
+		if(newAddr==INADDR_NONE) //if not try to find the hostname
 			{
 				EnterCriticalSection(&csGet);
 				HOSTENT* hostent=gethostbyname(szIP); //lookup

@@ -155,7 +155,7 @@ SINT32 CASocket::connect(CASocketAddr & psa,UINT retry,UINT32 time)
 SINT32 CASocket::connect(CASocketAddr & psa,UINT msTimeOut)
 	{
 		localPort=-1;
-		if(m_Socket==0&&create()==SOCKET_ERROR)
+		if(m_Socket==0&&create(psa.getType())==SOCKET_ERROR)
 			{
 				return SOCKET_ERROR;
 			}
