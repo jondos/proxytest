@@ -3,6 +3,7 @@
 CACmdLnOptions::CACmdLnOptions()
     {
 	bDaemon=false;
+	bFirstMix=bLastMix=bMiddleMix=false;
 	iTargetPort=iServerPort=-1;
 	strTargetHost=NULL;
     }

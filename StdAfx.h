@@ -17,7 +17,7 @@
     #define THREAD_RETURN void
     #define THREAD_RETURN_ERROR return
     #define THREAD_RETURN_SUCCESS return
-		#define sleep(i) Sleep(i*1000)
+    #define sleep(i) Sleep(i*1000)
 #else
     #include <sys/socket.h>
     #include <netinet/in.h>
@@ -38,6 +38,7 @@
     #define SD_RECEIVE 0
     #define SD_SEND 1
     #define SD_BOTH 2
+    #define WSAGetLastError() errno
 
     #ifndef __linux
     	#define INADDR_NONE -1

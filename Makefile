@@ -5,7 +5,7 @@ CC=gcc
 INCLUDE = 
 LIBS	= -lpthread
 CPPFLAGS = -D_REENTRANT -O3 -Wall
-#DEBUG =-D_DEBUG -g
+DEBUG =-D_DEBUG -g
 
 OBJS_ALL=CASocket.o\
 	CASocketGroup.o\
