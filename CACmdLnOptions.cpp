@@ -117,7 +117,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 	int iCompressedLogs=0;
 	char* serverPort=NULL;
 //	char* user=NULL;
-//	int nrOfOpenFiles=-1;
+	int iVersion=-1;
 	char* configfile=NULL;
  // int bXmlKey=0;
 	DOM_Document docMixXml;
@@ -143,6 +143,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 //		{"files",'f',POPT_ARG_INT,&nrOfOpenFiles,0,"number of open files (sockets)","<filehandles>"},
 		{"template",'t',POPT_ARG_NONE,&iTemplate,0,"generate conf template and exit",NULL},
 		{"config",'c',POPT_ARG_STRING,&configfile,0,"config file to use","<file>"},
+		{"version",'v',POPT_ARG_NONE,&iVersion,0,"show version",NULL},
 		POPT_AUTOHELP
 		{NULL,0,0,
 		NULL,0,NULL,NULL}
@@ -157,6 +158,13 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 			generateTemplate();
 			exit(0);
 		}
+	if(iVersion!=0)
+		{
+			printf("Version: %s\n",MIX_VERSION);
+			printf("Using: %s!\n",OPENSSL_VERSION_TEXT);
+			exit(0);
+		}
+
 	if(configfile!=NULL)
 		{
 			
