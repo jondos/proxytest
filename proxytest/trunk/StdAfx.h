@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.03.37"
+#define MIX_VERSION "00.03.38"
 
 #if defined(DEBUG)|| defined(_DEBUG)
 	#undef DEBUG
@@ -43,7 +43,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define _DEBUG
 #endif
 //#define LOG_CHANNEL
-//#define LOG_PACKET_TIMES //computes statistics about the processing time each packet needs
+#define LOG_PACKET_TIMES //computes statistics about the processing time each packet needs
 //#define COMPRESSED_LOGS
 //#define DO_TRACE
 //#define PAYMENT_SUPPORT (outdated --> to be removed)
