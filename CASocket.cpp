@@ -168,7 +168,7 @@ SINT32 CASocket::connect(CASocketAddr & psa,UINT msTimeOut)
 			return E_UNKNOWN;
 #endif
 
-#ifndef HAVE_POOL
+//#ifndef HAVE_POOL
 		struct timeval tval;
 		tval.tv_sec=msTimeOut/1000;
 		tval.tv_usec=(msTimeOut%1000)*1000;
@@ -178,12 +178,13 @@ SINT32 CASocket::connect(CASocketAddr & psa,UINT msTimeOut)
 		FD_SET(m_Socket,&readSet);
 		FD_SET(m_Socket,&writeSet);
 		err=::select(m_Socket+1,&readSet,&writeSet,NULL,&tval);
-#else
+/*#else
 		struct pollfd opollfd;
 		opollfd.fd=m_Socket;
 		opollfd.events=POLLIN|POLLOUT;
 		err=::pool(&opollfd,1,msTimeOut);
 #endif		
+*/
 		if(err!=1) //timeout or error
 			{
 				::close(m_Socket);
