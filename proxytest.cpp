@@ -58,12 +58,11 @@ THREAD_RETURN lpIO(void *v)
 		MUXPACKET oMuxPacket;
 		int len;
 		CASocket* newSocket,*tmpSocket;
-		CASymCipher oSymCipher;
-		unsigned char key[16];
-		memset(key,0,sizeof(key));
-		oSymCipher.setEncryptionKey(key);
-		oSymCipher.setDecryptionKey(key);
+		CASymCipher* newCipher;
 		int countRead;
+		CONNECTION oConnection;		
+		unsigned char key[16];
+		memset(key,0,16);
 		for(;;)
 			{
 				if((countRead=oSocketGroup.select())==SOCKET_ERROR)
@@ -87,7 +86,10 @@ THREAD_RETURN lpIO(void *v)
 							}
 						else
 							{
-								oSocketList.add(lastChannelId++,newSocket);
+								newCipher=new CASymCipher();
+								newCipher->setDecryptionKey(key);
+								newCipher->setEncryptionKey(key);
+								oSocketList.add(lastChannelId++,newSocket,newCipher);
 								oSocketGroup.add(*newSocket);
 							}
 					}
@@ -107,7 +109,10 @@ THREAD_RETURN lpIO(void *v)
 							}
 						else
 							{
-								oSocketList.add(lastChannelId++,newSocket);
+								newCipher=new CASymCipher();
+								newCipher->setDecryptionKey(key);
+								newCipher->setEncryptionKey(key);
+								oSocketList.add(lastChannelId++,newSocket,newCipher);
 								oSocketGroup.add(*newSocket);
 							}
 					}
@@ -141,10 +146,10 @@ THREAD_RETURN lpIO(void *v)
 									#ifdef _DEBUG
 										CAMsg::printMsg(LOG_DEBUG,"Sending Data to Browser!");
 									#endif
-									CASocket* tmpSocket=oSocketList.get(oMuxPacket.channel);
-									if(tmpSocket!=NULL)
+//									CASocket* tmpSocket=oSocketList.get(oMuxPacket.channel,oConnection);
+									if(oSocketList.get(oMuxPacket.channel,&oConnection))
 										{
-											tmpSocket->send(oMuxPacket.data,len);
+											oConnection.pSocket->send(oMuxPacket.data,len);
 										}
 									else
 										{
@@ -246,10 +251,10 @@ int doLocalProxy()
 		if(lpIOPair->muxOut.connect(&addrNext)!=SOCKET_ERROR)
 			{
 				CAMsg::printMsg(LOG_INFO," connected!\n");
-				unsigned char key[16];
-				memset(key,0,16);
-				lpIOPair->muxOut.setDecryptionKey(key);
-				lpIOPair->muxOut.setEncryptionKey(key);
+//				unsigned char key[16];
+//				memset(key,0,16);
+//				lpIOPair->muxOut.setDecryptionKey(key);
+//				lpIOPair->muxOut.setEncryptionKey(key);
 				lpIO(lpIOPair);
 				ret=0;
 			}
@@ -281,6 +286,7 @@ THREAD_RETURN mmIO(void* v)
 		HCHANNEL inChannel,outChannel,lastId;
 		lastId=1;
 		int len;
+		CONNECTION oConnection;
 		MUXPACKET oMuxPacket;
 		for(;;)
 			{
@@ -297,7 +303,7 @@ THREAD_RETURN mmIO(void* v)
 								CAMsg::printMsg(LOG_CRIT,"Fehler beim Empfangen -- Exiting!\n");
 								exit(-1);
 							}
-						if(!oSocketList.get(oMuxPacket.channel,&outChannel))
+						if(!oSocketList.get(oMuxPacket.channel,&oConnection))
 							{
 								if(len!=0)
 									{
@@ -314,12 +320,12 @@ THREAD_RETURN mmIO(void* v)
 							{
 								if(len==0)
 									{
-										mmIOPair->muxOut.close(outChannel);
+										mmIOPair->muxOut.close(oConnection.outChannel);
 										oSocketList.remove(oMuxPacket.channel);
 									}
 								else
 									{
-										oMuxPacket.channel=outChannel;
+										oMuxPacket.channel=oConnection.outChannel;
 										mmIOPair->muxOut.send(&oMuxPacket);
 									}
 							}
@@ -333,17 +339,17 @@ THREAD_RETURN mmIO(void* v)
 								CAMsg::printMsg(LOG_CRIT,"Fehler beim Empfangen -- Exiting!\n");
 								exit(-1);
 							}
-						if(oSocketList.get(&inChannel,oMuxPacket.channel))
+						if(oSocketList.get(&oConnection,oMuxPacket.channel))
 							{
 								if(len!=0)
 									{
-										oMuxPacket.channel=inChannel;
+										oMuxPacket.channel=oConnection.id;
 										mmIOPair->muxIn.send(&oMuxPacket);
 									}
 								else
 									{
-										mmIOPair->muxIn.close(inChannel);
-										oSocketList.remove(inChannel);
+										mmIOPair->muxIn.close(oConnection.id);
+										oSocketList.remove(oConnection.id);
 									}
 							}
 						else
@@ -399,6 +405,7 @@ THREAD_RETURN fmIO(void *v)
 		HCHANNEL lastChannelId=1;
 		HCHANNEL outChannel;
 		MUXPACKET oMuxPacket;
+		CONNECTION oConnection;
 //		char buff[1001];
 		int len;
 		CAMuxSocket* newMuxSocket;
@@ -433,10 +440,10 @@ THREAD_RETURN fmIO(void *v)
 							}
 						else
 							{
-								unsigned char key[16];
-								memset(key,0,16);
-								newMuxSocket->setDecryptionKey(key);
-								newMuxSocket->setEncryptionKey(key);
+		//						unsigned char key[16];
+			//					memset(key,0,16);
+				//				newMuxSocket->setDecryptionKey(key);
+					//			newMuxSocket->setEncryptionKey(key);
 								oMuxChannelList.add(newMuxSocket);
 								oSocketGroup.add(*newMuxSocket);
 							}
@@ -571,10 +578,10 @@ THREAD_RETURN fmIO(void *v)
 											{
 												if(len==0)
 													{
-														if(oMuxChannelList.get(tmpEntry,oMuxPacket.channel,&outChannel))
+														if(oMuxChannelList.get(tmpEntry,oMuxPacket.channel,&oConnection))
 															{
-																fmIOPair->muxOut.close(outChannel);
-																oMuxChannelList.remove(outChannel,NULL);
+																fmIOPair->muxOut.close(oConnection.outChannel);
+																oMuxChannelList.remove(oConnection.outChannel,NULL);
 															}
 														else
 															{
@@ -585,9 +592,9 @@ THREAD_RETURN fmIO(void *v)
 													}
 												else
 													{
-														if(oMuxChannelList.get(tmpEntry,oMuxPacket.channel,&outChannel))
+														if(oMuxChannelList.get(tmpEntry,oMuxPacket.channel,&oConnection))
 															{
-																oMuxPacket.channel=outChannel;
+																oMuxPacket.channel=oConnection.outChannel;
 															}
 														else
 															{
@@ -665,6 +672,7 @@ THREAD_RETURN lmIO(void *v)
 		MUXPACKET oMuxPacket;
 		int len;
 		int countRead;
+		CONNECTION oConnection;
 		for(;;)
 			{
 				if((countRead=oSocketGroup.select())==SOCKET_ERROR)
@@ -681,15 +689,15 @@ THREAD_RETURN lmIO(void *v)
 								CAMsg::printMsg(LOG_CRIT,"Channel to previous mix closed -- Exiting!\n");
 								exit(-1);
 							}
-						CASocket* tmpSocket=oSocketList.get(oMuxPacket.channel);
-						if(tmpSocket==NULL)
+	//					CASocket* tmpSocket=oSocketList.get(oMuxPacket.channel);
+						if(!oSocketList.get(oMuxPacket.channel,&oConnection))
 							{
 								if(len!=0)
 									{
 										#ifdef _DEBUG
 										    CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
 										#endif
-										tmpSocket=new CASocket;
+										CASocket* tmpSocket=new CASocket;
 										int ret;
 										if(oMuxPacket.type==MUX_SOCKS)
 											ret=tmpSocket->connect(&lmIOPair->addrSocks);
@@ -723,22 +731,22 @@ THREAD_RETURN lmIO(void *v)
 							{
 								if(len==0)
 									{
-										oSocketGroup.remove(*tmpSocket);
-										tmpSocket->close();
+										oSocketGroup.remove(*oConnection.pSocket);
+										oConnection.pSocket->close();
 										lmIOPair->muxIn.close(oMuxPacket.channel);
 										oSocketList.remove(oMuxPacket.channel);
-										delete tmpSocket;
+										delete oConnection.pSocket;
 									}
 								else
 									{
-										len=tmpSocket->send(oMuxPacket.data,len);
+										len=oConnection.pSocket->send(oMuxPacket.data,len);
 										if(len==SOCKET_ERROR)
 											{
-												oSocketGroup.remove(*tmpSocket);
-												tmpSocket->close();
+												oSocketGroup.remove(*oConnection.pSocket);
+												oConnection.pSocket->close();
 												lmIOPair->muxIn.close(oMuxPacket.channel);
 												oSocketList.remove(oMuxPacket.channel);
-												delete tmpSocket;
+												delete oConnection.pSocket;
 											}
 									}
 							}

@@ -26,7 +26,7 @@ class CAMuxChannelList
 			MUXLISTENTRY* get(CAMuxSocket* pMuxSocket);
 			bool remove(CAMuxSocket* pMuxSocket,MUXLISTENTRY* pEntry);
 			int add(MUXLISTENTRY* pEntry,HCHANNEL in,HCHANNEL out);
-			bool get(MUXLISTENTRY* pEntry,HCHANNEL in,HCHANNEL* out);
+			bool get(MUXLISTENTRY* pEntry,HCHANNEL in,CONNECTION* out);
 			REVERSEMUXLISTENTRY* get(HCHANNEL out);
 			bool remove(HCHANNEL out,REVERSEMUXLISTENTRY* reverseEntry);
 			MUXLISTENTRY* getFirst();

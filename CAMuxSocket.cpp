@@ -11,7 +11,7 @@ char buff[255];
 CAMuxSocket::CAMuxSocket()
 	{
 		bIsTunneld=false;
-		bDecrypt=bEncrypt=false;
+//		bDecrypt=bEncrypt=false;
 	}
 	
 int CAMuxSocket::useTunnel(char* proxyhost,unsigned short proxyport)
@@ -73,7 +73,7 @@ int CAMuxSocket::close()
 			return tunnel_close(m_pTunnel);
 	}
 
-			
+/*			
 int CAMuxSocket::send(HCHANNEL channel_id,char* buff,unsigned short bufflen)
 	{
 		if(bufflen>DATA_SIZE)
@@ -84,16 +84,16 @@ int CAMuxSocket::send(HCHANNEL channel_id,char* buff,unsigned short bufflen)
 		MuxPacket.len=bufflen;
 		return send(&MuxPacket);
 	}
-	
-int CAMuxSocket::send(MUXPACKET *pPacket)
+*/	
+int CAMuxSocket::send(MUXPACKET *pPacket,CASymCipher* pCipher)
 	{
 		int MuxPacketSize=sizeof(MUXPACKET);
 		int aktIndex=0;
 		int len=0;
 		pPacket->channel=htonl(pPacket->channel);
 		pPacket->len=htons(pPacket->len);
-		if(bEncrypt)
-			oSymCipher.encrypt((unsigned char*)pPacket,sizeof(MUXPACKET));
+		if(pCipher!=NULL)
+			pCipher->encrypt((unsigned char*)pPacket,sizeof(MUXPACKET));
 		if(!bIsTunneld)
 			{
 				do
@@ -123,7 +123,7 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 			}
 		return sizeof(MUXPACKET);
 	}
-		
+/*		
 int CAMuxSocket::receive(HCHANNEL* channel_id,char* buff,unsigned short bufflen)
 	{
 		MUXPACKET MuxPacket;
@@ -141,8 +141,8 @@ int CAMuxSocket::receive(HCHANNEL* channel_id,char* buff,unsigned short bufflen)
 		memcpy(buff,MuxPacket.data,MuxPacket.len);
 		return MuxPacket.len;
 	}
-
-int CAMuxSocket::receive(MUXPACKET* pPacket)
+*/
+int CAMuxSocket::receive(MUXPACKET* pPacket,CASymCipher* pCipher)
 	{
 		int MuxPacketSize=sizeof(MUXPACKET);
 		int aktIndex=0;
@@ -179,9 +179,9 @@ int CAMuxSocket::receive(MUXPACKET* pPacket)
 				#endif
 				return SOCKET_ERROR;
 			}
-		if(bDecrypt)
+		if(pCipher!=NULL)
 			{
-				oSymCipher.decrypt((unsigned char*)pPacket,sizeof(MUXPACKET));
+				pCipher->decrypt((unsigned char*)pPacket,sizeof(MUXPACKET));
 			}
 
 		pPacket->len=ntohs(pPacket->len);	
@@ -189,13 +189,15 @@ int CAMuxSocket::receive(MUXPACKET* pPacket)
 		return pPacket->len;
 	}
 
-int CAMuxSocket::close(HCHANNEL channel_id)
+int CAMuxSocket::close(HCHANNEL channel_id,CASymCipher* pCipher)
 	{
-		char tmpBuff;
-		return send(channel_id,&tmpBuff,0);
+		MUXPACKET oPacket;
+		oPacket.channel=channel_id;
+		oPacket.len=0;
+		return send(&oPacket,pCipher);
 	}
 
-
+/*
 int CAMuxSocket::setDecryptionKey(unsigned char* key)
 	{
 		oSymCipher.setDecryptionKey(key);
@@ -209,3 +211,4 @@ int CAMuxSocket::setEncryptionKey(unsigned char* key)
 		bEncrypt=true;
 		return 0;
 	}
+	*/

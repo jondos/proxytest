@@ -2,6 +2,7 @@
 #define __CASOCKETLIST__
 #include "CASocket.hpp"
 #include "CAMuxSocket.hpp"
+#include "CASymCipher.hpp"
 
 typedef struct connlist
 	{
@@ -11,6 +12,7 @@ typedef struct connlist
 				CASocket* pSocket;
 				HCHANNEL outChannel;
 			};
+		CASymCipher* pCipher;
 		connlist* next;
 	} CONNECTIONLIST,CONNECTION;
 		
@@ -21,11 +23,11 @@ class CASocketList
 		public:
 			CASocketList();
 			~CASocketList();
-			int add(HCHANNEL id,CASocket* pSocket);
-			int add(HCHANNEL in,HCHANNEL out);
-			CASocket* get(HCHANNEL id);
-			bool	get(HCHANNEL in,HCHANNEL* out);
-			bool	get(HCHANNEL* in,HCHANNEL out);
+			int add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher=NULL);
+			int add(HCHANNEL in,HCHANNEL out,CASymCipher* pCipher=NULL);
+	//		CONNECTION get(HCHANNEL id);
+			bool	get(HCHANNEL in,CONNECTION* out);
+			bool	get(CONNECTION* in,HCHANNEL out);
 			CASocket* remove(HCHANNEL id);
 			CONNECTION* getFirst();
 			CONNECTION* getNext();

@@ -50,7 +50,7 @@ CASocketList::~CASocketList()
 		DeleteCriticalSection(&cs);
 	}
 
-int CASocketList::add(HCHANNEL id,CASocket* pSocket)
+int CASocketList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher)
 	{
 		EnterCriticalSection(&cs);
 		CONNECTIONLIST* tmp;
@@ -67,12 +67,13 @@ int CASocketList::add(HCHANNEL id,CASocket* pSocket)
 		tmp->next=connections;
 		connections=tmp;
 		connections->pSocket=pSocket;
+		connections->pCipher=pCipher;
 		connections->id=id;
 		LeaveCriticalSection(&cs);
 		return id;
 	}
 
-int CASocketList::add(HCHANNEL in,HCHANNEL out)
+int CASocketList::add(HCHANNEL in,HCHANNEL out,CASymCipher* pCipher)
 	{
 		EnterCriticalSection(&cs);
 		CONNECTIONLIST* tmp;
@@ -89,11 +90,12 @@ int CASocketList::add(HCHANNEL in,HCHANNEL out)
 		tmp->next=connections;
 		connections=tmp;
 		connections->outChannel=out;
+		connections->pCipher=pCipher;
 		connections->id=in;
 		LeaveCriticalSection(&cs);
 		return 0;
 	}
-
+/*
 CASocket* CASocketList::get(HCHANNEL id)
 	{
 		EnterCriticalSection(&cs);
@@ -113,8 +115,8 @@ CASocket* CASocketList::get(HCHANNEL id)
 		LeaveCriticalSection(&cs);
 		return NULL;
 	}
-
-bool	CASocketList::get(HCHANNEL in,HCHANNEL* out)
+*/
+bool	CASocketList::get(HCHANNEL in,CONNECTION* out)
 	{
 		EnterCriticalSection(&cs);
 		CONNECTIONLIST* tmp;
@@ -123,7 +125,8 @@ bool	CASocketList::get(HCHANNEL in,HCHANNEL* out)
 			{
 				if(tmp->id==in)
 					{
-						*out=tmp->outChannel;
+						out->outChannel=tmp->outChannel;
+						out->pCipher=tmp->pCipher;
 						LeaveCriticalSection(&cs);
 						return true;
 					}
@@ -133,7 +136,7 @@ bool	CASocketList::get(HCHANNEL in,HCHANNEL* out)
 		return false;
 	}
 
-bool	CASocketList::get(HCHANNEL* in,HCHANNEL out)
+bool	CASocketList::get(CONNECTION* in,HCHANNEL out)
 	{
 		EnterCriticalSection(&cs);
 		CONNECTIONLIST* tmp;
@@ -142,7 +145,8 @@ bool	CASocketList::get(HCHANNEL* in,HCHANNEL out)
 			{
 				if(tmp->outChannel==out)
 					{
-						*in=tmp->id;
+						in->id=tmp->id;
+						in->pCipher=tmp->pCipher;
 						LeaveCriticalSection(&cs);
 						return true;
 					}

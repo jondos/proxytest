@@ -115,7 +115,7 @@ int CAMuxChannelList::add(MUXLISTENTRY* pEntry,HCHANNEL in,HCHANNEL out)
 		return 0;
 	}
 
-bool CAMuxChannelList::get(MUXLISTENTRY* pEntry, HCHANNEL in, HCHANNEL* out)
+bool CAMuxChannelList::get(MUXLISTENTRY* pEntry, HCHANNEL in, CONNECTION* out)
 	{
 		return pEntry->pSocketList->get(in,out);
 	}

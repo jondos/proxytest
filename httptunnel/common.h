@@ -87,7 +87,7 @@ static inline ssize_t
 read_all (int fd, void *buf, size_t len)
 {
   ssize_t n, m, r;
-  long flags;
+//  long flags;
   char *rbuf = (char*)buf;
 
 //SK13
