@@ -56,6 +56,13 @@ class CALastMix:public CAMix
 		private:
 			CASocketList oSuspendList;
 
+		private:
+			friend THREAD_RETURN loopLog(void*);
+			volatile bool m_bRunLog;
+			volatile UINT32 m_logUploadedPackets;
+			volatile UINT32 m_logUploadedBytes;
+			volatile UINT32 m_logDownloadedPackets;
+			volatile UINT32 m_logDownloadedBytes;
 	};
 
 #endif

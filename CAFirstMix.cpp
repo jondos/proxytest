@@ -130,30 +130,6 @@ SINT32 CAFirstMix::init()
 		CAMsg::printMsg(LOG_CRIT,"Received Key Info lenght %u\n",ntohs(len));
 		m_pRSA=new CAASymCipher;
 		m_pRSA->generateKeyPair(1024);
-#ifndef NEW_KEY_PROTOCOL 
-		UINT8* recvBuff=new UINT8[ntohs(len)+2];
-		memcpy(recvBuff,&len,2);
-
-		if(((CASocket*)(*m_pMuxOut))->receiveFully(recvBuff+2,ntohs(len))!=E_SUCCESS)
-			{
-				CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info!\n");
-				delete []recvBuff;
-				return E_UNKNOWN;
-			}
-		CAMsg::printMsg(LOG_CRIT,"Received Key Info...\n");
-
-		UINT32 keySize=m_pRSA->getPublicKeySize();
-		m_KeyInfoSize=ntohs((*(UINT16*)recvBuff))+2;
-		m_KeyInfoBuff=new UINT8[m_KeyInfoSize+keySize];
-		memcpy(m_KeyInfoBuff,recvBuff,m_KeyInfoSize);
-		delete []recvBuff;
-		m_KeyInfoBuff[2]++; //chainlen erhoehen
-		UINT32 numberOfMixes=m_KeyInfoBuff[2];
-		m_pRSA->getPublicKey(m_KeyInfoBuff+m_KeyInfoSize,&keySize);
-		m_KeyInfoSize+=keySize;
-		(*(UINT16*)m_KeyInfoBuff)=htons(m_KeyInfoSize-2);
-		initMixCascadeInfo(NULL,m_KeyInfoBuff[2]);			
-#else
 		len=ntohs(len);
 		UINT8* recvBuff=new UINT8[len+1];
 
@@ -166,7 +142,6 @@ SINT32 CAFirstMix::init()
 		CAMsg::printMsg(LOG_CRIT,"Received Key Info...\n");
 		recvBuff[len]=0; //get the Key's from the other mixes (and the Mix-Id's...!)
 		initMixCascadeInfo(recvBuff,len+1);			
-#endif
 		
 		CASocketAddrINet socketAddrIn;
 		UINT8 serverHost[255];
@@ -1022,7 +997,6 @@ static void sMixesHandler(XMLElement &elem, void *userData)
 	*/
 SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 	{ 
-#ifdef NEW_KEY_PROTOCOL
 		//Parse the input, which is the XML send from the previos mix, containing keys and id's
 		if(recvBuff==NULL||len==0)
 			return E_UNKNOWN;
@@ -1139,42 +1113,6 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		DOM_Output::dumpToMem(docCascade,m_strXmlMixCascadeInfo,&tlen);
 		m_strXmlMixCascadeInfo[tlen]=0;
 
-#else
-		BufferOutputStream oBufferStream(1024,1024);
-		XMLOutput oxmlOut(oBufferStream);
-		oBufferStream.reset();
-		oxmlOut.BeginDocument("1.0","UTF-8",true);
-		oxmlOut.BeginElementAttrs("MixCascade");
-		UINT8 hostname[255];
-		UINT8 id[50];
-		if(options.getServerHost(hostname,255)!=E_SUCCESS)
-			{
-				CASocketAddrINet::getLocalHostName(hostname,255);
-			}
-		options.getMixId(id,50);
-		oxmlOut.WriteAttr("id",(char*)id);
-		oxmlOut.EndAttrs();
-		UINT8 name[255];
-		if(options.getCascadeName(name,255)!=E_SUCCESS)
-			{
-				return E_UNKNOWN;
-			}
-		oxmlOut.WriteElement("Name",(char*)name);
-		oxmlOut.WriteElement("IP",(char*)hostname);
-		oxmlOut.WriteElement("Port",(int)options.getServerPort());
-		if(options.getProxySupport())
-      oxmlOut.WriteElement("ProxyPort",(int)443);
-		oxmlOut.BeginElementAttrs("Mixes");
-		oxmlOut.WriteAttr("count",(int)len);
-		oxmlOut.EndAttrs();
-		oxmlOut.EndElement();
-		oxmlOut.EndElement();
-		oxmlOut.EndDocument();
-		len=oBufferStream.getBufferSize();
-		m_strXmlMixCascadeInfo=new UINT8[len+1];
-		memcpy(m_strXmlMixCascadeInfo,oBufferStream.getBuff(),len);
-		m_strXmlMixCascadeInfo[len]=0;
-#endif
 		return E_SUCCESS;
 	}
 
