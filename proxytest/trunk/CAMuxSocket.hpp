@@ -108,6 +108,7 @@ class CAMuxSocket
 					DeleteCriticalSection(&csReceive);
 				}
 			int accept(UINT16 port);
+			SINT32 accept(CASocketAddr & oAddr);
 			SINT32 connect(LPCASOCKETADDR psa);
 			SINT32 connect(LPCASOCKETADDR psa,UINT retry,UINT32 time);
 			int close();

@@ -50,8 +50,13 @@ CASocket::CASocket()
 
 SINT32 CASocket::create()
 	{
+		return create(AF_INET);
+	}
+
+SINT32 CASocket::create(int type)
+	{
 		if(m_Socket==0)
-			m_Socket=socket(AF_INET,SOCK_STREAM,0);
+			m_Socket=socket(type,SOCK_STREAM,0);
 		if(m_Socket==INVALID_SOCKET)
 			{
 				int er=errno;
@@ -68,7 +73,8 @@ SINT32 CASocket::create()
 SINT32 CASocket::listen(LPCASOCKETADDR psa)
 	{
 		localPort=-1;
-		if(m_Socket==0&&create()==SOCKET_ERROR)
+		int type=psa->getType();
+		if(m_Socket==0&&create(type)==SOCKET_ERROR)
 			return SOCKET_ERROR;
 		if(::bind(m_Socket,(LPSOCKADDR)psa,sizeof(*psa))==SOCKET_ERROR)
 		    return SOCKET_ERROR;

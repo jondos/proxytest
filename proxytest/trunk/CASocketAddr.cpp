@@ -33,10 +33,15 @@ CRITICAL_SECTION CASocketAddr::csGet;
 
 CASocketAddr::CASocketAddr()
 	{
-		sin_family=AF_INET;
-		sin_port=0;
-		sin_addr.s_addr=0;
+		m_pAddr=NULL;
+		m_Type=-1;
 	}
+
+CASocketAddr::~CASocketAddr()
+	{
+		delete m_pAddr;
+	}
+
 
 CASocketAddr::CASocketAddr(char* szIP,UINT16 port)
 	{
@@ -64,17 +69,19 @@ SINT32 CASocketAddr::destroy()
 
 SINT32 CASocketAddr::setAddr(char* szIP,UINT16 port)
 	{
-		sin_family=AF_INET;
-		sin_port=htons(port);
-		sin_addr.s_addr=inet_addr(szIP);
-		if(sin_addr.s_addr==INADDR_NONE)
+		m_pAddr=new sockaddr_in;
+		m_Type=AF_INET;
+		((sockaddr_in*)m_pAddr)->sin_family=AF_INET;
+		((sockaddr_in*)m_pAddr)->sin_port=htons(port);
+		((sockaddr_in*)m_pAddr)->sin_addr.s_addr=inet_addr(szIP);
+		if(((sockaddr_in*)m_pAddr)->sin_addr.s_addr==INADDR_NONE)
 			{
 				EnterCriticalSection(&csGet);
 				HOSTENT* hostent=gethostbyname(szIP);
 				if(hostent==NULL)
-					sin_addr.s_addr=INADDR_NONE;
+					((sockaddr_in*)m_pAddr)->sin_addr.s_addr=INADDR_NONE;
 				else
-					memcpy(&sin_addr.s_addr,hostent->h_addr_list[0],hostent->h_length);
+					memcpy(&((sockaddr_in*)m_pAddr)->sin_addr.s_addr,hostent->h_addr_list[0],hostent->h_length);
 				LeaveCriticalSection(&csGet);
 			}
 		return E_SUCCESS;
@@ -82,22 +89,24 @@ SINT32 CASocketAddr::setAddr(char* szIP,UINT16 port)
 
 SINT32 CASocketAddr::setPort(UINT16 port)
 	{
-		sin_port=htons(port);
+		((sockaddr_in*)m_pAddr)->sin_port=htons(port);
 		return E_SUCCESS;
 	}
 
 CASocketAddr::CASocketAddr(UINT16 port)
 	{
-		sin_family=AF_INET;
-		sin_port=htons(port);
-		sin_addr.s_addr=INADDR_ANY;
+		m_pAddr=new sockaddr_in;
+		m_Type=AF_INET;
+		((sockaddr_in*)m_pAddr)->sin_family=AF_INET;
+		((sockaddr_in*)m_pAddr)->sin_port=htons(port);
+		((sockaddr_in*)m_pAddr)->sin_addr.s_addr=INADDR_ANY;
 	}
 
 SINT32 CASocketAddr::getHostName(UINT8* buff,UINT32 len)
 	{
 		SINT32 ret;
 		EnterCriticalSection(&csGet);
-		HOSTENT* hosten=gethostbyaddr((const char*)&sin_addr,4,AF_INET);
+		HOSTENT* hosten=gethostbyaddr((const char*)&((sockaddr_in*)m_pAddr)->sin_addr,4,AF_INET);
 		if(hosten==NULL||hosten->h_name==NULL||strlen(hosten->h_name)>=len)
 		 ret=SOCKET_ERROR;
 		else
@@ -111,7 +120,7 @@ SINT32 CASocketAddr::getHostName(UINT8* buff,UINT32 len)
 
 UINT16 CASocketAddr::getPort()
 	{
-		return ntohs(sin_port);
+		return ntohs(((sockaddr_in*)m_pAddr)->sin_port);
 	}
 
 SINT32 CASocketAddr::getLocalHostName(UINT8* buff,UINT32 len)
@@ -155,4 +164,18 @@ SINT32 CASocketAddr::getLocalHostIP(UINT8* ip)
 			}
 		LeaveCriticalSection(&csGet);
 		return ret;
+	}
+
+SINT32 CASocketAddr::setPath(char* path)
+	{
+#ifndef _WIN32
+		m_pAddr=new sockaddr_un;
+		m_Type=AF_LOCAL;
+		((sockaddr_un*)m_pAddr)->sun_family=AF_LOCAL;
+		((sockaddr_un*)m_pAddr)->sun_len=strlen(path);
+		strcpy(((sockaddr_un*)m_pAddr)->sun_path,path);
+		return E_SUCCESS;
+#else
+		return E_UNKNOWN;
+#endif
 	}

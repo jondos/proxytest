@@ -405,7 +405,10 @@ SINT32 CAFirstMix::init()
 		CASocketAddr addrNext;
 		UINT8 strTarget[255];
 		options.getTargetHost(strTarget,255);
-		addrNext.setAddr((char*)strTarget,options.getTargetPort());
+		if(strTarget[0]=='/') //Unix-Domain
+			addrNext.setPath((char*)strTarget);
+		else
+			addrNext.setAddr((char*)strTarget,options.getTargetPort());
 		CAMsg::printMsg(LOG_INFO,"Try connecting to next Mix: %s:%u ...\n",strTarget,options.getTargetPort());
 		if(((CASocket*)muxOut)->create()!=E_SUCCESS)
 			{
