@@ -3,10 +3,14 @@
 #include "../CASocketGroup.hpp"
 #include "../CAUtil.hpp"
 #include "../CACmdLnOptions.hpp"
+#include "../CASingleSocketGroup.hpp"
 CACmdLnOptions options;
+#ifdef _DEBUG
+int sockets;
+#endif
 int main()
 {
-	printf("Waiting for 2000 (dead) connections...");
+	printf("Waiting for 1000 (dead) connections...");
 	#ifdef _WIN32
 		int err=0;
 		WSADATA wsadata;
@@ -14,10 +18,11 @@ int main()
 	#endif
 	CASocket oSocketAccept;
 	CASocketGroup oGroup(false);
+	//CASingleSocketGroup oGroup(false);
 	oSocketAccept.create();
 	oSocketAccept.setReuseAddr(true);
 	oSocketAccept.listen(5000);
-	for(int i=0;i<2000;i++)
+	for(int i=0;i<1;i++)
 	{
 		CASocket* pTmp=new CASocket();
 		if(oSocketAccept.accept(*pTmp)!=E_SUCCESS)
@@ -25,7 +30,9 @@ int main()
 			printf("accept failure\n");
 			exit(0);
 		}
-		oGroup.add(*pTmp);
+				oGroup.add(*pTmp);
+				if(oGroup.remove(*pTmp)!=E_SUCCESS)
+				printf("Error in remove!\n");
 	}
 
 	printf("Start pool speed test\n");
@@ -34,7 +41,7 @@ int main()
 		printf("Test: %u ",i);
 		UINT64 current,end;
 		getcurrentTimeMillis(current);
-		for(int j=0;j<10000;j++)
+		for(int j=0;j<1000000;j++)
 		{
 			oGroup.select(0);
 		}
