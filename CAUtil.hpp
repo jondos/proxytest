@@ -73,6 +73,12 @@ SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, DOM_DocumentFragment& doc
 SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, const UINT8* const xml, UINT32 xmllen,CAASymCipher* pRSA);
 SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, DOM_Node & root,CAASymCipher* pRSA);
 
+/** Replaces a DOM element with an encrypted version of this element*/
+SINT32 encryptXMLElement(DOM_Node &, CAASymCipher* pRSA);
+
+/** Replaces a DOM element with a deencrypted version of this element*/
+SINT32 decryptXMLElement(DOM_Node &, CAASymCipher* pRSA);
+
 inline void set64(UINT64& op1,UINT32 op2)
 	{
 #if !defined(HAVE_NATIVE_UINT64)
