@@ -34,6 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketAddrUnix.hpp"
 #include "CAThread.hpp"
 #include "CAInfoService.hpp"
+#include "CAUtil.hpp"
 #include "xml/DOM_Output.hpp"
 
 extern CACmdLnOptions options;
@@ -109,13 +110,12 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 		UINT32 count=atol(tmpStr);
 		delete tmpStr;
 		count++;
-		char tmpBuff[500];
-		sprintf(tmpBuff,"%u",count);
-		root.setAttribute("count",DOMString(tmpBuff));
+		setDOMElementAttribute(root,"count",count);
 		
 		DOM_Element mixNode=doc.createElement(DOMString("Mix"));
-		options.getMixId((UINT8*)tmpBuff,50); //the mix id...
-		mixNode.setAttribute("id",DOMString(tmpBuff));
+		UINT8 tmpBuff[50];
+		options.getMixId(tmpBuff,50); //the mix id...
+		mixNode.setAttribute("id",DOMString((char*)tmpBuff));
 
 		DOM_DocumentFragment* pDocFragment=NULL;
 		m_RSA.getPublicKeyAsDocumentFragment(pDocFragment); //the key
@@ -126,12 +126,13 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 
 		recvBuff=new UINT8[2048];
 		UINT32 outlen=2048;
-		DOM_Output::dumpToMem(doc,recvBuff,&outlen);
+		DOM_Output::dumpToMem(doc,recvBuff+2,&outlen);
 		#ifdef _DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"New Key Info size: %u\n",outlen);
 		#endif
-		
-		if(((CASocket*)*m_pMuxIn)->send(recvBuff,len)==-1)
+		len=htons(outlen);
+		memcpy(recvBuff,&len,2);
+		if(((CASocket*)*m_pMuxIn)->send(recvBuff,outlen+2)==-1)
 			{
 				CAMsg::printMsg(LOG_DEBUG,"Error sending new New Key Info\n");
 				return E_UNKNOWN;
