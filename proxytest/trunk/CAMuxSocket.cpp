@@ -166,40 +166,27 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 		int MuxPacketSize=MUXPACKET_SIZE;//sizeof(MUXPACKET);
 		int aktIndex=0;
 		int len=0;
+		int ret;
+		HCHANNEL tmpChannel=pPacket->channel;
+		UINT16 tmpFlags=pPacket->flags;
 		pPacket->channel=htonl(pPacket->channel);
-//		pPacket->len=htons(pPacket->len);
+		pPacket->flags=htonl(pPacket->flags);
+		len=m_Socket.send(((UINT8*)pPacket)+aktIndex,MuxPacketSize);
 
-//		if(!bIsTunneld)
-//			{
-			//	do
-				//	{
-						len=m_Socket.send(((UINT8*)pPacket)+aktIndex,MuxPacketSize);
-					//	MuxPacketSize-=len;
-					//	aktIndex+=len;
-					//} while(len>0&&MuxPacketSize>0);
-/*			}
-		else
-			{		
-				do
-					{
-						len=tunnel_write(m_pTunnel,(void*)"fghj",4);//((char*)pPacket)+aktIndex,MuxPacketSize);
-						return 0;
-//						MuxPacketSize-=len;
-//						aktIndex+=len;
-					} while(len>0&&MuxPacketSize>0);	
-			}
-*/
 		if(len==SOCKET_ERROR)
 			{
 				#ifdef _DEBUG
 					CAMsg::printMsg(LOG_DEBUG,"MuxSocket-Send-Error!\n");
 					CAMsg::printMsg(LOG_DEBUG,"SOCKET-ERROR: %i\n",WSAGetLastError());
 				#endif
-				return SOCKET_ERROR;
+				ret=SOCKET_ERROR;
 			}
-		if(len==E_QUEUEFULL)
-			return E_QUEUEFULL;
-		return MUXPACKET_SIZE;
+		else if(len==E_QUEUEFULL)
+			ret=E_QUEUEFULL;
+		else ret=MUXPACKET_SIZE;
+		pPacket->channel=tmpChannel;
+		pPacket->flags=tmpFlags;
+		return ret;
 	}
 #endif
 
@@ -292,6 +279,7 @@ int CAMuxSocket::receive(MUXPACKET* pPacket)
 
 //		pPacket->len=ntohs(pPacket->len);	
 		pPacket->channel=ntohl(pPacket->channel);
+		pPacket->flags=ntohl(pPacket->flags);
 		return MUXPACKET_SIZE;
 	}
 #endif
