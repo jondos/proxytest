@@ -23,8 +23,8 @@ class CASocketList
 		public:
 			CASocketList();
 			~CASocketList();
-			int add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher=NULL);
-			int add(HCHANNEL in,HCHANNEL out,CASymCipher* pCipher=NULL);
+			int add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher);
+			int add(HCHANNEL in,HCHANNEL out,CASymCipher* pCipher);
 	//		CONNECTION get(HCHANNEL id);
 			bool	get(HCHANNEL in,CONNECTION* out);
 			bool	get(CONNECTION* in,HCHANNEL out);

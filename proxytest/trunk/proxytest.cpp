@@ -65,6 +65,7 @@ THREAD_RETURN lpIO(void *v)
 		unsigned char key[16];
 		memset(key,0,16);
 		unsigned char chainlen=lpIOPair->chainlen;
+		chainlen=2;
 		for(;;)
 			{
 				if((countRead=oSocketGroup.select())==SOCKET_ERROR)
