@@ -101,7 +101,7 @@ THREAD_RETURN InfoLoop(void *p)
 	//					oSocket.close();
 					}
 				oSocket.close();	
-				sleep(60);
+				sleep(5/*60*/);
 			}
 		delete buff;
 	}
