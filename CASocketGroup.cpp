@@ -50,6 +50,8 @@ CASocketGroup::CASocketGroup()
 				{
 					m_pollfd_read[i].events=POLLIN;
 					m_pollfd_write[i].events=POLLOUT;	
+					m_pollfd_read[i].fd=-1;
+					m_pollfd_write[i].fd=-1;	
 				}
 		#endif
 		InitializeCriticalSection(&m_csFD_SET);
@@ -104,8 +106,8 @@ SINT32 CASocketGroup::remove(CASocket&s)
 			#endif
 			FD_CLR((SOCKET)s,&m_fdset);
 		#else
-			m_pollfd_read[(SOCKET)s].fd=0;
-			m_pollfd_write[(SOCKET)s].fd=0;			
+			m_pollfd_read[(SOCKET)s].fd=-1;
+			m_pollfd_write[(SOCKET)s].fd=-1;			
 		#endif
 		LeaveCriticalSection(&m_csFD_SET);
 		return E_SUCCESS;
@@ -120,8 +122,8 @@ SINT32 CASocketGroup::remove(CAMuxSocket&s)
 			#endif
 			FD_CLR((SOCKET)s,&m_fdset);
 		#else
-			m_pollfd_read[(SOCKET)s].fd=0;
-			m_pollfd_write[(SOCKET)s].fd=0;			
+			m_pollfd_read[(SOCKET)s].fd=-1;
+			m_pollfd_write[(SOCKET)s].fd=-1;			
 		#endif
 		LeaveCriticalSection(&m_csFD_SET);
 		return E_SUCCESS;
