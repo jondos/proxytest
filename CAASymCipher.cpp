@@ -30,7 +30,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAASymCipher.hpp"
 #include "CABase64.hpp"
 #include "CAUtil.hpp"
-#include "xml/xmlinput.h"
+#include "xml/DOM_Output.hpp"
 CAASymCipher::CAASymCipher()
 	{
 		m_pRSA=NULL;
@@ -215,27 +215,46 @@ SINT32 CAASymCipher::getPublicKeyAsXML(UINT8* buff,UINT32 *len)
 	{
 		if(m_pRSA==NULL||buff==NULL)
 			return E_UNKNOWN;
-		memcpy(buff,"<RSAKeyValue><Modulus>",22);
-		UINT32 aktIndex=22;
-		UINT32 size=*len-aktIndex;
-		UINT8 tmpBuff[256];
-		BN_bn2bin(m_pRSA->n,tmpBuff);
-		CABase64::encode(tmpBuff,BN_num_bytes(m_pRSA->n),buff+aktIndex,&size);
-		aktIndex+=size;
-		memcpy(buff+aktIndex,"</Modulus><Exponent>",20);
-		aktIndex+=20;
-		BN_bn2bin(m_pRSA->e,tmpBuff);
-		size=*len-aktIndex;
-		CABase64::encode(tmpBuff,BN_num_bytes(m_pRSA->e),buff+aktIndex,&size);
-		aktIndex+=size;
-		memcpy((char*)buff+aktIndex,"</Exponent></RSAKeyValue>",25);
-		*len=aktIndex+25;
+		DOM_DocumentFragment* pDFrag=NULL;
+		getPublicKeyAsDocumentFragment(pDFrag);
+		DOM_Output::dumpToMem(*pDFrag,buff,len);
+		delete pDFrag;
 		return E_SUCCESS;
 	}
 
+SINT32 CAASymCipher::getPublicKeyAsDocumentFragment(DOM_DocumentFragment* & dFrag)
+	{
+		if(m_pRSA==NULL)
+			return E_UNKNOWN;
+		dFrag=new DOM_DocumentFragment();
+		DOM_Document doc=DOM_Document::createDocument();
+		DOM_Element& root=doc.createElement(DOMString("RSAKeyValue"));
+		*dFrag=doc.createDocumentFragment();
+		
+		DOM_Element & nodeModulus=doc.createElement(DOMString("Modulus"));
+		root.appendChild(nodeModulus);
+		UINT8 tmpBuff[256];
+		UINT32 size=256;
+		BN_bn2bin(m_pRSA->n,tmpBuff);
+		CABase64::encode(tmpBuff,BN_num_bytes(m_pRSA->n),tmpBuff,&size);
+		tmpBuff[size]=0;
+		DOM_Text& tmpTextNode=doc.createTextNode(DOMString((char*)tmpBuff));
+		nodeModulus.appendChild(tmpTextNode);
 
+		DOM_Element& nodeExponent=doc.createElement(DOMString("Exponent"));
+		BN_bn2bin(m_pRSA->e,tmpBuff);
+		size=256;
+		CABase64::encode(tmpBuff,BN_num_bytes(m_pRSA->e),tmpBuff,&size);
+		tmpBuff[size]=0;
+		tmpTextNode=doc.createTextNode(DOMString((char*)tmpBuff));
+		nodeExponent.appendChild(tmpTextNode);
 
+		root.appendChild(nodeExponent);
+		dFrag->appendChild(root);
+		return E_SUCCESS;
+	}
 
+/*
 //XML Decode...
 static void sRSAKeyParamValueHandler(XMLElement &elem, void *userData)
 {
@@ -270,7 +289,7 @@ static void sRSAKeyValueHandler(XMLElement &elem, void *userData)
 	XMLHandler::END};
 		elem.Process(handlers, userData);
 }
-
+*/
 /** Sets the public key to the values stored in \c key. 
 	* The format must match the format XML described for getPublicKeyAsXML(). 
 	*@param key byte array which holds the new public key
@@ -279,34 +298,66 @@ static void sRSAKeyValueHandler(XMLElement &elem, void *userData)
 	*@retval E_SUCCESS otherwise
 	*@see getPublicKeyAsXML
 	*/
-SINT32 CAASymCipher::setPublicKeyAsXML(UINT8* key,UINT32* len)
+SINT32 CAASymCipher::setPublicKeyAsXML(UINT8* key,UINT32 len)
 	{
 		if(key==NULL||len==NULL)
 			return E_UNKNOWN;
 
-		BufferInputStream oStream(key,*len);
-		XMLInput input(oStream);
+		MemBufInputSource oInput(key,len,"rsaKey");
+		DOMParser oParser;
+		oParser.parse(oInput);
+		DOM_Document& doc=oParser.getDocument();
+		DOM_Element& root=doc.getDocumentElement();
+		return setPublicKeyAsDOMNode(root);
+	}		
 
-		// set up initial handler for RSA-Key
-		XMLHandler handlers[] = 
-			{
-				XMLHandler("RSAKeyValue",sRSAKeyValueHandler),
-				XMLHandler::END
-			};
-	
-		RSA* tmpRSA=RSA_new();
-		try
-			{
-				input.Process(handlers, tmpRSA);
+//Bugy!! Cahnges node!!!		
+SINT32 CAASymCipher::setPublicKeyAsDOMNode(DOM_Node& node)
+	{	
+		DOM_Node& root=node;
+		while(root!=NULL)
+			{	
+				if(root.getNodeName().equals("RSAKeyValue"))
+					{
+						RSA* tmpRSA=RSA_new();
+						UINT32 decLen=4096;
+						UINT8 decBuff[4096];
+						DOM_Node& child=root.getFirstChild();
+						while(child!=NULL)
+							{
+								if(child.getNodeName().equals("Modulus"))
+									{
+										if(tmpRSA->n!=NULL)
+											BN_free(tmpRSA->n);
+										char* tmpStr=child.getFirstChild().getNodeValue().transcode();
+										decLen=4096;
+										CABase64::decode((UINT8*)tmpStr,strlen(tmpStr),decBuff,&decLen);
+										delete tmpStr;
+										tmpRSA->n=BN_bin2bn(decBuff,decLen,NULL);
+									}
+								else if(child.getNodeName().equals("Exponent"))
+									{
+										if(tmpRSA->e!=NULL)
+											BN_free(tmpRSA->e);
+										char* tmpStr=child.getFirstChild().getNodeValue().transcode();
+										decLen=4096;
+										CABase64::decode((UINT8*)tmpStr,strlen(tmpStr),decBuff,&decLen);
+										delete tmpStr;
+										tmpRSA->e=BN_bin2bn(decBuff,decLen,NULL);
+									}
+								child=child.getNextSibling();
+							}
+						if(tmpRSA->n!=NULL&&tmpRSA->e!=NULL)
+							{
+								if(m_pRSA!=NULL)
+									RSA_free(m_pRSA);
+								m_pRSA=tmpRSA;
+								return E_SUCCESS;
+							}
+						RSA_free(tmpRSA);
+						return E_UNKNOWN;
+					}
+				root=root.getNextSibling();		
 			}
-		catch (const XMLParseException &e)
-			{
-				RSA_free(tmpRSA);
-				return E_UNKNOWN;
-			}
-		if(m_pRSA!=NULL)
-			RSA_free(m_pRSA);
-		m_pRSA=tmpRSA;
-		*len=oStream.getPos();
-		return E_SUCCESS;
+		return E_UNKNOWN;
 	}

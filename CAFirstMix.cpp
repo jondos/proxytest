@@ -38,7 +38,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketAddrUnix.hpp"
 #include "CAThread.hpp"
 #include "CAUtil.hpp"
-#include "xml/xmlinput.h"
+#include "xml/DOM_Output.hpp"
 
 extern CACmdLnOptions options;
 
@@ -114,7 +114,6 @@ SINT32 CAFirstMix::init()
 		delete pAddrNext;
 
 		CAMsg::printMsg(LOG_INFO," connected!\n");
-//		sleep(1);
 		if(((CASocket*)(*m_pMuxOut))->setKeepAlive((UINT32)1800)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_INFO,"Socket option TCP-KEEP-ALIVE returned an error - so not set!\n");
@@ -953,7 +952,7 @@ SINT32 CAFirstMix::clean()
 		#endif
 		return E_SUCCESS;
 	}
-
+/*
  struct internal_mix_handler_data_struct
 	{
 		UINT32 mixcount;
@@ -970,7 +969,7 @@ static void sMixHandler(XMLElement &elem, void *userData)
 		INTERNAL_MIX_HANDLER_STRUCT* data=(INTERNAL_MIX_HANDLER_STRUCT*)userData;
 		UINT32 aktPos=elem.GetInput().GetOffset();
 		UINT32 size=data->input->getSize()-aktPos;
-		data->m_arRSA[data->aktMix++].setPublicKeyAsXML(data->input->getBuffer()+aktPos,&size);
+		data->m_arRSA[data->aktMix++].setPublicKeyAsXML(data->input->getBuffer()+aktPos,size);
 		XMLAttribute attrs=elem.GetAttrList();
 		while(strcmp(attrs.GetName(),"id")!=0)
 			attrs=attrs.GetNext();
@@ -1016,7 +1015,7 @@ static void sMixesHandler(XMLElement &elem, void *userData)
 		elem.Process(handlers,userData);
 		strcat((char*)data->cascadeInfo,"</Mixes>");
 	}
-
+*/
 /** This will initialize the XML Cascade Info send to the InfoService and
   * the Key struct which is send to each user which connects
 	* This function is called from init()
@@ -1031,37 +1030,33 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		CAMsg::printMsg(LOG_DEBUG,"Get KeyInfo (foolowing line)\n");
 		CAMsg::printMsg(LOG_DEBUG,"%s\n",recvBuff);
 
-		BufferInputStream* pStream=new BufferInputStream(recvBuff,len);
-		XMLInput input(*pStream);
-		// set up initial handler for RSA-Key
-		XMLHandler handlers[] = 
-			{
-				XMLHandler("Mixes",sMixesHandler),
-				XMLHandler::END
-			};
-	
-		INTERNAL_MIX_HANDLER_STRUCT tmpData;
-		memset(&tmpData,0,sizeof(tmpData));
-		tmpData.input=pStream;
-		tmpData.cascadeInfo=new UINT8[10000]; //only for <Mixes>....</Mixes>
-		try
-			{
-				input.Process(handlers, &tmpData);
-			}
-		catch (const XMLParseException &e)
-			{
-				delete pStream;
-				return E_UNKNOWN;
-			}
-		delete pStream;
-		m_KeyInfoBuff=new UINT8[256*(tmpData.mixcount+1)];
+		
+		DOMParser oParser;
+		MemBufInputSource oInput(recvBuff,len,"tmp");
+		oParser.parse(oInput);
+		DOM_Document& doc=oParser.getDocument();
+		DOM_Element& elemMixes=doc.getDocumentElement();
+		char* tmpStr=elemMixes.getAttribute("count").transcode();
+		UINT32 count=atol(tmpStr);
+		delete tmpStr;
+
+		DOM_Node& child=elemMixes.getLastChild();
+		
+		m_KeyInfoBuff=new UINT8[(count+1)*256];
 		m_KeyInfoSize=3;
 		UINT32 tlen;
-		for(int i=tmpData.mixcount-1;i>=0;i--)
+		while(child!=NULL)
 			{
-				tlen=256;
-				tmpData.m_arRSA[i].getPublicKey(m_KeyInfoBuff+m_KeyInfoSize,&tlen);
-				m_KeyInfoSize+=tlen;
+				if(child.getNodeName().equals("Mix"))
+					{
+						DOM_Node& rsaKey=child.getFirstChild();
+						CAASymCipher oRSA;
+						oRSA.setPublicKeyAsDOMNode(rsaKey);
+						tlen=256;
+						oRSA.getPublicKey(m_KeyInfoBuff+m_KeyInfoSize,&tlen);
+						m_KeyInfoSize+=tlen;
+					}
+				child=child.getPreviousSibling();
 			}
 		tlen=256;
 		m_pRSA->getPublicKey(m_KeyInfoBuff+m_KeyInfoSize,&tlen);
@@ -1069,14 +1064,26 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 
 		UINT16 tmp=htons(m_KeyInfoSize);
 		memcpy(m_KeyInfoBuff,&tmp,2);
-		m_KeyInfoBuff[2]=tmpData.mixcount+1;
-		delete[] tmpData.m_arRSA;
-//CascadInfo
-		BufferOutputStream oBufferStream(1024,1024);
-		XMLOutput oxmlOut(oBufferStream);
-		oBufferStream.reset();
-		oxmlOut.BeginDocument("1.0","UTF-8",true);
-		oxmlOut.BeginElementAttrs("MixCascade");
+		m_KeyInfoBuff[2]=count+1;
+
+		
+
+		UINT8* tmpBuff=new UINT8[2048];
+		tlen=2048;
+		options.getMixXml(tmpBuff,&tlen);
+		MemBufInputSource oInput1(tmpBuff,tlen,"tmp1");
+		oParser.parse(oInput1);
+		DOM_Document& docMix=oParser.getDocument();
+		DOM_Node& nodeMix=doc.importNode(docMix.getFirstChild(),true);
+		elemMixes.insertBefore(nodeMix,elemMixes.getFirstChild());
+		setDOMElementAttribute(elemMixes,"count",count+1);
+		delete tmpBuff;
+
+	//CascadInfo		
+		DOM_Document& docCascade=DOM_Document::createDocument();
+		DOM_Element& elemRoot=docCascade.createElement("MixCascade");
+
+
 		UINT8 hostname[255];
 		UINT8 id[50];
 		if(options.getServerHost(hostname,255)!=E_SUCCESS)
@@ -1084,31 +1091,53 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 				CASocketAddrINet::getLocalHostName(hostname,255);
 			}
 		options.getMixId(id,50);
-		oxmlOut.WriteAttr("id",(char*)id);
-		oxmlOut.EndAttrs();
+		
+		elemRoot.setAttribute(DOMString("id"),DOMString((char*)id));
 		UINT8 name[255];
 		if(options.getCascadeName(name,255)!=E_SUCCESS)
 			{
 				return E_UNKNOWN;
 			}
-		oxmlOut.WriteElement("Name",(char*)name);
-		oxmlOut.WriteElement("Host",(char*)hostname);
+		docCascade.appendChild(elemRoot);
+		DOM_Element& elem=docCascade.createElement("Name");
+		DOM_Text& text=docCascade.createTextNode(DOMString((char*)name));
+		elem.appendChild(text);
+		elemRoot.appendChild(elem);
+		
+		elem=docCascade.createElement("Host");
+		text=docCascade.createTextNode(DOMString((char*)hostname));
+		elem.appendChild(text);
+		elemRoot.appendChild(elem);
+		
 		UINT8 ip[255];
 		CASocketAddrINet oAddr;
 		oAddr.setAddr(hostname,1);
 		oAddr.getIPAsStr(ip,255);
-		oxmlOut.WriteElement("IP",(char*)ip);
-		oxmlOut.WriteElement("Port",(int)options.getServerPort());
+		
+		elem=docCascade.createElement("IP");
+		text=docCascade.createTextNode(DOMString((char*)ip));
+		elem.appendChild(text);
+		elemRoot.appendChild(elem);
+	
+		
+		DOM_Element e=docCascade.createElement("Port");
+		elemRoot.appendChild(e);
+		setDOMElementValue(e,options.getServerPort());
+
 		if(options.getProxySupport())
-      oxmlOut.WriteElement("ProxyPort",(int)443);
-		oxmlOut.writeString((char*)tmpData.cascadeInfo); //Write <Mixes..></Mixes...>
-		delete tmpData.cascadeInfo;
-		oxmlOut.EndElement();
-		oxmlOut.EndDocument();
-		len=oBufferStream.getBufferSize();
-		m_strXmlMixCascadeInfo=new UINT8[len+1];
-		memcpy(m_strXmlMixCascadeInfo,oBufferStream.getBuff(),len);
-		m_strXmlMixCascadeInfo[len]=0;
+			{
+				elem=docCascade.createElement(DOMString("ProxyPort"));
+				setDOMElementValue(elem,443);
+				elemRoot.appendChild(elem);
+			}
+ 
+		
+		elemRoot.appendChild(docCascade.importNode(elemMixes,true));
+
+		tlen=2048;
+		m_strXmlMixCascadeInfo=new UINT8[tlen+1];
+		DOM_Output::dumpToMem(docCascade,m_strXmlMixCascadeInfo,&tlen);
+		m_strXmlMixCascadeInfo[tlen]=0;
 
 #else
 		BufferOutputStream oBufferStream(1024,1024);

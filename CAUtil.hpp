@@ -27,8 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CA_UTIL__
 #define __CA_UTIL__
-#include "xml/xmloutput.h"
-
+#include "CAASymCipher.hpp"
 UINT32 strtrim(UINT8*);
 
 SINT32 memtrim(UINT8* out,const UINT8* in,UINT32 len);
@@ -52,137 +51,13 @@ UINT32 getMemoryUsage();
 SINT32 filelength(int handle);
 #endif
 
-/**
-	This class implements the Output Stream interface required by XML::Output. 
-	It stores all the data in a memory buffer.
-*/
-class BufferOutputStream:public XMLOutputStream
-	{
-		public:
-			/** Constructs a new buffered Output Stream.
-			@param initsize	the inital size of the buffer that holds the streamed data
-							If initsize=0 then the default value is 1 kilo byte (so initsize=1024)
-			@param grow the number of bytes by which the buffer is increased, if needed. 
-									If grow=0 then the initial size is used (so grow=initsize)
-			**/
-			BufferOutputStream(UINT32 initsize=0,UINT32 grow=0)
-				{
-					if(initsize==0)
-						initsize=1024;
-					m_buffer=(UINT8*)malloc(initsize);
-					if(m_buffer==NULL)
-						m_size=0;
-					else
-						m_size=initsize;
-					m_used=0;
-					if(grow>0)
-						m_grow=grow;
-					else
-						m_grow=initsize;
-				}
-			
-			/** Releases the memory for the buffer.**/
-			virtual ~BufferOutputStream()
-				{
-					if(m_buffer!=NULL)
-						free(m_buffer);
-				}
+SINT32 setDOMElementValue(DOM_Element& elem,UINT32 value);
+SINT32 setDOMElementAttribute(DOM_Element& elem,char* attr,int value);
 
-	/** write up to bufLen characters to an output source (memory buffer).
-		@param buf		source buffer
-		@param bufLen	number of characters to write
-		@return 		the number of characters actually written - if this
-						number is less than bufLen, there was an error (which is acctually E_UNKNOWN)
-	*/			
-			int write(const char *buf, size_t bufLen)
-				{
-					if(m_size-m_used<bufLen)
-						{
-							UINT8* tmp=(UINT8*)realloc(m_buffer,m_size+m_grow);
-							if(tmp==NULL)
-								{
-									return E_UNKNOWN;	
-								}
-							m_size+=m_grow;
-							m_buffer=tmp;
-						}
-					memcpy(m_buffer+m_used,buf,bufLen);
-					m_used+=bufLen;
-					return bufLen;
-				}
+SINT32 getDOMChildByName(const DOM_Node& node,UINT8* name,DOM_Node& child);
 
-			/** Gets the buffer.
-			@return a pointer to the buffer which holds the already streamed data. May be NULL.
-			*/
-			UINT8* getBuff()
-				{
-					return m_buffer;
-				}
-			
-			/** Gets the number of bytes which are stored in the output buffer.
-			@return number of bytes writen to the stream.
-			*/
-			UINT32 getBufferSize()
-				{
-					return m_used;	
-				}
+SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, UINT8* xml, UINT32* xmllen,CAASymCipher* pRSA);
+SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, UINT8* xml, UINT32 xmllen,CAASymCipher* pRSA);
 
-			/** Resets the stream. All data is trashed and the next output will be writen to the beginn of the buffer.
-			@return always E_SUCCESS
-			*/
-			SINT32 reset()
-				{
-					m_used=0;
-					return E_SUCCESS;
-				}
-
-		private:
-			UINT8* m_buffer; ///The buffer which stores the data
-			UINT32 m_size; ///The size of the buffer in which the streaming data is stored 
-			UINT32 m_used; ///The number of bytes already used of the buffer
-			UINT32 m_grow; ///The number of bytes by which the buffer should grow if neccesary
-	};
-
-
-class BufferInputStream:public XMLInputStream
-	{
-		public:
-			BufferInputStream(UINT8* buff,UINT32 l)
-				{
-					buffer=buff;
-					len=l;
-					pos=0;
-				}
-
-		int read(XML_Char *buf, size_t bufLen)
-			{
-				UINT32 size=(UINT32)min(bufLen,len-pos);
-				if(size==0)
-					return 0;
-				memcpy(buf,buffer+pos,size);
-				pos+=size;
-				return size;
-			}
-
-		UINT32 getPos()
-			{
-				return pos;
-			}
-
-		UINT32 getSize()
-			{
-				return len;
-			}
-
-		UINT8* getBuffer()
-			{
-				return buffer;
-			}
-
-		private:
-			UINT8* buffer;
-			UINT32 pos;
-			UINT32 len;
-	};
 
 #endif

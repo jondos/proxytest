@@ -29,8 +29,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASignature.hpp"
 #include "CABase64.hpp"
 #include "CAUtil.hpp"
-#include "xml/xmlstream.h"
-#include "xml/xmlinput.h"
+#include "xml/DOM_Output.hpp"
 
 CASignature::CASignature()
 	{
@@ -53,103 +52,77 @@ SINT32 CASignature::setSignKey(UINT8* buff,UINT32 len,UINT32 type)
 
 
 //XML Decode...
-static void sDSAKeyParamValueHandler(XMLElement &elem, void *userData)
-{
-	UINT8 buff[4096];
-	int len=(int)elem.ReadData((char*)buff,4096);
-	
-	UINT32 decLen=4096;
-	UINT8 decBuff[4096];
-	CABase64::decode(buff,len,decBuff,&decLen);
-	
-	DSA* tmpDSA=(DSA*)userData;
-	switch(elem.GetName()[0])
-		{
-			case 'P':
-				if(tmpDSA->p!=NULL)
-					BN_free(tmpDSA->p);
-				tmpDSA->p=BN_bin2bn((unsigned char*)decBuff,decLen,NULL);
-			break;
-			case 'Q':
-				if(tmpDSA->q!=NULL)
-					BN_free(tmpDSA->q);
-				tmpDSA->q=BN_bin2bn((unsigned char*)decBuff,decLen,NULL);
-			break;
-			case 'G':
-				if(tmpDSA->g!=NULL)
-					BN_free(tmpDSA->g);
-				tmpDSA->g=BN_bin2bn((unsigned char*)decBuff,decLen,NULL);
-			break;
-			case 'X':
-				if(tmpDSA->priv_key!=NULL)
-					BN_free(tmpDSA->priv_key);
-				tmpDSA->priv_key=BN_bin2bn((unsigned char*)decBuff,decLen,NULL);
-			break;
-			case 'Y':
-				if(tmpDSA->pub_key!=NULL)
-					BN_free(tmpDSA->pub_key);
-				tmpDSA->pub_key=BN_bin2bn((unsigned char*)decBuff,decLen,NULL);
-			break;
-		}
-	
-}
-
-static void sDSAKeyValueHandler(XMLElement &elem, void *userData)
-{
-	XMLHandler handlers[] = {
-	XMLHandler("P",sDSAKeyParamValueHandler),
-	XMLHandler("Q",sDSAKeyParamValueHandler),
-	XMLHandler("G",sDSAKeyParamValueHandler),
-	XMLHandler("X",sDSAKeyParamValueHandler),
-	XMLHandler("Y",sDSAKeyParamValueHandler),
-	XMLHandler::END};
-		elem.Process(handlers, userData);
-}
-
-
-static void sKeyValueHandler(XMLElement &elem, void *userData)
-{
-		XMLHandler handlers[] = {
-		XMLHandler("DSAKeyValue",sDSAKeyValueHandler),
-			XMLHandler::END};
-		elem.Process(handlers, userData);
-}
-
-static void sKeyInfoHandler(XMLElement &elem, void *userData)
-{
-		XMLHandler handlers[] = {
-		XMLHandler("KeyValue",sKeyValueHandler),
-			XMLHandler::END};
-		elem.Process(handlers, userData);
-}
-
 SINT32 CASignature::parseSignKeyXML(UINT8* buff,UINT32 len)
 	{
-		BufferInputStream oStream(buff,len);
-		XMLInput input(oStream);
 
-	// set up initial handler for Document
-		XMLHandler handlers[] = 
-			{
-				XMLHandler("KeyInfo",sKeyInfoHandler),
-				XMLHandler::END
-			};
-	
+		MemBufInputSource oInput(buff,len,"sigkey");
+		DOMParser oParser;
+		oParser.parse(oInput);
+		DOM_Document& doc=oParser.getDocument();
+		DOM_Element& rootKeyInfo=doc.getDocumentElement();
+		if(!rootKeyInfo.getNodeName().equals("KeyInfo"))
+			return E_UNKNOWN;
+		DOM_Node elemKeyValue;
+		if(getDOMChildByName(rootKeyInfo,(UINT8*)"KeyValue",elemKeyValue)!=E_SUCCESS)
+			return E_UNKNOWN;
+		if(getDOMChildByName(elemKeyValue,(UINT8*)"DSAKeyValue",elemKeyValue)!=E_SUCCESS)
+			return E_UNKNOWN;
+		UINT8 tbuff[4096];
+		UINT32 tlen=4096;
 		DSA* tmpDSA=DSA_new();
-		try
+		DOM_Node& child=elemKeyValue.getFirstChild();
+		while(child!=NULL)
 			{
-				input.Process(handlers, tmpDSA);
-			}
-		catch (const XMLParseException &e)
-			{
-				DSA_free(tmpDSA);
-				return E_UNKNOWN;
+				DOMString& name=child.getNodeName();
+				DOM_Node &text=child.getFirstChild();
+				if(!text.isNull())
+					{
+						char* tmpStr=text.getNodeValue().transcode();
+						tlen=4096;
+						CABase64::decode((UINT8*)tmpStr,strlen(tmpStr),tbuff,&tlen);
+						delete tmpStr;
+						if(name.equals("P"))
+							{
+								if(tmpDSA->p!=NULL)
+									BN_free(tmpDSA->p);
+								tmpDSA->p=BN_bin2bn(tbuff,tlen,NULL);
+							}
+						else if(name.equals("Q"))
+							{
+								if(tmpDSA->q!=NULL)
+									BN_free(tmpDSA->q);
+								tmpDSA->q=BN_bin2bn(tbuff,tlen,NULL);
+							}
+						else if(name.equals("G"))
+							{
+								if(tmpDSA->g!=NULL)
+										BN_free(tmpDSA->g);
+									tmpDSA->g=BN_bin2bn(tbuff,tlen,NULL);
+							}
+						else if(name.equals("X"))
+							{
+								if(tmpDSA->priv_key!=NULL)
+									BN_free(tmpDSA->priv_key);
+								tmpDSA->priv_key=BN_bin2bn(tbuff,tlen,NULL);
+
+							}
+						else if(name.equals("Y"))
+							{
+								if(tmpDSA->pub_key!=NULL)
+									BN_free(tmpDSA->pub_key);
+								tmpDSA->pub_key=BN_bin2bn(tbuff,tlen,NULL);
+							}
+					}
+				child=child.getNextSibling();
 			}
 		if(DSA_sign_setup(tmpDSA,NULL,&tmpDSA->kinv,&tmpDSA->r)!=1)
 			{
 				DSA_free(tmpDSA);
 				return E_UNKNOWN;
-			}		m_pDSA=tmpDSA;
+			}		
+		if(m_pDSA!=NULL)
+			DSA_free(m_pDSA);
+		m_pDSA=tmpDSA;
 		return E_SUCCESS;
 	}
 
@@ -250,7 +223,7 @@ SINT32 CASignature::getXMLSignatureSize()
 	{
 		return (SINT32)strlen(XMLSIG_TEMPLATE)+strlen(XMLSIGINFO_TEMPLATE)+/*size of DigestValue*/+20+/*sizeof SignatureValue*/+40;
 	}
-
+/*
 typedef struct
 	{
 		UINT8* out;
@@ -281,8 +254,8 @@ static void smakeXMLCanonicalDataHandler(const XML_Char *data, size_t len, void 
 		memcpy(pData->out+pData->pos,buff,len);
 		pData->pos+=len;
 		delete []buff;
-	}
-
+	}*/
+/*
 static void smakeXMLCanonicalElementHandler(XMLElement &elem, void *userData)
 	{
 		XMLCanonicalHandlerData* pData=(XMLCanonicalHandlerData*)userData;
@@ -334,33 +307,14 @@ static void smakeXMLCanonicalElementHandler(XMLElement &elem, void *userData)
 		pData->out[pData->pos++]='>';
 
 	}
-
+*/
 SINT32 CASignature::makeXMLCanonical(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen)
 	{
-		BufferInputStream oStream(in,inlen);
-		XMLInput input(oStream);
-
-	// set up initial handler for Document
-		XMLHandler handlers[] =
-			{
-				XMLHandler(smakeXMLCanonicalElementHandler),
-				XMLHandler(smakeXMLCanonicalDataHandler),
-				XMLHandler::END
-			};
-	
-		XMLCanonicalHandlerData oData;
-		oData.out=out;
-		oData.outlen=*outlen;
-		oData.pos=0;
-		oData.err=0;
-		try
-			{
-				input.Process(handlers, &oData);
-			}
-		catch (const XMLParseException &e)
-			{
-				return E_UNKNOWN;
-			}
-		*outlen=oData.pos;
-		return oData.err;
+		MemBufInputSource oInput(in,inlen,"tmpCanonical");
+		DOMParser oParser;
+		oParser.parse(oInput);
+		DOM_Document& doc=oParser.getDocument();
+		DOM_Element& elem=doc.getDocumentElement();
+		DOM_Output::makeCanonical(elem,out,outlen);
+		return E_SUCCESS;
 	}

@@ -28,6 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CAASYMCIPHER__
 #define __CAASYMCIPHER__
 #define RSA_SIZE 128
+
 class CAASymCipher
 	{
 		public:
@@ -39,9 +40,12 @@ class CAASymCipher
 			SINT32 generateKeyPair(UINT32 size);
 			SINT32 getPublicKey(UINT8* buff,UINT32 *len);
 			SINT32 getPublicKeyAsXML(UINT8* buff,UINT32* len);
+//			DOM_Document* getPublicKeyAsDocumentFragment();
+			SINT32 getPublicKeyAsDocumentFragment(DOM_DocumentFragment*& pDFrag);
 			SINT32 getPublicKeySize();
 			SINT32 setPublicKey(UINT8* buff,UINT32* len);
-			SINT32 setPublicKeyAsXML(UINT8* buff,UINT32* len);
+			SINT32 setPublicKeyAsXML(UINT8* buff,UINT32 len);
+			SINT32 setPublicKeyAsDOMNode(DOM_Node& node);
 		private:
 			RSA* m_pRSA;
 	};

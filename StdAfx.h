@@ -50,6 +50,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
     #include <io.h>
     #include <conio.h>
 		#include <sys/timeb.h>
+		#include <malloc.h>
 		#define GET_NET_ERROR (WSAGetLastError())
 		#define ERR_INTERN_TIMEDOUT WSAETIMEDOUT
 		#define ERR_INTERN_CONNREFUSED WSAECONNREFUSED
@@ -67,7 +68,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		typedef unsigned char UINT8;
 		typedef signed char SINT8;
 #else
-	#if defined(CWDEBUG) &&defined(__cplusplus)
+	#if defined(CWDEBUG)
 	    #include <libcw/sysd.h>
 	    #include <libcw/debug.h>
 	#endif
@@ -241,5 +242,19 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include <openssl/rand.h>
 #include <openssl/evp.h>
 #include <openssl/asn1.h>
+
+//For DOM
+#include <util/PlatformUtils.hpp>
+#include <util/XMLString.hpp>
+#include <util/XMLUniDefs.hpp>
+#include <framework/XMLFormatter.hpp>
+#include <util/TranscodingException.hpp>
+
+
+#include <dom/DOM_DOMException.hpp>
+#include <framework/MemBufInputSource.hpp>
+#include <parsers/DOMParser.hpp>
+#include <dom/DOM.hpp>
+
 
 #endif // !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)

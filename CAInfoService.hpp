@@ -40,14 +40,11 @@ class CAInfoService
 			SINT32 sendStatus();
 			SINT32 start();
 			SINT32 stop();
-			//SINT32 setLevel(SINT32 user,SINT32 risk,SINT32 traffic);
 			SINT32 getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic);
-			//SINT32 setMixedPackets(UINT32 packets);
 			SINT32 getMixedPackets(UINT32* ppackets);
 			bool getRun(){return m_bRun;}
 			SINT32 setSignature(CASignature* pSignature);
 			CASignature* getSignature(){return m_pSignature;}
-			static SINT32 test();
 		private:
 			volatile bool m_bRun;
 			CASignature*	m_pSignature;

@@ -49,7 +49,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CALastMix.hpp"
 #include "CALocalProxy.hpp"
 #include "CASymCipher.hpp"
-
+#include "CABase64.hpp"
+#include "xml/DOM_Output.hpp"
 //#ifdef _WIN32
 //HANDLE hEventThreadEnde;
 //#endif
@@ -159,8 +160,13 @@ For Upstream and Downstream different keys are used.
 
 int main(int argc, const char* argv[])
 	{		
-
-	/*	
+			XMLPlatformUtils::Initialize();		
+/*			CAASymCipher oRsa;
+			oRsa.generateKeyPair(1024);
+			UINT8 buff1[1024];
+			UINT32 len=1024;
+			oRsa.getPublicKeyAsXML(buff1,&len);
+	*/		/*	
 		if(argc>1)
 			{
 				CASocket oSocketServer;
@@ -402,6 +408,7 @@ Debug(dc::malloc.on());
 		#ifdef _WIN32		
 			WSACleanup();
 		#endif
+   XMLPlatformUtils::Terminate();
 		CAMsg::printMsg(LOG_CRIT,"Terminating Programm!\n");
 #ifdef _WIN32
 		_CrtMemCheckpoint( &s2 );

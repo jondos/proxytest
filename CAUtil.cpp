@@ -26,7 +26,8 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
-
+#include "CAUtil.hpp"
+#include "CABase64.hpp"
 /**
 *	Removes leading and ending whitespaces (chars<=32) from a zero terminated string.
 *		@param s input string (null terminated)
@@ -235,3 +236,62 @@ SINT32 filelength(int handle)
 		return st.st_size;
 	}
 #endif
+
+SINT32 setDOMElementValue(DOM_Element& elem,UINT32 text)
+	{
+		UINT8 tmp[10];
+		sprintf((char*)tmp,"%u",text);
+		DOM_Text t=elem.getOwnerDocument().createTextNode(DOMString((char*)tmp));
+		elem.appendChild(t);
+		return E_SUCCESS;
+	}
+
+SINT32 setDOMElementAttribute(DOM_Element& elem,char* attr,int value)
+	{
+		UINT8 tmp[10];
+		sprintf((char*)tmp,"%i",value);
+		elem.setAttribute(attr,DOMString((char*)tmp));
+		return E_SUCCESS;
+	}
+
+SINT32 getDOMChildByName(const DOM_Node& node,UINT8* name,DOM_Node& child)
+	{
+		child=node.getFirstChild();
+		while(child!=NULL)
+			{
+				if(child.getNodeName().equals((char*)name))
+					return E_SUCCESS;
+				child=child.getNextSibling();
+			}
+		return E_UNKNOWN;
+	}
+
+SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, UINT8* xml, UINT32* xmllen,CAASymCipher* pRSA)
+	{
+#define XML_ENCODE_KEY_TEMPLATE "<EncryptedKey><EncryptionMethod Algorithm=\"RSA\"/><CipherData><CipherValue>%s</CipherValue></CipherData></EncryptedKey>"
+		UINT8 tmpBuff[1024];
+		memset(tmpBuff,0,sizeof(tmpBuff));
+		memcpy(tmpBuff+128-keylen,key,keylen);
+		pRSA->encrypt(tmpBuff,tmpBuff);
+		UINT32 len=1024;
+		CABase64::encode(tmpBuff,128,tmpBuff,&len);
+		tmpBuff[len]=0;
+		sprintf((char*)xml,XML_ENCODE_KEY_TEMPLATE,tmpBuff);
+		*xmllen=strlen((char*)xml);
+		return E_SUCCESS;
+	}
+
+SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, UINT8* xml, UINT32 xmllen,CAASymCipher* pRSA)
+	{
+		char* start=strstr((char*)xml,"<CipherValue>");
+		start+=13;
+		char* end=strstr(start,"</CipherValue>");
+		UINT8 tmpBuff[1024];
+		UINT32 len=1024;
+		CABase64::decode((UINT8*)start,end-start,tmpBuff,&len);
+		pRSA->decrypt(tmpBuff,tmpBuff);
+		*keylen=32;
+		memcpy(key,tmpBuff+128-(*keylen),(*keylen));
+		return E_SUCCESS;
+	}
+
