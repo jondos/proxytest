@@ -140,8 +140,8 @@ THREAD_RETURN InfoLoop(void *p)
 	//	CASocketAddr::getLocalHostName((UINT8*)buff,255);
 		CASocketAddr::getLocalHostIP(buff);
 //*>> Beginn very ugly hack for anon.inf.tu-dresden.de --> new Concepts needed!!!!!1		
-		if(strncmp((char*)buff,"ithif46",7)==0)
-			strcpy((char*)buff,"mix.inf.tu-dresden.de");
+//		if(strncmp((char*)buff,"ithif46",7)==0)
+//			strcpy((char*)buff,"mix.inf.tu-dresden.de");
 //end hack....
 		sprintf(strAnonServer,"%u.%u.%u.%u%%3A%u",buff[0],buff[1],buff[2],buff[3],options.getServerPort());
 		int helocount=10;
@@ -284,12 +284,18 @@ SINT32 CAInfoService::sendHelo()
 				UINT buffLen;
 				oxmlOut.BeginDocument("1.0","UTF-8",true);
 				oxmlOut.BeginElementAttrs("MixCascade");
-				CASocketAddr::getLocalHostName((UINT8*)hostname,255);
+				CASocketAddr::getLocalHostIP(hostname);
 //*>> Beginn very ugly hack for anon.inf.tu-dresden.de --> new Concepts needed!!!!!1		
-		if(strncmp((char*)hostname,"ithif46",7)==0)
-			strcpy((char*)hostname,"mix.inf.tu-dresden.de");
+//		if(strncmp((char*)buff,"ithif46",7)==0)
+//			strcpy((char*)buff,"mix.inf.tu-dresden.de");
 //end hack....
-				sprintf(buff,"%s%%3A%u",hostname,options.getServerPort());
+				sprintf(buff,"%u.%u.%u.%u%%3A%u",hostname[0],hostname[1],hostname[2],hostname[3],options.getServerPort());
+//				CASocketAddr::getLocalHostName((UINT8*)hostname,255);
+//*>> Beginn very ugly hack for anon.inf.tu-dresden.de --> new Concepts needed!!!!!1		
+	//	if(strncmp((char*)hostname,"ithif46",7)==0)
+	//		strcpy((char*)hostname,"mix.inf.tu-dresden.de");
+//end hack....
+	//			sprintf(buff,"%s%%3A%u",hostname,options.getServerPort());
 				oxmlOut.WriteAttr("id",(char*)buff);
 				oxmlOut.EndAttrs();
 				if(options.getCascadeName((UINT8*)buff,1024)!=E_SUCCESS)
@@ -297,6 +303,8 @@ SINT32 CAInfoService::sendHelo()
 				oxmlOut.WriteElement("Name",(char*)buff);
 				oxmlOut.WriteElement("IP",(char*)hostname);
 				oxmlOut.WriteElement("Port",(int)options.getServerPort());
+        if(options.getProxySupport())
+        	oxmlOut.WriteElement("ProxyPort",(int)443);
 				oxmlOut.EndElement();
 				oxmlOut.EndDocument();
 				buffLen=1024;
