@@ -475,6 +475,7 @@ SINT32 CAFirstMix::loop()
 		MUXLISTENTRY* tmpMuxListEntry;
 	
 		CASocketGroup oSocketGroup;
+		CASocketGroup oSocketGroupMuxOut;
 		CAMuxSocket* pnewMuxSocket;
 		SINT32 countRead;
 		HCHANNEL lastChannelId=1;
@@ -487,6 +488,7 @@ SINT32 CAFirstMix::loop()
 
 		oSocketGroup.add(socketIn);
 		oSocketGroup.add(muxOut);
+		oSocketGroupMuxOut.add(muxOut);
 
 		oInfoService.setSignature(&mSignature);
 		oInfoService.setLevel(0,-1,-1);
@@ -533,68 +535,73 @@ SINT32 CAFirstMix::loop()
 							}
 					}
 				if(oSocketGroup.isSignaled(muxOut))
-						{
-							ret=muxOut.receive(&oMuxPacket);
-							if(ret==SOCKET_ERROR)
-								{
-									CAMsg::printMsg(LOG_CRIT,"Mux-Out-Channel Receiving Data Error - Exiting!\n");									
-									goto ERR;
-								}
-							if(oMuxPacket.flags==CHANNEL_CLOSE) //close event
-								{
-									#ifdef _DEBUG
-										CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u ... ",oMuxPacket.channel);
-									#endif
-									REVERSEMUXLISTENTRY otmpReverseEntry;
-									if(oMuxChannelList.remove(oMuxPacket.channel,&otmpReverseEntry))
-										{
-											otmpReverseEntry.pMuxSocket->close(otmpReverseEntry.inChannel);
-											delete otmpReverseEntry.pCipher;
-											#ifdef _DEBUG
-												CAMsg::printMsg(LOG_DEBUG,"closed!\n");
-											#endif
-											deleteResume(otmpReverseEntry.pMuxSocket,otmpReverseEntry.outChannel);
-										}
-								}
-							else
-								{
-									#ifdef _DEBUG
-										CAMsg::printMsg(LOG_DEBUG,"Sending Data to Browser!");
-									#endif
-									tmpReverseEntry=oMuxChannelList.get(oMuxPacket.channel);
-									if(tmpReverseEntry!=NULL)
-										{
-											oMuxPacket.channel=tmpReverseEntry->inChannel;
-											tmpReverseEntry->pCipher->decryptAES(oMuxPacket.data,oMuxPacket.data,DATA_SIZE);
-											if(tmpReverseEntry->pMuxSocket->send(&oMuxPacket)==E_QUEUEFULL)
-												{
-													EnterCriticalSection(&csResume);
-													MUXLISTENTRY* pml=oSuspendList.get(tmpReverseEntry->pMuxSocket);
-													CONNECTION oCon;
-													if(pml==NULL||!pml->pSocketList->get(&oCon,tmpReverseEntry->outChannel))
-														{
-															oMuxPacket.channel=tmpReverseEntry->outChannel;
-															oMuxPacket.flags=CHANNEL_SUSPEND;
-															CAMsg::printMsg(LOG_INFO,"Sending suspend for channel: %u\n",oMuxPacket.channel);
-															muxOut.send(&oMuxPacket);
-															if(pml==NULL)
-																{
-																	oSuspendList.add(tmpReverseEntry->pMuxSocket);
-																	pml=oSuspendList.get(tmpReverseEntry->pMuxSocket);
-																}
-															pml->pSocketList->add(tmpReverseEntry->inChannel,tmpReverseEntry->outChannel,NULL);
-														}
-													LeaveCriticalSection(&csResume);
-												}
-										}
-									else
-										{
-											#ifdef _DEBUG
-												CAMsg::printMsg(LOG_DEBUG,"Error Sending Data to Browser -- Channel-Id %u no valid!\n",oMuxPacket.channel);										
-											#endif
-										}
-								}
-						}
+					{
+						int countMuxOut=nUser;
+						do
+							{
+								ret=muxOut.receive(&oMuxPacket);
+								if(ret==SOCKET_ERROR)
+									{
+										CAMsg::printMsg(LOG_CRIT,"Mux-Out-Channel Receiving Data Error - Exiting!\n");									
+										goto ERR;
+									}
+								if(oMuxPacket.flags==CHANNEL_CLOSE) //close event
+									{
+										#ifdef _DEBUG
+											CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u ... ",oMuxPacket.channel);
+										#endif
+										REVERSEMUXLISTENTRY otmpReverseEntry;
+										if(oMuxChannelList.remove(oMuxPacket.channel,&otmpReverseEntry))
+											{
+												otmpReverseEntry.pMuxSocket->close(otmpReverseEntry.inChannel);
+												delete otmpReverseEntry.pCipher;
+												#ifdef _DEBUG
+													CAMsg::printMsg(LOG_DEBUG,"closed!\n");
+												#endif
+												deleteResume(otmpReverseEntry.pMuxSocket,otmpReverseEntry.outChannel);
+											}
+									}
+								else
+									{
+										#ifdef _DEBUG
+											CAMsg::printMsg(LOG_DEBUG,"Sending Data to Browser!");
+										#endif
+										tmpReverseEntry=oMuxChannelList.get(oMuxPacket.channel);
+										if(tmpReverseEntry!=NULL)
+											{
+												oMuxPacket.channel=tmpReverseEntry->inChannel;
+												tmpReverseEntry->pCipher->decryptAES(oMuxPacket.data,oMuxPacket.data,DATA_SIZE);
+												if(tmpReverseEntry->pMuxSocket->send(&oMuxPacket)==E_QUEUEFULL)
+													{
+														EnterCriticalSection(&csResume);
+														MUXLISTENTRY* pml=oSuspendList.get(tmpReverseEntry->pMuxSocket);
+														CONNECTION oCon;
+														if(pml==NULL||!pml->pSocketList->get(&oCon,tmpReverseEntry->outChannel))
+															{
+																oMuxPacket.channel=tmpReverseEntry->outChannel;
+																oMuxPacket.flags=CHANNEL_SUSPEND;
+																CAMsg::printMsg(LOG_INFO,"Sending suspend for channel: %u\n",oMuxPacket.channel);
+																muxOut.send(&oMuxPacket);
+																if(pml==NULL)
+																	{
+																		oSuspendList.add(tmpReverseEntry->pMuxSocket);
+																		pml=oSuspendList.get(tmpReverseEntry->pMuxSocket);
+																	}
+																pml->pSocketList->add(tmpReverseEntry->inChannel,tmpReverseEntry->outChannel,NULL);
+															}
+														LeaveCriticalSection(&csResume);
+													}
+											}
+										else
+											{
+												#ifdef _DEBUG
+													CAMsg::printMsg(LOG_DEBUG,"Error Sending Data to Browser -- Channel-Id %u no valid!\n",oMuxPacket.channel);										
+												#endif
+											}
+							}
+						countMuxOut--;
+					}while(oSocketGroupMuxOut.select(false,0)==1&&countMuxOut>0);
+				}
 			//	if(oSocketGroup.isSignaled(fmIOPair->muxHttpIn))
 			//		{
 			//			countRead--;
