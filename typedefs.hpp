@@ -153,6 +153,9 @@ struct t_queue_entry
 		#ifdef LOG_PACKET_TIMES
 			UINT64 timestamp_proccessing_start;
 			UINT64 timestamp_proccessing_end;
+			//without send/receive or queueing times
+			UINT64 timestamp_proccessing_start_OP;
+			UINT64 timestamp_proccessing_end_OP;
 			#ifdef USE_POOL
 				UINT64 pool_timestamp_in;
 				UINT64 pool_timestamp_out;
