@@ -11,5 +11,7 @@ class CAMixSocket
 			int close(int mode);
 		protected:
 			int id;
-			CRITICAL_SECTION csClose;
+			#ifdef _REENTRANT
+				CRITICAL_SECTION csClose;
+			#endif
 	};

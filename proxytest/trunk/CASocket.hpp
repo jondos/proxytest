@@ -21,9 +21,12 @@ class CASocket
 			operator SOCKET(){return m_Socket;}
 			int getLocalPort();
 			int setReuseAddr(bool b);
+			int setRecvLowWat(int r);
 		private:
 			SOCKET m_Socket;
-			CRITICAL_SECTION csClose;
+			#ifdef _REENTRANT
+				CRITICAL_SECTION csClose;
+			#endif
 			int closeMode;
 	};
 #endif

@@ -142,3 +142,10 @@ int CASocket::setReuseAddr(bool b)
 		if(b) val=1;
 		return setsockopt(m_Socket,SOL_SOCKET,SO_REUSEADDR,(char*)&val,sizeof(val));
 	}
+
+int CASocket::setRecvLowWat(int r)
+	{
+		int val=r;
+		return setsockopt(m_Socket,SOL_SOCKET,SO_RCVLOWAT,(char*)&val,sizeof(val));
+	}
+

@@ -1,42 +1,51 @@
 #include "StdAfx.h"
 #include "CASocketList.hpp"
 
+#define POOL_SIZE 1000
+
+typedef struct t_MEMBLOCK
+	{
+		void * mem;
+		t_MEMBLOCK* next;
+	} _MEMBLOCK;
+
+int CASocketList::increasePool()
+	{
+		CONNECTIONLIST* tmp=new CONNECTIONLIST[POOL_SIZE];
+		memset(tmp,0,sizeof(CONNECTIONLIST)*POOL_SIZE);
+		for(int i=1;i<POOL_SIZE;i++)
+			{
+				tmp[i-1].next=&tmp[i];
+			}
+		tmp[POOL_SIZE-1].next=pool;
+		pool=tmp;
+		_MEMBLOCK* tmpMem=new _MEMBLOCK;
+		tmpMem->next=memlist;
+		tmpMem->mem=tmp;
+		memlist=tmpMem;
+		return 0;
+	}
+
 CASocketList::CASocketList()
 	{
 		connections=NULL;
-		pool=new CONNECTIONLIST;
-		pool->id=0;
-		pool->pSocket=NULL;
-		CONNECTIONLIST* tmp;
-		tmp=pool;
-		for(int i=2;i<1000;i++)
-			{
-				tmp->next=new CONNECTIONLIST;
-				tmp=tmp->next;
-				tmp->id=0;
-				tmp->pSocket=NULL;
-			}
-		tmp->next=NULL;
+		pool=NULL;
+		memlist=NULL;
 		aktEnumPos=NULL;
 		InitializeCriticalSection(&cs);
+		increasePool();
 	}
 
 CASocketList::~CASocketList()
 	{
-		CONNECTIONLIST* tmp;
-		tmp=pool;
+		_MEMBLOCK* tmp;
+		tmp=memlist;
 		while(tmp!=NULL)
 			{
-				pool=tmp;
+				delete tmp->mem;
+				memlist=tmp;
 				tmp=tmp->next;
-				delete pool;
-			}
-		tmp=connections;
-		while(tmp!=NULL)
-			{
-				connections=tmp;
-				tmp=tmp->next;
-				delete connections;
+				delete memlist;
 			}
 		DeleteCriticalSection(&cs);
 	}
@@ -45,46 +54,44 @@ int CASocketList::add(HCHANNEL id,CASocket* pSocket)
 	{
 		EnterCriticalSection(&cs);
 		CONNECTIONLIST* tmp;
-		int ret;
 		if(pool==NULL)
 		    {
-					ret=SOCKET_ERROR;
+					if(increasePool()==SOCKET_ERROR)
+						{
+							LeaveCriticalSection(&cs);
+							return SOCKET_ERROR;
+						}
 		    }
-		else
-		    {
-					tmp=pool;
-					pool=pool->next;
-					tmp->next=connections;
-					connections=tmp;
-					connections->pSocket=pSocket;
-					connections->id=id;
-					ret=id;
-		    }
+		tmp=pool;
+		pool=pool->next;
+		tmp->next=connections;
+		connections=tmp;
+		connections->pSocket=pSocket;
+		connections->id=id;
 		LeaveCriticalSection(&cs);
-		return ret;
+		return id;
 	}
 
 int CASocketList::add(HCHANNEL in,HCHANNEL out)
 	{
 		EnterCriticalSection(&cs);
 		CONNECTIONLIST* tmp;
-		int ret;
 		if(pool==NULL)
 		    {
-					ret=SOCKET_ERROR;
+					if(increasePool()==SOCKET_ERROR)
+						{
+							LeaveCriticalSection(&cs);
+							return SOCKET_ERROR;
+						}
 		    }
-		else
-		    {
-					tmp=pool;
-					pool=pool->next;
-					tmp->next=connections;
-					connections=tmp;
-					connections->outChannel=out;
-					connections->id=in;
-					ret=0;
-		    }
+		tmp=pool;
+		pool=pool->next;
+		tmp->next=connections;
+		connections=tmp;
+		connections->outChannel=out;
+		connections->id=in;
 		LeaveCriticalSection(&cs);
-		return ret;
+		return 0;
 	}
 
 CASocket* CASocketList::get(HCHANNEL id)

@@ -14,6 +14,8 @@ typedef struct connlist
 		connlist* next;
 	} CONNECTIONLIST,CONNECTION;
 		
+struct t_MEMBLOCK;
+
 class CASocketList
 	{
 		public:
@@ -28,9 +30,13 @@ class CASocketList
 			CONNECTION* getFirst();
 			CONNECTION* getNext();
 		protected:
+			int increasePool();
 			CONNECTIONLIST* connections;
 			CONNECTIONLIST* pool;
-			CRITICAL_SECTION cs;
+			#ifdef _REENTRANT
+				CRITICAL_SECTION cs;
+			#endif
 			CONNECTIONLIST* aktEnumPos;
+			t_MEMBLOCK* memlist;
 	};	
 #endif

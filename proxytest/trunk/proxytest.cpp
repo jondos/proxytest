@@ -3,7 +3,6 @@
 
 #include "StdAfx.h"
 #include "CASocket.hpp"
-#include "CAMixSocket.hpp"
 #include "CASocketGroup.hpp"
 #include "CASocketAddr.hpp"
 #include "CACmdLnOptions.hpp"
@@ -17,7 +16,7 @@ HANDLE hEventThreadEnde;
 #endif
 CACmdLnOptions options;
 
-CRITICAL_SECTION csClose;
+//CRITICAL_SECTION csClose;
 typedef struct
 {
 	unsigned short len;
