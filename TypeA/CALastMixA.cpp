@@ -124,7 +124,7 @@ SINT32 CALastMixA::loop()
 														tmpSocket->create();
 														tmpSocket->setRecvBuff(50000);
 														tmpSocket->setSendBuff(5000);
-														ret=tmpSocket->connect(*m_pCacheLB->get(),LAST_MIX_TO_PROXY_CONNECT_TIMEOUT);
+														ret=tmpSocket->connect(*ptmpLB->get(),LAST_MIX_TO_PROXY_CONNECT_TIMEOUT);
 														if(ret==E_SUCCESS)
 															break;
 														tmpSocket->close();
