@@ -591,6 +591,7 @@ THREAD_RETURN fmIO(void *v)
 			{
 				if((countRead=oSocketGroup.select())==SOCKET_ERROR)
 					{
+						CAMsg::printMsg(LOG_ERR,"SELECT Error %u - Connection from Browser!\n",errno);
 						sleep(1);
 						continue;
 					}
@@ -603,9 +604,7 @@ THREAD_RETURN fmIO(void *v)
 						newMuxSocket=new CAMuxSocket;
 						if(fmIOPair->socketIn.accept(*(CASocket*)newMuxSocket)==SOCKET_ERROR)
 							{
-								#ifdef _DEBUG
-									CAMsg::printMsg(LOG_DEBUG,"Accept Error - Connection from Browser!\n");
-								#endif
+								CAMsg::printMsg(LOG_ERR,"Accept Error %u - Connection from Browser!\n",errno);
 								delete newMuxSocket;
 							}
 						else
