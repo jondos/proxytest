@@ -35,10 +35,17 @@ extern CACmdLnOptions options;
 
 THREAD_RETURN RoundTripTimeLoop(void *p)
 	{
-		CARoundTripTime* pRTT=(CARoundTripTime*)p;
-		CASocketAddr addrNextMix;
-		SINT32 ret=options.getTargetRTTPort();
 		UINT16 tmpPort;
+		SINT32 ret;
+		CARoundTripTime* pRTT=(CARoundTripTime*)p;
+
+		UINT8 localPortAndIP[6];
+		CASocketAddr::getLocalHostIP(localPortAndIP);
+		tmpPort=htons(pRTT->m_localPort);
+		memcpy(localPortAndIP+4,&tmpPort,2);
+		
+		CASocketAddr addrNextMix;
+		ret=options.getTargetRTTPort();
 		if(ret==E_UNSPECIFIED)
 			tmpPort=options.getTargetPort()+1;
 		else
@@ -46,25 +53,14 @@ THREAD_RETURN RoundTripTimeLoop(void *p)
 		UINT8* buff=new UINT8[4096];
 		options.getTargetHost(buff,4096);
 		addrNextMix.setAddr((char*)buff,tmpPort);
-		ret=options.getServerRTTPort();
-		if(ret==E_UNSPECIFIED)
-			tmpPort=options.getServerPort()+1;
-		else
-			tmpPort=(UINT16)ret;
-		CADatagramSocket oSocket;
-		oSocket.bind(tmpPort);
-		UINT8 localPortAndIP[6];
-		CASocketAddr::getLocalHostIP(localPortAndIP);
-		tmpPort=htons(tmpPort);
-		memcpy(localPortAndIP+4,&tmpPort,2);
 		CASocketAddr to;
 		to.sin_family=AF_INET;
 		BIGNUM* bnTmp=BN_new();
 		BIGNUM* bnTmp2=BN_new();
 		memset(buff,0,4);
-		while(pRTT->getRun())
+		while(pRTT->m_bRun)
 			{
-				SINT32 len=oSocket.receive(buff+8,4096-8,NULL);
+				SINT32 len=pRTT->m_oSocket.receive(buff+8,4096-8,NULL);
 				if(len!=SOCKET_ERROR)
 					{
 						if(!options.isLastMix()) //what to do if not last Mix....
@@ -79,9 +75,9 @@ THREAD_RETURN RoundTripTimeLoop(void *p)
 										memcpy(buff+8+len,localPortAndIP,6); //inserting (return) Port and IP
 										len+=6;
 #ifndef _DEBUG
-										oSocket.send(buff+8,len,&addrNextMix);
+										pRTT->m_oSocket.send(buff+8,len,&addrNextMix);
 #else
-										len=oSocket.send(buff+8,len,&addrNextMix);
+										len=pRTT->m_oSocket.send(buff+8,len,&addrNextMix);
 										if(len!=E_SUCCESS)
 											CAMsg::printMsg(LOG_DEBUG,"Couldn't send a RRT-Packet.\n");
 #endif
@@ -96,7 +92,7 @@ THREAD_RETURN RoundTripTimeLoop(void *p)
 										memcpy(&to.sin_addr,buff+len-6,4);
 										memcpy(&to.sin_port,buff+len-2,2);
 										len-=6; // Removed return IP/Port
-										oSocket.send(buff,len,&to);
+										pRTT->m_oSocket.send(buff,len,&to);
 									}
 							}
 						else //what to do if last mix...
@@ -105,7 +101,7 @@ THREAD_RETURN RoundTripTimeLoop(void *p)
 								memcpy(&to.sin_port,buff+8+len-2,2);
 								len-=6; // Removed return IP/Port
 								buff[8]=0; // Cleared Header...
-								oSocket.send(buff+8,len,&to);
+								pRTT->m_oSocket.send(buff+8,len,&to);
 							}
 					}
 			}
@@ -117,6 +113,14 @@ THREAD_RETURN RoundTripTimeLoop(void *p)
 
 SINT32 CARoundTripTime::start()
 	{
+		SINT32 ret;
+		ret=options.getServerRTTPort();
+		if(ret==E_UNSPECIFIED)
+			m_localPort=options.getServerPort()+1;
+		else
+			m_localPort=(UINT16)ret;
+		if(m_oSocket.bind(m_localPort)!=E_SUCCESS)
+			return E_UNKNOWN;
 		m_bRun=true;
 		#ifdef _WIN32
 		 _beginthread(RoundTripTimeLoop,0,this);

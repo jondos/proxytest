@@ -26,13 +26,17 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "CADatagramSocket.hpp"
+THREAD_RETURN RoundTripTimeLoop(void *p);
+
 class CARoundTripTime
 	{
 		public:
 			CARoundTripTime(){m_bRun=false;}
 			SINT32 start();
 			SINT32 stop();
-			bool getRun(){return m_bRun;}
 		private:
 			bool m_bRun;
+			UINT16 m_localPort;
+			CADatagramSocket m_oSocket;
+			friend THREAD_RETURN RoundTripTimeLoop(void* p);
 	};
