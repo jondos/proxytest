@@ -157,6 +157,9 @@ SINT32 CAFirstMixA::loop()
 													pHashEntry->trafficIn++;
 												#endif
 #ifdef PAYMENT
+												//New control channel code...!
+												if(pHashEntry->pControlChannelDispatcher->proccessMixPacket(pMixPacket))
+													goto NEXT_USER;
 												// payment code added by Bastian Voigt
 												if(m_pAccountingInstance->handleJapPacket( pMixPacket, pHashEntry ) != 0) 
 													{
@@ -173,7 +176,6 @@ SINT32 CAFirstMixA::loop()
 												if(pMixPacket->flags==CHANNEL_DUMMY)					// just a dummy to keep the connection alife in e.g. NAT gateways 
 													{ 
 														getRandom(pMixPacket->data,DATA_SIZE);
-														pHashEntry->pMuxSocket->prepareForSend(pMixPacket);
 														#ifdef LOG_PACKET_TIMES
 															setZero64(pQueueEntry->timestamp_proccessing_start);
 														#endif
@@ -287,9 +289,11 @@ SINT32 CAFirstMixA::loop()
 													}
 											}
 								#ifdef HAVE_EPOLL
+NEXT_USER:
 									pHashEntry=(fmHashTableEntry*)m_psocketgroupUsersRead->getNextSignaledSocketData();
 								#else
 									}//if is signaled
+NEXT_USER:
 									pHashEntry=m_pChannelList->getNext();
 								#endif
 							}
@@ -323,7 +327,6 @@ SINT32 CAFirstMixA::loop()
 									{
 										pMixPacket->channel=pEntry->channelIn;
 										getRandom(pMixPacket->data,DATA_SIZE);
-										pEntry->pHead->pMuxSocket->prepareForSend(pMixPacket);
 										#ifdef LOG_PACKET_TIMES
 											getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
 										#endif
@@ -370,7 +373,6 @@ SINT32 CAFirstMixA::loop()
 										pMixPacket->channel=pEntry->channelIn;
 										pEntry->pCipher->crypt2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 										
-										pEntry->pHead->pMuxSocket->prepareForSend(pMixPacket);
 										#ifdef LOG_PACKET_TIMES
 											getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
 										#endif
@@ -438,31 +440,27 @@ SINT32 CAFirstMixA::loop()
 								countRead--;
 #endif
 								UINT32 len=sizeof(tQueueEntry);
-								#ifdef LOG_PACKET_TIMES
-									if(pfmHashEntry->uAlreadySendPacketSize==0)
+								if(pfmHashEntry->uAlreadySendPacketSize==0)
+									{
 										pfmHashEntry->pQueueSend->get((UINT8*)&pfmHashEntry->oQueueEntry,&len); //We only make a peek() here because we do not know if sending will succeed or not (because send() is non blocking there!)
-									len=MIXPACKET_SIZE-pfmHashEntry->uAlreadySendPacketSize;
-									ret=((CASocket*)pfmHashEntry->pMuxSocket)->send(((UINT8*)&(pfmHashEntry->oQueueEntry))+pfmHashEntry->uAlreadySendPacketSize,len);
-								#else	
-									pfmHashEntry->pQueueSend->peek(tmpBuff,&len); //We only make a peek() here because we do not know if sending will succeed or not (because send() is non blocking there!)
-									ret=((CASocket*)pfmHashEntry->pMuxSocket)->send(tmpBuff,len);
-								#endif
+										pfmHashEntry->pMuxSocket->prepareForSend(&(pfmHashEntry->oQueueEntry.packet));
+									}
+								len=MIXPACKET_SIZE-pfmHashEntry->uAlreadySendPacketSize;
+								ret=((CASocket*)pfmHashEntry->pMuxSocket)->send(((UINT8*)&(pfmHashEntry->oQueueEntry))+pfmHashEntry->uAlreadySendPacketSize,len);
 								if(ret>0)
 									{
-										#ifndef LOG_PACKET_TIMES
-											pfmHashEntry->pQueueSend->remove((UINT32*)&ret);
-										#else
-											pfmHashEntry->uAlreadySendPacketSize+=ret;
-											if(pfmHashEntry->uAlreadySendPacketSize==MIXPACKET_SIZE)
-												{
-													pfmHashEntry->uAlreadySendPacketSize=0;
+										pfmHashEntry->uAlreadySendPacketSize+=ret;
+										if(pfmHashEntry->uAlreadySendPacketSize==MIXPACKET_SIZE)
+											{
+												pfmHashEntry->uAlreadySendPacketSize=0;
+												#ifdef LOG_PACKET_TIMES
 													if(!isZero64(pfmHashEntry->oQueueEntry.timestamp_proccessing_start))
 														{
 															getcurrentTimeMicros(pfmHashEntry->oQueueEntry.timestamp_proccessing_end);
 															m_pLogPacketStats->addToTimeingStats(pfmHashEntry->oQueueEntry,CHANNEL_DATA,false);
 														}
-												}
-										#endif
+												#endif
+											}
 #define USER_SEND_BUFFER_RESUME 10000
 										if( pfmHashEntry->cSuspend > 0 &&
 												pfmHashEntry->pQueueSend->getSize() < USER_SEND_BUFFER_RESUME)

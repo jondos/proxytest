@@ -542,13 +542,12 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 				delete pNewUser;
 				return E_UNKNOWN;
 			}
+		fmHashTableEntry* pHashEntry=m_pChannelList->get(pNewUser);
 #ifdef PAYMENT
 		// set AI encryption keys
-		fmHashTableEntry* pHashEntry=m_pChannelList->get(pNewUser);
 		m_pAccountingInstance->setJapKeys(pHashEntry, oMixPacket.data+41, oMixPacket.data+57); 
 #endif
 #ifdef FIRST_MIX_SYMMETRIC
-		fmHashTableEntry* pHashEntry=m_pChannelList->get(pNewUser);
 		pHashEntry->pSymCipher=new CASymCipher();
 		UINT8 buff[16];
 		memset(buff,0,16);
