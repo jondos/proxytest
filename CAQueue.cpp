@@ -288,7 +288,7 @@ struct __queue_test
 	{
 		CAQueue* pQueue;
 		UINT8* buff;
-		UINT32 len;
+		SINT32 len;
 	};
 
 THREAD_RETURN producer(void* param)
@@ -296,7 +296,7 @@ THREAD_RETURN producer(void* param)
 		struct __queue_test* pTest=(struct __queue_test *)param;
 		UINT32 count=0;
 		UINT32 aktSize;
-		while(pTest->len>0)
+		while(pTest->len>10)
 				{
 					aktSize=rand();
 					aktSize%=0xFFFF;
@@ -325,7 +325,7 @@ THREAD_RETURN consumer(void* param)
 					THREAD_RETURN_ERROR;
 				count+=aktSize;
 				pTest->len-=aktSize;
-			}while(pTest->len>0);
+			}while(pTest->len>10);
 		THREAD_RETURN_SUCCESS;
 	}
 
