@@ -773,7 +773,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		DOM_Element elemPrevCert;
 		getDOMChildByName(elemCertificates,(UINT8*)"PrevMixCertificate",elemPrevCert,false);
 		if(elemPrevCert!=NULL)
-			m_pNextMixCertificate=CACertificate::decode(elemPrevCert.getFirstChild(),CERT_X509CERTIFICATE);
+			m_pPrevMixCertificate=CACertificate::decode(elemPrevCert.getFirstChild(),CERT_X509CERTIFICATE);
 
 		//get InfoService data
 		DOM_Element elemNetwork;
