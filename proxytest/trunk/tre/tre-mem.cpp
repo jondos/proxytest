@@ -24,7 +24,8 @@
   cannot be freed individually, only all at once.  There can be multiple
   allocators, though.
 */
-//#ifdef LOG_CRIME
+#include "../StdAfx.h"
+#ifdef LOG_CRIME
 #include "tre-config.h"
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -162,5 +163,5 @@ tre_mem_alloc_impl(tre_mem_t mem, int provided, void *provided_block,
   mem->n -= size;
   return ptr;
 }
-//#endif //LOG_CRIME
+#endif //LOG_CRIME
 /* EOF */

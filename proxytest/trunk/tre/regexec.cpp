@@ -17,7 +17,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
-//#ifdef LOG_CRIME
+#include "../StdAfx.h"
+#ifdef LOG_CRIME
 #include "tre-config.h"
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -276,5 +277,5 @@ regawexec(const regex_t *preg, const wchar_t *str,
 
 #endif /* TRE_APPROX */
 
-//#endif //LOG_CRIME
+#endif //LOG_CRIME
 /* EOF */
