@@ -535,64 +535,30 @@ SINT32 CACmdLnOptions::getMixXml(UINT8* strxml,UINT32* len)
 
 SINT32 CACmdLnOptions::generateTemplate()
 	{
-		BufferOutputStream oBufferStream(1024,1024);
-		XMLOutput oxmlOut(oBufferStream);
-		oBufferStream.reset();
-		oxmlOut.BeginDocument("1.0","UTF-8",true);
-		oxmlOut.BeginElementAttrs("Mix");
-		oxmlOut.WriteAttr("id","");
-		oxmlOut.EndAttrs();
-		oxmlOut.BeginElement("Name");
-		oxmlOut.Indent();
-		oxmlOut.writeLine("<!-- Insert a human readable name here-->");
-		oxmlOut.EndElement();
-		oxmlOut.BeginElement("Location");
-		oxmlOut.Indent();
-		oxmlOut.writeLine("<!-- Fill out the following Elements to give infomation about the location of the Mix-->");
-		oxmlOut.BeginElement("State");
-		oxmlOut.Indent();
-		oxmlOut.writeLine("<!-- Insert the State of the Mix-Location here-->");
-		oxmlOut.EndElement();
-		oxmlOut.BeginElement("City");
-		oxmlOut.Indent();
-		oxmlOut.writeLine("<!-- Insert the City of the Mix-Location here-->");
-		oxmlOut.EndElement();
-		oxmlOut.BeginElement("Position");
-		oxmlOut.Indent();
-		oxmlOut.writeLine("<!-- Insert the Position of the Mix here-->");
-		oxmlOut.BeginElement("Geo");
-		oxmlOut.Indent();
-		oxmlOut.writeLine("<!-- Insert the Geographical Position of the Mix here-->");
-		oxmlOut.BeginElement("Longitude");
-		oxmlOut.Indent();
-		oxmlOut.writeLine("<!-- Insert the Longitude of the Geographical Position of the Mix here-->");
-		oxmlOut.EndElement();
-		oxmlOut.BeginElement("Latitude");
-		oxmlOut.Indent();
-		oxmlOut.writeLine("<!-- Insert the Latitude of the Geographical Position of the Mix here-->");
-		oxmlOut.EndElement();
-		oxmlOut.BeginElement("Altitude");
-		oxmlOut.Indent();
-		oxmlOut.writeLine("<!-- Insert the Altitude of the Geographical Position of the Mix here-->");
-		oxmlOut.EndElement();
-		oxmlOut.EndElement();
-		oxmlOut.EndElement();
-		oxmlOut.EndElement();
-		oxmlOut.BeginElement("Software");
-		oxmlOut.Indent();
-		oxmlOut.writeLine("<!-- This gives information about the Mix-Software used-->");
-		oxmlOut.BeginElement("Version");
-		oxmlOut.Indent();
-		oxmlOut.writeLine("<!-- The Version of the Software used - automatically set! -->");
-		oxmlOut.EndElement();
-		oxmlOut.EndElement();
-		oxmlOut.EndElement();
-		oxmlOut.EndDocument();
+#define XML_CONFIG_TEMPLATE "<?xml version=\"1.0\" ?>\
+<Mix id=\"\">\
+\t<Name><!-- Insert a human readable name here--></Name>\
+\t<Location> <!-- Fill out the following Elements to give infomation about the location of the Mix-->\
+\t\t<State><!-- Insert the State of the Mix-Location here--></State>\
+\t\t<City><!-- Insert the City of the Mix-Location here--></City>\
+\t\t<Position> <!-- Insert the Position of the Mix here-->\
+\t\t\t<Geo> <!-- Insert the Geographical Position of the Mix here-->\
+\t\t\t\t<Longitude> <!-- Insert the Longitude of the Geographical Position of the Mix here--> </Longitude>\
+\t\t\t\t<Latitude> <!-- Insert the Latitude of the Geographical Position of the Mix here--> </Latitude>\
+\t\t\t\t<Altitude> <!-- Insert the Altitude of the Geographical Position of the Mix here--> </Altitude>\
+\t\t\t</Geo>\
+\t\t</Position>\
+\t</Location>\
+\t<Software> <!-- This gives information about the Mix-Software used-->\
+\t\t<Version> <!-- The Version of the Software used - automatically set! --> </Version>\
+\t</Software>\
+</Mix>"
+
 		int handle;
 		handle=open("mix_template.conf",O_BINARY|O_RDWR|O_CREAT,S_IREAD | S_IWRITE);
 		if(handle==-1)
 			return E_UNKNOWN;
-		write(handle,oBufferStream.getBuff(),oBufferStream.getBufferSize());
+		write(handle,XML_CONFIG_TEMPLATE,strlen(XML_CONFIG_TEMPLATE));
 		close(handle);
 		return E_SUCCESS;
 	}

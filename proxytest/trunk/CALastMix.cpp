@@ -158,7 +158,7 @@ SINT32 CALastMix::init()
 		keySize=1024;
 		UINT32 aktIndex=2; //First two bytes for len reserved
 		//Beginn with: <?XML version="1.0"?><Mixes count="1"><Mix id="  
-		memcpy(buff+aktIndex,"<?XML version=\"1.0\"?><Mixes count=\"1\"><Mix id=\"",47);
+		memcpy(buff+aktIndex,"<?xml version=\"1.0\"?><Mixes count=\"1\"><Mix id=\"",47);
 		aktIndex+=47;
 		//than insert the Mix id
 		options.getMixId(buff+aktIndex,50);

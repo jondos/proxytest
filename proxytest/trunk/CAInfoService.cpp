@@ -28,11 +28,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "StdAfx.h"
 #include "CAInfoService.hpp"
 #include "CASocket.hpp"
-#include "xml/xmloutput.h"
 #include "CACmdLnOptions.hpp"
 #include "CAMsg.hpp"
 #include "CASocketAddrINet.hpp"
 #include "CAUtil.hpp"
+//#include "xml/DOM_Output.hpp"
 extern CACmdLnOptions options;
 
 
@@ -130,17 +130,12 @@ SINT32 CAInfoService::sendStatus()
 		oAddr.setAddr(hostname,options.getInfoServerPort());
 		if(oSocket.connect(oAddr)==E_SUCCESS)
 			{
-				BufferOutputStream oBufferStream(1024,1024);
-				XMLOutput oxmlOut(oBufferStream);
-				oBufferStream.reset();
-				oxmlOut.BeginDocument("1.0","UTF-8",true);
-				oxmlOut.BeginElementAttrs("MixCascadeStatus");
 				UINT8 strMixId[255];
 				options.getMixId(strMixId,255);
-				oxmlOut.WriteAttr("id",(char*)strMixId);
+				
 				tmpUser=tmpPackets=tmpRisk=tmpTraffic=-1;
 				getLevel(&tmpUser,&tmpRisk,&tmpTraffic);
-				getMixedPackets((UINT32*)&tmpPackets);
+				getMixedPackets(&tmpPackets);
 				UINT32 avgTraffic=tmpPackets/m_minuts;
 				m_minuts++;
 				UINT32 diffTraffic=tmpPackets-m_lastMixedPackets;
@@ -158,16 +153,15 @@ SINT32 CAInfoService::sendStatus()
 					}
 				m_lastMixedPackets=tmpPackets;
 			
-				oxmlOut.WriteAttr("nrOfActiveUsers",(int)tmpUser);
-				oxmlOut.WriteAttr("currentRisk",(int)tmpRisk);
-				oxmlOut.WriteAttr("trafficSituation",(int)tmpTraffic);
-				oxmlOut.WriteAttr("mixedPackets",(int)tmpPackets);
-				oxmlOut.EndAttrs();
-				oxmlOut.EndElement();
-				oxmlOut.EndDocument();
+#define XML_MIX_CASCADE_STATUS "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\
+<MixCascadeStatus id=\"%s\" currentRisk=\"%i\" mixedPackets=\"%u\" nrOfActiveUsers=\"%i\" trafficSituation=\"%i\"\
+ ></MixCascadeStatus>"
+				
 				UINT32 buffLen=1024;
 				UINT8* buff=new UINT8[buffLen];
-				m_pSignature->signXML(oBufferStream.getBuff(),oBufferStream.getBufferSize(),(UINT8*)buff,&buffLen);
+				UINT8 tmpBuff[1024];
+				sprintf((char*)tmpBuff,XML_MIX_CASCADE_STATUS,strMixId,tmpRisk,tmpPackets,tmpUser,tmpTraffic);
+				m_pSignature->signXML(tmpBuff,strlen((char*)tmpBuff),buff,&buffLen);
 				sprintf((char*)buffHeader,"POST /feedback HTTP/1.0\r\nContent-Length: %u\r\n\r\n",buffLen);
 				oSocket.send(buffHeader,strlen((char*)buffHeader));
 				oSocket.send(buff,buffLen);
@@ -223,47 +217,3 @@ ERR:
 		return E_UNKNOWN;
 	}
 
-SINT32 CAInfoService::test()
-	{
-		BufferOutputStream oBufferStream(1024,1024);
-		XMLOutput oxmlOut(oBufferStream);
-		CASignature oSignature;
-		UINT8 fileBuff[2048];
-		int handle=open("G:/proxytest/Debug/privkey.xml",O_BINARY|O_RDONLY);
-		UINT32 len=read(handle,fileBuff,2048);
-		close(handle);
-		oSignature.setSignKey(fileBuff,len,SIGKEY_XML);
-		UINT8 buff[1024];
-		UINT32 buffLen;
-#ifdef _WIN32
-		_CrtMemState s1, s2, s3;
-		_CrtMemCheckpoint( &s1 );
-#endif
-		for(int i=0;i<1000;i++)
-			{
-				oBufferStream.reset();
-				oxmlOut.BeginDocument("1.0","UTF-8",true);
-				oxmlOut.BeginElementAttrs("MixCascadeStatus");
-				oxmlOut.WriteAttr("id","errwrzteutuztuit");
-				int tmpUser,tmpPackets,tmpRisk,tmpTraffic;
-			
-				oxmlOut.WriteAttr("nrOfActiveUsers",(int)tmpUser);
-				oxmlOut.WriteAttr("currentRisk",(int)tmpRisk);
-				oxmlOut.WriteAttr("trafficSituation",(int)tmpTraffic);
-				oxmlOut.WriteAttr("mixedPackets",(int)tmpPackets);
-				oxmlOut.EndAttrs();
-				oxmlOut.BeginElementAttrs("Mixes");
-				oxmlOut.WriteAttr("count",(int)3);
-				oxmlOut.EndAttrs();
-				oxmlOut.EndElement();
-				oxmlOut.EndElement();
-				oxmlOut.EndDocument();
-				oSignature.signXML(oBufferStream.getBuff(),oBufferStream.getBufferSize(),(UINT8*)buff,&buffLen);
-			}
-#ifdef _WIN32
-		_CrtMemCheckpoint( &s2 );
-		if ( _CrtMemDifference( &s3, &s1, &s2 ) )
-      _CrtMemDumpStatistics( &s3 );
-#endif
-		return E_SUCCESS;
-	}

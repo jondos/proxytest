@@ -5,10 +5,10 @@
 #ifndef H_POPT
 #define H_POPT
 
-#ifdef __cplusplus
+/*#ifdef __cplusplus
 extern "C" {
 #endif
-
+*/
 #include <stdio.h>			/* for FILE * */
 
 #define POPT_OPTION_DEPTH	10
@@ -122,9 +122,9 @@ void poptSetOtherOptionHelp(poptContext con, const char * text);
 /*@observer@*/ const char * poptGetInvocationName(poptContext con);
 /* shuffles argv pointers to remove stripped args, returns new argc */
 int poptStrippedArgv(poptContext con, int argc, char **argv);
-
+/*
 #ifdef  __cplusplus
 }
 #endif
-
+*/
 #endif

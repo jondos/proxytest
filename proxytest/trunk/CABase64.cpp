@@ -48,12 +48,21 @@ SINT32 CABase64::decode(UINT8* in,UINT32 inlen,UINT8* out,UINT32 *outlen)
 			}
 		EVP_ENCODE_CTX oCTX;
 		EVP_DecodeInit(&oCTX);
-		UINT32 len;
+		int len=0;
 		*outlen=0;
-		if(EVP_DecodeUpdate(&oCTX,out,(int*)outlen,in,(int)inlen)==-1)
-			return E_UNKNOWN;
-		if(EVP_DecodeFinal(&oCTX,out+(*outlen),(int*)&len)==-1)
-			return E_UNKNOWN;
+		//ensure that in and out are disjunct - otherwise copy in
+		if( ((out>=in) && (in+inlen>out)) || ((out<in) && (out+*outlen>in)) )
+			{
+				UINT8* tmpIn=new UINT8[inlen];
+				memcpy(tmpIn,in,inlen);
+				EVP_DecodeUpdate(&oCTX,out,(int*)outlen,tmpIn,(int)inlen);
+				delete tmpIn;
+			}
+		else
+			{
+				EVP_DecodeUpdate(&oCTX,out,(int*)outlen,in,(int)inlen);
+			}
+		EVP_DecodeFinal(&oCTX,out+(*outlen),&len);
 		(*outlen)+=len;
 		return E_SUCCESS;
 	}
@@ -79,11 +88,24 @@ SINT32 CABase64::encode(UINT8* in,UINT32 inlen,UINT8* out,UINT32 *outlen)
 			}
 		if(inlen>*outlen)
 			return E_UNKNOWN;
+
 		EVP_ENCODE_CTX oCTX;
 		EVP_EncodeInit(&oCTX);
 		UINT32 len;
 		*outlen=0;
-		EVP_EncodeUpdate(&oCTX,out,(int*)outlen,in,(int)inlen);
+		
+		//ensure that in and out are disjunct - otherwise copy in
+		if( ((out>=in) && (in+inlen>out)) || ((out<in) && (out+*outlen>in)) )
+			{
+				UINT8* tmpIn=new UINT8[inlen];
+				memcpy(tmpIn,in,inlen);
+				EVP_EncodeUpdate(&oCTX,out,(int*)outlen,tmpIn,(int)inlen);
+				delete tmpIn;
+			}
+		else
+			{
+				EVP_EncodeUpdate(&oCTX,out,(int*)outlen,in,(int)inlen);
+			}
 		EVP_EncodeFinal(&oCTX,out+(*outlen),(int*)&len);
 		(*outlen)+=len;
 		return E_SUCCESS;

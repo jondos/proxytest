@@ -67,7 +67,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /G6 /MDd /W4 /Gm /GX /ZI /Od /I "g:\openssl-0.9.6b\inc32" /I ".\pthread\include" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "_DEBUG" /D "DO_TRACE" /D "_REENTRANT" /D "__MIX_TEST" /FAcs /FR /Yu"stdafx.h" /FD /GZ /c
+# ADD CPP /nologo /G6 /MDd /W4 /Gm /GX /ZI /Od /I "g:\openssl-0.9.6b\inc32" /I ".\pthread\include" /I "s:\xerces-c1_6_0-win32\include" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "_DEBUG" /D "DO_TRACE" /D "_REENTRANT" /D "__MIX_TEST" /FAcs /FR /Yu"stdafx.h" /FD /GZ /c
 # ADD BASE RSC /l 0x407 /d "_DEBUG"
 # ADD RSC /l 0x407 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -75,7 +75,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 ws2_32.lib kernel32.lib libeay32.lib gdi32.lib pthread.lib /nologo /subsystem:console /map /debug /machine:I386 /pdbtype:sept /libpath:"g:\openssl-0.9.6b\out32dll.dbg" /libpath:"pthread\lib_debug"
+# ADD LINK32 ws2_32.lib kernel32.lib libeay32.lib gdi32.lib pthread.lib xerces-c_1D.lib /nologo /subsystem:console /map /debug /machine:I386 /pdbtype:sept /libpath:"g:\openssl-0.9.6b\out32dll.dbg" /libpath:"pthread\lib_debug" /libpath:"s:\xerces-c1_6_0-win32\lib"
 # SUBTRACT LINK32 /nodefaultlib
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
@@ -118,20 +118,15 @@ LINK32=link.exe
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\popt\popt.c
+SOURCE=.\popt\popt.cpp
 
 !IF  "$(CFG)" == "proxytest - Win32 Release"
 
-# SUBTRACT CPP /YX /Yc /Yu
-
 !ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
 
-# ADD CPP /W3
 # SUBTRACT CPP /YX /Yc /Yu
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
-
-# SUBTRACT CPP /YX /Yc /Yu
 
 !ENDIF 
 
@@ -142,15 +137,12 @@ SOURCE=.\popt\popt.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\popt\popthelp.c
+SOURCE=.\popt\popthelp.cpp
 
 !IF  "$(CFG)" == "proxytest - Win32 Release"
 
-# SUBTRACT CPP /YX /Yc /Yu
-
 !ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
 
-# ADD CPP /W3
 # SUBTRACT CPP /YX /Yc /Yu
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
@@ -164,20 +156,15 @@ SOURCE=.\popt\poptint.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\popt\poptparse.c
+SOURCE=.\popt\poptparse.cpp
 
 !IF  "$(CFG)" == "proxytest - Win32 Release"
 
-# SUBTRACT CPP /YX /Yc /Yu
-
 !ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
 
-# ADD CPP /W3
 # SUBTRACT CPP /YX /Yc /Yu
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
-
-# SUBTRACT CPP /YX /Yc /Yu
 
 !ENDIF 
 
@@ -192,37 +179,9 @@ SOURCE=.\popt\system.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\xml\xmlconfig.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\xml\xmlinput.cpp
+SOURCE=.\xml\DOM_Output.cpp
 
 !IF  "$(CFG)" == "proxytest - Win32 Release"
-
-# SUBTRACT CPP /YX /Yc /Yu
-
-!ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
-
-# ADD CPP /W3
-# SUBTRACT CPP /YX /Yc /Yu
-
-!ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\xml\xmlinput.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\xml\xmlinput_c.cpp
-
-!IF  "$(CFG)" == "proxytest - Win32 Release"
-
-# SUBTRACT CPP /YX /Yc /Yu
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
 
@@ -235,33 +194,7 @@ SOURCE=.\xml\xmlinput_c.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\xml\xmlinputp.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\xml\xmloutput.cpp
-
-!IF  "$(CFG)" == "proxytest - Win32 Release"
-
-# SUBTRACT CPP /YX /Yc /Yu
-
-!ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
-
-# ADD CPP /W3
-# SUBTRACT CPP /YX /Yc /Yu
-
-!ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\xml\xmloutput.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\xml\xmlstream.h
+SOURCE=.\xml\DOM_Output.hpp
 # End Source File
 # End Group
 # Begin Group "aes"

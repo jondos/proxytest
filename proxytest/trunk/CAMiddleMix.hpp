@@ -44,6 +44,8 @@ class CAMiddleMix:public CAMix
 			SINT32 init();
 			SINT32 initOnce();
 			SINT32 clean();
+			
+			SINT32 proccessKeyExchange();
 		private:
 			CAMuxSocket* m_pMuxIn;
 			CAMuxSocket* m_pMuxOut;

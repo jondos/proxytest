@@ -34,6 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketAddrUnix.hpp"
 #include "CAThread.hpp"
 #include "CAInfoService.hpp"
+#include "xml/DOM_Output.hpp"
 
 extern CACmdLnOptions options;
 
@@ -61,6 +62,84 @@ SINT32 CAMiddleMix::initOnce()
 			}
 END:		
 		delete []fileBuff;
+		return E_SUCCESS;
+	}
+
+SINT32 CAMiddleMix::proccessKeyExchange()
+	{
+		UINT8* recvBuff=NULL;
+		UINT8* infoBuff=NULL;
+		
+		UINT16 len;
+		if(((CASocket*)*m_pMuxOut)->receiveFully((UINT8*)&len,2)!=E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_INFO,"Error receiving Key Info lenght!\n");
+				return E_UNKNOWN;
+			}
+		len=ntohs(len);
+		CAMsg::printMsg(LOG_INFO,"Received Key Info lenght %u\n",len);
+		recvBuff=new UINT8[len+1]; //for the \0 at the end
+		if(recvBuff==NULL)
+			return E_UNKNOWN;
+		if(((CASocket*)*m_pMuxOut)->receiveFully(recvBuff,len)!=E_SUCCESS)
+			{
+				delete recvBuff;
+				return E_UNKNOWN;
+			}
+		recvBuff[len]=0; //make a string
+
+		CAMsg::printMsg(LOG_INFO,"Received Key Info...\n");
+		
+				
+		CAMsg::printMsg(LOG_INFO,"%s\n",recvBuff);
+		MemBufInputSource oInput(recvBuff,len,"tmpID");
+		DOMParser oParser;
+		oParser.parse(oInput);		
+		DOM_Document & doc=oParser.getDocument();
+		delete recvBuff;
+
+		DOM_Element& root=doc.getDocumentElement();
+		
+		DOMString tmpDOMStr=root.getAttribute("count");
+		char* tmpStr=tmpDOMStr.transcode();
+		if(tmpStr==NULL)
+			{//TODO all deletes...
+				return E_UNKNOWN;
+			}
+		UINT32 count=atol(tmpStr);
+		delete tmpStr;
+		count++;
+		char tmpBuff[500];
+		sprintf(tmpBuff,"%u",count);
+		root.setAttribute("count",DOMString(tmpBuff));
+		
+		DOM_Element& mixNode=doc.createElement(DOMString("Mix"));
+		options.getMixId((UINT8*)tmpBuff,50); //the mix id...
+		mixNode.setAttribute("id",DOMString(tmpBuff));
+
+		DOM_DocumentFragment* pDocFragment=NULL;
+		m_RSA.getPublicKeyAsDocumentFragment(pDocFragment); //the key
+		mixNode.appendChild(doc.importNode(*pDocFragment,true));
+		delete pDocFragment;
+		root.appendChild(mixNode);
+//		delete mixNode;
+
+		recvBuff=new UINT8[2048];
+		UINT32 outlen=2048;
+		DOM_Output::dumpToMem(doc,recvBuff,&outlen);
+		#ifdef _DEBUG
+			CAMsg::printMsg(LOG_DEBUG,"New Key Info size: %u\n",outlen);
+		#endif
+		
+		if(((CASocket*)*m_pMuxIn)->send(recvBuff,len)==-1)
+			{
+				CAMsg::printMsg(LOG_DEBUG,"Error sending new New Key Info\n");
+				return E_UNKNOWN;
+			}
+		else
+			CAMsg::printMsg(LOG_DEBUG,"Sending new New Key Info succeded\n");
+		delete recvBuff;
+//		delete doc;
 		return E_SUCCESS;
 	}
 
@@ -121,38 +200,6 @@ SINT32 CAMiddleMix::init()
 					CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
 			}
 		
-		unsigned char* recvBuff=NULL;
-		unsigned char* infoBuff=NULL;
-		
-		UINT16 keyLen;
-		if(((CASocket*)*m_pMuxOut)->receiveFully((UINT8*)&keyLen,2)!=E_SUCCESS)
-			{
-				CAMsg::printMsg(LOG_INFO,"Error receiving Key Info lenght!\n");
-				return E_UNKNOWN;
-			}
-		CAMsg::printMsg(LOG_INFO,"Received Key Info lenght %u\n",ntohs(keyLen));
-#ifndef NEW_KEY_PROTOCOL		
-		recvBuff=new unsigned char[ntohs(keyLen)+2];
-		if(recvBuff==NULL)
-			return E_UNKNOWN;
-		memcpy(recvBuff,&keyLen,2);
-		if(((CASocket*)m_MuxOut)->receiveFully(recvBuff+2,ntohs(keyLen))!=E_SUCCESS)
-			{
-				delete recvBuff;
-				return E_UNKNOWN;
-			}
-#else
-		keyLen=ntohs(keyLen);
-		recvBuff=new UINT8[keyLen+1];
-		if(((CASocket*)*m_pMuxOut)->receiveFully(recvBuff,keyLen)!=E_SUCCESS)
-			{
-				delete recvBuff;
-				return E_UNKNOWN;
-			}
-		recvBuff[keyLen]=0; //make a string
-#endif
-		CAMsg::printMsg(LOG_INFO,"Received Key Info...\n");
-		
 		CASocketAddr* pAddrListen;
 		memset(path,0,255);
 		if(options.getServerHost(path,255)==E_SUCCESS&&path[0]=='/') //unix domain
@@ -178,7 +225,6 @@ SINT32 CAMiddleMix::init()
 		if(m_pMuxIn->accept(*pAddrListen)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Error waiting for previous Mix... -- Exiting!\n");				
-				delete recvBuff;
 				return E_UNKNOWN;
 			}
 		((CASocket*)*m_pMuxIn)->setRecvBuff(50*MIXPACKET_SIZE);
@@ -190,96 +236,9 @@ SINT32 CAMiddleMix::init()
 					CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
 			}
 		
-		
-UINT16 infoSize;
-#ifndef NEW_KEY_PROTOCOL
-		UINT32 keySize=m_RSA.getPublicKeySize();
-		memcpy(&infoSize,recvBuff,2);
-		infoSize=ntohs(infoSize)+2;
-		if(infoSize>keyLen)
-			{
-				delete recvBuff;
-				return E_UNKNOWN;
-			}
-		infoBuff=new UINT8[infoSize+keySize]; 
-		if(infoBuff==NULL)
-			{
-				delete recvBuff;
-				return E_UNKNOWN;
-			}
-		memcpy(infoBuff,recvBuff,infoSize);
-		delete recvBuff;
-		
-		infoBuff[2]++; //chainlen erhoehen
-		m_RSA.getPublicKey(infoBuff+infoSize,&keySize);
-		infoSize+=keySize;
-		(*(UINT16*)infoBuff)=htons(infoSize-2);
-#else
-		CAMsg::printMsg(LOG_INFO,"%s\n",recvBuff);
-		char* start_pos=strstr((char*)recvBuff,"count=\""); //search for count
-		if(start_pos==NULL)
-			{
-				delete recvBuff;
-				return E_UNKNOWN;
-			}
-		start_pos+=7; //now it points to the beginning of the Count of Mixes number
-		char* end_pos=strchr(start_pos,'"'); //find the end
-		if(end_pos==NULL)
-			{
-				delete recvBuff;
-				return E_UNKNOWN;
-			}
-		*end_pos=0;
-		UINT32 count=atol(start_pos);
-		*end_pos='"';
-		count+=1;
-		//New we have to insert our XML-Key struct in the one the have received....
-		infoBuff=new UINT8[keyLen+1024];
-		infoSize=0;
-		infoSize=start_pos-(char*)recvBuff;
-		UINT32 aktIndex=2;
-		memcpy(infoBuff+aktIndex,recvBuff,infoSize);
-		aktIndex+=infoSize;
-		sprintf((char*)infoBuff+aktIndex,"%u",count);
-		aktIndex=strlen((char*)infoBuff);
-		//now the have the right count in the output buff
-		start_pos=end_pos;
-		end_pos=strstr(start_pos,"<Mix"); //get the beginn of the first mix
-		memcpy(infoBuff+aktIndex,start_pos,end_pos-start_pos);
-		aktIndex+=end_pos-start_pos;
-		//now the have to insert out Mix-Key-Values....
-		memcpy(infoBuff+aktIndex,"<Mix id=\"",9);
-		aktIndex+=9;
-		options.getMixId(infoBuff+aktIndex,50); //the mix id...
-		aktIndex=strlen((char*)infoBuff);
-		memcpy(infoBuff+aktIndex,"\">",2);
-		aktIndex+=2;
-		count=1024;
-		m_RSA.getPublicKeyAsXML(infoBuff+aktIndex,&count); //the key
-		aktIndex+=count;
-		memcpy(infoBuff+aktIndex,"</Mix>",6);//the closing mix tag
-		aktIndex+=6;
-		infoSize=keyLen-(end_pos-(char*)recvBuff);
-		memcpy(infoBuff+aktIndex,end_pos,infoSize); //all the rest
-		aktIndex+=infoSize;
-		infoSize=aktIndex;
-		infoSize=htons(infoSize-2);
-		memcpy(infoBuff,&infoSize,2);
-		infoSize=aktIndex;
-		delete recvBuff;
-#endif
-		#ifdef _DEBUG
-			CAMsg::printMsg(LOG_DEBUG,"New Key Info size: %u\n",infoSize);
-		#endif
-		if(((CASocket*)*m_pMuxIn)->send(infoBuff,infoSize)==-1)
-			{
-				CAMsg::printMsg(LOG_DEBUG,"Error sending new New Key Info\n");
-				delete infoBuff;
-				return E_UNKNOWN;
-			}
-		else
-			CAMsg::printMsg(LOG_DEBUG,"Sending new New Key Info succeded\n");
-		delete infoBuff;
+
+		proccessKeyExchange();
+
 		m_pMiddleMixChannelList=new CAMiddleMixChannelList();
 		
 		return E_SUCCESS;
