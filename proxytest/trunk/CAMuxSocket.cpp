@@ -270,15 +270,14 @@ int CAMuxSocket::close(HCHANNEL channel_id,UINT8* buff)
 	}*/
 
 #ifdef LOG_CRIME
-UINT32 CAMuxSocket::sigCrime(HCHANNEL channel_id,UINT8* buff)
+UINT32 CAMuxSocket::sigCrime(HCHANNEL channel_id,MIXPACKET* sigPacket)
 	{
-		MIXPACKET oPacket;
-		oPacket.channel=channel_id;
+		sigPacket->channel=channel_id;
 		UINT32 v;
 		getRandom(&v);
 		v&=CHANNEL_SIG_CRIME_ID_MASK;
-		oPacket.flags=(CHANNEL_SIG_CRIME|v);
-		send(&oPacket,buff);
+		sigPacket->flags=(CHANNEL_SIG_CRIME|v);
+		getRandom(sigPacket->data,DATA_SIZE);
 		return (v>>8);
 	}
 #endif

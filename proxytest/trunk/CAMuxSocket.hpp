@@ -169,7 +169,7 @@ class CAMuxSocket
 			//int close(HCHANNEL channel_id);
 			//int close(HCHANNEL channel_id,UINT8* buff);
 #ifdef LOG_CRIME
-			UINT32 sigCrime(HCHANNEL channel_id,UINT8* buff);
+			UINT32 sigCrime(HCHANNEL channel_id,MIXPACKET* sigPacket);
 #endif
 			operator CASocket*(){return &m_Socket;}
 			operator SOCKET(){return (SOCKET)m_Socket;}
