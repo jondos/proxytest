@@ -92,7 +92,7 @@
 			#define InitializeCriticalSection(p) pthread_mutex_init(p,NULL)
 			#define EnterCriticalSection(p) pthread_mutex_lock(p)
 			#define LeaveCriticalSection(p) pthread_mutex_unlock(p)
-		#else
+		#else 
 			#define CRITICAL_SECTION 
 			#define DeleteCriticalSection(p) 
 			#define InitializeCriticalSection(p) 
@@ -127,7 +127,7 @@
     #ifndef min
 	#define min(a,b) ((a<b)?(a):(b))
     #endif	
-	#ifdef __linux
+	#if __linux
 		#include <linux/types.h>
 		typedef __u32 UINT32;
 		typedef __s32 SINT32;
@@ -137,6 +137,16 @@
 		typedef __s16 SINT16;
 		typedef __u8 UINT8;
 		typedef __s8 SINT8;
+	#elif __sgi
+		typedef __uint32_t UINT32;
+		typedef __int32_t SINT32;
+		typedef unsigned int UINT;
+		typedef signed int SINT;
+		typedef unsigned short UINT16;
+		typedef signed short SINT16;
+		typedef unsigned char UINT8;
+		typedef signed char SINT8;
+	
 	#endif
 #endif
 

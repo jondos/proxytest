@@ -40,7 +40,9 @@ SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 	    {
 				#ifndef _WIN32
 				#ifdef HAVE_VSYSLOG
-					vsyslog(type,format,ap);
+				 #ifndef __sgi	
+				 vsyslog(type,format,ap);
+				 #endif
 				#else
 					char buff[1024];
 					vsnprintf(buff,1024,format,ap);
