@@ -290,11 +290,11 @@ struct MMPair
 THREAD_RETURN mmIO(void* v)
 	{
 		MMPair* mmIOPair=(MMPair*)v;
-		CAMuxSocket& muxOut=mmIOPair->muxOut;
-		CAMuxSocket& muxIn=mmIOPair->muxIn;
+		//CAMuxSocket& muxOut=mmIOPair->muxOut;
+		//CAMuxSocket& muxIn=mmIOPair->muxIn;
 		CASocketGroup oSocketGroup;
-		oSocketGroup.add(muxIn);
-		oSocketGroup.add(muxOut);
+		oSocketGroup.add(mmIOPair->muxIn);
+		oSocketGroup.add(mmIOPair->muxOut);
 		CASocketList oSocketList;
 		HCHANNEL lastId;
 		lastId=1;
@@ -310,9 +310,9 @@ THREAD_RETURN mmIO(void* v)
 						sleep(1);
 						continue;
 					}
-				if(oSocketGroup.isSignaled(muxIn))
+				if(oSocketGroup.isSignaled(mmIOPair->muxIn))
 					{
-						len=muxIn.receive(&oMuxPacket);
+						len=mmIOPair->muxIn.receive(&oMuxPacket);
 						if(len==SOCKET_ERROR)
 							{
 								CAMsg::printMsg(LOG_CRIT,"Fehler beim Empfangen -- Exiting!\n");
@@ -331,7 +331,7 @@ THREAD_RETURN mmIO(void* v)
 										oSocketList.add(oMuxPacket.channel,lastId,newCipher);
 										oMuxPacket.channel=lastId;
 										newCipher->decrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
-										muxOut.send(&oMuxPacket);
+										mmIOPair->muxOut.send(&oMuxPacket);
 										lastId++;
 									}
 							}
@@ -339,21 +339,21 @@ THREAD_RETURN mmIO(void* v)
 							{
 								if(len==0)
 									{
-										muxOut.close(oConnection.outChannel);
+										mmIOPair->muxOut.close(oConnection.outChannel);
 										oSocketList.remove(oMuxPacket.channel);
 									}
 								else
 									{
 										oMuxPacket.channel=oConnection.outChannel;
 										oConnection.pCipher->decrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
-										muxOut.send(&oMuxPacket);
+										mmIOPair->muxOut.send(&oMuxPacket);
 									}
 							}
 					}
 				
-				if(oSocketGroup.isSignaled(muxOut))
+				if(oSocketGroup.isSignaled(mmIOPair->muxOut))
 					{
-						len=muxOut.receive(&oMuxPacket);
+						len=mmIOPair->muxOut.receive(&oMuxPacket);
 						if(len==SOCKET_ERROR)
 							{
 								CAMsg::printMsg(LOG_CRIT,"Fehler beim Empfangen -- Exiting!\n");
@@ -365,16 +365,16 @@ THREAD_RETURN mmIO(void* v)
 									{
 										oMuxPacket.channel=oConnection.id;
 										oConnection.pCipher->decrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
-										muxIn.send(&oMuxPacket);
+										mmIOPair->muxIn.send(&oMuxPacket);
 									}
 								else
 									{
-										muxIn.close(oConnection.id);
+										mmIOPair->muxIn.close(oConnection.id);
 										oSocketList.remove(oConnection.id);
 									}
 							}
 						else
-							muxOut.close(oMuxPacket.channel);
+							mmIOPair->muxOut.close(oMuxPacket.channel);
 					}
 			}
 		THREAD_RETURN_SUCCESS;
