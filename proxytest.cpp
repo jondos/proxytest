@@ -592,7 +592,13 @@ THREAD_RETURN fmIO(void *v)
 							}
 						else
 							{
-								((CASocket*)newMuxSocket)->setKeepAlive(true);
+								#ifdef _DEBUG
+									int ret=((CASocket*)newMuxSocket)->setKeepAlive(true);
+									if(ret==SOCKET_ERROR)
+										CAMsg::printMsg(LOG_DEBUG,"Fehler bei KeepAlive!");
+								#else
+									((CASocket*)newMuxSocket)->setKeepAlive(true);
+								#endif
 								((CASocket*)newMuxSocket)->send((char*)infoBuff,infoSize);
 								oMuxChannelList.add(newMuxSocket);
 								nUser++;
