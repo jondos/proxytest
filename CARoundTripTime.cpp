@@ -112,12 +112,11 @@ SINT32 CARoundTripTime::start()
 		 pthread_t othread;
 		 pthread_create(&othread,NULL,RoundTripTimeLoop,this);
 		#endif
-		return 0;
-		return 0;
+		return E_SUCCESS;
 	}
 
 SINT32 CARoundTripTime::stop()
 	{
 		m_bRun=false;
-		return 0;
+		return E_SUCCESS;
 	}
