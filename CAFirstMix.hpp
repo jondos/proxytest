@@ -44,23 +44,17 @@ class CAFirstMix:public CAMix,CASocketASyncSendResume
 		private:
 			SINT32 loop();
 			SINT32 init();
-#ifdef PROT2
 			SINT32 clean();
 			SINT32 initOnce();
-#endif
 		private:
 			CASocket		socketIn;
       CASocket		m_socketHttpsIn;
 			CAMuxSocket muxOut;
-#ifndef PROT2
-			UINT8* recvBuff;
-#else
 			UINT8* mKeyInfoBuff;
 			UINT16 mKeyInfoSize;
 			UINT32 m_MixedPackets;
 			CAASymCipher mRSA;
 			CASignature mSignature;
-#endif
 			CAMuxChannelList oSuspendList;
 		public:
 			void resume(CASocket* pSocket);

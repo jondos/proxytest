@@ -35,68 +35,55 @@ typedef UINT32 HCHANNEL;
 #define MIX_PAYLOAD_HTTP  0 
 #define MIX_PAYLOAD_SOCKS 1
 
-#ifndef PROT2
-	#define DATA_SIZE 1000 // Size of Data in a single Mux Packet
 
-	typedef struct t_MuxPacket
+#define DATA_SIZE 			992
+#define PAYLOAD_SIZE 		989
+#define MIXPACKET_SIZE 	998
+
+#define CHANNEL_DATA		0x00
+#define CHANNEL_OPEN		0x00
+#define CHANNEL_CLOSE		0x01
+#define CHANNEL_SUSPEND 0x02
+#define	CHANNEL_RESUME	0x04
+
+#if defined(WIN32) ||defined(__sgi)
+	#pragma pack( push, t_MixPacket )
+	#pragma pack(1)
+	struct t_MixPacket
 		{
 			HCHANNEL channel;
-			UINT16	len;
-			UINT8		type;
-			UINT8		reserved;
-			UINT8		data[DATA_SIZE];
-		} MUXPACKET;
-
+			UINT16  flags;
+			union
+				{
+					UINT8		data[DATA_SIZE];
+					struct t_MixPacketPayload
+						{
+							UINT16 len;
+							UINT8 type;
+							UINT8 data[PAYLOAD_SIZE];
+					} payload;
+				};
+		};
+	#pragma pack( pop, t_MixPacket )
 #else
+	struct t_MixPacket
+		{
+			HCHANNEL channel;
+			UINT16  flags;
+			union
+				{
+					UINT8		data[DATA_SIZE];
+					struct t_MixPacketPayload
+						{
+							UINT16 len;
+							UINT8 type;
+							UINT8 data[PAYLOAD_SIZE];
+					} payload;
+				};
+		} __attribute__ ((__packed__)); // MUXPACKET __attribute__ ((__packed__));
+#endif //WIN32 
 
-	#define DATA_SIZE 			992
-	#define PAYLOAD_SIZE 		989
-	#define MIXPACKET_SIZE 	998
-
-	#define CHANNEL_DATA		0x00
-	#define CHANNEL_OPEN		0x00
-	#define CHANNEL_CLOSE		0x01
-	#define CHANNEL_SUSPEND 0x02
-	#define	CHANNEL_RESUME	0x04
-
-	#if defined(WIN32) ||defined(__sgi)
-		#pragma pack( push, t_MixPacket )
-		#pragma pack(1)
-		struct t_MixPacket
-			{
-				HCHANNEL channel;
-				UINT16  flags;
-				union
-					{
-						UINT8		data[DATA_SIZE];
-						struct t_MixPacketPayload
-							{
-								UINT16 len;
-								UINT8 type;
-								UINT8 data[PAYLOAD_SIZE];
-						} payload;
-					};
-			};
-		#pragma pack( pop, t_MixPacket )
-	#else
-		struct t_MixPacket
-			{
-				HCHANNEL channel;
-				UINT16  flags;
-				union
-					{
-						UINT8		data[DATA_SIZE];
-						struct t_MixPacketPayload
-							{
-								UINT16 len;
-								UINT8 type;
-								UINT8 data[PAYLOAD_SIZE];
-						} payload;
-					};
-			} __attribute__ ((__packed__)); // MUXPACKET __attribute__ ((__packed__));
-	#endif //WIN32 
-	typedef t_MixPacket MIXPACKET;
-#endif //PROT2
+typedef t_MixPacket MIXPACKET;
 
 class CAMuxSocket
 	{

@@ -32,10 +32,8 @@ class CAMix
 		public:
 			SINT32 start();
 		protected:
-#ifdef PROT2
 			virtual SINT32 clean()=0;
 			virtual SINT32 initOnce(){return E_SUCCESS;};
-#endif
 			virtual SINT32 init()=0;
 			virtual SINT32 loop()=0;
 	};

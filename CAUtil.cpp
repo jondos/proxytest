@@ -28,56 +28,68 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "StdAfx.h"
 
 /**
-*	Removes leading and ending whitespaces (chars<32) from a string.
+*	Removes leading and ending whitespaces (chars<=32) from a zero terminated string.
 *		@param s input string (null terminated)
 *		@return new size of string
-*		
+*		@retval 0 means, that either s was NULL or that the new string has a zero length 
+*											(that means, that the old string only contains whitespaces)
 */
-SINT32 strtrim(UINT8* s)
+UINT32 strtrim(UINT8* s)
 	{
-		UINT32 inpos=0;
-		UINT32 outpos=0;
 		if(s==NULL)
 			return 0;
-		UINT32 size=strlen((char*)s);
-		while(inpos<size&&s[inpos]<32)
-			inpos++;
-		while(inpos<size&&s[inpos]>32)
-			s[outpos++]=s[inpos++];
-		s[outpos]=0;
-		return outpos;
+		UINT32 end=strlen((char*)s);
+		if(end==0)
+			return 0;
+		end--;
+		UINT32 start=0;
+		UINT32 size;
+		while(start<end&&s[start]<=32)
+			start++;
+		while(end>=start&&s[end]<=32)
+			end--;
+		size=(end+1)-start;
+		memmove(s,s+start,size);
+		s[size]=0;
+		return size;
 	}
 
 /**
-*	Removes leading and ending whitespaces (chars<32) from a byte array.
+*	Removes leading and ending whitespaces (chars<=32) from a byte array.
 *		@param src input byte array
 *		@param dest output byte array
 *		@param size size of the input byte array
-*		@return E_UNKNOWN, if an error occurs
-*				 size of output otherwise
+*		@retval E_UNSPECIFIED, if dest was NULL
+*		@return	size of output otherwise
+*		@todo replace UINT32 size with SINT32 size
 */
 SINT32 memtrim(UINT8* dest,const UINT8* src,UINT32 size)
 	{
-		UINT32 inpos=0;
-		UINT32 outpos=0;
 		if(src==NULL||size==0)
 			return 0;
 		if(dest==NULL)
-			return E_UNKNOWN;
-		while(inpos<size&&src[inpos]<32)
-			inpos++;
-		while(inpos<size&&src[inpos]>32)
-			dest[outpos++]=src[inpos++];
-		return (SINT32)outpos;
+			return E_UNSPECIFIED;
+		UINT32 start=0;
+		UINT32 end=size-1;
+		while(start<end&&src[start]<=32)
+			start++;
+		while(end>=start&&src[end]<=32)
+			end--;
+		size=(end+1)-start;
+		memmove(dest,src+start,size);
+		return (SINT32)size;
 	}
 
 /** Gets the current Systemtime in milli seconds. 
 	* @param bnTime - Big Number, in which the current time is placed
-	* @return E_UNKNOWN, if an error occurs
-	*					E_SUCCESS, otherwise
+	* @retval E_UNSPECIFIED, if bnTime was NULL
+	* @retval E_UNKNOWN, if an error occurs
+	*	@retval	E_SUCCESS, otherwise
 */
 SINT32 getcurrentTimeMillis(BIGNUM* bnTime)
 	{
+		if(bnTime==NULL)
+			return E_UNSPECIFIED;
 		#ifdef _WIN32
 			struct _timeb timebuffer;
 			_ftime(&timebuffer);
