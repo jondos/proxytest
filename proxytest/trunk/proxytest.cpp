@@ -80,7 +80,15 @@ void removePidFile()
 		UINT8 strPidFile[512];
 		if(options.getPidFile(strPidFile,512)==E_SUCCESS)
 			{
-				remove((char*)strPidFile);
+				if(::remove((char*)strPidFile)!=0)
+					{
+#ifndef _WIN32
+						int old_uid=geteuid(); //old uid... stored if we have to switch to root
+						seteuid(0);
+						::remove((char*)strPidFile);
+						seteuid(old_uid);
+#endif
+					}
 			}
 	}
 
@@ -603,17 +611,32 @@ Debug(dc::malloc.on());
 		UINT8 strPidFile[512];
 		if(options.getPidFile(strPidFile,512)==E_SUCCESS)
 			{
+				#ifndef _WIN32
+					int old_uid=geteuid(); //old uid... stored if we have to switch to root
+				#endif
 				pid_t pid=getpid();
 				UINT8 thePid[10];
 				sprintf((char*)thePid,"%i",pid);
 				int len=strlen((char*)thePid);
 				int hFile=open((char*)strPidFile,O_TRUNC|O_CREAT|O_WRONLY,S_IREAD|S_IWRITE);
+#ifndef _WIN32
+				if(hFile==-1&&seteuid(0)!=-1) //probably we do not have enough rights (because we have already switch to an other uid --> try to go back temporaly..
+					{
+						hFile=open((char*)strPidFile,O_TRUNC|O_CREAT|O_WRONLY,S_IREAD|S_IWRITE);
+					}
+#endif
 				if(hFile==-1||len!=write(hFile,thePid,len))
 					{
+						#ifndef _WIN32
+										seteuid(old_uid);
+						#endif
 						CAMsg::printMsg(LOG_CRIT,"Couldt not write pidfile - exiting!\n");
 						exit(EXIT_FAILURE);
 					}
 				close(hFile);
+#ifndef _WIN32
+				seteuid(old_uid);
+#endif
 			}
 
 //		CARoundTripTime* pRTT=NULL;
