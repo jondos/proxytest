@@ -67,7 +67,15 @@ THREAD_RETURN SocketASyncSendLoop(void* p)
 										len=MIXPACKET_SIZE;
 									}
 								if(akt->pQueue->get(buff,(UINT32*)&len)==E_SUCCESS)
-									akt->pSocket->send(buff,len,true);
+									{
+										UINT32 t1=time(NULL);
+										akt->pSocket->send(buff,len,true);
+										UINT32 t2=time(NULL)-t1;
+										if(t2>1)
+											{
+												CAMsg::printMsg(LOG_DEBUG,"Real AsynCSend takes more than one second! - %u seconds\n",t2); 
+											}
+									}
 								if(akt->bwasOverFull&&akt->pQueue->getSize()<pASyncSend->m_SendQueueLowWater)
 									{
 										#ifdef _DEBUG
