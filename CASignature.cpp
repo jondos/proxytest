@@ -459,7 +459,7 @@ SINT32 CASignature::setVerifyKey(const DOM_Element& xmlKey)
 	
 	// parse "Y"
 	DOM_Element elem;
-	if(getDOMChildByName(xmlKey, (UINT8*)"Y", elem, false)
+	if(getDOMChildByName(elemDsaKey, (UINT8*)"Y", elem, false)
 			!=E_SUCCESS)
 		{
 			return E_UNKNOWN;
@@ -481,7 +481,7 @@ SINT32 CASignature::setVerifyKey(const DOM_Element& xmlKey)
 
 	// parse "G"
 	len = 4096;
-	if(getDOMChildByName(xmlKey, (UINT8*)"G", elem, false)
+	if(getDOMChildByName(elemDsaKey, (UINT8*)"G", elem, false)
 			!=E_SUCCESS)
 		{
 			DSA_free(tmpDSA);
@@ -503,7 +503,7 @@ SINT32 CASignature::setVerifyKey(const DOM_Element& xmlKey)
 	
 	// parse "P"
 	len = 4096;
-	if(getDOMChildByName(xmlKey, (UINT8*)"P", elem, false)
+	if(getDOMChildByName(elemDsaKey, (UINT8*)"P", elem, false)
 			!=E_SUCCESS)
 		{
 			DSA_free(tmpDSA);
@@ -525,7 +525,7 @@ SINT32 CASignature::setVerifyKey(const DOM_Element& xmlKey)
 
 	// parse "Q"
 	len = 4096;
-	if(getDOMChildByName(xmlKey, (UINT8*)"Q", elem, false)
+	if(getDOMChildByName(elemDsaKey, (UINT8*)"Q", elem, false)
 			!=E_SUCCESS)
 		{
 			DSA_free(tmpDSA);
@@ -569,6 +569,35 @@ SINT32 CASignature::verify(UINT8* in,UINT32 inlen,DSA_SIG* dsaSig)
 		 return E_SUCCESS;
 		return E_UNKNOWN;
 	}
+
+	
+/**
+ * Verifies an ASN.1 DER encoded SHA1-DSA signature
+ *
+ * @author Bastian Voigt
+ * @param in the document that was signed
+ * @param inlen, the document length
+ * @param dsaSig the DER encoded signature
+ * @param sigLen the signature length (normally 46 bytes)
+ * @return E_SUCCESS if the signature is valid, 
+ * 		E_UNKNOWN if an error occurs, 
+ * 		E_INVALID if the signature is invalid
+ */
+SINT32 CASignature::verifyDER(UINT8* in, UINT32 inlen, const UINT8 * dsaSig, const UINT32 sigLen)
+	{
+		UINT8 dgst[SHA_DIGEST_LENGTH];
+		UINT32 rc;
+
+		if(m_pDSA==NULL||dsaSig==NULL)
+			return E_UNKNOWN;
+		SHA1(in,inlen,dgst);
+		if((rc=DSA_verify(0, dgst, SHA_DIGEST_LENGTH, dsaSig, sigLen, m_pDSA))==1)
+			return E_SUCCESS;
+		else if(rc==0)
+			return E_INVALID; // wrong signature
+		return E_UNKNOWN;
+	}
+
 
 SINT32 CASignature::verifyXML(const UINT8* const in,UINT32 inlen)
 	{
@@ -682,10 +711,13 @@ SINT32 CASignature::verifyXML(DOM_Node& root,CACertStore* trustedCerts)
 
 SINT32 CASignature::encodeRS(UINT8* out,UINT32* outLen,DSA_SIG* pdsaSig)
 	{
+		UINT32 rSize, sSize;
 		memset(out,0,40); //make first 40 bytes '0' --> if r or s is less then 20 bytes long! 
 											//(Due to be compatible to the standarad r and s must be 20 bytes each) 
-		BN_bn2bin(pdsaSig->r,out+20-BN_num_bytes(pdsaSig->r)); //so r is 20 bytes with leading '0'...
-		BN_bn2bin(pdsaSig->s,out+40-BN_num_bytes(pdsaSig->s));
+		rSize = BN_num_bytes(pdsaSig->r);
+		sSize = BN_num_bytes(pdsaSig->s);
+		BN_bn2bin(pdsaSig->r,out+20-rSize); //so r is 20 bytes with leading '0'...
+		BN_bn2bin(pdsaSig->s,out+40-sSize);
 		*outLen=40;
 		return E_SUCCESS;
 	}

@@ -28,6 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #ifndef __CATLSCLIENTSOCKET_HPP__
 #define __CATLSCLIENTSOCKET_HPP__
+
 #include "CASocketAddr.hpp"
 #include "CASocket.hpp"
 #include "CAMsg.hpp"
@@ -59,11 +60,11 @@ public:
 	}
 
 	/** don't use this */
-	SINT32 connect(CASocketAddr& psa,UINT32 msTimeOut) 
+/*	SINT32 connect(CASocketAddr& psa,UINT32 msTimeOut) 
 		{
 			CAMsg::printMsg(LOG_ERR, "Don't use TLSClientSocket::connect(CASocketAddr&, UINT32) !!");
 			return E_UNKNOWN;
-		}
+		}*/
 
 
 private:

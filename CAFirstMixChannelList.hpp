@@ -43,38 +43,43 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
  */
  
 /** new user, not yet authenticated */
-#define AUTH_NEW 0
+#define AUTH_NEW 0x0
 
 /** user has sent an account certificate */
-#define AUTH_GOT_ACCOUNTCERT 1
+#define AUTH_GOT_ACCOUNTCERT 0x1
 
 /** format and signature of all received certificates was OK */
-#define AUTH_ACCOUNT_OK 2
+#define AUTH_ACCOUNT_OK 0x2
 
 /** we have a recent balance certificate */
-#define AUTH_HAVE_RECENT_BALENCE 4
+#define AUTH_HAVE_RECENT_BALENCE 0x4
 
 /** we have sent one or two balance request */
-#define AUTH_SENT_BALANCE_REQUEST 8
-#define AUTH_SENT_SECOND_BALANCE_REQUEST 16
+#define AUTH_SENT_BALANCE_REQUEST 0x8
+#define AUTH_SENT_SECOND_BALANCE_REQUEST 0x10
 
 /** we have sent one or two CC requests */
-#define AUTH_SENT_CC_REQUEST 32
-#define AUTH_SENT_SECOND_CC_REQUEST 64
+#define AUTH_SENT_CC_REQUEST 0x20
+#define AUTH_SENT_SECOND_CC_REQUEST 0x40
 
 /** we have a costConfirmation which was not yet forwarded to the Bi */
-#define AUTH_HAVE_UNSETTLED_CC 128
-
+#define AUTH_HAVE_UNSETTLED_CC 0x80
 
 /** we have sent one request for an accountcertificate */
-#define AUTH_SENT_ACCOUNT_REQUEST 256
-#define AUTH_SENT_SECOND_ACCOUNT_REQUEST 512
+#define AUTH_SENT_ACCOUNT_REQUEST 0x100
+#define AUTH_SENT_SECOND_ACCOUNT_REQUEST 0x200
 
 /** the user tried to fake something */
-#define AUTH_FAKE 1024
+#define AUTH_FAKE 0x400
 
 /** we have sent a challenge and not yet received the response */
-#define AUTH_CHALLENGE_SENT 2048
+#define AUTH_CHALLENGE_SENT 0x800
+
+/** the account is empty */
+#define AUTH_ACCOUNT_EMPTY 0x1000
+
+/** a fatal error occured earlier */
+#define AUTH_FATAL_ERROR 0x2000
 
 class CAAccountingControlChannel;
 
@@ -89,9 +94,6 @@ struct t_accountinginfo
 	
 	/** the signature verifying instance for this user */
 	CASignature * pPublicKey;
-	
-	/** the last cost confirmation we received, as XML byte array */
-	UINT8 * pLastXmlCC;
 	
 	/** the last known deposit (from the last received balance cert) */
 	UINT64 lastbalDeposit;

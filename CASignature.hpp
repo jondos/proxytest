@@ -62,6 +62,18 @@ class CASignature
 			SINT32 CASignature::decodeRS(const UINT8* in, const UINT32 inLen, DSA_SIG* pDsaSig);
 			SINT32 verify(UINT8* in,UINT32 inlen,DSA_SIG* dsaSig);
 			
+			/**
+			* Verifies an ASN.1 DER encoded SHA1-DSA signature
+			*
+			* @author Bastian Voigt
+			* @param in the document that was signed
+			* @param inlen, the document length
+			* @param dsaSig the DER encoded signature
+			* @param sigLen the signature length (normally 46 bytes)
+			* @return E_SUCCESS if the signature is valid
+			*/
+			SINT32 verifyDER(UINT8* in, UINT32 inlen, const UINT8 * dsaSig, const UINT32 sigLen);
+			
 			friend class CASSLContext;
 		private:
 			DSA* getDSA(){return m_pDSA;}

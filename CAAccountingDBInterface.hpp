@@ -51,11 +51,7 @@ public:
 	* @return E_UNKNOWN if we are already connected
 	* @return E_SUCCESS if all is OK
 	*/
-	SINT32 initDBConnection(
-			const UINT8 * host, UINT32 tcp_port, 
-			const UINT8 * dbName, const UINT8 * userName,
-			const UINT8 * password
-		);
+	SINT32 initDBConnection();
 	
 	/**
 	* Terminates the database connection

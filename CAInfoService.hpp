@@ -72,9 +72,6 @@ class CAInfoService
 		private:
 			// added by ronin <ronin2@web.de>
 			SINT32 handleConfigEvent(DOM_Document& doc);
-			///Tries to understand the HTTP Answer. If 200 Ok and something is sent
-			//than the Content-Length of the following body is returned.
-			SINT32 parseHTTPAnswer(CASocket&, UINT32*);
 
 			volatile bool m_bRun;
 			CASignature*	m_pSignature;

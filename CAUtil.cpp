@@ -337,6 +337,23 @@ SINT32 setDOMElementValue(DOM_Element& elem,UINT32 text)
 		return E_SUCCESS;
 	}
 
+/**
+ * Sets the decimal text representation of a 64bit integer as node value
+ * TODO: implement this for non-64bit platforms
+ */
+SINT32 setDOMElementValue(DOM_Element & elem, const UINT64 text)
+	{
+		UINT8 tmp[32];
+		#ifdef HAVE_NATIVE_UINT64
+			snprintf((char*)tmp, 31, "%llu", text);
+		#else
+			#warning setDOMElementValue(uint64) is not implemented for this platform!!
+			return E_UNKNOWN;
+		#endif
+		setDOMElementValue(elem,tmp);
+		return E_SUCCESS;
+	}
+
 SINT32 setDOMElementValue(DOM_Element& elem,const UINT8* value)
 	{
 		DOM_Text t=elem.getOwnerDocument().createTextNode(DOMString((char*)value));
@@ -973,9 +990,12 @@ SINT32 parseU64(const UINT8 * str, UINT64& value)
 		#ifdef HAVE_ATOLL
 			value = (UINT64) atoll((char *)str);
 			return E_SUCCESS;
+		#else
+			#warning parseU64() is not implemented for platforms without atoll() support!!!
 		#endif
 		return E_UNKNOWN;
 	#else
+		#warning parseU64() is not implemented for platforms without native UINT64 support!!!
 		///@todo code if we do not have native UINT64
 		return E_UNKNOWN;
 	#endif

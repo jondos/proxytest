@@ -36,6 +36,10 @@ class CAASymCipher;
 class CASSLContext;
 class CACertificate
 	{
+		friend class CASignature;
+		friend class CAASymCipher;
+		friend class CASSLContext;
+	
 		public:
 			~CACertificate(){X509_free(m_pCert);}
 			CACertificate* clone()
@@ -50,13 +54,23 @@ class CACertificate
 			SINT32 encode(UINT8* buff,UINT32* bufflen,UINT32 type);
 			SINT32 encode(DOM_DocumentFragment& docFrag,DOM_Document& doc);
 					
-		friend class CASignature;
-		friend class CAASymCipher;
-		friend class CASSLContext;
+			static UINT8 * getXmlElementName() 
+				{
+					if(!CACertificate::m_spXmlElementName)
+					{
+						UINT8 name[] = "X509Certificate";
+						CACertificate::m_spXmlElementName = new UINT8[strlen((char*)name)+1];
+						strcpy((char*)CACertificate::m_spXmlElementName, (char*)name);
+					}
+					return CACertificate::m_spXmlElementName;
+				}
+			
+					
 		private:
 			CACertificate();
 		private:
 			X509* getX509(){return m_pCert;}
 			X509* m_pCert;
+		static UINT8 * m_spXmlElementName;
 	};
 #endif

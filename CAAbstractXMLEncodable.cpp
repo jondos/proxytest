@@ -37,7 +37,7 @@ SINT32 CAAbstractXMLEncodable::toXmlDocument(DOM_Document &doc)
 {
 	DOM_Element elemRoot;
 	doc = DOM_Document::createDocument();
-	toXmlElement(doc, elemRoot);
+	this->toXmlElement(doc, elemRoot);
 	doc.appendChild(elemRoot);
 	return E_SUCCESS;
 }
@@ -45,8 +45,17 @@ SINT32 CAAbstractXMLEncodable::toXmlDocument(DOM_Document &doc)
 UINT8 * CAAbstractXMLEncodable::toXmlString(UINT32 &size)
 {
 	DOM_Document doc;
+	//DOM_Element elemRoot;
+	UINT8 *tmp, *tmp2;
 	toXmlDocument(doc);
-	DOM_Element elemRoot = doc.getDocumentElement();
-	UINT8* tmp = DOM_Output::dumpToMem((DOM_Node&)elemRoot, &size);
-	return tmp;
+	
+	//elemRoot = doc.getDocumentElement();
+	tmp = DOM_Output::dumpToMem(doc, &size);
+	
+	// put null at the end...
+	tmp2 = new UINT8[size+1];
+	memcpy(tmp2, tmp, size);
+	tmp2[size]='\0';
+	delete[] tmp;
+	return tmp2;
 }

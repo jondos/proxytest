@@ -65,6 +65,7 @@ public:
 	SINT32 toXmlElement(DOM_Document &a_doc, DOM_Element &elemRoot);
 	
 	UINT32 getErrorCode() {return m_iErrorCode;}
+	UINT8* getDescription() {return m_strErrMsg;}
 
 	static const UINT32 ERR_OK = 0;
 	static const UINT32 ERR_INTERNAL_SERVER_ERROR = 1;
@@ -73,6 +74,10 @@ public:
 	static const UINT32 ERR_KEY_NOT_FOUND = 4;
 	static const UINT32 ERR_BAD_SIGNATURE = 5;
 	static const UINT32 ERR_BAD_REQUEST = 6;
+	static const UINT32 ERR_NO_ACCOUNTCERT = 7;
+	static const UINT32 ERR_NO_BALANCE = 8;
+	static const UINT32 ERR_NO_CONFIRMATION = 9;
+	static const UINT32 ERR_ACCOUNT_EMPTY = 10;
 
 private: 
 

@@ -35,6 +35,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "xml/DOM_Output.hpp"
 #include "CASingleSocketGroup.hpp"
 #include "CALastMix.hpp"
+#include "CAHttpClient.hpp"
 
 extern CACmdLnOptions options;
 
@@ -163,11 +164,14 @@ SINT32 CAInfoService::sendStatus(bool bIncludeCerts)
 		UINT8 buffHeader[255];
 		SINT32 tmpUser,tmpRisk,tmpTraffic;
 		UINT64 tmpPackets;
+		CAHttpClient httpClient;
+		
 		if(options.getInfoServerHost(hostname,255)!=E_SUCCESS)
 			return E_UNKNOWN;
 		oAddr.setAddr(hostname,options.getInfoServerPort());
 		if(oSocket.connect(oAddr)!=E_SUCCESS)
 			return E_UNKNOWN;
+		httpClient.setSocket(&oSocket);
 		UINT8 strMixId[255];
 		options.getMixId(strMixId,255);
 		
@@ -249,6 +253,7 @@ SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param)
 		UINT8 buffHeader[255];
 		UINT32 sendBuffLen;
 		UINT8* sendBuff=NULL;
+		CAHttpClient httpClient;
 
     UINT32 requestType = REQUEST_TYPE_POST;
     bool receiveAnswer = false;
@@ -283,6 +288,7 @@ SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param)
     oSocket.setRecvBuff(255);
 		if(oSocket.connect(oAddr)==E_SUCCESS)
 			{
+				httpClient.setSocket(&oSocket);
 				DOM_Document docMixInfo;
 				if(options.getMixXml(docMixInfo)!=E_SUCCESS)
 					{
@@ -324,11 +330,13 @@ SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param)
 					goto ERR;
 
 				delete []sendBuff;
-
+				sendBuff=NULL;
         if(receiveAnswer)
         {
-            ret = parseHTTPAnswer(oSocket, &len);
-            if(ret == E_SUCCESS && len > 0)
+            ret = httpClient.parseHTTPHeader(&len);
+						if(ret!=E_SUCCESS)
+							goto ERR;
+            if(len > 0)
             {
                 recvBuff = new UINT8[len+1];
                 ret = oSocket.receiveFully(recvBuff, len);
@@ -413,11 +421,14 @@ SINT32 CAInfoService::sendCascadeHelo()
 		UINT8 buffHeader[255];
 		UINT32 sendBuffLen;
 		UINT8* sendBuff=NULL;
+		CAHttpClient httpClient;
+		
 		if(options.getInfoServerHost(hostname,255)!=E_SUCCESS)
 			goto ERR;
 		oAddr.setAddr(hostname,options.getInfoServerPort());
 		if(oSocket.connect(oAddr)==E_SUCCESS)
 			{
+				httpClient.setSocket(&oSocket);
 				DOM_Document docMixInfo;
         if(m_pMix->getMixCascadeInfo(docMixInfo)!=E_SUCCESS)
 					{
@@ -549,54 +560,3 @@ SINT32 CAInfoService::handleConfigEvent(DOM_Document& doc)
     return E_SUCCESS;
 }
 
-SINT32 CAInfoService::parseHTTPAnswer(CASocket& server, UINT32* contentLength)
-{
-    char *line = new char[255];
-    SINT32 ret = 0;
-    SINT32 ret2 = E_UNKNOWN;
-    do
-    {
-        int i=0;
-        UINT8 byte = 0;
-        do
-        {
-            ret = server.receive(&byte, 1);
-            if(byte == '\r' || byte == '\n')
-            {
-                line[i++] = 0;
-						}
-            else
-            {
-                line[i++] = byte;
-            }
-        }
-        while(byte != '\n' && i<255 && ret > 0);
-
-        if(ret < 0)
-            break;
-
-        if(strncmp(line, "HTTP", 4) == 0)
-        {
-            if(strstr(line, "200 OK") == NULL)
-            {
-                CAMsg::printMsg(LOG_CRIT,"InfoService: Error: InfoService returned: '%s'.\n",line);
-                if(strstr(line, "404") != NULL)
-                {
-
-                    CAMsg::printMsg(LOG_CRIT,"InfoService: Error: Maybe the desired mix is not online? Retry later.\n", line);
-                }
-                ret2 = E_UNKNOWN;
-                break;
-            }
-						else
-							ret2=E_SUCCESS;
-        }
-        else if(strncmp(line, "Content-length: ", 16) == 0)
-        {
-            *contentLength = (UINT32) atol(line+16);
-        }
-    }
-    while(strlen(line) > 0);
-    delete[] line;
-    return ret2;
-}

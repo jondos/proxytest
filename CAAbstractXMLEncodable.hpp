@@ -28,6 +28,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef CAABSTRACTXMLENCODABLE_HPP
 #define CAABSTRACTXMLENCODABLE_HPP
 
+#include "StdAfx.h"
+
 
 /**
 Abstract base class for classes which can be converted to an XML structure.

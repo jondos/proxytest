@@ -29,6 +29,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CAACCOUNTINGSETTLETHREAD__
 #define __CAACCOUNTINGSETTLETHREAD__
 
+#include "StdAfx.h"
+#include "CAThread.hpp"
 
 struct t_aiSettleItem
 {
@@ -43,14 +45,16 @@ typedef struct t_aiSettleItem aiSettleItem;
  * @author Bastian Voigt
  * @todo make SLEEP_SECONDS a configure option
  */
-class CAAccountingSettleThread{
+class CAAccountingSettleThread
+{
 public:
 	CAAccountingSettleThread();
-
 	~CAAccountingSettleThread();
-
+	
+private:
 	static THREAD_RETURN CAAccountingSettleThread::mainLoop(void * param);
-
+	
+	CAThread * m_pThread;
 };
 
 #endif

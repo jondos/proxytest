@@ -34,7 +34,7 @@ public:
 	static UINT8 * getXMLElementName();
 
 private:
-	static void initXMLElementName();
+	//static void initXMLElementName();
 	SINT32 setValues(DOM_Element &elemRoot);
 	
 	UINT64 m_lTransferredBytes;
