@@ -167,10 +167,10 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 		int aktIndex=0;
 		int len=0;
 		int ret;
-		HCHANNEL tmpChannel=pPacket->channel;
-		UINT16 tmpFlags=pPacket->flags;
+		//HCHANNEL tmpChannel=pPacket->channel;
+		//UINT16 tmpFlags=pPacket->flags;
 		pPacket->channel=htonl(pPacket->channel);
-	//	pPacket->flags=htonl(pPacket->flags);
+	//	pPacket->flags=htons(pPacket->flags);
 		len=m_Socket.send(((UINT8*)pPacket)+aktIndex,MuxPacketSize);
 
 		if(len==SOCKET_ERROR)
@@ -279,7 +279,7 @@ int CAMuxSocket::receive(MUXPACKET* pPacket)
 
 //		pPacket->len=ntohs(pPacket->len);	
 		pPacket->channel=ntohl(pPacket->channel);
-//		pPacket->flags=ntohl(pPacket->flags);
+//		pPacket->flags=ntohs(pPacket->flags);
 		return MUXPACKET_SIZE;
 	}
 #endif
