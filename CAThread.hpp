@@ -27,8 +27,24 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CATHREAD__
 #define __CATHREAD__
+
 typedef void *(*THREAD_MAIN_TYP)(void *);
-//#include "CAConditionVariable.hpp"
+/**
+	Some example on CAThread:
+
+	THREAD_RETURN_TYPE doSomeThing(void* param)
+		{
+			THREAD_RETURN_SUCCESS
+		}
+	
+
+	CAThread* pThread=new CAThread();
+	pThread->setMainLoop(doSomeThing);
+	pThread->start(theParams);
+	pThread->join();
+	delete pThread;
+
+	*/
 class CAThread
 	{
 		public:
