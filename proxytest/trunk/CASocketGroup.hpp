@@ -29,6 +29,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define __CASOCKETGROUP__
 #include "CAMuxSocket.hpp"
 #include "CAMutex.hpp"
+#ifdef HAVE_EPOLL
+	#include "CASocketGroupEpoll.hpp"
+	typedef CASocketGroupEpoll CASocketGroup;
+#else
 class CASocketGroup
 	{
 		public:
@@ -123,4 +127,5 @@ class CASocketGroup
 			#endif
 			CAMutex m_csFD_SET;
 	};
+#endif
 #endif

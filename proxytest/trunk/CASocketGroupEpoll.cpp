@@ -43,7 +43,7 @@ CASocketGroupEpoll::~CASocketGroupEpoll()
 		delete m_pEpollEvent; 
 	}
 
-SINT32 setPoolForWrite(bool bWrite)
+SINT32 CASocketGroupEpoll::setPoolForWrite(bool bWrite)
 	{
 		if(bWrite)
 			m_pEpollEvent->events=EPOLLOUT|EPOLLERR|EPOLLHUP;
