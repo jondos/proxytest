@@ -26,10 +26,10 @@ class CAMuxSocket
 			int accept(int port);
 			int connect(LPSOCKETADDR psa);
 			int close();
-			int send(HCHANNEL channel_id,char* buff,int len);
+			int send(HCHANNEL channel_id,char* buff,unsigned short len);
 			int send(MUXPACKET *pPacket);
 			int send(MUXPACKET *pPacket,CASymCipher oCipher);
-			int receive(HCHANNEL* channel_id,char* buff,int len);
+			int receive(HCHANNEL* channel_id,char* buff,unsigned short len);
 			int receive(MUXPACKET *pPacket);
 			int receive(MUXPACKET *pPacket,CASymCipher oCipher);
 			int close(HCHANNEL channel_id);
