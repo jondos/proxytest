@@ -5,7 +5,7 @@
 
 AUTOMAKE_OPTIONS = foreign
 sbin_PROGRAMS = mix
-proxytest_SOURCES = CAAbstractControlChannel.cpp\
+mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CAAbstractXMLEncodable.cpp\
 		    CAAbstractXMLSignable.cpp\
 		    CAAccountingBIInterface.cpp\
