@@ -287,9 +287,9 @@ SINT32 CAFirstMixA::loop()
 						countRead--;
 						ret=MIXPACKET_SIZE;
 						#ifdef LOG_PACKET_TIMES
-							m_pQueueReadFromMix->get((UINT8*)pMixPacket,(UINT32*)&ret);
+							m_pQueueReadFromMix->get((UINT8*)pMixPacket,(UINT32*)&ret,download_packet_timestamp);
 						#else
-							m_pQueueReadFromMix->get((UINT8*)pMixPacket,(UINT32*)&ret,download_time_stamp);
+							m_pQueueReadFromMix->get((UINT8*)pMixPacket,(UINT32*)&ret);
 						#endif	
 						#ifdef USE_POOL
 							#ifdef LOG_PACKET_TIMES
@@ -298,7 +298,7 @@ SINT32 CAFirstMixA::loop()
 //								pPool->pool(pPoolEntry);
 //								set64(download_packet_timestamp,pPoolEntry->overall_timestamp);
 							#else
-//								pPool->pool((tPoolEntry*)pMixPacket);
+								pPool->pool((tPoolEntry*)pMixPacket);
 							#endif	
 						#endif
 						if(pMixPacket->flags==CHANNEL_CLOSE) //close event
@@ -392,10 +392,10 @@ SINT32 CAFirstMixA::loop()
 									{
 										#ifdef _DEBUG
 											CAMsg::printMsg(LOG_DEBUG,"Error Sending Data to Browser -- Channel-Id %u no valid!\n",pMixPacket->channel);
+											#ifdef LOG_CHANNEL
+												CAMsg::printMsg(LOG_INFO,"Packet late arrive for channel: %u\n",pMixPacket->channel);
+											#endif
 										#endif
-										#ifdef LOG_CHANNEL
-											CAMsg::printMsg(LOG_INFO,"Packet late arrive for channel: %u\n",pMixPacket->channel);
-										#endif												
 									}
 							}
 					}
