@@ -143,11 +143,21 @@ class CACmdLnOptions
 					return NULL;
 				}
 
+			bool hasPrevMixTestCertificate()
+				{
+					return m_pPrevMixCertificate!=NULL;
+				}
+
 			CACertificate* getPrevMixTestCertificate()
 				{
 					if(m_pPrevMixCertificate!=NULL)
 						return m_pPrevMixCertificate->clone();
 					return NULL;
+				}
+
+			bool hasNextMixTestCertificate()
+				{
+					return m_pNextMixCertificate!=NULL;
 				}
 
 			CACertificate* getNextMixTestCertificate()

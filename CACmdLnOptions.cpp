@@ -459,7 +459,7 @@ SINT32 CACmdLnOptions::setPrevMix(DOM_Document& doc)
     DOM_Element elemCert;
     getDOMChildByName(elemSig,(UINT8*)"X509Data",elemCert,true);
     if(elemCert!=NULL)
-    {
+			{
 				CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - elem cert found in data from infoservice\n");
         DOM_Element elemOptionsRoot = m_docMixXml.getDocumentElement();
 				CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - got  current options root element\n");
@@ -468,13 +468,20 @@ SINT32 CACmdLnOptions::setPrevMix(DOM_Document& doc)
         DOM_Element elemOptionsPrevMixCert;
 
         if(getDOMChildByName(elemOptionsRoot, (UINT8*) "PrevMixCertificate", elemOptionsPrevMixCert, false) != E_SUCCESS)
-        {
+					{
 						CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - no prev cert set at the moment\n");
             elemOptionsPrevMixCert = m_docMixXml.createElement("PrevMixCertificate");
             elemOptionsCerts.appendChild(elemOptionsPrevMixCert);
   					CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - try to import the one we got from infoservice\n");
-            elemOptionsPrevMixCert.appendChild(m_docMixXml.importNode(elemCert.getFirstChild(),true));
-        }
+						getDOMChildByName(elemCert,(UINT8*)"X509Certificate",elemCert,false);
+						elemOptionsPrevMixCert.appendChild(m_docMixXml.importNode(elemCert,true));
+						CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - MixConf now:\n");
+						UINT8 buff[8192];
+						UINT32 len=8192;
+						DOM_Output::dumpToMem(m_docMixXml,buff,&len);
+						buff[len]=0;
+						CAMsg::printMsg(LOG_DEBUG,(char*)buff);
+					}
         else
         {
             if(elemOptionsPrevMixCert.hasChildNodes())
@@ -486,9 +493,9 @@ SINT32 CACmdLnOptions::setPrevMix(DOM_Document& doc)
             {
                 elemOptionsPrevMixCert.appendChild(m_docMixXml.importNode(elemCert.getFirstChild(),true));
             }
-	}
-		CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - end\n");
-	return processXmlConfiguration(m_docMixXml);
+				}
+			CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - end\n");
+			return processXmlConfiguration(m_docMixXml);
     }
 		CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - end with error\n");
     return E_UNKNOWN;
