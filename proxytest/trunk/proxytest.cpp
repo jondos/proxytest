@@ -200,6 +200,37 @@ changes after decrypting. If this mix-packed was the first packed of a channel, 
 for this channel will change to (because of the content format for the first packed of a channel, explained later). 
 
 For Upstream and Downstream different keys are used.
+
+\section docCascadeInit Initialisation of a Cascade
+
+\image html JAPCascadeInit.gif "Figure 4: Steps during Cascade initialisation (3 Mix example)
+
+Fiugre 4 shows the steps which take place, than a Cascade starts. These steps are illustrated using a 3 Mix example.
+The procedure is as follows:
+
+\li Step 1: Each Mix starts, reads its configuration file (including own key
+ for digital signature and test keys from previous and next mix) and generates a 
+ public key pair of the asymmetric crpyto system used by the mix for encryption 
+ (currently this is RSA).
+
+\li Step 2: Mix 2 establishes a TCP/IP connection with Mix 3. 
+No data is transmitted during this step.
+
+\li Step 3: Mix 3 sends its public key  to Mix 2 (signed with its signature key).
+See \ref XMLInterMixInitSendFromLast "[XML]" for a description of the XML struct send in this step. 
+
+\li Step 4: Mix 2 generates and sends a symmetric key to Mix 3, encrypted with the public key 
+of Mix 3, signed by Mix 2. 
+This key is used for inter-mix encryption and is actually a 64 byte octet stream.
+See \ref XMLInterMixInitAnswer "[XML]" for a description of the XML struct send in this step.\n  
+The first 16 bytes a used as a key for 
+inter-mix encryption of packets send from Mix \e n-1 to Mix \e n (e.g. upstream direction).
+The next 16 byte are used as IV for this cipher. The next 16 bytes are used as
+key for downstream direction and the last 16 bytes are the IV for this cipher.
+
+\li Step 5,6,7: This steps are equal to step 2,3,4. Mix 1 establishes a TCP/IP-connection
+with Mix 2. Mix 2 send it publick key to Mix 1 and Mix 1 generates and sends 
+a symmetric key to Mix 2.
 */
 
 

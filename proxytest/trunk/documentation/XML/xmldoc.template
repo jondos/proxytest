@@ -10,4 +10,8 @@ This is the index of all XML structs used in the project.
 2. Answer send from Mix \e n-1 to Mix \e n during cascade init
 	\verbinclude InterMix-KeyExchange-Answer.xml
 
+\par \anchor XMLFirstMixToInfoService
+3. Mix-Cascade info (and info about the FirstMix) send from the
+FirstMix to the InfoService.
+\verbinclude FirstMixToInfoService.xml 
 */
