@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.01.52"
+#define MIX_VERSION "00.01.53"
 
 //#define LOG_CHANNEL
 //#define COMPRESSED_LOGS
@@ -169,8 +169,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
   #endif	
 	#if defined(__linux)
 		#include <linux/types.h>
-	#define HAVE_NATIVE_UINT64
-	typedef unsigned long long UINT64;
+		#define HAVE_NATIVE_UINT64
+		typedef unsigned long long UINT64;
 		typedef __u32 UINT32;
 		typedef __s32 SINT32;
 		typedef unsigned int UINT;
@@ -180,9 +180,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		typedef __u8 UINT8;
 		typedef __s8 SINT8;
 	#elif defined(__sgi)
-	#define HAVE_NATIVE_UINT64
-	typedef __uint64_t UINT64;	
-	 typedef __uint32_t UINT32;
+		#define HAVE_NATIVE_UINT64
+		typedef __uint64_t UINT64;	
+		typedef __uint32_t UINT32;
 		typedef __int32_t SINT32;
 		typedef unsigned int UINT;
 		typedef signed int SINT;
@@ -202,6 +202,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#else     	
 		#warning This seams to be a currently not supported plattform - may be things go wrong! 
 		#warning Please report the plattform, so that it could be added 
+		#ifdef __GNUC__ //TODO check if for all GNUC long long is 64 bit!!
+			#define HAVE_NATIVE_UINT64
+			typedef unsigned long long UINT64;
+		#endif
 		typedef unsigned int UINT32;
 		typedef signed int SINT32;
 		typedef unsigned int UINT;
