@@ -33,8 +33,36 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketAddrINet.hpp"
 #include "CASocketAddrUnix.hpp"
 #include "CAThread.hpp"
+#include "CAInfoService.hpp"
 
 extern CACmdLnOptions options;
+
+SINT32 CAMiddleMix::initOnce()
+	{
+		CAMsg::printMsg(LOG_DEBUG,"Starting MiddleMix InitOnce\n");
+		int handle;
+		SINT32 len;
+		UINT8* fileBuff=new UINT8[2048];
+		if(fileBuff==NULL||options.getKeyFileName(fileBuff,2048)!=E_SUCCESS)
+			goto END;
+		handle=open((char*)fileBuff,O_BINARY|O_RDONLY);
+		if(handle==-1)
+			goto END;
+		len=read(handle,fileBuff,2048);
+		close(handle);
+		if(len<1)
+			goto END;
+		m_pSignature=new CASignature();
+		if(m_pSignature->setSignKey(fileBuff,len,SIGKEY_XML)!=E_SUCCESS)
+			{
+				delete m_pSignature;
+				m_pSignature=NULL;
+				goto END;
+			}
+END:		
+		delete []fileBuff;
+		return E_SUCCESS;
+	}
 
 SINT32 CAMiddleMix::init()
 	{		
@@ -238,6 +266,7 @@ UINT16 infoSize;
 			CAMsg::printMsg(LOG_DEBUG,"Sending new New Key Info succeded\n");
 		delete infoBuff;
 		m_pMiddleMixChannelList=new CAMiddleMixChannelList();
+		
 		return E_SUCCESS;
 	}
 
@@ -303,6 +332,14 @@ ERR:
 
 SINT32 CAMiddleMix::loop()
 	{
+		CAInfoService* pInfoService=NULL;
+		if(m_pSignature!=NULL&&options.isInfoServiceEnabled())
+			{
+				pInfoService=new CAInfoService();
+				pInfoService->setSignature(m_pSignature);
+				pInfoService->sendHelo();
+				pInfoService->start();
+			}
 		MIXPACKET* pMixPacket=new MIXPACKET;
 		HCHANNEL channelOut;
 		CASymCipher* pCipher;
@@ -385,6 +422,8 @@ ERR:
 		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
 		delete tmpRSABuff;
 		delete pMixPacket;
+		if(pInfoService!=NULL)
+			delete pInfoService;
 		return E_UNKNOWN;
 	}
 SINT32 CAMiddleMix::clean()
