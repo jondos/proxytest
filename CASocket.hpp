@@ -76,7 +76,7 @@ class CASocket
 			SINT32 getNonBlocking(bool* b);
 		private:
 			bool m_bSocketIsClosed; //this is a flag, which shows, if the m_Socket is valid
-													//we should not set m_Sockt to -1 or so after close,
+													//we should not set m_Socket to -1 or so after close,
 													//because the Socket value ist needed sometimes even after close!!!
 													// (because it is used as a Key in lookups for instance as a HashValue etc.)
 			SOCKET m_Socket;
