@@ -16,6 +16,8 @@ AC_PROG_CXX
 AC_PROG_INSTALL
 AC_PROG_RANLIB
 
+CFLAGS="$CFLGS -D_ASYNC -DPROT2"
+
 case "$host" in
 *-*-solaris*)
         LIBS="$LIBS -lnsl -lsocket"
@@ -129,15 +131,6 @@ AC_ARG_WITH(debug,
 	[
 		if test "x$withval" != "$xno" ; then
 			CFLAGS="$CFLAGS -D_DEBUG"
-		fi
-	]
-)
-
-AC_ARG_WITH(prot2,
-	[  --with-prot2		  Enable Protocol Version 0.2],
-	[
-		if test "x$withval" != "$xno" ; then
-			CFLAGS="$CFLAGS -DPROT2"
 		fi
 	]
 )
