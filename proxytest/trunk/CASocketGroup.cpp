@@ -159,6 +159,7 @@ SINT32 CASocketGroup::select()
 				#endif			    
 			#endif
 		#else
+			m_bWriteQueried=false;
 			return ::poll(m_pollfd_read,m_max,-1);
 		#endif
 	}
@@ -199,15 +200,13 @@ SINT32 CASocketGroup::select(bool bWrite,UINT32 ms)
 		#else
 			if(bWrite)
 				{
-					for(int i=0;i<m_max;i++)
-						m_pollfd_read[i].events=POLLOUT;
-					ret=::poll(m_pollfd_read,m_max,ms);
-					for(int i=0;i<m_max;i++)
-						m_pollfd_read[i].events=POLLIN; //back to default...
+					ret=::poll(m_pollfd_write,m_max,ms);
+					m_bWriteQueried=true;
 				}
 			else
 				{
 					ret=::poll(m_pollfd_read,m_max,ms);
+					m_bWriteQueried=false;
 				}
 		#endif
 		if(ret==0)

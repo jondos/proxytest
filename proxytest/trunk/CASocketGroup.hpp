@@ -47,12 +47,16 @@ class CASocketGroup
 			SINT32 remove(CAMuxSocket&s);
 			SINT32 select();
 			SINT32 select(bool bWrite,UINT32 time_ms);
+
 			bool isSignaled(CASocket&s)
 				{
 					#ifndef HAVE_POLL
 						return FD_ISSET((SOCKET)s,&m_signaled_set)!=0;
 					#else
-						return m_pollfd_read[(SOCKET)s].revents!=0;
+						if(m_bWriteQueried)
+							return m_pollfd_write[(SOCKET)s].revents!=0;
+						else
+							return m_pollfd_read[(SOCKET)s].revents!=0;
 					#endif
 				}
 
@@ -61,7 +65,10 @@ class CASocketGroup
 					#ifndef HAVE_POLL
 						return FD_ISSET((SOCKET)*ps,&m_signaled_set)!=0;
 					#else
-						return m_pollfd_read[(SOCKET)*ps].revents!=0;
+						if(m_bWriteQueried)
+							return m_pollfd_write[(SOCKET)*ps].revents!=0;
+						else
+							return m_pollfd_read[(SOCKET)*ps].revents!=0;
 					#endif
 				}
 
@@ -70,7 +77,10 @@ class CASocketGroup
 					#ifndef HAVE_POLL
 						return FD_ISSET((SOCKET)s,&m_signaled_set)!=0;
 					#else
-						return m_pollfd_read[(SOCKET)s].revents!=0;
+						if(m_bWriteQueried)
+							return m_pollfd_write[(SOCKET)s].revents!=0;
+						else
+							return m_pollfd_read[(SOCKET)s].revents!=0;
 					#endif
 				}
 
@@ -85,6 +95,7 @@ class CASocketGroup
 				struct pollfd* m_pollfd_write;
 				struct pollfd* m_pollfd_read;
 				int m_max;
+				bool m_bWriteQueried;
 			#endif
 			CRITICAL_SECTION m_csFD_SET;
 	};
