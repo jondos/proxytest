@@ -210,12 +210,14 @@ void proxy(void* tmpSocket)
 	}
 */
 
+#ifdef _DEBUG
 void signal_broken_pipe( int sig)
 	{
 		printf("Hm.. Broken Pipe.... How cares!\n");
 		signal(SIGPIPE,signal_broken_pipe);
 	}
-	
+#endif
+
 THREAD_RETURN proxytomix(void* tmpPair)
 	{
 		CASocket* inSocket=((CASocketToMix*)tmpPair)->in;	
@@ -307,7 +309,11 @@ int main(int argc, char* argv[])
 //		time_t t=time(NULL);
 //		strftime(buff,BUFF_SIZE,"%Y%m%d-%H%M%S",localtime(&t));
 //		int handle=open(buff,_O_BINARY|_O_CREAT|_O_RDWR,S_IWRITE);
+#ifdef _DEBUG
 		signal(SIGPIPE,signal_broken_pipe);
+#else
+		signal(SIGPIPE,SIG_IGN);
+#endif
 		while(
 		#ifdef _WIN32
 		!_kbhit()

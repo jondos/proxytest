@@ -36,7 +36,7 @@
     #define SD_SEND 1
     #define SD_BOTH 2
 
-    #ifndef _LINUX
+    #ifndef __linux
     	#define INADDR_NONE -1
     #endif    
     #define CRITICAL_SECTION pthread_mutex_t
