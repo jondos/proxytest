@@ -693,6 +693,7 @@ SINT32 CACmdLnOptions::getDatabasePassword(UINT8 * pass, UINT32 len)
 	return (SINT32)strlen((char *)m_strDatabasePassword);	
 }
 
+
 #endif /* ifdef PAYMENT */
 
 UINT16 CACmdLnOptions::getInfoServerPort()
@@ -999,15 +1000,10 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 					m_iJPIPort = tmp;
 				}
 				
-				// Get JPI Public Key
-				getDOMChildByName(elemJPI,(UINT8*)"PublicKey", elem, false);
+				// Get JPI Test Certificate
+				getDOMChildByName(elemJPI,(UINT8*)"TestCertificate", elem, false);
 				if(elem!=NULL) {
-					m_pPublicKey = new CASignature();
-					if(m_pSignKey->setSignKey(elem.getFirstChild(),SIGKEY_PKCS12,(char*)passwd)!=E_SUCCESS) {
-						CAMsg::printMsg(LOG_CRIT,"Couldt not read own signature key!\n");
-						delete m_pSignKey;
-						m_pSignKey=NULL;
-					}
+					m_pJpiTestCertificate = CACertificate.decode(elem.getFirstChild(), CERT_X509CERTIFICATE);
 				}
 			}
 

@@ -137,7 +137,8 @@ UINT32 CAAccountingInstance::setJapKeys( fmHashTableEntry *pHashEntry,
  * or somehow tried to fake authentication, connection should be closed
  * @return 4 AuthState unknown (internal error, should not happen)
  */
-UINT32 CAAccountingInstance::handleJapPacket( MIXPACKET *pPacket,
+UINT32 CAAccountingInstance::handleJapPacket( 
+		MIXPACKET *pPacket,
 																							fmHashTableEntry *pHashEntry
 																							)
 {
@@ -153,12 +154,13 @@ UINT32 CAAccountingInstance::handleJapPacket( MIXPACKET *pPacket,
 
 	
 	// is this packet an JAP->AI packet?
+	// todo use controlchannels here
 	if(pPacket->channel == 0xFFFFFFFF) {
 		if(pCipherIn != 0) { // decrypt the packet
-			pCipherIn->crypt1(	pData, 
-															pData, DATA_SIZE);
+			pCipherIn->crypt1( pData, pData, DATA_SIZE);
 		}
-		else {
+		else 
+		{
 			CAMsg::printMsg(LOG_ERR, "Could not decrypt JAP->AI packet: key not initialized\n");
 		}
 		
@@ -167,12 +169,16 @@ UINT32 CAAccountingInstance::handleJapPacket( MIXPACKET *pPacket,
 	}
 	else {
 
-		// user is authenticated normally
+		// set the lock
 		m_Mutex.lock();
-		if(pAccInfo->authState == AUTH_OK) {
-			// count the payload
+		
+		// count the packet
 			pAccInfo->mixedPackets++;
 			
+		switch(pAccInfo->authState)
+		{
+
+		case AUTH_OK:
 			// if the JAP refuses to send a cost confirmation -> byebye!
 			if(pAccInfo->mixedPackets >= pAccInfo->confirmedPackets+1000) {
 				m_Mutex.unlock();
@@ -187,11 +193,10 @@ UINT32 CAAccountingInstance::handleJapPacket( MIXPACKET *pPacket,
 			// let the packet pass thru
 			m_Mutex.unlock();
 			return 1;
-		}
 		
-		// user has not sent his/her certificate
-		else if(pAccInfo->authState == AUTH_UNKNOWN) {
-			pAccInfo->mixedPackets++;
+
+		case AUTH_NEW:
+		case AUTH_CHALLENGE_SENT:
 			// new (not yet authenticated) users can surf a bit (up to 500 Packets~=500KB) 
 			// before they get kicked out
 			if(pAccInfo->mixedPackets >= 500) {
@@ -208,18 +213,18 @@ UINT32 CAAccountingInstance::handleJapPacket( MIXPACKET *pPacket,
 				m_Mutex.unlock();
 				return 1;
 			}
-		}
 		
-		// user is a bad guy
-		else if(pAccInfo->authState == AUTH_BAD) {
+
+		case AUTH_BAD:
 			m_Mutex.unlock();
 			CAMsg::printMsg(LOG_DEBUG, "Accounting instance: Account %d, IP %d.%d.%d.%d is evil (AuthState BAD)!", 
 				pAccInfo->accountNumber, pHashEntry->peerIP[0], pHashEntry->peerIP[1],
 				pHashEntry->peerIP[2], pHashEntry->peerIP[3]);
 			m_pIPBlockList->insertIP(pHashEntry->peerIP);
 			return 3;
-		}
-		else {
+
+
+		default:
 			m_Mutex.unlock();
 			CAMsg::printMsg(LOG_ERROR, "Accounting instance: Account %d, IP %d.%d.%d.%d has invalid AuthState!",
 				pAccInfo->accountNumber, pHashEntry->peerIP[0], pHashEntry->peerIP[1],
@@ -238,8 +243,10 @@ UINT32 CAAccountingInstance::handleJapPacket( MIXPACKET *pPacket,
  * buffer. When a complete message was received, this function puts it
  * in the AI queue, so the AI thread can deal with it
  */
-void CAAccountingInstance::addToReceiveBuffer(UINT8 *pData, 
-																							fmHashTableEntry *pHashEntry) 
+void CAAccountingInstance::addToReceiveBuffer(
+		UINT8 *pData, 
+		fmHashTableEntry *pHashEntry
+	) 
 {
 	// Note: We don't need to use m_Mutex in this function because only this
 	// thread reads/writes pReceiveBuffer, msgTotalSize, msgCurrentSize
@@ -313,7 +320,7 @@ void CAAccountingInstance::addToReceiveBuffer(UINT8 *pData,
 
 /**
  * The Main Loop of the accounting instance thread.
- * TODO: terminate the whole firstMix on db connection errors
+ * TODO: terminate the whole firstMix on DB connection errors
  */
 THREAD_RETURN CAAccountingInstance::aiThreadMainLoop(void *param)
 {
@@ -336,7 +343,8 @@ THREAD_RETURN CAAccountingInstance::aiThreadMainLoop(void *param)
 	}
 
 	
-	while(true) {	
+	while(true) 
+	{
 		CAMsg::printMsg(LOG_DEBUG, "AI Thread waiting for message .. \n");
 		pQueue->getOrWait((UINT8 *)pQueueItem, &itemSize);
 		CAMsg::printMsg(LOG_DEBUG, "aiThread(): got message\n");
@@ -354,8 +362,10 @@ THREAD_RETURN CAAccountingInstance::aiThreadMainLoop(void *param)
  * what type of message we have and calls the appropriate handle...() 
  * function
  */
-void CAAccountingInstance::processJapMessage( fmHashTableEntry * pHashEntry, 
-										  												UINT8 * pData, UINT32 dataLen ) 
+void CAAccountingInstance::processJapMessage( 
+		fmHashTableEntry * pHashEntry, 
+		UINT8 * pData, UINT32 dataLen 
+	) 
 {
   // parse XML - get tagname of document element
   MemBufInputSource oInput(pData, dataLen, "AccountingMessage");
@@ -401,11 +411,27 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 						const DOM_Element &root,
 						UINT8 * pData, UINT32 dataLen)
 {
-	aiAccountingInfo *pAccInfo;
-	pAccInfo = pHashEntry->accountingInfo;
+	CACertificate *jpiTestCert;
+	CASignature jpiSigTester;
+	aiAccountingInfo *pAccInfo = pHashEntry->accountingInfo;
 	DOM_Element elGeneral;
-	UINT8 strGeneral[255];
-	UINT32 strGeneralLen=255;
+	UINT8 strGeneral[256];
+	UINT32 strGeneralLen=256;
+
+	// check authstate of this user, only continue if AUTH_NEW
+	m_Mutex.lock();
+	switch(pAccInfo->authState)
+	{
+		case AUTH_NEW:
+			break;
+			
+		case AUTH_BAD:
+		case AUTH_OK:
+			CAMsg::printMsg(LOG_DEBUG, "User with authState %d has sent certificate again\n", pAccInfo->authState);
+			m_Mutex.unlock();
+			return;
+	}
+	m_Mutex.unlock();
 
 	// parse accountnumber
 	if(getDOMChildByName(root, "AccountNumber", elGeneral, false)!=E_SUCCESS) {
@@ -418,38 +444,110 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 	}
 	pAccInfo->accountNumber = atoi(strGeneral);
 	
-	// check signature
+	// parse public key
+	if(getDOMChildByName(root, "JapPublicKey", elGeneral, false)!=E_SUCCESS) 
+	{
+		handleAccountCertificateError(3);
+		return;
+	}
 	
-	// send challenge
+	
+	// check JPI signature
+	jpiTestCert = options.getJpiTestCertificate();
+	if(!jpiTestCert)
+	{
+		CAMsg::printMsg(LOG_ERROR, "JPI Test Certificate not found! Could not check signature!\n");
+		m_Mutex.lock();
+		pAccInfo->authState = AUTH_ERR;
+		m_Mutex.unlock();
+		return;
+	}
+	jpiSigTester.setVerifyKey(jpiTestCert);
+	if(jpiSigTester.verifyXML(root,NULL)!=E_SUCCESS)
+	{
+	
+		// signature invalid. mark this user as bad guy
+		CAMsg::printMsg(LOG_INFO, "CAAccountingInstance::handleAccountCertificate(): Bad Jpi signature");
+		m_Mutex.lock();
+		pAccInfo->authState = AUTH_BAD;
+		m_Mutex.unlock();
+	}
+	else
+	{
+		// generate & send challenge
+		// todo implement with control channels
+	
 
-	// TODO: validate RESPONSE
 	m_Mutex.lock();
-	pAccInfo->authState = 
+		pAccInfo->authState = AUTH_CHALLENGE_SENT;
 	m_Mutex.unlock();
+		sendAIMessageToJap(...);
+	}
 
+	delete jpiTestCert;
 	return;
 }
 
 
-void CAAccountingInstance::handleAccountCertificateError(	fmHashTableEntry *pHashEntry,
-																													UINT32 num) 
+
+void CAAccountingInstance::handleAccountCertificateError(	
+		fmHashTableEntry *pHashEntry,
+		UINT32 num
+	)
 {
 	aiAccountingInfo * pAccInfo = pHashEntry->pAccountingInfo;
-	CAMsg::printMsg(LOG_ERR, "AI: AccountCertificate has wrong format(%i)! Ignoring\n", num);
+	CAMsg::printMsg(LOG_ERR, "AI: AccountCertificate has wrong format(%d)! Ignoring\n", num);
 	sendAIMessageToJap(pHashEntry, ...); // inform the jap of his evilness
 	pAccInfo->closeConnection = 1;
 }
 
 
 
-void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry, 
+/**
+ * Handles the response to our challenge.
+ * Checks the validity of the response and sets the user's authState
+ * accordingly.
+ */
+void CAAccountingInstance::handleChallengeResponse(
+		fmHashTableEntry *pHashEntry, 
 						const DOM_Element &root,
-						UINT8 * pData, UINT32 dataLen)
+		UINT8 * pData, 
+		UINT32 dataLen
+	)
 {
-	// check it
+	// check current authstate
+	m_Mutex.lock();
+	switch(pAccInfo->authState)
+	{
+		case AUTH_CHALLENGE_SENT:
+			break;
+			
+		default:
+			CAMsg::printMsg(
+					LOG_DEBUG, "User with authState %d has sent response to challenge?!\n", 
+					pAccInfo->authState
+				);
+			m_Mutex.unlock();
+			return;
+	}
+	m_Mutex.unlock();
 	
-	// set authstate accordingly
+	// todo check response
 	
+	if(...)
+	{
+		// set authstate accordingly
+		m_Mutex.lock();
+		pAccInfo->authState = AUTH_OK;
+		m_Mutex.unlock();
+	}
+	else
+	{
+		// user does not have private key
+		m_Mutex.lock();
+		pAccInfo->authState = AUTH_BAD;
+		m_Mutex.unlock();
+	}
 }
 
 
@@ -463,6 +561,7 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,
 							const DOM_Element &root,
 							UINT8 * pData, UINT32 dataLen)
 {
+	CASignature * pSigTester;
 	aiAccountingInfo *pAccInfo;
 	pAccInfo = pHashEntry->accountingInfo;
 
@@ -476,7 +575,17 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,
  * </CC>
  */
  
-	// TODO: check signature
+	// check signature
+	m_Mutex.lock();
+	pSigTester = pAccInfo->pPublicKey;
+	if(pSigTester->verifyXML(root, NULL)!=E_SUCCESS)
+	{
+		// wrong signature
+		CAMsg::printMsg(LOG_DEBUG, "CostConfirmation has INVALID SIGNATURE!\n");
+		m_Mutex.unlock();
+		return;
+	}
+	m_Mutex.unlock();
 	
 	// parse ai name	
 	DOM_Element elemAiName = root.getElementsByTagName("AIName");
@@ -485,8 +594,8 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,
 		CAMsg::printMsg(LOG_DEBUG, "CostConfirmation has WRONG FORMAT!! Ignoring\n");
 		return;
 	}
-	DOMString dstrAiName = ((DOM_CharacterData)node).getData();
-	char *aiName = dstrAiName.transcode();	
+	/*DOMString dstrAiName = ((DOM_CharacterData)node).getData();
+	char *aiName = dstrAiName.transcode();	*/
 
 
 	// parse Bytes
@@ -508,14 +617,44 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,
 }
 
 
-void CAAccountingInstance::handleBalanceCertificate(fmHashTableEntry *pHashEntry, 
+
+/**
+ * Handles a balance certificate sent by the JAP.
+ * Checks signature and age.
+ */
+void CAAccountingInstance::handleBalanceCertificate(
+		fmHashTableEntry *pHashEntry, 
 			const DOM_Element &root,
-			UINT8 * pData, UINT32 dataLen)
+		UINT8 * pData, UINT32 dataLen
+	)
 {
-	// TODO: validate signature
-	// CASignature sig;
-	// sig.setVerifyKey(CACertificate );
-	// sig.verifyXML(root, pTrustedCerts);
+	CASignature * pSigTester;
+	UINT8 strGeneral[256];
+	UINT32 strGeneralLen=256;
+	
+	
+	// test signature
+	m_Mutex.lock();
+	pSigTester = pHashEntry->pAccountingInfo->pPublicKey;
+	if(pSigTester->verifyXML(root, NULL)!=E_SUCCESS)
+	{
+		CAMsg::printMsg(LOG_DEBUG, "BalanceCertificate has BAD SIGNATURE!! Ignoring\n");
+		m_Mutex.unlock();
+		return;
+	}
+	m_Mutex.unlock();
+
+	// parse timestamp
+	if(getDOMChildByName(root, "Timestamp", elGeneral, false)!=E_SUCCESS) {
+		return;
+	}
+	if(getDOMElementValue(elGeneral,strGeneral,&strGeneralLen)!=E_SUCCESS) {
+		return;
+	}
+	CAMsg::printMsg(LOG_DEBUG, "BalCert->Timestamp (unparsed): %s\n", strGeneral);
+	
+	
+
 	
 	// TODO: check age
 	
@@ -597,6 +736,7 @@ UINT32 CAAccountingInstance::initTableEntry(fmHashTableEntry * pHashEntry)
 {
 	pHashEntry->pAccountingInfo = new aiAccountingInfo;
 	memset(pHashEntry->pAccountingInfo, 0, sizeof(aiAccountingInfo) );
+	pHashEntry->pAccountingInfo->authState = AUTH_NEW;
 	return 0;
 }
 
@@ -604,7 +744,7 @@ UINT32 CAAccountingInstance::initTableEntry(fmHashTableEntry * pHashEntry)
 
 /**
  * This should always be called when closing a JAP connection
- * to cleanup the data structures
+ * to cleanup the payment data structures
  */
 UINT32 CAAccountingInstance::cleanupTableEntry(fmHashTableEntry *pHashEntry) 
 {
@@ -612,14 +752,29 @@ UINT32 CAAccountingInstance::cleanupTableEntry(fmHashTableEntry *pHashEntry)
 	aiAccountingInfo * pAccInfo;
 	if(pHashEntry->pAccountingInfo != 0) {
 		pAccInfo = pHashEntry->pAccountingInfo;
+		
+		// delete session keys
 		if(pAccInfo->pCipherIn != 0) {
 			delete pAccInfo->pCipherIn;	
 		}
 		if(pAccInfo->pCipherOut != 0) {
 			delete pAccInfo->pCipherOut;
 		}
+		
+		// empty and free receive buffer (maybe obsolete with control channels)
 		if(pAccInfo->pReceiveBuffer != 0) {
 			free(pAccInfo->pReceiveBuffer);
+		}
+		
+		// delete additional data
+		if(pAccInfo->pPublicKey != 0)
+		{
+			// todo check is "delete" ok here?
+			delete pAccInfo->pPublicKey;
+		}
+		if(pAccInfo->pChallenge != 0)
+		{
+			delete pAccInfo->pChallenge;
 		}
 		if(pAccInfo->pLastXmlCostConfirmation != 0) {
 			free(pAccInfo->pLastXmlCostConfirmation);

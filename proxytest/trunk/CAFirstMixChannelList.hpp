@@ -33,23 +33,31 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMutex.hpp"
 #include "CAMsg.hpp"
 #include "CAControlChannelDispatcher.hpp"
+
 #ifdef PAYMENT
+//#include "CAAccountingInstance.hpp"
+
+#define AUTH_NEW 1
+#define AUTH_BAD 2
+#define AUTH_OK 3
+
 /**
  * Structure that holds all per-user payment information
  * Included in CAFirstMixChannelList (struct fmHashTableEntry)
  */
 struct t_accountinginfo
 {
-	UINT8 * pReceiveBuffer; //buffer for storing incoming msgs
-	UINT32  msgTotalSize;   //total size of the incoming msg
-	UINT32  msgCurrentSize; //number of bytes received
+	UINT8 * pReceiveBuffer; //buffer for storing incoming msgs (maybe obsolete with controlchannels?)
+	UINT32  msgTotalSize;   //total size of the incoming msg (maybe obsolete s.o.)
+	UINT32  msgCurrentSize; //number of bytes received (maybe obsolete s.o.)
 
-	// for encrypting/decryptinh  payment packets
+	// for encrypting/decrypting  payment packets
 	CASymCipher * pCipherIn; //decrypt JAP->AI packets
 	CASymCipher * pCipherOut; //encrypt AI->JAP packets
 
 	UINT8 * pLastXmlCostConfirmation;
-
+	UINT8 * pChallenge;
+	CASignature * pPublicKey;
 	UINT64 accountNumber;
 	UINT64 maxBalance;
 
@@ -58,6 +66,7 @@ struct t_accountinginfo
 	
 	UINT32 authState;				// state of the authentication process
 	// this can be one of AUTH_NEW, AUTH_BAD, AUTH_OK
+
 };
 typedef struct t_accountinginfo aiAccountingInfo;
 typedef aiAccountingInfo * LP_aiAccountingInfo;
