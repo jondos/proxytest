@@ -139,7 +139,10 @@ SINT32 CASocket::close()
 				linger.l_linger=0;
 				if(::setsockopt(m_Socket,SOL_SOCKET,SO_LINGER,(char*)&linger,sizeof(linger))!=0)
 					CAMsg::printMsg(LOG_DEBUG,"Fehler bei setsockopt - LINGER!\n");
-	*/			::closesocket(m_Socket);
+	*/			
+				if(m_bASyncSend)
+					m_pASyncSend->close(this);			
+				::closesocket(m_Socket);
 #ifdef _DEBUG
 				sockets--;
 #endif
@@ -160,7 +163,11 @@ SINT32 CASocket::close(int mode)
 		if(mode==SD_RECEIVE||mode==SD_BOTH)
 			closeMode|=CLOSE_RECEIVE;
 		if(mode==SD_SEND||mode==SD_BOTH)
-			closeMode|=CLOSE_SEND;
+			{
+				if(m_bASyncSend)
+					m_pASyncSend->close(this);
+				closeMode|=CLOSE_SEND;				
+			}
 		int ret;
 		if(closeMode==CLOSE_BOTH)
 			{
