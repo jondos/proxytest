@@ -25,68 +25,39 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
-#ifndef __CASOCKETLIST__
-#define __CASOCKETLIST__
+#ifndef __CASINGLESOCKETGROUP__
+#define __CASINGLESOCKETGROUP__
+#ifndef HAVE_POLL
+#include "CASocketGroup.hpp"
+typedef CASocketGroup CASingleSocketGroup;
+#else
 #include "CAMuxSocket.hpp"
-#include "CASymCipher.hpp"
-
-typedef struct connlist
-	{
-		CASymCipher* pCipher;
-		connlist* next;
-		union
-			{
-				CASocket* pSocket;
-				HCHANNEL outChannel;
-			};
-		HCHANNEL id;
-	} CONNECTIONLIST,CONNECTION;
-		
-struct t_MEMBLOCK;
-
-class CASocketList
+class CASingleSocketGroup
 	{
 		public:
-			CASocketList();
-			CASocketList(bool bThreadSafe);
-			~CASocketList();
-			SINT32 add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher);
-			SINT32 add(HCHANNEL in,HCHANNEL out,CASymCipher* pCipher);
-			bool	get(HCHANNEL in,CONNECTION* out);
-			bool	get(CONNECTION* in,HCHANNEL out);
-			bool	get(CONNECTION* in,CASocket* pSocket);
-			
-			CASocket* remove(HCHANNEL id);
-			SINT32 clear();
-			/** Gets the first entry of the channel-list.
-			*	@return the first entry of the channel list (this is not a copy!!)
-			*
-			*/	 
-			CONNECTION*  getFirst()
+			CASingleSocketGroup();
+			~CASingleSocketGroup();
+			SINT32 add(CASocket&s);
+			SINT32 add(CAMuxSocket&s);
+			SINT32 select();
+			SINT32 select(bool bWrite,UINT32 time_ms);
+/*			bool isSignaled(CASocket&s)
 				{
-					m_AktEnumPos=m_Connections;
-					return m_AktEnumPos;
+					return FD_ISSET((SOCKET)s,&m_signaled_set)!=0;
 				}
 
-			/** Gets the next entry of the channel-list.
-			*	@return the next entry of the channel list (this is not a copy!!)
-			*
-			*/	 
-			CONNECTION* getNext()
+			bool isSignaled(CASocket*ps)
 				{
-					if(m_AktEnumPos!=NULL)
-						m_AktEnumPos=m_AktEnumPos->next;
-					return m_AktEnumPos;
+					return FD_ISSET((SOCKET)*ps,&m_signaled_set)!=0;
 				}
 
-			SINT32 setThreadSafe(bool b);
+			bool isSignaled(CAMuxSocket&s)
+				{
+					return FD_ISSET((SOCKET)s,&m_signaled_set)!=0;
+				}
+*/
 		protected:
-			SINT32 increasePool();
-			CONNECTIONLIST* m_Connections;
-			CONNECTIONLIST* m_Pool;
-			CONNECTIONLIST* m_AktEnumPos;
-			t_MEMBLOCK* m_Memlist;
-			CRITICAL_SECTION cs;
-			bool m_bThreadSafe;
-	};	
+			struct pollfd m_poolfd;
+	};
+#endif
 #endif
