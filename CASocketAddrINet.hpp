@@ -57,8 +57,8 @@ class CASocketAddrINet:public CASocketAddr,sockaddr_in
 
 
 		private:
-			static CRITICAL_SECTION csGet;
-			static bool bIsCsInitialized;
+			static CRITICAL_SECTION m_csGet;
+			static bool m_bIsCsInitialized;
 	};
 
 #endif

@@ -28,16 +28,16 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "StdAfx.h"
 #include "CASocketAddrINet.hpp"
 
-bool CASocketAddrINet::bIsCsInitialized=false;
-CRITICAL_SECTION CASocketAddrINet::csGet;
+bool CASocketAddrINet::m_bIsCsInitialized=false;
+CRITICAL_SECTION CASocketAddrINet::m_csGet;
 
 /** Must be called once before using one of the CAsocketAddrINet functions */
 SINT32 CASocketAddrINet::init()
 	{
-		if(!bIsCsInitialized)
+		if(!m_bIsCsInitialized)
 			{
-				InitializeCriticalSection(&csGet);
-				bIsCsInitialized=true;
+				InitializeCriticalSection(&m_csGet);
+				m_bIsCsInitialized=true;
 			}
 		return E_SUCCESS;
 	}
@@ -46,11 +46,11 @@ SINT32 CASocketAddrINet::init()
        init() must be called */
 SINT32 CASocketAddrINet::destroy()
 	{
-		if(bIsCsInitialized)
+		if(m_bIsCsInitialized)
 			{
-				DeleteCriticalSection(&csGet);
+				DeleteCriticalSection(&m_csGet);
 			}
-		bIsCsInitialized=false;
+		m_bIsCsInitialized=false;
 		return E_SUCCESS;
 	}
 
@@ -83,16 +83,16 @@ SINT32 CASocketAddrINet::setAddr(char* szIP,UINT16 port)
 		UINT32 newAddr=inet_addr(szIP); //is it a doted string (a.b.c.d) ?
 		if(newAddr==INADDR_NONE) //if not try to find the hostname
 			{
-				EnterCriticalSection(&csGet);
+				EnterCriticalSection(&m_csGet);
 				HOSTENT* hostent=gethostbyname(szIP); //lookup
 				if(hostent!=NULL) //get it!
 					memcpy(&sin_addr.s_addr,hostent->h_addr_list[0],hostent->h_length);
 				else
 					{
-						LeaveCriticalSection(&csGet);
+						LeaveCriticalSection(&m_csGet);
 						return E_UNKNOWN_HOST; //not found!
 					}
-				LeaveCriticalSection(&csGet);
+				LeaveCriticalSection(&m_csGet);
 			}
 		else
 			sin_addr.s_addr=newAddr;
@@ -132,7 +132,7 @@ SINT32 CASocketAddrINet::getHostName(UINT8* buff,UINT32 len)
 		if(buff==NULL)
 			return E_UNSPECIFIED;
 		SINT32 ret;
-		EnterCriticalSection(&csGet);
+		EnterCriticalSection(&m_csGet);
 		HOSTENT* hosten=gethostbyaddr((const char*)&sin_addr,4,AF_INET);
 		if(hosten==NULL||hosten->h_name==NULL)
 			ret=E_UNKNOWN_HOST;
@@ -143,7 +143,7 @@ SINT32 CASocketAddrINet::getHostName(UINT8* buff,UINT32 len)
 				strcpy((char*)buff,hosten->h_name);
 				ret=E_SUCCESS;
 			}
-		LeaveCriticalSection(&csGet);
+		LeaveCriticalSection(&m_csGet);
 		return ret;
 	}
 
@@ -160,7 +160,7 @@ SINT32 CASocketAddrINet::getLocalHostName(UINT8* buff,UINT32 len)
 		if(buff==NULL)
 			return E_UNSPECIFIED;
 		SINT32 ret;
-		EnterCriticalSection(&csGet);
+		EnterCriticalSection(&m_csGet);
 		if(gethostname((char*)buff,len)==-1)
 			ret=E_SPACE;
 		else
@@ -176,7 +176,7 @@ SINT32 CASocketAddrINet::getLocalHostName(UINT8* buff,UINT32 len)
 						ret=E_SUCCESS;
 					}
 			}
-		LeaveCriticalSection(&csGet);
+		LeaveCriticalSection(&m_csGet);
 		return ret;
 	}
 
@@ -189,7 +189,7 @@ SINT32 CASocketAddrINet::getLocalHostIP(UINT8 ip[4])
 	{
 		SINT32 ret;
 		char buff[256];
-		EnterCriticalSection(&csGet);
+		EnterCriticalSection(&m_csGet);
 		if(gethostname(buff,256)==-1)
 			ret=E_UNKNOWN;
 		else
@@ -203,7 +203,7 @@ SINT32 CASocketAddrINet::getLocalHostIP(UINT8 ip[4])
 						ret=E_SUCCESS;
 					}
 			}
-		LeaveCriticalSection(&csGet);
+		LeaveCriticalSection(&m_csGet);
 		return ret;
 	}
 

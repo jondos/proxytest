@@ -36,7 +36,7 @@ CASocketGroup::CASocketGroup()
 	{
 		FD_ZERO(&m_fdset);
 		FD_ZERO(&m_signaled_set);
-		InitializeCriticalSection(&csFD_SET);
+		InitializeCriticalSection(&m_csFD_SET);
 		#ifndef _WIN32
 		    max=0;
 		#endif
@@ -44,61 +44,61 @@ CASocketGroup::CASocketGroup()
 			
 SINT32 CASocketGroup::add(CASocket&s)
 	{
-		EnterCriticalSection(&csFD_SET);
+		EnterCriticalSection(&m_csFD_SET);
 		#ifndef _WIN32
-		    if(max<((SOCKET)s)+1)
-			max=((SOCKET)s)+1;
+		    if(m_max<((SOCKET)s)+1)
+			m_max=((SOCKET)s)+1;
 		#endif
 		FD_SET((SOCKET)s,&m_fdset);
 		#ifdef _DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"CASocketGroutp: Added SOCKET: %u\n",(SOCKET)s);
 		#endif
-		LeaveCriticalSection(&csFD_SET);
+		LeaveCriticalSection(&m_csFD_SET);
 		return E_SUCCESS;
 	}
 
 SINT32 CASocketGroup::add(CAMuxSocket&s)
 	{
-		EnterCriticalSection(&csFD_SET);
+		EnterCriticalSection(&m_csFD_SET);
 		#ifndef _WIN32
-		    if(max<((SOCKET)s)+1)
-			max=((SOCKET)s)+1;
+		    if(m_max<((SOCKET)s)+1)
+			m_max=((SOCKET)s)+1;
 		#endif
 		#ifdef _DEBUG
 				CAMsg::printMsg(LOG_DEBUG,"CASocketGroup: Added SOCKET: %u\n",(SOCKET)s);
 		#endif
 		FD_SET((SOCKET)s,&m_fdset);
-		LeaveCriticalSection(&csFD_SET);
+		LeaveCriticalSection(&m_csFD_SET);
 		return E_SUCCESS;
 	}
 
 SINT32 CASocketGroup::remove(CASocket&s)
 	{
-		EnterCriticalSection(&csFD_SET);
+		EnterCriticalSection(&m_csFD_SET);
 		#ifdef _DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"CASocketGroutp: Removed SOCKET: %u\n",(SOCKET)s);
 		#endif
 		FD_CLR((SOCKET)s,&m_fdset);
-		LeaveCriticalSection(&csFD_SET);
+		LeaveCriticalSection(&m_csFD_SET);
 		return E_SUCCESS;
 	}
 
 SINT32 CASocketGroup::remove(CAMuxSocket&s)
 	{
-		EnterCriticalSection(&csFD_SET);
+		EnterCriticalSection(&m_csFD_SET);
 		#ifdef _DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"CASocketGroutp: Removed SOCKET: %u\n",(SOCKET)s);
 		#endif
 		FD_CLR((SOCKET)s,&m_fdset);
-		LeaveCriticalSection(&csFD_SET);
+		LeaveCriticalSection(&m_csFD_SET);
 		return E_SUCCESS;
 	}
 
 SINT32 CASocketGroup::select()
 	{
-		EnterCriticalSection(&csFD_SET);
+		EnterCriticalSection(&m_csFD_SET);
 		memcpy(&m_signaled_set,&m_fdset,sizeof(fd_set));
-		LeaveCriticalSection(&csFD_SET);
+		LeaveCriticalSection(&m_csFD_SET);
 		#ifdef _DEBUG
 			#ifdef _WIN32
 			    int ret=::select(0,&m_signaled_set,NULL,NULL,NULL);
@@ -114,7 +114,7 @@ SINT32 CASocketGroup::select()
 			#ifdef _WIN32
 			    return ::select(0,&m_signaled_set,NULL,NULL,NULL);
 			#else
-			    return ::select(max,&m_signaled_set,NULL,NULL,NULL);
+			    return ::select(m_max,&m_signaled_set,NULL,NULL,NULL);
 			#endif			    
 		#endif
 
@@ -122,9 +122,9 @@ SINT32 CASocketGroup::select()
 
 SINT32 CASocketGroup::select(bool bWrite,UINT32 ms)
 	{
-		EnterCriticalSection(&csFD_SET);
+		EnterCriticalSection(&m_csFD_SET);
 		memcpy(&m_signaled_set,&m_fdset,sizeof(fd_set));
-		LeaveCriticalSection(&csFD_SET);
+		LeaveCriticalSection(&m_csFD_SET);
 		fd_set* set_read,*set_write;
 		timeval ti;
 		ti.tv_sec=0;
@@ -150,7 +150,7 @@ SINT32 CASocketGroup::select(bool bWrite,UINT32 ms)
 				else
 					ret=::select(0,set_read,set_write,NULL,&ti);
 		#else
-			  ret=::select(max,set_read,set_write,NULL,&ti);
+			  ret=::select(m_max,set_read,set_write,NULL,&ti);
 		#endif
 		if(ret==0)
 			{

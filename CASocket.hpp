@@ -34,7 +34,7 @@ class CASocket
 	{
 		public:
 			CASocket();
-			~CASocket(){close();DeleteCriticalSection(&csClose);}
+			~CASocket(){close();DeleteCriticalSection(&m_csClose);}
 
 			SINT32 create();
 			SINT32 create(int type);
@@ -78,11 +78,11 @@ class CASocket
 			UINT8 m_ipPeer[4];
 			SOCKET m_Socket;
 			#ifdef _REENTRANT
-				CRITICAL_SECTION csClose;
+				CRITICAL_SECTION m_csClose;
 			#endif
-			int closeMode;
+			int m_closeMode;
 			// temporary hack...
-			int localPort;
+			int m_localPort;
 			bool m_bASyncSend;
 			static CASocketASyncSend* m_pASyncSend;
 	};

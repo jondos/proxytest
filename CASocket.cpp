@@ -42,9 +42,9 @@ CASocketASyncSend* CASocket::m_pASyncSend=NULL;
 CASocket::CASocket()
 	{
 		m_Socket=0;
-		InitializeCriticalSection(&csClose);
-		closeMode=0;
-		localPort=-1;
+		InitializeCriticalSection(&m_csClose);
+		m_closeMode=0;
+		m_localPort=-1;
 		m_bASyncSend=false;
 		memset(m_ipPeer,0,4);
 	}
@@ -67,13 +67,13 @@ SINT32 CASocket::create(int type)
 					CAMsg::printMsg(LOG_CRIT,"Couldt not create a new Socket! - Error: %i\n",er);
 				return SOCKET_ERROR;
 			}
-		localPort=-1;
+		m_localPort=-1;
 		return E_SUCCESS;
 	}
 
 SINT32 CASocket::listen(CASocketAddr & psa)
 	{
-		localPort=-1;
+		m_localPort=-1;
 		int type=psa.getType();
 		if(m_Socket==0&&create(type)==SOCKET_ERROR)
 			return SOCKET_ERROR;
@@ -90,7 +90,7 @@ SINT32 CASocket::listen(UINT16 port)
 
 SINT32 CASocket::accept(CASocket &s)
 	{
-		s.localPort=-1;
+		s.m_localPort=-1;
 		struct sockaddr_in peer;
 		socklen_t peersize=sizeof(peer);
 		s.m_Socket=::accept(m_Socket,(struct sockaddr*)&peer,&peersize);
@@ -116,7 +116,7 @@ SINT32 CASocket::connect(CASocketAddr & psa)
 SINT32 CASocket::connect(CASocketAddr & psa,UINT retry,UINT32 time)
 	{
 //		CAMsg::printMsg(LOG_DEBUG,"Socket:connect\n");
-		localPort=-1;
+		m_localPort=-1;
 		if(m_Socket==0&&create()==SOCKET_ERROR)
 			{
 				return SOCKET_ERROR;
@@ -154,7 +154,7 @@ SINT32 CASocket::connect(CASocketAddr & psa,UINT retry,UINT32 time)
 
 SINT32 CASocket::connect(CASocketAddr & psa,UINT msTimeOut)
 	{
-		localPort=-1;
+		m_localPort=-1;
 		if(m_Socket==0&&create(psa.getType())==SOCKET_ERROR)
 			{
 				return SOCKET_ERROR;
@@ -217,7 +217,7 @@ SINT32 CASocket::connect(CASocketAddr & psa,UINT msTimeOut)
 SINT32 CASocket::close()
 	{
 //		EnterCriticalSection(&csClose);
-		localPort=-1;
+		m_localPort=-1;
 		int ret;
 		if(m_Socket!=0)
 			{
@@ -248,18 +248,18 @@ SINT32 CASocket::close()
 SINT32 CASocket::close(int mode)
 	{
 //		EnterCriticalSection(&csClose);
-		localPort=-1;
+		m_localPort=-1;
 		::shutdown(m_Socket,mode);
 		if(mode==SD_RECEIVE||mode==SD_BOTH)
-			closeMode|=CLOSE_RECEIVE;
+			m_closeMode|=CLOSE_RECEIVE;
 		if(mode==SD_SEND||mode==SD_BOTH)
 			{
 				if(m_bASyncSend)
 					m_pASyncSend->close(this);
-				closeMode|=CLOSE_SEND;				
+				m_closeMode|=CLOSE_SEND;				
 			}
 		int ret;
-		if(closeMode==CLOSE_BOTH)
+		if(m_closeMode==CLOSE_BOTH)
 			{
 				close();
 				ret=E_SUCCESS;
@@ -420,16 +420,16 @@ SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len,SINT32 timeout)
 
 int CASocket::getLocalPort()
 	{
-		if(localPort==-1)
+		if(m_localPort==-1)
 			{
 				struct sockaddr_in addr;
 				socklen_t namelen=sizeof(struct sockaddr_in);
 				if(getsockname(m_Socket,(struct sockaddr*)&addr,&namelen)==SOCKET_ERROR)
 					return SOCKET_ERROR;
 				else
-					localPort=ntohs(addr.sin_port);
+					m_localPort=ntohs(addr.sin_port);
 			}
-		return localPort;
+		return m_localPort;
 	}
 
 SINT32 CASocket::getPeerIP(UINT8 ip[4])

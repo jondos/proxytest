@@ -41,7 +41,7 @@ class CAASymCipher
 			SINT32 getPublicKeySize();
 			SINT32 setPublicKey(UINT8* buff,UINT32* len);
 		private:
-			RSA* rsa;
+			RSA* m_pRSA;
 	};
 
 #endif

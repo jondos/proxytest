@@ -31,7 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 CAASymCipher::CAASymCipher()
 	{
-		rsa=NULL;
+		m_pRSA=NULL;
 	}
 
 CAASymCipher::~CAASymCipher()
@@ -41,8 +41,8 @@ CAASymCipher::~CAASymCipher()
 
 SINT32 CAASymCipher::destroy()
 	{
-		RSA_free(rsa);
-		rsa=NULL;
+		RSA_free(m_pRSA);
+		m_pRSA=NULL;
 		return E_SUCCESS;
 	}
 
@@ -55,7 +55,7 @@ SINT32 CAASymCipher::destroy()
 	*/
 SINT32 CAASymCipher::decrypt(UINT8* from,UINT8* to)
 	{
-		if(RSA_private_decrypt(128,from,to,rsa,RSA_NO_PADDING)==-1)
+		if(RSA_private_decrypt(128,from,to,m_pRSA,RSA_NO_PADDING)==-1)
 			return E_UNKNOWN;
 		else
 			return E_SUCCESS;
@@ -70,7 +70,7 @@ SINT32 CAASymCipher::decrypt(UINT8* from,UINT8* to)
 	*/
 SINT32 CAASymCipher::encrypt(UINT8* from,UINT8* to)
 	{
-		if(RSA_public_encrypt(128,from,to,rsa,RSA_NO_PADDING)==-1)
+		if(RSA_public_encrypt(128,from,to,m_pRSA,RSA_NO_PADDING)==-1)
 			return E_UNKNOWN;
 		else
 			return E_SUCCESS;
@@ -83,9 +83,9 @@ SINT32 CAASymCipher::encrypt(UINT8* from,UINT8* to)
 	*/
 SINT32 CAASymCipher::generateKeyPair(UINT32 size)
 	{
-		RSA_free(rsa);
-		rsa=RSA_generate_key(size,65537,NULL,NULL);
-		if(rsa==NULL)
+		RSA_free(m_pRSA);
+		m_pRSA=RSA_generate_key(size,65537,NULL,NULL);
+		if(m_pRSA==NULL)
 			return E_UNKNOWN;
 		else
 			return E_SUCCESS;
@@ -108,22 +108,22 @@ SINT32 CAASymCipher::generateKeyPair(UINT32 size)
 	*/
 SINT32 CAASymCipher::getPublicKey(UINT8* buff,UINT32 *len)
 	{
-		if(rsa==NULL||buff==NULL)
+		if(m_pRSA==NULL||buff==NULL)
 			return E_UNKNOWN;
 		SINT32 keySize=getPublicKeySize();
 		if(keySize<=0||(*len)<(UINT32)keySize)
 			return E_UNKNOWN;
 		UINT32 aktIndex=0;
-		UINT16 size=htons(BN_num_bytes(rsa->n));
+		UINT16 size=htons(BN_num_bytes(m_pRSA->n));
 		memcpy(buff,&size,sizeof(size));
 		aktIndex+=sizeof(size);
-		BN_bn2bin(rsa->n,buff+aktIndex);
-		aktIndex+=BN_num_bytes(rsa->n);
-		size=htons(BN_num_bytes(rsa->e));
+		BN_bn2bin(m_pRSA->n,buff+aktIndex);
+		aktIndex+=BN_num_bytes(m_pRSA->n);
+		size=htons(BN_num_bytes(m_pRSA->e));
 		memcpy(buff+aktIndex,&size,sizeof(size));
 		aktIndex+=sizeof(size);
-		BN_bn2bin(rsa->e,buff+aktIndex);
-		aktIndex+=BN_num_bytes(rsa->e);
+		BN_bn2bin(m_pRSA->e,buff+aktIndex);
+		aktIndex+=BN_num_bytes(m_pRSA->e);
 		*len=aktIndex;
 		return E_SUCCESS;
 	}
@@ -136,9 +136,9 @@ SINT32 CAASymCipher::getPublicKey(UINT8* buff,UINT32 *len)
 	*/
 SINT32 CAASymCipher::getPublicKeySize()
 	{
-		if(rsa==NULL||rsa->n==NULL||rsa->e==NULL)
+		if(m_pRSA==NULL||m_pRSA->n==NULL||m_pRSA->e==NULL)
 			return E_UNKNOWN;
-		return (SINT32)BN_num_bytes(rsa->n)+BN_num_bytes(rsa->e)+4;
+		return (SINT32)BN_num_bytes(m_pRSA->n)+BN_num_bytes(m_pRSA->e)+4;
 	}
 
 /** Sets the public key to the vaules stored in \c key. The format must match the format described for getPublicKey(). 
@@ -157,9 +157,9 @@ SINT32 CAASymCipher::setPublicKey(UINT8* key,UINT32* len)
 		if(key==NULL||len==NULL||(*len)<6) //the need at least 6 bytes: 4 for the sizes and 1 for n and 1 for e
 			goto _ERROR;
 		availBytes=(*len);
-		RSA_free(rsa);
-		rsa=RSA_new();
-		if(rsa==NULL)
+		RSA_free(m_pRSA);
+		m_pRSA=RSA_new();
+		if(m_pRSA==NULL)
 			goto _ERROR;
 		memcpy(&size,key,2);
 		size=ntohs(size);
@@ -168,10 +168,10 @@ SINT32 CAASymCipher::setPublicKey(UINT8* key,UINT32* len)
 			goto _ERROR;
 		aktIndex=2;
 		availBytes-=size;
-		rsa->n=BN_new();
-		if(rsa->n==NULL)
+		m_pRSA->n=BN_new();
+		if(m_pRSA->n==NULL)
 			goto _ERROR;
-		BN_bin2bn(key+aktIndex,size,rsa->n);
+		BN_bin2bn(key+aktIndex,size,m_pRSA->n);
 		aktIndex+=size;
 		memcpy(&size,key+aktIndex,2);
 		size=ntohs(size);
@@ -179,14 +179,14 @@ SINT32 CAASymCipher::setPublicKey(UINT8* key,UINT32* len)
 		aktIndex+=2;
 		if(size>availBytes) 
 			goto _ERROR;
-		rsa->e=BN_new();
-		BN_bin2bn(key+aktIndex,size,rsa->e);
+		m_pRSA->e=BN_new();
+		BN_bin2bn(key+aktIndex,size,m_pRSA->e);
 		aktIndex+=size;
 		(*len)=aktIndex;
 		return E_SUCCESS;
 _ERROR:
-		RSA_free(rsa);
-		rsa=NULL;
+		RSA_free(m_pRSA);
+		m_pRSA=NULL;
 		return E_UNKNOWN;
 	}
 	
