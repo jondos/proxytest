@@ -34,6 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define FILENAME_ERRORLOG_GZ "/errors.gz"
 #define FILENAME_INFOLOG_GZ "/messages.gz"
 
+#define MAX_MSG_SIZE 2048
 extern CACmdLnOptions options;
 
 CAMsg CAMsg::oMsg;
@@ -43,7 +44,7 @@ const char* const CAMsg::m_strMsgTypes[4]={", error   ] ",", critical] ",", info
 
 CAMsg::CAMsg()
     {
-			m_strMsgBuff=new char[1025+20+STRMSGTYPES_SIZE];
+			m_strMsgBuff=new char[MAX_MSG_SIZE+1+20+STRMSGTYPES_SIZE];
 			m_uLogType=MSG_STDOUT;
 			m_hFileInfo=-1;
 			m_strLogFile=new char[1024];
@@ -103,9 +104,9 @@ SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 					return E_UNKNOWN;
 			}
 #ifdef HAVE_VSNPRINTF
-		vsnprintf(oMsg.m_strMsgBuff+20+STRMSGTYPES_SIZE,1024,format,ap);
+		vsnprintf(oMsg.m_strMsgBuff+20+STRMSGTYPES_SIZE,MAX_MSG_SIZE,format,ap);
 #else
-	  trio_vsnprintf(oMsg.m_strMsgBuff+20+STRMSGTYPES_SIZE,1024,format,ap);
+	  trio_vsnprintf(oMsg.m_strMsgBuff+20+STRMSGTYPES_SIZE,MAX_MSG_SIZE,format,ap);
 #endif
 		va_end(ap);
 		switch(oMsg.m_uLogType)

@@ -559,7 +559,6 @@ SINT32 CAMiddleMix::loop()
 								CAMsg::printMsg(LOG_INFO,"loopUpStream received a packet with invalid flags: %0X .  Removing them.\n",(pMixPacket->flags & ~CHANNEL_ALLOWED_FLAGS));
 								pMixPacket->flags&=CHANNEL_ALLOWED_FLAGS;
 							}
-							}
 						#ifdef USE_POOL	
 							if(pMixPacket->channel==DUMMY_CHANNEL)
 								{
