@@ -45,6 +45,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAAccountingInstance.hpp"
 #endif
 #include "CALogPacketStats.hpp"
+#ifdef HAVE_EPOLL
+	#include "CASocketGroupEpoll.hpp"
+#endif
 
 class CAInfoService;
 
@@ -62,7 +65,8 @@ class CAFirstMix:public CAMix
 					m_arrSocketsIn=NULL;
 					m_pRSA=NULL;
 					m_pInfoService=NULL;
-					m_psocketgroupUsersRead=m_psocketgroupUsersWrite=NULL;
+					m_psocketgroupUsersRead=NULL;
+					m_psocketgroupUsersWrite=NULL;
 					m_pChannelList=NULL;
 					m_pMuxOut=NULL;
 					m_docMixCascadeInfo=NULL;
@@ -161,7 +165,11 @@ class CAFirstMix:public CAMix
 			UINT32 m_nSocketsIn; //number of usable ListenerInterface (non 'virtual')
 			volatile bool m_bRestart;
 			CASocket* m_arrSocketsIn;
+#ifdef HAVE_EPOLL
+			CASocketGroupEpoll* m_psocketgroupUsersRead;
+#else
 			CASocketGroup* m_psocketgroupUsersRead;
+#endif
 			CASocketGroup* m_psocketgroupUsersWrite;
 			CAInfoService* m_pInfoService;
 			CAMuxSocket* m_pMuxOut;

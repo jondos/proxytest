@@ -589,7 +589,11 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		pHashEntry->pSymCipher->setKey(buff);
 #endif
 		incUsers();																	// increment the user counter by one
+#ifdef HAVE_EPOLL
+		m_psocketgroupUsersRead->add(*pNewUser,pHashEntry); // add user socket to the established ones that we read data from.
+#else
 		m_psocketgroupUsersRead->add(*pNewUser); // add user socket to the established ones that we read data from.
+#endif
 		return E_SUCCESS;
 	}
 
