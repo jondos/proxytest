@@ -68,8 +68,9 @@ CALastMixChannelList::~CALastMixChannelList()
 		pNewEntry->pSocket=pSocket;
 		pNewEntry->pQueueSend=pQueue;
 #ifdef LOG_CHANNEL
-		pNewEntry->trafficIn=0;
+		pNewEntry->trafficIn=trafficIn;
 		pNewEntry->trafficOut=0;
+		pNewEntry->timeCreated=time;
 #endif
 		if(pEntry==NULL) //First Entry for Hash in HashTable
 			{
