@@ -118,7 +118,7 @@ int main(int argc, const char* argv[])
 					if(pid!=0)
 						exit(0);
 					setsid();
-					chdir("/");
+//					chdir("/");
 					umask(0);
 				#endif
 			}
