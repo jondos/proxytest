@@ -279,7 +279,7 @@ int CAMuxSocket::receive(MUXPACKET* pPacket)
 
 //		pPacket->len=ntohs(pPacket->len);	
 		pPacket->channel=ntohl(pPacket->channel);
-		pPacket->flags=ntohl(pPacket->flags);
+//		pPacket->flags=ntohl(pPacket->flags);
 		return MUXPACKET_SIZE;
 	}
 #endif
