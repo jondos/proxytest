@@ -65,6 +65,7 @@ CASocketList::CASocketList()
 
 CASocketList::~CASocketList()
 	{
+		clear();
 //		DeleteCriticalSection(&cs);
 	}
 
