@@ -52,6 +52,21 @@ int CAMuxSocket::useTunnel(char* proxyhost,UINT16 proxyport)
 		return 0;
 	}
 */
+
+SINT32 CAMuxSocket::setCrypt(bool b)
+	{
+		bIsCrypted=b;
+		if(b)
+			{
+				UINT8 nullkey[16];
+				memset(nullkey,0,16);
+				ocipherIn.setKeyAES(nullkey);
+				ocipherOut.setKeyAES(nullkey);
+			}
+		return E_SUCCESS;
+	}
+
+
 #ifndef PROT2
 int CAMuxSocket::accept(UINT16 port)
 	{
@@ -88,10 +103,6 @@ int CAMuxSocket::accept(UINT16 port)
 			return SOCKET_ERROR;
 		oSocket.close();
 		m_Socket.setRecvLowWat(sizeof(MUXPACKET));
-		UINT8 nullkey[16];
-		memset(nullkey,0,16);
-		ocipherIn.setKeyAES(nullkey);
-		ocipherOut.setKeyAES(nullkey);
 		return E_SUCCESS;
 	}
 #endif		
@@ -106,10 +117,6 @@ SINT32 CAMuxSocket::connect(LPCASOCKETADDR psa,UINT retry,UINT32 time)
 //		if(!bIsTunneld)
 //			{
 				m_Socket.setRecvLowWat(MUXPACKET_SIZE);
-				UINT8 nullkey[16];
-				memset(nullkey,0,16);
-				ocipherIn.setKeyAES(nullkey);
-				ocipherOut.setKeyAES(nullkey);
 				return m_Socket.connect(psa,retry,time);
 /*			}
 		else
@@ -251,6 +258,7 @@ SINT32 CAMuxSocket::receive(MUXPACKET* pPacket)
 	{
 		if(m_Socket.receiveFully((UINT8*)pPacket,MUXPACKET_SIZE)!=E_SUCCESS)
 			return SOCKET_ERROR;
+		if(bIsCrypted)ocipherIn.decryptAES((UINT8*)pPacket,(UINT8*)pPacket,16);
 		pPacket->channel=ntohl(pPacket->channel);
 		pPacket->flags=ntohs(pPacket->flags);
 		return MUXPACKET_SIZE;
