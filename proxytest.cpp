@@ -85,32 +85,38 @@ void signal_interrupt( int sig)
 
 /** \mainpage 
  
-\section Description of the communication protocol
+\section docCommProto Description of the system and communication protocol
 
 \subsection Basics
 
-The whole system consist of JAP's, mix-servers, cache proxies and the InfoService. (Figure 1)
-The local proxy (JAP) and the mix servers communicate using tcp/ip-Internet connections.
+The whole system consist of JAP's, mix-servers, cache proxies and the InfoService. (see Figure 1)
+
+\image html JAPArchitecture.gif "Figure 1: The Architecture of the Anonymous-Service"
+	
+The local proxy (JAP) and the mix servers communicate using TCP/IP-Internet connections.
  Each JAP has one and only one connection to a mix server. A mix server has one and only one connection
 to one or two other mixes. If a mix receives data packets from JAP's and sends them to an other mix, we call
- them a first mix. So a first mix has exactly one connection to an other mix. If a mix receives packets from
- a mix and sends the data to the chache proxy, we call them the last mix. Consequently a last
+ them a \em first mix. So a first mix has exactly one connection to an other mix. If a mix receives packets from
+ a mix and sends the data to the cache proxy, we call them the \em last mix. Consequently a last
  mix has only one connection to an other mix. Each mix with two connections to other mixes is called
- a middle mix. This type of mix will receive packets form one mix and forwards them to the other mix.
-If mixes are connected in a meanigful way a chain is setup up, so what packets are transmitted from JAP's to the cahce-proxies and than to the Internet.
-A chain of mixes is called a mix-cascade (or cascade for short)
-Many different cascades could exist at the same time but JAP can select one and only one at the same time.
+ a \em middle mix. This type of mix will receive packets form one mix and forwards them to the other mix.
+
+If mixes are connected in a meanigful way a chain is setup up, so what packets are transmitted from JAP's 
+to the cache-proxies and than to the Internet.
+A chain of mixes is called a \em mix-cascade (or \em cascade for short).
+Many different cascades could exist at the same time, but JAP can select one and only one at the same time.
+
 Also a mix could only be part of one and only one cascade. If a mix is not part of a cascade, we call it a free mix.
-Free mixes are not useable for JAP but could be connected to build a new cascade.
+Free mixes are not useable for JAP, but could be connected to build a new cascade.
   
-\subsection Mulitplexing and Demultiplexing
+\subsection docMux Mulitplexing and Demultiplexing
 
 JAP acts as a local proxy for the browser. The browser opens many connections to the JAP (usually one per HTTP-Request).
 All this connections are multiplexed over the one connection to the first mix JAP is connected to.
-Every connection from the browser is called a channel (mix channel or anonymous channel). A first mix sends the packets from multiple channels from multiple users to the next mix.
-All over one tcp/ip connection. So JAP and the mixes have to multiplex/demultiplex the channels.
-A channel can transport only fixed sized packets. These packets are called mix-packets. So a first mix for instance gets many packets from different users in parallel 
-and sends them to the next mix in a serialized way. (Figure 2)
+Every connection from the browser is called a \em channel (mix channel or anonymous channel). A first mix sends the packets from multiple channels from multiple users to the next mix.
+All over one TCP/IP connection. So JAP and the mixes have to multiplex/demultiplex the channels.
+A channel can transport only fixed sized packets. These packets are called \em mix-packets. So a first mix for instance gets many packets from different users in parallel 
+and sends them to the next mix in a serialized way. (see Figure 2)
 
 Each mix packet has a size of MIX_PACKET_SIZE bytes. The header of the packet is as follows:
 4 bytes Channel-ID

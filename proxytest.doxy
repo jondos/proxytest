@@ -58,7 +58,7 @@ EXCLUDE                =
 EXCLUDE_PATTERNS       = 
 EXAMPLE_PATH           = 
 EXAMPLE_PATTERNS       = 
-IMAGE_PATH             = 
+IMAGE_PATH             = docImages
 INPUT_FILTER           = 
 #---------------------------------------------------------------------------
 # configuration options related to the alphabetical class index
