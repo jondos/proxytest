@@ -245,6 +245,9 @@ THREAD_RETURN loopAcceptUsers(void* param)
 				if(countRead<0&&countRead!=E_TIMEDOUT)
 					break;
 				i=0;
+#ifdef _DEBUG
+				CAMsg::printMsg(LOG_DEBUG,"UserAcceptLoop: countRead=%i",countRead);
+#endif
 				while(countRead>0&&i<nSocketsIn)
 					{						
 						if(osocketgroupAccept.isSignaled(socketsIn[i]))
