@@ -53,7 +53,7 @@ THREAD_RETURN RoundTripTimeLoop(void *p)
 			tmpPort=(UINT16)ret;
 		UINT8* buff=new UINT8[4096];
 		options.getTargetHost(buff,4096);
-		addrNextMix.setAddr((char*)buff,tmpPort);
+		addrNextMix.setAddr(buff,tmpPort);
 		CASocketAddrINet to;
 //		to.sin_family=AF_INET;
 		BIGNUM* bnTmp=BN_new();
@@ -96,7 +96,7 @@ THREAD_RETURN RoundTripTimeLoop(void *p)
 										memcpy(&ip,buff+len-6,4);
 										memcpy(&port,buff+len-2,2);
 										sprintf(szip,"%u.%u.%u.%u",ip[0],ip[1],ip[2],ip[3]);
-										to.setAddr(szip,port);
+										to.setAddr((UINT8*)szip,port);
 										len-=6; // Removed return IP/Port
 										pRTT->m_oSocket.send(buff,len,to);
 									}
@@ -109,7 +109,7 @@ THREAD_RETURN RoundTripTimeLoop(void *p)
 								memcpy(ip,buff+8+len-6,4);
 								memcpy(&port,buff+8+len-2,2);
 								sprintf(szip,"%u.%u.%u.%u",ip[0],ip[1],ip[2],ip[3]);
-								to.setAddr(szip,port);
+								to.setAddr((UINT8*)szip,port);
 								len-=6; // Removed return IP/Port
 								buff[8]=0; // Cleared Header...
 								pRTT->m_oSocket.send(buff+8,len,to);

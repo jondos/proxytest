@@ -62,7 +62,7 @@ SINT32 CAMiddleMix::init()
 		else
 			{
 				pAddrNext=new CASocketAddrINet();
-				((CASocketAddrINet*)pAddrNext)->setAddr((char*)strTarget,options.getTargetPort());
+				((CASocketAddrINet*)pAddrNext)->setAddr(strTarget,options.getTargetPort());
 			}
 
 		

@@ -38,7 +38,7 @@ extern CACmdLnOptions options;
 SINT32 CALocalProxy::init()
 	{
 		CASocketAddrINet socketAddrIn;
-		socketAddrIn.setAddr("127.0.0.1",options.getServerPort());
+		socketAddrIn.setAddr((UINT8*)"127.0.0.1",options.getServerPort());
 		socketIn.create();
 		socketIn.setReuseAddr(true);
 		if(socketIn.listen(socketAddrIn)==SOCKET_ERROR)
@@ -48,7 +48,7 @@ SINT32 CALocalProxy::init()
 		    }
 		if(options.getSOCKSServerPort()!=(UINT16)-1)
 			{
-				socketAddrIn.setAddr("127.0.0.1",options.getSOCKSServerPort());
+				socketAddrIn.setAddr((UINT8*)"127.0.0.1",options.getSOCKSServerPort());
 				socketSOCKSIn.create();
 				socketSOCKSIn.setReuseAddr(true);
 				if(socketSOCKSIn.listen(socketAddrIn)==SOCKET_ERROR)
@@ -60,7 +60,7 @@ SINT32 CALocalProxy::init()
 		CASocketAddrINet addrNext;
 		UINT8 strTarget[255];
 		options.getTargetHost(strTarget,255);
-		addrNext.setAddr((char*)strTarget,options.getTargetPort());
+		addrNext.setAddr(strTarget,options.getTargetPort());
 		CAMsg::printMsg(LOG_INFO,"Try connecting to next Mix...\ncvs u");
 
 		((CASocket*)muxOut)->create();
