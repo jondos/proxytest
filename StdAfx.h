@@ -55,12 +55,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#endif
 	//Delay is at the moment constant and calculate as
 	// 1000/DELAY_BUCKET_GROW_INTERVALL*DELAY_BUCKET_GROW bytes/s
-	#ifndef DELAY_KBYTE_PER_SECOND
+	#ifndef DELAY_CHANNEL_KBYTE_PER_SECOND
 		#define DELAY_BUCKET_GROW_INTERVALL 100 //Time in ms
 		#define DELAY_BUCKET_GROW PAYLOAD_SIZE //Grow in bytes
 	//so we have around 10 KByte/s at the moment
 	#else
-		#define DELAY_BUCKET_GROW_INTERVALL (1/DELAY_KBYTE_PER_SECOND) //Time in ms
+		#define DELAY_BUCKET_GROW_INTERVALL (1/DELAY_CHANNEL_KBYTE_PER_SECOND) //Time in ms
 		#define DELAY_BUCKET_GROW PAYLOAD_SIZE //Grow in bytes
 	#endif	
 #endif
