@@ -835,8 +835,13 @@ SKIP_NEXT_MIX:
 		//add NextMixInterface to the End of the List...		
 		if(targetInterfaceNextMix!=NULL)
 			{
-				m_arTargetInterfaces[m_cnTargets++].net_type=targetInterfaceNextMix->net_type;
-				m_arTargetInterfaces[m_cnTargets++].target_type=targetInterfaceNextMix->target_type;
+				if(m_arTargetInterfaces==NULL)
+					{
+						m_cnTargets=0;
+						m_arTargetInterfaces=new TargetInterface[1];
+					}
+				m_arTargetInterfaces[m_cnTargets].net_type=targetInterfaceNextMix->net_type;
+				m_arTargetInterfaces[m_cnTargets].target_type=targetInterfaceNextMix->target_type;
 				m_arTargetInterfaces[m_cnTargets++].addr=targetInterfaceNextMix->addr;
 				delete targetInterfaceNextMix;
 			}
