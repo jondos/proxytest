@@ -54,7 +54,11 @@ CALastMixChannelList::~CALastMixChannelList()
 		delete[] m_HashTable;
 	}
 
-SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue)
+#ifndef LOG_CHANNEL
+	SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue)
+#else
+	SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue,UINT64 time, UINT32 trafficIn)
+#endif
 	{
 		UINT32 hash=id&0x0000FFFF;
 		lmChannelListEntry* pEntry=m_HashTable[hash];
@@ -63,8 +67,10 @@ SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCip
 		pNewEntry->pCipher=pCipher;
 		pNewEntry->pSocket=pSocket;
 		pNewEntry->pQueueSend=pQueue;
+#ifdef LOG_CHANNEL
 		pNewEntry->trafficIn=0;
 		pNewEntry->trafficOut=0;
+#endif
 		if(pEntry==NULL) //First Entry for Hash in HashTable
 			{
 				pNewEntry->list_Channels.next=NULL;
@@ -136,6 +142,7 @@ SINT32 CALastMixChannelList::removeChannel(HCHANNEL channel)
 
 SINT32 CALastMixChannelList::test()
 				{
+#ifndef LOG_CHANNEL
 					CALastMixChannelList oList;
 					UINT32 c;
 					UINT32 rand;
@@ -144,8 +151,9 @@ SINT32 CALastMixChannelList::test()
 						{
 							getRandom(&c);
 							oList.add(c,NULL,NULL,NULL);
-						}
-					for(i=0;i<10;i++)
+
+					}
+					for(i=0;i<10000;i++)
 						{
 							lmChannelListEntry* akt=oList.getFirstSocket();
 							while(akt!=NULL)
@@ -176,5 +184,6 @@ SINT32 CALastMixChannelList::test()
 									akt=oList.getNextSocket();
 								}
 						}
+#endif
 					return 0;
 				}

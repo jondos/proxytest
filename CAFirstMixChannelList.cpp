@@ -83,8 +83,11 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,UINT8 peerIP[4],CAQueu
 		pHashTableEntry->pMuxSocket=pMuxSocket;
 		pHashTableEntry->pQueueSend=pQueueSend;
 		pHashTableEntry->cNumberOfChannels=0;
+#ifdef LOG_CHANNEL
 		pHashTableEntry->trafficIn=0;
 		pHashTableEntry->trafficOut=0;
+		getcurrentTimeMillis(pHashTableEntry->timeCreated);
+#endif
 		memcpy(pHashTableEntry->peerIP,peerIP,4);
 
 		//now insert the new connection in the list of all open connections
@@ -303,9 +306,6 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 #endif
 				pEntry=pTmpEntry;
 			}
-#ifdef LOG_CHANNEL
-		CAMsg::printMsg(LOG_DEBUG,"Traffic was: IN: %u  --  OUT: %u\n",pHashTableEntry->trafficIn,pHashTableEntry->trafficOut);
-#endif
 		memset(pHashTableEntry,0,sizeof(fmHashTableEntry)); //'delete' the connection from the connection hash table 
 		m_Mutex.unlock();
 		return E_SUCCESS;

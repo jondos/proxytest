@@ -64,7 +64,11 @@ class CAIPList
 			CAIPList(UINT32 allowedConnections);
 			~CAIPList();
 			SINT32 insertIP(const UINT8 ip[4]);
+#ifndef LOG_CHANNEL
 			SINT32 removeIP(const UINT8 ip[4]);
+#else
+			SINT32 removeIP(const UINT8 ip[4],UINT32 time,UINT32 trafficIn,UINT32 trafficOut);
+#endif
 		protected:
 			UINT32 m_allowedConnections;
 			PIPLIST* m_HashTable;

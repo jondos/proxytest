@@ -140,7 +140,11 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 	* @return the remaining count of inserts for this IP-Address. 
 	* @retval 0 if IP-Address is delete form the list
 	*/
-SINT32 CAIPList::removeIP(const UINT8 ip[4])
+#ifndef LOG_CHANNEL
+	SINT32 CAIPList::removeIP(const UINT8 ip[4])
+#else
+	SINT32 CAIPList::removeIP(const UINT8 ip[4],UINT32 time,UINT32 trafficIn,UINT32 trafficOut)
+#endif
 	{
 		UINT16 hashvalue=(ip[2]<<8)|ip[3];
 		m_Mutex.lock();
@@ -164,7 +168,11 @@ SINT32 CAIPList::removeIP(const UINT8 ip[4])
 											UINT8 hash[16];
 											memcpy(m_Random,ip,4);
 											MD5(m_Random,56,hash);
-											CAMsg::printMsg(LOG_DEBUG,"Removing IP-Address: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X !\n",hash[0],hash[1],hash[2],hash[3],hash[4],hash[5],hash[6],hash[7],hash[8],hash[9],hash[10],hash[11],hash[12],hash[13],hash[14],hash[15]);
+											#ifdef LOG_CHANNEL
+												CAMsg::printMsg(LOG_DEBUG,"Removing IP-Address: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X -- Traffic was: IN: %u  --  OUT: %u\n",hash[0],hash[1],hash[2],hash[3],hash[4],hash[5],hash[6],hash[7],hash[8],hash[9],hash[10],hash[11],hash[12],hash[13],hash[14],hash[15],trafficIn,trafficOut);
+											#else
+												CAMsg::printMsg(LOG_DEBUG,"Removing IP-Address: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X !\n",hash[0],hash[1],hash[2],hash[3],hash[4],hash[5],hash[6],hash[7],hash[8],hash[9],hash[10],hash[11],hash[12],hash[13],hash[14],hash[15]);
+											#endif
 										#else
 											CAMsg::printMsg(LOG_DEBUG,"Removing IP-Address: {%u.%u.%u.%u} !\n",ip[0],ip[1],ip[2],ip[3]);
 										#endif

@@ -38,8 +38,11 @@ struct t_fmhashtableentry
 			CAMuxSocket*	pMuxSocket;
 			CAQueue*			pQueueSend;
 			UINT32				cSuspend;
+#ifdef LOG_CHANNEL
 			UINT32				trafficIn;
 			UINT32				trafficOut;
+			UINT64				timeCreated;
+#endif
 			UINT8					peerIP[4]; //needed for flooding controll
 		private:
 			UINT32				cNumberOfChannels;

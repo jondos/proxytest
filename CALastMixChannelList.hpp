@@ -43,9 +43,11 @@ struct t_lastmixchannellist
 			CASymCipher*  pCipher;
 			CASocket*			pSocket;
 			CAQueue*			pQueueSend;
+#ifdef LOG_CHANNEL
 			UINT32				trafficIn;
 			UINT32				trafficOut;
-
+			UINT64				timeCreated;
+#endif
 		private:
 			struct
 				{
@@ -71,9 +73,12 @@ class CALastMixChannelList
 		public:
 			CALastMixChannelList();
 			~CALastMixChannelList();
-		
-			SINT32 add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue);
 
+#ifndef LOG_CHANNEL			
+			SINT32 add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue);
+#else
+			SINT32 add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue,UINT64 time,UINT32 trafficIn);
+#endif
 			lmChannelListEntry* get(HCHANNEL channelIn)
 				{
 					lmChannelListEntry* akt=m_HashTable[channelIn&0x0000FFFF];
