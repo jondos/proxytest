@@ -49,6 +49,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAFirstMix.hpp"
 #include "CALastMix.hpp"
 #include "CALocalProxy.hpp"
+
 //#ifdef _WIN32
 //HANDLE hEventThreadEnde;
 //#endif
@@ -79,62 +80,12 @@ int sockets;
 
 int main(int argc, const char* argv[])
 	{
+
 		#ifdef _WIN32
 			int err=0;
 			WSADATA wsadata;
 			err=WSAStartup(0x0202,&wsadata);
 		#endif
-// Util test..
-//BIGNUM bn;
-//getcurrentTimeMillis(&bn);
-//exit(0);
-
-/* AES Test....
-CASymCipher oCipher;
-UINT8 key[16];
-UINT8 in[1000];
-memset(key,0,16);
-memset(in,0,1000);
-
-//oCipher.setEncryptionKeyAES(key);
-oCipher.setDecryptionKeyAES(key);
-clock_t l=clock();
-for(int i=0;i<10000;i++)
-	oCipher.decryptAES(in,in,1000);
-//oCipher.decryptAES(in,in,1000);
-l=clock()-l;
-printf("Zeit [ms]: %f",((double)l/(double)CLOCKS_PER_SEC)*1000.0);
-//oCipher.decryptAES(in,in,17);
-exit(0);
-END AES Test*/
-/* //Datagram test
-	CADatagramSocket oSocket;
-	oSocket.bind(5000);
-	UINT8 buff[1000];
-	CASocketAddr from;
-	oSocket.receive(buff,1000,&from);
-	oSocket.send(buff,100,&from);
-	oSocket.close();
-	exit(0);
- */
- /*		//low-water receive-test
-		CASocket oSocket;
-		oSocket.listen(9000);
-		CASocket cSocket;
-		oSocket.accept(cSocket);
-		CASocketGroup oSocketGroup;
-		printf("RecvLowWat returned: %i",cSocket.setRecvLowWat(1000));
-		oSocketGroup.add(cSocket);
-		oSocketGroup.select();
-		printf("Can read: %i\n",cSocket.available());
-		UINT8 buff[1];
-	//	cSocket.receive(buff,1);
-		sleep(2);
-		oSocketGroup.select();
-		printf("Can read: %i\n",cSocket.available());
-		oSocket.close();
-		exit(0);
-*/
 		//initalize Random..
 
 		#if _WIN32
@@ -147,17 +98,6 @@ END AES Test*/
 		#endif
 
 	
-	/*	UINT8 nullkey[16];
-		memset(nullkey,0,16);
-		CASymCipher oI;
-		CASymCipher oO;
-		oI.setKeyAES(nullkey);
-		oO.setKeyAES(nullkey);
-		UINT8 buff[160];
-		memset(buff,'A',160);
-		oI.encryptAES(buff,buff,16);
-		oO.decryptAES(buff,buff,16);
-*/
 		options.parse(argc,argv);
 		if(options.getDaemon())
 			{

@@ -36,17 +36,17 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		return E_SUCCESS;
 	}
 */
-/*bool CASymCipher::isEncyptionKeyValid()
+bool CASymCipher::isEncyptionKeyValid()
 	{
 		return bEncKeySet;
 	}
-*/
+
 /*
 SINT32 CASymCipher::generateEncryptionKey()
 	{
 		UINT8 key[16];
 		RAND_bytes(key,16);
-		return setEncryptionKey(key);
+		return setKeyAES(key);
 	}
 */
 /*SINT32 CASymCipher::getEncryptionKey(UINT8* key)
@@ -98,6 +98,7 @@ SINT32 CASymCipher::setKeyAES(UINT8* key)
 		makeKey(&keyAES,/*DIR_ENCRYPT,*/KEY_SIZE*8,(char*)key);
 		memset(iv,0,16);
 		memset(iv2,0,16);
+		bEncKeySet=true;
 		return E_SUCCESS;
 	}
 

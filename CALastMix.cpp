@@ -439,7 +439,11 @@ LOOP_START:
 											oMuxPacket.payload.data[ntohs(oMuxPacket.payload.len)]=0;
 											CAMsg::printMsg(LOG_DEBUG,"%u\n%s",ntohs(oMuxPacket.payload.len),oMuxPacket.payload.data);
 										#endif
-										ret=oConnection.pSocket->send(oMuxPacket.payload.data,ntohs(oMuxPacket.payload.len));
+										ret=ntohs(oMuxPacket.payload.len);
+										if(ret>=0&&ret<=PAYLOAD_SIZE)
+											ret=oConnection.pSocket->send(oMuxPacket.payload.data,ret);
+										else
+											ret=SOCKET_ERROR;
 										if(ret==SOCKET_ERROR)
 											{
 												oSocketGroup.remove(*(oConnection.pSocket));
