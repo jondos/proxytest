@@ -152,7 +152,7 @@ SINT32 CASocketGroup::select()
 				#endif			    
 			#endif
 		#else
-						ret ::poll(m_pollfd_read,MAX_POLLFD,-1);
+						return ::poll(m_pollfd_read,MAX_POLLFD,-1);
 		#endif
 	}
 
