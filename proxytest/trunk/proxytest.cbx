@@ -25,7 +25,7 @@
   <property category="build.config.1" name="win32.builddir" value="windows/Release_Build"/>
   <property category="build.node" name="name" value="mix"/>
   <property category="build.node" name="type" value="exeproject"/>
-  <property category="build.platform" name="active" value="linux"/>
+  <property category="build.platform" name="active" value="win32"/>
   <property category="build.platform" name="linux.Debug_Build.toolset" value="gnuc++"/>
   <property category="build.platform" name="linux.Release_Build.toolset" value="gnuc++"/>
   <property category="build.platform" name="linux.default" value="gnuc++"/>
@@ -39,7 +39,7 @@
   <property category="build.platform" name="win32.gnuc++.enabled" value="0"/>
   <property category="build.platform" name="win32.mswin32.enabled" value="0"/>
   <property category="build.platform" name="win32.win32b.enabled" value="1"/>
-  <property category="cbproject" name="lastnodeid" value="256"/>
+  <property category="cbproject" name="lastnodeid" value="316"/>
   <property category="cbproject" name="version" value="X.1.0"/>
   <property category="classbrowser" name="GroupByVisibility" value="1"/>
   <property category="classbrowser" name="SeparateByKind" value="1"/>
@@ -128,7 +128,7 @@
   <property category="runtime.5" name="RunnableType" value="com.borland.cbuilder.runtime.ExecutableRunner"/>
   <property category="runtime.5" name="native.exec.args" value="-c ../../documentation/SampleConfiguration/LastMixWithLog.xml"/>
   <property category="runtime.5" name="native.target.override" value="0"/>
-  <property category="unique" name="id" value="256"/>
+  <property category="unique" name="id" value="316"/>
   <property category="win32.Debug_Build.MinGW.dlltool_def" name="option.export-all.enabled" value="1"/>
   <property category="win32.Debug_Build.MinGW.dlltool_def" name="option.output-def.enabled" value="1"/>
   <property category="win32.Debug_Build.MinGW.dlltool_lib" name="option.dllname.enabled" value="1"/>
@@ -320,11 +320,6 @@
   <property category="win32b.ilink32" name="option.aa.enabled" value="0"/>
   <property category="win32b.ilink32" name="option.ap.enabled" value="1"/>
   <property category="win32b.ilink32" name="param.objfiles.1" value="c0x32.obj"/>
-  <node name="proxytest" type="NavigationDirectory">
-    <property category="directorynode" name="showSubdirectories" value="1"/>
-    <property category="directorynode" name="url" value="."/>
-    <property category="unique" name="id" value="255"/>
-  </node>
   <node name="SampleConfiguration" type="NavigationDirectory">
     <property category="directorynode" name="url" value="documentation/SampleConfiguration"/>
     <property category="unique" name="id" value="253"/>
@@ -346,6 +341,54 @@
         <property category="unique" name="id" value="235"/>
       </file>
     </node>
+    <file path="A128BitNumber.cpp">
+      <property category="unique" name="id" value="257"/>
+    </file>
+    <file path="A128BitNumber.hpp">
+      <property category="unique" name="id" value="259"/>
+    </file>
+    <file path="CAAbstractControlChannel.cpp">
+      <property category="unique" name="id" value="261"/>
+    </file>
+    <file path="CAAbstractControlChannel.hpp">
+      <property category="unique" name="id" value="263"/>
+    </file>
+    <file path="CAAbstractXMLEncodable.cpp">
+      <property category="unique" name="id" value="265"/>
+    </file>
+    <file path="CAAbstractXMLEncodable.hpp">
+      <property category="unique" name="id" value="267"/>
+    </file>
+    <file path="CAAbstractXMLSignable.cpp">
+      <property category="unique" name="id" value="269"/>
+    </file>
+    <file path="CAAbstractXMLSignable.hpp">
+      <property category="unique" name="id" value="271"/>
+    </file>
+    <file path="CAAccountingBIInterface.cpp">
+      <property category="unique" name="id" value="273"/>
+    </file>
+    <file path="CAAccountingBIInterface.hpp">
+      <property category="unique" name="id" value="275"/>
+    </file>
+    <file path="CAAccountingControlChannel.cpp">
+      <property category="unique" name="id" value="277"/>
+    </file>
+    <file path="CAAccountingControlChannel.hpp">
+      <property category="unique" name="id" value="279"/>
+    </file>
+    <file path="CAAccountingDBInterface.cpp">
+      <property category="unique" name="id" value="281"/>
+    </file>
+    <file path="CAAccountingDBInterface.hpp">
+      <property category="unique" name="id" value="283"/>
+    </file>
+    <file path="CAAccountingInstance.cpp">
+      <property category="unique" name="id" value="285"/>
+    </file>
+    <file path="CAAccountingInstance.hpp">
+      <property category="unique" name="id" value="287"/>
+    </file>
     <file path="CAASymCipher.cpp">
       <property category="unique" name="id" value="241"/>
     </file>
@@ -544,17 +587,47 @@
     <file path="CASocketGroup.hpp">
       <property category="unique" name="id" value="127"/>
     </file>
+    <file path="CASocketGroupEpoll.cpp">
+      <property category="unique" name="id" value="289"/>
+    </file>
+    <file path="CASocketGroupEpoll.hpp">
+      <property category="unique" name="id" value="291"/>
+    </file>
     <file path="CASocketList.cpp">
       <property category="unique" name="id" value="129"/>
     </file>
     <file path="CASocketList.hpp">
       <property category="unique" name="id" value="131"/>
     </file>
+    <file path="CASSLClientSocket.cpp">
+      <property category="unique" name="id" value="293"/>
+    </file>
+    <file path="CASSLClientSocket.hpp">
+      <property category="unique" name="id" value="295"/>
+    </file>
+    <file path="CASSLContext.cpp">
+      <property category="unique" name="id" value="297"/>
+    </file>
+    <file path="CASSLContext.hpp">
+      <property category="unique" name="id" value="299"/>
+    </file>
     <file path="CASymCipher.cpp">
       <property category="unique" name="id" value="133"/>
     </file>
     <file path="CASymCipher.hpp">
       <property category="unique" name="id" value="135"/>
+    </file>
+    <file path="CASyncControlChannel.cpp">
+      <property category="unique" name="id" value="301"/>
+    </file>
+    <file path="CASyncControlChannel.hpp">
+      <property category="unique" name="id" value="303"/>
+    </file>
+    <file path="CATempIPBlockList.cpp">
+      <property category="unique" name="id" value="305"/>
+    </file>
+    <file path="CATempIPBlockList.hpp">
+      <property category="unique" name="id" value="307"/>
     </file>
     <file path="CAThread.cpp">
       <property category="unique" name="id" value="137"/>
@@ -573,6 +646,18 @@
     </file>
     <file path="CAUtil.hpp">
       <property category="unique" name="id" value="143"/>
+    </file>
+    <file path="CAXMLCostConfirmation.cpp">
+      <property category="unique" name="id" value="309"/>
+    </file>
+    <file path="CAXMLCostConfirmation.hpp">
+      <property category="unique" name="id" value="311"/>
+    </file>
+    <file path="CAXMLErrorMessage.cpp">
+      <property category="unique" name="id" value="313"/>
+    </file>
+    <file path="CAXMLErrorMessage.hpp">
+      <property category="unique" name="id" value="315"/>
     </file>
   </node>
   <node name="popt" type="Folder">
