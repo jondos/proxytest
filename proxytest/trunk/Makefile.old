@@ -8,10 +8,11 @@
 INCLUDE = -I. -I/usr/users/sya/sk13/openssl/include -I/home/imis/mix/openssl64/include -I/sun/ikt/sk13/openssl/include
 #LIBS	= -L/usr/local/ssl/lib -L/usr/users/sya/sk13/openssl/lib -L/home/imis/mix/openssl64/lib -L/sun/ikt/sk13/openssl/lib ./popt/popt.a ./httptunnel/httptunnel.a ./xml/xml.a -lcrypto -lpthread
 LIBDIR= -L/usr/users/sya/sk13/openssl/lib -L/home/imis/mix/openssl64/lib -L/sun/ikt/sk13/openssl/lib
-LIBS	= ./popt/popt.a ./httptunnel/httptunnel.a ./xml/xml.a -lcrypto -lpthread
+LIBS	= ./popt/popt.a ./xml/xml.a -lcrypto -lpthread
 #CPPFLAGS =-O3 -Wall 
 #CPPFLAGS =-O3 -D_REENTRANT
 #DEBUG =-D_DEBUG -g
+MAKE=make -f Makefile.old
 
 OBJS_ALL=CASocket.o\
 	CASocketGroup.o\
@@ -67,13 +68,16 @@ solaris-ultrasparc-gcc:
 irix-64-cc:
 	$(MAKE) 'CC=CC -r10000 -mips4 -64' 'CPPFLAGS=-fullwarn -Ofast=IP27 -D_REENTRANT' 'LIBS=$(LIBS)' _all 
 
+irix-64-cc-prot2:
+	$(MAKE) 'CC=CC -r10000 -mips4 -64' 'CPPFLAGS=-DPROT2 -fullwarn -Ofast=IP27 -D_REENTRANT' 'LIBS=$(LIBS) ./aes/libaes.a' _all_aes 
+
 irix-64-cc-debug:
 	$(MAKE) 'CC=CC -r10000 -mips4 -64' 'CPPFLAGS=-D_REENTRANT' 'DEBUG=-g2 -D_DEBUG' 'LIBS=$(LIBS)' _all 
 
-_all: $(OBJS) httptunnel.a popt.a xml.a
+_all: $(OBJS) popt.a xml.a
 	$(CC) -o proxytest $(DEBUG) $(CPPFLAGS) $(OBJS) $(LIBDIR) $(LIBS) 
 
-_all_aes: $(OBJS) httptunnel.a popt.a xml.a aes.a
+_all_aes: $(OBJS) popt.a xml.a libaes.a
 	$(CC) -o proxytest $(DEBUG) $(CPPFLAGS) $(OBJS) $(LIBDIR) $(LIBS) 
 
 popt.a:
@@ -85,7 +89,7 @@ httptunnel.a:
 xml.a: 
 	cd xml;$(MAKE) 'CC=$(CC)' 'DEBUG=$(DEBUG)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)';
 
-aes.a: 
+libaes.a: 
 	cd aes;$(MAKE) 'CC=$(CC)' 'DEBUG=$(DEBUG)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)';
 
 clean:
