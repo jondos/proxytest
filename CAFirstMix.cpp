@@ -1043,12 +1043,12 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		elemOwnMix.appendChild(docXmlKeyInfo.importNode(docfragKey,true));
 		elemMixesKey.insertBefore(elemOwnMix,elemMixesKey.getFirstChild());
 		setDOMElementAttribute((DOM_Element&)elemMixesKey,"count",count+1);
-		CACertificate* ownCert=options.getOwnCertificate();
-		CACertStore* tmpCertStore=new CACertStore();
-		tmpCertStore->add(ownCert);
-		m_pSignature->signXML(elemRootKey,tmpCertStore);
-		delete ownCert;
-		delete tmpCertStore;
+		//CACertificate* ownCert=options.getOwnCertificate();
+		//CACertStore* tmpCertStore=new CACertStore();
+		//tmpCertStore->add(ownCert);
+		//m_pSignature->signXML(elemRootKey,tmpCertStore);
+		//delete ownCert;
+		//delete tmpCertStore;
 		
 		tlen=0;
 		UINT8* tmpB=DOM_Output::dumpToMem(docXmlKeyInfo,&tlen);
