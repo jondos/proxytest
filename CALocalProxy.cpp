@@ -84,22 +84,28 @@ SINT32 CALocalProxy::initOnce()
 
 SINT32 CALocalProxy::init()
 	{
-		ListenerInterface oListener;
+		CAListenerInterface* pListener;
 		
-		CASocketAddrINet socketAddrIn;
 		m_socketIn.create();
 		m_socketIn.setReuseAddr(true);
-		options.getListenerInterface(oListener,1);
-		if(((CASocketAddrINet*)oListener.addr)->isAnyIP())
-			((CASocketAddrINet*)oListener.addr)->setAddr((UINT8*)"127.0.0.1",((CASocketAddrINet*)oListener.addr)->getPort());
-		if(m_socketIn.listen(*oListener.addr)!=E_SUCCESS)
-		  {
-				CAMsg::printMsg(LOG_CRIT,"Cannot listen (1)\n");
-				delete oListener.addr;
+		pListener=options.getListenerInterface(1);
+		if(pListener==NULL)
+			{
+				CAMsg::printMsg(LOG_CRIT,"No listener specified\n");
 				return E_UNKNOWN;
 			}
-		delete oListener.addr;
-		if(options.getSOCKSServerPort()!=(UINT16)-1)
+		CASocketAddrINet* pSocketAddrIn=(CASocketAddrINet*)pListener->getAddr();
+		delete pListener;
+		if(pSocketAddrIn->isAnyIP())
+			pSocketAddrIn->setAddr((UINT8*)"127.0.0.1",pSocketAddrIn->getPort());
+		if(m_socketIn.listen(*pSocketAddrIn)!=E_SUCCESS)
+		  {
+				CAMsg::printMsg(LOG_CRIT,"Cannot listen (1)\n");
+				delete pSocketAddrIn;
+				return E_UNKNOWN;
+			}
+		delete pSocketAddrIn;
+/*		if(options.getSOCKSServerPort()!=(UINT16)-1)
 			{
 				socketAddrIn.setAddr((UINT8*)"127.0.0.1",options.getSOCKSServerPort());
 				m_socketSOCKSIn.create();
@@ -109,7 +115,7 @@ SINT32 CALocalProxy::init()
 						CAMsg::printMsg(LOG_CRIT,"Cannot listen (2)\n");
 						return E_UNKNOWN;
 					}
-			}
+			}*/
 		CASocketAddrINet addrNext;
 		UINT8 strTarget[255];
 		options.getMixHost(strTarget,255);
