@@ -53,7 +53,7 @@ class CASocketGroupEpoll
 				{
 					SINT32 ret=E_SUCCESS;
 					m_csFD_SET.lock();
-					if(epoll_ctl(m_hEPFDt,EPOLL_CTL_ADD,s.getSocket(),m_pEpollEvent)!=0)
+					if(epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,s.getSocket(),m_pEpollEvent)!=0)
 						ret=E_UNKNOWN;
 					m_csFD_SET.unlock();
 					return ret;
@@ -130,7 +130,7 @@ class CASocketGroupEpoll
 
 			bool isSignaled(CASocket*ps)
 				{
-					SINT32 socket=(SOCKET)*s;
+					SINT32 socket=(SOCKET)*ps;
 					for(SINT32 i=0;i<m_iNumOfReadyFD;i++)
 						{
 							if(s==m_pEvents->data.fd)
