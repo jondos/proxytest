@@ -110,7 +110,9 @@ SINT32 CASocket::connect(LPCASOCKETADDR psa,UINT retry,UINT32 time)
 		for(UINT i=0;i<retry;i++)
 			{
 				CAMsg::printMsg(LOG_DEBUG,"Socket:connect-connect\n");
-				if(::connect(m_Socket,addr,addr_len)!=0)
+				err=::connect(m_Socket,addr,addr_len);
+				CAMsg::printMsg(LOG_DEBUG,"Socket:connect-connect-finished err: %i\n",err);
+				if(err!=0)
 					{  
 						err=GETERROR;
 						#ifdef _DEBUG
