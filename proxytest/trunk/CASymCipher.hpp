@@ -31,28 +31,24 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define KEY_SIZE 16
 
 #include "aes/rijndael-api-fst.h"
-#include "CALookAble.hpp"
-class CASymCipher:public CALookAble
+#include "CALockAble.hpp"
+class CASymCipher:public CALockAble
 	{
 		public:
 			CASymCipher()
 				{
-					printf("CASum start\n");
 					m_bEncKeySet=false;
 					m_keyAES=new keyInstance[1];
 					m_iv=new UINT8[16];
 					m_iv2=new UINT8[16];
-					printf("CASum end\n");
 				}
 
 			~CASymCipher()
 				{
 					waitForDestroy();
-					printf("~CASum start\n");
 					delete[] m_keyAES;
 					delete[] m_iv;
 					delete[] m_iv2;
-					printf("~CASum end\n");
 				}
 	//		SINT32 generateEncryptionKey();
 	//		SINT32 getEncryptionKey(UINT8* key);
