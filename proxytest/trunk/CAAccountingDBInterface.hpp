@@ -25,8 +25,12 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
-#ifndef CAACCOUNTINGDBINTERFACE_HPP
-#define CAACCOUNTINGDBINTERFACE_HPP
+#ifndef __CAACCOUNTINGDBINTERFACE__
+#define __CAACCOUNTINGDBINTERFACE__
+
+#include "StdAfx.h"
+#include "CAQueue.hpp"
+#include "CAXMLCostConfirmation.hpp"
 
 /**
   * @author Bastian Voigt
@@ -40,15 +44,54 @@ public:
 	CAAccountingDBInterface();
 	~CAAccountingDBInterface();
 
-	SINT32 initDBConnection(const UINT8 * host, UINT32 tcp_port, 
-													const UINT8 * dbName, const UINT8 * userName,
-													const UINT8 * password);
+	/**
+	* Initiates the database connection. 
+	* This function is called inside the aiThread
+	*
+	* @return E_NOT_CONNECTED if the connection could not be established
+	* @return E_UNKNOWN if we are already connected
+	* @return E_SUCCESS if all is OK
+	*/
+	SINT32 initDBConnection(
+			const UINT8 * host, UINT32 tcp_port, 
+			const UINT8 * dbName, const UINT8 * userName,
+			const UINT8 * password
+		);
+	
+	/**
+	* Terminates the database connection
+	* @return E_SUCCESS
+	*/
 	SINT32 terminateDBConnection();
+	
+	/**
+	* Creates the tables we need in the DB
+	*
+	* @return E_SUCCESS if all is OK
+	* @return E_UNKNOWN if the query could not be executed
+	* @return E_NOT_CONNECTED if we are not connected to the DB
+	*/
 	SINT32 createTables();
+	
+	
 	SINT32 dropTables();
-	SINT32 storeCostConfirmation(UINT64 accountNumber, UINT64 bytes, UINT8 * xmlCC, UINT32 isSettled);
-//	SINT32 storeCostConfirmation(UINT64 accountNumber, char *buf, UINT32 *len);
-	SINT32 getCostConfirmation(UINT64 accountNumber, UINT8 *buf, UINT32 *len);
+	
+	SINT32 storeCostConfirmation(CAXMLCostConfirmation &cc);
+
+	SINT32 getCostConfirmation(UINT64 accountNumber, CAXMLCostConfirmation *pCC);
+	
+	
+	/**
+	 * Fills the CAQueue with all non-settled cost confirmations
+	 *
+	 */
+	SINT32 getUnsettledCostConfirmations(CAQueue &q);
+	
+	/**
+	 * Marks this account as settled.
+	 * @todo what to do if there was a new CC stored while we were busy settling the old one?
+	 */
+	SINT32 markAsSettled(UINT64 accountNumber);
 
 private:
 	/** connection to postgreSQL database */

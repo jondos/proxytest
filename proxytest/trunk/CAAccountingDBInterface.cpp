@@ -188,76 +188,155 @@ SINT32 CAAccountingDBInterface::dropTables()
  * @return E_SPACE, if the buffer is too small. In this case len contains the
  * minimum number of bytes needed
  */
-SINT32 CAAccountingDBInterface::getCostConfirmation(UINT64 accountNumber, UINT8 *buf, UINT32 *len)
+SINT32 CAAccountingDBInterface::getCostConfirmation(UINT64 accountNumber, CAXMLCostConfirmation *pCC)
 {
 	if(!m_bConnected) return E_NOT_CONNECTED;
-	UINT8 queryF[] = "SELECT XMLCC FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER=%i";
+	UINT8 queryF[] = "SELECT XMLCC FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER=%lld";
 	UINT8 query[100+25];
 	UINT8 * xmlCC;
-	sprintf( (char *)query, (char *)queryF, accountNumber);
-
 	PGresult * result;
+	UINT32 reslen;
+	
+	sprintf( (char *)query, (char *)queryF, accountNumber);
 	result = PQexec(m_dbConn, (char *)query);
-	if(PQresultStatus(result)!=PGRES_TUPLES_OK) {
+	if(PQresultStatus(result)!=PGRES_TUPLES_OK) 
+	{
 		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Could not read XMLCC. Reason: %s\n", 
 				PQresultErrorMessage(result));
-		return E_NOT_CONNECTED;
+		return E_UNKNOWN;
 	}
-	if(PQntuples(result)!=0) {
+	if(PQntuples(result)!=0) 
+	{
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingDBInterface: XMLCC not found.\n");
 		return E_NOT_FOUND;
 	}
+	
 	xmlCC = (UINT8*) PQgetvalue(result, 0, 0);
-	int reslen = strlen((char *)xmlCC);
-	if(reslen>= *len) {
-		*len = reslen;
-		delete [] xmlCC;
-		return E_SPACE;
-	}
-	strncpy((char*)buf, (char *)xmlCC, *len);
-	delete [] xmlCC;
+	pCC = new CAXMLCostConfirmation(xmlCC);
 	return E_SUCCESS;
 }
+
+
+
 
 
 /**
  * stores a cost confirmation in the DB
+ * @todo optimize - maybe do check and insert/update in one step??
  */
-SINT32 CAAccountingDBInterface::storeCostConfirmation(
-		UINT64 accountNumber, UINT64 bytes, 
-		UINT8 * xmlCC, UINT32 isSettled) 
+SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc )
 {
+	#ifndef HAVE_NATIVE_UINT64
+		#warning Native UINT64 type not available - CostConfirmation Database might be non-functional
+	#endif
+	UINT8 query1F[] = "SELECT COUNT(*) FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER=%lld";
+	UINT8 query2F[] = "INSERT INTO COSTCONFIRMATIONS VALUES (%lld, %lld, '%s', %d)";
+	UINT8 query3F[] = 
+		"UPDATE COSTCONFIRMATIONS SET TRANSFERREDBYTES=%lld, XMLCC='%s', SETTLED=%d "
+		"WHERE ACCOUNTNUMBER=%lld";
+	UINT8 * query;
+	UINT8 * pStrCC;
+	UINT32 size;
+	PGresult * pResult;
+		
 	if(!m_bConnected) return E_NOT_CONNECTED;
+	pStrCC = cc.toXmlString(size);
 	
-	// hack to see if there is already an entry
-	if(getCostConfirmation(accountNumber, 0, 0)==E_NOT_FOUND) {
-		char queryF[] = "INSERT INTO COSTCONFIRMATIONS VALUES %i, %i, %s, %d;";
-		char query[100+2100];
-		sprintf(query, queryF, accountNumber, bytes, xmlCC, isSettled);
-
-		PGresult * result;
-		result = PQexec(m_dbConn, query);
-		if(PQresultStatus(result)!=PGRES_COMMAND_OK) {
-			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Could not write XMLCC(1). Reason: %s\n", 
-						PQresultErrorMessage(result));
-			return E_NOT_CONNECTED;
-		}
-	}
+	// Test: is there already an entry with this accountno.?
+	query = new UINT8[ strlen((char*)query1F) + strlen((char*)pStrCC) + 128 ];
+	sprintf( (char*)query, (char*)query1F, cc.getAccountNumber());
 	
-	else {
-		char queryF[] = "UPDATE COSTCONFIRMATIONS SET BYTES=%i,XMLCC='%s',SETTLED=%d WHERE ACCOUNTNUMBER=%i;";
-		char query[200+2100];
-		sprintf(query, queryF, bytes, xmlCC, isSettled);
-
-		PGresult * result;
-		result = PQexec(m_dbConn, query);
-		if(PQresultStatus(result) != PGRES_COMMAND_OK) {
-			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Could not write XMLCC(2). Reason: %s\n", 
-						PQresultErrorMessage(result));
-			return E_NOT_CONNECTED;
+	// to receive result in binary format...
+	pResult = PQexecParams(m_dbConn, (char*)query, 0, 0, 0, 0, 0, 1);
+	if( (PQresultStatus(pResult) != PGRES_TUPLES_OK) || 
+			(PQntuples(pResult) != 1))
+		{
+			delete[] pStrCC;
+			delete[] query;
+			return E_UNKNOWN;
 		}
+	
+	// put query together (either insert or update)
+	if(ntohl( *((UINT32*)PQgetvalue(pResult, 0, 0)) ) == 0)
+		{
+			sprintf( // do insert
+					(char*)query, (char*)query2F, 
+					cc.getAccountNumber(), cc.getTransferredBytes(), 
+					pStrCC, 0);
+		}
+	else
+		{
+			sprintf( // do update
+					(char*)query, (char*) query3F,
+					cc.getTransferredBytes(), pStrCC, 0, cc.getAccountNumber()
+				);
+		}
+	
+	// issue query..
+	pResult = PQexec(m_dbConn, (char*)query);
+	delete[] pStrCC;
+	delete[] query;	
+	if(PQresultStatus(pResult) != PGRES_COMMAND_OK)
+	{
+		return E_UNKNOWN;
 	}
 	return E_SUCCESS;
+
 }
+
+
+/**
+	* Fills the CAQueue with all non-settled cost confirmations
+	*
+	*/
+SINT32 CAAccountingDBInterface::getUnsettledCostConfirmations(CAQueue &q)
+{
+	UINT8 query[] = "SELECT XMLCC FROM COSTCONFIRMATIONS WHERE SETTLED=0";
+	PGresult * result;
+	SINT32 numTuples, i;
+	UINT8 * pTmpStr;
+	CAXMLCostConfirmation * pCC;
+	
+	if(!m_bConnected) return E_NOT_CONNECTED;
+	
+	result = PQexec(m_dbConn, (char *)query);
+	if(PQresultStatus(result) != PGRES_TUPLES_OK)
+	{
+		return E_UNKNOWN;
+	}
+	numTuples = PQntuples(result);
+	for(i=0; i<numTuples; i++)
+	{
+		pTmpStr = (UINT8*)PQgetvalue(result, i, 0);
+		pCC = new CAXMLCostConfirmation( pTmpStr );
+		q.add(&pCC, sizeof(CAXMLCostConfirmation *));
+	}
+	
+	return E_SUCCESS;
+}
+
+/**
+	* Marks this account as settled.
+	* @todo what to do if there was a new CC stored while we were busy settling the old one?
+	*/
+SINT32 CAAccountingDBInterface::markAsSettled(UINT64 accountNumber)
+{
+	UINT8 queryF[] = "UPDATE COSTCONFIRMATIONS SET SETTLED=1 WHERE ACCOUNTNUMBER=%lld";
+	UINT8 * query;
+	PGresult * result;
+	
+	if(!m_bConnected) return E_NOT_CONNECTED;
+	query = new UINT8[strlen((char*)queryF)+32];
+	sprintf((char *)query, (char*)queryF, accountNumber);
+	result = PQexec(m_dbConn, (char *)query);
+	delete[] query;
+	if(PQresultStatus(result) != PGRES_TUPLES_OK)
+	{
+		return E_UNKNOWN;
+	}
+	
+	return E_SUCCESS;
+}
+
 
 #endif

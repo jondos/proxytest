@@ -4,12 +4,12 @@ All rights reserved.
 Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:
 
-	- Redistributions of source code must retain the above copyright notice, 
-	  this list of conditions and the following disclaimer.
+  - Redistributions of source code must retain the above copyright notice, 
+    this list of conditions and the following disclaimer.
 
-	- Redistributions in binary form must reproduce the above copyright notice, 
-	  this list of conditions and the following disclaimer in the documentation and/or 
-		other materials provided with the distribution.
+  - Redistributions in binary form must reproduce the above copyright notice, 
+    this list of conditions and the following disclaimer in the documentation and/or 
+    other materials provided with the distribution.
 
 	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors 
 	  may be used to endorse or promote products derived from this software without specific 
@@ -46,7 +46,6 @@ CAXMLErrorMessage::CAXMLErrorMessage(UINT32 errorCode)
 			(UINT8*)"Wrong format", (UINT8*)"Wrong Data", (UINT8*)"Key not found", 
 			(UINT8*)"Bad Signature", (UINT8*)"Bad request"
 		};
-	
 		m_iErrorCode = errorCode;
 		if (m_iErrorCode < 0 || m_iErrorCode >= 7)
 		{
@@ -62,6 +61,37 @@ CAXMLErrorMessage::CAXMLErrorMessage(UINT32 errorCode)
 	}
 
 
+CAXMLErrorMessage::CAXMLErrorMessage(UINT8 * strXmlData)
+	: CAAbstractXMLEncodable()
+{
+	MemBufInputSource oInput( strXmlData, strlen((char*)strXmlData), "XMLErrorMessage" );
+	DOMParser oParser;
+	oParser.parse( oInput );
+	DOM_Document doc = oParser.getDocument();
+	DOM_Element elemRoot = doc.getDocumentElement();
+	setValues(elemRoot);
+}
+
+
+SINT32 CAXMLErrorMessage::setValues(DOM_Element &elemRoot)
+{
+	UINT8 strGeneral[256];
+	UINT32 strGeneralLen = 256;
+	SINT32 tmp;
+	SINT32 rc;
+	if( ((rc=getDOMElementAttribute(elemRoot, "code", &tmp)) !=E_SUCCESS) ||
+			((rc=getDOMElementValue(elemRoot, strGeneral, &strGeneralLen)) !=E_SUCCESS)
+		)
+	{
+		return rc;
+	}
+	m_iErrorCode = (UINT32)tmp;
+	if(m_strErrMsg) delete [] m_strErrMsg;
+	m_strErrMsg = new UINT8[strGeneralLen+1];
+	strcpy((char*)m_strErrMsg, (char*)strGeneral);
+	return ERR_OK;
+}
+
 
 CAXMLErrorMessage::~CAXMLErrorMessage()
 	{
@@ -70,7 +100,7 @@ CAXMLErrorMessage::~CAXMLErrorMessage()
 	}
 
 
-SINT32 CAXMLErrorMessage::toXmlElement(DOM_Document a_doc, DOM_Element &elemRoot)
+SINT32 CAXMLErrorMessage::toXmlElement(DOM_Document &a_doc, DOM_Element &elemRoot)
 	{
 		elemRoot = a_doc.createElement("ErrorMessage");
 		setDOMElementAttribute(elemRoot, "code", m_iErrorCode);

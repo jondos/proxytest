@@ -247,9 +247,8 @@ SINT32 CAAccountingBIInterface::sendPostRequest(UINT8 * request, UINT8 * data, U
   memcpy(buf, requestS, len);
   memcpy(buf+len, data, dataLen);
 
-
-  // send request
-  int ret = 0;
+	// send request
+	int ret = 0;
   //int offset = 0;
   do
     {
@@ -380,9 +379,30 @@ SINT32 CAAccountingBIInterface::receiveResponse(UINT32 *status, UINT8 *buf, UINT
  * Send a cost confirmation to the JPI
  * TODO: Error handling
  */
-SINT32 CAAccountingBIInterface::settle(UINT8 *costConfirmation)
+CAXMLErrorMessage * CAAccountingBIInterface::settle(CAXMLCostConfirmation &cc)
 {
-  UINT8 requestF[] = "<?xml version=\"1.0\">\n<Confirmations>\n%s</Confirmations>\n";
+	UINT8 * pStrCC;
+	UINT8 response[512];
+	UINT32 size, status;
+	CAXMLErrorMessage *pErrMsg;
+	
+	pStrCC = cc.toXmlString(size);
+	sendPostRequest((UINT8*)"/settle", pStrCC, strlen((char*)pStrCC));
+	delete[] pStrCC;
+	
+	size = 512;
+	receiveResponse(&status, response, &size);
+	if( (!response) || (status!=200) )
+	{
+		return NULL;
+	}
+	else
+	{
+		pErrMsg = new CAXMLErrorMessage(response);
+		return pErrMsg;
+	}
+
+/*  UINT8 requestF[] = "<?xml version=\"1.0\">\n<Confirmations>\n%s</Confirmations>\n";
   UINT32 sendbuflen = strlen((char *)costConfirmation) + strlen((char *)requestF) + 10;
   UINT8* sendbuf=new UINT8[sendbuflen];
   UINT32 status;
@@ -393,7 +413,7 @@ SINT32 CAAccountingBIInterface::settle(UINT8 *costConfirmation)
   UINT8* response=new UINT8[responseLen];
   receiveResponse(&status, response, &responseLen);
   delete response;
-	return E_SUCCESS;
+	return E_SUCCESS;*/
 }
 
 

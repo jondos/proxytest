@@ -54,9 +54,17 @@ public:
 	 * @param errorCode UINT32
 	 */
 	CAXMLErrorMessage(UINT32 errorCode);
+	
+	/**
+	 * Parses the string XML representation
+	 */
+	CAXMLErrorMessage(UINT8 * strXmlData);
+	
 
 	~CAXMLErrorMessage();
-	SINT32 toXmlElement(DOM_Document a_doc, DOM_Element &elemRoot);
+	SINT32 toXmlElement(DOM_Document &a_doc, DOM_Element &elemRoot);
+	
+	UINT32 getErrorCode() {return m_iErrorCode;}
 
 	static const UINT32 ERR_OK = 0;
 	static const UINT32 ERR_INTERNAL_SERVER_ERROR = 1;
@@ -67,6 +75,8 @@ public:
 	static const UINT32 ERR_BAD_REQUEST = 6;
 
 private: 
+
+	SINT32 setValues(DOM_Element &elemRoot);
 	
 	UINT32 m_iErrorCode;
 	UINT8 * m_strErrMsg;

@@ -27,10 +27,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #include "StdAfx.h"
 #include "CAAbstractXMLEncodable.hpp"
+#include "xml/DOM_Output.hpp"
 
-CAAbstractXMLEncodable::CAAbstractXMLEncodable()
+/*CAAbstractXMLEncodable::CAAbstractXMLEncodable()
 {
-}
+}*/
 
 SINT32 CAAbstractXMLEncodable::toXmlDocument(DOM_Document &doc)
 {
@@ -39,4 +40,13 @@ SINT32 CAAbstractXMLEncodable::toXmlDocument(DOM_Document &doc)
 	toXmlElement(doc, elemRoot);
 	doc.appendChild(elemRoot);
 	return E_SUCCESS;
+}
+
+UINT8 * CAAbstractXMLEncodable::toXmlString(UINT32 &size)
+{
+	DOM_Document doc;
+	toXmlDocument(doc);
+	DOM_Element elemRoot = doc.getDocumentElement();
+	UINT8* tmp = DOM_Output::dumpToMem((DOM_Node&)elemRoot, &size);
+	return tmp;
 }

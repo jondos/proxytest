@@ -30,17 +30,47 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 
 /**
-Abstract base class for classes which can be converted to an XML structure
+Abstract base class for classes which can be converted to an XML structure.
+This corresponds to anon.util.IXMLEncodable in the Java implementation
 @author Bastian Voigt
 */
 class CAAbstractXMLEncodable{
 public:
-	CAAbstractXMLEncodable();
+	CAAbstractXMLEncodable() {}
 
-//	~CAAbstractXMLEncodable();
+	/** pure virtual destructor. Define real destructor in your derived class */
+	virtual ~CAAbstractXMLEncodable() {}
 	
-	virtual SINT32 toXmlElement(DOM_Document a_doc, DOM_Element &elemRoot)=0;
+	/**
+	 * Creates the XML structure inside an existing DOM_Document, but does not
+	 * append it to any node.
+	 *
+	 * @param a_doc an existing DOM_Document
+	 * @param elemRoot on return contains the root element of the created XML structure.
+	 * Note that the element is not appended to any node in the document
+	 */
+	virtual SINT32 toXmlElement(DOM_Document &a_doc, DOM_Element &elemRoot)=0;
+	
+	/** 
+	 * returns a pointer to the tagname of this XML structure's top level element.
+	 * The buffer is allocated dynamically, the caller must delete[] it !!
+	 * This is commented out because virtual static functions are not allowed,
+	 * but should be implemented by subclasses nevertheless..
+	 */
+	// virtual static UINT8 * getXMLElementName()=0;
+	
+	/**
+	 * Creates a new XML document, then calls toXmlElement and appends the element
+	 * as DocumentElement.
+	 */
 	SINT32 toXmlDocument(DOM_Document &doc);
+	
+	/**
+	 * Converts the XML structure to a null-terminated C-String representation.
+	 * @param size on return contains the size of the allocated buffer
+	 * @return a newly allocated buffer which must be delete[] by the caller
+	 */
+	UINT8 * toXmlString(UINT32 &size);
 };
 
 #endif

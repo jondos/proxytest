@@ -399,6 +399,14 @@ SINT32 getDOMElementAttribute(const DOM_Element& elem,const char* attrName,int* 
 		return E_SUCCESS;
 	}
 
+/*SINT32 getDOMElementTagName(const DOM_Element& elem, char ** tagName)
+{
+	if( elem==NULL || *tagName==NULL )
+		return E_UNKNOWN;
+	char * tmpStr = elem.getTagName().transcode();
+	
+}*/
+
 SINT32 getDOMElementAttribute(const DOM_Node& elem,const char* attrName,bool& value)
 	{
 		if(	elem==NULL||elem.getNodeType()!=DOM_Node::ELEMENT_NODE||
@@ -440,6 +448,17 @@ SINT32 getDOMChildByName(const DOM_Node& node,const UINT8* const name,DOM_Node& 
 		return E_UNKNOWN;
 	}
 
+/** 
+ * Returns the content of the text node(s) under elem
+ * as null-terminated C String. If there is no text node
+ * len is set to 0.
+ * 
+ * TODO: Why is elem a DOM_Node and not a DOM_Element here?
+ * @param DOM_Node the element which has a text node under it
+ * @param value a buffer that gets the text value
+ * @param len on call contains the buffer size, on return contains the number of bytes copied
+ * @return E_SPACE if the buffer is too small, E_SUCCESS otherwise, E_UNKNOWN if the element is NULL
+ */
 SINT32 getDOMElementValue(const DOM_Node& elem,UINT8* value,UINT32* valuelen)
 	{
 		ASSERT(value!=NULL,"Value is null");
@@ -502,6 +521,7 @@ SINT32 getDOMElementValue(const DOM_Element& elem, UINT64 &value)
 	
 	return E_SUCCESS;
 }
+
 
 SINT32 getDOMElementValue(const DOM_Element& elem,UINT16* value)
 	{
@@ -960,7 +980,6 @@ SINT32 parseU64(const UINT8 * str, UINT64& value)
 		return E_UNKNOWN;
 	#endif
 }
-
 
 /**
  * Parses a timestamp in JDBC timestamp escape format (as it comes from the BI)
