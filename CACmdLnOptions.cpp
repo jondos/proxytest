@@ -304,7 +304,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 			char* pos=strstr(m_strMixXml,"id=\"\"");
 			if(pos!=NULL)
 				{
-					pos+=5;
+					pos+=4;
 					UINT32 left=strlen(m_strMixXml)+m_strMixXml-pos+1;
 					memmove(pos+strlen((char*)id),pos,left);
 					memcpy(pos,id,strlen((char*)id));
