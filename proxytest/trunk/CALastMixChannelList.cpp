@@ -121,6 +121,7 @@ SINT32 CALastMixChannelList::removeChannel(HCHANNEL channel)
 						//TODO: Adjust m_nextListsocket
 						return E_SUCCESS;
 					}
+				pEntry=pEntry->list_Channels.next;
 			}
 		return E_SUCCESS;
 	}
