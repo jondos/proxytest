@@ -355,11 +355,13 @@ SINT32 CASignature::signXML(DOM_Node& node,CACertStore* pIncludeCerts)
 			{
 				//Making KeyInfo-Block
 				DOM_DocumentFragment tmpDocFrag;
-				pIncludeCerts->encode(tmpDocFrag,doc);
-				DOM_Element elemKeyInfo=doc.createElement("KeyInfo");
-				elemKeyInfo.appendChild(doc.importNode(tmpDocFrag,true));
-				tmpDocFrag=0;
-				elemSignature.appendChild(elemKeyInfo);
+				if(pIncludeCerts->encode(tmpDocFrag,doc)==E_SUCCESS&&!tmpDocFrag.isNull())
+					{
+						DOM_Element elemKeyInfo=doc.createElement("KeyInfo");
+						elemKeyInfo.appendChild(doc.importNode(tmpDocFrag,true));
+						tmpDocFrag=0;
+						elemSignature.appendChild(elemKeyInfo);
+					}
 			}
 		elemRoot.appendChild(elemSignature);
 		return E_SUCCESS;

@@ -84,6 +84,14 @@ SINT32 CACertStore::encode(UINT8* buff,UINT32* bufflen,UINT32 type)
 		return E_SUCCESS;
 	}
 
+/**Creates a XML DocumentFragment which represenst all the Certifcates in this 
+	* CertStore
+	*
+	*	@param docFrag on ouput holds the created DOM_DocumentFragment
+	* @param doc owner document of the new DOM_DocumentFragment
+	* @retval E_SUCCESS if successful
+	* @retval E_UNKNOWN otherwise
+	*/
 SINT32 CACertStore::encode(DOM_DocumentFragment& docFrag,DOM_Document& doc)
 	{
 		docFrag=doc.createDocumentFragment();
