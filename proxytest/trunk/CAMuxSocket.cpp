@@ -104,6 +104,7 @@ int CAMuxSocket::close()
 			return tunnel_close(m_pTunnel);
 	}
 
+#ifndef PROT2
 int CAMuxSocket::send(MUXPACKET *pPacket)
 	{
 		int MuxPacketSize=sizeof(MUXPACKET);
@@ -141,7 +142,45 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 			}
 		return sizeof(MUXPACKET);
 	}
+#else
+int CAMuxSocket::send(MUXPACKET *pPacket)
+	{
+		int MuxPacketSize=sizeof(MUXPACKET);
+		int aktIndex=0;
+		int len=0;
 
+		if(!bIsTunneld)
+			{
+				do
+					{
+						len=m_Socket.send(((UINT8*)pPacket)+aktIndex,MuxPacketSize);
+						MuxPacketSize-=len;
+						aktIndex+=len;
+					} while(len>0&&MuxPacketSize>0);
+			}
+		else
+			{		
+				do
+					{
+						len=tunnel_write(m_pTunnel,(void*)"fghj",4);//((char*)pPacket)+aktIndex,MuxPacketSize);
+						return 0;
+//						MuxPacketSize-=len;
+//						aktIndex+=len;
+					} while(len>0&&MuxPacketSize>0);	
+			}
+		if(len==SOCKET_ERROR)
+			{
+				#ifdef _DEBUG
+					CAMsg::printMsg(LOG_DEBUG,"MuxSocket-Send-Error!\n");
+					CAMsg::printMsg(LOG_DEBUG,"SOCKET-ERROR: %i\n",WSAGetLastError());
+				#endif
+				return SOCKET_ERROR;
+			}
+		return sizeof(MUXPACKET);
+	}
+#endif
+
+#ifndef PROT2
 int CAMuxSocket::receive(MUXPACKET* pPacket)
 	{
 		int MuxPacketSize=sizeof(MUXPACKET);
@@ -184,7 +223,52 @@ int CAMuxSocket::receive(MUXPACKET* pPacket)
 		pPacket->channel=ntohl(pPacket->channel);
 		return pPacket->len;
 	}
+#else
+int CAMuxSocket::receive(MUXPACKET* pPacket)
+	{
+		int MuxPacketSize=sizeof(MUXPACKET);
+		int aktIndex=0;
+		int len=0;
+		if(!bIsTunneld)
+			{
+				do
+					{
+						len=m_Socket.receive(((UINT8*)pPacket)+aktIndex,MuxPacketSize);
+						MuxPacketSize-=len;
+						aktIndex+=len;
+					} while(len>0&&MuxPacketSize>0);
+			}
+		else
+			{
+				do
+					{
+						char buff[6];
+						len=tunnel_read(m_pTunnel,buff,1);//((char*)pPacket)+aktIndex,MuxPacketSize);
+						buff[5]=0;
+						printf(buff);
+						return 0;
+//						MuxPacketSize-=len;
+//						aktIndex+=len;
+					} while(len>0&&MuxPacketSize>0);
+			}
+		if(len==SOCKET_ERROR||len==0)
+			{
+				#ifdef _DEBUG
+					CAMsg::printMsg(LOG_DEBUG,"MuxSocket-Receive - ungültiges Packet!\n");
+					CAMsg::printMsg(LOG_DEBUG,"Data-Len %i\n",len);
+					if(len==SOCKET_ERROR)
+						CAMsg::printMsg(LOG_DEBUG,"SOCKET-ERROR: %i\n",WSAGetLastError());
+				#endif
+				return SOCKET_ERROR;
+			}
 
+//		pPacket->len=ntohs(pPacket->len);	
+//		pPacket->channel=ntohl(pPacket->channel);
+		return sizeof(MUXPACKET);
+	}
+#endif
+
+#ifndef PROT2
 int CAMuxSocket::close(HCHANNEL channel_id)
 	{
 		MUXPACKET oPacket;
@@ -192,3 +276,4 @@ int CAMuxSocket::close(HCHANNEL channel_id)
 		oPacket.len=0;
 		return send(&oPacket);
 	}
+#endif
