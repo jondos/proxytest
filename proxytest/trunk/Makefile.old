@@ -40,6 +40,7 @@ OBJS_ALL=CASocket.o\
 	CAMiddleMix.o\
 	CALocalProxy.o\
 	CACacheLoadBalancing.o\
+	CAThread.o\
 	proxytest.o
 
 OBJS=$(OBJS_ALL)
