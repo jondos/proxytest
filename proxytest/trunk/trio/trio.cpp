@@ -60,13 +60,6 @@
 # define TRIO_ERROR_RETURN(x,y) (-1)
 #endif
 
-#if defined(__STDC_ISO_10646__) || defined(MB_LEN_MAX) || defined(USE_MULTIBYTE) || TRIO_WIDECHAR
-# define TRIO_COMPILER_SUPPORTS_MULTIBYTE
-# if !defined(MB_LEN_MAX)
-#  define MB_LEN_MAX 6
-# endif
-#endif
-
 
 /*************************************************************************
  * Generic definitions
@@ -86,6 +79,13 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <errno.h>
+
+#if defined(__STDC_ISO_10646__) || defined(MB_LEN_MAX) || defined(USE_MULTIBYTE) || TRIO_WIDECHAR
+# define TRIO_COMPILER_SUPPORTS_MULTIBYTE
+# if !defined(MB_LEN_MAX)
+#  define MB_LEN_MAX 6
+# endif
+#endif
 
 #ifndef NULL
 # define NULL 0

@@ -110,7 +110,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 	DOM_Document docMixXml;
 	poptOption options[]=
 	 {
-		{"localproxy",'l',POPT_ARG_NONE,&iLocalProxy,0,"act as local proxy",NULL},
+		{"localproxy",'j',POPT_ARG_NONE,&iLocalProxy,0,"act as local proxy",NULL},
 		{"daemon",'d',POPT_ARG_NONE,&iDaemon,0,"start as daemon [only for local proxy]",NULL},
 		{"next",'n',POPT_ARG_STRING,&target,0,"first mix of cascade [only for local proxy]","<ip:port>"},
 		{"port",'p',POPT_ARG_STRING,&serverPort,0,"listening on [host:]port|path [only for local proxy]","<[host:]port|path>"},
