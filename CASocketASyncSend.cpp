@@ -24,7 +24,7 @@ THREAD_RETURN SocketASyncSendLoop(void* p)
 							{
 								ret--;
 								UINT32 len=BUFF_SIZE;
-								if(akt->pQueue->getNext(buff,&len)==E_SUCCESS))
+								if(akt->pQueue->getNext(buff,&len)==E_SUCCESS)
 									::send((SOCKET)*(akt->pSocket),(char*)buff,len,0);
 								if(akt->pQueue->isEmpty())
 									{

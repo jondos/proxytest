@@ -131,9 +131,6 @@ SINT32 CASocketGroup::select(bool bWrite,UINT32 ms)
 		#endif
 		if(ret==0)
 			{
-				#ifdef _DEBUG
-					CAMsg::printMsg(LOG_DEBUG,"SocketGroup Select-Timed Out!\n");
-				#endif				
 				return E_TIMEDOUT;
 			}
 		if(ret==SOCKET_ERROR)
