@@ -216,16 +216,26 @@ UINT16 infoSize;
 		(*(UINT16*)infoBuff)=htons(infoSize-2);
 #else
 		CAMsg::printMsg(LOG_INFO,"%s\n",recvBuff);
-		//New we have to insert our XML-Key struct in the one the have received....
-		infoBuff=new UINT8[keyLen+1024];
-		infoSize=0;
 		char* start_pos=strstr((char*)recvBuff,"count=\""); //search for count
-		start_pos+=7; //now it points to the beginning of the Counjt of Mixes number
+		if(start_pos==NULL)
+			{
+				delete recvBuff;
+				return E_UNKNOWN;
+			}
+		start_pos+=7; //now it points to the beginning of the Count of Mixes number
 		char* end_pos=strchr(start_pos,'"'); //find the end
+		if(end_pos==NULL)
+			{
+				delete recvBuff;
+				return E_UNKNOWN;
+			}
 		*end_pos=0;
 		UINT32 count=atol(start_pos);
 		*end_pos='"';
 		count+=1;
+		//New we have to insert our XML-Key struct in the one the have received....
+		infoBuff=new UINT8[keyLen+1024];
+		infoSize=0;
 		infoSize=start_pos-(char*)recvBuff;
 		UINT32 aktIndex=2;
 		memcpy(infoBuff+aktIndex,recvBuff,infoSize);
@@ -256,6 +266,7 @@ UINT16 infoSize;
 		infoSize=htons(infoSize-2);
 		memcpy(infoBuff,&infoSize,2);
 		infoSize=aktIndex;
+		delete recvBuff;
 #endif
 		#ifdef _DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"New Key Info size: %u\n",infoSize);
