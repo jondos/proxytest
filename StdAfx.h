@@ -87,7 +87,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	 #include "config.h"
 	 #ifndef HAVE_SOCKLEN_T 
 		typedef int socklent_t;
-	 endif
+	 #endif
 	#else
 	 #define HAVE_UNIX_DOMAIN_PROTOCOL
 	 #define HAVE_VSNPRINTF
