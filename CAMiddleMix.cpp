@@ -99,6 +99,7 @@ SINT32 CAMiddleMix::init()
 		if(((CASocket*)m_MuxOut)->receiveFully((UINT8*)&keyLen,2)!=E_SUCCESS)
 			return E_UNKNOWN;
 		CAMsg::printMsg(LOG_INFO,"Received Key Info lenght %u\n",ntohs(keyLen));
+#ifndef NEW_KEY_PROTOCOL		
 		recvBuff=new unsigned char[ntohs(keyLen)+2];
 		if(recvBuff==NULL)
 			return E_UNKNOWN;
@@ -108,6 +109,16 @@ SINT32 CAMiddleMix::init()
 				delete recvBuff;
 				return E_UNKNOWN;
 			}
+#else
+		keyLen=ntohs(keyLen);
+		recvBuff=new UINT8[keyLen+1];
+		if(((CASocket*)m_MuxOut)->receiveFully(recvBuff,keyLen)!=E_SUCCESS)
+			{
+				delete recvBuff;
+				return E_UNKNOWN;
+			}
+		recvBuff[keyLen]=0; //make a string
+#endif
 		CAMsg::printMsg(LOG_INFO,"Received Key Info...\n");
 		
 		CASocketAddr* pAddrListen;
@@ -146,9 +157,11 @@ SINT32 CAMiddleMix::init()
 				if(((CASocket*)m_MuxIn)->setKeepAlive(true)!=E_SUCCESS)
 					CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
 			}
-
+		
+		
+UINT16 infoSize;
+#ifndef NEW_KEY_PROTOCOL
 		UINT32 keySize=m_RSA.getPublicKeySize();
-		UINT16 infoSize;
 		memcpy(&infoSize,recvBuff,2);
 		infoSize=ntohs(infoSize)+2;
 		if(infoSize>keyLen)
@@ -156,7 +169,7 @@ SINT32 CAMiddleMix::init()
 				delete recvBuff;
 				return E_UNKNOWN;
 			}
-		infoBuff=new unsigned char[infoSize+keySize]; 
+		infoBuff=new UINT8[infoSize+keySize]; 
 		if(infoBuff==NULL)
 			{
 				delete recvBuff;
@@ -169,6 +182,48 @@ SINT32 CAMiddleMix::init()
 		m_RSA.getPublicKey(infoBuff+infoSize,&keySize);
 		infoSize+=keySize;
 		(*(UINT16*)infoBuff)=htons(infoSize-2);
+#else
+		//New we have to insert our XML-Key struct in the one the have received....
+		infoBuff=new UINT8[keyLen+1024];
+		infoSize=0;
+		char* start_pos=strstr((char*)recvBuff,"count=\""); //search for count
+		start_pos+=7; //now it points to the beginning of the Counjt of Mixes number
+		char* end_pos=strchr(start_pos,'"'); //find the end
+		*end_pos=0;
+		UINT32 count=atol(start_pos);
+		*end_pos='"';
+		count+=1;
+		infoSize=start_pos-(char*)recvBuff;
+		UINT32 aktIndex=2;
+		memcpy(infoBuff+aktIndex,recvBuff,infoSize);
+		aktIndex+=infoSize;
+		ltoa(count,(char*)infoBuff+aktIndex,10);
+		aktIndex=strlen((char*)infoBuff);
+		//now the have the right count in the output buff
+		start_pos=end_pos;
+		end_pos=strstr(start_pos,"<Mix"); //get the beginn of the first mix
+		memcpy(infoBuff+aktIndex,start_pos,end_pos-start_pos);
+		aktIndex+=end_pos-start_pos;
+		//now the have to insert out Mix-Key-Values....
+		memcpy(infoBuff+aktIndex,"<Mix id=\"",9);
+		aktIndex+=9;
+		options.getMixId(infoBuff+aktIndex,50); //the mix id...
+		aktIndex=strlen((char*)infoBuff);
+		memcpy(infoBuff+aktIndex,"\">",2);
+		aktIndex+=2;
+		count=1024;
+		m_RSA.getPublicKeyAsXML(infoBuff+aktIndex,&count); //the key
+		aktIndex+=count;
+		memcpy(infoBuff+aktIndex,"</Mix>",6);//the closing mix tag
+		aktIndex+=6;
+		infoSize=keyLen-(end_pos-(char*)recvBuff);
+		memcpy(infoBuff+aktIndex,end_pos,infoSize); //all the rest
+		aktIndex+=infoSize;
+		infoSize=aktIndex;
+		infoSize=htons(infoSize-2);
+		memcpy(infoBuff,&infoSize,2);
+		infoSize=aktIndex;
+#endif
 		#ifdef _DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"New Key Info size: %u\n",infoSize);
 		#endif

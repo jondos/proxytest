@@ -34,7 +34,7 @@ class CAInfoService
 	{
 		public:
 			CAInfoService();
-			CAInfoService(CAFirstMix* pFirstMix,UINT32 numberOfMixes);
+			CAInfoService(CAFirstMix* pFirstMix);
 			~CAInfoService();
 			SINT32 sendHelo();
 			SINT32 sendStatus();
@@ -44,13 +44,11 @@ class CAInfoService
 			SINT32 getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic);
 			//SINT32 setMixedPackets(UINT32 packets);
 			SINT32 getMixedPackets(UINT32* ppackets);
-			SINT32 getNumberOfMixes(UINT32* pmixes){return m_NumberOfMixes;}
 			bool getRun(){return m_bRun;}
 			SINT32 setSignature(CASignature* pSignature);
 			CASignature* getSignature(){return m_pSignature;}
 			static SINT32 test();
 		private:
-			UINT32				m_NumberOfMixes;
 			volatile bool m_bRun;
 			CASignature*	m_pSignature;
 			CAFirstMix*		m_pFirstMix;

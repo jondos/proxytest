@@ -40,34 +40,8 @@ extern CACmdLnOptions options;
 THREAD_RETURN InfoLoop(void *p)
 	{
 		CAInfoService* pInfoService=(CAInfoService*)p;
-	//	CASocket oSocket;
-	//	CASocketAddrINet oAddr;
-	//	CASignature* pSignature=pInfoService->getSignature();
-	//	UINT8* buff=new UINT8[1024];
-//		UINT8 buffHeader[255];
-	//	options.getInfoServerHost(buff,1024);
-	//	oAddr.setAddr(buff,options.getInfoServerPort());
-	//	BufferOutputStream oBufferStream(1024,1024);
-	//	XMLOutput oxmlOut(oBufferStream);
-//		UINT32 buffLen;
-//		UINT8 strAnonServer[255];
-	//	UINT8 strMixId[255];
-//		options.getMixId(strMixId,255);
-/*		if(options.getServerHost((UINT8*)strAnonServer,255)!=E_SUCCESS)
-			CASocketAddrINet::getLocalHostIP(buff);
-		else
-			{
-				CASocketAddrINet oAddr;
-				oAddr.setAddr(strAnonServer,0);
-				oAddr.getIP(buff);
-			}
-		sprintf((char*)strAnonServer,"%u.%u.%u.%u%%3A%u",buff[0],buff[1],buff[2],buff[3],options.getServerPort());
-*/		int helocount=10;
+		int helocount=10;
 
-		//Must be changed to UINT64 ....
-//		UINT32 avgTraffic=0;		
-//	UINT32 diffTraffic;
-//		double dTmp;
 		while(pInfoService->getRun())
 			{
 				pInfoService->sendStatus();
@@ -80,23 +54,19 @@ THREAD_RETURN InfoLoop(void *p)
 				 helocount--;
 				sSleep(60);
 			}
-//		delete []buff;
 		THREAD_RETURN_SUCCESS;
 	}
 
 CAInfoService::CAInfoService()
 	{
 		m_pFirstMix=NULL;
-		m_NumberOfMixes=0;
 		m_bRun=false;
 		m_pSignature=NULL;
 	}
 
-CAInfoService::CAInfoService(CAFirstMix* pFirstMix,UINT32 numberOfMixes)
+CAInfoService::CAInfoService(CAFirstMix* pFirstMix)
 	{
-//		iUser=iRisk=iTraffic=-1;
 		m_pFirstMix=pFirstMix;
-		m_NumberOfMixes=numberOfMixes;
 		m_bRun=false;
 		m_pSignature=NULL;
 	}
@@ -105,26 +75,6 @@ CAInfoService::~CAInfoService()
 	{
 		stop();
 	}
-/*
-SINT32 CAInfoService::setLevel(SINT32 user,SINT32 risk,SINT32 traffic)
-	{
-		csLevel.lock();
-		iUser=user;
-		iRisk=risk;
-		iTraffic=traffic;
-		csLevel.unlock();
-		return E_SUCCESS;
-	}
-*/
-/*
-SINT32 CAInfoService::setMixedPackets(UINT32 nPackets)
-	{
-		EnterCriticalSection(&csLevel);
-		m_MixedPackets=nPackets;
-		LeaveCriticalSection(&csLevel);
-		return E_SUCCESS;
-	}
-*/
 
 SINT32 CAInfoService::setSignature(CASignature* pSig)
 	{
@@ -134,25 +84,14 @@ SINT32 CAInfoService::setSignature(CASignature* pSig)
 
 SINT32 CAInfoService::getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic)
 	{
-/*		csLevel.lock();
-		if(puser!=NULL)
-			*puser=iUser;
-		if(ptraffic!=NULL)
-			*ptraffic=iTraffic;
-		if(prisk!=NULL)
-			*prisk=iRisk;
-		csLevel.unlock();*/
 		return m_pFirstMix->getLevel(puser,prisk,ptraffic);
 	}
 
 SINT32 CAInfoService::getMixedPackets(UINT32* ppackets)
 	{
-		//EnterCriticalSection(&csLevel);
 		if(m_pFirstMix!=NULL)
 			return m_pFirstMix->getMixedPackets(ppackets);
 		return E_UNKNOWN;
-		//LeaveCriticalSection(&csLevel);
-		//return E_SUCCESS;
 	}
 
 SINT32 CAInfoService::start()
@@ -243,7 +182,6 @@ SINT32 CAInfoService::sendHelo()
 		CASocket oSocket;
 		CASocketAddrINet oAddr;
 		UINT8 hostname[255];
-		UINT8 id[50];
 		UINT8 buffHeader[255];
 		if(options.getInfoServerHost(hostname,255)!=E_SUCCESS)
 			return E_UNKNOWN;
@@ -253,41 +191,19 @@ SINT32 CAInfoService::sendHelo()
 				UINT8* buff=new UINT8[1024];
 				if(buff==NULL)
 					return E_UNKNOWN;
-				UINT buffLen;
+				UINT32 buffLen;
 				if(options.isFirstMix())
 					{
-					 //the following has to be moved to CACmndLnOptions
-						BufferOutputStream oBufferStream(1024,1024);
-						XMLOutput oxmlOut(oBufferStream);
-						oBufferStream.reset();
-						oxmlOut.BeginDocument("1.0","UTF-8",true);
-						oxmlOut.BeginElementAttrs("MixCascade");
-						
-						if(options.getServerHost(hostname,255)!=E_SUCCESS)
+					 //the following has to be moved to FirstMix...
+						UINT8* tmpBuff=new UINT8[1024];
+						UINT32 len=1024;
+						if(m_pFirstMix->getMixCascadeInfo(tmpBuff,&len)!=E_SUCCESS)
 							{
-								CASocketAddrINet::getLocalHostName(hostname,255);
-							}
-						options.getMixId(id,50);
-						oxmlOut.WriteAttr("id",(char*)id);
-						oxmlOut.EndAttrs();
-						if(options.getCascadeName(buff,1024)!=E_SUCCESS)
-							{
-								delete []buff;
+								delete [] tmpBuff;
 								return E_UNKNOWN;
 							}
-						oxmlOut.WriteElement("Name",(char*)buff);
-						oxmlOut.WriteElement("IP",(char*)hostname);
-						oxmlOut.WriteElement("Port",(int)options.getServerPort());
-						if(options.getProxySupport())
-        			oxmlOut.WriteElement("ProxyPort",(int)443);
-						oxmlOut.BeginElementAttrs("Mixes");
-						oxmlOut.WriteAttr("count",(int)m_NumberOfMixes);
-						oxmlOut.EndAttrs();
-						oxmlOut.EndElement();
-						oxmlOut.EndElement();
-						oxmlOut.EndDocument();
 						buffLen=1024;
-						if(m_pSignature->signXML(oBufferStream.getBuff(),oBufferStream.getBufferSize(),(UINT8*)buff,&buffLen)!=E_SUCCESS)
+						if(m_pSignature->signXML(tmpBuff,len,(UINT8*)buff,&buffLen)!=E_SUCCESS)
 							{delete []buff;return E_UNKNOWN;}
 					}
 				else

@@ -28,7 +28,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #include "StdAfx.h"
 #include "CAASymCipher.hpp"
-
+#include "CABase64.hpp"
+#include "CAUtil.hpp"
+#include "xml/xmlinput.h"
 CAASymCipher::CAASymCipher()
 	{
 		m_pRSA=NULL;
@@ -190,3 +192,121 @@ _ERROR:
 		return E_UNKNOWN;
 	}
 
+/** Stores the public key in \c buff as XML. The format is as follows:
+	*
+	* <RSAKeyValue>
+	*   <Modulus>
+	*     the modulus of the Key as ds::CryptoBinary
+	*   </Modulus>
+	*   <Exponent>
+	*     the exponent of the key as ds::CryptoBinary
+	*   </Exponent>
+	* <RSAKeyValue>
+	*There is NO \0 at the end.
+	*@param buff byte array in which the public key should be stored
+	*@param len on input holds the size of buff, on return it contains the number 
+	*           of bytes needed to store the public key
+	*@retval E_UNKNOWN in case of an error
+	*@retval E_SUCCESS otherwise
+	*
+	*@see setPublicKeyasXML
+	*/
+SINT32 CAASymCipher::getPublicKeyAsXML(UINT8* buff,UINT32 *len)
+	{
+		if(m_pRSA==NULL||buff==NULL)
+			return E_UNKNOWN;
+		memcpy(buff,"<RSAKeyValue><Modulus>",22);
+		UINT32 aktIndex=22;
+		UINT32 size=*len-aktIndex;
+		UINT8 tmpBuff[256];
+		BN_bn2bin(m_pRSA->n,tmpBuff);
+		CABase64::encode(tmpBuff,BN_num_bytes(m_pRSA->n),buff+aktIndex,&size);
+		aktIndex+=size;
+		memcpy(buff+aktIndex,"</Modulus><Exponent>",20);
+		aktIndex+=20;
+		BN_bn2bin(m_pRSA->e,tmpBuff);
+		size=*len-aktIndex;
+		CABase64::encode(tmpBuff,BN_num_bytes(m_pRSA->e),buff+aktIndex,&size);
+		aktIndex+=size;
+		memcpy((char*)buff+aktIndex,"</Exponent></RSAKeyValue>",25);
+		*len=aktIndex+25;
+		return E_SUCCESS;
+	}
+
+
+
+
+//XML Decode...
+static void sRSAKeyParamValueHandler(XMLElement &elem, void *userData)
+{
+	UINT8 buff[4096];
+	int len=(int)elem.ReadData((char*)buff,4096);
+	
+	UINT32 decLen=4096;
+	UINT8 decBuff[4096];
+	CABase64::decode(buff,len,decBuff,&decLen);
+	
+	RSA* tmpRSA=(RSA*)userData;
+	switch(elem.GetName()[0])
+		{
+			case 'E':
+				if(tmpRSA->e!=NULL)
+					BN_free(tmpRSA->e);
+				tmpRSA->e=BN_bin2bn((unsigned char*)decBuff,decLen,NULL);
+			break;
+			case 'M':
+				if(tmpRSA->n!=NULL)
+					BN_free(tmpRSA->n);
+				tmpRSA->n=BN_bin2bn((unsigned char*)decBuff,decLen,NULL);
+			break;
+		}	
+}
+
+static void sRSAKeyValueHandler(XMLElement &elem, void *userData)
+{
+	XMLHandler handlers[] = {
+	XMLHandler("Modulus",sRSAKeyParamValueHandler),
+	XMLHandler("Exponent",sRSAKeyParamValueHandler),
+	XMLHandler::END};
+		elem.Process(handlers, userData);
+}
+
+/** Sets the public key to the values stored in \c key. 
+	* The format must match the format XML described for getPublicKeyAsXML(). 
+	*@param key byte array which holds the new public key
+	*@param len on input,size of key byte array, on successful return number of bytes 'consumed'
+	*@retval E_UNKNOWN in case of an error, the cipher is the uninitialized (no key is set)
+	*@retval E_SUCCESS otherwise
+	*@see getPublicKeyAsXML
+	*/
+SINT32 CAASymCipher::setPublicKeyAsXML(UINT8* key,UINT32* len)
+	{
+		if(key==NULL||len==NULL)
+			return E_UNKNOWN;
+
+		BufferInputStream oStream(key,*len);
+		XMLInput input(oStream);
+
+		// set up initial handler for RSA-Key
+		XMLHandler handlers[] = 
+			{
+				XMLHandler("RSAKeyValue",sRSAKeyValueHandler),
+				XMLHandler::END
+			};
+	
+		RSA* tmpRSA=RSA_new();
+		try
+			{
+				input.Process(handlers, tmpRSA);
+			}
+		catch (const XMLParseException &e)
+			{
+				RSA_free(tmpRSA);
+				return E_UNKNOWN;
+			}
+		if(m_pRSA!=NULL)
+			RSA_free(m_pRSA);
+		m_pRSA=tmpRSA;
+		*len=oStream.getPos();
+		return E_SUCCESS;
+	}

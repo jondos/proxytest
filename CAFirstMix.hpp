@@ -58,6 +58,7 @@ class CAFirstMix:public CAMix
 					m_psocketgroupUsersRead=m_psocketgroupUsersWrite=NULL;
 					m_pChannelList=NULL;
 					m_pMuxOut=NULL;
+					m_strXmlMixCascadeInfo=NULL;
 				}
 			virtual ~CAFirstMix(){}
 		private:
@@ -65,6 +66,7 @@ class CAFirstMix:public CAMix
 			SINT32 init();
 			SINT32 clean();
 			SINT32 initOnce();
+			SINT32 initMixCascadeInfo(UINT8* recvBuff,UINT32 len);
 		public:
 			SINT32 getMixedPackets(UINT32* ppackets)
 				{
@@ -83,6 +85,9 @@ class CAFirstMix:public CAMix
 					*ptraffic=-1;
 					return E_SUCCESS;
 				}
+			/** Retruns the Mix-Cascade info which should be send to tthe InfoService*/
+			SINT32 getMixCascadeInfo(UINT8* buff,UINT32*len);
+					
 			
 		friend THREAD_RETURN loopSendToMix(void*);
 		friend THREAD_RETURN loopAcceptUsers(void*);
@@ -112,6 +117,7 @@ class CAFirstMix:public CAMix
 					return E_SUCCESS;
 				}
 
+				
 			bool getRestart()
 				{
 					return m_bRestart;
@@ -131,6 +137,7 @@ class CAFirstMix:public CAMix
 			CAMuxSocket* m_pMuxOut;
 			UINT8* m_KeyInfoBuff;
 			UINT16 m_KeyInfoSize;
+			UINT8* m_strXmlMixCascadeInfo;
 			UINT32 m_nMixedPackets;
 			CAASymCipher* m_pRSA;
 			CASignature mSignature;
