@@ -5,6 +5,7 @@ Copyright (C) 1999 Lars Brinkhoff.  See COPYING for terms and conditions.
 
 Code common to both htc and hts.
 */
+#include "../StdAfx.h"
 #include "common.h"
 #include "tunnel.h"
 

@@ -229,7 +229,7 @@ int doLocalProxy()
 		addrNext.setAddr(strTarget,options.getTargetPort());
 		CAMsg::printMsg(LOG_INFO,"Try connectiong to next Mix...");
 
-		CAMuxSocket http;
+/*		CAMuxSocket http;
 		http.useTunnel("anon.inf.tu-dresden.de",3128);
 		http.connect(&addrNext);
 		MUXPACKET oMuxPacket;
@@ -240,12 +240,16 @@ int doLocalProxy()
 		http.close();
 		sleep(10);
 		return -1;
-//		((CASocket*)lpIOPair->muxOut)->create();
+*///		((CASocket*)lpIOPair->muxOut)->create();
 //		((CASocket*)lpIOPair->muxOut)->setSendBuff(sizeof(MUXPACKET)*50);
 //		((CASocket*)lpIOPair->muxOut)->setRecvBuff(sizeof(MUXPACKET)*50);
 		if(lpIOPair->muxOut.connect(&addrNext)!=SOCKET_ERROR)
 			{
 				CAMsg::printMsg(LOG_INFO," connected!\n");
+				unsigned char key[16];
+				memset(key,0,16);
+				lpIOPair->muxOut.setDecryptionKey(key);
+				lpIOPair->muxOut.setEncryptionKey(key);
 				lpIO(lpIOPair);
 				ret=0;
 			}
@@ -429,6 +433,10 @@ THREAD_RETURN fmIO(void *v)
 							}
 						else
 							{
+								unsigned char key[16];
+								memset(key,0,16);
+								newMuxSocket->setDecryptionKey(key);
+								newMuxSocket->setEncryptionKey(key);
 								oMuxChannelList.add(newMuxSocket);
 								oSocketGroup.add(*newMuxSocket);
 							}
@@ -617,7 +625,7 @@ int doFirstMix()
 		    }
 		
 		
-		fmIOPair->muxHttpIn.useTunnel("anon.inf.tu-dresden.de",2020);
+/*		fmIOPair->muxHttpIn.useTunnel("anon.inf.tu-dresden.de",2020);
 		printf("Before Connected");
 		if(fmIOPair->muxHttpIn.accept(4040)==SOCKET_ERROR)
 			{
@@ -630,7 +638,7 @@ int doFirstMix()
 		printf("Recevied: %u",len);
 		fmIOPair->muxHttpIn.close();
 		return -1;
-
+*/
 		CASocketAddr addrNext;
 		char strTarget[255];
 		options.getTargetHost(strTarget,255);
@@ -808,8 +816,10 @@ int doLastMix()
 		    }
 //		((CASocket*)lmIOPair->muxIn)->setRecvBuff(50*sizeof(MUXPACKET));
 //		((CASocket*)lmIOPair->muxIn)->setSendBuff(50*sizeof(MUXPACKET));
-
-		CAMsg::printMsg(LOG_INFO,"connected!\n");
+/*		unsigned char key[16];
+		memset(key,0,16);
+		lmIOPair->muxIn.setDecryptionKey(key);
+*/		CAMsg::printMsg(LOG_INFO,"connected!\n");
 		char strTarget[255];
 		options.getTargetHost(strTarget,255);
 		lmIOPair->addrSquid.setAddr(strTarget,options.getTargetPort());
@@ -827,7 +837,7 @@ int doLastMix()
 
 int main(int argc, const char* argv[])
 	{
-	
+
 	    options.parse(argc,argv);
 #ifndef _WIN32
 			if(options.getDaemon())

@@ -3,6 +3,7 @@ port/poll.c
 
 Copyright (C) 1999 Lars Brinkhoff.  See COPYING for terms and conditions.
 */
+#include "../StdAfx.h"
 
 #include "config.h"
 

@@ -9,7 +9,7 @@ class CASymCipher
 			int encrypt(unsigned char* in,int len);
 			int decrypt(unsigned char* in,int len);
 		protected:
-//			BF_KEY keyEnc,keyDec;
+			BF_KEY keyEnc,keyDec;
 	};
 
 #endif

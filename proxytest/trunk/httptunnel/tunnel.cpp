@@ -5,7 +5,9 @@ Copyright (C) 1999 Lars Brinkhoff.  See COPYING for terms and conditions.
 
 See tunnel.h for some documentation about the programming interface.
 */
+#include "../StdAfx.h"
 
+/*
 #ifndef WIN32
 #include <time.h>
 #include <stdio.h>
@@ -18,7 +20,7 @@ See tunnel.h for some documentation about the programming interface.
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #else
 #endif
-
+*/
 #include "common.h"
 
 #include "http.h"

@@ -6,9 +6,7 @@ bug alert: parse_header() doesn't handle header fields that are extended
 over multiple lines.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "../StdAfx.h"
 
 #include "common.h"
 #include "http.h"

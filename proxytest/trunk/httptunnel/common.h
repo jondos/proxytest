@@ -7,11 +7,10 @@ Copyright (C) 1999 Lars Brinkhoff.  See COPYING for terms and conditions.
 #ifndef COMMON_H
 #define COMMON_H
 
-#include "../StdAfx.h"
 #include "config.h"
 
 #ifndef _WIN32
-#include <errno.h>
+/*#include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -23,13 +22,15 @@ Copyright (C) 1999 Lars Brinkhoff.  See COPYING for terms and conditions.
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <stdarg.h>
+*/
 #else
-#include <errno.h>
+/*#include <errno.h>
 #include <windows.h>
 #include <winsock.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <time.h>
+*/
 #include "poll_.h"
 #endif
 
