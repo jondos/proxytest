@@ -115,11 +115,7 @@ SINT32 CASocket::connect(LPCASOCKETADDR psa,UINT retry,UINT32 time)
 							return SOCKET_ERROR;
 						#ifdef _DEBUG
 							CAMsg::printMsg(LOG_DEBUG,"Cannot connect... retrying\n");
-						#endif
-						close();
-						create();
-						
-						
+						#endif						
 						sleep(time);
 					}
 				else
