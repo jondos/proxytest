@@ -106,7 +106,7 @@ freebsd-x86-gcc-lthread:
 	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -fomit-frame-pointer -O3' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -llthread' 'LIBDIR=-L/usr/local/lib' _all_aes 
 
 freebsd-x86-gcc-pthread:
-	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -fomit-frame-pointer -O3' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -llthread -lpthread' 'LIBDIR=-L/usr/local/lib -L/usr/local/lib/pth' _all_aes 
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -fomit-frame-pointer -O3' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lpthread' 'LIBDIR=-L/usr/local/lib -L/usr/local/lib/pth' _all_aes 
 
 _all_aes: $(OBJS) libpopt.a libxml.a libaes.a
 	$(CC) -o proxytest $(DEBUG) $(CPPFLAGS) $(OBJS) $(LIBDIR) $(LIBS) 
