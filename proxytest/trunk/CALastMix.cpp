@@ -225,6 +225,12 @@ SINT32 CALastMix::loop()
 												else
 														{    
 															UINT16 payLen=ntohs(pMixPacket->payload.len);
+															#ifdef _DEBUG
+																UINT8 c=pMixPacket->payload.data[30];
+																pMixPacket->payload.data[30]=0;
+																CAMsg::printMsg(LOG_DEBUG,"Try sending data to Squid: %s\n",pMixPacket->payload.data);
+																pMixPacket->payload.data[30]=c;
+															#endif
 															if(payLen>PAYLOAD_SIZE||tmpSocket->sendTimeOut(pMixPacket->payload.data,payLen,_SEND_TIMEOUT)==SOCKET_ERROR)
 																{
 																	#ifdef _DEBUG
@@ -296,7 +302,7 @@ SINT32 CALastMix::loop()
 //end Step 1
 
 //Step 2 Sending to Cache...
-				countRead=osocketgroupCacheWrite.select(true,0);
+				countRead=osocketgroupCacheWrite.select(true,0 );
 				if(countRead>0)
 					{
 						bAktiv=true;
