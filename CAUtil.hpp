@@ -121,10 +121,10 @@ inline UINT32 diff64(UINT64& bigop,UINT64& smallop)
 
 inline UINT32 div64(UINT64& op1,UINT32 op2)
 	{
-#if !defined(HAVE_NATVIE_UINT64)
+#if !defined(HAVE_NATIVE_UINT64)
 		return (UINT32) -1; //TODO!!!
 #else
-		return (UINT32)op1/op2;
+		return (UINT32)(op1/op2);
 #endif
 	}
 
