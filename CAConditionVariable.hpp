@@ -44,6 +44,12 @@ class CAConditionVariable:public CAMutex
 					delete m_pCondVar;
 				}
 			
+				/** Waits for a signal or for a timeout.
+				* Note: lock() must be called before wait() and unlock() 
+				* must be called if proccessing ends.
+				* @retval E_SUCCESS if signaled
+				* @retval E_UNKNOWN if an error occured
+				*/
 			SINT32 wait()
 				{
 					if(pthread_cond_wait(m_pCondVar,m_pMutex)==0)
@@ -51,7 +57,16 @@ class CAConditionVariable:public CAMutex
 					return E_UNKNOWN;
 				}
 
-			/** Waits for a signal or for a timeout.
+			/** Very ugly sholty to delete uncommented function!
+				*/
+			SINT32 wait(CAMutex& oMutex)
+				{
+					if(pthread_cond_wait(m_pCondVar,oMutex.m_pMutex)==0)
+						return E_SUCCESS;
+					return E_UNKNOWN;
+				}
+
+				/** Waits for a signal or for a timeout.
 				* Note: lock() must be called before wait() and unlock() 
 				* must be called if proccessing ends.
 				* @param msTimeout timout value in millis seconds
@@ -78,18 +93,16 @@ class CAConditionVariable:public CAMutex
 					return E_UNKNOWN;
 				}
 
-/*			SINT32 wait(UINT32 msSeconds)
-				{
-					struct timespec t;
-					t
-					if(pthread_cond_timedwait(m_pCondVar,m_pMutex,&t)==0)
-						return E_SUCCESS;
-					return E_UNKNOWN;
-				}
-*/
 			SINT32 signal()
 				{
 					if(pthread_cond_signal(m_pCondVar)==0)
+						return E_SUCCESS;
+					return E_UNKNOWN;
+				}
+
+			SINT32 broadcast()
+				{
+					if(pthread_cond_broadcast(m_pCondVar)==0)
 						return E_SUCCESS;
 					return E_UNKNOWN;
 				}

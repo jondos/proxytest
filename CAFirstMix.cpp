@@ -77,7 +77,6 @@ SINT32 CAFirstMix::init()
 	{
 		m_nMixedPackets=0; //reset to zero after each restart (at the moment neccessary for infoservice)
 		m_bRestart=false;
-		m_nLoginThreads=0;
 		//Establishing all Listeners
 		m_arrSocketsIn=new CASocket[m_nSocketsIn];
 		UINT32 i,aktSocket=0;
@@ -208,6 +207,8 @@ SINT32 CAFirstMix::init()
 		m_psocketgroupUsersWrite=new CASocketGroup;
 		m_pInfoService=new CAInfoService(this);
 
+		m_pthreadsLogin=new CAThreadPool(NUM_LOGIN_WORKER_TRHEADS,MAX_LOGIN_QUEUE,false);
+
 		//Starting thread for Step 1
 		m_pthreadAcceptUsers=new CAThread();
 		m_pthreadAcceptUsers->setMainLoop(fm_loopAcceptUsers);
@@ -297,6 +298,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 		CAFirstMix* pFirstMix=(CAFirstMix*)param;
 		CASocket* socketsIn=pFirstMix->m_arrSocketsIn;
 		CAIPList* pIPList=pFirstMix->m_pIPList;
+		CAThreadPool* pthreadsLogin=pFirstMix->m_pthreadsLogin;
 		UINT32 nSocketsIn=pFirstMix->m_nSocketsIn;
 		CASocketGroup osocketgroupAccept;
 		CAMuxSocket* pNewMuxSocket;
@@ -350,6 +352,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 											}
 										else
 											{
+												/*
 												CAThread* pThread=new CAThread();
 												pThread->setMainLoop(fm_loopDoUserLogin);
 												t_UserLoginData* d=new t_UserLoginData;
@@ -358,6 +361,12 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 												memcpy(d->peerIP,peerIP,4);
 												pFirstMix->incLoginThreads();
 												pThread->start(d,true);
+												*/
+												t_UserLoginData* d=new t_UserLoginData;
+												d->pNewUser=pNewMuxSocket;
+												d->pMix=pFirstMix;
+												memcpy(d->peerIP,peerIP,4);
+												pthreadsLogin->addRequest(fm_loopDoUserLogin,d);
 											}
 									}
 							}
@@ -374,7 +383,6 @@ THREAD_RETURN fm_loopDoUserLogin(void* param)
 	{
 		t_UserLoginData* d=(t_UserLoginData*)param;
 		d->pMix->doUserLogin(d->pNewUser,d->peerIP);
-		d->pMix->decLoginThreads();
 		delete d;
 		THREAD_RETURN_SUCCESS;
 	}
@@ -430,15 +438,6 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 #endif		
 		incUsers();																	// increment the user counter by one
 		m_psocketgroupUsersRead->add(*pNewUser); // add user socket to the established ones that we read data from.
-		return E_SUCCESS;
-	}
-
-SINT32 CAFirstMix::waitForLoginThreads()
-	{
-		while(m_nLoginThreads>0)
-			{
-				msSleep(1000);
-			}
 		return E_SUCCESS;
 	}
 
@@ -578,6 +577,8 @@ END_THREAD:
 
 SINT32 CAFirstMix::clean()
 	{
+		if(m_pthreadsLogin!=NULL)
+			delete m_pthreadsLogin;
 		if(m_pInfoService!=NULL)
 			{
 				#ifdef _DEBUG

@@ -2018,6 +2018,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\CAThreadPool.cpp">
+			</File>
+			<File
 				RelativePath="CAUtil.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -2950,6 +2953,9 @@
 			</File>
 			<File
 				RelativePath="CAThread.hpp">
+			</File>
+			<File
+				RelativePath=".\CAThreadPool.hpp">
 			</File>
 			<File
 				RelativePath="CAUtil.hpp">
