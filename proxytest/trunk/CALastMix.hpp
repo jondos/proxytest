@@ -11,9 +11,9 @@ class CALastMix:public CAMix
 		public:
 			CALastMix(){};
 			~CALastMix(){};
-			SINT32 start();
 		private:
 			SINT32 loop();
+			SINT32 init();
 		private:
 			CAMuxSocket		muxIn;
 			CASocketAddr	addrSquid;

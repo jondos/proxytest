@@ -7,6 +7,79 @@
 
 extern CACmdLnOptions options;
 
+SINT32 CALocalProxy::init()
+	{
+		int ret;	
+		CASocketAddr socketAddrIn("127.0.0.1",options.getServerPort());
+		socketIn.create();
+		socketIn.setReuseAddr(true);
+		if(socketIn.listen(&socketAddrIn)==SOCKET_ERROR)
+		    {
+					CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
+					return E_UNKNOWN;
+		    }
+		if(options.getSOCKSServerPort()!=-1)
+			{
+				socketAddrIn.setAddr("127.0.0.1",options.getSOCKSServerPort());
+				socketSOCKSIn.create();
+				socketSOCKSIn.setReuseAddr(true);
+				if(socketSOCKSIn.listen(&socketAddrIn)==SOCKET_ERROR)
+						{
+							CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
+							return E_UNKNOWN;
+						}
+			}
+		CASocketAddr addrNext;
+		UINT8 strTarget[255];
+		options.getTargetHost(strTarget,255);
+		addrNext.setAddr((char*)strTarget,options.getTargetPort());
+		CAMsg::printMsg(LOG_INFO,"Try connectiong to next Mix...");
+
+/*		CAMuxSocket http;
+		http.useTunnel("anon.inf.tu-dresden.de",3128);
+		http.connect(&addrNext);
+		MUXPACKET oMuxPacket;
+		oMuxPacket.channel=1;
+		oMuxPacket.len=10;
+		memcpy(oMuxPacket.data,"Hllo",3);
+		http.send(&oMuxPacket);
+		http.close();
+		sleep(10);
+		return -1;
+*/		((CASocket*)muxOut)->create();
+		((CASocket*)muxOut)->setSendBuff(sizeof(MUXPACKET)*50);
+		((CASocket*)muxOut)->setRecvBuff(sizeof(MUXPACKET)*50);
+		if(muxOut.connect(&addrNext)==E_SUCCESS)
+			{
+				
+				CAMsg::printMsg(LOG_INFO," connected!\n");
+				UINT16 size;
+				((CASocket*)muxOut)->receive((UINT8*)&size,2);
+				((CASocket*)muxOut)->receive(&chainlen,1);
+				CAMsg::printMsg(LOG_INFO,"Chain-Length: %d\n",chainlen);
+				size=ntohs(size)-1;
+				UINT8* buff=new UINT8[size];
+				((CASocket*)muxOut)->receive(buff,size);
+				arRSA=new CAASymCipher[chainlen];
+				int aktIndex=0;
+				for(int i=0;i<chainlen;i++)
+					{
+						int len=size;
+						arRSA[i].setPublicKey(buff+aktIndex,(UINT32*)&len);
+						size-=len;
+						aktIndex+=len;
+					}
+				
+				return E_SUCCESS;
+			}
+		else
+			{
+				CAMsg::printMsg(LOG_CRIT,"Cannot connect to next Mix!\n");
+				return E_UNKNOWN;
+			}
+	//	WaitForSingleObject(hEventThreadEnde,INFINITE);
+	}
+
 SINT32 CALocalProxy::loop()
 	{
 		CASocketList  oSocketList;
@@ -195,75 +268,3 @@ SINT32 CALocalProxy::loop()
 		return E_SUCCESS;
 	}
 
-SINT32 CALocalProxy::start()
-	{
-		int ret;	
-		CASocketAddr socketAddrIn("127.0.0.1",options.getServerPort());
-		socketIn.create();
-		socketIn.setReuseAddr(true);
-		if(socketIn.listen(&socketAddrIn)==SOCKET_ERROR)
-		    {
-					CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
-					return -1;
-		    }
-		if(options.getSOCKSServerPort()!=-1)
-			{
-				socketAddrIn.setAddr("127.0.0.1",options.getSOCKSServerPort());
-				socketSOCKSIn.create();
-				socketSOCKSIn.setReuseAddr(true);
-				if(socketSOCKSIn.listen(&socketAddrIn)==SOCKET_ERROR)
-						{
-							CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
-							return -1;
-						}
-			}
-		CASocketAddr addrNext;
-		UINT8 strTarget[255];
-		options.getTargetHost(strTarget,255);
-		addrNext.setAddr((char*)strTarget,options.getTargetPort());
-		CAMsg::printMsg(LOG_INFO,"Try connectiong to next Mix...");
-
-/*		CAMuxSocket http;
-		http.useTunnel("anon.inf.tu-dresden.de",3128);
-		http.connect(&addrNext);
-		MUXPACKET oMuxPacket;
-		oMuxPacket.channel=1;
-		oMuxPacket.len=10;
-		memcpy(oMuxPacket.data,"Hllo",3);
-		http.send(&oMuxPacket);
-		http.close();
-		sleep(10);
-		return -1;
-*/		((CASocket*)muxOut)->create();
-		((CASocket*)muxOut)->setSendBuff(sizeof(MUXPACKET)*50);
-		((CASocket*)muxOut)->setRecvBuff(sizeof(MUXPACKET)*50);
-		if(muxOut.connect(&addrNext)==E_SUCCESS)
-			{
-				
-				CAMsg::printMsg(LOG_INFO," connected!\n");
-				UINT16 size;
-				((CASocket*)muxOut)->receive((UINT8*)&size,2);
-				((CASocket*)muxOut)->receive(&chainlen,1);
-				CAMsg::printMsg(LOG_INFO,"Chain-Length: %d\n",chainlen);
-				size=ntohs(size)-1;
-				UINT8* buff=new UINT8[size];
-				((CASocket*)muxOut)->receive(buff,size);
-				arRSA=new CAASymCipher[chainlen];
-				int aktIndex=0;
-				for(int i=0;i<chainlen;i++)
-					{
-						int len=size;
-						arRSA[i].setPublicKey(buff+aktIndex,(UINT32*)&len);
-						size-=len;
-						aktIndex+=len;
-					}
-				
-				return loop();
-			}
-		else
-			{
-				CAMsg::printMsg(LOG_CRIT,"Cannot connect to next Mix!\n");
-				return E_UNKNOWN;
-			}
-	//	WaitForSingleObject(hEventThreadEnde,INFINITE);
-	}

@@ -4,29 +4,6 @@
 CAASymCipher::CAASymCipher()
 	{
 		rsa=NULL;
-/*		rsa=RSA_new();
-		BN_dec2bn(&rsa->n,"146045156752988119086694783791784827226235382817403930968569889520448117142515762490154404168568789906602128114569640745056455078919081535135223786488790643345745133490238858425068609186364886282528002310113020992003131292706048279603244985126945363695371250073851319256901415103802627246986865697725280735339");
-		BN_dec2bn(&rsa->e,"65537");
-		BN_dec2bn(&rsa->d,"100449081981135731814880969134969450418081177287292668146836998032008168337214710926746722039495350318598616459287747779485859425017265350531079350592317712851494980594232914153427023840292323686802553784291416771584974703478561388467839475898474798517021187817368293846108514686245237357922210697818039852961");
-		BN_dec2bn(&rsa->p,"12987122050932746826150318675050441016017480290196436481483831016275193544458430352845567706110422764241659422875175787195135987176410029197001621285742957");
-		BN_dec2bn(&rsa->q,"11245382632135887575471281417377089057560682219005124170598788751650268860247740981683175391022053998046084433194418490790049622751379904072048156065321527");
-
-		BIGNUM bn1;
-		BN_init(&bn1);
-		BN_one(&bn1);
-		BIGNUM tbn;
-		BN_init(&tbn);
-		BN_sub(&tbn,rsa->p,&bn1);
-		BN_CTX ctx;
-		BN_CTX_init(&ctx);
-		rsa->dmp1=BN_new();
-		BN_mod(rsa->dmp1,rsa->d,&tbn,&ctx);
-		BN_sub(&tbn,rsa->q,&bn1);
-		rsa->dmq1=BN_new();
-		BN_mod(rsa->dmq1,rsa->d,&tbn,&ctx);
-		rsa->iqmp=BN_new();
-		BN_mod_inverse(rsa->iqmp,rsa->q,rsa->p,&ctx);
-	*///	int i=RSA_check_key(rsa);
 	}
 
 CAASymCipher::~CAASymCipher()
@@ -34,16 +11,39 @@ CAASymCipher::~CAASymCipher()
 		RSA_free(rsa);
 	}
 
-int CAASymCipher::decrypt(unsigned char* from,unsigned char* to)
+/** Decrypts exactly one block which is stored in from. The result of the decryption is stored in to.
+	*@param from one block of cipher text
+	*@param to the decrypted plain text
+	*@return E_UNKNOWN in case of an error
+	*        E_SUCCESS otherwise
+	*/
+SINT32 CAASymCipher::decrypt(UINT8* from,UINT8* to)
 	{
-		return RSA_private_decrypt(128,from,to,rsa,RSA_NO_PADDING);		
+		if(RSA_private_decrypt(128,from,to,rsa,RSA_NO_PADDING)==-1)
+			return E_UNKNOWN;
+		else
+			return E_SUCCESS;
 	}
 
-int CAASymCipher::encrypt(unsigned char* from,unsigned char* to)
+/** Encrypts exactly one block which is stored in from. The result of the encrpytion is stored in to.
+	*@param from one block of plain text
+	*@param to the encrypted cipher text
+	*@return E_UNKNOWN in case of an error
+	*        E_SUCCESS otherwise
+	*/
+SINT32 CAASymCipher::encrypt(UINT8* from,UINT8* to)
 	{
-		return RSA_public_encrypt(128,from,to,rsa,RSA_NO_PADDING);		
+		if(RSA_public_encrypt(128,from,to,rsa,RSA_NO_PADDING)==-1)
+			return E_UNKNOWN;
+		else
+			return E_SUCCESS;
 	}
 
+/** Generates a new random key-pair of size bits.
+	*@param size keysize of the new keypair
+	*@return E_UNKNOWN in case of an error
+	*        E_SUCCESS otherwise
+	*/
 SINT32 CAASymCipher::generateKeyPair(UINT32 size)
 	{
 		RSA_free(rsa);
@@ -54,10 +54,25 @@ SINT32 CAASymCipher::generateKeyPair(UINT32 size)
 			return E_SUCCESS;
 	}
 
+/** Stores the public key in buff. The format is as follows:
+	*
+	* SIZE-N [2 bytes] - number of bytes which are needed for the modulus n (in network byte order..)
+	* N [SIZE-N bytes] - the modulus n as integer (in network byte order)
+	* SIZE-E [2 bytes] - number of bytes which are needed for the exponent e (in network byte order..)
+	* E [SIZE-E bytes] - the exponent e as integer (in network byte order)
+	*
+	*@param buff byte array in which the public key should be stored
+	*@param len on input holds the size of buff, on return it contains the number 
+	*           of bytes needed to store the public key
+	*@return E_UNKNOWN in case of an error
+	*        E_SUCCESS otherwise
+	*@see getPublicKeysize
+	*@see setPublicKey
+	*/
 SINT32 CAASymCipher::getPublicKey(UINT8* buff,UINT32 *len)
 	{
-		if(buff==NULL||*len<getPublicKeySize())
-			return -1;
+		if(rsa==NULL||buff==NULL||(*len)<getPublicKeySize())
+			return E_UNKNOWN;
 		int aktIndex=0;
 		UINT16 size=htons(BN_num_bytes(rsa->n));
 		memcpy(buff,&size,sizeof(size));
@@ -73,28 +88,65 @@ SINT32 CAASymCipher::getPublicKey(UINT8* buff,UINT32 *len)
 		return E_SUCCESS;
 	}
 
+/** Returns the number of bytes needed to store we public key. This is the number of bytes needed for a
+	* call of getPublicKey().
+	*@return E_UNKOWN in case of an error
+	*        number of bytes otherwise
+	*@see getPublicKey
+	*/
 SINT32 CAASymCipher::getPublicKeySize()
 	{
 		if(rsa==NULL||rsa->n==NULL||rsa->e==NULL)
-			return -1;
+			return E_UNKNOWN;
 		return (SINT32)BN_num_bytes(rsa->n)+BN_num_bytes(rsa->e)+4;
 	}
 
+/** Sets the public key to the vaules sotred in key. The format must match the format described for getPublicKey(). 
+	*@param key byte array which holds the new public key
+	*@param len on input,size of key byte array, on successful return number of bytes 'consumed'
+	*@return E_UNKNOWN in case of an error, the cipher is the uninitialized (no key is set)
+	*        E_SUCCESS otherwise
+	*@see getPublicKey
+	*/
 SINT32 CAASymCipher::setPublicKey(UINT8* key,UINT32* len)
 	{
+		UINT32 aktIndex;
+		UINT32 availBytes;
+		UINT16 size;
+
+		if(key==NULL||len==NULL||(*len)<6) //the need at least 6 bytes: 4 for the sizes and 1 for n and 1 for e
+			goto _ERROR;
+		availBytes=(*len);
+		RSA_free(rsa);
 		rsa=RSA_new();
-		int aktIndex=0;
-		UINT16 size=ntohs(*((UINT16*)key)); //may be bugy!!!!!
-		aktIndex+=2;
+		if(rsa==NULL)
+			goto _ERROR;
+		memcpy(&size,key,2);
+		size=ntohs(size);
+		availBytes-=2;
+		if(size>availBytes-3) //the need at least 3 bytes for the exponent...
+			goto _ERROR;
+		aktIndex=2;
+		availBytes-=size;
 		rsa->n=BN_new();
+		if(rsa->n==NULL)
+			goto _ERROR;
 		BN_bin2bn(key+aktIndex,size,rsa->n);
 		aktIndex+=size;
-		size=ntohs(*((unsigned short*)(key+aktIndex)));
+		memcpy(&size,key+aktIndex,2);
+		size=ntohs(size);
+		availBytes-=2;
 		aktIndex+=2;
+		if(size>availBytes) 
+			goto _ERROR;
 		rsa->e=BN_new();
 		BN_bin2bn(key+aktIndex,size,rsa->e);
 		aktIndex+=size;
-		*len=aktIndex;
+		(*len)=aktIndex;
 		return E_SUCCESS;
+_ERROR:
+		RSA_free(rsa);
+		rsa=NULL;
+		return E_UNKNOWN;
 	}
 	

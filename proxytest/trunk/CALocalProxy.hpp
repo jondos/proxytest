@@ -10,9 +10,9 @@ class CALocalProxy:public CAMix
 		public:
 			CALocalProxy(){};
 			~CALocalProxy(){};
-			SINT32 start();
 		private:
 			SINT32 loop();
+			SINT32 init();
 		private:
 			CASocket socketIn;
 			CASocket socketSOCKSIn;
