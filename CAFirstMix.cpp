@@ -205,6 +205,7 @@ SINT32 CAFirstMix::init()
 #ifndef _WIN32
 				seteuid(old_uid);
 #endif
+				ret=E_UNKNOWN;
 				if(ret!=E_SUCCESS)
 					{
 						CAMsg::printMsg(LOG_CRIT,"Cannot listen on HTTPS-Port\n");
@@ -1053,7 +1054,7 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 				return E_UNKNOWN;
 			}
 		delete pStream;
-		m_KeyInfoBuff=new UINT8[256*tmpData.mixcount];
+		m_KeyInfoBuff=new UINT8[256*(tmpData.mixcount+1)];
 		m_KeyInfoSize=3;
 		UINT32 tlen;
 		for(int i=tmpData.mixcount-1;i>=0;i--)

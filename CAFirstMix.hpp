@@ -48,7 +48,8 @@ class CAFirstMix:public CAMix
 		public:
 			CAFirstMix()
 				{
-					m_nMixedPackets=0;m_nSocketsIn=0;
+					m_nMixedPackets=0;
+					m_nSocketsIn=0;
 					m_pQueueSendToMix=NULL;
 					m_pIPList=NULL;
 					m_arrSocketsIn=NULL;
