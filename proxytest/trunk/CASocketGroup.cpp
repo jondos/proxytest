@@ -158,6 +158,7 @@ SINT32 CASocketGroup::select()
 
 SINT32 CASocketGroup::select(bool bWrite,UINT32 ms)
 	{
+		SINT32 ret;
 		#ifndef HAVE_POLL
 			EnterCriticalSection(&m_csFD_SET);
 			memcpy(&m_signaled_set,&m_fdset,sizeof(fd_set));
@@ -177,7 +178,6 @@ SINT32 CASocketGroup::select(bool bWrite,UINT32 ms)
 					set_read=NULL;
 					set_write=&m_signaled_set;
 				}
-			SINT32 ret;
 			#ifdef _WIN32
 					if(m_signaled_set.fd_count==0)
 						{

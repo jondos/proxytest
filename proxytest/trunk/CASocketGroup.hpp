@@ -52,7 +52,7 @@ class CASocketGroup
 					#ifndef HAVE_POLL
 						return FD_ISSET((SOCKET)s,&m_signaled_set)!=0;
 					#else
-						return m_pollfd_read[(SOCKET)s]->revents!=0;
+						return m_pollfd_read[(SOCKET)s].revents!=0;
 					#endif
 				}
 
@@ -61,7 +61,7 @@ class CASocketGroup
 					#ifndef HAVE_POLL
 						return FD_ISSET((SOCKET)*ps,&m_signaled_set)!=0;
 					#else
-						return m_pollfd_read[(SOCKET)*ps]->revents!=0;
+						return m_pollfd_read[(SOCKET)*ps].revents!=0;
 					#endif
 				}
 
@@ -70,7 +70,7 @@ class CASocketGroup
 					#ifndef HAVE_POLL
 						return FD_ISSET((SOCKET)s,&m_signaled_set)!=0;
 					#else
-						return m_pollfd_read[(SOCKET)s]->revents!=0;
+						return m_pollfd_read[(SOCKET)s].revents!=0;
 					#endif
 				}
 
