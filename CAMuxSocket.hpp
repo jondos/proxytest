@@ -32,8 +32,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASymCipher.hpp"
 
 typedef UINT32 HCHANNEL;
-#define MUX_HTTP  0 
-#define MUX_SOCKS 1
+#define MIX_PAYLOAD_HTTP  0 
+#define MIX_PAYLOAD_SOCKS 1
 
 #ifndef PROT2
 	#define DATA_SIZE 1000 // Size of Data in a single Mux Packet
@@ -51,7 +51,7 @@ typedef UINT32 HCHANNEL;
 
 	#define DATA_SIZE 			992
 	#define PAYLOAD_SIZE 		989
-	#define MUXPACKET_SIZE 	998
+	#define MIXPACKET_SIZE 	998
 
 	#define CHANNEL_DATA		0x00
 	#define CHANNEL_OPEN		0x00
@@ -60,41 +60,42 @@ typedef UINT32 HCHANNEL;
 	#define	CHANNEL_RESUME	0x04
 
 	#if defined(WIN32) ||defined(__sgi)
-		#pragma pack( push, t_MuxPacket )
+		#pragma pack( push, t_MixPacket )
 		#pragma pack(1)
-		typedef struct t_MuxPacket
+		struct t_MixPacket
 			{
 				HCHANNEL channel;
 				UINT16  flags;
 				union
 					{
 						UINT8		data[DATA_SIZE];
-						struct t_MuxPacketPayload
+						struct t_MixPacketPayload
 							{
 								UINT16 len;
 								UINT8 type;
 								UINT8 data[PAYLOAD_SIZE];
 						} payload;
 					};
-			} MUXPACKET;
-		#pragma pack( pop, t_MuxPacket )
+			};
+		#pragma pack( pop, t_MixPacket )
 	#else
-		typedef struct t_MuxPacket
+		struct t_MixPacket
 			{
 				HCHANNEL channel;
 				UINT16  flags;
 				union
 					{
 						UINT8		data[DATA_SIZE];
-						struct t_MuxPacketPayload
+						struct t_MixPacketPayload
 							{
 								UINT16 len;
 								UINT8 type;
 								UINT8 data[PAYLOAD_SIZE];
 						} payload;
 					};
-			} __attribute__ ((__packed__)) MUXPACKET __attribute__ ((__packed__));
+			} __attribute__ ((__packed__)); // MUXPACKET __attribute__ ((__packed__));
 	#endif //WIN32 
+	typedef t_MixPacket MIXPACKET;
 #endif //PROT2
 
 class CAMuxSocket
@@ -112,9 +113,9 @@ class CAMuxSocket
 			SINT32 connect(CASocketAddr& psa);
 			SINT32 connect(CASocketAddr& psa,UINT retry,UINT32 time);
 			int close();
-			int send(MUXPACKET *pPacket);
-			SINT32 receive(MUXPACKET *pPacket);
-			SINT32 receive(MUXPACKET *pPacket,UINT32 timeout);
+			int send(MIXPACKET *pPacket);
+			SINT32 receive(MIXPACKET *pPacket);
+			SINT32 receive(MIXPACKET *pPacket,UINT32 timeout);
 			int close(HCHANNEL channel_id);
 			operator CASocket*(){return &m_Socket;}
 			operator SOCKET(){return (SOCKET)m_Socket;

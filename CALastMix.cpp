@@ -286,9 +286,9 @@ SINT32 CALastMix::init()
 					return E_UNKNOWN;
 		    }
 		delete pAddrListen;
-		((CASocket*)muxIn)->setRecvBuff(500*MUXPACKET_SIZE);
-		((CASocket*)muxIn)->setSendBuff(500*MUXPACKET_SIZE);
-		if(((CASocket*)muxIn)->setSendLowWat(MUXPACKET_SIZE)!=E_SUCCESS)
+		((CASocket*)muxIn)->setRecvBuff(500*MIXPACKET_SIZE);
+		((CASocket*)muxIn)->setSendBuff(500*MIXPACKET_SIZE);
+		if(((CASocket*)muxIn)->setSendLowWat(MIXPACKET_SIZE)!=E_SUCCESS)
 			CAMsg::printMsg(LOG_INFO,"SOCKET Option SENDLOWWAT not set!\n");
 		if(((CASocket*)muxIn)->setKeepAlive((UINT32)1800)!=E_SUCCESS)
 			{
@@ -330,7 +330,7 @@ SINT32 CALastMix::loop()
 		CASocketList  oSocketList;
 		CASocketGroup oSocketGroup;
 		CASocketGroup oSocketGroupMuxIn;
-		MUXPACKET oMuxPacket;
+		MIXPACKET oMixPacket;
 		SINT32 ret;
 		SINT32 countRead;
 		CONNECTION oConnection;
@@ -352,31 +352,31 @@ LOOP_START:
 				if(oSocketGroup.isSignaled(muxIn))
 					{
 						countRead--;
-						ret=muxIn.receive(&oMuxPacket);
+						ret=muxIn.receive(&oMixPacket);
 						if(ret==SOCKET_ERROR)
 							{
 								CAMsg::printMsg(LOG_CRIT,"Channel to previous mix closed -- Restarting!\n");
 								goto ERR;
 							}
-						if(!oSocketList.get(oMuxPacket.channel,&oConnection))
+						if(!oSocketList.get(oMixPacket.channel,&oConnection))
 							{
-								if(oMuxPacket.flags==CHANNEL_OPEN)
+								if(oMixPacket.flags==CHANNEL_OPEN)
 									{
 										#ifdef _DEBUG
 										    CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
 										#endif
 		
 										CASymCipher* newCipher=new CASymCipher();
-										mRSA.decrypt(oMuxPacket.data,rsaBuff);
+										mRSA.decrypt(oMixPacket.data,rsaBuff);
 										newCipher->setKeyAES(rsaBuff);
-										newCipher->decryptAES(oMuxPacket.data+RSA_SIZE,
-																					oMuxPacket.data+RSA_SIZE-KEY_SIZE,
+										newCipher->decryptAES(oMixPacket.data+RSA_SIZE,
+																					oMixPacket.data+RSA_SIZE-KEY_SIZE,
 																					DATA_SIZE-RSA_SIZE);
-										memcpy(oMuxPacket.data,rsaBuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
+										memcpy(oMixPacket.data,rsaBuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
 												
 										CASocket* tmpSocket=new CASocket;										
 										int ret;
-										if(oMuxPacket.payload.type==MUX_SOCKS)
+										if(oMixPacket.payload.type==MIX_PAYLOAD_SOCKS)
 											ret=tmpSocket->connect(maddrSocks,_CONNECT_TIMEOUT); 
 										else
 											{
@@ -392,7 +392,7 @@ LOOP_START:
 													#endif
 													delete tmpSocket;
 													delete newCipher;
-													if(muxIn.close(oMuxPacket.channel)==SOCKET_ERROR)
+													if(muxIn.close(oMixPacket.channel)==SOCKET_ERROR)
 														goto ERR;
 										    }
 										else
@@ -402,12 +402,12 @@ LOOP_START:
 #endif													
 //													if(tmpSocket->setSendTimeOut(_SEND_TIMEOUT)!=E_SUCCESS)
 //														CAMsg::printMsg(LOG_DEBUG,"Could not SEND Timeout!!");
-													UINT16 payLen=ntohs(oMuxPacket.payload.len);
+													UINT16 payLen=ntohs(oMixPacket.payload.len);
 													#ifdef _DEBUG
-														oMuxPacket.payload.data[ntohs(oMuxPacket.payload.len)]=0;
-														CAMsg::printMsg(LOG_DEBUG,"%u\n%s",ntohs(oMuxPacket.payload.len),oMuxPacket.payload.data);
+														oMixPacket.payload.data[ntohs(oMixPacket.payload.len)]=0;
+														CAMsg::printMsg(LOG_DEBUG,"%u\n%s",ntohs(oMixPacket.payload.len),oMixPacket.payload.data);
 													#endif
-													if(payLen>PAYLOAD_SIZE||tmpSocket->sendTimeOut(oMuxPacket.payload.data,payLen,_SEND_TIMEOUT)==SOCKET_ERROR)
+													if(payLen>PAYLOAD_SIZE||tmpSocket->sendTimeOut(oMixPacket.payload.data,payLen,_SEND_TIMEOUT)==SOCKET_ERROR)
 														{
 															#ifdef _DEBUG
 																CAMsg::printMsg(LOG_DEBUG,"Error sending Data to Squid!");
@@ -415,12 +415,12 @@ LOOP_START:
 															tmpSocket->close();
 															delete tmpSocket;
 															delete newCipher;
-															if(muxIn.close(oMuxPacket.channel)==SOCKET_ERROR)
+															if(muxIn.close(oMixPacket.channel)==SOCKET_ERROR)
 																goto ERR;
 														}
 													else
 														{
-															oSocketList.add(oMuxPacket.channel,tmpSocket,newCipher);
+															oSocketList.add(oMixPacket.channel,tmpSocket,newCipher);
 															oSocketGroup.add(*tmpSocket);
 														}
 										    }
@@ -434,42 +434,42 @@ LOOP_START:
 							}
 						else
 							{
-								if(oMuxPacket.flags==CHANNEL_CLOSE)
+								if(oMixPacket.flags==CHANNEL_CLOSE)
 									{
 										oSocketGroup.remove(*(oConnection.pSocket));
 										oConnection.pSocket->close();
-										deleteResume(oMuxPacket.channel);
-										oSocketList.remove(oMuxPacket.channel);
+										deleteResume(oMixPacket.channel);
+										oSocketList.remove(oMixPacket.channel);
 										delete oConnection.pSocket;
 										delete oConnection.pCipher;
 										#ifdef _DEBUG
-											CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u\n",oMuxPacket.channel);
+											CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u\n",oMixPacket.channel);
 										#endif
 									}
-								else if(oMuxPacket.flags==CHANNEL_SUSPEND)
+								else if(oMixPacket.flags==CHANNEL_SUSPEND)
 									{
 										oSocketGroup.remove(*(oConnection.pSocket));
 										#ifdef _DEBUG
-											CAMsg::printMsg(LOG_DEBUG,"Suspending Channel: %u\n",oMuxPacket.channel);
+											CAMsg::printMsg(LOG_DEBUG,"Suspending Channel: %u\n",oMixPacket.channel);
 										#endif
 									}
-								else if(oMuxPacket.flags==CHANNEL_RESUME)
+								else if(oMixPacket.flags==CHANNEL_RESUME)
 									{
 										oSocketGroup.add(*(oConnection.pSocket));
 										#ifdef _DEBUG
-											CAMsg::printMsg(LOG_DEBUG,"Resumeing Channel: %u\n",oMuxPacket.channel);
+											CAMsg::printMsg(LOG_DEBUG,"Resumeing Channel: %u\n",oMixPacket.channel);
 										#endif
 									}
 								else
 									{
-										oConnection.pCipher->decryptAES(oMuxPacket.data,oMuxPacket.data,DATA_SIZE);
+										oConnection.pCipher->decryptAES(oMixPacket.data,oMixPacket.data,DATA_SIZE);
 										#ifdef _DEBUG
-											oMuxPacket.payload.data[ntohs(oMuxPacket.payload.len)]=0;
-											CAMsg::printMsg(LOG_DEBUG,"%u\n%s",ntohs(oMuxPacket.payload.len),oMuxPacket.payload.data);
+											oMixPacket.payload.data[ntohs(oMixPacket.payload.len)]=0;
+											CAMsg::printMsg(LOG_DEBUG,"%u\n%s",ntohs(oMixPacket.payload.len),oMixPacket.payload.data);
 										#endif
-										ret=ntohs(oMuxPacket.payload.len);
+										ret=ntohs(oMixPacket.payload.len);
 										if(ret>=0&&ret<=PAYLOAD_SIZE)
-											ret=oConnection.pSocket->sendTimeOut(oMuxPacket.payload.data,ret,_SEND_TIMEOUT);
+											ret=oConnection.pSocket->sendTimeOut(oMixPacket.payload.data,ret,_SEND_TIMEOUT);
 										else
 											ret=SOCKET_ERROR;
 										if(ret==SOCKET_ERROR)
@@ -478,9 +478,9 @@ LOOP_START:
 												oConnection.pSocket->close();
 												delete oConnection.pSocket;
 												delete oConnection.pCipher;
-												oSocketList.remove(oMuxPacket.channel);
-												deleteResume(oMuxPacket.channel);
-												if(muxIn.close(oMuxPacket.channel)==SOCKET_ERROR)
+												oSocketList.remove(oMixPacket.channel);
+												deleteResume(oMixPacket.channel);
+												if(muxIn.close(oMixPacket.channel)==SOCKET_ERROR)
 													goto ERR;
 											}
 	//we let the queu grow as much as memor is available...
@@ -512,7 +512,7 @@ LOOP_START:
 										#ifdef _DEBUG
 										    CAMsg::printMsg(LOG_DEBUG,"Receiving Data from Squid!");
 										#endif
-										ret=tmpCon->pSocket->receive(oMuxPacket.payload.data,PAYLOAD_SIZE);
+										ret=tmpCon->pSocket->receive(oMixPacket.payload.data,PAYLOAD_SIZE);
 										if(ret==SOCKET_ERROR||ret==0)
 											{
 												#ifdef _DEBUG
@@ -531,12 +531,12 @@ LOOP_START:
 											}
 										else 
 											{
-												oMuxPacket.channel=tmpCon->id;
-												oMuxPacket.flags=CHANNEL_DATA;
-												oMuxPacket.payload.len=htons((UINT16)ret);
-												oMuxPacket.payload.type=0;
-												tmpCon->pCipher->decryptAES2(oMuxPacket.data,oMuxPacket.data,DATA_SIZE);
-												if(muxIn.send(&oMuxPacket)==SOCKET_ERROR)
+												oMixPacket.channel=tmpCon->id;
+												oMixPacket.flags=CHANNEL_DATA;
+												oMixPacket.payload.len=htons((UINT16)ret);
+												oMixPacket.payload.type=0;
+												tmpCon->pCipher->decryptAES2(oMixPacket.data,oMixPacket.data,DATA_SIZE);
+												if(muxIn.send(&oMixPacket)==SOCKET_ERROR)
 													{
 														CAMsg::printMsg(LOG_CRIT,"Mux Data Sending Error - Restarting!\n");
 														goto ERR;
@@ -574,10 +574,10 @@ void CALastMix::resume(CASocket* pSocket)
 		CONNECTION oConnection;
 		if(oSuspendList.get(&oConnection,pSocket))
 			{
-				MUXPACKET oMuxPacket;
-				oMuxPacket.flags=CHANNEL_RESUME;
-				oMuxPacket.channel=oConnection.id;
-				muxIn.send(&oMuxPacket);
+				MIXPACKET oMixPacket;
+				oMixPacket.flags=CHANNEL_RESUME;
+				oMixPacket.channel=oConnection.id;
+				muxIn.send(&oMixPacket);
 				oSuspendList.remove(oConnection.id);
 			}
 		LeaveCriticalSection(&csResume);

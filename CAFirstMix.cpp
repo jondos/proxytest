@@ -429,9 +429,9 @@ SINT32 CAFirstMix::init()
 				CAMsg::printMsg(LOG_CRIT,"Cannot create SOCKET for connection to next Mix!\n");
 				return E_UNKNOWN;
 			}
-		((CASocket*)muxOut)->setSendBuff(500*MUXPACKET_SIZE);
-		((CASocket*)muxOut)->setRecvBuff(500*MUXPACKET_SIZE);
-		if(((CASocket*)muxOut)->setSendLowWat(MUXPACKET_SIZE)!=E_SUCCESS)
+		((CASocket*)muxOut)->setSendBuff(500*MIXPACKET_SIZE);
+		((CASocket*)muxOut)->setRecvBuff(500*MIXPACKET_SIZE);
+		if(((CASocket*)muxOut)->setSendLowWat(MIXPACKET_SIZE)!=E_SUCCESS)
 			CAMsg::printMsg(LOG_INFO,"SOCKET Option SENDLOWWAT not set!\n");
 		CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET RecvBuffSize: %i\n",((CASocket*)muxOut)->getRecvBuff());
 		CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET SendBuffSize: %i\n",((CASocket*)muxOut)->getSendBuff());
@@ -529,7 +529,7 @@ SINT32 CAFirstMix::loop()
 		CAMuxSocket* pnewMuxSocket;
 		SINT32 countRead;
 		HCHANNEL lastChannelId=1;
-		MUXPACKET oMuxPacket;
+		MIXPACKET oMixPacket;
 		CONNECTION oConnection;
 		CAInfoService oInfoService(this);
 		UINT32 nUser=0;
@@ -595,7 +595,7 @@ LOOP_START:
 												((CASocket*)pnewMuxSocket)->setKeepAlive(true);
 											#endif
 			#ifdef _ASYNC
-											((CASocket*)pnewMuxSocket)->setASyncSend(true,MUXPACKET_SIZE,0,0,this);
+											((CASocket*)pnewMuxSocket)->setASyncSend(true,MIXPACKET_SIZE,0,0,this);
 			#endif
 											((CASocket*)pnewMuxSocket)->send(mKeyInfoBuff,mKeyInfoSize);
 											oMuxChannelList.add(pnewMuxSocket);
@@ -637,7 +637,7 @@ LOOP_START:
 											((CASocket*)pnewMuxSocket)->setKeepAlive(true);
 										#endif
 		#ifdef _ASYNC
-										((CASocket*)pnewMuxSocket)->setASyncSend(true,MUXPACKET_SIZE,0,0,this);
+										((CASocket*)pnewMuxSocket)->setASyncSend(true,MIXPACKET_SIZE,0,0,this);
 		#endif
 										((CASocket*)pnewMuxSocket)->send(mKeyInfoBuff,mKeyInfoSize);
 										oMuxChannelList.add(pnewMuxSocket);
@@ -653,19 +653,19 @@ LOOP_START:
 						int countMuxOut=nUser;
 						do
 							{
-								ret=muxOut.receive(&oMuxPacket);
+								ret=muxOut.receive(&oMixPacket);
 								if(ret==SOCKET_ERROR)
 									{
 										CAMsg::printMsg(LOG_CRIT,"Mux-Out-Channel Receiving Data Error - Exiting!\n");
 										goto ERR;
 									}
-								if(oMuxPacket.flags==CHANNEL_CLOSE) //close event
+								if(oMixPacket.flags==CHANNEL_CLOSE) //close event
 									{
 										#ifdef _DEBUG
-											CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u ... ",oMuxPacket.channel);
+											CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u ... ",oMixPacket.channel);
 										#endif
 										REVERSEMUXLISTENTRY otmpReverseEntry;
-										if(oMuxChannelList.remove(oMuxPacket.channel,&otmpReverseEntry))
+										if(oMuxChannelList.remove(oMixPacket.channel,&otmpReverseEntry))
 											{
 												otmpReverseEntry.pMuxSocket->close(otmpReverseEntry.inChannel);
 												delete otmpReverseEntry.pCipher;
@@ -680,26 +680,26 @@ LOOP_START:
 										#ifdef _DEBUG
 											CAMsg::printMsg(LOG_DEBUG,"Sending Data to Browser!");
 										#endif
-										tmpReverseEntry=oMuxChannelList.get(oMuxPacket.channel);
+										tmpReverseEntry=oMuxChannelList.get(oMixPacket.channel);
 										if(tmpReverseEntry!=NULL)
 											{
-												oMuxPacket.channel=tmpReverseEntry->inChannel;
-												tmpReverseEntry->pCipher->decryptAES2(oMuxPacket.data,oMuxPacket.data,DATA_SIZE);
+												oMixPacket.channel=tmpReverseEntry->inChannel;
+												tmpReverseEntry->pCipher->decryptAES2(oMixPacket.data,oMixPacket.data,DATA_SIZE);
 												//TODO: Test for SOCKET_ERROR!!!!
 												
-												if(tmpReverseEntry->pMuxSocket->send(&oMuxPacket)==E_QUEUEFULL)
+												if(tmpReverseEntry->pMuxSocket->send(&oMixPacket)==E_QUEUEFULL)
 													{
 														EnterCriticalSection(&csResume);
 														MUXLISTENTRY* pml=oSuspendList.get(tmpReverseEntry->pMuxSocket);
 														CONNECTION oCon;
 														if(pml==NULL||!pml->pSocketList->get(&oCon,tmpReverseEntry->outChannel)) //Have we not send a suspend message yet ?
 															{
-																oMuxPacket.channel=tmpReverseEntry->outChannel;
-																oMuxPacket.flags=CHANNEL_SUSPEND;
+																oMixPacket.channel=tmpReverseEntry->outChannel;
+																oMixPacket.flags=CHANNEL_SUSPEND;
 																#ifdef _DEBUG
-																	CAMsg::printMsg(LOG_INFO,"Sending suspend for channel: %u\n",oMuxPacket.channel);
+																	CAMsg::printMsg(LOG_INFO,"Sending suspend for channel: %u\n",oMixPacket.channel);
 																#endif
-																if(muxOut.send(&oMuxPacket)==SOCKET_ERROR)
+																if(muxOut.send(&oMixPacket)==SOCKET_ERROR)
                                 	{
                                 		CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Restarting!\n");
                                     LeaveCriticalSection(&csResume);
@@ -719,7 +719,7 @@ LOOP_START:
 										else
 											{
 												#ifdef _DEBUG
-													CAMsg::printMsg(LOG_DEBUG,"Error Sending Data to Browser -- Channel-Id %u no valid!\n",oMuxPacket.channel);
+													CAMsg::printMsg(LOG_DEBUG,"Error Sending Data to Browser -- Channel-Id %u no valid!\n",oMixPacket.channel);
 												#endif
 											}
 							}
@@ -736,7 +736,7 @@ LOOP_START:
 										if(oSocketGroupMuxOut.select(true,100)!=1)
 											goto LOOP_START;
 										countRead--;
-										ret=tmpMuxListEntry->pMuxSocket->receive(&oMuxPacket,0);
+										ret=tmpMuxListEntry->pMuxSocket->receive(&oMixPacket,0);
 										if(ret==SOCKET_ERROR)
 											{
 												((CASocket*)tmpMuxListEntry->pMuxSocket)->getPeerIP(ip);
@@ -771,9 +771,9 @@ LOOP_START:
 											}
 										else
 											{
-												if(oMuxPacket.flags==CHANNEL_CLOSE)
+												if(oMixPacket.flags==CHANNEL_CLOSE)
 													{
-														if(oMuxChannelList.get(tmpMuxListEntry,oMuxPacket.channel,&oConnection))
+														if(oMuxChannelList.get(tmpMuxListEntry,oMixPacket.channel,&oConnection))
 															{
 																if(muxOut.close(oConnection.outChannel)==SOCKET_ERROR)
                										{
@@ -794,29 +794,29 @@ LOOP_START:
 												else
 													{
 														CASymCipher* pCipher=NULL;
-														if(oMuxChannelList.get(tmpMuxListEntry,oMuxPacket.channel,&oConnection))
+														if(oMuxChannelList.get(tmpMuxListEntry,oMixPacket.channel,&oConnection))
 															{
-																oMuxPacket.channel=oConnection.outChannel;
+																oMixPacket.channel=oConnection.outChannel;
 																pCipher=oConnection.pCipher;
-																pCipher->decryptAES((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
+																pCipher->decryptAES(oMixPacket.data,oMixPacket.data,DATA_SIZE);
 															}
 														else
 															{
 																pCipher= new CASymCipher();
-																mRSA.decrypt(oMuxPacket.data,rsaBuff);
+																mRSA.decrypt(oMixPacket.data,rsaBuff);
 																pCipher->setKeyAES(rsaBuff);
-																pCipher->decryptAES(oMuxPacket.data+RSA_SIZE,
-																								 oMuxPacket.data+RSA_SIZE-KEY_SIZE,
+																pCipher->decryptAES(oMixPacket.data+RSA_SIZE,
+																								 oMixPacket.data+RSA_SIZE-KEY_SIZE,
 																								 DATA_SIZE-RSA_SIZE);
-																memcpy(oMuxPacket.data,rsaBuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
+																memcpy(oMixPacket.data,rsaBuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
 
-																oMuxChannelList.add(tmpMuxListEntry,oMuxPacket.channel,lastChannelId,pCipher);
+																oMuxChannelList.add(tmpMuxListEntry,oMixPacket.channel,lastChannelId,pCipher);
 																#ifdef _DEBUG
 																	CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",lastChannelId);
 																#endif
-																oMuxPacket.channel=lastChannelId++;
+																oMixPacket.channel=lastChannelId++;
 															}
-														if(muxOut.send(&oMuxPacket)==SOCKET_ERROR)
+														if(muxOut.send(&oMixPacket)==SOCKET_ERROR)
 															{
 																CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Restarting!\n");
 																goto ERR;
@@ -874,10 +874,10 @@ void CAFirstMix::resume(CASocket* pSocket)
 						CONNECTION* pcon=pml->pSocketList->getFirst();
 						while(pcon!=NULL)
 							{
-								MUXPACKET oMuxPacket;
-								oMuxPacket.flags=CHANNEL_RESUME;
-								oMuxPacket.channel=pcon->outChannel;
-								muxOut.send(&oMuxPacket);
+								MIXPACKET oMixPacket;
+								oMixPacket.flags=CHANNEL_RESUME;
+								oMixPacket.channel=pcon->outChannel;
+								muxOut.send(&oMixPacket);
 								pcon=pml->pSocketList->getNext();
 							}
 						MUXLISTENTRY oEntry;
