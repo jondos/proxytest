@@ -58,7 +58,7 @@ class CAQueue
 			SINT32 peek(UINT8* pbuff,UINT32* psize);
 			SINT32 remove(UINT32* psize);
 			
-			/** Returns the size of stored data.
+			/** Returns the size of stored data in byte.
 				* @return size of Queue
 				*/
 			UINT32 getSize()
