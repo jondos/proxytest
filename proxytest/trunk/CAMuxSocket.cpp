@@ -10,7 +10,7 @@ CAMuxSocket::CAMuxSocket()
 	{
 	}
 	
-int CAMuxSocket::accept(int port)
+int CAMuxSocket::accept(unsigned short port)
 	{
 		CASocket oSocket;
 		if(oSocket.listen(port)==SOCKET_ERROR)
@@ -49,7 +49,7 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 		int aktIndex=0;
 		int len=0;
 		pPacket->channel=htonl(pPacket->channel);
-		pPacket->len=htonl(pPacket->len);
+		pPacket->len=htons(pPacket->len);
 		
 		do
 			{
@@ -110,7 +110,7 @@ int CAMuxSocket::receive(MUXPACKET* pPacket)
 				#endif
 				return SOCKET_ERROR;
 			}
-		pPacket->len=ntohl(pPacket->len);	
+		pPacket->len=ntohs(pPacket->len);	
 		pPacket->channel=ntohl(pPacket->channel);
 		return pPacket->len;
 	}
