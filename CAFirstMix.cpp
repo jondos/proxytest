@@ -509,6 +509,10 @@ SINT32 CAFirstMix::loop()
 //		threadReadFromUsers.setMainLoop(loopReadFromUsers);
 //		threadReadFromUsers.start(this);
 
+		#ifdef USE_POOL
+			CAPool* pPool=new CAPool(MIX_POOL_SIZE);
+		#endif
+
 		//Starting thread for Step 4
 		CAThread threadSendToMix;
 		threadSendToMix.setMainLoop(fm_loopSendToMix);
@@ -763,6 +767,9 @@ SINT32 CAFirstMix::loop()
 							}
 						if(ret!=MIXPACKET_SIZE)
 							break;
+						#ifdef USE_POOL
+							pPool->pool(pMixPacket);
+						#endif
 						if(pMixPacket->flags==CHANNEL_CLOSE) //close event
 							{
 								#if defined(_DEBUG) && !defined(__MIX_TEST)
@@ -942,6 +949,9 @@ ERR:
 		CAMsg::printMsg	(LOG_CRIT,"Memory usage after: %u\n",getMemoryUsage());	
 		delete pMixPacket;
 		delete []tmpBuff;
+		#ifdef USE_POOL
+			delete pPool;
+		#endif
 		CAMsg::printMsg(LOG_CRIT,"Main Loop exited!!\n");
 		return E_UNKNOWN;
 	}

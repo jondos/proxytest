@@ -112,5 +112,3 @@ SINT32 CAPool::pool(MIXPACKET* pMixPacket)
 			}		
 		return E_SUCCESS;
 	}
-	
-		

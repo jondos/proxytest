@@ -110,6 +110,12 @@
 	</References>
 	<Files>
 		<File
+			RelativePath=".\proxytest.doxy">
+		</File>
+		<File
+			RelativePath=".\proxytest_short.doxy">
+		</File>
+		<File
 			RelativePath=".\proxytest_win.doxy">
 		</File>
 		<File
@@ -118,7 +124,8 @@
 				Name="Debug|Win32">
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="s:\doxygen\bin\doxygen g:\proxytest\proxytest_win_short.doxy"
+					CommandLine="s:\doxygen\bin\doxygen g:\proxytest\proxytest_win_short.doxy
+"
 					Outputs="$ProjectDir\doc_short\html\index.html"/>
 			</FileConfiguration>
 		</File>
