@@ -4688,7 +4688,9 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-#include <sys/types.h>\n #include <sys/socket.h>
+
+#include <sys/types.h>
+#include <sys/socket.h>
 
 int
 main ()
@@ -4744,6 +4746,8 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
+
+#include <sys/types.h>
 #include <sys/socket.h>
 
 int
@@ -4914,6 +4918,9 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
+
+#include <sys/types.h>
+#include <sys/socket.h>
 #include <netinet/in.h>
 
 int
@@ -5028,6 +5035,8 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
+
+#include <sys/types.h>
 #include <sys/socket.h>
 
 int
