@@ -31,23 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 bool CASocketAddrINet::bIsCsInitialized=false;
 CRITICAL_SECTION CASocketAddrINet::csGet;
 
-CASocketAddrINet::CASocketAddrINet()
-	{
-		sin_family=AF_INET;
-		sin_addr.s_addr=INADDR_ANY;
-		sin_port=0;
-	}
-
-//CASocketAddrINet::~CASocketAddrINet()
-//	{
-//	}
-
-
-CASocketAddrINet::CASocketAddrINet(char* szIP,UINT16 port)
-	{
-		setAddr(szIP,port);
-	}
-
+/** Must be called once before using one of the CAsocketAddrINet functions */
 SINT32 CASocketAddrINet::init()
 	{
 		if(!bIsCsInitialized)
@@ -58,45 +42,28 @@ SINT32 CASocketAddrINet::init()
 		return E_SUCCESS;
 	}
 
+/** Should be called if CASocketAddrINEt functions are not longer needed. If needed again 
+       init() must be called */
 SINT32 CASocketAddrINet::destroy()
 	{
 		if(bIsCsInitialized)
 			{
 				DeleteCriticalSection(&csGet);
 			}
+		bIsCsInitialized=false;
 		return E_SUCCESS;
 	}
 
 
-SINT32 CASocketAddrINet::getSize()
-	{
-		return sizeof(sockaddr_in);
-	}
-
-SINT32 CASocketAddrINet::setAddr(char* szIP,UINT16 port)
+/**Constructs a IP-Address for port 0 and ANY local host ip*/
+CASocketAddrINet::CASocketAddrINet()
 	{
 		sin_family=AF_INET;
-		sin_port=htons(port);
-		sin_addr.s_addr=inet_addr(szIP);
-		if(sin_addr.s_addr==INADDR_NONE)
-			{
-				EnterCriticalSection(&csGet);
-				HOSTENT* hostent=gethostbyname(szIP);
-				if(hostent==NULL)
-					sin_addr.s_addr=INADDR_NONE;
-				else
-					memcpy(&sin_addr.s_addr,hostent->h_addr_list[0],hostent->h_length);
-				LeaveCriticalSection(&csGet);
-			}
-		return E_SUCCESS;
+		sin_addr.s_addr=INADDR_ANY;
+		sin_port=0;
 	}
 
-SINT32 CASocketAddrINet::setPort(UINT16 port)
-	{
-		sin_port=htons(port);
-		return E_SUCCESS;
-	}
-
+/**Constructs an IP-Address for port and ANY local host ip */
 CASocketAddrINet::CASocketAddrINet(UINT16 port)
 	{
 		sin_family=AF_INET;
@@ -104,13 +71,73 @@ CASocketAddrINet::CASocketAddrINet(UINT16 port)
 		sin_addr.s_addr=INADDR_ANY;
 	}
 
+/** Sets the address to szIP and port. szIP could be either a hostname or an IP-Address of the form a.b.c.d .
+	* @param szIP new value for IP-Address or hostname (zero terminated string)
+	* @param port new value for port
+	* @retval E_SUCCESS if no error occurs
+	* @retval E_UNKNOWN_HOST if the hostname couldt not be resolved (or the ip is wrong). 
+	*                        In this case the old values are NOT changed.
+	*/
+SINT32 CASocketAddrINet::setAddr(char* szIP,UINT16 port)
+	{
+		UINT32 newAddr=inet_addr(szIP); //is it a doted string (a.b.c.d) ?
+		if(sin_addr.s_addr==INADDR_NONE) //if not try to find the hostname
+			{
+				EnterCriticalSection(&csGet);
+				HOSTENT* hostent=gethostbyname(szIP); //lookup
+				if(hostent!=NULL) //get it!
+					memcpy(&sin_addr.s_addr,hostent->h_addr_list[0],hostent->h_length);
+				else
+					{
+						return E_UNKNOWN_HOST; //not found!
+						LeaveCriticalSection(&csGet);
+					}
+				LeaveCriticalSection(&csGet);
+			}
+		else
+			sin_addr.s_addr=newAddr;
+		sin_port=htons(port);
+		return E_SUCCESS;
+	}
+
+/**Changes only(!) the port value of the address
+	*
+	* @param port new value for port
+	*	@return always E_SUCCESS
+	*/
+SINT32 CASocketAddrINet::setPort(UINT16 port)
+	{
+		sin_port=htons(port);
+		return E_SUCCESS;
+	}
+
+/** Returns the port value of the address.
+	* @return port
+	*/
+UINT16 CASocketAddrINet::getPort()
+	{
+		return ntohs(sin_port);
+	}
+
+/** Returns the hostname for the address.
+	* @param buff buffer for the returned zero terminated hostname
+	* @param len the size of the buffer
+	* @retval E_SUCCESS if no error occured
+	* @retval E_UNKNOWN_HOST if the name of the host could not be resolved
+	* @retval E_UNSPECIFIED if buff was NULL
+	* @retval E_SPACE if size of the buffer is to small
+	*/
 SINT32 CASocketAddrINet::getHostName(UINT8* buff,UINT32 len)
 	{
+		if(buff==NULL)
+			return E_UNSPECIFIED;
 		SINT32 ret;
 		EnterCriticalSection(&csGet);
 		HOSTENT* hosten=gethostbyaddr((const char*)&sin_addr,4,AF_INET);
-		if(hosten==NULL||hosten->h_name==NULL||strlen(hosten->h_name)>=len)
-		 ret=SOCKET_ERROR;
+		if(hosten==NULL||hosten->h_name==NULL)
+			ret=E_UNKNOWN_HOST;
+		else if(strlen(hosten->h_name)>=len)
+			ret=E_SPACE;
 		else
 			{
 				strcpy((char*)buff,hosten->h_name);
@@ -120,22 +147,29 @@ SINT32 CASocketAddrINet::getHostName(UINT8* buff,UINT32 len)
 		return ret;
 	}
 
-UINT16 CASocketAddrINet::getPort()
-	{
-		return ntohs(sin_port);
-	}
-
+/** Returns the name of the local host.
+	* @param buff buffer for the returned zero terminated hostname
+	* @param len the size of the buffer
+	* @retval E_SUCCESS if no error occured
+	* @retval E_UNKNOWN_HOST if the name of the host could not be resolved
+	* @retval E_UNSPECIFIED if buff was NULL
+	* @retval E_SPACE if size of the buffer is to small
+	*/
 SINT32 CASocketAddrINet::getLocalHostName(UINT8* buff,UINT32 len)
 	{
+		if(buff==NULL)
+			return E_UNSPECIFIED;
 		SINT32 ret;
 		EnterCriticalSection(&csGet);
 		if(gethostname((char*)buff,len)==-1)
-			ret=SOCKET_ERROR;
+			ret=E_SPACE;
 		else
 			{
 				HOSTENT* hosten=gethostbyname((char*)buff);
-				if(hosten==NULL||hosten->h_name==NULL||strlen(hosten->h_name)>=len)
-					ret=SOCKET_ERROR;
+				if(hosten==NULL||hosten->h_name==NULL)
+					ret=E_UNKNOWN_HOST;
+				else if(strlen(hosten->h_name)>=len)
+					ret=E_SPACE;
 				else
 					{
 						strcpy((char*)buff,hosten->h_name);
@@ -146,18 +180,23 @@ SINT32 CASocketAddrINet::getLocalHostName(UINT8* buff,UINT32 len)
 		return ret;
 	}
 
-SINT32 CASocketAddrINet::getLocalHostIP(UINT8* ip)
+/** Returns the local IP-Address as four bytes.
+	* @param ip buffer for the returned IP-Address
+	* @retval E_SUCCESS if no error occurs
+	* @retval E_UNKNOWN in case of an error
+	*/
+SINT32 CASocketAddrINet::getLocalHostIP(UINT8 ip[4])
 	{
 		SINT32 ret;
 		char buff[256];
 		EnterCriticalSection(&csGet);
 		if(gethostname(buff,256)==-1)
-			ret=SOCKET_ERROR;
+			ret=E_UNKNOWN;
 		else
 			{
 				HOSTENT* hosten=gethostbyname((char*)buff);
 				if(hosten==NULL)
-					ret=SOCKET_ERROR;
+					ret=E_UNKNOWN;
 				else
 					{
 						memcpy((char*)ip,hosten->h_addr_list[0],4);

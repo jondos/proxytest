@@ -25,25 +25,30 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
-#ifdef HAVE_UNIX_DOMAIN_PROTOCOL
+	#ifdef HAVE_UNIX_DOMAIN_PROTOCOL
 	#ifndef __CASOCKETADDRUNIX__
 	#define __CASOCKETADDRUNIX__
 	#include "CASocketAddr.hpp"
+
+	/** This is a class for Unix Domain Protocol Sockat Addresses.*/
 	class CASocketAddrUnix:public CASocketAddr,sockaddr_un
 		{
 			public:
 				CASocketAddrUnix();
-				//~CASocketAddrUnix();
 				
+				/**Returns the type (family) of the socket this address is for (always AF_LOCAL)
+					* @return AF_LOCAL
+					*/
 				int getType(){return AF_LOCAL;}
-				SINT32 getSize();
+				
+				/** Resturns the size of the SOCKADDR struct used.
+					* return sizeof(sockaddr_un)
+					*/
+				SINT32 getSize(){return sizeof(sockaddr_un);}
+				
+				/** Makes a cast to SOCKADDR* .*/
 				::LPSOCKADDR LPSOCKADDR(){return (::LPSOCKADDR)(static_cast<sockaddr_un*>(this));}			
 				
-				/*UNIX-Domain*/
-				CASocketAddrUnix(char* szPath);
-				
-
-				/*UNIX-Domain*/
 				SINT32 setPath(char* path);
 		};
 

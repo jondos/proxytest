@@ -30,26 +30,27 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketAddrUnix.hpp"
 
 
+/** Constructs an address with an empty path*/
 CASocketAddrUnix::CASocketAddrUnix()
 	{
 		sun_family=AF_LOCAL;
 		memset(sun_path,0,sizeof(sun_path));
 	}
 
-//CASocketAddrUnix::~CASocketAddrUnix()
-//	{
-//	}
 
-SINT32 CASocketAddrUnix::getSize()
-	{
-		return sizeof(sockaddr_un);
-	}
-
-
+/** Sets the path for the unix domain protocol address.
+	* @param path the new path value (zero terminated)
+	* @retval E_SUCCESS if no error occured
+	* @retval E_UNSPECIFIED if path was NULL
+	* @retval E_SPACE if path was to long
+	*/
 SINT32 CASocketAddrUnix::setPath(char* path)
 	{
-		sun_family=AF_LOCAL;
+		if(path==NULL)
+			return E_UNSPECIFIED;
 //		((sockaddr_un*)m_pAddr)->sun_len=strlen(path);
+		if(strlen(path)>=sizeof(sun_path))
+			return E_SPACE;
 		strcpy(sun_path,path);
 		return E_SUCCESS;
 	}

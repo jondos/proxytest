@@ -37,7 +37,8 @@ extern CACmdLnOptions options;
 
 SINT32 CALocalProxy::init()
 	{
-		CASocketAddrINet socketAddrIn("127.0.0.1",options.getServerPort());
+		CASocketAddrINet socketAddrIn;
+		socketAddrIn.setAddr("127.0.0.1",options.getServerPort());
 		socketIn.create();
 		socketIn.setReuseAddr(true);
 		if(socketIn.listen(socketAddrIn)==SOCKET_ERROR)

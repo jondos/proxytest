@@ -27,12 +27,19 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CASOCKETADDR__
 #define __CASOCKETADDR__
+
+/** This is an abstract class for representing a socket address used in CASocket, CADatagramSocket and CAMuxSocket.*/
 class CASocketAddr
 	{
 		public:
-			
+			/** The type (family) of socket for which this address is useful. 
+			  * Must be overwritten in subclasses. **/		
 			virtual int  getType()=0;
+			
+			/** The size of the SOCKADDR struct needed by function of CASocket and other.*/
 			virtual SINT32 getSize()=0;
+			
+			/** Casts to a SOCKADDR struct **/
 			virtual	::LPSOCKADDR LPSOCKADDR()=0;
 			//	virtual operator LPSOCKADDR()=0;
 	};
