@@ -270,7 +270,8 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 	if(serverPort!=NULL&&m_bLocalProxy)
 		{
 			m_arListenerInterfaces=new CAListenerInterface*[1]; 
-			m_cnListenerInterfaces=1;
+			m_arListenerInterfaces[0]=NULL;
+			m_cnListenerInterfaces=0;
 			char* tmpStr;
 			if(serverPort[0]=='/') //Unix Domain Socket
 				{
@@ -295,6 +296,8 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 					delete [] strServerHost;
 				}
 			free(serverPort);
+			if(m_arListenerInterfaces[0]!=0)
+				m_cnListenerInterfaces=1;
 		}
 
 	m_iSOCKSServerPort=SOCKSport;
