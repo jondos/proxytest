@@ -294,8 +294,9 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 
 		UINT8 key[150];
 		UINT32 keySize=150;
-		decodeXMLEncryptedKey(key,&keySize,recvBuff,len,m_pRSA);
-		if(keySize!=64)
+	
+		ret=decodeXMLEncryptedKey(key,&keySize,elemRoot,m_pRSA);
+		if(ret!=E_SUCCESS||keySize!=64)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Couldt not set the symetric key to be used by the MuxSocket!\n");		
 				return E_UNKNOWN;
