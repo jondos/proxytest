@@ -41,6 +41,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_strMixXml=m_strUser=strKeyFileName=strCascadeName=strLogDir=NULL;
 		pTargets=NULL;
 		cntTargets=0;
+		m_strMixID=NULL;
   }
 CACmdLnOptions::~CACmdLnOptions()
 	{
@@ -75,6 +76,8 @@ void CACmdLnOptions::clean()
 			delete[] m_strUser;
 		if(m_strMixXml!=NULL)
 			delete[] m_strMixXml;
+		if(m_strMixID!=NULL)
+			delete[] m_strMixID;
 		if(pTargets!=NULL)
 			{
 				delete[] pTargets;
@@ -370,16 +373,25 @@ SINT32 CACmdLnOptions::getMixId(UINT8* id,UINT32 len)
 	{
 		if(len<24) //we need 24 chars (including final \0)
 			return E_UNKNOWN;
-		UINT8 buff[4];
-		if(strServerHost==NULL||strServerHost[0]=='/')
-			CASocketAddrINet::getLocalHostIP(buff);
-		else
+		if(m_strMixID==NULL)
 			{
-				CASocketAddrINet oAddr;
-				oAddr.setAddr((UINT8*)strServerHost,0);
-				oAddr.getIP(buff);
+				UINT8 buff[4];
+				UINT16 thePort=iServerPort;
+				if(strServerHost==NULL||strServerHost[0]=='/')
+					{
+						CASocketAddrINet::getLocalHostIP(buff);
+						getRandom((UINT8*)&thePort,2);
+					}
+				else
+					{
+						CASocketAddrINet oAddr;
+						oAddr.setAddr((UINT8*)strServerHost,0);
+						oAddr.getIP(buff);
+					}
+				m_strMixID=new char[24];
+				sprintf(m_strMixID,"%u.%u.%u.%u%%3A%u",buff[0],buff[1],buff[2],buff[3],thePort);
 			}
-		sprintf((char*)id,"%u.%u.%u.%u%%3A%u",buff[0],buff[1],buff[2],buff[3],(UINT16)iServerPort);
+		strcpy((char*)id,m_strMixID);		
 		return E_SUCCESS;
 	}
 

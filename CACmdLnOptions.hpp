@@ -103,6 +103,7 @@ class CACmdLnOptions
 			char* strLogDir;
 			char* m_strUser;
 			char* m_strMixXml;
+			char* m_strMixID;
 
 			CASocketAddrINet* pTargets;
 			UINT32 cntTargets;
