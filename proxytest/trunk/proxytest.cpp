@@ -77,6 +77,12 @@ int sockets;
 	#endif
 #endif
 
+void signal_interrupt( int sig)
+	{
+		CAMsg::printMsg(LOG_INFO,"Hm.. Strg+C pressed... exiting!\n");
+		exit(0);
+	}
+
 
 int main(int argc, const char* argv[])
 	{
@@ -137,6 +143,7 @@ int main(int argc, const char* argv[])
 			signal(SIGPIPE,SIG_IGN);
 	#endif
 #endif
+		signal(SIGINT,signal_interrupt);
 		CAMix* pMix=NULL;
 		CARoundTripTime* pRTT=NULL;
 		if(options.isLocalProxy())
