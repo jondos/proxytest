@@ -150,7 +150,7 @@ AC_ARG_WITH(xml-include,
 		fi
 	]
 )
-CFLAGS="$CFLAGS -I$xmlincludedir -I$xmlincludedir/xercesc"
+CFLAGS="$CFLAGS -I/usr/include/xercesc -I$xmlincludedir -I$xmlincludedir/xercesc"
 CPPFLAGS=$CFLAGS
 CXXFLAGS=$CFLAGS
 AC_CHECK_HEADER([dom/DOM.hpp],AC_MSG_RESULT([Xerces-C includes found]),
