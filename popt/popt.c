@@ -4,7 +4,7 @@
 
 #include "../StdAfx.h"
 //#include "system.h"
-#include "popt.h"
+//#include "popt.h"
 #include "poptint.h"
 
 #ifdef _WIN32

@@ -803,7 +803,7 @@ THREAD_RETURN lmIO(void *v)
 										else
 										    {    
 													CASymCipher* newCipher=new CASymCipher();
-													lmIOPair->pRSA->decrypt((unsigned char*)oMuxPacket.data,buff);
+													pRSA->decrypt((unsigned char*)oMuxPacket.data,buff);
 													newCipher->setDecryptionKey(buff);
 													newCipher->setEncryptionKey(buff);
 													newCipher->decrypt((unsigned char*)oMuxPacket.data+RSA_SIZE,
@@ -997,8 +997,10 @@ int main(int argc, const char* argv[])
 		//initalize Random..
 #ifdef _WIN32
 		RAND_screen();
-//#else
-//		RAND_seed();
+#else 
+ #ifndef __linux
+		RAND_seed();
+ #endif
 #endif
 		options.parse(argc,argv);
 #ifndef _WIN32

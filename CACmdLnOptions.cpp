@@ -24,44 +24,25 @@ CACmdLnOptions::~CACmdLnOptions()
 int CACmdLnOptions::parse(int argc,const char** argv)
     {
 	int ret;
-	poptOption options[7];
-	memset(options,0,sizeof(options));
 	
-	options[0].shortName='d';
-	options[0].argInfo=POPT_ARG_NONE;
 	int iDaemon=0;
-	options[0].arg=&iDaemon;
-	
-	options[1].shortName='n';
-	options[1].argInfo=POPT_ARG_STRING;
-	char* target=NULL;
-//	memset(target,0,sizeof(target));
-	options[1].arg=&target;
-
-	options[2].shortName='p';
-	options[2].argInfo=POPT_ARG_INT;
+	char target[255];
 	int port=-1;
-//	memset(target,0,sizeof(target));
-	options[2].arg=&port;
-
-	options[3].shortName='m';
-	options[3].argInfo=POPT_ARG_INT;
 	int mix=-1;
-//	memset(target,0,sizeof(target));
-	options[3].arg=&mix;
-
-	options[4].shortName='s';
-	options[4].argInfo=POPT_ARG_INT;
 	int SOCKSport=-1;
-//	memset(target,0,sizeof(target));
-	options[4].arg=&SOCKSport;
-
-	options[5].shortName='o';
-	options[5].argInfo=POPT_ARG_STRING;
-	char* socks=NULL;
-//	memset(target,0,sizeof(target));
-	options[5].arg=&socks;
-
+	char socks[255];
+	poptOption options[]=
+	 {
+		{"daemon",'d',POPT_ARG_NONE,&iDaemon,0,"start as daemon",NULL},
+		{"next",'n',POPT_ARG_STRING,target,0,"next mix/http-proxy","<ip:port>"},
+		{"port",'p',POPT_ARG_INT,&port,0,"listening port","<portnumber>"},
+		{"mix",'m',POPT_ARG_INT,&mix,0,"local|first|middle|last mix","<0|1|2|3>"},
+		{"socksport",'s',POPT_ARG_INT,&SOCKSport,0,"listening port for socks","<portnumber>"},
+		{"socksproxy",'o',POPT_ARG_STRING,&socks,0,"socks proxy","<ip:port>"},
+		POPT_AUTOHELP
+		{NULL,0,0,
+		NULL,0,NULL,NULL}
+	};
 	poptContext ctx=poptGetContext(NULL,argc,argv,options,0);
 	ret=poptGetNextOpt(ctx);
 	poptFreeContext(ctx);
