@@ -250,8 +250,7 @@ SINT32 CASocket::close(UINT32 mode)
 /** Sends some data over the network. This may block, if socket is in blocking mode.
 	@param buff - the buffer of data to send
 	@param len - content length
-	@retval E_AGAIN, if non blocking socket would block
-	@retval E_TIMEDOUT, if a timout was set for this socket
+	@retval E_AGAIN, if non blocking socket would block or a timeout was reached
 	@retval E_UNKNOWN, if an error occured
 	@ret number of bytes send
 */
@@ -274,8 +273,6 @@ SINT32 CASocket::send(const UINT8* buff,UINT32 len)
 			{
 				if(ef==ERR_INTERN_WOULDBLOCK)
 					return E_AGAIN;
-				//else if(ef==ERR_INTERN_TIMEDOUT)
-				//	return E_TIMEDOUT;
 			}
 	  return ret;	    	    
 	}
@@ -339,8 +336,7 @@ SINT32 CASocket::available()
 
 	/**
 @return SOCKET_ERROR if an error occured
-@retval E_AGAIN, if socket was in non-blocking mode an receive would block
-@retval E_TIMEDOUT, if a timeout was set
+@retval E_AGAIN, if socket was in non-blocking mode an receive would block or a timeout was reached
 @retval 0 if socket was gracefully closed
 @return the number of bytes received (always >0)
 **/
@@ -357,8 +353,6 @@ SINT32 CASocket::receive(UINT8* buff,UINT32 len)
 			{
 				if(ef==ERR_INTERN_WOULDBLOCK)
 					return E_AGAIN;
-				//else if(ef==ERR_INTERN_TIMEDOUT)
-				//	return E_TIMEDOUT;
 			}
 #ifdef _DEBUG
 		if(ret==SOCKET_ERROR)

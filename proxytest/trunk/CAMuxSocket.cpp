@@ -31,9 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef _DEBUG
 	#include "CAMsg.hpp"
 #endif
-#include "CASocketGroup.hpp"
-//#include "httptunnel/common.h"
-char buff[255];
+#include "CASingleSocketGroup.hpp"
 
 CAMuxSocket::CAMuxSocket()
 	{
@@ -180,7 +178,7 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 timeout)
 				LeaveCriticalSection(&csReceive);
 				return E_UNKNOWN;
 			}
-		if(ret==len)
+		if(ret==len) //whole packet recieved
 			{
 				if(m_bIsCrypted)
         	m_oCipherIn.decryptAES(m_Buff,m_Buff,16);
@@ -191,45 +189,44 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 timeout)
 				LeaveCriticalSection(&csReceive);
 				return MIXPACKET_SIZE;
 			}
-		m_aktBuffPos+=ret;
-		if(timeout==0)
+		if(ret>0) //some new bytes arrived
+			m_aktBuffPos+=ret;
+		if(timeout==0) //we should not wait any more
 			{
 				LeaveCriticalSection(&csReceive);
 				return E_AGAIN;
 			}
 		UINT32 timeE=time(NULL)+timeout;
 		SINT32 dt=timeout;
-		CASocketGroup oSocketGroup;
+		CASingleSocketGroup oSocketGroup;
 		oSocketGroup.add(*this);
 		do
 			{
 				ret=oSocketGroup.select(false,dt);
-				if(ret<0)
+				if(ret!=1)
 					{
 						LeaveCriticalSection(&csReceive);
 						return E_UNKNOWN;
 					}
-				if(ret==1)
+				ret=m_Socket.receive(m_Buff+m_aktBuffPos,len);
+				if(ret<=0&&ret!=E_AGAIN)
 					{
-						ret=m_Socket.receive(m_Buff+m_aktBuffPos,len);
-						if(ret<=0)
-							{
-								LeaveCriticalSection(&csReceive);
-								return E_UNKNOWN;
-							}
-						if(ret==len)
-							{
-								if(m_bIsCrypted)
-                	m_oCipherIn.decryptAES(m_Buff,m_Buff,16);
-								memcpy(pPacket,m_Buff,MIXPACKET_SIZE);
-								pPacket->channel=ntohl(pPacket->channel);
-								pPacket->flags=ntohs(pPacket->flags);
-								m_aktBuffPos=0;
-								LeaveCriticalSection(&csReceive);
-								return MIXPACKET_SIZE;
-							}
-						m_aktBuffPos+=ret;
+						LeaveCriticalSection(&csReceive);
+						return E_UNKNOWN;
 					}
+				if(ret==len)
+					{
+						if(m_bIsCrypted)
+              m_oCipherIn.decryptAES(m_Buff,m_Buff,16);
+						memcpy(pPacket,m_Buff,MIXPACKET_SIZE);
+						pPacket->channel=ntohl(pPacket->channel);
+						pPacket->flags=ntohs(pPacket->flags);
+						m_aktBuffPos=0;
+						LeaveCriticalSection(&csReceive);
+						return MIXPACKET_SIZE;
+					}
+				if(ret>0)
+					m_aktBuffPos+=ret;
 				dt=timeE-time(NULL);
 			}	while(dt>0);
 		LeaveCriticalSection(&csReceive);

@@ -160,7 +160,7 @@ int main(int argc, const char* argv[])
 	{
 		CASocketAddrINet::init();
 
-		
+	/*	
 		if(argc>1)
 			{
 				CASocket oSocketServer;
@@ -207,7 +207,7 @@ int main(int argc, const char* argv[])
 				sleep(20);
 				memset(buff,'B',20);
 				oSocketClient.send(buff,20);
-/*				UINT32 u;
+*//*				UINT32 u;
 				u=5000;
 			//	s=oSocketClient.setSendBuff(5000);
 				s=oSocketClient.getSendBuff();
