@@ -84,7 +84,7 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 			return E_UNKNOWN;
 		if(((CASocket*)*m_pMuxOut)->receiveFully(recvBuff,len)!=E_SUCCESS)
 			{
-				delete recvBuff;
+				delete []recvBuff;
 				return E_UNKNOWN;
 			}
 		recvBuff[len]=0; //make a string
@@ -97,10 +97,34 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 		DOMParser oParser;
 		oParser.parse(oInput);		
 		DOM_Document doc=oParser.getDocument();
-		delete recvBuff;
+		delete []recvBuff;
 
 		DOM_Element root=doc.getDocumentElement();
 		
+		//Sending symetric key...
+		DOM_Node child=root.getFirstChild();
+		while(child!=NULL)
+			{
+				if(child.getNodeName().equals("Mix"))
+					{
+						DOM_Node rsaKey=child.getFirstChild();
+						CAASymCipher oRSA;
+						oRSA.setPublicKeyAsDOMNode(rsaKey);
+						UINT8 key[16];
+						getRandom(key,16);
+						UINT8 buff[400];
+						UINT32 bufflen=400;
+						encodeXMLEncryptedKey(key,16,buff,&bufflen,&oRSA);
+						m_pMuxOut->setKey(key);
+						UINT16 size=htons(bufflen);
+						((CASocket*)m_pMuxOut)->send((UINT8*)&size,2);
+						((CASocket*)m_pMuxOut)->send(buff,bufflen);
+						break;
+					}
+				child=child.getNextSibling();
+			}
+		
+
 		DOMString tmpDOMStr=root.getAttribute("count");
 		char* tmpStr=tmpDOMStr.transcode();
 		if(tmpStr==NULL)
@@ -118,7 +142,7 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 		mixNode.setAttribute("id",DOMString((char*)tmpBuff));
 
 		DOM_DocumentFragment* pDocFragment=NULL;
-		m_RSA.getPublicKeyAsDocumentFragment(pDocFragment); //the key
+		m_pRSA->getPublicKeyAsDocumentFragment(pDocFragment); //the key
 		mixNode.appendChild(doc.importNode(*pDocFragment,true));
 		delete pDocFragment;
 		
@@ -141,7 +165,24 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 			}
 		else
 			CAMsg::printMsg(LOG_DEBUG,"Sending new New Key Info succeded\n");
-		delete recvBuff;
+		
+			//Now receiving the symmetric key
+		((CASocket*)*m_pMuxIn)->receive((UINT8*)&len,2);
+		len=ntohs(len);
+		if(((CASocket*)*m_pMuxIn)->receive(recvBuff,len)!=len)
+			{
+				CAMsg::printMsg(LOG_ERR,"Error receiving symetric key!\n");
+				delete []recvBuff;
+				return E_UNKNOWN;
+			}
+		recvBuff[len]=0;
+		CAMsg::printMsg(LOG_INFO,"Symmetric Key Info received is:\n");
+		CAMsg::printMsg(LOG_INFO,"%s\n",(char*)recvBuff);		
+		UINT8 key[50];
+		UINT32 keySize=50;
+		decodeXMLEncryptedKey(key,&keySize,recvBuff,len,m_pRSA);
+		m_pMuxIn->setKey(key);
+		delete [] recvBuff;
 //		delete doc;
 		return E_SUCCESS;
 	}
@@ -149,7 +190,8 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 SINT32 CAMiddleMix::init()
 	{		
 		CAMsg::printMsg(LOG_INFO,"Creating Key...\n");
-		if(m_RSA.generateKeyPair(1024)!=E_SUCCESS)
+		m_pRSA=new CAASymCipher();
+		if(m_pRSA->generateKeyPair(1024)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Init: Error generating Key-Pair...\n");
 				return E_UNKNOWN;		
@@ -358,7 +400,7 @@ SINT32 CAMiddleMix::loop()
 												CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
 										#endif
 										pCipher=new CASymCipher();
-										m_RSA.decrypt(pMixPacket->data,tmpRSABuff);
+										m_pRSA->decrypt(pMixPacket->data,tmpRSABuff);
 										pCipher->setKeyAES(tmpRSABuff);
 										pCipher->decryptAES(pMixPacket->data+RSA_SIZE,
 																				pMixPacket->data+RSA_SIZE-KEY_SIZE,
@@ -417,7 +459,9 @@ SINT32 CAMiddleMix::clean()
 				delete m_pMuxOut;
 			}
 		m_pMuxOut=NULL;
-		m_RSA.destroy();
+		if(m_pRSA!=NULL)
+			delete m_pRSA;
+		m_pRSA=NULL;
 		if(m_pMiddleMixChannelList!=NULL)
 			delete m_pMiddleMixChannelList;
 		m_pMiddleMixChannelList=NULL;

@@ -37,7 +37,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 class CAMiddleMix:public CAMix
 	{
 		public:
-			CAMiddleMix(){m_pMiddleMixChannelList=NULL;m_pMuxOut=NULL;m_pMuxIn=NULL;}
+			CAMiddleMix(){m_pMiddleMixChannelList=NULL;m_pMuxOut=NULL;m_pMuxIn=NULL;m_pRSA=NULL;}
 			virtual ~CAMiddleMix(){};
 		private:
 			SINT32 loop();
@@ -49,7 +49,7 @@ class CAMiddleMix:public CAMix
 		private:
 			CAMuxSocket* m_pMuxIn;
 			CAMuxSocket* m_pMuxOut;
-			CAASymCipher m_RSA;
+			CAASymCipher* m_pRSA;
 			CASignature* m_pSignature;
 			CAMiddleMixChannelList* m_pMiddleMixChannelList;
 			friend THREAD_RETURN loopDownStream(void *p);
