@@ -89,8 +89,8 @@ SINT32 CASocketAddrINet::setAddr(char* szIP,UINT16 port)
 					memcpy(&sin_addr.s_addr,hostent->h_addr_list[0],hostent->h_length);
 				else
 					{
-						return E_UNKNOWN_HOST; //not found!
 						LeaveCriticalSection(&csGet);
+						return E_UNKNOWN_HOST; //not found!
 					}
 				LeaveCriticalSection(&csGet);
 			}
