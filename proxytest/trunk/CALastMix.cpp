@@ -235,9 +235,11 @@ SINT32 CALastMix::processKeyExchange()
 		delete messageBuff;
 		
 		//Now receiving the symmetric key
+		CAMsg::printMsg(LOG_INFO,"Waiting for len of Symmetric Key from previous Mix...\n");
 		((CASocket*)*m_pMuxIn)->receive((UINT8*)&tmp,2);
 		len=ntohs(tmp);
 		messageBuff=new UINT8[len+1]; //+1 for the closing Zero
+		CAMsg::printMsg(LOG_INFO,"Got it - Len of Symmetric Key is: %i\n",len);
 		CAMsg::printMsg(LOG_INFO,"Waiting for Symmetric Key from previous Mix...\n");
 		if(((CASocket*)*m_pMuxIn)->receive(messageBuff,len)!=(SINT32)len)
 			{

@@ -442,9 +442,10 @@ SINT32 CAFirstMix::processKeyExchange()
 
             m_pSignature->signXML(elemRoot);
             DOM_Output::dumpToMem(docSymKey,out,&outlen);
-            m_pMuxOut->setSendKey(key,32);
+						m_pMuxOut->setSendKey(key,32);
             m_pMuxOut->setReceiveKey(key+32,32);
             UINT16 size=htons((UINT16)outlen);
+						CAMsg::printMsg(LOG_DEBUG,"Sending symmetric key to next Mix! Size: %i\n",outlen);
             ((CASocket*)m_pMuxOut)->send((UINT8*)&size,2);
             ((CASocket*)m_pMuxOut)->send(out,outlen);
             m_pMuxOut->setCrypt(true);
@@ -459,12 +460,12 @@ SINT32 CAFirstMix::processKeyExchange()
         CAMsg::printMsg(LOG_CRIT,"Error initializing cascade info.\n");
         return E_UNKNOWN;
     }
-    else
+/*    else
     {
         if(m_pInfoService != NULL)
             m_pInfoService->sendCascadeHelo();
-    }
-
+    }*/
+		CAMsg::printMsg(LOG_DEBUG,"Keyexchange finished!\n");
     return E_SUCCESS;
 }
 
