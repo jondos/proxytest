@@ -86,9 +86,17 @@
 		#ifdef __sgi
 			#include <alloca.h>
 			#include <ctype.h>
+		#endif
+		#ifdef __cplusplus
+		#ifdef __sgi	
+			#include <vector.h>
 			#include <mstring.h>
 			extern "C++" {typedef basic_string <char> string;}
-    #endif
+    #else
+		 #include <string>
+		 #include <vector>
+		#endif
+		#endif
     #ifndef min
 	#define min(a,b) ((a<b)?(a):(b))
     #endif	
