@@ -336,8 +336,10 @@ Debug(dc::malloc.on());
 					if(pid!=0)
 						exit(0);
 					setsid();
+					#ifndef DO_TRACE
 					chdir("/");
 					umask(0);
+					#endif
 				#endif
 			}
 		else
