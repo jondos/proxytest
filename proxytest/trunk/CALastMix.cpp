@@ -143,16 +143,6 @@ SINT32 CALastMix::init()
 		UINT16 messageSize=0;
 		UINT32 keySize=0;
 		UINT8* buff=NULL;
-#ifndef NEW_KEY_PROTOCOL		
-		keySize=mRSA.getPublicKeySize();
-		messageSize=keySize+1;
-		buff=new UINT8[messageSize+2];
-		UINT16 tmp=htons(messageSize);
-		memcpy(buff,&tmp,2);
-		buff[2]=1; //chainlen
-		mRSA.getPublicKey(buff+3,&keySize);
-		messageSize+=2;
-#else
 		//Constructing the XML Key Info in buff
 		buff=new UINT8[1024];
 		keySize=1024;
@@ -178,7 +168,6 @@ SINT32 CALastMix::init()
 		buff[aktIndex]=0;
 		CAMsg::printMsg(LOG_INFO,"Key Info is:\n");
 		CAMsg::printMsg(LOG_INFO,"%s\n",(char*)buff+2);		
-#endif
 		CAMsg::printMsg(LOG_INFO,"Sending Infos (chain length and RSA-Key, Message-Size %u)\n",messageSize);
 		if(((CASocket*)*m_pMuxIn)->send(buff,messageSize)!=messageSize)
 			{
@@ -188,6 +177,27 @@ SINT32 CALastMix::init()
 			}
 		delete []buff;
 		return E_SUCCESS;
+	}
+
+THREAD_RETURN loopLog(void* param)
+	{
+		CALastMix* pLastMix=(CALastMix*)param;
+		pLastMix->m_bRunLog=true;
+		UINT32 countLog=0;
+		while(pLastMix->m_bRunLog)
+			{
+				if(countLog==0)
+					{
+						CAMsg::printMsg(LOG_DEBUG,"Uploadaed  Packets: %u\n",pLastMix->m_logUploadedPackets);
+						CAMsg::printMsg(LOG_DEBUG,"Downloaded Packets: %u\n",pLastMix->m_logDownloadedPackets);
+						CAMsg::printMsg(LOG_DEBUG,"Uploadaed  Bytes  : %u\n",pLastMix->m_logUploadedBytes);
+						CAMsg::printMsg(LOG_DEBUG,"Downloaded Bytes  : %u\n",pLastMix->m_logDownloadedBytes);
+						countLog=30;
+					}
+				sSleep(30);
+				countLog--;
+			}
+		THREAD_RETURN_SUCCESS;
 	}
 
 #define _CONNECT_TIMEOUT 5000 //5 Seconds...
@@ -221,6 +231,11 @@ SINT32 CALastMix::loop()
 				pInfoService->sendHelo();
 				pInfoService->start();
 			}
+		m_logUploadedPackets=m_logDownloadedPackets=m_logUploadedBytes=m_logDownloadedBytes=0;
+		CAThread oLogThread;
+		oLogThread.setMainLoop(loopLog);
+		oLogThread.start(this);
+		
 		for(;;)
 			{
 				bAktiv=false;
@@ -242,6 +257,7 @@ SINT32 CALastMix::loop()
 								if(ret!=MIXPACKET_SIZE)
 									break;
 								//else one packet received
+								m_logUploadedPackets++;
 								if(!oSocketList.get(pMixPacket->channel,&oConnection))
 									{
 										if(pMixPacket->flags==CHANNEL_OPEN_OLD||pMixPacket->flags==CHANNEL_OPEN_NEW)
@@ -284,7 +300,8 @@ SINT32 CALastMix::loop()
 															delete newCipher;
 															m_pMuxIn->close(pMixPacket->channel,tmpBuff);
 															oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);			
-														}
+															m_logDownloadedPackets++;	
+													}
 												else
 														{    
 															UINT16 payLen=ntohs(pMixPacket->payload.len);
@@ -304,6 +321,7 @@ SINT32 CALastMix::loop()
 																	delete newCipher;
 																	m_pMuxIn->close(pMixPacket->channel,tmpBuff);
 																	oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);			
+																	m_logDownloadedPackets++;	
 																}
 															else
 																{
@@ -355,7 +373,8 @@ SINT32 CALastMix::loop()
 														delete oConnection.pSendQueue;
 														oSocketList.remove(pMixPacket->channel);
 														m_pMuxIn->close(pMixPacket->channel,tmpBuff);
-														oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);			
+														oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);
+														m_logDownloadedPackets++;	
 													}
 												else
 													{
@@ -383,6 +402,7 @@ SINT32 CALastMix::loop()
 										len=tmpCon->pSocket->send(tmpBuff,len);
 										if(len>0)
 											{
+												m_logUploadedBytes+=len;
 												tmpCon->pSendQueue->remove((UINT32*)&len);
 												if(tmpCon->pSendQueue->isEmpty())
 													{
@@ -401,6 +421,7 @@ SINT32 CALastMix::loop()
 														delete tmpCon->pSendQueue;
 														m_pMuxIn->close(tmpCon->id,tmpBuff);
 														oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);			
+														m_logDownloadedPackets++;	
 														oSocketList.remove(tmpCon->id);											 
 													}
 											}
@@ -437,9 +458,11 @@ SINT32 CALastMix::loop()
 														oSocketList.remove(tmpID);
 														m_pMuxIn->close(tmpID,tmpBuff);
 														oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);			
+														m_logDownloadedPackets++;	
 													}
 												else 
 													{
+														m_logDownloadedBytes+=ret;
 														pMixPacket->channel=tmpCon->id;
 														pMixPacket->flags=CHANNEL_DATA;
 														pMixPacket->payload.len=htons((UINT16)ret);
@@ -447,6 +470,7 @@ SINT32 CALastMix::loop()
 														tmpCon->pCipher->decryptAES2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 														m_pMuxIn->send(pMixPacket,tmpBuff);
 														oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);
+														m_logDownloadedPackets++;
 													}
 											}
 										else
@@ -488,6 +512,7 @@ SINT32 CALastMix::loop()
 
 ERR:
 		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
+		m_bRunLog=false;
 		if(pInfoService!=NULL)
 			{
 				delete pInfoService;
@@ -503,6 +528,7 @@ ERR:
 			}
 		delete []tmpBuff;
 		delete pMixPacket;
+		oLogThread.join();
 		return E_UNKNOWN;
 	}
 
