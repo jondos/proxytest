@@ -46,6 +46,8 @@ bool CAMuxChannelList::remove(CAMuxSocket* pMuxSocket,MUXLISTENTRY* pEntry)
 			{
 				if(tmpEntry->pMuxSocket==pMuxSocket)
 					{
+						if(aktEnumPos==tmpEntry)
+							aktEnumPos=tmpEntry->next;
 						if(before==NULL)
 							{
 								list=tmpEntry->next;
