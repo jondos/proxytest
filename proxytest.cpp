@@ -485,7 +485,7 @@ Debug(dc::malloc.on());
 										exit(-1);
 									}
 								else
-									options.disableEncryptedLog();
+									options.enableEncryptedLog(false);
 							}
 					#endif
 					pid_t pid;
