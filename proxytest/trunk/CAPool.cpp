@@ -39,6 +39,8 @@ CAPool::CAPool(UINT32 poolsize)
 		m_pPoolList->mixpacket.channel=0;
 		m_pPoolList->next=NULL;
 		m_pLastEntry=m_pPoolList;
+		m_arChannelIDs=new HCHANNEL[poolsize];
+		m_arChannelIDs[0]=0;
 		for(UINT32 i=1;i<poolsize;i++)
 			{
 				tPoolListEntry* tmpEntry=new tPoolListEntry;
@@ -47,6 +49,7 @@ CAPool::CAPool(UINT32 poolsize)
 				tmpEntry->mixpacket.channel=0;
 				tmpEntry->next=m_pPoolList;
 				m_pPoolList=tmpEntry;
+				m_arChannelIDs[i]=0;
 			}
 		m_pEntry=new tPoolListEntry;	
 	}
@@ -60,7 +63,8 @@ CAPool::~CAPool()
 				m_pPoolList=m_pPoolList->next;
 				delete tmpEntry;
 			}
-		delete m_pEntry;	
+		delete m_pEntry;
+		delete[] m_arChannelIDs;
 	}
 	
 SINT32 CAPool::pool(MIXPACKET* pMixPacket)
@@ -68,26 +72,14 @@ SINT32 CAPool::pool(MIXPACKET* pMixPacket)
 		UINT32 v;
 		getRandom(&v);
 		v=v%m_uPoolSize;
-		tPoolListEntry* tmpEntry=m_pPoolList;
-		while(v>0)
-			{
-				tmpEntry=tmpEntry->next;
-				v--;
-			}
-		HCHANNEL id=tmpEntry->mixpacket.channel;
-	
-		tPoolListEntry* pEntryOut=tmpEntry;
-		tmpEntry=m_pPoolList;
+		HCHANNEL id=m_arChannelIDs[v];
+		m_arChannelIDs[v]=pMixPacket->channel;
 		tPoolListEntry* pPrevEntry=NULL;		
-		while(tmpEntry!=pEntryOut)
+		tPoolListEntry* pEntryOut=m_pPoolList;
+		while(pEntryOut->mixpacket.channel!=id)
 			{
-				if(tmpEntry->mixpacket.channel==id)
-					{
-						pEntryOut=tmpEntry;
-						break;
-					}
-				pPrevEntry=tmpEntry;
-				tmpEntry=tmpEntry->next;	
+				pPrevEntry=pEntryOut;
+				pEntryOut=pEntryOut->next;	
 			}
 
 		if(pEntryOut==m_pPoolList) //first element to remove)

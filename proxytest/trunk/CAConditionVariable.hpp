@@ -28,6 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CACONVAR__
 #define __CACONVAR__
 #include "CAMutex.hpp"
+#include "CAUtil.hpp"
 class CAConditionVariable:public CAMutex
 	{
 		public:
@@ -61,8 +62,14 @@ class CAConditionVariable:public CAMutex
 			SINT32 wait(UINT32 msTimeout)
 				{
 					timespec to;
-					to.tv_sec = time(NULL) + msTimeout/1000;
-          to.tv_nsec = (msTimeout%1000)*1000;
+					getcurrentTime(to);
+					to.tv_nsec+=(msTimeout%1000)*1000000;
+					to.tv_sec+=msTimeout/1000;
+          if(to.tv_nsec>999999999)
+						{
+							to.tv_sec++;
+							to.tv_nsec-=1000000000;
+						}
 					int ret=pthread_cond_timedwait(m_pCondVar,m_pMutex,&to);
 					if(ret==0)
 						return E_SUCCESS;

@@ -36,7 +36,7 @@ SINT32 memtrim(UINT8* out,const UINT8* in,UINT32 len);
 char* strins(const char* src,UINT32 pos,const char* ins);
 char* strins(const char* src,const char * pos,const char* ins);
 
-//SINT32 getcurrentTimeMillis(BIGNUM *bnTime); 
+SINT32 getcurrentTime(timespec& t); 
 SINT32 getcurrentTimeMillis(UINT64& u64Time);
 
 SINT32 getRandom(UINT8* buff,UINT32 len);

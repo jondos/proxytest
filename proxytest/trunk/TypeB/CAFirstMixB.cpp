@@ -2,7 +2,7 @@
 #include "CAFirstMixB.hpp"
 #include "../CASingleSocketGroup.hpp"
 #include "../CAInfoService.hpp"
-
+#include "../CAPool.hpp"
 #ifndef NO_LOOPACCEPTUSER
 	#define NO_LOOPACCEPTUSER
 #endif
@@ -40,7 +40,7 @@ SINT32 CAFirstMixB::loop()
 #endif		
 		//Starting thread for Step 2
 		UINT8 peerIP[4];
-		UINT8 rsaBuff[RSA_SIZE];
+//		UINT8 rsaBuff[RSA_SIZE];
 #ifdef LOG_CHANNEL
 		UINT64 current_time;
 		UINT32 diff_time;
@@ -463,7 +463,7 @@ SINT32 CAFirstMixB::loop()
 				  msSleep(100);
 			}
 
-	ERR:
+//	ERR:
 		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
 		m_bRestart=true;
 		CAMsg::printMsg(LOG_CRIT,"Stopping InfoService....\n");

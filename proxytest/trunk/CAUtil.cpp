@@ -145,6 +145,25 @@ char* strins(const char* src,const char * pos,const char* ins)
 	  #endif
 	}*/
 
+SINT32 getcurrentTime(timespec& t)
+	{
+		#ifdef _WIN32
+			struct _timeb timebuffer;
+			_ftime(&timebuffer);
+			/* Hack what should be solved better...*/
+			t.tv_sec=timebuffer.time;
+			t.tv_nsec=timebuffer.millitm*1000000;
+			/* end of hack..*/
+			return E_SUCCESS;
+	  #else //we dont use ftime due to a bug in glibc2.0
+		//we use gettimeofday() in order to get the millis...
+			struct timeval tv;
+			gettimeofday(&tv,NULL); //getting millis...
+			t.tv_sec=tv.tv_sec;
+			t.tv_nsec=tv.tv_usec*1000;
+	  #endif
+	}
+
 /** Gets the current Systemtime in milli seconds. 
 	* @param u64Time - 64 bit Integer, in which the current time is placed
 	* @retval E_UNKNOWN, if an error occurs
