@@ -35,7 +35,7 @@ class CAMiddleMix:public CAMix
 	{
 		public:
 			CAMiddleMix(){};
-			~CAMiddleMix(){};
+			virtual ~CAMiddleMix(){};
 		private:
 			SINT32 loop();
 			SINT32 init();

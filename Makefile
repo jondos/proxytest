@@ -29,6 +29,11 @@ OBJS_ALL=CASocket.o\
 	CAUtil.o\
 	CADatagramSocket.o\
 	CARoundTripTime.o\
+	CAMix.o\
+	CAFirstMix.o\
+	CALastMix.o\
+	CAMiddleMix.o\
+	CALocalProxy.o\
 	proxytest.o
 
 OBJS=$(OBJS_ALL)

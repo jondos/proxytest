@@ -35,7 +35,7 @@ class CAFirstMix:public CAMix
 	{
 		public:
 			CAFirstMix(){};
-			~CAFirstMix(){};
+			virtual ~CAFirstMix(){};
 		private:
 			SINT32 loop();
 			SINT32 init();

@@ -35,7 +35,7 @@ class CALocalProxy:public CAMix
 	{
 		public:
 			CALocalProxy(){};
-			~CALocalProxy(){};
+			virtual ~CALocalProxy(){};
 		private:
 			SINT32 loop();
 			SINT32 init();

@@ -36,7 +36,7 @@ class CALastMix:public CAMix
 	{
 		public:
 			CALastMix(){};
-			~CALastMix(){};
+			virtual ~CALastMix(){};
 		private:
 			SINT32 loop();
 			SINT32 init();

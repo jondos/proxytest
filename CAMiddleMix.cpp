@@ -39,7 +39,7 @@ SINT32 CAMiddleMix::init()
 		CAMsg::printMsg(LOG_INFO,"Creating Key...\n");
 		if(oRSA.generateKeyPair(1024)!=E_SUCCESS)
 			return E_UNKNOWN;
-		return E_SUCCESS();
+		return E_SUCCESS;
 	}
 
 SINT32 CAMiddleMix::loop()

@@ -64,7 +64,7 @@ SINT32 CALastMix::init()
 		options.getSOCKSHost(strTarget,255);
 		addrSocks.setAddr((char*)strTarget,options.getSOCKSPort());
 		
-		return E_SUCCESS();
+		return E_SUCCESS;
 	}
 
 SINT32 CALastMix::loop()
