@@ -197,8 +197,7 @@ int CASocket::send(UINT8* buff,UINT32 len)
 			}
 		else
 			{
-				m_pASyncSend->send(this,buff,len);
-				ret=len;
+				ret=m_pASyncSend->send(this,buff,len);
 			}
 	  return ret;	    	    
 	}
@@ -320,19 +319,20 @@ SINT32 CASocket::setKeepAlive(UINT32 sec)
 #endif
 	}
 
-SINT32 CASocket::setASyncSend(bool b,SINT32 size)
+SINT32 CASocket::setASyncSend(bool b,SINT32 size,CAFirstMix* pMix)
 	{
-/*		if(b)
+		if(b)
 			{
 				if(size!=-1)
 					setSendLowWat(size);
 				if(m_pASyncSend==NULL)
 					{
 						m_pASyncSend=new CASocketASyncSend();
+						m_pASyncSend->setFirstMix(pMix);
 						m_pASyncSend->start();
 					}
 			}
 		m_bASyncSend=b;
-*/
+
 		return E_SUCCESS;
 	}

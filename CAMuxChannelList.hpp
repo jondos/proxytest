@@ -25,6 +25,8 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
+#ifndef __CAMUXCHANNELLIST__
+#define __CAMUXCHANNELLIST__
 #include "CAMuxSocket.hpp"
 #include "CASocketList.hpp"
 
@@ -52,18 +54,22 @@ class CAMuxChannelList
 			CAMuxChannelList();
 			~CAMuxChannelList();
 			int add(CAMuxSocket* pMuxSocket);
-			MUXLISTENTRY* get(CAMuxSocket* pMuxSocket);
-			bool remove(CAMuxSocket* pMuxSocket,MUXLISTENTRY* pEntry);
 			int add(MUXLISTENTRY* pEntry,HCHANNEL in,HCHANNEL out,CASymCipher* pCipher);
+			
+			MUXLISTENTRY* get(CAMuxSocket* pMuxSocket);
 			bool get(MUXLISTENTRY* pEntry,HCHANNEL in,CONNECTION* out);
 			REVERSEMUXLISTENTRY* get(HCHANNEL out);
-			bool remove(HCHANNEL out,REVERSEMUXLISTENTRY* reverseEntry);
 			MUXLISTENTRY* getFirst();
 			MUXLISTENTRY* getNext();
+			
+			bool remove(CAMuxSocket* pMuxSocket,MUXLISTENTRY* pEntry);
+			bool remove(HCHANNEL out,REVERSEMUXLISTENTRY* reverseEntry);
 
+			SINT32 clear();
 		protected:
 			MUXLIST* list;
 			MUXLISTENTRY* aktEnumPos;
 			REVERSEMUXLIST* reverselist;
 	};
 
+#endif

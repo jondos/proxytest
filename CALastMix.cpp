@@ -318,7 +318,7 @@ SINT32 CALastMix::loop()
 							}
 						if(!oSocketList.get(oMuxPacket.channel,&oConnection))
 							{
-								if(oMuxPacket.flags==0)
+								if(oMuxPacket.flags==CHANNEL_OPEN)
 									{
 										#ifdef _DEBUG
 										    CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
@@ -379,7 +379,7 @@ SINT32 CALastMix::loop()
 							}
 						else
 							{
-								if(oMuxPacket.flags!=0)
+								if(oMuxPacket.flags==CHANNEL_CLOSE)
 									{
 										oSocketGroup.remove(*(oConnection.pSocket));
 										oConnection.pSocket->close();
@@ -387,6 +387,15 @@ SINT32 CALastMix::loop()
 										oSocketList.remove(oMuxPacket.channel);
 										delete oConnection.pSocket;
 										delete oConnection.pCipher;
+									}
+								else if(oMuxPacket.flags==CHANNEL_SUSPEND)
+									{
+										CAMsg::printMsg(LOG_INFO,"Suspending channel: %u\n",oMuxPacket.channel);
+										oSocketGroup.remove(*(oConnection.pSocket));
+									}
+								else if(oMuxPacket.flags==CHANNEL_RESUME)
+									{
+										oSocketGroup.add(*(oConnection.pSocket));
 									}
 								else
 									{
@@ -435,7 +444,7 @@ SINT32 CALastMix::loop()
 										else 
 											{
 												oMuxPacket.channel=tmpCon->id;
-												oMuxPacket.flags=0;
+												oMuxPacket.flags=CHANNEL_DATA;
 												oMuxPacket.payload.len=htons((UINT16)ret);
 												oMuxPacket.payload.type=0;
 												tmpCon->pCipher->decryptAES(oMuxPacket.data,oMuxPacket.data,DATA_SIZE);

@@ -171,12 +171,12 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 
 //		if(!bIsTunneld)
 //			{
-				do
-					{
+			//	do
+				//	{
 						len=m_Socket.send(((UINT8*)pPacket)+aktIndex,MuxPacketSize);
-						MuxPacketSize-=len;
-						aktIndex+=len;
-					} while(len>0&&MuxPacketSize>0);
+					//	MuxPacketSize-=len;
+					//	aktIndex+=len;
+					//} while(len>0&&MuxPacketSize>0);
 /*			}
 		else
 			{		
@@ -197,6 +197,8 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 				#endif
 				return SOCKET_ERROR;
 			}
+		if(len==E_QUEUEFULL)
+			return E_QUEUEFULL;
 		return MUXPACKET_SIZE;
 	}
 #endif

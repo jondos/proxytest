@@ -33,11 +33,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMuxSocket.hpp"
 #include "CAASymCipher.hpp"
 #include "CASignature.hpp"
+#include "CAMuxChannelList.hpp"
 class CAFirstMix:public CAMix
 	{
 		public:
-			CAFirstMix(){};
-			virtual ~CAFirstMix(){};
+			CAFirstMix(){InitializeCriticalSection(&csResume);}
+			virtual ~CAFirstMix(){DeleteCriticalSection(&csResume);}
 		private:
 			SINT32 loop();
 			SINT32 init();
@@ -56,6 +57,12 @@ class CAFirstMix:public CAMix
 			CAASymCipher mRSA;
 			CASignature mSignature;
 #endif
+			CAMuxChannelList oSuspendList;
+		public:
+			void resume(CASocket* pSocket);
+			CRITICAL_SECTION csResume;
+			void deleteResume(CAMuxSocket* pMuxSocket);
+			void deleteResume(CAMuxSocket*pMuxSocket,HCHANNEL outCahnnel);
 	};
 
 #endif
