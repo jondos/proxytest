@@ -59,7 +59,7 @@ class CASocketList
 			CASocketList(bool bThreadSafe);
 			~CASocketList();
 #ifdef LOG_CHANNEL
-			SINT32 add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue,UINT64 time,UINT32 initalUpLoad);
+			SINT32 add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue,UINT64 time=0,UINT32 initalUpLoad=0);
 #else
 			SINT32 add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue);
 #endif
