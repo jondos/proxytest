@@ -54,7 +54,9 @@ The internal organisation is a hash-table with overrun lists. The hashtable has
 @warning This class is NOT thread safe.
 @version 1.0 first version
  */
-	class CAIPList
+#ifndef __CA_IP_LIST
+#define __CA_IP_LIST
+class CAIPList
 	{
 		public:
 			CAIPList();
@@ -67,3 +69,4 @@ The internal organisation is a hash-table with overrun lists. The hashtable has
 			PIPLIST* m_HashTable;
 			UINT8 m_Random[56]; //seams to be the best value for MD5, which operats on x*512-64 bit (52*8+4*8=512-64)
 	};
+#endif
