@@ -579,8 +579,7 @@ Debug(dc::malloc.on());
 				CAMsg::openSpecialLog();
 			}
 		CAMsg::printMsg(LOG_INFO,"Anon proxy started!\n");
-		CAMsg::printMsg(LOG_INFO,"Version: %s\n",MIX_VERSION);
-	  CAMsg::printMsg(LOG_INFO,"Using: %s!\n",OPENSSL_VERSION_TEXT);
+		CAMsg::printMsg(LOG_INFO,MIX_VERSION_INFO);
 #ifdef _DEBUG
 		sockets=0;
 #endif

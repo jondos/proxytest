@@ -178,8 +178,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 	poptFreeContext(ctx);
 	if(iVersion!=0)
 		{
-			printf("Version: %s\n",MIX_VERSION);
-			printf("Using: %s!\n",OPENSSL_VERSION_TEXT);
+			printf(MIX_VERSION_INFO);
 			exit(0);
 		}
 
