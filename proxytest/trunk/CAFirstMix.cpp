@@ -337,9 +337,14 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 									}
 								else
 									{
-		//Prüfen ob schon vorhanden..	
+										//Prüfen ob schon vorhanden..	
 										ret=((CASocket*)pNewMuxSocket)->getPeerIP(peerIP);
-										if(ret!=E_SUCCESS||pIPList->insertIP(peerIP)<0)
+										#ifdef PAYMENT
+											if(ret!=E_SUCCESS||pIPList->insertIP(peerIP)<0 ||
+												pFirstMix->m_pAccountingInstance->isIPAddressBlocked(peerIP))
+										#else
+											if(ret!=E_SUCCESS||pIPList->insertIP(peerIP)<0)
+										#endif
 											{
 												delete pNewMuxSocket;
 											}
