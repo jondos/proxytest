@@ -103,7 +103,29 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	 #ifndef __FreeBSD__
     	#define socklen_t int	
 	 #endif
+    #ifndef O_BINARY
+	#define O_BINARY 0
+    #endif
+    #ifndef MAX_PATH
+	#define MAX_PATH 4096
+    #endif
+		#define HAVE_FIONREAD
+		#ifdef __sgi
+			#undef HAVE_VSNPRINTF
+			#include <alloca.h>
+//			#include <ctype.h>
+		#endif
+    #ifndef __linux 
+	#ifndef INADDR_NONE
+    	    #define INADDR_NONE -1
+	#endif
+    	#include <sys/filio.h>
+    	#define MSG_NOSIGNAL 0
+    #endif
 	#endif 
+#ifdef HAVE_FILIO
+    	#include <sys/filio.h>
+#endif			
 		#include <sys/ioctl.h>
 		#include <sys/types.h>
     #include <sys/socket.h>
@@ -121,16 +143,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
     #include <stdarg.h>
     #include <memory.h>       
 		#include <ctype.h>
-    #ifndef O_BINARY
-	#define O_BINARY 0
-    #endif
-    #ifndef MAX_PATH
-	#define MAX_PATH 4096
-    #endif
     typedef struct sockaddr* LPSOCKADDR;
     #define SOCKET int
     typedef struct hostent HOSTENT;
-		#define HAVE_FIONREAD
 		#define ioctlsocket(a,b,c) ioctl(a,b,c)
     #define closesocket(s) close(s)
     #define SOCKET_ERROR -1
@@ -140,13 +155,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
     #define SD_BOTH 2
     #define WSAGetLastError() errno
 		#define msleep(i) usleep(i*1000)
-    #ifndef __linux 
-	#ifndef INADDR_NONE
-    	    #define INADDR_NONE -1
-	#endif
-    	#include <sys/filio.h>
-    	#define MSG_NOSIGNAL 0
-    #endif
 		#ifdef _REENTRANT
 			#define CRITICAL_SECTION pthread_mutex_t
 			#define DeleteCriticalSection(p) pthread_mutex_destroy(p)
@@ -166,11 +174,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define GETERROR (errno) 
 		#define ERR_INTERN_TIMEDOUT ETIMEDOUT
 		#define ERR_INTERN_CONNREFUSED ECONNREFUSED
-		#ifdef __sgi
-			#undef HAVE_VSNPRINTF
-			#include <alloca.h>
-//			#include <ctype.h>
-		#endif
 		#ifdef __cplusplus
 		#ifdef __sgi	
 			#include <vector.h>
