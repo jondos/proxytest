@@ -54,7 +54,7 @@ SINT32 CASocket::create(int type)
 			m_Socket=socket(type,SOCK_STREAM,0);
 		if(m_Socket==INVALID_SOCKET)
 			{
-				int er=errno;
+				int er=GET_NET_ERROR;
 				if(er==EMFILE)
 					CAMsg::printMsg(LOG_CRIT,"Couldt not create a new Socket!\n");
 				else
@@ -121,7 +121,7 @@ SINT32 CASocket::connect(CASocketAddr & psa,UINT retry,UINT32 time)
 //				CAMsg::printMsg(LOG_DEBUG,"Socket:connect-connect-finished err: %i\n",err);
 				if(err!=0)
 					{  
-						err=GETERROR;
+						err=GET_NET_ERROR;
 						#ifdef _DEBUG
 						 CAMsg::printMsg(LOG_DEBUG,"Con-Error: %i\n",err);
 						#endif
@@ -158,7 +158,7 @@ SINT32 CASocket::connect(CASocketAddr & psa,UINT msTimeOut)
 		err=::connect(m_Socket,addr,addr_len);
 		if(err==0)
 			return E_SUCCESS;
-		err=GETERROR;
+		err=GET_NET_ERROR;
 #ifdef _WIN32
 		if(err!=WSAEWOULDBLOCK)
 			return E_UNKNOWN;
@@ -210,7 +210,7 @@ SINT32 CASocket::close()
 #ifdef _DEBUG				
 				if(::closesocket(m_Socket)==SOCKET_ERROR)
 					{
-						CAMsg::printMsg(LOG_DEBUG,"Fehler bei CASocket::closesocket\n -- %i",GETERROR);
+						CAMsg::printMsg(LOG_DEBUG,"Fehler bei CASocket::closesocket\n -- %i",GET_NET_ERROR);
 					}
 				sockets--;
 #else
@@ -265,10 +265,10 @@ SINT32 CASocket::send(const UINT8* buff,UINT32 len)
 				ret=::send(m_Socket,(char*)buff,len,MSG_NOSIGNAL);
 				#ifdef _DEBUG
 					if(ret==SOCKET_ERROR)
-						printf("Fehler beim Socket-send: %i",errno);
+						printf("Fehler beim Socket-send: %i",GET_NET_ERROR);
 				#endif
 			}
-		while(ret==SOCKET_ERROR&&(ef=errno)==EINTR);
+		while(ret==SOCKET_ERROR&&(ef=GET_NET_ERROR)==EINTR);
 		if(ret==SOCKET_ERROR)
 			{
 				if(ef==ERR_INTERN_WOULDBLOCK)
@@ -336,7 +336,7 @@ SINT32 CASocket::available()
 
 	/**
 @return SOCKET_ERROR if an error occured
-@retval E_AGAIN, if socket was in non-blocking mode an receive would block or a timeout was reached
+@retval E_AGAIN, if socket was in non-blocking mode and receive would block or a timeout was reached
 @retval 0 if socket was gracefully closed
 @return the number of bytes received (always >0)
 **/
@@ -348,7 +348,7 @@ SINT32 CASocket::receive(UINT8* buff,UINT32 len)
 			{
 				ret=::recv(m_Socket,(char*)buff,len,MSG_NOSIGNAL);
 			}
-	  while(ret==SOCKET_ERROR&&(ef=errno)==EINTR);
+	  while(ret==SOCKET_ERROR&&(ef=GET_NET_ERROR)==EINTR);
 		if(ret==SOCKET_ERROR)
 			{
 				if(ef==ERR_INTERN_WOULDBLOCK)
