@@ -348,6 +348,10 @@ SOURCE=.\CAMiddleMix.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CAMiddleMixChannelList.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\CAMix.cpp
 # End Source File
 # Begin Source File
@@ -506,7 +510,15 @@ SOURCE=.\CALocalProxy.hpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CALookAble.hpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\CAMiddleMix.hpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CAMiddleMixChannelList.hpp
 # End Source File
 # Begin Source File
 

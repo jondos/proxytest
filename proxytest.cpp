@@ -48,6 +48,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAFirstMix.hpp"
 #include "CALastMix.hpp"
 #include "CALocalProxy.hpp"
+#include "CASymCipher.hpp"
 
 //#ifdef _WIN32
 //HANDLE hEventThreadEnde;
@@ -160,7 +161,7 @@ For Upstream and Downstream different keys are used.
 
 int main(int argc, const char* argv[])
 	{		
-//		CASocketAddrINet::init();
+
 
 	/*	
 		if(argc>1)

@@ -31,11 +31,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMix.hpp"
 #include "CAMuxSocket.hpp"
 #include "CAASymCipher.hpp"
-#include "CASocketList.hpp"
+#include "CAMiddleMixChannelList.hpp"
 class CAMiddleMix:public CAMix
 	{
 		public:
-			CAMiddleMix(){};
+			CAMiddleMix(){m_pMiddleMixChannelList=NULL;};
 			virtual ~CAMiddleMix(){};
 		private:
 			SINT32 loop();
@@ -45,7 +45,7 @@ class CAMiddleMix:public CAMix
 			CAMuxSocket m_MuxIn;
 			CAMuxSocket m_MuxOut;
 			CAASymCipher m_RSA;
-			CASocketList m_oSocketList;
+			CAMiddleMixChannelList* m_pMiddleMixChannelList;
 			friend THREAD_RETURN loopDownStream(void *p);
 	};
 

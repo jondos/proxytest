@@ -25,57 +25,38 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
-#ifndef __CASYMCIPHER__
-#define __CASYMCIPHER__
+#ifndef __CAMIDDLEMIXCHANNELLIST__
+#define __CAMIDDLEMIXCHANNELLIST__
+#include "CASymCipher.hpp"
+#include "CAMuxSocket.hpp"
+#include "CAMutex.hpp"
 
-#define KEY_SIZE 16
+struct t_middlemixchannellist
+	{
+		HCHANNEL channelIn;
+		HCHANNEL channelOut;
+		CASymCipher* pCipher;
+		struct t_middlemixchannellist* next,*prev;
+	};
+typedef struct t_middlemixchannellist mmChannelList;
+typedef struct t_middlemixchannellist mmChannelListEntry;
 
-#include "aes/rijndael-api-fst.h"
-#include "CALookAble.hpp"
-class CASymCipher:public CALookAble
+class CAMiddleMixChannelList
 	{
 		public:
-			CASymCipher()
-				{
-					printf("CASum start\n");
-					m_bEncKeySet=false;
-					m_keyAES=new keyInstance[1];
-					m_iv=new UINT8[16];
-					m_iv2=new UINT8[16];
-					printf("CASum end\n");
-				}
+			CAMiddleMixChannelList(){m_pChannelList=NULL;}
+			~CAMiddleMixChannelList();
+		
+			SINT32 add(HCHANNEL channelIn,CASymCipher* pCipher,HCHANNEL* channelOut);
+			
+			SINT32 getInToOut(HCHANNEL channelIn, HCHANNEL* channelOut,CASymCipher** ppCipher);
+			SINT32 getOutToIn(HCHANNEL* channelIn, HCHANNEL channelOut,CASymCipher** ppCipher);
 
-			~CASymCipher()
-				{
-					waitForDestroy();
-					printf("~CASum start\n");
-					delete[] m_keyAES;
-					delete[] m_iv;
-					delete[] m_iv2;
-					printf("~CASum end\n");
-				}
-	//		SINT32 generateEncryptionKey();
-	//		SINT32 getEncryptionKey(UINT8* key);
-	//		SINT32 setEncryptionKey(UINT8* key);
-			bool isEncyptionKeyValid()
-				{
-					return m_bEncKeySet;
-				}
-
-	//		SINT32 setDecryptionKey(UINT8* key);
-		//	SINT32 encrypt(UINT8* in,UINT32 len);
-		//	SINT32 decrypt(UINT8* in,UINT8* out,UINT32 len);
-	//		SINT32 generateEncryptionKeyAES();
-	//		SINT32 setEncryptionKeyAES(UINT8* key);
-			SINT32 setKeyAES(UINT8* key);
-			SINT32 decryptAES(UINT8* in,UINT8* out,UINT32 len);
-			SINT32 decryptAES2(UINT8* in,UINT8* out,UINT32 len);
-			SINT32 encryptAES(UINT8* in,UINT8* out,UINT32 len);
-		protected:
-			keyInstance* m_keyAES;
-			UINT8* m_iv;
-			UINT8* m_iv2;
-			bool m_bEncKeySet;
+			SINT32 remove(HCHANNEL channelIn);
+					
+		
+		private:
+			mmChannelList* m_pChannelList;
+			CAMutex m_Mutex;
 	};
-
 #endif
