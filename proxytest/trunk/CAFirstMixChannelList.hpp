@@ -78,7 +78,7 @@ struct t_firstmixchannellist
 					struct t_firstmixchannellist* prev;
 					struct t_firstmixchannellist* next;
 				} list_InChannelPerSocket;
-
+		
 		friend class CAFirstMixChannelList;
 	};
 

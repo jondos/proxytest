@@ -180,9 +180,9 @@ SINT32 CALastMix::loop()
 								//else one packet received
 								if(!oSocketList.get(pMixPacket->channel,&oConnection))
 									{
-										if(pMixPacket->flags==CHANNEL_OPEN)
+										if(pMixPacket->flags==CHANNEL_OPEN_OLD||pMixPacket->flags==CHANNEL_OPEN_NEW)
 											{
-												#ifdef _DEBUG
+												#if defined(_DEBUG1) 
 														CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
 												#endif
 				
@@ -193,7 +193,6 @@ SINT32 CALastMix::loop()
 																							pMixPacket->data+RSA_SIZE-KEY_SIZE,
 																							DATA_SIZE-RSA_SIZE);
 												memcpy(pMixPacket->data,rsaBuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
-														
 												CASocket* tmpSocket=new CASocket;										
 												int ret;
 												if(pMixPacket->payload.type==MIX_PAYLOAD_SOCKS)
@@ -225,7 +224,7 @@ SINT32 CALastMix::loop()
 												else
 														{    
 															UINT16 payLen=ntohs(pMixPacket->payload.len);
-															#ifdef _DEBUG
+															#ifdef _DEBUG1
 																UINT8 c=pMixPacket->payload.data[30];
 																pMixPacket->payload.data[30]=0;
 																CAMsg::printMsg(LOG_DEBUG,"Try sending data to Squid: %s\n",pMixPacket->payload.data);
@@ -234,7 +233,7 @@ SINT32 CALastMix::loop()
 															if(payLen>PAYLOAD_SIZE||tmpSocket->sendTimeOut(pMixPacket->payload.data,payLen,_SEND_TIMEOUT)==SOCKET_ERROR)
 																{
 																	#ifdef _DEBUG
-																		CAMsg::printMsg(LOG_DEBUG,"Error sending Data to Squid!");
+																		CAMsg::printMsg(LOG_DEBUG,"Error sending Data to Squid!\n");
 																	#endif
 																	tmpSocket->close();
 																	delete tmpSocket;
@@ -271,7 +270,7 @@ SINT32 CALastMix::loop()
 											{
 												osocketgroupCacheRead.add(*(oConnection.pSocket));
 											}
-										else
+										else if(pMixPacket->flags==CHANNEL_DATA)
 											{
 												oConnection.pCipher->decryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 												ret=ntohs(pMixPacket->payload.len);
@@ -312,7 +311,7 @@ SINT32 CALastMix::loop()
 								if(osocketgroupCacheWrite.isSignaled(*(tmpCon->pSocket)))
 									{
 										countRead--;
-										SINT32 len=1000;
+										SINT32 len=MIXPACKET_SIZE;
 										tmpCon->pSendQueue->peek(tmpBuff,(UINT32*)&len);
 										len=tmpCon->pSocket->send(tmpBuff,len);
 										if(len>0)

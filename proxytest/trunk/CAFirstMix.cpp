@@ -341,13 +341,13 @@ THREAD_RETURN loopReadFromUsers(void* param)
 	
 		for(;;)
 			{
-				pHashEntry=pChannelList->getFirst();
 				countRead=psocketgroupUsersRead->select(false,1000); //if we sleep her forever, we will not notice new sockets...
 				if(countRead<0)
 					{ //check for error
 						if(pFirstMix->getRestart()||countRead!=E_TIMEDOUT)
 							goto END_THREAD;
 					}
+				pHashEntry=pChannelList->getFirst();
 				while(pHashEntry!=NULL&&countRead>0)
 					{
 						pMuxSocket=pHashEntry->pMuxSocket;
@@ -390,7 +390,7 @@ THREAD_RETURN loopReadFromUsers(void* param)
 													}
 												else
 													{
-														#ifdef _DEBUG
+														#if defined(_DEBUG) && ! defined(__MIX_TEST)
 															CAMsg::printMsg(LOG_DEBUG,"Invalid ID to close from Browser!\n");
 														#endif
 													}
@@ -398,13 +398,16 @@ THREAD_RETURN loopReadFromUsers(void* param)
 										else
 											{
 												pEntry=pChannelList->get(pMuxSocket,pMixPacket->channel);
-												if(pEntry!=NULL)
+												if(pEntry!=NULL&&pMixPacket->flags==CHANNEL_DATA)
 													{
 														pMixPacket->channel=pEntry->channelOut;
 														pCipher=pEntry->pCipher;
 														pCipher->decryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+														pNextMix->send(pMixPacket,tmpBuff);
+														pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
+														pFirstMix->incMixedPackets();
 													}
-												else
+												else if(pEntry==NULL&&(pMixPacket->flags==CHANNEL_OPEN_OLD||pMixPacket->flags==CHANNEL_OPEN_NEW))
 													{
 														pCipher= new CASymCipher();
 														pRSA->decrypt(pMixPacket->data,rsaBuff);
@@ -415,14 +418,13 @@ THREAD_RETURN loopReadFromUsers(void* param)
 														memcpy(pMixPacket->data,rsaBuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
 
 														pChannelList->add(pMuxSocket,pMixPacket->channel,pCipher,&pMixPacket->channel);
-														#ifdef _DEBUG
+														#if defined(_DEBUG) && !defined(__MIX_TEST)
 															CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",pMixPacket->channel);
 														#endif
-														//oMixPacket.channel=lastChannelId++;
+														pNextMix->send(pMixPacket,tmpBuff);
+														pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
+														pFirstMix->incMixedPackets();
 													}
-												pNextMix->send(pMixPacket,tmpBuff);
-												pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
-												pFirstMix->incMixedPackets();
 											}
 									}
 							}
@@ -456,7 +458,6 @@ SINT32 CAFirstMix::loop()
 		m_nUser=0;
 		m_bRestart=false;
 		SINT32 ret;
-//		UINT8 rsaBuff[RSA_SIZE];
 //		UINT32 maxSocketsIn;
 //		osocketgroupAccept.add(m_socketIn);
 //    CASocket** socketsIn;
@@ -489,7 +490,6 @@ SINT32 CAFirstMix::loop()
 		m_pInfoService->start();
 		CAMsg::printMsg(LOG_DEBUG,"InfoService Loop started\n");
 
-//		UINT8 ip[4];
 		UINT8* tmpBuff=new UINT8[MIXPACKET_SIZE];
 		CAMsg::printMsg(LOG_DEBUG,"Starting Message Loop... \n");
 		bool bAktiv;
@@ -499,9 +499,11 @@ SINT32 CAFirstMix::loop()
 		threadAcceptUsers.start(this);
 		
 		//Starting thread for Step 2
-		CAThread threadReadFromUsers;
-		threadReadFromUsers.setMainLoop(loopReadFromUsers);
-		threadReadFromUsers.start(this);
+		 UINT8 ip[4];
+		UINT8 rsaBuff[RSA_SIZE];
+//		CAThread threadReadFromUsers;
+//		threadReadFromUsers.setMainLoop(loopReadFromUsers);
+//		threadReadFromUsers.start(this);
 
 		//Starting thread for Step 4
 		CAThread threadSendToMix;
@@ -571,7 +573,7 @@ SINT32 CAFirstMix::loop()
 // Checking for data from users
 // Now in a separate Thread (see loopReadFromUsers())
 
-/*
+
 				fmHashTableEntry* pHashEntry=m_pChannelList->getFirst();
 				countRead=m_psocketgroupUsersRead->select(false,0);
 				if(countRead>0)
@@ -660,7 +662,7 @@ SINT32 CAFirstMix::loop()
 							}
 						pHashEntry=m_pChannelList->getNext();
 					}
-*/
+
 //Third step
 //Sending to next mix
 
@@ -683,7 +685,7 @@ SINT32 CAFirstMix::loop()
 							break;
 						if(pMixPacket->flags==CHANNEL_CLOSE) //close event
 							{
-								#ifdef _DEBUG
+								#if defined(_DEBUG) && !defined(__MIX_TEST)
 									CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u ... ",pMixPacket->channel);
 								#endif
 								fmChannelList* pEntry=m_pChannelList->get(pMixPacket->channel);
@@ -693,12 +695,13 @@ SINT32 CAFirstMix::loop()
 										pEntry->pHead->pQueueSend->add(tmpBuff,MIXPACKET_SIZE);
 										m_psocketgroupUsersWrite->add(*pEntry->pHead->pMuxSocket);
 										delete pEntry->pCipher;
+	
 										m_pChannelList->remove(pEntry->pHead->pMuxSocket,pEntry->channelIn);
 									}
 							}
 						else
 							{
-								#ifdef _DEBUG
+								#if defined(_DEBUG) && !defined(__MIX_TEST)
 									CAMsg::printMsg(LOG_DEBUG,"Sending Data to Browser!");
 								#endif
 								fmChannelList* pEntry=m_pChannelList->get(pMixPacket->channel);
@@ -725,6 +728,7 @@ SINT32 CAFirstMix::loop()
 												pEntry->bIsSuspended=true;
 												pEntry->pHead->cSuspend++;
 											}
+	
 										incMixedPackets();
 									}
 								else
@@ -768,6 +772,7 @@ SINT32 CAFirstMix::loop()
 																m_pMuxOut->send(pMixPacket,tmpBuff);
 																m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
 															}
+	
 														pEntry=m_pChannelList->getNextChannel(pEntry);
 													}
 												pfmHashEntry->cSuspend=0;
@@ -797,7 +802,7 @@ ERR:
 		m_pQueueSendToMix->add(&b,1);
 		threadAcceptUsers.join();
 		threadSendToMix.join(); //will not join if queue is empty (and so wating)!!!
-		threadReadFromUsers.join(); 
+//		threadReadFromUsers.join(); 
 		fmHashTableEntry* pHashEntry=m_pChannelList->getFirst();
 		while(pHashEntry!=NULL)
 			{
@@ -809,6 +814,7 @@ ERR:
 				while(pEntry!=NULL)
 					{
 						delete pEntry->pCipher;
+	
 						pEntry=m_pChannelList->getNextChannel(pEntry);
 					}
 				pHashEntry=m_pChannelList->getNext();

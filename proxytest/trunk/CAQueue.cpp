@@ -28,10 +28,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "StdAfx.h"
 #include "CAQueue.hpp"
 #include "CAMsg.hpp"
+#include "CAUtil.hpp"
 #include "CAThread.hpp"
 
 CAQueue::~CAQueue()
 	{
+		m_csQueue.lock();
 		while(m_Queue!=NULL)
 			{
 				delete m_Queue->pBuff;
@@ -39,6 +41,7 @@ CAQueue::~CAQueue()
 				m_Queue=m_Queue->next;
 				delete m_lastElem;
 			}
+		m_csQueue.unlock();
 	}
 
 /** Adds data to the Queue.
@@ -49,6 +52,8 @@ CAQueue::~CAQueue()
 	*/
 SINT32 CAQueue::add(const UINT8* buff,UINT32 size)
 	{
+		if(size==0)
+			return E_SUCCESS;
 		if(buff==NULL)
 			return E_UNKNOWN;
 		m_csQueue.lock();
@@ -139,11 +144,14 @@ SINT32 CAQueue::get(UINT8* pbuff,UINT32* psize)
 						return E_SUCCESS;
 					}
 			}
-		memcpy(pbuff,m_Queue->pBuff,space);
-		*psize+=space;
-		m_Queue->size-=space;
-		m_nQueueSize-=space;
-		memmove(m_Queue->pBuff,m_Queue->pBuff+space,m_Queue->size);
+		if(space>0)
+			{
+				memcpy(pbuff,m_Queue->pBuff,space);
+				*psize+=space;
+				m_Queue->size-=space;
+				m_nQueueSize-=space;
+				memmove(m_Queue->pBuff,m_Queue->pBuff+space,m_Queue->size);
+			}
 		m_csQueue.unlock();
 		return E_SUCCESS;
 	}
@@ -233,10 +241,13 @@ SINT32 CAQueue::remove(UINT32* psize)
 						return E_SUCCESS;
 					}
 			}
-		*psize+=space;
-		m_Queue->size-=space;
-		m_nQueueSize-=space;
-		memmove(m_Queue->pBuff,m_Queue->pBuff+space,m_Queue->size);
+		if(space>0)
+			{
+				*psize+=space;
+				m_Queue->size-=space;
+				m_nQueueSize-=space;
+				memmove(m_Queue->pBuff,m_Queue->pBuff+space,m_Queue->size);
+			}
 		m_csQueue.unlock();
 		return E_SUCCESS;
 	}
@@ -262,6 +273,7 @@ THREAD_RETURN producer(void* param)
 						THREAD_RETURN_ERROR;
 					count+=aktSize;
 					pTest->len-=aktSize;
+					msSleep(rand()%100);
 				}
 		if(pTest->pQueue->add(pTest->buff+count,pTest->len)!=E_SUCCESS)
 			THREAD_RETURN_ERROR;
@@ -330,7 +342,6 @@ SINT32 CAQueue::test()
 			return E_UNKNOWN;
 		if(memcmp(source,target,TEST_SIZE)!=0)
 			return E_UNKNOWN;
-		
 		//Multiple Threads....
 		CAThread othreadProducer;
 		CAThread othreadConsumer;
@@ -341,8 +352,8 @@ SINT32 CAQueue::test()
 		t2.buff=target;
 		t2.len=t1.len=TEST_SIZE;
 		t2.pQueue=t1.pQueue=&oQueue;
-		othreadConsumer.start(&t2);
 		othreadProducer.start(&t1);
+		othreadConsumer.start(&t2);
 		othreadProducer.join();
 		othreadConsumer.join();
 		if(memcmp(source,target,TEST_SIZE)!=0)
