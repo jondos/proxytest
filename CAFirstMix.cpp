@@ -572,97 +572,100 @@ SINT32 CAFirstMix::loop()
 // Second Step 
 // Checking for data from users
 // Now in a separate Thread (see loopReadFromUsers())
-
-
-				fmHashTableEntry* pHashEntry=m_pChannelList->getFirst();
-				countRead=m_psocketgroupUsersRead->select(false,0);
-				if(countRead>0)
-					bAktiv=true;
-				while(pHashEntry!=NULL&&countRead>0)
+//Only proccess user data, if queue to next mix is not to long!!
+#define MAX_NEXT_MIX_QUEUE_SIZE 10000000 //10 MByte
+				if(m_pQueueSendToMix->getSize()<MAX_NEXT_MIX_QUEUE_SIZE)
 					{
-						CAMuxSocket* pMuxSocket=pHashEntry->pMuxSocket;
-						if(m_psocketgroupUsersRead->isSignaled(*pMuxSocket))
+			
+						fmHashTableEntry* pHashEntry=m_pChannelList->getFirst();
+						countRead=m_psocketgroupUsersRead->select(false,0);
+						if(countRead>0)
+							bAktiv=true;
+						while(pHashEntry!=NULL&&countRead>0)
 							{
-								countRead--;
-								ret=pMuxSocket->receive(pMixPacket,0);
-								if(ret==SOCKET_ERROR)
+								CAMuxSocket* pMuxSocket=pHashEntry->pMuxSocket;
+								if(m_psocketgroupUsersRead->isSignaled(*pMuxSocket))
 									{
-										((CASocket*)pMuxSocket)->getPeerIP(ip);
-										m_pIPList->removeIP(ip);
-										m_psocketgroupUsersRead->remove(*(CASocket*)pMuxSocket);
-										m_psocketgroupUsersWrite->remove(*(CASocket*)pMuxSocket);
-										fmChannelListEntry* pEntry;
-										pEntry=m_pChannelList->getFirstChannelForSocket(pMuxSocket);
-										while(pEntry!=NULL)
+										countRead--;
+										ret=pMuxSocket->receive(pMixPacket,0);
+										if(ret==SOCKET_ERROR)
 											{
-												m_pMuxOut->close(pEntry->channelOut,tmpBuff);
-												m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
-                        delete pEntry->pCipher;
-												pEntry=m_pChannelList->getNextChannel(pEntry);
-											}
-										ASSERT(pHashEntry->pQueueSend!=NULL,"Send queue is NULL");
-										delete pHashEntry->pQueueSend;
-										m_pChannelList->remove(pMuxSocket);
-										pMuxSocket->close();
-										delete pMuxSocket;
-										decUsers();
-									}
-								else if(ret==MIXPACKET_SIZE)
-									{
-										if(pMixPacket->flags==CHANNEL_CLOSE)
-											{
+												((CASocket*)pMuxSocket)->getPeerIP(ip);
+												m_pIPList->removeIP(ip);
+												m_psocketgroupUsersRead->remove(*(CASocket*)pMuxSocket);
+												m_psocketgroupUsersWrite->remove(*(CASocket*)pMuxSocket);
 												fmChannelListEntry* pEntry;
-												pEntry=m_pChannelList->get(pMuxSocket,pMixPacket->channel);
-												if(pEntry!=NULL)
+												pEntry=m_pChannelList->getFirstChannelForSocket(pMuxSocket);
+												while(pEntry!=NULL)
 													{
 														m_pMuxOut->close(pEntry->channelOut,tmpBuff);
 														m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
-                            delete pEntry->pCipher;
-														m_pChannelList->remove(pMuxSocket,pMixPacket->channel);
+														delete pEntry->pCipher;
+														pEntry=m_pChannelList->getNextChannel(pEntry);
 													}
-												else
-													{
-														#ifdef _DEBUG
-															CAMsg::printMsg(LOG_DEBUG,"Invalid ID to close from Browser!\n");
-														#endif
-													}
+												ASSERT(pHashEntry->pQueueSend!=NULL,"Send queue is NULL");
+												delete pHashEntry->pQueueSend;
+												m_pChannelList->remove(pMuxSocket);
+												pMuxSocket->close();
+												delete pMuxSocket;
+												decUsers();
 											}
-										else
+										else if(ret==MIXPACKET_SIZE)
 											{
-												CASymCipher* pCipher=NULL;
-												fmChannelListEntry* pEntry;
-												pEntry=m_pChannelList->get(pMuxSocket,pMixPacket->channel);
-												if(pEntry!=NULL)
+												if(pMixPacket->flags==CHANNEL_CLOSE)
 													{
-														pMixPacket->channel=pEntry->channelOut;
-														pCipher=pEntry->pCipher;
-														pCipher->decryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+														fmChannelListEntry* pEntry;
+														pEntry=m_pChannelList->get(pMuxSocket,pMixPacket->channel);
+														if(pEntry!=NULL)
+															{
+																m_pMuxOut->close(pEntry->channelOut,tmpBuff);
+																m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
+																delete pEntry->pCipher;
+																m_pChannelList->remove(pMuxSocket,pMixPacket->channel);
+															}
+														else
+															{
+																#ifdef _DEBUG
+																	CAMsg::printMsg(LOG_DEBUG,"Invalid ID to close from Browser!\n");
+																#endif
+															}
 													}
 												else
 													{
-														pCipher= new CASymCipher();
-														m_pRSA->decrypt(pMixPacket->data,rsaBuff);
-														pCipher->setKeyAES(rsaBuff);
-														pCipher->decryptAES(pMixPacket->data+RSA_SIZE,
-																						 pMixPacket->data+RSA_SIZE-KEY_SIZE,
-																						 DATA_SIZE-RSA_SIZE);
-														memcpy(pMixPacket->data,rsaBuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
+														CASymCipher* pCipher=NULL;
+														fmChannelListEntry* pEntry;
+														pEntry=m_pChannelList->get(pMuxSocket,pMixPacket->channel);
+														if(pEntry!=NULL)
+															{
+																pMixPacket->channel=pEntry->channelOut;
+																pCipher=pEntry->pCipher;
+																pCipher->decryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+															}
+														else
+															{
+																pCipher= new CASymCipher();
+																m_pRSA->decrypt(pMixPacket->data,rsaBuff);
+																pCipher->setKeyAES(rsaBuff);
+																pCipher->decryptAES(pMixPacket->data+RSA_SIZE,
+																								 pMixPacket->data+RSA_SIZE-KEY_SIZE,
+																								 DATA_SIZE-RSA_SIZE);
+																memcpy(pMixPacket->data,rsaBuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
 
-														m_pChannelList->add(pMuxSocket,pMixPacket->channel,pCipher,&pMixPacket->channel);
-														#ifdef _DEBUG
-															CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",pMixPacket->channel);
-														#endif
-														//oMixPacket.channel=lastChannelId++;
+																m_pChannelList->add(pMuxSocket,pMixPacket->channel,pCipher,&pMixPacket->channel);
+																#ifdef _DEBUG
+																	CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",pMixPacket->channel);
+																#endif
+																//oMixPacket.channel=lastChannelId++;
+															}
+														m_pMuxOut->send(pMixPacket,tmpBuff);
+														m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
+														incMixedPackets();
 													}
-												m_pMuxOut->send(pMixPacket,tmpBuff);
-												m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
-												incMixedPackets();
 											}
 									}
+								pHashEntry=m_pChannelList->getNext();
 							}
-						pHashEntry=m_pChannelList->getNext();
 					}
-
 //Third step
 //Sending to next mix
 
