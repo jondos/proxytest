@@ -202,7 +202,7 @@ SINT32 CAAccountingBIInterface::sendGetRequest(UINT8 * request)
 
   UINT8 requestF[] = "GET %s HTTP/1.1\r\n\r\n";
   UINT32 len = strlen((char *)requestF) + strlen((char *)request);
-  UINT8 requestS[len+1];
+  UINT8* requestS=new UINT8[len+1];
   sprintf((char *)requestS, (char *)requestF, (char *)request);
   len = strlen((char *)requestS);
 
@@ -214,6 +214,7 @@ SINT32 CAAccountingBIInterface::sendGetRequest(UINT8 * request)
       ret = m_pSslSocket->send(requestS, len);
     }
   while(ret == E_AGAIN);
+	delete requestS;
   if(ret == E_UNKNOWN)
     { // socket error
       return E_UNKNOWN;
@@ -238,11 +239,11 @@ SINT32 CAAccountingBIInterface::sendPostRequest(UINT8 * request, UINT8 * data, U
 
   UINT8 requestF[] = "POST %s HTTP/1.1\r\nContent-length: %d\r\n\r\n";
   UINT32 len = strlen((char *)requestF) + strlen((char *)request) + 30;
-  UINT8 requestS[len];
+  UINT8* requestS=new UINT8[len+1];
   sprintf((char *)requestS, (char *)requestF, (char *)request, dataLen);
   len = strlen((char *)requestS);
   UINT32 bufsize = len + dataLen;
-  UINT8 buf[bufsize];
+  UINT8* buf=new UINT8[bufsize];
   memcpy(buf, requestS, len);
   memcpy(buf+len, data, dataLen);
 
@@ -255,7 +256,9 @@ SINT32 CAAccountingBIInterface::sendPostRequest(UINT8 * request, UINT8 * data, U
       ret = m_pSslSocket->send(buf, bufsize);
     }
   while(ret == E_AGAIN);
-  if(ret == E_UNKNOWN)
+  delete requestS;
+	delete buf;
+	if(ret == E_UNKNOWN)
     { // socket error
       return E_UNKNOWN;
     }
@@ -381,14 +384,16 @@ SINT32 CAAccountingBIInterface::settle(UINT8 *costConfirmation)
 {
   UINT8 requestF[] = "<?xml version=\"1.0\">\n<Confirmations>\n%s</Confirmations>\n";
   UINT32 sendbuflen = strlen((char *)costConfirmation) + strlen((char *)requestF) + 10;
-  UINT8 sendbuf[sendbuflen];
+  UINT8* sendbuf=new UINT8[sendbuflen];
   UINT32 status;
   sprintf((char *)sendbuf, (char *)requestF, (char *)costConfirmation);
   sendPostRequest((UINT8 *)"/settle", sendbuf, strlen((char *)sendbuf));
-  UINT32 responseLen = 500;
-  UINT8 response[responseLen];
+  delete sendbuf;
+	UINT32 responseLen = 500;
+  UINT8* response=new UINT8[responseLen];
   receiveResponse(&status, response, &responseLen);
-  return E_SUCCESS;
+  delete response;
+	return E_SUCCESS;
 }
 
 
@@ -405,11 +410,12 @@ SINT32 CAAccountingBIInterface::update(UINT8 *balanceCert, UINT8 * response, UIN
 {
   UINT8 requestF[] = "<?xml version=\"1.0\">\n<Balances>\n%s</Balances>\n";
   UINT32 sendbuflen = strlen((char *)balanceCert) + strlen((char *)requestF) + 10;
-  UINT8 sendbuf[sendbuflen];
+  UINT8* sendbuf=new UINT8[sendbuflen];
   UINT32 status;
   sprintf((char *)sendbuf, (char *)requestF, (char *)balanceCert);
   sendPostRequest((UINT8 *)"/update", sendbuf, strlen((char *)sendbuf));
-  receiveResponse(&status, response, responseLen);
+  delete sendbuf;
+	receiveResponse(&status, response, responseLen);
   return E_SUCCESS;
 }
 
