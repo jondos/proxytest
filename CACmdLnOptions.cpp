@@ -112,7 +112,12 @@ int CACmdLnOptions::parse(int argc,const char** argv)
   if(target!=NULL)
 	    {
 				char* tmpStr;
-				if((tmpStr=strchr(target,':'))!=NULL)
+				if(target[0]=='/') //UNix Domain Sockaet
+				 {
+					strTargetHost=new char[strlen(target)+1];
+					strcpy(strTargetHost,target);
+				 }
+				else if((tmpStr=strchr(target,':'))!=NULL)
 					{
 						strTargetHost=new char[tmpStr-target+1];
 						(*tmpStr)=0;
@@ -165,13 +170,13 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 	    }
 	if(serverPort!=NULL)
 		{
-			if(serverPort[0]!='/')
+			if(serverPort[0]!='/') //not unix-domain
 				{
 					iServerPort=atol(serverPort);
 				}
 			else
 				{
-					strServerPath=new char[strlen(serverPort)];
+					strServerPath=new char[strlen(serverPort)+1];
 					strcpy(strServerPath,serverPort);
 					free(serverPort);
 				}

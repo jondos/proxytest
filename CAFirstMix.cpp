@@ -410,7 +410,7 @@ SINT32 CAFirstMix::init()
 		else
 			addrNext.setAddr((char*)strTarget,options.getTargetPort());
 		CAMsg::printMsg(LOG_INFO,"Try connecting to next Mix: %s:%u ...\n",strTarget,options.getTargetPort());
-		if(((CASocket*)muxOut)->create()!=E_SUCCESS)
+		if(((CASocket*)muxOut)->create(addrNext.getType())!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Cannot create SOCKET for connection to next Mix!\n");
 				return E_UNKNOWN;
