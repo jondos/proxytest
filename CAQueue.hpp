@@ -48,7 +48,6 @@ class CAQueue
 		public:
 			CAQueue()
 				{
-					InitializeCriticalSection(&m_csQueue);
 					m_Queue=NULL;
 					m_nQueueSize=0;
 				}
@@ -84,7 +83,7 @@ class CAQueue
 		private:
 			QUEUE* m_Queue;
 			QUEUE* m_lastElem;
-			CRITICAL_SECTION m_csQueue;
+			CAMutex m_csQueue;
 			CAConditionVariable m_convarSize;
 			UINT32 m_nQueueSize;
 	};

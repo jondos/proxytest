@@ -29,6 +29,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define __CASOCKETLIST__
 #include "CAMuxSocket.hpp"
 #include "CASymCipher.hpp"
+#include "CAMutex.hpp"
 #include "CAQueue.hpp"
 
 typedef struct connlist
@@ -89,7 +90,7 @@ class CASocketList
 			CONNECTIONLIST* m_Pool;
 			CONNECTIONLIST* m_AktEnumPos;
 			t_MEMBLOCK* m_Memlist;
-			CRITICAL_SECTION cs;
+			CAMutex cs;
 			bool m_bThreadSafe;
 			UINT32 m_Size;
 	};	

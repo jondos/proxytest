@@ -86,8 +86,6 @@ CASocketList::CASocketList(bool bThreadSafe)
 CASocketList::~CASocketList()
 	{
 		clear();
-		if(m_bThreadSafe)
-			DeleteCriticalSection(&cs);
 	}
 
 SINT32 CASocketList::clear()
@@ -110,14 +108,7 @@ SINT32 CASocketList::clear()
 
 SINT32 CASocketList::setThreadSafe(bool b)
 	{
-		if(b!=m_bThreadSafe)
-			{
-				if(m_bThreadSafe)
-					DeleteCriticalSection(&cs);
-				if(b)
-					InitializeCriticalSection(&cs);
-				m_bThreadSafe=b;
-			}
+		m_bThreadSafe=b;
 		return E_SUCCESS;
 	}
 
@@ -132,14 +123,14 @@ SINT32 CASocketList::setThreadSafe(bool b)
 SINT32 CASocketList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue)
 	{
 		if(m_bThreadSafe)
-			EnterCriticalSection(&cs);
+			cs.lock();
 		CONNECTIONLIST* tmp;
 		if(m_Pool==NULL)
 		  {
 				if(increasePool()!=E_SUCCESS)
 					{
 						if(m_bThreadSafe)
-							LeaveCriticalSection(&cs);
+							cs.unlock();
 						return E_UNKNOWN;
 					}
 		   }
@@ -153,21 +144,21 @@ SINT32 CASocketList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQu
 		m_Connections->id=id;
 		m_Size++;
 		if(m_bThreadSafe)
-			LeaveCriticalSection(&cs);
+			cs.unlock();
 		return E_SUCCESS;
 	}
 
 SINT32 CASocketList::add(HCHANNEL in,HCHANNEL out,CASymCipher* pCipher)
 	{
 		if(m_bThreadSafe)
-			EnterCriticalSection(&cs);
+			cs.lock();
 		CONNECTIONLIST* tmp;
 		if(m_Pool==NULL)
 		  {
 				if(increasePool()!=E_SUCCESS)
 					{
 						if(m_bThreadSafe)
-							LeaveCriticalSection(&cs);
+							cs.unlock();
 						return E_UNKNOWN;
 					}
 		  }
@@ -181,7 +172,7 @@ SINT32 CASocketList::add(HCHANNEL in,HCHANNEL out,CASymCipher* pCipher)
 		m_Connections->id=in;
 		m_Size++;
 		if(m_bThreadSafe)
-			LeaveCriticalSection(&cs);
+			cs.unlock();
 		return E_SUCCESS;
 	}
 
@@ -195,7 +186,7 @@ SINT32 CASocketList::add(HCHANNEL in,HCHANNEL out,CASymCipher* pCipher)
 bool	CASocketList::get(HCHANNEL in,CONNECTION* out)
 	{
 		if(m_bThreadSafe)
-			EnterCriticalSection(&cs);
+			cs.lock();
 		CONNECTIONLIST* tmp;
 		tmp=m_Connections;
 		while(tmp!=NULL)
@@ -204,13 +195,13 @@ bool	CASocketList::get(HCHANNEL in,CONNECTION* out)
 					{
 						memcpy(out,tmp,sizeof(CONNECTION));
 						if(m_bThreadSafe)
-							LeaveCriticalSection(&cs);
+							cs.unlock();
 						return true;
 					}
 				tmp=tmp->next;
 			}
 		if(m_bThreadSafe)
-			LeaveCriticalSection(&cs);
+			cs.unlock();
 		return false;
 	}
 
@@ -224,7 +215,7 @@ bool	CASocketList::get(HCHANNEL in,CONNECTION* out)
 bool	CASocketList::get(CONNECTION* in,HCHANNEL out)
 	{
 		if(m_bThreadSafe)
-			EnterCriticalSection(&cs);
+			cs.lock();
 		CONNECTIONLIST* tmp;
 		tmp=m_Connections;
 		while(tmp!=NULL)
@@ -233,13 +224,13 @@ bool	CASocketList::get(CONNECTION* in,HCHANNEL out)
 					{
 						memcpy(in,tmp,sizeof(CONNECTION));
 						if(m_bThreadSafe)
-							LeaveCriticalSection(&cs);
+							cs.unlock();
 						return true;
 					}
 				tmp=tmp->next;
 			}
 		if(m_bThreadSafe)
-			LeaveCriticalSection(&cs);
+			cs.unlock();
 		return false;
 	}
 
@@ -253,7 +244,7 @@ bool	CASocketList::get(CONNECTION* in,HCHANNEL out)
 bool	CASocketList::get(CONNECTION* in,CASocket* pSocket)
 	{
 		if(m_bThreadSafe)
-			EnterCriticalSection(&cs);
+			cs.lock();
 		CONNECTIONLIST* tmp;
 		tmp=m_Connections;
 		while(tmp!=NULL)
@@ -262,20 +253,20 @@ bool	CASocketList::get(CONNECTION* in,CASocket* pSocket)
 					{
 						memcpy(in,tmp,sizeof(CONNECTION));
 						if(m_bThreadSafe)
-							LeaveCriticalSection(&cs);
+							cs.unlock();
 						return true;
 					}
 				tmp=tmp->next;
 			}
 		if(m_bThreadSafe)
-			LeaveCriticalSection(&cs);
+			cs.unlock();
 		return false;
 	}
 
 CASocket* CASocketList::remove(HCHANNEL id)
 	{
 		if(m_bThreadSafe)
-			EnterCriticalSection(&cs);
+			cs.lock();
 		CONNECTIONLIST* tmp,*before;
 		CASocket* ret;
 		tmp=m_Connections;
@@ -295,14 +286,14 @@ CASocket* CASocketList::remove(HCHANNEL id)
 						ret=tmp->pSocket;
 						m_Size--;
 						if(m_bThreadSafe)
-							LeaveCriticalSection(&cs);
+							cs.unlock();
 						return ret;
 					}
 				before=tmp;
 				tmp=tmp->next;
 			}
 		if(m_bThreadSafe)
-			LeaveCriticalSection(&cs);
+			cs.unlock();
 		return NULL;
 	}
 

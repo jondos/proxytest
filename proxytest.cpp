@@ -160,7 +160,7 @@ For Upstream and Downstream different keys are used.
 
 int main(int argc, const char* argv[])
 	{		
-		CASocketAddrINet::init();
+//		CASocketAddrINet::init();
 
 	/*	
 		if(argc>1)
@@ -365,7 +365,7 @@ int main(int argc, const char* argv[])
 //EXIT:
 		delete pRTT;
 		delete pMix;
-		CASocketAddrINet::destroy();
+//		CASocketAddrINet::destroy();
 		#ifdef _WIN32		
 			WSACleanup();
 		#endif

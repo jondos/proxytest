@@ -55,12 +55,11 @@ CASocketGroup::CASocketGroup()
 				}
 			m_max=0;
 		#endif
-		InitializeCriticalSection(&m_csFD_SET);
 	}
 			
 SINT32 CASocketGroup::add(CASocket&s)
 	{
-		EnterCriticalSection(&m_csFD_SET);
+		m_csFD_SET.lock();
 		#ifndef HAVE_POLL
 			#ifndef _WIN32
 					if(m_max<((SOCKET)s)+1)
@@ -76,13 +75,13 @@ SINT32 CASocketGroup::add(CASocket&s)
 			if(m_max<((SOCKET)s)+1)
 				m_max=((SOCKET)s)+1;
 		#endif
-		LeaveCriticalSection(&m_csFD_SET);
+		m_csFD_SET.unlock();
 		return E_SUCCESS;
 	}
 
 SINT32 CASocketGroup::add(CAMuxSocket&s)
 	{
-		EnterCriticalSection(&m_csFD_SET);
+		m_csFD_SET.lock();
 		#ifndef HAVE_POLL
 			#ifndef _WIN32
 					if(m_max<((SOCKET)s)+1)
@@ -98,13 +97,13 @@ SINT32 CASocketGroup::add(CAMuxSocket&s)
 			if(m_max<((SOCKET)s)+1)
 				m_max=((SOCKET)s)+1;
 		#endif
-		LeaveCriticalSection(&m_csFD_SET);
+		m_csFD_SET.unlock();
 		return E_SUCCESS;
 	}
 
 SINT32 CASocketGroup::remove(CASocket&s)
 	{
-		EnterCriticalSection(&m_csFD_SET);
+		m_csFD_SET.lock();
 		#ifndef HAVE_POLL
 //			#ifdef _DEBUG
 //				CAMsg::printMsg(LOG_DEBUG,"CASocketGroutp: Removed SOCKET: %u\n",(SOCKET)s);
@@ -114,13 +113,13 @@ SINT32 CASocketGroup::remove(CASocket&s)
 			m_pollfd_read[(SOCKET)s].fd=-1;
 			m_pollfd_write[(SOCKET)s].fd=-1;			
 		#endif
-		LeaveCriticalSection(&m_csFD_SET);
+		m_csFD_SET.unlock();
 		return E_SUCCESS;
 	}
 
 SINT32 CASocketGroup::remove(CAMuxSocket&s)
 	{
-		EnterCriticalSection(&m_csFD_SET);
+		m_csFD_SET.lock();
 		#ifndef HAVE_POLL
 //			#ifdef _DEBUG
 //				CAMsg::printMsg(LOG_DEBUG,"CASocketGroutp: Removed SOCKET: %u\n",(SOCKET)s);
@@ -130,16 +129,16 @@ SINT32 CASocketGroup::remove(CAMuxSocket&s)
 			m_pollfd_read[(SOCKET)s].fd=-1;
 			m_pollfd_write[(SOCKET)s].fd=-1;			
 		#endif
-		LeaveCriticalSection(&m_csFD_SET);
+		m_csFD_SET.unlock();
 		return E_SUCCESS;
 	}
 
 SINT32 CASocketGroup::select()
 	{
 		#ifndef HAVE_POLL
-			EnterCriticalSection(&m_csFD_SET);
+			m_csFD_SET.lock();
 			memcpy(&m_signaled_set,&m_fdset,sizeof(fd_set));
-			LeaveCriticalSection(&m_csFD_SET);
+			m_csFD_SET.unlock();
 			#ifdef _DEBUG
 				#ifdef _WIN32
 						int ret=::select(0,&m_signaled_set,NULL,NULL,NULL);
@@ -168,9 +167,9 @@ SINT32 CASocketGroup::select(bool bWrite,UINT32 ms)
 	{
 		SINT32 ret;
 		#ifndef HAVE_POLL
-			EnterCriticalSection(&m_csFD_SET);
+			m_csFD_SET.lock();
 			memcpy(&m_signaled_set,&m_fdset,sizeof(fd_set));
-			LeaveCriticalSection(&m_csFD_SET);
+			m_csFD_SET.unlock();
 			fd_set* set_read,*set_write;
 			timeval ti;
 			ti.tv_sec=0;

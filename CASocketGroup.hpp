@@ -28,13 +28,13 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CASOCKETGROUP__
 #define __CASOCKETGROUP__
 #include "CAMuxSocket.hpp"
+#include "CAMutex.hpp"
 class CASocketGroup
 	{
 		public:
 			CASocketGroup();
 			~CASocketGroup()
 				{
-					DeleteCriticalSection(&m_csFD_SET);
 					#ifdef HAVE_POLL
 						delete[] m_pollfd_read;
 						delete[] m_pollfd_write;
@@ -97,6 +97,6 @@ class CASocketGroup
 				int m_max;
 				bool m_bWriteQueried;
 			#endif
-			CRITICAL_SECTION m_csFD_SET;
+			CAMutex m_csFD_SET;
 	};
 #endif

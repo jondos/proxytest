@@ -29,6 +29,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASignature.hpp"
 #include "CAFirstMix.hpp"
 #include "CAThread.hpp"
+#include "CAMutex.hpp"
 class CAInfoService
 	{
 		public:
@@ -50,7 +51,7 @@ class CAInfoService
 			SINT32 iTraffic; 
 			//UINT32 m_MixedPackets;
 			bool bRun;
-			CRITICAL_SECTION csLevel;
+			CAMutex csLevel;
 			CASignature* pSignature;
 			CAFirstMix* m_pFirstMix;
 			CAThread m_threadRunLoop;

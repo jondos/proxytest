@@ -30,6 +30,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define __CAMUXSOCKET__
 #include "CASocket.hpp"
 #include "CASymCipher.hpp"
+#include "CAMutex.hpp"
 
 typedef UINT32 HCHANNEL;
 #define MIX_PAYLOAD_HTTP  0 
@@ -92,8 +93,6 @@ class CAMuxSocket
 			~CAMuxSocket()
 				{
 					delete m_Buff;
-					DeleteCriticalSection(&csSend);
-					DeleteCriticalSection(&csReceive);
 				}
 			SINT32 accept(UINT16 port);
 			SINT32 accept(CASocketAddr & oAddr);
@@ -110,14 +109,6 @@ class CAMuxSocket
 			operator SOCKET(){return (SOCKET)m_Socket;}
 			SOCKET getSocket(){return (SOCKET)m_Socket;}
 
-			/*SINT32 getSendSpace()
-				{
-					SINT32 s=m_Socket.getSendSpace();
-					if(s<0)
-						return E_UNKNOWN;
-					return s/MIXPACKET_SIZE;
-				}
-			*/										
 			SINT32 setCrypt(bool b);
 		private:
 				CASocket m_Socket;
@@ -126,7 +117,7 @@ class CAMuxSocket
 				CASymCipher m_oCipherIn;
 				CASymCipher m_oCipherOut;
 				bool m_bIsCrypted;
-				CRITICAL_SECTION csSend;
-				CRITICAL_SECTION csReceive;
+				CAMutex csSend;
+				CAMutex csReceive;
 	};
 #endif
