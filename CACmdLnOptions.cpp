@@ -574,12 +574,8 @@ UINT16 CACmdLnOptions::getInfoServerPort()
     
 SINT32 CACmdLnOptions::getInfoServerHost(UINT8* host,UINT32 len)
   {
-		if(strInfoServerHost==NULL)
-				return E_UNKNOWN;
-		if(len<=(UINT32)strlen(strInfoServerHost))
-				{
-					return E_UNKNOWN;		
-				}
+		if((strInfoServerHost==NULL)||(len<=(UINT32)strlen(strInfoServerHost)))
+			return E_UNKNOWN;
 		strcpy((char*)host,strInfoServerHost);
 		return E_SUCCESS;
   }
@@ -640,12 +636,22 @@ bool CACmdLnOptions::isLocalProxy()
 			return bLocalProxy;
     }
 
-SINT32 CACmdLnOptions::getMixXml(UINT8* strxml,UINT32* len)
+/** Copies the bytes of the XML tree describing the Mix into buffXml. There is no
+	*	terminatin '0' appended!
+	* @param buffXml destination byte array
+	*	@param len size of the destination byte array
+	*					on return the number of copied bytes
+	*	@retval E_SUCCESS, if it was successful
+	* @retval E_UNKNOWN, in case of an error (for instance if the destination buffer is to small)
+*/
+SINT32 CACmdLnOptions::getMixXml(UINT8* buffXml,UINT32* len)
 	{
-		UINT32 strMixXmlLen=strlen(m_strMixXml);
-		if(strxml==NULL||m_strMixXml==NULL||len==NULL||*len<strMixXmlLen)
+		if(buffXml==NULL||m_strMixXml==NULL||len==NULL)
 			return E_UNKNOWN;
-		memcpy(strxml,m_strMixXml,strMixXmlLen);
+		UINT32 strMixXmlLen=strlen(m_strMixXml);
+		if(*len<strMixXmlLen)
+			return E_UNKNOWN;
+		memcpy(buffXml,m_strMixXml,strMixXmlLen);
 		*len=strMixXmlLen;
 		return E_SUCCESS;
 	}

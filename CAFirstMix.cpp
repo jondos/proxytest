@@ -626,7 +626,9 @@ SINT32 CAFirstMix::loop()
 											}
 										else if(ret==MIXPACKET_SIZE)
 											{
-												pHashEntry->trafficIn++;
+												#ifdef LOG_CHANNEL
+													pHashEntry->trafficIn++;
+												#endif
 												if(pMixPacket->flags==CHANNEL_DUMMY)
 													{
 														pMuxSocket->send(pMixPacket,tmpBuff);
@@ -798,7 +800,9 @@ SINT32 CAFirstMix::loop()
 								ret=((CASocket*)pfmHashEntry->pMuxSocket)->send(tmpBuff,len);
 								if(ret>0)
 									{
-										pfmHashEntry->trafficOut++;
+										#ifdef LOG_CHANNEL
+											pfmHashEntry->trafficOut++;
+										#endif
 										pfmHashEntry->pQueueSend->remove((UINT32*)&ret);
 #define USER_SEND_BUFFER_RESUME 10000
 										if(pfmHashEntry->cSuspend>0&&
