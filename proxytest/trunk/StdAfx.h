@@ -57,8 +57,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
     #define THREAD_RETURN_SUCCESS return
     #define sleep(i) Sleep(i*1000)
 		#define GETERROR (WSAGetLastError())
-		#define E_TIMEDOUT WSAETIMEDOUT
-		#define E_CONNREFUSED WSAECONNREFUSED
+		#define ERR_INTERN_TIMEDOUT WSAETIMEDOUT
+		#define ERR_INTERN_CONNREFUSED WSAECONNREFUSED
 		#define MSG_DONTWAIT 0
 		#define HAVE_FIONREAD
 		#define msleep(i) Sleep(i) 
@@ -152,8 +152,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
     #define THREAD_RETURN_ERROR return(NULL)
     #define THREAD_RETURN_SUCCESS return (NULL)
 		#define GETERROR (errno) 
-		#define E_TIMEDOUT ETIMEDOUT
-		#define E_CONNREFUSED ECONNREFUSED
+		#define ERR_INTERN_TIMEDOUT ETIMEDOUT
+		#define ERR_INTERN_CONNREFUSED ECONNREFUSED
 		#ifdef __sgi
 			#undef HAVE_VSNPRINTF
 			#include <alloca.h>
@@ -212,6 +212,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define E_UNSPECIFIED -100 // A Parameter was not specified/not set
 #define E_QUEUEFULL -200 // If a Send Queue contains more data then a defined number
 #define E_AGAIN -300 //If something was'nt completed und should request again later..
+#define E_TIMEDOUT -301 //An opertion has timed out
 #include <assert.h>
 #include <stdio.h>
 #include <time.h>

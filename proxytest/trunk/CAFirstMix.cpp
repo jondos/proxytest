@@ -531,6 +531,7 @@ SINT32 CAFirstMix::loop()
 								oMuxChannelList.add(pnewMuxSocket);
 								nUser++;
 								oInfoService.setLevel(nUser,-1,-1);
+								oInfoService.setMixedPackets(m_MixedPackets);
 								oSocketGroup.add(*pnewMuxSocket);
 							}
 					}
@@ -591,6 +592,7 @@ SINT32 CAFirstMix::loop()
 															}
 														LeaveCriticalSection(&csResume);
 													}
+												m_MixedPackets++;
 											}
 										else
 											{
@@ -692,6 +694,7 @@ SINT32 CAFirstMix::loop()
 													}
 												nUser--;
 												oInfoService.setLevel(nUser,-1,-1);
+												oInfoService.setMixedPackets(m_MixedPackets);
 											}
 										else if(ret==E_AGAIN)
 											{
@@ -746,6 +749,7 @@ SINT32 CAFirstMix::loop()
 																CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Restarting!\n");									
 																goto ERR;
 															}
+														m_MixedPackets++;
 												}
 											}
 									}

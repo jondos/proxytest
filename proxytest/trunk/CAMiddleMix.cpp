@@ -380,12 +380,14 @@ SINT32 CAMiddleMix::loop()
 					}
 				if(oSocketGroup.isSignaled(muxIn))
 					{
-						ret=muxIn.receive(&oMuxPacket);
+						ret=muxIn.receive(&oMuxPacket,0);
 						if(ret==SOCKET_ERROR)
 							{
 								CAMsg::printMsg(LOG_CRIT,"Fehler beim Empfangen -- Exiting!\n");
 								goto ERR;
 							}
+						if(ret==E_AGAIN)
+							goto NEXT;
 						if(!oSocketList.get(oMuxPacket.channel,&oConnection))
 							{
 								if(oMuxPacket.flags==CHANNEL_OPEN)
@@ -423,15 +425,17 @@ SINT32 CAMiddleMix::loop()
 									}
 							}
 					}
-				
+NEXT:				
 				if(oSocketGroup.isSignaled(muxOut))
 					{
-						ret=muxOut.receive(&oMuxPacket);
+						ret=muxOut.receive(&oMuxPacket,0);
 						if(ret==SOCKET_ERROR)
 							{
 								CAMsg::printMsg(LOG_CRIT,"Fehler beim Empfangen -- Exiting!\n");
 								goto ERR;
 							}
+						if(ret==E_AGAIN)
+							continue;
 						if(oSocketList.get(&oConnection,oMuxPacket.channel))
 							{
 								if(oMuxPacket.flags!=CHANNEL_CLOSE)

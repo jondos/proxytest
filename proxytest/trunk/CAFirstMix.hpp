@@ -38,7 +38,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 class CAFirstMix:public CAMix,CASocketASyncSendResume
 	{
 		public:
-			CAFirstMix(){InitializeCriticalSection(&csResume);}
+			CAFirstMix(){InitializeCriticalSection(&csResume);m_MixedPackets=0;}
 			virtual ~CAFirstMix(){DeleteCriticalSection(&csResume);}
 		private:
 			SINT32 loop();
@@ -55,6 +55,7 @@ class CAFirstMix:public CAMix,CASocketASyncSendResume
 #else
 			UINT8* mKeyInfoBuff;
 			UINT16 mKeyInfoSize;
+			UINT32 m_MixedPackets;
 			CAASymCipher mRSA;
 			CASignature mSignature;
 #endif

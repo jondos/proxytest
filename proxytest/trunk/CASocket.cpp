@@ -118,8 +118,8 @@ SINT32 CASocket::connect(LPCASOCKETADDR psa,UINT retry,UINT32 time)
 						#ifdef _DEBUG
 						 CAMsg::printMsg(LOG_DEBUG,"Con-Error: %i\n",err);
 						#endif
-						if(err!=E_TIMEDOUT&&err!=E_CONNREFUSED)
-							return SOCKET_ERROR;
+						if(err!=ERR_INTERN_TIMEDOUT&&err!=ERR_INTERN_CONNREFUSED)
+							return SOCKET_ERROR; //Should be better.....
 						#ifdef _DEBUG
 							CAMsg::printMsg(LOG_DEBUG,"Cannot connect... retrying\n");
 						#endif						

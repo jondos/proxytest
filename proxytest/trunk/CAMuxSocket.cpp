@@ -242,21 +242,11 @@ SINT32 CAMuxSocket::receive(MUXPACKET* pPacket)
 		pPacket->flags=ntohs(pPacket->flags);
 		return MUXPACKET_SIZE;
 	}
-
+/**Trys to receive a Mix-Packet. If after timout milliseconds not a whole packet is available
+* E_AGAIN will be returned. In this case you should later try to get the rest of the packet
+*/
 SINT32 CAMuxSocket::receive(MUXPACKET* pPacket,UINT32 timeout)
 	{
-/*		SINT32 ret=m_Socket.receiveFully((UINT8*)pPacket,MUXPACKET_SIZE,timeout);
-		if(ret==E_SUCCESS)
-			{
-				pPacket->channel=ntohl(pPacket->channel);
-				pPacket->flags=ntohs(pPacket->flags);
-				return MUXPACKET_SIZE;
-			}
-		if(ret==E_TIMEDOUT)
-			return E_TIMEDOUT;
-		return SOCKET_ERROR;
-*/
-
 		SINT32 len=MUXPACKET_SIZE-m_aktBuffPos;
 		SINT32 ret=m_Socket.receive(m_Buff+m_aktBuffPos,len);
 		if(ret<=0)
