@@ -110,7 +110,7 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 						if(memcmp(entry->ip,ip,2)==0) //we have found the entry
 							{
 								#ifdef PSEUDO_LOG
-									CAMsg::printMsg(LOG_DEBUG,"An other Connection from IP-Address: {%u.%u.%u.%u} !\n",ip[0],ip[1],ip[2],ip[3]);
+									CAMsg::printMsg(LOG_DEBUG,"Inserting IP-Address: {%u.%u.%u.%u} !\n",ip[0],ip[1],ip[2],ip[3]);
 								#endif
 								if(entry->count>=m_allowedConnections) //an Attack...
 									{
