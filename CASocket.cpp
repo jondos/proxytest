@@ -30,7 +30,7 @@ int CASocket::create()
 		return 0;
 	}
 
-SINT32 CASocket::listen(LPSOCKETADDR psa)
+SINT32 CASocket::listen(LPCASOCKETADDR psa)
 	{
 		localPort=-1;
 		if(m_Socket==0&&create()==SOCKET_ERROR)
@@ -61,12 +61,12 @@ int CASocket::accept(CASocket &s)
 		return 0;
 	}
 			
-int CASocket::connect(LPSOCKETADDR psa)
+int CASocket::connect(LPCASOCKETADDR psa)
 	{
 		return connect(psa,1,0);
 	}
 
-int CASocket::connect(LPSOCKETADDR psa,UINT retry,UINT32 time)
+int CASocket::connect(LPCASOCKETADDR psa,UINT retry,UINT32 time)
 	{
 		localPort=-1;
 		if(m_Socket==0&&create()==SOCKET_ERROR)

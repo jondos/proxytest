@@ -11,9 +11,10 @@ class CASocketAddr:public sockaddr_in
 			UINT16 getPort();
 			SINT32 getHostName(UINT8* buff,UINT32 len);
 			static SINT32 getLocalHostName(UINT8* buff,UINT32 len);
+			static SINT32 getLocalHostIP(UINT8* ip);
 			operator LPSOCKADDR(){return (::LPSOCKADDR)this;}
 
 	};
 
-typedef CASocketAddr* LPSOCKETADDR;
+typedef CASocketAddr* LPCASOCKETADDR;
 #endif
