@@ -34,12 +34,12 @@ CASocketAddr::CASocketAddr()
 		sin_addr.s_addr=0;
 	}
 
-CASocketAddr::CASocketAddr(char* szIP,unsigned short port)
+CASocketAddr::CASocketAddr(char* szIP,UINT16 port)
 	{
 		setAddr(szIP,port);
 	}
 
-int CASocketAddr::setAddr(char* szIP,unsigned short port)
+int CASocketAddr::setAddr(char* szIP,UINT16 port)
 	{
 		sin_family=AF_INET;
 		sin_port=htons(port);
@@ -55,7 +55,7 @@ int CASocketAddr::setAddr(char* szIP,unsigned short port)
 		return 0;
 	}
 			
-CASocketAddr::CASocketAddr(unsigned short port)
+CASocketAddr::CASocketAddr(UINT16 port)
 	{
 		sin_family=AF_INET;
 		sin_port=htons(port);

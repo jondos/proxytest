@@ -40,7 +40,7 @@ CAMuxSocket::CAMuxSocket()
 		bIsTunneld=false;
 	}
 	
-int CAMuxSocket::useTunnel(char* proxyhost,unsigned short proxyport)
+int CAMuxSocket::useTunnel(char* proxyhost,UINT16 proxyport)
 	{
 		m_szTunnelHost=new char[strlen(proxyhost)+1];
 		strcpy(m_szTunnelHost,proxyhost);
@@ -49,7 +49,7 @@ int CAMuxSocket::useTunnel(char* proxyhost,unsigned short proxyport)
 		return 0;
 	}
 
-int CAMuxSocket::accept(unsigned short port)
+int CAMuxSocket::accept(UINT16 port)
 	{
 		if(!bIsTunneld)
 			{

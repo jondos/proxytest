@@ -31,6 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CACmdLnOptions.hpp"
 #include "CAUtil.hpp"
 extern CACmdLnOptions options;
+
 THREAD_RETURN RoundTripTimeLoop(void *p)
 	{
 		CARoundTripTime* pRTT=(CARoundTripTime*)p;
