@@ -7,7 +7,7 @@
 #include "CASocketGroup.hpp"
 #include "CASocketAddr.hpp"
 #include "CACmdLnOptions.hpp"
-
+#include "CAMsg.hpp"
 CRITICAL_SECTION csClose;
 typedef struct
 {
@@ -29,194 +29,12 @@ typedef struct
 		CAMixSocket* in;
 		CASocket* out;
 	}CAMixToSocket;
-/*
-int main(int argc, char* argv[])
-	{
-		int err=0;
-		#ifdef _WIN32
-		WSADATA wsadata;
-		err=WSAStartup(0x0202,&wsadata);
-		#endif
-	fd_set read_set;
-	FD_ZERO(&read_set);
-	SOCKET socketIn=socket(AF_INET,SOCK_STREAM,0);
-	sockaddr_in addrIn;
-	char hostname[50];
-	err=gethostname(hostname,50);
-	HOSTENT* hostent=gethostbyname(hostname);
-	addrIn.sin_family=AF_INET;
-	addrIn.sin_port=htons(1999);
-	memcpy(&addrIn.sin_addr,hostent->h_addr_list[0],hostent->h_length);
-
-	hostent=gethostbyname("anon.inf.tu-dresden.de");
-	sockaddr_in addrSquid;
-	addrSquid.sin_family=AF_INET;
-	addrSquid.sin_port=htons(3128);
-	memcpy(&addrSquid.sin_addr,hostent->h_addr_list[0],hostent->h_length);
-	err=bind(socketIn,(sockaddr*)&addrIn,sizeof(addrIn));
-	err=listen(socketIn,SOMAXCONN);
-	FD_SET(socketIn,&read_set);
-	fd_set tmp_set;
-	SOCKET intoout[10000];
-	memset(intoout,0,sizeof(intoout));
-#define BUFF_SIZE 65000
-	char buff[BUFF_SIZE];
-	time_t t=time(NULL);
-	strftime(buff,BUFF_SIZE,"%Y%m%d-%H%M%S",localtime(&t));
-	int handle=open(buff,_O_BINARY|_O_CREAT|_O_RDWR,S_IWRITE);
-	while(!_kbhit())
-		{
-			memcpy(&tmp_set,&read_set,sizeof(FD_SET));
-			int waiting=select(0,&tmp_set,NULL,NULL,NULL);
-			if(FD_ISSET(socketIn,&tmp_set))
-				{
-					SOCKET newConn=accept(socketIn,NULL,NULL);
-					SOCKET newOut=socket(AF_INET,SOCK_STREAM,0);
-					err=connect(newOut,(sockaddr*)&addrSquid,sizeof(addrSquid));
-					intoout[newConn]=newOut;
-					intoout[newOut]=newConn;
-					FD_SET(newConn,&read_set);
-					FD_SET(newOut,&read_set);
-					waiting--;
-				}
-			SOCKET i=10;
-			while(waiting>0&&i<4096)
-				{
-					i++;
-					if(FD_ISSET(i,&tmp_set)&&i!=socketIn)
-						{
-							long len=recv(i,buff,BUFF_SIZE,0);
-							if(len==SOCKET_ERROR)
-								{
-									err=WSAGetLastError();
-									if(err==WSAECONNRESET||err==WSAESHUTDOWN)
-										{
-											shutdown(i,SD_BOTH);
-											shutdown(intoout[i],SD_BOTH);
-											closesocket(i);
-											closesocket(intoout[i]);
-											FD_CLR(i,&read_set);
-											FD_CLR(intoout[i],&read_set);
-											intoout[intoout[i]]=0;
-											intoout[i]=0;
-										}
-									else{	
-									printf("Receive Error: %u",err);
-									LPVOID lpMsgBuf;
-									FormatMessage( 
-												FORMAT_MESSAGE_ALLOCATE_BUFFER | 
-												FORMAT_MESSAGE_FROM_SYSTEM | 
-												FORMAT_MESSAGE_IGNORE_INSERTS,
-												NULL,
-												err,
-												MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-												(LPTSTR) &lpMsgBuf,
-												0,
-												NULL 
-										);
-									printf("%s\n", (LPCTSTR)lpMsgBuf);
-									LocalFree( lpMsgBuf );
-									}
- 								}
-							else if(len==0)
-								{
-									shutdown(i,SD_BOTH);
-									shutdown(intoout[i],SD_BOTH);
-									closesocket(i);
-									closesocket(intoout[i]);
-									FD_CLR(i,&read_set);
-									FD_CLR(intoout[i],&read_set);
-									intoout[intoout[i]]=0;
-									intoout[i]=0;
-								}
-							else
-								{
-									log proto;
-									proto.len=len;
-									proto.time=time(NULL);
-									write(handle,&proto,sizeof(proto));
-									long index=0;
-									while(len>1000)
-										{
-											long s=send(intoout[i],buff+index,1000,0);
-											len-=s;
-											index+=s;
-										}
-									send(intoout[i],buff+index,len,0);
-								}
-
-							waiting--;
-						}
-				}
-		}
-	shutdown(socketIn,SD_BOTH);
-	closesocket(socketIn);
-	for(SOCKET i=0;i<10000;i++)
-		{
-			if(intoout[i]!=0)
-				{
-					shutdown(i,SD_BOTH);
-					closesocket(i);
-				}
-		}
-	close(handle);
-	#ifdef _WIN32
-	WSACleanup();
-	#endif
-	return 0;
-}
-*/
-/*
-void proxy(void* tmpSocket)
-	{
-		CASocket* inSocket=(CASocket*)tmpSocket;	
-		CASocket outSocket;
-		if(outSocket.connect(&socketAddrSquid)==SOCKET_ERROR)
-			{
-				delete inSocket;
-				return;
-			}
-		CASocketGroup socketGroup;
-		socketGroup.add(*inSocket);
-		socketGroup.add(outSocket);
-		char buff[1000];
-		while(true)
-			{
-				socketGroup.select();
-				if(socketGroup.isSignaled(*inSocket))
-					{
-						int len=inSocket->receive(buff,1000);
-						if(len==SOCKET_ERROR||len==0)
-							{
-								if(len==SOCKET_ERROR)printf("Socket Error...\n");
-								inSocket->close();
-								outSocket.close();
-								break;
-							}
-						outSocket.send(buff,len);
-					}
-				if(socketGroup.isSignaled(outSocket))
-					{
-						int len=outSocket.receive(buff,1000);
-						if(len==SOCKET_ERROR||len==0)
-							{
-								if(len==SOCKET_ERROR)printf("Socket Error...\n");
-								inSocket->close();
-								outSocket.close();
-								break;
-							}
-						inSocket->send(buff,len);
-					}
-			}
-		delete inSocket;
-	}
-*/
 
 #ifndef _WIN32
 	#ifdef _DEBUG 
 		void signal_broken_pipe( int sig)
 			{
-				printf("Hm.. Broken Pipe.... How cares!\n");
+				CAMsg::printMsg(LOG_WARNING,"Hm.. Broken Pipe.... How cares!\n");
 				signal(SIGPIPE,signal_broken_pipe);
 			}
 	#endif
@@ -229,7 +47,7 @@ THREAD_RETURN proxytomix(void* tmpPair)
 		char* buff=new char[1001];
 		if(buff==NULL)
 		    {
-					printf("No more Memory!\n");
+					CAMsg::printMsg(LOG_ERR,"No more Memory!\n");
 					THREAD_RETURN_ERROR;
 		    }    
 		while(true)
@@ -251,7 +69,7 @@ THREAD_RETURN proxytomix(void* tmpPair)
 		delete (CASocketToMix*)tmpPair;
 		LeaveCriticalSection(&csClose);
 #ifdef _DEBUG
-		printf("Thread terminated\n");
+		CAMsg::printMsg(LOG_DEBUG,"Thread terminated\n");
 #endif
 		THREAD_RETURN_SUCCESS;
 	}
@@ -263,7 +81,7 @@ THREAD_RETURN mixtoproxy(void* tmpPair)
 		char* buff=new char[1001];
 		if(buff==NULL)
 		    {
-					printf("Out of Memory!\n");
+					CAMsg::printMsg(LOG_ERR,"Out of Memory!\n");
 					THREAD_RETURN_ERROR;
 		    }
 		while(true)
@@ -285,7 +103,7 @@ THREAD_RETURN mixtoproxy(void* tmpPair)
 		delete (CAMixToSocket*)tmpPair;
 		LeaveCriticalSection(&csClose);
 #ifdef _DEBUG
-		printf("Thread terminated\n");
+		CAMsg::printMsg(LOG_DEBUG,"Thread terminated\n");
 #endif
 		THREAD_RETURN_SUCCESS;
 	}
@@ -297,6 +115,7 @@ int main(int argc, const char* argv[])
 	    options.parse(argc,argv);
 	    if(options.getDaemon())
 		{
+		    CAMsg::setOptions(MSG_LOG);
 		    pid_t pid;
 		    pid=fork();
 		    if(pid!=0)
@@ -305,6 +124,7 @@ int main(int argc, const char* argv[])
 		    chdir("/");
 		    umask(0);		    
 		}
+	    CAMsg::printMsg(LOG_INFO,"Anon proxy started!\n");
 	    char strTargetHost[255];
 	    options.getTargetHost(strTargetHost,255);
 #ifdef _DEBUG
@@ -322,7 +142,7 @@ int main(int argc, const char* argv[])
 		CASocket socketIn;
 		if(socketIn.listen(&socketAddrIn)==SOCKET_ERROR)
 		    {
-			printf("Cannot listen\n");
+			CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
 			exit(-1);
 		    }
 //		time_t t=time(NULL);
@@ -347,7 +167,7 @@ int main(int argc, const char* argv[])
 				CASocketToMix* tmpPair1=new CASocketToMix();
 				if(tmpPair2==NULL||tmpPair1==NULL)
 				    {
-					printf("Less memory!\n");
+					CAMsg::printMsg(LOG_ERR,"Less memory!\n");
 					exit(-1);
 				    }
 				tmpPair1->in=new CASocket();
@@ -381,9 +201,7 @@ int main(int argc, const char* argv[])
 				    err=pthread_create(&p1,NULL,proxytomix,tmpPair1);
 				    if(err!=0)
 					{
-					    printf("Can't create Thread 1 - Error:%i\n",err);
-//					    printf("EAGAIN:%i\n",EAGAIN);
-//					    printf("MAxThreads:%u\n",PTHREAD_THREADS_MAX);
+					    CAMsg::printMsg(LOG_WARNING,"Can't create Thread 1 - Error:%i\n",err);
 					    sleep(1);
 					    continue;
 					    //exit(-2);
@@ -391,19 +209,16 @@ int main(int argc, const char* argv[])
 				    err=pthread_create(&p2,NULL,mixtoproxy,tmpPair2);
 				    if(err!=0)	
 					{
-					    printf("Can't create Thread 2 - Error:%i\n",err);
-//					    printf("EAGAIN:%i\n",EAGAIN);
-//					    printf("MAxThreads:%u\n",PTHREAD_THREADS_MAX);
-					    //exit(-2);
+					    CAMsg::printMsg(LOG_WARNING,"Can't create Thread 2 - Error:%i\n",err);
 					    sleep(1);
 					    continue;
 					}
 				#endif
 #ifdef _DEBUG
-				printf("%i\n",sockets);
+				CAMsg::printMsg(LOG_DEBUG,"%i\n",sockets);
 #endif
 			}
-		printf("Exiting...\n");	
+		CAMsg::printMsg(LOG_INFO,"Exiting...\n");	
 		socketIn.close();
 //	close(handle);
 #ifdef _WIN32		

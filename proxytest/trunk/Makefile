@@ -14,6 +14,7 @@ OBJS_ALL=CASocket.o\
 	CASocketAddr.o\
 	CASocketList.o\
 	CACmdLnOptions.o\
+	CAMsg.o\
 	proxytest.o
 
 OBJS=$(OBJS_ALL)
@@ -21,7 +22,7 @@ OBJS=$(OBJS_ALL)
 .cpp.o:
 	$(CC) -c $(CPPFLAGS) $(DEBUG) $< $(LDFLAGS) -o $@
 
-popt.a:
+popt.a: ./popt/popt.c ./popt/poptparse.c ./popt/findme.c
 	$(CC) -c  $(DEBUG) -DHAVE_STRERROR ./popt/popt.c -o ./popt/popt.o
 	$(CC) -c  $(DEBUG) -DHAVE_STRERROR ./popt/poptparse.c -o ./popt/poptparse.o
 	$(CC) -c  $(DEBUG) -DHAVE_STRERROR ./popt/findme.c -o ./popt/findme.o

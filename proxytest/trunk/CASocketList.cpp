@@ -32,7 +32,6 @@ int CASocketList::add(CASocket* pSocket)
 		int ret;
 		if(pool==NULL)
 		    {
-			printf("CASocketList - add -out of pool!\n");
 			ret=SOCKET_ERROR;
 		    }
 		else
