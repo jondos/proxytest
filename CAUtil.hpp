@@ -161,3 +161,13 @@ inline void print64(UINT8* buff,UINT64& op)
 #endif
 
 UINT8* readFile(UINT8* name,UINT32* size);
+
+/*
+ Timestamp related functions
+ */
+UINT16 currentTimestamp(UINT8* buff);
+ 
+/*
+ Checking for duplicates
+*/
+bool validTimestampAndFingerprint(UINT8* fingerprint, UINT16 len, UINT8* timestamp_buff);

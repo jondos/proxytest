@@ -35,6 +35,28 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketAddrINet.hpp"
 
 extern CACmdLnOptions options;
+// signals the main loop whether to capture or replay packets
+bool CALocalProxy::bCapturePackets;
+bool CALocalProxy::bReplayPackets;
+int CALocalProxy::iCapturedPackets;
+
+// Signal handler for SIGUSR1.
+// This starts the capture with the next channel-open message.
+void SIGUSR1_handler(int signum)
+	{
+		CAMsg::printMsg(LOG_DEBUG,"Starting to capture packets for replay attack.\n");
+		CALocalProxy::bCapturePackets = true;
+		CALocalProxy::iCapturedPackets = 0;
+	}
+
+// Signal handler for SIGUSR2.
+// This replays the currently captured packets.
+void SIGUSR2_handler(int signum)
+	{
+		CAMsg::printMsg(LOG_DEBUG,"Starting replay of packets.\n");
+		CALocalProxy::bReplayPackets = true;
+	}
+
 
 SINT32 CALocalProxy::initOnce()
 	{
@@ -43,11 +65,14 @@ SINT32 CALocalProxy::initOnce()
 				CAMsg::printMsg(LOG_CRIT,"No Listener Interface spezified!\n");
 				return E_UNKNOWN;
 			}
-		if(options.getListenerInterfaceCount()<1)
-		  {
-				CAMsg::printMsg(LOG_CRIT,"No Listener Interface specified!\n");
-				return E_UNKNOWN;
-			}
+
+		bCapturePackets = bReplayPackets = false;
+		#if defined(REPLAY_DETECTION)&&!defined(_WIN32)
+			// Set up signal handling for the replay attack.
+			signal(SIGUSR1, SIGUSR1_handler);
+			signal(SIGUSR2, SIGUSR2_handler);
+		#endif
+
 		UINT8 strTarget[255];
 		if(options.getMixHost(strTarget,255)!=E_SUCCESS)
 		  {
@@ -157,13 +182,49 @@ SINT32 CALocalProxy::loop()
 		CASymCipher* newCipher;
 		int countRead;
 		CONNECTION oConnection;
+
+		// Temporary storage for packets that could be replayed.
+		MIXPACKET* pReplayMixPackets=new MIXPACKET[REPLAY_COUNT];
+		memset(pReplayMixPackets,0,MIXPACKET_SIZE*REPLAY_COUNT);
+		// channel ID from which packets are captured
+		unsigned uCapturedChannel = 0;
+
+
 		for(;;)
 			{
-				if((countRead=oSocketGroup.select())==SOCKET_ERROR)
+				// Add timeout to select to allow for a replay attack to take place.
+				if((countRead=oSocketGroup.select(false, 100))==SOCKET_ERROR)
 					{
 						sSleep(1);
 						continue;
 					}
+
+				// Start a replay attack, if a packet is present
+				if(bReplayPackets)
+					{
+						if(iCapturedPackets > 0)
+							{
+								for(int i = 0; i < iCapturedPackets; i++)
+									{
+										memcpy(pMixPacket,&pReplayMixPackets[i],MIXPACKET_SIZE);
+										CAMsg::printMsg(LOG_DEBUG,"Replaying packet #%d: %X %X %X %X\n", (i+1), *pMixPacket->data, *(pMixPacket->data+1), *(pMixPacket->data+2), *(pMixPacket->data+3));
+										if(m_muxOut.send(pMixPacket)==SOCKET_ERROR)
+											{
+												CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Exiting!\n");
+												ret=E_UNKNOWN;
+												goto MIX_CONNECTION_ERROR;
+											}
+									}
+								memset(pMixPacket,0,MIXPACKET_SIZE);
+							}
+						else
+							{
+								CAMsg::printMsg(LOG_DEBUG,"No captured packets found.\n");
+							}
+					CAMsg::printMsg(LOG_DEBUG,"Replay finished.\n");
+					bReplayPackets = false;
+				}
+
 				if(oSocketGroup.isSignaled(m_socketIn))
 					{
 						countRead--;
@@ -234,6 +295,13 @@ SINT32 CALocalProxy::loop()
 													#endif
 													delete oConnection.pSocket;
 													delete [] oConnection.pCiphers;
+
+													// stop capturing packets when the channel is closed
+													if(pMixPacket->channel == uCapturedChannel)
+														{
+															CAMsg::printMsg(LOG_DEBUG,"Stopping to capture packets.\n");
+															bCapturePackets = false;
+														}
 												}
 										}
 									else
@@ -258,7 +326,7 @@ SINT32 CALocalProxy::loop()
 										countRead--;
 										getRandom(pMixPacket->payload.data,PAYLOAD_SIZE);
 										if(!tmpCon->pCiphers[0].isEncyptionKeyValid())
-											len=tmpCon->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE-m_chainlen*16);
+											len=tmpCon->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE-m_chainlen*(KEY_SIZE + TIMESTAMP_SIZE));
 										else
 											len=tmpCon->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE);
 										if(len==SOCKET_ERROR||len==0)
@@ -292,19 +360,32 @@ SINT32 CALocalProxy::loop()
 													{
 														//Has to bee optimized!!!!
 														unsigned char buff[DATA_SIZE];
-														int size=DATA_SIZE-16;
+														int size=DATA_SIZE-KEY_SIZE-TIMESTAMP_SIZE;
 														//tmpCon->pCipher->generateEncryptionKey(); //generate Key
 														for(int c=0;c<m_chainlen;c++)
 															{
-																getRandom(buff,16);
+																getRandom(buff,KEY_SIZE);
 																buff[0]&=0x7F; // Hack for RSA to ensure m < n !!!!!
 																tmpCon->pCiphers[c].setKeyAES(buff);
-																memcpy(buff+KEY_SIZE,pMixPacket->data,size);
+																/*
+																	PROTOCOL CHANGE:
+																	This is a change in the protocol between JAP and the mixes:
+																	In the RSA encrypted part of the channel-open packet apart
+																	from the symmetric key for each mix, we now include a
+																	TIMESTAMP_SIZE bytes wide timestamp. This reduces the storage
+																	space for symmetrical keys in the RSA_SIZE wide part of the
+																	packet (from 8 to 7).
+																*/
+																#ifdef WITH_TIMESTAMP
+																	currentTimestamp(buff+KEY_SIZE);
+																#endif
+																memcpy(buff+KEY_SIZE+TIMESTAMP_SIZE,pMixPacket->data,size);
 																m_arRSA[c].encrypt(buff,buff);
+																// Does RSA_SIZE need to be increased by RSA_SIZE/KEY_SIZE*TIMESTAMP_SIZE?
 																tmpCon->pCiphers[c].encryptAES(buff+RSA_SIZE,buff+RSA_SIZE,DATA_SIZE-RSA_SIZE);
 																memcpy(pMixPacket->data,buff,DATA_SIZE);
-																size-=KEY_SIZE;
-																len+=KEY_SIZE;
+																size-=KEY_SIZE+TIMESTAMP_SIZE;
+																len+=KEY_SIZE+TIMESTAMP_SIZE;
 															}
 														pMixPacket->flags=CHANNEL_OPEN;
 													}
@@ -314,6 +395,28 @@ SINT32 CALocalProxy::loop()
 															tmpCon->pCiphers[c].encryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 														pMixPacket->flags=CHANNEL_DATA;
 													}
+
+												// Capture the this packet for future replay
+												if(bCapturePackets)
+													{
+														if(!iCapturedPackets && (pMixPacket->flags == CHANNEL_OPEN))
+															{
+																CAMsg::printMsg(LOG_DEBUG,"Captured channel-open packet: %X %X %X %X\n", *pMixPacket->data, *(pMixPacket->data+1), *(pMixPacket->data+2), *(pMixPacket->data+3));
+																memcpy(&pReplayMixPackets[iCapturedPackets++],pMixPacket,MIXPACKET_SIZE);
+																uCapturedChannel = pMixPacket->channel;
+															}
+														else if(iCapturedPackets && (uCapturedChannel == pMixPacket->channel))
+															{
+																CAMsg::printMsg(LOG_DEBUG,"Captured data packet: %X %X %X %X\n", *pMixPacket->data, *(pMixPacket->data+1), *(pMixPacket->data+2), *(pMixPacket->data+3));
+																memcpy(&pReplayMixPackets[iCapturedPackets++],pMixPacket,MIXPACKET_SIZE);
+															}
+													}
+												if(iCapturedPackets >= REPLAY_COUNT)
+													{
+														CAMsg::printMsg(LOG_DEBUG,"Storage full, stopping to capture packets.\n");
+														bCapturePackets = false;
+													}
+
 												if(m_muxOut.send(pMixPacket)==SOCKET_ERROR)
 													{
 														CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Exiting!\n");									

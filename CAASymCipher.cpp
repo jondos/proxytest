@@ -57,7 +57,7 @@ SINT32 CAASymCipher::destroy()
 	*/
 SINT32 CAASymCipher::decrypt(UINT8* from,UINT8* to)
 	{
-		if(RSA_private_decrypt(128,from,to,m_pRSA,RSA_NO_PADDING)==-1)
+		if(RSA_private_decrypt(RSA_SIZE,from,to,m_pRSA,RSA_NO_PADDING)==-1)
 			return E_UNKNOWN;
 		else
 			return E_SUCCESS;
@@ -72,7 +72,7 @@ SINT32 CAASymCipher::decrypt(UINT8* from,UINT8* to)
 	*/
 SINT32 CAASymCipher::encrypt(UINT8* from,UINT8* to)
 	{
-		if(RSA_public_encrypt(128,from,to,m_pRSA,RSA_NO_PADDING)==-1)
+		if(RSA_public_encrypt(RSA_SIZE,from,to,m_pRSA,RSA_NO_PADDING)==-1)
 			return E_UNKNOWN;
 		else
 			return E_SUCCESS;

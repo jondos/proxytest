@@ -31,11 +31,22 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMix.hpp"
 #include "CAMuxSocket.hpp"
 #include "CAASymCipher.hpp"
+
+// How many packets do you want to replay at a time?
+#define REPLAY_COUNT 16
+
 class CALocalProxy:public CAMix
 	{
 		public:
 			CALocalProxy(){m_arRSA=NULL;}
 			virtual ~CALocalProxy(){clean();}
+
+			
+			// signals the main loop whether to capture or replay packets
+			static bool bCapturePackets;
+			static bool bReplayPackets;
+			static int iCapturedPackets;
+
 		private:
 			SINT32 loop();
 			SINT32 init();
