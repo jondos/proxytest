@@ -134,7 +134,7 @@ THREAD_RETURN InfoLoop(void *p)
 		oAddr.setAddr((char*)buff,options.getInfoServerPort());
 		BufferOutputStream oBufferStream(1024,1024);
 		XML::Output oxmlOut(oBufferStream);
-		SINT32 tmpUser,tmpRisk,tmpTraffic;
+		SINT32 tmpUser,tmpRisk,tmpTraffic,tmpPackets;
 		UINT32 buffLen;
 		char strAnonServer[255];
 	//	CASocketAddr::getLocalHostName((UINT8*)buff,255);
@@ -154,9 +154,11 @@ THREAD_RETURN InfoLoop(void *p)
 						oxmlOut.BeginElementAttrs("MixCascadeStatus");
 						oxmlOut.WriteAttr("id",(char*)strAnonServer);
 						pInfoService->getLevel(&tmpUser,&tmpRisk,&tmpTraffic);
+						pInfoService->getMixedPackets((UINT32*)&tmpPackets);
 						oxmlOut.WriteAttr("nrOfActiveUsers",(int)tmpUser);
 						oxmlOut.WriteAttr("currentRisk",(int)tmpRisk);
 						oxmlOut.WriteAttr("trafficSituation",(int)tmpTraffic);
+						oxmlOut.WriteAttr("mixedPackets",(int)tmpPackets);
 						oxmlOut.EndAttrs();
 						oxmlOut.EndElement();
 						oxmlOut.EndDocument();
@@ -183,6 +185,7 @@ CAInfoService::CAInfoService()
 	{
 		InitializeCriticalSection(&csLevel);
 		iUser=iRisk=iTraffic=-1;
+		m_MixedPackets=0;
 		bRun=false;
 		pSignature=NULL;
 	}
@@ -203,6 +206,14 @@ SINT32 CAInfoService::setLevel(SINT32 user,SINT32 risk,SINT32 traffic)
 		return 0;
 	}
 
+SINT32 CAInfoService::setMixedPackets(UINT32 nPackets)
+	{
+		EnterCriticalSection(&csLevel);
+		m_MixedPackets=nPackets;
+		LeaveCriticalSection(&csLevel);
+		return E_SUCCESS;
+	}
+
 SINT32 CAInfoService::setSignature(CASignature* pSig)
 	{
 		pSignature=pSig;
@@ -218,6 +229,15 @@ SINT32 CAInfoService::getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic)
 			*ptraffic=iTraffic;
 		if(prisk!=NULL)
 			*prisk=iRisk;
+		LeaveCriticalSection(&csLevel);
+		return E_SUCCESS;
+	}
+
+SINT32 CAInfoService::getMixedPackets(UINT32* ppackets)
+	{
+		EnterCriticalSection(&csLevel);
+		if(ppackets!=NULL)
+			*ppackets=m_MixedPackets;
 		LeaveCriticalSection(&csLevel);
 		return E_SUCCESS;
 	}

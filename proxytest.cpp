@@ -184,14 +184,14 @@ END AES Test*/
 			signal(SIGPIPE,SIG_IGN);
 	#endif
 #endif
-//		CARoundTripTime* pRTT=new CARoundTripTime();
+		CARoundTripTime* pRTT=new CARoundTripTime();
 		CAMix* pMix=NULL;
-//	  CAMsg::printMsg(LOG_INFO,"Starting RoundTripTime...\n");
-//		if(pRTT->start()!=E_SUCCESS)
-//			{
-//				CAMsg::printMsg(LOG_CRIT,"RoundTripTime Startup FAILED - Exiting!\n");
-//				goto EXIT;
-//			}
+	  CAMsg::printMsg(LOG_INFO,"Starting RoundTripTime...\n");
+		if(pRTT->start()!=E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_CRIT,"RoundTripTime Startup FAILED - Exiting!\n");
+				goto EXIT;
+			}
 		if(options.isLocalProxy())
 			{
 				pMix=new CALocalProxy();
@@ -212,7 +212,7 @@ END AES Test*/
 		if(pMix->start()!=E_SUCCESS)
 			CAMsg::printMsg(LOG_CRIT,"Error during MIX-Startup!\n");
 EXIT:
-//		delete pRTT;
+		delete pRTT;
 		delete pMix;
 		CASocketAddr::destroy();
 		#ifdef _WIN32		
