@@ -36,6 +36,14 @@ CALastMixChannelList::CALastMixChannelList()
 		m_listSockets=NULL;
 		m_listSocketsNext=NULL;
 		m_nChannels=0;
+#ifdef DELAY_CHANNELS
+		m_pDelayBuckets=new UINT32*[MAX_POLLFD];
+		memset(m_pDelayBuckets,0,sizeof(UINT32*)*MAX_POLLFD);
+		m_pThreadDelayBucketsLoop=new CAThread();
+		m_bDelayBucketsLoopRun=true;
+		m_pThreadDelayBucketsLoop->setMainLoop(fml_loopDelayBuckets);
+		m_pThreadDelayBucketsLoop->start(this);
+#endif
 	}
 
 CALastMixChannelList::~CALastMixChannelList()
@@ -52,6 +60,12 @@ CALastMixChannelList::~CALastMixChannelList()
 					}
 			}
 		delete[] m_HashTable;
+#ifdef DELAY_CHANNELS
+		m_bDelayBucketsLoopRun=false;
+		m_pThreadDelayBucketsLoop->join();
+		delete m_pThreadDelayBucketsLoop;
+		delete []m_pDelayBuckets;
+#endif
 	}
 
 #ifndef LOG_CHANNEL
@@ -73,11 +87,13 @@ CALastMixChannelList::~CALastMixChannelList()
 		pNewEntry->packetsDataInFromUser=1;
 		pNewEntry->packetsDataOutToUser=0;
 #endif
-#if defined (LOG_CHANNEL)||defined(DELAY_CHANNELS)
+#if defined (LOG_CHANNEL)
 		pNewEntry->trafficOutToUser=0;
 #endif
 #ifdef DELAY_CHANNELS
-		pNewEntry->timeNextSend=0; //can always send first packet
+		pNewEntry->delayBucket=DELAY_CHANNEL_TRAFFIC; //can always send some first packets
+		pNewEntry->delayBucketID=(SOCKET)pSocket;
+		m_pDelayBuckets[pNewEntry->delayBucketID]=&pNewEntry->delayBucket;
 #endif
 		if(pEntry==NULL) //First Entry for Hash in HashTable
 			{
@@ -139,6 +155,9 @@ SINT32 CALastMixChannelList::removeChannel(HCHANNEL channel)
 							pEntry->list_Sockets.prev->list_Sockets.next=pEntry->list_Sockets.next;
 						if(pEntry->list_Sockets.next!=NULL)
 							pEntry->list_Sockets.next->list_Sockets.prev=pEntry->list_Sockets.prev;
+						#ifdef DELAY_CHANNELS
+							m_pDelayBuckets[pEntry->delayBucketID]=NULL;
+						#endif
 						delete pEntry;
 						m_nChannels--;					
 						return E_SUCCESS;
@@ -195,3 +214,19 @@ SINT32 CALastMixChannelList::test()
 #endif
 					return 0;
 				}
+
+#ifdef DELAY_CHANNELS
+	THREAD_RETURN fml_loopDelayBuckets(void* param)
+		{
+			CALastMixChannelList* pChannelList=(CALastMixChannelList*)param;
+			UINT32** pDelayBuckets=pChannelList->m_pDelayBuckets;
+			while(pChannelList->m_bDelayBucketsLoopRun)
+				{
+					for(UINT32 i=0;i<MAX_POLLFD;i++)
+						if(pDelayBuckets[i]!=NULL)
+							pDelayBuckets[i]+=1000;
+					msSleep(100);
+				}
+			THREAD_RETURN_SUCCESS;
+		}
+#endif

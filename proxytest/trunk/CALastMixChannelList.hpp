@@ -33,6 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASymCipher.hpp"
 #include "CAMutex.hpp"
 #include "CAMsg.hpp"
+#include "CAThread.hpp"
 
 struct t_lastmixchannellist
 	{
@@ -44,7 +45,8 @@ struct t_lastmixchannellist
 			CASocket*			pSocket;
 			CAQueue*			pQueueSend;
 #ifdef DELAY_CHANNELS
-			UINT64				timeNextSend;
+			UINT32				delayBucket;
+			UINT32				delayBucketID;
 #endif
 #ifdef LOG_CHANNEL
 			UINT64				timeCreated;
@@ -52,7 +54,7 @@ struct t_lastmixchannellist
 			UINT32				packetsDataOutToUser;
 			UINT32				packetsDataInFromUser;
 #endif
-#if defined (LOG_CHANNEL)||defined(DELAY_CHANNELS) 
+#if defined (LOG_CHANNEL)
 			UINT32				trafficOutToUser;
 #endif
 		private:
@@ -74,6 +76,7 @@ struct t_lastmixchannellist
 typedef struct t_lastmixchannellist lmChannelList; 
 typedef struct t_lastmixchannellist lmChannelListEntry; 
 typedef lmChannelListEntry* LP_lmChannelListEntry;
+
 
 class CALastMixChannelList
 	{
@@ -131,5 +134,11 @@ class CALastMixChannelList
 			lmChannelList* m_listSocketsNext;
 			///This mutex is used in all functions and makes them thread safe.
 			CAMutex m_Mutex;
+			#ifdef DELAY_CHANNELS
+				UINT32** m_pDelayBuckets;
+				CAThread* m_pThreadDelayBucketsLoop;
+				bool m_bDelayBucketsLoopRun;
+				friend THREAD_RETURN fml_loopDelayBuckets(void*);
+			#endif
 	};
 #endif

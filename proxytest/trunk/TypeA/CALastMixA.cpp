@@ -388,10 +388,6 @@ SINT32 CALastMixA::loop()
 				countRead=osocketgroupCacheRead.select(0);
 				if(countRead>0)
 					{
-						#ifdef DELAY_CHANNELS
-							UINT64 aktTime;
-							getcurrentTimeMillis(aktTime);
-						#endif
 #ifdef HAVE_EPOLL
 						pChannelListEntry=(lmChannelListEntry*)osocketgroupCacheRead.getFirstSignaledSocketData();
 						while(pChannelListEntry!=NULL)
@@ -406,12 +402,17 @@ SINT32 CALastMixA::loop()
 #endif
 										if(m_pQueueSendToMix->getSize()<MAX_MIXIN_SEND_QUEUE_SIZE
 												#ifdef DELAY_CHANNELS
-													&&(pChannelListEntry->trafficOutToUser<DELAY_CHANNEL_TRAFFIC||isGreater64(aktTime,pChannelListEntry->timeNextSend))
+													&&(pChannelListEntry->delayBucket>0)
 												#endif
 											)
 											{
 												bAktiv=true;
-												ret=pChannelListEntry->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE);
+												#ifndef DELAY_CHANNELS
+													ret=pChannelListEntry->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE);
+												#else
+													UINT32 readLen=min(pChannelListEntry->delayBucket,PAYLOAD_SIZE);
+													ret=pChannelListEntry->pSocket->receive(pMixPacket->payload.data,readLen);
+												#endif
 												#ifdef LOG_PACKET_TIMES
 													getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_start);
 													set64(pQueueEntry->timestamp_proccessing_start_OP,pQueueEntry->timestamp_proccessing_start);
@@ -441,8 +442,11 @@ SINT32 CALastMixA::loop()
 												else 
 													{
 														add64((UINT64&)m_logDownloadedBytes,ret);
-														#if defined(LOG_CHANNEL)||defined(DELAY_CHANNELS)
+														#if defined(LOG_CHANNEL)
 															pChannelListEntry->trafficOutToUser+=ret;
+														#endif
+														#ifdef DELAY_CHANNELS
+															pChannelListEntry->delayBucket-=ret;
 														#endif
 														pMixPacket->channel=pChannelListEntry->channelIn;
 														pMixPacket->flags=CHANNEL_DATA;
@@ -457,12 +461,6 @@ SINT32 CALastMixA::loop()
 														#if defined(LOG_CHANNEL)
 															pChannelListEntry->packetsDataOutToUser++;
 														#endif													
-														#ifdef DELAY_CHANNELS
-															set64(pChannelListEntry->timeNextSend,aktTime);
-															UINT32 delayTime=(ret>>5);
-															delayTime+=(ret>>4);
-															add64(pChannelListEntry->timeNextSend,delayTime/*DELAY_CHANNEL_SEND_INTERVALL*/);
-														#endif
 													}
 											}
 										else
