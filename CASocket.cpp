@@ -322,7 +322,7 @@ SINT32 CASocket::setKeepAlive(UINT32 sec)
 
 SINT32 CASocket::setASyncSend(bool b,SINT32 size)
 	{
-		if(b)
+/*		if(b)
 			{
 				if(size!=-1)
 					setSendLowWat(size);
@@ -333,5 +333,6 @@ SINT32 CASocket::setASyncSend(bool b,SINT32 size)
 					}
 			}
 		m_bASyncSend=b;
+*/
 		return E_SUCCESS;
 	}
