@@ -1,13 +1,10 @@
 #include "../StdAfx.h"
 #include "../CACmdLnOptions.hpp"
 #include "CAFlashMix.hpp"
-#include <iostream>
 
 #ifdef __BORLANDC__
     #pragma argsused
 #endif
-
-using namespace std;
 
 CACmdLnOptions options;
 
@@ -74,7 +71,7 @@ int main( int argc, char * argv[] )
     fm->start();
 
     char c;
-    cin >> c;
+    std::cin >> c;
 
     delete fm;
 
