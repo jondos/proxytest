@@ -157,7 +157,7 @@ for this channel will change to (because of the content format for the first pac
 For Upstream and Downstream different keys are used.
 */
 int main(int argc, const char* argv[])
-	{
+	{		
 		CASocketAddrINet::init();
 
 	/*	
@@ -262,10 +262,21 @@ int main(int argc, const char* argv[])
 		#endif
 
 		options.parse(argc,argv);
+		UINT8 buff[255];
+#ifndef WIN32
+		if(options.getUser(buff,255)==E_SUCCESS) //switching user
+			{
+				strcut passwd* pwd=getpwnam(user);
+				if(pwd==NULL||seteuid(pwd->pw_uid)==-1)
+					CAMsg::printMsg(LOG_ERROR,"Could not switch to effective user %s!\n",buff);
+			}
+		if(geteuid()==0)
+			CAMsg::printMsg(LOG_WARN,"Warning - Running as root!\n",buff);
+#endif
+		
 		if(options.getDaemon())
 			{
 				#ifndef _WIN32
-					UINT8 buff[255];
 					if(options.getLogDir(buff,255)==E_SUCCESS)
 						CAMsg::setOptions(MSG_FILE);
 					else
@@ -275,13 +286,12 @@ int main(int argc, const char* argv[])
 					if(pid!=0)
 						exit(0);
 					setsid();
-//					chdir("/");
+					chdir("/");
 					umask(0);
 				#endif
 			}
 		else
 			{
-				UINT8 buff[255];
 				if(options.getLogDir((UINT8*)buff,255)==E_SUCCESS)
 					CAMsg::setOptions(MSG_FILE);
 			}

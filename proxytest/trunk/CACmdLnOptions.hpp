@@ -69,6 +69,7 @@ class CACmdLnOptions
 			SINT32 getKeyFileName(UINT8* filename,UINT32 len);
 			SINT32 getCascadeName(UINT8* name,UINT32 len);
 			SINT32 getLogDir(UINT8* name,UINT32 len);
+			SINT32 getUser(UINT8* user,UINT32 len);
 			bool isLocalProxy();
 			bool isFirstMix();
 			bool isMiddleMix();
@@ -91,6 +92,7 @@ class CACmdLnOptions
 			bool bLocalProxy,bFirstMix,bMiddleMix,bLastMix;
 			char* strCascadeName;
 			char* strLogDir;
+			char* strUser;
 
 			CASocketAddrINet* pTargets;
 			UINT32 cntTargets;
