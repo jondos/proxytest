@@ -74,8 +74,7 @@ VERSION = @VERSION@
 AUTOMAKE_OPTIONS = foreign
 
 noinst_LIBRARIES = libaes.a
-libaes_a_SOURCES = rijndael-alg-fst.cpp rijndael-api-fst.cpp rijndael-alg-fst.h rijndael-api-fst.h 		    boxes-fst.dat.h 
-
+libaes_a_SOURCES = encrypt.cpp rijndael-api-fst.h boxes-fst.dat.h 
 
 includes = @INCLUDES@
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -89,7 +88,7 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 libaes_a_LIBADD = 
-libaes_a_OBJECTS =  rijndael-alg-fst.o rijndael-api-fst.o
+libaes_a_OBJECTS =  encrypt.o
 AR = ar
 CXXFLAGS = @CXXFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -106,7 +105,7 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = gtar
 GZIP_ENV = --best
-DEP_FILES =  .deps/rijndael-alg-fst.P .deps/rijndael-api-fst.P
+DEP_FILES =  .deps/encrypt.P
 SOURCES = $(libaes_a_SOURCES)
 OBJECTS = $(libaes_a_OBJECTS)
 
