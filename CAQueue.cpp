@@ -406,5 +406,6 @@ SINT32 CAQueue::test()
 		
 		delete []source;
 		delete []target;
+		m_maxAlloc=m_aktAlloc=0;
 		return E_SUCCESS;
 	}

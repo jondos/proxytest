@@ -28,12 +28,16 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CAQUEUE__
 #define __CAQUEUE__
 #include "CAConditionVariable.hpp"
+#include "CAMsg.hpp"
 
 struct _t_queue
 	{
 		UINT8* pBuff;
 		_t_queue* next;
 		UINT32 size;
+#ifdef DO_TRACE
+		UINT32 allocSize;
+#endif
 	};
 
 typedef struct _t_queue QUEUE;
@@ -92,5 +96,44 @@ class CAQueue
 #endif
 			CAMutex m_csQueue;
 			CAConditionVariable m_convarSize;
+#ifdef DO_TRACE
+			static UINT32 m_aktAlloc;
+			static UINT32 m_maxAlloc;
+			
+			QUEUE* newQUEUE()
+				{
+					m_aktAlloc+=sizeof(QUEUE);
+					if(m_maxAlloc<m_aktAlloc)
+						{
+							m_maxAlloc=m_aktAlloc;
+							CAMsg::printMsg(LOG_DEBUG,"CAQueue current alloc: %u\n",m_aktAlloc);
+						}
+					return (QUEUE*)new QUEUE;
+				}
+			
+			void deleteQUEUE(QUEUE* entry)
+				{
+					m_aktAlloc-=sizeof(QUEUE);
+					delete entry;
+				}
+
+			UINT8* newUINT8Buff(UINT32 size)
+				{
+					m_aktAlloc+=size;
+					if(m_maxAlloc<m_aktAlloc)
+						{
+							m_maxAlloc=m_aktAlloc;
+							CAMsg::printMsg(LOG_DEBUG,"CAQueue current alloc: %u\n",m_aktAlloc);
+						}
+					return (UINT8*)new UINT8[size];
+				}
+
+			void deleteUINT8Buff(UINT8* entry,UINT32 size)
+				{
+					m_aktAlloc-=size;
+					delete[] entry;
+				}
+
+#endif
 	};
 #endif
