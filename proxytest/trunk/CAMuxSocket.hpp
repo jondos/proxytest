@@ -107,14 +107,14 @@ class CAMuxSocket
 			operator CASocket*(){return &m_Socket;}
 			operator SOCKET(){return (SOCKET)m_Socket;}
 			
-			SINT32 getSendSpace()
+			/*SINT32 getSendSpace()
 				{
 					SINT32 s=m_Socket.getSendSpace();
 					if(s<0)
 						return E_UNKNOWN;
 					return s/MIXPACKET_SIZE;
 				}
-													
+			*/										
 			SINT32 setCrypt(bool b);
 		private:
 				CASocket m_Socket;

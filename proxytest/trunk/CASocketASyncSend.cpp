@@ -56,8 +56,8 @@ THREAD_RETURN SocketASyncSendLoop(void* p)
 						if(pASyncSend->m_oSocketGroup.isSignaled(akt->pSocket))
 							{
 								ret--;
-								SINT32 len=BUFF_SIZE;
-								SINT32 sendSpace=akt->pSocket->getSendSpace();
+								//SINT32 len=BUFF_SIZE;
+								/*SINT32 sendSpace=akt->pSocket->getSendSpace();
 								if(sendSpace>=0)
 									{
 										len=min(sendSpace,len);
@@ -65,8 +65,9 @@ THREAD_RETURN SocketASyncSendLoop(void* p)
 								else
 									{ //if we could not find out how big the sendspace is
 										len=MIXPACKET_SIZE;
-									}
-								if(akt->pQueue->get(buff,(UINT32*)&len)==E_SUCCESS)
+									}*/
+								UINT32 len=MIXPACKET_SIZE;
+								if(akt->pQueue->get(buff,&len)==E_SUCCESS)
 									{
 										UINT32 t1=time(NULL);
 										akt->pSocket->send(buff,len,true);

@@ -69,7 +69,7 @@ class CASocket
 			SINT32 getRecvBuff();
 			SINT32 setSendBuff(SINT32 r);
 			SINT32 getSendBuff();
-			SINT32 getSendSpace();
+			//SINT32 getSendSpace();
 			SINT32 setKeepAlive(bool b);
 			SINT32 setKeepAlive(UINT32 sec);
 			SINT32 setNonBlocking(bool b);
