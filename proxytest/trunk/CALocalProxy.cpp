@@ -304,7 +304,7 @@ SINT32 CALocalProxy::loop()
 											for(UINT32 c=0;c<m_chainlen;c++)
 												oConnection.pCiphers[c].crypt2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 											#ifdef _DEBUG
-												CAMsg::printMsg(LOG_DEBUG,"Sending Data to Browser!");
+												CAMsg::printMsg(LOG_DEBUG,"Sending Data to Browser!\n");
 											#endif
 											oConnection.pSocket->send(pMixPacket->payload.data,ntohs(pMixPacket->payload.len));
 										}
