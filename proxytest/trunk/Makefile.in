@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4-p2 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -73,15 +73,15 @@ VERSION = @VERSION@
 
 AUTOMAKE_OPTIONS = foreign
 sbin_PROGRAMS = proxytest
-proxytest_SOURCES = CAASymCipher.cpp 		    CABase64.cpp 		    CACacheLoadBalancing.cpp 		    CACmdLnOptions.cpp 		    CAConditionVariable.cpp 		    CADatagramSocket.cpp 		    CAFirstMix.cpp 		    CAFirstMixChannelList.cpp 		    CAInfoService.cpp 		    CAIPList.cpp 		    CALastMix.cpp 		    CALocalProxy.cpp 		    CAMiddleMix.cpp 		    CAMiddleMixChannelList.cpp 		    CAMix.cpp 		    CAMsg.cpp 		    CAMutex.cpp 		    CAMuxSocket.cpp 		    CAQueue.cpp 		    CARoundTripTime.cpp 		    CASemaphore.cpp 		    CASignature.cpp 		    CASocket.cpp 		    CASocketAddrINet.cpp 		    CASocketAddrUnix.cpp 		    CASocketGroup.cpp 		    CASocketList.cpp 		    CASymCipher.cpp 		    CAThread.cpp 		    CAUtil.cpp 		    StdAfx.cpp 		    proxytest.cpp 		    CAASymCipher.hpp 		    CABase64.hpp 		    CACacheLoadBalancing.hpp 		    CAConditionVariable.hpp 		    CACmdLnOptions.hpp 		    CAFirstMix.hpp 		    CAFirstMixChannelList.hpp 		    CAInfoService.hpp 		    CAIPList.hpp 		    CALastMix.hpp 		    CALocalProxy.hpp 		    CALockAble.hpp 		    CAMiddleMix.hpp 		    CAMiddleMixChannelList.hpp 		    CAMix.hpp 		    CAMsg.hpp 		    CAMutex.hpp 		    CAMuxSocket.hpp 		    CAQueue.hpp 		    CARoundTripTime.hpp 		    CASemaphore.hpp 		    CASignature.hpp 		    CASocket.hpp 		    CASocketAddr.hpp 		    CASockerAddrINet.hpp 		    CASocketAddrUnix.hpp 		    CASocketGroup.hpp 		    CASocketList.hpp 		    CASymCipher.hpp 		    CAThread.hpp 		    CAUtil.hpp 		    StdAfx.h 
+proxytest_SOURCES = CAASymCipher.cpp 		    CABase64.cpp 		    CACacheLoadBalancing.cpp 		    CACertificate.cpp 		    CACertStore.cpp 		    CACmdLnOptions.cpp 		    CAConditionVariable.cpp 		    CADatagramSocket.cpp 		    CAFirstMix.cpp 		    CAFirstMixChannelList.cpp 		    CAInfoService.cpp 		    CAIPList.cpp 		    CALastMix.cpp 		    CALocalProxy.cpp 		    CAMiddleMix.cpp 		    CAMiddleMixChannelList.cpp 		    CAMix.cpp 		    CAMsg.cpp 		    CAMutex.cpp 		    CAMuxSocket.cpp 		    CAQueue.cpp 		    CARoundTripTime.cpp 		    CASemaphore.cpp 		    CASignature.cpp 		    CASocket.cpp 		    CASocketAddrINet.cpp 		    CASocketAddrUnix.cpp 		    CASocketGroup.cpp 		    CASocketList.cpp 		    CASymCipher.cpp 		    CAThread.cpp 		    CAUtil.cpp 		    StdAfx.cpp 		    proxytest.cpp 		    CAASymCipher.hpp 		    CABase64.hpp 		    CACacheLoadBalancing.hpp 		    CACertificate.hpp 		    CACertStore.hpp 		    CAConditionVariable.hpp 		    CACmdLnOptions.hpp 		    CAFirstMix.hpp 		    CAFirstMixChannelList.hpp 		    CAInfoService.hpp 		    CAIPList.hpp 		    CALastMix.hpp 		    CALocalProxy.hpp 		    CALockAble.hpp 		    CAMiddleMix.hpp 		    CAMiddleMixChannelList.hpp 		    CAMix.hpp 		    CAMsg.hpp 		    CAMutex.hpp 		    CAMuxSocket.hpp 		    CAQueue.hpp 		    CARoundTripTime.hpp 		    CASemaphore.hpp 		    CASignature.hpp 		    CASocket.hpp 		    CASocketAddr.hpp 		    CASockerAddrINet.hpp 		    CASocketAddrUnix.hpp 		    CASocketGroup.hpp 		    CASocketList.hpp 		    CASymCipher.hpp 		    CAThread.hpp 		    CAUtil.hpp 		    StdAfx.h 
 
 
-proxytest_LDADD = $(top_srcdir)/xml/libxml.a 		  $(top_srcdir)/aes/libaes.a 		  $(top_srcdir)/popt/libpopt.a
+proxytest_LDADD = $(top_srcdir)/xml/libxml.a 		  $(top_srcdir)/aes/libaes.a 		  $(top_srcdir)/popt/libpopt.a 		  $(top_srcdir)/trio/libtrio.a
 
 
 EXTRA_DIST = README proxytest.doxy proxytest.dsp proxytest.dsw
 
-SUBDIRS = popt xml aes
+SUBDIRS = popt xml aes trio
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = config.h
@@ -94,15 +94,16 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 proxytest_OBJECTS =  CAASymCipher.o CABase64.o CACacheLoadBalancing.o \
-CACmdLnOptions.o CAConditionVariable.o CADatagramSocket.o CAFirstMix.o \
-CAFirstMixChannelList.o CAInfoService.o CAIPList.o CALastMix.o \
-CALocalProxy.o CAMiddleMix.o CAMiddleMixChannelList.o CAMix.o CAMsg.o \
-CAMutex.o CAMuxSocket.o CAQueue.o CARoundTripTime.o CASemaphore.o \
-CASignature.o CASocket.o CASocketAddrINet.o CASocketAddrUnix.o \
-CASocketGroup.o CASocketList.o CASymCipher.o CAThread.o CAUtil.o \
-StdAfx.o proxytest.o
+CACertificate.o CACertStore.o CACmdLnOptions.o CAConditionVariable.o \
+CADatagramSocket.o CAFirstMix.o CAFirstMixChannelList.o CAInfoService.o \
+CAIPList.o CALastMix.o CALocalProxy.o CAMiddleMix.o \
+CAMiddleMixChannelList.o CAMix.o CAMsg.o CAMutex.o CAMuxSocket.o \
+CAQueue.o CARoundTripTime.o CASemaphore.o CASignature.o CASocket.o \
+CASocketAddrINet.o CASocketAddrUnix.o CASocketGroup.o CASocketList.o \
+CASymCipher.o CAThread.o CAUtil.o StdAfx.o proxytest.o
 proxytest_DEPENDENCIES =  $(top_srcdir)/xml/libxml.a \
-$(top_srcdir)/aes/libaes.a $(top_srcdir)/popt/libpopt.a
+$(top_srcdir)/aes/libaes.a $(top_srcdir)/popt/libpopt.a \
+$(top_srcdir)/trio/libtrio.a
 proxytest_LDFLAGS = 
 CXXFLAGS = @CXXFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -119,11 +120,12 @@ install-sh missing mkinstalldirs
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 DEP_FILES =  .deps/CAASymCipher.P .deps/CABase64.P \
-.deps/CACacheLoadBalancing.P .deps/CACmdLnOptions.P \
-.deps/CAConditionVariable.P .deps/CADatagramSocket.P .deps/CAFirstMix.P \
+.deps/CACacheLoadBalancing.P .deps/CACertStore.P .deps/CACertificate.P \
+.deps/CACmdLnOptions.P .deps/CAConditionVariable.P \
+.deps/CADatagramSocket.P .deps/CAFirstMix.P \
 .deps/CAFirstMixChannelList.P .deps/CAIPList.P .deps/CAInfoService.P \
 .deps/CALastMix.P .deps/CALocalProxy.P .deps/CAMiddleMix.P \
 .deps/CAMiddleMixChannelList.P .deps/CAMix.P .deps/CAMsg.P \
@@ -264,7 +266,7 @@ maintainer-clean-recursive:
 	dot_seen=no; \
 	rev=''; list='$(SUBDIRS)'; for subdir in $$list; do \
 	  rev="$$subdir $$rev"; \
-	  test "$$subdir" = "." && dot_seen=yes; \
+	  test "$$subdir" != "." || dot_seen=yes; \
 	done; \
 	test "$$dot_seen" = "no" && rev=". $$rev"; \
 	target=`echo $@ | sed s/-recursive//`; \

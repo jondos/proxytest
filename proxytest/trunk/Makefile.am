@@ -8,6 +8,8 @@ sbin_PROGRAMS = proxytest
 proxytest_SOURCES = CAASymCipher.cpp \
 		    CABase64.cpp \
 		    CACacheLoadBalancing.cpp\
+		    CACertificate.cpp\
+		    CACertStore.cpp\
 		    CACmdLnOptions.cpp \
 		    CAConditionVariable.cpp\
 		    CADatagramSocket.cpp \
@@ -40,6 +42,8 @@ proxytest_SOURCES = CAASymCipher.cpp \
 		    CAASymCipher.hpp \
 		    CABase64.hpp \
 		    CACacheLoadBalancing.hpp\
+		    CACertificate.hpp\
+		    CACertStore.hpp\
 		    CAConditionVariable.hpp\
 		    CACmdLnOptions.hpp \
 		    CAFirstMix.hpp \
@@ -72,8 +76,9 @@ proxytest_SOURCES = CAASymCipher.cpp \
 
 proxytest_LDADD = $(top_srcdir)/xml/libxml.a \
 		  $(top_srcdir)/aes/libaes.a \
-		  $(top_srcdir)/popt/libpopt.a
+		  $(top_srcdir)/popt/libpopt.a\
+		  $(top_srcdir)/trio/libtrio.a
 
 EXTRA_DIST = README proxytest.doxy proxytest.dsp proxytest.dsw
 
-SUBDIRS = popt xml aes
+SUBDIRS = popt xml aes trio

@@ -18,6 +18,10 @@ AC_PROG_CXX
 AC_PROG_INSTALL
 AC_PROG_RANLIB
 
+dnl CFLAGS="$CFLAGS -I. -I/usr/include -I/usr/local/include"
+dnl CPPFLAGS=$CFLAGS
+dnl CXXFLAGS=$CFLAGS
+LIBS="$LIBS -L/usr/lib -L/usr/local/lib"
 case "$host" in
 *-*-solaris*)
         LIBS="$LIBS -lnsl -lsocket"
@@ -32,6 +36,7 @@ case "$host" in
 	;;
 esac
 
+AC_LANG(C++)
 
 dnl Checks for libraries.
 
@@ -129,6 +134,11 @@ AC_ARG_WITH(xml-include,
 	]
 )
 CFLAGS="$CFLAGS -I$xmlincludedir"
+CPPFLAGS=$CFLAGS
+CXXFLAGS=$CFLAGS
+AC_CHECK_HEADER([dom/DOM.hpp],AC_MSG_RESULT([Xerces-C includes found]),
+		AC_MSG_ERROR([Xerces-C includes NOT found - please use --with-xml-include]),[//Check])
+
 
 xmllibdir="/usr/local/lib"
 AC_ARG_WITH(xml-lib,
@@ -141,12 +151,17 @@ AC_ARG_WITH(xml-lib,
 )
 LIBS="$LIBS -L$xmllibdir -lxercesc"
 
+AC_TRY_LINK([#include "util/PlatformUtils.hpp"],[XMLPlatformUtils::Initialize()],AC_MSG_RESULT([XercesC-Lib found]),
+		AC_MSG_ERROR([Xerces-C Lib NOT found - please use --with-xml-lib]))
+
+
 dnl Checks for header files.
-AC_HEADER_STDC([])
+AC_LANG([C])
+AC_HEADER_STDC
 
 dnl Checks for library functions.
-AC_CHECK_FUNC(strerror,AC_DEFINE(HAVE_STRERROR,,[Define if you have strerror()]))
-
+dnl AC_CHECK_FUNC(strerror,AC_DEFINE(HAVE_STRERROR,,[Define if you have strerror()]))
+AC_CHECK_FUNCS([strerror])
 
 AC_ARG_WITH(debug,
 	[  --with-debug		  Enable debug mode],
@@ -182,5 +197,5 @@ fi
 
 CXXFLAGS=$CFLAGS
 
-AC_OUTPUT(Makefile popt/Makefile xml/Makefile aes/Makefile)
+AC_OUTPUT(Makefile popt/Makefile xml/Makefile aes/Makefile trio/Makefile)
 dnl AC_OUTPUT
