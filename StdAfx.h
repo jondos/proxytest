@@ -51,7 +51,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #endif
 //#define LOG_CRIME  
 //#define NO_PARKING //to disable control flow
-//#define USE_POOL
+#define USE_POOL
 
 //Some constants
 #define LAST_MIX_TO_PROXY_CONNECT_TIMEOUT 2000 //Connection timeout for last mix to proxy connections 2 Seconds...
