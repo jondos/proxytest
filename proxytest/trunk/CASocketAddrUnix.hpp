@@ -61,7 +61,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 					}
 				
 				/** Makes a cast to SOCKADDR* .*/
-				const ::LPSOCKADDR LPSOCKADDR() const
+				const SOCKADDR* LPSOCKADDR() const
 					{
 						return (const ::LPSOCKADDR)(static_cast<const sockaddr_un*>(this));
 					}			

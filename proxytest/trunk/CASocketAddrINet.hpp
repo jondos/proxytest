@@ -50,7 +50,7 @@ class CASocketAddrINet:private sockaddr_in,public CASocketAddr
 				}
 
 			/** Makes a cast to struct SOCKADDR* */
-			const ::LPSOCKADDR LPSOCKADDR()const
+			const SOCKADDR* LPSOCKADDR()const
 				{
 					#if defined(_WIN32) &&!defined(MSC_VER) //for Borland C++ under Windows
 					  return (const ::LPSOCKADDR)(sockaddr_in*)this;

@@ -150,7 +150,7 @@ SINT32 CASocket::connect(CASocketAddr & psa,UINT32 retry,UINT32 time)
 		sockets++;
 #endif
 		int err=0;
-		LPSOCKADDR addr=psa.LPSOCKADDR();
+		const SOCKADDR* addr=psa.LPSOCKADDR();
 		int addr_len=psa.getSize();
 		for(UINT32 i=0;i<retry;i++)
 			{
