@@ -164,22 +164,29 @@ int main(int argc, const char* argv[])
 		if(argc>1)
 			{
 				CASocket oSocketServer;
+				oSocketServer.create(AF_INET);
+				oSocketServer.setRecvBuff(1000);
 				oSocketServer.listen(6789);
 				CASocket oS;
+				
 				oSocketServer.accept(oS);
+				SINT32 j=oS.getRecvBuff();
+				CAMsg::printMsg(LOG_DEBUG,"Recv-Buff %i\n",j);
 				sleep(1000000);
 				exit(0);
 			}
 		else
 			{
 				CASocket oSocketClient;
+				oSocketClient.create(AF_INET);
+				SINT32 s=oSocketClient.setSendBuff(5000);
+
 				CASocketAddrINet serverAddr;
 				serverAddr.setPort(6789);
 				oSocketClient.connect(serverAddr);
 				UINT32 u;
-				SINT32 s;
 				u=5000;
-				s=oSocketClient.setSendBuff(5000);
+			//	s=oSocketClient.setSendBuff(5000);
 				s=oSocketClient.getSendBuff();
 				CAMsg::printMsg(LOG_DEBUG,"SendBuff now: %i\n",s);
 				s=oSocketClient.getSendSpace();
