@@ -1314,7 +1314,7 @@ trio_xstring_append(trio_string_t *self,
 /*
  * trio_xstring_append_char
  */
-TRIO_PUBLIC int
+/*TRIO_PUBLIC int
 trio_xstring_append_char(trio_string_t *self,
 			 char character)
 {
@@ -1332,7 +1332,7 @@ trio_xstring_append_char(trio_string_t *self,
  error:
   return FALSE;
 }
-
+*/
 
 /**
    Search for the first occurrence of second parameter in the first.

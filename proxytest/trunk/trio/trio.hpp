@@ -72,38 +72,11 @@ const char *trio_strerror(int);
  * Print Functions
  */
 
-int trio_printf(const char *format, ...);
-int trio_vprintf(const char *format, va_list args);
-int trio_printfv(const char *format, void **args);
-
-int trio_fprintf(FILE *file, const char *format, ...);
-int trio_vfprintf(FILE *file, const char *format, va_list args);
-int trio_fprintfv(FILE *file, const char *format, void **args);
-
-int trio_dprintf(int fd, const char *format, ...);
-int trio_vdprintf(int fd, const char *format, va_list args);
-int trio_dprintfv(int fd, const char *format, void **args);
-
-/* trio_sprintf(target, format, ...)
- * trio_snprintf(target, maxsize, format, ...)
- *
- *   Build 'target' according to 'format' and succesive
- *   arguments. This is equal to the sprintf() and
- *   snprintf() functions.
- */
-int trio_sprintf(char *buffer, const char *format, ...);
-int trio_vsprintf(char *buffer, const char *format, va_list args);
-int trio_sprintfv(char *buffer, const char *format, void **args);
-
 int trio_snprintf(char *buffer, size_t max, const char *format, ...);
 int trio_vsnprintf(char *buffer, size_t bufferSize, const char *format,
 		   va_list args);
 int trio_snprintfv(char *buffer, size_t bufferSize, const char *format,
 		   void **args);
-
-int trio_snprintfcat(char *buffer, size_t max, const char *format, ...);
-int trio_vsnprintfcat(char *buffer, size_t bufferSize, const char *format,
-                      va_list args);
 
 #endif /* WITHOUT_TRIO */
 
