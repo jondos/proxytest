@@ -27,8 +27,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #include "../StdAfx.h"
 #include "AllTestsCA.hpp"
-#include <cppunit/extensions/HelperMacros.h>
-#include <cppunit/TestFixture.h>
 /* Include your tests here. */
 #include "SampleTest.hpp"
 

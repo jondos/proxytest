@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.03.18"
+#define MIX_VERSION "00.03.19"
 
 
 //#define LOG_CHANNEL
@@ -307,6 +307,13 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //Compressed Logs
 #ifdef COMPRESSED_LOGS
 #include <zlib.h>
+#endif
+
+//For CPPUnit Test
+#ifdef __UNIT_TEST__
+	#include <cppunit/ui/text/TestRunner.h>
+	#include <cppunit/extensions/HelperMacros.h>
+	#include <cppunit/TestFixture.h>
 #endif
 
 //Mix Version Info as multiline String

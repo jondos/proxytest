@@ -28,9 +28,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __SAMPLETEST__
 #define __SAMPLETEST__
 
-#include <cppunit/extensions/HelperMacros.h>
-#include <cppunit/TestFixture.h>
-
 /* As Sample is a fictive class, it can not really be imported. */
 //#include "../Sample.hpp"
 

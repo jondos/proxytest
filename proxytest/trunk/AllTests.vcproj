@@ -21,11 +21,11 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;G:\xerces-c-src_2_5_0\src&quot;;&quot;G:\xerces-c-src_2_5_0\src\xercesc&quot;;&quot;G:\openssl-0.9.7c\inc32&quot;;G:\proxytest\pthread\include;&quot;G:\cppunit-1.9.14\include&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;__UNIT_TEST__"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				UsePrecompiledHeader="0"
+				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="../StdAfx.h"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
@@ -111,9 +111,6 @@
 		</Configuration>
 	</Configurations>
 	<References>
-		<ProjectReference
-			ReferencedProjectIdentifier="{150377B0-CA8F-4031-A0B8-45A3001F4F81}"
-			Name="proxytest"/>
 	</References>
 	<Files>
 		<Filter
