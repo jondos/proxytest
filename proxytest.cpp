@@ -143,7 +143,15 @@ or back via the anonymous channel.
 The channel-id is changed in every mix. Also the content bytes changes in every mix, 
 because each mix will perform a single encryption/decryption.
 
+\subsection Inter-Mix Encryption
+The stream of mix-packets between to mixes is encrypted using AES-128/128 in OFB-128 mode. Exactly only the
+first part of each mix-packet is encrpyted. (see Figure 3)
+The encryption is done, so that an attacker could not see the channel-id and flags of a mix-packet. OFB is chosen, so that
+an attacker could not replay a mix-packed. If he replays a mix-packed, than at least the channel-id 
+changes after decrypting. If this mix-packed was the first packed of a channel, than the cryptographic keys
+for this channel will change to (because of the content format for the first packed of a channel, explained later). 
 
+For Upstream and Downstream different keys are used.
 */
 int main(int argc, const char* argv[])
 	{
@@ -151,6 +159,11 @@ int main(int argc, const char* argv[])
 		if(MIXPACKET_SIZE!=sizeof(MIXPACKET))
 			{
 				CAMsg::printMsg(LOG_CRIT,"MIXPACKET_SIZE != sizeof(MUXPACKET) --> maybe a compiler (optimization) problem!\n");
+				exit(-1);
+			}
+		if(sizeof(UINT32)!=4)
+			{
+				CAMsg::printMsg(LOG_CRIT,"sizeof(UINT32) != 4 --> maybe a compiler (optimization) problem!\n");
 				exit(-1);
 			}
 

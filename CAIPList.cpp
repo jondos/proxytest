@@ -29,18 +29,26 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAIPList.hpp"
 #include "CAMsg.hpp"
 
-/**Constructs a empty CAIPList.*/ 
+/**Constructs a empty CAIPList. The default number of allowed insertions is used*/ 
 CAIPList::CAIPList()
-	{
-		m_HashTable=new PIPLIST[0xFFFF];
-		memset(m_HashTable,0,0xFFFF*sizeof(PIPLIST));
+	{	
+		CAIPList(MAX_IP_CONNECTIONS);
+	}
 
+/**Constructs a empty CAIPList, there allowedConnections insertions 
+are allowed until an error is returned
+@param allowedConnections number of insertions of the same IP-Address, until an error is returned
+*/
+CAIPList::CAIPList(UINT32 allowedConnections)
+	{
+		m_HashTable=new PIPLIST[0x10000];
+		memset(m_HashTable,0,0x10000*sizeof(PIPLIST));
 	}
 
 /** Deletes the IPList and frees all used resources*/
 CAIPList::~CAIPList()
 	{
-		for(UINT32 i=0;i<0x10000;i++)
+		for(UINT32 i=0;i<=0xFFFF;i++)
 			{
 				PIPLIST entry=m_HashTable[i];
 				PIPLIST tmpEntry;
@@ -55,11 +63,11 @@ CAIPList::~CAIPList()
 
 /** Inserts the IP-Address into the list. 
   * If the IP-Address is already in the list then the number of insert()
-	* called for this IP-Adress is returned. If this number is larger than MAX_IP_CONNECTIONS
+	* called for this IP-Adress is returned. If this number is larger than m_allowedConnections
 	* an error is returned.
 	* @param ip the IP-Address to insert
-	* @return number of inserts fpr this IP-Address
-  * @retval E_UNKNOWN, if an error occured or an IP is inserted more than MAX_IP_CONNECTIONS times
+	* @return number of inserts for this IP-Address
+  * @retval E_UNKNOWN, if an error occured or an IP is inserted more than m_allowedConnections times
 	*/
 SINT32 CAIPList::insertIP(UINT8 ip[4])
 	{
@@ -69,7 +77,7 @@ SINT32 CAIPList::insertIP(UINT8 ip[4])
 		if(entry==NULL)
 			{
 				entry=new IPLISTENTRY;
-				memcpy(entry->ip,ip,4);
+				memcpy(entry->ip,ip,2);
 				entry->count=1;
 				entry->next=NULL;
 				m_HashTable[hashvalue]=entry;
@@ -80,9 +88,9 @@ SINT32 CAIPList::insertIP(UINT8 ip[4])
 				PIPLIST last;
 				do
 					{
-						if(memcmp(entry->ip,ip,4)==0) //we have found the entry
+						if(memcmp(entry->ip,ip,2)==0) //we have found the entry
 							{
-								if(entry->count>=MAX_IP_CONNECTIONS) //an Attack...
+								if(entry->count>=m_allowedConnections) //an Attack...
 									{
 										CAMsg::printMsg(LOG_CRIT,"possible Flooding Attack from: %u.%u.%u.%u !\n",ip[0],ip[1],ip[2],ip[3]);
 										return E_UNKNOWN;
@@ -95,7 +103,7 @@ SINT32 CAIPList::insertIP(UINT8 ip[4])
 					} while(entry!=NULL);
 				last->next=new IPLISTENTRY;
 				entry=last->next;
-				memcpy(entry->ip,ip,4);
+				memcpy(entry->ip,ip,2);
 				entry->count=1;
 				entry->next=NULL;
 				return entry->count;
@@ -104,7 +112,8 @@ SINT32 CAIPList::insertIP(UINT8 ip[4])
 
 /** Removes the IP-Address from the list.
 	* @param ip IP-Address to remove
-	* @return the remaining count of inserts for this IP-Address. 0 if IP-Address is delete form the list
+	* @return the remaining count of inserts for this IP-Address. 
+	* @retval 0 if IP-Address is delete form the list
 	*/
 SINT32 CAIPList::removeIP(UINT8 ip[4])
 	{
@@ -120,7 +129,7 @@ SINT32 CAIPList::removeIP(UINT8 ip[4])
 				PIPLIST before=NULL;
 				while(entry!=NULL)
 					{
-						if(memcmp(entry->ip,ip,4)==0)
+						if(memcmp(entry->ip,ip,2)==0)
 							{
 								entry->count--;
 								if(entry->count==0)

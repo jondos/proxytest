@@ -25,21 +25,42 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
-typedef struct _iplist_t
-	{
-		UINT8 ip[4];
-		UINT8 count;
-		_iplist_t* next;
-	}	IPLISTENTRY,*PIPLIST;
 
+/** This structure is used for building the IP-List. 
+It stores the first two bytes of an IP-Address, how often this IP-Address was inserted
+and a pointer to the next element of the list*/
+	struct _iplist_t
+	{
+		UINT8 ip[2]; /** First to Bytes of the IP-Address*/
+		UINT8 count; /** Count of insertions*/ 
+		struct _iplist_t* next; /**Next element, NULL if element is the last one*/
+	};
+
+typedef struct _iplist_t IPLISTENTRY;
+typedef struct _iplist_t* PIPLIST;
+
+/** The default value of allowed insertions, until insertIP() will return an error*/
 #define MAX_IP_CONNECTIONS 10
-class CAIPList
+
+/** The purpose of this class is to store a list of IP-Addresses. If an
+IP-Address is inserted more than 'x' times, than an error is returned.
+The First mix uses this functionalty to do some basic Denial Of Service defens.
+If some one tries to do connection flooding to the First Mix, only 'x' connections
+are accepted and the others are droped. 
+The internal organisation is a hash-table with overrun lists. The hashtable has
+0x10000 buckets. The last two bytes of an IP-Address are the hash-key.
+@note This class only supports IPv4.
+@warning This class is NOT thread safe.
+ */
+	class CAIPList
 	{
 		public:
 			CAIPList();
+			CAIPList(UINT32 allowedConnections);
 			~CAIPList();
 			SINT32 insertIP(UINT8 ip[4]);
 			SINT32 removeIP(UINT8 ip[4]);
 		protected:
+			UINT32 m_allowedConnections;
 			PIPLIST* m_HashTable;
 	};
