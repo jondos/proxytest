@@ -40,13 +40,13 @@ CAMsg::CAMsg()
 			m_uLogType=MSG_STDOUT;
 			m_hFileErr=m_hFileInfo=-1;
 			m_strMsgBuff[0]='[';
-			InitializeCriticalSection(&csPrint);
+			InitializeCriticalSection(&m_csPrint);
 		}
 
 CAMsg::~CAMsg()
     {
 			closeLog();
-			DeleteCriticalSection(&csPrint);
+			DeleteCriticalSection(&m_csPrint);
     }
   
 const char* const CAMsg::m_strMsgTypes[4]={", error   ] ",", critical] ",", info    ] ",", debug   ] "}; //all same size!
@@ -68,7 +68,7 @@ SINT32 CAMsg::setOptions(UINT32 opt)
 
 SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 	{
-		EnterCriticalSection(&oMsg.csPrint);
+		EnterCriticalSection(&oMsg.m_csPrint);
 		va_list ap;
 		va_start(ap,format);
 		SINT32 ret=E_SUCCESS;
@@ -92,7 +92,7 @@ SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 				break;
 				default:
 					va_end(ap);
-					LeaveCriticalSection(&oMsg.csPrint);
+					LeaveCriticalSection(&oMsg.m_csPrint);
 					return E_UNKNOWN;
 			}
 #ifdef HAVE_VSNPRINTF
@@ -132,7 +132,7 @@ SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 				default:
 				 ret=E_UNKNOWN;
 			}
-		LeaveCriticalSection(&oMsg.csPrint);
+		LeaveCriticalSection(&oMsg.m_csPrint);
 		return ret;
   }
 

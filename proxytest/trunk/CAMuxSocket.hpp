@@ -112,9 +112,9 @@ class CAMuxSocket
 				CASocket m_Socket;
 				UINT32 m_aktBuffPos;
 				UINT8* m_Buff;
-				CASymCipher ocipherIn;
-				CASymCipher ocipherOut;
-				bool bIsCrypted;
+				CASymCipher m_oCipherIn;
+				CASymCipher m_oCipherOut;
+				bool m_bIsCrypted;
 				CRITICAL_SECTION csSend;
 				CRITICAL_SECTION csReceive;
 	};

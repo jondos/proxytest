@@ -31,6 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMix.hpp"
 #include "CAMuxSocket.hpp"
 #include "CAASymCipher.hpp"
+#include "CASocketList.hpp"
 class CAMiddleMix:public CAMix
 	{
 		public:
@@ -41,9 +42,13 @@ class CAMiddleMix:public CAMix
 			SINT32 init();
 			SINT32 clean();
 		private:
-			CAMuxSocket muxIn;
-			CAMuxSocket muxOut;
-			CAASymCipher mRSA;
+			CAMuxSocket m_MuxIn;
+			CAMuxSocket m_MuxOut;
+			CAASymCipher m_RSA;
+			CASocketList m_oSocketList;
+#ifdef _ASYNC
+			friend THREAD_RETURN loopDownStream(void *p);
+#endif
 	};
 
 #endif

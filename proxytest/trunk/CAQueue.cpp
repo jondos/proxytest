@@ -39,20 +39,20 @@ CAQueue::~CAQueue()
 				m_Queue=m_Queue->next;
 				delete m_lastElem;
 			}
-		DeleteCriticalSection(&csQueue);
+		DeleteCriticalSection(&m_csQueue);
 	}
 
 SINT32 CAQueue::add(UINT8* buff,UINT32 size)
 	{
 		if(buff==NULL)
 			return E_UNKNOWN;
-		EnterCriticalSection(&csQueue);
+		EnterCriticalSection(&m_csQueue);
 		if(m_Queue==NULL)
 			{
 				m_Queue=new QUEUE;
 				if(m_Queue==NULL)
 					{
-						LeaveCriticalSection(&csQueue);
+						LeaveCriticalSection(&m_csQueue);
 						return E_UNKNOWN;
 					}
 				m_Queue->pBuff=new UINT8[size];
@@ -60,7 +60,7 @@ SINT32 CAQueue::add(UINT8* buff,UINT32 size)
 					{
 						delete m_Queue;
 						m_Queue=NULL;
-						LeaveCriticalSection(&csQueue);
+						LeaveCriticalSection(&m_csQueue);
 						return E_UNKNOWN;
 					}
 				m_Queue->next=NULL;
@@ -73,7 +73,7 @@ SINT32 CAQueue::add(UINT8* buff,UINT32 size)
 				m_lastElem->next=new QUEUE;
 				if(m_lastElem->next==NULL)
 					{
-						LeaveCriticalSection(&csQueue);
+						LeaveCriticalSection(&m_csQueue);
 						return E_UNKNOWN;
 					}
 				m_lastElem->next->pBuff=new UINT8[size];
@@ -81,7 +81,7 @@ SINT32 CAQueue::add(UINT8* buff,UINT32 size)
 					{
 						delete m_lastElem->next;
 						m_lastElem->next=NULL;
-						LeaveCriticalSection(&csQueue);
+						LeaveCriticalSection(&m_csQueue);
 						return E_UNKNOWN;
 					}
 				m_lastElem=m_lastElem->next;
@@ -93,9 +93,8 @@ SINT32 CAQueue::add(UINT8* buff,UINT32 size)
 		if(m_nQueueSize>m_nMaxQueueSize)
 			{
 				m_nMaxQueueSize=m_nQueueSize;
-		//		CAMsg::printMsg(LOG_DEBUG,"Max Queue Size now: %u\n",m_nMaxQueueSize);
 			}
-		LeaveCriticalSection(&csQueue);
+		LeaveCriticalSection(&m_csQueue);
 		return m_nQueueSize;
 	}
 			
@@ -103,7 +102,7 @@ SINT32 CAQueue::getNext(UINT8* pbuff,UINT32* psize)
 	{
 		if(m_Queue==NULL||pbuff==NULL||psize==NULL)
 			return E_UNKNOWN;
-		EnterCriticalSection(&csQueue);
+		EnterCriticalSection(&m_csQueue);
 		SINT32 ret;
 		if(*psize<m_Queue->size)
 			ret=E_UNKNOWN;
@@ -118,7 +117,7 @@ SINT32 CAQueue::getNext(UINT8* pbuff,UINT32* psize)
 				m_nQueueSize--;
 				ret=E_SUCCESS;
 			}
-		LeaveCriticalSection(&csQueue);
+		LeaveCriticalSection(&m_csQueue);
 		return ret;
 	}
 			

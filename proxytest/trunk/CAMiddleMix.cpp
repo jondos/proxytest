@@ -38,7 +38,7 @@ extern CACmdLnOptions options;
 SINT32 CAMiddleMix::init()
 	{		
 		CAMsg::printMsg(LOG_INFO,"Creating Key...\n");
-		if(mRSA.generateKeyPair(1024)!=E_SUCCESS)
+		if(m_RSA.generateKeyPair(1024)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Init: Error generating Key-Pair...\n");
 				return E_UNKNOWN;		
@@ -49,68 +49,64 @@ SINT32 CAMiddleMix::init()
 		CASocketAddrINet nextMix;
 		nextMix.setAddr((char*)strTarget,options.getTargetPort());
 		
-		if(((CASocket*)muxOut)->create()!=E_SUCCESS)
+		if(((CASocket*)m_MuxOut)->create()!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Init: Cannot create SOCKET for outgoing conncetion...\n");
 				return E_UNKNOWN;
 			}
-		((CASocket*)muxOut)->setRecvBuff(50*MIXPACKET_SIZE);
-		((CASocket*)muxOut)->setSendBuff(50*MIXPACKET_SIZE);
+		((CASocket*)m_MuxOut)->setRecvBuff(50*MIXPACKET_SIZE);
+		((CASocket*)m_MuxOut)->setSendBuff(50*MIXPACKET_SIZE);
 #define RETRIES 100
 #define RETRYTIME 30
 		CAMsg::printMsg(LOG_INFO,"Init: Try to connect to next Mix: %s...\n",strTarget);
-		if(muxOut.connect(nextMix,RETRIES,RETRYTIME)!=E_SUCCESS)
+		if(m_MuxOut.connect(nextMix,RETRIES,RETRYTIME)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Cannot connect to next Mix -- Exiting!\n");
 				return E_UNKNOWN;
 			}
 //		mSocketGroup.add(muxOut);
 		CAMsg::printMsg(LOG_INFO," connected!\n");
-		if(((CASocket*)muxOut)->setKeepAlive((UINT32)1800)!=E_SUCCESS)
+		if(((CASocket*)m_MuxOut)->setKeepAlive((UINT32)1800)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_INFO,"Socket option TCP-KEEP-ALIVE returned an error - so not set!\n");
-				if(((CASocket*)muxOut)->setKeepAlive(true)!=E_SUCCESS)
+				if(((CASocket*)m_MuxOut)->setKeepAlive(true)!=E_SUCCESS)
 					CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
 			}
 		
-//		int len;
-//		unsigned char buff[RSA_SIZE];
-//		CONNECTION oConnection;
-//		CONNECTION* pCon;
 		unsigned char* recvBuff=NULL;
 		unsigned char* infoBuff=NULL;
 		
 		UINT16 keyLen;
-		if(((CASocket*)muxOut)->receiveFully((UINT8*)&keyLen,2)!=E_SUCCESS)
+		if(((CASocket*)m_MuxOut)->receiveFully((UINT8*)&keyLen,2)!=E_SUCCESS)
 			return E_UNKNOWN;
 		CAMsg::printMsg(LOG_INFO,"Received Key Info lenght %u\n",ntohs(keyLen));
 		recvBuff=new unsigned char[ntohs(keyLen)+2];
 		if(recvBuff==NULL)
 			return E_UNKNOWN;
 		memcpy(recvBuff,&keyLen,2);
-		if(((CASocket*)muxOut)->receiveFully(recvBuff+2,ntohs(keyLen))!=E_SUCCESS)
+		if(((CASocket*)m_MuxOut)->receiveFully(recvBuff+2,ntohs(keyLen))!=E_SUCCESS)
 			{
 				delete recvBuff;
 				return E_UNKNOWN;
 			}
 		CAMsg::printMsg(LOG_INFO,"Received Key Info...\n");
 		
-		if(muxIn.accept(options.getServerPort())==SOCKET_ERROR)
+		if(m_MuxIn.accept(options.getServerPort())==SOCKET_ERROR)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Error waiting for previous Mix... -- Exiting!\n");				
 				delete recvBuff;
 				return E_UNKNOWN;
 			}
-		((CASocket*)muxIn)->setRecvBuff(50*MIXPACKET_SIZE);
-		((CASocket*)muxIn)->setSendBuff(50*MIXPACKET_SIZE);
-		if(((CASocket*)muxIn)->setKeepAlive((UINT32)1800)!=E_SUCCESS)
+		((CASocket*)m_MuxIn)->setRecvBuff(50*MIXPACKET_SIZE);
+		((CASocket*)m_MuxIn)->setSendBuff(50*MIXPACKET_SIZE);
+		if(((CASocket*)m_MuxIn)->setKeepAlive((UINT32)1800)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_INFO,"Socket option TCP-KEEP-ALIVE returned an error - so not set!\n");
-				if(((CASocket*)muxIn)->setKeepAlive(true)!=E_SUCCESS)
+				if(((CASocket*)m_MuxIn)->setKeepAlive(true)!=E_SUCCESS)
 					CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
 			}
 
-		UINT32 keySize=mRSA.getPublicKeySize();
+		UINT32 keySize=m_RSA.getPublicKeySize();
 		UINT16 infoSize;
 		memcpy(&infoSize,recvBuff,2);
 		infoSize=ntohs(infoSize)+2;
@@ -129,13 +125,13 @@ SINT32 CAMiddleMix::init()
 		delete recvBuff;
 		
 		infoBuff[2]++; //chainlen erhoehen
-		mRSA.getPublicKey(infoBuff+infoSize,&keySize);
+		m_RSA.getPublicKey(infoBuff+infoSize,&keySize);
 		infoSize+=keySize;
 		(*(UINT16*)infoBuff)=htons(infoSize-2);
 		#ifdef _DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"New Key Info size: %u\n",infoSize);
 		#endif
-		if(((CASocket*)muxIn)->send(infoBuff,infoSize)==-1)
+		if(((CASocket*)m_MuxIn)->send(infoBuff,infoSize)==-1)
 			{
 				CAMsg::printMsg(LOG_DEBUG,"Error sending new New Key Info\n");
 				delete infoBuff;
@@ -147,7 +143,133 @@ SINT32 CAMiddleMix::init()
 		return E_SUCCESS;
 	}
 
+#ifdef _ASYNC
+//Bug: What if Upstream deletes a channel, if if proccess a packet for this channel
+// (pChipher could become invaild)!!! 
+	
+THREAD_RETURN loopDownStream(void *p)
+	{
+		CAMiddleMix* pMix=(CAMiddleMix*)p;
+		CONNECTION oConnection;
+		MIXPACKET oMixPacket;
+		SINT32 ret;
+		for(;;)
+			{
+				ret=pMix->m_MuxOut.receive(&oMixPacket);
+				if(ret==SOCKET_ERROR)
+						{
+							CAMsg::printMsg(LOG_CRIT,"Fehler beim Empfangen -- Exiting!\n");
+							goto ERR;
+						}
+				if(pMix->m_oSocketList.get(&oConnection,oMixPacket.channel))
+					{
+						if(oMixPacket.flags!=CHANNEL_CLOSE)
+							{
+								oMixPacket.channel=oConnection.id;
+								oConnection.pCipher->decryptAES2(oMixPacket.data,oMixPacket.data,DATA_SIZE);
+								if(pMix->m_MuxIn.send(&oMixPacket)==SOCKET_ERROR)
+									goto ERR;
+							}
+						else
+							{
+								if(pMix->m_MuxIn.close(oConnection.id)==SOCKET_ERROR)
+									goto ERR;
+								delete oConnection.pCipher;
+								pMix->m_oSocketList.remove(oConnection.id);
+							}
+					}
+/*				else
+					{
+						if(pMix->m_MuxOut.close(oMixPacket.channel)==SOCKET_ERROR)
+							goto ERR;
+					}
+*/			}
+ERR:
+		THREAD_RETURN_SUCCESS;		
+	}
 
+
+SINT32 CAMiddleMix::loop()
+	{
+		CONNECTION oConnection;
+		MIXPACKET oMixPacket;
+		HCHANNEL lastId=1;
+		SINT32 ret;
+		UINT8 tmpRSABuff[RSA_SIZE];
+		m_MuxIn.setCrypt(true);
+		m_MuxOut.setCrypt(true);
+		m_oSocketList.clear();
+		m_oSocketList.setThreadSafe(true);
+		#ifdef _WIN32
+		 _beginthread(loopDownStream,0,this);
+		#else
+		 pthread_t othread;
+		 pthread_create(&othread,NULL,loopDownStream,this);
+		#endif
+
+		for(;;)
+			{
+				ret=m_MuxIn.receive(&oMixPacket);
+				if(ret==SOCKET_ERROR)
+					{
+						CAMsg::printMsg(LOG_CRIT,"Fehler beim Empfangen -- Exiting!\n");
+						goto ERR;
+					}
+				if(!m_oSocketList.get(oMixPacket.channel,&oConnection))
+					{
+						if(oMixPacket.flags==CHANNEL_OPEN)
+							{
+								#ifdef _DEBUG
+										CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
+								#endif
+								CASymCipher* newCipher=new CASymCipher();
+								m_RSA.decrypt((unsigned char*)oMixPacket.data,tmpRSABuff);
+								newCipher->setKeyAES(tmpRSABuff);
+								newCipher->decryptAES(oMixPacket.data+RSA_SIZE,
+																			oMixPacket.data+RSA_SIZE-KEY_SIZE,
+																			DATA_SIZE-RSA_SIZE);
+								memcpy(oMixPacket.data,tmpRSABuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
+								m_oSocketList.add(oMixPacket.channel,lastId,newCipher);
+								oMixPacket.channel=lastId;
+								lastId++;
+								if(m_MuxOut.send(&oMixPacket)==SOCKET_ERROR)
+									goto ERR;
+							}
+					}
+				else
+					{
+						if(oMixPacket.flags==CHANNEL_CLOSE)
+							{
+								if(m_MuxOut.close(oConnection.outChannel)==SOCKET_ERROR)
+									goto ERR;
+								delete oConnection.pCipher;
+								m_oSocketList.remove(oMixPacket.channel);
+							}
+						else
+							{
+								oMixPacket.channel=oConnection.outChannel;
+								oConnection.pCipher->decryptAES(oMixPacket.data,oMixPacket.data,DATA_SIZE);
+								if(m_MuxOut.send(&oMixPacket)==SOCKET_ERROR)
+									goto ERR;
+							}
+					}
+			}
+ERR:
+		m_MuxIn.close();
+		m_MuxOut.close();
+//todo wait for other thread
+		
+//
+		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
+		CONNECTION* pCon=m_oSocketList.getFirst();
+		while(pCon!=NULL)
+			{
+				delete pCon->pCipher;
+				pCon=m_oSocketList.getNext();
+			}
+		return E_UNKNOWN;
+	}
+#else
 SINT32 CAMiddleMix::loop()
 	{
 		CONNECTION oConnection;
@@ -205,6 +327,7 @@ SINT32 CAMiddleMix::loop()
 									{
 										if(muxOut.close(oConnection.outChannel)==SOCKET_ERROR)
 											goto ERR;
+										delete oConnection.pCipher;
 										oSocketList.remove(oMixPacket.channel);
 									}
 								else
@@ -240,6 +363,7 @@ NEXT:
 									{
 										if(muxIn.close(oConnection.id)==SOCKET_ERROR)
 											goto ERR;
+										delete oConnection.pCipher;
 										oSocketList.remove(oConnection.id);
 									}
 							}
@@ -260,11 +384,11 @@ ERR:
 			}
 		return E_UNKNOWN;
 	}
-
+#endif
 SINT32 CAMiddleMix::clean()
 	{
-		muxIn.close();
-		muxOut.close();
-		mRSA.destroy();
+		m_MuxIn.close();
+		m_MuxOut.close();
+		m_RSA.destroy();
 		return E_SUCCESS;
 	}

@@ -55,5 +55,5 @@ class CAMsg
 			int m_hFileInfo;
 			char m_strMsgBuff[1050];
 			static const char* const m_strMsgTypes[4];
-			CRITICAL_SECTION csPrint;
+			CRITICAL_SECTION m_csPrint;
    };

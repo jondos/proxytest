@@ -61,12 +61,12 @@ class BufferInputStream:public XML::InputStream
 
 CASignature::CASignature()
 	{
-		dsa=NULL;
+		m_pDSA=NULL;
 	}
 
 CASignature::~CASignature()
 	{
-		DSA_free(dsa);
+		DSA_free(m_pDSA);
 	}
 
 SINT32 CASignature::setSignKey(UINT8* buff,UINT32 len,UINT32 type)
@@ -177,7 +177,7 @@ SINT32 CASignature::parseSignKeyXML(UINT8* buff,UINT32 len)
 				DSA_free(tmpDSA);
 				return E_UNKNOWN;
 			}
-		dsa=tmpDSA;
+		m_pDSA=tmpDSA;
 		return E_SUCCESS;
 	}
 
@@ -186,14 +186,14 @@ SINT32 CASignature::sign(UINT8* in,UINT32 inlen,UINT8* sig,UINT32* siglen)
 	{
 		UINT8 dgst[SHA_DIGEST_LENGTH];
 		SHA1(in,inlen,dgst);
-		if(DSA_sign(0,dgst,SHA_DIGEST_LENGTH,sig,siglen,dsa)==1)
+		if(DSA_sign(0,dgst,SHA_DIGEST_LENGTH,sig,siglen,m_pDSA)==1)
 		 return E_SUCCESS;
 		return E_UNKNOWN;
 	}
 
 SINT32 CASignature::getSignatureSize()
 	{
-		return DSA_size(dsa);
+		return DSA_size(m_pDSA);
 	}
 
 const char *XMLSIGINFO_TEMPLATE=

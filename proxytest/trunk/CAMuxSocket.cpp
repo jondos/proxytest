@@ -39,7 +39,7 @@ CAMuxSocket::CAMuxSocket()
 	{
 		m_Buff=new UINT8[MIXPACKET_SIZE];
 		m_aktBuffPos=0;
-		bIsCrypted=false;
+		m_bIsCrypted=false;
 		InitializeCriticalSection(&csSend);
 		InitializeCriticalSection(&csReceive);
 	}
@@ -48,13 +48,13 @@ SINT32 CAMuxSocket::setCrypt(bool b)
 	{
 		EnterCriticalSection(&csSend);
 		EnterCriticalSection(&csReceive);
-		bIsCrypted=b;
+		m_bIsCrypted=b;
 		if(b)
 			{
 				UINT8 nullkey[16];
 				memset(nullkey,0,16);
-				ocipherIn.setKeyAES(nullkey);
-				ocipherOut.setKeyAES(nullkey);
+				m_oCipherIn.setKeyAES(nullkey);
+				m_oCipherOut.setKeyAES(nullkey);
 			}
 		LeaveCriticalSection(&csReceive);
 		LeaveCriticalSection(&csSend);
@@ -114,8 +114,8 @@ int CAMuxSocket::send(MIXPACKET *pPacket)
 		memcpy(tmpBuff,pPacket,16);
 		pPacket->channel=htonl(pPacket->channel);
 		pPacket->flags=htons(pPacket->flags);
-		if(bIsCrypted)
-    	ocipherOut.encryptAES(((UINT8*)pPacket),((UINT8*)pPacket),16);
+		if(m_bIsCrypted)
+    	m_oCipherOut.encryptAES(((UINT8*)pPacket),((UINT8*)pPacket),16);
 		ret=m_Socket.send(((UINT8*)pPacket),MIXPACKET_SIZE);
 		if(ret==SOCKET_ERROR)
 			{
@@ -142,8 +142,8 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket)
 				LeaveCriticalSection(&csReceive);
 				return SOCKET_ERROR;
 			}
-		if(bIsCrypted)
-    	ocipherIn.decryptAES((UINT8*)pPacket,(UINT8*)pPacket,16);
+		if(m_bIsCrypted)
+    	m_oCipherIn.decryptAES((UINT8*)pPacket,(UINT8*)pPacket,16);
 		pPacket->channel=ntohl(pPacket->channel);
 		pPacket->flags=ntohs(pPacket->flags);
 		LeaveCriticalSection(&csReceive);		
@@ -165,8 +165,8 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 timeout)
 			}
 		if(ret==len)
 			{
-				if(bIsCrypted)
-        	ocipherIn.decryptAES(m_Buff,m_Buff,16);
+				if(m_bIsCrypted)
+        	m_oCipherIn.decryptAES(m_Buff,m_Buff,16);
 				memcpy(pPacket,m_Buff,MIXPACKET_SIZE);
 				pPacket->channel=ntohl(pPacket->channel);
 				pPacket->flags=ntohs(pPacket->flags);
@@ -202,8 +202,8 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 timeout)
 							}
 						if(ret==len)
 							{
-								if(bIsCrypted)
-                	ocipherIn.decryptAES(m_Buff,m_Buff,16);
+								if(m_bIsCrypted)
+                	m_oCipherIn.decryptAES(m_Buff,m_Buff,16);
 								memcpy(pPacket,m_Buff,MIXPACKET_SIZE);
 								pPacket->channel=ntohl(pPacket->channel);
 								pPacket->flags=ntohs(pPacket->flags);
