@@ -512,7 +512,7 @@ SINT32 CALastMix::loop()
 										countRead--;
 										if(oqueueMixIn.getSize()<MAX_MIXIN_SEND_QUEUE_SIZE
 												#ifdef DELAY_CHANNELS
-													&&(pChannelListEntry->trafficOut>DELAY_CHANNEL_TRAFFIC&&isGreater64(aktTime,pChannelListEntry->timeNextSend))
+													&&(pChannelListEntry->trafficOut<DELAY_CHANNEL_TRAFFIC||isGreater64(aktTime,pChannelListEntry->timeNextSend))
 												#endif
 											)
 											{
