@@ -101,7 +101,7 @@ SINT32 CALocalProxy::init()
 				UINT16 size;
 				((CASocket*)m_muxOut)->receive((UINT8*)&size,2);
 				((CASocket*)m_muxOut)->receive(&m_chainlen,1);
-				if(m_chainlen='<')//assuming XML
+				if(m_chainlen=='<')//assuming XML
 					{
 						size=ntohs(size);
 						UINT8* buff=new UINT8[size+1];
