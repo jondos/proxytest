@@ -1,18 +1,19 @@
+#You should only need to change the following lines:
+OPENSSL_INC=/usr/local/ssl/include
+OPENSSL_LIB=/usr/local/ssl/lib
+XERCESC_INC=/usr/local/include/xercesc
+XERCESC_LIB=/usr/local/lib
+
+#### I believe you do not need to change anything behind this....
+
+INCLUDE = -I. -I${OPENSSL_INC} -I/usr/users/sya/sk13/openssl/include -I/home/imis/mix/openssl64/include -I/sun/ikt/sk13/openssl/include -I${XERCESC_INC} -I${HOME}/xercesc/include/xercesc
+LIBDIR= -L${OPENSSL_LIB} -L/usr/users/sya/sk13/openssl/lib -L/home/imis/mix/openssl64/lib -L/sun/ikt/sk13/openssl/lib -L/usr/local/lib -L${XERCESC_LIB} -L${HOME}/xercesc/lib
+LIBS	= ./popt/libpopt.a ./xml/libxml.a ./trio/libtrio.a ./aes/libaes.a -lcrypto -lm -lxercesc
+
+MAKE=make -f Makefile.old
+
 .SUFFIXES:
 .SUFFIXES: .o .cpp	
-
-#CC=gcc
-#CC=CC -mips4 -64
-#CC=gcc -mcpu=ultrasparc
-#INCLUDE = -I. -I/usr/local/ssl/include -I/usr/users/sya/sk13/openssl/include -I/home/imis/mix/openssl64/include -I/sun/ikt/sk13/openssl/include
-INCLUDE = -I. -I/usr/local/ssl/include -I/usr/users/sya/sk13/openssl/include -I/home/imis/mix/openssl64/include -I/sun/ikt/sk13/openssl/include -I/usr/local/include/xercesc -I${HOME}/xercesc/include/xercesc
-#LIBS	= -L/usr/local/ssl/lib -L/usr/users/sya/sk13/openssl/lib -L/home/imis/mix/openssl64/lib -L/sun/ikt/sk13/openssl/lib ./popt/popt.a ./httptunnel/httptunnel.a ./xml/xml.a -lcrypto -lpthread
-LIBDIR= -L/usr/local/ssl/lib -L/usr/users/sya/sk13/openssl/lib -L/home/imis/mix/openssl64/lib -L/sun/ikt/sk13/openssl/lib -L/usr/local/lib -L${HOME}/xercesc/lib
-LIBS	= ./popt/libpopt.a ./xml/libxml.a ./trio/libtrio.a ./aes/libaes.a -lcrypto -lm -lxercesc
-#CPPFLAGS =-O3 -Wall 
-#CPPFLAGS =-O3 -D_REENTRANT
-#DEBUG =-D_DEBUG -g
-MAKE=make -f Makefile.old
 
 OBJS_ALL=CASocket.o\
 	CAQueue.o\
@@ -58,15 +59,20 @@ OBJS=$(OBJS_ALL)
 
 all: 
 	@echo 'Please select a target:'
-	@echo 'linux-x86-gcc, linux-k6-gcc,' 
-	@echo 'linux-x86-gcc-static, linux-k6-gcc-static, linux-x86-gcc-debug,'
+	@echo 'linux-x86-gcc, linux-k6-gcc, linux-i686-gcc' 
+	@echo 'linux-i686-gcc-static, linux-k6-gcc-static, linux-x86-gcc-debug,'
 	@echo 'solaris-ultrasparc-gcc, irix-64-cc, irix-64-cc-debug'
+	@echo 'freebsd-x86-gcc-lthread, freebsd-x86-gcc-pthread'
+
 
 linux-x86-gcc:
-	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -finline-functions -fomit-frame-pointer -march=i686 -O3' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -finline-functions -fomit-frame-pointer -O3' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
 
-linux-x86-gcc-static:
-	$(MAKE) 'CC=gcc' 'CPPFLAGS=-static -D_ASYNC -D_REENTRANT -Wall -Wcast-align -fomit-frame-pointer -march=i686 -O3' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=-L/usr/local/ssl/lib' _all_aes 
+linux-i686-gcc-static:
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-static -D_ASYNC -D_REENTRANT -Wall -Wcast-align -fomit-frame-pointer -march=i686 -O3' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
+
+linux-i686-gcc:
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -finline-functions -fomit-frame-pointer -march=i686 -O3' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
 
 linux-k6-gcc:
 	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -finline-functions -fomit-frame-pointer -march=k6 -O3' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=-L/usr/local/ssl/lib' _all_aes 
