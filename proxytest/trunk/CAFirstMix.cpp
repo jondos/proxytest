@@ -205,7 +205,6 @@ SINT32 CAFirstMix::init()
 #ifndef _WIN32
 				seteuid(old_uid);
 #endif
-				ret=E_UNKNOWN;
 				if(ret!=E_SUCCESS)
 					{
 						CAMsg::printMsg(LOG_CRIT,"Cannot listen on HTTPS-Port\n");
