@@ -194,7 +194,7 @@ SINT32 CASocket::connect(LPCASOCKETADDR psa,UINT msTimeOut)
 			}
 		if(FD_ISSET(m_Socket,&readSet)||FD_ISSET(m_Socket,&writeSet))
 			{
-				int len=sizeof(err);
+				socklen_t len=sizeof(err);
 				err=0;
 				if(::getsockopt(m_Socket,SOL_SOCKET,SO_ERROR,(char*)&err,&len)<0||err!=0)
 					{
