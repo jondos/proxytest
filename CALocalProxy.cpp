@@ -44,7 +44,7 @@ SINT32 CALocalProxy::init()
 					CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
 					return E_UNKNOWN;
 		    }
-		if(options.getSOCKSServerPort()!=-1)
+		if(options.getSOCKSServerPort()!=(UINT16)-1)
 			{
 				socketAddrIn.setAddr("127.0.0.1",options.getSOCKSServerPort());
 				socketSOCKSIn.create();
