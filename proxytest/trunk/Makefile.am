@@ -27,7 +27,6 @@ proxytest_SOURCES = CAASymCipher.cpp \
 		    CAMutex.cpp\
 		    CAMuxSocket.cpp \
 		    CAQueue.cpp \
-		    CARoundTripTime.cpp \
 		    CASemaphore.cpp\
 		    CASignature.cpp \
 		    CASocket.cpp \
@@ -62,7 +61,6 @@ proxytest_SOURCES = CAASymCipher.cpp \
 		    CAMutex.hpp\
 		    CAMuxSocket.hpp \
 		    CAQueue.hpp \
-		    CARoundTripTime.hpp \
 		    CASemaphore.hpp\
 		    CASignature.hpp \
 		    CASocket.hpp \
