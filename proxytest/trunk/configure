@@ -870,6 +870,7 @@ Optional Features:
                           Specify if to build with bandwith limitation and
                           optionally the number of bytes which are transferred
                           without any limitation
+  --enable-payment        Specify if to build with payment support
   --enable-debug          Enable debug mode
   --enable-crime-detection
                           Enable crime detection mode
@@ -3748,6 +3749,18 @@ if test "${enable_bandwidth_limitation+set}" = set; then
 		    if test "x$enableval" != "xyes" ; then
 			BANDWIDTH_LIMIT="$BANDWIDTH_LIMIT -DDELAY_CHANNEL_TRAFFIC=$enableval"
 		    fi
+		fi
+
+
+fi;
+
+PAYMENT=""
+# Check whether --enable-payment or --disable-payment was given.
+if test "${enable_payment+set}" = set; then
+  enableval="$enable_payment"
+
+		if test "x$enableval" != "xno" ; then
+		    PAYMENT="-DPAYMENT"
 		fi
 
 
@@ -10628,7 +10641,7 @@ if test "${enable_crime_detection+set}" = set; then
 fi;
 
 
-CFLAGS="$CFLAGS $POOL $BANDWIDTH_LIMIT $OFLAGS"
+CFLAGS="$CFLAGS $POOL $BANDWIDTH_LIMIT $PAYMENT $OFLAGS"
 CXXFLAGS=$CFLAGS
 
                                                             ac_config_files="$ac_config_files Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile"

@@ -131,6 +131,18 @@ AC_ARG_ENABLE(bandwidth-limitation,
 	]
 )
 
+dnl payment ??
+PAYMENT=""
+AC_ARG_ENABLE(payment,
+	AS_HELP_STRING([--enable-payment],
+			[Specify if to build with payment support]),
+	[
+		if test "x$enableval" != "xno" ; then
+		    PAYMENT="-DPAYMENT"
+		fi
+	]
+)
+
 LIBS="$DEFAULTLIBS"
 
 dnl Checks for Headers
@@ -360,7 +372,7 @@ AC_ARG_ENABLE(crime-detection,
 )
 
 
-CFLAGS="$CFLAGS $POOL $BANDWIDTH_LIMIT $OFLAGS"
+CFLAGS="$CFLAGS $POOL $BANDWIDTH_LIMIT $PAYMENT $OFLAGS"
 CXXFLAGS=$CFLAGS
 
 AC_CONFIG_FILES([Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile])
