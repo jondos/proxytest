@@ -184,14 +184,17 @@ THREAD_RETURN loopLog(void* param)
 		CALastMix* pLastMix=(CALastMix*)param;
 		pLastMix->m_bRunLog=true;
 		UINT32 countLog=0;
+		UINT8 buff[256];
 		while(pLastMix->m_bRunLog)
 			{
 				if(countLog==0)
 					{
 						CAMsg::printMsg(LOG_DEBUG,"Uploadaed  Packets: %u\n",pLastMix->m_logUploadedPackets);
 						CAMsg::printMsg(LOG_DEBUG,"Downloaded Packets: %u\n",pLastMix->m_logDownloadedPackets);
-						CAMsg::printMsg(LOG_DEBUG,"Uploadaed  Bytes  : %u\n",pLastMix->m_logUploadedBytes);
-						CAMsg::printMsg(LOG_DEBUG,"Downloaded Bytes  : %u\n",pLastMix->m_logDownloadedBytes);
+						print64(buff,(UINT64&)pLastMix->m_logUploadedBytes);
+						CAMsg::printMsg(LOG_DEBUG,"Uploadaed  Bytes  : %s\n",buff);
+						print64(buff,(UINT64&)pLastMix->m_logDownloadedBytes);
+						CAMsg::printMsg(LOG_DEBUG,"Downloaded Bytes  : %s\n",buff);
 						countLog=30;
 					}
 				sSleep(30);
@@ -231,7 +234,9 @@ SINT32 CALastMix::loop()
 				pInfoService->sendHelo();
 				pInfoService->start();
 			}
-		m_logUploadedPackets=m_logDownloadedPackets=m_logUploadedBytes=m_logDownloadedBytes=0;
+		m_logUploadedPackets=m_logDownloadedPackets=0;
+		set64((UINT64&)m_logUploadedBytes,0);
+		set64((UINT64&)m_logDownloadedBytes,0);
 		CAThread oLogThread;
 		oLogThread.setMainLoop(loopLog);
 		oLogThread.start(this);
@@ -402,7 +407,7 @@ SINT32 CALastMix::loop()
 										len=tmpCon->pSocket->send(tmpBuff,len);
 										if(len>0)
 											{
-												m_logUploadedBytes+=len;
+												add64((UINT64&)m_logUploadedBytes,len);
 												tmpCon->pSendQueue->remove((UINT32*)&len);
 												if(tmpCon->pSendQueue->isEmpty())
 													{
@@ -462,7 +467,7 @@ SINT32 CALastMix::loop()
 													}
 												else 
 													{
-														m_logDownloadedBytes+=ret;
+														add64((UINT64&)m_logDownloadedBytes,ret);
 														pMixPacket->channel=tmpCon->id;
 														pMixPacket->flags=CHANNEL_DATA;
 														pMixPacket->payload.len=htons((UINT16)ret);

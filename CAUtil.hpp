@@ -59,5 +59,42 @@ SINT32 getDOMChildByName(const DOM_Node& node,UINT8* name,DOM_Node& child);
 SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, UINT8* xml, UINT32* xmllen,CAASymCipher* pRSA);
 SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, UINT8* xml, UINT32 xmllen,CAASymCipher* pRSA);
 
+#ifndef _WIN32
+typedef struct __UINT64__t_
+	{
+		UINT32 high;
+		UINT32 low;
+	} UINT64;	 
+#endif
 
+inline void set64(UINT64& op1,UINT32 op2)
+	{
+#ifndef _WIN32
+		op1.low=op2;
+		op1.high=0;
+#else
+		op1=op2;
+#endif
+	}
+
+inline void add64(UINT64& op1,UINT32 op2)
+	{
+#ifndef _WIN32
+		UINT32 t=op1.low;
+		op1.low+=op2;
+		if(op1.low<t)
+			op1.high++;
+#else
+		op1+=op2;
+#endif
+	}
+
+inline void print64(UINT8* buff,UINT64& op)
+	{
+#ifndef _WIN32
+		sprintf((char*)buff,"(%u:%u)",op.high,op.low);
+#else
+		sprintf((char*)buff,"(%u)",op);
+#endif
+	}
 #endif
