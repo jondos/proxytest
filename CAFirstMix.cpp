@@ -492,6 +492,7 @@ SINT32 CAFirstMix::loop()
 		oSocketGroup.add(socketIn);
 		oSocketGroup.add(muxOut);
 		oSocketGroupMuxOut.add(muxOut);
+		muxOut.setCrypt(true);
 
 		oInfoService.setSignature(&mSignature);
 		oInfoService.setLevel(0,-1,-1);
