@@ -317,6 +317,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include <sys/stat.h>
 #include <signal.h>
 #include <errno.h>
+#include "trio/trio.hpp"
 #include "popt/system.h"
 #include "popt/popt.h"
 #include <openssl/ssl.h>
