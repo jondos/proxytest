@@ -27,6 +27,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #include "StdAfx.h"
 #include "CACmdLnOptions.hpp"
+#include "CAUtil.hpp"
+#include "CAMsg.hpp"
+#include "CASocketAddrINet.hpp"
+
 CACmdLnOptions::CACmdLnOptions()
   {
 		bDaemon=m_bHttps=false;
@@ -34,7 +38,7 @@ CACmdLnOptions::CACmdLnOptions()
 		iTargetPort=iSOCKSPort=iServerPort=iSOCKSServerPort=iInfoServerPort=0xFFFF;
 		iTargetRTTPort=iServerRTTPort=-1;
 		strServerHost=strTargetHost=strSOCKSHost=strInfoServerHost=NULL;
-		strUser=strKeyFileName=strCascadeName=strLogDir=NULL;
+		m_strMixXml=m_strUser=strKeyFileName=strCascadeName=strLogDir=NULL;
 		pTargets=NULL;
 		cntTargets=0;
   }
@@ -67,8 +71,10 @@ void CACmdLnOptions::clean()
 			delete[] strCascadeName;
 		if(strLogDir!=NULL)
 			delete[] strLogDir;
-		if(strUser!=NULL)
-			delete[] strUser;
+		if(m_strUser!=NULL)
+			delete[] m_strUser;
+		if(m_strMixXml!=NULL)
+			delete[] m_strMixXml;
 		if(pTargets!=NULL)
 			{
 				delete[] pTargets;
@@ -80,6 +86,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 	//int ret;
 	
 	int iDaemon=0;
+	int iTemplate=0;
   int bHttps=0;
   char* target=NULL;
 	int serverrttport=-1;
@@ -92,6 +99,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 	char* logdir=NULL;
 	char* serverPort=NULL;
 	char* user=NULL;
+	char* configfile=NULL;
 
 	poptOption options[]=
 	 {
@@ -108,6 +116,8 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 		{"name",'a',POPT_ARG_STRING,&cascadename,0,"name of the cascade","<string>"},
 		{"logdir",'l',POPT_ARG_STRING,&logdir,0,"directory where log files go to","<dir>"},
 		{"user",'u',POPT_ARG_STRING,&user,0,"effective user","<user>"},
+		{"template",'t',POPT_ARG_NONE,&iTemplate,0,"generate conf template and exit",NULL},
+		{"config",'c',POPT_ARG_STRING,&configfile,0,"config file to use","<file>"},
 		POPT_AUTOHELP
 		{NULL,0,0,
 		NULL,0,NULL,NULL}
@@ -115,6 +125,27 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 	poptContext ctx=poptGetContext(NULL,argc,argv,options,0);
 	poptGetNextOpt(ctx);
 	poptFreeContext(ctx);
+	if(iTemplate!=0)
+		{
+			generateTemplate();
+			exit(0);
+		}
+	if(configfile!=NULL)
+		{
+			int handle;
+			handle=open(configfile,O_BINARY|O_RDONLY);
+			if(handle==-1)
+				CAMsg::printMsg(LOG_CRIT,"Couldt not read config file: %s\n",configfile);
+			else
+				{
+					SINT32 len=filelength(handle);
+					m_strMixXml=new char[len+50]; //some space for the id, which is the only thing, which is changed....
+					read(handle,m_strMixXml,len);
+					m_strMixXml[len]=0;
+					close(handle);
+				}
+			free(configfile);
+		}
 	if(iDaemon==0)
 	    bDaemon=false;
 	else
@@ -227,8 +258,8 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 	    }
 	if(user!=NULL)
 	    {
-					strUser=new char[strlen(user)+1];
-					strcpy(strUser,user);
+					m_strUser=new char[strlen(user)+1];
+					strcpy(m_strUser,user);
 					free(user);	
 	    }
 	if(serverPort!=NULL)
@@ -266,6 +297,25 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 		bMiddleMix=true;
 	else 
 		bLastMix=true;
+	if(m_strMixXml!=NULL) //we should insert the right Id...
+		{
+			UINT8 id[50];
+			getMixId(id,50);
+			char* pos=strstr(m_strMixXml,"id=\"\"");
+			if(pos!=NULL)
+				{
+					pos+=5;
+					UINT32 left=strlen(m_strMixXml)+m_strMixXml-pos+1;
+					memmove(pos+strlen((char*)id),pos,left);
+					memcpy(pos,id,strlen((char*)id));
+				}
+			else
+				{
+					CAMsg::printMsg(LOG_CRIT,"Placeholder for Mix-Id not found in Mix conf file\n");
+					delete m_strMixXml;
+					m_strMixXml=NULL;
+				}
+		}
 		return E_SUCCESS;
 	
     }
@@ -289,6 +339,23 @@ SINT32 CACmdLnOptions::getServerHost(UINT8* path,UINT32 len)
 		if(path==NULL||strServerHost==NULL||len<=strlen(strServerHost))
 			return E_UNKNOWN;
 		strcpy((char*)path,strServerHost);
+		return E_SUCCESS;
+	}
+
+SINT32 CACmdLnOptions::getMixId(UINT8* id,UINT32 len)
+	{
+		if(len<24) //we need 24 chars (including final \0)
+			return E_UNKNOWN;
+		UINT8 buff[4];
+		if(strServerHost==NULL||strServerHost[0]=='\\')
+			CASocketAddrINet::getLocalHostIP(buff);
+		else
+			{
+				CASocketAddrINet oAddr;
+				oAddr.setAddr((UINT8*)strServerHost,0);
+				oAddr.getIP(buff);
+			}
+		sprintf((char*)id,"%u.%u.%u.%u%%3A%u",buff[0],buff[1],buff[2],buff[3],(UINT16)iServerPort);
 		return E_SUCCESS;
 	}
 
@@ -402,13 +469,13 @@ SINT32 CACmdLnOptions::getLogDir(UINT8* name,UINT32 len)
 
 SINT32 CACmdLnOptions::getUser(UINT8* user,UINT32 len)
   {
-		if(strUser==NULL||user==NULL)
+		if(m_strUser==NULL||user==NULL)
 				return E_UNKNOWN;
-		if(len<=(UINT32)strlen(strUser))
+		if(len<=(UINT32)strlen(m_strUser))
 				{
 					return E_UNKNOWN;		
 				}
-		strcpy((char*)user,strUser);
+		strcpy((char*)user,m_strUser);
 		return E_SUCCESS;
   }
 
@@ -431,3 +498,37 @@ bool CACmdLnOptions::isLocalProxy()
     {
 			return bLocalProxy;
     }
+
+SINT32 CACmdLnOptions::getMixXml(UINT8* strxml,UINT32 len)
+	{
+		if(strxml==NULL||m_strMixXml==NULL||len<=strlen(m_strMixXml))
+			return E_UNKNOWN;
+		strcpy((char*)strxml,m_strMixXml);
+		return E_SUCCESS;
+	}
+
+SINT32 CACmdLnOptions::generateTemplate()
+	{
+		BufferOutputStream oBufferStream(1024,1024);
+		XMLOutput oxmlOut(oBufferStream);
+		oBufferStream.reset();
+		oxmlOut.BeginDocument("1.0","UTF-8",true);
+		oxmlOut.BeginElement("Mix");
+		oxmlOut.BeginElement("Location");
+		oxmlOut.Indent();
+		oxmlOut.writeLine("<!-- Fill out the following Elements to give infomation about the location of the Mix-->");
+		oxmlOut.BeginElement("State");
+		oxmlOut.Indent();
+		oxmlOut.writeLine("<!-- Insert the State of the Mix-Location here-->");
+		oxmlOut.EndElement();
+		oxmlOut.EndElement();
+		oxmlOut.EndElement();
+		oxmlOut.EndDocument();
+		int handle;
+		handle=open("mix_template.conf",O_BINARY|O_RDWR|O_CREAT,_S_IREAD | _S_IWRITE);
+		if(handle==-1)
+			return E_UNKNOWN;
+		write(handle,oBufferStream.getBuff(),oBufferStream.getBufferSize());
+		close(handle);
+		return E_SUCCESS;
+	}
