@@ -54,6 +54,9 @@ SINT32 CALastMix::initOnce()
 				options.getTargetAddr(&oAddr,i);
 				m_oCacheLB.add(&oAddr);
 			}
+		CASocketAddrINet* pAddr=m_oCacheLB.get();
+		pAddr=m_oCacheLB.get();
+		pAddr=m_oCacheLB.get();
 		UINT8 strTarget[255];
 		options.getSOCKSHost(strTarget,255);
 		maddrSocks.setAddr((char*)strTarget,options.getSOCKSPort());

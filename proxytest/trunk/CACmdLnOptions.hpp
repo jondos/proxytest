@@ -54,7 +54,7 @@ class CACmdLnOptions
 				{
 					if(nr>0&&nr<=cntTargets&&pAddr!=NULL)
 						{
-							memcpy(pAddr,&pTargets[nr],sizeof(CASocketAddrINet));
+							memcpy(pAddr,&pTargets[nr-1],sizeof(CASocketAddrINet));
 							return E_SUCCESS;
 						}
 					else
