@@ -45,9 +45,9 @@ int CAMuxSocket::send(HCHANNEL channel_id,char* buff,int bufflen)
 		if(bufflen>DATA_SIZE)
 			return SOCKET_ERROR;
 		MUXPACKET MuxPacket;
-		MuxPacket.channel=channel_id;
+		MuxPacket.channel=htonl(channel_id);
 		memcpy(MuxPacket.data,buff,bufflen);
-		MuxPacket.len=bufflen;
+		MuxPacket.len=htonl(bufflen);
 		int MuxPacketSize=sizeof(MuxPacket);
 		int aktIndex=0;
 		int len=0;
@@ -81,7 +81,8 @@ int CAMuxSocket::receive(HCHANNEL* channel_id,char* buff,int bufflen)
 				MuxPacketSize-=len;
 				aktIndex+=len;
 			} while(len>0&&MuxPacketSize>0);
-		
+		MuxPacket.len=ntohl(MuxPacket.len);	
+		MuxPacket.channel=ntohl(MuxPacket.channel);
 		if(len==SOCKET_ERROR||MuxPacket.len<0||MuxPacket.len>bufflen)
 			{
 				#ifdef _DEBUG
