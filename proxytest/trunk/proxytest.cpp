@@ -65,7 +65,6 @@ THREAD_RETURN lpIO(void *v)
 		CAASymCipher oRSA;
 		int countRead;
 		CONNECTION oConnection;		
-		unsigned char key[16];
 		unsigned char chainlen=lpIOPair->chainlen;
 		for(;;)
 			{
@@ -900,6 +899,58 @@ int doLastMix()
 int main(int argc, const char* argv[])
 	{
 
+// Test!!!
+/*		CAASymCipher oRSA;
+		int handle=open("g:\\jap\\classes\\plain.bytes",O_BINARY|O_RDWR,S_IWRITE);
+		int MAX=filelength(handle);
+		unsigned char * buff=new unsigned char[MAX];
+		read(handle,buff,MAX);
+		close(handle);
+		handle=open("g:\\jap\\classes\\crypt.bytes",O_BINARY|O_RDWR,S_IWRITE);
+		unsigned char * crypt=new unsigned char[MAX];
+		read(handle,crypt,MAX);
+		close(handle);
+		unsigned char* decrypt=new unsigned char[MAX];
+		printf("Decrypting..\n");
+	//	MAX=128*450;
+		int start=0*128;
+		long s=clock();
+		for (int i=start;i<MAX;i+=128)
+			if(oRSA.decrypt(crypt+i,decrypt+i)==-1)
+				printf("Fehler..!\n");
+		long r=clock();
+		printf("done...Comparing%u\n",r-s);
+		int c=memcmp(buff,decrypt,MAX);
+		if(c!=0)
+			for (int z=start;z<MAX;z++)
+				if(buff[z]!=decrypt[z])
+					printf("%u ",z);
+	*//*		printf("Plain: \n");
+			for (int z=start;z<MAX;z++)
+				printf("%X:",buff[z]);
+			printf("\nEncrypted by JAVA: \n");
+			for (z=start;z<MAX;z++)
+				printf("%X:",crypt[z]);
+			printf("\nEncrypted by C: \n");
+			memset(crypt+start,0,128);
+			oRSA.encrypt(buff+start,crypt+start);
+			for (z=start;z<MAX;z++)
+				printf("%X:",crypt[z]);
+			printf("\nDecrypted by C: \n");
+			oRSA.decrypt(crypt+start,buff+start);
+			for (z=start;z<MAX;z++)
+				printf("%X:",buff[z]);
+		*/
+	//		BIGNUM* bn=NULL;
+		//	BN_dec2bn(&bn,"146045156752988119086694783791784827226235382817403930968569889520448117142515762490154404168568789906602128114569640745056455078919081535135223786488790643345745133490238858425068609186364886282528002310113020992003131292706048279603244985126945363695371250073851319256901415103802627246986865697725280735339");
+			
+			/*			BIGNUM bn1;
+			BN_init(&bn1);
+			BN_bin2bn(buff+start-128,128,&bn1);
+			printf("%d",BN_cmp(bn,&bn1));
+			exit(0);
+´*/
+		// End TEst...
 	    options.parse(argc,argv);
 #ifndef _WIN32
 			if(options.getDaemon())
