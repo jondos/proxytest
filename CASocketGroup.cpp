@@ -1,6 +1,6 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "CASocket.hpp"
-#include "CASocketgroup.hpp"
+#include "CASocketGroup.hpp"
 CASocketGroup::CASocketGroup()
 	{
 		FD_ZERO(&m_fdset);

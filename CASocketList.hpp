@@ -1,4 +1,4 @@
-#include "casocket.hpp"
+#include "CASocket.hpp"
 
 typedef struct connlist
 	{

@@ -1,6 +1,6 @@
-#include "stdafx.h"
-#include "camixchannel.hpp"
-#include "casocket.hpp"
+#include "StdAfx.h"
+#include "CAMixChannel.hpp"
+#include "CASocket.hpp"
 
 CAMixChannel oMixChannel;
 

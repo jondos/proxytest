@@ -1,5 +1,5 @@
-#include "stdafx.h"
-#include "casocketlist.hpp"
+#include "StdAfx.h"
+#include "CASocketList.hpp"
 
 CASocketList::CASocketList()
 	{
