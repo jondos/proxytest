@@ -1184,10 +1184,14 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		DOM_Node elemMixesDocCascade=docCascade.importNode(elemMixes,false);
 		elemRoot.appendChild(elemMixesDocCascade);
 		DOM_Node node=elemMixes.getFirstChild();
+		bool bIsFirst=true;
 		while(node!=NULL)
 			{
 				if(node.getNodeType()==DOM_Node::ELEMENT_NODE&&node.getNodeName().equals("Mix"))
-					elemMixesDocCascade.appendChild(docCascade.importNode(node,false));
+					{
+						elemMixesDocCascade.appendChild(docCascade.importNode(node,bIsFirst));
+						bIsFirst=false;
+					}
 				node=node.getNextSibling();
 			}
 		
