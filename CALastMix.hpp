@@ -51,8 +51,17 @@ class CALastMix:public CAMix
 					m_pRSA=NULL;m_pInfoService=NULL;
 					m_pthreadSendToMix=m_pthreadReadFromMix=NULL;
 					m_pQueueSendToMix=m_pQueueReadFromMix=NULL;
+					m_pCacheLB=new CACacheLoadBalancing();
+					m_pSocksLB=new CACacheLoadBalancing();
 				}
-			virtual ~CALastMix(){clean();}
+
+			virtual ~CALastMix()
+				{
+					clean();
+					delete m_pCacheLB;
+					delete m_pSocksLB;
+				}
+
 			SINT32 reconfigure();
 		protected:
 			virtual SINT32 loop()=0;
@@ -71,8 +80,8 @@ class CALastMix:public CAMix
 			CAMuxSocket*					m_pMuxIn;
 			CAQueue*							m_pQueueSendToMix;
 			CAQueue*							m_pQueueReadFromMix;
-			CACacheLoadBalancing	m_oCacheLB;
-			CASocketAddrINet			maddrSocks;
+			CACacheLoadBalancing*	m_pCacheLB;
+			CACacheLoadBalancing* m_pSocksLB;
 			CAASymCipher*					m_pRSA;
 			CASignature*					m_pSignature;
 			CAInfoService*				m_pInfoService;
