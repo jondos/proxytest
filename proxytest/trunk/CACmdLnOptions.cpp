@@ -33,7 +33,7 @@ CACmdLnOptions::CACmdLnOptions()
 		bLocalProxy=bFirstMix=bLastMix=bMiddleMix=false;
 		iTargetPort=iSOCKSPort=iServerPort=iSOCKSServerPort=iInfoServerPort=0xFFFF;
 		iTargetRTTPort=iServerRTTPort=-1;
-		strServerPath=strTargetHost=strSOCKSHost=strInfoServerHost=NULL;
+		strServerHost=strTargetHost=strSOCKSHost=strInfoServerHost=NULL;
 		strKeyFileName=strCascadeName=strLogDir=NULL;
   }
 
@@ -43,9 +43,9 @@ CACmdLnOptions::~CACmdLnOptions()
 			{
 				delete strTargetHost;
 	    }
-		if(strServerPath!=NULL)
+		if(strServerHost!=NULL)
 			{
-				delete strServerPath;
+				delete strServerHost;
 	    }
 		if(strSOCKSHost!=NULL)
 			{
@@ -83,7 +83,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 	 {
 		{"daemon",'d',POPT_ARG_NONE,&iDaemon,0,"start as daemon",NULL},
 		{"next",'n',POPT_ARG_STRING,&target,0,"next mix/http-proxy","<ip:port[,rttport]>"},
-		{"port",'p',POPT_ARG_STRING,&serverPort,0,"listening port|path","<portnumber|path>"},
+		{"port",'p',POPT_ARG_STRING,&serverPort,0,"listening [host:]port|path","<[host:]port|path>"},
 		{"https",'h',POPT_ARG_NONE,&bHttps,0,"support proxy requests",NULL},
 		{"rttport",'r',POPT_ARG_INT,&serverrttport,0,"round trip time port","<portnumber>"},
 		{"mix",'m',POPT_ARG_INT,&mix,0,"local|first|middle|last mix","<0|1|2|3>"},
@@ -111,7 +111,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
   if(target!=NULL)
 	    {
 				char* tmpStr;
-				if(target[0]=='/') //UNix Domain Sockaet
+				if(target[0]=='/') //Unix Domain Sockaet
 				 {
 					strTargetHost=new char[strlen(target)+1];
 					strcpy(strTargetHost,target);
@@ -169,16 +169,27 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 	    }
 	if(serverPort!=NULL)
 		{
-			if(serverPort[0]!='/') //not unix-domain
+			char* tmpStr;
+			if(serverPort[0]=='/') //Unix Domain Socket
+			 {
+				strServerHost=new char[strlen(serverPort)+1];
+				strcpy(strServerHost,serverPort);
+			 }
+			else if((tmpStr=strchr(serverPort,':'))!=NULL) //host:port
 				{
-					iServerPort=atol(serverPort);
+					strServerHost=new char[tmpStr-serverPort+1];
+					(*tmpStr)=0;
+					strcpy(strServerHost,serverPort);
+					iServerPort=(int)atol(tmpStr+1);
 				}
-			else
+			else //port only ?
 				{
-					strServerPath=new char[strlen(serverPort)+1];
-					strcpy(strServerPath,serverPort);
-					free(serverPort);
+					if(strServerHost!=NULL)
+						delete strServerHost;
+					strServerHost=NULL;
+					iServerPort=(int)atol(serverPort);
 				}
+			free(serverPort);
 		}
 	if(serverrttport!=-1)
 		iServerRTTPort=serverrttport;
@@ -209,11 +220,11 @@ UINT16 CACmdLnOptions::getServerPort()
 		return iServerPort;
   }
     
-SINT32 CACmdLnOptions::getServerPath(UINT8* path,UINT32 len)
+SINT32 CACmdLnOptions::getServerHost(UINT8* path,UINT32 len)
 	{
-		if(path==NULL||strServerPath==NULL||len<=strlen(strServerPath))
+		if(path==NULL||strServerHost==NULL||len<=strlen(strServerHost))
 			return E_UNKNOWN;
-		strcpy((char*)path,strServerPath);
+		strcpy((char*)path,strServerHost);
 		return E_SUCCESS;
 	}
 

@@ -38,8 +38,8 @@ class CACmdLnOptions
 	    bool getDaemon();
       bool getProxySupport();
 	    UINT16 getServerPort();
-			/*For Unix Domain Sockets*/
-	    SINT32 getServerPath(UINT8* path,UINT32 len);
+			/*For IP (Host) AND Unix Domain Sockets*/
+	    SINT32 getServerHost(UINT8* path,UINT32 len);
 			SINT32 getServerRTTPort();
 			UINT16 getSOCKSServerPort();
 	    UINT16 getTargetPort();
@@ -65,7 +65,7 @@ class CACmdLnOptions
 	    UINT16 iTargetPort;
 	    SINT32 iTargetRTTPort;
 			char* strTargetHost;
-	    char* strServerPath; //Unix Domain Socket
+	    char* strServerHost; //Host or Unix Domain Socket
 			char* strSOCKSHost;
 	    UINT16 iSOCKSPort;
 	    char* strInfoServerHost;

@@ -51,6 +51,7 @@ class CASocketAddrINet:public CASocketAddr,sockaddr_in
       SINT32 setPort(UINT16 port);
       UINT16 getPort();
 			SINT32 getHostName(UINT8* buff,UINT32 len);
+			SINT32 getIP(UINT8 buff[4]);
 			static SINT32 getLocalHostName(UINT8* buff,UINT32 len);
 			static SINT32 getLocalHostIP(UINT8 ip[4]);
 //			operator LPSOCKADDR(){return (::LPSOCKADDR)m_pAddr;}

@@ -147,7 +147,17 @@ SINT32 CAFirstMix::init()
 		mKeyInfoSize+=keySize;
 		(*(UINT16*)mKeyInfoBuff)=htons(mKeyInfoSize-2);
 
-		CASocketAddrINet socketAddrIn(options.getServerPort());
+		
+		CASocketAddrINet socketAddrIn;
+		UINT8 serverHost[255];
+		if(options.getServerHost(serverHost,255)!=E_SUCCESS)
+			{
+				socketAddrIn.setPort(options.getServerPort());
+			}
+		else
+			{
+				socketAddrIn.setAddr((char*)serverHost,options.getServerPort());
+			}
 		socketIn.create();
 		socketIn.setReuseAddr(true);
 		if(socketIn.listen(socketAddrIn)==SOCKET_ERROR)

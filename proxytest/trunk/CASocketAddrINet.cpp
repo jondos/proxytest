@@ -119,7 +119,7 @@ UINT16 CASocketAddrINet::getPort()
 		return ntohs(sin_port);
 	}
 
-/** Returns the hostname for the address.
+/** Returns the hostname for this address.
 	* @param buff buffer for the returned zero terminated hostname
 	* @param len the size of the buffer
 	* @retval E_SUCCESS if no error occured
@@ -145,6 +145,16 @@ SINT32 CASocketAddrINet::getHostName(UINT8* buff,UINT32 len)
 			}
 		LeaveCriticalSection(&m_csGet);
 		return ret;
+	}
+
+/** Returns the IP-Numbers for this address.
+	* @param buff buffer for the returned IP-Address (4 Bytes)
+	* @retval E_SUCCESS if no error occured
+	*/
+SINT32 CASocketAddrINet::getIP(UINT8 buff[4])
+	{
+		memcpy(buff,&sin_addr.s_addr,4);		
+		return E_SUCCESS;
 	}
 
 /** Returns the name of the local host.
