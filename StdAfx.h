@@ -244,7 +244,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define E_SOCKETCLOSED -302 //An operation which required an open socket uses a closed socket
 #define E_SOCKET_LISTEN -303 //An error occured during listen
 #define E_SOCKET_ACCEPT -304 //An error occured during accept
-#define E_SOCKET_BIND -304 //An error occured during bind
+#define E_SOCKET_BIND -305 //An error occured during bind
 #define E_UNKNOWN_HOST -400 // A hostname could not be resolved
 #define E_FILE_OPEN -500 //Error in opening a file
 #define E_FILE_READ -501 //Error in opening a file

@@ -71,12 +71,14 @@ class CASingleSocketGroup
 			
 			SINT32 select(UINT32 time_ms)
 				{
-					int ret=::poll(m_pollfd,1,time_ms);
-					if(ret==0)
+					SINT32 ret=::poll(m_pollfd,1,time_ms);
+					if(ret==1)
+						return ret;
+					else if(ret==0)
 						{
 							return E_TIMEDOUT;
 						}
-					if(ret==SOCKET_ERROR)
+					else if(ret==SOCKET_ERROR)
 						{
 							#ifdef _DEBUG
 								ret=GET_NET_ERROR;
@@ -84,6 +86,7 @@ class CASingleSocketGroup
 							#endif
 							return E_UNKNOWN;
 						}
+					return E_UNKNOWN;
 				}
 
 

@@ -115,11 +115,11 @@ class CASocketGroup
 				fd_set m_signaled_set;
 				fd_set* m_set_read,*m_set_write;
 				#ifndef _WIN32
-					UINT32 m_max;
+					SINT32 m_max;
 				#endif
 			#else
 				struct pollfd* m_pollfd;
-				UINT32 m_max;
+				SINT32 m_max;
 			#endif
 			CAMutex m_csFD_SET;
 	};
