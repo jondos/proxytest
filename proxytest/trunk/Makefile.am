@@ -49,6 +49,7 @@ proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CAThread.cpp \
 		    CAThreadPool.cpp\
 		    CAUtil.cpp \
+		    CAXMLErrorMessage.cpp\
 		    StdAfx.cpp \
 		    proxytest.cpp \
 		    CAAbstractControlChannel.hpp\
@@ -97,6 +98,7 @@ proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CAThread.hpp \
 		    CAThreadPool.hpp\
 		    CAUtil.hpp \
+		    CAXMLErrorMessage.hpp\
 		    StdAfx.h \
 		    basetypedefs.h
 
