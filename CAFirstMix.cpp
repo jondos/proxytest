@@ -227,7 +227,7 @@ THREAD_RETURN loopAcceptUsers(void* param)
 		CAFirstMix* pFirstMix=(CAFirstMix*)param;
 		CASocket* socketsIn=pFirstMix->m_arrSocketsIn;
 		CAIPList* pIPList=pFirstMix->m_pIPList;
-		CAInfoService* pInfoService=pFirstMix->m_pInfoService;
+//		CAInfoService* pInfoService=pFirstMix->m_pInfoService;
 		CAFirstMixChannelList* pChannelList=pFirstMix->m_pChannelList;
 		CASocketGroup* psocketgroupUsersRead=pFirstMix->m_psocketgroupUsersRead;
 		UINT32 nSocketsIn=pFirstMix->m_nSocketsIn;
@@ -238,7 +238,7 @@ THREAD_RETURN loopAcceptUsers(void* param)
 		CAMuxSocket* pNewMuxSocket;
 		UINT8* ip=new UINT8[4];
 		UINT32 i=0;
-		UINT32& nUser=pFirstMix->m_nUser;
+//		UINT32& nUser=pFirstMix->m_nUser;
 		SINT32 countRead;
 		SINT32 ret;
 		for(i=0;i<nSocketsIn;i++)
@@ -310,7 +310,7 @@ THREAD_RETURN loopReadFromUsers(void* param)
 		CASocketGroup* psocketgroupUsersRead=pFirstMix->m_psocketgroupUsersRead;
 		CASocketGroup* psocketgroupUsersWrite=pFirstMix->m_psocketgroupUsersWrite;
 		CAQueue* pQueueSendToMix=pFirstMix->m_pQueueSendToMix;
-		CAInfoService* pInfoService=pFirstMix->m_pInfoService;
+//		CAInfoService* pInfoService=pFirstMix->m_pInfoService;
 		CAASymCipher* pRSA=pFirstMix->m_pRSA;
 		CAIPList* pIPList=pFirstMix->m_pIPList;
 		CAMuxSocket* pNextMix=pFirstMix->m_pMuxOut;
