@@ -62,7 +62,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 /**
  * Singleton: This is the reference to the only instance of this class
  */
-CAAccountingInstance * CAAccountingInstance::m_spInstance = NULL;
+CAAccountingInstance * CAAccountingInstance::ms_pInstance = NULL;
 
 
 
