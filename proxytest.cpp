@@ -184,6 +184,7 @@ END AES Test*/
 	#endif
 #endif
 		CARoundTripTime* pRTT=new CARoundTripTime();
+	  CAMsg::printMsg(LOG_INFO,"Starting RoundTripTime...\n");
 		pRTT->start();
 		CAMix* pMix=NULL;
 		if(options.isLocalProxy())
@@ -200,10 +201,15 @@ END AES Test*/
 			}
 		else
 			pMix=new CALastMix();
-		pMix->start();
+	  CAMsg::printMsg(LOG_INFO,"Starting MIX...\n");
+		if(pMix->start()!=E_SUCCESS)
+			CAMsg::printMsg(LOG_CRIT,"Error during MIX-Startup!\n");
 		delete pRTT;
+		delete pMix;
 		#ifdef _WIN32		
 			WSACleanup();
 		#endif
+		
+		CAMsg::printMsg(LOG_CRIT,"Terminating Programm!\n");
 		return 0;
 	}
