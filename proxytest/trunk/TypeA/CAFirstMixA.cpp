@@ -47,22 +47,6 @@ SINT32 CAFirstMixA::loop()
 		UINT8* tmpBuff=new UINT8[MIXPACKET_SIZE];
 		CAMsg::printMsg(LOG_DEBUG,"Starting Message Loop... \n");
 		bool bAktiv;
-/*
-		//Starting thread for Step 1
-		UINT32 i;
-#if !defined(_DEBUG) && !defined(NO_LOOPACCEPTUSER)
-		CAThread threadAcceptUsers;
-		threadAcceptUsers.setMainLoop(loopAcceptUsers);
-		threadAcceptUsers.start(this);
-#else
-		CASocketGroup osocketgroupAccept;
-		for(i=0;i<m_nSocketsIn;i++)
-			osocketgroupAccept.add(m_arrSocketsIn[i]);
-
-#endif		
-*/
-		//Starting thread for Step 2
-//		UINT8 peerIP[4];
 		UINT8 rsaBuff[RSA_SIZE];
 #ifdef LOG_CHANNEL
 		UINT64 current_time;
@@ -76,11 +60,6 @@ SINT32 CAFirstMixA::loop()
 			CAPool* pPool=new CAPool(MIX_POOL_SIZE);
 		#endif
 
-		//Starting thread for Step 4
-/*		CAThread threadSendToMix;
-		threadSendToMix.setMainLoop(fm_loopSendToMix);
-		threadSendToMix.start(this);
-*/
 		for(;;)	                                                          /* the main mix loop as long as there are things that are not handled by threads. */
 			{
 				bAktiv=false;
@@ -90,67 +69,6 @@ SINT32 CAFirstMixA::loop()
 //Checking for new connections		
 // Now in a separat Thread.... 
 
-/*#if defined(_DEBUG) || defined(NO_LOOPACCEPTUSER)				
-				
-				countRead=osocketgroupAccept.select(false,0);	                // how many new JAP<->mix connections are there
-				i=0;
-				if(countRead>0)
-					bAktiv=true;
-				while(countRead>0&&i<m_nSocketsIn)														// iterate through all those sockets as long as there is a new one left.
-					{						
-						if(osocketgroupAccept.isSignaled(m_arrSocketsIn[i]))			// if new client connection
-							{
-								countRead--;
-								#ifdef _DEBUG
-									CAMsg::printMsg(LOG_DEBUG,"New direct Connection from Client!\n");
-								#endif
-								CAMuxSocket* pnewMuxSocket=new CAMuxSocket;						// create a socket object for this JAP<->mix connection
-								if(m_arrSocketsIn[i].accept(*(CASocket*)pnewMuxSocket)!=E_SUCCESS)  // establish the connection and IF that fails 
-									{
-										CAMsg::printMsg(LOG_ERR,"Accept Error %u - direct Connection from Client!\n",GET_NET_ERROR);
-										delete pnewMuxSocket;
-									}
-								else																									// connection established
-									{
-																																			// check for simple DoS attack.
-											ret=((CASocket*)pnewMuxSocket)->getPeerIP(peerIP);  
-											if(ret!=E_SUCCESS||m_pIPList->insertIP(peerIP)<0) // IF we can't read the peer's IP or he already has too many connections
-												{
-													pnewMuxSocket->close();
-													delete pnewMuxSocket;
-												}
-											else
-												{
-																																			// no DoS attack. business as usual.
-													#ifdef _DEBUG
-														int ret=((CASocket*)pnewMuxSocket)->setKeepAlive(true);
-														if(ret!=E_SUCCESS)
-															CAMsg::printMsg(LOG_DEBUG,"Error setting KeepAlive!");
-													#else
-														((CASocket*)pnewMuxSocket)->setKeepAlive(true);
-													#endif*/
-													/*
-														ADDITIONAL PREREQUISITE:
-														The timestamps in the messages require the user to sync his time
-														with the time of the cascade. Hence, the current time needs to be
-														added to the data that is sent to the user below.
-														For the mixes that form the cascade, the synchronization can be
-														left to an external protocol such as NTP. Unfortunately, this is
-														not enforceable for all users.
-													*//*
-													((CASocket*)pnewMuxSocket)->send(m_xmlKeyInfoBuff,m_xmlKeyInfoSize);  // send the mix-keys to JAP
-													((CASocket*)pnewMuxSocket)->setNonBlocking(true);	                    // stefan: sendet das send in der letzten zeile doch noch nicht? wenn doch, kann dann ein JAP nicht durch verweigern der annahme hier den mix blockieren? vermutlich nciht, aber andersherum faend ich das einleuchtender.
-													// es kann nicht blockieren unter der Annahme das der TCP-Sendbuffer > m_xmlKeyInfoSize ist....
-													m_pChannelList->add(pnewMuxSocket,peerIP,new CAQueue); // adding user connection to mix->JAP channel list (stefan: sollte das nicht connection list sein? --> es handelt sich um eine Datenstruktu fŸr Connections/Channels ).
-													incUsers();																	// increment the user counter by one
-													m_psocketgroupUsersRead->add(*pnewMuxSocket); // add user socket to the established ones that we read data from.
-												}
-									}
-							}
-						i++;
-					}
-#endif
-*/				
 // Second Step 
 // Checking for data from users
 // Now in a separate Thread (see loopReadFromUsers())
@@ -197,7 +115,6 @@ SINT32 CAFirstMixA::loop()
 												ASSERT(pHashEntry->pQueueSend!=NULL,"Send queue is NULL");
 												delete pHashEntry->pQueueSend;
 												m_pChannelList->remove(pMuxSocket);
-												pMuxSocket->close();
 												delete pMuxSocket;
 												decUsers();
 											}
@@ -216,7 +133,6 @@ SINT32 CAFirstMixA::loop()
 														m_psocketgroupUsersWrite->remove(*(CASocket*)pMuxSocket);
 														delete pHashEntry->pQueueSend;
 														m_pChannelList->remove(pMuxSocket);
-														pMuxSocket->close();
 														delete pMuxSocket;
 														decUsers();
 													}
