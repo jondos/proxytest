@@ -165,7 +165,8 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 						setDOMElementValue(elemNonceHash,arNonce);						
 						elemRoot.appendChild(elemNonceHash);
 						m_pSignature->signXML(elemRoot);
-						m_pMuxOut->setKey(key,64);
+						m_pMuxOut->setSendKey(key,32);
+						m_pMuxOut->setReceiveKey(key+32,32);
 						UINT32 outlen=0;
 						UINT8* out=DOM_Output::dumpToMem(docSymKey,&outlen);
 						UINT16 size=htons(outlen);
@@ -293,11 +294,13 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 		UINT8 key[150];
 		UINT32 keySize=150;
 		decodeXMLEncryptedKey(key,&keySize,recvBuff,len,m_pRSA);
-		if(m_pMuxIn->setKey(key,keySize)!=E_SUCCESS)
+		if(keySize!=64)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Couldt not set the symetric key to be used by the MuxSocket!\n");		
 				return E_UNKNOWN;
 			}
+		m_pMuxIn->setReceiveKey(key,32);
+		m_pMuxIn->setSendKey(key+32,32);
 		return E_SUCCESS;
 	}
 
