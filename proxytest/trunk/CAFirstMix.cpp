@@ -694,7 +694,10 @@ SINT32 CAFirstMix::loop()
 												oInfoService.setLevel(nUser,-1,-1);
 											}
 										else if(ret==E_TIMEDOUT)
-											continue;
+											{
+												tmpMuxListEntry=oMuxChannelList.getNext();
+												continue;
+											}
 										else
 											{
 												if(oMuxPacket.flags==CHANNEL_CLOSE)

@@ -208,7 +208,8 @@ int CASocket::send(UINT8* buff,UINT32 len)
 	  return ret;	    	    
 	}
 
-int CASocket::available()
+#ifdef HAVE_FIONREAD
+SINT32 CASocket::available()
 	{
 		unsigned long ul;
 		if(ioctlsocket(m_Socket,FIONREAD,&ul)==SOCKET_ERROR)
@@ -216,6 +217,7 @@ int CASocket::available()
 		else
 			return (int)ul;
 	}
+#endif
 
 /**
 @return SOCKET_ERROR if an error occured
@@ -259,28 +261,37 @@ SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len)
 	  return E_SUCCESS;	    	    
 	}
 
+/** Trys to receive all bytes. After the timout value has elpased, the error E_TIMEDOUT is returned
+*Woudn't work correctly on Windows....
+*/
 SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len,SINT32 timeout)
 	{
 		SINT32 ret;
-		ret=::recv(m_Socket,(char*)buff,len,MSG_NOSIGNAL|MSG_PEEK|MSG_DONTWAIT);
-		if(ret<=0)
-			return SOCKET_ERROR;
-		if((UINT32)ret!=len)
+		SINT32 dt=timeout/2;
+		do
 			{
-				msleep(timeout);
-				ret=::recv(m_Socket,(char*)buff,len,MSG_NOSIGNAL|MSG_PEEK|MSG_DONTWAIT);
-				if(ret<=0)
+				#ifdef HAVE_AVAILABLE
+					ret=available();
+				#else
+					ret=::recv(m_Socket,(char*)buff,len,MSG_NOSIGNAL|MSG_PEEK|MSG_DONTWAIT);
+				#endif		
+				if(ret<=0) //This may be a bug (=0 ?)
 					return SOCKET_ERROR;
-				if((UINT32)ret!=len)
-					return E_TIMEDOUT;
+				if(ret>=len)
+					{
+						ret=receive(buff,len);
+						if(ret<=0||(UINT32)ret!=len)
+							{
+								CAMsg::printMsg(LOG_DEBUG,"ReceiveFully receive error ret=%i\n",ret);
+								return E_UNKNOWN;
+							}
+						return E_SUCCESS;	    	    
+					}
+				msleep(dt);
+				timeout-=dt;
 			}
-		ret=receive(buff,len);
-		if(ret<=0||(UINT32)ret!=len)
-			{
-				CAMsg::printMsg(LOG_DEBUG,"ReceiveFully receive error ret=%i\n",ret);
-		    return E_UNKNOWN;
-			}
-	  return E_SUCCESS;	    	    
+		while(timeout>0);
+		return E_TIMEDOUT;
 	}
 
 int CASocket::getLocalPort()
