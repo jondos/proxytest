@@ -1,10 +1,10 @@
 #You should only need to change the following lines:
 OPENSSL_INC=/usr/local/ssl/include
 OPENSSL_LIB=/usr/local/ssl/lib
-#XERCESC_INC=/usr/local/include/
-#XERCESC_LIB=/usr/local/lib
-XERCESC_INC=/usr/include/
-XERCESC_LIB=/usr/lib
+XERCESC_INC=/usr/local/include/
+XERCESC_LIB=/usr/local/lib
+#XERCESC_INC=/usr/include/
+#XERCESC_LIB=/usr/lib
 
 #### I believe you do not need to change anything behind this....
 
