@@ -228,7 +228,7 @@ SINT32 CAInfoService::sendHelo()
 				oxmlOut.WriteAttr("id",(char*)buff);
 				oxmlOut.EndAttrs();
 				if(options.getCascadeName((UINT8*)buff,1024)!=E_SUCCESS)
-					goto _LABEL_ERROR;
+					{if(buff!=NULL)delete buff;return E_UNKNOWN;}
 				oxmlOut.WriteElement("Name",(char*)buff);
 				oxmlOut.WriteElement("IP",(char*)hostname);
 				oxmlOut.WriteElement("Port",(int)options.getServerPort());
@@ -236,7 +236,7 @@ SINT32 CAInfoService::sendHelo()
 				oxmlOut.EndDocument();
 				buffLen=1024;
 				if(pSignature->signXML(oBufferStream.getBuff(),oBufferStream.getBufferSize(),(UINT8*)buff,&buffLen)!=E_SUCCESS)
-					goto _LABEL_ERROR;
+					{if(buff!=NULL)delete buff;return E_UNKNOWN;}
 				oSocket.send((UINT8*)"POST /helo HTTP/1.0\r\n\r\n",23);
 				oSocket.send((UINT8*)buff,buffLen);
 				oSocket.close();

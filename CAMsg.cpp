@@ -84,7 +84,11 @@ SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 								{
 									char buff[1024];
 									#ifndef _WIN32
+									#ifndef __sgi
 										vsnprintf(buff,1024,format,ap);
+									#else
+									  vsprintf(buff,format,ap);
+									#endif	
 									#else
 										_vsnprintf(buff,1024,format,ap);
 									#endif
@@ -98,7 +102,11 @@ SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 								{
 									char buff[1024];
 									#ifndef _WIN32
+									#ifndef __sgi
 										vsnprintf(buff,1024,format,ap);
+									#else
+									  vsprintf(buff,format,ap);
+									#endif	
 									#else
 										_vsnprintf(buff,1024,format,ap);
 									#endif
