@@ -8,6 +8,7 @@ sbin_PROGRAMS = proxytest
 proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CAAbstractXMLEncodable.cpp\
 		    CAAccountingControlChannel.cpp\
+		    CAAccountingInstance.cpp\
 		    CAASymCipher.cpp \
 		    CABase64.cpp \
 		    CACacheLoadBalancing.cpp\
@@ -55,6 +56,7 @@ proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CAAbstractControlChannel.hpp\
 		    CAAbstractXMLEncodable.hpp\
 		    CAAccountingControlChannel.hpp\
+		    CAAccountingInstance.hpp\
 		    CAASymCipher.hpp \
 		    CABase64.hpp \
 		    CACacheLoadBalancing.hpp\
