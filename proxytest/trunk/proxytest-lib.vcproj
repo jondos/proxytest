@@ -338,6 +338,9 @@
 			Name="Quellcodedateien"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
 			<File
+				RelativePath=".\CAAbstractControlChannel.cpp">
+			</File>
+			<File
 				RelativePath=".\CAAccountingBIInterface.cpp">
 			</File>
 			<File
@@ -394,6 +397,9 @@
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\CAASyncControlChannel.cpp">
 			</File>
 			<File
 				RelativePath="CABase64.cpp">
@@ -682,6 +688,9 @@
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\CAControlChannelDispatcher.cpp">
 			</File>
 			<File
 				RelativePath="CADatabase.cpp">
@@ -1951,6 +1960,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\CASyncControlChannel.cpp">
+			</File>
+			<File
 				RelativePath=".\CATempIPBlockList.cpp">
 			</File>
 			<File
@@ -2756,6 +2768,9 @@
 				RelativePath=".\basetypedefs.h">
 			</File>
 			<File
+				RelativePath=".\CAAbstractControlChannel.hpp">
+			</File>
+			<File
 				RelativePath=".\CAAccountingBIInterface.hpp">
 			</File>
 			<File
@@ -2766,6 +2781,9 @@
 			</File>
 			<File
 				RelativePath="CAASymCipher.hpp">
+			</File>
+			<File
+				RelativePath=".\CAASyncControlChannel.hpp">
 			</File>
 			<File
 				RelativePath="CABase64.hpp">
@@ -2787,6 +2805,9 @@
 			</File>
 			<File
 				RelativePath="CAConditionVariable.hpp">
+			</File>
+			<File
+				RelativePath=".\CAControlChannelDispatcher.hpp">
 			</File>
 			<File
 				RelativePath="CADatabase.hpp">
@@ -2889,6 +2910,9 @@
 			</File>
 			<File
 				RelativePath="CASymCipher.hpp">
+			</File>
+			<File
+				RelativePath=".\CASyncControlChannel.hpp">
 			</File>
 			<File
 				RelativePath=".\CATempIPBlockList.hpp">

@@ -25,34 +25,12 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
-#include "CAControlChannelDispatcher.hpp"
-class CAAbstractControlChannel
+
+#ifndef _CASYNCCONTROLCHANNEL_
+#define _CASYNCCONTROLCHANNEL_
+#include "CAAbstractControlChannel.hpp"
+
+class CASyncControlChannel : public CAAbstractControlChannel
 {
-  public:
-    CAAbstractControlChannel(UINT8 id, bool bIsEncrypted,
-														CAControlChannelDispatcher* pDispatcher)
-			{
-				m_bIsEncrypted=bIsEncrypted;
-				m_ID=id;
-				m_pDispatcher=pDispatcher;
-			}
-
-		virtual SINT32 proccessMessage(UINT8* msg, UINT32 msglen)=0;
-    SINT32 sendMessage(UINT8* msg, UINT32 msglen)
-			{
-				return m_pDispatcher->sendMessages(m_ID,m_bIsEncrypted,msg,msglen);
-			}
-
-		UINT32 getID()
-			{
-				return m_ID;
-			}
-
-    bool isEncrypted();
-
-  protected:
-		CAControlChannelDispatcher* m_pDispatcher;
-		bool m_bIsEncrypted;
-    UINT32 m_ID;
-
 };
+#endif 

@@ -25,34 +25,55 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
+
+#include "StdAfx.h"
 #include "CAControlChannelDispatcher.hpp"
-class CAAbstractControlChannel
-{
-  public:
-    CAAbstractControlChannel(UINT8 id, bool bIsEncrypted,
-														CAControlChannelDispatcher* pDispatcher)
+#include "CAAbstractControlChannel.hpp"
+
+SINT32 CAControlChannelDispatcher::registerControlChannel(CAAbstractControlChannel* pControlChannel)
+	{
+		m_arControlChannels[pControlChannel->getID()]= pControlChannel;
+		return E_SUCCESS;
+	}
+
+SINT32 CAControlChannelDispatcher::removeControlChannel(UINT32 id)
+	{
+		m_arControlChannels[id]=NULL;
+		return E_SUCCESS;
+	}
+
+bool CAControlChannelDispatcher::proccessMixPacket(MIXPACKET* pPacket)
+	{
+		if(pPacket->channel<256&&pPacket->channel>0)
 			{
-				m_bIsEncrypted=bIsEncrypted;
-				m_ID=id;
-				m_pDispatcher=pDispatcher;
+				CAAbstractControlChannel* pControlChannel=m_arControlChannels[pPacket->channel];
+				if(pControlChannel!=NULL)
+					{
+						pControlChannel->proccessMessage(pPacket->data,pPacket->flags);
+						return true;
+					}
 			}
+		return false;
+	}
 
-		virtual SINT32 proccessMessage(UINT8* msg, UINT32 msglen)=0;
-    SINT32 sendMessage(UINT8* msg, UINT32 msglen)
+SINT32 CAControlChannelDispatcher::sendMessages(UINT32 id,bool m_bIsEncrypted,UINT8* msg,UINT32 msglen)
+	{
+		m_pMixPacket->channel=id;
+		UINT32 aktIndex=0;
+		while(msglen>0)
 			{
-				return m_pDispatcher->sendMessages(m_ID,m_bIsEncrypted,msg,msglen);
+				if(msglen>DATA_SIZE)
+					{
+						m_pMixPacket->flags=DATA_SIZE;
+					}
+				else
+					{
+						m_pMixPacket->flags=msglen;
+					}
+				memcpy(m_pMixPacket->data,msg+aktIndex,m_pMixPacket->flags);
+				m_pSendQueue->add(m_pQueueEntry,sizeof(tQueueEntry));
+				aktIndex+=m_pMixPacket->flags;
+				msglen-=m_pMixPacket->flags;
 			}
-
-		UINT32 getID()
-			{
-				return m_ID;
-			}
-
-    bool isEncrypted();
-
-  protected:
-		CAControlChannelDispatcher* m_pDispatcher;
-		bool m_bIsEncrypted;
-    UINT32 m_ID;
-
-};
+		return E_SUCCESS;
+	}

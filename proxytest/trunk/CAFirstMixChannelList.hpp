@@ -32,6 +32,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASymCipher.hpp"
 #include "CAMutex.hpp"
 #include "CAMsg.hpp"
+#include "CAControlChannelDispatcher.hpp"
 #ifdef PAYMENT
 /**
  * Structure that holds all per-user payment information
@@ -67,10 +68,9 @@ struct t_fmhashtableentry
 		public:
 			CAMuxSocket*	pMuxSocket;
 			CAQueue*			pQueueSend;
-#ifdef LOG_PACKET_TIMES
+			CAControlChannelDispatcher* pControlChannelDispatcher;
 			UINT32        uAlreadySendPacketSize;
 			tQueueEntry		oQueueEntry;
-#endif
 			UINT32				cSuspend;
 #ifdef LOG_CHANNEL
 			UINT32				trafficIn;

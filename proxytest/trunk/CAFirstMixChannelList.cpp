@@ -89,9 +89,8 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,UINT8 peerIP[4],CAQueu
 			}
 		pHashTableEntry->pMuxSocket=pMuxSocket;
 		pHashTableEntry->pQueueSend=pQueueSend;
-#ifdef LOG_PACKET_TIMES
+		pHashTableEntry->pControlChannelDispatcher=new CAControlChannelDispatcher(pQueueSend);
 		pHashTableEntry->uAlreadySendPacketSize=0;
-#endif		
 		pHashTableEntry->cNumberOfChannels=0;
 #ifdef LOG_CHANNEL
 		pHashTableEntry->trafficIn=0;
@@ -255,8 +254,8 @@ fmChannelListEntry* CAFirstMixChannelList::get(CAMuxSocket* pMuxSocket,HCHANNEL 
 		return NULL;		
 	}
 
-/** Removes all channels, which belongs to the given connection and the connection itself from the
-	* list.
+/** Removes all channels, which belongs to the given connection and 
+	* the connection itself from the list.
 	* @param pMuxSocket the connection from the user
 	* @retval E_SUCCESS if successful
 	* @retval E_UNKNOWN in case of an error
@@ -275,6 +274,7 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 				m_Mutex.unlock();
 				return E_UNKNOWN;
 			}
+		delete pHashTableEntry->pControlChannelDispatcher;
 		if(m_listHashTableNext==pHashTableEntry) //adjust the enumeration over all connections (@see getNext())
 			m_listHashTableNext=pHashTableEntry->list_HashEntries.next;
 		
