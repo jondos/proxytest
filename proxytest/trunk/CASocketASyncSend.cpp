@@ -233,7 +233,6 @@ SINT32 CASocketASyncSend::stop()
 		m_bRun=false;
 		//Insert: WAIT FOR THREAD Termination...
 		_t_socket_list* akt=m_Sockets;
-		_t_socket_list* before=NULL;
 		while(m_Sockets!=NULL)
 			{
 				if(!m_Sockets->pQueue->isEmpty())
