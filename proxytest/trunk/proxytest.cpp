@@ -1060,6 +1060,29 @@ int doLastMix()
 
 int main(int argc, const char* argv[])
 	{
+		#ifdef _WIN32
+			int err=0;
+			WSADATA wsadata;
+			err=WSAStartup(0x0202,&wsadata);
+		#endif
+		//low-water receive-test
+		CASocket oSocket;
+		oSocket.listen(9000);
+		CASocket cSocket;
+		oSocket.accept(cSocket);
+		CASocketGroup oSocketGroup;
+		printf("RecvLowWat returned: %i",cSocket.setRecvLowWat(1000));
+		oSocketGroup.add(cSocket);
+		oSocketGroup.select();
+		printf("Can read: %i\n",cSocket.available());
+		UINT8 buff[1];
+	//	cSocket.receive(buff,1);
+		sleep(2);
+		oSocketGroup.select();
+		printf("Can read: %i\n",cSocket.available());
+		oSocket.close();
+		exit(0);
+
 		//initalize Random..
 		#if _WIN32
 			RAND_screen();
@@ -1099,11 +1122,7 @@ int main(int argc, const char* argv[])
 #ifdef _DEBUG
 		sockets=0;
 #endif
-		#ifdef _WIN32
-			int err=0;
-			WSADATA wsadata;
-			err=WSAStartup(0x0202,&wsadata);
-		#endif
+
 		
 #ifndef _WIN32
 	#ifdef _DEBUG
