@@ -61,7 +61,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define NO_LOOPACCEPTUSER //to disable user accept thread for First Mix
 
 //#define USE_POOL
-//#define FIRST_MIX_SYMMETRIC //to enable use of only symmetric encryption for first mix
+#define FIRST_MIX_SYMMETRIC //to enable use of only symmetric encryption for first mix
 //#define NEW_MIX_TYPE // to enable the new 1:x mix protocol
 
 //#define WITH_TIMESTAMP // Add timestamps to the channel-open packets.

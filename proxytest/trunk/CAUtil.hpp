@@ -163,6 +163,19 @@ inline bool isGreater64(UINT64& op1,UINT64& op2)
 #endif
 	}
 
+inline bool isLesser64(UINT64& smallOp1,UINT64& bigOp2)
+	{
+#if !defined(HAVE_NATIVE_UINT64)
+		if(smallOp1.high<bigOp2.high)
+			return true;
+		if(smallOp1.high==bigOp2.high)
+			return smallOp1.low<bigOp2.low;
+		return false;
+#else
+		return smallOp1<bigOp2;
+#endif
+	}
+
 inline bool isEqual64(UINT64& op1,UINT64& op2)
 	{
 #if !defined(HAVE_NATIVE_UINT64)

@@ -415,7 +415,8 @@ SINT32 CASocket::sendFully(const UINT8* buff,UINT32 len)
 	* @param buff the buffer which get the received data
 	* @param len size of buff
 	*	@return SOCKET_ERROR if an error occured
-	* @retval E_AGAIN, if socket was in non-blocking mode and receive would block or a timeout was reached
+	* @retval E_AGAIN, if socket was in non-blocking mode and 
+	*                  receive would block or a timeout was reached
 	* @retval 0 if socket was gracefully closed
 	* @return the number of bytes received (always >0)
 **/
@@ -443,8 +444,6 @@ SINT32 CASocket::receive(UINT8* buff,UINT32 len)
 /**Receives all bytes. This blocks until all bytes are received or an error occured.
 @return E_UNKNOWN, in case of an error
 @return E_SUCCESS otherwise
-
-//TODO:: bugy for non-blocking socket...
 */
 SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len)
 	{
@@ -455,7 +454,12 @@ SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len)
 				ret=receive(buff+pos,len);
 				if(ret<=0)
 					{
-						if(ret==0||(ret!=E_AGAIN&&ret!=E_TIMEDOUT))
+						if(ret=E_AGAIN)
+							{
+								msSleep(100);
+								continue;
+							}
+						else
 							return E_UNKNOWN;
 					}
 				pos+=ret;
@@ -465,8 +469,8 @@ SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len)
 	  return E_SUCCESS;	    	    
 	}
 
-/** Trys to receive all bytes. After the timout value has elpased, the error E_TIMEDOUT is returned
-	* Would not work correctly on Windows....
+/** Trys to receive all bytes. After the timout value has elapsed, 
+	* the error E_TIMEDOUT is returned
 	*	@param buff byte array, where the received bytes would be stored 
 	*	@param len	on input holds the number of bytes which should be read,
 	*	@param msTimeOut the timout in milli seconds
@@ -474,37 +478,37 @@ SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len)
 	* @retval E_UNKNOWN if an error occured
 	* @retval E_SUCCESS if all bytes could be read
 	*
-	* TODO: Lots of work TODO!!!!!
 	*/
-SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len,UINT16 msTimeOut)
+SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len,UINT32 msTimeOut)
 	{
 		SINT32 ret;
-		UINT16 dt=msTimeOut/2+1;
-		SINT32 timeoutLeft=msTimeOut;
-		do
+		UINT32 pos=0;
+		UINT64 currentTime,endTime;
+		getcurrentTimeMillis(currentTime);
+		set64(endTime,currentTime);
+		add64(endTime,msTimeOut);
+		CASingleSocketGroup oSG(false);
+		oSG.add(*this);
+		for(;;)
 			{
-				#ifdef HAVE_AVAILABLE
-					ret=available();
-				#else
-					ret=::recv(m_Socket,(char*)buff,len,MSG_NOSIGNAL|MSG_PEEK|MSG_DONTWAIT);
-				#endif		
-				if(ret<=0) //This may be a bug (=0 ?)
-					return SOCKET_ERROR;
-				if((UINT32)ret>=len)
+				ret=oSG.select(msTimeOut);
+				if(ret==1)
 					{
-						ret=receive(buff,len);
-						if(ret<=0||(UINT32)ret!=len)
-							{
-								CAMsg::printMsg(LOG_DEBUG,"ReceiveFully receive error ret=%i\n",ret);
-								return E_UNKNOWN;
-							}
-						return E_SUCCESS;	    	    
+						ret=receive(buff+pos,len);
+						if(ret>=0)
+							return E_UNKNOWN;
+						pos+=ret;
+						len-=ret;
 					}
-				msSleep(dt);
-				timeoutLeft-=dt;
+				else if(ret=E_TIMEDOUT)
+					return E_TIMEDOUT;
+				if(len==0)
+					return E_SUCCESS;
+				getcurrentTimeMillis(currentTime);
+				if(!isLesser64(currentTime,endTime))
+					return E_TIMEDOUT;
+				msTimeOut=diff64(endTime,currentTime);
 			}
-		while(timeoutLeft>0);
-		return E_TIMEDOUT;
 	}
 
 SINT32 CASocket::getLocalPort()
