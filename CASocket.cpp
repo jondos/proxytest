@@ -141,6 +141,7 @@ SINT32 CASocket::connect(CASocketAddr & psa,UINT retry,UINT32 time)
 
 SINT32 CASocket::connect(CASocketAddr & psa,UINT msTimeOut)
 	{
+		CAMsg::printMsg(LOG_DEBUG,"Try to connect\n");
 		if(m_Socket==0&&create(psa.getType())==SOCKET_ERROR)
 			{
 				return SOCKET_ERROR;
