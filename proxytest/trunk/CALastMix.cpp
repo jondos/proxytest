@@ -300,7 +300,7 @@ SINT32 CALastMix::init()
 	}
 
 #define _CONNECT_TIMEOUT 5000 //5 Seconds...
-#define _SEND_TIMEOUT 5000 //5 Seconds...
+#define _SEND_TIMEOUT (UINT32)5000 //5 Seconds...
 
 SINT32 CALastMix::loop()
 	{
@@ -377,8 +377,8 @@ LOOP_START:
 #ifdef _ASYNC
 //													tmpSocket->setASyncSend(true,-1,0,10000,this);
 #endif													
-													if(tmpSocket->setSendTimeOut(_SEND_TIMEOUT)!=E_SUCCESS)
-														CAMsg::printMsg(LOG_DEBUG,"Could not SEND Timeout!!");
+//													if(tmpSocket->setSendTimeOut(_SEND_TIMEOUT)!=E_SUCCESS)
+//														CAMsg::printMsg(LOG_DEBUG,"Could not SEND Timeout!!");
 													UINT16 payLen=ntohs(oMuxPacket.payload.len);
 													#ifdef _DEBUG
 														oMuxPacket.payload.data[ntohs(oMuxPacket.payload.len)]=0;
@@ -446,7 +446,7 @@ LOOP_START:
 										#endif
 										ret=ntohs(oMuxPacket.payload.len);
 										if(ret>=0&&ret<=PAYLOAD_SIZE)
-											ret=oConnection.pSocket->send(oMuxPacket.payload.data,ret);
+											ret=oConnection.pSocket->send(oMuxPacket.payload.data,ret,_SEND_TIMEOUT);
 										else
 											ret=SOCKET_ERROR;
 										if(ret==SOCKET_ERROR)

@@ -155,13 +155,9 @@ SINT32 CASocket::connect(LPCASOCKETADDR psa,UINT msTimeOut)
 #ifdef _DEBUG
 		sockets++;
 #endif
-#ifndef _WIN32
-		int flags=fcntl(m_Socket,F_GETFL,0);
-		fcntl(m_Socket,F_SETFL,flags|O_NONBLOCK);
-#else
-		unsigned long flags=1;
-		ioctlsocket(m_Socket,FIONBIO,&flags);
-#endif
+		bool bWasNonBlocking=false;
+		getNonBlocking(&bWasNonBlocking);
+		setNonBlocking(true);
 		int err=0;
 		LPSOCKADDR addr=(LPSOCKADDR)psa;
 		int addr_len=sizeof(*addr);
@@ -202,12 +198,7 @@ SINT32 CASocket::connect(LPCASOCKETADDR psa,UINT msTimeOut)
 						m_Socket=-1;
 						return E_UNKNOWN;
 					}
-				#ifndef _WIN32
-					fcntl(m_Socket,F_SETFL,flags);
-				#else
-						flags=0;
-						ioctlsocket(m_Socket,FIONBIO,&flags);
-				#endif
+				setNonBlocking(bWasNonBlocking);
 				return E_SUCCESS;
 			}
 		::close(m_Socket);
@@ -309,10 +300,26 @@ int CASocket::send(UINT8* buff,UINT32 len,bool bDisableAsync)
 */
 int CASocket::send(UINT8* buff,UINT32 len,UINT32 msTimeOut)
 	{
-	  SINT32 aktTimeOut=getSendTimeOut();	
-	  setSendTimeOut(msTimeOut);
-		int ret=send(buff,len,true);
-		setSendTimeOut(aktTimeOut);
+	  int ret;
+		SINT32 aktTimeOut=getSendTimeOut();	
+		if(setSendTimeOut(msTimeOut)!=E_SUCCESS)
+			{//do it complicate but still to simple!!!! more work TODO
+				bool bWasNonBlocking=false;
+				getNonBlocking(&bWasNonBlocking);
+				setNonBlocking(true);
+				ret=send(buff,len,true);
+				if(ret==SOCKET_ERROR)
+					{
+						msleep(msTimeOut);
+						ret=send(buff,len,true);
+					}
+				setNonBlocking(bWasNonBlocking);
+			}
+		else
+			{
+				ret=send(buff,len,true);
+				setSendTimeOut(aktTimeOut);
+			}
 		return ret;	    	    
 	}
 
@@ -536,6 +543,43 @@ SINT32 CASocket::setKeepAlive(UINT32 sec)
 #else
 		return E_UNKNOWN;
 #endif
+	}
+
+
+SINT32 CASocket::setNonBlocking(bool b)
+	{
+		if(b)
+			{
+				#ifndef _WIN32
+						int flags=fcntl(m_Socket,F_GETFL,0);
+						fcntl(m_Socket,F_SETFL,flags|O_NONBLOCK);
+				#else
+						unsigned long flags=1;
+						ioctlsocket(m_Socket,FIONBIO,&flags);
+				#endif
+			}
+		else
+			{
+				#ifndef _WIN32
+						int flags=fcntl(m_Socket,F_GETFL,0);
+						fcntl(m_Socket,F_SETFL,flags~O_NONBLOCK);
+				#else
+						unsigned long flags=0;
+						ioctlsocket(m_Socket,FIONBIO,&flags);
+				#endif
+			}
+		return E_SUCCESS;
+	}
+
+SINT32 CASocket::getNonBlocking(bool* b)
+	{
+		#ifndef _WIN32
+				int flags=fcntl(m_Socket,F_GETFL,0);
+				*b=((flags&O_NONBLOCK)==O_NONBLOCK);
+		#else
+				return SOCKET_ERROR;
+		#endif
+		return E_SUCCESS;
 	}
 
 SINT32 CASocket::setASyncSend(bool b,SINT32 estimatedSendSize,UINT32 lowwater,UINT32 SendQueueSoftLimit,CASocketASyncSendResume* pResume)
