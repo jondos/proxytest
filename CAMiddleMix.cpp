@@ -445,12 +445,12 @@ THREAD_RETURN loopDownStream(void *p)
 											goto ERR;
 //									}
 //								else
-									{//connection should be closed
+	//								{//connection should be closed
 	//									pCipher->unlock();
 		//								if(pMix->m_pMuxIn->close(channelIn)==SOCKET_ERROR)
 			//								goto ERR;
 				//						pMix->m_pMiddleMixChannelList->remove(channelIn);
-									}
+		//							}
 							}
 					}
 			}

@@ -534,7 +534,8 @@ SINT32 CAFirstMix::loop()
 													#endif
 													((CASocket*)pnewMuxSocket)->send(m_xmlKeyInfoBuff,m_xmlKeyInfoSize);  // send the mix-keys to JAP
 													((CASocket*)pnewMuxSocket)->setNonBlocking(true);	                    // stefan: sendet das send in der letzten zeile doch noch nicht? wenn doch, kann dann ein JAP nicht durch verweigern der annahme hier den mix blockieren? vermutlich nciht, aber andersherum faend ich das einleuchtender.
-													m_pChannelList->add(pnewMuxSocket,peerIP,new CAQueue); // adding user connection to mix->JAP channel list (stefan: sollte das nicht connection list sein? ).
+													// es kann nicht blockieren unter der Annahme das der TCP-Sendbuffer > m_xmlKeyInfoSize ist....
+													m_pChannelList->add(pnewMuxSocket,peerIP,new CAQueue); // adding user connection to mix->JAP channel list (stefan: sollte das nicht connection list sein? --> es handelt sich um eine Datenstruktu fŸr Connections/Channels ).
 													incUsers();																	// increment the user counter by one
 													m_psocketgroupUsersRead->add(*pnewMuxSocket); // add user socket to the established ones that we read data from.
 												}
@@ -600,7 +601,7 @@ SINT32 CAFirstMix::loop()
 																																			//so we assume that this is
 																																			//the first packet of a connection
 																																			//which contains the key
-														// stefan: ist das eine der protokoll-leichen die bald rausfliegen?
+														// stefan: ist das eine der protokoll-leichen die bald rausfliegen? --> ja hoffentlich...
 													{
 														m_pRSA->decrypt(pMixPacket->data,rsaBuff);
 														if(memcmp("KEYPACKET",rsaBuff,9)!=0)
@@ -625,7 +626,8 @@ SINT32 CAFirstMix::loop()
 													pHashEntry->trafficIn++;
 												#endif
 												if(pMixPacket->flags==CHANNEL_DUMMY)					// just a dummy to keep the connection alife in e.g. NAT gateways 
-													{ // stefan: ein dummy wird einfach zurueck zum nutzer geschickt? ohne umverschluesseln (ausser dem ersten teil)?
+													{ 
+														getRandom(pMixPacket->data,DATA_SIZE);
 														pMuxSocket->send(pMixPacket,tmpBuff);
 														pHashEntry->pQueueSend->add(tmpBuff,MIXPACKET_SIZE);
 														m_psocketgroupUsersWrite->add(*pMuxSocket); 
@@ -648,7 +650,7 @@ SINT32 CAFirstMix::loop()
 																														pEntry->channelIn,pEntry->pHead->id,pEntry->packetsInFromUser,pEntry->packetsOutToUser,pEntry->timeCreated,current_time,diff_time);
 																#endif
 																delete pEntry->pCipher;              // forget the symetric key of this connection
-																m_pChannelList->removeChannel(pMuxSocket,pMixPacket->channel);
+																m_pChannelList->removeChannel(pMuxSocket,pEntry->channelIn);
 															}
 														#ifdef _DEBUG
 														else
@@ -676,8 +678,9 @@ SINT32 CAFirstMix::loop()
 															}
 														else if(pEntry==NULL&&pMixPacket->flags==CHANNEL_OPEN)  // open a new mix channel
 														{ // stefan: muesste das nicht vor die behandlung von CHANNEL_DATA? oder gilt OPEN => !DATA ? 
+														   //es gilt: open -> data
 																pCipher= new CASymCipher();
-																m_pRSA->decrypt(pMixPacket->data,rsaBuff); // stefan: das hier ist doch eine ziemlich kostspielige operation. sollte das pruefen auf Max_Number_Of_Channels nicht vorher passieren?
+																m_pRSA->decrypt(pMixPacket->data,rsaBuff); // stefan: das hier ist doch eine ziemlich kostspielige operation. sollte das pruefen auf Max_Number_Of_Channels nicht vorher passieren? --> ok sollte aufs TODO ...
 																pCipher->setKeyAES(rsaBuff);
 																pCipher->decryptAES(pMixPacket->data+RSA_SIZE,
 																								 pMixPacket->data+RSA_SIZE-KEY_SIZE,
