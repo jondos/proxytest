@@ -4717,7 +4717,13 @@ LIBS="$LIBS $XMLLIBFLAGS"
 cat >conftest.$ac_ext <<_ACEOF
 #line $LINENO "configure"
 #include "confdefs.h"
+
+#include "util/XercesDefs.hpp"
 #include "util/PlatformUtils.hpp"
+#if (_XERCES_VERSION >= 20200)
+    XERCES_CPP_NAMESPACE_USE
+#endif
+
 #ifdef F77_DUMMY_MAIN
 #  ifdef __cplusplus
      extern "C"
@@ -4728,6 +4734,7 @@ int
 main ()
 {
 XMLPlatformUtils::Initialize()
+
   ;
   return 0;
 }
