@@ -30,8 +30,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketASyncSend.hpp"
 #ifdef _DEBUG
 	extern int sockets;
-	#include "CAMsg.hpp"
 #endif
+#include "CAMsg.hpp"
 #define CLOSE_SEND		0x01
 #define CLOSE_RECEIVE 0x02
 #define CLOSE_BOTH		0x03
@@ -215,11 +215,14 @@ int CASocket::available()
 int CASocket::receive(UINT8* buff,UINT32 len)
 	{
 		int ret;	
+	  int ef;
 	  do
 			{
 				ret=::recv(m_Socket,(char*)buff,len,MSG_NOSIGNAL);
 			}
-	  while(ret==SOCKET_ERROR&&errno==EINTR);
+	  while(ret==SOCKET_ERROR&&(ef=errno)==EINTR);
+	  if(ret==SOCKET_ERROR)
+	      CAMsg::printMsg(LOG_DEBUG,"Receive error: %i\n",ef);
 	  return ret;	    	    
 	}
 
