@@ -151,7 +151,8 @@ SINT32 CAMiddleMixChannelList::test()
 					UINT32 c;
 					UINT32 d;
 					UINT32 rand;
-					for(int i=0;i<1000;i++)
+					int i,j;
+					for(i=0;i<1000;i++)
 						{
 							getRandom(&c);
 							oList.add(c,NULL,&d);
@@ -160,14 +161,14 @@ SINT32 CAMiddleMixChannelList::test()
 						{
 							getRandom(&rand);
 							if(rand<0x0FFFFFFF)
-								for(int i=0;i<5;i++)
+								for(j=0;j<5;j++)
 									{
 										getRandom(&c);
 										oList.add(c,NULL,&d);
 									}
 							getRandom(&rand);
 							if(rand<0x7FFFFFFF)
-								for(int i=0;i<100000;i++)
+								for(int j=0;j<100000;j++)
 									{
 										getRandom(&c);
 										oList.remove(c);
@@ -175,4 +176,3 @@ SINT32 CAMiddleMixChannelList::test()
 						}
 					return 0;
 				}
-	
