@@ -121,18 +121,18 @@ char* strins(const char* src,const char * pos,const char* ins)
 	* @retval E_UNKNOWN, if an error occurs
 	*	@retval	E_SUCCESS, otherwise
 */
-SINT32 getcurrentTimeMillis(BIGNUM* bnTime)
+/*SINT32 getcurrentTimeMillis(BIGNUM* bnTime)
 	{
 		if(bnTime==NULL)
 			return E_UNSPECIFIED;
 		#ifdef _WIN32
 			struct _timeb timebuffer;
 			_ftime(&timebuffer);
-			/* Hack what should be solved better...*/
+			// Hack what should be solved better...
 			BN_set_word(bnTime,timebuffer.time);
 			BN_mul_word(bnTime,1000);
 			BN_add_word(bnTime,timebuffer.millitm);
-			/* end of hack..*/
+			// end of hack..
 			return E_SUCCESS;
 	  #else //we dont use ftime due to a bug in glibc2.0
 		//we use gettimeofday() in order to get the millis...
@@ -143,8 +143,13 @@ SINT32 getcurrentTimeMillis(BIGNUM* bnTime)
 			BN_add_word(bnTime,tv.tv_usec/1000);
 			return E_SUCCESS;
 	  #endif
-	}
+	}*/
 
+/** Gets the current Systemtime in milli seconds. 
+	* @param u64Time - 64 bit Integer, in which the current time is placed
+	* @retval E_UNKNOWN, if an error occurs
+	*	@retval	E_SUCCESS, otherwise
+*/
 SINT32 getcurrentTimeMillis(UINT64& u64Time)
 	{
 		#ifdef _WIN32
@@ -159,7 +164,7 @@ SINT32 getcurrentTimeMillis(UINT64& u64Time)
 			struct timeval tv;
 			gettimeofday(&tv,NULL); //getting millis...
 			#ifdef HAVE_NATIVE_UINT64
-				u64Time=tv.tv_sec*1000+tv.tv_usec/1000000;
+				u64Time=tv.tv_sec*1000+tv.tv_usec/1000;
 				return E_SUCCESS;
 			#else
 				return E_UNKNOWN;
