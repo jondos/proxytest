@@ -997,8 +997,8 @@ int main(int argc, const char* argv[])
 		//initalize Random..
 #ifdef _WIN32
 		RAND_screen();
-#else
-		RAND_seed();
+//#else
+//		RAND_seed();
 #endif
 		options.parse(argc,argv);
 #ifndef _WIN32
