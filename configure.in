@@ -114,6 +114,20 @@ AC_ARG_WITH(pool,
 	]
 )
 
+dnl delay channels ??
+BANDWIDTH_LIMIT=""
+AC_ARG_WITH(pool,
+	[  --with-bandwidth-limitation=LIMITATION_START     Specify if to build wiht bandwith limitation and optionally the number of bytes which are transferred without any limitation ],
+	[
+		if test "x$withval" != "$xno" ; then
+		    BANDWIDTH_LIMIT="-DDELAY_CHANNELS"
+		    if test "x$withval" != "xyes" ; then	
+			BANDWIDTH_LIMIT="$BANDWIDTH_LIMIT -DDELAY_CHANNEL_TRAFFIC=$withval"
+		    fi	
+		fi
+	]
+)
+
 LIBS="$DEFAULTLIBS"
 
 dnl Checks for Headers
@@ -315,7 +329,7 @@ AC_ARG_WITH(crime-detection,
 )
 
 
-CFLAGS="$CFLAGS $POOL $OFLAGS"
+CFLAGS="$CFLAGS $POOL $BANDWIDTH_LIMIT $OFLAGS"
 CXXFLAGS=$CFLAGS
 
 AC_CONFIG_FILES([Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile])
