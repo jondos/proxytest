@@ -420,11 +420,22 @@ SINT32 CAFirstMix::init()
 			}
 
 		UINT16 len;
-		((CASocket*)muxOut)->receive((UINT8*)&len,2);
+		if(((CASocket*)muxOut)->receive((UINT8*)&len,2)!=2)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info lenght!\n");
+				return E_UNKNOWN;
+			}
 		CAMsg::printMsg(LOG_CRIT,"Received Key Info lenght %u\n",ntohs(len));
 		UINT8* recvBuff=new unsigned char[ntohs(len)+2];
 		memcpy(recvBuff,&len,2);
-		((CASocket*)muxOut)->receive(recvBuff+2,ntohs(len));
+		
+		len=ntohs(len);
+		if(((CASocket*)muxOut)->receive(recvBuff+2,len)!=len)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info!\n");
+				delete recvBuff;
+				return E_UNKNOWN;
+			}
 		CAMsg::printMsg(LOG_CRIT,"Received Key Info...\n");
 
 		mRSA.generateKeyPair(1024);
