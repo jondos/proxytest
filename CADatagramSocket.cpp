@@ -87,10 +87,10 @@ SINT32 CADatagramSocket::close()
 SINT32 CADatagramSocket::bind(CASocketAddr & from)
 	{
 //		localPort=-1;
-		if(m_Socket==0&&create(from.m_Type)==SOCKET_ERROR)
+		if(m_Socket==0&&create(from.getType())==SOCKET_ERROR)
 			return SOCKET_ERROR;
-		
-		if(::bind(m_Socket,(LPSOCKADDR)from,from.getSize())==SOCKET_ERROR)
+		LPSOCKADDR fr=from.LPSOCKADDR();
+		if(::bind(m_Socket,from.LPSOCKADDR(),from.getSize())==SOCKET_ERROR)
 		    return SOCKET_ERROR;
 		return E_SUCCESS;
 	}
@@ -103,7 +103,7 @@ SINT32 CADatagramSocket::bind(UINT16 port)
 
 SINT32 CADatagramSocket::send(UINT8* buff,UINT32 len,CASocketAddr & to)
 	{
-    		if(::sendto(m_Socket,(char*)buff,len,MSG_NOSIGNAL,(LPSOCKADDR)to,to.getSize())==SOCKET_ERROR)
+    		if(::sendto(m_Socket,(char*)buff,len,MSG_NOSIGNAL,to.LPSOCKADDR(),to.getSize())==SOCKET_ERROR)
 			return E_UNKNOWN;
 		return E_SUCCESS;	    	    
 	}

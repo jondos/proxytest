@@ -28,7 +28,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "StdAfx.h"
 #ifdef HAVE_UNIX_DOMAIN_PROTOCOL
 #include "CASocketAddrUnix.hpp"
-const int CASocketAddrUnix::m_Type=AF_LOCAL;
 
 
 CASocketAddrUnix::CASocketAddrUnix()

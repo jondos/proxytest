@@ -33,10 +33,12 @@ class CASocketAddrINet:public CASocketAddr,sockaddr_in
 		public:
 			static SINT32 init();
 			static SINT32 destroy();
-			static const int m_Type;
+			int getType(){return AF_INET;}
 			CASocketAddrINet();
 			~CASocketAddrINet();
-			
+		//	virtual operator LPSOCKADDR(){
+		//		return (::LPSOCKADDR)this;}			
+			::LPSOCKADDR LPSOCKADDR(){return (::LPSOCKADDR)(static_cast<sockaddr_in*>(this));}			
 			SINT32 getSize();
 			/*TCP/IP*/
 			CASocketAddrINet(char* szIP,UINT16 port);

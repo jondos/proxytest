@@ -35,8 +35,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 				CASocketAddrUnix();
 				~CASocketAddrUnix();
 				
-				static const int m_Type;
+				int getType(){return AF_LOCAL;}
 				SINT32 getSize();
+				::LPSOCKADDR LPSOCKADDR(){return (::LPSOCKADDR)(static_cast<sockaddr_un*>(this));}			
 				
 				/*UNIX-Domain*/
 				CASocketAddrUnix(char* szPath);

@@ -29,7 +29,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketAddrINet.hpp"
 
 bool CASocketAddrINet::bIsCsInitialized=false;
-const int CASocketAddrINet::m_Type=AF_INET;
 CRITICAL_SECTION CASocketAddrINet::csGet;
 
 CASocketAddrINet::CASocketAddrINet()

@@ -104,7 +104,7 @@ SINT32 CAMuxSocket::accept(UINT16 port)
 SINT32 CAMuxSocket::accept(CASocketAddr& oAddr)
 	{
 		CASocket oSocket;
-		oSocket.create(oAddr.m_Type);
+		oSocket.create(oAddr.getType());
 		oSocket.setReuseAddr(true);
 		if(oSocket.listen(oAddr)==SOCKET_ERROR)
 			return SOCKET_ERROR;
