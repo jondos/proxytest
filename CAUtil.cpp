@@ -342,6 +342,19 @@ SINT32 getDOMElementValue(DOM_Element& elem,UINT8* value,UINT32* valuelen)
 		return E_SUCCESS;
 	}
 
+SINT32 getDOMElementValue(DOM_Element& elem,UINT32* value)
+	{
+		ASSERT(value!=NULL,"Value is null");
+		ASSERT(!elem.isNull,"Element is NULL");
+		UINT8 buff[255];
+		UINT32 buffLen=255;
+		if(getDOMElementValue(elem,buff,&buffLen)!=E_SUCCESS)
+			return E_UNKNOWN;
+		*value=atol((char*)buff);
+		
+		return E_SUCCESS;
+	}
+
 SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, UINT8* xml, UINT32* xmllen,CAASymCipher* pRSA)
 	{
 #define XML_ENCODE_KEY_TEMPLATE "<EncryptedKey><EncryptionMethod Algorithm=\"RSA\"/><CipherData><CipherValue>%s</CipherValue></CipherData></EncryptedKey>"

@@ -407,10 +407,6 @@ SOURCE=.\CAQueue.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\CARoundTripTime.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\CASemaphore.cpp
 # End Source File
 # Begin Source File
@@ -594,10 +590,6 @@ SOURCE=.\CAPayment.hpp
 # Begin Source File
 
 SOURCE=.\CAQueue.hpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\CARoundTripTime.hpp
 # End Source File
 # Begin Source File
 

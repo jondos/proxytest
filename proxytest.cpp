@@ -41,7 +41,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAInfoService.hpp"
 #include "CASignature.hpp"
 #include "CADatagramSocket.hpp"
-#include "CARoundTripTime.hpp"
+//#include "CARoundTripTime.hpp"
 #include "CAUtil.hpp"
 #include "CAMix.hpp"
 #include "CAMiddleMix.hpp"
@@ -462,7 +462,7 @@ Debug(dc::malloc.on());
 		signal(SIGINT,signal_interrupt);
 		signal(SIGTERM,signal_term);
 		CAMix* pMix=NULL;
-		CARoundTripTime* pRTT=NULL;
+//		CARoundTripTime* pRTT=NULL;
 		if(options.isLocalProxy())
 			{
 				pMix=new CALocalProxy();
@@ -494,7 +494,7 @@ Debug(dc::malloc.on());
 		if(pMix->start()!=E_SUCCESS)
 			CAMsg::printMsg(LOG_CRIT,"Error during MIX-Startup!\n");
 //EXIT:
-		delete pRTT;
+//		delete pRTT;
 		delete pMix;
 //		CASocketAddrINet::destroy();
 		#ifdef _WIN32		
