@@ -341,7 +341,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //Mix Version Info as multiline String
 #ifdef XERCES_FULLVERSIONDOT
 	#define MY_XERCES_VERSION XERCES_FULLVERSIONDOT
-#else if defined(XERCES_DLLVersionStr)
+#elif defined(XERCES_DLLVersionStr)
 	#define MY_XERCES_VERSION XERCES_DLLVersionStr
 #else
 	#define MY_XERCES_VERSION "unknown"
