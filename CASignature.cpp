@@ -179,12 +179,14 @@ SINT32 CASignature::signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32 *outlen)
 		
 		//Calculating the Digest...
 		UINT32 len=*outlen;
-		makeXMLCanonical(in,inlen,out,&len);
+		if(makeXMLCanonical(in,inlen,out,&len)!=E_SUCCESS)
+			return E_UNKNOWN;
 		UINT8 dgst[SHA_DIGEST_LENGTH];
 		SHA1(out,len,dgst);
 		UINT8 tmpBuff[1024];
 		len=1024;
-		CABase64::encode(dgst,SHA_DIGEST_LENGTH,tmpBuff,&len);
+		if(CABase64::encode(dgst,SHA_DIGEST_LENGTH,tmpBuff,&len)!=E_SUCCESS)
+			return E_UNKNOWN;
 		tmpBuff[len]=0;
 
 		//Creating the Sig-InfoBlock....
@@ -192,20 +194,16 @@ SINT32 CASignature::signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32 *outlen)
 		
 		// Signing the SignInfo block....
 		len=1024;//*outlen;
-		makeXMLCanonical(out,(UINT32)strlen((char*)out),tmpBuff,&len);
+		if(makeXMLCanonical(out,(UINT32)strlen((char*)out),tmpBuff,&len)!=E_SUCCESS)
+			return E_UNKNOWN;
 		UINT sigSize=255;
 		UINT8 sig[255];
 		UINT8* c=sig;
-// tmp
-//		tmpBuff[len]=0;
-//		printf("CanSigInfo: %s\n",tmpBuff);
-//		printf("CanSigInfoSize: %u\n",len);
-//tmp end
-		sign(tmpBuff,len,sig,&sigSize);
+		if(sign(tmpBuff,len,sig,&sigSize)!=E_SUCCESS)
+			return E_UNKNOWN;
 		
 		//Making Base64-Encode r and s
 		STACK* a=NULL;
-//		d2i_ASN1_SET(&a,&c,sigSize,(char *(__cdecl *)(void))d2i_ASN1_INTEGER,NULL,V_ASN1_SEQUENCE,V_ASN1_UNIVERSAL);
 		d2i_ASN1_SET(&a,&c,sigSize,(char *(*)(void))d2i_ASN1_INTEGER,NULL,V_ASN1_SEQUENCE,V_ASN1_UNIVERSAL);
 		BIGNUM* s =BN_new();
 		ASN1_INTEGER* i=(ASN1_INTEGER*)sk_pop(a);
@@ -217,22 +215,20 @@ SINT32 CASignature::signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32 *outlen)
 		ASN1_INTEGER_free(i);
 		sk_free(a);
 
-//tmp
-//		printf("r: %s\n",BN_bn2dec(r));
-//		printf("s: %s\n",BN_bn2dec(s));
-//tmp-End
 		memset(tmpBuff,0,40); //make first 40 bytes '0' --> if r or s is less then 20 bytes long! 
 													//(Due to be compatible to the standarad r and s must be 20 bytes each) 
 		BN_bn2bin(r,tmpBuff+20-BN_num_bytes(r)); //so r is 20 bytes with leading '0'...
 		BN_bn2bin(s,tmpBuff+40-BN_num_bytes(s));
+		BN_free(r);
+		BN_free(s);
+
 		sigSize=255;
-		CABase64::encode(tmpBuff,40,sig,&sigSize);
+		if(CABase64::encode(tmpBuff,40,sig,&sigSize)!=E_SUCCESS)
+			return E_UNKNOWN;
 		sig[sigSize]=0;
 
 		//Makeing the hole Signature-Block....
 		sprintf((char*)tmpBuff,XMLSIG_TEMPLATE,out,sig);
-		BN_free(r);
-		BN_free(s);
 
 		/* Find the last closing tag (</...>) and insert the <Signature> Element just before*/
 		int pos=inlen-1;
@@ -267,8 +263,8 @@ static void smakeXMLCanonicalDataHandler(const XML_Char *data, size_t len, void 
 		XMLCanonicalHandlerData* pData=(XMLCanonicalHandlerData*)userData;
 		if(pData->err!=0)
 			return;
-		char* buff=new char[len];
-		len=memtrim(data,buff,len);
+		UINT8* buff=new UINT8[len];
+		len=memtrim(buff,(UINT8*)data,len);
 		if(len==0)
 			{
 				delete buff;

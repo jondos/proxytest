@@ -71,9 +71,9 @@ THREAD_RETURN InfoLoop(void *p)
 		CASocket oSocket;
 		CASocketAddr oAddr;
 		CASignature* pSignature=pInfoService->getSignature();
-		char* buff=new char[1024];
+		UINT8* buff=new UINT8[1024];
 		options.getInfoServerHost(buff,1024);
-		oAddr.setAddr(buff,options.getInfoServerPort());
+		oAddr.setAddr((char*)buff,options.getInfoServerPort());
 		BufferOutputStream oBufferStream(1024,1024);
 		XML::Output oxmlOut(oBufferStream);
 		UINT32 nUser,nRisk,nTraffic;
@@ -186,9 +186,9 @@ int CAInfoService::sendHelo()
 	{
 		CASocket oSocket;
 		CASocketAddr oAddr;
-		char hostname[255];
+		UINT8 hostname[255];
 		options.getInfoServerHost(hostname,255);
-		oAddr.setAddr(hostname,options.getInfoServerPort());
+		oAddr.setAddr((char*)hostname,options.getInfoServerPort());
 		if(oSocket.connect(&oAddr)==E_SUCCESS)
 			{
 				BufferOutputStream oBufferStream(1024,1024);
@@ -200,13 +200,13 @@ int CAInfoService::sendHelo()
 				oxmlOut.BeginElementAttrs("MixCascade");
 				CASocketAddr::getLocalHostName((UINT8*)hostname,255);
 //*>> Beginn very ugly hack for anon.inf.tu-dresden.de --> new Concepts needed!!!!!1		
-		if(strncmp(hostname,"ithif77",7)==0)
-			strcpy(hostname,"anon.inf.tu-dresden.de");
+		if(strncmp((char*)hostname,"ithif77",7)==0)
+			strcpy((char*)hostname,"anon.inf.tu-dresden.de");
 //end hack....
 				sprintf(buff,"%s%%3A%u",hostname,options.getServerPort());
 				oxmlOut.WriteAttr("id",buff);
 				oxmlOut.EndAttrs();
-				options.getCascadeName(buff,1024);
+				options.getCascadeName((UINT8*)buff,1024);
 				oxmlOut.WriteElement("Name",buff);
 				oxmlOut.WriteElement("IP",hostname);
 				oxmlOut.WriteElement("Port",options.getServerPort());

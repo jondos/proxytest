@@ -264,9 +264,9 @@ int doLocalProxy()
 						}
 			}
 		CASocketAddr addrNext;
-		char strTarget[255];
+		UINT8 strTarget[255];
 		options.getTargetHost(strTarget,255);
-		addrNext.setAddr(strTarget,options.getTargetPort());
+		addrNext.setAddr((char*)strTarget,options.getTargetPort());
 		CAMsg::printMsg(LOG_INFO,"Try connectiong to next Mix...");
 
 /*		CAMuxSocket http;
@@ -287,19 +287,19 @@ int doLocalProxy()
 			{
 				
 				CAMsg::printMsg(LOG_INFO," connected!\n");
-				unsigned short size;
-				((CASocket*)lpIOPair->muxOut)->receive((char*)&size,2);
-				((CASocket*)lpIOPair->muxOut)->receive((char*)&lpIOPair->chainlen,1);
+				UINT16 size;
+				((CASocket*)lpIOPair->muxOut)->receive((UINT8*)&size,2);
+				((CASocket*)lpIOPair->muxOut)->receive(&lpIOPair->chainlen,1);
 				CAMsg::printMsg(LOG_INFO,"Chain-Length: %d\n",lpIOPair->chainlen);
 				size=ntohs(size)-1;
-				unsigned char* buff=new unsigned char[size];
-				((CASocket*)lpIOPair->muxOut)->receive((char*)buff,size);
+				UINT8* buff=new UINT8[size];
+				((CASocket*)lpIOPair->muxOut)->receive(buff,size);
 				lpIOPair->arRSA=new CAASymCipher[lpIOPair->chainlen];
 				int aktIndex=0;
 				for(int i=0;i<lpIOPair->chainlen;i++)
 					{
 						int len=size;
-						lpIOPair->arRSA[i].setPublicKey(buff+aktIndex,&len);
+						lpIOPair->arRSA[i].setPublicKey(buff+aktIndex,(UINT32*)&len);
 						size-=len;
 						aktIndex+=len;
 					}
@@ -342,10 +342,10 @@ THREAD_RETURN mmIO(void* v)
 		//CAMuxSocket& muxOut=mmIOPair->muxOut;
 		//CAMuxSocket& muxIn=mmIOPair->muxIn;
 		
-		char strTarget[255];
+		UINT8 strTarget[255];
 		options.getTargetHost(strTarget,255);
 		CASocketAddr nextMix;
-		nextMix.setAddr(strTarget,options.getTargetPort());
+		nextMix.setAddr((char*)strTarget,options.getTargetPort());
 		
 SET_IN:		
 		((CASocket*)mmIOPair->muxOut)->create();
@@ -359,13 +359,13 @@ SET_IN:
 		oSocketGroup.add(mmIOPair->muxOut);
 
 		CAMsg::printMsg(LOG_INFO," connected!\n");
-		unsigned short keyLen;
-		((CASocket*)mmIOPair->muxOut)->receive((char*)&keyLen,2);
+		UINT16 keyLen;
+		((CASocket*)mmIOPair->muxOut)->receive((UINT8*)&keyLen,2);
 		CAMsg::printMsg(LOG_INFO,"Received Key Info lenght %u\n",ntohs(keyLen));
 		delete recvBuff;
 		recvBuff=new unsigned char[ntohs(keyLen)+2];
 		memcpy(recvBuff,&keyLen,2);
-		((CASocket*)mmIOPair->muxOut)->receive((char*)recvBuff+2,ntohs(keyLen));
+		((CASocket*)mmIOPair->muxOut)->receive(recvBuff+2,ntohs(keyLen));
 		CAMsg::printMsg(LOG_INFO,"Received Key Info...\n");
 		
 		
@@ -380,8 +380,8 @@ SET_OUT:
 
 		oSocketGroup.add(mmIOPair->muxIn);
 
-		int keySize=mmIOPair->oRSA.getPublicKeySize();
-		unsigned short infoSize=ntohs((*(unsigned short*)recvBuff))+2;
+		UINT32 keySize=mmIOPair->oRSA.getPublicKeySize();
+		UINT16 infoSize=ntohs((*(unsigned short*)recvBuff))+2;
 		delete infoBuff;
 		infoBuff=new unsigned char[infoSize+keySize]; 
 		memcpy(infoBuff,recvBuff,infoSize);
@@ -392,7 +392,7 @@ SET_OUT:
 		#ifdef _DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"New Key Info size: %u\n",infoSize);
 		#endif
-		if(((CASocket*)mmIOPair->muxIn)->send((char*)infoBuff,infoSize)==-1)
+		if(((CASocket*)mmIOPair->muxIn)->send(infoBuff,infoSize)==-1)
 			CAMsg::printMsg(LOG_DEBUG,"Error sending new New Key Info\n");
 		else
 			CAMsg::printMsg(LOG_DEBUG,"Sending new New Key Info succeded\n");
@@ -547,18 +547,18 @@ THREAD_RETURN fmIO(void *v)
 		CAMuxSocket* newMuxSocket;
 		MUXLISTENTRY* tmpEntry;
 		REVERSEMUXLISTENTRY* tmpReverseEntry;
-		unsigned char buff[RSA_SIZE];
+		UINT8 buff[RSA_SIZE];
 		int countRead=0;
 		CAASymCipher oRSA;
 		oRSA.generateKeyPair(1024);
-		int keySize=oRSA.getPublicKeySize();
-		unsigned short infoSize=ntohs((*(unsigned short*)fmIOPair->recvBuff))+2;
-		unsigned char* infoBuff=new unsigned char[infoSize+keySize]; 
+		UINT32 keySize=oRSA.getPublicKeySize();
+		UINT16 infoSize=ntohs((*(UINT16*)fmIOPair->recvBuff))+2;
+		UINT8* infoBuff=new UINT8[infoSize+keySize]; 
 		memcpy(infoBuff,fmIOPair->recvBuff,infoSize);
 		infoBuff[2]++; //chainlen erhöhen
 		oRSA.getPublicKey(infoBuff+infoSize,&keySize);
 		infoSize+=keySize;
-		(*(unsigned short*)infoBuff)=htons(infoSize-2);
+		(*(UINT16*)infoBuff)=htons(infoSize-2);
 		#ifdef _DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"New Key Info size: %u\n",infoSize);
 		#endif
@@ -568,9 +568,9 @@ THREAD_RETURN fmIO(void *v)
 		#endif
 		CAInfoService oInfoService;
 		// reading SingKey....
-		char* fileBuff=new char[2048];
+		UINT8* fileBuff=new UINT8[2048];
 		options.getKeyFileName(fileBuff,2048);
-		int handle=open(fileBuff,O_BINARY|O_RDONLY);
+		int handle=open((char*)fileBuff,O_BINARY|O_RDONLY);
 		if(handle==-1)
 			THREAD_RETURN_ERROR;
 		len=read(handle,fileBuff,2048);
@@ -616,7 +616,7 @@ THREAD_RETURN fmIO(void *v)
 								#else
 									((CASocket*)newMuxSocket)->setKeepAlive(true);
 								#endif
-								((CASocket*)newMuxSocket)->send((char*)infoBuff,infoSize);
+								((CASocket*)newMuxSocket)->send(infoBuff,infoSize);
 								oMuxChannelList.add(newMuxSocket);
 								nUser++;
 								oInfoService.setLevel(nUser,0,0);
@@ -828,9 +828,9 @@ int doFirstMix()
 		
 		
 		CASocketAddr addrNext;
-		char strTarget[255];
+		UINT8 strTarget[255];
 		options.getTargetHost(strTarget,255);
-		addrNext.setAddr(strTarget,options.getTargetPort());
+		addrNext.setAddr((char*)strTarget,options.getTargetPort());
 		CAMsg::printMsg(LOG_INFO,"Try connectiong to next Mix... %s:%u",strTarget,options.getTargetPort());
 		((CASocket*)fmIOPair->muxOut)->create();
 		((CASocket*)fmIOPair->muxOut)->setSendBuff(50*sizeof(MUXPACKET));
@@ -838,12 +838,12 @@ int doFirstMix()
 		if(fmIOPair->muxOut.connect(&addrNext,10,10)==E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_INFO," connected!\n");
-				unsigned short len;
-				((CASocket*)fmIOPair->muxOut)->receive((char*)&len,2);
+				UINT16 len;
+				((CASocket*)fmIOPair->muxOut)->receive((UINT8*)&len,2);
 				CAMsg::printMsg(LOG_CRIT,"Received Key Inof lenght %u\n",ntohs(len));
 				fmIOPair->recvBuff=new unsigned char[ntohs(len)+2];
 				memcpy(fmIOPair->recvBuff,&len,2);
-				((CASocket*)fmIOPair->muxOut)->receive((char*)fmIOPair->recvBuff+2,ntohs(len));
+				((CASocket*)fmIOPair->muxOut)->receive(fmIOPair->recvBuff+2,ntohs(len));
 				CAMsg::printMsg(LOG_CRIT,"Received Key Info...\n");
 				fmIO(fmIOPair);
 				ret=0;
@@ -1029,33 +1029,33 @@ int doLastMix()
 		    {
 					CAMsg::printMsg(LOG_CRIT," failed!\n");
 					delete lmIOPair;
-					return -1;
+					return E_UNKNOWN;
 		    }
 		((CASocket*)lmIOPair->muxIn)->setRecvBuff(50*sizeof(MUXPACKET));
 		((CASocket*)lmIOPair->muxIn)->setSendBuff(50*sizeof(MUXPACKET));
 		
 		CAMsg::printMsg(LOG_INFO,"connected!\n");
 		CAMsg::printMsg(LOG_INFO,"Sending Infos (chain length and RSA-Key)\n");
-		int keySize=lmIOPair->pRSA->getPublicKeySize();
-		unsigned short messageSize=keySize+1;
-		unsigned char* buff=new unsigned char[messageSize+2];
-		(*(unsigned short*)buff)=htons(messageSize);
+		UINT32 keySize=lmIOPair->pRSA->getPublicKeySize();
+		UINT16 messageSize=keySize+1;
+		UINT8* buff=new UINT8[messageSize+2];
+		(*(UINT16*)buff)=htons(messageSize);
 		buff[2]=1; //chainlen
 		lmIOPair->pRSA->getPublicKey(buff+3,&keySize);
-		((CASocket*)lmIOPair->muxIn)->send((char*)buff,messageSize+2);
+		((CASocket*)lmIOPair->muxIn)->send(buff,messageSize+2);
 		
-		char strTarget[255];
+		UINT8 strTarget[255];
 		options.getTargetHost(strTarget,255);
-		lmIOPair->addrSquid.setAddr(strTarget,options.getTargetPort());
+		lmIOPair->addrSquid.setAddr((char*)strTarget,options.getTargetPort());
 
 		options.getSOCKSHost(strTarget,255);
-		lmIOPair->addrSocks.setAddr(strTarget,options.getSOCKSPort());
+		lmIOPair->addrSocks.setAddr((char*)strTarget,options.getSOCKSPort());
 		
 		//	_beginthread(lmIO,0,lmIOPair);
 		lmIO(lmIOPair);
 		//WaitForSingleObject(hEventThreadEnde,INFINITE);
 		delete lmIOPair;
-		return 0;
+		return E_SUCCESS;
 	}
 
 

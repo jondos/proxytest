@@ -42,9 +42,14 @@ WARN_FORMAT           = "$file:$line: $text"
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                 = .
+INPUT                 = . \
+			xml \
+			httptunnel \
+			popt
 FILE_PATTERNS         = *.cpp \
-                        *.hpp
+                        *.hpp \
+                        *.c \
+                        *.h
 RECURSIVE             = NO
 EXCLUDE               = 
 EXCLUDE_PATTERNS      = 
