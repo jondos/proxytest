@@ -30,9 +30,6 @@ int CASocket::accept(CASocket &s)
 		if(s.m_Socket==SOCKET_ERROR)
 			{
 				s.m_Socket=0;
-				#ifdef _DEBUG
-					printf("Accept Error!\n");
-				#endif
 				return SOCKET_ERROR;
 			}
 #ifdef _DEBUG
