@@ -8,11 +8,11 @@
         <Daemon>False</Daemon>
         <Logging>
             <File compressed="False">../../logLastMix</File>
-        </Logging>
+        </Logging>        
     </General>
     <Network>
         <ListenerInterfaces>
-            <ListenerInterface>
+            <ListenerInterface hidden="True">
                 <NetworkProtocol>RAW/TCP</NetworkProtocol>
                 <Host>localhost</Host>
                 <IP>127.0.0.1</IP>

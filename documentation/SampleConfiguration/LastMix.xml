@@ -9,7 +9,7 @@
     </General>
     <Network>
         <ListenerInterfaces>
-            <ListenerInterface>
+            <ListenerInterface hidden="True">
                 <NetworkProtocol>RAW/TCP</NetworkProtocol>
                 <Host>localhost</Host>
                 <IP>127.0.0.1</IP>
