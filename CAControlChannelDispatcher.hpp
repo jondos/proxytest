@@ -31,9 +31,16 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAQueue.hpp"
 class CAAbstractControlChannel;
 
+/** This class "dispatches" messages which it receives via proccessMixPacket()
+	* to the associated control channel.
+	*/
 class CAControlChannelDispatcher
 {
   public:
+		/** Constructs a new dispatcher.
+			* @param pSendQueue queue in which the mix packets are put, if
+			*  a control channel sends a message
+			*/
 		CAControlChannelDispatcher(CAQueue* pSendQueue)
 			{
 				m_pSendQueue=pSendQueue;
@@ -49,8 +56,10 @@ class CAControlChannelDispatcher
 				delete m_pQueueEntry;
 			}
 
+		/** Registers a control channel for receiving messages*/		
     SINT32 registerControlChannel(CAAbstractControlChannel* pControlChannel);
     SINT32 removeControlChannel(UINT32 id);
+
     bool proccessMixPacket(MIXPACKET* pPacket);
 		SINT32 sendMessages(UINT32 id,bool m_bIsEncrypted,UINT8* msg,UINT32 msglen);
   private:
