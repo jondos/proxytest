@@ -72,8 +72,8 @@ class CALastMix:public CAMix
 #endif
 
 		private:
-			friend THREAD_RETURN lm_loopSendToMix(void* param);
-			friend THREAD_RETURN loopLog(void*);
+			friend static THREAD_RETURN lm_loopSendToMix(void* param);
+			friend static THREAD_RETURN loopLog(void*);
 			volatile bool m_bRunLog;
 			volatile UINT32 m_logUploadedPackets;
 			volatile UINT64 m_logUploadedBytes;

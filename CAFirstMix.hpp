@@ -38,12 +38,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketGroup.hpp"
 #include "CAQueue.hpp"
 #include "CAUtil.hpp"
-
-THREAD_RETURN loopSendToMix(void *param);
-THREAD_RETURN loopAcceptUsers(void *param);
-THREAD_RETURN loopReadFromUsers(void *param);
-
 class CAInfoService;
+
 class CAFirstMix:public CAMix
 	{
 		public:
@@ -97,9 +93,9 @@ class CAFirstMix:public CAMix
 				}
 					
 			
-		friend THREAD_RETURN loopSendToMix(void*);
-		friend THREAD_RETURN loopAcceptUsers(void*);
-		friend THREAD_RETURN loopReadFromUsers(void*);
+		friend static THREAD_RETURN loopSendToMix(void*);
+		friend static THREAD_RETURN loopAcceptUsers(void*);
+		friend static THREAD_RETURN loopReadFromUsers(void*);
 
 		private:
 			SINT32 incUsers()

@@ -188,7 +188,7 @@ SINT32 CAFirstMix::init()
 1. Close connection to next mix
 2. put a byte in the Mix-Output-Queue
 */
-THREAD_RETURN loopSendToMix(void* param)
+static THREAD_RETURN loopSendToMix(void* param)
 	{
 		CAQueue* pQueue=((CAFirstMix*)param)->m_pQueueSendToMix;
 //		CASocket* pSocket=(CASocket *)(*((CAFirstMix*)param)->m_pMuxOut);
@@ -244,7 +244,7 @@ THREAD_RETURN loopSendToMix(void* param)
 1. Set m_bRestart in firstMix to true
 2. close all accept sockets
 */
-THREAD_RETURN loopAcceptUsers(void* param)
+static THREAD_RETURN loopAcceptUsers(void* param)
 	{
 		CAFirstMix* pFirstMix=(CAFirstMix*)param;
 		CASocket* socketsIn=pFirstMix->m_arrSocketsIn;

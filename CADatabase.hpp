@@ -46,7 +46,7 @@ class CADatabase
 			SINT32 stop();
 			static SINT32 test();
 		private:
-			friend THREAD_RETURN loopMaintenance(void *param);
+			friend static THREAD_RETURN loopMaintenance(void *param);
 
 			SINT32 nextClock();
 			LP_databaseEntry* m_currDatabase;

@@ -37,7 +37,7 @@ extern CACmdLnOptions options;
 
 
 
-THREAD_RETURN InfoLoop(void *p)
+static THREAD_RETURN InfoLoop(void *p)
 	{
 		CAInfoService* pInfoService=(CAInfoService*)p;
 		int helocount=10;
