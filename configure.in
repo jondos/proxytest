@@ -73,7 +73,7 @@ esac
 dnl Architecture dependend compiler optimisations
 MARCH=""
 AC_ARG_WITH(arch,
-	[  --with-arch=i386|i486     Specify architecure for optimisation ],
+	AC_HELP_STRING([--with-arch=i386|i486|i586|i686|pentium3],[Specify architecure for optimisation]),
 	[
 		if test "x$withval" != "$xno" ; then
 			MARCH="-march=$withval"
@@ -94,7 +94,7 @@ OFLAGS="$OFLAGS $MARCH"
 
 dnl Static?
 AC_ARG_ENABLE(static,
-	    [--enable-static     Static linking],
+	    AC_HELP_STRING([--enable-static],[Static linking]),
 	    [CFLAGS="$CFLAGS -static"
 	     CXXFLAGS="$CXXFLAGS -static"
 	    ])
@@ -103,11 +103,11 @@ AC_ARG_ENABLE(static,
 dnl pool mix ??
 POOL=""
 AC_ARG_WITH(pool,
-	[  --with-pool=POOLSIZE     Specify if to build a pool mix and optionally the poolsize ],
+	AC_HELP_STRING([--with-pool=POOLSIZE],[Specify if to build a pool mix and optionally the poolsize]),
 	[
 		if test "x$withval" != "$xno" ; then
 		    POOL="-DUSE_POOL"
-		    if test "x$withval" != "xyes" ; then	
+		    if test "x$withval" != "$xyes" ; then	
 			POOL="$POOL -DMIX_POOL_SIZE=$withval"
 		    fi	
 		fi
@@ -116,12 +116,13 @@ AC_ARG_WITH(pool,
 
 dnl delay channels ??
 BANDWIDTH_LIMIT=""
-AC_ARG_WITH(bandwith-limitation,
-	[  --with-bandwidth-limitation=LIMITATION_START     Specify if to build with bandwith limitation and optionally the number of bytes which are transferred without any limitation ],
+AC_ARG_WITH(bandwithlimitation,
+	AC_HELP_STRING([--with-bandwidthlimitation=LIMITATION_START],
+			[Specify if to build with bandwith limitation and optionally the number of bytes which are transferred without any limitation]),
 	[
 		if test "x$withval" != "$xno" ; then
 		    BANDWIDTH_LIMIT="-DDELAY_CHANNELS"
-		    if test "x$withval" != "xyes" ; then	
+		    if test "x$withval" != "$xyes" ; then	
 			BANDWIDTH_LIMIT="$BANDWIDTH_LIMIT -DDELAY_CHANNEL_TRAFFIC=$withval"
 		    fi	
 		fi
