@@ -78,6 +78,24 @@ SINT32 CACmdLnOptions::clearTargetInterfaces()
 		return E_SUCCESS;
 	}
 
+/** Deletes all information about the listener interfaces.
+	*/
+SINT32 CACmdLnOptions::clearListenerInterfaces()
+	{
+		if(m_arListenerInterfaces!=NULL)
+			{
+				for(UINT32 i=0;i<m_cnListenerInterfaces;i++)
+					{
+						delete m_arListenerInterfaces[i].addr;
+						delete [] m_arListenerInterfaces[i].hostname;
+					}
+				delete[] m_arListenerInterfaces;
+			}
+		m_cnListenerInterfaces=0;
+		m_arListenerInterfaces=NULL;
+		return E_SUCCESS;
+	}
+
 void CACmdLnOptions::clean()
   {
 		if(m_strConfigFile!=NULL)
@@ -108,6 +126,7 @@ void CACmdLnOptions::clean()
 		if(m_strMixID!=NULL)
 			delete[] m_strMixID;
 		clearTargetInterfaces();
+		clearListenerInterfaces();
 		if(m_pSignKey!=NULL)
 			delete m_pSignKey;
 		if(m_pOwnCertificate!=NULL)

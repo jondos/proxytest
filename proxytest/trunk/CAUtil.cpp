@@ -376,20 +376,50 @@ SINT32 getDOMElementValue(DOM_Element& elem,UINT16* value)
 		return E_SUCCESS;
 	}
 
-SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, UINT8* xml, UINT32* xmllen,CAASymCipher* pRSA)
+void __encryptKey(UINT8* key,UINT32 keylen,UINT8* outBuff,UINT32* outLen,CAASymCipher* pRSA)
 	{
-#define XML_ENCODE_KEY_TEMPLATE "<EncryptedKey><EncryptionMethod Algorithm=\"RSA\"/><CipherData><CipherValue>%s</CipherValue></CipherData></EncryptedKey>"
 		UINT8 tmpBuff[1024];
 		memset(tmpBuff,0,sizeof(tmpBuff));
 		memcpy(tmpBuff+128-keylen,key,keylen);
 		pRSA->encrypt(tmpBuff,tmpBuff);
+		CABase64::encode(tmpBuff,128,outBuff,outLen);
+		outBuff[*outLen]=0;
+	}
+
+SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, UINT8* xml, UINT32* xmllen,CAASymCipher* pRSA)
+	{
+#define XML_ENCODE_KEY_TEMPLATE "<EncryptedKey><EncryptionMethod Algorithm=\"RSA\"/><CipherData><CipherValue>%s</CipherValue></CipherData></EncryptedKey>"
+		UINT8 tmpBuff[1024];
 		UINT32 len=1024;
-		CABase64::encode(tmpBuff,128,tmpBuff,&len);
-		tmpBuff[len]=0;
+		__encryptKey(key,keylen,tmpBuff,&len,pRSA);
 		sprintf((char*)xml,XML_ENCODE_KEY_TEMPLATE,tmpBuff);
 		*xmllen=strlen((char*)xml);
 		return E_SUCCESS;
 	}
+
+SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, DOM_DocumentFragment& docFrag,CAASymCipher* pRSA)
+	{
+		DOM_Document doc=DOM_Document::createDocument();
+		DOM_Element root=doc.createElement(DOMString("EncryptedKey"));
+		docFrag=doc.createDocumentFragment();
+		docFrag.appendChild(root);
+		DOM_Element elem1=doc.createElement("EncryptionMethod");
+		setDOMElementAttribute(elem1,"Algorithm",(UINT8*)"RSA");
+		root.appendChild(elem1);
+		DOM_Element elem2=doc.createElement("CipherData");
+		elem1.appendChild(elem2);
+		elem1=doc.createElement("CipherValue");
+		elem2.appendChild(elem1);
+		UINT8 tmpBuff[1024];
+		UINT32 tmpLen=1024;
+		__encryptKey(key,keylen,tmpBuff,&tmpLen,pRSA);
+		setDOMElementValue(elem1,tmpBuff);
+		return E_SUCCESS;
+	}
+
+
+		
+	
 
 SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, const UINT8* const xml, UINT32 xmllen,CAASymCipher* pRSA)
 	{
@@ -407,7 +437,16 @@ SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, const UINT8* const xml, 
 			return E_UNKNOWN;
 		CABase64::decode(buff,bufflen,buff,&bufflen);
 		pRSA->decrypt(buff,buff);
-		*keylen=16;
+		for(SINT32 i=127;i>=0;i--)
+			{
+				if(buff[i]!=0)
+					if(i>32)
+						*keylen=64;
+					else if(i>16)
+						*keylen=32;
+					else 
+						*keylen=16;
+			}
 		memcpy(key,buff+128-(*keylen),(*keylen));
 		return E_SUCCESS;
 	}
