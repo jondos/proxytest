@@ -488,7 +488,7 @@ SINT32 CAFirstMix::loop()
 		HCHANNEL lastChannelId=1;
 		MUXPACKET oMuxPacket;
 		CONNECTION oConnection;
-		CAInfoService oInfoService;
+		CAInfoService oInfoService(this);
 		UINT32 nUser=0;
 		SINT32 ret;
 		UINT8 rsaBuff[RSA_SIZE];
@@ -540,7 +540,7 @@ LOOP_START:
 								oMuxChannelList.add(pnewMuxSocket);
 								nUser++;
 								oInfoService.setLevel(nUser,-1,-1);
-								oInfoService.setMixedPackets(m_MixedPackets);
+//								oInfoService.setMixedPackets(m_MixedPackets);
 								oSocketGroup.add(*pnewMuxSocket);
 							}
 					}
@@ -707,7 +707,7 @@ LOOP_START:
 													}
 												nUser--;
 												oInfoService.setLevel(nUser,-1,-1);
-												oInfoService.setMixedPackets(m_MixedPackets);
+//												oInfoService.setMixedPackets(m_MixedPackets);
 											}
 										else if(ret==E_AGAIN)
 											{

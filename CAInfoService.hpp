@@ -27,17 +27,18 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 
 #include "CASignature.hpp"
+#include "CAFirstMix.hpp"
 class CAInfoService
 	{
 		public:
-			CAInfoService();
+			CAInfoService(CAFirstMix* pFirstMix);
 			~CAInfoService();
 			SINT32 sendHelo();
 			int start();
 			int stop();
 			SINT32 setLevel(SINT32 user,SINT32 risk,SINT32 traffic);
 			SINT32 getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic);
-			SINT32 setMixedPackets(UINT32 packets);
+			//SINT32 setMixedPackets(UINT32 packets);
 			SINT32 getMixedPackets(UINT32* ppackets);
 			bool getRun(){return bRun;}
 			SINT32 setSignature(CASignature* pSignature);
@@ -46,8 +47,9 @@ class CAInfoService
 			SINT32 iUser;
 			SINT32 iRisk;
 			SINT32 iTraffic; 
-			UINT32 m_MixedPackets;
+			//UINT32 m_MixedPackets;
 			bool bRun;
 			CRITICAL_SECTION csLevel;
 			CASignature* pSignature;
+			CAFirstMix* m_pFirstMix;
 	};
