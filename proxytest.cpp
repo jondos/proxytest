@@ -723,9 +723,9 @@ Debug(dc::malloc.on());
 						}
 				#endif
 			}
-//			CAMsg::printMsg(LOG_ENCRYPTED,"Test: Anon proxy started!\n");
-//			CAMsg::printMsg(LOG_ENCRYPTED,"Test2: Anon proxy started!\n");
-//			CAMsg::printMsg(LOG_ENCRYPTED,"Test3: Anon proxy started!\n");
+			CAMsg::printMsg(LOG_ENCRYPTED,"Test: Anon proxy started!\n");
+			CAMsg::printMsg(LOG_ENCRYPTED,"Test2: Anon proxy started!\n");
+			CAMsg::printMsg(LOG_ENCRYPTED,"Test3: Anon proxy started!\n");
 		
 		CAMsg::printMsg(LOG_INFO,"Anon proxy started!\n");
 		CAMsg::printMsg(LOG_INFO,MIX_VERSION_INFO);

@@ -49,7 +49,7 @@ class CASignature
 			SINT32 verifyXML(const UINT8* const in,UINT32 inlen);
 			SINT32 verifyXML(DOM_Node& node,CACertStore* pTrustedCerts=NULL);
 			SINT32 getSignatureSize();
-			friend CASSLContext;
+			friend class CASSLContext;
 		private:
 			DSA* getDSA(){return m_pDSA;}
 			DSA* m_pDSA;
