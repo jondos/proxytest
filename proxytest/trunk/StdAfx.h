@@ -17,6 +17,7 @@
     #define THREAD_RETURN void
     #define THREAD_RETURN_ERROR return
     #define THREAD_RETURN_SUCCESS return
+		#define sleep(i) Sleep(i*1000)
 #else
     #include <sys/socket.h>
     #include <netinet/in.h>
@@ -26,7 +27,7 @@
     #include <unistd.h>
     #include <stdlib.h>
     #include <strings.h>
-    #include <signal.h>
+   
     typedef struct sockaddr* LPSOCKADDR;
     #define SOCKET int
     typedef struct hostent HOSTENT;
@@ -53,7 +54,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-
+#include <signal.h>
 // ZU ERLEDIGEN: Verweisen Sie hier auf zusätzliche Header-Dateien, die Ihr Programm benötigt
 
 //{{AFX_INSERT_LOCATION}}
