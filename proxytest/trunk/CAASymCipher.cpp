@@ -228,20 +228,20 @@ SINT32 CAASymCipher::getPublicKeyAsDocumentFragment(DOM_DocumentFragment* & dFra
 			return E_UNKNOWN;
 		dFrag=new DOM_DocumentFragment();
 		DOM_Document doc=DOM_Document::createDocument();
-		DOM_Element& root=doc.createElement(DOMString("RSAKeyValue"));
+		DOM_Element root=doc.createElement(DOMString("RSAKeyValue"));
 		*dFrag=doc.createDocumentFragment();
 		
-		DOM_Element & nodeModulus=doc.createElement(DOMString("Modulus"));
+		DOM_Element nodeModulus=doc.createElement(DOMString("Modulus"));
 		root.appendChild(nodeModulus);
 		UINT8 tmpBuff[256];
 		UINT32 size=256;
 		BN_bn2bin(m_pRSA->n,tmpBuff);
 		CABase64::encode(tmpBuff,BN_num_bytes(m_pRSA->n),tmpBuff,&size);
 		tmpBuff[size]=0;
-		DOM_Text& tmpTextNode=doc.createTextNode(DOMString((char*)tmpBuff));
+		DOM_Text tmpTextNode=doc.createTextNode(DOMString((char*)tmpBuff));
 		nodeModulus.appendChild(tmpTextNode);
 
-		DOM_Element& nodeExponent=doc.createElement(DOMString("Exponent"));
+		DOM_Element nodeExponent=doc.createElement(DOMString("Exponent"));
 		BN_bn2bin(m_pRSA->e,tmpBuff);
 		size=256;
 		CABase64::encode(tmpBuff,BN_num_bytes(m_pRSA->e),tmpBuff,&size);
@@ -300,21 +300,21 @@ static void sRSAKeyValueHandler(XMLElement &elem, void *userData)
 	*/
 SINT32 CAASymCipher::setPublicKeyAsXML(UINT8* key,UINT32 len)
 	{
-		if(key==NULL||len==NULL)
+		if(key==NULL)
 			return E_UNKNOWN;
 
 		MemBufInputSource oInput(key,len,"rsaKey");
 		DOMParser oParser;
 		oParser.parse(oInput);
-		DOM_Document& doc=oParser.getDocument();
-		DOM_Element& root=doc.getDocumentElement();
+		DOM_Document doc=oParser.getDocument();
+		DOM_Element root=doc.getDocumentElement();
 		return setPublicKeyAsDOMNode(root);
 	}		
 
 //Bugy!! Cahnges node!!!		
 SINT32 CAASymCipher::setPublicKeyAsDOMNode(DOM_Node& node)
 	{	
-		DOM_Node& root=node;
+		DOM_Node root=node;
 		while(root!=NULL)
 			{	
 				if(root.getNodeName().equals("RSAKeyValue"))
@@ -322,7 +322,7 @@ SINT32 CAASymCipher::setPublicKeyAsDOMNode(DOM_Node& node)
 						RSA* tmpRSA=RSA_new();
 						UINT32 decLen=4096;
 						UINT8 decBuff[4096];
-						DOM_Node& child=root.getFirstChild();
+						DOM_Node child=root.getFirstChild();
 						while(child!=NULL)
 							{
 								if(child.getNodeName().equals("Modulus"))

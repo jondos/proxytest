@@ -68,7 +68,7 @@ END:
 SINT32 CAMiddleMix::proccessKeyExchange()
 	{
 		UINT8* recvBuff=NULL;
-		UINT8* infoBuff=NULL;
+//		UINT8* infoBuff=NULL;
 		
 		UINT16 len;
 		if(((CASocket*)*m_pMuxOut)->receiveFully((UINT8*)&len,2)!=E_SUCCESS)
@@ -95,10 +95,10 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 		MemBufInputSource oInput(recvBuff,len,"tmpID");
 		DOMParser oParser;
 		oParser.parse(oInput);		
-		DOM_Document & doc=oParser.getDocument();
+		DOM_Document doc=oParser.getDocument();
 		delete recvBuff;
 
-		DOM_Element& root=doc.getDocumentElement();
+		DOM_Element root=doc.getDocumentElement();
 		
 		DOMString tmpDOMStr=root.getAttribute("count");
 		char* tmpStr=tmpDOMStr.transcode();
@@ -113,7 +113,7 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 		sprintf(tmpBuff,"%u",count);
 		root.setAttribute("count",DOMString(tmpBuff));
 		
-		DOM_Element& mixNode=doc.createElement(DOMString("Mix"));
+		DOM_Element mixNode=doc.createElement(DOMString("Mix"));
 		options.getMixId((UINT8*)tmpBuff,50); //the mix id...
 		mixNode.setAttribute("id",DOMString(tmpBuff));
 

@@ -1034,13 +1034,13 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		DOMParser oParser;
 		MemBufInputSource oInput(recvBuff,len,"tmp");
 		oParser.parse(oInput);
-		DOM_Document& doc=oParser.getDocument();
-		DOM_Element& elemMixes=doc.getDocumentElement();
+		DOM_Document doc=oParser.getDocument();
+		DOM_Element elemMixes=doc.getDocumentElement();
 		char* tmpStr=elemMixes.getAttribute("count").transcode();
 		UINT32 count=atol(tmpStr);
 		delete tmpStr;
 
-		DOM_Node& child=elemMixes.getLastChild();
+		DOM_Node child=elemMixes.getLastChild();
 		
 		m_KeyInfoBuff=new UINT8[(count+1)*256];
 		m_KeyInfoSize=3;
@@ -1049,7 +1049,7 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 			{
 				if(child.getNodeName().equals("Mix"))
 					{
-						DOM_Node& rsaKey=child.getFirstChild();
+						DOM_Node rsaKey=child.getFirstChild();
 						CAASymCipher oRSA;
 						oRSA.setPublicKeyAsDOMNode(rsaKey);
 						tlen=256;
@@ -1073,15 +1073,15 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		options.getMixXml(tmpBuff,&tlen);
 		MemBufInputSource oInput1(tmpBuff,tlen,"tmp1");
 		oParser.parse(oInput1);
-		DOM_Document& docMix=oParser.getDocument();
-		DOM_Node& nodeMix=doc.importNode(docMix.getFirstChild(),true);
+		DOM_Document docMix=oParser.getDocument();
+		DOM_Node nodeMix=doc.importNode(docMix.getFirstChild(),true);
 		elemMixes.insertBefore(nodeMix,elemMixes.getFirstChild());
 		setDOMElementAttribute(elemMixes,"count",count+1);
 		delete tmpBuff;
 
 	//CascadInfo		
-		DOM_Document& docCascade=DOM_Document::createDocument();
-		DOM_Element& elemRoot=docCascade.createElement("MixCascade");
+		DOM_Document docCascade=DOM_Document::createDocument();
+		DOM_Element elemRoot=docCascade.createElement("MixCascade");
 
 
 		UINT8 hostname[255];
@@ -1099,8 +1099,8 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 				return E_UNKNOWN;
 			}
 		docCascade.appendChild(elemRoot);
-		DOM_Element& elem=docCascade.createElement("Name");
-		DOM_Text& text=docCascade.createTextNode(DOMString((char*)name));
+		DOM_Element elem=docCascade.createElement("Name");
+		DOM_Text text=docCascade.createTextNode(DOMString((char*)name));
 		elem.appendChild(text);
 		elemRoot.appendChild(elem);
 		
