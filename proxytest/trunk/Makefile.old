@@ -62,6 +62,9 @@ linux-x86-gcc-prot2:
 linux-x86-gcc-async:
 	$(MAKE) 'CC=gcc' 'CPPFLAGS=-DPROT2 -D_ASYNC -D_REENTRANT -Wall -Wcast-align -fomit-frame-pointer -march=i686 -O3 -D_REENTRANT' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lstdc++ ./aes/libaes.a' 'LIBDIR=-L/usr/local/ssl/lib' _all_aes 
 
+linux-k6-gcc-async:
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-DPROT2 -D_ASYNC -D_REENTRANT -Wall -Wcast-align -fomit-frame-pointer -march=k6 -O3 -D_REENTRANT' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lstdc++ ./aes/libaes.a' 'LIBDIR=-L/usr/local/ssl/lib' _all_aes 
+
 linux-x86-gcc-debug-async:
 	$(MAKE) 'CC=gcc' 'CPPFLAGS=-ggdb -D_REENTRANT -D_ASYNC -DPROT2 -Wall -Wcast-align -march=i686 -D_REENTRANT' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lstdc++ ./aes/libaes.a' 'LIBDIR=-L/usr/local/ssl/lib' _all_aes 
 
