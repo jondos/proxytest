@@ -371,6 +371,8 @@ SINT32 CAMiddleMix::loop()
 		CASocketGroup oSocketGroup;
 		oSocketGroup.add(muxIn);
 		oSocketGroup.add(muxOut);
+		muxIn.setCrypt(true);
+		muxOut.setCrypt(true);
 		for(;;)
 			{
 				if(oSocketGroup.select()==SOCKET_ERROR)

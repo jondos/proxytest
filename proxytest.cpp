@@ -145,6 +145,19 @@ END AES Test*/
 				RAND_seed(randbuff,sizeof(randbuff));
 			#endif
 		#endif
+
+	
+	/*	UINT8 nullkey[16];
+		memset(nullkey,0,16);
+		CASymCipher oI;
+		CASymCipher oO;
+		oI.setKeyAES(nullkey);
+		oO.setKeyAES(nullkey);
+		UINT8 buff[160];
+		memset(buff,'A',160);
+		oI.encryptAES(buff,buff,16);
+		oO.decryptAES(buff,buff,16);
+*/
 		options.parse(argc,argv);
 		if(options.getDaemon())
 			{
