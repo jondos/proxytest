@@ -37,11 +37,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 extern CACmdLnOptions options;
 #ifdef LOG_CHANNEL
+		//CAMsg::printMsg(LOG_DEBUG,"Channel time log format is as follows: Channel-ID,Channel duration [micros], Upload (bytes), Download (bytes), DataAndOpenPacketsFromUser, DataPacketsToUser\n"); 
 	#define MACRO_DO_LOG_CHANNEL\
 		diff_time=diff64(pQueueEntry->timestamp_proccessing_end,pChannelListEntry->timeCreated);\
-		CAMsg::printMsg(LOG_DEBUG,"Channel %u closed - Start (received open packet) %Lu - End (proccessed closed) %Lu - Time [micros] - %u, Upload - %u, Download - %u, DataAndOpenPacketsFromUser %u, DataPacketsToUser %u\n",\
-			pChannelListEntry->channelIn,pChannelListEntry->timeCreated,\
-			pQueueEntry->timestamp_proccessing_end,diff_time,pChannelListEntry->trafficInFromUser,pChannelListEntry->trafficOutToUser,\
+		CAMsg::printMsg(LOG_DEBUG,"%u,%u,%u,%u,%u,%u\n",\
+			pChannelListEntry->channelIn,\
+			diff_time,pChannelListEntry->trafficInFromUser,pChannelListEntry->trafficOutToUser,\
 			pChannelListEntry->packetsDataInFromUser,pChannelListEntry->packetsDataOutToUser); 
 #endif
 SINT32 CALastMixA::loop()
@@ -82,6 +83,7 @@ SINT32 CALastMixA::loop()
 
 		#ifdef LOG_CHANNEL
 			UINT32 diff_time; 
+			CAMsg::printMsg(LOG_DEBUG,"Channel time log format is as follows: Channel-ID,Channel duration [micros], Upload (bytes), Download (bytes), DataAndOpenPacketsFromUser, DataPacketsToUser\n"); 
 		#endif
 
 		while(!m_bRestart)
@@ -98,7 +100,10 @@ SINT32 CALastMixA::loop()
 							{
 								ret=sizeof(tQueueEntry);
 								m_pQueueReadFromMix->get((UINT8*)pQueueEntry,(UINT32*)&ret);
-								// one packet received
+								#ifdef LOG_PACKET_TIMES
+									getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_start_OP);
+								#endif
+							// one packet received
 								m_logUploadedPackets++;
 								pChannelListEntry=pChannelList->get(pMixPacket->channel);
 								if(pChannelListEntry==NULL)
@@ -127,6 +132,9 @@ SINT32 CALastMixA::loop()
 																							DATA_SIZE-RSA_SIZE);
 												memcpy(	pMixPacket->data,rsaBuff+KEY_SIZE+TIMESTAMP_SIZE,
 																RSA_SIZE-(KEY_SIZE+TIMESTAMP_SIZE));
+												#ifdef LOG_PACKET_TIMES
+													getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
+												#endif
 												CASocket* tmpSocket=new CASocket;
 												CACacheLoadBalancing* ptmpLB=m_pCacheLB;
 												int ret=E_UNKNOWN;
@@ -231,6 +239,7 @@ SINT32 CALastMixA::loop()
 												pChannelList->removeChannel(pMixPacket->channel);
 												#ifdef LOG_PACKET_TIMES
 													getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
+													set64(pQueueEntry->timestamp_proccessing_end_OP,pQueueEntry->timestamp_proccessing_end);
 													m_pLogPacketStats->addToTimeingStats(*pQueueEntry,CHANNEL_CLOSE,true);
 													#ifdef LOG_CHANNEL
 														MACRO_DO_LOG_CHANNEL
@@ -263,6 +272,9 @@ SINT32 CALastMixA::loop()
 													{
 														#ifdef LOG_CHANNEL
 															pChannelListEntry->trafficInFromUser+=ret;
+														#endif
+														#ifdef LOG_PACKET_TIMES
+															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
 														#endif
 														ret=pChannelListEntry->pQueueSend->add(pMixPacket->payload.data,ret);
 													}
@@ -402,6 +414,7 @@ SINT32 CALastMixA::loop()
 												ret=pChannelListEntry->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE);
 												#ifdef LOG_PACKET_TIMES
 													getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_start);
+													set64(pQueueEntry->timestamp_proccessing_start_OP,pQueueEntry->timestamp_proccessing_start_OP);
 												#endif
 												if(ret==SOCKET_ERROR||ret==0)
 													{
@@ -419,6 +432,9 @@ SINT32 CALastMixA::loop()
 														pMixPacket->channel=pChannelListEntry->channelIn;
 														getRandom(pMixPacket->data,DATA_SIZE);
 														pChannelList->removeChannel(pChannelListEntry->channelIn);
+														#ifdef LOG_PACKET_TIMES
+															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
+														#endif
 														m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));			
 														m_logDownloadedPackets++;	
 													}
@@ -433,6 +449,9 @@ SINT32 CALastMixA::loop()
 														pMixPacket->payload.len=htons((UINT16)ret);
 														pMixPacket->payload.type=0;
 														pChannelListEntry->pCipher->crypt2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+														#ifdef LOG_PACKET_TIMES
+															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
+														#endif
 														m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));			
 														m_logDownloadedPackets++;
 														#if defined(LOG_CHANNEL)

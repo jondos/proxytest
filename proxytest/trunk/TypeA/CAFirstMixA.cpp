@@ -60,6 +60,9 @@ SINT32 CAFirstMixA::loop()
 #ifdef LOG_CHANNEL
 		UINT64 current_time;
 		UINT32 diff_time;
+		CAMsg::printMsg(LOG_DEBUG,"Channel log formats:\n");
+		CAMsg::printMsg(LOG_DEBUG,"1. Close received from user (times in micros) - 1:Channel-ID,Connection-ID,PacketsIn (only data and open),PacketsOut (only data),ChannelDuration (open packet received --> close packet put into send queue to next mix)\n");
+		CAMsg::printMsg(LOG_DEBUG,"2. Channel close from Mix(times in micros)- 2.:Channel-ID,Connection-ID,PacketsIn (only data and open), PacketsOut (only data),ChannelDuration (open packet received)--> close packet put into send queue to next user\n");
 #endif
 //		CAThread threadReadFromUsers;
 //		threadReadFromUsers.setMainLoop(loopReadFromUsers);
@@ -111,6 +114,7 @@ SINT32 CAFirstMixA::loop()
 										ret=pMuxSocket->receive(pMixPacket,0);
 										#if defined LOG_PACKET_TIMES||defined(LOG_CHANNEL)
 											getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_start);
+											set64(pQueueEntry->timestamp_proccessing_start_OP,pQueueEntry->timestamp_proccessing_start);
 										#endif	
 										if(ret==SOCKET_ERROR/*||pHashEntry->accessUntil<time()*/) 
 											{	
@@ -188,13 +192,17 @@ SINT32 CAFirstMixA::loop()
 															{
 																pMixPacket->channel=pEntry->channelOut;
 																getRandom(pMixPacket->data,DATA_SIZE);
+																#ifdef LOG_PACKET_TIMES
+																	getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
+																#endif
 																m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));
 																#ifdef LOG_CHANNEL
 																	//pEntry->packetsInFromUser++;
 																	getcurrentTimeMicros(current_time);
 																	diff_time=diff64(current_time,pEntry->timeCreated);
-																	CAMsg::printMsg(LOG_DEBUG,"Channel close received from user (times in micros) - Channel: %u, Connection: %Lu - PacketsIn (only data and open): %u, PacketsOut (only data): %u - ChannelStart (open packet received) : %Lu, ChannelEnd (close packet put into send queue to next mix): %Lu, ChannelDuration: %u\n",
-																														pEntry->channelIn,pEntry->pHead->id,pEntry->packetsInFromUser,pEntry->packetsOutToUser,pEntry->timeCreated,current_time,diff_time);
+																	CAMsg::printMsg(LOG_DEBUG,"1:%u,%Lu,%u,%u,%u\n",
+																														pEntry->channelIn,pEntry->pHead->id,pEntry->packetsInFromUser,pEntry->packetsOutToUser,
+																														diff_time);
 																#endif
 																delete pEntry->pCipher;              // forget the symetric key of this connection
 																m_pChannelList->removeChannel(pMuxSocket,pEntry->channelIn);
@@ -217,6 +225,9 @@ SINT32 CAFirstMixA::loop()
 																pCipher=pEntry->pCipher;
 																pCipher->crypt1(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 																                     // queue the packet for sending to the next mix.
+																#ifdef LOG_PACKET_TIMES
+																	getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
+																#endif
 																m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));
 																incMixedPackets();
 																#ifdef LOG_CHANNEL
@@ -258,6 +269,9 @@ SINT32 CAFirstMixA::loop()
 																	}
 																else
 																	{
+																		#ifdef LOG_PACKET_TIMES
+																			getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
+																		#endif
 																		#ifdef LOG_CHANNEL
 																			fmChannelListEntry* pTmpEntry=m_pChannelList->get(pMuxSocket,tmpC);
 																			pTmpEntry->packetsInFromUser++;
@@ -296,6 +310,9 @@ SINT32 CAFirstMixA::loop()
 						countRead--;
 						ret=sizeof(tQueueEntry);
 						m_pQueueReadFromMix->get((UINT8*)pQueueEntry,(UINT32*)&ret);
+						#ifdef LOG_PACKET_TIMES
+							getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_start_OP);
+						#endif
 						if(pMixPacket->flags==CHANNEL_CLOSE) //close event
 							{
 								#if defined(_DEBUG) && !defined(__MIX_TEST)
@@ -307,14 +324,18 @@ SINT32 CAFirstMixA::loop()
 										pMixPacket->channel=pEntry->channelIn;
 										getRandom(pMixPacket->data,DATA_SIZE);
 										pEntry->pHead->pMuxSocket->prepareForSend(pMixPacket);
+										#ifdef LOG_PACKET_TIMES
+											getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
+										#endif
 										pEntry->pHead->pQueueSend->add(pMixPacket,sizeof(tQueueEntry));
 										#ifdef LOG_CHANNEL
 											pEntry->pHead->trafficOut++;
 											//pEntry->packetsOutToUser++;
 											getcurrentTimeMicros(current_time);
 											diff_time=diff64(current_time,pEntry->timeCreated);
-											CAMsg::printMsg(LOG_DEBUG,"Channel close from Mix(times in micros)- Channel: %u, Connection: %Lu - PacketsIn (only data and open): %u, PacketsOut (only data): %u - ChannelStart (open packet received): %Lu, ChannelEnd (close packet put into send queue to next user): %Lu, ChannelDuration: %u\n",
-																								pEntry->channelIn,pEntry->pHead->id,pEntry->packetsInFromUser,pEntry->packetsOutToUser,pEntry->timeCreated,current_time,diff_time);
+											CAMsg::printMsg(LOG_DEBUG,"2:%u,%Lu,%u,%u,%u\n",
+																								pEntry->channelIn,pEntry->pHead->id,pEntry->packetsInFromUser,pEntry->packetsOutToUser,
+																								diff_time);
 										#endif
 										
 										#ifdef HAVE_EPOLL
@@ -350,6 +371,9 @@ SINT32 CAFirstMixA::loop()
 										pEntry->pCipher->crypt2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 										
 										pEntry->pHead->pMuxSocket->prepareForSend(pMixPacket);
+										#ifdef LOG_PACKET_TIMES
+											getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
+										#endif
 										pEntry->pHead->pQueueSend->add(pMixPacket,sizeof(tQueueEntry));
 										#ifdef LOG_CHANNEL
 											pEntry->pHead->trafficOut++;

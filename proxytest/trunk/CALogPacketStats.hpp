@@ -74,6 +74,16 @@ class CALogPacketStats
 			UINT32 m_timingCountOpenPacketsUpstream;
 			UINT64 m_timingSumOpenPacketUpstream;
 
+			//OP means "only proccessing" (without send or queueing times)
+			UINT32 m_timingMaxDataPacketUpstreamOP,m_timingMaxDataPacketDownStreamOP;
+			UINT32 m_timingMinDataPacketUpstreamOP,m_timingMinDataPacketDownStreamOP;
+			UINT64 m_timingSumDataPacketUpstreamOP,m_timingSumDataPacketDownStreamOP;
+			UINT32 m_timingMaxClosePacketUpstreamOP;
+			UINT32 m_timingMinClosePacketUpstreamOP;
+			UINT64 m_timingSumClosePacketUpstreamOP;
+			UINT32 m_timingMaxOpenPacketUpstreamOP,m_timingMinOpenPacketUpstreamOP;
+			UINT64 m_timingSumOpenPacketUpstreamOP;
+
 			#ifdef USE_POOL
 				UINT32 m_timingMaxPoolPacketUpstream,m_timingMaxPoolPacketDownStream;
 				UINT32 m_timingMinPoolPacketUpstream,m_timingMinPoolPacketDownStream;

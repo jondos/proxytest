@@ -364,7 +364,8 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
+						PreprocessorDefinitions=""
+						WarningLevel="3"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="VTune|Win32">
