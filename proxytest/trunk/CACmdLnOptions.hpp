@@ -215,6 +215,7 @@ class CACmdLnOptions
 				}
 			
 			SINT32 getUser(UINT8* user,UINT32 len);
+			SINT32 getPidFile(UINT8* pidfile,UINT32 len);
 
 			/** Get the XML describing the Mix. this is not a string!*/
 			//SINT32 getMixXml(UINT8* strxml,UINT32* len);
@@ -286,6 +287,7 @@ class CACmdLnOptions
 			char*		m_strEncryptedLogDir;
 			bool		m_bCompressedLogs;
 			char*		m_strUser;
+			char*		m_strPidFile;
 			SINT32	m_nrOfOpenFiles; //How many open files (sockets) should we use
 			DOM_Document m_docMixInfo;
 			DOM_Document m_docMixXml;
@@ -318,17 +320,17 @@ class CACmdLnOptions
 #ifdef PAYMENT
 // added by Bastian Voigt:
 // getter functions for the payment config options
-	private:
-		CAXMLBI * m_pBI;
+		private:
+			CAXMLBI * m_pBI;
 			UINT8 * m_strDatabaseHost;
 			UINT8 * m_strDatabaseName;
 			UINT8 * m_strDatabaseUser;
 			UINT8 * m_strDatabasePassword;
-		UINT8* m_strAiID;
+			UINT8* m_strAiID;
 			UINT16 m_iDatabasePort;
-		UINT32 m_iPaymentHardLimit;
-		UINT32 m_iPaymentSoftLimit;
-		UINT32 m_iPaymentSettleInterval;
+			UINT32 m_iPaymentHardLimit;
+			UINT32 m_iPaymentSoftLimit;
+			UINT32 m_iPaymentSettleInterval;
 #endif
 
 		private:
