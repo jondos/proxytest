@@ -75,8 +75,8 @@ MARCH=""
 AC_ARG_WITH(arch,
 	AS_HELP_STRING([--with-arch=i386|i486|i586|i686|pentium3],[Specify architecure for optimisation]),
 	[
-		if test "x$withval" != "$xno" ; then
-			MARCH="-march=$withval"
+		if test "x$enableval" != "$xno" ; then
+			MARCH="-march=$enableval"
 		fi
 	]
 )
@@ -95,7 +95,7 @@ dnl Static?
 AC_ARG_ENABLE(static,
 	    AS_HELP_STRING([--enable-static],[Static linking]),
 	    [
-		if test "x$withval" != "$xno" ; then
+		if test "x$enableval" != "$xno" ; then
 		    CFLAGS="$CFLAGS -static"
 	    	    CXXFLAGS="$CXXFLAGS -static"
 		fi    
@@ -107,10 +107,10 @@ POOL=""
 AC_ARG_ENABLE(pool,
 	AS_HELP_STRING([--enable-pool=POOLSIZE],[Specify if to build a pool mix and optionally the poolsize]),
 	[
-		if test "x$withval" != "$xno" ; then
+		if test "x$enableval" != "$xno" ; then
 		    POOL="-DUSE_POOL"
-		    if test "x$withval" != "$xyes" ; then	
-			POOL="$POOL -DMIX_POOL_SIZE=$withval"
+		    if test "x$enableval" != "$xyes" ; then	
+			POOL="$POOL -DMIX_POOL_SIZE=$enableval"
 		    fi	
 		fi
 	]
@@ -123,10 +123,10 @@ AC_ARG_ENABLE(bandwithlimitation,
 			[Specify if to build with bandwith limitation and optionally the number of bytes which are transferred without any limitation]),
 	[
 	AC_MSG_NOTICE([hier])
-		if test "x$withval" != "$xno" ; then
+		if test "x$enableval" != "$xno" ; then
 		    BANDWIDTH_LIMIT="-DDELAY_CHANNELS"
-		    if test "x$withval" != "$xyes" ; then	
-			BANDWIDTH_LIMIT="$BANDWIDTH_LIMIT -DDELAY_CHANNEL_TRAFFIC=$withval"
+		    if test "x$enableval" != "$xyes" ; then	
+			BANDWIDTH_LIMIT="$BANDWIDTH_LIMIT -DDELAY_CHANNEL_TRAFFIC=$enable"
 		    fi	
 		fi
 	]
@@ -317,7 +317,7 @@ AC_LANG_POP(C++)
 AC_ARG_ENABLE(debug,
 	AS_HELP_STRING([--enable-debug],[Enable debug mode]),
 	[
-	    if test "x$withval" != "$xno" ; then
+	    if test "x$enableval" != "$xno" ; then
 		CFLAGS="$CFLAGS -g -D_DEBUG"
 		OFLAGS=""
 	    fi
@@ -327,7 +327,7 @@ AC_ARG_ENABLE(debug,
 AC_ARG_ENABLE(crime-detection,
 	AS_HELP_STRING([--enable-crime-detection],[Enable crime detection mode]),
 	[
-	    if test "x$withval" != "$xno" ; then
+	    if test "x$enableval" != "$xno" ; then
 		CFLAGS="$CFLAGS -DLOG_CRIME"
 	    fi	
 	]
