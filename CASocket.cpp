@@ -334,16 +334,46 @@ SINT32 CASocket::setSendLowWat(UINT32 r)
 		return setsockopt(m_Socket,SOL_SOCKET,SO_SNDLOWAT,(char*)&val,sizeof(val));
 	}
 
+SINT32 CASocket::getSendLowWat()
+	{
+		int val;
+		int size=sizeof(val);
+		if(getsockopt(m_Socket,SOL_SOCKET,SO_SNDLOWAT,(char*)&val,&size)==SOCKET_ERROR)
+			return E_UNKNOWN;
+		else
+			return val;
+	}
+
 SINT32 CASocket::setRecvBuff(UINT32 r)
 	{
 		int val=r;
 		return setsockopt(m_Socket,SOL_SOCKET,SO_RCVBUF,(char*)&val,sizeof(val));	
 	}
 
+SINT32 CASocket::getRecvBuff()
+	{
+		int val;
+		int size=sizeof(val);
+		if(getsockopt(m_Socket,SOL_SOCKET,SO_RCVBUF,(char*)&val,&size)==SOCKET_ERROR)
+			return E_UNKNOWN;
+		else
+			return val;
+	}
+
 SINT32 CASocket::setSendBuff(UINT32 r)
 	{
 		int val=r;
 		return setsockopt(m_Socket,SOL_SOCKET,SO_SNDBUF,(char*)&val,sizeof(val));	
+	}
+
+SINT32 CASocket::getSendBuff()
+	{
+		int val;
+		int size=sizeof(val);
+		if(getsockopt(m_Socket,SOL_SOCKET,SO_SNDBUF,(char*)&val,&size)==SOCKET_ERROR)
+			return E_UNKNOWN;
+		else
+			return val;
 	}
 
 /** Enables/disables the socket keep-alive option.

@@ -415,7 +415,11 @@ SINT32 CAFirstMix::init()
 		((CASocket*)muxOut)->setRecvBuff(500*MUXPACKET_SIZE);
 		if(((CASocket*)muxOut)->setSendLowWat(MUXPACKET_SIZE)!=E_SUCCESS)
 			CAMsg::printMsg(LOG_INFO,"SOCKET Option SENDLOWWAT not set!\n");
+		CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET RecvBuffSize: %i\n",((CASocket*)muxOut)->getRecvBuff());
+		CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET SendBuffSize: %i\n",((CASocket*)muxOut)->getSendBuff());
+		CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET SendLowWatSize: %i\n",((CASocket*)muxOut)->getSendLowWat());
 	
+
 		if(muxOut.connect(&addrNext,10,10)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Cannot connect to next Mix!\n");
