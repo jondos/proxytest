@@ -870,6 +870,10 @@ Optional Features:
                           Specify if to build with bandwith limitation and
                           optionally the number of bytes which are transferred
                           without any limitation
+  --enable-bandwidth-limitation-throughput=LIMITATION_THROUGHPUT
+                          Specify if to build with bandwith limitation and
+                          optionally the limit in kByte/s of each
+                          communication channel
   --enable-payment        Specify if to build with payment support
   --enable-debug          Enable debug mode
   --enable-crime-detection
@@ -3748,6 +3752,20 @@ if test "${enable_bandwidth_limitation+set}" = set; then
 		    BANDWIDTH_LIMIT="-DDELAY_CHANNELS"
 		    if test "x$enableval" != "xyes" ; then
 			BANDWIDTH_LIMIT="$BANDWIDTH_LIMIT -DDELAY_CHANNEL_TRAFFIC=$enableval"
+		    fi
+		fi
+
+
+fi;
+BANDWIDTH_LIMIT_THROUGHPUT=""
+# Check whether --enable-bandwidth-limitation-throughput or --disable-bandwidth-limitation-throughput was given.
+if test "${enable_bandwidth_limitation_throughput+set}" = set; then
+  enableval="$enable_bandwidth_limitation_throughput"
+
+		if test "x$enableval" != "xno" ; then
+		    BANDWIDTH_LIMIT_THROUGHPUT="-DDELAY_CHANNELS"
+		    if test "x$enableval" != "xyes" ; then
+			BANDWIDTH_LIMIT_THROUGHPUT="$BANDWIDTH_LIMIT_THROUGHPUT -DDELAY_CHANNEL_KBYTE_PER_SECOND=$enableval"
 		    fi
 		fi
 
@@ -10754,7 +10772,7 @@ if test "${enable_crime_detection+set}" = set; then
 fi;
 
 
-CFLAGS="$CFLAGS $POOL $BANDWIDTH_LIMIT $PAYMENT $OFLAGS"
+CFLAGS="$CFLAGS $POOL $BANDWIDTH_LIMIT $BANDWITH_LIMIT_THROUGHPUT $PAYMENT $OFLAGS"
 CXXFLAGS=$CFLAGS
 LIBS="$LIBS $PAYMENT_LIB"
 

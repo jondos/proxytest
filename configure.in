@@ -130,6 +130,19 @@ AC_ARG_ENABLE(bandwidth-limitation,
 		fi
 	]
 )
+BANDWIDTH_LIMIT_THROUGHPUT=""
+AC_ARG_ENABLE(bandwidth-limitation-throughput,
+	AS_HELP_STRING([--enable-bandwidth-limitation-throughput=LIMITATION_THROUGHPUT],
+			[Specify if to build with bandwith limitation and optionally the limit in kByte/s of each communication channel]),
+	[
+		if test "x$enableval" != "xno" ; then
+		    BANDWIDTH_LIMIT_THROUGHPUT="-DDELAY_CHANNELS"
+		    if test "x$enableval" != "xyes" ; then	
+			BANDWIDTH_LIMIT_THROUGHPUT="$BANDWIDTH_LIMIT_THROUGHPUT -DDELAY_CHANNEL_KBYTE_PER_SECOND=$enableval"
+		    fi	
+		fi
+	]
+)
 
 dnl payment ??
 PAYMENT=""
@@ -394,7 +407,7 @@ AC_ARG_ENABLE(crime-detection,
 )
 
 
-CFLAGS="$CFLAGS $POOL $BANDWIDTH_LIMIT $PAYMENT $OFLAGS"
+CFLAGS="$CFLAGS $POOL $BANDWIDTH_LIMIT $BANDWITH_LIMIT_THROUGHPUT $PAYMENT $OFLAGS"
 CXXFLAGS=$CFLAGS
 LIBS="$LIBS $PAYMENT_LIB"
 
