@@ -115,8 +115,8 @@ class CAMuxSocket
 			int send(MIXPACKET *pPacket,UINT8* buff);
 			SINT32 receive(MIXPACKET *pPacket);
 			SINT32 receive(MIXPACKET *pPacket,UINT32 timeout);
-			int close(HCHANNEL channel_id);
-			int close(HCHANNEL channel_id,UINT8* buff);
+			//int close(HCHANNEL channel_id);
+			//int close(HCHANNEL channel_id,UINT8* buff);
 #ifdef LOG_CRIME
 			UINT32 sigCrime(HCHANNEL channel_id,UINT8* buff);
 #endif

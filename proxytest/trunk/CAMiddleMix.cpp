@@ -429,20 +429,20 @@ THREAD_RETURN loopDownStream(void *p)
 						
 						if(pMix->m_pMiddleMixChannelList->getOutToIn(&channelIn,pMixPacket->channel,&pCipher)==E_SUCCESS)
 							{//connection found
-								if(pMixPacket->flags!=CHANNEL_CLOSE)
-									{
+//								if(pMixPacket->flags!=CHANNEL_CLOSE)
+//									{
 										pMixPacket->channel=channelIn;
 										pCipher->decryptAES2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 										pCipher->unlock();
 										if(pMix->m_pMuxIn->send(pMixPacket)==SOCKET_ERROR)
 											goto ERR;
-									}
-								else
+//									}
+//								else
 									{//connection should be closed
-										pCipher->unlock();
-										if(pMix->m_pMuxIn->close(channelIn)==SOCKET_ERROR)
-											goto ERR;
-										pMix->m_pMiddleMixChannelList->remove(channelIn);
+	//									pCipher->unlock();
+		//								if(pMix->m_pMuxIn->close(channelIn)==SOCKET_ERROR)
+			//								goto ERR;
+				//						pMix->m_pMiddleMixChannelList->remove(channelIn);
 									}
 							}
 					}
@@ -526,21 +526,21 @@ SINT32 CAMiddleMix::loop()
 							}
 						else
 							{//established connection
-								if(pMixPacket->flags==CHANNEL_CLOSE)
-									{
-										pCipher->unlock();
-										if(m_pMuxOut->close(channelOut)==SOCKET_ERROR)
-											goto ERR;
-										m_pMiddleMixChannelList->remove(pMixPacket->channel);
-									}
-								else
-									{
+							//	if(pMixPacket->flags==CHANNEL_CLOSE)
+							//		{
+							//			pCipher->unlock();
+							//			if(m_pMuxOut->close(channelOut)==SOCKET_ERROR)
+							//				goto ERR;
+							//			m_pMiddleMixChannelList->remove(pMixPacket->channel);
+							//		}
+							//	else
+							//		{
 										pMixPacket->channel=channelOut;
 										pCipher->decryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 										pCipher->unlock();
 										if(m_pMuxOut->send(pMixPacket)==SOCKET_ERROR)
 											goto ERR;
-									}
+							//		}
 							}
 					}
 			}
