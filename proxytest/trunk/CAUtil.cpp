@@ -426,7 +426,7 @@ SINT32 getDOMElementValue(const DOM_Node& elem,UINT8* value,UINT32* valuelen)
 	{
 		ASSERT(value!=NULL,"Value is null");
 		ASSERT(valuelen!=NULL,"ValueLen is null");
-		ASSERT(!elem.isNull,"Element is NULL");
+		ASSERT(elem!=NULL,"Element is NULL");
 		if(elem.isNull())
 			return E_UNKNOWN;
 		DOM_Node text=elem.getFirstChild();
@@ -457,7 +457,7 @@ SINT32 getDOMElementValue(const DOM_Node& elem,UINT8* value,UINT32* valuelen)
 SINT32 getDOMElementValue(const DOM_Element& elem,UINT32* value)
 	{
 		ASSERT(value!=NULL,"Value is null");
-		ASSERT(!elem.isNull,"Element is NULL");
+		ASSERT(elem!=NULL,"Element is NULL");
 		UINT8 buff[255];
 		UINT32 buffLen=255;
 		if(getDOMElementValue(elem,buff,&buffLen)!=E_SUCCESS)
