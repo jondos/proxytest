@@ -152,7 +152,7 @@ SINT32 msSleep(UINT16 ms)
 			struct timespec req;
 			struct timespec rem;
 			req.tv_sec=ms/1000;
-			req.tv_nsec=(ms%1000)*1000;
+			req.tv_nsec=(ms%1000)*1000000;
 			while(nanosleep(&req,&rem)==-1)
 				{
 					req.tv_sec=rem.tv_sec;
