@@ -115,7 +115,7 @@ SINT32 getcurrentTimeMillis(BIGNUM* bnTime)
 	}
 
 /** Gets 32 random bits.
-	@param val - on return the bits a random
+	@param val - on return the bits are random
 	@retval E_UNKNOWN, if an error occured
 	@retval E_SUCCESS, if successful
 */

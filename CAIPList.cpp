@@ -153,20 +153,14 @@ SINT32 CAIPList::removeIP(UINT8 ip[4])
 										MD5(m_Random,sizeof(m_Random),hash);
 										CAMsg::printMsg(LOG_DEBUG,"Removing IP-Address: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X !\n",hash[0],hash[1],hash[2],hash[3],hash[4],hash[5],hash[6],hash[7],hash[8],hash[9],hash[10],hash[11],hash[12],hash[13],hash[14],hash[15]);
 										if(before==NULL)
-											{
-												m_HashTable[hashvalue]=NULL;
-												delete entry;
-												m_Mutex.unlock();
-												return 0;
-											}
+											m_HashTable[hashvalue]=NULL;
 										else
-											{
-												before->next=entry->next;
-												delete entry;
-												m_Mutex.unlock();
-												return 0;
-											}
+											before->next=entry->next;
+										delete entry;
+										m_Mutex.unlock();
+										return 0;
 									}
+								m_Mutex.unlock();
 								return entry->count;
 							}
 						before=entry;

@@ -163,6 +163,15 @@ SINT32 CASocketGroup::select()
 		#endif
 	}
 
+/** Waits for events on the sockets. If after ms milliseconds no event occurs, E_TIMEDOUT is returned
+	* @param bWrite - if true, the functions wait for writeable sockets, otherwise for readable
+	* @param ms - maximum milliseconds to wait
+	* @retval E_TIMEDOUT, if other ms milliseconds no event occurs
+	* @retval 0, if no socket was read/writeable
+	* @retval E_UNKNOWN, if an error occured
+	* @return number of read/writeable sockets
+	*/
+
 SINT32 CASocketGroup::select(bool bWrite,UINT32 ms)
 	{
 		SINT32 ret;
