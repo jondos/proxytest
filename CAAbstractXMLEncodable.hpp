@@ -39,7 +39,7 @@ public:
 
 //	~CAAbstractXMLEncodable();
 	
-	virtual SINT32 toXmlElement(DOM_Document a_doc, DOM_Element &elemRoot);
+	virtual SINT32 toXmlElement(DOM_Document a_doc, DOM_Element &elemRoot)=0;
 	SINT32 toXmlDocument(DOM_Document &doc);
 };
 

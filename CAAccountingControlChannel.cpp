@@ -27,6 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 
 #include "StdAfx.h"
+#ifdef PAYMENT
 #include "CAAccountingControlChannel.hpp"
 #define ACCOUNT_CONTROL_CHANNEL_ID 2
 
@@ -60,3 +61,4 @@ SINT32 CAAccountingControlChannel::processXMLMessage(DOM_Document &a_doc)
 	ms_pAccountingInstance->m_pQueue->add(pItem, sizeof(aiQueueItem));
 	return E_SUCCESS;
 }
+#endif
