@@ -99,7 +99,7 @@ void CACmdLnOptions::clean()
 SINT32 CACmdLnOptions::parse(int argc,const char** argv)
     {
 	//int ret;
-	ListenerInterface* pCmndLineListener=NULL;
+	//ListenerInterface* pCmndLineListener=NULL;
 	int iDaemon=0;
 	int iTemplate=0;
 //  int bHttps=0;
@@ -901,7 +901,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 										tmpLen=255;
 										if(getDOMElementValue(elemFile,tmpBuff,&tmpLen)!=E_SUCCESS)
 											continue;
-										if(((CASocketAddrUnix*)addr)->setAddr(tmpBuff)!=E_SUCCESS)
+										if(((CASocketAddrUnix*)addr)->setPath(tmpBuff)!=E_SUCCESS)
 											continue;
 										m_arListenerInterfaces[aktInterface].hostname=NULL;
 									}
