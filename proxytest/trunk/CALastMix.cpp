@@ -50,7 +50,10 @@ SINT32 CALastMix::initOnce()
 	{
 		UINT32 cntTargets=options.getTargetInterfaceCount();
 		if(cntTargets==0)
-			return E_UNKNOWN;
+			{
+				CAMsg::printMsg(LOG_CRIT,"No Targets (proxies) specified!\n");
+				return E_UNKNOWN;
+			}
 //		CASocketAddrINet oAddr;
 		UINT32 i;
 		for(i=1;i<=cntTargets;i++)
