@@ -456,7 +456,7 @@ LOOP_START:
 							{
 								if(oSocketGroup.isSignaled(*(tmpCon->pSocket)))
 									{
-										if(oSocketGroupMuxIn.select(true,0)!=1)
+										if(oSocketGroupMuxIn.select(true,100)!=1)
 											goto LOOP_START;
 										countRead--;
 										#ifdef _DEBUG
