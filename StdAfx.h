@@ -92,7 +92,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#else
 	 #define HAVE_UNIX_DOMAIN_PROTOCOL
 	 #define HAVE_VSNPRINTF
-	 #ifndef __linux
+#define HAVE_POLL
+		#ifndef __linux
 	     #define HAVE_TCP_KEEPALIVE
 	 #endif
 	 #ifdef __sgi

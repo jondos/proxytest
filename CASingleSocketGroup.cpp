@@ -25,68 +25,54 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
-#ifndef __CASOCKETLIST__
-#define __CASOCKETLIST__
-#include "CAMuxSocket.hpp"
-#include "CASymCipher.hpp"
+#include "StdAfx.h"
+#ifdef HAVE_POLL
+#include "CASocket.hpp"
+#include "CASingleSocketGroup.hpp"
+//#ifdef _DEBUG
+	#include "CAMsg.hpp"
+//#endif
 
-typedef struct connlist
-	{
-		CASymCipher* pCipher;
-		connlist* next;
-		union
-			{
-				CASocket* pSocket;
-				HCHANNEL outChannel;
-			};
-		HCHANNEL id;
-	} CONNECTIONLIST,CONNECTION;
-		
-struct t_MEMBLOCK;
-
-class CASocketList
-	{
-		public:
-			CASocketList();
-			CASocketList(bool bThreadSafe);
-			~CASocketList();
-			SINT32 add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher);
-			SINT32 add(HCHANNEL in,HCHANNEL out,CASymCipher* pCipher);
-			bool	get(HCHANNEL in,CONNECTION* out);
-			bool	get(CONNECTION* in,HCHANNEL out);
-			bool	get(CONNECTION* in,CASocket* pSocket);
 			
-			CASocket* remove(HCHANNEL id);
-			SINT32 clear();
-			/** Gets the first entry of the channel-list.
-			*	@return the first entry of the channel list (this is not a copy!!)
-			*
-			*/	 
-			CONNECTION*  getFirst()
-				{
-					m_AktEnumPos=m_Connections;
-					return m_AktEnumPos;
-				}
+SINT32 CASingleSocketGroup::add(CASocket&s)
+	{
+		m_pollfd->fd=(SOCKET)s;
+		return E_SUCCESS;
+	}
 
-			/** Gets the next entry of the channel-list.
-			*	@return the next entry of the channel list (this is not a copy!!)
-			*
-			*/	 
-			CONNECTION* getNext()
-				{
-					if(m_AktEnumPos!=NULL)
-						m_AktEnumPos=m_AktEnumPos->next;
-					return m_AktEnumPos;
-				}
+SINT32 CASingleGroup::add(CAMuxSocket&s)
+	{
+		m_pollfd->fd=(SOCKET)s;
+		return E_SUCCESS;
+	}
 
-			SINT32 setThreadSafe(bool b);
-		protected:
-			SINT32 increasePool();
-			CONNECTIONLIST* m_Connections;
-			CONNECTIONLIST* m_Pool;
-			CONNECTIONLIST* m_AktEnumPos;
-			t_MEMBLOCK* m_Memlist;
-			CRITICAL_SECTION cs;
-			bool m_bThreadSafe;
-	};	
+SINT32 CASocketGroup::select()
+	{
+		m_poolfd->events=POLLIN;
+    return ::poll(m_poolfd,1,INFTIM);
+
+	}
+
+SINT32 CASocketGroup::select(bool bWrite,UINT32 ms)
+	{
+		if(bWrite)
+			m_poolfd->events=POOLOUT
+		else
+			m_poolfd->events=POOLIN
+		int ret=::pool(m_pollfd,1,ms);
+		if(ret==0)
+			{
+				return E_TIMEDOUT;
+			}
+		if(ret==SOCKET_ERROR)
+			{
+				ret=WSAGetLastError();
+				#ifdef _DEBUG
+					CAMsg::printMsg(LOG_DEBUG,"SocketGroup Select-Fehler: %i\n",WSAGetLastError());
+				#endif
+				return E_UNKNOWN;
+			}
+		return ret;
+	}
+			
 #endif
