@@ -553,7 +553,7 @@ GRAPHICAL_HIERARCHY   = YES
 # This tag can be used to specify the path where the dot tool can be found. 
 # If left blank, it is assumed the dot tool can be found on the path. 
 
-DOT_PATH              = 
+DOT_PATH              = /home/sk13/gv1.5/bin/
 
 #---------------------------------------------------------------------------
 # Configuration::addtions related to the search engine   
