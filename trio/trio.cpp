@@ -3834,7 +3834,7 @@ trio_printv_ref(void *ref,
 
 /*************************************************************************
  * TrioSkipWhitespaces
- */
+ *//*
 TRIO_PRIVATE int
 TrioSkipWhitespaces(trio_class_t *self)
 {
@@ -3846,13 +3846,13 @@ TrioSkipWhitespaces(trio_class_t *self)
       self->InStream(self, &ch);
     }
   return ch;
-}
+}*/
 
 /*************************************************************************
  * TrioGetCollation
  */
 #if TRIO_EXTENSION
-TRIO_PRIVATE void
+/*TRIO_PRIVATE void
 TrioGetCollation(void)
 {
   int i;
@@ -3861,7 +3861,7 @@ TrioGetCollation(void)
   char first[2];
   char second[2];
 
-  /* This is computational expensive */
+  // This is computational expensive 
   first[1] = NIL;
   second[1] = NIL;
   for (i = 0; i < MAX_CHARACTER_CLASS; i++)
@@ -3876,7 +3876,7 @@ TrioGetCollation(void)
 	}
       internalCollationArray[i][k] = NIL;
     }
-}
+}*/
 #endif
 
 /*************************************************************************
