@@ -18,15 +18,21 @@ AC_PROG_CXX
 AC_PROG_INSTALL
 AC_PROG_RANLIB
 
+AC_LANG_PUSH(C++)
+AC_COMPILE_IFELSE([int main(){return 0;}],[],[AC_MSG_FAILURE([Could not run C++ compiler])])
+AC_LANG_POP(C++)
+
+CFLAGS=""
+CXXFLAGS=""
+
 if test "x$GCC" = "xyes" ; then
-   CPPFLAGS="-Wall -D_REENTRANT"   
+   CFLAGS="-Wall -D_REENTRANT"
+   CXXFLAGS=$CFLAGS   
 else
    echo "You need the GNU C Compiler to compile proxytest."
    exit 
 fi
 
-CFLAGS=""
-CXXFLAGS=""
 LIBS="$LIBS -L/usr/lib -L/usr/local/lib"
 
 case "$host" in
@@ -158,7 +164,7 @@ LIBS="$saved_LIBS -lcrypto"
 
 
 dnl Check for Xerces-C
-AC_LANG(C++)
+AC_LANG_PUSH(C++)
 dnl Check for XML includes.
 xmlincludedir="/usr/local/include"
 AC_ARG_WITH(xml-include,
@@ -198,7 +204,7 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 ]])],[AC_MSG_RESULT(XercesC-Lib found)],[AC_MSG_ERROR(Xerces-C Lib NOT found - please use --with-xml-lib)])
 
 
-AC_LANG([C])
+AC_LANG_POP(C++)
 
 
 AC_ARG_WITH(debug,
