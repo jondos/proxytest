@@ -75,6 +75,11 @@ class CAFirstMix:public CAMix
 					m_pthreadAcceptUsers=NULL;
 					m_pthreadsLogin=NULL;
 					#ifdef LOG_PACKET_TIMES
+						if(sizeof(CAFirstMix::tQueueEntry)!=MIXPACKET_SIZE+sizeof(UINT64))
+							{
+								CAMsg::printMsg(LOG_CRIT,"sizeof(CAFirstMix::tQueueEntry)!=MIXPACKETSIZE+sizeof(UINT64) - exiting!\n");
+								exit(0);
+							}
 						m_pLogPacketStats=NULL;
 					#endif	
 				}
