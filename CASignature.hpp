@@ -53,13 +53,6 @@ class CASignature
 			SINT32 verifyXML(const UINT8* const in,UINT32 inlen);
 			SINT32 verifyXML(DOM_Node& node,CACertStore* pTrustedCerts=NULL);
 			SINT32 getSignatureSize();
-			friend class CASSLContext;
-		private:
-			DSA* getDSA(){return m_pDSA;}
-			DSA* m_pDSA;
-			SINT32 parseSignKeyXML(const UINT8* buff,UINT32 len);
-			SINT32 verify(UINT8* in,UINT32 inlen,DSA_SIG* dsaSig);
-			SINT32 sign(UINT8* in,UINT32 inlen,DSA_SIG** dsaSig);
 			SINT32 encodeRS(UINT8* out,UINT32* outLen,DSA_SIG* pdsaSig);
 			
 			/**
@@ -67,5 +60,15 @@ class CASignature
 			* openSSL R/S BigNumber format.
 			*/
 			SINT32 CASignature::decodeRS(const UINT8* in, const UINT32 inLen, DSA_SIG* pDsaSig);
+			SINT32 verify(UINT8* in,UINT32 inlen,DSA_SIG* dsaSig);
+			
+			friend class CASSLContext;
+		private:
+			DSA* getDSA(){return m_pDSA;}
+			DSA* m_pDSA;
+			SINT32 parseSignKeyXML(const UINT8* buff,UINT32 len);
+			SINT32 sign(UINT8* in,UINT32 inlen,DSA_SIG** dsaSig);
+
+			
 	};
 #endif

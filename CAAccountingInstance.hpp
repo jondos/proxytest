@@ -37,9 +37,19 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CATempIPBlockList.hpp"
 #include "CAAccountingDBInterface.hpp"
 #include "CAAccountingBIInterface.hpp"
+#include "CAAccountingControlChannel.hpp"
 
+// we want a costconfirmation from the user for every megabyte
+// after 2megs of unconfirmed traffic we kick the user out
+// todo put this in the configfile
+#define HARDLIMIT_UNCONFIRMED_BYTES 1024*1024*2
+#define SOFTLIMIT_UNCONFIRMED_BYTES 1024*1024
 
-struct t_aiqueueitem 
+// the number of seconds that may pass between a pay request
+// and the jap sending its answer
+#define REQUEST_TIMEOUT 30
+
+/*struct t_aiqueueitem 
 {
 	UINT8 * pData;
 	UINT32 dataLen;
@@ -47,45 +57,61 @@ struct t_aiqueueitem
 };
 typedef struct t_aiqueueitem aiQueueItem;
 typedef aiQueueItem* p_aiQueueItem;
+*/
+
+struct t_aiqueueitem
+{
+	DOM_Document * pDomDoc;
+	fmHashTableEntry * pHashEntry;
+};
+typedef struct t_aiqueueitem aiQueueItem;
 
 
 
 /**
  * This is the AI (accounting instance or abrechnungsinstanz in german)
- * class. It creates an instance on the first call to getInstance and 
- * launches its msg processing thread internally.
+ * class. It is a singleton class, only one instance exists at a time.
+ * On the first call to getInstance() the initialization is performed.
+ *
  */
-class CAAccountingInstance 
+class CAAccountingInstance
 {
+	friend class CAAccountingControlChannel;
+
 public:
 
 	/**
 	 * Returns a reference to the Singleton instance
 	 */
-	static CAAccountingInstance *getInstance();
-
-	/**
-	 * This must be called by the FirstMix when a JAP connected and sent 
-	 * its symmetric keys
-	 */
-	UINT32 setJapKeys( fmHashTableEntry * pHashEntry,
-										 UINT8 * out, UINT8 * in);
+	static inline CAAccountingInstance *getInstance()
+		{
+			if(ms_pInstance!=NULL)
+				{
+					return ms_pInstance;
+				}
+			else
+				{
+					ms_pInstance = new CAAccountingInstance();
+					return ms_pInstance;
+				}
+		}
+		
 
 	/**
 	 * This should always be called when closing a JAP connection
 	 * to cleanup the data structures
 	 */
-	UINT32 cleanupTableEntry(fmHashTableEntry * pHashEntry);
-	UINT32 initTableEntry(fmHashTableEntry * pHashEntry);
+	SINT32 cleanupTableEntry(fmHashTableEntry * pHashEntry);
+	SINT32 initTableEntry(fmHashTableEntry * pHashEntry);
 
 	/**
 	 * This should be called by the FirstMix for every incoming Jap packet
 	 */
-	UINT32 handleJapPacket( MIXPACKET *packet,
-													fmHashTableEntry *pHashEntry
-													);
-													
-
+	SINT32 handleJapPacket( 
+			MIXPACKET *packet,
+			fmHashTableEntry *pHashEntry
+		);
+		
 
 	/**
 	 * Check if an IP address is temporarily blocked by the accounting instance.
@@ -93,76 +119,92 @@ public:
 	 * @retval 1 if the given IP is blocked
 	 * @retval 0 if it is not blocked
 	 */
-	SINT32 isIPAddressBlocked(const UINT8 ip[4])
+	inline SINT32 isIPAddressBlocked(const UINT8 ip[4])
 	{ return m_pIPBlockList->checkIP(ip); }
+	
 
 private:
 
 	CAAccountingInstance(); //Singleton!
 	~CAAccountingInstance();
 
-	void addToReceiveBuffer( UINT8 *data, 
-												fmHashTableEntry *pHashEntry
-												);
 
 	/**
-	* Handle a user (xml) message sent to us by the Jap. 
+	* Handle a user (xml) message sent to us by the Jap through the ControlChannel
 	*  
 	* This function is running inside the AiThread. It determines 
 	* what type of message we have and calls the appropriate handle...() 
 	* function
 	*/
-	void processJapMessage( fmHashTableEntry * pHashEntry, 
-											UINT8 * pData,
-											UINT32 dataLen
-											);
+	void CAAccountingInstance::processJapMessage(
+		fmHashTableEntry * pHashEntry,
+		DOM_Document * pDomDoc
+	);
 
 	/**
 	* Handles a cost confirmation sent by a jap
 	*/
-	void handleCostConfirmation(fmHashTableEntry *pHashEntry, 
-								const DOM_Element &root,
-								UINT8 * pData, UINT32 dataLen);
+	void handleCostConfirmation(
+			fmHashTableEntry *pHashEntry, 
+			const DOM_Element &root
+		);
 
 	/**
 	* Handles an account certificate of a newly connected Jap.
 	*/
-	void handleAccountCertificate(fmHashTableEntry *pHashEntry, 
-							const DOM_Element &root,
-							UINT8 * pData, UINT32 dataLen);
-
-	void handleAccountCertificateError(fmHashTableEntry *pHashEntry, UINT32 num);
+	void handleAccountCertificate(
+			fmHashTableEntry *pHashEntry, 
+			DOM_Element &root
+		);
 	
-	void handleBalanceCertificate(fmHashTableEntry *pHashEntry, 
-				const DOM_Element &root,
-				UINT8 * pData, UINT32 dataLen);
-				
-	void handleChallengeResponse(fmHashTableEntry *pHashEntry, 
-				const DOM_Element &root,
-				UINT8 * pData, UINT32 dataLen);
+	/**
+	 * Handles a balance certificate
+	 */
+	void handleBalanceCertificate(
+			fmHashTableEntry *pHashEntry, 
+			const DOM_Element &root
+		);
+	
+	/**
+	 * Checks the response of the challenge-response auth.
+	 */
+	void handleChallengeResponse(
+			fmHashTableEntry *pHashEntry, 
+			const DOM_Element &root
+		);
 
+				
+	SINT32 makeCCRequest(
+			const UINT64 accountNumber, 
+			const UINT64 transferredBytes, 
+			DOM_Document& doc
+		);
+	SINT32 makeBalanceRequest(const SINT32 seconds, DOM_Document &doc);
+	SINT32 makeAccountRequest(DOM_Document &doc);
+	
 
 
 	/**
-	* Sends a message to the Jap. The message is automatically splitted into 
-	* several mixpackets if necessary and is encrypted using the pCipherOut
-	* AES cipher
-	*/
-  void sendAIMessageToJap(fmHashTableEntry pHashEntry,
-                          UINT8 *msgString, UINT32 msgLen);
-
+	 * The main loop of the AI thread - reads messages from the queue 
+	 * and calls the appropriate handlers
+	 */
 	static THREAD_RETURN aiThreadMainLoop(void *param);
 
-	/** internal receiving queue for messages coming from japs */
-	CAQueue * m_pQueue;
+	
 
 	/** this thread reads messages from the queue and processes them */
 	CAThread * m_pThread;
 	
 	/** this is for synchronizing the write access to the HashEntries */
 	CAMutex m_Mutex;
+	
+	/** the name of this accounting instance */
+	UINT8 * m_AiName;
 
+	/** the interface to the database */
 	CAAccountingDBInterface * m_dbInterface;
+	
+	/** the interface to the payment instance */
 	CAAccountingBIInterface * m_biInterface;
 	
 	/** 
@@ -176,9 +218,16 @@ private:
 	/**
 	 * Singleton: This is the reference to the only instance of this class
 	 */
-	static CAAccountingInstance * m_pInstance;	
-    
-
+	static CAAccountingInstance * ms_pInstance;
+	
+	/**
+	 * Signature verifying instance for BI signatures
+	 * @todo initialize this member
+	 */
+	CASignature * m_pJpiVerifyingInstance;
+	
+	/** internal receiving queue for messages coming from Japs */
+	CAQueue * m_pQueue;
 };
 
 

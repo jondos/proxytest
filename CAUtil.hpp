@@ -262,11 +262,30 @@ void currentTimestamp(UINT8* buff,bool bInNetworkByteOrder=false);
 bool validTimestampAndFingerprint(UINT8* fingerprint, UINT16 len, UINT8* timestamp_buff);
 
 
-SINT32 parseJdbcTimestamp(const UINT8 * strTimestamp, UINT64& secValue);
+/**
+ * Parses a timestamp in JDBC timestamp escape format (as it comes from the BI)
+ * and outputs the value in milliseconds since the epoch.
+ *
+ * @param strTimestamp the string containing the timestamp
+ * @param value an integer variable that gets the milliseconds value.
+ */
+SINT32 parseJdbcTimestamp(const UINT8 * strTimestamp, SINT32& seconds);
+
 
 /**
- * Parses an unsigned 64bit integer
+ * Converts a timestamp (in seconds) to the String JDBC timestamp
+ * escape format (YYYY-MM-DD HH:MM:SS)
+ * @param seconds integer value containing the timestamp in seconds since the epoch
+ * @param strTimestamp a string buffer that gets the result
+ * @param len the buffer length
+ * @todo think about timezone handling
  */
-//SINT32 parseU64(const UINT8 * str, UINT64& value)
+SINT32 formatJdbcTimestamp(const SINT32 seconds, UINT8 * strTimestamp, const UINT32 len);
+
+
+/**
+ * Parses a 64bit integer
+ */
+SINT32 parseU64(const UINT8 * str, UINT64& value);
 
 #endif

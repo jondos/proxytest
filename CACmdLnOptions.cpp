@@ -1003,7 +1003,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 				// Get JPI Test Certificate
 				getDOMChildByName(elemJPI,(UINT8*)"TestCertificate", elem, false);
 				if(elem!=NULL) {
-					m_pJpiTestCertificate = CACertificate.decode(elem.getFirstChild(), CERT_X509CERTIFICATE);
+					m_pJpiTestCertificate = CACertificate::decode(elem.getFirstChild(), CERT_X509CERTIFICATE);
 				}
 			}
 

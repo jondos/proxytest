@@ -45,6 +45,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef WITH_CONTROL_CHANNELS_TEST
 	#include "CAControlChannelTest.hpp"
 #endif
+#ifdef PAYMENT
+	#include "CAAccountingControlChannel.hpp"
+#endif
 extern CACmdLnOptions options;
 
 
@@ -839,8 +842,9 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		fmHashTableEntry* pHashEntry=m_pChannelList->get(pNewUser);
 #endif
 #ifdef PAYMENT
-		// set AI encryption keys
-		m_pAccountingInstance->setJapKeys(pHashEntry, oMixPacket.data+41, oMixPacket.data+57); 
+		// register AI control channel
+		pHashEntry->pAccountingInfo->pControlChannel = new CAAccountingControlChannel(pHashEntry);
+		pHashEntry->pControlChannelDispatcher->registerControlChannel(pHashEntry->pAccountingInfo->pControlChannel);
 #endif
 #ifdef FIRST_MIX_SYMMETRIC
 		pHashEntry->pSymCipher=new CASymCipher();
@@ -1290,3 +1294,4 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff, UINT16 len)
 		return E_SUCCESS;
 	}
 */
+

@@ -37,9 +37,46 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef PAYMENT
 //#include "CAAccountingInstance.hpp"
 
-#define AUTH_NEW 1
-#define AUTH_BAD 2
-#define AUTH_OK 3
+/**
+ * These flags are used to represent the state
+ * of the payment
+ */
+ 
+/** new user, not yet authenticated */
+#define AUTH_NEW 0
+
+/** user has sent an account certificate */
+#define AUTH_GOT_ACCOUNTCERT 1
+
+/** format and signature of all received certificates was OK */
+#define AUTH_ACCOUNT_OK 2
+
+/** we have a recent balance certificate */
+#define AUTH_HAVE_RECENT_BALENCE 4
+
+/** we have sent one or two balance request */
+#define AUTH_SENT_BALANCE_REQUEST 8
+#define AUTH_SENT_SECOND_BALANCE_REQUEST 16
+
+/** we have sent one or two CC requests */
+#define AUTH_SENT_CC_REQUEST 32
+#define AUTH_SENT_SECOND_CC_REQUEST 64
+
+/** we have a costConfirmation which was not yet forwarded to the Bi */
+#define AUTH_HAVE_UNSETTLED_CC 128
+
+
+/** we have sent one request for an accountcertificate */
+#define AUTH_SENT_ACCOUNT_REQUEST 256
+#define AUTH_SENT_SECOND_ACCOUNT_REQUEST 512
+
+/** the user tried to fake something */
+#define AUTH_FAKE 1024
+
+/** we have sent a challenge and not yet received the response */
+#define AUTH_CHALLENGE_SENT 2048
+
+class CAAccountingControlChannel;
 
 /**
  * Structure that holds all per-user payment information
@@ -47,26 +84,47 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
  */
 struct t_accountinginfo
 {
-	UINT8 * pReceiveBuffer; //buffer for storing incoming msgs (maybe obsolete with controlchannels?)
-	UINT32  msgTotalSize;   //total size of the incoming msg (maybe obsolete s.o.)
-	UINT32  msgCurrentSize; //number of bytes received (maybe obsolete s.o.)
-
-	// for encrypting/decrypting  payment packets
-	CASymCipher * pCipherIn; //decrypt JAP->AI packets
-	CASymCipher * pCipherOut; //encrypt AI->JAP packets
-
-	UINT8 * pLastXmlCostConfirmation;
+	/** we store the challenge here to verify the response later */
 	UINT8 * pChallenge;
-	CASignature * pPublicKey;
-	UINT64 accountNumber;
-	UINT64 maxBalance;
-
-	UINT64 balanceLeft;
-//	UINT64 balance
 	
-	UINT32 authState;				// state of the authentication process
-	// this can be one of AUTH_NEW, AUTH_BAD, AUTH_OK
+	/** the signature verifying instance for this user */
+	CASignature * pPublicKey;
+	
+	/** the last cost confirmation we received, as XML byte array */
+	UINT8 * pLastXmlCC;
+	
+	/** the last known deposit (from the last received balance cert) */
+	UINT64 lastbalDeposit;
+	
+	/** the last known spent value (from the last received balance cert) */
+	UINT64 lastbalSpent;
+	
+	/** the transferredBytes value as it was when we received the last Balance */
+	SINT32 lastbalTransferredBytes;
+	
+	/** the minimum timestamp for the requested XMLBalance */
+	SINT32 reqbalMinSeconds;
+	
+	/** the number of bytes that was transferred (as counted by the AI)*/
+	UINT64 transferredBytes;
+	
+	/** the number of bytes that was confirmed by the account user */
+	UINT64 confirmedBytes;
+	
+	/** the number of transferredBytes that we last asked the account user to confirm */
+	UINT64 reqConfirmBytes;
+	
+	/** the user's account number */
+	UINT64 accountNumber;
 
+	/** a pointer to the user-specific control channel object */
+	CAAccountingControlChannel * pControlChannel;
+	
+	/** Flags, see above AUTH_* */
+	UINT32 authFlags;
+
+	/** timestamp when last PayRequest was sent */
+	SINT32 lastRequestSeconds;
 };
 typedef struct t_accountinginfo aiAccountingInfo;
 typedef aiAccountingInfo * LP_aiAccountingInfo;

@@ -344,6 +344,9 @@
 				RelativePath=".\CAAbstractControlChannel.cpp">
 			</File>
 			<File
+				RelativePath=".\CAAbstractXMLEncodable.cpp">
+			</File>
+			<File
 				RelativePath=".\CAAccountingBIInterface.cpp">
 			</File>
 			<File
@@ -2074,6 +2077,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\CAXMLErrorMessage.cpp">
+			</File>
+			<File
 				RelativePath="StdAfx.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -2783,6 +2789,9 @@
 				RelativePath=".\CAAbstractControlChannel.hpp">
 			</File>
 			<File
+				RelativePath=".\CAAbstractXMLEncodable.hpp">
+			</File>
+			<File
 				RelativePath=".\CAAccountingBIInterface.hpp">
 			</File>
 			<File
@@ -2943,6 +2952,9 @@
 			</File>
 			<File
 				RelativePath="CAUtil.hpp">
+			</File>
+			<File
+				RelativePath=".\CAXMLErrorMessage.hpp">
 			</File>
 			<File
 				RelativePath="StdAfx.h">
