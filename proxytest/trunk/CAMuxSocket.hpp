@@ -148,8 +148,8 @@ class CAMuxSocket
 						}
 					else if(keyLen==32)
 						{
-							m_oCipherIn.setKeyAES(key);
-							m_oCipherOut.setKeyAES(key+16);
+							m_oCipherOut.setKeyAES(key);
+							m_oCipherIn.setKeyAES(key+16);
 						}
 				else
 						return E_UNKNOWN;
