@@ -75,7 +75,7 @@ class CASocket
 			SINT32 getNonBlocking(bool* b);
 		private:
 			SOCKET m_Socket;
-			//CAMutex m_csClose;
+			CAMutex m_csClose;
 			UINT32 m_closeMode;
 	};
 #endif

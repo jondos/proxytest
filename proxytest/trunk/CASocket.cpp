@@ -204,7 +204,7 @@ SINT32 CASocket::connect(CASocketAddr & psa,UINT msTimeOut)
 			
 SINT32 CASocket::close()
 	{
-//		EnterCriticalSection(&csClose);
+		m_csClose.lock();
 		int ret;
 		if(m_Socket!=0)
 			{
@@ -222,7 +222,7 @@ SINT32 CASocket::close()
 			}
 		else
 			ret=SOCKET_ERROR;
-//		LeaveCriticalSection(&csClose);
+		m_csClose.unlock();
 		return ret;
 	}
 
