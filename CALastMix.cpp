@@ -310,7 +310,8 @@ SINT32 CALastMix::loop()
 		CONNECTION oConnection;
 		UINT8 rsaBuff[RSA_SIZE];
 		CONNECTION* tmpCon;
-		
+		HCHANNEL tmpID;
+
 		oSocketGroup.add(muxIn);
 		oSocketGroupMuxIn.add(muxIn);
 		muxIn.setCrypt(true);
@@ -358,14 +359,15 @@ LOOP_START:
 	    										#ifdef _DEBUG
 														CAMsg::printMsg(LOG_DEBUG,"Cannot connect to Squid!\n");
 													#endif
-													muxIn.close(oMuxPacket.channel);
 													delete tmpSocket;
 													delete newCipher;
+													if(muxIn.close(oMuxPacket.channel)==SOCKET_ERROR)
+														goto ERR;
 										    }
 										else
 										    {    
 #ifdef _ASYNC
-//													tmpSocket->setASyncSend(true,-1,this);
+													tmpSocket->setASyncSend(true,-1,0,10000,this);
 #endif													
 													int payLen=ntohs(oMuxPacket.payload.len);
 													#ifdef _DEBUG
@@ -378,9 +380,10 @@ LOOP_START:
 																CAMsg::printMsg(LOG_DEBUG,"Error sending Data to Squid!");
 															#endif
 															tmpSocket->close();
-															muxIn.close(oMuxPacket.channel);
 															delete tmpSocket;
 															delete newCipher;
+															if(muxIn.close(oMuxPacket.channel)==SOCKET_ERROR)
+																goto ERR;
 														}
 													else
 														{
@@ -403,26 +406,25 @@ LOOP_START:
 										oSocketGroup.remove(*(oConnection.pSocket));
 										oConnection.pSocket->close();
 										deleteResume(oMuxPacket.channel);
-										//muxIn.close(oMuxPacket.channel);
 										oSocketList.remove(oMuxPacket.channel);
 										delete oConnection.pSocket;
 										delete oConnection.pCipher;
 										#ifdef _DEBUG
-										CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u\n",oMuxPacket.channel);
+											CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u\n",oMuxPacket.channel);
 										#endif
 									}
 								else if(oMuxPacket.flags==CHANNEL_SUSPEND)
 									{
 										oSocketGroup.remove(*(oConnection.pSocket));
 										#ifdef _DEBUG
-										CAMsg::printMsg(LOG_DEBUG,"Suspending Channel: %u\n",oMuxPacket.channel);
+											CAMsg::printMsg(LOG_DEBUG,"Suspending Channel: %u\n",oMuxPacket.channel);
 										#endif
 									}
 								else if(oMuxPacket.flags==CHANNEL_RESUME)
 									{
 										oSocketGroup.add(*(oConnection.pSocket));
 										#ifdef _DEBUG
-										CAMsg::printMsg(LOG_DEBUG,"Resumeing Channel: %u\n",oMuxPacket.channel);
+											CAMsg::printMsg(LOG_DEBUG,"Resumeing Channel: %u\n",oMuxPacket.channel);
 										#endif
 									}
 								else
@@ -437,12 +439,15 @@ LOOP_START:
 											{
 												oSocketGroup.remove(*(oConnection.pSocket));
 												oConnection.pSocket->close();
-												muxIn.close(oMuxPacket.channel);
-												oSocketList.remove(oMuxPacket.channel);
 												delete oConnection.pSocket;
 												delete oConnection.pCipher;
+												oSocketList.remove(oMuxPacket.channel);
 												deleteResume(oMuxPacket.channel);
+												if(muxIn.close(oMuxPacket.channel)==SOCKET_ERROR)
+													goto ERR;
 											}
+	//we let the queu grow as much as memor is available...
+	/*									
 										else if(ret==E_QUEUEFULL)
 											{
 												EnterCriticalSection(&csResume);
@@ -452,7 +457,9 @@ LOOP_START:
 												muxIn.send(&oMuxPacket);
 												LeaveCriticalSection(&csResume);
 											}
+	*/
 									}
+	
 							}
 					}
 				if(countRead>0)
@@ -476,11 +483,14 @@ LOOP_START:
 												#endif
 												oSocketGroup.remove(*(tmpCon->pSocket));
 												tmpCon->pSocket->close();
-												muxIn.close(tmpCon->id);
 												delete tmpCon->pSocket;
 												delete tmpCon->pCipher;
-												oSocketList.remove(tmpCon->id);
-												deleteResume(tmpCon->id);
+												tmpID=tmpCon->id;
+												oSocketList.remove(tmpID);
+												deleteResume(tmpID);
+												oSocketList.remove(tmpID);
+												if(muxIn.close(tmpID)==SOCKET_ERROR)
+													goto ERR;
 											}
 										else 
 											{
@@ -501,6 +511,7 @@ LOOP_START:
 					}
 			}
 ERR:
+		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
 		tmpCon=oSocketList.getFirst();
 		while(tmpCon!=NULL)
 			{

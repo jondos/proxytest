@@ -49,23 +49,29 @@ THREAD_RETURN SocketASyncSendLoop(void* p);
 class CASocketASyncSend
 	{	
 		public:
-			CASocketASyncSend(){m_Sockets=NULL;InitializeCriticalSection(&cs);}
-			~CASocketASyncSend();
+			CASocketASyncSend(){m_bRun=false;m_SendQueueLowWater=10;m_SendQueueSoftLimit=100;m_Sockets=NULL;InitializeCriticalSection(&cs);}
+			~CASocketASyncSend(){stop();DeleteCriticalSection(&cs);}
 			SINT32 send(CASocket* pSocket,UINT8* buff,UINT32 size);
 			SINT32 close(CASocket* pSocket);
 			SINT32 start();
-			SINT32 stop(){return E_UNKNOWN;}
-			friend THREAD_RETURN SocketASyncSendLoop(void* p);
+			SINT32 stop();
+			//Sets the limit after which send will generate E_QUEUEFULL error
+			SINT32 setSendQueueSoftLimit(UINT32 limit){m_SendQueueSoftLimit=limit;return E_SUCCESS;}
+			SINT32 setSendQueueLowWater(UINT32 lowwater){m_SendQueueLowWater=lowwater;return E_SUCCESS;}
+			//The resume method is called with a Socket, if the Queuesize of this sockete falls below SendQueueLowWater
+			SINT32 setResume(CASocketASyncSendResume* resume){pResume=resume;return E_SUCCESS;}
 
+			friend THREAD_RETURN SocketASyncSendLoop(void* p);
 		protected:
 			CASocketGroup m_oSocketGroup;
 			_t_socket_list* m_Sockets;
 			#ifdef _REENTRANT
 				CRITICAL_SECTION cs;
 			#endif
+			UINT32 m_SendQueueSoftLimit;
+			UINT32 m_SendQueueLowWater;
+			bool m_bRun;
+			CASocketASyncSendResume* pResume;
 
-		public:
-				void setResume(CASocketASyncSendResume* resume){pResume=resume;}
-				CASocketASyncSendResume* pResume;
 	};
 #endif

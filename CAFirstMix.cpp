@@ -558,7 +558,7 @@ LOOP_START:
 									((CASocket*)pnewMuxSocket)->setKeepAlive(true);
 								#endif
 #ifdef _ASYNC
-								((CASocket*)pnewMuxSocket)->setASyncSend(true,MUXPACKET_SIZE,this);
+								((CASocket*)pnewMuxSocket)->setASyncSend(true,MUXPACKET_SIZE,0,0,this);
 #endif
 								((CASocket*)pnewMuxSocket)->send(mKeyInfoBuff,mKeyInfoSize);
 								oMuxChannelList.add(pnewMuxSocket);
@@ -589,7 +589,7 @@ LOOP_START:
 									((CASocket*)pnewMuxSocket)->setKeepAlive(true);
 								#endif
 #ifdef _ASYNC
-								((CASocket*)pnewMuxSocket)->setASyncSend(true,MUXPACKET_SIZE,this);
+								((CASocket*)pnewMuxSocket)->setASyncSend(true,MUXPACKET_SIZE,0,0,this);
 #endif
 								((CASocket*)pnewMuxSocket)->send(mKeyInfoBuff,mKeyInfoSize);
 								oMuxChannelList.add(pnewMuxSocket);
@@ -681,7 +681,7 @@ LOOP_START:
 							{
 								if(oSocketGroup.isSignaled(*tmpMuxListEntry->pMuxSocket))
 									{
-										if(oSocketGroupMuxOut.select(true,0)!=1)
+										if(oSocketGroupMuxOut.select(true,100)!=1)
 											goto LOOP_START;
 										countRead--;
 										ret=tmpMuxListEntry->pMuxSocket->receive(&oMuxPacket,0);
@@ -777,6 +777,7 @@ LOOP_START:
 					}
 			}
 ERR:
+		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
 		socketIn.close();
 		muxOut.close();
 		tmpMuxListEntry=oMuxChannelList.getFirst();

@@ -65,7 +65,7 @@ class CASocket
 			SINT32 getSendBuff();
 			SINT32 setKeepAlive(bool b);
 			SINT32 setKeepAlive(UINT32 sec);
-			SINT32 setASyncSend(bool b,SINT32 size,CASocketASyncSendResume* pResume);
+			SINT32 setASyncSend(bool b,SINT32 size,UINT32 lowwater,UINT32 SendQueueSoftLimit,CASocketASyncSendResume* pResume);
 		private:
 			SOCKET m_Socket;
 			#ifdef _REENTRANT

@@ -36,13 +36,18 @@ THREAD_RETURN SocketASyncSendLoop(void* p)
 #define BUFF_SIZE 0xFFFF
 		UINT8* buff=new UINT8[BUFF_SIZE];
 		SINT32 ret;
-		while(true)
+		while(pASyncSend->m_bRun)
 			{
 				if((ret=pASyncSend->m_oSocketGroup.select(true,50))==E_UNKNOWN||ret==E_TIMEDOUT) //bugy...
 					{
 						continue;
 					}
 				EnterCriticalSection(&pASyncSend->cs);
+				if(!pASyncSend->m_bRun)
+					{
+						LeaveCriticalSection(&pASyncSend->cs);
+						break;
+					}
 				_t_socket_list* akt=pASyncSend->m_Sockets;
 				_t_socket_list* tmp;
 				_t_socket_list* before=NULL;
@@ -54,8 +59,7 @@ THREAD_RETURN SocketASyncSendLoop(void* p)
 								UINT32 len=BUFF_SIZE;
 								if(akt->pQueue->getNext(buff,&len)==E_SUCCESS)
 									akt->pSocket->send(buff,len,true);
-#define BUFFLOWLEVEL 10
-								if(akt->bwasOverFull&&akt->pQueue->getSize()<BUFFLOWLEVEL)
+								if(akt->bwasOverFull&&akt->pQueue->getSize()<pASyncSend->m_SendQueueLowWater)
 									{
 										#ifdef _DEBUG
 											CAMsg::printMsg(LOG_INFO,"Resumeing...\n");
@@ -91,13 +95,18 @@ THREAD_RETURN SocketASyncSendLoop(void* p)
 			}
 	}
 
-#define SENDQUEUEFULLSIZE 100
+//#define SENDQUEUEFULLSIZE 100
 
 SINT32 CASocketASyncSend::send(CASocket* pSocket,UINT8* buff,UINT32 size)
 	{
 		if(pSocket==NULL||buff==NULL)
 			return E_UNKNOWN;
 		EnterCriticalSection(&cs);
+		if(!m_bRun)
+			{
+				LeaveCriticalSection(&cs);
+				return E_UNKNOWN;
+			}
 		SINT32 ret;
 		if(m_Sockets==NULL)
 			{
@@ -133,7 +142,7 @@ SINT32 CASocketASyncSend::send(CASocket* pSocket,UINT8* buff,UINT32 size)
 								ret=akt->pQueue->add(buff,size);
 								if(ret<0)
 									ret =E_UNKNOWN;
-								else if(ret>SENDQUEUEFULLSIZE)
+								else if(ret>m_SendQueueSoftLimit)
 									{
 										akt->bwasOverFull=true;
 										ret=E_QUEUEFULL;
@@ -202,11 +211,38 @@ SINT32 CASocketASyncSend::close(CASocket* pSocket)
 
 SINT32 CASocketASyncSend::start()
 	{
-		#ifdef _WIN32
-		 _beginthread(SocketASyncSendLoop,0,this);
-		#else
-		 pthread_t othread;
-		 pthread_create(&othread,NULL,SocketASyncSendLoop,this);
-		#endif
-		 return E_SUCCESS;
+		EnterCriticalSection(&cs);
+		if(!m_bRun)
+			{
+				m_bRun=true;
+				#ifdef _WIN32
+					_beginthread(SocketASyncSendLoop,0,this);
+				#else
+					pthread_t othread;
+					pthread_create(&othread,NULL,SocketASyncSendLoop,this);
+				#endif
+			}
+		LeaveCriticalSection(&cs);
+		return E_SUCCESS;
+	}
+
+SINT32 CASocketASyncSend::stop()
+	{
+		EnterCriticalSection(&cs);
+		m_bRun=false;
+		//Insert: WAIT FOR THREAD Termination...
+		_t_socket_list* akt=m_Sockets;
+		_t_socket_list* before=NULL;
+		while(m_Sockets!=NULL)
+			{
+				if(!m_Sockets->pQueue->isEmpty())
+					CAMsg::printMsg(LOG_INFO,"Deleting non empty send queue!\n");
+					delete m_Sockets->pQueue;
+				akt=m_Sockets;
+				m_oSocketGroup.remove(*m_Sockets->pSocket);
+				m_Sockets=m_Sockets->next;
+				delete akt;
+			}
+		LeaveCriticalSection(&cs);
+		return E_SUCCESS;
 	}
