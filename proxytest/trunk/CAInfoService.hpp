@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 class CAInfoService
 	{
 		public:
-			CAInfoService(CAFirstMix* pFirstMix);
+			CAInfoService(CAFirstMix* pFirstMix,UINT32 numberOfMixes);
 			~CAInfoService();
 			SINT32 sendHelo();
 			int start();
@@ -42,14 +42,16 @@ class CAInfoService
 			SINT32 getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic);
 			//SINT32 setMixedPackets(UINT32 packets);
 			SINT32 getMixedPackets(UINT32* ppackets);
+			SINT32 getNumberOfMixes(UINT32* pmixes){return m_NumberOfMixes;}
 			bool getRun(){return bRun;}
 			SINT32 setSignature(CASignature* pSignature);
 			CASignature* getSignature(){return pSignature;}
+			static SINT32 test();
 		private:
 			//SINT32 iUser;
 			//SINT32 iRisk;
 			//SINT32 iTraffic; 
-			//UINT32 m_MixedPackets;
+			UINT32 m_NumberOfMixes;
 			bool bRun;
 			//CAMutex csLevel;
 			CASignature* pSignature;

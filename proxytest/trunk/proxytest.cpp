@@ -247,7 +247,8 @@ int main(int argc, const char* argv[])
 	#endif
 
 #endif 
-		//some test....
+
+			//some test....
 		if(MIXPACKET_SIZE!=sizeof(MIXPACKET))
 			{
 				CAMsg::printMsg(LOG_CRIT,"MIXPACKET_SIZE [%u] != sizeof(MUXPACKET) [%u] --> maybe a compiler (optimization) problem!\n",MIXPACKET_SIZE,sizeof(MIXPACKET));
