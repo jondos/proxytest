@@ -203,6 +203,7 @@ END AES Test*/
 			}
 		else if(options.isMiddleMix())
 			{
+				CAMsg::printMsg(LOG_INFO,"I am a Middle MIX..\n");
 				pMix=new CAMiddleMix();
 			}
 		else
