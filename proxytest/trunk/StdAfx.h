@@ -58,6 +58,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 //Some constants
 #define LAST_MIX_TO_PROXY_CONNECT_TIMEOUT 2000 //Connection timeout for last mix to proxy connections 2 Seconds...
+#define LAST_MIX_TO_PROXY_SEND_TIMEOUT (UINT32)5000 //5 Seconds...
+
 #define MIX_POOL_SIZE 10  //packets in the Mix pool
 #define MIX_POOL_TIMEOUT 100 //home long to wait (in ms) before a dummy is put in the pool
 #define DUMMY_CHANNEL 0
@@ -122,6 +124,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#ifdef __FreeBSD__
 			#undef HAVE_TCP_KEEPALIVE
 		#endif
+		#ifdef __CYGWIN__
+			#undef HAVE_TCP_KEEPALIVE
+			#define MSG_DONTWAIT 0
+		#endif
 		#if !defined(__FreeBSD__)&&!defined(__linux)
     	typedef int socklen_t;
 		#endif
@@ -135,7 +141,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 			#undef HAVE_VSNPRINTF
 			#include <alloca.h>
 		#endif
-    #ifndef __linux 
+    #if !defined( __linux) &&!defined(__CYGWIN__) 
     	#include <sys/filio.h>
     	#define MSG_NOSIGNAL 0
     #endif
@@ -210,7 +216,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include <assert.h>
 
 #include <pthread.h>
-#include <semaphore.h>
+//#include <semaphore.h>
 #define THREAD_RETURN void*
 #define THREAD_RETURN_ERROR return(NULL)
 #define THREAD_RETURN_SUCCESS return (NULL)

@@ -551,7 +551,7 @@ SINT32 CASocket::getRecvBuff()
 		else
 			return val;
 	}
-/** Returuns < 0 on error, otherwise the new sendbuffersize (which may be less than r)*/
+/** Returns < 0 on error, otherwise the new sendbuffersize (which may be less than r)*/
 SINT32 CASocket::setSendBuff(SINT32 r)
 	{
 		if(r<0)

@@ -63,6 +63,12 @@ typedef UINT32 HCHANNEL;
 	#if defined(WIN32) ||defined(__sgi)
 		#pragma pack( push, t_MixPacket )
 		#pragma pack(1)
+		struct t_MixPacketPayload
+			{
+				UINT16 len;
+				UINT8 type;
+				UINT8 data[PAYLOAD_SIZE];
+			};
 		struct t_MixPacket
 			{
 				HCHANNEL channel;
@@ -70,12 +76,7 @@ typedef UINT32 HCHANNEL;
 				union
 					{
 						UINT8		data[DATA_SIZE];
-						struct t_MixPacketPayload
-							{
-								UINT16 len;
-								UINT8 type;
-								UINT8 data[PAYLOAD_SIZE];
-						} payload;
+						struct t_MixPacketPayload payload;
 					};
 			};
 		#pragma pack( pop, t_MixPacket )
