@@ -36,6 +36,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CACacheLoadBalancing.hpp"
 #include "CASignature.hpp"
 #include "CAUtil.hpp"
+#ifdef LOG_CRIME
+	#include "tre/regex.h"
+#endif
 
 class CALastMix:public CAMix
 
@@ -62,6 +65,10 @@ class CALastMix:public CAMix
 			CASignature* m_pSignature;
 //		private:
 //			CASocketList oSuspendList;
+#ifdef LOG_CRIME
+			regex_t* m_pCrimeRegExps;
+			UINT32 m_nCrimeRegExp;
+#endif
 
 		private:
 			friend THREAD_RETURN loopLog(void*);
