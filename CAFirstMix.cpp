@@ -28,6 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "StdAfx.h"
 #include "CAFirstMix.hpp"
 #include "CASocketGroup.hpp"
+#include "CASingleSocketGroup.hpp"
 #include "CAMsg.hpp"
 #include "CACmdLnOptions.hpp"
 #include "CAMuxChannelList.hpp"
@@ -188,7 +189,7 @@ SINT32 CAFirstMix::loop()
 		MUXLISTENTRY* tmpMuxListEntry;
 
 		CASocketGroup oSocketGroup;
-		CASocketGroup oSocketGroupMuxOut;
+		CASingleSocketGroup oSocketGroupMuxOut;
 		CAMuxSocket* pnewMuxSocket;
 		SINT32 countRead;
 		HCHANNEL lastChannelId=1;
