@@ -4,7 +4,6 @@
 #include "CAMix.hpp"
 #include "CAMuxSocket.hpp"
 #include "CAASymCipher.hpp"
-#include "CASocket.hpp"
 class CALocalProxy:public CAMix
 	{
 		public:
