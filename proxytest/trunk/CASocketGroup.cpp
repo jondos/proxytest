@@ -32,8 +32,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#ifdef _DEBUG
 	#include "CAMsg.hpp"
 //#endif
-#ifdef HAVE_EPOLL
-#else
+//#ifdef HAVE_EPOLL
+//#else
 CASocketGroup::CASocketGroup(bool bWrite)
 	{
 		#ifndef HAVE_POLL
@@ -178,4 +178,4 @@ SINT32 CASocketGroup::select(UINT32 time_ms)
 			}
 		return ret;
 	}
-#endif
+//#endif

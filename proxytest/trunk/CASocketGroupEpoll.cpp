@@ -28,7 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "StdAfx.h"
 #include "CASocketGroupEpoll.hpp"
 #ifdef HAVE_EPOLL
-CASocketGroupEpoll::CASocketGroupEpoll(bool bWrite):
+CASocketGroupEpoll::CASocketGroupEpoll(bool bWrite)
 	{
 		m_hEPFD=epoll_create(MAX_POLLFD);
 		m_pEpollEvent=new struct epoll_event;
