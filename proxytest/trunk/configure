@@ -3647,6 +3647,8 @@ case "$host" in
         ;;
 *-*-freebsd*)
 	DEFAULTLIBS="$LIBS -L/usr/local/lib -liconv"
+	CFLAGS="$CFLAGS -pthread"
+	CXXFLAGS=$CXXFLAGS -pthread"
 	;;
 *-*-netbsd*)
 	DEFAULTLIBS="$LIBS -L/usr/pkg/lib -liconv"
