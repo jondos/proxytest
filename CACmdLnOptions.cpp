@@ -4,8 +4,8 @@ CACmdLnOptions::CACmdLnOptions()
   {
 		bDaemon=false;
 		bLocalProxy=bFirstMix=bLastMix=bMiddleMix=false;
-		iTargetPort=iServerPort=-1;
-		strTargetHost=NULL;
+		iTargetPort=iSOCKSPort=iServerPort=iSOCKSServerPort=-1;
+		strTargetHost=strSOCKSHost=NULL;
   }
 
 CACmdLnOptions::~CACmdLnOptions()
@@ -14,12 +14,16 @@ CACmdLnOptions::~CACmdLnOptions()
 			{
 				delete strTargetHost;
 	    }
+		if(strSOCKSHost!=NULL)
+			{
+				delete strSOCKSHost;
+	    }
   }
     
 int CACmdLnOptions::parse(int argc,const char** argv)
     {
 	int ret;
-	poptOption options[5];
+	poptOption options[7];
 	memset(options,0,sizeof(options));
 	
 	options[0].shortName='d';
@@ -45,6 +49,18 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 //	memset(target,0,sizeof(target));
 	options[3].arg=&mix;
 
+	options[4].shortName='s';
+	options[4].argInfo=POPT_ARG_INT;
+	int SOCKSport=-1;
+//	memset(target,0,sizeof(target));
+	options[4].arg=&SOCKSport;
+
+	options[5].shortName='o';
+	options[5].argInfo=POPT_ARG_STRING;
+	char* socks=NULL;
+//	memset(target,0,sizeof(target));
+	options[5].arg=&socks;
+
 	poptContext ctx=poptGetContext(NULL,argc,argv,options,0);
 	ret=poptGetNextOpt(ctx);
 	poptFreeContext(ctx);
@@ -54,17 +70,30 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 	    bDaemon=true;
 	if(target!=NULL)
 	    {
-		char* tmpStr;
-		if((tmpStr=strchr(target,':'))!=NULL)
-		    {
-			strTargetHost=new char[tmpStr-target+1];
-			(*tmpStr)=0;
-			strcpy(strTargetHost,target);
-			iTargetPort=atol(tmpStr+1);
-		    }
-		free(target);	
+				char* tmpStr;
+				if((tmpStr=strchr(target,':'))!=NULL)
+						{
+					strTargetHost=new char[tmpStr-target+1];
+					(*tmpStr)=0;
+					strcpy(strTargetHost,target);
+					iTargetPort=atol(tmpStr+1);
+						}
+				free(target);	
+	    }
+	if(socks!=NULL)
+	    {
+				char* tmpStr;
+				if((tmpStr=strchr(socks,':'))!=NULL)
+						{
+					strSOCKSHost=new char[tmpStr-socks+1];
+					(*tmpStr)=0;
+					strcpy(strSOCKSHost,socks);
+					iSOCKSPort=atol(tmpStr+1);
+						}
+				free(socks);	
 	    }
 	iServerPort=port;
+	iSOCKSServerPort=SOCKSport;
 	if(mix==0)
 		bLocalProxy=true;
 	else if(mix==1)
@@ -87,6 +116,11 @@ int CACmdLnOptions::getServerPort()
 	return iServerPort;
     }
     
+int CACmdLnOptions::getSOCKSServerPort()
+  {
+		return iSOCKSServerPort;
+  }
+
 int CACmdLnOptions::getTargetPort()
     {
 	return iTargetPort;
@@ -103,6 +137,24 @@ int CACmdLnOptions::getTargetHost(char* host,int len)
 		strcpy(host,strTargetHost);
 		return strlen(strTargetHost);
   }
+
+int CACmdLnOptions::getSOCKSPort()
+  {
+		return iSOCKSPort;
+  }
+    
+int CACmdLnOptions::getSOCKSHost(char* host,int len)
+  {
+		if(strSOCKSHost==NULL)
+				return -1;
+		if(len<=(int)strlen(strSOCKSHost))
+				{
+					return strlen(strSOCKSHost)+1;		
+				}
+		strcpy(host,strSOCKSHost);
+		return strlen(strSOCKSHost);
+  }
+
 
 bool CACmdLnOptions::isFirstMix()
   {

@@ -19,6 +19,7 @@ class CASocket
 			int receive(char* buff,int len);
 			int receive(char* buff,int len,CASymCipher& oCipher);
 			operator SOCKET(){return m_Socket;}
+			int getLocalPort();
 		private:
 			SOCKET m_Socket;
 			CRITICAL_SECTION csClose;

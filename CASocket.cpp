@@ -124,3 +124,14 @@ int CASocket::receive(char* buff,int len)
 	{
 		return ::recv(m_Socket,buff,len,0);
 	}
+
+int CASocket::getLocalPort()
+	{
+		struct sockaddr_in addr;
+		int namelen=sizeof(struct sockaddr_in);
+		if(getsockname(m_Socket,(struct sockaddr*)&addr,&namelen)==SOCKET_ERROR)
+			return SOCKET_ERROR;
+		else
+			return ntohs(addr.sin_port);
+
+	}
