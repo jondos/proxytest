@@ -60,13 +60,16 @@ OBJS=$(OBJS_ALL)
 all: 
 	@echo 'Please select a target:'
 	@echo 'linux-x86-gcc, linux-k6-gcc, linux-i686-gcc' 
-	@echo 'linux-i686-gcc-static, linux-k6-gcc-static, linux-x86-gcc-debug,'
+	@echo 'linux-i686-gcc-static, linux-pentium3-gcc-static, linux-k6-gcc-static, linux-x86-gcc-debug,'
 	@echo 'solaris-ultrasparc-gcc, irix-64-cc, irix-64-cc-debug'
 	@echo 'freebsd-x86-gcc-lthread, freebsd-x86-gcc-pthread'
 
 
 linux-x86-gcc:
 	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -finline-functions -fomit-frame-pointer -O3' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
+
+linux-pentium3-gcc-static:
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-static -D_ASYNC -D_REENTRANT -Wall -Wcast-align -fomit-frame-pointer -march=pentium3 -O3' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
 
 linux-i686-gcc-static:
 	$(MAKE) 'CC=gcc' 'CPPFLAGS=-static -D_ASYNC -D_REENTRANT -Wall -Wcast-align -fomit-frame-pointer -march=i686 -O3' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
