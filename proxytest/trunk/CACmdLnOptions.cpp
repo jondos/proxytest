@@ -90,21 +90,21 @@ int CACmdLnOptions::getTargetPort()
     }
     
 int CACmdLnOptions::getTargetHost(char* host,int len)
-    {
-	if(strTargetHost==NULL)
-	    return -1;
-	if(len<=strlen(strTargetHost))
-	    {
-		return strlen(strTargetHost)+1;		
-	    }
-	strcpy(host,strTargetHost);
-	return strlen(strTargetHost);
-    }
+  {
+		if(strTargetHost==NULL)
+				return -1;
+		if(len<=(int)strlen(strTargetHost))
+				{
+					return strlen(strTargetHost)+1;		
+				}
+		strcpy(host,strTargetHost);
+		return strlen(strTargetHost);
+  }
 
 bool CACmdLnOptions::isFirstMix()
-    {
-			return bFirstMix;
-    }
+  {
+		return bFirstMix;
+  }
 
 bool CACmdLnOptions::isMiddleMix()
     {
