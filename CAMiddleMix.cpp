@@ -283,7 +283,7 @@ SINT32 CAMiddleMix::loop()
 							}
 						if(m_pMiddleMixChannelList->getInToOut(pMixPacket->channel,&channelOut,&pCipher)!=E_SUCCESS)
 							{//new connection
-								if(pMixPacket->flags==CHANNEL_OPEN)
+								if(pMixPacket->flags==CHANNEL_OPEN_OLD||pMixPacket->flags==CHANNEL_OPEN_NEW)
 									{
 										#ifdef _DEBUG
 												CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");

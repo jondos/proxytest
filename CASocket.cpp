@@ -266,7 +266,7 @@ SINT32 CASocket::send(const UINT8* buff,UINT32 len)
 				ret=::send(m_Socket,(char*)buff,len,MSG_NOSIGNAL);
 				#ifdef _DEBUG
 					if(ret==SOCKET_ERROR)
-						printf("Fehler beim Socket-send: %i",GET_NET_ERROR);
+						CAMsg::printMsg(LOG_DEBUG,"Fehler beim Socket-send: %i",GET_NET_ERROR);
 				#endif
 			}
 		while(ret==SOCKET_ERROR&&(ef=GET_NET_ERROR)==EINTR);

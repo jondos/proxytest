@@ -263,7 +263,7 @@ SINT32 CALocalProxy::loop()
 																size-=KEY_SIZE;
 																len+=KEY_SIZE;
 															}
-														oMixPacket.flags=CHANNEL_OPEN;
+														oMixPacket.flags=CHANNEL_OPEN_OLD;
 													}
 												else //sonst
 													{

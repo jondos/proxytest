@@ -19,6 +19,7 @@ class CALockAble
 					m_ConVar.lock();
 					m_nLockCount--;
 					m_ConVar.unlock();
+					m_ConVar.signal();
 					return E_SUCCESS;
 				}
 
