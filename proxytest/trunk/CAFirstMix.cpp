@@ -70,7 +70,7 @@ SINT32 CAFirstMix::init()
 				ListenerInterface oListener;
 				if(options.getListenerInterface(oListener,i)!=E_SUCCESS)
 					{
-						CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
+						CAMsg::printMsg(LOG_CRIT,"Cannot listen (1)\n");
 						return E_UNKNOWN;
 					}
 				m_arrSocketsIn[i-1].create();
@@ -91,7 +91,7 @@ SINT32 CAFirstMix::init()
 #endif
 				if(ret!=E_SUCCESS)
 					{
-						CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
+						CAMsg::printMsg(LOG_CRIT,"Cannot listen (2)\n");
 						return E_UNKNOWN;
 					}
 			}

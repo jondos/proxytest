@@ -69,7 +69,7 @@ SINT32 CALocalProxy::init()
 			((CASocketAddrINet*)oListener.addr)->setAddr((UINT8*)"127.0.0.1",((CASocketAddrINet*)oListener.addr)->getPort());
 		if(socketIn.listen(*oListener.addr)!=E_SUCCESS)
 		  {
-				CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
+				CAMsg::printMsg(LOG_CRIT,"Cannot listen (1)\n");
 				delete oListener.addr;
 				return E_UNKNOWN;
 			}
@@ -81,7 +81,7 @@ SINT32 CALocalProxy::init()
 				socketSOCKSIn.setReuseAddr(true);
 				if(socketSOCKSIn.listen(socketAddrIn)!=E_SUCCESS)
 					{
-						CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
+						CAMsg::printMsg(LOG_CRIT,"Cannot listen (2)\n");
 						return E_UNKNOWN;
 					}
 			}
