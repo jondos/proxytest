@@ -222,13 +222,14 @@ THREAD_RETURN loopSendToMix(void* param)
 				SINT32 ret=pQueue->getOrWait((UINT8*)pMixPacket,&len,MIX_POOL_TIMEOUT);
 				if(ret==E_TIMEDOUT)
 					{
+						continue;
 						pMixPacket->flags=0;
 						pMixPacket->channel=DUMMY_CHANNEL;
 						getRandom(pMixPacket->data,DATA_SIZE);
 					}
 				else if(ret!=E_SUCCESS||len!=MIXPACKET_SIZE)
 					break;
-				pPool->pool(pMixPacket);
+				//pPool->pool(pMixPacket);
 				if(pMuxSocket->send((MIXPACKET*)buff)!=MIXPACKET_SIZE)
 					break;
 			}
