@@ -98,10 +98,63 @@ int CASocketGroup::select()
 		#endif
 
 	}
+
+SINT32 CASocketGroup::select(bool bWrite,UINT32 ms)
+	{
+		memcpy(&m_signaled_set,&m_fdset,sizeof(fd_set));
+		FD_SET* set_read,*set_write;
+		TIMEVAL ti;
+		ti.tv_sec=0;
+		ti.tv_usec=ms*1000;
+		if(!bWrite)
+			{
+				set_read=&m_signaled_set;
+				set_write=NULL;
+					
+			}
+		else
+			{
+				set_read=NULL;
+				set_write=&m_signaled_set;
+			}
+		SINT32 ret;
+		#ifdef _WIN32
+				if(m_signaled_set.fd_count==0)
+					{
+						Sleep(ms);
+						ret=0;
+					}
+				else
+					ret=::select(0,set_read,set_write,NULL,&ti);
+		#else
+			  ret=::select(max,set_read,set_write,NULL,&ti);
+		#endif
+		if(ret==0)
+			{
+				#ifdef _DEBUG
+					CAMsg::printMsg(LOG_DEBUG,"SocketGroup Select-Timed Out!\n");
+				#endif				
+				return E_TIMEDOUT;
+			}
+		if(ret==SOCKET_ERROR)
+			{
+				ret=WSAGetLastError();
+				#ifdef _DEBUG
+					CAMsg::printMsg(LOG_DEBUG,"SocketGroup Select-Fehler: %i\n",WSAGetLastError());
+				#endif
+				return E_UNKNOWN;
+			}
+		return ret;
+	}
 			
 bool CASocketGroup::isSignaled(CASocket&s)
 	{
 		return FD_ISSET((SOCKET)s,&m_signaled_set)!=0;
+	}
+
+bool CASocketGroup::isSignaled(CASocket*ps)
+	{
+		return FD_ISSET((SOCKET)*ps,&m_signaled_set)!=0;
 	}
 
 bool CASocketGroup::isSignaled(CAMuxSocket&s)

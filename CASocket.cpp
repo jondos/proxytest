@@ -27,7 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #include "StdAfx.h"
 #include "CASocket.hpp"
-
+#include "CASocketASyncSend.hpp"
 #ifdef _DEBUG
 	extern int sockets;
 	#include "CAMsg.hpp"
@@ -36,12 +36,15 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define CLOSE_RECEIVE 0x02
 #define CLOSE_BOTH		0x03
 
+CASocketASyncSend* CASocket::m_pASyncSend=NULL;
+
 CASocket::CASocket()
 	{
 		m_Socket=0;
 		InitializeCriticalSection(&csClose);
 		closeMode=0;
 		localPort=-1;
+		m_bASyncSend=false;
 	}
 
 SINT32 CASocket::create()
@@ -173,15 +176,23 @@ SINT32 CASocket::close(int mode)
 int CASocket::send(UINT8* buff,UINT32 len)
 	{
 	  int ret;	
-	  do
+	  if(!m_bASyncSend) //snyc send...
 			{
-		    ret=::send(m_Socket,(char*)buff,len,MSG_NOSIGNAL);
-			 #ifdef _DEBUG
-				if(ret==SOCKET_ERROR)
-				 printf("Fehler beim Socket-send: %i",errno);
-				#endif
+				do
+					{
+						ret=::send(m_Socket,(char*)buff,len,MSG_NOSIGNAL);
+					 #ifdef _DEBUG
+						if(ret==SOCKET_ERROR)
+						 printf("Fehler beim Socket-send: %i",errno);
+						#endif
+					}
+				while(ret==SOCKET_ERROR&&errno==EINTR);
 			}
-	  while(ret==SOCKET_ERROR&&errno==EINTR);
+		else
+			{
+				m_pASyncSend->send(this,buff,len);
+				ret=len;
+			}
 	  return ret;	    	    
 	}
 
@@ -232,6 +243,12 @@ SINT32 CASocket::setRecvLowWat(UINT32 r)
 		return setsockopt(m_Socket,SOL_SOCKET,SO_RCVLOWAT,(char*)&val,sizeof(val));
 	}
 
+SINT32 CASocket::setSendLowWat(UINT32 r)
+	{
+		int val=r;
+		return setsockopt(m_Socket,SOL_SOCKET,SO_SNDLOWAT,(char*)&val,sizeof(val));
+	}
+
 SINT32 CASocket::setRecvBuff(UINT32 r)
 	{
 		int val=r;
@@ -275,4 +292,20 @@ SINT32 CASocket::setKeepAlive(UINT32 sec)
 #else
 		return E_UNKNOWN;
 #endif
+	}
+
+SINT32 CASocket::setASyncSend(bool b,SINT32 size)
+	{
+		if(b)
+			{
+				if(size!=-1)
+					setSendLowWat(size);
+				if(m_pASyncSend==NULL)
+					{
+						m_pASyncSend=new CASocketASyncSend();
+						m_pASyncSend->start();
+					}
+			}
+		m_bASyncSend=b;
+		return E_SUCCESS;
 	}

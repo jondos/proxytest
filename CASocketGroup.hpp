@@ -34,7 +34,9 @@ class CASocketGroup
 			int add(CAMuxSocket&s);
 			int remove(CASocket&s);
 			int select();
+			SINT32 select(bool bWrite,UINT32 time_ms);
 			bool isSignaled(CASocket&s);
+			bool isSignaled(CASocket*ps);
 			bool isSignaled(CAMuxSocket&s);
 		protected:
 			fd_set m_fdset;

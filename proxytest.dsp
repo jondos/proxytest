@@ -226,6 +226,7 @@ SOURCE=.\httptunnel\http.cpp
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
 
+# ADD CPP /W3
 # SUBTRACT CPP /YX /Yc /Yu
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
@@ -464,6 +465,10 @@ SOURCE=.\CAMuxSocket.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CAQueue.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\CARoundTripTime.cpp
 # End Source File
 # Begin Source File
@@ -477,6 +482,10 @@ SOURCE=.\CASocket.cpp
 # Begin Source File
 
 SOURCE=.\CASocketAddr.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CASocketASyncSend.cpp
 # End Source File
 # Begin Source File
 
@@ -575,6 +584,10 @@ SOURCE=.\CAMuxSocket.hpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CAQueue.hpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\CARoundTripTime.hpp
 # End Source File
 # Begin Source File
@@ -588,6 +601,10 @@ SOURCE=.\CASocket.hpp
 # Begin Source File
 
 SOURCE=.\CASocketAddr.hpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CASocketASyncSend.hpp
 # End Source File
 # Begin Source File
 
