@@ -384,7 +384,7 @@ LOOP_START:
 														oMuxPacket.payload.data[ntohs(oMuxPacket.payload.len)]=0;
 														CAMsg::printMsg(LOG_DEBUG,"%u\n%s",ntohs(oMuxPacket.payload.len),oMuxPacket.payload.data);
 													#endif
-													if(payLen>PAYLOAD_SIZE||tmpSocket->send(oMuxPacket.payload.data,payLen)==SOCKET_ERROR)
+													if(payLen>PAYLOAD_SIZE||tmpSocket->sendTimeOut(oMuxPacket.payload.data,payLen,_SEND_TIMEOUT)==SOCKET_ERROR)
 														{
 															#ifdef _DEBUG
 																CAMsg::printMsg(LOG_DEBUG,"Error sending Data to Squid!");

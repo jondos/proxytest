@@ -298,7 +298,7 @@ int CASocket::send(UINT8* buff,UINT32 len,bool bDisableAsync)
 	@param msTimeOut MilliSeconds to wait
 	@ret number of bytes send, or -1 in case of an error
 */
-int CASocket::send(UINT8* buff,UINT32 len,UINT32 msTimeOut)
+int CASocket::sendTimeOut(UINT8* buff,UINT32 len,UINT32 msTimeOut)
 	{
 	  int ret;
 		SINT32 aktTimeOut=0;	
