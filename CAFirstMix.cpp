@@ -328,6 +328,7 @@ SINT32 CAFirstMix::loop()
                         delete pEntry->pCipher;
 												pEntry=oChannelList.getNextChannel(pEntry);
 											}
+										ASSERT(pHashEntry->pQueueSend!=NULL,"Send queue is NULL");
 										delete pHashEntry->pQueueSend;
 										oChannelList.remove(pMuxSocket);
 										pMuxSocket->close();

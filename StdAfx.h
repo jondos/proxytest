@@ -255,6 +255,13 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define E_UNKNOWN_HOST -400 // A hostname could not be resolved
 
 #include <assert.h>
+
+#ifndef DEBUG
+#define ASSERT(cond,msg)
+#else
+#define ASSERT(cond,msg) {if(!(cond)){CAMsg::printMsg(LOG_DEBUG,"ASSERT: %s (File: %s, Line: %s)\n",msg,__FILE__,__LINE__);}}
+#endif
+
 #include <stdio.h>
 #include <time.h>
 #include <sys/types.h>
