@@ -209,8 +209,8 @@ SINT32 CAFirstMix::init()
 		m_pQueueReadFromMix=new CAQueue(MIXPACKET_SIZE);
 #endif		
 		m_pChannelList=new CAFirstMixChannelList();
-		m_psocketgroupUsersRead=new CASocketGroup;
-		m_psocketgroupUsersWrite=new CASocketGroup;
+		m_psocketgroupUsersRead=new CASocketGroup(false);
+		m_psocketgroupUsersWrite=new CASocketGroup(true);
 		m_pInfoService=new CAInfoService(this);
 
 		m_pthreadsLogin=new CAThreadPool(NUM_LOGIN_WORKER_TRHEADS,MAX_LOGIN_QUEUE,false);
@@ -366,7 +366,7 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 			CAQueue* pQueue=pFirstMix->m_pQueueReadFromMix;
 		#endif
 		MIXPACKET* pMixPacket=new MIXPACKET;
-		CASingleSocketGroup* pSocketGroup=new CASingleSocketGroup();
+		CASingleSocketGroup* pSocketGroup=new CASingleSocketGroup(false);
 		pSocketGroup->add(*pMuxSocket);
 		#ifdef USE_POOL
 			CAPool* pPool=new CAPool(MIX_POOL_SIZE);
@@ -379,7 +379,7 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 						msSleep(200);
 						continue;
 					}
-				SINT32 ret=pSocketGroup->select(false,MIX_POOL_TIMEOUT);	
+				SINT32 ret=pSocketGroup->select(MIX_POOL_TIMEOUT);	
 				if(ret==E_TIMEDOUT)
 					{
 						#ifdef USE_POOL
@@ -439,7 +439,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 		CAIPList* pIPList=pFirstMix->m_pIPList;
 		CAThreadPool* pthreadsLogin=pFirstMix->m_pthreadsLogin;
 		UINT32 nSocketsIn=pFirstMix->m_nSocketsIn;
-		CASocketGroup osocketgroupAccept;
+		CASocketGroup osocketgroupAccept(false);
 		CAMuxSocket* pNewMuxSocket;
 		UINT8* peerIP=new UINT8[4];
 		UINT32 i=0;
@@ -449,7 +449,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 			osocketgroupAccept.add(socketsIn[i]);
 		while(!pFirstMix->getRestart())
 			{
-				countRead=osocketgroupAccept.select(false,10000);
+				countRead=osocketgroupAccept.select(10000);
 				if(countRead<0)
 					{ //check for Error - are we restarting ?
 						if(pFirstMix->getRestart()||countRead!=E_TIMEDOUT)

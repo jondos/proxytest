@@ -32,27 +32,5 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#ifdef _DEBUG
 	#include "CAMsg.hpp"
 //#endif
-
-SINT32 CASingleSocketGroup::select(bool bWrite,UINT32 time_ms)
-	{
-		if(bWrite)
-			m_pollfd->events=POLLOUT;
-		else
-			m_pollfd->events=POLLIN;
-		int ret=::poll(m_pollfd,1,time_ms);
-		if(ret==0)
-			{
-				return E_TIMEDOUT;
-			}
-		if(ret==SOCKET_ERROR)
-			{
-				#ifdef _DEBUG
-					ret=GET_NET_ERROR;
-					CAMsg::printMsg(LOG_DEBUG,"SocketGroup Select-Fehler: %i\n",ret);
-				#endif
-				return E_UNKNOWN;
-			}
-		return ret;
-	}
 			
 #endif

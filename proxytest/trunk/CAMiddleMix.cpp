@@ -428,7 +428,7 @@ THREAD_RETURN mm_loopDownStream(void *p)
 		CASymCipher* pCipher;
 		MIXPACKET* pMixPacket=new MIXPACKET;
 		SINT32 ret;
-		CASingleSocketGroup oSocketGroup;
+		CASingleSocketGroup oSocketGroup(false);
 		oSocketGroup.add(*(pMix->m_pMuxOut));
 #ifdef USE_POOL		
 		CAPool* pPool=new CAPool(MIX_POOL_SIZE);
@@ -436,9 +436,9 @@ THREAD_RETURN mm_loopDownStream(void *p)
 		for(;;)
 			{
 				#ifndef USE_POOL			
-					ret=oSocketGroup.select(false,1000);
+					ret=oSocketGroup.select(1000);
 				#else
-					ret=oSocketGroup.select(false,MIX_POOL_TIMEOUT);
+					ret=oSocketGroup.select(MIX_POOL_TIMEOUT);
 				#endif
 				if(ret!=1)
 					{
@@ -524,7 +524,7 @@ SINT32 CAMiddleMix::loop()
 		CASymCipher* pCipher;
 		SINT32 ret;
 		UINT8* tmpRSABuff=new UINT8[RSA_SIZE];
-		CASingleSocketGroup oSocketGroup;
+		CASingleSocketGroup oSocketGroup(false);
 		oSocketGroup.add(*m_pMuxIn);
 		m_pMuxIn->setCrypt(true);
 		m_pMuxOut->setCrypt(true);
@@ -537,9 +537,9 @@ SINT32 CAMiddleMix::loop()
 		for(;;)
 			{
 				#ifndef USE_POOL			
-					ret=oSocketGroup.select(false,1000);
+					ret=oSocketGroup.select(1000);
 				#else
-					ret=oSocketGroup.select(false,MIX_POOL_TIMEOUT);
+					ret=oSocketGroup.select(MIX_POOL_TIMEOUT);
 				#endif
 				if(ret!=1)
 					{

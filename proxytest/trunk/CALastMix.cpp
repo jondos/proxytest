@@ -415,7 +415,7 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 			CAQueue* pQueue=pLastMix->m_pQueueReadFromMix;
 		#endif
 		MIXPACKET* pMixPacket=new MIXPACKET;
-		CASingleSocketGroup* pSocketGroup=new CASingleSocketGroup();
+		CASingleSocketGroup* pSocketGroup=new CASingleSocketGroup(false);
 		pSocketGroup->add(*pMuxSocket);
 		#ifdef USE_POOL
 			CAPool* pPool=new CAPool(MIX_POOL_SIZE);
@@ -428,7 +428,7 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 						msSleep(200);
 						continue;
 					}
-				SINT32 ret=pSocketGroup->select(false,MIX_POOL_TIMEOUT);	
+				SINT32 ret=pSocketGroup->select(MIX_POOL_TIMEOUT);	
 				if(ret==E_TIMEDOUT)
 					{
 						#ifdef USE_POOL

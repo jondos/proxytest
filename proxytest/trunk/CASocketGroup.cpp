@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#endif
 
 #define MAX_POLLFD 8192
-CASocketGroup::CASocketGroup()
+CASocketGroup::CASocketGroup(bool bWrite)
 	{
 		#ifndef HAVE_POLL
 			FD_ZERO(&m_fdset);
@@ -43,22 +43,41 @@ CASocketGroup::CASocketGroup()
 				  m_max=0;
 			#endif
 		#else
-			m_pollfd_read=new struct pollfd[MAX_POLLFD];
-			memset(m_pollfd_read,0,sizeof(struct pollfd)*MAX_POLLFD);
-			m_pollfd_write=new struct pollfd[MAX_POLLFD];
-			memset(m_pollfd_write,0,sizeof(struct pollfd)*MAX_POLLFD);
-			for(int i=0;i<MAX_POLLFD;i++)
-				{
-					m_pollfd_read[i].events=POLLIN;
-					m_pollfd_write[i].events=POLLOUT;	
-					m_pollfd_read[i].fd=-1;
-					m_pollfd_write[i].fd=-1;	
-				}
+			m_pollfd=new struct pollfd[MAX_POLLFD];
+			memset(m_pollfd,0,sizeof(struct pollfd)*MAX_POLLFD);
 			m_max=0;
 		#endif
+		setPoolForWrite(bWrite);
+	}
+
+inline SINT32 CASocketGroup::setPoolForWrite(bool bWrite)
+	{
+		#ifndef HAVE_POLL
+		if(!bWrite)
+				{
+					m_set_read=&m_signaled_set;
+					m_set_write=NULL;
+						
+				}
+			else
+				{
+					m_set_read=NULL;
+					m_set_write=&m_signaled_set;
+				}	
+		#else
+			for(int i=0;i<MAX_POLLFD;i++)
+				{
+					if(bWrite)
+						m_pollfd[i].events=POLLOUT;
+					else
+						m_pollfd[i].events=POLLIN;
+					m_pollfd[i].fd=-1;
+				}
+		#endif
+		return E_SUCCESS;
 	}
 			
-SINT32 CASocketGroup::add(CASocket&s)
+inline SINT32 CASocketGroup::add(CASocket&s)
 	{
 		m_csFD_SET.lock();
 		#ifndef HAVE_POLL
@@ -67,12 +86,8 @@ SINT32 CASocketGroup::add(CASocket&s)
 				m_max=((SOCKET)s)+1;
 			#endif
 			FD_SET((SOCKET)s,&m_fdset);
-//			#ifdef _DEBUG
-//				CAMsg::printMsg(LOG_DEBUG,"CASocketGroutp: Added SOCKET: %u\n",(SOCKET)s);
-//			#endif
 		#else
-			m_pollfd_read[(SOCKET)s].fd=(SOCKET)s;
-			m_pollfd_write[(SOCKET)s].fd=(SOCKET)s;
+			m_pollfd[(SOCKET)s].fd=(SOCKET)s;
 			if(m_max<((SOCKET)s)+1)
 				m_max=((SOCKET)s)+1;
 		#endif
@@ -80,7 +95,7 @@ SINT32 CASocketGroup::add(CASocket&s)
 		return E_SUCCESS;
 	}
 
-SINT32 CASocketGroup::add(CAMuxSocket&s)
+inline SINT32 CASocketGroup::add(CAMuxSocket&s)
 	{
 		m_csFD_SET.lock();
 		#ifndef HAVE_POLL
@@ -88,13 +103,9 @@ SINT32 CASocketGroup::add(CAMuxSocket&s)
 			if(m_max<(s.getSocket())+1)
 				m_max=(s.getSocket())+1;
 			#endif
-//			#ifdef _DEBUG
-//					CAMsg::printMsg(LOG_DEBUG,"CASocketGroup: Added SOCKET: %u\n",(SOCKET)s);
-//			#endif
 			FD_SET(s.getSocket(),&m_fdset);
 		#else
-		m_pollfd_read[s.getSocket()].fd=s.getSocket();
-		m_pollfd_write[s.getSocket()].fd=s.getSocket();			
+		m_pollfd[s.getSocket()].fd=s.getSocket();
 		if(m_max<(s.getSocket())+1)
 			m_max=(s.getSocket())+1;
 		#endif
@@ -106,13 +117,9 @@ SINT32 CASocketGroup::remove(CASocket&s)
 	{
 		m_csFD_SET.lock();
 		#ifndef HAVE_POLL
-//			#ifdef _DEBUG
-//				CAMsg::printMsg(LOG_DEBUG,"CASocketGroutp: Removed SOCKET: %u\n",(SOCKET)s);
-//			#endif
 			FD_CLR((SOCKET)s,&m_fdset);
 		#else
-			m_pollfd_read[(SOCKET)s].fd=-1;
-			m_pollfd_write[(SOCKET)s].fd=-1;			
+			m_pollfd[(SOCKET)s].fd=-1;			
 		#endif
 		m_csFD_SET.unlock();
 		return E_SUCCESS;
@@ -122,13 +129,9 @@ SINT32 CASocketGroup::remove(CAMuxSocket&s)
 	{
 		m_csFD_SET.lock();
 		#ifndef HAVE_POLL
-//			#ifdef _DEBUG
-//				CAMsg::printMsg(LOG_DEBUG,"CASocketGroutp: Removed SOCKET: %u\n",(SOCKET)s);
-//			#endif
 			FD_CLR((SOCKET)s,&m_fdset);
 		#else
-			m_pollfd_read[(SOCKET)s].fd=-1;
-			m_pollfd_write[(SOCKET)s].fd=-1;			
+			m_pollfd[(SOCKET)s].fd=-1;
 		#endif
 		m_csFD_SET.unlock();
 		return E_SUCCESS;
@@ -142,9 +145,9 @@ SINT32 CASocketGroup::select()
 			m_csFD_SET.unlock();
 			#ifdef _DEBUG
 				#ifdef _WIN32
-						int ret=::select(0,&m_signaled_set,NULL,NULL,NULL);
+						int ret=::select(0,m_set_read,m_set_write,NULL,NULL);
 				#else
-						int ret=::select(m_max,&m_signaled_set,NULL,NULL,NULL);
+						int ret=::select(m_max,m_set_read,m_set_write,NULL,NULL);
 				#endif			    
 				if(ret==SOCKET_ERROR)
 					{
@@ -153,19 +156,17 @@ SINT32 CASocketGroup::select()
 				return ret;
 			#else
 				#ifdef _WIN32
-						return ::select(0,&m_signaled_set,NULL,NULL,NULL);
+						return ::select(0,m_set_read,m_set_write,NULL,NULL);
 				#else
-						return ::select(m_max,&m_signaled_set,NULL,NULL,NULL);
+						return ::select(m_max,m_set_read,m_set_write,NULL,NULL);
 				#endif			    
 			#endif
 		#else
-			m_bWriteQueried=false;
-			return ::poll(m_pollfd_read,m_max,-1);
+			return ::poll(m_pollfd,m_max,-1);
 		#endif
 	}
 
 /** Waits for events on the sockets. If after ms milliseconds no event occurs, E_TIMEDOUT is returned
-	* @param bWrite - if true, the functions wait for writeable sockets, otherwise for readable
 	* @param time_ms - maximum milliseconds to wait
 	* @retval E_TIMEDOUT, if other ms milliseconds no event occurs
 	* @retval 0, if no socket was read/writeable
@@ -173,28 +174,17 @@ SINT32 CASocketGroup::select()
 	* @return number of read/writeable sockets
 	*/
 
-SINT32 CASocketGroup::select(bool bWrite,UINT32 time_ms)
+SINT32 CASocketGroup::select(UINT32 time_ms)
 	{
 		SINT32 ret;
 		#ifndef HAVE_POLL
 			m_csFD_SET.lock();
 			memcpy(&m_signaled_set,&m_fdset,sizeof(fd_set));
 			m_csFD_SET.unlock();
-			fd_set* set_read,*set_write;
 			timeval ti;
 			ti.tv_sec=0;
 			ti.tv_usec=time_ms*1000;
-			if(!bWrite)
-				{
-					set_read=&m_signaled_set;
-					set_write=NULL;
-						
-				}
-			else
-				{
-					set_read=NULL;
-					set_write=&m_signaled_set;
-				}
+	
 			#ifdef _WIN32
 					if(m_signaled_set.fd_count==0)
 						{
@@ -202,21 +192,12 @@ SINT32 CASocketGroup::select(bool bWrite,UINT32 time_ms)
 							ret=0;
 						}
 					else
-						ret=::select(0,set_read,set_write,NULL,&ti);
+						ret=::select(0,m_set_read,m_set_write,NULL,&ti);
 			#else
-					ret=::select(m_max,set_read,set_write,NULL,&ti);
+					ret=::select(m_max,m_set_read,m_set_write,NULL,&ti);
 			#endif
 		#else
-			if(bWrite)
-				{
-					ret=::poll(m_pollfd_write,m_max,time_ms);
-					m_bWriteQueried=true;
-				}
-			else
-				{
-					ret=::poll(m_pollfd_read,m_max,time_ms);
-					m_bWriteQueried=false;
-				}
+			ret=::poll(m_pollfd,m_max,time_ms);
 		#endif
 		if(ret==0)
 			{
@@ -234,4 +215,3 @@ SINT32 CASocketGroup::select(bool bWrite,UINT32 time_ms)
 			}
 		return ret;
 	}
-			

@@ -206,7 +206,7 @@ SINT32 CAInfoService::sendStatus(bool bIncludeCerts)
 				return E_UNKNOWN;
 			}
 		sprintf((char*)buffHeader,"POST /feedback HTTP/1.0\r\nContent-Length: %u\r\n\r\n",buffLen);
-		oSocket.send(buffHeader,strlen((char*)buffHeader));
+		oSocket.sendFully(buffHeader,strlen((char*)buffHeader));
 		SINT32 ret=oSocket.sendFully(buff,buffLen);
 		delete[] buff;
 		oSocket.close();	
@@ -257,8 +257,9 @@ SINT32 CAInfoService::sendMixHelo()
 				if(sendBuff==NULL)
 					goto ERR;
 				sprintf((char*)buffHeader,"POST /helo HTTP/1.0\r\nContent-Length: %u\r\n\r\n",sendBuffLen);
-				oSocket.send(buffHeader,strlen((char*)buffHeader));
-				oSocket.send(sendBuff,sendBuffLen);
+				if(	oSocket.sendFully(buffHeader,strlen((char*)buffHeader))!=E_SUCCESS||
+						oSocket.sendFully(sendBuff,sendBuffLen)!=E_SUCCESS)
+					goto ERR;
 				oSocket.close();
 				delete []sendBuff;
 				return E_SUCCESS;	
@@ -313,8 +314,9 @@ SINT32 CAInfoService::sendCascadeHelo()
 				if(sendBuff==NULL)
 					goto ERR;
 				sprintf((char*)buffHeader,"POST /cascade HTTP/1.0\r\nContent-Length: %u\r\n\r\n",sendBuffLen);
-				oSocket.send(buffHeader,strlen((char*)buffHeader));
-				oSocket.send(sendBuff,sendBuffLen);
+				if(	oSocket.sendFully(buffHeader,strlen((char*)buffHeader))!=E_SUCCESS||
+						oSocket.sendFully(sendBuff,sendBuffLen)!=E_SUCCESS)
+						goto ERR;
 				oSocket.close();
 				delete []sendBuff;
 				return E_SUCCESS;	
