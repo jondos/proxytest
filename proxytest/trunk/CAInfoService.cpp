@@ -86,15 +86,15 @@ THREAD_RETURN InfoLoop(void *p)
 			strcpy(strAnonServer,"anon.inf.tu-dresden.de");
 //end hack....
 		sprintf(strAnonServer,"%s%%3A%u",buff,options.getServerPort());
-
+		int helocount=10;
 		while(pInfoService->getRun())
 			{
 				if(oSocket.connect(&oAddr)==E_SUCCESS)
 					{
 						oBufferStream.reset();
 						oxmlOut.BeginDocument("1.0","UTF-8",true);
-						oxmlOut.BeginElementAttrs("status");
-						oxmlOut.WriteAttr("anonServer",strAnonServer);
+						oxmlOut.BeginElementAttrs("MixCascadeStatus");
+						oxmlOut.WriteAttr("id",strAnonServer);
 						pInfoService->getLevel(&nUser,&nRisk,&nTraffic);
 						oxmlOut.WriteAttr("nrOfActiveUsers",nUser);
 						oxmlOut.WriteAttr("currentRisk",nRisk);
@@ -108,6 +108,11 @@ THREAD_RETURN InfoLoop(void *p)
 						oSocket.send(buff,buffLen);
 					}
 				oSocket.close();	
+				if(helocount==0)
+					{
+						pInfoService->sendHelo();
+						helocount=10;
+					}
 				sleep(60);
 			}
 		delete buff;
