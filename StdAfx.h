@@ -270,6 +270,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#if !defined(HAVE_MSG_DONTWAIT)&&!defined(MSG_DONTWAIT)
 		#define MSG_DONTWAIT 0
 	#endif
+	#ifdef __FreeBSD__
+		#define O_SYNC O_FSYNC
+	#endif
 #endif
 
 
