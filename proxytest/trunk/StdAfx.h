@@ -38,7 +38,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 
 //#define LOG_CHANNEL
-#define LOG_PACKET_TIMES //computes statistics about the processing time each packet needs
+//#define LOG_PACKET_TIMES //computes statistics about the processing time each packet needs
 //#define COMPRESSED_LOGS
 //#define DO_TRACE
 //#define PAYMENT_SUPPORT (outdated --> to be removed)
