@@ -242,6 +242,5 @@ class CACmdLnOptions
 			SINT32 readXmlConfiguration(DOM_Document& docConfig,const UINT8* const configFileName);
 			SINT32 processXmlConfiguration(DOM_Document& docConfig);
 			SINT32 clearTargetInterfaces();
-			SINT32 clearListenerInterfaces();
 	};
 #endif

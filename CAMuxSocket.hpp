@@ -42,7 +42,12 @@ typedef UINT32 HCHANNEL;
 #define MIXPACKET_SIZE 	998
 
 #define CHANNEL_DATA		0x00
-#define CHANNEL_OPEN		0x08 //must be 8 in final version!!
+#ifdef NEW_PROTOCOL
+	#define CHANNEL_OPEN_OLD		0x08 //must be 8 in final version!!
+#else 
+	#define CHANNEL_OPEN_OLD		0x00
+#endif
+#define CHANNEL_OPEN_NEW		0x08
 
 #define CHANNEL_CLOSE		0x01
 #define CHANNEL_SUSPEND 0x02
@@ -134,9 +139,8 @@ class CAMuxSocket
 				*
 				* @param key buffer conntaining the key bits
 				* @param keyLen size of the buffer (keys)
-				*					if keylen=16, then the key is used for incomming and outgoing direction (key only)
-				*					if keylen=32, the the first bytes a used for incoming (key only) and the second for outgoing (key only)
-				*					if keylen=64, the the first bytes a used for incoming (key + IV ) and the second for outgoing (key + IV)
+				*					if keylen=16, then the key is used for incomming and outgoing direction
+				*					if keylen=32, the the first bytes a used for incoming and the second for outgoing
 				*	@retval E_SUCCESS if successful
 				*	@retval E_UNKNOWN otherwise
 				*/
@@ -151,13 +155,6 @@ class CAMuxSocket
 						{
 							m_oCipherIn.setKeyAES(key);
 							m_oCipherOut.setKeyAES(key+16);
-						}
-					else if(keyLen==64)
-						{
-							m_oCipherIn.setKeyAES(key);
-							m_oCipherIn.setIV(key+16);
-							m_oCipherOut.setKeyAES(key+32);
-							m_oCipherOut.setIV(key+48);
 						}
 					else
 						return E_UNKNOWN;

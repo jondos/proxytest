@@ -56,12 +56,6 @@ class CASymCipher:public CALockAble
 				}
 
 			SINT32 setKeyAES(UINT8* key);
-			SINT32 setIV(UINT8* iv)
-				{// TODO m_iv2 ???
-					memcpy(m_iv,iv,16);
-					return E_SUCCESS;
-				}
-
 			SINT32 decryptAES(UINT8* in,UINT8* out,UINT32 len);
 			SINT32 decryptAES2(UINT8* in,UINT8* out,UINT32 len);
 			SINT32 encryptAES(UINT8* in,UINT8* out,UINT32 len);

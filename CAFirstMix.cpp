@@ -39,7 +39,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAThread.hpp"
 #include "CAUtil.hpp"
 #include "CASignature.hpp"
-#include "CABase64.hpp"
 #include "xml/DOM_Output.hpp"
 
 extern CACmdLnOptions options;
@@ -218,6 +217,8 @@ THREAD_RETURN loopAcceptUsers(void* param)
 		CAFirstMixChannelList* pChannelList=pFirstMix->m_pChannelList;
 		CASocketGroup* psocketgroupUsersRead=pFirstMix->m_psocketgroupUsersRead;
 		UINT32 nSocketsIn=pFirstMix->m_nSocketsIn;
+		UINT8* pKeyInfoBuff=pFirstMix->m_KeyInfoBuff;
+		UINT32 nKeyInfoSize=pFirstMix->m_KeyInfoSize;
 
 		UINT8* pxmlKeyInfoBuff=pFirstMix->m_xmlKeyInfoBuff;
 		UINT32 nxmlKeyInfoSize=pFirstMix->m_xmlKeyInfoSize;
@@ -278,7 +279,11 @@ THREAD_RETURN loopAcceptUsers(void* param)
 												#else
 													((CASocket*)pNewMuxSocket)->setKeepAlive(true);
 												#endif
+#ifdef NEW_KEY2USER_PROTOCOL
 												((CASocket*)pNewMuxSocket)->send(pxmlKeyInfoBuff,nxmlKeyInfoSize);
+#else
+												((CASocket*)pNewMuxSocket)->send(pKeyInfoBuff,nKeyInfoSize);
+#endif
 												((CASocket*)pNewMuxSocket)->setNonBlocking(true);
 												pChannelList->add(pNewMuxSocket,peerIP,new CAQueue);
 												pFirstMix->incUsers();
@@ -532,7 +537,11 @@ SINT32 CAFirstMix::loop()
 													#else
 														((CASocket*)pnewMuxSocket)->setKeepAlive(true);
 													#endif
+#ifdef NEW_KEY2USER_PROTOCOL
 													((CASocket*)pnewMuxSocket)->send(m_xmlKeyInfoBuff,m_xmlKeyInfoSize);
+#else
+													((CASocket*)pnewMuxSocket)->send(m_KeyInfoBuff,m_KeyInfoSize);
+#endif
 													((CASocket*)pnewMuxSocket)->setNonBlocking(true);
 													m_pChannelList->add(pnewMuxSocket,peerIP,new CAQueue);
 													incUsers();
@@ -593,6 +602,7 @@ SINT32 CAFirstMix::loop()
 											}
 										else if(ret==MIXPACKET_SIZE)
 											{
+												#ifdef NEW_KEY2USER_PROTOCOL
 													if(!pMuxSocket->getIsEncrypted())//Encryption is not set yet -> 
 																													 //so we assume that this is
 																													//the first packet of a connection
@@ -617,6 +627,7 @@ SINT32 CAFirstMix::loop()
 																}
 															goto NEXT_USER_CONNECTION;
 														}
+												#endif
 												#ifdef LOG_CHANNEL
 													pHashEntry->trafficIn++;
 												#endif
@@ -668,7 +679,7 @@ SINT32 CAFirstMix::loop()
 																	pEntry->packetsInFromUser++;
 																#endif
 															}
-														else if(pEntry==NULL&&pMixPacket->flags==CHANNEL_OPEN)
+														else if(pEntry==NULL&&(pMixPacket->flags==CHANNEL_OPEN_OLD||pMixPacket->flags==CHANNEL_OPEN_NEW))
 															{
 																pCipher= new CASymCipher();
 																m_pRSA->decrypt(pMixPacket->data,rsaBuff);
@@ -700,7 +711,9 @@ SINT32 CAFirstMix::loop()
 													}
 											}
 									}
+#ifdef NEW_KEY2USER_PROTOCOL
 	NEXT_USER_CONNECTION:
+#endif
 									pHashEntry=m_pChannelList->getNext();
 							}
 					}
@@ -960,6 +973,9 @@ SINT32 CAFirstMix::clean()
 		if(m_pRSA!=NULL)
 			delete m_pRSA;
 		m_pRSA=NULL;
+		if(m_KeyInfoBuff!=NULL)
+			delete []m_KeyInfoBuff;
+		m_KeyInfoBuff=NULL;
 		if(m_xmlKeyInfoBuff!=NULL)
 			delete []m_xmlKeyInfoBuff;
 		m_xmlKeyInfoBuff=NULL;
@@ -971,8 +987,71 @@ SINT32 CAFirstMix::clean()
 		#endif
 		return E_SUCCESS;
 	}
+/*
+ struct internal_mix_handler_data_struct
+	{
+		UINT32 mixcount;
+		UINT32 aktMix;
+		UINT8* cascadeInfo;
+		BufferInputStream* input;
+		CAASymCipher* m_arRSA; 
+	};
+	
+typedef struct internal_mix_handler_data_struct INTERNAL_MIX_HANDLER_STRUCT;
 
-	/** This will initialize the XML Cascade Info send to the InfoService and
+static void sMixHandler(XMLElement &elem, void *userData)
+	{
+		INTERNAL_MIX_HANDLER_STRUCT* data=(INTERNAL_MIX_HANDLER_STRUCT*)userData;
+		UINT32 aktPos=elem.GetInput().GetOffset();
+		UINT32 size=data->input->getSize()-aktPos;
+		data->m_arRSA[data->aktMix++].setPublicKeyAsXML(data->input->getBuffer()+aktPos,size);
+		XMLAttribute attrs=elem.GetAttrList();
+		while(strcmp(attrs.GetName(),"id")!=0)
+			attrs=attrs.GetNext();
+		strcat((char*)data->cascadeInfo,"<Mix id=\"");
+		strcat((char*)data->cascadeInfo,attrs.GetValue());
+		strcat((char*)data->cascadeInfo,"\"></Mix>");
+	}
+
+static void sMixesHandler(XMLElement &elem, void *userData)
+	{	
+		INTERNAL_MIX_HANDLER_STRUCT* data=(INTERNAL_MIX_HANDLER_STRUCT*)userData;
+		// set up initial handler for RSA-Key
+		XMLHandler handlers[] = 
+			{
+				XMLHandler("Mix",sMixHandler),
+				XMLHandler::END
+			};
+		XMLAttribute attrs=elem.GetAttrList();
+		while(strcmp(attrs.GetName(),"count")!=0)
+			{
+				attrs=attrs.GetNext();
+			}
+		data->mixcount=atol(attrs.GetValue());
+		data->m_arRSA=new CAASymCipher[data->mixcount];
+		data->aktMix=0;
+		sprintf((char*)data->cascadeInfo,"<Mixes count=\"%u\">",data->mixcount+1);
+		UINT32 tmpBuffLen=5000;
+		UINT8 tmpBuff[5000];
+		options.getMixXml(tmpBuff,&tmpBuffLen);
+		tmpBuff[tmpBuffLen]=0; //make a string
+		//options.getMixId(tmpBuff,50);
+		//sprintf((char*)data->cascadeInfo+strlen((char*)data->cascadeInfo),"<Mix id=\"%s\"></Mix>",tmpBuff);
+		char* startpos=strstr((char*)tmpBuff,"<Mix");
+		if(startpos!=NULL)
+			{
+				strcpy((char*)data->cascadeInfo+strlen((char*)data->cascadeInfo),startpos);
+			}
+		else
+			{
+				options.getMixId(tmpBuff,50);
+				sprintf((char*)data->cascadeInfo+strlen((char*)data->cascadeInfo),"<Mix id=\"%s\"></Mix>",tmpBuff);
+			}
+		elem.Process(handlers,userData);
+		strcat((char*)data->cascadeInfo,"</Mixes>");
+	}
+*/
+/** This will initialize the XML Cascade Info send to the InfoService and
   * the Key struct which is send to each user which connects
 	* This function is called from init()
 	*/
@@ -999,6 +1078,9 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		
 		DOM_Node child=elemMixes.getLastChild();
 		
+		m_KeyInfoBuff=new UINT8[(count+1)*256];
+		m_KeyInfoSize=3;
+		
 		//tmp XML-Structure for constructing the XML which is send to each user
 		DOM_Document docXmlKeyInfo=DOM_Document::createDocument();
 		DOM_Element elemRootKey=docXmlKeyInfo.createElement("MixCascade");
@@ -1019,12 +1101,19 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 						CAASymCipher oRSA;
 						oRSA.setPublicKeyAsDOMNode(rsaKey);
 						tlen=256;
+						oRSA.getPublicKey(m_KeyInfoBuff+m_KeyInfoSize,&tlen);
+						m_KeyInfoSize+=tlen;
 					}
 				child=child.getPreviousSibling();
 			}
 		tlen=256;
-	
-	
+		m_pRSA->getPublicKey(m_KeyInfoBuff+m_KeyInfoSize,&tlen);
+		m_KeyInfoSize+=tlen;
+
+		UINT16 tmp=htons(m_KeyInfoSize-2);
+		memcpy(m_KeyInfoBuff,&tmp,2);
+		m_KeyInfoBuff[2]=count+1;
+
 		//Inserting own Key in XML-Key struct
 		DOM_DocumentFragment docfragKey;
 		m_pRSA->getPublicKeyAsDocumentFragment(docfragKey);
@@ -1066,42 +1155,15 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 						DOM_Node rsaKey=child.getFirstChild();
 						CAASymCipher oRSA;
 						oRSA.setPublicKeyAsDOMNode(rsaKey);
-						DOM_Element elemNonce;
-						getDOMChildByName(child,(UINT8*)"Nonce",elemNonce,false);
-						UINT8 arNonce[1024];
-						if(elemNonce!=NULL)
-							{
-								UINT32 lenNonce=1024;
-								UINT32 tmpLen=1024;
-								getDOMElementValue(elemNonce,arNonce,&lenNonce);
-								CABase64::decode(arNonce,lenNonce,arNonce,&tmpLen);
-								lenNonce=tmpLen;
-								tmpLen=1024;
-								CABase64::encode(SHA1(arNonce,lenNonce,NULL),SHA_DIGEST_LENGTH,
-																	arNonce,&tmpLen);
-								arNonce[tmpLen]=0;
-							}
-						UINT8 key[64];
-						getRandom(key,64);
-						//UINT8 buff[400];
-						//UINT32 bufflen=400;
-						DOM_DocumentFragment docfragSymKey;
-						encodeXMLEncryptedKey(key,64,docfragSymKey,&oRSA);
-						DOM_Document docSymKey=DOM_Document::createDocument();
-						docSymKey.appendChild(docSymKey.importNode(docfragSymKey,true));
-						DOM_Element elemRoot=docSymKey.getDocumentElement();
-						if(elemNonce!=NULL)
-							{
-								DOM_Element elemNonceHash=docSymKey.createElement("Nonce");
-								setDOMElementValue(elemNonceHash,arNonce);
-								elemRoot.appendChild(elemNonceHash);
-							}
-						UINT32 outlen=5000;
+						UINT8 key[16];
+						getRandom(key,16);
+						UINT8 buff[400];
+						UINT32 bufflen=400;
+						encodeXMLEncryptedKey(key,16,buff,&bufflen,&oRSA);
+						UINT32 outlen=bufflen+5000;
 						UINT8* out=new UINT8[outlen];
-
-						m_pSignature->signXML(elemRoot);
-						DOM_Output::dumpToMem(docSymKey,out,&outlen);
-						m_pMuxOut->setKey(key,64);
+						m_pSignature->signXML(buff,bufflen,out,&outlen);
+						m_pMuxOut->setKey(key,16);
 						UINT16 size=htons(outlen);
 						((CASocket*)m_pMuxOut)->send((UINT8*)&size,2);
 						((CASocket*)m_pMuxOut)->send(out,outlen);

@@ -655,8 +655,8 @@ SINT32 CASocket::getNonBlocking(bool* b)
 		#ifndef _WIN32
 				int flags=fcntl(m_Socket,F_GETFL,0);
 				*b=((flags&O_NONBLOCK)==O_NONBLOCK);
-				return E_SUCCESS;
 		#else
 				return SOCKET_ERROR;
 		#endif
+		return E_SUCCESS;
 	}

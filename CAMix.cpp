@@ -32,7 +32,7 @@ SINT32 CAMix::start()
 	{
 		if(initOnce()!=E_SUCCESS)
 			return E_UNKNOWN;
-		for(;;)
+		while(true)
 			{
 				if(init()==E_SUCCESS)
 					loop();
