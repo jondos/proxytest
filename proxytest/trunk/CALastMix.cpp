@@ -667,7 +667,7 @@ SINT32 CALastMix::loop()
 //end Step 3
 
 //Step 4 Writing to previous Mix
-				if(osocketgroupMixIn.select(true,0)==1)
+				if(!oqueueMixIn.isEmpty()&&osocketgroupMixIn.select(true,0)==1)
 					{
 						countRead=oSocketList.getSize()+1;
 						while(countRead>0&&!oqueueMixIn.isEmpty())
