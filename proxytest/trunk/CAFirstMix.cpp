@@ -210,9 +210,12 @@ THREAD_RETURN loopSendToMix(void* param)
 		for(;;)
 			{
 				len=0xFFFF;
-				pQueue->getOrWait(buff,&len);
+				if(pQueue->isEmpty())
+					msSleep(1000);
+					else{
+				pQueue->get/*OrWait*/(buff,&len);
 				if(pSocket->sendFully(buff,len)!=E_SUCCESS)
-					break;
+					break;}
 			}
 		delete buff;
 		THREAD_RETURN_SUCCESS;
