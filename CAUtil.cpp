@@ -145,6 +145,28 @@ SINT32 getcurrentTimeMillis(BIGNUM* bnTime)
 	  #endif
 	}
 
+SINT32 getcurrentTimeMillis(UINT64& u64Time)
+	{
+		#ifdef _WIN32
+			struct _timeb timebuffer;
+			_ftime(&timebuffer);
+			/* Hack what should be solved better...*/
+			u64Time=timebuffer.time*1000+timebuffer.millitm;
+			/* end of hack..*/
+			return E_SUCCESS;
+	  #else //we dont use ftime due to a bug in glibc2.0
+		//we use gettimeofday() in order to get the millis...
+			struct timeval tv;
+			gettimeofday(&tv,NULL); //getting millis...
+			#ifdef __linux
+				u64Time=tv.tv_sec*1000+tv.tv_usec/1000;
+				return E_SUCCESS;
+			#else
+				return E_UNKNOWN;
+			#endif
+	  #endif
+	}
+
 /** Gets 32 random bits.
 	@param val - on return the bits are random
 	@retval E_UNKNOWN, if an error occured
