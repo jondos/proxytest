@@ -27,8 +27,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #include "StdAfx.h"
 #include "CAMiddleMix.hpp"
-#include "CASocketList.hpp"
-#include "CASocketGroup.hpp"
+//#include "CASocketList.hpp"
+#include "CASingleSocketGroup.hpp"
 #include "CAMsg.hpp"
 #include "CACmdLnOptions.hpp"
 #include "CASocketAddrINet.hpp"
@@ -191,30 +191,46 @@ THREAD_RETURN loopDownStream(void *p)
 		CASymCipher* pCipher;
 		MIXPACKET* pMixPacket=new MIXPACKET;
 		SINT32 ret;
+		CASingleSocketGroup oSocketGroup;
+		oSocketGroup.add(pMix->m_MuxOut);
 		for(;;)
 			{
-				ret=pMix->m_MuxOut.receive(pMixPacket);
-				if(ret==SOCKET_ERROR)
-						{
-							CAMsg::printMsg(LOG_CRIT,"loopDownStream -- Fehler bei receive() -- goto ERR!\n");
-							goto ERR;
-						}
-				if(pMix->m_pMiddleMixChannelList->getOutToIn(&channelIn,pMixPacket->channel,&pCipher)==E_SUCCESS)
-					{//connection found
-						if(pMixPacket->flags!=CHANNEL_CLOSE)
-							{
-								pMixPacket->channel=channelIn;
-								pCipher->decryptAES2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
-								pCipher->unlock();
-								if(pMix->m_MuxIn.send(pMixPacket)==SOCKET_ERROR)
-									goto ERR;
-							}
+				ret=oSocketGroup.select(false,1000);
+				if(ret!=1)
+					{
+						if(ret==E_TIMEDOUT)
+							continue;
 						else
-							{//connection should be closed
-								pCipher->unlock();
-								if(pMix->m_MuxIn.close(channelIn)==SOCKET_ERROR)
+							{
+								CAMsg::printMsg(LOG_CRIT,"loopDownStream -- Fehler bei select() -- goto ERR!\n");
+								goto ERR;
+							}
+					}
+				else
+					{
+						ret=pMix->m_MuxOut.receive(pMixPacket);
+						if(ret==SOCKET_ERROR)
+								{
+									CAMsg::printMsg(LOG_CRIT,"loopDownStream -- Fehler bei receive() -- goto ERR!\n");
 									goto ERR;
-								pMix->m_pMiddleMixChannelList->remove(channelIn);
+								}
+						if(pMix->m_pMiddleMixChannelList->getOutToIn(&channelIn,pMixPacket->channel,&pCipher)==E_SUCCESS)
+							{//connection found
+								if(pMixPacket->flags!=CHANNEL_CLOSE)
+									{
+										pMixPacket->channel=channelIn;
+										pCipher->decryptAES2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+										pCipher->unlock();
+										if(pMix->m_MuxIn.send(pMixPacket)==SOCKET_ERROR)
+											goto ERR;
+									}
+								else
+									{//connection should be closed
+										pCipher->unlock();
+										if(pMix->m_MuxIn.close(channelIn)==SOCKET_ERROR)
+											goto ERR;
+										pMix->m_pMiddleMixChannelList->remove(channelIn);
+									}
 							}
 					}
 			}
@@ -234,6 +250,8 @@ SINT32 CAMiddleMix::loop()
 		CASymCipher* pCipher;
 		SINT32 ret;
 		UINT8* tmpRSABuff=new UINT8[RSA_SIZE];
+		CASingleSocketGroup oSocketGroup;
+		oSocketGroup.add(m_MuxIn);
 		m_MuxIn.setCrypt(true);
 		m_MuxOut.setCrypt(true);
 		CAThread oThread;
@@ -241,48 +259,62 @@ SINT32 CAMiddleMix::loop()
 		oThread.start(this);
 		for(;;)
 			{
-				ret=m_MuxIn.receive(pMixPacket);
-				if(ret==SOCKET_ERROR)
+				ret=oSocketGroup.select(false,1000);
+				if(ret!=1)
 					{
-						CAMsg::printMsg(LOG_CRIT,"Fehler beim Empfangen -- Exiting!\n");
-						goto ERR;
-					}
-				if(m_pMiddleMixChannelList->getInToOut(pMixPacket->channel,&channelOut,&pCipher)!=E_SUCCESS)
-					{//new connection
-						if(pMixPacket->flags==CHANNEL_OPEN)
+						if(ret==E_TIMEDOUT)
+							continue;
+						else
 							{
-								#ifdef _DEBUG
-										CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
-								#endif
-								pCipher=new CASymCipher();
-								m_RSA.decrypt(pMixPacket->data,tmpRSABuff);
-								pCipher->setKeyAES(tmpRSABuff);
-								pCipher->decryptAES(pMixPacket->data+RSA_SIZE,
-																		pMixPacket->data+RSA_SIZE-KEY_SIZE,
-																		DATA_SIZE-RSA_SIZE);
-								memcpy(pMixPacket->data,tmpRSABuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
-								m_pMiddleMixChannelList->add(pMixPacket->channel,pCipher,&channelOut);
-								pMixPacket->channel=channelOut;
-								if(m_MuxOut.send(pMixPacket)==SOCKET_ERROR)
-									goto ERR;
+								CAMsg::printMsg(LOG_CRIT,"loopUpStream -- Fehler bei select() -- goto ERR!\n");
+								goto ERR;
 							}
 					}
 				else
-					{//established connection
-						if(pMixPacket->flags==CHANNEL_CLOSE)
+					{
+						ret=m_MuxIn.receive(pMixPacket);
+						if(ret==SOCKET_ERROR)
 							{
-								pCipher->unlock();
-								if(m_MuxOut.close(channelOut)==SOCKET_ERROR)
-									goto ERR;
-								m_pMiddleMixChannelList->remove(pMixPacket->channel);
+								CAMsg::printMsg(LOG_CRIT,"Fehler beim Empfangen -- Exiting!\n");
+								goto ERR;
+							}
+						if(m_pMiddleMixChannelList->getInToOut(pMixPacket->channel,&channelOut,&pCipher)!=E_SUCCESS)
+							{//new connection
+								if(pMixPacket->flags==CHANNEL_OPEN)
+									{
+										#ifdef _DEBUG
+												CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
+										#endif
+										pCipher=new CASymCipher();
+										m_RSA.decrypt(pMixPacket->data,tmpRSABuff);
+										pCipher->setKeyAES(tmpRSABuff);
+										pCipher->decryptAES(pMixPacket->data+RSA_SIZE,
+																				pMixPacket->data+RSA_SIZE-KEY_SIZE,
+																				DATA_SIZE-RSA_SIZE);
+										memcpy(pMixPacket->data,tmpRSABuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
+										m_pMiddleMixChannelList->add(pMixPacket->channel,pCipher,&channelOut);
+										pMixPacket->channel=channelOut;
+										if(m_MuxOut.send(pMixPacket)==SOCKET_ERROR)
+											goto ERR;
+									}
 							}
 						else
-							{
-								pMixPacket->channel=channelOut;
-								pCipher->decryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
-								pCipher->unlock();
-								if(m_MuxOut.send(pMixPacket)==SOCKET_ERROR)
-									goto ERR;
+							{//established connection
+								if(pMixPacket->flags==CHANNEL_CLOSE)
+									{
+										pCipher->unlock();
+										if(m_MuxOut.close(channelOut)==SOCKET_ERROR)
+											goto ERR;
+										m_pMiddleMixChannelList->remove(pMixPacket->channel);
+									}
+								else
+									{
+										pMixPacket->channel=channelOut;
+										pCipher->decryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+										pCipher->unlock();
+										if(m_MuxOut.send(pMixPacket)==SOCKET_ERROR)
+											goto ERR;
+									}
 							}
 					}
 			}
