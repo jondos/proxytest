@@ -166,38 +166,39 @@ SINT32 CASocket::connect(CASocketAddr & psa,UINT msTimeOut)
 		if(err!=EINPROGRESS)
 			return E_UNKNOWN;
 #endif
+
+#ifndef HAVE_POOL
+		struct timeval tval;
+		tval.tv_sec=msTimeOut/1000;
+		tval.tv_usec=(msTimeOut%1000)*1000;
 		fd_set readSet,writeSet;
 		FD_ZERO(&readSet);
 		FD_ZERO(&writeSet);
 		FD_SET(m_Socket,&readSet);
 		FD_SET(m_Socket,&writeSet);
-		struct timeval tval;
-		tval.tv_sec=msTimeOut/1000;
-		tval.tv_usec=(msTimeOut%1000)*1000;
 		err=::select(m_Socket+1,&readSet,&writeSet,NULL,&tval);
-		if(err==0) //timeout
+#else
+		struct pollfd opollfd;
+		opollfd.fd=m_Socket;
+		opollfd.events=POLLIN|POLLOUT;
+		err=::pool(&opollfd,1,msTimeOut);
+#endif		
+		if(err!=1) //timeout or error
 			{
 				::close(m_Socket);
 				m_Socket=-1;
 				return E_UNKNOWN;
 			}
-		if(FD_ISSET(m_Socket,&readSet)||FD_ISSET(m_Socket,&writeSet))
+		socklen_t len=sizeof(err);
+		err=0;
+		if(::getsockopt(m_Socket,SOL_SOCKET,SO_ERROR,(char*)&err,&len)<0||err!=0) //error by connect
 			{
-				socklen_t len=sizeof(err);
-				err=0;
-				if(::getsockopt(m_Socket,SOL_SOCKET,SO_ERROR,(char*)&err,&len)<0||err!=0)
-					{
-						::close(m_Socket);
-						m_Socket=-1;
-						return E_UNKNOWN;
-					}
-				setNonBlocking(bWasNonBlocking);
-				return E_SUCCESS;
+				::close(m_Socket);
+				m_Socket=-1;
+				return E_UNKNOWN;
 			}
-		::close(m_Socket);
-		m_Socket=-1;
-		return E_UNKNOWN;
-	
+		setNonBlocking(bWasNonBlocking);
+		return E_SUCCESS;	
 	}
 			
 SINT32 CASocket::close()
