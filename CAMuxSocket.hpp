@@ -135,8 +135,6 @@ class CAMuxSocket
 				* @param key buffer conntaining the key bits
 				* @param keyLen size of the buffer (keys)
 				*					if keylen=16, then the key is used for incomming and outgoing direction (key only)
-				*					if keylen=32, the the first bytes a used for incoming (key only) and the second for outgoing (key only)
-				*					if keylen=64, the the first bytes a used for incoming (key + IV ) and the second for outgoing (key + IV)
 				*	@retval E_SUCCESS if successful
 				*	@retval E_UNKNOWN otherwise
 				*/
@@ -147,17 +145,29 @@ class CAMuxSocket
 							m_oCipherIn.setKeyAES(key);
 							m_oCipherOut.setKeyAES(key);
 						}
-					else if(keyLen==32)
+				else
+						return E_UNKNOWN;
+					return E_SUCCESS;
+				}
+
+			SINT32 setSendKey(UINT8* key,UINT32 keyLen)
+				{
+					if(keyLen==32)
 						{
-							m_oCipherIn.setKeyAES(key);
-							m_oCipherOut.setKeyAES(key+16);
+							m_oCipherOut.setKeyAES(key);
+							m_oCipherOut.setIV(key+16);
 						}
-					else if(keyLen==64)
+					else
+						return E_UNKNOWN;
+					return E_SUCCESS;
+				}
+
+			SINT32 setReceiveKey(UINT8* key,UINT32 keyLen)
+				{
+					if(keyLen==32)
 						{
 							m_oCipherIn.setKeyAES(key);
 							m_oCipherIn.setIV(key+16);
-							m_oCipherOut.setKeyAES(key+32);
-							m_oCipherOut.setIV(key+48);
 						}
 					else
 						return E_UNKNOWN;

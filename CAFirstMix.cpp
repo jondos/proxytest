@@ -1101,7 +1101,8 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 
 						m_pSignature->signXML(elemRoot);
 						DOM_Output::dumpToMem(docSymKey,out,&outlen);
-						m_pMuxOut->setKey(key,64);
+						m_pMuxOut->setSendKey(key,32);
+						m_pMuxOut->setReceiveKey(key+32,32);
 						UINT16 size=htons(outlen);
 						((CASocket*)m_pMuxOut)->send((UINT8*)&size,2);
 						((CASocket*)m_pMuxOut)->send(out,outlen);
