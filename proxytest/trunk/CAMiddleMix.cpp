@@ -355,7 +355,7 @@ SET_OUT:
 #endif
 										memcpy(oMuxPacket.data,buff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
 										
-										oMuxPacket.len=oMuxPacket.len-16;
+//										oMuxPacket.len=oMuxPacket.len-16;
 
 										oSocketList.add(oMuxPacket.channel,lastId,newCipher);
 										oMuxPacket.channel=lastId;

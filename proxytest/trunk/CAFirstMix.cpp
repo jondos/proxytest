@@ -379,7 +379,7 @@ SINT32 CAFirstMix::loop()
 		oSocketGroup.add(socketIn);
 		oSocketGroup.add(muxOut);
 		HCHANNEL lastChannelId=1;
-		FIRSTMIX_MUXPACKET oMuxPacket;
+		MUXPACKET oMuxPacket;
 		CONNECTION oConnection;
 		int len;
 		CAMuxSocket* newMuxSocket;
@@ -402,7 +402,7 @@ SINT32 CAFirstMix::loop()
 		#endif
 		#ifdef _DEBUG
 		 CAMsg::printMsg(LOG_DEBUG,"Size of MuxPacket: %u\n",sizeof(oMuxPacket));
-		 CAMsg::printMsg(LOG_DEBUG,"Pointer: %p,%p,%p,%p\n",&oMuxPacket.channel,&oMuxPacket.len,&oMuxPacket.type,&oMuxPacket.data);
+		 CAMsg::printMsg(LOG_DEBUG,"Pointer: %p,%p,%p\n",&oMuxPacket.channel,&oMuxPacket.flags,oMuxPacket.data);
 		#endif
 		CAInfoService oInfoService;
 		// reading SingKey....
@@ -464,7 +464,7 @@ SINT32 CAFirstMix::loop()
 				if(oSocketGroup.isSignaled(muxOut))
 						{
 							len=muxOut.receive(&oMuxPacket);
-							if(len==0)
+							if(len!=SOCKET_ERROR&&oMuxPacket.flags!=0) //close event
 								{
 									#ifdef _DEBUG
 										CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u ... ",oMuxPacket.channel);
@@ -598,7 +598,7 @@ SINT32 CAFirstMix::loop()
 											}
 										else
 											{
-												if(len==0)
+												if(oMuxPacket.flags!=0)
 													{
 														if(oMuxChannelList.get(tmpEntry,oMuxPacket.channel,&oConnection))
 															{
@@ -650,7 +650,7 @@ SINT32 CAFirstMix::loop()
 																	CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",lastChannelId);
 																#endif
 																oMuxPacket.channel=lastChannelId++;
-																oMuxPacket.len=oMuxPacket.len-16;
+																//oMuxPacket.len=oMuxPacket.len-16;
 															}
 														if(muxOut.send(&oMuxPacket)==SOCKET_ERROR)
 															{

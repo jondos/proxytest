@@ -148,6 +148,8 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 		int MuxPacketSize=sizeof(MUXPACKET);
 		int aktIndex=0;
 		int len=0;
+		pPacket->channel=htonl(pPacket->channel);
+//		pPacket->len=htons(pPacket->len);
 
 		if(!bIsTunneld)
 			{
@@ -263,7 +265,7 @@ int CAMuxSocket::receive(MUXPACKET* pPacket)
 			}
 
 //		pPacket->len=ntohs(pPacket->len);	
-//		pPacket->channel=ntohl(pPacket->channel);
+		pPacket->channel=ntohl(pPacket->channel);
 		return sizeof(MUXPACKET);
 	}
 #endif
@@ -274,6 +276,14 @@ int CAMuxSocket::close(HCHANNEL channel_id)
 		MUXPACKET oPacket;
 		oPacket.channel=channel_id;
 		oPacket.len=0;
+		return send(&oPacket);
+	}
+#else
+int CAMuxSocket::close(HCHANNEL channel_id)
+	{
+		MUXPACKET oPacket;
+		oPacket.channel=channel_id;
+		oPacket.flags=1;
 		return send(&oPacket);
 	}
 #endif

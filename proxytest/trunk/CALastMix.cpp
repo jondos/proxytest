@@ -67,6 +67,7 @@ SINT32 CALastMix::init()
 		return E_SUCCESS;
 	}
 
+#ifndef PROT2
 SINT32 CALastMix::loop()
 	{
 		CASocketList  oSocketList;
@@ -234,3 +235,177 @@ SINT32 CALastMix::loop()
 		return E_SUCCESS;
 	}
 
+#else
+SINT32 CALastMix::loop()
+	{
+		CASocketList  oSocketList;
+		CASocketGroup oSocketGroup;
+		oSocketGroup.add(muxIn);
+		MUXPACKET oMuxPacket;
+		int len;
+		int countRead;
+		CONNECTION oConnection;
+		unsigned char buff[RSA_SIZE];
+		for(;;)
+			{
+					if((countRead=oSocketGroup.select())==SOCKET_ERROR)
+					{
+						sleep(1);
+						continue;
+					}
+				if(oSocketGroup.isSignaled(muxIn))
+					{
+						countRead--;
+						len=muxIn.receive(&oMuxPacket);
+						if(len==SOCKET_ERROR)
+							{
+								CAMsg::printMsg(LOG_CRIT,"Channel to previous mix closed -- Exiting!\n");
+								exit(-1);
+							}
+						if(!oSocketList.get(oMuxPacket.channel,&oConnection))
+							{
+								if(oMuxPacket.flags==0)
+									{
+										#ifdef _DEBUG
+										    CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
+										#endif
+		
+										CASymCipher* newCipher=new CASymCipher();
+										pRSA->decrypt((unsigned char*)oMuxPacket.data,buff);
+										newCipher->setDecryptionKeyAES(buff);
+										newCipher->decryptAES((unsigned char*)oMuxPacket.data+RSA_SIZE,
+																			 (unsigned char*)oMuxPacket.data+RSA_SIZE-KEY_SIZE,
+																			 DATA_SIZE-RSA_SIZE);
+										memcpy(oMuxPacket.data,buff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
+												
+										CASocket* tmpSocket=new CASocket;										
+										int ret;
+										if(oMuxPacket.payload.type==MUX_SOCKS)
+											ret=tmpSocket->connect(&addrSocks);
+										else
+											ret=tmpSocket->connect(&addrSquid);	
+										if(ret!=E_SUCCESS)
+										    {
+	    										#ifdef _DEBUG
+														CAMsg::printMsg(LOG_DEBUG,"Cannot connect to Squid!\n");
+													#endif
+													muxIn.close(oMuxPacket.channel);
+													delete tmpSocket;
+													delete newCipher;
+										    }
+										else
+										    {    
+													
+													int payLen=ntohs(oMuxPacket.payload.len);
+													#ifdef _DEBUG
+														oMuxPacket.payload.data[ntohs(oMuxPacket.payload.len)]=0;
+														CAMsg::printMsg(LOG_DEBUG,"%u\n%s",ntohs(oMuxPacket.payload.len),oMuxPacket.payload.data);
+													#endif
+													if(payLen>PAYLOAD_SIZE||tmpSocket->send(oMuxPacket.payload.data,payLen)==SOCKET_ERROR)
+														{
+															#ifdef _DEBUG
+																CAMsg::printMsg(LOG_DEBUG,"Error sending Data to Squid!");
+															#endif
+															tmpSocket->close();
+															muxIn.close(oMuxPacket.channel);
+															delete tmpSocket;
+															delete newCipher;
+														}
+													else
+														{
+															oSocketList.add(oMuxPacket.channel,tmpSocket,newCipher);
+															oSocketGroup.add(*tmpSocket);
+														}
+										    }
+									}
+								else
+									{
+										CAMsg::printMsg(LOG_CRIT,"Should never be here!!! New Channel wich Chaneel detroy packet!\n");
+									}
+							}
+						else
+							{
+								if(oMuxPacket.flags!=0)
+									{
+										oSocketGroup.remove(*(oConnection.pSocket));
+										oConnection.pSocket->close();
+										muxIn.close(oMuxPacket.channel);
+										oSocketList.remove(oMuxPacket.channel);
+										delete oConnection.pSocket;
+										delete oConnection.pCipher;
+									}
+								else
+									{
+#ifndef AES
+										oConnection.pCipher->decrypt((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
+#else
+										oConnection.pCipher->decryptAES((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
+#endif
+										
+		//								PAYLOAD* pPayload=(PAYLOAD*)&(oMuxPacket.data);		
+										#ifdef _DEBUG
+											oMuxPacket.payload.data[ntohs(oMuxPacket.payload.len)]=0;
+											CAMsg::printMsg(LOG_DEBUG,"%u\n%s",ntohs(oMuxPacket.payload.len),oMuxPacket.payload.data);
+										#endif
+										len=oConnection.pSocket->send(oMuxPacket.payload.data,ntohs(oMuxPacket.payload.len));
+										if(len==SOCKET_ERROR)
+											{
+												oSocketGroup.remove(*(oConnection.pSocket));
+												oConnection.pSocket->close();
+												muxIn.close(oMuxPacket.channel);
+												oSocketList.remove(oMuxPacket.channel);
+												delete oConnection.pSocket;
+												delete oConnection.pCipher;
+											}
+									}
+							}
+					}
+				if(countRead>0)
+					{
+						CONNECTION* tmpCon;
+						tmpCon=oSocketList.getFirst();
+						while(tmpCon!=NULL&&countRead>0)
+							{
+								if(oSocketGroup.isSignaled(*(tmpCon->pSocket)))
+									{
+										countRead--;
+										#ifdef _DEBUG
+										    CAMsg::printMsg(LOG_DEBUG,"Receiving Data from Squid!");
+										#endif
+										//PAYLOAD* pPayload=(PAYLOAD*)&(oMuxPacket.data);		
+										len=tmpCon->pSocket->receive(oMuxPacket.payload.data,PAYLOAD_SIZE);
+										if(len==SOCKET_ERROR||len==0)
+											{
+												#ifdef _DEBUG
+														CAMsg::printMsg(LOG_DEBUG,"Closing Connection from Squid!\n");
+												#endif
+												oSocketGroup.remove(*(tmpCon->pSocket));
+												tmpCon->pSocket->close();
+												muxIn.close(tmpCon->id);
+												delete tmpCon->pSocket;
+												delete tmpCon->pCipher;
+												oSocketList.remove(tmpCon->id);
+												break;
+											}
+										else 
+											{
+												oMuxPacket.channel=tmpCon->id;
+												oMuxPacket.flags=0;
+												oMuxPacket.payload.len=htons((UINT16)len);
+												oMuxPacket.payload.type=0;
+												tmpCon->pCipher->decryptAES(oMuxPacket.data,oMuxPacket.data,DATA_SIZE);
+												if(muxIn.send(&oMuxPacket)==SOCKET_ERROR)
+													{
+														CAMsg::printMsg(LOG_CRIT,"Mux Data Sending Error - Exiting!\n");
+														exit(-1);
+													}
+											}
+									}
+								tmpCon=oSocketList.getNext();
+							}
+					}
+			}
+		return E_SUCCESS;
+	}
+
+#endif
