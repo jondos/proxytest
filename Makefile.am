@@ -12,6 +12,7 @@ proxytest_SOURCES = CAASymCipher.cpp \
 		    CACertStore.cpp\
 		    CACmdLnOptions.cpp \
 		    CAConditionVariable.cpp\
+		    CADatabase.cpp\
 		    CADatagramSocket.cpp \
 		    CAFirstMix.cpp \
 		    CAFirstMixChannelList.cpp \
@@ -26,6 +27,7 @@ proxytest_SOURCES = CAASymCipher.cpp \
 		    CAMsg.cpp \
 		    CAMutex.cpp\
 		    CAMuxSocket.cpp \
+		    CAPayment.cpp\
 		    CAQueue.cpp \
 		    CASemaphore.cpp\
 		    CASignature.cpp \
@@ -63,6 +65,7 @@ proxytest_SOURCES = CAASymCipher.cpp \
 		    CAMsg.hpp \
 		    CAMutex.hpp\
 		    CAMuxSocket.hpp \
+		    CAPayment.hpp\
 		    CAQueue.hpp \
 		    CASemaphore.hpp\
 		    CASignature.hpp \
