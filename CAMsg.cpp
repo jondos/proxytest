@@ -127,7 +127,6 @@ SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 					//	}
 				break;
 				case MSG_STDOUT:
-					printf("h5\n");
 					printf(oMsg.m_strMsgBuff);
 				break;
 				default:
