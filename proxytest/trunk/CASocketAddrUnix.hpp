@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		{
 			public:
 				CASocketAddrUnix();
-				~CASocketAddrUnix();
+				//~CASocketAddrUnix();
 				
 				int getType(){return AF_LOCAL;}
 				SINT32 getSize();
