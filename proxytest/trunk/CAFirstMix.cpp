@@ -195,7 +195,11 @@ SINT32 CAFirstMix::init()
 				return E_UNKNOWN;
 			}			
 		
-    m_pIPList=new CAIPList();
+#ifdef PAYMENT
+		m_pAccountingInstance = CAAccountingInstance::getInstance();
+#endif
+
+		m_pIPList=new CAIPList();
 		m_pQueueSendToMix=new CAQueue();
 		m_pChannelList=new CAFirstMixChannelList();
 		m_psocketgroupUsersRead=new CASocketGroup;

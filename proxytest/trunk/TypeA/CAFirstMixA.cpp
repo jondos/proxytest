@@ -228,12 +228,31 @@ SINT32 CAFirstMixA::loop()
 															{
 																pMuxSocket->setKey(rsaBuff+9,32);
 																pMuxSocket->setCrypt(true);
+#ifdef PAYMENT
+																// set AI encryption keys
+																m_pAccountingInstance->setJapKeys(pHashEntry, rsaBuff+41, rsaBuff+57); 
+#endif
 															}
 														goto NEXT_USER_CONNECTION;
 													}
 												#ifdef LOG_CHANNEL
 													pHashEntry->trafficIn++;
 												#endif
+#ifdef PAYMENT
+												// payment code added by Bastian Voigt
+												if(m_pAccountingInstance->handleJapPacket( pMixPacket, pHashEntry ) != 0) 
+													{
+														// this jap is evil! terminate connection and add IP to blacklist
+														m_pIPList->removeIP(pHashEntry->peerIP);
+														m_psocketgroupUsersRead->remove(*(CASocket*)pMuxSocket);
+														m_psocketgroupUsersWrite->remove(*(CASocket*)pMuxSocket);
+														delete pHashEntry->pQueueSend;
+														m_pChannelList->remove(pMuxSocket);
+														pMuxSocket->close();
+														delete pMuxSocket;
+														decUsers();
+													}
+#endif
 												if(pMixPacket->flags==CHANNEL_DUMMY)					// just a dummy to keep the connection alife in e.g. NAT gateways 
 													{ 
 														getRandom(pMixPacket->data,DATA_SIZE);

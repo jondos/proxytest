@@ -34,13 +34,13 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.03.02"
+#define MIX_VERSION "00.03.03"
 
 
 //#define LOG_CHANNEL
 //#define COMPRESSED_LOGS
 //#define DO_TRACE
-//#define PAYMENT_SUPPORT
+//#define PAYMENT_SUPPORT (outdated --> to be removed)
 //#define PSEUDO_LOG
 //#define DELAY_CHANNELS //to enable max channel bandwidth
 
@@ -50,6 +50,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //	#define DELAY_CHANNEL_SEND_INTERVALL 100 //Minimum time between two delayed packets (in ms)
 #endif
 //#define LOG_CRIME  
+//#define PAYMENT //to enable payment support
 //#define NO_PARKING //to disable control flow
 #define NO_LOOPACCEPTUSER //to disable user accept thread for First Mix
 
