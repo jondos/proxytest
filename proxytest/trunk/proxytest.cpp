@@ -199,7 +199,14 @@ int main(int argc, const char* argv[])
 			OpenSSL_add_all_algorithms();
 			pOpenSSLMutexes=new CAMutex[CRYPTO_num_locks()];
 			CRYPTO_set_locking_callback((void (*)(int,int,const char *,int))openssl_locking_callback);	
-	
+
+			UINT8 buffz[81];
+			memset(buffz,65,81);
+			buffz[76]=10;
+			UINT8 out[80];
+			UINT32 outlen=80;
+			CABase64::decode(buffz,81,out,&outlen);
+			int z=3;
 	/*		CAPayment oPayment;
 			oPayment.init((UINT8*)"dud14.inf.tu-dresden.de",3306,(UINT8*)"payment",(UINT8*)"payment");
 			UINT32 accessUntil;
