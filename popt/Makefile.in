@@ -74,7 +74,7 @@ VERSION = @VERSION@
 AUTOMAKE_OPTIONS = foreign
 
 noinst_LIBRARIES = libpopt.a
-libpopt_a_SOURCES = popt.c poptparse.c popthelp.c 		    popt.h poptint.h system.h 
+libpopt_a_SOURCES = popt.cpp poptparse.cpp popthelp.cpp 		    popt.h poptint.h system.h 
 
 
 includes = @INCLUDES@
@@ -91,6 +91,10 @@ LIBS = @LIBS@
 libpopt_a_LIBADD = 
 libpopt_a_OBJECTS =  popt.o poptparse.o popthelp.o
 AR = ar
+CXXFLAGS = @CXXFLAGS@
+CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLD = $(CXX)
+CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
@@ -108,7 +112,7 @@ OBJECTS = $(libpopt_a_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
-.SUFFIXES: .S .c .o .s
+.SUFFIXES: .S .c .cpp .o .s
 $(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --foreign popt/Makefile
 
@@ -146,6 +150,8 @@ libpopt.a: $(libpopt_a_OBJECTS) $(libpopt_a_DEPENDENCIES)
 	-rm -f libpopt.a
 	$(AR) cru libpopt.a $(libpopt_a_OBJECTS) $(libpopt_a_LIBADD)
 	$(RANLIB) libpopt.a
+.cpp.o:
+	$(CXXCOMPILE) -c $<
 
 tags: TAGS
 
@@ -222,6 +228,25 @@ maintainer-clean-depend:
 %.lo: %.c
 	@echo '$(LTCOMPILE) -c $<'; \
 	$(LTCOMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
+	@-sed -e 's/^\([^:]*\)\.o[ 	]*:/\1.lo \1.o :/' \
+	  < .deps/$(*F).pp > .deps/$(*F).P; \
+	tr ' ' '\012' < .deps/$(*F).pp \
+	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
+	    >> .deps/$(*F).P; \
+	rm -f .deps/$(*F).pp
+
+%.o: %.cpp
+	@echo '$(CXXCOMPILE) -c $<'; \
+	$(CXXCOMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
+	@-cp .deps/$(*F).pp .deps/$(*F).P; \
+	tr ' ' '\012' < .deps/$(*F).pp \
+	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
+	    >> .deps/$(*F).P; \
+	rm .deps/$(*F).pp
+
+%.lo: %.cpp
+	@echo '$(LTCXXCOMPILE) -c $<'; \
+	$(LTCXXCOMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
 	@-sed -e 's/^\([^:]*\)\.o[ 	]*:/\1.lo \1.o :/' \
 	  < .deps/$(*F).pp > .deps/$(*F).P; \
 	tr ' ' '\012' < .deps/$(*F).pp \
