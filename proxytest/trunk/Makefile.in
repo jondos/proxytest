@@ -71,13 +71,13 @@ am_proxytest_OBJECTS = CAASymCipher.$(OBJEXT) CABase64.$(OBJEXT) \
 	CALocalProxy.$(OBJEXT) CAMiddleMix.$(OBJEXT) \
 	CAMiddleMixChannelList.$(OBJEXT) CAMix.$(OBJEXT) \
 	CAMsg.$(OBJEXT) CAMutex.$(OBJEXT) CAMuxSocket.$(OBJEXT) \
-	CAPayment.$(OBJEXT) CAQueue.$(OBJEXT) CASemaphore.$(OBJEXT) \
-	CASignature.$(OBJEXT) CASingleSocketGroup.$(OBJEXT) \
-	CASocket.$(OBJEXT) CASocketAddrINet.$(OBJEXT) \
-	CASocketAddrUnix.$(OBJEXT) CASocketGroup.$(OBJEXT) \
-	CASocketList.$(OBJEXT) CASymCipher.$(OBJEXT) \
-	CAThread.$(OBJEXT) CAUtil.$(OBJEXT) StdAfx.$(OBJEXT) \
-	proxytest.$(OBJEXT)
+	CAPayment.$(OBJEXT) CAPool.$(OBJEXT) CAQueue.$(OBJEXT) \
+	CASemaphore.$(OBJEXT) CASignature.$(OBJEXT) \
+	CASingleSocketGroup.$(OBJEXT) CASocket.$(OBJEXT) \
+	CASocketAddrINet.$(OBJEXT) CASocketAddrUnix.$(OBJEXT) \
+	CASocketGroup.$(OBJEXT) CASocketList.$(OBJEXT) \
+	CASymCipher.$(OBJEXT) CAThread.$(OBJEXT) CAUtil.$(OBJEXT) \
+	StdAfx.$(OBJEXT) proxytest.$(OBJEXT)
 proxytest_OBJECTS = $(am_proxytest_OBJECTS)
 proxytest_DEPENDENCIES = $(top_srcdir)/xml/libxml.a \
 	$(top_srcdir)/aes/libaes.a $(top_srcdir)/popt/libpopt.a \
@@ -107,8 +107,8 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/CAMiddleMixChannelList.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CAMix.Po ./$(DEPDIR)/CAMsg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CAMutex.Po ./$(DEPDIR)/CAMuxSocket.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/CAPayment.Po ./$(DEPDIR)/CAQueue.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/CASemaphore.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CAPayment.Po ./$(DEPDIR)/CAPool.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CAQueue.Po ./$(DEPDIR)/CASemaphore.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CASignature.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CASingleSocketGroup.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CASocket.Po \
@@ -264,6 +264,7 @@ proxytest_SOURCES = CAASymCipher.cpp \
 		    CAMutex.cpp\
 		    CAMuxSocket.cpp \
 		    CAPayment.cpp\
+		    CAPool.cpp\
 		    CAQueue.cpp \
 		    CASemaphore.cpp\
 		    CASignature.cpp \
@@ -303,6 +304,7 @@ proxytest_SOURCES = CAASymCipher.cpp \
 		    CAMutex.hpp\
 		    CAMuxSocket.hpp \
 		    CAPayment.hpp\
+		    CAPool.hpp\
 		    CAQueue.hpp \
 		    CASemaphore.hpp\
 		    CASignature.hpp \
@@ -440,6 +442,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMutex.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMuxSocket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAPayment.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAPool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAQueue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASemaphore.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASignature.Po@am__quote@
