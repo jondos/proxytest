@@ -346,7 +346,7 @@ SINT32 CASocket::available()
 			return (int)ul;
 	}
 #endif
-
+/*
 SINT32 CASocket::getSendSpace()
 	{
 #ifdef HAVE_TIOCOUTQ
@@ -368,7 +368,7 @@ SINT32 CASocket::getSendSpace()
 #else
 		return E_UNKNOWN;
 #endif
-	}
+	}*/
 /**
 @return SOCKET_ERROR if an error occured
 @return 0 if socket was gracefully closed

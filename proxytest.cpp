@@ -158,7 +158,7 @@ For Upstream and Downstream different keys are used.
 */
 int main(int argc, const char* argv[])
 	{
-		CASocketAddrINet::init();
+/*		CASocketAddrINet::init();
 
 		
 		if(argc>1)
@@ -204,7 +204,7 @@ int main(int argc, const char* argv[])
 					}
 				exit(0);
 			}		
-
+*/
 		//some test....
 		if(MIXPACKET_SIZE!=sizeof(MIXPACKET))
 			{
