@@ -169,11 +169,11 @@ SINT32 CAFirstMixA::loop()
 												if(pMixPacket->flags==CHANNEL_DUMMY)					// just a dummy to keep the connection alife in e.g. NAT gateways 
 													{ 
 														getRandom(pMixPacket->data,DATA_SIZE);
-														pHashEntry->pMuxSocket->send(pMixPacket,tmpBuff);
+														pHashEntry->pMuxSocket->prepareForSend(pMixPacket);
 														#ifdef LOG_PACKET_TIMES
-															setZero64(((CAFirstMix::tQueueEntry*)tmpBuff)->timestamp);
+															setZero64(pQueueEntry->timestamp);
 														#endif
-														pHashEntry->pQueueSend->add(tmpBuff,sizeof(CAFirstMix::tQueueEntry));
+														pHashEntry->pQueueSend->add(pMixPacket,sizeof(CAFirstMix::tQueueEntry));
 														#ifdef HAVE_EPOLL
 															m_psocketgroupUsersWrite->add(*pMuxSocket,pHashEntry); 
 														#else
@@ -316,11 +316,8 @@ SINT32 CAFirstMixA::loop()
 									{
 										pMixPacket->channel=pEntry->channelIn;
 										getRandom(pMixPacket->data,DATA_SIZE);
-										pEntry->pHead->pMuxSocket->send(pMixPacket,tmpBuff);
-										#ifdef LOG_PACKET_TIMES
-											set64(((CAFirstMix::tQueueEntry*)tmpBuff)->timestamp,pQueueEntry->timestamp);
-										#endif
-										pEntry->pHead->pQueueSend->add(tmpBuff,sizeof(CAFirstMix::tQueueEntry));
+										pEntry->pHead->pMuxSocket->prepareForSend(pMixPacket);
+										pEntry->pHead->pQueueSend->add(pMixPacket,sizeof(CAFirstMix::tQueueEntry));
 										#ifdef LOG_CHANNEL
 											pEntry->pHead->trafficOut++;
 											//pEntry->packetsOutToUser++;
