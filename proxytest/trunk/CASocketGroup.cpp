@@ -135,7 +135,7 @@ SINT32 CASocketGroup::remove(CAMuxSocket&s)
 
 SINT32 CASocketGroup::select()
 	{
-		#ifndef HAVE_POLL
+			#ifndef HAVE_POLL
 			m_csFD_SET.lock();
 			memcpy(&m_signaled_set,&m_fdset,sizeof(fd_set));
 			m_csFD_SET.unlock();
@@ -143,7 +143,7 @@ SINT32 CASocketGroup::select()
 				#ifdef _WIN32
 						int ret=::select(0,&m_signaled_set,NULL,NULL,NULL);
 				#else
-						int ret=::select(max,&m_signaled_set,NULL,NULL,NULL);
+						int ret=::select(m_max,&m_signaled_set,NULL,NULL,NULL);
 				#endif			    
 				if(ret==SOCKET_ERROR)
 					{
