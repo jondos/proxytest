@@ -84,23 +84,27 @@ CAInfoService::CAInfoService()
 		m_minuts=0;
 		m_lastMixedPackets=0;
     m_expectedMixRelPos = 0;
+		m_pthreadRunLoop=new CAThread((UINT8*)"InfoServiceThread");
 }
 
 CAInfoService::CAInfoService(CAMix* pMix)
 	{
-		m_pMix=pMix;
+    m_pMix=NULL;
 		m_bRun=false;
 		m_pSignature=NULL;
 		m_pcertstoreOwnCerts=NULL;
 		m_minuts=0;
 		m_lastMixedPackets=0;
     m_expectedMixRelPos = 0;
-}
+		m_pthreadRunLoop=new CAThread((UINT8*)"InfoServiceThread");
+		m_pMix=pMix;
+	}
 
 CAInfoService::~CAInfoService()
 	{
 		stop();
 		delete m_pcertstoreOwnCerts;
+		delete m_pthreadRunLoop;
 	}
 /** Sets the signature used to sign the messages send to Infoservice.
 	* If pOwnCert!=NULL this Certifcate is included in the Signature
@@ -140,8 +144,8 @@ SINT32 CAInfoService::start()
 		m_bRun=true;
 		set64(m_lastMixedPackets,(UINT32)0);
 		m_minuts=1;
-		m_threadRunLoop.setMainLoop(InfoLoop);
-		return m_threadRunLoop.start(this);
+		m_pthreadRunLoop->setMainLoop(InfoLoop);
+		return m_pthreadRunLoop->start(this);
 	}
 
 SINT32 CAInfoService::stop()
@@ -149,7 +153,7 @@ SINT32 CAInfoService::stop()
 		if(m_bRun)
 			{
 				m_bRun=false;
-				m_threadRunLoop.join();
+				m_pthreadRunLoop->join();
 			}
 		return E_SUCCESS;
 	}

@@ -232,17 +232,17 @@ SINT32 CAFirstMix::init()
 		m_pthreadsLogin=new CAThreadPool(NUM_LOGIN_WORKER_TRHEADS,MAX_LOGIN_QUEUE,false);
 
 		//Starting thread for Step 1
-		m_pthreadAcceptUsers=new CAThread();
+		m_pthreadAcceptUsers=new CAThread((UINT8*)"CAFirstMix - AcceptUsers");
 		m_pthreadAcceptUsers->setMainLoop(fm_loopAcceptUsers);
 		m_pthreadAcceptUsers->start(this);
 
 		//Starting thread for Step 3
-		m_pthreadSendToMix=new CAThread();
+		m_pthreadSendToMix=new CAThread((UINT8*)"CAFirstMix - SendToMix");
 		m_pthreadSendToMix->setMainLoop(fm_loopSendToMix);
 		m_pthreadSendToMix->start(this);
 
 		//Startting thread for Step 4a
-		m_pthreadReadFromMix=new CAThread();
+		m_pthreadReadFromMix=new CAThread((UINT8*)"CAFirstMix - ReadFromMix");
 		m_pthreadReadFromMix->setMainLoop(fm_loopReadFromMix);
 		m_pthreadReadFromMix->start(this);
 

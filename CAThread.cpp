@@ -27,11 +27,28 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #include "StdAfx.h"
 #include "CAThread.hpp"
+#include "CAUtil.hpp"
+#include "CAMsg.hpp"
 
 CAThread::CAThread()
 	{
 		m_fncMainLoop=NULL;
 		m_pThread=NULL;
+		m_strName=NULL;
+	}
+
+CAThread::CAThread(const UINT8* strName)
+	{
+		m_fncMainLoop=NULL;
+		m_pThread=NULL;
+		m_strName=NULL;
+		if(strName!=NULL)
+			{
+				UINT32 len=strlen((char*)strName);
+				m_strName=new UINT8[len+1];
+				memcpy(m_strName,strName,len);
+				m_strName[len]=0;
+			}
 	}
 
 /** A daemon thread is a dettached thread, which will not
@@ -42,6 +59,12 @@ SINT32 CAThread::start(void* param,bool bDaemon)
 			return E_UNKNOWN;
 		m_pThread=new pthread_t;
 		pthread_create(m_pThread,NULL,m_fncMainLoop,param);
+		if(m_strName!=NULL)
+			{
+				UINT8* temp=bytes2hex(m_pThread,sizeof(pthread_t));
+				CAMsg::printMsg(LOG_DEBUG,"Thread with name: %s created - pthread_t: %s\n",m_strName,temp);
+				delete temp;
+			}
 		if(bDaemon)
 			pthread_detach(*m_pThread);
 		return E_SUCCESS;

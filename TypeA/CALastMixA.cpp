@@ -77,7 +77,7 @@ SINT32 CALastMixA::loop()
 		m_logUploadedPackets=m_logDownloadedPackets=0;
 		set64((UINT64&)m_logUploadedBytes,(UINT32)0);
 		set64((UINT64&)m_logDownloadedBytes,(UINT32)0);
-		CAThread oLogThread;
+		CAThread oLogThread((UINT8*)"CALastMixA - LogLoop");
 		oLogThread.setMainLoop(lm_loopLog);
 		oLogThread.start(this);
 

@@ -49,10 +49,13 @@ class CAThread
 	{
 		public:
 			CAThread();
+			CAThread(const UINT8* strName);
 			~CAThread()
 				{
 					if(m_pThread!=NULL)
 						delete m_pThread;
+					if(m_strName!=NULL)
+						delete m_strName;
 				}
 
 			SINT32 setMainLoop(THREAD_MAIN_TYP fnc)
@@ -95,6 +98,7 @@ class CAThread
 		private:
 			THREAD_MAIN_TYP m_fncMainLoop;
 	 		pthread_t* m_pThread;
+			UINT8* m_strName; //a name mostly for debuging purpose...
 			//CAConditionVariable m_CondVar;
 	};
 #endif
