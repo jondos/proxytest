@@ -504,6 +504,7 @@ SINT32 CAFirstMix::loop()
 								#else
 									((CASocket*)pnewMuxSocket)->setKeepAlive(true);
 								#endif
+								((CASocket*)pnewMuxSocket)->setASyncSend(true,MUXPACKET_SIZE);
 								((CASocket*)pnewMuxSocket)->send(mKeyInfoBuff,mKeyInfoSize);
 								oMuxChannelList.add(pnewMuxSocket);
 								nUser++;

@@ -28,6 +28,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "CASocketAddr.hpp"
+class CASocketASyncSend;
 
 class CASocket
 	{
@@ -55,7 +56,9 @@ class CASocket
 			SINT32 setSendBuff(UINT32 r);
 			SINT32 setKeepAlive(bool b);
 			SINT32 setKeepAlive(UINT32 sec);
+			SINT32 setASyncSend(bool b,SINT32 size=-1);
 		private:
+			SINT32 setSendLowWat(UINT32 r);
 			SOCKET m_Socket;
 			#ifdef _REENTRANT
 				CRITICAL_SECTION csClose;
@@ -63,5 +66,7 @@ class CASocket
 			int closeMode;
 			// temporary hack...
 			int localPort;
+			bool m_bASyncSend;
+			static CASocketASyncSend* m_pASyncSend;
 	};
 #endif
