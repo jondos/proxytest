@@ -369,7 +369,6 @@ int main(int argc, const char* argv[])
 		pMix=NULL;
 
 		int i;
-		UINT32 start;
 		SINT32 maxFiles;
 		//Setup Routines
 		XMLPlatformUtils::Initialize();	
@@ -603,7 +602,7 @@ Debug(dc::malloc.on());
 		//exit(0);
 		//Testing msSleep
 		CAMsg::printMsg(LOG_DEBUG,"Should sleep now for aprox 2 seconds....\n");
-		start=time(NULL);
+		UINT32 start=time(NULL);
 		for(i=0;i<10;i++)
 			msSleep(200);
 		start=time(NULL)-start;
