@@ -64,8 +64,10 @@ SINT32 CAMix::start()
 
     while(true)
     {
+				CAMsg::printMsg(LOG_DEBUG, "CAMix main: before init()\n");
         if(init() == E_SUCCESS)
         {
+					CAMsg::printMsg(LOG_DEBUG, "CAMix main: init() returned success\n");
             if(m_pInfoService != NULL)
             {
                 m_pInfoService->setConfiguring(false);
@@ -74,17 +76,15 @@ SINT32 CAMix::start()
             }
 
             CAMsg::printMsg(LOG_INFO, "The mix is now on-line.\n");
-
-					loop();
-
-            CAMsg::printMsg(LOG_DEBUG, "loop() returned, maybe connection lost.\n");
-
+						loop();
+						CAMsg::printMsg(LOG_DEBUG, "CAMix main: loop() returned, maybe connection lost.\n");
         }
         else
         {
             CAMsg::printMsg(LOG_DEBUG, "init() failed, maybe no connection.\n");
         }
 
+				CAMsg::printMsg(LOG_DEBUG, "CAMix main: stopping InfoService\n");
         if(m_pInfoService != NULL)
         {
             if(options.acceptReconfiguration())
@@ -92,7 +92,9 @@ SINT32 CAMix::start()
             else
                 m_pInfoService->stop();
         }
+				CAMsg::printMsg(LOG_DEBUG, "CAMix main: before clean()\n");
 				clean();
+				CAMsg::printMsg(LOG_DEBUG, "CAMix main: after clean()\n");
         sSleep(20);
     }
 }
