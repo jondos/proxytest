@@ -67,7 +67,8 @@ am_proxytest_OBJECTS = CAAbstractControlChannel.$(OBJEXT) \
 	CAAccountingBIInterface.$(OBJEXT) \
 	CAAccountingControlChannel.$(OBJEXT) \
 	CAAccountingDBInterface.$(OBJEXT) \
-	CAAccountingInstance.$(OBJEXT) CAASymCipher.$(OBJEXT) \
+	CAAccountingInstance.$(OBJEXT) \
+	CAAccountingSettleThread.$(OBJEXT) CAASymCipher.$(OBJEXT) \
 	CABase64.$(OBJEXT) CACacheLoadBalancing.$(OBJEXT) \
 	CACertificate.$(OBJEXT) CACertStore.$(OBJEXT) \
 	CACmdLnOptions.$(OBJEXT) CAConditionVariable.$(OBJEXT) \
@@ -85,7 +86,7 @@ am_proxytest_OBJECTS = CAAbstractControlChannel.$(OBJEXT) \
 	CASingleSocketGroup.$(OBJEXT) CASocket.$(OBJEXT) \
 	CASocketAddrINet.$(OBJEXT) CASocketAddrUnix.$(OBJEXT) \
 	CASocketGroup.$(OBJEXT) CASocketGroupEpoll.$(OBJEXT) \
-	CASocketList.$(OBJEXT) CASSLClientSocket.$(OBJEXT) \
+	CASocketList.$(OBJEXT) CATLSClientSocket.$(OBJEXT) \
 	CASSLContext.$(OBJEXT) CASymCipher.$(OBJEXT) \
 	CATempIPBlockList.$(OBJEXT) CAThread.$(OBJEXT) \
 	CAThreadPool.$(OBJEXT) CAUtil.$(OBJEXT) \
@@ -228,6 +229,7 @@ proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CAAccountingControlChannel.cpp\
 		    CAAccountingDBInterface.cpp\
 		    CAAccountingInstance.cpp\
+		    CAAccountingSettleThread.cpp\
 		    CAASymCipher.cpp \
 		    CABase64.cpp \
 		    CACacheLoadBalancing.cpp\
@@ -266,7 +268,7 @@ proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CASocketGroup.cpp \
 		    CASocketGroupEpoll.cpp\
 		    CASocketList.cpp \
-		    CASSLClientSocket.cpp\
+		    CATLSClientSocket.cpp\
 		    CASSLContext.cpp\
 		    CASymCipher.cpp \
 		    CATempIPBlockList.cpp\
@@ -284,6 +286,7 @@ proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CAAccountingControlChannel.hpp\
 		    CAAccountingDBInterface.hpp\
 		    CAAccountingInstance.hpp\
+		    CAAccountingSettleThread.hpp\
 		    CAASymCipher.hpp \
 		    CABase64.hpp \
 		    CACacheLoadBalancing.hpp\
@@ -324,7 +327,7 @@ proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CASocketGroup.hpp \
 		    CASocketGroupEpoll.hpp\
 		    CASocketList.hpp \
-		    CASSLClientSocket.hpp\
+		    CATLSClientSocket.hpp\
 		    CASSLContext.hpp\
 		    CASymCipher.hpp \
 		    CATempIPBlockList.hpp\
@@ -440,6 +443,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAAccountingControlChannel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAAccountingDBInterface.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAAccountingInstance.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAAccountingSettleThread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CABase64.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CACacheLoadBalancing.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CACertStore.Po@am__quote@
@@ -468,7 +472,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAPayment.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAPool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAQueue.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASSLClientSocket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASSLContext.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASemaphore.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASignature.Po@am__quote@
@@ -480,6 +483,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASocketGroupEpoll.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASocketList.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASymCipher.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CATLSClientSocket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CATempIPBlockList.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAThread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAThreadPool.Po@am__quote@

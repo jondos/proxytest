@@ -12,6 +12,7 @@ proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CAAccountingControlChannel.cpp\
 		    CAAccountingDBInterface.cpp\
 		    CAAccountingInstance.cpp\
+		    CAAccountingSettleThread.cpp\
 		    CAASymCipher.cpp \
 		    CABase64.cpp \
 		    CACacheLoadBalancing.cpp\
@@ -50,7 +51,7 @@ proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CASocketGroup.cpp \
 		    CASocketGroupEpoll.cpp\
 		    CASocketList.cpp \
-		    CASSLClientSocket.cpp\
+		    CATLSClientSocket.cpp\
 		    CASSLContext.cpp\
 		    CASymCipher.cpp \
 		    CATempIPBlockList.cpp\
@@ -68,6 +69,7 @@ proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CAAccountingControlChannel.hpp\
 		    CAAccountingDBInterface.hpp\
 		    CAAccountingInstance.hpp\
+		    CAAccountingSettleThread.hpp\
 		    CAASymCipher.hpp \
 		    CABase64.hpp \
 		    CACacheLoadBalancing.hpp\
@@ -108,7 +110,7 @@ proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CASocketGroup.hpp \
 		    CASocketGroupEpoll.hpp\
 		    CASocketList.hpp \
-		    CASSLClientSocket.hpp\
+		    CATLSClientSocket.hpp\
 		    CASSLContext.hpp\
 		    CASymCipher.hpp \
 		    CATempIPBlockList.hpp\
