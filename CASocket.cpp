@@ -167,7 +167,7 @@ SINT32 CASocket::connect(CASocketAddr & psa,UINT msTimeOut)
 			return E_UNKNOWN;
 #endif
 
-#ifndef HAVE_POOL
+#ifndef HAVE_POLL
 		struct timeval tval;
 		tval.tv_sec=msTimeOut/1000;
 		tval.tv_usec=(msTimeOut%1000)*1000;
