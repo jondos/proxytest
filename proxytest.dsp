@@ -282,6 +282,8 @@ SOURCE=.\aes\encrypt.cpp
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
 
+# SUBTRACT CPP /YX /Yc /Yu
+
 !ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
 
 !ENDIF 

@@ -169,6 +169,14 @@ int main(int argc, const char* argv[])
 				CAMsg::printMsg(LOG_CRIT,"sizeof(UINT32) != 4 --> maybe a compiler (optimization) problem!\n");
 				exit(-1);
 			}
+
+		if(CAQueue::test()!=E_SUCCESS)
+			CAMsg::printMsg(LOG_CRIT,"CAQueue::test() NOT passed! Exiting\n");
+		else
+			CAMsg::printMsg(LOG_DEBUG,"CAQueue::test() passed!\n");
+		
+		exit(0);
+		
 		//startup
 		#ifdef _WIN32
 			int err=0;
