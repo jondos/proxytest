@@ -31,18 +31,28 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CACmdLnOptions.hpp"
 #include "CAMsg.hpp"
 #include "CASocketAddrINet.hpp"
+#include "CASocket.hpp"
 
 extern CACmdLnOptions options;
 
 /**
  * Constructor
  * Initiates the DB connection
+ * @param useTLS if nonzero, a TLS socket is used.
  */
-CAAccountingBIInterface::CAAccountingBIInterface()
+CAAccountingBIInterface::CAAccountingBIInterface(UINT32 useTLS)
 {
   // init some vars
   m_lineBufferSize = 0;
-  m_pSslSocket = new CASSLClientSocket();
+	m_bUseTLS = useTLS;
+	if(useTLS)
+	{
+		m_pSocket = new CATLSClientSocket();
+	}
+	else
+	{
+		m_pSocket = new CASocket();
+	}
 
   // get JPI info from config file
   UINT8 jpiHost[255];
@@ -69,7 +79,7 @@ CAAccountingBIInterface::~CAAccountingBIInterface()
     free(m_pLineBuffer);
 
   terminateBIConnection();
-  delete m_pSslSocket;
+  delete m_pSocket;
 }
 
 
@@ -79,7 +89,7 @@ CAAccountingBIInterface::~CAAccountingBIInterface()
  */
 SINT32 CAAccountingBIInterface::initBIConnection(CASocketAddrINet address)
 {
-  if(m_pSslSocket->connect(address)!=E_SUCCESS)
+  if(m_pSocket->connect(address)!=E_SUCCESS)
     {
       CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface: could not connect to JPI!!");
       m_connected = false;
@@ -98,7 +108,7 @@ SINT32 CAAccountingBIInterface::terminateBIConnection()
 {
   if(m_connected)
     {
-      m_pSslSocket->close();
+      m_pSocket->close();
     }
   return E_SUCCESS;
 }
@@ -149,7 +159,7 @@ SINT32 CAAccountingBIInterface::readLine(UINT8 * line, UINT32 * maxLen)
       // no complete line left, let's read more data from the socket
       while(true)
         {
-          ret = m_pSslSocket->receive( m_pLineBuffer+m_lineBufferNumBytes,
+          ret = m_pSocket->receive( m_pLineBuffer+m_lineBufferNumBytes,
                                        m_lineBufferSize-m_lineBufferNumBytes);
           if(ret == SOCKET_ERROR )
             {
@@ -162,7 +172,7 @@ SINT32 CAAccountingBIInterface::readLine(UINT8 * line, UINT32 * maxLen)
           if(ret == 0)
             { // socket was closed
               m_connected = false;
-              m_pSslSocket->close();
+              m_pSocket->close();
               return E_NOT_CONNECTED;
             }
           if(ret>0)
@@ -211,7 +221,7 @@ SINT32 CAAccountingBIInterface::sendGetRequest(UINT8 * request)
   //int offset = 0;
   do
     {
-      ret = m_pSslSocket->send(requestS, len);
+      ret = m_pSocket->send(requestS, len);
     }
   while(ret == E_AGAIN);
 	delete requestS;
@@ -252,7 +262,7 @@ SINT32 CAAccountingBIInterface::sendPostRequest(UINT8 * request, UINT8 * data, U
   //int offset = 0;
   do
     {
-      ret = m_pSslSocket->send(buf, bufsize);
+      ret = m_pSocket->send(buf, bufsize);
     }
   while(ret == E_AGAIN);
   delete requestS;
@@ -346,7 +356,7 @@ SINT32 CAAccountingBIInterface::receiveResponse(UINT32 *status, UINT8 *buf, UINT
         }
       while( *size<contentLength)
         { // now LineBuffer is empty, read from real socket
-          int ret = m_pSslSocket->receive(buf + *size, contentLength - *size);
+          int ret = m_pSocket->receive(buf + *size, contentLength - *size);
           if(ret == SOCKET_ERROR )
             {
               return SOCKET_ERROR;
@@ -358,7 +368,7 @@ SINT32 CAAccountingBIInterface::receiveResponse(UINT32 *status, UINT8 *buf, UINT
           if(ret == 0)
             { // socket was closed
               m_connected = false;
-              m_pSslSocket->close();
+              m_pSocket->close();
               return E_NOT_CONNECTED;
             }
           if(ret>0)

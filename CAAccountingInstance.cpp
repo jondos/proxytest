@@ -73,12 +73,12 @@ CAAccountingInstance::CAAccountingInstance()
 {
 	CAMsg::printMsg( LOG_DEBUG, "AccountingInstance initialising\n" );
 	m_pQueue = new CAQueue();
-//	m_pIPBlockList = new CATempIPBlockList();
+	m_pIPBlockList = new CATempIPBlockList(60000);
 	
 	// initialize some configuration settings
 
 	// initialize JPI connection
-	m_biInterface = new CAAccountingBIInterface();
+	m_biInterface = new CAAccountingBIInterface(0 /* no SSL, for debugging */);
 
 	// initialize Database connection
 	m_dbInterface = new CAAccountingDBInterface();
@@ -226,6 +226,7 @@ SINT32 CAAccountingInstance::handleJapPacket(
 				{
 					// send a reminder...
 					DOM_Document doc;
+					CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending REMINDER CC request.");
 					makeCCRequest(pAccInfo->accountNumber, pAccInfo->transferredBytes, doc);
 					pAccInfo->pControlChannel->sendMessage(doc);
 					pAccInfo->authFlags |= AUTH_SENT_SECOND_CC_REQUEST;
@@ -238,6 +239,7 @@ SINT32 CAAccountingInstance::handleJapPacket(
 			{
 				// send a first CC request
 				DOM_Document doc;
+				CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending CC request.");
 				makeCCRequest(pAccInfo->accountNumber, pAccInfo->transferredBytes, doc);
 				pAccInfo->pControlChannel->sendMessage(doc);
 				pAccInfo->authFlags |= AUTH_SENT_CC_REQUEST;
@@ -275,6 +277,7 @@ SINT32 CAAccountingInstance::handleJapPacket(
 						// send a reminder...
 						// TODO adjust "newerThan" value
 						DOM_Document doc;
+						CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending REMINDER balance request.");
 						makeBalanceRequest((SINT32)now.tv_sec-600, doc);
 						pAccInfo->pControlChannel->sendMessage(doc);
 						pAccInfo->authFlags |= AUTH_SENT_SECOND_BALANCE_REQUEST;
@@ -288,6 +291,7 @@ SINT32 CAAccountingInstance::handleJapPacket(
 					// send a first CC request
 					DOM_Document doc;
 					makeBalanceRequest(now.tv_sec-600, doc);
+					CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending balance request.");
 					pAccInfo->pControlChannel->sendMessage(doc);
 					pAccInfo->authFlags |= AUTH_SENT_BALANCE_REQUEST;
 					pAccInfo->lastRequestSeconds = now.tv_sec;
@@ -316,6 +320,10 @@ SINT32 CAAccountingInstance::handleJapPacket(
 				if(now.tv_sec >= pAccInfo->lastRequestSeconds + REQUEST_TIMEOUT)
 				{
 					// timeout
+					CAMsg::printMsg( LOG_DEBUG, "Accounting instance: User at IP %d.%d.%d.%d refused "
+												"to send account certificate.", pAccInfo->accountNumber, 
+												pHashEntry->peerIP[ 0 ], pHashEntry->peerIP[ 1 ],
+												pHashEntry->peerIP[ 2 ], pHashEntry->peerIP[ 3 ] );
 					m_Mutex.unlock();
 					return 2;
 				}
@@ -325,22 +333,24 @@ SINT32 CAAccountingInstance::handleJapPacket(
 			if(now.tv_sec >= pAccInfo->lastRequestSeconds + REQUEST_TIMEOUT)
 			{
 				// send reminder
+				CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending REMINDER account request.");
 				DOM_Document doc;
 				makeAccountRequest(doc);
 				pAccInfo->pControlChannel->sendMessage(doc);
 				pAccInfo->authFlags |= AUTH_SENT_SECOND_ACCOUNT_REQUEST;
 				pAccInfo->lastRequestSeconds = now.tv_sec;
-				m_Mutex.unlock();
-				return 1;
 			}
+			m_Mutex.unlock();
+			return 1;
 		}
 		else
 		{
 			// send first request
+			CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending account request.");
 			DOM_Document doc;
 			makeAccountRequest(doc);
 			pAccInfo->pControlChannel->sendMessage(doc);
-			pAccInfo->authFlags |= AUTH_SENT_SECOND_ACCOUNT_REQUEST;
+			pAccInfo->authFlags |= AUTH_SENT_ACCOUNT_REQUEST;
 			pAccInfo->lastRequestSeconds = now.tv_sec;
 			m_Mutex.unlock();
 			return 1;

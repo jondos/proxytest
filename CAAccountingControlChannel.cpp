@@ -33,6 +33,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 CAAccountingInstance * CAAccountingControlChannel::ms_pAccountingInstance=NULL;
 
+
+/**
+ Creates a new accounting controlchannel and stores a pointer to this
+ in the pHashEntry.
+*/
 CAAccountingControlChannel::CAAccountingControlChannel(fmHashTableEntry * pHashEntry)
  : CASyncControlChannel(ACCOUNT_CONTROL_CHANNEL_ID, true)
 {
@@ -40,6 +45,7 @@ CAAccountingControlChannel::CAAccountingControlChannel(fmHashTableEntry * pHashE
 	if(!ms_pAccountingInstance)
 		ms_pAccountingInstance = CAAccountingInstance::getInstance();
 	ms_pAccountingInstance->initTableEntry(pHashEntry);
+	pHashEntry->pAccountingInfo->pControlChannel = this;
 }
 
 
