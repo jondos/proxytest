@@ -150,7 +150,7 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 																	arNonce,&tmpLen);
 						arNonce[tmpLen]=0;
 						
-						//Extracting PubKey of Mix n+1, generating SymKey for lin encryption
+						//Extracting PubKey of Mix n+1, generating SymKey for link encryption
 						//with Mix n+1, encrypt and send them
 						DOM_Node rsaKey=child.getFirstChild();
 						CAASymCipher oRSA;
@@ -512,16 +512,34 @@ SINT32 CAMiddleMix::loop()
 		oSocketGroup.add(*m_pMuxIn);
 		m_pMuxIn->setCrypt(true);
 		m_pMuxOut->setCrypt(true);
+		#ifdef USE_POOL		
+			CAPool* pPool=new CAPool(MIX_POOL_SIZE);
+		#endif
 		CAThread oThread;
 		oThread.setMainLoop(loopDownStream);
 		oThread.start(this);
 		for(;;)
 			{
-				ret=oSocketGroup.select(false,1000);
+				#ifndef USE_POOL			
+					ret=oSocketGroup.select(false,1000);
+				#else
+					ret=oSocketGroup.select(false,MAX_POOL_TIMEOUT);
+				#endif
 				if(ret!=1)
 					{
 						if(ret==E_TIMEDOUT)
-							continue;
+							{
+								#ifndef USE_POOL
+									continue;
+								#else
+									pMixPacket->channel=DUMMY_CHANNEL;
+									pMixPacket->flags=CHANNEL_CLOSE;
+									getRandom(pMixPacket->data,DATA_SIZE);
+									pPool->pool(pMixPacket);
+									if(m_pMuxOut->send(pMixPacket)==SOCKET_ERROR)
+										goto ERR;								
+								#endif
+							}
 						else
 							{
 								CAMsg::printMsg(LOG_CRIT,"loopUpStream -- Fehler bei select() -- goto ERR!\n");
@@ -541,8 +559,20 @@ SINT32 CAMiddleMix::loop()
 								CAMsg::printMsg(LOG_INFO,"loopUpStream received a packet with invalid flags: %0X .  Removing them.\n",(pMixPacket->flags & ~CHANNEL_ALLOWED_FLAGS));
 								pMixPacket->flags&=CHANNEL_ALLOWED_FLAGS;
 							}
+							}
+						#ifdef USE_POOL	
+							if(pMixPacket->channel==DUMMY_CHANNEL)
+								{
+									pMixPacket->flags=CHANNEL_CLOSE;
+									getRandom(pMixPacket->data,DATA_SIZE);
+									pPool->pool(pMixPacket);
+									if(m_pMuxOut->send(pMixPacket)==SOCKET_ERROR)
+										goto ERR;								
+								}
+							else
+						#endif
 						if(m_pMiddleMixChannelList->getInToOut(pMixPacket->channel,&channelOut,&pCipher)!=E_SUCCESS)
-							{//new connection
+							{//new connection ?
 								if(pMixPacket->flags==CHANNEL_OPEN)
 									{
 										#ifdef _DEBUG
@@ -557,27 +587,23 @@ SINT32 CAMiddleMix::loop()
 										memcpy(pMixPacket->data,tmpRSABuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
 										m_pMiddleMixChannelList->add(pMixPacket->channel,pCipher,&channelOut);
 										pMixPacket->channel=channelOut;
+										#ifdef USE_POOL
+											pPool->pool(pMixPacket);
+										#endif
 										if(m_pMuxOut->send(pMixPacket)==SOCKET_ERROR)
 											goto ERR;
 									}
 							}
 						else
 							{//established connection
-							//	if(pMixPacket->flags==CHANNEL_CLOSE)
-							//		{
-							//			pCipher->unlock();
-							//			if(m_pMuxOut->close(channelOut)==SOCKET_ERROR)
-							//				goto ERR;
-							//			m_pMiddleMixChannelList->remove(pMixPacket->channel);
-							//		}
-							//	else
-							//		{
-										pMixPacket->channel=channelOut;
-										pCipher->decryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
-										pCipher->unlock();
-										if(m_pMuxOut->send(pMixPacket)==SOCKET_ERROR)
-											goto ERR;
-							//		}
+									pMixPacket->channel=channelOut;
+									pCipher->decryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+									pCipher->unlock();
+									#ifdef USE_POOL
+										pPool->pool(pMixPacket);
+									#endif
+									if(m_pMuxOut->send(pMixPacket)==SOCKET_ERROR)
+										goto ERR;
 							}
 					}
 			}
@@ -590,6 +616,9 @@ ERR:
 		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
 		delete tmpRSABuff;
 		delete pMixPacket;
+		#ifdef USE_POOL
+			delete pPool;
+		#endif
 		if(pInfoService!=NULL)
 			delete pInfoService;
 		return E_UNKNOWN;
