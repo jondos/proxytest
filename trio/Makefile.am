@@ -5,8 +5,8 @@
 
 AUTOMAKE_OPTIONS = foreign
 
-noinst_LIBRARIES = libpopt.a
-libpopt_a_SOURCES = popt.cpp poptparse.cpp popthelp.cpp \
-		    popt.h poptint.h system.h 
+noinst_LIBRARIES = libtrio.a
+libtrio_a_SOURCES = trio.cpp triostr.cpp trionan.cpp \
+		    triop.h  
 
 includes = @INCLUDES@

@@ -33,10 +33,13 @@
 /* Define if the type socklen_t is available */
 #undef HAVE_SOCKLEN_T
 
+/* Define if you have the <stdint.h> header file. */
+#undef HAVE_STDINT_H
+
 /* Define if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
 
-/* Define if you have strerror() */
+/* Define if you have the `strerror' function. */
 #undef HAVE_STRERROR
 
 /* Define if you have the <strings.h> header file. */
@@ -47,6 +50,12 @@
 
 /* Define if you have the <sys/filio.h> header file. */
 #undef HAVE_SYS_FILIO_H
+
+/* Define if you have the <sys/stat.h> header file. */
+#undef HAVE_SYS_STAT_H
+
+/* Define if you have the <sys/types.h> header file. */
+#undef HAVE_SYS_TYPES_H
 
 /* Define if your OS supports the TCP socket option TCP_KEEPALIVE */
 #undef HAVE_TCP_KEEPALIVE
