@@ -59,7 +59,7 @@ class CAMsg
 	{
 		private:
 			CAMsg(); //Singleton!
-			static CAMsg oMsg;
+			static CAMsg* pMsg;
 		public:
 			~CAMsg();
 			static SINT32 setLogOptions(UINT32 options);

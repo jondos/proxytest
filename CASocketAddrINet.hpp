@@ -83,8 +83,7 @@ class CASocketAddrINet:private sockaddr_in,public CASocketAddr
 
 
 		private:
-			static CAMutex m_csGet;
-			static bool m_bIsCsInitialized;
+			static CAMutex* m_pcsGet;
 	};
 
 #endif
