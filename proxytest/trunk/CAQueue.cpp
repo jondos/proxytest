@@ -34,15 +34,24 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 UINT32 CAQueue::m_aktAlloc=0;
 UINT32 CAQueue::m_maxAlloc=0;
 
+/** Deletes this Queue and all stored data*/
 CAQueue::~CAQueue()
 	{
 		m_csQueue.lock();
 		while(m_Queue!=NULL)
 			{
+#ifndef DO_TRACE
 				delete m_Queue->pBuff;
+#else
+				deleteUINT8Buff(m_Queue->pBuff,m_Queue->allocSize);
+#endif
 				m_lastElem=m_Queue;
 				m_Queue=m_Queue->next;
+#ifndef DO_TRACE
 				delete m_lastElem;
+#else
+				deleteQUEUE(m_lastElem);
+#endif
 			}
 		m_csQueue.unlock();
 	}

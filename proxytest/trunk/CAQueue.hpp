@@ -106,7 +106,7 @@ class CAQueue
 					if(m_maxAlloc<m_aktAlloc)
 						{
 							m_maxAlloc=m_aktAlloc;
-							CAMsg::printMsg(LOG_DEBUG,"CAQueue current alloc: %u\n",m_aktAlloc);
+							CAMsg::printMsg(LOG_DEBUG,"CAQueue current alloc: %u Current Size (of this queue) %u\n",m_aktAlloc,m_nQueueSize);
 						}
 					return (QUEUE*)new QUEUE;
 				}
