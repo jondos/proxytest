@@ -64,7 +64,7 @@ class CAMsg
 			~CAMsg();
 			static SINT32 init(){pMsg=new CAMsg();return E_SUCCESS;}
 			static SINT32 setLogOptions(UINT32 options);
-			static SINT32 printMsg(UINT32 typ,char* format,...);
+			static SINT32 printMsg(UINT32 typ,const char* format,...);
 			static SINT32 openEncryptedLog();
 			static SINT32 closeEncryptedLog();
 		private:
