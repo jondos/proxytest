@@ -490,12 +490,12 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 		getDOMChildByName(root,(UINT8*)"MixProtocolVersion",elemVersion,false);
 		UINT8 strVersion[255];
 		UINT32 tmpLen=255;
-		if(getDOMElementValue(elemVersion,strVersion,&tmpLen)==E_SUCCESS)
+		if(getDOMElementValue(elemVersion,strVersion,&tmpLen)==E_SUCCESS&&tmpLen==3)
 			{
 #ifdef _DEBUG
-				CAMsg::printMsg(LOG_INFO,"MixProtocolVersion:%s\n",strVersion);
+				CAMsg::printMsg(LOG_INFO,"XML MixProtocolVersion value:%s\n",strVersion);
 #endif
-				if(tmpLen==3&&memcmp(strVersion,"0.4",3)==0)
+				if(memcmp(strVersion,"0.4",3)==0)
 					{
 						CAMsg::printMsg(LOG_INFO,"MixCascadeProtocolVersion: 0.4\n");
 						m_MixCascadeProtocolVersion=MIX_CASCADE_PROTOCOL_VERSION_0_4;
@@ -504,8 +504,21 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 						memset(key,0,16);
 						m_pSymCipher->setKey(key);
 					}	
-				else
+				else if(memcmp(strVersion,"0.3",3)==0)
+					{
+						CAMsg::printMsg(LOG_INFO,"MixCascadeProtocolVersion: 0.3\n");
 						m_MixCascadeProtocolVersion=MIX_CASCADE_PROTOCOL_VERSION_0_3;
+					}
+				else if(memcmp(strVersion,"0.2",3)==0)
+					{
+						CAMsg::printMsg(LOG_INFO,"MixCascadeProtocolVersion: 0.2\n");
+						m_MixCascadeProtocolVersion=MIX_CASCADE_PROTOCOL_VERSION_0_2;
+					}
+				else
+					{
+						CAMsg::printMsg(LOG_ERR,"Unsupported MixProtocolVersion!\n");
+						return E_UNKNOWN;
+					}
 			}
 		else
 		{
