@@ -108,10 +108,15 @@ SINT32 CAQueue::add(const UINT8* buff,UINT32 size)
 	*/
 SINT32 CAQueue::get(UINT8* pbuff,UINT32* psize)
 	{
-		if(m_Queue==NULL||pbuff==NULL||psize==NULL)
+		if(pbuff==NULL||psize==NULL)
 			return E_UNKNOWN;
 		if(*psize==0)
 			return E_SUCCESS;
+		if(m_Queue==NULL)
+			{
+				*psize=0;
+				return E_SUCCESS;
+			}
 		EnterCriticalSection(&m_csQueue);
 		UINT32 space=*psize;
 		*psize=0;

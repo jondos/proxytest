@@ -44,18 +44,18 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define MSG_NOSIGNAL 0 
     #include <io.h>
     #include <conio.h>
-    #include <process.h>
+ //   #include <process.h>
 		#include <sys/timeb.h>
-		#ifndef _REENTRANT
-			#define CRITICAL_SECTION 
-			#define DeleteCriticalSection(p) 
-			#define InitializeCriticalSection(p) 
-			#define EnterCriticalSection(p) 
-			#define LeaveCriticalSection(p) 
-		#endif
-    #define THREAD_RETURN void
-    #define THREAD_RETURN_ERROR return
-    #define THREAD_RETURN_SUCCESS return
+//		#ifndef _REENTRANT
+//			#define CRITICAL_SECTION 
+//			#define DeleteCriticalSection(p) 
+//			#define InitializeCriticalSection(p) 
+//			#define EnterCriticalSection(p) 
+//			#define LeaveCriticalSection(p) 
+//		#endif
+//    #define THREAD_RETURN void
+ //   #define THREAD_RETURN_ERROR return
+ //   #define THREAD_RETURN_SUCCESS return
     #define sleep(i) Sleep(i*1000)
 		#define GET_NET_ERROR (WSAGetLastError())
 		#define ERR_INTERN_TIMEDOUT WSAETIMEDOUT
@@ -63,7 +63,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define ERR_INTERN_WOULDBLOCK	WSAEWOULDBLOCK
 		#define MSG_DONTWAIT 0
 		#define HAVE_FIONREAD
-		#define msleep(i) Sleep(i) 
+		#define msSleep(i) Sleep(i) 
 		#ifdef __cplusplus
 			#include <string>
 			#include <vector>
@@ -144,7 +144,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
     #include <netinet/in.h>
     #include <arpa/inet.h>
     #include <netdb.h>
-    #include <pthread.h>
+//    #include <pthread.h>
     #include <unistd.h>
     #include <stdlib.h>
     #include <strings.h>
@@ -163,23 +163,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
     #define SD_SEND 1
     #define SD_BOTH 2
     #define GET_NET_ERROR (errno)
-		#define msleep(i) usleep(i*1000)
-		#ifdef _REENTRANT
-			#define CRITICAL_SECTION pthread_mutex_t
-			#define DeleteCriticalSection(p) pthread_mutex_destroy(p)
-			#define InitializeCriticalSection(p) pthread_mutex_init(p,NULL)
-			#define EnterCriticalSection(p) pthread_mutex_lock(p)
-			#define LeaveCriticalSection(p) pthread_mutex_unlock(p)
-		#else 
-			#define CRITICAL_SECTION 
-			#define DeleteCriticalSection(p) 
-			#define InitializeCriticalSection(p) 
-			#define EnterCriticalSection(p) 
-			#define LeaveCriticalSection(p) 
-		#endif
-		#define THREAD_RETURN void*
-    #define THREAD_RETURN_ERROR return(NULL)
-    #define THREAD_RETURN_SUCCESS return (NULL)
+		#define msSleep(i) usleep(i*1000)
 //		#define GETERROR (errno) 
 		#define ERR_INTERN_TIMEDOUT ETIMEDOUT
 		#define ERR_INTERN_CONNREFUSED ECONNREFUSED
@@ -256,10 +240,21 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #include <assert.h>
 
+#include <pthread.h>
+#define CRITICAL_SECTION pthread_mutex_t
+#define DeleteCriticalSection(p) pthread_mutex_destroy(p)
+#define InitializeCriticalSection(p) pthread_mutex_init(p,NULL)
+#define EnterCriticalSection(p) pthread_mutex_lock(p)
+#define LeaveCriticalSection(p) pthread_mutex_unlock(p)
+#define THREAD_RETURN void*
+#define THREAD_RETURN_ERROR return(NULL)
+#define THREAD_RETURN_SUCCESS return (NULL)
+
+
 #ifndef DEBUG
 #define ASSERT(cond,msg)
 #else
-#define ASSERT(cond,msg) {if(!(cond)){CAMsg::printMsg(LOG_DEBUG,"ASSERT: %s (File: %s, Line: %s)\n",msg,__FILE__,__LINE__);}}
+#define ASSERT(cond,msg) {if(!(cond)){CAMsg::printMsg(LOG_DEBUG,"ASSERT: %s (File: %s, Line: %s)\n",msg,__FILE__,__LINE__);exit(-1);}}
 #endif
 
 #include <stdio.h>
@@ -279,9 +274,5 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include <openssl/rand.h>
 #include <openssl/evp.h>
 #include <openssl/asn1.h>
-
-#ifndef AES
-	#define AES
-#endif
 
 #endif // !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)

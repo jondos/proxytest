@@ -34,4 +34,7 @@ SINT32 memtrim(UINT8* out,const UINT8* in,UINT32 len);
 
 SINT32 getcurrentTimeMillis(BIGNUM *bnTime); 
 
+SINT32 getRandom(UINT8* buff,UINT32 len);
+
+SINT32 getRandom(UINT32* val);
 #endif

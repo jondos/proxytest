@@ -282,12 +282,8 @@ int CAInfoService::start()
 		if(pSignature==NULL)
 			return -1;
 		bRun=true;
-		#ifdef _WIN32
-		 _beginthread(InfoLoop,0,this);
-		#else
-		 pthread_t othread;
-		 pthread_create(&othread,NULL,InfoLoop,this);
-		#endif
+		pthread_t othread;
+		pthread_create(&othread,NULL,InfoLoop,this);
 		return 0;
 	}
 

@@ -28,15 +28,14 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "StdAfx.h"
 #include "CAIPList.hpp"
 #include "CAMsg.hpp"
-
+#include "CAUtil.hpp"
 /**Constructs a empty CAIPList. The default number #MAXIP_CONNECTIONS of allowed insertions is used*/ 
 CAIPList::CAIPList()
 	{	
 		m_HashTable=new PIPLIST[0x10000];
 		memset(m_HashTable,0,0x10000*sizeof(PIPLIST));
 		m_allowedConnections=MAX_IP_CONNECTIONS;
-		RAND_pseudo_bytes(m_Random,sizeof(m_Random));
-		RAND_bytes(m_Random,sizeof(m_Random));
+		getRandom(m_Random,sizeof(m_Random));
 	}
 
 /**Constructs a empty CAIPList, there allowedConnections insertions 
@@ -48,8 +47,7 @@ CAIPList::CAIPList(UINT32 allowedConnections)
 		m_HashTable=new PIPLIST[0x10000];
 		memset(m_HashTable,0,0x10000*sizeof(PIPLIST));
 		m_allowedConnections=allowedConnections;
-		RAND_pseudo_bytes(m_Random,sizeof(m_Random));
-		RAND_bytes(m_Random,sizeof(m_Random));
+		getRandom(m_Random,sizeof(m_Random));
 	}
 
 /** Deletes the IPList and frees all used resources*/

@@ -28,6 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "StdAfx.h"
 #include "CASocket.hpp"
 #include "CASocketAddrINet.hpp"
+#include "CASingleSocketGroup.hpp"
 #ifdef _DEBUG
 	extern int sockets;
 #endif
@@ -309,7 +310,7 @@ SINT32 CASocket::sendTimeOut(const UINT8* buff,UINT32 len,UINT32 msTimeOut)
 						ret=send(buff,len);
 						if(ret==E_AGAIN)
 							{
-								msleep(msTimeOut);
+								msSleep(msTimeOut);
 								ret=send(buff,len);
 							}
 						setNonBlocking(bWasNonBlocking);
@@ -321,6 +322,40 @@ SINT32 CASocket::sendTimeOut(const UINT8* buff,UINT32 len,UINT32 msTimeOut)
 					}
 			}
 		return ret;	    	    
+	}
+
+/** Sends all data over the network. This may block until all data is send.
+	@param buff - the buffer of data to send
+	@param len - content length
+	@retval E_UNKNOWN, if an error occured
+	@retval E_SUCCESS, if successful
+*/
+SINT32 CASocket::sendFully(const UINT8* buff,UINT32 len)
+	{
+	  if(len==0)
+			return 0; //nothing to send
+		SINT32 ret;
+		for(;;)
+			{
+				ret=send(buff,len);
+				if(ret==len)
+					return E_SUCCESS;
+				else if(ret==E_AGAIN)
+					{
+						CASingleSocketGroup ossg;
+						ossg.add(*this);
+						ret=ossg.select(false,1000);
+						if(ret==1||ret==E_TIMEDOUT)
+							continue;
+						return E_UNKNOWN;
+					}
+				else if(ret==E_UNKNOWN)
+					{
+						return E_UNKNOWN;
+					}
+				len-=ret;
+				buff+=ret;
+			}
 	}
 
 #ifdef HAVE_FIONREAD
@@ -419,7 +454,7 @@ SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len,SINT32 msTimeOut)
 							}
 						return E_SUCCESS;	    	    
 					}
-				msleep(dt);
+				msSleep(dt);
 				msTimeOut-=dt;
 			}
 		while(msTimeOut>0);

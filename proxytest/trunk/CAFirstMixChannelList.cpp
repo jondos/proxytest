@@ -27,7 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #include "StdAfx.h"
 #include "CAFirstMixChannelList.hpp"
-
+#include "CAUtil.hpp"
 
 #define MAX_HASH_KEY 1025
 
@@ -80,9 +80,9 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,CAQueue* pQueueSend)
 	}
 
 SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,HCHANNEL channelIn,
-																	HCHANNEL channelOut,CASymCipher* pCipher)
+																	CASymCipher* pCipher,HCHANNEL* channelOut)
 	{
-		if(pMuxSocket==NULL)
+		if(pMuxSocket==NULL||channelOut==NULL)
 			return E_UNKNOWN;
 		SINT32 hashkey=pMuxSocket->getSocket();
 		if(hashkey>MAX_HASH_KEY-1||hashkey<0)
@@ -94,8 +94,13 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,HCHANNEL channelIn,
 		fmChannelListEntry* pNewEntry=new fmChannelListEntry;
 		memset(pNewEntry,0,sizeof(fmChannelListEntry));
 		pNewEntry->pCipher=pCipher;
-		pNewEntry->channelIn=channelIn;
-		pNewEntry->channelOut=channelOut;
+		pNewEntry->channelIn=channelIn;	
+		
+		do
+			{
+				getRandom(channelOut); //get new Random OUT-CHANNEL-ID
+			} while(get(*channelOut)==NULL); //until it is unused...
+		pNewEntry->channelOut=*channelOut;
 		pNewEntry->bIsSuspended=false;
 		pNewEntry->pHead=pHashTableEntry;
 		if(pEntry==NULL) //First Entry to the channel list
@@ -112,7 +117,7 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,HCHANNEL channelIn,
 		pHashTableEntry->pChannelList=pNewEntry;
 		
 		
-		hashkey=channelOut&0x0000FFFF;
+		hashkey=(*channelOut)&0x0000FFFF;
 		pEntry=m_HashTableOutChannels[hashkey];
 		if(pEntry!=NULL) //Hash Table Bucket Over run....
 			{
@@ -155,18 +160,6 @@ fmChannelListEntry* CAFirstMixChannelList::get(CAMuxSocket* pMuxSocket,HCHANNEL 
 				pEntry=pEntry->list_InChannelPerSocket.next;
 			}
 		return NULL;		
-	}
-
-fmChannelListEntry* CAFirstMixChannelList::get(HCHANNEL channelOut)
-	{
-		fmChannelListEntry* pEntry=m_HashTableOutChannels[channelOut&0x0000FFFF];
-		while(pEntry!=NULL)
-			{
-				if(pEntry->channelOut==channelOut)
-					return pEntry;
-				pEntry=pEntry->list_OutChannelHashTable.next;
-			}
-		return NULL;
 	}
 	
 SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)

@@ -92,11 +92,21 @@ class CAFirstMixChannelList
 			~CAFirstMixChannelList();
 		
 			SINT32 add(CAMuxSocket* pMuxSocket,CAQueue* pQueueSend);
-			SINT32 add(CAMuxSocket* pMuxSocket,HCHANNEL channelIn,HCHANNEL channelOut,CASymCipher* pCipher);
+			SINT32 add(CAMuxSocket* pMuxSocket,HCHANNEL channelIn,CASymCipher* pCipher,HCHANNEL* channelOut);
 			
 			fmChannelListEntry* get(CAMuxSocket* pMuxSocket,HCHANNEL channelIn);
-			fmChannelListEntry* get(HCHANNEL channelOut);
-	
+			fmChannelListEntry* get(HCHANNEL channelOut)
+				{
+					fmChannelListEntry* pEntry=m_HashTableOutChannels[channelOut&0x0000FFFF];
+					while(pEntry!=NULL)
+						{
+							if(pEntry->channelOut==channelOut)
+								return pEntry;
+							pEntry=pEntry->list_OutChannelHashTable.next;
+						}
+					return NULL;
+				}	
+
 			SINT32 remove(CAMuxSocket* pMuxSocket);
 			SINT32 remove(CAMuxSocket* pMuxSocket,HCHANNEL channelIn);
 					

@@ -395,7 +395,7 @@ SINT32 CALastMix::loop()
 					}
 //end step 4
 				if(!bAktiv)
-					msleep(100);
+					msSleep(100);
 			}
 
 
