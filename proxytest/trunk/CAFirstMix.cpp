@@ -649,7 +649,7 @@ LOOP_START:
 					}
 			if(oSocketGroup.isSignaled(muxOut))
 					{
-						countRead--;
+						//countRead--;
 						int countMuxOut=nUser;
 						do
 							{
