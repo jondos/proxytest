@@ -345,7 +345,11 @@ SINT32 setDOMElementValue(DOM_Element & elem, const UINT64 text)
 	{
 		UINT8 tmp[32];
 		#ifdef HAVE_NATIVE_UINT64
-			snprintf((char*)tmp, 31, "%llu", text);
+			#ifdef HAVE_SNPRINTF
+				snprintf((char*)tmp, 31, "%llu", text);
+			#else
+				trio_snprintf((char*)tmp, 31, "%llu", text);
+			#endif
 		#else
 			#warning setDOMElementValue(uint64) is not implemented for this platform!!
 			return E_UNKNOWN;

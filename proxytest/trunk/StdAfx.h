@@ -157,6 +157,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define MSG_DONTWAIT 0
 		#define O_NONBLOCK 0
 		#define HAVE_VSNPRINTF
+		#define HAVE_SNPRINTF
 		#define vsnprintf _vsnprintf
 		#define snprintf _snprintf
 		#define atoll _atoi64
@@ -179,6 +180,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#else
 		#define HAVE_UNIX_DOMAIN_PROTOCOL
 		#define HAVE_VSNPRINTF
+		#define HAVE_SNPRINTF
 		#define HAVE_ATOLL
 		#define HAVE_POLL
 		#ifndef __linux
@@ -205,6 +207,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
     #endif
 		#ifdef __sgi
 			#undef HAVE_VSNPRINTF
+			#undef HAVE_SNPRINTF
 			#include <alloca.h>
 		#endif
     #if !defined( __linux) &&!defined(__CYGWIN__)
