@@ -47,6 +47,8 @@ proxytest_SOURCES = CAASymCipher.cpp \
 		    CACertStore.hpp\
 		    CAConditionVariable.hpp\
 		    CACmdLnOptions.hpp \
+		    CADatabase.hpp\
+		    CADatagramSocket.hpp\
 		    CAFirstMix.hpp \
 		    CAFirstMixChannelList.hpp \
 		    CAInfoService.hpp \
@@ -67,7 +69,7 @@ proxytest_SOURCES = CAASymCipher.cpp \
 		    CASingleSocketGroup.hpp\
 		    CASocket.hpp \
 		    CASocketAddr.hpp \
-		    CASockerAddrINet.hpp \
+		    CASocketAddrINet.hpp \
 		    CASocketAddrUnix.hpp \
 		    CASocketGroup.hpp \
 		    CASocketList.hpp \
