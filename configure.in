@@ -331,7 +331,7 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM([
 ], [XMLPlatformUtils::Initialize();		DOM_Document doc=DOM_Document::createDocument();
 
 ])],[AC_MSG_RESULT(No)],[AC_MSG_RESULT(Yes)
-LIBS="$LIBS libxerces-depdom"
+LIBS="$LIBS -lxerces-depdom"
 ])
 
 
