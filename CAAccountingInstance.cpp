@@ -190,9 +190,6 @@ SINT32 CAAccountingInstance::handleJapPacket( MIXPACKET *pPacket, fmHashTableEnt
 		// check: is it time to request a new cost confirmation?
 		else if( (pAccInfo->transferredBytes-pAccInfo->confirmedBytes) >= m_iSoftLimitBytes)
 		{
-			CAMsg::printMsg(
-					LOG_DEBUG, "\n\ntransferred: %lld\nconfirmed: %lld\nsoftlimit: %d\nYes it is time!!\n",
-					pAccInfo->transferredBytes, pAccInfo->confirmedBytes, m_iSoftLimitBytes);
 			if( (pAccInfo->authFlags & AUTH_SENT_CC_REQUEST) )
 			{
 				if( (pAccInfo->authFlags & AUTH_SENT_SECOND_CC_REQUEST))
@@ -402,7 +399,7 @@ SINT32 CAAccountingInstance::handleJapPacket( MIXPACKET *pPacket, fmHashTableEnt
 }
 
 
-/** TODO: maybe make this an own CAAbstractXMLEncodable class */
+/** TODO: maybe make this an own CAAbstractXMLEncodable subclass */
 SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UINT64 transferredBytes, DOM_Document& doc)
 {
 	// create a DOM CostConfirmation document
@@ -430,7 +427,7 @@ SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UIN
 	return E_SUCCESS;
 }
 
-/** TODO: maybe make this an own CAAbstractXMLEncodable class */
+/** TODO: maybe make this an own CAAbstractXMLEncodable subclass */
 SINT32 CAAccountingInstance::makeBalanceRequest(const SINT32 seconds, DOM_Document &doc)
 {
 	UINT8 timeBuf[128];
@@ -449,7 +446,7 @@ SINT32 CAAccountingInstance::makeBalanceRequest(const SINT32 seconds, DOM_Docume
 	return E_SUCCESS;
 }
 
-/** @todo maybe make this an own CAAbstractXMLEncodable class */
+/** TODO: maybe make this an own CAAbstractXMLEncodable subclass */
 SINT32 CAAccountingInstance::makeAccountRequest(DOM_Document &doc)
 {
 	doc = DOM_Document::createDocument();
@@ -726,7 +723,7 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 	
 	// fetch cost confirmation from last session if available
 	CAXMLCostConfirmation * pCC = NULL;
-	m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, pCC);
+	m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, &pCC);
 	if(pCC!=NULL)
 		{
 			pAccInfo->transferredBytes += pCC->getTransferredBytes();
@@ -940,6 +937,7 @@ void CAAccountingInstance::handleBalanceCertificate(fmHashTableEntry *pHashEntry
 	
 	pAccInfo->lastbalDeposit = newDeposit;
 	pAccInfo->lastbalSpent = newSpent;
+	pAccInfo->lastbalTransferredBytes = pAccInfo->transferredBytes;
 	
 	// everything is OK, situation normal
 	pAccInfo->authFlags &= ~(AUTH_SENT_BALANCE_REQUEST|AUTH_SENT_SECOND_BALANCE_REQUEST);

@@ -73,7 +73,7 @@ public:
 	
 	SINT32 storeCostConfirmation(CAXMLCostConfirmation &cc);
 
-	SINT32 getCostConfirmation(UINT64 accountNumber, CAXMLCostConfirmation *pCC);
+	SINT32 getCostConfirmation(UINT64 accountNumber, CAXMLCostConfirmation **pCC);
 	
 	
 	/**

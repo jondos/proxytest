@@ -25,7 +25,7 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
-
+#ifdef PAYMENT
 #ifndef __CAACCOUNTINGINSTANCE__
 #define __CAACCOUNTINGINSTANCE__
 
@@ -179,7 +179,6 @@ private:
 	
 	UINT32 m_iSoftLimitBytes;
 	UINT32 m_iHardLimitBytes;
-	
 	// /** the interface to the payment instance */
 	// CAAccountingBIInterface * m_biInterface;
 	
@@ -213,3 +212,4 @@ private:
 
 
 #endif
+#endif //Payment
