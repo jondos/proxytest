@@ -58,8 +58,11 @@ class CASocket
 			SINT32 setReuseAddr(bool b);
 			SINT32 setRecvLowWat(UINT32 r);
 			SINT32 setSendLowWat(UINT32 r);
+			SINT32 getSendLowWat();
 			SINT32 setRecvBuff(UINT32 r);
+			SINT32 getRecvBuff();
 			SINT32 setSendBuff(UINT32 r);
+			SINT32 getSendBuff();
 			SINT32 setKeepAlive(bool b);
 			SINT32 setKeepAlive(UINT32 sec);
 			SINT32 setASyncSend(bool b,SINT32 size,CASocketASyncSendResume* pResume);
