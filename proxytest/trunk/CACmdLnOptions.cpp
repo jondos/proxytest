@@ -448,6 +448,7 @@ SINT32 CACmdLnOptions::setNextMix(DOM_Document& doc)
 */
 SINT32 CACmdLnOptions::setPrevMix(DOM_Document& doc)
 {
+		CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - start\n");
     DOM_Element elemRoot = doc.getDocumentElement();
     
     //getCertificates if given...
@@ -459,7 +460,7 @@ SINT32 CACmdLnOptions::setPrevMix(DOM_Document& doc)
     getDOMChildByName(elemSig,(UINT8*)"X509Data",elemCert,true);
     if(elemCert!=NULL)
     {
-
+				CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - elem cert found in data from infoservice\n");
         DOM_Element elemOptionsRoot = m_docMixXml.getDocumentElement();
         DOM_Element elemOptionsCerts;
         getDOMChildByName(elemOptionsRoot, (UINT8*) "Certificates", elemOptionsCerts, false);
@@ -483,9 +484,10 @@ SINT32 CACmdLnOptions::setPrevMix(DOM_Document& doc)
                 elemOptionsPrevMixCert.appendChild(m_docMixXml.importNode(elemCert.getFirstChild(),true));
             }
 	}
-
+		CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - end\n");
 	return processXmlConfiguration(m_docMixXml);
     }
+		CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - end with error\n");
     return E_UNKNOWN;
 }
 

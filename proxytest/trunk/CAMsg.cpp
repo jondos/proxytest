@@ -82,7 +82,7 @@ SINT32 CAMsg::setLogOptions(UINT32 opt)
 			return E_UNKNOWN;
     }
 
-SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
+SINT32 CAMsg::printMsg(UINT32 type,const char* format,...)
 	{
 		pMsg->m_pcsPrint->lock();
 		va_list ap;
