@@ -58,14 +58,13 @@ THREAD_RETURN lpIO(void *v)
 		HCHANNEL lastChannelId=1;
 		MUXPACKET oMuxPacket;
 		int len,ret;
-		CASocket* newSocket,*tmpSocket;
+		CASocket* newSocket;//,*tmpSocket;
 		CASymCipher* newCipher;
 		int countRead;
 		CONNECTION oConnection;		
 		unsigned char key[16];
 		memset(key,0,16);
 		unsigned char chainlen=lpIOPair->chainlen;
-		chainlen=2;
 		for(;;)
 			{
 				if((countRead=oSocketGroup.select())==SOCKET_ERROR)
@@ -144,15 +143,16 @@ THREAD_RETURN lpIO(void *v)
 												CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u ... ",oMuxPacket.channel);
 											#endif
 											//TODO: deleting cipher...
-											tmpSocket=oSocketList.remove(oMuxPacket.channel);
-											if(tmpSocket!=NULL)
+											/*tmpSocket=*/oSocketList.remove(oMuxPacket.channel);
+											if(oConnection.pSocket!=NULL)
 												{
-													oSocketGroup.remove(*tmpSocket);
-													tmpSocket->close();
+													oSocketGroup.remove(*oConnection.pSocket);
+													oConnection.pSocket->close();
 													#ifdef _DEBUG
 														CAMsg::printMsg(LOG_DEBUG,"closed!\n");
 													#endif
-													delete tmpSocket;
+													delete oConnection.pSocket;
+													delete oConnection.pCipher;
 												}
 										}
 									else
@@ -168,9 +168,9 @@ THREAD_RETURN lpIO(void *v)
 					{
 						CONNECTION* tmpCon;
 						tmpCon=oSocketList.getFirst();
-						while(tmpCon!=NULL)
+						while(tmpCon!=NULL&&countRead>0)
 							{
-								if(oSocketGroup.isSignaled(*tmpCon->pSocket)&&countRead>0)
+								if(oSocketGroup.isSignaled(*tmpCon->pSocket))
 									{
 										countRead--;
 										len=tmpCon->pSocket->receive(oMuxPacket.data,1000);
@@ -255,17 +255,13 @@ int doLocalProxy()
 		http.close();
 		sleep(10);
 		return -1;
-*///		((CASocket*)lpIOPair->muxOut)->create();
-//		((CASocket*)lpIOPair->muxOut)->setSendBuff(sizeof(MUXPACKET)*50);
-//		((CASocket*)lpIOPair->muxOut)->setRecvBuff(sizeof(MUXPACKET)*50);
+*/		((CASocket*)lpIOPair->muxOut)->create();
+		((CASocket*)lpIOPair->muxOut)->setSendBuff(sizeof(MUXPACKET)*50);
+		((CASocket*)lpIOPair->muxOut)->setRecvBuff(sizeof(MUXPACKET)*50);
 		if(lpIOPair->muxOut.connect(&addrNext)!=SOCKET_ERROR)
 			{
 				
 				CAMsg::printMsg(LOG_INFO," connected!\n");
-//				unsigned char key[16];
-//				memset(key,0,16);
-//				lpIOPair->muxOut.setDecryptionKey(key);
-//				lpIOPair->muxOut.setEncryptionKey(key);
 				((CASocket*)lpIOPair->muxOut)->receive((char*)&lpIOPair->chainlen,1);
 				CAMsg::printMsg(LOG_INFO,"Chain-Length: %d\n",lpIOPair->chainlen);
 				lpIO(lpIOPair);
@@ -388,9 +384,9 @@ int doMiddleMix()
 		char strTarget[255];
 		options.getTargetHost(strTarget,255);
 		nextMix.setAddr(strTarget,options.getTargetPort());
-//		((CASocket*)mmIOPair->muxOut)->create();
-//		((CASocket*)mmIOPair->muxOut)->setRecvBuff(50*sizeof(MUXPACKET));
-//		((CASocket*)mmIOPair->muxOut)->setSendBuff(50*sizeof(MUXPACKET));
+		((CASocket*)mmIOPair->muxOut)->create();
+		((CASocket*)mmIOPair->muxOut)->setRecvBuff(50*sizeof(MUXPACKET));
+		((CASocket*)mmIOPair->muxOut)->setSendBuff(50*sizeof(MUXPACKET));
 		if(mmIOPair->muxOut.connect(&nextMix)==SOCKET_ERROR)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Cannot connect to next Mix -- Exiting!\n");
@@ -405,8 +401,8 @@ int doMiddleMix()
 				delete mmIOPair;
 				return SOCKET_ERROR;
 			}
-	//	((CASocket*)mmIOPair->muxIn)->setRecvBuff(50*sizeof(MUXPACKET));
-	//	((CASocket*)mmIOPair->muxIn)->setSendBuff(50*sizeof(MUXPACKET));
+		((CASocket*)mmIOPair->muxIn)->setRecvBuff(50*sizeof(MUXPACKET));
+		((CASocket*)mmIOPair->muxIn)->setSendBuff(50*sizeof(MUXPACKET));
 		chainlen++;
 		((CASocket*)mmIOPair->muxIn)->send(&chainlen,1);
 		mmIO(mmIOPair);
@@ -430,19 +426,14 @@ THREAD_RETURN fmIO(void *v)
 		oSocketGroup.add(fmIOPair->socketIn);
 		oSocketGroup.add(fmIOPair->muxOut);
 		HCHANNEL lastChannelId=1;
-//		HCHANNEL outChannel;
 		MUXPACKET oMuxPacket;
 		CONNECTION oConnection;
-//		char buff[1001];
 		int len;
 		CAMuxSocket* newMuxSocket;
 		MUXLISTENTRY* tmpEntry;
 		REVERSEMUXLISTENTRY* tmpReverseEntry;
-//		CASymCipher oSymCipher;
 		unsigned char key[16];
 		memset(key,0,sizeof(key));
-//		oSymCipher.setEncryptionKey(key);
-//		oSymCipher.setDecryptionKey(key);
 		int countRead=0;
 		unsigned char chainlen=fmIOPair->chainlen;
 		for(;;)
@@ -468,10 +459,6 @@ THREAD_RETURN fmIO(void *v)
 							}
 						else
 							{
-		//						unsigned char key[16];
-			//					memset(key,0,16);
-				//				newMuxSocket->setDecryptionKey(key);
-					//			newMuxSocket->setEncryptionKey(key);
 								((CASocket*)newMuxSocket)->send((char*)&chainlen,1);
 								oMuxChannelList.add(newMuxSocket);
 								oSocketGroup.add(*newMuxSocket);
@@ -673,9 +660,9 @@ int doFirstMix()
 		options.getTargetHost(strTarget,255);
 		addrNext.setAddr(strTarget,options.getTargetPort());
 		CAMsg::printMsg(LOG_INFO,"Try connectiong to next Mix...");
-	//	((CASocket*)fmIOPair->muxOut)->create();
-	//	((CASocket*)fmIOPair->muxOut)->setSendBuff(50*sizeof(MUXPACKET));
-	//	((CASocket*)fmIOPair->muxOut)->setRecvBuff(50*sizeof(MUXPACKET));
+		((CASocket*)fmIOPair->muxOut)->create();
+		((CASocket*)fmIOPair->muxOut)->setSendBuff(50*sizeof(MUXPACKET));
+		((CASocket*)fmIOPair->muxOut)->setRecvBuff(50*sizeof(MUXPACKET));
 		if(fmIOPair->muxOut.connect(&addrNext)!=SOCKET_ERROR)
 			{
 				CAMsg::printMsg(LOG_INFO," connected!\n");
@@ -729,7 +716,6 @@ THREAD_RETURN lmIO(void *v)
 								CAMsg::printMsg(LOG_CRIT,"Channel to previous mix closed -- Exiting!\n");
 								exit(-1);
 							}
-	//					CASocket* tmpSocket=oSocketList.get(oMuxPacket.channel);
 						if(!oSocketList.get(oMuxPacket.channel,&oConnection))
 							{
 								if(len!=0)
@@ -776,7 +762,7 @@ THREAD_RETURN lmIO(void *v)
 							{
 								if(len==0)
 									{
-										oSocketGroup.remove(*oConnection.pSocket);
+										oSocketGroup.remove(*(oConnection.pSocket));
 										oConnection.pSocket->close();
 										lmIOPair->muxIn.close(oMuxPacket.channel);
 										oSocketList.remove(oMuxPacket.channel);
@@ -789,7 +775,7 @@ THREAD_RETURN lmIO(void *v)
 										len=oConnection.pSocket->send(oMuxPacket.data,len);
 										if(len==SOCKET_ERROR)
 											{
-												oSocketGroup.remove(*oConnection.pSocket);
+												oSocketGroup.remove(*(oConnection.pSocket));
 												oConnection.pSocket->close();
 												lmIOPair->muxIn.close(oMuxPacket.channel);
 												oSocketList.remove(oMuxPacket.channel);
@@ -811,35 +797,31 @@ THREAD_RETURN lmIO(void *v)
 										#ifdef _DEBUG
 										    CAMsg::printMsg(LOG_DEBUG,"Receiving Data from Squid!");
 										#endif
-//										do
-//											{
-												len=tmpCon->pSocket->receive(oMuxPacket.data,1000);
-												if(len==SOCKET_ERROR||len==0)
+										len=tmpCon->pSocket->receive(oMuxPacket.data,1000);
+										if(len==SOCKET_ERROR||len==0)
+											{
+												#ifdef _DEBUG
+														CAMsg::printMsg(LOG_DEBUG,"Closing Connection from Squid!\n");
+												#endif
+												oSocketGroup.remove(*(tmpCon->pSocket));
+												tmpCon->pSocket->close();
+												lmIOPair->muxIn.close(tmpCon->id);
+												oSocketList.remove(tmpCon->id);
+												delete tmpCon->pSocket;
+												delete tmpCon->pCipher;
+												break;
+											}
+										else 
+											{
+												oMuxPacket.channel=tmpCon->id;
+												oMuxPacket.len=(unsigned short)len;
+												tmpCon->pCipher->decrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
+												if(lmIOPair->muxIn.send(&oMuxPacket)==SOCKET_ERROR)
 													{
-														#ifdef _DEBUG
-																CAMsg::printMsg(LOG_DEBUG,"Closing Connection from Squid!\n");
-														#endif
-														oSocketGroup.remove(*tmpCon->pSocket);
-														tmpCon->pSocket->close();
-														lmIOPair->muxIn.close(tmpCon->id);
-														oSocketList.remove(tmpCon->id);
-														delete tmpCon->pSocket;
-														delete tmpCon->pCipher;
-														break;
+														CAMsg::printMsg(LOG_CRIT,"Mux Data Sending Error - Exiting!\n");
+														exit(-1);
 													}
-												else 
-													{
-														oMuxPacket.channel=tmpCon->id;
-														oMuxPacket.len=(unsigned short)len;
-														tmpCon->pCipher->decrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
-														if(lmIOPair->muxIn.send(&oMuxPacket)==SOCKET_ERROR)
-															{
-																CAMsg::printMsg(LOG_CRIT,"Mux Data Sending Error - Exiting!\n");
-																exit(-1);
-															}
-													}
-//											}
-//										while(tmpCon->pSocket->available()>=1000);
+											}
 									}
 								tmpCon=oSocketList.getNext();
 							}
@@ -858,12 +840,8 @@ int doLastMix()
 					delete lmIOPair;
 					return -1;
 		    }
-//		((CASocket*)lmIOPair->muxIn)->setRecvBuff(50*sizeof(MUXPACKET));
-//		((CASocket*)lmIOPair->muxIn)->setSendBuff(50*sizeof(MUXPACKET));
-/*		unsigned char key[16];
-		memset(key,0,16);
-		lmIOPair->muxIn.setDecryptionKey(key);
-*/		
+		((CASocket*)lmIOPair->muxIn)->setRecvBuff(50*sizeof(MUXPACKET));
+		((CASocket*)lmIOPair->muxIn)->setSendBuff(50*sizeof(MUXPACKET));
 		
 		CAMsg::printMsg(LOG_INFO,"connected!\n");
 		CAMsg::printMsg(LOG_INFO,"Sending chain length: 1!\n");
