@@ -59,7 +59,23 @@ bool CAMuxChannelList::remove(CAMuxSocket* pMuxSocket,MUXLISTENTRY* pEntry)
 						CONNECTION* tmpCon=tmpEntry->pSocketList->getFirst();
 						while(tmpCon!=NULL)
 							{
-								remove(tmpCon->outChannel,NULL);
+								//Out-Channel aus Reverselist entfernen....
+								REVERSEMUXLISTENTRY* rbefore=NULL;
+								REVERSEMUXLISTENTRY* tmpReverseEntry=reverselist;
+								while(tmpReverseEntry!=NULL)
+									{
+										if(tmpReverseEntry->outChannel==tmpCon->outChannel)
+											{
+												if(rbefore!=NULL)
+													rbefore->next=tmpReverseEntry->next;
+												else
+													reverselist=tmpReverseEntry->next;
+												delete tmpReverseEntry;
+												break;			
+											}
+										rbefore=tmpReverseEntry;
+										tmpReverseEntry=tmpReverseEntry->next;
+									}
 								tmpCon=tmpEntry->pSocketList->getNext();
 							}
 						if(pEntry!=NULL)
@@ -125,6 +141,8 @@ bool CAMuxChannelList::remove(HCHANNEL out,REVERSEMUXLISTENTRY* retReverseEntry)
 				if(tmpReverseEntry->outChannel==out)
 					{
 						MUXLISTENTRY* tmpEntry=get(tmpReverseEntry->pMuxSocket);
+						
+						//Error korrektion!!!!!
 						tmpEntry->pSocketList->remove(tmpReverseEntry->inChannel);
 						if(before!=NULL)
 							{
