@@ -1,0 +1,3 @@
+
+#undef HAVE_OPENSSL
+#undef HAVE_STRERROR
