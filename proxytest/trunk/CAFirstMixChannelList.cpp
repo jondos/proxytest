@@ -173,8 +173,8 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 					}
 				else
 					{
-						pHashTableEntry->list_HashEntries.next->list_HashEntries.prev=NULL;
 						m_listHashTableHead=pHashTableEntry->list_HashEntries.next;
+						m_listHashTableHead->list_HashEntries.prev=NULL;
 					}
 			}
 		else
@@ -324,5 +324,7 @@ fmChannelListEntry* CAFirstMixChannelList::getFirstChannelForSocket(CAMuxSocket*
 
 fmChannelListEntry* CAFirstMixChannelList::getNextChannel(fmChannelListEntry* pEntry)
 	{
+		if(pEntry==NULL)
+			return NULL;
 		return pEntry->list_InChannelPerSocket.next;
 	}
