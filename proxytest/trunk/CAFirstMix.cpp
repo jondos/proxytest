@@ -1051,8 +1051,8 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 						oRSA.setPublicKeyAsDOMNode(rsaKey);
 						UINT8 key[16];
 						getRandom(key,16);
-						UINT8 buff[256];
-						UINT32 bufflen=256;
+						UINT8 buff[400];
+						UINT32 bufflen=400;
 						encodeXMLEncryptedKey(key,16,buff,&bufflen,&oRSA);
 						m_pMuxOut->setKey(key);
 						UINT16 size=ntohs(bufflen);
