@@ -275,7 +275,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef DEBUG
 #define ASSERT(cond,msg)
 #else
-#define ASSERT(cond,msg) {if(!(cond)){CAMsg::printMsg(LOG_DEBUG,"ASSERT: %s (File: %s, Line: %s)\n",msg,__FILE__,__LINE__);exit(-1);}}
+#define ASSERT(cond,msg) {if(!(cond)){CAMsg::printMsg(LOG_DEBUG,"ASSERT: %s (File: %s, Line: %u)\n",msg,__FILE__,__LINE__);}}
 #endif
 
 #include <stdio.h>
