@@ -450,8 +450,6 @@ SINT32 CALastMix::loop()
 						UINT32 channels=oSocketList.getSize()+1;
 						for(UINT32 k=0;k<channels;k++)
 							{
-								if(osocketgroupMixIn.select(false,0)!=1)
-									break;
 								ret=muxIn.receive(pMixPacket,0);
 								if(ret==SOCKET_ERROR)
 									{
@@ -672,7 +670,7 @@ SINT32 CALastMix::loop()
 				if(!oqueueMixIn.isEmpty()&&osocketgroupMixIn.select(true,0)==1)
 					{
 						countRead=oSocketList.getSize()+1;
-						while(countRead>0&&!oqueueMixIn.isEmpty()&&osocketgroupMixIn.select(true,0)==1)
+						while(countRead>0&&!oqueueMixIn.isEmpty())
 							{
 								bAktiv=true;
 								countRead--;
