@@ -86,7 +86,7 @@ SINT32 CADatagramSocket::bind(LPCASOCKETADDR from)
 			return SOCKET_ERROR;
 		if(::bind(m_Socket,(LPSOCKADDR)from,sizeof(*from))==SOCKET_ERROR)
 		    return SOCKET_ERROR;
-		return 0;
+		return E_SUCCESS;
 	}
 
 SINT32 CADatagramSocket::bind(UINT16 port)
@@ -97,12 +97,9 @@ SINT32 CADatagramSocket::bind(UINT16 port)
 
 SINT32 CADatagramSocket::send(UINT8* buff,UINT32 len,LPCASOCKETADDR to)
 	{
-    int ret=::sendto(m_Socket,(char*)buff,len,MSG_NOSIGNAL,(LPSOCKADDR)to,sizeof(*to));
-			 #ifdef _DEBUG
-				if(ret==SOCKET_ERROR)
-				 printf("FEhler beim Socket-send: %i",errno);
-				#endif
-	  return ret;	    	    
+    		if(::sendto(m_Socket,(char*)buff,len,MSG_NOSIGNAL,(LPSOCKADDR)to,sizeof(*to))==SOCKET_ERROR)
+			return E_UNKNOWN;
+		return E_SUCCESS;	    	    
 	}
 
 
