@@ -315,4 +315,19 @@ SINT32 formatJdbcTimestamp(const SINT32 seconds, UINT8 * strTimestamp, const UIN
  */
 SINT32 parseU64(const UINT8 * str, UINT64& value);
 
+/** Clones an OpenSSL DSA structure
+	*/
+DSA* DSA_clone(DSA* dsa)
+	{
+		if(dsa==NULL)
+			return NULL;
+		DSA* tmpDSA=DSA_new();
+		tmpDSA->g=BN_dup(dsa->g);
+		tmpDSA->p=BN_dup(dsa->p);
+		tmpDSA->q=BN_dup(dsa->q);
+		tmpDSA->pub_key=BN_dup(dsa->pub_key);
+		if(dsa->priv_key!=NULL)
+			tmpDSA->priv_key=BN_dup(dsa->priv_key);
+		return tmpDSA;
+	}
 #endif
