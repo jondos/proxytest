@@ -485,12 +485,6 @@ END_THREAD:
 	}
 */
 
-#define NO_LOOPACCEPTUSER
-
-
-
-
-
 SINT32 CAFirstMix::clean()
 	{
 		#ifdef _DEBUG
