@@ -5,7 +5,7 @@ dnl
 
 AC_INIT([proxytest],[0.0.2])
 AM_INIT_AUTOMAKE
-AC_PREREQ(2.57)
+AC_PREREQ(2.52)
 AC_CONFIG_SRCDIR([proxytest.cpp])
 AC_CONFIG_HEADERS([config.h])
 AC_CANONICAL_HOST
@@ -19,7 +19,7 @@ AC_PROG_INSTALL
 AC_PROG_RANLIB
 
 AC_LANG_PUSH(C++)
-AC_COMPILE_IFELSE([int main(){return 0;}],[],[AC_MSG_FAILURE([Could not run C++ compiler])])
+AC_COMPILE_IFELSE([int main(){return 0;}],[],[AC_MSG_ERROR([Could not run C++ compiler])])
 AC_LANG_POP(C++)
 
 CFLAGS=""
@@ -89,6 +89,19 @@ AC_CHECK_DECL(MSG_NOSIGNAL,[],[AC_DEFINE(MSG_NOSIGNAL,0,[This is a flag to read(
 
 dnl Checks for types
 AC_CHECK_TYPE(socklen_t,[AC_DEFINE(HAVE_SOCKLEN_T,,[Define if the type socklen_t is available])],[],[#include <sys/socket.h>])
+
+dnl Checks for sizes of base types
+AC_CHECK_SIZEOF(unsigned char)
+AC_CHECK_SIZEOF(signed char)
+AC_CHECK_SIZEOF(unsigned short)
+AC_CHECK_SIZEOF(signed short)
+AC_CHECK_SIZEOF(unsigned int)
+AC_CHECK_SIZEOF(signed int)
+AC_CHECK_SIZEOF(unsigned long)
+AC_CHECK_SIZEOF(signed long)
+AC_CHECK_SIZEOF(unsigned long long)
+AC_CHECK_SIZEOF(__uint64_t)
+
 
 
 dnl Checks for libraries.
@@ -190,7 +203,8 @@ AC_ARG_WITH(xml-include,
 XMLINCLUDEFLAGS="-I/usr/include/xercesc -I$xmlincludedir -I$xmlincludedir/xercesc"
 CFLAGS="$CFLAGS $XMLINCLUDEFLAGS"
 CXXFLAGS=$CFLAGS
-AC_CHECK_HEADER([dom/DOM.hpp],AC_MSG_RESULT([Xerces-C includes found]),
+AC_MSG_NOTICE([Xerces-C tests])
+AC_CHECK_HEADER([dom/DOM.hpp],,
 		AC_MSG_ERROR([Xerces-C includes NOT found - please use --with-xml-include]),[//Check])
 
 
@@ -205,15 +219,15 @@ AC_ARG_WITH(xml-lib,
 )
 XMLLIBFLAGS="-L$xmllibdir -lxerces-c"
 LIBS="$LIBS $XMLLIBFLAGS"
-
-AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+AC_MSG_CHECKING([for libxerces-c])
+AC_LINK_IFELSE([AC_LANG_PROGRAM([
 #include "util/XercesDefs.hpp"
 #include "util/PlatformUtils.hpp"
 #if (_XERCES_VERSION >= 20200)
     XERCES_CPP_NAMESPACE_USE
 #endif
-]], [[XMLPlatformUtils::Initialize()
-]])],[AC_MSG_RESULT(XercesC-Lib found)],[AC_MSG_ERROR(Xerces-C Lib NOT found - please use --with-xml-lib)])
+], [XMLPlatformUtils::Initialize()
+])],[AC_MSG_RESULT(found)],[AC_MSG_ERROR(Xerces-C Lib NOT found - please use --with-xml-lib)])
 
 
 AC_LANG_POP(C++)
