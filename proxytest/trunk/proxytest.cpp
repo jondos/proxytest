@@ -266,7 +266,7 @@ int main(int argc, char* argv[])
 		err=WSAStartup(0x0202,&wsadata);
 		#endif
 		InitializeCriticalSection(&csClose);
-		CASocketAddr socketAddrIn(1999);
+		CASocketAddr socketAddrIn(atol(argv[3]));
 		socketAddrSquid.setAddr(argv[1],atol(argv[2]));
 		CASocket socketIn;
 		if(socketIn.listen(&socketAddrIn)==SOCKET_ERROR)
