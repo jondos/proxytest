@@ -60,7 +60,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define E_TIMEDOUT WSAETIMEDOUT
 		#define E_CONNREFUSED WSAECONNREFUSED
 		#define MSG_DONTWAIT 0
-		#define usleep(i) Sleep(i) 
+		#define msleep(i) Sleep(i) 
 		#ifdef __cplusplus
 			#include <string>
 			#include <vector>
@@ -124,7 +124,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
     #define SD_SEND 1
     #define SD_BOTH 2
     #define WSAGetLastError() errno
-
+		#define msleep(i) usleep(i*1000)
     #ifndef __linux 
 	#ifndef INADDR_NONE
     	    #define INADDR_NONE -1
