@@ -94,7 +94,9 @@ am_mix_OBJECTS = CAAbstractControlChannel.$(OBJEXT) \
 	CAXMLErrorMessage.$(OBJEXT) StdAfx.$(OBJEXT) \
 	proxytest.$(OBJEXT)
 mix_OBJECTS = $(am_mix_OBJECTS)
-mix_LDADD = $(LDADD)
+mix_DEPENDENCIES = $(top_srcdir)/xml/libxml.a \
+	$(top_srcdir)/popt/libpopt.a $(top_srcdir)/trio/libtrio.a \
+	$(top_srcdir)/tre/libtre.a $(top_srcdir)/TypeA/libmixa.a
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I.
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -344,7 +346,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    StdAfx.h \
 		    basetypedefs.h
 
-proxytest_LDADD = $(top_srcdir)/xml/libxml.a \
+mix_LDADD = $(top_srcdir)/xml/libxml.a \
 		  $(top_srcdir)/popt/libpopt.a \
 		  $(top_srcdir)/trio/libtrio.a \
 		  $(top_srcdir)/tre/libtre.a \
