@@ -1,0 +1,158 @@
+#You should only need to change the following lines:
+OPENSSL_INC=/usr/local/ssl/include
+OPENSSL_LIB=/usr/local/ssl/lib
+XERCESC_INC=/usr/local/include/xercesc
+XERCESC_LIB=/usr/local/lib
+
+#### I believe you do not need to change anything behind this....
+
+INCLUDE = -I. -I${OPENSSL_INC} -I/usr/users/sya/sk13/openssl/include -I/home/imis/mix/openssl64/include -I/sun/ikt/sk13/openssl/include -I${XERCESC_INC} -I${XERCESC_INC}/xercesc -I${HOME}/xercesc/include/xercesc
+LIBDIR= -L${OPENSSL_LIB} -L/usr/users/sya/sk13/openssl/lib -L/home/imis/mix/openssl64/lib -L/sun/ikt/sk13/openssl/lib -L/usr/local/lib -L${XERCESC_LIB} -L${HOME}/xercesc/lib
+LIBS	= ./popt/libpopt.a ./xml/libxml.a ./trio/libtrio.a ./tre/libtre.a ./aes/libaes.a -lcrypto -lm -lxerces-c
+
+MAKE=make -f Makefile.old
+
+.SUFFIXES:
+.SUFFIXES: .o .cpp	
+
+OBJS_ALL=CASocket.o\
+	CAQueue.o\
+	CASingleSocketGroup.o\
+	CASocketGroup.o\
+	CASocketAddrINet.o\
+	CASocketAddrUnix.o\
+	CASocketList.o\
+	CACmdLnOptions.o\
+	CAMsg.o\
+	CAMuxSocket.o\
+	CAFirstMixChannelList.o\
+	CAIPList.o\
+	CASymCipher.o\
+	CAASymCipher.o\
+	CAInfoService.o\
+	CASignature.o\
+	CABase64.o\
+	CAUtil.o\
+	CADatagramSocket.o\
+	CAMix.o\
+	CAFirstMix.o\
+	CALastMix.o\
+	CALastMixChannelList.o\
+	CAListenerInterface.o\
+	CAMiddleMix.o\
+	CALocalProxy.o\
+	CACacheLoadBalancing.o\
+	CAThread.o\
+	CASemaphore.o\
+	CAMutex.o\
+	CAConditionVariable.o\
+	CAMiddleMixChannelList.o\
+	CADatabase.o\
+	CACertificate.o\
+	CACertStore.o\
+	CAPool.o\
+	proxytest.o
+
+OBJS=$(OBJS_ALL)
+
+.cpp.o:
+	$(CC) -c $(CPPFLAGS) $(INCLUDE) $(DEBUG) $< $(LDFLAGS) -o $@
+
+
+all: 
+	@echo 'Please select a target:'
+	@echo 'linux-x86-gcc,linux-x86-gcc-static , linux-k6-gcc, linux-i686-gcc' 
+	@echo 'linux-i686-gcc-static, linux-pentium3-gcc-static, linux-k6-gcc-static, linux-x86-gcc-debug,'
+	@echo 'solaris-ultrasparc-gcc, irix-64-cc, irix-64-cc-debug'
+	@echo 'freebsd-x86-gcc-lthread, freebsd-x86-gcc-pthread'
+
+
+linux-x86-gcc:
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -finline-functions -fomit-frame-pointer -O3' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
+
+linux-x86-gcc-static:
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-static -D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -finline-functions -fomit-frame-pointer -O3' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
+
+linux-pentium3-gcc-static:
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-static -D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -finline-functions -fomit-frame-pointer -march=pentium3 -O3' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
+
+linux-i686-gcc-static:
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-static -D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -finline-functions -fomit-frame-pointer -march=i686 -O3' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
+
+linux-i686-gcc:
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -finline-functions -fomit-frame-pointer -march=i686 -O3' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
+
+linux-k6-gcc:
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -finline-functions -fomit-frame-pointer -march=k6 -O3' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=-L/usr/local/ssl/lib' _all_aes 
+
+linux-k6-gcc-static:
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-static -D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -finline-functions -fomit-frame-pointer -march=k6 -O3' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=-L/usr/local/ssl/lib' _all_aes 
+
+linux-x86-gcc-prof-async:
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-static -D_ASYNC -D_REENTRANT -Wall -Wcast-align -march=i686 -O3 -g -p -pg -a' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lpthread' 'LIBDIR=-L/usr/local/ssl/lib' _all_aes 
+
+linux-x86-gcc-fnc-async:
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-static -D_ASYNC -D_REENTRANT -Wall -Wcast-align -march=i686 -O3 -g -finstrument-functions' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=-lm -lbfd -liberty -ldl $(LIBS) -lpthread -lfnccheck' 'LIBDIR=-L/usr/local/ssl/lib -L$(HOME)/fncheck/lib' _all_aes 
+
+linux-x86-gcc-g-static:
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-ggdb -static -D_REENTRANT -Wall -Wcast-align' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=-L/usr/local/ssl/lib' _all_aes 
+
+linux-x86-gcc-debug-static:
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-ggdb -static -DDO_TRACE -D_DEBUG -D_REENTRANT -Wall -Wcast-align' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=-L/usr/local/ssl/lib' _all_aes 
+
+linux-x86-gcc-trace-static:
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-ggdb -static -DDO_TRACE -D_REENTRANT -Wall -Wcast-align -march=i686' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=-L/usr/local/ssl/lib' _all_aes 
+
+linux-x86-gcc-cwdebug-static:
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-ggdb -static -D_DEBUG -DCWDEBUG -D_REENTRANT -Wall -Wcast-align -march=i686' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lcwd -ldl -lpthread -lstdc++' 'LIBDIR=-L/usr/local/ssl/lib' _all_aes 
+
+linux-x86-icc-async:
+	$(MAKE) 'CC=icc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT' 'INCLUDE=-I. -I/usr/local/ssl/include -I/opt/intel/compiler50/ia32/include' 'LIBS=$(LIBS) -lpthread' 'LIBDIR=-L/usr/local/ssl/lib -L/opt/intel/compiler50/ia32/lib' _all_aes 
+
+solaris-ultrasparc-gcc:
+	$(MAKE) 'CC=gcc -mcpu=ultrasparc' 'CPPFLAGS=-O3 -D_REENTRANT' 'LIBS=$(LIBS) -lpthread -lsocket -lnsl' _all_aes 
+
+irix-64-cc:
+	$(MAKE) 'CC=CC -r10000 -mips4 -64' 'CPPFLAGS=-D_ASYNC -fullwarn -Ofast=IP27 -D_REENTRANT' 'LIBS=$(LIBS) -lpthread' _all_aes 
+
+irix-64-cc1:
+	$(MAKE) 'CC=CC -64' 'CPPFLAGS=-D_ASYNC -fullwarn -D_REENTRANT' 'LIBS=$(LIBS) -lpthread' _all_aes 
+
+irix-64-cc-debug:
+	$(MAKE) 'CC=CC -r10000 -mips4 -64' 'CPPFLAGS=-D_REENTRANT' 'DEBUG=-g2 -D_DEBUG' 'LIBS=$(LIBS) -lpthread ' _all_aes 
+
+freebsd-x86-gcc-lthread:
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -fomit-frame-pointer -O3' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -llthread' 'LIBDIR=-L/usr/local/lib' _all_aes 
+
+freebsd-x86-gcc-pthread:
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -fomit-frame-pointer -O3' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lpthread' 'LIBDIR=-L/usr/local/lib -L/usr/local/lib/pth' _all_aes 
+
+linux-x86-gcc-webdeploy:
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -O0' 'INCLUDE=$(INCLUDE)' 'LIBS=./libxerces-c.a ./popt/libpopt.a ./xml/libxml.a ./trio/libtrio.a ./aes/libaes.a -lcrypto -lm -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
+
+_all_aes: $(OBJS) libpopt.a libxml.a libaes.a libtrio.a libtre.a
+	$(CC) -o proxytest $(DEBUG) $(CPPFLAGS) $(OBJS) $(LIBDIR) $(LIBS)
+
+libpopt.a:
+	cd popt;$(MAKE) 'CC=$(CC)' 'DEBUG=$(DEBUG)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)'
+
+libtrio.a:
+	cd trio;$(MAKE) 'CC=$(CC)' 'DEBUG=$(DEBUG)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)'
+
+libtre.a:
+	cd tre;$(MAKE) 'CC=$(CC)' 'DEBUG=$(DEBUG)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)'
+
+libxml.a: 
+	cd xml;$(MAKE) 'CC=$(CC)' 'DEBUG=$(DEBUG)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)';
+
+libaes.a: 
+	cd aes;$(MAKE) 'CC=$(CC)' 'DEBUG=$(DEBUG)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)';
+
+clean:
+	rm -f $(OBJS)
+	cd popt; $(MAKE) clean;
+	cd trio;$(MAKE) clean;
+	cd tre;$(MAKE) clean;
+	cd xml;$(MAKE) clean;
+	cd aes;$(MAKE) clean;
+	rm -f proxytest
