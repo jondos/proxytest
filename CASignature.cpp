@@ -83,14 +83,20 @@ SINT32 CASignature::setSignKey(const DOM_Node& n,UINT32 type,char* passwd)
 						{
 							if(node.getNodeName().equals("X509PKCS12"))
 								{
-										char* tmpStr=node.getFirstChild().getNodeValue().transcode();
-										UINT32 decLen=4096;
-										UINT8* decBuff=new UINT8[decLen];
-										CABase64::decode((UINT8*)tmpStr,strlen(tmpStr),decBuff,&decLen);
-										delete [] tmpStr;
-										SINT32 ret=setSignKey(decBuff,decLen,SIGKEY_PKCS12,passwd);
-										delete[] decBuff;
-										return ret;
+									UINT32 strLen=4096;
+									UINT8* tmpStr=new UINT8[strLen];
+									if(getDOMElementValue(node,tmpStr,&strLen)!=E_SUCCESS)
+										{
+											delete[] tmpStr;
+											return E_UNKNOWN;
+										}
+									UINT32 decLen=4096;
+									UINT8* decBuff=new UINT8[decLen];
+									CABase64::decode((UINT8*)tmpStr,strLen,decBuff,&decLen);
+									delete [] tmpStr;
+									SINT32 ret=setSignKey(decBuff,decLen,SIGKEY_PKCS12,passwd);
+									delete[] decBuff;
+									return ret;
 								}
 							node=node.getNextSibling();
 						}

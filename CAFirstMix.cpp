@@ -194,7 +194,6 @@ THREAD_RETURN loopSendToMix(void* param)
 //		CASocket* pSocket=(CASocket *)(*((CAFirstMix*)param)->m_pMuxOut);
 		CAMuxSocket* pMuxSocket=((CAFirstMix*)param)->m_pMuxOut;
 		
-		UINT8* buff=new UINT8[0xFFFF];
 		UINT32 len;
 /*		for(;;)
 			{
@@ -204,6 +203,7 @@ THREAD_RETURN loopSendToMix(void* param)
 					break;
 			}*/
 #ifndef USE_POOL
+		UINT8* buff=new UINT8[0xFFFF];
 		for(;;)
 			{
 				len=MIXPACKET_SIZE;
@@ -213,6 +213,7 @@ THREAD_RETURN loopSendToMix(void* param)
 				if(pMuxSocket->send((MIXPACKET*)buff)!=MIXPACKET_SIZE)
 					break;
 			}
+		delete []buff;
 #else
 		CAPool* pPool=new CAPool(MIX_POOL_SIZE);
 		MIXPACKET* pMixPacket=new MIXPACKET;
@@ -222,21 +223,19 @@ THREAD_RETURN loopSendToMix(void* param)
 				SINT32 ret=pQueue->getOrWait((UINT8*)pMixPacket,&len,MIX_POOL_TIMEOUT);
 				if(ret==E_TIMEDOUT)
 					{
-						continue;
 						pMixPacket->flags=0;
 						pMixPacket->channel=DUMMY_CHANNEL;
 						getRandom(pMixPacket->data,DATA_SIZE);
 					}
 				else if(ret!=E_SUCCESS||len!=MIXPACKET_SIZE)
 					break;
-				//pPool->pool(pMixPacket);
-				if(pMuxSocket->send((MIXPACKET*)buff)!=MIXPACKET_SIZE)
+				pPool->pool(pMixPacket);
+				if(pMuxSocket->send(pMixPacket)!=MIXPACKET_SIZE)
 					break;
 			}
 		delete pMixPacket;
 		delete pPool;
 #endif
-		delete []buff;
 		CAMsg::printMsg(LOG_DEBUG,"Exiting Thread SendToMix\n");
 		THREAD_RETURN_SUCCESS;
 	}
@@ -466,7 +465,6 @@ END_THREAD:
 */
 
 #define NO_LOOPACCEPTUSER
-//#define NO_LOOP_SEND_TO_MIX
 SINT32 CAFirstMix::loop()
 	{
 		CASingleSocketGroup osocketgroupMixOut;
@@ -512,14 +510,10 @@ SINT32 CAFirstMix::loop()
 //		threadReadFromUsers.start(this);
 
 		//Starting thread for Step 4
-#if !defined(_DEBUG)&&!defined(NO_LOOP_SEND_TO_MIX)
 		CAThread threadSendToMix;
 		threadSendToMix.setMainLoop(loopSendToMix);
 		threadSendToMix.start(this);
-#else
-		UINT8* sendbuff=new UINT8[0xFFFF];
-		((CASocket*)m_pMuxOut)->setNonBlocking(true);
-#endif
+
 		for(;;)	                                                          /* the main mix loop as long as there are things that are not handled by threads. */
 			{
 				bAktiv=false;
@@ -754,23 +748,6 @@ SINT32 CAFirstMix::loop()
 
 // Now in a separate Thread (see loopSendToMix())
 
-// if not _DEBUG or NO_LOOP_SEND_TO_MIX defined
-#if defined (_DEBUG) || defined(NO_LOOP_SEND_TO_MIX)
-	/*	SINT32 sendlen=0x0FFFF;
-		if(osocketgroupMixOut.select(true,0)==1&&m_pQueueSendToMix->peek(sendbuff,(UINT32*)&sendlen)==E_SUCCESS)
-			{
-				bAktiv=true;
-				sendlen=((CASocket*)m_pMuxOut)->send(sendbuff,sendlen);
-				if(sendlen>0)
-					m_pQueueSendToMix->remove((UINT32*)&sendlen);
-			}*/
-		SINT32 sendlen=MIXPACKET_SIZE;
-		if(osocketgroupMixOut.select(true,0)==1&&m_pQueueSendToMix->get(sendbuff,(UINT32*)&sendlen)==E_SUCCESS)
-			{
-				bAktiv=true;
-				m_pMuxOut->send((MIXPACKET*)sendbuff);
-			}
-#endif
 //Step 4
 //Reading from Mix				
 				countRead=m_nUser+1;
@@ -939,12 +916,8 @@ ERR:
 		CAMsg::printMsg(LOG_CRIT,"Wait for LoopAcceptUsers!\n");
 		threadAcceptUsers.join();
 #endif
-#if !defined(_DEBUG) && !defined(NO_LOOP_SEND_TO_MIX)
 		CAMsg::printMsg(LOG_CRIT,"Wait for LoopSendToMix!\n");
 		threadSendToMix.join(); //will not join if queue is empty (and so wating)!!!
-#else
-		delete sendbuff;
-#endif
 		//		threadReadFromUsers.join(); 
 		CAMsg::printMsg(LOG_CRIT,"Before deleting CAFirstMixChannelList()!\n");
 		CAMsg::printMsg	(LOG_CRIT,"Memeory usage before: %u\n",getMemoryUsage());	
