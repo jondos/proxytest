@@ -254,12 +254,17 @@ SINT32 CALastMix::loop()
 				pInfoService->start();
 			}
 		m_logUploadedPackets=m_logDownloadedPackets=0;
-		set64((UINT64&)m_logUploadedBytes,0);
-		set64((UINT64&)m_logDownloadedBytes,0);
+		set64((UINT64&)m_logUploadedBytes,(UINT32)0);
+		set64((UINT64&)m_logDownloadedBytes,(UINT32)0);
 		CAThread oLogThread;
 		oLogThread.setMainLoop(loopLog);
 		oLogThread.start(this);
-		
+
+		#ifdef LOG_CHANNEL
+			UINT64 current_millis;
+			UINT32 diff_time; 
+		#endif
+
 		for(;;)
 			{
 				bAktiv=false;
@@ -350,7 +355,12 @@ SINT32 CALastMix::loop()
 															else
 																{
 																	tmpSocket->setNonBlocking(true);
-																	oSocketList.add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue());
+																	#ifdef LOG_CHANNEL
+																		getcurrentTimeMillis(current_millis);
+																		oSocketList.add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue(),current_millis);
+																	#else
+																		oSocketList.add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue());
+																	#endif
 																	osocketgroupCacheRead.add(*tmpSocket);
 																}
 														}
@@ -364,6 +374,11 @@ SINT32 CALastMix::loop()
 												osocketgroupCacheWrite.remove(*(oConnection.pSocket));
 												oConnection.pSocket->close();
 												oSocketList.remove(pMixPacket->channel);
+												#ifdef LOG_CHANNEL
+													getcurrentTimeMillis(current_millis);
+													diff_time=diff64(current_millis,oConnection.time_created);
+													CAMsg::printMsg(LOG_DEBUG,"Channel %u closed: Time - %u, Upload - %u, Download - %u\n",oConnection.id,diff_time,oConnection.u32Upload,oConnection.u32Download); 
+												#endif
 												delete oConnection.pSocket;
 												delete oConnection.pCipher;
 												delete oConnection.pSendQueue;										
@@ -384,7 +399,12 @@ SINT32 CALastMix::loop()
 												oConnection.pCipher->decryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 												ret=ntohs(pMixPacket->payload.len);
 												if(ret>=0&&ret<=PAYLOAD_SIZE)
-													ret=oConnection.pSendQueue->add(pMixPacket->payload.data,ret);
+													{
+														ret=oConnection.pSendQueue->add(pMixPacket->payload.data,ret);
+														#ifdef LOG_CHANNEL
+															oConnection.u32Upload+=ret;
+														#endif
+													}
 												else
 													ret=SOCKET_ERROR;
 												if(ret==SOCKET_ERROR)
@@ -392,6 +412,11 @@ SINT32 CALastMix::loop()
 														osocketgroupCacheRead.remove(*(oConnection.pSocket));
 														osocketgroupCacheWrite.remove(*(oConnection.pSocket));
 														oConnection.pSocket->close();
+														#ifdef LOG_CHANNEL
+															getcurrentTimeMillis(current_millis);
+															diff_time=diff64(current_millis,oConnection.time_created);
+															CAMsg::printMsg(LOG_DEBUG,"Channel %u closed: Time - %u, Upload - %u, Download - %u\n",oConnection.id,diff_time,oConnection.u32Upload,oConnection.u32Download); 
+														#endif
 														delete oConnection.pSocket;
 														delete oConnection.pCipher;
 														delete oConnection.pSendQueue;
@@ -440,6 +465,11 @@ SINT32 CALastMix::loop()
 														osocketgroupCacheRead.remove(*(tmpCon->pSocket));
 														osocketgroupCacheWrite.remove(*(tmpCon->pSocket));
 														tmpCon->pSocket->close();
+														#ifdef LOG_CHANNEL
+															getcurrentTimeMillis(current_millis);
+															diff_time=diff64(current_millis,tmpCon->time_created);
+															CAMsg::printMsg(LOG_DEBUG,"Channel %u closed: Time - %u, Upload - %u, Download - %u\n",tmpCon->id,diff_time,tmpCon->u32Upload,tmpCon->u32Download); 
+														#endif
 														delete tmpCon->pSocket;
 														delete tmpCon->pCipher;
 														delete tmpCon->pSendQueue;
@@ -475,6 +505,11 @@ SINT32 CALastMix::loop()
 														osocketgroupCacheRead.remove(*(tmpCon->pSocket));
 														osocketgroupCacheWrite.remove(*(tmpCon->pSocket));
 														tmpCon->pSocket->close();
+														#ifdef LOG_CHANNEL
+															getcurrentTimeMillis(current_millis);
+															diff_time=diff64(current_millis,tmpCon->time_created);
+															CAMsg::printMsg(LOG_DEBUG,"Channel %u closed: Time - %u, Upload - %u, Download - %u\n",tmpCon->id,diff_time,tmpCon->u32Upload,tmpCon->u32Download); 
+														#endif
 														delete tmpCon->pSocket;
 														delete tmpCon->pCipher;
 														delete tmpCon->pSendQueue;
@@ -487,6 +522,9 @@ SINT32 CALastMix::loop()
 												else 
 													{
 														add64((UINT64&)m_logDownloadedBytes,ret);
+														#ifdef LOG_CHANNEL
+															tmpCon->u32Download+=ret;
+														#endif
 														pMixPacket->channel=tmpCon->id;
 														pMixPacket->flags=CHANNEL_DATA;
 														pMixPacket->payload.len=htons((UINT16)ret);

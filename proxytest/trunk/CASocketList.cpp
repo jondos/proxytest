@@ -27,7 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #include "StdAfx.h"
 #include "CASocketList.hpp"
-
+#include "CAUtil.hpp"
 #define POOL_SIZE 1000
 
 typedef struct t_MEMBLOCK
@@ -120,7 +120,11 @@ SINT32 CASocketList::setThreadSafe(bool b)
 *	        E_UNKNOWN, otherwise
 *
 */
+#ifdef LOG_CHANNEL
+SINT32 CASocketList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue,UINT64 time)
+#else
 SINT32 CASocketList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue)
+#endif
 	{
 		if(m_bThreadSafe)
 			cs.lock();
@@ -142,6 +146,11 @@ SINT32 CASocketList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQu
 		m_Connections->pCipher=pCipher;
 		m_Connections->pSendQueue=pQueue;
 		m_Connections->id=id;
+#ifdef LOG_CHANNEL
+		m_Connections->u32Download=0;
+		m_Connections->u32Upload=0;
+		set64(m_Connections->time_created,time);
+#endif
 		m_Size++;
 		if(m_bThreadSafe)
 			cs.unlock();

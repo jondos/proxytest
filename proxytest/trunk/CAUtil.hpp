@@ -36,6 +36,7 @@ char* strins(const char* src,UINT32 pos,const char* ins);
 char* strins(const char* src,const char * pos,const char* ins);
 
 SINT32 getcurrentTimeMillis(BIGNUM *bnTime); 
+SINT32 getcurrentTimeMillis(UINT64& u64Time);
 
 SINT32 getRandom(UINT8* buff,UINT32 len);
 
@@ -83,6 +84,16 @@ inline void set64(UINT64& op1,UINT32 op2)
 #endif
 	}
 
+inline void set64(UINT64& op1,UINT64 op2)
+	{
+#if !defined(_WIN32)&&!defined(__linux)
+		op1.low=op2.low;
+		op1.high=op2.high;
+#else
+		op1=op2;
+#endif
+	}
+
 inline void add64(UINT64& op1,UINT32 op2)
 	{
 #if !defined(_WIN32)&&!defined(__linux)
@@ -93,6 +104,15 @@ inline void add64(UINT64& op1,UINT32 op2)
 #else
 		op1+=op2;
 #endif
+	}
+
+inline UINT32 diff64(UINT64& bigop,UINT64& smallop)
+	{
+		#if !defined(_WIN32)&&!defined(__linux)
+		return (UINT32) -1; //TODO!!!
+		#else
+			return (UINT32)bigop-smallop;
+		#endif
 	}
 
 inline void print64(UINT8* buff,UINT64& op)

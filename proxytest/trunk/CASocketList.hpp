@@ -43,6 +43,11 @@ typedef struct connlist
 				HCHANNEL outChannel;
 			};
 		HCHANNEL id;
+#ifdef LOG_CHANNEL
+		UINT32	u32Upload;
+		UINT32	u32Download;
+		UINT64	time_created;
+#endif
 	} CONNECTIONLIST,CONNECTION;
 		
 struct t_MEMBLOCK;
@@ -53,7 +58,11 @@ class CASocketList
 			CASocketList();
 			CASocketList(bool bThreadSafe);
 			~CASocketList();
+#ifdef LOG_CHANNEL
+			SINT32 add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue,UINT64 time=0);
+#else
 			SINT32 add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue);
+#endif
 			SINT32 add(HCHANNEL in,HCHANNEL out,CASymCipher* pCipher);
 			bool	get(HCHANNEL in,CONNECTION* out);
 			bool	get(CONNECTION* in,HCHANNEL out);
