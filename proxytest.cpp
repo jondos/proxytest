@@ -587,6 +587,24 @@ Debug(dc::malloc.on());
 #endif
 		signal(SIGINT,signal_interrupt);
 		signal(SIGTERM,signal_term);
+
+		//Try to write pidfile....
+		UINT8 strPidFile[512];
+		if(options.getPidFile(strPidFile,512)==E_SUCCESS)
+			{
+				pid_t pid=getpid();
+				UINT8 thePid[10];
+				itoa(pid,(char*)thePid,10);
+				int len=strlen((char*)thePid);
+				int hFile=open((char*)strPidFile,O_TRUNC|O_CREAT|O_WRONLY,S_IREAD|S_IWRITE);
+				if(hFile==-1||len!=write(hFile,thePid,len))
+					{
+						CAMsg::printMsg(LOG_CRIT,"Couldt not write pidfile - exiting!\n");
+						exit(EXIT_FAILURE);
+					}
+				close(hFile);
+			}
+
 //		CARoundTripTime* pRTT=NULL;
 		if(options.isLocalProxy())
 			{

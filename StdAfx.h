@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.03.68"
+#define MIX_VERSION "00.03.69"
 
 #if defined(DEBUG)|| defined(_DEBUG)
 	#undef DEBUG
@@ -143,6 +143,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
     #include <io.h>
     #include <conio.h>
 		#include <sys/timeb.h>
+		#include <process.h>
 		#ifdef MSC_VER
 			#define ftime _ftime
 			#define timeb _timeb
@@ -161,6 +162,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define vsnprintf _vsnprintf
 		#define snprintf _snprintf
 		#define atoll _atoi64
+		#define getpid _getpid
 		#define HAVE_ATOLL
 #else
 	//__linux is not defined on power pc so we define our own __linux if __linux__ is defined

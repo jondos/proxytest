@@ -61,6 +61,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_pLogEncryptionCertificate=NULL;
 		m_bIsEncryptedLogEnabled=false;
 		m_pcsReConfigure=new CAMutex();
+		m_strPidFile=NULL;
  }
 
 CACmdLnOptions::~CACmdLnOptions()
@@ -129,6 +130,9 @@ void CACmdLnOptions::clean()
 		if(m_strLogDir!=NULL)
 			delete[] m_strLogDir;
 		m_strLogDir=NULL;
+		if(m_strPidFile!=NULL)
+			delete[] m_strPidFile;
+		m_strPidFile=NULL;
 		if(m_strEncryptedLogDir!=NULL)
 			delete[] m_strEncryptedLogDir;
 		m_strEncryptedLogDir=NULL;
@@ -172,6 +176,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 	int iVersion=0;
 	char* configfile=NULL;
 	int iAutoReconnect=0;
+	char* strPidFile=NULL;
 	//DOM_Document docMixXml;
 	poptOption options[]=
 	 {
@@ -187,6 +192,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 #endif
 		{"config",'c',POPT_ARG_STRING,&configfile,0,"config file to use [for a real Mix in a cascade]","<file>"},
 		{"version",'v',POPT_ARG_NONE,&iVersion,0,"show version",NULL},
+		{"pidfile",'r',POPT_ARG_STRING,&strPidFile,0,"file where the PID will be stored","<file>"},
 		POPT_AUTOHELP
 		{NULL,0,0,
 		NULL,0,NULL,NULL}
@@ -267,7 +273,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 				free(target);
 	    }
 	if(socks!=NULL)
-	    {
+			{
 				char* tmpStr;
 				if((tmpStr=strchr(socks,':'))!=NULL)
 						{
@@ -284,6 +290,12 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 					strcpy(m_strLogDir,logdir);
 					free(logdir);
 	    }
+	if(strPidFile!=NULL)
+		{
+			m_strPidFile=new char[strlen(strPidFile)+1];
+			strcpy(m_strPidFile,strPidFile);
+			free(strPidFile);
+		}
 	if(iCompressedLogs==0)
 		m_bCompressedLogs=false;
 	else
@@ -745,9 +757,21 @@ SINT32 CACmdLnOptions::getLogDir(UINT8* name,UINT32 len)
 				return E_UNKNOWN;
 		if(len<=(UINT32)strlen(m_strLogDir))
 				{
-					return E_UNKNOWN;
+					return E_SPACE;
 				}
 		strcpy((char*)name,m_strLogDir);
+		return E_SUCCESS;
+  }
+
+SINT32 CACmdLnOptions::getPidFile(UINT8* pidfile,UINT32 len)
+  {
+		if(m_strPidFile==NULL||pidfile==NULL)
+				return E_UNKNOWN;
+		if(len<=(UINT32)strlen(m_strPidFile))
+				{
+					return E_SPACE;
+				}
+		strcpy((char*)pidfile,m_strPidFile);
 		return E_SUCCESS;
   }
 
