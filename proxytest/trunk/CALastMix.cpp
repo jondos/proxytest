@@ -361,7 +361,6 @@ THREAD_RETURN lm_loopSendToMix(void* param)
 				if(pMuxSocket->send(pMixPacket)!=MIXPACKET_SIZE)
 					{
 						CAMsg::printMsg(LOG_ERR,"CALastMix::lm_loopSendToMix - Error in sending MixPaket\n");
-						CAMsg::printMsg(LOG_ERR,"ret=%i len=%i\n",ret,len);
 						break;
 					}
 #ifdef LOG_PACKET_TIMES
@@ -464,6 +463,7 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 						#endif
 						if(ret!=MIXPACKET_SIZE)
 							{
+								CAMsg::printMsg(LOG_ERR,"CALastMix::lm_loopReadFromMix - received returned: %i\n",ret);
 								pLastMix->m_bRestart=true;
 								break;
 							}
