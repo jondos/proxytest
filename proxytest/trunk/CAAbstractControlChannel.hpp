@@ -26,6 +26,11 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "CAControlChannelDispatcher.hpp"
+
+/** The base of each control channel. 
+	* Controls channels should be derived from CASyncControlChannel or 
+	* CAASyncControlChannel
+	*/
 class CAAbstractControlChannel
 {
   public:
@@ -38,7 +43,9 @@ class CAAbstractControlChannel
 			}
 
 		virtual SINT32 proccessMessage(UINT8* msg, UINT32 msglen)=0;
-    SINT32 sendMessage(UINT8* msg, UINT32 msglen)
+    
+		/** Call to send a message via this control channel.*/
+		SINT32 sendMessage(UINT8* msg, UINT32 msglen)
 			{
 				return m_pDispatcher->sendMessages(m_ID,m_bIsEncrypted,msg,msglen);
 			}

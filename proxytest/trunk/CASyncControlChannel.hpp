@@ -30,6 +30,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define _CASYNCCONTROLCHANNEL_
 #include "CAAbstractControlChannel.hpp"
 
+/** A synchronous control channel. This means, that every control message
+  * will be proccessed imedially. You have to override proccessMessage().*/
 class CASyncControlChannel : public CAAbstractControlChannel
 {
 };
