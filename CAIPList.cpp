@@ -35,6 +35,8 @@ CAIPList::CAIPList()
 		m_HashTable=new PIPLIST[0x10000];
 		memset(m_HashTable,0,0x10000*sizeof(PIPLIST));
 		m_allowedConnections=MAX_IP_CONNECTIONS;
+		RAND_pseudo_bytes(m_Random,sizeof(m_Random));
+		RAND_bytes(m_Random,sizeof(m_Random));
 	}
 
 /**Constructs a empty CAIPList, there allowedConnections insertions 
@@ -46,6 +48,8 @@ CAIPList::CAIPList(UINT32 allowedConnections)
 		m_HashTable=new PIPLIST[0x10000];
 		memset(m_HashTable,0,0x10000*sizeof(PIPLIST));
 		m_allowedConnections=allowedConnections;
+		RAND_pseudo_bytes(m_Random,sizeof(m_Random));
+		RAND_bytes(m_Random,sizeof(m_Random));
 	}
 
 /** Deletes the IPList and frees all used resources*/
@@ -79,8 +83,9 @@ SINT32 CAIPList::insertIP(UINT8 ip[4])
 		if(entry==NULL)
 			{
 				UINT8 hash[16];
-				MD5(ip,4,hash);
-				CAMsg::printMsg(LOG_DEBUG,"Inserting IP-Address: %X%X%X%X%X%X%X%X%X%X%X%X%X%X%X%X !\n",hash[0],hash[1],hash[2],hash[3],hash[4],hash[5],hash[6],hash[7],hash[8],hash[9],hash[10],hash[11],hash[12],hash[13],hash[14],hash[15]);
+				memcpy(m_Random,ip,4);
+				MD5(m_Random,sizeof(m_Random),hash);
+				CAMsg::printMsg(LOG_DEBUG,"Inserting IP-Address: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X !\n",hash[0],hash[1],hash[2],hash[3],hash[4],hash[5],hash[6],hash[7],hash[8],hash[9],hash[10],hash[11],hash[12],hash[13],hash[14],hash[15]);
 				entry=new IPLISTENTRY;
 				memcpy(entry->ip,ip,2);
 				entry->count=1;
@@ -139,8 +144,9 @@ SINT32 CAIPList::removeIP(UINT8 ip[4])
 								if(entry->count==0)
 									{
 										UINT8 hash[16];
-										MD5(ip,4,hash);
-										CAMsg::printMsg(LOG_DEBUG,"Removing IP-Address: %X%X%X%X%X%X%X%X%X%X%X%X%X%X%X%X !\n",hash[0],hash[1],hash[2],hash[3],hash[4],hash[5],hash[6],hash[7],hash[8],hash[9],hash[10],hash[11],hash[12],hash[13],hash[14],hash[15]);
+										memcpy(m_Random,ip,4);
+										MD5(m_Random,sizeof(m_Random),hash);
+										CAMsg::printMsg(LOG_DEBUG,"Removing IP-Address: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X !\n",hash[0],hash[1],hash[2],hash[3],hash[4],hash[5],hash[6],hash[7],hash[8],hash[9],hash[10],hash[11],hash[12],hash[13],hash[14],hash[15]);
 										if(before==NULL)
 											{
 												m_HashTable[hashvalue]=NULL;

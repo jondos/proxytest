@@ -65,4 +65,5 @@ The internal organisation is a hash-table with overrun lists. The hashtable has
 		protected:
 			UINT32 m_allowedConnections;
 			PIPLIST* m_HashTable;
+			UINT8 m_Random[56]; //seams to be the best value for MD5, which operats on x*512-64 bit (52*8+4*8=512-64)
 	};
