@@ -75,7 +75,7 @@ typedef struct
 	#endif
 #endif
 
-void cleanup()
+void removePidFile()
 	{
 		UINT8 strPidFile[512];
 		if(options.getPidFile(strPidFile,512)==E_SUCCESS)
@@ -87,14 +87,14 @@ void cleanup()
 void signal_term( int sig)
 	{
 		CAMsg::printMsg(LOG_INFO,"Hm.. Signal SIG_TERM received... exiting!\n");
-		cleanup();
+		removePidFile();
 		exit(0);
 	}
 
 void signal_interrupt( int sig)
 	{
 		CAMsg::printMsg(LOG_INFO,"Hm.. Strg+C pressed... exiting!\n");
-		cleanup();
+		removePidFile();
 		exit(0);
 	}
 
@@ -398,7 +398,7 @@ Debug(dc::malloc.on());
 				CAMsg::printMsg(LOG_CRIT,".payload.data: %u (should be 9)\n",hoffsets[6]=(UINT8*)&oPacket.payload.data-p);
 				for(int i=0;i<7;i++)
 				 if(soffsets[i]!=hoffsets[i])
-					exit(-1);
+					exit(EXIT_FAILURE);
 				CAMsg::printMsg(LOG_CRIT,"Hm, The Offsets seams to be ok - so we try to continue - hope that works...\n");
 			}
 #endif
@@ -503,7 +503,7 @@ Debug(dc::malloc.on());
 				if (setrlimit(RLIMIT_NOFILE, &lim) != 0)
 					{
 						CAMsg::printMsg(LOG_CRIT,"Could not set MAX open files to: %u -- Exiting!\n",maxFiles);
-						exit(1);
+						exit(EXIT_FAILURE);
 					}
 			}
 		if(options.getUser(buff,255)==E_SUCCESS) //switching user
@@ -537,7 +537,7 @@ Debug(dc::malloc.on());
 								if(options.isEncryptedLogEnabled())
 									{
 										CAMsg::printMsg(LOG_ERR,"Could not open encrypted log - exiting!\n");
-										exit(-1);
+										exit(EXIT_FAILURE);
 									}
 								else
 									options.enableEncryptedLog(false);
@@ -546,7 +546,7 @@ Debug(dc::malloc.on());
 					pid_t pid;
 					pid=fork();
 					if(pid!=0)
-						exit(0);
+						exit(EXIT_SUCCESS);
 					setsid();
 					#ifndef DO_TRACE
 					chdir("/");
@@ -570,7 +570,7 @@ Debug(dc::malloc.on());
 								if(options.isEncryptedLogEnabled())
 									{
 										CAMsg::printMsg(LOG_ERR,"Could not open encrypted log - exiting!\n");
-										exit(-1);
+										exit(EXIT_FAILURE);
 									}
 								else
 									options.enableEncryptedLog(false);
@@ -668,6 +668,7 @@ EXIT:
 		#ifdef _WIN32
 			WSACleanup();
 		#endif
+		removePidFile();
 		options.clean();
 //OpenSSL Cleanup
 		CRYPTO_set_locking_callback(NULL);
