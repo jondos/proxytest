@@ -469,7 +469,6 @@ SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len)
 	* Would not work correctly on Windows....
 	*	@param buff byte array, where the received bytes would be stored 
 	*	@param len	on input holds the number of bytes which should be read,
-	*							on return gives the number of bytes which are read before the timeout
 	*	@param msTimeOut the timout in milli seconds
 	* @retval E_TIMEDOUT if not all byts could be read
 	* @retval E_UNKNOWN if an error occured
