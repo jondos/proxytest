@@ -55,6 +55,7 @@ class CASocket
 			SINT32 receiveFully(UINT8* buff,UINT32 len,SINT32 timeout);
 			operator SOCKET(){return m_Socket;}
 			int getLocalPort();
+			SINT32 getPeerIP(UINT8 ip[4]);
 			SINT32 setReuseAddr(bool b);
 			SINT32 setRecvLowWat(UINT32 r);
 			SINT32 setSendLowWat(UINT32 r);
@@ -67,6 +68,7 @@ class CASocket
 			SINT32 setKeepAlive(UINT32 sec);
 			SINT32 setASyncSend(bool b,SINT32 size,UINT32 lowwater,UINT32 SendQueueSoftLimit,CASocketASyncSendResume* pResume);
 		private:
+			UINT8 m_ipPeer[4];
 			SOCKET m_Socket;
 			#ifdef _REENTRANT
 				CRITICAL_SECTION csClose;

@@ -96,7 +96,7 @@ SINT32 CASocket::accept(CASocket &s)
 #ifdef _DEBUG
 		sockets++;
 #endif
-		memcpy(s.m_ipPeer,&peer.sin_addr.S_un.S_un_b,4);
+		memcpy(s.m_ipPeer,&peer.sin_addr,4);
 		return 0;
 	}
 			

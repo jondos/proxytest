@@ -341,6 +341,10 @@ SOURCE=.\CAInfoService.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CAIPList.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\CALastMix.cpp
 # End Source File
 # Begin Source File
@@ -461,6 +465,10 @@ SOURCE=.\CAFirstMix.hpp
 # Begin Source File
 
 SOURCE=.\CAInfoService.hpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CAIPList.hpp
 # End Source File
 # Begin Source File
 
