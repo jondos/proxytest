@@ -998,9 +998,20 @@ static void sMixesHandler(XMLElement &elem, void *userData)
 			}
 		data->mixcount=atol(attrs.GetValue());
 		sprintf((char*)data->cascadeInfo,"<Mixes count=\"%u\">",data->mixcount+1);
-		UINT8 tmpBuff[50];
-		options.getMixId(tmpBuff,50);
-		sprintf((char*)data->cascadeInfo+strlen((char*)data->cascadeInfo),"<Mix id=\"%s\"></Mix>",tmpBuff);
+		UINT8 tmpBuff[5000];
+		options.getMixXml(tmpBuff,5000);
+		//options.getMixId(tmpBuff,50);
+		//sprintf((char*)data->cascadeInfo+strlen((char*)data->cascadeInfo),"<Mix id=\"%s\"></Mix>",tmpBuff);
+		char* startpos=strstr((char*)tmpBuff,"<Mix");
+		if(startpos!=NULL)
+			{
+				strcpy((char*)data->cascadeInfo+strlen((char*)data->cascadeInfo),startpos);
+			}
+		else
+			{
+				options.getMixId(tmpBuff,50);
+				sprintf((char*)data->cascadeInfo+strlen((char*)data->cascadeInfo),"<Mix id=\"%s\"></Mix>",tmpBuff);
+			}
 		elem.Process(handlers,userData);
 		strcat((char*)data->cascadeInfo,"</Mixes>");
 	}
@@ -1074,7 +1085,7 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		oxmlOut.WriteElement("Port",(int)options.getServerPort());
 		if(options.getProxySupport())
       oxmlOut.WriteElement("ProxyPort",(int)443);
-		oxmlOut.writeString((char*)tmpData.cascadeInfo);
+		oxmlOut.writeString((char*)tmpData.cascadeInfo); //Write <Mixes..></Mixes...>
 		oxmlOut.EndElement();
 		oxmlOut.EndDocument();
 		len=oBufferStream.getBufferSize();
