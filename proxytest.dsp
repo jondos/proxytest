@@ -389,10 +389,6 @@ SOURCE=.\CASocket.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\CASocketAddr.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\CASocketAddrINet.cpp
 # End Source File
 # Begin Source File

@@ -35,7 +35,7 @@ class CASocketAddrINet:public CASocketAddr,sockaddr_in
 			static SINT32 destroy();
 			int getType(){return AF_INET;}
 			CASocketAddrINet();
-			~CASocketAddrINet();
+			//~CASocketAddrINet();
 		//	virtual operator LPSOCKADDR(){
 		//		return (::LPSOCKADDR)this;}			
 			::LPSOCKADDR LPSOCKADDR(){return (::LPSOCKADDR)(static_cast<sockaddr_in*>(this));}			
