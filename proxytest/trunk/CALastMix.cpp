@@ -353,7 +353,12 @@ LOOP_START:
 										if(oMuxPacket.payload.type==MUX_SOCKS)
 											ret=tmpSocket->connect(&maddrSocks); //may be block
 										else
-											ret=tmpSocket->connect(&maddrSquid);	//may be block
+											{
+												tmpSocket->create();
+												tmpSocket->setRecvBuff(50000);
+												tmpSocket->setSendBuff(5000);
+												ret=tmpSocket->connect(&maddrSquid);	//may be block
+											}	
 										if(ret!=E_SUCCESS)
 										    {
 	    										#ifdef _DEBUG
@@ -367,7 +372,7 @@ LOOP_START:
 										else
 										    {    
 #ifdef _ASYNC
-													tmpSocket->setASyncSend(true,-1,0,10000,this);
+//													tmpSocket->setASyncSend(true,-1,0,10000,this);
 #endif													
 													int payLen=ntohs(oMuxPacket.payload.len);
 													#ifdef _DEBUG
