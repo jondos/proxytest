@@ -62,6 +62,8 @@ INPUT                  = . \
                          xml \
                          popt \
                          aes \
+                         TypeA \
+                         TypeB \
                          documentation/XML \
                          documentation
 FILE_PATTERNS          = *.cpp \
