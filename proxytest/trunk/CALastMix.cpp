@@ -230,7 +230,6 @@ THREAD_RETURN loopLog(void* param)
 		THREAD_RETURN_SUCCESS;
 	}
 
-#define _CONNECT_TIMEOUT 5000 //5 Seconds...
 #define _SEND_TIMEOUT (UINT32)5000 //5 Seconds...
 
 SINT32 CALastMix::loop()
@@ -315,7 +314,7 @@ SINT32 CALastMix::loop()
 												CASocket* tmpSocket=new CASocket;										
 												int ret;
 												if(pMixPacket->payload.type==MIX_PAYLOAD_SOCKS)
-													ret=tmpSocket->connect(maddrSocks,_CONNECT_TIMEOUT); 
+													ret=tmpSocket->connect(maddrSocks,LAST_MIX_TO_PROXY_CONNECT_TIMEOUT); 
 												else
 													{
 														UINT32 count=0;
@@ -325,7 +324,7 @@ SINT32 CALastMix::loop()
 																tmpSocket->create();
 																tmpSocket->setRecvBuff(50000);
 																tmpSocket->setSendBuff(5000);
-																ret=tmpSocket->connect(*m_oCacheLB.get(),_CONNECT_TIMEOUT);
+																ret=tmpSocket->connect(*m_oCacheLB.get(),LAST_MIX_TO_PROXY_CONNECT_TIMEOUT);
 																count++;
 															}
 														while(ret!=E_SUCCESS&&count<countCacheAddresses);
