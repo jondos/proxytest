@@ -36,7 +36,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMsg.hpp"
 #include "CAMuxSocket.hpp"
 #include "CASocketList.hpp"
-#include "CAMuxChannelList.hpp"
 #include "CASymCipher.hpp"
 #include "CAASymCipher.hpp"
 #include "CAInfoService.hpp"

@@ -549,7 +549,6 @@ SINT32 CAFirstMix::loop()
 		SINT32 countRead;
 		HCHANNEL lastChannelId=1;
 		MIXPACKET oMixPacket;
-		//CONNECTION oConnection;
 		CAInfoService oInfoService(this);
 		UINT32 nUser=0;
 		SINT32 ret;
@@ -650,7 +649,6 @@ SINT32 CAFirstMix::loop()
 // Second Step 
 // Checking for data from users
 				fmHashTableEntry* pHashEntry=oChannelList.getFirst();
-				//tmpMuxListEntry=oMuxChannelList.getFirst();
 				countRead=osocketgroupUsersRead.select(false,0);
 				if(countRead>0)
 					bAktiv=true;
@@ -667,7 +665,6 @@ SINT32 CAFirstMix::loop()
 										m_pIPList->removeIP(ip);
 										osocketgroupUsersRead.remove(*(CASocket*)pMuxSocket);
 										osocketgroupUsersWrite.remove(*(CASocket*)pMuxSocket);
-										//MUXLISTENTRY otmpEntry;
 										fmChannelListEntry* pEntry;
 										pEntry=oChannelList.getFirstChannelForSocket(pMuxSocket);
 										while(pEntry!=NULL)
@@ -726,7 +723,6 @@ SINT32 CAFirstMix::loop()
 														memcpy(oMixPacket.data,rsaBuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
 
 														oChannelList.add(pMuxSocket,oMixPacket.channel,lastChannelId,pCipher);
-														//oMuxChannelList.add(tmpMuxListEntry,oMixPacket.channel,lastChannelId,pCipher);
 														#ifdef _DEBUG
 															CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",lastChannelId);
 														#endif

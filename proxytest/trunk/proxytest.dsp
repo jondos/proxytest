@@ -320,6 +320,10 @@ SOURCE=.\CAFirstMix.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CAFirstMixChannelList.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\CAInfoService.cpp
 # End Source File
 # Begin Source File
@@ -463,6 +467,10 @@ SOURCE=.\CADatagramSocket.hpp
 # Begin Source File
 
 SOURCE=.\CAFirstMix.hpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CAFirstMixChannelList.hpp
 # End Source File
 # Begin Source File
 
