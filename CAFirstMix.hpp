@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMuxSocket.hpp"
 #include "CAASymCipher.hpp"
 #include "CASignature.hpp"
-#include "CAMuxChannelList.hpp"
+//#include "CAMuxChannelList.hpp"
 #include "CAIPList.hpp" 
 class CAFirstMix:public CAMix
 	{
@@ -54,7 +54,7 @@ class CAFirstMix:public CAMix
 			UINT32 m_MixedPackets;
 			CAASymCipher mRSA;
 			CASignature mSignature;
-			CAMuxChannelList oSuspendList;
+			//CAMuxChannelList oSuspendList;
 		public:
 			SINT32 getMixedPackets(UINT32* ppackets)
 				{
