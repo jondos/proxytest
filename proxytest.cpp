@@ -175,8 +175,6 @@ int main(int argc, const char* argv[])
 		else
 			CAMsg::printMsg(LOG_DEBUG,"CAQueue::test() passed!\n");
 		
-		exit(0);
-		
 		//startup
 		#ifdef _WIN32
 			int err=0;
