@@ -45,6 +45,7 @@ OBJS_ALL=CASocket.o\
 	CALocalProxy.o\
 	CACacheLoadBalancing.o\
 	CAThread.o\
+	CAThreadPool.o\
 	CASemaphore.o\
 	CAMutex.o\
 	CAConditionVariable.o\
