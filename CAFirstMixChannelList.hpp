@@ -96,16 +96,13 @@ class CAFirstMixChannelList
 			SINT32 add(CAMuxSocket* pMuxSocket,HCHANNEL channelIn,CASymCipher* pCipher,HCHANNEL* channelOut);
 			
 			fmChannelListEntry* get(CAMuxSocket* pMuxSocket,HCHANNEL channelIn);
+
 			fmChannelListEntry* get(HCHANNEL channelOut)
 				{
-					fmChannelListEntry* pEntry=m_HashTableOutChannels[channelOut&0x0000FFFF];
-					while(pEntry!=NULL)
-						{
-							if(pEntry->channelOut==channelOut)
-								return pEntry;
-							pEntry=pEntry->list_OutChannelHashTable.next;
-						}
-					return NULL;
+					m_Mutex.lock();
+					fmChannelListEntry* pEntry=get_intern_without_lock(channelOut);
+					m_Mutex.unlock();
+					return pEntry;
 				}	
 
 			SINT32 remove(CAMuxSocket* pMuxSocket);
@@ -118,9 +115,23 @@ class CAFirstMixChannelList
 			fmChannelListEntry* getNextChannel(fmChannelListEntry* pEntry);
 		
 		private:
+			fmChannelListEntry* get_intern_without_lock(HCHANNEL channelOut)
+				{
+					fmChannelListEntry* pEntry=m_HashTableOutChannels[channelOut&0x0000FFFF];
+					while(pEntry!=NULL)
+						{
+							if(pEntry->channelOut==channelOut)
+								{
+									return pEntry;
+								}
+							pEntry=pEntry->list_OutChannelHashTable.next;
+						}
+					return NULL;
+				}	
+
+		private:
 			LP_fmHashTableEntry* m_HashTable;
 			LP_fmChannelListEntry* m_HashTableOutChannels;
-			//fmChannelListEntry* m_listOutChannelHead;
 			fmHashTableEntry* m_listHashTableHead;
 			fmHashTableEntry* m_listHashTableCurrent;
 			CAMutex m_Mutex;
