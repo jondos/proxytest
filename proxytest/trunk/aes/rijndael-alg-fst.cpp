@@ -15,23 +15,27 @@ int ROUNDS;
 
 #include "boxes-fst.dat.h"
 
-static word8 shifts[3][4][2] = {
-   0, 0,
-   1, 3,
-   2, 2,
-   3, 1,
-   
-   0, 0,
-   1, 5,
-   2, 4,
-   3, 3,
-   
-   0, 0,
-   1, 7,
-   3, 5,
-   4, 4
-}; 
-
+static word8 shifts[3][4][2] =
+	{
+		{
+			{0, 0},
+			{1, 3},
+			{2, 2},
+			{3, 1},
+		},
+		{
+			{0, 0},
+			{1, 5},
+			{2, 4},
+			{3, 3},
+		},
+		{
+			{0, 0},
+			{1, 7},
+			{3, 5},
+			{4, 4}
+		}
+	}; 
 
 word8 mul(word8 a, word8 b) {
    /* multiply two elements of GF(2^m)
