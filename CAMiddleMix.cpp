@@ -125,7 +125,10 @@ SINT32 CAMiddleMix::init()
 		
 		UINT16 keyLen;
 		if(((CASocket*)m_MuxOut)->receiveFully((UINT8*)&keyLen,2)!=E_SUCCESS)
-			return E_UNKNOWN;
+			{
+				CAMsg::printMsg(LOG_INFO,"Error receiving Key Info lenght!\n");
+				return E_UNKNOWN;
+			}
 		CAMsg::printMsg(LOG_INFO,"Received Key Info lenght %u\n",ntohs(keyLen));
 #ifndef NEW_KEY_PROTOCOL		
 		recvBuff=new unsigned char[ntohs(keyLen)+2];
