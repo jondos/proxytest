@@ -317,7 +317,7 @@ static void smakeXMLCanonicalElementHandler(XML::Element &elem, void *userData)
 		if(pData->err!=0)
 			return;
 		char* name=(char*)elem.GetName();
-		int namelen=(int)strlen(name);
+		UINT32 namelen=strlen(name);
 		if(pData->outlen-pData->pos<2*namelen+5)
 			{
 				pData->err=-1;
