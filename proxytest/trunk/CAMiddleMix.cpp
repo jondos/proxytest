@@ -235,7 +235,7 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 		memcpy(out,&len,2);
 		ret=((CASocket*)*m_pMuxIn)->send(out,outlen+2);
 		delete[] out;
-		if(ret!=E_SUCCESS)
+		if(ret!=outlen+2)
 			{
 				CAMsg::printMsg(LOG_DEBUG,"Error sending new New Key Info\n");
 				return E_UNKNOWN;
@@ -377,7 +377,12 @@ SINT32 CAMiddleMix::init()
 			}
 		
 
-		proccessKeyExchange();
+		if(proccessKeyExchange()!=E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Error in proccessKeyExchange()!\n");
+				return E_UNKNOWN;
+			}
+	
 
 		m_pMiddleMixChannelList=new CAMiddleMixChannelList();
 		
