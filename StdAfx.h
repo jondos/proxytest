@@ -59,6 +59,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define GETERROR (WSAGetLastError())
 		#define E_TIMEDOUT WSAETIMEDOUT
 		#define E_CONNREFUSED WSAECONNREFUSED
+		#define MSG_DONTWAIT 0
+		#define usleep(i) Sleep(i) 
 		#ifdef __cplusplus
 			#include <string>
 			#include <vector>
