@@ -207,8 +207,15 @@ SINT32 CALastMix::processKeyExchange()
 		SINT32 ret=decodeXMLEncryptedKey(key,&keySize,messageBuff,len,&mRSA);
 		delete []messageBuff;
 		if(ret!=E_SUCCESS)
-			return E_UNKNOWN;
-		m_pMuxIn->setKey(key);
+			{
+				CAMsg::printMsg(LOG_CRIT,"Couldt not decrypt the symetric key!\n");		
+				return E_UNKNOWN;
+			}
+		if(m_pMuxIn->setKey(key,keySize)!=E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Couldt not set the symetric key to be used by the MuxSocket!\n");		
+				return E_UNKNOWN;
+			}
 		return E_SUCCESS;
 	}
 

@@ -26,73 +26,12 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
-//#include "aes/encrypt.cpp"
 #include "CASymCipher.hpp"
-
-/*SINT32 CASymCipher::setEncryptionKey(UINT8* key)
-	{
-		BF_set_key(&keyEnc,16,key);
-		memcpy(rawKeyEnc,key,16);
-		bEncKeySet=true;
-		return E_SUCCESS;
-	}
-*/
-
-/*
-SINT32 CASymCipher::generateEncryptionKey()
-	{
-		UINT8 key[16];
-		RAND_bytes(key,16);
-		return setKeyAES(key);
-	}
-*/
-/*SINT32 CASymCipher::getEncryptionKey(UINT8* key)
-	{
-		if(bEncKeySet)
-			{
-				memcpy(key,rawKeyEnc,16);		
-				return E_SUCCESS;
-			}
-		else
-			return E_UNKNOWN;
-	}
-*//*
-SINT32 CASymCipher::setDecryptionKey(UINT8* key)
-	{
-		BF_set_key(&keyDec,16,key);
-		return E_SUCCESS;
-	}
-*/
-/*SINT32 CASymCipher::encrypt(UINT8* in,UINT32 len)
-	{
-		for(UINT32 i=0;i<len;i+=8)
-			BF_ecb_encrypt(in+i,in+i,&keyEnc,BF_ENCRYPT);
-		return E_SUCCESS;
-	}
-
-SINT32 CASymCipher::decrypt(UINT8* in,UINT8* out,UINT32 len)
-	{
-		for(UINT32 i=0;i<len;i+=8)
-			BF_ecb_encrypt(in+i,out+i,&keyDec,BF_DECRYPT);
-		return E_SUCCESS;
-	}
-*/	
-
 //AES
-/*
-SINT32 CASymCipher::setEncryptionKeyAES(UINT8* key)
-	{
-		makeKey(&keyEncAES,DIR_ENCRYPT,KEY_SIZE*8,(char*)key);
-		memcpy(rawKeyEnc,key,16);
-		bEncKeySet=true;
-		memset(iv,0,16);
-		return E_SUCCESS;
-	}
-*/
 
 SINT32 CASymCipher::setKeyAES(UINT8* key)
 	{
-		makeKey(*m_keyAES,/*KEY_SIZE*8*/(char*)key);
+		makeKey(*m_keyAES,(char*)key);
 		memset(m_iv,0,16);
 		memset(m_iv2,0,16);
 		m_bEncKeySet=true;
@@ -103,10 +42,9 @@ SINT32 CASymCipher::setKeyAES(UINT8* key)
 SINT32 CASymCipher::decryptAES(UINT8* in,UINT8* out,UINT32 len)
 	{
 		UINT32 i=0;
-		//while(i<len-15)
     while(i+15<len)
     	{
-				rijndaelEncrypt (m_iv, m_iv, *m_keyAES/*.keySched*/);
+				rijndaelEncrypt (m_iv, m_iv, *m_keyAES);
 				out[i]=in[i]^m_iv[0];
 				i++;
 				out[i]=in[i]^m_iv[1];
@@ -142,7 +80,7 @@ SINT32 CASymCipher::decryptAES(UINT8* in,UINT8* out,UINT32 len)
 			}
 		if(i<len) //In this case len-i<16 !
 			{
-				rijndaelEncrypt (m_iv, m_iv, *m_keyAES/*.keySched*/);
+				rijndaelEncrypt (m_iv, m_iv, *m_keyAES);
 				len-=i;
 				for(UINT32 k=0;k<len;k++)
 				 {
@@ -257,13 +195,3 @@ SINT32 CASymCipher::encryptAES(UINT8* in,UINT8* out,UINT32 len)
 			}
 		return E_SUCCESS;
 	}
-
-
-	/*
-SINT32 CASymCipher::generateEncryptionKeyAES()
-	{
-		UINT8 key[16];
-		RAND_bytes(key,16);
-		return setEncryptionKeyAES(key);
-	}
-*/

@@ -119,21 +119,45 @@ class CAMuxSocket
 			SOCKET getSocket(){return (SOCKET)m_Socket;}
 
 			SINT32 setCrypt(bool b);
-			SINT32 setKey(UINT8* key)
+			bool getIsEncrypted()
 				{
-					m_oCipherIn.setKeyAES(key);
-					m_oCipherOut.setKeyAES(key);
+					return m_bIsCrypted;
+				}
+
+			/** Sets the symmetric keys used for de-/encrypting the Mux connection
+				*
+				* @param key buffer conntaining the key bits
+				* @param keyLen size of the buffer (keys)
+				*					if keylen=16, then the key is used for incomming and outgoing direction
+				*					if keylen=32, the the first bytes a used for incoming and the second for outgoing
+				*	@retval E_SUCCESS if successful
+				*	@retval E_UNKNOWN otherwise
+				*/
+			SINT32 setKey(UINT8* key,UINT32 keyLen)
+				{
+					if(keyLen==16)
+						{
+							m_oCipherIn.setKeyAES(key);
+							m_oCipherOut.setKeyAES(key);
+						}
+					else if(keyLen==32)
+						{
+							m_oCipherIn.setKeyAES(key);
+							m_oCipherOut.setKeyAES(key+16);
+						}
+					else
+						return E_UNKNOWN;
 					return E_SUCCESS;
 				}
 
 		private:
-				CASocket m_Socket;
-				UINT32 m_aktBuffPos;
-				UINT8* m_Buff;
+				CASocket		m_Socket;
+				UINT32			m_aktBuffPos;
+				UINT8*			m_Buff;
 				CASymCipher m_oCipherIn;
 				CASymCipher m_oCipherOut;
-				bool m_bIsCrypted;
-				CAMutex csSend;
-				CAMutex csReceive;
+				bool				m_bIsCrypted;
+				CAMutex			m_csSend;
+				CAMutex			m_csReceive;
 	};
 #endif

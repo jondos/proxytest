@@ -116,7 +116,7 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 						UINT8* out=new UINT8[outlen];
 						encodeXMLEncryptedKey(key,16,buff,&bufflen,&oRSA);
 						m_pSignature->signXML(buff,bufflen,out,&outlen);
-						m_pMuxOut->setKey(key);
+						m_pMuxOut->setKey(key,16);
 						UINT16 size=htons(outlen);
 						((CASocket*)m_pMuxOut)->send((UINT8*)&size,2);
 						((CASocket*)m_pMuxOut)->send(out,outlen);
@@ -198,9 +198,13 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 		UINT8 key[50];
 		UINT32 keySize=50;
 		decodeXMLEncryptedKey(key,&keySize,recvBuff,len,m_pRSA);
-		m_pMuxIn->setKey(key);
+		if(m_pMuxIn->setKey(key,keySize)!=E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Couldt not set the symetric key to be used by the MuxSocket!\n");		
+				delete []recvBuff;
+				return E_UNKNOWN;
+			}
 		delete [] recvBuff;
-//		delete doc;
 		return E_SUCCESS;
 	}
 
