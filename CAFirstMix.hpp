@@ -54,7 +54,6 @@ class CAFirstMix:public CAMix
 					m_pQueueSendToMix=NULL;
 					m_pIPList=NULL;
 					m_arrSocketsIn=NULL;
-					m_KeyInfoBuff=NULL;
 					m_pRSA=NULL;
 					m_pInfoService=NULL;
 					m_psocketgroupUsersRead=m_psocketgroupUsersWrite=NULL;
@@ -143,9 +142,7 @@ class CAFirstMix:public CAMix
 			CASocketGroup* m_psocketgroupUsersWrite;
 			CAInfoService* m_pInfoService;
 			CAMuxSocket* m_pMuxOut;
-			UINT8* m_KeyInfoBuff;
-			UINT16 m_KeyInfoSize;
-
+	
 			UINT8* m_xmlKeyInfoBuff;
 			UINT16 m_xmlKeyInfoSize;
 

@@ -35,6 +35,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAThread.hpp"
 #include "CAInfoService.hpp"
 #include "CAUtil.hpp"
+#include "CABase64.hpp"
 #include "xml/DOM_Output.hpp"
 
 extern CACmdLnOptions options;
@@ -104,19 +105,42 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 						delete nextCert;
 						if(ret!=E_SUCCESS)
 							return E_UNKNOWN;
-
+						DOM_Element elemNonce;
+						getDOMChildByName(child,(UINT8*)"Nonce",elemNonce,false);
+						UINT8 arNonce[1024];
+						if(elemNonce!=NULL)
+							{
+								UINT32 lenNonce=1024;
+								UINT32 tmpLen=1024;
+								getDOMElementValue(elemNonce,arNonce,&lenNonce);
+								CABase64::decode(arNonce,lenNonce,arNonce,&tmpLen);
+								lenNonce=tmpLen;
+								tmpLen=1024;
+								CABase64::encode(SHA1(arNonce,lenNonce,NULL),SHA_DIGEST_LENGTH,
+																	arNonce,&tmpLen);
+								arNonce[tmpLen]=0;
+							}
 						DOM_Node rsaKey=child.getFirstChild();
 						CAASymCipher oRSA;
 						oRSA.setPublicKeyAsDOMNode(rsaKey);
-						UINT8 key[16];
-						getRandom(key,16);
+						UINT8 key[64];
+						getRandom(key,64);
 						UINT8 buff[4000];
-						UINT32 bufflen=4000;
-						UINT32 outlen=bufflen+5000;
+						UINT32 outlen=5000;
 						UINT8* out=new UINT8[outlen];
-						encodeXMLEncryptedKey(key,16,buff,&bufflen,&oRSA);
-						m_pSignature->signXML(buff,bufflen,out,&outlen);
-						m_pMuxOut->setKey(key,16);
+						DOM_DocumentFragment docfragSymKey;
+						encodeXMLEncryptedKey(key,64,docfragSymKey,&oRSA);
+						DOM_Document docSymKey=DOM_Document::createDocument();
+						docSymKey.appendChild(docSymKey.importNode(docfragSymKey,true));
+						if(elemNonce!=NULL)
+							{
+								DOM_Element elemNonceHash=docSymKey.createElement("Nonce");
+								setDOMElementValue(elemNonceHash,arNonce);
+								docSymKey.getDocumentElement().appendChild(elemNonceHash);
+							}
+						m_pSignature->signXML(docSymKey.getDocumentElement());
+						m_pMuxOut->setKey(key,64);
+						DOM_Output::dumpToMem(docSymKey,out,&outlen);
 						UINT16 size=htons(outlen);
 						((CASocket*)m_pMuxOut)->send((UINT8*)&size,2);
 						((CASocket*)m_pMuxOut)->send(out,outlen);
@@ -147,6 +171,15 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 		m_pRSA->getPublicKeyAsDocumentFragment(pDocFragment); //the key
 		mixNode.appendChild(doc.importNode(pDocFragment,true));
 		pDocFragment=0;
+		//inserting Nonce
+		DOM_Element elemNonce=doc.createElement("Nonce");
+		UINT8 arNonce[16];
+		getRandom(arNonce,16);
+		UINT32 tmpLen=50;
+		CABase64::encode(arNonce,16,tmpBuff,&tmpLen);
+		tmpBuff[tmpLen]=0;
+		setDOMElementValue(elemNonce,tmpBuff);
+		mixNode.appendChild(elemNonce);
 		
 		m_pSignature->signXML(mixNode);
 		
@@ -193,10 +226,30 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 				delete []recvBuff;
 				return E_UNKNOWN;
 			}
+		//Verifying nonce
+		MemBufInputSource oInput1(recvBuff,len,"tmp");
+		oParser.parse(oInput1);
+		doc=oParser.getDocument();
+		DOM_Element elemRoot=doc.getDocumentElement();
+		elemNonce=NULL;
+		getDOMChildByName(elemRoot,(UINT8*)"Nonce",elemNonce,false);
+		tmpLen=50;
+		memset(tmpBuff,0,tmpLen);
+		if(elemNonce==NULL||getDOMElementValue(elemNonce,tmpBuff,&tmpLen)!=E_SUCCESS||
+			CABase64::decode(tmpBuff,tmpLen,tmpBuff,&tmpLen)!=E_SUCCESS||
+			tmpLen!=SHA_DIGEST_LENGTH ||
+			memcmp(SHA1(arNonce,16,NULL),tmpBuff,SHA_DIGEST_LENGTH)!=0
+			)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Couldt not verify the Nonce!\n");		
+				delete []recvBuff;
+				return E_UNKNOWN;
+			}
+
 		CAMsg::printMsg(LOG_INFO,"Verified the symetric key!\n");		
 
-		UINT8 key[50];
-		UINT32 keySize=50;
+		UINT8 key[150];
+		UINT32 keySize=150;
 		decodeXMLEncryptedKey(key,&keySize,recvBuff,len,m_pRSA);
 		if(m_pMuxIn->setKey(key,keySize)!=E_SUCCESS)
 			{
@@ -403,7 +456,7 @@ SINT32 CAMiddleMix::loop()
 							}
 						if(m_pMiddleMixChannelList->getInToOut(pMixPacket->channel,&channelOut,&pCipher)!=E_SUCCESS)
 							{//new connection
-								if(pMixPacket->flags==CHANNEL_OPEN_OLD||pMixPacket->flags==CHANNEL_OPEN_NEW)
+								if(pMixPacket->flags==CHANNEL_OPEN)
 									{
 										#ifdef _DEBUG
 												CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");

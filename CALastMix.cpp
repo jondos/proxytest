@@ -37,6 +37,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAUtil.hpp"
 #include "CAInfoService.hpp"
 #include "CACertStore.hpp"
+#include "CABase64.hpp"
 #include "xml/DOM_Output.hpp"
 
 extern CACmdLnOptions options;
@@ -135,6 +136,38 @@ SINT32 CALastMix::init()
 		return processKeyExchange();
 	}
 
+/** Processes the startup communication with the preceeding mix.
+	* Step 1: Mix n-1 open a TCP/IP Connection
+	* Step 2: LastMix sends XML struct describing itself, 
+	*					containing PubKey of LastMix, signed by LastMix
+	* Step 3: Mix n-1 sends XML struct containing encrpyted (with PubKey) Symetric Key used for
+	*					interlink encryption between Mix n-1 <---> LastMix, signed by Mix n-1
+	*
+	* The XML struct send from LastMix to Mix n-1 has the following stucture:
+	* <XML version=1.0"/>
+	*	<Mixes count="1">
+	*		<Mix id="...">
+	*			<MixProtocolVersion>0.3</MixProtocolVersion> 			
+	*			<RSAKeyValue>
+	*				<Modulus></Modulus>
+	*				<Exponent></Exponent>
+	*			<RSAKeyValue>
+	*			<Nonce>...</Nonce>
+	*			<Signature>...</Signature>
+	*		</Mix>
+	*	</Mixes>
+	*
+	* The XML struct send from Mix n-1 to LastMix is:
+	* <XML version=1.0"/>
+	* <EncryptedKey>
+	*		<EncryptionMethod Algorithm="RSA"/>
+	*		<CipherData>
+	*			<CipherValue>...</CipherValue>
+	*		</CipherData>
+	*   <Nonce>...</Nonce>
+	*		<Signature>...</Signature>
+	*	</EncryptedKey>
+	*/
 SINT32 CALastMix::processKeyExchange()
 	{
 		DOM_Document doc=DOM_Document::createDocument();
@@ -147,12 +180,28 @@ SINT32 CALastMix::processKeyExchange()
 		elemMix.setAttribute("id",(char*)idBuff);
 		elemMixes.appendChild(elemMix);
 
+		//Inserting MixProtocol Version (0.3)
+		DOM_Element elemMixProtocolVersion=doc.createElement("MixProtocolVersion");
+		elemMix.appendChild(elemMixProtocolVersion);
+		setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.3");
+
+		//Inserting RSA-Key
 		DOM_DocumentFragment tmpDocFrag;
 		mRSA.getPublicKeyAsDocumentFragment(tmpDocFrag);
 		DOM_Node nodeRsaKey=doc.importNode(tmpDocFrag,true);
 		elemMix.appendChild(nodeRsaKey);
 		tmpDocFrag=0;
-
+		//inserting Nonce
+		DOM_Element elemNonce=doc.createElement("Nonce");
+		UINT8 arNonce[16];
+		getRandom(arNonce,16);
+		UINT8 tmpBuff[50];
+		UINT32 tmpLen=50;
+		CABase64::encode(arNonce,16,tmpBuff,&tmpLen);
+		tmpBuff[tmpLen]=0;
+		setDOMElementValue(elemNonce,tmpBuff);
+		elemMix.appendChild(elemNonce);
+		
 		m_pSignature->signXML(elemMix);
 		
 		UINT32 len=0;
@@ -193,10 +242,31 @@ SINT32 CALastMix::processKeyExchange()
 				delete []messageBuff;
 				return E_UNKNOWN;
 			}
+		//Verifying nonce!
+		MemBufInputSource oInput(messageBuff,len,"tmp");
+		DOMParser oParser;
+		oParser.parse(oInput);
+		doc=oParser.getDocument();
+		DOM_Element elemRoot=doc.getDocumentElement();
+		elemNonce=NULL;
+		getDOMChildByName(elemRoot,(UINT8*)"Nonce",elemNonce,false);
+		tmpLen=50;
+		memset(tmpBuff,0,tmpLen);
+		if(elemNonce==NULL||getDOMElementValue(elemNonce,tmpBuff,&tmpLen)!=E_SUCCESS||
+			CABase64::decode(tmpBuff,tmpLen,tmpBuff,&tmpLen)!=E_SUCCESS||
+			tmpLen!=SHA_DIGEST_LENGTH ||
+			memcmp(SHA1(arNonce,16,NULL),tmpBuff,SHA_DIGEST_LENGTH)!=0
+			)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Couldt not verify the Nonce!\n");		
+				delete []messageBuff;
+				return E_UNKNOWN;
+			}
+		
 		CAMsg::printMsg(LOG_INFO,"Verified the symetric key!\n");		
 		
-		UINT8 key[50];
-		UINT32 keySize=50;
+		UINT8 key[150];
+		UINT32 keySize=150;
 		SINT32 ret=decodeXMLEncryptedKey(key,&keySize,messageBuff,len,&mRSA);
 		delete []messageBuff;
 		if(ret!=E_SUCCESS)
@@ -313,7 +383,7 @@ SINT32 CALastMix::loop()
 								pChannelListEntry=pChannelList->get(pMixPacket->channel);
 								if(pChannelListEntry==NULL)
 									{
-										if(pMixPacket->flags==CHANNEL_OPEN_OLD||pMixPacket->flags==CHANNEL_OPEN_NEW)
+										if(pMixPacket->flags==CHANNEL_OPEN)
 											{
 												#if defined(_DEBUG1) 
 														CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");

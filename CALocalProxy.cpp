@@ -288,7 +288,7 @@ SINT32 CALocalProxy::loop()
 																size-=KEY_SIZE;
 																len+=KEY_SIZE;
 															}
-														pMixPacket->flags=CHANNEL_OPEN_OLD;
+														pMixPacket->flags=CHANNEL_OPEN;
 													}
 												else //sonst
 													{

@@ -87,7 +87,7 @@ SINT32 CASignature::setSignKey(const DOM_Node& n,UINT32 type,char* passwd)
 										UINT32 decLen=4096;
 										UINT8* decBuff=new UINT8[decLen];
 										CABase64::decode((UINT8*)tmpStr,strlen(tmpStr),decBuff,&decLen);
-										delete tmpStr;
+										delete [] tmpStr;
 										SINT32 ret=setSignKey(decBuff,decLen,SIGKEY_PKCS12,passwd);
 										delete[] decBuff;
 										return ret;
@@ -262,8 +262,8 @@ SINT32 CASignature::signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen,CAC
 	*	@retval E_SUCCESS, if the Signature could be successful created
 	* @retval E_UNKNOWN, otherwise
 */
-SINT32 CASignature::signXML(DOM_Node &node,CACertStore* pIncludeCerts)
-	{
+SINT32 CASignature::signXML(DOM_Node& node,CACertStore* pIncludeCerts)
+	{	
 		//Calculating the Digest...
 		UINT32 len=0;
 		UINT8* canonicalBuff=DOM_Output::makeCanonical(node,&len);
