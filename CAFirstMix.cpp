@@ -695,12 +695,12 @@ SINT32 CAFirstMix::loop()
 																	}
 																else
 																	{
-																		m_pMuxOut->send(pMixPacket,tmpBuff);
-																		m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
-																		incMixedPackets();
 																		#ifdef LOG_CHANNEL
 																			m_pChannelList->get(pMuxSocket,pMixPacket->channel)->packetsInFromUser++;
 																		#endif
+																		m_pMuxOut->send(pMixPacket,tmpBuff);
+																		m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
+																		incMixedPackets();
 																		#ifdef _DEBUG
 																			CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",pMixPacket->channel);
 																		#endif
