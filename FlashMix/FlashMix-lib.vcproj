@@ -19,7 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;G:\postgres-client-lib\include\postgresql&quot;;&quot;G:\postgres-client-lib\include&quot;;&quot;G:\xerces-c-src_2_5_0\src\xercesc&quot;;&quot;G:\xerces-c-src_2_5_0\src&quot;;&quot;g:\openssl-0.9.7c\inc32&quot;;..\pthread\include;n:\mysql\include;&quot;g:\zlib-1.1.4&quot;"
+				AdditionalIncludeDirectories="$(INCLUDE_XERCES_C);$(INCLUDE_XERCES_C)\xercesc;$(INCLUDE_OPENSSL);$(INCLUDE_PTHREADS);$(INCLUDE_ZLIB);$(INCLUDE_MYSQL);$(INCLUDE_POSTGRES_CLIENT_LIB)\postgresql;$(INCLUDE_POSTGRES_CLIENT_LIB);"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"

@@ -19,7 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;G:\postgres-client-lib\include\postgresql&quot;;&quot;G:\postgres-client-lib\include&quot;;&quot;G:\xerces-c-src_2_5_0\src\xercesc&quot;;&quot;G:\xerces-c-src_2_5_0\src&quot;;&quot;g:\openssl-0.9.7c\inc32&quot;;..\pthread\include;n:\mysql\include;&quot;g:\zlib-1.1.4&quot;"
+				AdditionalIncludeDirectories="$(INCLUDE_XERCES_C);$(INCLUDE_XERCES_C)\xercesc;$(INCLUDE_OPENSSL);$(INCLUDE_PTHREADS);$(INCLUDE_ZLIB);$(INCLUDE_MYSQL);$(INCLUDE_POSTGRES_CLIENT_LIB)\postgresql;$(INCLUDE_POSTGRES_CLIENT_LIB);"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -35,7 +35,7 @@
 				AdditionalDependencies="proxytest-lib.lib ws2_32.lib ssleay32.lib libeay32.lib pthreadVC.lib xerces-c_2D.lib zlib.lib"
 				OutputFile="$(OutDir)/FlashMixUser.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;G:\proxytest\proxytest-lib\Debug&quot;;&quot;G:\xerces-c-src_2_5_0\build\win32\vc7\debug&quot;;&quot;g:\openssl-0.9.7c\out32.dbg&quot;;..\pthread\lib;n:\mysql\lib\debug;&quot;g:\zlib-1.1.4&quot;"
+				AdditionalLibraryDirectories=".\proxytest-lib\Debug;$(LIB_XERCES_C_DEBUG);$(LIB_OPENSSL);$(LIB_PTHREADS);$(LIB_ZLIB);$(LIB_MYSQL_DEBUG)"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/FlashMixUser.pdb"
 				SubSystem="1"
