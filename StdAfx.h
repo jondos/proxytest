@@ -55,6 +55,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <signal.h>
+#include "popt/system.h"
 // ZU ERLEDIGEN: Verweisen Sie hier auf zusätzliche Header-Dateien, die Ihr Programm benötigt
 
 //{{AFX_INSERT_LOCATION}}

@@ -6,6 +6,8 @@
 #include "CAMixSocket.hpp"
 #include "CASocketGroup.hpp"
 #include "CASocketAddr.hpp"
+#include "CACmdLnOptions.hpp"
+
 CRITICAL_SECTION csClose;
 typedef struct
 {
@@ -288,8 +290,23 @@ THREAD_RETURN mixtoproxy(void* tmpPair)
 		THREAD_RETURN_SUCCESS;
 	}
 
-int main(int argc, char* argv[])
+int main(int argc, const char* argv[])
 	{
+	
+	    CACmdLnOptions options;
+	    options.parse(argc,argv);
+	    if(options.getDaemon())
+		{
+		    pid_t pid;
+		    pid=fork();
+		    if(pid!=0)
+			exit(0);
+		    setsid();
+		    chdir("/");
+		    umask(0);		    
+		}
+	    char strTargetHost[255];
+	    options.getTargetHost(strTargetHost,255);
 #ifdef _DEBUG
 		sockets=0;
 #endif
@@ -300,8 +317,8 @@ int main(int argc, char* argv[])
 		#endif
 		
 		InitializeCriticalSection(&csClose);
-		CASocketAddr socketAddrIn(atol(argv[3]));
-		socketAddrSquid.setAddr(argv[1],atol(argv[2]));
+		CASocketAddr socketAddrIn(options.getServerPort());
+		socketAddrSquid.setAddr(strTargetHost,options.getTargetPort());
 		CASocket socketIn;
 		if(socketIn.listen(&socketAddrIn)==SOCKET_ERROR)
 		    {
@@ -367,7 +384,9 @@ int main(int argc, char* argv[])
 					    printf("Can't create Thread 1 - Error:%i\n",err);
 //					    printf("EAGAIN:%i\n",EAGAIN);
 //					    printf("MAxThreads:%u\n",PTHREAD_THREADS_MAX);
-					    exit(-2);
+					    sleep(1);
+					    continue;
+					    //exit(-2);
 					}
 				    err=pthread_create(&p2,NULL,mixtoproxy,tmpPair2);
 				    if(err!=0)	
@@ -375,7 +394,9 @@ int main(int argc, char* argv[])
 					    printf("Can't create Thread 2 - Error:%i\n",err);
 //					    printf("EAGAIN:%i\n",EAGAIN);
 //					    printf("MAxThreads:%u\n",PTHREAD_THREADS_MAX);
-					    exit(-2);
+					    //exit(-2);
+					    sleep(1);
+					    continue;
 					}
 				#endif
 #ifdef _DEBUG
