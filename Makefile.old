@@ -8,7 +8,7 @@
 INCLUDE = -I. -I/usr/users/sya/sk13/openssl/include -I/home/imis/mix/openssl64/include -I/sun/ikt/sk13/openssl/include
 #LIBS	= -L/usr/local/ssl/lib -L/usr/users/sya/sk13/openssl/lib -L/home/imis/mix/openssl64/lib -L/sun/ikt/sk13/openssl/lib ./popt/popt.a ./httptunnel/httptunnel.a ./xml/xml.a -lcrypto -lpthread
 LIBDIR= -L/usr/users/sya/sk13/openssl/lib -L/home/imis/mix/openssl64/lib -L/sun/ikt/sk13/openssl/lib -L/usr/local/lib
-LIBS	= ./popt/popt.a ./xml/xml.a ./aes/libaes.a -lcrypto 
+LIBS	= ./popt/libpopt.a ./xml/libxml.a ./aes/libaes.a -lcrypto 
 #CPPFLAGS =-O3 -Wall 
 #CPPFLAGS =-O3 -D_REENTRANT
 #DEBUG =-D_DEBUG -g
