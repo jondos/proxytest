@@ -62,10 +62,11 @@ am__installdirs = "$(DESTDIR)$(sbindir)"
 sbinPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(sbin_PROGRAMS)
 am_proxytest_OBJECTS = CAAbstractControlChannel.$(OBJEXT) \
-	CAASymCipher.$(OBJEXT) CABase64.$(OBJEXT) \
-	CACacheLoadBalancing.$(OBJEXT) CACertificate.$(OBJEXT) \
-	CACertStore.$(OBJEXT) CACmdLnOptions.$(OBJEXT) \
-	CAConditionVariable.$(OBJEXT) \
+	CAAbstractXMLEncodeable.$(OBJEXT) \
+	CAAccountingControlChannel.$(OBJEXT) CAASymCipher.$(OBJEXT) \
+	CABase64.$(OBJEXT) CACacheLoadBalancing.$(OBJEXT) \
+	CACertificate.$(OBJEXT) CACertStore.$(OBJEXT) \
+	CACmdLnOptions.$(OBJEXT) CAConditionVariable.$(OBJEXT) \
 	CAControlChannelDispatcher.$(OBJEXT) \
 	CAControlChannelTest.$(OBJEXT) CADatabase.$(OBJEXT) \
 	CADatagramSocket.$(OBJEXT) CAFirstMix.$(OBJEXT) \
@@ -214,6 +215,8 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 AUTOMAKE_OPTIONS = foreign
 proxytest_SOURCES = CAAbstractControlChannel.cpp\
+		    CAAbstractXMLEncodeable.cpp\
+		    CAAccountingControlChannel.cpp\
 		    CAASymCipher.cpp \
 		    CABase64.cpp \
 		    CACacheLoadBalancing.cpp\
@@ -258,6 +261,8 @@ proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    StdAfx.cpp \
 		    proxytest.cpp \
 		    CAAbstractControlChannel.hpp\
+		    CAAbstractXMLEncodeable.hpp\
+		    CAAccountingControlChannel.hpp\
 		    CAASymCipher.hpp \
 		    CABase64.hpp \
 		    CACacheLoadBalancing.hpp\
@@ -402,6 +407,8 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAASymCipher.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAAbstractControlChannel.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAAbstractXMLEncodeable.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAAccountingControlChannel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CABase64.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CACacheLoadBalancing.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CACertStore.Po@am__quote@
