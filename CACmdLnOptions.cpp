@@ -35,6 +35,8 @@ CACmdLnOptions::CACmdLnOptions()
 		iTargetRTTPort=iServerRTTPort=-1;
 		strServerHost=strTargetHost=strSOCKSHost=strInfoServerHost=NULL;
 		strKeyFileName=strCascadeName=strLogDir=NULL;
+		pTargets=NULL;
+		cntTargets=0;
   }
 
 CACmdLnOptions::~CACmdLnOptions()
@@ -61,6 +63,10 @@ CACmdLnOptions::~CACmdLnOptions()
 			delete strCascadeName;
 		if(strLogDir!=NULL)
 			delete strLogDir;
+		if(pTargets!=NULL)
+			{
+				delete pTargets;
+			}
   }
     
 int CACmdLnOptions::parse(int argc,const char** argv)
@@ -82,7 +88,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 	poptOption options[]=
 	 {
 		{"daemon",'d',POPT_ARG_NONE,&iDaemon,0,"start as daemon",NULL},
-		{"next",'n',POPT_ARG_STRING,&target,0,"next mix/http-proxy","<ip:port[,rttport]>"},
+		{"next",'n',POPT_ARG_STRING,&target,0,"next mix/http-proxy(s)","<path|{ip:port[,rttport][;ip:port]*}>"},
 		{"port",'p',POPT_ARG_STRING,&serverPort,0,"listening [host:]port|path","<[host:]port|path>"},
 		{"https",'h',POPT_ARG_NONE,&bHttps,0,"support proxy requests",NULL},
 		{"rttport",'r',POPT_ARG_INT,&serverrttport,0,"round trip time port","<portnumber>"},
@@ -116,12 +122,36 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 					strTargetHost=new char[strlen(target)+1];
 					strcpy(strTargetHost,target);
 				 }
-				else if((tmpStr=strchr(target,':'))!=NULL)
+				else
 					{
-						strTargetHost=new char[tmpStr-target+1];
-						(*tmpStr)=0;
-						strcpy(strTargetHost,target);
-						iTargetPort=(int)atol(tmpStr+1);
+						cntTargets=1;
+						int i;
+						for(i=0;i<strlen(target);i++)
+							{
+								if(target[i]==';')
+									cntTargets++;
+							}
+						pTargets=new CASocketAddrINet[cntTargets];
+						tmpStr=strtok(target,";");
+						char tmpHostname[255];
+						int tmpPort;
+						i=0;
+						while(tmpStr!=NULL)
+							{
+								char* tmpStr1=strchr(tmpStr,':');
+								memcpy(tmpHostname,tmpStr,tmpStr1-tmpStr);
+								tmpHostname[tmpStr1-tmpStr]=0;
+								tmpPort=(int)atol(tmpStr1+1);
+								pTargets[i].setAddr(tmpHostname,tmpPort);
+								if(i==0)
+									{
+										strTargetHost=new char[strlen(tmpHostname)+1];
+										strcpy(strTargetHost,tmpHostname);
+										iTargetPort=tmpPort;
+									}
+								i++;
+								tmpStr=strtok(NULL,";");
+							}
 					}
 				free(target);
 	    }

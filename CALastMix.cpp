@@ -43,6 +43,23 @@ extern CACmdLnOptions options;
 //---------------------------------------------------------
 /********************************************************************************/
 
+SINT32 CALastMix::initOnce()
+	{
+		UINT32 cntTargets=options.getTargetCount();
+		if(cntTargets==0)
+			return E_UNKNOWN;
+		CASocketAddrINet oAddr;
+		for(int i=1;i<=cntTargets;i++)
+			{
+				options.getTargetAddr(&oAddr,i);
+				m_oCacheLB.add(&oAddr);
+			}
+		UINT8 strTarget[255];
+		options.getSOCKSHost(strTarget,255);
+		maddrSocks.setAddr((char*)strTarget,options.getSOCKSPort());
+		return E_SUCCESS;
+	}
+
 SINT32 CALastMix::init()
 	{
 		if(mRSA.generateKeyPair(1024)!=E_SUCCESS)
@@ -101,12 +118,6 @@ SINT32 CALastMix::init()
 				delete buff;
 				return E_UNKNOWN;
 			}
-		UINT8 strTarget[255];
-		options.getTargetHost(strTarget,255);
-		maddrSquid.setAddr((char*)strTarget,options.getTargetPort());
-
-		options.getSOCKSHost(strTarget,255);
-		maddrSocks.setAddr((char*)strTarget,options.getSOCKSPort());
 		delete buff;
 		return E_SUCCESS;
 	}
@@ -169,10 +180,17 @@ LOOP_START:
 											ret=tmpSocket->connect(maddrSocks,_CONNECT_TIMEOUT); 
 										else
 											{
-												tmpSocket->create();
-												tmpSocket->setRecvBuff(50000);
-												tmpSocket->setSendBuff(5000);
-												ret=tmpSocket->connect(maddrSquid,_CONNECT_TIMEOUT);
+												UINT32 count=0;
+												do
+													{
+														tmpSocket->close();
+														tmpSocket->create();
+														tmpSocket->setRecvBuff(50000);
+														tmpSocket->setSendBuff(5000);
+														ret=tmpSocket->connect((CASocketAddrINet)*m_oCacheLB.get(),_CONNECT_TIMEOUT);
+														count++;
+													}
+												while(ret!=E_SUCCESS&&count<m_oCacheLB.getElementCount());
 											}	
 										if(ret!=E_SUCCESS)
 										    {
