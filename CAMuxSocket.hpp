@@ -125,6 +125,7 @@ class CAMuxSocket
 					m_oCipherOut.setKeyAES(key);
 					return E_SUCCESS;
 				}
+
 		private:
 				CASocket m_Socket;
 				UINT32 m_aktBuffPos;

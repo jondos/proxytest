@@ -236,7 +236,7 @@ THREAD_RETURN loopAcceptUsers(void* param)
 					{ //check for Error - are we restarting ?
 						if(pFirstMix->getRestart()||countRead!=E_TIMEDOUT)
 							goto END_THREAD;
-					};
+					}
 				i=0;
 #ifdef _DEBUG
 				CAMsg::printMsg(LOG_DEBUG,"UserAcceptLoop: countRead=%i\n",countRead);
@@ -247,13 +247,13 @@ THREAD_RETURN loopAcceptUsers(void* param)
 							{
 								countRead--;
 								#ifdef _DEBUG
-									CAMsg::printMsg(LOG_DEBUG,"New direct Connection from Browser!\n");
+									CAMsg::printMsg(LOG_DEBUG,"New direct Connection from Client!\n");
 								#endif
 								pNewMuxSocket=new CAMuxSocket;
 								ret=socketsIn[i].accept(*(CASocket*)pNewMuxSocket);
 								if(ret!=E_SUCCESS)
 									{
-										CAMsg::printMsg(LOG_ERR,"Accept Error %u - direct Connection from Browser!\n",GET_NET_ERROR);
+										CAMsg::printMsg(LOG_ERR,"Accept Error %u - direct Connection from Client!\n",GET_NET_ERROR);
 										delete pNewMuxSocket;
 										if(ret==E_SOCKETCLOSED&&pFirstMix->getRestart()) //Hm, should we restart ??
 											goto END_THREAD;
@@ -522,7 +522,7 @@ SINT32 CAFirstMix::loop()
 
 //First Step
 //Checking for new connections		
-// Now in a separat Thread.... (if NOt _DEBUG defined!)
+// Now in a separat Thread.... (if NOT _DEBUG defined!)
 
 #if defined(_DEBUG) || defined(NO_LOOPACCEPTUSER)				
 				
@@ -536,12 +536,12 @@ SINT32 CAFirstMix::loop()
 							{
 								countRead--;
 								#ifdef _DEBUG
-									CAMsg::printMsg(LOG_DEBUG,"New direct Connection from Browser!\n");
+									CAMsg::printMsg(LOG_DEBUG,"New direct Connection from Client!\n");
 								#endif
 								CAMuxSocket* pnewMuxSocket=new CAMuxSocket;
 								if(m_arrSocketsIn[i].accept(*(CASocket*)pnewMuxSocket)!=E_SUCCESS)
 									{
-										CAMsg::printMsg(LOG_ERR,"Accept Error %u - direct Connection from Browser!\n",GET_NET_ERROR);
+										CAMsg::printMsg(LOG_ERR,"Accept Error %u - direct Connection from Client!\n",GET_NET_ERROR);
 										delete pnewMuxSocket;
 									}
 								else
