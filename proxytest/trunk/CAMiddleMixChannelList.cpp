@@ -29,7 +29,7 @@ SINT32 CAMiddleMixChannelList::add(HCHANNEL channelIn,CASymCipher* pCipher,HCHAN
 		do
 			{
 				getRandom(&pEntry->channelOut);
-			}while(getOutToIn(NULL,pEntry->channelOut,NULL)==E_SUCCESS);
+			}while(getOutToIn_intern_without_lock(NULL,pEntry->channelOut,NULL)==E_SUCCESS);
 		if(m_pChannelList!=NULL)
 			m_pChannelList->prev=pEntry;
 		m_pChannelList=pEntry;
@@ -58,29 +58,6 @@ SINT32 CAMiddleMixChannelList::getInToOut(HCHANNEL channelIn, HCHANNEL* channelO
 		m_Mutex.unlock();
 		return E_UNKNOWN;
 	}
-
-SINT32 CAMiddleMixChannelList::getOutToIn(HCHANNEL* channelIn, HCHANNEL channelOut,CASymCipher** ppCipher)
-	{
-		m_Mutex.lock();
-		mmChannelListEntry* pEntry=m_pChannelList;
-		while(pEntry!=NULL)
-			{
-				if(pEntry->channelOut==channelOut)
-					{
-						if(channelIn!=NULL)
-							*channelIn=pEntry->channelIn;
-						if(ppCipher!=NULL)
-							*ppCipher=pEntry->pCipher;
-						(*ppCipher)->lock();
-						m_Mutex.unlock();
-						return E_SUCCESS;
-					}
-				pEntry=pEntry->next;
-			}
-		m_Mutex.unlock();
-		return E_UNKNOWN;
-	}
-			
 
 SINT32 CAMiddleMixChannelList::remove(HCHANNEL channelIn)
 	{

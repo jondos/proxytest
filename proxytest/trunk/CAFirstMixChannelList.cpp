@@ -107,7 +107,7 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,HCHANNEL channelIn,
 		do
 			{
 				getRandom(channelOut); //get new Random OUT-CHANNEL-ID
-			} while(get(*channelOut)!=NULL); //until it is unused...
+			} while(get_intern_without_lock(*channelOut)!=NULL); //until it is unused...
 		pNewEntry->channelOut=*channelOut;
 		pNewEntry->bIsSuspended=false;
 		pNewEntry->pHead=pHashTableEntry;
