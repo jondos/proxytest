@@ -28,7 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #ifndef __CAACCOUNTINGBIINTERFACE__
 #define __CAACCOUNTINGBIINTERFACE__
-#include "CASSLClientSocket.hpp"
+#include "CATLSClientSocket.hpp"
 #include "CASocketAddrINet.hpp"
 #include "CAXMLCostConfirmation.hpp"
 #include "CAXMLErrorMessage.hpp"
@@ -43,7 +43,7 @@ class CAAccountingBIInterface
 {
 
 public: 
-	CAAccountingBIInterface();
+	CAAccountingBIInterface(UINT32 useSSL);
 	~CAAccountingBIInterface();
 
 	SINT32 initBIConnection(CASocketAddrINet address);
@@ -118,11 +118,12 @@ private:
 	SINT32 receiveResponse(UINT32 *status, UINT8 *buf, UINT32 *size);
 
 	bool m_connected;
-	CASSLClientSocket * m_pSslSocket;
+	CASocket * m_pSocket;
 
 	UINT8 * m_pLineBuffer; // for readLine function
 	UINT32 m_lineBufferSize;
 	UINT32 m_lineBufferNumBytes;
+	UINT32 m_bUseTLS;
 };
 
 #endif
