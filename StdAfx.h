@@ -146,7 +146,15 @@
 		typedef signed short SINT16;
 		typedef unsigned char UINT8;
 		typedef signed char SINT8;
-	
+	#elif __sun    	
+		typedef uint32_t UINT32;
+		typedef int32_t SINT32;
+		typedef unsigned int UINT;
+		typedef signed int SINT;
+		typedef uint16_t UINT16;
+		typedef int16_t SINT16;
+		typedef uint8_t UINT8;
+		typedef int8_t SINT8;
 	#endif
 #endif
 
