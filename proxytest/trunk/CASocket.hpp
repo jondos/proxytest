@@ -28,12 +28,12 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "CASocketAddr.hpp"
-
+#include "CAMutex.hpp"
 class CASocket
 	{
 		public:
 			CASocket();
-			~CASocket(){close();DeleteCriticalSection(&m_csClose);}
+			~CASocket(){close();}
 
 			SINT32 create();
 			SINT32 create(int type);
@@ -75,9 +75,7 @@ class CASocket
 			SINT32 getNonBlocking(bool* b);
 		private:
 			SOCKET m_Socket;
-			#ifdef _REENTRANT
-				CRITICAL_SECTION m_csClose;
-			#endif
+			//CAMutex m_csClose;
 			UINT32 m_closeMode;
 	};
 #endif

@@ -34,7 +34,7 @@ class CADatagramSocket
 	{
 		public:
 			CADatagramSocket();
-			~CADatagramSocket(){close();DeleteCriticalSection(&csClose);}
+			~CADatagramSocket(){close();}
 
 			SINT32 create();
 			SINT32 create(int type);
@@ -54,9 +54,6 @@ class CADatagramSocket
 */
 		private:
 			SOCKET m_Socket;
-			#ifdef _REENTRANT
-				CRITICAL_SECTION csClose;
-			#endif
 			// temporary hack...
 //			int localPort;
 	};

@@ -28,13 +28,13 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CASOCKETADDRINET__
 #define __CASOCKETADDRINET__
 #include "CASocketAddr.hpp"
-
+#include "CAMutex.hpp"
 /** This class represents a socket address for Internet (IP) connections. */
 class CASocketAddrINet:public CASocketAddr,sockaddr_in
 	{
 		public:
-			static SINT32 init();
-			static SINT32 destroy();
+			//static SINT32 init();
+			//static SINT32 destroy();
 			int getType(){return AF_INET;}
 			CASocketAddrINet();
 			CASocketAddrINet(UINT16 port);
@@ -61,7 +61,7 @@ class CASocketAddrINet:public CASocketAddr,sockaddr_in
 
 
 		private:
-			static CRITICAL_SECTION m_csGet;
+			static CAMutex m_csGet;
 			static bool m_bIsCsInitialized;
 	};
 

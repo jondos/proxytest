@@ -215,7 +215,6 @@ THREAD_RETURN InfoLoop(void *p)
 
 CAInfoService::CAInfoService(CAFirstMix* pFirstMix)
 	{
-		InitializeCriticalSection(&csLevel);
 		iUser=iRisk=iTraffic=-1;
 		m_pFirstMix=pFirstMix;
 
@@ -227,16 +226,15 @@ CAInfoService::~CAInfoService()
 	{
 		stop();
 		m_threadRunLoop.join();
-		DeleteCriticalSection(&csLevel);
 	}
 
 SINT32 CAInfoService::setLevel(SINT32 user,SINT32 risk,SINT32 traffic)
 	{
-		EnterCriticalSection(&csLevel);
+		csLevel.lock();
 		iUser=user;
 		iRisk=risk;
 		iTraffic=traffic;
-		LeaveCriticalSection(&csLevel);
+		csLevel.unlock();
 		return E_SUCCESS;
 	}
 /*
@@ -257,14 +255,14 @@ SINT32 CAInfoService::setSignature(CASignature* pSig)
 
 SINT32 CAInfoService::getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic)
 	{
-		EnterCriticalSection(&csLevel);
+		csLevel.lock();
 		if(puser!=NULL)
 			*puser=iUser;
 		if(ptraffic!=NULL)
 			*ptraffic=iTraffic;
 		if(prisk!=NULL)
 			*prisk=iRisk;
-		LeaveCriticalSection(&csLevel);
+		csLevel.unlock();
 		return E_SUCCESS;
 	}
 

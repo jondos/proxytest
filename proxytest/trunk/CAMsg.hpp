@@ -27,6 +27,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 // TODO: Sylog for NT!!
 
+#ifndef __CAMSG__
+#define __CAMSG__
+
 #define MSG_STDOUT	0x00
 #define MSG_LOG			0x01
 #define MSG_FILE		0x02
@@ -37,7 +40,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define LOG_INFO	2 
 	#define LOG_DEBUG 3
 #endif
-
+#include "CAMutex.hpp"
 class CAMsg
 	{
 		protected:
@@ -55,5 +58,6 @@ class CAMsg
 			int m_hFileInfo;
 			char m_strMsgBuff[1050];
 			static const char* const m_strMsgTypes[4];
-			CRITICAL_SECTION m_csPrint;
+			CAMutex m_csPrint;
    };
+#endif

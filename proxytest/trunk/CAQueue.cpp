@@ -39,7 +39,6 @@ CAQueue::~CAQueue()
 				m_Queue=m_Queue->next;
 				delete m_lastElem;
 			}
-		DeleteCriticalSection(&m_csQueue);
 	}
 
 /** Adds data to the Queue.
@@ -52,15 +51,13 @@ SINT32 CAQueue::add(const UINT8* buff,UINT32 size)
 	{
 		if(buff==NULL)
 			return E_UNKNOWN;
-		//m_convarSize.lock();
-		EnterCriticalSection(&m_csQueue);
+		m_csQueue.lock();
 		if(m_Queue==NULL)
 			{
 				m_Queue=new QUEUE;
 				if(m_Queue==NULL)
 					{
-						//m_convarSize.unlock();
-						LeaveCriticalSection(&m_csQueue);
+						m_csQueue.unlock();
 						return E_UNKNOWN;
 					}
 				m_Queue->pBuff=new UINT8[size];
@@ -68,8 +65,7 @@ SINT32 CAQueue::add(const UINT8* buff,UINT32 size)
 					{
 						delete m_Queue;
 						m_Queue=NULL;
-						LeaveCriticalSection(&m_csQueue);
-						//m_convarSize.unlock();
+						m_csQueue.unlock();
 						return E_UNKNOWN;
 					}
 				m_Queue->next=NULL;
@@ -82,8 +78,7 @@ SINT32 CAQueue::add(const UINT8* buff,UINT32 size)
 				m_lastElem->next=new QUEUE;
 				if(m_lastElem->next==NULL)
 					{
-						LeaveCriticalSection(&m_csQueue);
-							//m_convarSize.unlock();
+						m_csQueue.unlock();
 						return E_UNKNOWN;
 					}
 				m_lastElem->next->pBuff=new UINT8[size];
@@ -91,8 +86,7 @@ SINT32 CAQueue::add(const UINT8* buff,UINT32 size)
 					{
 						delete m_lastElem->next;
 						m_lastElem->next=NULL;
-						LeaveCriticalSection(&m_csQueue);
-						//m_convarSize.unlock();
+						m_csQueue.unlock();
 						return E_UNKNOWN;
 					}
 				m_lastElem=m_lastElem->next;
@@ -102,7 +96,7 @@ SINT32 CAQueue::add(const UINT8* buff,UINT32 size)
 			}
 		m_nQueueSize+=size;
 	//	m_convarSize.unlock();
-		LeaveCriticalSection(&m_csQueue);
+		m_csQueue.unlock();
 		m_convarSize.signal();
 		return E_SUCCESS;
 	}
@@ -125,7 +119,7 @@ SINT32 CAQueue::get(UINT8* pbuff,UINT32* psize)
 				*psize=0;
 				return E_SUCCESS;
 			}
-		EnterCriticalSection(&m_csQueue);
+		m_csQueue.lock();
 		UINT32 space=*psize;
 		*psize=0;
 		while(space>=m_Queue->size)
@@ -141,7 +135,7 @@ SINT32 CAQueue::get(UINT8* pbuff,UINT32* psize)
 				delete tmp;
 				if(m_Queue==NULL)
 					{
-						LeaveCriticalSection(&m_csQueue);
+						m_csQueue.unlock();
 						return E_SUCCESS;
 					}
 			}
@@ -150,7 +144,7 @@ SINT32 CAQueue::get(UINT8* pbuff,UINT32* psize)
 		m_Queue->size-=space;
 		m_nQueueSize-=space;
 		memmove(m_Queue->pBuff,m_Queue->pBuff+space,m_Queue->size);
-		LeaveCriticalSection(&m_csQueue);
+		m_csQueue.unlock();
 		return E_SUCCESS;
 	}
 
@@ -185,7 +179,7 @@ SINT32 CAQueue::peek(UINT8* pbuff,UINT32* psize)
 			return E_UNKNOWN;
 		if(*psize==0)
 			return E_SUCCESS;
-		EnterCriticalSection(&m_csQueue);
+		m_csQueue.lock();
 		UINT32 space=*psize;
 		*psize=0;
 		QUEUE* tmpQueue=m_Queue;
@@ -198,13 +192,13 @@ SINT32 CAQueue::peek(UINT8* pbuff,UINT32* psize)
 				tmpQueue=tmpQueue->next;
 				if(tmpQueue==NULL)
 					{
-						LeaveCriticalSection(&m_csQueue);
+						m_csQueue.unlock();
 						return E_SUCCESS;
 					}
 			}
 		memcpy(pbuff,tmpQueue->pBuff,space);
 		*psize+=space;
-		LeaveCriticalSection(&m_csQueue);
+		m_csQueue.unlock();
 		return E_SUCCESS;
 	}	
 	
@@ -221,7 +215,7 @@ SINT32 CAQueue::remove(UINT32* psize)
 			return E_UNKNOWN;
 		if(*psize==0)
 			return E_SUCCESS;
-		EnterCriticalSection(&m_csQueue);
+		m_csQueue.lock();
 		UINT32 space=*psize;
 		*psize=0;
 		while(space>=m_Queue->size)
@@ -235,7 +229,7 @@ SINT32 CAQueue::remove(UINT32* psize)
 				delete tmp;
 				if(m_Queue==NULL)
 					{
-						LeaveCriticalSection(&m_csQueue);
+						m_csQueue.unlock();
 						return E_SUCCESS;
 					}
 			}
@@ -243,7 +237,7 @@ SINT32 CAQueue::remove(UINT32* psize)
 		m_Queue->size-=space;
 		m_nQueueSize-=space;
 		memmove(m_Queue->pBuff,m_Queue->pBuff+space,m_Queue->size);
-		LeaveCriticalSection(&m_csQueue);
+		m_csQueue.unlock();
 		return E_SUCCESS;
 	}
 

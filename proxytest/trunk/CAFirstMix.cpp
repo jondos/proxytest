@@ -235,7 +235,7 @@ THREAD_RETURN loopAcceptUsers(void* param)
 		UINT8* ip=new UINT8[4];
 		UINT32 i=0;
 		UINT32& nUser=pFirstMix->m_nUser;
-		UINT32 countRead;
+		SINT32 countRead;
 		SINT32 ret;
 		for(i=0;i<nSocketsIn;i++)
 			osocketgroupAccept.add(socketsIn[i]);
@@ -637,7 +637,7 @@ ERR:
 		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
 		m_pInfoService->stop();
 		muxOut.close();
-		for(int  i=0;i<m_nSocketsIn;i++)
+		for(UINT32  i=0;i<m_nSocketsIn;i++)
 			m_arrSocketsIn[i].close();
 		threadAcceptUsers.join();
 		threadSendToMix.join();
