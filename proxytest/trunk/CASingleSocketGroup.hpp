@@ -27,12 +27,40 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CASINGLESOCKETGROUP__
 #define __CASINGLESOCKETGROUP__
-#ifndef HAVE_POLL
-#include "CASocketGroup.hpp"
-typedef CASocketGroup CASingleSocketGroup;
+/** Not thread safe!*/
+#if !defined(HAVE_POLL)&&!defined(HAVE_EPOLL)
+	#include "CASocketGroup.hpp"
+class CASingleSocketGroup:public CASocketGroup
+	{
+		public:
+			CASingleSocketGroup(bool bWrite):CASocketGroup(bWrite)
+			{
+			}
+
+			static SINT32 select_once(CASocket& s,bool bWrite,UINT32 time_ms)
+				{
+					fd_set fdset;
+					FD_ZERO(&fdset);
+					FD_SET((SOCKET)s,&fdset);
+					SINT32 ret;
+					timeval ti;
+					ti.tv_sec=0;
+					ti.tv_usec=time_ms*1000;
+					if(bWrite)
+						ret=::select(1,NULL,&fdset,NULL,&ti);
+					else
+						ret=::select(1,&fdset,NULL,NULL,&ti);
+					if(ret>0)
+						return ret;
+					else if(ret==0)
+						return E_TIMEDOUT;
+					return E_UNKNOWN;
+				}
+	};
+
 #else
 #include "CAMuxSocket.hpp"
-/** Not thread safe!*/
+#ifdef HAVE_POLL
 class CASingleSocketGroup
 	{
 		public:
@@ -78,20 +106,114 @@ class CASingleSocketGroup
 						{
 							return E_TIMEDOUT;
 						}
-					else if(ret==SOCKET_ERROR)
-						{
-							#ifdef _DEBUG
-								ret=GET_NET_ERROR;
-								CAMsg::printMsg(LOG_DEBUG,"SocketGroup Select-Fehler: %i\n",ret);
-							#endif
-							return E_UNKNOWN;
-						}
+					#ifdef _DEBUG
+						ret=GET_NET_ERROR;
+						CAMsg::printMsg(LOG_DEBUG,"SocketGroup Select-Fehler: %i\n",ret);
+					#endif
 					return E_UNKNOWN;
 				}
 
+				static SINT32 select_once(CASocket& s,bool bWrite,UINT32 time_ms)
+					{
+						struct pollfd pollfd;
+						if(bWrite)
+							pollfd.events=POLLOUT;
+						else
+							pollfd.events=POLLIN;
+						pollfd.fd=(SOCKET)s;
+						SINT32 ret=::poll(&pollfd,1,time_ms);
+						if(ret==1)
+							return ret;
+						else if(ret==0)
+							return E_TIMEDOUT;
+						return E_UNKOWN;							
+					}
 
 		private:
 			struct pollfd* m_pollfd;
 	};
+#else if defined(HAVE_EPOLL)
+class CASingleSocketGroup
+	{
+		public:
+			CASingleSocketGroup(bool bWrite)
+				{
+					m_hEPFD=epoll_create(1);
+					setPoolForWrite(bWrite);
+				}
+
+			~CASingleSocketGroup()
+				{
+					close(hEPFD);
+				}
+			
+			SINT32 add(CAMuxSocket&s)
+				{
+					if(epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,(SOCKET)s,&m_pollAdd)!=0)
+						return E_UNKNOWN;
+					return E_SUCCESS;
+				}
+
+			SINT32 add(CAMuxSocket&s)
+				{
+					if(epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,s.getSocket(),&m_pollAdd)!=0)
+						return E_UNKNOWN;
+					return E_SUCCESS;
+				}
+
+			SINT32 setPoolForWrite(bool bWrite)
+				{
+					if(bWrite)
+						m_pollAdd->events=POLLOUT|POLLERR|POLLHUP;
+					else
+						m_pollfd->events=POLLIN|POLLERR|POLLHUP;
+					return E_SUCCESS;
+				}
+
+			SINT32 select()
+				{
+					return ::epoll_wait(m_hEPFD,&m_Events,1,-1);
+				}
+			
+			SINT32 select(UINT32 time_ms)
+				{
+					SINT32 ret=::epoll_wait(m_hEPFD,&m_Events,1,time_ms);
+					if(ret==1)
+						return ret;
+					else if(ret==0)
+						{
+							return E_TIMEDOUT;
+						}
+					#ifdef _DEBUG
+						ret=GET_NET_ERROR;
+						CAMsg::printMsg(LOG_DEBUG,"SocketGroup Select-Fehler: %i\n",ret);
+					#endif
+					return E_UNKNOWN;
+				}
+
+			static SINT32 select_once(CASocket& s,bool bWrite,UINT32 time_ms)
+				{
+					struct epool_events events;
+					if(bWrite)
+						events.events=POLLOUT|POLLERR|POLLHUP;
+					else
+						events.events=POLLIN|POLLERR|POLLHUP;
+					epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,(SOCKET)s,&events);
+					SINT32 ret=::epoll_wait(m_hEPFD,&events,1,time_ms);
+					if(ret==1)
+						return ret;
+					else if(ret==0)
+						{
+							return E_TIMEDOUT;
+						}
+					return E_UNKNOWN;
+				}
+
+		private:
+			struct epool_events m_epollAdd;
+			struct epool_events m_Events;
+			SINT32 m_hEPFD;
+	};
+#endif
 #endif
 #endif
