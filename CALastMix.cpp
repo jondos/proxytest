@@ -58,30 +58,10 @@ extern CACmdLnOptions options;
 
 SINT32 CALastMix::initOnce()
 	{
-		UINT32 cntTargets=options.getTargetInterfaceCount();
-		if(cntTargets==0)
+		if(setTargets()!=E_SUCCESS)
 			{
-				CAMsg::printMsg(LOG_CRIT,"No Targets (proxies) specified!\n");
+				CAMsg::printMsg(LOG_CRIT,"Could not set Targets (proxies)!\n");
 				return E_UNKNOWN;
-			}
-//		CASocketAddrINet oAddr;
-		UINT32 i;
-		for(i=1;i<=cntTargets;i++)
-			{
-				TargetInterface oTargetInterface;
-				options.getTargetInterface(oTargetInterface,i);
-				if(oTargetInterface.target_type==TARGET_HTTP_PROXY)
-					m_oCacheLB.add(oTargetInterface.addr);
-				delete oTargetInterface.addr;
-			}
-		CAMsg::printMsg(LOG_DEBUG,"This mix will use the following proxies:\n");
-		for(i=0;i<m_oCacheLB.getElementCount();i++)
-			{
-				CASocketAddrINet* pAddr=m_oCacheLB.get();
-				UINT8 ip[4];
-				pAddr->getIP(ip);
-				UINT32 port=pAddr->getPort();
-				CAMsg::printMsg(LOG_DEBUG,"%u. Proxy's Address: %u.%u.%u.%u:%u\n",i+1,ip[0],ip[1],ip[2],ip[3],port);
 			}
 		
 		UINT8 strTarget[255];
@@ -229,6 +209,15 @@ SINT32 CALastMix::processKeyExchange()
 				CAMsg::printMsg(LOG_CRIT,"Couldt not set the symetric key to be used by the MuxSocket!\n");		
 				return E_UNKNOWN;
 			}
+		return E_SUCCESS;
+	}
+
+SINT32 CALastMix::reconfigure()
+	{
+		CAMsg::printMsg(LOG_DEBUG,"Reconfiguring Last Mix\n");
+		CAMsg::printMsg(LOG_DEBUG,"Re-read cache proxies\n");
+		if(setTargets()!=E_SUCCESS)
+			CAMsg::printMsg(LOG_DEBUG,"Could not set new cache proxies\n");
 		return E_SUCCESS;
 	}
 
@@ -673,6 +662,40 @@ ERR:
 			return false;			
 		}
 #endif
+
+/** Reads the configured proxies from \c options.
+	* @retval E_UNKNOWN if no proxies are specified
+	* @retval E_SUCCESS if successfully configured the proxies
+	*/
+SINT32 CALastMix::setTargets()
+	{
+		UINT32 cntTargets=options.getTargetInterfaceCount();
+		if(cntTargets==0)
+			{
+				CAMsg::printMsg(LOG_CRIT,"No Targets (proxies) specified!\n");
+				return E_UNKNOWN;
+			}
+		m_oCacheLB.clean();
+		UINT32 i;
+		for(i=1;i<=cntTargets;i++)
+			{
+				TargetInterface oTargetInterface;
+				options.getTargetInterface(oTargetInterface,i);
+				if(oTargetInterface.target_type==TARGET_HTTP_PROXY)
+					m_oCacheLB.add(oTargetInterface.addr);
+				delete oTargetInterface.addr;
+			}
+		CAMsg::printMsg(LOG_DEBUG,"This mix will use the following proxies:\n");
+		for(i=0;i<m_oCacheLB.getElementCount();i++)
+			{
+				CASocketAddrINet* pAddr=m_oCacheLB.get();
+				UINT8 ip[4];
+				pAddr->getIP(ip);
+				UINT32 port=pAddr->getPort();
+				CAMsg::printMsg(LOG_DEBUG,"%u. Proxy's Address: %u.%u.%u.%u:%u\n",i+1,ip[0],ip[1],ip[2],ip[3],port);
+			}
+		return E_SUCCESS;
+	}			
 
 SINT32 CALastMix::clean()
 	{

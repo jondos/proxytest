@@ -28,22 +28,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "StdAfx.h"
 #include "CACacheLoadBalancing.hpp"
 
-CACacheLoadBalancing::~CACacheLoadBalancing()
-	{
-		CACHE_LB_ENTRY* pEntry;
-		CACHE_LB_ENTRY* pFirst=pSelectedEntry;
-		while(pSelectedEntry!=NULL)
-			{
-				if(pSelectedEntry->next==pFirst)
-					pEntry=NULL;
-				else 
-					pEntry=pSelectedEntry->next;
-				delete pSelectedEntry->pAddr;
-				delete pSelectedEntry;
-				pSelectedEntry=pEntry;
-			}			
-	};
-
 /* Adds a new Address to the pool of Addresses. 
  * This addresses are used for Load Balancing (currently a simple Round Robin).
  * @retval E_UNKNOWN, in case of an error
@@ -57,6 +41,7 @@ SINT32 CACacheLoadBalancing::add(CASocketAddr* const pAddr)
 		if(pEntry==NULL)
 			return E_UNKNOWN;
 		pEntry->pAddr=(CASocketAddrINet*)pAddr->clone();
+		m_csLock.lock();
 		if(pSelectedEntry==NULL)
 			{
 				pSelectedEntry=pEntry;
@@ -68,5 +53,6 @@ SINT32 CACacheLoadBalancing::add(CASocketAddr* const pAddr)
 				pSelectedEntry->next=pEntry;						
 			}
 		m_ElementCount++;
+		m_csLock.unlock();
 		return E_SUCCESS;
 	}

@@ -28,6 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef _CA_CACHE_LOAD_BALANCING
 #define _CA_CACHE_LOAD_BALANCING
 #include "CASocketAddrINet.hpp"
+#include "CAMutex.hpp"
 
 struct t_cachelb_list
 	{
@@ -39,7 +40,7 @@ typedef t_cachelb_list CACHE_LB_ENTRY;
 
 /** This class stores Addresses off different Cache-Proxies. It can be used
   * for Load Balancing between them. Currently a simple Ropund Robin is implemented.
-	* This class is NOT thread safe.
+	* 
 	*/
 class CACacheLoadBalancing
 	{
@@ -49,7 +50,29 @@ class CACacheLoadBalancing
 					m_ElementCount=0;
 					pSelectedEntry=NULL;
 				}
-			~CACacheLoadBalancing();
+				~CACacheLoadBalancing(){clean();}
+
+			/** Deletes all information*/
+			SINT32 clean()
+				{
+					m_csLock.lock();
+					CACHE_LB_ENTRY* pEntry;
+					CACHE_LB_ENTRY* pFirst=pSelectedEntry;
+					while(pSelectedEntry!=NULL)
+						{
+							if(pSelectedEntry->next==pFirst)
+								pEntry=NULL;
+							else 
+								pEntry=pSelectedEntry->next;
+							delete pSelectedEntry->pAddr;
+							delete pSelectedEntry;
+							pSelectedEntry=pEntry;
+						}
+					m_ElementCount=0;
+					m_csLock.unlock();
+					return E_SUCCESS;
+				}
+
 			SINT32 add(CASocketAddr* const pAddr);
 			
 			/** Gets the 'next' Address according to the Load-Balancing algorithm. 
@@ -58,9 +81,14 @@ class CACacheLoadBalancing
 				*/
 			CASocketAddrINet* get()
 				{
+					m_csLock.lock();
 					if(pSelectedEntry==NULL)
-						return NULL;
+						{
+							m_csLock.unlock();
+							return NULL;
+						}
 					pSelectedEntry=pSelectedEntry->next;
+					m_csLock.unlock();
 					return pSelectedEntry->pAddr;
 				}
 
@@ -75,5 +103,6 @@ class CACacheLoadBalancing
 		private:
 			CACHE_LB_ENTRY* pSelectedEntry;
 			UINT32 m_ElementCount;
+			CAMutex m_csLock;
 	};
 #endif

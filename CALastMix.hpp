@@ -46,6 +46,7 @@ class CALastMix:public CAMix
 		public:
 			CALastMix(){m_pMuxIn=NULL;m_pSignature=NULL;}
 			virtual ~CALastMix(){if(m_pSignature!=NULL) delete m_pSignature;}
+			SINT32 reconfigure();
 		private:
 			SINT32 loop();
 			SINT32 init();
@@ -53,6 +54,7 @@ class CALastMix:public CAMix
 			SINT32 clean();
 
 			SINT32 processKeyExchange();
+			SINT32 setTargets();
 #ifdef LOG_CRIME
 			bool	 checkCrime(UINT8* payLoad,UINT32 payLen);
 #endif

@@ -67,6 +67,9 @@ CACmdLnOptions options;
 //Global Locks required by OpenSSL-Library
 CAMutex* pOpenSSLMutexes;
 
+// The Mix....
+CAMix* pMix=NULL;
+
 typedef struct
 {
 	unsigned short len;
@@ -102,7 +105,7 @@ void signal_interrupt( int sig)
 
 void signal_hup(int sig)
 	{
-		options.reread();
+		options.reread(pMix);
 	}
 
 
@@ -202,7 +205,8 @@ For Upstream and Downstream different keys are used.
 
 int main(int argc, const char* argv[])
 	{		
-		CAMix* pMix=NULL;
+		pMix=NULL;
+
 		int i;
 		UINT32 start;
 		SINT32 maxFiles;
