@@ -44,7 +44,7 @@ struct t_fmhashtableentry
 			UINT64				timeCreated;
 			UINT64				id;
 #endif
-			UINT8					peerIP[4]; //needed for flooding controll
+			UINT8					peerIP[4]; //needed for flooding control
 		private:
 			UINT32				cNumberOfChannels;
 			struct t_firstmixchannellist* pChannelList;
