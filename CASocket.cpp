@@ -232,19 +232,22 @@ int CASocket::receive(UINT8* buff,UINT32 len)
 	  return ret;	    	    
 	}
 
+/**Receives all bytes
+@return E_UNKOWN, in case of an error
+@return E_SUCCESS otherwise
+*/
 SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len)
 	{
-		int ret;
-		int pos=0;
+		SINT32 ret;
+		UINT32 pos=0;
 	  do
 			{
 				ret=receive(buff+pos,len);
 				if(ret<=0)
-				{
-				    CAMsg::printMsg(LOG_DEBUG,"ReceiveFully receive error ret=%i\n",ret);
-				    
-					return E_UNKNOWN;
-				}
+					{
+						CAMsg::printMsg(LOG_DEBUG,"ReceiveFully receive error ret=%i\n",ret);
+				    return E_UNKNOWN;
+					}
 				pos+=ret;
 				len-=ret;
 			}
