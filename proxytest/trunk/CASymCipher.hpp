@@ -59,6 +59,7 @@ class CASymCipher:public CALockAble
 			SINT32 setIV(UINT8* iv)
 				{// TODO m_iv2 ???
 					memcpy(m_iv,iv,16);
+					memcpy(m_iv2,iv,16);
 					return E_SUCCESS;
 				}
 

@@ -135,6 +135,7 @@ class CAMuxSocket
 				* @param key buffer conntaining the key bits
 				* @param keyLen size of the buffer (keys)
 				*					if keylen=16, then the key is used for incomming and outgoing direction (key only)
+				*					if keylen=32, then the first bytes are used for incoming and the last bytes are used for outgoing
 				*	@retval E_SUCCESS if successful
 				*	@retval E_UNKNOWN otherwise
 				*/
@@ -144,6 +145,11 @@ class CAMuxSocket
 						{
 							m_oCipherIn.setKeyAES(key);
 							m_oCipherOut.setKeyAES(key);
+						}
+					else if(keyLen==32)
+						{
+							m_oCipherIn.setKeyAES(key);
+							m_oCipherOut.setKeyAES(key+16);
 						}
 				else
 						return E_UNKNOWN;
