@@ -30,6 +30,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAUtil.hpp"
 #include "CAMsg.hpp"
 #include "CASocketAddrINet.hpp"
+#include "xml/DOM_Output.hpp"
 
 CACmdLnOptions::CACmdLnOptions()
   {
@@ -114,7 +115,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 	char* user=NULL;
 	char* configfile=NULL;
   int bXmlKey=0;
-
+	DOM_Document docMixXml;
 	poptOption options[]=
 	 {
 		{"daemon",'d',POPT_ARG_NONE,&iDaemon,0,"start as daemon",NULL},
@@ -149,6 +150,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 		}
 	if(configfile!=NULL)
 		{
+			
 			int handle;
 			handle=open(configfile,O_BINARY|O_RDONLY);
 			if(handle==-1)
@@ -156,10 +158,14 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 			else
 				{
 					SINT32 len=filelength(handle);
-					m_strMixXml=new char[len+50]; //some space for the id, which is the only thing, which is changed....
-					read(handle,m_strMixXml,len);
-					m_strMixXml[len]=0;
+					UINT8* tmpChar=new UINT8[len];
+					read(handle,tmpChar,len);
 					close(handle);
+					DOMParser parser;
+					MemBufInputSource in(tmpChar,len,"tmpConfigBuff");
+					parser.parse(in);
+					docMixXml=parser.getDocument();
+					delete[] tmpChar;
 				}
 			free(configfile);
 		}
@@ -308,47 +314,77 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 		bMiddleMix=true;
 	else 
 		bLastMix=true;
-	if(m_strMixXml!=NULL) //we should insert the right Id and other stuff...
+
+//Now we could setup the MixID
+//either form ConfigFile or from Host/Port
+	if(docMixXml!=NULL)
 		{
-			UINT8 id[50];
-			getMixId(id,50);
-			char* pos=strstr(m_strMixXml,"id=\"\"");
-			if(pos!=NULL)
+			DOM_Element elemRoot=docMixXml.getDocumentElement();
+			DOMString tmpID=elemRoot.getAttribute("id");
+			if(tmpID!=NULL)
 				{
-					pos+=4;
-					pos=strins(m_strMixXml,pos,(char*)id);
-					delete m_strMixXml;
-					m_strMixXml=pos;
-					/*UINT32 left=strlen(m_strMixXml)+m_strMixXml-pos+1;
-					memmove(pos+strlen((char*)id),pos,left);
-					memcpy(pos,id,strlen((char*)id));*/
+					m_strMixID=new char[tmpID.length()+1];
+					char* tmpChr=tmpID.transcode();
+					memcpy(m_strMixID,tmpChr,tmpID.length());
+					m_strMixID[tmpID.length()]=0;
+					delete[] tmpChr;
+				}
+		}
+	if(m_strMixID==NULL) //we do not got it from Config File...
+		{
+			UINT8 buff[4];
+			UINT16 thePort=iServerPort;
+			if(strServerHost==NULL||strServerHost[0]=='/')
+				{
+					CASocketAddrINet::getLocalHostIP(buff);
+					if(thePort==0xFFFF)
+						getRandom((UINT8*)&thePort,2);
 				}
 			else
 				{
-					CAMsg::printMsg(LOG_CRIT,"Placeholder for Mix-Id not found in Mix conf file\n");
-					delete m_strMixXml;
-					m_strMixXml=NULL;
+					CASocketAddrINet oAddr;
+					oAddr.setAddr((UINT8*)strServerHost,0);
+					oAddr.getIP(buff);
 				}
+			m_strMixID=new char[24];
+			sprintf(m_strMixID,"%u.%u.%u.%u%%3A%u",buff[0],buff[1],buff[2],buff[3],thePort);
+		}
+	
+	
+	if(docMixXml!=NULL) //we should insert the right Id and other stuff...
+		{
+			UINT8 id[50];
+			getMixId(id,50);
+			DOM_Element elemRoot=docMixXml.getDocumentElement();
+			elemRoot.setAttribute("id",DOMString((char*)id));
+			
 			//Insert Version
-			pos=strstr(m_strMixXml,"</Version>");
-			if(pos!=NULL)
-				{
-					pos=strins(m_strMixXml,pos,MIX_VERSION);					
-					delete m_strMixXml;
-					m_strMixXml=pos;
-				}
+			DOM_Element elemSoftware;
+			getDOMChildByName(elemRoot,(UINT8*)"Software",elemSoftware);
+			DOM_Element elemVersion;
+			getDOMChildByName(elemSoftware,(UINT8*)"Version",elemVersion);
+			if(elemVersion!=NULL)
+				setDOMElementValue(elemVersion,(UINT8*)MIX_VERSION);
 			else
 				CAMsg::printMsg(LOG_CRIT,"Software <Version> not set\n");
 		}
-	if(m_strMixXml==NULL) //Ok the get an error in proccesing infos about the mix, we should at leas t give the id!
+	if(docMixXml==NULL) //Ok the get an error in proccesing infos about the mix, we should at leas t give the id!
 		{
-			m_strMixXml=new char[255];
-			strcpy((char*)m_strMixXml,"<?xml version=\"1.0\"?><Mix id=\"");
+			docMixXml=DOM_Document::createDocument();
+			DOM_Element elemRoot=docMixXml.createElement("Mix");
 			UINT8 id[50];
 			getMixId(id,50);
-			strcat((char*)m_strMixXml,(char*)id);
-			strcat((char*)m_strMixXml,"\"></Mix>");
+			elemRoot.setAttribute("id",DOMString((char*)id));
+			docMixXml.appendChild(elemRoot);
 		}
+
+//Make an String from the Doc
+	UINT32 xmlLen=0;
+	UINT8* tmpXml=DOM_Output::dumpToMem(docMixXml,&xmlLen);
+	m_strMixXml=new char[xmlLen+1];
+	memcpy(m_strMixXml,tmpXml,xmlLen);
+	m_strMixXml[xmlLen]=0;
+	delete[] tmpXml;
 
 	UINT8 tmpCertDir[2048];
 	UINT8 tmpFileName[2048];
@@ -437,27 +473,8 @@ SINT32 CACmdLnOptions::getServerHost(UINT8* path,UINT32 len)
 
 SINT32 CACmdLnOptions::getMixId(UINT8* id,UINT32 len)
 	{
-		if(len<24) //we need 24 chars (including final \0)
+		if(len<24||m_strMixID==NULL) //we need 24 chars (including final \0)
 			return E_UNKNOWN;
-		if(m_strMixID==NULL)
-			{
-				UINT8 buff[4];
-				UINT16 thePort=iServerPort;
-				if(strServerHost==NULL||strServerHost[0]=='/')
-					{
-						CASocketAddrINet::getLocalHostIP(buff);
-						if(thePort==0xFFFF)
-							getRandom((UINT8*)&thePort,2);
-					}
-				else
-					{
-						CASocketAddrINet oAddr;
-						oAddr.setAddr((UINT8*)strServerHost,0);
-						oAddr.getIP(buff);
-					}
-				m_strMixID=new char[24];
-				sprintf(m_strMixID,"%u.%u.%u.%u%%3A%u",buff[0],buff[1],buff[2],buff[3],thePort);
-			}
 		strcpy((char*)id,m_strMixID);		
 		return E_SUCCESS;
 	}
