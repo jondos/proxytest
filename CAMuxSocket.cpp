@@ -184,8 +184,8 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 		else if(len==E_QUEUEFULL)
 			ret=E_QUEUEFULL;
 		else ret=MUXPACKET_SIZE;
-		pPacket->channel=tmpChannel;
-		pPacket->flags=tmpFlags;
+		//pPacket->channel=tmpChannel;
+		//pPacket->flags=tmpFlags;
 		return ret;
 	}
 #endif
@@ -297,7 +297,7 @@ int CAMuxSocket::close(HCHANNEL channel_id)
 	{
 		MUXPACKET oPacket;
 		oPacket.channel=channel_id;
-		oPacket.flags=1;
+		oPacket.flags=CHANNEL_CLOSE;
 		return send(&oPacket);
 	}
 #endif
