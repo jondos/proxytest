@@ -93,14 +93,19 @@ SINT32 CAMuxSocket::connect(CASocketAddr & psa,UINT retry,UINT32 time)
 		m_aktBuffPos=0;
 		return m_Socket.connect(psa,retry,time);
 	}
-			
-int CAMuxSocket::close()
+/** Closes the underlying socket.*/			
+SINT32 CAMuxSocket::close()
 	{
 		m_aktBuffPos=0;
 		return m_Socket.close();
 	}
-
-int CAMuxSocket::send(MIXPACKET *pPacket)
+/** Sends a MixPacket over the Network. Will block until the whol packet is 
+	* send.
+	* @param pPacket MixPacket to send
+	* @retval MIXPACKET_SIZE if MixPacket was successful send
+	* @retval E_UNKNOWN otherwise
+*/
+SINT32 CAMuxSocket::send(MIXPACKET *pPacket)
 	{
 		m_csSend.lock();
 		int ret;
@@ -110,14 +115,14 @@ int CAMuxSocket::send(MIXPACKET *pPacket)
 		pPacket->flags=htons(pPacket->flags);
 		if(m_bIsCrypted)
     	m_oCipherOut.encryptAES(((UINT8*)pPacket),((UINT8*)pPacket),16);
-		ret=m_Socket.send(((UINT8*)pPacket),MIXPACKET_SIZE);
-		if(ret==SOCKET_ERROR)
+		ret=m_Socket.sendFully(((UINT8*)pPacket),MIXPACKET_SIZE);
+		if(ret!=E_SUCCESS)
 			{
 				#ifdef _DEBUG
 					CAMsg::printMsg(LOG_DEBUG,"MuxSocket-Send-Error!\n");
 					CAMsg::printMsg(LOG_DEBUG,"SOCKET-ERROR: %i\n",GET_NET_ERROR);
 				#endif
-				ret=SOCKET_ERROR;
+				ret=E_UNKNOWN;
 			}
 		else
 			ret=MIXPACKET_SIZE;
@@ -126,7 +131,7 @@ int CAMuxSocket::send(MIXPACKET *pPacket)
 		return ret;
 	}
 
-int CAMuxSocket::send(MIXPACKET *pPacket,UINT8* buff)
+SINT32 CAMuxSocket::send(MIXPACKET *pPacket,UINT8* buff)
 	{
 		m_csSend.lock();
 		int ret;
