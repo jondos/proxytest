@@ -99,7 +99,12 @@ class CASingleSocketGroup
 				{
 					return ::poll(m_pollfd,1,-1);
 				}
-			
+			/** Waits for "events" on the socket. 
+				* @param time_ms time in milli seconds to wait
+				* @return E_TIMEDOUT if after time_ms milli seconds no event occured
+				* @return E_UNKNOWN if an error occured
+				* @return 1 if an event occured
+				*/
 			SINT32 select(UINT32 time_ms)
 				{
 					SINT32 ret=::poll(m_pollfd,1,time_ms);
