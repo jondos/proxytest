@@ -31,9 +31,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 CACacheLoadBalancing::~CACacheLoadBalancing()
 	{
 		CACHE_LB_ENTRY* pEntry;
+		CACHE_LB_ENTRY* pFirst=pSelectedEntry;
 		while(pSelectedEntry!=NULL)
 			{
-				if(pSelectedEntry==pSelectedEntry->next)
+				if(pSelectedEntry->next==pFirst)
 					pEntry=NULL;
 				else 
 					pEntry=pSelectedEntry->next;
