@@ -435,6 +435,9 @@ SINT32 CAFirstMixA::loop()
 												{
 													pfmHashEntry->uAlreadySendPacketSize=0;
 													UINT64 timestamp;
+													ret=sizeof(CAFirstMix::tQueueEntry)-MIXPACKET_SIZE-sizeof(timestamp);
+													if(ret>0)
+														pfmHashEntry->pQueueSend->get(tmpBuff,(UINT32*)&ret);
 													ret=sizeof(timestamp);
 													pfmHashEntry->pQueueSend->get((UINT8*)&timestamp,(UINT32*)&ret);
 													if(!isZero64(timestamp))
