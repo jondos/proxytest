@@ -62,7 +62,7 @@ INPUT                  = . \
                          xml \
                          popt \
                          aes \
-                         documentation/xml
+                         documentation/XML
 FILE_PATTERNS          = *.cpp \
                          *.hpp \
                          *.c \
@@ -72,7 +72,7 @@ RECURSIVE              = NO
 EXCLUDE                = 
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = 
-EXAMPLE_PATH           = documentation/xml
+EXAMPLE_PATH           = documentation/XML
 EXAMPLE_PATTERNS       = 
 EXAMPLE_RECURSIVE      = NO
 IMAGE_PATH             = docImages
