@@ -15,6 +15,7 @@ class CACmdLnOptions
 	    SINT32 getInfoServerHost(UINT8* host,UINT32 len);
 			SINT32 getKeyFileName(UINT8* filename,UINT32 len);
 			SINT32 getCascadeName(UINT8* name,UINT32 len);
+			SINT32 getLogDir(UINT8* name,UINT32 len);
 			bool isLocalProxy();
 			bool isFirstMix();
 			bool isMiddleMix();
@@ -32,4 +33,5 @@ class CACmdLnOptions
 			char* strKeyFileName;
 			bool bLocalProxy,bFirstMix,bMiddleMix,bLastMix;
 			char* strCascadeName;  
+			char* strLogDir;  
 	};
