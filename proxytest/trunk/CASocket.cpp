@@ -33,6 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	extern int sockets;
 #endif
 #include "CAMsg.hpp"
+#include "CAUtil.hpp"
 #define CLOSE_SEND		0x01
 #define CLOSE_RECEIVE 0x02
 #define CLOSE_BOTH		0x03
@@ -130,7 +131,7 @@ SINT32 CASocket::connect(CASocketAddr & psa,UINT retry,UINT32 time)
 						#ifdef _DEBUG
 							CAMsg::printMsg(LOG_DEBUG,"Cannot connect... retrying\n");
 						#endif						
-						sleep(time);
+						sSleep(time);
 					}
 				else
 						return E_SUCCESS;

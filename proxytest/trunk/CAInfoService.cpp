@@ -32,6 +32,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CACmdLnOptions.hpp"
 #include "CAMsg.hpp"
 #include "CASocketAddrINet.hpp"
+#include "CAUtil.hpp"
 extern CACmdLnOptions options;
 
 /**
@@ -207,7 +208,7 @@ THREAD_RETURN InfoLoop(void *p)
 					}
 				else 
 				 helocount--;
-				sleep(60);
+				sSleep(60);
 			}
 		delete buff;
 		THREAD_RETURN_SUCCESS;

@@ -37,4 +37,8 @@ SINT32 getcurrentTimeMillis(BIGNUM *bnTime);
 SINT32 getRandom(UINT8* buff,UINT32 len);
 
 SINT32 getRandom(UINT32* val);
+
+SINT32 msSleep(UINT16 ms);
+
+SINT32 sSleep(UINT16 sec);
 #endif

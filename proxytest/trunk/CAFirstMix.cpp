@@ -37,6 +37,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketAddrINet.hpp"
 #include "CASocketAddrUnix.hpp"
 #include "CAThread.hpp"
+#include "CAUtil.hpp"
 
 extern CACmdLnOptions options;
 

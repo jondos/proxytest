@@ -27,7 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #include "StdAfx.h"
 #include "CAMix.hpp"
-
+#include "CAUtil.hpp"
 SINT32 CAMix::start()
 	{
 		if(initOnce()!=E_SUCCESS)
@@ -37,6 +37,6 @@ SINT32 CAMix::start()
 				if(init()==E_SUCCESS)
 					loop();
 				clean();
-				sleep(60);
+				sSleep(60);
 			}
 	}
