@@ -30,12 +30,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 class CASocketAddr
 	{
 		public:
-			CASocketAddr();
-			~CASocketAddr();
 			
-			static const int  m_Type;
+			virtual int  getType()=0;
 			virtual SINT32 getSize()=0;
-			operator LPSOCKADDR(){return (::LPSOCKADDR)this;}
+			virtual	::LPSOCKADDR LPSOCKADDR()=0;
+			//	virtual operator LPSOCKADDR()=0;
 	};
 
 typedef CASocketAddr* LPCASOCKETADDR;

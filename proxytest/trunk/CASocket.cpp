@@ -74,10 +74,10 @@ SINT32 CASocket::create(int type)
 SINT32 CASocket::listen(CASocketAddr & psa)
 	{
 		localPort=-1;
-		int type=psa.m_Type;
+		int type=psa.getType();
 		if(m_Socket==0&&create(type)==SOCKET_ERROR)
 			return SOCKET_ERROR;
-		if(::bind(m_Socket,(LPSOCKADDR)psa,psa.getSize())==SOCKET_ERROR)
+		if(::bind(m_Socket,psa.LPSOCKADDR(),psa.getSize())==SOCKET_ERROR)
 		    return SOCKET_ERROR;
 		return ::listen(m_Socket,SOMAXCONN);
 	}
@@ -125,7 +125,7 @@ SINT32 CASocket::connect(CASocketAddr & psa,UINT retry,UINT32 time)
 		sockets++;
 #endif
 		int err=0;
-		LPSOCKADDR addr=(LPSOCKADDR)psa;
+		LPSOCKADDR addr=psa.LPSOCKADDR();
 		int addr_len=psa.getSize();
 		for(UINT i=0;i<retry;i++)
 			{
@@ -166,7 +166,7 @@ SINT32 CASocket::connect(CASocketAddr & psa,UINT msTimeOut)
 		getNonBlocking(&bWasNonBlocking);
 		setNonBlocking(true);
 		int err=0;
-		LPSOCKADDR addr=(LPSOCKADDR)psa;
+		LPSOCKADDR addr=psa.LPSOCKADDR();
 		int addr_len=psa.getSize();
 		
 		err=::connect(m_Socket,addr,addr_len);
