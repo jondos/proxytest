@@ -114,8 +114,8 @@ class CAFirstMixChannelList
 				* This method is NOT thread safe (and so only for internal use)
 				* @see get() 
 				*	@param channelOut the out-channel id for which the information is requested
-				* @ret the in-channel and all associated information
-				* @retval NULL,if not found in list
+				* @return the in-channel and all associated information
+				* @retval NULL if not found in list
 				*/
 			fmChannelListEntry* get_intern_without_lock(HCHANNEL channelOut)
 				{
@@ -134,8 +134,8 @@ class CAFirstMixChannelList
 		public:
 			/** Gets the in-channel and all associated information for the given out-channel.
 				* @param channelOut the out-channel id for which the information is requested
-				* @ret the in-channel and all associated information
-				* @retval NULL,if not found in list
+				* @return the in-channel and all associated information
+				* @retval NULL if not found in list
 				*/
 			fmChannelListEntry* get(HCHANNEL channelOut)
 				{
@@ -145,10 +145,16 @@ class CAFirstMixChannelList
 					return pEntry;
 				}	
 		private:
+			///The Hash-Table of all connections.
 			LP_fmHashTableEntry* m_HashTable;
+			///The Hash-Table of all out-channels.
 			LP_fmChannelListEntry* m_HashTableOutChannels;
+			
+			///Pointer to the head of a list of all connections.
 			fmHashTableEntry* m_listHashTableHead;
+			///Next Element in the enumeration of all connections.
 			fmHashTableEntry* m_listHashTableNext;
+			///This mutex is used in all functions and makes them thread safe.
 			CAMutex m_Mutex;
 
 	};

@@ -42,6 +42,8 @@ class CACmdLnOptions
 			UINT16 getServerPort();
 			/*For IP (Host) AND Unix Domain Sockets*/
 	    SINT32 getServerHost(UINT8* path,UINT32 len);
+			
+			SINT32 getMixId(UINT8* id,UINT32 len);
 			SINT32 getServerRTTPort();
 			UINT16 getSOCKSServerPort();
 	    
@@ -71,10 +73,15 @@ class CACmdLnOptions
 			SINT32 getCascadeName(UINT8* name,UINT32 len);
 			SINT32 getLogDir(UINT8* name,UINT32 len);
 			SINT32 getUser(UINT8* user,UINT32 len);
+			SINT32 getMixXml(UINT8* strxml,UINT32 len);
 			bool isLocalProxy();
 			bool isFirstMix();
 			bool isMiddleMix();
 			bool isLastMix();
+			bool isInfoServiceEnabled()
+				{
+					return strInfoServerHost!=NULL;
+				}
 	protected:
 	    bool bDaemon;
       bool m_bHttps;
@@ -93,9 +100,13 @@ class CACmdLnOptions
 			bool bLocalProxy,bFirstMix,bMiddleMix,bLastMix;
 			char* strCascadeName;
 			char* strLogDir;
-			char* strUser;
+			char* m_strUser;
+			char* m_strMixXml;
 
 			CASocketAddrINet* pTargets;
 			UINT32 cntTargets;
+
+		private:
+			SINT32 generateTemplate();
 	};
 #endif

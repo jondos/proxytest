@@ -525,7 +525,7 @@ SINT32 CACmdLnOptions::generateTemplate()
 		oxmlOut.EndElement();
 		oxmlOut.EndDocument();
 		int handle;
-		handle=open("mix_template.conf",O_BINARY|O_RDWR|O_CREAT,_S_IREAD | _S_IWRITE);
+		handle=open("mix_template.conf",O_BINARY|O_RDWR|O_CREAT,S_IREAD | S_IWRITE);
 		if(handle==-1)
 			return E_UNKNOWN;
 		write(handle,oBufferStream.getBuff(),oBufferStream.getBufferSize());
