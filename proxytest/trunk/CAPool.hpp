@@ -20,6 +20,9 @@ class CAPool
 		
 		private:
 			tPoolListEntry* m_pPoolList;
+			tPoolListEntry* m_pLastEntry;
+			tPoolListEntry* m_pEntry;
+			UINT32 m_uPoolSize;
 		
 	};
 #endif
