@@ -3645,6 +3645,8 @@ case "$host" in
 *-*-irix*)
         CFLAGS="$CFLAGS "
         ;;
+*-*-freebsd*)
+	DEFAULTLIBS="$LIBS -liconv"
 *)
 	;;
 esac
