@@ -28,7 +28,6 @@ SINT32 strtrim(UINT8* s)
 *		@param size size of the input byte array
 *		@return E_UNKNOWN, if an error occurs
 *				 size of output otherwise
-*		
 */
 SINT32 memtrim(UINT8* dest,const UINT8* src,UINT32 size)
 	{
@@ -43,4 +42,21 @@ SINT32 memtrim(UINT8* dest,const UINT8* src,UINT32 size)
 		while(inpos<size&&src[inpos]>32)
 			dest[outpos++]=src[inpos++];
 		return (SINT32)outpos;
+	}
+
+/** Gets the current Systemtime in milli seconds. 
+	* @param bnTime - Big Number, in which the current time is placed
+	* @return E_UNKNOWN, if an error occurs
+	*					E_SUCCESS, otherwise
+*/
+SINT32 getcurrentTimeMillis(BIGNUM* bnTime)
+	{
+		struct _timeb timebuffer;
+		_ftime(&timebuffer);
+		/* Hack what should be solved better...*/
+		BN_set_word(bnTime,timebuffer.time);
+		BN_mul_word(bnTime,1000);
+		BN_add_word(bnTime,timebuffer.millitm);
+		/* end of hack..*/
+		return E_SUCCESS;
 	}

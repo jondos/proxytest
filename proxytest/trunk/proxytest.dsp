@@ -337,6 +337,10 @@ SOURCE=.\CACmdLnOptions.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CADatagramSocket.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\CAInfoService.cpp
 # End Source File
 # Begin Source File
@@ -350,6 +354,10 @@ SOURCE=.\CAMuxChannelList.cpp
 # Begin Source File
 
 SOURCE=.\CAMuxSocket.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CARoundTripTime.cpp
 # End Source File
 # Begin Source File
 
@@ -406,6 +414,10 @@ SOURCE=.\CACmdLnOptions.hpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CADatagramSocket.hpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\CAInfoService.hpp
 # End Source File
 # Begin Source File
@@ -419,6 +431,10 @@ SOURCE=.\CAMuxChannelList.hpp
 # Begin Source File
 
 SOURCE=.\CAMuxSocket.hpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CARoundTripTime.hpp
 # End Source File
 # Begin Source File
 

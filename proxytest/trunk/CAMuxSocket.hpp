@@ -26,8 +26,8 @@ class CAMuxSocket
 			~CAMuxSocket(){}
 			int useTunnel(char* proxyhost,UINT16 proxyport);
 			int accept(UINT16 port);
-			SINT32 connect(LPSOCKETADDR psa);
-			SINT32 connect(LPSOCKETADDR psa,UINT retry,UINT32 time);
+			SINT32 connect(LPCASOCKETADDR psa);
+			SINT32 connect(LPCASOCKETADDR psa,UINT retry,UINT32 time);
 			int close();
 			int send(MUXPACKET *pPacket);
 			int receive(MUXPACKET *pPacket);

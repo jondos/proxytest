@@ -6,9 +6,11 @@ class CACmdLnOptions
 	    int parse(int argc,const char** arg);
 	    bool getDaemon();
 	    UINT16 getServerPort();
-	    UINT16 getSOCKSServerPort();
+	    SINT32 getServerRTTPort();
+			UINT16 getSOCKSServerPort();
 	    UINT16 getTargetPort();
-	    SINT32 getTargetHost(UINT8* host,UINT32 len);
+	    SINT32 getTargetRTTPort();
+			SINT32 getTargetHost(UINT8* host,UINT32 len);
 	    UINT16 getSOCKSPort();
 	    SINT32 getSOCKSHost(UINT8* host,UINT32 len);
 	    UINT16 getInfoServerPort();
@@ -23,9 +25,11 @@ class CACmdLnOptions
 	protected:
 	    bool bDaemon;
 	    UINT16 iServerPort;
+			SINT32 iServerRTTPort;
 	    UINT16 iSOCKSServerPort;
 	    UINT16 iTargetPort;
-	    char* strTargetHost;
+	    SINT32 iTargetRTTPort;
+			char* strTargetHost;
 	    char* strSOCKSHost;
 	    UINT16 iSOCKSPort;
 	    char* strInfoServerHost;

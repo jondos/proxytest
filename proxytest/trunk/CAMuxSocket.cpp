@@ -46,12 +46,12 @@ int CAMuxSocket::accept(unsigned short port)
 		return 0;
 	}
 			
-SINT32 CAMuxSocket::connect(LPSOCKETADDR psa)
+SINT32 CAMuxSocket::connect(LPCASOCKETADDR psa)
 	{
 		return connect(psa,1,0);
 	}
 
-SINT32 CAMuxSocket::connect(LPSOCKETADDR psa,UINT retry,UINT32 time)
+SINT32 CAMuxSocket::connect(LPCASOCKETADDR psa,UINT retry,UINT32 time)
 	{
 		if(!bIsTunneld)
 			{

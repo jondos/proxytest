@@ -65,3 +65,15 @@ SINT32 CASocketAddr::getLocalHostName(UINT8* buff,UINT32 len)
 		strcpy((char*)buff,hosten->h_name);
 		return E_SUCCESS;
 	}
+
+SINT32 CASocketAddr::getLocalHostIP(UINT8* ip)
+	{
+		char buff[256];
+		if(gethostname(buff,256)==-1)
+			return SOCKET_ERROR;
+		HOSTENT* hosten=gethostbyname((char*)buff);
+		if(hosten==NULL)
+			return SOCKET_ERROR;
+		memcpy((char*)ip,hosten->h_addr_list[0],4);
+		return E_SUCCESS;
+	}

@@ -5,7 +5,8 @@ CACmdLnOptions::CACmdLnOptions()
   {
 		bDaemon=false;
 		bLocalProxy=bFirstMix=bLastMix=bMiddleMix=false;
-		iTargetPort=iSOCKSPort=iServerPort=iSOCKSServerPort=iInfoServerPort-1;
+		iTargetPort=iSOCKSPort=iServerPort=iSOCKSServerPort=iInfoServerPort=0xFFFF;
+		iTargetRTTPort=iServerRTTPort=-1;
 		strTargetHost=strSOCKSHost=strInfoServerHost=NULL;
 		strKeyFileName=strCascadeName=strLogDir=NULL;
   }
@@ -39,6 +40,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 	int iDaemon=0;
 	char* target=NULL;
 	int port=-1;
+	int serverrttport=-1;
 	int mix=-1;
 	int SOCKSport=-1;
 	char* socks=NULL;
@@ -49,8 +51,9 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 	poptOption options[]=
 	 {
 		{"daemon",'d',POPT_ARG_NONE,&iDaemon,0,"start as daemon",NULL},
-		{"next",'n',POPT_ARG_STRING,&target,0,"next mix/http-proxy","<ip:port>"},
+		{"next",'n',POPT_ARG_STRING,&target,0,"next mix/http-proxy","<ip:port[,rttport]>"},
 		{"port",'p',POPT_ARG_INT,&port,0,"listening port","<portnumber>"},
+		{"rttport",'r',POPT_ARG_INT,&serverrttport,0,"round trip time port","<portnumber>"},
 		{"mix",'m',POPT_ARG_INT,&mix,0,"local|first|middle|last mix","<0|1|2|3>"},
 		{"socksport",'s',POPT_ARG_INT,&SOCKSport,0,"listening port for socks","<portnumber>"},
 		{"socksproxy",'o',POPT_ARG_STRING,&socks,0,"socks proxy","<ip:port>"},
@@ -124,6 +127,8 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 					free(logdir);	
 	    }
 	iServerPort=port;
+	if(serverrttport!=-1)
+		iServerRTTPort=serverrttport;
 	iSOCKSServerPort=SOCKSport;
 	if(mix==0)
 		bLocalProxy=true;
@@ -143,20 +148,36 @@ bool CACmdLnOptions::getDaemon()
     }
     
 UINT16 CACmdLnOptions::getServerPort()
-    {
-	return iServerPort;
-    }
+  {
+		return iServerPort;
+  }
     
+SINT32 CACmdLnOptions::getServerRTTPort()
+  {
+		if(iServerRTTPort!=-1)
+			return iServerRTTPort;
+		else
+			return E_UNSPECIFIED;
+  }
+
 UINT16 CACmdLnOptions::getSOCKSServerPort()
   {
 		return iSOCKSServerPort;
   }
 
 UINT16 CACmdLnOptions::getTargetPort()
-    {
-	return iTargetPort;
-    }
+	{
+		return iTargetPort;
+  }
     
+SINT32 CACmdLnOptions::getTargetRTTPort()
+  {
+		if(iTargetRTTPort!=-1)
+			return iTargetRTTPort;
+		else
+			return E_UNSPECIFIED;
+  }
+
 SINT32 CACmdLnOptions::getTargetHost(UINT8* host,UINT32 len)
   {
 		if(strTargetHost==NULL)

@@ -14,6 +14,8 @@
 #include "CAASymCipher.hpp"
 #include "CAInfoService.hpp"
 #include "CASignature.hpp"
+#include "CADatagramSocket.hpp"
+#include "CARoundTripTime.hpp"
 //#ifdef _WIN32
 //HANDLE hEventThreadEnde;
 //#endif
@@ -1065,8 +1067,18 @@ int main(int argc, const char* argv[])
 			WSADATA wsadata;
 			err=WSAStartup(0x0202,&wsadata);
 		#endif
-		//low-water receive-test
-/*		CASocket oSocket;
+/* //Datagram test
+	CADatagramSocket oSocket;
+	oSocket.bind(5000);
+	UINT8 buff[1000];
+	CASocketAddr from;
+	oSocket.receive(buff,1000,&from);
+	oSocket.send(buff,100,&from);
+	oSocket.close();
+	exit(0);
+ */
+ /*		//low-water receive-test
+		CASocket oSocket;
 		oSocket.listen(9000);
 		CASocket cSocket;
 		oSocket.accept(cSocket);
@@ -1131,6 +1143,8 @@ int main(int argc, const char* argv[])
 			signal(SIGPIPE,SIG_IGN);
 	#endif
 #endif
+		CARoundTripTime* pRTT=new CARoundTripTime();
+		pRTT->start();
 		if(options.isLocalProxy())
 			{
 				doLocalProxy();
@@ -1145,7 +1159,8 @@ int main(int argc, const char* argv[])
 			}
 		else
 			doLastMix();
-
+		
+		delete pRTT;
 		#ifdef _WIN32		
 			WSACleanup();
 		#endif

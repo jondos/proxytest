@@ -16,6 +16,7 @@
     #include <io.h>
     #include <conio.h>
     #include <process.h>
+		#include <sys/timeb.h>
 		#ifndef _REENTRANT
 			#define CRITICAL_SECTION 
 			#define DeleteCriticalSection(p) 
@@ -160,6 +161,7 @@
 
 #define E_SUCCESS 0
 #define E_UNKNOWN -1
+#define E_UNSPECIFIED -100 // A Parameter was not specified/not set
 #include <assert.h>
 #include <stdio.h>
 #include <time.h>
