@@ -305,5 +305,5 @@ AC_ARG_WITH(crime-detection,
 CFLAGS="$CFLAGS $POOL $OFLAGS"
 CXXFLAGS=$CFLAGS
 
-AC_CONFIG_FILES([Makefile popt/Makefile xml/Makefile aes/Makefile trio/Makefile tre/Makefile TypeA/Makefile])
+AC_CONFIG_FILES([Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile])
 AC_OUTPUT
