@@ -330,8 +330,8 @@ SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param)
             if(ret == E_SUCCESS && len > 0)
             {
                 recvBuff = new UINT8[len+1];
-                ret = oSocket.receive(recvBuff, len);
-                if(ret <= 0)
+                ret = oSocket.receiveFully(recvBuff, len);
+                if(ret!=E_SUCCESS)
                 {
 										delete recvBuff;
                     oSocket.close();
@@ -340,6 +340,7 @@ SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param)
 								recvBuff[len]=0;
 								CAMsg::printMsg(LOG_DEBUG,"Received from Infoservice:\n");
 								CAMsg::printMsg(LOG_DEBUG,(char*)recvBuff);
+								CAMsg::printMsg(LOG_DEBUG,"\n");
             }
         }
 
