@@ -362,6 +362,10 @@ SOURCE=.\CASignature.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CASingleSocketGroup.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\CASocket.cpp
 # End Source File
 # Begin Source File
@@ -501,6 +505,10 @@ SOURCE=.\CARoundTripTime.hpp
 # Begin Source File
 
 SOURCE=.\CASignature.hpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CASingleSocketGroup.hpp
 # End Source File
 # Begin Source File
 
