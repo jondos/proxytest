@@ -25,7 +25,7 @@
   <property category="build.config.1" name="win32.builddir" value="windows/Release_Build"/>
   <property category="build.node" name="name" value="mix"/>
   <property category="build.node" name="type" value="exeproject"/>
-  <property category="build.platform" name="active" value="linux"/>
+  <property category="build.platform" name="active" value="win32"/>
   <property category="build.platform" name="linux.Debug_Build.toolset" value="gnuc++"/>
   <property category="build.platform" name="linux.Release_Build.toolset" value="gnuc++"/>
   <property category="build.platform" name="linux.default" value="gnuc++"/>
@@ -96,7 +96,7 @@
   <property category="linux.Release_Build.gnuc++.g++link" name="param.filenames.3" value="-lxerces-c"/>
   <property category="linux.gnuc++.Debug_Build" name="saved" value="1"/>
   <property category="linux.gnuc++.Release_Build" name="saved" value="1"/>
-  <property category="runtime" name="ConfigurationCount" value="2"/>
+  <property category="runtime" name="ConfigurationCount" value="3"/>
   <property category="runtime" name="DefaultConfiguration" value="-1"/>
   <property category="runtime.0" name="BuildTargetOnRun" value="com.borland.cbuilder.build.CBProjectBuilder$ProjectBuildAction;make"/>
   <property category="runtime.0" name="ConfigurationName" value="Debug"/>
@@ -113,6 +113,11 @@
   <property category="runtime.2" name="RunnableType" value="com.borland.cbuilder.runtime.ExecutableRunner"/>
   <property category="runtime.2" name="native.exec.args" value="-c ../../LastMix.xml"/>
   <property category="runtime.2" name="native.target.override" value="0"/>
+  <property category="runtime.3" name="BuildTargetOnRun" value="com.borland.cbuilder.build.CBProjectBuilder$ProjectBuildAction;make"/>
+  <property category="runtime.3" name="ConfigurationName" value="VersionsInfo"/>
+  <property category="runtime.3" name="RunnableType" value="com.borland.cbuilder.runtime.ExecutableRunner"/>
+  <property category="runtime.3" name="native.exec.args" value="-v"/>
+  <property category="runtime.3" name="native.target.override" value="0"/>
   <property category="unique" name="id" value="252"/>
   <property category="win32.Debug_Build.MinGW.dlltool_def" name="option.export-all.enabled" value="1"/>
   <property category="win32.Debug_Build.MinGW.dlltool_def" name="option.output-def.enabled" value="1"/>
@@ -206,14 +211,39 @@
   <property category="win32.Debug_Build.win32b.ilink32" name="param.libfiles.6" value="cw32mti.lib"/>
   <property category="win32.Debug_Build.win32b.ilink32" name="param.libfiles.merge" value="0"/>
   <property category="win32.MinGW.Debug_Build" name="saved" value="1"/>
+  <property category="win32.MinGW.Release_Build" name="saved" value="1"/>
+  <property category="win32.Release_Build.MinGW.dlltool_def" name="option.export-all.enabled" value="1"/>
+  <property category="win32.Release_Build.MinGW.dlltool_def" name="option.output-def.enabled" value="1"/>
+  <property category="win32.Release_Build.MinGW.dlltool_lib" name="option.dllname.enabled" value="1"/>
+  <property category="win32.Release_Build.MinGW.dlltool_lib" name="option.input-def.enabled" value="1"/>
+  <property category="win32.Release_Build.MinGW.dlltool_lib" name="option.output-lib.enabled" value="1"/>
+  <property category="win32.Release_Build.MinGW.g++compile" name="option.B.arg.1" value="$(BCBX)\MinGW\bin"/>
+  <property category="win32.Release_Build.MinGW.g++compile" name="option.B.enabled" value="1"/>
+  <property category="win32.Release_Build.MinGW.g++compile" name="option.I.arg.1" value="$(BCBX)\mingw\include"/>
+  <property category="win32.Release_Build.MinGW.g++compile" name="option.I.arg.2" value="$(BCBX)\mingw\include\c++\3.2"/>
+  <property category="win32.Release_Build.MinGW.g++compile" name="option.I.enabled" value="1"/>
+  <property category="win32.Release_Build.MinGW.g++compile" name="option.MD.enabled" value="1"/>
+  <property category="win32.Release_Build.MinGW.g++compile" name="option.c.enabled" value="1"/>
+  <property category="win32.Release_Build.MinGW.g++compile" name="option.o.enabled" value="1"/>
+  <property category="win32.Release_Build.MinGW.g++link" name="option.B.arg.1" value="$(BCBX)\MinGW\bin"/>
+  <property category="win32.Release_Build.MinGW.g++link" name="option.B.enabled" value="1"/>
+  <property category="win32.Release_Build.MinGW.g++link" name="option.o.enabled" value="1"/>
+  <property category="win32.Release_Build.MinGW.windres" name="option.o.enabled" value="1"/>
   <property category="win32.Release_Build.win32b.bcc32" name="option.I.arg.1" value="$(BCBX)\include"/>
   <property category="win32.Release_Build.win32b.bcc32" name="option.I.arg.2" value="$(BCBX)\..\pthreads\include"/>
   <property category="win32.Release_Build.win32b.bcc32" name="option.I.arg.3" value="$(BCBX)\..\xerces-c2_5_0\include"/>
   <property category="win32.Release_Build.win32b.bcc32" name="option.I.arg.4" value="$(BCBX)\..\xerces-c2_5_0\include\xercesc"/>
   <property category="win32.Release_Build.win32b.bcc32" name="option.I.arg.5" value="$(BCBX)\..\openssl-0.9.7c\inc32"/>
+  <property category="win32.Release_Build.win32b.bcc32" name="option.I.arg.6" value="G:\xerces-c-src_2_5_0\src"/>
+  <property category="win32.Release_Build.win32b.bcc32" name="option.I.arg.7" value="G:\xerces-c-src_2_5_0\src\xercesc"/>
+  <property category="win32.Release_Build.win32b.bcc32" name="option.I.arg.8" value="G:\openssl-0.9.7c\inc32"/>
+  <property category="win32.Release_Build.win32b.bcc32" name="option.I.arg.9" value="G:\proxytest\pthread\include"/>
   <property category="win32.Release_Build.win32b.bcc32" name="option.I.enabled" value="1"/>
   <property category="win32.Release_Build.win32b.bcc32" name="option.O2.enabled" value="0"/>
   <property category="win32.Release_Build.win32b.bcc32" name="option.Od.enabled" value="1"/>
+  <property category="win32.Release_Build.win32b.bcc32" name="option.Os.enabled" value="1"/>
+  <property category="win32.Release_Build.win32b.bcc32" name="option.Oz.enabled" value="1"/>
+  <property category="win32.Release_Build.win32b.bcc32" name="option.RT.enabled" value="0"/>
   <property category="win32.Release_Build.win32b.bcc32" name="option.V.enabled" value="1"/>
   <property category="win32.Release_Build.win32b.bcc32" name="option.a8.enabled" value="1"/>
   <property category="win32.Release_Build.win32b.bcc32" name="option.batchfilecompile.enabled" value="1"/>
@@ -228,7 +258,9 @@
   <property category="win32.Release_Build.win32b.bcc32" name="option.o.enabled" value="1"/>
   <property category="win32.Release_Build.win32b.bcc32" name="option.r.enabled" value="1"/>
   <property category="win32.Release_Build.win32b.bcc32" name="option.responsefile.enabled" value="1"/>
+  <property category="win32.Release_Build.win32b.bcc32" name="option.tC.enabled" value="1"/>
   <property category="win32.Release_Build.win32b.bcc32" name="option.tWC.enabled" value="1"/>
+  <property category="win32.Release_Build.win32b.bcc32" name="option.tWM.enabled" value="1"/>
   <property category="win32.Release_Build.win32b.bcc32" name="option.vi.enabled" value="1"/>
   <property category="win32.Release_Build.win32b.brcc32" name="option.F.enabled" value="1"/>
   <property category="win32.Release_Build.win32b.ilink32" name="option.Enn.arg" value="0"/>
@@ -242,6 +274,9 @@
   <property category="win32.Release_Build.win32b.ilink32" name="option.L.arg.2" value="&quot;$(BCBX)\..\openssl-0.9.7c\out32&quot;"/>
   <property category="win32.Release_Build.win32b.ilink32" name="option.L.arg.3" value="$(BCBX)\..\pthreads\lib"/>
   <property category="win32.Release_Build.win32b.ilink32" name="option.L.arg.4" value="&quot;$(BCBX)\..\xerces-c2_5_0\bin&quot;"/>
+  <property category="win32.Release_Build.win32b.ilink32" name="option.L.arg.5" value="G:\openssl-0.9.7c\out32_borland"/>
+  <property category="win32.Release_Build.win32b.ilink32" name="option.L.arg.6" value="G:\xerces-c-src_2_5_0\build\win32\BCC.551"/>
+  <property category="win32.Release_Build.win32b.ilink32" name="option.L.arg.7" value="G:\proxytest\pthread\lib"/>
   <property category="win32.Release_Build.win32b.ilink32" name="option.L.enabled" value="1"/>
   <property category="win32.Release_Build.win32b.ilink32" name="option.S:xxxx.arg" value="0x00100000"/>
   <property category="win32.Release_Build.win32b.ilink32" name="option.S:xxxx.enabled" value="0"/>
