@@ -30,13 +30,13 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define CAACCOUNTINGBIINTERFACE_H
 #include "CASSLClientSocket.hpp"
 #include "CASocketAddrINet.hpp"
+
+
 /**
- * This object encapsulates the connection to the JPI and
- * allows sending "settle" http(s) requests with cost confirmations
+ * This class encapsulates the connection to the JPI
  *
  * @author Bastian Voigt
  */
-
 class CAAccountingBIInterface 
 {
 
@@ -46,16 +46,77 @@ public:
 
 	SINT32 initBIConnection(CASocketAddrINet address);
 	SINT32 terminateBIConnection();
-	SINT32 settle(UINT64 accountNumber, char * xmlCC);
-	SINT32 update(UINT64 accountNumber);
+	
+	/**
+	 * Send a cost confirmation to the JPI
+	 */
+	SINT32 settle(UINT8 *costConfirmation);
+	
+	/**
+	 * Request a new Balance certificate from the JPI
+	 *
+	 * @param balanceCert an old balance certificate that the AI wishes to update
+	 * @param response a buffer to receive the new balanceCert
+	 * @param responseLen the maximum size of the buffer
+	 */
+	SINT32 update(UINT8 *balanceCert, UINT8 * response, UINT32 *responseLen);
 
 private:
-	SINT32 readLine(char * line, int maxLen);
-	SINT32 sendGetRequest(UINT8 * request, UINT8 * data, UINT32 dataSize, 
-												UINT8 * response, UINT32 responseBufsize);
+	
+	/**
+	 * Reads a line of text from the socket. When you used this function for reading
+	 * and you want to read directly from the socket again, you HAVE TO EMPTY THE LINE
+	 * BUFFER FIRST TO AVOID LOSING DATA THAT WAS READ FROM THE SOCKET AND IS STILL
+	 * IN THE LINEBUFFER!
+	 *
+	 * @param line String buffer for the line
+	 * @param maxLen buffer size
+	 * @return E_SUCCESS if all is OK
+	 * @return E_AGAIN on repeatable errors (e.g. timeout)
+	 * @return SOCKET_ERROR if a socket error was signaled
+	 * @return E_NOT_CONNECTED if we lost the connection
+	 */
+	SINT32 readLine(UINT8 * line, UINT32 * maxLen);
+	
+	/**
+	 * Sends a HTTP GET request to the JPI
+	 *
+	 * @param request the request keyword as c string (e.g. "/settle" or "/update")
+	 * @return E_UNKNOWN on socket errors
+	 * @return E_NOT_CONNECTED if the connection was lost
+	 * @return E_SUCCESS if all is OK
+	 */
+	SINT32 sendGetRequest(UINT8 * request);
+	
+	/**
+	 * Sends a HTTP POST request to the JPI
+	 *
+	 * @param request the request keyword as c string (e.g. "/settle" or "/update")
+	 * @return E_UNKNOWN on socket errors
+	 * @return E_NOT_CONNECTED if the connection was lost
+	 * @return E_SUCCESS if all is OK
+	 */	
+	SINT32 sendPostRequest(UINT8 * request, UINT8 * data, UINT32 dataLen);
+	
+	/**
+	 * Receives the response to a HTTP request.
+	 *
+	 * @param status integer to take the the HTTP status code (e.g. 200 OK or 404 not found)
+	 * @param buf the buffer where the HTTP response data is put into
+	 * @param size size of the buffer
+	 * @return E_SPACE if the response buffer is too small (in this case,
+	 * dataSize contains the minimum size needed)
+	 * @return E_AGAIN if you can try again
+	 * @return E_UNKNOWN if a socket error occured or the incoming data has 
+	 * wrong format or we have no connection
+	 * @return E_NOT_CONNECTED if we are not connected
+	 * @return E_SUCCESS if the answer was received successfully.
+	 * In this case size contains the size of the data received
+	 */
+	SINT32 receiveResponse(UINT32 *status, UINT8 *buf, UINT32 *size);
 
 	bool m_connected;
-	CASSLClientSocket * m_sslSocket;
+	CASSLClientSocket * m_pSslSocket;
 
 	UINT8 * m_pLineBuffer; // for readLine function
 	UINT32 m_lineBufferSize;

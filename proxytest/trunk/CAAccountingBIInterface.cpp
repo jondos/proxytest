@@ -28,19 +28,33 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "StdAfx.h"
 #ifdef PAYMENT
 #include "CAAccountingBIInterface.hpp"
+#include "CACmdLnOptions.hpp"
+#include "CAMsg.hpp"
+#include "CASocketAddrINet.hpp"
 
+extern CACmdLnOptions options;
 
 /**
  * Constructor
+ * Initiates the DB connection
  */
 CAAccountingBIInterface::CAAccountingBIInterface()
 {
+	// init some vars
 	m_lineBufferSize = 0;
-	
 	m_pSslSocket = new CASSLClientSocket();
 	
-	CASocketAddrINet biAddress = config.getBiAddress();
-	initBIConnection(biAddress, true);
+	// get JPI info from config file
+	UINT8 jpiHost[255];
+	if(options.getJPIHost(jpiHost, 255) != E_SUCCESS) {
+		CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface: could not get JPI hostname");
+	}
+	UINT16 jpiPort;
+	jpiPort = options.getJPIPort();
+	CASocketAddrINet biAddress;
+	biAddress.setAddr(jpiHost, jpiPort);
+	
+	initBIConnection(biAddress);
 }
 
 
@@ -64,7 +78,7 @@ CAAccountingBIInterface::~CAAccountingBIInterface()
 SINT32 CAAccountingBIInterface::initBIConnection(CASocketAddrINet address)
 {
 	if(m_pSslSocket->connect(address)!=E_SUCCESS) {
-		CAMsg::printMsg(LOG_ERROR, "AccountingInstance could not connect to JPI!!");
+		CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface: could not connect to JPI!!");
 		m_connected = false;
 		return E_UNKNOWN;
 	}
@@ -88,8 +102,10 @@ SINT32 CAAccountingBIInterface::terminateBIConnection()
 
 
 /**
- * Reads a line of text from the socket. When using this function for reading,
- * please use ONLY this function. Otherwise you will lose data
+ * Reads a line of text from the socket. When you used this function for reading
+ * and you want to read directly from the socket again, you HAVE TO EMPTY THE LINE
+ * BUFFER FIRST TO AVOID LOSING DATA THAT WAS READ FROM THE SOCKET AND IS STILL
+ * IN THE LINEBUFFER!
  *
  * @param line String buffer for the line
  * @param maxLen buffer size
@@ -98,30 +114,31 @@ SINT32 CAAccountingBIInterface::terminateBIConnection()
  * @return SOCKET_ERROR if a socket error was signaled
  * @return E_NOT_CONNECTED if we lost the connection
  */
-SINT32 readLine(UINT8 * line, UINT32 * maxLen)
+SINT32 CAAccountingBIInterface::readLine(UINT8 * line, UINT32 * maxLen)
 {
 	if(!m_connected) return E_NOT_CONNECTED;
 	
 	// do we need to allocate the buffer first?
 	if(m_lineBufferSize==0) {
 		m_lineBufferSize = 1024;
-		m_lineBuffer = (UINT8 *) malloc(m_lineBufferSize);
+		m_pLineBuffer = (UINT8 *) malloc(m_lineBufferSize);
 	}
 
-	int i, ret;
+	UINT32 i;
+	SINT32 ret;
 	bool found = false;
 	
   while(true) {
 		
 		// check if there is a complete line still left in the buffer
-		for(i=0; !found && i<m_lineBufferOffset; i++) {
+		for(i=0; !found && i<m_lineBufferNumBytes; i++) {
 			if(m_pLineBuffer[i]=='\n') found=true;
 		}
 		if(found) break;
 
 		// no complete line left, let's read more data from the socket
 		while(true) {
-			ret = m_pSslSocket->read( m_pLineBuffer+m_lineBufferNumBytes,
+			ret = m_pSslSocket->receive( m_pLineBuffer+m_lineBufferNumBytes,
 																m_lineBufferSize-m_lineBufferNumBytes);
 			if(ret == SOCKET_ERROR ) {
 				return SOCKET_ERROR;
@@ -129,7 +146,7 @@ SINT32 readLine(UINT8 * line, UINT32 * maxLen)
 			if(ret == E_AGAIN) {
 				return E_AGAIN;
 			}
-	    if(len == 0) { // socket was closed
+	    if(ret == 0) { // socket was closed
 				m_connected = false;
 				m_pSslSocket->close();
 				return E_NOT_CONNECTED;
@@ -166,19 +183,52 @@ SINT32 CAAccountingBIInterface::sendGetRequest(UINT8 * request)
 {
   if(!m_connected) return E_NOT_CONNECTED;
 	
-	char requestF[] = "GET %s HTTP/1.1\r\n\r\n";
-	UINT32 len = strlen(requestF) + strlen(request);
-	char requestS[len];
-	sprintf(requestS, requestF, request);
-  len = strlen(requestS);
-  UINT32 bufsize = len + dataSize;
+	UINT8 requestF[] = "GET %s HTTP/1.1\r\n\r\n";
+	UINT32 len = strlen((char *)requestF) + strlen((char *)request);
+	UINT8 requestS[len+1];
+	sprintf((char *)requestS, (char *)requestF, (char *)request);
+  len = strlen((char *)requestS);
+	
+	// send request
+	SINT32 ret = 0;
+	//int offset = 0;
+	do {
+		ret = m_pSslSocket->send(requestS, len);
+	} while(ret == E_AGAIN);
+	if(ret == E_UNKNOWN) { // socket error
+		return E_UNKNOWN;
+	}
+	return E_SUCCESS;
+}
+
+
+
+/**
+ * Sends a HTTP POST request to the JPI
+ *
+ * @param request the request keyword as c string (e.g. "/settle" or "/update")
+ * @return E_UNKNOWN on socket errors
+ * @return E_NOT_CONNECTED if the connection was lost
+ * @return E_SUCCESS if all is OK
+ */
+SINT32 CAAccountingBIInterface::sendPostRequest(UINT8 * request, UINT8 * data, UINT32 dataLen)
+{
+  if(!m_connected) return E_NOT_CONNECTED;
+	
+	UINT8 requestF[] = "POST %s HTTP/1.1\r\nContent-length: %d\r\n\r\n";
+	UINT32 len = strlen((char *)requestF) + strlen((char *)request) + 30;
+	UINT8 requestS[len];
+	sprintf((char *)requestS, (char *)requestF, (char *)request, dataLen);
+  len = strlen((char *)requestS);
+  UINT32 bufsize = len + dataLen;
   UINT8 buf[bufsize];
   memcpy(buf, requestS, len);
-  memcpy(buf+len, data, dataSize);
+  memcpy(buf+len, data, dataLen);
+
 	
 	// send request
 	int ret = 0;
-	int offset = 0;
+	//int offset = 0;
 	do {
 		ret = m_pSslSocket->send(buf, bufsize);
 	} while(ret == E_AGAIN);
@@ -190,43 +240,53 @@ SINT32 CAAccountingBIInterface::sendGetRequest(UINT8 * request)
 
 
 
-/**
- * Receives the response to a HTTP request.
- *
- * @param data the buffer where the response data should go
- * @param dataSize buffer size
- * @param status integer to take the the HTTP status code (e.g. 200 OK or 404 not found)
- * @return E_SPACE if the response buffer is too small (in this case,
- * dataSize contains the minimum size needed)
- * @return E_UNKNOWN if a socket error occured or the incoming data has wrong format
- * @return E_NOT_CONNECTED if we are not connected
- * @return E_SUCCESS if the answer was received successfully
- */
+	/**
+	 * Receives the response to a HTTP request.
+	 * TODO: Better error handling
+	 *
+	 * @param status integer to take the the HTTP status code (e.g. 200 OK or 404 not found)
+	 * @param buf the buffer where the HTTP response data is put into
+	 * @param size size of the buffer
+	 * @return E_SPACE if the response buffer is too small (in this case,
+	 * dataSize contains the minimum size needed)
+	 * @return E_AGAIN if you can try again
+	 * @return E_UNKNOWN if a socket error occured or the incoming data has 
+	 * wrong format or we have no connection
+	 * @return E_NOT_CONNECTED if we are not connected
+	 * @return E_SUCCESS if the answer was received successfully.
+	 * In this case size contains the size of the data received
+	 */
 SINT32 CAAccountingBIInterface::receiveResponse(UINT32 *status, UINT8 *buf, UINT32 *size)
 {
-	char line[255];
-	int contentLength = 0;
-	int i=0;
-	int len=0;
-	
-	if(readLine(line, 255) == E_SUCCESS) { // read first line (status)
-		len = strlen(line);
+	UINT8 line[255];
+	UINT32 contentLength = 0;
+	SINT32 i=0;
+	SINT32 len=0;
+	UINT32 j=255;
+	if(readLine(line, &j) == E_SUCCESS) { // read first line (status)
+		len = strlen((char *)line);
 		
 		// extract status information
 		for(i=0; i<len && line[i]!=' '; i++);
 		if(line[i]!=' ') return E_UNKNOWN;
     line[i]=0;
-    *status = atoi(line);
+    *status = atoi((char *)line);
 	}
 	else return E_UNKNOWN;
 
-	do { // read all header lines and look for "Content-length"
-		if(readLine(line,255) == E_SUCCESS) {
-			len = strlen(line);
-			
+	do { // read all header lines and parse content length
+		j=255;
+		if(readLine(line,&j) == E_SUCCESS) {
+			len = strlen((char *)line);
+			if(len>15) {
+				UINT8 temp[15];
+				memcpy(temp, line, 15);
+				if(memcmp(temp, "Content-length:", 15)==0) {
+					contentLength = atoi((char *)line+15);
+				}
+			}
 		}
 		else return E_UNKNOWN;
-				
 	} while(len>0);
 
 	if(contentLength>0) {
@@ -237,30 +297,77 @@ SINT32 CAAccountingBIInterface::receiveResponse(UINT32 *status, UINT8 *buf, UINT
 		}
 		if(m_lineBufferNumBytes>0) { // empty LineBuffer first !!!
 			int numBytes = (m_lineBufferNumBytes>=contentLength?contentLength:m_lineBufferNumBytes);
-			memcpy(buf, m_lineBuffer, numBytes);
+			memcpy(buf, m_pLineBuffer, numBytes);
 			*size = numBytes;
 			if(m_lineBufferNumBytes - numBytes > 0) {
-				memmove(m_lineBuffer, m_lineBuffer + numBytes, m_lineBufferNumBytes-numBytes);
+				memmove(m_pLineBuffer, m_pLineBuffer + numBytes, m_lineBufferNumBytes-numBytes);
 				m_lineBufferNumBytes -= numBytes;
 			}
 		}
-		if( *size<contentLength) { // now LineBuffer is empty, read from real socket
-
+		while( *size<contentLength) { // now LineBuffer is empty, read from real socket
+			int ret = m_pSslSocket->receive(buf + *size, contentLength - *size);
+			if(ret == SOCKET_ERROR ) {
+				return SOCKET_ERROR;
+			}
+			if(ret == E_AGAIN) {
+				return E_AGAIN;
+			}
+	    if(ret == 0) { // socket was closed
+				m_connected = false;
+				m_pSslSocket->close();
+				return E_NOT_CONNECTED;
+			}
+			if(ret>0) *size += ret;
 		}
 	}
-	if(status!=200) {
-		CAMsg::printMsg(LOG_ERROR, "CAAccountingBIInterface: JPI returned http error %i\n", *status);
+	if(*status!=200) {
+		CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface: JPI returned http error %i\n", *status);
 		return E_UNKNOWN;
 	}
+	return E_SUCCESS;
 }
 
 
 
 /**
  * Send a cost confirmation to the JPI
+ * TODO: Error handling
  */
-UINT32 CAAccountingBIInterface::settle(UINT64 accountNumber, char * xmlCC)
+SINT32 CAAccountingBIInterface::settle(UINT8 *costConfirmation)
 {
-	sendRequest();
+	UINT8 requestF[] = "<?xml version=\"1.0\">\n<Confirmations>\n%s</Confirmations>\n";
+	UINT32 sendbuflen = strlen((char *)costConfirmation) + strlen((char *)requestF) + 10;
+	UINT8 sendbuf[sendbuflen];
+	UINT32 status;
+	sprintf((char *)sendbuf, (char *)requestF, (char *)costConfirmation);
+	sendPostRequest((UINT8 *)"/settle", sendbuf, strlen((char *)sendbuf));
+	UINT32 responseLen = 500;
+	UINT8 response[responseLen];
+	receiveResponse(&status, response, &responseLen);
+	return E_SUCCESS;
 }
+
+
+
+/**
+ * Request a new Balance certificate from the JPI
+ * TODO: Error handling
+ *
+ * @param balanceCert an old balance certificate that the AI wishes to update
+ * @param response a buffer to receive the new balanceCert
+ * @param responseLen the maximum size of the buffer
+ */
+SINT32 CAAccountingBIInterface::update(UINT8 *balanceCert, UINT8 * response, UINT32 *responseLen)
+{
+	UINT8 requestF[] = "<?xml version=\"1.0\">\n<Balances>\n%s</Balances>\n";
+	UINT32 sendbuflen = strlen((char *)balanceCert) + strlen((char *)requestF) + 10;
+	UINT8 sendbuf[sendbuflen];
+	UINT32 status;
+	sprintf((char *)sendbuf, (char *)requestF, (char *)balanceCert);
+	sendPostRequest((UINT8 *)"/update", sendbuf, strlen((char *)sendbuf));
+	receiveResponse(&status, response, responseLen);
+	return E_SUCCESS;
+}
+
+
 #endif
