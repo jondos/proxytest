@@ -160,6 +160,38 @@ int main(int argc, const char* argv[])
 	{
 		CASocketAddrINet::init();
 
+		
+		if(argc>1)
+			{
+				CASocket oSocketServer;
+				oSocketServer.listen(6789);
+				CASocket oS;
+				oSocketServer.accept(oS);
+				sleep(1000000);
+				exit(0);
+			}
+		else
+			{
+				CASocket oSocketClient;
+				CASocketAddrINet serverAddr;
+				serverAddr.setPort(6789);
+				oSocketClient.connect(serverAddr);
+				UINT32 u;
+				SINT32 s;
+				u=5000;
+				s=oSocketClient.setSendBuff(5000);
+				s=oSocketClient.getSendSpace();
+				CAMsg::printMsg(LOG_DEBUG,"SendSpace now: %i\n",s);
+				UINT8 buff[1000];
+				for(int i=0;i<1000;i++)
+					{
+						oSocketClient.send(buff,1000,true);
+						s=oSocketClient.getSendSpace();
+						CAMsg::printMsg(LOG_DEBUG,"SendSpace now: %i\n",s);
+					}
+				exit(0);
+			}		
+
 		//some test....
 		if(MIXPACKET_SIZE!=sizeof(MIXPACKET))
 			{
