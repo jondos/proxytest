@@ -810,14 +810,18 @@ SINT32 CAFirstMix::loop()
 ERR:
 		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
 		m_bRestart=true;
+		CAMsg::printMsg(LOG_CRIT,"Stopping InfoService....\n");
 		m_pInfoService->stop();
+		CAMsg::printMsg(LOG_CRIT,"Stopped InfoService!\n");
 		m_pMuxOut->close();
 		for(UINT32  i=0;i<m_nSocketsIn;i++)
 			m_arrSocketsIn[i].close();
 		//writng one byte to the queue...
 		UINT8 b;
 		m_pQueueSendToMix->add(&b,1);
+		CAMsg::printMsg(LOG_CRIT,"Wait for LoopAcceptUsers!\n");
 		threadAcceptUsers.join();
+		CAMsg::printMsg(LOG_CRIT,"Wait for LoopSendToMix!\n");
 		threadSendToMix.join(); //will not join if queue is empty (and so wating)!!!
 //		threadReadFromUsers.join(); 
 		fmHashTableEntry* pHashEntry=m_pChannelList->getFirst();
