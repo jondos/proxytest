@@ -365,7 +365,8 @@ SINT32 CACmdLnOptions::setNewValues(CACmdLnOptions& newOptions)
 * 
 */
 SINT32 CACmdLnOptions::setNextMix(DOM_Document& doc)
-{
+	{
+		CAMsg::printMsg("setNextMix() - start\n");
     DOM_Element elemRoot = doc.getDocumentElement();
 
     //getCertificates if given...
@@ -401,7 +402,7 @@ SINT32 CACmdLnOptions::setNextMix(DOM_Document& doc)
             elemOptionsNextMixCert.appendChild(m_docMixXml.importNode(elemCert.getFirstChild(),true));
         }
     }
-
+		CAMsg::printMsg("setNextMix() - certificates done\n");
     DOM_Element elemNextMix;
     getDOMChildByName(elemRoot,(UINT8*)"ListenerInterface",elemNextMix,true);
 
@@ -434,6 +435,7 @@ SINT32 CACmdLnOptions::setNextMix(DOM_Document& doc)
         interfaceData = interfaceData.getNextSibling();
     }
 
+		CAMsg::printMsg("setNextMix() - end\n");
     return processXmlConfiguration(m_docMixXml);
 }
 
