@@ -223,12 +223,12 @@ int CASignature::signXML(char* in,unsigned int inlen,char* out,unsigned int *out
 //		printf("r: %s\n",BN_bn2dec(r));
 //		printf("s: %s\n",BN_bn2dec(s));
 //tmp-End
-		BN_bn2bin(r,(unsigned char*)tmpBuff);
-		len=BN_num_bytes(r);
-		BN_bn2bin(s,(unsigned char*)tmpBuff+len);
-		len+=BN_num_bytes(s);
+		memset(tmpBuff,0,40); //make first 40 bytes '0' --> if r or s is less then 20 bytes long! 
+													//(Due to be compatible to the standarad r and s must be 20 bytes each) 
+		BN_bn2bin(r,(unsigned char*)tmpBuff+20-BN_num_bytes(r)); //so r is 20 bytes with leading '0'...
+		BN_bn2bin(s,(unsigned char*)tmpBuff+40-BN_num_bytes(s));
 		sigSize=255;
-		CABase64::encode(tmpBuff,len,(char*)sig,&sigSize);
+		CABase64::encode(tmpBuff,40,(char*)sig,&sigSize);
 		sig[sigSize]=0;
 
 		//Makeing the hole Signature-Block....
