@@ -169,7 +169,6 @@ int main(int argc, const char* argv[])
 				CAMsg::printMsg(LOG_CRIT,"sizeof(UINT32) != 4 --> maybe a compiler (optimization) problem!\n");
 				exit(-1);
 			}
-
 		//startup
 		#ifdef _WIN32
 			int err=0;
