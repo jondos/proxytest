@@ -211,8 +211,22 @@ LOOP_START:
 //														CAMsg::printMsg(LOG_DEBUG,"Could not SEND Timeout!!");
 													UINT16 payLen=ntohs(pMixPacket->payload.len);
 													#ifdef _DEBUG
-														pMixPacket->payload.data[ntohs(pMixPacket->payload.len)]=0;
-														CAMsg::printMsg(LOG_DEBUG,"%u\n%s",ntohs(pMixPacket->payload.len),pMixPacket->payload.data);
+														UINT8 sendLogFile [255];
+														options.getLogDir(sendLogFile,255);
+														strcat((char*)sendLogFile,"/OutChannel_");
+														char tmpC [10];
+														ltoa(pMixPacket->channel,tmpC,10);
+														strcat((char*)sendLogFile,tmpC);
+														strcat((char*)sendLogFile,".log");
+														int handle=_open((char*)sendLogFile,_O_RDWR|_O_BINARY|_O_CREAT|_O_APPEND,_S_IWRITE|_S_IREAD);
+														sprintf((char*)sendLogFile,"Payload-Length :%i\n--\n",payLen);
+														write(handle,(char*)sendLogFile,strlen((char*)sendLogFile));
+														write(handle,pMixPacket->payload.data,payLen);
+														write(handle,"\n-------------\n",15);
+														close(handle);
+														//pMixPacket->payload.data[ntohs(pMixPacket->payload.len)]=0;
+														//CAMsg::printMsg(LOG_DEBUG,"%u\n%s",ntohs(pMixPacket->payload.len),pMixPacket->payload.data);
+													
 													#endif
 													if(payLen>PAYLOAD_SIZE||tmpSocket->sendTimeOut(pMixPacket->payload.data,payLen,_SEND_TIMEOUT)==SOCKET_ERROR)
 														{
@@ -270,11 +284,25 @@ LOOP_START:
 								else
 									{
 										oConnection.pCipher->decryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
-										#ifdef _DEBUG
-											pMixPacket->payload.data[ntohs(pMixPacket->payload.len)]=0;
-											CAMsg::printMsg(LOG_DEBUG,"%u\n%s",ntohs(pMixPacket->payload.len),pMixPacket->payload.data);
-										#endif
 										ret=ntohs(pMixPacket->payload.len);
+										#ifdef _DEBUG
+														UINT8 sendLogFile [255];
+														options.getLogDir(sendLogFile,255);
+														strcat((char*)sendLogFile,"/OutChannel_");
+														char tmpC [10];
+														ltoa(pMixPacket->channel,tmpC,10);
+														strcat((char*)sendLogFile,tmpC);
+														strcat((char*)sendLogFile,".log");
+														int handle=_open((char*)sendLogFile,_O_RDWR|_O_BINARY|_O_CREAT|_O_APPEND,_S_IWRITE|_S_IREAD);
+														sprintf((char*)sendLogFile,"Payload-Length :%i\n--\n",ret);
+														write(handle,(char*)sendLogFile,strlen((char*)sendLogFile));
+														write(handle,pMixPacket->payload.data,ret);
+														write(handle,"\n-------------\n",15);
+														close(handle);
+														//pMixPacket->payload.data[ntohs(pMixPacket->payload.len)]=0;
+														//CAMsg::printMsg(LOG_DEBUG,"%u\n%s",ntohs(pMixPacket->payload.len),pMixPacket->payload.data);
+													
+										#endif
 										if(ret>=0&&ret<=PAYLOAD_SIZE)
 											ret=oConnection.pSocket->sendTimeOut(pMixPacket->payload.data,ret,_SEND_TIMEOUT);
 										else

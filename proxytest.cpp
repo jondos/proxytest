@@ -158,10 +158,10 @@ For Upstream and Downstream different keys are used.
 */
 int main(int argc, const char* argv[])
 	{
-/*		CASocketAddrINet::init();
+		CASocketAddrINet::init();
 
 		
-		if(argc>1)
+/*		if(argc>1)
 			{
 				CASocket oSocketServer;
 				oSocketServer.create(AF_INET);
