@@ -61,7 +61,7 @@ class CAQueue
 #endif
 				}
 			~CAQueue();
-			SINT32 add(const UINT8* buff,UINT32 size);
+			SINT32 add(const void* buff,UINT32 size);
 			SINT32 get(UINT8* pbuff,UINT32* psize);
 			SINT32 getOrWait(UINT8* pbuff,UINT32* psize);
 			SINT32 peek(UINT8* pbuff,UINT32* psize);

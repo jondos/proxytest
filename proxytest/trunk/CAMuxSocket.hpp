@@ -158,7 +158,11 @@ class CAMuxSocket
 
 			SINT32 setSendKey(UINT8* key,UINT32 keyLen)
 				{
-					if(keyLen==32)
+					if(keyLen==16)
+						{
+							m_oCipherOut.setKeyAES(key);
+						}
+					else if(keyLen==32)
 						{
 							m_oCipherOut.setKeyAES(key);
 							m_oCipherOut.setIV(key+16);
@@ -170,7 +174,11 @@ class CAMuxSocket
 
 			SINT32 setReceiveKey(UINT8* key,UINT32 keyLen)
 				{
-					if(keyLen==32)
+					if(keyLen==16)
+						{
+							m_oCipherIn.setKeyAES(key);
+						}
+					else if(keyLen==32)
 						{
 							m_oCipherIn.setKeyAES(key);
 							m_oCipherIn.setIV(key+16);

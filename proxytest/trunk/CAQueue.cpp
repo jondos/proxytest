@@ -70,7 +70,7 @@ CAQueue::~CAQueue()
 	* @retval E_UNKNOWN in case of an error
 	* @retval E_SUCCESS if succesful
 	*/
-SINT32 CAQueue::add(const UINT8* buff,UINT32 size)
+SINT32 CAQueue::add(const void* buff,UINT32 size)
 	{
 		if(size==0)
 			return E_SUCCESS;
