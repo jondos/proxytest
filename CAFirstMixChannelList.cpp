@@ -53,8 +53,8 @@ CAFirstMixChannelList::~CAFirstMixChannelList()
 				{
 					delete m_HashTable[i];
 				}
-		delete m_HashTable;
-		delete m_HashTableOutChannels;
+		delete []m_HashTable;
+		delete []m_HashTableOutChannels;
 	}
 		
 SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,CAQueue* pQueueSend)

@@ -188,7 +188,7 @@ UINT32 getMemoryUsage()
 		if(getrusage(RUSAGE_SELF,&usage_self)==-1)
 			return 0;
 		struct rusage usage_children;
-		if(getrusage(RUSAGE_CHILDREN,&usage_chidlren)==-1)
+		if(getrusage(RUSAGE_CHILDREN,&usage_children)==-1)
 			return 0;
 		return usage_self.ru_idrss+usage_children.ru_idrss;
 #else
