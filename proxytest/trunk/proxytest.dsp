@@ -226,6 +226,60 @@ SOURCE=.\aes\encrypt.cpp
 SOURCE=".\aes\rijndael-api-fst.h"
 # End Source File
 # End Group
+# Begin Group "trio"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\trio\trio.cpp
+
+!IF  "$(CFG)" == "proxytest - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\trio\trio.hpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\trio\triodef.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\trio\trionan.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\trio\triop.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\trio\triostr.cpp
+
+!IF  "$(CFG)" == "proxytest - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\trio\triostr.h
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=.\CAASymCipher.cpp

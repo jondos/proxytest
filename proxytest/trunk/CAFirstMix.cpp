@@ -986,8 +986,8 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		if(recvBuff==NULL||len==0)
 			return E_UNKNOWN;
 
-	//	CAMsg::printMsg(LOG_DEBUG,"Get KeyInfo (foolowing line)\n");
-	//	CAMsg::printMsg(LOG_DEBUG,"%s\n",recvBuff);
+		CAMsg::printMsg(LOG_DEBUG,"Get KeyInfo (foolowing line)\n");
+		CAMsg::printMsg(LOG_DEBUG,"%s\n",recvBuff);
 
 		
 		DOMParser oParser;
