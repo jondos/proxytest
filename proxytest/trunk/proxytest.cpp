@@ -999,7 +999,8 @@ int main(int argc, const char* argv[])
 		RAND_screen();
 #else 
  #ifndef __linux
-		RAND_seed();
+                 unsigned char randbuff[255];
+		RAND_seed(randbuff,sizeof(randbuff));
  #endif
 #endif
 		options.parse(argc,argv);

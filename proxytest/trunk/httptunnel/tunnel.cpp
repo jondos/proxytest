@@ -266,7 +266,7 @@ tunnel_out_setsockopts (int fd)
     if (setsockopt (fd,
 		    SOL_SOCKET,
 		    SO_SNDBUF,
-		    (void *)&i,
+		    (char *)&i,
 		    sizeof i) == -1)
       {
 	log_debug ("tunnel_out_setsockopts: non-fatal SO_SNDBUF error: %s",
@@ -276,7 +276,7 @@ tunnel_out_setsockopts (int fd)
     getsockopt (fd,
 		SOL_SOCKET,
 		SO_SNDBUF,
-		(void *)&i,
+		(char *)&i,
 		&n);
     log_debug ("tunnel_out_setsockopts: SO_SNDBUF: %d", i);
   }

@@ -30,7 +30,7 @@ OBJS=$(OBJS_ALL)
 all: $(OBJS) popt.a httptunnel.a
 	$(CC) -o proxytest $(OBJS) $(LIBS)
 
-all_sun: $(OBJS) 
+all_sun: $(OBJS) popt.a httptunnel.a 
 	$(CC) -o proxytest $(OBJS) $(LIBS) -lsocket -lnsl
 
 debug: $(OBJS) popt.a httptunnel.a
