@@ -67,7 +67,7 @@ SINT32 CAMiddleMix::init()
 
 		
 		
-		if(((CASocket*)m_MuxOut)->create()!=E_SUCCESS)
+		if(((CASocket*)m_MuxOut)->create(pAddrNext->getType())!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Init: Cannot create SOCKET for outgoing conncetion...\n");
 				return E_UNKNOWN;
