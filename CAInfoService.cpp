@@ -97,13 +97,13 @@ THREAD_RETURN InfoLoop(void *p)
 		SINT32 tmpUser,tmpRisk,tmpTraffic;
 		UINT32 buffLen;
 		char strAnonServer[255];
-		CASocketAddr::getLocalHostName((UINT8*)buff,255);
-		
+	//	CASocketAddr::getLocalHostName((UINT8*)buff,255);
+		CASocketAddr::getLocalHostIP(buff);
 //*>> Beginn very ugly hack for anon.inf.tu-dresden.de --> new Concepts needed!!!!!1		
 		if(strncmp((char*)buff,"ithif46",7)==0)
 			strcpy((char*)buff,"mix.inf.tu-dresden.de");
 //end hack....
-		sprintf(strAnonServer,"%s%%3A%u",buff,options.getServerPort());
+		sprintf(strAnonServer,"%u.%u.%u.%u%3A%u",buff[0],buff[1],buff[2],buff[3],options.getServerPort());
 		int helocount=10;
 		while(pInfoService->getRun())
 			{
