@@ -10,7 +10,7 @@ typedef struct _t_queue
 class CAQueue
 	{
 		public:
-			CAQueue(){InitializeCriticalSection(&csQueue);m_Queue=NULL;}
+			CAQueue(){InitializeCriticalSection(&csQueue);m_Queue=NULL;m_nQueueSize=0;}
 			~CAQueue();
 			SINT32 add(UINT8* buff,UINT32 size);
 			SINT32 getNext(UINT8* pbuff,UINT32* psize);
@@ -21,6 +21,7 @@ class CAQueue
 			#ifdef _REENTRANT
 				CRITICAL_SECTION csQueue;
 			#endif
-	
+			UINT32 m_nQueueSize;
+			static UINT32 m_nMaxQueueSize;
 	};
 #endif

@@ -1,5 +1,7 @@
 #include "StdAfx.h"
 #include "CAQueue.hpp"
+#include "CAMsg.hpp"
+UINT32 CAQueue::m_nMaxQueueSize=0;
 
 CAQueue::~CAQueue()
 	{
@@ -34,6 +36,12 @@ SINT32 CAQueue::add(UINT8* buff,UINT32 size)
 				m_lastElem->size=size;
 				memcpy(m_lastElem->pBuff,buff,size);
 			}
+		m_nQueueSize++;
+		if(m_nQueueSize>m_nMaxQueueSize)
+			{
+				m_nMaxQueueSize=m_nQueueSize;
+				CAMsg::printMsg(LOG_DEBUG,"Max Queue Size now: %u\n",m_nMaxQueueSize);
+			}
 		LeaveCriticalSection(&csQueue);
 		return E_SUCCESS;
 	}
@@ -42,7 +50,7 @@ SINT32 CAQueue::getNext(UINT8* pbuff,UINT32* psize)
 	{
 		EnterCriticalSection(&csQueue);
 		SINT32 ret;
-		if(m_Queue==NULL||*psize<m_Queue->size)
+		if(m_Queue==NULL||pbuff==NULL||*psize<m_Queue->size)
 			ret=E_UNKNOWN;
 		else
 			{
@@ -52,6 +60,7 @@ SINT32 CAQueue::getNext(UINT8* pbuff,UINT32* psize)
 				QUEUE* tmp=m_Queue;
 				m_Queue=m_Queue->next;
 				delete tmp;
+				m_nQueueSize--;
 				ret=E_SUCCESS;
 			}
 		LeaveCriticalSection(&csQueue);
