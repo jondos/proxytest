@@ -32,7 +32,7 @@ int CAMuxSocket::close()
 	}
 
 			
-int CAMuxSocket::send(HCHANNEL channel_id,char* buff,int bufflen)
+int CAMuxSocket::send(HCHANNEL channel_id,char* buff,unsigned short bufflen)
 	{
 		if(bufflen>DATA_SIZE)
 			return SOCKET_ERROR;
@@ -69,12 +69,12 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 		return sizeof(MUXPACKET);
 	}
 		
-int CAMuxSocket::receive(HCHANNEL* channel_id,char* buff,int bufflen)
+int CAMuxSocket::receive(HCHANNEL* channel_id,char* buff,unsigned short bufflen)
 	{
 		MUXPACKET MuxPacket;
 		if(receive(&MuxPacket)==SOCKET_ERROR)
 			return SOCKET_ERROR;
-		if(MuxPacket.len<0||MuxPacket.len>bufflen)
+		if(MuxPacket.len>bufflen)
 			{
 				#ifdef _DEBUG
 					CAMsg::printMsg(LOG_DEBUG,"MuxSocket-Receive - ungültiges Packet!\n");
