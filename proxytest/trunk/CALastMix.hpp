@@ -31,11 +31,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMix.hpp"
 #include "CAMuxSocket.hpp"
 #include "CAASymCipher.hpp"
-//#include "CASocketList.hpp"
 #include "CASocketAddrINet.hpp"
 #include "CACacheLoadBalancing.hpp"
 #include "CASignature.hpp"
 #include "CAUtil.hpp"
+#include "CAQueue.hpp"
 #ifdef LOG_CRIME
 	#include "tre/regex.h"
 #endif
@@ -60,19 +60,19 @@ class CALastMix:public CAMix
 #endif
 
 		private:
-			CAMuxSocket*		m_pMuxIn;
-			CACacheLoadBalancing m_oCacheLB;
-			CASocketAddrINet	maddrSocks;
-			CAASymCipher mRSA;
-			CASignature* m_pSignature;
-//		private:
-//			CASocketList oSuspendList;
+			CAMuxSocket*					m_pMuxIn;
+			CAQueue*							m_pQueueSendToMix;
+			CACacheLoadBalancing	m_oCacheLB;
+			CASocketAddrINet			maddrSocks;
+			CAASymCipher					mRSA;
+			CASignature*					m_pSignature;
 #ifdef LOG_CRIME
 			regex_t* m_pCrimeRegExps;
 			UINT32 m_nCrimeRegExp;
 #endif
 
 		private:
+			friend THREAD_RETURN lm_loopSendToMix(void* param);
 			friend THREAD_RETURN loopLog(void*);
 			volatile bool m_bRunLog;
 			volatile UINT32 m_logUploadedPackets;
