@@ -155,6 +155,7 @@ class CACmdLnOptions
 					return NULL;
 				}
 
+
 			bool hasNextMixTestCertificate()
 				{
 					return m_pNextMixCertificate!=NULL;
@@ -249,6 +250,13 @@ class CACmdLnOptions
 			SINT32 getDatabaseName(UINT8 * name, UINT32 len);
 			SINT32 getDatabaseUsername(UINT8 * user, UINT32 len);
 			SINT32 getDatabasePassword(UINT8 * pass, UINT32 len);
+			
+			CACertificate * getJPITestCertificate()
+				{
+					if(m_pJpiTestCertificate!=NULL)
+						return m_pJpiTestCertificate->clone();
+					return NULL;
+				}
 #endif	
 
     // added by ronin <ronin2@web.de>
@@ -318,6 +326,7 @@ class CACmdLnOptions
 			UINT8 * m_strDatabaseUser;
 			UINT8 * m_strDatabasePassword;
 			UINT16 m_iDatabasePort;
+			CACertificate * m_pJpiTestCertificate;
 #endif
 
 		private:
