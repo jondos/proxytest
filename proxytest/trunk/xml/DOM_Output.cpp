@@ -36,7 +36,13 @@ XMLFormatter& operator<< (XMLFormatter& strm, const DOMString& s)
     return strm;
 	}
 
-
+/** Dumps a Node of an XML Document.
+	* @param toWrite Node which will be dumped
+	* @param bCanonical, if true the dump is done in a 'canonical' way, 
+	*											e.g. white psace are eliminated etc.
+	* @retval E_SUCCESS, if successful
+	* @retval E_UNKNOWN, otherwise
+*/
 SINT32 DOM_Output::dumpNode(DOM_Node& toWrite,bool bCanonical)
 	{
     if(toWrite==0)
