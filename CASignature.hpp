@@ -37,8 +37,8 @@ class CASignature
 			~CASignature();
 			CASignature* clone();
 			SINT32 generateSignKey(UINT32 size);
-			SINT32 setSignKey(UINT8* buff,UINT32 len,UINT32 type,char* passwd=NULL);
-			SINT32 setSignKey(const DOM_Node& node,UINT32 type,char* passwd=NULL);
+			SINT32 setSignKey(const UINT8* buff,UINT32 len,UINT32 type,const char* passwd=NULL);
+			SINT32 setSignKey(const DOM_Node& node,UINT32 type,const char* passwd=NULL);
 //			SINT32 sign(UINT8* in,UINT32 inlen,UINT8* sig,UINT32* siglen);
 			SINT32 signXML(DOM_Node& node,CACertStore* pIncludeCerts=NULL);
 			SINT32 signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen,CACertStore* pIncludeCerts=NULL);
@@ -49,7 +49,7 @@ class CASignature
 			SINT32 getSignatureSize();
 		private:
 			DSA* m_pDSA;
-			SINT32 parseSignKeyXML(UINT8* buff,UINT32 len);
+			SINT32 parseSignKeyXML(const UINT8* buff,UINT32 len);
 			SINT32 verify(UINT8* in,UINT32 inlen,DSA_SIG* dsaSig);
 			SINT32 sign(UINT8* in,UINT32 inlen,DSA_SIG** dsaSig);
 	};

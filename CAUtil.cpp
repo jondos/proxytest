@@ -287,17 +287,23 @@ SINT32 setDOMElementValue(DOM_Element& elem,const UINT8* value)
 		return E_SUCCESS;
 	}
 
-SINT32 setDOMElementAttribute(DOM_Element& elem,const char* attrName,const UINT8* value)
+SINT32 setDOMElementAttribute(DOM_Node& elem,const char* attrName,const UINT8* value)
 	{
-		elem.setAttribute(attrName,DOMString((const char*)value));
+		if(elem.isNull()||elem.getNodeType()!=DOM_Node::ELEMENT_NODE||
+				attrName==NULL||value==NULL)
+			return E_UNKNOWN;
+		static_cast<DOM_Element&>(elem).setAttribute(attrName,DOMString((const char*)value));
 		return E_SUCCESS;
 	}
 
-SINT32 setDOMElementAttribute(DOM_Element& elem,const char* attrName,int value)
+SINT32 setDOMElementAttribute(DOM_Node& elem,const char* attrName,int value)
 	{
+		if(elem.isNull()||elem.getNodeType()!=DOM_Node::ELEMENT_NODE||
+				attrName==NULL)
+			return E_UNKNOWN;
 		UINT8 tmp[10];
 		sprintf((char*)tmp,"%i",value);
-		elem.setAttribute(attrName,DOMString((char*)tmp));
+		static_cast<DOM_Element&>(elem).setAttribute(attrName,DOMString((char*)tmp));
 		return E_SUCCESS;
 	}
 

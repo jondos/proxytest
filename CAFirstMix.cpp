@@ -1196,17 +1196,6 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 				child=child.getNextSibling();
 			}
 		
-		//UINT8* tmpBuff=new UINT8[2048];
-		//tlen=2048;
-		DOM_Document docMixInfo;
-		options.getMixXml(docMixInfo);
-		//MemBufInputSource oInput1(tmpBuff,tlen,"tmp1");
-		//oParser.parse(oInput1);
-		//DOM_Document docMix=oParser.getDocument();
-		DOM_Node nodeMix=doc.importNode(docMixInfo.getFirstChild(),true);
-		elemMixes.insertBefore(nodeMix,elemMixes.getFirstChild());
-		setDOMElementAttribute(elemMixes,"count",count+1);
-		//delete tmpBuff;
 
 	//CascadeInfo		
 		m_docMixCascadeInfo=DOM_Document::createDocument();
@@ -1214,8 +1203,6 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 
 
 		UINT8 id[50];
-		//ListenerInterface oListener;
-		
 		options.getMixId(id,50);
 		elemRoot.setAttribute(DOMString("id"),DOMString((char*)id));
 		
@@ -1230,8 +1217,6 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		elem.appendChild(text);
 		elemRoot.appendChild(elem);
 		
-		//UINT8 hostname[255];
-		//UINT8 ip[255];
 		elem=m_docMixCascadeInfo.createElement("Network");
 		elemRoot.appendChild(elem);
 		DOM_Element elemListenerInterfaces=m_docMixCascadeInfo.createElement("ListenerInterfaces");
@@ -1250,19 +1235,23 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 				delete pListener;
 			}
 		
-		DOM_Node elemMixesDocCascade=m_docMixCascadeInfo.importNode(elemMixes,false);
+		DOM_Element elemThisMix=m_docMixCascadeInfo.createElement("Mix");
+		elemThisMix.setAttribute(DOMString("id"),DOMString((char*)id));
+		DOM_Node elemMixesDocCascade=m_docMixCascadeInfo.createElement("Mixes");
+		elemMixesDocCascade.appendChild(elemThisMix);
+		count=1;
 		elemRoot.appendChild(elemMixesDocCascade);
+		
 		DOM_Node node=elemMixes.getFirstChild();
-		bool bIsFirst=true;
 		while(node!=NULL)
 			{
 				if(node.getNodeType()==DOM_Node::ELEMENT_NODE&&node.getNodeName().equals("Mix"))
 					{
-						elemMixesDocCascade.appendChild(m_docMixCascadeInfo.importNode(node,bIsFirst));
-						bIsFirst=false;
+						elemMixesDocCascade.appendChild(m_docMixCascadeInfo.importNode(node,false));
+						count++;
 					}
 				node=node.getNextSibling();
 			}
-		
+		setDOMElementAttribute(elemMixesDocCascade,"count",count);
 		return E_SUCCESS;
 	}
