@@ -32,7 +32,7 @@ THREAD_RETURN InfoLoop(void *p)
 						oSocket.send("POST /feedback HTTP/1.0\r\n\r\n",27);
 						oxmlOut.BeginDocument();
 						oxmlOut.BeginElementAttrs("status");
-						oxmlOut.WriteAttr("anonServer","anon.inf.tu-dresden.de%3A6543");
+						oxmlOut.WriteAttr("anonServer","anon.inf.tu-dresden.de%3A6544");
 						pInfoService->getLevel(&nUser,&nRisk,&nTraffic);
 						oxmlOut.WriteAttr("nrOfActiveUsers",nUser);
 						oxmlOut.WriteAttr("currentRisk",nRisk);
@@ -40,8 +40,9 @@ THREAD_RETURN InfoLoop(void *p)
 						oxmlOut.EndAttrs();
 						oxmlOut.EndElement();
 						oxmlOut.EndDocument();
-						oSocket.close();
+	//					oSocket.close();
 					}
+				oSocket.close();	
 				sleep(60);
 			}
 	}
