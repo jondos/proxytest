@@ -357,11 +357,13 @@ SINT32 CAMiddleMix::init()
 		((CASocket*)*m_pMuxOut)->setRecvBuff(50*MIXPACKET_SIZE);
 		((CASocket*)*m_pMuxOut)->setSendBuff(50*MIXPACKET_SIZE);
 
-//We now tell the worl that we are waiting...
+//We now tell the world that we are waiting...
 		if(m_pSignature!=NULL&&options.isInfoServiceEnabled())
 			{
 				m_pInfoService=new CAInfoService();
-				m_pInfoService->setSignature(m_pSignature);
+				CACertificate* tmp=options.getOwnCertificate();
+				m_pInfoService->setSignature(m_pSignature,tmp);
+				delete tmp;
 				m_pInfoService->start();
 			}
 #define RETRIES 100

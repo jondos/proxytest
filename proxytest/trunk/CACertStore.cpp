@@ -46,6 +46,11 @@ CACertStore::~CACertStore()
 			}
 	}
 
+/** Adds a COPY of a given certifcate to this CertStore.
+	* @param cert Certifcate of which a copy is added to this cert store
+	* @retval E_SUCCESS if successfull
+	* @retval E_UNKNOWN if not (for instance if cert==NULL)
+	*/
 SINT32 CACertStore::add(CACertificate* cert)
 	{
 		if(cert==NULL)

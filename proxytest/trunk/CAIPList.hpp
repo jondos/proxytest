@@ -53,7 +53,6 @@ The internal organisation is a hash-table with overrun lists. The hashtable has
 0x10000 buckets. The last two bytes of an IP-Address are the hash-key.
 @note This class only supports IPv4.
 @warning If there is less memory, CAIPList will crash!
-@warning This class is NOT thread safe.
 @version 1.0 first version
  */
 
@@ -69,7 +68,7 @@ class CAIPList
 #else
 			SINT32 removeIP(const UINT8 ip[4],UINT32 time,UINT32 trafficIn,UINT32 trafficOut);
 #endif
-		protected:
+		private:
 			UINT32 m_allowedConnections;
 			PIPLIST* m_HashTable;
 			UINT8* m_Random; //seems to be the best value for MD5, which operates on x*512-64 bit (52*8+4*8=512-64)

@@ -123,13 +123,47 @@ SINT32 DOM_Output::dumpNode(DOM_Node& toWrite,bool bCanonical)
 
             // Output the element start tag.
 
-            // Output any attributes on this element
+            // Output any attributes on this element in lexicograhpical order
             DOM_NamedNodeMap attributes = toWrite.getAttributes();
             int attrCount = attributes.getLength();
-            for (int i = 0; i < attrCount; i++)
-            {
-                DOM_Node  attribute = attributes.item(i);
+						char**attr_names=NULL;
+						int* sort_indices=NULL;
+						if(attrCount>0)
+							{
+								attr_names=new char*[attrCount];
+								sort_indices=new int[attrCount];
+								for(int i=0;i<attrCount;i++)
+									{
+										DOM_Node  attribute = attributes.item(i);
+										attr_names[i]=attribute.getNodeName().transcode();
+										sort_indices[i]=i;
+									}
+								//now sort them
+								if(attrCount>1)
+									{
+										for(int i=0;i<attrCount;i++)
+											{
+												char *akt=attr_names[sort_indices[i]];
+												for(int j=i+1;j<attrCount;j++)
+													{
+														char* tmp=attr_names[sort_indices[j]];
+														if(strcmp(akt,tmp)>0)
+															{
+																int t=sort_indices[i];
+																sort_indices[i]=sort_indices[j];
+																sort_indices[j]=t;
+																akt=tmp;
+															}
+													}
+											}
+									}
+							}
 
+						for (int i = 0; i < attrCount; i++)
+            {
+								delete[] attr_names[i];
+                DOM_Node  attribute = attributes.item(sort_indices[i]);
+	
                 //
                 //  Again the name has to be completely representable. But the
                 //  attribute can have refs and requires the attribute style
@@ -144,6 +178,9 @@ SINT32 DOM_Output::dumpNode(DOM_Node& toWrite,bool bCanonical)
                              << chDoubleQuote;
             }
             *m_pFormatter << XMLFormatter::NoEscapes << chCloseAngle;
+
+						delete[] attr_names;
+						delete[] sort_indices;
 
             //
             //  Test for the presence of children, which includes both

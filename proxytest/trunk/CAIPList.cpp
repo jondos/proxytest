@@ -33,11 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	* The default number #MAXIP_CONNECTIONS of allowed insertions is used*/ 
 CAIPList::CAIPList()
 	{	
-		m_Random=new UINT8[56];
-		m_HashTable=new PIPLIST[0x10000];
-		memset(m_HashTable,0,0x10000*sizeof(PIPLIST));
-		m_allowedConnections=MAX_IP_CONNECTIONS;
-		getRandom(m_Random,56);
+		CAIPList(MAX_IP_CONNECTIONS);
 	}
 
 /**Constructs a empty CAIPList, there allowedConnections insertions 
