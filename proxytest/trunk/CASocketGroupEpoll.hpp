@@ -43,7 +43,9 @@ class CASocketGroupEpoll
 				{
 					SINT32 ret=E_SUCCESS;
 					m_csFD_SET.lock();
-					if(epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,(SOCKET)s,m_pEpollEvent)!=0)
+					SOCKET socket=(SOCKET)s;
+					m_pEpollEvent->data.fd=socket;
+					if(epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,socket,m_pEpollEvent)!=0)
 						ret=E_UNKNOWN;
 					m_csFD_SET.unlock();
 					return ret;
@@ -53,7 +55,9 @@ class CASocketGroupEpoll
 				{
 					SINT32 ret=E_SUCCESS;
 					m_csFD_SET.lock();
-					if(epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,s.getSocket(),m_pEpollEvent)!=0)
+					SOCKET socket=s.getSocket();
+					m_pEpollEvent->data.fd=socket;
+					if(epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,socket,m_pEpollEvent)!=0)
 						ret=E_UNKNOWN;
 					m_csFD_SET.unlock();
 					return ret;
