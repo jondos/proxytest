@@ -4,7 +4,7 @@ libtre.a: regexec.c regcomp.c tre-mem.c tre-match-backtrack.c tre-match-parallel
 	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) tre-mem.c -o tre-mem.o
 	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG)	tre-match-backtrack.c -o tre-match-backtrack.o
 	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG)	tre-match-parallel.c -o tre-match-parallel.o
-	ar -rcs libtre.a regexec.o regcomp.o tre-mem.o 
+	ar -rcs libtre.a regexec.o regcomp.o tre-mem.o tre-match-backtrack.o tre-match-parallel.o
 
 clean:
 	rm -f *.o
