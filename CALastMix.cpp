@@ -48,7 +48,7 @@ extern CACmdLnOptions options;
 		CAMsg::printMsg(LOG_DEBUG,"Channel %u closed - Start %Lu - End %Lu - Time [ms] - %u, Upload - %u, Download - %u, DataPacketsFromUser %u, DataPacketsToUser %u\n",\
 			pChannelListEntry->channelIn,pChannelListEntry->timeCreated,\
 			current_millis,diff_time,pChannelListEntry->trafficInFromUser,pChannelListEntry->trafficOutToUser,\
-			pChannelListEntry->packetsDataOutToUser,pChannelListEntry->packetsDataInFromUser); 
+			pChannelListEntry->packetsDataInFromUser,pChannelListEntry->packetsDataOutToUser); 
 #endif
 
 /*******************************************************************************/
