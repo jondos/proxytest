@@ -187,7 +187,7 @@ LOOP_START:
 														tmpSocket->create();
 														tmpSocket->setRecvBuff(50000);
 														tmpSocket->setSendBuff(5000);
-														ret=tmpSocket->connect((CASocketAddrINet)*m_oCacheLB.get(),_CONNECT_TIMEOUT);
+														ret=tmpSocket->connect(*m_oCacheLB.get(),_CONNECT_TIMEOUT);
 														count++;
 													}
 												while(ret!=E_SUCCESS&&count<m_oCacheLB.getElementCount());
