@@ -28,6 +28,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #include "CAMutex.hpp"
 #include "CAThread.hpp"
+
+static THREAD_RETURN loopMaintenance(void *param);
+
 typedef struct __t_database_entry
 	{
 		__t_database_entry* next;
@@ -46,7 +49,7 @@ class CADatabase
 			SINT32 stop();
 			static SINT32 test();
 		private:
-			friend static THREAD_RETURN loopMaintenance(void *param);
+			friend THREAD_RETURN loopMaintenance(void *param);
 
 			SINT32 nextClock();
 			LP_databaseEntry* m_currDatabase;
