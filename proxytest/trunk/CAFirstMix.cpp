@@ -580,7 +580,7 @@ LOOP_START:
 										if(tmpReverseEntry!=NULL)
 											{
 												oMuxPacket.channel=tmpReverseEntry->inChannel;
-												tmpReverseEntry->pCipher->decryptAES(oMuxPacket.data,oMuxPacket.data,DATA_SIZE);
+												tmpReverseEntry->pCipher->decryptAES2(oMuxPacket.data,oMuxPacket.data,DATA_SIZE);
 												if(tmpReverseEntry->pMuxSocket->send(&oMuxPacket)==E_QUEUEFULL)
 													{
 														EnterCriticalSection(&csResume);

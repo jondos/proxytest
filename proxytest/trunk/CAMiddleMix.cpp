@@ -421,7 +421,7 @@ SINT32 CAMiddleMix::loop()
 								else
 									{
 										oMuxPacket.channel=oConnection.outChannel;
-										oConnection.pCipher->decryptAES(oMuxPacket.data,oMuxPacket.data,DATA_SIZE);
+										oConnection.pCipher->decryptAES2(oMuxPacket.data,oMuxPacket.data,DATA_SIZE);
 										if(muxOut.send(&oMuxPacket)==SOCKET_ERROR)
 											goto ERR;
 									}
