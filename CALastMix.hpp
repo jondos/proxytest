@@ -40,6 +40,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef LOG_CRIME
 	#include "tre/regex.h"
 #endif
+#include "CALogPacketStats.hpp"
 
 class CALastMix:public CAMix
 
@@ -53,6 +54,9 @@ class CALastMix:public CAMix
 					m_pQueueSendToMix=m_pQueueReadFromMix=NULL;
 					m_pCacheLB=new CACacheLoadBalancing();
 					m_pSocksLB=new CACacheLoadBalancing();
+					#ifdef LOG_PACKET_STATS
+						m_pLogPacketStats=NULL;
+					#endif
 				}
 
 			virtual ~CALastMix()
@@ -78,8 +82,14 @@ class CALastMix:public CAMix
 		protected:
 			volatile bool					m_bRestart;
 			CAMuxSocket*					m_pMuxIn;
-			CAQueue*							m_pQueueSendToMix;
-			CAQueue*							m_pQueueReadFromMix;
+			#ifdef LOG_PACKET_TIMES
+				CATimedQueue* m_pQueueSendToMix;
+				CATimedQueue* m_pQueueReadFromMix;
+				CALogPacketStats* m_pLogPacketStats;
+			#else			
+				CAQueue* m_pQueueSendToMix;
+				CAQueue* m_pQueueReadFromMix;
+			#endif			
 			CACacheLoadBalancing*	m_pCacheLB;
 			CACacheLoadBalancing* m_pSocksLB;
 			CAASymCipher*					m_pRSA;

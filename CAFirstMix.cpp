@@ -240,11 +240,9 @@ SINT32 CAFirstMix::init()
 
 		//Starting thread for logging
 #ifdef LOG_PACKET_TIMES
-		resetTimeingStats();
-		m_pthreadLog=new CAThread();
-		m_pthreadLog->setMainLoop(fm_loopLog);
-		m_bRunLog=true;
-		m_pthreadLog->start(this);
+		m_pLogPacketStats=new CALogPacketStats();
+		m_pLogPacketStats->setLogIntervallInMinutes(FM_PACKET_STATS_LOG_INTERVALL);
+		m_pLogPacketStats->start();
 #endif		
 		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix init() succeded\n");
 		return E_SUCCESS;
@@ -288,16 +286,14 @@ THREAD_RETURN fm_loopSendToMix(void* param)
 				if(pMuxSocket->send((MIXPACKET*)buff)!=MIXPACKET_SIZE)
 					break;
 #ifdef LOG_PACKET_TIMES
- 					{
-						if(!isZero64(timestamp))
-							{
-								getcurrentTimeMicros(tmpU64);
-								pFirstMix->addToTimeingStats(diff64(tmpU64,timestamp),((MIXPACKET*)buff)->flags,true);
-								#ifdef _DEBUG
-									CAMsg::printMsg(LOG_CRIT,"Upload Packet processing time (arrival <--> send): %u µs\n",diff64(tmpU64,timestamp));
-								#endif
-							}	
-					}
+ 				if(!isZero64(timestamp))
+					{
+						getcurrentTimeMicros(tmpU64);
+						pFirstMix->m_pLogPacketStats->addToTimeingStats(diff64(tmpU64,timestamp),((MIXPACKET*)buff)->flags,true);
+						#ifdef _DEBUG
+							CAMsg::printMsg(LOG_CRIT,"Upload Packet processing time (arrival <--> send): %u µs\n",diff64(tmpU64,timestamp));
+						#endif
+					}	
 #endif					
 			}
 		delete []buff;
@@ -752,9 +748,9 @@ SINT32 CAFirstMix::clean()
 			delete m_pthreadSendToMix;
 		m_pthreadAcceptUsers=NULL;
 		#ifdef LOG_PACKET_TIMES
-		if(m_pthreadLog!=NULL)
-			delete m_pthreadLog;
-		m_pthreadLog=NULL;
+		if(m_pLogPacketStats!=NULL)
+			delete m_pLogPacketStats;
+		m_pLogPacketStats=NULL;
 		#endif
 		if(m_arrSocketsIn!=NULL)
 			delete[] m_arrSocketsIn;
@@ -1010,119 +1006,3 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		setDOMElementAttribute(elemMixesDocCascade,"count",count);
 		return E_SUCCESS;
 	}
-
-#ifdef LOG_PACKET_TIMES
-/** How to end this thread
-	* Set m_bRunLog=false;
-	*/
-#define FM_LOG_INTERVAL 2//log interval in 30 seconds steps!	
-THREAD_RETURN fm_loopLog(void* param)
-	{
-		CAFirstMix* pFirstMix=(CAFirstMix*)param;
-		UINT32 countLog=0;
-		while(pFirstMix->m_bRunLog)
-			{
-				if(countLog==0)
-					{
-						pFirstMix->logTimeingStats();
-						pFirstMix->resetTimeingStats();
-						countLog=FM_LOG_INTERVAL;
-					}
-				sSleep(30);
-				countLog--;
-			}
-		THREAD_RETURN_SUCCESS;
-	}
-	
-SINT32 CAFirstMix::addToTimeingStats(UINT32 proccessingTime,UINT32 uType,bool bUpstream)
-{
-	m_csTimeingStats.lock();
-	if(bUpstream)
-	{
-		if(uType==CHANNEL_DATA)
-			{
-				m_timingCountDataPacketsUpstream++;
-				add64(m_timingSumDataPacketUpstream,proccessingTime);
-				if(proccessingTime>m_timingMaxDataPacketUpstream)
-					m_timingMaxDataPacketUpstream=proccessingTime;
-				else if(m_timingMinDataPacketUpstream>proccessingTime)
-					m_timingMinDataPacketUpstream=proccessingTime;	
-			}
-		else if(uType==CHANNEL_CLOSE)
-			{
-				m_timingCountClosePacketsUpstream++;
-				add64(m_timingSumClosePacketUpstream,proccessingTime);
-				if(proccessingTime>m_timingMaxClosePacketUpstream) 
-					m_timingMaxClosePacketUpstream=proccessingTime;
-				else if(m_timingMinClosePacketUpstream>proccessingTime)
-					m_timingMinClosePacketUpstream=proccessingTime;	
-			}
-		else
-			{//open
-				m_timingCountOpenPacketsUpstream++;
-				add64(m_timingSumOpenPacketUpstream,proccessingTime);
-				if(proccessingTime>m_timingMaxOpenPacketUpstream)
-					m_timingMaxOpenPacketUpstream=proccessingTime;
-				else if(m_timingMinOpenPacketUpstream>proccessingTime)
-					m_timingMinOpenPacketUpstream=proccessingTime;	
-			}
-	}
-	else //downstream
-		{
-			//always data packets
-				m_timingCountDataPacketsDownStream++;
-				add64(m_timingSumDataPacketDownStream,proccessingTime);
-				if(proccessingTime>m_timingMaxDataPacketDownStream)
-					m_timingMaxDataPacketDownStream=proccessingTime;
-				else if(m_timingMinDataPacketDownStream>proccessingTime)
-					m_timingMinDataPacketDownStream=proccessingTime;	
-		}
-	m_csTimeingStats.unlock();
-	return E_SUCCESS;
-}
-
-SINT32 CAFirstMix::logTimeingStats()
-{
-	if(m_timingCountDataPacketsDownStream==0)
-		return E_SUCCESS;
-	m_csTimeingStats.lock();	
-	UINT32 aveDataUpstream=0;
-	UINT32 aveCloseUpstream=0;
-	UINT32 aveOpenUpstream=0;
-	if(m_timingCountOpenPacketsUpstream>0)
-			aveOpenUpstream=div64(m_timingSumOpenPacketUpstream,m_timingCountOpenPacketsUpstream);
-	if(m_timingCountDataPacketsUpstream>0)
-			aveDataUpstream=div64(m_timingSumDataPacketUpstream,m_timingCountDataPacketsUpstream);
-	if(m_timingCountClosePacketsUpstream>0)
-			aveCloseUpstream=div64(m_timingSumClosePacketUpstream,m_timingCountClosePacketsUpstream);
-	CAMsg::printMsg(LOG_DEBUG,"Packet timeing stats [µs] -- Data Packets Upstream [%u] (Min/Max/Ave): %u/%u/%u -- Open Packets Upstream [%u]: %u/%u/%u Close Packets Upstream [%u] %u/%u/%u -- Data Packets Downstream [%u]: %u/%u/%u \n",
-	m_timingCountDataPacketsUpstream,m_timingMinDataPacketUpstream,m_timingMaxDataPacketUpstream,aveDataUpstream,
-	m_timingCountOpenPacketsUpstream,m_timingMinOpenPacketUpstream,m_timingMaxOpenPacketUpstream,aveOpenUpstream,
-	m_timingCountClosePacketsUpstream,m_timingMinClosePacketUpstream,m_timingMaxClosePacketUpstream,aveCloseUpstream,
-	m_timingCountDataPacketsDownStream,m_timingMinDataPacketDownStream,m_timingMaxDataPacketDownStream,div64(m_timingSumDataPacketDownStream,m_timingCountDataPacketsDownStream));
-	m_csTimeingStats.unlock();
-	return E_SUCCESS;
-}
-
-SINT32 CAFirstMix::resetTimeingStats()
-	{
-		m_csTimeingStats.lock();
-		m_timingMaxDataPacketUpstream=0;
-		m_timingMaxDataPacketDownStream=0;
-		m_timingMaxClosePacketUpstream=0;
-		m_timingMinDataPacketUpstream=0xFFFFFFFF;
-		m_timingMinDataPacketDownStream=0xFFFFFFFF;
-		m_timingMinClosePacketUpstream=0xFFFFFFFF;
-		m_timingCountDataPacketsUpstream=m_timingCountDataPacketsDownStream=0;
-		m_timingCountClosePacketsUpstream=0;
-		setZero64(m_timingSumDataPacketUpstream);
-		setZero64(m_timingSumDataPacketDownStream);
-		setZero64(m_timingSumClosePacketUpstream);
-		m_timingMaxOpenPacketUpstream=0;
-		m_timingMinOpenPacketUpstream=0xFFFFFFFF;
-		m_timingCountOpenPacketsUpstream=0;
-		setZero64(m_timingSumOpenPacketUpstream);
-		m_csTimeingStats.unlock();
-		return E_SUCCESS;
-	}
-#endif

@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.03.30"
+#define MIX_VERSION "00.03.31"
 
 
 //#define LOG_CHANNEL
@@ -75,6 +75,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #endif
 #define MIX_POOL_TIMEOUT 200 //home long to wait (in ms) before a dummy is put in the pool
 #define DUMMY_CHANNEL 0
+
+#define FM_PACKET_STATS_LOG_INTERVALL 15 //Intervall in Minutes for loggin packet stats for the first Mix
+#define LM_PACKET_STATS_LOG_INTERVALL 15 //Intervall in Minutes for loggin packet stats for the last Mix
 
 #define MIX_CASCADE_PROTOCOL_VERSION_0_4 4
 #define MIX_CASCADE_PROTOCOL_VERSION_0_3 3

@@ -213,7 +213,7 @@ inline void print64(UINT8* buff,UINT64 num)
 			while(mask>1)
 				{
 					mask/=10;
-					digit=num/mask;
+					digit=(UINT)(num/mask);
 					if(digit>0||bprintZero)
 						{
 							buff[index++]=(UINT8)(digit+'0');

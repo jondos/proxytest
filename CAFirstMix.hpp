@@ -44,6 +44,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef PAYMENT
 #include "CAAccountingInstance.hpp"
 #endif
+#include "CALogPacketStats.hpp"
+
 class CAInfoService;
 
 
@@ -70,7 +72,7 @@ class CAFirstMix:public CAMix
 					m_pthreadAcceptUsers=NULL;
 					m_pthreadsLogin=NULL;
 					#ifdef LOG_PACKET_TIMES
-						m_pthreadLog=NULL;
+						m_pLogPacketStats=NULL;
 					#endif	
 				}
 			virtual ~CAFirstMix(){}
@@ -149,25 +151,7 @@ class CAFirstMix:public CAMix
 #ifdef LOG_PACKET_TIMES
 			CATimedQueue* m_pQueueSendToMix;
 			CATimedQueue* m_pQueueReadFromMix;
-			CAMutex m_csTimeingStats;
-			SINT32 addToTimeingStats(UINT32 proccessingTime,UINT32 uType,bool bUpstream);
-			SINT32 resetTimeingStats();
-			SINT32 logTimeingStats();
-			UINT32 m_timingMaxDataPacketUpstream,m_timingMaxDataPacketDownStream;
-			UINT32 m_timingMinDataPacketUpstream,m_timingMinDataPacketDownStream;
-			UINT32 m_timingCountDataPacketsUpstream,m_timingCountDataPacketsDownStream;
-			UINT64 m_timingSumDataPacketUpstream,m_timingSumDataPacketDownStream;
-			UINT32 m_timingMaxClosePacketUpstream;
-			UINT32 m_timingMinClosePacketUpstream;
-			UINT32 m_timingCountClosePacketsUpstream;
-			UINT64 m_timingSumClosePacketUpstream;
-			UINT32 m_timingMaxOpenPacketUpstream,m_timingMinOpenPacketUpstream;
-			UINT32 m_timingCountOpenPacketsUpstream;
-			UINT64 m_timingSumOpenPacketUpstream;
-			friend THREAD_RETURN	fm_loopLog(void*);
-			volatile bool					m_bRunLog;
-			CAThread*							m_pthreadLog;
-
+			CALogPacketStats* m_pLogPacketStats;
 #else			
 			CAQueue* m_pQueueSendToMix;
 			CAQueue* m_pQueueReadFromMix;
