@@ -67,7 +67,7 @@ THREAD_RETURN lpIO(void *v)
 		CONNECTION oConnection;		
 		unsigned char chainlen=lpIOPair->chainlen;
 		unsigned short socksPort=options.getSOCKSServerPort();
-		bool bHaveSocks=(socksPort!=-1);
+		bool bHaveSocks=(socksPort!=0xFFFF);
 		for(;;)
 			{
 				if((countRead=oSocketGroup.select())==SOCKET_ERROR)
