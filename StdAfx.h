@@ -76,8 +76,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		typedef unsigned char UINT8;
 		typedef signed char SINT8;
 #else
-    #include "config.h"
-
+  #ifdef HAVE_CONFIG_H  
+	#include "config.h"
+	#endif
 #define PROT2
 
 		#include <sys/ioctl.h>

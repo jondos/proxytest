@@ -49,8 +49,9 @@ typedef UINT32 HCHANNEL;
 
 #else
 
-	#define DATA_SIZE 992
-	#define PAYLOAD_SIZE 989
+	#define DATA_SIZE 			992
+	#define PAYLOAD_SIZE 		989
+	#define MUXPACKET_SIZE 	998
 
 	#if defined(WIN32) ||defined(__sgi)
 		#pragma pack( push, t_MuxPacket )
