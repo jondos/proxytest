@@ -82,14 +82,6 @@ class CALastMix:public CAMix
 		protected:
 			volatile bool					m_bRestart;
 			CAMuxSocket*					m_pMuxIn;
-			struct t_queue_entry
-				{
-					MIXPACKET packet;
-					#ifdef LOG_PACKET_TIMES
-						UINT64 timestamp;
-					#endif
-				};
-			typedef struct t_queue_entry tQueueEntry;
 			CAQueue* m_pQueueSendToMix;
 			CAQueue* m_pQueueReadFromMix;
 			#ifdef LOG_PACKET_TIMES

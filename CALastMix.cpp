@@ -128,8 +128,8 @@ SINT32 CALastMix::init()
 		if(ret!=E_SUCCESS)
 			return ret;
 		
-		m_pQueueSendToMix=new CAQueue(sizeof(CALastMix::tQueueEntry));
-		m_pQueueReadFromMix=new CAQueue(sizeof(CALastMix::tQueueEntry));
+		m_pQueueSendToMix=new CAQueue(sizeof(tQueueEntry));
+		m_pQueueReadFromMix=new CAQueue(sizeof(tQueueEntry));
 
 		m_bRestart=false;
 		//Starting thread for Step 1a
@@ -334,19 +334,18 @@ THREAD_RETURN lm_loopSendToMix(void* param)
 		CAMuxSocket* pMuxSocket=pLastMix->m_pMuxIn;
 #ifdef LOG_PACKET_TIMES
 		UINT64 tmpU64;
-		UINT64 pool_timestamp;
 #endif		
 		SINT32 ret;
 		UINT32 len;
 #ifndef USE_POOL
-		CALastMix::tQueueEntry* pQueueEntry=new CALastMix::tQueueEntry;
+		tQueueEntry* pQueueEntry=new tQueueEntry;
 		MIXPACKET* pMixPacket=&pQueueEntry->packet;
 
 		while(!pLastMix->m_bRestart)
 			{
-				len=sizeof(CALastMix::tQueueEntry);
+				len=sizeof(tQueueEntry);
 				ret=pQueue->getOrWait((UINT8*)pQueueEntry,&len);
-				if(ret!=E_SUCCESS||len!=sizeof(CALastMix::tQueueEntry))
+				if(ret!=E_SUCCESS||len!=sizeof(tQueueEntry))
 					break;
 				if(pMuxSocket->send(pMixPacket)!=MIXPACKET_SIZE)
 					break;
@@ -365,21 +364,41 @@ THREAD_RETURN lm_loopSendToMix(void* param)
 #else
 		CAPool* pPool=new CAPool(MIX_POOL_SIZE);
 		tPoolEntry* pPoolEntry=new tPoolEntry;
+		MIXPACKET* pMixPacket=&pPoolEntry->packet;
 		while(!pLastMix->m_bRestart)
 			{
-				len=MIXPACKET_SIZE;
+				len=sizeof(tQueueEntry);
 				SINT32 ret=pQueue->getOrWait((UINT8*)pPoolEntry,&len,MIX_POOL_TIMEOUT);
 				if(ret==E_TIMEDOUT)
 					{
-						pPoolEntry->mixpacket.flags=0;
-						pPoolEntry->mixpacket.channel=DUMMY_CHANNEL;
-						getRandom(pPoolEntry->mixpacket.data,DATA_SIZE);
+						pMixPacket->flags=CHANNEL_DUMMY;
+						pMixPacket->channel=DUMMY_CHANNEL;
+						getRandom(pMixPacket->data,DATA_SIZE);
+						#ifdef LOG_PACKET_TIMES
+							setZero64(pPoolEntry->timestamp);
+						#endif
 					}
-				else if(ret!=E_SUCCESS||len!=MIXPACKET_SIZE)
+				else if(ret!=E_SUCCESS||len!=sizeof(tQueueEntry))
 					break;
+				#ifdef LOG_PACKET_TIMES
+					getcurrentTimeMicros(pPoolEntry->pool_timestamp_in);
+				#endif
 				pPool->pool(pPoolEntry);
-				if(pMuxSocket->send(&pPoolEntry->mixpacket)!=MIXPACKET_SIZE)
+				#ifdef LOG_PACKET_TIMES
+					getcurrentTimeMicros(pPoolEntry->pool_timestamp_out);
+				#endif
+				if(pMuxSocket->send(pMixPacket)!=MIXPACKET_SIZE)
 					break;
+#ifdef LOG_PACKET_TIMES
+ 				if(!isZero64(pPoolEntry->timestamp))
+					{
+						getcurrentTimeMicros(tmpU64);
+						pLastMix->m_pLogPacketStats->addToTimeingStats(diff64(tmpU64,pPoolEntry->timestamp),CHANNEL_DATA,false);
+						#ifdef _DEBUG
+							CAMsg::printMsg(LOG_CRIT,"Download Packet processing time (arrival <--> send): %u µs\n",diff64(tmpU64,pPoolEntry->timestamp));
+						#endif
+					}
+#endif					
 			}
 		delete pPoolEntry;
 		delete pPool;
@@ -397,7 +416,7 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 		CALastMix* pLastMix=(CALastMix*)pParam;
 		CAMuxSocket* pMuxSocket=pLastMix->m_pMuxIn;
 		CAQueue* pQueue=pLastMix->m_pQueueReadFromMix;
-		CALastMix::tQueueEntry* pQueueEntry=new CALastMix::tQueueEntry;
+		tQueueEntry* pQueueEntry=new tQueueEntry;
 		MIXPACKET* pMixPacket=&pQueueEntry->packet;
 		CASingleSocketGroup* pSocketGroup=new CASingleSocketGroup(false);
 		pSocketGroup->add(*pMuxSocket);
@@ -416,30 +435,38 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 				if(ret==E_TIMEDOUT)
 					{
 						#ifdef USE_POOL
-							pMixPacket->flags=0;
+							pMixPacket->flags=CHANNEL_DUMMY;
 							pMixPacket->channel=DUMMY_CHANNEL;
 							getRandom(pMixPacket->data,DATA_SIZE);
-							ret=MIXPACKET_SIZE;
+							#ifdef LOG_PACKET_TIMES
+								setZero64(pQueueEntry->timestamp);
+							#endif
 						#else
 							continue;	
 						#endif	
 					}
 				else if(ret>0)
 					{
+						ret=pMuxSocket->receive(pMixPacket);
 						#ifdef LOG_PACKET_TIMES
 							getcurrentTimeMicros(pQueueEntry->timestamp);
 						#endif
-						ret=pMuxSocket->receive(pMixPacket);
-					}
-				if(ret!=MIXPACKET_SIZE)
-					{
-						pLastMix->m_bRestart=true;
-						break;
+						if(ret!=MIXPACKET_SIZE)
+							{
+								pLastMix->m_bRestart=true;
+								break;
+							}
 					}
 				#ifdef USE_POOL
-					pPool->pool((tPoolEntry*)pMixPacket);
+					#ifdef LOG_PACKET_TIMES
+						getcurrentTimeMicros(pQueueEntry->pool_timestamp_in);
+					#endif
+					pPool->pool((tPoolEntry*) pQueueEntry);
+					#ifdef LOG_PACKET_TIMES
+						getcurrentTimeMicros(pQueueEntry->pool_timestamp_out);
+					#endif
 				#endif		
-				pQueue->add(pQueueEntry,sizeof(CALastMix::tQueueEntry));	
+				pQueue->add(pQueueEntry,sizeof(tQueueEntry));	
 			}
 		delete pQueueEntry;
 		#ifdef USE_POOL
