@@ -105,6 +105,7 @@ SINT32 CALastMix::init()
 		if(ret!=E_SUCCESS)
 		    {
 					CAMsg::printMsg(LOG_CRIT," failed!\n");
+					CAMsg::printMsg(LOG_CRIT,"Reason: call to accept() faild with error code: %i\n",ret); 
 					return E_UNKNOWN;
 		    }
 		((CASocket*)*m_pMuxIn)->setRecvBuff(500*MIXPACKET_SIZE);

@@ -67,14 +67,21 @@ SINT32 CAMuxSocket::accept(UINT16 port)
 		return E_SUCCESS;
 	}
 
+/** Waits for an incoming connection on oAddr.
+  * @retval E_SUCCESS, if successful
+	* @retval E_SOCKET_BIND, E_SOCKET_LISTEN
+	* @retval E_UNKOWN
+	*/
 SINT32 CAMuxSocket::accept(const CASocketAddr& oAddr)
 	{
 		CASocket oSocket;
 		oSocket.create(oAddr.getType());
 		oSocket.setReuseAddr(true);
-		if(oSocket.listen(oAddr)!=E_SUCCESS)
-			return E_UNKNOWN;
-		if(oSocket.accept(m_Socket)!=E_SUCCESS)
+		SINT32 ret=oSocket.listen(oAddr);
+		if(ret!=E_SUCCESS)
+			return ret;
+		ret=oSocket.accept(m_Socket);
+		if(ret!=E_SUCCESS)
 			return E_UNKNOWN;
 		oSocket.close();
 		m_Socket.setRecvLowWat(MIXPACKET_SIZE);

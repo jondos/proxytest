@@ -69,6 +69,12 @@ SINT32 CASocket::create(int type)
 		return E_SUCCESS;
 	}
 
+/** Starts listening on address psa.
+	* @retval E_SUCCESS, if successful
+	* @retval E_SOCKET_LISTEN, if call to listen() returns an error
+	* @retval E_SOCKET_BIND,	 if call to bind() returns an error
+	* @retval E_UNKNOWN, otherwise
+	*/
 SINT32 CASocket::listen(const CASocketAddr& psa)
 	{
 		int type=psa.getType();
@@ -89,12 +95,12 @@ SINT32 CASocket::listen(const CASocketAddr& psa)
 		if(::bind(m_Socket,psa.LPSOCKADDR(),psa.getSize())==SOCKET_ERROR)
 			{
 				close();
-				return E_UNKNOWN;
+				return E_SOCKET_BIND;
 			}
 		if(::listen(m_Socket,SOMAXCONN)==SOCKET_ERROR)
 			{
 				close();
-				return E_UNKNOWN;
+				return E_SOCKET_LISTEN;
 			}
 		return E_SUCCESS;
 	}
