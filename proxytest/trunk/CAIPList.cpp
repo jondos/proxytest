@@ -71,11 +71,13 @@ CAIPList::~CAIPList()
 	*/
 SINT32 CAIPList::insertIP(UINT8 ip[4])
 	{
-		CAMsg::printMsg(LOG_DEBUG,"Inserting IP-Address: %u.%u.%u.%u !\n",ip[0],ip[1],ip[2],ip[3]);
 		UINT16 hashvalue=ip[2]<<8|ip[3];
 		PIPLIST entry=m_HashTable[hashvalue];
 		if(entry==NULL)
 			{
+				UINT8 hash[16];
+				MD5(ip,4,hash);
+				CAMsg::printMsg(LOG_DEBUG,"Inserting IP-Address: %X%X%X%X%X%X%X%X%X%X%X%X%X%X%X%X !\n",hash[0],hash[1],hash[2],hash[3],hash[4],hash[5],hash[6],hash[7],hash[8],hash[9],hash[10],hash[11],hash[12],hash[13],hash[14],hash[15]);
 				entry=new IPLISTENTRY;
 				memcpy(entry->ip,ip,2);
 				entry->count=1;
@@ -117,7 +119,6 @@ SINT32 CAIPList::insertIP(UINT8 ip[4])
 	*/
 SINT32 CAIPList::removeIP(UINT8 ip[4])
 	{
-		CAMsg::printMsg(LOG_DEBUG,"Removing IP-Address: %u.%u.%u.%u !\n",ip[0],ip[1],ip[2],ip[3]);
 		UINT16 hashvalue=ip[2]<<8|ip[3];
 		PIPLIST entry=m_HashTable[hashvalue];
 		if(entry==NULL)
@@ -134,6 +135,9 @@ SINT32 CAIPList::removeIP(UINT8 ip[4])
 								entry->count--;
 								if(entry->count==0)
 									{
+										UINT8 hash[16];
+										MD5(ip,4,hash);
+										CAMsg::printMsg(LOG_DEBUG,"Removing IP-Address: %X%X%X%X%X%X%X%X%X%X%X%X%X%X%X%X !\n",hash[0],hash[1],hash[2],hash[3],hash[4],hash[5],hash[6],hash[7],hash[8],hash[9],hash[10],hash[11],hash[12],hash[13],hash[14],hash[15]);
 										if(before==NULL)
 											{
 												m_HashTable[hashvalue]=NULL;

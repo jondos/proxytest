@@ -52,6 +52,7 @@ The internal organisation is a hash-table with overrun lists. The hashtable has
 @note This class only supports IPv4.
 @warning If there is less memory, CAIPList will crash!
 @warning This class is NOT thread safe.
+@version 1.0 first version
  */
 	class CAIPList
 	{
