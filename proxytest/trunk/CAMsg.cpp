@@ -31,6 +31,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CACmdLnOptions.hpp"
 #define FILENAME_ERRORLOG "/errors"
 #define FILENAME_INFOLOG "/messages"
+#define FILENAME_ERRORLOG_GZ "/errors.gz"
+#define FILENAME_INFOLOG_GZ "/messages.gz"
 
 extern CACmdLnOptions options;
 
@@ -45,6 +47,9 @@ CAMsg::CAMsg()
 			m_uLogType=MSG_STDOUT;
 			m_hFileErr=m_hFileInfo=-1;
 			m_strMsgBuff[0]='[';
+#ifdef COMPRESSED_LOGS
+			m_gzFileErr=m_gzFileInfo=NULL;
+#endif
 		}
 
 CAMsg::~CAMsg()
@@ -59,7 +64,7 @@ SINT32 CAMsg::setOptions(UINT32 opt)
 					return E_SUCCESS;
 			if(oMsg.openLog(opt)==E_SUCCESS)
 				{
-					oMsg.closeLog();
+					oMsg.closeLog(); //closes the OLD Log!
 					oMsg.m_uLogType=opt;
 					return E_SUCCESS;
 				}
@@ -126,6 +131,15 @@ SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 								}
 					//	}
 				break;
+#ifdef COMPRESSED_LOGS
+				case MSG_COMPRESSED_FILE:
+					if(oMsg.m_gzFileInfo!=NULL)
+						{
+							if(gzwrite(oMsg.m_gzFileInfo,oMsg.m_strMsgBuff,strlen(oMsg.m_strMsgBuff))==-1)
+								ret=E_UNKNOWN;
+						}
+				break;
+#endif
 				case MSG_STDOUT:
 					printf(oMsg.m_strMsgBuff);
 				break;
@@ -152,13 +166,23 @@ SINT32 CAMsg::closeLog()
 					if(m_hFileInfo!=-1)
 						close(m_hFileInfo);
 					m_hFileInfo=-1;
+#ifdef COMPRESSED_LOGS
+				case MSG_COMPRESSED_FILE:
+					if(m_gzFileErr!=NULL)
+						gzclose(m_gzFileErr);
+					m_gzFileErr=NULL;
+					if(m_gzFileInfo!=NULL)
+						gzclose(m_gzFileInfo);
+					m_gzFileInfo=NULL;
 				break;
+#endif
 			}
 		return E_SUCCESS;
 	}
 
 SINT32 CAMsg::openLog(UINT32 type)
 	{
+		int tmpHandle=-1;
 		switch(type)
 			{
 				case MSG_LOG:
@@ -178,6 +202,24 @@ SINT32 CAMsg::openLog(UINT32 type)
 					strcat(buff,FILENAME_INFOLOG);
 					m_hFileInfo=open(buff,O_APPEND|O_CREAT|O_WRONLY,S_IREAD|S_IWRITE);										
 				break;
+#ifdef COMPRESSED_LOGS
+				case MSG_COMPRESSED_FILE:
+					if(options.getLogDir((UINT8*)logdir,255)!=E_SUCCESS)
+						return E_UNKNOWN;
+					strcpy(buff,logdir);
+					strcat(buff,FILENAME_ERRORLOG_GZ);
+					tmpHandle=open(buff,O_APPEND|O_CREAT|O_WRONLY,S_IREAD|S_IWRITE);
+					m_gzFileErr=gzdopen(tmpHandle,"wb9");
+					strcpy(buff,logdir);
+					strcat(buff,FILENAME_INFOLOG_GZ);
+					tmpHandle=open(buff,O_APPEND|O_CREAT|O_WRONLY,S_IREAD|S_IWRITE);
+					m_gzFileInfo=gzdopen(tmpHandle,"wb9");
+					if(m_gzFileInfo==NULL||m_gzFileErr==NULL)
+						return E_UNKNOWN;
+				break;
+#endif
+				default:
+					return E_UNKNOWN;
 			}
 		return E_SUCCESS;
 	}

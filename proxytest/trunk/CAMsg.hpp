@@ -30,9 +30,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CAMSG__
 #define __CAMSG__
 
-#define MSG_STDOUT	0x00
-#define MSG_LOG			0x01
-#define MSG_FILE		0x02
+#define MSG_STDOUT						0x00
+#define MSG_LOG								0x01
+#define MSG_FILE							0x02
+#define MSG_COMPRESSED_FILE		0x03
 
 #ifdef _WIN32
 	#define LOG_ERR		0
@@ -59,5 +60,9 @@ class CAMsg
 			char *m_strMsgBuff;
 			static const char* const m_strMsgTypes[4];
 			CAMutex m_csPrint;
+#ifdef COMPRESSED_LOGS
+			gzFile m_gzFileErr;
+			gzFile m_gzFileInfo;
+#endif
    };
 #endif

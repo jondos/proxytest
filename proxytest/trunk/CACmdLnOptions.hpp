@@ -41,6 +41,7 @@ class CACmdLnOptions
 	    bool getDaemon();
       bool getProxySupport();
 	   
+
 			UINT16 getServerPort();
 			/*For IP (Host) AND Unix Domain Sockets*/
 	    SINT32 getServerHost(UINT8* path,UINT32 len);
@@ -106,6 +107,10 @@ class CACmdLnOptions
 			
 			SINT32 getCascadeName(UINT8* name,UINT32 len);
 			SINT32 getLogDir(UINT8* name,UINT32 len);
+			bool getCompressLogs()
+				{
+					return bCompressedLogs;
+				}
 			SINT32 getUser(UINT8* user,UINT32 len);
 			/** Get the XML describing the Mix. this is not a string!*/
 			SINT32 getMixXml(UINT8* strxml,UINT32* len);
@@ -134,6 +139,7 @@ class CACmdLnOptions
 			bool bLocalProxy,bFirstMix,bMiddleMix,bLastMix;
 			char* strCascadeName;
 			char* strLogDir;
+			bool bCompressedLogs;
 			char* m_strUser;
 			SINT32 m_nrOfOpenFiles; //How many open files (sockets) should we use
 			char* m_strMixXml;

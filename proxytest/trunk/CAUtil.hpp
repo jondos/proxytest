@@ -102,7 +102,7 @@ inline UINT32 diff64(UINT64& bigop,UINT64& smallop)
 		#if !defined(_WIN32)&&!defined(__linux)
 		return (UINT32) -1; //TODO!!!
 		#else
-			return (UINT32)bigop-smallop;
+			return (UINT32)(bigop-smallop);
 		#endif
 	}
 

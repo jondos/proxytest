@@ -48,6 +48,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_pOwnCertificate=NULL;
 		m_pPrevMixCertificate=NULL;
 		m_pNextMixCertificate=NULL;
+		bCompressedLogs=false;
   }
 CACmdLnOptions::~CACmdLnOptions()
 	{
@@ -112,6 +113,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 	char* certsdir=NULL;
 	char* cascadename=NULL;
 	char* logdir=NULL;
+	int iCompressedLogs=0;
 	char* serverPort=NULL;
 	char* user=NULL;
 	int nrOfOpenFiles=-1;
@@ -133,6 +135,9 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 		{"xmlkey",'x',POPT_ARG_NONE,&bXmlKey,0,"sign key is in XML-Format",NULL},
 		{"name",'a',POPT_ARG_STRING,&cascadename,0,"name of the cascade","<string>"},
 		{"logdir",'l',POPT_ARG_STRING,&logdir,0,"directory where log files go to","<dir>"},
+#ifdef COMPRESSED_LOGS
+		{"gzip",'z',POPT_ARG_NONE,&iCompressedLogs,0,"create gziped logs",NULL},
+#endif
 		{"user",'u',POPT_ARG_STRING,&user,0,"effective user","<user>"},
 		{"files",'f',POPT_ARG_INT,&nrOfOpenFiles,0,"number of open files (sockets)","<filehandles>"},
 		{"template",'t',POPT_ARG_NONE,&iTemplate,0,"generate conf template and exit",NULL},
@@ -276,6 +281,10 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 					strcpy(strLogDir,logdir);
 					free(logdir);	
 	    }
+	if(iCompressedLogs==0)
+		bCompressedLogs=false;
+	else
+		bCompressedLogs=true;
 	if(user!=NULL)
 	    {
 					m_strUser=new char[strlen(user)+1];
