@@ -154,6 +154,7 @@ class CAMuxSocket
 			CAMuxSocket();
 			~CAMuxSocket()
 				{
+					close();
 					delete []m_Buff;
 				}
 			SINT32 accept(UINT16 port);

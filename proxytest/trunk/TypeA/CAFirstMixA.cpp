@@ -43,15 +43,11 @@ SINT32 CAFirstMixA::loop()
 		SINT32 ret;
 		osocketgroupMixOut.add(*m_pMuxOut);
 		m_pMuxOut->setCrypt(true);
-		
-		m_pInfoService->setSignature(m_pSignature);
-		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix InfoService - Signature set\n");
-		m_pInfoService->start();
-		CAMsg::printMsg(LOG_DEBUG,"InfoService Loop started\n");
-
+	
 		UINT8* tmpBuff=new UINT8[MIXPACKET_SIZE];
 		CAMsg::printMsg(LOG_DEBUG,"Starting Message Loop... \n");
 		bool bAktiv;
+/*
 		//Starting thread for Step 1
 		UINT32 i;
 #if !defined(_DEBUG) && !defined(NO_LOOPACCEPTUSER)
@@ -64,8 +60,9 @@ SINT32 CAFirstMixA::loop()
 			osocketgroupAccept.add(m_arrSocketsIn[i]);
 
 #endif		
+*/
 		//Starting thread for Step 2
-		UINT8 peerIP[4];
+//		UINT8 peerIP[4];
 		UINT8 rsaBuff[RSA_SIZE];
 #ifdef LOG_CHANNEL
 		UINT64 current_time;
@@ -80,10 +77,10 @@ SINT32 CAFirstMixA::loop()
 		#endif
 
 		//Starting thread for Step 4
-		CAThread threadSendToMix;
+/*		CAThread threadSendToMix;
 		threadSendToMix.setMainLoop(fm_loopSendToMix);
 		threadSendToMix.start(this);
-
+*/
 		for(;;)	                                                          /* the main mix loop as long as there are things that are not handled by threads. */
 			{
 				bAktiv=false;
@@ -91,9 +88,9 @@ SINT32 CAFirstMixA::loop()
 
 //First Step
 //Checking for new connections		
-// Now in a separat Thread.... (if NOT _DEBUG defined!)
+// Now in a separat Thread.... 
 
-#if defined(_DEBUG) || defined(NO_LOOPACCEPTUSER)				
+/*#if defined(_DEBUG) || defined(NO_LOOPACCEPTUSER)				
 				
 				countRead=osocketgroupAccept.select(false,0);	                // how many new JAP<->mix connections are there
 				i=0;
@@ -131,7 +128,7 @@ SINT32 CAFirstMixA::loop()
 															CAMsg::printMsg(LOG_DEBUG,"Error setting KeepAlive!");
 													#else
 														((CASocket*)pnewMuxSocket)->setKeepAlive(true);
-													#endif
+													#endif*/
 													/*
 														ADDITIONAL PREREQUISITE:
 														The timestamps in the messages require the user to sync his time
@@ -140,7 +137,7 @@ SINT32 CAFirstMixA::loop()
 														For the mixes that form the cascade, the synchronization can be
 														left to an external protocol such as NTP. Unfortunately, this is
 														not enforceable for all users.
-													*/
+													*//*
 													((CASocket*)pnewMuxSocket)->send(m_xmlKeyInfoBuff,m_xmlKeyInfoSize);  // send the mix-keys to JAP
 													((CASocket*)pnewMuxSocket)->setNonBlocking(true);	                    // stefan: sendet das send in der letzten zeile doch noch nicht? wenn doch, kann dann ein JAP nicht durch verweigern der annahme hier den mix blockieren? vermutlich nciht, aber andersherum faend ich das einleuchtender.
 													// es kann nicht blockieren unter der Annahme das der TCP-Sendbuffer > m_xmlKeyInfoSize ist....
@@ -153,7 +150,7 @@ SINT32 CAFirstMixA::loop()
 						i++;
 					}
 #endif
-				
+*/				
 // Second Step 
 // Checking for data from users
 // Now in a separate Thread (see loopReadFromUsers())
@@ -206,35 +203,6 @@ SINT32 CAFirstMixA::loop()
 											}
 										else if(ret==MIXPACKET_SIZE) 											// we've read enough data for a whole mix packet. nice!
 											{
-												if(!pMuxSocket->getIsEncrypted())	            //Encryption is not set yet -> 
-																																			//so we assume that this is
-																																			//the first packet of a connection
-																																			//which contains the key
-														// stefan: ist das eine der protokoll-leichen die bald rausfliegen? --> ja hoffentlich...
-													{
-														m_pRSA->decrypt(pMixPacket->data,rsaBuff);
-														if(memcmp("KEYPACKET",rsaBuff,9)!=0)
-															{
-																m_pIPList->removeIP(pHashEntry->peerIP);
-																m_psocketgroupUsersRead->remove(*(CASocket*)pMuxSocket);
-																m_psocketgroupUsersWrite->remove(*(CASocket*)pMuxSocket);
-																delete pHashEntry->pQueueSend;
-																m_pChannelList->remove(pMuxSocket);
-																pMuxSocket->close();
-																delete pMuxSocket;
-																decUsers();
-															}
-														else
-															{
-																pMuxSocket->setKey(rsaBuff+9,32);
-																pMuxSocket->setCrypt(true);
-#ifdef PAYMENT
-																// set AI encryption keys
-																m_pAccountingInstance->setJapKeys(pHashEntry, rsaBuff+41, rsaBuff+57); 
-#endif
-															}
-														goto NEXT_USER_CONNECTION;
-													}
 												#ifdef LOG_CHANNEL
 													pHashEntry->trafficIn++;
 												#endif
@@ -344,7 +312,6 @@ SINT32 CAFirstMixA::loop()
 													}
 											}
 									}
-	NEXT_USER_CONNECTION:
 									pHashEntry=m_pChannelList->getNext();
 							}
 					}
@@ -507,26 +474,24 @@ SINT32 CAFirstMixA::loop()
 				  msSleep(100);
 			}
 ERR:
+//@todo move cleanup to clean() !
 		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
 		m_bRestart=true;
-		CAMsg::printMsg(LOG_CRIT,"Stopping InfoService....\n");
-		CAMsg::printMsg	(LOG_CRIT,"Memory usage before: %u\n",getMemoryUsage());	
-		m_pInfoService->stop();
-		CAMsg::printMsg	(LOG_CRIT,"Memory usage after: %u\n",getMemoryUsage());	
-		CAMsg::printMsg(LOG_CRIT,"Stopped InfoService!\n");
 		m_pMuxOut->close();
-		for(i=0;i<m_nSocketsIn;i++)
+		for(UINT32 i=0;i<m_nSocketsIn;i++)
 			m_arrSocketsIn[i].close();
 		//writng one byte to the queue...
 		UINT8 b;
 		m_pQueueSendToMix->add(&b,1);
-#if !defined(_DEBUG) && !defined(NO_LOOPACCEPTUSER)
+//#if !defined(_DEBUG) && !defined(NO_LOOPACCEPTUSER)
 		CAMsg::printMsg(LOG_CRIT,"Wait for LoopAcceptUsers!\n");
-		threadAcceptUsers.join();
-#endif
+		m_pthreadAcceptUsers->join();
+//#endif
 		CAMsg::printMsg(LOG_CRIT,"Wait for LoopSendToMix!\n");
-		threadSendToMix.join(); //will not join if queue is empty (and so wating)!!!
-		//		threadReadFromUsers.join(); 
+		m_pthreadSendToMix->join(); //will not join if queue is empty (and so wating)!!!
+		//waits until all login threads terminates....
+		// we have to be sure that the Accept thread was alread stoped!
+		waitForLoginThreads(); 
 		CAMsg::printMsg(LOG_CRIT,"Before deleting CAFirstMixChannelList()!\n");
 		CAMsg::printMsg	(LOG_CRIT,"Memeory usage before: %u\n",getMemoryUsage());	
 		fmHashTableEntry* pHashEntry=m_pChannelList->getFirst();
