@@ -348,9 +348,9 @@ SINT32 CALastMix::loop()
 										    }
 										else
 										    {    
-#ifdef _ASYNC
-													tmpSocket->setASyncSend(true,-1,this);
-#endif													
+//#ifdef _ASYNC
+//													tmpSocket->setASyncSend(true,-1,this);
+//#endif													
 													//tmpSocket->setASyncSend(true);
 													int payLen=ntohs(oMuxPacket.payload.len);
 													#ifdef _DEBUG
