@@ -110,6 +110,13 @@ class CAFirstMixChannelList
 		
 			static SINT32 test();
 		private:
+			/** Gets the in-channel and all associated information for the given out-channel.
+				* This method is NOT thread safe (and so only for internal use)
+				* @see get() 
+				*	@param channelOut the out-channel id for which the information is requested
+				* @ret the in-channel and all associated information
+				* @retval NULL,if not found in list
+				*/
 			fmChannelListEntry* get_intern_without_lock(HCHANNEL channelOut)
 				{
 					fmChannelListEntry* pEntry=m_HashTableOutChannels[channelOut&0x0000FFFF];
@@ -125,6 +132,11 @@ class CAFirstMixChannelList
 				}	
 
 		public:
+			/** Gets the in-channel and all associated information for the given out-channel.
+				* @param channelOut the out-channel id for which the information is requested
+				* @ret the in-channel and all associated information
+				* @retval NULL,if not found in list
+				*/
 			fmChannelListEntry* get(HCHANNEL channelOut)
 				{
 					m_Mutex.lock();

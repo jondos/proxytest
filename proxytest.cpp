@@ -157,7 +157,7 @@ for this channel will change to (because of the content format for the first pac
 For Upstream and Downstream different keys are used.
 */
 
-#define MIX_VERSION "00.01.12"
+#define MIX_VERSION "00.01.13"
 
 int main(int argc, const char* argv[])
 	{		

@@ -57,6 +57,12 @@ CAFirstMixChannelList::~CAFirstMixChannelList()
 		delete []m_HashTableOutChannels;
 	}
 		
+/** Adds a new TCP/IP connection (a new user) to the channel list
+	* @param pMuxSocket the new connection (from a user)
+	* @param pQueueSend the send-queue to use for this connection
+	* @retval E_UNKNOWN, in case of an error
+	* @retval E_SUCCES, if successful
+	*/
 SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,CAQueue* pQueueSend)
 	{
 		if(pMuxSocket==NULL)
@@ -66,7 +72,7 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,CAQueue* pQueueSend)
 			return E_UNKNOWN;
 		m_Mutex.lock();
 		fmHashTableEntry* pHashTableEntry=m_HashTable[hashkey];
-		if(pHashTableEntry->pMuxSocket!=NULL)
+		if(pHashTableEntry->pMuxSocket!=NULL) //the entry in the hasttable for this socket (hashkey) must be empty
 			{
 				m_Mutex.unlock();
 				return E_UNKNOWN;
@@ -74,14 +80,16 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,CAQueue* pQueueSend)
 		pHashTableEntry->pMuxSocket=pMuxSocket;
 		pHashTableEntry->pQueueSend=pQueueSend;
 		pHashTableEntry->cNumberOfChannels=0;
-		if(m_listHashTableHead==NULL)
+		
+		//now insert the new connection in the list of all open connections
+		if(m_listHashTableHead==NULL) //if first one
 			{
 				pHashTableEntry->list_HashEntries.next=NULL;
 				pHashTableEntry->list_HashEntries.prev=NULL;
 				m_listHashTableHead=pHashTableEntry;				
 			}
 		else
-			{
+			{//add to the head of the double linked list
 				pHashTableEntry->list_HashEntries.next=m_listHashTableHead;
 				pHashTableEntry->list_HashEntries.prev=NULL;
 				m_listHashTableHead->list_HashEntries.prev=pHashTableEntry;
@@ -91,7 +99,18 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,CAQueue* pQueueSend)
 		return E_SUCCESS;
 	}
 
+///The maximum number of channels allowed per connection
 #define MAX_NUMBER_OF_CHANNELS 50
+
+/** Adds a new channel for a given connection to the channel list. 
+	* Also a new out-channel id is generated and returned.
+	* @param pMuxSocket the connection from the user
+	* @param channelIn the channel, which should be added
+	* @param pCipher the symmetric cipher associated with this channel
+	* @param channelOut a pointer to the place, there the new generated out-channel id is stored
+	* @retval E_SUCCESS, if successful
+	* @retval E_UNKOWN, in case of an error
+	*/
 SINT32 CAFirstMixChannelList::addChannel(CAMuxSocket* pMuxSocket,HCHANNEL channelIn,
 																	CASymCipher* pCipher,HCHANNEL* channelOut)
 	{
@@ -121,6 +140,7 @@ SINT32 CAFirstMixChannelList::addChannel(CAMuxSocket* pMuxSocket,HCHANNEL channe
 		pNewEntry->channelOut=*channelOut;
 		pNewEntry->bIsSuspended=false;
 		pNewEntry->pHead=pHashTableEntry;
+		//add to the channel list for the given connection
 		if(pEntry==NULL) //First Entry to the channel list
 			{
 				pNewEntry->list_InChannelPerSocket.next=NULL;
@@ -134,7 +154,7 @@ SINT32 CAFirstMixChannelList::addChannel(CAMuxSocket* pMuxSocket,HCHANNEL channe
 			}
 		pHashTableEntry->pChannelList=pNewEntry;
 		
-		
+		//add to the out-channel list
 		hashkey=(*channelOut)&0x0000FFFF;
 		pEntry=m_HashTableOutChannels[hashkey];
 		if(pEntry!=NULL) //Hash Table Bucket Over run....
@@ -148,7 +168,13 @@ SINT32 CAFirstMixChannelList::addChannel(CAMuxSocket* pMuxSocket,HCHANNEL channe
 		m_Mutex.unlock();
 		return E_SUCCESS;
 	}
-			
+
+/** Returns the information for a given Input-Channel-ID
+	* @param pMuxSocket the connection from the user
+	* @param channelIn the channel id
+	* @ret all channel associated information (output-channel id, cipher etc.)
+	* @retval NULL, if not found
+*/
 fmChannelListEntry* CAFirstMixChannelList::get(CAMuxSocket* pMuxSocket,HCHANNEL channelIn)
 	{
 		if(pMuxSocket==NULL)
@@ -171,7 +197,13 @@ fmChannelListEntry* CAFirstMixChannelList::get(CAMuxSocket* pMuxSocket,HCHANNEL 
 		m_Mutex.unlock();
 		return NULL;		
 	}
-	
+
+/** Removes all channels, which belongs to the given connection and the connection itself from the
+	* list.
+	* @param pMuxSocket the connection from the user
+	* @retval E_SUCCESS, if successful
+	* @retval E_UNKNOWN, in case of an error
+	*/
 SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 	{
 		if(pMuxSocket==NULL)
@@ -181,69 +213,69 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 			return E_UNKNOWN;
 		m_Mutex.lock();
 		fmHashTableEntry* pHashTableEntry=m_HashTable[hashkey];
-		if(pHashTableEntry->pMuxSocket==NULL)
+		if(pHashTableEntry->pMuxSocket==NULL) //this connection is not in the list
 			{
 				m_Mutex.unlock();
 				return E_UNKNOWN;
 			}
-		if(m_listHashTableNext==pHashTableEntry)
+		if(m_listHashTableNext==pHashTableEntry) //adjust the enumeration over all connections (@see getNext())
 			m_listHashTableNext=pHashTableEntry->list_HashEntries.next;
 		
-		if(pHashTableEntry->list_HashEntries.prev==NULL) //head
+		if(pHashTableEntry->list_HashEntries.prev==NULL) //if entry is the head of the connection list
 			{
-				if(pHashTableEntry->list_HashEntries.next==NULL)
+				if(pHashTableEntry->list_HashEntries.next==NULL) //if entry is also the last (so the only one in the list..)
 					{
-						m_listHashTableHead=NULL;
+						m_listHashTableHead=NULL; //list is now empty
 					}
 				else
-					{
-						m_listHashTableHead=pHashTableEntry->list_HashEntries.next;
+					{//remove the head of the list
+						m_listHashTableHead=pHashTableEntry->list_HashEntries.next; 
 						m_listHashTableHead->list_HashEntries.prev=NULL;
 					}
 			}
 		else
-			{
+			{//the connection is not the head of the list
 				if(pHashTableEntry->list_HashEntries.next==NULL)
-					{
+					{//the connection is the last element in the list
 						pHashTableEntry->list_HashEntries.prev->list_HashEntries.next=NULL;
 					}
 				else
-					{
+					{//its a simple middle element
 						pHashTableEntry->list_HashEntries.prev->list_HashEntries.next=pHashTableEntry->list_HashEntries.next;
 						pHashTableEntry->list_HashEntries.next->list_HashEntries.prev=pHashTableEntry->list_HashEntries.prev;
 					}
 			}
 		fmChannelListEntry* pEntry=pHashTableEntry->pChannelList;
 		fmChannelListEntry* pTmpEntry;
-		while(pEntry!=NULL)
+		while(pEntry!=NULL)//for all channels....
 			{
+				//remove the out channel form the out channel hast table
 				hashkey=pEntry->channelOut&0x0000FFFF;
 				pTmpEntry=m_HashTableOutChannels[hashkey];
 				while(pTmpEntry!=NULL)
 					{
 						if(pTmpEntry->channelOut==pEntry->channelOut)
-							{
-								if(pTmpEntry->list_OutChannelHashTable.prev==NULL) //head
+							{//we have found the entry
+								if(pTmpEntry->list_OutChannelHashTable.prev==NULL) //it's the head
 									{
 										if(pTmpEntry->list_OutChannelHashTable.next==NULL)
-											{
-												m_HashTableOutChannels[hashkey]=NULL;
+											{//it's also the last Element
+												m_HashTableOutChannels[hashkey]=NULL; //empty this hash bucket
 											}
 										else
-											{
-												
+											{												
 												pTmpEntry->list_OutChannelHashTable.next->list_OutChannelHashTable.prev=NULL;
 												m_HashTableOutChannels[hashkey]=pTmpEntry->list_OutChannelHashTable.next;
 											}
 									}
 								else
-									{
+									{//not the head
 										if(pTmpEntry->list_OutChannelHashTable.next==NULL)
-											{
+											{//but the last
 												pTmpEntry->list_OutChannelHashTable.prev->list_OutChannelHashTable.next=NULL;
 											}
 										else
-											{
+											{//a middle element
 												pTmpEntry->list_OutChannelHashTable.prev->list_OutChannelHashTable.next=pTmpEntry->list_OutChannelHashTable.next;
 												pTmpEntry->list_OutChannelHashTable.next->list_OutChannelHashTable.prev=pTmpEntry->list_OutChannelHashTable.prev;
 											}
@@ -258,11 +290,18 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 				delete pEntry;
 				pEntry=pTmpEntry;
 			}
-		memset(pHashTableEntry,0,sizeof(fmHashTableEntry));
+
+		memset(pHashTableEntry,0,sizeof(fmHashTableEntry)); //'delete' the connection from the connection hash table 
 		m_Mutex.unlock();
 		return E_SUCCESS;
 	}
 
+/** Removes a single channel from the list.
+	* @param pMuxsocket the connection from the user
+	* @param channelIn the channel, which should be removed
+	* @retval E_SUCCESS, if successful
+	* @retval E_UNKNOWN, in case of an error
+	*/
 SINT32 CAFirstMixChannelList::removeChannel(CAMuxSocket* pMuxSocket,HCHANNEL channelIn)
 	{
 		if(pMuxSocket==NULL)
@@ -280,14 +319,14 @@ SINT32 CAFirstMixChannelList::removeChannel(CAMuxSocket* pMuxSocket,HCHANNEL cha
 		fmChannelListEntry* pEntry=pHashTableEntry->pChannelList;
 		while(pEntry!=NULL)
 			{
-				if(pEntry->channelIn==channelIn)
+				if(pEntry->channelIn==channelIn) //search for the channel
 					{
-						hashkey=pEntry->channelOut&0x0000FFFF;
+						hashkey=pEntry->channelOut&0x0000FFFF; //remove the out channel from the out channel hash table
 						fmChannelListEntry*pTmpEntry=m_HashTableOutChannels[hashkey];
 						while(pTmpEntry!=NULL)
 							{
 								if(pTmpEntry->channelOut==pEntry->channelOut)
-									{
+									{//found it in the out channel hash table
 										if(pTmpEntry->list_OutChannelHashTable.prev==NULL) //head
 											{
 												if(pTmpEntry->list_OutChannelHashTable.next==NULL)
@@ -304,11 +343,11 @@ SINT32 CAFirstMixChannelList::removeChannel(CAMuxSocket* pMuxSocket,HCHANNEL cha
 										else
 											{
 												if(pTmpEntry->list_OutChannelHashTable.next==NULL)
-													{
+													{//last element
 														pTmpEntry->list_OutChannelHashTable.prev->list_OutChannelHashTable.next=NULL;
 													}
 												else
-													{
+													{//middle element
 														pTmpEntry->list_OutChannelHashTable.prev->list_OutChannelHashTable.next=pTmpEntry->list_OutChannelHashTable.next;
 														pTmpEntry->list_OutChannelHashTable.next->list_OutChannelHashTable.prev=pTmpEntry->list_OutChannelHashTable.prev;
 													}
@@ -318,11 +357,11 @@ SINT32 CAFirstMixChannelList::removeChannel(CAMuxSocket* pMuxSocket,HCHANNEL cha
 								pTmpEntry=pTmpEntry->list_OutChannelHashTable.next;
 						}
 
-
+						//remove the channel from the channel hast table
 						if(pEntry->list_InChannelPerSocket.prev==NULL) //head
 							{
 								if(pEntry->list_InChannelPerSocket.next==NULL)
-									{
+									{//the only element
 										pHashTableEntry->pChannelList=NULL;
 									}
 								else
@@ -334,11 +373,11 @@ SINT32 CAFirstMixChannelList::removeChannel(CAMuxSocket* pMuxSocket,HCHANNEL cha
 						else
 							{
 								if(pEntry->list_InChannelPerSocket.next==NULL)
-									{
+									{//the last element
 										pEntry->list_InChannelPerSocket.prev->list_InChannelPerSocket.next=NULL;
 									}
 								else
-									{
+									{//a middle element
 										pEntry->list_InChannelPerSocket.prev->list_InChannelPerSocket.next=pEntry->list_InChannelPerSocket.next;
 										pEntry->list_InChannelPerSocket.next->list_InChannelPerSocket.prev=pEntry->list_InChannelPerSocket.prev;
 									}
@@ -348,13 +387,17 @@ SINT32 CAFirstMixChannelList::removeChannel(CAMuxSocket* pMuxSocket,HCHANNEL cha
 						m_Mutex.unlock();
 						return E_SUCCESS;
 					}
-				pEntry=pEntry->list_InChannelPerSocket.next;
+				pEntry=pEntry->list_InChannelPerSocket.next; //try next channel
 			}
 		m_Mutex.unlock();
-		return E_UNKNOWN;
+		return E_UNKNOWN;//not found
 	}
 
-
+/** Gets the first connection of all connections in the list.
+	* @see getNext()
+	* @ret first connection in the list
+	* @retval NULL, if no connection is in the list
+	*/
 fmHashTableEntry* CAFirstMixChannelList::getFirst()
 	{
 		if(m_listHashTableHead!=NULL)
@@ -364,6 +407,11 @@ fmHashTableEntry* CAFirstMixChannelList::getFirst()
 		return m_listHashTableHead;
 	}
 
+/** Gets the next entry in the connections-list.
+	* @see getFirst()
+	* @ret next entry in the connection list
+	* @retval NULL, in case of an error
+	*/
 fmHashTableEntry* CAFirstMixChannelList::getNext()
 	{
 		fmHashTableEntry* tmpEntry=m_listHashTableNext;
@@ -372,6 +420,12 @@ fmHashTableEntry* CAFirstMixChannelList::getNext()
 		return tmpEntry;
 	}
 
+/** Gets the first channel for a given connection
+	* @see getNextChannel()
+	* @param pMuxSocket the connection from the user
+	* @ret the channel and the associated information
+	* @retval NULL, if no channel for this connection exists at the moment
+	*/
 fmChannelListEntry* CAFirstMixChannelList::getFirstChannelForSocket(CAMuxSocket* pMuxSocket)
 	{
 		if(pMuxSocket==NULL)
@@ -383,6 +437,12 @@ fmChannelListEntry* CAFirstMixChannelList::getFirstChannelForSocket(CAMuxSocket*
 		return pHashTableEntry->pChannelList;
 	}
 
+/** Gets the next channel for a given connection.
+	* @see getFirstChannelForSocket()
+	* @param a entry returned by a previos call to getFirstChannelForSocket() or getNextChannel()
+	* @ret the next channel and all associated information
+	* @retval NULL, if there are no more channels for this connection
+	*/
 fmChannelListEntry* CAFirstMixChannelList::getNextChannel(fmChannelListEntry* pEntry)
 	{
 		if(pEntry==NULL)
