@@ -347,7 +347,7 @@ SINT32 CACmdLnOptions::getMixId(UINT8* id,UINT32 len)
 		if(len<24) //we need 24 chars (including final \0)
 			return E_UNKNOWN;
 		UINT8 buff[4];
-		if(strServerHost==NULL||strServerHost[0]=='\\')
+		if(strServerHost==NULL||strServerHost[0]=='/')
 			CASocketAddrINet::getLocalHostIP(buff);
 		else
 			{
@@ -513,7 +513,8 @@ SINT32 CACmdLnOptions::generateTemplate()
 		XMLOutput oxmlOut(oBufferStream);
 		oBufferStream.reset();
 		oxmlOut.BeginDocument("1.0","UTF-8",true);
-		oxmlOut.BeginElement("Mix");
+		oxmlOut.BeginElementAttrs("Mix");
+		oxmlOut.WriteAttr("id","");
 		oxmlOut.BeginElement("Location");
 		oxmlOut.Indent();
 		oxmlOut.writeLine("<!-- Fill out the following Elements to give infomation about the location of the Mix-->");
