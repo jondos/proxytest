@@ -54,3 +54,14 @@ unsigned short CASocketAddr::getPort()
 	{
 		return ntohs(sin_port);
 	}
+
+int CASocketAddr::getLocalHostName(char* buff,int len)
+	{
+		if(gethostname(buff,len)==-1)
+			return SOCKET_ERROR;
+		HOSTENT* hosten=gethostbyname(buff);
+		if(hosten==NULL||hosten->h_name==NULL||strlen(hosten->h_name)>=len)
+			return SOCKET_ERROR;
+		strcpy(buff,hosten->h_name);
+		return 0;
+	}
