@@ -6,10 +6,14 @@ typedef unsigned int HCHANNEL;
 
 #define DATA_SIZE 1000 // Size of Data in a single Mux Packet
 
+#define MUX_HTTP  0 
+#define MUX_SOCKS 1
+
 typedef struct t_MuxPacket
 	{
 		HCHANNEL channel;
 		int len;
+		int type;
 		char data[DATA_SIZE];
 	} MUXPACKET;
 

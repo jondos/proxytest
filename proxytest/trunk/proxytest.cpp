@@ -28,16 +28,6 @@ CASocketAddr socketAddrSquid;
 #ifdef _DEBUG
 int sockets;
 #endif
-typedef struct 
-	{
-		CASocket* in;
-		CAMixSocket* out;
-	}CASocketToMix;
-typedef struct 
-	{
-		CAMixSocket* in;
-		CASocket* out;
-	}CAMixToSocket;
 
 #ifndef _WIN32
 	#ifdef _DEBUG 
@@ -49,79 +39,10 @@ typedef struct
 	#endif
 #endif
 
-		/*
-THREAD_RETURN proxytomix(void* tmpPair)
-	{
-		CASocket* inSocket=((CASocketToMix*)tmpPair)->in;	
-		CAMixSocket* outSocket=((CASocketToMix*)tmpPair)->out;	
-		char* buff=new char[1001];
-		if(buff==NULL)
-		    {
-					CAMsg::printMsg(LOG_ERR,"No more Memory!\n");
-					THREAD_RETURN_ERROR;
-		    }    
-		while(true)
-			{
-				int len=inSocket->receive(buff,1000);
-				if(len==SOCKET_ERROR||len==0)
-					{
-						break;
-					}
-				if(outSocket->send(buff,len)==SOCKET_ERROR)
-					break;
-			}
-		delete buff;
-		EnterCriticalSection(&csClose);
-		if(inSocket->close(SD_RECEIVE)==0)
-			delete inSocket;
-		if(outSocket->close(SD_SEND)==0)
-			delete outSocket;
-		delete (CASocketToMix*)tmpPair;
-		LeaveCriticalSection(&csClose);
-#ifdef _DEBUG
-		CAMsg::printMsg(LOG_DEBUG,"Thread terminated\n");
-#endif
-		THREAD_RETURN_SUCCESS;
-	}
-
-THREAD_RETURN mixtoproxy(void* tmpPair)
-	{
-		CAMixSocket* inSocket=((CAMixToSocket*)tmpPair)->in;	
-		CASocket* outSocket=((CAMixToSocket*)tmpPair)->out;	
-		char* buff=new char[1001];
-		if(buff==NULL)
-		    {
-					CAMsg::printMsg(LOG_ERR,"Out of Memory!\n");
-					THREAD_RETURN_ERROR;
-		    }
-		while(true)
-			{
-				int len=inSocket->receive(buff,1000);
-				if(len==SOCKET_ERROR||len==0)
-					{
-						break;
-					}
-				if(outSocket->send(buff,len)==SOCKET_ERROR)
-					break;
-			}
-		delete buff;
-		EnterCriticalSection(&csClose);
-		if(inSocket->close(SD_RECEIVE)==0)
-			delete inSocket;
-		if(outSocket->close(SD_SEND)==0)
-			delete outSocket;
-		delete (CAMixToSocket*)tmpPair;
-		LeaveCriticalSection(&csClose);
-#ifdef _DEBUG
-		CAMsg::printMsg(LOG_DEBUG,"Thread terminated\n");
-#endif
-		THREAD_RETURN_SUCCESS;
-	}
-*/
-
 typedef struct t_LPPair
 	{
 		CASocket socketIn;
+		CASocket socketSOCKSIn;
 		CAMuxSocket muxOut;
 	} LPPair;
 
@@ -131,6 +52,8 @@ THREAD_RETURN lpIO(void *v)
 		CASocketList  oSocketList;
 		CASocketGroup oSocketGroup;
 		oSocketGroup.add(lpIOPair->socketIn);
+		if(options.getSOCKSServerPort()!=-1)
+			oSocketGroup.add(lpIOPair->socketSOCKSIn);
 		oSocketGroup.add(*((CASocket*)lpIOPair->muxOut));
 		HCHANNEL lastChannelId=1;
 //		HCHANNEL channel;
@@ -160,6 +83,25 @@ THREAD_RETURN lpIO(void *v)
 							{
 								#ifdef _DEBUG
 									CAMsg::printMsg(LOG_DEBUG,"Accept Error - Connection from Browser!\n");
+								#endif
+								delete newSocket;
+							}
+						else
+							{
+								oSocketList.add(lastChannelId++,newSocket);
+								oSocketGroup.add(*newSocket);
+							}
+					}
+				else if(options.getSOCKSServerPort()!=-1&&oSocketGroup.isSignaled(lpIOPair->socketSOCKSIn))
+					{
+						#ifdef _DEBUG
+							CAMsg::printMsg(LOG_DEBUG,"New Connection from SOCKS!\n");
+						#endif
+						newSocket=new CASocket;
+						if(lpIOPair->socketSOCKSIn.accept(*newSocket)==SOCKET_ERROR)
+							{
+								#ifdef _DEBUG
+									CAMsg::printMsg(LOG_DEBUG,"Accept Error - Connection from SOCKS!\n");
 								#endif
 								delete newSocket;
 							}
@@ -230,10 +172,21 @@ THREAD_RETURN lpIO(void *v)
 														delete tmpSocket;
 													}
 											}
-										else if(lpIOPair->muxOut.send(&oMuxPacket)==SOCKET_ERROR)
+										else 
 											{
-												CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Exiting!\n");									
-												exit(-1);
+												if(options.getSOCKSServerPort()!=-1&&tmpCon->pSocket->getLocalPort()==options.getSOCKSServerPort())
+													{
+														oMuxPacket.type=MUX_SOCKS;
+													}
+												else
+													{
+														oMuxPacket.type=MUX_HTTP;
+													}
+												if(lpIOPair->muxOut.send(&oMuxPacket)==SOCKET_ERROR)
+													{
+														CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Exiting!\n");									
+														exit(-1);
+													}
 											}
 										break;
 									}
@@ -254,6 +207,15 @@ int doLocalProxy()
 					CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
 					return -1;
 		    }
+		if(options.getSOCKSServerPort()!=-1)
+			{
+				socketAddrIn.setAddr("127.0.0.1",options.getSOCKSServerPort());
+				if(lpIOPair->socketSOCKSIn.listen(&socketAddrIn)==SOCKET_ERROR)
+						{
+							CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
+							return -1;
+						}
+			}
 		CASocketAddr addrNext;
 		char strTarget[255];
 		options.getTargetHost(strTarget,255);
@@ -584,6 +546,7 @@ struct LMPair
 	{
 		CAMuxSocket muxIn;
 		CASocketAddr addrSquid;
+		CASocketAddr addrSocks;
 	};
 
 THREAD_RETURN lmIO(void *v)
@@ -619,7 +582,12 @@ THREAD_RETURN lmIO(void *v)
 										    CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
 										#endif
 										tmpSocket=new CASocket;
-										if(tmpSocket->connect(&lmIOPair->addrSquid)==SOCKET_ERROR)
+										int ret;
+										if(oMuxPacket.type==MUX_SOCKS)
+											ret=tmpSocket->connect(&lmIOPair->addrSocks);
+										else
+											ret=tmpSocket->connect(&lmIOPair->addrSquid);	
+										if(ret==SOCKET_ERROR)
 										    {
 	    										#ifdef _DEBUG
 														CAMsg::printMsg(LOG_DEBUG,"Cannot connect to Squid!\n");
@@ -724,7 +692,11 @@ int doLastMix()
 		char strTarget[255];
 		options.getTargetHost(strTarget,255);
 		lmIOPair->addrSquid.setAddr(strTarget,options.getTargetPort());
-	//	_beginthread(lmIO,0,lmIOPair);
+
+		options.getSOCKSHost(strTarget,255);
+		lmIOPair->addrSocks.setAddr(strTarget,options.getSOCKSPort());
+		
+		//	_beginthread(lmIO,0,lmIOPair);
 		lmIO(lmIOPair);
 		//WaitForSingleObject(hEventThreadEnde,INFINITE);
 		delete lmIOPair;
