@@ -742,6 +742,7 @@ SKIP_NEXT_MIX:
 						m_arTargetInterfaces=new TargetInterface[m_cnTargets]; 
 						UINT32 aktInterface=0;
 						UINT32 type=0;
+						UINT32 proxy_type=0;
 						CASocketAddr* addr=NULL;
 						UINT16 port;
 						for(UINT32 i=0;i<nlTargetInterfaces.getLength();i++)
@@ -767,6 +768,21 @@ SKIP_NEXT_MIX:
 									type=SSL_UNIX;
 								else
 									continue;
+								//ProxyType
+								elemType=NULL;
+								getDOMChildByName(elemTargetInterface,(UINT8*)"ProxyType",elemType,false);
+								tmpLen=255;
+								if(getDOMElementValue(elemType,tmpBuff,&tmpLen)!=E_SUCCESS)
+									continue;
+								strtrim(tmpBuff);
+								if(strcmp((char*)tmpBuff,"SOCKS")==0)
+									proxy_type=TARGET_SOCKS_PROXY;
+								else if(strcmp((char*)tmpBuff,"HTTP")==0)
+									type=TARGET_HTTP_PROXY;
+								else
+									continue;
+								
+								
 								if(type==SSL_TCP||type==RAW_TCP)
 									{
 										DOM_Element elemPort;
@@ -807,6 +823,7 @@ SKIP_NEXT_MIX:
 									continue;
 		#endif
 								m_arTargetInterfaces[aktInterface].net_type=type;
+								m_arTargetInterfaces[aktInterface].target_type=proxy_type;
 								m_arTargetInterfaces[aktInterface].addr=addr->clone();
 								delete addr;
 								addr=NULL;
