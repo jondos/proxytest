@@ -3646,7 +3646,7 @@ case "$host" in
         CFLAGS="$CFLAGS "
         ;;
 *-*-freebsd*)
-	DEFAULTLIBS="$LIBS -liconv"
+	DEFAULTLIBS="$LIBS -L/usr/local/lib -liconv"
 	;;
 *)
 	;;
