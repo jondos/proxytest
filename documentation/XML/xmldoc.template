@@ -22,7 +22,12 @@ FirstMix to the InfoService.
 
 \par \anchor XMLMixHELO
 5. Mix-HELO send from the
-Middle- or LastMixFirst to the InfoService to announce itself.
+Middle- or LastMix to the InfoService to announce itself.
 \verbinclude MixHELO.xml 
+
+\par \anchor XMLMixKeyInfo
+6. Mix-KeyInfo send from the
+FirstMix to the JAP.
+\verbinclude FirstMixToJAP.xml 
 
 */
