@@ -70,7 +70,7 @@ class CAMiddleMixChannelList
 			
 			SINT32 getInToOut(HCHANNEL channelIn, HCHANNEL* channelOut,CASymCipher** ppCipher);
 			SINT32 remove(HCHANNEL channelIn);
-		
+			static SINT32 test();  
 		private:
 			SINT32 CAMiddleMixChannelList::getOutToIn_intern_without_lock(HCHANNEL* channelIn, HCHANNEL channelOut,CASymCipher** ppCipher)
 				{

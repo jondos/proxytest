@@ -145,3 +145,34 @@ SINT32 CAMiddleMixChannelList::remove(HCHANNEL channelIn)
 		return E_UNKNOWN;
 	}
 					
+SINT32 CAMiddleMixChannelList::test()
+				{
+					CAMiddleMixChannelList oList;
+					UINT32 c;
+					UINT32 d;
+					UINT32 rand;
+					for(int i=0;i<1000;i++)
+						{
+							getRandom(&c);
+							oList.add(c,NULL,&d);
+						}
+					for(i=0;i<100;i++)
+						{
+							getRandom(&rand);
+							if(rand<0x0FFFFFFF)
+								for(int i=0;i<5;i++)
+									{
+										getRandom(&c);
+										oList.add(c,NULL,&d);
+									}
+							getRandom(&rand);
+							if(rand<0x7FFFFFFF)
+								for(int i=0;i<100000;i++)
+									{
+										getRandom(&c);
+										oList.remove(c);
+									}
+						}
+					return 0;
+				}
+	
