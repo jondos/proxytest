@@ -162,7 +162,7 @@ SINT32 CALastMix::init()
 		aktIndex+=47;
 		//than insert the Mix id
 		options.getMixId(buff+aktIndex,50);
-		aktIndex=strlen((char*)buff+2);
+		aktIndex=strlen((char*)buff+2)+2;
 		//the closing chars for the <Mix> tag
 		memcpy(buff+aktIndex,"\">",2);
 		aktIndex+=2;
