@@ -602,7 +602,7 @@ THREAD_RETURN fmIO(void *v)
 								((CASocket*)newMuxSocket)->send((char*)infoBuff,infoSize);
 								oMuxChannelList.add(newMuxSocket);
 								nUser++;
-								oInfoService.setLevel(nUser,-1,-1);
+								oInfoService.setLevel(nUser,0,0);
 								oSocketGroup.add(*newMuxSocket);
 							}
 					}
