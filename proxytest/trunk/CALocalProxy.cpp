@@ -64,8 +64,8 @@ SINT32 CALocalProxy::init()
 		CAMsg::printMsg(LOG_INFO,"Try connecting to next Mix...\ncvs u");
 
 		((CASocket*)muxOut)->create();
-		((CASocket*)muxOut)->setSendBuff(sizeof(MUXPACKET)*50);
-		((CASocket*)muxOut)->setRecvBuff(sizeof(MUXPACKET)*50);
+		((CASocket*)muxOut)->setSendBuff(MIXPACKET_SIZE*50);
+		((CASocket*)muxOut)->setRecvBuff(MIXPACKET_SIZE*50);
 		if(muxOut.connect(addrNext)==E_SUCCESS)
 			{
 				
@@ -107,8 +107,8 @@ SINT32 CALocalProxy::loop()
 			oSocketGroup.add(socketSOCKSIn);
 		oSocketGroup.add(muxOut);
 		HCHANNEL lastChannelId=1;
-		MUXPACKET oMuxPacket;
-		memset(&oMuxPacket,0,sizeof(oMuxPacket));
+		MIXPACKET oMixPacket;
+		memset(&oMixPacket,0,MIXPACKET_SIZE);
 		int len,ret;
 		CASocket* newSocket;//,*tmpSocket;
 		CASymCipher* newCipher;
@@ -166,27 +166,27 @@ SINT32 CALocalProxy::loop()
 				if(oSocketGroup.isSignaled(muxOut))
 						{
 							countRead--;	
-							ret=muxOut.receive(&oMuxPacket);
+							ret=muxOut.receive(&oMixPacket);
 							if(ret==SOCKET_ERROR)
 								{
 									CAMsg::printMsg(LOG_CRIT,"Mux-Channel Receiving Data Error - Exiting!\n");									
 									exit(-1);
 								}
 
-							if(!oSocketList.get(oMuxPacket.channel,&oConnection))
+							if(!oSocketList.get(oMixPacket.channel,&oConnection))
 								{
 									CAMsg::printMsg(LOG_DEBUG,"Error Sending Data to Browser -- Channel-Id no valid!\n");										
 								}
 							else
 								{
 									for(int c=0;c<chainlen;c++)
-										oConnection.pCipher[c].decryptAES2((unsigned char*)oMuxPacket.data,oMuxPacket.data,DATA_SIZE);
-									if(oMuxPacket.flags==CHANNEL_CLOSE)
+										oConnection.pCipher[c].decryptAES2((unsigned char*)oMixPacket.data,oMixPacket.data,DATA_SIZE);
+									if(oMixPacket.flags==CHANNEL_CLOSE)
 										{
 											#ifdef _DEBUG
-												CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u ... ",oMuxPacket.channel);
+												CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u ... ",oMixPacket.channel);
 											#endif
-											/*tmpSocket=*/oSocketList.remove(oMuxPacket.channel);
+											/*tmpSocket=*/oSocketList.remove(oMixPacket.channel);
 											if(oConnection.pSocket!=NULL)
 												{
 													oSocketGroup.remove(*oConnection.pSocket);
@@ -203,7 +203,7 @@ SINT32 CALocalProxy::loop()
 											#ifdef _DEBUG
 												CAMsg::printMsg(LOG_DEBUG,"Sending Data to Browser!");
 											#endif
-											oConnection.pSocket->send(oMuxPacket.payload.data,ntohs(oMuxPacket.payload.len));
+											oConnection.pSocket->send(oMixPacket.payload.data,ntohs(oMixPacket.payload.len));
 										}
 								}
 						}
@@ -217,9 +217,9 @@ SINT32 CALocalProxy::loop()
 									{
 										countRead--;
 										if(!tmpCon->pCipher[0].isEncyptionKeyValid())
-											len=tmpCon->pSocket->receive(oMuxPacket.payload.data,PAYLOAD_SIZE-chainlen*16);
+											len=tmpCon->pSocket->receive(oMixPacket.payload.data,PAYLOAD_SIZE-chainlen*16);
 										else
-											len=tmpCon->pSocket->receive(oMuxPacket.payload.data,PAYLOAD_SIZE);
+											len=tmpCon->pSocket->receive(oMixPacket.payload.data,PAYLOAD_SIZE);
 										if(len==SOCKET_ERROR||len==0)
 											{
 												//TODO delete cipher..
@@ -234,15 +234,15 @@ SINT32 CALocalProxy::loop()
 											}
 										else 
 											{
-												oMuxPacket.channel=tmpCon->id;
-												oMuxPacket.payload.len=htons(len);
+												oMixPacket.channel=tmpCon->id;
+												oMixPacket.payload.len=htons(len);
 												if(bHaveSocks&&tmpCon->pSocket->getLocalPort()==socksPort)
 													{
-														oMuxPacket.payload.type=MUX_SOCKS;
+														oMixPacket.payload.type=MIX_PAYLOAD_SOCKS;
 													}
 												else
 													{
-														oMuxPacket.payload.type=MUX_HTTP;
+														oMixPacket.payload.type=MIX_PAYLOAD_HTTP;
 													}
 												if(!tmpCon->pCipher[0].isEncyptionKeyValid()) //First time --> rsa key
 													{
@@ -254,22 +254,22 @@ SINT32 CALocalProxy::loop()
 															{
 																RAND_bytes(buff,16);
 																tmpCon->pCipher[c].setKeyAES(buff);
-																memcpy(buff+KEY_SIZE,oMuxPacket.data,size);
+																memcpy(buff+KEY_SIZE,oMixPacket.data,size);
 																arRSA[c].encrypt(buff,buff);
 																tmpCon->pCipher[c].encryptAES(buff+RSA_SIZE,buff+RSA_SIZE,DATA_SIZE-RSA_SIZE);
-																memcpy(oMuxPacket.data,buff,DATA_SIZE);
+																memcpy(oMixPacket.data,buff,DATA_SIZE);
 																size-=KEY_SIZE;
 																len+=KEY_SIZE;
 															}
-														oMuxPacket.flags=CHANNEL_OPEN;
+														oMixPacket.flags=CHANNEL_OPEN;
 													}
 												else //sonst
 													{
 														for(int c=0;c<chainlen;c++)
-															tmpCon->pCipher[c].encryptAES((unsigned char*)oMuxPacket.data,oMuxPacket.data,DATA_SIZE);
-														oMuxPacket.flags=CHANNEL_DATA;
+															tmpCon->pCipher[c].encryptAES((unsigned char*)oMixPacket.data,oMixPacket.data,DATA_SIZE);
+														oMixPacket.flags=CHANNEL_DATA;
 													}
-												if(muxOut.send(&oMuxPacket)==SOCKET_ERROR)
+												if(muxOut.send(&oMixPacket)==SOCKET_ERROR)
 													{
 														CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Exiting!\n");									
 														exit(-1);

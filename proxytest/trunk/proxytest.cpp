@@ -111,33 +111,50 @@ Free mixes are not useable for JAP, but could be connected to build a new cascad
   
 \subsection docMux Mulitplexing and Demultiplexing
 
-JAP acts as a local proxy for the browser. The browser opens many connections to the JAP (usually one per HTTP-Request).
+JAP acts as a local proxy for the browser. 
+The browser opens many connections to the JAP (usually one per HTTP-Request).
 All this connections are multiplexed over the one connection to the first mix JAP is connected to.
-Every connection from the browser is called a \em channel (mix channel or anonymous channel). A first mix sends the packets from multiple channels from multiple users to the next mix.
+Every connection from the browser is called a \em channel (mix channel or anonymous channel). 
+A first mix sends the stream of packets (from multiple channels) from multiple users to the next mix.
 All over one TCP/IP connection. So JAP and the mixes have to multiplex/demultiplex the channels.
-A channel can transport only fixed sized packets. These packets are called \em mix-packets. So a first mix for instance gets many packets from different users in parallel 
+A channel can transport only fixed sized packets. These packets are called \em mix-packets. 
+So a first mix for instance gets many packets from different users in parallel 
 and sends them to the next mix in a serialized way. (see Figure 2)
 
-Each mix packet has a size of MIX_PACKET_SIZE bytes. The header of the packet is as follows:
-4 bytes Channel-ID
-2 bytes Flags
-DATA_SIZE content (transported bytes)
-The content bytes have different meanings in differnet situations and mixes.
+\image html JAPMixPacketMux.gif "Figure 2: Mux/DeMux of fixed sized mix-packets"
+
+
+Each mix-packet has a size of #MIXPACKET_SIZE (998) bytes. 
+The header of each packet is as follows (see also: #MIXPACKET):
+\li 4 bytes \c channel-id
+\li 2 bytes \c flags
+\li #DATA_SIZE (992) bytes  \c content (transported bytes)
+
+The content bytes have different meanings in different situations and mixes.
 For instance the content itself is meaningful only at the last mix (because of multiple encryptions)
 The format of the content (at the last mix) is:
-2 bytes len
-1 byte type
-PAYLOAD_SIZE bytes payload
+\li 2 bytes \c len
+\li 1 byte \c type
+\li #PAYLOAD_SIZE (989) bytes \c payload
 
-They payload are the bytes what should be transported from the browser to the Internet or back via the anonymous channel.
+They payload are the bytes what should be transported from the browser to the Internet 
+or back via the anonymous channel.
 
-The Channel-ID is changed in every mix. Also the content bytes changes in every mix, because each mix will perform a single encryption/decryption.
+The channel-id is changed in every mix. Also the content bytes changes in every mix, 
+because each mix will perform a single encryption/decryption.
 
 
 */
 int main(int argc, const char* argv[])
 	{
+		//some test....
+		if(MIXPACKET_SIZE!=sizeof(MIXPACKET))
+			{
+				CAMsg::printMsg(LOG_CRIT,"MIXPACKET_SIZE != sizeof(MUXPACKET) --> maybe a compiler (optimization) problem!\n");
+				exit(-1);
+			}
 
+		//startup
 		#ifdef _WIN32
 			int err=0;
 			WSADATA wsadata;

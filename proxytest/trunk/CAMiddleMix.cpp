@@ -267,8 +267,8 @@ SINT32 CAMiddleMix::init()
 				CAMsg::printMsg(LOG_CRIT,"Init: Cannot create SOCKET for outgoing conncetion...\n");
 				return E_UNKNOWN;
 			}
-		((CASocket*)muxOut)->setRecvBuff(50*MUXPACKET_SIZE);
-		((CASocket*)muxOut)->setSendBuff(50*MUXPACKET_SIZE);
+		((CASocket*)muxOut)->setRecvBuff(50*MIXPACKET_SIZE);
+		((CASocket*)muxOut)->setSendBuff(50*MIXPACKET_SIZE);
 #define RETRIES 100
 #define RETRYTIME 30
 		CAMsg::printMsg(LOG_INFO,"Init: Try to connect to next Mix: %s...\n",strTarget);
@@ -314,8 +314,8 @@ SINT32 CAMiddleMix::init()
 				delete recvBuff;
 				return E_UNKNOWN;
 			}
-		((CASocket*)muxIn)->setRecvBuff(50*MUXPACKET_SIZE);
-		((CASocket*)muxIn)->setSendBuff(50*MUXPACKET_SIZE);
+		((CASocket*)muxIn)->setRecvBuff(50*MIXPACKET_SIZE);
+		((CASocket*)muxIn)->setSendBuff(50*MIXPACKET_SIZE);
 		if(((CASocket*)muxIn)->setKeepAlive((UINT32)1800)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_INFO,"Socket option TCP-KEEP-ALIVE returned an error - so not set!\n");
@@ -364,7 +364,7 @@ SINT32 CAMiddleMix::init()
 SINT32 CAMiddleMix::loop()
 	{
 		CONNECTION oConnection;
-		MUXPACKET oMuxPacket;
+		MIXPACKET oMixPacket;
 		HCHANNEL lastId=1;
 		SINT32 ret;
 		UINT8 tmpRSABuff[RSA_SIZE];
@@ -383,7 +383,7 @@ SINT32 CAMiddleMix::loop()
 					}
 				if(oSocketGroup.isSignaled(muxIn))
 					{
-						ret=muxIn.receive(&oMuxPacket,0);
+						ret=muxIn.receive(&oMixPacket,0);
 						if(ret==SOCKET_ERROR)
 							{
 								CAMsg::printMsg(LOG_CRIT,"Fehler beim Empfangen -- Exiting!\n");
@@ -391,40 +391,40 @@ SINT32 CAMiddleMix::loop()
 							}
 						if(ret==E_AGAIN)
 							goto NEXT;
-						if(!oSocketList.get(oMuxPacket.channel,&oConnection))
+						if(!oSocketList.get(oMixPacket.channel,&oConnection))
 							{
-								if(oMuxPacket.flags==CHANNEL_OPEN)
+								if(oMixPacket.flags==CHANNEL_OPEN)
 									{
 										#ifdef _DEBUG
 										    CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
 										#endif
 										CASymCipher* newCipher=new CASymCipher();
-										mRSA.decrypt((unsigned char*)oMuxPacket.data,tmpRSABuff);
+										mRSA.decrypt((unsigned char*)oMixPacket.data,tmpRSABuff);
 										newCipher->setKeyAES(tmpRSABuff);
-										newCipher->decryptAES(oMuxPacket.data+RSA_SIZE,
-																					oMuxPacket.data+RSA_SIZE-KEY_SIZE,
+										newCipher->decryptAES(oMixPacket.data+RSA_SIZE,
+																					oMixPacket.data+RSA_SIZE-KEY_SIZE,
 																					DATA_SIZE-RSA_SIZE);
-										memcpy(oMuxPacket.data,tmpRSABuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
-										oSocketList.add(oMuxPacket.channel,lastId,newCipher);
-										oMuxPacket.channel=lastId;
+										memcpy(oMixPacket.data,tmpRSABuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
+										oSocketList.add(oMixPacket.channel,lastId,newCipher);
+										oMixPacket.channel=lastId;
 										lastId++;
-										if(muxOut.send(&oMuxPacket)==SOCKET_ERROR)
+										if(muxOut.send(&oMixPacket)==SOCKET_ERROR)
 											goto ERR;
 									}
 							}
 						else
 							{
-								if(oMuxPacket.flags==CHANNEL_CLOSE)
+								if(oMixPacket.flags==CHANNEL_CLOSE)
 									{
 										if(muxOut.close(oConnection.outChannel)==SOCKET_ERROR)
 											goto ERR;
-										oSocketList.remove(oMuxPacket.channel);
+										oSocketList.remove(oMixPacket.channel);
 									}
 								else
 									{
-										oMuxPacket.channel=oConnection.outChannel;
-										oConnection.pCipher->decryptAES(oMuxPacket.data,oMuxPacket.data,DATA_SIZE);
-										if(muxOut.send(&oMuxPacket)==SOCKET_ERROR)
+										oMixPacket.channel=oConnection.outChannel;
+										oConnection.pCipher->decryptAES(oMixPacket.data,oMixPacket.data,DATA_SIZE);
+										if(muxOut.send(&oMixPacket)==SOCKET_ERROR)
 											goto ERR;
 									}
 							}
@@ -432,7 +432,7 @@ SINT32 CAMiddleMix::loop()
 NEXT:				
 				if(oSocketGroup.isSignaled(muxOut))
 					{
-						ret=muxOut.receive(&oMuxPacket,0);
+						ret=muxOut.receive(&oMixPacket,0);
 						if(ret==SOCKET_ERROR)
 							{
 								CAMsg::printMsg(LOG_CRIT,"Fehler beim Empfangen -- Exiting!\n");
@@ -440,13 +440,13 @@ NEXT:
 							}
 						if(ret==E_AGAIN)
 							continue;
-						if(oSocketList.get(&oConnection,oMuxPacket.channel))
+						if(oSocketList.get(&oConnection,oMixPacket.channel))
 							{
-								if(oMuxPacket.flags!=CHANNEL_CLOSE)
+								if(oMixPacket.flags!=CHANNEL_CLOSE)
 									{
-										oMuxPacket.channel=oConnection.id;
-										oConnection.pCipher->decryptAES2(oMuxPacket.data,oMuxPacket.data,DATA_SIZE);
-										if(muxIn.send(&oMuxPacket)==SOCKET_ERROR)
+										oMixPacket.channel=oConnection.id;
+										oConnection.pCipher->decryptAES2(oMixPacket.data,oMixPacket.data,DATA_SIZE);
+										if(muxIn.send(&oMixPacket)==SOCKET_ERROR)
 											goto ERR;
 									}
 								else
@@ -458,7 +458,7 @@ NEXT:
 							}
 						else
 							{
-								if(muxOut.close(oMuxPacket.channel)==SOCKET_ERROR)
+								if(muxOut.close(oMixPacket.channel)==SOCKET_ERROR)
 									goto ERR;
 							}
 					}

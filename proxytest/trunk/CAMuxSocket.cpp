@@ -37,7 +37,7 @@ char buff[255];
 
 CAMuxSocket::CAMuxSocket()
 	{
-		m_Buff=new UINT8[MUXPACKET_SIZE];
+		m_Buff=new UINT8[MIXPACKET_SIZE];
 		m_aktBuffPos=0;
 		bIsCrypted=false;
 		InitializeCriticalSection(&csSend);
@@ -97,7 +97,7 @@ SINT32 CAMuxSocket::accept(UINT16 port)
 		if(oSocket.accept(m_Socket)==SOCKET_ERROR)
 			return SOCKET_ERROR;
 		oSocket.close();
-		m_Socket.setRecvLowWat(sizeof(MUXPACKET));
+		m_Socket.setRecvLowWat(sizeof(MIXPACKET));
 		return E_SUCCESS;
 	}
 
@@ -111,7 +111,7 @@ SINT32 CAMuxSocket::accept(CASocketAddr& oAddr)
 		if(oSocket.accept(m_Socket)==SOCKET_ERROR)
 			return SOCKET_ERROR;
 		oSocket.close();
-		m_Socket.setRecvLowWat(sizeof(MUXPACKET));
+		m_Socket.setRecvLowWat(sizeof(MIXPACKET));
 		return E_SUCCESS;
 	}
 
@@ -126,7 +126,7 @@ SINT32 CAMuxSocket::connect(CASocketAddr & psa,UINT retry,UINT32 time)
 	{
 //		if(!bIsTunneld)
 //			{
-				m_Socket.setRecvLowWat(MUXPACKET_SIZE);
+				m_Socket.setRecvLowWat(MIXPACKET_SIZE);
 				return m_Socket.connect(psa,retry,time);
 /*			}
 		else
@@ -150,7 +150,7 @@ int CAMuxSocket::close()
 */	}
 
 #ifndef PROT2
-int CAMuxSocket::send(MUXPACKET *pPacket)
+int CAMuxSocket::send(MIXPACKET *pPacket)
 	{
 		int MuxPacketSize=sizeof(MUXPACKET);
 		int aktIndex=0;
@@ -190,7 +190,7 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 	}
 #else
 
-int CAMuxSocket::send(MUXPACKET *pPacket)
+int CAMuxSocket::send(MIXPACKET *pPacket)
 	{
 		EnterCriticalSection(&csSend);
 		int ret;
@@ -200,7 +200,7 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 		pPacket->flags=htons(pPacket->flags);
 		if(bIsCrypted)
     	ocipherOut.encryptAES(((UINT8*)pPacket),((UINT8*)pPacket),16);
-		ret=m_Socket.send(((UINT8*)pPacket),MUXPACKET_SIZE);
+		ret=m_Socket.send(((UINT8*)pPacket),MIXPACKET_SIZE);
 		if(ret==SOCKET_ERROR)
 			{
 				#ifdef _DEBUG
@@ -212,7 +212,7 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 		else if(ret==E_QUEUEFULL)
 			ret=E_QUEUEFULL;
 		else
-			ret=MUXPACKET_SIZE;
+			ret=MIXPACKET_SIZE;
 		memcpy(pPacket,tmpBuff,16);
 		LeaveCriticalSection(&csSend);
 		return ret;
@@ -220,7 +220,7 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 #endif
 
 #ifndef PROT2
-int CAMuxSocket::receive(MUXPACKET* pPacket)
+int CAMuxSocket::receive(MIXPACKET* pPacket)
 	{
 		int MuxPacketSize=sizeof(MUXPACKET);
 		int aktIndex=0;
@@ -264,10 +264,10 @@ int CAMuxSocket::receive(MUXPACKET* pPacket)
 		return pPacket->len;
 	}
 #else
-SINT32 CAMuxSocket::receive(MUXPACKET* pPacket)
+SINT32 CAMuxSocket::receive(MIXPACKET* pPacket)
 	{
 		EnterCriticalSection(&csReceive);
-		if(m_Socket.receiveFully((UINT8*)pPacket,MUXPACKET_SIZE)!=E_SUCCESS)
+		if(m_Socket.receiveFully((UINT8*)pPacket,MIXPACKET_SIZE)!=E_SUCCESS)
 			{
 				LeaveCriticalSection(&csReceive);
 				return SOCKET_ERROR;
@@ -277,16 +277,16 @@ SINT32 CAMuxSocket::receive(MUXPACKET* pPacket)
 		pPacket->channel=ntohl(pPacket->channel);
 		pPacket->flags=ntohs(pPacket->flags);
 		LeaveCriticalSection(&csReceive);		
-		return MUXPACKET_SIZE;
+		return MIXPACKET_SIZE;
 	}
 
 /**Trys to receive a Mix-Packet. If after timout milliseconds not a whole packet is available
 * E_AGAIN will be returned. In this case you should later try to get the rest of the packet
 */
-SINT32 CAMuxSocket::receive(MUXPACKET* pPacket,UINT32 timeout)
+SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 timeout)
 	{
 		EnterCriticalSection(&csReceive);
-		SINT32 len=MUXPACKET_SIZE-m_aktBuffPos;
+		SINT32 len=MIXPACKET_SIZE-m_aktBuffPos;
 		SINT32 ret=m_Socket.receive(m_Buff+m_aktBuffPos,len);
 		if(ret<=0)
 			{
@@ -297,12 +297,12 @@ SINT32 CAMuxSocket::receive(MUXPACKET* pPacket,UINT32 timeout)
 			{
 				if(bIsCrypted)
         	ocipherIn.decryptAES(m_Buff,m_Buff,16);
-				memcpy(pPacket,m_Buff,MUXPACKET_SIZE);
+				memcpy(pPacket,m_Buff,MIXPACKET_SIZE);
 				pPacket->channel=ntohl(pPacket->channel);
 				pPacket->flags=ntohs(pPacket->flags);
 				m_aktBuffPos=0;
 				LeaveCriticalSection(&csReceive);
-				return MUXPACKET_SIZE;
+				return MIXPACKET_SIZE;
 			}
 		m_aktBuffPos+=ret;
 		if(timeout==0)
@@ -334,12 +334,12 @@ SINT32 CAMuxSocket::receive(MUXPACKET* pPacket,UINT32 timeout)
 							{
 								if(bIsCrypted)
                 	ocipherIn.decryptAES(m_Buff,m_Buff,16);
-								memcpy(pPacket,m_Buff,MUXPACKET_SIZE);
+								memcpy(pPacket,m_Buff,MIXPACKET_SIZE);
 								pPacket->channel=ntohl(pPacket->channel);
 								pPacket->flags=ntohs(pPacket->flags);
 								m_aktBuffPos=0;
 								LeaveCriticalSection(&csReceive);
-								return MUXPACKET_SIZE;
+								return MIXPACKET_SIZE;
 							}
 						m_aktBuffPos+=ret;
 					}
@@ -361,7 +361,7 @@ int CAMuxSocket::close(HCHANNEL channel_id)
 #else
 int CAMuxSocket::close(HCHANNEL channel_id)
 	{
-		MUXPACKET oPacket;
+		MIXPACKET oPacket;
 		oPacket.channel=channel_id;
 		oPacket.flags=CHANNEL_CLOSE;
 		return send(&oPacket);
