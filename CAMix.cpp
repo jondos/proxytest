@@ -34,6 +34,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 CAMix::CAMix()
 {
     m_acceptReconfiguration = options.acceptReconfiguration();
+		m_pSignature=NULL;
+		m_pInfoService=NULL;
 }
 
 SINT32 CAMix::start()
