@@ -463,6 +463,7 @@ NEXT:
 					}
 			}
 ERR:
+		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
 		CONNECTION* pCon=oSocketList.getFirst();
 		while(pCon!=NULL)
 			{

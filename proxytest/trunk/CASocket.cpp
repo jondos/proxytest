@@ -416,16 +416,20 @@ SINT32 CASocket::setKeepAlive(UINT32 sec)
 #endif
 	}
 
-SINT32 CASocket::setASyncSend(bool b,SINT32 size,CASocketASyncSendResume* pResume)
+SINT32 CASocket::setASyncSend(bool b,SINT32 estimatedSendSize,UINT32 lowwater,UINT32 SendQueueSoftLimit,CASocketASyncSendResume* pResume)
 	{
 		if(b)
 			{
-				if(size!=-1)
-					setSendLowWat(size);
+				if(estimatedSendSize!=-1)
+					setSendLowWat(estimatedSendSize);
 				if(m_pASyncSend==NULL)
 					{
 						m_pASyncSend=new CASocketASyncSend();
 						m_pASyncSend->setResume(pResume);
+						if(SendQueueSoftLimit!=0)
+							m_pASyncSend->setSendQueueSoftLimit(SendQueueSoftLimit);
+						if(lowwater!=0)
+							m_pASyncSend->setSendQueueLowWater(lowwater);
 						m_pASyncSend->start();
 					}
 			}
