@@ -118,6 +118,28 @@ if (test ! -z "$ac_cv_openssldir" && test "x$ac_cv_openssldir" != "x(system)") ;
 fi
 LIBS="$saved_LIBS -lcrypto"
 
+xmlincludedir="/usr/local/include/xercesc"
+dnl Check for XML libs and includes.
+AC_ARG_WITH(xml-include,
+	[  --with-xml-include=PATH     Specify path to XERCES-C include files],
+	[
+		if test "x$withval" != "$xno" ; then
+			xmlincludedir=$withval
+		fi
+	]
+)
+CFLAGS="$CFLAGS -I$xmlincludedir"
+
+xmllibdir="/usr/local/lib"
+AC_ARG_WITH(xml-lib,
+	[  --with-xml-lib=PATH     Specify path to XERCES-C library files],
+	[
+		if test "x$withval" != "$xno" ; then
+			xmllibdir=$withval
+		fi
+	]
+)
+LIBS="$LIBS -L$xmllibdir -lxercesc"
 
 dnl Checks for header files.
 AC_HEADER_STDC([])
