@@ -1,0 +1,538 @@
+/*
+Copyright (c) 2000, The JAP-Team 
+All rights reserved.
+Redistribution and use in source and binary forms, with or without modification, 
+are permitted provided that the following conditions are met:
+
+	- Redistributions of source code must retain the above copyright notice, 
+	  this list of conditions and the following disclaimer.
+
+	- Redistributions in binary form must reproduce the above copyright notice, 
+	  this list of conditions and the following disclaimer in the documentation and/or 
+		other materials provided with the distribution.
+
+	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors 
+	  may be used to endorse or promote products derived from this software without specific 
+		prior written permission. 
+
+	
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS 
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
+AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
+BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
+OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
+OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
+*/
+#include "StdAfx.h"
+#include "CALocalProxy.hpp"
+#include "CASocketList.hpp"
+#include "CASocketGroup.hpp"
+#include "CAMsg.hpp"
+#include "CACmdLnOptions.hpp"
+#include "CAUtil.hpp"
+#include "CASocketAddrINet.hpp"
+#ifndef NEW_MIX_TYPE
+extern CACmdLnOptions options;
+// signals the main loop whether to capture or replay packets
+bool CALocalProxy::bCapturePackets;
+bool CALocalProxy::bReplayPackets;
+int CALocalProxy::iCapturedPackets;
+
+// Signal handler for SIGUSR1.
+// This starts the capture with the next channel-open message.
+void SIGUSR1_handler(int signum)
+	{
+		CAMsg::printMsg(LOG_DEBUG,"Starting to capture packets for replay attack.\n");
+		CALocalProxy::bCapturePackets = true;
+		CALocalProxy::iCapturedPackets = 0;
+	}
+
+// Signal handler for SIGUSR2.
+// This replays the currently captured packets.
+void SIGUSR2_handler(int signum)
+	{
+		CAMsg::printMsg(LOG_DEBUG,"Starting replay of packets.\n");
+		CALocalProxy::bReplayPackets = true;
+	}
+
+
+SINT32 CALocalProxy::initOnce()
+	{
+		if(options.getListenerInterfaceCount()<1)
+		  {
+				CAMsg::printMsg(LOG_CRIT,"No Listener Interface spezified!\n");
+				return E_UNKNOWN;
+			}
+
+		bCapturePackets = bReplayPackets = false;
+		#if defined(REPLAY_DETECTION)&&!defined(_WIN32)
+			// Set up signal handling for the replay attack.
+			signal(SIGUSR1, SIGUSR1_handler);
+			signal(SIGUSR2, SIGUSR2_handler);
+		#endif
+
+		UINT8 strTarget[255];
+		if(options.getMixHost(strTarget,255)!=E_SUCCESS)
+		  {
+				CAMsg::printMsg(LOG_CRIT,"No AnonServer specified!\n");
+				return E_UNKNOWN;
+			}
+		return E_SUCCESS;
+	}
+
+SINT32 CALocalProxy::init()
+	{
+		CAListenerInterface* pListener;
+		
+		m_socketIn.create();
+		m_socketIn.setReuseAddr(true);
+		pListener=options.getListenerInterface(1);
+		if(pListener==NULL)
+			{
+				CAMsg::printMsg(LOG_CRIT,"No listener specified\n");
+				return E_UNKNOWN;
+			}
+		CASocketAddrINet* pSocketAddrIn=(CASocketAddrINet*)pListener->getAddr();
+		delete pListener;
+		if(pSocketAddrIn->isAnyIP())
+			pSocketAddrIn->setAddr((UINT8*)"127.0.0.1",pSocketAddrIn->getPort());
+		if(m_socketIn.listen(*pSocketAddrIn)!=E_SUCCESS)
+		  {
+				CAMsg::printMsg(LOG_CRIT,"Cannot listen (1)\n");
+				delete pSocketAddrIn;
+				return E_UNKNOWN;
+			}
+		delete pSocketAddrIn;
+/*		if(options.getSOCKSServerPort()!=(UINT16)-1)
+			{
+				socketAddrIn.setAddr((UINT8*)"127.0.0.1",options.getSOCKSServerPort());
+				m_socketSOCKSIn.create();
+				m_socketSOCKSIn.setReuseAddr(true);
+				if(m_socketSOCKSIn.listen(socketAddrIn)!=E_SUCCESS)
+					{
+						CAMsg::printMsg(LOG_CRIT,"Cannot listen (2)\n");
+						return E_UNKNOWN;
+					}
+			}*/
+		CASocketAddrINet addrNext;
+		UINT8 strTarget[255];
+		options.getMixHost(strTarget,255);
+		addrNext.setAddr(strTarget,options.getMixPort());
+		CAMsg::printMsg(LOG_INFO,"Try connecting to next Mix...\n");
+
+		((CASocket*)m_muxOut)->create();
+		((CASocket*)m_muxOut)->setSendBuff(MIXPACKET_SIZE*50);
+		((CASocket*)m_muxOut)->setRecvBuff(MIXPACKET_SIZE*50);
+		if(m_muxOut.connect(addrNext)==E_SUCCESS)
+			{
+				
+				CAMsg::printMsg(LOG_INFO," connected!\n");
+				UINT16 size;
+				UINT8 byte;
+				((CASocket*)m_muxOut)->receiveFully((UINT8*)&size,2);
+				((CASocket*)m_muxOut)->receiveFully((UINT8*)&byte,1);
+				CAMsg::printMsg(LOG_INFO,"Received Key Info!\n");
+				if(byte=='<')//assuming XML
+					{
+						size=ntohs(size);
+						UINT8* buff=new UINT8[size+1];
+						buff[0]=byte;
+						((CASocket*)m_muxOut)->receiveFully(buff+1,size-1);
+						buff[size]=0;
+						SINT32 ret=processKeyExchange(buff,size);
+						delete []  buff;
+						if(ret!=E_SUCCESS)
+							return E_UNKNOWN;
+					}
+				else
+					{
+						return E_UNKNOWN;
+					}
+				return E_SUCCESS;
+			}
+		else
+			{
+				CAMsg::printMsg(LOG_CRIT,"Cannot connect to next Mix!\n");
+				return E_UNKNOWN;
+			}
+	}
+
+SINT32 CALocalProxy::loop()
+	{
+		CASocketList  oSocketList;
+		CASocketGroup oSocketGroup(false);
+		oSocketGroup.add(m_socketIn);
+		UINT16 socksPort=options.getSOCKSServerPort();
+		bool bHaveSocks=(socksPort!=0xFFFF);
+		if(bHaveSocks)
+			oSocketGroup.add(m_socketSOCKSIn);
+		oSocketGroup.add(m_muxOut);
+		MIXPACKET* pMixPacket=new MIXPACKET;
+
+		memset(pMixPacket,0,MIXPACKET_SIZE);
+		SINT32 len,ret;
+		CASocket* newSocket;//,*tmpSocket;
+		CASymCipher* newCipher;
+		int countRead;
+		CONNECTION oConnection;
+
+		// Temporary storage for packets that could be replayed.
+		MIXPACKET* pReplayMixPackets=new MIXPACKET[REPLAY_COUNT];
+		memset(pReplayMixPackets,0,MIXPACKET_SIZE*REPLAY_COUNT);
+		// channel ID from which packets are captured
+		unsigned uCapturedChannel = 0;
+
+
+		for(;;)
+			{
+				// Add timeout to select to allow for a replay attack to take place.
+				if((countRead=oSocketGroup.select(100))==SOCKET_ERROR)
+					{
+						sSleep(1);
+						continue;
+					}
+
+				// Start a replay attack, if a packet is present
+				if(bReplayPackets)
+					{
+						if(iCapturedPackets > 0)
+							{
+								for(int i = 0; i < iCapturedPackets; i++)
+									{
+										memcpy(pMixPacket,&pReplayMixPackets[i],MIXPACKET_SIZE);
+										CAMsg::printMsg(LOG_DEBUG,"Replaying packet #%d: %X %X %X %X\n", (i+1), *pMixPacket->data, *(pMixPacket->data+1), *(pMixPacket->data+2), *(pMixPacket->data+3));
+										if(m_muxOut.send(pMixPacket)==SOCKET_ERROR)
+											{
+												CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Exiting!\n");
+												ret=E_UNKNOWN;
+												goto MIX_CONNECTION_ERROR;
+											}
+									}
+								memset(pMixPacket,0,MIXPACKET_SIZE);
+							}
+						else
+							{
+								CAMsg::printMsg(LOG_DEBUG,"No captured packets found.\n");
+							}
+					CAMsg::printMsg(LOG_DEBUG,"Replay finished.\n");
+					bReplayPackets = false;
+				}
+
+				if(oSocketGroup.isSignaled(m_socketIn))
+					{
+						countRead--;
+						#ifdef _DEBUG
+							CAMsg::printMsg(LOG_DEBUG,"New Connection from Browser!\n");
+						#endif
+						newSocket=new CASocket;
+						if(m_socketIn.accept(*newSocket)!=E_SUCCESS)
+							{
+								#ifdef _DEBUG
+									CAMsg::printMsg(LOG_DEBUG,"Accept Error - Connection from Browser!\n");
+								#endif
+								delete newSocket;
+							}
+						else
+							{
+								newCipher=new CASymCipher[m_chainlen];
+								oSocketList.add(newSocket,newCipher);
+								oSocketGroup.add(*newSocket);
+							}
+					}
+				if(bHaveSocks&&oSocketGroup.isSignaled(m_socketSOCKSIn))
+					{
+						countRead--;
+						#ifdef _DEBUG
+							CAMsg::printMsg(LOG_DEBUG,"New Connection from SOCKS!\n");
+						#endif
+						newSocket=new CASocket;
+						if(m_socketSOCKSIn.accept(*newSocket)!=E_SUCCESS)
+							{
+								#ifdef _DEBUG
+									CAMsg::printMsg(LOG_DEBUG,"Accept Error - Connection from SOCKS!\n");
+								#endif
+								delete newSocket;
+							}
+						else
+							{
+								newCipher=new CASymCipher[m_chainlen];
+								oSocketList.add(newSocket,newCipher);
+								oSocketGroup.add(*newSocket);
+							}
+					}
+				if(oSocketGroup.isSignaled(m_muxOut))
+						{
+							countRead--;	
+							ret=m_muxOut.receive(pMixPacket);
+							if(ret==SOCKET_ERROR)
+								{
+									CAMsg::printMsg(LOG_CRIT,"Mux-Channel Receiving Data Error - Exiting!\n");									
+									ret=E_UNKNOWN;
+									goto MIX_CONNECTION_ERROR;
+								}
+
+							if(oSocketList.get(pMixPacket->channel,&oConnection)==E_SUCCESS)
+								{
+									if(pMixPacket->flags==CHANNEL_CLOSE)
+										{
+											#ifdef _DEBUG
+												CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u ... ",pMixPacket->channel);
+											#endif
+											/*tmpSocket=*/oSocketList.remove(pMixPacket->channel);
+											if(oConnection.pSocket!=NULL)
+												{
+													oSocketGroup.remove(*oConnection.pSocket);
+													oConnection.pSocket->close();
+													#ifdef _DEBUG
+														CAMsg::printMsg(LOG_DEBUG,"closed!\n");
+													#endif
+													delete oConnection.pSocket;
+													delete [] oConnection.pCiphers;
+
+													// stop capturing packets when the channel is closed
+													if(pMixPacket->channel == uCapturedChannel)
+														{
+															CAMsg::printMsg(LOG_DEBUG,"Stopping to capture packets.\n");
+															bCapturePackets = false;
+														}
+												}
+										}
+									else
+										{
+											for(UINT32 c=0;c<m_chainlen;c++)
+												oConnection.pCiphers[c].crypt2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+											#ifdef _DEBUG
+												CAMsg::printMsg(LOG_DEBUG,"Sending Data to Browser!");
+											#endif
+											oConnection.pSocket->send(pMixPacket->payload.data,ntohs(pMixPacket->payload.len));
+										}
+								}
+						}
+				if(countRead>0)
+					{
+						CONNECTION* tmpCon;
+						tmpCon=oSocketList.getFirst();
+						while(tmpCon!=NULL&&countRead>0)
+							{
+								if(oSocketGroup.isSignaled(*tmpCon->pSocket))
+									{
+										countRead--;
+										getRandom(pMixPacket->payload.data,PAYLOAD_SIZE);
+										if(!tmpCon->pCiphers[0].isKeyValid())
+											len=tmpCon->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE-m_chainlen*(KEY_SIZE + TIMESTAMP_SIZE));
+										else
+											len=tmpCon->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE);
+										if(len==SOCKET_ERROR||len==0)
+											{
+												//TODO delete cipher..
+												CASocket* tmpSocket=oSocketList.remove(tmpCon->outChannel);
+												if(tmpSocket!=NULL)
+													{
+														oSocketGroup.remove(*tmpSocket);
+														pMixPacket->flags=CHANNEL_CLOSE;
+														pMixPacket->channel=tmpCon->outChannel;
+														getRandom(pMixPacket->data,DATA_SIZE);
+														m_muxOut.send(pMixPacket);
+														tmpSocket->close();
+														delete tmpSocket;
+													}
+											}
+										else 
+											{
+												pMixPacket->channel=tmpCon->outChannel;
+												pMixPacket->payload.len=htons(len);
+												if(bHaveSocks&&tmpCon->pSocket->getLocalPort()==socksPort)
+													{
+														pMixPacket->payload.type=MIX_PAYLOAD_SOCKS;
+													}
+												else
+													{
+														pMixPacket->payload.type=MIX_PAYLOAD_HTTP;
+													}
+												if(!tmpCon->pCiphers[0].isKeyValid()) //First time --> rsa key
+													{
+														//Has to bee optimized!!!!
+														UINT8 buff[DATA_SIZE];
+														UINT32 size=DATA_SIZE-KEY_SIZE-TIMESTAMP_SIZE;
+														//tmpCon->pCipher->generateEncryptionKey(); //generate Key
+														for(UINT32 c=0;c<m_chainlen;c++)
+															{
+																getRandom(buff,KEY_SIZE);
+																buff[0]&=0x7F; // Hack for RSA to ensure m < n !!!!!
+																tmpCon->pCiphers[c].setKey(buff);
+																/*
+																	PROTOCOL CHANGE:
+																	This is a change in the protocol between JAP and the mixes:
+																	In the RSA encrypted part of the channel-open packet apart
+																	from the symmetric key for each mix, we now include a
+																	TIMESTAMP_SIZE bytes wide timestamp. This reduces the storage
+																	space for symmetrical keys in the RSA_SIZE wide part of the
+																	packet (from 8 to 7).
+																*/
+																#ifdef WITH_TIMESTAMP
+																	currentTimestamp(buff+KEY_SIZE,true);
+																#endif
+																memcpy(buff+KEY_SIZE+TIMESTAMP_SIZE,pMixPacket->data,size);
+																if(m_MixCascadeProtocolVersion==MIX_CASCADE_PROTOCOL_VERSION_0_4&&c==m_chainlen-1)
+																	{
+																		m_pSymCipher->crypt1(buff,buff,KEY_SIZE);
+																		tmpCon->pCiphers[c].crypt1(buff+KEY_SIZE,buff+KEY_SIZE,DATA_SIZE-KEY_SIZE);
+																	}
+																else
+																	{
+																		m_arRSA[c].encrypt(buff,buff);
+																		// Does RSA_SIZE need to be increased by RSA_SIZE/KEY_SIZE*TIMESTAMP_SIZE?
+																		tmpCon->pCiphers[c].crypt1(buff+RSA_SIZE,buff+RSA_SIZE,DATA_SIZE-RSA_SIZE);
+																	}	
+																memcpy(pMixPacket->data,buff,DATA_SIZE);
+																size-=KEY_SIZE+TIMESTAMP_SIZE;
+																len+=KEY_SIZE+TIMESTAMP_SIZE;
+															}
+														pMixPacket->flags=CHANNEL_OPEN;
+													}
+												else //sonst
+													{
+														for(UINT32 c=0;c<m_chainlen;c++)
+															tmpCon->pCiphers[c].crypt1(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+														pMixPacket->flags=CHANNEL_DATA;
+													}
+
+												// Capture the this packet for future replay
+												if(bCapturePackets)
+													{
+														if(!iCapturedPackets && (pMixPacket->flags == CHANNEL_OPEN))
+															{
+																CAMsg::printMsg(LOG_DEBUG,"Captured channel-open packet: %X %X %X %X\n", *pMixPacket->data, *(pMixPacket->data+1), *(pMixPacket->data+2), *(pMixPacket->data+3));
+																memcpy(&pReplayMixPackets[iCapturedPackets++],pMixPacket,MIXPACKET_SIZE);
+																uCapturedChannel = pMixPacket->channel;
+															}
+														else if(iCapturedPackets && (uCapturedChannel == pMixPacket->channel))
+															{
+																CAMsg::printMsg(LOG_DEBUG,"Captured data packet: %X %X %X %X\n", *pMixPacket->data, *(pMixPacket->data+1), *(pMixPacket->data+2), *(pMixPacket->data+3));
+																memcpy(&pReplayMixPackets[iCapturedPackets++],pMixPacket,MIXPACKET_SIZE);
+															}
+													}
+												if(iCapturedPackets >= REPLAY_COUNT)
+													{
+														CAMsg::printMsg(LOG_DEBUG,"Storage full, stopping to capture packets.\n");
+														bCapturePackets = false;
+													}
+
+												if(m_muxOut.send(pMixPacket)==SOCKET_ERROR)
+													{
+														CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Exiting!\n");									
+														ret=E_UNKNOWN;
+														goto MIX_CONNECTION_ERROR;
+													}
+											}
+										break;
+									}
+								tmpCon=oSocketList.getNext();
+							}
+					}
+			}
+MIX_CONNECTION_ERROR:
+		CONNECTION* tmpCon=oSocketList.getFirst();
+		while(tmpCon!=NULL)
+			{
+				delete [] tmpCon->pCiphers;
+				delete tmpCon->pSocket;
+				tmpCon=tmpCon->next;
+			}
+		delete pMixPacket;
+		if(ret==E_SUCCESS)
+			return E_SUCCESS;
+		if(options.getAutoReconnect())
+			return E_UNKNOWN;
+		else
+			exit(-1);
+	}
+
+SINT32 CALocalProxy::clean()
+	{
+		m_socketIn.close();
+		m_socketSOCKSIn.close();
+		m_muxOut.close();
+		if(m_arRSA!=NULL)
+			delete[] m_arRSA;
+		m_arRSA=NULL;
+		return E_SUCCESS;
+	}
+
+SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
+	{
+		CAMsg::printMsg(LOG_INFO,"Login process and key exchange started...\n");
+		//Parsing KeyInfo received from Mix n+1
+		MemBufInputSource oInput(buff,len,"localoproxy");
+		DOMParser oParser;
+		oParser.parse(oInput);		
+		DOM_Document doc=oParser.getDocument();
+		if(doc.isNull())
+			{
+				CAMsg::printMsg(LOG_INFO,"Error parsing Key Info from Mix!\n");
+				return E_UNKNOWN;
+			}
+
+
+		DOM_Element root=doc.getDocumentElement();
+		DOM_Element elemVersion;
+		getDOMChildByName(root,(UINT8*)"MixProtocolVersion",elemVersion,false);
+		UINT8 strVersion[255];
+		UINT32 tmpLen=255;
+		if(getDOMElementValue(elemVersion,strVersion,&tmpLen)==E_SUCCESS)
+			{
+			printf("hier\n");
+				if(tmpLen==3&&memcmp(strVersion,"0.4",3)==0)
+					{
+						CAMsg::printMsg(LOG_INFO,"MixCascadeProtocolVersion: 0.4\n");
+						m_MixCascadeProtocolVersion=MIX_CASCADE_PROTOCOL_VERSION_0_4;
+						m_pSymCipher=new CASymCipher();
+						UINT8 key[16];
+						memset(key,0,16);
+						m_pSymCipher->setKey(key);
+					}	
+				else
+						m_MixCascadeProtocolVersion=MIX_CASCADE_PROTOCOL_VERSION_0_3;
+			}
+		DOM_Element elemMixes;
+		getDOMChildByName(root,(UINT8*)"Mixes",elemMixes,false);
+		int chainlen=-1;
+		if(elemMixes==NULL||getDOMElementAttribute(elemMixes,"count",&chainlen)!=E_SUCCESS)
+			return E_UNKNOWN;
+		m_chainlen=(UINT32)chainlen;
+		UINT32 i=0;
+		m_arRSA=new CAASymCipher[m_chainlen];
+		DOM_Node child=elemMixes.getLastChild();
+		while(child!= NULL&&chainlen>0)
+			{
+				if(child.getNodeName().equals("Mix"))
+					{
+						DOM_Node nodeKey=child.getFirstChild();
+						if(m_arRSA[i++].setPublicKeyAsDOMNode(nodeKey)!=E_SUCCESS)
+							return E_UNKNOWN;						
+						chainlen--;
+					}
+				child=child.getPreviousSibling();
+			}
+		if(chainlen!=0)
+			return E_UNKNOWN;
+		//Now sending SymKeys....
+		MIXPACKET oPacket;
+		oPacket.flags=0;
+		oPacket.channel=0;
+		UINT8 keys[32];
+		getRandom(keys,32);
+		m_muxOut.setReceiveKey(keys,16);
+		m_muxOut.setSendKey(keys+16,16);
+		getRandom(oPacket.data,DATA_SIZE);
+		memcpy(oPacket.data,"KEYPACKET",9);
+		memcpy(oPacket.data+9,keys,32);
+		m_arRSA[m_chainlen-1].encrypt(oPacket.data,oPacket.data);
+		m_muxOut.send(&oPacket);
+		m_muxOut.setCrypt(true);
+		CAMsg::printMsg(LOG_INFO,"Login process and key exchange finished!\n");		
+		return E_SUCCESS;
+	}
+#endif //!NEW_MIX_TYPE
