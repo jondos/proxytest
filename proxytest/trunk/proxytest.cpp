@@ -161,21 +161,34 @@ int main(int argc, const char* argv[])
 		CASocketAddrINet::init();
 
 		
-/*		if(argc>1)
+		if(argc>1)
 			{
 				CASocket oSocketServer;
 				oSocketServer.create(AF_INET);
-				oSocketServer.setRecvBuff(15000);
-				SINT32 j=oSocketServer.getRecvBuff();
-				CAMsg::printMsg(LOG_DEBUG,"Recv-Buff %i\n",j);
+				//oSocketServer.setRecvBuff(15000);
+				//SINT32 j=oSocketServer.getRecvBuff();
+				//CAMsg::printMsg(LOG_DEBUG,"Recv-Buff %i\n",j);
 				oSocketServer.listen(6789);
 				CASocket oS;
 				
 				oSocketServer.accept(oS);
 				//oS.setRecvBuff(1000);
-				j=oS.getRecvBuff();
-				CAMsg::printMsg(LOG_DEBUG,"Recv-Buff %i\n",j);
-				sleep(1000000);
+				//j=oS.getRecvBuff();
+				//CAMsg::printMsg(LOG_DEBUG,"Recv-Buff %i\n",j);
+				oS.setNonBlocking(true);
+				for(;;)
+					{
+						UINT8 buff[21];
+						int ret=oS.receive(buff,20);
+						if(ret!=E_AGAIN)
+							{
+								buff[ret]=0;
+								printf((char*)buff);
+							}
+						else
+							printf("E_AGAIN\n!");
+						sleep(1);
+					}
 				exit(0);
 			}
 		else
@@ -187,7 +200,14 @@ int main(int argc, const char* argv[])
 				CASocketAddrINet serverAddr;
 				serverAddr.setPort(6789);
 				oSocketClient.connect(serverAddr);
-				UINT32 u;
+				sleep(20);
+				UINT8 buff[20];
+				memset(buff,'A',20);
+				oSocketClient.send(buff,20);
+				sleep(20);
+				memset(buff,'B',20);
+				oSocketClient.send(buff,20);
+/*				UINT32 u;
 				u=5000;
 			//	s=oSocketClient.setSendBuff(5000);
 				s=oSocketClient.getSendBuff();
@@ -202,9 +222,11 @@ int main(int argc, const char* argv[])
 						s=oSocketClient.getSendSpace();
 						CAMsg::printMsg(LOG_DEBUG,"SendSpace now: %i\n",s);
 					}
+*/
+				sleep(100000);
 				exit(0);
 			}		
-*/
+
 		//some test....
 		if(MIXPACKET_SIZE!=sizeof(MIXPACKET))
 			{
