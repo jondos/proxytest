@@ -39,11 +39,12 @@ CAASymCipher::~CAASymCipher()
 		RSA_free(rsa);
 	}
 
-/** Decrypts exactly one block which is stored in from. The result of the decryption is stored in to.
+/** Decrypts exactly one block which is stored in @c from. 
+	*The result of the decryption is stored in @c to.
 	*@param from one block of cipher text
 	*@param to the decrypted plain text
-	*@return E_UNKNOWN in case of an error
-	*        E_SUCCESS otherwise
+	*@retval E_UNKNOWN in case of an error
+	*@retval E_SUCCESS otherwise
 	*/
 SINT32 CAASymCipher::decrypt(UINT8* from,UINT8* to)
 	{
@@ -53,11 +54,12 @@ SINT32 CAASymCipher::decrypt(UINT8* from,UINT8* to)
 			return E_SUCCESS;
 	}
 
-/** Encrypts exactly one block which is stored in from. The result of the encrpytion is stored in to.
+/** Encrypts exactly one block which is stored in @c from. 
+ *The result of the encrpytion is stored in @c to.
 	*@param from one block of plain text
 	*@param to the encrypted cipher text
-	*@return E_UNKNOWN in case of an error
-	*        E_SUCCESS otherwise
+	*@retval E_UNKNOWN in case of an error
+	*@retval E_SUCCESS otherwise
 	*/
 SINT32 CAASymCipher::encrypt(UINT8* from,UINT8* to)
 	{
@@ -69,8 +71,8 @@ SINT32 CAASymCipher::encrypt(UINT8* from,UINT8* to)
 
 /** Generates a new random key-pair of size bits.
 	*@param size keysize of the new keypair
-	*@return E_UNKNOWN in case of an error
-	*        E_SUCCESS otherwise
+	*@retval E_UNKNOWN in case of an error
+	*@retval E_SUCCESS otherwise
 	*/
 SINT32 CAASymCipher::generateKeyPair(UINT32 size)
 	{
@@ -82,19 +84,19 @@ SINT32 CAASymCipher::generateKeyPair(UINT32 size)
 			return E_SUCCESS;
 	}
 
-/** Stores the public key in buff. The format is as follows:
+/** Stores the public key in \c buff. The format is as follows:
 	*
-	* SIZE-N [2 bytes] - number of bytes which are needed for the modulus n (in network byte order..)
-	* N [SIZE-N bytes] - the modulus n as integer (in network byte order)
-	* SIZE-E [2 bytes] - number of bytes which are needed for the exponent e (in network byte order..)
-	* E [SIZE-E bytes] - the exponent e as integer (in network byte order)
+	* \li \c SIZE-N [2 bytes] - number of bytes which are needed for the modulus n (in network byte order..)
+	* \li \c N [SIZE-N bytes] - the modulus \c n as integer (in network byte order)
+	* \li \c SIZE-E [2 bytes] - number of bytes which are needed for the exponent e (in network byte order..)
+	* \li \c E [SIZE-E bytes] - the exponent \c e as integer (in network byte order)
 	*
 	*@param buff byte array in which the public key should be stored
 	*@param len on input holds the size of buff, on return it contains the number 
 	*           of bytes needed to store the public key
-	*@return E_UNKNOWN in case of an error
-	*        E_SUCCESS otherwise
-	*@see getPublicKeysize
+	*@retval E_UNKNOWN in case of an error
+	*@retval E_SUCCESS otherwise
+	*@see getPublicKeySize
 	*@see setPublicKey
 	*/
 SINT32 CAASymCipher::getPublicKey(UINT8* buff,UINT32 *len)
@@ -129,11 +131,11 @@ SINT32 CAASymCipher::getPublicKeySize()
 		return (SINT32)BN_num_bytes(rsa->n)+BN_num_bytes(rsa->e)+4;
 	}
 
-/** Sets the public key to the vaules sotred in key. The format must match the format described for getPublicKey(). 
+/** Sets the public key to the vaules stored in \c key. The format must match the format described for getPublicKey(). 
 	*@param key byte array which holds the new public key
 	*@param len on input,size of key byte array, on successful return number of bytes 'consumed'
-	*@return E_UNKNOWN in case of an error, the cipher is the uninitialized (no key is set)
-	*        E_SUCCESS otherwise
+	*@retval E_UNKNOWN in case of an error, the cipher is the uninitialized (no key is set)
+	*@retval E_SUCCESS otherwise
 	*@see getPublicKey
 	*/
 SINT32 CAASymCipher::setPublicKey(UINT8* key,UINT32* len)
