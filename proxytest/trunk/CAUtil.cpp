@@ -114,19 +114,32 @@ SINT32 getcurrentTimeMillis(BIGNUM* bnTime)
 	  #endif
 	}
 
+/** Gets 32 random bits.
+	@param val - on return the bits a random
+	@retval E_UNKNOWN, if an error occured
+	@retval E_SUCCESS, if successful
+*/
 SINT32 getRandom(UINT32* val)
 	{
 		ASSERT(val!=NULL,"VAL should be not NULL");
-		RAND_pseudo_bytes((UINT8*)val,4);
-		RAND_bytes((UINT8*)val,4);
+		if(RAND_bytes((UINT8*)val,4)!=1&&
+			 RAND_pseudo_bytes((UINT8*)val,4)<0)
+				return E_UNKNOWN;
 		return E_SUCCESS;
 	}
 
+/** Gets some random bytes.
+	@param buff - buff which is filled with randomness
+	@prama len - number of bytes requested
+	@retval E_UNKNOWN, if an error occured
+	@retval E_SUCCESS, if successful
+*/
 SINT32 getRandom(UINT8* buff,UINT32 len)
 	{
 		ASSERT(buff!=NULL,"BUFF should be not NULL")
-		RAND_pseudo_bytes(buff,len);
-		RAND_bytes(buff,len);		
+		if(RAND_bytes(buff,len)!=1&&		
+			 RAND_pseudo_bytes(buff,len)<0)
+			return E_UNKNOWN;
 		return E_SUCCESS;
 	}
 
