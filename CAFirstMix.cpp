@@ -419,7 +419,7 @@ SINT32 CAFirstMix::init()
 				return E_UNKNOWN;
 			}
 		CAMsg::printMsg(LOG_INFO," connected!\n");
-		sleep(1);
+//		sleep(1);
 		if(((CASocket*)muxOut)->setKeepAlive((UINT32)1800)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_INFO,"Socket option TCP-KEEP-ALIVE returned an error - so not set!\n");
