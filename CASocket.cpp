@@ -27,6 +27,14 @@ int CASocket::listen(LPSOCKETADDR psa)
 int CASocket::accept(CASocket &s)
 	{
 		s.m_Socket=::accept(m_Socket,NULL,NULL);
+		if(s.m_Socket==SOCKET_ERROR)
+			{
+				s.m_Socket=0;
+				#ifdef _DEBUG
+					printf("Accept Error!\n");
+				#endif
+				return SOCKET_ERROR;
+			}
 #ifdef _DEBUG
 		sockets++;
 #endif
@@ -36,7 +44,11 @@ int CASocket::accept(CASocket &s)
 int CASocket::connect(LPSOCKETADDR psa)
 	{
 		if(m_Socket==0)
-			m_Socket=socket(AF_INET,SOCK_STREAM,0);
+			{
+				m_Socket=socket(AF_INET,SOCK_STREAM,0);
+				if(m_Socket==-1)
+					return SOCKET_ERROR;
+			}
 #ifdef _DEBUG
 		sockets++;
 #endif

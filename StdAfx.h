@@ -26,6 +26,7 @@
     #include <unistd.h>
     #include <stdlib.h>
     #include <strings.h>
+    #include <signal.h>
     typedef struct sockaddr* LPSOCKADDR;
     #define SOCKET int
     typedef struct hostent HOSTENT;

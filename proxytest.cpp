@@ -209,6 +209,13 @@ void proxy(void* tmpSocket)
 		delete inSocket;
 	}
 */
+
+void signal_broken_pipe( int sig)
+	{
+		printf("Hm.. Broken Pipe.... How cares!\n");
+		signal(SIGPIPE,signal_broken_pipe);
+	}
+	
 THREAD_RETURN proxytomix(void* tmpPair)
 	{
 		CASocket* inSocket=((CASocketToMix*)tmpPair)->in;	
@@ -287,6 +294,7 @@ int main(int argc, char* argv[])
 		WSADATA wsadata;
 		err=WSAStartup(0x0202,&wsadata);
 		#endif
+		
 		InitializeCriticalSection(&csClose);
 		CASocketAddr socketAddrIn(atol(argv[3]));
 		socketAddrSquid.setAddr(argv[1],atol(argv[2]));
@@ -299,6 +307,7 @@ int main(int argc, char* argv[])
 //		time_t t=time(NULL);
 //		strftime(buff,BUFF_SIZE,"%Y%m%d-%H%M%S",localtime(&t));
 //		int handle=open(buff,_O_BINARY|_O_CREAT|_O_RDWR,S_IWRITE);
+		signal(SIGPIPE,signal_broken_pipe);
 		while(
 		#ifdef _WIN32
 		!_kbhit()
@@ -315,9 +324,17 @@ int main(int argc, char* argv[])
 					exit(-1);
 				    }
 				tmpPair1->in=new CASocket();
-				socketIn.accept(*tmpPair1->in);
+				if(socketIn.accept(*tmpPair1->in)==SOCKET_ERROR)
+					{
+						delete tmpPair1->in;
+						delete tmpPair1;
+						delete tmpPair2;
+						sleep(1);
+						continue;
+					}
 				tmpPair1->out=new CAMixSocket();
-				tmpPair1->out->connect(&socketAddrSquid);
+				if(tmpPair1->out->connect(&socketAddrSquid)==SOCKET_ERROR)
+					break;
 				
 				tmpPair2->in=tmpPair1->out;
 				tmpPair2->out=tmpPair1->in;
@@ -348,6 +365,7 @@ int main(int argc, char* argv[])
 				printf("%i\n",sockets);
 #endif
 			}
+		printf("Exiting...\n");	
 		socketIn.close();
 //	close(handle);
 #ifdef _WIN32		

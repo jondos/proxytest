@@ -20,6 +20,11 @@ CAMixSocket::~CAMixSocket()
 int CAMixSocket::connect(LPSOCKETADDR psa)
 	{
 		id=oMixChannel.connect(psa);
+		if(id==SOCKET_ERROR)
+			{
+				id=0;
+				return SOCKET_ERROR;
+			}
 #ifdef _DEBUG
 		sockets++;
 #endif
