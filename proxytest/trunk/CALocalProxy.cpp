@@ -144,7 +144,7 @@ SINT32 CALocalProxy::loop()
 						else
 							{
 								newCipher=new CASymCipher[chainlen];
-								oSocketList.add(lastChannelId++,newSocket,newCipher,NULL);
+								oSocketList.add(lastChannelId++,newSocket,newCipher);
 								oSocketGroup.add(*newSocket);
 							}
 					}
@@ -165,7 +165,7 @@ SINT32 CALocalProxy::loop()
 						else
 							{
 								newCipher=new CASymCipher[chainlen];
-								oSocketList.add(lastChannelId++,newSocket,newCipher,NULL);
+								oSocketList.add(lastChannelId++,newSocket,newCipher);
 								oSocketGroup.add(*newSocket);
 							}
 					}
@@ -225,18 +225,18 @@ SINT32 CALocalProxy::loop()
 										if(len==SOCKET_ERROR||len==0)
 											{
 												//TODO delete cipher..
-												CASocket* tmpSocket=oSocketList.remove(tmpCon->id);
+												CASocket* tmpSocket=oSocketList.remove(tmpCon->outChannel);
 												if(tmpSocket!=NULL)
 													{
 														oSocketGroup.remove(*tmpSocket);
-														muxOut.close(tmpCon->id);
+														muxOut.close(tmpCon->outChannel);
 														tmpSocket->close();
 														delete tmpSocket;
 													}
 											}
 										else 
 											{
-												pMixPacket->channel=tmpCon->id;
+												pMixPacket->channel=tmpCon->outChannel;
 												pMixPacket->payload.len=htons(len);
 												if(bHaveSocks&&tmpCon->pSocket->getLocalPort()==socksPort)
 													{
