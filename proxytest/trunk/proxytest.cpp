@@ -165,14 +165,14 @@ int main(int argc, const char* argv[])
 			{
 				CASocket oSocketServer;
 				oSocketServer.create(AF_INET);
-				oSocketServer.setRecvBuff(1000);
+				oSocketServer.setRecvBuff(15000);
 				SINT32 j=oSocketServer.getRecvBuff();
 				CAMsg::printMsg(LOG_DEBUG,"Recv-Buff %i\n",j);
 				oSocketServer.listen(6789);
 				CASocket oS;
 				
 				oSocketServer.accept(oS);
-				oS.setRecvBuff(1000);
+				//oS.setRecvBuff(1000);
 				j=oS.getRecvBuff();
 				CAMsg::printMsg(LOG_DEBUG,"Recv-Buff %i\n",j);
 				sleep(1000000);
@@ -182,7 +182,7 @@ int main(int argc, const char* argv[])
 			{
 				CASocket oSocketClient;
 				oSocketClient.create(AF_INET);
-				SINT32 s=oSocketClient.setSendBuff(5000);
+				SINT32 s=oSocketClient.setSendBuff(15000);
 
 				CASocketAddrINet serverAddr;
 				serverAddr.setPort(6789);
