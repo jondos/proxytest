@@ -82,7 +82,8 @@ am_proxytest_OBJECTS = CAAbstractControlChannel.$(OBJEXT) \
 	CASocketAddrINet.$(OBJEXT) CASocketAddrUnix.$(OBJEXT) \
 	CASocketGroup.$(OBJEXT) CASocketList.$(OBJEXT) \
 	CASymCipher.$(OBJEXT) CAThread.$(OBJEXT) \
-	CAThreadPool.$(OBJEXT) CAUtil.$(OBJEXT) StdAfx.$(OBJEXT) \
+	CAThreadPool.$(OBJEXT) CAUtil.$(OBJEXT) \
+	CAXMLErrorMessage.$(OBJEXT) StdAfx.$(OBJEXT) \
 	proxytest.$(OBJEXT)
 proxytest_OBJECTS = $(am_proxytest_OBJECTS)
 proxytest_DEPENDENCIES = $(top_srcdir)/xml/libxml.a \
@@ -258,6 +259,7 @@ proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CAThread.cpp \
 		    CAThreadPool.cpp\
 		    CAUtil.cpp \
+		    CAXMLErrorMessage.cpp\
 		    StdAfx.cpp \
 		    proxytest.cpp \
 		    CAAbstractControlChannel.hpp\
@@ -306,6 +308,7 @@ proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CAThread.hpp \
 		    CAThreadPool.hpp\
 		    CAUtil.hpp \
+		    CAXMLErrorMessage.hpp\
 		    StdAfx.h \
 		    basetypedefs.h
 
@@ -449,6 +452,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAThread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAThreadPool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAUtil.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAXMLErrorMessage.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/StdAfx.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/proxytest.Po@am__quote@
 
