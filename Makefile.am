@@ -14,6 +14,7 @@ proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CACmdLnOptions.cpp \
 		    CAConditionVariable.cpp\
 		    CAControlChannelDispatcher.cpp\
+		    CAControlChannelTest.cpp\
 		    CADatabase.cpp\
 		    CADatagramSocket.cpp \
 		    CAFirstMix.cpp \
@@ -56,6 +57,7 @@ proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CACertStore.hpp\
 		    CAConditionVariable.hpp\
 		    CAControlChannelDispatcher.hpp\
+		    CAControlChannelTest.hpp\
 		    CACmdLnOptions.hpp \
 		    CADatabase.hpp\
 		    CADatagramSocket.hpp\
