@@ -84,6 +84,7 @@ class CASocketGroup
 			#else
 				struct pollfd* m_pollfd_write;
 				struct pollfd* m_pollfd_read;
+				int m_max;
 			#endif
 			CRITICAL_SECTION m_csFD_SET;
 	};
