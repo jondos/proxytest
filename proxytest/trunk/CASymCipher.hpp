@@ -63,6 +63,7 @@ class CASymCipher:public CALockAble
 				}
 
 			SINT32 setKey(const UINT8* key);	
+			SINT32 setKey(const UINT8* key,bool bEncrypt);	
 
 			/** Sets iv1 and iv2 to p_iv.
 				* @param p_iv 16 random bytes used for new iv1 and iv2.
@@ -77,8 +78,9 @@ class CASymCipher:public CALockAble
 
 			SINT32 crypt1(const UINT8* in,UINT8* out,UINT32 len);
 			SINT32 crypt2(const UINT8* in,UINT8* out,UINT32 len);
+			SINT32 crypt1CBCwithPKCS7(const UINT8* in,UINT8* out,UINT32* len);
 		protected:
-			/*keyInstance**/ AES_KEY* m_keyAES;
+			AES_KEY* m_keyAES;
 			UINT8* m_iv1;
 			UINT8* m_iv2;
 			bool m_bKeySet;

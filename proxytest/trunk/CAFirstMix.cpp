@@ -517,6 +517,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		((CASocket*)pNewUser)->setNonBlocking(true);	                    // stefan: sendet das send in der letzten zeile doch noch nicht? wenn doch, kann dann ein JAP nicht durch verweigern der annahme hier den mix blockieren? vermutlich nciht, aber andersherum faend ich das einleuchtender.
 		// es kann nicht blockieren unter der Annahme das der TCP-Sendbuffer > m_xmlKeyInfoSize ist....
 		//wait for keys from user
+#ifndef FIRST_MIX_SYMMETRIC
 		MIXPACKET oMixPacket;
 		if(pNewUser->receive(&oMixPacket,FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT)!=MIXPACKET_SIZE) //wait at most 10 second for user to send sym key
 			{
@@ -533,7 +534,37 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 			}
 		pNewUser->setKey(oMixPacket.data+9,32);
 		pNewUser->setCrypt(true);
-
+#else
+		UINT16 xml_len;
+		if(((CASocket*)pNewUser)->receiveFully((UINT8*)&xml_len,2,10000)!=E_SUCCESS)
+			{
+				delete pNewUser;
+				m_pIPList->removeIP(peerIP);
+				return E_UNKNOWN;
+			}
+		xml_len=ntohs(xml_len);
+		UINT8* xml_buff=new UINT8[xml_len];
+		if(((CASocket*)pNewUser)->receiveFully(xml_buff,xml_len,10000)!=E_SUCCESS)
+			{
+				delete pNewUser;
+				delete xml_buff;
+				m_pIPList->removeIP(peerIP);
+				return E_UNKNOWN;
+			}
+		DOMParser oParser;
+		MemBufInputSource oInput(xml_buff,xml_len,"tmp");
+		oParser.parse(oInput);
+		delete xml_buff;
+		DOM_Document doc=oParser.getDocument();
+		DOM_Element elemRoot;
+		if(doc==NULL||(elemRoot=doc.getDocumentElement())==NULL||
+			decryptXMLElement(elemRoot,m_pRSA)!=E_SUCCESS)
+			{
+				delete pNewUser;
+				m_pIPList->removeIP(peerIP);
+				return E_UNKNOWN;
+			}		
+#endif
 		CAQueue* tmpQueue=new CAQueue(sizeof(tQueueEntry));
 		if(m_pChannelList->add(pNewUser,peerIP,tmpQueue)!=E_SUCCESS)// adding user connection to mix->JAP channel list (stefan: sollte das nicht connection list sein? --> es handelt sich um eine Datenstruktu fŸr Connections/Channels ).
 			{	
