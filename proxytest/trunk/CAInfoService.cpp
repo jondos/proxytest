@@ -85,7 +85,12 @@ int CAInfoService::getLevel(int* puser,int* prisk,int* ptraffic)
 int CAInfoService::start()
 	{
 		bRun=true;
-		_beginthread(InfoLoop,0,this);
+		#ifdef _WIN32
+		 _beginthread(InfoLoop,0,this);
+		#else
+		 pthread_t othread;
+		 pthread_create(&othread,NULL,InfoLoop,this);
+		#endif
 		return 0;
 	}
 
