@@ -106,6 +106,7 @@ SINT32 CALocalProxy::init()
 	//	WaitForSingleObject(hEventThreadEnde,INFINITE);
 	}
 
+#ifndef PROT2
 SINT32 CALocalProxy::loop()
 	{
 		CASocketList  oSocketList;
@@ -294,3 +295,9 @@ SINT32 CALocalProxy::loop()
 		return E_SUCCESS;
 	}
 
+#else
+SINT32 CALocalProxy::loop()
+	{
+		return E_UNKNOWN;
+	}
+#endif

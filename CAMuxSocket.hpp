@@ -32,12 +32,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "httptunnel/tunnel.h"
 
 typedef UINT32 HCHANNEL;
+#define MUX_HTTP  0 
+#define MUX_SOCKS 1
 
 #ifndef PROT2
 #define DATA_SIZE 1000 // Size of Data in a single Mux Packet
 
-#define MUX_HTTP  0 
-#define MUX_SOCKS 1
 
 typedef struct t_MuxPacket
 	{
@@ -47,31 +47,30 @@ typedef struct t_MuxPacket
 		UINT8		reserved;
 		UINT8		data[DATA_SIZE];
 	} MUXPACKET;
+
 #else
-#define PACKET_SIZE 1024
+
+#define DATA_SIZE 992
+#define PAYLOAD_SIZE 989
+#pragma pack( push, t_MuxPacket )
+#pragma pack(1)
+
 typedef struct t_MuxPacket
 	{
-		UINT8		data[PACKET_SIZE];
-	} MUXPACKET;
-
-typedef struct t_FirstMixMuxPacket
-	{
+		HCHANNEL channel;
+		UINT16  flags;
 		union
 			{
-				struct RSA
+				UINT8		data[DATA_SIZE];
+				struct t_MuxPacketPayload
 					{
-						UINT8			rsa[128];
-						UINT8			data[PACKET_SIZE-128];
-					};
-				struct 
-					{
-						HCHANNEL	channel;
-						UINT16		flags;
-						UINT8			symkey[16];
-						UINT8			data[PACKET_SIZE-22];
-					};
+						UINT16 len;
+						UINT8 type;
+						UINT8 data[PAYLOAD_SIZE];
+				} payload;
 			};
-	} FIRSTMIX_MUXPACKET;
+	} MUXPACKET;
+#pragma pack( pop, t_MuxPacket )
 
 #endif
 
@@ -87,9 +86,7 @@ class CAMuxSocket
 			int close();
 			int send(MUXPACKET *pPacket);
 			int receive(MUXPACKET *pPacket);
-#ifndef PROT2
 			int close(HCHANNEL channel_id);
-#endif
 			operator CASocket*(){return &m_Socket;}
 			operator SOCKET(){if(!bIsTunneld)
 														return (SOCKET)m_Socket;
