@@ -102,7 +102,7 @@ int CASocketGroup::select()
 SINT32 CASocketGroup::select(bool bWrite,UINT32 ms)
 	{
 		memcpy(&m_signaled_set,&m_fdset,sizeof(fd_set));
-		FD_SET* set_read,*set_write;
+		fd_set* set_read,*set_write;
 		TIMEVAL ti;
 		ti.tv_sec=0;
 		ti.tv_usec=ms*1000;
