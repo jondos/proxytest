@@ -1,7 +1,6 @@
 #ifndef __CAABSTRACTXMLSIGNABLE__
 #define __CAABSTRACTXMLSIGNABLE__
 
-#include "StdAfx.h"
 #include "CAAbstractXMLEncodable.hpp"
 #include "CACertStore.hpp"
 #include "CASignature.hpp"

@@ -1,6 +1,9 @@
+#include "StdAfx.h"
 #include "CAXMLCostConfirmation.hpp"
 #include "CAUtil.hpp"
 #include "CAMsg.hpp"
+
+CAXMLCostConfirmation::ms_pStrElemName=NULL;
 
 CAXMLCostConfirmation::CAXMLCostConfirmation(UINT8 * strXmlData) 
 	: CAAbstractXMLSignable()
