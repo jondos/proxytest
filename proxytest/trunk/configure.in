@@ -106,7 +106,7 @@ int main(void)
 ])
 
 if (test ! -z "$ac_cv_openssldir" && test "x$ac_cv_openssldir" != "x(system)") ; then
-	AC_DEFINE(HAVE_OPENSSL)
+	AC_DEFINE(HAVE_OPENSSL,,[Define if you have OpenSSL (which is needed!)])
 	dnl Need to recover ssldir - test above runs in subshell
 	ssldir=$ac_cv_openssldir
 	CFLAGS="$saved_CFLAGS -I$ssldir/include"
@@ -125,7 +125,7 @@ dnl Checks for header files.
 AC_HEADER_STDC([])
 
 dnl Checks for library functions.
-AC_CHECK_FUNC(strerror,AC_DEFINE(HAVE_STRERROR))
+AC_CHECK_FUNC(strerror,AC_DEFINE(HAVE_STRERROR,,[Define if you have strerror()]))
 
 
 AC_ARG_WITH(debug,
@@ -141,8 +141,8 @@ AC_ARG_WITH(debug,
 AC_CHECK_FUNCS(vsnprintf)
 
 AC_CHECK_DECL(TCP_KEEPALIVE,[],[],[#include <sys/socket.h>])
-AC_CHECK_DECL(AF_UNIX,[AC_DEFINE(HAVE_UNIX_DOMAIN_PROTOCOL)],[],[#include <sys/socket.h>])
-AC_CHECK_TYPE(socklen_t,[AC_DEFINE(HAVE_SOCKLEN_T)],[],[#include <sys/socket.h>])
+AC_CHECK_DECL(AF_UNIX,[AC_DEFINE(HAVE_UNIX_DOMAIN_PROTOCOL,,[Define if your OS supports the Unix Domain protocol])],[],[#include <sys/socket.h>])
+AC_CHECK_TYPE(socklen_t,[AC_DEFINE(HAVE_SOCKLEN_T,,[Define if the type socklen_t is available])],[],[#include <sys/socket.h>])
 AC_FUNC_ALLOCA
 
 if test "x$GCC" = "xyes" ; then
