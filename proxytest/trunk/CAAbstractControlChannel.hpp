@@ -61,5 +61,4 @@ class CAAbstractControlChannel
 		CAControlChannelDispatcher* m_pDispatcher;
 		bool m_bIsEncrypted;
     UINT32 m_ID;
-
 };
