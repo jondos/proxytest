@@ -204,6 +204,10 @@ SINT32 CAFirstMix::init()
 	}
 
 
+/**How to end this thread:
+1. Close connection to next mix
+2. put a byte in the Mix-Output-Queue
+*/
 THREAD_RETURN loopSendToMix(void* param)
 	{
 		CAQueue* pQueue=((CAFirstMix*)param)->m_pQueueSendToMix;
@@ -222,6 +226,10 @@ THREAD_RETURN loopSendToMix(void* param)
 		THREAD_RETURN_SUCCESS;
 	}
 
+/*How to end this thread
+1. Set m_bRestart in firstMix to true
+2. close all accept sockets
+*/
 THREAD_RETURN loopAcceptUsers(void* param)
 	{
 		CAFirstMix* pFirstMix=(CAFirstMix*)param;
@@ -246,8 +254,11 @@ THREAD_RETURN loopAcceptUsers(void* param)
 		for(;;)
 			{
 				countRead=osocketgroupAccept.select(false,10000);
-				if(countRead<0&&countRead!=E_TIMEDOUT)
-					break;
+				if(countRead<0)
+					{ //check for Error - are we restarting ?
+						if(pFirstMix->getRestart()||countRead!=E_TIMEDOUT)
+							goto END_THREAD;
+					};
 				i=0;
 #ifdef _DEBUG
 				CAMsg::printMsg(LOG_DEBUG,"UserAcceptLoop: countRead=%i\n",countRead);
@@ -291,12 +302,12 @@ THREAD_RETURN loopAcceptUsers(void* param)
 												pFirstMix->incUsers();
 												psocketgroupUsersRead->add(*pNewMuxSocket);
 											}
-								}
-						}
-					i++;
-				}
-			
+									}
+							}
+						i++;
+					}
 			}
+END_THREAD:
 		delete ip;
 		CAMsg::printMsg(LOG_DEBUG,"Exiting Thread AcceptUser\n");
 		THREAD_RETURN_SUCCESS;
@@ -332,6 +343,11 @@ THREAD_RETURN loopReadFromUsers(void* param)
 			{
 				pHashEntry=pChannelList->getFirst();
 				countRead=psocketgroupUsersRead->select(false,1000); //if we sleep her forever, we will not notice new sockets...
+				if(countRead<0)
+					{ //check for error
+						if(pFirstMix->getRestart()||countRead!=E_TIMEDOUT)
+							goto END_THREAD;
+					}
 				while(pHashEntry!=NULL&&countRead>0)
 					{
 						pMuxSocket=pHashEntry->pMuxSocket;
@@ -413,7 +429,7 @@ THREAD_RETURN loopReadFromUsers(void* param)
 						pHashEntry=pChannelList->getNext();
 					}
 			}
-ERR:
+END_THREAD:
 		delete ip;
 		delete tmpBuff;
 		delete pMixPacket;
@@ -437,6 +453,7 @@ SINT32 CAFirstMix::loop()
 		MIXPACKET* pMixPacket=new MIXPACKET;
 //		CAInfoService oInfoService(this);
 		m_nUser=0;
+		m_bRestart=false;
 		SINT32 ret;
 //		UINT8 rsaBuff[RSA_SIZE];
 //		UINT32 maxSocketsIn;
@@ -769,13 +786,17 @@ SINT32 CAFirstMix::loop()
 			}
 ERR:
 		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
+		m_bRestart=true;
 		m_pInfoService->stop();
 		m_pMuxOut->close();
 		for(UINT32  i=0;i<m_nSocketsIn;i++)
 			m_arrSocketsIn[i].close();
+		//writng one byte to the queue...
+		UINT8 b;
+		m_pQueueSendToMix->add(&b,1);
 		threadAcceptUsers.join();
 		threadSendToMix.join(); //will not join if queue is empty (and so wating)!!!
-		threadReadFromUsers.join(); //will never join!!!!
+		threadReadFromUsers.join(); 
 		fmHashTableEntry* pHashEntry=m_pChannelList->getFirst();
 		while(pHashEntry!=NULL)
 			{

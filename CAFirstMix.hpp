@@ -112,12 +112,18 @@ class CAFirstMix:public CAMix
 					return E_SUCCESS;
 				}
 
+			bool getRestart()
+				{
+					return m_bRestart;
+				}
+			
 		private:	
 			CAIPList* m_pIPList;
 			CAQueue* m_pQueueSendToMix;
 			CAFirstMixChannelList* m_pChannelList;
 			UINT32 m_nUser;
 			UINT32 m_nSocketsIn;
+			bool m_bRestart;
 			CASocket* m_arrSocketsIn;
 			CASocketGroup* m_psocketgroupUsersRead;
 			CASocketGroup* m_psocketgroupUsersWrite;
