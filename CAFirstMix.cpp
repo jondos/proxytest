@@ -537,8 +537,6 @@ ERR:
 SINT32 CAFirstMix::loop()
 	{
 		CAFirstMixChannelList  oChannelList;
-		//REVERSEMUXLISTENTRY* tmpReverseEntry;
-		//MUXLISTENTRY* tmpMuxListEntry;
 
 		CASocketGroup osocketgroupAccept;
 		CASocketGroup osocketgroupUsersRead;
@@ -635,7 +633,6 @@ SINT32 CAFirstMix::loop()
 													((CASocket*)pnewMuxSocket)->send(mKeyInfoBuff,mKeyInfoSize);
 													((CASocket*)pnewMuxSocket)->setNonBlocking(true);
 													oChannelList.add(pnewMuxSocket,new CAQueue);
-													//oMuxChannelList.add(pnewMuxSocket,new CAQueue);
 													nUser++;
 													oInfoService.setLevel(nUser,-1,-1);
 													osocketgroupUsersRead.add(*pnewMuxSocket);

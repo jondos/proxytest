@@ -6,8 +6,13 @@
 
 CAFirstMixChannelList::CAFirstMixChannelList()
 	{
-		m_HashTable=new fmHashTableEntry[MAX_HASH_KEY];
-		memset(m_HashTable,0,sizeof(fmHashTableEntry)*MAX_HASH_KEY);
+		m_HashTable=new LP_fmHashTableEntry[MAX_HASH_KEY];
+		memset(m_HashTable,0,sizeof(LP_fmHashTableEntry)*MAX_HASH_KEY);
+		for(int i=0;i<MAX_HASH_KEY;i++)
+			{
+				m_HashTable[i]=new fmHashTableEntry;
+				memset(m_HashTable[i],0,sizeof(fmHashTableEntry));
+			}
 		m_listOutChannelHead=NULL;
 		m_listHashTableHead=NULL;
 		m_listHashTableCurrent=NULL;
@@ -24,23 +29,23 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,CAQueue* pQueueSend)
 		SINT32 hashkey=(SOCKET)pMuxSocket;
 		if(hashkey>MAX_HASH_KEY-1||hashkey<0)
 			return E_UNKNOWN;
-		fmHashTableEntry oHashTableEntry=m_HashTable[hashkey];
-		if(oHashTableEntry.pMuxSocket!=NULL)
+		fmHashTableEntry* pHashTableEntry=m_HashTable[hashkey];
+		if(pHashTableEntry->pMuxSocket!=NULL)
 			return E_UNKNOWN;
-		oHashTableEntry.pMuxSocket=pMuxSocket;
-		oHashTableEntry.pQueueSend=pQueueSend;
+		pHashTableEntry->pMuxSocket=pMuxSocket;
+		pHashTableEntry->pQueueSend=pQueueSend;
 		if(m_listHashTableHead==NULL)
 			{
-				oHashTableEntry.list_HashEntries.next=NULL;
-				oHashTableEntry.list_HashEntries.prev=NULL;
-				m_listHashTableHead=&oHashTableEntry;				
+				pHashTableEntry->list_HashEntries.next=NULL;
+				pHashTableEntry->list_HashEntries.prev=NULL;
+				m_listHashTableHead=pHashTableEntry;				
 			}
 		else
 			{
-				oHashTableEntry.list_HashEntries.next=m_listHashTableHead;
-				oHashTableEntry.list_HashEntries.prev=NULL;
-				m_listHashTableHead->list_HashEntries.prev=&oHashTableEntry;
-				m_listHashTableHead=&oHashTableEntry;				
+				pHashTableEntry->list_HashEntries.next=m_listHashTableHead;
+				pHashTableEntry->list_HashEntries.prev=NULL;
+				m_listHashTableHead->list_HashEntries.prev=pHashTableEntry;
+				m_listHashTableHead=pHashTableEntry;				
 			}
 		return E_SUCCESS;
 	}
@@ -53,18 +58,18 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,HCHANNEL channelIn,
 		SINT32 hashkey=(SOCKET)pMuxSocket;
 		if(hashkey>MAX_HASH_KEY-1||hashkey<0)
 			return E_UNKNOWN;
-		fmHashTableEntry oHashTableEntry=m_HashTable[hashkey];
-		if(oHashTableEntry.pMuxSocket==NULL)
+		fmHashTableEntry* pHashTableEntry=m_HashTable[hashkey];
+		if(pHashTableEntry->pMuxSocket==NULL)
 			return E_UNKNOWN;
-		fmChannelListEntry* pEntry=oHashTableEntry.pChannelList;
+		fmChannelListEntry* pEntry=pHashTableEntry->pChannelList;
 		fmChannelListEntry* pNewEntry=new fmChannelListEntry;
 		memset(pNewEntry,0,sizeof(fmChannelListEntry));
 		pNewEntry->pCipher=pCipher;
 		pNewEntry->channelIn=channelIn;
 		pNewEntry->channelOut=channelOut;
 		pNewEntry->bIsSuspended=false;
-		pNewEntry->pHead=&oHashTableEntry;
-		if(pEntry==NULL)
+		pNewEntry->pHead=pHashTableEntry;
+		if(pEntry==NULL) //First Entry to the channel list
 			{
 				pNewEntry->list_InChannelPerSocket.next=NULL;
 				pNewEntry->list_InChannelPerSocket.prev=NULL;				
@@ -75,8 +80,8 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,HCHANNEL channelIn,
 				pNewEntry->list_InChannelPerSocket.prev=NULL;
 				pEntry->list_InChannelPerSocket.prev=pNewEntry;
 			}
-		oHashTableEntry.pChannelList=pNewEntry;
-		if(m_listOutChannelHead==NULL)
+		pHashTableEntry->pChannelList=pNewEntry;
+		if(m_listOutChannelHead==NULL) //First Entry to OutChannel-List
 			{
 				pNewEntry->list_OutChannel.prev=NULL;
 				pNewEntry->list_OutChannel.next=NULL;
@@ -100,8 +105,8 @@ fmChannelListEntry* CAFirstMixChannelList::get(CAMuxSocket* pMuxSocket,HCHANNEL 
 		SINT32 hashkey=(SOCKET)pMuxSocket;
 		if(hashkey>MAX_HASH_KEY-1||hashkey<0)
 			return NULL;
-		fmHashTableEntry oHashTableEntry=m_HashTable[hashkey];
-		fmChannelListEntry* pEntry=oHashTableEntry.pChannelList;
+		fmHashTableEntry* pHashTableEntry=m_HashTable[hashkey];
+		fmChannelListEntry* pEntry=pHashTableEntry->pChannelList;
 		while(pEntry!=NULL)
 			{
 				if(pEntry->channelIn==channelIn)
@@ -130,34 +135,34 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 		SINT32 hashkey=(SOCKET)pMuxSocket;
 		if(hashkey>MAX_HASH_KEY-1||hashkey<0)
 			return E_UNKNOWN;
-		fmHashTableEntry oHashTableEntry=m_HashTable[hashkey];
-		if(oHashTableEntry.pMuxSocket==NULL)
+		fmHashTableEntry* pHashTableEntry=m_HashTable[hashkey];
+		if(pHashTableEntry->pMuxSocket==NULL)
 			return E_UNKNOWN;
-		if(oHashTableEntry.list_HashEntries.prev==NULL) //head
+		if(pHashTableEntry->list_HashEntries.prev==NULL) //head
 			{
-				if(oHashTableEntry.list_HashEntries.next==NULL)
+				if(pHashTableEntry->list_HashEntries.next==NULL)
 					{
 						m_listHashTableHead=NULL;
 					}
 				else
 					{
-						oHashTableEntry.list_HashEntries.next->list_HashEntries.prev=NULL;
-						m_listHashTableHead=oHashTableEntry.list_HashEntries.next;
+						pHashTableEntry->list_HashEntries.next->list_HashEntries.prev=NULL;
+						m_listHashTableHead=pHashTableEntry->list_HashEntries.next;
 					}
 			}
 		else
 			{
-				if(oHashTableEntry.list_HashEntries.next==NULL)
+				if(pHashTableEntry->list_HashEntries.next==NULL)
 					{
-						oHashTableEntry.list_HashEntries.prev->list_HashEntries.next=NULL;
+						pHashTableEntry->list_HashEntries.prev->list_HashEntries.next=NULL;
 					}
 				else
 					{
-						oHashTableEntry.list_HashEntries.prev->list_HashEntries.next=oHashTableEntry.list_HashEntries.next;
-						oHashTableEntry.list_HashEntries.next->list_HashEntries.prev=oHashTableEntry.list_HashEntries.prev;
+						pHashTableEntry->list_HashEntries.prev->list_HashEntries.next=pHashTableEntry->list_HashEntries.next;
+						pHashTableEntry->list_HashEntries.next->list_HashEntries.prev=pHashTableEntry->list_HashEntries.prev;
 					}
 			}
-		fmChannelListEntry* pEntry=oHashTableEntry.pChannelList;
+		fmChannelListEntry* pEntry=pHashTableEntry->pChannelList;
 		fmChannelListEntry* pTmpEntry;
 		while(pEntry!=NULL)
 			{
@@ -189,7 +194,7 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 				delete pEntry;
 				pEntry=pTmpEntry;
 			}
-		memset(&oHashTableEntry,0,sizeof(fmHashTableEntry));
+		memset(pHashTableEntry,0,sizeof(fmHashTableEntry));
 		return E_SUCCESS;
 	}
 
@@ -200,10 +205,10 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket,HCHANNEL channelIn)
 		SINT32 hashkey=(SOCKET)pMuxSocket;
 		if(hashkey>MAX_HASH_KEY-1||hashkey<0)
 			return E_UNKNOWN;
-		fmHashTableEntry oHashTableEntry=m_HashTable[hashkey];
-		if(oHashTableEntry.pMuxSocket==NULL)
+		fmHashTableEntry* pHashTableEntry=m_HashTable[hashkey];
+		if(pHashTableEntry->pMuxSocket==NULL)
 			return E_UNKNOWN;
-		fmChannelListEntry* pEntry=oHashTableEntry.pChannelList;
+		fmChannelListEntry* pEntry=pHashTableEntry->pChannelList;
 		while(pEntry!=NULL)
 			{
 				if(pEntry->channelIn==channelIn)
@@ -237,12 +242,12 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket,HCHANNEL channelIn)
 							{
 								if(pEntry->list_InChannelPerSocket.next==NULL)
 									{
-										oHashTableEntry.pChannelList=NULL;
+										pHashTableEntry->pChannelList=NULL;
 									}
 								else
 									{
 										pEntry->list_InChannelPerSocket.next->list_InChannelPerSocket.prev=NULL;
-										oHashTableEntry.pChannelList=pEntry->list_InChannelPerSocket.next;
+										pHashTableEntry->pChannelList=pEntry->list_InChannelPerSocket.next;
 									}
 							}
 						else
@@ -286,8 +291,8 @@ fmChannelListEntry* CAFirstMixChannelList::getFirstChannelForSocket(CAMuxSocket*
 		SINT32 hashkey=(SOCKET)pMuxSocket;
 		if(hashkey>MAX_HASH_KEY-1||hashkey<0)
 			return NULL;
-		fmHashTableEntry oHashTableEntry=m_HashTable[hashkey];
-		return oHashTableEntry.pChannelList;
+		fmHashTableEntry* pHashTableEntry=m_HashTable[hashkey];
+		return pHashTableEntry->pChannelList;
 	}
 
 fmChannelListEntry* CAFirstMixChannelList::getNextChannel(fmChannelListEntry* pEntry)
