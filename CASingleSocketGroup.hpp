@@ -126,7 +126,7 @@ class CASingleSocketGroup
 							return ret;
 						else if(ret==0)
 							return E_TIMEDOUT;
-						return E_UNKOWN;							
+						return E_UNKNOWN;							
 					}
 
 		private:
