@@ -361,7 +361,7 @@ SINT32 CAMiddleMix::loop()
 							}
 						if(!oSocketList.get(oMuxPacket.channel,&oConnection))
 							{
-								if(oMuxPacket.flags==0)
+								if(oMuxPacket.flags==CHANNEL_OPEN)
 									{
 										#ifdef _DEBUG
 										    CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
@@ -382,7 +382,7 @@ SINT32 CAMiddleMix::loop()
 							}
 						else
 							{
-								if(oMuxPacket.flags!=0)
+								if(oMuxPacket.flags==CHANNEL_CLOSE)
 									{
 										muxOut.close(oConnection.outChannel);
 										oSocketList.remove(oMuxPacket.channel);
@@ -407,7 +407,7 @@ SINT32 CAMiddleMix::loop()
 							}
 						if(oSocketList.get(&oConnection,oMuxPacket.channel))
 							{
-								if(oMuxPacket.flags==0)
+								if(oMuxPacket.flags!=CHANNEL_CLOSE)
 									{
 										oMuxPacket.channel=oConnection.id;
 										oConnection.pCipher->decryptAES(oMuxPacket.data,oMuxPacket.data,DATA_SIZE);
