@@ -428,5 +428,6 @@ SINT32 CAQueue::test()
 #ifdef DO_TRACE
 		m_maxAlloc=m_aktAlloc=0;
 #endif
+
 		return E_SUCCESS;
 	}
