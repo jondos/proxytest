@@ -99,6 +99,7 @@ SINT32 CASocket::accept(CASocket &s)
 		memcpy(s.m_ipPeer,&peer.sin_addr,4);
 		return 0;
 	}
+
 			
 SINT32 CASocket::connect(LPCASOCKETADDR psa)
 	{
@@ -141,6 +142,78 @@ SINT32 CASocket::connect(LPCASOCKETADDR psa,UINT retry,UINT32 time)
 						return E_SUCCESS;
 			}
 		return err;
+	}
+			
+
+SINT32 CASocket::connect(LPCASOCKETADDR psa,UINT msTimeOut)
+	{
+		localPort=-1;
+		if(m_Socket==0&&create()==SOCKET_ERROR)
+			{
+				return SOCKET_ERROR;
+			}
+#ifdef _DEBUG
+		sockets++;
+#endif
+#ifndef _WIN32
+		int flags=fcntl(m_Socket,F_GETFL,0);
+		fcntl(m_Socket,F_SETFL,flasg|O_NONBLOCK);
+#else
+		unsigned long flags=1;
+		ioctlsocket(m_Socket,FIONBIO,&flags);
+#endif
+		int err=0;
+		LPSOCKADDR addr=(LPSOCKADDR)psa;
+		int addr_len=sizeof(*addr);
+		
+		err=::connect(m_Socket,addr,addr_len);
+		if(err==0)
+			return E_SUCCESS;
+		err=GETERROR;
+#ifdef _WIN32
+		if(err!=WSAEWOULDBLOCK)
+			return E_UNKNOWN;
+#else
+		if(err!=EINPROGRESS)
+			return E_UNKNOWN;
+#endif
+		FD_SET readSet,writeSet;
+		FD_ZERO(&readSet);
+		FD_ZERO(&writeSet);
+		FD_SET(m_Socket,&readSet);
+		FD_SET(m_Socket,&writeSet);
+		struct timeval tval;
+		tval.tv_sec=msTimeOut/1000;
+		tval.tv_usec=(msTimeOut%1000)*1000;
+		err=::select(m_Socket+1,&readSet,&writeSet,NULL,&tval);
+		if(err==0) //timeout
+			{
+				::close(m_Socket);
+				m_Socket=-1;
+				return E_UNKNOWN;
+			}
+		if(FD_ISSET(m_Socket,&readSet)||FD_ISSET(m_Socket,&writeSet))
+			{
+				int len=sizeof(err);
+				err=0;
+				if(::getsockopt(m_Socket,SOL_SOCKET,SO_ERROR,(char*)&err,&len)<0||err!=0)
+					{
+						::close(m_Socket);
+						m_Socket=-1;
+						return E_UNKNOWN;
+					}
+				#ifndef _WIN32
+					fcntl(m_Socket,F_SETFL,flags);
+				#else
+						flags=0;
+						ioctlsocket(m_Socket,FIONBIO,&flags);
+				#endif
+				return E_SUCCESS;
+			}
+		::close(m_Socket);
+		m_Socket=-1;
+		return E_UNKNOWN;
+	
 	}
 			
 SINT32 CASocket::close()
