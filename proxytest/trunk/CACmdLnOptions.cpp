@@ -7,7 +7,7 @@ CACmdLnOptions::CACmdLnOptions()
 		bLocalProxy=bFirstMix=bLastMix=bMiddleMix=false;
 		iTargetPort=iSOCKSPort=iServerPort=iSOCKSServerPort=iInfoServerPort-1;
 		strTargetHost=strSOCKSHost=strInfoServerHost=NULL;
-		strKeyFileName=strCascadeName=NULL;
+		strKeyFileName=strCascadeName=strLogDir=NULL;
   }
 
 CACmdLnOptions::~CACmdLnOptions()
@@ -28,6 +28,8 @@ CACmdLnOptions::~CACmdLnOptions()
 			delete strKeyFileName;
 		if(strCascadeName!=NULL)
 			delete strCascadeName;
+		if(strLogDir!=NULL)
+			delete strLogDir;
   }
     
 int CACmdLnOptions::parse(int argc,const char** argv)
@@ -43,6 +45,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 	char* infoserver=NULL;
 	char* keyfile=NULL;
 	char* cascadename=NULL;
+	char* logdir=NULL;
 	poptOption options[]=
 	 {
 		{"daemon",'d',POPT_ARG_NONE,&iDaemon,0,"start as daemon",NULL},
@@ -54,6 +57,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 		{"infoserver",'i',POPT_ARG_STRING,&infoserver,0,"info server","<ip:port>"},
 		{"key",'k',POPT_ARG_STRING,&keyfile,0,"sign key file","<file>"},
 		{"name",'a',POPT_ARG_STRING,&cascadename,0,"name of the cascade","<string>"},
+		{"logdir",'l',POPT_ARG_STRING,&logdir,0,"directory where log files go to","<dir>"},
 		POPT_AUTOHELP
 		{NULL,0,0,
 		NULL,0,NULL,NULL}
@@ -113,6 +117,12 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 					strcpy(strCascadeName,cascadename);
 					free(cascadename);	
 	    }
+	if(logdir!=NULL)
+	    {
+					strLogDir=new char[strlen(logdir)+1];
+					strcpy(strLogDir,logdir);
+					free(logdir);	
+	    }
 	iServerPort=port;
 	iSOCKSServerPort=SOCKSport;
 	if(mix==0)
@@ -156,7 +166,7 @@ SINT32 CACmdLnOptions::getTargetHost(UINT8* host,UINT32 len)
 					return E_UNKNOWN;		
 				}
 		strcpy((char*)host,strTargetHost);
-		return (SINT32)strlen(strTargetHost);
+		return E_SUCCESS;
   }
 
 UINT16 CACmdLnOptions::getSOCKSPort()
@@ -190,7 +200,7 @@ SINT32 CACmdLnOptions::getInfoServerHost(UINT8* host,UINT32 len)
 					return E_UNKNOWN;		
 				}
 		strcpy((char*)host,strInfoServerHost);
-		return (SINT32)strlen(strInfoServerHost);
+		return E_SUCCESS;
   }
 
 SINT32 CACmdLnOptions::getKeyFileName(UINT8* filename,UINT32 len)
@@ -202,7 +212,7 @@ SINT32 CACmdLnOptions::getKeyFileName(UINT8* filename,UINT32 len)
 					return E_UNKNOWN;		
 				}
 		strcpy((char*)filename,strKeyFileName);
-		return (SINT32)strlen(strKeyFileName);
+		return E_SUCCESS;
   }
 
 SINT32 CACmdLnOptions::getCascadeName(UINT8* name,UINT32 len)
@@ -214,7 +224,19 @@ SINT32 CACmdLnOptions::getCascadeName(UINT8* name,UINT32 len)
 					return E_UNKNOWN;		
 				}
 		strcpy((char*)name,strCascadeName);
-		return (SINT32)strlen(strCascadeName);
+		return E_SUCCESS;
+  }
+
+SINT32 CACmdLnOptions::getLogDir(UINT8* name,UINT32 len)
+  {
+		if(strLogDir==NULL)
+				return E_UNKNOWN;
+		if(len<=(UINT32)strlen(strLogDir))
+				{
+					return E_UNKNOWN;		
+				}
+		strcpy((char*)name,strLogDir);
+		return E_SUCCESS;
   }
 
 bool CACmdLnOptions::isFirstMix()
