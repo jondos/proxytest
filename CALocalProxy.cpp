@@ -36,30 +36,54 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 extern CACmdLnOptions options;
 
+SINT32 CALocalProxy::initOnce()
+	{
+		if(options.getListenerInterfaceCount()<1)
+		  {
+				CAMsg::printMsg(LOG_CRIT,"No Listener Interface spezified!\n");
+				return E_UNKNOWN;
+			}
+		if(options.getListenerInterfaceCount()<1)
+		  {
+				CAMsg::printMsg(LOG_CRIT,"No Listener Interface specified!\n");
+				return E_UNKNOWN;
+			}
+		UINT8 strTarget[255];
+		if(options.getMixHost(strTarget,255)!=E_SUCCESS)
+		  {
+				CAMsg::printMsg(LOG_CRIT,"No AnonServer specified!\n");
+				return E_UNKNOWN;
+			}
+		return E_SUCCESS;
+	}
+
 SINT32 CALocalProxy::init()
 	{
 		ListenerInterface oListener;
-		options.getListenerInterface(oListener,1);
+		
 		CASocketAddrINet socketAddrIn;
 		socketIn.create();
 		socketIn.setReuseAddr(true);
+		options.getListenerInterface(oListener,1);
 		if(((CASocketAddrINet*)oListener.addr)->isAnyIP())
 			((CASocketAddrINet*)oListener.addr)->setAddr((UINT8*)"127.0.0.1",((CASocketAddrINet*)oListener.addr)->getPort());
 		if(socketIn.listen(*oListener.addr)!=E_SUCCESS)
-		    {
-					CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
-					return E_UNKNOWN;
-		    }
+		  {
+				CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
+				delete oListener.addr;
+				return E_UNKNOWN;
+			}
+		delete oListener.addr;
 		if(options.getSOCKSServerPort()!=(UINT16)-1)
 			{
 				socketAddrIn.setAddr((UINT8*)"127.0.0.1",options.getSOCKSServerPort());
 				socketSOCKSIn.create();
 				socketSOCKSIn.setReuseAddr(true);
 				if(socketSOCKSIn.listen(socketAddrIn)!=E_SUCCESS)
-						{
-							CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
-							return E_UNKNOWN;
-						}
+					{
+						CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
+						return E_UNKNOWN;
+					}
 			}
 		CASocketAddrINet addrNext;
 		UINT8 strTarget[255];
@@ -90,7 +114,7 @@ SINT32 CALocalProxy::init()
 						size-=len;
 						aktIndex+=len;
 					}
-				
+				delete[] buff;
 				return E_SUCCESS;
 			}
 		else
@@ -283,5 +307,6 @@ SINT32 CALocalProxy::loop()
 							}
 					}
 			}
+		delete pMixPacket;
 		return E_SUCCESS;
 	}
