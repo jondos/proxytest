@@ -97,7 +97,7 @@ SINT32 CAQueue::add(const UINT8* buff,UINT32 size)
 		m_nQueueSize+=size;
 	//	m_convarSize.unlock();
 		m_csQueue.unlock();
-		m_convarSize.signal();
+		//m_convarSize.signal();
 		return E_SUCCESS;
 	}
 
@@ -262,7 +262,6 @@ THREAD_RETURN producer(void* param)
 						THREAD_RETURN_ERROR;
 					count+=aktSize;
 					pTest->len-=aktSize;
-					msSleep(1000);
 				}
 		if(pTest->pQueue->add(pTest->buff+count,pTest->len)!=E_SUCCESS)
 			THREAD_RETURN_ERROR;
@@ -282,7 +281,6 @@ THREAD_RETURN consumer(void* param)
 					THREAD_RETURN_ERROR;
 				count+=aktSize;
 				pTest->len-=aktSize;
-				msSleep(1000);
 			}while(pTest->len>0);
 		THREAD_RETURN_SUCCESS;
 	}

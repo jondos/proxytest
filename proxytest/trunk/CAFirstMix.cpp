@@ -218,6 +218,7 @@ THREAD_RETURN loopSendToMix(void* param)
 					break;}
 			}
 		delete buff;
+		CAMsg::printMsg(LOG_DEBUG,"Exiting Thread SendToMix\n");
 		THREAD_RETURN_SUCCESS;
 	}
 
@@ -298,6 +299,7 @@ THREAD_RETURN loopAcceptUsers(void* param)
 			
 			}
 		delete ip;
+		CAMsg::printMsg(LOG_DEBUG,"Exiting Thread AcceptUser\n");
 		THREAD_RETURN_SUCCESS;
 	}
 
