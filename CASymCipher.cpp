@@ -130,22 +130,38 @@ SINT32 CASymCipher::decryptAES(UINT8* in,UINT8* out,UINT32 len)
 				rijndaelEncrypt (iv, iv, keyDecAES.keySched);
 
 		//	blockEncrypt(&cipher,&keyDecAES,iv,16<<3,iv); 
-				out[i]=in[i++]^iv[0];
-				out[i]=in[i++]^iv[1];
-				out[i]=in[i++]^iv[2];
-				out[i]=in[i++]^iv[3];
-				out[i]=in[i++]^iv[4];
-				out[i]=in[i++]^iv[5];
-				out[i]=in[i++]^iv[6];
-				out[i]=in[i++]^iv[7];
-				out[i]=in[i++]^iv[8];
-				out[i]=in[i++]^iv[9];
-				out[i]=in[i++]^iv[10];
-				out[i]=in[i++]^iv[11];
-				out[i]=in[i++]^iv[12];
-				out[i]=in[i++]^iv[13];
-				out[i]=in[i++]^iv[14];
-				out[i]=in[i++]^iv[15];
+				out[i]=in[i]^iv[0];
+				i++;
+				out[i]=in[i]^iv[1];
+				i++;
+				out[i]=in[i]^iv[2];
+				i++;
+				out[i]=in[i]^iv[3];
+				i++;
+				out[i]=in[i]^iv[4];
+				i++;
+				out[i]=in[i]^iv[5];
+				i++;
+				out[i]=in[i]^iv[6];
+				i++;
+				out[i]=in[i]^iv[7];
+				i++;
+				out[i]=in[i]^iv[8];
+				i++;
+				out[i]=in[i]^iv[9];
+				i++;
+				out[i]=in[i]^iv[10];
+				i++;
+				out[i]=in[i]^iv[11];
+				i++;
+				out[i]=in[i]^iv[12];
+				i++;
+				out[i]=in[i]^iv[13];
+				i++;
+				out[i]=in[i]^iv[14];
+				i++;
+				out[i]=in[i]^iv[15];
+				i++;
 			}
 		if(i<len)
 			{
@@ -153,7 +169,10 @@ SINT32 CASymCipher::decryptAES(UINT8* in,UINT8* out,UINT32 len)
 //				blockEncrypt(&cipher,&keyDecAES,iv,16<<3,iv); 
 				len-=i;
 				for(int k=0;k<len;k++)
-					out[i]=in[i++]^iv[k];
+				 {
+					 out[i]=in[i]^iv[k];
+					 i++;
+					 }
 			}
 		return E_SUCCESS;
 	}
