@@ -129,7 +129,7 @@ inline UINT32 div64(UINT64& op1,UINT32 op2)
 inline void print64(UINT8* buff,UINT64& op)
 	{
 #if defined(_WIN32)
-		sprintf((char*)buff,"%I64u",op);
+		_ui64toa(op,(char*)buff,10);
 #elif defined(__linux)
 		sprintf((char*)buff,"%Lu",op);
 #else

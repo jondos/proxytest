@@ -73,9 +73,13 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		typedef unsigned char UINT8;
 		typedef signed char SINT8;
 #else
+	//__linux is not defined on power pc so we define our own __linux if __linux__ is defined
+	#if defined(__linux__) && !defined(__linux)
+		#define __linux
+	#endif
 	#if defined(CWDEBUG)
-	    #include <libcw/sysd.h>
-	    #include <libcw/debug.h>
+	  #include <libcw/sysd.h>
+	  #include <libcw/debug.h>
 	#endif
 
   #ifdef HAVE_CONFIG_H  
