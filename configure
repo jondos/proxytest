@@ -3649,7 +3649,7 @@ case "$host" in
 	DEFAULTLIBS="$LIBS -L/usr/local/lib -liconv"
 	;;
 *-*-netbsd*)
-	DEFAULTLIBS="$LIBS -L/usr/local/lib -liconv"
+	DEFAULTLIBS="$LIBS -L/usr/pkg/lib -liconv"
 	;;
 *)
 	;;
