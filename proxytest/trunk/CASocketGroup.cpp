@@ -32,7 +32,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include "CAMsg.hpp"
 //#endif
 
-#define MAX_POLLFD 1024
+#define MAX_POLLFD 8192
 CASocketGroup::CASocketGroup()
 	{
 		#ifndef HAVE_POLL
