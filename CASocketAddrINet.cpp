@@ -156,6 +156,27 @@ SINT32 CASocketAddrINet::getIP(UINT8 buff[4])
 		return E_SUCCESS;
 	}
 
+/** Returns the IP-Number as an address string (doted-format).
+	* @param buff buffer for the returned IP-Address
+	* @param len buffer-space
+	* @retval E_SUCCESS if no error occured
+	*/
+SINT32 CASocketAddrINet::getIPAsStr(UINT8* buff,UINT32 len)
+	{
+		if(buff==NULL)
+			return E_UNKNOWN;
+		UINT8 ip[4];
+		if(getIP(ip)!=E_SUCCESS)
+			return E_UNKNOWN;
+		char* strAddr=inet_ntoa(sin_addr);
+		if(strAddr==NULL)
+			return E_UNKNOWN;
+		if(strlen(strAddr)>=len)
+			return E_UNKNOWN;
+		strcpy((char*)buff,strAddr);
+		return E_SUCCESS;
+	}
+
 /** Returns the name of the local host.
 	* @param buff buffer for the returned zero terminated hostname
 	* @param len the size of the buffer
