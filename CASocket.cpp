@@ -233,11 +233,13 @@ SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len)
 	  do
 			{
 				ret=receive(buff+pos,len);
+				if(ret<0)
+					return E_UNKNOWN;
 				pos+=ret;
 				len-=ret;
 			}
-	  while(ret>0&&len>0);
-	  return ret;	    	    
+	  while(len>0);
+	  return E_SUCCESS;	    	    
 	}
 
 int CASocket::getLocalPort()
