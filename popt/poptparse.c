@@ -55,7 +55,7 @@ int poptParseArgvString(const char * s, int * argcPtr, const char *** argvPtr)
 	    if (*src == '\\') {
 		src++;
 		if (!*src) {
-		    free(argv);
+		    free((void*)argv);
 		    return POPT_ERROR_BADQUOTE;
 		}
 		if (*src != quote) *buf++ = '\\';
@@ -66,7 +66,7 @@ int poptParseArgvString(const char * s, int * argcPtr, const char *** argvPtr)
 		buf++, argc++;
 		if (argc == argvAlloced) {
 		    argvAlloced += POPT_ARGV_ARRAY_GROW_DELTA;
-		    argv = (const char**)realloc(argv, sizeof(*argv) * argvAlloced);
+		    argv = (const char**)realloc((void*)argv, sizeof(*argv) * argvAlloced);
 		}
 		argv[argc] = buf;
 	    }
@@ -78,7 +78,7 @@ int poptParseArgvString(const char * s, int * argcPtr, const char *** argvPtr)
 	  case '\\':
 	    src++;
 	    if (!*src) {
-		free(argv);
+		free((void*)argv);
 		return POPT_ERROR_BADQUOTE;
 	    }
 	    /*@fallthrough@*/
@@ -94,7 +94,7 @@ int poptParseArgvString(const char * s, int * argcPtr, const char *** argvPtr)
 
     (void) poptDupArgv(argc, argv, argcPtr, argvPtr);
 
-    free(argv);
+    free((void*)argv);
 
     return 0;
 }
