@@ -203,7 +203,7 @@ SINT32 CAInfoService::sendHelo()
 								return E_UNKNOWN;
 							}
 						buffLen=1024;
-						if(m_pSignature->signXML(tmpBuff,len,(UINT8*)buff,&buffLen)!=E_SUCCESS)
+						if(m_pSignature->signXML(tmpBuff,strlen((char*)tmpBuff),(UINT8*)buff,&buffLen)!=E_SUCCESS)
 							{delete []buff;return E_UNKNOWN;}
 					}
 				else
