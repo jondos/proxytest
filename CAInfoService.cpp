@@ -94,7 +94,7 @@ THREAD_RETURN InfoLoop(void *p)
 						oBufferStream.reset();
 						oxmlOut.BeginDocument("1.0","UTF-8",true);
 						oxmlOut.BeginElementAttrs("MixCascadeStatus");
-						oxmlOut.WriteAttr("id",strAnonServer);
+						oxmlOut.WriteAttr("id",(char*)strAnonServer);
 						pInfoService->getLevel(&nUser,&nRisk,&nTraffic);
 						oxmlOut.WriteAttr("nrOfActiveUsers",(int)nUser);
 						oxmlOut.WriteAttr("currentRisk",(int)nRisk);
@@ -206,12 +206,12 @@ int CAInfoService::sendHelo()
 			strcpy((char*)hostname,"anon.inf.tu-dresden.de");
 //end hack....
 				sprintf(buff,"%s%%3A%u",hostname,options.getServerPort());
-				oxmlOut.WriteAttr("id",buff);
+				oxmlOut.WriteAttr("id",(char*)buff);
 				oxmlOut.EndAttrs();
 				options.getCascadeName((UINT8*)buff,1024);
-				oxmlOut.WriteElement("Name",buff);
-				oxmlOut.WriteElement("IP",hostname);
-				oxmlOut.WriteElement("Port",options.getServerPort());
+				oxmlOut.WriteElement("Name",(char*)buff);
+				oxmlOut.WriteElement("IP",(char*)hostname);
+				oxmlOut.WriteElement("Port",(int)options.getServerPort());
 				oxmlOut.EndElement();
 				oxmlOut.EndDocument();
 				buffLen=1024;
