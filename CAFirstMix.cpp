@@ -578,6 +578,8 @@ SINT32 CAFirstMix::loop()
 												#else
 													getcurrentTimeMillis(current_time);
 													diff_time=diff64(current_time,pHashEntry->timeCreated);
+													CAMsg::printMsg(LOG_DEBUG,"Connection closed - Connection: %Lu, PacketsIn %u, Packets Out %u - Connection start %Lu, Connection end %uL, Connection duration %u\n",
+																						pHashEntry->id,pHashEntry->trafficIn,pHashEntry->trafficOut,pHashEntry->timeCreated,current_time,diff_time);
 													m_pIPList->removeIP(pHashEntry->peerIP,diff_time,pHashEntry->trafficIn,pHashEntry->trafficOut);
 												#endif
 												m_psocketgroupUsersRead->remove(*(CASocket*)pMuxSocket);
@@ -643,6 +645,13 @@ SINT32 CAFirstMix::loop()
 															{
 																m_pMuxOut->close(pEntry->channelOut,tmpBuff);
 																m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
+																#ifdef LOG_CHANNEL
+																	pEntry->packetsInFromUser++;
+																	getcurrentTimeMillis(current_time);
+																	diff_time=diff64(current_time,pEntry->timeCreated);
+																	CAMsg::printMsg(LOG_DEBUG,"Channel close - Channel: %u, Connection: %Lu - PacketsIn: %u, PacketsOut: %u - ChannelStart: %Lu, ChannelEnd: %Lu, ChannelDuration: %u\n",
+																														pEntry->channelIn,pEntry->pHead->id,pEntry->packetsInFromUser,pEntry->packetsOutToUser,pEntry->timeCreated,current_time,diff_time);
+																#endif
 																delete pEntry->pCipher;
 																m_pChannelList->removeChannel(pMuxSocket,pMixPacket->channel);
 															}
@@ -666,6 +675,9 @@ SINT32 CAFirstMix::loop()
 																m_pMuxOut->send(pMixPacket,tmpBuff);
 																m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
 																incMixedPackets();
+																#ifdef LOG_CHANNEL
+																	pEntry->packetsInFromUser++;
+																#endif
 															}
 														else if(pEntry==NULL&&(pMixPacket->flags==CHANNEL_OPEN_OLD||pMixPacket->flags==CHANNEL_OPEN_NEW))
 															{
@@ -686,6 +698,9 @@ SINT32 CAFirstMix::loop()
 																		m_pMuxOut->send(pMixPacket,tmpBuff);
 																		m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
 																		incMixedPackets();
+																		#ifdef LOG_CHANNEL
+																			m_pChannelList->get(pMuxSocket,pMixPacket->channel)->packetsInFromUser++;
+																		#endif
 																		#ifdef _DEBUG
 																			CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",pMixPacket->channel);
 																		#endif
@@ -741,6 +756,15 @@ SINT32 CAFirstMix::loop()
 									{
 										pEntry->pHead->pMuxSocket->close(pEntry->channelIn,tmpBuff);
 										pEntry->pHead->pQueueSend->add(tmpBuff,MIXPACKET_SIZE);
+										#ifdef LOG_CHANNEL
+											pEntry->pHead->trafficOut++;
+											pEntry->packetsOutToUser++;
+											getcurrentTimeMillis(current_time);
+											diff_time=diff64(current_time,pEntry->timeCreated);
+											CAMsg::printMsg(LOG_DEBUG,"Channel close - Channel: %u, Connection: %Lu - PacketsIn: %u, PacketsOut: %u - ChannelStart: %Lu, ChannelEnd: %Lu, ChannelDuration: %u\n",
+																								pEntry->channelIn,pEntry->pHead->id,pEntry->packetsInFromUser,pEntry->packetsOutToUser,pEntry->timeCreated,current_time,diff_time);
+										#endif
+										
 										m_psocketgroupUsersWrite->add(*pEntry->pHead->pMuxSocket);
 										delete pEntry->pCipher;
 	
@@ -760,6 +784,10 @@ SINT32 CAFirstMix::loop()
 										
 										pEntry->pHead->pMuxSocket->send(pMixPacket,tmpBuff);
 										pEntry->pHead->pQueueSend->add(tmpBuff,MIXPACKET_SIZE);
+										#ifdef LOG_CHANNEL
+											pEntry->pHead->trafficOut++;
+											pEntry->packetsOutToUser++;
+										#endif
 										m_psocketgroupUsersWrite->add(*pEntry->pHead->pMuxSocket);
 #define MAX_USER_SEND_QUEUE 100000
 										if(pEntry->pHead->pQueueSend->getSize()>MAX_USER_SEND_QUEUE&&
@@ -803,9 +831,6 @@ SINT32 CAFirstMix::loop()
 								ret=((CASocket*)pfmHashEntry->pMuxSocket)->send(tmpBuff,len);
 								if(ret>0)
 									{
-										#ifdef LOG_CHANNEL
-											pfmHashEntry->trafficOut++;
-										#endif
 										pfmHashEntry->pQueueSend->remove((UINT32*)&ret);
 #define USER_SEND_BUFFER_RESUME 10000
 										if(pfmHashEntry->cSuspend>0&&

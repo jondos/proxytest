@@ -42,6 +42,7 @@ struct t_fmhashtableentry
 			UINT32				trafficIn;
 			UINT32				trafficOut;
 			UINT64				timeCreated;
+			UINT64				id;
 #endif
 			UINT8					peerIP[4]; //needed for flooding controll
 		private:
@@ -72,6 +73,12 @@ struct t_firstmixchannellist
 		
 			CASymCipher* pCipher;
 			bool bIsSuspended;
+
+#ifdef LOG_CHANNEL
+			UINT32				packetsInFromUser;
+			UINT32				packetsOutToUser;
+			UINT64				timeCreated;	
+#endif
 
 		private:
 			struct
