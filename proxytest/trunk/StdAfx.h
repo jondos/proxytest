@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.03.64"
+#define MIX_VERSION "00.03.65"
 
 #if defined(DEBUG)|| defined(_DEBUG)
 	#undef DEBUG
@@ -55,9 +55,14 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#endif
 	//Delay is at the moment constant and calculate as
 	// 1000/DELAY_BUCKET_GROW_INTERVALL*DELAY_BUCKET_GROW bytes/s
-	#define DELAY_BUCKET_GROW_INTERVALL 100 //Time in ms
-	#define DELAY_BUCKET_GROW PAYLOAD_SIZE //Grow in bytes
+	#ifndef DELAY_KBYTE_PER_SECOND
+		#define DELAY_BUCKET_GROW_INTERVALL 100 //Time in ms
+		#define DELAY_BUCKET_GROW PAYLOAD_SIZE //Grow in bytes
 	//so we have around 10 KByte/s at the moment
+	#else
+		#define DELAY_BUCKET_GROW_INTERVALL (1/DELAY_KBYTE_PER_SECOND) //Time in ms
+		#define DELAY_BUCKET_GROW PAYLOAD_SIZE //Grow in bytes
+	#endif	
 #endif
 //#define LOG_CRIME
 //#define PAYMENT //to enable payment support, now use configure --enable-payment..

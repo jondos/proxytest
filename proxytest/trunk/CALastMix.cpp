@@ -353,9 +353,17 @@ THREAD_RETURN lm_loopSendToMix(void* param)
 				len=sizeof(tQueueEntry);
 				ret=pQueue->getOrWait((UINT8*)pQueueEntry,&len);
 				if(ret!=E_SUCCESS||len!=sizeof(tQueueEntry))
-					break;
+					{
+						CAMsg::printMsg(LOG_ERR,"CALastMix::lm_loopSendToMix - Error in dequeueing MixPaket\n");
+						CAMsg::printMsg(LOG_ERR,"ret=%i len=%i\n",ret,len);
+						break;
+					}
 				if(pMuxSocket->send(pMixPacket)!=MIXPACKET_SIZE)
-					break;
+					{
+						CAMsg::printMsg(LOG_ERR,"CALastMix::lm_loopSendToMix - Error in sending MixPaket\n");
+						CAMsg::printMsg(LOG_ERR,"ret=%i len=%i\n",ret,len);
+						break;
+					}
 #ifdef LOG_PACKET_TIMES
  				if(!isZero64(pQueueEntry->timestamp_proccessing_start))
 					{
@@ -383,7 +391,9 @@ THREAD_RETURN lm_loopSendToMix(void* param)
 						#endif
 					}
 				else if(ret!=E_SUCCESS||len!=sizeof(tQueueEntry))
-					break;
+					{
+						break;
+					}
 				#ifdef LOG_PACKET_TIMES
 					getcurrentTimeMicros(pPoolEntry->pool_timestamp_in);
 				#endif

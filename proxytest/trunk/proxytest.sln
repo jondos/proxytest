@@ -118,6 +118,7 @@ Global
 		documentation\XML\InterMix-LastMix-to-Successor.xml = documentation\XML\InterMix-LastMix-to-Successor.xml
 		documentation\XML\MixCascadeStatus.xml = documentation\XML\MixCascadeStatus.xml
 		documentation\XML\MixHELO.xml = documentation\XML\MixHELO.xml
+		proxytest_win_short.doxy = proxytest_win_short.doxy
 		documentation\XML\xmldoc.template = documentation\XML\xmldoc.template
 		documentation\XML\XMLSignature.xml = documentation\XML\XMLSignature.xml
 	EndGlobalSection

@@ -295,12 +295,13 @@ SINT32 CASocket::close(UINT32 mode)
 	}
 */
 			
-/** Sends some data over the network. This may block, if socket is in blocking mode.
-	@param buff the buffer of data to send
-	@param len content length
-	@retval E_AGAIN if non blocking socket would block or a timeout was reached
-	@retval E_UNKNOWN if an error occured
-	@return number of bytes send
+/** Sends some data over the network. This may block, 
+	* if socket is in blocking mode.
+	* @param buff the buffer of data to send
+	* @param len content length
+	* @retval E_AGAIN if non blocking socket would block or a timeout was reached
+	* @retval E_UNKNOWN if an error occured
+	* @return number of bytes send
 */
 SINT32 CASocket::send(const UINT8* buff,UINT32 len)
 	{
@@ -394,15 +395,22 @@ SINT32 CASocket::sendFully(const UINT8* buff,UINT32 len)
 						ret=CASingleSocketGroup::select_once(*this,true,1000);
 						if(ret>=0||ret==E_TIMEDOUT)
 							continue;
+						#ifdef _DEBUG
+							CAMsg::printMsg(LOG_DEBUG,"CASocket::sendFully() - error near select_once() ret=%i\n",ret);
+						#endif
 						return E_UNKNOWN;
 					}
 				else if(ret<0)
 					{
+						#ifdef _DEBUG
+							CAMsg::printMsg(LOG_DEBUG,"CASocket::sendFully() - send returned %i\n",ret);
+						#endif
 						return E_UNKNOWN;
 					}
 				len-=ret;
 				buff+=ret;
 			}
+			//could never be here....
 	}
 
 /** Will receive some bytes from the socket. May block or not depending on whatever this socket

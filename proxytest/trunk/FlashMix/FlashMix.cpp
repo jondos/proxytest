@@ -70,9 +70,6 @@ int main( int argc, char * argv[] )
     fm->init();
     fm->start();
 
-    char c;
-    std::cin >> c;
-
     delete fm;
 
     return 0;
