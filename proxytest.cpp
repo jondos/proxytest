@@ -560,7 +560,8 @@ THREAD_RETURN fmIO(void *v)
 		#ifdef _DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"New Key Info size: %u\n",infoSize);
 		#endif
-		
+		printf("Size of MuxPacket: %u\n",sizeof(oMuxPacket));
+		printf("Pointer: %p,%p,%p,%p\n",&oMuxPacket.channel,&oMuxPacket.len,&oMuxPacket.type,&oMuxPacket.data);
 		for(;;)
 			{
 				if((countRead=oSocketGroup.select())==SOCKET_ERROR)
