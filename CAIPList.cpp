@@ -76,7 +76,7 @@ CAIPList::~CAIPList()
 	*/
 SINT32 CAIPList::insertIP(UINT8 ip[4])
 	{
-		UINT16 hashvalue=ip[2]<<8|ip[3];
+		UINT16 hashvalue=(ip[2]<<8)|ip[3];
 		m_Mutex.lock();
 		PIPLIST entry=m_HashTable[hashvalue];
 		if(entry==NULL)
@@ -130,7 +130,7 @@ SINT32 CAIPList::insertIP(UINT8 ip[4])
 	*/
 SINT32 CAIPList::removeIP(UINT8 ip[4])
 	{
-		UINT16 hashvalue=ip[2]<<8|ip[3];
+		UINT16 hashvalue=(ip[2]<<8)|ip[3];
 		m_Mutex.lock();
 		PIPLIST entry=m_HashTable[hashvalue];
 		if(entry==NULL)
