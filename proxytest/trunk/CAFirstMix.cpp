@@ -769,7 +769,7 @@ void CAFirstMix::resume(CASocket* pSocket)
 		MUXLISTENTRY* pml=oSuspendList.getFirst();
 		while(pml!=NULL)
 			{
-				if((SOCKET)pml->pMuxSocket==(SOCKET)pSocket)
+				if(((SOCKET)*(pml->pMuxSocket))==((SOCKET)*pSocket))
 					{
 						CONNECTION* pcon=pml->pSocketList->getFirst();
 						while(pcon!=NULL)

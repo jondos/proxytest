@@ -47,8 +47,9 @@ OBJS=$(OBJS_ALL)
 
 all: 
 	@echo 'Please select a target:'
-	@echo 'linux-x86-gcc, linux-x86-gcc-static, linux-x86-gcc-debug,'
-	@echo 'solaris-ultrasparc-gcc, irix-64-cc'
+	@echo 'linux-x86-gcc, linux-x86-gcc-prot2, linux-x86-gcc-async,' 
+	@echo 'linux-x86-gcc-static, linux-x86-gcc-debug,'
+	@echo 'solaris-ultrasparc-gcc, irix-64-cc, irix-64-cc-prot2, irix-64-cc-async'
 
 
 linux-x86-gcc:
@@ -78,6 +79,9 @@ irix-64-cc:
 
 irix-64-cc-prot2:
 	$(MAKE) 'CC=CC -r10000 -mips4 -64' 'CPPFLAGS=-DPROT2 -fullwarn -Ofast=IP27 -D_REENTRANT' 'LIBS=$(LIBS) ./aes/libaes.a' _all_aes 
+
+irix-64-cc-async:
+	$(MAKE) 'CC=CC -r10000 -mips4 -64' 'CPPFLAGS=-DPROT2 -D_ASYNC -fullwarn -Ofast=IP27 -D_REENTRANT' 'LIBS=$(LIBS) ./aes/libaes.a' _all_aes 
 
 irix-64-cc-debug-prot2:
 	$(MAKE) 'CC=CC -r10000 -mips4 -64' 'CPPFLAGS=-D_DEBUG -DPROT2 -fullwarn -O0 -g -D_REENTRANT' 'LIBS=$(LIBS) ./aes/libaes.a' _all_aes 
