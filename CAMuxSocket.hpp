@@ -2,7 +2,7 @@
 #define __CAMUXSOCKET__
 #include "CASocket.hpp"
 
-typedef int HCHANNEL;
+typedef unsigned int HCHANNEL;
 
 class CAMuxSocket
 	{
@@ -14,6 +14,7 @@ class CAMuxSocket
 			int close();
 			int send(HCHANNEL channel_id,char* buff,int len);
 			int receive(HCHANNEL* channel_id,char* buff,int len);
+			int close(HCHANNEL channel_id);
 			operator CASocket*(){return &m_Socket;}
 		private:
 			CASocket m_Socket;

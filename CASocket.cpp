@@ -2,7 +2,8 @@
 #include "CASocketAddr.hpp"
 #include "CASocket.hpp"
 #ifdef _DEBUG
-extern int sockets;
+	extern int sockets;
+	#include "CAMsg.hpp"
 #endif
 #define CLOSE_SEND		0x01
 #define CLOSE_RECEIVE 0x02
@@ -67,7 +68,12 @@ int CASocket::close()
 		int ret;
 		if(m_Socket!=0)
 			{
-				::closesocket(m_Socket);
+	/*			LINGER linger;
+				linger.l_onoff=1;
+				linger.l_linger=0;
+				if(::setsockopt(m_Socket,SOL_SOCKET,SO_LINGER,(char*)&linger,sizeof(linger))!=0)
+					CAMsg::printMsg(LOG_DEBUG,"Fehler bei setsockopt - LINGER!\n");
+	*/			::closesocket(m_Socket);
 #ifdef _DEBUG
 				sockets--;
 #endif
@@ -83,7 +89,7 @@ int CASocket::close()
 int CASocket::close(int mode)
 	{
 		EnterCriticalSection(&csClose);
-		shutdown(m_Socket,mode);
+		::shutdown(m_Socket,mode);
 		if(mode==SD_RECEIVE||mode==SD_BOTH)
 			closeMode|=CLOSE_RECEIVE;
 		if(mode==SD_SEND||mode==SD_BOTH)

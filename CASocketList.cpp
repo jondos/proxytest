@@ -5,7 +5,7 @@ CASocketList::CASocketList()
 	{
 		connections=NULL;
 		pool=new CONNECTIONLIST;
-		pool->id=1;
+		pool->id=0;
 		pool->pSocket=NULL;
 		CONNECTIONLIST* tmp;
 		tmp=pool;
@@ -13,7 +13,7 @@ CASocketList::CASocketList()
 			{
 				tmp->next=new CONNECTIONLIST;
 				tmp=tmp->next;
-				tmp->id=i;
+				tmp->id=0;
 				tmp->pSocket=NULL;
 			}
 		tmp->next=NULL;
@@ -26,29 +26,31 @@ CASocketList::~CASocketList()
 		DeleteCriticalSection(&cs);
 	}
 
-int CASocketList::add(CASocket* pSocket)
+int CASocketList::add(HCHANNEL id,CASocket* pSocket)
 	{
 		EnterCriticalSection(&cs);
 		CONNECTIONLIST* tmp;
 		int ret;
 		if(pool==NULL)
 		    {
-			ret=SOCKET_ERROR;
+					ret=SOCKET_ERROR;
 		    }
 		else
 		    {
-			tmp=pool;
-			pool=pool->next;
-			tmp->next=connections;
-			connections=tmp;
-			connections->pSocket=pSocket;
-			ret=connections->id;
+					tmp=pool;
+					pool=pool->next;
+					tmp->next=connections;
+					connections=tmp;
+					connections->pSocket=pSocket;
+					connections->id=id;
+					return id;
 		    }
 		LeaveCriticalSection(&cs);
 		return ret;
 	}
 
-int CASocketList::add(int id,CASocket* pSocket)
+/*
+int CASocketList::add(HCHANNEL id,CASocket* pSocket)
 	{
 		EnterCriticalSection(&cs);
 		CONNECTIONLIST* tmp;
@@ -86,8 +88,9 @@ ende:
 		LeaveCriticalSection(&cs);
 		return ret;
 	}
+*/
 
-CASocket* CASocketList::get(int id)
+CASocket* CASocketList::get(HCHANNEL id)
 	{
 		EnterCriticalSection(&cs);
 		CONNECTIONLIST* tmp;
@@ -107,7 +110,7 @@ CASocket* CASocketList::get(int id)
 		return NULL;
 	}
 
-CASocket* CASocketList::remove(int id)
+CASocket* CASocketList::remove(HCHANNEL id)
 	{
 		EnterCriticalSection(&cs);
 		CONNECTIONLIST* tmp,*before;

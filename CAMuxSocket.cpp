@@ -5,11 +5,13 @@
 	#include "CAMsg.hpp"
 #endif
 
+#define DATA_SIZE 1000 // Size of Data in a single Mux Packet
+
 typedef struct t_MuxPacket
 	{
 		HCHANNEL channel;
 		int len;
-		char data[1000];
+		char data[DATA_SIZE];
 	} MUXPACKET;
 
 CAMuxSocket::CAMuxSocket()
@@ -19,8 +21,10 @@ CAMuxSocket::CAMuxSocket()
 int CAMuxSocket::accept(int port)
 	{
 		CASocket oSocket;
-		oSocket.listen(port);
-		oSocket.accept(m_Socket);
+		if(oSocket.listen(port)==SOCKET_ERROR)
+			return SOCKET_ERROR;
+		if(oSocket.accept(m_Socket)==SOCKET_ERROR)
+			return SOCKET_ERROR;
 		oSocket.close();
 		return 0;
 	}
@@ -32,14 +36,13 @@ int CAMuxSocket::connect(LPSOCKETADDR psa)
 			
 int CAMuxSocket::close()
 	{
-		int ret;
-		return ret;
+		return m_Socket.close();
 	}
 
 			
 int CAMuxSocket::send(HCHANNEL channel_id,char* buff,int bufflen)
 	{
-		if(bufflen>1000)
+		if(bufflen>DATA_SIZE)
 			return SOCKET_ERROR;
 		MUXPACKET MuxPacket;
 		MuxPacket.channel=channel_id;
@@ -92,4 +95,10 @@ int CAMuxSocket::receive(HCHANNEL* channel_id,char* buff,int bufflen)
 		*channel_id=MuxPacket.channel;
 		memcpy(buff,MuxPacket.data,MuxPacket.len);
 		return MuxPacket.len;
+	}
+
+int CAMuxSocket::close(HCHANNEL channel_id)
+	{
+		char tmpBuff;
+		return send(channel_id,&tmpBuff,0);
 	}

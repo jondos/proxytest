@@ -1,9 +1,10 @@
 #include "CASocket.hpp"
+#include "CAMuxSocket.hpp"
 
 typedef struct connlist
 	{
 		CASocket* pSocket;
-		int id;
+		HCHANNEL id;
 		connlist* next;
 	} CONNECTIONLIST,CONNECTION;
 		
@@ -14,10 +15,10 @@ class CASocketList
 		public:
 			CASocketList();
 			~CASocketList();
-			int add(CASocket* pSocket);
-			int add(int id,CASocket* pSocket);
-			CASocket* get(int id);
-			CASocket* remove(int id);
+//			int add(CASocket* pSocket);
+			int add(HCHANNEL id,CASocket* pSocket);
+			CASocket* get(HCHANNEL id);
+			CASocket* remove(HCHANNEL id);
 			CONNECTION* getFirst();
 			CONNECTION* getNext();
 		protected:
