@@ -214,8 +214,8 @@ THREAD_RETURN proxytomix(void* tmpPair)
 		char* buff=new char[1001];
 		if(buff==NULL)
 		    {
-			printf("No more Memory!\n");
-			return(THREAD_RETURN_ERROR);
+					printf("No more Memory!\n");
+					THREAD_RETURN_ERROR;
 		    }    
 		while(true)
 			{
@@ -244,8 +244,8 @@ THREAD_RETURN mixtoproxy(void* tmpPair)
 		char* buff=new char[1001];
 		if(buff==NULL)
 		    {
-			printf("Out of Memory!\n");
-			return(THREAD_RETURN_ERROR);
+					printf("Out of Memory!\n");
+					THREAD_RETURN_ERROR;
 		    }
 		while(true)
 			{
