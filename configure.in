@@ -146,6 +146,7 @@ AC_FUNC_ALLOCA
 AC_CHECK_FUNCS([strerror])
 AC_CHECK_FUNCS([vsnprintf])
 AC_CHECK_FUNCS([poll])
+AC_CHECK_FUNCS([epoll])
 
 dnl Checks for declarations.
 AC_CHECK_DECL(TCP_KEEPALIVE,[AC_DEFINE(HAVE_TCP_KEEPALIVE,,[Define if your OS supports the TCP socket option TCP_KEEPALIVE])],[],[

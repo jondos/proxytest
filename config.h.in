@@ -15,6 +15,9 @@
    */
 #undef HAVE_ALLOCA_H
 
+/* Define to 1 if you have the `epoll' function. */
+#undef HAVE_EPOLL
+
 /* This is a flag to ioctl() to get the number of available bytes on a socket
    */
 #undef HAVE_FIONREAD
