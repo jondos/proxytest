@@ -95,25 +95,23 @@ SINT32 CAFirstMix::init()
 					}
 			}
 
+		
 		CASocketAddr* pAddrNext=NULL;
-		UINT8 strTarget[255];
-		options.getTargetHost(strTarget,255);
-		if(strTarget[0]=='/') //Unix-Domain
+		for(i=0;i<options.getTargetInterfaceCount();i++)
 			{
-#ifdef HAVE_UNIX_DOMAIN_PROTOCOL
-				pAddrNext=new CASocketAddrUnix();
-				((CASocketAddrUnix*)pAddrNext)->setPath((char*)strTarget);
-				CAMsg::printMsg(LOG_INFO,"Try connecting to next Mix on Unix-Domain-Socket: %s\n",strTarget);
-#else
-				CAMsg::printMsg(LOG_CRIT,"I do not understand the Unix Domain Protocol!\n");
-				return E_UNKNOWN;
-#endif
+				TargetInterface oNextMix;
+				options.getTargetInterface(oNextMix,i+1);
+				if(oNextMix.target_type==TARGET_MIX)
+					{
+						pAddrNext=oNextMix.addr;
+						break;
+					}
+				delete oNextMix.addr;
 			}
-		else
+		if(pAddrNext==NULL)
 			{
-				pAddrNext=new CASocketAddrINet();
-				((CASocketAddrINet*)pAddrNext)->setAddr(strTarget,options.getTargetPort());
-				CAMsg::printMsg(LOG_INFO,"Try connecting to next Mix: %s:%u ...\n",strTarget,options.getTargetPort());
+				CAMsg::printMsg(LOG_CRIT,"No next Mix specified!\n");
+				return E_UNKNOWN;
 			}
 		m_pMuxOut=new CAMuxSocket();
 		if(((CASocket*)(*m_pMuxOut))->create(pAddrNext->getType())!=E_SUCCESS)

@@ -34,13 +34,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 CACmdLnOptions::CACmdLnOptions()
   {
-		bDaemon=false;
-		bLocalProxy=bFirstMix=bLastMix=bMiddleMix=false;
-		iTargetPort=iSOCKSPort=iSOCKSServerPort=iInfoServerPort=0xFFFF;
-		iTargetRTTPort=/*iServerRTTPort=*/-1;
-		strTargetHost=strSOCKSHost=strInfoServerHost=NULL;
-		m_strMixXml=m_strUser=strCascadeName=strLogDir=NULL;
-		m_arTargets=NULL;
+		m_bDaemon=false;
+		m_bLocalProxy=m_bFirstMix=m_bLastMix=m_bMiddleMix=false;
+		m_iTargetPort=m_iSOCKSPort=m_iSOCKSServerPort=m_iInfoServerPort=0xFFFF;
+		m_strTargetHost=m_strSOCKSHost=m_strInfoServerHost=NULL;
+		m_strMixXml=m_strUser=m_strCascadeName=m_strLogDir=NULL;
+		m_arTargetInterfaces=NULL;
 		m_cnTargets=0;
 		m_arListenerInterfaces=NULL;
 		m_cnListenerInterfaces=0;
@@ -50,7 +49,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_pOwnCertificate=NULL;
 		m_pPrevMixCertificate=NULL;
 		m_pNextMixCertificate=NULL;
-		bCompressedLogs=false;
+		m_bCompressedLogs=false;
   }
 
 CACmdLnOptions::~CACmdLnOptions()
@@ -60,31 +59,31 @@ CACmdLnOptions::~CACmdLnOptions()
 
 void CACmdLnOptions::clean()
   {
-		if(strTargetHost!=NULL)
+		if(m_strTargetHost!=NULL)
 			{
-				delete[] strTargetHost;
+				delete[] m_strTargetHost;
 	    }
-		if(strSOCKSHost!=NULL)
+		if(m_strSOCKSHost!=NULL)
 			{
-				delete[] strSOCKSHost;
+				delete[] m_strSOCKSHost;
 	    }
-		if(strInfoServerHost!=NULL)
+		if(m_strInfoServerHost!=NULL)
 			{
-				delete[] strInfoServerHost;
+				delete[] m_strInfoServerHost;
 	    }
-		if(strCascadeName!=NULL)
-			delete[] strCascadeName;
-		if(strLogDir!=NULL)
-			delete[] strLogDir;
+		if(m_strCascadeName!=NULL)
+			delete[] m_strCascadeName;
+		if(m_strLogDir!=NULL)
+			delete[] m_strLogDir;
 		if(m_strUser!=NULL)
 			delete[] m_strUser;
 		if(m_strMixXml!=NULL)
 			delete[] m_strMixXml;
 		if(m_strMixID!=NULL)
 			delete[] m_strMixID;
-		if(m_arTargets!=NULL)
+		if(m_arTargetInterfaces!=NULL)
 			{
-				delete[] m_arTargets;
+				delete[] m_arTargetInterfaces;
 			}
 		if(m_pSignKey!=NULL)
 			delete m_pSignKey;
@@ -98,48 +97,28 @@ void CACmdLnOptions::clean()
     
 SINT32 CACmdLnOptions::parse(int argc,const char** argv)
     {
-	//int ret;
-	//ListenerInterface* pCmndLineListener=NULL;
 	int iDaemon=0;
-	int iTemplate=0;
-//  int bHttps=0;
   char* target=NULL;
-//	int serverrttport=-1;
-	int mix=-1;
+	int iLocalProxy=0;
 	int SOCKSport=-1;
 	char* socks=NULL;
-	char* infoserver=NULL;
-//	char* certsdir=NULL;
-	char* cascadename=NULL;
 	char* logdir=NULL;
 	int iCompressedLogs=0;
 	char* serverPort=NULL;
-//	char* user=NULL;
 	int iVersion=0;
 	char* configfile=NULL;
- // int bXmlKey=0;
 	DOM_Document docMixXml;
 	poptOption options[]=
 	 {
-		{"daemon",'d',POPT_ARG_NONE,&iDaemon,0,"start as daemon",NULL},
-		{"next",'n',POPT_ARG_STRING,&target,0,"next mix/http-proxy(s)","<path|{ip:port[,rttport][;ip:port]*}>"},
-		{"port",'p',POPT_ARG_STRING,&serverPort,0,"ONLY FOR LOCAL PROXY!: listening [host:]port|path","<[host:]port|path>"},
-//		{"https",'h',POPT_ARG_NONE,&bHttps,0,"support proxy requests",NULL},
-//		{"rttport",'r',POPT_ARG_INT,&serverrttport,0,"round trip time port","<portnumber>"},
-		{"mix",'m',POPT_ARG_INT,&mix,0,"local|first|middle|last mix","<0|1|2|3>"},
+		{"localproxy",'l',POPT_ARG_NONE,&iLocalProxy,0,"act as local proxy",NULL},
+		{"daemon",'d',POPT_ARG_NONE,&iDaemon,0,"start as daemon [only for local proxy]",NULL},
+		{"next",'n',POPT_ARG_STRING,&target,0,"first mix of cascade [only for local proxy]","<ip:port>"},
+		{"port",'p',POPT_ARG_STRING,&serverPort,0,"listening on [host:]port|path [only for local proxy]","<[host:]port|path>"},
 		{"socksport",'s',POPT_ARG_INT,&SOCKSport,0,"listening port for socks","<portnumber>"},
-		{"socksproxy",'o',POPT_ARG_STRING,&socks,0,"socks proxy","<ip:port>"},
-//		{"infoserver",'i',POPT_ARG_STRING,&infoserver,0,"info server","<ip:port>"},
-//		{"certs",'e',POPT_ARG_STRING,&certsdir,0,"certs and key directory which the files: own.pfx (or privkey.xml), next.cer, prev.cer","<dir>"},
-//		{"xmlkey",'x',POPT_ARG_NONE,&bXmlKey,0,"sign key is in XML-Format",NULL},
-		{"name",'a',POPT_ARG_STRING,&cascadename,0,"name of the cascade","<string>"},
-		{"logdir",'l',POPT_ARG_STRING,&logdir,0,"directory where log files go to","<dir>"},
+		{"logdir",'l',POPT_ARG_STRING,&logdir,0,"directory where log files go to [only for local proxy]","<dir>"},
 #ifdef COMPRESSED_LOGS
 		{"gzip",'z',POPT_ARG_NONE,&iCompressedLogs,0,"create gziped logs",NULL},
 #endif
-//		{"user",'u',POPT_ARG_STRING,&user,0,"effective user","<user>"},
-//		{"files",'f',POPT_ARG_INT,&nrOfOpenFiles,0,"number of open files (sockets)","<filehandles>"},
-		{"template",'t',POPT_ARG_NONE,&iTemplate,0,"generate conf template and exit",NULL},
 		{"config",'c',POPT_ARG_STRING,&configfile,0,"config file to use","<file>"},
 		{"version",'v',POPT_ARG_NONE,&iVersion,0,"show version",NULL},
 		POPT_AUTOHELP
@@ -151,11 +130,6 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 	while(ret==POPT_ERROR_BADOPT)
 		ret=poptGetNextOpt(ctx);
 	poptFreeContext(ctx);
-	if(iTemplate!=0)
-		{
-			generateTemplate();
-			exit(0);
-		}
 	if(iVersion!=0)
 		{
 			printf("Version: %s\n",MIX_VERSION);
@@ -163,14 +137,8 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 			exit(0);
 		}
 
-	if(mix==0)
-		bLocalProxy=true;
-	else if(mix==1)
-		bFirstMix=true;
-	else if(mix==2)
-		bMiddleMix=true;
-	else 
-		bLastMix=true;
+	if(iLocalProxy!=0)
+		m_bLocalProxy=true;
 
 	if(configfile!=NULL)
 		{
@@ -197,66 +165,46 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 			free(configfile);
 		}
 	if(iDaemon==0)
-	    bDaemon=false;
+	    m_bDaemon=false;
 	else
-	    bDaemon=true;
+	    m_bDaemon=true;
   if(target!=NULL)
 	    {
-				char* tmpStr;
 				if(target[0]=='/') //Unix Domain Sockaet
 				 {
-					strTargetHost=new char[strlen(target)+1];
-					strcpy(strTargetHost,target);
+					m_strTargetHost=new char[strlen(target)+1];
+					strcpy(m_strTargetHost,target);
 				 }
 				else
 					{
-						m_cnTargets=1;
-						UINT32 i;
-						for(i=0;i<strlen(target);i++)
-							{
-								if(target[i]==';')
-									m_cnTargets++;
-							}
-						m_arTargets=new CASocketAddrINet[m_cnTargets];
-						tmpStr=strtok(target,";");
 						char tmpHostname[255];
 						int tmpPort;
-						i=0;
-						while(tmpStr!=NULL)
+						char* tmpStr1=strchr(target,':');
+						if(tmpStr1!=NULL)
 							{
-								char* tmpStr1=strchr(tmpStr,':');
-								if(tmpStr1!=NULL)
-									{
-										memcpy(tmpHostname,tmpStr,tmpStr1-tmpStr);
-										tmpHostname[tmpStr1-tmpStr]=0;
-										tmpPort=(int)atol(tmpStr1+1);
-									}
-								else
-									{//TODO what if not in right form ?
-										//try if it is a number --> use it as port
-										//and use 'localhost' as traget-host 
-										tmpPort=(int)atol(tmpStr);
-										if(tmpPort!=0) //we get it
-											{
-												strcpy(tmpHostname,"localhost");
-											}
-										else //we try to use it as host and use the default port
-											{
-#define DEFAULT_TARGET_PORT 6544
-												tmpPort=DEFAULT_TARGET_PORT;
-												strcpy(tmpHostname,tmpStr);
-											}
-									}
-								m_arTargets[i].setAddr((UINT8*)tmpHostname,tmpPort);
-								if(i==0)
-									{
-										strTargetHost=new char[strlen(tmpHostname)+1];
-										strcpy(strTargetHost,tmpHostname);
-										iTargetPort=tmpPort;
-									}
-								i++;
-								tmpStr=strtok(NULL,";");
+								memcpy(tmpHostname,target,tmpStr1-target);
+								tmpHostname[tmpStr1-target]=0;
+								tmpPort=(int)atol(tmpStr1+1);
 							}
+						else
+							{//TODO what if not in right form ?
+								//try if it is a number --> use it as port
+								//and use 'localhost' as traget-host 
+								tmpPort=(int)atol(target);
+								if(tmpPort!=0) //we get it
+									{
+										strcpy(tmpHostname,"localhost");
+									}
+								else //we try to use it as host and use the default port
+									{
+#define DEFAULT_TARGET_PORT 6544
+										tmpPort=DEFAULT_TARGET_PORT;
+										strcpy(tmpHostname,target);
+									}
+							}
+						m_strTargetHost=new char[strlen(tmpHostname)+1];
+						strcpy(m_strTargetHost,tmpHostname);
+						m_iTargetPort=tmpPort;
 					}
 				free(target);
 	    }
@@ -265,48 +213,24 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 				char* tmpStr;
 				if((tmpStr=strchr(socks,':'))!=NULL)
 						{
-					strSOCKSHost=new char[tmpStr-socks+1];
+					m_strSOCKSHost=new char[tmpStr-socks+1];
 					(*tmpStr)=0;
-					strcpy(strSOCKSHost,socks);
-					iSOCKSPort=(int)atol(tmpStr+1);
+					strcpy(m_strSOCKSHost,socks);
+					m_iSOCKSPort=(int)atol(tmpStr+1);
 						}
 				free(socks);	
 	    }
-	if(infoserver!=NULL)
-	    {
-				char* tmpStr;
-				if((tmpStr=strchr(infoserver,':'))!=NULL)
-						{
-					strInfoServerHost=new char[tmpStr-infoserver+1];
-					(*tmpStr)=0;
-					strcpy(strInfoServerHost,infoserver);
-					iInfoServerPort=(int)atol(tmpStr+1);
-						}
-				free(infoserver);	
-	    }
-	if(cascadename!=NULL)
-	    {
-					strCascadeName=new char[strlen(cascadename)+1];
-					strcpy(strCascadeName,cascadename);
-					free(cascadename);	
-	    }
 	if(logdir!=NULL)
 	    {
-					strLogDir=new char[strlen(logdir)+1];
-					strcpy(strLogDir,logdir);
+					m_strLogDir=new char[strlen(logdir)+1];
+					strcpy(m_strLogDir,logdir);
 					free(logdir);	
 	    }
 	if(iCompressedLogs==0)
-		bCompressedLogs=false;
+		m_bCompressedLogs=false;
 	else
-		bCompressedLogs=true;
-/*	if(user!=NULL)
-	    {
-					m_strUser=new char[strlen(user)+1];
-					strcpy(m_strUser,user);
-					free(user);	
-	    }
-*/	if(serverPort!=NULL&&bLocalProxy)
+		m_bCompressedLogs=true;
+	if(serverPort!=NULL&&m_bLocalProxy)
 		{
 			m_arListenerInterfaces=new ListenerInterface[1]; 
 			m_cnListenerInterfaces=1;
@@ -344,152 +268,8 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 			free(serverPort);
 		}
 
-//	if(serverrttport!=-1)
-//		iServerRTTPort=serverrttport;
-	iSOCKSServerPort=SOCKSport;
-//	m_nrOfOpenFiles=nrOfOpenFiles;
-	//This is only for mixes - not for local proxy
-/*	if(!bLocalProxy)
-		{
-		//Now we could setup the MixID
-		//either form ConfigFile or from Host/Port
-			if(docMixXml!=NULL)
-				{
-					DOM_Element elemRoot=docMixXml.getDocumentElement();
-					DOMString tmpID=elemRoot.getAttribute("id");
-					if(tmpID!=NULL)
-						{
-							m_strMixID=new char[tmpID.length()+1];
-							char* tmpChr=tmpID.transcode();
-							memcpy(m_strMixID,tmpChr,tmpID.length());
-							m_strMixID[tmpID.length()]=0;
-							delete[] tmpChr;
-						}
-				}
-			if(m_strMixID==NULL) //we do not got it from Config File...
-				{
-					UINT8 buff[4];
-					UINT16 thePort=iServerPort;
-					if(strServerHost==NULL||strServerHost[0]=='/')
-						{
-							CASocketAddrINet::getLocalHostIP(buff);
-							if(thePort==0xFFFF)
-								getRandom((UINT8*)&thePort,2);
-						}
-					else
-						{
-							CASocketAddrINet oAddr;
-							oAddr.setAddr((UINT8*)strServerHost,0);
-							oAddr.getIP(buff);
-						}
-					m_strMixID=new char[24];
-					sprintf(m_strMixID,"%u.%u.%u.%u%%3A%u",buff[0],buff[1],buff[2],buff[3],thePort);
-				}
-			
-			
-			if(docMixXml!=NULL) //we should insert the right Id and other stuff...
-				{
-					UINT8 id[50];
-					getMixId(id,50);
-					DOM_Element elemRoot=docMixXml.getDocumentElement();
-					elemRoot.setAttribute("id",DOMString((char*)id));
-					
-					//Insert Version
-					DOM_Element elemSoftware;
-					getDOMChildByName(elemRoot,(UINT8*)"Software",elemSoftware);
-					DOM_Element elemVersion;
-					getDOMChildByName(elemSoftware,(UINT8*)"Version",elemVersion);
-					if(elemVersion!=NULL)
-						setDOMElementValue(elemVersion,(UINT8*)MIX_VERSION);
-					else
-						CAMsg::printMsg(LOG_CRIT,"Software <Version> not set\n");
-				}
-			if(docMixXml==NULL) //Ok the get an error in proccesing infos about the mix, we should at leas t give the id!
-				{
-					docMixXml=DOM_Document::createDocument();
-					DOM_Element elemRoot=docMixXml.createElement("Mix");
-					UINT8 id[50];
-					getMixId(id,50);
-					elemRoot.setAttribute("id",DOMString((char*)id));
-					docMixXml.appendChild(elemRoot);
-				}
-
-		//Make an String from the Doc
-			UINT32 xmlLen=0;
-			UINT8* tmpXml=DOM_Output::dumpToMem(docMixXml,&xmlLen);
-			m_strMixXml=new char[xmlLen+1];
-			memcpy(m_strMixXml,tmpXml,xmlLen);
-			m_strMixXml[xmlLen]=0;
-			delete[] tmpXml;
-*/
-//			UINT8 tmpCertDir[2048];
-//			UINT8 tmpFileName[2048];
-//			UINT8* buff=NULL;
-//			UINT32 size;
-/*			if(certsdir!=NULL)
-				{
-					strcpy((char*)tmpCertDir,certsdir);
-					free(certsdir);				
-				}
-			else
-				tmpCertDir[0]=0;
-*/			//Try to load SignKey
-/*			if(bXmlKey)
-				{
-					if(m_pSignKey==NULL)
-						{
-							strcpy((char*)tmpFileName,(char*)tmpCertDir);
-							strcat((char*)tmpFileName,"/privkey.xml");
-							buff=readFile(tmpFileName,&size);
-							if(buff!=NULL)
-								{
-									m_pSignKey=new CASignature();
-									m_pSignKey->setSignKey(buff,size,SIGKEY_XML);
-								}
-						}
-				}
-			else
-				{
-					if(m_pSignKey==NULL||m_pOwnCertificate==NULL)
-						{
-							strcpy((char*)tmpFileName,(char*)tmpCertDir);
-							strcat((char*)tmpFileName,"/own.pfx");
-							UINT8* buff=readFile(tmpFileName,&size);
-							if(buff!=NULL)
-								{
-									m_pSignKey=new CASignature();
-									UINT8 passwd[500];
-									passwd[0]=0;
-									if(m_pSignKey->setSignKey(buff,size,SIGKEY_PKCS12)!=E_SUCCESS)
-										{//Maybe not an empty passwd
-											printf("I need a passwd for the SignKey: ");
-											scanf("%s",(char*)passwd); //This is a typicall Buffer Overflow :-)
-											if(m_pSignKey->setSignKey(buff,size,SIGKEY_PKCS12,(char*)passwd)!=E_SUCCESS)
-												{
-													delete m_pSignKey;
-													m_pSignKey=NULL;
-												}
-										}
-									m_pOwnCertificate=CACertificate::decode(buff,size,CERT_PKCS12,(char*)passwd);
-								}
-						}
-				}
-			delete buff;
-			//Try to load Certificates
-			strcpy((char*)tmpFileName,(char*)tmpCertDir);
-			strcat((char*)tmpFileName,"/next.cer");
-			buff=readFile(tmpFileName,&size);
-			m_pNextMixCertificate=CACertificate::decode(buff,size,CERT_DER);
-			delete buff;
-			strcpy((char*)tmpFileName,(char*)tmpCertDir);
-			strcat((char*)tmpFileName,"/prev.cer");
-			buff=readFile(tmpFileName,&size);
-			m_pPrevMixCertificate=CACertificate::decode(buff,size,CERT_DER);
-			delete buff;
-	
-		}
-*/
-	if(!bLocalProxy)
+	m_iSOCKSServerPort=SOCKSport;
+	if(!m_bLocalProxy)
 		{
 			ret=processXmlConfiguration(docMixXml);
 			if(ret!=E_SUCCESS)
@@ -500,27 +280,9 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 
 bool CACmdLnOptions::getDaemon()
 	{
-		return bDaemon;
+		return m_bDaemon;
   }
 
-/*bool CACmdLnOptions::getProxySupport()
-	{
-  	return m_bHttps;
-  }
-*/
-/*UINT16 CACmdLnOptions::getServerPort()
-  {
-		return iServerPort;
-  }
-*/    
-/*SINT32 CACmdLnOptions::getServerHost(UINT8* path,UINT32 len)
-	{
-		if(path==NULL||strServerHost==NULL||len<=strlen(strServerHost))
-			return E_UNKNOWN;
-		strcpy((char*)path,strServerHost);
-		return E_SUCCESS;
-	}
-*/
 SINT32 CACmdLnOptions::getMixId(UINT8* id,UINT32 len)
 	{
 		if(len<24||m_strMixID==NULL) //we need 24 chars (including final \0)
@@ -529,95 +291,81 @@ SINT32 CACmdLnOptions::getMixId(UINT8* id,UINT32 len)
 		return E_SUCCESS;
 	}
 
-/*SINT32 CACmdLnOptions::getServerRTTPort()
-  {
-		if(iServerRTTPort!=-1)
-			return iServerRTTPort;
-		else
-			return E_UNSPECIFIED;
-  }*/
 
 UINT16 CACmdLnOptions::getSOCKSServerPort()
   {
-		return iSOCKSServerPort;
+		return m_iSOCKSServerPort;
   }
 
-UINT16 CACmdLnOptions::getTargetPort()
+UINT16 CACmdLnOptions::getMixPort()
 	{
-		return iTargetPort;
+		return m_iTargetPort;
   }
     
-SINT32 CACmdLnOptions::getTargetRTTPort()
-  {
-		if(iTargetRTTPort!=-1)
-			return iTargetRTTPort;
-		else
-			return E_UNSPECIFIED;
-  }
 
-SINT32 CACmdLnOptions::getTargetHost(UINT8* host,UINT32 len)
+SINT32 CACmdLnOptions::getMixHost(UINT8* host,UINT32 len)
   {
-		if(strTargetHost==NULL)
+		if(m_strTargetHost==NULL)
 				return E_UNKNOWN;
-		if(len<=(UINT32)strlen(strTargetHost))
+		if(len<=(UINT32)strlen(m_strTargetHost))
 				{
 					return E_UNKNOWN;		
 				}
-		strcpy((char*)host,strTargetHost);
+		strcpy((char*)host,m_strTargetHost);
 		return E_SUCCESS;
   }
 
 UINT16 CACmdLnOptions::getSOCKSPort()
   {
-		return iSOCKSPort;
+		return m_iSOCKSPort;
   }
     
 SINT32 CACmdLnOptions::getSOCKSHost(UINT8* host,UINT32 len)
   {
-		if(strSOCKSHost==NULL)
+		if(m_strSOCKSHost==NULL)
 				return E_UNKNOWN;
-		if(len<=(UINT32)strlen(strSOCKSHost))
+		if(len<=(UINT32)strlen(m_strSOCKSHost))
 				{
 					return E_UNKNOWN;		
 				}
-		strcpy((char*)host,strSOCKSHost);
-		return (SINT32)strlen(strSOCKSHost);
+		strcpy((char*)host,m_strSOCKSHost);
+		return (SINT32)strlen(m_strSOCKSHost);
   }
 
 UINT16 CACmdLnOptions::getInfoServerPort()
   {
-		return iInfoServerPort;
+		return m_iInfoServerPort;
   }
     
 SINT32 CACmdLnOptions::getInfoServerHost(UINT8* host,UINT32 len)
   {
-		if((strInfoServerHost==NULL)||(len<=(UINT32)strlen(strInfoServerHost)))
+		if((m_strInfoServerHost==NULL)||(len<=(UINT32)strlen(m_strInfoServerHost)))
 			return E_UNKNOWN;
-		strcpy((char*)host,strInfoServerHost);
+		strcpy((char*)host,m_strInfoServerHost);
 		return E_SUCCESS;
   }
 
 SINT32 CACmdLnOptions::getCascadeName(UINT8* name,UINT32 len)
   {
-		if(strCascadeName==NULL)
+		if(m_strCascadeName==NULL)
 				return E_UNKNOWN;
-		if(len<=(UINT32)strlen(strCascadeName))
+		if(len<=(UINT32)strlen(m_strCascadeName))
 				{
 					return E_UNKNOWN;		
 				}
-		strcpy((char*)name,strCascadeName);
+		strcpy((char*)name,m_strCascadeName);
 		return E_SUCCESS;
   }
 
 SINT32 CACmdLnOptions::getLogDir(UINT8* name,UINT32 len)
   {
-		if(strLogDir==NULL||name==NULL)
+		if(m_strLogDir==NULL||name==NULL)
 				return E_UNKNOWN;
-		if(len<=(UINT32)strlen(strLogDir))
+		if(len<=(UINT32)strlen(m_strLogDir))
 				{
 					return E_UNKNOWN;		
 				}
-		strcpy((char*)name,strLogDir);
+		strcpy((char*)name,m_strLogDir);
 		return E_SUCCESS;
   }
 
@@ -635,22 +383,22 @@ SINT32 CACmdLnOptions::getUser(UINT8* user,UINT32 len)
 
 bool CACmdLnOptions::isFirstMix()
   {
-		return bFirstMix;
+		return m_bFirstMix;
   }
 
 bool CACmdLnOptions::isMiddleMix()
     {
-			return bMiddleMix;
+			return m_bMiddleMix;
     }
 
 bool CACmdLnOptions::isLastMix()
     {
-			return bLastMix;
+			return m_bLastMix;
     }
 
 bool CACmdLnOptions::isLocalProxy()
     {
-			return bLocalProxy;
+			return m_bLocalProxy;
     }
 
 /** Copies the bytes of the XML tree describing the Mix into buffXml. There is no
@@ -670,36 +418,6 @@ SINT32 CACmdLnOptions::getMixXml(UINT8* buffXml,UINT32* len)
 			return E_UNKNOWN;
 		memcpy(buffXml,m_strMixXml,strMixXmlLen);
 		*len=strMixXmlLen;
-		return E_SUCCESS;
-	}
-
-SINT32 CACmdLnOptions::generateTemplate()
-	{
-#define XML_CONFIG_TEMPLATE "	<?xml version=\"1.0\" ?>\
-<Mix id=\"\">\
-\t<Name><!-- Insert a human readable name here--></Name>\
-\t<Location> <!-- Fill out the following Elements to give infomation about the location of the Mix-->\
-\t\t<State><!-- Insert the State of the Mix-Location here--></State>\
-\t\t<City><!-- Insert the City of the Mix-Location here--></City>\
-\t\t<Position> <!-- Insert the Position of the Mix here-->\
-\t\t\t<Geo> <!-- Insert the Geographical Position of the Mix here-->\
-\t\t\t\t<Longitude> <!-- Insert the Longitude of the Geographical Position of the Mix here--> </Longitude>\
-\t\t\t\t<Latitude> <!-- Insert the Latitude of the Geographical Position of the Mix here--> </Latitude>\
-\t\t\t\t<Altitude> <!-- Insert the Altitude of the Geographical Position of the Mix here--> </Altitude>\
-\t\t\t</Geo>\
-\t\t</Position>\
-\t</Location>\
-\t<Software> <!-- This gives information about the Mix-Software used-->\
-\t\t<Version> <!-- The Version of the Software used - automatically set! --> </Version>\
-\t</Software>\
-</Mix>"
-
-		int handle;
-		handle=open("mix_template.conf",O_BINARY|O_RDWR|O_CREAT,S_IREAD | S_IWRITE);
-		if(handle==-1)
-			return E_UNKNOWN;
-		write(handle,XML_CONFIG_TEMPLATE,strlen(XML_CONFIG_TEMPLATE));
-		close(handle);
 		return E_SUCCESS;
 	}
 
@@ -730,11 +448,21 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS)
 			{
 				if(memcmp(tmpBuff,"FirstMix",8)==0)
-					bFirstMix=true;
+					m_bFirstMix=true;
 				else if (memcmp(tmpBuff,"MiddleMix",9)==0)
-					bMiddleMix=true;
+					m_bMiddleMix=true;
 				else if (memcmp(tmpBuff,"LastMix",7)==0)
-					bLastMix=true;
+					m_bLastMix=true;
+			}
+
+		//getCascadeName
+		getDOMChildByName(elemGeneral,(UINT8*)"CascadeName",elem,false);
+		tmpLen=255;
+		if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS)
+			{
+				m_strCascadeName=new char[tmpLen+1];
+				memcpy(m_strCascadeName,tmpBuff,tmpLen);
+				m_strCascadeName[tmpLen]=0;
 			}
 		
 		//get Username to run as...
@@ -755,7 +483,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		getDOMChildByName(elemGeneral,(UINT8*)"Daemon",elem,false);
 		tmpLen=255;
 		if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS&&memcmp(tmpBuff,"True",4)==0)
-			bDaemon=true;		
+			m_bDaemon=true;		
 		//get Logging
 		DOM_Element elemLogging;
 		getDOMChildByName(elemGeneral,(UINT8*)"Logging",elemLogging,false);
@@ -766,8 +494,8 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 				if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS)
 					{
 						strtrim(tmpBuff);
-						strLogDir=new char[strlen((char*)tmpBuff)+1];
-						strcpy(strLogDir,(char*)tmpBuff);
+						m_strLogDir=new char[strlen((char*)tmpBuff)+1];
+						strcpy(m_strLogDir,(char*)tmpBuff);
 					}				
 			}
 
@@ -817,12 +545,12 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS)
 			{
 				strtrim(tmpBuff);
-				strInfoServerHost=new char[strlen((char*)tmpBuff)+1];
-				strcpy(strInfoServerHost,(char*)tmpBuff);
+				m_strInfoServerHost=new char[strlen((char*)tmpBuff)+1];
+				strcpy(m_strInfoServerHost,(char*)tmpBuff);
 			}
 		getDOMChildByName(elemInfoService,(UINT8*)"Port",elem,false);
 		if(getDOMElementValue(elem,&tmp)==E_SUCCESS)
-			iInfoServerPort=tmp;
+			m_iInfoServerPort=tmp;
 
 		//get ListenerInterfaces
 		DOM_Element elemListenerInterfaces;
@@ -924,6 +652,176 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 							}
 						m_cnListenerInterfaces=aktInterface;
 					}
+			}
+
+		//get TargetInterfaces
+		m_cnTargets=0;
+		TargetInterface* targetInterfaceNextMix=NULL;
+		//NextMix --> only one!!
+		DOM_Element elemNextMix;
+		getDOMChildByName(elemRoot,(UINT8*)"NextMix",elemNextMix,false);
+		if(elemNextMix!=NULL)
+			{
+				UINT32 type;
+				CASocketAddr* addr=NULL;
+				DOM_Element elemType;
+				getDOMChildByName(elemNextMix,(UINT8*)"Type",elemType,false);
+				tmpLen=255;
+				if(getDOMElementValue(elemType,tmpBuff,&tmpLen)!=E_SUCCESS)
+					goto SKIP_NEXT_MIX;
+				strtrim(tmpBuff);
+				if(strcmp((char*)tmpBuff,"RAW/TCP")==0)
+					type=RAW_TCP;
+				else if(strcmp((char*)tmpBuff,"RAW/UNIX")==0)
+					type=RAW_UNIX;
+				else if(strcmp((char*)tmpBuff,"SSL/TCP")==0)
+					type=SSL_TCP;
+				else if(strcmp((char*)tmpBuff,"SSL/UNIX")==0)
+					type=SSL_UNIX;
+				else
+					goto SKIP_NEXT_MIX;
+				if(type==SSL_TCP||type==RAW_TCP)
+					{
+						DOM_Element elemPort;
+						DOM_Element elemHost;
+						UINT16 port;
+						getDOMChildByName(elemNextMix,(UINT8*)"Port",elemPort,false);
+						if(getDOMElementValue(elemPort,&port)!=E_SUCCESS)
+							goto SKIP_NEXT_MIX;
+
+						addr=new CASocketAddrINet;
+						getDOMChildByName(elemNextMix,(UINT8*)"Host",elemHost,false);
+						if(elemHost!=NULL)
+							{
+								UINT8 buffHost[255];
+								UINT32 buffHostLen=255;
+								if(getDOMElementValue(elemHost,buffHost,&buffHostLen)!=E_SUCCESS)
+									goto SKIP_NEXT_MIX;
+								if(((CASocketAddrINet*)addr)->setAddr(buffHost,port)!=E_SUCCESS)
+									goto SKIP_NEXT_MIX;
+							}
+						else
+							goto SKIP_NEXT_MIX;
+					}
+				else
+#ifdef HAVE_UNIX_DOMAIN_PROTOCOL
+					{
+						DOM_Element elemFile;
+						getDOMChildByName(elemNextMix,(UINT8*)"File",elemFile,false);
+						tmpLen=255;
+						if(getDOMElementValue(elemFile,tmpBuff,&tmpLen)!=E_SUCCESS)
+							goto SKIP_NEXT_MIX;
+						tmpBuff[tmpLen]=0;
+						strtrim(tmpBuff);
+						addr=new CASocketAddrUnix;
+						if(((CASocketAddrUnix*)addr)->setPath((char*)tmpBuff)!=E_SUCCESS)
+							goto SKIP_NEXT_MIX;
+					}
+#else
+					goto SKIP_NEXT_MIX;
+#endif
+				targetInterfaceNextMix=new TargetInterface;
+				targetInterfaceNextMix->target_type=TARGET_MIX;
+				targetInterfaceNextMix->net_type=type;
+				targetInterfaceNextMix->addr=addr->clone();
+				m_cnTargets=1;
+SKIP_NEXT_MIX:
+				delete addr;
+			}
+		
+		//Next Proxies
+		DOM_Element elemProxies;
+		getDOMChildByName(elemRoot,(UINT8*)"Proxies",elemProxies,false);
+		if(elemProxies!=NULL)
+			{
+				DOM_NodeList nlTargetInterfaces;
+				nlTargetInterfaces=elemProxies.getElementsByTagName("Proxy");
+				m_cnTargets+=nlTargetInterfaces.getLength();
+				if(nlTargetInterfaces.getLength()>0)
+					{
+						m_arTargetInterfaces=new TargetInterface[m_cnTargets]; 
+						UINT32 aktInterface=0;
+						UINT32 type=0;
+						CASocketAddr* addr=NULL;
+						UINT16 port;
+						for(UINT32 i=0;i<nlTargetInterfaces.getLength();i++)
+							{
+								if(addr!=NULL)
+									delete addr;
+								addr=NULL;
+								DOM_Node elemTargetInterface;
+								elemTargetInterface=nlTargetInterfaces.item(i);
+								DOM_Element elemType;
+								getDOMChildByName(elemTargetInterface,(UINT8*)"Type",elemType,false);
+								tmpLen=255;
+								if(getDOMElementValue(elemType,tmpBuff,&tmpLen)!=E_SUCCESS)
+									continue;
+								strtrim(tmpBuff);
+								if(strcmp((char*)tmpBuff,"RAW/TCP")==0)
+									type=RAW_TCP;
+								else if(strcmp((char*)tmpBuff,"RAW/UNIX")==0)
+									type=RAW_UNIX;
+								else if(strcmp((char*)tmpBuff,"SSL/TCP")==0)
+									type=SSL_TCP;
+								else if(strcmp((char*)tmpBuff,"SSL/UNIX")==0)
+									type=SSL_UNIX;
+								else
+									continue;
+								if(type==SSL_TCP||type==RAW_TCP)
+									{
+										DOM_Element elemPort;
+										DOM_Element elemHost;
+										getDOMChildByName(elemTargetInterface,(UINT8*)"Port",elemPort,false);
+										if(getDOMElementValue(elemPort,&port)!=E_SUCCESS)
+											continue;
+
+										addr=new CASocketAddrINet;
+										getDOMChildByName(elemTargetInterface,(UINT8*)"Host",elemHost,false);
+										if(elemHost!=NULL)
+											{
+												UINT8 buffHost[255];
+												UINT32 buffHostLen=255;
+												if(getDOMElementValue(elemHost,buffHost,&buffHostLen)!=E_SUCCESS)
+													continue;
+												if(((CASocketAddrINet*)addr)->setAddr(buffHost,port)!=E_SUCCESS)
+													continue;
+											}
+										else
+											continue;
+									}
+								else
+		#ifdef HAVE_UNIX_DOMAIN_PROTOCOL
+									{
+										DOM_Element elemFile;
+										getDOMChildByName(elemTargetInterface,(UINT8*)"File",elemFile,false);
+										tmpLen=255;
+										if(getDOMElementValue(elemFile,tmpBuff,&tmpLen)!=E_SUCCESS)
+											continue;
+										tmpBuff[tmpLen]=0;
+										strtrim(tmpBuff);
+										addr=new CASocketAddrUnix;
+										if(((CASocketAddrUnix*)addr)->setPath((char*)tmpBuff)!=E_SUCCESS)
+											continue;
+									}
+		#else
+									continue;
+		#endif
+								m_arTargetInterfaces[aktInterface].net_type=type;
+								m_arTargetInterfaces[aktInterface].addr=addr->clone();
+								delete addr;
+								addr=NULL;
+								aktInterface++;
+							}
+						m_cnTargets=aktInterface;
+					}
+			}//end if elemProxies!=null
+		//add NextMixInterface to the End of the List...		
+		if(targetInterfaceNextMix!=NULL)
+			{
+				m_arTargetInterfaces[m_cnTargets++].net_type=targetInterfaceNextMix->net_type;
+				m_arTargetInterfaces[m_cnTargets++].target_type=targetInterfaceNextMix->target_type;
+				m_arTargetInterfaces[m_cnTargets++].addr=targetInterfaceNextMix->addr;
+				delete targetInterfaceNextMix;
 			}
 		//construct a XML-String, which describes the Mix (send via Infoservice.Helo())
 		DOM_Document docMixXml=DOM_Document::createDocument();
