@@ -38,7 +38,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 class CAMiddleMix:public CAMix
 	{
 		public:
-			CAMiddleMix()
+			CAMiddleMix():CAMix()
 				{
 					m_pMiddleMixChannelList=NULL;
 					m_pMuxOut=NULL;m_pMuxIn=NULL;m_pRSA=NULL;m_pSignature=NULL;
@@ -51,15 +51,26 @@ class CAMiddleMix:public CAMix
 			SINT32 initOnce();
 			SINT32 clean();
 			
-			SINT32 proccessKeyExchange();
-		private:
+    /**
+    * This method is not applicable to middle mixes; it does nothing
+    * @param d ignored
+    * @retval E_SUCCESS in any case
+    */
+    virtual SINT32 initMixCascadeInfo(DOM_Element& d)
+    {
+        return E_SUCCESS;
+    }
+    
+    virtual SINT32 processKeyExchange();
+
+private:
 			CAMuxSocket* m_pMuxIn;
 			CAMuxSocket* m_pMuxOut;
 			CAASymCipher* m_pRSA;
-			CASignature* m_pSignature;
+			//CASignature* m_pSignature;
 			volatile bool m_bRun;
 			CAMiddleMixChannelList* m_pMiddleMixChannelList;
-			CAInfoService* m_pInfoService;
+			//CAInfoService* m_pInfoService;
 			friend THREAD_RETURN mm_loopDownStream(void *p);
 	};
 

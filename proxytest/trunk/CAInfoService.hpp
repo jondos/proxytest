@@ -31,29 +31,57 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAFirstMix.hpp"
 #include "CAThread.hpp"
 #include "CAMutex.hpp"
+#include "CACmdLnOptions.hpp"
+
+#define REQUEST_TYPE_POST 0
+#define REQUEST_TYPE_GET	1
+
+#define REQUEST_COMMAND_CONFIGURE 0
+#define REQUEST_COMMAND_HELO			1
+#define REQUEST_COMMAND_MIXINFO		2
+
 class CAInfoService
 	{
 		public:
 			CAInfoService();
-			CAInfoService(CAFirstMix* pFirstMix);
+			CAInfoService(CAMix* pMix);
 			~CAInfoService();
-			SINT32 sendMixHelo();
+			SINT32 sendMixHelo(SINT32 requestCommand=-1,const UINT8* param=NULL);
+			SINT32 sendMixInfo(const UINT8* pMixID);
 			SINT32 sendCascadeHelo();
 			SINT32 sendStatus(bool bIncludeCerts);
 			SINT32 start();
 			SINT32 stop();
 			SINT32 getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic);
 			SINT32 getMixedPackets(UINT64& ppackets);
-			bool getRun(){return m_bRun;}
+			bool isRunning(){return m_bRun;}
 			SINT32 setSignature(CASignature* pSignature,CACertificate* ownCert);
-		//	CASignature* getSignature(){return m_pSignature;}
+
+			// added by ronin <ronin2@web.de>
+			bool isConfiguring()
+			{
+					return m_bConfiguring;
+			}
+			
+			void setConfiguring(bool a_configuring)
+			{
+					m_bConfiguring = a_configuring;
+			}
+
+			//	CASignature* getSignature(){return m_pSignature;}
 		private:
+			// added by ronin <ronin2@web.de>
+			SINT32 handleConfigEvent(DOM_Document& doc);
+			SINT32 parseHTTPHeader(CASocket&, UINT32*);
+
 			volatile bool m_bRun;
 			CASignature*	m_pSignature;
 			CACertStore*	m_pcertstoreOwnCerts;
-			CAFirstMix*		m_pFirstMix;
+			CAMix*				m_pMix;
 			CAThread			m_threadRunLoop;
 			UINT64				m_lastMixedPackets;
 			UINT32				m_minuts;
-	};
+			SINT32				m_expectedMixRelPos;
+			bool					m_bConfiguring;
+};
 #endif

@@ -33,54 +33,64 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketAddrINet.hpp"
 #include "CAUtil.hpp"
 #include "xml/DOM_Output.hpp"
+#include "CASingleSocketGroup.hpp"
+#include "CALastMix.hpp"
+
 extern CACmdLnOptions options;
 
-
+const char * STRINGS_REQUEST_TYPES[2]={"POST","GET"};
+const char * STRINGS_REQUEST_COMMANDS[3]={"configure","helo","mixinfo/"};
 
 static THREAD_RETURN InfoLoop(void *p)
 	{
 		CAInfoService* pInfoService=(CAInfoService*)p;
 		int helocount=0;
 		bool bIsFirst=true; //send our own certifcate only the first time
-		while(pInfoService->getRun())
+    while(pInfoService->isRunning())
 			{
 				if(pInfoService->sendStatus(bIsFirst)==E_SUCCESS)
 					bIsFirst=false;
-				if(helocount==0)
+	// check every minute if configuring, every 10 minutes otherwise
+        if(helocount==0 || pInfoService->isConfiguring())
 					{
-						pInfoService->sendMixHelo();
-						if(pInfoService->sendCascadeHelo()!=E_SUCCESS)
+            if(options.isFirstMix() || (options.isLastMix() && pInfoService->isConfiguring()))
 							{
-								CAMsg::printMsg(LOG_ERR,"Could not send Cascade Information to the InfoService!\n");
+								if(pInfoService->sendCascadeHelo()!=E_SUCCESS)
+									{
+                    CAMsg::printMsg(LOG_ERR,"InfoService: Error: Could not send Cascade Information.\n");
+									}
 							}
+            pInfoService->sendMixHelo();
 						helocount=10;
 					}
 				else 
-				 helocount--;
+					helocount--;
 				sSleep(60);
 			}
 		THREAD_RETURN_SUCCESS;
 	}
 
 CAInfoService::CAInfoService()
-	{
-		m_pFirstMix=NULL;
+{
+    m_pMix=NULL;
 		m_bRun=false;
 		m_pSignature=NULL;
 		m_pcertstoreOwnCerts=NULL;
 		m_minuts=0;
 		m_lastMixedPackets=0;
-	}
+    m_expectedMixRelPos = 0;
+}
 
-CAInfoService::CAInfoService(CAFirstMix* pFirstMix)
+CAInfoService::CAInfoService(CAMix* pMix)
 	{
-		m_pFirstMix=pFirstMix;
+		m_pMix=pMix;
 		m_bRun=false;
 		m_pSignature=NULL;
 		m_pcertstoreOwnCerts=NULL;
 		m_minuts=0;
 		m_lastMixedPackets=0;
-	}
+    m_expectedMixRelPos = 0;
+}
 
 CAInfoService::~CAInfoService()
 	{
@@ -105,14 +115,16 @@ SINT32 CAInfoService::setSignature(CASignature* pSig,CACertificate* pOwnCert)
 	}
 
 SINT32 CAInfoService::getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic)
-	{
-		return m_pFirstMix->getLevel(puser,prisk,ptraffic);
-	}
+{
+    if(m_pMix!=NULL && options.isFirstMix())
+        return ((CAFirstMix*)m_pMix)->getLevel(puser,prisk,ptraffic);
+    return E_UNKNOWN;
+}
 
 SINT32 CAInfoService::getMixedPackets(UINT64& ppackets)
 	{
-		if(m_pFirstMix!=NULL)
-			return m_pFirstMix->getMixedPackets(ppackets);
+    if(m_pMix!=NULL && options.isFirstMix())
+        return ((CAFirstMix*)m_pMix)->getMixedPackets(ppackets);
 		return E_UNKNOWN;
 	}
 
@@ -215,19 +227,59 @@ SINT32 CAInfoService::sendStatus(bool bIncludeCerts)
 		return E_UNKNOWN;
 	}
 
+
+/** POSTs the MIXINFO message for a mix to the InfoService.
+	*/
+SINT32 CAInfoService::sendMixInfo(const UINT8* pMixID)
+{
+	return sendMixHelo(REQUEST_COMMAND_MIXINFO,pMixID);
+}
+
 /** POSTs the HELO message for a mix to the InfoService.
 	*/
-SINT32 CAInfoService::sendMixHelo()
-	{
+SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param)
+{
+    UINT8* recvBuff = NULL;
+    SINT32 ret = E_SUCCESS;
+    UINT32 len = 0;
+
 		CASocket oSocket;
 		CASocketAddrINet oAddr;
 		UINT8 hostname[255];
 		UINT8 buffHeader[255];
 		UINT32 sendBuffLen;
 		UINT8* sendBuff=NULL;
+
+    UINT32 requestType = REQUEST_TYPE_POST;
+    bool receiveAnswer = false;
+
+    if(requestCommand<0)
+			{
+        if(m_bConfiguring)
+					{
+            requestCommand = REQUEST_COMMAND_CONFIGURE;
+            receiveAnswer = true;
+					}
+        else
+					{
+            requestCommand = REQUEST_COMMAND_HELO;
+					}
+			}
+		else
+			{
+        if(requestCommand==REQUEST_COMMAND_MIXINFO)
+					{
+            requestType=REQUEST_TYPE_GET;
+            receiveAnswer = true;
+					}
+			}
+
+
 		if(options.getInfoServerHost(hostname,255)!=E_SUCCESS)
 			goto ERR;
 		oAddr.setAddr(hostname,options.getInfoServerPort());
+
+    oSocket.setRecvBuff(255);
 		if(oSocket.connect(oAddr)==E_SUCCESS)
 			{
 				DOM_Document docMixInfo;
@@ -256,12 +308,79 @@ SINT32 CAInfoService::sendMixHelo()
 				sendBuff=DOM_Output::dumpToMem(docMixInfo,&sendBuffLen);
 				if(sendBuff==NULL)
 					goto ERR;
-				sprintf((char*)buffHeader,"POST /helo HTTP/1.0\r\nContent-Length: %u\r\n\r\n",sendBuffLen);
-				if(	oSocket.sendFully(buffHeader,strlen((char*)buffHeader))!=E_SUCCESS||
+
+				const char* strRequestCommand=STRINGS_REQUEST_COMMANDS[requestCommand];
+				const char* strRequestType=STRINGS_REQUEST_TYPES[requestType];
+
+        CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending [%s] %s to InfoService.\r\n", strRequestType,strRequestCommand);
+
+        if(requestCommand==REQUEST_COMMAND_MIXINFO)
+					sprintf((char*)buffHeader,"%s /%s%s HTTP/1.0\r\nContent-Length: %u\r\n\r\n", strRequestType, strRequestCommand, param,sendBuffLen);
+				else
+					sprintf((char*)buffHeader,"%s /%s HTTP/1.0\r\nContent-Length: %u\r\n\r\n", strRequestType, strRequestCommand, sendBuffLen);
+ 				if(oSocket.sendFully(buffHeader,strlen((char*)buffHeader))!=E_SUCCESS||
 						oSocket.sendFully(sendBuff,sendBuffLen)!=E_SUCCESS)
 					goto ERR;
-				oSocket.close();
+
 				delete []sendBuff;
+
+        if(receiveAnswer)
+        {
+            ret = parseHTTPHeader(oSocket, &len);
+            if(ret == E_SUCCESS && len > 0)
+            {
+                recvBuff = new UINT8[len+1];
+                ret = oSocket.receive(recvBuff, len);
+                if(ret <= 0)
+                {
+                    oSocket.close();
+                    goto ERR;
+                }
+            }
+        }
+
+        oSocket.close();
+
+        if(recvBuff != NULL)
+        {
+            MemBufInputSource oInput(recvBuff,len,"tmpID");
+            DOMParser oParser;
+            oParser.parse(oInput);
+            DOM_Document doc=oParser.getDocument();
+            delete[] recvBuff;
+            DOM_Element root;
+            if(!doc.isNull() && (root = doc.getDocumentElement()) != NULL)
+            {
+                if(root.getNodeName().equals("MixCascade"))
+                {
+                    ret = handleConfigEvent(doc);
+                    if(ret == E_SUCCESS)
+                        m_bConfiguring = false;
+                    else
+                        return ret;
+                }
+                else if(root.getNodeName().equals("Mix"))
+                {
+                    if(m_expectedMixRelPos < 0)
+                    {
+                        CAMsg::printMsg(LOG_DEBUG,"InfoService: Setting new previous mix: %s\n",root.getAttribute("id").transcode());
+
+                        options.setPrevMix(doc);
+                    }
+                    else if(m_expectedMixRelPos > 0)
+                    {
+                        CAMsg::printMsg(LOG_DEBUG,"InfoService: Setting new next mix: %s\n",root.getAttribute("id").transcode());
+
+                        options.setNextMix(doc);
+                    }
+                }
+            }
+            else
+            {
+                CAMsg::printMsg(LOG_CRIT,"InfoService: Error parsing answer from InfoService!\n");
+            }
+        }
+
 				return E_SUCCESS;	
 			}
 ERR:
@@ -270,11 +389,17 @@ ERR:
 		return E_UNKNOWN;
 	}
 
-/** POSTs the HELO message for a whole cascade to the InfoService [only first mix does this].
+/** POSTs the HELO message for a whole cascade to the InfoService.
+ * If the running mix is a last mix, this method is used to inform the
+ * InfoService that it wants to create a new cascade. The InfoService
+ * then tells all involved mixes to join this cascade.
+ * If the current mix is a middle mix, this method does nothing.
+ * @param E_SUCCESS on success
+ * @param E_UNKNOWN on any error
 	*/
 SINT32 CAInfoService::sendCascadeHelo()
-	{
-		if(!options.isFirstMix())
+{
+    if(options.isMiddleMix())
 			return E_SUCCESS;
 		CASocket oSocket;
 		CASocketAddrINet oAddr;
@@ -288,8 +413,9 @@ SINT32 CAInfoService::sendCascadeHelo()
 		if(oSocket.connect(oAddr)==E_SUCCESS)
 			{
 				DOM_Document docMixInfo;
-				if(m_pFirstMix->getMixCascadeInfo(docMixInfo)!=E_SUCCESS)
+        if(m_pMix->getMixCascadeInfo(docMixInfo)!=E_SUCCESS)
 					{
+            CAMsg::printMsg(LOG_INFO,"InfoService: Error: Cascade not yet configured.\r\n");
 						goto ERR;
 					}
 				//insert (or update) the Timestamp
@@ -313,6 +439,16 @@ SINT32 CAInfoService::sendCascadeHelo()
 				sendBuff=DOM_Output::dumpToMem(docMixInfo,&sendBuffLen);
 				if(sendBuff==NULL)
 					goto ERR;
+
+        if(options.isFirstMix())
+        {
+            CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending cascade helo to InfoService.\r\n");
+        }
+        else
+        {
+            CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending cascade configuration request to InfoService.\r\n");
+        }
+
 				sprintf((char*)buffHeader,"POST /cascade HTTP/1.0\r\nContent-Length: %u\r\n\r\n",sendBuffLen);
 				if(	oSocket.sendFully(buffHeader,strlen((char*)buffHeader))!=E_SUCCESS||
 						oSocket.sendFully(sendBuff,sendBuffLen)!=E_SUCCESS)
@@ -325,4 +461,128 @@ ERR:
 		if(sendBuff!=NULL)
 			delete []sendBuff;
 		return E_UNKNOWN;
+}
+
+SINT32 CAInfoService::handleConfigEvent(DOM_Document& doc)
+{
+    CAMsg::printMsg(LOG_INFO,"InfoService: Cascade info received from InfoService\n");
+
+    DOM_Element root=doc.getDocumentElement();
+    DOM_Node mixesElement;
+    getDOMChildByName(root,(UINT8*)"Mixes", mixesElement, false);
+    char* mixId;
+    char* prevMixId = NULL;
+    char* myNextMixId = NULL;
+    char* myPrevMixId = NULL;
+    bool bFoundMix = false;
+    UINT8 myMixId[64];
+    options.getMixId(myMixId,64);
+    DOM_Node child = mixesElement.getFirstChild();
+    while(child!=NULL)
+    {
+        if(child.getNodeName().equals("Mix") && child.getNodeType() == DOM_Node::ELEMENT_NODE)
+        {
+            mixId = static_cast<const DOM_Element&>(child).getAttribute("id").transcode();
+            if(strcmp(mixId,(char*)myMixId) == 0)
+            {
+                bFoundMix = true;
+                myPrevMixId = prevMixId;
+            }
+            else if(bFoundMix == true)
+            {
+                myNextMixId = mixId;
+                break;
+            }
+            prevMixId = mixId;
+        }
+        child = child.getNextSibling();
+    }
+
+    SINT32 ret = 0;
+    //char* c;
+
+    if(myPrevMixId != NULL)
+    {
+        CAMsg::printMsg(LOG_INFO,"InfoService: Asking InfoService about previous mix ...\n");
+
+        m_expectedMixRelPos = -1;
+        //c = new char[8+strlen(myPrevMixId)+1];
+        //strcpy(c,"mixinfo/");
+        //strcat(c,myPrevMixId);
+        ret = sendMixInfo((UINT8*)myPrevMixId);
+        //delete[] c;
+        if(ret != E_SUCCESS)
+        {
+            CAMsg::printMsg(LOG_CRIT,"InfoService: Error retrieving mix info from InfoService!\n");
+            return ret;
+        }
+    }
+
+    if(myNextMixId != NULL)
+    {
+        CAMsg::printMsg(LOG_INFO,"InfoService: Asking InfoService about next mix ...\n");
+
+        m_expectedMixRelPos = 1;
+        //c = new char[8+strlen(myNextMixId)+1];
+        //strcpy(c,"mixinfo/");
+        //strcat(c,myNextMixId);
+        ret = sendMixInfo((UINT8*)myNextMixId);
+        //delete[] c;
+        if(ret != E_SUCCESS)
+        {
+            CAMsg::printMsg(LOG_CRIT,"InfoService: Error retrieving mix info from InfoService!\n");
+            return ret;
+        }
+    }
+    return E_SUCCESS;
+}
+
+SINT32 CAInfoService::parseHTTPHeader(CASocket& server, UINT32* contentLength)
+{
+    char *line = new char[255];
+    SINT32 ret = 0;
+    SINT32 ret2 = E_SUCCESS;
+    do
+    {
+        int i=0;
+        UINT8 byte = 0;
+        do
+        {
+            ret = server.receive(&byte, 1);
+            if(byte == '\r' || byte == '\n')
+            {
+                line[i++] = 0;
 	}
+            else
+            {
+                line[i++] = byte;
+            }
+        }
+        while(byte != '\n' && i<255 && ret > 0);
+
+        if(ret < 0)
+            break;
+
+        if(strncmp(line, "HTTP", 4) == 0)
+        {
+            if(strstr(line, "200 OK") == NULL)
+            {
+                CAMsg::printMsg(LOG_CRIT,"InfoService: Error: InfoService returned: '%s'.\n",line);
+                if(strstr(line, "404") != NULL)
+                {
+
+                    CAMsg::printMsg(LOG_CRIT,"InfoService: Error: Maybe the desired mix is not online? Retry later.\n", line);
+                }
+                ret2 = E_UNKNOWN;
+                break;
+            }
+        }
+        else if(strncmp(line, "Content-length: ", 16) == 0)
+        {
+            *contentLength = (UINT32) atol(line+16);
+        }
+    }
+    while(strlen(line) > 0);
+    delete[] line;
+    return ret2;
+}

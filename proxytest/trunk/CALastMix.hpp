@@ -46,7 +46,7 @@ class CALastMix:public CAMix
 
 	{
 		public:
-			CALastMix()
+			CALastMix():CAMix()
 				{
 					m_pMuxIn=NULL;m_pSignature=NULL;
 					m_pRSA=NULL;m_pInfoService=NULL;
@@ -73,7 +73,13 @@ class CALastMix:public CAMix
 			SINT32 initOnce();
 			SINT32 clean();
 
-			SINT32 processKeyExchange();
+    // added by ronin <ronin2@web.de>
+    SINT32 initMixCascadeInfo(DOM_Element&);
+
+    // moved to CAMix.hpp
+    virtual SINT32 processKeyExchange();
+    
+
 			SINT32 setTargets();
 #ifdef LOG_CRIME
 			bool	 checkCrime(UINT8* payLoad,UINT32 payLen);
@@ -90,8 +96,8 @@ class CALastMix:public CAMix
 			CACacheLoadBalancing*	m_pCacheLB;
 			CACacheLoadBalancing* m_pSocksLB;
 			CAASymCipher*					m_pRSA;
-			CASignature*					m_pSignature;
-			CAInfoService*				m_pInfoService;
+			//CASignature*					m_pSignature;
+			//CAInfoService*				m_pInfoService;
 			CAThread*							m_pthreadSendToMix;
 			CAThread*							m_pthreadReadFromMix;
 #ifdef LOG_CRIME
