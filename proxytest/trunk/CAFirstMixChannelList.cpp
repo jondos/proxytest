@@ -466,10 +466,12 @@ SINT32 CAFirstMixChannelList::removeChannel(CAMuxSocket* pMuxSocket,HCHANNEL cha
 	*/
 fmHashTableEntry* CAFirstMixChannelList::getFirst()
 	{
+		m_Mutex.lock();
 		if(m_listHashTableHead!=NULL)
 			m_listHashTableNext=m_listHashTableHead->list_HashEntries.next;
 		else
 			m_listHashTableNext=NULL;
+		m_Mutex.unlock();
 		return m_listHashTableHead;
 	}
 
@@ -480,9 +482,11 @@ fmHashTableEntry* CAFirstMixChannelList::getFirst()
 	*/
 fmHashTableEntry* CAFirstMixChannelList::getNext()
 	{
+		m_Mutex.lock();
 		fmHashTableEntry* tmpEntry=m_listHashTableNext;
 		if(m_listHashTableNext!=NULL)
 			m_listHashTableNext=m_listHashTableNext->list_HashEntries.next;
+		m_Mutex.unlock();
 		return tmpEntry;
 	}
 
