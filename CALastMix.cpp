@@ -232,29 +232,29 @@ LOOP_START:
 										delete oConnection.pSocket;
 										delete oConnection.pCipher;
 										#ifdef _DEBUG
-											CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u\n",oMixPacket.channel);
+											CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u\n",pMixPacket->channel);
 										#endif
 									}
 								else if(pMixPacket->flags==CHANNEL_SUSPEND)
 									{
 										oSocketGroup.remove(*(oConnection.pSocket));
 										#ifdef _DEBUG
-											CAMsg::printMsg(LOG_DEBUG,"Suspending Channel: %u\n",oMixPacket.channel);
+											CAMsg::printMsg(LOG_DEBUG,"Suspending Channel: %u\n",pMixPacket->channel);
 										#endif
 									}
 								else if(pMixPacket->flags==CHANNEL_RESUME)
 									{
 										oSocketGroup.add(*(oConnection.pSocket));
 										#ifdef _DEBUG
-											CAMsg::printMsg(LOG_DEBUG,"Resumeing Channel: %u\n",oMixPacket.channel);
+											CAMsg::printMsg(LOG_DEBUG,"Resumeing Channel: %u\n",pMixPacket->channel);
 										#endif
 									}
 								else
 									{
 										oConnection.pCipher->decryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 										#ifdef _DEBUG
-											oMixPacket.payload.data[ntohs(oMixPacket.payload.len)]=0;
-											CAMsg::printMsg(LOG_DEBUG,"%u\n%s",ntohs(pMixPacket->payload.len),oMixPacket.payload.data);
+											pMixPacket->payload.data[ntohs(pMixPacket->payload.len)]=0;
+											CAMsg::printMsg(LOG_DEBUG,"%u\n%s",ntohs(pMixPacket->payload.len),pMixPacket->payload.data);
 										#endif
 										ret=ntohs(pMixPacket->payload.len);
 										if(ret>=0&&ret<=PAYLOAD_SIZE)
