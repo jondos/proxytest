@@ -28,6 +28,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "StdAfx.h"
 #include "CAUtil.hpp"
 #include "CABase64.hpp"
+#ifdef DEBUG
+	#include "CAMsg.hpp"
+#endif
 /**
 *	Removes leading and ending whitespaces (chars<=32) from a zero terminated string.
 *		@param s input string (null terminated)
