@@ -80,7 +80,7 @@ int CASocket::connect(LPSOCKETADDR psa,int retry,int time)
 			{
 				if(::connect(m_Socket,(LPSOCKADDR)psa,sizeof(*psa))!=0)
 					{  
-						err=GETERROR();
+						err=GETERROR;
 						printf("Con-Error: %i",err);
 						if(err!=E_TIMEDOUT&&err!=E_CONNREFUSED)
 							return SOCKET_ERROR;
