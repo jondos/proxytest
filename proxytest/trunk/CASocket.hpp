@@ -71,9 +71,9 @@ class CASocket
 			SINT32 getLocalPort();
 			SINT32 getPeerIP(UINT8 ip[4]);
 			SINT32 setReuseAddr(bool b);
-			SINT32 setRecvLowWat(UINT32 r);
-			SINT32 setSendLowWat(UINT32 r);
-			SINT32 getSendLowWat();
+			//SINT32 setRecvLowWat(UINT32 r);
+			//SINT32 setSendLowWat(UINT32 r);
+			//SINT32 getSendLowWat();
 			SINT32 setSendTimeOut(UINT32 msTimeOut);
 			SINT32 getSendTimeOut();
 			SINT32 setRecvBuff(UINT32 r);

@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.03.67"
+#define MIX_VERSION "00.03.68"
 
 #if defined(DEBUG)|| defined(_DEBUG)
 	#undef DEBUG
@@ -156,7 +156,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define ERR_INTERN_SOCKET_CLOSED WSAENOTSOCK
 		#define MSG_DONTWAIT 0
 		#define O_NONBLOCK 0
-		#define O_SYNC 0
 		#define HAVE_VSNPRINTF
 		#define HAVE_SNPRINTF
 		#define vsnprintf _vsnprintf
@@ -184,6 +183,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define HAVE_SNPRINTF
 		#define HAVE_ATOLL
 		#define HAVE_POLL
+		#define HAVE_O_SYNC
 		#ifndef __linux
 			#define HAVE_TCP_KEEPALIVE
 		#endif
@@ -192,6 +192,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#endif
 		#ifdef __FreeBSD__
 			#undef HAVE_TCP_KEEPALIVE
+			#undef HAVE_O_SYNC
+			#define HAVE_O_FSYNC
 		#endif
 		#ifdef __CYGWIN__
 			#undef HAVE_TCP_KEEPALIVE
@@ -270,11 +272,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#if !defined(HAVE_MSG_DONTWAIT)&&!defined(MSG_DONTWAIT)
 		#define MSG_DONTWAIT 0
 	#endif
-	#ifdef __FreeBSD__
-		#define O_SYNC O_FSYNC
-	#endif
-#endif
-
+#endif //WIn32 ?
 
 //Error constants...
 
@@ -359,6 +357,15 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //For large file support
 #ifndef O_LARGEFILE
 	#define O_LARGEFILE 0
+#endif
+
+//O_SYNC defined ???
+#ifndef HAVE_O_SYNC
+	#ifdef HAVE_O_FSYNC
+		#define O_SYNC O_FSYNC
+	#else 
+		#define	O_SYNC 0
+	#endif
 #endif
 
 //The min() macro

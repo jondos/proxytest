@@ -547,6 +547,7 @@ SINT32 CASocket::setReuseAddr(bool b)
 		return setsockopt(m_Socket,SOL_SOCKET,SO_REUSEADDR,(char*)&val,sizeof(val));
 	}
 
+/*
 SINT32 CASocket::setRecvLowWat(UINT32 r)
 	{
 		int val=r;
@@ -568,7 +569,7 @@ SINT32 CASocket::getSendLowWat()
 		else
 			return val;
 	}
-
+*/
 SINT32 CASocket::setRecvBuff(UINT32 r)
 	{
 		int val=r;

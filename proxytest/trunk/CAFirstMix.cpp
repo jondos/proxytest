@@ -151,11 +151,11 @@ SINT32 CAFirstMix::init()
 			}
 		((CASocket*)(*m_pMuxOut))->setSendBuff(500*MIXPACKET_SIZE);
 		((CASocket*)(*m_pMuxOut))->setRecvBuff(500*MIXPACKET_SIZE);
-		if(((CASocket*)(*m_pMuxOut))->setSendLowWat(MIXPACKET_SIZE)!=E_SUCCESS)
-			CAMsg::printMsg(LOG_INFO,"SOCKET Option SENDLOWWAT not set!\n");
+		//if(((CASocket*)(*m_pMuxOut))->setSendLowWat(MIXPACKET_SIZE)!=E_SUCCESS)
+		//	CAMsg::printMsg(LOG_INFO,"SOCKET Option SENDLOWWAT not set!\n");
 		CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET RecvBuffSize: %i\n",((CASocket*)(*m_pMuxOut))->getRecvBuff());
 		CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET SendBuffSize: %i\n",((CASocket*)(*m_pMuxOut))->getSendBuff());
-		CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET SendLowWatSize: %i\n",((CASocket*)(*m_pMuxOut))->getSendLowWat());
+		//CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET SendLowWatSize: %i\n",((CASocket*)(*m_pMuxOut))->getSendLowWat());
 
 		CAMsg::printMsg(LOG_INFO,"Try to connect to next Mix...\n");
 
