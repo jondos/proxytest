@@ -141,7 +141,84 @@ SINT32 CAQueue::get(UINT8* pbuff,UINT32* psize)
 		LeaveCriticalSection(&m_csQueue);
 		return ret;
 	}
-			
+
+/** Peeks data from the Queue (without removing from the Queue).
+  * @param pbuff, pointer to a buffer, there the data should be stored
+	* @param psize, on call contains the size of pbuff, on return contains the size of returned data
+	* @retval E_SUCCESS, if succesful
+	* @retval E_UNKNOWN, in case of an error
+	*/
+SINT32 CAQueue::peek(UINT8* pbuff,UINT32* psize)
+	{
+		if(m_Queue==NULL||pbuff==NULL||psize==NULL)
+			return E_UNKNOWN;
+		if(*psize==0)
+			return E_SUCCESS;
+		EnterCriticalSection(&m_csQueue);
+		SINT32 ret;
+		UINT32 space=*psize;
+		*psize=0;
+		QUEUE* tmpQueue=m_Queue;
+		while(space>=tmpQueue->size)
+			{
+				memcpy(pbuff,tmpQueue->pBuff,tmpQueue->size);
+				*psize+=tmpQueue->size;
+				pbuff+=tmpQueue->size;
+				space-=tmpQueue->size;
+				tmpQueue=tmpQueue->next;
+				if(tmpQueue==NULL)
+					{
+						LeaveCriticalSection(&m_csQueue);
+						return E_SUCCESS;
+					}
+			}
+		memcpy(pbuff,tmpQueue->pBuff,space);
+		*psize+=space;
+		ret=E_SUCCESS;
+		LeaveCriticalSection(&m_csQueue);
+		return ret;
+	}	
+	
+	
+/** Removes data from the Queue.
+	* @param psize, on call contains the size of data to remove, on return contains the size of removed data
+	* @retval E_SUCCESS, if succesful
+	* @retval E_UNKNOWN, in case of an error
+	*/
+SINT32 CAQueue::remove(UINT32* psize)
+	{
+		if(m_Queue==NULL||psize==NULL)
+			return E_UNKNOWN;
+		if(*psize==0)
+			return E_SUCCESS;
+		EnterCriticalSection(&m_csQueue);
+		SINT32 ret;
+		UINT32 space=*psize;
+		*psize=0;
+		while(space>=m_Queue->size)
+			{
+				*psize+=m_Queue->size;
+				space-=m_Queue->size;
+				m_nQueueSize-=m_Queue->size;
+				delete m_Queue->pBuff;
+				QUEUE* tmp=m_Queue;
+				m_Queue=m_Queue->next;
+				delete tmp;
+				if(m_Queue==NULL)
+					{
+						LeaveCriticalSection(&m_csQueue);
+						return E_SUCCESS;
+					}
+			}
+		*psize+=space;
+		m_Queue->size-=space;
+		m_nQueueSize-=space;
+		memmove(m_Queue->pBuff,m_Queue->pBuff+space,m_Queue->size);
+		ret=E_SUCCESS;
+		LeaveCriticalSection(&m_csQueue);
+		return ret;
+	}
+
 SINT32 CAQueue::test()
 	{
 		CAQueue oQueue;

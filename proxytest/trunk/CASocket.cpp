@@ -279,6 +279,7 @@ SINT32 CASocket::close(int mode)
 	@param len - content length
 	@param bDisableAsync - force to send this asynchronous (even if Async-Modus was set via setAsync)
 					default: false
+	@retval E_AGAIN, if non blocking socket would block
 	@ret number of bytes send, or -1 in case of an error
 */
 int CASocket::send(const UINT8* buff,UINT32 len,bool bDisableAsync)
@@ -288,6 +289,7 @@ int CASocket::send(const UINT8* buff,UINT32 len,bool bDisableAsync)
 		int ret;	
 	  if(!m_bASyncSend||bDisableAsync) //sync send...
 			{
+				SINT32 ef=0;
 				do
 					{
 						ret=::send(m_Socket,(char*)buff,len,MSG_NOSIGNAL);
@@ -296,7 +298,12 @@ int CASocket::send(const UINT8* buff,UINT32 len,bool bDisableAsync)
 								printf("Fehler beim Socket-send: %i",errno);
 						#endif
 					}
-				while(ret==SOCKET_ERROR&&errno==EINTR);
+				while(ret==SOCKET_ERROR&&(ef=errno)==EINTR);
+				if(ret==SOCKET_ERROR)
+					{
+						if(ef==ERR_INTERN_WOULDBLOCK)
+							return E_AGAIN;
+					}
 			}
 		else
 			{
@@ -371,6 +378,7 @@ SINT32 CASocket::getSendSpace()
 	}*/
 /**
 @return SOCKET_ERROR if an error occured
+@retval E_AGAIN, if socket was in non-blocking mode an receive would block
 @return 0 if socket was gracefully closed
 @return the number of bytes received (always >0)
 **/
@@ -383,6 +391,11 @@ int CASocket::receive(UINT8* buff,UINT32 len)
 				ret=::recv(m_Socket,(char*)buff,len,MSG_NOSIGNAL);
 			}
 	  while(ret==SOCKET_ERROR&&(ef=errno)==EINTR);
+		if(ret==SOCKET_ERROR)
+			{
+				if(ef==ERR_INTERN_WOULDBLOCK)
+					return E_AGAIN;
+			}
 #ifdef _DEBUG
 		if(ret==SOCKET_ERROR)
 	      CAMsg::printMsg(LOG_DEBUG,"Receive error: %i\n",ef);
@@ -393,6 +406,8 @@ int CASocket::receive(UINT8* buff,UINT32 len)
 /**Receives all bytes
 @return E_UNKOWN, in case of an error
 @return E_SUCCESS otherwise
+
+//TODO:: bugy for non-blocking socket...
 */
 SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len)
 	{

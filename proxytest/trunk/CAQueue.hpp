@@ -42,6 +42,8 @@ class CAQueue
 			~CAQueue();
 			SINT32 add(const UINT8* buff,UINT32 size);
 			SINT32 get(UINT8* pbuff,UINT32* psize);
+			SINT32 peek(UINT8* pbuff,UINT32* psize);
+			SINT32 remove(UINT32* psize);
 			/** Returns the size of stored data.
 				* @retrun size of Queue
 				*/

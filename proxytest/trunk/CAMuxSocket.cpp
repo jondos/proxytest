@@ -134,6 +134,23 @@ int CAMuxSocket::send(MIXPACKET *pPacket)
 		return ret;
 	}
 
+int CAMuxSocket::send(MIXPACKET *pPacket,UINT8* buff)
+	{
+		EnterCriticalSection(&csSend);
+		int ret;
+		UINT8 tmpBuff[16];
+		memcpy(tmpBuff,pPacket,16);
+		pPacket->channel=htonl(pPacket->channel);
+		pPacket->flags=htons(pPacket->flags);
+		if(m_bIsCrypted)
+    	m_oCipherOut.encryptAES(((UINT8*)pPacket),((UINT8*)pPacket),16);
+		memcpy(buff,((UINT8*)pPacket),MIXPACKET_SIZE);
+		ret=MIXPACKET_SIZE;
+		memcpy(pPacket,tmpBuff,16);
+		LeaveCriticalSection(&csSend);
+		return ret;
+	}
+
 SINT32 CAMuxSocket::receive(MIXPACKET* pPacket)
 	{
 		EnterCriticalSection(&csReceive);
@@ -153,12 +170,14 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket)
 /**Trys to receive a Mix-Packet. If after timout milliseconds not a whole packet is available
 * E_AGAIN will be returned. In this case you should later try to get the rest of the packet
 */
+
+//TODO: Bug if socket is in non_blocking mode!!
 SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 timeout)
 	{
 		EnterCriticalSection(&csReceive);
 		SINT32 len=MIXPACKET_SIZE-m_aktBuffPos;
 		SINT32 ret=m_Socket.receive(m_Buff+m_aktBuffPos,len);
-		if(ret<=0)
+		if(ret<=0&&ret!=E_AGAIN) //if socket was set in non-blocking mode
 			{
 				LeaveCriticalSection(&csReceive);
 				return E_UNKNOWN;
@@ -225,4 +244,12 @@ int CAMuxSocket::close(HCHANNEL channel_id)
 		oPacket.channel=channel_id;
 		oPacket.flags=CHANNEL_CLOSE;
 		return send(&oPacket);
+	}
+
+int CAMuxSocket::close(HCHANNEL channel_id,UINT8* buff)
+	{
+		MIXPACKET oPacket;
+		oPacket.channel=channel_id;
+		oPacket.flags=CHANNEL_CLOSE;
+		return send(&oPacket,buff);
 	}
