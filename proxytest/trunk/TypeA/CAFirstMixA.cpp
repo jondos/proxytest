@@ -408,7 +408,7 @@ ERR:
 		m_pthreadSendToMix->join(); //will not join if queue is empty (and so wating)!!!
 		//waits until all login threads terminates....
 		// we have to be sure that the Accept thread was alread stoped!
-		waitForLoginThreads(); 
+		m_pthreadsLogin->destroy(true);
 		CAMsg::printMsg(LOG_CRIT,"Before deleting CAFirstMixChannelList()!\n");
 		CAMsg::printMsg	(LOG_CRIT,"Memeory usage before: %u\n",getMemoryUsage());	
 		fmHashTableEntry* pHashEntry=m_pChannelList->getFirst();
