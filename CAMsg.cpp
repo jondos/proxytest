@@ -40,7 +40,7 @@ int CAMsg::printMsg(int type,char* format,...)
 	    {
 				#ifndef _WIN32
 					char buff[1024];
-					snprintf(buff,1024,format,ap);
+					vsnprintf(buff,1024,format,ap);
 					syslog(type,buff);
 				#endif
 	    }
