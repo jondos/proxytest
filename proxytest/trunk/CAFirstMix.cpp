@@ -376,6 +376,7 @@ SINT32 CAFirstMix::loop()
 #else
 SINT32 CAFirstMix::initOnce()
 	{
+		CAMsg::printMsg(LOG_DEBUG,"Starting FirstMix InitOnce\n");
 		UINT8* fileBuff=new UINT8[2048];
 		options.getKeyFileName(fileBuff,2048);
 		int handle=open((char*)fileBuff,O_BINARY|O_RDONLY);
