@@ -2,7 +2,8 @@
    file accompanying popt source distributions, available from 
    ftp://ftp.redhat.com/pub/code/popt */
 
-#include "system.h"
+#include "../StdAfx.h"
+//#include "system.h"
 
 #define POPT_ARGV_ARRAY_GROW_DELTA 5
 

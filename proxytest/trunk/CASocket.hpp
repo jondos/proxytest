@@ -7,6 +7,7 @@ class CASocket
 			CASocket();
 			~CASocket(){close();DeleteCriticalSection(&csClose);}
 			int listen(LPSOCKETADDR psa);
+			int listen(int port);
 			int accept(CASocket &s);
 			int connect(LPSOCKETADDR psa);
 			int close();

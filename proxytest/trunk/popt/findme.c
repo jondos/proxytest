@@ -2,6 +2,7 @@
    file accompanying popt source distributions, available from 
    ftp://ftp.redhat.com/pub/code/popt */
 
+#include "../StdAfx.h"
 #include "system.h"
 #include "findme.h"
 

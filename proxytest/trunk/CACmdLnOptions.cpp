@@ -17,7 +17,7 @@ CACmdLnOptions::~CACmdLnOptions()
 int CACmdLnOptions::parse(int argc,const char** argv)
     {
 	int ret;
-	poptOption options[4];
+	poptOption options[5];
 	memset(options,0,sizeof(options));
 	
 	options[0].shortName='d';
@@ -36,6 +36,12 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 	int port=-1;
 //	memset(target,0,sizeof(target));
 	options[2].arg=&port;
+
+	options[3].shortName='m';
+	options[3].argInfo=POPT_ARG_INT;
+	int mix=-1;
+//	memset(target,0,sizeof(target));
+	options[3].arg=&mix;
 
 	poptContext ctx=poptGetContext(NULL,argc,argv,options,0);
 	ret=poptGetNextOpt(ctx);
@@ -57,6 +63,12 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 		free(target);	
 	    }
 	iServerPort=port;
+	if(mix==0)
+		bFirstMix=true;
+	else if(mix==1)
+		bMiddleMix=true;
+	else
+		bLastMix=true;
 	return 0;
 	
     }
@@ -86,4 +98,19 @@ int CACmdLnOptions::getTargetHost(char* host,int len)
 	    }
 	strcpy(host,strTargetHost);
 	return strlen(strTargetHost);
+    }
+
+bool CACmdLnOptions::isFirstMix()
+    {
+			return bFirstMix;
+    }
+
+bool CACmdLnOptions::isMiddleMix()
+    {
+			return bMiddleMix;
+    }
+
+bool CACmdLnOptions::isLastMix()
+    {
+			return bLastMix;
     }

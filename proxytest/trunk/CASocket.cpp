@@ -14,7 +14,7 @@ CASocket::CASocket()
 		InitializeCriticalSection(&csClose);
 		closeMode=0;
 	}
-	
+
 int CASocket::listen(LPSOCKETADDR psa)
 	{
 		if(m_Socket==0)
@@ -24,6 +24,12 @@ int CASocket::listen(LPSOCKETADDR psa)
 		return ::listen(m_Socket,SOMAXCONN);
 	}
 			
+int CASocket::listen(int port)
+	{
+		CASocketAddr oSocketAddr(port);
+		return listen(&oSocketAddr);
+	}
+
 int CASocket::accept(CASocket &s)
 	{
 		s.m_Socket=::accept(m_Socket,NULL,NULL);

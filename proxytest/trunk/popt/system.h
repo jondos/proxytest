@@ -41,6 +41,9 @@ char *alloca ();
 #elif defined(__GNUC__) && defined(__STRICT_ANSI__)
 #define alloca __builtin_alloca
 #endif
+#ifdef _WIN32
+	#define alloca _alloca
+#endif
 
 /*@only@*/ char * xstrdup (const char *str);
 

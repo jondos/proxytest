@@ -2,10 +2,14 @@
    file accompanying popt source distributions, available from
    ftp://ftp.redhat.com/pub/code/popt */
 
-#include "system.h"
-#include "findme.h"
+#include "../StdAfx.h"
+//#include "system.h"
+//#include "findme.h"
 #include "poptint.h"
 
+#ifdef _WIN32
+	#define HAVE_STRERROR
+#endif
 #ifndef HAVE_STRERROR
 static char * strerror(int errno) {
     extern int sys_nerr;
@@ -216,6 +220,7 @@ static int handleAlias(poptContext con, const char * longName, char shortName,
     return 1;
 }
 
+/*
 static void execCommand(poptContext con) {
     const char ** argv;
     int pos = 0;
@@ -253,23 +258,23 @@ static void execCommand(poptContext con) {
 #ifdef __hpux
     setresuid(getuid(), getuid(),-1);
 #else
-/*
- * XXX " ... on BSD systems setuid() should be preferred over setreuid()"
- * XXX 	sez' Timur Bakeyev <mc@bat.ru>
- * XXX	from Norbert Warmuth <nwarmuth@privat.circular.de>
- */
+//
+// XXX " ... on BSD systems setuid() should be preferred over setreuid()"
+// XXX 	sez' Timur Bakeyev <mc@bat.ru>
+// XXX	from Norbert Warmuth <nwarmuth@privat.circular.de>
+//
 #if defined(HAVE_SETUID)
     setuid(getuid());
 #elif defined (HAVE_SETREUID)
-    setreuid(getuid(), getuid()); /*hlauer: not portable to hpux9.01 */
+    setreuid(getuid(), getuid()); //hlauer: not portable to hpux9.01 
 #else
-    ; /* Can't drop privileges */
+    ; // Can't drop privileges 
 #endif
 #endif
 
     execvp(argv[0], (char *const *)argv);
 }
-
+*/
 /*@observer@*/ static const struct poptOption *
 findOption(const struct poptOption * table, const char * longName,
     char shortName,
@@ -411,7 +416,7 @@ int poptGetNextOpt(poptContext con)
 	}
 	if (!con->os->nextCharArg && con->os->next == con->os->argc) {
 	    invokeCallbacks(con, con->options, 1);
-	    if (con->doExec) execCommand(con);
+	    //if (con->doExec) execCommand(con);
 	    return -1;
 	}
 
