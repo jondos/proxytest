@@ -37,7 +37,7 @@ CACmdLnOptions::CACmdLnOptions()
 		bDaemon=m_bHttps=false;
 		bLocalProxy=bFirstMix=bLastMix=bMiddleMix=false;
 		iTargetPort=iSOCKSPort=iServerPort=iSOCKSServerPort=iInfoServerPort=0xFFFF;
-		iTargetRTTPort=iServerRTTPort=-1;
+		iTargetRTTPort=/*iServerRTTPort=*/-1;
 		strServerHost=strTargetHost=strSOCKSHost=strInfoServerHost=NULL;
 		m_strMixXml=m_strUser=strCascadeName=strLogDir=NULL;
 		pTargets=NULL;
@@ -111,15 +111,15 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 	int SOCKSport=-1;
 	char* socks=NULL;
 	char* infoserver=NULL;
-	char* certsdir=NULL;
+//	char* certsdir=NULL;
 	char* cascadename=NULL;
 	char* logdir=NULL;
 	int iCompressedLogs=0;
 	char* serverPort=NULL;
-	char* user=NULL;
-	int nrOfOpenFiles=-1;
+//	char* user=NULL;
+//	int nrOfOpenFiles=-1;
 	char* configfile=NULL;
-  int bXmlKey=0;
+ // int bXmlKey=0;
 	DOM_Document docMixXml;
 	poptOption options[]=
 	 {
@@ -127,20 +127,20 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 		{"next",'n',POPT_ARG_STRING,&target,0,"next mix/http-proxy(s)","<path|{ip:port[,rttport][;ip:port]*}>"},
 		{"port",'p',POPT_ARG_STRING,&serverPort,0,"listening [host:]port|path","<[host:]port|path>"},
 		{"https",'h',POPT_ARG_NONE,&bHttps,0,"support proxy requests",NULL},
-		{"rttport",'r',POPT_ARG_INT,&serverrttport,0,"round trip time port","<portnumber>"},
+//		{"rttport",'r',POPT_ARG_INT,&serverrttport,0,"round trip time port","<portnumber>"},
 		{"mix",'m',POPT_ARG_INT,&mix,0,"local|first|middle|last mix","<0|1|2|3>"},
 		{"socksport",'s',POPT_ARG_INT,&SOCKSport,0,"listening port for socks","<portnumber>"},
 		{"socksproxy",'o',POPT_ARG_STRING,&socks,0,"socks proxy","<ip:port>"},
-		{"infoserver",'i',POPT_ARG_STRING,&infoserver,0,"info server","<ip:port>"},
-		{"certs",'e',POPT_ARG_STRING,&certsdir,0,"certs and key directory which the files: own.pfx (or privkey.xml), next.cer, prev.cer","<dir>"},
-		{"xmlkey",'x',POPT_ARG_NONE,&bXmlKey,0,"sign key is in XML-Format",NULL},
+//		{"infoserver",'i',POPT_ARG_STRING,&infoserver,0,"info server","<ip:port>"},
+//		{"certs",'e',POPT_ARG_STRING,&certsdir,0,"certs and key directory which the files: own.pfx (or privkey.xml), next.cer, prev.cer","<dir>"},
+//		{"xmlkey",'x',POPT_ARG_NONE,&bXmlKey,0,"sign key is in XML-Format",NULL},
 		{"name",'a',POPT_ARG_STRING,&cascadename,0,"name of the cascade","<string>"},
 		{"logdir",'l',POPT_ARG_STRING,&logdir,0,"directory where log files go to","<dir>"},
 #ifdef COMPRESSED_LOGS
 		{"gzip",'z',POPT_ARG_NONE,&iCompressedLogs,0,"create gziped logs",NULL},
 #endif
-		{"user",'u',POPT_ARG_STRING,&user,0,"effective user","<user>"},
-		{"files",'f',POPT_ARG_INT,&nrOfOpenFiles,0,"number of open files (sockets)","<filehandles>"},
+//		{"user",'u',POPT_ARG_STRING,&user,0,"effective user","<user>"},
+//		{"files",'f',POPT_ARG_INT,&nrOfOpenFiles,0,"number of open files (sockets)","<filehandles>"},
 		{"template",'t',POPT_ARG_NONE,&iTemplate,0,"generate conf template and exit",NULL},
 		{"config",'c',POPT_ARG_STRING,&configfile,0,"config file to use","<file>"},
 		POPT_AUTOHELP
@@ -286,13 +286,13 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 		bCompressedLogs=false;
 	else
 		bCompressedLogs=true;
-	if(user!=NULL)
+/*	if(user!=NULL)
 	    {
 					m_strUser=new char[strlen(user)+1];
 					strcpy(m_strUser,user);
 					free(user);	
 	    }
-	if(serverPort!=NULL)
+*/	if(serverPort!=NULL)
 		{
 			char* tmpStr;
 			if(serverPort[0]=='/') //Unix Domain Socket
@@ -316,10 +316,10 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 				}
 			free(serverPort);
 		}
-	if(serverrttport!=-1)
-		iServerRTTPort=serverrttport;
+//	if(serverrttport!=-1)
+//		iServerRTTPort=serverrttport;
 	iSOCKSServerPort=SOCKSport;
-	m_nrOfOpenFiles=nrOfOpenFiles;
+//	m_nrOfOpenFiles=nrOfOpenFiles;
 	if(mix==0)
 		bLocalProxy=true;
 	else if(mix==1)
@@ -329,9 +329,9 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 	else 
 		bLastMix=true;
 	//This is only for mixes - not for local proxy
-	if(!bLocalProxy)
+/*	if(!bLocalProxy)
 		{
-/*		//Now we could setup the MixID
+		//Now we could setup the MixID
 		//either form ConfigFile or from Host/Port
 			if(docMixXml!=NULL)
 				{
@@ -402,19 +402,19 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 			m_strMixXml[xmlLen]=0;
 			delete[] tmpXml;
 */
-			UINT8 tmpCertDir[2048];
-			UINT8 tmpFileName[2048];
-			UINT8* buff=NULL;
-			UINT32 size;
-			if(certsdir!=NULL)
+//			UINT8 tmpCertDir[2048];
+//			UINT8 tmpFileName[2048];
+//			UINT8* buff=NULL;
+//			UINT32 size;
+/*			if(certsdir!=NULL)
 				{
 					strcpy((char*)tmpCertDir,certsdir);
 					free(certsdir);				
 				}
 			else
 				tmpCertDir[0]=0;
-			//Try to load SignKey
-			if(bXmlKey)
+*/			//Try to load SignKey
+/*			if(bXmlKey)
 				{
 					if(m_pSignKey==NULL)
 						{
@@ -468,6 +468,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 			delete buff;
 	
 		}
+*/
 	if(!bLocalProxy)
 		return processXmlConfiguration(docMixXml);
 	return E_SUCCESS;
@@ -503,13 +504,13 @@ SINT32 CACmdLnOptions::getMixId(UINT8* id,UINT32 len)
 		return E_SUCCESS;
 	}
 
-SINT32 CACmdLnOptions::getServerRTTPort()
+/*SINT32 CACmdLnOptions::getServerRTTPort()
   {
 		if(iServerRTTPort!=-1)
 			return iServerRTTPort;
 		else
 			return E_UNSPECIFIED;
-  }
+  }*/
 
 UINT16 CACmdLnOptions::getSOCKSServerPort()
   {
@@ -643,7 +644,7 @@ SINT32 CACmdLnOptions::getMixXml(UINT8* strxml,UINT32* len)
 
 SINT32 CACmdLnOptions::generateTemplate()
 	{
-#define XML_CONFIG_TEMPLATE "<?xml version=\"1.0\" ?>\
+#define XML_CONFIG_TEMPLATE "	<?xml version=\"1.0\" ?>\
 <Mix id=\"\">\
 \t<Name><!-- Insert a human readable name here--></Name>\
 \t<Location> <!-- Fill out the following Elements to give infomation about the location of the Mix-->\
@@ -690,7 +691,55 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		strtrim(tmpBuff);
 		m_strMixID=new char[strlen((char*)tmpBuff)+1];
 		strcpy(m_strMixID,(char*) tmpBuff);
-			
+		//getMixType
+		DOM_Element elem;
+		getDOMChildByName(elemGeneral,(UINT8*)"MixType",elem,false);
+		tmpLen=255;
+		if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS)
+			{
+				if(memcmp(tmpBuff,"FirstMix",8)==0)
+					bFirstMix=true;
+				else if (memcmp(tmpBuff,"MiddleMix",9)==0)
+					bMiddleMix=true;
+				else if (memcmp(tmpBuff,"LastMix",7)==0)
+					bLastMix=true;
+			}
+		
+		//get Username to run as...
+		getDOMChildByName(elemGeneral,(UINT8*)"UserID",elem,false);
+		tmpLen=255;
+		if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS)
+			{
+				m_strUser=new char[tmpLen+1];
+				memcpy(m_strUser,tmpBuff,tmpLen);
+				m_strUser[tmpLen]=0;
+			}
+		//get Number of File Descriptors to use
+		getDOMChildByName(elemGeneral,(UINT8*)"NrOfFileDescriptors",elem,false);
+		UINT32 tmp;
+		if(getDOMElementValue(elem,&tmp)==E_SUCCESS)
+			m_nrOfOpenFiles=tmp;
+		//get Run as Daemon
+		getDOMChildByName(elemGeneral,(UINT8*)"Daemon",elem,false);
+		tmpLen=255;
+		if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS&&memcmp(tmpBuff,"True",4)==0)
+			bDaemon=true;		
+		//get Logging
+		DOM_Element elemLogging;
+		getDOMChildByName(elemGeneral,(UINT8*)"Logging",elemLogging,false);
+		if(elemLogging!=NULL)
+			{
+				tmpLen=255;
+				getDOMChildByName(elemLogging,(UINT8*)"File",elem,false);
+				if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS)
+					{
+						strLogDir=new char[tmpLen+1];
+						memcpy(strLogDir,tmpBuff,tmpLen);
+						strLogDir[tmpLen]=0;
+					}				
+			}
+
+
 		//getCertificates if given...
 		DOM_Element elemCertificates;
 		getDOMChildByName(elemRoot,(UINT8*)"Certificates",elemCertificates,false);
@@ -725,6 +774,23 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		if(elemPrevCert!=NULL)
 			m_pNextMixCertificate=CACertificate::decode(elemPrevCert.getFirstChild(),CERT_X509CERTIFICATE);
 
+		//get InfoService data
+		DOM_Element elemNetwork;
+		getDOMChildByName(elemRoot,(UINT8*)"Network",elemNetwork,false);
+		DOM_Element elemInfoService;
+		getDOMChildByName(elemNetwork,(UINT8*)"InfoService",elemInfoService,false);
+		getDOMChildByName(elemInfoService,(UINT8*)"Host",elem,false);
+		tmpLen=255;
+		if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS)
+			{
+				strInfoServerHost=new char[tmpLen+1];
+				memcpy(strInfoServerHost,tmpBuff,tmpLen);
+				strInfoServerHost[tmpLen]=0;
+			}
+		getDOMChildByName(elemInfoService,(UINT8*)"Port",elem,false);
+		if(getDOMElementValue(elem,&tmp)==E_SUCCESS)
+			iInfoServerPort=tmp;
+
 		//construct a XML-String, which describes the Mix (send via Infoservice.Helo())
 		DOM_Document docMixXml=DOM_Document::createDocument();
 		DOM_Element elemMix=docMixXml.createElement("Mix");
@@ -732,12 +798,10 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		docMixXml.appendChild(elemMix);
 		
 		//Inserting the Name if given...
-		DOM_Element elemMixName;
-		getDOMChildByName(elemRoot,(UINT8*)"MixName",elemMixName,false);
-		if(elemMixName!=NULL)
+		getDOMChildByName(elemGeneral,(UINT8*)"MixName",elem,false);
+		tmpLen=255;
+		if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS)
 			{
-				tmpLen=255;
-				getDOMElementValue(elemMixName,tmpBuff,&tmpLen);
 				DOM_Element elemName=docMixXml.createElement("Name");
 				setDOMElementValue(elemName,tmpBuff);
 				elemMix.appendChild(elemName);
@@ -755,6 +819,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 						tmpChild=tmpChild.getNextSibling();
 					}
 			}
+		
 		//Set Software-Version...
 		DOM_Element elemSoftware=docMixXml.createElement("Software");
 		DOM_Element elemVersion=docMixXml.createElement("Version");

@@ -47,7 +47,7 @@ class CACmdLnOptions
 	    SINT32 getServerHost(UINT8* path,UINT32 len);
 			
 			SINT32 getMixId(UINT8* id,UINT32 len);
-			SINT32 getServerRTTPort();
+//			SINT32 getServerRTTPort();
 			UINT16 getSOCKSServerPort();
 	    
 			//for historic reason gives always the first entry in the possible target list
@@ -127,7 +127,7 @@ class CACmdLnOptions
 	    bool bDaemon;
       bool m_bHttps;
 	    UINT16 iServerPort;
-			SINT32 iServerRTTPort;
+//			SINT32 iServerRTTPort;
 	    UINT16 iSOCKSServerPort;
 	    UINT16 iTargetPort; //only for the first target...
 	    SINT32 iTargetRTTPort; //only for the first target
