@@ -31,14 +31,13 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMsg.hpp"
 #include "CACmdLnOptions.hpp"
 #include "CAMuxChannelList.hpp"
-#include "CAAsymCipher.hpp"
+#include "CAASymCipher.hpp"
 #include "CAInfoService.hpp"
 
 extern CACmdLnOptions options;
 
 SINT32 CAFirstMix::init()
 	{
-		int ret;	
 		CASocketAddr socketAddrIn(options.getServerPort());
 		socketIn.create();
 		socketIn.setReuseAddr(true);
@@ -67,7 +66,7 @@ SINT32 CAFirstMix::init()
 				memcpy(recvBuff,&len,2);
 				((CASocket*)muxOut)->receive(recvBuff+2,ntohs(len));
 				CAMsg::printMsg(LOG_CRIT,"Received Key Info...\n");
-				return E_SUCCESS();
+				return E_SUCCESS;
 			}
 		else
 			{
