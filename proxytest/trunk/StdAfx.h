@@ -27,7 +27,7 @@
     #define THREAD_RETURN_ERROR return
     #define THREAD_RETURN_SUCCESS return
     #define sleep(i) Sleep(i*1000)
-		#define GETERROR WSAGetLastError
+		#define GETERROR (WSAGetLastError())
 		#define E_TIMEDOUT WSAETIMEDOUT
 		#define E_CONNREFUSED WSAECONNREFUSED
 #else
@@ -82,7 +82,7 @@
     #define THREAD_RETURN_SUCCESS return (NULL)
     
     #define min(a,b) ((a<b)?(a):(b))
-		#define GETERROR errno 
+		#define GETERROR (errno) 
 		#define E_TIMEDOUT ETIMEDOUT
 		#define E_CONNREFUSED ECONNREFUSED
 		#ifdef __sgi
