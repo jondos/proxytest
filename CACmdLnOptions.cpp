@@ -446,7 +446,8 @@ SINT32 CACmdLnOptions::getMixId(UINT8* id,UINT32 len)
 				if(strServerHost==NULL||strServerHost[0]=='/')
 					{
 						CASocketAddrINet::getLocalHostIP(buff);
-						getRandom((UINT8*)&thePort,2);
+						if(thePort==0xFFFF)
+							getRandom((UINT8*)&thePort,2);
 					}
 				else
 					{
