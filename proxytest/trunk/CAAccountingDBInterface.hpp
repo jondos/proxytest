@@ -27,7 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CAACCOUNTINGDBINTERFACE__
 #define __CAACCOUNTINGDBINTERFACE__
-
+#ifdef PAYMENT
 #include "CAQueue.hpp"
 #include "CAXMLCostConfirmation.hpp"
 
@@ -93,5 +93,5 @@ private:
 	PGconn * m_dbConn;
 	bool m_bConnected;
 };
-
+#endif //PAYMENT
 #endif

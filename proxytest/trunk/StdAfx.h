@@ -152,6 +152,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define O_NONBLOCK 0
 		#define HAVE_VSNPRINTF
 		#define vsnprintf _vsnprintf
+		#define snprintf _snprintf
 		#define atoll _atoi64
 		#define HAVE_ATOLL
 #else

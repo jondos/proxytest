@@ -25,7 +25,8 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
-
+#include "StdAfx.h"
+#ifdef PAYMENT
 #include "CAAccountingSettleThread.hpp"
 #include "CAAccountingBIInterface.hpp"
 #include "CAAccountingDBInterface.hpp"
@@ -134,5 +135,4 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * param)
 		}
 	return (THREAD_RETURN)0;
 }
-
-
+#endif //PAYMENT
