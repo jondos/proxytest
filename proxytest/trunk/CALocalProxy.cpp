@@ -179,7 +179,7 @@ SINT32 CALocalProxy::loop()
 									exit(-1);
 								}
 
-							if(oSocketList.get(pMixPacket->channel,&oConnection))
+							if(oSocketList.get(pMixPacket->channel,&oConnection)==E_SUCCESS)
 								{
 									if(pMixPacket->flags==CHANNEL_CLOSE)
 										{
@@ -264,7 +264,7 @@ SINT32 CALocalProxy::loop()
 																size-=KEY_SIZE;
 																len+=KEY_SIZE;
 															}
-														pMixPacket->flags=CHANNEL_OPEN_NEW;
+														pMixPacket->flags=CHANNEL_OPEN_OLD;
 													}
 												else //sonst
 													{

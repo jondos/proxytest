@@ -316,22 +316,28 @@ SINT32 getDOMElementValue(DOM_Element& elem,UINT8* value,UINT32* valuelen)
 		ASSERT(valuelen!=NULL,"ValueLen is null");
 		ASSERT(!elem.isNull,"Element is NULL");
 		DOM_Node text=elem.getFirstChild();
-		if(!text.isNull())
+		UINT32 spaceLeft=*valuelen;
+		*valuelen=0;
+		while(!text.isNull())
 			{
-				DOMString str=text.getNodeValue();
-				if(str.length()>=*valuelen)
+				if(text.getNodeType()==DOM_Node::TEXT_NODE)
 					{
-						*valuelen=str.length()+1;
-						return E_SPACE;
+						DOMString str=text.getNodeValue();
+						if(str.length()>=spaceLeft)
+							{
+								*valuelen=str.length()+1;
+								return E_SPACE;
+							}
+						char* tmpStr=str.transcode();
+						memcpy(value+(*valuelen),tmpStr,str.length());
+						*valuelen+=str.length();
+						spaceLeft-=str.length();
+						delete[] tmpStr;
 					}
-				char* tmpStr=str.transcode();
-				*valuelen=str.length();
-				memcpy(value,tmpStr,*valuelen);
-				tmpStr[*valuelen]=0;
-				delete[] tmpStr;
-				return E_SUCCESS;
+				text=text.getNextSibling();
 			}
-		return E_UNKNOWN;
+		value[*valuelen]=0;
+		return E_SUCCESS;
 	}
 
 SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, UINT8* xml, UINT32* xmllen,CAASymCipher* pRSA)

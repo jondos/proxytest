@@ -37,7 +37,7 @@ class CACmdLnOptions
 	    CACmdLnOptions();
 	    ~CACmdLnOptions();
 			void clean();
-			int parse(int argc,const char** arg);
+			SINT32 parse(int argc,const char** arg);
 	    bool getDaemon();
       bool getProxySupport();
 	   
@@ -57,7 +57,7 @@ class CACmdLnOptions
 	   
 			//if we have more than one Target (currently only Caches are possible...)
 			UINT32 getTargetCount(){return cntTargets;}
-			SINT32 getTargetAddr(CASocketAddrINet& oAddr, UINT32 nr)
+			SINT32 getTargetAddr(CASocketAddr& oAddr, UINT32 nr)
 				{
 					if(nr>0&&nr<=cntTargets)
 						{
@@ -84,6 +84,7 @@ class CACmdLnOptions
 						return m_pSignKey->clone(); 
 					return NULL;
 				}
+			
 			CACertificate* getOwnCertificate()
 				{
 					if(m_pOwnCertificate!=NULL)
@@ -154,5 +155,6 @@ class CACmdLnOptions
 			CACertificate* m_pNextMixCertificate;
 		private:
 			SINT32 generateTemplate();
+			SINT32 processXmlConfiguration(DOM_Document& docConfig);
 	};
 #endif
