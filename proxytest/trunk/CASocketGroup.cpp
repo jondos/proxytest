@@ -148,7 +148,7 @@ SINT32 CASocketGroup::select()
 				#endif			    
 				if(ret==SOCKET_ERROR)
 					{
-						CAMsg::printMsg(LOG_DEBUG,"SocketGroup Select-Fehler: %i\n",WSAGetLastError());
+						CAMsg::printMsg(LOG_DEBUG,"SocketGroup Select-Fehler: %i\n",GET_NET_ERROR);
 					}
 				return ret;
 			#else
@@ -215,9 +215,8 @@ SINT32 CASocketGroup::select(bool bWrite,UINT32 ms)
 			}
 		if(ret==SOCKET_ERROR)
 			{
-				ret=WSAGetLastError();
 				#ifdef _DEBUG
-					CAMsg::printMsg(LOG_DEBUG,"SocketGroup Select-Fehler: %i\n",WSAGetLastError());
+					CAMsg::printMsg(LOG_DEBUG,"SocketGroup Select-Fehler: %i\n",GET_NET_ERROR);
 				#endif
 				return E_UNKNOWN;
 			}

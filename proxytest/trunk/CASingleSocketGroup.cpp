@@ -48,9 +48,9 @@ SINT32 CASingleSocketGroup::select(bool bWrite,UINT32 ms)
 			}
 		if(ret==SOCKET_ERROR)
 			{
-				ret=WSAGetLastError();
 				#ifdef _DEBUG
-					CAMsg::printMsg(LOG_DEBUG,"SocketGroup Select-Fehler: %i\n",WSAGetLastError());
+					ret=GET_NET_ERROR;
+					CAMsg::printMsg(LOG_DEBUG,"SocketGroup Select-Fehler: %i\n",ret);
 				#endif
 				return E_UNKNOWN;
 			}
