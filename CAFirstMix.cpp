@@ -799,6 +799,7 @@ SINT32 CAFirstMix::loop()
 											pEntry->packetsOutToUser++;
 										#endif
 										m_psocketgroupUsersWrite->add(*pEntry->pHead->pMuxSocket);
+#ifndef NO_PARKING
 #define MAX_USER_SEND_QUEUE 100000
 										if(pEntry->pHead->pQueueSend->getSize()>MAX_USER_SEND_QUEUE&&
 												!pEntry->bIsSuspended)
@@ -814,6 +815,7 @@ SINT32 CAFirstMix::loop()
 												pEntry->bIsSuspended=true;
 												pEntry->pHead->cSuspend++;
 											}
+#endif
 										incMixedPackets();
 									}
 								else

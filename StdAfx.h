@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.01.69"
+#define MIX_VERSION "00.01.70"
 
 //#define LOG_CHANNEL
 //#define COMPRESSED_LOGS
@@ -43,13 +43,15 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define PSEUDO_LOG
 //#define NEW_PROTOCOL
 //#define NEW_KEY2USER_PROTOCOL
-//#define DELAY_CHANNELS
+//#define DELAY_CHANNELS //to enable max channel bandwidth
+
 #ifdef DELAY_CHANNELS
 	#define DELAY_CHANNEL_TRAFFIC 10000 //Traffic in bytes after which (download direction) the channel is delayed
 	//Delay is at the moment constant (max . Channel-Traffic: 10 KByte/s)
 //	#define DELAY_CHANNEL_SEND_INTERVALL 100 //Minimum time between two delayed packets (in ms)
 #endif
-//#define LOG_CRIME
+//#define LOG_CRIME  
+//#define NO_PARKING //to disable control flow
 
 //Some constants
 #define LAST_MIX_TO_PROXY_CONNECT_TIMEOUT 2000 //Connection timeout for last mix to proxy connections 2 Seconds...
