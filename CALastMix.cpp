@@ -403,7 +403,7 @@ LOOP_START:
 										oSocketGroup.remove(*(oConnection.pSocket));
 										oConnection.pSocket->close();
 										deleteResume(oMuxPacket.channel);
-										muxIn.close(oMuxPacket.channel);
+										//muxIn.close(oMuxPacket.channel);
 										oSocketList.remove(oMuxPacket.channel);
 										delete oConnection.pSocket;
 										delete oConnection.pCipher;
@@ -451,10 +451,10 @@ LOOP_START:
 						tmpCon=oSocketList.getFirst();
 						while(tmpCon!=NULL&&countRead>0)
 							{
-								if(oSocketGroupMuxIn.select(true,0)!=1)
-									goto LOOP_START;
 								if(oSocketGroup.isSignaled(*(tmpCon->pSocket)))
 									{
+										if(oSocketGroupMuxIn.select(true,0)!=1)
+											goto LOOP_START;
 										countRead--;
 										#ifdef _DEBUG
 										    CAMsg::printMsg(LOG_DEBUG,"Receiving Data from Squid!");
