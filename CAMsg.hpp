@@ -41,6 +41,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define LOG_INFO	2 
 	#define LOG_DEBUG 3
 #endif
+#define LOG_SPECIAL 255
+
 #include "CAMutex.hpp"
 class CAMsg
 	{
@@ -49,20 +51,21 @@ class CAMsg
 			static CAMsg oMsg;
 		public:
 			~CAMsg();
-			static SINT32 setOptions(UINT32 options);
+			static SINT32 setLogOptions(UINT32 options);
 			static SINT32 printMsg(UINT32 typ,char* format,...);
+			static SINT32 openSpecialLog();
+			static SINT32 closeSpecialLog();
 		protected:
 			SINT32 openLog(UINT32 type);
 			SINT32 closeLog();
 			UINT32 m_uLogType;
-//			int m_hFileErr;
+			int m_hFileSpecial;
 			int m_hFileInfo;
 			char *m_strMsgBuff;
 			char *m_strLogFile; 
-			static const char* const m_strMsgTypes[4];
+			static const char* const m_strMsgTypes[5];
 			CAMutex m_csPrint;
 #ifdef COMPRESSED_LOGS
-			gzFile m_gzFileErr;
 			gzFile m_gzFileInfo;
 #endif
    };

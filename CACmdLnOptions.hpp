@@ -173,6 +173,7 @@ class CACmdLnOptions
 			
 			SINT32 getCascadeName(UINT8* name,UINT32 len);
 			SINT32 getLogDir(UINT8* name,UINT32 len);
+			SINT32 getSpecialLogDir(UINT8* name,UINT32 len);
 			bool getCompressLogs()
 				{
 					return m_bCompressedLogs;
@@ -218,6 +219,7 @@ class CACmdLnOptions
 			bool		m_bAutoReconnect; //auto reconnect if connection to first mix lost ??
 			char*		m_strCascadeName;
 			char*		m_strLogDir;
+			char*		m_strSpecialLogDir;
 			bool		m_bCompressedLogs;
 			char*		m_strUser;
 			SINT32	m_nrOfOpenFiles; //How many open files (sockets) should we use
