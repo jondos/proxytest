@@ -76,6 +76,16 @@ class CASymCipher:public CALockAble
 					return E_SUCCESS;
 				}
 
+			/** Sets iv2 to p_iv.
+				* @param p_iv 16 random bytes used for new iv2.
+				* @retval E_SUCCESS
+				*/
+			SINT32 setIV2(const UINT8* p_iv)
+				{
+					memcpy(m_iv2,p_iv,16);
+					return E_SUCCESS;
+				}
+
 			SINT32 crypt1(const UINT8* in,UINT8* out,UINT32 len);
 			SINT32 crypt2(const UINT8* in,UINT8* out,UINT32 len);
 			SINT32 crypt1CBCwithPKCS7(const UINT8* in,UINT8* out,UINT32* len);

@@ -254,6 +254,9 @@ SINT32 CAFirstMixA::loop()
 																pCipher= new CASymCipher();
 																pCipher->setKey(rsaBuff);
 																#ifdef FIRST_MIX_SYMMETRIC
+																	for(int i=0;i<16;i++)
+																		rsaBuff[i]=0xFF;
+																	pCipher->setIV2(rsaBuff);
 																	pCipher->crypt1(pMixPacket->data+KEY_SIZE,pMixPacket->data,DATA_SIZE-KEY_SIZE);
 																#else
 																	pCipher->crypt1(pMixPacket->data+RSA_SIZE,
