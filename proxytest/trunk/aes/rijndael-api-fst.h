@@ -76,9 +76,9 @@ typedef struct {  /* changed order of the components */
 			setup the round keys in a variable block length setting 
 	     cipherInit(): parameter blockLen added (for obvious reasons)		
  */
-int makeKey(keyInstance *key, BYTE direction, int keyLen, char *keyMaterial);
+int makeKey(keyInstance *key, /*BYTE direction,*/ int keyLen, char *keyMaterial);
 
-int cipherInit(cipherInstance *cipher, BYTE mode, char *IV);
+/*int cipherInit(cipherInstance *cipher, BYTE mode, char *IV);
 
 int blockEncrypt(cipherInstance *cipher, keyInstance *key, BYTE *input, 
 			int inputLen, BYTE *outBuffer);
@@ -87,3 +87,4 @@ int blockDecrypt(cipherInstance *cipher, keyInstance *key, BYTE *input,
 			int inputLen, BYTE *outBuffer);
 int cipherUpdateRounds(cipherInstance *cipher, keyInstance *key, BYTE *input, 
                         int inputLen, BYTE *outBuffer, int Rounds);
+*/

@@ -118,7 +118,7 @@ class CAMuxSocket
 												//else
 													//return tunnel_pollin_fd(m_pTunnel);
 													}
-			SINT32 setCrypt(bool b){bIsCrypted=b;}
+			SINT32 setCrypt(bool b){bIsCrypted=b;return E_SUCCESS;}
 
 		private:
 				CASocket m_Socket;

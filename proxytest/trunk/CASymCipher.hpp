@@ -34,30 +34,31 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 class CASymCipher
 	{
 		public:
-			CASymCipher(){bEncKeySet=false;}
-			SINT32 generateEncryptionKey();
-			SINT32 getEncryptionKey(UINT8* key);
-			SINT32 setEncryptionKey(UINT8* key);
-			bool isEncyptionKeyValid();
-			SINT32 setDecryptionKey(UINT8* key);
-			SINT32 encrypt(UINT8* in,UINT32 len);
-			SINT32 decrypt(UINT8* in,UINT8* out,UINT32 len);
+			CASymCipher(){/*bEncKeySet=false;*/}
+	//		SINT32 generateEncryptionKey();
+	//		SINT32 getEncryptionKey(UINT8* key);
+	//		SINT32 setEncryptionKey(UINT8* key);
+	//		bool isEncyptionKeyValid();
+	//		SINT32 setDecryptionKey(UINT8* key);
+		//	SINT32 encrypt(UINT8* in,UINT32 len);
+		//	SINT32 decrypt(UINT8* in,UINT8* out,UINT32 len);
 		protected:
-			BF_KEY keyEnc,keyDec;
-			UINT8 rawKeyEnc[16];
-			bool bEncKeySet;
+		//	BF_KEY keyEnc,keyDec;
+		//	UINT8 rawKeyEnc[16];
+		//	bool bEncKeySet;
 
 			//AES
 		public:
 	//		SINT32 generateEncryptionKeyAES();
 	//		SINT32 setEncryptionKeyAES(UINT8* key);
-			SINT32 setDecryptionKeyAES(UINT8* key);
+			SINT32 setKeyAES(UINT8* key);
 	//		SINT32 encryptAES(UINT8* in,UINT32 len);
 			SINT32 decryptAES(UINT8* in,UINT8* out,UINT32 len);
+			SINT32 encryptAES(UINT8* in,UINT8* out,UINT32 len);
 		protected:
 			//AES
-			keyInstance keyEncAES;
-			keyInstance keyDecAES;
+		//	keyInstance keyEncAES;
+			keyInstance keyAES;
 			UINT8 iv[16];
 	};
 
