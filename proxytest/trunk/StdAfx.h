@@ -108,6 +108,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
     #include <syslog.h>
     #include <stdarg.h>
     #include <memory.h>       
+		#include <ctype.h>
     #ifndef O_BINARY
 	#define O_BINARY 0
     #endif
@@ -157,7 +158,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#ifdef __sgi
 			#undef HAVE_VSNPRINTF
 			#include <alloca.h>
-			#include <ctype.h>
+//			#include <ctype.h>
 		#endif
 		#ifdef __cplusplus
 		#ifdef __sgi	
