@@ -132,7 +132,7 @@ class CASingleSocketGroup
 		private:
 			struct pollfd* m_pollfd;
 	};
-#else if defined(HAVE_EPOLL)
+#elif defined(HAVE_EPOLL)
 class CASingleSocketGroup
 	{
 		public:
