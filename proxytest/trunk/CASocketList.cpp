@@ -52,45 +52,71 @@ SINT32 CASocketList::increasePool()
 			{
 				tmp[i-1].next=&tmp[i];
 			}
-		tmp[POOL_SIZE-1].next=pool;
-		pool=tmp;
-		tmpMem->next=memlist;
+		tmp[POOL_SIZE-1].next=m_Pool;
+		m_Pool=tmp;
+		tmpMem->next=m_Memlist;
 		tmpMem->mem=tmp;
-		memlist=tmpMem;
+		m_Memlist=tmpMem;
 		return E_SUCCESS;
 	}
 
 CASocketList::CASocketList()
 	{
-		connections=NULL;
-		pool=NULL;
-		memlist=NULL;
-		aktEnumPos=NULL;
-//		InitializeCriticalSection(&cs);
+		m_Connections=NULL;
+		m_Pool=NULL;
+		m_Memlist=NULL;
+		m_AktEnumPos=NULL;
+		m_bThreadSafe=false;
+		setThreadSafe(false);
+		increasePool();
+	}
+
+CASocketList::CASocketList(bool bThreadSafe)
+	{
+		m_Connections=NULL;
+		m_Pool=NULL;
+		m_Memlist=NULL;
+		m_AktEnumPos=NULL;
+		m_bThreadSafe=false;
+		setThreadSafe(bThreadSafe);
 		increasePool();
 	}
 
 CASocketList::~CASocketList()
 	{
 		clear();
-//		DeleteCriticalSection(&cs);
+		if(m_bThreadSafe)
+			DeleteCriticalSection(&cs);
 	}
 
 SINT32 CASocketList::clear()
 	{
 		_MEMBLOCK* tmp;
-		tmp=memlist;
+		tmp=m_Memlist;
 		while(tmp!=NULL)
 			{
 				delete tmp->mem;
-				memlist=tmp;
+				m_Memlist=tmp;
 				tmp=tmp->next;
-				delete memlist;
+				delete m_Memlist;
 			}
-		connections=NULL;
-		pool=NULL;
-		memlist=NULL;
-		aktEnumPos=NULL;
+		m_Connections=NULL;
+		m_Pool=NULL;
+		m_Memlist=NULL;
+		m_AktEnumPos=NULL;
+		return E_SUCCESS;
+	}
+
+SINT32 CASocketList::setThreadSafe(bool b)
+	{
+		if(b!=m_bThreadSafe)
+			{
+				if(m_bThreadSafe)
+					DeleteCriticalSection(&cs);
+				if(b)
+					InitializeCriticalSection(&cs);
+				m_bThreadSafe=b;
+			}
 		return E_SUCCESS;
 	}
 
@@ -104,47 +130,53 @@ SINT32 CASocketList::clear()
 */
 SINT32 CASocketList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher)
 	{
-//		EnterCriticalSection(&cs);
+		if(m_bThreadSafe)
+			EnterCriticalSection(&cs);
 		CONNECTIONLIST* tmp;
-		if(pool==NULL)
-		    {
-			if(increasePool()!=E_SUCCESS)
-						{
-//							LeaveCriticalSection(&cs);
-							return E_UNKNOWN;
-						}
-		    }
-		tmp=pool;
-		pool=pool->next;
-		tmp->next=connections;
-		connections=tmp;
-		connections->pSocket=pSocket;
-		connections->pCipher=pCipher;
-		connections->id=id;
-//		LeaveCriticalSection(&cs);
+		if(m_Pool==NULL)
+		  {
+				if(increasePool()!=E_SUCCESS)
+					{
+						if(m_bThreadSafe)
+							LeaveCriticalSection(&cs);
+						return E_UNKNOWN;
+					}
+		   }
+		tmp=m_Pool;
+		m_Pool=m_Pool->next;
+		tmp->next=m_Connections;
+		m_Connections=tmp;
+		m_Connections->pSocket=pSocket;
+		m_Connections->pCipher=pCipher;
+		m_Connections->id=id;
+		if(m_bThreadSafe)
+			LeaveCriticalSection(&cs);
 		return E_SUCCESS;
 	}
 
 SINT32 CASocketList::add(HCHANNEL in,HCHANNEL out,CASymCipher* pCipher)
 	{
-//		EnterCriticalSection(&cs);
+		if(m_bThreadSafe)
+			EnterCriticalSection(&cs);
 		CONNECTIONLIST* tmp;
-		if(pool==NULL)
-		    {
-					if(increasePool()!=E_SUCCESS)
-						{
-//							LeaveCriticalSection(&cs);
-							return E_UNKNOWN;
-						}
-		    }
-		tmp=pool;
-		pool=pool->next;
-		tmp->next=connections;
-		connections=tmp;
-		connections->outChannel=out;
-		connections->pCipher=pCipher;
-		connections->id=in;
-//		LeaveCriticalSection(&cs);
+		if(m_Pool==NULL)
+		  {
+				if(increasePool()!=E_SUCCESS)
+					{
+						if(m_bThreadSafe)
+							LeaveCriticalSection(&cs);
+						return E_UNKNOWN;
+					}
+		  }
+		tmp=m_Pool;
+		m_Pool=m_Pool->next;
+		tmp->next=m_Connections;
+		m_Connections=tmp;
+		m_Connections->outChannel=out;
+		m_Connections->pCipher=pCipher;
+		m_Connections->id=in;
+		if(m_bThreadSafe)
+			LeaveCriticalSection(&cs);
 		return E_SUCCESS;
 	}
 
@@ -157,20 +189,23 @@ SINT32 CASocketList::add(HCHANNEL in,HCHANNEL out,CASymCipher* pCipher)
 */
 bool	CASocketList::get(HCHANNEL in,CONNECTION* out)
 	{
-//		EnterCriticalSection(&cs);
+		if(m_bThreadSafe)
+			EnterCriticalSection(&cs);
 		CONNECTIONLIST* tmp;
-		tmp=connections;
+		tmp=m_Connections;
 		while(tmp!=NULL)
 			{
 				if(tmp->id==in)
 					{
 						memcpy(out,tmp,sizeof(CONNECTION));
-//						LeaveCriticalSection(&cs);
+						if(m_bThreadSafe)
+							LeaveCriticalSection(&cs);
 						return true;
 					}
 				tmp=tmp->next;
 			}
-//		LeaveCriticalSection(&cs);
+		if(m_bThreadSafe)
+			LeaveCriticalSection(&cs);
 		return false;
 	}
 
@@ -183,20 +218,23 @@ bool	CASocketList::get(HCHANNEL in,CONNECTION* out)
 */
 bool	CASocketList::get(CONNECTION* in,HCHANNEL out)
 	{
-//		EnterCriticalSection(&cs);
+		if(m_bThreadSafe)
+			EnterCriticalSection(&cs);
 		CONNECTIONLIST* tmp;
-		tmp=connections;
+		tmp=m_Connections;
 		while(tmp!=NULL)
 			{
 				if(tmp->outChannel==out)
 					{
 						memcpy(in,tmp,sizeof(CONNECTION));
-//						LeaveCriticalSection(&cs);
+						if(m_bThreadSafe)
+							LeaveCriticalSection(&cs);
 						return true;
 					}
 				tmp=tmp->next;
 			}
-//		LeaveCriticalSection(&cs);
+		if(m_bThreadSafe)
+			LeaveCriticalSection(&cs);
 		return false;
 	}
 
@@ -209,50 +247,56 @@ bool	CASocketList::get(CONNECTION* in,HCHANNEL out)
 */
 bool	CASocketList::get(CONNECTION* in,CASocket* pSocket)
 	{
-//		EnterCriticalSection(&cs);
+		if(m_bThreadSafe)
+			EnterCriticalSection(&cs);
 		CONNECTIONLIST* tmp;
-		tmp=connections;
+		tmp=m_Connections;
 		while(tmp!=NULL)
 			{
 				if(tmp->pSocket==pSocket)
 					{
 						memcpy(in,tmp,sizeof(CONNECTION));
-//						LeaveCriticalSection(&cs);
+						if(m_bThreadSafe)
+							LeaveCriticalSection(&cs);
 						return true;
 					}
 				tmp=tmp->next;
 			}
-//		LeaveCriticalSection(&cs);
+		if(m_bThreadSafe)
+			LeaveCriticalSection(&cs);
 		return false;
 	}
 
 CASocket* CASocketList::remove(HCHANNEL id)
 	{
-//		EnterCriticalSection(&cs);
+		if(m_bThreadSafe)
+			EnterCriticalSection(&cs);
 		CONNECTIONLIST* tmp,*before;
 		CASocket* ret;
-		tmp=connections;
+		tmp=m_Connections;
 		before=NULL;
 		while(tmp!=NULL)
 			{
 				if(tmp->id==id)
 					{
-						if(aktEnumPos==tmp)
-							aktEnumPos=tmp->next;
+						if(m_AktEnumPos==tmp)
+							m_AktEnumPos=tmp->next;
 						if(before!=NULL)
 							before->next=tmp->next;
 						else
-							connections=tmp->next;
-						tmp->next=pool;
-						pool=tmp;
+							m_Connections=tmp->next;
+						tmp->next=m_Pool;
+						m_Pool=tmp;
 						ret=tmp->pSocket;
-//						LeaveCriticalSection(&cs);
+						if(m_bThreadSafe)
+							LeaveCriticalSection(&cs);
 						return ret;
 					}
 				before=tmp;
 				tmp=tmp->next;
 			}
-//		LeaveCriticalSection(&cs);
+		if(m_bThreadSafe)
+			LeaveCriticalSection(&cs);
 		return NULL;
 	}
 
@@ -262,8 +306,8 @@ CASocket* CASocketList::remove(HCHANNEL id)
 */	 
 CONNECTION* CASocketList::getFirst()
 	{
-		aktEnumPos=connections;
-		return aktEnumPos;
+		m_AktEnumPos=m_Connections;
+		return m_AktEnumPos;
 	}
 
 /** Gets the next entry of the channel-list.
@@ -272,7 +316,7 @@ CONNECTION* CASocketList::getFirst()
 */	 
 CONNECTION* CASocketList::getNext()
 	{
-		if(aktEnumPos!=NULL)
-			aktEnumPos=aktEnumPos->next;
-		return aktEnumPos;
+		if(m_AktEnumPos!=NULL)
+			m_AktEnumPos=m_AktEnumPos->next;
+		return m_AktEnumPos;
 	}

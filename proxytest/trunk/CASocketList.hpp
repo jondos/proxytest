@@ -48,6 +48,7 @@ class CASocketList
 	{
 		public:
 			CASocketList();
+			CASocketList(bool bThreadSafe);
 			~CASocketList();
 			SINT32 add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher);
 			SINT32 add(HCHANNEL in,HCHANNEL out,CASymCipher* pCipher);
@@ -59,14 +60,15 @@ class CASocketList
 			SINT32 clear();
 			CONNECTION* getFirst();
 			CONNECTION* getNext();
+
+			SINT32 setThreadSafe(bool b);
 		protected:
 			SINT32 increasePool();
-			CONNECTIONLIST* connections;
-			CONNECTIONLIST* pool;
-			#ifdef _REENTRANT
-//				CRITICAL_SECTION cs;
-			#endif
-			CONNECTIONLIST* aktEnumPos;
-			t_MEMBLOCK* memlist;
+			CONNECTIONLIST* m_Connections;
+			CONNECTIONLIST* m_Pool;
+			CRITICAL_SECTION cs;
+			CONNECTIONLIST* m_AktEnumPos;
+			t_MEMBLOCK* m_Memlist;
+			bool m_bThreadSafe;
 	};	
 #endif

@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 class CASymCipher
 	{
 		public:
-			CASymCipher(){bEncKeySet=false;}
+			CASymCipher(){m_bEncKeySet=false;}
 	//		SINT32 generateEncryptionKey();
 	//		SINT32 getEncryptionKey(UINT8* key);
 	//		SINT32 setEncryptionKey(UINT8* key);
@@ -42,13 +42,6 @@ class CASymCipher
 	//		SINT32 setDecryptionKey(UINT8* key);
 		//	SINT32 encrypt(UINT8* in,UINT32 len);
 		//	SINT32 decrypt(UINT8* in,UINT8* out,UINT32 len);
-		protected:
-		//	BF_KEY keyEnc,keyDec;
-		//	UINT8 rawKeyEnc[16];
-				bool bEncKeySet;
-
-			//AES
-		public:
 	//		SINT32 generateEncryptionKeyAES();
 	//		SINT32 setEncryptionKeyAES(UINT8* key);
 			SINT32 setKeyAES(UINT8* key);
@@ -56,11 +49,10 @@ class CASymCipher
 			SINT32 decryptAES2(UINT8* in,UINT8* out,UINT32 len);
 			SINT32 encryptAES(UINT8* in,UINT8* out,UINT32 len);
 		protected:
-			//AES
-		//	keyInstance keyEncAES;
-			keyInstance keyAES;
-			UINT8 iv[16];
-			UINT8 iv2[16];
+			bool m_bEncKeySet;
+			keyInstance m_keyAES;
+			UINT8 m_iv[16];
+			UINT8 m_iv2[16];
 	};
 
 #endif

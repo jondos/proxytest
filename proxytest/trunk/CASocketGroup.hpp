@@ -32,7 +32,7 @@ class CASocketGroup
 	{
 		public:
 			CASocketGroup();
-			~CASocketGroup(){DeleteCriticalSection(&csFD_SET);}
+			~CASocketGroup(){DeleteCriticalSection(&m_csFD_SET);}
 			SINT32 add(CASocket&s);
 			SINT32 add(CAMuxSocket&s);
 			SINT32 remove(CASocket&s);
@@ -45,9 +45,9 @@ class CASocketGroup
 		protected:
 			fd_set m_fdset;
 			fd_set m_signaled_set;
-			CRITICAL_SECTION csFD_SET;
+			CRITICAL_SECTION m_csFD_SET;
 			#ifndef _WIN32
-			    int max;
+			    int m_max;
 			#endif
 	};
 #endif

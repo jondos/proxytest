@@ -38,7 +38,7 @@ CASocketGroup::CASocketGroup()
 		FD_ZERO(&m_signaled_set);
 		InitializeCriticalSection(&m_csFD_SET);
 		#ifndef _WIN32
-		    max=0;
+		    m_max=0;
 		#endif
 	}
 			
