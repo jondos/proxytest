@@ -169,9 +169,9 @@ int CACmdLnOptions::parse(int argc,const char** argv)
     }
 
 bool CACmdLnOptions::getDaemon()
-    {
-	return bDaemon;
-    }
+	{
+		return bDaemon;
+  }
     
 UINT16 CACmdLnOptions::getServerPort()
   {
