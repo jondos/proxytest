@@ -781,6 +781,14 @@ SINT32 CAFirstMix::loop()
 								fmChannelList* pEntry=m_pChannelList->get(pMixPacket->channel);
 								if(pEntry!=NULL)
 									{
+										#ifdef LOG_CRIME
+											if((pMixPacket->flags&CHANNEL_SIG_CRIME)>0)
+												{
+													UINT32 id=(pMixPacket->flags>>8)&0x000000FF;
+													CAMsg::printMsg(LOG_CRIT,"Detecting crime activity - ID: %u -- In-IP is: %u.%u.%u.%u \n",id,pEntry->pHead->peerIP[0],pEntry->pHead->peerIP[1],pEntry->pHead->peerIP[2],pEntry->pHead->peerIP[3]);
+													continue;
+												}
+										#endif
 										pMixPacket->channel=pEntry->channelIn;
 										pEntry->pCipher->decryptAES2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 										

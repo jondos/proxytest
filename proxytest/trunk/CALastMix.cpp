@@ -372,6 +372,18 @@ SINT32 CALastMix::loop()
 																CAMsg::printMsg(LOG_DEBUG,"Try sending data to Squid: %s\n",pMixPacket->payload.data);
 																pMixPacket->payload.data[30]=c;
 															#endif
+															#ifdef LOG_CRIME
+																if(payLen<=PAYLOAD_SIZE&&checkCrime(pMixPacket->payload.data,payLen))
+																	{
+																		UINT8 crimeBuff[PAYLOAD_SIZE+1];
+																		memset(crimeBuff,0,PAYLOAD_SIZE+1);
+																		memcpy(crimeBuff,pMixPacket->payload.data,payLen);
+																		m_pMuxIn->sigCrime(pMixPacket->channel,tmpBuff);
+																		oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);
+																		UINT32 id=(pMixPacket->channel>>8)&0xFF;
+																		CAMsg::printMsg(LOG_CRIT,"Crime detected -- ID: %u -- Content: %s\n",id,crimeBuff,payLen);
+																	}
+															#endif
 															if(payLen>PAYLOAD_SIZE||tmpSocket->sendTimeOut(pMixPacket->payload.data,payLen,_SEND_TIMEOUT)==SOCKET_ERROR)
 																{
 																	#ifdef _DEBUG
@@ -638,6 +650,12 @@ ERR:
 		return E_UNKNOWN;
 	}
 
+#ifdef LOG_CRIME
+	bool CALastMix::checkCrime(UINT8* payLoad,UINT32 payLen)
+		{
+			return rand()<(RAND_MAX>>2);
+		}
+#endif
 
 SINT32 CALastMix::clean()
 	{
