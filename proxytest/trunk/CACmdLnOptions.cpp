@@ -316,9 +316,18 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 					m_strMixXml=NULL;
 				}
 		}
-		return E_SUCCESS;
+	if(m_strMixXml==NULL) //Ok the get an error in proccesing infos about the mix, we should at leas t give the id!
+		{
+			m_strMixXml=new char[255];
+			strcpy((char*)m_strMixXml,"<?xml version=\"1.0\"?><Mix id=\"");
+			UINT8 id[50];
+			getMixId(id,50);
+			strcat((char*)m_strMixXml,(char*)id);
+			strcat((char*)m_strMixXml,"\"></Mix>");
+		}
+	return E_SUCCESS;
 	
-    }
+ }
 
 bool CACmdLnOptions::getDaemon()
 	{

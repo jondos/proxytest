@@ -188,29 +188,29 @@ SINT32 CAInfoService::sendHelo()
 		oAddr.setAddr(hostname,options.getInfoServerPort());
 		if(oSocket.connect(oAddr)==E_SUCCESS)
 			{
-				UINT8* buff=new UINT8[1024];
+				UINT8* buff=new UINT8[2024];
 				if(buff==NULL)
 					return E_UNKNOWN;
 				UINT32 buffLen;
 				if(options.isFirstMix())
 					{
 					 //the following has to be moved to FirstMix...
-						UINT8* tmpBuff=new UINT8[1024];
-						UINT32 len=1024;
+						UINT8* tmpBuff=new UINT8[2024];
+						UINT32 len=2024;
 						if(m_pFirstMix->getMixCascadeInfo(tmpBuff,&len)!=E_SUCCESS)
 							{
 								delete [] tmpBuff;
 								return E_UNKNOWN;
 							}
-						buffLen=1024;
+						buffLen=2024;
 						if(m_pSignature->signXML(tmpBuff,strlen((char*)tmpBuff),(UINT8*)buff,&buffLen)!=E_SUCCESS)
 							{delete []buff;return E_UNKNOWN;}
 					}
 				else
 					{
-						buffLen=1024;
-						UINT8* tmpBuff=new UINT8[1024];
-						if(options.getMixXml(tmpBuff,1024)!=E_SUCCESS)
+						buffLen=2024;
+						UINT8* tmpBuff=new UINT8[2024];
+						if(options.getMixXml(tmpBuff,2024)!=E_SUCCESS)
 							{
 								delete [] tmpBuff;
 								return E_UNKNOWN;
