@@ -3,7 +3,7 @@
 #include "CAUtil.hpp"
 #include "CAMsg.hpp"
 
-CAXMLCostConfirmation::ms_pStrElemName=NULL;
+UINT8* CAXMLCostConfirmation::ms_pStrElemName=NULL;
 
 CAXMLCostConfirmation::CAXMLCostConfirmation(UINT8 * strXmlData) 
 	: CAAbstractXMLSignable()

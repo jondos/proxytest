@@ -1,7 +1,6 @@
 #ifndef __CAXMLCOSTCONFIRMATION__
 #define __CAXMLCOSTCONFIRMATION__
 
-#include "StdAfx.h"
 #include "CAAbstractXMLSignable.hpp"
 
 /**
