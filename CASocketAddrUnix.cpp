@@ -37,6 +37,12 @@ CASocketAddrUnix::CASocketAddrUnix()
 		memset(sun_path,0,sizeof(sun_path));
 	}
 
+/**Constructs an Unix Adress from an other Unix-Address */
+CASocketAddrINet::CASocketAddrINet(const CASocketUnixINet& addr)
+	{
+		sun_family=AF_LOCAL;
+		memcpy(sun_path,addr.sun_path,sizeof(sun_path));
+	}
 
 /** Sets the path for the unix domain protocol address.
 	* @param path the new path value (zero terminated)
