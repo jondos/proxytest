@@ -307,6 +307,55 @@ THREAD_RETURN loopLog(void* param)
 
 #define _SEND_TIMEOUT (UINT32)5000 //5 Seconds...
 
+/**How to end this thread:
+1. Close connection to next mix
+2. put a byte in the Mix-Output-Queue
+*/
+THREAD_RETURN lm_loopSendToMix(void* param)
+	{
+		CAQueue* pQueue=((CALastMix*)param)->m_pQueueSendToMix;
+		CAMuxSocket* pMuxSocket=((CALastMix*)param)->m_pMuxIn;
+		
+		UINT32 len;
+#ifndef USE_POOL
+		UINT8* buff=new UINT8[0xFFFF];
+		for(;;)
+			{
+				len=MIXPACKET_SIZE;
+				SINT32 ret=pQueue->getOrWait(buff,&len);
+				if(ret!=E_SUCCESS||len!=MIXPACKET_SIZE)
+					break;
+				if(pMuxSocket->send((MIXPACKET*)buff)!=MIXPACKET_SIZE)
+					break;
+			}
+		delete []buff;
+#else
+		CAPool* pPool=new CAPool(MIX_POOL_SIZE);
+		MIXPACKET* pMixPacket=new MIXPACKET;
+		for(;;)
+			{
+				len=MIXPACKET_SIZE;
+				SINT32 ret=pQueue->getOrWait((UINT8*)pMixPacket,&len,MIX_POOL_TIMEOUT);
+				if(ret==E_TIMEDOUT)
+					{
+						pMixPacket->flags=0;
+						pMixPacket->channel=DUMMY_CHANNEL;
+						getRandom(pMixPacket->data,DATA_SIZE);
+					}
+				else if(ret!=E_SUCCESS||len!=MIXPACKET_SIZE)
+					break;
+				pPool->pool(pMixPacket);
+				if(pMuxSocket->send(pMixPacket)!=MIXPACKET_SIZE)
+					break;
+			}
+		delete pMixPacket;
+		delete pPool;
+#endif
+		CAMsg::printMsg(LOG_DEBUG,"Exiting Thread SendToMix\n");
+		THREAD_RETURN_SUCCESS;
+	}
+
+
 SINT32 CALastMix::loop()
 	{
 		//CASocketList  oSocketList;
@@ -321,7 +370,7 @@ SINT32 CALastMix::loop()
 		UINT8 rsaBuff[RSA_SIZE];
 		//CONNECTION* tmpCon;
 //		HCHANNEL tmpID;
-		CAQueue oqueueMixIn;
+		m_pQueueSendToMix=new CAQueue();
 		UINT8* tmpBuff=new UINT8[MIXPACKET_SIZE];
 		osocketgroupMixIn.add(*m_pMuxIn);
 		((CASocket*)*m_pMuxIn)->setNonBlocking(true);
@@ -347,6 +396,9 @@ SINT32 CALastMix::loop()
 			UINT64 current_millis;
 			UINT32 diff_time; 
 		#endif
+		CAThread threadSendToMix;
+		threadSendToMix.setMainLoop(loopSendToMix);
+		threadSendToMix.start(this);
 
 		for(;;)
 			{
@@ -413,8 +465,7 @@ SINT32 CALastMix::loop()
 															delete newCipher;
 															getRandom(pMixPacket->data,DATA_SIZE);
 															pMixPacket->flags=CHANNEL_CLOSE;
-															m_pMuxIn->send(pMixPacket,tmpBuff);
-															oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);			
+															m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE);			
 															m_logDownloadedPackets++;	
 													}
 												else
@@ -447,8 +498,7 @@ SINT32 CALastMix::loop()
 																	delete newCipher;
 																	getRandom(pMixPacket->data,DATA_SIZE);
 																	pMixPacket->flags=CHANNEL_CLOSE;
-																	m_pMuxIn->send(pMixPacket,tmpBuff);
-																	oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);			
+																	m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE);			
 																	m_logDownloadedPackets++;	
 																}
 															else
@@ -521,8 +571,7 @@ SINT32 CALastMix::loop()
 														pChannelList->removeChannel(pMixPacket->channel);
 														getRandom(pMixPacket->data,DATA_SIZE);
 														pMixPacket->flags=CHANNEL_CLOSE;
-														m_pMuxIn->send(pMixPacket,tmpBuff);
-														oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);
+														m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE);
 														m_logDownloadedPackets++;	
 													}
 												else
@@ -574,8 +623,7 @@ SINT32 CALastMix::loop()
 														pMixPacket->flags=CHANNEL_CLOSE;
 														getRandom(pMixPacket->data,DATA_SIZE);
 														pMixPacket->channel=pChannelListEntry->channelIn;
-														m_pMuxIn->send(pMixPacket,tmpBuff);
-														oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);			
+														m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE);			
 														m_logDownloadedPackets++;	
 														pChannelList->removeChannel(pChannelListEntry->channelIn);											 
 													}
@@ -601,7 +649,7 @@ SINT32 CALastMix::loop()
 								if(osocketgroupCacheRead.isSignaled(*(pChannelListEntry->pSocket)))
 									{
 										countRead--;
-										if(oqueueMixIn.getSize()<MAX_MIXIN_SEND_QUEUE_SIZE
+										if(m_pQueueSendToMix->getSize()<MAX_MIXIN_SEND_QUEUE_SIZE
 												#ifdef DELAY_CHANNELS
 													&&(pChannelListEntry->trafficOutToUser<DELAY_CHANNEL_TRAFFIC||isGreater64(aktTime,pChannelListEntry->timeNextSend))
 												#endif
@@ -623,9 +671,8 @@ SINT32 CALastMix::loop()
 														pMixPacket->flags=CHANNEL_CLOSE;
 														pMixPacket->channel=pChannelListEntry->channelIn;
 														getRandom(pMixPacket->data,DATA_SIZE);
-														m_pMuxIn->send(pMixPacket,tmpBuff);
 														pChannelList->removeChannel(pChannelListEntry->channelIn);
-														oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);			
+														m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE);			
 														m_logDownloadedPackets++;	
 													}
 												else 
@@ -639,8 +686,7 @@ SINT32 CALastMix::loop()
 														pMixPacket->payload.len=htons((UINT16)ret);
 														pMixPacket->payload.type=0;
 														pChannelListEntry->pCipher->decryptAES2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
-														m_pMuxIn->send(pMixPacket,tmpBuff);
-														oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);
+														m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE);
 														m_logDownloadedPackets++;
 														#if defined(LOG_CHANNEL)
 															pChannelListEntry->packetsDataOutToUser++;
@@ -662,26 +708,8 @@ SINT32 CALastMix::loop()
 //end Step 3
 
 //Step 4 Writing to previous Mix
-				if(!oqueueMixIn.isEmpty()&&osocketgroupMixIn.select(true,0)==1)
-					{
-						countRead=pChannelList->getSize()+1;
-						while(countRead>0&&!oqueueMixIn.isEmpty())
-							{
-								bAktiv=true;
-								countRead--;
-								UINT32 len=MIXPACKET_SIZE;
-								oqueueMixIn.peek(tmpBuff,&len);
-								ret=((CASocket*)*m_pMuxIn)->send(tmpBuff,len);
-								if(ret>0)
-									{
-										oqueueMixIn.remove((UINT32*)&ret);
-									}
-								else if(ret==E_AGAIN)
-									break;
-								else
-									goto ERR;
-							}
-					}
+// Now in a separate Thread!
+//
 //end step 4
 				if(!bAktiv)
 					msSleep(100);
@@ -692,6 +720,11 @@ SINT32 CALastMix::loop()
 
 ERR:
 		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
+		m_pMuxIn->close();
+		UINT8 b;
+		m_pQueueSendToMix->add(&b,1);
+		CAMsg::printMsg(LOG_CRIT,"Wait for LoopSendToMix!\n");
+		threadSendToMix.join(); //will not join if queue is empty (and so wating)!!!
 		m_bRunLog=false;
 		if(pInfoService!=NULL)
 			{
@@ -709,6 +742,8 @@ ERR:
 		delete pChannelList;
 		delete []tmpBuff;
 		delete pMixPacket;
+		delete m_pQueueSendToMix;
+		m_pQueueSendToMix=NULL;
 		oLogThread.join();
 		return E_UNKNOWN;
 	}
