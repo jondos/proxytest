@@ -58,6 +58,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
 CAAccountingInstance * CAAccountingInstance::m_pInstance = 0;
 
+
+
 /**
  * private Constructor
  */
@@ -65,9 +67,12 @@ CAAccountingInstance::CAAccountingInstance()
 {
 	CAMsg::printMsg(LOG_DEBUG, "AccountingInstance initialising\n");
 	m_pQueue = new CAQueue();
+	m_pIPBlockList = new CATempIPBlockList();
 
 	// initialize JPI connection
 	m_biInterface = new CAAccountingBIInterface();
+	
+	// initialize Database connection
 	m_dbInterface = new CAAccountingDBInterface();
 
 	// launch AI thread
@@ -84,6 +89,9 @@ CAAccountingInstance::CAAccountingInstance()
 CAAccountingInstance::~CAAccountingInstance()
 {
 	CAMsg::printMsg(LOG_DEBUG, "AccountingInstance dying\n");
+	delete m_biInterface;
+	delete m_dbInterface;
+	delete m_pIPBlockList;
 	delete m_pQueue;
 }
 
@@ -99,7 +107,8 @@ UINT32 CAAccountingInstance::setJapKeys( fmHashTableEntry *pHashEntry,
 	CAMsg::printMsg(LOG_ERR, "AI setting Cipher keys\n");
 	aiAccountingInfo * pAccInfo;
 	pAccInfo = pHashEntry->pAccountingInfo;
-
+	m_Mutex.lock();
+	
 	// if necessary, create new CASymCipher objects
 	if( pAccInfo->pCipherIn == 0 )
 		pAccInfo->pCipherIn = new CASymCipher();
@@ -109,6 +118,7 @@ UINT32 CAAccountingInstance::setJapKeys( fmHashTableEntry *pHashEntry,
 	// set the keys
 	pHashEntry->pAccountingInfo->pCipherIn->setKey(in);
 	pHashEntry->pAccountingInfo->pCipherOut->setKey(out);
+	m_Mutex.unlock();
 	return 0;
 }
 
@@ -116,11 +126,16 @@ UINT32 CAAccountingInstance::setJapKeys( fmHashTableEntry *pHashEntry,
 
 
 /**
- * This is called by the FirstMix for each incoming JAP packet.
- * Filters out JAP->AI packets.
+ * This function is called by the FirstMix for each incoming JAP packet.
+ * It filters out JAP->AI packets, counts the payload of normal packets and 
+ * tells the mix when a connection should be closed.
  * 
- * @return 0 if everything is OK
- * @return >0 means this jap is evil and the connection should be closed
+ * @return 0 if the packet is an JAP->AI packet (caller should drop it)
+ * @return 1 everything is OK, packet should be forwarded to next mix
+ * @return 2 user did not send certificate, connection should be closed
+ * @return 3 user is an evil hax0r, i.e. did not send a cost confirmation 
+ * or somehow tried to fake authentication, connection should be closed
+ * @return 4 AuthState unknown (internal error, should not happen)
  */
 UINT32 CAAccountingInstance::handleJapPacket( MIXPACKET *pPacket,
 																							fmHashTableEntry *pHashEntry
@@ -149,20 +164,69 @@ UINT32 CAAccountingInstance::handleJapPacket( MIXPACKET *pPacket,
 		
 		addToReceiveBuffer( pData, pHashEntry); // add it to the AI msg buffer
 		return 0;
-  }
-  else {
-		//CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: received normal packet, dump:\n");
-		//hexDump( (UINT8 *)pPacket, DATA_SIZE+6);
-		
-		// no, it's a normal user packet.
-		// check if the user is authorized
-		// if not, close the connection
-		//if(userOK) 
-			return 0;
-		//else
-		//	return 1;
-  }
+	}
+	else {
 
+		// user is authenticated normally
+		m_Mutex.lock();
+		if(pAccInfo->authState == AUTH_OK) {
+			// count the payload
+			pAccInfo->mixedPackets++;
+			
+			// if the JAP refuses to send a cost confirmation -> byebye!
+			if(pAccInfo->mixedPackets >= pAccInfo->confirmedPackets+1000) {
+				m_Mutex.unlock();
+				CAMsg::printMsg(LOG_DEBUG, "Accounting instance: Account %d, IP %d.%d.%d.%d refused "
+						"to send cost confirmation.", 
+						pAccInfo->accountNumber, pHashEntry->peerIP[0], pHashEntry->peerIP[1],
+						pHashEntry->peerIP[2], pHashEntry->peerIP[3]);
+				m_pIPBlockList->insertIP(pHashEntry->peerIP);
+				return 3;
+			}
+			
+			// let the packet pass thru
+			m_Mutex.unlock();
+			return 1;
+		}
+		
+		// user has not sent his/her certificate
+		else if(pAccInfo->authState == AUTH_UNKNOWN) {
+			pAccInfo->mixedPackets++;
+			// new (not yet authenticated) users can surf a bit (up to 500 Packets~=500KB) 
+			// before they get kicked out
+			if(pAccInfo->mixedPackets >= 500) {
+				m_Mutex.unlock();
+				CAMsg::printMsg(LOG_DEBUG, "Accounting instance: Unknown User at IP %d.%d.%d.%d has sent/received " 
+						"more than 500 packets and will be kicked",
+						pHashEntry->peerIP[0], pHashEntry->peerIP[1],
+						pHashEntry->peerIP[2], pHashEntry->peerIP[3]);
+				m_pIPBlockList->insertIP(pHashEntry->peerIP);
+				return 2;
+			}
+			else {
+				// let the packet pass thru
+				m_Mutex.unlock();
+				return 1;
+			}
+		}
+		
+		// user is a bad guy
+		else if(pAccInfo->authState == AUTH_BAD) {
+			m_Mutex.unlock();
+			CAMsg::printMsg(LOG_DEBUG, "Accounting instance: Account %d, IP %d.%d.%d.%d is evil (AuthState BAD)!", 
+				pAccInfo->accountNumber, pHashEntry->peerIP[0], pHashEntry->peerIP[1],
+				pHashEntry->peerIP[2], pHashEntry->peerIP[3]);
+			m_pIPBlockList->insertIP(pHashEntry->peerIP);
+			return 3;
+		}
+		else {
+			m_Mutex.unlock();
+			CAMsg::printMsg(LOG_ERROR, "Accounting instance: Account %d, IP %d.%d.%d.%d has invalid AuthState!",
+				pAccInfo->accountNumber, pHashEntry->peerIP[0], pHashEntry->peerIP[1],
+				pHashEntry->peerIP[2], pHashEntry->peerIP[3]);
+			return 4;
+		}
+	}
 }
 
 
@@ -177,6 +241,10 @@ UINT32 CAAccountingInstance::handleJapPacket( MIXPACKET *pPacket,
 void CAAccountingInstance::addToReceiveBuffer(UINT8 *pData, 
 																							fmHashTableEntry *pHashEntry) 
 {
+	// Note: We don't need to use m_Mutex in this function because only this
+	// thread reads/writes pReceiveBuffer, msgTotalSize, msgCurrentSize
+	// the queue is implemented threadsafe by itself
+	
 	int numBytes = 0;
 	aiQueueItem *pQueueItem;
 	aiAccountingInfo * pAccInfo;
@@ -242,6 +310,7 @@ void CAAccountingInstance::addToReceiveBuffer(UINT8 *pData,
 }
 
 
+
 /**
  * The Main Loop of the accounting instance thread.
  * TODO: terminate the whole firstMix on db connection errors
@@ -303,22 +372,22 @@ void CAAccountingInstance::processJapMessage( fmHashTableEntry * pHashEntry,
 	// what type of message is it?
   if(strcmp(docElementName, "AccountCertificate")==0) {
 		CAMsg::printMsg(LOG_DEBUG, "AI: It is an AccountCertificate\n");
-		handleAccountCertificate(pHashEntry, root);
+		handleAccountCertificate(pHashEntry, root, pData, dataLen);
   }
   else if(strcmp(docElementName, "CC")==0) {
 		CAMsg::printMsg(LOG_DEBUG, "AI: It is a CostConfirmation .. nice but atm not necessary\n");
-		handleCostConfirmation(pHashEntry, root);				
+		handleCostConfirmation(pHashEntry, root, pData, dataLen);				
   }
 	else if(strcmp(docElementName, "Balance")==0) {
 		CAMsg::printMsg(LOG_DEBUG, "AI: It is a balance certificate .. yuppi!\n");
-		handleBalanceCertificate(pHashEntry, root);
+		handleBalanceCertificate(pHashEntry, root, pData, dataLen);
 	}
   else {
 		CAMsg::printMsg(LOG_ERR, "AI: XML message with root element \"%s\" is unknown! Ignoring\n",
 										docElementName);
 	// Error
   }
-	CAMsg::printMsg(LOG_DEBUG, "Deletingi\n");
+	CAMsg::printMsg(LOG_DEBUG, "Deleting\n");
 	delete docElementName;
 	//free(docElementName); ??
 	CAMsg::printMsg(LOG_DEBUG, "Ende von procesJapMsg\n");
@@ -328,7 +397,9 @@ void CAAccountingInstance::processJapMessage( fmHashTableEntry * pHashEntry,
 /**
  * Handles an account certificate of a newly connected Jap.
  */
-void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry, const DOM_Element &root)
+void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry, 
+						const DOM_Element &root,
+						UINT8 * pData, UINT32 dataLen)
 {
 	aiAccountingInfo *pAccInfo;
 	pAccInfo = pHashEntry->accountingInfo;
@@ -346,12 +417,20 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		return;
 	}
 	pAccInfo->accountNumber = atoi(strGeneral);
+	
+	// check signature
+	
+	// send challenge
 
 	// TODO: validate RESPONSE
-	pAccInfo->authState =
+	m_Mutex.lock();
+	pAccInfo->authState = 
+	m_Mutex.unlock();
 
 	return;
 }
+
+
 void CAAccountingInstance::handleAccountCertificateError(	fmHashTableEntry *pHashEntry,
 																													UINT32 num) 
 {
@@ -362,25 +441,45 @@ void CAAccountingInstance::handleAccountCertificateError(	fmHashTableEntry *pHas
 }
 
 
+
+void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry, 
+						const DOM_Element &root,
+						UINT8 * pData, UINT32 dataLen)
+{
+	// check it
+	
+	// set authstate accordingly
+	
+}
+
+
+
+
+
 /**
  * Handles a cost confirmation sent by a jap (INCOMPLETE)
  */
-void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry, const DOM_Element &root)
+void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry, 
+							const DOM_Element &root,
+							UINT8 * pData, UINT32 dataLen)
 {
-	PGresult *dbResult;
+	aiAccountingInfo *pAccInfo;
+	pAccInfo = pHashEntry->accountingInfo;
 
-	// strings for db query
-	// analyse XML
-/*	<CC>
-		<ID>=AIname
-		<AN>=Accountnummer
-		<C>=Cost
-		<D>=hash
-		<w>=tickprice
-	</CC>*/
+// in this version we are using XMLEasyCC
+// without micropayment which has the following format:
+ /*
+ * <CC version="1.0">
+ *   <AIName>aiName</AIName>
+ *   <Bytes>Number of Bytes transferred</Bytes>
+ *   <Number>accountNumber</Number>
+ * </CC>
+ */
+ 
+	// TODO: check signature
 	
 	// parse ai name	
-	DOM_Element elemAiName = root.getElementsByTagName(aiNameTagname);
+	DOM_Element elemAiName = root.getElementsByTagName("AIName");
 	DOM_Node node = elemAiName.getFirstChild();
 	if(node.getNodeType() != TEXT_NODE) {
 		CAMsg::printMsg(LOG_DEBUG, "CostConfirmation has WRONG FORMAT!! Ignoring\n");
@@ -390,19 +489,115 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry, 
 	char *aiName = dstrAiName.transcode();	
 
 
-	// parse cost
-	DOM_Element elemAiName = root.getElementsByTagName(aiNameTagname);
+	// parse Bytes
+	DOM_Element elemAiName = root.getElementsByTagName("Bytes");
 	DOM_Node node = elemAiName.getFirstChild();
 	if(node.getNodeType() != TEXT_NODE) {
 		CAMsg::printMsg(LOG_DEBUG, "CostConfirmation has WRONG FORMAT!! Ignoring\n");
 		return;
 	}
-	DOMString dstrAiName = ((DOM_CharacterData)node).getData();
-	char *aiName = dstrAiName.transcode();
+	DOMString dstrBytes = ((DOM_CharacterData)node).getData();
+	char *strBytes = dstrBytes.transcode();
+	UINT64 bytes = (UINT64)strtol(strBytes, 0, 10);
+	
 
-		
 	// store to db
-	m_dbInterface->storeCostConfirmation(...);
+	m_dbInterface->storeCostConfirmation(pAccInfo->accountNumber, bytes, pData);
+	delete [] strBytes;
+	delete [] aiName;
+}
+
+
+void CAAccountingInstance::handleBalanceCertificate(fmHashTableEntry *pHashEntry, 
+			const DOM_Element &root,
+			UINT8 * pData, UINT32 dataLen)
+{
+	// TODO: validate signature
+	// CASignature sig;
+	// sig.setVerifyKey(CACertificate );
+	// sig.verifyXML(root, pTrustedCerts);
+	
+	// TODO: check age
+	
+	// TODO: if too old -> ask JPI for a new one
+	// if JPI is not available at present -> let user proceed for a while
+}
+
+
+/**
+ * Tells the Jap which data this AI expects to receive from the Jap.
+ * This can be sent to every user at the beginning of the connection,
+ * before any user packets were sent, or it can be sent to users who 
+ * refuse to send authentication / cost confirmation info before closing
+ * the connection
+ *
+ * // TODO: Rewrite
+ */
+void CAAccountingInstance::sendAIRequest(fmHashTableEntry pHashEntry, bool certNeeded,
+																				bool balanceNeeded, bool costConfirmationNeeded) 
+{
+	char msgString[500];
+	sprintf(msgString, "<AIRequest>\n<CertNeeded>%s</CertNeeded>\n<BalanceNeeded>%s</BalanceNeeded>"
+			"\n<CostConfirmationNeeded>%s</CostConfirmationNeeded>\n<Random></Random>\n</AIRequest>\n",
+			(certNeeded?"true":"false"), (balanceNeeded?"true":"false"), 
+			(costConfirmationNeeded?"true":"false"));
+	sendAIMessageToJap(pHashEntry, msgString, strlen(msgString));
+}
+
+
+
+/**
+ * Sends a message to the Jap. The message is automatically splitted into 
+ * several mixpackets if necessary and is encrypted using the pCipherOut
+ * AES cipher
+ */
+void CAAccountingInstance::sendAIMessageToJap(fmHashTableEntry pHashEntry,
+																						UINT8 *msgString, UINT32 msgLen)
+{
+	aiAccountingInfo * pAccInfo = pHashEntry->pAccountingInfo;
+	CASymCipher * pCipherOut = pAccInfo->pCipherOut;
+	MIXPACKET *pMixPacket = (MIXPACKET *) malloc(MIXPACKET_SIZE);
+
+	// set packet header
+	pMixPacket->channel = 0xffffffff; //special AI channel number
+	pMixPacket->flags = 0;
+	
+	// send first packet (with length information)
+	(UINT32)pMixPacket->DATA[0] = ntohl(msgLen);
+	UINT32 numBytes;
+	UINT32 index=0;
+	if(msgLen < (DATA_SIZE-sizeof(UINT32)) ) 
+		numBytes=msgLen;
+	else 
+		numBytes = DATA_SIZE-sizeof(UINT32);
+	memcpy(pMixPacket->DATA+sizeof(UINT32), msgString, numBytes);
+	pCipherOut->encrypt(pMixPacket->DATA, pMixPacket->DATA, DATA_SIZE);
+	pHashEntry->pMuxSocket->send(pMixPacket);
+	
+	
+	// send remaining packets
+	index += numBytes;
+	do {
+		numBytes = (msgLen-index>=DATA_SIZE ? DATA_SIZE : msgLen-index );
+		memcpy(pMixPacket->DATA, msgString+index, numBytes);
+		index += numBytes;
+		pCipherOut->encrypt(pMixPacket->DATA, pMixPacket->DATA, DATA_SIZE);
+		pHashEntry->pMuxSocket->send(pMixPacket);
+	} while(msgLen>index);
+	free(pMixPacket);
+}
+
+
+
+/**
+ * This must be called whenever a JAP is connecting to init our per-user
+ * data structures
+ */
+UINT32 CAAccountingInstance::initTableEntry(fmHashTableEntry * pHashEntry)
+{
+	pHashEntry->pAccountingInfo = new aiAccountingInfo;
+	memset(pHashEntry->pAccountingInfo, 0, sizeof(aiAccountingInfo) );
+	return 0;
 }
 
 
@@ -413,7 +608,7 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry, 
  */
 UINT32 CAAccountingInstance::cleanupTableEntry(fmHashTableEntry *pHashEntry) 
 {
-	CAMsg::printMsg(LOG_DEBUG, "cleanupTableEntry() Hello World\n");
+	CAMsg::printMsg(LOG_DEBUG, "cleanupTableEntry()\n");
 	aiAccountingInfo * pAccInfo;
 	if(pHashEntry->pAccountingInfo != 0) {
 		pAccInfo = pHashEntry->pAccountingInfo;
@@ -431,87 +626,6 @@ UINT32 CAAccountingInstance::cleanupTableEntry(fmHashTableEntry *pHashEntry)
 		}
 		delete pHashEntry->pAccountingInfo;
 	}
-	return 0;
-}
-
-
-
-/**
- * Tells the Jap which data this AI expects to receive from the Jap.
- * This can be sent to every user at the beginning of the connection,
- * before any user packets were sent
- *
- * INCOMPLETE
- */
-void CAAccountingInstance::sendAIRequest(fmHashTableEntry pHashEntry, bool certNeeded,
-																				bool balanceNeeded, bool costConfirmationNeeded) 
-{
-	char str1[] = "<AIRequest>\n";
-	char str2[] = "<CertNeeded>";
-	char str3[] = "</CertNeeded>\n";
-	char str4[] = "<BalanceNeeded>";
-	char str5[] = "</BalanceNeeded>\n";
-	char str6[] = "<CostConfirmationNeeded>";
-	char str7[] = "</CostConfirmationNeeded>\n";
-	char str8[] = "<Random>";
-	char str9[] = "</Random>\n";
-	char str10[] = "</AIRequest>\n";
-
-//	sprintf(...);
-//	sendAIMessageToJap(pHashEntry, msgString, strlen(msgString));
-}
-
-
-
-/**
- * Sends a message to the Jap. The message is automatically splitted into 
- * several mixpackets if necessary and is encrypted using the pCipherOut
- * AES cipher
- */
-void CAAccountingInstance::sendAIMessageToJap(fmHashTableEntry pHashEntry,
-																						UINT8 *msgString, UINT32 msgLen)
-{
-	aiAccountingInfo * pAccInfo = pHashEntry->pAccountingInfo;
-	CASymCipher * pCipherOut = pAccInfo->pCipherOut;
-	
-	
-	UINT32 msgTotalLength = msgLen + sizeof(UINT32); // add 4 bytes for the msg length 
-	UINT32 numPackets = msgTotalLength / DATA_SIZE;
-	if( (msgTotalLength%DATA_SIZE) != 0 ) numPackets++;
-	MIXPACKET *pMixPacket = (MIXPACKET *) malloc(MIXPACKET_SIZE);
-
-	// set packet header
-	pMixPacket->channel = 0xffffffff; //special AI channel number
-	pMixPacket->flags = 0;
-	
-	// send first packet (with length information)
-	(UINT32)pMixPacket->DATA[0] = ntohl(msgLen);
-	UINT32 numBytes;
-	UINT32 index=0;
-	if(msgLen < (DATA_SIZE-sizeof(UINT32)) ) 
-		numBytes=msgLen;
-	else 
-		numBytes = DATA_SIZE-sizeof(UINT32);
-	memcpy(pMixPacket->DATA+sizeof(UINT32), msgString, numBytes);
-	pCipherOut->encrypt(pMixPacket->DATA, pMixPacket->DATA, DATA_SIZE);
-	
-	// send remaining packets
-	for(i=1; i<numPackets; i++) {
-		index += numBytes;	
-		memcpy(pMixPacket->DATA+sizeof(UINT32)+index, msgString+index, numBytes);
-		pCipherOut->encrypt(pMixPacket->DATA, pMixPacket->DATA, DATA_SIZE);	
-	}
-}
-
-
-
-/**
- * This must be called when a JAP is connecting to init our data structures
- */
-UINT32 CAAccountingInstance::initTableEntry(fmHashTableEntry * pHashEntry)
-{
-	pHashEntry->pAccountingInfo = new aiAccountingInfo;
-	memset(pHashEntry->pAccountingInfo, 0, sizeof(aiAccountingInfo) );
 	return 0;
 }
 

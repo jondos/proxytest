@@ -29,9 +29,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAFirstMixChannelList.hpp"
 #include "CAUtil.hpp"
 #include "CAMsg.hpp"
-//#include "CAAccountingInstance.hpp"
-
 #define MAX_HASH_KEY 8113
+
+#ifdef PAYMENT
+#include "CAAccountingInstance.hpp"
+#endif
 
 CAFirstMixChannelList::CAFirstMixChannelList()
 	{

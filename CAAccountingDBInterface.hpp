@@ -34,21 +34,21 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
   * This class is used to store cost confirmations
   * in a postgresql database
   */
-class PGconn;
 class CAAccountingDBInterface
 {
 public: 
 	CAAccountingDBInterface();
 	~CAAccountingDBInterface();
 
-	SINT32 initDBConnection(char * host, int tcp_port, char * dbName,
-													char * userName, char * password);
+	SINT32 initDBConnection(const UINT8 * host, UINT32 tcp_port, 
+													const UINT8 * dbName, const UINT8 * userName,
+													const UINT8 * password);
 	SINT32 terminateDBConnection();
 	SINT32 createTables();
 	SINT32 dropTables();
-	SINT32 storeCostConfirmation(UINT64 accountNumber, UINT64 bytes, char * xmlCC);
+	SINT32 storeCostConfirmation(UINT64 accountNumber, UINT64 bytes, UINT8 * xmlCC);
 //	SINT32 storeCostConfirmation(UINT64 accountNumber, char *buf, UINT32 *len);
-	SINT32 getCostConfirmation(UINT64 accountNumber, char *buf, UINT32 *len);
+	SINT32 getCostConfirmation(UINT64 accountNumber, UINT8 *buf, UINT32 *len);
 
 private:
 	/** connection to postgreSQL database */

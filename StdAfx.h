@@ -51,7 +51,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //	#define DELAY_CHANNEL_SEND_INTERVALL 100 //Minimum time between two delayed packets (in ms)
 #endif
 //#define LOG_CRIME
-//#define PAYMENT //to enable payment support
+#define PAYMENT //to enable payment support
 //#define NO_PARKING //to disable control flow
 //#define NO_LOOPACCEPTUSER //to disable user accept thread for First Mix
 
@@ -242,6 +242,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define E_FILE_OPEN -500 //Error in opening a file
 #define E_FILE_READ -501 //Error in opening a file
 #define E_XML_PARSE -600 //Error in parsing XML
+#define E_NOT_CONNECTED -700 //Something is not connected that should be 
+														// (like a TCP/IP connection or a database connection)
+#define E_NOT_FOUND -701 //Something was not found
 
 #include <assert.h>
 
@@ -315,6 +318,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include <mysql.h>
 #endif
 
+//For Payment
+#ifdef PAYMENT
+#include <libpq-fe.h>
+#endif
 //Compressed Logs
 #ifdef COMPRESSED_LOGS
 #include <zlib.h>
