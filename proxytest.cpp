@@ -16,6 +16,7 @@
 #include "CASignature.hpp"
 #include "CADatagramSocket.hpp"
 #include "CARoundTripTime.hpp"
+#include "CAUtil.hpp"
 //#ifdef _WIN32
 //HANDLE hEventThreadEnde;
 //#endif
@@ -1067,6 +1068,11 @@ int main(int argc, const char* argv[])
 			WSADATA wsadata;
 			err=WSAStartup(0x0202,&wsadata);
 		#endif
+// Util test..
+BIGNUM bn;
+getcurrentTimeMillis(&bn);
+exit(0);
+
 /* //Datagram test
 	CADatagramSocket oSocket;
 	oSocket.bind(5000);

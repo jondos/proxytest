@@ -25,7 +25,6 @@ THREAD_RETURN RoundTripTimeLoop(void *p)
 		memcpy(localPortAndIP+4,&tmpPort,2);
 		CASocketAddr to;
 		to.sin_family=AF_INET;
-		struct _timeb timebuffer;
 		BIGNUM* bnTmp=BN_new();
 		BIGNUM* bnTmp2=BN_new();
 		memset(buff,0,4);
@@ -74,6 +73,7 @@ THREAD_RETURN RoundTripTimeLoop(void *p)
 		BN_free(bnTmp);
 		BN_free(bnTmp2);
 		delete buff;
+		THREAD_RETURN_SUCCESS;
 	}
 
 SINT32 CARoundTripTime::start()

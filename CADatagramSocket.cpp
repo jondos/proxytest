@@ -85,14 +85,13 @@ SINT32 CADatagramSocket::receive(UINT8* buff,UINT32 len,LPCASOCKETADDR from)
 		int ret;	
 		if(from!=NULL)
 			{
-				int fromlen=sizeof(*from);
+				socklen_t fromlen=sizeof(*from);
 				ret=::recvfrom(m_Socket,(char*)buff,len,MSG_NOSIGNAL,(LPSOCKADDR)from,&fromlen);
 			}
 		else
 			{
 				ret=::recv(m_Socket,(char*)buff,len,MSG_NOSIGNAL);
 			}
-		int err=WSAGetLastError();
 		return ret;	    	    
 	}
 
