@@ -13,6 +13,7 @@ CAMuxSocket::CAMuxSocket()
 int CAMuxSocket::accept(unsigned short port)
 	{
 		CASocket oSocket;
+		oSocket.setReuseAddr(true);
 		if(oSocket.listen(port)==SOCKET_ERROR)
 			return SOCKET_ERROR;
 		if(oSocket.accept(m_Socket)==SOCKET_ERROR)
@@ -79,8 +80,6 @@ int CAMuxSocket::receive(HCHANNEL* channel_id,char* buff,unsigned short bufflen)
 				#ifdef _DEBUG
 					CAMsg::printMsg(LOG_DEBUG,"MuxSocket-Receive - ungültiges Packet!\n");
 					CAMsg::printMsg(LOG_DEBUG,"Data-Len %i\n",MuxPacket.len);
-					if(MuxPacket.len==SOCKET_ERROR)
-						CAMsg::printMsg(LOG_DEBUG,"SOCKET-ERROR: %i\n",WSAGetLastError());
 				#endif
 				return SOCKET_ERROR;
 			}
