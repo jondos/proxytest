@@ -251,7 +251,10 @@ SINT32 CAMiddleMix::init()
 	{		
 		CAMsg::printMsg(LOG_INFO,"Creating Key...\n");
 		if(mRSA.generateKeyPair(1024)!=E_SUCCESS)
-			return E_UNKNOWN;
+			{
+				CAMsg::printMsg(LOG_CRIT,"Init: Error generating Key-Pair...\n");
+				return E_UNKNOWN;		
+			}
 		
 		UINT8 strTarget[255];
 		options.getTargetHost(strTarget,255);
