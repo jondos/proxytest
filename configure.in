@@ -48,6 +48,7 @@ case "$host" in
         ;;
 *-*-freebsd*)
 	DEFAULTLIBS="$LIBS -liconv"
+	;;
 *)
 	;;
 esac
