@@ -40,7 +40,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 				/**Returns the type (family) of the socket this address is for (always AF_LOCAL)
 					* @return AF_LOCAL
 					*/
-				int getType() const
+				SINT32 getType() const
 					{
 						return AF_LOCAL;
 					}

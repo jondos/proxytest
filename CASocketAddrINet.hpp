@@ -35,7 +35,7 @@ class CASocketAddrINet:private sockaddr_in,public CASocketAddr
 		public:
 			static SINT32 init(){m_pcsGet=new CAMutex();return E_SUCCESS;}
 			//static SINT32 destroy();
-			int getType()const
+			SINT32 getType()const
 				{
 					return AF_INET;
 				}
