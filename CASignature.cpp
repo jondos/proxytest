@@ -239,7 +239,8 @@ SINT32 CASignature::getSignatureSize()
 	* @param out destination byte array which on return contains the XML Document including the XML Signature
 	* @param outlen size of destination byte array, on return contains the len of the signed XML document
 	* @param pIncludeCerts points to a CACertStore, which holds CACertificates, 
-	*					which should be included in the XML Signature for easy verification 
+	*					which should be included in the XML Signature for easy verification; if NULL 
+	*					no Certs will be included
 	*	@retval E_SUCCESS, if the Signature could be successful created
 	* @retval E_SPACE, if the destination byte array is to small for the signed XML Document
 	* @retval E_UNKNOWN, otherwise
@@ -265,7 +266,8 @@ SINT32 CASignature::signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen,CAC
 	* If ther is already a Signature is is removed first.
 	* @param node Node which should be signed 
 	* @param pIncludeCerts points to a CACertStore, which holds CACertificates, 
-	*					which should be included in the XML Signature for easy verification 
+	*					which should be included in the XML Signature for easy verification;
+	*					if null no certificates will be included
 	*	@retval E_SUCCESS, if the Signature could be successful created
 	* @retval E_UNKNOWN, otherwise
 */

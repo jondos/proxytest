@@ -173,12 +173,16 @@ THREAD_RETURN CATempIPBlockList::cleanupThreadMainLoop(void *param)
 					// entry can be removed
 					if(previous==NULL) {
 						instance->m_hashTable[i] = entry->next;
+						previous=entry->next;
+						delete entry; 
+						entry=previous;
+						previous=NULL;
 					}
 					else {
 						previous->next = entry->next;
+						delete entry;
+						entry = previous->next;
 					}
-					delete entry;
-					entry = previous->next;
 				}
 				else {
 					// entry is still valid
@@ -188,6 +192,7 @@ THREAD_RETURN CATempIPBlockList::cleanupThreadMainLoop(void *param)
 			}
 		}
 		instance->m_Mutex.unlock();
+
 		// let the thread sleep for 10 minutes
 		sSleep(CLEANUP_THREAD_SLEEP_INTERVAL);
 	}

@@ -41,10 +41,11 @@ static THREAD_RETURN InfoLoop(void *p)
 	{
 		CAInfoService* pInfoService=(CAInfoService*)p;
 		int helocount=0;
-
+		bool bIsFirst=true; //send our own certifcate only the first time
 		while(pInfoService->getRun())
 			{
-				pInfoService->sendStatus();
+				if(pInfoService->sendStatus(bIsFirst)==E_SUCCESS)
+					bIsFirst=false;
 				if(helocount==0)
 					{
 						pInfoService->sendMixHelo();
@@ -134,8 +135,10 @@ SINT32 CAInfoService::stop()
 	}
 
 /** POSTs mix status to the InfoService. [only first mix does this at the moment]
+	* @retval E_UNKNOWN if something goes wrong
+	* @retval E_SUCCESS otherwise
 	*/
-SINT32 CAInfoService::sendStatus()
+SINT32 CAInfoService::sendStatus(bool bIncludeCerts)
 	{
 		if(!options.isFirstMix())
 			return E_SUCCESS;
@@ -148,57 +151,65 @@ SINT32 CAInfoService::sendStatus()
 		if(options.getInfoServerHost(hostname,255)!=E_SUCCESS)
 			return E_UNKNOWN;
 		oAddr.setAddr(hostname,options.getInfoServerPort());
-		if(oSocket.connect(oAddr)==E_SUCCESS)
+		if(oSocket.connect(oAddr)!=E_SUCCESS)
+			return E_UNKNOWN;
+		UINT8 strMixId[255];
+		options.getMixId(strMixId,255);
+		
+		tmpUser=tmpTraffic=tmpRisk=-1;
+		set64(tmpPackets,(UINT32)-1);
+		getLevel(&tmpUser,&tmpRisk,&tmpTraffic);
+		getMixedPackets(tmpPackets);
+		UINT32 avgTraffic=div64(tmpPackets,m_minuts);
+		m_minuts++;
+		UINT32 diffTraffic=diff64(tmpPackets,m_lastMixedPackets);
+		if(avgTraffic==0)
 			{
-				UINT8 strMixId[255];
-				options.getMixId(strMixId,255);
-				
-				tmpUser=tmpTraffic=tmpRisk=-1;
-				set64(tmpPackets,(UINT32)-1);
-				getLevel(&tmpUser,&tmpRisk,&tmpTraffic);
-				getMixedPackets(tmpPackets);
-				UINT32 avgTraffic=div64(tmpPackets,m_minuts);
-				m_minuts++;
-				UINT32 diffTraffic=diff64(tmpPackets,m_lastMixedPackets);
-				if(avgTraffic==0)
-					{
-						if(diffTraffic==0)
-							tmpTraffic=0;
-						else
-							tmpTraffic=100;
-					}
+				if(diffTraffic==0)
+					tmpTraffic=0;
 				else
-					{
-						double dTmp=(double)diffTraffic/(double)avgTraffic;
-						tmpTraffic=min(SINT32(50.*dTmp),100);
-					}
-				set64(m_lastMixedPackets,tmpPackets);
+					tmpTraffic=100;
+			}
+		else
+			{
+				double dTmp=(double)diffTraffic/(double)avgTraffic;
+				tmpTraffic=min(SINT32(50.*dTmp),100);
+			}
+		set64(m_lastMixedPackets,tmpPackets);
 
 //let the attributes in alphabetical order..
 #define XML_MIX_CASCADE_STATUS "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\
 <MixCascadeStatus LastUpdate=\"%s\" currentRisk=\"%i\" id=\"%s\" mixedPackets=\"%s\" nrOfActiveUsers=\"%i\" trafficSituation=\"%i\"\
 ></MixCascadeStatus>"
 				
-				UINT32 buffLen=4096;
-				UINT8* buff=new UINT8[buffLen];
-				UINT8 tmpBuff[1024];
-				UINT8 buffMixedPackets[50];
-				print64(buffMixedPackets,tmpPackets);
-				UINT64 currentMillis;
-				UINT8 tmpStrCurrentMillis[50];
-				if(getcurrentTimeMillis(currentMillis)==E_SUCCESS)
-					print64(tmpStrCurrentMillis,currentMillis);
-				else
-					tmpStrCurrentMillis[0]=0;
-				sprintf((char*)tmpBuff,XML_MIX_CASCADE_STATUS,tmpStrCurrentMillis,tmpRisk,strMixId,buffMixedPackets,tmpUser,tmpTraffic);
-				m_pSignature->signXML(tmpBuff,strlen((char*)tmpBuff),buff,&buffLen,m_pcertstoreOwnCerts);
-				sprintf((char*)buffHeader,"POST /feedback HTTP/1.0\r\nContent-Length: %u\r\n\r\n",buffLen);
-				oSocket.send(buffHeader,strlen((char*)buffHeader));
-				oSocket.send(buff,buffLen);
+		UINT32 buffLen=4096;
+		UINT8* buff=new UINT8[buffLen];
+		UINT8 tmpBuff[1024];
+		UINT8 buffMixedPackets[50];
+		print64(buffMixedPackets,tmpPackets);
+		UINT64 currentMillis;
+		UINT8 tmpStrCurrentMillis[50];
+		if(getcurrentTimeMillis(currentMillis)==E_SUCCESS)
+			print64(tmpStrCurrentMillis,currentMillis);
+		else
+			tmpStrCurrentMillis[0]=0;
+		sprintf((char*)tmpBuff,XML_MIX_CASCADE_STATUS,tmpStrCurrentMillis,tmpRisk,strMixId,buffMixedPackets,tmpUser,tmpTraffic);
+		CACertStore* ptmpCertStore=m_pcertstoreOwnCerts;
+		if(!bIncludeCerts)
+			ptmpCertStore=NULL;
+		if(m_pSignature->signXML(tmpBuff,strlen((char*)tmpBuff),buff,&buffLen,ptmpCertStore)!=E_SUCCESS)
+			{
 				delete[] buff;
+				return E_UNKNOWN;
 			}
+		sprintf((char*)buffHeader,"POST /feedback HTTP/1.0\r\nContent-Length: %u\r\n\r\n",buffLen);
+		oSocket.send(buffHeader,strlen((char*)buffHeader));
+		SINT32 ret=oSocket.sendFully(buff,buffLen);
+		delete[] buff;
 		oSocket.close();	
-		return E_SUCCESS;
+		if(ret==E_SUCCESS)
+			return E_SUCCESS;
+		return E_UNKNOWN;
 	}
 
 /** POSTs the HELO message for a mix to the InfoService.

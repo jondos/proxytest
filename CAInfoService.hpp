@@ -39,7 +39,7 @@ class CAInfoService
 			~CAInfoService();
 			SINT32 sendMixHelo();
 			SINT32 sendCascadeHelo();
-			SINT32 sendStatus();
+			SINT32 sendStatus(bool bIncludeCerts);
 			SINT32 start();
 			SINT32 stop();
 			SINT32 getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic);
