@@ -168,7 +168,7 @@ inline void print64(UINT8* buff,UINT64 num)
 					buff[1]=0;
 					return;
 				}
-			UINT64 mask=10000000000000000000L;
+			UINT64 mask=10000000000000000000U;
 			UINT digit;
 			UINT32 index=0;
 			bool bprintZero=false;
