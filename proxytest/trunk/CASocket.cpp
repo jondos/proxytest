@@ -285,9 +285,9 @@ SINT32 CASocket::setKeepAlive(UINT32 sec)
 #ifdef HAVE_TCP_KEEPALIVE
 		int val=sec;
 		if(setKeepAlive(true)!=E_SUCCESS)
-			return E_UNKOWN;
+			return E_UNKNOWN;
 		if(setsockopt(m_Socket,IPPROTO_TCP,TCP_KEEPALIVE,(char*)&val,sizeof(val))==SOCKET_ERROR)
-			return E_UNKOWN;
+			return E_UNKNOWN;
 		return E_SUCCESS;
 #else
 		return E_UNKNOWN;
