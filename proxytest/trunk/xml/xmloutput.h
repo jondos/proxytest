@@ -28,8 +28,6 @@
 #include "xmlstream.h"
 
 #ifdef __cplusplus
-#include <vector.h>
-#include <string.h>
 
 XML_BEGIN_NAMESPACE
 
