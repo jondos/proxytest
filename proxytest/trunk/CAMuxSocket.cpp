@@ -240,6 +240,20 @@ SINT32 CAMuxSocket::receive(MUXPACKET* pPacket)
 		pPacket->flags=ntohs(pPacket->flags);
 		return MUXPACKET_SIZE;
 	}
+
+SINT32 CAMuxSocket::receive(MUXPACKET* pPacket,UINT32 timeout)
+	{
+		SINT32 ret=m_Socket.receiveFully((UINT8*)pPacket,MUXPACKET_SIZE,timeout);
+		if(ret==E_SUCCESS)
+			{
+				pPacket->channel=ntohl(pPacket->channel);
+				pPacket->flags=ntohs(pPacket->flags);
+				return MUXPACKET_SIZE;
+			}
+		if(ret==E_TIMEDOUT)
+			return E_TIMEDOUT;
+		return SOCKET_ERROR;
+	}
 #endif
 
 #ifndef PROT2

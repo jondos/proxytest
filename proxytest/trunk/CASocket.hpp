@@ -49,6 +49,7 @@ class CASocket
 			int available();
 			int receive(UINT8* buff,UINT32 len);
 			SINT32 receiveFully(UINT8* buff,UINT32 len);
+			SINT32 receiveFully(UINT8* buff,UINT32 len,SINT32 timeout);
 			operator SOCKET(){return m_Socket;}
 			int getLocalPort();
 			SINT32 setReuseAddr(bool b);

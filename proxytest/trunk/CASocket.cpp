@@ -259,6 +259,30 @@ SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len)
 	  return E_SUCCESS;	    	    
 	}
 
+SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len,SINT32 timeout)
+	{
+		SINT32 ret;
+		ret=::recv(m_Socket,(char*)buff,len,MSG_PEEK|MSG_DONTWAIT);
+		if(ret<0)
+			return SOCKET_ERROR;
+		if(ret!=len)
+			{
+				usleep(timeout);
+				ret=::recv(m_Socket,(char*)buff,len,MSG_PEEK|MSG_DONTWAIT);
+				if(ret<0)
+					return SOCKET_ERROR;
+				if(ret!=len)
+					return E_TIMEDOUT;
+			}
+		ret=receive(buff,len);
+		if(ret<=0||ret!=len)
+			{
+				CAMsg::printMsg(LOG_DEBUG,"ReceiveFully receive error ret=%i\n",ret);
+		    return E_UNKNOWN;
+			}
+	  return E_SUCCESS;	    	    
+	}
+
 int CASocket::getLocalPort()
 	{
 		if(localPort==-1)

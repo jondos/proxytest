@@ -109,6 +109,7 @@ class CAMuxSocket
 			int close();
 			int send(MUXPACKET *pPacket);
 			SINT32 receive(MUXPACKET *pPacket);
+			SINT32 receive(MUXPACKET *pPacket,UINT32 timeout);
 			int close(HCHANNEL channel_id);
 			operator CASocket*(){return &m_Socket;}
 			operator SOCKET(){//if(!bIsTunneld)
