@@ -372,7 +372,7 @@ SINT32 setDOMElementAttribute(DOM_Node& elem,const char* attrName,int value)
 		return E_SUCCESS;
 	}
 
-SINT32 getDOMElementAttribute(const DOM_Element& elem,const char* attrName,UINT8* value,UINT32* len);
+SINT32 getDOMElementAttribute(const DOM_Element& elem,const char* attrName,UINT8* value,UINT32* len)
 	{
 		if(elem==NULL||attrName==NULL||value==NULL||len==NULL)
 			return E_UNKNOWN;

@@ -829,7 +829,9 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 				delete pNewUser;
 				return E_UNKNOWN;
 			}
+#if defined(PAYMENT)||(FIRST_MIX_SYMMETRIC)
 		fmHashTableEntry* pHashEntry=m_pChannelList->get(pNewUser);
+#endif
 #ifdef PAYMENT
 		// set AI encryption keys
 		m_pAccountingInstance->setJapKeys(pHashEntry, oMixPacket.data+41, oMixPacket.data+57); 
