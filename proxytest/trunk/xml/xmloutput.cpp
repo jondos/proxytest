@@ -26,7 +26,7 @@
 #include "../StdAfx.h"
 #include "xmloutput.h"
 //#include <stdio.h>
-//3~/#include <assert.h>
+//#include <assert.h>
 
 XML_BEGIN_NAMESPACE
 
