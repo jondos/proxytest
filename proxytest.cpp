@@ -205,10 +205,10 @@ THREAD_RETURN lpIO(void *v)
 														//Has to bee optimized!!!!
 														unsigned char buff[DATA_SIZE];
 														int size=DATA_SIZE-16;
+														tmpCon->pCipher->generateEncryptionKey(); //generate Key
 														for(int c=0;c<chainlen;c++)
 															{
-																memset(buff,0,KEY_SIZE); // generate key...
-																tmpCon->pCipher->setEncryptionKey(buff);
+																tmpCon->pCipher->getEncryptionKey(buff); // get key...
 																memcpy(buff+KEY_SIZE,oMuxPacket.data,size);
 																lpIOPair->arRSA[c].encrypt(buff,buff);
 																tmpCon->pCipher->encrypt(buff+RSA_SIZE,DATA_SIZE-RSA_SIZE);
