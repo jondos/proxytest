@@ -50,6 +50,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_pNextMixCertificate=NULL;
 		bCompressedLogs=false;
   }
+
 CACmdLnOptions::~CACmdLnOptions()
 	{
 		clean();
@@ -415,36 +416,42 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 			//Try to load SignKey
 			if(bXmlKey)
 				{
-					strcpy((char*)tmpFileName,(char*)tmpCertDir);
-					strcat((char*)tmpFileName,"/privkey.xml");
-					buff=readFile(tmpFileName,&size);
-					if(buff!=NULL)
+					if(m_pSignKey==NULL)
 						{
-							m_pSignKey=new CASignature();
-							m_pSignKey->setSignKey(buff,size,SIGKEY_XML);
+							strcpy((char*)tmpFileName,(char*)tmpCertDir);
+							strcat((char*)tmpFileName,"/privkey.xml");
+							buff=readFile(tmpFileName,&size);
+							if(buff!=NULL)
+								{
+									m_pSignKey=new CASignature();
+									m_pSignKey->setSignKey(buff,size,SIGKEY_XML);
+								}
 						}
 				}
 			else
 				{
-					strcpy((char*)tmpFileName,(char*)tmpCertDir);
-					strcat((char*)tmpFileName,"/own.pfx");
-					UINT8* buff=readFile(tmpFileName,&size);
-					if(buff!=NULL)
+					if(m_pSignKey==NULL||m_pOwnCertificate==NULL)
 						{
-							m_pSignKey=new CASignature();
-							UINT8 passwd[500];
-							passwd[0]=0;
-							if(m_pSignKey->setSignKey(buff,size,SIGKEY_PKCS12)!=E_SUCCESS)
-								{//Maybe not an empty passwd
-									printf("I need a passwd for the SignKey: ");
-									scanf("%s",(char*)passwd); //This is a typicall Buffer Overflow :-)
-									if(m_pSignKey->setSignKey(buff,size,SIGKEY_PKCS12,(char*)passwd)!=E_SUCCESS)
-										{
-											delete m_pSignKey;
-											m_pSignKey=NULL;
+							strcpy((char*)tmpFileName,(char*)tmpCertDir);
+							strcat((char*)tmpFileName,"/own.pfx");
+							UINT8* buff=readFile(tmpFileName,&size);
+							if(buff!=NULL)
+								{
+									m_pSignKey=new CASignature();
+									UINT8 passwd[500];
+									passwd[0]=0;
+									if(m_pSignKey->setSignKey(buff,size,SIGKEY_PKCS12)!=E_SUCCESS)
+										{//Maybe not an empty passwd
+											printf("I need a passwd for the SignKey: ");
+											scanf("%s",(char*)passwd); //This is a typicall Buffer Overflow :-)
+											if(m_pSignKey->setSignKey(buff,size,SIGKEY_PKCS12,(char*)passwd)!=E_SUCCESS)
+												{
+													delete m_pSignKey;
+													m_pSignKey=NULL;
+												}
 										}
+									m_pOwnCertificate=CACertificate::decode(buff,size,CERT_PKCS12,(char*)passwd);
 								}
-							m_pOwnCertificate=CACertificate::decode(buff,size,CERT_PKCS12,(char*)passwd);
 						}
 				}
 			delete buff;
@@ -669,19 +676,55 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		if(docConfig==NULL)
 			return E_UNKNOWN;
 		DOM_Element elemRoot=docConfig.getDocumentElement();
-		
+		DOM_Element elemGeneral;
+		getDOMChildByName(elemRoot,(UINT8*)"General",elemGeneral,false);
+
 		//get MixID
-		DOM_Element elemMixID;
-		getDOMChildByName(elemRoot,(UINT8*)"MixID",elemMixID,false);
-		if(elemMixID==NULL)
-			return E_UNKNOWN;
 		UINT8 tmpBuff[255];
 		UINT32 tmpLen=255;
+		DOM_Element elemMixID;
+		getDOMChildByName(elemGeneral,(UINT8*)"MixID",elemMixID,false);
+		if(elemMixID==NULL)
+			return E_UNKNOWN;
 		getDOMElementValue(elemMixID,tmpBuff,&tmpLen);
 		strtrim(tmpBuff);
 		m_strMixID=new char[strlen((char*)tmpBuff)+1];
 		strcpy(m_strMixID,(char*) tmpBuff);
 			
+		//getCertificates if given...
+		DOM_Element elemCertificates;
+		getDOMChildByName(elemRoot,(UINT8*)"Certificates",elemCertificates,false);
+		//Own Certiticate first
+		DOM_Element elemOwnCert;
+		getDOMChildByName(elemCertificates,(UINT8*)"OwnCertificate",elemOwnCert,false);
+		if(elemOwnCert!=NULL)
+			{
+				m_pSignKey=new CASignature();
+				UINT8 passwd[500];
+				passwd[0]=0;
+				if(m_pSignKey->setSignKey(elemOwnCert.getFirstChild(),SIGKEY_PKCS12)!=E_SUCCESS)
+					{//Maybe not an empty passwd
+						printf("I need a passwd for the SignKey: ");
+						scanf("%s",(char*)passwd); //This is a typicall Buffer Overflow :-)
+						if(m_pSignKey->setSignKey(elemOwnCert.getFirstChild(),SIGKEY_PKCS12,(char*)passwd)!=E_SUCCESS)
+							{
+								delete m_pSignKey;
+								m_pSignKey=NULL;
+							}
+					}
+				m_pOwnCertificate=CACertificate::decode(elemOwnCert.getFirstChild(),CERT_PKCS12,(char*)passwd);
+			}
+		//nextMixCertificate if given
+		DOM_Element elemNextCert;
+		getDOMChildByName(elemCertificates,(UINT8*)"NextMixCertificate",elemNextCert,false);
+		if(elemNextCert!=NULL)
+			m_pNextMixCertificate=CACertificate::decode(elemNextCert.getFirstChild(),CERT_X509CERTIFICATE);
+		//prevMixCertificate if given
+		DOM_Element elemPrevCert;
+		getDOMChildByName(elemCertificates,(UINT8*)"PrevMixCertificate",elemPrevCert,false);
+		if(elemPrevCert!=NULL)
+			m_pNextMixCertificate=CACertificate::decode(elemPrevCert.getFirstChild(),CERT_X509CERTIFICATE);
+
 		//construct a XML-String, which describes the Mix (send via Infoservice.Helo())
 		DOM_Document docMixXml=DOM_Document::createDocument();
 		DOM_Element elemMix=docMixXml.createElement("Mix");

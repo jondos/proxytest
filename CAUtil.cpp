@@ -285,6 +285,8 @@ SINT32 setDOMElementAttribute(DOM_Element& elem,char* attr,int value)
 
 SINT32 getDOMElementAttribute(DOM_Element& elem,char* attr,int* value)
 	{
+		if(elem==NULL||attr==NULL||value==NULL)
+			return E_UNKNOWN;
 		char* tmpStr=elem.getAttribute(attr).transcode();
 		*value=atol(tmpStr);
 		delete tmpStr;

@@ -308,7 +308,7 @@ SINT32 CAASymCipher::setPublicKeyAsXML(UINT8* key,UINT32 len)
 		return setPublicKeyAsDOMNode(root);
 	}		
 
-//Bugy!! Cahnges node!!!		
+//Bugy!! Changes node!!!		
 SINT32 CAASymCipher::setPublicKeyAsDOMNode(DOM_Node& node)
 	{	
 		DOM_Node root=node;

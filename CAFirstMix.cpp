@@ -1013,8 +1013,11 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		oParser.parse(oInput);
 		DOM_Document doc=oParser.getDocument();
 		DOM_Element elemMixes=doc.getDocumentElement();
+		if(elemMixes==NULL)
+			return E_UNKNOWN;
 		int count=0;
-		getDOMElementAttribute(elemMixes,"count",&count);
+		if(getDOMElementAttribute(elemMixes,"count",&count)!=E_SUCCESS)
+			return E_UNKNOWN;
 		
 		DOM_Node child=elemMixes.getLastChild();
 		
