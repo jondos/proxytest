@@ -69,14 +69,6 @@ class CAMiddleMixChannelList
 			SINT32 add(HCHANNEL channelIn,CASymCipher* pCipher,HCHANNEL* channelOut);
 			
 			SINT32 getInToOut(HCHANNEL channelIn, HCHANNEL* channelOut,CASymCipher** ppCipher);
-			SINT32 getOutToIn(HCHANNEL* channelIn, HCHANNEL channelOut,CASymCipher** ppCipher)
-				{
-					m_Mutex.lock();
-					SINT32 ret=getOutToIn_intern_without_lock(channelIn,channelOut,ppCipher);
-					m_Mutex.unlock();
-					return ret;
-				}
-
 			SINT32 remove(HCHANNEL channelIn);
 		
 		private:
@@ -100,7 +92,15 @@ class CAMiddleMixChannelList
 						}
 					return E_UNKNOWN;
 				}
-		
+		public:
+			SINT32 getOutToIn(HCHANNEL* channelIn, HCHANNEL channelOut,CASymCipher** ppCipher)
+				{
+					m_Mutex.lock();
+					SINT32 ret=getOutToIn_intern_without_lock(channelIn,channelOut,ppCipher);
+					m_Mutex.unlock();
+					return ret;
+				}
+
 		private:
 			LP_mmHashTableEntry* m_pHashTableIn;
 			LP_mmHashTableEntry* m_pHashTableOut;
