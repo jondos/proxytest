@@ -39,25 +39,20 @@
   <property category="build.platform" name="win32.gnuc++.enabled" value="0"/>
   <property category="build.platform" name="win32.mswin32.enabled" value="0"/>
   <property category="build.platform" name="win32.win32b.enabled" value="1"/>
-  <property category="cbproject" name="lastnodeid" value="270"/>
+  <property category="cbproject" name="lastnodeid" value="284"/>
   <property category="cbproject" name="version" value="X.1.0"/>
   <property category="classbrowser" name="GroupByVisibility" value="1"/>
   <property category="classbrowser" name="SeparateByKind" value="1"/>
   <property category="classbrowser" name="SortAlphabetically" value="1"/>
   <property category="classbrowser" name="enable" value="1"/>
-  <property category="cppFormatting" name="cStyleComment.formatPureMembers" value="1"/>
-  <property category="cppFormatting" name="indent-label" value="normal"/>
-  <property category="cppFormatting" name="keep-array-initialization" value="1"/>
-  <property category="cppFormatting" name="keep-end-of-lines" value="1"/>
-  <property category="cppFormatting" name="label-on-next-line" value="0"/>
-  <property category="cppFormatting" name="number-empty-lines-before-class" value="1"/>
-  <property category="cppFormatting" name="preproc-position" value="atLineStart"/>
-  <property category="cppFormatting" name="right_margin" value="110"/>
+  <property category="editor.general" name="line_ending.style" value="3"/>
   <property category="generalFormatting" name="blockIndent" value="4"/>
+  <property category="generalFormatting" name="lineEndingStyle" value="3"/>
   <property category="generalFormatting" name="tabSize" value="4"/>
   <property category="generalFormatting" name="useTabChar" value="1"/>
   <property category="linux.Debug_Build.gnuc++.g++compile" name="option.D_MACRO_VALUE.arg.1" value="HAVE_CONFIG_H"/>
   <property category="linux.Debug_Build.gnuc++.g++compile" name="option.D_MACRO_VALUE.arg.2" value="_DEBUG"/>
+  <property category="linux.Debug_Build.gnuc++.g++compile" name="option.D_MACRO_VALUE.arg.3" value="_TESTMODE"/>
   <property category="linux.Debug_Build.gnuc++.g++compile" name="option.D_MACRO_VALUE.arg.merge" value="0"/>
   <property category="linux.Debug_Build.gnuc++.g++compile" name="option.D_MACRO_VALUE.enabled" value="1"/>
   <property category="linux.Debug_Build.gnuc++.g++compile" name="option.I.arg.1" value="/usr/include"/>
@@ -65,7 +60,8 @@
   <property category="linux.Debug_Build.gnuc++.g++compile" name="option.I.arg.3" value="."/>
   <property category="linux.Debug_Build.gnuc++.g++compile" name="option.I.arg.4" value=".."/>
   <property category="linux.Debug_Build.gnuc++.g++compile" name="option.I.arg.5" value="/usr/include/xercesc"/>
-  <property category="linux.Debug_Build.gnuc++.g++compile" name="option.I.arg.6" value="/usr/include/cppunit"/>
+  <property category="linux.Debug_Build.gnuc++.g++compile" name="option.I.arg.6" value="/usr/local/include/"/>
+  <property category="linux.Debug_Build.gnuc++.g++compile" name="option.I.arg.merge" value="0"/>
   <property category="linux.Debug_Build.gnuc++.g++compile" name="option.I.enabled" value="1"/>
   <property category="linux.Debug_Build.gnuc++.g++compile" name="option.MD.enabled" value="1"/>
   <property category="linux.Debug_Build.gnuc++.g++compile" name="option.O0.enabled" value="1"/>
@@ -108,7 +104,7 @@
   <property category="runtime.0" name="ConfigurationName" value="Debug"/>
   <property category="runtime.0" name="RunnableType" value="com.borland.cbuilder.runtime.ExecutableRunner"/>
   <property category="runtime.0" name="native.target.override" value="0"/>
-  <property category="unique" name="id" value="270"/>
+  <property category="unique" name="id" value="284"/>
   <property category="win32.Debug_Build.MinGW.dlltool_def" name="option.export-all.enabled" value="1"/>
   <property category="win32.Debug_Build.MinGW.dlltool_def" name="option.output-def.enabled" value="1"/>
   <property category="win32.Debug_Build.MinGW.dlltool_lib" name="option.dllname.enabled" value="1"/>
@@ -130,6 +126,7 @@
   <property category="win32.Debug_Build.MinGW.g++link" name="option.o.enabled" value="1"/>
   <property category="win32.Debug_Build.MinGW.windres" name="option.o.enabled" value="1"/>
   <property category="win32.Debug_Build.win32b.bcc32" name="option.D.arg.1" value="_DEBUG"/>
+  <property category="win32.Debug_Build.win32b.bcc32" name="option.D.arg.2" value="_TESTMODE"/>
   <property category="win32.Debug_Build.win32b.bcc32" name="option.D.enabled" value="1"/>
   <property category="win32.Debug_Build.win32b.bcc32" name="option.I.arg.1" value="$(BCBX)\include"/>
   <property category="win32.Debug_Build.win32b.bcc32" name="option.I.arg.2" value="$(BCBX)\..\pthreads\include"/>
@@ -504,6 +501,12 @@
     <file path="CAThread.hpp">
       <property category="unique" name="id" value="139"/>
     </file>
+    <file path="CAThreadPool.cpp">
+      <property category="unique" name="id" value="271"/>
+    </file>
+    <file path="CAThreadPool.hpp">
+      <property category="unique" name="id" value="273"/>
+    </file>
     <file path="CAUtil.cpp">
       <property category="unique" name="id" value="141"/>
     </file>
@@ -532,22 +535,22 @@
       <property category="unique" name="id" value="171"/>
     </file>
   </node>
-  <node name="tests" type="Folder">
+  <node name="test" type="Folder">
     <property category="unique" name="id" value="255"/>
-    <file path="tests/Alltests.cpp">
-      <property category="unique" name="id" value="257"/>
+    <file path="test/Alltests.cpp">
+      <property category="unique" name="id" value="275"/>
     </file>
-    <file path="tests/AllTestsCA.cpp">
-      <property category="unique" name="id" value="269"/>
+    <file path="test/AllTestsCA.cpp">
+      <property category="unique" name="id" value="277"/>
     </file>
-    <file path="tests/AllTestsCA.hpp">
-      <property category="unique" name="id" value="259"/>
+    <file path="test/AllTestsCA.hpp">
+      <property category="unique" name="id" value="279"/>
     </file>
-    <file path="tests/SampleTest.cpp">
-      <property category="unique" name="id" value="263"/>
+    <file path="test/SampleTest.cpp">
+      <property category="unique" name="id" value="281"/>
     </file>
-    <file path="tests/SampleTest.hpp">
-      <property category="unique" name="id" value="261"/>
+    <file path="test/SampleTest.hpp">
+      <property category="unique" name="id" value="283"/>
     </file>
   </node>
   <node name="tre" type="Folder">

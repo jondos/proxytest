@@ -25,8 +25,10 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
-#include "../StdAfx.h"
+
 #include "AllTestsCA.hpp"
+#include <cppunit/extensions/HelperMacros.h>
+#include <cppunit/TestFixture.h>
 /* Include your tests here. */
 #include "SampleTest.hpp"
 

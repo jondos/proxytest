@@ -26,7 +26,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 
-#include "../StdAfx.h"
+#include "StdAfx.h"
 #include "SampleTest.hpp"
 
 void SampleTest::setUp()
@@ -45,13 +45,12 @@ void SampleTest::testDoSomethingMethod()
 	for (m_One = 0; m_One < 5; m_One++); /* Simulates a method call. */
 	CPPUNIT_ASSERT_EQUAL((SINT32)5, m_One);
 
-	m_One += 18;
+	m_One += 18; /* Simulates a method call. */
 	CPPUNIT_ASSERT_EQUAL((SINT32)23, m_One);
 }
 
 void SampleTest::testDoAnything()
 {
 	m_bTwo = true; /* Simulates a method call. */
-
 	CPPUNIT_ASSERT(m_bTwo);
 }

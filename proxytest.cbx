@@ -6,7 +6,7 @@
   <property category="build.config" name="excludedefaultforzero" value="0"/>
   <property category="build.config.0" name="builddir" value="Debug"/>
   <property category="build.config.0" name="key" value="Debug_Build"/>
-  <property category="build.config.0" name="linux.builddir" value="linux/Debug_Build"/>
+  <property category="build.config.0" name="linux.builddir" value="linux/Debug_Build_Test"/>
   <property category="build.config.0" name="name" value="Debug Build"/>
   <property category="build.config.0" name="settings.MinGW" value="default;debug"/>
   <property category="build.config.0" name="settings.gnuc++" value="default;debug"/>
@@ -39,23 +39,26 @@
   <property category="build.platform" name="win32.gnuc++.enabled" value="0"/>
   <property category="build.platform" name="win32.mswin32.enabled" value="0"/>
   <property category="build.platform" name="win32.win32b.enabled" value="1"/>
-  <property category="cbproject" name="lastnodeid" value="248"/>
+  <property category="cbproject" name="lastnodeid" value="252"/>
   <property category="cbproject" name="version" value="X.1.0"/>
   <property category="classbrowser" name="GroupByVisibility" value="1"/>
   <property category="classbrowser" name="SeparateByKind" value="1"/>
   <property category="classbrowser" name="SortAlphabetically" value="1"/>
   <property category="classbrowser" name="enable" value="1"/>
+  <property category="editor.general" name="line_ending.style" value="3"/>
+  <property category="generalFormatting" name="lineEndingStyle" value="3"/>
   <property category="generalFormatting" name="tabSize" value="2"/>
   <property category="generalFormatting" name="useTabChar" value="1"/>
   <property category="linux.Debug_Build.gnuc++.g++compile" name="option.D_MACRO_VALUE.arg.1" value="HAVE_CONFIG_H"/>
   <property category="linux.Debug_Build.gnuc++.g++compile" name="option.D_MACRO_VALUE.arg.2" value="_DEBUG"/>
   <property category="linux.Debug_Build.gnuc++.g++compile" name="option.D_MACRO_VALUE.arg.merge" value="0"/>
   <property category="linux.Debug_Build.gnuc++.g++compile" name="option.D_MACRO_VALUE.enabled" value="1"/>
-  <property category="linux.Debug_Build.gnuc++.g++compile" name="option.I.arg.1" value="."/>
-  <property category="linux.Debug_Build.gnuc++.g++compile" name="option.I.arg.2" value=".."/>
-  <property category="linux.Debug_Build.gnuc++.g++compile" name="option.I.arg.3" value="/usr/include"/>
-  <property category="linux.Debug_Build.gnuc++.g++compile" name="option.I.arg.4" value="/usr/include/g++-3"/>
-  <property category="linux.Debug_Build.gnuc++.g++compile" name="option.I.arg.5" value="/usr/include/xercesc"/>
+  <property category="linux.Debug_Build.gnuc++.g++compile" name="option.I.arg.1" value="\usr\include"/>
+  <property category="linux.Debug_Build.gnuc++.g++compile" name="option.I.arg.2" value="\usr\include\g++-3"/>
+  <property category="linux.Debug_Build.gnuc++.g++compile" name="option.I.arg.3" value="."/>
+  <property category="linux.Debug_Build.gnuc++.g++compile" name="option.I.arg.4" value=".."/>
+  <property category="linux.Debug_Build.gnuc++.g++compile" name="option.I.arg.5" value="\usr\include\xercesc"/>
+  <property category="linux.Debug_Build.gnuc++.g++compile" name="option.I.arg.6" value="\usr\local\include"/>
   <property category="linux.Debug_Build.gnuc++.g++compile" name="option.I.enabled" value="1"/>
   <property category="linux.Debug_Build.gnuc++.g++compile" name="option.MD.enabled" value="1"/>
   <property category="linux.Debug_Build.gnuc++.g++compile" name="option.O0.enabled" value="1"/>
@@ -93,19 +96,24 @@
   <property category="linux.Release_Build.gnuc++.g++link" name="param.filenames.3" value="-lxerces-c"/>
   <property category="linux.gnuc++.Debug_Build" name="saved" value="1"/>
   <property category="linux.gnuc++.Release_Build" name="saved" value="1"/>
-  <property category="runtime" name="ConfigurationCount" value="1"/>
+  <property category="runtime" name="ConfigurationCount" value="2"/>
   <property category="runtime" name="DefaultConfiguration" value="-1"/>
   <property category="runtime.0" name="BuildTargetOnRun" value="com.borland.cbuilder.build.CBProjectBuilder$ProjectBuildAction;make"/>
   <property category="runtime.0" name="ConfigurationName" value="Debug"/>
   <property category="runtime.0" name="RunnableType" value="com.borland.cbuilder.runtime.ExecutableRunner"/>
   <property category="runtime.0" name="native.exec.args" value="-v"/>
   <property category="runtime.0" name="native.target.override" value="0"/>
-  <property category="runtime.1" name="BuildTargetOnRun" value="com.borland.cbuilder.build.CBProjectBuilder$ProjectBuildAction;make"/>
+  <property category="runtime.1" name="BuildTargetOnRun" value="com.borland.cbuilder.build.CBProjectBuilder$ProjectBuildAction;postcompile"/>
   <property category="runtime.1" name="ConfigurationName" value="First Mix"/>
   <property category="runtime.1" name="RunnableType" value="com.borland.cbuilder.runtime.ExecutableRunner"/>
-  <property category="runtime.1" name="native.exec.args" value="-c g:\proxytest\debug\test_mix1_conf.xml"/>
+  <property category="runtime.1" name="native.exec.args" value="-c ../../FirstMix.xml"/>
   <property category="runtime.1" name="native.target.override" value="0"/>
-  <property category="unique" name="id" value="248"/>
+  <property category="runtime.2" name="BuildTargetOnRun" value="com.borland.cbuilder.build.CBProjectBuilder$ProjectBuildAction;postcompile"/>
+  <property category="runtime.2" name="ConfigurationName" value="Last Mix"/>
+  <property category="runtime.2" name="RunnableType" value="com.borland.cbuilder.runtime.ExecutableRunner"/>
+  <property category="runtime.2" name="native.exec.args" value="-c ../../LastMix.xml"/>
+  <property category="runtime.2" name="native.target.override" value="0"/>
+  <property category="unique" name="id" value="252"/>
   <property category="win32.Debug_Build.MinGW.dlltool_def" name="option.export-all.enabled" value="1"/>
   <property category="win32.Debug_Build.MinGW.dlltool_def" name="option.output-def.enabled" value="1"/>
   <property category="win32.Debug_Build.MinGW.dlltool_lib" name="option.dllname.enabled" value="1"/>
@@ -204,7 +212,8 @@
   <property category="win32.Release_Build.win32b.bcc32" name="option.I.arg.4" value="$(BCBX)\..\xerces-c2_5_0\include\xercesc"/>
   <property category="win32.Release_Build.win32b.bcc32" name="option.I.arg.5" value="$(BCBX)\..\openssl-0.9.7c\inc32"/>
   <property category="win32.Release_Build.win32b.bcc32" name="option.I.enabled" value="1"/>
-  <property category="win32.Release_Build.win32b.bcc32" name="option.O2.enabled" value="1"/>
+  <property category="win32.Release_Build.win32b.bcc32" name="option.O2.enabled" value="0"/>
+  <property category="win32.Release_Build.win32b.bcc32" name="option.Od.enabled" value="1"/>
   <property category="win32.Release_Build.win32b.bcc32" name="option.V.enabled" value="1"/>
   <property category="win32.Release_Build.win32b.bcc32" name="option.a8.enabled" value="1"/>
   <property category="win32.Release_Build.win32b.bcc32" name="option.batchfilecompile.enabled" value="1"/>
@@ -497,6 +506,12 @@
     </file>
     <file path="CAThread.hpp">
       <property category="unique" name="id" value="139"/>
+    </file>
+    <file path="CAThreadPool.cpp">
+      <property category="unique" name="id" value="249"/>
+    </file>
+    <file path="CAThreadPool.hpp">
+      <property category="unique" name="id" value="251"/>
     </file>
     <file path="CAUtil.cpp">
       <property category="unique" name="id" value="141"/>
