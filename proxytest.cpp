@@ -780,6 +780,7 @@ int doFirstMix()
 		int ret;	
 		CASocketAddr socketAddrIn(options.getServerPort());
 		FMPair* fmIOPair=new FMPair;
+		fmIOPair->socketIn.create();
 		fmIOPair->socketIn.setReuseAddr(true);
 		if(fmIOPair->socketIn.listen(&socketAddrIn)==SOCKET_ERROR)
 		    {
