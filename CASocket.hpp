@@ -31,6 +31,7 @@ class CASocket
 			int setRecvLowWat(int r);
 			int setRecvBuff(int r);
 			int setSendBuff(int r);
+			int setKeepAlive(bool b);
 		private:
 			SOCKET m_Socket;
 			#ifdef _REENTRANT
