@@ -41,7 +41,7 @@ SINT32 CALastMix::init()
 	{
 		pRSA=new CAASymCipher();
 		pRSA->generateKeyPair(1024);
-		CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...");
+		CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...\n");
 		if(muxIn.accept(options.getServerPort())==SOCKET_ERROR)
 		    {
 					CAMsg::printMsg(LOG_CRIT," failed!\n");
@@ -58,8 +58,12 @@ SINT32 CALastMix::init()
 		(*(UINT16*)buff)=htons(messageSize);
 		buff[2]=1; //chainlen
 		pRSA->getPublicKey(buff+3,&keySize);
-		((CASocket*)muxIn)->send(buff,messageSize+2);
-		
+		if(((CASocket*)muxIn)->send(buff,messageSize+2)!=E_SUCCESS)
+		{
+		    delete buff;
+		    return E_UNKOWN;
+		}
+		delete buff;
 		UINT8 strTarget[255];
 		options.getTargetHost(strTarget,255);
 		addrSquid.setAddr((char*)strTarget,options.getTargetPort());
@@ -84,6 +88,9 @@ SINT32 CALastMix::loop()
 			{
 				if((countRead=oSocketGroup.select())==SOCKET_ERROR)
 					{
+										#ifdef _DEBUG
+										    CAMsg::printMsg(LOG_DEBUG,"Select Error\n");
+										#endif
 						sleep(1);
 						continue;
 					}
@@ -241,7 +248,7 @@ SINT32 CALastMix::loop()
 SINT32 CALastMix::init()
 	{
 		mRSA.generateKeyPair(1024);
-		CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...");
+		CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...\n");
 		if(muxIn.accept(options.getServerPort())==SOCKET_ERROR)
 		    {
 					CAMsg::printMsg(LOG_CRIT," failed!\n");

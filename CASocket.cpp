@@ -101,9 +101,11 @@ SINT32 CASocket::connect(LPCASOCKETADDR psa,UINT retry,UINT32 time)
 		sockets++;
 #endif
 		int err=0;
+		LPSOCKADDR addr=(LPSOCKADDR)psa;
+		int addr_len=sizeof(*addr);
 		for(UINT i=0;i<retry;i++)
 			{
-				if(::connect(m_Socket,(LPSOCKADDR)psa,sizeof(*psa))!=0)
+				if(::connect(m_Socket,addr,addr_len)!=0)
 					{  
 						err=GETERROR;
 						#ifdef _DEBUG
@@ -114,6 +116,10 @@ SINT32 CASocket::connect(LPCASOCKETADDR psa,UINT retry,UINT32 time)
 						#ifdef _DEBUG
 							CAMsg::printMsg(LOG_DEBUG,"Cannot connect... retrying\n");
 						#endif
+						close();
+						create();
+						
+						
 						sleep(time);
 					}
 				else
