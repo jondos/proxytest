@@ -173,7 +173,7 @@ SINT32 CAFirstMix::init()
 #ifndef _WIN32
         //we have to be a temporaly superuser...
 				int old_uid=geteuid();
-				if(seteuid(getuid())==-1)
+				if(seteuid(0)==-1) //changing to root
 					CAMsg::printMsg(LOG_CRIT,"Setuid failed!\n");
 #endif				
 				SINT32 ret=m_socketHttpsIn.listen(socketAddrIn);

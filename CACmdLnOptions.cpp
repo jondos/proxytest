@@ -34,7 +34,7 @@ CACmdLnOptions::CACmdLnOptions()
 		iTargetPort=iSOCKSPort=iServerPort=iSOCKSServerPort=iInfoServerPort=0xFFFF;
 		iTargetRTTPort=iServerRTTPort=-1;
 		strServerHost=strTargetHost=strSOCKSHost=strInfoServerHost=NULL;
-		strKeyFileName=strCascadeName=strLogDir=NULL;
+		strUser=strKeyFileName=strCascadeName=strLogDir=NULL;
 		pTargets=NULL;
 		cntTargets=0;
   }
@@ -63,6 +63,8 @@ CACmdLnOptions::~CACmdLnOptions()
 			delete strCascadeName;
 		if(strLogDir!=NULL)
 			delete strLogDir;
+		if(strUser!=NULL)
+			delete strUser;
 		if(pTargets!=NULL)
 			{
 				delete pTargets;
@@ -85,6 +87,8 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 	char* cascadename=NULL;
 	char* logdir=NULL;
 	char* serverPort=NULL;
+	char* user=NULL;
+
 	poptOption options[]=
 	 {
 		{"daemon",'d',POPT_ARG_NONE,&iDaemon,0,"start as daemon",NULL},
@@ -99,6 +103,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 		{"key",'k',POPT_ARG_STRING,&keyfile,0,"sign key file","<file>"},
 		{"name",'a',POPT_ARG_STRING,&cascadename,0,"name of the cascade","<string>"},
 		{"logdir",'l',POPT_ARG_STRING,&logdir,0,"directory where log files go to","<dir>"},
+		{"user",'u',POPT_ARG_STRING,&user,0,"effective user","<user>"},
 		POPT_AUTOHELP
 		{NULL,0,0,
 		NULL,0,NULL,NULL}
@@ -196,6 +201,12 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 					strLogDir=new char[strlen(logdir)+1];
 					strcpy(strLogDir,logdir);
 					free(logdir);	
+	    }
+	if(user!=NULL)
+	    {
+					strUser=new char[strlen(user)+1];
+					strcpy(strUser,user);
+					free(user);	
 	    }
 	if(serverPort!=NULL)
 		{
@@ -363,6 +374,18 @@ SINT32 CACmdLnOptions::getLogDir(UINT8* name,UINT32 len)
 					return E_UNKNOWN;		
 				}
 		strcpy((char*)name,strLogDir);
+		return E_SUCCESS;
+  }
+
+SINT32 CACmdLnOptions::getUser(UINT8* user,UINT32 len)
+  {
+		if(strUser==NULL)
+				return E_UNKNOWN;
+		if(len<=(UINT32)strlen(strUser))
+				{
+					return E_UNKNOWN;		
+				}
+		strcpy((char*)user,strUser);
 		return E_SUCCESS;
   }
 
