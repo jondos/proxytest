@@ -73,7 +73,7 @@ esac
 dnl Architecture dependend compiler optimisations
 MARCH=""
 AC_ARG_WITH(arch,
-	AC_HELP_STRING([--with-arch=i386|i486|i586|i686|pentium3],[Specify architecure for optimisation]),
+	AS_HELP_STRING([--with-arch=i386|i486|i586|i686|pentium3],[Specify architecure for optimisation]),
 	[
 		if test "x$withval" != "$xno" ; then
 			MARCH="-march=$withval"
@@ -94,7 +94,7 @@ OFLAGS="$OFLAGS $MARCH"
 
 dnl Static?
 AC_ARG_ENABLE(static,
-	    AC_HELP_STRING([--enable-static],[Static linking]),
+	    AS_HELP_STRING([--enable-static],[Static linking]),
 	    [CFLAGS="$CFLAGS -static"
 	     CXXFLAGS="$CXXFLAGS -static"
 	    ])
@@ -103,7 +103,7 @@ AC_ARG_ENABLE(static,
 dnl pool mix ??
 POOL=""
 AC_ARG_WITH(pool,
-	AC_HELP_STRING([--with-pool=POOLSIZE],[Specify if to build a pool mix and optionally the poolsize]),
+	AS_HELP_STRING([--with-pool=POOLSIZE],[Specify if to build a pool mix and optionally the poolsize]),
 	[
 		if test "x$withval" != "$xno" ; then
 		    POOL="-DUSE_POOL"
@@ -117,9 +117,10 @@ AC_ARG_WITH(pool,
 dnl delay channels ??
 BANDWIDTH_LIMIT=""
 AC_ARG_WITH(bandwithlimitation,
-	AC_HELP_STRING([--with-bandwidthlimitation=LIMITATION_START],
+	AS_HELP_STRING([--with-bandwidthlimitation=LIMITATION_START],
 			[Specify if to build with bandwith limitation and optionally the number of bytes which are transferred without any limitation]),
 	[
+	echo "hier"
 		if test "x$withval" != "$xno" ; then
 		    BANDWIDTH_LIMIT="-DDELAY_CHANNELS"
 		    if test "x$withval" != "$xyes" ; then	
@@ -185,7 +186,7 @@ dnl Checks for libraries.
 
 dnl Check for OpenSSL libs and includes. Adopted from OpenSSH configure.in
 AC_ARG_WITH(ssl-dir,
-	[  --with-ssl-dir=PATH     Specify path to OpenSSL installation ],
+	AS_HELP_STRING([--with-ssl-dir=PATH],[Specify path to OpenSSL installation]),
 	[
 		if test "x$withval" != "$xno" ; then
 			tryssldir=$withval
@@ -270,7 +271,8 @@ AC_LANG_PUSH(C++)
 dnl Check for XML includes.
 xmlincludedir="/usr/local/include"
 AC_ARG_WITH(xml-include,
-	[  --with-xml-include=PATH     Specify path to XERCES-C include files (without a trailing '/xercesc')],
+	AS_HELP_STRING([--with-xml-include=PATH],
+			[Specify path to XERCES-C include files (without a trailing '/xercesc')]),
 	[
 		if test "x$withval" != "$xno" ; then
 			xmlincludedir=$withval
@@ -287,7 +289,7 @@ AC_CHECK_HEADER([dom/DOM.hpp],,
 
 xmllibdir="/usr/local/lib"
 AC_ARG_WITH(xml-lib,
-	[  --with-xml-lib=PATH     Specify path to XERCES-C library files],
+	AS_HELP_STRING([--with-xml-lib=PATH],[Specify path to XERCES-C library files]),
 	[
 		if test "x$withval" != "$xno" ; then
 			xmllibdir=$withval
@@ -311,7 +313,7 @@ AC_LANG_POP(C++)
 
 
 AC_ARG_WITH(debug,
-	[  --with-debug		  Enable debug mode],
+	AS_HELP_STRING([--with-debug],[Enable debug mode]),
 	[
 		if test "x$withval" != "$xno" ; then
 			CFLAGS="$CFLAGS -g -D_DEBUG"
@@ -321,7 +323,7 @@ AC_ARG_WITH(debug,
 )
 
 AC_ARG_WITH(crime-detection,
-	[  --with-crime-detection		  Enable crime detection mode],
+	AS_HELP_STRING([--with-crime-detection],[Enable crime detection mode]),
 	[
 		if test "x$withval" != "$xno" ; then
 			CFLAGS="$CFLAGS -DLOG_CRIME"
