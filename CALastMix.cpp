@@ -479,7 +479,7 @@ LOOP_START:
 												oMuxPacket.flags=CHANNEL_DATA;
 												oMuxPacket.payload.len=htons((UINT16)ret);
 												oMuxPacket.payload.type=0;
-												tmpCon->pCipher->decryptAES(oMuxPacket.data,oMuxPacket.data,DATA_SIZE);
+												tmpCon->pCipher->decryptAES2(oMuxPacket.data,oMuxPacket.data,DATA_SIZE);
 												if(muxIn.send(&oMuxPacket)==SOCKET_ERROR)
 													{
 														CAMsg::printMsg(LOG_CRIT,"Mux Data Sending Error - Restarting!\n");

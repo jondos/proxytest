@@ -97,6 +97,7 @@ SINT32 CASymCipher::setKeyAES(UINT8* key)
 	{
 		makeKey(&keyAES,/*DIR_ENCRYPT,*/KEY_SIZE*8,(char*)key);
 		memset(iv,0,16);
+		memset(iv2,0,16);
 		return E_SUCCESS;
 	}
 
@@ -167,6 +168,58 @@ SINT32 CASymCipher::decryptAES(UINT8* in,UINT8* out,UINT32 len)
 				for(UINT32 k=0;k<len;k++)
 				 {
 					 out[i]=in[i]^iv[k];
+					 i++;
+					}
+			}
+		return E_SUCCESS;
+	}
+
+SINT32 CASymCipher::decryptAES2(UINT8* in,UINT8* out,UINT32 len)
+	{
+		UINT32 i=0;
+		while(i<len-15)
+			{
+				rijndaelEncrypt (iv2, iv2, keyAES.keySched);
+				out[i]=in[i]^iv2[0];
+				i++;
+				out[i]=in[i]^iv2[1];
+				i++;
+				out[i]=in[i]^iv2[2];
+				i++;
+				out[i]=in[i]^iv2[3];
+				i++;
+				out[i]=in[i]^iv2[4];
+				i++;
+				out[i]=in[i]^iv2[5];
+				i++;
+				out[i]=in[i]^iv2[6];
+				i++;
+				out[i]=in[i]^iv2[7];
+				i++;
+				out[i]=in[i]^iv2[8];
+				i++;
+				out[i]=in[i]^iv2[9];
+				i++;
+				out[i]=in[i]^iv2[10];
+				i++;
+				out[i]=in[i]^iv2[11];
+				i++;
+				out[i]=in[i]^iv2[12];
+				i++;
+				out[i]=in[i]^iv2[13];
+				i++;
+				out[i]=in[i]^iv2[14];
+				i++;
+				out[i]=in[i]^iv2[15];
+				i++;
+			}
+		if(i<len)
+			{
+				rijndaelEncrypt (iv2, iv2, keyAES.keySched);
+				len-=i;
+				for(UINT32 k=0;k<len;k++)
+				 {
+					 out[i]=in[i]^iv2[k];
 					 i++;
 					}
 			}
