@@ -69,7 +69,7 @@ CASignature::~CASignature()
 		DSA_free(dsa);
 	}
 
-SINT32 CASignature::setSignKey(UINT8* buff,UINT32 len,int type)
+SINT32 CASignature::setSignKey(UINT8* buff,UINT32 len,UINT32 type)
 	{
 		if(buff==NULL||len<1||type!=SIGKEY_XML)
 			return E_UNKNOWN;

@@ -383,7 +383,7 @@ SINT32 CAFirstMix::initOnce()
 			return E_UNKNOWN;
 		SINT32 len=read(handle,fileBuff,2048);
 		close(handle);
-		if(mSignature.setSignKey(fileBuff,len,SIGKEY_XML)==-1)
+		if(mSignature.setSignKey(fileBuff,len,SIGKEY_XML)!=E_SUCCESS)
 			{
 				delete fileBuff;
 				return E_UNKNOWN;
