@@ -214,6 +214,9 @@ THREAD_RETURN fmIO(void *v)
 				oSocketGroup.select();
 				if(oSocketGroup.isSignaled(fmIOPair->socketIn))
 					{
+						#ifdef _DEBUG
+							CAMsg::printMsg(LOG_DEBUG,"New Connection from Browser!\n");
+						#endif
 						CASocket* newSocket=new CASocket;
 						fmIOPair->socketIn.accept(*newSocket);
 						oSocketList.add(newSocket);
@@ -234,6 +237,9 @@ THREAD_RETURN fmIO(void *v)
 								}
 							else
 								{
+									#ifdef _DEBUG
+										CAMsg::printMsg(LOG_DEBUG,"Sending Data to Browser!\n");
+									#endif
 									CASocket* tmpSocket=oSocketList.get(channel);
 									tmpSocket->send(buff,len);
 								}
@@ -280,8 +286,10 @@ int doFirstMix()
 		char strTarget[255];
 		options.getTargetHost(strTarget,255);
 		addrNext.setAddr(strTarget,options.getTargetPort());
+		CAMsg::printMsg(LOG_INFO,"Try connectiong to next Mix...");
 		if(fmIOPair->muxOut.connect(&addrNext)!=SOCKET_ERROR)
 			{
+				CAMsg::printMsg(LOG_INFO," connected!\n");
 				fmIO(fmIOPair);
 				ret=0;
 			}
