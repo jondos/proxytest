@@ -66,7 +66,7 @@ CAFirstMixChannelList::~CAFirstMixChannelList()
 	* @retval E_UNKNOWN in case of an error
 	* @retval E_SUCCESS if successful
 	*/
-SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,CAQueue* pQueueSend)
+SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,UINT8 peerIP[4],CAQueue* pQueueSend)
 	{
 		if(pMuxSocket==NULL)
 			return E_UNKNOWN;
@@ -85,6 +85,7 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,CAQueue* pQueueSend)
 		pHashTableEntry->cNumberOfChannels=0;
 		pHashTableEntry->trafficIn=0;
 		pHashTableEntry->trafficOut=0;
+		memcpy(pHashTableEntry->peerIP,peerIP,4);
 
 		//now insert the new connection in the list of all open connections
 		if(m_listHashTableHead==NULL) //if first one
@@ -472,7 +473,8 @@ SINT32 CAFirstMixChannelList::test()
 		CAFirstMixChannelList* pList=new CAFirstMixChannelList();
 		CAMuxSocket *pMuxSocket=new CAMuxSocket();
 		((CASocket*)pMuxSocket)->create();
-		pList->add(pMuxSocket,NULL);
+		UINT8 peerIP[4];
+		pList->add(pMuxSocket,peerIP,NULL);
 #if defined(_WIN32) && defined(_DEBUG)
 		_CrtMemState s1, s2, s3;
 		_CrtMemCheckpoint( &s1 );

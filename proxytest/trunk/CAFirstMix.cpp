@@ -221,7 +221,7 @@ THREAD_RETURN loopAcceptUsers(void* param)
 
 		CASocketGroup osocketgroupAccept;
 		CAMuxSocket* pNewMuxSocket;
-		UINT8* ip=new UINT8[4];
+		UINT8* peerIP=new UINT8[4];
 		UINT32 i=0;
 //		UINT32& nUser=pFirstMix->m_nUser;
 		SINT32 countRead;
@@ -260,8 +260,8 @@ THREAD_RETURN loopAcceptUsers(void* param)
 								else
 									{
 		//Prüfen ob schon vorhanden..	
-										ret=((CASocket*)pNewMuxSocket)->getPeerIP(ip);
-										if(ret!=E_SUCCESS||pIPList->insertIP(ip)<0)
+										ret=((CASocket*)pNewMuxSocket)->getPeerIP(peerIP);
+										if(ret!=E_SUCCESS||pIPList->insertIP(peerIP)<0)
 											{
 												pNewMuxSocket->close();
 												delete pNewMuxSocket;
@@ -278,7 +278,7 @@ THREAD_RETURN loopAcceptUsers(void* param)
 												#endif
 												((CASocket*)pNewMuxSocket)->send(pKeyInfoBuff,nKeyInfoSize);
 												((CASocket*)pNewMuxSocket)->setNonBlocking(true);
-												pChannelList->add(pNewMuxSocket,new CAQueue);
+												pChannelList->add(pNewMuxSocket,peerIP,new CAQueue);
 												pFirstMix->incUsers();
 												psocketgroupUsersRead->add(*pNewMuxSocket);
 											}
@@ -288,7 +288,7 @@ THREAD_RETURN loopAcceptUsers(void* param)
 					}
 			}
 END_THREAD:
-		delete []ip;
+		delete []peerIP;
 		CAMsg::printMsg(LOG_DEBUG,"Exiting Thread AcceptUser\n");
 		THREAD_RETURN_SUCCESS;
 	}
@@ -491,7 +491,7 @@ SINT32 CAFirstMix::loop()
 
 #endif		
 		//Starting thread for Step 2
-		 UINT8 ip[4];
+		UINT8 peerIP[4];
 		UINT8 rsaBuff[RSA_SIZE];
 //		CAThread threadReadFromUsers;
 //		threadReadFromUsers.setMainLoop(loopReadFromUsers);
@@ -538,8 +538,8 @@ SINT32 CAFirstMix::loop()
 								else
 									{
 		//Prüfen ob schon vorhanden..	
-											ret=((CASocket*)pnewMuxSocket)->getPeerIP(ip);
-											if(ret!=E_SUCCESS||m_pIPList->insertIP(ip)<0)
+											ret=((CASocket*)pnewMuxSocket)->getPeerIP(peerIP);
+											if(ret!=E_SUCCESS||m_pIPList->insertIP(peerIP)<0)
 												{
 													pnewMuxSocket->close();
 													delete pnewMuxSocket;
@@ -556,7 +556,7 @@ SINT32 CAFirstMix::loop()
 													#endif
 													((CASocket*)pnewMuxSocket)->send(m_KeyInfoBuff,m_KeyInfoSize);
 													((CASocket*)pnewMuxSocket)->setNonBlocking(true);
-													m_pChannelList->add(pnewMuxSocket,new CAQueue);
+													m_pChannelList->add(pnewMuxSocket,peerIP,new CAQueue);
 													incUsers();
 													m_psocketgroupUsersRead->add(*pnewMuxSocket);
 												}
@@ -586,8 +586,7 @@ SINT32 CAFirstMix::loop()
 										ret=pMuxSocket->receive(pMixPacket,0);
 										if(ret==SOCKET_ERROR/*||pHashEntry->accessUntil<time()*/)
 											{
-												((CASocket*)pMuxSocket)->getPeerIP(ip);
-												m_pIPList->removeIP(ip);
+												m_pIPList->removeIP(pHashEntry->peerIP);
 												m_psocketgroupUsersRead->remove(*(CASocket*)pMuxSocket);
 												m_psocketgroupUsersWrite->remove(*(CASocket*)pMuxSocket);
 												fmChannelListEntry* pEntry;
