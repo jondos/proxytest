@@ -72,7 +72,7 @@ UINT8* CASocketAddrUnix::getPath()
 		if(len==0)
 			return NULL;
 		UINT8* p=new UINT8[len+1];
-		strcpy(p,sun_path);
+		strcpy((char*)p,sun_path);
 		return p;
 	}
 

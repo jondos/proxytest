@@ -67,6 +67,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 					}			
 				
 				SINT32 setPath(const char* path);
+				UINT8* getPath();
 		};
 
 	#endif
