@@ -2,7 +2,7 @@
 \setlength{\parindent}{0pt}
 
 \usepackage{url}
-
+\usepackage{hyperref}
 \begin{document}
 
 %\newenvironment{myoutput} { \begin{center}\framebox[1.05\width]\{\begin{minipage}[c]{0.8\textwidth} \small\{ \begin{verbatim} } { \end{verbatim}\} \end{minipage} \} \end{center} }
@@ -283,7 +283,7 @@ Make sure that there is a link named libxerces-c.so in the librarie directory by
 \begin{verbatim}
 $ cd $XERCESCROOT/lib
 $ ln -is libxerces-c1_7_0.so libxerces-c.so
-\end{{verbatim}
+\end{verbatim}
 
 
 The rest is the same as described in \ref{compilemix}.
@@ -956,7 +956,7 @@ Reboot your machine to finally test it all.
 \subsubsection{Red Hat}
 
 
-\verbatim|export LD_LIBRARY_PATH=/home/mix/xerces-c-src_2_3_0/lib/|
+\verb|export LD_LIBRARY_PATH=/home/mix/xerces-c-src_2_3_0/lib/|
 
 
 % ---------------------------------------------------------------------
