@@ -317,6 +317,8 @@ SINT32 getDOMElementValue(DOM_Element& elem,UINT8* value,UINT32* valuelen)
 		ASSERT(value!=NULL,"Value is null");
 		ASSERT(valuelen!=NULL,"ValueLen is null");
 		ASSERT(!elem.isNull,"Element is NULL");
+		if(elem.isNull())
+			return E_UNKNOWN;
 		DOM_Node text=elem.getFirstChild();
 		UINT32 spaceLeft=*valuelen;
 		*valuelen=0;
