@@ -111,7 +111,8 @@ SINT32 CAMiddleMix::init()
 		CAMsg::printMsg(LOG_INFO,"Received Key Info...\n");
 		
 		CASocketAddr* pAddrListen;
-		if(options.getServerHost(path,255)==E_SUCCESS) //unix domain
+		memset(path,0,255);
+		if(options.getServerHost(path,255)==E_SUCCESS&&path[0]=='/') //unix domain
 			{
 #ifdef HAVE_UNIX_DOMAIN_PROTOCOL
 				pAddrListen=new CASocketAddrUnix();
@@ -124,7 +125,7 @@ SINT32 CAMiddleMix::init()
 		else
 			{
 				pAddrListen=new CASocketAddrINet();
-				((CASocketAddrINet*)pAddrListen)->setPort(options.getServerPort());
+				((CASocketAddrINet*)pAddrListen)->setAddr(path,options.getServerPort());
 			}
 
 
