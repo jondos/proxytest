@@ -57,6 +57,7 @@ public:
     CAFirstMix() : CAMix()
 				{
 					m_nMixedPackets=0;
+					m_nUser=0;
 					m_nSocketsIn=0;
 					m_pQueueSendToMix=NULL;
 					m_pQueueReadFromMix=NULL;
