@@ -26,15 +26,15 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 	int ret;
 	
 	int iDaemon=0;
-	char target[255];
+	char* target=NULL;
 	int port=-1;
 	int mix=-1;
 	int SOCKSport=-1;
-	char socks[255];
+	char* socks=NULL;
 	poptOption options[]=
 	 {
 		{"daemon",'d',POPT_ARG_NONE,&iDaemon,0,"start as daemon",NULL},
-		{"next",'n',POPT_ARG_STRING,target,0,"next mix/http-proxy","<ip:port>"},
+		{"next",'n',POPT_ARG_STRING,&target,0,"next mix/http-proxy","<ip:port>"},
 		{"port",'p',POPT_ARG_INT,&port,0,"listening port","<portnumber>"},
 		{"mix",'m',POPT_ARG_INT,&mix,0,"local|first|middle|last mix","<0|1|2|3>"},
 		{"socksport",'s',POPT_ARG_INT,&SOCKSport,0,"listening port for socks","<portnumber>"},
