@@ -35,7 +35,10 @@ int CASocket::connect(LPSOCKETADDR psa)
 		if(m_Socket==0)
 			m_Socket=socket(AF_INET,SOCK_STREAM,0);
 		sockets++;
-		return ::connect(m_Socket,(LPSOCKADDR)psa,sizeof(*psa));
+		if(::connect(m_Socket,(LPSOCKADDR)psa,sizeof(*psa))!=0)
+		    return SOCKET_ERROR;
+		else
+		    return 0;	    
 	}
 			
 int CASocket::close()

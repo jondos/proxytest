@@ -38,6 +38,7 @@
     #define EnterCriticalSection(p) //pthread_mutex_lock(p)
     #define LeaveCriticalSection(p) //pthread_mutex_unlock(p)
     #define THREAD_RETURN void*
+    #define THREAD_RETURN_ERROR NULL
 #endif
 #include <stdio.h>
 #include <time.h>

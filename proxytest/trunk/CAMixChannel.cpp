@@ -15,12 +15,14 @@ CAMixChannel::CAMixChannel()
 	{
 		InitializeCriticalSection(&csSend);
 		InitializeCriticalSection(&csConnect);
+		InitializeCriticalSection(&csClose);
 	}
 
 CAMixChannel::~CAMixChannel()
 	{
 		DeleteCriticalSection(&csSend);
 		DeleteCriticalSection(&csConnect);
+		DeleteCriticalSection(&csClose);
 	}
 
 int CAMixChannel::connect(LPSOCKETADDR psa)
@@ -28,8 +30,14 @@ int CAMixChannel::connect(LPSOCKETADDR psa)
 		EnterCriticalSection(&csConnect);
 		int ret;
 		CASocket* pSocket=new CASocket();
-		pSocket->connect(psa);
-		ret=connections.add(pSocket);
+		if(pSocket->connect(psa)==SOCKET_ERROR)
+		    {
+			delete pSocket;
+			printf("CAMixChannel - Connection error!\n");
+			ret=SOCKET_ERROR;
+		    }
+		else
+		    ret=connections.add(pSocket);
 		LeaveCriticalSection(&csConnect);
 		return ret;
 	}
@@ -69,21 +77,35 @@ int CAMixChannel::receive(int id,char* buff,int len)
 					}
 			}*/
 		CASocket* pSocket=connections.get(id);
-		return pSocket->receive(buff,len);		
+		if(pSocket==NULL)
+		    return SOCKET_ERROR;
+		else
+		    return pSocket->receive(buff,len);		
 	}
 
 int CAMixChannel::close(int id)
 	{
+		EnterCriticalSection(&csClose);
 		CASocket* pSocket=connections.remove(id);
 		if(pSocket!=NULL)
 			delete pSocket;
+		LeaveCriticalSection(&csClose);
 		return 0;
 	}
 
 int CAMixChannel::close(int id,int mode)
 	{
+		EnterCriticalSection(&csSend);
 		CASocket* pSocket=connections.get(id);
+		int ret;
 		if(pSocket==NULL)
-			return SOCKET_ERROR;
-		return pSocket->close(mode);
+			ret=SOCKET_ERROR;
+		else
+		    {
+			ret=pSocket->close(mode);
+			if(ret==0)
+			    close(id);
+		    }
+		LeaveCriticalSection(&csClose);
+		return ret;
 	}
