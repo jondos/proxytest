@@ -73,7 +73,7 @@ VERSION = @VERSION@
 
 AUTOMAKE_OPTIONS = foreign
 sbin_PROGRAMS = proxytest
-proxytest_SOURCES = CAASymCipher.cpp 										CABase64.cpp 										CACmdLnOptions.cpp 		   							CADatagramSocket.cpp 										CAFirstMix.cpp 										CAInfoService.cpp 										CAIPList.cpp 		   							CALastMix.cpp 										CALocalProxy.cpp 										CAMiddleMix.cpp 		   							CAMix.cpp 										CAMsg.cpp 										CAMuxChannelList.cpp 		   							CAMuxSocket.cpp 										CAQueue.cpp 										CARoundTripTime.cpp 										CASignature.cpp 		   							CASocket.cpp 										CASocketAddr.cpp 										CASocketASyncSend.cpp 										CASocketGroup.cpp 		   							CASocketList.cpp 										CASymCipher.cpp 										CAUtil.cpp 										StdAfx.cpp 		   							proxytest.cpp 		   	            CAASymCipher.hpp 										CA_Base64.hpp 										CACallback.hpp 										CACmdLnOptions.hpp 										CAFirstMix.hpp 										CAInfoService.hpp 										CAIPList.hpp 										CALastMix.hpp 										CALocalProxy.hpp 										CAMiddleMix.hpp 										CAMix.hpp 										CAMsg.hpp 										CAMuxChannelList.hpp 										CAMuxSocket.hpp 										CAQueue.hpp 										CARoundTripTime.hpp 										CASignature.hpp 										CASocket.hpp 										CASocketAddr.hpp \ 
+proxytest_SOURCES = CAASymCipher.cpp 										CABase64.cpp 										CACmdLnOptions.cpp 		   							CADatagramSocket.cpp 										CAFirstMix.cpp 										CAInfoService.cpp 										CAIPList.cpp 		   							CALastMix.cpp 										CALocalProxy.cpp 										CAMiddleMix.cpp 		   							CAMix.cpp 										CAMsg.cpp 										CAMuxChannelList.cpp 		   							CAMuxSocket.cpp 										CAQueue.cpp 										CARoundTripTime.cpp 										CASignature.cpp 		   							CASocket.cpp 										CASocketAddrINet.cpp 										CASocketAddrUnix.cpp 										CASocketASyncSend.cpp 										CASocketGroup.cpp 		   							CASocketList.cpp 										CASymCipher.cpp 										CAUtil.cpp 										StdAfx.cpp 		   							proxytest.cpp 		   	            CAASymCipher.hpp 										CA_Base64.hpp 										CACallback.hpp 										CACmdLnOptions.hpp 										CAFirstMix.hpp 										CAInfoService.hpp 										CAIPList.hpp 										CALastMix.hpp 										CALocalProxy.hpp 										CAMiddleMix.hpp 										CAMix.hpp 										CAMsg.hpp 										CAMuxChannelList.hpp 										CAMuxSocket.hpp 										CAQueue.hpp 										CARoundTripTime.hpp 										CASignature.hpp 										CASocket.hpp 										CASocketAddr.hpp \ 
 
 
 proxytest_LDADD = $(top_srcdir)/xml/libxml.a 		  $(top_srcdir)/aes/libaes.a 		  $(top_srcdir)/popt/libpopt.a
@@ -97,8 +97,9 @@ proxytest_OBJECTS =  CAASymCipher.o CABase64.o CACmdLnOptions.o \
 CADatagramSocket.o CAFirstMix.o CAInfoService.o CAIPList.o CALastMix.o \
 CALocalProxy.o CAMiddleMix.o CAMix.o CAMsg.o CAMuxChannelList.o \
 CAMuxSocket.o CAQueue.o CARoundTripTime.o CASignature.o CASocket.o \
-CASocketAddr.o CASocketASyncSend.o CASocketGroup.o CASocketList.o \
-CASymCipher.o CAUtil.o StdAfx.o proxytest.o
+CASocketAddrINet.o CASocketAddrUnix.o CASocketASyncSend.o \
+CASocketGroup.o CASocketList.o CASymCipher.o CAUtil.o StdAfx.o \
+proxytest.o
 proxytest_DEPENDENCIES =  $(top_srcdir)/xml/libxml.a \
 $(top_srcdir)/aes/libaes.a $(top_srcdir)/popt/libpopt.a
 proxytest_LDFLAGS = 
@@ -125,9 +126,9 @@ DEP_FILES =  .deps/CAASymCipher.P .deps/CABase64.P \
 .deps/CALocalProxy.P .deps/CAMiddleMix.P .deps/CAMix.P .deps/CAMsg.P \
 .deps/CAMuxChannelList.P .deps/CAMuxSocket.P .deps/CAQueue.P \
 .deps/CARoundTripTime.P .deps/CASignature.P .deps/CASocket.P \
-.deps/CASocketASyncSend.P .deps/CASocketAddr.P .deps/CASocketGroup.P \
-.deps/CASocketList.P .deps/CASymCipher.P .deps/CAUtil.P .deps/StdAfx.P \
-.deps/proxytest.P
+.deps/CASocketASyncSend.P .deps/CASocketAddrINet.P \
+.deps/CASocketAddrUnix.P .deps/CASocketGroup.P .deps/CASocketList.P \
+.deps/CASymCipher.P .deps/CAUtil.P .deps/StdAfx.P .deps/proxytest.P
 SOURCES = $(proxytest_SOURCES)
 OBJECTS = $(proxytest_OBJECTS)
 
@@ -514,6 +515,8 @@ uninstall-am uninstall all-redirect all-am all installdirs-am \
 installdirs mostlyclean-generic distclean-generic clean-generic \
 maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
+										CASockerAddrINet.hpp \
+										CASocketAddrUnix.hpp \
 										CASocketASyncSend.hpp \
 										CASocketGroup.hpp \
 										CASocketList.hpp \
