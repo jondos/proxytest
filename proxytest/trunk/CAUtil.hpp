@@ -56,6 +56,7 @@ SINT32 filelength(int handle);
 #endif
 
 SINT32 setDOMElementValue(DOM_Element& elem,UINT32 value);
+SINT32 getDOMElementValue(const DOM_Element& elem, UINT64 &value);
 SINT32 getDOMElementValue(const DOM_Element& elem,UINT32* value);
 SINT32 getDOMElementValue(const DOM_Element& elem,UINT16* value);
 SINT32 setDOMElementValue(DOM_Element& elem,const UINT8* value);
@@ -258,5 +259,13 @@ void currentTimestamp(UINT8* buff,bool bInNetworkByteOrder=false);
  Checking for duplicates
 */
 bool validTimestampAndFingerprint(UINT8* fingerprint, UINT16 len, UINT8* timestamp_buff);
+
+
+SINT32 parseJdbcTimestamp(const UINT8 * strTimestamp, UINT64& secValue);
+
+/**
+ * Parses an unsigned 64bit integer
+ */
+//SINT32 parseU64(const UINT8 * str, UINT64& value)
 
 #endif
