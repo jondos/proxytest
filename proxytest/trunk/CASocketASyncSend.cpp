@@ -89,7 +89,7 @@ SINT32 CASocketASyncSend::send(CASocket* pSocket,UINT8* buff,UINT32 size)
 					{
 						if(akt->pSocket==pSocket)
 							{
-								m_Sockets->pQueue->add(buff,size);
+								akt->pQueue->add(buff,size);
 								LeaveCriticalSection(&cs);
 								return E_SUCCESS;
 							}
@@ -104,6 +104,36 @@ SINT32 CASocketASyncSend::send(CASocket* pSocket,UINT8* buff,UINT32 size)
 				m_oSocketGroup.add(*pSocket);
 				ret=E_SUCCESS;
 			}
+		LeaveCriticalSection(&cs);
+		return ret;
+	}
+
+SINT32 CASocketASyncSend::close(CASocket* pSocket)
+	{
+		EnterCriticalSection(&cs);
+		SINT32 ret;
+		_t_socket_list* akt=m_Sockets;
+		_t_socket_list* before=NULL;
+		while(akt!=NULL)
+			{
+				if(akt->pSocket==pSocket)
+					{
+						if(!akt->pQueue->isEmpty())
+							CAMsg::printMsg(LOG_INFO,"Deleting non empty send queue!\n");
+						delete akt->pQueue;
+						if(before!=NULL)
+							before->next=akt;
+						else
+							m_Sockets=akt->next;
+						m_oSocketGroup.remove(*akt->pSocket);
+						delete akt;
+						LeaveCriticalSection(&cs);
+						return E_SUCCESS;
+					}
+				before=akt;
+				akt=akt->next;
+			}
+		ret=E_SUCCESS;
 		LeaveCriticalSection(&cs);
 		return ret;
 	}
