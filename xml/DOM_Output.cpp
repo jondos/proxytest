@@ -43,13 +43,13 @@ SINT32 DOM_Output::dumpNode(DOM_Node& toWrite,bool bCanonical)
 			return E_UNKNOWN;
 		// Get the name and value out for convenience
     DOMString   nodeName = toWrite.getNodeName();
-    DOMString   nodeValue = toWrite.getNodeValue();
-    unsigned long lent = nodeValue.length();
 
     switch (toWrite.getNodeType())
 			{
         case DOM_Node::TEXT_NODE:
 					{
+						DOMString   nodeValue = toWrite.getNodeValue();
+						unsigned long lent = nodeValue.length();
             if(!bCanonical)
 							{
 								m_pFormatter->formatBuf(nodeValue.rawBuffer(),
