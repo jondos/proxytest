@@ -143,7 +143,7 @@ or back via the anonymous channel.
 The channel-id is changed in every mix. Also the content bytes changes in every mix, 
 because each mix will perform a single encryption/decryption.
 
-\subsection Inter-Mix Encryption
+\subsection docInterMixEncryption Inter-Mix Encryption
 The stream of mix-packets between to mixes is encrypted using AES-128/128 in OFB-128 mode. Exactly only the
 first part of each mix-packet is encrpyted. (see Figure 3)
 
