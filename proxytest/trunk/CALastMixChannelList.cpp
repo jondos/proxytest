@@ -92,7 +92,14 @@ CALastMixChannelList::~CALastMixChannelList()
 #endif
 #ifdef DELAY_CHANNELS
 		pNewEntry->delayBucket=DELAY_CHANNEL_TRAFFIC; //can always send some first packets
-		pNewEntry->delayBucketID=(SOCKET)pSocket;
+		for(UINT32 i=0;i<MAX_POLLFD;i++)
+			{
+				if(m_pDelayBuckets[i]==NULL)
+					{
+						pNewEntry->delayBucketID=i;
+						break;
+					}
+			}
 		m_pDelayBuckets[pNewEntry->delayBucketID]=&pNewEntry->delayBucket;
 #endif
 		if(pEntry==NULL) //First Entry for Hash in HashTable
@@ -224,8 +231,8 @@ SINT32 CALastMixChannelList::test()
 				{
 					for(UINT32 i=0;i<MAX_POLLFD;i++)
 						if(pDelayBuckets[i]!=NULL)
-							pDelayBuckets[i]+=1000;
-					msSleep(100);
+							*(pDelayBuckets[i])+=DELAY_BUCKET_GROW;
+					msSleep(DELAY_BUCKET_GROW_INTERVALL);
 				}
 			THREAD_RETURN_SUCCESS;
 		}

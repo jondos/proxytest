@@ -52,8 +52,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define HAVE_EPOLL //define if you have epoll support on your (Linux) system
 #ifdef DELAY_CHANNELS
 	#define DELAY_CHANNEL_TRAFFIC 10000 //Traffic in bytes after which (download direction) the channel is delayed
-	//Delay is at the moment constant (max . Channel-Traffic: 10 KByte/s)
-//	#define DELAY_CHANNEL_SEND_INTERVALL 100 //Minimum time between two delayed packets (in ms)
+	//Delay is at the moment constant and calculate as
+	// 1000/DELAY_BUCKET_GROW_INTERVALL*DELAY_BUCKET_GROW bytes/s
+	#define DELAY_BUCKET_GROW_INTERVALL 100 //Time in ms
+	#define DELAY_BUCKET_GROW PAYLOAD_SIZE //Grow in bytes
+	//so we have around 10 KByte/s at the moment
 #endif
 //#define LOG_CRIME
 //#define PAYMENT //to enable payment support
