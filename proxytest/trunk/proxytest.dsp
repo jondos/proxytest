@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /G6 /MD /W3 /GX /O2 /I "g:\openssl-0.9.6b\inc32" /I ".\pthread\include" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "_REENTRANT" /Yu"stdafx.h" /FD /c
+# ADD CPP /nologo /G6 /MD /W3 /GX /O2 /I "g:\openssl-0.9.6c\inc32" /I ".\pthread\include" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "_REENTRANT" /Yu"stdafx.h" /FD /c
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
 # ADD RSC /l 0x407 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -67,7 +67,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /G6 /MDd /W4 /Gm /GX /ZI /Od /I "g:\openssl-0.9.6b\inc32" /I ".\pthread\include" /I "s:\xerces-c1_6_0-win32\include" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "_DEBUG" /D "DO_TRACE" /D "_REENTRANT" /D "__MIX_TEST" /FAcs /FR /Yu"stdafx.h" /FD /GZ /c
+# ADD CPP /nologo /G6 /MDd /W4 /Gm /GX /ZI /Od /I "g:\openssl-0.9.6c\inc32" /I ".\pthread\include" /I "s:\xerces-c1_6_0-win32\include" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "_DEBUG" /D "DO_TRACE" /D "_REENTRANT" /D "__MIX_TEST" /FAcs /FR /Yu"stdafx.h" /FD /GZ /c
 # ADD BASE RSC /l 0x407 /d "_DEBUG"
 # ADD RSC /l 0x407 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -75,7 +75,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 ws2_32.lib kernel32.lib libeay32.lib gdi32.lib pthread.lib xerces-c_1D.lib /nologo /subsystem:console /map /debug /machine:I386 /pdbtype:sept /libpath:"g:\openssl-0.9.6b\out32dll.dbg" /libpath:"pthread\lib_debug" /libpath:"s:\xerces-c1_6_0-win32\lib"
+# ADD LINK32 ws2_32.lib kernel32.lib libeay32.lib gdi32.lib pthread.lib xerces-c_1D.lib /nologo /subsystem:console /map /debug /machine:I386 /pdbtype:sept /libpath:"g:\openssl-0.9.6c\out32dll.dbg" /libpath:"pthread\lib_debug" /libpath:"s:\xerces-c1_6_0-win32\lib"
 # SUBTRACT LINK32 /nodefaultlib
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
@@ -240,11 +240,23 @@ SOURCE=.\CACacheLoadBalancing.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CACertificate.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CACertStore.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\CACmdLnOptions.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=.\CAConditionVariable.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CADatabase.cpp
 # End Source File
 # Begin Source File
 
@@ -406,11 +418,23 @@ SOURCE=.\CACallback.hpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CACertificate.hpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CACertStore.hpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\CACmdLnOptions.hpp
 # End Source File
 # Begin Source File
 
 SOURCE=.\CAConditionVariable.hpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CADatabase.hpp
 # End Source File
 # Begin Source File
 

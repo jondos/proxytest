@@ -25,5 +25,36 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
-#include "StdAfx.h"
-#include "CASemaphore.hpp"
+
+#include "CAMutex.hpp"
+#include "CAThread.hpp"
+typedef struct __t_database_entry
+	{
+		__t_database_entry* next;
+		UINT8 key[14];
+	} t_databaseEntry; 
+
+typedef t_databaseEntry* LP_databaseEntry;
+
+class CADatabase
+	{
+		public:
+			CADatabase(UINT32 m_refTime);
+			~CADatabase();
+			SINT32 insert(UINT8 key[16]);
+			SINT32 start();
+			SINT32 stop();
+			static SINT32 test();
+		private:
+			friend THREAD_RETURN loopMaintenance(void *param);
+
+			SINT32 nextClock();
+			LP_databaseEntry* m_currDatabase;
+			LP_databaseEntry* m_prevDatabase;
+			LP_databaseEntry* m_nextDatabase;
+			bool m_bRun;
+			UINT32 m_refTime;
+			UINT32 m_Clock;
+			CAMutex m_oMutex;
+			CAThread m_oThread;
+	};

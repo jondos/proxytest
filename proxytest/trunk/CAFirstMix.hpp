@@ -144,7 +144,7 @@ class CAFirstMix:public CAMix
 			UINT8* m_strXmlMixCascadeInfo;
 			UINT32 m_nMixedPackets;
 			CAASymCipher* m_pRSA;
-			CASignature mSignature;
+			CASignature* m_pSignature;
 			CAMutex m_mutexUser;
 			CAMutex m_mutexMixedPackets;
 	};

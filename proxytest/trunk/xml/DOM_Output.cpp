@@ -27,11 +27,13 @@ void DOM_Output::dumpToMem(DOM_Node &node,UINT8* buff,UINT32* size)
 		out.m_pFormatTarget->dumpMem(buff,size);
 	}
 
-void DOM_Output::makeCanonical(DOM_Node &node,UINT8* buff,UINT32* size)
+SINT32 DOM_Output::makeCanonical(DOM_Node &node,UINT8* buff,UINT32* size)
 	{
 		DOM_Output out;
-		out.dumpNode(node,true);
-		out.m_pFormatTarget->dumpMem(buff,size);
+		if(	out.dumpNode(node,true)!=E_SUCCESS||
+				out.m_pFormatTarget->dumpMem(buff,size)!=E_SUCCESS)
+			return E_UNKNOWN;
+		return E_SUCCESS;
 	}
 
 XMLFormatter& operator<< (XMLFormatter& strm, const DOMString& s)
@@ -50,7 +52,7 @@ XMLFormatter& operator<< (XMLFormatter& strm, const DOMString& s)
 }
 
 
-void DOM_Output::dumpNode(DOM_Node& toWrite,bool bCanonical)
+SINT32 DOM_Output::dumpNode(DOM_Node& toWrite,bool bCanonical)
 {
     // Get the name and value out for convenience
     DOMString   nodeName = toWrite.getNodeName();
@@ -291,7 +293,10 @@ void DOM_Output::dumpNode(DOM_Node& toWrite,bool bCanonical)
         }
 
 */
+			default:
+				return E_UNKNOWN;
     }
+	return E_SUCCESS;
 }
 
 

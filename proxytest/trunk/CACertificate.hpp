@@ -25,5 +25,30 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
-#include "StdAfx.h"
-#include "CASemaphore.hpp"
+#ifndef __CACERTIFICATE__
+#define __CACERTIFICATE__
+#define CERT_DER 1
+#define CERT_XML_X509CERTIFICATE 2
+#define CERT_PKCS12 3
+class CASignature;
+class CACertificate
+	{
+		public:
+			~CACertificate(){X509_free(m_pCert);}
+			CACertificate* clone()
+				{
+					CACertificate* tmp=new CACertificate;
+					tmp->m_pCert=X509_dup(m_pCert);
+					return tmp;
+				}
+			
+			static CACertificate* decode(UINT8* buff,UINT32 bufflen,UINT32 type,char* passwd=NULL);
+			SINT32 encode(UINT8* buff,UINT32* bufflen,UINT32 type);
+			SINT32 encode(DOM_DocumentFragment& docFrag,DOM_Document& doc);
+		protected:
+			CACertificate();
+		friend class CASignature;
+		private:
+			X509* m_pCert;
+	};
+#endif

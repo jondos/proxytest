@@ -50,6 +50,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CALocalProxy.hpp"
 #include "CASymCipher.hpp"
 #include "CABase64.hpp"
+#include "CADatabase.hpp"
+#include "CACertificate.hpp"
+#include "CACertStore.hpp"
 #include "xml/DOM_Output.hpp"
 //#ifdef _WIN32
 //HANDLE hEventThreadEnde;
@@ -160,7 +163,8 @@ For Upstream and Downstream different keys are used.
 
 int main(int argc, const char* argv[])
 	{		
-			XMLPlatformUtils::Initialize();		
+			XMLPlatformUtils::Initialize();	
+			OpenSSL_add_all_algorithms();
 /*			CAASymCipher oRsa;
 			oRsa.generateKeyPair(1024);
 			UINT8 buff1[1024];
@@ -308,6 +312,55 @@ Debug(dc::malloc.on());
 			#endif
 		#endif
 
+	
+/*		UINT8 buff1[1024];
+		UINT32 len=1024;
+		oRsa.getPublicKeyAsXML(buff1,&len);
+		CASignature oSignature;
+		oSignature.generateSignKey(1024);
+		UINT8 out[2048];
+		UINT32 outlen=2048;
+		oSignature.signXML(buff1,len,out,&outlen);
+		SINT32 r=oSignature.verifyXML(out,outlen);
+		r=r;
+	*/
+	/*	int handle=open("jap.pfx",O_BINARY|O_RDONLY);
+		UINT32 size=filelength(handle);
+		UINT8* bg=new UINT8[2048];
+		read(handle,bg,size);
+		close(handle);
+		CASignature oSignature;
+		oSignature.setSignKey(bg,size,SIGKEY_PKCS12,"pass");
+		CACertificate* cert=CACertificate::decode(bg,size,CERT_PKCS12,"pass");
+		*//*
+		int handle=open("jap.cer",O_BINARY|O_RDONLY);
+		UINT32 size=filelength(handle);
+		UINT8* bg=new UINT8[2048];
+		read(handle,bg,size);
+		close(handle);
+		CACertificate* cert=CACertificate::decode(bg,size,DER);
+		CACertStore oCerts;
+		oCerts.add(cert);
+		delete cert;
+		handle=open("mix.cer",O_BINARY|O_RDONLY);
+		size=filelength(handle);
+		read(handle,bg,size);
+		close(handle);
+		cert=CACertificate::decode(bg,size,DER);
+		oCerts.add(cert);
+		CASignature oSignature;
+		oSignature.generateSignKey(1024);
+		UINT8 in[255];
+		strcpy((char*)in,"<Test><Value>1</Value></Test>");
+		UINT8 out[20480];
+		UINT32 outlen=20480;
+		oSignature.signXML(in,strlen((char*)in),out,&outlen,&oCerts);
+		handle=open("text.xml",O_CREAT|O_BINARY|O_RDWR,_S_IWRITE);
+		write(handle,"<?xml version=\"1.0\"?>",21);
+		write(handle,out,outlen);
+		close(handle);
+*/
+		//		CADatabase::test();
 		if(CAQueue::test()!=E_SUCCESS)
 			CAMsg::printMsg(LOG_CRIT,"CAQueue::test() NOT passed! Exiting\n");
 		else

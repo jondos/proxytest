@@ -41,12 +41,71 @@ CASignature::~CASignature()
 		DSA_free(m_pDSA);
 	}
 
-SINT32 CASignature::setSignKey(UINT8* buff,UINT32 len,UINT32 type)
+
+CASignature* CASignature::clone()
 	{
-		if(buff==NULL||len<1||type!=SIGKEY_XML)
+		CASignature* tmpSig=new CASignature();
+		if(m_pDSA!=NULL)
+			{
+				DSA* tmpDSA=DSAparams_dup(m_pDSA);
+				tmpDSA->priv_key=BN_dup(m_pDSA->priv_key);
+				tmpDSA->pub_key=BN_dup(m_pDSA->pub_key);
+				tmpSig->m_pDSA=tmpDSA;
+			}
+		return tmpSig;
+	}
+
+SINT32 CASignature::generateSignKey(UINT32 size)
+	{
+		if(m_pDSA!=NULL)
+			DSA_free(m_pDSA);
+		m_pDSA=NULL;
+		m_pDSA=DSA_generate_parameters(size,NULL,0,NULL,NULL,NULL,NULL);
+		if(m_pDSA==NULL)
 			return E_UNKNOWN;
-		if(type==SIGKEY_XML)
-			return parseSignKeyXML(buff,len);
+		if(DSA_generate_key(m_pDSA)!=1)
+			{
+				DSA_free(m_pDSA);
+				m_pDSA=NULL;
+				return E_UNKNOWN;
+			}
+		return E_SUCCESS;
+	}
+
+SINT32 CASignature::setSignKey(UINT8* buff,UINT32 len,UINT32 type,char* passwd)
+	{
+		if(buff==NULL||len<1)
+			return E_UNKNOWN;
+		switch (type)
+			{
+				case SIGKEY_XML:
+					return parseSignKeyXML(buff,len);
+
+				case SIGKEY_PKCS12:
+					PKCS12* tmpPKCS12=d2i_PKCS12(NULL,&buff,len);	
+					EVP_PKEY* key=NULL;
+//					X509* cert=NULL;
+					if(PKCS12_parse(tmpPKCS12,passwd,&key,NULL,NULL)!=1)
+						return E_UNKNOWN;
+	//				X509_free(cert);
+					if(EVP_PKEY_type(key->type)!=EVP_PKEY_DSA)
+						{
+							EVP_PKEY_free(key);
+							return E_UNKNOWN;
+						}
+					DSA* tmpDSA=DSAparams_dup(key->pkey.dsa);
+					tmpDSA->priv_key=BN_dup(key->pkey.dsa->priv_key);
+					tmpDSA->pub_key=BN_dup(key->pkey.dsa->pub_key);
+					EVP_PKEY_free(key);
+					if(DSA_sign_setup(tmpDSA,NULL,&tmpDSA->kinv,&tmpDSA->r)!=1)
+						{
+							DSA_free(tmpDSA);
+							return E_UNKNOWN;
+						}
+					DSA_free(m_pDSA);
+					m_pDSA=tmpDSA;
+					return E_SUCCESS;
+			}
 		return E_UNKNOWN;
 	}
 
@@ -145,8 +204,10 @@ const char *XMLSIGINFO_TEMPLATE=
 "<SignedInfo>\n\t\t<Reference URI=\"\">\n\t\t<DigestValue>%s</DigestValue>\n\t</Reference>\n\t</SignedInfo>";
 const char *XMLSIG_TEMPLATE=
 "<Signature>\n\t%s\n<SignatureValue>%s</SignatureValue>\n</Signature>";
+const char *XMLSIG_TEMPLATE_WITH_KEYINFO=
+"<Signature>\n\t%s\n<SignatureValue>%s</SignatureValue>\n<KeyInfo>%s</KeyInfo>\n</Signature>";
 
-SINT32 CASignature::signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32 *outlen)
+SINT32 CASignature::signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen,CACertStore* pIncludeCerts)
 	{
 		if(in==NULL||inlen<1||out==NULL||*outlen<inlen+getXMLSignatureSize())
 			return E_UNKNOWN;
@@ -157,7 +218,7 @@ SINT32 CASignature::signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32 *outlen)
 			return E_UNKNOWN;
 		UINT8 dgst[SHA_DIGEST_LENGTH];
 		SHA1(out,len,dgst);
-		UINT8 tmpBuff[1024];
+		UINT8 tmpBuff[10240]; //HAS TO BE CHANGED
 		len=1024;
 		if(CABase64::encode(dgst,SHA_DIGEST_LENGTH,tmpBuff,&len)!=E_SUCCESS)
 			return E_UNKNOWN;
@@ -201,8 +262,19 @@ SINT32 CASignature::signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32 *outlen)
 			return E_UNKNOWN;
 		sig[sigSize]=0;
 
-		//Makeing the hole Signature-Block....
-		sprintf((char*)tmpBuff,XMLSIG_TEMPLATE,out,sig);
+		//Makeing the whole Signature-Block....
+		if(pIncludeCerts!=NULL)
+			{
+				//Making KeyInfo-Block
+				UINT32 keyInfoSize=pIncludeCerts->getNumber()*1500; //HACK!
+				UINT8* strKeyInfo=new UINT8[keyInfoSize];	
+				pIncludeCerts->encode(strKeyInfo,&keyInfoSize,XML_X509DATA);
+				strKeyInfo[keyInfoSize]=0;
+				sprintf((char*)tmpBuff,XMLSIG_TEMPLATE_WITH_KEYINFO,out,sig,strKeyInfo);
+				delete[] strKeyInfo;
+			}
+		else
+			sprintf((char*)tmpBuff,XMLSIG_TEMPLATE,out,sig);
 
 		// Find the last closing tag (</...>) and insert the <Signature> Element just before
 		int pos=inlen-1;
@@ -216,6 +288,218 @@ SINT32 CASignature::signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32 *outlen)
 		*outlen+=strlen((char*)tmpBuff);
 		memcpy(out+(*outlen),in+pos,inlen-pos);
 		(*outlen)+=inlen-pos;
+		return E_SUCCESS;
+	}
+
+SINT32 CASignature::signXML(DOM_Node &node,CACertStore* pIncludeCerts)
+	{
+		//Calculating the Digest...
+		UINT8* buff=new UINT8[10000];
+		UINT32 len=10000;
+		DOM_Output::makeCanonical(node,buff,&len);
+		
+		UINT8 dgst[SHA_DIGEST_LENGTH];
+		SHA1(buff,len,dgst);
+		UINT8 tmpBuff[10240]; //HAS TO BE CHANGED
+		len=1024;
+		if(CABase64::encode(dgst,SHA_DIGEST_LENGTH,tmpBuff,&len)!=E_SUCCESS)
+			return E_UNKNOWN;
+		tmpBuff[len]=0;
+
+
+		//Creating the Sig-InfoBlock....
+		DOM_Document doc=node.getOwnerDocument();
+		DOM_Element elemSignedInfo=doc.createElement("SignedInfo");
+		DOM_Element elemReference=doc.createElement("Reference");
+		elemReference.setAttribute("URI","");
+		DOM_Element elemDigestValue=doc.createElement("DigestValue");
+		setDOMElementValue(elemDigestValue,tmpBuff);
+		elemSignedInfo.appendChild(elemReference);
+		elemReference.appendChild(elemDigestValue);
+
+		// Signing the SignInfo block....
+		len=10000;//*outlen;
+		DOM_Output::makeCanonical(elemSignedInfo,buff,&len);
+		
+		UINT sigSize=255;
+		UINT8 sig[255];
+		UINT8* c=sig;
+		if(sign(buff,len,sig,&sigSize)!=E_SUCCESS)
+			return E_UNKNOWN;
+		
+		//Making Base64-Encode r and s
+		STACK* a=NULL;
+		d2i_ASN1_SET(&a,&c,sigSize,(char *(*)(void))d2i_ASN1_INTEGER,NULL,V_ASN1_SEQUENCE,V_ASN1_UNIVERSAL);
+		BIGNUM* s =BN_new();
+		ASN1_INTEGER* i=(ASN1_INTEGER*)sk_pop(a);
+		ASN1_INTEGER_to_BN(i,s);
+		ASN1_INTEGER_free(i);
+		BIGNUM* r =BN_new();
+		i=(ASN1_INTEGER*)sk_pop(a);
+		ASN1_INTEGER_to_BN(i,r);
+		ASN1_INTEGER_free(i);
+		sk_free(a);
+
+		memset(tmpBuff,0,40); //make first 40 bytes '0' --> if r or s is less then 20 bytes long! 
+													//(Due to be compatible to the standarad r and s must be 20 bytes each) 
+		BN_bn2bin(r,tmpBuff+20-BN_num_bytes(r)); //so r is 20 bytes with leading '0'...
+		BN_bn2bin(s,tmpBuff+40-BN_num_bytes(s));
+		BN_free(r);
+		BN_free(s);
+
+		sigSize=255;
+		if(CABase64::encode(tmpBuff,40,sig,&sigSize)!=E_SUCCESS)
+			return E_UNKNOWN;
+		sig[sigSize]=0;
+
+		//Makeing the whole Signature-Block....
+		DOM_Element elemSignature=doc.createElement("Signature");
+		DOM_Element elemSignatureValue=doc.createElement("SignatureValue");
+		setDOMElementValue(elemSignatureValue,sig);
+		elemSignature.appendChild(elemSignedInfo);
+		elemSignature.appendChild(elemSignatureValue);
+	
+		if(pIncludeCerts!=NULL)
+			{
+				//Making KeyInfo-Block
+				DOM_DocumentFragment tmpDocFrag;
+				pIncludeCerts->encode(tmpDocFrag,doc);
+				DOM_Element elemKeyInfo=doc.createElement("KeyInfo");
+				elemKeyInfo.appendChild(doc.importNode(tmpDocFrag,true));
+				tmpDocFrag=0;
+				elemSignature.appendChild(elemKeyInfo);
+			}
+		
+		node.appendChild(elemSignature);
+		return E_SUCCESS;
+	}
+
+SINT32 CASignature::setVerifyKey(CACertificate* pCert)
+	{
+		EVP_PKEY *key=X509_get_pubkey(pCert->m_pCert);
+		if(EVP_PKEY_type(key->type)!=EVP_PKEY_DSA)
+			{
+				EVP_PKEY_free(key);
+				return E_UNKNOWN;
+			}
+		DSA* tmpDSA=DSAparams_dup(key->pkey.dsa);
+		tmpDSA->pub_key=BN_dup(key->pkey.dsa->pub_key);
+		EVP_PKEY_free(key);
+		DSA_free(m_pDSA);
+		m_pDSA=tmpDSA;
+		return E_SUCCESS;
+	}
+
+SINT32 CASignature::verify(UINT8* in,UINT32 inlen,UINT8* sig,UINT32 siglen)
+	{
+		UINT8 dgst[SHA_DIGEST_LENGTH];
+		SHA1(in,inlen,dgst);
+		if(DSA_verify(0,dgst,SHA_DIGEST_LENGTH,sig,siglen,m_pDSA)==1)
+		 return E_SUCCESS;
+		return E_UNKNOWN;
+	}
+
+SINT32 CASignature::verifyXML(UINT8* in,UINT32 inlen)
+	{
+		MemBufInputSource oInput(in,inlen,"sigverify");
+		DOMParser oParser;
+		oParser.parse(oInput);
+		DOM_Document doc=oParser.getDocument();
+		DOM_Element root=doc.getDocumentElement();
+		return verifyXML(root,NULL);
+	}
+
+
+SINT32 CASignature::verifyXML(DOM_Node& root,CACertStore* trustedCerts)
+	{
+		DOM_Element elemSignature;
+		getDOMChildByName(root,(UINT8*)"Signature",elemSignature);
+		if(elemSignature.isNull())
+			return E_UNKNOWN;
+		DOM_Element elemSigValue;
+		getDOMChildByName(elemSignature,(UINT8*)"SignatureValue",elemSigValue);
+		if(elemSigValue.isNull())
+			return E_UNKNOWN;
+		DOM_Element elemSigInfo;
+		getDOMChildByName(elemSignature,(UINT8*)"SignedInfo",elemSigInfo);
+		if(elemSigInfo.isNull())
+			return E_UNKNOWN;
+		DOM_Element elemReference;
+		getDOMChildByName(elemSigInfo,(UINT8*)"Reference",elemReference);
+		if(elemReference.isNull())
+			return E_UNKNOWN;
+		DOM_Element elemDigestValue;
+		getDOMChildByName(elemReference,(UINT8*)"DigestValue",elemDigestValue);
+		if(elemDigestValue.isNull())
+			return E_UNKNOWN;
+
+		UINT8 dgst[255];
+		UINT32 dgstlen=255;
+		if(getDOMElementValue(elemDigestValue,dgst,&dgstlen)!=E_SUCCESS)
+			return E_UNKNOWN;
+		if(CABase64::decode(dgst,dgstlen,dgst,&dgstlen)!=E_SUCCESS)
+			return E_UNKNOWN;
+		if(dgstlen!=SHA_DIGEST_LENGTH)
+			return E_UNKNOWN;
+		UINT8 tmpSig[255];
+		UINT32 tmpSiglen=255;
+		if(getDOMElementValue(elemSigValue,tmpSig,&tmpSiglen)!=E_SUCCESS)
+			return E_UNKNOWN;
+		if(CABase64::decode(tmpSig,tmpSiglen,tmpSig,&tmpSiglen)!=E_SUCCESS)
+			return E_UNKNOWN;
+		if(tmpSiglen!=40)
+			return E_UNKNOWN;
+		//extract r and s and make the ASN.1 sequenz
+			//Making DER-Encoding of r and s.....
+            // ASN.1 Notation:
+            //  sequence
+            //    {
+            //          integer r
+            //          integer s
+            //    }
+            //--> Der-Encoding
+            // 0x30 //Sequence
+            // 46 // len in bytes
+            // 0x02 // integer
+            // 21? // len in bytes of r
+					  // 0x00  // fir a '0' to mark this value as positiv integer
+            // ....   //value of r
+            // 0x02 //integer
+            // 21 //len of s
+					  // 0x00  // first a '0' to mark this value as positiv integer
+						// ... value of s
+		UINT8 sig[48];
+		sig[0]=0x30;
+		sig[1]=46;
+		sig[2]=0x02;
+		sig[3]=21;
+		sig[4]=0;
+		memcpy(sig+5,tmpSig,20);
+		sig[25]=0x02;
+		sig[26]=21;
+		sig[27]=0;
+		memcpy(sig+28,tmpSig+20,20);
+
+		UINT8* out=new UINT8[5000];
+		UINT32 outlen=5000;
+		if(DOM_Output::makeCanonical(elemSigInfo,out,&outlen)!=E_SUCCESS||
+				verify(out,outlen,sig,46)!=E_SUCCESS)
+			{
+				delete[] out;
+				return E_UNKNOWN;
+			}
+				
+		root.removeChild(elemSignature);
+		outlen=5000;
+		DOM_Output::makeCanonical(root,out,&outlen);
+		UINT8 dgst1[SHA_DIGEST_LENGTH];
+		SHA1(out,outlen,dgst1);
+		delete[] out;
+		for(int i=0;i<SHA_DIGEST_LENGTH;i++)
+			{
+				if(dgst1[i]!=dgst[i])
+					return E_UNKNOWN;	
+			}
 		return E_SUCCESS;
 	}
 

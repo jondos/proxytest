@@ -40,8 +40,7 @@ class CAASymCipher
 			SINT32 generateKeyPair(UINT32 size);
 			SINT32 getPublicKey(UINT8* buff,UINT32 *len);
 			SINT32 getPublicKeyAsXML(UINT8* buff,UINT32* len);
-//			DOM_Document* getPublicKeyAsDocumentFragment();
-			SINT32 getPublicKeyAsDocumentFragment(DOM_DocumentFragment*& pDFrag);
+			SINT32 getPublicKeyAsDocumentFragment(DOM_DocumentFragment& pDFrag);
 			SINT32 getPublicKeySize();
 			SINT32 setPublicKey(UINT8* buff,UINT32* len);
 			SINT32 setPublicKeyAsXML(UINT8* buff,UINT32 len);

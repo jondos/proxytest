@@ -40,10 +40,12 @@ class MemFormatTarget: public XMLFormatTarget
 								}
 						}
 				}
-			void dumpMem(UINT8* buff,UINT32* size)
+			SINT32 dumpMem(UINT8* buff,UINT32* size)
 				{
-					pQueue->add(m_Buff,m_aktIndex);
-					pQueue->get(buff,size);
+					if(	pQueue->add(m_Buff,m_aktIndex)!=E_SUCCESS||
+							pQueue->get(buff,size)!=E_SUCCESS)
+						return E_UNKNOWN;
+					return E_SUCCESS;
 				}
 
 		private:
@@ -56,7 +58,7 @@ class DOM_Output
 	{
 		public:
 			static void dumpToMem(DOM_Node& node,UINT8* buff, UINT32* size);
-			static void makeCanonical(DOM_Node& node,UINT8* buff,UINT32* size);
+			static SINT32 makeCanonical(DOM_Node& node,UINT8* buff,UINT32* size);
 		private:
 			DOM_Output()
 				{
@@ -70,7 +72,7 @@ class DOM_Output
 					delete m_pFormatter;
 				}
 
-			void dumpNode(DOM_Node& toWrite,bool bCanonical);
+			SINT32 dumpNode(DOM_Node& toWrite,bool bCanonical);
 			XMLFormatter* m_pFormatter;
 			MemFormatTarget* m_pFormatTarget;
 			static const XMLCh  m_XML[39]; 

@@ -215,21 +215,19 @@ SINT32 CAASymCipher::getPublicKeyAsXML(UINT8* buff,UINT32 *len)
 	{
 		if(m_pRSA==NULL||buff==NULL)
 			return E_UNKNOWN;
-		DOM_DocumentFragment* pDFrag=NULL;
+		DOM_DocumentFragment pDFrag;
 		getPublicKeyAsDocumentFragment(pDFrag);
-		DOM_Output::dumpToMem(*pDFrag,buff,len);
-		delete pDFrag;
+		DOM_Output::dumpToMem(pDFrag,buff,len);
 		return E_SUCCESS;
 	}
 
-SINT32 CAASymCipher::getPublicKeyAsDocumentFragment(DOM_DocumentFragment* & dFrag)
+SINT32 CAASymCipher::getPublicKeyAsDocumentFragment(DOM_DocumentFragment& dFrag)
 	{
 		if(m_pRSA==NULL)
 			return E_UNKNOWN;
-		dFrag=new DOM_DocumentFragment();
 		DOM_Document doc=DOM_Document::createDocument();
 		DOM_Element root=doc.createElement(DOMString("RSAKeyValue"));
-		*dFrag=doc.createDocumentFragment();
+		dFrag=doc.createDocumentFragment();
 		
 		DOM_Element nodeModulus=doc.createElement(DOMString("Modulus"));
 		root.appendChild(nodeModulus);
@@ -250,10 +248,9 @@ SINT32 CAASymCipher::getPublicKeyAsDocumentFragment(DOM_DocumentFragment* & dFra
 		nodeExponent.appendChild(tmpTextNode);
 
 		root.appendChild(nodeExponent);
-		dFrag->appendChild(root);
+		dFrag.appendChild(root);
 		return E_SUCCESS;
 	}
-
 /*
 //XML Decode...
 static void sRSAKeyParamValueHandler(XMLElement &elem, void *userData)

@@ -38,6 +38,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketAddrUnix.hpp"
 #include "CAThread.hpp"
 #include "CAUtil.hpp"
+#include "CASignature.hpp"
 #include "xml/DOM_Output.hpp"
 
 extern CACmdLnOptions options;
@@ -46,26 +47,10 @@ extern CACmdLnOptions options;
 SINT32 CAFirstMix::initOnce()
 	{
 		CAMsg::printMsg(LOG_DEBUG,"Starting FirstMix InitOnce\n");
-		SINT32 ret=E_UNKNOWN;
-		int handle;
-		SINT32 len;
-		UINT8* fileBuff=new UINT8[2048];
-		if(fileBuff==NULL||options.getKeyFileName(fileBuff,2048)!=E_SUCCESS)
-			goto END;
-		handle=open((char*)fileBuff,O_BINARY|O_RDONLY);
-		if(handle==-1)
-			goto END;
-		len=read(handle,fileBuff,2048);
-		close(handle);
-		if(len<1)
-			goto END;
-		if(mSignature.setSignKey(fileBuff,len,SIGKEY_XML)!=E_SUCCESS)
-			goto END;
-		ret=E_SUCCESS;
-END:		
-		delete []fileBuff;
-		return ret;
-
+		m_pSignature=options.getSignKey();
+		if(m_pSignature==NULL)
+			return E_UNKNOWN;
+		return E_SUCCESS;
 	}
 
 SINT32 CAFirstMix::init()
@@ -482,7 +467,7 @@ SINT32 CAFirstMix::loop()
 		osocketgroupMixOut.add(*m_pMuxOut);
 		m_pMuxOut->setCrypt(true);
 		
-		m_pInfoService->setSignature(&mSignature);
+		m_pInfoService->setSignature(m_pSignature);
 		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix InfoService - Signature set\n");
 //		m_pInfoService->setLevel(0,-1,-1);
 		m_pInfoService->sendHelo();
@@ -1001,8 +986,8 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		if(recvBuff==NULL||len==0)
 			return E_UNKNOWN;
 
-		CAMsg::printMsg(LOG_DEBUG,"Get KeyInfo (foolowing line)\n");
-		CAMsg::printMsg(LOG_DEBUG,"%s\n",recvBuff);
+	//	CAMsg::printMsg(LOG_DEBUG,"Get KeyInfo (foolowing line)\n");
+	//	CAMsg::printMsg(LOG_DEBUG,"%s\n",recvBuff);
 
 		
 		DOMParser oParser;
@@ -1046,6 +1031,15 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 			{
 				if(child.getNodeName().equals("Mix"))
 					{
+						//check Signature....
+						CASignature oSig;
+						CACertificate* nextCert=options.getNextMixTestCertificate();
+						oSig.setVerifyKey(nextCert);
+						SINT32 ret=oSig.verifyXML(child,NULL);
+						delete nextCert;
+						if(ret!=E_SUCCESS)
+							return E_UNKNOWN;
+
 						DOM_Node rsaKey=child.getFirstChild();
 						CAASymCipher oRSA;
 						oRSA.setPublicKeyAsDOMNode(rsaKey);
@@ -1054,10 +1048,14 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 						UINT8 buff[400];
 						UINT32 bufflen=400;
 						encodeXMLEncryptedKey(key,16,buff,&bufflen,&oRSA);
+						UINT32 outlen=bufflen+5000;
+						UINT8* out=new UINT8[outlen];
+						m_pSignature->signXML(buff,bufflen,out,&outlen);
 						m_pMuxOut->setKey(key);
-						UINT16 size=htons(bufflen);
+						UINT16 size=htons(outlen);
 						((CASocket*)m_pMuxOut)->send((UINT8*)&size,2);
-						((CASocket*)m_pMuxOut)->send(buff,bufflen);
+						((CASocket*)m_pMuxOut)->send(out,outlen);
+						delete[] out;
 						break;
 					}
 				child=child.getNextSibling();

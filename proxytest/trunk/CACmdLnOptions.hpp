@@ -29,6 +29,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CACMDLNOPTIONS__
 #define __CACMDLNOPTIONS__
 #include "CASocketAddrINet.hpp"
+#include "CASignature.hpp"
+#include "CACertificate.hpp"
 class CACmdLnOptions
     {
 	public:
@@ -69,7 +71,34 @@ class CACmdLnOptions
 	    SINT32 getSOCKSHost(UINT8* host,UINT32 len);
 	    UINT16 getInfoServerPort();
 	    SINT32 getInfoServerHost(UINT8* host,UINT32 len);
-			SINT32 getKeyFileName(UINT8* filename,UINT32 len);
+			
+			CASignature* getSignKey()
+				{
+					if(m_pSignKey!=NULL)
+						return m_pSignKey->clone(); 
+					return NULL;
+				}
+			CACertificate* getOwnCertificate()
+				{
+					if(m_pOwnCertificate!=NULL)
+						return m_pOwnCertificate->clone(); 
+					return NULL;
+				}
+
+			CACertificate* getPrevMixTestCertificate()
+				{
+					if(m_pPrevMixCertificate!=NULL)
+						return m_pPrevMixCertificate->clone(); 
+					return NULL;
+				}
+
+			CACertificate* getNextMixTestCertificate()
+				{
+					if(m_pNextMixCertificate!=NULL)
+						return m_pNextMixCertificate->clone(); 
+					return NULL;
+				}
+			
 			SINT32 getCascadeName(UINT8* name,UINT32 len);
 			SINT32 getLogDir(UINT8* name,UINT32 len);
 			SINT32 getUser(UINT8* user,UINT32 len);
@@ -97,7 +126,6 @@ class CACmdLnOptions
 	    UINT16 iSOCKSPort;
 	    char* strInfoServerHost;
 	    UINT16 iInfoServerPort;
-			char* strKeyFileName;
 			bool bLocalProxy,bFirstMix,bMiddleMix,bLastMix;
 			char* strCascadeName;
 			char* strLogDir;
@@ -107,7 +135,11 @@ class CACmdLnOptions
 
 			CASocketAddrINet* pTargets;
 			UINT32 cntTargets;
-
+			
+			CASignature* m_pSignKey;
+			CACertificate* m_pOwnCertificate;
+			CACertificate* m_pPrevMixCertificate;
+			CACertificate* m_pNextMixCertificate;
 		private:
 			SINT32 generateTemplate();
 	};
