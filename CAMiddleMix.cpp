@@ -434,7 +434,7 @@ THREAD_RETURN mm_loopDownStream(void *p)
 #ifdef USE_POOL		
 		CAPool* pPool=new CAPool(MIX_POOL_SIZE);
 #endif
-		for(;;)
+		while(pMix->m_bRun)
 			{
 				#ifndef USE_POOL
 					ret=oSocketGroup.select(1000);
@@ -506,6 +506,7 @@ THREAD_RETURN mm_loopDownStream(void *p)
 			}
 ERR:
 		CAMsg::printMsg(LOG_CRIT,"loopDownStream -- Exiting!\n");
+		pMix->m_bRun=false;
 		delete pPoolEntry;
 		#ifdef USE_POOL
 			delete pPool;
@@ -533,10 +534,11 @@ SINT32 CAMiddleMix::loop()
 		#ifdef USE_POOL		
 			CAPool* pPool=new CAPool(MIX_POOL_SIZE);
 		#endif
+		m_bRun=true;
 		CAThread oThread;
 		oThread.setMainLoop(mm_loopDownStream);
 		oThread.start(this);
-		for(;;)
+		while(m_bRun)
 			{
 				#ifndef USE_POOL			
 					ret=oSocketGroup.select(1000);
@@ -634,6 +636,7 @@ SINT32 CAMiddleMix::loop()
 			}
 ERR:
 		CAMsg::printMsg(LOG_CRIT,"Preparing for restart...\n");
+		m_bRun=false;
 		m_pMuxIn->close();
 		m_pMuxOut->close();
 		oThread.join();		

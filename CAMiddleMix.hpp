@@ -57,6 +57,7 @@ class CAMiddleMix:public CAMix
 			CAMuxSocket* m_pMuxOut;
 			CAASymCipher* m_pRSA;
 			CASignature* m_pSignature;
+			volatile bool m_bRun;
 			CAMiddleMixChannelList* m_pMiddleMixChannelList;
 			CAInfoService* m_pInfoService;
 			friend THREAD_RETURN mm_loopDownStream(void *p);
