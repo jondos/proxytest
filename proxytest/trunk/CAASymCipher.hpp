@@ -9,6 +9,7 @@ class CAASymCipher
 			int generateKeyPair(int size);
 			int getPublicKey(unsigned char* buff,int *len);
 			int getPublicKeySize();
+			int setPublicKey(unsigned char* buff,int *len);
 		private:
 			RSA* rsa;
 	};

@@ -45,6 +45,7 @@ typedef struct t_LPPair
 		CASocket socketSOCKSIn;
 		CAMuxSocket muxOut;
 		unsigned char chainlen;
+		CAASymCipher* arRSA;
 	} LPPair;
 
 THREAD_RETURN lpIO(void *v)
@@ -62,7 +63,6 @@ THREAD_RETURN lpIO(void *v)
 		int len,ret;
 		CASocket* newSocket;//,*tmpSocket;
 		CASymCipher* newCipher;
-		CAASymCipher oRSA;
 		int countRead;
 		CONNECTION oConnection;		
 		unsigned char chainlen=lpIOPair->chainlen;
@@ -210,7 +210,7 @@ THREAD_RETURN lpIO(void *v)
 																memset(buff,0,KEY_SIZE); // generate key...
 																tmpCon->pCipher->setEncryptionKey(buff);
 																memcpy(buff+KEY_SIZE,oMuxPacket.data,size);
-																oRSA.encrypt(buff,buff);
+																lpIOPair->arRSA[c].encrypt(buff,buff);
 																tmpCon->pCipher->encrypt(buff+RSA_SIZE,DATA_SIZE-RSA_SIZE);
 																memcpy(oMuxPacket.data,buff,DATA_SIZE);
 																size-=KEY_SIZE;
@@ -285,8 +285,23 @@ int doLocalProxy()
 			{
 				
 				CAMsg::printMsg(LOG_INFO," connected!\n");
+				unsigned short size;
+				((CASocket*)lpIOPair->muxOut)->receive((char*)&size,2);
 				((CASocket*)lpIOPair->muxOut)->receive((char*)&lpIOPair->chainlen,1);
 				CAMsg::printMsg(LOG_INFO,"Chain-Length: %d\n",lpIOPair->chainlen);
+				size=ntohs(size)-1;
+				unsigned char* buff=new unsigned char[size];
+				((CASocket*)lpIOPair->muxOut)->receive((char*)buff,size);
+				lpIOPair->arRSA=new CAASymCipher[lpIOPair->chainlen];
+				int aktIndex=0;
+				for(int i=0;i<lpIOPair->chainlen;i++)
+					{
+						int len=size;
+						lpIOPair->arRSA[i].setPublicKey(buff+aktIndex,&len);
+						size-=len;
+						aktIndex+=len;
+					}
+				
 				lpIO(lpIOPair);
 				ret=0;
 			}
