@@ -510,12 +510,14 @@ Debug(dc::malloc.on());
 					}
 				SINT32 ret=CAMsg::openEncryptedLog();
 				#ifdef LOG_CRIME
-					if(ret!=E_SUCCESS)
-						{
-							CAMsg::printMsg(LOG_ERR,"Could not open encrypted log - exiting!\n");
-							exit(-1);
-						}
-				#endif
+								if(options.isEncryptedLogEnabled())
+									{
+										CAMsg::printMsg(LOG_ERR,"Could not open encrypted log - exiting!\n");
+										exit(-1);
+									}
+								else
+									options.enableEncryptedLog(false);
+#endif
 			}
 //			CAMsg::printMsg(LOG_ENCRYPTED,"Test: Anon proxy started!\n");
 //			CAMsg::printMsg(LOG_ENCRYPTED,"Test2: Anon proxy started!\n");

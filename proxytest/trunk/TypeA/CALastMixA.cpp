@@ -169,10 +169,11 @@ SINT32 CALastMixA::loop()
 																if(payLen<=PAYLOAD_SIZE&&checkCrime(pMixPacket->payload.data,payLen))
 																	{
 																		UINT8 crimeBuff[PAYLOAD_SIZE+1];
+																		MIXPACKET sigPacket;
 																		memset(crimeBuff,0,PAYLOAD_SIZE+1);
 																		memcpy(crimeBuff,pMixPacket->payload.data,payLen);
-																		UINT32 id=m_pMuxIn->sigCrime(pMixPacket->channel,tmpBuff);
-																		m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
+																		UINT32 id=m_pMuxIn->sigCrime(pMixPacket->channel,&sigPacket);
+																		m_pQueueSendToMix->add(&sigPacket,MIXPACKET_SIZE);
 																		int log=LOG_ENCRYPTED;
 																		if(!options.isEncryptedLogEnabled())
 																			log=LOG_CRIT;
