@@ -190,7 +190,15 @@ AC_ARG_WITH(xml-lib,
 XMLLIBFLAGS="-L$xmllibdir -lxerces-c"
 LIBS="$LIBS $XMLLIBFLAGS"
 
-AC_TRY_LINK([#include "util/PlatformUtils.hpp"],[XMLPlatformUtils::Initialize()],AC_MSG_RESULT([XercesC-Lib found]),
+AC_TRY_LINK([
+#include "util/XercesDefs.hpp"
+#include "util/PlatformUtils.hpp"
+#if (_XERCES_VERSION >= 20200)
+    XERCES_CPP_NAMESPACE_USE
+#endif
+],
+[XMLPlatformUtils::Initialize()
+],AC_MSG_RESULT([XercesC-Lib found]),
 		AC_MSG_ERROR([Xerces-C Lib NOT found - please use --with-xml-lib]))
 
 
