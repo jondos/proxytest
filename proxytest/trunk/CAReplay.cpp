@@ -75,7 +75,7 @@ SINT32 CAReplay::checkAndInsert (UINT32 hash, A128BitNumber* key, bool* isNoRepl
 	              //ActiveHash now points at the position
 	                            //of the array where the key is to
 	                           //be inserted
-	
+
 
   if (pActiveHash->seg1 == 0 && pActiveHash->seg2 == 0)         //if no value is located at this position
 		{
@@ -86,7 +86,7 @@ SINT32 CAReplay::checkAndInsert (UINT32 hash, A128BitNumber* key, bool* isNoRepl
 		{
       if (pActiveHash->seg1 == fragment1 && pActiveHash->seg2 == fragment2)            //if not compare the fragments to prevent
 				{                                     //a replay attack and if not identical
-					isNoReplay = false;
+					*isNoReplay = false;
 					return E_SUCCESS;
 				}
 			else                                    //continue to the next array field and repreat
@@ -97,7 +97,7 @@ SINT32 CAReplay::checkAndInsert (UINT32 hash, A128BitNumber* key, bool* isNoRepl
 						{
 							if (pActiveHash->seg1 == fragment1 && pActiveHash->seg2 == fragment2)
 								{
-									isNoReplay = false;
+									*isNoReplay = false;
 									return E_SUCCESS;
 								}
 							else
@@ -114,7 +114,7 @@ SINT32 CAReplay::checkAndInsert (UINT32 hash, A128BitNumber* key, bool* isNoRepl
 						{
 							if (pActiveHash->seg1 == fragment1 && pActiveHash->seg2 == fragment2)      //if we ran out of the array in the first
 								{
-									isNoReplay = false;
+									*isNoReplay = false;
 									return E_SUCCESS;
 								}						                      //cycle, we try once more and return
 							else                              //false if this failes, as the array
@@ -125,7 +125,7 @@ SINT32 CAReplay::checkAndInsert (UINT32 hash, A128BitNumber* key, bool* isNoRepl
 						}
 					if (position == HASH_SIZE)
 						{
-							isNoReplay = false;
+							*isNoReplay = false;
 							return E_SUCCESS;
 						}
 				}
@@ -168,7 +168,7 @@ SINT32 CAReplay::validEpochAndKey( A128BitNumber* key, UINT32 keylen, UINT32 epo
 			return E_SUCCESS;
 	  }
   else
-	  isNoReplay = false;
+	  *isNoReplay = false;
     return E_SUCCESS;
 }
 

@@ -3,4 +3,5 @@
 <projectgroup>
   <project path="proxytest.cbx"/>
   <project path="AllTests.cbx"/>
+  <project path="proxytest_lib.cbx"/>
 </projectgroup>
