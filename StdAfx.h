@@ -89,6 +89,9 @@
 #include "popt/system.h"
 #include <openssl/blowfish.h>
 #include <openssl/rsa.h>
+#include <openssl/dsa.h>
+#include <openssl/sha.h>
+#include <openssl/rand.h>
 		// ZU ERLEDIGEN: Verweisen Sie hier auf zusätzliche Header-Dateien, die Ihr Programm benötigt
 
 //{{AFX_INSERT_LOCATION}}

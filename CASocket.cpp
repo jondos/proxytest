@@ -17,6 +17,7 @@ CASocket::CASocket()
 		m_Socket=0;
 		InitializeCriticalSection(&csClose);
 		closeMode=0;
+		localPort=-1;
 	}
 int CASocket::create()
 	{
@@ -24,10 +25,12 @@ int CASocket::create()
 			m_Socket=socket(AF_INET,SOCK_STREAM,0);
 		if(m_Socket==INVALID_SOCKET)
 			return SOCKET_ERROR;
+		localPort=-1;
 		return 0;
 	}
 int CASocket::listen(LPSOCKETADDR psa)
 	{
+		localPort=-1;
 		if(m_Socket==0&&create()==SOCKET_ERROR)
 			return SOCKET_ERROR;
 		if(::bind(m_Socket,(LPSOCKADDR)psa,sizeof(*psa))==SOCKET_ERROR)
@@ -43,6 +46,7 @@ int CASocket::listen(unsigned short port)
 
 int CASocket::accept(CASocket &s)
 	{
+		s.localPort=-1;
 		s.m_Socket=::accept(m_Socket,NULL,NULL);
 		if(s.m_Socket==SOCKET_ERROR)
 			{
@@ -57,6 +61,7 @@ int CASocket::accept(CASocket &s)
 			
 int CASocket::connect(LPSOCKETADDR psa)
 	{
+		localPort=-1;
 		if(m_Socket==0&&create()==SOCKET_ERROR)
 			{
 				return SOCKET_ERROR;
@@ -73,6 +78,7 @@ int CASocket::connect(LPSOCKETADDR psa)
 int CASocket::close()
 	{
 //		EnterCriticalSection(&csClose);
+		localPort=-1;
 		int ret;
 		if(m_Socket!=0)
 			{
@@ -97,6 +103,7 @@ int CASocket::close()
 int CASocket::close(int mode)
 	{
 		EnterCriticalSection(&csClose);
+		localPort=-1;
 		::shutdown(m_Socket,mode);
 		if(mode==SD_RECEIVE||mode==SD_BOTH)
 			closeMode|=CLOSE_RECEIVE;
@@ -147,13 +154,16 @@ int CASocket::receive(char* buff,int len)
 
 int CASocket::getLocalPort()
 	{
-		struct sockaddr_in addr;
-		socklen_t namelen=sizeof(struct sockaddr_in);
-		if(getsockname(m_Socket,(struct sockaddr*)&addr,&namelen)==SOCKET_ERROR)
-			return SOCKET_ERROR;
-		else
-			return ntohs(addr.sin_port);
-
+		if(localPort==-1)
+			{
+				struct sockaddr_in addr;
+				socklen_t namelen=sizeof(struct sockaddr_in);
+				if(getsockname(m_Socket,(struct sockaddr*)&addr,&namelen)==SOCKET_ERROR)
+					return SOCKET_ERROR;
+				else
+					localPort=ntohs(addr.sin_port);
+			}
+		return localPort;
 	}
 
 int CASocket::setReuseAddr(bool b)
