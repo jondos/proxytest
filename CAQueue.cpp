@@ -231,9 +231,9 @@ SINT32 CAQueue::getOrWait(UINT8* pbuff,UINT32* psize)
 	}
 
 	/** Peeks data from the Queue. The data is NOT removed from the Queue.
-  * @param pbuff, pointer to a buffer, there the data should be stored
-	* @param psize, on call contains the size of pbuff, 
-	*								on return contains the size of returned data
+  * @param pbuff pointer to a buffer, where the data should be stored
+	* @param psize on call contains the size of pbuff, 
+	*							 on return contains the size of returned data
 	* @retval E_SUCCESS if succesful
 	* @retval E_UNKNOWN in case of an error
 	*/

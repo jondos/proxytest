@@ -37,7 +37,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 CACmdLnOptions::CACmdLnOptions()
   {
-		m_bDaemon=false;
+		m_bDaemon=m_bIsRunReConfigure=false;
 		m_bLocalProxy=m_bFirstMix=m_bLastMix=m_bMiddleMix=false;
 		m_iTargetPort=m_iSOCKSPort=m_iSOCKSServerPort=m_iInfoServerPort=0xFFFF;
 		m_strTargetHost=m_strSOCKSHost=m_strInfoServerHost=NULL;
@@ -284,6 +284,37 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 		}
 	return E_SUCCESS;
  }
+
+/** Rereads the configuration file (if one was given on startup) and reconfigures
+	* the mix according to the new values. This is done asyncronous. A new thread is
+	* started, which does the actual work.
+	* @retval E_SUCCESS if successful
+	* @retval E_UNKNOWN if an error occurs
+	*/
+SINT32 CACmdLnOptions::reread()
+	{
+		if(m_bIsRunReConfigure)
+			return E_UNKNOWN;
+		m_csReConfigure.lock();
+		m_bIsRunReConfigure=true;
+		m_threadReConfigure.start(this);
+		m_csReConfigure.unlock();
+		return E_SUCCESS;
+	}
+
+/** Thread that does the actual reconfigure work. Only one is running at the same time.
+	* @param param pointer to the \c CAComdLnOptions object
+	*/
+THREAD_RETURN threadReConfigure(void *param)
+	{
+		CACmdLnOptions* pOptions=(CACmdLnOptions*)param;
+		pOptions->m_csReConfigure.lock();
+		CAMsg::printMsg(LOG_DEBUG,"ReConfiguration of the Mix is under way....\n");
+		pOptions->m_bIsRunReConfigure=false;
+		CAMsg::printMsg(LOG_DEBUG,"ReConfiguration of the Mix finished!\n");
+		pOptions->m_csReConfigure.unlock();
+		THREAD_RETURN_SUCCESS;
+	}
 
 bool CACmdLnOptions::getDaemon()
 	{

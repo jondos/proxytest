@@ -278,11 +278,11 @@ SINT32 CASocket::close(UINT32 mode)
 	}
 			
 /** Sends some data over the network. This may block, if socket is in blocking mode.
-	@param buff - the buffer of data to send
-	@param len - content length
-	@retval E_AGAIN, if non blocking socket would block or a timeout was reached
-	@retval E_UNKNOWN, if an error occured
-	@ret number of bytes send
+	@param buff the buffer of data to send
+	@param len content length
+	@retval E_AGAIN if non blocking socket would block or a timeout was reached
+	@retval E_UNKNOWN if an error occured
+	@return number of bytes send
 */
 SINT32 CASocket::send(const UINT8* buff,UINT32 len)
 	{
@@ -310,12 +310,12 @@ SINT32 CASocket::send(const UINT8* buff,UINT32 len)
 
 /** Sends some data over the network. Using a Timeout if socket is in blocking mode. 
 	Otherwise E_AGAIN may returned
-	@param buff - the buffer to send
-	@param len - content length
+	@param buff the buffer to send
+	@param len content length
 	@param msTimeOut Maximum MilliSeconds to wait
-	@retval E_AGAIN, if Operation would block on a non-blocking socket
-	@retval E_TIMEDOUT, if the timeout was reached
-	@ret number of bytes send, or -1 in case of an error
+	@retval E_AGAIN if Operation would block on a non-blocking socket
+	@retval E_TIMEDOUT if the timeout was reached
+	@return number of bytes send, or -1 in case of an error
 */
 SINT32 CASocket::sendTimeOut(const UINT8* buff,UINT32 len,UINT32 msTimeOut)
 	{
@@ -447,14 +447,15 @@ SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len)
 
 /** Trys to receive all bytes. After the timout value has elpased, the error E_TIMEDOUT is returned
 	* Would not work correctly on Windows....
-	* @param len	on input holds the number of bytes which should be read,
+	*	@param buff byte array, where the received bytes would be stored 
+	*	@param len	on input holds the number of bytes which should be read,
 	*							on return gives the number of bytes which are read before the timeout
 	*	@param msTimeOut the timout in milli seconds
-	* @retval E_TIMEDOUT, if not all byts could be read
-	* @retval E_UNKNOWN, if an error occured
-	* @retval E_SUCCESS, if all bytes could be read
+	* @retval E_TIMEDOUT if not all byts could be read
+	* @retval E_UNKNOWN if an error occured
+	* @retval E_SUCCESS if all bytes could be read
 	*
-	* Lots of work TODO!!!!!
+	* TODO: Lots of work TODO!!!!!
 	*/
 SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len,UINT16 msTimeOut)
 	{

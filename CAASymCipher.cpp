@@ -78,7 +78,7 @@ SINT32 CAASymCipher::encrypt(UINT8* from,UINT8* to)
 			return E_SUCCESS;
 	}
 
-/** Generates a new random key-pair of size bits.
+/** Generates a new random key-pair of \c size bits.
 	*@param size keysize of the new keypair
 	*@retval E_UNKNOWN in case of an error
 	*@retval E_SUCCESS otherwise
@@ -101,12 +101,12 @@ SINT32 CAASymCipher::generateKeyPair(UINT32 size)
 	* \li \c E [SIZE-E bytes] - the exponent \c e as integer (in network byte order)
 	*
 	*@param buff byte array in which the public key should be stored
-	*@param len on input holds the size of buff, on return it contains the number 
+	*@param len on input holds the size of \c buff, on return it contains the number 
 	*           of bytes needed to store the public key
 	*@retval E_UNKNOWN in case of an error
 	*@retval E_SUCCESS otherwise
-	*@see getPublicKeySize
-	*@see setPublicKey
+	*@see getPublicKeySize()
+	*@see setPublicKey()
 	*/
 SINT32 CAASymCipher::getPublicKey(UINT8* buff,UINT32 *len)
 	{
@@ -194,22 +194,23 @@ _ERROR:
 
 /** Stores the public key in \c buff as XML. The format is as follows:
 	*
-	* <RSAKeyValue>
-	*   <Modulus>
-	*     the modulus of the Key as ds::CryptoBinary
-	*   </Modulus>
-	*   <Exponent>
-	*     the exponent of the key as ds::CryptoBinary
-	*   </Exponent>
-	* <RSAKeyValue>
-	*There is NO \0 at the end.
+	* \verbatim
+	<RSAKeyValue>
+	  <Modulus>
+	    the modulus of the Key as ds::CryptoBinary
+	  </Modulus>
+	  <Exponent>
+	    the exponent of the key as ds::CryptoBinary
+	  </Exponent>
+	<RSAKeyValue>\endverbatim
+	*There is NO \\0 at the end.
 	*@param buff byte array in which the public key should be stored
-	*@param len on input holds the size of buff, on return it contains the number 
+	*@param len on input holds the size of \c buff, on return it contains the number 
 	*           of bytes needed to store the public key
 	*@retval E_UNKNOWN in case of an error
 	*@retval E_SUCCESS otherwise
 	*
-	*@see setPublicKeyasXML
+	*@see setPublicKeyAsXML()
 	*/
 SINT32 CAASymCipher::getPublicKeyAsXML(UINT8* buff,UINT32 *len)
 	{

@@ -32,6 +32,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketAddrUnix.hpp"
 #include "CASignature.hpp"
 #include "CACertificate.hpp"
+#include "CAThread.hpp"
 #ifdef LOG_CRIME
 	#include "tre/regex.h"
 #endif
@@ -70,6 +71,7 @@ class CACmdLnOptions
 	    ~CACmdLnOptions();
 			void clean();
 			SINT32 parse(int argc,const char** arg);
+			SINT32 reread();
 	    bool getDaemon();
       //bool getProxySupport();
 
@@ -183,9 +185,13 @@ class CACmdLnOptions
 					*len=m_nCrimeRegExps;
 					return m_arCrimeRegExps;
 				}
-#endif			
+#endif
+		friend THREAD_RETURN threadReConfigure(void *param);
 		private:
-	    bool		m_bDaemon;
+			bool		m_bIsRunReConfigure; //true, if an async reconfigure is under way 
+	    CAMutex m_csReConfigure; //Ensures that reconfigure is running only once at the same time;
+			CAThread m_threadReConfigure; //Thread, that does the actual reconfigure work
+			bool		m_bDaemon;
 	    UINT16	m_iSOCKSServerPort;
 	    UINT16	m_iTargetPort; //only for the local proxy...
 			char*		m_strTargetHost; //only for the local proxy...

@@ -113,11 +113,11 @@ SINT32 CASocketList::setThreadSafe(bool b)
 	}
 
 /** Add a new channel to the channel-list.
-*	@param id - channel-id of the new channel
-*	@param pSocket - a CASocket assoziated with the channel
-*	@param pCipher - a CASymCipher assoziated with the channel
-*	@return E_SUCCESS, if no error occurs
-*	        E_UNKNOWN, otherwise
+*	@param id channel-id of the new channel
+*	@param pSocket a CASocket assoziated with the channel
+*	@param pCiphers an array of CASymCipher assoziated with the channel
+*	@return E_SUCCESS if no error occurs
+*	        E_UNKNOWN otherwise
 *
 */
 SINT32 CASocketList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCiphers)

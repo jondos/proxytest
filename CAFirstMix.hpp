@@ -86,14 +86,20 @@ class CAFirstMix:public CAMix
 				}
 			
 			/** Returns the Mix-Cascade info which should be send to the InfoService.
-				* The status message ist an XML struct retruned in buff. There is not \0 after
-				* the XML (so it is not a string!*/
+				* The status message ist a XML struct returned in \c buff. 
+				* There is no \\0 after the XML (so it is not a string!)
+				*
+				* @param buff byte array, where the XML struct would be stored
+				* @param len	on input contains the size of \c buff
+				*							on output contains the size of the XML struct
+				*/
 			SINT32 getMixCascadeInfo(UINT8* buff,UINT32*len);
 					
 			
 		friend THREAD_RETURN loopSendToMix(void*);
 		friend THREAD_RETURN loopAcceptUsers(void*);
 		friend THREAD_RETURN loopReadFromUsers(void*);
+
 		private:
 			SINT32 incUsers()
 				{
