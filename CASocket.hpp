@@ -47,6 +47,7 @@ class CASocket
 			SINT32 close();
 			SINT32 close(int mode);
 			int send(UINT8* buff,UINT32 len,bool bDisableAsync=false);
+			int send(UINT8* buff,UINT32 len,UINT32 msTimeOut);
 #ifdef HAVE_FIONREAD
 			#define HAVE_AVAILABLE
 			SINT32 available();
@@ -61,6 +62,8 @@ class CASocket
 			SINT32 setRecvLowWat(UINT32 r);
 			SINT32 setSendLowWat(UINT32 r);
 			SINT32 getSendLowWat();
+			SINT32 setSendTimeOut(UINT32 msTimeOut);
+			SINT32 getSendTimeOut();
 			SINT32 setRecvBuff(UINT32 r);
 			SINT32 getRecvBuff();
 			SINT32 setSendBuff(UINT32 r);

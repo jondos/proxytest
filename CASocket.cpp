@@ -301,6 +301,21 @@ int CASocket::send(UINT8* buff,UINT32 len,bool bDisableAsync)
 	  return ret;	    	    
 	}
 
+/** Sends the buff over the network. Using a Timeout
+	@param buff - the buffer to send
+	@param len - content length
+	@param msTimeOut MilliSeconds to wait
+	@ret number of bytes send, or -1 in case of an error
+*/
+int CASocket::send(UINT8* buff,UINT32 len,UINT32 msTimeOut)
+	{
+	  SINT32 aktTimeOut=getSendTimeOut();	
+	  setSendTimeOut(msTimeOut);
+		int ret=send(buff,len,true);
+		setSendTimeOut(aktTimeOut);
+		return ret;	    	    
+	}
+
 #ifdef HAVE_FIONREAD
 SINT32 CASocket::available()
 	{
@@ -470,6 +485,24 @@ SINT32 CASocket::getSendBuff()
 			return E_UNKNOWN;
 		else
 			return val;
+	}
+
+SINT32 CASocket::setSendTimeOut(UINT32 msTimeOut)
+	{
+		timeval t;
+		t.tv_sec=msTimeOut/1000;
+		t.tv_usec=(msTimeOut%1000)*1000;
+		return setsockopt(m_Socket,SOL_SOCKET,SO_SNDTIMEO,(char*)&t,sizeof(t));	
+	}
+
+SINT32 CASocket::getSendTimeOut()
+	{
+		timeval val;
+		socklen_t size=sizeof(val);
+		if(getsockopt(m_Socket,SOL_SOCKET,SO_SNDTIMEO,(char*)&val,&size)==SOCKET_ERROR)
+			return E_UNKNOWN;
+		else
+			return val.tv_sec*1000+val.tv_usec/1000;
 	}
 
 /** Enables/disables the socket keep-alive option.
