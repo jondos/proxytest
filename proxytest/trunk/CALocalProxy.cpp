@@ -177,11 +177,7 @@ SINT32 CALocalProxy::loop()
 									exit(-1);
 								}
 
-							if(!oSocketList.get(oMixPacket.channel,&oConnection))
-								{
-									CAMsg::printMsg(LOG_DEBUG,"Error Sending Data to Browser -- Channel-Id no valid!\n");										
-								}
-							else
+							if(oSocketList.get(oMixPacket.channel,&oConnection))
 								{
 									if(oMixPacket.flags==CHANNEL_CLOSE)
 										{

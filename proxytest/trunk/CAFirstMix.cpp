@@ -811,6 +811,7 @@ SINT32 CAFirstMix::loop()
 												oqueueMixOut.add(tmpBuff,MIXPACKET_SIZE);
 												
 												pEntry->bIsSuspended=true;
+												pEntry->pHead->cSuspend++;
 											}
 										m_MixedPackets++;
 									}
@@ -841,7 +842,8 @@ SINT32 CAFirstMix::loop()
 									{
 										pfmHashEntry->pQueueSend->remove((UINT32*)&ret);
 #define USER_SEND_BUFFER_RESUME 10000
-										if(pfmHashEntry->pQueueSend->getSize()<USER_SEND_BUFFER_RESUME)
+										if(pfmHashEntry->cSuspend>0&&
+												pfmHashEntry->pQueueSend->getSize()<USER_SEND_BUFFER_RESUME)
 											{
 												fmChannelListEntry* pEntry;
 												pEntry=oChannelList.getFirstChannelForSocket(pfmHashEntry->pMuxSocket);
@@ -856,6 +858,7 @@ SINT32 CAFirstMix::loop()
 															}
 														pEntry=oChannelList.getNextChannel(pEntry);
 													}
+												pfmHashEntry->cSuspend=0;
 											}
 										if(pfmHashEntry->pQueueSend->isEmpty())
 											{
