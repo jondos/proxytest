@@ -31,6 +31,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAUtil.hpp"
 #include "CAThread.hpp"
 
+UINT32 CAQueue::m_aktAlloc=0;
+UINT32 CAQueue::m_maxAlloc=0;
+
 CAQueue::~CAQueue()
 	{
 		m_csQueue.lock();
@@ -59,16 +62,29 @@ SINT32 CAQueue::add(const UINT8* buff,UINT32 size)
 		m_csQueue.lock();
 		if(m_Queue==NULL)
 			{
+#ifndef DO_TRACE
 				m_Queue=new QUEUE;
+#else
+				m_Queue=newQUEUE();
+#endif
 				if(m_Queue==NULL)
 					{
 						m_csQueue.unlock();
 						return E_UNKNOWN;
 					}
+#ifndef DO_TRACE
 				m_Queue->pBuff=new UINT8[size];
+#else
+				m_Queue->pBuff=newUINT8Buff(size);
+				m_Queue->allocSize=size;
+#endif
 				if(m_Queue->pBuff==NULL)
 					{
+#ifndef DO_TRACE
 						delete m_Queue;
+#else
+						deleteQUEUE(m_Queue);
+#endif
 						m_Queue=NULL;
 						m_csQueue.unlock();
 						return E_UNKNOWN;
@@ -80,16 +96,29 @@ SINT32 CAQueue::add(const UINT8* buff,UINT32 size)
 			}
 		else
 			{
+#ifndef DO_TRACE
 				m_lastElem->next=new QUEUE;
+#else
+				m_lastElem->next=newQUEUE();
+#endif
 				if(m_lastElem->next==NULL)
 					{
 						m_csQueue.unlock();
 						return E_UNKNOWN;
 					}
+#ifndef DO_TRACE
 				m_lastElem->next->pBuff=new UINT8[size];
+#else
+				m_lastElem->next->pBuff=newUINT8Buff(size);
+				m_lastElem->next->allocSize=size;
+#endif
 				if(m_lastElem->next->pBuff==NULL)
 					{
+#ifndef DO_TRACE
 						delete m_lastElem->next;
+#else
+						deleteQUEUE(m_lastElem->next);
+#endif
 						m_lastElem->next=NULL;
 						m_csQueue.unlock();
 						return E_UNKNOWN;
@@ -134,10 +163,18 @@ SINT32 CAQueue::get(UINT8* pbuff,UINT32* psize)
 				pbuff+=m_Queue->size;
 				space-=m_Queue->size;
 				m_nQueueSize-=m_Queue->size;
+#ifndef DO_TRACE
 				delete []m_Queue->pBuff;
+#else
+				deleteUINT8Buff(m_Queue->pBuff,m_Queue->allocSize);
+#endif
 				QUEUE* tmp=m_Queue;
 				m_Queue=m_Queue->next;
+#ifndef DO_TRACE
 				delete tmp;
+#else
+				deleteQUEUE(tmp);
+#endif
 				if(m_Queue==NULL)
 					{
 						m_csQueue.unlock();
@@ -231,10 +268,18 @@ SINT32 CAQueue::remove(UINT32* psize)
 				*psize+=m_Queue->size;
 				space-=m_Queue->size;
 				m_nQueueSize-=m_Queue->size;
+#ifndef DO_TRACE
 				delete []m_Queue->pBuff;
+#else
+				deleteUINT8Buff(m_Queue->pBuff,m_Queue->allocSize);
+#endif
 				QUEUE* tmp=m_Queue;
 				m_Queue=m_Queue->next;
+#ifndef DO_TRACE
 				delete tmp;
+#else
+				deleteQUEUE(tmp);
+#endif
 				if(m_Queue==NULL)
 					{
 						m_csQueue.unlock();
