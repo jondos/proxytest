@@ -147,7 +147,7 @@ THREAD_RETURN worker_thread_main_loop(void *arg)
 				{
 					pPool->m_condNotEmpty.wait(pPool->m_mutexQueue);
 				}
-			sSleep(5); 
+			//sSleep(5); 
 			// Has a shutdown started while i was sleeping? 
 			if (pPool->m_bShutdown)
 				{
