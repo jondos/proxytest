@@ -474,7 +474,7 @@ SINT32 CAFirstMixA::loop()
 				if(!bAktiv)
 				  msSleep(100);
 			}
-ERR:
+//ERR:
 //@todo move cleanup to clean() !
 		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
 		m_bRestart=true;
