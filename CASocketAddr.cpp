@@ -40,3 +40,15 @@ CASocketAddr::CASocketAddr(unsigned short port)
 	*/
 		sin_addr.s_addr=INADDR_ANY;
 	}
+
+int CASocketAddr::getHostName(char* buff,int len)
+	{
+		HOSTENT* hosten=gethostbyaddr((const char*)&sin_addr,4,AF_INET);
+		strcpy(buff,hosten->h_name);
+		return 0;
+	}
+
+unsigned short CASocketAddr::getPort()
+	{
+		return ntohs(sin_port);
+	}

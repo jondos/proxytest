@@ -5,34 +5,68 @@
 	#include "CAMsg.hpp"
 #endif
 
-
+#include "httptunnel/common.h"
 CAMuxSocket::CAMuxSocket()
 	{
+		bIsTunneld=false;
 	}
 	
+int CAMuxSocket::useTunnel(char* proxyhost,unsigned short proxyport)
+	{
+		m_szTunnelHost=new char[strlen(proxyhost)+1];
+		strcpy(m_szTunnelHost,proxyhost);
+		m_uTunnelPort=proxyport;
+		bIsTunneld=true;
+		return 0;
+	}
+
 int CAMuxSocket::accept(unsigned short port)
 	{
-		CASocket oSocket;
-		oSocket.create();
-		oSocket.setReuseAddr(true);
-		if(oSocket.listen(port)==SOCKET_ERROR)
-			return SOCKET_ERROR;
-		if(oSocket.accept(m_Socket)==SOCKET_ERROR)
-			return SOCKET_ERROR;
-		oSocket.close();
-		m_Socket.setRecvLowWat(sizeof(MUXPACKET));
+		if(!bIsTunneld)
+			{
+				CASocket oSocket;
+				oSocket.create();
+				oSocket.setReuseAddr(true);
+				if(oSocket.listen(port)==SOCKET_ERROR)
+					return SOCKET_ERROR;
+				if(oSocket.accept(m_Socket)==SOCKET_ERROR)
+					return SOCKET_ERROR;
+				oSocket.close();
+				m_Socket.setRecvLowWat(sizeof(MUXPACKET));
+			}
+		else
+			{
+				m_pTunnel=tunnel_new_server (port,0/*DEFAULT_CONTENT_LENGTH*//*sizeof(MUXPACKET)*/);
+				tunnel_accept(m_pTunnel);
+			}
 		return 0;
 	}
 			
 int CAMuxSocket::connect(LPSOCKETADDR psa)
 	{
-		m_Socket.setRecvLowWat(sizeof(MUXPACKET));
-		return m_Socket.connect(psa);	    
+		if(!bIsTunneld)
+			{
+				m_Socket.setRecvLowWat(sizeof(MUXPACKET));
+				return m_Socket.connect(psa);
+			}
+		else
+			{
+				char buff[255];
+				psa->getHostName(buff,255);
+				m_pTunnel=tunnel_new_client (buff, psa->getPort(),m_szTunnelHost,m_uTunnelPort,
+			   0/*DEFAULT_CONTENT_LENGTH*//*sizeof(MUXPACKET)*/);
+				return tunnel_connect(m_pTunnel);
+			}
 	}
 			
 int CAMuxSocket::close()
 	{
-		return m_Socket.close();
+		if(!bIsTunneld)
+			{
+				return m_Socket.close();
+			}
+		else
+			return tunnel_close(m_pTunnel);
 	}
 
 			
@@ -54,14 +88,25 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 		int len=0;
 		pPacket->channel=htonl(pPacket->channel);
 		pPacket->len=htons(pPacket->len);
-		
-		do
+		if(!bIsTunneld)
 			{
-				len=m_Socket.send(((char*)pPacket)+aktIndex,MuxPacketSize);
-				MuxPacketSize-=len;
-				aktIndex+=len;
-			} while(len>0&&MuxPacketSize>0);
-		
+				do
+					{
+						len=m_Socket.send(((char*)pPacket)+aktIndex,MuxPacketSize);
+						MuxPacketSize-=len;
+						aktIndex+=len;
+					} while(len>0&&MuxPacketSize>0);
+			}
+		else
+			{		
+				do
+					{
+						len=tunnel_write(m_pTunnel,"fghj",4);//((char*)pPacket)+aktIndex,MuxPacketSize);
+						return 0;
+						MuxPacketSize-=len;
+						aktIndex+=len;
+					} while(len>0&&MuxPacketSize>0);	
+			}
 		if(len==SOCKET_ERROR)
 			{
 				#ifdef _DEBUG
@@ -96,12 +141,28 @@ int CAMuxSocket::receive(MUXPACKET* pPacket)
 		int MuxPacketSize=sizeof(MUXPACKET);
 		int aktIndex=0;
 		int len=0;
-		do
+		if(!bIsTunneld)
 			{
-				len=m_Socket.receive(((char*)pPacket)+aktIndex,MuxPacketSize);
-				MuxPacketSize-=len;
-				aktIndex+=len;
-			} while(len>0&&MuxPacketSize>0);
+				do
+					{
+						len=m_Socket.receive(((char*)pPacket)+aktIndex,MuxPacketSize);
+						MuxPacketSize-=len;
+						aktIndex+=len;
+					} while(len>0&&MuxPacketSize>0);
+			}
+		else
+			{
+				do
+					{
+						char buff[6];
+						len=tunnel_read(m_pTunnel,buff,4);//((char*)pPacket)+aktIndex,MuxPacketSize);
+						buff[5]=0;
+						printf(buff);
+						return 0;
+						MuxPacketSize-=len;
+						aktIndex+=len;
+					} while(len>0&&MuxPacketSize>0);
+			}
 		if(len==SOCKET_ERROR||len==0)
 			{
 				#ifdef _DEBUG
