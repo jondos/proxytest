@@ -28,6 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #include "CASignature.hpp"
 #include "CAFirstMix.hpp"
+#include "CAThread.hpp"
 class CAInfoService
 	{
 		public:
@@ -52,4 +53,5 @@ class CAInfoService
 			CRITICAL_SECTION csLevel;
 			CASignature* pSignature;
 			CAFirstMix* m_pFirstMix;
+			CAThread m_threadRunLoop;
 	};

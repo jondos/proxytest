@@ -226,6 +226,7 @@ CAInfoService::CAInfoService(CAFirstMix* pFirstMix)
 CAInfoService::~CAInfoService()
 	{
 		stop();
+		m_threadRunLoop.join();
 		DeleteCriticalSection(&csLevel);
 	}
 
@@ -282,9 +283,8 @@ int CAInfoService::start()
 		if(pSignature==NULL)
 			return -1;
 		bRun=true;
-		pthread_t othread;
-		pthread_create(&othread,NULL,InfoLoop,this);
-		return 0;
+		m_threadRunLoop.setMainLoop(InfoLoop);
+		return m_threadRunLoop.start(this);
 	}
 
 int CAInfoService::stop()

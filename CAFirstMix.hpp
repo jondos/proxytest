@@ -33,32 +33,25 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMuxSocket.hpp"
 #include "CAASymCipher.hpp"
 #include "CASignature.hpp"
-//#include "CAMuxChannelList.hpp"
+#include "CAFirstMixChannelList.hpp"
 #include "CAIPList.hpp" 
+#include "CASocketGroup.hpp"
 #include "CAQueue.hpp"
 
 THREAD_RETURN loopSendToMix(void *param);
+THREAD_RETURN loopAcceptUsers(void *param);
 
+class CAInfoService;
 class CAFirstMix:public CAMix
 	{
 		public:
-			CAFirstMix(){/*InitializeCriticalSection(&csResume);*/m_MixedPackets=0;}
-			virtual ~CAFirstMix(){/*DeleteCriticalSection(&csResume);*/}
+			CAFirstMix(){m_MixedPackets=0;}
+			virtual ~CAFirstMix(){}
 		private:
 			SINT32 loop();
 			SINT32 init();
 			SINT32 clean();
 			SINT32 initOnce();
-		private:
-			CASocket		m_socketIn;
-      CASocket		m_socketHttpsIn;
-			CAMuxSocket muxOut;
-			UINT8* mKeyInfoBuff;
-			UINT16 mKeyInfoSize;
-			UINT32 m_MixedPackets;
-			CAASymCipher mRSA;
-			CASignature mSignature;
-			//CAMuxChannelList oSuspendList;
 		public:
 			SINT32 getMixedPackets(UINT32* ppackets)
 				{
@@ -70,9 +63,24 @@ class CAFirstMix:public CAMix
 					return E_UNKNOWN;
 				}
 		friend THREAD_RETURN loopSendToMix(void*);
+		friend THREAD_RETURN loopAcceptUsers(void*);
 		private:	
 			CAIPList* m_pIPList;
 			CAQueue* m_pQueueSendToMix;
+			CAFirstMixChannelList* m_pChannelList;
+			UINT32 m_nUser;
+			UINT32 m_nSocketsIn;
+			CASocket* m_arrSocketsIn;
+			CASocketGroup* m_psocketgroupUsersRead;
+			CAInfoService* m_pInfoService;
+//			CASocket		m_socketIn;
+//      CASocket		m_socketHttpsIn;
+			CAMuxSocket muxOut;
+			UINT8* m_KeyInfoBuff;
+			UINT16 m_KeyInfoSize;
+			UINT32 m_MixedPackets;
+			CAASymCipher mRSA;
+			CASignature mSignature;
 	};
 
 #endif

@@ -256,10 +256,6 @@ int main(int argc, const char* argv[])
 				exit(-1);
 			}
 
-		if(CAQueue::test()!=E_SUCCESS)
-			CAMsg::printMsg(LOG_CRIT,"CAQueue::test() NOT passed! Exiting\n");
-		else
-			CAMsg::printMsg(LOG_DEBUG,"CAQueue::test() passed!\n");
 		
 		//startup
 		#ifdef _WIN32
@@ -278,6 +274,12 @@ int main(int argc, const char* argv[])
 			#endif
 		#endif
 
+		if(CAQueue::test()!=E_SUCCESS)
+			CAMsg::printMsg(LOG_CRIT,"CAQueue::test() NOT passed! Exiting\n");
+		else
+			CAMsg::printMsg(LOG_DEBUG,"CAQueue::test() passed!\n");
+
+		exit(0);
 		options.parse(argc,argv);
 		UINT8 buff[255];
 #ifndef WIN32

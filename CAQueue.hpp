@@ -27,6 +27,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CAQUEUE__
 #define __CAQUEUE__
+#include "CAConditionVariable.hpp"
+
 struct _t_queue
 	{
 		UINT8* pBuff;
@@ -38,6 +40,8 @@ typedef struct _t_queue QUEUE;
 
 /** This is a simple FIFO-Queue. You can add data and get them back.
 	* This class is thread safe.
+	* TODO: The dandling of getAndWit is not correct because remove could intercept....
+	* Maybe we do not neeed an other Mutex other than then ConVar....
 	*/
 class CAQueue
 	{
@@ -51,6 +55,7 @@ class CAQueue
 			~CAQueue();
 			SINT32 add(const UINT8* buff,UINT32 size);
 			SINT32 get(UINT8* pbuff,UINT32* psize);
+			SINT32 getOrWait(UINT8* pbuff,UINT32* psize);
 			SINT32 peek(UINT8* pbuff,UINT32* psize);
 			SINT32 remove(UINT32* psize);
 			
@@ -80,6 +85,7 @@ class CAQueue
 			QUEUE* m_Queue;
 			QUEUE* m_lastElem;
 			CRITICAL_SECTION m_csQueue;
+			CAConditionVariable m_convarSize;
 			UINT32 m_nQueueSize;
 	};
 #endif

@@ -312,6 +312,10 @@ SOURCE=.\CACmdLnOptions.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CAConditionVariable.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\CADatagramSocket.cpp
 # End Source File
 # Begin Source File
@@ -352,6 +356,10 @@ SOURCE=.\CAMsg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CAMutex.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\CAMuxSocket.cpp
 # End Source File
 # Begin Source File
@@ -361,6 +369,10 @@ SOURCE=.\CAQueue.cpp
 # Begin Source File
 
 SOURCE=.\CARoundTripTime.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CASemaphore.cpp
 # End Source File
 # Begin Source File
 
@@ -462,6 +474,10 @@ SOURCE=.\CACmdLnOptions.hpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CAConditionVariable.hpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\CADatagramSocket.hpp
 # End Source File
 # Begin Source File
@@ -502,6 +518,10 @@ SOURCE=.\CAMsg.hpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CAMutex.hpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\CAMuxSocket.hpp
 # End Source File
 # Begin Source File
@@ -511,6 +531,10 @@ SOURCE=.\CAQueue.hpp
 # Begin Source File
 
 SOURCE=.\CARoundTripTime.hpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CASemaphore.hpp
 # End Source File
 # Begin Source File
 
