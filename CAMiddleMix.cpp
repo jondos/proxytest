@@ -419,8 +419,8 @@ THREAD_RETURN loopDownStream(void *p)
 									continue;
 								#else
 									pMixPacket->channel=DUMMY_CHANNEL;
-									pMixPacket->flag=CHANNEL_CLOSE;
-									getRandom(pMixPacklet->data,DATA_SIZE);
+									pMixPacket->flags=CHANNEL_CLOSE;
+									getRandom(pMixPacket->data,DATA_SIZE);
 									pPool->pool(pMixPacket);
 									if(pMix->m_pMuxIn->send(pMixPacket)==SOCKET_ERROR)
 										goto ERR;								
@@ -448,8 +448,8 @@ THREAD_RETURN loopDownStream(void *p)
 						#ifdef USE_POOL	
 							if(pMix->channel==DUMMY_CHANNEL)
 								{
-									pMixPacket->flag=CHANNEL_CLOSE;
-									getRandom(pMixPacklet->data,DATA_SIZE);
+									pMixPacket->flags=CHANNEL_CLOSE;
+									getRandom(pMixPacket->data,DATA_SIZE);
 									pPool->pool(pMixPacket);
 									if(pMix->m_pMuxIn->send(pMixPacket)==SOCKET_ERROR)
 										goto ERR;								
