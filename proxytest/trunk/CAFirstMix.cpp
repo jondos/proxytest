@@ -456,7 +456,6 @@ SINT32 CAFirstMix::loop()
 	{
 //		CAFirstMixChannelList  oChannelList;
 
-		//CASocketGroup osocketgroupAccept;
 		//CASocketGroup osocketgroupUsersRead;
 //		CASocketGroup osocketgroupUsersWrite;
 		CASingleSocketGroup osocketgroupMixOut;
@@ -504,10 +503,17 @@ SINT32 CAFirstMix::loop()
 		CAMsg::printMsg(LOG_DEBUG,"Starting Message Loop... \n");
 		bool bAktiv;
 		//Starting thread for Step 1
+		UINT32 i;
+#ifndef _DEBUG
 		CAThread threadAcceptUsers;
 		threadAcceptUsers.setMainLoop(loopAcceptUsers);
 		threadAcceptUsers.start(this);
-		
+#else
+		CASocketGroup osocketgroupAccept;
+		for(i=0;i<m_nSocketsIn;i++)
+			osocketgroupAccept.add(m_arrSocketsIn[i]);
+
+#endif		
 		//Starting thread for Step 2
 		 UINT8 ip[4];
 		UINT8 rsaBuff[RSA_SIZE];
@@ -526,23 +532,24 @@ SINT32 CAFirstMix::loop()
 
 //First Step
 //Checking for new connections		
-// Now in a separat Thread....
+// Now in a separat Thread.... (if NOt _DEBUG defined!)
+
+#ifdef _DEBUG				
 				
-/*				
 				countRead=osocketgroupAccept.select(false,0);
-				UINT32 i=0;
+				i=0;
 				if(countRead>0)
 					bAktiv=true;
-				while(countRead>0&&i<maxSocketsIn)
+				while(countRead>0&&i<m_nSocketsIn)
 					{						
-						if(osocketgroupAccept.isSignaled(*socketsIn[i]))
+						if(osocketgroupAccept.isSignaled(m_arrSocketsIn[i]))
 							{
 								countRead--;
 								#ifdef _DEBUG
 									CAMsg::printMsg(LOG_DEBUG,"New direct Connection from Browser!\n");
 								#endif
-								pnewMuxSocket=new CAMuxSocket;
-								if(socketsIn[i]->accept(*(CASocket*)pnewMuxSocket)==SOCKET_ERROR)
+								CAMuxSocket* pnewMuxSocket=new CAMuxSocket;
+								if(m_arrSocketsIn[i].accept(*(CASocket*)pnewMuxSocket)!=E_SUCCESS)
 									{
 										CAMsg::printMsg(LOG_ERR,"Accept Error %u - direct Connection from Browser!\n",GET_NET_ERROR);
 										delete pnewMuxSocket;
@@ -566,18 +573,17 @@ SINT32 CAFirstMix::loop()
 													#else
 														((CASocket*)pnewMuxSocket)->setKeepAlive(true);
 													#endif
-													((CASocket*)pnewMuxSocket)->send(mKeyInfoBuff,mKeyInfoSize);
+													((CASocket*)pnewMuxSocket)->send(m_KeyInfoBuff,m_KeyInfoSize);
 													((CASocket*)pnewMuxSocket)->setNonBlocking(true);
-													oChannelList.add(pnewMuxSocket,new CAQueue);
-													nUser++;
-													oInfoService.setLevel(nUser,-1,-1);
-													osocketgroupUsersRead.add(*pnewMuxSocket);
+													m_pChannelList->add(pnewMuxSocket,new CAQueue);
+													incUsers();
+													m_psocketgroupUsersRead->add(*pnewMuxSocket);
 												}
 									}
 							}
 						i++;
 					}
-*/
+#endif
 				
 // Second Step 
 // Checking for data from users
@@ -819,13 +825,15 @@ ERR:
 		CAMsg::printMsg	(LOG_CRIT,"Memeory usage after: %u\n",getMemoryUsage());	
 		CAMsg::printMsg(LOG_CRIT,"Stopped InfoService!\n");
 		m_pMuxOut->close();
-		for(UINT32  i=0;i<m_nSocketsIn;i++)
+		for(i=0;i<m_nSocketsIn;i++)
 			m_arrSocketsIn[i].close();
 		//writng one byte to the queue...
 		UINT8 b;
 		m_pQueueSendToMix->add(&b,1);
+#ifndef _DEBUG
 		CAMsg::printMsg(LOG_CRIT,"Wait for LoopAcceptUsers!\n");
 		threadAcceptUsers.join();
+#endif
 		CAMsg::printMsg(LOG_CRIT,"Wait for LoopSendToMix!\n");
 		threadSendToMix.join(); //will not join if queue is empty (and so wating)!!!
 //		threadReadFromUsers.join(); 
@@ -849,7 +857,7 @@ ERR:
 				delete pMuxSocket;
 				pHashEntry=m_pChannelList->getNext();
 			}
-		CAMsg::printMsg	(LOG_CRIT,"Memeory usage after: %u\n",getMemoryUsage());	
+		CAMsg::printMsg	(LOG_CRIT,"Memory usage after: %u\n",getMemoryUsage());	
 		delete pMixPacket;
 		delete []tmpBuff;
 		CAMsg::printMsg(LOG_CRIT,"Main Loop exited!!\n");

@@ -352,7 +352,7 @@ SINT32 CASocket::sendTimeOut(const UINT8* buff,UINT32 len,UINT32 msTimeOut)
 SINT32 CASocket::sendFully(const UINT8* buff,UINT32 len)
 	{
 	  if(len==0)
-			return 0; //nothing to send
+			return E_SUCCESS; //nothing to send
 		SINT32 ret;
 		for(;;)
 			{
