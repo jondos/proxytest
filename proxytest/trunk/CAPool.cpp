@@ -20,6 +20,17 @@ CAPool::CAPool(UINT32 poolsize)
 			}
 	}
 	
+CAPool::~CAPool()
+	{
+		tPoolListEntry* tmpEntry;
+		while(m_pPoolList!=NULL)
+			{
+				tmpEntry=m_pPoolList;
+				m_pPoolList=m_pPoolList->next;
+				delete tmpEntry;
+			}
+	}
+	
 SINT32 CAPool::pool(MIXPACKET* pMixPacket)
 	{
 		return E_SUCCESS;
