@@ -435,7 +435,7 @@ THREAD_RETURN mm_loopDownStream(void *p)
 #endif
 		for(;;)
 			{
-				#ifndef USE_POOL			
+				#ifndef USE_POOL
 					ret=oSocketGroup.select(1000);
 				#else
 					ret=oSocketGroup.select(MIX_POOL_TIMEOUT);
