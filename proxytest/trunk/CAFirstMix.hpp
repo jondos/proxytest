@@ -60,6 +60,7 @@ class CAFirstMix:public CAMix
 					m_pChannelList=NULL;
 					m_pMuxOut=NULL;
 					m_strXmlMixCascadeInfo=NULL;
+					m_xmlKeyInfoBuff=NULL;
 				}
 			virtual ~CAFirstMix(){}
 		private:
@@ -141,6 +142,10 @@ class CAFirstMix:public CAMix
 			CAMuxSocket* m_pMuxOut;
 			UINT8* m_KeyInfoBuff;
 			UINT16 m_KeyInfoSize;
+
+			UINT8* m_xmlKeyInfoBuff;
+			UINT16 m_xmlKeyInfoSize;
+
 			UINT8* m_strXmlMixCascadeInfo;
 			UINT32 m_nMixedPackets;
 			CAASymCipher* m_pRSA;

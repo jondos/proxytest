@@ -180,7 +180,6 @@ SINT32 CAFirstMix::init()
 		return E_SUCCESS;
 	}
 
-
 /**How to end this thread:
 1. Close connection to next mix
 2. put a byte in the Mix-Output-Queue
@@ -219,6 +218,8 @@ THREAD_RETURN loopAcceptUsers(void* param)
 		UINT8* pKeyInfoBuff=pFirstMix->m_KeyInfoBuff;
 		UINT32 nKeyInfoSize=pFirstMix->m_KeyInfoSize;
 
+		UINT8* pxmlKeyInfoBuff=pFirstMix->m_xmlKeyInfoBuff;
+		UINT32 nxmlKeyInfoSize=pFirstMix->m_xmlKeyInfoSize;
 		CASocketGroup osocketgroupAccept;
 		CAMuxSocket* pNewMuxSocket;
 		UINT8* peerIP=new UINT8[4];
@@ -276,7 +277,11 @@ THREAD_RETURN loopAcceptUsers(void* param)
 												#else
 													((CASocket*)pNewMuxSocket)->setKeepAlive(true);
 												#endif
+#ifdef NEW_KEY2USER_PROTOCOL
+												((CASocket*)pNewMuxSocket)->send(pxmlKeyInfoBuff,nxmlKeyInfoSize);
+#else
 												((CASocket*)pNewMuxSocket)->send(pKeyInfoBuff,nKeyInfoSize);
+#endif
 												((CASocket*)pNewMuxSocket)->setNonBlocking(true);
 												pChannelList->add(pNewMuxSocket,peerIP,new CAQueue);
 												pFirstMix->incUsers();
@@ -428,7 +433,7 @@ END_THREAD:
 */
 
 #define NO_LOOPACCEPTUSER
-#define NO_LOOP_SEND_TO_MIX
+//#define NO_LOOP_SEND_TO_MIX
 SINT32 CAFirstMix::loop()
 	{
 //		CAFirstMixChannelList  oChannelList;
@@ -554,7 +559,11 @@ SINT32 CAFirstMix::loop()
 													#else
 														((CASocket*)pnewMuxSocket)->setKeepAlive(true);
 													#endif
+#ifdef NEW_KEY2USER_PROTOCOL
+													((CASocket*)pnewMuxSocket)->send(m_xmlKeyInfoBuff,m_xmlKeyInfoSize);
+#else
 													((CASocket*)pnewMuxSocket)->send(m_KeyInfoBuff,m_KeyInfoSize);
+#endif
 													((CASocket*)pnewMuxSocket)->setNonBlocking(true);
 													m_pChannelList->add(pnewMuxSocket,peerIP,new CAQueue);
 													incUsers();
@@ -910,6 +919,9 @@ SINT32 CAFirstMix::clean()
 		if(m_KeyInfoBuff!=NULL)
 			delete []m_KeyInfoBuff;
 		m_KeyInfoBuff=NULL;
+		if(m_xmlKeyInfoBuff!=NULL)
+			delete []m_xmlKeyInfoBuff;
+		m_xmlKeyInfoBuff=NULL;
 		if(m_strXmlMixCascadeInfo!=NULL)
 			delete []m_strXmlMixCascadeInfo;
 		m_strXmlMixCascadeInfo=NULL;
@@ -1008,6 +1020,14 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		
 		m_KeyInfoBuff=new UINT8[(count+1)*256];
 		m_KeyInfoSize=3;
+		
+		//tmp XML-Structure for constructing the XML which is send to each user
+		DOM_Document docXmlKeyInfo=DOM_Document::createDocument();
+		DOM_Element elemRootKey=docXmlKeyInfo.createElement("MixCascade");
+		docXmlKeyInfo.appendChild(elemRootKey);
+		DOM_Node elemMixesKey=docXmlKeyInfo.importNode(elemMixes,true);
+		elemRootKey.appendChild(elemMixesKey);
+		
 		UINT32 tlen;
 		while(child!=NULL)
 			{
@@ -1029,6 +1049,21 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		UINT16 tmp=htons(m_KeyInfoSize-2);
 		memcpy(m_KeyInfoBuff,&tmp,2);
 		m_KeyInfoBuff[2]=count+1;
+
+		//Inserting own Key in XML-Key struct
+		DOM_DocumentFragment docfragKey;
+		m_pRSA->getPublicKeyAsDocumentFragment(docfragKey);
+		DOM_Element elemOwnMix=docXmlKeyInfo.createElement("Mix");
+		elemOwnMix.appendChild(docfragKey);
+		elemMixesKey.insertBefore(elemOwnMix,elemMixesKey.getFirstChild());
+		tlen=0;
+		UINT8* tmpB=DOM_Output::dumpToMem(docXmlKeyInfo,&tlen);
+		m_xmlKeyInfoBuff=new UINT8[tlen+2];
+		memcpy(m_xmlKeyInfoBuff+2,tmpB,tlen);
+		UINT16 s=htons(tlen);
+		memcpy(	m_xmlKeyInfoBuff,&s,2);
+		m_xmlKeyInfoSize=tlen+2;
+		delete []tmpB;
 
 		//Sending symetric key...
 		child=elemMixes.getFirstChild();
@@ -1133,7 +1168,7 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		elemRoot.appendChild(docCascade.importNode(elemMixes,true));
 
 		
-		UINT8* tmpB=DOM_Output::dumpToMem(docCascade,&tlen);
+		tmpB=DOM_Output::dumpToMem(docCascade,&tlen);
 		m_strXmlMixCascadeInfo=new UINT8[tlen+1];
 		memcpy(m_strXmlMixCascadeInfo,tmpB,tlen);
 		m_strXmlMixCascadeInfo[tlen]=0;
