@@ -77,6 +77,10 @@
 /* This is the maximum length of a file system path */
 #undef MAX_PATH
 
+/* This is a flag to read(), to tell the os does not wait for any bytes to
+   arrive */
+#undef MSG_DONTWAIT
+
 /* This is a flag to read(), to tell the os to get no signals */
 #undef MSG_NOSIGNAL
 
