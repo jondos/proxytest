@@ -125,7 +125,7 @@ SINT32 CAFirstMix::loop()
 			}
 		delete fileBuff;
 		oInfoService.setSignature(&oSignature);
-		oInfoService.setLevel(0,0,0);
+		oInfoService.setLevel(0,-1,-1);
 		oInfoService.sendHelo();
 		oInfoService.start();
 		int nUser=0;
@@ -161,7 +161,7 @@ SINT32 CAFirstMix::loop()
 								((CASocket*)newMuxSocket)->send(infoBuff,infoSize);
 								oMuxChannelList.add(newMuxSocket);
 								nUser++;
-								oInfoService.setLevel(nUser,0,0);
+								oInfoService.setLevel(nUser,-1,-1);
 								oSocketGroup.add(*newMuxSocket);
 							}
 					}
@@ -294,7 +294,7 @@ SINT32 CAFirstMix::loop()
 														delete otmpEntry.pSocketList;
 													}
 												nUser--;
-												oInfoService.setLevel(nUser,0,0);
+												oInfoService.setLevel(nUser,-1,-1);
 											}
 										else
 											{
