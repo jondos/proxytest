@@ -263,6 +263,7 @@ SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param)
         else
 					{
             requestCommand = REQUEST_COMMAND_HELO;
+            receiveAnswer = true;
 					}
 			}
 		else
@@ -326,7 +327,7 @@ SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param)
 
         if(receiveAnswer)
         {
-            ret = parseHTTPHeader(oSocket, &len);
+            ret = parseHTTPAnswer(oSocket, &len);
             if(ret == E_SUCCESS && len > 0)
             {
                 recvBuff = new UINT8[len+1];
@@ -458,6 +459,12 @@ SINT32 CAInfoService::sendCascadeHelo()
 				if(	oSocket.sendFully(buffHeader,strlen((char*)buffHeader))!=E_SUCCESS||
 						oSocket.sendFully(sendBuff,sendBuffLen)!=E_SUCCESS)
 						goto ERR;
+				//Receive answer --> 200 Ok or failure
+				//HTTP/1.1 200 Ok
+				if(oSocket.receiveFully(buffHeader,12,MIX_TO_INFOSERVICE_TIMEOUT)!=E_SUCCESS)
+					goto ERR;
+				if(memcmp(buffHeader+9,"200",3)!=0)
+					goto ERR;
 				oSocket.close();
 				delete []sendBuff;
 				return E_SUCCESS;	
@@ -542,11 +549,11 @@ SINT32 CAInfoService::handleConfigEvent(DOM_Document& doc)
     return E_SUCCESS;
 }
 
-SINT32 CAInfoService::parseHTTPHeader(CASocket& server, UINT32* contentLength)
+SINT32 CAInfoService::parseHTTPAnswer(CASocket& server, UINT32* contentLength)
 {
     char *line = new char[255];
     SINT32 ret = 0;
-    SINT32 ret2 = E_SUCCESS;
+    SINT32 ret2 = E_UNKNOWN;
     do
     {
         int i=0;
@@ -557,7 +564,7 @@ SINT32 CAInfoService::parseHTTPHeader(CASocket& server, UINT32* contentLength)
             if(byte == '\r' || byte == '\n')
             {
                 line[i++] = 0;
-	}
+						}
             else
             {
                 line[i++] = byte;
@@ -581,6 +588,8 @@ SINT32 CAInfoService::parseHTTPHeader(CASocket& server, UINT32* contentLength)
                 ret2 = E_UNKNOWN;
                 break;
             }
+						else
+							ret2=E_SUCCESS;
         }
         else if(strncmp(line, "Content-length: ", 16) == 0)
         {

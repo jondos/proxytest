@@ -334,6 +334,7 @@ SINT32 CASocket::send(const UINT8* buff,UINT32 len)
 	@retval E_AGAIN if Operation would block on a non-blocking socket
 	@retval E_TIMEDOUT if the timeout was reached
 	@return number of bytes send, or -1 in case of an error
+	///FIXME really buggy!!!!
 */
 SINT32 CASocket::sendTimeOut(const UINT8* buff,UINT32 len,UINT32 msTimeOut)
 	{
@@ -465,8 +466,9 @@ SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len)
 	  return E_SUCCESS;	    	    
 	}
 
-/** Trys to receive all bytes. After the timout value has elapsed, 
-	* the error E_TIMEDOUT is returned
+/** Trys to receive all bytes. If after the timeout value has elapsed, 
+	* not all bytes are received
+	* the error E_TIMEDOUT is returned.
 	*	@param buff byte array, where the received bytes would be stored 
 	*	@param len	on input holds the number of bytes which should be read,
 	*	@param msTimeOut the timout in milli seconds
