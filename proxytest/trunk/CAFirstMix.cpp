@@ -1130,7 +1130,7 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 				if(child.getNodeName().equals("Mix"))
 					{
 						//check Signature....
-						CAMsg::printMsg(LOG_DEBUG,"Try to verify next mix signature...");
+						CAMsg::printMsg(LOG_DEBUG,"Try to verify next mix signature...\n");
 						CASignature oSig;
 						CACertificate* nextCert=options.getNextMixTestCertificate();
 						oSig.setVerifyKey(nextCert);
