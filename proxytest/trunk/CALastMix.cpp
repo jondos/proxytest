@@ -328,6 +328,9 @@ SINT32 CALastMix::loop()
 											}
 										else if(pMixPacket->flags==CHANNEL_SUSPEND)
 											{
+												#ifdef _DEBUG
+													CAMsg::printMsg(LOG_DEBUG,"Suspending channel %u Socket: %u\n",pMixPacket->channel,(SOCKET)(*oConnection.pSocket));
+												#endif
 												osocketgroupCacheRead.remove(*(oConnection.pSocket));
 											}
 										else if(pMixPacket->flags==CHANNEL_RESUME)
