@@ -33,6 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 typedef UINT32 HCHANNEL;
 
+#ifndef PROT2
 #define DATA_SIZE 1000 // Size of Data in a single Mux Packet
 
 #define MUX_HTTP  0 
@@ -46,6 +47,33 @@ typedef struct t_MuxPacket
 		UINT8		reserved;
 		UINT8		data[DATA_SIZE];
 	} MUXPACKET;
+#else
+#define PACKET_SIZE 1024
+typedef struct t_MuxPacket
+	{
+		UINT8		data[PACKET_SIZE];
+	} MUXPACKET;
+
+typedef struct t_FirstMixMuxPacket
+	{
+		union
+			{
+				struct RSA
+					{
+						UINT8			rsa[128];
+						UINT8			data[PACKET_SIZE-128];
+					};
+				struct 
+					{
+						HCHANNEL	channel;
+						UINT16		flags;
+						UINT8			symkey[16];
+						UINT8			data[PACKET_SIZE-22];
+					};
+			};
+	} FIRSTMIX_MUXPACKET;
+
+#endif
 
 class CAMuxSocket
 	{
@@ -59,7 +87,9 @@ class CAMuxSocket
 			int close();
 			int send(MUXPACKET *pPacket);
 			int receive(MUXPACKET *pPacket);
+#ifndef PROT2
 			int close(HCHANNEL channel_id);
+#endif
 			operator CASocket*(){return &m_Socket;}
 			operator SOCKET(){if(!bIsTunneld)
 														return (SOCKET)m_Socket;

@@ -75,6 +75,7 @@ SINT32 CAFirstMix::init()
 			}
 	}
 
+#ifndef PROT2
 SINT32 CAFirstMix::loop()
 	{
 		CAMuxChannelList  oMuxChannelList;
@@ -370,3 +371,300 @@ SINT32 CAFirstMix::loop()
 		return E_SUCCESS;
 	}
 
+#else
+SINT32 CAFirstMix::loop()
+	{
+		CAMuxChannelList  oMuxChannelList;
+		CASocketGroup oSocketGroup;
+		oSocketGroup.add(socketIn);
+		oSocketGroup.add(muxOut);
+		HCHANNEL lastChannelId=1;
+		FIRSTMIX_MUXPACKET oMuxPacket;
+		CONNECTION oConnection;
+		int len;
+		CAMuxSocket* newMuxSocket;
+		MUXLISTENTRY* tmpEntry;
+		REVERSEMUXLISTENTRY* tmpReverseEntry;
+		UINT8 buff[RSA_SIZE];
+		int countRead=0;
+		CAASymCipher oRSA;
+		oRSA.generateKeyPair(1024);
+		UINT32 keySize=oRSA.getPublicKeySize();
+		UINT16 infoSize=ntohs((*(UINT16*)recvBuff))+2;
+		UINT8* infoBuff=new UINT8[infoSize+keySize]; 
+		memcpy(infoBuff,recvBuff,infoSize);
+		infoBuff[2]++; //chainlen erhoehen
+		oRSA.getPublicKey(infoBuff+infoSize,&keySize);
+		infoSize+=keySize;
+		(*(UINT16*)infoBuff)=htons(infoSize-2);
+		#ifdef _DEBUG
+			CAMsg::printMsg(LOG_DEBUG,"New Key Info size: %u\n",infoSize);
+		#endif
+		#ifdef _DEBUG
+		 CAMsg::printMsg(LOG_DEBUG,"Size of MuxPacket: %u\n",sizeof(oMuxPacket));
+		 CAMsg::printMsg(LOG_DEBUG,"Pointer: %p,%p,%p,%p\n",&oMuxPacket.channel,&oMuxPacket.len,&oMuxPacket.type,&oMuxPacket.data);
+		#endif
+		CAInfoService oInfoService;
+		// reading SingKey....
+		UINT8* fileBuff=new UINT8[2048];
+		options.getKeyFileName(fileBuff,2048);
+		int handle=open((char*)fileBuff,O_BINARY|O_RDONLY);
+		if(handle==-1)
+			return E_UNKNOWN;
+		len=read(handle,fileBuff,2048);
+		close(handle);
+		CASignature oSignature;
+		if(oSignature.setSignKey(fileBuff,len,SIGKEY_XML)==-1)
+			{
+				delete fileBuff;
+				return E_UNKNOWN;
+			}
+		delete fileBuff;
+		oInfoService.setSignature(&oSignature);
+		oInfoService.setLevel(0,-1,-1);
+		oInfoService.sendHelo();
+		oInfoService.start();
+		int nUser=0;
+		for(;;)
+			{
+				if((countRead=oSocketGroup.select())==SOCKET_ERROR)
+					{
+						CAMsg::printMsg(LOG_ERR,"SELECT Error %u - Connection from Browser!\n",errno);
+						sleep(1);
+						continue;
+					}
+				if(oSocketGroup.isSignaled(socketIn))
+					{
+						countRead--;
+						#ifdef _DEBUG
+							CAMsg::printMsg(LOG_DEBUG,"New Connection from Browser!\n");
+						#endif
+						newMuxSocket=new CAMuxSocket;
+						if(socketIn.accept(*(CASocket*)newMuxSocket)==SOCKET_ERROR)
+							{
+								CAMsg::printMsg(LOG_ERR,"Accept Error %u - Connection from Browser!\n",errno);
+								delete newMuxSocket;
+							}
+						else
+							{
+								#ifdef _DEBUG
+									int ret=((CASocket*)newMuxSocket)->setKeepAlive(true);
+									if(ret==SOCKET_ERROR)
+										CAMsg::printMsg(LOG_DEBUG,"Fehler bei KeepAlive!");
+								#else
+									((CASocket*)newMuxSocket)->setKeepAlive(true);
+								#endif
+								((CASocket*)newMuxSocket)->send(infoBuff,infoSize);
+								oMuxChannelList.add(newMuxSocket);
+								nUser++;
+								oInfoService.setLevel(nUser,-1,-1);
+								oSocketGroup.add(*newMuxSocket);
+							}
+					}
+				if(oSocketGroup.isSignaled(muxOut))
+						{
+							len=muxOut.receive(&oMuxPacket);
+							if(len==0)
+								{
+									#ifdef _DEBUG
+										CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u ... ",oMuxPacket.channel);
+									#endif
+									REVERSEMUXLISTENTRY otmpReverseEntry;
+									if(oMuxChannelList.remove(oMuxPacket.channel,&otmpReverseEntry))
+										{
+											otmpReverseEntry.pMuxSocket->close(otmpReverseEntry.inChannel);
+											delete otmpReverseEntry.pCipher;
+											#ifdef _DEBUG
+												CAMsg::printMsg(LOG_DEBUG,"closed!\n");
+											#endif
+										}
+								}
+							else if(len==SOCKET_ERROR)
+								{
+									CAMsg::printMsg(LOG_CRIT,"Mux-Channel Receiving Data Error - Exiting!\n");									
+									exit(-1);
+								}
+							else
+								{
+									#ifdef _DEBUG
+										CAMsg::printMsg(LOG_DEBUG,"Sending Data to Browser!");
+									#endif
+									tmpReverseEntry=oMuxChannelList.get(oMuxPacket.channel);
+									if(tmpReverseEntry!=NULL)
+										{
+											oMuxPacket.channel=tmpReverseEntry->inChannel;
+#ifndef AES
+											tmpReverseEntry->pCipher->decrypt((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
+#else
+											tmpReverseEntry->pCipher->decryptAES((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
+#endif
+											tmpReverseEntry->pMuxSocket->send(&oMuxPacket);
+										}
+									else
+										{
+											CAMsg::printMsg(LOG_DEBUG,"Error Sending Data to Browser -- Channel-Id %u no valid!\n",oMuxPacket.channel);										
+										}
+								}
+						}
+			//	if(oSocketGroup.isSignaled(fmIOPair->muxHttpIn))
+			//		{
+			//			countRead--;
+			//			len=fmIOPair->muxHttpIn.receive(&oMuxPacket);
+			//			printf("Receivde Htpp-Packet - Len: %u Content %s",len,oMuxPacket.data); 
+			/*			if(len==SOCKET_ERROR)
+							{
+								MUXLISTENTRY otmpEntry;
+								if(oMuxChannelList.remove(tmpEntry->pMuxSocket,&otmpEntry))
+									{
+										oSocketGroup.remove(*(CASocket*)otmpEntry.pMuxSocket);
+										CONNECTION* tmpCon=otmpEntry.pSocketList->getFirst();
+										while(tmpCon!=NULL)
+											{
+												fmIOPair->muxOut.close(tmpCon->outChannel);
+												tmpCon=otmpEntry.pSocketList->getNext();
+											}
+										otmpEntry.pMuxSocket->close();
+										delete otmpEntry.pMuxSocket;
+										delete otmpEntry.pSocketList;
+									}
+							}
+						else
+							{
+								if(len==0)
+									{
+										if(oMuxChannelList.get(tmpEntry,oMuxPacket.channel,&outChannel))
+											{
+												fmIOPair->muxOut.close(outChannel);
+												oMuxChannelList.remove(outChannel,NULL);
+											}
+										else
+											{
+												#ifdef _DEBUG
+													CAMsg::printMsg(LOG_DEBUG,"Invalid ID to close from Browser!\n");
+												#endif
+											}
+									}
+								else
+									{
+										if(oMuxChannelList.get(tmpEntry,oMuxPacket.channel,&outChannel))
+											{
+												oMuxPacket.channel=outChannel;
+											}
+										else
+											{
+												oMuxChannelList.add(tmpEntry,oMuxPacket.channel,lastChannelId);
+												#ifdef _DEBUG
+													CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",lastChannelId);
+												#endif
+												oMuxPacket.channel=lastChannelId++;
+											}
+										if(fmIOPair->muxOut.send(&oMuxPacket)==SOCKET_ERROR)
+											{
+												CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Exiting!\n");									
+												exit(-1);
+											}
+								}
+						}
+						*/
+				//	}
+				if(countRead>0)
+					{
+						tmpEntry=oMuxChannelList.getFirst();
+						while(tmpEntry!=NULL&&countRead>0)
+							{
+								if(oSocketGroup.isSignaled(*tmpEntry->pMuxSocket))
+									{
+										countRead--;
+										len=tmpEntry->pMuxSocket->receive(&oMuxPacket);
+										if(len==SOCKET_ERROR)
+											{
+												MUXLISTENTRY otmpEntry;
+												if(oMuxChannelList.remove(tmpEntry->pMuxSocket,&otmpEntry))
+													{
+														oSocketGroup.remove(*(CASocket*)otmpEntry.pMuxSocket);
+														CONNECTION* tmpCon=otmpEntry.pSocketList->getFirst();
+														while(tmpCon!=NULL)
+															{
+																muxOut.close(tmpCon->outChannel);
+																delete tmpCon->pCipher;
+																tmpCon=otmpEntry.pSocketList->getNext();
+															}
+														otmpEntry.pMuxSocket->close();
+														delete otmpEntry.pMuxSocket;
+														delete otmpEntry.pSocketList;
+													}
+												nUser--;
+												oInfoService.setLevel(nUser,-1,-1);
+											}
+										else
+											{
+												if(len==0)
+													{
+														if(oMuxChannelList.get(tmpEntry,oMuxPacket.channel,&oConnection))
+															{
+																muxOut.close(oConnection.outChannel);
+																oMuxChannelList.remove(oConnection.outChannel,NULL);
+																delete oConnection.pCipher;
+															}
+														else
+															{
+																#ifdef _DEBUG
+																	CAMsg::printMsg(LOG_DEBUG,"Invalid ID to close from Browser!\n");
+																#endif
+															}
+													}
+												else
+													{
+														CASymCipher* pCipher=NULL;
+														if(oMuxChannelList.get(tmpEntry,oMuxPacket.channel,&oConnection))
+															{
+																oMuxPacket.channel=oConnection.outChannel;
+																pCipher=oConnection.pCipher;
+#ifndef AES
+																pCipher->decrypt((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
+#else
+																pCipher->decryptAES((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
+#endif
+														}
+														else
+															{
+																pCipher= new CASymCipher();
+																oRSA.decrypt((unsigned char*)oMuxPacket.data,buff);
+#ifndef AES
+																pCipher->setDecryptionKey(buff);
+//																pCipher->setEncryptionKey(buff);
+																pCipher->decrypt((unsigned char*)oMuxPacket.data+RSA_SIZE,
+																								 (unsigned char*)oMuxPacket.data+RSA_SIZE-KEY_SIZE,
+																								 DATA_SIZE-RSA_SIZE);
+#else
+																pCipher->setDecryptionKeyAES(buff);
+//																pCipher->setEncryptionKeyAES(buff);
+																pCipher->decryptAES((unsigned char*)oMuxPacket.data+RSA_SIZE,
+																								 (unsigned char*)oMuxPacket.data+RSA_SIZE-KEY_SIZE,
+																								 DATA_SIZE-RSA_SIZE);
+#endif
+																memcpy(oMuxPacket.data,buff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
+																
+																oMuxChannelList.add(tmpEntry,oMuxPacket.channel,lastChannelId,pCipher);
+																#ifdef _DEBUG
+																	CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",lastChannelId);
+																#endif
+																oMuxPacket.channel=lastChannelId++;
+																oMuxPacket.len=oMuxPacket.len-16;
+															}
+														if(muxOut.send(&oMuxPacket)==SOCKET_ERROR)
+															{
+																CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Exiting!\n");									
+																exit(-1);
+															}
+												}
+											}
+									}
+								tmpEntry=oMuxChannelList.getNext();
+							}
+					}
+			}
+		return E_SUCCESS;
+	}
+
+#endif
