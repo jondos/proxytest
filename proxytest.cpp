@@ -222,11 +222,11 @@ int main(int argc, const char* argv[])
 						s=oSocketClient.getSendSpace();
 						CAMsg::printMsg(LOG_DEBUG,"SendSpace now: %i\n",s);
 					}
-*/
+
 				sleep(100000);
 				exit(0);
 			}		
-
+*/
 		//some test....
 		if(MIXPACKET_SIZE!=sizeof(MIXPACKET))
 			{
