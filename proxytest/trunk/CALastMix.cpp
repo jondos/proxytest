@@ -83,7 +83,7 @@ SINT32 CALastMix::init()
 		else
 			{
 				pAddrListen=new CASocketAddrINet();
-				((CASocketAddrINet*)pAddrListen)->setPort(options.getServerPort());
+				((CASocketAddrINet*)pAddrListen)->setAddr((char*)path,options.getServerPort());
 			}
 		if(muxIn.accept(*pAddrListen)==SOCKET_ERROR)
 		    {
