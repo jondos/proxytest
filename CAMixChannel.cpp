@@ -57,25 +57,6 @@ int CAMixChannel::send(int id,char* buff,int len)
 
 int CAMixChannel::receive(int id,char* buff,int len)
 	{
-	/*	EnterCriticalSection(&csReceive);
-		RECEIVELIST* tmp=received;
-		RECEIVELIST* before=NULL;
-		while(tmp!=NULL)
-			{
-				if(tmp->id==id)
-					{
-						if(before!=NULL)
-							before->next=tmp->next;
-						else
-							received=tmp->next;
-						memcpy(buff,tmp->buff,tmp->len);
-						delete tmp->buff;
-						int ret=tmp->len;
-						delete tmp;
-						LeaveCriticalSection(&csReceive);
-						return ret;
-					}
-			}*/
 		CASocket* pSocket=connections.get(id);
 		if(pSocket==NULL)
 		    return SOCKET_ERROR;
@@ -85,17 +66,17 @@ int CAMixChannel::receive(int id,char* buff,int len)
 
 int CAMixChannel::close(int id)
 	{
-		EnterCriticalSection(&csClose);
+//		EnterCriticalSection(&csClose);
 		CASocket* pSocket=connections.remove(id);
 		if(pSocket!=NULL)
 			delete pSocket;
-		LeaveCriticalSection(&csClose);
+//		LeaveCriticalSection(&csClose);
 		return 0;
 	}
 
 int CAMixChannel::close(int id,int mode)
 	{
-		EnterCriticalSection(&csSend);
+		EnterCriticalSection(&csClose);
 		CASocket* pSocket=connections.get(id);
 		int ret;
 		if(pSocket==NULL)

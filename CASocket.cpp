@@ -43,7 +43,7 @@ int CASocket::connect(LPSOCKETADDR psa)
 			
 int CASocket::close()
 	{
-		EnterCriticalSection(&csClose);
+//		EnterCriticalSection(&csClose);
 		int ret;
 		if(m_Socket!=0)
 			{
@@ -54,7 +54,7 @@ int CASocket::close()
 			}
 		else
 			ret=SOCKET_ERROR;
-		LeaveCriticalSection(&csClose);
+//		LeaveCriticalSection(&csClose);
 		return ret;
 	}
 

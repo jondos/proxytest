@@ -7,7 +7,7 @@ class CAMixSocket
 			int connect(LPSOCKETADDR psa);
 			int send(char* buff,int len);
 			int receive(char* buff,int len);
-			int close();
+//			int close();
 			int close(int mode);
 		protected:
 			int id;
