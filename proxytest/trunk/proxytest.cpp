@@ -332,7 +332,7 @@ int main(int argc, char* argv[])
 					{
 					    printf("Can't create Thread 1 - Error:%i\n",err);
 //					    printf("EAGAIN:%i\n",EAGAIN);
-					    printf("MAxThreads:%u\n",PTHREAD_THREADS_MAX);
+//					    printf("MAxThreads:%u\n",PTHREAD_THREADS_MAX);
 					    exit(-2);
 					}
 				    err=pthread_create(&p2,NULL,mixtoproxy,tmpPair2);
@@ -340,7 +340,7 @@ int main(int argc, char* argv[])
 					{
 					    printf("Can't create Thread 2 - Error:%i\n",err);
 //					    printf("EAGAIN:%i\n",EAGAIN);
-					    printf("MAxThreads:%u\n",PTHREAD_THREADS_MAX);
+//					    printf("MAxThreads:%u\n",PTHREAD_THREADS_MAX);
 					    exit(-2);
 					}
 				#endif
