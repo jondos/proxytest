@@ -74,31 +74,26 @@ static void sDSAKeyParamValueHandler(XML::Element &elem, void *userData)
 				if(tmpDSA->p!=NULL)
 					BN_free(tmpDSA->p);
 				tmpDSA->p=BN_bin2bn((unsigned char*)decBuff,decLen,NULL);
-				printf("P: %s\n",BN_bn2dec(tmpDSA->p));
 			break;
 			case 'Q':
 				if(tmpDSA->q!=NULL)
 					BN_free(tmpDSA->q);
 				tmpDSA->q=BN_bin2bn((unsigned char*)decBuff,decLen,NULL);
-				printf("Q: %s\n",BN_bn2dec(tmpDSA->q));
 			break;
 			case 'G':
 				if(tmpDSA->g!=NULL)
 					BN_free(tmpDSA->g);
 				tmpDSA->g=BN_bin2bn((unsigned char*)decBuff,decLen,NULL);
-				printf("G: %s\n",BN_bn2dec(tmpDSA->g));
 			break;
 			case 'X':
 				if(tmpDSA->priv_key!=NULL)
 					BN_free(tmpDSA->priv_key);
 				tmpDSA->priv_key=BN_bin2bn((unsigned char*)decBuff,decLen,NULL);
-				printf("X: %s\n",BN_bn2dec(tmpDSA->priv_key));
 			break;
 			case 'Y':
 				if(tmpDSA->pub_key!=NULL)
 					BN_free(tmpDSA->pub_key);
 				tmpDSA->pub_key=BN_bin2bn((unsigned char*)decBuff,decLen,NULL);
-				printf("Y: %s\n",BN_bn2dec(tmpDSA->pub_key));
 			break;
 		}
 	
@@ -106,8 +101,6 @@ static void sDSAKeyParamValueHandler(XML::Element &elem, void *userData)
 
 static void sDSAKeyValueHandler(XML::Element &elem, void *userData)
 {
-	// found a Document - make a new one 
-	printf("DSAKeyValue found!\n");
 	XML::Handler handlers[] = {
 	XML::Handler("P",sDSAKeyParamValueHandler),
 	XML::Handler("Q",sDSAKeyParamValueHandler),
@@ -121,8 +114,6 @@ static void sDSAKeyValueHandler(XML::Element &elem, void *userData)
 
 static void sKeyValueHandler(XML::Element &elem, void *userData)
 {
-	// found a Document - make a new one 
-	printf("KeyValue found!\n");
 		XML::Handler handlers[] = {
 		XML::Handler("DSAKeyValue",sDSAKeyValueHandler),
 			XML::Handler::END};
@@ -131,8 +122,6 @@ static void sKeyValueHandler(XML::Element &elem, void *userData)
 
 static void sKeyInfoHandler(XML::Element &elem, void *userData)
 {
-	// found a Document - make a new one 
-	printf("KeyInfo found!\n");
 		XML::Handler handlers[] = {
 		XML::Handler("KeyValue",sKeyValueHandler),
 			XML::Handler::END};
@@ -209,25 +198,34 @@ int CASignature::signXML(char* in,unsigned int inlen,char* out,unsigned int *out
 		unsigned int sigSize=255;
 		unsigned char sig[255];
 		unsigned char* c=sig;
+// tmp
+//		tmpBuff[len]=0;
+//		printf("CanSigInfo: %s\n",tmpBuff);
+//		printf("CanSigInfoSize: %u\n",len);
+//tmp end
 		sign((unsigned char*)tmpBuff,len,sig,&sigSize);
 		
 		//Making Base64-Encode r and s
 		STACK* a=NULL;
 		d2i_ASN1_SET(&a,&c,sigSize,(char *(__cdecl *)(void))d2i_ASN1_INTEGER,NULL,V_ASN1_SEQUENCE,V_ASN1_UNIVERSAL);
-		BIGNUM* r =BN_new();
-		ASN1_INTEGER* i=(ASN1_INTEGER*)sk_pop(a);
-		ASN1_INTEGER_to_BN(i,r);
-		ASN1_INTEGER_free(i);
 		BIGNUM* s =BN_new();
-		i=(ASN1_INTEGER*)sk_pop(a);
+		ASN1_INTEGER* i=(ASN1_INTEGER*)sk_pop(a);
 		ASN1_INTEGER_to_BN(i,s);
+		ASN1_INTEGER_free(i);
+		BIGNUM* r =BN_new();
+		i=(ASN1_INTEGER*)sk_pop(a);
+		ASN1_INTEGER_to_BN(i,r);
 		ASN1_INTEGER_free(i);
 		sk_free(a);
 
+//tmp
+//		printf("r: %s\n",BN_bn2dec(r));
+//		printf("s: %s\n",BN_bn2dec(s));
+//tmp-End
 		BN_bn2bin(r,(unsigned char*)tmpBuff);
 		len=BN_num_bytes(r);
 		BN_bn2bin(s,(unsigned char*)tmpBuff+len);
-		len+=BN_num_bytes(r);
+		len+=BN_num_bytes(s);
 		sigSize=255;
 		CABase64::encode(tmpBuff,len,(char*)sig,&sigSize);
 		sig[sigSize]=0;

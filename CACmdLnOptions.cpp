@@ -7,6 +7,7 @@ CACmdLnOptions::CACmdLnOptions()
 		bLocalProxy=bFirstMix=bLastMix=bMiddleMix=false;
 		iTargetPort=iSOCKSPort=iServerPort=iSOCKSServerPort=iInfoServerPort-1;
 		strTargetHost=strSOCKSHost=strInfoServerHost=NULL;
+		strKeyFileName=NULL;
   }
 
 CACmdLnOptions::~CACmdLnOptions()
@@ -23,6 +24,8 @@ CACmdLnOptions::~CACmdLnOptions()
 			{
 				delete strInfoServerHost;
 	    }
+		if(strKeyFileName!=NULL)
+			delete strKeyFileName;
   }
     
 int CACmdLnOptions::parse(int argc,const char** argv)
@@ -36,6 +39,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 	int SOCKSport=-1;
 	char* socks=NULL;
 	char* infoserver=NULL;
+	char* keyfile=NULL;
 	poptOption options[]=
 	 {
 		{"daemon",'d',POPT_ARG_NONE,&iDaemon,0,"start as daemon",NULL},
@@ -45,6 +49,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 		{"socksport",'s',POPT_ARG_INT,&SOCKSport,0,"listening port for socks","<portnumber>"},
 		{"socksproxy",'o',POPT_ARG_STRING,&socks,0,"socks proxy","<ip:port>"},
 		{"infoserver",'i',POPT_ARG_STRING,&infoserver,0,"info server","<ip:port>"},
+		{"key",'k',POPT_ARG_STRING,&keyfile,0,"sign key file","<file>"},
 		POPT_AUTOHELP
 		{NULL,0,0,
 		NULL,0,NULL,NULL}
@@ -91,6 +96,12 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 					iInfoServerPort=atol(tmpStr+1);
 						}
 				free(infoserver);	
+	    }
+	if(keyfile!=NULL)
+	    {
+					strKeyFileName=new char[strlen(keyfile)+1];
+					strcpy(strKeyFileName,keyfile);
+					free(keyfile);	
 	    }
 	iServerPort=port;
 	iSOCKSServerPort=SOCKSport;
@@ -170,6 +181,18 @@ int CACmdLnOptions::getInfoServerHost(char* host,int len)
 				}
 		strcpy(host,strInfoServerHost);
 		return strlen(strInfoServerHost);
+  }
+
+int CACmdLnOptions::getKeyFileName(char* filename,int len)
+  {
+		if(strKeyFileName==NULL)
+				return -1;
+		if(len<=(int)strlen(strKeyFileName))
+				{
+					return strlen(strKeyFileName)+1;		
+				}
+		strcpy(filename,strKeyFileName);
+		return strlen(strKeyFileName);
   }
 
 bool CACmdLnOptions::isFirstMix()
