@@ -89,21 +89,22 @@ SINT32 CAFirstMix::init()
 				((CASocketAddrINet*)pAddrNext)->setAddr(strTarget,options.getTargetPort());
 				CAMsg::printMsg(LOG_INFO,"Try connecting to next Mix: %s:%u ...\n",strTarget,options.getTargetPort());
 			}
-		if(((CASocket*)muxOut)->create(pAddrNext->getType())!=E_SUCCESS)
+		m_pMuxOut=new CAMuxSocket();
+		if(((CASocket*)(*m_pMuxOut))->create(pAddrNext->getType())!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Cannot create SOCKET for connection to next Mix!\n");
 				return E_UNKNOWN;
 			}
-		((CASocket*)muxOut)->setSendBuff(500*MIXPACKET_SIZE);
-		((CASocket*)muxOut)->setRecvBuff(500*MIXPACKET_SIZE);
-		if(((CASocket*)muxOut)->setSendLowWat(MIXPACKET_SIZE)!=E_SUCCESS)
+		((CASocket*)(*m_pMuxOut))->setSendBuff(500*MIXPACKET_SIZE);
+		((CASocket*)(*m_pMuxOut))->setRecvBuff(500*MIXPACKET_SIZE);
+		if(((CASocket*)(*m_pMuxOut))->setSendLowWat(MIXPACKET_SIZE)!=E_SUCCESS)
 			CAMsg::printMsg(LOG_INFO,"SOCKET Option SENDLOWWAT not set!\n");
-		CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET RecvBuffSize: %i\n",((CASocket*)muxOut)->getRecvBuff());
-		CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET SendBuffSize: %i\n",((CASocket*)muxOut)->getSendBuff());
-		CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET SendLowWatSize: %i\n",((CASocket*)muxOut)->getSendLowWat());
+		CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET RecvBuffSize: %i\n",((CASocket*)(*m_pMuxOut))->getRecvBuff());
+		CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET SendBuffSize: %i\n",((CASocket*)(*m_pMuxOut))->getSendBuff());
+		CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET SendLowWatSize: %i\n",((CASocket*)(*m_pMuxOut))->getSendLowWat());
 
 
-		if(muxOut.connect(*pAddrNext,10,10)!=E_SUCCESS)
+		if(m_pMuxOut->connect(*pAddrNext,10,10)!=E_SUCCESS)
 			{
 				delete pAddrNext;
 				CAMsg::printMsg(LOG_CRIT,"Cannot connect to next Mix!\n");
@@ -113,15 +114,15 @@ SINT32 CAFirstMix::init()
 
 		CAMsg::printMsg(LOG_INFO," connected!\n");
 //		sleep(1);
-		if(((CASocket*)muxOut)->setKeepAlive((UINT32)1800)!=E_SUCCESS)
+		if(((CASocket*)(*m_pMuxOut))->setKeepAlive((UINT32)1800)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_INFO,"Socket option TCP-KEEP-ALIVE returned an error - so not set!\n");
-				if(((CASocket*)muxOut)->setKeepAlive(true)!=E_SUCCESS)
+				if(((CASocket*)(*m_pMuxOut))->setKeepAlive(true)!=E_SUCCESS)
 					CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
 			}
 
 		UINT16 len;
-		if(((CASocket*)muxOut)->receiveFully((UINT8*)&len,2)!=E_SUCCESS)
+		if(((CASocket*)(*m_pMuxOut))->receiveFully((UINT8*)&len,2)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info lenght!\n");
 				return E_UNKNOWN;
@@ -130,7 +131,7 @@ SINT32 CAFirstMix::init()
 		UINT8* recvBuff=new unsigned char[ntohs(len)+2];
 		memcpy(recvBuff,&len,2);
 
-		if(((CASocket*)muxOut)->receiveFully(recvBuff+2,ntohs(len))!=E_SUCCESS)
+		if(((CASocket*)(*m_pMuxOut))->receiveFully(recvBuff+2,ntohs(len))!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info!\n");
 				delete recvBuff;
@@ -196,6 +197,7 @@ SINT32 CAFirstMix::init()
 		m_pQueueSendToMix=new CAQueue();
 		m_pChannelList=new CAFirstMixChannelList();
 		m_psocketgroupUsersRead=new CASocketGroup;
+		m_psocketgroupUsersWrite=new CASocketGroup;
 		m_pInfoService=new CAInfoService(this);
 		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix init() succeded\n");
 		return E_SUCCESS;
@@ -205,7 +207,7 @@ SINT32 CAFirstMix::init()
 THREAD_RETURN loopSendToMix(void* param)
 	{
 		CAQueue* pQueue=((CAFirstMix*)param)->m_pQueueSendToMix;
-		CASocket* pSocket=(CASocket *)((CAFirstMix*)param)->muxOut;
+		CASocket* pSocket=(CASocket *)(*((CAFirstMix*)param)->m_pMuxOut);
 		UINT8* buff=new UINT8[0xFFFF];
 		UINT32 len;
 		for(;;)
@@ -286,8 +288,7 @@ THREAD_RETURN loopAcceptUsers(void* param)
 												((CASocket*)pNewMuxSocket)->send(pKeyInfoBuff,nKeyInfoSize);
 												((CASocket*)pNewMuxSocket)->setNonBlocking(true);
 												pChannelList->add(pNewMuxSocket,new CAQueue);
-												nUser++;
-												pInfoService->setLevel(nUser,-1,-1);
+												pFirstMix->incUsers();
 												psocketgroupUsersRead->add(*pNewMuxSocket);
 											}
 								}
@@ -302,13 +303,133 @@ THREAD_RETURN loopAcceptUsers(void* param)
 	}
 
 
+THREAD_RETURN loopReadFromUsers(void* param)
+	{
+		CAFirstMix* pFirstMix=(CAFirstMix*)param;
+		CAFirstMixChannelList* pChannelList=pFirstMix->m_pChannelList;
+		CASocketGroup* psocketgroupUsersRead=pFirstMix->m_psocketgroupUsersRead;
+		CASocketGroup* psocketgroupUsersWrite=pFirstMix->m_psocketgroupUsersWrite;
+		CAQueue* pQueueSendToMix=pFirstMix->m_pQueueSendToMix;
+		CAInfoService* pInfoService=pFirstMix->m_pInfoService;
+		CAASymCipher* pRSA=pFirstMix->m_pRSA;
+		CAIPList* pIPList=pFirstMix->m_pIPList;
+		CAMuxSocket* pNextMix=pFirstMix->m_pMuxOut;
+
+		CAMuxSocket* pMuxSocket;
+		
+		SINT32 countRead;
+		SINT32 ret;
+		UINT8* ip=new UINT8[4];
+		UINT8* tmpBuff=new UINT8[MIXPACKET_SIZE];
+		MIXPACKET* pMixPacket=new MIXPACKET;
+		UINT8* rsaBuff=new UINT8[RSA_SIZE];
+
+		fmHashTableEntry* pHashEntry;
+		fmChannelListEntry* pEntry;
+		CASymCipher* pCipher=NULL;
+	
+		for(;;)
+			{
+				pHashEntry=pChannelList->getFirst();
+				countRead=psocketgroupUsersRead->select(false,1000); //if we sleep her forever, we will not notice new sockets...
+				while(pHashEntry!=NULL&&countRead>0)
+					{
+						pMuxSocket=pHashEntry->pMuxSocket;
+						if(psocketgroupUsersRead->isSignaled(*pMuxSocket))
+							{
+								countRead--;
+								ret=pMuxSocket->receive(pMixPacket,0);
+								if(ret==SOCKET_ERROR)
+									{
+										((CASocket*)pMuxSocket)->getPeerIP(ip);
+										pIPList->removeIP(ip);
+										psocketgroupUsersRead->remove(*(CASocket*)pMuxSocket);
+										psocketgroupUsersWrite->remove(*(CASocket*)pMuxSocket);
+										pEntry=pChannelList->getFirstChannelForSocket(pMuxSocket);
+										while(pEntry!=NULL)
+											{
+												pNextMix->close(pEntry->channelOut,tmpBuff);
+												pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
+												delete pEntry->pCipher;
+												pEntry=pChannelList->getNextChannel(pEntry);
+											}
+										ASSERT(pHashEntry->pQueueSend!=NULL,"Send queue is NULL");
+										delete pHashEntry->pQueueSend;
+										pChannelList->remove(pMuxSocket);
+										pMuxSocket->close();
+										delete pMuxSocket;
+										pFirstMix->decUsers();
+									}
+								else if(ret==MIXPACKET_SIZE)
+									{
+										if(pMixPacket->flags==CHANNEL_CLOSE)
+											{
+												pEntry=pChannelList->get(pMuxSocket,pMixPacket->channel);
+												if(pEntry!=NULL)
+													{
+														pNextMix->close(pEntry->channelOut,tmpBuff);
+														pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
+														delete pEntry->pCipher;
+														pChannelList->remove(pMuxSocket,pMixPacket->channel);
+													}
+												else
+													{
+														#ifdef _DEBUG
+															CAMsg::printMsg(LOG_DEBUG,"Invalid ID to close from Browser!\n");
+														#endif
+													}
+											}
+										else
+											{
+												pEntry=pChannelList->get(pMuxSocket,pMixPacket->channel);
+												if(pEntry!=NULL)
+													{
+														pMixPacket->channel=pEntry->channelOut;
+														pCipher=pEntry->pCipher;
+														pCipher->decryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+													}
+												else
+													{
+														pCipher= new CASymCipher();
+														pRSA->decrypt(pMixPacket->data,rsaBuff);
+														pCipher->setKeyAES(rsaBuff);
+														pCipher->decryptAES(pMixPacket->data+RSA_SIZE,
+																						 pMixPacket->data+RSA_SIZE-KEY_SIZE,
+																						 DATA_SIZE-RSA_SIZE);
+														memcpy(pMixPacket->data,rsaBuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
+
+														pChannelList->add(pMuxSocket,pMixPacket->channel,pCipher,&pMixPacket->channel);
+														#ifdef _DEBUG
+															CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",pMixPacket->channel);
+														#endif
+														//oMixPacket.channel=lastChannelId++;
+													}
+												pNextMix->send(pMixPacket,tmpBuff);
+												pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
+												pFirstMix->incMixedPackets();
+											}
+									}
+							}
+						pHashEntry=pChannelList->getNext();
+					}
+			}
+ERR:
+		delete ip;
+		delete tmpBuff;
+		delete pMixPacket;
+		delete rsaBuff;
+		THREAD_RETURN_SUCCESS;
+	}
+
+
+
 SINT32 CAFirstMix::loop()
 	{
 //		CAFirstMixChannelList  oChannelList;
 
 		//CASocketGroup osocketgroupAccept;
 		//CASocketGroup osocketgroupUsersRead;
-		CASocketGroup osocketgroupUsersWrite;
+//		CASocketGroup osocketgroupUsersWrite;
 		CASingleSocketGroup osocketgroupMixOut;
 //		CAMuxSocket* pnewMuxSocket;
 		SINT32 countRead;
@@ -317,7 +438,7 @@ SINT32 CAFirstMix::loop()
 //		CAInfoService oInfoService(this);
 		m_nUser=0;
 		SINT32 ret;
-		UINT8 rsaBuff[RSA_SIZE];
+//		UINT8 rsaBuff[RSA_SIZE];
 //		UINT32 maxSocketsIn;
 //		osocketgroupAccept.add(m_socketIn);
 //    CASocket** socketsIn;
@@ -338,19 +459,19 @@ SINT32 CAFirstMix::loop()
 				socketsIn[0]=&m_socketIn;
 			}
 */
-		osocketgroupMixOut.add(muxOut);
-		muxOut.setCrypt(true);
+		osocketgroupMixOut.add(*m_pMuxOut);
+		m_pMuxOut->setCrypt(true);
 		//((CASocket*)muxOut)->setNonBlocking(true);
 		
 		m_pInfoService->setSignature(&mSignature);
 		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix InfoService - Signature set\n");
-		m_pInfoService->setLevel(0,-1,-1);
+//		m_pInfoService->setLevel(0,-1,-1);
 		m_pInfoService->sendHelo();
 		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix Helo sended\n");
 		m_pInfoService->start();
 		CAMsg::printMsg(LOG_DEBUG,"InfoService Loop started\n");
 
-		UINT8 ip[4];
+//		UINT8 ip[4];
 		UINT8* tmpBuff=new UINT8[MIXPACKET_SIZE];
 		CAMsg::printMsg(LOG_DEBUG,"Starting Message Loop... \n");
 		bool bAktiv;
@@ -359,6 +480,11 @@ SINT32 CAFirstMix::loop()
 		threadAcceptUsers.setMainLoop(loopAcceptUsers);
 		threadAcceptUsers.start(this);
 		
+		//Starting thread for Step 2
+		CAThread threadReadFromUsers;
+		threadReadFromUsers.setMainLoop(loopReadFromUsers);
+		threadReadFromUsers.start(this);
+
 		//Starting thread for Step 4
 		CAThread threadSendToMix;
 		threadSendToMix.setMainLoop(loopSendToMix);
@@ -425,6 +551,9 @@ SINT32 CAFirstMix::loop()
 				
 // Second Step 
 // Checking for data from users
+// Now in a separate Thread (see loopReadFromUsers())
+
+/*
 				fmHashTableEntry* pHashEntry=m_pChannelList->getFirst();
 				countRead=m_psocketgroupUsersRead->select(false,0);
 				if(countRead>0)
@@ -441,12 +570,12 @@ SINT32 CAFirstMix::loop()
 										((CASocket*)pMuxSocket)->getPeerIP(ip);
 										m_pIPList->removeIP(ip);
 										m_psocketgroupUsersRead->remove(*(CASocket*)pMuxSocket);
-										osocketgroupUsersWrite.remove(*(CASocket*)pMuxSocket);
+										m_psocketgroupUsersWrite->remove(*(CASocket*)pMuxSocket);
 										fmChannelListEntry* pEntry;
 										pEntry=m_pChannelList->getFirstChannelForSocket(pMuxSocket);
 										while(pEntry!=NULL)
 											{
-												muxOut.close(pEntry->channelOut,tmpBuff);
+												m_pMuxOut->close(pEntry->channelOut,tmpBuff);
 												m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
                         delete pEntry->pCipher;
 												pEntry=m_pChannelList->getNextChannel(pEntry);
@@ -456,8 +585,7 @@ SINT32 CAFirstMix::loop()
 										m_pChannelList->remove(pMuxSocket);
 										pMuxSocket->close();
 										delete pMuxSocket;
-										m_nUser--;
-										m_pInfoService->setLevel(m_nUser,-1,-1);
+										incUsers();
 									}
 								else if(ret==MIXPACKET_SIZE)
 									{
@@ -467,7 +595,7 @@ SINT32 CAFirstMix::loop()
 												pEntry=m_pChannelList->get(pMuxSocket,pMixPacket->channel);
 												if(pEntry!=NULL)
 													{
-														muxOut.close(pEntry->channelOut,tmpBuff);
+														m_pMuxOut->close(pEntry->channelOut,tmpBuff);
 														m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
                             delete pEntry->pCipher;
 														m_pChannelList->remove(pMuxSocket,pMixPacket->channel);
@@ -506,15 +634,15 @@ SINT32 CAFirstMix::loop()
 														#endif
 														//oMixPacket.channel=lastChannelId++;
 													}
-												muxOut.send(pMixPacket,tmpBuff);
+												m_pMuxOut->send(pMixPacket,tmpBuff);
 												m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
-												m_MixedPackets++;
+												incMixedPackets();
 											}
 									}
 							}
 						pHashEntry=m_pChannelList->getNext();
 					}
-
+*/
 //Third step
 //Sending to next mix
 
@@ -527,7 +655,7 @@ SINT32 CAFirstMix::loop()
 					{
 						bAktiv=true;
 						countRead--;
-						ret=muxOut.receive(pMixPacket,0);
+						ret=m_pMuxOut->receive(pMixPacket,0);
 						if(ret==SOCKET_ERROR)
 							{
 								CAMsg::printMsg(LOG_CRIT,"Mux-Out-Channel Receiving Data Error - Exiting!\n");
@@ -545,7 +673,7 @@ SINT32 CAFirstMix::loop()
 									{
 										pEntry->pHead->pMuxSocket->close(pEntry->channelIn,tmpBuff);
 										pEntry->pHead->pQueueSend->add(tmpBuff,MIXPACKET_SIZE);
-										osocketgroupUsersWrite.add(*pEntry->pHead->pMuxSocket);
+										m_psocketgroupUsersWrite->add(*pEntry->pHead->pMuxSocket);
 										delete pEntry->pCipher;
 										m_pChannelList->remove(pEntry->pHead->pMuxSocket,pEntry->channelIn);
 									}
@@ -563,7 +691,7 @@ SINT32 CAFirstMix::loop()
 										
 										pEntry->pHead->pMuxSocket->send(pMixPacket,tmpBuff);
 										pEntry->pHead->pQueueSend->add(tmpBuff,MIXPACKET_SIZE);
-										osocketgroupUsersWrite.add(*pEntry->pHead->pMuxSocket);
+										m_psocketgroupUsersWrite->add(*pEntry->pHead->pMuxSocket);
 #define MAX_USER_SEND_QUEUE 100000
 										if(pEntry->pHead->pQueueSend->getSize()>MAX_USER_SEND_QUEUE&&
 												!pEntry->bIsSuspended)
@@ -573,13 +701,13 @@ SINT32 CAFirstMix::loop()
 												#ifdef _DEBUG
 													CAMsg::printMsg(LOG_INFO,"Sending suspend for channel: %u\n",pMixPacket->channel);
 												#endif												
-												muxOut.send(pMixPacket,tmpBuff);
+												m_pMuxOut->send(pMixPacket,tmpBuff);
 												m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
 												
 												pEntry->bIsSuspended=true;
 												pEntry->pHead->cSuspend++;
 											}
-										m_MixedPackets++;
+										incMixedPackets();
 									}
 								else
 									{
@@ -593,12 +721,12 @@ SINT32 CAFirstMix::loop()
 //Step 5 
 //Writing to users...
 				fmHashTableEntry* pfmHashEntry=m_pChannelList->getFirst();
-				countRead=osocketgroupUsersWrite.select(true,0);
+				countRead=m_psocketgroupUsersWrite->select(true,0);
 				if(countRead>0)
 					bAktiv=true;
 				while(countRead>0&&pfmHashEntry!=NULL)
 					{
-						if(osocketgroupUsersWrite.isSignaled(*pfmHashEntry->pMuxSocket))
+						if(m_psocketgroupUsersWrite->isSignaled(*pfmHashEntry->pMuxSocket))
 							{
 								countRead--;
 								UINT32 len=MIXPACKET_SIZE;
@@ -619,7 +747,7 @@ SINT32 CAFirstMix::loop()
 															{
 																pMixPacket->flags=CHANNEL_RESUME;
 																pMixPacket->channel=pEntry->channelOut;
-																muxOut.send(pMixPacket,tmpBuff);
+																m_pMuxOut->send(pMixPacket,tmpBuff);
 																m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
 															}
 														pEntry=m_pChannelList->getNextChannel(pEntry);
@@ -628,7 +756,7 @@ SINT32 CAFirstMix::loop()
 											}
 										if(pfmHashEntry->pQueueSend->isEmpty())
 											{
-												osocketgroupUsersWrite.remove(*pfmHashEntry->pMuxSocket);
+												m_psocketgroupUsersWrite->remove(*pfmHashEntry->pMuxSocket);
 											}
 									}
 								//todo error handling
@@ -642,11 +770,12 @@ SINT32 CAFirstMix::loop()
 ERR:
 		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
 		m_pInfoService->stop();
-		muxOut.close();
+		m_pMuxOut->close();
 		for(UINT32  i=0;i<m_nSocketsIn;i++)
 			m_arrSocketsIn[i].close();
 		threadAcceptUsers.join();
-		threadSendToMix.join();
+		threadSendToMix.join(); //will not join if queue is empty (and so wating)!!!
+		threadReadFromUsers.join(); //will never join!!!!
 		fmHashTableEntry* pHashEntry=m_pChannelList->getFirst();
 		while(pHashEntry!=NULL)
 			{
@@ -682,7 +811,12 @@ SINT32 CAFirstMix::clean()
 		if(m_arrSocketsIn!=NULL)
 			delete[] m_arrSocketsIn;
 		m_arrSocketsIn=NULL;
-		muxOut.close();
+		if(m_pMuxOut!=NULL)
+			{
+				m_pMuxOut->close();
+				delete m_pMuxOut;
+			}
+		m_pMuxOut=NULL;
 		if(m_pIPList!=NULL)
 			delete m_pIPList;
 		m_pIPList=NULL;
@@ -695,6 +829,9 @@ SINT32 CAFirstMix::clean()
 		if(m_psocketgroupUsersRead!=NULL)
 			delete m_psocketgroupUsersRead;
 		m_psocketgroupUsersRead=NULL;
+		if(m_psocketgroupUsersWrite!=NULL)
+			delete m_psocketgroupUsersWrite;
+		m_psocketgroupUsersWrite=NULL;
 		if(m_pRSA!=NULL)
 			delete m_pRSA;
 		m_pRSA=NULL;
