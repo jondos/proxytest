@@ -3760,7 +3760,7 @@ if test "${enable_payment+set}" = set; then
   enableval="$enable_payment"
 
 		if test "x$enableval" != "xno" ; then
-		    PAYMENT="-DPAYMENT"
+		    PAYMENT="-DPAYMENT -lpq++"
 		fi
 
 

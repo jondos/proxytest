@@ -48,6 +48,8 @@ proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CASocketAddrUnix.cpp \
 		    CASocketGroup.cpp \
 		    CASocketList.cpp \
+		    CASSLClientSocket.cpp\
+		    CASSLContext.cpp\
 		    CASymCipher.cpp \
 		    CAThread.cpp \
 		    CAThreadPool.cpp\
@@ -100,6 +102,8 @@ proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CASocketAddrUnix.hpp \
 		    CASocketGroup.hpp \
 		    CASocketList.hpp \
+		    CASSLClientSocket.hpp\
+		    CASSLContext.hpp\
 		    CASymCipher.hpp \
 		    CAThread.hpp \
 		    CAThreadPool.hpp\
