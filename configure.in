@@ -140,17 +140,17 @@ LIBS="$saved_LIBS -lcrypto"
 
 AC_LANG(C++)
 
-xmlincludedir="/usr/local/include/xercesc"
+xmlincludedir="/usr/local/include"
 dnl Check for XML libs and includes.
 AC_ARG_WITH(xml-include,
-	[  --with-xml-include=PATH     Specify path to XERCES-C include files],
+	[  --with-xml-include=PATH     Specify path to XERCES-C include files (without a trailing '/xercesc')],
 	[
 		if test "x$withval" != "$xno" ; then
 			xmlincludedir=$withval
 		fi
 	]
 )
-CFLAGS="$CFLAGS -I$xmlincludedir"
+CFLAGS="$CFLAGS -I$xmlincludedir -I$xmlincludedir/xercesc"
 CPPFLAGS=$CFLAGS
 CXXFLAGS=$CFLAGS
 AC_CHECK_HEADER([dom/DOM.hpp],AC_MSG_RESULT([Xerces-C includes found]),
