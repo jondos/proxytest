@@ -47,8 +47,8 @@ SINT32 CALastMixA::loop()
 #ifndef NEW_MIX_TYPE
 		//CASocketList  oSocketList;
 		CALastMixChannelList* pChannelList=new CALastMixChannelList;
-		CASocketGroup osocketgroupCacheRead;
-		CASocketGroup osocketgroupCacheWrite;
+		CASocketGroup osocketgroupCacheRead(false);
+		CASocketGroup osocketgroupCacheWrite(true);
 		//CASingleSocketGroup osocketgroupMixIn;
 		#ifdef LOG_PACKET_TIMES
 			tPoolEntry* pPoolEntry=new tPoolEntry;
@@ -316,7 +316,7 @@ SINT32 CALastMixA::loop()
 //end Step 1
 
 //Step 2 Sending to Cache...
-				countRead=osocketgroupCacheWrite.select(true,0 );
+				countRead=osocketgroupCacheWrite.select(/*true,*/0 );
 				if(countRead>0)
 					{
 						bAktiv=true;
@@ -372,7 +372,7 @@ SINT32 CALastMixA::loop()
 
 //Step 3 Reading from Cache....
 #define MAX_MIXIN_SEND_QUEUE_SIZE 1000000
-				countRead=osocketgroupCacheRead.select(false,0);
+				countRead=osocketgroupCacheRead.select(/*false,*/0);
 				if(countRead>0)
 					{
 						#ifdef DELAY_CHANNELS

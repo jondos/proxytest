@@ -76,42 +76,6 @@ inline SINT32 CASocketGroup::setPoolForWrite(bool bWrite)
 		#endif
 		return E_SUCCESS;
 	}
-			
-inline SINT32 CASocketGroup::add(CASocket&s)
-	{
-		m_csFD_SET.lock();
-		#ifndef HAVE_POLL
-			#ifndef _WIN32
-					if(m_max<((SOCKET)s)+1)
-				m_max=((SOCKET)s)+1;
-			#endif
-			FD_SET((SOCKET)s,&m_fdset);
-		#else
-			m_pollfd[(SOCKET)s].fd=(SOCKET)s;
-			if(m_max<((SOCKET)s)+1)
-				m_max=((SOCKET)s)+1;
-		#endif
-		m_csFD_SET.unlock();
-		return E_SUCCESS;
-	}
-
-inline SINT32 CASocketGroup::add(CAMuxSocket&s)
-	{
-		m_csFD_SET.lock();
-		#ifndef HAVE_POLL
-			#ifndef _WIN32
-			if(m_max<(s.getSocket())+1)
-				m_max=(s.getSocket())+1;
-			#endif
-			FD_SET(s.getSocket(),&m_fdset);
-		#else
-		m_pollfd[s.getSocket()].fd=s.getSocket();
-		if(m_max<(s.getSocket())+1)
-			m_max=(s.getSocket())+1;
-		#endif
-		m_csFD_SET.unlock();
-		return E_SUCCESS;
-	}
 
 SINT32 CASocketGroup::remove(CASocket&s)
 	{

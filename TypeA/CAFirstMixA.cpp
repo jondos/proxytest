@@ -83,7 +83,7 @@ SINT32 CAFirstMixA::loop()
 				if(m_pQueueSendToMix->getSize()<MAX_NEXT_MIX_QUEUE_SIZE)
 					{
 						fmHashTableEntry* pHashEntry=m_pChannelList->getFirst();
-						countRead=m_psocketgroupUsersRead->select(false,0);				// how many JAP<->mix connections have received data from their coresponding JAP
+						countRead=m_psocketgroupUsersRead->select(/*false,*/0);				// how many JAP<->mix connections have received data from their coresponding JAP
 						if(countRead>0)
 							bAktiv=true;
 						while(pHashEntry!=NULL&&countRead>0)											// iterate through all connections as long as there is at least one active left
@@ -403,7 +403,7 @@ SINT32 CAFirstMixA::loop()
 //Step 5 
 //Writing to users...
 				fmHashTableEntry* pfmHashEntry=m_pChannelList->getFirst();
-				countRead=m_psocketgroupUsersWrite->select(true,0);
+				countRead=m_psocketgroupUsersWrite->select(/*true,*/0);
 				if(countRead>0)
 					bAktiv=true;
 				while(countRead>0&&pfmHashEntry!=NULL)

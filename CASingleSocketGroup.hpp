@@ -55,7 +55,7 @@ class CASingleSocketGroup
 					return E_SUCCESS;
 				}
 
-			SINT32 setPoolForWrite(bWrite)
+			SINT32 setPoolForWrite(bool bWrite)
 				{
 					if(bWrite)
 						m_pollfd->events=POLLOUT;
