@@ -3735,6 +3735,16 @@ int testTre()
 		if(sizeof(void*)!=sizeof(tre_parse_re_stack_symbol_t))
 			printf("Ooops... sizeof(void*)!=sizeof(tre_parse_re_stack_symbol_t) --> Causing trouble in tre!\n");
 		return 0;
+		tre_stack_t* p=tre_stack_new(5,5,1);
+		tre_stack_push(p,(void*)0x03040506);
+		if(tre_stack_pop_int(p)!=0x03040506)
+			printf("Ooops... push/pop (int) failure\n");
+		tre_addtags_symbol_t z=ADDTAGS_SET_SUBMATCH_END;
+		tre_stack_push(p,(void*)z);
+		if((tre_addtags_symbol_t)tre_stack_pop_int(p)!=z)
+			printf("Ooops... push/pop (tre_addtags_symbol_t) failure\n");
+		tre_stack_destroy(p);
+
 	}	
 #endif //LOG_CRIME
 /* EOF */
