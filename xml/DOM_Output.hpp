@@ -160,8 +160,13 @@ class DOM_Output
 			DOM_Output()
 				{
 					m_pFormatTarget=new MemFormatTarget();
-					m_pFormatter=new XMLFormatter(m_UTF8, m_pFormatTarget,
-                                          XMLFormatter::NoEscapes, XMLFormatter::UnRep_Fail);
+					#if (_XERCES_VERSION >= 20300) //XMl-Version since Xerces 2.3.0
+						m_pFormatter=new XMLFormatter(m_UTF8,m_1_0, m_pFormatTarget,
+																						XMLFormatter::NoEscapes, XMLFormatter::UnRep_Fail);
+					#else
+						m_pFormatter=new XMLFormatter(m_UTF8, m_pFormatTarget,
+																						XMLFormatter::NoEscapes, XMLFormatter::UnRep_Fail);
+					#endif
 				}
 			~DOM_Output()
 				{
@@ -174,4 +179,5 @@ class DOM_Output
 			MemFormatTarget* m_pFormatTarget;
 			static const XMLCh  m_XML[39]; 
 			static const XMLCh  m_UTF8[6]; 
+			static const XMLCh  m_1_0[4]; 
 };
