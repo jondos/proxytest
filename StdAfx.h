@@ -45,6 +45,7 @@
     #define ioctlsocket(a,b,c) ioctl(a,b,c)
     #define closesocket(s) close(s)
     #define SOCKET_ERROR -1
+    #define INVALID_SOCKET -1
     #define SD_RECEIVE 0
     #define SD_SEND 1
     #define SD_BOTH 2

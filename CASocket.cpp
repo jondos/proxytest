@@ -113,7 +113,13 @@ int CASocket::close(int mode)
 			
 int CASocket::send(char* buff,int len)
 	{
-		return ::send(m_Socket,buff,len,0);
+	    int ret;	
+	    do
+		{
+		    ret=::send(m_Socket,buff,len,MSG_NOSIGNAL);
+		}
+	    while(ret==SOCKET_ERROR&&errno==EINTR);
+	    return ret;	    	    
 	}
 
 int CASocket::available()
@@ -127,7 +133,13 @@ int CASocket::available()
 
 int CASocket::receive(char* buff,int len)
 	{
-		return ::recv(m_Socket,buff,len,0);
+	    int ret;	
+	    do
+		{
+		    ret=::recv(m_Socket,buff,len,MSG_NOSIGNAL);
+		}
+	    while(ret==SOCKET_ERROR&&errno==EINTR);
+	    return ret;	    	    
 	}
 
 int CASocket::getLocalPort()
