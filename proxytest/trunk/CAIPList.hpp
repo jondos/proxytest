@@ -66,7 +66,7 @@ class CAIPList
 #ifndef LOG_CHANNEL
 			SINT32 removeIP(const UINT8 ip[4]);
 #else
-			SINT32 removeIP(const UINT8 ip[4],UINT32 time,UINT32 trafficIn,UINT32 trafficOut);
+			SINT32 removeIP(const UINT8 ip[4],UINT32 time=0,UINT32 trafficIn=0,UINT32 trafficOut=0);
 #endif
 		private:
 			UINT32 m_allowedConnections;

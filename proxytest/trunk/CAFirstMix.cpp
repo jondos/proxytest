@@ -202,11 +202,12 @@ SINT32 CAFirstMix::init()
 
 		m_pIPList=new CAIPList();
 #ifdef LOG_PACKET_TIMES
-		m_pQueueSendToMix=new CATimedQueue();
+		m_pQueueSendToMix=new CATimedQueue(MIXPACKET_SIZE);
+		m_pQueueReadFromMix=new CATimedQueue(MIXPACKET_SIZE);
 #else		
 		m_pQueueSendToMix=new CAQueue(MIXPACKET_SIZE);
-#endif		
 		m_pQueueReadFromMix=new CAQueue(MIXPACKET_SIZE);
+#endif		
 		m_pChannelList=new CAFirstMixChannelList();
 		m_psocketgroupUsersRead=new CASocketGroup;
 		m_psocketgroupUsersWrite=new CASocketGroup;
@@ -337,9 +338,11 @@ THREAD_RETURN fm_loopSendToMix(void* param)
 					if(!isZero64(pPoolEntry->overall_timestamp))
 						{
 							getcurrentTimeMicros(tmpU64);
-							CAMsg::printMsg(LOG_CRIT,"Upload Packet processing time (arrival <--> send): %u 탎 [Pool Time: %u 탎]\n",
-																				diff64(tmpU64,pPoolEntry->overall_timestamp),
-																				diff64(pool_timestamp,pPoolEntry->pool_timestamp));
+							#ifdef _DEBUG
+								CAMsg::printMsg(LOG_CRIT,"Upload Packet processing time (arrival <--> send): %u 탎 [Pool Time: %u 탎]\n",
+																					diff64(tmpU64,pPoolEntry->overall_timestamp),
+																					diff64(pool_timestamp,pPoolEntry->pool_timestamp));
+							#endif
 						}	
 				#endif	
 			}
@@ -358,7 +361,12 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 	{
 		CAFirstMix* pFirstMix=(CAFirstMix*)pParam;
 		CAMuxSocket* pMuxSocket=pFirstMix->m_pMuxOut;
-		CAQueue* pQueue=pFirstMix->m_pQueueReadFromMix;
+		#ifdef LOG_PACKET_TIMES
+			UINT64 time_stamp;
+			CATimedQueue* pQueue=pFirstMix->m_pQueueReadFromMix;
+		#else		
+			CAQueue* pQueue=pFirstMix->m_pQueueReadFromMix;
+		#endif
 		MIXPACKET* pMixPacket=new MIXPACKET;
 		CASingleSocketGroup* pSocketGroup=new CASingleSocketGroup();
 		pSocketGroup->add(*pMuxSocket);
@@ -386,7 +394,12 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 						#endif	
 					}
 				else if(ret>0)
-					ret=pMuxSocket->receive(pMixPacket);
+					{
+						ret=pMuxSocket->receive(pMixPacket);
+						#ifdef LOG_PACKET_TIMES
+							getcurrentTimeMicros(time_stamp);
+						#endif
+					}
 				if(ret!=MIXPACKET_SIZE)
 					{
 						pFirstMix->m_bRestart=true;
@@ -394,8 +407,12 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 					}
 				#ifdef USE_POOL
 					pPool->pool((tPoolEntry*)pMixPacket);
-				#endif		
-				pQueue->add(pMixPacket,MIXPACKET_SIZE);	
+				#endif	
+				#ifdef LOG_PACKET_TIMES
+					pQueue->add(pMixPacket,MIXPACKET_SIZE,time_stamp);	
+				#else
+					pQueue->add(pMixPacket,MIXPACKET_SIZE);	
+				#endif
 			}
 		delete pMixPacket;
 		#ifdef USE_POOL
@@ -546,7 +563,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		pNewUser->setCrypt(true);
 
 #ifdef LOG_PACKET_TIMES
-		CATimedQueue* tmpQueue=new CATimedQueue();
+		CATimedQueue* tmpQueue=new CATimedQueue(MIXPACKET_SIZE);
 #else
 		CAQueue* tmpQueue=new CAQueue(MIXPACKET_SIZE);
 #endif

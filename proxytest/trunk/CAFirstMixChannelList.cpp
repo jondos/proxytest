@@ -179,7 +179,6 @@ SINT32 CAFirstMixChannelList::addChannel(CAMuxSocket* pMuxSocket,HCHANNEL channe
 #ifdef LOG_CHANNEL
 		pNewEntry->packetsInFromUser=0;
 		pNewEntry->packetsOutToUser=0;
-		getcurrentTimeMillis(pNewEntry->timeCreated);
 #endif
 
 		
