@@ -173,7 +173,8 @@ tre_stack_pop(tre_stack_t *s)
 inline static int
 tre_stack_pop_int(tre_stack_t *s)
 {
-  return (int)s->stack[--s->ptr];
+	//TODO Needs testing!!!
+  return ((int*)(s->stack))[--s->ptr];
 }
 
 
