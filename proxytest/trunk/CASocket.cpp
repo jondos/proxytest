@@ -27,7 +27,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #include "StdAfx.h"
 #include "CASocket.hpp"
-#include "CASocketASyncSend.hpp"
 #include "CASocketAddrINet.hpp"
 #ifdef _DEBUG
 	extern int sockets;
@@ -37,17 +36,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define CLOSE_RECEIVE 0x02
 #define CLOSE_BOTH		0x03
 
-CASocketASyncSend* CASocket::m_pASyncSend=NULL;
-
 CASocket::CASocket()
 	{
 		m_Socket=0;
 		InitializeCriticalSection(&m_csClose);
 		m_closeMode=0;
-		m_localPort=-1;
-		m_aktSendBuffer=-1;
-		m_bASyncSend=false;
-		memset(m_ipPeer,0,4);
 	}
 
 SINT32 CASocket::create()
@@ -57,7 +50,6 @@ SINT32 CASocket::create()
 
 SINT32 CASocket::create(int type)
 	{
-		m_aktSendBuffer=-1;
 		if(m_Socket==0)
 			m_Socket=socket(type,SOCK_STREAM,0);
 		if(m_Socket==INVALID_SOCKET)
@@ -69,13 +61,11 @@ SINT32 CASocket::create(int type)
 					CAMsg::printMsg(LOG_CRIT,"Couldt not create a new Socket! - Error: %i\n",er);
 				return SOCKET_ERROR;
 			}
-		m_localPort=-1;
 		return E_SUCCESS;
 	}
 
 SINT32 CASocket::listen(CASocketAddr & psa)
 	{
-		m_localPort=-1;
 		int type=psa.getType();
 		if(m_Socket==0&&create(type)==SOCKET_ERROR)
 			return SOCKET_ERROR;
@@ -92,10 +82,7 @@ SINT32 CASocket::listen(UINT16 port)
 
 SINT32 CASocket::accept(CASocket &s)
 	{
-		s.m_localPort=-1;
-		struct sockaddr_in peer;
-		socklen_t peersize=sizeof(peer);
-		s.m_Socket=::accept(m_Socket,(struct sockaddr*)&peer,&peersize);
+		s.m_Socket=::accept(m_Socket,NULL,NULL);
 		if(s.m_Socket==SOCKET_ERROR)
 			{
 				s.m_Socket=0;
@@ -105,8 +92,7 @@ SINT32 CASocket::accept(CASocket &s)
 #ifdef _DEBUG
 		sockets++;
 #endif
-		memcpy(s.m_ipPeer,&peer.sin_addr,4);
-		return 0;
+		return E_SUCCESS;
 	}
 
 			
@@ -118,7 +104,6 @@ SINT32 CASocket::connect(CASocketAddr & psa)
 SINT32 CASocket::connect(CASocketAddr & psa,UINT retry,UINT32 time)
 	{
 //		CAMsg::printMsg(LOG_DEBUG,"Socket:connect\n");
-		m_localPort=-1;
 		if(m_Socket==0&&create()==SOCKET_ERROR)
 			{
 				return SOCKET_ERROR;
@@ -156,7 +141,6 @@ SINT32 CASocket::connect(CASocketAddr & psa,UINT retry,UINT32 time)
 
 SINT32 CASocket::connect(CASocketAddr & psa,UINT msTimeOut)
 	{
-		m_localPort=-1;
 		if(m_Socket==0&&create(psa.getType())==SOCKET_ERROR)
 			{
 				return SOCKET_ERROR;
@@ -219,18 +203,9 @@ SINT32 CASocket::connect(CASocketAddr & psa,UINT msTimeOut)
 SINT32 CASocket::close()
 	{
 //		EnterCriticalSection(&csClose);
-		m_localPort=-1;
 		int ret;
 		if(m_Socket!=0)
 			{
-	/*			LINGER linger;
-				linger.l_onoff=1;
-				linger.l_linger=0;
-				if(::setsockopt(m_Socket,SOL_SOCKET,SO_LINGER,(char*)&linger,sizeof(linger))!=0)
-					CAMsg::printMsg(LOG_DEBUG,"Fehler bei setsockopt - LINGER!\n");
-	*/			
-				if(m_bASyncSend)
-					m_pASyncSend->close(this);
 #ifdef _DEBUG				
 				if(::closesocket(m_Socket)==SOCKET_ERROR)
 					{
@@ -249,17 +224,14 @@ SINT32 CASocket::close()
 		return ret;
 	}
 
-SINT32 CASocket::close(int mode)
+SINT32 CASocket::close(UINT32 mode)
 	{
 //		EnterCriticalSection(&csClose);
-		m_localPort=-1;
 		::shutdown(m_Socket,mode);
 		if(mode==SD_RECEIVE||mode==SD_BOTH)
 			m_closeMode|=CLOSE_RECEIVE;
 		if(mode==SD_SEND||mode==SD_BOTH)
 			{
-				if(m_bASyncSend)
-					m_pASyncSend->close(this);
 				m_closeMode|=CLOSE_SEND;				
 			}
 		int ret;
@@ -274,71 +246,81 @@ SINT32 CASocket::close(int mode)
 		return ret;
 	}
 			
-/** Sends the buff over the network.
-	@param buff - the buffer to send
+/** Sends some data over the network. This may block, if socket is in blocking mode.
+	@param buff - the buffer of data to send
 	@param len - content length
-	@param bDisableAsync - force to send this asynchronous (even if Async-Modus was set via setAsync)
-					default: false
 	@retval E_AGAIN, if non blocking socket would block
-	@ret number of bytes send, or -1 in case of an error
+	@retval E_TIMEDOUT, if a timout was set for this socket
+	@retval E_UNKNOWN, if an error occured
+	@ret number of bytes send
 */
-int CASocket::send(const UINT8* buff,UINT32 len,bool bDisableAsync)
+SINT32 CASocket::send(const UINT8* buff,UINT32 len)
 	{
 	  if(len==0)
 			return 0; //nothing to send
 		int ret;	
-	  if(!m_bASyncSend||bDisableAsync) //sync send...
+		SINT32 ef=0;
+		do
 			{
-				SINT32 ef=0;
-				do
-					{
-						ret=::send(m_Socket,(char*)buff,len,MSG_NOSIGNAL);
-						#ifdef _DEBUG
-							if(ret==SOCKET_ERROR)
-								printf("Fehler beim Socket-send: %i",errno);
-						#endif
-					}
-				while(ret==SOCKET_ERROR&&(ef=errno)==EINTR);
-				if(ret==SOCKET_ERROR)
-					{
-						if(ef==ERR_INTERN_WOULDBLOCK)
-							return E_AGAIN;
-					}
+				ret=::send(m_Socket,(char*)buff,len,MSG_NOSIGNAL);
+				#ifdef _DEBUG
+					if(ret==SOCKET_ERROR)
+						printf("Fehler beim Socket-send: %i",errno);
+				#endif
 			}
-		else
+		while(ret==SOCKET_ERROR&&(ef=errno)==EINTR);
+		if(ret==SOCKET_ERROR)
 			{
-				ret=m_pASyncSend->send(this,buff,len);
+				if(ef==ERR_INTERN_WOULDBLOCK)
+					return E_AGAIN;
+				else if(ef==ERR_INTERN_TIMEDOUT)
+					return E_TIMEDOUT;
 			}
 	  return ret;	    	    
 	}
 
-/** Sends the buff over the network. Using a Timeout
+/** Sends some data over the network. Using a Timeout if socket is in blocking mode. 
+	Otherwise E_AGAIN may returned
 	@param buff - the buffer to send
 	@param len - content length
-	@param msTimeOut MilliSeconds to wait
+	@param msTimeOut Maximum MilliSeconds to wait
+	@retval E_AGAIN, if Operation would block on a non-blocking socket
+	@retval E_TIMEDOUT, if the timeout was reached
 	@ret number of bytes send, or -1 in case of an error
 */
-int CASocket::sendTimeOut(const UINT8* buff,UINT32 len,UINT32 msTimeOut)
+SINT32 CASocket::sendTimeOut(const UINT8* buff,UINT32 len,UINT32 msTimeOut)
 	{
 	  int ret;
 		SINT32 aktTimeOut=0;	
-		if((aktTimeOut=getSendTimeOut())==SOCKET_ERROR||setSendTimeOut(msTimeOut)!=E_SUCCESS)
-			{//do it complicate but still to simple!!!! more work TODO
-				bool bWasNonBlocking=false;
-				getNonBlocking(&bWasNonBlocking);
-				setNonBlocking(true);
-				ret=send(buff,len,true);
-				if(ret==SOCKET_ERROR)
-					{
-						msleep(msTimeOut);
-						ret=send(buff,len,true);
-					}
-				setNonBlocking(bWasNonBlocking);
+		bool bWasNonBlocking;
+		getNonBlocking(&bWasNonBlocking);
+		if(bWasNonBlocking) //we are in non-blocking mode
+			{
+				ret=send(buff,len);				
 			}
 		else
 			{
-				ret=send(buff,len,true);
-				setSendTimeOut(aktTimeOut);
+				aktTimeOut=getSendTimeOut();
+				if(aktTimeOut>0&&(UINT32)aktTimeOut==msTimeOut) //we already have the right timeout
+					{
+						ret=send(buff,len);
+					}
+				else if(aktTimeOut<0||setSendTimeOut(msTimeOut)!=E_SUCCESS)
+					{//do it complicate but still to simple!!!! more work TODO
+						setNonBlocking(true);
+						ret=send(buff,len);
+						if(ret==E_AGAIN)
+							{
+								msleep(msTimeOut);
+								ret=send(buff,len);
+							}
+						setNonBlocking(bWasNonBlocking);
+					}
+				else
+					{
+						ret=send(buff,len);
+						setSendTimeOut(aktTimeOut);
+					}
 			}
 		return ret;	    	    
 	}
@@ -353,36 +335,15 @@ SINT32 CASocket::available()
 			return (int)ul;
 	}
 #endif
-/*
-SINT32 CASocket::getSendSpace()
-	{
-#ifdef HAVE_TIOCOUTQ
-		UINT32 ul;
-		SINT32 sl=m_aktSendBuffer;
-		if(sl<=0)
-			{
-				sl=getSendBuff();
-				if(sl<=0)
-					return E_UNKNOWN;
-			}
-		if(ioctlsocket(m_Socket,TIOCOUTQ,&ul)==SOCKET_ERROR)
-			return SOCKET_ERROR;
-		else
-		{
-			CAMsg::printMsg(LOG_DEBUG,"Unsent data now: %i\n",ul);
-			return sl-(SINT32)ul;
-		}
-#else
-		return E_UNKNOWN;
-#endif
-	}*/
-/**
+
+	/**
 @return SOCKET_ERROR if an error occured
 @retval E_AGAIN, if socket was in non-blocking mode an receive would block
-@return 0 if socket was gracefully closed
+@retval E_TIMEDOUT, if a timeout was set
+@retval 0 if socket was gracefully closed
 @return the number of bytes received (always >0)
 **/
-int CASocket::receive(UINT8* buff,UINT32 len)
+SINT32 CASocket::receive(UINT8* buff,UINT32 len)
 	{
 		int ret;	
 	  int ef=0;
@@ -395,6 +356,8 @@ int CASocket::receive(UINT8* buff,UINT32 len)
 			{
 				if(ef==ERR_INTERN_WOULDBLOCK)
 					return E_AGAIN;
+				else if(ef==ERR_INTERN_TIMEDOUT)
+					return E_TIMEDOUT;
 			}
 #ifdef _DEBUG
 		if(ret==SOCKET_ERROR)
@@ -403,8 +366,8 @@ int CASocket::receive(UINT8* buff,UINT32 len)
 	  return ret;	    	    
 	}
 
-/**Receives all bytes
-@return E_UNKOWN, in case of an error
+/**Receives all bytes. This blocks until all bytes are received or an error occured.
+@return E_UNKNOWN, in case of an error
 @return E_SUCCESS otherwise
 
 //TODO:: bugy for non-blocking socket...
@@ -418,8 +381,8 @@ SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len)
 				ret=receive(buff+pos,len);
 				if(ret<=0)
 					{
-						CAMsg::printMsg(LOG_DEBUG,"ReceiveFully receive error ret=%i\n",ret);
-				    return E_UNKNOWN;
+						if(ret==0||(ret!=E_AGAIN&&ret!=E_TIMEDOUT))
+							return E_UNKNOWN;
 					}
 				pos+=ret;
 				len-=ret;
@@ -430,11 +393,18 @@ SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len)
 
 /** Trys to receive all bytes. After the timout value has elpased, the error E_TIMEDOUT is returned
 *Woudn't work correctly on Windows....
+*@param len on input holds the number of bytes which should be read,
+						on return gives the number of bytes which are read before the timeout
+*@retval E_TIMEDOUT, if not all byts could be read
+*@retval E_UNKNOWN, if an error occured
+*@retval E_SUCCESS, if all bytes could be read
+*
+* Lots of work TODO!!!!!
 */
-SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len,SINT32 timeout)
+SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len,SINT32 msTimeOut)
 	{
 		SINT32 ret;
-		SINT32 dt=timeout/2;
+		SINT32 dt=msTimeOut/2;
 		do
 			{
 				#ifdef HAVE_AVAILABLE
@@ -455,31 +425,28 @@ SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len,SINT32 timeout)
 						return E_SUCCESS;	    	    
 					}
 				msleep(dt);
-				timeout-=dt;
+				msTimeOut-=dt;
 			}
-		while(timeout>0);
+		while(msTimeOut>0);
 		return E_TIMEDOUT;
 	}
 
-int CASocket::getLocalPort()
+SINT32 CASocket::getLocalPort()
 	{
-		if(m_localPort==-1)
-			{
-				struct sockaddr_in addr;
-				socklen_t namelen=sizeof(struct sockaddr_in);
-				if(getsockname(m_Socket,(struct sockaddr*)&addr,&namelen)==SOCKET_ERROR)
-					return SOCKET_ERROR;
-				else
-					m_localPort=ntohs(addr.sin_port);
-			}
-		return m_localPort;
+		struct sockaddr_in addr;
+		socklen_t namelen=sizeof(struct sockaddr_in);
+		if(getsockname(m_Socket,(struct sockaddr*)&addr,&namelen)==SOCKET_ERROR)
+			return SOCKET_ERROR;
+		return ntohs(addr.sin_port);
 	}
 
 SINT32 CASocket::getPeerIP(UINT8 ip[4])
 	{
-		if(m_ipPeer[0]==0)
-			return E_UNKNOWN;
-		memcpy(ip,m_ipPeer,4);
+		struct sockaddr_in addr;
+		socklen_t namelen=sizeof(struct sockaddr_in);
+		if(getpeername(m_Socket,(struct sockaddr*)&addr,&namelen)==SOCKET_ERROR)
+			return SOCKET_ERROR;
+		memcpy(ip,&addr.sin_addr,4);
 		return E_SUCCESS;
 	}
 
@@ -532,7 +499,6 @@ SINT32 CASocket::setSendBuff(SINT32 r)
 	{
 		if(r<0)
 			return E_UNKNOWN;
-		m_aktSendBuffer=-1;
 		SINT32 val=r;
 		SINT32 ret=setsockopt(m_Socket,SOL_SOCKET,SO_SNDBUF,(char*)&val,sizeof(val));	
 		if(ret!=0)
@@ -547,10 +513,7 @@ SINT32 CASocket::getSendBuff()
 		if(getsockopt(m_Socket,SOL_SOCKET,SO_SNDBUF,(char*)&val,&size)==SOCKET_ERROR)
 			return E_UNKNOWN;
 		else
-			{
-				m_aktSendBuffer=val;
-				return val;
-			}
+			return val;
 	}
 
 SINT32 CASocket::setSendTimeOut(UINT32 msTimeOut)
@@ -640,26 +603,3 @@ SINT32 CASocket::getNonBlocking(bool* b)
 		#endif
 		return E_SUCCESS;
 	}
-/*
-SINT32 CASocket::setASyncSend(bool b,SINT32 estimatedSendSize,UINT32 lowwater,UINT32 SendQueueSoftLimit,CASocketASyncSendResume* pResume)
-	{
-		if(b)
-			{
-				if(estimatedSendSize!=-1)
-					setSendLowWat(estimatedSendSize);
-				if(m_pASyncSend==NULL)
-					{
-						m_pASyncSend=new CASocketASyncSend();
-						m_pASyncSend->setResume(pResume);
-						if(SendQueueSoftLimit!=0)
-							m_pASyncSend->setSendQueueSoftLimit(SendQueueSoftLimit);
-						if(lowwater!=0)
-							m_pASyncSend->setSendQueueLowWater(lowwater);
-						m_pASyncSend->start();
-					}
-			}
-		m_bASyncSend=b;
-
-		return E_SUCCESS;
-	}
-*/
