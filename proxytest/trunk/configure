@@ -5376,11 +5376,9 @@ fi
 echo "$as_me:$LINENO: result: $ac_cv_func_epoll_wait" >&5
 echo "${ECHO_T}$ac_cv_func_epoll_wait" >&6
 if test $ac_cv_func_epoll_wait = yes; then
-  :
-else
 
 cat >>confdefs.h <<\_ACEOF
-#define HAVE_EPOLL
+#define HAVE_EPOLL 1
 _ACEOF
 
 fi
