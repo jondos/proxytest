@@ -116,8 +116,8 @@ AC_ARG_WITH(pool,
 
 dnl delay channels ??
 BANDWIDTH_LIMIT=""
-AC_ARG_WITH(pool,
-	[  --with-bandwidth-limitation=LIMITATION_START     Specify if to build wiht bandwith limitation and optionally the number of bytes which are transferred without any limitation ],
+AC_ARG_WITH(bandwith-limitation,
+	[  --with-bandwidth-limitation=LIMITATION_START     Specify if to build with bandwith limitation and optionally the number of bytes which are transferred without any limitation ],
 	[
 		if test "x$withval" != "$xno" ; then
 		    BANDWIDTH_LIMIT="-DDELAY_CHANNELS"

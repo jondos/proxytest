@@ -870,7 +870,7 @@ Optional Packages:
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-arch=i386|i486     Specify architecure for optimisation
   --with-pool=POOLSIZE     Specify if to build a pool mix and optionally the poolsize
-  --with-bandwidth-limitation=LIMITATION_START     Specify if to build wiht bandwith limitation and optionally the number of bytes which are transferred without any limitation
+  --with-bandwidth-limitation=LIMITATION_START     Specify if to build with bandwith limitation and optionally the number of bytes which are transferred without any limitation
   --with-ssl-dir=PATH     Specify path to OpenSSL installation
   --with-xml-include=PATH     Specify path to XERCES-C include files (without a trailing '/xercesc')
   --with-xml-lib=PATH     Specify path to XERCES-C library files
@@ -3733,9 +3733,9 @@ fi;
 
 BANDWIDTH_LIMIT=""
 
-# Check whether --with-pool or --without-pool was given.
-if test "${with_pool+set}" = set; then
-  withval="$with_pool"
+# Check whether --with-bandwith-limitation or --without-bandwith-limitation was given.
+if test "${with_bandwith_limitation+set}" = set; then
+  withval="$with_bandwith_limitation"
 
 		if test "x$withval" != "$xno" ; then
 		    BANDWIDTH_LIMIT="-DDELAY_CHANNELS"
