@@ -500,13 +500,21 @@ SINT32 CALastMix::loop()
 				countRead=osocketgroupCacheRead.select(false,0);
 				if(countRead>0)
 					{
+						#ifdef DELAY_CHANNELS
+							UINT64 aktTime;
+							getcurrentTimeMillis(aktTime);
+						#endif
 						pChannelListEntry=pChannelList->getFirstSocket();
 						while(pChannelListEntry!=NULL&&countRead>0)
 							{
 								if(osocketgroupCacheRead.isSignaled(*(pChannelListEntry->pSocket)))
 									{
 										countRead--;
-										if(oqueueMixIn.getSize()<MAX_MIXIN_SEND_QUEUE_SIZE)
+										if(oqueueMixIn.getSize()<MAX_MIXIN_SEND_QUEUE_SIZE
+												#ifdef DELAY_CHANNELS
+													&&(pChannelListEntry->trafficOut>DELAY_CHANNEL_TRAFFIC&&isGreater64(aktTime,pChannelListEntry->timeNextSend))
+												#endif
+											)
 											{
 												bAktiv=true;
 												ret=pChannelListEntry->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE);
@@ -531,7 +539,7 @@ SINT32 CALastMix::loop()
 												else 
 													{
 														add64((UINT64&)m_logDownloadedBytes,ret);
-														#ifdef LOG_CHANNEL
+														#if defined(LOG_CHANNEL)||defined(DELAY_CHANNELS)
 															pChannelListEntry->trafficOut+=ret;
 														#endif
 														pMixPacket->channel=pChannelListEntry->channelIn;
@@ -542,6 +550,10 @@ SINT32 CALastMix::loop()
 														m_pMuxIn->send(pMixPacket,tmpBuff);
 														oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);
 														m_logDownloadedPackets++;
+														#ifdef DELAY_CHANNELS
+															set64(pChannelListEntry->timeNextSend,aktTime);
+															add64(pChannelListEntry->timeNextSend,DELAY_CHANNEL_SEND_INTERVALL);
+														#endif
 													}
 											}
 										else

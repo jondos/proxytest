@@ -128,6 +128,19 @@ inline UINT32 div64(UINT64& op1,UINT32 op2)
 #endif
 	}
 
+inline boolean isGreater64(UINT64& op1,UINT64& op2)
+	{
+#if !defined(HAVE_NATIVE_UINT64)
+		if(op1.high>op2.high)
+			return true;
+		if(op1.high==op2.high)
+			return op1.low>op2.low;
+		return false;
+#else
+		return op1>op2;
+#endif
+	}
+
 inline void print64(UINT8* buff,UINT64& op)
 	{
 #if defined(_WIN32)

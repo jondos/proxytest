@@ -43,10 +43,15 @@ struct t_lastmixchannellist
 			CASymCipher*  pCipher;
 			CASocket*			pSocket;
 			CAQueue*			pQueueSend;
+#ifdef DELAY_CHANNELS
+			UINT64				timeNextSend;
+#endif
 #ifdef LOG_CHANNEL
-			UINT32				trafficIn;
-			UINT32				trafficOut;
 			UINT64				timeCreated;
+			UINT32				trafficIn;
+#endif
+#if defined (LOG_CHANNEL)||defined(DELAY_CHANNELS) 
+			UINT32				trafficOut;
 #endif
 		private:
 			struct

@@ -69,8 +69,13 @@ CALastMixChannelList::~CALastMixChannelList()
 		pNewEntry->pQueueSend=pQueue;
 #ifdef LOG_CHANNEL
 		pNewEntry->trafficIn=trafficIn;
-		pNewEntry->trafficOut=0;
 		pNewEntry->timeCreated=time;
+#endif
+#if defined (LOG_CHANNEL)||defined(DELAY_CHANNELS)
+		pNewEntry->trafficOut=0;
+#endif
+#ifdef DELAY_CHANNELS
+		pNewEntry->timeNextSend=0; //can always send first packet
 #endif
 		if(pEntry==NULL) //First Entry for Hash in HashTable
 			{
