@@ -866,7 +866,7 @@ Optional Features:
   --enable-static         Static linking
   --enable-pool=POOLSIZE  Specify if to build a pool mix and optionally the
                           poolsize
-  --enable-bandwidthlimitation=LIMITATION_START
+  --enable-bandwidth-limitation=LIMITATION_START
                           Specify if to build with bandwith limitation and
                           optionally the number of bytes which are transferred
                           without any limitation
@@ -3739,16 +3739,14 @@ if test "${enable_pool+set}" = set; then
 fi;
 
 BANDWIDTH_LIMIT=""
-# Check whether --enable-bandwithlimitation or --disable-bandwithlimitation was given.
-if test "${enable_bandwithlimitation+set}" = set; then
-  enableval="$enable_bandwithlimitation"
+# Check whether --enable-bandwidth-limitation or --disable-bandwidth-limitation was given.
+if test "${enable_bandwidth_limitation+set}" = set; then
+  enableval="$enable_bandwidth_limitation"
 
-	{ echo "$as_me:$LINENO: hier" >&5
-echo "$as_me: hier" >&6;}
 		if test "x$enableval" != "xno" ; then
 		    BANDWIDTH_LIMIT="-DDELAY_CHANNELS"
 		    if test "x$enableval" != "xyes" ; then
-			BANDWIDTH_LIMIT="$BANDWIDTH_LIMIT -DDELAY_CHANNEL_TRAFFIC=$enable"
+			BANDWIDTH_LIMIT="$BANDWIDTH_LIMIT -DDELAY_CHANNEL_TRAFFIC=$enableval"
 		    fi
 		fi
 
