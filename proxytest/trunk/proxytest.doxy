@@ -134,7 +134,7 @@ COLLABORATION_GRAPH    = YES
 INCLUDE_GRAPH          = YES
 INCLUDED_BY_GRAPH      = YES
 GRAPHICAL_HIERARCHY    = YES
-DOT_PATH               = /home/sk13/gv1.5/bin/
+DOT_PATH               = $HOME/gviz/bin/
 MAX_DOT_GRAPH_WIDTH    = 1024
 MAX_DOT_GRAPH_HEIGHT   = 1024
 #---------------------------------------------------------------------------
