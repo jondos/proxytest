@@ -37,7 +37,8 @@ class CACmdLnOptions
 	    int parse(int argc,const char** arg);
 	    bool getDaemon();
       bool getProxySupport();
-	    UINT16 getServerPort();
+	   
+			UINT16 getServerPort();
 			/*For IP (Host) AND Unix Domain Sockets*/
 	    SINT32 getServerHost(UINT8* path,UINT32 len);
 			SINT32 getServerRTTPort();
