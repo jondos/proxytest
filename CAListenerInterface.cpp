@@ -60,7 +60,8 @@ SINT32	CAListenerInterface::toDOMFragment(DOM_DocumentFragment& fragment,DOM_Doc
 		setDOMElementValue(elem,(UINT8*)"RAW/TCP");
 		elem=ownerDoc.createElement("Port");
 		elemListenerInterface.appendChild(elem);
-		setDOMElementValue(elem,((CASocketAddrINet*)m_pAddr)->getPort());
+		UINT32 port=((CASocketAddrINet*)m_pAddr)->getPort();
+		setDOMElementValue(elem,port);
 		elem=ownerDoc.createElement("Host");
 		elemListenerInterface.appendChild(elem);
 		UINT8 ip[50];
