@@ -7,6 +7,7 @@ AUTOMAKE_OPTIONS = foreign
 sbin_PROGRAMS = proxytest
 proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CAAbstractXMLEncodable.cpp\
+		    CAAbstractXMLSignable.cpp\
 		    CAAccountingBIInterface.cpp\
 		    CAAccountingControlChannel.cpp\
 		    CAAccountingDBInterface.cpp\
@@ -55,11 +56,13 @@ proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CAThread.cpp \
 		    CAThreadPool.cpp\
 		    CAUtil.cpp \
+		    CAXMLCostConfirmation.cpp\
 		    CAXMLErrorMessage.cpp\
 		    StdAfx.cpp \
 		    proxytest.cpp \
 		    CAAbstractControlChannel.hpp\
 		    CAAbstractXMLEncodable.hpp\
+		    CAAbstractXMLSignable.hpp\
 		    CAAccountingBIInterface.hpp\
 		    CAAccountingControlChannel.hpp\
 		    CAAccountingDBInterface.hpp\
@@ -110,6 +113,7 @@ proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CAThread.hpp \
 		    CAThreadPool.hpp\
 		    CAUtil.hpp \
+		    CAXMLCostConfirmation.hpp\
 		    CAXMLErrorMessage.hpp\
 		    StdAfx.h \
 		    basetypedefs.h
