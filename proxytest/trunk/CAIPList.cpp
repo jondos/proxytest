@@ -43,6 +43,7 @@ CAIPList::CAIPList(UINT32 allowedConnections)
 	{
 		m_HashTable=new PIPLIST[0x10000];
 		memset(m_HashTable,0,0x10000*sizeof(PIPLIST));
+		m_allowedConnections=allowedConnections;
 	}
 
 /** Deletes the IPList and frees all used resources*/
