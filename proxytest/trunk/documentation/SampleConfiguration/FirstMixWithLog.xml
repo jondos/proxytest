@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MixConfiguration version="0.4">
     <General>
-        <MixID>mixTestCascade</MixID>
+        <MixID>mixOne</MixID>
         <MixType>FirstMix</MixType>
         <MixName>FirstMix</MixName>
         <CascadeName>TestCascade</CascadeName>
         <Daemon>False</Daemon>
         <Logging>
             <File compressed="False">../../logFirstMix</File>
-        </Logging>        
+        </Logging>
     </General>
     <Network>
         <ListenerInterfaces>
-            <ListenerInterface hidden="True">
+            <ListenerInterface>
                 <NetworkProtocol>RAW/TCP</NetworkProtocol>
-                <Host>localhost</Host>
+                <Host>127.0.0.1</Host>
                 <IP>127.0.0.1</IP>
                 <Port>3001</Port>
             </ListenerInterface>
