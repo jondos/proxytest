@@ -195,7 +195,7 @@ SINT32 CALocalProxy::loop()
 														CAMsg::printMsg(LOG_DEBUG,"closed!\n");
 													#endif
 													delete oConnection.pSocket;
-													delete [chainlen] oConnection.pCipher;
+													delete [] oConnection.pCipher;
 												}
 										}
 									else

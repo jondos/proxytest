@@ -43,7 +43,7 @@ class CACacheLoadBalancing
 			CACacheLoadBalancing(){m_ElementCount=0;paktEntry=NULL;}
 			~CACacheLoadBalancing();
 			SINT32 add(const CASocketAddrINet & pAddr);
-			const CASocketAddrINet* get()
+			CASocketAddrINet* get()
 				{
 					if(paktEntry==NULL)
 						return NULL;
