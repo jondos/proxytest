@@ -52,8 +52,8 @@ typedef struct t_MuxPacket
 
 #define DATA_SIZE 992
 #define PAYLOAD_SIZE 989
-#pragma pack( push, t_MuxPacket )
-#pragma pack(1)
+//#pragma pack( push, t_MuxPacket )
+//#pragma pack(1)
 
 typedef struct t_MuxPacket
 	{
@@ -69,8 +69,8 @@ typedef struct t_MuxPacket
 						UINT8 data[PAYLOAD_SIZE];
 				} payload;
 			};
-	} MUXPACKET;
-#pragma pack( pop, t_MuxPacket )
+	} __attribute__ ((__packed__)) MUXPACKET __attribute__ ((__packed__));
+//#pragma pack( pop, t_MuxPacket )
 
 #endif
 
