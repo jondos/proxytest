@@ -176,8 +176,7 @@ SINT32 CASignature::parseSignKeyXML(UINT8* buff,UINT32 len)
 			{
 				DSA_free(tmpDSA);
 				return E_UNKNOWN;
-			}
-		m_pDSA=tmpDSA;
+			}		m_pDSA=tmpDSA;
 		return E_SUCCESS;
 	}
 
@@ -259,7 +258,7 @@ SINT32 CASignature::signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32 *outlen)
 		//Makeing the hole Signature-Block....
 		sprintf((char*)tmpBuff,XMLSIG_TEMPLATE,out,sig);
 
-		/* Find the last closing tag (</...>) and insert the <Signature> Element just before*/
+		// Find the last closing tag (</...>) and insert the <Signature> Element just before
 		int pos=inlen-1;
 		while(pos>=0&&in[pos]!='<')
 			pos--;

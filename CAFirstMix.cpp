@@ -146,6 +146,7 @@ SINT32 CAFirstMix::init()
 		memcpy(m_KeyInfoBuff,recvBuff,m_KeyInfoSize);
 		delete recvBuff;
 		m_KeyInfoBuff[2]++; //chainlen erhoehen
+		UINT32 numberOfMixes=m_KeyInfoBuff[2];
 		m_pRSA->getPublicKey(m_KeyInfoBuff+m_KeyInfoSize,&keySize);
 		m_KeyInfoSize+=keySize;
 		(*(UINT16*)m_KeyInfoBuff)=htons(m_KeyInfoSize-2);
@@ -198,7 +199,7 @@ SINT32 CAFirstMix::init()
 		m_pChannelList=new CAFirstMixChannelList();
 		m_psocketgroupUsersRead=new CASocketGroup;
 		m_psocketgroupUsersWrite=new CASocketGroup;
-		m_pInfoService=new CAInfoService(this);
+		m_pInfoService=new CAInfoService(this,numberOfMixes);
 		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix init() succeded\n");
 		return E_SUCCESS;
 	}
@@ -313,7 +314,7 @@ END_THREAD:
 		THREAD_RETURN_SUCCESS;
 	}
 
-
+/*
 THREAD_RETURN loopReadFromUsers(void* param)
 	{
 		CAFirstMix* pFirstMix=(CAFirstMix*)param;
@@ -445,7 +446,7 @@ END_THREAD:
 		CAMsg::printMsg(LOG_DEBUG,"Exiting Thread ReadFromUser\n");
 		THREAD_RETURN_SUCCESS;
 	}
-
+*/
 
 
 SINT32 CAFirstMix::loop()
@@ -640,7 +641,7 @@ SINT32 CAFirstMix::loop()
 														CASymCipher* pCipher=NULL;
 														fmChannelListEntry* pEntry;
 														pEntry=m_pChannelList->get(pMuxSocket,pMixPacket->channel);
-														if(pEntry!=NULL)
+														if(pEntry!=NULL&&pMixPacket->flags==CHANNEL_DATA)
 															{
 																pMixPacket->channel=pEntry->channelOut;
 																pCipher=pEntry->pCipher;
@@ -649,7 +650,7 @@ SINT32 CAFirstMix::loop()
 																m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
 																incMixedPackets();
 															}
-														else
+														else if(pEntry==NULL&&(pMixPacket->flags==CHANNEL_OPEN_OLD||pMixPacket->flags==CHANNEL_OPEN_NEW))
 															{
 																pCipher= new CASymCipher();
 																m_pRSA->decrypt(pMixPacket->data,rsaBuff);

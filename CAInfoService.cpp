@@ -214,11 +214,11 @@ THREAD_RETURN InfoLoop(void *p)
 		THREAD_RETURN_SUCCESS;
 	}
 
-CAInfoService::CAInfoService(CAFirstMix* pFirstMix)
+CAInfoService::CAInfoService(CAFirstMix* pFirstMix,UINT32 numberOfMixes)
 	{
 //		iUser=iRisk=iTraffic=-1;
 		m_pFirstMix=pFirstMix;
-
+		m_NumberOfMixes=numberOfMixes;
 		bRun=false;
 		pSignature=NULL;
 	}
@@ -339,6 +339,10 @@ SINT32 CAInfoService::sendHelo()
 				oxmlOut.WriteElement("Port",(int)options.getServerPort());
         if(options.getProxySupport())
         	oxmlOut.WriteElement("ProxyPort",(int)443);
+				oxmlOut.BeginElementAttrs("Mixes");
+				oxmlOut.WriteAttr("count",(int)m_NumberOfMixes);
+				oxmlOut.EndAttrs();
+				oxmlOut.EndElement();
 				oxmlOut.EndElement();
 				oxmlOut.EndDocument();
 				buffLen=1024;
@@ -358,4 +362,43 @@ SINT32 CAInfoService::sendHelo()
 		return E_UNKNOWN;
 	}
 
-
+SINT32 CAInfoService::test()
+	{
+		BufferOutputStream oBufferStream(1024,1024);
+		XMLOutput oxmlOut(oBufferStream);
+		CASignature oSignature;
+		UINT8 fileBuff[2048];
+		int handle=open("G:/proxytest/Debug/privkey.xml",O_BINARY|O_RDONLY);
+		UINT32 len=read(handle,fileBuff,2048);
+		close(handle);
+		oSignature.setSignKey(fileBuff,len,SIGKEY_XML);
+		UINT8 buff[1024];
+		UINT32 buffLen;
+#ifdef _WIN32
+		_CrtMemState s1, s2, s3;
+		_CrtMemCheckpoint( &s1 );
+#endif
+		for(int i=0;i<1000;i++)
+			{
+				oBufferStream.reset();
+				oxmlOut.BeginDocument("1.0","UTF-8",true);
+				oxmlOut.BeginElementAttrs("MixCascadeStatus");
+				oxmlOut.WriteAttr("id","errwrzteutuztuit");
+				int tmpUser,tmpPackets,tmpRisk,tmpTraffic;
+			
+				oxmlOut.WriteAttr("nrOfActiveUsers",(int)tmpUser);
+				oxmlOut.WriteAttr("currentRisk",(int)tmpRisk);
+				oxmlOut.WriteAttr("trafficSituation",(int)tmpTraffic);
+				oxmlOut.WriteAttr("mixedPackets",(int)tmpPackets);
+				oxmlOut.EndAttrs();
+				oxmlOut.EndElement();
+				oxmlOut.EndDocument();
+				oSignature.signXML(oBufferStream.getBuff(),oBufferStream.getBufferSize(),(UINT8*)buff,&buffLen);
+			}
+#ifdef _WIN32
+		_CrtMemCheckpoint( &s2 );
+		if ( _CrtMemDifference( &s3, &s1, &s2 ) )
+      _CrtMemDumpStatistics( &s3 );
+#endif
+		return E_SUCCESS;
+	}
