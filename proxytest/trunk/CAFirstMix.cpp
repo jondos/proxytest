@@ -484,7 +484,7 @@ SINT32 CAFirstMix::loop()
 		UINT8* sendbuff=new UINT8[0xFFFF];
 		((CASocket*)m_pMuxOut)->setNonBlocking(true);
 #endif
-		for(;;)
+		for(;;)	                                                          /* the main mix loop as long as there are things that are not handled by threads. */
 			{
 				bAktiv=false;
 //LOOP_START:
@@ -495,48 +495,48 @@ SINT32 CAFirstMix::loop()
 
 #if defined(_DEBUG) || defined(NO_LOOPACCEPTUSER)				
 				
-				countRead=osocketgroupAccept.select(false,0);
+				countRead=osocketgroupAccept.select(false,0);	                // how many new JAP<->mix connections are there
 				i=0;
 				if(countRead>0)
 					bAktiv=true;
-				while(countRead>0&&i<m_nSocketsIn)
+				while(countRead>0&&i<m_nSocketsIn)														// iterate through all those sockets as long as there is a new one left.
 					{						
-						if(osocketgroupAccept.isSignaled(m_arrSocketsIn[i]))
+						if(osocketgroupAccept.isSignaled(m_arrSocketsIn[i]))			// if new client connection
 							{
 								countRead--;
 								#ifdef _DEBUG
 									CAMsg::printMsg(LOG_DEBUG,"New direct Connection from Client!\n");
 								#endif
-								CAMuxSocket* pnewMuxSocket=new CAMuxSocket;
-								if(m_arrSocketsIn[i].accept(*(CASocket*)pnewMuxSocket)!=E_SUCCESS)
+								CAMuxSocket* pnewMuxSocket=new CAMuxSocket;						// create a socket object for this JAP<->mix connection
+								if(m_arrSocketsIn[i].accept(*(CASocket*)pnewMuxSocket)!=E_SUCCESS)  // establish the connection and IF that fails 
 									{
 										CAMsg::printMsg(LOG_ERR,"Accept Error %u - direct Connection from Client!\n",GET_NET_ERROR);
 										delete pnewMuxSocket;
 									}
-								else
+								else																									// connection established
 									{
-		//Prüfen ob schon vorhanden..	
-											ret=((CASocket*)pnewMuxSocket)->getPeerIP(peerIP);
-											if(ret!=E_SUCCESS||m_pIPList->insertIP(peerIP)<0)
+																																			// check for simple DoS attack.
+											ret=((CASocket*)pnewMuxSocket)->getPeerIP(peerIP);  
+											if(ret!=E_SUCCESS||m_pIPList->insertIP(peerIP)<0) // IF we can't read the peer's IP or he already has too many connections
 												{
 													pnewMuxSocket->close();
 													delete pnewMuxSocket;
 												}
 											else
 												{
-		//Weiter wie bisher...								
+																																			// no DoS attack. business as usual.
 													#ifdef _DEBUG
 														int ret=((CASocket*)pnewMuxSocket)->setKeepAlive(true);
 														if(ret!=E_SUCCESS)
-															CAMsg::printMsg(LOG_DEBUG,"Fehler bei KeepAlive!");
+															CAMsg::printMsg(LOG_DEBUG,"Error setting KeepAlive!");
 													#else
 														((CASocket*)pnewMuxSocket)->setKeepAlive(true);
 													#endif
-													((CASocket*)pnewMuxSocket)->send(m_xmlKeyInfoBuff,m_xmlKeyInfoSize);
-													((CASocket*)pnewMuxSocket)->setNonBlocking(true);
-													m_pChannelList->add(pnewMuxSocket,peerIP,new CAQueue);
-													incUsers();
-													m_psocketgroupUsersRead->add(*pnewMuxSocket);
+													((CASocket*)pnewMuxSocket)->send(m_xmlKeyInfoBuff,m_xmlKeyInfoSize);  // send the mix-keys to JAP
+													((CASocket*)pnewMuxSocket)->setNonBlocking(true);	                    // stefan: sendet das send in der letzten zeile doch noch nicht? wenn doch, kann dann ein JAP nicht durch verweigern der annahme hier den mix blockieren? vermutlich nciht, aber andersherum faend ich das einleuchtender.
+													m_pChannelList->add(pnewMuxSocket,peerIP,new CAQueue); // adding user connection to mix->JAP channel list (stefan: sollte das nicht connection list sein? ).
+													incUsers();																	// increment the user counter by one
+													m_psocketgroupUsersRead->add(*pnewMuxSocket); // add user socket to the established ones that we read data from.
 												}
 									}
 							}
@@ -552,18 +552,18 @@ SINT32 CAFirstMix::loop()
 				if(m_pQueueSendToMix->getSize()<MAX_NEXT_MIX_QUEUE_SIZE)
 					{
 						fmHashTableEntry* pHashEntry=m_pChannelList->getFirst();
-						countRead=m_psocketgroupUsersRead->select(false,0);
+						countRead=m_psocketgroupUsersRead->select(false,0);				// how many JAP<->mix connections have received data from their coresponding JAP
 						if(countRead>0)
 							bAktiv=true;
-						while(pHashEntry!=NULL&&countRead>0)
+						while(pHashEntry!=NULL&&countRead>0)											// iterate through all connections as long as there is at least one active left
 							{
 								CAMuxSocket* pMuxSocket=pHashEntry->pMuxSocket;
-								if(m_psocketgroupUsersRead->isSignaled(*pMuxSocket))
+								if(m_psocketgroupUsersRead->isSignaled(*pMuxSocket))	// if this one seems to have data
 									{
 										countRead--;
 										ret=pMuxSocket->receive(pMixPacket,0);
-										if(ret==SOCKET_ERROR/*||pHashEntry->accessUntil<time()*/)
-											{
+										if(ret==SOCKET_ERROR/*||pHashEntry->accessUntil<time()*/) 
+											{																								// remove dead connections
 												#ifndef LOG_CHANNEL
 													m_pIPList->removeIP(pHashEntry->peerIP);
 												#else
@@ -591,42 +591,43 @@ SINT32 CAFirstMix::loop()
 												delete pMuxSocket;
 												decUsers();
 											}
-										else if(ret==MIXPACKET_SIZE)
+										else if(ret==MIXPACKET_SIZE) 											// we've read enough data for a whole mix packet. nice!
 											{
-													if(!pMuxSocket->getIsEncrypted())//Encryption is not set yet -> 
-																													 //so we assume that this is
-																													//the first packet of a connection
-																													//which contains the key
-														{
-															m_pRSA->decrypt(pMixPacket->data,rsaBuff);
-															if(memcmp("KEYPACKET",rsaBuff,9)!=0)
-																{
-																	m_pIPList->removeIP(pHashEntry->peerIP);
-																	m_psocketgroupUsersRead->remove(*(CASocket*)pMuxSocket);
-																	m_psocketgroupUsersWrite->remove(*(CASocket*)pMuxSocket);
-																	delete pHashEntry->pQueueSend;
-																	m_pChannelList->remove(pMuxSocket);
-																	pMuxSocket->close();
-																	delete pMuxSocket;
-																	decUsers();
-																}
-															else
-																{
-																	pMuxSocket->setKey(rsaBuff+9,32);
-																	pMuxSocket->setCrypt(true);
-																}
-															goto NEXT_USER_CONNECTION;
-														}
+												if(!pMuxSocket->getIsEncrypted())	            //Encryption is not set yet -> 
+																																			//so we assume that this is
+																																			//the first packet of a connection
+																																			//which contains the key
+														// stefan: ist das eine der protokoll-leichen die bald rausfliegen?
+													{
+														m_pRSA->decrypt(pMixPacket->data,rsaBuff);
+														if(memcmp("KEYPACKET",rsaBuff,9)!=0)
+															{
+																m_pIPList->removeIP(pHashEntry->peerIP);
+																m_psocketgroupUsersRead->remove(*(CASocket*)pMuxSocket);
+																m_psocketgroupUsersWrite->remove(*(CASocket*)pMuxSocket);
+																delete pHashEntry->pQueueSend;
+																m_pChannelList->remove(pMuxSocket);
+																pMuxSocket->close();
+																delete pMuxSocket;
+																decUsers();
+															}
+														else
+															{
+																pMuxSocket->setKey(rsaBuff+9,32);
+																pMuxSocket->setCrypt(true);
+															}
+														goto NEXT_USER_CONNECTION;
+													}
 												#ifdef LOG_CHANNEL
 													pHashEntry->trafficIn++;
 												#endif
-												if(pMixPacket->flags==CHANNEL_DUMMY)
-													{
+												if(pMixPacket->flags==CHANNEL_DUMMY)					// just a dummy to keep the connection alife in e.g. NAT gateways 
+													{ // stefan: ein dummy wird einfach zurueck zum nutzer geschickt? ohne umverschluesseln (ausser dem ersten teil)?
 														pMuxSocket->send(pMixPacket,tmpBuff);
 														pHashEntry->pQueueSend->add(tmpBuff,MIXPACKET_SIZE);
-														m_psocketgroupUsersWrite->add(*pMuxSocket);
+														m_psocketgroupUsersWrite->add(*pMuxSocket); 
 													}
-												else if(pMixPacket->flags==CHANNEL_CLOSE)
+												else if(pMixPacket->flags==CHANNEL_CLOSE)			// closing one mix-channel (not the JAP<->mix connection!)
 													{
 														fmChannelListEntry* pEntry;
 														pEntry=m_pChannelList->get(pMuxSocket,pMixPacket->channel);
@@ -641,7 +642,7 @@ SINT32 CAFirstMix::loop()
 																	CAMsg::printMsg(LOG_DEBUG,"Channel close - Channel: %u, Connection: %Lu - PacketsIn (only data): %u, PacketsOut (only data): %u - ChannelStart: %Lu, ChannelEnd: %Lu, ChannelDuration: %u\n",
 																														pEntry->channelIn,pEntry->pHead->id,pEntry->packetsInFromUser,pEntry->packetsOutToUser,pEntry->timeCreated,current_time,diff_time);
 																#endif
-																delete pEntry->pCipher;
+																delete pEntry->pCipher;              // forget the symetric key of this connection
 																m_pChannelList->removeChannel(pMuxSocket,pMixPacket->channel);
 															}
 														#ifdef _DEBUG
@@ -651,7 +652,7 @@ SINT32 CAFirstMix::loop()
 															}
 														#endif
 													}
-												else
+												else		                                     // finally! a normal mix packet
 													{
 														CASymCipher* pCipher=NULL;
 														fmChannelListEntry* pEntry;
@@ -661,17 +662,17 @@ SINT32 CAFirstMix::loop()
 																pMixPacket->channel=pEntry->channelOut;
 																pCipher=pEntry->pCipher;
 																pCipher->decryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
-																m_pMuxOut->send(pMixPacket,tmpBuff);
-																m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
+																m_pMuxOut->send(pMixPacket,tmpBuff);            // prepare packet for sending (apply symmetric cypher to first block)
+																m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE); // queue the packet for sending to the next mix.
 																incMixedPackets();
 																#ifdef LOG_CHANNEL
 																	pEntry->packetsInFromUser++;
 																#endif
 															}
-														else if(pEntry==NULL&&pMixPacket->flags==CHANNEL_OPEN)
-															{
+														else if(pEntry==NULL&&pMixPacket->flags==CHANNEL_OPEN)  // open a new mix channel
+														{ // stefan: muesste das nicht vor die behandlung von CHANNEL_DATA? oder gilt OPEN => !DATA ? 
 																pCipher= new CASymCipher();
-																m_pRSA->decrypt(pMixPacket->data,rsaBuff);
+																m_pRSA->decrypt(pMixPacket->data,rsaBuff); // stefan: das hier ist doch eine ziemlich kostspielige operation. sollte das pruefen auf Max_Number_Of_Channels nicht vorher passieren?
 																pCipher->setKeyAES(rsaBuff);
 																pCipher->decryptAES(pMixPacket->data+RSA_SIZE,
 																								 pMixPacket->data+RSA_SIZE-KEY_SIZE,
