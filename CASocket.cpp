@@ -193,17 +193,24 @@ SINT32 CASocket::close(int mode)
 		return ret;
 	}
 			
-int CASocket::send(UINT8* buff,UINT32 len)
+/** Sends the buff over the network.
+	@param buff - the buffer to send
+	@param len - content length
+	@param bDisableAsync - force to send this asynchronous (even if Async-Modus was set via setAsync)
+					default: false
+	@ret number of bytes send, or -1 in case of an error
+*/
+int CASocket::send(UINT8* buff,UINT32 len,bool bDisableAsync)
 	{
 	  int ret;	
-	  if(!m_bASyncSend) //snyc send...
+	  if(!m_bASyncSend||bDisableAsync) //sycc send...
 			{
 				do
 					{
 						ret=::send(m_Socket,(char*)buff,len,MSG_NOSIGNAL);
-					 #ifdef _DEBUG
-						if(ret==SOCKET_ERROR)
-						 printf("Fehler beim Socket-send: %i",errno);
+						#ifdef _DEBUG
+							if(ret==SOCKET_ERROR)
+								printf("Fehler beim Socket-send: %i",errno);
 						#endif
 					}
 				while(ret==SOCKET_ERROR&&errno==EINTR);

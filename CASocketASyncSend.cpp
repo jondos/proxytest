@@ -52,7 +52,7 @@ THREAD_RETURN SocketASyncSendLoop(void* p)
 								ret--;
 								UINT32 len=BUFF_SIZE;
 								if(akt->pQueue->getNext(buff,&len)==E_SUCCESS)
-									::send((SOCKET)*(akt->pSocket),(char*)buff,len,0);
+									akt->pSocket->send(buff,len,true);
 #define BUFFLOWLEVEL 10
 								if(akt->bwasOverFull&&akt->pQueue->getSize()<BUFFLOWLEVEL)
 									{

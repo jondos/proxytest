@@ -407,14 +407,17 @@ LOOP_START:
 										oSocketList.remove(oMuxPacket.channel);
 										delete oConnection.pSocket;
 										delete oConnection.pCipher;
+										CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u\n",oMuxPacket.channel);
 									}
 								else if(oMuxPacket.flags==CHANNEL_SUSPEND)
 									{
 										oSocketGroup.remove(*(oConnection.pSocket));
+										CAMsg::printMsg(LOG_DEBUG,"Suspending Channel: %u\n",oMuxPacket.channel);
 									}
 								else if(oMuxPacket.flags==CHANNEL_RESUME)
 									{
 										oSocketGroup.add(*(oConnection.pSocket));
+										CAMsg::printMsg(LOG_DEBUG,"Resumeing Channel: %u\n",oMuxPacket.channel);
 									}
 								else
 									{

@@ -45,7 +45,7 @@ class CASocket
 			SINT32 connect(LPCASOCKETADDR psa,UINT retry,UINT32 time);
 			SINT32 close();
 			SINT32 close(int mode);
-			int send(UINT8* buff,UINT32 len);
+			int send(UINT8* buff,UINT32 len,bool bDisableAsync=false);
 #ifdef HAVE_FIONREAD
 			#define HAVE_AVAILABLE
 			SINT32 available();
