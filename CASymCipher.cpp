@@ -28,7 +28,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "StdAfx.h"
 //#include "aes/encrypt.cpp"
 #include "CASymCipher.hpp"
-#include "aes/encrypt.cpp"
 
 /*SINT32 CASymCipher::setEncryptionKey(UINT8* key)
 	{
