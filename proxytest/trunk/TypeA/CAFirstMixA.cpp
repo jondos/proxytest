@@ -432,7 +432,7 @@ SINT32 CAFirstMixA::loop()
 														{
 															UINT64 tmpU64;
 															getcurrentTimeMicros(tmpU64);
-															addToTimeingStats(diff64(tmpU64,timestamp),((MIXPACKET*)tmpBuff)->flags,false);
+															m_pLogPacketStats->addToTimeingStats(diff64(tmpU64,timestamp),((MIXPACKET*)tmpBuff)->flags,false);
 															#ifdef _DEBUG
 																CAMsg::printMsg(LOG_CRIT,"Download Packet processing time (arrival <--> send): %u µs\n",diff64(tmpU64,timestamp));
 															#endif
@@ -488,7 +488,6 @@ SINT32 CAFirstMixA::loop()
 		//writng some bytes to the queue...
 		UINT8 b[MIXPACKET_SIZE+1];
 		#ifdef LOG_PACKET_TIMES
-			m_bRunLog=false;
 			m_pQueueSendToMix->add(b,MIXPACKET_SIZE+1,upload_packet_timestamp);
 		#else
 			m_pQueueSendToMix->add(b,MIXPACKET_SIZE+1);
@@ -502,8 +501,8 @@ SINT32 CAFirstMixA::loop()
 		CAMsg::printMsg(LOG_CRIT,"Wait for LoopReadFromMix!\n");
 		m_pthreadReadFromMix->join();
 		#ifdef LOG_PACKET_TIMES
-			CAMsg::printMsg(LOG_CRIT,"Wait for LoopLog!\n");
-			m_pthreadLog->join();
+			CAMsg::printMsg(LOG_CRIT,"Wait for LoopLogPacketStats to terminate!\n");
+			m_pLogPacketStats->stop();
 		#endif	
 		//waits until all login threads terminates....
 		// we have to be sure that the Accept thread was alread stoped!
