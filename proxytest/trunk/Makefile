@@ -47,8 +47,13 @@ all:
 	@echo 'linux-x86-gcc, linux-x86-gcc-static, linux-x86-gcc-debug,'
 	@echo 'solaris-ultrasparc-gcc, irix-64-cc'
 
+
 linux-x86-gcc:
 	$(MAKE) 'CC=gcc' 'CPPFLAGS=-Wall -Wcast-align -fomit-frame-pointer -march=i686 -O3 -D_REENTRANT' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lstdc++' 'LIBDIR=-L/usr/local/ssl/lib' _all 
+
+
+linux-x86-gcc-prot2:
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-DPROT2 -Wall -Wcast-align -fomit-frame-pointer -march=i686 -O3 -D_REENTRANT' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lstdc++ ./aes/aes.a' 'LIBDIR=-L/usr/local/ssl/lib' _all_aes 
 
 linux-x86-gcc-static:
 	$(MAKE) 'CC=gcc' 'CPPFLAGS=-static -Wall -Wcast-align -fomit-frame-pointer -march=i686 -O3 -D_REENTRANT' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lstdc++' 'LIBDIR=-L/usr/local/ssl/lib' _all 
@@ -68,6 +73,9 @@ irix-64-cc-debug:
 _all: $(OBJS) httptunnel.a popt.a xml.a
 	$(CC) -o proxytest $(DEBUG) $(CPPFLAGS) $(OBJS) $(LIBDIR) $(LIBS) 
 
+_all_aes: $(OBJS) httptunnel.a popt.a xml.a aes.a
+	$(CC) -o proxytest $(DEBUG) $(CPPFLAGS) $(OBJS) $(LIBDIR) $(LIBS) 
+
 popt.a:
 	cd popt;$(MAKE) 'CC=$(CC)' 'DEBUG=$(DEBUG)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)'
 
@@ -77,9 +85,13 @@ httptunnel.a:
 xml.a: 
 	cd xml;$(MAKE) 'CC=$(CC)' 'DEBUG=$(DEBUG)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)';
 
+aes.a: 
+	cd aes;$(MAKE) 'CC=$(CC)' 'DEBUG=$(DEBUG)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)';
+
 clean:
 	rm -f $(OBJS)
 	cd popt; $(MAKE) clean;
 	cd httptunnel;$(MAKE) clean;
 	cd xml;$(MAKE) clean;
+	cd aes;$(MAKE) clean;
 	rm -f proxytest

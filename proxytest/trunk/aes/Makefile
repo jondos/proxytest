@@ -1,0 +1,9 @@
+aes.a: rijndael-alg-fst.cpp rijndael-api-fst.cpp  
+	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) rijndael-alg-fst.cpp -o rijndael-alg-fst.o
+	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) rijndael-api-fst.cpp -o rijndael-api-fst.o
+	ar -rcs aes.a *.o 
+
+clean:
+	rm -f *.o
+	rm -f aes.a
+
