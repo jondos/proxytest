@@ -1,4 +1,4 @@
-#include "../StdAFx.h"
+#include "../StdAfx.h"
 #include "CAFirstMixB.hpp"
 #include "../CASingleSocketGroup.hpp"
 #include "../CAInfoService.hpp"
@@ -17,7 +17,7 @@ SINT32 CAFirstMixB::loop()
 		SINT32 ret;
 		osocketgroupMixOut.add(*m_pMuxOut);
 		m_pMuxOut->setCrypt(true);
-		
+
 		m_pInfoService->setSignature(m_pSignature,NULL);
 		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix InfoService - Signature set\n");
 		m_pInfoService->start();
@@ -37,7 +37,7 @@ SINT32 CAFirstMixB::loop()
 		for(i=0;i<m_nSocketsIn;i++)
 			osocketgroupAccept.add(m_arrSocketsIn[i]);
 
-#endif		
+#endif
 		//Starting thread for Step 2
 		UINT8 peerIP[4];
 //		UINT8 rsaBuff[RSA_SIZE];
@@ -58,23 +58,23 @@ SINT32 CAFirstMixB::loop()
 		threadSendToMix.setMainLoop(fm_loopSendToMix);
 		threadSendToMix.start(this);
 
-		while(!m_bRestart)	                                                          // the main mix loop as long as there are things that are not handled by threads. 
+		while(!m_bRestart)	                                                          // the main mix loop as long as there are things that are not handled by threads.
 			{
 				bAktiv=false;
 //LOOP_START:
 
 //First Step
-//Checking for new connections		
+//Checking for new connections
 // Now in a separat Thread.... (if NOT _DEBUG defined!)
 
-#if defined(_DEBUG) || defined(NO_LOOPACCEPTUSER)				
-				
+#if defined(_DEBUG) || defined(NO_LOOPACCEPTUSER)
+
 				countRead=osocketgroupAccept.select(false,0);	                // how many new JAP<->mix connections are there
 				i=0;
 				if(countRead>0)
 					bAktiv=true;
 				while(countRead>0&&i<m_nSocketsIn)														// iterate through all those sockets as long as there is a new one left.
-					{						
+					{
 						if(osocketgroupAccept.isSignaled(m_arrSocketsIn[i]))			// if new client connection
 							{
 								countRead--;
@@ -82,7 +82,7 @@ SINT32 CAFirstMixB::loop()
 									CAMsg::printMsg(LOG_DEBUG,"New direct Connection from Client!\n");
 								#endif
 								CAMuxSocket* pnewMuxSocket=new CAMuxSocket;						// create a socket object for this JAP<->mix connection
-								if(m_arrSocketsIn[i].accept(*(CASocket*)pnewMuxSocket)!=E_SUCCESS)  // establish the connection and IF that fails 
+								if(m_arrSocketsIn[i].accept(*(CASocket*)pnewMuxSocket)!=E_SUCCESS)  // establish the connection and IF that fails
 									{
 										CAMsg::printMsg(LOG_ERR,"Accept Error %u - direct Connection from Client!\n",GET_NET_ERROR);
 										delete pnewMuxSocket;
@@ -90,7 +90,7 @@ SINT32 CAFirstMixB::loop()
 								else																									// connection established
 									{
 																																			// check for simple DoS attack.
-											ret=((CASocket*)pnewMuxSocket)->getPeerIP(peerIP);  
+											ret=((CASocket*)pnewMuxSocket)->getPeerIP(peerIP);
 											if(ret!=E_SUCCESS||m_pIPList->insertIP(peerIP)<0) // IF we can't read the peer's IP or he already has too many connections
 												{
 													pnewMuxSocket->close();
@@ -127,8 +127,8 @@ SINT32 CAFirstMixB::loop()
 						i++;
 					}
 #endif
-				
-// Second Step 
+
+// Second Step
 // Checking for data from users
 // Now in a separate Thread (see loopReadFromUsers())
 //Only proccess user data, if queue to next mix is not to long!!
@@ -147,7 +147,7 @@ SINT32 CAFirstMixB::loop()
 									{
 										countRead--;
 										ret=pMuxSocket->receive(pMixPacket,0);
-										if(ret==SOCKET_ERROR) 
+										if(ret==SOCKET_ERROR)
 											{																								// remove dead connections
 												#ifndef LOG_CHANNEL
 													m_pIPList->removeIP(pHashEntry->peerIP);
@@ -181,7 +181,7 @@ SINT32 CAFirstMixB::loop()
 											}
 										else if(ret==MIXPACKET_SIZE) 											// we've read enough data for a whole mix packet. nice!
 											{
-												if(!pMuxSocket->getIsEncrypted())	            //Encryption is not set yet -> 
+												if(!pMuxSocket->getIsEncrypted())	            //Encryption is not set yet ->
 																																			//so we assume that this is
 																																			//the first packet of a connection
 																																			//which contains the key
@@ -209,12 +209,12 @@ SINT32 CAFirstMixB::loop()
 												#ifdef LOG_CHANNEL
 													pHashEntry->trafficIn++;
 												#endif
-												if(pMixPacket->flags==CHANNEL_DUMMY)					// just a dummy to keep the connection alife in e.g. NAT gateways 
-													{ 
+												if(pMixPacket->flags==CHANNEL_DUMMY)					// just a dummy to keep the connection alife in e.g. NAT gateways
+													{
 														getRandom(pMixPacket->data,DATA_SIZE);
 														pMuxSocket->send(pMixPacket,tmpBuff);
 														pHashEntry->pQueueSend->add(tmpBuff,MIXPACKET_SIZE);
-														m_psocketgroupUsersWrite->add(*pMuxSocket); 
+														m_psocketgroupUsersWrite->add(*pMuxSocket);
 													}
 												else if(pMixPacket->flags==CHANNEL_CLOSE)			// closing one mix-channel (not the JAP<->mix connection!)
 													{
@@ -261,7 +261,7 @@ SINT32 CAFirstMixB::loop()
 																#endif
 															}
 														else if(pEntry==NULL&&pMixPacket->flags==CHANNEL_OPEN)  // open a new mix channel
-														{ // stefan: muesste das nicht vor die behandlung von CHANNEL_DATA? oder gilt OPEN => !DATA ? 
+														{ // stefan: muesste das nicht vor die behandlung von CHANNEL_DATA? oder gilt OPEN => !DATA ?
 														   //es gilt: open -> data
 																m_pRSA->decrypt(pMixPacket->data,rsaBuff); // stefan: das hier ist doch eine ziemlich kostspielige operation. sollte das pruefen auf Max_Number_Of_Channels nicht vorher passieren? --> ok sollte aufs TODO ...
 																#ifdef REPLAY_DETECTION
@@ -276,7 +276,7 @@ SINT32 CAFirstMixB::loop()
 																pCipher->decryptAES(pMixPacket->data+RSA_SIZE,
 																								 pMixPacket->data+RSA_SIZE-(KEY_SIZE+TIMESTAMP_SIZE),
 																								 DATA_SIZE-RSA_SIZE);
-																memcpy(pMixPacket->data,rsaBuff+KEY_SIZE+TIMESTAMP_SIZE,RSA_SIZE-(KEY_SIZE+TIMESTAMP_SIZE));																
+																memcpy(pMixPacket->data,rsaBuff+KEY_SIZE+TIMESTAMP_SIZE,RSA_SIZE-(KEY_SIZE+TIMESTAMP_SIZE));
 																#ifdef LOG_CHANNEL
 																	HCHANNEL tmpC=pMixPacket->channel;
 																#endif
@@ -310,7 +310,7 @@ SINT32 CAFirstMixB::loop()
 // Now in a separate Thread (see loopSendToMix())
 
 //Step 4
-//Reading from Mix				
+//Reading from Mix
 				countRead=m_nUser+1;
 				while(countRead>0&&osocketgroupMixOut.select(false,0)==1)
 					{
@@ -347,10 +347,10 @@ SINT32 CAFirstMixB::loop()
 											CAMsg::printMsg(LOG_DEBUG,"Channel close - Channel: %u, Connection: %Lu - PacketsIn (only data): %u, PacketsOut (only data): %u - ChannelStart: %Lu, ChannelEnd: %Lu, ChannelDuration: %u\n",
 																								pEntry->channelIn,pEntry->pHead->id,pEntry->packetsInFromUser,pEntry->packetsOutToUser,pEntry->timeCreated,current_time,diff_time);
 										#endif
-										
+
 										m_psocketgroupUsersWrite->add(*pEntry->pHead->pMuxSocket);
 										delete pEntry->pCipher;
-	
+
 										m_pChannelList->removeChannel(pEntry->pHead->pMuxSocket,pEntry->channelIn);
 									}
 							}
@@ -372,7 +372,7 @@ SINT32 CAFirstMixB::loop()
 										#endif
 										pMixPacket->channel=pEntry->channelIn;
 										pEntry->pCipher->decryptAES2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
-										
+
 										pEntry->pHead->pMuxSocket->send(pMixPacket,tmpBuff);
 										pEntry->pHead->pQueueSend->add(tmpBuff,MIXPACKET_SIZE);
 										#ifdef LOG_CHANNEL
@@ -389,10 +389,10 @@ SINT32 CAFirstMixB::loop()
 												pMixPacket->flags=CHANNEL_SUSPEND;
 												#ifdef _DEBUG
 													CAMsg::printMsg(LOG_INFO,"Sending suspend for channel: %u\n",pMixPacket->channel);
-												#endif												
+												#endif
 												//m_pMuxOut->send(pMixPacket,tmpBuff);
 												m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE);
-												
+
 												pEntry->bIsSuspended=true;
 												pEntry->pHead->cSuspend++;
 											}
@@ -406,12 +406,12 @@ SINT32 CAFirstMixB::loop()
 										#endif
 										#ifdef LOG_CHANNEL
 											CAMsg::printMsg(LOG_INFO,"Packet late arrive for channel: %u\n",pMixPacket->channel);
-										#endif												
+										#endif
 									}
 							}
 					}
 
-//Step 5 
+//Step 5
 //Writing to users...
 				fmHashTableEntry* pfmHashEntry=m_pChannelList->getFirst();
 				countRead=m_psocketgroupUsersWrite->select(true,0);
@@ -442,9 +442,9 @@ SINT32 CAFirstMixB::loop()
 																pMixPacket->channel=pEntry->channelOut;
 																//m_pMuxOut->send(pMixPacket,tmpBuff);
 																m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE);
-																pEntry->bIsSuspended=false;	
+																pEntry->bIsSuspended=false;
 															}
-														
+
 														pEntry=m_pChannelList->getNextChannel(pEntry);
 													}
 												pfmHashEntry->cSuspend=0;
@@ -467,9 +467,9 @@ SINT32 CAFirstMixB::loop()
 		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
 		m_bRestart=true;
 		CAMsg::printMsg(LOG_CRIT,"Stopping InfoService....\n");
-		CAMsg::printMsg	(LOG_CRIT,"Memory usage before: %u\n",getMemoryUsage());	
+		CAMsg::printMsg	(LOG_CRIT,"Memory usage before: %u\n",getMemoryUsage());
 		m_pInfoService->stop();
-		CAMsg::printMsg	(LOG_CRIT,"Memory usage after: %u\n",getMemoryUsage());	
+		CAMsg::printMsg	(LOG_CRIT,"Memory usage after: %u\n",getMemoryUsage());
 		CAMsg::printMsg(LOG_CRIT,"Stopped InfoService!\n");
 		m_pMuxOut->close();
 		for(i=0;i<m_nSocketsIn;i++)
@@ -483,9 +483,9 @@ SINT32 CAFirstMixB::loop()
 #endif
 		CAMsg::printMsg(LOG_CRIT,"Wait for LoopSendToMix!\n");
 		threadSendToMix.join(); //will not join if queue is empty (and so wating)!!!
-		//		threadReadFromUsers.join(); 
+		//		threadReadFromUsers.join();
 		CAMsg::printMsg(LOG_CRIT,"Before deleting CAFirstMixChannelList()!\n");
-		CAMsg::printMsg	(LOG_CRIT,"Memeory usage before: %u\n",getMemoryUsage());	
+		CAMsg::printMsg	(LOG_CRIT,"Memeory usage before: %u\n",getMemoryUsage());
 		fmHashTableEntry* pHashEntry=m_pChannelList->getFirst();
 		while(pHashEntry!=NULL)
 			{
@@ -503,7 +503,7 @@ SINT32 CAFirstMixB::loop()
 				delete pMuxSocket;
 				pHashEntry=m_pChannelList->getNext();
 			}
-		CAMsg::printMsg	(LOG_CRIT,"Memory usage after: %u\n",getMemoryUsage());	
+		CAMsg::printMsg	(LOG_CRIT,"Memory usage after: %u\n",getMemoryUsage());
 		delete pMixPacket;
 		delete []tmpBuff;
 		#ifdef USE_POOL
