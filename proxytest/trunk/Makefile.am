@@ -18,7 +18,7 @@ proxytest_SOURCES = CAASymCipher.cpp \
 										CAMiddleMix.cpp \
 		   							CAMix.cpp \
 										CAMsg.cpp \
-										CAMuxChannelList.cpp \
+										CAFirstMixChannelList.cpp \
 		   							CAMuxSocket.cpp \
 										CAQueue.cpp \
 										CARoundTripTime.cpp \
@@ -45,7 +45,7 @@ proxytest_SOURCES = CAASymCipher.cpp \
 										CAMiddleMix.hpp \
 										CAMix.hpp \
 										CAMsg.hpp \
-										CAMuxChannelList.hpp \
+										CAFirstMixChannelList.hpp \
 										CAMuxSocket.hpp \
 										CAQueue.hpp \
 										CARoundTripTime.hpp \
