@@ -1,0 +1,77 @@
+\documentclass[a4paper,german]{article}
+\usepackage{babel}
+\usepackage{amsmath}
+\usepackage[pdftitle={Schl"usselaustausch f"ur symmetrische Verschl"usselung im ersten Mix},pdfauthor={Stefan K"opsell},
+pdfsubject={Effiziente und skalierbare Realisierung von unbeobachtbarer und anonymer Kommunikation im Internet}
+ ]{hyperref}
+%\usepackage{thumbpdf} 
+\def\sig{\mathop{\rm Sig}\nolimits}
+\def\hash{\mathop{\rm H}\nolimits}
+\def\enc{\mathop{\rm E}\nolimits}
+\def\xor{\oplus}
+\begin{document}
+\title{Schl"usselaustausch f"ur symmetrische Verschl"usselung im ersten Mix\\V 0.4}
+\author{Stefan K"opsell}
+\maketitle
+\section{Ziel und Annahmen}
+Das bisherige Mix-Protokoll unterscheidet bzgl. der Verschl"usselung nicht zwischen ersten, mittleren und letzten Mixen. Die Aufbaunachricht
+f"ur einen Kanal ist in jedem Fall asymmetrisch verschl"usselt.
+
+Aus Performance-Sicht ist es nat"urlich sinnvoll, die Kanalaufbaunachrichten 
+f"ur den ersten Mix symmetrisch zu verschl"usseln. Der daf"ur notwendige Schl"ussel\-austausch (oder genauer: Geheimnistransport) soll beim Anmelden des Nutzers an der Mix-Kaskade erfolgen.
+Folgende Anforderungen soll das Schl"ussel\-austauschprotokoll erf"ullen:
+\begin{enumerate}
+\item Zwischen einem Nutzer $U$ und dem ersten Mix soll ein Geheimnis ausgetauscht werden, das nur der Nutzer und der erste
+Mix kennen.
+\item Das Protokoll soll aus m"oglichst wenigen Nachrichten bestehen.
+\item Der Rechenaufwand f"ur den Mix soll m"oglichst gering sein.
+\item Synchronit"at von Uhren oder Z"ahlern etc. zwischen Nutzer und Mix soll keine Voraussetzung sein.
+\item Die erste Nachricht soll vom Mix zum Nutzer gesendet werden. Dem Nutzer k"onnen so zus"atzliche Informationen "ubermittelt werden,
+die den weiteren Protokollablauf beeinflussen (Ber"ucksichtigung von Unterschieden verschiedener Protokollversionen etc.)
+\item\label{z1} Um \glqq Denial Of Service\grqq-Angriffe nicht zu erleichtern, sollte diese erste Nachricht keinen signifikanten Ressourcenverbrauch 
+(Rechenzeit, Speicher etc.) beim ersten Mix verursachen .
+\end{enumerate}
+
+\noindent
+Dem Schl"usselaustauschprotokoll liegen dabei folgende Annahmen (auch bzgl. Angreifermodell) zugrunde:
+\begin{enumerate}
+\item Der Nutzer kennt den "offentlichen Signatur-Testschl"ussel $t_\text{Mix}$ des ersten Mixes.
+\item Der Angreifer kann wie "ublich alle Nachrichten abh"oren und ver"andern.
+\item Der Angreifer kennt nicht den geheimen Signatur-Schl"ussel $s_\text{Mix}$ des ersten Mixes.
+\item Der Angreifer kennt alle bisher ausgetauschten Geheimnisse.
+\item \label{a1} Der Angreifer kennt au{\ss}er dem aktuell g"ultigen alle geheimen Entschl"usselungschl"ussel des ersten Mixes.
+\end{enumerate}
+
+\section{Protokoll}
+Das Protokoll zum Austausch des Geheimnisses $\text{SEC}$ besteht aus fünf Schritten (wobei nur bei drei Schritten Nachrichten übertragen werden) und l"auft wie folgt ab:
+\begin{enumerate}
+\item $U$\hspace{1.233cm}: erzeugt Geheimnis $\text{SEC}$
+\item $\text{Mix}\rightarrow U: m_1=c_\text{Mix},\sig_\text{Mix}(c_\text{Mix})$
+\item $U\rightarrow\text{Mix}: m_2=\enc_{c_\text{Mix}}(\text{SEC})$
+\item $\text{Mix}\rightarrow U: m_3=\sig_\text{Mix}(m_2)$
+\item $U$\hspace{1.233cm}: "uberpr"uft ob $m_3\overset{?}{=}\sig_\text{Mix}(m_2)$
+\end{enumerate}
+
+\noindent
+\emph{Anmerkungen}: Der Nutzer "uberpr"uft nach Erhalt von $m_3$ die Signatur  
+(gem"a{\ss} der Nachricht $m_2$, die der Nutzer gesendet hat).
+
+Die erste Nachricht dient zur "Ubermittlung des aktuell g"ultigen "offentlichen Verschl"usselungsschl"ussels des ersten Mixes. 
+Da diese Nachricht unabh"angig vom Nutzer $U$ ist, kann sie voraus berechnet werden (Erf"ullung von Anforderung~\ref{z1}). 
+Allerdings k"onnte es sich um einen Replay einer "alteren Nachricht $m_1'$ durch den Angreifer handeln. Gem"a{\ss} Annahme~\ref{a1} kennt der Angreifer
+in diesem Fall den zugeh"origen Entschl"usselungsschl"ussel.
+
+Mit der zweiten Nachricht wird das Geheimnis an den Mix "ubermittelt. 
+
+Die dritte Nachricht dient dazu, die Aktualit"at des ausgetauschten Geheimnisses zu garantieren. 
+Hat der Angreifer im ersten Schritt die Nachricht $m_1$ durch eine "altere Nachricht $m_1'$ ersetzt, 
+so kann er die Nachricht $m_2$ entschl"usseln und erf"ahrt somit das Geheimnis. Allerdings mu{\ss} er eine neue Nachricht $m_2'$ mit dem 
+aktuellen $c_\text{Mix}$ erzeugen, damit der Mix sie akzeptiert. Dies wird dann durch den Nutzer in Schritt 3
+bemerkt, da der signierte Wert nicht dem berechneten entspricht. 
+\appendix
+\section{Notation}
+\begin{tabbing}
+$\enc_c(m)$\hspace{1cm}\=Verschl"usselung von $m$ mittels OAEP-RSA\\\> mit dem "offentlichen Schl"ussel $c$\\
+$\sig_\text{Mix}(m)$\>Signatur geleistet vom ersten Mix unter die Nachricht $m$
+\end{tabbing}
+\end{document}
