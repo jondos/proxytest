@@ -10486,7 +10486,7 @@ sed 's/^/| /' conftest.$ac_ext >&5
 
 echo "$as_me:$LINENO: result: Yes" >&5
 echo "${ECHO_T}Yes" >&6
-LIBS="$LIBS libxerces-depdom"
+LIBS="$LIBS -lxerces-depdom"
 
 fi
 rm -f conftest.err conftest.$ac_objext \
