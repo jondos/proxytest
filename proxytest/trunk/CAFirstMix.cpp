@@ -434,6 +434,7 @@ END_THREAD:
 		delete tmpBuff;
 		delete pMixPacket;
 		delete rsaBuff;
+		CAMsg::printMsg(LOG_DEBUG,"Exiting Thread ReadFromUser\n");
 		THREAD_RETURN_SUCCESS;
 	}
 
@@ -813,6 +814,7 @@ ERR:
 				pHashEntry=m_pChannelList->getNext();
 			}
 		delete pMixPacket;
+		CAMsg::printMsg(LOG_CRIT,"Main Loop exited!!\n");
 		return E_UNKNOWN;
 	}
 

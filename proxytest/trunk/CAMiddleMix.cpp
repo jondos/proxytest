@@ -219,6 +219,8 @@ THREAD_RETURN loopDownStream(void *p)
 					}
 			}
 ERR:
+		pMix->m_MuxIn.close();
+		pMix->m_MuxOut.close();
 		THREAD_RETURN_SUCCESS;		
 	}
 
