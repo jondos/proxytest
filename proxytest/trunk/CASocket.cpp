@@ -138,7 +138,7 @@ int CASocket::getLocalPort()
 
 int CASocket::setReuseAddr(bool b)
 	{
-		BOOL val=0;
+		int val=0;
 		if(b) val=1;
 		return setsockopt(m_Socket,SOL_SOCKET,SO_REUSEADDR,(char*)&val,sizeof(val));
 	}
