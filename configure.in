@@ -145,6 +145,7 @@ dnl Checks for library functions.
 AC_FUNC_ALLOCA
 AC_CHECK_FUNCS([strerror])
 AC_CHECK_FUNCS([vsnprintf])
+AC_CHECK_FUNCS([atoll])
 AC_CHECK_FUNCS([poll])
 AC_CHECK_FUNC([epoll_wait],AC_DEFINE(HAVE_EPOLL,1,[Define if your OS support the epoll() syscall]))
 
