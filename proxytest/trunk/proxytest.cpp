@@ -53,7 +53,7 @@ THREAD_RETURN lpIO(void *v)
 		oSocketGroup.add(lpIOPair->socketIn);
 		if(options.getSOCKSServerPort()!=-1)
 			oSocketGroup.add(lpIOPair->socketSOCKSIn);
-		oSocketGroup.add(*((CASocket*)lpIOPair->muxOut));
+		oSocketGroup.add(lpIOPair->muxOut);
 		HCHANNEL lastChannelId=1;
 		MUXPACKET oMuxPacket;
 		int len;
@@ -111,7 +111,7 @@ THREAD_RETURN lpIO(void *v)
 								oSocketGroup.add(*newSocket);
 							}
 					}
-				if(oSocketGroup.isSignaled((*(CASocket*)lpIOPair->muxOut)))
+				if(oSocketGroup.isSignaled(lpIOPair->muxOut))
 						{
 							countRead--;	
 							len=lpIOPair->muxOut.receive(&oMuxPacket);
@@ -228,9 +228,21 @@ int doLocalProxy()
 		options.getTargetHost(strTarget,255);
 		addrNext.setAddr(strTarget,options.getTargetPort());
 		CAMsg::printMsg(LOG_INFO,"Try connectiong to next Mix...");
-		((CASocket*)lpIOPair->muxOut)->create();
-		((CASocket*)lpIOPair->muxOut)->setSendBuff(sizeof(MUXPACKET)*50);
-		((CASocket*)lpIOPair->muxOut)->setRecvBuff(sizeof(MUXPACKET)*50);
+
+		CAMuxSocket http;
+		http.useTunnel("anon.inf.tu-dresden.de",3128);
+		http.connect(&addrNext);
+		MUXPACKET oMuxPacket;
+		oMuxPacket.channel=1;
+		oMuxPacket.len=10;
+		memcpy(oMuxPacket.data,"Hllo",3);
+		http.send(&oMuxPacket);
+		http.close();
+		sleep(10);
+		return -1;
+//		((CASocket*)lpIOPair->muxOut)->create();
+//		((CASocket*)lpIOPair->muxOut)->setSendBuff(sizeof(MUXPACKET)*50);
+//		((CASocket*)lpIOPair->muxOut)->setRecvBuff(sizeof(MUXPACKET)*50);
 		if(lpIOPair->muxOut.connect(&addrNext)!=SOCKET_ERROR)
 			{
 				CAMsg::printMsg(LOG_INFO," connected!\n");
@@ -344,9 +356,9 @@ int doMiddleMix()
 		char strTarget[255];
 		options.getTargetHost(strTarget,255);
 		nextMix.setAddr(strTarget,options.getTargetPort());
-		((CASocket*)mmIOPair->muxOut)->create();
-		((CASocket*)mmIOPair->muxOut)->setRecvBuff(50*sizeof(MUXPACKET));
-		((CASocket*)mmIOPair->muxOut)->setSendBuff(50*sizeof(MUXPACKET));
+//		((CASocket*)mmIOPair->muxOut)->create();
+//		((CASocket*)mmIOPair->muxOut)->setRecvBuff(50*sizeof(MUXPACKET));
+//		((CASocket*)mmIOPair->muxOut)->setSendBuff(50*sizeof(MUXPACKET));
 		if(mmIOPair->muxOut.connect(&nextMix)==SOCKET_ERROR)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Cannot connect to next Mix -- Exiting!\n");
@@ -359,8 +371,8 @@ int doMiddleMix()
 				delete mmIOPair;
 				return SOCKET_ERROR;
 			}
-		((CASocket*)mmIOPair->muxIn)->setRecvBuff(50*sizeof(MUXPACKET));
-		((CASocket*)mmIOPair->muxIn)->setSendBuff(50*sizeof(MUXPACKET));
+	//	((CASocket*)mmIOPair->muxIn)->setRecvBuff(50*sizeof(MUXPACKET));
+	//	((CASocket*)mmIOPair->muxIn)->setSendBuff(50*sizeof(MUXPACKET));
 		mmIO(mmIOPair);
 		delete mmIOPair;
 		return 0;
@@ -369,6 +381,7 @@ int doMiddleMix()
 typedef struct t_FMPair
 	{
 		CASocket socketIn;
+		CAMuxSocket muxHttpIn;
 		CAMuxSocket muxOut;
 	} FMPair;
 
@@ -378,7 +391,7 @@ THREAD_RETURN fmIO(void *v)
 		CAMuxChannelList  oMuxChannelList;
 		CASocketGroup oSocketGroup;
 		oSocketGroup.add(fmIOPair->socketIn);
-		oSocketGroup.add(*((CASocket*)fmIOPair->muxOut));
+		oSocketGroup.add(fmIOPair->muxOut);
 		HCHANNEL lastChannelId=1;
 		HCHANNEL outChannel;
 		MUXPACKET oMuxPacket;
@@ -420,7 +433,7 @@ THREAD_RETURN fmIO(void *v)
 								oSocketGroup.add(*newMuxSocket);
 							}
 					}
-				if(oSocketGroup.isSignaled((*(CASocket*)fmIOPair->muxOut)))
+				if(oSocketGroup.isSignaled(fmIOPair->muxOut))
 						{
 							len=fmIOPair->muxOut.receive(&oMuxPacket);
 							if(len==0)
@@ -459,6 +472,67 @@ THREAD_RETURN fmIO(void *v)
 										}
 								}
 						}
+				if(oSocketGroup.isSignaled(fmIOPair->muxHttpIn))
+					{
+						countRead--;
+						len=fmIOPair->muxHttpIn.receive(&oMuxPacket);
+						printf("Receivde Htpp-Packet - Len: %u Content %s",len,oMuxPacket.data); 
+			/*			if(len==SOCKET_ERROR)
+							{
+								MUXLISTENTRY otmpEntry;
+								if(oMuxChannelList.remove(tmpEntry->pMuxSocket,&otmpEntry))
+									{
+										oSocketGroup.remove(*(CASocket*)otmpEntry.pMuxSocket);
+										CONNECTION* tmpCon=otmpEntry.pSocketList->getFirst();
+										while(tmpCon!=NULL)
+											{
+												fmIOPair->muxOut.close(tmpCon->outChannel);
+												tmpCon=otmpEntry.pSocketList->getNext();
+											}
+										otmpEntry.pMuxSocket->close();
+										delete otmpEntry.pMuxSocket;
+										delete otmpEntry.pSocketList;
+									}
+							}
+						else
+							{
+								if(len==0)
+									{
+										if(oMuxChannelList.get(tmpEntry,oMuxPacket.channel,&outChannel))
+											{
+												fmIOPair->muxOut.close(outChannel);
+												oMuxChannelList.remove(outChannel,NULL);
+											}
+										else
+											{
+												#ifdef _DEBUG
+													CAMsg::printMsg(LOG_DEBUG,"Invalid ID to close from Browser!\n");
+												#endif
+											}
+									}
+								else
+									{
+										if(oMuxChannelList.get(tmpEntry,oMuxPacket.channel,&outChannel))
+											{
+												oMuxPacket.channel=outChannel;
+											}
+										else
+											{
+												oMuxChannelList.add(tmpEntry,oMuxPacket.channel,lastChannelId);
+												#ifdef _DEBUG
+													CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",lastChannelId);
+												#endif
+												oMuxPacket.channel=lastChannelId++;
+											}
+										if(fmIOPair->muxOut.send(&oMuxPacket)==SOCKET_ERROR)
+											{
+												CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Exiting!\n");									
+												exit(-1);
+											}
+								}
+						}
+						*/
+					}
 				if(countRead>0)
 					{
 						tmpEntry=oMuxChannelList.getFirst();
@@ -541,14 +615,30 @@ int doFirstMix()
 					CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
 					return -1;
 		    }
+		
+		
+		fmIOPair->muxHttpIn.useTunnel("anon.inf.tu-dresden.de",2020);
+		printf("Before Connected");
+		if(fmIOPair->muxHttpIn.accept(2020)==SOCKET_ERROR)
+			{
+					CAMsg::printMsg(LOG_CRIT,"Cannot HTTP listen\n");
+			}
+		printf("Connected");
+		
+		MUXPACKET oPack;
+		int len=fmIOPair->muxHttpIn.receive(&oPack);
+		printf("Recevied: %u",len);
+		fmIOPair->muxHttpIn.close();
+		return -1;
+
 		CASocketAddr addrNext;
 		char strTarget[255];
 		options.getTargetHost(strTarget,255);
 		addrNext.setAddr(strTarget,options.getTargetPort());
 		CAMsg::printMsg(LOG_INFO,"Try connectiong to next Mix...");
-		((CASocket*)fmIOPair->muxOut)->create();
-		((CASocket*)fmIOPair->muxOut)->setSendBuff(50*sizeof(MUXPACKET));
-		((CASocket*)fmIOPair->muxOut)->setRecvBuff(50*sizeof(MUXPACKET));
+	//	((CASocket*)fmIOPair->muxOut)->create();
+	//	((CASocket*)fmIOPair->muxOut)->setSendBuff(50*sizeof(MUXPACKET));
+	//	((CASocket*)fmIOPair->muxOut)->setRecvBuff(50*sizeof(MUXPACKET));
 		if(fmIOPair->muxOut.connect(&addrNext)!=SOCKET_ERROR)
 			{
 				CAMsg::printMsg(LOG_INFO," connected!\n");
@@ -577,7 +667,7 @@ THREAD_RETURN lmIO(void *v)
 		LMPair* lmIOPair=(LMPair*)v;
 		CASocketList  oSocketList;
 		CASocketGroup oSocketGroup;
-		oSocketGroup.add(*((CASocket*)lmIOPair->muxIn));
+		oSocketGroup.add(lmIOPair->muxIn);
 		MUXPACKET oMuxPacket;
 		int len;
 		int countRead;
@@ -588,7 +678,7 @@ THREAD_RETURN lmIO(void *v)
 						sleep(1);
 						continue;
 					}
-				if(oSocketGroup.isSignaled(*((CASocket*)lmIOPair->muxIn)))
+				if(oSocketGroup.isSignaled(lmIOPair->muxIn))
 					{
 						countRead--;
 						len=lmIOPair->muxIn.receive(&oMuxPacket);
@@ -716,8 +806,8 @@ int doLastMix()
 					delete lmIOPair;
 					return -1;
 		    }
-		((CASocket*)lmIOPair->muxIn)->setRecvBuff(50*sizeof(MUXPACKET));
-		((CASocket*)lmIOPair->muxIn)->setSendBuff(50*sizeof(MUXPACKET));
+//		((CASocket*)lmIOPair->muxIn)->setRecvBuff(50*sizeof(MUXPACKET));
+//		((CASocket*)lmIOPair->muxIn)->setSendBuff(50*sizeof(MUXPACKET));
 
 		CAMsg::printMsg(LOG_INFO,"connected!\n");
 		char strTarget[255];

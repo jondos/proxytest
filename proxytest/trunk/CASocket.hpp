@@ -7,7 +7,9 @@ class CASocket
 		public:
 			CASocket();
 			~CASocket(){close();DeleteCriticalSection(&csClose);}
+
 			int create();
+
 			int listen(LPSOCKETADDR psa);
 			int listen(unsigned short port);
 			int accept(CASocket &s);
