@@ -382,7 +382,8 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 			{
 				if(child.getNodeName().equals("Mix"))
 					{
-						if(m_arRSA[i++].setPublicKeyAsDOMNode(child.getFirstChild())!=E_SUCCESS)
+						DOM_Node nodeKey=child.getFirstChild();
+						if(m_arRSA[i++].setPublicKeyAsDOMNode(nodeKey)!=E_SUCCESS)
 							return E_UNKNOWN;						
 						chainlen--;
 					}
