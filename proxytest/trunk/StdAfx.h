@@ -97,6 +97,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#include <sys/ioctl.h>
     #include <sys/socket.h>
     #include <sys/un.h>
+		#define HAVE_UNIX_DOMAIN_PROTOCOL
 		#include <sys/poll.h>
     #include <sys/time.h>
     #include <netinet/in.h>
