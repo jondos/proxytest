@@ -3,7 +3,7 @@
 
 CC=gcc
 INCLUDE = 
-LIBS	= -lpthread
+LIBS	= -L/usr/local/ssl/lib -lpthread -lcrypto
 CPPFLAGS = -D_REENTRANT -O3 -Wall
 #DEBUG =-D_DEBUG -g
 
@@ -14,6 +14,8 @@ OBJS_ALL=CASocket.o\
 	CACmdLnOptions.o\
 	CAMsg.o\
 	CAMuxSocket.o\
+	CAMuxChannelList.o\
+	CASymCipher.o\
 	proxytest.o
 
 OBJS=$(OBJS_ALL)

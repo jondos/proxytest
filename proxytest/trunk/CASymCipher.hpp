@@ -4,10 +4,10 @@
 class CASymCipher
 	{
 		public:
-			setEncryptionKey(unsigned char* key);
-			setDecryptionKey(unsigned char* key);
-			encrypt(unsigned char* in,int len);
-			decrypt(unsigned char* in,int len);
+			int setEncryptionKey(unsigned char* key);
+			int setDecryptionKey(unsigned char* key);
+			int encrypt(unsigned char* in,int len);
+			int decrypt(unsigned char* in,int len);
 		protected:
 			BF_KEY keyEnc,keyDec;
 	};
