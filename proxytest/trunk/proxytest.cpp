@@ -725,16 +725,16 @@ int main(int argc, const char* argv[])
 	    options.parse(argc,argv);
 #ifndef _WIN32
 			if(options.getDaemon())
-		{
-		    CAMsg::setOptions(MSG_LOG);
-		    pid_t pid;
-		    pid=fork();
-		    if(pid!=0)
-			exit(0);
-		    setsid();
-		    chdir("/");
-		    umask(0);		    
-		}
+				{
+					CAMsg::setOptions(MSG_LOG);
+					pid_t pid;
+					pid=fork();
+					if(pid!=0)
+						exit(0);
+					setsid();
+					chdir("/");
+					umask(0);		    
+				}
 #endif
 	    CAMsg::printMsg(LOG_INFO,"Anon proxy started!\n");
 #ifdef _DEBUG
@@ -746,19 +746,6 @@ int main(int argc, const char* argv[])
 		err=WSAStartup(0x0202,&wsadata);
 		#endif
 		
-/*		InitializeCriticalSection(&csClose);
-		CASocketAddr socketAddrIn(options.getServerPort());
-		socketAddrSquid.setAddr(strTargetHost,options.getTargetPort());
-		CASocket socketIn;
-		if(socketIn.listen(&socketAddrIn)==SOCKET_ERROR)
-		    {
-			CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
-			exit(-1);
-		    }
-*/
-	//		time_t t=time(NULL);
-//		strftime(buff,BUFF_SIZE,"%Y%m%d-%H%M%S",localtime(&t));
-//		int handle=open(buff,_O_BINARY|_O_CREAT|_O_RDWR,S_IWRITE);
 #ifndef _WIN32
 	#ifdef _DEBUG
 			signal(SIGPIPE,signal_broken_pipe);
@@ -780,76 +767,9 @@ int main(int argc, const char* argv[])
 			}
 		else
 			doLastMix();
-/*		while(
-		#ifdef _WIN32
-		!_kbhit()
-		#else
-		true
+
+		#ifdef _WIN32		
+			WSACleanup();
 		#endif
-		)
-			{
-				CAMixToSocket* tmpPair2=new CAMixToSocket();
-				CASocketToMix* tmpPair1=new CASocketToMix();
-				if(tmpPair2==NULL||tmpPair1==NULL)
-				    {
-					CAMsg::printMsg(LOG_ERR,"Less memory!\n");
-					exit(-1);
-				    }
-				tmpPair1->in=new CASocket();
-				if(socketIn.accept(*tmpPair1->in)==SOCKET_ERROR)
-					{
-						delete tmpPair1->in;
-						delete tmpPair1;
-						delete tmpPair2;
-						sleep(1);
-						continue;
-					}
-				tmpPair1->out=new CAMixSocket();
-				if(tmpPair1->out->connect(&socketAddrSquid)==SOCKET_ERROR)
-					{
-						delete tmpPair1->in;
-						delete tmpPair1->out;
-						delete tmpPair1;
-						delete tmpPair2;
-						sleep(1);
-						continue;
-					}
-				
-				tmpPair2->in=tmpPair1->out;
-				tmpPair2->out=tmpPair1->in;
-				#ifdef _WIN32
-				    _beginthread(proxytomix,0,tmpPair1);
-				    _beginthread(mixtoproxy,0,tmpPair2);
-				#else
-				    pthread_t p1,p2;
-				    int err;
-				    err=pthread_create(&p1,NULL,proxytomix,tmpPair1);
-				    if(err!=0)
-					{
-					    CAMsg::printMsg(LOG_WARNING,"Can't create Thread 1 - Error:%i\n",err);
-					    sleep(1);
-					    continue;
-					    //exit(-2);
-					}
-				    err=pthread_create(&p2,NULL,mixtoproxy,tmpPair2);
-				    if(err!=0)	
-					{
-					    CAMsg::printMsg(LOG_WARNING,"Can't create Thread 2 - Error:%i\n",err);
-					    sleep(1);
-					    continue;
-					}
-				#endif
-#ifdef _DEBUG
-				CAMsg::printMsg(LOG_DEBUG,"%i\n",sockets);
-#endif
-			}
-		CAMsg::printMsg(LOG_INFO,"Exiting...\n");	
-		socketIn.close();
-//	close(handle);
-*/
-	#ifdef _WIN32		
-WSACleanup();
-#endif
-		DeleteCriticalSection(&csClose);
 		return 0;
 	}
