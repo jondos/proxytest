@@ -387,7 +387,7 @@ Debug(dc::malloc.on());
 				struct passwd* pwd=getpwnam((char*)buff);
 				if(pwd==NULL||seteuid(pwd->pw_uid)==-1)
 					CAMsg::printMsg(LOG_ERR,"Could not switch to effective user %s!\n",buff);
-			
+			}
 		if(geteuid()==0)
 			CAMsg::printMsg(LOG_INFO,"Warning - Running as root!\n");
 		SINT32 maxFiles=options.getMaxOpenFiles();
