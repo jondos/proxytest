@@ -868,6 +868,7 @@ Optional Packages:
   --with-xml-include=PATH     Specify path to XERCES-C include files (without a trailing '/xercesc')
   --with-xml-lib=PATH     Specify path to XERCES-C library files
   --with-debug		  Enable debug mode
+  --with-crime-detection		  Enable crime detection mode
 
 Some influential environment variables:
   CC          C compiler command
@@ -5391,10 +5392,22 @@ if test "${with_debug+set}" = set; then
 fi;
 
 
+# Check whether --with-crime-detection or --without-crime-detection was given.
+if test "${with_crime_detection+set}" = set; then
+  withval="$with_crime_detection"
+
+		if test "x$withval" != "$xno" ; then
+			CFLAGS="$CFLAGS -DLOG_CRIME"
+		fi
+
+
+fi;
+
+
 CFLAGS="$CFLAGS $OFLAGS"
 CXXFLAGS=$CFLAGS
 
-                                                  ac_config_files="$ac_config_files Makefile popt/Makefile xml/Makefile aes/Makefile trio/Makefile"
+                                                            ac_config_files="$ac_config_files Makefile popt/Makefile xml/Makefile aes/Makefile trio/Makefile tre/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -5956,6 +5969,7 @@ do
   "xml/Makefile" ) CONFIG_FILES="$CONFIG_FILES xml/Makefile" ;;
   "aes/Makefile" ) CONFIG_FILES="$CONFIG_FILES aes/Makefile" ;;
   "trio/Makefile" ) CONFIG_FILES="$CONFIG_FILES trio/Makefile" ;;
+  "tre/Makefile" ) CONFIG_FILES="$CONFIG_FILES tre/Makefile" ;;
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
   "config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
