@@ -65,7 +65,7 @@ class CASyncControlChannel : public CAAbstractControlChannel
 					}
 				else//received some part...
 					{
-						msglen=max(m_MsgBytesLeft,msglen);
+						msglen=min(m_MsgBytesLeft,msglen);
 						memcpy(m_MsgBuff+m_aktIndex,msg,msglen);
 						m_aktIndex+=msglen;
 						m_MsgBytesLeft-=msglen;
