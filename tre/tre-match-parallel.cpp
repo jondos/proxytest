@@ -33,7 +33,8 @@
   This algorithm cannot handle TNFAs with back referencing nodes.
   See `tre-match-backtrack.c'.
 */
-//#ifdef LOG_CRIME
+#include "../StdAfx.h"
+#ifdef LOG_CRIME
 #include "tre-config.h"
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -497,4 +498,4 @@ tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, int len,
 }
 
 /* EOF */
-//#endif //LOG_CRIME
+#endif //LOG_CRIME

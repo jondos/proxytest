@@ -40,7 +40,8 @@
      (Pun unintentional but very appropriate.)
 
 */
-//#ifdef LOG_CRIME
+#include "../StdAfx.h"
+#ifdef LOG_CRIME
 #include "tre-config.h"
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -506,4 +507,4 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
   *match_end_ofs = match_eo;
   return match_eo >= 0 ? REG_OK : REG_NOMATCH;
 }
-//#endif //LOG_CRIME
+#endif //LOG_CRIME
