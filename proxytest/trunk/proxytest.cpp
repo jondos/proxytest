@@ -213,7 +213,7 @@ int main(int argc, const char* argv[])
 					CAMsg::setOptions(MSG_FILE);
 			}
 		CASocketAddrINet::init();
-	  CAMsg::printMsg(LOG_INFO,"Anon proxy started!\n");
+		CAMsg::printMsg(LOG_INFO,"Anon proxy started!\n");
 	  CAMsg::printMsg(LOG_INFO,"Using: %s!\n",OPENSSL_VERSION_TEXT);
 #ifdef _DEBUG
 		sockets=0;
