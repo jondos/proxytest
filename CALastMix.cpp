@@ -694,7 +694,9 @@ ERR:
 		{ //Lots of TODO!!!!
 			//DNS Lookup may block if Host does not exists!!!!!
 			//so we use regexp....
-			UINT8* startOfUrl=(UINT8*)memchr(payLoad,32,payLen); //search for first space...
+			if(payLen<3)
+				return false;
+			UINT8* startOfUrl=(UINT8*)memchr(payLoad,32,payLen-1); //search for first space...
 			if(startOfUrl==NULL)
 				return false;
 			startOfUrl++;

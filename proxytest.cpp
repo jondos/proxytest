@@ -231,6 +231,18 @@ key for downstream direction and the last 16 bytes are the IV for this cipher.
 \li Step 5,6,7: This steps are equal to step 2,3,4. Mix 1 establishes a TCP/IP-connection
 with Mix 2. Mix 2 send it publick key to Mix 1 and Mix 1 generates and sends 
 a symmetric key to Mix 2.
+
+\section docMixInfoService Communication between Mix and InfoService
+
+\image html JAPMixInfoService.gif "Figure 5: Communication between Mix and InfoService"
+
+\li 1. HELO-Message send from each mix to the InfoService every 10 minutes to announce itself.  
+See \ref XMLMixHELO "[XML]" for a description of the XML struct send. 
+
+\li 2. Status-Message send from the FirstMix to the InfoService every minute to update the current
+status of the Mix cascade including Number of Users, Traffic situation etc.
+See \ref XMLMixCascadeStatus "[XML]" for a description of the XML struct send. 
+
 */
 
 
