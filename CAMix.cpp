@@ -143,17 +143,17 @@ SINT32 CAMix::initMixCascadeInfo(DOM_Element& mixes)
     DOM_Element elemRoot=m_docMixCascadeInfo.createElement("MixCascade");
 
     UINT8 id[50];
+		UINT8* cascadeID=NULL;
     options.getMixId(id,50);
 
     UINT8 name[255];
     if(options.getCascadeName(name,255)!=E_SUCCESS)
     {
-		return E_UNKNOWN;
-	}
+			return E_UNKNOWN;
+		}
     m_docMixCascadeInfo.appendChild(elemRoot);
     DOM_Element elem=m_docMixCascadeInfo.createElement("Name");
-    DOM_Text text=m_docMixCascadeInfo.createTextNode(DOMString((char*)name));
-    elem.appendChild(text);
+		setDOMElementValue(elem,name);
     elemRoot.appendChild(elem);
 
     elem=m_docMixCascadeInfo.createElement("Network");
@@ -165,7 +165,7 @@ SINT32 CAMix::initMixCascadeInfo(DOM_Element& mixes)
     {
         CAListenerInterface* pListener=options.getListenerInterface(i);
         if(pListener->isHidden())
-        {/*do nothing*/
+        {//do nothing
         }
         else if(pListener->getType()==RAW_TCP)
         {
@@ -174,10 +174,9 @@ SINT32 CAMix::initMixCascadeInfo(DOM_Element& mixes)
             elemListenerInterfaces.appendChild(docFrag);
         }
         delete pListener;
-    }
-
+    }	
     DOM_Element elemThisMix=m_docMixCascadeInfo.createElement("Mix");
-    elemThisMix.setAttribute(DOMString("id"),DOMString((char*)id));
+    setDOMElementAttribute(elemThisMix,"id",id);
     DOM_Node elemMixesDocCascade=m_docMixCascadeInfo.createElement("Mixes");
     count=1;
     if(options.isFirstMix())
@@ -186,7 +185,8 @@ SINT32 CAMix::initMixCascadeInfo(DOM_Element& mixes)
     }
     elemRoot.appendChild(elemMixesDocCascade);
 
-    char* cascadeId = NULL;
+//    UINT8 cascadeId[255];
+//		UINT32 cascadeIdLen=255;
 
     DOM_Node node=mixes.getFirstChild();
     while(node!=NULL)
@@ -195,7 +195,7 @@ SINT32 CAMix::initMixCascadeInfo(DOM_Element& mixes)
         {
             elemMixesDocCascade.appendChild(m_docMixCascadeInfo.importNode(node,false));
             count++;
-            cascadeId = static_cast<const DOM_Element&>(node).getAttribute("id").transcode();
+ //           cascadeId = static_cast<const DOM_Element&>(node).getAttribute("id").transcode();
         }
         node=node.getNextSibling();
     }
@@ -203,12 +203,16 @@ SINT32 CAMix::initMixCascadeInfo(DOM_Element& mixes)
     if(options.isLastMix())
     {
         elemMixesDocCascade.appendChild(elemThisMix);
-        cascadeId = (char*) id;
+        cascadeID = id;
+    }
+		else if(options.isFirstMix())
+    {
+        cascadeID = id;
     }
 
-    if(cascadeId != NULL)
-        elemRoot.setAttribute(DOMString("id"),DOMString(cascadeId));
-
+    if(cascadeID != NULL)
+				setDOMElementAttribute(elemRoot,"id",cascadeID);
     setDOMElementAttribute(elemMixesDocCascade,"count",count);
     return E_SUCCESS;
 }
+

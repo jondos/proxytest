@@ -78,7 +78,7 @@ class CAMix
 					return E_SUCCESS;
 			}
 			// added by ronin <ronin2@web.de>
-			virtual SINT32 initMixCascadeInfo(DOM_Element&);
+			virtual SINT32 initMixCascadeInfo(DOM_Element& elemMixes);
 
 			CASignature* m_pSignature;
 			CAInfoService* m_pInfoService;
