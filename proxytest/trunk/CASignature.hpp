@@ -43,7 +43,7 @@ class CASignature
 			SINT32 signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen,CACertStore* pIncludeCerts=NULL);
 			SINT32 setVerifyKey(CACertificate* pCert);
 			SINT32 verify(UINT8* in,UINT32 inlen,UINT8* sig,UINT32 siglen);
-			SINT32 verifyXML(UINT8* in,UINT32 inlen);
+			SINT32 verifyXML(const UINT8* const in,UINT32 inlen);
 			SINT32 verifyXML(DOM_Node& node,CACertStore* pTrustedCerts=NULL);
 			SINT32 getSignatureSize();
 		private:
