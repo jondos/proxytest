@@ -76,7 +76,7 @@ CAIPList::~CAIPList()
 	* @return number of inserts for this IP-Address
   * @retval E_UNKNOWN if an error occured or an IP is inserted more than m_allowedConnections times
 	*/
-SINT32 CAIPList::insertIP(UINT8 ip[4])
+SINT32 CAIPList::insertIP(const UINT8 ip[4])
 	{
 		UINT16 hashvalue=(ip[2]<<8)|ip[3];
 		m_Mutex.lock();
@@ -130,7 +130,7 @@ SINT32 CAIPList::insertIP(UINT8 ip[4])
 	* @return the remaining count of inserts for this IP-Address. 
 	* @retval 0 if IP-Address is delete form the list
 	*/
-SINT32 CAIPList::removeIP(UINT8 ip[4])
+SINT32 CAIPList::removeIP(const UINT8 ip[4])
 	{
 		UINT16 hashvalue=(ip[2]<<8)|ip[3];
 		m_Mutex.lock();

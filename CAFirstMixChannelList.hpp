@@ -35,13 +35,14 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 struct t_fmhashtableentry
 	{
 		public:
-			CAMuxSocket* pMuxSocket;
-			CAQueue* pQueueSend;
-			UINT32 cSuspend;
-			UINT32 trafficIn;
-			UINT32 trafficOut;
+			CAMuxSocket*	pMuxSocket;
+			CAQueue*			pQueueSend;
+			UINT32				cSuspend;
+			UINT32				trafficIn;
+			UINT32				trafficOut;
+			UINT8					peerIP[4]; //needed for flooding controll
 		private:
-			UINT32 cNumberOfChannels;
+			UINT32				cNumberOfChannels;
 			struct t_firstmixchannellist* pChannelList;
 
 			struct
@@ -95,7 +96,7 @@ class CAFirstMixChannelList
 			CAFirstMixChannelList();
 			~CAFirstMixChannelList();
 		
-			SINT32 add(CAMuxSocket* pMuxSocket,CAQueue* pQueueSend);
+			SINT32 add(CAMuxSocket* pMuxSocket,UINT8 peerIP[4],CAQueue* pQueueSend);
 			SINT32 addChannel(CAMuxSocket* pMuxSocket,HCHANNEL channelIn,CASymCipher* pCipher,HCHANNEL* channelOut);
 			
 			fmChannelListEntry* get(CAMuxSocket* pMuxSocket,HCHANNEL channelIn);
