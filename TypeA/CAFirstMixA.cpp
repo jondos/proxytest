@@ -350,7 +350,7 @@ SINT32 CAFirstMixA::loop()
 										#endif
 										
 										#ifdef HAVE_EPOLL
-											m_psocketgroupUsersWrite->add(*pEntry->pHead->pMuxSocket,*pEntry->pHead); 
+											m_psocketgroupUsersWrite->add(*pEntry->pHead->pMuxSocket,pEntry->pHead); 
 										#else
 											m_psocketgroupUsersWrite->add(*pEntry->pHead->pMuxSocket); 
 										#endif
@@ -392,7 +392,7 @@ SINT32 CAFirstMixA::loop()
 											pEntry->packetsOutToUser++;
 										#endif
 										#ifdef HAVE_EPOLL
-											m_psocketgroupUsersWrite->add(*pEntry->pHead->pMuxSocket,*pEntry->pHead); 
+											m_psocketgroupUsersWrite->add(*pEntry->pHead->pMuxSocket,pEntry->pHead); 
 										#else
 											m_psocketgroupUsersWrite->add(*pEntry->pHead->pMuxSocket); 
 										#endif
