@@ -77,7 +77,7 @@ SINT32 CASocket::create(int type)
 	*/
 SINT32 CASocket::listen(const CASocketAddr& psa)
 	{
-		int type=psa.getType();
+		SINT32 type=psa.getType();
 		if(m_bSocketIsClosed&&create(type)!=E_SUCCESS)
 			return E_UNKNOWN;
 #ifdef HAVE_UNIX_DOMAIN
@@ -87,7 +87,11 @@ SINT32 CASocket::listen(const CASocketAddr& psa)
 				UINT8* path=((CASocketAddrUnix&)psa).getPath();
 				if(path!=NULL)
 					{
-						unlink((char*)path);
+						SINT32 ret=::unlink((char*)path);
+						#ifdef _DEBUG
+							if(ret!=0)
+								CAMSg::printMsg(LOG_ERR,"CASocket::listen() -- could not unlink unix domain socket file name -- a call to bind or listen may fail...");
+						#endif
 						delete path;
 					}
 			}

@@ -39,7 +39,7 @@ class CASocketAddr
 
 			/** The type (family) of socket for which this address is useful.
 			  * Must be overwritten in subclasses. **/
-			virtual int  getType() const =0;
+			virtual SINT32  getType() const =0;
 
 			/** The size of the SOCKADDR struct needed by function of CASocket and other.*/
 			virtual SINT32 getSize() const =0;
