@@ -133,6 +133,9 @@ AC_CHECK_DECL(FIONREAD,[AC_DEFINE(HAVE_FIONREAD,,[This is a flag to ioctl() to g
 AC_CHECK_DECL(MSG_NOSIGNAL,[],[AC_DEFINE(MSG_NOSIGNAL,0,[This is a flag to read(), to tell the os to get no signals])],[
 #include <sys/types.h>
 #include <sys/socket.h>])
+AC_CHECK_DECL(MSG_DONTWAIT,[],[AC_DEFINE(MSG_DONTWAIT,0,[This is a flag to read(), to tell the os does not wait for any bytes to arrive])],[
+#include <sys/types.h>
+#include <sys/socket.h>])
 
 dnl Checks for types
 AC_CHECK_TYPE(socklen_t,[AC_DEFINE(HAVE_SOCKLEN_T,,[Define if the type socklen_t is available])],[],[
