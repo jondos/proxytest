@@ -202,7 +202,7 @@ SINT32 CASignature::getSignatureSize()
 
 SINT32 CASignature::signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen,CACertStore* pIncludeCerts)
 	{
-		if(in==NULL||inlen<1||out==NULL||*outlen==NULL)
+		if(in==NULL||inlen<1||out==NULL||outlen==NULL)
 			return E_UNKNOWN;
 		
 		MemBufInputSource oInput(in,inlen,"signxml");

@@ -5,14 +5,14 @@ class MemFormatTarget: public XMLFormatTarget
 		public:
 			MemFormatTarget()
 				{
-					pQueue=new CAQueue();
+					m_pQueue=new CAQueue();
 					m_Buff=new UINT8[MEM_FORMART_TARGET_SPACE];
 					m_aktIndex=0;
 				}
 
 			~MemFormatTarget()
 				{
-					delete pQueue;
+					delete m_pQueue;
 					delete[] m_Buff;
 				}
 
@@ -35,21 +35,57 @@ class MemFormatTarget: public XMLFormatTarget
 									memcpy(m_Buff+m_aktIndex,write,space);
 									write+=space;
 									c-=space;
-									pQueue->add(m_Buff,MEM_FORMART_TARGET_SPACE);
+									m_pQueue->add(m_Buff,MEM_FORMART_TARGET_SPACE);
 									m_aktIndex=0;
 								}
 						}
 				}
+
+			/** Copys the XML-chars into buff.
+				* @param buff buffer in which to copy the XML-chars
+				* @param size contains the size of buff, on return contains the number of XML-CHars copied
+				* @return E_SUCCESS, if successful
+				* @return E_SPACE, if buff is to small
+				* @return E_UNKNOWN, if an error occurs
+				*/
 			SINT32 dumpMem(UINT8* buff,UINT32* size)
 				{
-					if(	pQueue->add(m_Buff,m_aktIndex)!=E_SUCCESS||
-							pQueue->get(buff,size)!=E_SUCCESS)
+					if(buff==NULL||size==NULL)
+						return E_UNKNOWN;
+					if(m_aktIndex>0&&m_pQueue->add(m_Buff,m_aktIndex)!=E_SUCCESS)
+						return E_UNKNOWN;
+					m_aktIndex=0;
+					if(*size<m_pQueue->getSize())
+						return E_SPACE;
+					if(m_pQueue->peek(buff,size)!=E_SUCCESS)
 						return E_UNKNOWN;
 					return E_SUCCESS;
 				}
 
+			/** Returns a Copy of the XML-chars.
+				* @param size, on return contains the number of XML-Chars copied
+				* @return a pointer to a newls allocated buff, which must be delete[] by the caller
+				* @return NULL, if an error occurs
+				*/
+			UINT8* dumpMem(UINT32* size)
+				{
+					if(size==NULL)
+						return NULL;
+					if(m_aktIndex>0&&m_pQueue->add(m_Buff,m_aktIndex)!=E_SUCCESS)
+						return NULL;
+					m_aktIndex=0;
+					*size=m_pQueue->getSize();
+					UINT8* tmp=new UINT8[*size];
+					if(m_pQueue->peek(tmp,size)!=E_SUCCESS)
+						{
+							delete[] tmp;
+							return NULL;
+						}
+					return tmp;
+				}
+
 		private:
-			CAQueue* pQueue;
+			CAQueue* m_pQueue;
 			UINT8* m_Buff;
 			UINT32 m_aktIndex;
 	};
@@ -57,8 +93,69 @@ class MemFormatTarget: public XMLFormatTarget
 class DOM_Output
 	{
 		public:
-			static void dumpToMem(DOM_Node& node,UINT8* buff, UINT32* size);
-			static SINT32 makeCanonical(DOM_Node& node,UINT8* buff,UINT32* size);
+			/** Dumps the node and all childs into buff.
+				* @param node, Node to dump
+				* @param buff buffer in which to copy the XML-chars
+				* @param size contains the size of buff, on return contains the number of XML-CHars copied
+				* @return E_SUCCESS, if successful
+				* @return E_SPACE, if buff is to small
+				* @return E_UNKNOWN, if an error occurs
+				*/
+			static SINT32 dumpToMem(DOM_Node& node,UINT8* buff, UINT32* size)
+				{
+					DOM_Output out;
+					if(	out.dumpNode(node,false)!=E_SUCCESS)
+						return E_UNKNOWN;
+					return out.m_pFormatTarget->dumpMem(buff,size);
+				}
+
+			
+			/** Dumps the Node an returns a pointer to the memory.
+				* @param node, Node to dump
+				* @param size, on return contains the number of XML-Chars copied
+				* @return a pointer to a newls allocated buff, which must be delete[] by the caller
+				* @return NULL, if an error occurs
+				*/
+			static UINT8* dumpToMem(DOM_Node& node,UINT32* size)
+				{
+					DOM_Output out;
+					if(	out.dumpNode(node,false)!=E_SUCCESS)
+						return NULL;
+					return out.m_pFormatTarget->dumpMem(size);
+				}
+
+			
+			/** Dumps the node and all childs in a 'cannonical form' into buff.
+				* @param node, Node to dump
+				* @param buff buffer in which to copy the XML-chars
+				* @param size contains the size of buff, on return contains the number of XML-CHars copied
+				* @return E_SUCCESS, if successful
+				* @return E_SPACE, if buff is to small
+				* @return E_UNKNOWN, if an error occurs
+				*/
+			static SINT32 makeCanonical(DOM_Node& node,UINT8* buff,UINT32* size)
+				{
+					DOM_Output out;
+					if(	out.dumpNode(node,true)!=E_SUCCESS)
+						return E_UNKNOWN;
+					return out.m_pFormatTarget->dumpMem(buff,size);
+				}
+
+		
+			/** Dumps the Node in a cannonical form an returns a pointer to the memory.
+				* @param node, Node to dump
+				* @param size, on return contains the number of XML-Chars copied
+				* @return a pointer to a newls allocated buff, which must be delete[] by the caller
+				* @return NULL, if an error occurs
+				*/
+			static UINT8* makeCanonical(DOM_Node& node,UINT32* size)
+				{
+					DOM_Output out;
+					if(	out.dumpNode(node,true)!=E_SUCCESS)
+						return NULL;
+					return out.m_pFormatTarget->dumpMem(size);
+				}
+
 		private:
 			DOM_Output()
 				{

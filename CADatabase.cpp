@@ -163,7 +163,8 @@ SINT32 CADatabase::test()
 		oDatabase.start();
 		UINT8 key[16];
 		memset(key,0,16);
-		for(UINT32 i=0;i<20;i++)
+		UINT32 i;
+		for(i=0;i<20;i++)
 			{
 				getRandom(key,1);
 				oDatabase.insert(key);

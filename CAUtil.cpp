@@ -261,6 +261,14 @@ SINT32 setDOMElementAttribute(DOM_Element& elem,char* attr,int value)
 		return E_SUCCESS;
 	}
 
+SINT32 getDOMElementAttribute(DOM_Element& elem,char* attr,int* value)
+	{
+		char* tmpStr=elem.getAttribute(attr).transcode();
+		*value=atol(tmpStr);
+		delete tmpStr;
+		return E_SUCCESS;
+	}
+
 SINT32 getDOMChildByName(const DOM_Node& node,UINT8* name,DOM_Node& child)
 	{
 		child=node.getFirstChild();
@@ -275,18 +283,28 @@ SINT32 getDOMChildByName(const DOM_Node& node,UINT8* name,DOM_Node& child)
 
 SINT32 getDOMElementValue(DOM_Element& elem,UINT8* value,UINT32* valuelen)
 	{
+		ASSERT(value!=NULL,"Value is null");
+		ASSERT(valuelen!=NULL,"ValueLen is null");
+		ASSERT(!elem.isNull,"Element is NULL");
 		DOM_Node text=elem.getFirstChild();
 		if(!text.isNull())
 			{
 				DOMString str=text.getNodeValue();
-
+				if(str.length()>=*valuelen)
+					{
+						*valuelen=str.length()+1;
+						return E_SPACE;
+					}
 				char* tmpStr=str.transcode();
 				*valuelen=str.length();
 				memcpy(value,tmpStr,*valuelen);
+				tmpStr[*valuelen]=0;
+				delete[] tmpStr;
 				return E_SUCCESS;
 			}
 		return E_UNKNOWN;
 	}
+
 SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, UINT8* xml, UINT32* xmllen,CAASymCipher* pRSA)
 	{
 #define XML_ENCODE_KEY_TEMPLATE "<EncryptedKey><EncryptionMethod Algorithm=\"RSA\"/><CipherData><CipherValue>%s</CipherValue></CipherData></EncryptedKey>"
@@ -304,15 +322,21 @@ SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, UINT8* xml, UINT32* xmlle
 
 SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, UINT8* xml, UINT32 xmllen,CAASymCipher* pRSA)
 	{
-		char* start=strstr((char*)xml,"<CipherValue>");
-		start+=13;
-		char* end=strstr(start,"</CipherValue>");
-		UINT8 tmpBuff[1024];
-		UINT32 len=1024;
-		CABase64::decode((UINT8*)start,end-start,tmpBuff,&len);
-		pRSA->decrypt(tmpBuff,tmpBuff);
+		MemBufInputSource oInput(xml,xmllen,"sigverify");
+		DOMParser oParser;
+		oParser.parse(oInput);
+		DOM_Document doc=oParser.getDocument();
+		DOM_Element root=doc.getDocumentElement();
+		if(!root.getNodeName().equals("CipherValue"))
+			return E_UNKNOWN;
+		UINT8 buff[2048];
+		UINT32 bufflen=2048;
+		if(getDOMElementValue(root,buff,&bufflen)!=E_SUCCESS)
+			return E_UNKNOWN;
+		CABase64::decode(buff,bufflen,buff,&bufflen);
+		pRSA->decrypt(buff,buff);
 		*keylen=16;
-		memcpy(key,tmpBuff+128-(*keylen),(*keylen));
+		memcpy(key,buff+128-(*keylen),(*keylen));
 		return E_SUCCESS;
 	}
 
