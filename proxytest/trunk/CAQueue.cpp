@@ -47,7 +47,7 @@ CAQueue::~CAQueue()
 				delete m_pHeap->pBuff;
 				m_lastElem=m_pHeap;
 				m_pHeap=m_pHeap->next;
-				delete m_pHeap;
+				delete m_lastElem;
 			}
 		m_pcsQueue->unlock();
 		delete m_pcsQueue;

@@ -457,10 +457,10 @@ Debug(dc::malloc.on());
 
 #ifdef _DEBUG
 		//		CADatabase::test();
-//		if(CAQueue::test()!=E_SUCCESS)
-//			CAMsg::printMsg(LOG_CRIT,"CAQueue::test() NOT passed! Exiting\n");
-//		else
-//			CAMsg::printMsg(LOG_DEBUG,"CAQueue::test() passed!\n");
+		if(CAQueue::test()!=E_SUCCESS)
+			CAMsg::printMsg(LOG_CRIT,"CAQueue::test() NOT passed! Exiting\n");
+		else
+			CAMsg::printMsg(LOG_DEBUG,"CAQueue::test() passed!\n");
 
 		//CALastMixChannelList::test();
 		//exit(0);

@@ -48,8 +48,10 @@ typedef struct _t_queue QUEUE;
 class CAQueue
 	{
 		public:
-			/** Give the size of the amount of data what you will add in one step. Used for optimizations.
-				* Use expectedElementSize=0, if you hav no idea about the typicall amount of data added in one call to add().
+			/** Give the size of the amount of data what you will add in one step. 
+				* Used for optimizations.
+				* Use expectedElementSize=0, if you have no idea about 
+				* the typicall amount of data added in one call to add().
 				*/
 			CAQueue(UINT32 expectedElementSize=0)
 				{
