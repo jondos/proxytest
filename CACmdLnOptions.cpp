@@ -515,6 +515,7 @@ SINT32 CACmdLnOptions::generateTemplate()
 		oxmlOut.BeginDocument("1.0","UTF-8",true);
 		oxmlOut.BeginElementAttrs("Mix");
 		oxmlOut.WriteAttr("id","");
+		oxmlOut.EndAttrs();
 		oxmlOut.BeginElement("Location");
 		oxmlOut.Indent();
 		oxmlOut.writeLine("<!-- Fill out the following Elements to give infomation about the location of the Mix-->");
