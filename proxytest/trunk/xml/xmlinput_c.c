@@ -109,7 +109,6 @@ static void ungetChar(XML_Input *input, XML_Char c)
 static XmlToken getNextToken(XML_Input *input, XML_Char *token, size_t *tokenLen, int expectAttrs)
 {
 	XML_Char *tptr = token;
-	int attr = 0;
 
 	/* look at first character to see if we're in whitespace */
 	XML_Char c = nextChar(input);
@@ -1455,7 +1454,6 @@ const XML_Char *XML_ElementGetAttrValue(const XML_Element *elem, int index)
 /* look for an Attribute with the given name and return the value */
 const XML_Attribute *XML_ElementFindAttr(const XML_Element *elem, const XML_Char *name)
 {
-	int i = 0;
 	const XML_Attribute *attr = elem->attrs;
 	while (attr)
 	{
