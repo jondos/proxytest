@@ -49,7 +49,7 @@ CAMsg::~CAMsg()
 			DeleteCriticalSection(&csPrint);
     }
   
-char* CAMsg::m_strMsgTypes[4]={", error   ] ",", critical] ",", info    ] ",", debug   ] "}; //all same size!
+const char* const CAMsg::m_strMsgTypes[4]={", error   ] ",", critical] ",", info    ] ",", debug   ] "}; //all same size!
 #define STRMSGTYPES_SIZE 12
 
   
@@ -76,6 +76,7 @@ SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 		//Date is: yyyy/mm/dd-hh:mm:ss   -- the size is: 19 
 		time_t currtime=time(NULL);
 		strftime(oMsg.m_strMsgBuff+1,255,"%Y/%m/%d-%H:%M:%S",localtime(&currtime));
+		printf(oMsg.m_strMsgBuff);
 		switch(type)
 			{
 				case LOG_DEBUG:
