@@ -263,13 +263,13 @@ SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len,SINT32 timeout)
 	{
 		SINT32 ret;
 		ret=::recv(m_Socket,(char*)buff,len,MSG_NOSIGNAL|MSG_PEEK|MSG_DONTWAIT);
-		if(ret<0)
+		if(ret<=0)
 			return SOCKET_ERROR;
 		if((UINT32)ret!=len)
 			{
 				msleep(timeout);
 				ret=::recv(m_Socket,(char*)buff,len,MSG_NOSIGNAL|MSG_PEEK|MSG_DONTWAIT);
-				if(ret<0)
+				if(ret<=0)
 					return SOCKET_ERROR;
 				if((UINT32)ret!=len)
 					return E_TIMEDOUT;
