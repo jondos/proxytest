@@ -104,28 +104,30 @@ SINT32 CAQueue::getNext(UINT8* pbuff,UINT32* psize)
 			return E_UNKNOWN;
 		EnterCriticalSection(&m_csQueue);
 		SINT32 ret;
-		UINT32 copySize=min(m_Queue->size,*psize);
-//		if(*psize<m_Queue->size)
-//			ret=E_UNKNOWN;
-//		else
+		UINT32 space=*psize;
+		*psize=0;
+		while(space>=m_Queue->size)
 			{
-				memcpy(pbuff,m_Queue->pBuff,copySize);
-				*psize=copySize;
-				if(copySize==m_Queue->size)
+				memcpy(pbuff,m_Queue->pBuff,m_Queue->size);
+				*psize+=m_Queue->size;
+				pbuff+=m_Queue->size;
+				space-=m_Queue->size;
+				delete m_Queue->pBuff;
+				QUEUE* tmp=m_Queue;
+				m_Queue=m_Queue->next;
+				delete tmp;
+				m_nQueueSize--;
+				if(m_Queue==NULL)
 					{
-						delete m_Queue->pBuff;
-						QUEUE* tmp=m_Queue;
-						m_Queue=m_Queue->next;
-						delete tmp;
-						m_nQueueSize--;
+						LeaveCriticalSection(&m_csQueue);
+						return E_SUCCESS;
 					}
-				else
-					{
-						m_Queue->size-=copySize;
-						memmove(m_Queue->pBuff,m_Queue->pBuff+copySize,m_Queue->size);
-					}
-				ret=E_SUCCESS;
 			}
+		memcpy(pbuff,m_Queue->pBuff,space);
+		*psize+=space;
+		m_Queue->size-=space;
+		memmove(m_Queue->pBuff,m_Queue->pBuff+space,m_Queue->size);
+		ret=E_SUCCESS;
 		LeaveCriticalSection(&m_csQueue);
 		return ret;
 	}
