@@ -27,9 +27,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 // TODO: Sylog for NT!!
 
-#define MSG_STDOUT 0x00
-#define MSG_LOG 0x01
-#define MSG_FILE 0x02
+#define MSG_STDOUT	0x00
+#define MSG_LOG			0x01
+#define MSG_FILE		0x02
 
 #ifdef _WIN32
 	#define LOG_ERR		0
@@ -50,7 +50,9 @@ class CAMsg
 		protected:
 			SINT32 openLog(UINT32 type);
 			SINT32 closeLog();
-			UINT32 uLogType;
-			int hFileErr;
-			int hFileInfo;
+			UINT32 m_uLogType;
+			int m_hFileErr;
+			int m_hFileInfo;
+			char m_strMsgBuff[1050];
+			static char* m_strMsgTypes[4];
    };

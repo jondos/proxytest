@@ -68,6 +68,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	//	#ifndef UINT32
 	//		typedef unsigned long UINT32;
 	//	#endif
+
+		#define HAVE_VSNPRINTF
+		#define vsnprintf _vsnprintf
+
 		typedef signed long SINT32;
 		typedef unsigned int UINT;
 		typedef signed int SINT;
@@ -79,8 +83,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
   #ifdef HAVE_CONFIG_H  
 	#include "config.h"
 	#endif
-#define PROT2
-
+	#define PROT2
+#define HAVE_VSNPRINTF
 		#include <sys/ioctl.h>
     #include <sys/socket.h>
     #include <sys/poll.h>
@@ -142,6 +146,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define E_CONNREFUSED ECONNREFUSED
 		#ifdef __sgi
 			#define HAVE_VSYSLOG 1
+#undef HAVE_VSNPRINTF
 			#include <alloca.h>
 			#include <ctype.h>
 		#endif
