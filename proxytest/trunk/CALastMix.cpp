@@ -208,7 +208,7 @@ LOOP_START:
 										else
 										    {    
 #ifdef _ASYNC
-//													tmpSocket->setASyncSend(true,-1,0,10000,this);
+//													tmpSocket->setASyncSend(true,-1,0,100000,this);
 #endif													
 //													if(tmpSocket->setSendTimeOut(_SEND_TIMEOUT)!=E_SUCCESS)
 //														CAMsg::printMsg(LOG_DEBUG,"Could not SEND Timeout!!");
@@ -312,6 +312,7 @@ LOOP_START:
 				if(countRead>0)
 					{
 						tmpCon=oSocketList.getFirst();
+						SINT32 sendSpace=muxIn.getSendSpace();
 						while(tmpCon!=NULL&&countRead>0)
 							{
 								if(oSocketGroup.isSignaled(*(tmpCon->pSocket)))
