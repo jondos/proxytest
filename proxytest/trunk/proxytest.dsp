@@ -309,6 +309,114 @@ SOURCE=.\trio\triostr.cpp
 SOURCE=.\trio\triostr.h
 # End Source File
 # End Group
+# Begin Group "tre"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\tre\regcomp.c
+
+!IF  "$(CFG)" == "proxytest - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
+
+# ADD CPP /W3
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\tre\regex.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tre\regexec.c
+
+!IF  "$(CFG)" == "proxytest - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
+
+# ADD CPP /W3
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=".\tre\tre-config.h"
+# End Source File
+# Begin Source File
+
+SOURCE=".\tre\tre-internal.h"
+# End Source File
+# Begin Source File
+
+SOURCE=".\tre\tre-match-backtrack.c"
+
+!IF  "$(CFG)" == "proxytest - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
+
+# ADD CPP /W3
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=".\tre\tre-match-parallel.c"
+
+!IF  "$(CFG)" == "proxytest - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
+
+# ADD CPP /W3
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=".\tre\tre-match-utils.h"
+# End Source File
+# Begin Source File
+
+SOURCE=".\tre\tre-mem.c"
+
+!IF  "$(CFG)" == "proxytest - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
+
+# ADD CPP /W3
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=".\tre\tre-mem.h"
+# End Source File
+# Begin Source File
+
+SOURCE=.\tre\xmalloc.h
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=.\CAASymCipher.cpp

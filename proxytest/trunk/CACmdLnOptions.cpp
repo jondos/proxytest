@@ -31,6 +31,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMsg.hpp"
 #include "CASocketAddrINet.hpp"
 #include "xml/DOM_Output.hpp"
+#ifdef LOG_CRIME
+	#include "tre/regex.h"
+#endif
 
 CACmdLnOptions::CACmdLnOptions()
   {
@@ -893,6 +896,34 @@ SKIP_NEXT_MIX:
 		memcpy(m_strMixXml,tmpXml,xmlLen);
 		m_strMixXml[xmlLen]=0;
 		delete[] tmpXml;
+
+#ifdef LOG_CRIME
+		m_arCrimeRegExps=NULL;
+		m_nCrimeRegExps=0;
+		DOM_Element elemCrimeDetection;
+		getDOMChildByName(elemRoot,(UINT8*)"CrimeDetection",elemCrimeDetection,false);
+		if(elemCrimeDetection!=NULL)
+			{
+				DOM_NodeList nlRegExp;
+				nlRegExp=elemCrimeDetection.getElementsByTagName("RegExp");
+				m_arCrimeRegExps=new regex_t[nlRegExp.getLength()];
+				for(UINT32 i=0;i<nlRegExp.getLength();i++)
+					{
+						DOM_Node tmpChild=nlRegExp.item(i);
+						UINT32 lenRegExp=4096;
+						UINT8 buffRegExp[4096];
+						if(getDOMElementValue(tmpChild,buffRegExp,&lenRegExp)==E_SUCCESS)
+							{
+								if(regcomp(&m_arCrimeRegExps[m_nCrimeRegExps],(char*)buffRegExp,REG_EXTENDED|REG_ICASE|REG_NOSUB)!=0)
+									{
+										CAMsg::printMsg(LOG_CRIT,"Could not compile regexp: %s\n",buffRegExp);
+										exit(-1);
+									}
+								m_nCrimeRegExps++;
+							}
+					}
+			}
+#endif
 
 		return E_SUCCESS;
 	}

@@ -320,7 +320,7 @@ SINT32 getDOMChildByName(const DOM_Node& node,const UINT8* const name,DOM_Node& 
 		return E_UNKNOWN;
 	}
 
-SINT32 getDOMElementValue(DOM_Element& elem,UINT8* value,UINT32* valuelen)
+SINT32 getDOMElementValue(DOM_Node& elem,UINT8* value,UINT32* valuelen)
 	{
 		ASSERT(value!=NULL,"Value is null");
 		ASSERT(valuelen!=NULL,"ValueLen is null");

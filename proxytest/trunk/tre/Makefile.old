@@ -1,0 +1,9 @@
+libtre.a: regexec.c regcomp.c tre-mem.c
+	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) regexec.c -o regexec.o
+	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) regcomp.c -o regcomp.o
+	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) tre-mem.c -o tre-mem.o
+	ar -rcs libtre.a regexec.o regcomp.o tre-mem.o 
+
+clean:
+	rm -f *.o
+	rm -f libtre.a
