@@ -265,7 +265,7 @@ int doLocalProxy()
 //				memset(key,0,16);
 //				lpIOPair->muxOut.setDecryptionKey(key);
 //				lpIOPair->muxOut.setEncryptionKey(key);
-				lpIOPair->chainlen=2;
+				((CASocket*)lpIOPair->muxOut)->receive((char*)&lpIOPair->chainlen,1);
 				lpIO(lpIOPair);
 				ret=0;
 			}
@@ -386,6 +386,8 @@ int doMiddleMix()
 				delete mmIOPair;
 				return SOCKET_ERROR;
 			}
+		char chainlen;
+		((CASocket*)mmIOPair->muxOut)->receive(&chainlen,1);
 		if(mmIOPair->muxIn.accept(options.getServerPort())==SOCKET_ERROR)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Error waiting for previous Mix... -- Exiting!\n");
@@ -394,6 +396,8 @@ int doMiddleMix()
 			}
 	//	((CASocket*)mmIOPair->muxIn)->setRecvBuff(50*sizeof(MUXPACKET));
 	//	((CASocket*)mmIOPair->muxIn)->setSendBuff(50*sizeof(MUXPACKET));
+		chainlen++;
+		((CASocket*)mmIOPair->muxIn)->send(&chainlen,1);
 		mmIO(mmIOPair);
 		delete mmIOPair;
 		return 0;
@@ -404,6 +408,7 @@ typedef struct t_FMPair
 		CASocket socketIn;
 		CAMuxSocket muxHttpIn;
 		CAMuxSocket muxOut;
+		unsigned char chainlen;
 	} FMPair;
 
 THREAD_RETURN fmIO(void *v)
@@ -428,6 +433,7 @@ THREAD_RETURN fmIO(void *v)
 //		oSymCipher.setEncryptionKey(key);
 //		oSymCipher.setDecryptionKey(key);
 		int countRead=0;
+		unsigned char chainlen=fmIOPair->chainlen;
 		for(;;)
 			{
 				if((countRead=oSocketGroup.select())==SOCKET_ERROR)
@@ -455,6 +461,7 @@ THREAD_RETURN fmIO(void *v)
 			//					memset(key,0,16);
 				//				newMuxSocket->setDecryptionKey(key);
 					//			newMuxSocket->setEncryptionKey(key);
+								((CASocket*)newMuxSocket)->send((char*)&chainlen,1);
 								oMuxChannelList.add(newMuxSocket);
 								oSocketGroup.add(*newMuxSocket);
 							}
@@ -661,6 +668,8 @@ int doFirstMix()
 		if(fmIOPair->muxOut.connect(&addrNext)!=SOCKET_ERROR)
 			{
 				CAMsg::printMsg(LOG_INFO," connected!\n");
+				((CASocket*)fmIOPair->muxOut)->receive((char*)&fmIOPair->chainlen,1);
+				fmIOPair->chainlen++;
 				fmIO(fmIOPair);
 				ret=0;
 			}
@@ -843,7 +852,13 @@ int doLastMix()
 /*		unsigned char key[16];
 		memset(key,0,16);
 		lmIOPair->muxIn.setDecryptionKey(key);
-*/		CAMsg::printMsg(LOG_INFO,"connected!\n");
+*/		
+		
+		CAMsg::printMsg(LOG_INFO,"connected!\n");
+		CAMsg::printMsg(LOG_INFO,"Sending chain length: 1!\n");
+		char chainlen=1;
+		((CASocket*)lmIOPair->muxIn)->send(&chainlen,1);
+		
 		char strTarget[255];
 		options.getTargetHost(strTarget,255);
 		lmIOPair->addrSquid.setAddr(strTarget,options.getTargetPort());

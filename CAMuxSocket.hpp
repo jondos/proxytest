@@ -35,7 +35,7 @@ class CAMuxSocket
 //			int receive(MUXPACKET *pPacket);
 			int receive(MUXPACKET *pPacket);
 			int close(HCHANNEL channel_id);
-	//		operator CASocket*(){return &m_Socket;}
+			operator CASocket*(){return &m_Socket;}
 			operator SOCKET(){if(!bIsTunneld)
 														return (SOCKET)m_Socket;
 												else
