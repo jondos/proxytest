@@ -5,14 +5,6 @@
 	#include "CAMsg.hpp"
 #endif
 
-#define DATA_SIZE 1000 // Size of Data in a single Mux Packet
-
-typedef struct t_MuxPacket
-	{
-		HCHANNEL channel;
-		int len;
-		char data[DATA_SIZE];
-	} MUXPACKET;
 
 CAMuxSocket::CAMuxSocket()
 	{
@@ -45,15 +37,23 @@ int CAMuxSocket::send(HCHANNEL channel_id,char* buff,int bufflen)
 		if(bufflen>DATA_SIZE)
 			return SOCKET_ERROR;
 		MUXPACKET MuxPacket;
-		MuxPacket.channel=htonl(channel_id);
 		memcpy(MuxPacket.data,buff,bufflen);
-		MuxPacket.len=htonl(bufflen);
-		int MuxPacketSize=sizeof(MuxPacket);
+		MuxPacket.channel=channel_id;
+		MuxPacket.len=bufflen;
+		return send(&MuxPacket);
+	}
+	
+int CAMuxSocket::send(MUXPACKET *pPacket)
+	{
+		int MuxPacketSize=sizeof(MUXPACKET);
 		int aktIndex=0;
 		int len=0;
+		pPacket->channel=htonl(pPacket->channel);
+		pPacket->len=htonl(pPacket->len);
+		
 		do
 			{
-				len=m_Socket.send(((char*)&MuxPacket)+aktIndex,MuxPacketSize);
+				len=m_Socket.send(((char*)pPacket)+aktIndex,MuxPacketSize);
 				MuxPacketSize-=len;
 				aktIndex+=len;
 			} while(len>0&&MuxPacketSize>0);
@@ -66,24 +66,15 @@ int CAMuxSocket::send(HCHANNEL channel_id,char* buff,int bufflen)
 				#endif
 				return SOCKET_ERROR;
 			}
-		return sizeof(MuxPacket);
+		return sizeof(MUXPACKET);
 	}
-			
+		
 int CAMuxSocket::receive(HCHANNEL* channel_id,char* buff,int bufflen)
 	{
 		MUXPACKET MuxPacket;
-		int MuxPacketSize=sizeof(MuxPacket);
-		int aktIndex=0;
-		int len=0;
-		do
-			{
-				len=m_Socket.receive(((char*)&MuxPacket)+aktIndex,MuxPacketSize);
-				MuxPacketSize-=len;
-				aktIndex+=len;
-			} while(len>0&&MuxPacketSize>0);
-		MuxPacket.len=ntohl(MuxPacket.len);	
-		MuxPacket.channel=ntohl(MuxPacket.channel);
-		if(len==SOCKET_ERROR||MuxPacket.len<0||MuxPacket.len>bufflen)
+		if(receive(&MuxPacket)==SOCKET_ERROR)
+			return SOCKET_ERROR;
+		if(MuxPacket.len<0||MuxPacket.len>bufflen)
 			{
 				#ifdef _DEBUG
 					CAMsg::printMsg(LOG_DEBUG,"MuxSocket-Receive - ungültiges Packet!\n");
@@ -96,6 +87,32 @@ int CAMuxSocket::receive(HCHANNEL* channel_id,char* buff,int bufflen)
 		*channel_id=MuxPacket.channel;
 		memcpy(buff,MuxPacket.data,MuxPacket.len);
 		return MuxPacket.len;
+	}
+
+int CAMuxSocket::receive(MUXPACKET* pPacket)
+	{
+		int MuxPacketSize=sizeof(MUXPACKET);
+		int aktIndex=0;
+		int len=0;
+		do
+			{
+				len=m_Socket.receive(((char*)pPacket)+aktIndex,MuxPacketSize);
+				MuxPacketSize-=len;
+				aktIndex+=len;
+			} while(len>0&&MuxPacketSize>0);
+		if(len==SOCKET_ERROR)
+			{
+				#ifdef _DEBUG
+					CAMsg::printMsg(LOG_DEBUG,"MuxSocket-Receive - ungültiges Packet!\n");
+					CAMsg::printMsg(LOG_DEBUG,"Data-Len %i\n",len);
+					if(len==SOCKET_ERROR)
+						CAMsg::printMsg(LOG_DEBUG,"SOCKET-ERROR: %i\n",WSAGetLastError());
+				#endif
+				return SOCKET_ERROR;
+			}
+		pPacket->len=ntohl(pPacket->len);	
+		pPacket->channel=ntohl(pPacket->channel);
+		return pPacket->len;
 	}
 
 int CAMuxSocket::close(HCHANNEL channel_id)

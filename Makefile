@@ -9,8 +9,6 @@ CPPFLAGS = -D_REENTRANT -O3 -Wall
 
 OBJS_ALL=CASocket.o\
 	CASocketGroup.o\
-	CAMixChannel.o\
-	CAMixSocket.o\
 	CASocketAddr.o\
 	CASocketList.o\
 	CACmdLnOptions.o\
@@ -28,7 +26,7 @@ all: $(OBJS) popt.a
 	$(CC) -o proxytest $(OBJS) ./popt/popt.a $(LIBS)
 
 all_sun: $(OBJS) 
-	$(CC) -o proxytest $(OBJS) $(LIBS) -lsocket -lnsl
+	$(CC) -o proxytest $(OBJS) $(LIBS) ./popt/popt.a -lsocket -lnsl
 
 debug: $(OBJS) popt.a
 	$(CC) -o proxytest $(OBJS) ./popt/popt.a $(LIBS)
