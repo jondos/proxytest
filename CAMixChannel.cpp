@@ -32,9 +32,9 @@ int CAMixChannel::connect(LPSOCKETADDR psa)
 		CASocket* pSocket=new CASocket();
 		if(pSocket->connect(psa)==SOCKET_ERROR)
 		    {
-			delete pSocket;
-			printf("CAMixChannel - Connection error!\n");
-			ret=SOCKET_ERROR;
+					delete pSocket;
+					printf("CAMixChannel - Connection error!\n");
+					ret=SOCKET_ERROR;
 		    }
 		else
 		    ret=connections.add(pSocket);
