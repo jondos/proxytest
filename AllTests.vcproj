@@ -127,6 +127,9 @@
 				RelativePath=".\test\CAFirstMixChannelListTest.cpp">
 			</File>
 			<File
+				RelativePath=".\test\PoolSpeedTest.cpp">
+			</File>
+			<File
 				RelativePath=".\test\SampleTest.cpp">
 			</File>
 		</Filter>
