@@ -17,6 +17,7 @@ MAKE=make -f Makefile.old
 OBJS_ALL=CASocket.o\
 	CASocketASyncSend.o\
 	CAQueue.o\
+	CASingleSocketGroup.o\
 	CASocketGroup.o\
 	CASocketAddrINet.o\
 	CASocketAddrUnix.o\

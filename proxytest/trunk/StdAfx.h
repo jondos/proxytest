@@ -130,6 +130,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef HAVE_FILIO
     	#include <sys/filio.h>
 #endif			
+#ifdef HAVE_POLL
+    	#include <poll.h>
+#endif			
 		#include <sys/ioctl.h>
 		#include <sys/types.h>
     #include <sys/socket.h>

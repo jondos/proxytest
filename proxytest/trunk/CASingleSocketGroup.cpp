@@ -40,26 +40,25 @@ SINT32 CASingleSocketGroup::add(CASocket&s)
 		return E_SUCCESS;
 	}
 
-SINT32 CASingleGroup::add(CAMuxSocket&s)
+SINT32 CASingleSocketGroup::add(CAMuxSocket&s)
 	{
 		m_pollfd->fd=(SOCKET)s;
 		return E_SUCCESS;
 	}
 
-SINT32 CASocketGroup::select()
+SINT32 CASingleSocketGroup::select()
 	{
-		m_poolfd->events=POLLIN;
-    return ::poll(m_poolfd,1,INFTIM);
-
+		m_pollfd->events=POLLIN;
+    return ::poll(m_pollfd,1,-1);
 	}
 
-SINT32 CASocketGroup::select(bool bWrite,UINT32 ms)
+SINT32 CASingleSocketGroup::select(bool bWrite,UINT32 ms)
 	{
 		if(bWrite)
-			m_poolfd->events=POOLOUT
+			m_pollfd->events=POLLOUT;
 		else
-			m_poolfd->events=POOLIN
-		int ret=::pool(m_pollfd,1,ms);
+			m_pollfd->events=POLLIN;
+		int ret=::poll(m_pollfd,1,ms);
 		if(ret==0)
 			{
 				return E_TIMEDOUT;
