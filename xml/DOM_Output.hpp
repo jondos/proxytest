@@ -142,10 +142,10 @@ class DOM_Output
 				}
 
 		
-			/** Dumps the Node in a cannonical form an returns a pointer to the memory.
+			/** Dumps the Node in a cannonical form and returns a pointer to the memory.
 				* @param node, Node to dump
 				* @param size, on return contains the number of XML-Chars copied
-				* @return a pointer to a newls allocated buff, which must be delete[] by the caller
+				* @return a pointer to a newly allocated buff, which must be delete[] by the caller
 				* @return NULL, if an error occurs
 				*/
 			static UINT8* makeCanonical(DOM_Node& node,UINT32* size)
