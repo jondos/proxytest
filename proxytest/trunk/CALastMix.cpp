@@ -485,7 +485,7 @@ SINT32 CALastMix::loop()
 																		memset(crimeBuff,0,PAYLOAD_SIZE+1);
 																		memcpy(crimeBuff,pMixPacket->payload.data,payLen);
 																		UINT32 id=m_pMuxIn->sigCrime(pMixPacket->channel,tmpBuff);
-																		oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);
+																		m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
 																		CAMsg::printMsg(LOG_SPECIAL,"Crime detected -- ID: %u -- Content: \n%s\n",id,crimeBuff,payLen);
 																	}
 															#endif
