@@ -45,8 +45,10 @@ extern CACmdLnOptions options;
 	#define MACRO_DO_LOG_CHANNEL\
 		getcurrentTimeMillis(current_millis);\
 		diff_time=diff64(current_millis,pChannelListEntry->timeCreated);\
-		CAMsg::printMsg(LOG_DEBUG,"Channel %u closed - Start %Lu - End %Lu - Time [ms] - %u, Upload - %u, Download - %u\n",\
-			pChannelListEntry->channelIn,pChannelListEntry->timeCreated,current_millis,diff_time,pChannelListEntry->trafficIn,pChannelListEntry->trafficOut); 
+		CAMsg::printMsg(LOG_DEBUG,"Channel %u closed - Start %Lu - End %Lu - Time [ms] - %u, Upload - %u, Download - %u, DataPacketsFromUser %u, DataPacketsToUser %u\n",\
+			pChannelListEntry->channelIn,pChannelListEntry->timeCreated,\
+			current_millis,diff_time,pChannelListEntry->trafficInFromUser,pChannelListEntry->trafficOutToUser,\
+			pChannelListEntry->packetsDataOutToUser,pChannelListEntry->packetsDataInFromUser); 
 #endif
 
 /*******************************************************************************/
@@ -424,12 +426,15 @@ SINT32 CALastMix::loop()
 											}
 										else if(pMixPacket->flags==CHANNEL_DATA)
 											{
+												#ifdef LOG_CHANNEL
+													pChannelListEntry->packetsDataInFromUser++;
+												#endif
 												pChannelListEntry->pCipher->decryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 												ret=ntohs(pMixPacket->payload.len);
 												if(ret>=0&&ret<=PAYLOAD_SIZE)
 													{
 														#ifdef LOG_CHANNEL
-															pChannelListEntry->trafficIn+=ret;
+															pChannelListEntry->trafficInFromUser+=ret;
 														#endif
 														ret=pChannelListEntry->pQueueSend->add(pMixPacket->payload.data,ret);
 													}
@@ -526,7 +531,7 @@ SINT32 CALastMix::loop()
 										countRead--;
 										if(oqueueMixIn.getSize()<MAX_MIXIN_SEND_QUEUE_SIZE
 												#ifdef DELAY_CHANNELS
-													&&(pChannelListEntry->trafficOut<DELAY_CHANNEL_TRAFFIC||isGreater64(aktTime,pChannelListEntry->timeNextSend))
+													&&(pChannelListEntry->trafficOutToUser<DELAY_CHANNEL_TRAFFIC||isGreater64(aktTime,pChannelListEntry->timeNextSend))
 												#endif
 											)
 											{
@@ -552,7 +557,7 @@ SINT32 CALastMix::loop()
 													{
 														add64((UINT64&)m_logDownloadedBytes,ret);
 														#if defined(LOG_CHANNEL)||defined(DELAY_CHANNELS)
-															pChannelListEntry->trafficOut+=ret;
+															pChannelListEntry->trafficOutToUser+=ret;
 														#endif
 														pMixPacket->channel=pChannelListEntry->channelIn;
 														pMixPacket->flags=CHANNEL_DATA;
@@ -562,6 +567,9 @@ SINT32 CALastMix::loop()
 														m_pMuxIn->send(pMixPacket,tmpBuff);
 														oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);
 														m_logDownloadedPackets++;
+														#if defined(LOG_CHANNEL)
+															pChannelListEntry->packetsDataOutToUser++;
+														#endif													
 														#ifdef DELAY_CHANNELS
 															set64(pChannelListEntry->timeNextSend,aktTime);
 															UINT32 delayTime=(ret>>5);

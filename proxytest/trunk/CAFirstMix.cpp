@@ -646,10 +646,10 @@ SINT32 CAFirstMix::loop()
 																m_pMuxOut->close(pEntry->channelOut,tmpBuff);
 																m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
 																#ifdef LOG_CHANNEL
-																	pEntry->packetsInFromUser++;
+																	//pEntry->packetsInFromUser++;
 																	getcurrentTimeMillis(current_time);
 																	diff_time=diff64(current_time,pEntry->timeCreated);
-																	CAMsg::printMsg(LOG_DEBUG,"Channel close - Channel: %u, Connection: %Lu - PacketsIn: %u, PacketsOut: %u - ChannelStart: %Lu, ChannelEnd: %Lu, ChannelDuration: %u\n",
+																	CAMsg::printMsg(LOG_DEBUG,"Channel close - Channel: %u, Connection: %Lu - PacketsIn (only data): %u, PacketsOut (only data): %u - ChannelStart: %Lu, ChannelEnd: %Lu, ChannelDuration: %u\n",
 																														pEntry->channelIn,pEntry->pHead->id,pEntry->packetsInFromUser,pEntry->packetsOutToUser,pEntry->timeCreated,current_time,diff_time);
 																#endif
 																delete pEntry->pCipher;
@@ -760,10 +760,10 @@ SINT32 CAFirstMix::loop()
 										pEntry->pHead->pQueueSend->add(tmpBuff,MIXPACKET_SIZE);
 										#ifdef LOG_CHANNEL
 											pEntry->pHead->trafficOut++;
-											pEntry->packetsOutToUser++;
+											//pEntry->packetsOutToUser++;
 											getcurrentTimeMillis(current_time);
 											diff_time=diff64(current_time,pEntry->timeCreated);
-											CAMsg::printMsg(LOG_DEBUG,"Channel close - Channel: %u, Connection: %Lu - PacketsIn: %u, PacketsOut: %u - ChannelStart: %Lu, ChannelEnd: %Lu, ChannelDuration: %u\n",
+											CAMsg::printMsg(LOG_DEBUG,"Channel close - Channel: %u, Connection: %Lu - PacketsIn (only data): %u, PacketsOut (only data): %u - ChannelStart: %Lu, ChannelEnd: %Lu, ChannelDuration: %u\n",
 																								pEntry->channelIn,pEntry->pHead->id,pEntry->packetsInFromUser,pEntry->packetsOutToUser,pEntry->timeCreated,current_time,diff_time);
 										#endif
 										
@@ -813,6 +813,9 @@ SINT32 CAFirstMix::loop()
 										#ifdef _DEBUG
 											CAMsg::printMsg(LOG_DEBUG,"Error Sending Data to Browser -- Channel-Id %u no valid!\n",pMixPacket->channel);
 										#endif
+										#ifdef LOG_CHANNEL
+											CAMsg::printMsg(LOG_INFO,"Packet late arrive for channel: %u\n",pMixPacket->channel);
+										#endif												
 									}
 							}
 					}

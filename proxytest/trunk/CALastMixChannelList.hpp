@@ -48,10 +48,12 @@ struct t_lastmixchannellist
 #endif
 #ifdef LOG_CHANNEL
 			UINT64				timeCreated;
-			UINT32				trafficIn;
+			UINT32				trafficInFromUser;
+			UINT32				packetsDataOutToUser;
+			UINT32				packetsDataInFromUser;
 #endif
 #if defined (LOG_CHANNEL)||defined(DELAY_CHANNELS) 
-			UINT32				trafficOut;
+			UINT32				trafficOutToUser;
 #endif
 		private:
 			struct

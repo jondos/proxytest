@@ -57,7 +57,7 @@ CALastMixChannelList::~CALastMixChannelList()
 #ifndef LOG_CHANNEL
 	SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue)
 #else
-	SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue,UINT64 time, UINT32 trafficIn)
+	SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue,UINT64 time, UINT32 trafficInFromUser)
 #endif
 	{
 		UINT32 hash=id&0x0000FFFF;
@@ -68,11 +68,13 @@ CALastMixChannelList::~CALastMixChannelList()
 		pNewEntry->pSocket=pSocket;
 		pNewEntry->pQueueSend=pQueue;
 #ifdef LOG_CHANNEL
-		pNewEntry->trafficIn=trafficIn;
+		pNewEntry->trafficInFromUser=trafficInFromUser;
 		pNewEntry->timeCreated=time;
+		pNewEntry->packetsDataInFromUser=1;
+		pNewEntry->packetsDataOutToUser=0;
 #endif
 #if defined (LOG_CHANNEL)||defined(DELAY_CHANNELS)
-		pNewEntry->trafficOut=0;
+		pNewEntry->trafficOutToUser=0;
 #endif
 #ifdef DELAY_CHANNELS
 		pNewEntry->timeNextSend=0; //can always send first packet
