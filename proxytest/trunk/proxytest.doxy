@@ -48,7 +48,8 @@ WARN_FORMAT            = "$file:$line: $text"
 INPUT                  = . \
                          xml \
                          httptunnel \
-                         popt
+                         popt \
+			 aes
 FILE_PATTERNS          = *.cpp \
                          *.hpp \
                          *.c \
