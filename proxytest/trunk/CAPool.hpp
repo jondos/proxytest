@@ -28,22 +28,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CAPOOL__
 #define __CAPOOL__
 #include "CAMuxSocket.hpp"
-
-struct t_pool_entry
-	{
-		MIXPACKET mixpacket;
-		#ifdef LOG_PACKET_TIMES
-			UINT64 overall_timestamp;
-			UINT64 pool_timestamp;
-		#endif	
-	};
-	
-typedef struct t_pool_entry tPoolEntry; 	
 	
 struct t_pool_list
 	{
 		struct t_pool_list * next;
-		struct t_pool_entry poolentry;
+		tPoolEntry poolentry;
 	};
 
 typedef t_pool_list tPoolListEntry;

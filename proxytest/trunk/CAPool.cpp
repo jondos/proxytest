@@ -36,12 +36,12 @@ CAPool::CAPool(UINT32 poolsize)
 		m_uRandMax=0xFFFFFFFF;
 		m_uRandMax-=m_uRandMax%m_uPoolSize;
 		m_pPoolList=new tPoolListEntry;
-		getRandom(m_pPoolList->poolentry.mixpacket.data,DATA_SIZE);
-		m_pPoolList->poolentry.mixpacket.flags=CHANNEL_CLOSE;
-		m_pPoolList->poolentry.mixpacket.channel=0;
+		getRandom(m_pPoolList->poolentry.packet.data,DATA_SIZE);
+		m_pPoolList->poolentry.packet.flags=CHANNEL_DUMMY;
+		m_pPoolList->poolentry.packet.channel=DUMMY_CHANNEL;
 #ifdef LOG_PACKET_TIMES
-		setZero64(m_pPoolList->poolentry.overall_timestamp);
-		setZero64(m_pPoolList->poolentry.pool_timestamp);
+		setZero64(m_pPoolList->poolentry.timestamp);
+		setZero64(m_pPoolList->poolentry.pool_timestamp_in);
 #endif				
 		m_pPoolList->next=NULL;
 		m_pLastEntry=m_pPoolList;
@@ -50,12 +50,12 @@ CAPool::CAPool(UINT32 poolsize)
 		for(UINT32 i=1;i<poolsize;i++)
 			{
 				tPoolListEntry* tmpEntry=new tPoolListEntry;
-				getRandom(tmpEntry->poolentry.mixpacket.data,DATA_SIZE);
-				tmpEntry->poolentry.mixpacket.flags=CHANNEL_CLOSE;
-				tmpEntry->poolentry.mixpacket.channel=0;
+				getRandom(tmpEntry->poolentry.packet.data,DATA_SIZE);
+				tmpEntry->poolentry.packet.flags=CHANNEL_DUMMY;
+				tmpEntry->poolentry.packet.channel=DUMMY_CHANNEL;
 				#ifdef LOG_PACKET_TIMES
-					setZero64(tmpEntry->poolentry.overall_timestamp);
-					setZero64(tmpEntry->poolentry.pool_timestamp);
+					setZero64(tmpEntry->poolentry.timestamp);
+					setZero64(tmpEntry->poolentry.pool_timestamp_in);
 				#endif				
 				tmpEntry->next=m_pPoolList;
 				m_pPoolList=tmpEntry;
@@ -90,10 +90,10 @@ SINT32 CAPool::pool(tPoolEntry* pPoolEntry)
 					}
 			}
 		HCHANNEL id=m_arChannelIDs[v];
-		m_arChannelIDs[v]=pPoolEntry->mixpacket.channel;
+		m_arChannelIDs[v]=pPoolEntry->packet.channel;
 		tPoolListEntry* pPrevEntry=NULL;		
 		tPoolListEntry* pEntryOut=m_pPoolList;
-		while(pEntryOut->poolentry.mixpacket.channel!=id)
+		while(pEntryOut->poolentry.packet.channel!=id)
 			{
 				pPrevEntry=pEntryOut;
 				pEntryOut=pEntryOut->next;	

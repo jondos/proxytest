@@ -75,11 +75,6 @@ class CAFirstMix:public CAMix
 					m_pthreadAcceptUsers=NULL;
 					m_pthreadsLogin=NULL;
 					#ifdef LOG_PACKET_TIMES
-						if(sizeof(CAFirstMix::tQueueEntry)!=MIXPACKET_SIZE+sizeof(UINT64))
-							{
-								CAMsg::printMsg(LOG_CRIT,"sizeof(CAFirstMix::tQueueEntry) [%u] !=MIXPACKETSIZE+sizeof(UINT64) [%u]\n",sizeof(CAFirstMix::tQueueEntry),MIXPACKET_SIZE+sizeof(UINT64));
-								//exit(0);
-							}
 						m_pLogPacketStats=NULL;
 					#endif	
 				}
@@ -156,14 +151,6 @@ class CAFirstMix:public CAMix
 			SINT32 doUserLogin(CAMuxSocket* pNewUSer,UINT8 perrIP[4]);
 		protected:	
 			CAIPList* m_pIPList;
-			struct t_queue_entry
-				{
-					MIXPACKET packet;
-					#ifdef LOG_PACKET_TIMES
-						UINT64 timestamp;
-					#endif
-				};
-			typedef struct t_queue_entry tQueueEntry;
 			CAQueue* m_pQueueSendToMix;
 			CAQueue* m_pQueueReadFromMix;
 			#ifdef LOG_PACKET_TIMES

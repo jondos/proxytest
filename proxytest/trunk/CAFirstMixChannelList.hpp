@@ -69,6 +69,7 @@ struct t_fmhashtableentry
 			CAQueue*			pQueueSend;
 #ifdef LOG_PACKET_TIMES
 			UINT32        uAlreadySendPacketSize;
+			tQueueEntry		oQueueEntry;
 #endif
 			UINT32				cSuspend;
 #ifdef LOG_CHANNEL
