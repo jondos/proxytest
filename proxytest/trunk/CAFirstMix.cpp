@@ -736,6 +736,7 @@ SINT32 CAFirstMix::clean()
 	{
 		if(m_pthreadsLogin!=NULL)
 			delete m_pthreadsLogin;
+		m_pthreadsLogin=NULL;	
 		if(m_pInfoService!=NULL)
 			{
 				#ifdef _DEBUG
@@ -755,7 +756,7 @@ SINT32 CAFirstMix::clean()
 		m_pthreadAcceptUsers=NULL;
 		if(m_pthreadSendToMix!=NULL)
 			delete m_pthreadSendToMix;
-		m_pthreadAcceptUsers=NULL;
+		m_pthreadSendToMix=NULL;
 		#ifdef LOG_PACKET_TIMES
 		if(m_pLogPacketStats!=NULL)
 			delete m_pLogPacketStats;
