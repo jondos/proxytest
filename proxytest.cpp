@@ -301,16 +301,6 @@ Debug(dc::malloc.on());
 				CAMsg::printMsg(LOG_CRIT,"sizeof(UINT32) != 4 --> maybe a compiler (optimization) problem!\n");
 				exit(-1);
 			}
-
-		//Testing msSleep
-		CAMsg::printMsg(LOG_DEBUG,"Should sleep now for aprox 2 seconds....\n");
-		UINT32 start=time(NULL);
-		for(int i=0;i<10;i++)
-		msSleep(200);
-		start=time(NULL)-start;
-		CAMsg::printMsg(LOG_DEBUG,"done! Takes %u seconds\n",start);
-		//end Testin msSleep
-		
 				
 		//startup
 		#ifdef _WIN32
@@ -328,10 +318,9 @@ Debug(dc::malloc.on());
 				RAND_seed(randbuff,sizeof(randbuff));
 			#endif
 		#endif
-		
-//				CALastMixChannelList::test();
-//				exit(0);
-	
+
+		options.parse(argc,argv);
+			
 /*		UINT8 buff1[1024];
 		UINT32 len=1024;
 		oRsa.getPublicKeyAsXML(buff1,&len);
@@ -379,6 +368,7 @@ Debug(dc::malloc.on());
 		write(handle,out,outlen);
 		close(handle);
 */
+#ifdef DEBUG
 		//		CADatabase::test();
 		if(CAQueue::test()!=E_SUCCESS)
 			CAMsg::printMsg(LOG_CRIT,"CAQueue::test() NOT passed! Exiting\n");
@@ -386,7 +376,16 @@ Debug(dc::malloc.on());
 			CAMsg::printMsg(LOG_DEBUG,"CAQueue::test() passed!\n");
 
 		CAFirstMixChannelList::test();
-		options.parse(argc,argv);
+		//Testing msSleep
+		CAMsg::printMsg(LOG_DEBUG,"Should sleep now for aprox 2 seconds....\n");
+		UINT32 start=time(NULL);
+		for(int i=0;i<10;i++)
+		msSleep(200);
+		start=time(NULL)-start;
+		CAMsg::printMsg(LOG_DEBUG,"done! Takes %u seconds\n",start);
+		//end Testin msSleep
+
+#endif
 #ifdef _WIN32
 		_CrtMemCheckpoint( &s1 );
 #endif
