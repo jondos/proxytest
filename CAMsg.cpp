@@ -118,7 +118,7 @@ SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 				case MSG_FILE:
 					if(oMsg.m_hFileInfo==-1)
 						{
-							oMsg.m_hFileInfo=open(oMsg.m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK,S_IREAD|S_IWRITE);																	
+							oMsg.m_hFileInfo=open(oMsg.m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE,S_IREAD|S_IWRITE);																	
 						}
 					if(oMsg.m_hFileInfo!=-1)
 						{
@@ -191,7 +191,7 @@ SINT32 CAMsg::openLog(UINT32 type)
 					if(options.getLogDir((UINT8*)m_strLogFile,1024)!=E_SUCCESS)
 						return E_UNKNOWN;
 					strcat(m_strLogFile,FILENAME_INFOLOG);
-					m_hFileInfo=open(m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK,S_IREAD|S_IWRITE);										
+					m_hFileInfo=open(m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE,S_IREAD|S_IWRITE);										
 				break;
 #ifdef COMPRESSED_LOGS
 				case MSG_COMPRESSED_FILE:
