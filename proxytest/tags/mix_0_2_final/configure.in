@@ -1,0 +1,166 @@
+dnl
+dnl Autoconfiguration files for proxytest (a MiX proxy)
+dnl Konrad Rieck <kr@r0q.cx>
+dnl
+
+AC_INIT
+AC_PREREQ(2.50)
+AC_CONFIG_SRCDIR([proxytest.cpp])
+AM_INIT_AUTOMAKE(proxytest, 0.0.1)
+AM_CONFIG_HEADER(config.h)
+AC_CANONICAL_HOST
+
+
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_PROG_CXX 
+AC_PROG_INSTALL
+AC_PROG_RANLIB
+
+CFLAGS="$CFLGS -D_ASYNC"
+
+case "$host" in
+*-*-solaris*)
+        LIBS="$LIBS -lnsl -lsocket"
+        ;;
+*-*-linux*)
+        LIBS="$LIBS -lpthread"
+	;;
+*-*-irix*)
+        CFLAGS="$CFLAGS "
+        ;;
+*)
+	;;
+esac
+
+
+dnl Checks for libraries.
+
+dnl Check for OpenSSL libs and includes. Adopted from OpenSSH configure.in
+AC_ARG_WITH(ssl-dir,
+	[  --with-ssl-dir=PATH     Specify path to OpenSSL installation ],
+	[
+		if test "x$withval" != "$xno" ; then
+			tryssldir=$withval
+		fi
+	]
+)
+
+saved_LIBS="$LIBS"
+saved_LDFLAGS="$LDFLAGS"
+saved_CFLAGS="$CFLAGS"
+if test "x$prefix" != "xNONE" ; then
+	tryssldir="$tryssldir $prefix"
+fi
+AC_CACHE_CHECK([for OpenSSL directory], ac_cv_openssldir, [
+
+	for ssldir in "" $tryssldir /usr/local/openssl /usr/lib/openssl \
+                         /usr/local/ssl /usr/lib/ssl /usr/local /usr/pkg \
+                         /opt /opt/openssl $HOME/ssl $HOME/openssl ; do
+		if test ! -z "$ssldir" ; then
+			LDFLAGS="$saved_LDFLAGS -L$ssldir/lib -L$ssldir"
+			CFLAGS="$saved_CFLAGS -I$ssldir/include"
+			if test ! -z "$need_dash_r" ; then
+				LDFLAGS="$LDFLAGS -R$ssldir/lib -R$ssldir"
+			fi
+		else
+			LDFLAGS="$saved_LDFLAGS"
+		fi
+
+		LIBS="$saved_LIBS -lcrypto"
+
+		# Basic test to check for compatible version and correct 
+                # linking, *does not* test for RSA - that comes later.
+		AC_TRY_RUN(
+			[
+#include <string.h>
+#include <openssl/rand.h>
+int main(void) 
+{
+	char a[2048];
+	memset(a, 0, sizeof(a));
+	RAND_add(a, sizeof(a), sizeof(a));
+	return(RAND_status() <= 0);
+}
+			],
+			[
+				found_crypto=1
+				break;
+			], []
+		)
+
+		if test ! -z "$found_crypto" ; then
+			break;
+		fi
+	done
+
+	if test -z "$found_crypto" ; then
+		AC_MSG_ERROR([Could not find working SSLeay / OpenSSL libraries, please install])	
+	fi
+	if test -z "$ssldir" ; then
+		ssldir="(system)"
+	fi
+
+	ac_cv_openssldir=$ssldir
+])
+
+if (test ! -z "$ac_cv_openssldir" && test "x$ac_cv_openssldir" != "x(system)") ; then
+	AC_DEFINE(HAVE_OPENSSL,,[Define if you have OpenSSL (which is needed!)])
+	dnl Need to recover ssldir - test above runs in subshell
+	ssldir=$ac_cv_openssldir
+	CFLAGS="$saved_CFLAGS -I$ssldir/include"
+	LDFLAGS="$saved_LDFLAGS -L$ssldir/lib -L$ssldir"
+	if test ! -z "$need_dash_r" ; then
+		LDFLAGS="$LDFLAGS -R$ssldir/lib -R$ssldir"
+	fi
+	if test ! -z "$blibpath" ; then
+		blibpath="$blibpath:$ssldir:$ssldir/lib"
+	fi
+fi
+LIBS="$saved_LIBS -lcrypto"
+
+
+dnl Checks for header files.
+AC_HEADER_STDC([])
+
+dnl Checks for library functions.
+AC_CHECK_FUNC(strerror,AC_DEFINE(HAVE_STRERROR,,[Define if you have strerror()]))
+
+
+AC_ARG_WITH(debug,
+	[  --with-debug		  Enable debug mode],
+	[
+		if test "x$withval" != "$xno" ; then
+			CFLAGS="$CFLAGS -g -D_DEBUG"
+		fi
+	]
+)
+
+
+AC_CHECK_FUNCS(vsnprintf)
+
+AC_CHECK_DECL(TCP_KEEPALIVE,[AC_DEFINE(HAVE_TCP_KEEPALIVE,,[Define if your OS supports the TCP socket option TCP_KEEPALIVE])],[],[#include <sys/socket.h>])
+AC_CHECK_DECL(AF_UNIX,[AC_DEFINE(HAVE_UNIX_DOMAIN_PROTOCOL,,[Define if your OS supports the Unix Domain protocol])],[],[#include <sys/socket.h>])
+AC_CHECK_TYPE(socklen_t,[AC_DEFINE(HAVE_SOCKLEN_T,,[Define if the type socklen_t is available])],[],[#include <sys/socket.h>])
+AC_CHECK_DECL(O_BINARY,[],[AC_DEFINE(O_BINARY,0,[This flag is used in open(), in order to open a file in binary mode])])
+AC_CHECK_DECL(MAX_PATH,[],[AC_DEFINE(MAX_PATH,4096,[This is the maximum length of a file system path])])
+AC_CHECK_DECL(INADDR_NONE,[],[AC_DEFINE(INADDR_NONE,-1,[This is the value, which is returned from inet_addr(), in case of an error])],[#include <netinet/in.h>])
+AC_CHECK_DECL(FIONREAD,[AC_DEFINE(HAVE_FIONREAD,,[This is a flag to ioctl() to get the number of available bytes on a socket])],[],[#include <sys/ioctl.h>])
+AC_CHECK_DECL(MSG_NOSIGNAL,[],[AC_DEFINE(MSG_NOSIGNAL,0,[This is a flag to read(), to tell the os to get no signals])],[#include <sys/socket.h>])
+AC_CHECK_HEADERS(sys/filio.h)
+
+
+AC_FUNC_ALLOCA
+
+if test "x$GCC" = "xyes" ; then
+   CPPFLAGS="-Wall -D_REENTRANT"   
+else
+   echo "You need the GNU C Compiler to compile proxytest."
+   exit 
+fi
+
+CXXFLAGS=$CFLAGS
+
+AC_CONFIG_FILES(Makefile popt/Makefile xml/Makefile aes/Makefile)
+AC_OUTPUT
