@@ -30,9 +30,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef HAVE_EPOLL
 CASocketGroupEpoll::CASocketGroupEpoll(bool bWrite):
 	{
-		m_hEPFD=epoll_create(MAXPOOL_FD);
+		m_hEPFD=epoll_create(MAX_POLLFD);
 		m_pEpollEvent=new struct epoll_event;
-		m_pEvents=new struct epoll_event[MAXPOOL_FD];
+		m_pEvents=new struct epoll_event[MAX_POLLFD];
 		setPoolForWrite(bWrite);
 	}
 
