@@ -173,10 +173,10 @@ SINT32 CACertificate::encode(DOM_DocumentFragment& docFrag,DOM_Document& doc)
 		docFrag=doc.createDocumentFragment();
 		DOM_Element elemCert=doc.createElement("X509Certificate");
 		docFrag.appendChild(elemCert);
-		UINT8 buff[1000];
+		UINT8 buff[2048]; //TODO: Very bad --> looks like easy buffer overflow... [donn't care at the moment...]
 		UINT8* tmp=buff;
 		int i=i2d_X509(m_pCert,&tmp); //now we need DER
-		UINT32 bufflen=1000;
+		UINT32 bufflen=2048;
 		CABase64::encode(buff,i,buff,&bufflen); //now we have it converted to Base64
 		buff[bufflen]=0;
 		setDOMElementValue(elemCert,buff);

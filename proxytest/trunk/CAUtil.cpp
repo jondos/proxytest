@@ -164,7 +164,7 @@ SINT32 getcurrentTimeMillis(UINT64& u64Time)
 			struct timeval tv;
 			gettimeofday(&tv,NULL); //getting millis...
 			#ifdef HAVE_NATIVE_UINT64
-				u64Time=tv.tv_sec*1000+tv.tv_usec/1000;
+				u64Time=((UINT64)tv.tv_sec)*1000+((UINT64)tv.tv_usec)/1000;
 				return E_SUCCESS;
 			#else
 				return E_UNKNOWN;
