@@ -118,7 +118,7 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,UINT8 peerIP[4],CAQueu
 		// init accounting instance for this user
 		CAAccountingInstance *pAccInst;
 		pAccInst = CAAccountingInstance::getInstance();
-		pAccInst->initTableEntry(pHashTableEntry);
+//		pAccInst->initTableEntry(pHashTableEntry);
 //		m_pAccountingInstance->initTableEntry(pHashTableEntry);
 #endif
 		m_Mutex.unlock();

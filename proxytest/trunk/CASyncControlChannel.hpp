@@ -43,7 +43,11 @@ class CASyncControlChannel : public CAAbstractControlChannel
 					m_MsgBytesLeft=0;
 				}
 
-		/**Override this method to receive a XML Message*/
+		/**Override this method to receive a XML Message.
+			* Note: The DOM_Document reference is valid onyl within this call!
+			* If you need to store it for later processing, make a copy of
+			* the DOM_Document using docMsg.cloneNode(true)
+			*/
 		virtual SINT32 processXMLMessage(DOM_Document& docMsg)=0;
 
 	protected:

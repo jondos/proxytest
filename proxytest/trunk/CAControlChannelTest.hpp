@@ -41,7 +41,11 @@ public:
 	/** Reflects the incoming message back to the sender*/
 	SINT32 processXMLMessage(DOM_Document& doc)
 	{
-		return sendMessage(doc);
+		//Hm, I am to stupid to do it better...
+		DOM_Document* myDoc=new DOM_Document;
+		*myDoc=DOM_Document::createDocument();
+		myDoc->appendChild(myDoc->importNode(doc.getDocumentElement(),true));
+		return sendMessage(*myDoc);
 	}
 };
 #endif

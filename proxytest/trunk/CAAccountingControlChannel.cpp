@@ -64,7 +64,9 @@ CAAccountingControlChannel::~CAAccountingControlChannel()
 SINT32 CAAccountingControlChannel::processXMLMessage(DOM_Document &a_doc)
 {
 	aiQueueItem * pItem = new aiQueueItem;
-	pItem->pDomDoc = &a_doc;
+	
+	pItem->pDomDoc = &(DOM_Document::createDocument()); //new DOM_Document();
+	pItem->pDomDoc->appendChild(pItem->pDomDoc->importNode(a_doc.getDocumentElement(), true));
 	pItem->pHashEntry = m_pHashEntry;
 	ms_pAccountingInstance->m_pQueue->add(pItem, sizeof(aiQueueItem));
 	return E_SUCCESS;

@@ -632,7 +632,7 @@ SINT32 CACmdLnOptions::getJPIHost(UINT8* host,UINT32 len)
 				return E_UNKNOWN;
 			}
 	strcpy((char*)host,(char *)m_strJPIHost);
-	return (SINT32)strlen((char *)m_strJPIHost);	
+	return E_SUCCESS;//(SINT32)strlen((char *)m_strJPIHost);	
 }
 
 UINT16 CACmdLnOptions::getJPIPort()
@@ -1052,11 +1052,16 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 				UINT8 dbpass[500];
 				dbpass[0]=0;
 				printf("Please enter password for postgresql user %s at %s: ",m_strDatabaseUser, m_strDatabaseHost);
-				scanf("%400[^\n]",(char*)dbpass); 
+				scanf("%400[^\n]%*1[\n]",(char*)dbpass); 
 				int len = strlen((char *)dbpass);
 				if(len>0) {
 					m_strDatabasePassword = new UINT8[len+1];
 					strcpy((char *)m_strDatabasePassword, (char *)dbpass);
+					CAMsg::printMsg(LOG_DEBUG, "And the password iiiiiiiiiiiis........ %s", m_strDatabasePassword);
+				}
+				else
+				{
+					CAMsg::printMsg(LOG_DEBUG, "No database passwd.. :-((");
 				}	
 			}
 		}

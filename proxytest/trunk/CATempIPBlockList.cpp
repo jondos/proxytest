@@ -28,6 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "StdAfx.h"
 #include "CATempIPBlockList.hpp"
 #include "CAUtil.hpp"
+#include "CAMsg.hpp"
 
 
 CATempIPBlockList::CATempIPBlockList(UINT64 validTimeMillis)
@@ -36,6 +37,8 @@ CATempIPBlockList::CATempIPBlockList(UINT64 validTimeMillis)
 
 	m_hashTable=new PTEMPIPBLOCKLIST[0x10000];
 	memset(m_hashTable,0,0x10000*sizeof(PTEMPIPBLOCKLIST));
+	
+	m_pMutex = new CAMutex();
 	
 	// launch cleanup thread
 	m_pCleanupThread = new CAThread();
@@ -48,7 +51,8 @@ CATempIPBlockList::CATempIPBlockList(UINT64 validTimeMillis)
 
 CATempIPBlockList::~CATempIPBlockList()
 {
-	m_Mutex.lock();
+	CAMsg::printMsg(LOG_DEBUG, "CATmpIPBlockList terminating..");
+	m_pCleanupThread->join(); //wait for cleanupthread to wakeup and exit
 	//Now stop the cleanup thread...
 	m_bRunCleanupThread=false;
 	//its safe to delet it because we have the lock...
@@ -62,7 +66,7 @@ CATempIPBlockList::~CATempIPBlockList()
 		}
 	}
 	delete [] m_hashTable;
-	m_pCleanupThread->join(); //wait for cleanupthread to wakeup and exit
+	delete m_pMutex;
 }
 
 
@@ -85,7 +89,7 @@ SINT32 CATempIPBlockList::insertIP(const UINT8 ip[4])
 	newEntry->next=NULL;	
 	
 	UINT16 hashvalue=(ip[2]<<8)|ip[3];
-	m_Mutex.lock();
+	m_pMutex->lock();
 	
 	if(m_hashTable[hashvalue]==NULL) {
 		m_hashTable[hashvalue] = newEntry;
@@ -95,7 +99,7 @@ SINT32 CATempIPBlockList::insertIP(const UINT8 ip[4])
 		do {
 			if(memcmp(temp->ip,ip,2)==0) {
 				// we have found the entry
-				m_Mutex.unlock();
+				m_pMutex->unlock();
 				return E_UNKNOWN;
 			}
 			temp = temp->next;
@@ -103,7 +107,7 @@ SINT32 CATempIPBlockList::insertIP(const UINT8 ip[4])
 		while(temp->next);
 		temp->next = newEntry;
 	}
-	m_Mutex.unlock();	
+	m_pMutex->unlock();	
 	return E_SUCCESS;
 }
 
@@ -118,7 +122,7 @@ SINT32 CATempIPBlockList::insertIP(const UINT8 ip[4])
 SINT32 CATempIPBlockList::checkIP(const UINT8 ip[4])
 {
 	UINT16 hashvalue=(ip[2]<<8)|ip[3];
-	m_Mutex.lock();
+	m_pMutex->lock();
 	PTEMPIPBLOCKLIST entry = m_hashTable[hashvalue];
 	PTEMPIPBLOCKLIST previous = NULL;
 	while(entry) {
@@ -136,18 +140,18 @@ SINT32 CATempIPBlockList::checkIP(const UINT8 ip[4])
 					previous->next = entry->next;
 				}
 				delete entry;
-				m_Mutex.unlock();
+				m_pMutex->unlock();
 				return E_SUCCESS;
 			}
 			else {
-				m_Mutex.unlock();
+				m_pMutex->unlock();
 				return E_UNKNOWN;
 			}
 		}
 		previous = entry;
 		entry = entry->next;
 	}
-	m_Mutex.unlock();
+	m_pMutex->unlock();
 	return E_SUCCESS;
 }
 
@@ -164,7 +168,7 @@ THREAD_RETURN CATempIPBlockList::cleanupThreadMainLoop(void *param)
 		// do cleanup
 		UINT64 now;
 		getcurrentTimeMillis(now);
-		instance->m_Mutex.lock();
+		instance->m_pMutex->lock();
 		for(UINT32 i=0;i<=0xFFFF;i++) {
 			PTEMPIPBLOCKLIST entry=instance->m_hashTable[i];
 			PTEMPIPBLOCKLIST previous = NULL;
@@ -172,6 +176,7 @@ THREAD_RETURN CATempIPBlockList::cleanupThreadMainLoop(void *param)
 				if(entry->validTimeMillis <= now) {
 					// entry can be removed
 					if(previous==NULL) {
+						CAMsg::printMsg(LOG_DEBUG, "CATmpIPBlockList: removing entry...");
 						instance->m_hashTable[i] = entry->next;
 						previous=entry->next;
 						delete entry; 
@@ -191,7 +196,7 @@ THREAD_RETURN CATempIPBlockList::cleanupThreadMainLoop(void *param)
 				}
 			}
 		}
-		instance->m_Mutex.unlock();
+		instance->m_pMutex->unlock();
 
 		// let the thread sleep for 10 minutes
 		sSleep(CLEANUP_THREAD_SLEEP_INTERVAL);

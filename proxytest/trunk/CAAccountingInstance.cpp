@@ -194,12 +194,16 @@ SINT32 CAAccountingInstance::handleJapPacket(
 		// if the JAP refuses to send a cost confirmation -> byebye!
 		if ((pAccInfo->transferredBytes-pAccInfo->confirmedBytes) >= HARDLIMIT_UNCONFIRMED_BYTES)
 		{
-			m_Mutex.unlock();
 			CAMsg::printMsg( LOG_DEBUG, "Accounting instance: Account %d, IP %d.%d.%d.%d refused "
 												"to send cost confirmation.",
 												pAccInfo->accountNumber, pHashEntry->peerIP[ 0 ], pHashEntry->peerIP[ 1 ],
 												pHashEntry->peerIP[ 2 ], pHashEntry->peerIP[ 3 ] );
 			m_pIPBlockList->insertIP( pHashEntry->peerIP );
+			CAXMLErrorMessage msg(CAXMLErrorMessage::ERR_NO_CONFIRMATION);
+			DOM_Document doc;
+			msg.toXmlDocument(doc);
+			pAccInfo->pControlChannel->sendMessage(doc);
+			m_Mutex.unlock();
 			return 3;
 		}
 	
@@ -213,12 +217,16 @@ SINT32 CAAccountingInstance::handleJapPacket(
 				{
 					if(now.tv_sec >= pAccInfo->lastRequestSeconds + REQUEST_TIMEOUT)
 					{
-						m_Mutex.unlock();
 						CAMsg::printMsg( LOG_DEBUG, "Accounting instance: Account %d, IP %d.%d.%d.%d refused "
 															"to send cost confirmation(2).",
 															pAccInfo->accountNumber, pHashEntry->peerIP[ 0 ], pHashEntry->peerIP[ 1 ],
 															pHashEntry->peerIP[ 2 ], pHashEntry->peerIP[ 3 ] );
 						m_pIPBlockList->insertIP( pHashEntry->peerIP );
+						CAXMLErrorMessage msg(CAXMLErrorMessage::ERR_NO_CONFIRMATION);
+						DOM_Document doc;
+						msg.toXmlDocument(doc);
+						pAccInfo->pControlChannel->sendMessage(doc);
+						m_Mutex.unlock();
 						return 3;
 					}
 				}
@@ -263,12 +271,16 @@ SINT32 CAAccountingInstance::handleJapPacket(
 					{
 						if(now.tv_sec >= pAccInfo->lastRequestSeconds + REQUEST_TIMEOUT)
 						{
-							m_Mutex.unlock();
 							CAMsg::printMsg( LOG_DEBUG, "Accounting instance: Account %d, IP %d.%d.%d.%d refused "
 																"to send balance cert.",
 																pAccInfo->accountNumber, pHashEntry->peerIP[ 0 ], pHashEntry->peerIP[ 1 ],
 																pHashEntry->peerIP[ 2 ], pHashEntry->peerIP[ 3 ] );
 							m_pIPBlockList->insertIP( pHashEntry->peerIP );
+							CAXMLErrorMessage msg(CAXMLErrorMessage::ERR_NO_BALANCE);
+							DOM_Document doc;
+							msg.toXmlDocument(doc);
+							pAccInfo->pControlChannel->sendMessage(doc);
+							m_Mutex.unlock();
 							return 3;
 						}
 					}
@@ -324,6 +336,10 @@ SINT32 CAAccountingInstance::handleJapPacket(
 												"to send account certificate.", pAccInfo->accountNumber, 
 												pHashEntry->peerIP[ 0 ], pHashEntry->peerIP[ 1 ],
 												pHashEntry->peerIP[ 2 ], pHashEntry->peerIP[ 3 ] );
+					CAXMLErrorMessage msg(CAXMLErrorMessage::ERR_NO_ACCOUNTCERT);
+					DOM_Document doc;
+					msg.toXmlDocument(doc);
+					pAccInfo->pControlChannel->sendMessage(doc);
 					m_Mutex.unlock();
 					return 2;
 				}
@@ -446,7 +462,7 @@ THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
 			instance->m_pQueue->getOrWait( (UINT8*)&item, &itemSize );
 			CAMsg::printMsg( LOG_DEBUG, "aiThread(): got message\n" );
 			instance->processJapMessage( item.pHashEntry, item.pDomDoc );
-			delete item.pDomDoc;
+			//delete item.domDoc; (??)
 		}
 	return (THREAD_RETURN)0;
 }
@@ -496,6 +512,7 @@ void CAAccountingInstance::processJapMessage(
 											 docElementName );
 		}
 
+	delete pDomDoc;
 	delete [] docElementName;
 }
 

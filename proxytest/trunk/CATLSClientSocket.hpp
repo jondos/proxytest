@@ -25,62 +25,56 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
-/***************************************************************************
-                          CASSLClientSocket.hpp  -  description
-                             -------------------
-    begin                : Thu Dec 11 2003
-    email                : basti@itsec2
- ***************************************************************************/
 
-#ifndef CASSLCLIENTSOCKET_HPP
-#define CASSLCLIENTSOCKET_HPP
+#ifndef __CATLSCLIENTSOCKET_HPP__
+#define __CATLSCLIENTSOCKET_HPP__
 #include "CASocketAddr.hpp"
-
+#include "CASocket.hpp"
+#include "CAMsg.hpp"
 
 /**
-  * SSL Client Socket class
-  *
-  * Note: This uses /dev/urandom and might cause problems on systems other than linux
-  *
-  *
-  * @author Bastian Voigt
-  */
-class CASSLClientSocket
+ * This class can be used to establish a TLS / SSL encrypted connection to a server.
+ * Though this class has listen() and accept() functions, these should not be used!
+ * This class is meant to be used as client socket only!
+ *
+ * Note: This uses /dev/urandom and might cause problems on systems other than linux
+ *  @author Bastian Voigt
+ */
+class CATLSClientSocket : public CASocket
 {
 
 public: 
-	CASSLClientSocket();
-	~CASSLClientSocket();
-
-	SINT32 setNonBlocking(bool b);
-	SINT32 getNonBlocking(bool * b);
+	CATLSClientSocket();
 
 	SINT32 send(const UINT8* buff,UINT32 len);
 	SINT32 receive(UINT8* buff,UINT32 len);
-
 	SINT32 close();
+
+	/** Establishes the actual TCP/IP connection and performs the TLS handshake */
+	SINT32 connect(CASocketAddr & psa, UINT32 retry, UINT32 msWaitTime);
 	
-  /** Establishes the actual TCP/IP connection and performs the SSL handshake */
-  SINT32 connect(CASocketAddr & psa);
-  SINT32 connect(CASocketAddr & psa, UINT32 retry, UINT32 msWaitTime);
+	SINT32 connect(CASocketAddr & psa)
+	{
+		return connect(psa, 1, 0);
+	}
+
+	/** don't use this */
+	SINT32 connect(CASocketAddr& psa,UINT32 msTimeOut) 
+		{
+			CAMsg::printMsg(LOG_ERR, "Don't use TLSClientSocket::connect(CASocketAddr&, UINT32) !!");
+			return E_UNKNOWN;
+		}
 
 
 private:
- 	SINT32 create();
-	SINT32 create(int type);
-
 	SINT32 initSSLObject();
 	SINT32 doTCPConnect(CASocketAddr & psa, UINT32 retry, UINT32 msWaitTime);
-	SINT32 doSSLConnect(CASocketAddr &psa);
+	SINT32 doTLSConnect(CASocketAddr &psa);
 	
 	SSL * m_SSL;
-	SOCKET m_Socket;
 
-	/** are we connected physically ? */
-	bool m_bConnectedTCP;
-
-	/** is the SSL layer established ? */
-	bool m_bConnectedSSL;
+	/** is the TLS layer established ? */
+	bool m_bConnectedTLS;
 };
 
 #endif
