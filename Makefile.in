@@ -63,6 +63,7 @@ sbinPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(sbin_PROGRAMS)
 am_proxytest_OBJECTS = CAAbstractControlChannel.$(OBJEXT) \
 	CAAbstractXMLEncodable.$(OBJEXT) \
+	CAAbstractXMLSignable.$(OBJEXT) \
 	CAAccountingBIInterface.$(OBJEXT) \
 	CAAccountingControlChannel.$(OBJEXT) \
 	CAAccountingDBInterface.$(OBJEXT) \
@@ -87,8 +88,8 @@ am_proxytest_OBJECTS = CAAbstractControlChannel.$(OBJEXT) \
 	CASSLClientSocket.$(OBJEXT) CASSLContext.$(OBJEXT) \
 	CASymCipher.$(OBJEXT) CATempIPBlockList.$(OBJEXT) \
 	CAThread.$(OBJEXT) CAThreadPool.$(OBJEXT) CAUtil.$(OBJEXT) \
-	CAXMLErrorMessage.$(OBJEXT) StdAfx.$(OBJEXT) \
-	proxytest.$(OBJEXT)
+	CAXMLCostConfirmation.$(OBJEXT) CAXMLErrorMessage.$(OBJEXT) \
+	StdAfx.$(OBJEXT) proxytest.$(OBJEXT)
 proxytest_OBJECTS = $(am_proxytest_OBJECTS)
 proxytest_DEPENDENCIES = $(top_srcdir)/xml/libxml.a \
 	$(top_srcdir)/popt/libpopt.a $(top_srcdir)/trio/libtrio.a \
@@ -221,6 +222,7 @@ target_alias = @target_alias@
 AUTOMAKE_OPTIONS = foreign
 proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CAAbstractXMLEncodable.cpp\
+		    CAAbstractXMLSignable.cpp\
 		    CAAccountingBIInterface.cpp\
 		    CAAccountingControlChannel.cpp\
 		    CAAccountingDBInterface.cpp\
@@ -269,11 +271,13 @@ proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CAThread.cpp \
 		    CAThreadPool.cpp\
 		    CAUtil.cpp \
+		    CAXMLCostConfirmation.cpp\
 		    CAXMLErrorMessage.cpp\
 		    StdAfx.cpp \
 		    proxytest.cpp \
 		    CAAbstractControlChannel.hpp\
 		    CAAbstractXMLEncodable.hpp\
+		    CAAbstractXMLSignable.hpp\
 		    CAAccountingBIInterface.hpp\
 		    CAAccountingControlChannel.hpp\
 		    CAAccountingDBInterface.hpp\
@@ -324,6 +328,7 @@ proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CAThread.hpp \
 		    CAThreadPool.hpp\
 		    CAUtil.hpp \
+		    CAXMLCostConfirmation.hpp\
 		    CAXMLErrorMessage.hpp\
 		    StdAfx.h \
 		    basetypedefs.h
@@ -427,6 +432,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAASymCipher.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAAbstractControlChannel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAAbstractXMLEncodable.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAAbstractXMLSignable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAAccountingBIInterface.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAAccountingControlChannel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAAccountingDBInterface.Po@am__quote@
@@ -474,6 +480,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAThread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAThreadPool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAUtil.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAXMLCostConfirmation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAXMLErrorMessage.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/StdAfx.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/proxytest.Po@am__quote@
