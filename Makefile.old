@@ -56,10 +56,10 @@ linux-x86-gcc:
 
 
 linux-x86-gcc-prot2:
-	$(MAKE) 'CC=gcc' 'CPPFLAGS=-DPROT2 -Wall -Wcast-align -fomit-frame-pointer -march=i686 -O3 -D_REENTRANT' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lstdc++ ./aes/libaes.a' 'LIBDIR=-L/usr/local/ssl/lib' _all_aes 
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-DPROT2 -D_REENTRANT -Wall -Wcast-align -fomit-frame-pointer -march=i686 -O3 -D_REENTRANT' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lstdc++ ./aes/libaes.a' 'LIBDIR=-L/usr/local/ssl/lib' _all_aes 
 
 linux-x86-gcc-debug-prot2:
-	$(MAKE) 'CC=gcc' 'CPPFLAGS=-g -D_DEBUG -DPROT2 -Wall -Wcast-align -march=i686 -D_REENTRANT' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lstdc++ ./aes/libaes.a' 'LIBDIR=-L/usr/local/ssl/lib' _all_aes 
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-g -D_REENTRANT -D_DEBUG -DPROT2 -Wall -Wcast-align -march=i686 -D_REENTRANT' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lstdc++ ./aes/libaes.a' 'LIBDIR=-L/usr/local/ssl/lib' _all_aes 
 
 linux-x86-gcc-static:
 	$(MAKE) 'CC=gcc' 'CPPFLAGS=-static -Wall -Wcast-align -fomit-frame-pointer -march=i686 -O3 -D_REENTRANT' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lstdc++' 'LIBDIR=-L/usr/local/ssl/lib' _all 
