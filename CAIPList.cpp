@@ -27,6 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #include "StdAfx.h"
 #include "CAIPList.hpp"
+#include "CAMsg.hpp"
 
 CAIPList::CAIPList()
 	{
@@ -60,7 +61,10 @@ SINT32 CAIPList::insertIP(UINT8 ip[4])
 						if(memcmp(entry->ip,ip,4)==0)
 							{
 								if(entry->count>=MAX_IP_CONNECTIONS)
-									return E_UNKNOWN;
+									{
+										CAMsg::printMsg(LOG_CRIT,"possible Flooding Attack from: %u.%u.%u.%u !\n",ip[0],ip[1],ip[2],ip[3]);
+										return E_UNKNOWN;
+									}
 								entry->count++;
 								return entry->count;
 							}
