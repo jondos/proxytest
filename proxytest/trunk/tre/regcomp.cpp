@@ -1122,7 +1122,7 @@ tre_copy_ast(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *ast,
       if (status != REG_OK)
 	break;
 
-      symbol = (tre_copyast_symbol_t)(int)tre_stack_pop(stack);
+      symbol = (tre_copyast_symbol_t)tre_stack_pop_int(stack);
       switch (symbol)
 	{
 	case COPY_SET_RESULT_PTR:
@@ -1614,7 +1614,7 @@ ast_compute_nfl(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree)
     {
       if (status != REG_OK)
 	break;
-      symbol = tre_nfl_stack_symbol_t((int)tre_stack_pop(stack));
+      symbol = tre_nfl_stack_symbol_t(tre_stack_pop_int(stack));
       node =(tre_ast_node_t *) tre_stack_pop(stack);
       switch (symbol)
 	{
@@ -2744,7 +2744,7 @@ parse_re(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t **root_node,
     {
       if (status != REG_OK)
 	break;
-      symbol = (tre_parse_re_stack_symbol_t)(int)tre_stack_pop(stack);
+      symbol = (tre_parse_re_stack_symbol_t)tre_stack_pop_int(stack);
       switch (symbol)
 	{
 	case PARSE_RE:
@@ -3728,6 +3728,13 @@ regfree(regex_t *preg)
   xfree(tnfa->minimal_tags);
   xfree(tnfa);
 }
-
+int testTre()
+	{
+		if(sizeof(void*)!=sizeof(int))
+			printf("Ooops... sizeof(void*)!=sizeof(int) --> Causing trouble in tre!\n");
+		if(sizeof(void*)!=sizeof(tre_parse_re_stack_symbol_t))
+			printf("Ooops... sizeof(void*)!=sizeof(tre_parse_re_stack_symbol_t) --> Causing trouble in tre!\n");
+		return 0;
+	}	
 #endif //LOG_CRIME
 /* EOF */
