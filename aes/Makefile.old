@@ -1,7 +1,6 @@
-libaes.a: rijndael-alg-fst.cpp rijndael-api-fst.cpp  
-	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) rijndael-alg-fst.cpp -o rijndael-alg-fst.o
-	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) rijndael-api-fst.cpp -o rijndael-api-fst.o
-	ar -rcs libaes.a *.o 
+libaes.a: encrypt.cpp  
+	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) encrypt.cpp -o encrypt.o
+	ar -rcs libaes.a encrypt.o 
 
 clean:
 	rm -f *.o
