@@ -58,6 +58,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef LOG_CRIME
 #include "tre/regex.h"
 #endif
+#ifdef NEW_MIX_TYPE
+	#include "CAFirstMixNewProtocol.hpp"
+	#include "CALastMixNewProtocol.hpp"
+#endif
 //#include "CAPayment.hpp"
 //#ifdef _WIN32
 //HANDLE hEventThreadEnde;
@@ -341,7 +345,7 @@ See \ref XMLMixCascadeStatus "[XML]" for a description of the XML struct send.
 
 int main(int argc, const char* argv[])
 	{		
-	/*	UINT64 h=18446744073709551615;
+		/*	UINT64 h=18446744073709551615;
 	//	UINT64 h=184004600;
 		UINT8 bg[255];
 		UINT64 t1,t2;
@@ -482,6 +486,7 @@ Debug(dc::malloc.on());
 
 			//some test....
 		checkSizesOfBaseTypes();
+#ifndef NEW_MIX_TYPE
 		if(MIXPACKET_SIZE!=sizeof(MIXPACKET))
 			{
 				CAMsg::printMsg(LOG_CRIT,"MIXPACKET_SIZE [%u] != sizeof(MUXPACKET) [%u] --> maybe a compiler (optimization) problem!\n",MIXPACKET_SIZE,sizeof(MIXPACKET));
@@ -502,7 +507,7 @@ Debug(dc::malloc.on());
 					exit(-1);
 				CAMsg::printMsg(LOG_CRIT,"Hm, The Offsets seams to be ok - so we try to continue - hope that works...\n");
 			}
-		
+#endif		
 #ifdef LOG_CRIME
 			testTre();
 #endif
@@ -513,7 +518,13 @@ Debug(dc::malloc.on());
 			err=WSAStartup(0x0202,&wsadata);
 		#endif
 		//initalize Random..
-
+/*		CAListenerInterface* p=CAListenerInterface::getInstance(RAW_TCP,(UINT8*)"141.76.46.17",6789);
+		const CASocketAddr const* a=p->getAddr();
+		CASocketAddr* b=(CASocketAddr*)a;
+		((CASocketAddrINet*)a)->setPort(3);
+		delete a;
+		int z=3;
+*/
 		#if _WIN32
 			RAND_screen();
 		#else
@@ -533,6 +544,7 @@ Debug(dc::malloc.on());
 				goto EXIT;
 			}
 			
+
 /*		UINT8 buff1[1024];
 		UINT32 len=1024;
 		oRsa.getPublicKeyAsXML(buff1,&len);
@@ -684,7 +696,12 @@ Debug(dc::malloc.on());
 //		CARoundTripTime* pRTT=NULL;
 		if(options.isLocalProxy())
 			{
-				pMix=new CALocalProxy();
+				#ifndef NEW_MIX_TYPE
+					pMix=new CALocalProxy();
+				#else
+					CAMsg::printMsg(LOG_CRIT,"Compiled without LocalProxy support!\n");
+					goto EXIT;
+				#endif	
 			}
 		else
 			{
@@ -699,7 +716,11 @@ Debug(dc::malloc.on());
 				if(options.isFirstMix())
 					{
 						CAMsg::printMsg(LOG_INFO,"I am the First MIX..\n");
-						pMix=new CAFirstMix();
+						#if !defined(NEW_MIX_TYPE)
+							pMix=new CAFirstMix();
+						#else
+							pMix=new CAFirstMixNewProtocol();
+						#endif
 					}
 				else if(options.isMiddleMix())
 					{
@@ -707,7 +728,11 @@ Debug(dc::malloc.on());
 						pMix=new CAMiddleMix();
 					}
 				else
-					pMix=new CALastMix();
+						#if !defined(NEW_MIX_TYPE)
+							pMix=new CALastMix();
+						#else
+							pMix=new CALastMixNewProtocol();
+						#endif
 			}
 	  CAMsg::printMsg(LOG_INFO,"Starting MIX...\n");
 		if(pMix->start()!=E_SUCCESS)

@@ -40,10 +40,13 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 				/**Returns the type (family) of the socket this address is for (always AF_LOCAL)
 					* @return AF_LOCAL
 					*/
-				int getType(){return AF_LOCAL;}
+				int getType() const
+					{
+						return AF_LOCAL;
+					}
 				
 
-				CASocketAddr* clone()
+				CASocketAddr* clone() const
 					{
 						return new CASocketAddrUnix(*this);
 					}
@@ -52,12 +55,18 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 				/** Resturns the size of the SOCKADDR struct used.
 					* return sizeof(sockaddr_un)
 					*/
-				SINT32 getSize(){return sizeof(sockaddr_un);}
+				SINT32 getSize() const
+					{
+						return sizeof(sockaddr_un);
+					}
 				
 				/** Makes a cast to SOCKADDR* .*/
-				::LPSOCKADDR LPSOCKADDR(){return (::LPSOCKADDR)(static_cast<sockaddr_un*>(this));}			
+				const ::LPSOCKADDR LPSOCKADDR() const
+					{
+						return (const ::LPSOCKADDR)(static_cast<const sockaddr_un*>(this));
+					}			
 				
-				SINT32 setPath(char* path);
+				SINT32 setPath(const char* path);
 		};
 
 	#endif

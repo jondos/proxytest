@@ -37,8 +37,6 @@ typedef UINT32 HCHANNEL;
 #define MIX_PAYLOAD_SOCKS 1
 
 
-#define DATA_SIZE 			992
-#define PAYLOAD_SIZE 		989
 #define MIXPACKET_SIZE 	998
 
 #define CHANNEL_DATA		0x00
@@ -57,44 +55,95 @@ typedef UINT32 HCHANNEL;
 	#define CHANNEL_ALLOWED_FLAGS		(CHANNEL_OPEN|CHANNEL_CLOSE|CHANNEL_SUSPEND|CHANNEL_RESUME)
 #endif
 
-#if defined(WIN32) ||defined(__sgi)
-	#pragma pack( push, t_MixPacket )
-	#pragma pack(1)
-	struct t_MixPacket
-		{
-			HCHANNEL channel;
-			UINT16  flags;
-			union
-				{
-					UINT8		data[DATA_SIZE];
-					struct t_MixPacketPayload
-						{
-							UINT16 len;
-							UINT8 type;
-							UINT8 data[PAYLOAD_SIZE];
-					} payload;
-				};
-		};
-	#pragma pack( pop, t_MixPacket )
-#else
-	struct t_MixPacketPayload
-		{
-			UINT16 len;
-			UINT8 type;
-			UINT8 data[PAYLOAD_SIZE];
-		} __attribute__ ((__packed__));
+#ifndef NEW_MIX_TYPE
 
-	struct t_MixPacket
-		{
-			HCHANNEL channel;
-			UINT16  flags;
-			union
-				{
-					UINT8		data[DATA_SIZE];
-					struct t_MixPacketPayload payload;
-				};
-		} __attribute__ ((__packed__)); // MUXPACKET __attribute__ ((__packed__));
-#endif //WIN32 
+	#define DATA_SIZE 			992
+	#define PAYLOAD_SIZE 		989
+
+	#if defined(WIN32) ||defined(__sgi)
+		#pragma pack( push, t_MixPacket )
+		#pragma pack(1)
+		struct t_MixPacket
+			{
+				HCHANNEL channel;
+				UINT16  flags;
+				union
+					{
+						UINT8		data[DATA_SIZE];
+						struct t_MixPacketPayload
+							{
+								UINT16 len;
+								UINT8 type;
+								UINT8 data[PAYLOAD_SIZE];
+						} payload;
+					};
+			};
+		#pragma pack( pop, t_MixPacket )
+	#else
+		struct t_MixPacketPayload
+			{
+				UINT16 len;
+				UINT8 type;
+				UINT8 data[PAYLOAD_SIZE];
+			} __attribute__ ((__packed__));
+
+		struct t_MixPacket
+			{
+				HCHANNEL channel;
+				UINT16  flags;
+				union
+					{
+						UINT8		data[DATA_SIZE];
+						struct t_MixPacketPayload payload;
+					};
+			} __attribute__ ((__packed__)); // MUXPACKET __attribute__ ((__packed__));
+	#endif //WIN32 
+#else //NEW_MIX_TYPE
+
+	#define DATA_SIZE 			994
+	#define PAYLOAD_SIZE 		979
+
+	#if defined(WIN32) ||defined(__sgi)
+		#pragma pack( push, t_MixPacket )
+		#pragma pack(1)
+		struct t_MixPacket
+			{
+				HCHANNEL channel;
+				union
+					{
+						UINT8		data[DATA_SIZE];
+						struct t_MixPacketPayload
+							{
+								UINT8 linkid[8];
+								UINT8 seq[4];
+								UINT8 type;
+								UINT16 len;
+								UINT8 data[PAYLOAD_SIZE];
+						} payload;
+					};
+			};
+		#pragma pack( pop, t_MixPacket )
+	#else
+		struct t_MixPacketPayload
+			{
+				UINT8 linkid[8];
+				UINT8 seq[4];
+				UINT8 type;
+				UINT16 len;
+				UINT8 data[PAYLOAD_SIZE];
+			} __attribute__ ((__packed__));
+
+		struct t_MixPacket
+			{
+				HCHANNEL channel;
+				union
+					{
+						UINT8		data[DATA_SIZE];
+						struct t_MixPacketPayload payload;
+					};
+			} __attribute__ ((__packed__)); // MUXPACKET __attribute__ ((__packed__));
+	#endif //WIN32 
+#endif //NEW_MIX_TYPE
 
 typedef t_MixPacket MIXPACKET;
 
@@ -107,7 +156,7 @@ class CAMuxSocket
 					delete []m_Buff;
 				}
 			SINT32 accept(UINT16 port);
-			SINT32 accept(CASocketAddr & oAddr);
+			SINT32 accept(const CASocketAddr& oAddr);
 			SINT32 connect(CASocketAddr& psa);
 			SINT32 connect(CASocketAddr& psa,UINT retry,UINT32 time);
 			SINT32 close();

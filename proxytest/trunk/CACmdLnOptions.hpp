@@ -34,25 +34,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CACertificate.hpp"
 #include "CAThread.hpp"
 #include "CAMix.hpp"
+#include "CAListenerInterface.hpp"
 #ifdef LOG_CRIME
 	#include "tre/regex.h"
 #endif
 
-#define RAW_TCP		1
-#define RAW_UNIX	2
-#define SSL_TCP		3
-#define SSL_UNIX	4
-
-struct t_ListenerInterface
-	{
-		CASocketAddr* addr;
-		UINT8* hostname; 
-		UINT32 type;
-		bool	bHidden;
-		bool	bVirtual;
-	};
-
-typedef struct t_ListenerInterface ListenerInterface;
 
 #define TARGET_MIX					1
 #define TARGET_HTTP_PROXY		2	
@@ -61,7 +47,7 @@ typedef struct t_ListenerInterface ListenerInterface;
 struct t_TargetInterface
 	{
 		UINT32 target_type;
-		UINT32 net_type;
+		NetworkType net_type;
 		CASocketAddr* addr;
 	};
 
@@ -89,19 +75,12 @@ class CACmdLnOptions
 			UINT16 getSOCKSServerPort();
 	    
 			UINT32 getListenerInterfaceCount(){return m_cnListenerInterfaces;}
-			SINT32 getListenerInterface(ListenerInterface& oListenerInterface, UINT32 nr)		
+			CAListenerInterface* getListenerInterface(UINT32 nr)		
 				{
 					if(nr>0&&nr<=m_cnListenerInterfaces)
-						{
-							oListenerInterface.bHidden=m_arListenerInterfaces[nr-1].bHidden;
-							oListenerInterface.bVirtual=m_arListenerInterfaces[nr-1].bVirtual;
-							oListenerInterface.type=m_arListenerInterfaces[nr-1].type;
-							oListenerInterface.hostname=m_arListenerInterfaces[nr-1].hostname;
-							oListenerInterface.addr=m_arListenerInterfaces[nr-1].addr->clone();
-							return E_SUCCESS;
-						}
+						return new CAListenerInterface(*m_arListenerInterfaces[nr-1]);
 					else
-						return E_UNKNOWN;
+						return NULL;
 				};
 			
 			//this is only for the local proxy
@@ -233,10 +212,10 @@ class CACmdLnOptions
 			//char*		m_strMixXml;
 			char*		m_strMixID;
 
-			TargetInterface*		m_arTargetInterfaces;
-			UINT32							m_cnTargets;
-			ListenerInterface*	m_arListenerInterfaces;
-			UINT32							m_cnListenerInterfaces;
+			TargetInterface*			m_arTargetInterfaces;
+			UINT32								m_cnTargets;
+			CAListenerInterface**	m_arListenerInterfaces;
+			UINT32								m_cnListenerInterfaces;
 			
 			CASignature*		m_pSignKey;
 			CACertificate*	m_pOwnCertificate;

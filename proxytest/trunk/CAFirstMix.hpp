@@ -59,8 +59,8 @@ class CAFirstMix:public CAMix
 					m_xmlKeyInfoBuff=NULL;
 				}
 			virtual ~CAFirstMix(){}
-		private:
-			SINT32 loop();
+		protected:
+			virtual SINT32 loop();
 			SINT32 init();
 			SINT32 clean();
 			SINT32 initOnce();
@@ -97,7 +97,7 @@ class CAFirstMix:public CAMix
 		friend THREAD_RETURN fm_loopAcceptUsers(void*);
 		friend THREAD_RETURN fm_loopReadFromUsers(void*);
 
-		private:
+		protected:
 			SINT32 incUsers()
 				{
 					m_mutexUser.lock();
@@ -128,7 +128,7 @@ class CAFirstMix:public CAMix
 					return m_bRestart;
 				}
 			
-		private:	
+		protected:	
 			CAIPList* m_pIPList;
 			CAQueue* m_pQueueSendToMix;
 			CAFirstMixChannelList* m_pChannelList;

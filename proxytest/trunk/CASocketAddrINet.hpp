@@ -35,24 +35,30 @@ class CASocketAddrINet:public CASocketAddr,private sockaddr_in
 		public:
 			//static SINT32 init();
 			//static SINT32 destroy();
-			int getType(){return AF_INET;}
+			int getType()const
+				{
+					return AF_INET;
+				}
 			CASocketAddrINet();
 			CASocketAddrINet(UINT16 port);
 
 			CASocketAddrINet(const CASocketAddrINet& addr);
 
-			CASocketAddr* clone()
+			CASocketAddr* clone() const
 				{
 					return new CASocketAddrINet(*this);
 				}
 			
 			/** Makes a cast to struct SOCKADDR* */
-			::LPSOCKADDR LPSOCKADDR(){return (::LPSOCKADDR)(static_cast<sockaddr_in*>(this));}			
+			const ::LPSOCKADDR LPSOCKADDR()const
+				{
+					return (const ::LPSOCKADDR)(static_cast<const sockaddr_in*>(this));
+				}			
 
 			/** Returns the Size of the SOCKADDR struct used.
 				* @return sizeof(sockaddr_in)
 				*/
-			SINT32 getSize()
+			SINT32 getSize() const
 				{
 					return sizeof(sockaddr_in);
 				}

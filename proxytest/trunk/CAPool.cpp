@@ -29,7 +29,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAPool.hpp"
 #include "CAUtil.hpp"
 #include "CAMsg.hpp"
-
+#ifdef USE_POOL
 CAPool::CAPool(UINT32 poolsize)
 	{
 		m_uPoolSize=poolsize;
@@ -112,3 +112,4 @@ SINT32 CAPool::pool(MIXPACKET* pMixPacket)
 			}		
 		return E_SUCCESS;
 	}
+#endif

@@ -38,7 +38,7 @@ class CASocket
 			SINT32 create();
 			SINT32 create(int type);
 
-			SINT32 listen(CASocketAddr& psa);
+			SINT32 listen(const CASocketAddr& psa);
 			SINT32 listen(UINT16 port);
 			SINT32 accept(CASocket &s);
 			SINT32 connect(CASocketAddr& psa);

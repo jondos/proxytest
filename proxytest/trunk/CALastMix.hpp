@@ -52,8 +52,8 @@ class CALastMix:public CAMix
 				}
 			virtual ~CALastMix(){clean();}
 			SINT32 reconfigure();
-		private:
-			SINT32 loop();
+		protected:
+			virtual SINT32 loop();
 			SINT32 init();
 			SINT32 initOnce();
 			SINT32 clean();
@@ -64,7 +64,7 @@ class CALastMix:public CAMix
 			bool	 checkCrime(UINT8* payLoad,UINT32 payLen);
 #endif
 
-		private:
+		protected:
 			CAMuxSocket*					m_pMuxIn;
 			CAQueue*							m_pQueueSendToMix;
 			CACacheLoadBalancing	m_oCacheLB;
@@ -77,7 +77,7 @@ class CALastMix:public CAMix
 			UINT32								m_nCrimeRegExp;
 #endif
 
-		private:
+		protected:
 			friend THREAD_RETURN	lm_loopSendToMix(void* param);
 			friend THREAD_RETURN	lm_loopLog(void*);
 			volatile bool					m_bRunLog;

@@ -57,12 +57,13 @@ SINT32 CAFirstMix::initOnce()
 		m_nSocketsIn=0;
 		for(UINT32 i=1;i<=tmpSocketsIn;i++)
 			{
-				ListenerInterface oListener;
-				if(options.getListenerInterface(oListener,i)!=E_SUCCESS)
+				CAListenerInterface* pListener=NULL;
+				pListener=options.getListenerInterface(i);
+				if(pListener==NULL)
 					continue;
-				if(!oListener.bVirtual)
+				if(!pListener->isVirtual())
 					m_nSocketsIn++;
-				delete oListener.addr;
+				delete pListener;
 			}
 		if(m_nSocketsIn<1)
 			{
@@ -80,30 +81,33 @@ SINT32 CAFirstMix::init()
 		UINT32 i,aktSocket=0;
 		for(i=1;i<=options.getListenerInterfaceCount();i++)
 			{
-				ListenerInterface oListener;
-				if(options.getListenerInterface(oListener,i)!=E_SUCCESS)
+				CAListenerInterface* pListener=NULL;
+				pListener=options.getListenerInterface(i);
+				if(pListener==NULL)
 					{
 						CAMsg::printMsg(LOG_CRIT,"Cannot listen (1)\n");
 						return E_UNKNOWN;
 					}
-				if(oListener.bVirtual)
+				if(pListener->isVirtual())
 					{
-						delete oListener.addr;
+						delete pListener;
 						continue;
 					}
 				m_arrSocketsIn[aktSocket].create();
 				m_arrSocketsIn[aktSocket].setReuseAddr(true);
+				CASocketAddr* pAddr=pListener->getAddr();
+				delete pListener;
 #ifndef _WIN32
 				//we have to be a temporaly superuser if port <1024...
 				int old_uid=geteuid();
-				if(oListener.addr->getType()==AF_INET&&((CASocketAddrINet*)oListener.addr)->getPort()<1024)
+				if(pAddr->getType()==AF_INET&&((CASocketAddrINet*)pAddr)->getPort()<1024)
 					{
 						if(seteuid(0)==-1) //changing to root
 							CAMsg::printMsg(LOG_CRIT,"Setuid failed!\n");
 					}
 #endif				
-				SINT32 ret=m_arrSocketsIn[aktSocket].listen(*oListener.addr);
-				delete oListener.addr;
+				SINT32 ret=m_arrSocketsIn[aktSocket].listen(*pAddr);
+				delete pAddr;
 #ifndef _WIN32
 				seteuid(old_uid);
 #endif
@@ -484,6 +488,7 @@ END_THREAD:
 #define NO_LOOPACCEPTUSER
 SINT32 CAFirstMix::loop()
 	{
+#ifndef NEW_MIX_TYPE
 		CASingleSocketGroup osocketgroupMixOut;
 		SINT32 countRead;
 		MIXPACKET* pMixPacket=new MIXPACKET;
@@ -495,8 +500,6 @@ SINT32 CAFirstMix::loop()
 		
 		m_pInfoService->setSignature(m_pSignature);
 		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix InfoService - Signature set\n");
-		m_pInfoService->sendHelo();
-		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix Helo sended\n");
 		m_pInfoService->start();
 		CAMsg::printMsg(LOG_DEBUG,"InfoService Loop started\n");
 
@@ -986,9 +989,9 @@ ERR:
 			delete pPool;
 		#endif
 		CAMsg::printMsg(LOG_CRIT,"Main Loop exited!!\n");
+#endif //!MIX_NEW_TYP
 		return E_UNKNOWN;
 	}
-
 
 
 
@@ -1211,7 +1214,7 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 
 
 		UINT8 id[50];
-		ListenerInterface oListener;
+		//ListenerInterface oListener;
 		
 		options.getMixId(id,50);
 		elemRoot.setAttribute(DOMString("id"),DOMString((char*)id));
@@ -1236,31 +1239,15 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		
 		for(UINT32 i=1;i<=options.getListenerInterfaceCount();i++)
 			{
-				options.getListenerInterface(oListener,i);
-				if(oListener.bHidden){/*do nothing*/}
-				else if(oListener.type==RAW_TCP)
+				CAListenerInterface* pListener=options.getListenerInterface(i);
+				if(pListener->isHidden()){/*do nothing*/}
+				else if(pListener->getType()==RAW_TCP)
 					{
-						DOM_Element elemListenerInterface=m_docMixCascadeInfo.createElement("ListenerInterface");
-						elemListenerInterfaces.appendChild(elemListenerInterface);
-						elem=m_docMixCascadeInfo.createElement("Type");
-						elemListenerInterface.appendChild(elem);
-						setDOMElementValue(elem,(UINT8*)"RAW/TCP");
-						elem=m_docMixCascadeInfo.createElement("Port");
-						elemListenerInterface.appendChild(elem);
-						setDOMElementValue(elem,((CASocketAddrINet*)oListener.addr)->getPort());
-						if(oListener.hostname!=NULL)
-							strcpy((char*)hostname,(char*)oListener.hostname);
-						else 
-							((CASocketAddrINet*)oListener.addr)->getIPAsStr(hostname,255);
-						elem=m_docMixCascadeInfo.createElement("Host");
-						elemListenerInterface.appendChild(elem);
-						setDOMElementValue(elem,hostname);
-						elem=m_docMixCascadeInfo.createElement("IP");
-						elemListenerInterface.appendChild(elem);
-						((CASocketAddrINet*)oListener.addr)->getIPAsStr(ip,255);
-						setDOMElementValue(elem,ip);
+						DOM_DocumentFragment docFrag;
+						pListener->toDOMFragment(docFrag,m_docMixCascadeInfo);
+						elemListenerInterfaces.appendChild(docFrag);
 					}
-				delete oListener.addr;
+				delete pListener;
 			}
 		
 		DOM_Node elemMixesDocCascade=m_docMixCascadeInfo.importNode(elemMixes,false);

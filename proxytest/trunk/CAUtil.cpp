@@ -272,7 +272,7 @@ SINT32 setDOMElementValue(DOM_Element& elem,UINT32 text)
 		return E_SUCCESS;
 	}
 
-SINT32 setDOMElementValue(DOM_Element& elem,UINT8* value)
+SINT32 setDOMElementValue(DOM_Element& elem,const UINT8* value)
 	{
 		DOM_Text t=elem.getOwnerDocument().createTextNode(DOMString((char*)value));
 		//Remove all "old" text Elements...
@@ -287,13 +287,13 @@ SINT32 setDOMElementValue(DOM_Element& elem,UINT8* value)
 		return E_SUCCESS;
 	}
 
-SINT32 setDOMElementAttribute(DOM_Element& elem,char* attrName,UINT8* value)
+SINT32 setDOMElementAttribute(DOM_Element& elem,const char* attrName,const UINT8* value)
 	{
-		elem.setAttribute(attrName,DOMString((char*)value));
+		elem.setAttribute(attrName,DOMString((const char*)value));
 		return E_SUCCESS;
 	}
 
-SINT32 setDOMElementAttribute(DOM_Element& elem,char* attrName,int value)
+SINT32 setDOMElementAttribute(DOM_Element& elem,const char* attrName,int value)
 	{
 		UINT8 tmp[10];
 		sprintf((char*)tmp,"%i",value);
@@ -301,7 +301,7 @@ SINT32 setDOMElementAttribute(DOM_Element& elem,char* attrName,int value)
 		return E_SUCCESS;
 	}
 
-SINT32 getDOMElementAttribute(DOM_Element& elem,char* attrName,int* value)
+SINT32 getDOMElementAttribute(const DOM_Element& elem,const char* attrName,int* value)
 	{
 		if(elem==NULL||attrName==NULL||value==NULL)
 			return E_UNKNOWN;
@@ -311,13 +311,13 @@ SINT32 getDOMElementAttribute(DOM_Element& elem,char* attrName,int* value)
 		return E_SUCCESS;
 	}
 
-SINT32 getDOMElementAttribute(DOM_Node& elem,char* attrName,bool& value)
+SINT32 getDOMElementAttribute(const DOM_Node& elem,const char* attrName,bool& value)
 	{
 		if(	elem==NULL||elem.getNodeType()!=DOM_Node::ELEMENT_NODE||
 				attrName==NULL)
 			return E_UNKNOWN;
 		SINT32 ret=E_UNSPECIFIED;
-		char* tmpStr=static_cast<DOM_Element&>(elem).getAttribute(attrName).transcode();
+		char* tmpStr=static_cast<const DOM_Element&>(elem).getAttribute(attrName).transcode();
 		if(stricmp(tmpStr,"true")==0)
 			{
 				value=true;
@@ -352,7 +352,7 @@ SINT32 getDOMChildByName(const DOM_Node& node,const UINT8* const name,DOM_Node& 
 		return E_UNKNOWN;
 	}
 
-SINT32 getDOMElementValue(DOM_Node& elem,UINT8* value,UINT32* valuelen)
+SINT32 getDOMElementValue(const DOM_Node& elem,UINT8* value,UINT32* valuelen)
 	{
 		ASSERT(value!=NULL,"Value is null");
 		ASSERT(valuelen!=NULL,"ValueLen is null");
@@ -384,7 +384,7 @@ SINT32 getDOMElementValue(DOM_Node& elem,UINT8* value,UINT32* valuelen)
 		return E_SUCCESS;
 	}
 
-SINT32 getDOMElementValue(DOM_Element& elem,UINT32* value)
+SINT32 getDOMElementValue(const DOM_Element& elem,UINT32* value)
 	{
 		ASSERT(value!=NULL,"Value is null");
 		ASSERT(!elem.isNull,"Element is NULL");
@@ -397,7 +397,7 @@ SINT32 getDOMElementValue(DOM_Element& elem,UINT32* value)
 		return E_SUCCESS;
 	}
 
-SINT32 getDOMElementValue(DOM_Element& elem,UINT16* value)
+SINT32 getDOMElementValue(const DOM_Element& elem,UINT16* value)
 	{
 		UINT32 tmp;
 		if(getDOMElementValue(elem,&tmp)!=E_SUCCESS)

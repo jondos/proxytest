@@ -37,7 +37,8 @@ class CAInfoService
 			CAInfoService();
 			CAInfoService(CAFirstMix* pFirstMix);
 			~CAInfoService();
-			SINT32 sendHelo();
+			SINT32 sendMixHelo();
+			SINT32 sendCascadeHelo();
 			SINT32 sendStatus();
 			SINT32 start();
 			SINT32 stop();

@@ -33,17 +33,17 @@ class CASocketAddr
 	{
 		public:
 			/**Creates a copy of the Address*/
-			virtual CASocketAddr* clone()=0;
+			virtual CASocketAddr* clone() const=0;
 		
 			/** The type (family) of socket for which this address is useful. 
 			  * Must be overwritten in subclasses. **/		
-			virtual int  getType()=0;
+			virtual int  getType() const =0;
 			
 			/** The size of the SOCKADDR struct needed by function of CASocket and other.*/
-			virtual SINT32 getSize()=0;
+			virtual SINT32 getSize() const =0;
 			
 			/** Casts to a SOCKADDR struct **/
-			virtual	::LPSOCKADDR LPSOCKADDR()=0;
+			virtual	const ::LPSOCKADDR LPSOCKADDR() const =0;
 			//	virtual operator LPSOCKADDR()=0;
 
 	};

@@ -40,14 +40,15 @@ extern CACmdLnOptions options;
 static THREAD_RETURN InfoLoop(void *p)
 	{
 		CAInfoService* pInfoService=(CAInfoService*)p;
-		int helocount=10;
+		int helocount=0;
 
 		while(pInfoService->getRun())
 			{
 				pInfoService->sendStatus();
 				if(helocount==0)
 					{
-						pInfoService->sendHelo();
+						pInfoService->sendMixHelo();
+						pInfoService->sendCascadeHelo();
 						helocount=10;
 					}
 				else 
@@ -119,6 +120,8 @@ SINT32 CAInfoService::stop()
 		return E_SUCCESS;
 	}
 
+/** POSTs mix status to the InfoService. [only first mix does this at the moment]
+	*/
 SINT32 CAInfoService::sendStatus()
 	{
 		if(!options.isFirstMix())
@@ -184,7 +187,9 @@ SINT32 CAInfoService::sendStatus()
 		return E_SUCCESS;
 	}
 
-SINT32 CAInfoService::sendHelo()
+/** POSTs the HELO message for a mix to the InfoService.
+	*/
+SINT32 CAInfoService::sendMixHelo()
 	{
 		CASocket oSocket;
 		CASocketAddrINet oAddr;
@@ -198,14 +203,7 @@ SINT32 CAInfoService::sendHelo()
 		if(oSocket.connect(oAddr)==E_SUCCESS)
 			{
 				DOM_Document docMixInfo;
-				if(options.isFirstMix())
-					{
-						if(m_pFirstMix->getMixCascadeInfo(docMixInfo)!=E_SUCCESS)
-							{
-								goto ERR;
-							}
-					}
-				else if(options.getMixXml(docMixInfo)!=E_SUCCESS)
+				if(options.getMixXml(docMixInfo)!=E_SUCCESS)
 					{
 						goto ERR;
 					}
@@ -243,3 +241,58 @@ ERR:
 		return E_UNKNOWN;
 	}
 
+/** POSTs the HELO message for a whole cascade to the InfoService [only first mix does this].
+	*/
+SINT32 CAInfoService::sendCascadeHelo()
+	{
+		if(!options.isFirstMix())
+			return E_SUCCESS;
+		CASocket oSocket;
+		CASocketAddrINet oAddr;
+		UINT8 hostname[255];
+		UINT8 buffHeader[255];
+		UINT32 sendBuffLen;
+		UINT8* sendBuff=NULL;
+		if(options.getInfoServerHost(hostname,255)!=E_SUCCESS)
+			goto ERR;
+		oAddr.setAddr(hostname,options.getInfoServerPort());
+		if(oSocket.connect(oAddr)==E_SUCCESS)
+			{
+				DOM_Document docMixInfo;
+				if(m_pFirstMix->getMixCascadeInfo(docMixInfo)!=E_SUCCESS)
+					{
+						goto ERR;
+					}
+				//insert (or update) the Timestamp
+				DOM_Element elemRoot=docMixInfo.getDocumentElement();
+				DOM_Element elemTimeStamp;
+				if(getDOMChildByName(elemRoot,(UINT8*)"LastUpdate",elemTimeStamp,false)!=E_SUCCESS)
+					{
+						elemTimeStamp=docMixInfo.createElement("LastUpdate");
+						elemRoot.appendChild(elemTimeStamp);
+					}
+				UINT64 currentMillis;
+				getcurrentTimeMillis(currentMillis);
+				UINT8 tmpStrCurrentMillis[50];
+				print64(tmpStrCurrentMillis,currentMillis);
+				setDOMElementValue(elemTimeStamp,tmpStrCurrentMillis);
+				if(m_pSignature->signXML(docMixInfo)!=E_SUCCESS)
+					{
+						goto ERR;
+					}
+				
+				sendBuff=DOM_Output::dumpToMem(docMixInfo,&sendBuffLen);
+				if(sendBuff==NULL)
+					goto ERR;
+				sprintf((char*)buffHeader,"POST /helo HTTP/1.0\r\nContent-Length: %u\r\n\r\n",sendBuffLen);
+				oSocket.send(buffHeader,strlen((char*)buffHeader));
+				oSocket.send(sendBuff,sendBuffLen);
+				oSocket.close();
+				delete []sendBuff;
+				return E_SUCCESS;	
+			}
+ERR:
+		if(sendBuff!=NULL)
+			delete []sendBuff;
+		return E_UNKNOWN;
+	}

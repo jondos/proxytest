@@ -38,6 +38,7 @@ OBJS_ALL=CASocket.o\
 	CAFirstMix.o\
 	CALastMix.o\
 	CALastMixChannelList.o\
+	CAListenerInterface.o\
 	CAMiddleMix.o\
 	CALocalProxy.o\
 	CACacheLoadBalancing.o\
