@@ -170,7 +170,7 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 		HCHANNEL tmpChannel=pPacket->channel;
 		UINT16 tmpFlags=pPacket->flags;
 		pPacket->channel=htonl(pPacket->channel);
-		pPacket->flags=htonl(pPacket->flags);
+	//	pPacket->flags=htonl(pPacket->flags);
 		len=m_Socket.send(((UINT8*)pPacket)+aktIndex,MuxPacketSize);
 
 		if(len==SOCKET_ERROR)
