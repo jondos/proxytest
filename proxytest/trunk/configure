@@ -10611,7 +10611,7 @@ if test "x$PAYMENT" != "x" ; then
     echo "$as_me:$LINENO: checking for PostgreSQL libs" >&5
 echo $ECHO_N "checking for PostgreSQL libs... $ECHO_C" >&6
     saved_LIBS="$LIBS"
-    PAYMENT_LIB="-libpq"
+    PAYMENT_LIB="-lpq"
     LIBS="$LIBS $PAYMENT_LIB"
     cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
@@ -10659,7 +10659,7 @@ else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-				    PAYMENT_LIB="-libpq++"
+				    PAYMENT_LIB="-lpq++"
 				    LIBS="$saved_LIBS $PAYMENT_LIB"
 				    cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
