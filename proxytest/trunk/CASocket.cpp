@@ -213,6 +213,11 @@ int CASocket::available()
 			return (int)ul;
 	}
 
+/**
+@return SOCKET_ERROR if an error occured
+@return 0 if socket was gracefully closed
+@return the number of bytes received (always >0)
+**/
 int CASocket::receive(UINT8* buff,UINT32 len)
 	{
 		int ret;	
@@ -234,7 +239,7 @@ SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len)
 	  do
 			{
 				ret=receive(buff+pos,len);
-				if(ret<0)
+				if(ret<=0)
 					return E_UNKNOWN;
 				pos+=ret;
 				len-=ret;

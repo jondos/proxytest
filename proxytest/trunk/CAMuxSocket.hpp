@@ -108,7 +108,7 @@ class CAMuxSocket
 			SINT32 connect(LPCASOCKETADDR psa,UINT retry,UINT32 time);
 			int close();
 			int send(MUXPACKET *pPacket);
-			int receive(MUXPACKET *pPacket);
+			SINT32 receive(MUXPACKET *pPacket);
 			int close(HCHANNEL channel_id);
 			operator CASocket*(){return &m_Socket;}
 			operator SOCKET(){//if(!bIsTunneld)
