@@ -118,7 +118,7 @@ SINT32 CASocketASyncSend::send(CASocket* pSocket,UINT8* buff,UINT32 size)
 				return E_UNKNOWN;
 			}
 		SINT32 ret;
-		UINT32 uQueueSize;
+//		UINT32 uQueueSize;
 		if(m_Sockets==NULL)
 			{
 				m_Sockets=new _t_socket_list;

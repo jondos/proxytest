@@ -312,13 +312,29 @@ LOOP_START:
 				if(countRead>0)
 					{
 						tmpCon=oSocketList.getFirst();
-						SINT32 sendSpace=muxIn.getSendSpace();
+						SINT32 sendSpace=0;
 						while(tmpCon!=NULL&&countRead>0)
 							{
 								if(oSocketGroup.isSignaled(*(tmpCon->pSocket)))
 									{
-										if(oSocketGroupMuxIn.select(true,100)!=1)
-											goto LOOP_START;
+										if(sendSpace==0)
+											{ //Hm maybe we get some space during proccessing some request....
+												sendSpace=muxIn.getSendSpace();
+											}
+										if(sendSpace<0) //send space could not be retrieved
+										
+											{ //maybe select works....
+												if(oSocketGroupMuxIn.select(true,100)!=1)
+													goto LOOP_START;
+											}
+										else if(sendSpace==0)
+											{ 
+												goto LOOP_START;
+											}
+										else
+											{	
+												sendSpace--;
+											}
 										countRead--;
 										#ifdef _DEBUG
 										    CAMsg::printMsg(LOG_DEBUG,"Receiving Data from Squid!");
