@@ -1165,7 +1165,7 @@ trio_string_destroy(trio_string_t *self)
    number of characters from the ending of the string, starting at the
    terminating zero, is returned.
 */
-TRIO_PUBLIC char *
+/*TRIO_PUBLIC char *
 trio_string_get(trio_string_t *self, int offset)
 {
   char *result = NULL;
@@ -1197,7 +1197,7 @@ trio_string_get(trio_string_t *self, int offset)
     }
   return result;
 }
-
+*/
 
 /**
    Extract the content.
@@ -1256,24 +1256,6 @@ trio_string_size(trio_string_t *self)
   assert(self);
 
   return self->allocated;
-}
-
-
-/*
- * trio_string_terminate
- */
-TRIO_PUBLIC void
-trio_string_terminate(trio_string_t *self)
-{
-  char *end;
-  
-  assert(self);
-
-  end = trio_string_get(self, -1);
-  if (end)
-    {
-      *end = NIL;
-    }
 }
 
 
