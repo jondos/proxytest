@@ -140,7 +140,7 @@ to the cache-proxies and than to the Internet.
 A chain of mixes is called a \em mix-cascade (or \em cascade for short).
 Many different cascades could exist at the same time, but JAP can select one and only one at the same time.
 
-Also a mix could only be part of one and only one cascade. If a mix is not part of a cascade, we call it a free mix.
+Also a mix could only be part of one and only one cascade. If a mix is not part of a cascade, we call it a \em free mix.
 Free mixes are not useable for JAP, but could be connected to build a new cascade.
   
 \subsection docMux Mulitplexing and Demultiplexing

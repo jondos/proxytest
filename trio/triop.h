@@ -130,8 +130,6 @@ int trio_printv_ref(void *ref, const char *format, void **args);
 
 void trio_print_int(void *ref, int number);
 void trio_print_uint(void *ref, unsigned int number);
-/*  void trio_print_long(void *ref, long number); */
-/*  void trio_print_ulong(void *ref, unsigned long number); */
 void trio_print_double(void *ref, double number);
 void trio_print_string(void *ref, char *string);
 void trio_print_pointer(void *ref, void *pointer);
