@@ -216,7 +216,7 @@ inline void print64(UINT8* buff,UINT64 num)
 					digit=num/mask;
 					if(digit>0||bprintZero)
 						{
-							buff[index++]=digit+'0';
+							buff[index++]=(UINT8)(digit+'0');
 							num%=mask;
 							bprintZero=true;
 						}

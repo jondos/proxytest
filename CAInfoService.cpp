@@ -49,7 +49,10 @@ static THREAD_RETURN InfoLoop(void *p)
 				if(helocount==0)
 					{
 						pInfoService->sendMixHelo();
-						pInfoService->sendCascadeHelo();
+						if(pInfoService->sendCascadeHelo()!=E_SUCCESS)
+							{
+								CAMsg::printMsg(LOG_ERR,"Could not send Cascade Information to the InfoService!\n");
+							}
 						helocount=10;
 					}
 				else 
