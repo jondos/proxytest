@@ -185,7 +185,7 @@ SINT32 CASocketAddr::setPath(char* path)
 		m_pAddr=new sockaddr_un;
 		m_Type=AF_LOCAL;
 		((sockaddr_un*)m_pAddr)->sun_family=AF_LOCAL;
-		((sockaddr_un*)m_pAddr)->sun_len=strlen(path);
+//		((sockaddr_un*)m_pAddr)->sun_len=strlen(path);
 		strcpy(((sockaddr_un*)m_pAddr)->sun_path,path);
 		return E_SUCCESS;
 #else
