@@ -181,7 +181,7 @@ SINT32 CASocket::connect(CASocketAddr & psa,UINT msTimeOut)
 		struct pollfd opollfd;
 		opollfd.fd=m_Socket;
 		opollfd.events=POLLIN|POLLOUT;
-		err=::pool(&opollfd,1,msTimeOut);
+		err=::poll(&opollfd,1,msTimeOut);
 #endif		
 		if(err!=1) //timeout or error
 			{
