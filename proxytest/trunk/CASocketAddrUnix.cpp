@@ -60,4 +60,20 @@ SINT32 CASocketAddrUnix::setPath(const char* path)
 		strcpy(sun_path,path);
 		return E_SUCCESS;
 	}
+
+/** Gets the path for the unix domain protocol address.
+  * The returned char array has to be freed by the caller using delete[].
+	* @retval NULL if path was no specified yet
+	* @retval copy of the path value
+	*/
+UINT8* CASocketAddrUnix::getPath()
+	{
+		UINT32 len=strlen(sun_path);
+		if(len==0)
+			return NULL;
+		UINT8* p=new UINT8[len+1];
+		strcpy(p,sun_path);
+		return p;
+	}
+
 #endif

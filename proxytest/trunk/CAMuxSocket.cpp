@@ -219,6 +219,7 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 timeout)
 						m_csReceive.unlock();
 						return E_UNKNOWN;
 					}
+				len=MIXPACKET_SIZE-m_aktBuffPos;
 				ret=m_Socket.receive(m_Buff+m_aktBuffPos,len);
 				if(ret<=0&&ret!=E_AGAIN)
 					{
