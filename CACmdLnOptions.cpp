@@ -109,37 +109,51 @@ void CACmdLnOptions::clean()
 			{
 				delete[] m_strTargetHost;
 	    }
+		m_strTargetHost=NULL;
 		if(m_strSOCKSHost!=NULL)
 			{
 				delete[] m_strSOCKSHost;
 	    }
+		m_strSOCKSHost=NULL;
 		if(m_strInfoServerHost!=NULL)
 			{
 				delete[] m_strInfoServerHost;
 	    }
+		m_strInfoServerHost=NULL;
 		if(m_strCascadeName!=NULL)
 			delete[] m_strCascadeName;
+		m_strCascadeName=NULL;
 		if(m_strLogDir!=NULL)
 			delete[] m_strLogDir;
+		m_strLogDir=NULL;
 		if(m_strEncryptedLogDir!=NULL)
 			delete[] m_strEncryptedLogDir;
+		m_strEncryptedLogDir=NULL;
 		if(m_strUser!=NULL)
 			delete[] m_strUser;
-		m_docMixInfo=NULL;
+		m_strUser=NULL;
+		if(m_docMixInfo!=NULL)
+			m_docMixInfo=NULL;
 		if(m_strMixID!=NULL)
 			delete[] m_strMixID;
+		m_strMixID=NULL;
 		clearTargetInterfaces();
 		clearListenerInterfaces();
 		if(m_pSignKey!=NULL)
 			delete m_pSignKey;
+		m_pSignKey=NULL;
 		if(m_pOwnCertificate!=NULL)
 			delete m_pOwnCertificate;
+		m_pOwnCertificate=NULL;
 		if(m_pNextMixCertificate!=NULL)
 			delete m_pNextMixCertificate;
+		m_pNextMixCertificate=NULL;
 		if(m_pPrevMixCertificate!=NULL)
 			delete m_pPrevMixCertificate;
+		m_pPrevMixCertificate=NULL;
 		if(m_pLogEncryptionCertificate!=NULL)
 			delete m_pLogEncryptionCertificate;
+		m_pLogEncryptionCertificate=NULL;
 	}
 
 SINT32 CACmdLnOptions::parse(int argc,const char** argv)
