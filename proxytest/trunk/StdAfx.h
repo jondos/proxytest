@@ -55,7 +55,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 //Some constants
 #define LAST_MIX_TO_PROXY_CONNECT_TIMEOUT 2000 //Connection timeout for last mix to proxy connections 2 Seconds...
-#define POOL_SIZE 10
+#define MIX_POOL_SIZE 10
 
 #ifdef _WIN32
     #if _MSC_VER > 1000
