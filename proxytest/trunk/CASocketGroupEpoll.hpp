@@ -79,7 +79,7 @@ class CASocketGroupEpoll
 					return ret;
 				}
 
-			SINT32 select();
+			SINT32 select()
 				{
 					m_csFD_SET.lock();
 					m_iNumOfReadyFD=epoll_wait(m_hEPFD,m_pEvents,MAX_POLLFD,-1);
