@@ -25,6 +25,7 @@
     #include <pthread.h>
     #include <unistd.h>
     #include <stdlib.h>
+    #include <strings.h>
     typedef struct sockaddr* LPSOCKADDR;
     #define SOCKET int
     typedef struct hostent HOSTENT;
@@ -33,7 +34,10 @@
     #define SD_RECEIVE 0
     #define SD_SEND 1
     #define SD_BOTH 2
-    
+
+    #ifndef _LINUX
+    	#define INADDR_NONE -1
+    #endif    
     #define CRITICAL_SECTION pthread_mutex_t
     #define DeleteCriticalSection(p) pthread_mutex_destroy(p)
     #define InitializeCriticalSection(p) pthread_mutex_init(p,NULL)
