@@ -55,6 +55,7 @@
     	#define INADDR_NONE -1
     	#define socklen_t int
     	#include <sys/filio.h>
+    	#define MSG_NOSIGNAL 0
     #endif
 		#ifdef _REENTRANT
 			#define CRITICAL_SECTION pthread_mutex_t
