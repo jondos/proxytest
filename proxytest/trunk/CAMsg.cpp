@@ -182,7 +182,7 @@ SINT32 CAMsg::closeLog()
 
 SINT32 CAMsg::openLog(UINT32 type)
 	{
-		int tmpHandle=-1;
+//		int tmpHandle=-1;
 		switch(type)
 			{
 				case MSG_LOG:
