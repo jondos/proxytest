@@ -166,11 +166,14 @@ int main(int argc, const char* argv[])
 				CASocket oSocketServer;
 				oSocketServer.create(AF_INET);
 				oSocketServer.setRecvBuff(1000);
+				SINT32 j=oSocketServer.getRecvBuff();
+				CAMsg::printMsg(LOG_DEBUG,"Recv-Buff %i\n",j);
 				oSocketServer.listen(6789);
 				CASocket oS;
 				
 				oSocketServer.accept(oS);
-				SINT32 j=oS.getRecvBuff();
+				oS.setRecvBuff(1000);
+				j=oS.getRecvBuff();
 				CAMsg::printMsg(LOG_DEBUG,"Recv-Buff %i\n",j);
 				sleep(1000000);
 				exit(0);
@@ -194,7 +197,8 @@ int main(int argc, const char* argv[])
 				UINT8 buff[1000];
 				for(int i=0;i<1000;i++)
 					{
-						oSocketClient.send(buff,1000,true);
+						s=oSocketClient.send(buff,1000,true);
+						CAMsg::printMsg(LOG_DEBUG,"Has Send: %i\n",s);
 						s=oSocketClient.getSendSpace();
 						CAMsg::printMsg(LOG_DEBUG,"SendSpace now: %i\n",s);
 					}
