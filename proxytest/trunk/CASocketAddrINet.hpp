@@ -45,7 +45,10 @@ class CASocketAddrINet:public CASocketAddr,sockaddr_in
 			/** Returns the Size of the SOCKADDR struct used.
 				* @return sizeof(sockaddr_in)
 				*/
-			SINT32 getSize(){return sizeof(sockaddr_in);}
+			SINT32 getSize()
+				{
+					return sizeof(sockaddr_in);
+				}
 			
 			SINT32 setAddr(char* szIP,UINT16 port);
       SINT32 setPort(UINT16 port);

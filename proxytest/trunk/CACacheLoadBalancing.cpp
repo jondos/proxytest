@@ -31,37 +31,37 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 CACacheLoadBalancing::~CACacheLoadBalancing()
 	{
 		CACHE_LB_ENTRY* pEntry;
-		while(paktEntry!=NULL)
+		while(pSelectedEntry!=NULL)
 			{
-				//delete paktEntry->pAddr;
-				if(paktEntry==paktEntry->next)
-					{
-						pEntry=NULL;
-					}
-				else pEntry=paktEntry->next;
-				delete paktEntry;
-				paktEntry=pEntry;
+				if(pSelectedEntry==pSelectedEntry->next)
+					pEntry=NULL;
+				else 
+					pEntry=pSelectedEntry->next;
+				delete pSelectedEntry;
+				pSelectedEntry=pEntry;
 			}			
 	};
 
+/* Adds a new Address to the pool of Addresses. 
+ * This addresses are used for Load Balancing (currently a simple Round Robin).
+ * @retval E_UNKNOWN, in case of an error
+ * @retval E_SUCCESS, if succesful
+ */
 SINT32 CACacheLoadBalancing::add(const CASocketAddrINet& oAddr)
 	{
-		//if(pAddr==NULL)
-		//	return E_UNKNOWN;
 		CACHE_LB_ENTRY* pEntry=new CACHE_LB_ENTRY;
-		//pEntry->pAddr=new CASocketAddrINet;
-		
+		if(pEntry==NULL)
+			return E_UNKNOWN;
 		pEntry->oAddr=oAddr;
-		//memcpy(pEntry->pAddr,pAddr,sizeof(CASocketAddrINet));
-		if(paktEntry==NULL)
+		if(pSelectedEntry==NULL)
 			{
-				paktEntry=pEntry;
-				paktEntry->next=paktEntry;
+				pSelectedEntry=pEntry;
+				pSelectedEntry->next=pSelectedEntry;
 			}
 		else
 			{
-				pEntry->next=paktEntry->next;
-				paktEntry->next=pEntry;						
+				pEntry->next=pSelectedEntry->next;
+				pSelectedEntry->next=pEntry;						
 			}
 		m_ElementCount++;
 		return E_SUCCESS;

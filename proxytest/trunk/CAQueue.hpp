@@ -27,44 +27,59 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CAQUEUE__
 #define __CAQUEUE__
-typedef struct _t_queue
+struct _t_queue
 	{
 		UINT8* pBuff;
-		UINT32 size;
 		_t_queue* next;
-	}QUEUE;
+		UINT32 size;
+	};
 
-/** this is a simple FIFO-Queue. You can add data and get them back.*/
+typedef struct _t_queue QUEUE;
+
+/** This is a simple FIFO-Queue. You can add data and get them back.
+	* This class is thread safe.
+	*/
 class CAQueue
 	{
 		public:
-			CAQueue(){InitializeCriticalSection(&m_csQueue);m_Queue=NULL;m_nQueueSize=0;}
+			CAQueue()
+				{
+					InitializeCriticalSection(&m_csQueue);
+					m_Queue=NULL;
+					m_nQueueSize=0;
+				}
 			~CAQueue();
 			SINT32 add(const UINT8* buff,UINT32 size);
 			SINT32 get(UINT8* pbuff,UINT32* psize);
 			SINT32 peek(UINT8* pbuff,UINT32* psize);
 			SINT32 remove(UINT32* psize);
+			
 			/** Returns the size of stored data.
-				* @retrun size of Queue
+				* @return size of Queue
 				*/
-			UINT32 getSize(){return m_nQueueSize;}
+			UINT32 getSize()
+				{
+					return m_nQueueSize;
+				}
 			
 			/** Returns true, if the Queue is empty
 				* @retval true, if Queue is empty
 				* @retval false, if Queue contains data
 				*/
-			bool isEmpty(){return m_Queue==NULL;}
+			bool isEmpty()
+				{
+					return (m_Queue==NULL);
+				}
 
 			/** Method to test the Queue
 				* @retval E_SUCCESS, if Queue implementation seams to be ok
 				*/
 			static SINT32 test();
+		
 		private:
 			QUEUE* m_Queue;
 			QUEUE* m_lastElem;
-			#ifdef _REENTRANT
-				CRITICAL_SECTION m_csQueue;
-			#endif
+			CRITICAL_SECTION m_csQueue;
 			UINT32 m_nQueueSize;
 	};
 #endif
