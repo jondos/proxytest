@@ -21,6 +21,9 @@
 /* Define if your OS support the epoll() syscall */
 #undef HAVE_EPOLL
 
+/* Define to 1 if you have the <fcntl.h> header file. */
+#undef HAVE_FCNTL_H
+
 /* This is a flag to ioctl() to get the number of available bytes on a socket
    */
 #undef HAVE_FIONREAD
@@ -36,6 +39,12 @@
 
 /* Define if you have OpenSSL (which is needed!) */
 #undef HAVE_OPENSSL
+
+/* This is a flag to open() to do synchronized I/O */
+#undef HAVE_O_FSYNC
+
+/* This is a flag to open() to do synchronized I/O */
+#undef HAVE_O_SYNC
 
 /* Define to 1 if you have the `poll' function. */
 #undef HAVE_POLL
