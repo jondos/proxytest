@@ -37,14 +37,14 @@ CAQueue::~CAQueue()
 		m_pcsQueue->lock();
 		while(m_Queue!=NULL)
 			{
-				delete m_Queue->pBuff;
+				delete[] m_Queue->pBuff;
 				m_lastElem=m_Queue;
 				m_Queue=m_Queue->next;
 				delete m_lastElem;
 			}
 		while(m_pHeap!=NULL)
 			{
-				delete m_pHeap->pBuff;
+				delete[] m_pHeap->pBuff;
 				m_lastElem=m_pHeap;
 				m_pHeap=m_pHeap->next;
 				delete m_lastElem;
@@ -75,7 +75,7 @@ SINT32 CAQueue::add(const void* buff,UINT32 size)
 				m_pHeap=m_pHeap->next;
 				if(size>m_nExpectedElementSize)
 					{
-						delete m_Queue->pBuff;
+						delete[] m_Queue->pBuff;
 						m_Queue->pBuff=new UINT8[size];
 					}
 				m_Queue->next=NULL;
@@ -91,7 +91,7 @@ SINT32 CAQueue::add(const void* buff,UINT32 size)
 				m_pHeap=m_pHeap->next;
 				if(size>m_nExpectedElementSize)
 					{
-						delete m_lastElem->pBuff;
+						delete[] m_lastElem->pBuff;
 						m_lastElem->pBuff=new UINT8[size];
 					}
 				m_lastElem->next=NULL;
