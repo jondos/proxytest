@@ -109,15 +109,9 @@ void signal_hup(int sig)
 	}
 
 
-//Callbackfunction for looking required by OpenSSL
+///Callbackfunction for looking required by OpenSSL
 void openssl_locking_callback(int mode, int type, char *file, int line)
 	{
-/*#if _DEBUG
-		CAMsg::printMsg(LOG_DEBUG,"OpenSSL-Locking: thread=%4d mode=%s lock=%s %s:%d\n",
-			CRYPTO_thread_id(),
-			(mode&CRYPTO_LOCK)?"l":"u",
-			(type&CRYPTO_READ)?"r":"w",file,line);
-#endif*/
 		if (mode & CRYPTO_LOCK)
 			{
 				pOpenSSLMutexes[type].lock();
@@ -126,6 +120,48 @@ void openssl_locking_callback(int mode, int type, char *file, int line)
 			{
 				pOpenSSLMutexes[type].unlock();
 			}
+	}
+	
+///Check what the sizes of base types are as expected -- if not kill the programm
+void checkSizesOfBaseTypes()
+	{
+		if(sizeof(SINT8)!=1)
+			{
+				CAMsg::printMsg(LOG_CRIT,"sizeof(SINT8) != 1 --> maybe a compiler (optimization) problem!\n");
+				exit(-1);
+			}
+		if(sizeof(UINT8)!=1)
+			{
+				CAMsg::printMsg(LOG_CRIT,"sizeof(UINT8) != 1 --> maybe a compiler (optimization) problem!\n");
+				exit(-1);
+			}
+		if(sizeof(SINT16)!=2)
+			{
+				CAMsg::printMsg(LOG_CRIT,"sizeof(SINT16) != 2 --> maybe a compiler (optimization) problem!\n");
+				exit(-1);
+			}
+		if(sizeof(UINT16)!=2)
+			{
+				CAMsg::printMsg(LOG_CRIT,"sizeof(UINT16) != 2 --> maybe a compiler (optimization) problem!\n");
+				exit(-1);
+			}
+		if(sizeof(SINT32)!=4)
+			{
+				CAMsg::printMsg(LOG_CRIT,"sizeof(SINT32) != 4 --> maybe a compiler (optimization) problem!\n");
+				exit(-1);
+			}
+		if(sizeof(UINT32)!=4)
+			{
+				CAMsg::printMsg(LOG_CRIT,"sizeof(UINT32) != 4 --> maybe a compiler (optimization) problem!\n");
+				exit(-1);
+			}
+		#ifdef HAVE_NATIVE_UINT64	
+			if(sizeof(UINT64)!=8)
+				{
+					CAMsg::printMsg(LOG_CRIT,"sizeof(UINT64) != 8 --> maybe a compiler (optimization) problem!\n");
+					exit(-1);
+				}
+		#endif
 	}
 
 /** \mainpage 
@@ -391,6 +427,7 @@ Debug(dc::malloc.on());
 #endif
 
 			//some test....
+		checkSizesOfBaseTypes();
 		if(MIXPACKET_SIZE!=sizeof(MIXPACKET))
 			{
 				CAMsg::printMsg(LOG_CRIT,"MIXPACKET_SIZE [%u] != sizeof(MUXPACKET) [%u] --> maybe a compiler (optimization) problem!\n",MIXPACKET_SIZE,sizeof(MIXPACKET));
@@ -411,12 +448,7 @@ Debug(dc::malloc.on());
 					exit(-1);
 				CAMsg::printMsg(LOG_CRIT,"Hm, The Offsets seams to be ok - so we try to continue - hope that works...\n");
 			}
-		if(sizeof(UINT32)!=4)
-			{
-				CAMsg::printMsg(LOG_CRIT,"sizeof(UINT32) != 4 --> maybe a compiler (optimization) problem!\n");
-				exit(-1);
-			}
-				
+		
 #ifdef LOG_CRIME
 			testTre();
 #endif

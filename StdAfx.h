@@ -93,15 +93,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define HAVE_VSNPRINTF
 		#define vsnprintf _vsnprintf
 		
-	#define HAVE_NATIVE_UINT64
-
-		typedef signed long SINT32;
-		typedef unsigned int UINT;
-		typedef signed int SINT;
-		typedef unsigned short UINT16;
-		typedef signed short SINT16;
-		typedef unsigned char UINT8;
-		typedef signed char SINT8;
 #else
 	//__linux is not defined on power pc so we define our own __linux if __linux__ is defined
 	#if defined(__linux__) && !defined(__linux)
@@ -194,64 +185,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
   #ifndef min
 		#define min(a,b) ((a<b)?(a):(b))
   #endif	
-	#if defined(__linux)
-		#include <linux/types.h>
-		#define HAVE_NATIVE_UINT64
-		typedef unsigned long long UINT64;
-		typedef __u32 UINT32;
-		typedef __s32 SINT32;
-		typedef unsigned int UINT;
-		typedef signed int SINT;
-		typedef __u16 UINT16;
-		typedef __s16 SINT16;
-		typedef __u8 UINT8;
-		typedef __s8 SINT8;
-	#elif defined(__sgi)
-		#define HAVE_NATIVE_UINT64
-		typedef __uint64_t UINT64;	
-		typedef __uint32_t UINT32;
-		typedef __int32_t SINT32;
-		typedef unsigned int UINT;
-		typedef signed int SINT;
-		typedef unsigned short UINT16;
-		typedef signed short SINT16;
-		typedef unsigned char UINT8;
-		typedef signed char SINT8;
-	#elif defined(__sun)    	
-		typedef uint32_t UINT32;
-		typedef int32_t SINT32;
-		typedef unsigned int UINT;
-		typedef signed int SINT;
-		typedef uint16_t UINT16;
-		typedef int16_t SINT16;
-		typedef uint8_t UINT8;
-		typedef int8_t SINT8;
-	#else     	
-		#warning This seams to be a currently not supported plattform - may be things go wrong! 
-		#warning Please report the plattform, so that it could be added 
-		#ifdef __GNUC__ //TODO check if for all GNUC long long is 64 bit!!
-			#define HAVE_NATIVE_UINT64
-			typedef unsigned long long UINT64;
-		#endif
-		typedef unsigned int UINT32;
-		typedef signed int SINT32;
-		typedef unsigned int UINT;
-		typedef signed int SINT;
-		typedef unsigned short UINT16;
-		typedef signed short SINT16;
-		typedef unsigned char UINT8;
-		typedef signed char SINT8;
-	#endif
 
 #endif
 
-#if !defined(HAVE_NATIVE_UINT64)
-    typedef struct __UINT64__t_
-	{
-		UINT32 high;
-		UINT32 low;
-	} UINT64;	 
-#endif
 
 //Error constants...
 
@@ -348,4 +284,5 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #endif
 #define MIX_VERSION_INFO "Mix-Version: " MIX_VERSION "\nUsing: " OPENSSL_VERSION_TEXT "\nUsing Xerces-C: " MY_XERCES_VERSION "\n"
 
+#include "basetypedefs.h"
 #endif // !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
