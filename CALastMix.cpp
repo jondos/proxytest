@@ -263,8 +263,10 @@ SINT32 CALastMix::init()
 					CAMsg::printMsg(LOG_CRIT," failed!\n");
 					return E_UNKNOWN;
 		    }
-		((CASocket*)muxIn)->setRecvBuff(50*MUXPACKET_SIZE);
-		((CASocket*)muxIn)->setSendBuff(50*MUXPACKET_SIZE);
+		((CASocket*)muxIn)->setRecvBuff(500*MUXPACKET_SIZE);
+		((CASocket*)muxIn)->setSendBuff(500*MUXPACKET_SIZE);
+		if(((CASocket*)muxIn)->setSendLowWat(MUXPACKET_SIZE)!=E_SUCCESS)
+			CAMsg::printMsg(LOG_INFO,"SOCKET Option SENDLOWWAT not set!\n");
 		if(((CASocket*)muxIn)->setKeepAlive((UINT32)1800)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_INFO,"Socket option TCP-KEEP-ALIVE returned an error - so not set!\n");
@@ -301,6 +303,7 @@ SINT32 CALastMix::loop()
 	{
 		CASocketList  oSocketList;
 		CASocketGroup oSocketGroup;
+		CASocketGroup oSocketGroupMuxIn;
 		MUXPACKET oMuxPacket;
 		SINT32 ret;
 		SINT32 countRead;
@@ -309,8 +312,10 @@ SINT32 CALastMix::loop()
 		CONNECTION* tmpCon;
 		
 		oSocketGroup.add(muxIn);
+		oSocketGroupMuxIn.add(muxIn);
 		for(;;)
 			{
+LOOP_START:
 				if((countRead=oSocketGroup.select())==SOCKET_ERROR)
 					{
 						sleep(1);
@@ -445,6 +450,8 @@ SINT32 CALastMix::loop()
 						tmpCon=oSocketList.getFirst();
 						while(tmpCon!=NULL&&countRead>0)
 							{
+								if(oSocketGroupMuxIn.select(true,0)!=1)
+									goto LOOP_START;
 								if(oSocketGroup.isSignaled(*(tmpCon->pSocket)))
 									{
 										countRead--;
