@@ -170,7 +170,7 @@ THREAD_RETURN InfoLoop(void *p)
 						pInfoService->getLevel(&tmpUser,&tmpRisk,&tmpTraffic);
 						pInfoService->getMixedPackets((UINT32*)&tmpPackets);
 						avgTraffic=tmpPackets/minuts;
-		/*				minuts++;
+						minuts++;
 						diffTraffic=tmpPackets-lastMixedPackets;
 						if(avgTraffic==0)
 							{
@@ -185,7 +185,7 @@ THREAD_RETURN InfoLoop(void *p)
 								tmpTraffic=min(50.*dTmp,100);
 							}
 						lastMixedPackets=tmpPackets;
-			*/		
+					
 						oxmlOut.WriteAttr("nrOfActiveUsers",(int)tmpUser);
 						oxmlOut.WriteAttr("currentRisk",(int)tmpRisk);
 						oxmlOut.WriteAttr("trafficSituation",(int)tmpTraffic);
