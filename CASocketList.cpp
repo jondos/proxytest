@@ -80,6 +80,10 @@ SINT32 CASocketList::clear()
 				tmp=tmp->next;
 				delete memlist;
 			}
+		connections=NULL;
+		pool=NULL;
+		memlist=NULL;
+		aktEnumPos=NULL;
 		return E_SUCCESS;
 	}
 
