@@ -382,14 +382,6 @@ Debug(dc::malloc.on());
 #endif
 		UINT8 buff[255];
 #ifndef WIN32
-		if(options.getUser(buff,255)==E_SUCCESS) //switching user
-			{
-				struct passwd* pwd=getpwnam((char*)buff);
-				if(pwd==NULL||seteuid(pwd->pw_uid)==-1)
-					CAMsg::printMsg(LOG_ERR,"Could not switch to effective user %s!\n",buff);
-			}
-		if(geteuid()==0)
-			CAMsg::printMsg(LOG_INFO,"Warning - Running as root!\n");
 		SINT32 maxFiles=options.getMaxOpenFiles();
 		if(maxFiles>0)
 			{
@@ -402,6 +394,14 @@ Debug(dc::malloc.on());
 						exit(1);
 					}
 			}
+		if(options.getUser(buff,255)==E_SUCCESS) //switching user
+			{
+				struct passwd* pwd=getpwnam((char*)buff);
+				if(pwd==NULL||seteuid(pwd->pw_uid)==-1)
+					CAMsg::printMsg(LOG_ERR,"Could not switch to effective user %s!\n",buff);
+			}
+		if(geteuid()==0)
+			CAMsg::printMsg(LOG_INFO,"Warning - Running as root!\n");
 #endif
 		
 		if(options.getDaemon())
