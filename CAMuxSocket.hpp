@@ -101,9 +101,11 @@ class CAMuxSocket
 			SINT32 connect(CASocketAddr& psa,UINT retry,UINT32 time);
 			int close();
 			int send(MIXPACKET *pPacket);
+			int send(MIXPACKET *pPacket,UINT8* buff);
 			SINT32 receive(MIXPACKET *pPacket);
 			SINT32 receive(MIXPACKET *pPacket,UINT32 timeout);
 			int close(HCHANNEL channel_id);
+			int close(HCHANNEL channel_id,UINT8* buff);
 			operator CASocket*(){return &m_Socket;}
 			operator SOCKET(){return (SOCKET)m_Socket;}
 			

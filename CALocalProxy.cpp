@@ -138,7 +138,7 @@ SINT32 CALocalProxy::loop()
 						else
 							{
 								newCipher=new CASymCipher[chainlen];
-								oSocketList.add(lastChannelId++,newSocket,newCipher);
+								oSocketList.add(lastChannelId++,newSocket,newCipher,NULL);
 								oSocketGroup.add(*newSocket);
 							}
 					}
@@ -159,7 +159,7 @@ SINT32 CALocalProxy::loop()
 						else
 							{
 								newCipher=new CASymCipher[chainlen];
-								oSocketList.add(lastChannelId++,newSocket,newCipher);
+								oSocketList.add(lastChannelId++,newSocket,newCipher,NULL);
 								oSocketGroup.add(*newSocket);
 							}
 					}

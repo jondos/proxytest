@@ -69,6 +69,7 @@ CASocketList::CASocketList()
 		m_bThreadSafe=false;
 		setThreadSafe(false);
 		increasePool();
+		m_Size=0;
 	}
 
 CASocketList::CASocketList(bool bThreadSafe)
@@ -128,7 +129,7 @@ SINT32 CASocketList::setThreadSafe(bool b)
 *	        E_UNKNOWN, otherwise
 *
 */
-SINT32 CASocketList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher)
+SINT32 CASocketList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue)
 	{
 		if(m_bThreadSafe)
 			EnterCriticalSection(&cs);
@@ -148,7 +149,9 @@ SINT32 CASocketList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher)
 		m_Connections=tmp;
 		m_Connections->pSocket=pSocket;
 		m_Connections->pCipher=pCipher;
+		m_Connections->pSendQueue=pQueue;
 		m_Connections->id=id;
+		m_Size++;
 		if(m_bThreadSafe)
 			LeaveCriticalSection(&cs);
 		return E_SUCCESS;
@@ -174,7 +177,9 @@ SINT32 CASocketList::add(HCHANNEL in,HCHANNEL out,CASymCipher* pCipher)
 		m_Connections=tmp;
 		m_Connections->outChannel=out;
 		m_Connections->pCipher=pCipher;
+		m_Connections->pSendQueue=NULL;
 		m_Connections->id=in;
+		m_Size++;
 		if(m_bThreadSafe)
 			LeaveCriticalSection(&cs);
 		return E_SUCCESS;
@@ -288,6 +293,7 @@ CASocket* CASocketList::remove(HCHANNEL id)
 						tmp->next=m_Pool;
 						m_Pool=tmp;
 						ret=tmp->pSocket;
+						m_Size--;
 						if(m_bThreadSafe)
 							LeaveCriticalSection(&cs);
 						return ret;

@@ -29,10 +29,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define __CASOCKETLIST__
 #include "CAMuxSocket.hpp"
 #include "CASymCipher.hpp"
+#include "CAQueue.hpp"
 
 typedef struct connlist
 	{
 		CASymCipher* pCipher;
+		CAQueue* pSendQueue;
 		connlist* next;
 		union
 			{
@@ -50,7 +52,7 @@ class CASocketList
 			CASocketList();
 			CASocketList(bool bThreadSafe);
 			~CASocketList();
-			SINT32 add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher);
+			SINT32 add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue);
 			SINT32 add(HCHANNEL in,HCHANNEL out,CASymCipher* pCipher);
 			bool	get(HCHANNEL in,CONNECTION* out);
 			bool	get(CONNECTION* in,HCHANNEL out);
@@ -79,6 +81,7 @@ class CASocketList
 					return m_AktEnumPos;
 				}
 
+			UINT32 getSize(){return m_Size;}
 			SINT32 setThreadSafe(bool b);
 		protected:
 			SINT32 increasePool();
@@ -88,5 +91,6 @@ class CASocketList
 			t_MEMBLOCK* m_Memlist;
 			CRITICAL_SECTION cs;
 			bool m_bThreadSafe;
+			UINT32 m_Size;
 	};	
 #endif
