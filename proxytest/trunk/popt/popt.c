@@ -162,7 +162,7 @@ static int handleExec(poptContext con, char * longName, char shortName) {
        time 'round */
     if ((con->finalArgvCount + 1) >= (con->finalArgvAlloced)) {
 	con->finalArgvAlloced += 10;
-	con->finalArgv = (const char**)realloc(con->finalArgv,
+	con->finalArgv = (const char**)realloc((void*)con->finalArgv,
 			sizeof(*con->finalArgv) * con->finalArgvAlloced);
     }
 
@@ -592,7 +592,7 @@ int poptGetNextOpt(poptContext con)
 
 	if ((con->finalArgvCount + 2) >= (con->finalArgvAlloced)) {
 	    con->finalArgvAlloced += 10;
-	    con->finalArgv = (const char**)realloc(con->finalArgv,
+	    con->finalArgv = (const char**)realloc((void*)con->finalArgv,
 			    sizeof(*con->finalArgv) * con->finalArgvAlloced);
 	}
 
@@ -646,7 +646,7 @@ void poptFreeContext(poptContext con) {
 
     for (i = 0; i < con->numAliases; i++) {
 	if (con->aliases[i].longName) xfree(con->aliases[i].longName);
-	free(con->aliases[i].argv);
+	free((void*)con->aliases[i].argv);
     }
 
     for (i = 0; i < con->numExecs; i++) {
@@ -655,8 +655,8 @@ void poptFreeContext(poptContext con) {
     }
     if (con->execs) xfree(con->execs);
 
-    free(con->leftovers);
-    free(con->finalArgv);
+    free((void*)con->leftovers);
+    free((void*)con->finalArgv);
     if (con->appName) xfree(con->appName);
     if (con->aliases) free(con->aliases);
     if (con->otherHelp) xfree(con->otherHelp);

@@ -32,6 +32,7 @@ class CAMuxChannelList
 			bool remove(HCHANNEL out,REVERSEMUXLISTENTRY* reverseEntry);
 			MUXLISTENTRY* getFirst();
 			MUXLISTENTRY* getNext();
+
 		protected:
 			MUXLIST* list;
 			MUXLISTENTRY* aktEnumPos;

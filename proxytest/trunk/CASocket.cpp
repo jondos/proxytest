@@ -122,7 +122,7 @@ int CASocket::close()
 
 int CASocket::close(int mode)
 	{
-		EnterCriticalSection(&csClose);
+//		EnterCriticalSection(&csClose);
 		localPort=-1;
 		::shutdown(m_Socket,mode);
 		if(mode==SD_RECEIVE||mode==SD_BOTH)
@@ -137,7 +137,7 @@ int CASocket::close(int mode)
 			}
 		else
 			ret=1;
-		LeaveCriticalSection(&csClose);
+//		LeaveCriticalSection(&csClose);
 		return ret;
 	}
 			

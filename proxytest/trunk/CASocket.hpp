@@ -21,7 +21,7 @@ class CASocket
 			int close();
 			int close(int mode);
 			int send(char* buff,int len);
-			int send(char* buff,int len,CASymCipher& oCipher);
+//			int send(char* buff,int len,CASymCipher& oCipher);
 			int available();
 			int receive(char* buff,int len);
 			int receive(char* buff,int len,CASymCipher& oCipher);

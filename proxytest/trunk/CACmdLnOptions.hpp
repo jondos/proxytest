@@ -11,6 +11,8 @@ class CACmdLnOptions
 	    int getTargetHost(char* host,int len);
 	    int getSOCKSPort();
 	    int getSOCKSHost(char* host,int len);
+	    int getInfoServerPort();
+	    int getInfoServerHost(char* host,int len);
 			bool isLocalProxy();
 			bool isFirstMix();
 			bool isMiddleMix();
@@ -23,5 +25,7 @@ class CACmdLnOptions
 	    char* strTargetHost;
 	    char* strSOCKSHost;
 	    int iSOCKSPort;
+	    char* strInfoServerHost;
+	    int iInfoServerPort;
 			bool bLocalProxy,bFirstMix,bMiddleMix,bLastMix;
     };
