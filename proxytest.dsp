@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /G6 /MD /W3 /GX /Ox /Ot /Oa /Og /Oi /Ob2 /I "g:\openssl-0.9.5a\inc32" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "_REENTRANT" /Yu"stdafx.h" /FD /c
+# ADD CPP /nologo /G6 /MD /W3 /GX /Ox /Ot /Oa /Og /Oi /Ob2 /I "g:\openssl-0.9.5a\inc32" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "_REENTRANT" /D "AES" /Yu"stdafx.h" /FD /c
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
 # ADD RSC /l 0x407 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -51,7 +51,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=xilink6.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
-# ADD LINK32 ws2_32.lib kernel32.lib gdi32.lib libeay32.lib /nologo /subsystem:console /machine:I386 /libpath:"g:\openssl-0.9.5a\out32"
+# ADD LINK32 ws2_32.lib kernel32.lib libeay32.lib gdi32.lib /nologo /subsystem:console /machine:I386 /libpath:"g:\openssl-0.9.5a\out32"
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
 
@@ -336,6 +336,8 @@ SOURCE=".\aes\rijndael-alg-fst.cpp"
 
 !IF  "$(CFG)" == "proxytest - Win32 Release"
 
+# SUBTRACT CPP /YX /Yc /Yu
+
 !ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
 
 # SUBTRACT CPP /YX /Yc /Yu
@@ -354,6 +356,8 @@ SOURCE=".\aes\rijndael-alg-fst.h"
 SOURCE=".\aes\rijndael-api-fst.cpp"
 
 !IF  "$(CFG)" == "proxytest - Win32 Release"
+
+# SUBTRACT CPP /YX /Yc /Yu
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
 
