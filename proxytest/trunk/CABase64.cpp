@@ -28,14 +28,14 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "StdAfx.h"
 #include "CABase64.hpp"
 
-/** Makes a Base64-Decoding on the input byte array. It decodes in to out.
+/** Makes a Base64-Decoding on the input byte array. It decodes @c in to @c out.
 *	@param in input byte array
 *	@param inlen size of the input byte array
 *	@param out output byte array
 *	@param outlen on input must contain the size of the byte array for output,
 	              on return it contains the size of the decoded output
-*	@return E_SUCCESS, if no error occurs
-*	        E_UNKNOWN, if an error occurs
+*	@retval E_SUCCESS if no error occurs
+*	@retval E_UNKNOWN if an error occurs
 */ 
 SINT32 CABase64::decode(UINT8* in,UINT32 inlen,UINT8* out,UINT32 *outlen)
 	{
@@ -58,14 +58,14 @@ SINT32 CABase64::decode(UINT8* in,UINT32 inlen,UINT8* out,UINT32 *outlen)
 		return E_SUCCESS;
 	}
 
-/** Makes a Base64-Encoding on the input byte array. It encodes in to out.
+/** Makes a Base64-Encoding on the input byte array. It encodes @c in to @c out.
 *	@param in input byte array
 *	@param inlen size of the input byte array
 *	@param out output byte array
 *	@param outlen on input must contain the size of the byte array for output,
-	              on return it contains the size of the decoded output
-*	@return E_SUCCESS, if no error occurs
-*	        E_UNKNOWN, if an error occurs
+	              on return it contains the size of the encoded output
+*	@retval E_SUCCESS if no error occurs
+*	@retval E_UNKNOWN if an error occurs
 *
 */ 
 SINT32 CABase64::encode(UINT8* in,UINT32 inlen,UINT8* out,UINT32 *outlen)
