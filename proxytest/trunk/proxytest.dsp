@@ -75,7 +75,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 ws2_32.lib kernel32.lib libeay32.lib gdi32.lib pthreadVC.lib xerces-c_2D.lib libmysql.lib zlib.lib /nologo /subsystem:console /map /debug /machine:I386 /pdbtype:sept /libpath:"g:\openssl-0.9.6c\out32dll.dbg" /libpath:"pthread\lib" /libpath:"g:\xerces-c2_0_0-win32\lib" /libpath:"n:\mysql\lib\debug" /libpath:"g:\zlib-1.1.5"
+# ADD LINK32 ws2_32.lib kernel32.lib libeay32.lib gdi32.lib pthreadVC.lib xerces-c_2D.lib zlib.lib /nologo /subsystem:console /map /debug /machine:I386 /pdbtype:sept /libpath:"g:\openssl-0.9.6c\out32dll.dbg" /libpath:"pthread\lib" /libpath:"g:\xerces-c2_0_0-win32\lib" /libpath:"n:\mysql\lib\debug" /libpath:"g:\zlib-1.1.4"
 # SUBTRACT LINK32 /nodefaultlib
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"

@@ -31,6 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 CALastMixChannelList::CALastMixChannelList()
 	{
 		m_HashTable=new LP_lmChannelListEntry[0x10000];
+		memset(m_HashTable,0,0x10000*sizeof(LP_lmChannelListEntry));
 		m_listSockets=NULL;
 		m_listSocketsNext=NULL;
 	}
