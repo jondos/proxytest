@@ -184,10 +184,13 @@ SINT32 sSleep(UINT16 sec)
 UINT32 getMemoryUsage()
 	{
 #ifndef _WIN32
-		struct rusage usage;
-		if(getrusage(RUSAGE_BOTH,&usage)==-1)
+		struct rusage usage_self;
+		if(getrusage(RUSAGE_SELF,&usage_self)==-1)
 			return 0;
-		return usage.ru_idrss;
+		struct rusage usage_children;
+		if(getrusage(RUSAGE_CHILDREN,&usage_chidlren)==-1)
+			return 0;
+		return usage_self.ru_idrss+usage_children.ru_idrss;
 #else
 	return 0;
 #endif
