@@ -63,6 +63,7 @@ CAInfoService::CAInfoService()
 		m_pFirstMix=NULL;
 		m_bRun=false;
 		m_pSignature=NULL;
+		m_pcertstoreOwnCerts=NULL;
 		m_minuts=0;
 		m_lastMixedPackets=0;
 	}
@@ -72,6 +73,7 @@ CAInfoService::CAInfoService(CAFirstMix* pFirstMix)
 		m_pFirstMix=pFirstMix;
 		m_bRun=false;
 		m_pSignature=NULL;
+		m_pcertstoreOwnCerts=NULL;
 		m_minuts=0;
 		m_lastMixedPackets=0;
 	}
@@ -79,11 +81,22 @@ CAInfoService::CAInfoService(CAFirstMix* pFirstMix)
 CAInfoService::~CAInfoService()
 	{
 		stop();
+		delete m_pcertstoreOwnCerts;
 	}
-
-SINT32 CAInfoService::setSignature(CASignature* pSig)
+/** Sets the signature used to sign the messages send to Infoservice.
+	* If pOwnCert!=NULL this Certifcate is included in the Signature
+	*/
+SINT32 CAInfoService::setSignature(CASignature* pSig,CACertificate* pOwnCert)
 	{
 		m_pSignature=pSig;
+		if(m_pcertstoreOwnCerts!=NULL)
+			delete m_pcertstoreOwnCerts;
+		m_pcertstoreOwnCerts=NULL;
+		if(pOwnCert!=NULL)
+			{
+				m_pcertstoreOwnCerts=new CACertStore();
+				m_pcertstoreOwnCerts->add(pOwnCert);
+			}
 		return E_SUCCESS;
 	}
 
@@ -177,7 +190,7 @@ SINT32 CAInfoService::sendStatus()
 				else
 					tmpStrCurrentMillis[0]=0;
 				sprintf((char*)tmpBuff,XML_MIX_CASCADE_STATUS,strMixId,tmpRisk,buffMixedPackets,tmpUser,tmpTraffic,tmpStrCurrentMillis);
-				m_pSignature->signXML(tmpBuff,strlen((char*)tmpBuff),buff,&buffLen);
+				m_pSignature->signXML(tmpBuff,strlen((char*)tmpBuff),buff,&buffLen,m_pcertstoreOwnCerts);
 				sprintf((char*)buffHeader,"POST /feedback HTTP/1.0\r\nContent-Length: %u\r\n\r\n",buffLen);
 				oSocket.send(buffHeader,strlen((char*)buffHeader));
 				oSocket.send(buff,buffLen);
@@ -220,7 +233,7 @@ SINT32 CAInfoService::sendMixHelo()
 				UINT8 tmpStrCurrentMillis[50];
 				print64(tmpStrCurrentMillis,currentMillis);
 				setDOMElementValue(elemTimeStamp,tmpStrCurrentMillis);
-				if(m_pSignature->signXML(docMixInfo)!=E_SUCCESS)
+				if(m_pSignature->signXML(docMixInfo,m_pcertstoreOwnCerts)!=E_SUCCESS)
 					{
 						goto ERR;
 					}
@@ -276,7 +289,7 @@ SINT32 CAInfoService::sendCascadeHelo()
 				UINT8 tmpStrCurrentMillis[50];
 				print64(tmpStrCurrentMillis,currentMillis);
 				setDOMElementValue(elemTimeStamp,tmpStrCurrentMillis);
-				if(m_pSignature->signXML(docMixInfo)!=E_SUCCESS)
+				if(m_pSignature->signXML(docMixInfo,m_pcertstoreOwnCerts)!=E_SUCCESS)
 					{
 						goto ERR;
 					}

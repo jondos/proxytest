@@ -45,11 +45,12 @@ class CAInfoService
 			SINT32 getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic);
 			SINT32 getMixedPackets(UINT64& ppackets);
 			bool getRun(){return m_bRun;}
-			SINT32 setSignature(CASignature* pSignature);
-			CASignature* getSignature(){return m_pSignature;}
+			SINT32 setSignature(CASignature* pSignature,CACertificate* ownCert);
+		//	CASignature* getSignature(){return m_pSignature;}
 		private:
 			volatile bool m_bRun;
 			CASignature*	m_pSignature;
+			CACertStore*	m_pcertstoreOwnCerts;
 			CAFirstMix*		m_pFirstMix;
 			CAThread			m_threadRunLoop;
 			UINT64				m_lastMixedPackets;

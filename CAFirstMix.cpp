@@ -219,7 +219,9 @@ SINT32 CAFirstMix::init()
 		m_pthreadSendToMix->start(this);
 
 		//Starting InfoService
-		m_pInfoService->setSignature(m_pSignature);
+		CACertificate* tmp=options.getOwnCertificate();
+		m_pInfoService->setSignature(m_pSignature,tmp);
+		delete tmp;
 		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix InfoService - Signature set\n");
 		m_pInfoService->start();
 		CAMsg::printMsg(LOG_DEBUG,"InfoService Loop started\n");

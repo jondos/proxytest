@@ -90,7 +90,9 @@ SINT32 CALastMix::init()
 		if(m_pSignature!=NULL&&options.isInfoServiceEnabled())
 			{
 				m_pInfoService=new CAInfoService();
-				m_pInfoService->setSignature(m_pSignature);
+				CACertificate* tmp=options.getOwnCertificate();
+				m_pInfoService->setSignature(m_pSignature,tmp);
+				delete tmp;
 				m_pInfoService->start();
 			}
 

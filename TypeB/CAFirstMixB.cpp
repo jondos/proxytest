@@ -18,7 +18,7 @@ SINT32 CAFirstMixB::loop()
 		osocketgroupMixOut.add(*m_pMuxOut);
 		m_pMuxOut->setCrypt(true);
 		
-		m_pInfoService->setSignature(m_pSignature);
+		m_pInfoService->setSignature(m_pSignature,NULL);
 		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix InfoService - Signature set\n");
 		m_pInfoService->start();
 		CAMsg::printMsg(LOG_DEBUG,"InfoService Loop started\n");

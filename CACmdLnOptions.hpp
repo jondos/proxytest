@@ -133,7 +133,10 @@ class CACmdLnOptions
 					return NULL;
 				}
 
-			CACertificate* getOwnCertificate()
+			/** Returns a COPY of the public test certifcate for that mix.
+				* @retval a COPY of the mix test certifcate.
+				*/
+			CACertificate* getOwnCertificate() const
 				{
 					if(m_pOwnCertificate!=NULL)
 						return m_pOwnCertificate->clone();
