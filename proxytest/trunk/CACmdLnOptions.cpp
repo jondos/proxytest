@@ -205,7 +205,6 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 							}
 						pTargets=new CASocketAddrINet[cntTargets];
 						tmpStr=strtok(target,";");
-						printf("Target: %s\n",tmpStr);
 						char tmpHostname[255];
 						int tmpPort;
 						i=0;
@@ -234,7 +233,6 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 												strcpy(tmpHostname,tmpStr);
 											}
 									}
-								printf("Target Host: %s\n",tmpHostname);
 								pTargets[i].setAddr((UINT8*)tmpHostname,tmpPort);
 								if(i==0)
 									{
