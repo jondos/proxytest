@@ -168,11 +168,11 @@ SINT32 CASymCipher::decryptAES(UINT8* in,UINT8* out,UINT32 len)
 				rijndaelEncrypt (iv, iv, keyDecAES.keySched);
 //				blockEncrypt(&cipher,&keyDecAES,iv,16<<3,iv); 
 				len-=i;
-				for(int k=0;k<len;k++)
+				for(UINT32 k=0;k<len;k++)
 				 {
 					 out[i]=in[i]^iv[k];
 					 i++;
-					 }
+					}
 			}
 		return E_SUCCESS;
 	}
