@@ -208,13 +208,14 @@ proxytest_SOURCES = CAASymCipher.cpp \
 
 proxytest_LDADD = $(top_srcdir)/xml/libxml.a \
 		  $(top_srcdir)/aes/libaes.a \
-		  $(top_srcdir)/popt/libpopt.a\
-		  $(top_srcdir)/trio/libtrio.a
+		  $(top_srcdir)/popt/libpopt.a \
+		  $(top_srcdir)/trio/libtrio.a \
+		  $(top_srcdir)/tre/libtre.a
 
 
 EXTRA_DIST = README proxytest.doxy proxytest.dsp proxytest.dsw
 
-SUBDIRS = popt xml aes trio
+SUBDIRS = popt xml aes trio tre
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -243,7 +244,7 @@ am_proxytest_OBJECTS = CAASymCipher.$(OBJEXT) CABase64.$(OBJEXT) \
 proxytest_OBJECTS = $(am_proxytest_OBJECTS)
 proxytest_DEPENDENCIES = $(top_srcdir)/xml/libxml.a \
 	$(top_srcdir)/aes/libaes.a $(top_srcdir)/popt/libpopt.a \
-	$(top_srcdir)/trio/libtrio.a
+	$(top_srcdir)/trio/libtrio.a $(top_srcdir)/tre/libtre.a
 proxytest_LDFLAGS =
 
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I.
