@@ -30,6 +30,7 @@
 #else
     #include <sys/ioctl.h>
     #include <sys/socket.h>
+    #include <sys/poll.h>
     #include <netinet/in.h>
     #include <arpa/inet.h>
     #include <netdb.h>
@@ -39,7 +40,7 @@
     #include <strings.h>
     #include <syslog.h>
     #include <stdarg.h>
-       
+    #include <memory.h>       
     typedef struct sockaddr* LPSOCKADDR;
     #define SOCKET int
     typedef struct hostent HOSTENT;
@@ -74,6 +75,8 @@
 		#define THREAD_RETURN void*
     #define THREAD_RETURN_ERROR return(NULL)
     #define THREAD_RETURN_SUCCESS return (NULL)
+    
+    #define min(a,b) ((a<b)?(a):(b))
 #endif
 #include <stdio.h>
 #include <time.h>
