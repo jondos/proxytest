@@ -40,21 +40,14 @@ CAMuxSocket::CAMuxSocket()
 		m_Buff=new UINT8[MUXPACKET_SIZE];
 		m_aktBuffPos=0;
 		bIsCrypted=false;
-//		bIsTunneld=false;
+		InitializeCriticalSection(&csSend);
+		InitializeCriticalSection(&csReceive);
 	}
-/*	
-int CAMuxSocket::useTunnel(char* proxyhost,UINT16 proxyport)
-	{
-		m_szTunnelHost=new char[strlen(proxyhost)+1];
-		strcpy(m_szTunnelHost,proxyhost);
-		m_uTunnelPort=proxyport;
-		bIsTunneld=true;
-		return 0;
-	}
-*/
 
 SINT32 CAMuxSocket::setCrypt(bool b)
 	{
+		EnterCriticalSection(&csSend);
+		EnterCriticalSection(&csReceive);
 		bIsCrypted=b;
 		if(b)
 			{
@@ -63,6 +56,8 @@ SINT32 CAMuxSocket::setCrypt(bool b)
 				ocipherIn.setKeyAES(nullkey);
 				ocipherOut.setKeyAES(nullkey);
 			}
+		LeaveCriticalSection(&csReceive);
+		LeaveCriticalSection(&csSend);
 		return E_SUCCESS;
 	}
 
@@ -179,12 +174,12 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 		return sizeof(MUXPACKET);
 	}
 #else
+
 int CAMuxSocket::send(MUXPACKET *pPacket)
 	{
+		EnterCriticalSection(&csSend);
 		int ret;
 		UINT8 tmpBuff[16];
-		//HCHANNEL tmpChannel=pPacket->channel;
-		//UINT16 tmpFlags=pPacket->flags;
 		memcpy(tmpBuff,pPacket,16);
 		pPacket->channel=htonl(pPacket->channel);
 		pPacket->flags=htons(pPacket->flags);
@@ -204,8 +199,7 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 		else
 			ret=MUXPACKET_SIZE;
 		memcpy(pPacket,tmpBuff,16);
-//		pPacket->channel=tmpChannel;
-//		pPacket->flags=tmpFlags;
+		LeaveCriticalSection(&csSend);
 		return ret;
 	}
 #endif
@@ -257,12 +251,17 @@ int CAMuxSocket::receive(MUXPACKET* pPacket)
 #else
 SINT32 CAMuxSocket::receive(MUXPACKET* pPacket)
 	{
+		EnterCriticalSection(&csReceive);
 		if(m_Socket.receiveFully((UINT8*)pPacket,MUXPACKET_SIZE)!=E_SUCCESS)
-			return SOCKET_ERROR;
+			{
+				LeaveCriticalSection(&csReceive);
+				return SOCKET_ERROR;
+			}
 		if(bIsCrypted)
     	ocipherIn.decryptAES((UINT8*)pPacket,(UINT8*)pPacket,16);
 		pPacket->channel=ntohl(pPacket->channel);
 		pPacket->flags=ntohs(pPacket->flags);
+		LeaveCriticalSection(&csReceive);		
 		return MUXPACKET_SIZE;
 	}
 
@@ -271,10 +270,14 @@ SINT32 CAMuxSocket::receive(MUXPACKET* pPacket)
 */
 SINT32 CAMuxSocket::receive(MUXPACKET* pPacket,UINT32 timeout)
 	{
+		EnterCriticalSection(&csReceive);
 		SINT32 len=MUXPACKET_SIZE-m_aktBuffPos;
 		SINT32 ret=m_Socket.receive(m_Buff+m_aktBuffPos,len);
 		if(ret<=0)
-			return E_UNKNOWN;
+			{
+				LeaveCriticalSection(&csReceive);
+				return E_UNKNOWN;
+			}
 		if(ret==len)
 			{
 				if(bIsCrypted)
@@ -283,11 +286,15 @@ SINT32 CAMuxSocket::receive(MUXPACKET* pPacket,UINT32 timeout)
 				pPacket->channel=ntohl(pPacket->channel);
 				pPacket->flags=ntohs(pPacket->flags);
 				m_aktBuffPos=0;
+				LeaveCriticalSection(&csReceive);
 				return MUXPACKET_SIZE;
 			}
 		m_aktBuffPos+=ret;
 		if(timeout==0)
-			return E_AGAIN;
+			{
+				LeaveCriticalSection(&csReceive);
+				return E_AGAIN;
+			}
 		UINT32 timeE=time(NULL)+timeout;
 		SINT32 dt=timeout;
 		CASocketGroup oSocketGroup;
@@ -296,12 +303,18 @@ SINT32 CAMuxSocket::receive(MUXPACKET* pPacket,UINT32 timeout)
 			{
 				ret=oSocketGroup.select(false,dt);
 				if(ret<0)
-					return E_UNKNOWN;
+					{
+						LeaveCriticalSection(&csReceive);
+						return E_UNKNOWN;
+					}
 				if(ret==1)
 					{
 						ret=m_Socket.receive(m_Buff+m_aktBuffPos,len);
 						if(ret<=0)
-							return E_UNKNOWN;
+							{
+								LeaveCriticalSection(&csReceive);
+								return E_UNKNOWN;
+							}
 						if(ret==len)
 							{
 								if(bIsCrypted)
@@ -310,12 +323,14 @@ SINT32 CAMuxSocket::receive(MUXPACKET* pPacket,UINT32 timeout)
 								pPacket->channel=ntohl(pPacket->channel);
 								pPacket->flags=ntohs(pPacket->flags);
 								m_aktBuffPos=0;
+								LeaveCriticalSection(&csReceive);
 								return MUXPACKET_SIZE;
 							}
 						m_aktBuffPos+=ret;
 					}
 				dt=timeE-time(NULL);
 			}	while(dt>0);
+		LeaveCriticalSection(&csReceive);
 		return E_AGAIN;
 	}
 #endif

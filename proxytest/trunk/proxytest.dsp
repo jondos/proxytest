@@ -67,7 +67,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /G6 /MDd /W4 /Gm /GX /ZI /Od /I "g:\openssl-0.9.5a\inc32" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "_DEBUG" /D "_REENTRANT" /D "AES" /D "PROT2" /FAcs /FR /Yu"stdafx.h" /FD /GZ /c
+# ADD CPP /nologo /G6 /MDd /W4 /Gm /GX /ZI /Od /I "g:\openssl-0.9.6\inc32" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "_DEBUG" /D "_REENTRANT" /D "AES" /D "PROT2" /FAcs /FR /Yu"stdafx.h" /FD /GZ /c
 # ADD BASE RSC /l 0x407 /d "_DEBUG"
 # ADD RSC /l 0x407 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -185,102 +185,6 @@ SOURCE=.\popt\poptparse.c
 # Begin Source File
 
 SOURCE=.\popt\system.h
-# End Source File
-# End Group
-# Begin Group "httptunnel"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=.\httptunnel\common.cpp
-
-!IF  "$(CFG)" == "proxytest - Win32 Release"
-
-# ADD CPP /Yu"../StdAfx.h"
-
-!ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
-
-# ADD CPP /W3
-# SUBTRACT CPP /YX /Yc /Yu
-
-!ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\httptunnel\common.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\httptunnel\config.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\httptunnel\http.cpp
-
-!IF  "$(CFG)" == "proxytest - Win32 Release"
-
-# ADD CPP /Yu"../stdafx.h"
-
-!ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
-
-# ADD CPP /W3
-# SUBTRACT CPP /YX /Yc /Yu
-
-!ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\httptunnel\http.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\httptunnel\poll.cpp
-
-!IF  "$(CFG)" == "proxytest - Win32 Release"
-
-# ADD CPP /Yu"../stdafx.h"
-
-!ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
-
-# ADD CPP /W3
-# SUBTRACT CPP /YX /Yc /Yu
-
-!ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\httptunnel\poll_.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\httptunnel\tunnel.cpp
-
-!IF  "$(CFG)" == "proxytest - Win32 Release"
-
-# ADD CPP /Yu"../stdafx.h"
-
-!ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
-
-# ADD CPP /W3
-# SUBTRACT CPP /YX /Yc /Yu
-
-!ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\httptunnel\tunnel.h
 # End Source File
 # End Group
 # Begin Group "xml"

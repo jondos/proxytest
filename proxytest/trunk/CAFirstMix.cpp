@@ -557,7 +557,6 @@ LOOP_START:
 								oMuxChannelList.add(pnewMuxSocket);
 								nUser++;
 								oInfoService.setLevel(nUser,-1,-1);
-//								oInfoService.setMixedPackets(m_MixedPackets);
 								oSocketGroup.add(*pnewMuxSocket);
 							}
 					}
@@ -589,7 +588,6 @@ LOOP_START:
 								oMuxChannelList.add(pnewMuxSocket);
 								nUser++;
 								oInfoService.setLevel(nUser,-1,-1);
-//								oInfoService.setMixedPackets(m_MixedPackets);
 								oSocketGroup.add(*pnewMuxSocket);
 							}
 					}
@@ -669,67 +667,6 @@ LOOP_START:
 						countMuxOut--;
 					}while(oSocketGroupMuxOut.select(false,0)==1&&countMuxOut>0);
 				}
-			//	if(oSocketGroup.isSignaled(fmIOPair->muxHttpIn))
-			//		{
-			//			countRead--;
-			//			len=fmIOPair->muxHttpIn.receive(&oMuxPacket);
-			//			printf("Receivde Htpp-Packet - Len: %u Content %s",len,oMuxPacket.data);
-			/*			if(len==SOCKET_ERROR)
-							{
-								MUXLISTENTRY otmpEntry;
-								if(oMuxChannelList.remove(tmpEntry->pMuxSocket,&otmpEntry))
-									{
-										oSocketGroup.remove(*(CASocket*)otmpEntry.pMuxSocket);
-										CONNECTION* tmpCon=otmpEntry.pSocketList->getFirst();
-										while(tmpCon!=NULL)
-											{
-												fmIOPair->muxOut.close(tmpCon->outChannel);
-												tmpCon=otmpEntry.pSocketList->getNext();
-											}
-										otmpEntry.pMuxSocket->close();
-										delete otmpEntry.pMuxSocket;
-										delete otmpEntry.pSocketList;
-									}
-							}
-						else
-							{
-								if(len==0)
-									{
-										if(oMuxChannelList.get(tmpEntry,oMuxPacket.channel,&outChannel))
-											{
-												fmIOPair->muxOut.close(outChannel);
-												oMuxChannelList.remove(outChannel,NULL);
-											}
-										else
-											{
-												#ifdef _DEBUG
-													CAMsg::printMsg(LOG_DEBUG,"Invalid ID to close from Browser!\n");
-												#endif
-											}
-									}
-								else
-									{
-										if(oMuxChannelList.get(tmpEntry,oMuxPacket.channel,&outChannel))
-											{
-												oMuxPacket.channel=outChannel;
-											}
-										else
-											{
-												oMuxChannelList.add(tmpEntry,oMuxPacket.channel,lastChannelId);
-												#ifdef _DEBUG
-													CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",lastChannelId);
-												#endif
-												oMuxPacket.channel=lastChannelId++;
-											}
-										if(fmIOPair->muxOut.send(&oMuxPacket)==SOCKET_ERROR)
-											{
-												CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Exiting!\n");
-												exit(-1);
-											}
-								}
-						}
-						*/
-				//	}
 				if(countRead>0)
 					{
 						tmpMuxListEntry=oMuxChannelList.getFirst();
