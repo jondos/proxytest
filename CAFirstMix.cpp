@@ -1046,15 +1046,19 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		elemOwnMix.appendChild(docXmlKeyInfo.importNode(docfragKey,true));
 		elemMixesKey.insertBefore(elemOwnMix,elemMixesKey.getFirstChild());
 		setDOMElementAttribute((DOM_Element&)elemMixesKey,"count",count+1);
-		//CACertificate* ownCert=options.getOwnCertificate();
-		//CACertStore* tmpCertStore=new CACertStore();
-		//tmpCertStore->add(ownCert);
+		CACertificate* ownCert=options.getOwnCertificate();
+		if(ownCert==NULL)
+			{
+				CAMsg::printMsg(LOG_DEBUG,"Own Test Cert is NULL -- so it could not be inserted into signed KeyInfo send to users...\n");
+			}	
+		CACertStore* tmpCertStore=new CACertStore();
+		tmpCertStore->add(ownCert);
 		if(m_pSignature->signXML(elemRootKey/*,tmpCertStore*/)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_DEBUG,"Could not sign KeyInfo send to users...\n");
 			}
-		//delete ownCert;
-		//delete tmpCertStore;
+		delete ownCert;
+		delete tmpCertStore;
 		
 		tlen=0;
 		UINT8* tmpB=DOM_Output::dumpToMem(docXmlKeyInfo,&tlen);
