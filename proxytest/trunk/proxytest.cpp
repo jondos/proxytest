@@ -193,7 +193,8 @@ int main(int argc, const char* argv[])
 			CASymCipher* oSymCipher=new CASymCipher;
 			oSymCipher->setKeyAES(key);
 			unsigned long start=clock();
-			for(int i=0;i<1000;i++)
+			printf("Starting...\n");
+			for(int i=0;i<100000;i++)
 				{
 					oSymCipher->encryptAES(in,in,1024);
 				}
