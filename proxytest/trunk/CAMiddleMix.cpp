@@ -270,6 +270,7 @@ SINT32 CAMiddleMix::init()
 		((CASocket*)muxOut)->setSendBuff(50*MUXPACKET_SIZE);
 #define RETRIES 100
 #define RETRYTIME 30
+		CAMsg::printMsg(LOG_INFO,"Init: Try to connect to next Mix: %s...\n",strTarget);
 		if(muxOut.connect(&nextMix,RETRIES,RETRYTIME)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Cannot connect to next Mix -- Exiting!\n");
