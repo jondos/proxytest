@@ -36,7 +36,20 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 SINT32 CASymCipher::setKey(const UINT8* key)
 	{
 		//makeKey(*m_keyAES,(char*)key);
-		AES_set_encrypt_key(key,128,m_keyAES);
+		return setKey(key,true);
+	}
+
+/** Sets the key used for encryption/decryption. Also resets the IV to zero!
+	* @param key 16 random bytes used as key 
+	* @retval E_SUCCESS
+	*/
+SINT32 CASymCipher::setKey(const UINT8* key,bool bEncrypt)
+	{
+		//makeKey(*m_keyAES,(char*)key);
+		if(bEncrypt)
+			AES_set_encrypt_key(key,128,m_keyAES);
+		else
+			AES_set_decrypt_key(key,128,m_keyAES);
 		memset(m_iv1,0,16);
 		memset(m_iv2,0,16);
 		m_bKeySet=true;
@@ -169,6 +182,21 @@ SINT32 CASymCipher::crypt2(const UINT8* in,UINT8* out,UINT32 len)
 			}
 		return E_SUCCESS;
 	}
+
+/** Decryptes in to out using iv1. AES is used for encryption and the encryption
+	* is done with CBC mode and PKCS7 padding.
+	* @param in input (plain text) bytes
+	* @param out output (encrpyted) bytes
+	* @param len len of input. on return the plaintext len, 
+	*													which is always < len of input
+	* @retval E_SUCCESS
+	*/
+SINT32 CASymCipher::crypt1CBCwithPKCS7(const UINT8* in,UINT8* out,UINT32* len)
+	{
+		AES_cbc_encrypt(in,out,*len,m_keyAES,m_iv1,AES_DECRYPT);
+		return E_SUCCESS;
+	}
+
 /*
 SINT32 CASymCipher::encrypt1(const UINT8* in,UINT8* out,UINT32 len)
 	{

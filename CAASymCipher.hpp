@@ -38,6 +38,7 @@ class CAASymCipher
 			~CAASymCipher();
 			SINT32 destroy();
 			SINT32 decrypt(const UINT8* from,UINT8* to);
+			SINT32 decryptOAEP(const UINT8* from,UINT8* to,UINT32* len);
 			SINT32 encrypt(const UINT8* from,UINT8* to);
 			SINT32 generateKeyPair(UINT32 size);
 			//SINT32 getPublicKey(UINT8* buff,UINT32 *len);

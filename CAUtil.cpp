@@ -576,13 +576,53 @@ SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, DOM_Node & root,CAASymCi
 	*		</CipherData>
 	*	</EncryptedData>
 	*/
-SINT32 encryptXMLElement(DOM_Node & node, CAASymCipher* pRSA)
+SINT32 decryptXMLElement(DOM_Node & node, CAASymCipher* pRSA)
 	{
 		DOM_Document doc=node.getOwnerDocument();
-		DOM_Element elemEncData=doc.createElement("EncryptedData");
-		UINT32 size=0;
-		UINT8* elemBuff=DOM_Output::dumpToMem(node,&size);
-		DOM_Element elemCipherData=doc.createElement("CipherData");
+		if(!node.getNodeName().equals("EncryptedData"))
+			return E_UNKNOWN;
+		DOM_Node elemKeyInfo;
+		getDOMChildByName(node,(UINT8*)"ds:KeyInfo",elemKeyInfo,false);
+		DOM_Node elemEncKey;
+		getDOMChildByName(elemKeyInfo,(UINT8*)"EncryptedKey",elemEncKey,false);
+		DOM_Node elemCipherValue;
+		getDOMChildByName(elemEncKey,(UINT8*)"CipherValue",elemCipherValue,true);
+		UINT8* cipherValue=new UINT8[1000];
+		UINT32 len=1000;
+		if(getDOMElementValue(elemCipherValue,cipherValue,&len)!=E_SUCCESS)
+			{
+				delete cipherValue;
+				return E_UNKNOWN;
+			}
+		CABase64::decode(cipherValue,len,cipherValue,&len);
+		if(pRSA->decryptOAEP(cipherValue,cipherValue,&len)!=E_SUCCESS)
+			{
+				delete cipherValue;
+				return E_UNKNOWN;
+			}
+		CASymCipher *pSymCipher=new CASymCipher();
+		pSymCipher->setKey(cipherValue,false);
+		pSymCipher->setIVs(cipherValue+16);
+
+		DOM_Element elemCipherData;
+		getDOMChildByName(node,(UINT8*)"CipherData",elemCipherData,false);
+		getDOMChildByName(elemCipherData,(UINT8*)"CipherValue",elemCipherValue,false);
+		len=1000;
+		if(getDOMElementValue(elemCipherValue,cipherValue,&len)!=E_SUCCESS)
+			{
+				delete pSymCipher;
+				delete cipherValue;
+				return E_UNKNOWN;
+			}
+		CABase64::decode(cipherValue,len,cipherValue,&len);
+		SINT32 ret=pSymCipher->crypt1CBCwithPKCS7(cipherValue,cipherValue,&len);		
+		delete pSymCipher;
+		if(ret!=E_SUCCESS)
+			{
+				delete cipherValue;
+				return E_UNKNOWN;
+			}
+
 		return E_SUCCESS;
 	}
 
