@@ -303,8 +303,9 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 #endif
 				pEntry=pTmpEntry;
 			}
-
+#ifdef LOG_CHANNEL
 		CAMsg::printMsg(LOG_DEBUG,"Traffic was: IN: %u  --  OUT: %u\n",pHashTableEntry->trafficIn,pHashTableEntry->trafficOut);
+#endif
 		memset(pHashTableEntry,0,sizeof(fmHashTableEntry)); //'delete' the connection from the connection hash table 
 		m_Mutex.unlock();
 		return E_SUCCESS;
