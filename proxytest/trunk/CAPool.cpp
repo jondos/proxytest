@@ -18,7 +18,7 @@ CAPool::CAPool(UINT32 poolsize)
 				getRandom(tmpEntry->mixpacket.data,DATA_SIZE);
 				tmpEntry->mixpacket.flags=CHANNEL_CLOSE;
 				tmpEntry->mixpacket.channel=0;
-				tmpEntry=m_pPoolList;
+				tmpEntry->next=m_pPoolList;
 				m_pPoolList=tmpEntry;
 			}
 		m_pEntry=new tPoolListEntry;	
@@ -88,4 +88,5 @@ SINT32 CAPool::pool(MIXPACKET* pMixPacket)
 		CAMsg::printMsg(LOG_DEBUG,"pool() finished!\n",v);			
 		return E_SUCCESS;
 	}
+	
 		
