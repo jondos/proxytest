@@ -25,64 +25,62 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
-#ifndef __CASYMCIPHER__
-#define __CASYMCIPHER__
+/***************************************************************************
+                          CASSLClientSocket.hpp  -  description
+                             -------------------
+    begin                : Thu Dec 11 2003
+    email                : basti@itsec2
+ ***************************************************************************/
 
-#define KEY_SIZE 16
+#ifndef CASSLCLIENTSOCKET_HPP
+#define CASSLCLIENTSOCKET_HPP
+#include "CASocketAddr.hpp"
 
-#include "aes/rijndael-api-fst.h"
-#include "CALockAble.hpp"
 
-/** This class could be used for encryption/decryption of data (streams) with
-  * AES using 128bit OFB mode. Because of the OFB mode technical encryption
-	* and decrpytion are the same (depending on the kind of input). Therefore
-	* there is only a general crypt() function.
-	* This class has a 2-in-1 feature: Two independent IVs are available. Therefore
-	* we have crypt1() and crypt2() depending on the used IV.
-	*/
-class CASymCipher:public CALockAble
-	{
-		public:
-			CASymCipher()
-				{
-					m_bKeySet=false;
-					m_keyAES=new keyInstance[1];
-					m_iv1=new UINT8[16];
-					m_iv2=new UINT8[16];
-				}
+/**
+  * SSL Client Socket class
+  *
+  * Note: This uses /dev/urandom and might cause problems on systems other than linux
+  *
+  *
+  * @author Bastian Voigt
+  */
+class CASSLClientSocket
+{
 
-			~CASymCipher()
-				{
-					waitForDestroy();
-					delete[] m_keyAES;
-					delete[] m_iv1;
-					delete[] m_iv2;
-				}
-			bool isKeyValid()
-				{
-					return m_bKeySet;
-				}
+public: 
+	CASSLClientSocket();
+	~CASSLClientSocket();
 
-			SINT32 setKey(const UINT8* key);	
+	SINT32 setNonBlocking(bool b);
+	SINT32 getNonBlocking(bool * b);
 
-			/** Sets iv1 and iv2 to p_iv.
-				* @param p_iv 16 random bytes used for new iv1 and iv2.
-				* @retval E_SUCCESS
-				*/
-			SINT32 setIVs(const UINT8* p_iv)
-				{
-					memcpy(m_iv1,p_iv,16);
-					memcpy(m_iv2,p_iv,16);
-					return E_SUCCESS;
-				}
+	SINT32 send(const UINT8* buff,UINT32 len);
+	SINT32 receive(UINT8* buff,UINT32 len);
 
-			SINT32 crypt1(const UINT8* in,UINT8* out,UINT32 len);
-			SINT32 crypt2(const UINT8* in,UINT8* out,UINT32 len);
-		protected:
-			keyInstance* m_keyAES;
-			UINT8* m_iv1;
-			UINT8* m_iv2;
-			bool m_bKeySet;
-	};
+	SINT32 close();
+	
+  /** Establishes the actual TCP/IP connection and performs the SSL handshake */
+  SINT32 connect(CASocketAddr & psa);
+  SINT32 connect(CASocketAddr & psa, UINT32 retry, UINT32 msWaitTime);
+
+
+private:
+ 	SINT32 create();
+	SINT32 create(int type);
+
+	SINT32 initSSLObject();
+	SINT32 doTCPConnect(CASocketAddr & psa, UINT32 retry, UINT32 msWaitTime);
+	SINT32 doSSLConnect(CASocketAddr &psa);
+	
+	SSL * m_SSL;
+	SOCKET m_Socket;
+
+	/** are we connected physically ? */
+	bool m_bConnectedTCP;
+
+	/** is the SSL layer established ? */
+	bool m_bConnectedSSL;
+};
 
 #endif

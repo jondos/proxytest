@@ -154,9 +154,17 @@ class CACmdLnOptions
 					return NULL;
 				}
 			
+			/** Returns a certificate which contains a key which could be used for log encryption*/
+			CACertificate* getLogEncryptionKey()
+				{
+					if(m_pLogEncryptionCertificate!=NULL)
+						return m_pLogEncryptionCertificate->clone(); 
+					return NULL;
+				}
+
 			SINT32 getCascadeName(UINT8* name,UINT32 len);
 			SINT32 getLogDir(UINT8* name,UINT32 len);
-			SINT32 getSpecialLogDir(UINT8* name,UINT32 len);
+			SINT32 getEncryptedLogDir(UINT8* name,UINT32 len);
 			bool getCompressLogs()
 				{
 					return m_bCompressedLogs;
@@ -204,7 +212,7 @@ class CACmdLnOptions
 			bool		m_bAutoReconnect; //auto reconnect if connection to first mix lost ??
 			char*		m_strCascadeName;
 			char*		m_strLogDir;
-			char*		m_strSpecialLogDir;
+			char*		m_strEncryptedLogDir;
 			bool		m_bCompressedLogs;
 			char*		m_strUser;
 			SINT32	m_nrOfOpenFiles; //How many open files (sockets) should we use
@@ -221,6 +229,7 @@ class CACmdLnOptions
 			CACertificate*	m_pOwnCertificate;
 			CACertificate*	m_pPrevMixCertificate;
 			CACertificate*	m_pNextMixCertificate;
+			CACertificate*	m_pLogEncryptionCertificate;
 #ifdef LOG_CRIME
 			regex_t* m_arCrimeRegExps;
 			UINT32 m_nCrimeRegExps;

@@ -491,7 +491,7 @@ THREAD_RETURN mm_loopDownStream(void *p)
 									getRandom(pMixPacket->data,DATA_SIZE);
 								else
 								#endif
-								pCipher->decryptAES2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+								pCipher->crypt2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 								pCipher->unlock();
 								#ifdef USE_POOL
 									pPool->pool(pMixPacket);
@@ -600,8 +600,8 @@ SINT32 CAMiddleMix::loop()
 												}
 										#endif
 										pCipher=new CASymCipher();
-										pCipher->setKeyAES(tmpRSABuff);
-										pCipher->decryptAES(pMixPacket->data+RSA_SIZE,
+										pCipher->setKey(tmpRSABuff);
+										pCipher->crypt1(pMixPacket->data+RSA_SIZE,
 																				pMixPacket->data+RSA_SIZE-(KEY_SIZE+TIMESTAMP_SIZE),
 																				DATA_SIZE-RSA_SIZE);
 										memcpy(pMixPacket->data,tmpRSABuff+KEY_SIZE+TIMESTAMP_SIZE,RSA_SIZE-(KEY_SIZE+TIMESTAMP_SIZE));
@@ -617,7 +617,7 @@ SINT32 CAMiddleMix::loop()
 						else
 							{//established connection
 									pMixPacket->channel=channelOut;
-									pCipher->decryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+									pCipher->crypt1(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 									pCipher->unlock();
 									#ifdef USE_POOL
 										pPool->pool(pMixPacket);

@@ -193,13 +193,13 @@ class CAMuxSocket
 				{
 					if(keyLen==16)
 						{
-							m_oCipherIn.setKeyAES(key);
-							m_oCipherOut.setKeyAES(key);
+							m_oCipherIn.setKey(key);
+							m_oCipherOut.setKey(key);
 						}
 					else if(keyLen==32)
 						{
-							m_oCipherOut.setKeyAES(key);
-							m_oCipherIn.setKeyAES(key+16);
+							m_oCipherOut.setKey(key);
+							m_oCipherIn.setKey(key+16);
 						}
 				else
 						return E_UNKNOWN;
@@ -210,12 +210,12 @@ class CAMuxSocket
 				{
 					if(keyLen==16)
 						{
-							m_oCipherOut.setKeyAES(key);
+							m_oCipherOut.setKey(key);
 						}
 					else if(keyLen==32)
 						{
-							m_oCipherOut.setKeyAES(key);
-							m_oCipherOut.setIV(key+16);
+							m_oCipherOut.setKey(key);
+							m_oCipherOut.setIVs(key+16);
 						}
 					else
 						return E_UNKNOWN;
@@ -226,12 +226,12 @@ class CAMuxSocket
 				{
 					if(keyLen==16)
 						{
-							m_oCipherIn.setKeyAES(key);
+							m_oCipherIn.setKey(key);
 						}
 					else if(keyLen==32)
 						{
-							m_oCipherIn.setKeyAES(key);
-							m_oCipherIn.setIV(key+16);
+							m_oCipherIn.setKey(key);
+							m_oCipherIn.setIVs(key+16);
 						}
 					else
 						return E_UNKNOWN;

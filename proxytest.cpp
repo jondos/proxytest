@@ -707,8 +707,19 @@ Debug(dc::malloc.on());
 						else
 							CAMsg::setLogOptions(MSG_FILE);
 					}
-				CAMsg::openSpecialLog();
+				SINT32 ret=CAMsg::openEncryptedLog();
+				#ifdef LOG_CRIME
+					if(ret!=E_SUCCESS)
+						{
+							CAMsg::printMsg(LOG_ERR,"Could not open encrypted log - exiting!\n");
+							exit(-1);
+						}
+				#endif
 			}
+//			CAMsg::printMsg(LOG_ENCRYPTED,"Test: Anon proxy started!\n");
+//			CAMsg::printMsg(LOG_ENCRYPTED,"Test2: Anon proxy started!\n");
+//			CAMsg::printMsg(LOG_ENCRYPTED,"Test3: Anon proxy started!\n");
+		
 		CAMsg::printMsg(LOG_INFO,"Anon proxy started!\n");
 		CAMsg::printMsg(LOG_INFO,MIX_VERSION_INFO);
 #ifdef _DEBUG

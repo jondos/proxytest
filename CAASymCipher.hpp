@@ -27,6 +27,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CAASYMCIPHER__
 #define __CAASYMCIPHER__
+#include "CACertificate.hpp"
+
 #define RSA_SIZE 128
 
 class CAASymCipher
@@ -35,15 +37,16 @@ class CAASymCipher
 			CAASymCipher();
 			~CAASymCipher();
 			SINT32 destroy();
-			SINT32 decrypt(UINT8* from,UINT8* to);
-			SINT32 encrypt(UINT8* from,UINT8* to);
+			SINT32 decrypt(const UINT8* from,UINT8* to);
+			SINT32 encrypt(const UINT8* from,UINT8* to);
 			SINT32 generateKeyPair(UINT32 size);
 			SINT32 getPublicKey(UINT8* buff,UINT32 *len);
 			SINT32 getPublicKeyAsXML(UINT8* buff,UINT32* len);
 			SINT32 getPublicKeyAsDocumentFragment(DOM_DocumentFragment& pDFrag);
 			SINT32 getPublicKeySize();
 			SINT32 setPublicKey(UINT8* buff,UINT32* len);
-			SINT32 setPublicKeyAsXML(UINT8* buff,UINT32 len);
+			SINT32 setPublicKey(const CACertificate* pCert);
+			SINT32 setPublicKeyAsXML(const UINT8* buff,UINT32 len);
 			SINT32 setPublicKeyAsDOMNode(DOM_Node& node);
 		private:
 			RSA* m_pRSA;

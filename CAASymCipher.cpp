@@ -55,7 +55,7 @@ SINT32 CAASymCipher::destroy()
 	*@retval E_UNKNOWN in case of an error
 	*@retval E_SUCCESS otherwise
 	*/
-SINT32 CAASymCipher::decrypt(UINT8* from,UINT8* to)
+SINT32 CAASymCipher::decrypt(const UINT8* from,UINT8* to)
 	{
 		if(RSA_private_decrypt(RSA_SIZE,from,to,m_pRSA,RSA_NO_PADDING)==-1)
 			return E_UNKNOWN;
@@ -70,7 +70,7 @@ SINT32 CAASymCipher::decrypt(UINT8* from,UINT8* to)
 	*@retval E_UNKNOWN in case of an error
 	*@retval E_SUCCESS otherwise
 	*/
-SINT32 CAASymCipher::encrypt(UINT8* from,UINT8* to)
+SINT32 CAASymCipher::encrypt(const UINT8* from,UINT8* to)
 	{
 		if(RSA_public_encrypt(RSA_SIZE,from,to,m_pRSA,RSA_NO_PADDING)==-1)
 			return E_UNKNOWN;
@@ -252,42 +252,6 @@ SINT32 CAASymCipher::getPublicKeyAsDocumentFragment(DOM_DocumentFragment& dFrag)
 		dFrag.appendChild(root);
 		return E_SUCCESS;
 	}
-/*
-//XML Decode...
-static void sRSAKeyParamValueHandler(XMLElement &elem, void *userData)
-{
-	UINT8 buff[4096];
-	int len=(int)elem.ReadData((char*)buff,4096);
-	
-	UINT32 decLen=4096;
-	UINT8 decBuff[4096];
-	CABase64::decode(buff,len,decBuff,&decLen);
-	
-	RSA* tmpRSA=(RSA*)userData;
-	switch(elem.GetName()[0])
-		{
-			case 'E':
-				if(tmpRSA->e!=NULL)
-					BN_free(tmpRSA->e);
-				tmpRSA->e=BN_bin2bn((unsigned char*)decBuff,decLen,NULL);
-			break;
-			case 'M':
-				if(tmpRSA->n!=NULL)
-					BN_free(tmpRSA->n);
-				tmpRSA->n=BN_bin2bn((unsigned char*)decBuff,decLen,NULL);
-			break;
-		}	
-}
-
-static void sRSAKeyValueHandler(XMLElement &elem, void *userData)
-{
-	XMLHandler handlers[] = {
-	XMLHandler("Modulus",sRSAKeyParamValueHandler),
-	XMLHandler("Exponent",sRSAKeyParamValueHandler),
-	XMLHandler::END};
-		elem.Process(handlers, userData);
-}
-*/
 /** Sets the public key to the values stored in \c key. 
 	* The format must match the format XML described for getPublicKeyAsXML(). 
 	*@param key byte array which holds the new public key
@@ -296,7 +260,7 @@ static void sRSAKeyValueHandler(XMLElement &elem, void *userData)
 	*@retval E_SUCCESS otherwise
 	*@see getPublicKeyAsXML
 	*/
-SINT32 CAASymCipher::setPublicKeyAsXML(UINT8* key,UINT32 len)
+SINT32 CAASymCipher::setPublicKeyAsXML(const UINT8* key,UINT32 len)
 	{
 		if(key==NULL)
 			return E_UNKNOWN;
@@ -358,4 +322,25 @@ SINT32 CAASymCipher::setPublicKeyAsDOMNode(DOM_Node& node)
 				root=root.getNextSibling();		
 			}
 		return E_UNKNOWN;
+	}
+
+/** Sets the public key which is used for encryption to the contained in the
+	*	provided certificate. The key has to be a RSA public key.
+	*	@retval E_SUCCESS if successful
+	*	@retval E_UNKNOWN otherwise (in this case the key leaves untouched)
+	*/
+SINT32 CAASymCipher::setPublicKey(const CACertificate* pCert)
+	{
+		if(pCert==NULL)
+			return E_UNKNOWN;
+		EVP_PKEY* pubkey=X509_get_pubkey(pCert->m_pCert);
+		if(pubkey==NULL||(pubkey->type!=EVP_PKEY_RSA&&pubkey->type!=EVP_PKEY_RSA2))
+			return E_UNKNOWN;
+		RSA* r=pubkey->pkey.rsa;
+		if(RSA_size(r)!=128)
+			return E_UNKNOWN;
+		if(m_pRSA!=NULL)
+			RSA_free(m_pRSA);
+		m_pRSA=r;
+		return E_SUCCESS;
 	}

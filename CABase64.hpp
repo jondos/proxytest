@@ -28,6 +28,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 class CABase64
 	{
 		public:
-			static SINT32 decode(UINT8* in,UINT32 len,UINT8* out,UINT32* outlen);
-			static SINT32 encode(UINT8* in,UINT32 len,UINT8* out,UINT32* outlen);
+			static SINT32 decode(const UINT8* in,UINT32 len,UINT8* out,UINT32* outlen);
+			static SINT32 encode(const UINT8* in,UINT32 len,UINT8* out,UINT32* outlen);
 	};

@@ -37,7 +37,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 *	@retval E_SUCCESS if no error occurs
 *	@retval E_UNKNOWN if an error occurs
 */ 
-SINT32 CABase64::decode(UINT8* in,UINT32 inlen,UINT8* out,UINT32 *outlen)
+SINT32 CABase64::decode(const UINT8* in,UINT32 inlen,UINT8* out,UINT32 *outlen)
 	{
 		if(outlen==NULL)
 			return E_UNKNOWN;
@@ -60,7 +60,7 @@ SINT32 CABase64::decode(UINT8* in,UINT32 inlen,UINT8* out,UINT32 *outlen)
 			}
 		else
 			{
-				EVP_DecodeUpdate(&oCTX,out,(int*)outlen,in,(int)inlen);
+				EVP_DecodeUpdate(&oCTX,out,(int*)outlen,(unsigned char*)in,(int)inlen);
 			}
 		EVP_DecodeFinal(&oCTX,out+(*outlen),&len);
 		(*outlen)+=len;
@@ -77,7 +77,7 @@ SINT32 CABase64::decode(UINT8* in,UINT32 inlen,UINT8* out,UINT32 *outlen)
 *	@retval E_UNKNOWN if an error occurs
 *
 */ 
-SINT32 CABase64::encode(UINT8* in,UINT32 inlen,UINT8* out,UINT32 *outlen)
+SINT32 CABase64::encode(const UINT8* in,UINT32 inlen,UINT8* out,UINT32 *outlen)
 	{
 		if(outlen==NULL)
 			return E_UNKNOWN;
@@ -104,7 +104,7 @@ SINT32 CABase64::encode(UINT8* in,UINT32 inlen,UINT8* out,UINT32 *outlen)
 			}
 		else
 			{
-				EVP_EncodeUpdate(&oCTX,out,(int*)outlen,in,(int)inlen);
+				EVP_EncodeUpdate(&oCTX,out,(int*)outlen,(unsigned char*)in,(int)inlen);
 			}
 		EVP_EncodeFinal(&oCTX,out+(*outlen),(int*)&len);
 		(*outlen)+=len;
