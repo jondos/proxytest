@@ -1,59 +1,42 @@
 /*
-Copyright (c) 2000, The JAP-Team 
+Copyright (c) 2000, The JAP-Team
 All rights reserved.
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-	- Redistributions of source code must retain the above copyright notice, 
+	- Redistributions of source code must retain the above copyright notice,
 	  this list of conditions and the following disclaimer.
 
-	- Redistributions in binary form must reproduce the above copyright notice, 
-	  this list of conditions and the following disclaimer in the documentation and/or 
+	- Redistributions in binary form must reproduce the above copyright notice,
+	  this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
-	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors 
-	  may be used to endorse or promote products derived from this software without specific 
-		prior written permission. 
+	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
+	  may be used to endorse or promote products derived from this software without specific
+		prior written permission.
 
-	
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS 
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
 AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
 BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
-OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 // proxytest.cpp : Definiert den Einsprungpunkt fuer die Konsolenanwendung.
 //
 
 #include "StdAfx.h"
-#include "CASocket.hpp"
-#include "CASocketGroup.hpp"
-#include "CASocketAddrINet.hpp"
+
 #include "CACmdLnOptions.hpp"
 #include "CAMsg.hpp"
-#include "CAMuxSocket.hpp"
-#include "CASocketList.hpp"
-#include "CASymCipher.hpp"
-#include "CAASymCipher.hpp"
-#include "CAInfoService.hpp"
-#include "CASignature.hpp"
-#include "CADatagramSocket.hpp"
-//#include "CARoundTripTime.hpp"
-#include "CAUtil.hpp"
 #include "CAMix.hpp"
 #include "CAMiddleMix.hpp"
 #include "TypeA/CAFirstMixA.hpp"
 #include "TypeA/CALastMixA.hpp"
 #include "CALocalProxy.hpp"
-#include "CASymCipher.hpp"
-#include "CABase64.hpp"
-#include "CADatabase.hpp"
-#include "CACertificate.hpp"
-#include "CACertStore.hpp"
-#include "CALastMixChannelList.hpp"
 #include "xml/DOM_Output.hpp"
 #ifdef LOG_CRIME
 #include "tre/regex.h"
@@ -73,11 +56,7 @@ CAMutex* pOpenSSLMutexes;
 
 // The Mix....
 CAMix* pMix=NULL;
-/*
-#include <crypto++/integer.h>
-#include <crypto++/rsa.h>
-#include <crypto++/osrng.h>
-*/
+
 typedef struct
 {
 	unsigned short len;
@@ -90,7 +69,7 @@ int sockets;
 #endif
 
 #ifndef _WIN32
-	#ifdef _DEBUG 
+	#ifdef _DEBUG
 		void signal_broken_pipe( int sig)
 			{
 				CAMsg::printMsg(LOG_WARNING,"Hm.. Broken Pipe.... How cares!\n");
@@ -129,7 +108,7 @@ void openssl_locking_callback(int mode, int type, char *file, int line)
 				pOpenSSLMutexes[type].unlock();
 			}
 	}
-	
+
 ///Check what the sizes of base types are as expected -- if not kill the programm
 void checkSizesOfBaseTypes()
 	{
@@ -163,7 +142,7 @@ void checkSizesOfBaseTypes()
 				CAMsg::printMsg(LOG_CRIT,"sizeof(UINT32) != 4 --> maybe a compiler (optimization) problem!\n");
 				exit(-1);
 			}
-		#ifdef HAVE_NATIVE_UINT64	
+		#ifdef HAVE_NATIVE_UINT64
 			if(sizeof(UINT64)!=8)
 				{
 					CAMsg::printMsg(LOG_CRIT,"sizeof(UINT64) != 8 --> maybe a compiler (optimization) problem!\n");
@@ -172,8 +151,8 @@ void checkSizesOfBaseTypes()
 		#endif
 	}
 
-/** \mainpage 
- 
+/** \mainpage
+
 \section docCommProto Description of the system and communication protocol
 
 \subsection Basics
@@ -181,7 +160,7 @@ void checkSizesOfBaseTypes()
 The whole system consists of JAP's, mix-servers, cache proxies and the InfoService. (see Figure 1)
 
 \image html JAPArchitecture.gif "Figure 1: The Architecture of the Anonymous-Service"
-	
+
 The local proxy (JAP) and the mix servers communicate using TCP/IP-Internet connections.
  Each JAP has one and only one connection to a mix server. A mix server has one and only one connection
 to one or two other mixes. If a mix receives data packets from JAP's and sends them to an other mix, we call
@@ -190,32 +169,32 @@ to one or two other mixes. If a mix receives data packets from JAP's and sends t
  mix has only one connection to an other mix. Each mix with two connections to other mixes is called
  a \em middle mix. This type of mix will receive packets form one mix and forwards them to the other mix.
 
-If mixes are connected in a meaningful way a chain is setup up, so what packets are transmitted from JAP's 
+If mixes are connected in a meaningful way a chain is setup up, so what packets are transmitted from JAP's
 to the cache-proxies and than to the Internet.
 A chain of mixes is called a \em MixCascade (or \em cascade for short).
 Many different cascades could exist at the same time, but JAP can select one and only one at the same time.
 
 Also a mix could only be part of one and only one cascade. If a mix is not part of a cascade, we call it a \em free mix.
 Free mixes are not useable for JAP, but could be connected to build a new cascade.
-  
-Beside JAPs and Mixes we have added a third component to our system: the \em InfoService. 
-The InfoService is more or less a database which stores information about 
+
+Beside JAPs and Mixes we have added a third component to our system: the \em InfoService.
+The InfoService is more or less a database which stores information about
 the system like available MixCascades, status of Mixes etc.
 \subsection docMux Mulitplexing and Demultiplexing
 
-JAP acts as a local proxy for the browser. 
+JAP acts as a local proxy for the browser.
 The browser opens many connections to the JAP (usually one per HTTP-Request).
 All this connections are multiplexed over the one connection to the first mix JAP is connected to.
-Every connection from the browser is called a \em channel (mix channel or \em AnonChannel). 
+Every connection from the browser is called a \em channel (mix channel or \em AnonChannel).
 A first mix sends the stream of packets (from multiple channels) from multiple users to the next mix (all over one TCP/IP connection). So JAP and the mixes have to multiplex/demultiplex the channels.
-A channel can transport only fixed sized packets. These packets are called \em MixPackets. 
-So a first mix for instance gets many packets from different users in parallel 
+A channel can transport only fixed sized packets. These packets are called \em MixPackets.
+So a first mix for instance gets many packets from different users in parallel
 and sends them to the next mix in a serialized way. (see Figure 2)
 
 \image html JAPMixPacketMux.gif "Figure 2: Mux/DeMux of fixed sized MixPackets"
 
 
-Each MixPacket has a size of #MIXPACKET_SIZE (998) bytes (see Figure 3). 
+Each MixPacket has a size of #MIXPACKET_SIZE (998) bytes (see Figure 3).
 The header of each packet is as follows (see also: #MIXPACKET):
 \li 4 bytes \c channel-ID
 \li 2 bytes \c flags
@@ -231,10 +210,10 @@ The format of the data (at the last mix) is:
 \li 1 byte \c type
 \li #PAYLOAD_SIZE (989) bytes \c payload
 
-They payload are the bytes what should be transported from the browser to the Internet 
+They payload are the bytes what should be transported from the browser to the Internet
 or back via the anonymous channel.
 
-The channel-ID changes in every mix. Also the content bytes changes in every mix, 
+The channel-ID changes in every mix. Also the content bytes changes in every mix,
 because each mix will perform a single encryption/decryption.
 
 \subsection docInterMixEncryption Inter-Mix Encryption
@@ -242,19 +221,19 @@ The stream of MixPackets between to mixes is encrypted using AES-128/128 in OFB-
 first part (16 bytes) of each MixPacket is encrypted. (see Figure 4)
 
 \image html JAPInterMixEncryption.gif "Figure 4: Encryption between two mixes"
-	
-The encryption is done, so that an attacker could not see the channel-ID and flags of a MixPacket. OFB is chosen, so that
-an attacker could not replay a MixPacket. If he replays a MixPacket, than at least the channel-ID 
-changes after decrypting. If this MixPacket was the first packet of a channel, than the cryptographic keys
-for this channel will change to (because of the content format for the first packet of a channel, explained later). 
 
-For Upstream and Downstream different keys are used. 
+The encryption is done, so that an attacker could not see the channel-ID and flags of a MixPacket. OFB is chosen, so that
+an attacker could not replay a MixPacket. If he replays a MixPacket, than at least the channel-ID
+changes after decrypting. If this MixPacket was the first packet of a channel, than the cryptographic keys
+for this channel will change to (because of the content format for the first packet of a channel, explained later).
+
+For Upstream and Downstream different keys are used.
 See \ref docCascadeInit "[Cascade setup]" for information about exchange of these keys.
 
 \subsection docChannelSetup AnonChannel establishment
-Before data could be sent through an AnonChannel one has to be established. 
+Before data could be sent through an AnonChannel one has to be established.
 This is done by sending ChannelOpen messages through the mixes.
-Figure 5 shows the format of such a message how it would arrive for example 
+Figure 5 shows the format of such a message how it would arrive for example
 at the last mix.
 
 \image html MixPacketChannelOpen.gif "Figure 5: ChannelOpen packet (example for the last mix)"
@@ -269,29 +248,29 @@ Figure 6 shows the steps which take place, than a Cascade starts. These steps ar
 The procedure is as follows:
 
 \li Step 1: Each Mix starts, reads its configuration file (including own key
- for digital signature and test keys from previous and next mix) and generates a 
- public key pair of the asymmetric crypto system used by the mix for encryption 
+ for digital signature and test keys from previous and next mix) and generates a
+ public key pair of the asymmetric crypto system used by the mix for encryption
  (currently this is RSA).
 
-\li Step 2: Mix 2 establishes a TCP/IP connection with Mix 3. 
+\li Step 2: Mix 2 establishes a TCP/IP connection with Mix 3.
 No data is transmitted during this step.
 
 \li Step 3: Mix 3 sends its public key  to Mix 2 (signed with its signature key).
-See \ref XMLInterMixInitSendFromLast "[XML]" for a description of the XML struct send in this step. 
+See \ref XMLInterMixInitSendFromLast "[XML]" for a description of the XML struct send in this step.
 The <Nonce/> is a random byte string of length=16 (chosen by Mix 3) used for replay detection.
 
-\li Step 4: Mix 2 generates and sends a symmetric key to Mix 3, encrypted with the public key 
-of Mix 3, signed by Mix 2. 
+\li Step 4: Mix 2 generates and sends a symmetric key to Mix 3, encrypted with the public key
+of Mix 3, signed by Mix 2.
 This key is used for inter-mix encryption and is actually a 64 byte octet stream.
-See \ref XMLInterMixInitAnswer "[XML]" for a description of the XML struct send in this step.\n  
-The first 16 bytes a used as a key for 
+See \ref XMLInterMixInitAnswer "[XML]" for a description of the XML struct send in this step.\n
+The first 16 bytes a used as a key for
 inter-mix encryption of packets send from Mix \e n-1 to Mix \e n (e.g. upstream direction).
 The next 16 byte are used as IV for this cipher. The next 16 bytes are used as
 key for downstream direction and the last 16 bytes are the IV for this cipher.
-To detect replay attacks Mix 3 checks if the <Nonce/> element sent from Mix 2 is equal to SHA1(<Nonce/> chosen by Mix 3 in Step 3).  
+To detect replay attacks Mix 3 checks if the <Nonce/> element sent from Mix 2 is equal to SHA1(<Nonce/> chosen by Mix 3 in Step 3).
 
 \li Step 5,6,7: This steps are equal to step 2,3,4. Mix 1 establishes a TCP/IP-connection
-with Mix 2. Mix 2 send it publick key to Mix 1 and Mix 1 generates and sends 
+with Mix 2. Mix 2 send it publick key to Mix 1 and Mix 1 generates and sends
 a symmetric key to Mix 2.
 
 \section docMixJap Communication between Mix and JAP
@@ -300,20 +279,20 @@ a symmetric key to Mix 2.
 
 -# JAP opens a TCP/IP connection to a FirstMix
 -# FirstMix sends information about the cascade (including public keys of the Mixes) to the JAP.
-See \ref XMLMixKeyInfo "[XML]" for a description of the XML struct send. 
+See \ref XMLMixKeyInfo "[XML]" for a description of the XML struct send.
 -# JAP sends a special MixPacket, containing only 2 symmetric keys (IV is all '0') encrypted with the
 public key of the FirstMix. This keys are used for link encryption between JAP and FirstMix.
 Note: At the moment this is binary - but will use XML in the future.
 The data part of this MixPacket is as follows:
 	- the ASCII string: "KEYPACKET"
-	- 16 random bytes used as symetric key for packets send from Mix to JAP 
-	- 16 random bytes used as symmetric key for packets send from JAP to Mix 
+	- 16 random bytes used as symetric key for packets send from Mix to JAP
+	- 16 random bytes used as symmetric key for packets send from JAP to Mix
 	.
 
 -# Normal MixPacket exchange according to the mix protocol.
 
 \section docInfoService Communication with the InfoService
-HTTP GET/POST-requests are used for communication with the InfoService. 
+HTTP GET/POST-requests are used for communication with the InfoService.
 The filename part of the URL specifies the command (action) to be executed and
 additional information is transfered as XML struct in the body of the HTTP message.
 Example:
@@ -323,8 +302,8 @@ POST /status HTTP/1.0
 Content-Type: text/xml
 Content-Length: 251
 
-<?xml version="1.0" encoding="utf-8" ?> 
-<MixCascadeStatus id="testmix" 
+<?xml version="1.0" encoding="utf-8" ?>
+<MixCascadeStatus id="testmix"
                   mixedPackets="567899"
                   nrOfActiveUsers="235"
                   trafficSituation="78"
@@ -336,187 +315,50 @@ Content-Length: 251
 
 \image html JAPMixInfoService.gif "Figure 8: Communication between Mix and InfoService"
 
-\li 1. HELO-Messages send from each mix to the InfoService every 10 minutes to announce itself.  
+\li 1. HELO-Messages send from each mix to the InfoService every 10 minutes to announce itself.
 This is a POST request and the command name is: "helo".
-See \ref XMLMixHELO "[XML]" for a description of the XML struct send. 
+See \ref XMLMixHELO "[XML]" for a description of the XML struct send.
 
 \li 2. Status-Messages send from the FirstMix to the InfoService every minute to update the current
 status of the MixCascade including Number of Users, Traffic situation etc.
 This is a POST request and the command name is: "status".
-See \ref XMLMixCascadeStatus "[XML]" for a description of the XML struct send. 
+See \ref XMLMixCascadeStatus "[XML]" for a description of the XML struct send.
 
 */
 
 int main(int argc, const char* argv[])
-	{		
-		/*	UINT64 h=18446744073709551615;
-	//	UINT64 h=184004600;
-		UINT8 bg[255];
-		UINT64 t1,t2;
-		getcurrentTimeMillis(t1);
-		//for(UINT32 i=0;i<10000000;i++)
-			print64(bg,h);
-		getcurrentTimeMillis(t2);
-		printf("%u\n",diff64(t2,t1));
-		printf("%s\n",bg);
-		*/
-		/*	CAQueue oQ;
-		UINT32 l,b;
-		l=4;
-		SINT32 r=oQ.getOrWait((UINT8*)&b,&l,5000);
-		oQ.add(&b,4);
-		r=oQ.getOrWait((UINT8*)&b,&l,5000);
-		r=oQ.getOrWait((UINT8*)&b,&l,5000);
-		*/
-//		UINT16 timestamp;
-//		currentTimestamp((UINT8*)&timestamp);
+	{
+
 		pMix=NULL;
 
 		int i;
 		SINT32 maxFiles;
 		//Setup Routines
-		XMLPlatformUtils::Initialize();	
-		OpenSSL_add_all_algorithms();
+XMLPlatformUtils::Initialize();
+
+OpenSSL_add_all_algorithms();
 		pOpenSSLMutexes=new CAMutex[CRYPTO_num_locks()];
-		CRYPTO_set_locking_callback((void (*)(int,int,const char *,int))openssl_locking_callback);	
+		CRYPTO_set_locking_callback((void (*)(int,int,const char *,int))openssl_locking_callback);
 
-	/*		UINT8 buffz[162];
-			memset(buffz,65,162);
-			buffz[76]=10;
-			buffz[153]=10;
-			UINT8 out[180];
-			UINT32 outlen=180;
-			CABase64::decode(buffz,162,out,&outlen);
-			int z=3;
-	*//*		CAPayment oPayment;
-			oPayment.init((UINT8*)"dud14.inf.tu-dresden.de",3306,(UINT8*)"payment",(UINT8*)"payment");
-			UINT32 accessUntil;
-			SINT32 ret=oPayment.checkAccess((UINT8*)"payer1",5,&accessUntil);
-			ret=oPayment.checkAccess((UINT8*)"payer2",5,&accessUntil);
-			exit(0);
-	*/		
-			/*			CAASymCipher oRsa;
-			oRsa.generateKeyPair(1024);
-			UINT8 buff1[1024];
-			UINT32 len=1024;
-			oRsa.getPublicKeyAsXML(buff1,&len);
-	*/		/*	
-		if(argc>1)
-			{
-				CASocket oSocketServer;
-				oSocketServer.create(AF_INET);
-				//oSocketServer.setRecvBuff(15000);
-				//SINT32 j=oSocketServer.getRecvBuff();
-				//CAMsg::printMsg(LOG_DEBUG,"Recv-Buff %i\n",j);
-				oSocketServer.listen(6789);
-				CASocket oS;
-				
-				oSocketServer.accept(oS);
-				//oS.setRecvBuff(1000);
-				//j=oS.getRecvBuff();
-				//CAMsg::printMsg(LOG_DEBUG,"Recv-Buff %i\n",j);
-				oS.setNonBlocking(true);
-				for(;;)
-					{
-						UINT8 buff[21];
-						int ret=oS.receive(buff,20);
-						if(ret!=E_AGAIN)
-							{
-								buff[ret]=0;
-								printf((char*)buff);
-							}
-						else
-							printf("E_AGAIN\n!");
-						sleep(1);
-					}
-				exit(0);
-			}
-		else
-			{
-				CASocket oSocketClient;
-				oSocketClient.create(AF_INET);
-				SINT32 s=oSocketClient.setSendBuff(15000);
+#if defined(HAVE_CRTDBG)
+//			_CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_FILE );
+//			_CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDOUT );
+//			_CrtSetReportMode( _CRT_ERROR, _CRTDBG_MODE_FILE );
+//			_CrtSetReportFile( _CRT_ERROR, _CRTDBG_FILE_STDOUT );
+//			_CrtSetReportMode( _CRT_ASSERT, _CRTDBG_MODE_FILE );
+//			_CrtSetReportFile( _CRT_ASSERT, _CRTDBG_FILE_STDOUT );
 
-				CASocketAddrINet serverAddr;
-				serverAddr.setPort(6789);
-				oSocketClient.connect(serverAddr);
-				sleep(20);
-				UINT8 buff[20];
-				memset(buff,'A',20);
-				oSocketClient.send(buff,20);
-				sleep(20);
-				memset(buff,'B',20);
-				oSocketClient.send(buff,20);
-*//*				UINT32 u;
-				u=5000;
-			//	s=oSocketClient.setSendBuff(5000);
-				s=oSocketClient.getSendBuff();
-				CAMsg::printMsg(LOG_DEBUG,"SendBuff now: %i\n",s);
-				s=oSocketClient.getSendSpace();
-				CAMsg::printMsg(LOG_DEBUG,"SendSpace now: %i\n",s);
-				UINT8 buff[1000];
-				for(int i=0;i<1000;i++)
-					{
-						s=oSocketClient.send(buff,1000,true);
-						CAMsg::printMsg(LOG_DEBUG,"Has Send: %i\n",s);
-						s=oSocketClient.getSendSpace();
-						CAMsg::printMsg(LOG_DEBUG,"SendSpace now: %i\n",s);
-					}
-
-				sleep(100000);
-				exit(0);
-			}		
-*/
-/*
-			CAASymCipher oRSA;
-			oRSA.generateKeyPair(1024);
-			UINT8 from[200],to[200];
-			getRandom(from,200);
-			UINT64 st,en;
-			from[0]&=0x0F;
-			getcurrentTimeMillis(st);
-			//for(int i=0;i<10000;i++)
-				oRSA.decrypt(from,to);
-			getcurrentTimeMillis(en);
-			//printf("Dauer: %u\n",diff64(en,st));
-			
-			CryptoPP::AutoSeededRandomPool rng;
-			CryptoPP::InvertibleRSAFunction privkey;
-			privkey.Initialize(rng,1024);
-//			privkey.Precompute(10);
-			CryptoPP::Integer inte(from,128);
-			CryptoPP::Integer oint;
-			getcurrentTimeMillis(st);
-			for(int i=0;i<100;i++)
-				//privkey.ApplyFunction(inte);
-				privkey.CalculateInverse(rng,inte);
-			getcurrentTimeMillis(en);
-			printf("Dauer: %u\n",diff64(en,st));
-
-			CryptoPP::Integer ointz(to,128);
-			int r=ointz.Compare(oint);
-			exit(0);
-*/
-#if defined(_WIN32) && defined(_DEBUG)
-/*			_CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_FILE );
-			_CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDOUT );
-			_CrtSetReportMode( _CRT_ERROR, _CRTDBG_MODE_FILE );
-			_CrtSetReportFile( _CRT_ERROR, _CRTDBG_FILE_STDOUT );
-			_CrtSetReportMode( _CRT_ASSERT, _CRTDBG_MODE_FILE );
-			_CrtSetReportFile( _CRT_ASSERT, _CRTDBG_FILE_STDOUT );
-*/
 			UINT32 tmpDbgFlag = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
 			tmpDbgFlag |= _CRTDBG_ALLOC_MEM_DF;
 			tmpDbgFlag |=_CRTDBG_LEAK_CHECK_DF;
 			_CrtSetDbgFlag(tmpDbgFlag);
 			_CrtMemState s1, s2, s3;
-#endif 
+#endif
 //Switch on debug infos
 #ifdef CWDEBUG
 Debug(libcw_do.on());
 Debug(dc::malloc.on());
 #endif
-
 			//some test....
 		checkSizesOfBaseTypes();
 #ifndef NEW_MIX_TYPE
@@ -540,7 +382,7 @@ Debug(dc::malloc.on());
 					exit(-1);
 				CAMsg::printMsg(LOG_CRIT,"Hm, The Offsets seams to be ok - so we try to continue - hope that works...\n");
 			}
-#endif		
+#endif
 #ifdef LOG_CRIME
 			testTre();
 #endif
@@ -551,13 +393,7 @@ Debug(dc::malloc.on());
 			err=WSAStartup(0x0202,&wsadata);
 		#endif
 		//initalize Random..
-/*		CAListenerInterface* p=CAListenerInterface::getInstance(RAW_TCP,(UINT8*)"141.76.46.17",6789);
-		const CASocketAddr const* a=p->getAddr();
-		CASocketAddr* b=(CASocketAddr*)a;
-		((CASocketAddrINet*)a)->setPort(3);
-		delete a;
-		int z=3;
-*/
+
 #ifdef _DEBUG
 			UINT32 start;
 #endif
@@ -571,6 +407,7 @@ Debug(dc::malloc.on());
 		#endif
 
 		options.parse(argc,argv);
+
 		if(!(options.isFirstMix()||options.isMiddleMix()||options.isLastMix()||options.isLocalProxy()))
 			{
 				CAMsg::printMsg(LOG_CRIT,"You must specifiy, which kind of Mix you want to run!\n");
@@ -579,55 +416,9 @@ Debug(dc::malloc.on());
 				CAMsg::printMsg(LOG_CRIT,"Exiting...\n");
 				goto EXIT;
 			}
-			
 
-/*		UINT8 buff1[1024];
-		UINT32 len=1024;
-		oRsa.getPublicKeyAsXML(buff1,&len);
-		CASignature oSignature;
-		oSignature.generateSignKey(1024);
-		UINT8 out[2048];
-		UINT32 outlen=2048;
-		oSignature.signXML(buff1,len,out,&outlen);
-		SINT32 r=oSignature.verifyXML(out,outlen);
-		r=r;
-	*/
-	/*	int handle=open("jap.pfx",O_BINARY|O_RDONLY);
-		UINT32 size=filelength(handle);
-		UINT8* bg=new UINT8[2048];
-		read(handle,bg,size);
-		close(handle);
-		CASignature oSignature;
-		oSignature.setSignKey(bg,size,SIGKEY_PKCS12,"pass");
-		CACertificate* cert=CACertificate::decode(bg,size,CERT_PKCS12,"pass");
-		*//*
-		int handle=open("jap.cer",O_BINARY|O_RDONLY);
-		UINT32 size=filelength(handle);
-		UINT8* bg=new UINT8[2048];
-		read(handle,bg,size);
-		close(handle);
-		CACertificate* cert=CACertificate::decode(bg,size,DER);
-		CACertStore oCerts;
-		oCerts.add(cert);
-		delete cert;
-		handle=open("mix.cer",O_BINARY|O_RDONLY);
-		size=filelength(handle);
-		read(handle,bg,size);
-		close(handle);
-		cert=CACertificate::decode(bg,size,DER);
-		oCerts.add(cert);
-		CASignature oSignature;
-		oSignature.generateSignKey(1024);
-		UINT8 in[255];
-		strcpy((char*)in,"<Test><Value>1</Value></Test>");
-		UINT8 out[20480];
-		UINT32 outlen=20480;
-		oSignature.signXML(in,strlen((char*)in),out,&outlen,&oCerts);
-		handle=open("text.xml",O_CREAT|O_BINARY|O_RDWR,_S_IWRITE);
-		write(handle,"<?xml version=\"1.0\"?>",21);
-		write(handle,out,outlen);
-		close(handle);
-*/
+
+
 #ifdef _DEBUG
 		//		CADatabase::test();
 //		if(CAQueue::test()!=E_SUCCESS)
@@ -647,7 +438,7 @@ Debug(dc::malloc.on());
 		//end Testin msSleep
 
 #endif
-#ifdef _WIN32
+#ifdef HAVE_CRTDBG
 		_CrtMemCheckpoint( &s1 );
 #endif
 		UINT8 buff[255];
@@ -657,9 +448,9 @@ Debug(dc::malloc.on());
 		if(maxFiles>0)
 			{
 				struct rlimit lim;
-				/* Set the new MAX open files limit */
+				// Set the new MAX open files limit
 				lim.rlim_cur = lim.rlim_max = maxFiles;
-				if (setrlimit(RLIMIT_NOFILE, &lim) != 0) 
+				if (setrlimit(RLIMIT_NOFILE, &lim) != 0)
 					{
 						CAMsg::printMsg(LOG_CRIT,"Could not set MAX open files to: %u -- Exiting!\n",maxFiles);
 						exit(1);
@@ -676,7 +467,7 @@ Debug(dc::malloc.on());
 		if(geteuid()==0)
 			CAMsg::printMsg(LOG_INFO,"Warning - Running as root!\n");
 #endif
-		
+
 		if(options.getDaemon())
 			{
 				#ifndef _WIN32
@@ -729,14 +520,14 @@ Debug(dc::malloc.on());
 //			CAMsg::printMsg(LOG_ENCRYPTED,"Test: Anon proxy started!\n");
 //			CAMsg::printMsg(LOG_ENCRYPTED,"Test2: Anon proxy started!\n");
 //			CAMsg::printMsg(LOG_ENCRYPTED,"Test3: Anon proxy started!\n");
-		
+
 		CAMsg::printMsg(LOG_INFO,"Anon proxy started!\n");
 		CAMsg::printMsg(LOG_INFO,MIX_VERSION_INFO);
 #ifdef _DEBUG
 		sockets=0;
 #endif
 
-		
+
 #ifndef _WIN32
 	#ifdef _DEBUG
 			signal(SIGPIPE,signal_broken_pipe);
@@ -755,7 +546,7 @@ Debug(dc::malloc.on());
 				#else
 					CAMsg::printMsg(LOG_CRIT,"Compiled without LocalProxy support!\n");
 					goto EXIT;
-				#endif	
+				#endif
 			}
 		else
 			{
@@ -796,16 +587,16 @@ EXIT:
 		if(pMix!=NULL)
 			delete pMix;
 //		CASocketAddrINet::destroy();
-		#ifdef _WIN32		
+		#ifdef _WIN32
 			WSACleanup();
 		#endif
 //OpenSSL Cleanup
-		CRYPTO_set_locking_callback(NULL);	
+		CRYPTO_set_locking_callback(NULL);
 		delete []pOpenSSLMutexes;
 //XML Cleanup
 		XMLPlatformUtils::Terminate();
 		CAMsg::printMsg(LOG_CRIT,"Terminating Programm!\n");
-#if defined(_WIN32) && defined(_DEBUG)
+#if defined(HAVE_CRTDBG)
 		_CrtMemCheckpoint( &s2 );
 		if ( _CrtMemDifference( &s3, &s1, &s2 ) )
       _CrtMemDumpStatistics( &s3 );

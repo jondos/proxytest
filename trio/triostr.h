@@ -52,14 +52,14 @@ int trio_equal_max(const char *first, size_t max, const char *second);
 const char *trio_error(int);
 size_t trio_format_date_max(char *target, size_t max, const char *format, const struct tm *datetime);
 unsigned long trio_hash(const char *string, int type);
-char *trio_index(const char *string, char character);
-char *trio_index_last(const char *string, char character);
+//char *trio_index(const char *string, char character);
+//char *trio_index_last(const char *string, char character);
 size_t trio_length(const char *string);
 int trio_lower(char *target);
 int trio_match(const char *string, const char *pattern);
 int trio_match_case(const char *string, const char *pattern);
 size_t trio_span_function(char *target, const char *source, int (*Function)(int));
-char *trio_substring(const char *string, const char *substring);
+//char *trio_substring(const char *string, const char *substring);
 char *trio_substring_max(const char *string, size_t max, const char *substring);
 char *trio_tokenize(char *string, const char *delimiters);
 float trio_to_float(const char *source, const char **endp);
@@ -93,13 +93,13 @@ int trio_string_equal_max(trio_string_t *self, size_t max, trio_string_t *second
 int trio_string_equal_case(trio_string_t *self, trio_string_t *other);
 int trio_string_equal_case_max(trio_string_t *self, size_t max, trio_string_t *other);
 size_t trio_string_format_date_max(trio_string_t *self, size_t max, const char *format, const struct tm *datetime);
-char *trio_string_index(trio_string_t *self, int character);
-char *trio_string_index_last(trio_string_t *self, int character);
+//char *trio_string_index(trio_string_t *self, int character);
+//char *trio_string_index_last(trio_string_t *self, int character);
 int trio_string_length(trio_string_t *self);
 int trio_string_lower(trio_string_t *self);
 int trio_string_match(trio_string_t *self, trio_string_t *other);
 int trio_string_match_case(trio_string_t *self, trio_string_t *other);
-char *trio_string_substring(trio_string_t *self, trio_string_t *other);
+//char *trio_string_substring(trio_string_t *self, trio_string_t *other);
 int trio_string_upper(trio_string_t *self);
 
 //int trio_xstring_append_char(trio_string_t *self, char character);
@@ -113,6 +113,6 @@ int trio_xstring_equal_case(trio_string_t *self, const char *other);
 int trio_xstring_equal_case_max(trio_string_t *self, size_t max, const char *other);
 int trio_xstring_match(trio_string_t *self, const char *other);
 int trio_xstring_match_case(trio_string_t *self, const char *other);
-char *trio_xstring_substring(trio_string_t *self, const char *other);
+//char *trio_xstring_substring(trio_string_t *self, const char *other);
 
 #endif /* TRIO_TRIOSTR_H */

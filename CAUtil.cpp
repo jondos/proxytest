@@ -148,8 +148,8 @@ char* strins(const char* src,const char * pos,const char* ins)
 SINT32 getcurrentTime(timespec& t)
 	{
 		#ifdef _WIN32
-			struct _timeb timebuffer;
-			_ftime(&timebuffer);
+			timeb timebuffer;
+			ftime(&timebuffer);
 			/* Hack what should be solved better...*/
 			t.tv_sec=timebuffer.time;
 			t.tv_nsec=timebuffer.millitm*1000000;
@@ -172,8 +172,8 @@ SINT32 getcurrentTime(timespec& t)
 SINT32 getcurrentTimeMillis(UINT64& u64Time)
 	{
 		#ifdef _WIN32
-			struct _timeb timebuffer;
-			_ftime(&timebuffer);
+			timeb timebuffer;
+			ftime(&timebuffer);
 			/* Hack what should be solved better...*/
 			u64Time=((UINT64)timebuffer.time)*1000+((UINT64)timebuffer.millitm);
 			/* end of hack..*/

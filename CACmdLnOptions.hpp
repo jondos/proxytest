@@ -1,28 +1,28 @@
 /*
-Copyright (c) 2000, The JAP-Team 
+Copyright (c) 2000, The JAP-Team
 All rights reserved.
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-	- Redistributions of source code must retain the above copyright notice, 
+	- Redistributions of source code must retain the above copyright notice,
 	  this list of conditions and the following disclaimer.
 
-	- Redistributions in binary form must reproduce the above copyright notice, 
-	  this list of conditions and the following disclaimer in the documentation and/or 
+	- Redistributions in binary form must reproduce the above copyright notice,
+	  this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
-	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors 
-	  may be used to endorse or promote products derived from this software without specific 
-		prior written permission. 
+	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
+	  may be used to endorse or promote products derived from this software without specific
+		prior written permission.
 
-	
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS 
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
 AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
 BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
-OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 
@@ -41,7 +41,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 
 #define TARGET_MIX					1
-#define TARGET_HTTP_PROXY		2	
+#define TARGET_HTTP_PROXY		2
 #define TARGET_SOCKS_PROXY	3
 
 struct t_TargetInterface
@@ -65,34 +65,34 @@ class CACmdLnOptions
       //bool getProxySupport();
 
 			SINT32 getMixId(UINT8* id,UINT32 len);
-	   
+
 
 //			UINT16 getServerPort();
 			/*For IP (Host) AND Unix Domain Sockets*/
 //	    SINT32 getServerHost(UINT8* path,UINT32 len);
-			
+
 //			SINT32 getServerRTTPort();
 			UINT16 getSOCKSServerPort();
-	    
+
 			UINT32 getListenerInterfaceCount(){return m_cnListenerInterfaces;}
-			CAListenerInterface* getListenerInterface(UINT32 nr)		
+			CAListenerInterface* getListenerInterface(UINT32 nr)
 				{
 					if(nr>0&&nr<=m_cnListenerInterfaces&&m_arListenerInterfaces[nr-1]!=NULL)
 						return new CAListenerInterface(*m_arListenerInterfaces[nr-1]);
 					else
 						return NULL;
 				};
-			
+
 			//this is only for the local proxy
 			UINT16 getMixPort();
 			SINT32 getMixHost(UINT8* host,UINT32 len);
-	   
+
 			//if we have more than one Target (currently only Caches are possible...)
 			UINT32 getTargetInterfaceCount(){return m_cnTargets;}
 
 			/** Fills a \c TargetInterface struct with the values which belongs to
 				* the target interface \c nr.
-				* This is actual a copy of all values, so the caller is responsible 
+				* This is actual a copy of all values, so the caller is responsible
 				* for destroying them after use!
 				*
 				* @param oTargetInterface \c TargetInterface struct, which gets filles with
@@ -115,12 +115,12 @@ class CACmdLnOptions
 						return E_UNKNOWN;
 				};
 
-			
+
 			UINT16 getSOCKSPort();
 	    SINT32 getSOCKSHost(UINT8* host,UINT32 len);
 	    UINT16 getInfoServerPort();
 	    SINT32 getInfoServerHost(UINT8* host,UINT32 len);
-			
+
 			SINT32 getMaxOpenFiles()
 				{
 					return m_nrOfOpenFiles;
@@ -129,36 +129,36 @@ class CACmdLnOptions
 			CASignature* getSignKey()
 				{
 					if(m_pSignKey!=NULL)
-						return m_pSignKey->clone(); 
+						return m_pSignKey->clone();
 					return NULL;
 				}
-			
+
 			CACertificate* getOwnCertificate()
 				{
 					if(m_pOwnCertificate!=NULL)
-						return m_pOwnCertificate->clone(); 
+						return m_pOwnCertificate->clone();
 					return NULL;
 				}
 
 			CACertificate* getPrevMixTestCertificate()
 				{
 					if(m_pPrevMixCertificate!=NULL)
-						return m_pPrevMixCertificate->clone(); 
+						return m_pPrevMixCertificate->clone();
 					return NULL;
 				}
 
 			CACertificate* getNextMixTestCertificate()
 				{
 					if(m_pNextMixCertificate!=NULL)
-						return m_pNextMixCertificate->clone(); 
+						return m_pNextMixCertificate->clone();
 					return NULL;
 				}
-			
+
 			/** Returns a certificate which contains a key which could be used for log encryption*/
 			CACertificate* getLogEncryptionKey()
 				{
 					if(m_pLogEncryptionCertificate!=NULL)
-						return m_pLogEncryptionCertificate->clone(); 
+						return m_pLogEncryptionCertificate->clone();
 					return NULL;
 				}
 
@@ -197,7 +197,7 @@ class CACmdLnOptions
 		friend THREAD_RETURN threadReConfigure(void *param);
 		private:
 			UINT8*	m_strConfigFile; //the filename of the config file
-			bool		m_bIsRunReConfigure; //true, if an async reconfigure is under way 
+			bool		m_bIsRunReConfigure; //true, if an async reconfigure is under way
 	    CAMutex m_csReConfigure; //Ensures that reconfigure is running only once at the same time;
 			CAThread m_threadReConfigure; //Thread, that does the actual reconfigure work
 			bool		m_bDaemon;
@@ -224,7 +224,7 @@ class CACmdLnOptions
 			UINT32								m_cnTargets;
 			CAListenerInterface**	m_arListenerInterfaces;
 			UINT32								m_cnListenerInterfaces;
-			
+
 			CASignature*		m_pSignKey;
 			CACertificate*	m_pOwnCertificate;
 			CACertificate*	m_pPrevMixCertificate;

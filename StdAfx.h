@@ -1,28 +1,28 @@
 /*
-Copyright (c) 2000, The JAP-Team 
+Copyright (c) 2000, The JAP-Team
 All rights reserved.
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-	- Redistributions of source code must retain the above copyright notice, 
+	- Redistributions of source code must retain the above copyright notice,
 	  this list of conditions and the following disclaimer.
 
-	- Redistributions in binary form must reproduce the above copyright notice, 
-	  this list of conditions and the following disclaimer in the documentation and/or 
+	- Redistributions in binary form must reproduce the above copyright notice,
+	  this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
-	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors 
-	  may be used to endorse or promote products derived from this software without specific 
-		prior written permission. 
+	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
+	  may be used to endorse or promote products derived from this software without specific
+		prior written permission.
 
-	
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS 
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
 AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
 BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
-OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 
@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.03.07"
+#define MIX_VERSION "00.03.08"
 
 
 //#define LOG_CHANNEL
@@ -49,7 +49,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	//Delay is at the moment constant (max . Channel-Traffic: 10 KByte/s)
 //	#define DELAY_CHANNEL_SEND_INTERVALL 100 //Minimum time between two delayed packets (in ms)
 #endif
-//#define LOG_CRIME  
+//#define LOG_CRIME
 //#define PAYMENT //to enable payment support
 //#define NO_PARKING //to disable control flow
 //#define NO_LOOPACCEPTUSER //to disable user accept thread for First Mix
@@ -84,13 +84,21 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
     #if _MSC_VER > 1000
     #pragma once
     #endif // _MSC_VER > 1000
-		#include <crtdbg.h>
-    #include <winsock2.h>
+		#define _WIN32_WINDOWS 0x0410
+		#include <winsock2.h>
+		#if defined(_MSC_VER) &&defined (_DEBUG)
+			#include <crtdbg.h>
+			#define HAVE_CRTDBG
+		#endif
 		#define socklen_t int
-		#define MSG_NOSIGNAL 0 
+		#define MSG_NOSIGNAL 0
     #include <io.h>
     #include <conio.h>
 		#include <sys/timeb.h>
+		#ifdef MSC_VER
+			#define ftime _ftime
+			#define timeb _timeb
+		#endif
 		#include <malloc.h>
 		#define GET_NET_ERROR (WSAGetLastError())
 		#define ERR_INTERN_TIMEDOUT WSAETIMEDOUT
@@ -101,7 +109,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define O_NONBLOCK 0
 		#define HAVE_VSNPRINTF
 		#define vsnprintf _vsnprintf
-		
+
 #else
 	//__linux is not defined on power pc so we define our own __linux if __linux__ is defined
 	#if defined(__linux__) && !defined(__linux)
@@ -112,9 +120,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	  #include <libcw/debug.h>
 	#endif
 
-  #ifdef HAVE_CONFIG_H  
+  #ifdef HAVE_CONFIG_H
 		#include "config.h"
-		#ifndef HAVE_SOCKLEN_T 
+		#ifndef HAVE_SOCKLEN_T
 			typedef int socklen_t;
 		#endif
 	#else
@@ -147,18 +155,18 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 			#undef HAVE_VSNPRINTF
 			#include <alloca.h>
 		#endif
-    #if !defined( __linux) &&!defined(__CYGWIN__) 
+    #if !defined( __linux) &&!defined(__CYGWIN__)
     	#include <sys/filio.h>
     	#define MSG_NOSIGNAL 0
     #endif
-	#endif 
+	#endif
 
 	#ifdef HAVE_FILIO
 		#include <sys/filio.h>
-	#endif			
+	#endif
 	#ifdef HAVE_POLL
 		#include <poll.h>
-	#endif			
+	#endif
 	#include <sys/ioctl.h>
 	#include <sys/types.h>
   #include <sys/socket.h>
@@ -174,7 +182,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
   #include <syslog.h>
   #include <stdarg.h>
   #include <memory.h>
-  #include <sys/resource.h>       
+  #include <sys/resource.h>
 	#include <ctype.h>
   typedef struct sockaddr* LPSOCKADDR;
   #define SOCKET int
@@ -187,14 +195,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
   #define SD_SEND 1
   #define SD_BOTH 2
   #define GET_NET_ERROR (errno)
-	#define GETERROR (errno) 
+	#define GETERROR (errno)
 	#define ERR_INTERN_TIMEDOUT ETIMEDOUT
 	#define ERR_INTERN_CONNREFUSED ECONNREFUSED
 	#define ERR_INTERN_WOULDBLOCK EAGAIN
 	#define ERR_INTERN_SOCKET_CLOSED EBADF
-  #ifndef min
-		#define min(a,b) ((a<b)?(a):(b))
-  #endif	
 	#ifndef INADDR_NONE
 		#define INADDR_NONE -1
 	#endif
@@ -279,6 +284,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //FOr large file support
 #ifndef O_LARGEFILE
 	#define O_LARGEFILE 0
+#endif
+
+//The min() macro
+#ifndef min
+	#define min(a,b) ((a<b)?(a):(b))
 #endif
 
 //For MySQL
