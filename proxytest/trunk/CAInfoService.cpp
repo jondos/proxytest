@@ -216,7 +216,7 @@ THREAD_RETURN InfoLoop(void *p)
 
 CAInfoService::CAInfoService(CAFirstMix* pFirstMix)
 	{
-		iUser=iRisk=iTraffic=-1;
+//		iUser=iRisk=iTraffic=-1;
 		m_pFirstMix=pFirstMix;
 
 		bRun=false;
@@ -228,7 +228,7 @@ CAInfoService::~CAInfoService()
 		stop();
 		m_threadRunLoop.join();
 	}
-
+/*
 SINT32 CAInfoService::setLevel(SINT32 user,SINT32 risk,SINT32 traffic)
 	{
 		csLevel.lock();
@@ -238,6 +238,7 @@ SINT32 CAInfoService::setLevel(SINT32 user,SINT32 risk,SINT32 traffic)
 		csLevel.unlock();
 		return E_SUCCESS;
 	}
+*/
 /*
 SINT32 CAInfoService::setMixedPackets(UINT32 nPackets)
 	{
@@ -256,15 +257,15 @@ SINT32 CAInfoService::setSignature(CASignature* pSig)
 
 SINT32 CAInfoService::getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic)
 	{
-		csLevel.lock();
+/*		csLevel.lock();
 		if(puser!=NULL)
 			*puser=iUser;
 		if(ptraffic!=NULL)
 			*ptraffic=iTraffic;
 		if(prisk!=NULL)
 			*prisk=iRisk;
-		csLevel.unlock();
-		return E_SUCCESS;
+		csLevel.unlock();*/
+		return m_pFirstMix->getLevel(puser,prisk,ptraffic);
 	}
 
 SINT32 CAInfoService::getMixedPackets(UINT32* ppackets)

@@ -38,7 +38,7 @@ class CAInfoService
 			SINT32 sendHelo();
 			int start();
 			int stop();
-			SINT32 setLevel(SINT32 user,SINT32 risk,SINT32 traffic);
+			//SINT32 setLevel(SINT32 user,SINT32 risk,SINT32 traffic);
 			SINT32 getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic);
 			//SINT32 setMixedPackets(UINT32 packets);
 			SINT32 getMixedPackets(UINT32* ppackets);
@@ -46,12 +46,12 @@ class CAInfoService
 			SINT32 setSignature(CASignature* pSignature);
 			CASignature* getSignature(){return pSignature;}
 		private:
-			SINT32 iUser;
-			SINT32 iRisk;
-			SINT32 iTraffic; 
+			//SINT32 iUser;
+			//SINT32 iRisk;
+			//SINT32 iTraffic; 
 			//UINT32 m_MixedPackets;
 			bool bRun;
-			CAMutex csLevel;
+			//CAMutex csLevel;
 			CASignature* pSignature;
 			CAFirstMix* m_pFirstMix;
 			CAThread m_threadRunLoop;

@@ -40,6 +40,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 THREAD_RETURN loopSendToMix(void *param);
 THREAD_RETURN loopAcceptUsers(void *param);
+THREAD_RETURN loopReadFromUsers(void *param);
 
 class CAInfoService;
 class CAFirstMix:public CAMix
@@ -47,15 +48,16 @@ class CAFirstMix:public CAMix
 		public:
 			CAFirstMix()
 				{
-					m_MixedPackets=0;m_nSocketsIn=0;
+					m_nMixedPackets=0;m_nSocketsIn=0;
 					m_pQueueSendToMix=NULL;
 					m_pIPList=NULL;
 					m_arrSocketsIn=NULL;
 					m_KeyInfoBuff=NULL;
 					m_pRSA=NULL;
 					m_pInfoService=NULL;
-					m_psocketgroupUsersRead=NULL;
+					m_psocketgroupUsersRead=m_psocketgroupUsersWrite=NULL;
 					m_pChannelList=NULL;
+					m_pMuxOut=NULL;
 				}
 			virtual ~CAFirstMix(){}
 		private:
@@ -68,13 +70,48 @@ class CAFirstMix:public CAMix
 				{
 					if(ppackets!=NULL)
 						{
-							*ppackets=m_MixedPackets;
+							*ppackets=m_nMixedPackets;
 							return E_SUCCESS;
 						}
 					return E_UNKNOWN;
 				}
+
+			SINT32 getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic)
+				{
+					*puser=(SINT32)m_nUser;
+					*prisk=-1;
+					*ptraffic=-1;
+					return E_SUCCESS;
+				}
+			
 		friend THREAD_RETURN loopSendToMix(void*);
 		friend THREAD_RETURN loopAcceptUsers(void*);
+		friend THREAD_RETURN loopReadFromUsers(void*);
+		private:
+			SINT32 incUsers()
+				{
+					m_mutexUser.lock();
+					m_nUser++;
+					m_mutexUser.unlock();
+					return E_SUCCESS;
+				}
+			
+			SINT32 decUsers()
+				{
+					m_mutexUser.lock();
+					m_nUser--;
+					m_mutexUser.unlock();
+					return E_SUCCESS;
+				}
+
+			SINT32 incMixedPackets()
+				{
+					m_mutexMixedPackets.lock();
+					m_nMixedPackets++;
+					m_mutexMixedPackets.unlock();
+					return E_SUCCESS;
+				}
+
 		private:	
 			CAIPList* m_pIPList;
 			CAQueue* m_pQueueSendToMix;
@@ -83,15 +120,16 @@ class CAFirstMix:public CAMix
 			UINT32 m_nSocketsIn;
 			CASocket* m_arrSocketsIn;
 			CASocketGroup* m_psocketgroupUsersRead;
+			CASocketGroup* m_psocketgroupUsersWrite;
 			CAInfoService* m_pInfoService;
-//			CASocket		m_socketIn;
-//      CASocket		m_socketHttpsIn;
-			CAMuxSocket muxOut;
+			CAMuxSocket* m_pMuxOut;
 			UINT8* m_KeyInfoBuff;
 			UINT16 m_KeyInfoSize;
-			UINT32 m_MixedPackets;
+			UINT32 m_nMixedPackets;
 			CAASymCipher* m_pRSA;
 			CASignature mSignature;
+			CAMutex m_mutexUser;
+			CAMutex m_mutexMixedPackets;
 	};
 
 #endif
