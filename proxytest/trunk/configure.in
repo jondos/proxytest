@@ -220,6 +220,15 @@ AC_ARG_WITH(debug,
 	]
 )
 
+AC_ARG_WITH(crime-detection,
+	[  --with-crime-detection		  Enable crime detection mode],
+	[
+		if test "x$withval" != "$xno" ; then
+			CFLAGS="$CFLAGS -DLOG_CRIME"
+		fi
+	]
+)
+
 
 CFLAGS="$CFLAGS $OFLAGS"
 CXXFLAGS=$CFLAGS
