@@ -244,17 +244,17 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include <openssl/x509v3.h>
 
 //For DOM
-#include <xercesc/util/PlatformUtils.hpp>
-#include <xercesc/util/XMLString.hpp>
-#include <xercesc/util/XMLUniDefs.hpp>
-#include <xercesc/framework/XMLFormatter.hpp>
-#include <xercesc/util/TranscodingException.hpp>
+#include <util/PlatformUtils.hpp>
+#include <util/XMLString.hpp>
+#include <util/XMLUniDefs.hpp>
+#include <framework/XMLFormatter.hpp>
+#include <util/TranscodingException.hpp>
 
 
-#include <xercesc/dom/DOM_DOMException.hpp>
-#include <xercesc/framework/MemBufInputSource.hpp>
-#include <xercesc/parsers/DOMParser.hpp>
-#include <xercesc/dom/DOM.hpp>
+#include <dom/DOM_DOMException.hpp>
+#include <framework/MemBufInputSource.hpp>
+#include <parsers/DOMParser.hpp>
+#include <dom/DOM.hpp>
 
 //For MySQL
 #ifdef PAYMENT_SUPPORT

@@ -54,7 +54,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CACertificate.hpp"
 #include "CACertStore.hpp"
 #include "xml/DOM_Output.hpp"
-#include "CAPayment.hpp"
+//#include "CAPayment.hpp"
 //#ifdef _WIN32
 //HANDLE hEventThreadEnde;
 //#endif
