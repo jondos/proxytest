@@ -147,7 +147,8 @@ tunnel_in_setsockopts (int fd)
 
   if (tcp != -1)
     {
-      int i, n;
+      int i;
+      socklen_t n;
 
       i = 1;
       if (setsockopt (fd,
@@ -178,7 +179,8 @@ tunnel_out_setsockopts (int fd)
 #ifdef SO_SNDLOWAT
   {
     int tcp = get_proto_number ("tcp");
-    int i, n;
+    int i;
+    socklen_t n;
  
     if (tcp != -1)
       {
@@ -194,11 +196,7 @@ tunnel_out_setsockopts (int fd)
 		       strerror (errno));
 	  }
 	n = sizeof i;
-	getsockopt (fd,
-		    tcp,
-		    SO_SNDLOWAT,
-		    (char *)&i,
-		    &n);
+	getsockopt (fd,tcp,SO_SNDLOWAT,(char *)&i,&n);
 	log_debug ("tunnel_out_setsockopts: non-fatal SO_SNDLOWAT: %d", i);
       }
   }
@@ -207,7 +205,7 @@ tunnel_out_setsockopts (int fd)
 #ifdef SO_LINGER
   {
     struct linger l;
-    int n;
+    socklen_t n;
 
     l.l_onoff = 1;
     l.l_linger = 20 * 100; /* linger for 20 seconds */
@@ -261,7 +259,8 @@ tunnel_out_setsockopts (int fd)
 #else
 #ifdef SO_SNDBUF
   {
-    int i, n;
+    int i;
+    socklen_t n;
 
     i = 0;
     if (setsockopt (fd,
@@ -286,7 +285,8 @@ tunnel_out_setsockopts (int fd)
 
 #ifdef SO_KEEPALIVE
   {
-    int i, n;
+    int i;
+    socklen_t n;
 
     i = 1;
     if (setsockopt (fd,
@@ -1115,7 +1115,7 @@ tunnel_accept (Tunnel *tunnel)
 	}
 
       len = sizeof addr;
-      s = accept (tunnel->server_socket, (struct sockaddr *)&addr, &len);
+      s = accept (tunnel->server_socket, (struct sockaddr *)&addr,(socklen_t*) &len);
       if (s == -1)
 	{
 	  log_error ("tunnel_accept: accept error: %s", strerror (errno));

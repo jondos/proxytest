@@ -37,6 +37,8 @@ int CAMuxSocket::accept(unsigned short port)
 		else
 			{
 				m_pTunnel=tunnel_new_server (port,0/*DEFAULT_CONTENT_LENGTH*//*sizeof(MUXPACKET)*/);
+				if(m_pTunnel==NULL)
+				    return SOCKET_ERROR;
 				tunnel_accept(m_pTunnel);
 			}
 		return 0;
@@ -101,7 +103,7 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 			{		
 				do
 					{
-						len=tunnel_write(m_pTunnel,"fghj",4);//((char*)pPacket)+aktIndex,MuxPacketSize);
+						len=tunnel_write(m_pTunnel,(void*)"fghj",4);//((char*)pPacket)+aktIndex,MuxPacketSize);
 						return 0;
 						MuxPacketSize-=len;
 						aktIndex+=len;
@@ -155,7 +157,7 @@ int CAMuxSocket::receive(MUXPACKET* pPacket)
 				do
 					{
 						char buff[6];
-						len=tunnel_read(m_pTunnel,buff,4);//((char*)pPacket)+aktIndex,MuxPacketSize);
+						len=tunnel_read(m_pTunnel,buff,1);//((char*)pPacket)+aktIndex,MuxPacketSize);
 						buff[5]=0;
 						printf(buff);
 						return 0;

@@ -83,7 +83,11 @@
 #define HAVE_GETOPT_H 1
 
 /* Define if you have the <sys/poll.h> header file.  */
+#ifdef _WIN32
 #undef HAVE_SYS_POLL_H
+#else
+#define HAVE_SYS_POLL_H
+#endif
 
 /* Define if you have the <syslog.h> header file.  */
 #define HAVE_SYSLOG_H 1
@@ -110,5 +114,7 @@
 /* Define to 0xffffffff if <netinet/in.h> doesn't define. */
 /* #undef INADDR_NONE */
 
+#ifdef _WIN32
 #define ssize_t size_t
 #define inline __inline
+#endif

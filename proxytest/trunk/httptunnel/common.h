@@ -7,6 +7,7 @@ Copyright (C) 1999 Lars Brinkhoff.  See COPYING for terms and conditions.
 #ifndef COMMON_H
 #define COMMON_H
 
+#include "../StdAfx.h"
 #include "config.h"
 
 #ifndef _WIN32
@@ -18,6 +19,7 @@ Copyright (C) 1999 Lars Brinkhoff.  See COPYING for terms and conditions.
 #include <syslog.h>
 #include <getopt.h>
 #include <sys/socket.h>
+#include <sys/poll.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <stdarg.h>
@@ -52,8 +54,6 @@ Copyright (C) 1999 Lars Brinkhoff.  See COPYING for terms and conditions.
 #error "This system doesn't provide getopt()."
 #endif
 
-//extern "C"
-//{
 extern int debug_level;
 extern FILE *debug_file;
 
@@ -68,7 +68,7 @@ extern void log_annoying (char *fmt0, ...);
 static inline void log_debug (char *fmt0, ...) {}
 static inline void log_verbose (char *fmt0, ...) {}
 //static inline void log_annoying () {}
-static inline log_annoying(char *fmt0, ...){}
+static inline void log_annoying(char *fmt0, ...){}
 #endif
 
 extern int server_socket (int port, int backlog);
