@@ -357,7 +357,7 @@ SINT32 CALastMix::loop()
 																	tmpSocket->setNonBlocking(true);
 																	#ifdef LOG_CHANNEL
 																		getcurrentTimeMillis(current_millis);
-																		oSocketList.add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue(),current_millis);
+																		oSocketList.add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue(),current_millis,payLen);
 																	#else
 																		oSocketList.add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue());
 																	#endif

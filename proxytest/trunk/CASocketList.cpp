@@ -121,7 +121,7 @@ SINT32 CASocketList::setThreadSafe(bool b)
 *
 */
 #ifdef LOG_CHANNEL
-SINT32 CASocketList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue,UINT64 time)
+SINT32 CASocketList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue,UINT64 time,UINT32 initalUpload)
 #else
 SINT32 CASocketList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue)
 #endif
@@ -148,7 +148,7 @@ SINT32 CASocketList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQu
 		m_Connections->id=id;
 #ifdef LOG_CHANNEL
 		m_Connections->u32Download=0;
-		m_Connections->u32Upload=0;
+		m_Connections->u32Upload=initalUpload;
 		set64(m_Connections->time_created,time);
 #endif
 		m_Size++;
