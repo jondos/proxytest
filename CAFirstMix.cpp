@@ -607,7 +607,7 @@ SINT32 CAFirstMix::loop()
 								pnewMuxSocket=new CAMuxSocket;
 								if(socketsIn[i]->accept(*(CASocket*)pnewMuxSocket)==SOCKET_ERROR)
 									{
-										CAMsg::printMsg(LOG_ERR,"Accept Error %u - direct Connection from Browser!\n",errno);
+										CAMsg::printMsg(LOG_ERR,"Accept Error %u - direct Connection from Browser!\n",GET_NET_ERROR);
 										delete pnewMuxSocket;
 									}
 								else
@@ -670,9 +670,9 @@ SINT32 CAFirstMix::loop()
                         delete pEntry->pCipher;
 												pEntry=oChannelList.getNextChannel(pEntry);
 											}
-										pMuxSocket->close();
 										delete pHashEntry->pQueueSend;
 										oChannelList.remove(pMuxSocket);
+										pMuxSocket->close();
 										delete pMuxSocket;
 										nUser--;
 										oInfoService.setLevel(nUser,-1,-1);
