@@ -66,6 +66,6 @@ parameters at the bottom of the structs as appropriate.
  // } keyInstance;
 
 typedef  word8 keyInstance[MAXROUNDS+1][4][4];	
-//int rijndaelEncrypt (word8 a[16], word8 b[16], word8 rk[MAXROUNDS+1][4][4]);
-//int makeKey(keyInstance key, /*int keyLen,*/ char *keyMaterial);
+int rijndaelEncrypt (word8 a[16], word8 b[16], word8 rk[MAXROUNDS+1][4][4]);
+int makeKey(keyInstance key, /*int keyLen,*/ char *keyMaterial);
 

@@ -1,15 +1,15 @@
 #ifndef __AES_ENCRYPT__
 #define __AES_ENCRYPT__
 
-//#include "rijndael-api-fst.h"
-//#include <stdlib.h>
+#include "rijndael-api-fst.h"
+#include <stdlib.h>
 #define SC	((BC - 4) >> 1)
 
 #include "boxes-fst.dat.h"
 #define ROUNDS 10 //128/*keyLen*//32 + 6 //	ROUNDS = 128/*keyLen*//32 + 6;
 
 
-__forceinline int rijndaelEncrypt (word8 a[16], word8 b[16], word8 rk[MAXROUNDS+1][4][4])
+int rijndaelEncrypt (word8 a[16], word8 b[16], word8 rk[MAXROUNDS+1][4][4])
 {
 	/* Encryption of one block. 
 	 */
