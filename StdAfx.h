@@ -19,6 +19,7 @@
     #define THREAD_RETURN_SUCCESS return
     #define sleep(i) Sleep(i*1000)
 #else
+    #include <sys/ioctl.h>
     #include <sys/socket.h>
     #include <netinet/in.h>
     #include <arpa/inet.h>
@@ -33,6 +34,7 @@
     typedef struct sockaddr* LPSOCKADDR;
     #define SOCKET int
     typedef struct hostent HOSTENT;
+    #define ioctlsocket(a,b,c) ioctl(a,b,c)
     #define closesocket(s) close(s)
     #define SOCKET_ERROR -1
     #define SD_RECEIVE 0
