@@ -728,7 +728,8 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 #ifndef FIRST_MIX_SYMMETRIC
 		MIXPACKET oMixPacket;
 		((CASocket*)pNewUser)->setNonBlocking(true);	                    // stefan: sendet das send in der letzten zeile doch noch nicht? wenn doch, kann dann ein JAP nicht durch verweigern der annahme hier den mix blockieren? vermutlich nciht, aber andersherum faend ich das einleuchtender.
-		if(pNewUser->receive(&oMixPacket,FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT)!=MIXPACKET_SIZE) //wait at most 10 second for user to send sym key
+		if(pNewUser->receive(&oMixPacket,FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT)!=MIXPACKET_SIZE) //wait at most FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT 
+																																																	// milliseconds for user to send sym key
 			{
 				delete pNewUser;
 				m_pIPList->removeIP(peerIP);
