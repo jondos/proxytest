@@ -104,17 +104,26 @@ SINT32 CAQueue::getNext(UINT8* pbuff,UINT32* psize)
 			return E_UNKNOWN;
 		EnterCriticalSection(&m_csQueue);
 		SINT32 ret;
-		if(*psize<m_Queue->size)
-			ret=E_UNKNOWN;
-		else
+		UINT32 copySize=min(m_Queue->size,*psize);
+//		if(*psize<m_Queue->size)
+//			ret=E_UNKNOWN;
+//		else
 			{
-				memcpy(pbuff,m_Queue->pBuff,m_Queue->size);
-				*psize=m_Queue->size;
-				delete m_Queue->pBuff;
-				QUEUE* tmp=m_Queue;
-				m_Queue=m_Queue->next;
-				delete tmp;
-				m_nQueueSize--;
+				memcpy(pbuff,m_Queue->pBuff,copySize);
+				*psize=copySize;
+				if(copySize==m_Queue->size)
+					{
+						delete m_Queue->pBuff;
+						QUEUE* tmp=m_Queue;
+						m_Queue=m_Queue->next;
+						delete tmp;
+						m_nQueueSize--;
+					}
+				else
+					{
+						m_Queue->size-=copySize;
+						memmove(m_Queue->pBuff,m_Queue->pBuff+copySize,m_Queue->size);
+					}
 				ret=E_SUCCESS;
 			}
 		LeaveCriticalSection(&m_csQueue);
