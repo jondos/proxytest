@@ -863,14 +863,19 @@ Optional Features:
 			  (and sometimes confusing) to the casual installer
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
---enable-static     Static linking
+  --enable-static         Static linking
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
-  --with-arch=i386|i486     Specify architecure for optimisation
-  --with-pool=POOLSIZE     Specify if to build a pool mix and optionally the poolsize
-  --with-bandwidth-limitation=LIMITATION_START     Specify if to build with bandwith limitation and optionally the number of bytes which are transferred without any limitation
+  --with-arch=i386|i486|i586|i686|pentium3
+                          Specify architecure for optimisation
+  --with-pool=POOLSIZE    Specify if to build a pool mix and optionally the
+                          poolsize
+  --with-bandwidthlimitation=LIMITATION_START
+                          Specify if to build with bandwith limitation and
+                          optionally the number of bytes which are transferred
+                          without any limitation
   --with-ssl-dir=PATH     Specify path to OpenSSL installation
   --with-xml-include=PATH     Specify path to XERCES-C include files (without a trailing '/xercesc')
   --with-xml-lib=PATH     Specify path to XERCES-C library files
@@ -3723,7 +3728,7 @@ if test "${with_pool+set}" = set; then
 
 		if test "x$withval" != "$xno" ; then
 		    POOL="-DUSE_POOL"
-		    if test "x$withval" != "xyes" ; then
+		    if test "x$withval" != "$xyes" ; then
 			POOL="$POOL -DMIX_POOL_SIZE=$withval"
 		    fi
 		fi
@@ -3733,13 +3738,13 @@ fi;
 
 BANDWIDTH_LIMIT=""
 
-# Check whether --with-bandwith-limitation or --without-bandwith-limitation was given.
-if test "${with_bandwith_limitation+set}" = set; then
-  withval="$with_bandwith_limitation"
+# Check whether --with-bandwithlimitation or --without-bandwithlimitation was given.
+if test "${with_bandwithlimitation+set}" = set; then
+  withval="$with_bandwithlimitation"
 
 		if test "x$withval" != "$xno" ; then
 		    BANDWIDTH_LIMIT="-DDELAY_CHANNELS"
-		    if test "x$withval" != "xyes" ; then
+		    if test "x$withval" != "$xyes" ; then
 			BANDWIDTH_LIMIT="$BANDWIDTH_LIMIT -DDELAY_CHANNEL_TRAFFIC=$withval"
 		    fi
 		fi
