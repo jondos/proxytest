@@ -42,6 +42,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_strMixXml=m_strUser=strCascadeName=strLogDir=NULL;
 		pTargets=NULL;
 		cntTargets=0;
+		m_nrOfOpenFiles=-1;
 		m_strMixID=NULL;
 		m_pSignKey=NULL;
 		m_pOwnCertificate=NULL;
@@ -113,6 +114,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 	char* logdir=NULL;
 	char* serverPort=NULL;
 	char* user=NULL;
+	int nrOfOpenFiles=-1;
 	char* configfile=NULL;
   int bXmlKey=0;
 	DOM_Document docMixXml;
@@ -132,6 +134,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 		{"name",'a',POPT_ARG_STRING,&cascadename,0,"name of the cascade","<string>"},
 		{"logdir",'l',POPT_ARG_STRING,&logdir,0,"directory where log files go to","<dir>"},
 		{"user",'u',POPT_ARG_STRING,&user,0,"effective user","<user>"},
+		{"files",'f',POPT_ARG_INT,&nrOfOpenFiles,0,"number of open files (sockets)","<filehandles>"},
 		{"template",'t',POPT_ARG_NONE,&iTemplate,0,"generate conf template and exit",NULL},
 		{"config",'c',POPT_ARG_STRING,&configfile,0,"config file to use","<file>"},
 		POPT_AUTOHELP
@@ -306,6 +309,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 	if(serverrttport!=-1)
 		iServerRTTPort=serverrttport;
 	iSOCKSServerPort=SOCKSport;
+	m_nrOfOpenFiles=nrOfOpenFiles;
 	if(mix==0)
 		bLocalProxy=true;
 	else if(mix==1)

@@ -54,6 +54,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CACertificate.hpp"
 #include "CACertStore.hpp"
 #include "xml/DOM_Output.hpp"
+#include "CAPayment.hpp"
 //#ifdef _WIN32
 //HANDLE hEventThreadEnde;
 //#endif
@@ -161,11 +162,20 @@ for this channel will change to (because of the content format for the first pac
 For Upstream and Downstream different keys are used.
 */
 
+
 int main(int argc, const char* argv[])
 	{		
 			XMLPlatformUtils::Initialize();	
 			OpenSSL_add_all_algorithms();
-/*			CAASymCipher oRsa;
+	
+	/*		CAPayment oPayment;
+			oPayment.init((UINT8*)"dud14.inf.tu-dresden.de",3306,(UINT8*)"payment",(UINT8*)"payment");
+			UINT32 accessUntil;
+			SINT32 ret=oPayment.checkAccess((UINT8*)"payer1",5,&accessUntil);
+			ret=oPayment.checkAccess((UINT8*)"payer2",5,&accessUntil);
+			exit(0);
+	*/		
+			/*			CAASymCipher oRsa;
 			oRsa.generateKeyPair(1024);
 			UINT8 buff1[1024];
 			UINT32 len=1024;
@@ -256,6 +266,7 @@ int main(int argc, const char* argv[])
 Debug(libcw_do.on());
 Debug(dc::malloc.on());
 #endif
+
 			//some test....
 		if(MIXPACKET_SIZE!=sizeof(MIXPACKET))
 			{
@@ -376,9 +387,21 @@ Debug(dc::malloc.on());
 				struct passwd* pwd=getpwnam((char*)buff);
 				if(pwd==NULL||seteuid(pwd->pw_uid)==-1)
 					CAMsg::printMsg(LOG_ERR,"Could not switch to effective user %s!\n",buff);
-			}
+			
 		if(geteuid()==0)
 			CAMsg::printMsg(LOG_INFO,"Warning - Running as root!\n");
+		SINT32 maxFiles=options.getMaxOpenFiles();
+		if(maxFiles>0)
+			{
+				struct rlimit lim;
+				/* Set the new MAX open files limit */
+				lim.rlim_cur = lim.rlim_max = maxFiles;
+				if (setrlimit(RLIMIT_NOFILE, &lim) != 0) 
+					{
+						CAMsg::printMsg(LOG_CRIT,"Could not set MAX open files to: %u -- Exiting!\n",maxFiles");
+						exit(1);
+					}
+			}
 #endif
 		
 		if(options.getDaemon())

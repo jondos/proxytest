@@ -72,6 +72,11 @@ class CACmdLnOptions
 	    UINT16 getInfoServerPort();
 	    SINT32 getInfoServerHost(UINT8* host,UINT32 len);
 			
+			SINT32 getMaxOpenFiles()
+				{
+					return m_nrOfOpenFiles;
+				}
+
 			CASignature* getSignKey()
 				{
 					if(m_pSignKey!=NULL)
@@ -130,6 +135,7 @@ class CACmdLnOptions
 			char* strCascadeName;
 			char* strLogDir;
 			char* m_strUser;
+			SINT32 m_nrOfOpenFiles; //How many open files (sockets) should we use
 			char* m_strMixXml;
 			char* m_strMixID;
 

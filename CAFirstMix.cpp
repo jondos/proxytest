@@ -584,7 +584,7 @@ SINT32 CAFirstMix::loop()
 									{
 										countRead--;
 										ret=pMuxSocket->receive(pMixPacket,0);
-										if(ret==SOCKET_ERROR)
+										if(ret==SOCKET_ERROR/*||pHashEntry->accessUntil<time()*/)
 											{
 												((CASocket*)pMuxSocket)->getPeerIP(ip);
 												m_pIPList->removeIP(ip);
