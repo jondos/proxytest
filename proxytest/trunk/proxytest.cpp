@@ -230,8 +230,23 @@ int main(int argc, const char* argv[])
 		//some test....
 		if(MIXPACKET_SIZE!=sizeof(MIXPACKET))
 			{
-				CAMsg::printMsg(LOG_CRIT,"MIXPACKET_SIZE != sizeof(MUXPACKET) --> maybe a compiler (optimization) problem!\n");
-				exit(-1);
+				CAMsg::printMsg(LOG_CRIT,"MIXPACKET_SIZE [%u] != sizeof(MUXPACKET) [%u] --> maybe a compiler (optimization) problem!\n",MIXPACKET_SIZE,sizeof(MIXPACKET));
+				CAMsg::printMsg(LOG_CRIT,"Offsets:\n");
+				MIXPACKET oPacket;
+				UINT8 *p=(UINT8 *)&oPacket;
+				UINT32 soffsets[7]={0,4,6,6,6,8,9};
+				UINT32 hoffsets[7];
+				CAMsg::printMsg(LOG_CRIT,".channel %u (should be 0)\n",hoffsets[0]=(UINT8*)&(oPacket.channel)-p);
+				CAMsg::printMsg(LOG_CRIT,".flags: %u (should be 4)\n",hoffsets[1]=(UINT8*)&oPacket.flags-p);
+				CAMsg::printMsg(LOG_CRIT,".data: %u (should be 6)\n",hoffsets[2]=(UINT8*)&oPacket.data-p);
+				CAMsg::printMsg(LOG_CRIT,".payload: %u (should be 6)\n",hoffsets[3]=(UINT8*)&oPacket.payload-p);
+				CAMsg::printMsg(LOG_CRIT,".payload.len: %u (should be 6)\n",hoffsets[4]=(UINT8*)&oPacket.payload.len-p);
+				CAMsg::printMsg(LOG_CRIT,".payload.type: %u (should be 8)\n",hoffsets[5]=(UINT8*)&oPacket.payload.type-p);
+				CAMsg::printMsg(LOG_CRIT,".payload.data: %u (should be 9)\n",hoffsets[6]=(UINT8*)&oPacket.payload.data-p);
+				for(int i=0;i<7;i++)
+				 if(soffsets[i]!=hoffsets[i])
+					exit(-1);
+				CAMsg::printMsg(LOG_CRIT,"Hm, The Offsets seams to be ok - so we try to continue - hope that works...\n");
 			}
 		if(sizeof(UINT32)!=4)
 			{

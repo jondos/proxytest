@@ -93,8 +93,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#else
 	 #define HAVE_UNIX_DOMAIN_PROTOCOL
 	 #define HAVE_VSNPRINTF
-#define HAVE_TIOCOUTQ
-#define HAVE_POLL
+	#define HAVE_POLL
 		#ifndef __linux
 	     #define HAVE_TCP_KEEPALIVE
 	 #endif
@@ -106,7 +105,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	 #endif
 	 #ifndef __FreeBSD__
 	 #ifndef __linux
-    	#define int socklen_t	
+    	typedef int socklen_t;
 	 #endif
 	 #endif
     #ifndef O_BINARY
