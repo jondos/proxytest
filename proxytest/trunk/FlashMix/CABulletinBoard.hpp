@@ -1,10 +1,6 @@
 #ifndef __CABULLETINBOARD__
 #define __CABULLETINBOARD__
 
-#include <vector>
-#include <iostream>
-
-#include "../StdAfx.h"
 #include "../CAThread.hpp"
 #include "../CASocket.hpp"
 #include "../CASocketAddrINet.hpp"
@@ -16,8 +12,6 @@
 #include "CABNSend.hpp"
 #include "FlashMIXGlobal.hpp"
 #include "CAMainThread.hpp"
-
-using namespace std;
 
 class CABulletinBoard : public CAMainThread
 {

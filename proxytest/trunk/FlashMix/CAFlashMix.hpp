@@ -11,11 +11,6 @@
 #include "FlashMIXGlobal.hpp"
 #include "CAMainThread.hpp"
 
-#include <iostream>
-#include <string>
-
-using namespace std;
-
 static const UINT16 ROLE_PERM_SRV = 0;
 static const UINT16 ROLE_DECR_SRV = 1;
 

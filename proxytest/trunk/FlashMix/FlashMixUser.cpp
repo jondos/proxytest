@@ -1,5 +1,3 @@
-
-
 #include "../StdAfx.h"
 #include "../CACmdLnOptions.hpp"
 #include "../CAMsg.hpp"
@@ -12,13 +10,11 @@
     #pragma argsused
 #endif
 
-using namespace std;
-
 CACmdLnOptions options;
 
 void log(int line, SINT32 result, char* des, int msg)
 {
-    cout << "Line: " << line << " Result: " << result << " " << des << " " << msg << endl;
+    std::cout << "Line: " << line << " Result: " << result << " " << des << " " << msg << std::endl;
 }
 
 void coutbn(BIGNUM* bn)
@@ -116,6 +112,7 @@ int main( int argc, char * argv[] )
     SINT32 result = E_SUCCESS;
     CASocketAddrINet* pAddr = NULL;
     CASocket* pSocket = NULL;
+    pSocket->create();
     ELGAMAL* elBBSignKey = NULL;
     ELGAMAL* elGroupKey = NULL;
     UINT32 cnt = 0;

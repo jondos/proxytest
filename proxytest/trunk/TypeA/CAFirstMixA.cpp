@@ -300,7 +300,9 @@ NEXT_USER:
 									pHashEntry=(fmHashTableEntry*)m_psocketgroupUsersRead->getNextSignaledSocketData();
 								#else
 									}//if is signaled
+#ifdef WITH_CONTROL_CHANNELS
 NEXT_USER:
+#endif
 									pHashEntry=m_pChannelList->getNext();
 								#endif
 							}

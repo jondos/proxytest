@@ -1,6 +1,7 @@
 #include "../StdAfx.h"
 #include "CAFlashMIX.hpp"
-
+//#include <iostream>
+//#include <string>
 void logBN(char* a_cFormatStr, BIGNUM* a_bn)
 {
     char* c = BN_bn2dec(a_bn);
@@ -1411,61 +1412,10 @@ SINT32 CAFlashMIX::unblindCheckFirstReEnc(SINT32& ar_sResult, CAFlashMIX* a_ths,
     unblindFirstReEncExpList(ar_sResult, &bnExpList, a_pPrevMIX, a_pNextMIX,
         a_uSelfIdx, LISTSIZE, a_bnExp, MIXCNT);
 
-/*    for (UINT32 i = 0; i < MIXCNT; i++)
-    {
-        for (UINT32 j = 0; j < LISTSIZE; j++)
-            cout << " " << uPermList[(2*i + 0)*LISTSIZE + j];
-        cout << endl;
-        for (UINT32 j = 0; j < LISTSIZE; j++)
-            cout << " " << uPermList[(2*i + 1)*LISTSIZE + j];
-        cout << endl;
-    }/**/
-
-/*    for (UINT32 i = 0; i < MIXCNT; i++)
-    {
-        for (UINT32 j = 0; j < LISTSIZE; j++)
-        {
-            char* c = BN_bn2dec(bnExpList[2*i + 0][j]);
-            CAMsg::printMsg(LOG_DEBUG, "Exp [%d, %d] = %s\n", 2*i + 0, j, c);
-            OPENSSL_free(c);
-        }
-        for (UINT32 j = 0; j < LISTSIZE; j++)
-        {
-            char* c = BN_bn2dec(bnExpList[2*i + 1][j]);
-            CAMsg::printMsg(LOG_DEBUG, "Exp [%d, %d] = %s\n", 2*i + 1, j, c);
-            OPENSSL_free(c);
-        }
-    }/**/
-
     CAMsg::printMsg(LOG_DEBUG, "check 1 Reenc receive Perm and Exp %s\n", (ar_sResult == E_SUCCESS) ? "successfully finished" : "ERROR");
     unblindCalcAkk(ar_sResult, &uPerm0, &uPerm1, LISTSIZE, uPermList, MIXCNT);
-/*        cout << "Perm 0:";
-        for (UINT32 i = 0; i < 2*LISTSIZE; i++)
-            cout << " " << uPerm0[i];
-        cout << endl;
-        cout << "Perm 1:";
-        for (UINT32 i = 0; i < 2*LISTSIZE; i++)
-            cout << " " << uPerm1[i];
-        cout << endl;/**/
-
-/*    delete uPerm0;
-    delete uPerm1;
-    uPerm0 = NULL;
-    uPerm1 = NULL;
-
-    unblindCalcAkkPerm(ar_sResult, &uPerm0, &uPerm1, uPermList, MIXCNT, LISTSIZE);/**/
 
     CAMsg::printMsg(LOG_DEBUG, "check 1 Reenc calc akk perm %s\n", (ar_sResult == E_SUCCESS) ? "successfully finished" : "ERROR");
-
-/*    cout << "Perm 0:";
-    for (UINT32 i = 0; i < LISTSIZE; i++)
-        cout << " " << uPerm0[i];
-    cout << endl;
-    cout << "Perm 1:";
-    for (UINT32 i = 0; i < LISTSIZE; i++)
-        cout << " " << uPerm1[i];
-    cout << endl;/**/
-
 
     // calc sum exp of list 0
     for (UINT32 i = 1; (i < MIXCNT) && (ar_sResult == E_SUCCESS); i++)
@@ -1777,31 +1727,6 @@ SINT32 CAFlashMIX::unblindPermutate(SINT32& ar_sResult,
     return ar_sResult;
 }/**/
 
-/*
-SINT32 CAFlashMIX::unblindPermutate(SINT32& ar_sResult,
-    BIGNUM** ar_bnList, UINT32 a_uListSize, UINT32* a_uPerm)
-{
-    if (ar_sResult != E_SUCCESS)
-        return ar_sResult;
-    if ((ar_bnList == NULL) || (a_uPerm == NULL))
-    {
-        ar_sResult E_UNKNOWN;
-        return ar_sResult;
-    }
-
-    UINT32 uPL = 0;
-    UINT32 uPH = 0;
-
-    while (unblindPermSetPtr(uPL, uPH, 2*a_uListSize, a_uPerm) == E_SUCCESS)
-    {
-        BIGNUM* bnTmp = ar_bnList[a_uPerm[uPL]];
-        ar_bnList[a_uPerm[uPL]] = ar_bnList[a_uPerm[uPH]];
-        ar_bnList[a_uPerm[uPH]] = bnTmp;
-    }
-
-    return ar_sResult;
-}/**/
-
 SINT32 CAFlashMIX::unblindPermutateMsg(SINT32& ar_sResult, BIGNUM** ar_bnList,
     UINT32 a_uListSize, UINT32* a_uPerm)
 {
@@ -1809,7 +1734,7 @@ SINT32 CAFlashMIX::unblindPermutateMsg(SINT32& ar_sResult, BIGNUM** ar_bnList,
         return ar_sResult;
     if ((ar_bnList == NULL) || (a_uPerm == NULL))
     {
-        ar_sResult E_UNKNOWN;
+        ar_sResult=E_UNKNOWN;
         return ar_sResult;
     }
 
@@ -1893,44 +1818,11 @@ SINT32 CAFlashMIX::decrypt(CAFlashMIX* a_ths, CASocket* a_pBB)
 
     CAMsg::printMsg(LOG_DEBUG, "receive inputlist: %s\n", (result == E_SUCCESS) ? "successfully finished" : "ERROR");
 
-//    CAMsg::printMsg(LOG_DEBUG, "index: %d\n", uSelfIdx);
-
-/*    for (UINT32 i = 0; i < uInpListSize; i++)
-    {
-        char* c = BN_bn2dec(bnInpList[i]);
-        CAMsg::printMsg(LOG_DEBUG, "InpList %d: %s\n", i, c);
-        OPENSSL_free(c);
-    }/**/
-
     // decrypt
     uThsMIXIdx = getMIXIdx(a_ths->m_pMutexMIXData, a_ths->m_uMIXCnt, a_ths->m_vMIXData, a_ths->m_uLocalIP, a_ths->m_uPort);
     if (result == E_SUCCESS)
         if (ELGAMAL_calcSharedExp(&bnSharedExp, a_ths->m_uMIXCnt, MIXCNT, uDecryptList, uThsMIXIdx, a_ths->m_elGroupKey->x, a_ths->m_elGroupKey->q) != ELGAMAL_SUCCESS)
             result = E_UNKNOWN;
-
-/*    {
-        char* c = BN_bn2dec(bnSharedExp);
-        CAMsg::printMsg(LOG_DEBUG, "exp: %s\n", c);
-        OPENSSL_free(c);
-    }
-    {
-        char* c = BN_bn2dec(a_ths->m_elGroupKey->p);
-        CAMsg::printMsg(LOG_DEBUG, "key p = %s\n", c);
-        OPENSSL_free(c);
-        c = BN_bn2dec(a_ths->m_elGroupKey->q);
-        CAMsg::printMsg(LOG_DEBUG, "key q = %s\n", c);
-        OPENSSL_free(c);
-        c = BN_bn2dec(a_ths->m_elGroupKey->g);
-        CAMsg::printMsg(LOG_DEBUG, "key g = %s\n", c);
-        OPENSSL_free(c);
-        c = BN_bn2dec(a_ths->m_elGroupKey->x);
-        CAMsg::printMsg(LOG_DEBUG, "key x = %s\n", c);
-        OPENSSL_free(c);
-        c = BN_bn2dec(a_ths->m_elGroupKey->y);
-        CAMsg::printMsg(LOG_DEBUG, "key y = %s\n", c);
-        OPENSSL_free(c);
-    }/**/
-
 
     for (UINT32 i = 0; (i < uInpListSize) && (result == E_SUCCESS); i += 2)
     {
@@ -1941,13 +1833,6 @@ SINT32 CAFlashMIX::decrypt(CAFlashMIX* a_ths, CASocket* a_pBB)
                 result = E_UNKNOWN;
     }
 
-/*    for (UINT32 i = 0; i < uInpListSize; i++)
-    {
-        char* c = BN_bn2dec(bnInpList[i]);
-        CAMsg::printMsg(LOG_DEBUG, "OutList %d: %s\n", i, c);
-        OPENSSL_free(c);
-    }/**/
-
     // send the list
     if (uSelfIdx < MIXCNT - 1)
         sendSignedBNArray(result, a_ths->m_elSignKey, pNextMIX, uInpListSize, bnInpList);
@@ -1956,9 +1841,6 @@ SINT32 CAFlashMIX::decrypt(CAFlashMIX* a_ths, CASocket* a_pBB)
         // send to receivers
         for (UINT32 i = 0; (i < uInpListSize) && (result == E_SUCCESS); i += 2)
         {
-/*            char* c = BN_bn2hex(bnInpList[i]);
-            CAMsg::printMsg(LOG_DEBUG, "decrypted message %d: %s\n", i >> 1, c);
-            OPENSSL_free(c);*/
             decryptSendMessage(result, bnInpList[i]);
         }
     }
@@ -2073,41 +1955,4 @@ SINT32 CAFlashMIX::decryptSendMessage(SINT32& ar_sResult, BIGNUM* a_bnMsg)
     delete pAddr;
 
     return ar_sResult;
-
-/*    UINT8 uIP[4];
-    UINT8* cBN = NULL;
-    UINT32 cBNLength = 0;
-    UINT8* cMsg = NULL;
-
-    for (UINT32 i = 0; i < 4; i++)
-        uIP[i] = ((UINT8*)(a_bnMsg->d))[i];
-
-    initSocket(ar_sResult, &pSocket);
-    initSocketAddrINet(ar_sResult, &pAddr);
-
-    if (ar_sResult == E_SUCCESS)
-        ar_sResult = pAddr->setIP(uIP);
-    if (ar_sResult == E_SUCCESS)
-        ar_sResult = pAddr->setPort(((UINT16*)(a_bnMsg->d))[2]);
-
-    if (ar_sResult == E_SUCCESS)
-        ar_sResult = pSocket->connect(*pAddr, 5, 1);
-
-    if (ar_sResult == E_SUCCESS)
-        if ((cBN = (UINT8*)BN_bn2hex(a_bnMsg)) == NULL)
-            ar_sResult = E_UNKNOWN;
-
-    if (ar_sResult == E_SUCCESS);
-        cBNLength = strlen((char*)cBN) - 12;
-    sendUINT32(ar_sResult, pSocket, cBNLength);
-    if (ar_sResult == E_SUCCESS)
-        ar_sResult = pSocket->sendFully(cBN, cBNLength);
-
-    delete[] cMsg;
-    OPENSSL_free(cBN);
-    if (pSocket != NULL) pSocket->close();
-    delete pSocket;
-    delete pAddr;
-
-    return ar_sResult;*/
 }

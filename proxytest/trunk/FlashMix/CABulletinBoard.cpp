@@ -1,26 +1,28 @@
 #include "../StdAfx.h"
 #include "CABulletinBoard.hpp"
+#include <vector>
+#include <iostream>
 
 void log(int line, SINT32 result, char* des)
 {
-    cout << "Line: " << line << " Result: " << result << " " << des << endl;
+    std::cout << "Line: " << line << " Result: " << result << " " << des << std::endl;
 }
 
 void coutbn(BIGNUM* bn)
 {
     char* c = BN_bn2dec(bn);
-    cout << c << endl;
+    std::cout << c << std::endl;
     OPENSSL_free(c);
 }
 
 void coutElGamal(char* a_suffix, ELGAMAL* el)
 {
-    cout << a_suffix << "->p = "; coutbn(el->p);
-    cout << a_suffix << "->pm1 = "; coutbn(el->pm1);
-    cout << a_suffix << "->q = "; coutbn(el->q);
-    cout << a_suffix << "->g = "; coutbn(el->g);
-    cout << a_suffix << "->x = "; coutbn(el->x);
-    cout << a_suffix << "->y = "; coutbn(el->y);
+    std::cout << a_suffix << "->p = "; coutbn(el->p);
+    std::cout << a_suffix << "->pm1 = "; coutbn(el->pm1);
+    std::cout << a_suffix << "->q = "; coutbn(el->q);
+    std::cout << a_suffix << "->g = "; coutbn(el->g);
+    std::cout << a_suffix << "->x = "; coutbn(el->x);
+    std::cout << a_suffix << "->y = "; coutbn(el->y);
 }
 
 CABulletinBoard::CABulletinBoard(

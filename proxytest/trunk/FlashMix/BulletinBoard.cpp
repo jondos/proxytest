@@ -1,14 +1,15 @@
 #include "../StdAfx.h"
 #include "../CACmdLnOptions.hpp"
-
+#include "../CAMsg.hpp"
+#include "elgamal.hpp"
+#include "CABNSend.hpp"
+#include "FlashMixGlobal.hpp"
 #include "CABulletinBoard.hpp"
 #ifdef __BORLANDC__
     #pragma argsused
 #endif
 
 #include <iostream>
-
-using namespace std;
 
 CACmdLnOptions options;
 
@@ -66,7 +67,7 @@ int main( int argc, char * argv[] )
     bb->start();
 
     char c;
-    cin >> c;
+    std::cin >> c;
 
     delete bb;
 
