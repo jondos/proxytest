@@ -262,6 +262,7 @@ SINT32 CASignature::signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen,CAC
 	}
 
 /** Signs a DOM Node. The XML Signature is include in the XML Tree as a Child of the Node.
+	* If ther is already a Signature is is removed first.
 	* @param node Node which should be signed 
 	* @param pIncludeCerts points to a CACertStore, which holds CACertificates, 
 	*					which should be included in the XML Signature for easy verification 
@@ -270,9 +271,29 @@ SINT32 CASignature::signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen,CAC
 */
 SINT32 CASignature::signXML(DOM_Node& node,CACertStore* pIncludeCerts)
 	{	
+		//getting the Document an the Node to sign
+		DOM_Document doc;
+		DOM_Node elemRoot;
+		if(node.getNodeType()==DOM_Node::DOCUMENT_NODE)
+			{ //Hm, I am to stupid to do it better...
+				DOM_Document* tmpDoc=static_cast<DOM_Document*>(&node);
+				doc=*tmpDoc;
+				elemRoot=doc.getDocumentElement();
+			}
+		else
+			{
+				doc=node.getOwnerDocument();
+				elemRoot=node;
+			}
+
+		//check if there is already a Signature and if so remove it first...
+		DOM_Node tmpSignature;
+		if(getDOMChildByName(elemRoot,(UINT8*)"Signature",tmpSignature,false)==E_SUCCESS)
+			elemRoot.removeChild(tmpSignature);
+
 		//Calculating the Digest...
 		UINT32 len=0;
-		UINT8* canonicalBuff=DOM_Output::makeCanonical(node,&len);
+		UINT8* canonicalBuff=DOM_Output::makeCanonical(elemRoot,&len);
 		if(canonicalBuff==NULL)
 			return E_UNKNOWN;
 
@@ -288,7 +309,6 @@ SINT32 CASignature::signXML(DOM_Node& node,CACertStore* pIncludeCerts)
 
 
 		//Creating the Sig-InfoBlock....
-		DOM_Document doc=node.getOwnerDocument();
 		DOM_Element elemSignedInfo=doc.createElement("SignedInfo");
 		DOM_Element elemReference=doc.createElement("Reference");
 		elemReference.setAttribute("URI","");
@@ -302,9 +322,6 @@ SINT32 CASignature::signXML(DOM_Node& node,CACertStore* pIncludeCerts)
 		if(canonicalBuff==NULL)
 			return E_UNKNOWN;
 		
-	//	UINT sigSize=255;
-	//	UINT8 sig[255];
-	//	UINT8* c=sig;
 		DSA_SIG* pdsaSig=NULL;
 		SINT32 ret=sign(canonicalBuff,len,&pdsaSig);
 		delete[] canonicalBuff;
@@ -313,25 +330,10 @@ SINT32 CASignature::signXML(DOM_Node& node,CACertStore* pIncludeCerts)
 				DSA_SIG_free(pdsaSig);
 				return E_UNKNOWN;
 			}
-		//Making Base64-Encode r and s
-/*		STACK* a=NULL;
-		d2i_ASN1_SET(&a,&c,sigSize,(char *(*)(void))d2i_ASN1_INTEGER,NULL,V_ASN1_SEQUENCE,V_ASN1_UNIVERSAL);
-		BIGNUM* s =BN_new();
-		ASN1_INTEGER* i=(ASN1_INTEGER*)sk_pop(a);
-		ASN1_INTEGER_to_BN(i,s);
-		ASN1_INTEGER_free(i);
-		BIGNUM* r =BN_new();
-		i=(ASN1_INTEGER*)sk_pop(a);
-		ASN1_INTEGER_to_BN(i,r);
-		ASN1_INTEGER_free(i);
-		sk_free(a);
-*/
 		memset(tmpBuff,0,40); //make first 40 bytes '0' --> if r or s is less then 20 bytes long! 
 													//(Due to be compatible to the standarad r and s must be 20 bytes each) 
 		BN_bn2bin(pdsaSig->r,tmpBuff+20-BN_num_bytes(pdsaSig->r)); //so r is 20 bytes with leading '0'...
 		BN_bn2bin(pdsaSig->s,tmpBuff+40-BN_num_bytes(pdsaSig->s));
-//		BN_free(r);
-	//	BN_free(s);
 		DSA_SIG_free(pdsaSig);
 
 		UINT sigSize=255;
@@ -357,8 +359,7 @@ SINT32 CASignature::signXML(DOM_Node& node,CACertStore* pIncludeCerts)
 				tmpDocFrag=0;
 				elemSignature.appendChild(elemKeyInfo);
 			}
-		
-		node.appendChild(elemSignature);
+		elemRoot.appendChild(elemSignature);
 		return E_SUCCESS;
 	}
 

@@ -32,7 +32,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMsg.hpp"
 #include "CASocketAddrINet.hpp"
 #include "CAUtil.hpp"
-//#include "xml/DOM_Output.hpp"
+#include "xml/DOM_Output.hpp"
 extern CACmdLnOptions options;
 
 
@@ -188,41 +188,54 @@ SINT32 CAInfoService::sendHelo()
 		CASocketAddrINet oAddr;
 		UINT8 hostname[255];
 		UINT8 buffHeader[255];
-		UINT32 xmlBuffLen=4096;
-		UINT8* xmlBuff=new UINT8[xmlBuffLen];
-		UINT32 sendBuffLen=4096;
-		UINT8* sendBuff=new UINT8[sendBuffLen];
-		if(xmlBuff==NULL||sendBuff==NULL||options.getInfoServerHost(hostname,255)!=E_SUCCESS)
+		UINT32 sendBuffLen;
+		UINT8* sendBuff=NULL;
+		if(options.getInfoServerHost(hostname,255)!=E_SUCCESS)
 			goto ERR;
 		oAddr.setAddr(hostname,options.getInfoServerPort());
 		if(oSocket.connect(oAddr)==E_SUCCESS)
 			{
+				DOM_Document docMixInfo;
 				if(options.isFirstMix())
 					{
-						if(m_pFirstMix->getMixCascadeInfo(xmlBuff,&xmlBuffLen)!=E_SUCCESS)
+						if(m_pFirstMix->getMixCascadeInfo(docMixInfo)!=E_SUCCESS)
 							{
 								goto ERR;
 							}
 					}
-				else if(options.getMixXml(xmlBuff,&xmlBuffLen)!=E_SUCCESS)
+				else if(options.getMixXml(docMixInfo)!=E_SUCCESS)
 					{
 						goto ERR;
 					}
-				if(m_pSignature->signXML(xmlBuff,xmlBuffLen,sendBuff,&sendBuffLen)!=E_SUCCESS)
+				//insert (or update) the Timestamp
+				DOM_Element elemRoot=docMixInfo.getDocumentElement();
+				DOM_Element elemTimeStamp;
+				if(getDOMChildByName(elemRoot,(UINT8*)"LastUpdate",elemTimeStamp,false)!=E_SUCCESS)
+					{
+						elemTimeStamp=docMixInfo.createElement("LastUpdate");
+						elemRoot.appendChild(elemTimeStamp);
+					}
+				UINT64 currentMillis;
+				getcurrentTimeMillis(currentMillis);
+				UINT8 tmpStrCurrentMillis[50];
+				print64(tmpStrCurrentMillis,currentMillis);
+				setDOMElementValue(elemTimeStamp,tmpStrCurrentMillis);
+				if(m_pSignature->signXML(docMixInfo)!=E_SUCCESS)
 					{
 						goto ERR;
 					}
+				
+				sendBuff=DOM_Output::dumpToMem(docMixInfo,&sendBuffLen);
+				if(sendBuff==NULL)
+					goto ERR;
 				sprintf((char*)buffHeader,"POST /helo HTTP/1.0\r\nContent-Length: %u\r\n\r\n",sendBuffLen);
 				oSocket.send(buffHeader,strlen((char*)buffHeader));
 				oSocket.send(sendBuff,sendBuffLen);
 				oSocket.close();
 				delete []sendBuff;
-				delete []xmlBuff;
 				return E_SUCCESS;	
 			}
 ERR:
-		if(xmlBuff!=NULL)
-			delete []xmlBuff;
 		if(sendBuff!=NULL)
 			delete []sendBuff;
 		return E_UNKNOWN;
