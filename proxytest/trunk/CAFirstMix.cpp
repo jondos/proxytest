@@ -586,7 +586,7 @@ LOOP_START:
 														EnterCriticalSection(&csResume);
 														MUXLISTENTRY* pml=oSuspendList.get(tmpReverseEntry->pMuxSocket);
 														CONNECTION oCon;
-														if(pml==NULL||!pml->pSocketList->get(&oCon,tmpReverseEntry->outChannel))
+														if(pml==NULL||!pml->pSocketList->get(&oCon,tmpReverseEntry->outChannel)) //Have we not send a suspend message yet ?
 															{
 																oMuxPacket.channel=tmpReverseEntry->outChannel;
 																oMuxPacket.flags=CHANNEL_SUSPEND;
