@@ -1237,7 +1237,7 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		for(UINT32 i=1;i<=options.getListenerInterfaceCount();i++)
 			{
 				options.getListenerInterface(oListener,i);
-				if(oListener.bVirtual){/*do nothing*/}
+				if(oListener.bHidden){/*do nothing*/}
 				else if(oListener.type==RAW_TCP)
 					{
 						DOM_Element elemListenerInterface=m_docMixCascadeInfo.createElement("ListenerInterface");
