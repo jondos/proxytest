@@ -7,6 +7,7 @@ AUTOMAKE_OPTIONS = foreign
 sbin_PROGRAMS = proxytest
 proxytest_SOURCES = CAASymCipher.cpp \
 										CABase64.cpp \
+										CACacheLoadBalancing.cpp\
 										CACmdLnOptions.cpp \
 		   							CADatagramSocket.cpp \
 										CAFirstMix.cpp \
@@ -35,6 +36,7 @@ proxytest_SOURCES = CAASymCipher.cpp \
 		   	            CAASymCipher.hpp \
 										CA_Base64.hpp \
 										CACallback.hpp \
+										CACacheLoadBalancing.hpp\
 										CACmdLnOptions.hpp \
 										CAFirstMix.hpp \
 										CAInfoService.hpp \

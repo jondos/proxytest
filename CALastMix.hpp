@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketASyncSend.hpp"
 #include "CASocketList.hpp"
 #include "CASocketAddrINet.hpp"
-#include "CACAcheLoadBalancing.hpp"
+#include "CACacheLoadBalancing.hpp"
 
 class CALastMix:public CAMix,CASocketASyncSendResume
 
