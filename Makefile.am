@@ -82,7 +82,7 @@ proxytest_SOURCES = CAASymCipher.cpp \
 		    CAThread.hpp \
 		    CAUtil.hpp \
 		    StdAfx.h \
-		    basetypedefs.h\
+		    basetypedefs.h
 
 
 proxytest_LDADD = $(top_srcdir)/xml/libxml.a \
