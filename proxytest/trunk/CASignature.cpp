@@ -125,9 +125,7 @@ SINT32 CASignature::setSignKey(const UINT8* buff,UINT32 len,UINT32 type,const ch
 							EVP_PKEY_free(key);
 							return E_UNKNOWN;
 						}
-					DSA* tmpDSA=DSAparams_dup(key->pkey.dsa);
-					tmpDSA->priv_key=BN_dup(key->pkey.dsa->priv_key);
-					tmpDSA->pub_key=BN_dup(key->pkey.dsa->pub_key);
+					DSA* tmpDSA=DSA_clone(key->pkey.dsa);
 					EVP_PKEY_free(key);
 					if(DSA_sign_setup(tmpDSA,NULL,&tmpDSA->kinv,&tmpDSA->r)!=1)
 						{
@@ -402,8 +400,7 @@ SINT32 CASignature::setVerifyKey(CACertificate* pCert)
 				EVP_PKEY_free(key);
 				return E_UNKNOWN;
 			}
-		DSA* tmpDSA=DSAparams_dup(key->pkey.dsa);
-		tmpDSA->pub_key=BN_dup(key->pkey.dsa->pub_key);
+		DSA* tmpDSA=DSA_clone(key->pkey.dsa);
 		EVP_PKEY_free(key);
 		DSA_free(m_pDSA);
 		m_pDSA=tmpDSA;
