@@ -1,6 +1,5 @@
 #ifndef __CASOCKETLIST__
 #define __CASOCKETLIST__
-#include "CASocket.hpp"
 #include "CAMuxSocket.hpp"
 #include "CASymCipher.hpp"
 

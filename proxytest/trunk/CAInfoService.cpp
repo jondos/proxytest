@@ -1,7 +1,6 @@
 #include "StdAfx.h"
 #include "CAInfoService.hpp"
 #include "CASocket.hpp"
-#include "CASocketAddr.hpp"
 #include "xml/xmloutput.h"
 #include "CACmdLnOptions.hpp"
 extern CACmdLnOptions options;

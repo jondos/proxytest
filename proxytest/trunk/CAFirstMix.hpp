@@ -2,7 +2,6 @@
 #define __CAFIRSTMIX__
 
 #include "CAMix.hpp"
-#include "CASocket.hpp"
 #include "CAMuxSocket.hpp"
 class CAFirstMix:public CAMix
 	{

@@ -3,7 +3,6 @@
 
 #include "CAMix.hpp"
 #include "CAMuxSocket.hpp"
-#include "CASocketAddr.hpp"
 #include "CAASymCipher.hpp"
 
 class CALastMix:public CAMix

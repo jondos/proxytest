@@ -1,5 +1,4 @@
 #include "StdAfx.h"
-#include "CASocketAddr.hpp"
 #include "CADatagramSocket.hpp"
 
 

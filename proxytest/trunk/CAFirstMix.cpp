@@ -1,6 +1,5 @@
 #include "StdAfx.h"
 #include "CAFirstMix.hpp"
-#include "CASocketList.hpp"
 #include "CASocketGroup.hpp"
 #include "CAMsg.hpp"
 #include "CACmdLnOptions.hpp"

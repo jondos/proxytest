@@ -1,7 +1,6 @@
 #ifndef __CASOCKET__
 #define __CASOCKET__
 #include "CASocketAddr.hpp"
-#include "CASymCipher.hpp"
 
 class CASocket
 	{
