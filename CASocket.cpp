@@ -138,12 +138,6 @@ SINT32 CASocket::accept(CASocket &s)
 	}
 
 
-/** Tries to connect to the peer described by psa*/			
-SINT32 CASocket::connect(CASocketAddr & psa)
-	{
-		return connect(psa,1,0);
-	}
-
 /** Tries to connect to the peer described by psa.
 	* @param psa - peer
 	* @param retry - number of retries
@@ -277,6 +271,7 @@ SINT32 CASocket::close()
 		return ret;
 	}
 
+/* /// it seems that this function is never used (Bastian)
 SINT32 CASocket::close(UINT32 mode)
 	{
 //		EnterCriticalSection(&csClose);
@@ -298,6 +293,7 @@ SINT32 CASocket::close(UINT32 mode)
 //		LeaveCriticalSection(&csClose);
 		return ret;
 	}
+*/
 			
 /** Sends some data over the network. This may block, if socket is in blocking mode.
 	@param buff the buffer of data to send

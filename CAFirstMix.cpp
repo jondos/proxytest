@@ -843,8 +843,8 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 #endif
 #ifdef PAYMENT
 		// register AI control channel
-		pHashEntry->pAccountingInfo->pControlChannel = new CAAccountingControlChannel(pHashEntry);
-		pHashEntry->pControlChannelDispatcher->registerControlChannel(pHashEntry->pAccountingInfo->pControlChannel);
+		//CAAccountingControlChannel * pTmp = new CAAccountingControlChannel(pHashEntry);
+		pHashEntry->pControlChannelDispatcher->registerControlChannel(new CAAccountingControlChannel(pHashEntry));
 #endif
 #ifdef FIRST_MIX_SYMMETRIC
 		pHashEntry->pSymCipher=new CASymCipher();

@@ -1,18 +1,4 @@
 Microsoft Visual Studio Solution File, Format Version 8.00
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "proxytest", "proxytest.vcproj", "{150377B0-CA8F-4031-A0B8-45A3001F4F81}"
-	ProjectSection(ProjectDependencies) = postProject
-		{150377B0-CA8F-4031-A0B8-45A3001F4F81} = {150377B0-CA8F-4031-A0B8-45A3001F4F81}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "doxygen", "doxygen.vcproj", "{63F1E1AB-809D-459B-BAF1-F5B05512E248}"
-	ProjectSection(ProjectDependencies) = postProject
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AllTest", "AllTests.vcproj", "{1DE75B05-314A-4E97-B281-5D1075F7CF2D}"
-	ProjectSection(ProjectDependencies) = postProject
-		{150377B0-CA8F-4031-A0B8-45A3001F4F81} = {150377B0-CA8F-4031-A0B8-45A3001F4F81}
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "proxytest-lib", "proxytest-lib.vcproj", "{150377B0-CA8F-4031-A0B8-45A3001F4F81}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
@@ -23,17 +9,6 @@ Global
 		Release = Release
 	EndGlobalSection
 	GlobalSection(ProjectConfiguration) = postSolution
-		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Debug.ActiveCfg = Debug|Win32
-		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Debug.Build.0 = Debug|Win32
-		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Release.ActiveCfg = Release|Win32
-		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Release.Build.0 = Release|Win32
-		{63F1E1AB-809D-459B-BAF1-F5B05512E248}.Debug.ActiveCfg = Debug|Win32
-		{63F1E1AB-809D-459B-BAF1-F5B05512E248}.Release.ActiveCfg = Release|Win32
-		{63F1E1AB-809D-459B-BAF1-F5B05512E248}.Release.Build.0 = Release|Win32
-		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Debug.ActiveCfg = Debug|Win32
-		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Debug.Build.0 = Debug|Win32
-		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Release.ActiveCfg = Release|Win32
-		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Release.Build.0 = Release|Win32
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Debug.ActiveCfg = Debug|Win32
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Debug.Build.0 = Debug|Win32
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Release.ActiveCfg = Release|Win32

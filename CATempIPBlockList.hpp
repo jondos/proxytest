@@ -107,7 +107,7 @@ class CATempIPBlockList
 		PTEMPIPBLOCKLIST* m_hashTable;
 			
 		/** Used for locking the datastructure to make it threadsafe */
-		CAMutex m_Mutex;
+		CAMutex * m_pMutex;
 };
 
 #endif

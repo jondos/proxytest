@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.03.56"
+#define MIX_VERSION "00.03.57"
 
 #if defined(DEBUG)|| defined(_DEBUG)
 	#undef DEBUG
@@ -46,7 +46,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define LOG_PACKET_TIMES //computes statistics about the processing time each packet needs
 //#define COMPRESSED_LOGS
 //#define DO_TRACE
-//#define PAYMENT_SUPPORT (outdated --> to be removed)
 //#define PSEUDO_LOG
 //#define DELAY_CHANNELS //to enable max channel bandwidth
 //#define HAVE_EPOLL //define if you have epoll support on your (Linux) system

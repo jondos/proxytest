@@ -359,6 +359,9 @@
 				RelativePath=".\CAAccountingInstance.cpp">
 			</File>
 			<File
+				RelativePath=".\CAAccountingSettleThread.cpp">
+			</File>
+			<File
 				RelativePath="CAASymCipher.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -1920,9 +1923,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\CASSLClientSocket.cpp">
-			</File>
-			<File
 				RelativePath=".\CASSLContext.cpp">
 			</File>
 			<File
@@ -2030,6 +2030,9 @@
 			</File>
 			<File
 				RelativePath=".\CAThreadPool.cpp">
+			</File>
+			<File
+				RelativePath=".\CATLSClientSocket.cpp">
 			</File>
 			<File
 				RelativePath="CAUtil.cpp">
@@ -2807,6 +2810,9 @@
 				RelativePath=".\CAAccountingInstance.hpp">
 			</File>
 			<File
+				RelativePath=".\CAAccountingSettleThread.hpp">
+			</File>
+			<File
 				RelativePath="CAASymCipher.hpp">
 			</File>
 			<File
@@ -2936,9 +2942,6 @@
 				RelativePath="CASocketList.hpp">
 			</File>
 			<File
-				RelativePath=".\CASSLClientSocket.hpp">
-			</File>
-			<File
 				RelativePath=".\CASSLContext.hpp">
 			</File>
 			<File
@@ -2955,6 +2958,9 @@
 			</File>
 			<File
 				RelativePath=".\CAThreadPool.hpp">
+			</File>
+			<File
+				RelativePath=".\CATLSClientSocket.hpp">
 			</File>
 			<File
 				RelativePath="CAUtil.hpp">

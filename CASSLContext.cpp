@@ -43,11 +43,13 @@ CASSLContext * CASSLContext::m_pInstance = 0;
 /**
  * Initialize the context, load certificates, keys, etc
  */
-CASSLContext::CASSLContext(){
+CASSLContext::CASSLContext()
+{
 
 	// get X509 Mix Certificate
 	CACertificate * mixCert = options.getOwnCertificate();
-	if(mixCert == 0) {
+	if(mixCert == 0) 
+	{
 		CAMsg::printMsg(LOG_ERR, "CASSLContext could not get MixCertificate (1)\n");
 		return;
 	}
@@ -76,7 +78,8 @@ CASSLContext::CASSLContext(){
 
  	// initialize ssl context object
 	SSL_METHOD * meth;
-	meth = SSLv23_client_method();
+	//meth = SSLv23_client_method();
+	meth = TLSv1_client_method();
 	m_SSLCTX = SSL_CTX_new( meth );
 	if(m_SSLCTX==0) {
 //		CAMsg::printMsg(LOG_ERROR, "CASSLContext Could not init SSL Context\n");
@@ -139,7 +142,7 @@ CASSLContext::~CASSLContext(){
 SSL_CTX * CASSLContext::getSSLContext()
 {
 	if(m_pInstance == 0) {
-		m_pInstance = new CASSLContext();
+		m_pInstance = new CASSLContext;
 	}
 	return m_pInstance->m_SSLCTX;
 }

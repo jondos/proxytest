@@ -33,7 +33,7 @@ class CASocket
 	{
 		public:
 			CASocket();
-			~CASocket(){close();}
+			virtual ~CASocket(){close();}
 
 			SINT32 create();
 			SINT32 create(int type);
@@ -41,15 +41,21 @@ class CASocket
 			SINT32 listen(const CASocketAddr& psa);
 			SINT32 listen(UINT16 port);
 			SINT32 accept(CASocket &s);
-			SINT32 connect(CASocketAddr& psa);
-			SINT32 connect(CASocketAddr& psa,UINT32 retry,UINT32 msWaitTime);
-			SINT32 connect(CASocketAddr& psa,UINT32 msTimeOut);
-			SINT32 close();
-			SINT32 close(UINT32 mode);
-			SINT32 send(const UINT8* buff,UINT32 len);
+			virtual SINT32 connect(CASocketAddr& psa)
+				{
+					return connect(psa,1,0);
+				}
+				
+			virtual SINT32 connect(CASocketAddr& psa,UINT32 retry,UINT32 msWaitTime);
+			virtual SINT32 connect(CASocketAddr& psa,UINT32 msTimeOut);
+			
+			virtual SINT32 close();
+/* it seems that this function is not used:
+			SINT32 close(UINT32 mode);*/
+			virtual SINT32 send(const UINT8* buff,UINT32 len);
 			SINT32 sendFully(const UINT8* buff,UINT32 len);
 			SINT32 sendTimeOut(const UINT8* buff,UINT32 len,UINT32 msTimeOut);
-			SINT32 receive(UINT8* buff,UINT32 len);
+			virtual SINT32 receive(UINT8* buff,UINT32 len);
 			SINT32 receiveFully(UINT8* buff,UINT32 len);
 			SINT32 receiveFully(UINT8* buff,UINT32 len,UINT32 msTimeOut);
 			/** Returns the number of the Socket used. Which will be always the same number,
@@ -74,12 +80,14 @@ class CASocket
 			SINT32 setKeepAlive(UINT32 sec);
 			SINT32 setNonBlocking(bool b);
 			SINT32 getNonBlocking(bool* b);
-		private:
+		protected:
 			bool m_bSocketIsClosed; //this is a flag, which shows, if the m_Socket is valid
 													//we should not set m_Socket to -1 or so after close,
 													//because the Socket value ist needed sometimes even after close!!!
 													// (because it is used as a Key in lookups for instance as a HashValue etc.)
+
 			SOCKET m_Socket;
+		private:			
 			CAMutex m_csClose;
 			UINT32 m_closeMode;
 	};
