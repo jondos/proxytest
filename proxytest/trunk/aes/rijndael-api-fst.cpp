@@ -13,7 +13,7 @@
 int makeKey(keyInstance *key, BYTE direction, int keyLen, char *keyMaterial)
 {
 	word8 k[MAXKC][4];
-	int i, j, t;
+	int i;//, j, t;
 	
 	if (key == NULL) {
 		return BAD_KEY_INSTANCE;
