@@ -252,7 +252,7 @@ THREAD_RETURN loopAcceptUsers(void* param)
 		SINT32 ret;
 		for(i=0;i<nSocketsIn;i++)
 			osocketgroupAccept.add(socketsIn[i]);
-		for(;;)
+		while(!pFirstMix->getRestart())
 			{
 				countRead=osocketgroupAccept.select(false,10000);
 				if(countRead<0)
