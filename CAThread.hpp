@@ -44,8 +44,8 @@ class CAThread
 					m_fncMainLoop=fnc;
 					return E_SUCCESS;
 				}
-
-			SINT32 start(void* param);
+			
+			SINT32 start(void* param,bool bDaemon=false);
 			SINT32 join()
 				{
 					if(m_pThread==NULL)

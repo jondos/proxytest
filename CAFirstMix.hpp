@@ -38,6 +38,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketGroup.hpp"
 #include "CAQueue.hpp"
 #include "CAUtil.hpp"
+#include "CAThread.hpp"
 class CAInfoService;
 
 class CAFirstMix:public CAMix
@@ -57,6 +58,8 @@ class CAFirstMix:public CAMix
 					m_pMuxOut=NULL;
 					m_docMixCascadeInfo=NULL;
 					m_xmlKeyInfoBuff=NULL;
+					m_pthreadSendToMix=NULL;
+					m_pthreadAcceptUsers=NULL;
 				}
 			virtual ~CAFirstMix(){}
 		protected:
@@ -96,6 +99,7 @@ class CAFirstMix:public CAMix
 		friend THREAD_RETURN fm_loopSendToMix(void*);
 		friend THREAD_RETURN fm_loopAcceptUsers(void*);
 		friend THREAD_RETURN fm_loopReadFromUsers(void*);
+		friend THREAD_RETURN fm_loopDoUserLogin(void* param);
 
 		protected:
 			SINT32 incUsers()
@@ -123,16 +127,34 @@ class CAFirstMix:public CAMix
 				}
 
 				
+			SINT32 incLoginThreads()
+				{
+					m_mutexLoginThreads.lock();
+					m_nLoginThreads++;
+					m_mutexLoginThreads.unlock();
+					return E_SUCCESS;
+				}
+			
+			SINT32 decLoginThreads()
+				{
+					m_mutexLoginThreads.lock();
+					m_nLoginThreads--;
+					m_mutexLoginThreads.unlock();
+					return E_SUCCESS;
+				}
+
 			bool getRestart()
 				{
 					return m_bRestart;
 				}
-			
+			SINT32 doUserLogin(CAMuxSocket* pNewUSer,UINT8 perrIP[4]);
+			SINT32 waitForLoginThreads();
 		protected:	
 			CAIPList* m_pIPList;
 			CAQueue* m_pQueueSendToMix;
 			CAFirstMixChannelList* m_pChannelList;
-			UINT32 m_nUser;
+			volatile UINT32 m_nUser;
+			volatile UINT32 m_nLoginThreads;
 			UINT32 m_nSocketsIn; //number of usable ListenerInterface (non 'virtual')
 			volatile bool m_bRestart;
 			CASocket* m_arrSocketsIn;
@@ -144,13 +166,16 @@ class CAFirstMix:public CAMix
 			UINT8* m_xmlKeyInfoBuff;
 			UINT16 m_xmlKeyInfoSize;
 
-			//UINT8* m_strXmlMixCascadeInfo;
 			DOM_Document m_docMixCascadeInfo;
 			UINT64 m_nMixedPackets;
 			CAASymCipher* m_pRSA;
 			CASignature* m_pSignature;
 			CAMutex m_mutexUser;
 			CAMutex m_mutexMixedPackets;
+			CAMutex m_mutexLoginThreads;
+
+			CAThread* m_pthreadAcceptUsers;
+			CAThread* m_pthreadSendToMix;
 			#ifdef PAYMENT
 				CAAccountingInstance * m_pAccountingInstance;
 			#endif

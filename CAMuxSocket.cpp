@@ -170,11 +170,13 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket)
 		return MIXPACKET_SIZE;
 	}
 
-/**Trys to receive a Mix-Packet. If after timout milliseconds not a whole packet is available
-* E_AGAIN will be returned. In this case you should later try to get the rest of the packet
+/**Trys to receive a Mix-Packet. If after timout milliseconds not 
+* a whole packet is available
+* E_AGAIN will be returned. 
+* In this case you should later try to get the rest of the packet
 */
 
-//TODO: Bug if socket is in non_blocking mode!!
+//TODO: Bug if socket is not in non_blocking mode!!
 SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 timeout)
 	{
 		m_csReceive.lock();

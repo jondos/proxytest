@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.03.03"
+#define MIX_VERSION "00.03.05"
 
 
 //#define LOG_CHANNEL
@@ -52,7 +52,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define LOG_CRIME  
 //#define PAYMENT //to enable payment support
 //#define NO_PARKING //to disable control flow
-#define NO_LOOPACCEPTUSER //to disable user accept thread for First Mix
+//#define NO_LOOPACCEPTUSER //to disable user accept thread for First Mix
 
 //#define USE_POOL
 //#define NEW_MIX_TYPE // to enable the new 1:x mix protocol
@@ -60,6 +60,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define WITH_TIMESTAMP // Add timestamps to the channel-open packets.
 
 //Some constants
+#define FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT 10000 //Timout in waiting for login information to receive from JAP (10 seconds)
 #define LAST_MIX_TO_PROXY_CONNECT_TIMEOUT 2000 //Connection timeout for last mix to proxy connections 2 Seconds...
 #define LAST_MIX_TO_PROXY_SEND_TIMEOUT (UINT32)5000 //5 Seconds...
 

@@ -34,11 +34,16 @@ CAThread::CAThread()
 		m_pThread=NULL;
 	}
 
-SINT32 CAThread::start(void* param)
+/** A daemon thread is a dettached thread, which will not
+  * preserve  a join state */
+SINT32 CAThread::start(void* param,bool bDaemon)
 	{
 		if(m_fncMainLoop==NULL)
 			return E_UNKNOWN;
 		m_pThread=new pthread_t;
 		pthread_create(m_pThread,NULL,m_fncMainLoop,param);
+		if(bDaemon)
+			pthread_detach(*m_pThread);
 		return E_SUCCESS;
 	}
+

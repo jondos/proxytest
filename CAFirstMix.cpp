@@ -76,6 +76,8 @@ SINT32 CAFirstMix::initOnce()
 SINT32 CAFirstMix::init()
 	{
 		m_nMixedPackets=0; //reset to zero after each restart (at the moment neccessary for infoservice)
+		m_bRestart=false;
+		m_nLoginThreads=0;
 		//Establishing all Listeners
 		m_arrSocketsIn=new CASocket[m_nSocketsIn];
 		UINT32 i,aktSocket=0;
@@ -205,6 +207,23 @@ SINT32 CAFirstMix::init()
 		m_psocketgroupUsersRead=new CASocketGroup;
 		m_psocketgroupUsersWrite=new CASocketGroup;
 		m_pInfoService=new CAInfoService(this);
+
+		//Starting thread for Step 1
+		m_pthreadAcceptUsers=new CAThread();
+		m_pthreadAcceptUsers->setMainLoop(fm_loopAcceptUsers);
+		m_pthreadAcceptUsers->start(this);
+
+		//Starting thread for Step 4
+		m_pthreadSendToMix=new CAThread();
+		m_pthreadSendToMix->setMainLoop(fm_loopSendToMix);
+		m_pthreadSendToMix->start(this);
+
+		//Starting InfoService
+		m_pInfoService->setSignature(m_pSignature);
+		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix InfoService - Signature set\n");
+		m_pInfoService->start();
+		CAMsg::printMsg(LOG_DEBUG,"InfoService Loop started\n");
+
 		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix init() succeded\n");
 		return E_SUCCESS;
 	}
@@ -265,6 +284,15 @@ THREAD_RETURN fm_loopSendToMix(void* param)
 		THREAD_RETURN_SUCCESS;
 	}
 
+struct T_UserLoginData
+	{
+		CAMuxSocket* pNewUser;
+		CAFirstMix* pMix;
+		UINT8 peerIP[4];
+	};
+
+typedef struct T_UserLoginData t_UserLoginData;
+
 /*How to end this thread
 1. Set m_bRestart in firstMix to true
 2. close all accept sockets
@@ -274,18 +302,11 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 		CAFirstMix* pFirstMix=(CAFirstMix*)param;
 		CASocket* socketsIn=pFirstMix->m_arrSocketsIn;
 		CAIPList* pIPList=pFirstMix->m_pIPList;
-//		CAInfoService* pInfoService=pFirstMix->m_pInfoService;
-		CAFirstMixChannelList* pChannelList=pFirstMix->m_pChannelList;
-		CASocketGroup* psocketgroupUsersRead=pFirstMix->m_psocketgroupUsersRead;
 		UINT32 nSocketsIn=pFirstMix->m_nSocketsIn;
-
-		UINT8* pxmlKeyInfoBuff=pFirstMix->m_xmlKeyInfoBuff;
-		UINT32 nxmlKeyInfoSize=pFirstMix->m_xmlKeyInfoSize;
 		CASocketGroup osocketgroupAccept;
 		CAMuxSocket* pNewMuxSocket;
 		UINT8* peerIP=new UINT8[4];
 		UINT32 i=0;
-//		UINT32& nUser=pFirstMix->m_nUser;
 		SINT32 countRead;
 		SINT32 ret;
 		for(i=0;i<nSocketsIn;i++)
@@ -330,19 +351,14 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 											}
 										else
 											{
-		//Weiter wie bisher...								
-												#ifdef _DEBUG
-													int ret=((CASocket*)pNewMuxSocket)->setKeepAlive(true);
-													if(ret!=E_SUCCESS)
-														CAMsg::printMsg(LOG_DEBUG,"Fehler bei KeepAlive!");
-												#else
-													((CASocket*)pNewMuxSocket)->setKeepAlive(true);
-												#endif
-												((CASocket*)pNewMuxSocket)->send(pxmlKeyInfoBuff,nxmlKeyInfoSize);
-												((CASocket*)pNewMuxSocket)->setNonBlocking(true);
-												pChannelList->add(pNewMuxSocket,peerIP,new CAQueue);
-												pFirstMix->incUsers();
-												psocketgroupUsersRead->add(*pNewMuxSocket);
+												CAThread* pThread=new CAThread();
+												pThread->setMainLoop(fm_loopDoUserLogin);
+												t_UserLoginData* d=new t_UserLoginData;
+												d->pNewUser=pNewMuxSocket;
+												d->pMix=pFirstMix;
+												memcpy(d->peerIP,peerIP,4);
+												pFirstMix->incLoginThreads();
+												pThread->start(d,true);
 											}
 									}
 							}
@@ -353,6 +369,77 @@ END_THREAD:
 		delete []peerIP;
 		CAMsg::printMsg(LOG_DEBUG,"Exiting Thread AcceptUser\n");
 		THREAD_RETURN_SUCCESS;
+	}
+
+THREAD_RETURN fm_loopDoUserLogin(void* param)
+	{
+		t_UserLoginData* d=(t_UserLoginData*)param;
+		d->pMix->doUserLogin(d->pNewUser,d->peerIP);
+		d->pMix->decLoginThreads();
+		delete d;
+		THREAD_RETURN_SUCCESS;
+	}
+	
+/** Sends and receives all data neccessary for a User to "login".
+This is ending the public key of the Mixes and receiving the 
+sym keys of JAP. This is done in a thread on a per user basis
+@todo Cleanup of runing thread if mix restarts...
+*/
+SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
+	{
+		#ifdef _DEBUG
+			int ret=((CASocket*)pNewUser)->setKeepAlive(true);
+			if(ret!=E_SUCCESS)
+				CAMsg::printMsg(LOG_DEBUG,"Error setting KeepAlive!");
+		#else
+			((CASocket*)pNewUser)->setKeepAlive(true);
+		#endif
+		/*
+			ADDITIONAL PREREQUISITE:
+			The timestamps in the messages require the user to sync his time
+			with the time of the cascade. Hence, the current time needs to be
+			added to the data that is sent to the user below.
+			For the mixes that form the cascade, the synchronization can be
+			left to an external protocol such as NTP. Unfortunately, this is
+			not enforceable for all users.
+		*/
+		((CASocket*)pNewUser)->send(m_xmlKeyInfoBuff,m_xmlKeyInfoSize);  // send the mix-keys to JAP
+		((CASocket*)pNewUser)->setNonBlocking(true);	                    // stefan: sendet das send in der letzten zeile doch noch nicht? wenn doch, kann dann ein JAP nicht durch verweigern der annahme hier den mix blockieren? vermutlich nciht, aber andersherum faend ich das einleuchtender.
+		// es kann nicht blockieren unter der Annahme das der TCP-Sendbuffer > m_xmlKeyInfoSize ist....
+		//wait for keys from user
+		MIXPACKET oMixPacket;
+		if(pNewUser->receive(&oMixPacket,FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT)!=MIXPACKET_SIZE) //wait at most 10 second for user to send sym key
+			{
+				delete pNewUser;
+				m_pIPList->removeIP(peerIP);
+				return E_UNKNOWN;
+			}
+		m_pRSA->decrypt(oMixPacket.data,oMixPacket.data);
+		if(memcmp("KEYPACKET",oMixPacket.data,9)!=0)
+			{
+				m_pIPList->removeIP(peerIP);
+				delete pNewUser;
+				return E_UNKNOWN;
+			}
+		pNewUser->setKey(oMixPacket.data+9,32);
+		pNewUser->setCrypt(true);
+#ifdef PAYMENT
+		// set AI encryption keys
+		m_pAccountingInstance->setJapKeys(pHashEntry, oMixPacket.data+41, oMixPacket.data+57); 
+#endif		
+		m_pChannelList->add(pNewUser,peerIP,new CAQueue); // adding user connection to mix->JAP channel list (stefan: sollte das nicht connection list sein? --> es handelt sich um eine Datenstruktu fŸr Connections/Channels ).
+		incUsers();																	// increment the user counter by one
+		m_psocketgroupUsersRead->add(*pNewUser); // add user socket to the established ones that we read data from.
+		return E_SUCCESS;
+	}
+
+SINT32 CAFirstMix::waitForLoginThreads()
+	{
+		while(m_nLoginThreads>0)
+			{
+				msSleep(1000);
+			}
+		return E_SUCCESS;
 	}
 
 /*
@@ -494,6 +581,18 @@ SINT32 CAFirstMix::clean()
 		#ifdef _DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"CAFirstMix::clean() start\n");
 		#endif
+		CAMsg::printMsg(LOG_CRIT,"Stopping InfoService....\n");
+		CAMsg::printMsg	(LOG_CRIT,"Memory usage before: %u\n",getMemoryUsage());	
+		m_pInfoService->stop();
+		CAMsg::printMsg	(LOG_CRIT,"Memory usage after: %u\n",getMemoryUsage());	
+		CAMsg::printMsg(LOG_CRIT,"Stopped InfoService!\n");
+
+		if(m_pthreadAcceptUsers!=NULL)
+			delete m_pthreadAcceptUsers;
+		m_pthreadAcceptUsers=NULL;
+		if(m_pthreadSendToMix!=NULL)
+			delete m_pthreadSendToMix;
+		m_pthreadAcceptUsers=NULL;
 		if(m_pInfoService!=NULL)
 			delete m_pInfoService;
 		m_pInfoService=NULL;
