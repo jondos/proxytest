@@ -512,10 +512,11 @@ bool CACmdLnOptions::isLocalProxy()
 
 SINT32 CACmdLnOptions::getMixXml(UINT8* strxml,UINT32* len)
 	{
-		if(strxml==NULL||m_strMixXml==NULL||len==NULL||*len<=strlen(m_strMixXml))
+		UINT32 strMixXmlLen=strlen(m_strMixXml);
+		if(strxml==NULL||m_strMixXml==NULL||len==NULL||*len<strMixXmlLen)
 			return E_UNKNOWN;
-		strcpy((char*)strxml,m_strMixXml);
-		*len=strlen(m_strMixXml)+1;
+		memcpy(strxml,m_strMixXml,strMixXmlLen);
+		*len=strMixXmlLen;
 		return E_SUCCESS;
 	}
 
