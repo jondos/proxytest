@@ -170,7 +170,7 @@ void checkSizesOfBaseTypes()
 
 \subsection Basics
 
-The whole system consist of JAP's, mix-servers, cache proxies and the InfoService. (see Figure 1)
+The whole system consists of JAP's, mix-servers, cache proxies and the InfoService. (see Figure 1)
 
 \image html JAPArchitecture.gif "Figure 1: The Architecture of the Anonymous-Service"
 	
@@ -182,9 +182,9 @@ to one or two other mixes. If a mix receives data packets from JAP's and sends t
  mix has only one connection to an other mix. Each mix with two connections to other mixes is called
  a \em middle mix. This type of mix will receive packets form one mix and forwards them to the other mix.
 
-If mixes are connected in a meanigful way a chain is setup up, so what packets are transmitted from JAP's 
+If mixes are connected in a meaningful way a chain is setup up, so what packets are transmitted from JAP's 
 to the cache-proxies and than to the Internet.
-A chain of mixes is called a \em mix-cascade (or \em cascade for short).
+A chain of mixes is called a \em MixCascade (or \em cascade for short).
 Many different cascades could exist at the same time, but JAP can select one and only one at the same time.
 
 Also a mix could only be part of one and only one cascade. If a mix is not part of a cascade, we call it a \em free mix.
@@ -195,9 +195,8 @@ Free mixes are not useable for JAP, but could be connected to build a new cascad
 JAP acts as a local proxy for the browser. 
 The browser opens many connections to the JAP (usually one per HTTP-Request).
 All this connections are multiplexed over the one connection to the first mix JAP is connected to.
-Every connection from the browser is called a \em channel (mix channel or anonymous channel). 
-A first mix sends the stream of packets (from multiple channels) from multiple users to the next mix.
-All over one TCP/IP connection. So JAP and the mixes have to multiplex/demultiplex the channels.
+Every connection from the browser is called a \em channel (mix channel or \em AnonChannel). 
+A first mix sends the stream of packets (from multiple channels) from multiple users to the next mix (all over one TCP/IP connection). So JAP and the mixes have to multiplex/demultiplex the channels.
 A channel can transport only fixed sized packets. These packets are called \em MixPackets. 
 So a first mix for instance gets many packets from different users in parallel 
 and sends them to the next mix in a serialized way. (see Figure 2)
@@ -205,7 +204,7 @@ and sends them to the next mix in a serialized way. (see Figure 2)
 \image html JAPMixPacketMux.gif "Figure 2: Mux/DeMux of fixed sized MixPackets"
 
 
-Each MixPacket has a size of #MIXPACKET_SIZE (998) bytes (. 
+Each MixPacket has a size of #MIXPACKET_SIZE (998) bytes (see Figure 3). 
 The header of each packet is as follows (see also: #MIXPACKET):
 \li 4 bytes \c channel-ID
 \li 2 bytes \c flags
@@ -224,40 +223,41 @@ The format of the data (at the last mix) is:
 They payload are the bytes what should be transported from the browser to the Internet 
 or back via the anonymous channel.
 
-The channel-id is changed in every mix. Also the content bytes changes in every mix, 
+The channel-ID changes in every mix. Also the content bytes changes in every mix, 
 because each mix will perform a single encryption/decryption.
 
 \subsection docInterMixEncryption Inter-Mix Encryption
 The stream of MixPackets between to mixes is encrypted using AES-128/128 in OFB-128 mode. Exactly only the
-first part of each MixPacket is encrpyted. (see Figure 3)
+first part (16 bytes) of each MixPacket is encrypted. (see Figure 4)
 
-\image html JAPInterMixEncryption.gif "Figure 3: Encryption between two mixes"
+\image html JAPInterMixEncryption.gif "Figure 4: Encryption between two mixes"
 	
-The encryption is done, so that an attacker could not see the channel-id and flags of a MixPacket. OFB is chosen, so that
-an attacker could not replay a MixPacket. If he replays a MixPacket, than at least the channel-id 
+The encryption is done, so that an attacker could not see the channel-ID and flags of a MixPacket. OFB is chosen, so that
+an attacker could not replay a MixPacket. If he replays a MixPacket, than at least the channel-ID 
 changes after decrypting. If this MixPacket was the first packet of a channel, than the cryptographic keys
 for this channel will change to (because of the content format for the first packet of a channel, explained later). 
 
-For Upstream and Downstream different keys are used.
+For Upstream and Downstream different keys are used. 
+See \ref docCascadeInit "[Cascade setup]" for information about exchange of these keys.
 
 \subsection docChannelSetup AnonChannel establishment
 Before data could be sent through an AnonChannel one has to be established. 
 This is done by sending ChannelOpen messages through the mixes.
-Figure 4 shows the format of such a message how it would arrive for example 
+Figure 5 shows the format of such a message how it would arrive for example 
 at the last mix.
 
-\image html MixPacketChannelOpen.gif "Figure 4: ChannelOpen packet (example for the last mix)"
+\image html MixPacketChannelOpen.gif "Figure 5: ChannelOpen packet (example for the last mix)"
 
 \section docCascadeInit Initialisation of a Cascade
 
-\image html JAPCascadeInit.gif "Figure 4: Steps during Cascade initialisation (3 Mix example)
+\image html JAPCascadeInit.gif "Figure 6: Steps during Cascade initialisation (3 Mix example)
 
-Fiugre 4 shows the steps which take place, than a Cascade starts. These steps are illustrated using a 3 Mix example.
+Figure 6 shows the steps which take place, than a Cascade starts. These steps are illustrated using a 3 Mix example.
 The procedure is as follows:
 
 \li Step 1: Each Mix starts, reads its configuration file (including own key
  for digital signature and test keys from previous and next mix) and generates a 
- public key pair of the asymmetric crpyto system used by the mix for encryption 
+ public key pair of the asymmetric crypto system used by the mix for encryption 
  (currently this is RSA).
 
 \li Step 2: Mix 2 establishes a TCP/IP connection with Mix 3. 
@@ -281,7 +281,7 @@ a symmetric key to Mix 2.
 
 \section docMixInfoService Communication between Mix and InfoService
 
-\image html JAPMixInfoService.gif "Figure 5: Communication between Mix and InfoService"
+\image html JAPMixInfoService.gif "Figure 7: Communication between Mix and InfoService"
 
 \li 1. HELO-Message send from each mix to the InfoService every 10 minutes to announce itself.  
 See \ref XMLMixHELO "[XML]" for a description of the XML struct send. 
@@ -292,19 +292,20 @@ See \ref XMLMixCascadeStatus "[XML]" for a description of the XML struct send.
 
 \section docMixJap Communication between Mix and JAP
 
-\image html JAPMixJap.gif "Figure 6: Communication between Mix and JAP"
+\image html JAPMixJap.gif "Figure 8: Communication between Mix and JAP"
 
 \li 1. JAP opens a TCP/IP connection to a FirstMix
 
 \li 2. FirstMix sends information about the cascade (including public keys of the Mixes) to the JAP.
 See \ref XMLMixKeyInfo "[XML]" for a description of the XML struct send. 
 
-\li 3. JAP sends a special MixPacket, containing only 2 symmetric keys encrpyted with the
+\li 3. JAP sends a special MixPacket, containing only 2 symmetric keys encrypted with the
 public key of the FirstMix. This keys are used for link encryption between JAP and FirstMix.
 Note: At the moment this is binary - but will use XML in the future.
 
 \li 4. Normal MixPacket exchange according to the mix protocol.
 */
+
 
 
 int main(int argc, const char* argv[])
