@@ -56,7 +56,7 @@ THREAD_RETURN lpIO(void *v)
 		oSocketGroup.add(lpIOPair->muxOut);
 		HCHANNEL lastChannelId=1;
 		MUXPACKET oMuxPacket;
-		int len;
+		int len,ret;
 		CASocket* newSocket,*tmpSocket;
 		CASymCipher* newCipher;
 		int countRead;
@@ -119,41 +119,44 @@ THREAD_RETURN lpIO(void *v)
 				if(oSocketGroup.isSignaled(lpIOPair->muxOut))
 						{
 							countRead--;	
-							len=lpIOPair->muxOut.receive(&oMuxPacket);
-							if(len==0)
-								{
-									#ifdef _DEBUG
-										CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u ... ",oMuxPacket.channel);
-									#endif
-									tmpSocket=oSocketList.remove(oMuxPacket.channel);
-									if(tmpSocket!=NULL)
-										{
-											oSocketGroup.remove(*tmpSocket);
-											tmpSocket->close();
-											#ifdef _DEBUG
-												CAMsg::printMsg(LOG_DEBUG,"closed!\n");
-											#endif
-											delete tmpSocket;
-										}
-								}
-							else if(len==SOCKET_ERROR)
+							ret=lpIOPair->muxOut.receive(&oMuxPacket);
+							if(ret==SOCKET_ERROR)
 								{
 									CAMsg::printMsg(LOG_CRIT,"Mux-Channel Receiving Data Error - Exiting!\n");									
 									exit(-1);
 								}
+
+							if(!oSocketList.get(oMuxPacket.channel,&oConnection))
+								{
+									CAMsg::printMsg(LOG_DEBUG,"Error Sending Data to Browser -- Channel-Id no valid!\n");										
+								}
 							else
 								{
-									#ifdef _DEBUG
-										CAMsg::printMsg(LOG_DEBUG,"Sending Data to Browser!");
-									#endif
-//									CASocket* tmpSocket=oSocketList.get(oMuxPacket.channel,oConnection);
-									if(oSocketList.get(oMuxPacket.channel,&oConnection))
+									oConnection.pCipher->decrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
+									len=oMuxPacket.len;
+									if(len==0)
 										{
-											oConnection.pSocket->send(oMuxPacket.data,len);
+											#ifdef _DEBUG
+												CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u ... ",oMuxPacket.channel);
+											#endif
+											//TODO: deleting cipher...
+											tmpSocket=oSocketList.remove(oMuxPacket.channel);
+											if(tmpSocket!=NULL)
+												{
+													oSocketGroup.remove(*tmpSocket);
+													tmpSocket->close();
+													#ifdef _DEBUG
+														CAMsg::printMsg(LOG_DEBUG,"closed!\n");
+													#endif
+													delete tmpSocket;
+												}
 										}
 									else
 										{
-											CAMsg::printMsg(LOG_DEBUG,"Error Sending Data to Browser -- Channel-Id no valid!\n");										
+											#ifdef _DEBUG
+												CAMsg::printMsg(LOG_DEBUG,"Sending Data to Browser!");
+											#endif
+											oConnection.pSocket->send(oMuxPacket.data,len);
 										}
 								}
 						}
@@ -169,6 +172,7 @@ THREAD_RETURN lpIO(void *v)
 										len=tmpCon->pSocket->receive(oMuxPacket.data,1000);
 										if(len==SOCKET_ERROR||len==0)
 											{
+												//TODO delete cipher..
 												CASocket* tmpSocket=oSocketList.remove(tmpCon->id);
 												if(tmpSocket!=NULL)
 													{
@@ -190,6 +194,7 @@ THREAD_RETURN lpIO(void *v)
 													{
 														oMuxPacket.type=MUX_HTTP;
 													}
+												tmpCon->pCipher->decrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
 												if(lpIOPair->muxOut.send(&oMuxPacket)==SOCKET_ERROR)
 													{
 														CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Exiting!\n");									
@@ -283,7 +288,7 @@ THREAD_RETURN mmIO(void* v)
 		oSocketGroup.add(mmIOPair->muxOut);
 		CASocketList oSocketList;
 //		char buff[1001];
-		HCHANNEL inChannel,outChannel,lastId;
+		HCHANNEL /*inChannel,outChannel,*/lastId;
 		lastId=1;
 		int len;
 		CONNECTION oConnection;
@@ -403,7 +408,7 @@ THREAD_RETURN fmIO(void *v)
 		oSocketGroup.add(fmIOPair->socketIn);
 		oSocketGroup.add(fmIOPair->muxOut);
 		HCHANNEL lastChannelId=1;
-		HCHANNEL outChannel;
+//		HCHANNEL outChannel;
 		MUXPACKET oMuxPacket;
 		CONNECTION oConnection;
 //		char buff[1001];
@@ -411,11 +416,11 @@ THREAD_RETURN fmIO(void *v)
 		CAMuxSocket* newMuxSocket;
 		MUXLISTENTRY* tmpEntry;
 		REVERSEMUXLISTENTRY* tmpReverseEntry;
-		CASymCipher oSymCipher;
+//		CASymCipher oSymCipher;
 		unsigned char key[16];
 		memset(key,0,sizeof(key));
-		oSymCipher.setEncryptionKey(key);
-		oSymCipher.setDecryptionKey(key);
+//		oSymCipher.setEncryptionKey(key);
+//		oSymCipher.setDecryptionKey(key);
 		int countRead=0;
 		for(;;)
 			{
@@ -479,6 +484,7 @@ THREAD_RETURN fmIO(void *v)
 									if(tmpReverseEntry!=NULL)
 										{
 											oMuxPacket.channel=tmpReverseEntry->inChannel;
+											tmpReverseEntry->pCipher->decrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
 											tmpReverseEntry->pMuxSocket->send(&oMuxPacket);
 										}
 									else
@@ -592,18 +598,24 @@ THREAD_RETURN fmIO(void *v)
 													}
 												else
 													{
+														CASymCipher* pCipher=NULL;
 														if(oMuxChannelList.get(tmpEntry,oMuxPacket.channel,&oConnection))
 															{
 																oMuxPacket.channel=oConnection.outChannel;
+																pCipher=oConnection.pCipher;
 															}
 														else
 															{
-																oMuxChannelList.add(tmpEntry,oMuxPacket.channel,lastChannelId);
+																pCipher= new CASymCipher();
+																pCipher->setDecryptionKey(key);
+																pCipher->setEncryptionKey(key);
+																oMuxChannelList.add(tmpEntry,oMuxPacket.channel,lastChannelId,pCipher);
 																#ifdef _DEBUG
 																	CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",lastChannelId);
 																#endif
 																oMuxPacket.channel=lastChannelId++;
 															}
+														pCipher->decrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
 														if(fmIOPair->muxOut.send(&oMuxPacket)==SOCKET_ERROR)
 															{
 																CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Exiting!\n");									

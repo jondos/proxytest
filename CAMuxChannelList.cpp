@@ -95,9 +95,9 @@ bool CAMuxChannelList::remove(CAMuxSocket* pMuxSocket,MUXLISTENTRY* pEntry)
 	}
 
 			
-int CAMuxChannelList::add(MUXLISTENTRY* pEntry,HCHANNEL in,HCHANNEL out)
+int CAMuxChannelList::add(MUXLISTENTRY* pEntry,HCHANNEL in,HCHANNEL out,CASymCipher* pCipher)
 	{
-		pEntry->pSocketList->add(in,out);
+		pEntry->pSocketList->add(in,out,pCipher);
 		if(reverselist==NULL)
 			{
 				reverselist=new REVERSEMUXLISTENTRY;
@@ -112,6 +112,7 @@ int CAMuxChannelList::add(MUXLISTENTRY* pEntry,HCHANNEL in,HCHANNEL out)
 		reverselist->pMuxSocket=pEntry->pMuxSocket;
 		reverselist->inChannel=in;
 		reverselist->outChannel=out;
+		reverselist->pCipher=pCipher;
 		return 0;
 	}
 
