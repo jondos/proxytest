@@ -22,11 +22,11 @@ const XMLCh  DOM_Output::m_XML[39] =
 
 
 XMLFormatter& operator<< (XMLFormatter& strm, const DOMString& s)
-{
+	{
     unsigned int lent = s.length();
 
-	if (lent <= 0)
-		return strm;
+		if (lent <= 0)
+			return strm;
 
     XMLCh*  buf = new XMLCh[lent + 1];
     XMLString::copyNString(buf, s.rawBuffer(), lent);
@@ -34,20 +34,22 @@ XMLFormatter& operator<< (XMLFormatter& strm, const DOMString& s)
     strm << buf;
     delete [] buf;
     return strm;
-}
+	}
 
 
 SINT32 DOM_Output::dumpNode(DOM_Node& toWrite,bool bCanonical)
-{
-    // Get the name and value out for convenience
+	{
+    if(toWrite==0)
+			return E_UNKNOWN;
+		// Get the name and value out for convenience
     DOMString   nodeName = toWrite.getNodeName();
     DOMString   nodeValue = toWrite.getNodeValue();
     unsigned long lent = nodeValue.length();
 
     switch (toWrite.getNodeType())
-    {
+			{
         case DOM_Node::TEXT_NODE:
-        {
+					{
             if(!bCanonical)
 							{
 								m_pFormatter->formatBuf(nodeValue.rawBuffer(),
