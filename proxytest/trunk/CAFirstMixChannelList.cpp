@@ -28,6 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "StdAfx.h"
 #include "CAFirstMixChannelList.hpp"
 #include "CAUtil.hpp"
+#include "CAMsg.hpp"
 
 #define MAX_HASH_KEY 1025
 
@@ -97,6 +98,7 @@ SINT32 CAFirstMixChannelList::addChannel(CAMuxSocket* pMuxSocket,HCHANNEL channe
 		fmHashTableEntry* pHashTableEntry=m_HashTable[hashkey];
 		if(pHashTableEntry->pMuxSocket==NULL||pHashTableEntry->cNumberOfChannels>=MAX_NUMBER_OF_CHANNELS)
 			{
+				CAMsg::printMsg(LOG_DEBUG,"More than 50 channels!\n");
 				m_Mutex.unlock();
 				return E_UNKNOWN;
 			}
