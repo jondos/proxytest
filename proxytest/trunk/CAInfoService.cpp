@@ -284,7 +284,7 @@ SINT32 CAInfoService::sendCascadeHelo()
 				sendBuff=DOM_Output::dumpToMem(docMixInfo,&sendBuffLen);
 				if(sendBuff==NULL)
 					goto ERR;
-				sprintf((char*)buffHeader,"POST /helo HTTP/1.0\r\nContent-Length: %u\r\n\r\n",sendBuffLen);
+				sprintf((char*)buffHeader,"POST /cascade HTTP/1.0\r\nContent-Length: %u\r\n\r\n",sendBuffLen);
 				oSocket.send(buffHeader,strlen((char*)buffHeader));
 				oSocket.send(sendBuff,sendBuffLen);
 				oSocket.close();

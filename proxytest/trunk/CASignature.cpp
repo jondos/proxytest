@@ -73,7 +73,7 @@ SINT32 CASignature::generateSignKey(UINT32 size)
 		return E_SUCCESS;
 	}
 
-SINT32 CASignature::setSignKey(const DOM_Node& n,UINT32 type,char* passwd)
+SINT32 CASignature::setSignKey(const DOM_Node& n,UINT32 type,const char* passwd)
 	{
 		DOM_Node node=n; 
 		switch(type)
@@ -104,7 +104,7 @@ SINT32 CASignature::setSignKey(const DOM_Node& n,UINT32 type,char* passwd)
 		return E_UNKNOWN;
 	}
 
-SINT32 CASignature::setSignKey(UINT8* buff,UINT32 len,UINT32 type,char* passwd)
+SINT32 CASignature::setSignKey(const UINT8* buff,UINT32 len,UINT32 type,const char* passwd)
 	{
 		if(buff==NULL||len<1)
 			return E_UNKNOWN;
@@ -114,7 +114,7 @@ SINT32 CASignature::setSignKey(UINT8* buff,UINT32 len,UINT32 type,char* passwd)
 					return parseSignKeyXML(buff,len);
 
 				case SIGKEY_PKCS12:
-					PKCS12* tmpPKCS12=d2i_PKCS12(NULL,&buff,len);	
+					PKCS12* tmpPKCS12=d2i_PKCS12(NULL,(UINT8**)&buff,len);	
 					EVP_PKEY* key=NULL;
 //					X509* cert=NULL;
 					if(PKCS12_parse(tmpPKCS12,passwd,&key,NULL,NULL)!=1)
@@ -143,7 +143,7 @@ SINT32 CASignature::setSignKey(UINT8* buff,UINT32 len,UINT32 type,char* passwd)
 
 
 //XML Decode...
-SINT32 CASignature::parseSignKeyXML(UINT8* buff,UINT32 len)
+SINT32 CASignature::parseSignKeyXML(const UINT8* buff,UINT32 len)
 	{
 
 		MemBufInputSource oInput(buff,len,"sigkey");
