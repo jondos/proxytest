@@ -37,6 +37,7 @@ struct _t_queue
 		UINT32 size;
 #ifdef DO_TRACE
 		UINT32 allocSize;
+		_t_queue* shadow_this;
 #endif
 	};
 
@@ -54,6 +55,9 @@ class CAQueue
 				{
 					m_Queue=NULL;
 					m_nQueueSize=0;
+#ifdef DO_TRACE
+					CAMsg::printMsg(LOG_DEBUG,"CAQueue creating QUEUE [%p]\n",this);
+#endif
 				}
 			~CAQueue();
 			SINT32 add(const UINT8* buff,UINT32 size);
@@ -106,14 +110,18 @@ class CAQueue
 					if(m_maxAlloc<m_aktAlloc)
 						{
 							m_maxAlloc=m_aktAlloc;
-							CAMsg::printMsg(LOG_DEBUG,"CAQueue current alloc: %u Current Size (of this queue) %u\n",m_aktAlloc,m_nQueueSize);
+							CAMsg::printMsg(LOG_DEBUG,"CAQueue current alloc: %u Current Size (of this[%p] queue) %u\n",m_aktAlloc,this,m_nQueueSize);
 						}
-					return (QUEUE*)new QUEUE;
+					QUEUE* pQueue=new QUEUE;
+					pQueue->shadow_this=pQueue;
+					return pQueue;
 				}
 			
 			void deleteQUEUE(QUEUE* entry)
 				{
 					m_aktAlloc-=sizeof(QUEUE);
+					if(entry!=entry->shadow_this)
+							CAMsg::printMsg(LOG_CRIT,"CAQueue deleting QUEUE: this!=shadow_this!!\n");
 					delete entry;
 				}
 
@@ -123,7 +131,7 @@ class CAQueue
 					if(m_maxAlloc<m_aktAlloc)
 						{
 							m_maxAlloc=m_aktAlloc;
-							CAMsg::printMsg(LOG_DEBUG,"CAQueue current alloc: %u\n",m_aktAlloc);
+							CAMsg::printMsg(LOG_DEBUG,"CAQueue current alloc: %u Current Size (of this[%p] queue) %u\n",m_aktAlloc,this,m_nQueueSize);
 						}
 					return (UINT8*)new UINT8[size];
 				}

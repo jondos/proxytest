@@ -38,6 +38,10 @@ UINT32 CAQueue::m_maxAlloc=0;
 CAQueue::~CAQueue()
 	{
 		m_csQueue.lock();
+#ifdef DO_TRACE
+		CAMsg::printMsg(LOG_DEBUG,"CAQueue deleting - current alloc: %u Current Size (of this[%p] queue) %u\n",m_aktAlloc,this,m_nQueueSize);
+#endif
+		
 		while(m_Queue!=NULL)
 			{
 #ifndef DO_TRACE
@@ -53,6 +57,9 @@ CAQueue::~CAQueue()
 				deleteQUEUE(m_lastElem);
 #endif
 			}
+#ifdef DO_TRACE
+		CAMsg::printMsg(LOG_DEBUG,"CAQueue deleted QUEUE [%p] Current alloc now: %u\n",this,m_aktAlloc);
+#endif
 		m_csQueue.unlock();
 	}
 
