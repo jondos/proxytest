@@ -63,7 +63,8 @@ PROGRAMS = $(sbin_PROGRAMS)
 am_proxytest_OBJECTS = CAASymCipher.$(OBJEXT) CABase64.$(OBJEXT) \
 	CACacheLoadBalancing.$(OBJEXT) CACertificate.$(OBJEXT) \
 	CACertStore.$(OBJEXT) CACmdLnOptions.$(OBJEXT) \
-	CAConditionVariable.$(OBJEXT) CADatabase.$(OBJEXT) \
+	CAConditionVariable.$(OBJEXT) \
+	CAControlChannelDispatcher.$(OBJEXT) CADatabase.$(OBJEXT) \
 	CADatagramSocket.$(OBJEXT) CAFirstMix.$(OBJEXT) \
 	CAFirstMixChannelList.$(OBJEXT) CAInfoService.$(OBJEXT) \
 	CAIPList.$(OBJEXT) CALastMix.$(OBJEXT) \
@@ -93,6 +94,7 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/CACertificate.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CACmdLnOptions.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CAConditionVariable.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CAControlChannelDispatcher.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CADatabase.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CADatagramSocket.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CAFirstMix.Po \
@@ -248,6 +250,7 @@ proxytest_SOURCES = CAASymCipher.cpp \
 		    CACertStore.cpp\
 		    CACmdLnOptions.cpp \
 		    CAConditionVariable.cpp\
+		    CAControlChannelDispatcher.cpp\
 		    CADatabase.cpp\
 		    CADatagramSocket.cpp \
 		    CAFirstMix.cpp \
@@ -288,6 +291,7 @@ proxytest_SOURCES = CAASymCipher.cpp \
 		    CACertificate.hpp\
 		    CACertStore.hpp\
 		    CAConditionVariable.hpp\
+		    CAControlChannelDispatcher.hpp\
 		    CACmdLnOptions.hpp \
 		    CADatabase.hpp\
 		    CADatagramSocket.hpp\
@@ -429,6 +433,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CACertificate.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CACmdLnOptions.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAConditionVariable.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAControlChannelDispatcher.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CADatabase.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CADatagramSocket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAFirstMix.Po@am__quote@
