@@ -145,7 +145,6 @@ END AES Test*/
 				RAND_seed(randbuff,sizeof(randbuff));
 			#endif
 		#endif
-
 		options.parse(argc,argv);
 		if(options.getDaemon())
 			{
@@ -170,6 +169,7 @@ END AES Test*/
 				if(options.getLogDir((UINT8*)buff,255)==E_SUCCESS)
 					CAMsg::setOptions(MSG_FILE);
 			}
+		CASocketAddr::init();
 	  CAMsg::printMsg(LOG_INFO,"Anon proxy started!\n");
 	  CAMsg::printMsg(LOG_INFO,"Using: %s!\n",OPENSSL_VERSION_TEXT);
 #ifdef _DEBUG
@@ -214,6 +214,7 @@ END AES Test*/
 EXIT:
 		delete pRTT;
 		delete pMix;
+		CASocketAddr::destroy();
 		#ifdef _WIN32		
 			WSACleanup();
 		#endif

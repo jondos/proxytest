@@ -27,6 +27,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #include "StdAfx.h"
 #include "CASocketAddr.hpp"
+bool CASocketAddr::bIsCsInitialized=false;
+CRITICAL_SECTION CASocketAddr::csGet;
+
+
 CASocketAddr::CASocketAddr()
 	{
 		sin_family=AF_INET;
@@ -39,42 +43,64 @@ CASocketAddr::CASocketAddr(char* szIP,UINT16 port)
 		setAddr(szIP,port);
 	}
 
-int CASocketAddr::setAddr(char* szIP,UINT16 port)
+SINT32 CASocketAddr::init()
+	{
+		if(!bIsCsInitialized)
+			{
+				InitializeCriticalSection(&csGet);
+				bIsCsInitialized=true;
+			}
+		return E_SUCCESS;
+	}
+
+SINT32 CASocketAddr::destroy()
+	{
+		if(bIsCsInitialized)
+			{
+				DeleteCriticalSection(&csGet);
+			}
+		return E_SUCCESS;
+	}
+
+SINT32 CASocketAddr::setAddr(char* szIP,UINT16 port)
 	{
 		sin_family=AF_INET;
 		sin_port=htons(port);
 		sin_addr.s_addr=inet_addr(szIP);
 		if(sin_addr.s_addr==INADDR_NONE)
 			{
+				EnterCriticalSection(&csGet);
 				HOSTENT* hostent=gethostbyname(szIP);
 				if(hostent==NULL)
 					sin_addr.s_addr=INADDR_NONE;
 				else
 					memcpy(&sin_addr.s_addr,hostent->h_addr_list[0],hostent->h_length);
+				LeaveCriticalSection(&csGet);
 			}
-		return 0;
+		return E_SUCCESS;
 	}
 			
 CASocketAddr::CASocketAddr(UINT16 port)
 	{
 		sin_family=AF_INET;
 		sin_port=htons(port);
-		/*HOSTENT* hostent=gethostbyname("localhost");
-		if(hostent==NULL)
-			sin_addr.s_addr=0;
-		else
-			memcpy(&sin_addr.s_addr,hostent->h_addr_list[0],hostent->h_length);
-	*/
 		sin_addr.s_addr=INADDR_ANY;
 	}
 
 SINT32 CASocketAddr::getHostName(UINT8* buff,UINT32 len)
 	{
+		SINT32 ret;
+		EnterCriticalSection(&csGet);
 		HOSTENT* hosten=gethostbyaddr((const char*)&sin_addr,4,AF_INET);
 		if(hosten==NULL||hosten->h_name==NULL||strlen(hosten->h_name)>=len)
-		 return SOCKET_ERROR;
-		strcpy((char*)buff,hosten->h_name);
-		return E_SUCCESS;
+		 ret=SOCKET_ERROR;
+		else
+			{
+				strcpy((char*)buff,hosten->h_name);
+				ret=E_SUCCESS;
+			}
+		LeaveCriticalSection(&csGet);
+		return ret;
 	}
 
 UINT16 CASocketAddr::getPort()
@@ -84,23 +110,43 @@ UINT16 CASocketAddr::getPort()
 
 SINT32 CASocketAddr::getLocalHostName(UINT8* buff,UINT32 len)
 	{
+		SINT32 ret;
+		EnterCriticalSection(&csGet);
 		if(gethostname((char*)buff,len)==-1)
-			return SOCKET_ERROR;
-		HOSTENT* hosten=gethostbyname((char*)buff);
-		if(hosten==NULL||hosten->h_name==NULL||strlen(hosten->h_name)>=len)
-			return SOCKET_ERROR;
-		strcpy((char*)buff,hosten->h_name);
-		return E_SUCCESS;
+			ret=SOCKET_ERROR;
+		else
+			{
+				HOSTENT* hosten=gethostbyname((char*)buff);
+				if(hosten==NULL||hosten->h_name==NULL||strlen(hosten->h_name)>=len)
+					ret=SOCKET_ERROR;
+				else
+					{
+						strcpy((char*)buff,hosten->h_name);
+						ret=E_SUCCESS;
+					}
+			}
+		LeaveCriticalSection(&csGet);
+		return ret;
 	}
 
 SINT32 CASocketAddr::getLocalHostIP(UINT8* ip)
 	{
+		SINT32 ret;
 		char buff[256];
+		EnterCriticalSection(&csGet);
 		if(gethostname(buff,256)==-1)
-			return SOCKET_ERROR;
-		HOSTENT* hosten=gethostbyname((char*)buff);
-		if(hosten==NULL)
-			return SOCKET_ERROR;
-		memcpy((char*)ip,hosten->h_addr_list[0],4);
-		return E_SUCCESS;
+			ret=SOCKET_ERROR;
+		else
+			{
+				HOSTENT* hosten=gethostbyname((char*)buff);
+				if(hosten==NULL)
+					ret=SOCKET_ERROR;
+				else
+					{
+						memcpy((char*)ip,hosten->h_addr_list[0],4);
+						ret=E_SUCCESS;
+					}
+			}
+		LeaveCriticalSection(&csGet);
+		return ret;
 	}

@@ -30,17 +30,22 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 class CASocketAddr:public sockaddr_in
 	{
 		public:
+			static SINT32 init();
+			static SINT32 destroy();
 			CASocketAddr();
 			CASocketAddr(char* szIP,UINT16 port);
 			CASocketAddr(UINT16 port);
 
-			int setAddr(char* szIP,UINT16 port);
+			SINT32 setAddr(char* szIP,UINT16 port);
 			UINT16 getPort();
 			SINT32 getHostName(UINT8* buff,UINT32 len);
 			static SINT32 getLocalHostName(UINT8* buff,UINT32 len);
 			static SINT32 getLocalHostIP(UINT8* ip);
 			operator LPSOCKADDR(){return (::LPSOCKADDR)this;}
 
+		private:
+			static CRITICAL_SECTION csGet;
+			static bool bIsCsInitialized;
 	};
 
 typedef CASocketAddr* LPCASOCKETADDR;
