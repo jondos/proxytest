@@ -136,11 +136,19 @@ SET_OUT:
 										#endif
 										CASymCipher* newCipher=new CASymCipher();
 										oRSA.decrypt((unsigned char*)oMuxPacket.data,buff);
+#ifndef AES
 										newCipher->setDecryptionKey(buff);
-										newCipher->setEncryptionKey(buff);
+//										newCipher->setEncryptionKey(buff);
 										newCipher->decrypt((unsigned char*)oMuxPacket.data+RSA_SIZE,
 																			 (unsigned char*)oMuxPacket.data+RSA_SIZE-KEY_SIZE,
 																			 DATA_SIZE-RSA_SIZE);
+#else
+										newCipher->setDecryptionKeyAES(buff);
+//										newCipher->setEncryptionKeyAES(buff);
+										newCipher->decryptAES((unsigned char*)oMuxPacket.data+RSA_SIZE,
+																			 (unsigned char*)oMuxPacket.data+RSA_SIZE-KEY_SIZE,
+																			 DATA_SIZE-RSA_SIZE);
+#endif
 										memcpy(oMuxPacket.data,buff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
 										
 										oMuxPacket.len=oMuxPacket.len-16;
@@ -162,7 +170,11 @@ SET_OUT:
 								else
 									{
 										oMuxPacket.channel=oConnection.outChannel;
+#ifndef AES
 										oConnection.pCipher->decrypt((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
+#else
+										oConnection.pCipher->decryptAES((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
+#endif
 										if(muxOut.send(&oMuxPacket)==SOCKET_ERROR)
 											goto ERR_OUT;
 									}
@@ -183,7 +195,11 @@ SET_OUT:
 								if(len!=0)
 									{
 										oMuxPacket.channel=oConnection.id;
+#ifndef AES
 										oConnection.pCipher->decrypt((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
+#else
+										oConnection.pCipher->decryptAES((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
+#endif
 										if(muxIn.send(&oMuxPacket)==SOCKET_ERROR)
 											goto ERR_IN;
 									}

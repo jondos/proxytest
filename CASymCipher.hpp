@@ -29,6 +29,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define __CASYMCIPHER__
 
 #define KEY_SIZE 16
+
+#include "aes/rijndael-api-fst.h"
 class CASymCipher
 	{
 		public:
@@ -44,6 +46,19 @@ class CASymCipher
 			BF_KEY keyEnc,keyDec;
 			UINT8 rawKeyEnc[16];
 			bool bEncKeySet;
+
+			//AES
+		public:
+	//		SINT32 generateEncryptionKeyAES();
+	//		SINT32 setEncryptionKeyAES(UINT8* key);
+			SINT32 setDecryptionKeyAES(UINT8* key);
+	//		SINT32 encryptAES(UINT8* in,UINT32 len);
+			SINT32 decryptAES(UINT8* in,UINT8* out,UINT32 len);
+		protected:
+			//AES
+			keyInstance keyEncAES;
+			keyInstance keyDecAES;
+			UINT8 iv[16];
 	};
 
 #endif

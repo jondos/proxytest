@@ -67,7 +67,7 @@ LINK32=xilink6.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /G6 /MDd /W2 /Gm /GX /ZI /Od /I "g:\openssl-0.9.5a\inc32" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "_DEBUG" /D "_REENTRANT" /FAcs /FR /Yu"stdafx.h" /FD /GZ /c
+# ADD CPP /nologo /G6 /MDd /W4 /Gm /GX /ZI /Od /I "g:\openssl-0.9.5a\inc32" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "_DEBUG" /D "_REENTRANT" /D "AES" /FAcs /FR /Yu"stdafx.h" /FD /GZ /c
 # ADD BASE RSC /l 0x407 /d "_DEBUG"
 # ADD RSC /l 0x407 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -323,6 +323,52 @@ SOURCE=.\xml\xmloutput.h
 SOURCE=.\xml\xmlstream.h
 # End Source File
 # End Group
+# Begin Group "aes"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=".\aes\boxes-fst.dat.h"
+# End Source File
+# Begin Source File
+
+SOURCE=".\aes\rijndael-alg-fst.cpp"
+
+!IF  "$(CFG)" == "proxytest - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=".\aes\rijndael-alg-fst.h"
+# End Source File
+# Begin Source File
+
+SOURCE=".\aes\rijndael-api-fst.cpp"
+
+!IF  "$(CFG)" == "proxytest - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=".\aes\rijndael-api-fst.h"
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=.\CAASymCipher.cpp
@@ -414,7 +460,21 @@ SOURCE=.\proxytest.cpp
 # Begin Source File
 
 SOURCE=.\StdAfx.cpp
+
+!IF  "$(CFG)" == "proxytest - Win32 Release"
+
 # ADD CPP /Yc"stdafx.h"
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
+
+# ADD CPP /W3 /Yc"stdafx.h"
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
+
+# ADD CPP /Yc"stdafx.h"
+
+!ENDIF 
+
 # End Source File
 # End Group
 # Begin Group "Header-Dateien"

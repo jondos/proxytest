@@ -89,6 +89,24 @@ int main(int argc, const char* argv[])
 //getcurrentTimeMillis(&bn);
 //exit(0);
 
+/* AES Test....
+CASymCipher oCipher;
+UINT8 key[16];
+UINT8 in[1000];
+memset(key,0,16);
+memset(in,0,1000);
+
+//oCipher.setEncryptionKeyAES(key);
+oCipher.setDecryptionKeyAES(key);
+clock_t l=clock();
+for(int i=0;i<10000;i++)
+	oCipher.decryptAES(in,in,1000);
+//oCipher.decryptAES(in,in,1000);
+l=clock()-l;
+printf("Zeit [ms]: %f",((double)l/(double)CLOCKS_PER_SEC)*1000.0);
+//oCipher.decryptAES(in,in,17);
+exit(0);
+END AES Test*/
 /* //Datagram test
 	CADatagramSocket oSocket;
 	oSocket.bind(5000);

@@ -79,3 +79,89 @@ SINT32 CASymCipher::decrypt(UINT8* in,UINT8* out,UINT32 len)
 		return E_SUCCESS;
 	}
 	
+
+//AES
+/*
+SINT32 CASymCipher::setEncryptionKeyAES(UINT8* key)
+	{
+		makeKey(&keyEncAES,DIR_ENCRYPT,KEY_SIZE*8,(char*)key);
+		memcpy(rawKeyEnc,key,16);
+		bEncKeySet=true;
+		memset(iv,0,16);
+		return E_SUCCESS;
+	}
+*/
+
+SINT32 CASymCipher::setDecryptionKeyAES(UINT8* key)
+	{
+		makeKey(&keyDecAES,DIR_ENCRYPT,KEY_SIZE*8,(char*)key);
+		memset(iv,0,16);
+		return E_SUCCESS;
+	}
+
+/*SINT32 CASymCipher::encryptAES(UINT8* in,UINT32 len)
+	{
+		cipherInstance cipher;
+		cipherInit(&cipher, MODE_ECB,NULL);
+		UINT32 i=0;
+		while(i<len-15)
+			{
+				blockEncrypt(&cipher,&keyEncAES,iv,16<<3,iv); 
+				for(int k=0;k<16;k++)
+					in[i++]^=iv[k];
+			}
+		if(i<len)
+			{
+				blockEncrypt(&cipher,&keyEncAES,iv,16<<3,iv); 
+				len-=i;
+				for(int k=0;k<len;k++)
+					in[i++]^=iv[k];
+			}
+		return E_SUCCESS;
+	}
+*/
+SINT32 CASymCipher::decryptAES(UINT8* in,UINT8* out,UINT32 len)
+	{
+	//	cipherInstance cipher;
+	//	cipherInit(&cipher, MODE_ECB,NULL);
+		UINT32 i=0;
+		while(i<len-15)
+			{
+				rijndaelEncrypt (iv, iv, keyDecAES.keySched);
+
+		//	blockEncrypt(&cipher,&keyDecAES,iv,16<<3,iv); 
+				out[i]=in[i++]^iv[0];
+				out[i]=in[i++]^iv[1];
+				out[i]=in[i++]^iv[2];
+				out[i]=in[i++]^iv[3];
+				out[i]=in[i++]^iv[4];
+				out[i]=in[i++]^iv[5];
+				out[i]=in[i++]^iv[6];
+				out[i]=in[i++]^iv[7];
+				out[i]=in[i++]^iv[8];
+				out[i]=in[i++]^iv[9];
+				out[i]=in[i++]^iv[10];
+				out[i]=in[i++]^iv[11];
+				out[i]=in[i++]^iv[12];
+				out[i]=in[i++]^iv[13];
+				out[i]=in[i++]^iv[14];
+				out[i]=in[i++]^iv[15];
+			}
+		if(i<len)
+			{
+				rijndaelEncrypt (iv, iv, keyDecAES.keySched);
+//				blockEncrypt(&cipher,&keyDecAES,iv,16<<3,iv); 
+				len-=i;
+				for(int k=0;k<len;k++)
+					out[i]=in[i++]^iv[k];
+			}
+		return E_SUCCESS;
+	}
+/*
+SINT32 CASymCipher::generateEncryptionKeyAES()
+	{
+		UINT8 key[16];
+		RAND_bytes(key,16);
+		return setEncryptionKeyAES(key);
+	}
+*/
