@@ -181,10 +181,10 @@ SINT32 CASocket::connect(CASocketAddr & psa,UINT32 retry,UINT32 time)
 	}
 			
 
-/** Tries to connect to peeer psa.
+/** Tries to connect to peer psa.
 	*
 	*	@param psa - peer
-	* @param msTimeOut - abort after msTimeOut MilliSeconds
+	* @param msTimeOut - abort after msTimeOut milli seconds
 	*/
 SINT32 CASocket::connect(CASocketAddr & psa,UINT32 msTimeOut)
 	{
@@ -327,7 +327,7 @@ SINT32 CASocket::send(const UINT8* buff,UINT32 len)
 	  return ret;	    	    
 	}
 
-/** Sends some data over the network. Using a Timeout if socket is in blocking mode. 
+/** Sends some data over the network. Using a Timeout iff socket is in blocking mode. 
 	Otherwise E_AGAIN may returned
 	@param buff the buffer to send
 	@param len content length
@@ -417,6 +417,7 @@ SINT32 CASocket::sendFully(const UINT8* buff,UINT32 len)
 	* was set to blocking or non-blocking mode.
 	* Warning: If socket is in blocking mode and receive is called, receive will block until some
 	* data is available, EVEN IF AN OTHER THREAD WILL CLOSE THIS SOCKET!
+	*
 	* @param buff the buffer which get the received data
 	* @param len size of buff
 	*	@return SOCKET_ERROR if an error occured
@@ -424,7 +425,7 @@ SINT32 CASocket::sendFully(const UINT8* buff,UINT32 len)
 	*                  receive would block or a timeout was reached
 	* @retval 0 if socket was gracefully closed
 	* @return the number of bytes received (always >0)
-**/
+***/
 SINT32 CASocket::receive(UINT8* buff,UINT32 len)
 	{
 		int ret;	
@@ -446,10 +447,10 @@ SINT32 CASocket::receive(UINT8* buff,UINT32 len)
 	  return ret;	    	    
 	}
 
-/**Receives all bytes. This blocks until all bytes are received or an error occured.
-@return E_UNKNOWN, in case of an error
-@return E_SUCCESS otherwise
-*/
+/** Receives all len bytes. This blocks until all bytes are received or an error occured.
+	* @return E_UNKNOWN, in case of an error
+	* @return E_SUCCESS otherwise
+***/
 SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len)
 	{
 		SINT32 ret;

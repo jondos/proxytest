@@ -171,7 +171,13 @@ SINT32 CAMuxSocket::prepareForSend(MIXPACKET *pinoutPacket)
 		return MIXPACKET_SIZE;
 	}
 	
-
+/** Receives a whole MixPacket. Blocks until a packet is received or
+	* a socket error occurs.
+	*
+	* @param pPacket on return stores the received MixPacket
+	* @retval SOCKET_ERROR, in case of an error
+	* @retval MIXPACKET_SIZE otherwise
+	*/
 SINT32 CAMuxSocket::receive(MIXPACKET* pPacket)
 	{
 		m_csReceive.lock();

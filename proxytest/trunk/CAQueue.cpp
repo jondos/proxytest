@@ -296,7 +296,7 @@ THREAD_RETURN producer(void* param)
 		struct __queue_test* pTest=(struct __queue_test *)param;
 		UINT32 count=0;
 		UINT32 aktSize;
-		while(pTest->len>10000)
+		while(pTest->len>0)
 				{
 					aktSize=rand();
 					aktSize%=0xFFFF;

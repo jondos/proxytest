@@ -151,6 +151,7 @@ SINT32 CAMix::initMixCascadeInfo(DOM_Element& mixes)
     UINT8 name[255];
     if(options.getCascadeName(name,255)!=E_SUCCESS)
     {
+    	CAMsg::printMsg(LOG_ERR,"No cascade name given!\n");
 			return E_UNKNOWN;
 		}
     m_docMixCascadeInfo.appendChild(elemRoot);
