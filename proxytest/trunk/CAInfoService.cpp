@@ -113,6 +113,8 @@ THREAD_RETURN InfoLoop(void *p)
 						pInfoService->sendHelo();
 						helocount=10;
 					}
+				else 
+				 helocount--;
 				sleep(60);
 			}
 		delete buff;

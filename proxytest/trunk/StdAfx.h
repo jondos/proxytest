@@ -127,7 +127,17 @@
     #ifndef min
 	#define min(a,b) ((a<b)?(a):(b))
     #endif	
-
+	#ifdef __linux
+		#include <linux/types.h>
+		typedef __u32 UINT32;
+		typedef __s32 SINT32;
+		typedef unsigned int UINT;
+		typedef signed int SINT;
+		typedef __u16 UINT16;
+		typedef __s16 SINT16;
+		typedef __u8 UINT8;
+		typedef __s8 SINT8;
+	#endif
 #endif
 
 #define E_SUCCESS 0

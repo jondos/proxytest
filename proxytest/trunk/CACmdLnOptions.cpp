@@ -151,7 +151,7 @@ SINT32 CACmdLnOptions::getTargetHost(UINT8* host,UINT32 len)
   {
 		if(strTargetHost==NULL)
 				return E_UNKNOWN;
-		if(len<=(int)strlen(strTargetHost))
+		if(len<=(UINT32)strlen(strTargetHost))
 				{
 					return E_UNKNOWN;		
 				}
@@ -168,7 +168,7 @@ SINT32 CACmdLnOptions::getSOCKSHost(UINT8* host,UINT32 len)
   {
 		if(strSOCKSHost==NULL)
 				return E_UNKNOWN;
-		if(len<=(int)strlen(strSOCKSHost))
+		if(len<=(UINT32)strlen(strSOCKSHost))
 				{
 					return E_UNKNOWN;		
 				}
@@ -185,7 +185,7 @@ SINT32 CACmdLnOptions::getInfoServerHost(UINT8* host,UINT32 len)
   {
 		if(strInfoServerHost==NULL)
 				return E_UNKNOWN;
-		if(len<=(int)strlen(strInfoServerHost))
+		if(len<=(UINT32)strlen(strInfoServerHost))
 				{
 					return E_UNKNOWN;		
 				}
@@ -197,7 +197,7 @@ SINT32 CACmdLnOptions::getKeyFileName(UINT8* filename,UINT32 len)
   {
 		if(strKeyFileName==NULL)
 				return E_UNKNOWN;
-		if(len<=(int)strlen(strKeyFileName))
+		if(len<=(UINT32)strlen(strKeyFileName))
 				{
 					return E_UNKNOWN;		
 				}
@@ -209,7 +209,7 @@ SINT32 CACmdLnOptions::getCascadeName(UINT8* name,UINT32 len)
   {
 		if(strCascadeName==NULL)
 				return E_UNKNOWN;
-		if(len<=(int)strlen(strCascadeName))
+		if(len<=(UINT32)strlen(strCascadeName))
 				{
 					return E_UNKNOWN;		
 				}
