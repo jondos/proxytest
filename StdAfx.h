@@ -11,6 +11,7 @@
     #pragma once
     #endif // _MSC_VER > 1000
     #include <winsock2.h>
+		#define socklen_t int
     #include <io.h>
     #include <conio.h>
     #include <process.h>
