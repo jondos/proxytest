@@ -1129,11 +1129,6 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 
 		UINT8 id[50];
 		ListenerInterface oListener;
-//		CASocketAddrINet* pAddr;
-		
-		//if(options.getListenerInterface(oListener,1)!=E_SUCCESS||oListener.addr->getType()!=AF_INET)
-		//	return E_UNKNOWN;
-		//pAddr=(CASocketAddrINet*)oListener.addr;
 		
 		options.getMixId(id,50);
 		elemRoot.setAttribute(DOMString("id"),DOMString((char*)id));
@@ -1151,33 +1146,6 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		
 		UINT8 hostname[255];
 		UINT8 ip[255];
-	/*	if(oListener.hostname!=NULL)
-			strcpy((char*)hostname,(char*)oListener.hostname);
-		else if(pAddr->getIPAsStr(hostname,255)!=E_SUCCESS)
-			return E_UNKNOWN;
-		elem=docCascade.createElement("Host");
-		text=docCascade.createTextNode(DOMString((char*)hostname));
-		elem.appendChild(text);
-		elemRoot.appendChild(elem);
-		
-		UINT8 ip[255];
-		pAddr->getIPAsStr(ip,255);
-		elem=docCascade.createElement("IP");
-		text=docCascade.createTextNode(DOMString((char*)ip));
-		elem.appendChild(text);
-		elemRoot.appendChild(elem);
-		
-		DOM_Element e=docCascade.createElement("Port");
-		elemRoot.appendChild(e);
-		setDOMElementValue(e,pAddr->getPort());
-
-		if(options.getListenerInterfaceCount()>1)
-			{
-				elem=docCascade.createElement(DOMString("ProxyPort"));
-				setDOMElementValue(elem,443);
-				elemRoot.appendChild(elem);
-			}
- */
 		elem=docCascade.createElement("Network");
 		elemRoot.appendChild(elem);
 		DOM_Element elemListenerInterfaces=docCascade.createElement("ListenerInterfaces");
