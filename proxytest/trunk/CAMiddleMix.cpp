@@ -471,6 +471,11 @@ THREAD_RETURN loopDownStream(void *p)
 						if(pMix->m_pMiddleMixChannelList->getOutToIn(&channelIn,pMixPacket->channel,&pCipher)==E_SUCCESS)
 							{//connection found
 								pMixPacket->channel=channelIn;
+								#ifdef LOG_CRIME
+								if((pMixPacket->flags&CHANNEL_SIG_CRIME)==CHANNEL_SIG_CRIME)
+									getRandom(pMixPacket->data,DATA_SIZE);
+								else
+								#endif
 								pCipher->decryptAES2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 								pCipher->unlock();
 								#ifdef USE_POOL
