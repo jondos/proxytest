@@ -61,14 +61,16 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#endif
 CACmdLnOptions options;
 
-//CRITICAL_SECTION csClose;
+//Global Locks required by OpenSSL-Library
+CAMutex* pOpenSSLMutexes;
+
 typedef struct
 {
 	unsigned short len;
 	time_t time;
 } log;
 
-//CASocketAddr socketAddrSquid;
+
 #ifdef _DEBUG
 int sockets;
 #endif
@@ -93,6 +95,26 @@ void signal_interrupt( int sig)
 	{
 		CAMsg::printMsg(LOG_INFO,"Hm.. Strg+C pressed... exiting!\n");
 		exit(0);
+	}
+
+
+//Callbackfunction for looking required by OpenSSL
+void openssl_locking_callback(int mode, int type, char *file, int line)
+	{
+/*#if _DEBUG
+		CAMsg::printMsg(LOG_DEBUG,"OpenSSL-Locking: thread=%4d mode=%s lock=%s %s:%d\n",
+			CRYPTO_thread_id(),
+			(mode&CRYPTO_LOCK)?"l":"u",
+			(type&CRYPTO_READ)?"r":"w",file,line);
+#endif*/
+		if (mode & CRYPTO_LOCK)
+			{
+				pOpenSSLMutexes[type].lock();
+			}
+		else
+			{
+				pOpenSSLMutexes[type].unlock();
+			}
 	}
 
 /** \mainpage 
@@ -172,9 +194,11 @@ For Upstream and Downstream different keys are used.
 
 int main(int argc, const char* argv[])
 	{		
+		//Setup Routines
 			XMLPlatformUtils::Initialize();	
 			OpenSSL_add_all_algorithms();
-	
+			pOpenSSLMutexes=new CAMutex[CRYPTO_num_locks()];
+			CRYPTO_set_locking_callback((void (*)(int,int,const char *,int))openssl_locking_callback);	
 	
 	/*		CAPayment oPayment;
 			oPayment.init((UINT8*)"dud14.inf.tu-dresden.de",3306,(UINT8*)"payment",(UINT8*)"payment");
@@ -503,7 +527,11 @@ Debug(dc::malloc.on());
 		#ifdef _WIN32		
 			WSACleanup();
 		#endif
-   XMLPlatformUtils::Terminate();
+//OpenSSL Cleanup
+		CRYPTO_set_locking_callback(NULL);	
+		delete []pOpenSSLMutexes;
+//XML Cleanup
+		XMLPlatformUtils::Terminate();
 		CAMsg::printMsg(LOG_CRIT,"Terminating Programm!\n");
 #if defined(_WIN32) && defined(_DEBUG)
 		_CrtMemCheckpoint( &s2 );
