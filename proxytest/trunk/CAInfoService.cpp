@@ -66,7 +66,7 @@ static THREAD_RETURN InfoLoop(void *p)
 									}
 							}
             pInfoService->sendMixHelo();
-						helocount=10;
+						helocount=9;
 					}
 				else 
 					helocount--;
