@@ -86,7 +86,11 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 				UINT8 hash[16];
 				memcpy(m_Random,ip,4);
 				MD5(m_Random,sizeof(m_Random),hash);
+#ifndef PSEUDO_LOG
 				CAMsg::printMsg(LOG_DEBUG,"Inserting IP-Address: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X !\n",hash[0],hash[1],hash[2],hash[3],hash[4],hash[5],hash[6],hash[7],hash[8],hash[9],hash[10],hash[11],hash[12],hash[13],hash[14],hash[15]);
+#else
+				CAMsg::printMsg(LOG_DEBUG,"Inserting IP-Address: {%u.%u.%u.%u} !\n",ip[0],ip[1],ip[2],ip[3]);
+#endif
 				entry=new IPLISTENTRY;
 				memcpy(entry->ip,ip,2);
 				entry->count=1;
@@ -102,6 +106,9 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 					{
 						if(memcmp(entry->ip,ip,2)==0) //we have found the entry
 							{
+								#ifdef PSEUDO_LOG
+									CAMsg::printMsg(LOG_DEBUG,"An other Connection from IP-Address: {%u.%u.%u.%u} !\n",ip[0],ip[1],ip[2],ip[3]);
+								#endif
 								if(entry->count>=m_allowedConnections) //an Attack...
 									{
 										CAMsg::printMsg(LOG_CRIT,"possible Flooding Attack from: %u.%u.%u.%u !\n",ip[0],ip[1],ip[2],ip[3]);

@@ -819,9 +819,9 @@ ERR:
 		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
 		m_bRestart=true;
 		CAMsg::printMsg(LOG_CRIT,"Stopping InfoService....\n");
-		CAMsg::printMsg	(LOG_CRIT,"Memeory usage before: %u\n",getMemoryUsage());	
+		CAMsg::printMsg	(LOG_CRIT,"Memory usage before: %u\n",getMemoryUsage());	
 		m_pInfoService->stop();
-		CAMsg::printMsg	(LOG_CRIT,"Memeory usage after: %u\n",getMemoryUsage());	
+		CAMsg::printMsg	(LOG_CRIT,"Memory usage after: %u\n",getMemoryUsage());	
 		CAMsg::printMsg(LOG_CRIT,"Stopped InfoService!\n");
 		m_pMuxOut->close();
 		for(i=0;i<m_nSocketsIn;i++)
