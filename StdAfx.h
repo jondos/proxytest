@@ -51,7 +51,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define DELAY_CHANNELS //to enable max channel bandwidth
 //#define HAVE_EPOLL //define if you have epoll support on your (Linux) system
 #ifdef DELAY_CHANNELS
-	#define DELAY_CHANNEL_TRAFFIC 10000 //Traffic in bytes after which (download direction) the channel is delayed
+	#ifndef DELAY_CHANNEL_TRAFFIC
+		#define DELAY_CHANNEL_TRAFFIC 10000 //Traffic in bytes after which (download direction) the channel is delayed
+	#endif
 	//Delay is at the moment constant and calculate as
 	// 1000/DELAY_BUCKET_GROW_INTERVALL*DELAY_BUCKET_GROW bytes/s
 	#define DELAY_BUCKET_GROW_INTERVALL 100 //Time in ms
