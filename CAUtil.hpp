@@ -97,13 +97,33 @@ inline void add64(UINT64& op1,UINT32 op2)
 #endif
 	}
 
+inline void inc64(UINT64& op1)
+	{
+#if !defined(_WIN32)&&!defined(__linux)
+	op1.low++;
+	if(op1.low==0)
+		op1.high++;
+#else
+		op1++;
+#endif
+	}
+
 inline UINT32 diff64(UINT64& bigop,UINT64& smallop)
 	{
 		#if !defined(_WIN32)&&!defined(__linux)
-		return (UINT32) -1; //TODO!!!
+			return (UINT32) -1; //TODO!!!
 		#else
 			return (UINT32)(bigop-smallop);
 		#endif
+	}
+
+inline UINT32 div64(UINT64& op1,UINT32 op2)
+	{
+#if !defined(_WIN32)&&!defined(__linux)
+		return (UINT32) -1; //TODO!!!
+#else
+		return (UINT32)op1/op2;
+#endif
 	}
 
 inline void print64(UINT8* buff,UINT64& op)

@@ -87,7 +87,7 @@ SINT32 CAInfoService::getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic)
 		return m_pFirstMix->getLevel(puser,prisk,ptraffic);
 	}
 
-SINT32 CAInfoService::getMixedPackets(UINT32* ppackets)
+SINT32 CAInfoService::getMixedPackets(UINT64& ppackets)
 	{
 		if(m_pFirstMix!=NULL)
 			return m_pFirstMix->getMixedPackets(ppackets);
@@ -99,7 +99,7 @@ SINT32 CAInfoService::start()
 		if(m_pSignature==NULL)
 			return E_UNKNOWN;
 		m_bRun=true;
-		m_lastMixedPackets=0;
+		set64(m_lastMixedPackets,(UINT32)0);
 		m_minuts=1;
 		m_threadRunLoop.setMainLoop(InfoLoop);
 		return m_threadRunLoop.start(this);
@@ -124,7 +124,7 @@ SINT32 CAInfoService::sendStatus()
 		UINT8 hostname[255];
 		UINT8 buffHeader[255];
 		SINT32 tmpUser,tmpRisk,tmpTraffic;
-		UINT32 tmpPackets;
+		UINT64 tmpPackets;
 		if(options.getInfoServerHost(hostname,255)!=E_SUCCESS)
 			return E_UNKNOWN;
 		oAddr.setAddr(hostname,options.getInfoServerPort());
@@ -133,12 +133,13 @@ SINT32 CAInfoService::sendStatus()
 				UINT8 strMixId[255];
 				options.getMixId(strMixId,255);
 				
-				tmpUser=tmpPackets=tmpRisk=tmpTraffic=-1;
+				tmpUser=tmpTraffic=tmpRisk=-1;
+				set64(tmpPackets,(UINT32)-1);
 				getLevel(&tmpUser,&tmpRisk,&tmpTraffic);
-				getMixedPackets(&tmpPackets);
-				UINT32 avgTraffic=tmpPackets/m_minuts;
+				getMixedPackets(tmpPackets);
+				UINT32 avgTraffic=div64(tmpPackets,m_minuts);
 				m_minuts++;
-				UINT32 diffTraffic=tmpPackets-m_lastMixedPackets;
+				UINT32 diffTraffic=diff64(tmpPackets,m_lastMixedPackets);
 				if(avgTraffic==0)
 					{
 						if(diffTraffic==0)
@@ -151,16 +152,18 @@ SINT32 CAInfoService::sendStatus()
 						double dTmp=(double)diffTraffic/(double)avgTraffic;
 						tmpTraffic=min(SINT32(50.*dTmp),100);
 					}
-				m_lastMixedPackets=tmpPackets;
+				set64(m_lastMixedPackets,tmpPackets);
 			
 #define XML_MIX_CASCADE_STATUS "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\
-<MixCascadeStatus id=\"%s\" currentRisk=\"%i\" mixedPackets=\"%u\" nrOfActiveUsers=\"%i\" trafficSituation=\"%i\"\
+<MixCascadeStatus id=\"%s\" currentRisk=\"%i\" mixedPackets=\"%s\" nrOfActiveUsers=\"%i\" trafficSituation=\"%i\"\
  ></MixCascadeStatus>"
 				
 				UINT32 buffLen=1024;
 				UINT8* buff=new UINT8[buffLen];
 				UINT8 tmpBuff[1024];
-				sprintf((char*)tmpBuff,XML_MIX_CASCADE_STATUS,strMixId,tmpRisk,tmpPackets,tmpUser,tmpTraffic);
+				UINT8 buffMixedPackets[50];
+				print64(buffMixedPackets,tmpPackets);
+				sprintf((char*)tmpBuff,XML_MIX_CASCADE_STATUS,strMixId,tmpRisk,buffMixedPackets,tmpUser,tmpTraffic);
 				m_pSignature->signXML(tmpBuff,strlen((char*)tmpBuff),buff,&buffLen);
 				sprintf((char*)buffHeader,"POST /feedback HTTP/1.0\r\nContent-Length: %u\r\n\r\n",buffLen);
 				oSocket.send(buffHeader,strlen((char*)buffHeader));

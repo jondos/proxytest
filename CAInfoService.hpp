@@ -41,7 +41,7 @@ class CAInfoService
 			SINT32 start();
 			SINT32 stop();
 			SINT32 getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic);
-			SINT32 getMixedPackets(UINT32* ppackets);
+			SINT32 getMixedPackets(UINT64& ppackets);
 			bool getRun(){return m_bRun;}
 			SINT32 setSignature(CASignature* pSignature);
 			CASignature* getSignature(){return m_pSignature;}
@@ -50,6 +50,6 @@ class CAInfoService
 			CASignature*	m_pSignature;
 			CAFirstMix*		m_pFirstMix;
 			CAThread			m_threadRunLoop;
-			UINT32				m_lastMixedPackets;
+			UINT64				m_lastMixedPackets;
 			UINT32				m_minuts;
 	};

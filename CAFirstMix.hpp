@@ -37,6 +37,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAIPList.hpp" 
 #include "CASocketGroup.hpp"
 #include "CAQueue.hpp"
+#include "CAUtil.hpp"
 
 THREAD_RETURN loopSendToMix(void *param);
 THREAD_RETURN loopAcceptUsers(void *param);
@@ -70,14 +71,10 @@ class CAFirstMix:public CAMix
 			SINT32 initOnce();
 			SINT32 initMixCascadeInfo(UINT8* recvBuff,UINT32 len);
 		public:
-			SINT32 getMixedPackets(UINT32* ppackets)
+			SINT32 getMixedPackets(UINT64& ppackets)
 				{
-					if(ppackets!=NULL)
-						{
-							*ppackets=m_nMixedPackets;
-							return E_SUCCESS;
-						}
-					return E_UNKNOWN;
+					set64(ppackets,m_nMixedPackets);
+					return E_SUCCESS;
 				}
 
 			SINT32 getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic)
@@ -117,7 +114,7 @@ class CAFirstMix:public CAMix
 			SINT32 incMixedPackets()
 				{
 					m_mutexMixedPackets.lock();
-					m_nMixedPackets++;
+					inc64(m_nMixedPackets);
 					m_mutexMixedPackets.unlock();
 					return E_SUCCESS;
 				}
@@ -147,7 +144,7 @@ class CAFirstMix:public CAMix
 			UINT16 m_xmlKeyInfoSize;
 
 			UINT8* m_strXmlMixCascadeInfo;
-			UINT32 m_nMixedPackets;
+			UINT64 m_nMixedPackets;
 			CAASymCipher* m_pRSA;
 			CASignature* m_pSignature;
 			CAMutex m_mutexUser;
