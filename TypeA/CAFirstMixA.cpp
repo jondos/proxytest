@@ -430,8 +430,10 @@ NEXT_USER:
 //Step 5 
 //Writing to users...
 				countRead=m_psocketgroupUsersWrite->select(/*true,*/0);
+#ifndef WITH_CONTROL_CHANNELS
 				if(countRead>0)
 					bAktiv=true;
+#endif
 #ifdef HAVE_EPOLL		
 				fmHashTableEntry* pfmHashEntry=(fmHashTableEntry*)m_psocketgroupUsersWrite->getFirstSignaledSocketData();
 				while(pfmHashEntry!=NULL)
@@ -443,6 +445,11 @@ NEXT_USER:
 						if(m_psocketgroupUsersWrite->isSignaled(*pfmHashEntry->pMuxSocket))
 							{
 								countRead--;
+#endif
+#ifdef WITH_CONTROL_CHANNELS
+								if(pfmHashEntry->pQueueSend->getSize()>0)
+								{
+								bAktiv=true;
 #endif
 								UINT32 len=sizeof(tQueueEntry);
 								if(pfmHashEntry->uAlreadySendPacketSize==0)
@@ -490,12 +497,18 @@ NEXT_USER:
 													}
 												pfmHashEntry->cSuspend=0;
 											}
+#ifndef WITH_CONTROL_CHANNELS
 										if(pfmHashEntry->pQueueSend->isEmpty())
 											{
 												m_psocketgroupUsersWrite->remove(*pfmHashEntry->pMuxSocket);
 											}
+#endif
 									}
-								//todo error handling
+#ifdef WITH_CONTROL_CHANNELS
+								}
+#endif
+
+									//todo error handling
 #ifdef HAVE_EPOLL
 						pfmHashEntry=(fmHashTableEntry*)m_psocketgroupUsersWrite->getNextSignaledSocketData();
 #else
