@@ -57,6 +57,7 @@ CAMutex CASocketAddrINet::m_csGet;
 /**Constructs a IP-Address for port 0 and ANY local host ip*/
 CASocketAddrINet::CASocketAddrINet()
 	{
+		memset(LPSOCKADDR(),0,getSize());
 		sin_family=AF_INET;
 		sin_addr.s_addr=INADDR_ANY;
 		sin_port=0;
@@ -65,6 +66,7 @@ CASocketAddrINet::CASocketAddrINet()
 /**Constructs an IP-Address for port and ANY local host ip */
 CASocketAddrINet::CASocketAddrINet(UINT16 port)
 	{
+		memset(LPSOCKADDR(),0,getSize());
 		sin_family=AF_INET;
 		sin_port=htons(port);
 		sin_addr.s_addr=INADDR_ANY;
@@ -73,6 +75,7 @@ CASocketAddrINet::CASocketAddrINet(UINT16 port)
 /**Constructs an IP-Address from an other IP Adress */
 CASocketAddrINet::CASocketAddrINet(const CASocketAddrINet& addr)
 	{
+		memset(LPSOCKADDR(),0,getSize());
 		sin_family=AF_INET;
 		sin_port=addr.sin_port;
 		sin_addr.s_addr=addr.sin_addr.s_addr;
