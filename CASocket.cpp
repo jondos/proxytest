@@ -115,12 +115,18 @@ SINT32 CASocket::accept(CASocket &s)
 		return E_SUCCESS;
 	}
 
-			
+
+/** Tries to connect to the peer described by psa*/			
 SINT32 CASocket::connect(CASocketAddr & psa)
 	{
 		return connect(psa,1,0);
 	}
 
+/** Tries to connect to the peer described by psa.
+	* @param psa - peer
+	* @param retry - number of retries
+	* @param time - time between retries in seconds
+	*/			
 SINT32 CASocket::connect(CASocketAddr & psa,UINT32 retry,UINT32 time)
 	{
 //		CAMsg::printMsg(LOG_DEBUG,"Socket:connect\n");
@@ -159,6 +165,11 @@ SINT32 CASocket::connect(CASocketAddr & psa,UINT32 retry,UINT32 time)
 	}
 			
 
+/** Tries to connect to peeer psa.
+	*
+	*	@param psa - peer
+	* @param msTimeOut - abort after msTimeOut MilliSeconds
+	*/
 SINT32 CASocket::connect(CASocketAddr & psa,UINT32 msTimeOut)
 	{
 		if(m_bSocketIsClosed&&create(psa.getType())!=E_SUCCESS)
