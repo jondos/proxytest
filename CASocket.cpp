@@ -351,19 +351,19 @@ SINT32 CASocket::getSendSpace()
 	{
 #ifdef HAVE_TIOCOUTQ
 		UINT32 ul;
-		/*SINT32 sl=m_aktSendBuffer;
+		SINT32 sl=m_aktSendBuffer;
 		if(sl<=0)
 			{
 				sl=getSendBuff();
 				if(sl<=0)
 					return E_UNKNOWN;
-			}*/
+			}
 		if(ioctlsocket(m_Socket,TIOCOUTQ,&ul)==SOCKET_ERROR)
 			return SOCKET_ERROR;
 		else
 		{
 			CAMsg::printMsg(LOG_DEBUG,"Unsent data now: %i\n",ul);
-			return /*sl-*/(SINT32)ul;
+			return sl-(SINT32)ul;
 		}
 #else
 		return E_UNKNOWN;
