@@ -28,8 +28,8 @@
 #include "xmlstream.h"
 
 #ifdef __cplusplus
-#include <vector>
-#include <string>
+#include <vector.h>
+#include <string.h>
 
 XML_BEGIN_NAMESPACE
 
@@ -79,8 +79,8 @@ public:
 	*/
 	void EndAttrs(Mode mode = indent);
 
-	/// write the std::string attribute
-	void WriteAttr(const char *name, const std::string &value);
+	/// write the /*std::*/string attribute
+	void WriteAttr(const char *name, const /*std::*/string &value);
 	/// write a "C" string attribute
 	void WriteAttr(const char *name, const char *value);
 	/// write an integer attribute
@@ -97,7 +97,7 @@ public:
 	void Indent();
 
 	/// write out a "terse" element with the specified data
-	void WriteElement(const char *name, const std::string &value);
+	void WriteElement(const char *name, const /*std::*/string &value);
 	/// write out a "terse" element with the specified data
 	void WriteElement(const char *name, const char *value);
 	/// write out a "terse" element with the specified data
@@ -109,7 +109,7 @@ public:
 	/// write out a "terse" element with the specified data
 	void WriteElement(const char *name, bool value);
 
-	Output &operator<<(const std::string &str);
+	Output &operator<<(const /*std::*/string &str);
 	Output &operator<<(const char *str);
 	Output &operator<<(int value);
 	Output &operator<<(unsigned int value);
@@ -123,7 +123,7 @@ public:
 private:
 	OutputStream &mStream;
 	int mLevel;					// nesting level
-	typedef std::vector<const char *> ElementStack;
+	typedef /*std::*/vector<const char *> ElementStack;
 	ElementStack mElements;		// needed to write EndElement tag name
 	bool mAttributes;			// used for sanity-checking
 };
