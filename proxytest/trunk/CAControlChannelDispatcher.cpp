@@ -32,6 +32,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 SINT32 CAControlChannelDispatcher::registerControlChannel(CAAbstractControlChannel* pControlChannel)
 	{
+		pControlChannel->setDispatcher(this);
 		m_arControlChannels[pControlChannel->getID()]= pControlChannel;
 		return E_SUCCESS;
 	}

@@ -696,6 +696,9 @@
 				RelativePath=".\CAControlChannelDispatcher.cpp">
 			</File>
 			<File
+				RelativePath=".\CAControlChannelTest.cpp">
+			</File>
+			<File
 				RelativePath="CADatabase.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -2817,6 +2820,9 @@
 			</File>
 			<File
 				RelativePath=".\CAControlChannelDispatcher.hpp">
+			</File>
+			<File
+				RelativePath=".\CAControlChannelTest.hpp">
 			</File>
 			<File
 				RelativePath="CADatabase.hpp">

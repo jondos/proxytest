@@ -26,6 +26,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "CAControlChannelDispatcher.hpp"
+#include "xml/DOM_Output.hpp"
 
 /** The base of each control channel. 
 	* Controls channels should be derived from CASyncControlChannel or 
@@ -34,20 +35,31 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 class CAAbstractControlChannel
 {
   public:
-    CAAbstractControlChannel(UINT8 id, bool bIsEncrypted,
-														CAControlChannelDispatcher* pDispatcher)
+    CAAbstractControlChannel(UINT8 id, bool bIsEncrypted)
 			{
 				m_bIsEncrypted=bIsEncrypted;
 				m_ID=id;
-				m_pDispatcher=pDispatcher;
+				m_pDispatcher=NULL;
 			}
-
-		virtual SINT32 proccessMessage(UINT8* msg, UINT32 msglen)=0;
     
-		/** Call to send a message via this control channel.*/
-		SINT32 sendMessage(UINT8* msg, UINT32 msglen)
+		/** Call to send a XML message via this control channel.
+			*	@retval E_SPACE, if the serialized XML message is bigger than
+			*										0xFFFF bytes
+			* @retval E_SUCCESS, if the message that successful send
+			* @retval E_UNKNOWN, in case of an error
+			*/
+		SINT32 sendMessage(DOM_Document& docMsg)
 			{
-				return m_pDispatcher->sendMessages(m_ID,m_bIsEncrypted,msg,msglen);
+				UINT32 tlen=0xFFFF+2;
+				UINT8 tmpB[0xFFFF+2];
+				if(DOM_Output::dumpToMem(docMsg,tmpB+2,&tlen)!=E_SUCCESS||
+					tlen>0xFFFF)
+					{
+						return E_SPACE;
+					}
+				tmpB[0]=tlen>>8;
+				tmpB[1]=tlen&0xFF;
+				return m_pDispatcher->sendMessages(m_ID,m_bIsEncrypted,tmpB,tlen+2);
 			}
 
 		UINT32 getID()
@@ -58,6 +70,23 @@ class CAAbstractControlChannel
     bool isEncrypted();
 
   protected:
+		/** Processes some bytes of a message we get 
+				from the communication channel.  The reassemble this fragments
+				in a buffer. If all parts are received we call proccessMessagesComplete()*/
+		virtual SINT32 proccessMessage(UINT8* msg, UINT32 msglen)=0;
+
+		/** Called if a whole messages was received, which should be delivered
+			* to the final recipient*/
+		virtual SINT32 proccessMessageComplete()=0;
+
+		/** Sets the Dispatcher*/
+		SINT32 setDispatcher(CAControlChannelDispatcher* pDispatcher)
+			{
+				m_pDispatcher=pDispatcher;
+				return E_SUCCESS;
+			}
+
+		friend class CAControlChannelDispatcher;
 		CAControlChannelDispatcher* m_pDispatcher;
 		bool m_bIsEncrypted;
     UINT32 m_ID;
