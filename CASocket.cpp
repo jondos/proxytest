@@ -301,8 +301,8 @@ int CASocket::send(UINT8* buff,UINT32 len,bool bDisableAsync)
 int CASocket::send(UINT8* buff,UINT32 len,UINT32 msTimeOut)
 	{
 	  int ret;
-		SINT32 aktTimeOut=getSendTimeOut();	
-		if(setSendTimeOut(msTimeOut)!=E_SUCCESS)
+		SINT32 aktTimeOut=0;	
+		if((aktTimeOut=getSendTimeOut())==SOCKET_ERROR||setSendTimeOut(msTimeOut)!=E_SUCCESS)
 			{//do it complicate but still to simple!!!! more work TODO
 				bool bWasNonBlocking=false;
 				getNonBlocking(&bWasNonBlocking);
