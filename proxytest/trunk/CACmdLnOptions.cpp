@@ -42,7 +42,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_bLocalProxy=m_bFirstMix=m_bLastMix=m_bMiddleMix=false;
 		m_iTargetPort=m_iSOCKSPort=m_iSOCKSServerPort=m_iInfoServerPort=0xFFFF;
 		m_strTargetHost=m_strSOCKSHost=m_strInfoServerHost=NULL;
-		m_strMixXml=m_strUser=m_strCascadeName=m_strLogDir=NULL;
+		m_strMixXml=m_strUser=m_strCascadeName=m_strLogDir=m_strSpecialLogDir=NULL;
 		m_arTargetInterfaces=NULL;
 		m_cnTargets=0;
 		m_arListenerInterfaces=NULL;
@@ -119,6 +119,8 @@ void CACmdLnOptions::clean()
 			delete[] m_strCascadeName;
 		if(m_strLogDir!=NULL)
 			delete[] m_strLogDir;
+		if(m_strSpecialLogDir!=NULL)
+			delete[] m_strSpecialLogDir;
 		if(m_strUser!=NULL)
 			delete[] m_strUser;
 		if(m_strMixXml!=NULL)
@@ -489,6 +491,16 @@ SINT32 CACmdLnOptions::getLogDir(UINT8* name,UINT32 len)
 		return E_SUCCESS;
   }
 
+SINT32 CACmdLnOptions::getSpecialLogDir(UINT8* name,UINT32 len)
+  {
+		if(m_strSpecialLogDir==NULL||name==NULL)
+				return E_UNKNOWN;
+		if(len<=(UINT32)strlen(m_strSpecialLogDir))
+			return E_UNKNOWN;		
+		strcpy((char*)name,m_strSpecialLogDir);
+		return E_SUCCESS;
+  }
+
 SINT32 CACmdLnOptions::getUser(UINT8* user,UINT32 len)
   {
 		if(m_strUser==NULL||user==NULL)
@@ -654,6 +666,13 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 						strtrim(tmpBuff);
 						m_strLogDir=new char[strlen((char*)tmpBuff)+1];
 						strcpy(m_strLogDir,(char*)tmpBuff);
+					}
+				getDOMChildByName(elemLogging,(UINT8*)"SpecialFile",elem,false);
+				if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS)
+					{
+						strtrim(tmpBuff);
+						m_strSpecialLogDir=new char[strlen((char*)tmpBuff)+1];
+						strcpy(m_strSpecialLogDir,(char*)tmpBuff);
 					}				
 			}
 
