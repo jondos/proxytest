@@ -224,7 +224,7 @@ static XmlToken getNextToken(XML_Input *input, XML_Char *token, size_t *tokenLen
 		if (c == '/')
 		{
 			/* looks like an end tag */
-			while (1)
+			for(;;)
 			{
 				c = nextChar(input);
 				if (c == XML_EOF)
@@ -242,7 +242,7 @@ static XmlToken getNextToken(XML_Input *input, XML_Char *token, size_t *tokenLen
 		else if (c == '?')
 		{
 			/* looks like a processing instruction */
-			while (1)
+			for(;;)
 			{
 				c = nextChar(input);
 				if (c == XML_EOF)
@@ -305,7 +305,7 @@ static XmlToken getNextToken(XML_Input *input, XML_Char *token, size_t *tokenLen
 		else
 		{
 			/* probably a tag start */
-			while (1)
+			for(;;)
 			{
 				c = nextChar(input);
 				if (c == XML_EOF)
@@ -779,7 +779,7 @@ XML_Input *XML_InputCreate(XML_InputStream *stream)
 	
 	assert(stream);
 	
-	input = (XML_Input *)malloc(sizeof(XML_Input));
+	input = new XML_Input;//(XML_Input *)malloc(sizeof(XML_Input));
 	if (input)
 	{
 		/* set up function pointers */
@@ -797,20 +797,20 @@ XML_Input *XML_InputCreate(XML_InputStream *stream)
 		/* allocate our working buffer */
 		input->maxBufSize = XML_BUFFER_SIZE;
 		input->bufSize = 0;
-		input->buffer = (XML_Char *)malloc(input->maxBufSize);
+		input->buffer = (XML_Char *)new char[(input->maxBufSize)];
 		if (!input->buffer)
 		{
-			free(input);
+			delete input;
 			return NULL;
 		}
 		input->bufPtr = input->buffer;
 
 		/* allocate a block of attributes */
-		input->attrPool = (XML_Attribute *)malloc(sizeof(XML_Attribute) * XML_ATTR_MAX);
+		input->attrPool = new XML_Attribute[XML_ATTR_MAX];//(XML_Attribute *)malloc(sizeof(XML_Attribute) * XML_ATTR_MAX);
 		if (!input->attrPool)
 		{
-			free(input->buffer);
-			free(input);
+			delete []input->buffer;
+			delete input;
 			return NULL;
 		}
 		/* and link them together into a free list */
@@ -833,9 +833,9 @@ void XML_InputFree(XML_Input *input)
 {
 	if (input)
 	{
-		if (input->attrPool) free(input->attrPool);
-		if (input->buffer) free(input->buffer);
-		free(input);
+		if (input->attrPool) delete [] input->attrPool;
+		if (input->buffer) delete [] input->buffer;
+		delete input;
 	}
 }
 
