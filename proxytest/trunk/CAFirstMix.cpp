@@ -196,7 +196,11 @@ SINT32 CAFirstMix::loop()
 									if(tmpReverseEntry!=NULL)
 										{
 											oMuxPacket.channel=tmpReverseEntry->inChannel;
+#ifndef AES
 											tmpReverseEntry->pCipher->decrypt((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
+#else
+											tmpReverseEntry->pCipher->decryptAES((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
+#endif
 											tmpReverseEntry->pMuxSocket->send(&oMuxPacket);
 										}
 									else
@@ -319,17 +323,29 @@ SINT32 CAFirstMix::loop()
 															{
 																oMuxPacket.channel=oConnection.outChannel;
 																pCipher=oConnection.pCipher;
+#ifndef AES
 																pCipher->decrypt((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
-															}
+#else
+																pCipher->decryptAES((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
+#endif
+														}
 														else
 															{
 																pCipher= new CASymCipher();
 																oRSA.decrypt((unsigned char*)oMuxPacket.data,buff);
+#ifndef AES
 																pCipher->setDecryptionKey(buff);
-																pCipher->setEncryptionKey(buff);
+//																pCipher->setEncryptionKey(buff);
 																pCipher->decrypt((unsigned char*)oMuxPacket.data+RSA_SIZE,
 																								 (unsigned char*)oMuxPacket.data+RSA_SIZE-KEY_SIZE,
 																								 DATA_SIZE-RSA_SIZE);
+#else
+																pCipher->setDecryptionKeyAES(buff);
+//																pCipher->setEncryptionKeyAES(buff);
+																pCipher->decryptAES((unsigned char*)oMuxPacket.data+RSA_SIZE,
+																								 (unsigned char*)oMuxPacket.data+RSA_SIZE-KEY_SIZE,
+																								 DATA_SIZE-RSA_SIZE);
+#endif
 																memcpy(oMuxPacket.data,buff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
 																
 																oMuxChannelList.add(tmpEntry,oMuxPacket.channel,lastChannelId,pCipher);

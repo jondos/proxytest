@@ -118,11 +118,19 @@ SINT32 CALastMix::loop()
 										    {    
 													CASymCipher* newCipher=new CASymCipher();
 													pRSA->decrypt((unsigned char*)oMuxPacket.data,buff);
+#ifndef AES
 													newCipher->setDecryptionKey(buff);
-													newCipher->setEncryptionKey(buff);
+//													newCipher->setEncryptionKey(buff);
 													newCipher->decrypt((unsigned char*)oMuxPacket.data+RSA_SIZE,
 																						 (unsigned char*)oMuxPacket.data+RSA_SIZE-KEY_SIZE,
 																						 DATA_SIZE-RSA_SIZE);
+#else
+													newCipher->setDecryptionKeyAES(buff);
+//													newCipher->setEncryptionKeyAES(buff);
+													newCipher->decryptAES((unsigned char*)oMuxPacket.data+RSA_SIZE,
+																						 (unsigned char*)oMuxPacket.data+RSA_SIZE-KEY_SIZE,
+																						 DATA_SIZE-RSA_SIZE);
+#endif
 													memcpy(oMuxPacket.data,buff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
 													
 													#ifdef _DEBUG
@@ -159,7 +167,11 @@ SINT32 CALastMix::loop()
 									}
 								else
 									{
+#ifndef AES
 										oConnection.pCipher->decrypt((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
+#else
+										oConnection.pCipher->decryptAES((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
+#endif
 										len=oConnection.pSocket->send(oMuxPacket.data,len);
 										if(len==SOCKET_ERROR)
 											{
@@ -203,7 +215,11 @@ SINT32 CALastMix::loop()
 											{
 												oMuxPacket.channel=tmpCon->id;
 												oMuxPacket.len=(unsigned short)len;
+#ifndef AES
 												tmpCon->pCipher->decrypt((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
+#else
+												tmpCon->pCipher->decryptAES((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
+#endif
 												if(muxIn.send(&oMuxPacket)==SOCKET_ERROR)
 													{
 														CAMsg::printMsg(LOG_CRIT,"Mux Data Sending Error - Exiting!\n");
