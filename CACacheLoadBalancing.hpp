@@ -37,22 +37,43 @@ struct t_cachelb_list
 
 typedef t_cachelb_list CACHE_LB_ENTRY; 
 
+/** This class stores Addresses off different Cache-Proxies. It can be used
+  * for Load Balancing between them. Currently a simple Ropund Robin is implemented.
+	* This class is NOT thread safe.
+	*/
 class CACacheLoadBalancing
 	{
 		public:
-			CACacheLoadBalancing(){m_ElementCount=0;paktEntry=NULL;}
+			CACacheLoadBalancing()
+				{
+					m_ElementCount=0;
+					pSelectedEntry=NULL;
+				}
 			~CACacheLoadBalancing();
 			SINT32 add(const CASocketAddrINet & pAddr);
+			
+			/** Gets the 'next' Address according to the Load-Balancing algorithm. 
+			  * This is the Address which should be used for a connection to a cache proxy.
+				* @return next Address of a Cache-Proxy
+				*/
 			CASocketAddrINet* get()
 				{
-					if(paktEntry==NULL)
+					if(pSelectedEntry==NULL)
 						return NULL;
-					paktEntry=paktEntry->next;
-					return &paktEntry->oAddr;
+					pSelectedEntry=pSelectedEntry->next;
+					return &pSelectedEntry->oAddr;
 				}
-			UINT32 getElementCount(){return m_ElementCount;}
+
+			/* Gets the number of Addresses added.
+			 * @return number of added Addresses
+			 */
+			UINT32 getElementCount()
+				{
+					return m_ElementCount;
+				}
+
 		private:
-			CACHE_LB_ENTRY* paktEntry;
+			CACHE_LB_ENTRY* pSelectedEntry;
 			UINT32 m_ElementCount;
 	};
 #endif

@@ -44,8 +44,8 @@ CAQueue::~CAQueue()
 /** Adds data to the Queue.
 	* @param buff pointer to the data buffer
 	* @param size size of data to add
-	* @returnval E_UNKOWN, in case of an error
-	* @retval E_SUCCESS if succesful
+	* @retval E_UNKNOWN, in case of an error
+	* @retval E_SUCCESS, if succesful
 	*/
 SINT32 CAQueue::add(const UINT8* buff,UINT32 size)
 	{
@@ -99,9 +99,10 @@ SINT32 CAQueue::add(const UINT8* buff,UINT32 size)
 		return E_SUCCESS;
 	}
 
-/** Gets data from the Queue.
+/** Gets data from the Queue. The data is removed from the Queue
   * @param pbuff, pointer to a buffer, there the data should be stored
-	* @param psize, on call contains the size of pbuff, on return contains the size of returned data
+	* @param psize, on call contains the size of pbuff, on return contains 
+	*								the size of returned data
 	* @retval E_SUCCESS, if succesful
 	* @retval E_UNKNOWN, in case of an error
 	*/
@@ -112,7 +113,6 @@ SINT32 CAQueue::get(UINT8* pbuff,UINT32* psize)
 		if(*psize==0)
 			return E_SUCCESS;
 		EnterCriticalSection(&m_csQueue);
-		SINT32 ret;
 		UINT32 space=*psize;
 		*psize=0;
 		while(space>=m_Queue->size)
@@ -137,14 +137,14 @@ SINT32 CAQueue::get(UINT8* pbuff,UINT32* psize)
 		m_Queue->size-=space;
 		m_nQueueSize-=space;
 		memmove(m_Queue->pBuff,m_Queue->pBuff+space,m_Queue->size);
-		ret=E_SUCCESS;
 		LeaveCriticalSection(&m_csQueue);
-		return ret;
+		return E_SUCCESS;
 	}
 
-/** Peeks data from the Queue (without removing from the Queue).
+/** Peeks data from the Queue. The data is NOT removed from the Queue.
   * @param pbuff, pointer to a buffer, there the data should be stored
-	* @param psize, on call contains the size of pbuff, on return contains the size of returned data
+	* @param psize, on call contains the size of pbuff, 
+	*								on return contains the size of returned data
 	* @retval E_SUCCESS, if succesful
 	* @retval E_UNKNOWN, in case of an error
 	*/
@@ -155,7 +155,6 @@ SINT32 CAQueue::peek(UINT8* pbuff,UINT32* psize)
 		if(*psize==0)
 			return E_SUCCESS;
 		EnterCriticalSection(&m_csQueue);
-		SINT32 ret;
 		UINT32 space=*psize;
 		*psize=0;
 		QUEUE* tmpQueue=m_Queue;
@@ -174,14 +173,14 @@ SINT32 CAQueue::peek(UINT8* pbuff,UINT32* psize)
 			}
 		memcpy(pbuff,tmpQueue->pBuff,space);
 		*psize+=space;
-		ret=E_SUCCESS;
 		LeaveCriticalSection(&m_csQueue);
-		return ret;
+		return E_SUCCESS;
 	}	
 	
 	
 /** Removes data from the Queue.
-	* @param psize, on call contains the size of data to remove, on return contains the size of removed data
+	* @param psize, on call contains the size of data to remove, 
+	*								on return contains the size of removed data
 	* @retval E_SUCCESS, if succesful
 	* @retval E_UNKNOWN, in case of an error
 	*/
@@ -192,7 +191,6 @@ SINT32 CAQueue::remove(UINT32* psize)
 		if(*psize==0)
 			return E_SUCCESS;
 		EnterCriticalSection(&m_csQueue);
-		SINT32 ret;
 		UINT32 space=*psize;
 		*psize=0;
 		while(space>=m_Queue->size)
@@ -214,9 +212,8 @@ SINT32 CAQueue::remove(UINT32* psize)
 		m_Queue->size-=space;
 		m_nQueueSize-=space;
 		memmove(m_Queue->pBuff,m_Queue->pBuff+space,m_Queue->size);
-		ret=E_SUCCESS;
 		LeaveCriticalSection(&m_csQueue);
-		return ret;
+		return E_SUCCESS;
 	}
 
 SINT32 CAQueue::test()
