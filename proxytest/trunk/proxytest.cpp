@@ -235,6 +235,7 @@ THREAD_RETURN proxytomix(void* tmpPair)
 			delete outSocket;
 		delete (CASocketToMix*)tmpPair;
 		LeaveCriticalSection(&csClose);
+		printf("Thread terminated\n");
 	}
 
 THREAD_RETURN mixtoproxy(void* tmpPair)
@@ -265,6 +266,7 @@ THREAD_RETURN mixtoproxy(void* tmpPair)
 			delete outSocket;
 		delete (CAMixToSocket*)tmpPair;
 		LeaveCriticalSection(&csClose);
+		printf("Thread terminated\n");
 	}
 
 int main(int argc, char* argv[])

@@ -31,10 +31,10 @@ int CAMixSocket::receive(char* buff,int len)
 	{
 		return oMixChannel.receive(id,buff,len);
 	}
-
+/*
 int CAMixSocket::close()
 	{
-		EnterCriticalSection(&csClose);
+//		EnterCriticalSection(&csClose);
 		int ret;
 		if(id!=0)
 			{
@@ -45,10 +45,10 @@ int CAMixSocket::close()
 			}
 		else
 			ret=SOCKET_ERROR;
-		LeaveCriticalSection(&csClose);
+//		LeaveCriticalSection(&csClose);
 		return ret;
 	}
-
+*/
 int CAMixSocket::close(int mode)
 	{
 		EnterCriticalSection(&csClose);
