@@ -95,28 +95,29 @@ SINT32 CAMiddleMix::init()
 			}
 
 		
-		
-		if(((CASocket*)m_MuxOut)->create(pAddrNext->getType())!=E_SUCCESS)
+		m_pMuxOut=new CAMuxSocket();
+
+		if(((CASocket*)*m_pMuxOut)->create(pAddrNext->getType())!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Init: Cannot create SOCKET for outgoing conncetion...\n");
 				return E_UNKNOWN;
 			}
-		((CASocket*)m_MuxOut)->setRecvBuff(50*MIXPACKET_SIZE);
-		((CASocket*)m_MuxOut)->setSendBuff(50*MIXPACKET_SIZE);
+		((CASocket*)*m_pMuxOut)->setRecvBuff(50*MIXPACKET_SIZE);
+		((CASocket*)*m_pMuxOut)->setSendBuff(50*MIXPACKET_SIZE);
 #define RETRIES 100
 #define RETRYTIME 30
 		CAMsg::printMsg(LOG_INFO,"Init: Try to connect to next Mix: %s...\n",strTarget);
-		if(m_MuxOut.connect(*pAddrNext,RETRIES,RETRYTIME)!=E_SUCCESS)
+		if(m_pMuxOut->connect(*pAddrNext,RETRIES,RETRYTIME)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Cannot connect to next Mix -- Exiting!\n");
 				return E_UNKNOWN;
 			}
 //		mSocketGroup.add(muxOut);
 		CAMsg::printMsg(LOG_INFO," connected!\n");
-		if(((CASocket*)m_MuxOut)->setKeepAlive((UINT32)1800)!=E_SUCCESS)
+		if(((CASocket*)*m_pMuxOut)->setKeepAlive((UINT32)1800)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_INFO,"Socket option TCP-KEEP-ALIVE returned an error - so not set!\n");
-				if(((CASocket*)m_MuxOut)->setKeepAlive(true)!=E_SUCCESS)
+				if(((CASocket*)*m_pMuxOut)->setKeepAlive(true)!=E_SUCCESS)
 					CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
 			}
 		
@@ -124,7 +125,7 @@ SINT32 CAMiddleMix::init()
 		unsigned char* infoBuff=NULL;
 		
 		UINT16 keyLen;
-		if(((CASocket*)m_MuxOut)->receiveFully((UINT8*)&keyLen,2)!=E_SUCCESS)
+		if(((CASocket*)*m_pMuxOut)->receiveFully((UINT8*)&keyLen,2)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_INFO,"Error receiving Key Info lenght!\n");
 				return E_UNKNOWN;
@@ -143,7 +144,7 @@ SINT32 CAMiddleMix::init()
 #else
 		keyLen=ntohs(keyLen);
 		recvBuff=new UINT8[keyLen+1];
-		if(((CASocket*)m_MuxOut)->receiveFully(recvBuff,keyLen)!=E_SUCCESS)
+		if(((CASocket*)*m_pMuxOut)->receiveFully(recvBuff,keyLen)!=E_SUCCESS)
 			{
 				delete recvBuff;
 				return E_UNKNOWN;
@@ -173,19 +174,19 @@ SINT32 CAMiddleMix::init()
 					((CASocketAddrINet*)pAddrListen)->setAddr(path,options.getServerPort());
 			}
 
-
-		if(m_MuxIn.accept(*pAddrListen)!=E_SUCCESS)
+		m_pMuxIn=new CAMuxSocket();
+		if(m_pMuxIn->accept(*pAddrListen)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Error waiting for previous Mix... -- Exiting!\n");				
 				delete recvBuff;
 				return E_UNKNOWN;
 			}
-		((CASocket*)m_MuxIn)->setRecvBuff(50*MIXPACKET_SIZE);
-		((CASocket*)m_MuxIn)->setSendBuff(50*MIXPACKET_SIZE);
-		if(((CASocket*)m_MuxIn)->setKeepAlive((UINT32)1800)!=E_SUCCESS)
+		((CASocket*)*m_pMuxIn)->setRecvBuff(50*MIXPACKET_SIZE);
+		((CASocket*)*m_pMuxIn)->setSendBuff(50*MIXPACKET_SIZE);
+		if(((CASocket*)*m_pMuxIn)->setKeepAlive((UINT32)1800)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_INFO,"Socket option TCP-KEEP-ALIVE returned an error - so not set!\n");
-				if(((CASocket*)m_MuxIn)->setKeepAlive(true)!=E_SUCCESS)
+				if(((CASocket*)*m_pMuxIn)->setKeepAlive(true)!=E_SUCCESS)
 					CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
 			}
 		
@@ -259,7 +260,7 @@ UINT16 infoSize;
 		#ifdef _DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"New Key Info size: %u\n",infoSize);
 		#endif
-		if(((CASocket*)m_MuxIn)->send(infoBuff,infoSize)==-1)
+		if(((CASocket*)*m_pMuxIn)->send(infoBuff,infoSize)==-1)
 			{
 				CAMsg::printMsg(LOG_DEBUG,"Error sending new New Key Info\n");
 				delete infoBuff;
@@ -282,7 +283,7 @@ THREAD_RETURN loopDownStream(void *p)
 		MIXPACKET* pMixPacket=new MIXPACKET;
 		SINT32 ret;
 		CASingleSocketGroup oSocketGroup;
-		oSocketGroup.add(pMix->m_MuxOut);
+		oSocketGroup.add(*(pMix->m_pMuxOut));
 		for(;;)
 			{
 				ret=oSocketGroup.select(false,1000);
@@ -298,7 +299,7 @@ THREAD_RETURN loopDownStream(void *p)
 					}
 				else
 					{
-						ret=pMix->m_MuxOut.receive(pMixPacket);
+						ret=pMix->m_pMuxOut->receive(pMixPacket);
 						if(ret==SOCKET_ERROR)
 								{
 									CAMsg::printMsg(LOG_CRIT,"loopDownStream -- Fehler bei receive() -- goto ERR!\n");
@@ -311,13 +312,13 @@ THREAD_RETURN loopDownStream(void *p)
 										pMixPacket->channel=channelIn;
 										pCipher->decryptAES2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 										pCipher->unlock();
-										if(pMix->m_MuxIn.send(pMixPacket)==SOCKET_ERROR)
+										if(pMix->m_pMuxIn->send(pMixPacket)==SOCKET_ERROR)
 											goto ERR;
 									}
 								else
 									{//connection should be closed
 										pCipher->unlock();
-										if(pMix->m_MuxIn.close(channelIn)==SOCKET_ERROR)
+										if(pMix->m_pMuxIn->close(channelIn)==SOCKET_ERROR)
 											goto ERR;
 										pMix->m_pMiddleMixChannelList->remove(channelIn);
 									}
@@ -327,8 +328,8 @@ THREAD_RETURN loopDownStream(void *p)
 ERR:
 		CAMsg::printMsg(LOG_CRIT,"loopDownStream -- Exiting!\n");
 		delete pMixPacket;
-		pMix->m_MuxIn.close();
-		pMix->m_MuxOut.close();
+		pMix->m_pMuxIn->close();
+		pMix->m_pMuxOut->close();
 		THREAD_RETURN_SUCCESS;		
 	}
 
@@ -349,9 +350,9 @@ SINT32 CAMiddleMix::loop()
 		SINT32 ret;
 		UINT8* tmpRSABuff=new UINT8[RSA_SIZE];
 		CASingleSocketGroup oSocketGroup;
-		oSocketGroup.add(m_MuxIn);
-		m_MuxIn.setCrypt(true);
-		m_MuxOut.setCrypt(true);
+		oSocketGroup.add(*m_pMuxIn);
+		m_pMuxIn->setCrypt(true);
+		m_pMuxOut->setCrypt(true);
 		CAThread oThread;
 		oThread.setMainLoop(loopDownStream);
 		oThread.start(this);
@@ -370,7 +371,7 @@ SINT32 CAMiddleMix::loop()
 					}
 				else
 					{
-						ret=m_MuxIn.receive(pMixPacket);
+						ret=m_pMuxIn->receive(pMixPacket);
 						if(ret==SOCKET_ERROR)
 							{
 								CAMsg::printMsg(LOG_CRIT,"Fehler beim Empfangen -- Exiting!\n");
@@ -392,7 +393,7 @@ SINT32 CAMiddleMix::loop()
 										memcpy(pMixPacket->data,tmpRSABuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
 										m_pMiddleMixChannelList->add(pMixPacket->channel,pCipher,&channelOut);
 										pMixPacket->channel=channelOut;
-										if(m_MuxOut.send(pMixPacket)==SOCKET_ERROR)
+										if(m_pMuxOut->send(pMixPacket)==SOCKET_ERROR)
 											goto ERR;
 									}
 							}
@@ -401,7 +402,7 @@ SINT32 CAMiddleMix::loop()
 								if(pMixPacket->flags==CHANNEL_CLOSE)
 									{
 										pCipher->unlock();
-										if(m_MuxOut.close(channelOut)==SOCKET_ERROR)
+										if(m_pMuxOut->close(channelOut)==SOCKET_ERROR)
 											goto ERR;
 										m_pMiddleMixChannelList->remove(pMixPacket->channel);
 									}
@@ -410,7 +411,7 @@ SINT32 CAMiddleMix::loop()
 										pMixPacket->channel=channelOut;
 										pCipher->decryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 										pCipher->unlock();
-										if(m_MuxOut.send(pMixPacket)==SOCKET_ERROR)
+										if(m_pMuxOut->send(pMixPacket)==SOCKET_ERROR)
 											goto ERR;
 									}
 							}
@@ -418,8 +419,8 @@ SINT32 CAMiddleMix::loop()
 			}
 ERR:
 		CAMsg::printMsg(LOG_CRIT,"Preparing for restart...\n");
-		m_MuxIn.close();
-		m_MuxOut.close();
+		m_pMuxIn->close();
+		m_pMuxOut->close();
 		oThread.join();		
 
 		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
@@ -431,8 +432,18 @@ ERR:
 	}
 SINT32 CAMiddleMix::clean()
 	{
-		m_MuxIn.close();
-		m_MuxOut.close();
+		if(m_pMuxIn!=NULL)
+			{
+				m_pMuxIn->close();
+				delete m_pMuxIn;
+			}
+		m_pMuxIn=NULL;
+		if(m_pMuxOut!=NULL)
+			{
+				m_pMuxOut->close();
+				delete m_pMuxOut;
+			}
+		m_pMuxOut=NULL;
 		m_RSA.destroy();
 		if(m_pMiddleMixChannelList!=NULL)
 			delete m_pMiddleMixChannelList;

@@ -40,7 +40,7 @@ class CALastMix:public CAMix
 
 	{
 		public:
-			CALastMix(){}
+			CALastMix(){m_pMuxIn=NULL;}
 			virtual ~CALastMix(){if(m_pSignature!=NULL) delete m_pSignature;}
 		private:
 			SINT32 loop();
@@ -48,7 +48,7 @@ class CALastMix:public CAMix
 			SINT32 initOnce();
 			SINT32 clean();
 		private:
-			CAMuxSocket		muxIn;
+			CAMuxSocket*		m_pMuxIn;
 			CACacheLoadBalancing m_oCacheLB;
 			CASocketAddrINet	maddrSocks;
 			CAASymCipher mRSA;
