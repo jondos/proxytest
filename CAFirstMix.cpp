@@ -581,7 +581,9 @@ SINT32 CAFirstMix::loop()
 															{
 																oMuxPacket.channel=tmpReverseEntry->outChannel;
 																oMuxPacket.flags=CHANNEL_SUSPEND;
-																CAMsg::printMsg(LOG_INFO,"Sending suspend for channel: %u\n",oMuxPacket.channel);
+																#ifdef _DEBUG
+																	CAMsg::printMsg(LOG_INFO,"Sending suspend for channel: %u\n",oMuxPacket.channel);
+																#endif
 																muxOut.send(&oMuxPacket);
 																if(pml==NULL)
 																	{

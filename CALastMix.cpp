@@ -385,7 +385,9 @@ SINT32 CALastMix::loop()
 									}
 								else
 									{
-										CAMsg::printMsg(LOG_CRIT,"Should never be here!!! New Channel wich Channel detroy packet!\n");
+										#ifdef _DEBUG
+											CAMsg::printMsg(LOG_CRIT,"Should never be here!!! New Channel wich Channel detroy packet!\n");
+										#endif
 									}
 							}
 						else
