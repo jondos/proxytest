@@ -47,7 +47,7 @@ CAQueue::~CAQueue()
 #ifndef DO_TRACE
 				delete m_Queue->pBuff;
 #else
-				deleteUINT8Buff(m_Queue->pBuff,m_Queue->allocSize);
+				deleteUINT8Buff(m_Queue->pBuff,m_Queue->shadow_pBuff,m_Queue->allocSize);
 #endif
 				m_lastElem=m_Queue;
 				m_Queue=m_Queue->next;
@@ -93,6 +93,7 @@ SINT32 CAQueue::add(const UINT8* buff,UINT32 size)
 #else
 				m_Queue->pBuff=newUINT8Buff(size);
 				m_Queue->allocSize=size;
+				m_Queue->shadow_pBuff=m_Queue->pBuff;
 #endif
 				if(m_Queue->pBuff==NULL)
 					{
@@ -127,6 +128,7 @@ SINT32 CAQueue::add(const UINT8* buff,UINT32 size)
 #else
 				m_lastElem->next->pBuff=newUINT8Buff(size);
 				m_lastElem->next->allocSize=size;
+				m_lastElem->next->shadow_pBuff=m_lastElem->next->pBuff;
 #endif
 				if(m_lastElem->next->pBuff==NULL)
 					{
@@ -182,7 +184,7 @@ SINT32 CAQueue::get(UINT8* pbuff,UINT32* psize)
 #ifndef DO_TRACE
 				delete []m_Queue->pBuff;
 #else
-				deleteUINT8Buff(m_Queue->pBuff,m_Queue->allocSize);
+				deleteUINT8Buff(m_Queue->pBuff,m_Queue->shadow_pBuff,m_Queue->allocSize);
 #endif
 				QUEUE* tmp=m_Queue;
 				m_Queue=m_Queue->next;
@@ -287,7 +289,7 @@ SINT32 CAQueue::remove(UINT32* psize)
 #ifndef DO_TRACE
 				delete []m_Queue->pBuff;
 #else
-				deleteUINT8Buff(m_Queue->pBuff,m_Queue->allocSize);
+				deleteUINT8Buff(m_Queue->pBuff,m_Queue->shadow_pBuff,m_Queue->allocSize);
 #endif
 				QUEUE* tmp=m_Queue;
 				m_Queue=m_Queue->next;
