@@ -40,7 +40,6 @@ CAFirstMixChannelList::CAFirstMixChannelList()
 				m_HashTable[i]=new fmHashTableEntry;
 				memset(m_HashTable[i],0,sizeof(fmHashTableEntry));
 			}
-//		m_listOutChannelHead=NULL;
 		m_listHashTableHead=NULL;
 		m_listHashTableCurrent=NULL;
 		m_HashTableOutChannels=new LP_fmChannelListEntry[0x10000];
@@ -58,9 +57,13 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,CAQueue* pQueueSend)
 		SINT32 hashkey=pMuxSocket->getSocket();
 		if(hashkey>MAX_HASH_KEY-1||hashkey<0)
 			return E_UNKNOWN;
+		m_Mutex.lock();
 		fmHashTableEntry* pHashTableEntry=m_HashTable[hashkey];
 		if(pHashTableEntry->pMuxSocket!=NULL)
-			return E_UNKNOWN;
+			{
+				m_Mutex.unlock();
+				return E_UNKNOWN;
+			}
 		pHashTableEntry->pMuxSocket=pMuxSocket;
 		pHashTableEntry->pQueueSend=pQueueSend;
 		if(m_listHashTableHead==NULL)
@@ -76,6 +79,7 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,CAQueue* pQueueSend)
 				m_listHashTableHead->list_HashEntries.prev=pHashTableEntry;
 				m_listHashTableHead=pHashTableEntry;				
 			}
+		m_Mutex.unlock();
 		return E_SUCCESS;
 	}
 
@@ -87,9 +91,13 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,HCHANNEL channelIn,
 		SINT32 hashkey=pMuxSocket->getSocket();
 		if(hashkey>MAX_HASH_KEY-1||hashkey<0)
 			return E_UNKNOWN;
+		m_Mutex.lock();
 		fmHashTableEntry* pHashTableEntry=m_HashTable[hashkey];
 		if(pHashTableEntry->pMuxSocket==NULL)
-			return E_UNKNOWN;
+			{
+				m_Mutex.unlock();
+				return E_UNKNOWN;
+			}
 		fmChannelListEntry* pEntry=pHashTableEntry->pChannelList;
 		fmChannelListEntry* pNewEntry=new fmChannelListEntry;
 		memset(pNewEntry,0,sizeof(fmChannelListEntry));
@@ -126,21 +134,7 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,HCHANNEL channelIn,
 				pEntry->list_OutChannelHashTable.prev=pNewEntry;
 			}
 		m_HashTableOutChannels[hashkey]=pNewEntry;
-		/*
-		if(m_listOutChannelHead==NULL) //First Entry to OutChannel-List
-			{
-				pNewEntry->list_OutChannel.prev=NULL;
-				pNewEntry->list_OutChannel.next=NULL;
-				m_listOutChannelHead=pNewEntry;
-			}
-		else
-			{
-				pNewEntry->list_OutChannel.prev=NULL;
-				pNewEntry->list_OutChannel.next=m_listOutChannelHead;
-				m_listOutChannelHead->list_OutChannel.prev=pNewEntry;
-				m_listOutChannelHead=pNewEntry;
-			}
-		*/
+		m_Mutex.unlock();
 		return E_SUCCESS;
 	}
 			
@@ -151,14 +145,19 @@ fmChannelListEntry* CAFirstMixChannelList::get(CAMuxSocket* pMuxSocket,HCHANNEL 
 		SINT32 hashkey=pMuxSocket->getSocket();
 		if(hashkey>MAX_HASH_KEY-1||hashkey<0)
 			return NULL;
+		m_Mutex.lock();
 		fmHashTableEntry* pHashTableEntry=m_HashTable[hashkey];
 		fmChannelListEntry* pEntry=pHashTableEntry->pChannelList;
 		while(pEntry!=NULL)
 			{
 				if(pEntry->channelIn==channelIn)
-					return pEntry;
+					{
+						m_Mutex.unlock();
+						return pEntry;
+					}
 				pEntry=pEntry->list_InChannelPerSocket.next;
 			}
+		m_Mutex.unlock();
 		return NULL;		
 	}
 	
@@ -169,9 +168,13 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 		SINT32 hashkey=pMuxSocket->getSocket();
 		if(hashkey>MAX_HASH_KEY-1||hashkey<0)
 			return E_UNKNOWN;
+		m_Mutex.lock();
 		fmHashTableEntry* pHashTableEntry=m_HashTable[hashkey];
 		if(pHashTableEntry->pMuxSocket==NULL)
-			return E_UNKNOWN;
+			{
+				m_Mutex.unlock();
+				return E_UNKNOWN;
+			}
 		if(pHashTableEntry->list_HashEntries.prev==NULL) //head
 			{
 				if(pHashTableEntry->list_HashEntries.next==NULL)
@@ -238,35 +241,11 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 
 				pTmpEntry=pEntry->list_InChannelPerSocket.next;
 				
-				/*
-				if(pEntry->list_OutChannel.prev==NULL) //head
-					{
-						if(pEntry->list_OutChannel.next==NULL)
-							{
-								m_listOutChannelHead=NULL;
-							}
-						else
-							{
-								pEntry->list_OutChannel.next->list_OutChannel.prev=NULL;
-								m_listOutChannelHead=pEntry->list_OutChannel.next;
-							}
-					}
-				else
-					{
-						if(pEntry->list_OutChannel.next==NULL)
-							{
-								pEntry->list_OutChannel.prev->list_OutChannel.next=NULL;
-							}
-						else
-							{
-								pEntry->list_OutChannel.prev->list_OutChannel.next=pEntry->list_OutChannel.next;
-								pEntry->list_OutChannel.next->list_OutChannel.prev=pEntry->list_OutChannel.prev;
-							}
-					}*/
 				delete pEntry;
 				pEntry=pTmpEntry;
 			}
 		memset(pHashTableEntry,0,sizeof(fmHashTableEntry));
+		m_Mutex.unlock();
 		return E_SUCCESS;
 	}
 
@@ -277,9 +256,13 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket,HCHANNEL channelIn)
 		SINT32 hashkey=pMuxSocket->getSocket();
 		if(hashkey>MAX_HASH_KEY-1||hashkey<0)
 			return E_UNKNOWN;
+		m_Mutex.lock();
 		fmHashTableEntry* pHashTableEntry=m_HashTable[hashkey];
 		if(pHashTableEntry->pMuxSocket==NULL)
-			return E_UNKNOWN;
+			{
+				m_Mutex.unlock();
+				return E_UNKNOWN;
+			}
 		fmChannelListEntry* pEntry=pHashTableEntry->pChannelList;
 		while(pEntry!=NULL)
 			{
@@ -322,31 +305,6 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket,HCHANNEL channelIn)
 						}
 
 
-					/*						if(pEntry->list_OutChannel.prev==NULL) //head
-							{
-								if(pEntry->list_OutChannel.next==NULL)
-									{
-										m_listOutChannelHead=NULL;
-									}
-								else
-									{
-										pEntry->list_OutChannel.next->list_OutChannel.prev=NULL;
-										m_listOutChannelHead=pEntry->list_OutChannel.next;
-									}
-							}
-						else
-							{
-								if(pEntry->list_OutChannel.next==NULL)
-									{
-										pEntry->list_OutChannel.prev->list_OutChannel.next=NULL;
-									}
-								else
-									{
-										pEntry->list_OutChannel.prev->list_OutChannel.next=pEntry->list_OutChannel.next;
-										pEntry->list_OutChannel.next->list_OutChannel.prev=pEntry->list_OutChannel.prev;
-									}
-							}
-*/						
 						if(pEntry->list_InChannelPerSocket.prev==NULL) //head
 							{
 								if(pEntry->list_InChannelPerSocket.next==NULL)
@@ -372,10 +330,12 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket,HCHANNEL channelIn)
 									}
 							}
 						delete pEntry;
+						m_Mutex.unlock();
 						return E_SUCCESS;
 					}
 				pEntry=pEntry->list_InChannelPerSocket.next;
 			}
+		m_Mutex.unlock();
 		return E_UNKNOWN;
 	}
 

@@ -241,11 +241,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include <assert.h>
 
 #include <pthread.h>
-#define CRITICAL_SECTION pthread_mutex_t
-#define DeleteCriticalSection(p) pthread_mutex_destroy(p)
-#define InitializeCriticalSection(p) pthread_mutex_init(p,NULL)
-#define EnterCriticalSection(p) pthread_mutex_lock(p)
-#define LeaveCriticalSection(p) pthread_mutex_unlock(p)
+#include <semaphore.h>
 #define THREAD_RETURN void*
 #define THREAD_RETURN_ERROR return(NULL)
 #define THREAD_RETURN_SUCCESS return (NULL)

@@ -1,3 +1,5 @@
+#ifndef __CATHREAD__
+#define __CATHREAD__
 typedef void *(*THREAD_MAIN_TYP)(void *);
 
 class CAThread
@@ -22,3 +24,5 @@ class CAThread
 			THREAD_MAIN_TYP m_fncMainLoop;
 	 		pthread_t* m_pThread;
 	};
+#endif
+

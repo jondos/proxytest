@@ -25,11 +25,13 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
-
+#ifndef __CA_IP_LIST
+#define __CA_IP_LIST
+#include "CAMutex.hpp"
 /** This structure is used for building the IP-List. 
 It stores the first two bytes of an IP-Address, how often this IP-Address was inserted
 and a pointer to the next element of the list*/
-	struct _iplist_t
+struct _iplist_t
 	{
 		UINT8 ip[2]; /** First to Bytes of the IP-Address*/
 		UINT8 count; /** Count of insertions*/ 
@@ -54,8 +56,7 @@ The internal organisation is a hash-table with overrun lists. The hashtable has
 @warning This class is NOT thread safe.
 @version 1.0 first version
  */
-#ifndef __CA_IP_LIST
-#define __CA_IP_LIST
+
 class CAIPList
 	{
 		public:
@@ -68,5 +69,6 @@ class CAIPList
 			UINT32 m_allowedConnections;
 			PIPLIST* m_HashTable;
 			UINT8 m_Random[56]; //seams to be the best value for MD5, which operats on x*512-64 bit (52*8+4*8=512-64)
+			CAMutex m_Mutex;
 	};
 #endif

@@ -77,6 +77,7 @@ CAIPList::~CAIPList()
 SINT32 CAIPList::insertIP(UINT8 ip[4])
 	{
 		UINT16 hashvalue=ip[2]<<8|ip[3];
+		m_Mutex.lock();
 		PIPLIST entry=m_HashTable[hashvalue];
 		if(entry==NULL)
 			{
@@ -89,6 +90,7 @@ SINT32 CAIPList::insertIP(UINT8 ip[4])
 				entry->count=1;
 				entry->next=NULL;
 				m_HashTable[hashvalue]=entry;
+				m_Mutex.unlock();
 				return entry->count;
 			}
 		else
@@ -101,9 +103,11 @@ SINT32 CAIPList::insertIP(UINT8 ip[4])
 								if(entry->count>=m_allowedConnections) //an Attack...
 									{
 										CAMsg::printMsg(LOG_CRIT,"possible Flooding Attack from: %u.%u.%u.%u !\n",ip[0],ip[1],ip[2],ip[3]);
+										m_Mutex.unlock();
 										return E_UNKNOWN;
 									}
 								entry->count++;
+								m_Mutex.unlock();
 								return entry->count;
 							}
 						last=entry;
@@ -114,6 +118,7 @@ SINT32 CAIPList::insertIP(UINT8 ip[4])
 				memcpy(entry->ip,ip,2);
 				entry->count=1;
 				entry->next=NULL;
+				m_Mutex.unlock();
 				return entry->count;
 			}	
 	}
@@ -126,9 +131,11 @@ SINT32 CAIPList::insertIP(UINT8 ip[4])
 SINT32 CAIPList::removeIP(UINT8 ip[4])
 	{
 		UINT16 hashvalue=ip[2]<<8|ip[3];
+		m_Mutex.lock();
 		PIPLIST entry=m_HashTable[hashvalue];
 		if(entry==NULL)
 			{
+				m_Mutex.unlock();
 				return 0;
 			}
 		else
@@ -149,12 +156,14 @@ SINT32 CAIPList::removeIP(UINT8 ip[4])
 											{
 												m_HashTable[hashvalue]=NULL;
 												delete entry;
+												m_Mutex.unlock();
 												return 0;
 											}
 										else
 											{
 												before->next=entry->next;
 												delete entry;
+												m_Mutex.unlock();
 												return 0;
 											}
 									}
@@ -163,6 +172,7 @@ SINT32 CAIPList::removeIP(UINT8 ip[4])
 						before=entry;
 						entry=entry->next;
 					}
+				m_Mutex.unlock();
 				return 0;
 			}	
 	}
