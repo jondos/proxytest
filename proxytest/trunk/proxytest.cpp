@@ -45,6 +45,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include "TypeB/CAFirstMixB.hpp"
 	#include "TypeB/CALastMixB.hpp"
 #endif
+#include "CALogPacketStats.hpp"
 //#include "CAPayment.hpp"
 //#ifdef _WIN32
 //HANDLE hEventThreadEnde;

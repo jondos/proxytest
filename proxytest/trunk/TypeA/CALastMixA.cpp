@@ -38,11 +38,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 extern CACmdLnOptions options;
 #ifdef LOG_CHANNEL
 	#define MACRO_DO_LOG_CHANNEL\
-		getcurrentTimeMicros(current_millis);\
-		diff_time=diff64(current_millis,pChannelListEntry->timeCreated);\
+		diff_time=diff64(pQueueEntry->timestamp_proccessing_end,pChannelListEntry->timeCreated);\
 		CAMsg::printMsg(LOG_DEBUG,"Channel %u closed - Start (received open packet) %Lu - End (proccessed closed) %Lu - Time [micros] - %u, Upload - %u, Download - %u, DataAndOpenPacketsFromUser %u, DataPacketsToUser %u\n",\
 			pChannelListEntry->channelIn,pChannelListEntry->timeCreated,\
-			current_millis,diff_time,pChannelListEntry->trafficInFromUser,pChannelListEntry->trafficOutToUser,\
+			pQueueEntry->timestamp_proccessing_end,diff_time,pChannelListEntry->trafficInFromUser,pChannelListEntry->trafficOutToUser,\
 			pChannelListEntry->packetsDataInFromUser,pChannelListEntry->packetsDataOutToUser); 
 #endif
 SINT32 CALastMixA::loop()
@@ -82,7 +81,6 @@ SINT32 CALastMixA::loop()
 		oLogThread.start(this);
 
 		#ifdef LOG_CHANNEL
-			UINT64 current_millis;
 			UINT32 diff_time; 
 		#endif
 
@@ -203,8 +201,7 @@ SINT32 CALastMixA::loop()
 																{
 																	tmpSocket->setNonBlocking(true);
 																	#ifdef LOG_CHANNEL
-																		//getcurrentTimeMicros(current_millis);
-																		pChannelList->add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue(),pQueueEntry->timestamp,payLen);
+																		pChannelList->add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue(),pQueueEntry->timestamp_proccessing_start,payLen);
 																	#else
 																		pChannelList->add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue(PAYLOAD_SIZE));
 																	#endif
@@ -231,13 +228,13 @@ SINT32 CALastMixA::loop()
 												delete pChannelListEntry->pSocket;
 												delete pChannelListEntry->pCipher;
 												delete pChannelListEntry->pQueueSend;										
-												#ifdef LOG_CHANNEL
-													MACRO_DO_LOG_CHANNEL
-												#endif
 												pChannelList->removeChannel(pMixPacket->channel);
 												#ifdef LOG_PACKET_TIMES
 													getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
 													m_pLogPacketStats->addToTimeingStats(*pQueueEntry,CHANNEL_CLOSE,true);
+													#ifdef LOG_CHANNEL
+														MACRO_DO_LOG_CHANNEL
+													#endif
 												#endif
 											}
 										else if(pMixPacket->flags==CHANNEL_SUSPEND)
@@ -277,6 +274,7 @@ SINT32 CALastMixA::loop()
 														osocketgroupCacheWrite.remove(*(pChannelListEntry->pSocket));
 														pChannelListEntry->pSocket->close();
 														#ifdef LOG_CHANNEL
+															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
 															MACRO_DO_LOG_CHANNEL
 														#endif
 														delete pChannelListEntry->pSocket;
@@ -346,6 +344,7 @@ SINT32 CALastMixA::loop()
 														osocketgroupCacheWrite.remove(*(pChannelListEntry->pSocket));
 														pChannelListEntry->pSocket->close();
 														#ifdef LOG_CHANNEL
+															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
 															MACRO_DO_LOG_CHANNEL
 														#endif
 														delete pChannelListEntry->pSocket;
@@ -410,6 +409,7 @@ SINT32 CALastMixA::loop()
 														osocketgroupCacheWrite.remove(*(pChannelListEntry->pSocket));
 														pChannelListEntry->pSocket->close();
 														#ifdef LOG_CHANNEL
+															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
 															MACRO_DO_LOG_CHANNEL
 														#endif
 														delete pChannelListEntry->pSocket;
