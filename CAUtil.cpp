@@ -84,6 +84,36 @@ SINT32 memtrim(UINT8* dest,const UINT8* src,UINT32 size)
 		return (SINT32)size;
 	}
 
+/** Inserts a String ins in a String src starting after pos chars.
+	* Returns a newly allocated String which must be freed using delete.
+	*/
+char* strins(const char* src,UINT32 pos,const char* ins)
+	{
+		if(src==NULL||ins==NULL)
+			return NULL;
+		UINT32 srcLen=strlen(src);
+		if(pos>srcLen)
+			return NULL;
+		UINT32 insLen=strlen(ins);
+		char* newString=new char[srcLen+insLen+1];
+		if(newString==NULL)
+			return NULL;
+		memcpy(newString,src,pos);
+		memcpy(newString+pos,ins,insLen);
+		memcpy(newString+pos+insLen,src+pos,srcLen-pos+1); //copy includes the \0
+		return newString;
+	}
+
+/** Inserts a String ins in a String src starting at the char pos points to.
+	* Returns a newly allocated String which must be freed using delete.
+	*/
+char* strins(const char* src,const char * pos,const char* ins)
+	{
+		if(pos==NULL||pos<src)
+			return NULL;
+		return strins(src,pos-src,ins);
+	}
+
 /** Gets the current Systemtime in milli seconds. 
 	* @param bnTime - Big Number, in which the current time is placed
 	* @retval E_UNSPECIFIED, if bnTime was NULL

@@ -299,7 +299,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 		bMiddleMix=true;
 	else 
 		bLastMix=true;
-	if(m_strMixXml!=NULL) //we should insert the right Id...
+	if(m_strMixXml!=NULL) //we should insert the right Id and other stuff...
 		{
 			UINT8 id[50];
 			getMixId(id,50);
@@ -307,9 +307,12 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 			if(pos!=NULL)
 				{
 					pos+=4;
-					UINT32 left=strlen(m_strMixXml)+m_strMixXml-pos+1;
+					pos=strins(m_strMixXml,pos,(char*)id);
+					delete m_strMixXml;
+					m_strMixXml=pos;
+					/*UINT32 left=strlen(m_strMixXml)+m_strMixXml-pos+1;
 					memmove(pos+strlen((char*)id),pos,left);
-					memcpy(pos,id,strlen((char*)id));
+					memcpy(pos,id,strlen((char*)id));*/
 				}
 			else
 				{
@@ -317,6 +320,16 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 					delete m_strMixXml;
 					m_strMixXml=NULL;
 				}
+			//Insert Version
+			pos=strstr(m_strMixXml,"</Version>");
+			if(pos!=NULL)
+				{
+					pos=strins(m_strMixXml,pos,MIX_VERSION);					
+					delete m_strMixXml;
+					m_strMixXml=pos;
+				}
+			else
+				CAMsg::printMsg(LOG_CRIT,"Software <Version> not set\n");
 		}
 	if(m_strMixXml==NULL) //Ok the get an error in proccesing infos about the mix, we should at leas t give the id!
 		{
@@ -543,6 +556,14 @@ SINT32 CACmdLnOptions::generateTemplate()
 		oxmlOut.BeginElement("City");
 		oxmlOut.Indent();
 		oxmlOut.writeLine("<!-- Insert the City of the Mix-Location here-->");
+		oxmlOut.EndElement();
+		oxmlOut.EndElement();
+		oxmlOut.BeginElement("Software");
+		oxmlOut.Indent();
+		oxmlOut.writeLine("<!-- This gives information about the Mix-Software used-->");
+		oxmlOut.BeginElement("Version");
+		oxmlOut.Indent();
+		oxmlOut.writeLine("<!-- The Version of the Software used - automatically set! -->");
 		oxmlOut.EndElement();
 		oxmlOut.EndElement();
 		oxmlOut.EndElement();
