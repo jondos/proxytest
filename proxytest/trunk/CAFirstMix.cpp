@@ -612,6 +612,7 @@ SINT32 CAFirstMix::loop()
 													{
 														pMuxSocket->send(pMixPacket,tmpBuff);
 														pHashEntry->pQueueSend->add(tmpBuff,MIXPACKET_SIZE);
+														m_psocketgroupUsersWrite->add(*pMuxSocket);
 													}
 												else if(pMixPacket->flags==CHANNEL_CLOSE)
 													{
