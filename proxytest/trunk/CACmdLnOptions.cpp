@@ -834,7 +834,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 						UINT32 aktInterface=0;
 						UINT32 type=0;
 						CASocketAddr* addr=NULL;
-						UINT8* hostname=NULL;
+//						UINT8* hostname=NULL;
 						UINT32 port;
 						for(UINT32 i=0;i<m_cnListenerInterfaces;i++)
 							{
