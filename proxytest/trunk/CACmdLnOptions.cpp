@@ -7,7 +7,7 @@ CACmdLnOptions::CACmdLnOptions()
 		bLocalProxy=bFirstMix=bLastMix=bMiddleMix=false;
 		iTargetPort=iSOCKSPort=iServerPort=iSOCKSServerPort=iInfoServerPort-1;
 		strTargetHost=strSOCKSHost=strInfoServerHost=NULL;
-		strKeyFileName=NULL;
+		strKeyFileName=strCascadeName=NULL;
   }
 
 CACmdLnOptions::~CACmdLnOptions()
@@ -26,6 +26,8 @@ CACmdLnOptions::~CACmdLnOptions()
 	    }
 		if(strKeyFileName!=NULL)
 			delete strKeyFileName;
+		if(strCascadeName!=NULL)
+			delete strCascadeName;
   }
     
 int CACmdLnOptions::parse(int argc,const char** argv)
@@ -40,6 +42,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 	char* socks=NULL;
 	char* infoserver=NULL;
 	char* keyfile=NULL;
+	char* cascadename=NULL;
 	poptOption options[]=
 	 {
 		{"daemon",'d',POPT_ARG_NONE,&iDaemon,0,"start as daemon",NULL},
@@ -50,6 +53,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 		{"socksproxy",'o',POPT_ARG_STRING,&socks,0,"socks proxy","<ip:port>"},
 		{"infoserver",'i',POPT_ARG_STRING,&infoserver,0,"info server","<ip:port>"},
 		{"key",'k',POPT_ARG_STRING,&keyfile,0,"sign key file","<file>"},
+		{"name",'a',POPT_ARG_STRING,&cascadename,0,"name of the cascade","<string>"},
 		POPT_AUTOHELP
 		{NULL,0,0,
 		NULL,0,NULL,NULL}
@@ -102,6 +106,12 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 					strKeyFileName=new char[strlen(keyfile)+1];
 					strcpy(strKeyFileName,keyfile);
 					free(keyfile);	
+	    }
+	if(cascadename!=NULL)
+	    {
+					strCascadeName=new char[strlen(cascadename)+1];
+					strcpy(strCascadeName,cascadename);
+					free(cascadename);	
 	    }
 	iServerPort=port;
 	iSOCKSServerPort=SOCKSport;
@@ -193,6 +203,18 @@ int CACmdLnOptions::getKeyFileName(char* filename,int len)
 				}
 		strcpy(filename,strKeyFileName);
 		return (int)strlen(strKeyFileName);
+  }
+
+int CACmdLnOptions::getCascadeName(char* name,int len)
+  {
+		if(strCascadeName==NULL)
+				return -1;
+		if(len<=(int)strlen(strCascadeName))
+				{
+					return -1;		
+				}
+		strcpy(name,strCascadeName);
+		return (int)strlen(strCascadeName);
   }
 
 bool CACmdLnOptions::isFirstMix()

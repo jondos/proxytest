@@ -64,6 +64,7 @@ class BufferOutputStream:public XML::OutputStream
 			unsigned int used;
 			unsigned int grow;
 	};
+
 THREAD_RETURN InfoLoop(void *p)
 	{
 		CAInfoService* pInfoService=(CAInfoService*)p;
@@ -77,6 +78,15 @@ THREAD_RETURN InfoLoop(void *p)
 		XML::Output oxmlOut(oBufferStream);
 		int nUser,nRisk,nTraffic;
 		unsigned int buffLen;
+		char strAnonServer[255];
+		CASocketAddr::getLocalHostName(buff,255);
+		
+//*>> Beginn very ugly hack for anon.inf.tu-dresden.de --> new Concepts needed!!!!!1		
+		if(strncmp(strAnonServer,"ithif77",7)==0)
+			strcpy(strAnonServer,"anon.inf.tu-dresden.de");
+//end hack....
+		sprintf(strAnonServer,"%s%%3A%u",buff,options.getServerPort());
+
 		while(pInfoService->getRun())
 			{
 				if(oSocket.connect(&oAddr)==E_SUCCESS)
@@ -84,7 +94,7 @@ THREAD_RETURN InfoLoop(void *p)
 						oBufferStream.reset();
 						oxmlOut.BeginDocument("1.0","UTF-8",true);
 						oxmlOut.BeginElementAttrs("status");
-						oxmlOut.WriteAttr("anonServer","anon.inf.tu-dresden.de%3A6544");
+						oxmlOut.WriteAttr("anonServer",strAnonServer);
 						pInfoService->getLevel(&nUser,&nRisk,&nTraffic);
 						oxmlOut.WriteAttr("nrOfActiveUsers",nUser);
 						oxmlOut.WriteAttr("currentRisk",nRisk);
@@ -96,7 +106,6 @@ THREAD_RETURN InfoLoop(void *p)
 						pSignature->signXML(oBufferStream.getBuff(),oBufferStream.getBufferSize(),buff,&buffLen);
 						oSocket.send("POST /feedback HTTP/1.0\r\n\r\n",27);
 						oSocket.send(buff,buffLen);
-	//					oSocket.close();
 					}
 				oSocket.close();	
 				sleep(60);
@@ -168,5 +177,45 @@ int CAInfoService::stop()
 		return 0;
 	}
 
+int CAInfoService::sendHelo()
+	{
+		CASocket oSocket;
+		CASocketAddr oAddr;
+		char hostname[255];
+		options.getInfoServerHost(hostname,255);
+		oAddr.setAddr(hostname,options.getInfoServerPort());
+		if(oSocket.connect(&oAddr)==E_SUCCESS)
+			{
+				BufferOutputStream oBufferStream(1024,1024);
+				char* buff=new char[1024];
+				XML::Output oxmlOut(oBufferStream);
+				oBufferStream.reset();
+				unsigned int buffLen;
+				oxmlOut.BeginDocument("1.0","UTF-8",true);
+				oxmlOut.BeginElementAttrs("MixCascade");
+				CASocketAddr::getLocalHostName(hostname,255);
+//*>> Beginn very ugly hack for anon.inf.tu-dresden.de --> new Concepts needed!!!!!1		
+		if(strncmp(hostname,"ithif77",7)==0)
+			strcpy(hostname,"anon.inf.tu-dresden.de");
+//end hack....
+				sprintf(buff,"%s%%3A%u",hostname,options.getServerPort());
+				oxmlOut.WriteAttr("id",buff);
+				oxmlOut.EndAttrs();
+				options.getCascadeName(buff,1024);
+				oxmlOut.WriteElement("Name",buff);
+				oxmlOut.WriteElement("IP",hostname);
+				oxmlOut.WriteElement("Port",options.getServerPort());
+				oxmlOut.EndElement();
+				oxmlOut.EndDocument();
+				buffLen=1024;
+				pSignature->signXML(oBufferStream.getBuff(),oBufferStream.getBufferSize(),buff,&buffLen);
+				oSocket.send("POST /helo HTTP/1.0\r\n\r\n",23);
+				oSocket.send(buff,buffLen);
+				oSocket.close();
+				delete buff;		
+				return 0;				
+			}
+		return -1;
+	}
 
 

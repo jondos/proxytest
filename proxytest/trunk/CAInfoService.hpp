@@ -4,6 +4,7 @@ class CAInfoService
 		public:
 			CAInfoService();
 			~CAInfoService();
+			int sendHelo();
 			int start();
 			int stop();
 			int setLevel(int user,int risk,int traffic);

@@ -6,10 +6,11 @@ class CASocketAddr:public sockaddr_in
 			CASocketAddr();
 			CASocketAddr(char* szIP,unsigned short port);
 			CASocketAddr(unsigned short port);
-			
+
 			int setAddr(char* szIP,unsigned short port);
 			unsigned short getPort();
 			int getHostName(char* buff,int len);
+			static int getLocalHostName(char* buff,int len);
 			operator LPSOCKADDR(){return (::LPSOCKADDR)this;}
 
 	};

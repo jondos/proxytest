@@ -568,17 +568,12 @@ THREAD_RETURN fmIO(void *v)
 		#endif
 		CAInfoService oInfoService;
 		// reading SingKey....
-		char* fileBuff=new char[MAX_PATH];
-		options.getKeyFileName(fileBuff,MAX_PATH);
+		char* fileBuff=new char[2048];
+		options.getKeyFileName(fileBuff,2048);
 		int handle=open(fileBuff,O_BINARY|O_RDONLY);
 		if(handle==-1)
 			THREAD_RETURN_ERROR;
-		#ifdef _WIN32
-		len=filelength(handle);
-		#else
-		len=4096;
-		#endif
-		len=read(handle,fileBuff,len);
+		len=read(handle,fileBuff,2048);
 		close(handle);
 		CASignature oSignature;
 		if(oSignature.setSignKey(fileBuff,len,SIGKEY_XML)==-1)
@@ -589,6 +584,7 @@ THREAD_RETURN fmIO(void *v)
 		delete fileBuff;
 		oInfoService.setSignature(&oSignature);
 		oInfoService.setLevel(0,0,0);
+		oInfoService.sendHelo();
 		oInfoService.start();
 		int nUser=0;
 		for(;;)

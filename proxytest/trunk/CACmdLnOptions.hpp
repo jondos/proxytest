@@ -14,6 +14,7 @@ class CACmdLnOptions
 	    int getInfoServerPort();
 	    int getInfoServerHost(char* host,int len);
 			int getKeyFileName(char* filename,int len);
+			int getCascadeName(char* name,int len);
 			bool isLocalProxy();
 			bool isFirstMix();
 			bool isMiddleMix();
@@ -30,4 +31,5 @@ class CACmdLnOptions
 	    int iInfoServerPort;
 			char* strKeyFileName;
 			bool bLocalProxy,bFirstMix,bMiddleMix,bLastMix;
-    };
+			char* strCascadeName;  
+	};
