@@ -1,18 +1,16 @@
 #include "CAConditionVariable.hpp"
-class CALookAble
+class CALockAble
 	{
 		public:
-			CALookAble()
+			CALockAble()
 				{
-					printf("CALook start\n");
-					m_nLookCount=1;
-					printf("CALokk end\n");
+					m_nLockCount=1;
 				}
 
 			SINT32 lock()
 				{
 					m_ConVar.lock();
-					m_nLookCount++;
+					m_nLockCount++;
 					m_ConVar.unlock();
 					return E_SUCCESS;
 				}
@@ -27,16 +25,14 @@ class CALookAble
 		protected:
 			SINT32 waitForDestroy()
 				{
-					printf("~CALook start\n");
 					m_ConVar.lock();
-					while(m_nLookCount>1)
+					while(m_nLockCount>1)
 						m_ConVar.wait();
 					m_ConVar.unlock();	
-					printf("~CALokk end\n");
 					return E_SUCCESS;
 				}
 
 		private:
 			CAConditionVariable m_ConVar;
-			UINT32 m_nLookCount;
+			UINT32 m_nLockCount;
 	};
