@@ -594,7 +594,7 @@ Debug(dc::malloc.on());
 			{
 				pid_t pid=getpid();
 				UINT8 thePid[10];
-				sprintf((char*)thePid,"%i",thePid);
+				sprintf((char*)thePid,"%i",pid);
 				int len=strlen((char*)thePid);
 				int hFile=open((char*)strPidFile,O_TRUNC|O_CREAT|O_WRONLY,S_IREAD|S_IWRITE);
 				if(hFile==-1||len!=write(hFile,thePid,len))
