@@ -120,7 +120,7 @@ SINT32 CASocketList::setThreadSafe(bool b)
 *	        E_UNKNOWN otherwise
 *
 */
-SINT32 CASocketList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCiphers)
+SINT32 CASocketList::add(CASocket* pSocket,CASymCipher* pCiphers)
 	{
 		if(m_bThreadSafe)
 			cs.lock();
@@ -140,8 +140,20 @@ SINT32 CASocketList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCiphers)
 		m_Connections=tmp;
 		m_Connections->pSocket=pSocket;
 		m_Connections->pCiphers=pCiphers;
-		m_Connections->outChannel=id;
 
+		for(;;)
+			{
+SELECT_RANDOM_CHANNEL_ID:
+				getRandom(&m_Connections->outChannel);				
+				tmp=m_Connections->next;
+				while(tmp!=NULL)
+					{
+						if(tmp->outChannel==m_Connections->outChannel)
+							goto SELECT_RANDOM_CHANNEL_ID;
+						tmp=tmp->next;
+					}
+				break;
+			}
 		m_Size++;
 		if(m_bThreadSafe)
 			cs.unlock();

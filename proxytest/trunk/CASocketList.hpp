@@ -48,7 +48,7 @@ class CASocketList
 			CASocketList();
 			CASocketList(bool bThreadSafe);
 			~CASocketList();
-			SINT32 add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCiphers);
+			SINT32 add(CASocket* pSocket,CASymCipher* pCiphers);
 			SINT32	 get(HCHANNEL in,CONNECTION* out);
 			
 			CASocket* remove(HCHANNEL id);

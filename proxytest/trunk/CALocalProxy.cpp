@@ -149,7 +149,6 @@ SINT32 CALocalProxy::loop()
 		if(bHaveSocks)
 			oSocketGroup.add(m_socketSOCKSIn);
 		oSocketGroup.add(m_muxOut);
-		HCHANNEL lastChannelId=1;
 		MIXPACKET* pMixPacket=new MIXPACKET;
 
 		memset(pMixPacket,0,MIXPACKET_SIZE);
@@ -182,7 +181,7 @@ SINT32 CALocalProxy::loop()
 						else
 							{
 								newCipher=new CASymCipher[m_chainlen];
-								oSocketList.add(lastChannelId++,newSocket,newCipher);
+								oSocketList.add(newSocket,newCipher);
 								oSocketGroup.add(*newSocket);
 							}
 					}
@@ -203,7 +202,7 @@ SINT32 CALocalProxy::loop()
 						else
 							{
 								newCipher=new CASymCipher[m_chainlen];
-								oSocketList.add(lastChannelId++,newSocket,newCipher);
+								oSocketList.add(newSocket,newCipher);
 								oSocketGroup.add(*newSocket);
 							}
 					}
@@ -257,6 +256,7 @@ SINT32 CALocalProxy::loop()
 								if(oSocketGroup.isSignaled(*tmpCon->pSocket))
 									{
 										countRead--;
+										getRandom(pMixPacket->payload.data,PAYLOAD_SIZE);
 										if(!tmpCon->pCiphers[0].isEncyptionKeyValid())
 											len=tmpCon->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE-m_chainlen*16);
 										else
@@ -377,7 +377,7 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 		m_chainlen=(UINT32)chainlen;
 		UINT32 i=0;
 		m_arRSA=new CAASymCipher[m_chainlen];
-		DOM_Node child=elemMixes.getFirstChild();
+		DOM_Node child=elemMixes.getLastChild();
 		while(child!=NULL&&chainlen>0)
 			{
 				if(child.getNodeName().equals("Mix"))
@@ -387,7 +387,7 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 							return E_UNKNOWN;						
 						chainlen--;
 					}
-				child=child.getNextSibling();
+				child=child.getPreviousSibling();
 			}
 		if(chainlen!=0)
 			return E_UNKNOWN;
@@ -402,7 +402,7 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 		getRandom(oPacket.data,DATA_SIZE);
 		memcpy(oPacket.data,"KEYPACKET",9);
 		memcpy(oPacket.data+9,keys,32);
-		m_arRSA[0].encrypt(oPacket.data,oPacket.data);
+		m_arRSA[m_chainlen-1].encrypt(oPacket.data,oPacket.data);
 		m_muxOut.send(&oPacket);
 		m_muxOut.setCrypt(true);
 		return E_SUCCESS;
