@@ -28,6 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CA_UTIL__
 #define __CA_UTIL__
 #include "CAASymCipher.hpp"
+
 UINT32 strtrim(UINT8*);
 
 SINT32 memtrim(UINT8* out,const UINT8* in,UINT32 len);
@@ -63,16 +64,6 @@ SINT32 getDOMChildByName(const DOM_Node& node,const UINT8* const name,DOM_Node& 
 
 SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, UINT8* xml, UINT32* xmllen,CAASymCipher* pRSA);
 SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, const UINT8* const xml, UINT32 xmllen,CAASymCipher* pRSA);
-
-#ifdef __linux
-	typedef unsigned long long UINT64;
-#elif !defined(_WIN32)
-    typedef struct __UINT64__t_
-	{
-		UINT32 high;
-		UINT32 low;
-	} UINT64;	 
-#endif
 
 inline void set64(UINT64& op1,UINT32 op2)
 	{

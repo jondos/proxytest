@@ -197,6 +197,16 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #endif
 
+#ifdef __linux
+	typedef unsigned long long UINT64;
+#elif !defined(_WIN32)
+    typedef struct __UINT64__t_
+	{
+		UINT32 high;
+		UINT32 low;
+	} UINT64;	 
+#endif
+
 //Error constants...
 
 #define E_SUCCESS 0
