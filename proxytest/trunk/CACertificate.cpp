@@ -36,6 +36,49 @@ CACertificate::CACertificate()
 		m_pCert=NULL;
 	}
 
+CACertificate* CACertificate::decode(DOM_Node &node,UINT32 type,char* passwd)
+	{
+		switch(type)
+			{
+				case CERT_PKCS12:					
+					while(node!=NULL)
+						{
+							if(node.getNodeName().equals("X509PKCS12"))
+								{
+										char* tmpStr=node.getFirstChild().getNodeValue().transcode();
+										UINT32 decLen=4096;
+										UINT8* decBuff=new UINT8[decLen];
+										CABase64::decode((UINT8*)tmpStr,strlen(tmpStr),decBuff,&decLen);
+										delete tmpStr;
+										CACertificate* cert=decode(decBuff,decLen,CERT_PKCS12,passwd);
+										delete[] decBuff;
+										return cert;
+
+								}
+							node=node.getNextSibling();
+						}
+				break;
+				case	CERT_X509CERTIFICATE:
+					while(node!=NULL)
+						{
+							if(node.getNodeName().equals("X509Certificate"))
+								{
+										char* tmpStr=node.getFirstChild().getNodeValue().transcode();
+										UINT32 decLen=4096;
+										UINT8* decBuff=new UINT8[decLen];
+										CABase64::decode((UINT8*)tmpStr,strlen(tmpStr),decBuff,&decLen);
+										delete tmpStr;
+										CACertificate* cert=decode(decBuff,decLen,CERT_DER);
+										delete[] decBuff;
+										return cert;
+								}
+							node=node.getNextSibling();
+						}
+
+			}
+		return NULL;
+	}
+
 CACertificate* CACertificate::decode(UINT8* buff,UINT32 bufflen,UINT32 type,char* passwd)
 	{
 		if(buff==NULL)

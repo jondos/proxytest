@@ -30,6 +30,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define CERT_DER 1
 #define CERT_XML_X509CERTIFICATE 2
 #define CERT_PKCS12 3
+#define CERT_X509CERTIFICATE 4
 class CASignature;
 class CACertificate
 	{
@@ -43,6 +44,7 @@ class CACertificate
 				}
 			
 			static CACertificate* decode(UINT8* buff,UINT32 bufflen,UINT32 type,char* passwd=NULL);
+			static CACertificate* decode(DOM_Node&node,UINT32 type,char* passwd=NULL);
 			SINT32 encode(UINT8* buff,UINT32* bufflen,UINT32 type);
 			SINT32 encode(DOM_DocumentFragment& docFrag,DOM_Document& doc);
 					

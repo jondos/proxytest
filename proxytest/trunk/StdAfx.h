@@ -265,17 +265,21 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include <openssl/x509v3.h>
 
 //For DOM
+#include <util/XercesVersion.hpp>
 #include <util/PlatformUtils.hpp>
 #include <util/XMLString.hpp>
 #include <util/XMLUniDefs.hpp>
 #include <framework/XMLFormatter.hpp>
 #include <util/TranscodingException.hpp>
-
-
-#include <dom/DOM_DOMException.hpp>
 #include <framework/MemBufInputSource.hpp>
-#include <parsers/DOMParser.hpp>
-#include <dom/DOM.hpp>
+
+#if (XERCES_VERSION_MAJOR >1)
+	#include <dom/deprecated/DOM.hpp>
+	#include <dom/deprecated/DOMParser.hpp>
+#else
+	#include <dom/DOM.hpp>
+	#include <parsers/DOMParser.hpp>
+#endif
 
 //For MySQL
 #ifdef PAYMENT_SUPPORT
