@@ -3672,7 +3672,7 @@ case "$host" in
 	CXXFLAGS="$CXXFLAGS -pthread";
 	;;
 *-*-netbsd*)
-	DEFAULTLIBS="$LIBS -L/usr/pkg/lib -liconv"
+	DEFAULTLIBS="$LIBS -L/usr/pkg/lib -liconv -lpthread"
 	;;
 *)
 	;;
