@@ -139,7 +139,12 @@ SINT32 CALastMix::init()
 			}
 		
 		CAMsg::printMsg(LOG_INFO,"connected!\n");
-		
+	
+		return processKeyExchange();
+	}
+
+SINT32 CALastMix::processKeyExchange()
+	{
 		UINT16 messageSize=0;
 		UINT32 keySize=0;
 		UINT8* buff=NULL;
@@ -175,7 +180,20 @@ SINT32 CALastMix::init()
 				delete []buff;
 				return E_UNKNOWN;
 			}
+		//Now receiving the symmetric key
+		((CASocket*)*m_pMuxIn)->receive((UINT8*)&messageSize,2);
+		messageSize=ntohs(messageSize);
+		if(((CASocket*)*m_pMuxIn)->receive(buff,messageSize)!=messageSize)
+			{
+				CAMsg::printMsg(LOG_ERR,"Error receiving symetric key!\n");
+				delete []buff;
+				return E_UNKNOWN;
+			}
+		UINT8 key[50];
+		keySize=50;
+		decodeXMLEncryptedKey(key,&keySize,buff,messageSize,&mRSA);
 		delete []buff;
+		m_pMuxIn->setKey(key);
 		return E_SUCCESS;
 	}
 

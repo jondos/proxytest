@@ -48,6 +48,8 @@ class CALastMix:public CAMix
 			SINT32 init();
 			SINT32 initOnce();
 			SINT32 clean();
+
+			SINT32 processKeyExchange();
 		private:
 			CAMuxSocket*		m_pMuxIn;
 			CACacheLoadBalancing m_oCacheLB;

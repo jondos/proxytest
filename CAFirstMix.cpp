@@ -1040,8 +1040,29 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		memcpy(m_KeyInfoBuff,&tmp,2);
 		m_KeyInfoBuff[2]=count+1;
 
+		//Sending symetric key...
+		child=elemMixes.getFirstChild();
+		while(child!=NULL)
+			{
+				if(child.getNodeName().equals("Mix"))
+					{
+						DOM_Node rsaKey=child.getFirstChild();
+						CAASymCipher oRSA;
+						oRSA.setPublicKeyAsDOMNode(rsaKey);
+						UINT8 key[16];
+						getRandom(key,16);
+						UINT8 buff[256];
+						UINT32 bufflen=256;
+						encodeXMLEncryptedKey(key,16,buff,&bufflen,&oRSA);
+						m_pMuxOut->setKey(key);
+						UINT16 size=ntohs(bufflen);
+						((CASocket*)m_pMuxOut)->send((UINT8*)&size,2);
+						((CASocket*)m_pMuxOut)->send(buff,bufflen);
+						break;
+					}
+				child=child.getNextSibling();
+			}
 		
-
 		UINT8* tmpBuff=new UINT8[2048];
 		tlen=2048;
 		options.getMixXml(tmpBuff,&tlen);
