@@ -214,27 +214,24 @@ SINT32 CAMiddleMix::init()
 				return E_UNKNOWN;		
 			}
 		
-		UINT8 strTarget[255];
-		memset(strTarget,0,255);
-		CASocketAddr* pAddrNext;
-		options.getTargetHost(strTarget,255);
-		if(strTarget[0]=='/') //unix domain
+		CASocketAddr* pAddrNext=NULL;
+		for(UINT32 i=0;i<options.getTargetInterfaceCount();i++)
 			{
-#ifdef HAVE_UNIX_DOMAIN_PROTOCOL
-				pAddrNext=new CASocketAddrUnix();
-				((CASocketAddrUnix*)pAddrNext)->setPath((char*)strTarget);
-#else
-				CAMsg::printMsg(LOG_CRIT,"I do not understand the Unix Domain Protocol!\n");
+				TargetInterface oNextMix;
+				options.getTargetInterface(oNextMix,i+1);
+				if(oNextMix.target_type==TARGET_MIX)
+					{
+						pAddrNext=oNextMix.addr;
+						break;
+					}
+				delete oNextMix.addr;
+			}
+		if(pAddrNext==NULL)
+			{
+				CAMsg::printMsg(LOG_CRIT,"No next Mix specified!\n");
 				return E_UNKNOWN;
-#endif
 			}
-		else
-			{
-				pAddrNext=new CASocketAddrINet();
-				((CASocketAddrINet*)pAddrNext)->setAddr(strTarget,options.getTargetPort());
-			}
-
-		
+	
 		m_pMuxOut=new CAMuxSocket();
 
 		if(((CASocket*)*m_pMuxOut)->create(pAddrNext->getType())!=E_SUCCESS)
@@ -246,7 +243,7 @@ SINT32 CAMiddleMix::init()
 		((CASocket*)*m_pMuxOut)->setSendBuff(50*MIXPACKET_SIZE);
 #define RETRIES 100
 #define RETRYTIME 30
-		CAMsg::printMsg(LOG_INFO,"Init: Try to connect to next Mix: %s...\n",strTarget);
+		CAMsg::printMsg(LOG_INFO,"Init: Try to connect to next Mix...\n");
 		if(m_pMuxOut->connect(*pAddrNext,RETRIES,RETRYTIME)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Cannot connect to next Mix -- Exiting!\n");
