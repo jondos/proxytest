@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /G6 /MD /W3 /GX /Ox /Ot /Oa /Og /Oi /Ob1 /I "g:\openssl-0.9.6a\inc32" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "_REENTRANT" /D "_ASYNC" /Yu"stdafx.h" /FD /c
+# ADD CPP /nologo /G6 /MD /W3 /GX /Ox /Ot /Oa /Og /Oi /I "g:\openssl-0.9.6a\inc32" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "_REENTRANT" /D "_ASYNC" /Yu"stdafx.h" /FD /c
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
 # ADD RSC /l 0x407 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -67,7 +67,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /G6 /MDd /W4 /Gm /GX /ZI /Od /Ob0 /I "g:\openssl-0.9.6a\inc32" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "_DEBUG" /D "_REENTRANT" /D "AES" /D "_ASYNC" /FAcs /FR /Yu"stdafx.h" /FD /GZ /c
+# ADD CPP /nologo /G6 /MDd /W4 /Gm /GX /ZI /Od /I "g:\openssl-0.9.6a\inc32" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "_DEBUG" /D "_REENTRANT" /D "AES" /D "_ASYNC" /FAcs /FR /Yu"stdafx.h" /FD /GZ /c
 # ADD BASE RSC /l 0x407 /d "_DEBUG"
 # ADD RSC /l 0x407 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -274,36 +274,13 @@ SOURCE=".\aes\boxes-fst.dat.h"
 # End Source File
 # Begin Source File
 
-SOURCE=".\aes\rijndael-alg-fst.cpp"
+SOURCE=.\aes\encrypt.cpp
 
 !IF  "$(CFG)" == "proxytest - Win32 Release"
 
 # SUBTRACT CPP /YX /Yc /Yu
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
-
-# SUBTRACT CPP /YX /Yc /Yu
-
-!ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=".\aes\rijndael-alg-fst.h"
-# End Source File
-# Begin Source File
-
-SOURCE=".\aes\rijndael-api-fst.cpp"
-
-!IF  "$(CFG)" == "proxytest - Win32 Release"
-
-# SUBTRACT CPP /YX /Yc /Yu
-
-!ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
-
-# SUBTRACT CPP /YX /Yc /Yu
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
 
@@ -410,6 +387,17 @@ SOURCE=.\CASocketList.cpp
 # Begin Source File
 
 SOURCE=.\CASymCipher.cpp
+
+!IF  "$(CFG)" == "proxytest - Win32 Release"
+
+# ADD CPP /W4
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 

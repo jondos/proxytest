@@ -3,41 +3,47 @@
  */
 
 
-#include <stdio.h>
-#include "rijndael-alg-fst.h"
+//#include <stdio.h>
+//#include "rijndael-alg-fst.h"
 
+#define MAXKC				(256/32)
+#define MAXROUNDS			10 //14 fixed sized for 128 bit keys....
+
+typedef unsigned char		word8;	
+typedef unsigned short		word16;	
+typedef unsigned int		word32;
 /*  Defines:
 	Add any additional defines you need
 */
 
-#define     DIR_ENCRYPT     0    /*  Are we encrpyting?  */
-#define     DIR_DECRYPT     1    /*  Are we decrpyting?  */
-#define     MODE_ECB        1    /*  Are we ciphering in ECB mode?   */
-#define     MODE_CBC        2    /*  Are we ciphering in CBC mode?   */
-#define     MODE_CFB1       3    /*  Are we ciphering in 1-bit CFB mode? */
-#define     TRUE            1
-#define     FALSE           0
-#define	BITSPERBLOCK		128		/* Default number of bits in a cipher block */
+//#define     DIR_ENCRYPT     0    /*  Are we encrpyting?  */
+//#define     DIR_DECRYPT     1    /*  Are we decrpyting?  */
+//#define     MODE_ECB        1    /*  Are we ciphering in ECB mode?   */
+//#define     MODE_CBC        2    /*  Are we ciphering in CBC mode?   */
+//#define     MODE_CFB1       3    /*  Are we ciphering in 1-bit CFB mode? */
+//#define     TRUE            1
+//#define     FALSE           0
+//#define	BITSPERBLOCK		128		/* Default number of bits in a cipher block */
 
 /*  Error Codes - CHANGE POSSIBLE: inclusion of additional error codes  */
-#define     BAD_KEY_DIR        -1  /*  Key direction is invalid, e.g.,
-					unknown value */
-#define     BAD_KEY_MAT        -2  /*  Key material not of correct 
-					length */
+//#define     BAD_KEY_DIR        -1  /*  Key direction is invalid, e.g.,
+//					unknown value */
+//#define     BAD_KEY_MAT        -2  /*  Key material not of correct 
+//					length */
 #define     BAD_KEY_INSTANCE   -3  /*  Key passed is not valid  */
-#define     BAD_CIPHER_MODE    -4  /*  Params struct passed to 
-					cipherInit invalid */
-#define     BAD_CIPHER_STATE   -5  /*  Cipher in wrong state (e.g., not 
-					initialized) */
-#define     BAD_BLOCK_LENGTH   -6 
-#define     BAD_CIPHER_INSTANCE   -7 
+//#define     BAD_CIPHER_MODE    -4  /*  Params struct passed to 
+//					cipherInit invalid */
+//#define     BAD_CIPHER_STATE   -5  /*  Cipher in wrong state (e.g., not 
+//					initialized) */
+//#define     BAD_BLOCK_LENGTH   -6 
+//#define     BAD_CIPHER_INSTANCE   -7 
 
 
 /*  CHANGE POSSIBLE:  inclusion of algorithm specific defines  */
-#define     MAX_KEY_SIZE	64  /* # of ASCII char's needed to
-					represent a key */
-#define     MAX_IV_SIZE		32  /* # bytes needed to
-					represent an IV  */
+//#define     MAX_KEY_SIZE	64  /* # of ASCII char's needed to
+//					represent a key */
+//#define     MAX_IV_SIZE		32  /* # bytes needed to
+//					represent an IV  */
 
 /*  Typedefs:
 
@@ -45,46 +51,21 @@
 parameters at the bottom of the structs as appropriate.
 */
 
-typedef    unsigned char    BYTE;
+//typedef    unsigned char    BYTE;
 
 /*  The structure for key information */
-typedef struct {
-      BYTE  direction;	/*  Key used for encrypting or decrypting? */
-      int   keyLen;	/*  Length of the key  */
-//Sk13      char  keyMaterial[MAX_KEY_SIZE+1];  /*  Raw key data in ASCII,
-//sk13                                    e.g., user input or KAT values */
+// For Konstant KEy of 128 Bit!!!!!
+//typedef struct 
+//	{
+//		BYTE  direction;	/*  Key used for encrypting or decrypting? */
+//    int   keyLen;	/*  Length of the key  */
       /*  The following parameters are algorithm dependent, replace or
       		add as necessary  */
-      int   blockLen;   /* block length */
-      word8 keySched[MAXROUNDS+1][4][4];	/* key schedule		*/
-      } keyInstance;
+//    int   blockLen;   /* block length */
+ //   word8 keySched[MAXROUNDS+1][4][4];	/* key schedule		*/
+ // } keyInstance;
 
-/*  The structure for cipher information */
-typedef struct {  /* changed order of the components */
-      BYTE  mode;            /* MODE_ECB, MODE_CBC, or MODE_CFB1 */
-      BYTE  IV[MAX_IV_SIZE]; /* A possible Initialization Vector for 
-      					ciphering */
-      /*  Add any algorithm specific parameters needed here  */
-      int   blockLen;    	/* Sample: Handles non-128 bit block sizes
-      					(if available) */
-      } cipherInstance;
+typedef  word8 keyInstance[MAXROUNDS+1][4][4];	
+//int rijndaelEncrypt (word8 a[16], word8 b[16], word8 rk[MAXROUNDS+1][4][4]);
+//int makeKey(keyInstance key, /*int keyLen,*/ char *keyMaterial);
 
-
-/*  Function protoypes  */
-/*  CHANGED: makeKey(): parameter blockLen added
-                        this parameter is absolutely necessary if you want to
-			setup the round keys in a variable block length setting 
-	     cipherInit(): parameter blockLen added (for obvious reasons)		
- */
-int makeKey(keyInstance *key, /*BYTE direction,*/ int keyLen, char *keyMaterial);
-
-/*int cipherInit(cipherInstance *cipher, BYTE mode, char *IV);
-
-int blockEncrypt(cipherInstance *cipher, keyInstance *key, BYTE *input, 
-			int inputLen, BYTE *outBuffer);
-
-int blockDecrypt(cipherInstance *cipher, keyInstance *key, BYTE *input,
-			int inputLen, BYTE *outBuffer);
-int cipherUpdateRounds(cipherInstance *cipher, keyInstance *key, BYTE *input, 
-                        int inputLen, BYTE *outBuffer, int Rounds);
-*/

@@ -26,7 +26,9 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
+//#include "aes/encrypt.cpp"
 #include "CASymCipher.hpp"
+#include "aes/encrypt.cpp"
 
 /*SINT32 CASymCipher::setEncryptionKey(UINT8* key)
 	{
@@ -95,7 +97,7 @@ SINT32 CASymCipher::setEncryptionKeyAES(UINT8* key)
 
 SINT32 CASymCipher::setKeyAES(UINT8* key)
 	{
-		makeKey(&m_keyAES,/*DIR_ENCRYPT,*/KEY_SIZE*8,(char*)key);
+		makeKey(*m_keyAES,/*KEY_SIZE*8*/(char*)key);
 		memset(m_iv,0,16);
 		memset(m_iv2,0,16);
 		m_bEncKeySet=true;
@@ -109,7 +111,7 @@ SINT32 CASymCipher::decryptAES(UINT8* in,UINT8* out,UINT32 len)
 		//while(i<len-15)
     while(i+15<len)
     	{
-				rijndaelEncrypt (m_iv, m_iv, m_keyAES.keySched);
+				rijndaelEncrypt (m_iv, m_iv, *m_keyAES/*.keySched*/);
 				out[i]=in[i]^m_iv[0];
 				i++;
 				out[i]=in[i]^m_iv[1];
@@ -145,7 +147,7 @@ SINT32 CASymCipher::decryptAES(UINT8* in,UINT8* out,UINT32 len)
 			}
 		if(i<len) //In this case len-i<16 !
 			{
-				rijndaelEncrypt (m_iv, m_iv, m_keyAES.keySched);
+				rijndaelEncrypt (m_iv, m_iv, *m_keyAES/*.keySched*/);
 				len-=i;
 				for(UINT32 k=0;k<len;k++)
 				 {
@@ -161,7 +163,7 @@ SINT32 CASymCipher::decryptAES2(UINT8* in,UINT8* out,UINT32 len)
 		UINT32 i=0;
 		while(i+15<len)
 			{
-				rijndaelEncrypt (m_iv2, m_iv2, m_keyAES.keySched);
+				rijndaelEncrypt (m_iv2, m_iv2, *m_keyAES/*.keySched*/);
 				out[i]=in[i]^m_iv2[0];
 				i++;
 				out[i]=in[i]^m_iv2[1];
@@ -197,7 +199,7 @@ SINT32 CASymCipher::decryptAES2(UINT8* in,UINT8* out,UINT32 len)
 			}
 		if(i<len)
 			{
-				rijndaelEncrypt (m_iv2, m_iv2, m_keyAES.keySched);
+				rijndaelEncrypt (m_iv2, m_iv2, *m_keyAES/*.keySched*/);
 				len-=i;
 				for(UINT32 k=0;k<len;k++)
 				 {
@@ -213,7 +215,7 @@ SINT32 CASymCipher::encryptAES(UINT8* in,UINT8* out,UINT32 len)
 		UINT32 i=0;
 		while(i+15<len)
 			{
-				rijndaelEncrypt (m_iv, m_iv, m_keyAES.keySched);
+				rijndaelEncrypt (m_iv, m_iv, *m_keyAES/*.keySched*/);
 
 				out[i]=in[i]^m_iv[0];
 				i++;
@@ -250,7 +252,7 @@ SINT32 CASymCipher::encryptAES(UINT8* in,UINT8* out,UINT32 len)
 			}
 		if(i<len)
 			{
-				rijndaelEncrypt (m_iv, m_iv, m_keyAES.keySched);
+				rijndaelEncrypt (m_iv, m_iv, *m_keyAES/*.keySched*/);
 				len-=i;
 				for(UINT32 k=0;k<len;k++)
 				 {
