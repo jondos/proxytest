@@ -269,7 +269,7 @@ SINT32 getDOMElementAttribute(DOM_Element& elem,char* attr,int* value)
 		return E_SUCCESS;
 	}
 
-SINT32 getDOMChildByName(const DOM_Node& node,UINT8* name,DOM_Node& child,bool deep)
+SINT32 getDOMChildByName(const DOM_Node& node,const UINT8* const name,DOM_Node& child,bool deep)
 	{
 		child=node.getFirstChild();
 		while(child!=NULL)
