@@ -29,6 +29,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketASyncSend.hpp"
 #include "CAMsg.hpp"
 #include "CAFirstMix.hpp"
+
 THREAD_RETURN SocketASyncSendLoop(void* p)
 	{
 		CASocketASyncSend* pASyncSend=(CASocketASyncSend*)p;

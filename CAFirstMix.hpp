@@ -62,7 +62,15 @@ class CAFirstMix:public CAMix,CASocketASyncSendResume
 			CAMuxChannelList oSuspendList;
 		public:
 			void resume(CASocket* pSocket);
-			SINT32 getMixedPackets(UINT32* ppackets){if(ppackets!=NULL) return m_MixedPackets;return E_UNKNOWN;}
+			SINT32 getMixedPackets(UINT32* ppackets)
+				{
+					if(ppackets!=NULL)
+						{
+							*ppackets=m_MixedPackets;
+							return E_SUCCESS;
+						}
+					return E_UNKNOWN;
+				}
 		private:	
 			CRITICAL_SECTION csResume;
 			void deleteResume(CAMuxSocket* pMuxSocket);
