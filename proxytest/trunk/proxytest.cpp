@@ -893,6 +893,9 @@ THREAD_RETURN lmIO(void *v)
 													#endif
 													if(tmpSocket->send(oMuxPacket.data,len-KEY_SIZE)==SOCKET_ERROR)
 														{
+															#ifdef _DEBUG
+																CAMsg::printMsg(LOG_DEBUG,"Error sending Data to Squid!");
+															#endif
 															tmpSocket->close();
 															lmIOPair->muxIn.close(oMuxPacket.channel);
 															delete tmpSocket;
