@@ -45,11 +45,12 @@ int CASocketGroup::select()
 			return ret;
 		#else
 			#ifdef _WIN32
-			    int ret=::select(0,&m_signaled_set,NULL,NULL,NULL);
+			    return ::select(0,&m_signaled_set,NULL,NULL,NULL);
 			#else
-			    int ret=::select(max,&m_signaled_set,NULL,NULL,NULL);
+			    return ::select(max,&m_signaled_set,NULL,NULL,NULL);
 			#endif			    
 		#endif
+
 	}
 			
 bool CASocketGroup::isSignaled(CASocket&s)
