@@ -46,6 +46,7 @@ SINT32 CAMiddleMix::init()
 			}
 		
 		UINT8 strTarget[255];
+		memset(strTarget,0,255);
 		UINT8 path[255];
 		CASocketAddr* pAddrNext;
 		options.getTargetHost(strTarget,255);
@@ -62,7 +63,10 @@ SINT32 CAMiddleMix::init()
 		else
 			{
 				pAddrNext=new CASocketAddrINet();
-				((CASocketAddrINet*)pAddrNext)->setAddr(strTarget,options.getTargetPort());
+				if(strTarget[0]==0) //empty host --> so any
+					((CASocketAddrINet*)pAddrNext)->setPort(options.getTargetPort());
+				else
+					((CASocketAddrINet*)pAddrNext)->setAddr(strTarget,options.getTargetPort());
 			}
 
 		
