@@ -46,15 +46,20 @@ CACertificate* CACertificate::decode(const DOM_Node &n,UINT32 type,char* passwd)
 						{
 							if(node.getNodeName().equals("X509PKCS12"))
 								{
-										char* tmpStr=node.getFirstChild().getNodeValue().transcode();
-										UINT32 decLen=4096;
-										UINT8* decBuff=new UINT8[decLen];
-										CABase64::decode((UINT8*)tmpStr,strlen(tmpStr),decBuff,&decLen);
-										delete tmpStr;
-										CACertificate* cert=decode(decBuff,decLen,CERT_PKCS12,passwd);
-										delete[] decBuff;
-										return cert;
-
+									UINT32 strLen=4096;
+									UINT8* tmpStr=new UINT8[strLen];
+									if(getDOMElementValue(node,tmpStr,&strLen)!=E_SUCCESS)
+										{
+											delete tmpStr;
+											return NULL;
+										}
+									UINT32 decLen=4096;
+									UINT8* decBuff=new UINT8[decLen];
+									CABase64::decode((UINT8*)tmpStr,strLen,decBuff,&decLen);
+									delete tmpStr;
+									CACertificate* cert=decode(decBuff,decLen,CERT_PKCS12,passwd);
+									delete[] decBuff;
+									return cert;
 								}
 							node=node.getNextSibling();
 						}
@@ -64,14 +69,20 @@ CACertificate* CACertificate::decode(const DOM_Node &n,UINT32 type,char* passwd)
 						{
 							if(node.getNodeName().equals("X509Certificate"))
 								{
-										char* tmpStr=node.getFirstChild().getNodeValue().transcode();
-										UINT32 decLen=4096;
-										UINT8* decBuff=new UINT8[decLen];
-										CABase64::decode((UINT8*)tmpStr,strlen(tmpStr),decBuff,&decLen);
-										delete tmpStr;
-										CACertificate* cert=decode(decBuff,decLen,CERT_DER);
-										delete[] decBuff;
-										return cert;
+									UINT32 strLen=4096;
+									UINT8* tmpStr=new UINT8[strLen];
+									if(getDOMElementValue(node,tmpStr,&strLen)!=E_SUCCESS)
+										{
+											delete tmpStr;
+											return NULL;
+										}
+									UINT32 decLen=4096;
+									UINT8* decBuff=new UINT8[decLen];
+									CABase64::decode((UINT8*)tmpStr,strLen,decBuff,&decLen);
+									delete tmpStr;
+									CACertificate* cert=decode(decBuff,decLen,CERT_DER);
+									delete[] decBuff;
+									return cert;
 								}
 							node=node.getNextSibling();
 						}
