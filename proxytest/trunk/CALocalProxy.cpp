@@ -61,18 +61,7 @@ SINT32 CALocalProxy::init()
 		addrNext.setAddr((char*)strTarget,options.getTargetPort());
 		CAMsg::printMsg(LOG_INFO,"Try connectiong to next Mix...");
 
-/*		CAMuxSocket http;
-		http.useTunnel("anon.inf.tu-dresden.de",3128);
-		http.connect(&addrNext);
-		MUXPACKET oMuxPacket;
-		oMuxPacket.channel=1;
-		oMuxPacket.len=10;
-		memcpy(oMuxPacket.data,"Hllo",3);
-		http.send(&oMuxPacket);
-		http.close();
-		sleep(10);
-		return -1;
-*/		((CASocket*)muxOut)->create();
+		((CASocket*)muxOut)->create();
 		((CASocket*)muxOut)->setSendBuff(sizeof(MUXPACKET)*50);
 		((CASocket*)muxOut)->setRecvBuff(sizeof(MUXPACKET)*50);
 		if(muxOut.connect(&addrNext)==E_SUCCESS)
@@ -103,16 +92,16 @@ SINT32 CALocalProxy::init()
 				CAMsg::printMsg(LOG_CRIT,"Cannot connect to next Mix!\n");
 				return E_UNKNOWN;
 			}
-	//	WaitForSingleObject(hEventThreadEnde,INFINITE);
 	}
 
-#ifndef PROT2
 SINT32 CALocalProxy::loop()
 	{
 		CASocketList  oSocketList;
 		CASocketGroup oSocketGroup;
 		oSocketGroup.add(socketIn);
-		if(options.getSOCKSServerPort()!=-1)
+		UINT16 socksPort=options.getSOCKSServerPort();
+		bool bHaveSocks=(socksPort!=0xFFFF);
+		if(bHaveSocks)
 			oSocketGroup.add(socketSOCKSIn);
 		oSocketGroup.add(muxOut);
 		HCHANNEL lastChannelId=1;
@@ -123,8 +112,6 @@ SINT32 CALocalProxy::loop()
 		CASymCipher* newCipher;
 		int countRead;
 		CONNECTION oConnection;		
-		unsigned short socksPort=options.getSOCKSServerPort();
-		bool bHaveSocks=(socksPort!=0xFFFF);
 		for(;;)
 			{
 				if((countRead=oSocketGroup.select())==SOCKET_ERROR)
@@ -148,7 +135,7 @@ SINT32 CALocalProxy::loop()
 							}
 						else
 							{
-								newCipher=new CASymCipher();
+								newCipher=new CASymCipher[chainlen];
 								oSocketList.add(lastChannelId++,newSocket,newCipher);
 								oSocketGroup.add(*newSocket);
 							}
@@ -169,7 +156,7 @@ SINT32 CALocalProxy::loop()
 							}
 						else
 							{
-								newCipher=new CASymCipher();
+								newCipher=new CASymCipher[chainlen];
 								oSocketList.add(lastChannelId++,newSocket,newCipher);
 								oSocketGroup.add(*newSocket);
 							}
@@ -191,9 +178,8 @@ SINT32 CALocalProxy::loop()
 							else
 								{
 									for(int c=0;c<chainlen;c++)
-										oConnection.pCipher->encrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
-									len=oMuxPacket.len;
-									if(len==0)
+										oConnection.pCipher[c].decryptAES2((unsigned char*)oMuxPacket.data,oMuxPacket.data,DATA_SIZE);
+									if(oMuxPacket.flags==CHANNEL_CLOSE)
 										{
 											#ifdef _DEBUG
 												CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u ... ",oMuxPacket.channel);
@@ -216,7 +202,7 @@ SINT32 CALocalProxy::loop()
 											#ifdef _DEBUG
 												CAMsg::printMsg(LOG_DEBUG,"Sending Data to Browser!");
 											#endif
-											oConnection.pSocket->send(oMuxPacket.data,len);
+											oConnection.pSocket->send(oMuxPacket.payload.data,ntohs(oMuxPacket.payload.len));
 										}
 								}
 						}
@@ -229,10 +215,10 @@ SINT32 CALocalProxy::loop()
 								if(oSocketGroup.isSignaled(*tmpCon->pSocket))
 									{
 										countRead--;
-										if(!tmpCon->pCipher->isEncyptionKeyValid())
-											len=tmpCon->pSocket->receive(oMuxPacket.data,DATA_SIZE-chainlen*16);
+										if(!tmpCon->pCipher[0].isEncyptionKeyValid())
+											len=tmpCon->pSocket->receive(oMuxPacket.payload.data,PAYLOAD_SIZE-chainlen*16);
 										else
-											len=tmpCon->pSocket->receive(oMuxPacket.data,DATA_SIZE);
+											len=tmpCon->pSocket->receive(oMuxPacket.payload.data,PAYLOAD_SIZE);
 										if(len==SOCKET_ERROR||len==0)
 											{
 												//TODO delete cipher..
@@ -248,37 +234,39 @@ SINT32 CALocalProxy::loop()
 										else 
 											{
 												oMuxPacket.channel=tmpCon->id;
-												oMuxPacket.len=(unsigned short)len;
+												oMuxPacket.payload.len=htons(len);
 												if(bHaveSocks&&tmpCon->pSocket->getLocalPort()==socksPort)
 													{
-														oMuxPacket.type=MUX_SOCKS;
+														oMuxPacket.payload.type=MUX_SOCKS;
 													}
 												else
 													{
-														oMuxPacket.type=MUX_HTTP;
+														oMuxPacket.payload.type=MUX_HTTP;
 													}
-												if(!tmpCon->pCipher->isEncyptionKeyValid()) //First time --> rsa key
+												if(!tmpCon->pCipher[0].isEncyptionKeyValid()) //First time --> rsa key
 													{
 														//Has to bee optimized!!!!
 														unsigned char buff[DATA_SIZE];
 														int size=DATA_SIZE-16;
-														tmpCon->pCipher->generateEncryptionKey(); //generate Key
+														//tmpCon->pCipher->generateEncryptionKey(); //generate Key
 														for(int c=0;c<chainlen;c++)
 															{
-																tmpCon->pCipher->getEncryptionKey(buff); // get key...
+																RAND_bytes(buff,16);
+																tmpCon->pCipher[c].setKeyAES(buff);
 																memcpy(buff+KEY_SIZE,oMuxPacket.data,size);
 																arRSA[c].encrypt(buff,buff);
-																tmpCon->pCipher->encrypt(buff+RSA_SIZE,DATA_SIZE-RSA_SIZE);
+																tmpCon->pCipher[c].decryptAES(buff+RSA_SIZE,buff+RSA_SIZE,DATA_SIZE-RSA_SIZE);
 																memcpy(oMuxPacket.data,buff,DATA_SIZE);
 																size-=KEY_SIZE;
 																len+=KEY_SIZE;
 															}
-														oMuxPacket.len=len;
+														oMuxPacket.flags=CHANNEL_OPEN;
 													}
 												else //sonst
 													{
 														for(int c=0;c<chainlen;c++)
-															tmpCon->pCipher->encrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
+															tmpCon->pCipher[c].decryptAES((unsigned char*)oMuxPacket.data,oMuxPacket.data,DATA_SIZE);
+														oMuxPacket.flags=CHANNEL_DATA;
 													}
 												if(muxOut.send(&oMuxPacket)==SOCKET_ERROR)
 													{
@@ -294,10 +282,3 @@ SINT32 CALocalProxy::loop()
 			}
 		return E_SUCCESS;
 	}
-
-#else
-SINT32 CALocalProxy::loop()
-	{
-		return E_UNKNOWN;
-	}
-#endif
