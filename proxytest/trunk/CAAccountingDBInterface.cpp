@@ -28,6 +28,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "StdAfx.h"
 #ifdef PAYMENT
 #include "CAAccountingDBInterface.hpp"
+#include "CACmdLnOptions.hpp"
+#include "CAMsg.hpp"
+
+extern CACmdLnOptions options;
 
 /**
  * Constructor
@@ -35,29 +39,32 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 CAAccountingDBInterface::CAAccountingDBInterface()
 {
 	m_connected = false;
-/*
-  // TODO: Update CACmdLnOptions so that the following works:
-	char host[255];
-	options.getDatabaseHost(host, 255);
-	
-	int tcp_port = options.getDatabaseTcpPort();
-	
-	char dbName[255];
-	options.getDatabaseName(dbName, 255);
-	
-	char userName[255]
-	options.getDatabaseUserName(userName, 255);
-	
-	char password[255];
-	options.getDatabasePassword(password, 255);*/
 
-	char host[] = "itsec2.inf.fu-berlin.de";
-	int tcp_port = 5432;
-	char dbName[] = "paydb";
-	char userName[] = "pay";
-	char password[] = "dito";
+  // Get database connection info from configfile and/or commandline
+	UINT8 host[255];
+	if(options.getDatabaseHost(host, 255) == E_UNKNOWN) {
+		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Error, no Database Host!");
+		return;
+	}
+	UINT32 tcp_port = options.getDatabasePort();
+	UINT8 dbName[255];
+	if(options.getDatabaseName(dbName, 255) == E_UNKNOWN) {
+		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Error, no Database Name!");
+		return;
+	}
+	UINT8 userName[255];
+	if(options.getDatabaseUser(userName, 255) == E_UNKNOWN) {
+		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Error, no Database Username!");
+		return;
+	}
+	UINT8 password[255];
+	if(options.getDatabasePassword(password, 255) == E_UNKNOWN) {
+		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Error, no Database Password!");
+		return;
+	}
 
-	int dbStatus = initDBConnection(host, tcp_port, dbName, userName, password);
+	// connect to DB
+	SINT32 dbStatus = initDBConnection(host, tcp_port, dbName, userName, password);
 }
 
 
@@ -78,15 +85,17 @@ CAAccountingDBInterface::~CAAccountingDBInterface()
  * @return E_UNKNOWN if we are already connected
  * @return E_SUCCESS if all is OK
  */
-SINT32 CAAccountingDBInterface::initDBConnection(char * host, int tcp_port, char * dbName,
-																							char * userName, char * password)
+SINT32 CAAccountingDBInterface::initDBConnection(const UINT8 * host, UINT32 tcp_port,
+																								 const UINT8 * dbName,
+																								 const UINT8 * userName,
+																								 const UINT8 * password)
 {
 	if(m_connected) return E_UNKNOWN;
 	
 	char port[20];
 	sprintf(port, "%i", tcp_port);
-	m_dbConn = PQsetdbLogin(host, port, "", "",
-													dbName,	userName,	password);
+	m_dbConn = PQsetdbLogin((char*)host, port, "", "",
+													(char*)dbName,	(char*)userName,	(char*)password);
   if(PQstatus(m_dbConn) == CONNECTION_BAD) {
 		
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingDBInteface: Could not connect to Database. Reason: %s\n",
@@ -134,7 +143,7 @@ SINT32 CAAccountingDBInterface::createTables()
 	result = PQexec(m_dbConn, createTable);
 	resStatus = PQresultStatus(result);
 	if(resStatus!=PGRES_COMMAND_OK) {
-		CAMsg::printMsg(LOG_ERROR, "CAAccountingDBInterface: Could not create tables. Reason: %s\n", PQresultErrorMessage(result));
+		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Could not create tables. Reason: %s\n", PQresultErrorMessage(result));
 		return E_UNKNOWN;
 	}
 	return E_SUCCESS;
@@ -157,7 +166,8 @@ SINT32 CAAccountingDBInterface::dropTables()
 	PGresult * result;
 	result = PQexec(m_dbConn, dropTable);
 	if(PQresultStatus(result)!=PGRES_COMMAND_OK) {
-		CAMsg::printMsg(LOG_ERROR, "CAAccountingDBInterface: Could not drop tables. Reason: %s\n", PQresultErrorMessage(result));
+		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Could not drop tables. Reason: %s\n",
+											PQresultErrorMessage(result));
 		return E_UNKNOWN;
 	}
 	return E_SUCCESS;
@@ -173,17 +183,17 @@ SINT32 CAAccountingDBInterface::dropTables()
  * @return E_SPACE, if the buffer is too small. In this case len contains the
  * minimum number of bytes needed
  */
-SINT32 CAAccountingDBInterface::getCostConfirmation(UINT64 accountNumber, char *buf, UINT32 *len)
+SINT32 CAAccountingDBInterface::getCostConfirmation(UINT64 accountNumber, UINT8 *buf, UINT32 *len)
 {
 	if(!m_connected) return E_NOT_CONNECTED;
 	char queryF[] = "SELECT XMLCC FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER=%i";
-	char query[strlen(queryF)+25];
+	char query[100+25];
 	sprintf(query, queryF, accountNumber);
 
 	PGresult * result;
 	result = PQexec(m_dbConn, query);
 	if(PQresultStatus(result)!=PGRES_TUPLES_OK) {
-		CAMsg::printMsg(LOG_ERROR, "CAAccountingDBInterface: Could not read XMLCC. Reason: %s\n", PQresultErrorMessage(result));
+		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Could not read XMLCC. Reason: %s\n", PQresultErrorMessage(result));
 		return E_NOT_CONNECTED;
 	}
 	if(PQntuples(result)!=0) {
@@ -196,7 +206,7 @@ SINT32 CAAccountingDBInterface::getCostConfirmation(UINT64 accountNumber, char *
 		*len = reslen;
 		return E_SPACE;
 	}
-	strncpy(buf, xmlCC, *len);
+	strncpy((char*)buf, xmlCC, *len);
 	return E_SUCCESS;
 }
 
@@ -204,33 +214,36 @@ SINT32 CAAccountingDBInterface::getCostConfirmation(UINT64 accountNumber, char *
 /**
  * stores a cost confirmation in the DB
  */
-SINT32 CAAccountingDBInterface::storeCostConfirmation(UINT64 accountNumber, UINT64 bytes, char * xmlCC) 
+SINT32 CAAccountingDBInterface::storeCostConfirmation(UINT64 accountNumber, 
+																											UINT64 bytes, UINT8 * xmlCC) 
 {
 	if(!m_connected) return E_NOT_CONNECTED;
 	
 	// hack to see if there is already an entry
 	if(getCostConfirmation(accountNumber, 0, 0)==E_NOT_FOUND) {
 		char queryF[] = "INSERT INTO COSTCONFIRMATIONS VALUES %i, %i, %s;";
-		char query[strlen(queryF)+2100];
+		char query[100+2100];
 		sprintf(query, queryF, accountNumber, bytes, xmlCC);
 
 		PGresult * result;
 		result = PQexec(m_dbConn, query);
 		if(PQresultStatus(result)!=PGRES_COMMAND_OK) {
-			CAMsg::printMsg(LOG_ERROR, "CAAccountingDBInterface: Could not write XMLCC(1). Reason: %s\n", PQresultErrorMessage(result));
+			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Could not write XMLCC(1). Reason: %s\n", 
+						PQresultErrorMessage(result));
 			return E_NOT_CONNECTED;
 		}
 	}
 	
 	else {
 		char queryF[] = "UPDATE COSTCONFIRMATIONS SET BYTES=%i,XMLCC='%s' WHERE ACCOUNTNUMBER=%i;";
-		char query[strlen(queryF)+2100];
+		char query[200+2100];
 		sprintf(query, queryF, bytes, xmlCC);
 
 		PGresult * result;
 		result = PQexec(m_dbConn, query);
 		if(PQresultStatus(result) != PGRES_COMMAND_OK) {
-			CAMsg::printMsg(LOG_ERROR, "CAAccountingDBInterface: Could not write XMLCC(2). Reason: %s\n", PQresultErrorMessage(result));
+			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Could not write XMLCC(2). Reason: %s\n", 
+						PQresultErrorMessage(result));
 			return E_NOT_CONNECTED;
 		}
 	}

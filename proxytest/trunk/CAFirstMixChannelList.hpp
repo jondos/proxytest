@@ -53,6 +53,11 @@ struct t_accountinginfo
 	UINT64 accountNumber;
 	UINT64 maxBalance;
 
+	UINT64 balanceLeft;
+//	UINT64 balance
+	
+	UINT32 authState;				// state of the authentication process
+	// this can be one of AUTH_NEW, AUTH_BAD, AUTH_OK
 };
 typedef struct t_accountinginfo aiAccountingInfo;
 typedef aiAccountingInfo * LP_aiAccountingInfo;

@@ -789,7 +789,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 
 #ifdef PAYMENT
 // Added by Bastian Voigt: 
-// Read PaymentInstance data (Hostname, Port) from configfile
+// Read PaymentInstance data (JPI Hostname, Port, Publickey) from configfile
 
 		DOM_Element elemAccounting;
 		getDOMChildByName(elemRoot,(UINT8*)"Accounting",elemAccounting,false);
@@ -812,7 +812,19 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 				if(getDOMElementValue(elem, &tmp)==E_SUCCESS) {
 					m_iJPIPort = tmp;
 				}
+				
+				// Get JPI Public Key
+				getDOMChildByName(elemJPI,(UINT8*)"PublicKey", elem, false);
+				if(elem!=NULL) {
+					m_pPublicKey = new CASignature();
+					if(m_pSignKey->setSignKey(elem.getFirstChild(),SIGKEY_PKCS12,(char*)passwd)!=E_SUCCESS) {
+						CAMsg::printMsg(LOG_CRIT,"Couldt not read own signature key!\n");
+						delete m_pSignKey;
+						m_pSignKey=NULL;
+					}
+				}
 			}
+
 			
 			DOM_Element elemDatabase;
 			getDOMChildByName(elemAccounting, (UINT8*)"Database", elemDatabase, false);
@@ -863,8 +875,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 				if(len>0) {
 					m_strDatabasePassword = new UINT8[len+1];
 					strcpy((char *)m_strDatabasePassword, (char *)dbpass);
-				}
-				
+				}	
 			}
 		}
 		else {
@@ -872,6 +883,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		}
 
 #endif /* ifdef PAYMENT */
+
 
 		//get InfoService data
 		DOM_Element elemNetwork;
