@@ -123,7 +123,9 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 		NULL,0,NULL,NULL}
 	};
 	poptContext ctx=poptGetContext(NULL,argc,argv,options,0);
-	poptGetNextOpt(ctx);
+	int ret=poptGetNextOpt(ctx);
+	while(ret==POPT_ERROR_BADOPT)
+		ret=poptGetNextOpt(ctx);
 	poptFreeContext(ctx);
 	if(iTemplate!=0)
 		{
@@ -508,11 +510,12 @@ bool CACmdLnOptions::isLocalProxy()
 			return bLocalProxy;
     }
 
-SINT32 CACmdLnOptions::getMixXml(UINT8* strxml,UINT32 len)
+SINT32 CACmdLnOptions::getMixXml(UINT8* strxml,UINT32* len)
 	{
-		if(strxml==NULL||m_strMixXml==NULL||len<=strlen(m_strMixXml))
+		if(strxml==NULL||m_strMixXml==NULL||len==NULL||*len<=strlen(m_strMixXml))
 			return E_UNKNOWN;
 		strcpy((char*)strxml,m_strMixXml);
+		*len=strlen(m_strMixXml)+1;
 		return E_SUCCESS;
 	}
 

@@ -996,8 +996,9 @@ static void sMixesHandler(XMLElement &elem, void *userData)
 		data->m_arRSA=new CAASymCipher[data->mixcount];
 		data->aktMix=0;
 		sprintf((char*)data->cascadeInfo,"<Mixes count=\"%u\">",data->mixcount+1);
+		UINT32 tmpBuffLen=5000;
 		UINT8 tmpBuff[5000];
-		options.getMixXml(tmpBuff,5000);
+		options.getMixXml(tmpBuff,&tmpBuffLen);
 		//options.getMixId(tmpBuff,50);
 		//sprintf((char*)data->cascadeInfo+strlen((char*)data->cascadeInfo),"<Mix id=\"%s\"></Mix>",tmpBuff);
 		char* startpos=strstr((char*)tmpBuff,"<Mix");
