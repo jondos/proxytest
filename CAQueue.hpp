@@ -40,7 +40,7 @@ class CAQueue
 		public:
 			CAQueue(){InitializeCriticalSection(&m_csQueue);m_Queue=NULL;m_nQueueSize=0;}
 			~CAQueue();
-			SINT32 add(UINT8* buff,UINT32 size);
+			SINT32 add(const UINT8* buff,UINT32 size);
 			SINT32 get(UINT8* pbuff,UINT32* psize);
 			/** Returns the size of stored data.
 				* @retrun size of Queue

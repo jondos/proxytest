@@ -47,7 +47,7 @@ CAQueue::~CAQueue()
 	* @returnval E_UNKOWN, in case of an error
 	* @retval E_SUCCESS if succesful
 	*/
-SINT32 CAQueue::add(UINT8* buff,UINT32 size)
+SINT32 CAQueue::add(const UINT8* buff,UINT32 size)
 	{
 		if(buff==NULL)
 			return E_UNKNOWN;
@@ -109,6 +109,8 @@ SINT32 CAQueue::get(UINT8* pbuff,UINT32* psize)
 	{
 		if(m_Queue==NULL||pbuff==NULL||psize==NULL)
 			return E_UNKNOWN;
+		if(*psize==0)
+			return E_SUCCESS;
 		EnterCriticalSection(&m_csQueue);
 		SINT32 ret;
 		UINT32 space=*psize;

@@ -33,7 +33,7 @@ CACacheLoadBalancing::~CACacheLoadBalancing()
 		CACHE_LB_ENTRY* pEntry;
 		while(paktEntry!=NULL)
 			{
-				delete paktEntry->pAddr;
+				//delete paktEntry->pAddr;
 				if(paktEntry==paktEntry->next)
 					{
 						pEntry=NULL;
@@ -44,13 +44,15 @@ CACacheLoadBalancing::~CACacheLoadBalancing()
 			}			
 	};
 
-SINT32 CACacheLoadBalancing::add(CASocketAddrINet* pAddr)
+SINT32 CACacheLoadBalancing::add(const CASocketAddrINet& oAddr)
 	{
-		if(pAddr==NULL)
-			return E_UNKNOWN;
+		//if(pAddr==NULL)
+		//	return E_UNKNOWN;
 		CACHE_LB_ENTRY* pEntry=new CACHE_LB_ENTRY;
-		pEntry->pAddr=new CASocketAddrINet;
-		memcpy(pEntry->pAddr,pAddr,sizeof(CASocketAddrINet));
+		//pEntry->pAddr=new CASocketAddrINet;
+		
+		pEntry->oAddr=oAddr;
+		//memcpy(pEntry->pAddr,pAddr,sizeof(CASocketAddrINet));
 		if(paktEntry==NULL)
 			{
 				paktEntry=pEntry;

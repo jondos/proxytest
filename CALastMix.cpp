@@ -51,12 +51,9 @@ SINT32 CALastMix::initOnce()
 		CASocketAddrINet oAddr;
 		for(UINT32 i=1;i<=cntTargets;i++)
 			{
-				options.getTargetAddr(&oAddr,i);
-				m_oCacheLB.add(&oAddr);
+				options.getTargetAddr(oAddr,i);
+				m_oCacheLB.add(oAddr);
 			}
-		CASocketAddrINet* pAddr=m_oCacheLB.get();
-		pAddr=m_oCacheLB.get();
-		pAddr=m_oCacheLB.get();
 		UINT8 strTarget[255];
 		options.getSOCKSHost(strTarget,255);
 		maddrSocks.setAddr((char*)strTarget,options.getSOCKSPort());
@@ -190,7 +187,7 @@ LOOP_START:
 														tmpSocket->create();
 														tmpSocket->setRecvBuff(50000);
 														tmpSocket->setSendBuff(5000);
-														ret=tmpSocket->connect(*m_oCacheLB.get(),_CONNECT_TIMEOUT);
+														ret=tmpSocket->connect((CASocketAddrINet)*m_oCacheLB.get(),_CONNECT_TIMEOUT);
 														count++;
 													}
 												while(ret!=E_SUCCESS&&count<m_oCacheLB.getElementCount());

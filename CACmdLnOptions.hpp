@@ -50,11 +50,11 @@ class CACmdLnOptions
 	   
 			//if we have more than one Target (currently only Caches are possible...)
 			UINT32 getTargetCount(){return cntTargets;}
-			SINT32 getTargetAddr(CASocketAddrINet* pAddr, UINT32 nr)
+			SINT32 getTargetAddr(CASocketAddrINet& oAddr, UINT32 nr)
 				{
-					if(nr>0&&nr<=cntTargets&&pAddr!=NULL)
+					if(nr>0&&nr<=cntTargets)
 						{
-							memcpy(pAddr,&pTargets[nr-1],sizeof(CASocketAddrINet));
+							oAddr=pTargets[nr-1];
 							return E_SUCCESS;
 						}
 					else
