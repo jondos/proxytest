@@ -468,8 +468,10 @@ SINT32 CACmdLnOptions::setPrevMix(DOM_Document& doc)
 
         if(getDOMChildByName(elemOptionsRoot, (UINT8*) "PrevMixCertificate", elemOptionsPrevMixCert, false) != E_SUCCESS)
         {
+						CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - no prev cert set at the moment\n");
             elemOptionsPrevMixCert = m_docMixXml.createElement("PrevMixCertificate");
             elemOptionsCerts.appendChild(elemOptionsPrevMixCert);
+  					CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - try to import the one we got from infoservice\n");
             elemOptionsPrevMixCert.appendChild(m_docMixXml.importNode(elemCert.getFirstChild(),true));
         }
         else
