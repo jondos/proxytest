@@ -851,6 +851,30 @@ SINT32 CAFirstMix::loop()
 								if(ret>0)
 									{
 										tmpMuxListEntry->pSendQueue->remove((UINT32*)&ret);
+#define USER_SEND_BUFFER_RESUME 10000
+										if(tmpMuxListEntry->pSendQueue->getSize()<USER_SEND_BUFFER_RESUME)
+											{
+												MUXLISTENTRY* pml=oSuspendList.getFirst();
+												while(pml!=NULL)
+													{
+														if(pml->pMuxSocket==tmpMuxListEntry->pMuxSocket)
+															{
+																CONNECTION* pcon=pml->pSocketList->getFirst();
+																while(pcon!=NULL)
+																	{
+																		oMixPacket.flags=CHANNEL_RESUME;
+																		oMixPacket.channel=pcon->outChannel;
+																		muxOut.send(&oMixPacket,tmpBuff);
+																		oqueueMixOut.add(tmpBuff,MIXPACKET_SIZE);
+																		pcon=pml->pSocketList->getNext();
+																	}
+																MUXLISTENTRY oEntry;
+																oSuspendList.remove(pml->pMuxSocket,&oEntry);
+																delete oEntry.pSocketList;
+															}
+														pml=oSuspendList.getNext();
+													}
+											}
 										if(tmpMuxListEntry->pSendQueue->isEmpty())
 											{
 												osocketgroupUsersWrite.remove(*tmpMuxListEntry->pMuxSocket);
