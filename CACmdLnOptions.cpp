@@ -328,135 +328,139 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 	else 
 		bLastMix=true;
 
-//Now we could setup the MixID
-//either form ConfigFile or from Host/Port
-	if(docMixXml!=NULL)
+	//This is only for mixes - not for local proxy
+	if(!bLocalProxy)
 		{
-			DOM_Element elemRoot=docMixXml.getDocumentElement();
-			DOMString tmpID=elemRoot.getAttribute("id");
-			if(tmpID!=NULL)
+		//Now we could setup the MixID
+		//either form ConfigFile or from Host/Port
+			if(docMixXml!=NULL)
 				{
-					m_strMixID=new char[tmpID.length()+1];
-					char* tmpChr=tmpID.transcode();
-					memcpy(m_strMixID,tmpChr,tmpID.length());
-					m_strMixID[tmpID.length()]=0;
-					delete[] tmpChr;
-				}
-		}
-	if(m_strMixID==NULL) //we do not got it from Config File...
-		{
-			UINT8 buff[4];
-			UINT16 thePort=iServerPort;
-			if(strServerHost==NULL||strServerHost[0]=='/')
-				{
-					CASocketAddrINet::getLocalHostIP(buff);
-					if(thePort==0xFFFF)
-						getRandom((UINT8*)&thePort,2);
-				}
-			else
-				{
-					CASocketAddrINet oAddr;
-					oAddr.setAddr((UINT8*)strServerHost,0);
-					oAddr.getIP(buff);
-				}
-			m_strMixID=new char[24];
-			sprintf(m_strMixID,"%u.%u.%u.%u%%3A%u",buff[0],buff[1],buff[2],buff[3],thePort);
-		}
-	
-	
-	if(docMixXml!=NULL) //we should insert the right Id and other stuff...
-		{
-			UINT8 id[50];
-			getMixId(id,50);
-			DOM_Element elemRoot=docMixXml.getDocumentElement();
-			elemRoot.setAttribute("id",DOMString((char*)id));
-			
-			//Insert Version
-			DOM_Element elemSoftware;
-			getDOMChildByName(elemRoot,(UINT8*)"Software",elemSoftware);
-			DOM_Element elemVersion;
-			getDOMChildByName(elemSoftware,(UINT8*)"Version",elemVersion);
-			if(elemVersion!=NULL)
-				setDOMElementValue(elemVersion,(UINT8*)MIX_VERSION);
-			else
-				CAMsg::printMsg(LOG_CRIT,"Software <Version> not set\n");
-		}
-	if(docMixXml==NULL) //Ok the get an error in proccesing infos about the mix, we should at leas t give the id!
-		{
-			docMixXml=DOM_Document::createDocument();
-			DOM_Element elemRoot=docMixXml.createElement("Mix");
-			UINT8 id[50];
-			getMixId(id,50);
-			elemRoot.setAttribute("id",DOMString((char*)id));
-			docMixXml.appendChild(elemRoot);
-		}
-
-//Make an String from the Doc
-	UINT32 xmlLen=0;
-	UINT8* tmpXml=DOM_Output::dumpToMem(docMixXml,&xmlLen);
-	m_strMixXml=new char[xmlLen+1];
-	memcpy(m_strMixXml,tmpXml,xmlLen);
-	m_strMixXml[xmlLen]=0;
-	delete[] tmpXml;
-
-	UINT8 tmpCertDir[2048];
-	UINT8 tmpFileName[2048];
-	UINT8* buff=NULL;
-	UINT32 size;
-	if(certsdir!=NULL)
-		{
-			strcpy((char*)tmpCertDir,certsdir);
-			free(certsdir);				
-		}
-	else
-		tmpCertDir[0]=0;
-	//Try to load SignKey
-	if(bXmlKey)
-		{
-			strcpy((char*)tmpFileName,(char*)tmpCertDir);
-			strcat((char*)tmpFileName,"/privkey.xml");
-			buff=readFile(tmpFileName,&size);
-			if(buff!=NULL)
-				{
-					m_pSignKey=new CASignature();
-					m_pSignKey->setSignKey(buff,size,SIGKEY_XML);
-				}
-		}
-	else
-		{
-			strcpy((char*)tmpFileName,(char*)tmpCertDir);
-			strcat((char*)tmpFileName,"/own.pfx");
-			UINT8* buff=readFile(tmpFileName,&size);
-			if(buff!=NULL)
-				{
-					m_pSignKey=new CASignature();
-					UINT8 passwd[500];
-					passwd[0]=0;
-					if(m_pSignKey->setSignKey(buff,size,SIGKEY_PKCS12)!=E_SUCCESS)
-						{//Maybe not an empty passwd
-							printf("I need a passwd for the SignKey: ");
-							scanf("%s",(char*)passwd); //This is a typicall Buffer Overflow :-)
-							if(m_pSignKey->setSignKey(buff,size,SIGKEY_PKCS12,(char*)passwd)!=E_SUCCESS)
-								{
-									delete m_pSignKey;
-									m_pSignKey=NULL;
-								}
+					DOM_Element elemRoot=docMixXml.getDocumentElement();
+					DOMString tmpID=elemRoot.getAttribute("id");
+					if(tmpID!=NULL)
+						{
+							m_strMixID=new char[tmpID.length()+1];
+							char* tmpChr=tmpID.transcode();
+							memcpy(m_strMixID,tmpChr,tmpID.length());
+							m_strMixID[tmpID.length()]=0;
+							delete[] tmpChr;
 						}
-					m_pOwnCertificate=CACertificate::decode(buff,size,CERT_PKCS12,(char*)passwd);
 				}
+			if(m_strMixID==NULL) //we do not got it from Config File...
+				{
+					UINT8 buff[4];
+					UINT16 thePort=iServerPort;
+					if(strServerHost==NULL||strServerHost[0]=='/')
+						{
+							CASocketAddrINet::getLocalHostIP(buff);
+							if(thePort==0xFFFF)
+								getRandom((UINT8*)&thePort,2);
+						}
+					else
+						{
+							CASocketAddrINet oAddr;
+							oAddr.setAddr((UINT8*)strServerHost,0);
+							oAddr.getIP(buff);
+						}
+					m_strMixID=new char[24];
+					sprintf(m_strMixID,"%u.%u.%u.%u%%3A%u",buff[0],buff[1],buff[2],buff[3],thePort);
+				}
+			
+			
+			if(docMixXml!=NULL) //we should insert the right Id and other stuff...
+				{
+					UINT8 id[50];
+					getMixId(id,50);
+					DOM_Element elemRoot=docMixXml.getDocumentElement();
+					elemRoot.setAttribute("id",DOMString((char*)id));
+					
+					//Insert Version
+					DOM_Element elemSoftware;
+					getDOMChildByName(elemRoot,(UINT8*)"Software",elemSoftware);
+					DOM_Element elemVersion;
+					getDOMChildByName(elemSoftware,(UINT8*)"Version",elemVersion);
+					if(elemVersion!=NULL)
+						setDOMElementValue(elemVersion,(UINT8*)MIX_VERSION);
+					else
+						CAMsg::printMsg(LOG_CRIT,"Software <Version> not set\n");
+				}
+			if(docMixXml==NULL) //Ok the get an error in proccesing infos about the mix, we should at leas t give the id!
+				{
+					docMixXml=DOM_Document::createDocument();
+					DOM_Element elemRoot=docMixXml.createElement("Mix");
+					UINT8 id[50];
+					getMixId(id,50);
+					elemRoot.setAttribute("id",DOMString((char*)id));
+					docMixXml.appendChild(elemRoot);
+				}
+
+		//Make an String from the Doc
+			UINT32 xmlLen=0;
+			UINT8* tmpXml=DOM_Output::dumpToMem(docMixXml,&xmlLen);
+			m_strMixXml=new char[xmlLen+1];
+			memcpy(m_strMixXml,tmpXml,xmlLen);
+			m_strMixXml[xmlLen]=0;
+			delete[] tmpXml;
+
+			UINT8 tmpCertDir[2048];
+			UINT8 tmpFileName[2048];
+			UINT8* buff=NULL;
+			UINT32 size;
+			if(certsdir!=NULL)
+				{
+					strcpy((char*)tmpCertDir,certsdir);
+					free(certsdir);				
+				}
+			else
+				tmpCertDir[0]=0;
+			//Try to load SignKey
+			if(bXmlKey)
+				{
+					strcpy((char*)tmpFileName,(char*)tmpCertDir);
+					strcat((char*)tmpFileName,"/privkey.xml");
+					buff=readFile(tmpFileName,&size);
+					if(buff!=NULL)
+						{
+							m_pSignKey=new CASignature();
+							m_pSignKey->setSignKey(buff,size,SIGKEY_XML);
+						}
+				}
+			else
+				{
+					strcpy((char*)tmpFileName,(char*)tmpCertDir);
+					strcat((char*)tmpFileName,"/own.pfx");
+					UINT8* buff=readFile(tmpFileName,&size);
+					if(buff!=NULL)
+						{
+							m_pSignKey=new CASignature();
+							UINT8 passwd[500];
+							passwd[0]=0;
+							if(m_pSignKey->setSignKey(buff,size,SIGKEY_PKCS12)!=E_SUCCESS)
+								{//Maybe not an empty passwd
+									printf("I need a passwd for the SignKey: ");
+									scanf("%s",(char*)passwd); //This is a typicall Buffer Overflow :-)
+									if(m_pSignKey->setSignKey(buff,size,SIGKEY_PKCS12,(char*)passwd)!=E_SUCCESS)
+										{
+											delete m_pSignKey;
+											m_pSignKey=NULL;
+										}
+								}
+							m_pOwnCertificate=CACertificate::decode(buff,size,CERT_PKCS12,(char*)passwd);
+						}
+				}
+			delete buff;
+			//Try to load Certificates
+			strcpy((char*)tmpFileName,(char*)tmpCertDir);
+			strcat((char*)tmpFileName,"/next.cer");
+			buff=readFile(tmpFileName,&size);
+			m_pNextMixCertificate=CACertificate::decode(buff,size,CERT_DER);
+			delete buff;
+			strcpy((char*)tmpFileName,(char*)tmpCertDir);
+			strcat((char*)tmpFileName,"/prev.cer");
+			buff=readFile(tmpFileName,&size);
+			m_pPrevMixCertificate=CACertificate::decode(buff,size,CERT_DER);
+			delete buff;
 		}
-	delete buff;
-	//Try to load Certificates
-	strcpy((char*)tmpFileName,(char*)tmpCertDir);
-	strcat((char*)tmpFileName,"/next.cer");
-	buff=readFile(tmpFileName,&size);
-	m_pNextMixCertificate=CACertificate::decode(buff,size,CERT_DER);
-	delete buff;
-	strcpy((char*)tmpFileName,(char*)tmpCertDir);
-	strcat((char*)tmpFileName,"/prev.cer");
-	buff=readFile(tmpFileName,&size);
-	m_pPrevMixCertificate=CACertificate::decode(buff,size,CERT_DER);
-	delete buff;
 
 	return E_SUCCESS;
 	
