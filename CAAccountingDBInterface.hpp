@@ -28,7 +28,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CAACCOUNTINGDBINTERFACE__
 #define __CAACCOUNTINGDBINTERFACE__
 
-#include "StdAfx.h"
 #include "CAQueue.hpp"
 #include "CAXMLCostConfirmation.hpp"
 
