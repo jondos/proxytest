@@ -39,7 +39,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAQueue.hpp"
 #include "CAUtil.hpp"
 #include "CAThread.hpp"
+#ifdef PAYMENT
+#include "CAAccountingInstance.hpp"
+#endif
 class CAInfoService;
+
 
 class CAFirstMix:public CAMix
 	{

@@ -450,6 +450,79 @@ SINT32 CACmdLnOptions::getSOCKSHost(UINT8* host,UINT32 len)
 		return (SINT32)strlen(m_strSOCKSHost);
   }
 
+#ifdef PAYMENT
+SINT32 CACmdLnOptions::getJPIHost(UINT8* host,UINT32 len)
+{
+	if(m_strJPIHost==NULL)
+			return E_UNKNOWN;
+	if(len <= (UINT32)strlen( (char *)m_strJPIHost))
+			{
+				return E_UNKNOWN;
+			}
+	strcpy((char*)host,(char *)m_strJPIHost);
+	return (SINT32)strlen((char *)m_strJPIHost);	
+}
+
+UINT16 CACmdLnOptions::getJPIPort()
+{
+	return m_iJPIPort;
+}
+
+SINT32 CACmdLnOptions::getDatabaseHost(UINT8 * host, UINT32 len)
+{
+	if(m_strDatabaseHost==NULL)
+			return E_UNKNOWN;
+	if(len<=(UINT32)strlen((char *)m_strDatabaseHost))
+			{
+				return E_UNKNOWN;
+			}
+	strcpy((char*)host,(char *)m_strDatabaseHost);
+	return (SINT32)strlen((char *)m_strDatabaseHost);	
+}
+
+UINT16 CACmdLnOptions::getDatabasePort()
+{
+	return m_iDatabasePort;
+}
+
+SINT32 CACmdLnOptions::getDatabaseName(UINT8 * name, UINT32 len)
+{
+	if(m_strDatabaseName==NULL)
+			return E_UNKNOWN;
+	if(len<=(UINT32)strlen((char *)m_strDatabaseName))
+			{
+				return E_UNKNOWN;
+			}
+	strcpy((char*)name,(char *)m_strDatabaseName);
+	return (SINT32)strlen((char *)m_strDatabaseName);	
+}
+
+SINT32 CACmdLnOptions::getDatabaseUsername(UINT8 * user, UINT32 len)
+{
+	if(m_strDatabaseUser==NULL)
+			return E_UNKNOWN;
+	if(len<=(UINT32)strlen((char *)m_strDatabaseUser))
+			{
+				return E_UNKNOWN;
+			}
+	strcpy((char*)user,(char *)m_strDatabaseUser);
+	return (SINT32)strlen((char *)m_strDatabaseUser);	
+}
+
+SINT32 CACmdLnOptions::getDatabasePassword(UINT8 * pass, UINT32 len)
+{
+	if(m_strDatabasePassword==NULL)
+			return E_UNKNOWN;
+	if(len<=(UINT32)strlen((char *)m_strDatabasePassword))
+			{
+				return E_UNKNOWN;
+			}
+	strcpy((char*)pass,(char *)m_strDatabasePassword);
+	return (SINT32)strlen((char *)m_strDatabasePassword);	
+}
+
+#endif /* ifdef PAYMENT */
+
 UINT16 CACmdLnOptions::getInfoServerPort()
   {
 		return m_iInfoServerPort;
@@ -709,33 +782,92 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		getDOMChildByName(elemCertificates,(UINT8*)"PrevMixCertificate",elemPrevCert,false);
 		if(elemPrevCert!=NULL)
 			m_pPrevMixCertificate=CACertificate::decode(elemPrevCert.getFirstChild(),CERT_X509CERTIFICATE);
-/*
-#ifdef PAYMENT  // TODO: Make this code nicer
-		// get Accounting (payment) configuration
+
+#ifdef PAYMENT
+// Added by Bastian Voigt: 
+// Read PaymentInstance data (Hostname, Port) from configfile
+
 		DOM_Element elemAccounting;
 		getDOMChildByName(elemRoot,(UINT8*)"Accounting",elemAccounting,false);
-		DOM_Element elemJPI;
-
-		// get JPI Address
-		getDOMChildByName(elemAccounting, (UINT8*)"PaymentInstance", elemJPI, false);
-
-		// get JPI Hostname
-		getDOMChildByName(elemJPI, (UINT8*)"Host", elem, false);
-		tmpLen = 255;
-		if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) {
-
-			strtrim(tmpBuff);
-			m_strJPIHost = new char[strlen((char*)tmpBuff)+1];
-			strcpy(m_strJPIHost, (char *) tmpBuff);
+		if(elemAccounting != NULL) {
+			DOM_Element elemJPI;
+			getDOMChildByName(elemAccounting, (UINT8*)"PaymentInstance", elemJPI, false);
+			
+			if(elemJPI != NULL) {
+				// get JPI Hostname
+				getDOMChildByName(elemJPI, (UINT8*)"Host", elem, false);
+				tmpLen = 255;
+				if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) {
+					strtrim(tmpBuff);
+					m_strJPIHost = new UINT8[strlen((char*)tmpBuff)+1];
+					strcpy((char *)m_strJPIHost, (char *) tmpBuff);
+				}
+		
+				// get JPI Port
+				getDOMChildByName(elemJPI, (UINT8*)"Port", elem, false);
+				if(getDOMElementValue(elem, &tmp)==E_SUCCESS) {
+					m_iJPIPort = tmp;
+				}
+			}
+			
+			DOM_Element elemDatabase;
+			getDOMChildByName(elemAccounting, (UINT8*)"Database", elemDatabase, false);
+			
+			if(elemDatabase != NULL) {
+				// get DB Hostname
+				getDOMChildByName(elemDatabase, (UINT8*)"Host", elem, false);
+				tmpLen = 255;
+				if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) {
+					strtrim(tmpBuff);
+					m_strDatabaseHost = new UINT8[strlen((char*)tmpBuff)+1];
+					strcpy((char *)m_strDatabaseHost, (char *) tmpBuff);
+				}
+				// get Database Port
+				getDOMChildByName(elemDatabase, (UINT8*)"Port", elem, false);
+				if(getDOMElementValue(elem, &tmp)==E_SUCCESS) {
+					m_iDatabasePort = tmp;
+				}
+				// get DB Name
+				getDOMChildByName(elemDatabase, (UINT8*)"DBName", elem, false);
+				tmpLen = 255;
+				if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) {
+					strtrim(tmpBuff);
+					m_strDatabaseName = new UINT8[strlen((char*)tmpBuff)+1];
+					strcpy((char *)m_strDatabaseName, (char *) tmpBuff);
+				}
+				// get DB Username
+				getDOMChildByName(elemDatabase, (UINT8*)"Username", elem, false);
+				tmpLen = 255;
+				if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) {
+					strtrim(tmpBuff);
+					m_strDatabaseUser = new UINT8[strlen((char*)tmpBuff)+1];
+					strcpy((char *)m_strDatabaseUser, (char *) tmpBuff);
+				}
+/*				getDOMChildByName(elemDatabase, (UINT8*)"Password", elem, false);
+				tmpLen = 255;
+				if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) {
+					strtrim(tmpBuff);
+					m_strDatabasePassword = new char[strlen((char*)tmpBuff)+1];
+					strcpy(m_strDatabasePassword, (char *) tmpBuff);
+				}*/
+				// don't read password from XML but from stdin:
+				UINT8 dbpass[500];
+				dbpass[0]=0;
+				printf("Please enter password for postgresql user %s at %s: ",m_strDatabaseUser, m_strDatabaseHost);
+				scanf("%400[^\n]",(char*)dbpass); 
+				int len = strlen((char *)dbpass);
+				if(len>0) {
+					m_strDatabasePassword = new UINT8[len+1];
+					strcpy((char *)m_strDatabasePassword, (char *)dbpass);
+				}
+				
+			}
+		}
+		else {
+			CAMsg::printMsg( 17, "No accounting instance info found in configfile. Payment will not work!");
 		}
 
-		// get JPI Port
-		getDOMChildByName(elemJPI, (UINT8*)"Port", elem, false);
-		if(getDOMElementValue(elem, &tmp)==E_SUCCESS) {
-			m_iJPIPort = tmp;
-		}
-
-#endif*/ /* PAYMENT */
+#endif /* ifdef PAYMENT */
 
 		//get InfoService data
 		DOM_Element elemNetwork;
