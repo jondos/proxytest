@@ -38,7 +38,7 @@ extern CACmdLnOptions options;
  */
 CAAccountingDBInterface::CAAccountingDBInterface()
 {
-	m_connected = false;
+	m_bConnected = false;
 
   // Get database connection info from configfile and/or commandline
 	UINT8 host[255];
@@ -53,7 +53,7 @@ CAAccountingDBInterface::CAAccountingDBInterface()
 		return;
 	}
 	UINT8 userName[255];
-	if(options.getDatabaseUser(userName, 255) == E_UNKNOWN) {
+	if(options.getDatabaseUsername(userName, 255) == E_UNKNOWN) {
 		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Error, no Database Username!");
 		return;
 	}
@@ -90,7 +90,7 @@ SINT32 CAAccountingDBInterface::initDBConnection(const UINT8 * host, UINT32 tcp_
 																								 const UINT8 * userName,
 																								 const UINT8 * password)
 {
-	if(m_connected) return E_UNKNOWN;
+	if(m_bConnected) return E_UNKNOWN;
 	
 	char port[20];
 	sprintf(port, "%i", tcp_port);
@@ -102,10 +102,10 @@ SINT32 CAAccountingDBInterface::initDBConnection(const UINT8 * host, UINT32 tcp_
 										PQerrorMessage(m_dbConn));
 		PQfinish(m_dbConn);
 		m_dbConn = 0;
-		m_connected = false;
+		m_bConnected = false;
 		return E_NOT_CONNECTED;
 	}
-	m_connected = true;
+	m_bConnected = true;
 	return E_SUCCESS;
 }
 
@@ -116,10 +116,10 @@ SINT32 CAAccountingDBInterface::initDBConnection(const UINT8 * host, UINT32 tcp_
  */
 SINT32 CAAccountingDBInterface::terminateDBConnection() 
 {
-	if(m_connected) {
+	if(m_bConnected) {
 	  PQfinish(m_dbConn);
 	}
-	m_connected = false;
+	m_bConnected = false;
 	return E_SUCCESS;
 }
 
@@ -133,10 +133,15 @@ SINT32 CAAccountingDBInterface::terminateDBConnection()
  */
 SINT32 CAAccountingDBInterface::createTables()
 {
-	if(!m_connected) return E_NOT_CONNECTED;
+	if(!m_bConnected) return E_NOT_CONNECTED;
 	
 	char createTable[] = 
-		"CREATE TABLE COSTCONFIRMATIONS (ACCOUNTNUMBER BIGSERIAL PRIMARY KEY, BYTES BIGINT, XMLCC VARCHAR(2000));";
+		"CREATE TABLE COSTCONFIRMATIONS ("
+			"ACCOUNTNUMBER BIGSERIAL PRIMARY KEY,"
+			"BYTES BIGINT,"
+			"XMLCC VARCHAR(2000),"
+			"SETTLED INTEGER"
+		");";
 	
 	PGresult * result;
 	ExecStatusType resStatus;
@@ -159,7 +164,7 @@ SINT32 CAAccountingDBInterface::createTables()
  */
 SINT32 CAAccountingDBInterface::dropTables()
 {
-	if(!m_connected) return E_NOT_CONNECTED;
+	if(!m_bConnected) return E_NOT_CONNECTED;
 	char dropTable[] = 
 		"DROP TABLE COSTCONFIRMATIONS;";
 
@@ -185,28 +190,32 @@ SINT32 CAAccountingDBInterface::dropTables()
  */
 SINT32 CAAccountingDBInterface::getCostConfirmation(UINT64 accountNumber, UINT8 *buf, UINT32 *len)
 {
-	if(!m_connected) return E_NOT_CONNECTED;
-	char queryF[] = "SELECT XMLCC FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER=%i";
-	char query[100+25];
-	sprintf(query, queryF, accountNumber);
+	if(!m_bConnected) return E_NOT_CONNECTED;
+	UINT8 queryF[] = "SELECT XMLCC FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER=%i";
+	UINT8 query[100+25];
+	UINT8 * xmlCC;
+	sprintf( (char *)query, (char *)queryF, accountNumber);
 
 	PGresult * result;
-	result = PQexec(m_dbConn, query);
+	result = PQexec(m_dbConn, (char *)query);
 	if(PQresultStatus(result)!=PGRES_TUPLES_OK) {
-		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Could not read XMLCC. Reason: %s\n", PQresultErrorMessage(result));
+		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Could not read XMLCC. Reason: %s\n", 
+				PQresultErrorMessage(result));
 		return E_NOT_CONNECTED;
 	}
 	if(PQntuples(result)!=0) {
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingDBInterface: XMLCC not found.\n");
 		return E_NOT_FOUND;
 	}
-	char * xmlCC = PQgetvalue(result, 0, 0);
-	int reslen = strlen(xmlCC);
+	xmlCC = (UINT8*) PQgetvalue(result, 0, 0);
+	int reslen = strlen((char *)xmlCC);
 	if(reslen>= *len) {
 		*len = reslen;
+		delete [] xmlCC;
 		return E_SPACE;
 	}
-	strncpy((char*)buf, xmlCC, *len);
+	strncpy((char*)buf, (char *)xmlCC, *len);
+	delete [] xmlCC;
 	return E_SUCCESS;
 }
 
@@ -214,16 +223,17 @@ SINT32 CAAccountingDBInterface::getCostConfirmation(UINT64 accountNumber, UINT8 
 /**
  * stores a cost confirmation in the DB
  */
-SINT32 CAAccountingDBInterface::storeCostConfirmation(UINT64 accountNumber, 
-																											UINT64 bytes, UINT8 * xmlCC) 
+SINT32 CAAccountingDBInterface::storeCostConfirmation(
+		UINT64 accountNumber, UINT64 bytes, 
+		UINT8 * xmlCC, UINT32 isSettled) 
 {
-	if(!m_connected) return E_NOT_CONNECTED;
+	if(!m_bConnected) return E_NOT_CONNECTED;
 	
 	// hack to see if there is already an entry
 	if(getCostConfirmation(accountNumber, 0, 0)==E_NOT_FOUND) {
-		char queryF[] = "INSERT INTO COSTCONFIRMATIONS VALUES %i, %i, %s;";
+		char queryF[] = "INSERT INTO COSTCONFIRMATIONS VALUES %i, %i, %s, %d;";
 		char query[100+2100];
-		sprintf(query, queryF, accountNumber, bytes, xmlCC);
+		sprintf(query, queryF, accountNumber, bytes, xmlCC, isSettled);
 
 		PGresult * result;
 		result = PQexec(m_dbConn, query);
@@ -235,9 +245,9 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation(UINT64 accountNumber,
 	}
 	
 	else {
-		char queryF[] = "UPDATE COSTCONFIRMATIONS SET BYTES=%i,XMLCC='%s' WHERE ACCOUNTNUMBER=%i;";
+		char queryF[] = "UPDATE COSTCONFIRMATIONS SET BYTES=%i,XMLCC='%s',SETTLED=%d WHERE ACCOUNTNUMBER=%i;";
 		char query[200+2100];
-		sprintf(query, queryF, bytes, xmlCC);
+		sprintf(query, queryF, bytes, xmlCC, isSettled);
 
 		PGresult * result;
 		result = PQexec(m_dbConn, query);

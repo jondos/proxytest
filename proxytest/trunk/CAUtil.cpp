@@ -485,6 +485,24 @@ SINT32 getDOMElementValue(const DOM_Element& elem,UINT32* value)
 		return E_SUCCESS;
 	}
 
+SINT32 getDOMElementValue(const DOM_Element& elem, UINT64 &value)
+{
+	ASSERT(value!=NULL, "Value is null");
+	ASSERT(elem!=NULL, "Element is NULL");
+	UINT8 buf[256];
+	UINT32 bufLen = 256;
+	if(getDOMElementValue(elem,buf,&bufLen)!=E_SUCCESS)
+	{
+		return E_UNKNOWN;
+	}
+	if(parseU64(buf, value)!=E_SUCCESS)
+	{
+		return E_UNKNOWN;
+	}
+	
+	return E_SUCCESS;
+}
+
 SINT32 getDOMElementValue(const DOM_Element& elem,UINT16* value)
 	{
 		UINT32 tmp;
@@ -926,6 +944,23 @@ bool checkAndInsert(UINT8 hash, UINT8* value)
 			}
 	}
 
+/**
+ * Parses a 64bit integer
+ */
+SINT32 parseU64(const UINT8 * str, UINT64& value)
+{
+	#ifdef HAVE_NATIVE_UINT64
+		#ifdef HAVE_ATOLL
+			value = (UINT64) atoll((char *)str);
+			return E_SUCCESS;
+		#endif
+		return E_UNKNOWN;
+	#else
+		///@todo code if we do not have native UINT64
+		return E_UNKNOWN;
+	#endif
+}
+
 
 /**
  * Parses a timestamp in JDBC timestamp escape format (as it comes from the BI)
@@ -933,8 +968,9 @@ bool checkAndInsert(UINT8 hash, UINT8* value)
  *
  * @param strTimestamp the string containing the timestamp
  * @param seconds an integer variable that gets the seconds value.
+ * @todo think about timezone handling 
  */
-SINT32 parseJdbcTimestamp(const UINT8 * strTimestamp, UINT32& seconds)
+SINT32 parseJdbcTimestamp(const UINT8 * strTimestamp, SINT32& seconds)
 {
 	struct tm time;
 	SINT32 rc;
@@ -957,13 +993,21 @@ SINT32 parseJdbcTimestamp(const UINT8 * strTimestamp, UINT32& seconds)
 }
 
 
-
 /**
- * Parses a 64bit integer
+ * Converts a timestamp (in seconds) to the String JDBC timestamp
+ * escape format (YYYY-MM-DD HH:MM:SS)
+ * @param seconds integer value containing the timestamp in seconds since the epoch
+ * @param strTimestamp a string buffer that gets the result
+ * @param len the buffer length
+ * @todo think about timezone handling
  */
-//SINT32 parseU64(const UINT8 * str, UINT64& value)
-//{
-//	value = (UINT64) atoll(str);
-//	return E_SUCCESS;
-//}
-
+SINT32 formatJdbcTimestamp(const SINT32 seconds, UINT8 * strTimestamp, const UINT32 len)
+{
+	struct tm * time;
+	time = localtime((time_t *) (&seconds));
+	if(strftime((char *)strTimestamp, len, "%Y-%m-%d %H:%M:%S", time) == 0)
+	{
+		return E_SPACE;
+	}
+	return E_SUCCESS;
+}

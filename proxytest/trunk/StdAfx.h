@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.03.54"
+#define MIX_VERSION "00.03.55"
 
 #if defined(DEBUG)|| defined(_DEBUG)
 	#undef DEBUG
@@ -149,7 +149,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define O_NONBLOCK 0
 		#define HAVE_VSNPRINTF
 		#define vsnprintf _vsnprintf
-
+		#define atoll _atoi64
+		#define HAVE_ATOLL
 #else
 	//__linux is not defined on power pc so we define our own __linux if __linux__ is defined
 	#if defined(__linux__) && !defined(__linux)
@@ -168,6 +169,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#else
 		#define HAVE_UNIX_DOMAIN_PROTOCOL
 		#define HAVE_VSNPRINTF
+		#define HAVE_ATOLL
 		#define HAVE_POLL
 		#ifndef __linux
 			#define HAVE_TCP_KEEPALIVE

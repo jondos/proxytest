@@ -3,18 +3,18 @@ Copyright (c) 2000, The JAP-Team
 All rights reserved.
 Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:
-
+ 
 	- Redistributions of source code must retain the above copyright notice, 
 	  this list of conditions and the following disclaimer.
-
+ 
 	- Redistributions in binary form must reproduce the above copyright notice, 
 	  this list of conditions and the following disclaimer in the documentation and/or 
 		other materials provided with the distribution.
-
+ 
 	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors 
 	  may be used to endorse or promote products derived from this software without specific 
 		prior written permission. 
-
+ 
 	
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS 
 OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
@@ -40,21 +40,22 @@ extern CACmdLnOptions options;
  */
 CAAccountingBIInterface::CAAccountingBIInterface()
 {
-	// init some vars
-	m_lineBufferSize = 0;
-	m_pSslSocket = new CASSLClientSocket();
-	
-	// get JPI info from config file
-	UINT8 jpiHost[255];
-	if(options.getJPIHost(jpiHost, 255) != E_SUCCESS) {
-		CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface: could not get JPI hostname");
-	}
-	UINT16 jpiPort;
-	jpiPort = options.getJPIPort();
-	CASocketAddrINet biAddress;
-	biAddress.setAddr(jpiHost, jpiPort);
-	
-	initBIConnection(biAddress);
+  // init some vars
+  m_lineBufferSize = 0;
+  m_pSslSocket = new CASSLClientSocket();
+
+  // get JPI info from config file
+  UINT8 jpiHost[255];
+  if(options.getJPIHost(jpiHost, 255) != E_SUCCESS)
+    {
+      CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface: could not get JPI hostname");
+    }
+  UINT16 jpiPort;
+  jpiPort = options.getJPIPort();
+  CASocketAddrINet biAddress;
+  biAddress.setAddr(jpiHost, jpiPort);
+
+  initBIConnection(biAddress);
 }
 
 
@@ -63,11 +64,12 @@ CAAccountingBIInterface::CAAccountingBIInterface()
  * Destructor
  */
 CAAccountingBIInterface::~CAAccountingBIInterface()
-{	
-  if(m_lineBufferSize>0) free(m_pLineBuffer);
+{
+  if(m_lineBufferSize>0)
+    free(m_pLineBuffer);
 
-	terminateBIConnection();
-	delete m_pSslSocket;
+  terminateBIConnection();
+  delete m_pSslSocket;
 }
 
 
@@ -77,13 +79,14 @@ CAAccountingBIInterface::~CAAccountingBIInterface()
  */
 SINT32 CAAccountingBIInterface::initBIConnection(CASocketAddrINet address)
 {
-	if(m_pSslSocket->connect(address)!=E_SUCCESS) {
-		CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface: could not connect to JPI!!");
-		m_connected = false;
-		return E_UNKNOWN;
-	}
-	m_connected = true;
-	return E_SUCCESS;
+  if(m_pSslSocket->connect(address)!=E_SUCCESS)
+    {
+      CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface: could not connect to JPI!!");
+      m_connected = false;
+      return E_UNKNOWN;
+    }
+  m_connected = true;
+  return E_SUCCESS;
 }
 
 
@@ -93,10 +96,11 @@ SINT32 CAAccountingBIInterface::initBIConnection(CASocketAddrINet address)
  */
 SINT32 CAAccountingBIInterface::terminateBIConnection()
 {
-	if(m_connected) {
-		m_pSslSocket->close();
-	}
-	return E_SUCCESS;
+  if(m_connected)
+    {
+      m_pSslSocket->close();
+    }
+  return E_SUCCESS;
 }
 
 
@@ -116,61 +120,73 @@ SINT32 CAAccountingBIInterface::terminateBIConnection()
  */
 SINT32 CAAccountingBIInterface::readLine(UINT8 * line, UINT32 * maxLen)
 {
-	if(!m_connected) return E_NOT_CONNECTED;
-	
-	// do we need to allocate the buffer first?
-	if(m_lineBufferSize==0) {
-		m_lineBufferSize = 1024;
-		m_pLineBuffer = (UINT8 *) malloc(m_lineBufferSize);
-	}
+  if(!m_connected)
+    return E_NOT_CONNECTED;
 
-	UINT32 i;
-	SINT32 ret;
-	bool found = false;
-	
-  while(true) {
-		
-		// check if there is a complete line still left in the buffer
-		for(i=0; !found && i<m_lineBufferNumBytes; i++) {
-			if(m_pLineBuffer[i]=='\n') found=true;
-		}
-		if(found) break;
+  // do we need to allocate the buffer first?
+  if(m_lineBufferSize==0)
+    {
+      m_lineBufferSize = 1024;
+      m_pLineBuffer = (UINT8 *) malloc(m_lineBufferSize);
+    }
 
-		// no complete line left, let's read more data from the socket
-		while(true) {
-			ret = m_pSslSocket->receive( m_pLineBuffer+m_lineBufferNumBytes,
-																m_lineBufferSize-m_lineBufferNumBytes);
-			if(ret == SOCKET_ERROR ) {
-				return SOCKET_ERROR;
-			}
-			if(ret == E_AGAIN) {
-				return E_AGAIN;
-			}
-	    if(ret == 0) { // socket was closed
-				m_connected = false;
-				m_pSslSocket->close();
-				return E_NOT_CONNECTED;
-			}
-			if(ret>0) {
-				m_lineBufferNumBytes += ret;
-				break;
-			}
-		}
-	}
+  UINT32 i;
+  SINT32 ret;
+  bool found = false;
 
-	if(i >= (*maxLen)) { // check line length
-		*maxLen = i+1;
-		return E_SPACE;
-	}
-	memcpy(line, m_pLineBuffer, i);
-	line[i]='\0';
-	m_lineBufferNumBytes -= (i+1);
-	memmove(m_pLineBuffer, m_pLineBuffer+i+1, m_lineBufferNumBytes);
-	return E_SUCCESS;
+  while(true)
+    {
+
+      // check if there is a complete line still left in the buffer
+      for(i=0; !found && i<m_lineBufferNumBytes; i++)
+        {
+          if(m_pLineBuffer[i]=='\n')
+            found=true;
+        }
+      if(found)
+        break;
+
+      // no complete line left, let's read more data from the socket
+      while(true)
+        {
+          ret = m_pSslSocket->receive( m_pLineBuffer+m_lineBufferNumBytes,
+                                       m_lineBufferSize-m_lineBufferNumBytes);
+          if(ret == SOCKET_ERROR )
+            {
+              return SOCKET_ERROR;
+            }
+          if(ret == E_AGAIN)
+            {
+              return E_AGAIN;
+            }
+          if(ret == 0)
+            { // socket was closed
+              m_connected = false;
+              m_pSslSocket->close();
+              return E_NOT_CONNECTED;
+            }
+          if(ret>0)
+            {
+              m_lineBufferNumBytes += ret;
+              break;
+            }
+        }
+    }
+
+  if(i >= (*maxLen))
+    { // check line length
+      *maxLen = i+1;
+      return E_SPACE;
+    }
+  memcpy(line, m_pLineBuffer, i);
+  line[i]='\0';
+  m_lineBufferNumBytes -= (i+1);
+  memmove(m_pLineBuffer, m_pLineBuffer+i+1, m_lineBufferNumBytes);
+  return E_SUCCESS;
 }
 
 
-   
+
 /**
  * Sends a HTTP GET request to the JPI
  *
@@ -181,24 +197,28 @@ SINT32 CAAccountingBIInterface::readLine(UINT8 * line, UINT32 * maxLen)
  */
 SINT32 CAAccountingBIInterface::sendGetRequest(UINT8 * request)
 {
-  if(!m_connected) return E_NOT_CONNECTED;
-	
-	UINT8 requestF[] = "GET %s HTTP/1.1\r\n\r\n";
-	UINT32 len = strlen((char *)requestF) + strlen((char *)request);
-	UINT8 requestS[len+1];
-	sprintf((char *)requestS, (char *)requestF, (char *)request);
+  if(!m_connected)
+    return E_NOT_CONNECTED;
+
+  UINT8 requestF[] = "GET %s HTTP/1.1\r\n\r\n";
+  UINT32 len = strlen((char *)requestF) + strlen((char *)request);
+  UINT8 requestS[len+1];
+  sprintf((char *)requestS, (char *)requestF, (char *)request);
   len = strlen((char *)requestS);
-	
-	// send request
-	SINT32 ret = 0;
-	//int offset = 0;
-	do {
-		ret = m_pSslSocket->send(requestS, len);
-	} while(ret == E_AGAIN);
-	if(ret == E_UNKNOWN) { // socket error
-		return E_UNKNOWN;
-	}
-	return E_SUCCESS;
+
+  // send request
+  SINT32 ret = 0;
+  //int offset = 0;
+  do
+    {
+      ret = m_pSslSocket->send(requestS, len);
+    }
+  while(ret == E_AGAIN);
+  if(ret == E_UNKNOWN)
+    { // socket error
+      return E_UNKNOWN;
+    }
+  return E_SUCCESS;
 }
 
 
@@ -213,118 +233,142 @@ SINT32 CAAccountingBIInterface::sendGetRequest(UINT8 * request)
  */
 SINT32 CAAccountingBIInterface::sendPostRequest(UINT8 * request, UINT8 * data, UINT32 dataLen)
 {
-  if(!m_connected) return E_NOT_CONNECTED;
-	
-	UINT8 requestF[] = "POST %s HTTP/1.1\r\nContent-length: %d\r\n\r\n";
-	UINT32 len = strlen((char *)requestF) + strlen((char *)request) + 30;
-	UINT8 requestS[len];
-	sprintf((char *)requestS, (char *)requestF, (char *)request, dataLen);
+  if(!m_connected)
+    return E_NOT_CONNECTED;
+
+  UINT8 requestF[] = "POST %s HTTP/1.1\r\nContent-length: %d\r\n\r\n";
+  UINT32 len = strlen((char *)requestF) + strlen((char *)request) + 30;
+  UINT8 requestS[len];
+  sprintf((char *)requestS, (char *)requestF, (char *)request, dataLen);
   len = strlen((char *)requestS);
   UINT32 bufsize = len + dataLen;
   UINT8 buf[bufsize];
   memcpy(buf, requestS, len);
   memcpy(buf+len, data, dataLen);
 
-	
-	// send request
-	int ret = 0;
-	//int offset = 0;
-	do {
-		ret = m_pSslSocket->send(buf, bufsize);
-	} while(ret == E_AGAIN);
-	if(ret == E_UNKNOWN) { // socket error
-		return E_UNKNOWN;
-	}
-	return E_SUCCESS;
+
+  // send request
+  int ret = 0;
+  //int offset = 0;
+  do
+    {
+      ret = m_pSslSocket->send(buf, bufsize);
+    }
+  while(ret == E_AGAIN);
+  if(ret == E_UNKNOWN)
+    { // socket error
+      return E_UNKNOWN;
+    }
+  return E_SUCCESS;
 }
 
 
 
-	/**
-	 * Receives the response to a HTTP request.
-	 * TODO: Better error handling
-	 *
-	 * @param status integer to take the the HTTP status code (e.g. 200 OK or 404 not found)
-	 * @param buf the buffer where the HTTP response data is put into
-	 * @param size size of the buffer
-	 * @return E_SPACE if the response buffer is too small (in this case,
-	 * dataSize contains the minimum size needed)
-	 * @return E_AGAIN if you can try again
-	 * @return E_UNKNOWN if a socket error occured or the incoming data has 
-	 * wrong format or we have no connection
-	 * @return E_NOT_CONNECTED if we are not connected
-	 * @return E_SUCCESS if the answer was received successfully.
-	 * In this case size contains the size of the data received
-	 */
+/**
+ * Receives the response to a HTTP request.
+ * TODO: Better error handling
+ *
+ * @param status integer to take the the HTTP status code (e.g. 200 OK or 404 not found)
+ * @param buf the buffer where the HTTP response data is put into
+ * @param size size of the buffer
+ * @return E_SPACE if the response buffer is too small (in this case,
+ * dataSize contains the minimum size needed)
+ * @return E_AGAIN if you can try again
+ * @return E_UNKNOWN if a socket error occured or the incoming data has 
+ * wrong format or we have no connection
+ * @return E_NOT_CONNECTED if we are not connected
+ * @return E_SUCCESS if the answer was received successfully.
+ * In this case size contains the size of the data received
+ */
 SINT32 CAAccountingBIInterface::receiveResponse(UINT32 *status, UINT8 *buf, UINT32 *size)
 {
-	UINT8 line[255];
-	UINT32 contentLength = 0;
-	SINT32 i=0;
-	SINT32 len=0;
-	UINT32 j=255;
-	if(readLine(line, &j) == E_SUCCESS) { // read first line (status)
-		len = strlen((char *)line);
-		
-		// extract status information
-		for(i=0; i<len && line[i]!=' '; i++);
-		if(line[i]!=' ') return E_UNKNOWN;
-    line[i]=0;
-    *status = atoi((char *)line);
-	}
-	else return E_UNKNOWN;
+  UINT8 line[255];
+  UINT32 contentLength = 0;
+  SINT32 i=0;
+  SINT32 len=0;
+  UINT32 j=255;
+  if(readLine(line, &j) == E_SUCCESS)
+    { // read first line (status)
+      len = strlen((char *)line);
 
-	do { // read all header lines and parse content length
-		j=255;
-		if(readLine(line,&j) == E_SUCCESS) {
-			len = strlen((char *)line);
-			if(len>15) {
-				UINT8 temp[15];
-				memcpy(temp, line, 15);
-				if(memcmp(temp, "Content-length:", 15)==0) {
-					contentLength = atoi((char *)line+15);
-				}
-			}
-		}
-		else return E_UNKNOWN;
-	} while(len>0);
+      // extract status information
+      for(i=0; i<len && line[i]!=' '; i++)
+        ;
+      if(line[i]!=' ')
+        return E_UNKNOWN;
+      line[i]=0;
+      *status = atoi((char *)line);
+    }
+  else
+    return E_UNKNOWN;
 
-	if(contentLength>0) {
-		// read data part
-		if(contentLength> *size) {
-			*size = contentLength;
-			return E_SPACE;
-		}
-		if(m_lineBufferNumBytes>0) { // empty LineBuffer first !!!
-			int numBytes = (m_lineBufferNumBytes>=contentLength?contentLength:m_lineBufferNumBytes);
-			memcpy(buf, m_pLineBuffer, numBytes);
-			*size = numBytes;
-			if(m_lineBufferNumBytes - numBytes > 0) {
-				memmove(m_pLineBuffer, m_pLineBuffer + numBytes, m_lineBufferNumBytes-numBytes);
-				m_lineBufferNumBytes -= numBytes;
-			}
-		}
-		while( *size<contentLength) { // now LineBuffer is empty, read from real socket
-			int ret = m_pSslSocket->receive(buf + *size, contentLength - *size);
-			if(ret == SOCKET_ERROR ) {
-				return SOCKET_ERROR;
-			}
-			if(ret == E_AGAIN) {
-				return E_AGAIN;
-			}
-	    if(ret == 0) { // socket was closed
-				m_connected = false;
-				m_pSslSocket->close();
-				return E_NOT_CONNECTED;
-			}
-			if(ret>0) *size += ret;
-		}
-	}
-	if(*status!=200) {
-		CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface: JPI returned http error %i\n", *status);
-		return E_UNKNOWN;
-	}
-	return E_SUCCESS;
+  do
+    { // read all header lines and parse content length
+      j=255;
+      if(readLine(line,&j) == E_SUCCESS)
+        {
+          len = strlen((char *)line);
+          if(len>15)
+            {
+              UINT8 temp[15];
+              memcpy(temp, line, 15);
+              if(memcmp(temp, "Content-length:", 15)==0)
+                {
+                  contentLength = atoi((char *)line+15);
+                }
+            }
+        }
+      else
+        return E_UNKNOWN;
+    }
+  while(len>0);
+
+  if(contentLength>0)
+    {
+      // read data part
+      if(contentLength> *size)
+        {
+          *size = contentLength;
+          return E_SPACE;
+        }
+      if(m_lineBufferNumBytes>0)
+        { // empty LineBuffer first !!!
+          int numBytes = (m_lineBufferNumBytes>=contentLength?contentLength:m_lineBufferNumBytes);
+          memcpy(buf, m_pLineBuffer, numBytes);
+          *size = numBytes;
+          if(m_lineBufferNumBytes - numBytes > 0)
+            {
+              memmove(m_pLineBuffer, m_pLineBuffer + numBytes, m_lineBufferNumBytes-numBytes);
+              m_lineBufferNumBytes -= numBytes;
+            }
+        }
+      while( *size<contentLength)
+        { // now LineBuffer is empty, read from real socket
+          int ret = m_pSslSocket->receive(buf + *size, contentLength - *size);
+          if(ret == SOCKET_ERROR )
+            {
+              return SOCKET_ERROR;
+            }
+          if(ret == E_AGAIN)
+            {
+              return E_AGAIN;
+            }
+          if(ret == 0)
+            { // socket was closed
+              m_connected = false;
+              m_pSslSocket->close();
+              return E_NOT_CONNECTED;
+            }
+          if(ret>0)
+            *size += ret;
+        }
+    }
+  if(*status!=200)
+    {
+      CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface: JPI returned http error %i\n", *status);
+      return E_UNKNOWN;
+    }
+  return E_SUCCESS;
 }
 
 
@@ -335,16 +379,16 @@ SINT32 CAAccountingBIInterface::receiveResponse(UINT32 *status, UINT8 *buf, UINT
  */
 SINT32 CAAccountingBIInterface::settle(UINT8 *costConfirmation)
 {
-	UINT8 requestF[] = "<?xml version=\"1.0\">\n<Confirmations>\n%s</Confirmations>\n";
-	UINT32 sendbuflen = strlen((char *)costConfirmation) + strlen((char *)requestF) + 10;
-	UINT8 sendbuf[sendbuflen];
-	UINT32 status;
-	sprintf((char *)sendbuf, (char *)requestF, (char *)costConfirmation);
-	sendPostRequest((UINT8 *)"/settle", sendbuf, strlen((char *)sendbuf));
-	UINT32 responseLen = 500;
-	UINT8 response[responseLen];
-	receiveResponse(&status, response, &responseLen);
-	return E_SUCCESS;
+  UINT8 requestF[] = "<?xml version=\"1.0\">\n<Confirmations>\n%s</Confirmations>\n";
+  UINT32 sendbuflen = strlen((char *)costConfirmation) + strlen((char *)requestF) + 10;
+  UINT8 sendbuf[sendbuflen];
+  UINT32 status;
+  sprintf((char *)sendbuf, (char *)requestF, (char *)costConfirmation);
+  sendPostRequest((UINT8 *)"/settle", sendbuf, strlen((char *)sendbuf));
+  UINT32 responseLen = 500;
+  UINT8 response[responseLen];
+  receiveResponse(&status, response, &responseLen);
+  return E_SUCCESS;
 }
 
 
@@ -359,14 +403,14 @@ SINT32 CAAccountingBIInterface::settle(UINT8 *costConfirmation)
  */
 SINT32 CAAccountingBIInterface::update(UINT8 *balanceCert, UINT8 * response, UINT32 *responseLen)
 {
-	UINT8 requestF[] = "<?xml version=\"1.0\">\n<Balances>\n%s</Balances>\n";
-	UINT32 sendbuflen = strlen((char *)balanceCert) + strlen((char *)requestF) + 10;
-	UINT8 sendbuf[sendbuflen];
-	UINT32 status;
-	sprintf((char *)sendbuf, (char *)requestF, (char *)balanceCert);
-	sendPostRequest((UINT8 *)"/update", sendbuf, strlen((char *)sendbuf));
-	receiveResponse(&status, response, responseLen);
-	return E_SUCCESS;
+  UINT8 requestF[] = "<?xml version=\"1.0\">\n<Balances>\n%s</Balances>\n";
+  UINT32 sendbuflen = strlen((char *)balanceCert) + strlen((char *)requestF) + 10;
+  UINT8 sendbuf[sendbuflen];
+  UINT32 status;
+  sprintf((char *)sendbuf, (char *)requestF, (char *)balanceCert);
+  sendPostRequest((UINT8 *)"/update", sendbuf, strlen((char *)sendbuf));
+  receiveResponse(&status, response, responseLen);
+  return E_SUCCESS;
 }
 
 

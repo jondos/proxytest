@@ -29,7 +29,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define CAACCOUNTINGDBINTERFACE_HPP
 
 /**
-  *@author basti
+  * @author Bastian Voigt
   *
   * This class is used to store cost confirmations
   * in a postgresql database
@@ -46,14 +46,14 @@ public:
 	SINT32 terminateDBConnection();
 	SINT32 createTables();
 	SINT32 dropTables();
-	SINT32 storeCostConfirmation(UINT64 accountNumber, UINT64 bytes, UINT8 * xmlCC);
+	SINT32 storeCostConfirmation(UINT64 accountNumber, UINT64 bytes, UINT8 * xmlCC, UINT32 isSettled);
 //	SINT32 storeCostConfirmation(UINT64 accountNumber, char *buf, UINT32 *len);
 	SINT32 getCostConfirmation(UINT64 accountNumber, UINT8 *buf, UINT32 *len);
 
 private:
 	/** connection to postgreSQL database */
 	PGconn * m_dbConn;
-	bool m_connected;
+	bool m_bConnected;
 };
 
 #endif
