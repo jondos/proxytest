@@ -29,7 +29,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAIPList.hpp"
 #include "CAMsg.hpp"
 #include "CAUtil.hpp"
-/**Constructs a empty CAIPList. The default number #MAXIP_CONNECTIONS of allowed insertions is used*/ 
+/** Constructs an empty CAIPList. 
+	* The default number #MAXIP_CONNECTIONS of allowed insertions is used*/ 
 CAIPList::CAIPList()
 	{	
 		m_HashTable=new PIPLIST[0x10000];
@@ -39,7 +40,7 @@ CAIPList::CAIPList()
 	}
 
 /**Constructs a empty CAIPList, there allowedConnections insertions 
-are allowed until an error is returned
+are allowed, until an error is returned.
 @param allowedConnections number of insertions of the same IP-Address, until an error is returned
 */
 CAIPList::CAIPList(UINT32 allowedConnections)
@@ -73,7 +74,7 @@ CAIPList::~CAIPList()
 	* an error is returned.
 	* @param ip the IP-Address to insert
 	* @return number of inserts for this IP-Address
-  * @retval E_UNKNOWN, if an error occured or an IP is inserted more than m_allowedConnections times
+  * @retval E_UNKNOWN if an error occured or an IP is inserted more than m_allowedConnections times
 	*/
 SINT32 CAIPList::insertIP(UINT8 ip[4])
 	{

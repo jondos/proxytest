@@ -47,8 +47,8 @@ CAQueue::~CAQueue()
 /** Adds data to the Queue.
 	* @param buff pointer to the data buffer
 	* @param size size of data to add
-	* @retval E_UNKNOWN, in case of an error
-	* @retval E_SUCCESS, if succesful
+	* @retval E_UNKNOWN in case of an error
+	* @retval E_SUCCESS if succesful
 	*/
 SINT32 CAQueue::add(const UINT8* buff,UINT32 size)
 	{
@@ -107,11 +107,11 @@ SINT32 CAQueue::add(const UINT8* buff,UINT32 size)
 	}
 
 /** Gets data from the Queue. The data is removed from the Queue
-  * @param pbuff, pointer to a buffer, there the data should be stored
-	* @param psize, on call contains the size of pbuff, on return contains 
+  * @param pbuff pointer to a buffer, there the data should be stored
+	* @param psize on call contains the size of pbuff, on return contains 
 	*								the size of returned data
-	* @retval E_SUCCESS, if succesful
-	* @retval E_UNKNOWN, in case of an error
+	* @retval E_SUCCESS if succesful
+	* @retval E_UNKNOWN in case of an error
 	*/
 SINT32 CAQueue::get(UINT8* pbuff,UINT32* psize)
 	{
@@ -161,8 +161,8 @@ SINT32 CAQueue::get(UINT8* pbuff,UINT32* psize)
   * @param pbuff, pointer to a buffer, there the data should be stored
 	* @param psize, on call contains the size of pbuff, on return contains 
 	*								the size of returned data
-	* @retval E_SUCCESS, if succesful
-	* @retval E_UNKNOWN, in case of an error
+	* @retval E_SUCCESS if succesful
+	* @retval E_UNKNOWN in case of an error
 	*/
 SINT32 CAQueue::getOrWait(UINT8* pbuff,UINT32* psize)
 	{
@@ -178,8 +178,8 @@ SINT32 CAQueue::getOrWait(UINT8* pbuff,UINT32* psize)
   * @param pbuff, pointer to a buffer, there the data should be stored
 	* @param psize, on call contains the size of pbuff, 
 	*								on return contains the size of returned data
-	* @retval E_SUCCESS, if succesful
-	* @retval E_UNKNOWN, in case of an error
+	* @retval E_SUCCESS if succesful
+	* @retval E_UNKNOWN in case of an error
 	*/
 SINT32 CAQueue::peek(UINT8* pbuff,UINT32* psize)
 	{
@@ -212,10 +212,10 @@ SINT32 CAQueue::peek(UINT8* pbuff,UINT32* psize)
 	
 	
 /** Removes data from the Queue.
-	* @param psize, on call contains the size of data to remove, 
+	* @param psize on call contains the size of data to remove, 
 	*								on return contains the size of removed data
-	* @retval E_SUCCESS, if succesful
-	* @retval E_UNKNOWN, in case of an error
+	* @retval E_SUCCESS if succesful
+	* @retval E_UNKNOWN in case of an error
 	*/
 SINT32 CAQueue::remove(UINT32* psize)
 	{

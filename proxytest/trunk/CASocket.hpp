@@ -42,20 +42,16 @@ class CASocket
 			SINT32 listen(UINT16 port);
 			SINT32 accept(CASocket &s);
 			SINT32 connect(CASocketAddr& psa);
-			SINT32 connect(CASocketAddr& psa,UINT retry,UINT32 msWaitTime);
+			SINT32 connect(CASocketAddr& psa,UINT32 retry,UINT32 msWaitTime);
 			SINT32 connect(CASocketAddr& psa,UINT32 msTimeOut);
 			SINT32 close();
 			SINT32 close(UINT32 mode);
 			SINT32 send(const UINT8* buff,UINT32 len);
 			SINT32 sendFully(const UINT8* buff,UINT32 len);
 			SINT32 sendTimeOut(const UINT8* buff,UINT32 len,UINT32 msTimeOut);
-#ifdef HAVE_FIONREAD
-			#define HAVE_AVAILABLE
-			SINT32 available();
-#endif
 			SINT32 receive(UINT8* buff,UINT32 len);
 			SINT32 receiveFully(UINT8* buff,UINT32 len);
-			SINT32 receiveFully(UINT8* buff,UINT32 len,SINT32 timeout);
+			SINT32 receiveFully(UINT8* buff,UINT32 len,UINT16 msTimeOut);
 			/** Returns the number of the Socket used. Which will be always the same number,
 			** even after close(), until the Socket
 			** is recreated using create()

@@ -29,10 +29,10 @@
 
 #include "xmlconfig.h"
 
-#ifdef __cplusplus
+/*#ifdef __cplusplus
 	extern "C" {
 #endif
-
+*/
 /*
 	C Interface
 */
@@ -70,9 +70,9 @@ typedef struct XML_OutputStream_
 	XML_WriteProc writeProc;
 } XML_OutputStream;
 
-#ifdef __cplusplus
+/*#ifdef __cplusplus
 }	// extern "C"
-
+*/
 //
 // C++ Interface
 //
@@ -108,7 +108,7 @@ public:
 };
 
 //XML_END_NAMESPACE
-#endif	// __cplusplus
-
+/*#endif	// __cplusplus
+*/
 #endif	// XMLSTREAM_H
 
