@@ -81,7 +81,9 @@ int CASocket::connect(LPSOCKETADDR psa,int retry,int time)
 				if(::connect(m_Socket,(LPSOCKADDR)psa,sizeof(*psa))!=0)
 					{  
 						err=GETERROR;
-						printf("Con-Error: %i",err);
+						#ifdef _DEBUG
+						 CAMsg::printMsg(LOG_DEBUG,"Con-Error: %i",err);
+						#endif
 						if(err!=E_TIMEDOUT&&err!=E_CONNREFUSED)
 							return SOCKET_ERROR;
 						#ifdef _DEBUG

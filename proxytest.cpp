@@ -561,8 +561,10 @@ THREAD_RETURN fmIO(void *v)
 		#ifdef _DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"New Key Info size: %u\n",infoSize);
 		#endif
-		printf("Size of MuxPacket: %u\n",sizeof(oMuxPacket));
-		printf("Pointer: %p,%p,%p,%p\n",&oMuxPacket.channel,&oMuxPacket.len,&oMuxPacket.type,&oMuxPacket.data);
+		#ifdef _DEBUG
+		 CAMsg::printMsg(LOG_DEBUG,"Size of MuxPacket: %u\n",sizeof(oMuxPacket));
+		 CAMsg::printMsg(LOG_DEBUG,"Pointer: %p,%p,%p,%p\n",&oMuxPacket.channel,&oMuxPacket.len,&oMuxPacket.type,&oMuxPacket.data);
+		#endif
 		CAInfoService oInfoService;
 		oInfoService.setLevel(0,0,0);
 		oInfoService.start();
