@@ -277,6 +277,11 @@ regawexec(const regex_t *preg, const wchar_t *str,
 
 #endif /* TRE_APPROX */
 
-
+#else
+ //we add a dummy function to solve some linking problems...
+int __dummy__tre__dummy()
+	{
+		return 0;
+	}
 #endif //LOG_CRIME
 /* EOF */
