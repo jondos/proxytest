@@ -98,7 +98,9 @@ AC_CHECK_DECL(MSG_NOSIGNAL,[],[AC_DEFINE(MSG_NOSIGNAL,0,[This is a flag to read(
 #include <sys/socket.h>])
 
 dnl Checks for types
-AC_CHECK_TYPE(socklen_t,[AC_DEFINE(HAVE_SOCKLEN_T,,[Define if the type socklen_t is available])],[],[#include <sys/socket.h>])
+AC_CHECK_TYPE(socklen_t,[AC_DEFINE(HAVE_SOCKLEN_T,,[Define if the type socklen_t is available])],[],[
+#include <sys/types.h>
+#include <sys/socket.h>])
 
 dnl Checks for sizes of base types
 AC_CHECK_SIZEOF(unsigned char)
