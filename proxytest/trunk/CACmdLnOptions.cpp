@@ -474,10 +474,16 @@ SINT32 CACmdLnOptions::setPrevMix(DOM_Document& doc)
             elemOptionsCerts.appendChild(elemOptionsPrevMixCert);
   					CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - try to import the one we got from infoservice\n");
 						getDOMChildByName(elemCert,(UINT8*)"X509Certificate",elemCert,false);
-						elemOptionsPrevMixCert.appendChild(m_docMixXml.importNode(elemCert,true));
-						CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - MixConf now:\n");
+						
+						CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - Cert to be imported:\n");
 						UINT8 buff[8192];
 						UINT32 len=8192;
+						DOM_Output::dumpToMem(elemCert,buff,&len);
+						CAMsg::printMsg(LOG_DEBUG,(char*)buff);
+						
+						elemOptionsPrevMixCert.appendChild(m_docMixXml.importNode(elemCert,true));
+						CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - MixConf now:\n");
+						len=8192;
 						DOM_Output::dumpToMem(m_docMixXml,buff,&len);
 						buff[len]=0;
 						CAMsg::printMsg(LOG_DEBUG,(char*)buff);
