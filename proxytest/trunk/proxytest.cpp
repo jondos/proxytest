@@ -85,9 +85,9 @@ int main(int argc, const char* argv[])
 			err=WSAStartup(0x0202,&wsadata);
 		#endif
 // Util test..
-BIGNUM bn;
-getcurrentTimeMillis(&bn);
-exit(0);
+//BIGNUM bn;
+//getcurrentTimeMillis(&bn);
+//exit(0);
 
 /* //Datagram test
 	CADatagramSocket oSocket;
