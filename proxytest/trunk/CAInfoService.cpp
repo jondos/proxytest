@@ -182,7 +182,7 @@ THREAD_RETURN InfoLoop(void *p)
 						else
 							{
 								dTmp=(double)diffTraffic/(double)avgTraffic;
-								tmpTraffic=min(50.*dTmp,100);
+								tmpTraffic=min(SINT32(50.*dTmp),100);
 							}
 						lastMixedPackets=tmpPackets;
 					
