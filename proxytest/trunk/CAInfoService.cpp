@@ -391,6 +391,10 @@ SINT32 CAInfoService::test()
 				oxmlOut.WriteAttr("trafficSituation",(int)tmpTraffic);
 				oxmlOut.WriteAttr("mixedPackets",(int)tmpPackets);
 				oxmlOut.EndAttrs();
+				oxmlOut.BeginElementAttrs("Mixes");
+				oxmlOut.WriteAttr("count",(int)3);
+				oxmlOut.EndAttrs();
+				oxmlOut.EndElement();
 				oxmlOut.EndElement();
 				oxmlOut.EndDocument();
 				oSignature.signXML(oBufferStream.getBuff(),oBufferStream.getBufferSize(),(UINT8*)buff,&buffLen);
