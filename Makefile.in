@@ -107,7 +107,6 @@ proxytest_SOURCES = CAASymCipher.cpp \
 		    CAMutex.cpp\
 		    CAMuxSocket.cpp \
 		    CAQueue.cpp \
-		    CARoundTripTime.cpp \
 		    CASemaphore.cpp\
 		    CASignature.cpp \
 		    CASocket.cpp \
@@ -142,7 +141,6 @@ proxytest_SOURCES = CAASymCipher.cpp \
 		    CAMutex.hpp\
 		    CAMuxSocket.hpp \
 		    CAQueue.hpp \
-		    CARoundTripTime.hpp \
 		    CASemaphore.hpp\
 		    CASignature.hpp \
 		    CASocket.hpp \
@@ -183,8 +181,7 @@ am_proxytest_OBJECTS = CAASymCipher.$(OBJEXT) CABase64.$(OBJEXT) \
 	CALastMixChannelList.$(OBJEXT) CALocalProxy.$(OBJEXT) \
 	CAMiddleMix.$(OBJEXT) CAMiddleMixChannelList.$(OBJEXT) \
 	CAMix.$(OBJEXT) CAMsg.$(OBJEXT) CAMutex.$(OBJEXT) \
-	CAMuxSocket.$(OBJEXT) CAQueue.$(OBJEXT) \
-	CARoundTripTime.$(OBJEXT) CASemaphore.$(OBJEXT) \
+	CAMuxSocket.$(OBJEXT) CAQueue.$(OBJEXT) CASemaphore.$(OBJEXT) \
 	CASignature.$(OBJEXT) CASocket.$(OBJEXT) \
 	CASocketAddrINet.$(OBJEXT) CASocketAddrUnix.$(OBJEXT) \
 	CASocketGroup.$(OBJEXT) CASocketList.$(OBJEXT) \
@@ -222,9 +219,7 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/CAMiddleMixChannelList.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CAMix.Po ./$(DEPDIR)/CAMsg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CAMutex.Po ./$(DEPDIR)/CAMuxSocket.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/CAQueue.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/CARoundTripTime.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/CASemaphore.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CAQueue.Po ./$(DEPDIR)/CASemaphore.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CASignature.Po ./$(DEPDIR)/CASocket.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CASocketAddrINet.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CASocketAddrUnix.Po \
@@ -349,7 +344,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMutex.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMuxSocket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAQueue.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CARoundTripTime.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASemaphore.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASignature.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASocket.Po@am__quote@

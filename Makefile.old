@@ -34,7 +34,6 @@ OBJS_ALL=CASocket.o\
 	CABase64.o\
 	CAUtil.o\
 	CADatagramSocket.o\
-	CARoundTripTime.o\
 	CAMix.o\
 	CAFirstMix.o\
 	CALastMix.o\
