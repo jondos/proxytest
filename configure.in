@@ -3,7 +3,9 @@ dnl Autoconfiguration files for proxytest (a MiX proxy)
 dnl Konrad Rieck <kr@r0q.cx>
 dnl
 
-AC_INIT(proxytest.cpp)
+AC_INIT
+AC_PREREQ(2.50)
+AC_CONFIG_SRCDIR([proxytest.cpp])
 AM_INIT_AUTOMAKE(proxytest, 0.0.1)
 AM_CONFIG_HEADER(config.h)
 AC_CANONICAL_HOST
@@ -16,7 +18,7 @@ AC_PROG_CXX
 AC_PROG_INSTALL
 AC_PROG_RANLIB
 
-CFLAGS="$CFLGS -D_ASYNC -DPROT2"
+CFLAGS="$CFLGS -D_ASYNC"
 
 case "$host" in
 *-*-solaris*)
@@ -120,7 +122,7 @@ LIBS="$saved_LIBS -lcrypto"
 
 
 dnl Checks for header files.
-AC_STDC_HEADERS
+AC_HEADER_STDC([])
 
 dnl Checks for library functions.
 AC_CHECK_FUNC(strerror,AC_DEFINE(HAVE_STRERROR))
@@ -138,6 +140,11 @@ AC_ARG_WITH(debug,
 
 AC_CHECK_FUNCS(vsnprintf)
 
+AC_CHECK_DECL(TCP_KEEPALIVE,[],[],[#include <sys/socket.h>])
+AC_CHECK_DECL(AF_UNIX,[AC_DEFINE(HAVE_UNIX_DOMAIN_PROTOCOL)],[],[#include <sys/socket.h>])
+AC_CHECK_TYPE(socklen_t,[AC_DEFINE(HAVE_SOCKLEN_T)],[],[#include <sys/socket.h>])
+AC_FUNC_ALLOCA
+
 if test "x$GCC" = "xyes" ; then
    CPPFLAGS="-Wall -D_REENTRANT"   
 else
@@ -147,4 +154,5 @@ fi
 
 CXXFLAGS=$CFLAGS
 
-AC_OUTPUT(Makefile popt/Makefile xml/Makefile aes/Makefile)
+AC_CONFIG_FILES(Makefile popt/Makefile xml/Makefile aes/Makefile)
+AC_OUTPUT

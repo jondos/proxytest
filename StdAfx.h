@@ -85,7 +85,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #else
   #ifdef HAVE_CONFIG_H  
 	 #include "config.h"
+	 #ifndef HAVE_SOCKLEN_T 
+		typedef int socklent_t;
+	 endif
 	#else
+	 #define HAVE_UNIX_DOMAIN_PROTOCOL
 	 #define HAVE_VSNPRINTF
 	 #ifndef __linux
 	     #define HAVE_TCP_KEEPALIVE
@@ -96,12 +100,14 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	 #ifdef __FreeBSD__
 		 #undef HAVE_TCP_KEEPALIVE
 	 #endif
+	 #ifndef __FreeBSD__
+    	#define socklen_t int	
+	 #endif
 	#endif 
 		#include <sys/ioctl.h>
 		#include <sys/types.h>
     #include <sys/socket.h>
     #include <sys/un.h>
-		#define HAVE_UNIX_DOMAIN_PROTOCOL
 		#include <sys/poll.h>
     #include <sys/time.h>
     #include <netinet/in.h>
@@ -138,9 +144,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#ifndef INADDR_NONE
     	    #define INADDR_NONE -1
 	#endif
-#ifndef __FreeBSD__
-    	#define socklen_t int
-#endif
     	#include <sys/filio.h>
     	#define MSG_NOSIGNAL 0
     #endif
