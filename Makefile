@@ -18,6 +18,7 @@ OBJS_ALL=CASocket.o\
 	CAMuxSocket.o\
 	CAMuxChannelList.o\
 	CASymCipher.o\
+	CAASymCipher.o\
 	proxytest.o
 
 OBJS=$(OBJS_ALL)
