@@ -475,8 +475,15 @@ SINT32 CAFirstMix::init()
     	{
     		m_socketHttpsIn.create();
         m_socketHttpsIn.setReuseAddr(true);
-        socketAddrIn.setPort(443);
-        if(m_socketHttpsIn.listen(&socketAddrIn)==SOCKET_ERROR)
+				socketAddrIn.setPort(443);
+        //we have to be a temporaly superuser...
+				int old_uid=geteuid();
+	//			if(seteuid(getuid())==-1)
+		//			CAMsg::printMsg(LOG_CRIT,"Setuid failed!\n");
+
+				SINT32 ret=m_socketHttpsIn.listen(&socketAddrIn);
+			//	seteuid(old_uid);
+				if(ret==SOCKET_ERROR)
 		    {
 					CAMsg::printMsg(LOG_CRIT,"Cannot listen on HTTPS-Port\n");
 					return E_UNKNOWN;

@@ -107,8 +107,9 @@ _all_aes: $(OBJS) popt.a xml.a libaes.a
 popt.a:
 	cd popt;$(MAKE) 'CC=$(CC)' 'DEBUG=$(DEBUG)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)'
 
-httptunnel.a:
-	cd httptunnel;$(MAKE) 'CC=$(CC)' 'DEBUG=$(DEBUG)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)';
+#httptunnel.a:
+#	cd httptunnel;$(MAKE) 'CC=$(CC)' 'DEBUG=$(DEBUG)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)';
+#
 
 xml.a: 
 	cd xml;$(MAKE) 'CC=$(CC)' 'DEBUG=$(DEBUG)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)';
@@ -119,7 +120,7 @@ libaes.a:
 clean:
 	rm -f $(OBJS)
 	cd popt; $(MAKE) clean;
-	cd httptunnel;$(MAKE) clean;
+#	cd httptunnel;$(MAKE) clean;
 	cd xml;$(MAKE) clean;
 	cd aes;$(MAKE) clean;
 	rm -f proxytest
