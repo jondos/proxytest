@@ -140,9 +140,17 @@ AC_ARG_WITH(debug,
 
 AC_CHECK_FUNCS(vsnprintf)
 
-AC_CHECK_DECL(TCP_KEEPALIVE,[],[],[#include <sys/socket.h>])
+AC_CHECK_DECL(TCP_KEEPALIVE,[AC_DEFINE(HAVE_TCP_KEEPALIVE,,[Define if your OS supports the TCP socket option TCP_KEEPALIVE])],[],[#include <sys/socket.h>])
 AC_CHECK_DECL(AF_UNIX,[AC_DEFINE(HAVE_UNIX_DOMAIN_PROTOCOL,,[Define if your OS supports the Unix Domain protocol])],[],[#include <sys/socket.h>])
 AC_CHECK_TYPE(socklen_t,[AC_DEFINE(HAVE_SOCKLEN_T,,[Define if the type socklen_t is available])],[],[#include <sys/socket.h>])
+AC_CHECK_DECL(O_BINARY,[],[AC_DEFINE(O_BINARY,0,[This flag is used in open(), in order to open a file in binary mode])])
+AC_CHECK_DECL(MAX_PATH,[],[AC_DEFINE(MAX_PATH,4096,[This is the maximum length of a file system path])])
+AC_CHECK_DECL(INADDR_NONE,[],[AC_DEFINE(INADDR_NONE,-1,[This is the value, which is returned from inet_addr(), in case of an error])])
+AC_CHECK_DECL(FIONREAD,[AC_DEFINE(HAVE_FIONREAD,,[This is a flag to ioctl() to get the number of available bytes on a socket])],[],[#include <sys/ioctl.h>])
+AC_CHECK_DECL(MSG_NOSIGNAL,[],[AC_DEFINE(MSG_NOSIGNAL,0,[This is a flag to read(), to tell the os to get no signals])])
+AC_CHECK_HEADERS(sys/filio.h)
+
+
 AC_FUNC_ALLOCA
 
 if test "x$GCC" = "xyes" ; then
