@@ -53,6 +53,7 @@ CASocketGroup::CASocketGroup()
 					m_pollfd_read[i].fd=-1;
 					m_pollfd_write[i].fd=-1;	
 				}
+			m_max=0;
 		#endif
 		InitializeCriticalSection(&m_csFD_SET);
 	}
@@ -72,6 +73,8 @@ SINT32 CASocketGroup::add(CASocket&s)
 		#else
 			m_pollfd_read[(SOCKET)s].fd=(SOCKET)s;
 			m_pollfd_write[(SOCKET)s].fd=(SOCKET)s;
+			if(m_max<((SOCKET)s)+1)
+				m_max=((SOCKET)s)+1;
 		#endif
 		LeaveCriticalSection(&m_csFD_SET);
 		return E_SUCCESS;
@@ -92,6 +95,8 @@ SINT32 CASocketGroup::add(CAMuxSocket&s)
 		#else
 			m_pollfd_read[(SOCKET)s].fd=(SOCKET)s;
 			m_pollfd_write[(SOCKET)s].fd=(SOCKET)s;			
+			if(m_max<((SOCKET)s)+1)
+				m_max=((SOCKET)s)+1;
 		#endif
 		LeaveCriticalSection(&m_csFD_SET);
 		return E_SUCCESS;
@@ -154,7 +159,7 @@ SINT32 CASocketGroup::select()
 				#endif			    
 			#endif
 		#else
-						return ::poll(m_pollfd_read,MAX_POLLFD,-1);
+			return ::poll(m_pollfd_read,m_max,-1);
 		#endif
 	}
 
