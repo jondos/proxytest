@@ -671,7 +671,7 @@ SINT32 CAFirstMix::loop()
 												pEntry=oChannelList.getNextChannel(pEntry);
 											}
 										pMuxSocket->close();
-										delete pEntry->pHead->pQueueSend;
+										delete pHashEntry->pQueueSend;
 										oChannelList.remove(pMuxSocket);
 										delete pMuxSocket;
 										nUser--;
@@ -909,48 +909,3 @@ SINT32 CAFirstMix::clean()
 		m_pIPList=NULL;
 		return E_SUCCESS;
 	}
-/*
-void CAFirstMix::resume(CASocket* pSocket)
-	{
-		EnterCriticalSection(&csResume);
-		MUXLISTENTRY* pml=oSuspendList.getFirst();
-		while(pml!=NULL)
-			{
-				if(((SOCKET)*(pml->pMuxSocket))==((SOCKET)*pSocket))
-					{
-						CONNECTION* pcon=pml->pSocketList->getFirst();
-						while(pcon!=NULL)
-							{
-								MIXPACKET oMixPacket;
-								oMixPacket.flags=CHANNEL_RESUME;
-								oMixPacket.channel=pcon->outChannel;
-								muxOut.send(&oMixPacket);
-								pcon=pml->pSocketList->getNext();
-							}
-						MUXLISTENTRY oEntry;
-						oSuspendList.remove(pml->pMuxSocket,&oEntry);
-						delete oEntry.pSocketList;
-						LeaveCriticalSection(&csResume);
-						return;
-					}
-				pml=oSuspendList.getNext();
-			}
-		LeaveCriticalSection(&csResume);
-	}
-
-void CAFirstMix::deleteResume(CAMuxSocket* pSocket)
-	{
-		EnterCriticalSection(&csResume);
-		MUXLISTENTRY oEntry;
-		if(oSuspendList.remove(pSocket,&oEntry))
-			delete oEntry.pSocketList;
-		LeaveCriticalSection(&csResume);
-	}
-
-void CAFirstMix::deleteResume(CAMuxSocket* pSocket,HCHANNEL outChannel)
-	{
-		EnterCriticalSection(&csResume);
-		oSuspendList.remove(outChannel,NULL);
-		LeaveCriticalSection(&csResume);
-	}
-*/
