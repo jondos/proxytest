@@ -452,7 +452,7 @@ END_THREAD:
 */
 
 #define NO_LOOPACCEPTUSER
-
+#define NO_LOOP_SEND_TO_MIX
 SINT32 CAFirstMix::loop()
 	{
 //		CAFirstMixChannelList  oChannelList;
@@ -490,7 +490,6 @@ SINT32 CAFirstMix::loop()
 */
 		osocketgroupMixOut.add(*m_pMuxOut);
 		m_pMuxOut->setCrypt(true);
-		//((CASocket*)muxOut)->setNonBlocking(true);
 		
 		m_pInfoService->setSignature(&mSignature);
 		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix InfoService - Signature set\n");
@@ -523,9 +522,14 @@ SINT32 CAFirstMix::loop()
 //		threadReadFromUsers.start(this);
 
 		//Starting thread for Step 4
+#if !defined(_DEBUG)&&!defined(NO_LOOP_SEND_TO_MIX)
 		CAThread threadSendToMix;
 		threadSendToMix.setMainLoop(loopSendToMix);
 		threadSendToMix.start(this);
+#else
+		UINT8* sendbuff=new UINT8[0xFFFF];
+		((CASocket*)m_pMuxOut)->setNonBlocking(true);
+#endif
 		for(;;)
 			{
 				bAktiv=false;
@@ -695,6 +699,17 @@ SINT32 CAFirstMix::loop()
 
 // Now in a separate Thread (see loopSendToMix())
 
+// if not _DEBUG or NO_LOOP_SEND_TO_MIX defined
+#if defined (_DEBUG) || defined(NO_LOOP_SEND_TO_MIX)
+		SINT32 sendlen=0x0FFFF;
+		if(osocketgroupMixOut.select(true,0)==1&&m_pQueueSendToMix->peek(sendbuff,(UINT32*)&sendlen)==E_SUCCESS)
+			{
+				bAktiv=true;
+				sendlen=((CASocket*)m_pMuxOut)->send(sendbuff,sendlen);
+				if(sendlen>0)
+					m_pQueueSendToMix->remove((UINT32*)&sendlen);
+			}
+#endif
 //Step 4
 //Reading from Mix				
 				countRead=m_nUser+1;
@@ -835,9 +850,13 @@ ERR:
 		CAMsg::printMsg(LOG_CRIT,"Wait for LoopAcceptUsers!\n");
 		threadAcceptUsers.join();
 #endif
+#if !defined(_DEBUG) && !defined(NO_LOOP_SEND_TO_MIX)
 		CAMsg::printMsg(LOG_CRIT,"Wait for LoopSendToMix!\n");
 		threadSendToMix.join(); //will not join if queue is empty (and so wating)!!!
-//		threadReadFromUsers.join(); 
+#else
+		delete sendbuff;
+#endif
+		//		threadReadFromUsers.join(); 
 		CAMsg::printMsg(LOG_CRIT,"Before deleting CAFirstMixChannelList()!\n");
 		CAMsg::printMsg	(LOG_CRIT,"Memeory usage before: %u\n",getMemoryUsage());	
 		fmHashTableEntry* pHashEntry=m_pChannelList->getFirst();
