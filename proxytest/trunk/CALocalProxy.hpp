@@ -34,13 +34,13 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 class CALocalProxy:public CAMix
 	{
 		public:
-			CALocalProxy(){};
-			virtual ~CALocalProxy(){};
+			CALocalProxy(){arRSA=NULL;}
+			virtual ~CALocalProxy(){clean();}
 		private:
 			SINT32 loop();
 			SINT32 init();
 			SINT32 initOnce();
-			SINT32 clean(){return E_SUCCESS;}
+			SINT32 clean();
 		private:
 			CASocket socketIn;
 			CASocket socketSOCKSIn;

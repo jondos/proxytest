@@ -120,7 +120,7 @@ SINT32 CASocketList::setThreadSafe(bool b)
 *	        E_UNKNOWN, otherwise
 *
 */
-SINT32 CASocketList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher)
+SINT32 CASocketList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCiphers)
 	{
 		if(m_bThreadSafe)
 			cs.lock();
@@ -139,7 +139,7 @@ SINT32 CASocketList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher)
 		tmp->next=m_Connections;
 		m_Connections=tmp;
 		m_Connections->pSocket=pSocket;
-		m_Connections->pCipher=pCipher;
+		m_Connections->pCiphers=pCiphers;
 		m_Connections->outChannel=id;
 
 		m_Size++;

@@ -138,11 +138,11 @@ SINT32 CALocalProxy::loop()
 		MIXPACKET* pMixPacket=new MIXPACKET;
 
 		memset(pMixPacket,0,MIXPACKET_SIZE);
-		int len,ret;
+		SINT32 len,ret;
 		CASocket* newSocket;//,*tmpSocket;
 		CASymCipher* newCipher;
 		int countRead;
-		CONNECTION oConnection;		
+		CONNECTION oConnection;
 		for(;;)
 			{
 				if((countRead=oSocketGroup.select())==SOCKET_ERROR)
@@ -199,7 +199,8 @@ SINT32 CALocalProxy::loop()
 							if(ret==SOCKET_ERROR)
 								{
 									CAMsg::printMsg(LOG_CRIT,"Mux-Channel Receiving Data Error - Exiting!\n");									
-									exit(-1);
+									ret=E_UNKNOWN;
+									goto MIX_CONNECTION_ERROR;
 								}
 
 							if(oSocketList.get(pMixPacket->channel,&oConnection)==E_SUCCESS)
@@ -218,13 +219,13 @@ SINT32 CALocalProxy::loop()
 														CAMsg::printMsg(LOG_DEBUG,"closed!\n");
 													#endif
 													delete oConnection.pSocket;
-													delete [] oConnection.pCipher;
+													delete [] oConnection.pCiphers;
 												}
 										}
 									else
 										{
 											for(int c=0;c<chainlen;c++)
-												oConnection.pCipher[c].decryptAES2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+												oConnection.pCiphers[c].decryptAES2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 											#ifdef _DEBUG
 												CAMsg::printMsg(LOG_DEBUG,"Sending Data to Browser!");
 											#endif
@@ -241,7 +242,7 @@ SINT32 CALocalProxy::loop()
 								if(oSocketGroup.isSignaled(*tmpCon->pSocket))
 									{
 										countRead--;
-										if(!tmpCon->pCipher[0].isEncyptionKeyValid())
+										if(!tmpCon->pCiphers[0].isEncyptionKeyValid())
 											len=tmpCon->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE-chainlen*16);
 										else
 											len=tmpCon->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE);
@@ -269,7 +270,7 @@ SINT32 CALocalProxy::loop()
 													{
 														pMixPacket->payload.type=MIX_PAYLOAD_HTTP;
 													}
-												if(!tmpCon->pCipher[0].isEncyptionKeyValid()) //First time --> rsa key
+												if(!tmpCon->pCiphers[0].isEncyptionKeyValid()) //First time --> rsa key
 													{
 														//Has to bee optimized!!!!
 														unsigned char buff[DATA_SIZE];
@@ -279,10 +280,10 @@ SINT32 CALocalProxy::loop()
 															{
 																getRandom(buff,16);
 																buff[0]&=0x7F; // Hack for RSA to ensure m < n !!!!!
-																tmpCon->pCipher[c].setKeyAES(buff);
+																tmpCon->pCiphers[c].setKeyAES(buff);
 																memcpy(buff+KEY_SIZE,pMixPacket->data,size);
 																arRSA[c].encrypt(buff,buff);
-																tmpCon->pCipher[c].encryptAES(buff+RSA_SIZE,buff+RSA_SIZE,DATA_SIZE-RSA_SIZE);
+																tmpCon->pCiphers[c].encryptAES(buff+RSA_SIZE,buff+RSA_SIZE,DATA_SIZE-RSA_SIZE);
 																memcpy(pMixPacket->data,buff,DATA_SIZE);
 																size-=KEY_SIZE;
 																len+=KEY_SIZE;
@@ -292,13 +293,14 @@ SINT32 CALocalProxy::loop()
 												else //sonst
 													{
 														for(int c=0;c<chainlen;c++)
-															tmpCon->pCipher[c].encryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+															tmpCon->pCiphers[c].encryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 														pMixPacket->flags=CHANNEL_DATA;
 													}
 												if(muxOut.send(pMixPacket)==SOCKET_ERROR)
 													{
 														CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Exiting!\n");									
-														exit(-1);
+														ret=E_UNKNOWN;
+														goto MIX_CONNECTION_ERROR;
 													}
 											}
 										break;
@@ -307,6 +309,30 @@ SINT32 CALocalProxy::loop()
 							}
 					}
 			}
+MIX_CONNECTION_ERROR:
+		CONNECTION* tmpCon=oSocketList.getFirst();
+		while(tmpCon!=NULL)
+			{
+				delete [] tmpCon->pCiphers;
+				delete tmpCon->pSocket;
+				tmpCon=tmpCon->next;
+			}
 		delete pMixPacket;
+		if(ret==E_SUCCESS)
+			return E_SUCCESS;
+		if(options.getAutoReconnect())
+			return E_UNKNOWN;
+		else
+			exit(-1);
+	}
+
+SINT32 CALocalProxy::clean()
+	{
+		socketIn.close();
+		socketSOCKSIn.close();
+		muxOut.close();
+		if(arRSA!=NULL)
+			delete[] arRSA;
+		arRSA=NULL;
 		return E_SUCCESS;
 	}

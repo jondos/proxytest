@@ -169,6 +169,11 @@ class CACmdLnOptions
 				{
 					return m_strInfoServerHost!=NULL;
 				}
+
+			bool getAutoReconnect()
+				{
+					return m_bAutoReconnect;
+				}
 	
 		private:
 	    bool		m_bDaemon;
@@ -180,6 +185,7 @@ class CACmdLnOptions
 	    char*		m_strInfoServerHost;
 	    UINT16	m_iInfoServerPort;
 			bool		m_bLocalProxy,m_bFirstMix,m_bMiddleMix,m_bLastMix;
+			bool		m_bAutoReconnect; //auto reconnect if connection to first mix lost ??
 			char*		m_strCascadeName;
 			char*		m_strLogDir;
 			bool		m_bCompressedLogs;
