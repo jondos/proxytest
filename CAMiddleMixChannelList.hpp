@@ -71,8 +71,10 @@ class CAMiddleMixChannelList
 									if(channelIn!=NULL)
 										*channelIn=pEntry->channelIn;
 									if(ppCipher!=NULL)
-										*ppCipher=pEntry->pCipher;
-									(*ppCipher)->lock();
+										{
+											*ppCipher=pEntry->pCipher;
+											(*ppCipher)->lock();
+										}
 									return E_SUCCESS;
 								}
 							pEntry=pEntry->next;

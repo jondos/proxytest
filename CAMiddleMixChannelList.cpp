@@ -48,8 +48,10 @@ SINT32 CAMiddleMixChannelList::getInToOut(HCHANNEL channelIn, HCHANNEL* channelO
 						if(channelOut!=NULL)
 							*channelOut=pEntry->channelOut;
 						if(ppCipher!=NULL)
-							*ppCipher=pEntry->pCipher;
-						(*ppCipher)->lock();
+							{
+								*ppCipher=pEntry->pCipher;
+								(*ppCipher)->lock();
+							}
 						m_Mutex.unlock();
 						return E_SUCCESS;
 					}
