@@ -36,6 +36,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAInfoService.hpp"
 #include "CAUtil.hpp"
 #include "CABase64.hpp"
+#include "CAPool.hpp"
 #include "xml/DOM_Output.hpp"
 
 extern CACmdLnOptions options;
@@ -400,6 +401,7 @@ THREAD_RETURN loopDownStream(void *p)
 		SINT32 ret;
 		CASingleSocketGroup oSocketGroup;
 		oSocketGroup.add(*(pMix->m_pMuxOut));
+		CAPool pPool=new Pool(POOL_SIZE);
 		for(;;)
 			{
 				ret=oSocketGroup.select(false,1000);
@@ -434,6 +436,7 @@ THREAD_RETURN loopDownStream(void *p)
 										pMixPacket->channel=channelIn;
 										pCipher->decryptAES2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 										pCipher->unlock();
+										pPool->pool(pMixPacket);
 										if(pMix->m_pMuxIn->send(pMixPacket)==SOCKET_ERROR)
 											goto ERR;
 //									}
@@ -450,6 +453,7 @@ THREAD_RETURN loopDownStream(void *p)
 ERR:
 		CAMsg::printMsg(LOG_CRIT,"loopDownStream -- Exiting!\n");
 		delete pMixPacket;
+		delete pPool;
 		pMix->m_pMuxIn->close();
 		pMix->m_pMuxOut->close();
 		THREAD_RETURN_SUCCESS;		
