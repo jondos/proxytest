@@ -3,7 +3,7 @@
 #include "CASocket.hpp"
 #include "httptunnel/tunnel.h"
 #include "CASymCipher.hpp"
-typedef unsigned int HCHANNEL;
+typedef UINT32 HCHANNEL;
 
 #define DATA_SIZE 1000 // Size of Data in a single Mux Packet
 

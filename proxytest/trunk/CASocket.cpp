@@ -150,6 +150,10 @@ int CASocket::send(UINT8* buff,UINT32 len)
 	  do
 			{
 		    ret=::send(m_Socket,(char*)buff,len,MSG_NOSIGNAL);
+			 #ifdef _DEBUG
+				if(ret==SOCKET_ERROR)
+				 printf("FEhler beim Socket-send: %i",errno);
+				#endif
 			}
 	  while(ret==SOCKET_ERROR&&errno==EINTR);
 	  return ret;	    	    

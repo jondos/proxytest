@@ -20,6 +20,9 @@ int CASocketGroup::add(CASocket&s)
 			max=((SOCKET)s)+1;
 		#endif
 		FD_SET((SOCKET)s,&m_fdset);
+		#ifdef _DEBUG
+		 printf("CASocketGroutp: Added SOCKET: %u\n",(SOCKET)s);
+		#endif
 		return 0;
 	}
 
@@ -29,12 +32,18 @@ int CASocketGroup::add(CAMuxSocket&s)
 		    if(max<((SOCKET)s)+1)
 			max=((SOCKET)s)+1;
 		#endif
+		#ifdef _DEBUG
+		 printf("CASocketGroutp: Added SOCKET: %u\n",(SOCKET)s);
+		#endif
 		FD_SET((SOCKET)s,&m_fdset);
 		return 0;
 	}
 
 int CASocketGroup::remove(CASocket&s)
 	{
+		#ifdef _DEBUG
+		 printf("CASocketGroutp: Removed SOCKET: %u\n",(SOCKET)s);
+		#endif
 		FD_CLR((SOCKET)s,&m_fdset);
 		return 0;
 	}

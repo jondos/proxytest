@@ -55,6 +55,9 @@ solaris-ultrasparc-gcc:
 irix-64-cc:
 	$(MAKE) 'CC=CC -r10000 -mips4 -64' 'CPPFLAGS=-fullwarn -Ofast=IP27 -D_REENTRANT' 'LIBS=$(LIBS)' _all 
 
+irix-64-cc-debug:
+	$(MAKE) 'CC=CC -r10000 -mips4 -64' 'CPPFLAGS=-D_REENTRANT' 'DEBUG=-g2 -D_DEBUG' 'LIBS=$(LIBS)' _all 
+
 _all: $(OBJS) httptunnel.a popt.a xml.a
 	$(CC) -o proxytest $(DEBUG) $(CPPFLAGS) $(OBJS) $(LIBDIR) $(LIBS) 
 
