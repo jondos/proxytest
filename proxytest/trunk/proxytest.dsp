@@ -257,6 +257,63 @@ SOURCE=.\xml\xmlconfig.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\xml\xmlfile.cpp
+
+!IF  "$(CFG)" == "proxytest - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\xml\xmlfile.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\xml\xmlinput.cpp
+
+!IF  "$(CFG)" == "proxytest - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\xml\xmlinput.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\xml\xmlinput_c.c
+
+!IF  "$(CFG)" == "proxytest - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\xml\xmlinputp.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\xml\xmloutput.cpp
 
 !IF  "$(CFG)" == "proxytest - Win32 Release"
