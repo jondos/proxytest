@@ -87,6 +87,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	 #ifndef __linux
 	     #define HAVE_TCP_KEEPALIVE
 	 #endif
+	 #ifdef __sgi
+		 #undef HAVE_TCP_KEEPALIVE
+	 #endif
 	#endif 
 		#include <sys/ioctl.h>
     #include <sys/socket.h>
@@ -120,7 +123,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
     #define SD_BOTH 2
     #define WSAGetLastError() errno
 
-    #ifndef __linux
+    #ifndef __linux 
 	#ifndef INADDR_NONE
     	    #define INADDR_NONE -1
 	#endif
