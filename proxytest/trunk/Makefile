@@ -3,7 +3,8 @@
 
 CC=gcc
 INCLUDE = -I. -I/sun/ikt/sk13/openssl/include
-LIBS	= -L/usr/local/ssl/lib -L/sun/ikt/sk13/openssl/lib -lcrypto
+LIBS	= -L/usr/local/ssl/lib -L/sun/ikt/sk13/openssl/lib 
+#-lcrypto
 #-lpthread 
 CPPFLAGS =-O3 -Wall 
 #-D_REENTRANT
