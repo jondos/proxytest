@@ -60,6 +60,7 @@ SINT32 CAMuxChannelList::clear()
 		list=NULL;
 		reverselist=NULL;
 		aktEnumPos=NULL;
+		return E_SUCCESS;
 	}
 
 int CAMuxChannelList::add(CAMuxSocket* pMuxSocket)

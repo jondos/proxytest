@@ -31,12 +31,15 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMix.hpp"
 #include "CAMuxSocket.hpp"
 #include "CAASymCipher.hpp"
+#include "CASocketASyncSend.hpp"
+#include "CASocketList.hpp"
 
-class CALastMix:public CAMix
+class CALastMix:public CAMix,CASocketASyncSendResume
+
 	{
 		public:
-			CALastMix(){};
-			virtual ~CALastMix(){};
+			CALastMix(){InitializeCriticalSection(&csResume);}
+			virtual ~CALastMix(){DeleteCriticalSection(&csResume);}
 		private:
 			SINT32 loop();
 			SINT32 init();
@@ -55,6 +58,13 @@ class CALastMix:public CAMix
 			CASocketAddr	maddrSocks;
 			CAASymCipher mRSA;
 #endif
+		public:
+			void resume(CASocket* pSocket);
+		private:
+			CRITICAL_SECTION csResume;
+			CASocketList oSuspendList;
+			void deleteResume(HCHANNEL id);
+
 	};
 
 #endif

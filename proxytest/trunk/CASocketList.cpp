@@ -65,6 +65,11 @@ CASocketList::CASocketList()
 
 CASocketList::~CASocketList()
 	{
+//		DeleteCriticalSection(&cs);
+	}
+
+SINT32 CASocketList::clear()
+	{
 		_MEMBLOCK* tmp;
 		tmp=memlist;
 		while(tmp!=NULL)
@@ -74,7 +79,7 @@ CASocketList::~CASocketList()
 				tmp=tmp->next;
 				delete memlist;
 			}
-//		DeleteCriticalSection(&cs);
+		return E_SUCCESS;
 	}
 
 /** Add a new channel to the channel-list.
@@ -183,6 +188,31 @@ bool	CASocketList::get(CONNECTION* in,HCHANNEL out)
 		return false;
 	}
 
+/** Gets a copy of an entry form the channel-list.
+* @param in - the object, that will hold the copy
+*	@param pSocket - the assoziated(output) socket for wich the entry is requested
+*	@return true - if the channel was found
+	        false - otherwise
+*
+*/
+bool	CASocketList::get(CONNECTION* in,CASocket* pSocket)
+	{
+//		EnterCriticalSection(&cs);
+		CONNECTIONLIST* tmp;
+		tmp=connections;
+		while(tmp!=NULL)
+			{
+				if(tmp->pSocket==pSocket)
+					{
+						memcpy(in,tmp,sizeof(CONNECTION));
+//						LeaveCriticalSection(&cs);
+						return true;
+					}
+				tmp=tmp->next;
+			}
+//		LeaveCriticalSection(&cs);
+		return false;
+	}
 
 CASocket* CASocketList::remove(HCHANNEL id)
 	{
