@@ -51,7 +51,7 @@
 				OutputFile=".\Debug/proxytest.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="&quot;G:\proxytest\proxytest-lib\Debug&quot;;&quot;G:\xerces-c-src_2_5_0\build\win32\vc7\debug&quot;;&quot;g:\openssl-0.9.7c\out32dll&quot;;pthread\lib;n:\mysql\lib\debug;&quot;g:\zlib-1.1.4&quot;"
+				AdditionalLibraryDirectories="&quot;G:\proxytest\proxytest-lib\Debug&quot;;&quot;G:\xerces-c-src_2_5_0\build\win32\vc7\debug&quot;;&quot;g:\openssl-0.9.7c\out32.dbg&quot;;pthread\lib;n:\mysql\lib\debug;&quot;g:\zlib-1.1.4&quot;"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\Debug/proxytest.pdb"
 				GenerateMapFile="TRUE"

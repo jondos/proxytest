@@ -39,6 +39,7 @@ char* strins(const char* src,const char * pos,const char* ins);
 SINT32 getcurrentTime(timespec& t); 
 SINT32 getcurrentTimeMillis(UINT64& u64Time);
 
+SINT32 initRandom();
 SINT32 getRandom(UINT8* buff,UINT32 len);
 
 SINT32 getRandom(UINT32* val);
@@ -145,6 +146,14 @@ inline bool isGreater64(UINT64& op1,UINT64& op2)
 #endif
 	}
 
+inline bool isEqual64(UINT64& op1,UINT64& op2)
+	{
+#if !defined(HAVE_NATIVE_UINT64)
+		return (op1.high==op2.high)&&op1.low==op2.low;
+#else
+		return op1==op2;
+#endif
+	}
 /*inline void print64(UINT8* buff,UINT64& op)
 	{
 		#if defined(HAVE_NATIVE_UINT64)

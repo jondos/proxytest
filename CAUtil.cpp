@@ -192,6 +192,19 @@ SINT32 getcurrentTimeMillis(UINT64& u64Time)
 	  #endif
 	}
 
+SINT32 initRandom()
+	{
+		#if _WIN32
+			RAND_screen();
+		#else
+			#ifndef __linux
+				unsigned char randbuff[255];
+				getcurrentTime(*((timespec*)randbuff));
+				RAND_seed(randbuff,sizeof(randbuff));
+			#endif
+		#endif
+		return E_SUCCESS;
+	}
 /** Gets 32 random bits.
 	@param val - on return the bits are random
 	@retval E_UNKNOWN, if an error occured
