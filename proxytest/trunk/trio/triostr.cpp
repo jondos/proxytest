@@ -102,7 +102,7 @@ trio_create(size_t size)
 
    @param string String to be freed.
 */
-TRIO_PUBLIC TRIO_INLINE void
+TRIO_PUBLIC /*TRIO_INLINE*/ void
 trio_destroy(char *string)
 {
   if (string)
