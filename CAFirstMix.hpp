@@ -148,6 +148,7 @@ class CAFirstMix:public CAMix
 			CAIPList* m_pIPList;
 #ifdef LOG_PACKET_TIMES
 			CATimedQueue* m_pQueueSendToMix;
+			CATimedQueue* m_pQueueReadFromMix;
 			CAMutex m_csTimeingStats;
 			SINT32 addToTimeingStats(UINT32 proccessingTime,UINT32 uType,bool bUpstream);
 			SINT32 resetTimeingStats();
@@ -169,8 +170,8 @@ class CAFirstMix:public CAMix
 
 #else			
 			CAQueue* m_pQueueSendToMix;
-#endif			
 			CAQueue* m_pQueueReadFromMix;
+#endif			
 			CAFirstMixChannelList* m_pChannelList;
 			volatile UINT32 m_nUser;
 			UINT32 m_nSocketsIn; //number of usable ListenerInterface (non 'virtual')
