@@ -102,11 +102,11 @@ SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 					oMsg.m_csPrint.unlock();
 					return E_UNKNOWN;
 			}
-#ifdef HAVE_VSNPRINTF
-		vsnprintf(oMsg.m_strMsgBuff+20+STRMSGTYPES_SIZE,1024,format,ap);
-#else
+//#ifdef HAVE_VSNPRINTF
+//		vsnprintf(oMsg.m_strMsgBuff+20+STRMSGTYPES_SIZE,1024,format,ap);
+//#else
 	  trio_vsnprintf(oMsg.m_strMsgBuff+20+STRMSGTYPES_SIZE,1024,format,ap);
-#endif
+//#endif
 		va_end(ap);
 		switch(oMsg.m_uLogType)
 	    {
