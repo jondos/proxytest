@@ -38,7 +38,7 @@ LIBS="$LIBS -L/usr/lib -L/usr/local/lib"
 
 case "$host" in
 *-*-solaris*)
-        LIBS="$LIBS -lnsl -lsocket"
+        LIBS="$LIBS -lnsl -lsocket -lposix4"
         ;;
 *-*-linux*)
         LIBS="$LIBS -lpthread"

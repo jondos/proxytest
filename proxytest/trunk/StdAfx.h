@@ -153,9 +153,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
   #include <sys/un.h>
   #include <sys/time.h>
   #include <netinet/in.h>
-	#ifndef INADDR_NONE
-		#define INADDR_NONE -1
-	#endif
   #include <arpa/inet.h>
   #include <netdb.h>
   #include <unistd.h>
@@ -185,7 +182,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
   #ifndef min
 		#define min(a,b) ((a<b)?(a):(b))
   #endif	
-
+	#ifndef INADDR_NONE
+		#define INADDR_NONE -1
+	#endif
+    #ifndef AF_LOCAL
+	#define AF_LOCAL AF_UNIX
+    #endif
 #endif
 
 
