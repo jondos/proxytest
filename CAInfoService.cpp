@@ -270,6 +270,7 @@ SINT32 CAInfoService::sendHelo()
 		CASocket oSocket;
 		CASocketAddr oAddr;
 		UINT8 hostname[255];
+		UINT8 id[50];
 		if(options.getInfoServerHost(hostname,255)!=E_SUCCESS)
 			return E_UNKNOWN;
 		oAddr.setAddr((char*)hostname,options.getInfoServerPort());
@@ -284,24 +285,19 @@ SINT32 CAInfoService::sendHelo()
 				UINT buffLen;
 				oxmlOut.BeginDocument("1.0","UTF-8",true);
 				oxmlOut.BeginElementAttrs("MixCascade");
-				CASocketAddr::getLocalHostIP(hostname);
-//*>> Beginn very ugly hack for anon.inf.tu-dresden.de --> new Concepts needed!!!!!1		
-//		if(strncmp((char*)buff,"ithif46",7)==0)
-//			strcpy((char*)buff,"mix.inf.tu-dresden.de");
-//end hack....
-				sprintf(buff,"%u.%u.%u.%u%%3A%u",hostname[0],hostname[1],hostname[2],hostname[3],options.getServerPort());
-//				CASocketAddr::getLocalHostName((UINT8*)hostname,255);
-//*>> Beginn very ugly hack for anon.inf.tu-dresden.de --> new Concepts needed!!!!!1		
-	//	if(strncmp((char*)hostname,"ithif46",7)==0)
-	//		strcpy((char*)hostname,"mix.inf.tu-dresden.de");
-//end hack....
-	//			sprintf(buff,"%s%%3A%u",hostname,options.getServerPort());
-				oxmlOut.WriteAttr("id",(char*)buff);
+				CASocketAddr::getLocalHostIP((UINT8*)buff);
+				sprintf((char*)id,"%u.%u.%u.%u%%3A%u",buff[0],buff[1],buff[2],buff[3],options.getServerPort());
+				oxmlOut.WriteAttr("id",(char*)id);
 				oxmlOut.EndAttrs();
 				if(options.getCascadeName((UINT8*)buff,1024)!=E_SUCCESS)
 					{if(buff!=NULL)delete buff;return E_UNKNOWN;}
 				oxmlOut.WriteElement("Name",(char*)buff);
-				oxmlOut.WriteElement("IP",(char*)hostname);
+				CASocketAddr::getLocalHostName(hostname,255);
+//*>> Beginn very ugly hack for anon.inf.tu-dresden.de --> new Concepts needed!!!!!1		
+				if(strncmp((char*)hostname,"ithif46",7)==0)
+				    strcpy((char*)hostname,"mix.inf.tu-dresden.de");
+				sprintf(buff,"%s%%3A%u",hostname,options.getServerPort());
+				oxmlOut.WriteElement("IP",(char*)buff);
 				oxmlOut.WriteElement("Port",(int)options.getServerPort());
         if(options.getProxySupport())
         	oxmlOut.WriteElement("ProxyPort",(int)443);
