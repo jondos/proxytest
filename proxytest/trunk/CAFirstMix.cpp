@@ -1054,8 +1054,12 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		DOM_DocumentFragment docfragKey;
 		m_pRSA->getPublicKeyAsDocumentFragment(docfragKey);
 		DOM_Element elemOwnMix=docXmlKeyInfo.createElement("Mix");
+		UINT8 buffId[255];
+		options.getMixId(buffId,255);
+		elemOwnMix.setAttribute("id",DOMString((char*)buffId));
 		elemOwnMix.appendChild(docXmlKeyInfo.importNode(docfragKey,true));
 		elemMixesKey.insertBefore(elemOwnMix,elemMixesKey.getFirstChild());
+		setDOMElementAttribute((DOM_Element&)elemMixesKey,"count",count+1);
 		tlen=0;
 		UINT8* tmpB=DOM_Output::dumpToMem(docXmlKeyInfo,&tlen);
 		m_xmlKeyInfoBuff=new UINT8[tlen+2];
