@@ -118,15 +118,14 @@ AC_ARG_ENABLE(pool,
 
 dnl delay channels ??
 BANDWIDTH_LIMIT=""
-AC_ARG_ENABLE(bandwithlimitation,
-	AS_HELP_STRING([--enable-bandwidthlimitation=LIMITATION_START],
+AC_ARG_ENABLE(bandwidth-limitation,
+	AS_HELP_STRING([--enable-bandwidth-limitation=LIMITATION_START],
 			[Specify if to build with bandwith limitation and optionally the number of bytes which are transferred without any limitation]),
 	[
-	AC_MSG_NOTICE([hier])
 		if test "x$enableval" != "xno" ; then
 		    BANDWIDTH_LIMIT="-DDELAY_CHANNELS"
 		    if test "x$enableval" != "xyes" ; then	
-			BANDWIDTH_LIMIT="$BANDWIDTH_LIMIT -DDELAY_CHANNEL_TRAFFIC=$enable"
+			BANDWIDTH_LIMIT="$BANDWIDTH_LIMIT -DDELAY_CHANNEL_TRAFFIC=$enableval"
 		    fi	
 		fi
 	]
