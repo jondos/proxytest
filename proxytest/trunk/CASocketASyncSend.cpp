@@ -143,7 +143,7 @@ SINT32 CASocketASyncSend::send(CASocket* pSocket,UINT8* buff,UINT32 size)
 								ret=akt->pQueue->add(buff,size);
 								if(ret<0)
 									ret =E_UNKNOWN;
-								else if(ret>m_SendQueueSoftLimit)
+								else if((UINT32)ret>m_SendQueueSoftLimit)
 									{
 										akt->bwasOverFull=true;
 										ret=E_QUEUEFULL;

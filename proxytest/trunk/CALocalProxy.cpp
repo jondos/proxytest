@@ -59,7 +59,7 @@ SINT32 CALocalProxy::init()
 		UINT8 strTarget[255];
 		options.getTargetHost(strTarget,255);
 		addrNext.setAddr((char*)strTarget,options.getTargetPort());
-		CAMsg::printMsg(LOG_INFO,"Try connectiong to next Mix...");
+		CAMsg::printMsg(LOG_INFO,"Try connectiong to next Mix...\n");
 
 		((CASocket*)muxOut)->create();
 		((CASocket*)muxOut)->setSendBuff(sizeof(MUXPACKET)*50);
