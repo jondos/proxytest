@@ -261,7 +261,7 @@ SINT32 CAFirstMixA::loop()
 																		#ifdef LOG_CHANNEL
 																			fmChannelListEntry* pTmpEntry=m_pChannelList->get(pMuxSocket,tmpC);
 																			pTmpEntry->packetsInFromUser++;
-																			set64(pTmpEntry->timeCreated,upload_packet_timestamp);
+																			set64(pTmpEntry->timeCreated,pQueueEntry->timestamp_proccessing_start);
 																		#endif
 																		m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));
 																		incMixedPackets();

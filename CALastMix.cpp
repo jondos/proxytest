@@ -332,9 +332,6 @@ THREAD_RETURN lm_loopSendToMix(void* param)
 		CALastMix* pLastMix=(CALastMix*)param;
 		CAQueue* pQueue=pLastMix->m_pQueueSendToMix;
 		CAMuxSocket* pMuxSocket=pLastMix->m_pMuxIn;
-#ifdef LOG_PACKET_TIMES
-		UINT64 tmpU64;
-#endif		
 		SINT32 ret;
 		UINT32 len;
 #ifndef USE_POOL

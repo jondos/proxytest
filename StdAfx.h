@@ -87,6 +87,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #define FM_PACKET_STATS_LOG_INTERVALL 1 //Intervall in Minutes for loggin packet stats for the first Mix
 #define LM_PACKET_STATS_LOG_INTERVALL 1 //Intervall in Minutes for loggin packet stats for the last Mix
+#if defined(LOG_CHANNEL) &&!defined(LOG_PACKET_TIMES)
+	#define LOG_PACKET_TIMES
+#endif
 
 #define MIX_CASCADE_PROTOCOL_VERSION_0_4 4
 #define MIX_CASCADE_PROTOCOL_VERSION_0_3 3

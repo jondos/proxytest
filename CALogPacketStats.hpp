@@ -38,6 +38,7 @@ class CALogPacketStats
 				{
 					m_pthreadLog=NULL;
 					m_iLogIntervallInHalfMinutes=30;
+					resetTimeingStats();
 				}
 
 			~CALogPacketStats()
