@@ -3695,7 +3695,7 @@ MARCH=""
 if test "${with_arch+set}" = set; then
   withval="$with_arch"
 
-		if test "x$enableval" != "$xno" ; then
+		if test "x$enableval" != "xno" ; then
 			MARCH="-march=$enableval"
 		fi
 
@@ -3715,7 +3715,7 @@ OFLAGS="$OFLAGS $MARCH"
 if test "${enable_static+set}" = set; then
   enableval="$enable_static"
 
-		if test "x$enableval" != "$xno" ; then
+		if test "x$enableval" != "xno" ; then
 		    CFLAGS="$CFLAGS -static"
 	    	    CXXFLAGS="$CXXFLAGS -static"
 		fi
@@ -3728,9 +3728,9 @@ POOL=""
 if test "${enable_pool+set}" = set; then
   enableval="$enable_pool"
 
-		if test "x$enableval" != "$xno" ; then
+		if test "x$enableval" != "xno" ; then
 		    POOL="-DUSE_POOL"
-		    if test "x$enableval" != "$xyes" ; then
+		    if test "x$enableval" != "xyes" ; then
 			POOL="$POOL -DMIX_POOL_SIZE=$enableval"
 		    fi
 		fi
@@ -3745,9 +3745,9 @@ if test "${enable_bandwithlimitation+set}" = set; then
 
 	{ echo "$as_me:$LINENO: hier" >&5
 echo "$as_me: hier" >&6;}
-		if test "x$enableval" != "$xno" ; then
+		if test "x$enableval" != "xno" ; then
 		    BANDWIDTH_LIMIT="-DDELAY_CHANNELS"
-		    if test "x$enableval" != "$xyes" ; then
+		    if test "x$enableval" != "xyes" ; then
 			BANDWIDTH_LIMIT="$BANDWIDTH_LIMIT -DDELAY_CHANNEL_TRAFFIC=$enable"
 		    fi
 		fi
@@ -9820,7 +9820,7 @@ _ACEOF
 if test "${with_ssl_dir+set}" = set; then
   withval="$with_ssl_dir"
 
-		if test "x$withval" != "$xno" ; then
+		if test "x$withval" != "xno" ; then
 			tryssldir=$withval
 		fi
 
@@ -9960,7 +9960,7 @@ xmlincludedir="/usr/local/include"
 if test "${with_xml_include+set}" = set; then
   withval="$with_xml_include"
 
-		if test "x$withval" != "$xno" ; then
+		if test "x$withval" != "xno" ; then
 			xmlincludedir=$withval
 		fi
 
@@ -10036,7 +10036,7 @@ xmllibdir="/usr/local/lib"
 if test "${with_xml_lib+set}" = set; then
   withval="$with_xml_lib"
 
-		if test "x$withval" != "$xno" ; then
+		if test "x$withval" != "xno" ; then
 			xmllibdir=$withval
 		fi
 
@@ -10116,7 +10116,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 if test "${enable_debug+set}" = set; then
   enableval="$enable_debug"
 
-	    if test "x$enableval" != "$xno" ; then
+	    if test "x$enableval" != "xno" ; then
 		CFLAGS="$CFLAGS -g -D_DEBUG"
 		OFLAGS=""
 	    fi
@@ -10128,7 +10128,7 @@ fi;
 if test "${enable_crime_detection+set}" = set; then
   enableval="$enable_crime_detection"
 
-	    if test "x$enableval" != "$xno" ; then
+	    if test "x$enableval" != "xno" ; then
 		CFLAGS="$CFLAGS -DLOG_CRIME"
 	    fi
 
