@@ -281,7 +281,7 @@ int doLocalProxy()
 */		((CASocket*)lpIOPair->muxOut)->create();
 		((CASocket*)lpIOPair->muxOut)->setSendBuff(sizeof(MUXPACKET)*50);
 		((CASocket*)lpIOPair->muxOut)->setRecvBuff(sizeof(MUXPACKET)*50);
-		if(lpIOPair->muxOut.connect(&addrNext)!=SOCKET_ERROR)
+		if(lpIOPair->muxOut.connect(&addrNext)==E_SUCCESS)
 			{
 				
 				CAMsg::printMsg(LOG_INFO," connected!\n");
@@ -349,7 +349,7 @@ SET_IN:
 		((CASocket*)mmIOPair->muxOut)->create();
 		((CASocket*)mmIOPair->muxOut)->setRecvBuff(50*sizeof(MUXPACKET));
 		((CASocket*)mmIOPair->muxOut)->setSendBuff(50*sizeof(MUXPACKET));
-		if(mmIOPair->muxOut.connect(&nextMix)==SOCKET_ERROR)
+		if(mmIOPair->muxOut.connect(&nextMix)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Cannot connect to next Mix -- Exiting!\n");
 				THREAD_RETURN_ERROR;
@@ -795,7 +795,7 @@ int doFirstMix()
 		((CASocket*)fmIOPair->muxOut)->create();
 		((CASocket*)fmIOPair->muxOut)->setSendBuff(50*sizeof(MUXPACKET));
 		((CASocket*)fmIOPair->muxOut)->setRecvBuff(50*sizeof(MUXPACKET));
-		if(fmIOPair->muxOut.connect(&addrNext)!=SOCKET_ERROR)
+		if(fmIOPair->muxOut.connect(&addrNext,10,10)==E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_INFO," connected!\n");
 				unsigned short len;
@@ -867,7 +867,7 @@ THREAD_RETURN lmIO(void *v)
 											ret=tmpSocket->connect(&lmIOPair->addrSocks);
 										else
 											ret=tmpSocket->connect(&lmIOPair->addrSquid);	
-										if(ret==SOCKET_ERROR)
+										if(ret!=E_SUCCESS)
 										    {
 	    										#ifdef _DEBUG
 														CAMsg::printMsg(LOG_DEBUG,"Cannot connect to Squid!\n");

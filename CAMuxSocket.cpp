@@ -48,16 +48,21 @@ int CAMuxSocket::accept(unsigned short port)
 			
 int CAMuxSocket::connect(LPSOCKETADDR psa)
 	{
+		return connect(psa,1,0);
+	}
+
+int CAMuxSocket::connect(LPSOCKETADDR psa,int retry,int time)
+	{
 		if(!bIsTunneld)
 			{
 				m_Socket.setRecvLowWat(sizeof(MUXPACKET));
-				return m_Socket.connect(psa);
+				return m_Socket.connect(psa,retry,time);
 			}
 		else
 			{
 				psa->getHostName(buff,255);
 				m_pTunnel=tunnel_new_client (buff, psa->getPort(),m_szTunnelHost,m_uTunnelPort,
-			   0/*DEFAULT_CONTENT_LENGTH*//*sizeof(MUXPACKET)*/);
+				 0/*DEFAULT_CONTENT_LENGTH*//*sizeof(MUXPACKET)*/);
 				return tunnel_connect(m_pTunnel);
 			}
 	}
