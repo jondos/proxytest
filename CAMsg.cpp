@@ -36,6 +36,7 @@ SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 	{
 		va_list ap;
 		va_start(ap,format);
+		SINT32 ret=E_SUCCESS;
 		switch(oMsg.uLogType)
 	    {
 				case MSG_LOG:
@@ -60,7 +61,8 @@ SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 									#else
 										_vsnprintf(buff,1024,format,ap);
 									#endif
-									write(oMsg.hFileErr,buff,strlen(buff));
+									if(write(oMsg.hFileErr,buff,strlen(buff))==1)
+									 ret=E_UNKNOWN;
 								}
 						}
 					else
@@ -73,17 +75,19 @@ SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 									#else
 										_vsnprintf(buff,1024,format,ap);
 									#endif
-									write(oMsg.hFileInfo,buff,strlen(buff));
-									int l=errno;
+									if(write(oMsg.hFileInfo,buff,strlen(buff))==-1)
+									 ret=E_UNKNOWN;
 								}
 						}
 				break;
 				case MSG_STDOUT:
 					vprintf(format,ap);
 				break;
+				default:
+				 ret=E_UNKNOWN;
 			}
 		va_end(ap);
-		return E_SUCCESS;
+		return ret;
   }
 
 SINT32 CAMsg::closeLog()

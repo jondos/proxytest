@@ -1074,7 +1074,7 @@ int main(int argc, const char* argv[])
 		if(options.getDaemon())
 			{
 				#ifndef _WIN32
-					char buff[255];
+					UINT8 buff[255];
 					if(options.getLogDir(buff,255)==E_SUCCESS)
 						CAMsg::setOptions(MSG_FILE);
 					else
@@ -1090,7 +1090,7 @@ int main(int argc, const char* argv[])
 			}
 		else
 			{
-				char buff[255];
+				UINT8 buff[255];
 				if(options.getLogDir((UINT8*)buff,255)==E_SUCCESS)
 					CAMsg::setOptions(MSG_FILE);
 			}
