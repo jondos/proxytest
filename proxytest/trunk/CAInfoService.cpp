@@ -95,8 +95,6 @@ THREAD_RETURN InfoLoop(void *p)
 						buffLen=1024;
 						pSignature->signXML(oBufferStream.getBuff(),oBufferStream.getBufferSize(),buff,&buffLen);
 						oSocket.send("POST /feedback HTTP/1.0\r\n\r\n",27);
-						buff[buffLen]=0;
-						printf(buff);
 						oSocket.send(buff,buffLen);
 	//					oSocket.close();
 					}
