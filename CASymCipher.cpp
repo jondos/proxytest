@@ -38,7 +38,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 bool CASymCipher::isEncyptionKeyValid()
 	{
-		return bEncKeySet;
+		return m_bEncKeySet;
 	}
 
 /*
@@ -95,10 +95,10 @@ SINT32 CASymCipher::setEncryptionKeyAES(UINT8* key)
 
 SINT32 CASymCipher::setKeyAES(UINT8* key)
 	{
-		makeKey(&keyAES,/*DIR_ENCRYPT,*/KEY_SIZE*8,(char*)key);
-		memset(iv,0,16);
-		memset(iv2,0,16);
-		bEncKeySet=true;
+		makeKey(&m_keyAES,/*DIR_ENCRYPT,*/KEY_SIZE*8,(char*)key);
+		memset(m_iv,0,16);
+		memset(m_iv2,0,16);
+		m_bEncKeySet=true;
 		return E_SUCCESS;
 	}
 
@@ -109,47 +109,47 @@ SINT32 CASymCipher::decryptAES(UINT8* in,UINT8* out,UINT32 len)
 		//while(i<len-15)
     while(i+15<len)
     	{
-				rijndaelEncrypt (iv, iv, keyAES.keySched);
-				out[i]=in[i]^iv[0];
+				rijndaelEncrypt (m_iv, m_iv, m_keyAES.keySched);
+				out[i]=in[i]^m_iv[0];
 				i++;
-				out[i]=in[i]^iv[1];
+				out[i]=in[i]^m_iv[1];
 				i++;
-				out[i]=in[i]^iv[2];
+				out[i]=in[i]^m_iv[2];
 				i++;
-				out[i]=in[i]^iv[3];
+				out[i]=in[i]^m_iv[3];
 				i++;
-				out[i]=in[i]^iv[4];
+				out[i]=in[i]^m_iv[4];
 				i++;
-				out[i]=in[i]^iv[5];
+				out[i]=in[i]^m_iv[5];
 				i++;
-				out[i]=in[i]^iv[6];
+				out[i]=in[i]^m_iv[6];
 				i++;
-				out[i]=in[i]^iv[7];
+				out[i]=in[i]^m_iv[7];
 				i++;
-				out[i]=in[i]^iv[8];
+				out[i]=in[i]^m_iv[8];
 				i++;
-				out[i]=in[i]^iv[9];
+				out[i]=in[i]^m_iv[9];
 				i++;
-				out[i]=in[i]^iv[10];
+				out[i]=in[i]^m_iv[10];
 				i++;
-				out[i]=in[i]^iv[11];
+				out[i]=in[i]^m_iv[11];
 				i++;
-				out[i]=in[i]^iv[12];
+				out[i]=in[i]^m_iv[12];
 				i++;
-				out[i]=in[i]^iv[13];
+				out[i]=in[i]^m_iv[13];
 				i++;
-				out[i]=in[i]^iv[14];
+				out[i]=in[i]^m_iv[14];
 				i++;
-				out[i]=in[i]^iv[15];
+				out[i]=in[i]^m_iv[15];
 				i++;
 			}
 		if(i<len) //In this case len-i<16 !
 			{
-				rijndaelEncrypt (iv, iv, keyAES.keySched);
+				rijndaelEncrypt (m_iv, m_iv, m_keyAES.keySched);
 				len-=i;
 				for(UINT32 k=0;k<len;k++)
 				 {
-					 out[i]=in[i]^iv[k];
+					 out[i]=in[i]^m_iv[k];
 					 i++;
 					}
 			}
@@ -161,47 +161,47 @@ SINT32 CASymCipher::decryptAES2(UINT8* in,UINT8* out,UINT32 len)
 		UINT32 i=0;
 		while(i+15<len)
 			{
-				rijndaelEncrypt (iv2, iv2, keyAES.keySched);
-				out[i]=in[i]^iv2[0];
+				rijndaelEncrypt (m_iv2, m_iv2, m_keyAES.keySched);
+				out[i]=in[i]^m_iv2[0];
 				i++;
-				out[i]=in[i]^iv2[1];
+				out[i]=in[i]^m_iv2[1];
 				i++;
-				out[i]=in[i]^iv2[2];
+				out[i]=in[i]^m_iv2[2];
 				i++;
-				out[i]=in[i]^iv2[3];
+				out[i]=in[i]^m_iv2[3];
 				i++;
-				out[i]=in[i]^iv2[4];
+				out[i]=in[i]^m_iv2[4];
 				i++;
-				out[i]=in[i]^iv2[5];
+				out[i]=in[i]^m_iv2[5];
 				i++;
-				out[i]=in[i]^iv2[6];
+				out[i]=in[i]^m_iv2[6];
 				i++;
-				out[i]=in[i]^iv2[7];
+				out[i]=in[i]^m_iv2[7];
 				i++;
-				out[i]=in[i]^iv2[8];
+				out[i]=in[i]^m_iv2[8];
 				i++;
-				out[i]=in[i]^iv2[9];
+				out[i]=in[i]^m_iv2[9];
 				i++;
-				out[i]=in[i]^iv2[10];
+				out[i]=in[i]^m_iv2[10];
 				i++;
-				out[i]=in[i]^iv2[11];
+				out[i]=in[i]^m_iv2[11];
 				i++;
-				out[i]=in[i]^iv2[12];
+				out[i]=in[i]^m_iv2[12];
 				i++;
-				out[i]=in[i]^iv2[13];
+				out[i]=in[i]^m_iv2[13];
 				i++;
-				out[i]=in[i]^iv2[14];
+				out[i]=in[i]^m_iv2[14];
 				i++;
-				out[i]=in[i]^iv2[15];
+				out[i]=in[i]^m_iv2[15];
 				i++;
 			}
 		if(i<len)
 			{
-				rijndaelEncrypt (iv2, iv2, keyAES.keySched);
+				rijndaelEncrypt (m_iv2, m_iv2, m_keyAES.keySched);
 				len-=i;
 				for(UINT32 k=0;k<len;k++)
 				 {
-					 out[i]=in[i]^iv2[k];
+					 out[i]=in[i]^m_iv2[k];
 					 i++;
 					}
 			}
@@ -213,48 +213,48 @@ SINT32 CASymCipher::encryptAES(UINT8* in,UINT8* out,UINT32 len)
 		UINT32 i=0;
 		while(i+15<len)
 			{
-				rijndaelEncrypt (iv, iv, keyAES.keySched);
+				rijndaelEncrypt (m_iv, m_iv, m_keyAES.keySched);
 
-				out[i]=in[i]^iv[0];
+				out[i]=in[i]^m_iv[0];
 				i++;
-				out[i]=in[i]^iv[1];
+				out[i]=in[i]^m_iv[1];
 				i++;
-				out[i]=in[i]^iv[2];
+				out[i]=in[i]^m_iv[2];
 				i++;
-				out[i]=in[i]^iv[3];
+				out[i]=in[i]^m_iv[3];
 				i++;
-				out[i]=in[i]^iv[4];
+				out[i]=in[i]^m_iv[4];
 				i++;
-				out[i]=in[i]^iv[5];
+				out[i]=in[i]^m_iv[5];
 				i++;
-				out[i]=in[i]^iv[6];
+				out[i]=in[i]^m_iv[6];
 				i++;
-				out[i]=in[i]^iv[7];
+				out[i]=in[i]^m_iv[7];
 				i++;
-				out[i]=in[i]^iv[8];
+				out[i]=in[i]^m_iv[8];
 				i++;
-				out[i]=in[i]^iv[9];
+				out[i]=in[i]^m_iv[9];
 				i++;
-				out[i]=in[i]^iv[10];
+				out[i]=in[i]^m_iv[10];
 				i++;
-				out[i]=in[i]^iv[11];
+				out[i]=in[i]^m_iv[11];
 				i++;
-				out[i]=in[i]^iv[12];
+				out[i]=in[i]^m_iv[12];
 				i++;
-				out[i]=in[i]^iv[13];
+				out[i]=in[i]^m_iv[13];
 				i++;
-				out[i]=in[i]^iv[14];
+				out[i]=in[i]^m_iv[14];
 				i++;
-				out[i]=in[i]^iv[15];
+				out[i]=in[i]^m_iv[15];
 				i++;
 			}
 		if(i<len)
 			{
-				rijndaelEncrypt (iv, iv, keyAES.keySched);
+				rijndaelEncrypt (m_iv, m_iv, m_keyAES.keySched);
 				len-=i;
 				for(UINT32 k=0;k<len;k++)
 				 {
-					 out[i]=in[i]^iv[k];
+					 out[i]=in[i]^m_iv[k];
 					 i++;
 					}
 			}
