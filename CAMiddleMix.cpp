@@ -183,6 +183,7 @@ UINT16 infoSize;
 		infoSize+=keySize;
 		(*(UINT16*)infoBuff)=htons(infoSize-2);
 #else
+		CAMsg::printMsg(LOG_INFO,"%s\n",recvBuff);
 		//New we have to insert our XML-Key struct in the one the have received....
 		infoBuff=new UINT8[keyLen+1024];
 		infoSize=0;
