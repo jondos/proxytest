@@ -32,13 +32,21 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 typedef struct t_MEMBLOCK
 	{
-		void * mem;
+		CONNECTIONLIST* mem;
 		t_MEMBLOCK* next;
 	} _MEMBLOCK;
 
-int CASocketList::increasePool()
+SINT32 CASocketList::increasePool()
 	{
 		CONNECTIONLIST* tmp=new CONNECTIONLIST[POOL_SIZE];
+		if(tmp==NULL)
+			return E_UNKNOWN;
+		_MEMBLOCK* tmpMem=new _MEMBLOCK;
+		if(tmpMem==NULL)
+			{
+				delete tmp;
+				return E_UNKNOWN;
+			}
 		memset(tmp,0,sizeof(CONNECTIONLIST)*POOL_SIZE);
 		for(int i=1;i<POOL_SIZE;i++)
 			{
@@ -46,11 +54,10 @@ int CASocketList::increasePool()
 			}
 		tmp[POOL_SIZE-1].next=pool;
 		pool=tmp;
-		_MEMBLOCK* tmpMem=new _MEMBLOCK;
 		tmpMem->next=memlist;
 		tmpMem->mem=tmp;
 		memlist=tmpMem;
-		return 0;
+		return E_SUCCESS;
 	}
 
 CASocketList::CASocketList()
@@ -101,7 +108,7 @@ SINT32 CASocketList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher)
 		CONNECTIONLIST* tmp;
 		if(pool==NULL)
 		    {
-					if(increasePool()==SOCKET_ERROR)
+			if(increasePool()!=E_SUCCESS)
 						{
 //							LeaveCriticalSection(&cs);
 							return E_UNKNOWN;
@@ -124,7 +131,7 @@ SINT32 CASocketList::add(HCHANNEL in,HCHANNEL out,CASymCipher* pCipher)
 		CONNECTIONLIST* tmp;
 		if(pool==NULL)
 		    {
-					if(increasePool()==SOCKET_ERROR)
+					if(increasePool()!=E_SUCCESS)
 						{
 //							LeaveCriticalSection(&cs);
 							return E_UNKNOWN;

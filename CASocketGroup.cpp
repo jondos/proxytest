@@ -35,13 +35,16 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 CASocketGroup::CASocketGroup()
 	{
 		FD_ZERO(&m_fdset);
+		FD_ZERO(&m_signaled_set);
+		InitializeCriticalSection(&csFD_SET);
 		#ifndef _WIN32
 		    max=0;
 		#endif
 	}
 			
-int CASocketGroup::add(CASocket&s)
+SINT32 CASocketGroup::add(CASocket&s)
 	{
+		EnterCriticalSection(&csFD_SET);
 		#ifndef _WIN32
 		    if(max<((SOCKET)s)+1)
 			max=((SOCKET)s)+1;
@@ -50,11 +53,13 @@ int CASocketGroup::add(CASocket&s)
 		#ifdef _DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"CASocketGroutp: Added SOCKET: %u\n",(SOCKET)s);
 		#endif
-		return 0;
+		LeaveCriticalSection(&csFD_SET);
+		return E_SUCCESS;
 	}
 
-int CASocketGroup::add(CAMuxSocket&s)
+SINT32 CASocketGroup::add(CAMuxSocket&s)
 	{
+		EnterCriticalSection(&csFD_SET);
 		#ifndef _WIN32
 		    if(max<((SOCKET)s)+1)
 			max=((SOCKET)s)+1;
@@ -63,30 +68,37 @@ int CASocketGroup::add(CAMuxSocket&s)
 				CAMsg::printMsg(LOG_DEBUG,"CASocketGroutp: Added SOCKET: %u\n",(SOCKET)s);
 		#endif
 		FD_SET((SOCKET)s,&m_fdset);
-		return 0;
+		LeaveCriticalSection(&csFD_SET);
+		return E_SUCCESS;
 	}
 
-int CASocketGroup::remove(CASocket&s)
+SINT32 CASocketGroup::remove(CASocket&s)
 	{
+		EnterCriticalSection(&csFD_SET);
 		#ifdef _DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"CASocketGroutp: Removed SOCKET: %u\n",(SOCKET)s);
 		#endif
 		FD_CLR((SOCKET)s,&m_fdset);
-		return 0;
+		LeaveCriticalSection(&csFD_SET);
+		return E_SUCCESS;
 	}
 
-int CASocketGroup::remove(CAMuxSocket&s)
+SINT32 CASocketGroup::remove(CAMuxSocket&s)
 	{
+		EnterCriticalSection(&csFD_SET);
 		#ifdef _DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"CASocketGroutp: Removed SOCKET: %u\n",(SOCKET)s);
 		#endif
 		FD_CLR((SOCKET)s,&m_fdset);
-		return 0;
+		LeaveCriticalSection(&csFD_SET);
+		return E_SUCCESS;
 	}
 
-int CASocketGroup::select()
+SINT32 CASocketGroup::select()
 	{
+		EnterCriticalSection(&csFD_SET);
 		memcpy(&m_signaled_set,&m_fdset,sizeof(fd_set));
+		LeaveCriticalSection(&csFD_SET);
 		#ifdef _DEBUG
 			#ifdef _WIN32
 			    int ret=::select(0,&m_signaled_set,NULL,NULL,NULL);
@@ -110,7 +122,9 @@ int CASocketGroup::select()
 
 SINT32 CASocketGroup::select(bool bWrite,UINT32 ms)
 	{
+		EnterCriticalSection(&csFD_SET);
 		memcpy(&m_signaled_set,&m_fdset,sizeof(fd_set));
+		LeaveCriticalSection(&csFD_SET);
 		fd_set* set_read,*set_write;
 		timeval ti;
 		ti.tv_sec=0;

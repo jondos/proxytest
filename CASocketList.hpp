@@ -60,7 +60,7 @@ class CASocketList
 			CONNECTION* getFirst();
 			CONNECTION* getNext();
 		protected:
-			int increasePool();
+			SINT32 increasePool();
 			CONNECTIONLIST* connections;
 			CONNECTIONLIST* pool;
 			#ifdef _REENTRANT
