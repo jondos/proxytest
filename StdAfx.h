@@ -211,6 +211,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
   #ifndef AF_LOCAL
 		#define AF_LOCAL AF_UNIX
   #endif
+	#if !defined(HAVE_MSG_DONTWAIT)&&!define(MSG_DONTWAIT)
+		#define MSG_DONTWAIT 0
+	#endif
 #endif
 
 

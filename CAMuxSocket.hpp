@@ -60,7 +60,7 @@ typedef UINT32 HCHANNEL;
 	#define DATA_SIZE 			992
 	#define PAYLOAD_SIZE 		989
 
-	#if defined(WIN32) ||defined(__sgi)
+	#if (defined(WIN32) ||defined(__sgi))&&!defined(__GNUC__)
 		#pragma pack( push, t_MixPacket )
 		#pragma pack(1)
 		struct t_MixPacketPayload
