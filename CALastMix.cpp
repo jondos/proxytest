@@ -40,7 +40,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 extern CACmdLnOptions options;
 
-#ifdef LOG_CHANNEL
+/*#ifdef LOG_CHANNEL
 	#define MACRO_DO_LOG_CHANNEL\
 		getcurrentTimeMillis(current_millis);\
 		diff_time=diff64(current_millis,pChannelListEntry->timeCreated);\
@@ -49,7 +49,7 @@ extern CACmdLnOptions options;
 			current_millis,diff_time,pChannelListEntry->trafficInFromUser,pChannelListEntry->trafficOutToUser,\
 			pChannelListEntry->packetsDataInFromUser,pChannelListEntry->packetsDataOutToUser); 
 #endif
-
+*/
 /*******************************************************************************/
 // ----------START NEW VERSION -----------------------
 //---------------------------------------------------------
@@ -366,7 +366,7 @@ THREAD_RETURN lm_loopSendToMix(void* param)
  				if(!isZero64(timestamp))
 					{
 						getcurrentTimeMicros(tmpU64);
-						pLastMix->m_pLogPacketStats->addToTimeingStats(diff64(tmpU64,timestamp),((MIXPACKET*)buff)->flags,false);
+						pLastMix->m_pLogPacketStats->addToTimeingStats(diff64(tmpU64,timestamp),CHANNEL_DATA,false);
 						#ifdef _DEBUG
 							CAMsg::printMsg(LOG_CRIT,"Download Packet processing time (arrival <--> send): %u µs\n",diff64(tmpU64,timestamp));
 						#endif

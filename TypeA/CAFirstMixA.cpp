@@ -469,7 +469,7 @@ SINT32 CAFirstMixA::loop()
 														{
 															UINT64 tmpU64;
 															getcurrentTimeMicros(tmpU64);
-															m_pLogPacketStats->addToTimeingStats(diff64(tmpU64,timestamp),((MIXPACKET*)tmpBuff)->flags,false);
+															m_pLogPacketStats->addToTimeingStats(diff64(tmpU64,timestamp),CHANNEL_DATA,false);
 															#ifdef _DEBUG
 																CAMsg::printMsg(LOG_CRIT,"Download Packet processing time (arrival <--> send): %u µs\n",diff64(tmpU64,timestamp));
 															#endif

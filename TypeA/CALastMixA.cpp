@@ -227,7 +227,7 @@ SINT32 CALastMixA::loop()
 																	#ifdef LOG_PACKET_TIMES
 																		UINT64 tmpU64;
 																		getcurrentTimeMicros(tmpU64);
-																		m_pLogPacketStats->addToTimeingStats(diff64(tmpU64,upload_packet_timestamp),((MIXPACKET*)tmpBuff)->flags,true);
+																		m_pLogPacketStats->addToTimeingStats(diff64(tmpU64,upload_packet_timestamp),CHANNEL_OPEN,true);
 																		#ifdef _DEBUG
 																			CAMsg::printMsg(LOG_CRIT,"Upload Open Packet processing time (arrival <--> send): %u µs\n",diff64(tmpU64,upload_packet_timestamp));
 																		#endif
@@ -253,7 +253,7 @@ SINT32 CALastMixA::loop()
 												#ifdef LOG_PACKET_TIMES
 													UINT64 tmpU64;
 													getcurrentTimeMicros(tmpU64);
-													m_pLogPacketStats->addToTimeingStats(diff64(tmpU64,upload_packet_timestamp),((MIXPACKET*)tmpBuff)->flags,true);
+													m_pLogPacketStats->addToTimeingStats(diff64(tmpU64,upload_packet_timestamp),CHANNEL_CLOSE,true);
 													#ifdef _DEBUG
 														CAMsg::printMsg(LOG_CRIT,"Upload Close Packet processing time (arrival <--> socke closed): %u µs\n",diff64(tmpU64,upload_packet_timestamp));
 													#endif
@@ -322,7 +322,7 @@ SINT32 CALastMixA::loop()
 														#ifdef LOG_PACKET_TIMES
 															UINT64 tmpU64;
 															getcurrentTimeMicros(tmpU64);
-															m_pLogPacketStats->addToTimeingStats(diff64(tmpU64,upload_packet_timestamp),((MIXPACKET*)tmpBuff)->flags,true);
+															m_pLogPacketStats->addToTimeingStats(diff64(tmpU64,upload_packet_timestamp),CHANNEL_DATA,true);
 															#ifdef _DEBUG
 																CAMsg::printMsg(LOG_CRIT,"Upload Data Packet processing time (arrival <--> data put into queue): %u µs\n",diff64(tmpU64,upload_packet_timestamp));
 															#endif
