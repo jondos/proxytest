@@ -63,10 +63,7 @@ SINT32 CAMiddleMix::init()
 		else
 			{
 				pAddrNext=new CASocketAddrINet();
-				if(strTarget[0]==0) //empty host --> so any
-					((CASocketAddrINet*)pAddrNext)->setPort(options.getTargetPort());
-				else
-					((CASocketAddrINet*)pAddrNext)->setAddr(strTarget,options.getTargetPort());
+				((CASocketAddrINet*)pAddrNext)->setAddr(strTarget,options.getTargetPort());
 			}
 
 		
@@ -128,7 +125,10 @@ SINT32 CAMiddleMix::init()
 		else
 			{
 				pAddrListen=new CASocketAddrINet();
-				((CASocketAddrINet*)pAddrListen)->setAddr(path,options.getServerPort());
+				if(path[0]==0) //empty host
+					((CASocketAddrINet*)pAddrListen)->setPort(options.getServerPort());
+				else	
+					((CASocketAddrINet*)pAddrListen)->setAddr(path,options.getServerPort());
 			}
 
 
