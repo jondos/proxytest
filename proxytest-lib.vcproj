@@ -2004,9 +2004,6 @@
 				RelativePath=".\CAThreadPool.cpp">
 			</File>
 			<File
-				RelativePath=".\CATimedQueue.cpp">
-			</File>
-			<File
 				RelativePath="CAUtil.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -2900,9 +2897,6 @@
 			</File>
 			<File
 				RelativePath=".\CAThreadPool.hpp">
-			</File>
-			<File
-				RelativePath=".\CATimedQueue.hpp">
 			</File>
 			<File
 				RelativePath="CAUtil.hpp">

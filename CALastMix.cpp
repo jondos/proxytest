@@ -128,8 +128,8 @@ SINT32 CALastMix::init()
 		if(ret!=E_SUCCESS)
 			return ret;
 		
-		m_pQueueSendToMix=new CAQueue(sizeof(tQueueEntry));
-		m_pQueueReadFromMix=new CAQueue(sizeof(tQueueEntry));
+		m_pQueueSendToMix=new CAQueue(sizeof(CALastMix::tQueueEntry));
+		m_pQueueReadFromMix=new CAQueue(sizeof(CALastMix::tQueueEntry));
 
 		m_bRestart=false;
 		//Starting thread for Step 1a
