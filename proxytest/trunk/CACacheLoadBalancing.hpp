@@ -31,7 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 struct t_cachelb_list
 	{
-		CASocketAddrINet* pAddr;
+		CASocketAddrINet oAddr;
 		struct t_cachelb_list* next;
 	};
 
@@ -42,13 +42,13 @@ class CACacheLoadBalancing
 		public:
 			CACacheLoadBalancing(){m_ElementCount=0;paktEntry=NULL;}
 			~CACacheLoadBalancing();
-			SINT32 add(CASocketAddrINet* pAddr);
-			CASocketAddrINet* get()
+			SINT32 add(const CASocketAddrINet & pAddr);
+			const CASocketAddrINet* get()
 				{
 					if(paktEntry==NULL)
 						return NULL;
 					paktEntry=paktEntry->next;
-					return paktEntry->pAddr;
+					return &paktEntry->oAddr;
 				}
 			UINT32 getElementCount(){return m_ElementCount;}
 		private:

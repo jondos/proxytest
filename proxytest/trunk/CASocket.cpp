@@ -168,7 +168,7 @@ SINT32 CASocket::connect(CASocketAddr & psa,UINT msTimeOut)
 		getNonBlocking(&bWasNonBlocking);
 		setNonBlocking(true);
 		int err=0;
-		LPSOCKADDR addr=psa.LPSOCKADDR();
+		const LPSOCKADDR addr=(const LPSOCKADDR)psa.LPSOCKADDR();
 		int addr_len=psa.getSize();
 		
 		err=::connect(m_Socket,addr,addr_len);
@@ -281,9 +281,11 @@ SINT32 CASocket::close(int mode)
 					default: false
 	@ret number of bytes send, or -1 in case of an error
 */
-int CASocket::send(UINT8* buff,UINT32 len,bool bDisableAsync)
+int CASocket::send(const UINT8* buff,UINT32 len,bool bDisableAsync)
 	{
-	  int ret;	
+	  if(len==0)
+			return 0; //nothing to send
+		int ret;	
 	  if(!m_bASyncSend||bDisableAsync) //sync send...
 			{
 				do
@@ -309,7 +311,7 @@ int CASocket::send(UINT8* buff,UINT32 len,bool bDisableAsync)
 	@param msTimeOut MilliSeconds to wait
 	@ret number of bytes send, or -1 in case of an error
 */
-int CASocket::sendTimeOut(UINT8* buff,UINT32 len,UINT32 msTimeOut)
+int CASocket::sendTimeOut(const UINT8* buff,UINT32 len,UINT32 msTimeOut)
 	{
 	  int ret;
 		SINT32 aktTimeOut=0;	

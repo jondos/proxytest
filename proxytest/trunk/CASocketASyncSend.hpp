@@ -51,7 +51,7 @@ class CASocketASyncSend
 		public:
 			CASocketASyncSend(){m_bRun=false;m_SendQueueLowWater=10000;m_SendQueueSoftLimit=100000;m_Sockets=NULL;InitializeCriticalSection(&cs);}
 			~CASocketASyncSend(){stop();DeleteCriticalSection(&cs);}
-			SINT32 send(CASocket* pSocket,UINT8* buff,UINT32 size);
+			SINT32 send(CASocket* pSocket,const UINT8* buff,UINT32 size);
 			SINT32 close(CASocket* pSocket);
 			SINT32 start();
 			SINT32 stop();

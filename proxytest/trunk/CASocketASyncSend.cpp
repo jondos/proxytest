@@ -58,7 +58,7 @@ THREAD_RETURN SocketASyncSendLoop(void* p)
 								ret--;
 								SINT32 len=BUFF_SIZE;
 								SINT32 sendSpace=akt->pSocket->getSendSpace();
-								if(sendSpace>0)
+								if(sendSpace>=0)
 									{
 										len=min(sendSpace,len);
 									}
@@ -107,7 +107,7 @@ THREAD_RETURN SocketASyncSendLoop(void* p)
 
 //#define SENDQUEUEFULLSIZE 100
 
-SINT32 CASocketASyncSend::send(CASocket* pSocket,UINT8* buff,UINT32 size)
+SINT32 CASocketASyncSend::send(CASocket* pSocket,const UINT8* buff,UINT32 size)
 	{
 		if(pSocket==NULL||buff==NULL)
 			return E_UNKNOWN;
