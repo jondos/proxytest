@@ -159,7 +159,9 @@ SINT32 CASignature::sign(UINT8* in,UINT32 inlen,UINT8* sig,UINT32* siglen)
 	{
 		UINT8 dgst[SHA_DIGEST_LENGTH];
 		SHA1(in,inlen,dgst);
-		return DSA_sign(0,dgst,SHA_DIGEST_LENGTH,sig,siglen,dsa);
+		if(DSA_sign(0,dgst,SHA_DIGEST_LENGTH,sig,siglen,dsa)==1)
+		 return E_SUCCESS;
+		return E_UNKNOWN;
 	}
 
 SINT32 CASignature::getSignatureSize()
