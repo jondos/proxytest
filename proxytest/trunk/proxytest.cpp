@@ -193,6 +193,7 @@ END AES Test*/
 			}
 		else if(options.isFirstMix())
 			{
+				CAMsg::printMsg(LOG_INFO,"I am the First MIX..\n");
 				pMix=new CAFirstMix();
 			}
 		else if(options.isMiddleMix())
