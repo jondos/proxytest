@@ -632,12 +632,12 @@ SINT32 CAFirstMix::loop()
 																delete pEntry->pCipher;
 																m_pChannelList->removeChannel(pMuxSocket,pMixPacket->channel);
 															}
+														#ifdef _DEBUG
 														else
 															{
-																#ifdef _DEBUG
 																	CAMsg::printMsg(LOG_DEBUG,"Invalid ID to close from Browser!\n");
-																#endif
 															}
+														#endif
 													}
 												else
 													{
