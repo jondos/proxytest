@@ -85,8 +85,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define MIX_POOL_TIMEOUT 200 //home long to wait (in ms) before a dummy is put in the pool
 #define DUMMY_CHANNEL 0
 
-#define FM_PACKET_STATS_LOG_INTERVALL 15 //Intervall in Minutes for loggin packet stats for the first Mix
-#define LM_PACKET_STATS_LOG_INTERVALL 15 //Intervall in Minutes for loggin packet stats for the last Mix
+#define FM_PACKET_STATS_LOG_INTERVALL 1 //Intervall in Minutes for loggin packet stats for the first Mix
+#define LM_PACKET_STATS_LOG_INTERVALL 1 //Intervall in Minutes for loggin packet stats for the last Mix
 
 #define MIX_CASCADE_PROTOCOL_VERSION_0_4 4
 #define MIX_CASCADE_PROTOCOL_VERSION_0_3 3

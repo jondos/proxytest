@@ -200,7 +200,7 @@ SINT32 CAFirstMixA::loop()
 																	//pEntry->packetsInFromUser++;
 																	getcurrentTimeMicros(current_time);
 																	diff_time=diff64(current_time,pEntry->timeCreated);
-																	CAMsg::printMsg(LOG_DEBUG,"Channel close (upstream,times in micros) - Channel: %u, Connection: %Lu - PacketsIn (only data): %u, PacketsOut (only data): %u - ChannelStart (open packet received) : %Lu, ChannelEnd (close packet put into send queue to next mix): %Lu, ChannelDuration: %u\n",
+																	CAMsg::printMsg(LOG_DEBUG,"Channel close received from user (times in micros) - Channel: %u, Connection: %Lu - PacketsIn (only data and open): %u, PacketsOut (only data): %u - ChannelStart (open packet received) : %Lu, ChannelEnd (close packet put into send queue to next mix): %Lu, ChannelDuration: %u\n",
 																														pEntry->channelIn,pEntry->pHead->id,pEntry->packetsInFromUser,pEntry->packetsOutToUser,pEntry->timeCreated,current_time,diff_time);
 																#endif
 																delete pEntry->pCipher;              // forget the symetric key of this connection
@@ -345,7 +345,7 @@ SINT32 CAFirstMixA::loop()
 											//pEntry->packetsOutToUser++;
 											getcurrentTimeMicros(current_time);
 											diff_time=diff64(current_time,pEntry->timeCreated);
-											CAMsg::printMsg(LOG_DEBUG,"Channel close (downstream,times in micros)- Channel: %u, Connection: %Lu - PacketsIn (only data): %u, PacketsOut (only data): %u - ChannelStart (open packet received): %Lu, ChannelEnd (close packet put into send queue to next user): %Lu, ChannelDuration: %u\n",
+											CAMsg::printMsg(LOG_DEBUG,"Channel close from Mix(times in micros)- Channel: %u, Connection: %Lu - PacketsIn (only data and open): %u, PacketsOut (only data): %u - ChannelStart (open packet received): %Lu, ChannelEnd (close packet put into send queue to next user): %Lu, ChannelDuration: %u\n",
 																								pEntry->channelIn,pEntry->pHead->id,pEntry->packetsInFromUser,pEntry->packetsOutToUser,pEntry->timeCreated,current_time,diff_time);
 										#endif
 										
