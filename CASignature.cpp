@@ -48,9 +48,7 @@ CASignature* CASignature::clone()
 		CASignature* tmpSig=new CASignature();
 		if(m_pDSA!=NULL)
 			{
-				DSA* tmpDSA=DSAparams_dup(m_pDSA);
-				tmpDSA->priv_key=BN_dup(m_pDSA->priv_key);
-				tmpDSA->pub_key=BN_dup(m_pDSA->pub_key);
+				DSA* tmpDSA=DSA_clone(m_pDSA);
 				tmpSig->m_pDSA=tmpDSA;
 			}
 		return tmpSig;
