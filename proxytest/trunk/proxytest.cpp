@@ -566,7 +566,6 @@ THREAD_RETURN lmIO(void *v)
 		CASocketList  oSocketList;
 		CASocketGroup oSocketGroup;
 		oSocketGroup.add(*((CASocket*)lmIOPair->muxIn));
-//		char buff[1001];
 		MUXPACKET oMuxPacket;
 		int len;
 		int countRead;

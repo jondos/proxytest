@@ -86,46 +86,6 @@ int CASocketList::add(HCHANNEL in,HCHANNEL out)
 		LeaveCriticalSection(&cs);
 		return ret;
 	}
-/*
-int CASocketList::add(HCHANNEL id,CASocket* pSocket)
-	{
-		EnterCriticalSection(&cs);
-		CONNECTIONLIST* tmp;
-		int ret;
-		if(pool==NULL)
-		    {
-					ret=SOCKET_ERROR;
-		    }
-		else
-		    {
-					CONNECTIONLIST* before=NULL;
-					tmp=pool;
-					while(tmp!=NULL)
-						{
-							if(tmp->id==id)
-								{
-									tmp->pSocket=pSocket;
-									if(before!=NULL)
-										{
-											before->next=tmp->next;
-										}
-									else
-										pool=tmp->next;
-									tmp->next=connections;
-									connections=tmp;
-									ret=connections->id;
-									goto ende;
-								}
-							before=tmp;
-							tmp=tmp->next;
-						}
-					ret=-1;
-			}
-ende:
-		LeaveCriticalSection(&cs);
-		return ret;
-	}
-*/
 
 CASocket* CASocketList::get(HCHANNEL id)
 	{
@@ -196,6 +156,8 @@ CASocket* CASocketList::remove(HCHANNEL id)
 			{
 				if(tmp->id==id)
 					{
+						if(aktEnumPos==tmp)
+							aktEnumPos=tmp->next;
 						if(before!=NULL)
 							before->next=tmp->next;
 						else
