@@ -45,7 +45,8 @@ CAMsg::CAMsg()
     {
 			m_strMsgBuff=new char[1025+20+STRMSGTYPES_SIZE];
 			m_uLogType=MSG_STDOUT;
-			m_hFileErr=m_hFileInfo=-1;
+			m_hFileInfo=-1;
+			m_strLogFile=new char[1024];
 			m_strMsgBuff[0]='[';
 #ifdef COMPRESSED_LOGS
 			m_gzFileErr=m_gzFileInfo=NULL;
@@ -56,6 +57,7 @@ CAMsg::~CAMsg()
     {
 			closeLog();
 			delete[] m_strMsgBuff;
+			delete[] m_strLogFile;
 		}
     
 SINT32 CAMsg::setOptions(UINT32 opt)
@@ -114,22 +116,15 @@ SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 #endif
 				break;
 				case MSG_FILE:
-				/*	if(type==LOG_ERR||type==LOG_CRIT)
+					if(oMsg.m_hFileInfo==-1)
 						{
-							if(oMsg.m_hFileErr!=-1)
-								{
-									if(write(oMsg.m_hFileErr,oMsg.m_strMsgBuff,strlen(oMsg.m_strMsgBuff))==-1)
-									 ret=E_UNKNOWN;
-								}
+							oMsg.m_hFileInfo=open(oMsg.m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK,S_IREAD|S_IWRITE);																	
 						}
-					else
+					if(oMsg.m_hFileInfo!=-1)
 						{
-					*/		if(oMsg.m_hFileInfo!=-1)
-								{
-									if(write(oMsg.m_hFileInfo,oMsg.m_strMsgBuff,strlen(oMsg.m_strMsgBuff))==-1)
-									 ret=E_UNKNOWN;
-								}
-					//	}
+							if(write(oMsg.m_hFileInfo,oMsg.m_strMsgBuff,strlen(oMsg.m_strMsgBuff))==-1)
+							 ret=E_UNKNOWN;
+						}
 				break;
 #ifdef COMPRESSED_LOGS
 				case MSG_COMPRESSED_FILE:
@@ -160,9 +155,6 @@ SINT32 CAMsg::closeLog()
 					#endif
 				break;
 				case MSG_FILE:
-					if(m_hFileErr!=-1)
-						close(m_hFileErr);
-					m_hFileErr=-1;
 					if(m_hFileInfo!=-1)
 						close(m_hFileInfo);
 					m_hFileInfo=-1;
@@ -191,19 +183,15 @@ SINT32 CAMsg::openLog(UINT32 type)
 					#endif
 				break;
 				case MSG_FILE:
-					char logdir[255];
-					char buff[1024];
-					if(options.getLogDir((UINT8*)logdir,255)!=E_SUCCESS)
+					if(options.getLogDir((UINT8*)m_strLogFile,1024)!=E_SUCCESS)
 						return E_UNKNOWN;
-					strcpy(buff,logdir);
-					strcat(buff,FILENAME_ERRORLOG);
-					m_hFileErr=open(buff,O_APPEND|O_CREAT|O_WRONLY,S_IREAD|S_IWRITE);
-					strcpy(buff,logdir);
-					strcat(buff,FILENAME_INFOLOG);
-					m_hFileInfo=open(buff,O_APPEND|O_CREAT|O_WRONLY,S_IREAD|S_IWRITE);										
+					strcat(m_strLogFile,FILENAME_INFOLOG);
+					m_hFileInfo=open(m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK,S_IREAD|S_IWRITE);										
 				break;
 #ifdef COMPRESSED_LOGS
 				case MSG_COMPRESSED_FILE:
+					char logdir[255];
+					char buff[1024];
 					if(options.getLogDir((UINT8*)logdir,255)!=E_SUCCESS)
 						return E_UNKNOWN;
 					strcpy(buff,logdir);
