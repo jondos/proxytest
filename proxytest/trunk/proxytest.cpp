@@ -477,10 +477,15 @@ Debug(dc::malloc.on());
 						CAMsg::setLogOptions(MSG_LOG);
 					SINT32 ret=CAMsg::openEncryptedLog();
 					#ifdef LOG_CRIME
-						if(ret!=E_SUCCESS)
+					if(ret!=E_SUCCESS)
 							{
-								CAMsg::printMsg(LOG_ERR,"Could not open encrypted log - exiting!\n");
-								exit(-1);
+								if(options.isEncryptedLogEnabled())
+									{
+										CAMsg::printMsg(LOG_ERR,"Could not open encrypted log - exiting!\n");
+										exit(-1);
+									}
+								else
+									options.disableEncryptedLog();
 							}
 					#endif
 					pid_t pid;
