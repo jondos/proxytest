@@ -53,7 +53,7 @@ class CALastMix:public CAMix
 			virtual ~CALastMix(){clean();}
 			SINT32 reconfigure();
 		protected:
-			virtual SINT32 loop();
+			virtual SINT32 loop()=0;
 			SINT32 init();
 			SINT32 initOnce();
 			SINT32 clean();

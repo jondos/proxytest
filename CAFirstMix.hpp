@@ -60,7 +60,7 @@ class CAFirstMix:public CAMix
 				}
 			virtual ~CAFirstMix(){}
 		protected:
-			virtual SINT32 loop();
+			virtual SINT32 loop()=0;
 			SINT32 init();
 			SINT32 clean();
 			SINT32 initOnce();

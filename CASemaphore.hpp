@@ -27,6 +27,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CASEMAPHORE__
 #define __CASEMAPHORE__
+#undef USE_SEMAPHORE
+#ifdef USE_SEMAPHORE
 class CASemaphore
 	{
 		public:
@@ -60,4 +62,5 @@ class CASemaphore
 		private:
 			sem_t* m_pSemaphore;
 	};
+#endif
 #endif
