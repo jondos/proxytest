@@ -82,10 +82,24 @@ CAAccountingInstance::CAAccountingInstance()
 
 	// initialize Database connection
 	m_dbInterface = new CAAccountingDBInterface();
+	
+
+	
+	// initialize JPI signataure tester
+	CACertificate * pCert = options.getJPITestCertificate();
+	
+	/// TODO: Make this a configure option / maybe extract from certificate??
+	m_AiName = new UINT8[16];
+	strcpy((char*)m_AiName, "testai");
+	
+	m_pJpiVerifyingInstance = new CASignature();
+	m_pJpiVerifyingInstance->setVerifyKey(pCert);
+	delete pCert;
 
 	// launch AI thread
 	m_pThread = new CAThread();
 	m_pThread->setMainLoop( aiThreadMainLoop );
+	m_bThreadRunning = true;
 	m_pThread->start( this );
 	
 }
@@ -98,6 +112,9 @@ CAAccountingInstance::CAAccountingInstance()
 CAAccountingInstance::~CAAccountingInstance()
 {
 	CAMsg::printMsg( LOG_DEBUG, "AccountingInstance dying\n" );
+	m_bThreadRunning = false;
+	m_pThread->join();
+	delete m_pThread;
 	delete m_biInterface;
 	delete m_dbInterface;
 	delete m_pIPBlockList;
@@ -329,7 +346,7 @@ SINT32 CAAccountingInstance::handleJapPacket(
 			return 1;
 		}
 	}
-
+	return 4;
 }
 
 
@@ -399,15 +416,9 @@ SINT32 CAAccountingInstance::makeAccountRequest(DOM_Document &doc)
 THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
 {
 	CAAccountingInstance * instance;
-	CAQueue * pQueue;
-	aiQueueItem * pQueueItem;
+	aiQueueItem item;
 	UINT32 itemSize;
-
-	pQueueItem = new aiQueueItem;
-	itemSize = sizeof( aiQueueItem );
 	instance = ( CAAccountingInstance * ) param;
-	pQueue = instance->m_pQueue;
-
 	CAMsg::printMsg( LOG_DEBUG, "AI Thread starting\n" );
 
 	// initiate DB connection
@@ -418,14 +429,14 @@ THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
 		}*/
 
 
-	while ( true )
+	while ( instance->m_bThreadRunning )
 		{
 			CAMsg::printMsg( LOG_DEBUG, "AI Thread waiting for message .. \n" );
-			pQueue->getOrWait( ( UINT8 * ) pQueueItem, &itemSize );
+			itemSize = sizeof( aiQueueItem );
+			instance->m_pQueue->getOrWait( (UINT8*)&item, &itemSize );
 			CAMsg::printMsg( LOG_DEBUG, "aiThread(): got message\n" );
-			instance->processJapMessage( pQueueItem->pHashEntry, pQueueItem->pDomDoc );
-			delete pQueueItem->pDomDoc;
-			delete pQueueItem;
+			instance->processJapMessage( item.pHashEntry, item.pDomDoc );
+			delete item.pDomDoc;
 		}
 	return (THREAD_RETURN)0;
 }
@@ -664,16 +675,16 @@ void CAAccountingInstance::handleChallengeResponse(
  */
 void CAAccountingInstance::handleCostConfirmation(
 	fmHashTableEntry *pHashEntry,
-	const DOM_Element &root
+	DOM_Element &root
 )
 {
-	CASignature * pSigTester;
+//	CASignature * pSigTester;
 	aiAccountingInfo *pAccInfo;
 	pAccInfo = pHashEntry->pAccountingInfo;
-	DOM_Element elemGeneral;	
-	UINT8 strGeneral[ 1024 ];
-	UINT32 strGeneralLen = 1024;
-	UINT64 bytes;
+//	DOM_Element elemGeneral;	
+//	UINT8 strGeneral[ 1024 ];
+//	UINT32 strGeneralLen = 1024;
+//	UINT64 bytes;
 
 	
 	m_Mutex.lock();
@@ -685,10 +696,9 @@ void CAAccountingInstance::handleCostConfirmation(
 			m_Mutex.unlock();
 			return ;
 		}
-
-	// check signature
-	pSigTester = pAccInfo->pPublicKey;
-	if ( pSigTester->verifyXML( (DOM_Node &)root, (CACertStore *)NULL ) != E_SUCCESS )
+		
+	CAXMLCostConfirmation cc(root);
+	if( cc.verifySignature( *(pAccInfo->pPublicKey)) != E_SUCCESS)
 		{
 			// wrong signature
 			CAMsg::printMsg( LOG_DEBUG, "CostConfirmation has INVALID SIGNATURE!\n" );
@@ -702,25 +712,24 @@ void CAAccountingInstance::handleCostConfirmation(
 	m_Mutex.unlock();
 
 	// parse and check AI name
-	if ( getDOMChildByName( root, (UINT8*)"AIName", elemGeneral, false ) != E_SUCCESS ||
-			 getDOMElementValue( elemGeneral, strGeneral, &strGeneralLen ) != E_SUCCESS ||
-			 strcmp( (char *)strGeneral, (char *)m_AiName ) != 0 )
+	UINT8 * pAiID = cc.getAiID();
+	if( strcmp( (char *)pAiID, (char *)m_AiName ) != 0)
 		{
-			CAMsg::printMsg( LOG_DEBUG, "CostConfirmation has wrong AIName %s. Ignoring...\n", strGeneral );
+			CAMsg::printMsg( LOG_DEBUG, "CostConfirmation has wrong AIName %s. Ignoring...\n", pAiID );
 			CAXMLErrorMessage err(CAXMLErrorMessage::ERR_WRONG_DATA, (UINT8*)"Your CostConfirmation has a wrong AI name");
 			DOM_Document errDoc;
 			err.toXmlDocument(errDoc);
 			pAccInfo->pControlChannel->sendMessage(errDoc);
+			delete[] pAiID;
 			return ;
 		}
+	delete[] pAiID;
 
 	// parse & set transferredBytes
 	m_Mutex.lock();
-	if ( getDOMChildByName( root, (UINT8*)"Bytes", elemGeneral, false ) != E_SUCCESS ||
-			 getDOMElementValue( elemGeneral, bytes ) != E_SUCCESS ||
-			 bytes < pAccInfo->confirmedBytes )
+	if(cc.getTransferredBytes() < pAccInfo->confirmedBytes )
 		{
-			CAMsg::printMsg( LOG_DEBUG, "CostConfirmation has Wrong Number of Bytes (%lld). Ignoring...\n", bytes );
+			CAMsg::printMsg( LOG_DEBUG, "CostConfirmation has Wrong Number of Bytes (%lld). Ignoring...\n", cc.getTransferredBytes() );
 			CAXMLErrorMessage err(CAXMLErrorMessage::ERR_WRONG_DATA, 
 				(UINT8*)"Your CostConfirmation has a wrong number of transferred bytes");
 			DOM_Document errDoc;
@@ -729,29 +738,15 @@ void CAAccountingInstance::handleCostConfirmation(
 			m_Mutex.unlock();
 			return ;
 		}
-	pAccInfo->confirmedBytes = bytes;
-	if(pAccInfo->confirmedBytes == pAccInfo->reqConfirmBytes)
+	pAccInfo->confirmedBytes = cc.getTransferredBytes();
+	if(pAccInfo->confirmedBytes >= pAccInfo->reqConfirmBytes)
 	{
 		pAccInfo->authFlags &= ~AUTH_SENT_CC_REQUEST;
 		pAccInfo->authFlags &= ~AUTH_SENT_SECOND_CC_REQUEST;
 	}
-
-	// store XMLCC in database
-	strGeneralLen = 1024;
-	if( (DOM_Output::dumpToMem((DOM_Node &)root, strGeneral, &strGeneralLen) != E_SUCCESS) ||
-			(strGeneralLen >= 1024))
-	{
-		m_Mutex.unlock();
-		CAXMLErrorMessage err(CAXMLErrorMessage::ERR_WRONG_DATA, 
-			(UINT8*)"Your CostConfirmation is too long");
-		DOM_Document errDoc;
-		err.toXmlDocument(errDoc);
-		pAccInfo->pControlChannel->sendMessage(errDoc);
-		return ;
-	}
-	strGeneral[strGeneralLen] = '\0'; // make null-terminated string
-	m_dbInterface->storeCostConfirmation( pAccInfo->accountNumber, bytes, strGeneral, false );
 	m_Mutex.unlock();
+	
+	m_dbInterface->storeCostConfirmation( cc );
 	return ;
 }
 

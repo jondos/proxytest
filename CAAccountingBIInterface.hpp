@@ -30,6 +30,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define __CAACCOUNTINGBIINTERFACE__
 #include "CASSLClientSocket.hpp"
 #include "CASocketAddrINet.hpp"
+#include "CAXMLCostConfirmation.hpp"
+#include "CAXMLErrorMessage.hpp"
 
 
 /**
@@ -50,7 +52,7 @@ public:
 	/**
 	 * Send a cost confirmation to the JPI
 	 */
-	SINT32 settle(UINT8 *costConfirmation);
+	CAXMLErrorMessage * settle(CAXMLCostConfirmation &cc);
 	
 	/**
 	 * Request a new Balance certificate from the JPI

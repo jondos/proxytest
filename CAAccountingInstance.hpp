@@ -26,8 +26,8 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 
-#ifndef CA_ACCOUNTING_INSTANCE_HPP
-#define CA_ACCOUNTING_INSTANCE_HPP
+#ifndef __CAACCOUNTINGINSTANCE__
+#define __CAACCOUNTINGINSTANCE__
 
 //#include "CAMuxSocket.hpp"
 #include "CAFirstMixChannelList.hpp"
@@ -38,6 +38,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAAccountingDBInterface.hpp"
 #include "CAAccountingBIInterface.hpp"
 #include "CAAccountingControlChannel.hpp"
+#include "CACmdLnOptions.hpp"
 
 // we want a costconfirmation from the user for every megabyte
 // after 2megs of unconfirmed traffic we kick the user out
@@ -66,7 +67,7 @@ struct t_aiqueueitem
 };
 typedef struct t_aiqueueitem aiQueueItem;
 
-
+extern CACmdLnOptions options;
 
 /**
  * This is the AI (accounting instance or abrechnungsinstanz in german)
@@ -146,7 +147,7 @@ private:
 	*/
 	void handleCostConfirmation(
 			fmHashTableEntry *pHashEntry, 
-			const DOM_Element &root
+			DOM_Element &root
 		);
 
 	/**
@@ -228,6 +229,8 @@ private:
 	
 	/** internal receiving queue for messages coming from Japs */
 	CAQueue * m_pQueue;
+	
+	bool m_bThreadRunning;
 };
 
 

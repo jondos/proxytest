@@ -56,10 +56,31 @@ SINT32 filelength(int handle);
 #endif
 
 SINT32 setDOMElementValue(DOM_Element& elem,UINT32 value);
+
+/**
+ * Returns the content of the text node under elem
+ * as 64bit unsigned integer.
+ */
 SINT32 getDOMElementValue(const DOM_Element& elem, UINT64 &value);
+
 SINT32 getDOMElementValue(const DOM_Element& elem,UINT32* value);
+
 SINT32 getDOMElementValue(const DOM_Element& elem,UINT16* value);
+
 SINT32 setDOMElementValue(DOM_Element& elem,const UINT8* value);
+
+
+/** 
+ * Returns the content of the text node(s) under elem
+ * as null-terminated C String. If there is no text node
+ * len is set to 0.
+ * 
+ * TODO: Why is elem a DOM_Node and not a DOM_Element here?
+ * @param DOM_Node the element which has a text node under it
+ * @param value a buffer that gets the text value
+ * @param len on call contains the buffer size, on return contains the number of bytes copied
+ * @return E_SPACE if the buffer is too small, E_SUCCESS otherwise, E_UNKNOWN if the element is NULL
+ */
 SINT32 getDOMElementValue(const DOM_Node& elem,UINT8* value,UINT32* len);
 
 SINT32 setDOMElementAttribute(DOM_Node& elem,const char* attrName,int value);
