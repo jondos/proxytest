@@ -4,7 +4,7 @@ class CAInfoService
 		public:
 			CAInfoService();
 			~CAInfoService();
-			int sendHelo();
+			SINT32 sendHelo();
 			int start();
 			int stop();
 			SINT32 setLevel(UINT32 user,UINT32 risk,UINT32 traffic);

@@ -5,15 +5,7 @@
 #include "xml/xmloutput.h"
 #include "CACmdLnOptions.hpp"
 extern CACmdLnOptions options;
-/*class SocketOutputStream:public XML::OutputStream,public CASocket
-	{
-		public:
-			int write(const char *buf, size_t bufLen)
-				{
-					return send((char*)buf,bufLen);
-				}
-	};
-*/
+
 class BufferOutputStream:public XML::OutputStream
 	{
 		public:
@@ -184,12 +176,13 @@ int CAInfoService::stop()
 		return 0;
 	}
 
-int CAInfoService::sendHelo()
+SINT32 CAInfoService::sendHelo()
 	{
 		CASocket oSocket;
 		CASocketAddr oAddr;
 		UINT8 hostname[255];
-		options.getInfoServerHost(hostname,255);
+		if(options.getInfoServerHost(hostname,255)!=E_SUCCESS)
+			return E_UNKNOWN;
 		oAddr.setAddr((char*)hostname,options.getInfoServerPort());
 		if(oSocket.connect(&oAddr)==E_SUCCESS)
 			{
@@ -208,21 +201,27 @@ int CAInfoService::sendHelo()
 				sprintf(buff,"%s%%3A%u",hostname,options.getServerPort());
 				oxmlOut.WriteAttr("id",(char*)buff);
 				oxmlOut.EndAttrs();
-				options.getCascadeName((UINT8*)buff,1024);
+				if(options.getCascadeName((UINT8*)buff,1024)!=E_SUCCESS)
+					goto _LABEL_ERROR;
 				oxmlOut.WriteElement("Name",(char*)buff);
 				oxmlOut.WriteElement("IP",(char*)hostname);
 				oxmlOut.WriteElement("Port",(int)options.getServerPort());
 				oxmlOut.EndElement();
 				oxmlOut.EndDocument();
 				buffLen=1024;
-				pSignature->signXML(oBufferStream.getBuff(),oBufferStream.getBufferSize(),(UINT8*)buff,&buffLen);
+				if(pSignature->signXML(oBufferStream.getBuff(),oBufferStream.getBufferSize(),(UINT8*)buff,&buffLen)!=E_SUCCESS)
+					goto _LABEL_ERROR;
 				oSocket.send((UINT8*)"POST /helo HTTP/1.0\r\n\r\n",23);
 				oSocket.send((UINT8*)buff,buffLen);
 				oSocket.close();
 				delete buff;		
-				return 0;				
+				return E_SUCCESS;	
+_LABEL_ERROR:
+				if(buff!=NULL)
+					delete buff;
+				return E_UNKNOWN;
 			}
-		return -1;
+		return E_UNKNOWN;
 	}
 
 
