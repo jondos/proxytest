@@ -58,7 +58,6 @@ SINT32 CALastMixA::loop()
 		//osocketgroupMixIn.add(*m_pMuxIn);
 		//((CASocket*)*m_pMuxIn)->setNonBlocking(true);
 		bool bAktiv;
-		UINT32 countCacheAddresses=m_pCacheLB->getElementCount();
 		m_logUploadedPackets=m_logDownloadedPackets=0;
 		set64((UINT64&)m_logUploadedBytes,(UINT32)0);
 		set64((UINT64&)m_logDownloadedBytes,(UINT32)0);
