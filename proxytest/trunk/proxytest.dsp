@@ -352,10 +352,6 @@ SOURCE=.\CAMsg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\CAMuxChannelList.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\CAMuxSocket.cpp
 # End Source File
 # Begin Source File
@@ -499,10 +495,6 @@ SOURCE=.\CAMix.hpp
 # Begin Source File
 
 SOURCE=.\CAMsg.hpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\CAMuxChannelList.hpp
 # End Source File
 # Begin Source File
 

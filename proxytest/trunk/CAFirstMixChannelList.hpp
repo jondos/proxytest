@@ -32,15 +32,20 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 struct t_fmhashtableentry
 	{
-		CAMuxSocket* pMuxSocket;
-		CAQueue* pQueueSend;
-		struct t_firstmixchannellist* pChannelList;
+		public:
+			CAMuxSocket* pMuxSocket;
+			CAQueue* pQueueSend;
+		
+		private:
+			struct t_firstmixchannellist* pChannelList;
 
-		struct
-			{
-				struct t_fmhashtableentry* prev;
-				struct t_fmhashtableentry* next;
-			} list_HashEntries;
+			struct
+				{
+					struct t_fmhashtableentry* prev;
+					struct t_fmhashtableentry* next;
+				} list_HashEntries;
+
+		friend class CAFirstMixChannelList;
 	};
 
 typedef struct t_fmhashtableentry fmHashTableEntry;
@@ -48,34 +53,33 @@ typedef fmHashTableEntry* LP_fmHashTableEntry;
 
 struct t_firstmixchannellist
 	{
-		fmHashTableEntry* pHead;
-		HCHANNEL channelIn;
-		HCHANNEL channelOut;
+		public:
+			fmHashTableEntry* pHead;
+
+			HCHANNEL channelIn;
+			HCHANNEL channelOut;
 		
-		
+			CASymCipher* pCipher;
+			bool bIsSuspended;
 
-		CASymCipher* pCipher;
-		bool bIsSuspended;
+		private:
+			struct
+				{
+					struct t_firstmixchannellist* prev;
+					struct t_firstmixchannellist* next;
+				} list_OutChannel;
 
-		struct
-			{
-				struct t_firstmixchannellist* prev;
-				struct t_firstmixchannellist* next;
-			} list_OutChannel;
+			struct
+				{
+					struct t_firstmixchannellist* prev;
+					struct t_firstmixchannellist* next;
+				} list_InChannelPerSocket;
 
-		struct
-			{
-				struct t_firstmixchannellist* prev;
-				struct t_firstmixchannellist* next;
-			} list_InChannelPerSocket;
-
-		
+		friend class CAFirstMixChannelList;
 	};
 
 typedef struct t_firstmixchannellist fmChannelList; 
 typedef struct t_firstmixchannellist fmChannelListEntry; 
-
-
 
 class CAFirstMixChannelList
 	{
@@ -91,19 +95,17 @@ class CAFirstMixChannelList
 	
 			SINT32 remove(CAMuxSocket* pMuxSocket);
 			SINT32 remove(CAMuxSocket* pMuxSocket,HCHANNEL channelIn);
-			//SINT32 remove(HCHANNEL channelOut);
-		
-			
+					
 			fmHashTableEntry* getFirst();
 			fmHashTableEntry* getNext();
 		
 			fmChannelListEntry* getFirstChannelForSocket(CAMuxSocket* pMuxSocket);
 			fmChannelListEntry* getNextChannel(fmChannelListEntry* pEntry);
-
-			
+		
 		private:
 			LP_fmHashTableEntry* m_HashTable;
 			fmChannelListEntry* m_listOutChannelHead;
 			fmHashTableEntry* m_listHashTableHead;
 			fmHashTableEntry* m_listHashTableCurrent;
+
 	};
