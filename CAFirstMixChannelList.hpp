@@ -35,7 +35,8 @@ struct t_fmhashtableentry
 		public:
 			CAMuxSocket* pMuxSocket;
 			CAQueue* pQueueSend;
-		
+			UINT32 cSuspend;
+
 		private:
 			struct t_firstmixchannellist* pChannelList;
 
