@@ -37,6 +37,8 @@ char buff[255];
 
 CAMuxSocket::CAMuxSocket()
 	{
+		m_Buff=new UINT8[MUXPACKET_SIZE];
+		m_aktBuffPos=0;
 //		bIsTunneld=false;
 	}
 /*	
@@ -243,7 +245,7 @@ SINT32 CAMuxSocket::receive(MUXPACKET* pPacket)
 
 SINT32 CAMuxSocket::receive(MUXPACKET* pPacket,UINT32 timeout)
 	{
-		SINT32 ret=m_Socket.receiveFully((UINT8*)pPacket,MUXPACKET_SIZE,timeout);
+/*		SINT32 ret=m_Socket.receiveFully((UINT8*)pPacket,MUXPACKET_SIZE,timeout);
 		if(ret==E_SUCCESS)
 			{
 				pPacket->channel=ntohl(pPacket->channel);
@@ -253,6 +255,21 @@ SINT32 CAMuxSocket::receive(MUXPACKET* pPacket,UINT32 timeout)
 		if(ret==E_TIMEDOUT)
 			return E_TIMEDOUT;
 		return SOCKET_ERROR;
+*/
+
+		SINT32 len=MUXPACKET_SIZE-m_aktBuffPos;
+		SINT32 ret=m_Socket.receive(m_Buff+m_aktBuffPos,len);
+		if(ret<=0)
+			return E_UNKNOWN;
+		if(ret==len)
+			{
+				memcpy(pPacket,m_Buff,MUXPACKET_SIZE);
+				pPacket->channel=ntohl(pPacket->channel);
+				pPacket->flags=ntohs(pPacket->flags);
+				m_aktBuffPos=0;
+				return MUXPACKET_SIZE;
+			}
+		return E_AGAIN;	
 	}
 #endif
 

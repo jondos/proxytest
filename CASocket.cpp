@@ -277,7 +277,7 @@ SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len,SINT32 timeout)
 				#endif		
 				if(ret<=0) //This may be a bug (=0 ?)
 					return SOCKET_ERROR;
-				if(ret>=len)
+				if((UINT32)ret>=len)
 					{
 						ret=receive(buff,len);
 						if(ret<=0||(UINT32)ret!=len)
