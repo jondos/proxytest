@@ -49,6 +49,9 @@ case "$host" in
 *-*-freebsd*)
 	DEFAULTLIBS="$LIBS -L/usr/local/lib -liconv"
 	;;
+*-*-netbsd*)
+	DEFAULTLIBS="$LIBS -L/usr/local/lib -liconv"
+	;;
 *)
 	;;
 esac
