@@ -156,10 +156,12 @@ SINT32 CAFirstMixA::loop()
 												#ifdef LOG_CHANNEL
 													pHashEntry->trafficIn++;
 												#endif
-#ifdef PAYMENT
+#ifdef WITH_CONTROL_CHANNELS		
 												//New control channel code...!
 												if(pHashEntry->pControlChannelDispatcher->proccessMixPacket(pMixPacket))
 													goto NEXT_USER;
+#endif
+#ifdef PAYMENT
 												// payment code added by Bastian Voigt
 												if(m_pAccountingInstance->handleJapPacket( pMixPacket, pHashEntry ) != 0) 
 													{

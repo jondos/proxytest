@@ -42,7 +42,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CABase64.hpp"
 #include "xml/DOM_Output.hpp"
 #include "CAPool.hpp"
-
+#ifdef WITH_CONTROL_CHANNELS_TEST
+	#include "CAControlChannelTest.hpp"
+#endif
 extern CACmdLnOptions options;
 
 
@@ -833,7 +835,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 				delete pNewUser;
 				return E_UNKNOWN;
 			}
-#if defined(PAYMENT)||(FIRST_MIX_SYMMETRIC)
+#if defined(PAYMENT)||defined(FIRST_MIX_SYMMETRIC)||defined(WITH_CONTROL_CHANNELS_TEST)
 		fmHashTableEntry* pHashEntry=m_pChannelList->get(pNewUser);
 #endif
 #ifdef PAYMENT
@@ -847,6 +849,9 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		pNewUser->setReceiveKey(linkKey,32);
 		pNewUser->setSendKey(linkKey+32,32);
 		pNewUser->setCrypt(true);
+#endif
+#ifdef WITH_CONTROL_CHANNELS_TEST
+		pHashEntry->pControlChannelDispatcher->registerControlChannel(new CAControlChannelTest());
 #endif
 		incUsers();																	// increment the user counter by one
 #ifdef HAVE_EPOLL

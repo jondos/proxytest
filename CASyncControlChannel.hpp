@@ -31,8 +31,67 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAAbstractControlChannel.hpp"
 
 /** A synchronous control channel. This means, that every control message
-  * will be proccessed imedially. You have to override proccessMessage().*/
+  * will be proccessed imedially. You have to override proccessXMLMessage().*/
 class CASyncControlChannel : public CAAbstractControlChannel
 {
+	public:
+		  CASyncControlChannel(UINT8 id, bool bIsEncrypted):  
+					CAAbstractControlChannel(id,bIsEncrypted)
+				{
+					m_MsgBuff=new UINT8[0xFFFF];
+					m_aktIndex=0;
+					m_MsgBytesLeft=0;
+				}
+
+		/**Override this method to receive a XML Message*/
+		virtual SINT32 processXMLMessage(DOM_Document& docMsg)=0;
+
+	protected:
+		SINT32 proccessMessage(UINT8* msg, UINT32 msglen)
+			{
+				if(m_MsgBytesLeft==0)//start of new XML Msg
+					{
+						if(msglen<2)//this should never happen...
+							return E_UNKNOWN;
+						m_MsgBytesLeft=(msg[0]<<8)|msg[1];
+						msglen-=2;
+						m_aktIndex=msglen;
+						m_MsgBytesLeft-=msglen;
+						memcpy(m_MsgBuff,msg+2,msglen);
+					}
+				else//received some part...
+					{
+						msglen=max(m_MsgBytesLeft,msglen);
+						memcpy(m_MsgBuff+m_aktIndex,msg,msglen);
+						m_aktIndex+=msglen;
+						m_MsgBytesLeft-=msglen;
+					}
+				if(m_MsgBytesLeft==0)
+					{//whole msg receveid
+						return proccessMessageComplete();
+					}
+				return E_SUCCESS;
+			}
+
+		/** Parses the bytes in m_MsgBuff and calls processXMLMessage()*/		
+		SINT32 proccessMessageComplete()
+			{
+				MemBufInputSource oInput(m_MsgBuff,m_aktIndex,"synchannel");
+				DOMParser oParser;
+				oParser.parse(oInput);
+				m_aktIndex=0;
+				m_MsgBytesLeft=0;
+				DOM_Document doc=oParser.getDocument();
+				if(doc==NULL)
+					return E_UNKNOWN;
+				return processXMLMessage(doc);
+			}
+
+		///buffer for assembling the parts of the message
+		UINT8* m_MsgBuff;
+		///how much bytes have we received already?
+		UINT32 m_aktIndex;
+		///how much bytes we need until all bytes are received?
+		UINT32 m_MsgBytesLeft;
 };
 #endif 
