@@ -285,11 +285,16 @@ SINT32 CAMiddleMix::init()
 		unsigned char* infoBuff=NULL;
 		
 		UINT16 keyLen;
-		((CASocket*)muxOut)->receive((UINT8*)&keyLen,2);
+		if(((CASocket*)muxOut)->receiveFully((UINT8*)&keyLen,2)!=E_SUCCESS)
+			return E_UNKNOWN;
 		CAMsg::printMsg(LOG_INFO,"Received Key Info lenght %u\n",ntohs(keyLen));
 		recvBuff=new unsigned char[ntohs(keyLen)+2];
 		memcpy(recvBuff,&keyLen,2);
-		((CASocket*)muxOut)->receive(recvBuff+2,ntohs(keyLen));
+		if(((CASocket*)muxOut)->receiveFully(recvBuff+2,ntohs(keyLen))!=E_SUCCESS)
+			{
+				delete recvBuff;
+				return E_UNKNOWN;
+			}
 		CAMsg::printMsg(LOG_INFO,"Received Key Info...\n");
 		
 		if(muxIn.accept(options.getServerPort())==SOCKET_ERROR)
@@ -308,7 +313,14 @@ SINT32 CAMiddleMix::init()
 			}
 
 		UINT32 keySize=mRSA.getPublicKeySize();
-		UINT16 infoSize=ntohs((*(UINT16*)recvBuff))+2;
+		UINT16 infoSize;
+		memcpy(&infoSize,recvBuff,2);
+		infoSize=ntohs(infoSize)+2;
+		if(infoSize>keyLen)
+			{
+				delete recvBuff;
+				return E_UNKNOWN;
+			}
 		infoBuff=new unsigned char[infoSize+keySize]; 
 		memcpy(infoBuff,recvBuff,infoSize);
 		delete recvBuff;
