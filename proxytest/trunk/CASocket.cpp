@@ -282,7 +282,7 @@ SINT32 CASocket::close(int mode)
 int CASocket::send(UINT8* buff,UINT32 len,bool bDisableAsync)
 	{
 	  int ret;	
-	  if(!m_bASyncSend||bDisableAsync) //sycc send...
+	  if(!m_bASyncSend||bDisableAsync) //sync send...
 			{
 				do
 					{

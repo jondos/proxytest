@@ -34,15 +34,29 @@ typedef struct _t_queue
 		_t_queue* next;
 	}QUEUE;
 
+/** this is a simple FIFO-Queue. You can add data and get them back.*/
 class CAQueue
 	{
 		public:
 			CAQueue(){InitializeCriticalSection(&m_csQueue);m_Queue=NULL;m_nQueueSize=0;}
 			~CAQueue();
 			SINT32 add(UINT8* buff,UINT32 size);
-			SINT32 getNext(UINT8* pbuff,UINT32* psize);
+			SINT32 get(UINT8* pbuff,UINT32* psize);
+			/** Returns the size of stored data.
+				* @retrun size of Queue
+				*/
 			UINT32 getSize(){return m_nQueueSize;}
+			
+			/** Returns true, if the Queue is empty
+				* @retval true, if Queue is empty
+				* @retval false, if Queue contains data
+				*/
 			bool isEmpty(){return m_Queue==NULL;}
+
+			/** Method to test the Queue
+				* @retval E_SUCCESS, if Queue implementation seams to be ok
+				*/
+			static SINT32 test();
 		private:
 			QUEUE* m_Queue;
 			QUEUE* m_lastElem;
@@ -50,6 +64,5 @@ class CAQueue
 				CRITICAL_SECTION m_csQueue;
 			#endif
 			UINT32 m_nQueueSize;
-			static UINT32 m_nMaxQueueSize;
 	};
 #endif

@@ -62,7 +62,7 @@ THREAD_RETURN SocketASyncSendLoop(void* p)
 									{
 										len=min(sendSpace,len);
 									}
-								if(akt->pQueue->getNext(buff,(UINT32*)&len)==E_SUCCESS)
+								if(akt->pQueue->get(buff,(UINT32*)&len)==E_SUCCESS)
 									akt->pSocket->send(buff,len,true);
 								if(akt->bwasOverFull&&akt->pQueue->getSize()<pASyncSend->m_SendQueueLowWater)
 									{
@@ -114,6 +114,7 @@ SINT32 CASocketASyncSend::send(CASocket* pSocket,UINT8* buff,UINT32 size)
 				return E_UNKNOWN;
 			}
 		SINT32 ret;
+		UINT32 uQueueSize;
 		if(m_Sockets==NULL)
 			{
 				m_Sockets=new _t_socket_list;
@@ -124,7 +125,7 @@ SINT32 CASocketASyncSend::send(CASocket* pSocket,UINT8* buff,UINT32 size)
 					}
 				m_Sockets->pQueue=new CAQueue();
 				if(	m_Sockets->pQueue==NULL||
-						m_Sockets->pQueue->add(buff,size)<0)
+						m_Sockets->pQueue->add(buff,size)!=E_SUCCESS)
 					{
 						delete m_Sockets->pQueue;
 						delete m_Sockets;
@@ -145,10 +146,9 @@ SINT32 CASocketASyncSend::send(CASocket* pSocket,UINT8* buff,UINT32 size)
 					{
 						if(akt->pSocket==pSocket)
 							{
-								ret=akt->pQueue->add(buff,size);
-								if(ret<0)
-									ret =E_UNKNOWN;
-								else if((UINT32)ret>m_SendQueueSoftLimit)
+								if(akt->pQueue->add(buff,size)!=E_SUCCESS)
+									ret=E_UNKNOWN;
+								else if(akt->pQueue->getSize()>m_SendQueueSoftLimit)
 									{
 										akt->bwasOverFull=true;
 										ret=E_QUEUEFULL;
@@ -167,7 +167,7 @@ SINT32 CASocketASyncSend::send(CASocket* pSocket,UINT8* buff,UINT32 size)
 						return E_UNKNOWN;
 					}
 				akt->pQueue=new CAQueue();
-				if(akt->pQueue==NULL||akt->pQueue->add(buff,size)<0)
+				if(akt->pQueue==NULL||akt->pQueue->add(buff,size)!=E_SUCCESS)
 					{
 						delete akt->pQueue;
 						delete akt;
