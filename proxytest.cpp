@@ -12,9 +12,10 @@
 #include "CAMuxChannelList.hpp"
 #include "CASymCipher.hpp"
 #include "CAASymCipher.hpp"
-#ifdef _WIN32
-HANDLE hEventThreadEnde;
-#endif
+#include "CAInfoService.hpp"
+//#ifdef _WIN32
+//HANDLE hEventThreadEnde;
+//#endif
 CACmdLnOptions options;
 
 //CRITICAL_SECTION csClose;
@@ -562,6 +563,10 @@ THREAD_RETURN fmIO(void *v)
 		#endif
 		printf("Size of MuxPacket: %u\n",sizeof(oMuxPacket));
 		printf("Pointer: %p,%p,%p,%p\n",&oMuxPacket.channel,&oMuxPacket.len,&oMuxPacket.type,&oMuxPacket.data);
+		CAInfoService oInfoService;
+		oInfoService.setLevel(0,0,0);
+		oInfoService.start();
+		int nUser=0;
 		for(;;)
 			{
 				if((countRead=oSocketGroup.select())==SOCKET_ERROR)
@@ -587,6 +592,8 @@ THREAD_RETURN fmIO(void *v)
 							{
 								((CASocket*)newMuxSocket)->send((char*)infoBuff,infoSize);
 								oMuxChannelList.add(newMuxSocket);
+								nUser++;
+								oInfoService.setLevel(nUser,rand()%100,rand()%100);
 								oSocketGroup.add(*newMuxSocket);
 							}
 					}
@@ -716,6 +723,8 @@ THREAD_RETURN fmIO(void *v)
 														delete otmpEntry.pMuxSocket;
 														delete otmpEntry.pSocketList;
 													}
+												nUser--;
+												oInfoService.setLevel(nUser,rand()%100,rand()%100);
 											}
 										else
 											{

@@ -5,8 +5,8 @@ CACmdLnOptions::CACmdLnOptions()
   {
 		bDaemon=false;
 		bLocalProxy=bFirstMix=bLastMix=bMiddleMix=false;
-		iTargetPort=iSOCKSPort=iServerPort=iSOCKSServerPort=-1;
-		strTargetHost=strSOCKSHost=NULL;
+		iTargetPort=iSOCKSPort=iServerPort=iSOCKSServerPort=iInfoServerPort-1;
+		strTargetHost=strSOCKSHost=strInfoServerHost=NULL;
   }
 
 CACmdLnOptions::~CACmdLnOptions()
@@ -18,6 +18,10 @@ CACmdLnOptions::~CACmdLnOptions()
 		if(strSOCKSHost!=NULL)
 			{
 				delete strSOCKSHost;
+	    }
+		if(strInfoServerHost!=NULL)
+			{
+				delete strInfoServerHost;
 	    }
   }
     
@@ -31,6 +35,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 	int mix=-1;
 	int SOCKSport=-1;
 	char* socks=NULL;
+	char* infoserver=NULL;
 	poptOption options[]=
 	 {
 		{"daemon",'d',POPT_ARG_NONE,&iDaemon,0,"start as daemon",NULL},
@@ -39,6 +44,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 		{"mix",'m',POPT_ARG_INT,&mix,0,"local|first|middle|last mix","<0|1|2|3>"},
 		{"socksport",'s',POPT_ARG_INT,&SOCKSport,0,"listening port for socks","<portnumber>"},
 		{"socksproxy",'o',POPT_ARG_STRING,&socks,0,"socks proxy","<ip:port>"},
+		{"infoserver",'i',POPT_ARG_STRING,&infoserver,0,"info server","<ip:port>"},
 		POPT_AUTOHELP
 		{NULL,0,0,
 		NULL,0,NULL,NULL}
@@ -73,6 +79,18 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 					iSOCKSPort=atol(tmpStr+1);
 						}
 				free(socks);	
+	    }
+	if(infoserver!=NULL)
+	    {
+				char* tmpStr;
+				if((tmpStr=strchr(infoserver,':'))!=NULL)
+						{
+					strInfoServerHost=new char[tmpStr-infoserver+1];
+					(*tmpStr)=0;
+					strcpy(strInfoServerHost,infoserver);
+					iInfoServerPort=atol(tmpStr+1);
+						}
+				free(infoserver);	
 	    }
 	iServerPort=port;
 	iSOCKSServerPort=SOCKSport;
@@ -137,6 +155,22 @@ int CACmdLnOptions::getSOCKSHost(char* host,int len)
 		return strlen(strSOCKSHost);
   }
 
+int CACmdLnOptions::getInfoServerPort()
+  {
+		return iInfoServerPort;
+  }
+    
+int CACmdLnOptions::getInfoServerHost(char* host,int len)
+  {
+		if(strInfoServerHost==NULL)
+				return -1;
+		if(len<=(int)strlen(strInfoServerHost))
+				{
+					return strlen(strInfoServerHost)+1;		
+				}
+		strcpy(host,strInfoServerHost);
+		return strlen(strInfoServerHost);
+  }
 
 bool CACmdLnOptions::isFirstMix()
   {

@@ -36,7 +36,7 @@ class CASocketList
 			CONNECTIONLIST* connections;
 			CONNECTIONLIST* pool;
 			#ifdef _REENTRANT
-				CRITICAL_SECTION cs;
+//				CRITICAL_SECTION cs;
 			#endif
 			CONNECTIONLIST* aktEnumPos;
 			t_MEMBLOCK* memlist;

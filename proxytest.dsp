@@ -67,7 +67,7 @@ LINK32=xilink6.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /G6 /MDd /W2 /Gm /GX /ZI /Od /I "g:\openssl-0.9.5a\inc32" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "_DEBUG" /FAcs /FR /Yu"stdafx.h" /FD /GZ /c
+# ADD CPP /nologo /G6 /MDd /W2 /Gm /GX /ZI /Od /I "g:\openssl-0.9.5a\inc32" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "_DEBUG" /D "_REENTRANT" /FAcs /FR /Yu"stdafx.h" /FD /GZ /c
 # ADD BASE RSC /l 0x407 /d "_DEBUG"
 # ADD RSC /l 0x407 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -248,6 +248,37 @@ SOURCE=.\httptunnel\tunnel.cpp
 SOURCE=.\httptunnel\tunnel.h
 # End Source File
 # End Group
+# Begin Group "xml"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\xml\xmlconfig.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\xml\xmloutput.cpp
+
+!IF  "$(CFG)" == "proxytest - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\xml\xmloutput.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\xml\xmlstream.h
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=.\CAASymCipher.cpp
@@ -255,6 +286,10 @@ SOURCE=.\CAASymCipher.cpp
 # Begin Source File
 
 SOURCE=.\CACmdLnOptions.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CAInfoService.cpp
 # End Source File
 # Begin Source File
 
@@ -312,6 +347,10 @@ SOURCE=.\CAASymCipher.hpp
 # Begin Source File
 
 SOURCE=.\CACmdLnOptions.hpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CAInfoService.hpp
 # End Source File
 # Begin Source File
 
