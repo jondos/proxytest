@@ -82,7 +82,7 @@ SINT32 CALogPacketStats::addToTimeingStats(const tQueueEntry& oQueueEntry,UINT32
 					m_timingMinOpenPacketUpstream=proccessingTime;	
 			}
 		#ifdef USE_POOL
-			UINT32 poolTime=diff64(oQueueEntry.pool_timestamp_out,oQueueEntry.pool_timestamp_out);
+			UINT32 poolTime=diff64(oQueueEntry.pool_timestamp_out,oQueueEntry.pool_timestamp_in);
 			m_timingCountPoolPacketsUpstream++;
 			add64(m_timingSumPoolPacketUpstream,poolTime);
 			if(poolTime>m_timingMaxPoolPacketUpstream)
@@ -110,7 +110,7 @@ SINT32 CALogPacketStats::addToTimeingStats(const tQueueEntry& oQueueEntry,UINT32
 			else if(m_timingMinDataPacketDownStream>proccessingTime)
 				m_timingMinDataPacketDownStream=proccessingTime;	
 			#ifdef USE_POOL
-				UINT32 poolTime=diff64(oQueueEntry.pool_timestamp_out,oQueueEntry.pool_timestamp_out);
+				UINT32 poolTime=diff64(oQueueEntry.pool_timestamp_out,oQueueEntry.pool_timestamp_in);
 				m_timingCountPoolPacketsDownStream++;
 				add64(m_timingSumPoolPacketDownStream,poolTime);
 				if(poolTime>m_timingMaxPoolPacketDownStream)
