@@ -160,10 +160,11 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 						encodeXMLEncryptedKey(key,64,docfragSymKey,&oRSA);
 						DOM_Document docSymKey=DOM_Document::createDocument();
 						docSymKey.appendChild(docSymKey.importNode(docfragSymKey,true));
+						DOM_Element elemRoot=docSymKey.getDocumentElement();
 						DOM_Element elemNonceHash=docSymKey.createElement("Nonce");
-						setDOMElementValue(elemNonceHash,arNonce);
-						docSymKey.getDocumentElement().appendChild(elemNonceHash);
-						m_pSignature->signXML(docSymKey.getDocumentElement());
+						setDOMElementValue(elemNonceHash,arNonce);						
+						elemRoot.appendChild(elemNonceHash);
+						m_pSignature->signXML(elemRoot);
 						m_pMuxOut->setKey(key,64);
 						UINT32 outlen=0;
 						UINT8* out=DOM_Output::dumpToMem(docSymKey,&outlen);
