@@ -111,6 +111,12 @@ class CAMuxSocket
 			SOCKET getSocket(){return (SOCKET)m_Socket;}
 
 			SINT32 setCrypt(bool b);
+			SINT32 setKey(UINT8* key)
+				{
+					m_oCipherIn.setKeyAES(key);
+					m_oCipherOut.setKeyAES(key);
+					return E_SUCCESS;
+				}
 		private:
 				CASocket m_Socket;
 				UINT32 m_aktBuffPos;

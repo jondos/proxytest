@@ -45,13 +45,14 @@ SINT32 CAMuxSocket::setCrypt(bool b)
 		csSend.lock();
 		csReceive.lock();
 		m_bIsCrypted=b;
-		if(b)
+/*		if(b)
 			{
 				UINT8 nullkey[16];
 				memset(nullkey,0,16);
 				m_oCipherIn.setKeyAES(nullkey);
 				m_oCipherOut.setKeyAES(nullkey);
 			}
+*/
 		csReceive.unlock();
 		csSend.unlock();
 		return E_SUCCESS;
