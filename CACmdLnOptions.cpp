@@ -312,7 +312,8 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 			 {
 					m_arListenerInterfaces[0].type=RAW_UNIX;
 #ifdef HAVE_UNIX_DOMAIN_PROTOCOL
-					m_arListenerInterfaces[0].addr=new CASocketAddrUnix(serverPort);
+					m_arListenerInterfaces[0].addr=new CASocketAddrUnix();
+					m_arListenerInterfaces[0].addr.setPath(serverPort);
 #endif
 					m_arListenerInterfaces[0].hostname=NULL;
 				}
