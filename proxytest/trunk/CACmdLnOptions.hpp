@@ -164,7 +164,7 @@ class CACmdLnOptions
 			}
 
 			/** Set to true if the encrpyted log could/should be used**/
-			SINT32 enabledEncryptedLogEnabled(bool b)
+			SINT32 enableEncryptedLog(bool b)
 			{
 				m_bIsEncryptedLogEnabled=b;
 				return E_SUCCESS;
