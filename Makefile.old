@@ -1,10 +1,10 @@
 #You should only need to change the following lines:
 OPENSSL_INC=/usr/local/ssl/include
 OPENSSL_LIB=/usr/local/ssl/lib
-XERCESC_INC=/usr/local/include/
-XERCESC_LIB=/usr/local/lib
-#XERCESC_INC=/usr/include/
-#XERCESC_LIB=/usr/lib
+#XERCESC_INC=/usr/local/include/
+#XERCESC_LIB=/usr/local/lib
+XERCESC_INC=/usr/include/
+XERCESC_LIB=/usr/lib
 
 #### I believe you do not need to change anything behind this....
 
@@ -74,7 +74,7 @@ linux-x86-gcc:
 	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -finline-functions -fomit-frame-pointer -O3' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
 
 linux-x86-gcc-static:
-	$(MAKE) 'CC=gcc' 'CPPFLAGS=-static -D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -finline-functions -fomit-frame-pointer -O3' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-static -D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -finline-functions -fomit-frame-pointer -O3 --param large-function-growth=300' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
 
 linux-pentium3-gcc-static:
 	$(MAKE) 'CC=gcc' 'CPPFLAGS=-static -D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -finline-functions -fomit-frame-pointer -march=pentium3 -O3' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
