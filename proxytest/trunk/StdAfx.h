@@ -101,7 +101,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		 #undef HAVE_TCP_KEEPALIVE
 	 #endif
 	 #ifndef __FreeBSD__
-    	#define socklen_t int	
+	 #ifndef __linux
+    	#define int socklen_t	
+	 #endif
 	 #endif
     #ifndef O_BINARY
 	#define O_BINARY 0

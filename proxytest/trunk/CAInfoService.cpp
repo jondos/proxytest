@@ -209,7 +209,7 @@ SINT32 CAInfoService::setLevel(SINT32 user,SINT32 risk,SINT32 traffic)
 		iRisk=risk;
 		iTraffic=traffic;
 		LeaveCriticalSection(&csLevel);
-		return 0;
+		return E_SUCCESS;
 	}
 /*
 SINT32 CAInfoService::setMixedPackets(UINT32 nPackets)
