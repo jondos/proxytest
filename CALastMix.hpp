@@ -31,7 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMix.hpp"
 #include "CAMuxSocket.hpp"
 #include "CAASymCipher.hpp"
-#include "CASocketList.hpp"
+//#include "CASocketList.hpp"
 #include "CASocketAddrINet.hpp"
 #include "CACacheLoadBalancing.hpp"
 #include "CASignature.hpp"
@@ -56,8 +56,8 @@ class CALastMix:public CAMix
 			CASocketAddrINet	maddrSocks;
 			CAASymCipher mRSA;
 			CASignature* m_pSignature;
-		private:
-			CASocketList oSuspendList;
+//		private:
+//			CASocketList oSuspendList;
 
 		private:
 			friend THREAD_RETURN loopLog(void*);

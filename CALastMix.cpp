@@ -27,7 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #include "StdAfx.h"
 #include "CALastMix.hpp"
-#include "CASocketList.hpp"
+#include "CALastMixChannelList.hpp"
 #include "CASocketGroup.hpp"
 #include "CASingleSocketGroup.hpp"
 #include "CAMsg.hpp"
@@ -227,17 +227,18 @@ THREAD_RETURN loopLog(void* param)
 
 SINT32 CALastMix::loop()
 	{
-		CASocketList  oSocketList;
+		//CASocketList  oSocketList;
+		CALastMixChannelList* pChannelList=new CALastMixChannelList;
 		CASocketGroup osocketgroupCacheRead;
 		CASocketGroup osocketgroupCacheWrite;
 		CASingleSocketGroup osocketgroupMixIn;
 		MIXPACKET* pMixPacket=new MIXPACKET;
 		SINT32 ret;
 		SINT32 countRead;
-		CONNECTION oConnection;
+		lmChannelListEntry* pChannelListEntry;
 		UINT8 rsaBuff[RSA_SIZE];
-		CONNECTION* tmpCon;
-		HCHANNEL tmpID;
+		//CONNECTION* tmpCon;
+//		HCHANNEL tmpID;
 		CAQueue oqueueMixIn;
 		UINT8* tmpBuff=new UINT8[MIXPACKET_SIZE];
 		osocketgroupMixIn.add(*m_pMuxIn);
@@ -274,7 +275,7 @@ SINT32 CALastMix::loop()
 				if(countRead==1)
 					{
 						bAktiv=true;
-						UINT32 channels=oSocketList.getSize()+1;
+						UINT32 channels=pChannelList->getSize()+1;
 						for(UINT32 k=0;k<channels;k++)
 							{
 								ret=m_pMuxIn->receive(pMixPacket,0);
@@ -287,7 +288,8 @@ SINT32 CALastMix::loop()
 									break;
 								//else one packet received
 								m_logUploadedPackets++;
-								if(!oSocketList.get(pMixPacket->channel,&oConnection))
+								pChannelListEntry=pChannelList->get(pMixPacket->channel);
+								if(pChannelListEntry==NULL)
 									{
 										if(pMixPacket->flags==CHANNEL_OPEN_OLD||pMixPacket->flags==CHANNEL_OPEN_NEW)
 											{
@@ -357,9 +359,9 @@ SINT32 CALastMix::loop()
 																	tmpSocket->setNonBlocking(true);
 																	#ifdef LOG_CHANNEL
 																		getcurrentTimeMillis(current_millis);
-																		oSocketList.add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue(),current_millis,payLen);
+																		pChannelList->add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue()/*,current_millis,payLen*/);
 																	#else
-																		oSocketList.add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue());
+																		pChannelList->add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue());
 																	#endif
 																	osocketgroupCacheRead.add(*tmpSocket);
 																}
@@ -370,37 +372,37 @@ SINT32 CALastMix::loop()
 									{
 										if(pMixPacket->flags==CHANNEL_CLOSE)
 											{
-												osocketgroupCacheRead.remove(*(oConnection.pSocket));
-												osocketgroupCacheWrite.remove(*(oConnection.pSocket));
-												oConnection.pSocket->close();
-												oSocketList.remove(pMixPacket->channel);
+												osocketgroupCacheRead.remove(*(pChannelListEntry->pSocket));
+												osocketgroupCacheWrite.remove(*(pChannelListEntry->pSocket));
+												pChannelListEntry->pSocket->close();
+												delete pChannelListEntry->pSocket;
+												delete pChannelListEntry->pCipher;
+												delete pChannelListEntry->pQueueSend;										
+												pChannelList->removeChannel(pMixPacket->channel);
 												#ifdef LOG_CHANNEL
 													getcurrentTimeMillis(current_millis);
 													diff_time=diff64(current_millis,oConnection.time_created);
 													CAMsg::printMsg(LOG_DEBUG,"Channel %u closed: Time - %u, Upload - %u, Download - %u\n",oConnection.id,diff_time,oConnection.u32Upload,oConnection.u32Download); 
 												#endif
-												delete oConnection.pSocket;
-												delete oConnection.pCipher;
-												delete oConnection.pSendQueue;										
 											}
 										else if(pMixPacket->flags==CHANNEL_SUSPEND)
 											{
 												#ifdef _DEBUG
-													CAMsg::printMsg(LOG_DEBUG,"Suspending channel %u Socket: %u\n",pMixPacket->channel,(SOCKET)(*oConnection.pSocket));
+													CAMsg::printMsg(LOG_DEBUG,"Suspending channel %u Socket: %u\n",pMixPacket->channel,(SOCKET)(*pChannelListEntry->pSocket));
 												#endif
-												osocketgroupCacheRead.remove(*(oConnection.pSocket));
+												osocketgroupCacheRead.remove(*(pChannelListEntry->pSocket));
 											}
 										else if(pMixPacket->flags==CHANNEL_RESUME)
 											{
-												osocketgroupCacheRead.add(*(oConnection.pSocket));
+												osocketgroupCacheRead.add(*(pChannelListEntry->pSocket));
 											}
 										else if(pMixPacket->flags==CHANNEL_DATA)
 											{
-												oConnection.pCipher->decryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+												pChannelListEntry->pCipher->decryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 												ret=ntohs(pMixPacket->payload.len);
 												if(ret>=0&&ret<=PAYLOAD_SIZE)
 													{
-														ret=oConnection.pSendQueue->add(pMixPacket->payload.data,ret);
+														ret=pChannelListEntry->pQueueSend->add(pMixPacket->payload.data,ret);
 														#ifdef LOG_CHANNEL
 															oConnection.u32Upload+=ret;
 														#endif
@@ -409,25 +411,25 @@ SINT32 CALastMix::loop()
 													ret=SOCKET_ERROR;
 												if(ret==SOCKET_ERROR)
 													{
-														osocketgroupCacheRead.remove(*(oConnection.pSocket));
-														osocketgroupCacheWrite.remove(*(oConnection.pSocket));
-														oConnection.pSocket->close();
+														osocketgroupCacheRead.remove(*(pChannelListEntry->pSocket));
+														osocketgroupCacheWrite.remove(*(pChannelListEntry->pSocket));
+														pChannelListEntry->pSocket->close();
 														#ifdef LOG_CHANNEL
 															getcurrentTimeMillis(current_millis);
 															diff_time=diff64(current_millis,oConnection.time_created);
 															CAMsg::printMsg(LOG_DEBUG,"Channel %u closed: Time - %u, Upload - %u, Download - %u\n",oConnection.id,diff_time,oConnection.u32Upload,oConnection.u32Download); 
 														#endif
-														delete oConnection.pSocket;
-														delete oConnection.pCipher;
-														delete oConnection.pSendQueue;
-														oSocketList.remove(pMixPacket->channel);
+														delete pChannelListEntry->pSocket;
+														delete pChannelListEntry->pCipher;
+														delete pChannelListEntry->pQueueSend;
+														pChannelList->removeChannel(pMixPacket->channel);
 														m_pMuxIn->close(pMixPacket->channel,tmpBuff);
 														oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);
 														m_logDownloadedPackets++;	
 													}
 												else
 													{
-														osocketgroupCacheWrite.add(*(oConnection.pSocket));
+														osocketgroupCacheWrite.add(*(pChannelListEntry->pSocket));
 													}
 											}
 									}
@@ -440,47 +442,47 @@ SINT32 CALastMix::loop()
 				if(countRead>0)
 					{
 						bAktiv=true;
-						tmpCon=oSocketList.getFirst();
-						while(tmpCon!=NULL&&countRead>0)
+						pChannelListEntry=pChannelList->getFirstSocket();
+						while(pChannelListEntry!=NULL&&countRead>0)
 							{
-								if(osocketgroupCacheWrite.isSignaled(*(tmpCon->pSocket)))
+								if(osocketgroupCacheWrite.isSignaled(*(pChannelListEntry->pSocket)))
 									{
 										countRead--;
 										SINT32 len=MIXPACKET_SIZE;
-										tmpCon->pSendQueue->peek(tmpBuff,(UINT32*)&len);
-										len=tmpCon->pSocket->send(tmpBuff,len);
+										pChannelListEntry->pQueueSend->peek(tmpBuff,(UINT32*)&len);
+										len=pChannelListEntry->pSocket->send(tmpBuff,len);
 										if(len>0)
 											{
 												add64((UINT64&)m_logUploadedBytes,len);
-												tmpCon->pSendQueue->remove((UINT32*)&len);
-												if(tmpCon->pSendQueue->isEmpty())
+												pChannelListEntry->pQueueSend->remove((UINT32*)&len);
+												if(pChannelListEntry->pQueueSend->isEmpty())
 													{
-														osocketgroupCacheWrite.remove(*(tmpCon->pSocket));
+														osocketgroupCacheWrite.remove(*(pChannelListEntry->pSocket));
 													}
 											}
 										else
 											{
 												if(len==SOCKET_ERROR)
 													{ //do something if send error
-														osocketgroupCacheRead.remove(*(tmpCon->pSocket));
-														osocketgroupCacheWrite.remove(*(tmpCon->pSocket));
-														tmpCon->pSocket->close();
+														osocketgroupCacheRead.remove(*(pChannelListEntry->pSocket));
+														osocketgroupCacheWrite.remove(*(pChannelListEntry->pSocket));
+														pChannelListEntry->pSocket->close();
 														#ifdef LOG_CHANNEL
 															getcurrentTimeMillis(current_millis);
 															diff_time=diff64(current_millis,tmpCon->time_created);
 															CAMsg::printMsg(LOG_DEBUG,"Channel %u closed: Time - %u, Upload - %u, Download - %u\n",tmpCon->id,diff_time,tmpCon->u32Upload,tmpCon->u32Download); 
 														#endif
-														delete tmpCon->pSocket;
-														delete tmpCon->pCipher;
-														delete tmpCon->pSendQueue;
-														m_pMuxIn->close(tmpCon->id,tmpBuff);
+														delete pChannelListEntry->pSocket;
+														delete pChannelListEntry->pCipher;
+														delete pChannelListEntry->pQueueSend;
+														m_pMuxIn->close(pChannelListEntry->channelIn,tmpBuff);
 														oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);			
 														m_logDownloadedPackets++;	
-														oSocketList.remove(tmpCon->id);											 
+														pChannelList->removeChannel(pChannelListEntry->channelIn);											 
 													}
 											}
 									}
-								tmpCon=oSocketList.getNext();
+								pChannelListEntry=pChannelList->getNextSocket();
 							}
 					}
 //End Step 2
@@ -490,32 +492,31 @@ SINT32 CALastMix::loop()
 				countRead=osocketgroupCacheRead.select(false,0);
 				if(countRead>0)
 					{
-						tmpCon=oSocketList.getFirst();
-						while(tmpCon!=NULL&&countRead>0)
+						pChannelListEntry=pChannelList->getFirstSocket();
+						while(pChannelListEntry!=NULL&&countRead>0)
 							{
-								if(osocketgroupCacheRead.isSignaled(*(tmpCon->pSocket)))
+								if(osocketgroupCacheRead.isSignaled(*(pChannelListEntry->pSocket)))
 									{
 										countRead--;
 										if(oqueueMixIn.getSize()<MAX_MIXIN_SEND_QUEUE_SIZE)
 											{
 												bAktiv=true;
-												ret=tmpCon->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE);
+												ret=pChannelListEntry->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE);
 												if(ret==SOCKET_ERROR||ret==0)
 													{
-														osocketgroupCacheRead.remove(*(tmpCon->pSocket));
-														osocketgroupCacheWrite.remove(*(tmpCon->pSocket));
-														tmpCon->pSocket->close();
+														osocketgroupCacheRead.remove(*(pChannelListEntry->pSocket));
+														osocketgroupCacheWrite.remove(*(pChannelListEntry->pSocket));
+														pChannelListEntry->pSocket->close();
 														#ifdef LOG_CHANNEL
 															getcurrentTimeMillis(current_millis);
 															diff_time=diff64(current_millis,tmpCon->time_created);
 															CAMsg::printMsg(LOG_DEBUG,"Channel %u closed: Time - %u, Upload - %u, Download - %u\n",tmpCon->id,diff_time,tmpCon->u32Upload,tmpCon->u32Download); 
 														#endif
-														delete tmpCon->pSocket;
-														delete tmpCon->pCipher;
-														delete tmpCon->pSendQueue;
-														tmpID=tmpCon->id;
-														oSocketList.remove(tmpID);
-														m_pMuxIn->close(tmpID,tmpBuff);
+														delete pChannelListEntry->pSocket;
+														delete pChannelListEntry->pCipher;
+														delete pChannelListEntry->pQueueSend;
+														m_pMuxIn->close(pChannelListEntry->channelIn,tmpBuff);
+														pChannelList->removeChannel(pChannelListEntry->channelIn);
 														oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);			
 														m_logDownloadedPackets++;	
 													}
@@ -525,11 +526,11 @@ SINT32 CALastMix::loop()
 														#ifdef LOG_CHANNEL
 															tmpCon->u32Download+=ret;
 														#endif
-														pMixPacket->channel=tmpCon->id;
+														pMixPacket->channel=pChannelListEntry->channelIn;
 														pMixPacket->flags=CHANNEL_DATA;
 														pMixPacket->payload.len=htons((UINT16)ret);
 														pMixPacket->payload.type=0;
-														tmpCon->pCipher->decryptAES2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+														pChannelListEntry->pCipher->decryptAES2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 														m_pMuxIn->send(pMixPacket,tmpBuff);
 														oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);
 														m_logDownloadedPackets++;
@@ -538,7 +539,7 @@ SINT32 CALastMix::loop()
 										else
 											break;
 									}
-								tmpCon=oSocketList.getNext();
+								pChannelListEntry=pChannelList->getNextSocket();
 							}
 					}
 //end Step 3
@@ -546,7 +547,7 @@ SINT32 CALastMix::loop()
 //Step 4 Writing to previous Mix
 				if(!oqueueMixIn.isEmpty()&&osocketgroupMixIn.select(true,0)==1)
 					{
-						countRead=oSocketList.getSize()+1;
+						countRead=pChannelList->getSize()+1;
 						while(countRead>0&&!oqueueMixIn.isEmpty())
 							{
 								bAktiv=true;
@@ -579,15 +580,16 @@ ERR:
 			{
 				delete pInfoService;
 			}
-		tmpCon=oSocketList.getFirst();
-		while(tmpCon!=NULL)
+		pChannelListEntry=pChannelList->getFirstSocket();
+		while(pChannelListEntry!=NULL)
 			{
-				delete tmpCon->pCipher;
-				delete tmpCon->pSendQueue;
-				tmpCon->pSocket->close();
-				delete tmpCon->pSocket;
-				tmpCon=tmpCon->next;
+				delete pChannelListEntry->pCipher;
+				delete pChannelListEntry->pQueueSend;
+				pChannelListEntry->pSocket->close();
+				delete pChannelListEntry->pSocket;
+				pChannelListEntry=pChannelList->getNextSocket();
 			}
+		delete pChannelList;
 		delete []tmpBuff;
 		delete pMixPacket;
 		oLogThread.join();
@@ -604,7 +606,7 @@ SINT32 CALastMix::clean()
 			}
 		m_pMuxIn=NULL;
 		mRSA.destroy();
-		oSuspendList.clear();
+//		oSuspendList.clear();
 		return E_SUCCESS;
 	}
 

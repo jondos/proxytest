@@ -75,7 +75,7 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,UINT8 peerIP[4],CAQueu
 			return E_UNKNOWN;
 		m_Mutex.lock();
 		fmHashTableEntry* pHashTableEntry=m_HashTable[hashkey];
-		if(pHashTableEntry->pMuxSocket!=NULL) //the entry in the hasttable for this socket (hashkey) must be empty
+		if(pHashTableEntry->pMuxSocket!=NULL) //the entry in the hashtable for this socket (hashkey) must be empty
 			{
 				m_Mutex.unlock();
 				return E_UNKNOWN;

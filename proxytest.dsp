@@ -367,6 +367,10 @@ SOURCE=.\CALastMix.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CALastMixChannelList.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\CALocalProxy.cpp
 # End Source File
 # Begin Source File
@@ -546,6 +550,10 @@ SOURCE=.\CAIPList.hpp
 # Begin Source File
 
 SOURCE=.\CALastMix.hpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CALastMixChannelList.hpp
 # End Source File
 # Begin Source File
 
