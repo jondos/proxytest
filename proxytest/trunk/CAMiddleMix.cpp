@@ -318,6 +318,12 @@ THREAD_RETURN loopDownStream(void *p)
 									CAMsg::printMsg(LOG_CRIT,"loopDownStream -- Fehler bei receive() -- goto ERR!\n");
 									goto ERR;
 								}
+						if (pMixPacket->flags & ~CHANNEL_ALLOWED_FLAGS)
+							{
+								CAMsg::printMsg(LOG_INFO,"loopDownStream received a packet with invalid flags: %0X .  Removing them.\n",(pMixPacket->flags & ~CHANNEL_ALLOWED_FLAGS));
+								pMixPacket->flags&=CHANNEL_ALLOWED_FLAGS;
+							}
+						
 						if(pMix->m_pMiddleMixChannelList->getOutToIn(&channelIn,pMixPacket->channel,&pCipher)==E_SUCCESS)
 							{//connection found
 								if(pMixPacket->flags!=CHANNEL_CLOSE)
@@ -389,6 +395,11 @@ SINT32 CAMiddleMix::loop()
 							{
 								CAMsg::printMsg(LOG_CRIT,"Fehler beim Empfangen -- Exiting!\n");
 								goto ERR;
+							}
+						if (pMixPacket->flags & ~CHANNEL_ALLOWED_FLAGS)
+							{
+								CAMsg::printMsg(LOG_INFO,"loopUpStream received a packet with invalid flags: %0X .  Removing them.\n",(pMixPacket->flags & ~CHANNEL_ALLOWED_FLAGS));
+								pMixPacket->flags&=CHANNEL_ALLOWED_FLAGS;
 							}
 						if(m_pMiddleMixChannelList->getInToOut(pMixPacket->channel,&channelOut,&pCipher)!=E_SUCCESS)
 							{//new connection

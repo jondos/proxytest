@@ -135,7 +135,7 @@ int CAMuxSocket::send(MIXPACKET *pPacket,UINT8* buff)
 		pPacket->channel=htonl(pPacket->channel);
 		pPacket->flags=htons(pPacket->flags);
 		if(m_bIsCrypted)
-    	m_oCipherOut.encryptAES(((UINT8*)pPacket),((UINT8*)pPacket),16);
+			m_oCipherOut.encryptAES(((UINT8*)pPacket),((UINT8*)pPacket),16);
 		memcpy(buff,((UINT8*)pPacket),MIXPACKET_SIZE);
 		ret=MIXPACKET_SIZE;
 		memcpy(pPacket,tmpBuff,16);
@@ -177,7 +177,7 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 timeout)
 		if(ret==len) //whole packet recieved
 			{
 				if(m_bIsCrypted)
-        	m_oCipherIn.decryptAES(m_Buff,m_Buff,16);
+					m_oCipherIn.decryptAES(m_Buff,m_Buff,16);
 				memcpy(pPacket,m_Buff,MIXPACKET_SIZE);
 				pPacket->channel=ntohl(pPacket->channel);
 				pPacket->flags=ntohs(pPacket->flags);
@@ -213,7 +213,7 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 timeout)
 				if(ret==len)
 					{
 						if(m_bIsCrypted)
-              m_oCipherIn.decryptAES(m_Buff,m_Buff,16);
+							m_oCipherIn.decryptAES(m_Buff,m_Buff,16);
 						memcpy(pPacket,m_Buff,MIXPACKET_SIZE);
 						pPacket->channel=ntohl(pPacket->channel);
 						pPacket->flags=ntohs(pPacket->flags);
@@ -252,7 +252,7 @@ UINT32 CAMuxSocket::sigCrime(HCHANNEL channel_id,UINT8* buff)
 		oPacket.channel=channel_id;
 		UINT32 v;
 		getRandom(&v);
-		v&=0x0000FF00;
+		v&=CHANNEL_SIG_CRIME_ID_MASK;
 		oPacket.flags=(CHANNEL_SIG_CRIME|v);
 		send(&oPacket,buff);
 		return (v>>8);

@@ -380,7 +380,7 @@ SINT32 CALastMix::loop()
 																		memcpy(crimeBuff,pMixPacket->payload.data,payLen);
 																		UINT32 id=m_pMuxIn->sigCrime(pMixPacket->channel,tmpBuff);
 																		oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);
-																		CAMsg::printMsg(LOG_CRIT,"Crime detected -- ID: %u -- Content: %s\n",id,crimeBuff,payLen);
+																		CAMsg::printMsg(LOG_CRIT,"Crime detected -- ID: %u -- Content: \n%s\n",id,crimeBuff,payLen);
 																	}
 															#endif
 															if(payLen>PAYLOAD_SIZE||tmpSocket->sendTimeOut(pMixPacket->payload.data,payLen,_SEND_TIMEOUT)==SOCKET_ERROR)
