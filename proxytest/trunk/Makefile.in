@@ -63,7 +63,8 @@ sbinPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(sbin_PROGRAMS)
 am_proxytest_OBJECTS = CAAbstractControlChannel.$(OBJEXT) \
 	CAAbstractXMLEncodable.$(OBJEXT) \
-	CAAccountingControlChannel.$(OBJEXT) CAASymCipher.$(OBJEXT) \
+	CAAccountingControlChannel.$(OBJEXT) \
+	CAAccountingInstance.$(OBJEXT) CAASymCipher.$(OBJEXT) \
 	CABase64.$(OBJEXT) CACacheLoadBalancing.$(OBJEXT) \
 	CACertificate.$(OBJEXT) CACertStore.$(OBJEXT) \
 	CACmdLnOptions.$(OBJEXT) CAConditionVariable.$(OBJEXT) \
@@ -218,6 +219,7 @@ AUTOMAKE_OPTIONS = foreign
 proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CAAbstractXMLEncodable.cpp\
 		    CAAccountingControlChannel.cpp\
+		    CAAccountingInstance.cpp\
 		    CAASymCipher.cpp \
 		    CABase64.cpp \
 		    CACacheLoadBalancing.cpp\
@@ -265,6 +267,7 @@ proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CAAbstractControlChannel.hpp\
 		    CAAbstractXMLEncodable.hpp\
 		    CAAccountingControlChannel.hpp\
+		    CAAccountingInstance.hpp\
 		    CAASymCipher.hpp \
 		    CABase64.hpp \
 		    CACacheLoadBalancing.hpp\
@@ -412,6 +415,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAAbstractControlChannel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAAbstractXMLEncodable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAAccountingControlChannel.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAAccountingInstance.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CABase64.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CACacheLoadBalancing.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CACertStore.Po@am__quote@
