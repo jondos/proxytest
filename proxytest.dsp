@@ -67,7 +67,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /G6 /MDd /W4 /Gm /vmb /GX- /ZI /Od /I "g:\openssl-0.9.6c\inc32" /I ".\pthread\include" /I "g:\xerces-c1_7_0-win32\include" /I "n:\mysql\include" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "_DEBUG" /D "DO_TRACE" /D "_REENTRANT" /D "__MIX_TEST" /D "PAYMENT_SUPPORT" /D "__CLEANUP_C" /FAcs /FR /Yu"stdafx.h" /FD /GZ /c
+# ADD CPP /nologo /G6 /MDd /W4 /Gm /vmb /GX- /ZI /Od /I "g:\openssl-0.9.6c\inc32" /I ".\pthread\include" /I "g:\xerces-c1_7_0-win32\include\xercesc" /I "n:\mysql\include" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "_DEBUG" /D "DO_TRACE" /D "_REENTRANT" /D "__MIX_TEST" /D "PAYMENT_SUPPORT" /D "__CLEANUP_C" /FAcs /FR /Yu"stdafx.h" /FD /GZ /c
 # ADD BASE RSC /l 0x407 /d "_DEBUG"
 # ADD RSC /l 0x407 /d "_DEBUG"
 BSC32=bscmake.exe
