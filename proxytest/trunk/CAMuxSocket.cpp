@@ -87,11 +87,20 @@ int CAMuxSocket::send(HCHANNEL channel_id,char* buff,unsigned short bufflen)
 */	
 int CAMuxSocket::send(MUXPACKET *pPacket)
 	{
+			
+//		pPacket->data[pPacket->len]=0;
+//		printf("%s\n",pPacket->data);
+	
+	
 		int MuxPacketSize=sizeof(MUXPACKET);
 		int aktIndex=0;
 		int len=0;
 		pPacket->channel=htonl(pPacket->channel);
 		pPacket->len=htons(pPacket->len);
+		
+		
+		
+		
 		if(!bIsTunneld)
 			{
 				do
@@ -180,7 +189,7 @@ int CAMuxSocket::receive(MUXPACKET* pPacket)
 
 		pPacket->len=ntohs(pPacket->len);	
 		pPacket->channel=ntohl(pPacket->channel);
-		return len;
+		return pPacket->len;
 	}
 
 int CAMuxSocket::close(HCHANNEL channel_id)

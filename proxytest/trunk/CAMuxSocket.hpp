@@ -28,11 +28,7 @@ class CAMuxSocket
 			int accept(unsigned short port);
 			int connect(LPSOCKETADDR psa);
 			int close();
-		//	int send(HCHANNEL channel_id,char* buff,unsigned short len);
-	//		int send(MUXPACKET *pPacket);
 			int send(MUXPACKET *pPacket);
-			//int receive(HCHANNEL* channel_id,char* buff,unsigned short len);
-//			int receive(MUXPACKET *pPacket);
 			int receive(MUXPACKET *pPacket);
 			int close(HCHANNEL channel_id);
 			operator CASocket*(){return &m_Socket;}
@@ -41,18 +37,11 @@ class CAMuxSocket
 												else
 													return tunnel_pollin_fd(m_pTunnel);}
 
-//			int setDecryptionKey(unsigned char* key);
-//			int setEncryptionKey(unsigned char* key);
 		private:
 			CASocket m_Socket;
 			bool bIsTunneld;
 			Tunnel* m_pTunnel;
 			char *m_szTunnelHost;
 			unsigned short m_uTunnelPort;
-
-
-//			CASymCipher oSymCipher;
-//			bool bDecrypt;
-//			bool bEncrypt;
 	};
 #endif
