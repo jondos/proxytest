@@ -93,6 +93,7 @@ THREAD_RETURN SocketASyncSendLoop(void* p)
 					}
 				LeaveCriticalSection(&pASyncSend->cs);
 			}
+		THREAD_RETURN_SUCCESS;
 	}
 
 //#define SENDQUEUEFULLSIZE 100
