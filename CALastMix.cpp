@@ -50,7 +50,8 @@ SINT32 CALastMix::initOnce()
 		if(cntTargets==0)
 			return E_UNKNOWN;
 		CASocketAddrINet oAddr;
-		for(UINT32 i=1;i<=cntTargets;i++)
+		UINT32 i;
+		for(i=1;i<=cntTargets;i++)
 			{
 				options.getTargetAddr(oAddr,i);
 				m_oCacheLB.add(oAddr);
