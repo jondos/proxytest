@@ -26,7 +26,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 
-// stdafx.h : Include-Datei für Standard-System-Include-Dateien,
+// stdafx.h : Include-Datei fuer Standard-System-Include-Dateien,
 //  oder projektspezifische Include-Dateien, die haeufig benutzt, aber
 //      in unregelmaessigen Abstaenden geaendert werden.
 //
@@ -76,7 +76,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		typedef unsigned char UINT8;
 		typedef signed char SINT8;
 #else
-    #include <sys/ioctl.h>
+    #include "config.h"
+
+#define PROT2
+
+		#include <sys/ioctl.h>
     #include <sys/socket.h>
     #include <sys/poll.h>
     #include <sys/time.h>

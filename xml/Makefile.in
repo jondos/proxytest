@@ -199,13 +199,6 @@ distdir: $(DISTFILES)
 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
 	  fi; \
 	done
-xmlinput.o: xmlinput.cpp ../StdAfx.h ../popt/system.h ../popt/popt.h \
-	xmlstream.h xmlconfig.h xmlinputp.h xmlinput.h
-xmlinput_c.o: xmlinput_c.c ../StdAfx.h ../popt/system.h ../popt/popt.h \
-	xmlstream.h xmlconfig.h xmlinputp.h xmlinput.h
-xmloutput.o: xmloutput.cpp ../StdAfx.h ../popt/system.h ../popt/popt.h \
-	xmloutput.h xmlstream.h xmlconfig.h
-
 info-am:
 info: info-am
 dvi-am:

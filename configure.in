@@ -142,4 +142,4 @@ fi
 
 CXXFLAGS=$CFLAGS
 
-AC_OUTPUT(Makefile popt/Makefile xml/Makefile httptunnel/Makefile)
+AC_OUTPUT(Makefile popt/Makefile xml/Makefile aes/Makefile)
