@@ -1065,7 +1065,7 @@ int main(int argc, const char* argv[])
 		oSig.signXML(in,strlen(in),buff,&l);
 		buff[l]=0;
 
-		handle=open("g:\\projects\\InfoService\\jap.signed.xml",O_CREAT|O_BINARY|O_WRONLY);
+		handle=open("g:\\projects\\InfoService\\jap.signed.xml",O_CREAT|O_BINARY|O_WRONLY,_S_IWRITE);
 		write(handle,buff,l);
 		close(handle);
 		exit(0);
