@@ -237,8 +237,7 @@ int main(int argc, const char* argv[])
 				exit(0);
 			}		
 */
-#ifdef _DEBUG
-	#ifdef _WIN32
+#if defined(_WIN32) && defined(_DEBUG)
 /*			_CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_FILE );
 			_CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDOUT );
 			_CrtSetReportMode( _CRT_ERROR, _CRTDBG_MODE_FILE );
@@ -251,8 +250,6 @@ int main(int argc, const char* argv[])
 			tmpDbgFlag |=_CRTDBG_LEAK_CHECK_DF;
 			_CrtSetDbgFlag(tmpDbgFlag);
 			_CrtMemState s1, s2, s3;
-	#endif
-
 #endif 
 //Switch on debug infos
 #ifdef CWDEBUG
@@ -464,7 +461,7 @@ Debug(dc::malloc.on());
 		#endif
    XMLPlatformUtils::Terminate();
 		CAMsg::printMsg(LOG_CRIT,"Terminating Programm!\n");
-#ifdef _WIN32
+#if defined(_WIN32) && defined(_DEBUG)
 		_CrtMemCheckpoint( &s2 );
 		if ( _CrtMemDifference( &s3, &s1, &s2 ) )
       _CrtMemDumpStatistics( &s3 );

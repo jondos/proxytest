@@ -470,7 +470,7 @@ SINT32 CAFirstMixChannelList::test()
 		CAMuxSocket *pMuxSocket=new CAMuxSocket();
 		((CASocket*)pMuxSocket)->create();
 		pList->add(pMuxSocket,NULL);
-#ifdef _WIN32
+#if defined(_WIN32) && defined(_DEBUG)
 		_CrtMemState s1, s2, s3;
 		_CrtMemCheckpoint( &s1 );
 #endif
@@ -479,7 +479,7 @@ SINT32 CAFirstMixChannelList::test()
 			pList->addChannel(pMuxSocket,i,NULL,&channelOut);
 		for(i=0;i<50;i++)
 			pList->removeChannel(pMuxSocket,i);
-#ifdef _WIN32
+#if defined(_WIN32) && defined(_DEBUG)
 		_CrtMemCheckpoint( &s2 );
 		if ( _CrtMemDifference( &s3, &s1, &s2 ) )
       _CrtMemDumpStatistics( &s3 );
