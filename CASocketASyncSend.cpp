@@ -73,7 +73,7 @@ THREAD_RETURN SocketASyncSendLoop(void* p)
 										UINT32 t2=time(NULL)-t1;
 										if(t2>1)
 											{
-												CAMsg::printMsg(LOG_DEBUG,"Real AsynCSend takes more than one second! - %u seconds\n",t2); 
+												CAMsg::printMsg(LOG_DEBUG,"Real AsyncSend takes more than one second! - %u seconds\n",t2); 
 											}
 									}
 								if(akt->bwasOverFull&&akt->pQueue->getSize()<pASyncSend->m_SendQueueLowWater)
