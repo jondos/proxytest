@@ -6,14 +6,14 @@
 
 typedef struct connlist
 	{
-		HCHANNEL id;
+		CASymCipher* pCipher;
+		connlist* next;
 		union
 			{
 				CASocket* pSocket;
 				HCHANNEL outChannel;
 			};
-		CASymCipher* pCipher;
-		connlist* next;
+		HCHANNEL id;
 	} CONNECTIONLIST,CONNECTION;
 		
 struct t_MEMBLOCK;
