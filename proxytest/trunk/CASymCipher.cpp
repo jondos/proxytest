@@ -102,27 +102,7 @@ SINT32 CASymCipher::setKeyAES(UINT8* key)
 		return E_SUCCESS;
 	}
 
-/*SINT32 CASymCipher::encryptAES(UINT8* in,UINT32 len)
-	{
-		cipherInstance cipher;
-		cipherInit(&cipher, MODE_ECB,NULL);
-		UINT32 i=0;
-		while(i<len-15)
-			{
-				blockEncrypt(&cipher,&keyEncAES,iv,16<<3,iv);
-				for(int k=0;k<16;k++)
-					in[i++]^=iv[k];
-			}
-		if(i<len)
-			{
-				blockEncrypt(&cipher,&keyEncAES,iv,16<<3,iv);
-				len-=i;
-				for(int k=0;k<len;k++)
-					in[i++]^=iv[k];
-			}
-		return E_SUCCESS;
-	}
-*/
+
 SINT32 CASymCipher::decryptAES(UINT8* in,UINT8* out,UINT32 len)
 	{
 		UINT32 i=0;
