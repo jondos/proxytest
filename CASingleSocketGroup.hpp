@@ -35,8 +35,8 @@ typedef CASocketGroup CASingleSocketGroup;
 class CASingleSocketGroup
 	{
 		public:
-			CASingleSocketGroup();
-			~CASingleSocketGroup();
+			CASingleSocketGroup(){m_pollfd=new struct pollfd;}
+			~CASingleSocketGroup(){delete m_pollfd;}
 			SINT32 add(CASocket&s);
 			SINT32 add(CAMuxSocket&s);
 			SINT32 select();
@@ -57,7 +57,7 @@ class CASingleSocketGroup
 				}
 */
 		protected:
-			struct pollfd m_poolfd;
+			struct pollfd* m_pollfd;
 	};
 #endif
 #endif
