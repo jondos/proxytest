@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<MixCascade version="0.1">
+  <MixProtocolVersion>..</MixProtocolVersion>
+  <Mixes count="..">
+    <Mix id="..">
+      <RSAKeyValue>...</RSAKeyValue> <!--- PubKey of FirstMix -->
+    </Mix>
+    <Mix id=".">
+      <RSAKeyValue>...</RSAKeyValue> <!--- PubKey of second Mix etc. -->
+      <Signature>..</Signature> <!--- from Mix -->
+    </Mix>
+  </Mixes>
+  <Signature>..</Signature> <!--- from FirstMix -->
+</MixCascade>

@@ -243,6 +243,20 @@ See \ref XMLMixHELO "[XML]" for a description of the XML struct send.
 status of the Mix cascade including Number of Users, Traffic situation etc.
 See \ref XMLMixCascadeStatus "[XML]" for a description of the XML struct send. 
 
+\section docMixJap Communication between Mix and JAP
+
+\image html JAPMixJap.gif "Figure 6: Communication between Mix and JAP"
+
+\li 1. JAP opens a TCP/IP connection to a FirstMix
+
+\li 2. FirstMix sends information about the cascade (including public keys of the Mixes) to the JAP.
+See \ref XMLMixKeyInfo "[XML]" for a description of the XML struct send. 
+
+\li 3. JAP sends a special MixPacket, containing only 2 symmetric keys encrpyted with the
+public key of the FirstMix. This keys are used for link encryption between JAP and FirstMix.
+Note: At the moment this is binary - but will use XML in the future.
+
+\li 4. Normal MixPacket exchange according to the mix protocol.
 */
 
 

@@ -4,6 +4,7 @@
 	Version="7.10"
 	Name="doxygen"
 	ProjectGUID="{63F1E1AB-809D-459B-BAF1-F5B05512E248}"
+	RootNamespace="doxygen"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -109,10 +110,17 @@
 	</References>
 	<Files>
 		<File
-			RelativePath="..\proxytest_win.doxy">
+			RelativePath=".\proxytest_win.doxy">
 		</File>
 		<File
-			RelativePath="..\proxytest_win_short.doxy">
+			RelativePath=".\proxytest_win_short.doxy">
+			<FileConfiguration
+				Name="Debug|Win32">
+				<Tool
+					Name="VCCustomBuildTool"
+					CommandLine="s:\doxygen\bin\doxygen g:\proxytest\proxytest_win_short.doxy"
+					Outputs="$ProjectDir\doc_short\html\index.html"/>
+			</FileConfiguration>
 		</File>
 	</Files>
 	<Globals>
