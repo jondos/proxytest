@@ -319,7 +319,7 @@ SINT32 CASocket::setKeepAlive(UINT32 sec)
 #endif
 	}
 
-SINT32 CASocket::setASyncSend(bool b,SINT32 size,CAFirstMix* pMix)
+SINT32 CASocket::setASyncSend(bool b,SINT32 size,CASocketASyncSendResume* pResume)
 	{
 		if(b)
 			{
@@ -328,7 +328,7 @@ SINT32 CASocket::setASyncSend(bool b,SINT32 size,CAFirstMix* pMix)
 				if(m_pASyncSend==NULL)
 					{
 						m_pASyncSend=new CASocketASyncSend();
-						m_pASyncSend->setFirstMix(pMix);
+						m_pASyncSend->setResume(pResume);
 						m_pASyncSend->start();
 					}
 			}

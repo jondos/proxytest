@@ -75,6 +75,15 @@ int CASocketGroup::remove(CASocket&s)
 		return 0;
 	}
 
+int CASocketGroup::remove(CAMuxSocket&s)
+	{
+		#ifdef _DEBUG
+			CAMsg::printMsg(LOG_DEBUG,"CASocketGroutp: Removed SOCKET: %u\n",(SOCKET)s);
+		#endif
+		FD_CLR((SOCKET)s,&m_fdset);
+		return 0;
+	}
+
 int CASocketGroup::select()
 	{
 		memcpy(&m_signaled_set,&m_fdset,sizeof(fd_set));

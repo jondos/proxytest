@@ -25,6 +25,8 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
+#ifndef __CASOCKETGROUP__
+#define __CASOCKETGROUP__
 #include "CAMuxSocket.hpp"
 class CASocketGroup
 	{
@@ -33,6 +35,7 @@ class CASocketGroup
 			int add(CASocket&s);
 			int add(CAMuxSocket&s);
 			int remove(CASocket&s);
+			int remove(CAMuxSocket&s);
 			int select();
 			SINT32 select(bool bWrite,UINT32 time_ms);
 			bool isSignaled(CASocket&s);
@@ -45,3 +48,4 @@ class CASocketGroup
 			    int max;
 			#endif
 	};
+#endif

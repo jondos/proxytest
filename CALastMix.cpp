@@ -31,7 +31,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketGroup.hpp"
 #include "CAMsg.hpp"
 #include "CACmdLnOptions.hpp"
-
 extern CACmdLnOptions options;
 
 
@@ -349,6 +348,9 @@ SINT32 CALastMix::loop()
 										    }
 										else
 										    {    
+#ifdef _ASYNC
+													tmpSocket->setASyncSend(true,-1,this);
+#endif													
 													//tmpSocket->setASyncSend(true);
 													int payLen=ntohs(oMuxPacket.payload.len);
 													#ifdef _DEBUG
@@ -383,6 +385,7 @@ SINT32 CALastMix::loop()
 									{
 										oSocketGroup.remove(*(oConnection.pSocket));
 										oConnection.pSocket->close();
+										deleteResume(oMuxPacket.channel);
 										muxIn.close(oMuxPacket.channel);
 										oSocketList.remove(oMuxPacket.channel);
 										delete oConnection.pSocket;
@@ -390,7 +393,6 @@ SINT32 CALastMix::loop()
 									}
 								else if(oMuxPacket.flags==CHANNEL_SUSPEND)
 									{
-										CAMsg::printMsg(LOG_INFO,"Suspending channel: %u\n",oMuxPacket.channel);
 										oSocketGroup.remove(*(oConnection.pSocket));
 									}
 								else if(oMuxPacket.flags==CHANNEL_RESUME)
@@ -413,6 +415,16 @@ SINT32 CALastMix::loop()
 												oSocketList.remove(oMuxPacket.channel);
 												delete oConnection.pSocket;
 												delete oConnection.pCipher;
+												deleteResume(oMuxPacket.channel);
+											}
+										else if(ret==E_QUEUEFULL)
+											{
+												EnterCriticalSection(&csResume);
+												oSuspendList.add(oMuxPacket.channel,oConnection.pSocket,NULL);
+												oMuxPacket.flags=CHANNEL_SUSPEND;
+												CAMsg::printMsg(LOG_INFO,"Suspending channel %u\n",oMuxPacket.channel);
+												muxIn.send(&oMuxPacket);
+												LeaveCriticalSection(&csResume);
 											}
 									}
 							}
@@ -440,6 +452,7 @@ SINT32 CALastMix::loop()
 												delete tmpCon->pSocket;
 												delete tmpCon->pCipher;
 												oSocketList.remove(tmpCon->id);
+												deleteResume(tmpCon->id);
 											}
 										else 
 											{
@@ -475,7 +488,29 @@ SINT32 CALastMix::clean()
 	{
 		muxIn.close();
 		mRSA.destroy();
+		oSuspendList.clear();
 		return E_SUCCESS;
 	}
+
+void CALastMix::resume(CASocket* pSocket)
+	{
+		EnterCriticalSection(&csResume);
+		CONNECTION oConnection;
+		if(oSuspendList.get(&oConnection,pSocket))
+			{
+				MUXPACKET oMuxPacket;
+				oMuxPacket.flags=CHANNEL_RESUME;
+				oMuxPacket.channel=oConnection.id;
+				muxIn.send(&oMuxPacket);
+				oSuspendList.remove(oConnection.id);
+			}
+		LeaveCriticalSection(&csResume);
+	}
+void CALastMix::deleteResume(HCHANNEL id)
+{
+		EnterCriticalSection(&csResume);
+		oSuspendList.remove(id);
+		LeaveCriticalSection(&csResume);
+}
 
 #endif

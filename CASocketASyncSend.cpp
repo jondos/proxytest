@@ -57,7 +57,7 @@ THREAD_RETURN SocketASyncSendLoop(void* p)
 								if(akt->bwasOverFull&&akt->pQueue->getSize()<BUFFLOWLEVEL)
 									{
 										CAMsg::printMsg(LOG_INFO,"Resumeing...\n");
-										pASyncSend->pFirstMix->resume(akt->pSocket);
+										pASyncSend->pResume->resume(akt->pSocket);
 										akt->bwasOverFull=false;
 									}
 								if(akt->pQueue->isEmpty())

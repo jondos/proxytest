@@ -34,7 +34,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAASymCipher.hpp"
 #include "CASignature.hpp"
 #include "CAMuxChannelList.hpp"
-class CAFirstMix:public CAMix
+#include "CASocketASyncSend.hpp"
+class CAFirstMix:public CAMix,CASocketASyncSendResume
 	{
 		public:
 			CAFirstMix(){InitializeCriticalSection(&csResume);}
@@ -60,6 +61,7 @@ class CAFirstMix:public CAMix
 			CAMuxChannelList oSuspendList;
 		public:
 			void resume(CASocket* pSocket);
+		private:	
 			CRITICAL_SECTION csResume;
 			void deleteResume(CAMuxSocket* pMuxSocket);
 			void deleteResume(CAMuxSocket*pMuxSocket,HCHANNEL outCahnnel);

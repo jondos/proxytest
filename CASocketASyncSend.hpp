@@ -25,11 +25,17 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
+#ifndef __CASOCKETASYNCSEND__
+#define __CASOCKETASYNCSEND__
 #include "CASocketGroup.hpp"
 #include "CASocket.hpp"
 #include "CAQueue.hpp"
 
-class CAFirstMix;
+class CASocketASyncSendResume
+	{
+		public:
+			virtual void resume(CASocket* pSocket)=0;
+	};
 
 typedef struct __t_socket_list
 	{
@@ -58,7 +64,8 @@ class CASocketASyncSend
 				CRITICAL_SECTION cs;
 			#endif
 
-				public:
-					void setFirstMix(CAFirstMix* pMix){pFirstMix=pMix;}
-				CAFirstMix* pFirstMix;
+		public:
+				void setResume(CASocketASyncSendResume* resume){pResume=resume;}
+				CASocketASyncSendResume* pResume;
 	};
+#endif

@@ -53,7 +53,10 @@ class CASocketList
 			SINT32 add(HCHANNEL in,HCHANNEL out,CASymCipher* pCipher);
 			bool	get(HCHANNEL in,CONNECTION* out);
 			bool	get(CONNECTION* in,HCHANNEL out);
+			bool	get(CONNECTION* in,CASocket* pSocket);
+			
 			CASocket* remove(HCHANNEL id);
+			SINT32 clear();
 			CONNECTION* getFirst();
 			CONNECTION* getNext();
 		protected:
