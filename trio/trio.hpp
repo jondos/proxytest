@@ -105,12 +105,6 @@ int trio_snprintfcat(char *buffer, size_t max, const char *format, ...);
 int trio_vsnprintfcat(char *buffer, size_t bufferSize, const char *format,
                       va_list args);
 
-char *trio_aprintf(const char *format, ...);
-char *trio_vaprintf(const char *format, va_list args);
-
-int trio_asprintf(char **ret, const char *format, ...);
-int trio_vasprintf(char **ret, const char *format, va_list args);
-
 #endif /* WITHOUT_TRIO */
 
 #endif /* TRIO_TRIO_H */

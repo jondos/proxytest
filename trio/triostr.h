@@ -79,11 +79,10 @@ typedef struct _trio_string_t trio_string_t;
 
 trio_string_t *trio_string_create(int initial_size);
 void trio_string_destroy(trio_string_t *self);
-char *trio_string_get(trio_string_t *self, int offset);
 void trio_xstring_set(trio_string_t *self, char *buffer);
 char *trio_string_extract(trio_string_t *self);
 int trio_string_size(trio_string_t *self);
-void trio_string_terminate(trio_string_t *self);
+
 
 int trio_string_append(trio_string_t *self, trio_string_t *other);
 int trio_string_contains(trio_string_t *self, trio_string_t *other);
