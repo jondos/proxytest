@@ -492,6 +492,9 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 		UINT32 tmpLen=255;
 		if(getDOMElementValue(elemVersion,strVersion,&tmpLen)==E_SUCCESS)
 			{
+#ifdef _DEBUG
+				CAMsg::printMsg(LOG_INFO,"MixProtocolVersion:%s\n",strVersion);
+#endif
 				if(tmpLen==3&&memcmp(strVersion,"0.4",3)==0)
 					{
 						CAMsg::printMsg(LOG_INFO,"MixCascadeProtocolVersion: 0.4\n");
@@ -504,12 +507,34 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 				else
 						m_MixCascadeProtocolVersion=MIX_CASCADE_PROTOCOL_VERSION_0_3;
 			}
+		else
+		{
+#ifdef _DEBUG
+			CAMsg::printMsg(LOG_ERR,"No MixProtocolVersion given!\n");
+			return E_UNKNOWN;
+#endif
+		}
 		DOM_Element elemMixes;
 		getDOMChildByName(root,(UINT8*)"Mixes",elemMixes,false);
 		int chainlen=-1;
 		if(elemMixes==NULL||getDOMElementAttribute(elemMixes,"count",&chainlen)!=E_SUCCESS)
-			return E_UNKNOWN;
+			{
+#ifdef _DEBUG
+				CAMsg::printMsg(LOG_ERR,"No count of Mixes given!\n");
+				return E_UNKNOWN;
+#endif
+			}
 		m_chainlen=(UINT32)chainlen;
+#ifdef _DEBUG
+		CAMsg::printMsg(LOG_INFO,"Number of Mixes is: %u\n",m_chainlen);
+#endif
+		if(m_chainlen==0)
+			{
+#ifdef _DEBUG
+				CAMsg::printMsg(LOG_ERR,"Number of Mixes is 0!\n");
+				return E_UNKNOWN;
+#endif
+			}
 		UINT32 i=0;
 		m_arRSA=new CAASymCipher[m_chainlen];
 		DOM_Node child=elemMixes.getLastChild();
@@ -519,13 +544,23 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 					{
 						DOM_Node nodeKey=child.getFirstChild();
 						if(m_arRSA[i++].setPublicKeyAsDOMNode(nodeKey)!=E_SUCCESS)
-							return E_UNKNOWN;						
+							{
+#ifdef _DEBUG
+								CAMsg::printMsg(LOG_ERR,"Error in parsing the public key of a Mix\n");
+								return E_UNKNOWN;
+#endif
+							}
 						chainlen--;
 					}
 				child=child.getPreviousSibling();
 			}
 		if(chainlen!=0)
-			return E_UNKNOWN;
+			{
+#ifdef _DEBUG
+				CAMsg::printMsg(LOG_ERR,"Expected information for %u Mixes but found only %u!\n",m_chainlen,m_chainlen-chainlen);
+				return E_UNKNOWN;
+#endif
+			}
 		//Now sending SymKeys....
 		MIXPACKET oPacket;
 		oPacket.flags=0;
