@@ -249,6 +249,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include <openssl/dsa.h>
 #include <openssl/sha.h>
 #include <openssl/rand.h>
+#include <openssl/aes.h>
 #include <openssl/evp.h>
 #include <openssl/asn1.h>
 #include <openssl/pkcs12.h>
