@@ -49,7 +49,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	//Delay is at the moment constant (max . Channel-Traffic: 10 KByte/s)
 //	#define DELAY_CHANNEL_SEND_INTERVALL 100 //Minimum time between two delayed packets (in ms)
 #endif
-#define LOG_CRIME
+//#define LOG_CRIME
 //#define PAYMENT //to enable payment support
 //#define NO_PARKING //to disable control flow
 //#define NO_LOOPACCEPTUSER //to disable user accept thread for First Mix
