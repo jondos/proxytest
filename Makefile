@@ -1,10 +1,12 @@
 .SUFFIXES:
 .SUFFIXES: .o .cpp	
 
-CC=gcc
-#CC=CC -mips4 -64
+#CC=gcc
+#
+CC=CC -mips4 -64
 INCLUDE = -I. -I/usr/users/sya/sk13/openssl/include -I/home/imis/mix/openssl64/include -I/sun/ikt/sk13/openssl/include
-LIBS	= -L/usr/users/sya/sk13/openssl/lib -L/home/imis/mix/openssl64/lib -L/sun/ikt/sk13/openssl/lib ./popt/popt.a ./httptunnel/httptunnel.a ./xml/xml.a -lcrypto -lpthread -lstdc++
+LIBS	= -L/usr/users/sya/sk13/openssl/lib -L/home/imis/mix/openssl64/lib -L/sun/ikt/sk13/openssl/lib ./popt/popt.a ./httptunnel/httptunnel.a ./xml/xml.a -lcrypto -lpthread
+# -lstdc++
 #CPPFLAGS =-O3 -Wall 
 CPPFLAGS =-O3 -D_REENTRANT
 #DEBUG =-D_DEBUG -g
@@ -35,8 +37,8 @@ all_sun: $(OBJS) popt.a httptunnel.a xml.a
 	$(CC) -o proxytest $(OBJS) $(LIBS) -lsocket -lnsl
 
 all_sgi: $(OBJS) httptunnel.a popt.a xml.a
-	CC=CC -64 -mips4
-	$(CC) -o proxytest $(OBJS) $(LIBS) -lsocket -lnsl
+	$(CC) -o proxytest $(OBJS) $(LIBS) 
+#	#-lsocket -lnsl
 
 debug: $(OBJS) popt.a httptunnel.a xml.a
 	$(CC) -o proxytest $(OBJS) $(LIBS)

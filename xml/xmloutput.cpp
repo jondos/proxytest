@@ -23,9 +23,10 @@
 	http://www.gnu.org/copyleft/lgpl.html
 */
 
+#include "../StdAfx.h"
 #include "xmloutput.h"
-#include <stdio.h>
-#include <assert.h>
+//#include <stdio.h>
+//3~/#include <assert.h>
 
 XML_BEGIN_NAMESPACE
 
@@ -53,7 +54,7 @@ void Output::writeLine(const char *str)
 	write("\n", 1);
 }
 
-Output &Output::operator<<(const std::string &str)
+Output &Output::operator<<(const /*std::*/string &str)
 {
 	write(str.c_str(), str.size());
 	return *this;
@@ -167,7 +168,7 @@ void Output::EndElement(Mode mode)
 	(*this) << "</" << name << ">" << "\n";
 }
 
-void Output::WriteElement(const char *name, const std::string &value)
+void Output::WriteElement(const char *name, const /*std::*/string &value)
 {
 	assert(name);
 	BeginElement(name, terse);
@@ -216,7 +217,7 @@ void Output::WriteElement(const char *name, bool value)
 	EndElement(terse);
 }
 
-void Output::WriteAttr(const char *name, const std::string &value)
+void Output::WriteAttr(const char *name, const /*std::*/string &value)
 {
 	assert(mAttributes);
 	assert(name);

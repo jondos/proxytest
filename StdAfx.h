@@ -81,14 +81,16 @@
     #define THREAD_RETURN_ERROR return(NULL)
     #define THREAD_RETURN_SUCCESS return (NULL)
     
-    #define min(a,b) ((a<b)?(a):(b))
+//    #define min(a,b) ((a<b)?(a):(b))
 		#define GETERROR (errno) 
 		#define E_TIMEDOUT ETIMEDOUT
 		#define E_CONNREFUSED ECONNREFUSED
-		#ifdef __sgi
+//		#ifdef __sgi
 			#include <alloca.h>
 			#include <ctype.h>
-    #endif
+			#include <mstring.h>
+			extern "C++" {typedef basic_string <char> string;}
+//    #endif
 #endif
 
 #define E_SUCCESS 0		

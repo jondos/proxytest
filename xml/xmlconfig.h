@@ -28,7 +28,7 @@
 	#define XML_END_NAMESPACE	}
 #endif
 
-#include <stdlib.h>
+//#include <stdlib.h>
 
 #ifdef XML_UNICODE
 	#error UNICODE not implemented
