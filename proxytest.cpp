@@ -211,7 +211,12 @@ THREAD_RETURN proxytomix(void* tmpPair)
 	{
 		CASocket* inSocket=((CASocketToMix*)tmpPair)->in;	
 		CAMixSocket* outSocket=((CASocketToMix*)tmpPair)->out;	
-		char buff[1001];
+		char* buff=new char[1001];
+		if(buff==NULL)
+		    {
+			printf("No more Memory!\n");
+			return(THREAD_RETURN_ERROR);
+		    }    
 		while(true)
 			{
 				int len=inSocket->receive(buff,1000);
@@ -219,11 +224,10 @@ THREAD_RETURN proxytomix(void* tmpPair)
 					{
 						break;
 					}
-				buff[len]=0;
-//				printf(buff);
 				if(outSocket->send(buff,len)==SOCKET_ERROR)
 					break;
 			}
+		delete buff;
 		EnterCriticalSection(&csClose);
 		if(inSocket->close(SD_RECEIVE)==0)
 			delete inSocket;
@@ -237,7 +241,12 @@ THREAD_RETURN mixtoproxy(void* tmpPair)
 	{
 		CAMixSocket* inSocket=((CAMixToSocket*)tmpPair)->in;	
 		CASocket* outSocket=((CAMixToSocket*)tmpPair)->out;	
-		char buff[1000];
+		char* buff=new char[1001];
+		if(buff==NULL)
+		    {
+			printf("Out of Memory!\n");
+			return(THREAD_RETURN_ERROR);
+		    }
 		while(true)
 			{
 				int len=inSocket->receive(buff,1000);
@@ -248,6 +257,7 @@ THREAD_RETURN mixtoproxy(void* tmpPair)
 				if(outSocket->send(buff,len)==SOCKET_ERROR)
 					break;
 			}
+		delete buff;
 		EnterCriticalSection(&csClose);
 		if(inSocket->close(SD_RECEIVE)==0)
 			delete inSocket;
@@ -287,6 +297,11 @@ int main(int argc, char* argv[])
 			{
 				CAMixToSocket* tmpPair2=new CAMixToSocket();
 				CASocketToMix* tmpPair1=new CASocketToMix();
+				if(tmpPair2==NULL||tmpPair1==NULL)
+				    {
+					printf("Less memory!\n");
+					exit(-1);
+				    }
 				tmpPair1->in=new CASocket();
 				socketIn.accept(*tmpPair1->in);
 				tmpPair1->out=new CAMixSocket();
@@ -295,12 +310,27 @@ int main(int argc, char* argv[])
 				tmpPair2->in=tmpPair1->out;
 				tmpPair2->out=tmpPair1->in;
 				#ifdef _WIN32
-				_beginthread(proxytomix,0,tmpPair1);
-				_beginthread(mixtoproxy,0,tmpPair2);
+				    _beginthread(proxytomix,0,tmpPair1);
+				    _beginthread(mixtoproxy,0,tmpPair2);
 				#else
-				pthread_t p1,p2;
-				pthread_create(&p1,NULL,proxytomix,tmpPair1);
-				pthread_create(&p2,NULL,mixtoproxy,tmpPair2);
+				    pthread_t p1,p2;
+				    int err;
+				    err=pthread_create(&p1,NULL,proxytomix,tmpPair1);
+				    if(err!=0)
+					{
+					    printf("Can't create Thread 1 - Error:%i\n",err);
+//					    printf("EAGAIN:%i\n",EAGAIN);
+					    printf("MAxThreads:%u\n",PTHREAD_THREADS_MAX);
+					    exit(-2);
+					}
+				    err=pthread_create(&p2,NULL,mixtoproxy,tmpPair2);
+				    if(err!=0)	
+					{
+					    printf("Can't create Thread 2 - Error:%i\n",err);
+//					    printf("EAGAIN:%i\n",EAGAIN);
+					    printf("MAxThreads:%u\n",PTHREAD_THREADS_MAX);
+					    exit(-2);
+					}
 				#endif
 				printf("%i\n",sockets);
 			}

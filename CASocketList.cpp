@@ -29,12 +29,21 @@ int CASocketList::add(CASocket* pSocket)
 	{
 		EnterCriticalSection(&cs);
 		CONNECTIONLIST* tmp;
-		tmp=pool;
-		pool=pool->next;
-		tmp->next=connections;
-		connections=tmp;
-		connections->pSocket=pSocket;
-		int ret=connections->id;
+		int ret;
+		if(pool==NULL)
+		    {
+			printf("CASocketList - add -out of pool!\n");
+			ret=SOCKET_ERROR;
+		    }
+		else
+		    {
+			tmp=pool;
+			pool=pool->next;
+			tmp->next=connections;
+			connections=tmp;
+			connections->pSocket=pSocket;
+			ret=connections->id;
+		    }
 		LeaveCriticalSection(&cs);
 		return ret;
 	}

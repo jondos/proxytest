@@ -15,4 +15,5 @@ class CAMixChannel
 			CASocketList connections;
 			CRITICAL_SECTION csSend;
 			CRITICAL_SECTION csConnect;
+			CRITICAL_SECTION csClose;
 	};
