@@ -172,7 +172,7 @@ SINT32 CASocketGroup::select()
 	* @return number of read/writeable sockets
 	*/
 
-SINT32 CASocketGroup::select(bool bWrite,UINT32 ms)
+SINT32 CASocketGroup::select(bool bWrite,UINT32 time_ms)
 	{
 		SINT32 ret;
 		#ifndef HAVE_POLL
@@ -182,7 +182,7 @@ SINT32 CASocketGroup::select(bool bWrite,UINT32 ms)
 			fd_set* set_read,*set_write;
 			timeval ti;
 			ti.tv_sec=0;
-			ti.tv_usec=ms*1000;
+			ti.tv_usec=time_ms*1000;
 			if(!bWrite)
 				{
 					set_read=&m_signaled_set;
@@ -197,7 +197,7 @@ SINT32 CASocketGroup::select(bool bWrite,UINT32 ms)
 			#ifdef _WIN32
 					if(m_signaled_set.fd_count==0)
 						{
-							Sleep(ms);
+							Sleep(time_ms);
 							ret=0;
 						}
 					else
@@ -208,12 +208,12 @@ SINT32 CASocketGroup::select(bool bWrite,UINT32 ms)
 		#else
 			if(bWrite)
 				{
-					ret=::poll(m_pollfd_write,m_max,ms);
+					ret=::poll(m_pollfd_write,m_max,time_ms);
 					m_bWriteQueried=true;
 				}
 			else
 				{
-					ret=::poll(m_pollfd_read,m_max,ms);
+					ret=::poll(m_pollfd_read,m_max,time_ms);
 					m_bWriteQueried=false;
 				}
 		#endif
