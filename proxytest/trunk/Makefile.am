@@ -7,7 +7,9 @@ AUTOMAKE_OPTIONS = foreign
 sbin_PROGRAMS = proxytest
 proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CAAbstractXMLEncodable.cpp\
+		    CAAccountingBIInterface.cpp\
 		    CAAccountingControlChannel.cpp\
+		    CAAccountingDBInterface.cpp\
 		    CAAccountingInstance.cpp\
 		    CAASymCipher.cpp \
 		    CABase64.cpp \
@@ -55,7 +57,9 @@ proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    proxytest.cpp \
 		    CAAbstractControlChannel.hpp\
 		    CAAbstractXMLEncodable.hpp\
+		    CAAccountingBIInterface.hpp\
 		    CAAccountingControlChannel.hpp\
+		    CAAccountingDBInterface.hpp\
 		    CAAccountingInstance.hpp\
 		    CAASymCipher.hpp \
 		    CABase64.hpp \
