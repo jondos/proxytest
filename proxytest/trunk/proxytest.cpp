@@ -310,7 +310,7 @@ int main(int argc, const char* argv[])
 	  CAMsg::printMsg(LOG_INFO,"Starting MIX...\n");
 		if(pMix->start()!=E_SUCCESS)
 			CAMsg::printMsg(LOG_CRIT,"Error during MIX-Startup!\n");
-EXIT:
+//EXIT:
 		delete pRTT;
 		delete pMix;
 		CASocketAddrINet::destroy();
