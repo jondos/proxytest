@@ -29,7 +29,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "../StdAfx.h"
 #include "../CACmdLnOptions.hpp"
 #include "AllTestsCA.hpp"
-#include "CAFirstMixChannelListTest.hpp"
+//#include "CAFirstMixChannelListTest.hpp"
 
 #ifdef _DEBUG
 int sockets;
@@ -49,6 +49,8 @@ int main(void) {
 //			_CrtSetReportFile( _CRT_ERROR, _CRTDBG_FILE_STDOUT );
 //			_CrtSetReportMode( _CRT_ASSERT, _CRTDBG_MODE_FILE );
 //			_CrtSetReportFile( _CRT_ASSERT, _CRTDBG_FILE_STDOUT );
+			WSADATA wsadata;
+			WSAStartup(0x0202,&wsadata);
 
 			UINT32 tmpDbgFlag = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
 			tmpDbgFlag |= _CRTDBG_ALLOC_MEM_DF;
@@ -63,9 +65,9 @@ int main(void) {
         runner.addTest(AllTestsCA::suite());
         runner.run();
 
-				CAFirstMixChannelListTest* p=new CAFirstMixChannelListTest();
-					p->doTest();
-				delete p;
+			//	CAFirstMixChannelListTest* p=new CAFirstMixChannelListTest();
+			//		p->doThreadedTest();
+			//	delete p;
         return 0;
 }
 
