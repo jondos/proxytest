@@ -259,8 +259,8 @@ SINT32 CAMiddleMix::init()
 		nextMix.setAddr((char*)strTarget,options.getTargetPort());
 		
 		((CASocket*)muxOut)->create();
-		((CASocket*)muxOut)->setRecvBuff(50*sizeof(MUXPACKET));
-		((CASocket*)muxOut)->setSendBuff(50*sizeof(MUXPACKET));
+		((CASocket*)muxOut)->setRecvBuff(50*MUXPACKET_SIZE);
+		((CASocket*)muxOut)->setSendBuff(50*MUXPACKET_SIZE);
 #define RETRIES 100
 #define RETRYTIME 30
 		if(muxOut.connect(&nextMix,RETRIES,RETRYTIME)!=E_SUCCESS)
@@ -270,6 +270,12 @@ SINT32 CAMiddleMix::init()
 			}
 //		mSocketGroup.add(muxOut);
 		CAMsg::printMsg(LOG_INFO," connected!\n");
+		if(((CASocket*)muxOut)->setKeepAlive((UINT32)1800)!=E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_INFO,"Socket option TCP-KEEP-ALIVE returned an error - so not set!\n");
+				if(((CASocket*)muxOut)->setKeepAlive(true)!=E_SUCCESS)
+					CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
+			}
 		
 //		int len;
 //		unsigned char buff[RSA_SIZE];
@@ -292,8 +298,14 @@ SINT32 CAMiddleMix::init()
 				delete recvBuff;
 				return E_UNKNOWN;
 			}
-		((CASocket*)muxIn)->setRecvBuff(50*sizeof(MUXPACKET));
-		((CASocket*)muxIn)->setSendBuff(50*sizeof(MUXPACKET));
+		((CASocket*)muxIn)->setRecvBuff(50*MUXPACKET_SIZE);
+		((CASocket*)muxIn)->setSendBuff(50*MUXPACKET_SIZE);
+		if(((CASocket*)muxIn)->setKeepAlive((UINT32)1800)!=E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_INFO,"Socket option TCP-KEEP-ALIVE returned an error - so not set!\n");
+				if(((CASocket*)muxIn)->setKeepAlive(true)!=E_SUCCESS)
+					CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
+			}
 
 		UINT32 keySize=mRSA.getPublicKeySize();
 		UINT16 infoSize=ntohs((*(UINT16*)recvBuff))+2;

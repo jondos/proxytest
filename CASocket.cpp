@@ -219,34 +219,60 @@ int CASocket::getLocalPort()
 		return localPort;
 	}
 
-int CASocket::setReuseAddr(bool b)
+SINT32 CASocket::setReuseAddr(bool b)
 	{
 		int val=0;
 		if(b) val=1;
 		return setsockopt(m_Socket,SOL_SOCKET,SO_REUSEADDR,(char*)&val,sizeof(val));
 	}
 
-int CASocket::setRecvLowWat(UINT32 r)
+SINT32 CASocket::setRecvLowWat(UINT32 r)
 	{
 		int val=r;
 		return setsockopt(m_Socket,SOL_SOCKET,SO_RCVLOWAT,(char*)&val,sizeof(val));
 	}
 
-int CASocket::setRecvBuff(UINT32 r)
+SINT32 CASocket::setRecvBuff(UINT32 r)
 	{
 		int val=r;
 		return setsockopt(m_Socket,SOL_SOCKET,SO_RCVBUF,(char*)&val,sizeof(val));	
 	}
 
-int CASocket::setSendBuff(UINT32 r)
+SINT32 CASocket::setSendBuff(UINT32 r)
 	{
 		int val=r;
 		return setsockopt(m_Socket,SOL_SOCKET,SO_SNDBUF,(char*)&val,sizeof(val));	
 	}
 
-int CASocket::setKeepAlive(bool b)
+/** Enables/disables the socket keep-alive option.
+@param b true if option should be enabled, false otherwise
+@return E_SUCCES if no error occured
+@return E_UNKOWN otherwise
+*/
+SINT32 CASocket::setKeepAlive(bool b)
 	{
 		int val=0;
 		if(b) val=1;
-		return setsockopt(m_Socket,SOL_SOCKET,SO_KEEPALIVE,(char*)&val,sizeof(val));	
+		if(setsockopt(m_Socket,SOL_SOCKET,SO_KEEPALIVE,(char*)&val,sizeof(val))==SOCKET_ERROR)
+			return E_UNKNOWN;
+		return E_SUCCESS;
+	}
+
+/** Enables the socket keep-alive option with a given ping time (in seconds).
+@param sec the time intervall(in seconds) of a keep-alive message
+@return E_SUCCES if no error occured
+@return E_UNKOWN otherwise
+*/
+SINT32 CASocket::setKeepAlive(UINT32 sec)
+	{
+#ifdef HAVE_TCP_KEEPALIVE
+		int val=sec;
+		if(setKeepAlive(true)!=E_SUCCESS)
+			return E_UNKOWN;
+		if(setsockopt(m_Socket,IPPROTO_TCP,TCP_KEEPALIVE,(char*)&val,sizeof(val))==SOCKET_ERROR)
+			return E_UNKOWN;
+		return E_SUCCESS;
+#else
+		return E_UNKNOWN;
+#endif
 	}

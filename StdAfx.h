@@ -84,6 +84,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	 #include "config.h"
 	#else
 	 #define HAVE_VSNPRINTF
+	 #define HAVE_TCP_KEEPALIVE
 	#endif 
 		#include <sys/ioctl.h>
     #include <sys/socket.h>

@@ -404,14 +404,21 @@ SINT32 CAFirstMix::init()
 				CAMsg::printMsg(LOG_CRIT,"Cannot create SOCKET for connection to next Mix!\n");
 				return E_UNKNOWN;
 			}
-		((CASocket*)muxOut)->setSendBuff(50*sizeof(MUXPACKET));
-		((CASocket*)muxOut)->setRecvBuff(50*sizeof(MUXPACKET));
+		((CASocket*)muxOut)->setSendBuff(50*MUXPACKET_SIZE);
+		((CASocket*)muxOut)->setRecvBuff(50*MUXPACKET_SIZE);
 		if(muxOut.connect(&addrNext,10,10)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Cannot connect to next Mix!\n");
 				return E_UNKNOWN;
 			}
 		CAMsg::printMsg(LOG_INFO," connected!\n");
+		if(((CASocket*)muxOut)->setKeepAlive((UINT32)1800)!=E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_INFO,"Socket option TCP-KEEP-ALIVE returned an error - so not set!\n");
+				if(((CASocket*)muxOut)->setKeepAlive(true)!=E_SUCCESS)
+					CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
+			}
+
 		UINT16 len;
 		((CASocket*)muxOut)->receive((UINT8*)&len,2);
 		CAMsg::printMsg(LOG_CRIT,"Received Key Info lenght %u\n",ntohs(len));
@@ -492,7 +499,7 @@ SINT32 CAFirstMix::loop()
 							{
 								#ifdef _DEBUG
 									int ret=((CASocket*)pnewMuxSocket)->setKeepAlive(true);
-									if(ret==SOCKET_ERROR)
+									if(ret!=E_SUCCESS)
 										CAMsg::printMsg(LOG_DEBUG,"Fehler bei KeepAlive!");
 								#else
 									((CASocket*)pnewMuxSocket)->setKeepAlive(true);

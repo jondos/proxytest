@@ -254,8 +254,14 @@ SINT32 CALastMix::init()
 					CAMsg::printMsg(LOG_CRIT," failed!\n");
 					return E_UNKNOWN;
 		    }
-		((CASocket*)muxIn)->setRecvBuff(50*sizeof(MUXPACKET));
-		((CASocket*)muxIn)->setSendBuff(50*sizeof(MUXPACKET));
+		((CASocket*)muxIn)->setRecvBuff(50*MUXPACKET_SIZE);
+		((CASocket*)muxIn)->setSendBuff(50*MUXPACKET_SIZE);
+		if(((CASocket*)muxIn)->setKeepAlive((UINT32)1800)!=E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_INFO,"Socket option TCP-KEEP-ALIVE returned an error - so not set!\n");
+				if(((CASocket*)muxIn)->setKeepAlive(true)!=E_SUCCESS)
+					CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
+			}
 		
 		CAMsg::printMsg(LOG_INFO,"connected!\n");
 		CAMsg::printMsg(LOG_INFO,"Sending Infos (chain length and RSA-Key)\n");
