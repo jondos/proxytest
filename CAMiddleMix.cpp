@@ -404,7 +404,7 @@ SINT32 CAMiddleMix::init()
 	}
 
 	
-static THREAD_RETURN mm_loopDownStream(void *p)
+THREAD_RETURN mm_loopDownStream(void *p)
 	{
 		CAMiddleMix* pMix=(CAMiddleMix*)p;
 		HCHANNEL channelIn;
