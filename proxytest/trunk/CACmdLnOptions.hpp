@@ -35,6 +35,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAThread.hpp"
 #include "CAMix.hpp"
 #include "CAListenerInterface.hpp"
+#include "CAXMLBI.hpp"
 #ifdef LOG_CRIME
 	#include "tre/regex.h"
 #endif
@@ -241,8 +242,8 @@ class CACmdLnOptions
 #ifdef PAYMENT
 // added by Bastian Voigt:
 // getter functions for the payment config options
-			SINT32 getJPIHost(UINT8* host,UINT32 len);
-			UINT16 getJPIPort();
+/*			SINT32 getJPIHost(UINT8* host,UINT32 len);
+			UINT16 getJPIPort();*/
 			
 			// accounting database
 			SINT32 getDatabaseHost(UINT8 * host, UINT32 len);
@@ -250,13 +251,12 @@ class CACmdLnOptions
 			SINT32 getDatabaseName(UINT8 * name, UINT32 len);
 			SINT32 getDatabaseUsername(UINT8 * user, UINT32 len);
 			SINT32 getDatabasePassword(UINT8 * pass, UINT32 len);
+			SINT32 getAiID(UINT8 * id, UINT32 len);
+			CAXMLBI * getBI();
+			SINT32 getPaymentHardLimit(UINT32 *pHardLimit);
+			SINT32 getPaymentSoftLimit(UINT32 *pSoftLimit);
+			SINT32 getPaymentSettleInterval(UINT32 *pInterval);
 			
-			CACertificate * getJPITestCertificate()
-				{
-					if(m_pJpiTestCertificate!=NULL)
-						return m_pJpiTestCertificate->clone();
-					return NULL;
-				}
 #endif	
 
     // added by ronin <ronin2@web.de>
@@ -319,14 +319,16 @@ class CACmdLnOptions
 // added by Bastian Voigt:
 // getter functions for the payment config options
 	private:
-			UINT8 * m_strJPIHost;
-			UINT16 m_iJPIPort;
+		CAXMLBI * m_pBI;
 			UINT8 * m_strDatabaseHost;
 			UINT8 * m_strDatabaseName;
 			UINT8 * m_strDatabaseUser;
 			UINT8 * m_strDatabasePassword;
+		UINT8* m_strAiID;
 			UINT16 m_iDatabasePort;
-			CACertificate * m_pJpiTestCertificate;
+		UINT32 m_iPaymentHardLimit;
+		UINT32 m_iPaymentSoftLimit;
+		UINT32 m_iPaymentSettleInterval;
 #endif
 
 		private:

@@ -40,31 +40,8 @@ CAAccountingDBInterface::CAAccountingDBInterface()
 {
 	m_bConnected = false;
 
-  // Get database connection info from configfile and/or commandline
-	UINT8 host[255];
-	if(options.getDatabaseHost(host, 255) == E_UNKNOWN) {
-		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Error, no Database Host!");
-		return;
-	}
-	UINT32 tcp_port = options.getDatabasePort();
-	UINT8 dbName[255];
-	if(options.getDatabaseName(dbName, 255) == E_UNKNOWN) {
-		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Error, no Database Name!");
-		return;
-	}
-	UINT8 userName[255];
-	if(options.getDatabaseUsername(userName, 255) == E_UNKNOWN) {
-		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Error, no Database Username!");
-		return;
-	}
-	UINT8 password[255];
-	if(options.getDatabasePassword(password, 255) == E_UNKNOWN) {
-		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Error, no Database Password!");
-		return;
-	}
-
 	// connect to DB
-	SINT32 dbStatus = initDBConnection(host, tcp_port, dbName, userName, password);
+	//SINT32 dbStatus = initDBConnection(host, tcp_port, dbName, userName, password);
 }
 
 
@@ -73,7 +50,7 @@ CAAccountingDBInterface::CAAccountingDBInterface()
  */
 CAAccountingDBInterface::~CAAccountingDBInterface()
 {
-	terminateDBConnection();	
+	terminateDBConnection();
 }
 
 
@@ -85,21 +62,45 @@ CAAccountingDBInterface::~CAAccountingDBInterface()
  * @return E_UNKNOWN if we are already connected
  * @return E_SUCCESS if all is OK
  */
-SINT32 CAAccountingDBInterface::initDBConnection(const UINT8 * host, UINT32 tcp_port,
-																								 const UINT8 * dbName,
-																								 const UINT8 * userName,
-																								 const UINT8 * password)
+SINT32 CAAccountingDBInterface::initDBConnection()
 {
 	if(m_bConnected) return E_UNKNOWN;
 	
+  // Get database connection info from configfile and/or commandline
+	UINT8 host[255];
+	if(options.getDatabaseHost(host, 255) == E_UNKNOWN) {
+		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Error, no Database Host!");
+		return E_UNKNOWN;
+	}
+	UINT32 tcp_port = options.getDatabasePort();
+	UINT8 dbName[255];
+	if(options.getDatabaseName(dbName, 255) == E_UNKNOWN) {
+		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Error, no Database Name!");
+		return E_UNKNOWN;
+	}
+	UINT8 userName[255];
+	if(options.getDatabaseUsername(userName, 255) == E_UNKNOWN) {
+		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Error, no Database Username!");
+		return E_UNKNOWN;
+	}
+	UINT8 password[255];
+	if(options.getDatabasePassword(password, 255) == E_UNKNOWN) {
+		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Error, no Database Password!");
+		return E_UNKNOWN;
+	}	
+	
 	char port[20];
 	sprintf(port, "%i", tcp_port);
-	m_dbConn = PQsetdbLogin((char*)host, port, "", "",
-													(char*)dbName,	(char*)userName,	(char*)password);
-  if(PQstatus(m_dbConn) == CONNECTION_BAD) {
-		
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingDBInteface: Could not connect to Database. Reason: %s\n",
-										PQerrorMessage(m_dbConn));
+	m_dbConn = PQsetdbLogin(
+			(char*)host, port, "", "",
+			(char*)dbName, (char*)userName, (char*)password
+		);
+  if(PQstatus(m_dbConn) == CONNECTION_BAD) 
+	{
+		CAMsg::printMsg(
+				LOG_ERR, "CAAccountingDBInteface: Could not connect to Database. Reason: %s\n",
+				PQerrorMessage(m_dbConn)
+			);
 		PQfinish(m_dbConn);
 		m_dbConn = 0;
 		m_bConnected = false;
@@ -124,59 +125,6 @@ SINT32 CAAccountingDBInterface::terminateDBConnection()
 }
 
 
-/**
- * Creates the tables we need in the DB
- *
- * @return E_SUCCESS if all is OK
- * @return E_UNKNOWN if the query could not be executed
- * @return E_NOT_CONNECTED if we are not connected to the DB
- */
-SINT32 CAAccountingDBInterface::createTables()
-{
-	if(!m_bConnected) return E_NOT_CONNECTED;
-	
-	char createTable[] = 
-		"CREATE TABLE COSTCONFIRMATIONS ("
-			"ACCOUNTNUMBER BIGSERIAL PRIMARY KEY,"
-			"BYTES BIGINT,"
-			"XMLCC VARCHAR(2000),"
-			"SETTLED INTEGER"
-		");";
-	
-	PGresult * result;
-	ExecStatusType resStatus;
-	result = PQexec(m_dbConn, createTable);
-	resStatus = PQresultStatus(result);
-	if(resStatus!=PGRES_COMMAND_OK) {
-		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Could not create tables. Reason: %s\n", PQresultErrorMessage(result));
-		return E_UNKNOWN;
-	}
-	return E_SUCCESS;
-}
-
-
-/**
- * Drops (=deletes) the tables from the DB
- *
- * @return E_SUCCESS if all is OK
- * @return E_NOT_CONNECTED if we are not connected to the DB
- * @return E_UNKNOWN if the query could not be executed
- */
-SINT32 CAAccountingDBInterface::dropTables()
-{
-	if(!m_bConnected) return E_NOT_CONNECTED;
-	char dropTable[] = 
-		"DROP TABLE COSTCONFIRMATIONS;";
-
-	PGresult * result;
-	result = PQexec(m_dbConn, dropTable);
-	if(PQresultStatus(result)!=PGRES_COMMAND_OK) {
-		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Could not drop tables. Reason: %s\n",
-											PQresultErrorMessage(result));
-		return E_UNKNOWN;
-	}
-	return E_SUCCESS;
-}
 
 
 /**
@@ -192,10 +140,10 @@ SINT32 CAAccountingDBInterface::getCostConfirmation(UINT64 accountNumber, CAXMLC
 {
 	if(!m_bConnected) return E_NOT_CONNECTED;
 	UINT8 queryF[] = "SELECT XMLCC FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER=%lld";
-	UINT8 query[100+25];
+	UINT8 query[128];
 	UINT8 * xmlCC;
 	PGresult * result;
-	UINT32 reslen;
+//	UINT32 reslen;
 	
 	sprintf( (char *)query, (char *)queryF, accountNumber);
 	result = PQexec(m_dbConn, (char *)query);
@@ -205,7 +153,7 @@ SINT32 CAAccountingDBInterface::getCostConfirmation(UINT64 accountNumber, CAXMLC
 				PQresultErrorMessage(result));
 		return E_UNKNOWN;
 	}
-	if(PQntuples(result)!=0) 
+	if(PQntuples(result)!=1) 
 	{
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingDBInterface: XMLCC not found.\n");
 		return E_NOT_FOUND;
@@ -232,7 +180,7 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 	UINT8 query1F[] = "SELECT COUNT(*) FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER=%lld";
 	UINT8 query2F[] = "INSERT INTO COSTCONFIRMATIONS VALUES (%lld, %lld, '%s', %d)";
 	UINT8 query3F[] = 
-		"UPDATE COSTCONFIRMATIONS SET TRANSFERREDBYTES=%lld, XMLCC='%s', SETTLED=%d "
+		"UPDATE COSTCONFIRMATIONS SET BYTES=%lld, XMLCC='%s', SETTLED=%d "
 		"WHERE ACCOUNTNUMBER=%lld";
 	UINT8 * query;
 	UINT8 * pStrCC;
@@ -247,17 +195,31 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 	sprintf( (char*)query, (char*)query1F, cc.getAccountNumber());
 	
 	// to receive result in binary format...
-	pResult = PQexecParams(m_dbConn, (char*)query, 0, 0, 0, 0, 0, 1);
-	if( (PQresultStatus(pResult) != PGRES_TUPLES_OK) || 
-			(PQntuples(pResult) != 1))
-		{
-			delete[] pStrCC;
-			delete[] query;
-			return E_UNKNOWN;
-		}
+	pResult = PQexec(m_dbConn, (char*)query);
+	if(PQresultStatus(pResult) != PGRES_TUPLES_OK)
+	{
+		CAMsg::printMsg(
+				LOG_ERR, 
+				"Database Error '%s' while processing query '%s'\n", 
+				PQresultErrorMessage(pResult), query
+			);
+		delete[] pStrCC;
+		delete[] query;
+		return E_UNKNOWN;
+	}
+	if ( (PQntuples(pResult) != 1) ||
+				(PQgetisnull(pResult, 0, 0)) )
+	{
+		CAMsg::printMsg(LOG_ERR, "DBInterface: Wrong number of tuples or null value\n");
+		delete[] pStrCC;
+		delete[] query;
+		return E_UNKNOWN;
+	}
 	
 	// put query together (either insert or update)
-	if(ntohl( *((UINT32*)PQgetvalue(pResult, 0, 0)) ) == 0)
+	UINT8* pVal = (UINT8*)PQgetvalue(pResult, 0, 0);
+	CAMsg::printMsg(LOG_DEBUG, "DB store -> pVal ist %s, atoi gibt %d\n", pVal, atoi((char*)pVal));
+	if(atoi( (char*)pVal ) == 0)
 		{
 			sprintf( // do insert
 					(char*)query, (char*)query2F, 
@@ -275,13 +237,18 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 	// issue query..
 	pResult = PQexec(m_dbConn, (char*)query);
 	delete[] pStrCC;
-	delete[] query;	
 	if(PQresultStatus(pResult) != PGRES_COMMAND_OK)
 	{
+		CAMsg::printMsg(
+				LOG_ERR, 
+				"Database Error '%s' while processing query '%s'\n", 
+				PQresultErrorMessage(pResult), query
+			);
+		delete[] query;	
 		return E_UNKNOWN;
 	}
+	delete[] query;	
 	return E_SUCCESS;
-
 }
 
 

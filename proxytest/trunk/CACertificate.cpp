@@ -31,6 +31,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CABase64.hpp"
 #include "CAUtil.hpp"
 
+UINT8 * CACertificate::m_spXmlElementName =0;
+
 CACertificate::CACertificate()
 	{
 		m_pCert=NULL;

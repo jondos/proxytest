@@ -26,6 +26,7 @@ proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CADatagramSocket.cpp \
 		    CAFirstMix.cpp \
 		    CAFirstMixChannelList.cpp \
+				CAHttpClient.cpp \
 		    CAInfoService.cpp \
 		    CAIPList.cpp \
 		    CALastMix.cpp \
@@ -54,10 +55,12 @@ proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CATLSClientSocket.cpp\
 		    CASSLContext.cpp\
 		    CASymCipher.cpp \
+		    CASyncControlChannel.cpp\
 		    CATempIPBlockList.cpp\
 		    CAThread.cpp \
 		    CAThreadPool.cpp\
 		    CAUtil.cpp \
+				CAXMLBI.cpp \
 		    CAXMLCostConfirmation.cpp\
 		    CAXMLErrorMessage.cpp\
 		    StdAfx.cpp \
@@ -83,6 +86,7 @@ proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CADatagramSocket.hpp\
 		    CAFirstMix.hpp \
 		    CAFirstMixChannelList.hpp \
+				CAHttpClient.hpp \
 		    CAInfoService.hpp \
 		    CAIPList.hpp \
 		    CALastMix.hpp \
@@ -113,10 +117,12 @@ proxytest_SOURCES = CAAbstractControlChannel.cpp\
 		    CATLSClientSocket.hpp\
 		    CASSLContext.hpp\
 		    CASymCipher.hpp \
+		    CASyncControlChannel.hpp \
 		    CATempIPBlockList.hpp\
 		    CAThread.hpp \
 		    CAThreadPool.hpp\
 		    CAUtil.hpp \
+				CAXMLBI.hpp \
 		    CAXMLCostConfirmation.hpp\
 		    CAXMLErrorMessage.hpp\
 		    StdAfx.h \

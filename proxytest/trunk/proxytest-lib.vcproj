@@ -900,6 +900,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\CAHttpClient.cpp">
+			</File>
+			<File
 				RelativePath="CAInfoService.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -2083,6 +2086,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\CAXMLBI.cpp">
+			</File>
+			<File
 				RelativePath=".\CAXMLErrorMessage.cpp">
 			</File>
 			<File
@@ -2858,6 +2864,9 @@
 				RelativePath="CAFirstMixChannelList.hpp">
 			</File>
 			<File
+				RelativePath=".\CAHttpClient.hpp">
+			</File>
+			<File
 				RelativePath="CAInfoService.hpp">
 			</File>
 			<File
@@ -2964,6 +2973,9 @@
 			</File>
 			<File
 				RelativePath="CAUtil.hpp">
+			</File>
+			<File
+				RelativePath=".\CAXMLBI.hpp">
 			</File>
 			<File
 				RelativePath=".\CAXMLErrorMessage.hpp">

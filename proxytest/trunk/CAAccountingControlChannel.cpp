@@ -63,10 +63,34 @@ CAAccountingControlChannel::~CAAccountingControlChannel()
 */
 SINT32 CAAccountingControlChannel::processXMLMessage(DOM_Document &a_doc)
 {
-	aiQueueItem * pItem = new aiQueueItem;
+	aiQueueItem * pItem;
+	DOM_Document * pDoc;
+	DOM_Node root;
 	
-	pItem->pDomDoc = &(DOM_Document::createDocument()); //new DOM_Document();
-	pItem->pDomDoc->appendChild(pItem->pDomDoc->importNode(a_doc.getDocumentElement(), true));
+/*	#ifdef _DEBUG
+		UINT32 size=0; // dump message to logfile
+		UINT8 * pDump = DOM_Output::dumpToMem(a_doc, &size);
+		if(pDump != NULL)
+			{
+				CAMsg::printMsg(LOG_DEBUG, "Received ControlChannel msg: %s", pDump);
+				delete[] pDump;
+			}
+	#endif*/
+	
+	// it is necessary to clone the document here 
+	// because a_doc will be deleted after this function returns..
+	pDoc = new DOM_Document;
+	*pDoc = DOM_Document::createDocument();
+	root = a_doc.getFirstChild();
+	if(root == NULL)
+	{
+		delete pItem;
+		return E_UNKNOWN;
+	}
+	pDoc->appendChild(pDoc->importNode(root, true));
+	
+	pItem = new aiQueueItem;
+	pItem->pDomDoc = pDoc;
 	pItem->pHashEntry = m_pHashEntry;
 	ms_pAccountingInstance->m_pQueue->add(pItem, sizeof(aiQueueItem));
 	return E_SUCCESS;

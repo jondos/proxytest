@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.03.59"
+#define MIX_VERSION "00.03.60"
 
 #if defined(DEBUG)|| defined(_DEBUG)
 	#undef DEBUG
@@ -60,7 +60,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	//so we have around 10 KByte/s at the moment
 #endif
 //#define LOG_CRIME
-//#define PAYMENT //to enable payment support
+//#define PAYMENT //to enable payment support, now use configure --enable-payment..
 //#define NO_PARKING //to disable control flow
 //#define NO_LOOPACCEPTUSER //to disable user accept thread for First Mix
 
@@ -143,6 +143,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#endif
 		#include <malloc.h>
 		#define GET_NET_ERROR (WSAGetLastError())
+		#define GET_NET_ERROR_STR(x) ("Unknown error")
 		#define ERR_INTERN_TIMEDOUT WSAETIMEDOUT
 		#define ERR_INTERN_CONNREFUSED WSAECONNREFUSED
 		#define ERR_INTERN_WOULDBLOCK	WSAEWOULDBLOCK
@@ -243,6 +244,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
   #define SD_SEND 1
   #define SD_BOTH 2
   #define GET_NET_ERROR (errno)
+	#define GET_NET_ERROR_STR(x) (strerror(x))
 	#define GETERROR (errno)
 	#define ERR_INTERN_TIMEDOUT ETIMEDOUT
 	#define ERR_INTERN_CONNREFUSED ECONNREFUSED
@@ -280,6 +282,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define E_NOT_CONNECTED -700 //Something is not connected that should be 
 														// (like a TCP/IP connection or a database connection)
 #define E_NOT_FOUND -701 //Something was not found
+#define E_INVALID -800 // sth is invalid (e.g. signature verifying)
 
 #include <assert.h>
 
@@ -360,7 +363,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 //For Payment
 #ifdef PAYMENT
-#include <postgresql/libpq-fe.h>
+#include <libpq-fe.h>
 #endif
 //Compressed Logs
 #ifdef COMPRESSED_LOGS

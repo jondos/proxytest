@@ -433,7 +433,7 @@ SINT32 CASocket::receive(UINT8* buff,UINT32 len)
 			}
 #ifdef _DEBUG
 		if(ret==SOCKET_ERROR)
-	      CAMsg::printMsg(LOG_DEBUG,"Receive error: %i\n",ef);
+	      CAMsg::printMsg(LOG_DEBUG,"CASocket Receive error %d (%s)\n",ef,GET_NET_ERROR_STR(ef));
 #endif
 	  return ret;	    	    
 	}

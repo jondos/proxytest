@@ -5,21 +5,32 @@
 #include "CACertStore.hpp"
 #include "CASignature.hpp"
 #include "CAMsg.hpp"
+#include "xml/DOM_Output.hpp"
 
 /**
+ * An abstract base class for signable XML structures. 
+ *
  * @author Bastian Voigt
  */
 class CAAbstractXMLSignable : public CAAbstractXMLEncodable
 {
 public:
-	CAAbstractXMLSignable() {}
+	CAAbstractXMLSignable() : CAAbstractXMLEncodable()
+		{
+			m_signature = NULL;
+		}
+	
 	virtual ~CAAbstractXMLSignable() {}
+	
 	/** TODO: implement */
 	SINT32 sign(CASignature &signer)
 		{
 			return E_UNKNOWN;
 		}
 
+	/**
+	 * Verifies the signature. Returns E_SUCCESS if the signature is valid.
+	 */
 	SINT32 verifySignature(CASignature &verifier)
 		{
 			//ASSERT(verifier!=NULL, "sigVerifier is NULL");
@@ -30,6 +41,10 @@ public:
 			return rc;
 		}
 
+	/** 
+	 * sets the internal signature representation. 
+	 * Should be called from derived class constructors.
+	 */
 	SINT32 setSignature(DOM_Element &elemSig)
 		{
 			ASSERT(!elemSig.isNull(), "Signature element is NULL")
@@ -38,6 +53,7 @@ public:
 			return E_SUCCESS;
 		}
 
+	/** returns nonzero, if this structure is already signed */
 	SINT32 isSigned()
 		{
 			if(!m_signature.isNull())
@@ -49,7 +65,6 @@ public:
 				return false;
 			}
 		}
-
 
 protected:
 	DOM_Document m_signature;

@@ -29,7 +29,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CAACCOUNTINGINSTANCE__
 #define __CAACCOUNTINGINSTANCE__
 
-//#include "CAMuxSocket.hpp"
 #include "CAFirstMixChannelList.hpp"
 #include "CASymCipher.hpp"
 #include "CAQueue.hpp"
@@ -38,27 +37,20 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAAccountingDBInterface.hpp"
 #include "CAAccountingBIInterface.hpp"
 #include "CAAccountingControlChannel.hpp"
+#include "CAAccountingSettleThread.hpp"
 #include "CACmdLnOptions.hpp"
 
 // we want a costconfirmation from the user for every megabyte
 // after 2megs of unconfirmed traffic we kick the user out
 // todo put this in the configfile
-#define HARDLIMIT_UNCONFIRMED_BYTES 1024*1024*2
-#define SOFTLIMIT_UNCONFIRMED_BYTES 1024*1024
+//#define HARDLIMIT_UNCONFIRMED_BYTES 1024*1024*2
+//#define SOFTLIMIT_UNCONFIRMED_BYTES 1024*512
 
 // the number of seconds that may pass between a pay request
 // and the jap sending its answer
 #define REQUEST_TIMEOUT 30
+#define MIN_BALANCE 1024*512
 
-/*struct t_aiqueueitem 
-{
-	UINT8 * pData;
-	UINT32 dataLen;
-	fmHashTableEntry * pHashEntry;
-};
-typedef struct t_aiqueueitem aiQueueItem;
-typedef aiQueueItem* p_aiQueueItem;
-*/
 
 struct t_aiqueueitem
 {
@@ -71,9 +63,12 @@ extern CACmdLnOptions options;
 
 /**
  * This is the AI (accounting instance or abrechnungsinstanz in german)
- * class. It is a singleton class, only one instance exists at a time.
- * On the first call to getInstance() the initialization is performed.
+ * class. Its purpose is to count packets for every user and to decide
+ * wether the connection should be closed (e.g. when a user is betraying us, or
+ * simply when the account is empty and the user refuses to charge it).
  *
+ * It is a singleton class, only one instance exists at a time.
+ * On the first call to getInstance() the initialization is performed.
  */
 class CAAccountingInstance
 {
@@ -103,16 +98,13 @@ public:
 	 * to cleanup the data structures
 	 */
 	SINT32 cleanupTableEntry(fmHashTableEntry * pHashEntry);
+	
 	SINT32 initTableEntry(fmHashTableEntry * pHashEntry);
 
 	/**
 	 * This should be called by the FirstMix for every incoming Jap packet
 	 */
-	SINT32 handleJapPacket( 
-			MIXPACKET *packet,
-			fmHashTableEntry *pHashEntry
-		);
-		
+	SINT32 handleJapPacket( MIXPACKET *packet, fmHashTableEntry *pHashEntry );
 
 	/**
 	 * Check if an IP address is temporarily blocked by the accounting instance.
@@ -121,7 +113,9 @@ public:
 	 * @retval 0 if it is not blocked
 	 */
 	inline SINT32 isIPAddressBlocked(const UINT8 ip[4])
-	{ return m_pIPBlockList->checkIP(ip); }
+		{
+			return m_pIPBlockList->checkIP(ip); 
+		}
 	
 
 private:
@@ -137,62 +131,40 @@ private:
 	* what type of message we have and calls the appropriate handle...() 
 	* function
 	*/
-	void CAAccountingInstance::processJapMessage(
-		fmHashTableEntry * pHashEntry,
-		DOM_Document * pDomDoc
-	);
+	void CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry, DOM_Document * pDomDoc);
 
 	/**
 	* Handles a cost confirmation sent by a jap
 	*/
-	void handleCostConfirmation(
-			fmHashTableEntry *pHashEntry, 
-			DOM_Element &root
-		);
+	void handleCostConfirmation( fmHashTableEntry *pHashEntry, DOM_Element &root );
 
 	/**
 	* Handles an account certificate of a newly connected Jap.
 	*/
-	void handleAccountCertificate(
-			fmHashTableEntry *pHashEntry, 
-			DOM_Element &root
-		);
+	void handleAccountCertificate( fmHashTableEntry *pHashEntry, DOM_Element &root );
 	
 	/**
 	 * Handles a balance certificate
 	 */
-	void handleBalanceCertificate(
-			fmHashTableEntry *pHashEntry, 
-			const DOM_Element &root
-		);
+	void handleBalanceCertificate(fmHashTableEntry *pHashEntry, const DOM_Element &root);
 	
 	/**
 	 * Checks the response of the challenge-response auth.
 	 */
-	void handleChallengeResponse(
-			fmHashTableEntry *pHashEntry, 
-			const DOM_Element &root
-		);
+	void handleChallengeResponse(fmHashTableEntry *pHashEntry, const DOM_Element &root);
 
 				
-	SINT32 makeCCRequest(
-			const UINT64 accountNumber, 
-			const UINT64 transferredBytes, 
-			DOM_Document& doc
-		);
+	SINT32 makeCCRequest( const UINT64 accountNumber, const UINT64 transferredBytes, DOM_Document& doc);
 	SINT32 makeBalanceRequest(const SINT32 seconds, DOM_Document &doc);
 	SINT32 makeAccountRequest(DOM_Document &doc);
 	
-
-
+	
 	/**
 	 * The main loop of the AI thread - reads messages from the queue 
 	 * and calls the appropriate handlers
 	 */
 	static THREAD_RETURN aiThreadMainLoop(void *param);
-
 	
-
 	/** this thread reads messages from the queue and processes them */
 	CAThread * m_pThread;
 	
@@ -205,8 +177,11 @@ private:
 	/** the interface to the database */
 	CAAccountingDBInterface * m_dbInterface;
 	
-	/** the interface to the payment instance */
-	CAAccountingBIInterface * m_biInterface;
+	UINT32 m_iSoftLimitBytes;
+	UINT32 m_iHardLimitBytes;
+	
+	// /** the interface to the payment instance */
+	// CAAccountingBIInterface * m_biInterface;
 	
 	/** 
 	 * Users that get kicked out because they sent no authentication certificate
@@ -229,6 +204,9 @@ private:
 	
 	/** internal receiving queue for messages coming from Japs */
 	CAQueue * m_pQueue;
+	
+	/** this thread sends cost confirmations to the BI in regular intervals */
+	CAAccountingSettleThread * m_pSettleThread;
 	
 	bool m_bThreadRunning;
 };

@@ -31,6 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMix.hpp"
 #include "CAMsg.hpp"
 #include "CASocketAddrINet.hpp"
+#include "CAXMLBI.hpp"
 #include "xml/DOM_Output.hpp"
 #ifdef LOG_CRIME
 	#include "tre/regex.h"
@@ -623,22 +624,10 @@ SINT32 CACmdLnOptions::getSOCKSHost(UINT8* host,UINT32 len)
   }
 
 #ifdef PAYMENT
-SINT32 CACmdLnOptions::getJPIHost(UINT8* host,UINT32 len)
-{
-	if(m_strJPIHost==NULL)
-			return E_UNKNOWN;
-	if(len <= (UINT32)strlen( (char *)m_strJPIHost))
+CAXMLBI * CACmdLnOptions::getBI()
 			{
-				return E_UNKNOWN;
+		return m_pBI;
 			}
-	strcpy((char*)host,(char *)m_strJPIHost);
-	return E_SUCCESS;//(SINT32)strlen((char *)m_strJPIHost);	
-}
-
-UINT16 CACmdLnOptions::getJPIPort()
-{
-	return m_iJPIPort;
-}
 
 SINT32 CACmdLnOptions::getDatabaseHost(UINT8 * host, UINT32 len)
 {
@@ -693,6 +682,35 @@ SINT32 CACmdLnOptions::getDatabasePassword(UINT8 * pass, UINT32 len)
 	return (SINT32)strlen((char *)m_strDatabasePassword);	
 }
 
+SINT32 CACmdLnOptions::getAiID(UINT8 * id, UINT32 len)
+{
+	if(m_strAiID==NULL)
+			return E_UNKNOWN;
+	if(len<=(UINT32)strlen((char *)m_strAiID))
+			{
+				return E_UNKNOWN;
+			}
+	strcpy((char*)id,(char *)m_strAiID);
+	return (SINT32)strlen((char *)m_strAiID);
+}
+
+SINT32 CACmdLnOptions::getPaymentHardLimit(UINT32 *pHardLimit)
+	{
+		*pHardLimit = m_iPaymentHardLimit;
+		return E_SUCCESS;
+	}
+
+SINT32 CACmdLnOptions::getPaymentSoftLimit(UINT32 *pSoftLimit)
+	{
+		*pSoftLimit = m_iPaymentSoftLimit;
+		return E_SUCCESS;
+	}
+
+SINT32 CACmdLnOptions::getPaymentSettleInterval(UINT32 *pInterval)
+	{
+		*pInterval = m_iPaymentSettleInterval;
+		return E_SUCCESS;
+	}
 
 #endif /* ifdef PAYMENT */
 
@@ -956,7 +974,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 						scanf("%400[^\n]",(char*)passwd);
 						if(m_pSignKey->setSignKey(elemOwnCert.getFirstChild(),SIGKEY_PKCS12,(char*)passwd)!=E_SUCCESS)
 							{
-								CAMsg::printMsg(LOG_CRIT,"Couldt not read own signature key!\n");
+								CAMsg::printMsg(LOG_CRIT,"Could not read own signature key!\n");
 								delete m_pSignKey;
 								m_pSignKey=NULL;
 							}
@@ -982,35 +1000,45 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		getDOMChildByName(elemRoot,(UINT8*)"Accounting",elemAccounting,false);
 		if(elemAccounting != NULL) {
 			DOM_Element elemJPI;
-			getDOMChildByName(elemAccounting, (UINT8*)"PaymentInstance", elemJPI, false);
+			CAXMLBI * pBI=0;
+			getDOMChildByName(elemAccounting, CAXMLBI::getXMLElementName(), elemJPI, false);
+			if(elemJPI!=NULL)
+				pBI = new CAXMLBI(elemJPI);
+			if(pBI)
+				m_pBI = pBI;
+			else
+				m_pBI = 0;
 			
-			if(elemJPI != NULL) {
-				// get JPI Hostname
-				getDOMChildByName(elemJPI, (UINT8*)"Host", elem, false);
-				tmpLen = 255;
-				if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) {
-					strtrim(tmpBuff);
-					m_strJPIHost = new UINT8[strlen((char*)tmpBuff)+1];
-					strcpy((char *)m_strJPIHost, (char *) tmpBuff);
-				}
 		
-				// get JPI Port
-				getDOMChildByName(elemJPI, (UINT8*)"Port", elem, false);
-				if(getDOMElementValue(elem, &tmp)==E_SUCCESS) {
-					m_iJPIPort = tmp;
+			getDOMChildByName(elemAccounting, (UINT8*)"SoftLimit", elem, false);
+			if(getDOMElementValue(elem, &tmp)==E_SUCCESS)
+			{
+				m_iPaymentSoftLimit = tmp;
 				}
 				
-				// Get JPI Test Certificate
-				getDOMChildByName(elemJPI,(UINT8*)"TestCertificate", elem, false);
-				if(elem!=NULL) {
-					m_pJpiTestCertificate = CACertificate::decode(elem.getFirstChild(), CERT_X509CERTIFICATE);
+			getDOMChildByName(elemAccounting, (UINT8*)"HardLimit", elem, false);
+			if(getDOMElementValue(elem, &tmp)==E_SUCCESS)
+			{
+				m_iPaymentHardLimit = tmp;
+			}
+			getDOMChildByName(elemAccounting, (UINT8*)"SettleInterval", elem, false);
+			if(getDOMElementValue(elem, &tmp)==E_SUCCESS)
+			{
+				m_iPaymentSettleInterval = tmp;
 				}
+			
+			// get DB Username
+			getDOMChildByName(elemAccounting, (UINT8*)"AiID", elem, false);
+			tmpLen = 255;
+			if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) {
+				strtrim(tmpBuff);
+				m_strAiID = new UINT8[strlen((char*)tmpBuff)+1];
+				strcpy((char *)m_strAiID, (char *) tmpBuff);
 			}
 
 			
 			DOM_Element elemDatabase;
 			getDOMChildByName(elemAccounting, (UINT8*)"Database", elemDatabase, false);
-			
 			if(elemDatabase != NULL) {
 				// get DB Hostname
 				getDOMChildByName(elemDatabase, (UINT8*)"Host", elem, false);
@@ -1054,14 +1082,15 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 				printf("Please enter password for postgresql user %s at %s: ",m_strDatabaseUser, m_strDatabaseHost);
 				scanf("%400[^\n]%*1[\n]",(char*)dbpass); 
 				int len = strlen((char *)dbpass);
-				if(len>0) {
+				if(len>0) 
+				{
 					m_strDatabasePassword = new UINT8[len+1];
 					strcpy((char *)m_strDatabasePassword, (char *)dbpass);
-					CAMsg::printMsg(LOG_DEBUG, "And the password iiiiiiiiiiiis........ %s", m_strDatabasePassword);
 				}
 				else
 				{
-					CAMsg::printMsg(LOG_DEBUG, "No database passwd.. :-((");
+					m_strDatabasePassword = new UINT8[1];
+					m_strDatabasePassword[0] = '\0';
 				}	
 			}
 		}

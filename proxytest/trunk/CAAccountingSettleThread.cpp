@@ -26,18 +26,27 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 
-#include "StdAfx.h"
-#ifdef PAYMENT
 #include "CAAccountingSettleThread.hpp"
 #include "CAAccountingBIInterface.hpp"
 #include "CAAccountingDBInterface.hpp"
+#include "CACmdLnOptions.hpp"
+#include "CASocketAddrINet.hpp"
 #include "CAXMLCostConfirmation.hpp"
 #include "CAXMLErrorMessage.hpp"
 
-#define SLEEP_SECONDS 120
+//#define SLEEP_SECONDS 20
+
+
+
 
 CAAccountingSettleThread::CAAccountingSettleThread()
 {
+	// launch AI thread
+	m_pThread = new CAThread();
+	m_pThread->setMainLoop( mainLoop );
+	
+	CAMsg::printMsg(LOG_DEBUG, "Now launching Accounting SettleThread...\n");
+	m_pThread->start( this );
 }
 
 
@@ -46,40 +55,75 @@ CAAccountingSettleThread::~CAAccountingSettleThread()
 }
 
 /**
- * The main loop. Sleeps for a few minutes, then contacts the BI, then sleeps again
+ * The main loop. Sleeps for a few minutes, then contacts the BI to settle CCs, 
+ * then sleeps again
  */
 THREAD_RETURN CAAccountingSettleThread::mainLoop(void * param)
 {
-	CAAccountingBIInterface biConn(0);
+	CAAccountingBIInterface biConn(0 /* no tls, for now */);
 	CAAccountingDBInterface dbConn;
 	CAXMLErrorMessage * pErrMsg;
 	CAXMLCostConfirmation * pCC;
+	UINT32 sleepInterval;
 	CAQueue q;
-	UINT8 responseBuf[512];
-	UINT8 * pTmpStr;
 	UINT32 size;
-	UINT32 status;
-
+	CASocketAddrINet biAddr;
+	
+	CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread is running...\n");
+	
+	CAXMLBI * pBI = options.getBI();
+	biAddr.setAddr(pBI->getHostName(), pBI->getPortNumber());
+	options.getPaymentSettleInterval(&sleepInterval);
+	
 	while(true)
 		{
-			sSleep(SLEEP_SECONDS);
-		
-			dbConn.initDBConnection( host,port,dbName,userName,password);
+			#ifdef DEBUG
+				CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread going to sleep...\n");
+			#endif
+			sSleep(sleepInterval);
+			#ifdef DEBUG
+				CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread Waking up...\n");
+			#endif
+			if(dbConn.initDBConnection()!=E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_ERR, "SettleThread could not connect to Database. Retrying later...\n");
+				continue;
+			}
 			dbConn.getUnsettledCostConfirmations(q);
 			if(!q.isEmpty())
 				{
-					biConn.initBIConnection(CASockAddrINet);
+					if(biConn.initBIConnection()!=E_SUCCESS)
+						{
+							CAMsg::printMsg(LOG_DEBUG, "SettleThread: could not connect to BI. Retrying later...\n");
+							biConn.terminateBIConnection();
+							dbConn.terminateDBConnection();
+							continue;
+						}
 					do
 						{
 							// get the next CC from the queue
-							q.get((UINT8*)&pCC, &size);
+							size = sizeof(pCC);
+							if(q.get((UINT8*)(&pCC), &size)!=E_SUCCESS)
+								{
+									CAMsg::printMsg(LOG_ERR, "SettleThread: could not get next item from queue\n");
+									break;
+								}
 							pErrMsg = biConn.settle( *pCC );
-														
+							
 							// check returncode
-							if(pErrMsg->getErrorCode()==pErrMsg->ERR_OK)
-							{
-								dbConn.markAsSettled(pCC->getAccountNumber());
-							}
+							if(!pErrMsg)
+								{
+									CAMsg::printMsg(LOG_ERR, "SettleThread: Communication with BI failed!\n");
+								}
+							else if(pErrMsg->getErrorCode()!=pErrMsg->ERR_OK)
+								{
+									CAMsg::printMsg(LOG_ERR, "SettleThread: BI reported error no. %d (%s)\n",
+										pErrMsg->getErrorCode(), pErrMsg->getDescription() );
+								}
+							else
+								{
+									dbConn.markAsSettled(pCC->getAccountNumber());
+								}
 							delete pCC;
 							delete pErrMsg;
 						}
@@ -88,8 +132,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * param)
 				}
 			dbConn.terminateDBConnection();
 		}
-		
-	return THREAD_RETURN_SUCCESS;
+	return (THREAD_RETURN)0;
 }
 
-#endif
+

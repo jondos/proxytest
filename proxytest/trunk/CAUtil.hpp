@@ -63,6 +63,12 @@ SINT32 setDOMElementValue(DOM_Element& elem,UINT32 value);
  */
 SINT32 getDOMElementValue(const DOM_Element& elem, UINT64 &value);
 
+/**
+ * Sets the decimal text representation of a 64bit integer as node value
+ * TODO: implement this for non-64bit platforms
+ */
+SINT32 setDOMElementValue(DOM_Element & elem, const UINT64 text);
+
 SINT32 getDOMElementValue(const DOM_Element& elem,UINT32* value);
 
 SINT32 getDOMElementValue(const DOM_Element& elem,UINT16* value);
