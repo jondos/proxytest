@@ -33,6 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 typedef struct ReverseMuxList_t
 	{
 		CAMuxSocket* pMuxSocket;
+		CAQueue* pSendQueue;
 		HCHANNEL inChannel;
 		HCHANNEL outChannel;
 		CASymCipher* pCipher;
@@ -43,6 +44,7 @@ typedef struct MuxList_t
 	{
 		CAMuxSocket* pMuxSocket;
 		CASocketList* pSocketList;
+		CAQueue* pSendQueue;
 		MuxList_t* next;
 	} MUXLIST,MUXLISTENTRY;
 
@@ -53,7 +55,7 @@ class CAMuxChannelList
 		public:
 			CAMuxChannelList();
 			~CAMuxChannelList();
-			int add(CAMuxSocket* pMuxSocket);
+			int add(CAMuxSocket* pMuxSocket,CAQueue* pQueue);
 			int add(MUXLISTENTRY* pEntry,HCHANNEL in,HCHANNEL out,CASymCipher* pCipher);
 			
 			MUXLISTENTRY* get(CAMuxSocket* pMuxSocket);

@@ -63,7 +63,7 @@ SINT32 CAMuxChannelList::clear()
 		return E_SUCCESS;
 	}
 
-int CAMuxChannelList::add(CAMuxSocket* pMuxSocket)
+int CAMuxChannelList::add(CAMuxSocket* pMuxSocket,CAQueue* pQueue)
 	{
 		if(list==NULL)
 			{
@@ -78,6 +78,7 @@ int CAMuxChannelList::add(CAMuxSocket* pMuxSocket)
 			}
 		list->pSocketList=new CASocketList();
 		list->pMuxSocket=pMuxSocket;
+		list->pSendQueue=pQueue;
 		return 0;
 	}
 			
@@ -165,6 +166,7 @@ int CAMuxChannelList::add(MUXLISTENTRY* pEntry,HCHANNEL in,HCHANNEL out,CASymCip
 				reverselist=tmpEntry;
 			}
 		reverselist->pMuxSocket=pEntry->pMuxSocket;
+		reverselist->pSendQueue=pEntry->pSendQueue;
 		reverselist->inChannel=in;
 		reverselist->outChannel=out;
 		reverselist->pCipher=pCipher;

@@ -440,11 +440,12 @@ SINT32 CALastMix::loop()
 		for(;;)
 			{
 //Step one.. reading from previous Mix
+// reading maximal number of current channels packets
 				UINT32 channels=oSocketList.getSize()+1;
 				for(UINT32 k=0;k<channels;k++)
 					{
-						ret=osocketgroupMixIn.select(false,0);
-						if(ret!=1)
+						countRead=osocketgroupMixIn.select(false,0);
+						if(countRead!=1)
 							break;
 						else
 							{

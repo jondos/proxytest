@@ -158,9 +158,9 @@ SINT32 CAFirstMix::init()
 			{
 				socketAddrIn.setAddr((char*)serverHost,options.getServerPort());
 			}
-		socketIn.create();
-		socketIn.setReuseAddr(true);
-		if(socketIn.listen(socketAddrIn)==SOCKET_ERROR)
+		m_socketIn.create();
+		m_socketIn.setReuseAddr(true);
+		if(m_socketIn.listen(socketAddrIn)==SOCKET_ERROR)
 		    {
 					CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
 					return E_UNKNOWN;
@@ -191,7 +191,7 @@ SINT32 CAFirstMix::init()
 		return E_SUCCESS;
 	}
 
-
+/*
 SINT32 CAFirstMix::loop()
 	{
 		CAMuxChannelList  oMuxChannelList;
@@ -527,10 +527,364 @@ ERR:
 
 		return E_UNKNOWN;
 	}
+*/
+
+
+
+// NEw Version..................
+
+SINT32 CAFirstMix::loop()
+	{
+		CAMuxChannelList  oMuxChannelList;
+		REVERSEMUXLISTENTRY* tmpReverseEntry;
+		MUXLISTENTRY* tmpMuxListEntry;
+
+		CASocketGroup osocketgroupAccept;
+		CASocketGroup osocketgroupUsersRead;
+		CASocketGroup osocketgroupUsersWrite;
+		CASingleSocketGroup osocketgroupMixOut;
+		CAQueue oqueueMixOut;
+		CAMuxSocket* pnewMuxSocket;
+		SINT32 countRead;
+		HCHANNEL lastChannelId=1;
+		MIXPACKET oMixPacket;
+		CONNECTION oConnection;
+		CAInfoService oInfoService(this);
+		UINT32 nUser=0;
+		SINT32 ret;
+		UINT8 rsaBuff[RSA_SIZE];
+		UINT32 maxSocketsIn;
+		osocketgroupAccept.add(m_socketIn);
+    CASocket** socketsIn;
+		bool bProxySupport=false;
+    if(options.getProxySupport())
+    	{
+    		osocketgroupAccept.add(m_socketHttpsIn);
+      	bProxySupport=true;
+				socketsIn=new CASocket*[2];
+				maxSocketsIn=2;
+				socketsIn[0]=&m_socketIn;
+				socketsIn[1]=&m_socketHttpsIn;
+      }
+		else
+			{
+				socketsIn=new CASocket*[1];
+				maxSocketsIn=1;
+				socketsIn[0]=&m_socketIn;
+			}
+		osocketgroupMixOut.add(muxOut);
+		muxOut.setCrypt(true);
+		((CASocket*)muxOut)->setNonBlocking(true);
+		
+		oInfoService.setSignature(&mSignature);
+		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix InfoService - Signature set\n");
+		oInfoService.setLevel(0,-1,-1);
+		oInfoService.sendHelo();
+		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix Helo sended\n");
+		oInfoService.start();
+		CAMsg::printMsg(LOG_DEBUG,"InfoService Loop started\n");
+
+		UINT8 ip[4];
+		UINT8* tmpBuff=new UINT8[MIXPACKET_SIZE];
+		CAMsg::printMsg(LOG_DEBUG,"Starting Message Loop... \n");
+		for(;;)
+			{
+//LOOP_START:
+
+//First Step
+//Checking for new connections		
+				countRead=osocketgroupAccept.select(false,0);
+				UINT32 i=0;
+				while(countRead>0&&i<maxSocketsIn)
+					{						
+						if(osocketgroupAccept.isSignaled(*socketsIn[i]))
+							{
+								countRead--;
+								#ifdef _DEBUG
+									CAMsg::printMsg(LOG_DEBUG,"New direct Connection from Browser!\n");
+								#endif
+								pnewMuxSocket=new CAMuxSocket;
+								if(socketsIn[i]->accept(*(CASocket*)pnewMuxSocket)==SOCKET_ERROR)
+									{
+										CAMsg::printMsg(LOG_ERR,"Accept Error %u - direct Connection from Browser!\n",errno);
+										delete pnewMuxSocket;
+									}
+								else
+									{
+		//Prüfen ob schon vorhanden..	
+											ret=((CASocket*)pnewMuxSocket)->getPeerIP(ip);
+											if(ret!=E_SUCCESS||m_pIPList->insertIP(ip)<0)
+												{
+													pnewMuxSocket->close();
+													delete pnewMuxSocket;
+												}
+											else
+												{
+		//Weiter wie bisher...								
+													#ifdef _DEBUG
+														int ret=((CASocket*)pnewMuxSocket)->setKeepAlive(true);
+														if(ret!=E_SUCCESS)
+															CAMsg::printMsg(LOG_DEBUG,"Fehler bei KeepAlive!");
+													#else
+														((CASocket*)pnewMuxSocket)->setKeepAlive(true);
+													#endif
+													((CASocket*)pnewMuxSocket)->send(mKeyInfoBuff,mKeyInfoSize);
+													((CASocket*)pnewMuxSocket)->setNonBlocking(true);
+													oMuxChannelList.add(pnewMuxSocket,new CAQueue);
+													nUser++;
+													oInfoService.setLevel(nUser,-1,-1);
+													osocketgroupUsersRead.add(*pnewMuxSocket);
+												}
+									}
+							}
+						i++;
+					}
+
+				
+// Second Step 
+// Checking for data from users
+				tmpMuxListEntry=oMuxChannelList.getFirst();
+				countRead=osocketgroupUsersRead.select(false,0);
+				while(tmpMuxListEntry!=NULL&&countRead>0)
+					{
+						if(osocketgroupUsersRead.isSignaled(*(tmpMuxListEntry->pMuxSocket)))
+							{
+								countRead--;
+								ret=tmpMuxListEntry->pMuxSocket->receive(&oMixPacket,0);
+								if(ret==SOCKET_ERROR)
+									{
+										((CASocket*)tmpMuxListEntry->pMuxSocket)->getPeerIP(ip);
+										m_pIPList->removeIP(ip);
+										MUXLISTENTRY otmpEntry;
+										if(oMuxChannelList.remove(tmpMuxListEntry->pMuxSocket,&otmpEntry))
+											{
+												osocketgroupUsersRead.remove(*(CASocket*)otmpEntry.pMuxSocket);
+												osocketgroupUsersWrite.remove(*(CASocket*)otmpEntry.pMuxSocket);
+												CONNECTION* tmpCon=otmpEntry.pSocketList->getFirst();
+												while(tmpCon!=NULL)
+													{
+														muxOut.close(tmpCon->outChannel,tmpBuff);
+														oqueueMixOut.add(tmpBuff,MIXPACKET_SIZE);
+                            delete tmpCon->pCipher;
+														tmpCon=otmpEntry.pSocketList->getNext();
+													}
+												otmpEntry.pMuxSocket->close();
+												delete otmpEntry.pMuxSocket;
+												delete otmpEntry.pSendQueue;
+												delete otmpEntry.pSocketList;
+											}
+										nUser--;
+										oInfoService.setLevel(nUser,-1,-1);
+									}
+								else if(ret==E_AGAIN)
+									{
+										tmpMuxListEntry=oMuxChannelList.getNext();
+										continue;
+									}
+								else
+									{
+										if(oMixPacket.flags==CHANNEL_CLOSE)
+											{
+												if(oMuxChannelList.get(tmpMuxListEntry,oMixPacket.channel,&oConnection))
+													{
+														muxOut.close(oConnection.outChannel,tmpBuff);
+														oqueueMixOut.add(tmpBuff,MIXPACKET_SIZE);
+                            oMuxChannelList.remove(oConnection.outChannel,NULL);
+														delete oConnection.pCipher;
+													}
+												else
+													{
+														#ifdef _DEBUG
+															CAMsg::printMsg(LOG_DEBUG,"Invalid ID to close from Browser!\n");
+														#endif
+													}
+											}
+										else
+											{
+												CASymCipher* pCipher=NULL;
+												if(oMuxChannelList.get(tmpMuxListEntry,oMixPacket.channel,&oConnection))
+													{
+														oMixPacket.channel=oConnection.outChannel;
+														pCipher=oConnection.pCipher;
+														pCipher->decryptAES(oMixPacket.data,oMixPacket.data,DATA_SIZE);
+													}
+												else
+													{
+														pCipher= new CASymCipher();
+														mRSA.decrypt(oMixPacket.data,rsaBuff);
+														pCipher->setKeyAES(rsaBuff);
+														pCipher->decryptAES(oMixPacket.data+RSA_SIZE,
+																						 oMixPacket.data+RSA_SIZE-KEY_SIZE,
+																						 DATA_SIZE-RSA_SIZE);
+														memcpy(oMixPacket.data,rsaBuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
+
+														oMuxChannelList.add(tmpMuxListEntry,oMixPacket.channel,lastChannelId,pCipher);
+														#ifdef _DEBUG
+															CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",lastChannelId);
+														#endif
+														oMixPacket.channel=lastChannelId++;
+													}
+												muxOut.send(&oMixPacket,tmpBuff);
+												oqueueMixOut.add(tmpBuff,MIXPACKET_SIZE);
+												m_MixedPackets++;
+											}
+									}
+							}
+						tmpMuxListEntry=oMuxChannelList.getNext();
+					}
+
+//Third step
+//Sending to next mix
+				countRead=nUser+1;
+				while(countRead>0&&!oqueueMixOut.isEmpty()&&osocketgroupMixOut.select(true,0)==1)
+					{
+						countRead--;
+						UINT32 len=MIXPACKET_SIZE;
+						oqueueMixOut.peek(tmpBuff,&len);
+						ret=((CASocket*)muxOut)->send(tmpBuff,len);
+						if(ret>0)
+							{
+								oqueueMixOut.remove((UINT32*)&ret);
+							}
+						else if(ret==E_AGAIN)
+							break;
+						else
+							goto ERR;
+					}
+
+//Step 4
+//Reading from Mix				
+				countRead=nUser+1;
+				while(countRead>0&&osocketgroupMixOut.select(false,0)==1)
+					{
+						countRead--;
+						ret=muxOut.receive(&oMixPacket);
+						if(ret==SOCKET_ERROR)
+							{
+								CAMsg::printMsg(LOG_CRIT,"Mux-Out-Channel Receiving Data Error - Exiting!\n");
+								goto ERR;
+							}
+						if(ret!=MIXPACKET_SIZE)
+							break;
+						if(oMixPacket.flags==CHANNEL_CLOSE) //close event
+							{
+								#ifdef _DEBUG
+									CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u ... ",oMixPacket.channel);
+								#endif
+								REVERSEMUXLISTENTRY otmpReverseEntry;
+								if(oMuxChannelList.remove(oMixPacket.channel,&otmpReverseEntry))
+									{
+										otmpReverseEntry.pMuxSocket->close(otmpReverseEntry.inChannel,tmpBuff);
+										otmpReverseEntry.pSendQueue->add(tmpBuff,MIXPACKET_SIZE);
+										osocketgroupUsersWrite.add(*otmpReverseEntry.pMuxSocket);
+										delete otmpReverseEntry.pCipher;
+										#ifdef _DEBUG
+											CAMsg::printMsg(LOG_DEBUG,"closed!\n");
+										#endif
+									}
+							}
+						else
+							{
+								#ifdef _DEBUG
+									CAMsg::printMsg(LOG_DEBUG,"Sending Data to Browser!");
+								#endif
+								tmpReverseEntry=oMuxChannelList.get(oMixPacket.channel);
+								if(tmpReverseEntry!=NULL)
+									{
+										oMixPacket.channel=tmpReverseEntry->inChannel;
+										tmpReverseEntry->pCipher->decryptAES2(oMixPacket.data,oMixPacket.data,DATA_SIZE);
+										
+										tmpReverseEntry->pMuxSocket->send(&oMixPacket,tmpBuff);
+										tmpReverseEntry->pSendQueue->add(tmpBuff,MIXPACKET_SIZE);
+										osocketgroupUsersWrite.add(*tmpReverseEntry->pMuxSocket);
+#define MAX_USER_SEND_QUEUE 100000
+										if(tmpReverseEntry->pSendQueue->getSize()>MAX_USER_SEND_QUEUE)
+											{
+												MUXLISTENTRY* pml=oSuspendList.get(tmpReverseEntry->pMuxSocket);
+												CONNECTION oCon;
+												if(pml==NULL||!pml->pSocketList->get(&oCon,tmpReverseEntry->outChannel)) //Have we not send a suspend message yet ?
+													{
+														oMixPacket.channel=tmpReverseEntry->outChannel;
+														oMixPacket.flags=CHANNEL_SUSPEND;
+														#ifdef _DEBUG
+															CAMsg::printMsg(LOG_INFO,"Sending suspend for channel: %u\n",oMixPacket.channel);
+														#endif
+														muxOut.send(&oMixPacket,tmpBuff);
+														oqueueMixOut.add(tmpBuff,MIXPACKET_SIZE);
+														
+                            if(pml==NULL)
+															{
+																oSuspendList.add(tmpReverseEntry->pMuxSocket,NULL);
+																pml=oSuspendList.get(tmpReverseEntry->pMuxSocket);
+															}
+														pml->pSocketList->add(tmpReverseEntry->inChannel,tmpReverseEntry->outChannel,NULL);
+													}
+											}
+										m_MixedPackets++;
+									}
+								else
+									{
+										#ifdef _DEBUG
+											CAMsg::printMsg(LOG_DEBUG,"Error Sending Data to Browser -- Channel-Id %u no valid!\n",oMixPacket.channel);
+										#endif
+									}
+							}
+					}
+
+//Step 5 
+//Writing to users...
+				tmpMuxListEntry=oMuxChannelList.getFirst();
+				countRead=osocketgroupUsersWrite.select(true,0);
+				while(countRead>0&&tmpMuxListEntry!=NULL)
+					{
+						if(osocketgroupUsersWrite.isSignaled(*tmpMuxListEntry->pMuxSocket))
+							{
+								countRead--;
+								UINT32 len=MIXPACKET_SIZE;
+								tmpMuxListEntry->pSendQueue->peek(tmpBuff,&len);
+								ret=((CASocket*)tmpMuxListEntry->pMuxSocket)->send(tmpBuff,len);
+								if(ret>0)
+									{
+										tmpMuxListEntry->pSendQueue->remove((UINT32*)&ret);
+										if(tmpMuxListEntry->pSendQueue->isEmpty())
+											{
+												osocketgroupUsersWrite.remove(*tmpMuxListEntry->pMuxSocket);
+											}
+									}
+								//todo error handling
+
+							}
+					}
+			}
+ERR:
+		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
+		muxOut.close();
+		tmpMuxListEntry=oMuxChannelList.getFirst();
+		while(tmpMuxListEntry!=NULL)
+			{
+				tmpMuxListEntry->pMuxSocket->close();
+				delete tmpMuxListEntry->pMuxSocket;
+				
+				CONNECTION* tmpCon=tmpMuxListEntry->pSocketList->getFirst();
+				while(tmpCon!=NULL)
+					{
+						delete tmpCon->pCipher;
+						tmpCon=tmpMuxListEntry->pSocketList->getNext();
+					}
+				tmpMuxListEntry=oMuxChannelList.getNext();
+			}
+
+		return E_UNKNOWN;
+	}
+
+
+
+
+
 
 SINT32 CAFirstMix::clean()
 	{
-		socketIn.close();
+		m_socketIn.close();
     m_socketHttpsIn.close();
     muxOut.close();
 		mRSA.destroy();
@@ -539,7 +893,7 @@ SINT32 CAFirstMix::clean()
 		m_pIPList=NULL;
 		return E_SUCCESS;
 	}
-
+/*
 void CAFirstMix::resume(CASocket* pSocket)
 	{
 		EnterCriticalSection(&csResume);
@@ -583,3 +937,4 @@ void CAFirstMix::deleteResume(CAMuxSocket* pSocket,HCHANNEL outChannel)
 		oSuspendList.remove(outChannel,NULL);
 		LeaveCriticalSection(&csResume);
 	}
+*/
