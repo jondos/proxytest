@@ -70,7 +70,6 @@ SINT32 CALastMix::initOnce()
 		options.getSOCKSHost(strTarget,255);
 		maddrSocks.setAddr(strTarget,options.getSOCKSPort());
 
-		SINT32 ret=E_UNKNOWN;
 		int handle;
 		SINT32 len;
 		UINT8* fileBuff=new UINT8[2048];
@@ -184,6 +183,7 @@ SINT32 CALastMix::loop()
 			{
 				pInfoService=new CAInfoService();
 				pInfoService->setSignature(m_pSignature);
+				pInfoService->sendHelo();
 				pInfoService->start();
 			}
 		for(;;)
