@@ -37,6 +37,8 @@ struct t_pool_list
 
 typedef t_pool_list tPoolListEntry;
 
+/** This class implements the pool strategie of a Mix. See \ref docSectionPool "[Message Pool]" for more information.
+	*/
 class CAPool
 	{
 		public:

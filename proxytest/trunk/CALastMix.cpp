@@ -397,6 +397,9 @@ SINT32 CALastMix::loop()
 			UINT64 current_millis;
 			UINT32 diff_time; 
 		#endif
+		#ifdef USE_POOL
+			CAPool* pPool=new CAPool(MIX_POOL_SIZE);
+		#endif
 		CAThread threadSendToMix;
 		threadSendToMix.setMainLoop(lm_loopSendToMix);
 		threadSendToMix.start(this);
@@ -423,6 +426,9 @@ SINT32 CALastMix::loop()
 									break;
 								//else one packet received
 								m_logUploadedPackets++;
+								#ifdef USE_POOL
+									pPool->pool(pMixPacket);
+								#endif
 								pChannelListEntry=pChannelList->get(pMixPacket->channel);
 								if(pChannelListEntry==NULL)
 									{
@@ -745,6 +751,9 @@ ERR:
 		delete pMixPacket;
 		delete m_pQueueSendToMix;
 		m_pQueueSendToMix=NULL;
+		#ifdef USE_POOL
+			delete pPool;
+		#endif
 		oLogThread.join();
 		return E_UNKNOWN;
 	}

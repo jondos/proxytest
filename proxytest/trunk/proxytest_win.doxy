@@ -60,11 +60,14 @@ WARN_LOGFILE           =
 INPUT                  = . \
                          xml \
                          popt \
-                         aes
+                         aes\
+                         documentation/xml \
+                         documentation
 FILE_PATTERNS          = *.cpp \
                          *.hpp \
                          *.c \
-                         *.h
+                         *.h \
+                         *.template
 RECURSIVE              = NO
 EXCLUDE                = 
 EXCLUDE_SYMLINKS       = NO
