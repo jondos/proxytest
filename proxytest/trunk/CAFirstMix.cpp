@@ -563,7 +563,7 @@ LOOP_START:
 										{
 											pnewMuxSocket->close();
 											delete pnewMuxSocket;
-											continue;
+											goto LOOP_START;
 										}
 //Weiter wie bisher...								
 								#ifdef _DEBUG
@@ -603,7 +603,7 @@ LOOP_START:
 									{
 										pnewMuxSocket->close();
 										delete pnewMuxSocket;
-										continue;
+										goto LOOP_START;
 									}
 //Weiter wie bisher...
 								#ifdef _DEBUG

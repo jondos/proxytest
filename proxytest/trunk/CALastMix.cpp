@@ -299,6 +299,8 @@ SINT32 CALastMix::init()
 		return E_SUCCESS;
 	}
 
+#define _CONNECT_TIMEOUT 5000 //5 Seconds...
+
 SINT32 CALastMix::loop()
 	{
 		CASocketList  oSocketList;
@@ -351,13 +353,13 @@ LOOP_START:
 										CASocket* tmpSocket=new CASocket;										
 										int ret;
 										if(oMuxPacket.payload.type==MUX_SOCKS)
-											ret=tmpSocket->connect(&maddrSocks); //may be block
+											ret=tmpSocket->connect(&maddrSocks,_CONNECT_TIMEOUT); 
 										else
 											{
 												tmpSocket->create();
 												tmpSocket->setRecvBuff(50000);
 												tmpSocket->setSendBuff(5000);
-												ret=tmpSocket->connect(&maddrSquid);	//may be block
+												ret=tmpSocket->connect(&maddrSquid,_CONNECT_TIMEOUT);
 											}	
 										if(ret!=E_SUCCESS)
 										    {

@@ -131,6 +131,7 @@ THREAD_RETURN InfoLoop(void *p)
 		CASocketAddr oAddr;
 		CASignature* pSignature=pInfoService->getSignature();
 		UINT8* buff=new UINT8[1024];
+		UINT8 buffHeader[255];
 		options.getInfoServerHost(buff,1024);
 		oAddr.setAddr((char*)buff,options.getInfoServerPort());
 		BufferOutputStream oBufferStream(1024,1024);
@@ -166,8 +167,9 @@ THREAD_RETURN InfoLoop(void *p)
 						oxmlOut.EndDocument();
 						buffLen=1024;
 						pSignature->signXML(oBufferStream.getBuff(),oBufferStream.getBufferSize(),(UINT8*)buff,&buffLen);
-						oSocket.send((UINT8*)"POST /feedback HTTP/1.0\r\n\r\n",27);
-						oSocket.send((UINT8*)buff,buffLen);
+						sprintf((char*)buffHeader,"POST /feedback HTTP/1.0\r\nContent-Length: %u\r\n\r\n",buffLen);
+						oSocket.send(buffHeader,strlen((char*)buffHeader));
+						oSocket.send(buff,buffLen);
 					}
 				oSocket.close();	
 				if(helocount==0)
@@ -188,6 +190,7 @@ CAInfoService::CAInfoService(CAFirstMix* pFirstMix)
 		InitializeCriticalSection(&csLevel);
 		iUser=iRisk=iTraffic=-1;
 		m_pFirstMix=pFirstMix;
+
 		bRun=false;
 		pSignature=NULL;
 	}
@@ -272,6 +275,7 @@ SINT32 CAInfoService::sendHelo()
 		CASocketAddr oAddr;
 		UINT8 hostname[255];
 		UINT8 id[50];
+		UINT8 buffHeader[255];
 		if(options.getInfoServerHost(hostname,255)!=E_SUCCESS)
 			return E_UNKNOWN;
 		oAddr.setAddr((char*)hostname,options.getInfoServerPort());
@@ -306,8 +310,9 @@ SINT32 CAInfoService::sendHelo()
 				buffLen=1024;
 				if(pSignature->signXML(oBufferStream.getBuff(),oBufferStream.getBufferSize(),(UINT8*)buff,&buffLen)!=E_SUCCESS)
 					{if(buff!=NULL)delete buff;return E_UNKNOWN;}
-				oSocket.send((UINT8*)"POST /helo HTTP/1.0\r\n\r\n",23);
-				oSocket.send((UINT8*)buff,buffLen);
+				sprintf((char*)buffHeader,"POST /helo HTTP/1.0\r\nContent-Length: %u\r\n\r\n",buffLen);
+				oSocket.send(buffHeader,strlen((char*)buffHeader));
+				oSocket.send(buff,buffLen);
 				oSocket.close();
 				delete buff;		
 				return E_SUCCESS;	

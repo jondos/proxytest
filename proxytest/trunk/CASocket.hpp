@@ -42,7 +42,8 @@ class CASocket
 			SINT32 listen(UINT16 port);
 			SINT32 accept(CASocket &s);
 			SINT32 connect(LPCASOCKETADDR psa);
-			SINT32 connect(LPCASOCKETADDR psa,UINT retry,UINT32 time);
+			SINT32 connect(LPCASOCKETADDR psa,UINT retry,UINT32 msWaitTime);
+			SINT32 connect(LPCASOCKETADDR psa,UINT32 msTimeOut);
 			SINT32 close();
 			SINT32 close(int mode);
 			int send(UINT8* buff,UINT32 len,bool bDisableAsync=false);
