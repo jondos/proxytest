@@ -262,6 +262,7 @@ THREAD_RETURN producer(void* param)
 						THREAD_RETURN_ERROR;
 					count+=aktSize;
 					pTest->len-=aktSize;
+					msSleep(1000);
 				}
 		if(pTest->pQueue->add(pTest->buff+count,pTest->len)!=E_SUCCESS)
 			THREAD_RETURN_ERROR;
@@ -281,6 +282,7 @@ THREAD_RETURN consumer(void* param)
 					THREAD_RETURN_ERROR;
 				count+=aktSize;
 				pTest->len-=aktSize;
+				msSleep(1000);
 			}while(pTest->len>0);
 		THREAD_RETURN_SUCCESS;
 	}
