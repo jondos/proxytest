@@ -451,6 +451,7 @@ END_THREAD:
 	}
 */
 
+#define NO_ACCEPTLOOPUSER
 
 SINT32 CAFirstMix::loop()
 	{
@@ -504,7 +505,7 @@ SINT32 CAFirstMix::loop()
 		bool bAktiv;
 		//Starting thread for Step 1
 		UINT32 i;
-#ifndef _DEBUG
+#if !defined(_DEBUG) && !defined(NO_LOOPACCEPTUSER)
 		CAThread threadAcceptUsers;
 		threadAcceptUsers.setMainLoop(loopAcceptUsers);
 		threadAcceptUsers.start(this);
@@ -534,7 +535,7 @@ SINT32 CAFirstMix::loop()
 //Checking for new connections		
 // Now in a separat Thread.... (if NOt _DEBUG defined!)
 
-#ifdef _DEBUG				
+#if defined(_DEBUG) || defined(NO_LOOPACCEPTUSER)				
 				
 				countRead=osocketgroupAccept.select(false,0);
 				i=0;
@@ -830,7 +831,7 @@ ERR:
 		//writng one byte to the queue...
 		UINT8 b;
 		m_pQueueSendToMix->add(&b,1);
-#ifndef _DEBUG
+#if !defined(_DEBUG) && !defined(NO_LOOPACCEPTUSER)
 		CAMsg::printMsg(LOG_CRIT,"Wait for LoopAcceptUsers!\n");
 		threadAcceptUsers.join();
 #endif
