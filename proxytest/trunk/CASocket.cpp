@@ -213,3 +213,9 @@ int CASocket::setSendBuff(int r)
 		return setsockopt(m_Socket,SOL_SOCKET,SO_SNDBUF,(char*)&val,sizeof(val));	
 	}
 
+int CASocket::setKeepAlive(bool b)
+	{
+		int val=0;
+		if(b) val=1;
+		return setsockopt(m_Socket,SOL_SOCKET,SO_KEEPALIVE,(char*)&val,sizeof(val));	
+	}

@@ -592,6 +592,7 @@ THREAD_RETURN fmIO(void *v)
 							}
 						else
 							{
+								((CASocket*)newMuxSocket)->setKeepAlive(true);
 								((CASocket*)newMuxSocket)->send((char*)infoBuff,infoSize);
 								oMuxChannelList.add(newMuxSocket);
 								nUser++;
