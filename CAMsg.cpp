@@ -102,8 +102,6 @@ SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 					oMsg.m_csPrint.unlock();
 					return E_UNKNOWN;
 			}
-	  trio_vsnprintf(oMsg.m_strMsgBuff+20+STRMSGTYPES_SIZE,1024,format,ap);
-
 #ifdef HAVE_VSNPRINTF
 		vsnprintf(oMsg.m_strMsgBuff+20+STRMSGTYPES_SIZE,1024,format,ap);
 #else
