@@ -179,8 +179,6 @@ SINT32 CALocalProxy::loop()
 								}
 							else
 								{
-									for(int c=0;c<chainlen;c++)
-										oConnection.pCipher[c].decryptAES2((unsigned char*)oMixPacket.data,oMixPacket.data,DATA_SIZE);
 									if(oMixPacket.flags==CHANNEL_CLOSE)
 										{
 											#ifdef _DEBUG
@@ -200,6 +198,8 @@ SINT32 CALocalProxy::loop()
 										}
 									else
 										{
+											for(int c=0;c<chainlen;c++)
+												oConnection.pCipher[c].decryptAES2(oMixPacket.data,oMixPacket.data,DATA_SIZE);
 											#ifdef _DEBUG
 												CAMsg::printMsg(LOG_DEBUG,"Sending Data to Browser!");
 											#endif
@@ -253,6 +253,7 @@ SINT32 CALocalProxy::loop()
 														for(int c=0;c<chainlen;c++)
 															{
 																RAND_bytes(buff,16);
+																buff[0]&=0x7F; // Hack for RSA to ensure m < n !!!!!
 																tmpCon->pCipher[c].setKeyAES(buff);
 																memcpy(buff+KEY_SIZE,oMixPacket.data,size);
 																arRSA[c].encrypt(buff,buff);
@@ -266,7 +267,7 @@ SINT32 CALocalProxy::loop()
 												else //sonst
 													{
 														for(int c=0;c<chainlen;c++)
-															tmpCon->pCipher[c].encryptAES((unsigned char*)oMixPacket.data,oMixPacket.data,DATA_SIZE);
+															tmpCon->pCipher[c].encryptAES(oMixPacket.data,oMixPacket.data,DATA_SIZE);
 														oMixPacket.flags=CHANNEL_DATA;
 													}
 												if(muxOut.send(&oMixPacket)==SOCKET_ERROR)
