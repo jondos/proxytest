@@ -55,6 +55,16 @@ SINT32 CALastMix::initOnce()
 				options.getTargetAddr(oAddr,i);
 				m_oCacheLB.add(oAddr);
 			}
+		CAMsg::printMsg(LOG_DEBUG,"This mix will use the following proxies:\n");
+		for(i=0;i<m_oCacheLB.getElementCount();i++)
+			{
+				CASocketAddrINet* pAddr=m_oCacheLB.get();
+				UINT8 ip[4];
+				pAddr->getIP(ip);
+				UINT32 port=pAddr->getPort();
+				CAMsg::printMsg(LOG_DEBUG,"%u. Proxy's Address: %u.%u.%u.%u:%u\n",i+1,ip[0],ip[1],ip[2],ip[3],port);
+			}
+		
 		UINT8 strTarget[255];
 		options.getSOCKSHost(strTarget,255);
 		maddrSocks.setAddr(strTarget,options.getSOCKSPort());
@@ -145,6 +155,7 @@ SINT32 CALastMix::loop()
 		((CASocket*)muxIn)->setNonBlocking(true);
 		muxIn.setCrypt(true);
 		bool bAktiv;
+		UINT32 countCacheAddresses=m_oCacheLB.getElementCount();
 		for(;;)
 			{
 				bAktiv=false;
@@ -198,7 +209,7 @@ SINT32 CALastMix::loop()
 																ret=tmpSocket->connect(*m_oCacheLB.get(),_CONNECT_TIMEOUT);
 																count++;
 															}
-														while(ret!=E_SUCCESS&&count<m_oCacheLB.getElementCount());
+														while(ret!=E_SUCCESS&&count<countCacheAddresses);
 													}	
 												if(ret!=E_SUCCESS)
 														{
