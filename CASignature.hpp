@@ -39,16 +39,18 @@ class CASignature
 			SINT32 generateSignKey(UINT32 size);
 			SINT32 setSignKey(UINT8* buff,UINT32 len,UINT32 type,char* passwd=NULL);
 			SINT32 setSignKey(const DOM_Node& node,UINT32 type,char* passwd=NULL);
-			SINT32 sign(UINT8* in,UINT32 inlen,UINT8* sig,UINT32* siglen);
+//			SINT32 sign(UINT8* in,UINT32 inlen,UINT8* sig,UINT32* siglen);
 			SINT32 signXML(DOM_Node& node,CACertStore* pIncludeCerts=NULL);
 			SINT32 signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen,CACertStore* pIncludeCerts=NULL);
 			SINT32 setVerifyKey(CACertificate* pCert);
-			SINT32 verify(UINT8* in,UINT32 inlen,UINT8* sig,UINT32 siglen);
+//			SINT32 verify(UINT8* in,UINT32 inlen,UINT8* sig,UINT32 siglen);
 			SINT32 verifyXML(const UINT8* const in,UINT32 inlen);
 			SINT32 verifyXML(DOM_Node& node,CACertStore* pTrustedCerts=NULL);
 			SINT32 getSignatureSize();
 		private:
 			DSA* m_pDSA;
 			SINT32 parseSignKeyXML(UINT8* buff,UINT32 len);
+			SINT32 verify(UINT8* in,UINT32 inlen,DSA_SIG* dsaSig);
+			SINT32 sign(UINT8* in,UINT32 inlen,DSA_SIG** dsaSig);
 	};
 #endif

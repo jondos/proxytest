@@ -212,11 +212,12 @@ SINT32 CASignature::parseSignKeyXML(UINT8* buff,UINT32 len)
 	}
 
 
-SINT32 CASignature::sign(UINT8* in,UINT32 inlen,UINT8* sig,UINT32* siglen)
+SINT32 CASignature::sign(UINT8* in,UINT32 inlen,DSA_SIG** pdsaSig)
 	{
 		UINT8 dgst[SHA_DIGEST_LENGTH];
 		SHA1(in,inlen,dgst);
-		if(DSA_sign(0,dgst,SHA_DIGEST_LENGTH,sig,siglen,m_pDSA)==1)
+		*pdsaSig=DSA_do_sign(dgst,SHA_DIGEST_LENGTH,m_pDSA);
+		if(*pdsaSig!=NULL)
 		 return E_SUCCESS;
 		return E_UNKNOWN;
 	}
@@ -295,16 +296,19 @@ SINT32 CASignature::signXML(DOM_Node &node,CACertStore* pIncludeCerts)
 		if(canonicalBuff==NULL)
 			return E_UNKNOWN;
 		
-		UINT sigSize=255;
-		UINT8 sig[255];
-		UINT8* c=sig;
-		SINT32 ret=sign(canonicalBuff,len,sig,&sigSize);
+	//	UINT sigSize=255;
+	//	UINT8 sig[255];
+	//	UINT8* c=sig;
+		DSA_SIG* pdsaSig=NULL;
+		SINT32 ret=sign(canonicalBuff,len,&pdsaSig);
 		delete[] canonicalBuff;
 		if(ret!=E_SUCCESS)
-			return E_UNKNOWN;
-		
+			{
+				DSA_SIG_free(pdsaSig);
+				return E_UNKNOWN;
+			}
 		//Making Base64-Encode r and s
-		STACK* a=NULL;
+/*		STACK* a=NULL;
 		d2i_ASN1_SET(&a,&c,sigSize,(char *(*)(void))d2i_ASN1_INTEGER,NULL,V_ASN1_SEQUENCE,V_ASN1_UNIVERSAL);
 		BIGNUM* s =BN_new();
 		ASN1_INTEGER* i=(ASN1_INTEGER*)sk_pop(a);
@@ -315,15 +319,17 @@ SINT32 CASignature::signXML(DOM_Node &node,CACertStore* pIncludeCerts)
 		ASN1_INTEGER_to_BN(i,r);
 		ASN1_INTEGER_free(i);
 		sk_free(a);
-
+*/
 		memset(tmpBuff,0,40); //make first 40 bytes '0' --> if r or s is less then 20 bytes long! 
 													//(Due to be compatible to the standarad r and s must be 20 bytes each) 
-		BN_bn2bin(r,tmpBuff+20-BN_num_bytes(r)); //so r is 20 bytes with leading '0'...
-		BN_bn2bin(s,tmpBuff+40-BN_num_bytes(s));
-		BN_free(r);
-		BN_free(s);
+		BN_bn2bin(pdsaSig->r,tmpBuff+20-BN_num_bytes(pdsaSig->r)); //so r is 20 bytes with leading '0'...
+		BN_bn2bin(pdsaSig->s,tmpBuff+40-BN_num_bytes(pdsaSig->s));
+//		BN_free(r);
+	//	BN_free(s);
+		DSA_SIG_free(pdsaSig);
 
-		sigSize=255;
+		UINT sigSize=255;
+		UINT8 sig[255];
 		if(CABase64::encode(tmpBuff,40,sig,&sigSize)!=E_SUCCESS)
 			return E_UNKNOWN;
 		sig[sigSize]=0;
@@ -377,7 +383,7 @@ SINT32 CASignature::setVerifyKey(CACertificate* pCert)
 		m_pDSA=tmpDSA;
 		return E_SUCCESS;
 	}
-
+/*
 SINT32 CASignature::verify(UINT8* in,UINT32 inlen,UINT8* sig,UINT32 siglen)
 	{
 		if(m_pDSA==NULL)
@@ -385,6 +391,17 @@ SINT32 CASignature::verify(UINT8* in,UINT32 inlen,UINT8* sig,UINT32 siglen)
 		UINT8 dgst[SHA_DIGEST_LENGTH];
 		SHA1(in,inlen,dgst);
 		if(DSA_verify(0,dgst,SHA_DIGEST_LENGTH,sig,siglen,m_pDSA)==1)
+		 return E_SUCCESS;
+		return E_UNKNOWN;
+	}
+*/
+SINT32 CASignature::verify(UINT8* in,UINT32 inlen,DSA_SIG* dsaSig)
+	{
+		if(m_pDSA==NULL||dsaSig==NULL||dsaSig->r==NULL||dsaSig->s==NULL)
+			return E_UNKNOWN;
+		UINT8 dgst[SHA_DIGEST_LENGTH];
+		SHA1(in,inlen,dgst);
+		if(DSA_do_verify(dgst,SHA_DIGEST_LENGTH,dsaSig,m_pDSA)==1)
 		 return E_SUCCESS;
 		return E_UNKNOWN;
 	}
@@ -458,7 +475,7 @@ SINT32 CASignature::verifyXML(DOM_Node& root,CACertStore* trustedCerts)
             // 21 //len of s
 					  // 0x00  // first a '0' to mark this value as positiv integer
 						// ... value of s
-		UINT8 sig[48];
+		/*UINT8 sig[48];
 		sig[0]=0x30;
 		sig[1]=46;
 		sig[2]=0x02;
@@ -469,15 +486,20 @@ SINT32 CASignature::verifyXML(DOM_Node& root,CACertStore* trustedCerts)
 		sig[26]=21;
 		sig[27]=0;
 		memcpy(sig+28,tmpSig+20,20);
-
+*/
+		DSA_SIG* dsaSig=DSA_SIG_new();
+		dsaSig->r=BN_bin2bn(tmpSig,20,dsaSig->r);
+		dsaSig->s=BN_bin2bn(tmpSig+20,20,dsaSig->s);
 		UINT8* out=new UINT8[5000];
 		UINT32 outlen=5000;
 		if(DOM_Output::makeCanonical(elemSigInfo,out,&outlen)!=E_SUCCESS||
-				verify(out,outlen,sig,46)!=E_SUCCESS)
+				verify(out,outlen,dsaSig)!=E_SUCCESS)
 			{
+				DSA_SIG_free(dsaSig);
 				delete[] out;
 				return E_UNKNOWN;
 			}
+		DSA_SIG_free(dsaSig);
 				
 		root.removeChild(elemSignature);
 		outlen=5000;

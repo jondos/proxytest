@@ -1105,7 +1105,7 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 						if(ret!=E_SUCCESS)
 							{
 								CAMsg::printMsg(LOG_DEBUG,"failed!\n");
-								return E_UNKNOWN;
+									return E_UNKNOWN;
 							}
 						CAMsg::printMsg(LOG_DEBUG,"success!\n");
 						DOM_Node rsaKey=child.getFirstChild();
