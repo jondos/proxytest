@@ -406,11 +406,26 @@ THREAD_RETURN loopDownStream(void *p)
 #endif
 		for(;;)
 			{
-				ret=oSocketGroup.select(false,1000);
+				#ifndef USE_POOL			
+					ret=oSocketGroup.select(false,1000);
+				#else
+					ret=oSocketGroup.select(false,MAX_POOL_TIMEOUT);
+				#endif
 				if(ret!=1)
 					{
 						if(ret==E_TIMEDOUT)
-							continue;
+							{
+								#ifndef USE_POOL
+									continue;
+								#else
+									pMixPacket->channel=DUMMY_CHANNEL;
+									pMixPacket->flag=CHANNEL_CLOSE;
+									getRandom(pMixPacklet->data,DATA_SIZE);
+									pPool->pool(pMixPacket);
+									if(pMix->m_pMuxIn->send(pMixPacket)==SOCKET_ERROR)
+										goto ERR;								
+								#endif
+							}
 						else
 							{
 								CAMsg::printMsg(LOG_CRIT,"loopDownStream -- Fehler bei select() -- goto ERR!\n");
@@ -430,27 +445,27 @@ THREAD_RETURN loopDownStream(void *p)
 								CAMsg::printMsg(LOG_INFO,"loopDownStream received a packet with invalid flags: %0X .  Removing them.\n",(pMixPacket->flags & ~CHANNEL_ALLOWED_FLAGS));
 								pMixPacket->flags&=CHANNEL_ALLOWED_FLAGS;
 							}
-						
+						#ifdef USE_POOL	
+							if(pMix->channel==DUMMY_CHANNEL)
+								{
+									pMixPacket->flag=CHANNEL_CLOSE;
+									getRandom(pMixPacklet->data,DATA_SIZE);
+									pPool->pool(pMixPacket);
+									if(pMix->m_pMuxIn->send(pMixPacket)==SOCKET_ERROR)
+										goto ERR;								
+								}
+							else
+						#endif
 						if(pMix->m_pMiddleMixChannelList->getOutToIn(&channelIn,pMixPacket->channel,&pCipher)==E_SUCCESS)
 							{//connection found
-//								if(pMixPacket->flags!=CHANNEL_CLOSE)
-//									{
-										pMixPacket->channel=channelIn;
-										pCipher->decryptAES2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
-										pCipher->unlock();
-										#ifdef USE_POOL
-											pPool->pool(pMixPacket);
-										#endif
-										if(pMix->m_pMuxIn->send(pMixPacket)==SOCKET_ERROR)
-											goto ERR;
-//									}
-//								else
-	//								{//connection should be closed
-	//									pCipher->unlock();
-		//								if(pMix->m_pMuxIn->close(channelIn)==SOCKET_ERROR)
-			//								goto ERR;
-				//						pMix->m_pMiddleMixChannelList->remove(channelIn);
-		//							}
+								pMixPacket->channel=channelIn;
+								pCipher->decryptAES2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+								pCipher->unlock();
+								#ifdef USE_POOL
+									pPool->pool(pMixPacket);
+								#endif
+								if(pMix->m_pMuxIn->send(pMixPacket)==SOCKET_ERROR)
+									goto ERR;
 							}
 					}
 			}
