@@ -527,7 +527,12 @@ SINT32 CAFirstMix::loop()
 				if(oSocketGroup.isSignaled(muxOut))
 						{
 							ret=muxOut.receive(&oMuxPacket);
-							if(ret!=SOCKET_ERROR&&oMuxPacket.flags==CHANNEL_CLOSE) //close event
+							if(ret==SOCKET_ERROR)
+								{
+									CAMsg::printMsg(LOG_CRIT,"Mux-Channel Receiving Data Error - Exiting!\n");									
+									goto ERR;
+								}
+							if(oMuxPacket.flags==CHANNEL_CLOSE) //close event
 								{
 									#ifdef _DEBUG
 										CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u ... ",oMuxPacket.channel);
@@ -542,11 +547,6 @@ SINT32 CAFirstMix::loop()
 											#endif
 											deleteResume(otmpReverseEntry.pMuxSocket,otmpReverseEntry.outChannel);
 										}
-								}
-							else if(ret==SOCKET_ERROR)
-								{
-									CAMsg::printMsg(LOG_CRIT,"Mux-Channel Receiving Data Error - Exiting!\n");									
-									goto ERR;
 								}
 							else
 								{
@@ -680,7 +680,7 @@ SINT32 CAFirstMix::loop()
 											}
 										else
 											{
-												if(oMuxPacket.flags!=0)
+												if(oMuxPacket.flags==CHANNEL_CLOSE)
 													{
 														if(oMuxChannelList.get(tmpMuxListEntry,oMuxPacket.channel,&oConnection))
 															{
@@ -704,7 +704,7 @@ SINT32 CAFirstMix::loop()
 																oMuxPacket.channel=oConnection.outChannel;
 																pCipher=oConnection.pCipher;
 																pCipher->decryptAES((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
-														}
+															}
 														else
 															{
 																pCipher= new CASymCipher();

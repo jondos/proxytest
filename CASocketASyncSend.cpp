@@ -42,6 +42,7 @@ THREAD_RETURN SocketASyncSendLoop(void* p)
 											pASyncSend->m_Sockets=akt->next;
 										tmp=akt;
 										akt=akt->next;
+										delete tmp->pQueue;
 										delete tmp;
 									}
 								else
@@ -64,15 +65,30 @@ THREAD_RETURN SocketASyncSendLoop(void* p)
 
 SINT32 CASocketASyncSend::send(CASocket* pSocket,UINT8* buff,UINT32 size)
 	{
+		if(pSocket==NULL||buff==NULL)
+			return E_UNKNOWN;
 		EnterCriticalSection(&cs);
 		SINT32 ret;
 		if(m_Sockets==NULL)
 			{
 				m_Sockets=new _t_socket_list;
+				if(m_Sockets==NULL)
+					{
+						LeaveCriticalSection(&cs);
+						return E_UNKNOWN;
+					}
+				m_Sockets->pQueue=new CAQueue();
+				if(	m_Sockets->pQueue==NULL||
+						m_Sockets->pQueue->add(buff,size)<0)
+					{
+						delete m_Sockets->pQueue;
+						delete m_Sockets;
+						m_Sockets=NULL;
+						LeaveCriticalSection(&cs);
+						return E_UNKNOWN;
+					}
 				m_Sockets->next=NULL;
 				m_Sockets->pSocket=pSocket;
-				m_Sockets->pQueue=new CAQueue();
-				m_Sockets->pQueue->add(buff,size);
 				m_Sockets->bwasOverFull=false;
 				m_oSocketGroup.add(*pSocket);
 				ret=size;
@@ -85,7 +101,9 @@ SINT32 CASocketASyncSend::send(CASocket* pSocket,UINT8* buff,UINT32 size)
 						if(akt->pSocket==pSocket)
 							{
 								ret=akt->pQueue->add(buff,size);
-								if(ret>SENDQUEUEFULLSIZE)
+								if(ret<0)
+									ret =E_UNKNOWN;
+								else if(ret>SENDQUEUEFULLSIZE)
 									{
 										akt->bwasOverFull=true;
 										ret=E_QUEUEFULL;
@@ -98,11 +116,22 @@ SINT32 CASocketASyncSend::send(CASocket* pSocket,UINT8* buff,UINT32 size)
 						akt=akt->next;
 					}
 				akt=new _t_socket_list;
+				if(akt==NULL)
+					{
+						LeaveCriticalSection(&cs);
+						return E_UNKNOWN;
+					}
+				akt->pQueue=new CAQueue();
+				if(akt->pQueue==NULL||akt->pQueue->add(buff,size)<0)
+					{
+						delete akt->pQueue;
+						delete akt;
+						LeaveCriticalSection(&cs);
+						return E_UNKNOWN;
+					}
 				akt->next=m_Sockets;
 				m_Sockets=akt;
 				akt->pSocket=pSocket;
-				akt->pQueue=new CAQueue();
-				akt->pQueue->add(buff,size);
 				akt->bwasOverFull=false;
 				m_oSocketGroup.add(*pSocket);
 				ret=size;
