@@ -11,6 +11,7 @@ char buff[255];
 CAMuxSocket::CAMuxSocket()
 	{
 		bIsTunneld=false;
+		bDecrypt=bEncrypt=false;
 	}
 	
 int CAMuxSocket::useTunnel(char* proxyhost,unsigned short proxyport)
@@ -91,6 +92,8 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 		int len=0;
 		pPacket->channel=htonl(pPacket->channel);
 		pPacket->len=htons(pPacket->len);
+		if(bEncrypt)
+			oSymCipher.encrypt((unsigned char*)pPacket,sizeof(MUXPACKET));
 		if(!bIsTunneld)
 			{
 				do
@@ -176,6 +179,11 @@ int CAMuxSocket::receive(MUXPACKET* pPacket)
 				#endif
 				return SOCKET_ERROR;
 			}
+		if(bDecrypt)
+			{
+				oSymCipher.decrypt((unsigned char*)pPacket,sizeof(MUXPACKET));
+			}
+
 		pPacket->len=ntohs(pPacket->len);	
 		pPacket->channel=ntohl(pPacket->channel);
 		return pPacket->len;
@@ -185,4 +193,19 @@ int CAMuxSocket::close(HCHANNEL channel_id)
 	{
 		char tmpBuff;
 		return send(channel_id,&tmpBuff,0);
+	}
+
+
+int CAMuxSocket::setDecryptionKey(unsigned char* key)
+	{
+		oSymCipher.setDecryptionKey(key);
+		bDecrypt=true;
+		return 0;
+	}
+
+int CAMuxSocket::setEncryptionKey(unsigned char* key)
+	{
+		oSymCipher.setEncryptionKey(key);
+		bEncrypt=true;
+		return 0;
 	}

@@ -2,6 +2,7 @@
 #define __CAMUXSOCKET__
 #include "CASocket.hpp"
 #include "httptunnel/tunnel.h"
+#include "CASymCipher.hpp"
 typedef unsigned int HCHANNEL;
 
 #define DATA_SIZE 1000 // Size of Data in a single Mux Packet
@@ -39,11 +40,19 @@ class CAMuxSocket
 														return (SOCKET)m_Socket;
 												else
 													return tunnel_pollin_fd(m_pTunnel);}
+
+			int setDecryptionKey(unsigned char* key);
+			int setEncryptionKey(unsigned char* key);
 		private:
 			CASocket m_Socket;
 			bool bIsTunneld;
 			Tunnel* m_pTunnel;
 			char *m_szTunnelHost;
 			unsigned short m_uTunnelPort;
+
+
+			CASymCipher oSymCipher;
+			bool bDecrypt;
+			bool bEncrypt;
 	};
 #endif
