@@ -3005,7 +3005,7 @@ TrioFormat(void *destination,
 
 /*************************************************************************
  * TrioOutStreamFile
- */
+ *//*
 TRIO_PRIVATE void
 TrioOutStreamFile(trio_class_t *self,
 		  int output)
@@ -3025,11 +3025,11 @@ TrioOutStreamFile(trio_class_t *self,
       self->committed++;
     }
 }
-
+*/
 /*************************************************************************
  * TrioOutStreamFileDescriptor
  */
-TRIO_PRIVATE void
+/*TRIO_PRIVATE void
 TrioOutStreamFileDescriptor(trio_class_t *self,
 			    int output)
 {
@@ -3049,11 +3049,11 @@ TrioOutStreamFileDescriptor(trio_class_t *self,
       self->committed++;
     }
 }
-
+*/
 /*************************************************************************
  * TrioOutStreamString
  */
-TRIO_PRIVATE void
+/*TRIO_PRIVATE void
 TrioOutStreamString(trio_class_t *self,
 		    int output)
 {
@@ -3067,7 +3067,7 @@ TrioOutStreamString(trio_class_t *self,
   self->processed++;
   self->committed++;
 }
-
+*/
 /*************************************************************************
  * TrioOutStreamStringMax
  */
@@ -4702,7 +4702,7 @@ TrioReadPointer(trio_class_t *self,
 
 /*************************************************************************
  * TrioScanProcess
- */
+ *//*
 TRIO_PRIVATE int
 TrioScanProcess(trio_class_t *data,
 		TRIO_CONST char *format,
@@ -4714,8 +4714,8 @@ TrioScanProcess(trio_class_t *data,
 #endif
   int assignment;
   int ch;
-  int index; /* Index of format string */
-  int i; /* Index of current parameter */
+  int index; // Index of format string 
+  int i; // Index of current parameter 
   unsigned long flags;
   int width;
   int base;
@@ -4736,7 +4736,7 @@ TrioScanProcess(trio_class_t *data,
       if (! isascii(format[index]))
 	{
 	  charlen = mblen(&format[index], MB_LEN_MAX);
-	  /* Compare multibyte characters in format string */
+	  // Compare multibyte characters in format string 
 	  for (cnt = 0; cnt < charlen - 1; cnt++)
 	    {
 	      if (ch != format[index + cnt])
@@ -4745,9 +4745,9 @@ TrioScanProcess(trio_class_t *data,
 		}
 	      data->InStream(data, &ch);
 	    }
-	  continue; /* while */
+	  continue; // while 
 	}
-#endif /* TRIO_COMPILER_SUPPORTS_MULTIBYTE */
+#endif // TRIO_COMPILER_SUPPORTS_MULTIBYTE 
       if (EOF == ch)
 	return EOF;
       
@@ -4755,34 +4755,34 @@ TrioScanProcess(trio_class_t *data,
 	{
 	  if (CHAR_IDENTIFIER == format[index + 1])
 	    {
-	      /* Two % in format matches one % in input stream */
+	      // Two % in format matches one % in input stream 
 	      if (CHAR_IDENTIFIER == ch)
 		{
 		  data->InStream(data, &ch);
 		  index += 2;
-		  continue; /* while format chars left */
+		  continue; // while format chars left 
 		}
 	      else
 		return TRIO_ERROR_RETURN(TRIO_EINVAL, index);
 	    }
 
-	  /* Skip the parameter entries */
+	  // Skip the parameter entries 
 	  while (parameters[i].type == FORMAT_PARAMETER)
 	    i++;
 	  
 	  flags = parameters[i].flags;
-	  /* Find width */
+	  // Find width 
 	  width = parameters[i].width;
 	  if (flags & FLAGS_WIDTH_PARAMETER)
 	    {
-	      /* Get width from parameter list */
+	      // Get width from parameter list 
 	      width = (int)parameters[width].data.number.as_signed;
 	    }
-	  /* Find base */
+	  // Find base 
 	  base = parameters[i].base;
 	  if (flags & FLAGS_BASE_PARAMETER)
 	    {
-	      /* Get base from parameter list */
+	      // Get base from parameter list 
 	      base = (int)parameters[base].data.number.as_signed;
 	    }
 	  
@@ -4831,7 +4831,7 @@ TrioScanProcess(trio_class_t *data,
 		      *(int *)pointer = (int)number;
 		  }
 	      }
-	      break; /* FORMAT_INT */
+	      break; // FORMAT_INT 
 	      
 	    case FORMAT_STRING:
 #if TRIO_WIDECHAR
@@ -4857,7 +4857,7 @@ TrioScanProcess(trio_class_t *data,
 		    return assignment;
 		}
 	      assignment++;
-	      break; /* FORMAT_STRING */
+	      break; // FORMAT_STRING 
 	      
 	    case FORMAT_DOUBLE:
 	      if (!TrioReadDouble(data,
@@ -4868,19 +4868,19 @@ TrioScanProcess(trio_class_t *data,
 				  width))
 		return assignment;
 	      assignment++;
-	      break; /* FORMAT_DOUBLE */
+	      break; // FORMAT_DOUBLE 
 
 	    case FORMAT_GROUP:
 	      {
 		int characterclass[MAX_CHARACTER_CLASS + 1];
 		int rc;
 
-		/* Skip over modifiers */
+		// Skip over modifiers 
 		while (format[index] != SPECIFIER_GROUP)
 		  {
 		    index++;
 		  }
-		/* Skip over group specifier */
+		// Skip over group specifier 
 		index++;
 		
 		memset(characterclass, 0, sizeof(characterclass));
@@ -4901,7 +4901,7 @@ TrioScanProcess(trio_class_t *data,
 		  return assignment;
 		assignment++;
 	      }
-	      break; /* FORMAT_GROUP */
+	      break; // FORMAT_GROUP 
 	      
 	    case FORMAT_COUNT:
 	      pointer = parameters[i].data.pointer;
@@ -4939,7 +4939,7 @@ TrioScanProcess(trio_class_t *data,
 		      *(int *)pointer = (int)data->committed;
 		    }
 		}
-	      break; /* FORMAT_COUNT */
+	      break; // FORMAT_COUNT 
 	      
 	    case FORMAT_CHAR:
 #if TRIO_WIDECHAR
@@ -4965,7 +4965,7 @@ TrioScanProcess(trio_class_t *data,
 		    return assignment;
 		}
 	      assignment++;
-	      break; /* FORMAT_CHAR */
+	      break; // FORMAT_CHAR 
 	      
 	    case FORMAT_POINTER:
 	      if (!TrioReadPointer(data,
@@ -4975,10 +4975,10 @@ TrioScanProcess(trio_class_t *data,
 				   flags))
 		return assignment;
 	      assignment++;
-	      break; /* FORMAT_POINTER */
+	      break; // FORMAT_POINTER 
 	      
 	    case FORMAT_PARAMETER:
-	      break; /* FORMAT_PARAMETER */
+	      break; // FORMAT_PARAMETER 
 	      
 	    default:
 	      return TRIO_ERROR_RETURN(TRIO_EINVAL, index);
@@ -4987,11 +4987,11 @@ TrioScanProcess(trio_class_t *data,
 	  index = parameters[i].indexAfterSpecifier;
 	  i++;
 	}
-      else /* Not an % identifier */
+      else // Not an % identifier 
 	{
 	  if (isspace((int)format[index]))
 	    {
-	      /* Whitespaces may match any amount of whitespaces */
+	      // Whitespaces may match any amount of whitespaces 
 	      ch = TrioSkipWhitespaces(data);
 	    }
 	  else if (ch == format[index])
@@ -5006,7 +5006,7 @@ TrioScanProcess(trio_class_t *data,
     }
   return assignment;
 }
-
+*/
 /*************************************************************************
  * TrioScan
  */
@@ -5053,7 +5053,7 @@ TrioScan(TRIO_CONST void *source,
 /*************************************************************************
  * TrioInStreamFile
  */
-TRIO_PRIVATE void
+/*TRIO_PRIVATE void
 TrioInStreamFile(trio_class_t *self,
 		 int *intPointer)
 {
@@ -5077,10 +5077,11 @@ TrioInStreamFile(trio_class_t *self,
       *intPointer = self->current;
     }
 }
-
+*/
 /*************************************************************************
  * TrioInStreamFileDescriptor
  */
+/*
 TRIO_PRIVATE void
 TrioInStreamFileDescriptor(trio_class_t *self,
 			   int *intPointer)
@@ -5109,11 +5110,11 @@ TrioInStreamFileDescriptor(trio_class_t *self,
       *intPointer = self->current;
     }
 }
-
+*/
 /*************************************************************************
  * TrioInStreamString
  */
-TRIO_PRIVATE void
+/*TRIO_PRIVATE void
 TrioInStreamString(trio_class_t *self,
 		   int *intPointer)
 {
@@ -5136,3 +5137,4 @@ TrioInStreamString(trio_class_t *self,
       *intPointer = self->current;
     }
 }
+*/
