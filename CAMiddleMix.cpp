@@ -426,7 +426,8 @@ THREAD_RETURN mm_loopDownStream(void *p)
 		CAMiddleMix* pMix=(CAMiddleMix*)p;
 		HCHANNEL channelIn;
 		CASymCipher* pCipher;
-		MIXPACKET* pMixPacket=new MIXPACKET;
+		tPoolEntry* pPoolEntry=new tPoolEntry;
+		MIXPACKET* pMixPacket=pPoolEntry->packet;
 		SINT32 ret;
 		CASingleSocketGroup oSocketGroup(false);
 		oSocketGroup.add(*(pMix->m_pMuxOut));
@@ -448,9 +449,9 @@ THREAD_RETURN mm_loopDownStream(void *p)
 									continue;
 								#else
 									pMixPacket->channel=DUMMY_CHANNEL;
-									pMixPacket->flags=CHANNEL_CLOSE;
+									pMixPacket->flags=CHANNEL_DUMMY;
 									getRandom(pMixPacket->data,DATA_SIZE);
-									pPool->pool((tPoolEntry*)pMixPacket);
+									pPool->pool(pPoolEntry);
 									if(pMix->m_pMuxIn->send(pMixPacket)==SOCKET_ERROR)
 										goto ERR;								
 								#endif
@@ -477,9 +478,9 @@ THREAD_RETURN mm_loopDownStream(void *p)
 						#ifdef USE_POOL	
 							if(pMixPacket->channel==DUMMY_CHANNEL)
 								{
-									pMixPacket->flags=CHANNEL_CLOSE;
+									pMixPacket->flags=CHANNEL_DUMMY;
 									getRandom(pMixPacket->data,DATA_SIZE);
-									pPool->pool((tPoolEntry*)pMixPacket);
+									pPool->pool(pPoolEntry);
 									if(pMix->m_pMuxIn->send(pMixPacket)==SOCKET_ERROR)
 										goto ERR;								
 								}
@@ -496,7 +497,7 @@ THREAD_RETURN mm_loopDownStream(void *p)
 								pCipher->crypt2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 								pCipher->unlock();
 								#ifdef USE_POOL
-									pPool->pool((tPoolEntry*)pMixPacket);
+									pPool->pool(pPoolEntry);
 								#endif
 								if(pMix->m_pMuxIn->send(pMixPacket)==SOCKET_ERROR)
 									goto ERR;
@@ -505,7 +506,7 @@ THREAD_RETURN mm_loopDownStream(void *p)
 			}
 ERR:
 		CAMsg::printMsg(LOG_CRIT,"loopDownStream -- Exiting!\n");
-		delete pMixPacket;
+		delete pPoolEntry;
 		#ifdef USE_POOL
 			delete pPool;
 		#endif
@@ -519,7 +520,8 @@ ERR:
 SINT32 CAMiddleMix::loop()
 	{
 #ifndef NEW_MIX_TYPE
-		MIXPACKET* pMixPacket=new MIXPACKET;
+		pPoolEntry* pPoolEntry=new tPoolEntry;
+		MIXPACKET* pMixPacket=&pPoolEntry->packet;
 		HCHANNEL channelOut;
 		CASymCipher* pCipher;
 		SINT32 ret;
@@ -549,9 +551,9 @@ SINT32 CAMiddleMix::loop()
 									continue;
 								#else
 									pMixPacket->channel=DUMMY_CHANNEL;
-									pMixPacket->flags=CHANNEL_CLOSE;
+									pMixPacket->flags=CHANNEL_DUMMY;
 									getRandom(pMixPacket->data,DATA_SIZE);
-									pPool->pool((tPoolEntry*)pMixPacket);
+									pPool->pool(pPoolEntry);
 									if(m_pMuxOut->send(pMixPacket)==SOCKET_ERROR)
 										goto ERR;								
 								#endif
@@ -578,9 +580,9 @@ SINT32 CAMiddleMix::loop()
 						#ifdef USE_POOL	
 							if(pMixPacket->channel==DUMMY_CHANNEL)
 								{
-									pMixPacket->flags=CHANNEL_CLOSE;
+									pMixPacket->flags=CHANNEL_DUMMY;
 									getRandom(pMixPacket->data,DATA_SIZE);
-									pPool->pool((tPoolEntry*)pMixPacket);
+									pPool->pool(pPoolEntry);
 									if(m_pMuxOut->send(pMixPacket)==SOCKET_ERROR)
 										goto ERR;								
 								}
@@ -611,7 +613,7 @@ SINT32 CAMiddleMix::loop()
 										m_pMiddleMixChannelList->add(pMixPacket->channel,pCipher,&channelOut);
 										pMixPacket->channel=channelOut;
 										#ifdef USE_POOL
-											pPool->pool((tPoolEntry*)pMixPacket);
+											pPool->pool(pPoolEntry);
 										#endif
 										if(m_pMuxOut->send(pMixPacket)==SOCKET_ERROR)
 											goto ERR;
@@ -623,7 +625,7 @@ SINT32 CAMiddleMix::loop()
 									pCipher->crypt1(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 									pCipher->unlock();
 									#ifdef USE_POOL
-										pPool->pool((tPoolEntry*)pMixPacket);
+										pPool->pool(pPoolEntry);
 									#endif
 									if(m_pMuxOut->send(pMixPacket)==SOCKET_ERROR)
 										goto ERR;
@@ -638,7 +640,7 @@ ERR:
 
 		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
 		delete tmpRSABuff;
-		delete pMixPacket;
+		delete pPoolEntry;
 		#ifdef USE_POOL
 			delete pPool;
 		#endif
