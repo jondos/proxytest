@@ -31,7 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAAccountingControlChannel.hpp"
 #define ACCOUNT_CONTROL_CHANNEL_ID 2
 
-CAAccountingInstance::ms_pAccountingInstance=NULL;
+CAAccountingInstance * CAAccountingControlChannel::ms_pAccountingInstance=NULL;
 
 CAAccountingControlChannel::CAAccountingControlChannel(fmHashTableEntry * pHashEntry)
  : CASyncControlChannel(ACCOUNT_CONTROL_CHANNEL_ID, true)
