@@ -39,6 +39,7 @@ struct t_fmhashtableentry
 			UINT32 cSuspend;
 
 		private:
+			UINT32 cNumberOfChannels;
 			struct t_firstmixchannellist* pChannelList;
 
 			struct
@@ -93,13 +94,13 @@ class CAFirstMixChannelList
 			~CAFirstMixChannelList();
 		
 			SINT32 add(CAMuxSocket* pMuxSocket,CAQueue* pQueueSend);
-			SINT32 add(CAMuxSocket* pMuxSocket,HCHANNEL channelIn,CASymCipher* pCipher,HCHANNEL* channelOut);
+			SINT32 addChannel(CAMuxSocket* pMuxSocket,HCHANNEL channelIn,CASymCipher* pCipher,HCHANNEL* channelOut);
 			
 			fmChannelListEntry* get(CAMuxSocket* pMuxSocket,HCHANNEL channelIn);
 
 
 			SINT32 remove(CAMuxSocket* pMuxSocket);
-			SINT32 remove(CAMuxSocket* pMuxSocket,HCHANNEL channelIn);
+			SINT32 removeChannel(CAMuxSocket* pMuxSocket,HCHANNEL channelIn);
 					
 			fmHashTableEntry* getFirst();
 			fmHashTableEntry* getNext();
