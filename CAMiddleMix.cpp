@@ -121,7 +121,9 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 		m_RSA.getPublicKeyAsDocumentFragment(pDocFragment); //the key
 		mixNode.appendChild(doc.importNode(*pDocFragment,true));
 		delete pDocFragment;
-		root.appendChild(mixNode);
+		
+		root.insertBefore(mixNode,root.getFirstChild());
+//		root.appendChild(mixNode);
 //		delete mixNode;
 
 		recvBuff=new UINT8[2048];
