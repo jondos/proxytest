@@ -901,7 +901,8 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 										tmpLen=255;
 										if(getDOMElementValue(elemFile,tmpBuff,&tmpLen)!=E_SUCCESS)
 											continue;
-										if(((CASocketAddrUnix*)addr)->setPath(tmpBuff)!=E_SUCCESS)
+										tmpBuff[tmpLen]=0;
+										if(((CASocketAddrUnix*)addr)->setPath((char*)tmpBuff)!=E_SUCCESS)
 											continue;
 										m_arListenerInterfaces[aktInterface].hostname=NULL;
 									}
