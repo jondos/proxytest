@@ -39,6 +39,7 @@ CAMuxSocket::CAMuxSocket()
 	{
 		m_Buff=new UINT8[MUXPACKET_SIZE];
 		m_aktBuffPos=0;
+		bIsCrypted=false;
 //		bIsTunneld=false;
 	}
 /*	
@@ -87,6 +88,10 @@ int CAMuxSocket::accept(UINT16 port)
 			return SOCKET_ERROR;
 		oSocket.close();
 		m_Socket.setRecvLowWat(sizeof(MUXPACKET));
+		UINT8 nullkey[16];
+		memset(nullkey,0,16);
+		ocipherIn.setKeyAES(nullkey);
+		ocipherOut.setKeyAES(nullkey);
 		return E_SUCCESS;
 	}
 #endif		
@@ -101,6 +106,10 @@ SINT32 CAMuxSocket::connect(LPCASOCKETADDR psa,UINT retry,UINT32 time)
 //		if(!bIsTunneld)
 //			{
 				m_Socket.setRecvLowWat(MUXPACKET_SIZE);
+				UINT8 nullkey[16];
+				memset(nullkey,0,16);
+				ocipherIn.setKeyAES(nullkey);
+				ocipherOut.setKeyAES(nullkey);
 				return m_Socket.connect(psa,retry,time);
 /*			}
 		else
@@ -166,10 +175,13 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 int CAMuxSocket::send(MUXPACKET *pPacket)
 	{
 		int ret;
-		HCHANNEL tmpChannel=pPacket->channel;
-		UINT16 tmpFlags=pPacket->flags;
-		pPacket->channel=htonl(tmpChannel);
-		pPacket->flags=htons(tmpFlags);
+		UINT8 tmpBuff[16];
+		//HCHANNEL tmpChannel=pPacket->channel;
+		//UINT16 tmpFlags=pPacket->flags;
+		memcpy(tmpBuff,pPacket,16);
+		pPacket->channel=htonl(pPacket->channel);
+		pPacket->flags=htons(pPacket->flags);
+		if(bIsCrypted)ocipherOut.encryptAES(((UINT8*)pPacket),((UINT8*)pPacket),16);
 		ret=m_Socket.send(((UINT8*)pPacket),MUXPACKET_SIZE);
 		if(ret==SOCKET_ERROR)
 			{
@@ -183,8 +195,9 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 			ret=E_QUEUEFULL;
 		else 
 			ret=MUXPACKET_SIZE;
-		pPacket->channel=tmpChannel;
-		pPacket->flags=tmpFlags;
+		memcpy(pPacket,tmpBuff,16);
+//		pPacket->channel=tmpChannel;
+//		pPacket->flags=tmpFlags;
 		return ret;
 	}
 #endif
@@ -242,6 +255,7 @@ SINT32 CAMuxSocket::receive(MUXPACKET* pPacket)
 		pPacket->flags=ntohs(pPacket->flags);
 		return MUXPACKET_SIZE;
 	}
+
 /**Trys to receive a Mix-Packet. If after timout milliseconds not a whole packet is available
 * E_AGAIN will be returned. In this case you should later try to get the rest of the packet
 */
@@ -253,6 +267,7 @@ SINT32 CAMuxSocket::receive(MUXPACKET* pPacket,UINT32 timeout)
 			return E_UNKNOWN;
 		if(ret==len)
 			{
+				if(bIsCrypted)ocipherIn.decryptAES(m_Buff,m_Buff,16);
 				memcpy(pPacket,m_Buff,MUXPACKET_SIZE);
 				pPacket->channel=ntohl(pPacket->channel);
 				pPacket->flags=ntohs(pPacket->flags);
@@ -278,6 +293,7 @@ SINT32 CAMuxSocket::receive(MUXPACKET* pPacket,UINT32 timeout)
 							return E_UNKNOWN;
 						if(ret==len)
 							{
+								if(bIsCrypted)ocipherIn.decryptAES(m_Buff,m_Buff,16);
 								memcpy(pPacket,m_Buff,MUXPACKET_SIZE);
 								pPacket->channel=ntohl(pPacket->channel);
 								pPacket->flags=ntohs(pPacket->flags);
