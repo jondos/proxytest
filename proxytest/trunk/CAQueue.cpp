@@ -373,6 +373,7 @@ SINT32 CAQueue::test()
 			return E_UNKNOWN;
 		if(memcmp(source,target,TEST_SIZE)!=0)
 			return E_UNKNOWN;
+		
 		//Multiple Threads....
 		CAThread othreadProducer;
 		CAThread othreadConsumer;
