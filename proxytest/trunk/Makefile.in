@@ -77,8 +77,8 @@ am_proxytest_OBJECTS = CAASymCipher.$(OBJEXT) CABase64.$(OBJEXT) \
 	CASocketAddrINet.$(OBJEXT) CASocketAddrUnix.$(OBJEXT) \
 	CASocketGroup.$(OBJEXT) CASocketList.$(OBJEXT) \
 	CASymCipher.$(OBJEXT) CAThread.$(OBJEXT) \
-	CAThreadPool.$(OBJEXT) CAUtil.$(OBJEXT) StdAfx.$(OBJEXT) \
-	proxytest.$(OBJEXT)
+	CAThreadPool.$(OBJEXT) CATimedQueue.$(OBJEXT) CAUtil.$(OBJEXT) \
+	StdAfx.$(OBJEXT) proxytest.$(OBJEXT)
 proxytest_OBJECTS = $(am_proxytest_OBJECTS)
 proxytest_DEPENDENCIES = $(top_srcdir)/xml/libxml.a \
 	$(top_srcdir)/popt/libpopt.a $(top_srcdir)/trio/libtrio.a \
@@ -117,7 +117,8 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/CASocketGroup.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CASocketList.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CASymCipher.Po ./$(DEPDIR)/CAThread.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/CAThreadPool.Po ./$(DEPDIR)/CAUtil.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CAThreadPool.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CATimedQueue.Po ./$(DEPDIR)/CAUtil.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/StdAfx.Po ./$(DEPDIR)/proxytest.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -277,6 +278,7 @@ proxytest_SOURCES = CAASymCipher.cpp \
 		    CASymCipher.cpp \
 		    CAThread.cpp \
 		    CAThreadPool.cpp\
+		    CATimedQueue.cpp\
 		    CAUtil.cpp \
 		    StdAfx.cpp \
 		    proxytest.cpp \
@@ -317,6 +319,7 @@ proxytest_SOURCES = CAASymCipher.cpp \
 		    CASocketGroup.hpp \
 		    CASocketList.hpp \
 		    CASymCipher.hpp \
+		    CATimedQueue.hpp \
 		    CAThread.hpp \
 		    CAThreadPool.hpp\
 		    CAUtil.hpp \
@@ -456,6 +459,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASymCipher.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAThread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAThreadPool.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CATimedQueue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAUtil.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/StdAfx.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/proxytest.Po@am__quote@
