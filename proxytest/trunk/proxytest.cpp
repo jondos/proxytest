@@ -10,7 +10,9 @@
 #include "CAMsg.hpp"
 #include "CAMuxSocket.hpp"
 #include "CASocketList.hpp"
+#ifdef _WIN32
 HANDLE hEventThreadEnde;
+#endif
 CACmdLnOptions options;
 
 CRITICAL_SECTION csClose;
@@ -142,6 +144,7 @@ THREAD_RETURN mmInToOut(void* v)
 					break;
 			}
 		delete buff;		
+		THREAD_RETURN_SUCCESS;
 	}
 
 THREAD_RETURN mmOutToIn(void* v)
@@ -165,6 +168,7 @@ THREAD_RETURN mmOutToIn(void* v)
 					break;
 			}
 		delete buff;		
+		THREAD_RETURN_SUCCESS;
 	}
 
 int doMiddleMix()
@@ -176,9 +180,16 @@ int doMiddleMix()
 		nextMix.setAddr(strTarget,options.getTargetPort());
 		mmIOPair->muxOut.connect(&nextMix);
 		mmIOPair->muxIn.accept(options.getServerPort());
-		_beginthread(mmInToOut,0,mmIOPair);
-		_beginthread(mmOutToIn,0,mmIOPair);
-		WaitForSingleObject(hEventThreadEnde,INFINITE);
+		#ifdef _WIN32
+		    _beginthread(mmInToOut,0,mmIOPair);
+		    _beginthread(mmOutToIn,0,mmIOPair);
+		    WaitForSingleObject(hEventThreadEnde,INFINITE);
+		#else
+		    pthread_t p1,p2;
+		    int err;
+		    err=pthread_create(&p1,NULL,mmInToOut,mmIOPair);
+		    err=pthread_create(&p2,NULL,mmOutToIn,mmIOPair);
+		#endif
 		delete mmIOPair;
 		return 0;
 	}
@@ -252,6 +263,7 @@ THREAD_RETURN fmIO(void *v)
 							}
 					}
 			}
+		THREAD_RETURN_SUCCESS;
 	}
 
 int doFirstMix()
@@ -372,6 +384,7 @@ THREAD_RETURN lmIO(void *v)
 							}
 					}
 			}
+		THREAD_RETURN_SUCCESS;
 	}
 
 int doLastMix()
