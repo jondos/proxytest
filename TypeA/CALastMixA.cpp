@@ -170,7 +170,10 @@ SINT32 CALastMixA::loop()
 																		memcpy(crimeBuff,pMixPacket->payload.data,payLen);
 																		UINT32 id=m_pMuxIn->sigCrime(pMixPacket->channel,tmpBuff);
 																		m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
-																		CAMsg::printMsg(LOG_ENCRYPTED,"Crime detected -- ID: %u -- Content: \n%s\n",id,crimeBuff,payLen);
+																		int log=LOG_ENCRYPTED;
+																		if(!options.isEncryptedLogEnabled())
+																			log=LOG_CRIT;
+																		CAMsg::printMsg(log,"Crime detected -- ID: %u -- Content: \n%s\n",id,crimeBuff,payLen);
 																	}
 															#endif
 															if(payLen>PAYLOAD_SIZE||tmpSocket->sendTimeOut(pMixPacket->payload.data,payLen,LAST_MIX_TO_PROXY_SEND_TIMEOUT)==SOCKET_ERROR)
