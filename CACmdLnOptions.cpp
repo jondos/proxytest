@@ -117,7 +117,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 	int iCompressedLogs=0;
 	char* serverPort=NULL;
 //	char* user=NULL;
-	int iVersion=-1;
+	int iVersion=0;
 	char* configfile=NULL;
  // int bXmlKey=0;
 	DOM_Document docMixXml;

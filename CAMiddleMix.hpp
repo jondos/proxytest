@@ -37,7 +37,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 class CAMiddleMix:public CAMix
 	{
 		public:
-			CAMiddleMix(){m_pMiddleMixChannelList=NULL;m_pMuxOut=NULL;m_pMuxIn=NULL;m_pRSA=NULL;}
+			CAMiddleMix()
+				{m_pMiddleMixChannelList=NULL;m_pMuxOut=NULL;m_pMuxIn=NULL;m_pRSA=NULL;m_pSignature=NULL;}
 			virtual ~CAMiddleMix(){};
 		private:
 			SINT32 loop();

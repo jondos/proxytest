@@ -41,7 +41,7 @@ class CALastMix:public CAMix
 
 	{
 		public:
-			CALastMix(){m_pMuxIn=NULL;}
+			CALastMix(){m_pMuxIn=NULL;m_pSignature=NULL;}
 			virtual ~CALastMix(){if(m_pSignature!=NULL) delete m_pSignature;}
 		private:
 			SINT32 loop();
