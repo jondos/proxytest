@@ -1,8 +1,5 @@
 #include "StdAfx.h"
-#include "CASocketAddr.hpp"
 #include "CASocket.hpp"
-
-
 
 #ifdef _DEBUG
 	extern int sockets;
