@@ -59,11 +59,13 @@ CACmdLnOptions::CACmdLnOptions()
 		m_docMixInfo=NULL;
 		m_pLogEncryptionCertificate=NULL;
 		m_bIsEncryptedLogEnabled=false;
+		m_pcsReConfigure=new CAMutex();
  }
 
 CACmdLnOptions::~CACmdLnOptions()
 	{
 		clean();
+		delete m_pcsReConfigure;
 	}
 
 /** Deletes all information about the target interfaces.
@@ -366,14 +368,17 @@ SINT32 CACmdLnOptions::reread(CAMix* pMix)
 	{
 		if(m_bIsRunReConfigure)
 			return E_UNKNOWN;
-		m_csReConfigure.lock();
+		CAMsg::printMsg(LOG_DEBUG,"Re-readed before lock\n");
+		m_pcsReConfigure->lock();
+		CAMsg::printMsg(LOG_DEBUG,"Re-readed after lock\n");
 		m_bIsRunReConfigure=true;
 		m_threadReConfigure.setMainLoop(threadReConfigure);
+		CAMsg::printMsg(LOG_DEBUG,"Re-read After set thread loop\n");
 		t_CMNDLN_REREAD_PARAMS* param=new t_CMNDLN_REREAD_PARAMS;
 		param->pCmdLnOptions=this;
 		param->pMix=pMix;
 		m_threadReConfigure.start(param);
-		m_csReConfigure.unlock();
+		m_pcsReConfigure->unlock();
 		return E_SUCCESS;
 	}
 
@@ -385,7 +390,7 @@ THREAD_RETURN threadReConfigure(void *param)
 	{
 		CACmdLnOptions* pOptions=((t_CMNDLN_REREAD_PARAMS*)param)->pCmdLnOptions;
 		CAMix* pMix=((t_CMNDLN_REREAD_PARAMS*)param)->pMix;
-		pOptions->m_csReConfigure.lock();
+		pOptions->m_pcsReConfigure->lock();
 		CAMsg::printMsg(LOG_DEBUG,"ReConfiguration of the Mix is under way....\n");
 		CACmdLnOptions otmpOptions;
 		DOM_Document docConfig;
@@ -407,7 +412,7 @@ THREAD_RETURN threadReConfigure(void *param)
 REREAD_FINISH:
 		pOptions->m_bIsRunReConfigure=false;
 		CAMsg::printMsg(LOG_DEBUG,"ReConfiguration of the Mix finished!\n");
-		pOptions->m_csReConfigure.unlock();
+		pOptions->m_pcsReConfigure->unlock();
 		THREAD_RETURN_SUCCESS;
 	}
 
