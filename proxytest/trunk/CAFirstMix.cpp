@@ -514,11 +514,11 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 			not enforceable for all users.
 		*/
 		((CASocket*)pNewUser)->send(m_xmlKeyInfoBuff,m_xmlKeyInfoSize);  // send the mix-keys to JAP
-		((CASocket*)pNewUser)->setNonBlocking(true);	                    // stefan: sendet das send in der letzten zeile doch noch nicht? wenn doch, kann dann ein JAP nicht durch verweigern der annahme hier den mix blockieren? vermutlich nciht, aber andersherum faend ich das einleuchtender.
 		// es kann nicht blockieren unter der Annahme das der TCP-Sendbuffer > m_xmlKeyInfoSize ist....
 		//wait for keys from user
 #ifndef FIRST_MIX_SYMMETRIC
 		MIXPACKET oMixPacket;
+		((CASocket*)pNewUser)->setNonBlocking(true);	                    // stefan: sendet das send in der letzten zeile doch noch nicht? wenn doch, kann dann ein JAP nicht durch verweigern der annahme hier den mix blockieren? vermutlich nciht, aber andersherum faend ich das einleuchtender.
 		if(pNewUser->receive(&oMixPacket,FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT)!=MIXPACKET_SIZE) //wait at most 10 second for user to send sym key
 			{
 				delete pNewUser;
@@ -536,15 +536,15 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		pNewUser->setCrypt(true);
 #else
 		UINT16 xml_len;
-		if(((CASocket*)pNewUser)->receiveFully((UINT8*)&xml_len,2,10000)!=E_SUCCESS)
+		if(((CASocket*)pNewUser)->receiveFully((UINT8*)&xml_len,2,FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT)!=E_SUCCESS)
 			{
 				delete pNewUser;
 				m_pIPList->removeIP(peerIP);
 				return E_UNKNOWN;
 			}
 		xml_len=ntohs(xml_len);
-		UINT8* xml_buff=new UINT8[xml_len];
-		if(((CASocket*)pNewUser)->receiveFully(xml_buff,xml_len,10000)!=E_SUCCESS)
+		UINT8* xml_buff=new UINT8[xml_len+2]; //+2 for size...
+		if(((CASocket*)pNewUser)->receiveFully(xml_buff+2,xml_len,FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT)!=E_SUCCESS)
 			{
 				delete pNewUser;
 				delete xml_buff;
@@ -552,18 +552,64 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 				return E_UNKNOWN;
 			}
 		DOMParser oParser;
-		MemBufInputSource oInput(xml_buff,xml_len,"tmp");
+		MemBufInputSource oInput(xml_buff+2,xml_len,"tmp");
 		oParser.parse(oInput);
-		delete xml_buff;
 		DOM_Document doc=oParser.getDocument();
 		DOM_Element elemRoot;
 		if(doc==NULL||(elemRoot=doc.getDocumentElement())==NULL||
 			decryptXMLElement(elemRoot,m_pRSA)!=E_SUCCESS)
 			{
+				delete xml_buff;
 				delete pNewUser;
 				m_pIPList->removeIP(peerIP);
 				return E_UNKNOWN;
-			}		
+			}
+		elemRoot=doc.getDocumentElement();
+		if(!elemRoot.getNodeName().equals("JAPKeyExchange"))
+			{
+				delete xml_buff;
+				delete pNewUser;
+				m_pIPList->removeIP(peerIP);
+				return E_UNKNOWN;
+			}
+		DOM_Element elemLinkEnc,elemMixEnc;
+		getDOMChildByName(elemRoot,(UINT8*)"LinkEncryption",elemLinkEnc,false);
+		getDOMChildByName(elemRoot,(UINT8*)"MixEncryption",elemMixEnc,false);
+		UINT8 linkKey[255],mixKey[255];
+		UINT32 linkKeyLen=255,mixKeyLen=255;
+		if(	getDOMElementValue(elemLinkEnc,linkKey,&linkKeyLen)!=E_SUCCESS||
+				getDOMElementValue(elemMixEnc,mixKey,&mixKeyLen)!=E_SUCCESS||
+				CABase64::decode(linkKey,linkKeyLen,linkKey,&linkKeyLen)!=E_SUCCESS||
+				CABase64::decode(mixKey,mixKeyLen,mixKey,&mixKeyLen)!=E_SUCCESS||
+				linkKeyLen!=64||mixKeyLen!=32)
+			{
+				delete xml_buff;
+				delete pNewUser;
+				m_pIPList->removeIP(peerIP);
+				return E_UNKNOWN;
+			}
+		//Sending Signature....
+		xml_buff[0]=xml_len>>8;
+		xml_buff[1]=xml_len&0xFF;
+		UINT8 sig[255];
+		UINT32 siglen=255;
+		m_pSignature->sign(xml_buff,xml_len+2,sig,&siglen);
+		DOM_Document docSig=DOM_Document::createDocument();
+		elemRoot=docSig.createElement("Signature");
+		DOM_Element elemSigValue=docSig.createElement("SignatureValue");
+		docSig.appendChild(elemRoot);
+		elemRoot.appendChild(elemSigValue);
+		UINT32 u32=siglen;
+		CABase64::encode(sig,u32,sig,&siglen);
+		sig[siglen]=0;
+		setDOMElementValue(elemSigValue,sig);
+		u32=xml_len;
+		DOM_Output::dumpToMem(docSig,xml_buff+2,&u32);
+		xml_buff[0]=u32>>8;
+		xml_buff[1]=u32&0xFF;
+		((CASocket*)pNewUser)->send(xml_buff,u32+2);
+		delete xml_buff;
+		((CASocket*)pNewUser)->setNonBlocking(true);
 #endif
 		CAQueue* tmpQueue=new CAQueue(sizeof(tQueueEntry));
 		if(m_pChannelList->add(pNewUser,peerIP,tmpQueue)!=E_SUCCESS)// adding user connection to mix->JAP channel list (stefan: sollte das nicht connection list sein? --> es handelt sich um eine Datenstruktu fŸr Connections/Channels ).
@@ -580,9 +626,11 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 #endif
 #ifdef FIRST_MIX_SYMMETRIC
 		pHashEntry->pSymCipher=new CASymCipher();
-		UINT8 buff[16];
-		memset(buff,0,16);
-		pHashEntry->pSymCipher->setKey(buff);
+		pHashEntry->pSymCipher->setKey(mixKey);
+		pHashEntry->pSymCipher->setIVs(mixKey+16);
+		pNewUser->setReceiveKey(linkKey,32);
+		pNewUser->setSendKey(linkKey+32,32);
+		pNewUser->setCrypt(true);
 #endif
 		incUsers();																	// increment the user counter by one
 #ifdef HAVE_EPOLL

@@ -218,6 +218,15 @@ SINT32 CASignature::parseSignKeyXML(const UINT8* buff,UINT32 len)
 	}
 
 
+SINT32 CASignature::sign(UINT8* in,UINT32 inlen,UINT8* sig,UINT32* siglen)
+	{
+		DSA_SIG* signature;
+		if(	sign(in,inlen,&signature)!=E_SUCCESS||
+				encodeRS(sig,siglen,signature)!=E_SUCCESS)
+			return E_UNKNOWN;
+		return E_SUCCESS;
+	}
+
 SINT32 CASignature::sign(UINT8* in,UINT32 inlen,DSA_SIG** pdsaSig)
 	{
 		UINT8 dgst[SHA_DIGEST_LENGTH];
@@ -335,16 +344,18 @@ SINT32 CASignature::signXML(DOM_Node& node,CACertStore* pIncludeCerts)
 				DSA_SIG_free(pdsaSig);
 				return E_UNKNOWN;
 			}
-		memset(tmpBuff,0,40); //make first 40 bytes '0' --> if r or s is less then 20 bytes long! 
+		len=1024;
+		encodeRS(tmpBuff,&len,pdsaSig);
+		//memset(tmpBuff,0,40); //make first 40 bytes '0' --> if r or s is less then 20 bytes long! 
 													//(Due to be compatible to the standarad r and s must be 20 bytes each) 
-		BN_bn2bin(pdsaSig->r,tmpBuff+20-BN_num_bytes(pdsaSig->r)); //so r is 20 bytes with leading '0'...
-		BN_bn2bin(pdsaSig->s,tmpBuff+40-BN_num_bytes(pdsaSig->s));
+		//BN_bn2bin(pdsaSig->r,tmpBuff+20-BN_num_bytes(pdsaSig->r)); //so r is 20 bytes with leading '0'...
+		//BN_bn2bin(pdsaSig->s,tmpBuff+40-BN_num_bytes(pdsaSig->s));
 		
 		DSA_SIG_free(pdsaSig);
 
 		UINT sigSize=255;
 		UINT8 sig[255];
-		if(CABase64::encode(tmpBuff,40,sig,&sigSize)!=E_SUCCESS)
+		if(CABase64::encode(tmpBuff,len,sig,&sigSize)!=E_SUCCESS)
 			return E_UNKNOWN;
 		sig[sigSize]=0;
 
@@ -398,18 +409,7 @@ SINT32 CASignature::setVerifyKey(CACertificate* pCert)
 		m_pDSA=tmpDSA;
 		return E_SUCCESS;
 	}
-/*
-SINT32 CASignature::verify(UINT8* in,UINT32 inlen,UINT8* sig,UINT32 siglen)
-	{
-		if(m_pDSA==NULL)
-			return E_UNKNOWN;
-		UINT8 dgst[SHA_DIGEST_LENGTH];
-		SHA1(in,inlen,dgst);
-		if(DSA_verify(0,dgst,SHA_DIGEST_LENGTH,sig,siglen,m_pDSA)==1)
-		 return E_SUCCESS;
-		return E_UNKNOWN;
-	}
-*/
+
 SINT32 CASignature::verify(UINT8* in,UINT32 inlen,DSA_SIG* dsaSig)
 	{
 		if(m_pDSA==NULL||dsaSig==NULL||dsaSig->r==NULL||dsaSig->s==NULL)
@@ -531,4 +531,13 @@ SINT32 CASignature::verifyXML(DOM_Node& root,CACertStore* trustedCerts)
 		return E_SUCCESS;
 	}
 
+SINT32 CASignature::encodeRS(UINT8* out,UINT32* outLen,DSA_SIG* pdsaSig)
+	{
+		memset(out,0,40); //make first 40 bytes '0' --> if r or s is less then 20 bytes long! 
+											//(Due to be compatible to the standarad r and s must be 20 bytes each) 
+		BN_bn2bin(pdsaSig->r,out+20-BN_num_bytes(pdsaSig->r)); //so r is 20 bytes with leading '0'...
+		BN_bn2bin(pdsaSig->s,out+40-BN_num_bytes(pdsaSig->s));
+		*outLen=40;
+		return E_SUCCESS;
+	}
 
