@@ -74,6 +74,18 @@ SINT32 CASocket::listen(const CASocketAddr& psa)
 		int type=psa.getType();
 		if(m_bSocketIsClosed&&create(type)!=E_SUCCESS)
 			return E_UNKNOWN;
+#ifdef HAVE_UNIX_DOMAIN
+		//we have to delete the file before...
+		if(psa.getType()==AF_LOCAL)
+			{
+				UINT8* path=((CASocketAddrUnix&)psa).getPath();
+				if(path!=NULL)
+					{
+						unlink(path);
+						delete path;
+					}
+			}
+#endif			
 		if(::bind(m_Socket,psa.LPSOCKADDR(),psa.getSize())==SOCKET_ERROR)
 			{
 				close();
