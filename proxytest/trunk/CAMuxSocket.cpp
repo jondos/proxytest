@@ -177,7 +177,7 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket)
 */
 
 //TODO: Bug if socket is not in non_blocking mode!!
-SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 timeout)
+SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 msTimeout)
 	{
 		m_csReceive.lock();
 		SINT32 len=MIXPACKET_SIZE-m_aktBuffPos;
@@ -202,16 +202,19 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 timeout)
 			}
 		if(ret>0) //some new bytes arrived
 			m_aktBuffPos+=ret;
-		if(timeout==0) //we should not wait any more
+		if(msTimeout==0) //we should not wait any more
 			{
 				m_csReceive.unlock();
 				return E_AGAIN;
 			}
-		UINT32 timeE=time(NULL)+timeout;
-		SINT32 dt=timeout;
+		UINT64 timeE;
+		UINT64 timeC;
+		getcurrentTimeMillis(timeE);
+		add64(timeE,msTimeout);
+		UINT32 dt=msTimeout;
 		CASingleSocketGroup oSocketGroup;
 		oSocketGroup.add(*this);
-		do
+		for(;;)
 			{
 				ret=oSocketGroup.select(false,dt);
 				if(ret!=1)
@@ -241,8 +244,11 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 timeout)
 					}
 				if(ret>0)
 					m_aktBuffPos+=ret;
-				dt=timeE-time(NULL);
-			}	while(dt>0);
+				getcurrentTimeMillis(timeC);
+				if(isGreater64(timeC,timeE)||isEqual64(timeC,timeE))
+					break;
+				dt=diff64(timeE,timeC);
+			}
 		m_csReceive.unlock();
 		return E_AGAIN;
 	}

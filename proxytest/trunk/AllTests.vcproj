@@ -124,6 +124,9 @@
 				RelativePath=".\test\AllTestsCA.cpp">
 			</File>
 			<File
+				RelativePath=".\test\CAFirstMixChannelListTest.cpp">
+			</File>
+			<File
 				RelativePath=".\test\SampleTest.cpp">
 			</File>
 		</Filter>
@@ -133,6 +136,9 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
 				RelativePath=".\test\AllTestsCA.hpp">
+			</File>
+			<File
+				RelativePath=".\test\CAFirstMixChannelListTest.hpp">
 			</File>
 			<File
 				RelativePath=".\test\SampleTest.hpp">

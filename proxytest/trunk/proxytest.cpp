@@ -397,15 +397,7 @@ Debug(dc::malloc.on());
 #ifdef _DEBUG
 			UINT32 start;
 #endif
-		#if _WIN32
-			RAND_screen();
-		#else
-			#ifndef __linux
-				unsigned char randbuff[255];
-				RAND_seed(randbuff,sizeof(randbuff));
-			#endif
-		#endif
-
+		initRandom();
 		options.parse(argc,argv);
 
 		if(!(options.isFirstMix()||options.isMiddleMix()||options.isLastMix()||options.isLocalProxy()))

@@ -87,6 +87,8 @@ SINT32 CAASymCipher::generateKeyPair(UINT32 size)
 	{
 		RSA_free(m_pRSA);
 		m_pRSA=RSA_generate_key(size,65537,NULL,NULL);
+		m_pRSA->flags|=RSA_FLAG_THREAD_SAFE;
+		m_pRSA->flags|=RSA_FLAG_NO_BLINDING;
 		if(m_pRSA==NULL)
 			return E_UNKNOWN;
 		else
@@ -185,6 +187,8 @@ SINT32 CAASymCipher::setPublicKey(UINT8* key,UINT32* len)
 		BN_bin2bn(key+aktIndex,size,m_pRSA->e);
 		aktIndex+=size;
 		(*len)=aktIndex;
+		m_pRSA->flags|=RSA_FLAG_THREAD_SAFE;
+		m_pRSA->flags|=RSA_FLAG_NO_BLINDING;
 		return E_SUCCESS;
 _ERROR:
 		RSA_free(m_pRSA);
@@ -314,6 +318,8 @@ SINT32 CAASymCipher::setPublicKeyAsDOMNode(DOM_Node& node)
 								if(m_pRSA!=NULL)
 									RSA_free(m_pRSA);
 								m_pRSA=tmpRSA;
+								m_pRSA->flags|=RSA_FLAG_THREAD_SAFE;
+								m_pRSA->flags|=RSA_FLAG_NO_BLINDING;
 								return E_SUCCESS;
 							}
 						RSA_free(tmpRSA);
@@ -342,5 +348,7 @@ SINT32 CAASymCipher::setPublicKey(const CACertificate* pCert)
 		if(m_pRSA!=NULL)
 			RSA_free(m_pRSA);
 		m_pRSA=r;
+		m_pRSA->flags|=RSA_FLAG_THREAD_SAFE;
+		m_pRSA->flags|=RSA_FLAG_NO_BLINDING;
 		return E_SUCCESS;
 	}
