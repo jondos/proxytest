@@ -43,7 +43,8 @@ struct t_fmhashtableentry
 			} list_HashEntries;
 	};
 
-typedef t_fmhashtableentry fmHashTableEntry;
+typedef struct t_fmhashtableentry fmHashTableEntry;
+typedef fmHashTableEntry* LP_fmHashTableEntry;
 
 struct t_firstmixchannellist
 	{
@@ -101,7 +102,7 @@ class CAFirstMixChannelList
 
 			
 		private:
-			fmHashTableEntry* m_HashTable;
+			LP_fmHashTableEntry* m_HashTable;
 			fmChannelListEntry* m_listOutChannelHead;
 			fmHashTableEntry* m_listHashTableHead;
 			fmHashTableEntry* m_listHashTableCurrent;
