@@ -242,11 +242,11 @@ SINT32 CAInfoService::sendHelo()
 				oSocket.close();
 				delete buff;		
 				return E_SUCCESS;	
-_LABEL_ERROR:
+/*_LABEL_ERROR:
 				if(buff!=NULL)
 					delete buff;
 				return E_UNKNOWN;
-			}
+*/			}
 		return E_UNKNOWN;
 	}
 

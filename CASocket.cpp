@@ -44,14 +44,14 @@ CASocket::CASocket()
 		localPort=-1;
 	}
 
-int CASocket::create()
+SINT32 CASocket::create()
 	{
 		if(m_Socket==0)
 			m_Socket=socket(AF_INET,SOCK_STREAM,0);
 		if(m_Socket==INVALID_SOCKET)
 			return SOCKET_ERROR;
 		localPort=-1;
-		return 0;
+		return E_SUCCESS;
 	}
 
 SINT32 CASocket::listen(LPCASOCKETADDR psa)
@@ -70,7 +70,7 @@ SINT32 CASocket::listen(UINT16 port)
 		return listen(&oSocketAddr);
 	}
 
-int CASocket::accept(CASocket &s)
+SINT32 CASocket::accept(CASocket &s)
 	{
 		s.localPort=-1;
 		s.m_Socket=::accept(m_Socket,NULL,NULL);
@@ -85,12 +85,12 @@ int CASocket::accept(CASocket &s)
 		return 0;
 	}
 			
-int CASocket::connect(LPCASOCKETADDR psa)
+SINT32 CASocket::connect(LPCASOCKETADDR psa)
 	{
 		return connect(psa,1,0);
 	}
 
-int CASocket::connect(LPCASOCKETADDR psa,UINT retry,UINT32 time)
+SINT32 CASocket::connect(LPCASOCKETADDR psa,UINT retry,UINT32 time)
 	{
 		localPort=-1;
 		if(m_Socket==0&&create()==SOCKET_ERROR)
@@ -107,7 +107,7 @@ int CASocket::connect(LPCASOCKETADDR psa,UINT retry,UINT32 time)
 					{  
 						err=GETERROR;
 						#ifdef _DEBUG
-						 CAMsg::printMsg(LOG_DEBUG,"Con-Error: %i",err);
+						 CAMsg::printMsg(LOG_DEBUG,"Con-Error: %i\n",err);
 						#endif
 						if(err!=E_TIMEDOUT&&err!=E_CONNREFUSED)
 							return SOCKET_ERROR;
@@ -122,7 +122,7 @@ int CASocket::connect(LPCASOCKETADDR psa,UINT retry,UINT32 time)
 		return err;
 	}
 			
-int CASocket::close()
+SINT32 CASocket::close()
 	{
 //		EnterCriticalSection(&csClose);
 		localPort=-1;
@@ -139,7 +139,7 @@ int CASocket::close()
 				sockets--;
 #endif
 				m_Socket=0;
-				ret=0;
+				ret=E_SUCCESS;
 			}
 		else
 			ret=SOCKET_ERROR;
@@ -147,7 +147,7 @@ int CASocket::close()
 		return ret;
 	}
 
-int CASocket::close(int mode)
+SINT32 CASocket::close(int mode)
 	{
 //		EnterCriticalSection(&csClose);
 		localPort=-1;
@@ -160,7 +160,7 @@ int CASocket::close(int mode)
 		if(closeMode==CLOSE_BOTH)
 			{
 				close();
-				ret=0;
+				ret=E_SUCCESS;
 			}
 		else
 			ret=1;
@@ -176,7 +176,7 @@ int CASocket::send(UINT8* buff,UINT32 len)
 		    ret=::send(m_Socket,(char*)buff,len,MSG_NOSIGNAL);
 			 #ifdef _DEBUG
 				if(ret==SOCKET_ERROR)
-				 printf("FEhler beim Socket-send: %i",errno);
+				 printf("Fehler beim Socket-send: %i",errno);
 				#endif
 			}
 	  while(ret==SOCKET_ERROR&&errno==EINTR);

@@ -82,7 +82,7 @@ SINT32 CAMuxSocket::connect(LPCASOCKETADDR psa,UINT retry,UINT32 time)
 	{
 //		if(!bIsTunneld)
 //			{
-				m_Socket.setRecvLowWat(sizeof(MUXPACKET));
+				m_Socket.setRecvLowWat(MUXPACKET_SIZE);
 				return m_Socket.connect(psa,retry,time);
 /*			}
 		else
@@ -181,7 +181,7 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 				#endif
 				return SOCKET_ERROR;
 			}
-		return sizeof(MUXPACKET);
+		return MUXPACKET_SIZE;
 	}
 #endif
 
@@ -274,7 +274,7 @@ int CAMuxSocket::receive(MUXPACKET* pPacket)
 
 //		pPacket->len=ntohs(pPacket->len);	
 		pPacket->channel=ntohl(pPacket->channel);
-		return sizeof(MUXPACKET);
+		return MUXPACKET_SIZE;
 	}
 #endif
 

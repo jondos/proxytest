@@ -35,15 +35,15 @@ class CASocket
 			CASocket();
 			~CASocket(){close();DeleteCriticalSection(&csClose);}
 
-			int create();
+			SINT32 create();
 
 			SINT32 listen(LPCASOCKETADDR psa);
 			SINT32 listen(UINT16 port);
-			int accept(CASocket &s);
-			int connect(LPCASOCKETADDR psa);
-			int connect(LPCASOCKETADDR psa,UINT retry,UINT32 time);
-			int close();
-			int close(int mode);
+			SINT32 accept(CASocket &s);
+			SINT32 connect(LPCASOCKETADDR psa);
+			SINT32 connect(LPCASOCKETADDR psa,UINT retry,UINT32 time);
+			SINT32 close();
+			SINT32 close(int mode);
 			int send(UINT8* buff,UINT32 len);
 			int available();
 			int receive(UINT8* buff,UINT32 len);

@@ -398,8 +398,12 @@ SINT32 CAFirstMix::init()
 		UINT8 strTarget[255];
 		options.getTargetHost(strTarget,255);
 		addrNext.setAddr((char*)strTarget,options.getTargetPort());
-		CAMsg::printMsg(LOG_INFO,"Try connectiong to next Mix... %s:%u",strTarget,options.getTargetPort());
-		((CASocket*)muxOut)->create();
+		CAMsg::printMsg(LOG_INFO,"Try connecting to next Mix: %s:%u ...\n",strTarget,options.getTargetPort());
+		if(((CASocket*)muxOut)->create()!=E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Cannot create SOCKET for connection to next Mix!\n");
+				return E_UNKNOWN;
+			}
 		((CASocket*)muxOut)->setSendBuff(50*sizeof(MUXPACKET));
 		((CASocket*)muxOut)->setRecvBuff(50*sizeof(MUXPACKET));
 		if(muxOut.connect(&addrNext,10,10)!=E_SUCCESS)
@@ -708,6 +712,8 @@ ERR:
 
 SINT32 CAFirstMix::clean()
 	{
+		socketIn.close();
+		muxOut.close();
 		mRSA.destroy();
 		return E_SUCCESS;
 	}
