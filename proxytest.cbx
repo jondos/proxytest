@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--C++BuilderX Project-->
 <project>
-  <property category="build.config" name="active" value="0"/>
+  <property category="build.config" name="active" value="1"/>
   <property category="build.config" name="count" value="1"/>
   <property category="build.config" name="excludedefaultforzero" value="0"/>
   <property category="build.config.0" name="builddir" value="Debug"/>
@@ -22,7 +22,7 @@
   <property category="build.config.1" name="settings.intelwinia32" value="default;release"/>
   <property category="build.config.1" name="settings.mswin32" value="default;release"/>
   <property category="build.config.1" name="type" value="Toolset"/>
-  <property category="build.config.1" name="win32.builddir" value="windows/Release_Build"/>
+  <property category="build.config.1" name="win32.builddir" value="windows/proxytest_lib/Release_Build"/>
   <property category="build.node" name="name" value="mix"/>
   <property category="build.node" name="type" value="exeproject"/>
   <property category="build.platform" name="active" value="win32"/>
@@ -39,16 +39,13 @@
   <property category="build.platform" name="win32.gnuc++.enabled" value="0"/>
   <property category="build.platform" name="win32.mswin32.enabled" value="0"/>
   <property category="build.platform" name="win32.win32b.enabled" value="1"/>
-  <property category="buildorder" name="node.1" value="253"/>
-  <property category="buildorder" name="node.2" value="173"/>
+  <property category="buildorder" name="node.1" value="323"/>
+  <property category="buildorder" name="node.2" value="253"/>
   <property category="buildorder" name="node.3" value="197"/>
   <property category="buildorder" name="node.4" value="215"/>
   <property category="buildorder" name="node.5" value="221"/>
   <property category="buildorder" name="node.6" value="145"/>
-  <property category="buildorder" name="node.7" value="147"/>
-  <property category="buildorder" name="node.8" value="149"/>
-  <property category="buildorder" name="node.9" value="321"/>
-  <property category="cbproject" name="lastnodeid" value="322"/>
+  <property category="cbproject" name="lastnodeid" value="324"/>
   <property category="cbproject" name="version" value="X.1.0"/>
   <property category="classbrowser" name="GroupByVisibility" value="1"/>
   <property category="classbrowser" name="SeparateByKind" value="1"/>
@@ -137,7 +134,7 @@
   <property category="runtime.5" name="RunnableType" value="com.borland.cbuilder.runtime.ExecutableRunner"/>
   <property category="runtime.5" name="native.exec.args" value="-c ../../documentation/SampleConfiguration/LastMixWithLog.xml"/>
   <property category="runtime.5" name="native.target.override" value="0"/>
-  <property category="unique" name="id" value="322"/>
+  <property category="unique" name="id" value="324"/>
   <property category="win32.Debug_Build.MinGW.dlltool_def" name="option.export-all.enabled" value="1"/>
   <property category="win32.Debug_Build.MinGW.dlltool_def" name="option.output-def.enabled" value="1"/>
   <property category="win32.Debug_Build.MinGW.dlltool_lib" name="option.dllname.enabled" value="1"/>
@@ -321,13 +318,14 @@
   <property category="win32.Release_Build.win32b.ilink32" name="option.b:xxxx.enabled" value="0"/>
   <property category="win32.Release_Build.win32b.ilink32" name="option.responsefile.enabled" value="1"/>
   <property category="win32.Release_Build.win32b.ilink32" name="option.x.enabled" value="1"/>
-  <property category="win32.Release_Build.win32b.ilink32" name="param.libfiles.1" value="import32.lib"/>
-  <property category="win32.Release_Build.win32b.ilink32" name="param.libfiles.2" value="ssleay32.lib"/>
-  <property category="win32.Release_Build.win32b.ilink32" name="param.libfiles.3" value="libeay32.lib"/>
+  <property category="win32.Release_Build.win32b.ilink32" name="param.libfiles.1" value="cw32mti.lib"/>
+  <property category="win32.Release_Build.win32b.ilink32" name="param.libfiles.2" value="import32.lib"/>
+  <property category="win32.Release_Build.win32b.ilink32" name="param.libfiles.3" value="cw32mti.lib"/>
   <property category="win32.Release_Build.win32b.ilink32" name="param.libfiles.4" value="xerces-bor_2_5_0.lib"/>
-  <property category="win32.Release_Build.win32b.ilink32" name="param.libfiles.5" value="pthredas_dll.lib"/>
-  <property category="win32.Release_Build.win32b.ilink32" name="param.libfiles.6" value="cw32mti.lib"/>
-  <property category="win32.Release_Build.win32b.ilink32" name="param.libfiles.merge" value="0"/>
+  <property category="win32.Release_Build.win32b.ilink32" name="param.libfiles.5" value="ssleay32.lib"/>
+  <property category="win32.Release_Build.win32b.ilink32" name="param.libfiles.6" value="libeay32.lib"/>
+  <property category="win32.Release_Build.win32b.ilink32" name="param.libfiles.7" value="pthredas_dll.lib"/>
+  <property category="win32.Release_Build.win32b.ilink32" name="param.libfiles.merge" value="1"/>
   <property category="win32.Release_Build.win32b.ilink32" name="param.objfiles.1" value="c0x32.obj"/>
   <property category="win32.win32b.Debug_Build" name="saved" value="1"/>
   <property category="win32.win32b.Release_Build" name="saved" value="1"/>
@@ -340,80 +338,6 @@
   <node name="SampleConfiguration" type="NavigationDirectory">
     <property category="directorynode" name="url" value="documentation/SampleConfiguration"/>
     <property category="unique" name="id" value="253"/>
-  </node>
-  <node name="popt" type="Folder">
-    <property category="buildorder" name="node.1" value="161"/>
-    <property category="buildorder" name="node.2" value="163"/>
-    <property category="buildorder" name="node.3" value="165"/>
-    <property category="buildorder" name="node.4" value="167"/>
-    <property category="buildorder" name="node.5" value="169"/>
-    <property category="buildorder" name="node.6" value="171"/>
-    <property category="unique" name="id" value="173"/>
-    <file path="popt/popt.cpp">
-      <property category="unique" name="id" value="161"/>
-    </file>
-    <file path="popt/popt.h">
-      <property category="unique" name="id" value="163"/>
-    </file>
-    <file path="popt/popthelp.cpp">
-      <property category="unique" name="id" value="165"/>
-    </file>
-    <file path="popt/poptint.h">
-      <property category="unique" name="id" value="167"/>
-    </file>
-    <file path="popt/poptparse.cpp">
-      <property category="unique" name="id" value="169"/>
-    </file>
-    <file path="popt/system.h">
-      <property category="unique" name="id" value="171"/>
-    </file>
-  </node>
-  <node name="tre" type="Folder">
-    <property category="buildorder" name="node.1" value="175"/>
-    <property category="buildorder" name="node.10" value="193"/>
-    <property category="buildorder" name="node.11" value="195"/>
-    <property category="buildorder" name="node.2" value="177"/>
-    <property category="buildorder" name="node.3" value="179"/>
-    <property category="buildorder" name="node.4" value="181"/>
-    <property category="buildorder" name="node.5" value="183"/>
-    <property category="buildorder" name="node.6" value="185"/>
-    <property category="buildorder" name="node.7" value="187"/>
-    <property category="buildorder" name="node.8" value="189"/>
-    <property category="buildorder" name="node.9" value="191"/>
-    <property category="unique" name="id" value="197"/>
-    <file path="tre/regcomp.cpp">
-      <property category="unique" name="id" value="175"/>
-    </file>
-    <file path="tre/regex.h">
-      <property category="unique" name="id" value="177"/>
-    </file>
-    <file path="tre/regexec.cpp">
-      <property category="unique" name="id" value="179"/>
-    </file>
-    <file path="tre/tre-config.h">
-      <property category="unique" name="id" value="181"/>
-    </file>
-    <file path="tre/tre-internal.h">
-      <property category="unique" name="id" value="183"/>
-    </file>
-    <file path="tre/tre-match-backtrack.cpp">
-      <property category="unique" name="id" value="185"/>
-    </file>
-    <file path="tre/tre-match-parallel.cpp">
-      <property category="unique" name="id" value="187"/>
-    </file>
-    <file path="tre/tre-match-utils.h">
-      <property category="unique" name="id" value="189"/>
-    </file>
-    <file path="tre/tre-mem.cpp">
-      <property category="unique" name="id" value="191"/>
-    </file>
-    <file path="tre/tre-mem.h">
-      <property category="unique" name="id" value="193"/>
-    </file>
-    <file path="tre/xmalloc.h">
-      <property category="unique" name="id" value="195"/>
-    </file>
   </node>
   <node name="trio" type="Folder">
     <property category="buildorder" name="node.1" value="199"/>
@@ -450,28 +374,11 @@
       <property category="unique" name="id" value="213"/>
     </file>
   </node>
-  <node name="xml" type="Folder">
-    <property category="buildorder" name="node.1" value="217"/>
-    <property category="buildorder" name="node.2" value="219"/>
-    <property category="unique" name="id" value="221"/>
-    <file path="xml/DOM_Output.cpp">
-      <property category="unique" name="id" value="217"/>
-    </file>
-    <file path="xml/DOM_Output.hpp">
-      <property category="unique" name="id" value="219"/>
-    </file>
-  </node>
   <node name="proxytest_lib.cbx" type="DependencyNode">
     <property category="project" name="relative.url" value="proxytest_lib.cbx"/>
-    <property category="unique" name="id" value="321"/>
+    <property category="unique" name="id" value="323"/>
   </node>
   <file path="proxytest.cpp">
     <property category="unique" name="id" value="145"/>
-  </file>
-  <file path="StdAfx.cpp">
-    <property category="unique" name="id" value="147"/>
-  </file>
-  <file path="StdAfx.h">
-    <property category="unique" name="id" value="149"/>
   </file>
 </project>
