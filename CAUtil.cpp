@@ -622,7 +622,24 @@ SINT32 decryptXMLElement(DOM_Node & node, CAASymCipher* pRSA)
 				delete cipherValue;
 				return E_UNKNOWN;
 			}
-
+		//now the need to parse the plaintext...
+		MemBufInputSource oInput(cipherValue,len,"decryptelement");
+		DOMParser oParser;
+		oParser.parse(oInput);
+		delete cipherValue;		
+		DOM_Document docPlain=oParser.getDocument();
+		DOM_Node elemPlainRoot;
+		if(docPlain==NULL||(elemPlainRoot=docPlain.getDocumentElement())==NULL)
+			return E_UNKNOWN;
+		elemPlainRoot=doc.importNode(elemPlainRoot,true);	
+		DOM_Node parent=node.getParentNode();
+		if(parent.getNodeType()==DOM_Node::DOCUMENT_NODE)
+			{
+				parent.removeChild(node);
+				parent.appendChild(elemPlainRoot);
+			}
+		else	
+			parent.replaceChild(elemPlainRoot,node);	
 		return E_SUCCESS;
 	}
 
