@@ -887,6 +887,9 @@ THREAD_RETURN lmIO(void *v)
 																						 DATA_SIZE-RSA_SIZE);
 													memcpy(oMuxPacket.data,buff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
 													
+													#ifdef _DEBUG
+														CAMsg::printMsg(LOG_DEBUG,"%s",oMuxPacket.data);
+													#endif
 													if(tmpSocket->send(oMuxPacket.data,len-KEY_SIZE)==SOCKET_ERROR)
 														{
 															tmpSocket->close();
