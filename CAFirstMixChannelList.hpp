@@ -31,6 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAQueue.hpp"
 #include "CASymCipher.hpp"
 #include "CAMutex.hpp"
+#include "CAMsg.hpp"
 struct t_fmhashtableentry
 	{
 		public:
@@ -157,5 +158,24 @@ class CAFirstMixChannelList
 			///This mutex is used in all functions and makes them thread safe.
 			CAMutex m_Mutex;
 
+#ifdef DO_TRACE
+			UINT32 m_aktAlloc;
+			UINT32 m_maxAlloc;
+			LP_fmChannelListEntry newChannelListEntry()
+				{
+					m_aktAlloc+=sizeof(fmChannelListEntry);
+					return (LP_fmChannelListEntry)new fmChannelListEntry;
+					if(m_maxAlloc<m_aktAlloc)
+						{
+							m_maxAlloc=m_aktAlloc;
+							CAMsg::printMsg(LOG_DEBUG,"FirstMixChannelList current alloc: %u\n",m_aktAlloc);
+						}
+				}
+			void deleteChannelListEntry(LP_fmChannelListEntry entry)
+				{
+					m_aktAlloc-=sizeof(fmChannelListEntry);
+					delete entry;
+				}
+#endif
 	};
 #endif
