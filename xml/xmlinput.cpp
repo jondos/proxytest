@@ -22,11 +22,7 @@
 #include "../StdAfx.h"
 #include "xmlinputp.h"
 #include "xmlstream.h"
-//#include <assert.h>	// assert()
-//#include <stdio.h>	// sprintf()
-//#include <string.h>	// memset()
 
-//XML_BEGIN_NAMESPACE
 
 struct InputImpl
 {
@@ -467,5 +463,4 @@ InvalidValue::InvalidValue(const XMLInput &input, int line, int column) : XMLPar
 	this->column = column;
 }
 
-//XML_END_NAMESPACE
 

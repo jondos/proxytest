@@ -386,7 +386,7 @@ THREAD_RETURN loopReadFromUsers(void* param)
 														pNextMix->close(pEntry->channelOut,tmpBuff);
 														pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
 														delete pEntry->pCipher;
-														pChannelList->remove(pMuxSocket,pMixPacket->channel);
+														pChannelList->removeChannel(pMuxSocket,pMixPacket->channel);
 													}
 												else
 													{
@@ -417,13 +417,19 @@ THREAD_RETURN loopReadFromUsers(void* param)
 																						 DATA_SIZE-RSA_SIZE);
 														memcpy(pMixPacket->data,rsaBuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
 
-														pChannelList->add(pMuxSocket,pMixPacket->channel,pCipher,&pMixPacket->channel);
-														#if defined(_DEBUG) && !defined(__MIX_TEST)
-															CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",pMixPacket->channel);
-														#endif
-														pNextMix->send(pMixPacket,tmpBuff);
-														pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
-														pFirstMix->incMixedPackets();
+														if(pChannelList->addChannel(pMuxSocket,pMixPacket->channel,pCipher,&pMixPacket->channel)!=E_SUCCESS)
+															{//todo --> maybe move up to not make decryption!!
+																delete pCipher;
+															}
+														else
+															{
+																#if defined(_DEBUG) && !defined(__MIX_TEST)
+																	CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",pMixPacket->channel);
+																#endif
+																pNextMix->send(pMixPacket,tmpBuff);
+																pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
+																pFirstMix->incMixedPackets();
+															}
 													}
 											}
 									}
@@ -576,7 +582,6 @@ SINT32 CAFirstMix::loop()
 #define MAX_NEXT_MIX_QUEUE_SIZE 10000000 //10 MByte
 				if(m_pQueueSendToMix->getSize()<MAX_NEXT_MIX_QUEUE_SIZE)
 					{
-			
 						fmHashTableEntry* pHashEntry=m_pChannelList->getFirst();
 						countRead=m_psocketgroupUsersRead->select(false,0);
 						if(countRead>0)
@@ -621,7 +626,7 @@ SINT32 CAFirstMix::loop()
 																m_pMuxOut->close(pEntry->channelOut,tmpBuff);
 																m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
 																delete pEntry->pCipher;
-																m_pChannelList->remove(pMuxSocket,pMixPacket->channel);
+																m_pChannelList->removeChannel(pMuxSocket,pMixPacket->channel);
 															}
 														else
 															{
@@ -640,6 +645,9 @@ SINT32 CAFirstMix::loop()
 																pMixPacket->channel=pEntry->channelOut;
 																pCipher=pEntry->pCipher;
 																pCipher->decryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+																m_pMuxOut->send(pMixPacket,tmpBuff);
+																m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
+																incMixedPackets();
 															}
 														else
 															{
@@ -651,15 +659,20 @@ SINT32 CAFirstMix::loop()
 																								 DATA_SIZE-RSA_SIZE);
 																memcpy(pMixPacket->data,rsaBuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
 
-																m_pChannelList->add(pMuxSocket,pMixPacket->channel,pCipher,&pMixPacket->channel);
-																#ifdef _DEBUG
-																	CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",pMixPacket->channel);
-																#endif
-																//oMixPacket.channel=lastChannelId++;
+																if(m_pChannelList->addChannel(pMuxSocket,pMixPacket->channel,pCipher,&pMixPacket->channel)!=E_SUCCESS)
+																	{ //todo move up ?
+																		delete pCipher;
+																	}
+																else
+																	{
+																		m_pMuxOut->send(pMixPacket,tmpBuff);
+																		m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
+																		incMixedPackets();
+																		#ifdef _DEBUG
+																			CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",pMixPacket->channel);
+																		#endif
+																	}
 															}
-														m_pMuxOut->send(pMixPacket,tmpBuff);
-														m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
-														incMixedPackets();
 													}
 											}
 									}
@@ -699,7 +712,7 @@ SINT32 CAFirstMix::loop()
 										m_psocketgroupUsersWrite->add(*pEntry->pHead->pMuxSocket);
 										delete pEntry->pCipher;
 	
-										m_pChannelList->remove(pEntry->pHead->pMuxSocket,pEntry->channelIn);
+										m_pChannelList->removeChannel(pEntry->pHead->pMuxSocket,pEntry->channelIn);
 									}
 							}
 						else
