@@ -23,8 +23,10 @@ class CAMuxSocket
 			int close();
 			int send(HCHANNEL channel_id,char* buff,int len);
 			int send(MUXPACKET *pPacket);
+			int send(MUXPACKET *pPacket,CASymCipher oCipher);
 			int receive(HCHANNEL* channel_id,char* buff,int len);
 			int receive(MUXPACKET *pPacket);
+			int receive(MUXPACKET *pPacket,CASymCipher oCipher);
 			int close(HCHANNEL channel_id);
 			operator CASocket*(){return &m_Socket;}
 			operator SOCKET(){return (SOCKET)m_Socket;}

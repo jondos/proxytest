@@ -10,6 +10,8 @@
 #include "CAMsg.hpp"
 #include "CAMuxSocket.hpp"
 #include "CASocketList.hpp"
+#include "CAMuxChannelList.hpp"
+#include "CASymCipher.hpp"
 #ifdef _WIN32
 HANDLE hEventThreadEnde;
 #endif
@@ -116,6 +118,163 @@ THREAD_RETURN mixtoproxy(void* tmpPair)
 		THREAD_RETURN_SUCCESS;
 	}
 */
+
+typedef struct t_LPPair
+	{
+		CASocket socketIn;
+		CAMuxSocket muxOut;
+	} LPPair;
+
+THREAD_RETURN lpIO(void *v)
+	{
+		LPPair* lpIOPair=(LPPair*)v;
+		CASocketList  oSocketList;
+		CASocketGroup oSocketGroup;
+		oSocketGroup.add(lpIOPair->socketIn);
+		oSocketGroup.add(*((CASocket*)lpIOPair->muxOut));
+		HCHANNEL lastChannelId=1;
+//		HCHANNEL channel;
+		MUXPACKET oMuxPacket;
+//		char buff[1001];
+		int len;
+		CASocket* newSocket,*tmpSocket;
+		CASymCipher oSymCipher;
+		unsigned char key[16];
+		memset(key,0,sizeof(key));
+		oSymCipher.setEncryptionKey(key);
+		oSymCipher.setDecryptionKey(key);
+		for(;;)
+			{
+				if(oSocketGroup.select()==SOCKET_ERROR)
+					{
+						sleep(1);
+						continue;
+					}
+				if(oSocketGroup.isSignaled(lpIOPair->socketIn))
+					{
+						#ifdef _DEBUG
+							CAMsg::printMsg(LOG_DEBUG,"New Connection from Browser!\n");
+						#endif
+						newSocket=new CASocket;
+						if(lpIOPair->socketIn.accept(*newSocket)==SOCKET_ERROR)
+							{
+								#ifdef _DEBUG
+									CAMsg::printMsg(LOG_DEBUG,"Accept Error - Connection from Browser!\n");
+								#endif
+								delete newSocket;
+							}
+						else
+							{
+								oSocketList.add(lastChannelId++,newSocket);
+								oSocketGroup.add(*newSocket);
+							}
+					}
+				else if(oSocketGroup.isSignaled((*(CASocket*)lpIOPair->muxOut)))
+						{
+							len=lpIOPair->muxOut.receive(&oMuxPacket);
+							if(len==0)
+								{
+									#ifdef _DEBUG
+										CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u ... ",oMuxPacket.channel);
+									#endif
+									tmpSocket=oSocketList.remove(oMuxPacket.channel);
+									if(tmpSocket!=NULL)
+										{
+											oSocketGroup.remove(*tmpSocket);
+											tmpSocket->close();
+											#ifdef _DEBUG
+												CAMsg::printMsg(LOG_DEBUG,"closed!\n");
+											#endif
+											delete tmpSocket;
+										}
+								}
+							else if(len==SOCKET_ERROR)
+								{
+									CAMsg::printMsg(LOG_CRIT,"Mux-Channel Receiving Data Error - Exiting!\n");									
+									exit(-1);
+								}
+							else
+								{
+									#ifdef _DEBUG
+										CAMsg::printMsg(LOG_DEBUG,"Sending Data to Browser!");
+									#endif
+									CASocket* tmpSocket=oSocketList.get(oMuxPacket.channel);
+									if(tmpSocket!=NULL)
+										{
+											tmpSocket->send(oMuxPacket.data,len);
+										}
+									else
+										{
+											CAMsg::printMsg(LOG_DEBUG,"Error Sending Data to Browser -- Channel-Id no valid!\n");										
+										}
+								}
+						}
+				else
+					{
+						CONNECTION* tmpCon;
+						tmpCon=oSocketList.getFirst();
+						while(tmpCon!=NULL)
+							{
+								if(oSocketGroup.isSignaled(*tmpCon->pSocket))
+									{
+										oMuxPacket.len=tmpCon->pSocket->receive(oMuxPacket.data,1000);
+										oMuxPacket.channel=tmpCon->id;
+										if(oMuxPacket.len==SOCKET_ERROR||oMuxPacket.len==0)
+											{
+												CASocket* tmpSocket=oSocketList.remove(tmpCon->id);
+												if(tmpSocket!=NULL)
+													{
+														oSocketGroup.remove(*tmpSocket);
+														lpIOPair->muxOut.close(tmpCon->id);
+														tmpSocket->close();
+														delete tmpSocket;
+													}
+											}
+										else if(lpIOPair->muxOut.send(&oMuxPacket)==SOCKET_ERROR)
+											{
+												CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Exiting!\n");									
+												exit(-1);
+											}
+										break;
+									}
+								tmpCon=oSocketList.getNext();
+							}
+					}
+			}
+		THREAD_RETURN_SUCCESS;
+	}
+
+int doLocalProxy()
+	{
+		int ret;	
+		CASocketAddr socketAddrIn(options.getServerPort());
+		LPPair* lpIOPair=new LPPair;
+		if(lpIOPair->socketIn.listen(&socketAddrIn)==SOCKET_ERROR)
+		    {
+					CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
+					return -1;
+		    }
+		CASocketAddr addrNext;
+		char strTarget[255];
+		options.getTargetHost(strTarget,255);
+		addrNext.setAddr(strTarget,options.getTargetPort());
+		CAMsg::printMsg(LOG_INFO,"Try connectiong to next Mix...");
+		if(lpIOPair->muxOut.connect(&addrNext)!=SOCKET_ERROR)
+			{
+				CAMsg::printMsg(LOG_INFO," connected!\n");
+				lpIO(lpIOPair);
+				ret=0;
+			}
+		else
+			{
+				CAMsg::printMsg(LOG_CRIT,"Cannot connect to next Mix!\n");
+				ret=-1;
+			}
+	//	WaitForSingleObject(hEventThreadEnde,INFINITE);
+		delete lpIOPair;
+		return ret;
+	}
+
 
 struct MMPair
 	{
@@ -235,60 +394,66 @@ typedef struct t_FMPair
 THREAD_RETURN fmIO(void *v)
 	{
 		FMPair* fmIOPair=(FMPair*)v;
-		CASocketList  oSocketList;
+		CAMuxChannelList  oMuxChannelList;
 		CASocketGroup oSocketGroup;
 		oSocketGroup.add(fmIOPair->socketIn);
 		oSocketGroup.add(*((CASocket*)fmIOPair->muxOut));
 		HCHANNEL lastChannelId=1;
-//		HCHANNEL channel;
+		HCHANNEL outChannel;
 		MUXPACKET oMuxPacket;
 //		char buff[1001];
 		int len;
-		CASocket* newSocket,*tmpSocket;
+		CAMuxSocket* newMuxSocket;
+		MUXLISTENTRY* tmpEntry;
+		REVERSEMUXLISTENTRY* tmpReverseEntry;
+		CASymCipher oSymCipher;
+		unsigned char key[16];
+		memset(key,0,sizeof(key));
+		oSymCipher.setEncryptionKey(key);
+		oSymCipher.setDecryptionKey(key);
+		int countRead=0;
 		for(;;)
 			{
-				if(oSocketGroup.select()==SOCKET_ERROR)
+				if((countRead=oSocketGroup.select())==SOCKET_ERROR)
 					{
 						sleep(1);
 						continue;
 					}
 				if(oSocketGroup.isSignaled(fmIOPair->socketIn))
 					{
+						countRead--;
 						#ifdef _DEBUG
 							CAMsg::printMsg(LOG_DEBUG,"New Connection from Browser!\n");
 						#endif
-						newSocket=new CASocket;
-						if(fmIOPair->socketIn.accept(*newSocket)==SOCKET_ERROR)
+						newMuxSocket=new CAMuxSocket;
+						if(fmIOPair->socketIn.accept(*(CASocket*)newMuxSocket)==SOCKET_ERROR)
 							{
 								#ifdef _DEBUG
 									CAMsg::printMsg(LOG_DEBUG,"Accept Error - Connection from Browser!\n");
 								#endif
-								delete newSocket;
+								delete newMuxSocket;
 							}
 						else
 							{
-								oSocketList.add(lastChannelId++,newSocket);
-								oSocketGroup.add(*newSocket);
+								oMuxChannelList.add(newMuxSocket);
+								oSocketGroup.add(*newMuxSocket);
 							}
 					}
-				else
-					if(oSocketGroup.isSignaled((*(CASocket*)fmIOPair->muxOut)))
+				if(oSocketGroup.isSignaled((*(CASocket*)fmIOPair->muxOut)))
 						{
 							len=fmIOPair->muxOut.receive(&oMuxPacket);
 							if(len==0)
 								{
 									#ifdef _DEBUG
-										CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u ... ",channel);
+										CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u ... ",oMuxPacket.channel);
 									#endif
-									tmpSocket=oSocketList.remove(oMuxPacket.channel);
-									if(tmpSocket!=NULL)
+									REVERSEMUXLISTENTRY otmpReverseEntry;
+									if(oMuxChannelList.remove(oMuxPacket.channel,&otmpReverseEntry))
 										{
-											oSocketGroup.remove(*tmpSocket);
-											tmpSocket->close();
+											otmpReverseEntry.pMuxSocket->close(otmpReverseEntry.inChannel);
 											#ifdef _DEBUG
 												CAMsg::printMsg(LOG_DEBUG,"closed!\n");
 											#endif
-											delete tmpSocket;
 										}
 								}
 							else if(len==SOCKET_ERROR)
@@ -301,46 +466,83 @@ THREAD_RETURN fmIO(void *v)
 									#ifdef _DEBUG
 										CAMsg::printMsg(LOG_DEBUG,"Sending Data to Browser!");
 									#endif
-									CASocket* tmpSocket=oSocketList.get(oMuxPacket.channel);
-									if(tmpSocket!=NULL)
+									tmpReverseEntry=oMuxChannelList.get(oMuxPacket.channel);
+									if(tmpReverseEntry!=NULL)
 										{
-											tmpSocket->send(oMuxPacket.data,len);
+											oMuxPacket.channel=tmpReverseEntry->inChannel;
+											tmpReverseEntry->pMuxSocket->send(&oMuxPacket);
 										}
 									else
 										{
-											CAMsg::printMsg(LOG_DEBUG,"Error Sending Data to Browser -- Channel-Id no valid!\n");										
+											CAMsg::printMsg(LOG_DEBUG,"Error Sending Data to Browser -- Channel-Id %u no valid!\n",oMuxPacket.channel);										
 										}
 								}
 						}
-				else
+				if(countRead>0)
 					{
-						CONNECTION* tmpCon;
-						tmpCon=oSocketList.getFirst();
-						while(tmpCon!=NULL)
+						tmpEntry=oMuxChannelList.getFirst();
+						while(tmpEntry!=NULL&&countRead>0)
 							{
-								if(oSocketGroup.isSignaled(*tmpCon->pSocket))
+								if(oSocketGroup.isSignaled(*tmpEntry->pMuxSocket))
 									{
-										oMuxPacket.len=tmpCon->pSocket->receive(oMuxPacket.data,1000);
-										oMuxPacket.channel=tmpCon->id;
-										if(oMuxPacket.len==SOCKET_ERROR||oMuxPacket.len==0)
+										countRead--;
+										len=tmpEntry->pMuxSocket->receive(&oMuxPacket);
+										if(len==SOCKET_ERROR)
 											{
-												CASocket* tmpSocket=oSocketList.remove(tmpCon->id);
-												if(tmpSocket!=NULL)
+												MUXLISTENTRY otmpEntry;
+												if(oMuxChannelList.remove(tmpEntry->pMuxSocket,&otmpEntry))
 													{
-														oSocketGroup.remove(*tmpSocket);
-														fmIOPair->muxOut.close(tmpCon->id);
-														tmpSocket->close();
-														delete tmpSocket;
+														oSocketGroup.remove(*(CASocket*)otmpEntry.pMuxSocket);
+														CONNECTION* tmpCon=otmpEntry.pSocketList->getFirst();
+														while(tmpCon!=NULL)
+															{
+																fmIOPair->muxOut.close(tmpCon->outChannel);
+																tmpCon=otmpEntry.pSocketList->getNext();
+															}
+														otmpEntry.pMuxSocket->close();
+														delete otmpEntry.pMuxSocket;
+														delete otmpEntry.pSocketList;
 													}
 											}
-										else if(fmIOPair->muxOut.send(&oMuxPacket)==SOCKET_ERROR)
+										else
 											{
-												CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Exiting!\n");									
-												exit(-1);
+												if(len==0)
+													{
+														if(oMuxChannelList.get(tmpEntry,oMuxPacket.channel,&outChannel))
+															{
+																fmIOPair->muxOut.close(outChannel);
+																oMuxChannelList.remove(outChannel,NULL);
+															}
+														else
+															{
+																#ifdef _DEBUG
+																	CAMsg::printMsg(LOG_DEBUG,"Invalid ID to close from Browser!\n");
+																#endif
+															}
+													}
+												else
+													{
+														if(oMuxChannelList.get(tmpEntry,oMuxPacket.channel,&outChannel))
+															{
+																oMuxPacket.channel=outChannel;
+															}
+														else
+															{
+																oMuxChannelList.add(tmpEntry,oMuxPacket.channel,lastChannelId);
+																#ifdef _DEBUG
+																	CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",lastChannelId);
+																#endif
+																oMuxPacket.channel=lastChannelId++;
+															}
+														if(fmIOPair->muxOut.send(&oMuxPacket)==SOCKET_ERROR)
+															{
+																CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Exiting!\n");									
+																exit(-1);
+															}
+												}
 											}
-										break;
 									}
-								tmpCon=oSocketList.getNext();
+								tmpEntry=oMuxChannelList.getNext();
 							}
 					}
 			}
@@ -350,7 +552,7 @@ THREAD_RETURN fmIO(void *v)
 int doFirstMix()
 	{
 		int ret;	
-		CASocketAddr socketAddrIn(options.getServerPort());
+		CASocketAddr socketAddrIn("127.0.0.1",options.getServerPort());
 		FMPair* fmIOPair=new FMPair;
 		if(fmIOPair->socketIn.listen(&socketAddrIn)==SOCKET_ERROR)
 		    {
@@ -474,26 +676,31 @@ THREAD_RETURN lmIO(void *v)
 								if(oSocketGroup.isSignaled(*(tmpCon->pSocket)))
 									{
 										#ifdef _DEBUG
-										    CAMsg::printMsg(LOG_DEBUG,"Receving Data from Squid!");
+										    CAMsg::printMsg(LOG_DEBUG,"Receiving Data from Squid!");
 										#endif
-										oMuxPacket.len=tmpCon->pSocket->receive(oMuxPacket.data,1000);
-										oMuxPacket.channel=tmpCon->id;
-										if(oMuxPacket.len==SOCKET_ERROR||oMuxPacket.len==0)
+										do
 											{
-												#ifdef _DEBUG
-														CAMsg::printMsg(LOG_DEBUG,"Closing Connection from Squid!\n");
-												#endif
-												oSocketGroup.remove(*tmpCon->pSocket);
-												tmpCon->pSocket->close();
-												lmIOPair->muxIn.close(tmpCon->id);
-												oSocketList.remove(tmpCon->id);
-												delete tmpCon->pSocket;
+												oMuxPacket.len=tmpCon->pSocket->receive(oMuxPacket.data,1000);
+												oMuxPacket.channel=tmpCon->id;
+												if(oMuxPacket.len==SOCKET_ERROR||oMuxPacket.len==0)
+													{
+														#ifdef _DEBUG
+																CAMsg::printMsg(LOG_DEBUG,"Closing Connection from Squid!\n");
+														#endif
+														oSocketGroup.remove(*tmpCon->pSocket);
+														tmpCon->pSocket->close();
+														lmIOPair->muxIn.close(tmpCon->id);
+														oSocketList.remove(tmpCon->id);
+														delete tmpCon->pSocket;
+														break;
+													}
+												else if(lmIOPair->muxIn.send(&oMuxPacket)==SOCKET_ERROR)
+													{
+														CAMsg::printMsg(LOG_CRIT,"Mux Data Sending Error - Exiting!\n");
+														exit(-1);
+													}
 											}
-										else if(lmIOPair->muxIn.send(&oMuxPacket)==SOCKET_ERROR)
-											{
-												CAMsg::printMsg(LOG_CRIT,"Mux Data Sending Error - Exiting!\n");
-												exit(-1);
-											}
+										while(tmpCon->pSocket->available()>=1000);
 										break;
 									}
 								tmpCon=oSocketList.getNext();
@@ -572,7 +779,11 @@ int main(int argc, const char* argv[])
 			signal(SIGPIPE,SIG_IGN);
 	#endif
 #endif
-		if(options.isFirstMix())
+		if(options.isLocalProxy())
+			{
+				doLocalProxy();
+			}
+		else if(options.isFirstMix())
 			{
 				doFirstMix();
 			}
