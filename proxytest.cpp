@@ -82,6 +82,12 @@ int sockets;
 	#endif
 #endif
 
+void signal_term( int sig)
+	{
+		CAMsg::printMsg(LOG_INFO,"Hm.. Signal SIG_TERM received... exiting!\n");
+		exit(0);
+	}
+
 void signal_interrupt( int sig)
 	{
 		CAMsg::printMsg(LOG_INFO,"Hm.. Strg+C pressed... exiting!\n");
@@ -167,6 +173,7 @@ int main(int argc, const char* argv[])
 	{		
 			XMLPlatformUtils::Initialize();	
 			OpenSSL_add_all_algorithms();
+	
 	
 	/*		CAPayment oPayment;
 			oPayment.init((UINT8*)"dud14.inf.tu-dresden.de",3306,(UINT8*)"payment",(UINT8*)"payment");
@@ -453,6 +460,7 @@ Debug(dc::malloc.on());
 	#endif
 #endif
 		signal(SIGINT,signal_interrupt);
+		signal(SIGTERM,signal_term);
 		CAMix* pMix=NULL;
 		CARoundTripTime* pRTT=NULL;
 		if(options.isLocalProxy())
