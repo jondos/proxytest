@@ -197,6 +197,7 @@ int main(int argc, const char* argv[])
 		CAMix* pMix=NULL;
 		int i;
 		UINT32 start;
+		SINT32 maxFiles;
 		//Setup Routines
 		XMLPlatformUtils::Initialize();	
 		OpenSSL_add_all_algorithms();
@@ -435,7 +436,7 @@ Debug(dc::malloc.on());
 		UINT8 buff[255];
 
 #ifndef WIN32
-		SINT32 maxFiles=options.getMaxOpenFiles();
+		maxFiles=options.getMaxOpenFiles();
 		if(maxFiles>0)
 			{
 				struct rlimit lim;
