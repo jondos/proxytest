@@ -173,12 +173,13 @@ SINT32 CAInfoService::sendStatus()
 						tmpTraffic=min(SINT32(50.*dTmp),100);
 					}
 				set64(m_lastMixedPackets,tmpPackets);
-			
+
+//let the attributes in alphabetical order..
 #define XML_MIX_CASCADE_STATUS "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\
-<MixCascadeStatus id=\"%s\" currentRisk=\"%i\" mixedPackets=\"%s\" nrOfActiveUsers=\"%i\" trafficSituation=\"%i\"\
- LastUpdate=\"%s\"></MixCascadeStatus>"
+<MixCascadeStatus LastUpdate=\"%s\" currentRisk=\"%i\" id=\"%s\" mixedPackets=\"%s\" nrOfActiveUsers=\"%i\" trafficSituation=\"%i\"\
+></MixCascadeStatus>"
 				
-				UINT32 buffLen=1024;
+				UINT32 buffLen=4096;
 				UINT8* buff=new UINT8[buffLen];
 				UINT8 tmpBuff[1024];
 				UINT8 buffMixedPackets[50];
@@ -189,7 +190,7 @@ SINT32 CAInfoService::sendStatus()
 					print64(tmpStrCurrentMillis,currentMillis);
 				else
 					tmpStrCurrentMillis[0]=0;
-				sprintf((char*)tmpBuff,XML_MIX_CASCADE_STATUS,strMixId,tmpRisk,buffMixedPackets,tmpUser,tmpTraffic,tmpStrCurrentMillis);
+				sprintf((char*)tmpBuff,XML_MIX_CASCADE_STATUS,tmpStrCurrentMillis,tmpRisk,strMixId,buffMixedPackets,tmpUser,tmpTraffic);
 				m_pSignature->signXML(tmpBuff,strlen((char*)tmpBuff),buff,&buffLen,m_pcertstoreOwnCerts);
 				sprintf((char*)buffHeader,"POST /feedback HTTP/1.0\r\nContent-Length: %u\r\n\r\n",buffLen);
 				oSocket.send(buffHeader,strlen((char*)buffHeader));
