@@ -390,7 +390,8 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 		delete pMixPacket;
 		#ifdef USE_POOL
 			delete pPool;
-		#endif			
+		#endif	
+		THREAD_RETURN_SUCCESS;
 	}
 	
 struct T_UserLoginData

@@ -286,7 +286,7 @@ SINT32 CAFirstMixA::loop()
 						bAktiv=true;
 						countRead--;
 						ret=MIXPACKET_SIZE;
-						m_pQueueReadFromMix->get((UINT8*)pMixPacket,&ret);
+						m_pQueueReadFromMix->get((UINT8*)pMixPacket,(UINT32*)&ret);
 						#ifdef LOG_PACKET_TIMES
 							getcurrentTimeMicros(download_packet_timestamp);
 						#endif	
