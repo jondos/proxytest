@@ -205,7 +205,9 @@ THREAD_RETURN loopSendToMix(void* param)
 		for(;;)
 			{
 				len=MIXPACKET_SIZE;
-				pQueue->getOrWait(buff,&len);
+				SINT32 ret=pQueue->getOrWait(buff,&len);
+				if(ret!=E_SUCCESS||len!=MIXPACKET_SIZE)
+					break;
 				if(pMuxSocket->send((MIXPACKET*)buff)!=E_SUCCESS)
 					break;
 			}
