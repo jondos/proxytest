@@ -306,11 +306,19 @@ Note: At the moment this is binary - but will use XML in the future.
 \li 4. Normal MixPacket exchange according to the mix protocol.
 */
 
-
-
 int main(int argc, const char* argv[])
 	{		
-	/*	CAQueue oQ;
+		UINT64 h=18446744073709551615;
+	//	UINT64 h=184004600;
+		UINT8 bg[255];
+		UINT64 t1,t2;
+		getcurrentTimeMillis(t1);
+		for(UINT32 i=0;i<10000000;i++)
+			print64(bg,h);
+		getcurrentTimeMillis(t2);
+		printf("%u",diff64(t2,t1));
+		
+		/*	CAQueue oQ;
 		UINT32 l,b;
 		l=4;
 		SINT32 r=oQ.getOrWait((UINT8*)&b,&l,5000);

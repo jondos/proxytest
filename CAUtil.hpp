@@ -36,7 +36,7 @@ SINT32 memtrim(UINT8* out,const UINT8* in,UINT32 len);
 char* strins(const char* src,UINT32 pos,const char* ins);
 char* strins(const char* src,const char * pos,const char* ins);
 
-SINT32 getcurrentTimeMillis(BIGNUM *bnTime); 
+//SINT32 getcurrentTimeMillis(BIGNUM *bnTime); 
 SINT32 getcurrentTimeMillis(UINT64& u64Time);
 
 SINT32 getRandom(UINT8* buff,UINT32 len);
@@ -144,7 +144,7 @@ inline bool isGreater64(UINT64& op1,UINT64& op2)
 #endif
 	}
 
-inline void print64(UINT8* buff,UINT64& op)
+/*inline void print64(UINT8* buff,UINT64& op)
 	{
 		#if defined(HAVE_NATIVE_UINT64)
 			#if defined(_WIN32)
@@ -158,6 +158,43 @@ inline void print64(UINT8* buff,UINT64& op)
 			sprintf((char*)buff,"(%lu:%lu)",op.high,op.low);
 		#endif
 	}
+*/
+inline void print64(UINT8* buff,UINT64 num)
+	{
+		#ifdef HAVE_NATIVE_UINT64
+			if(num==0)
+				{
+					buff[0]='0';
+					buff[1]=0;
+					return;
+				}
+			UINT64 mask=10000000000000000000;
+			UINT digit;
+			UINT32 index=0;
+			bool bprintZero=false;
+			if(num>=mask)
+				{
+					buff[index++]='1';
+					num-=mask;
+					bprintZero=true;
+				}
+			while(mask>1)
+				{
+					mask/=10;
+					digit=num/mask;
+					if(digit>0||bprintZero)
+						{
+							buff[index++]=digit+'0';
+							num%=mask;
+							bprintZero=true;
+						}
+				}
+			buff[index]=0;
+		#else //no native UINT_64
+			sprintf((char*)buff,"(%lu:%lu)",op.high,op.low);
+		#endif
+	}
+
 
 UINT8* readFile(UINT8* name,UINT32* size);
 
