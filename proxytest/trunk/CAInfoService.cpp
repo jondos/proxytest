@@ -137,7 +137,8 @@ THREAD_RETURN InfoLoop(void *p)
 		oAddr.setAddr((char*)buff,options.getInfoServerPort());
 		BufferOutputStream oBufferStream(1024,1024);
 		XML::Output oxmlOut(oBufferStream);
-		SINT32 tmpUser,tmpRisk,tmpTraffic,tmpPackets;
+		SINT32 tmpUser,tmpRisk,tmpTraffic;
+		UINT32 tmpPackets;
 		UINT32 buffLen;
 		char strAnonServer[255];
 		if(options.getServerHost((UINT8*)strAnonServer,255)!=E_SUCCESS)
@@ -150,6 +151,13 @@ THREAD_RETURN InfoLoop(void *p)
 			}
 		sprintf(strAnonServer,"%u.%u.%u.%u%%3A%u",buff[0],buff[1],buff[2],buff[3],options.getServerPort());
 		int helocount=10;
+
+		//Must be changed to UINT64 ....
+		UINT32 avgTraffic=0;		
+		UINT32 lastMixedPackets=0;
+		UINT32 minuts=1;
+		UINT32 diffTraffic;
+		double dTmp;
 		while(pInfoService->getRun())
 			{
 				if(oSocket.connect(oAddr)==E_SUCCESS)
@@ -161,6 +169,22 @@ THREAD_RETURN InfoLoop(void *p)
 						tmpUser=tmpPackets=tmpRisk=tmpTraffic=-1;
 						pInfoService->getLevel(&tmpUser,&tmpRisk,&tmpTraffic);
 						pInfoService->getMixedPackets((UINT32*)&tmpPackets);
+						avgTraffic=tmpPackets/minuts;
+						minuts++;
+						diffTraffic=tmpPackets-lastMixedPackets;
+						if(avgTraffic==0)
+							{
+								if(diffTraffic==0)
+									tmpTraffic=0;
+								else
+									tmpTraffic=100;
+							}
+						else
+							{
+								dTmp=(double)diffTraffic/(double)avgTraffic;
+								tmpTraffic=min(50.*dTmp,100);
+							}
+						lastMixedPackets=tmpPackets;
 						oxmlOut.WriteAttr("nrOfActiveUsers",(int)tmpUser);
 						oxmlOut.WriteAttr("currentRisk",(int)tmpRisk);
 						oxmlOut.WriteAttr("trafficSituation",(int)tmpTraffic);
