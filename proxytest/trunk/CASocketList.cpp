@@ -43,7 +43,7 @@ int CASocketList::add(HCHANNEL id,CASocket* pSocket)
 					connections=tmp;
 					connections->pSocket=pSocket;
 					connections->id=id;
-					return id;
+					ret=id;
 		    }
 		LeaveCriticalSection(&cs);
 		return ret;
