@@ -107,7 +107,7 @@ SINT32 CASocketASyncSend::close(CASocket* pSocket)
 							CAMsg::printMsg(LOG_INFO,"Deleting non empty send queue!\n");
 						delete akt->pQueue;
 						if(before!=NULL)
-							before->next=akt;
+							before->next=akt->next;
 						else
 							m_Sockets=akt->next;
 						m_oSocketGroup.remove(*akt->pSocket);
