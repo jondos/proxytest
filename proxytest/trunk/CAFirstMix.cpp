@@ -608,7 +608,12 @@ SINT32 CAFirstMix::loop()
 										else if(ret==MIXPACKET_SIZE)
 											{
 												pHashEntry->trafficIn++;
-												if(pMixPacket->flags==CHANNEL_CLOSE)
+												if(pMixPacket->flags==CHANNEL_DUMMY)
+													{
+														pMuxSocket->send(pMixPacket,tmpBuff);
+														pHashEntry->pQueueSend->add(tmpBuff,MIXPACKET_SIZE);
+													}
+												else if(pMixPacket->flags==CHANNEL_CLOSE)
 													{
 														fmChannelListEntry* pEntry;
 														pEntry=m_pChannelList->get(pMuxSocket,pMixPacket->channel);

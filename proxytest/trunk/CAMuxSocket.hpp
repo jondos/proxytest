@@ -47,6 +47,7 @@ typedef UINT32 HCHANNEL;
 #define CHANNEL_CLOSE		0x01
 #define CHANNEL_SUSPEND 0x02
 #define	CHANNEL_RESUME	0x04
+#define	CHANNEL_DUMMY		0x10
 
 #if defined(WIN32) ||defined(__sgi)
 	#pragma pack( push, t_MixPacket )
