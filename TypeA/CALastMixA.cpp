@@ -38,9 +38,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 extern CACmdLnOptions options;
 #ifdef LOG_CHANNEL
 	#define MACRO_DO_LOG_CHANNEL\
-		getcurrentTimeMillis(current_millis);\
+		getcurrentTimeMicros(current_millis);\
 		diff_time=diff64(current_millis,pChannelListEntry->timeCreated);\
-		CAMsg::printMsg(LOG_DEBUG,"Channel %u closed - Start %Lu - End %Lu - Time [ms] - %u, Upload - %u, Download - %u, DataPacketsFromUser %u, DataPacketsToUser %u\n",\
+		CAMsg::printMsg(LOG_DEBUG,"Channel %u closed - Start (received open packet) %Lu - End (proccessed closed) %Lu - Time [micros] - %u, Upload - %u, Download - %u, DataAndOpenPacketsFromUser %u, DataPacketsToUser %u\n",\
 			pChannelListEntry->channelIn,pChannelListEntry->timeCreated,\
 			current_millis,diff_time,pChannelListEntry->trafficInFromUser,pChannelListEntry->trafficOutToUser,\
 			pChannelListEntry->packetsDataInFromUser,pChannelListEntry->packetsDataOutToUser); 
@@ -214,8 +214,8 @@ SINT32 CALastMixA::loop()
 																{
 																	tmpSocket->setNonBlocking(true);
 																	#ifdef LOG_CHANNEL
-																		getcurrentTimeMillis(current_millis);
-																		pChannelList->add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue(),current_millis,payLen);
+																		//getcurrentTimeMicros(current_millis);
+																		pChannelList->add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue(),upload_packet_timestamp,payLen);
 																	#else
 																		pChannelList->add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue(PAYLOAD_SIZE));
 																	#endif
