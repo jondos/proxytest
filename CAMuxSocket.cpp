@@ -119,7 +119,7 @@ int CAMuxSocket::send(MIXPACKET *pPacket)
 			{
 				#ifdef _DEBUG
 					CAMsg::printMsg(LOG_DEBUG,"MuxSocket-Send-Error!\n");
-					CAMsg::printMsg(LOG_DEBUG,"SOCKET-ERROR: %i\n",WSAGetLastError());
+					CAMsg::printMsg(LOG_DEBUG,"SOCKET-ERROR: %i\n",GET_NET_ERROR);
 				#endif
 				ret=SOCKET_ERROR;
 			}
