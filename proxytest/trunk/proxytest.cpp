@@ -158,6 +158,8 @@ For Upstream and Downstream different keys are used.
 */
 int main(int argc, const char* argv[])
 	{
+		CASocketAddrINet::init();
+
 		//some test....
 		if(MIXPACKET_SIZE!=sizeof(MIXPACKET))
 			{
@@ -216,7 +218,6 @@ int main(int argc, const char* argv[])
 				if(options.getLogDir((UINT8*)buff,255)==E_SUCCESS)
 					CAMsg::setOptions(MSG_FILE);
 			}
-		CASocketAddrINet::init();
 		CAMsg::printMsg(LOG_INFO,"Anon proxy started!\n");
 	  CAMsg::printMsg(LOG_INFO,"Using: %s!\n",OPENSSL_VERSION_TEXT);
 #ifdef _DEBUG

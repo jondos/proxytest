@@ -28,7 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #ifndef __CACMDLNOPTIONS__
 #define __CACMDLNOPTIONS__
-
+#include "CASocketAddrINet.hpp"
 class CACmdLnOptions
     {
 	public:
@@ -42,10 +42,26 @@ class CACmdLnOptions
 	    SINT32 getServerHost(UINT8* path,UINT32 len);
 			SINT32 getServerRTTPort();
 			UINT16 getSOCKSServerPort();
-	    UINT16 getTargetPort();
+	    
+			//for historic reason gives always the first entry in the possible target list
+			UINT16 getTargetPort();
 	    SINT32 getTargetRTTPort();
 			SINT32 getTargetHost(UINT8* host,UINT32 len);
-	    UINT16 getSOCKSPort();
+	   
+			//if we have more than one Target (currently only Caches are possible...)
+			UINT32 getTargetCount(){return cntTargets;}
+			SINT32 getTargetAddr(CASocketAddrINet* pAddr, UINT32 nr)
+				{
+					if(nr>0&&nr<=cntTargets&&pAddr!=NULL)
+						{
+							memcpy(pAddr,&pTargets[nr],sizeof(CASocketAddrINet));
+							return E_SUCCESS;
+						}
+					else
+						return E_UNKNOWN;
+				};
+
+			UINT16 getSOCKSPort();
 	    SINT32 getSOCKSHost(UINT8* host,UINT32 len);
 	    UINT16 getInfoServerPort();
 	    SINT32 getInfoServerHost(UINT8* host,UINT32 len);
@@ -62,9 +78,9 @@ class CACmdLnOptions
 	    UINT16 iServerPort;
 			SINT32 iServerRTTPort;
 	    UINT16 iSOCKSServerPort;
-	    UINT16 iTargetPort;
-	    SINT32 iTargetRTTPort;
-			char* strTargetHost;
+	    UINT16 iTargetPort; //only for the first target...
+	    SINT32 iTargetRTTPort; //only for the first target
+			char* strTargetHost; //only for the first target...
 	    char* strServerHost; //Host or Unix Domain Socket
 			char* strSOCKSHost;
 	    UINT16 iSOCKSPort;
@@ -74,5 +90,8 @@ class CACmdLnOptions
 			bool bLocalProxy,bFirstMix,bMiddleMix,bLastMix;
 			char* strCascadeName;
 			char* strLogDir;
+
+			CASocketAddrINet* pTargets;
+			UINT32 cntTargets;
 	};
 #endif

@@ -25,40 +25,34 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
-#ifndef __CALASTMIX__
-#define __CALASTMIX__
-
-#include "CAMix.hpp"
-#include "CAMuxSocket.hpp"
-#include "CAASymCipher.hpp"
-#include "CASocketASyncSend.hpp"
-#include "CASocketList.hpp"
+#ifndef _CA_CACHE_LOAD_BALANCING
+#define _CA_CACHE_LOAD_BALANCING
 #include "CASocketAddrINet.hpp"
-#include "CACAcheLoadBalancing.hpp"
 
-class CALastMix:public CAMix,CASocketASyncSendResume
-
+struct t_cachelb_list
 	{
-		public:
-			CALastMix(){InitializeCriticalSection(&csResume);}
-			virtual ~CALastMix(){DeleteCriticalSection(&csResume);}
-		private:
-			SINT32 loop();
-			SINT32 init();
-			SINT32 initOnce();
-			SINT32 clean();
-		private:
-			CAMuxSocket		muxIn;
-			CACacheLoadBalancing m_oCacheLB;
-			CASocketAddrINet	maddrSocks;
-			CAASymCipher mRSA;
-		public:
-			void resume(CASocket* pSocket);
-		private:
-			CRITICAL_SECTION csResume;
-			CASocketList oSuspendList;
-			void deleteResume(HCHANNEL id);
-
+		CASocketAddrINet* pAddr;
+		t_cachelb_list* next;
 	};
 
+typedef t_cachelb_list CACHE_LB_ENTRY; 
+
+class CACacheLoadBalancing
+	{
+		public:
+			CACacheLoadBalancing(){m_ElementCount=0;paktEntry=NULL;}
+			~CACacheLoadBalancing();
+			SINT32 add(CASocketAddrINet* pAddr);
+			CASocketAddrINet const * get()
+				{
+					if(paktEntry==NULL)
+						return NULL;
+					paktEntry=paktEntry->next;
+					return paktEntry->pAddr;
+				}
+			UINT32 getElementCount(){return m_ElementCount;}
+		private:
+			CACHE_LB_ENTRY* paktEntry;
+			UINT32 m_ElementCount;
+	};
 #endif

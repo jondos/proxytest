@@ -140,7 +140,6 @@ THREAD_RETURN InfoLoop(void *p)
 		SINT32 tmpUser,tmpRisk,tmpTraffic,tmpPackets;
 		UINT32 buffLen;
 		char strAnonServer[255];
-	//	CASocketAddr::getLocalHostName((UINT8*)buff,255);
 		if(options.getServerHost((UINT8*)strAnonServer,255)!=E_SUCCESS)
 			CASocketAddrINet::getLocalHostIP(buff);
 		else
@@ -149,10 +148,6 @@ THREAD_RETURN InfoLoop(void *p)
 				oAddr.setAddr(strAnonServer,0);
 				oAddr.getIP(buff);
 			}
-//*>> Beginn very ugly hack for anon.inf.tu-dresden.de --> new Concepts needed!!!!!1		
-//		if(strncmp((char*)buff,"ithif46",7)==0)
-//			strcpy((char*)buff,"mix.inf.tu-dresden.de");
-//end hack....
 		sprintf(strAnonServer,"%u.%u.%u.%u%%3A%u",buff[0],buff[1],buff[2],buff[3],options.getServerPort());
 		int helocount=10;
 		while(pInfoService->getRun())
@@ -316,9 +311,6 @@ SINT32 CAInfoService::sendHelo()
 				if(options.getCascadeName(buff,1024)!=E_SUCCESS)
 					{if(buff!=NULL)delete buff;return E_UNKNOWN;}
 				oxmlOut.WriteElement("Name",(char*)buff);
-//*>> Beginn very ugly hack for anon.inf.tu-dresden.de --> new Concepts needed!!!!!1
-				if(strncmp((char*)hostname,"ithif46",7)==0)
-				    strcpy((char*)hostname,"mix.inf.tu-dresden.de");
 				oxmlOut.WriteElement("IP",(char*)hostname);
 				oxmlOut.WriteElement("Port",(int)options.getServerPort());
         if(options.getProxySupport())

@@ -25,40 +25,42 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
-#ifndef __CALASTMIX__
-#define __CALASTMIX__
+#include "StdAfx.h"
+#include "CACacheLoadBalancing.hpp"
 
-#include "CAMix.hpp"
-#include "CAMuxSocket.hpp"
-#include "CAASymCipher.hpp"
-#include "CASocketASyncSend.hpp"
-#include "CASocketList.hpp"
-#include "CASocketAddrINet.hpp"
-#include "CACAcheLoadBalancing.hpp"
-
-class CALastMix:public CAMix,CASocketASyncSendResume
-
+CACacheLoadBalancing::~CACacheLoadBalancing()
 	{
-		public:
-			CALastMix(){InitializeCriticalSection(&csResume);}
-			virtual ~CALastMix(){DeleteCriticalSection(&csResume);}
-		private:
-			SINT32 loop();
-			SINT32 init();
-			SINT32 initOnce();
-			SINT32 clean();
-		private:
-			CAMuxSocket		muxIn;
-			CACacheLoadBalancing m_oCacheLB;
-			CASocketAddrINet	maddrSocks;
-			CAASymCipher mRSA;
-		public:
-			void resume(CASocket* pSocket);
-		private:
-			CRITICAL_SECTION csResume;
-			CASocketList oSuspendList;
-			void deleteResume(HCHANNEL id);
-
+		CACHE_LB_ENTRY* pEntry;
+		while(paktEntry!=NULL)
+			{
+				delete paktEntry->pAddr;
+				if(paktEntry==paktEntry->next)
+					{
+						pEntry=NULL;
+					}
+				else pEntry=paktEntry->next;
+				delete paktEntry;
+				paktEntry=pEntry;
+			}			
 	};
 
-#endif
+SINT32 CACacheLoadBalancing::add(CASocketAddrINet* pAddr)
+	{
+		if(pAddr==NULL)
+			return E_UNKNOWN;
+		CACHE_LB_ENTRY* pEntry=new CACHE_LB_ENTRY;
+		pEntry->pAddr=new CASocketAddrINet;
+		memcpy(pEntry->pAddr,pAddr,sizeof(CASocketAddrINet));
+		if(paktEntry==NULL)
+			{
+				paktEntry=pEntry;
+				pEntry->next=paktEntry;
+			}
+		else
+			{
+				pEntry->next=paktEntry->next;
+				paktEntry->next=pEntry;						
+			}
+		m_ElementCount++;
+		return E_SUCCESS;
+	}

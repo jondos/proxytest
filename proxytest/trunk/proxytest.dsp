@@ -304,6 +304,10 @@ SOURCE=.\CABase64.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CACacheLoadBalancing.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\CACmdLnOptions.cpp
 # End Source File
 # Begin Source File
@@ -443,6 +447,10 @@ SOURCE=.\CAASymCipher.hpp
 # Begin Source File
 
 SOURCE=.\CABase64.hpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CACacheLoadBalancing.hpp
 # End Source File
 # Begin Source File
 
