@@ -57,6 +57,11 @@ THREAD_RETURN SocketASyncSendLoop(void* p)
 							{
 								ret--;
 								UINT32 len=BUFF_SIZE;
+								SINT32 sendSpace=akt->pSocket->getSendSpace();
+								if(sendSpace>0)
+									{
+										len=min(sendSpace,len);
+									}
 								if(akt->pQueue->getNext(buff,&len)==E_SUCCESS)
 									akt->pSocket->send(buff,len,true);
 								if(akt->bwasOverFull&&akt->pQueue->getSize()<pASyncSend->m_SendQueueLowWater)

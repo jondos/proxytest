@@ -341,6 +341,19 @@ SINT32 CASocket::available()
 	}
 #endif
 
+SINT32 CASocket::getSendSpace()
+	{
+#ifdef HAVE_TIOCOUTQ
+		UINT32 ul;
+		SINT32 sl=getSendBuff();
+		if(ioctlsocket(m_Socket,TIOCOUTQ,&ul)==SOCKET_ERROR)
+			return SOCKET_ERROR;
+		else
+			return sl-(SINT32)ul;
+#else
+		return E_UNKNOWN;
+#endif
+	}
 /**
 @return SOCKET_ERROR if an error occured
 @return 0 if socket was gracefully closed
