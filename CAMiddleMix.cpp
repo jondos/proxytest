@@ -427,7 +427,7 @@ THREAD_RETURN mm_loopDownStream(void *p)
 		HCHANNEL channelIn;
 		CASymCipher* pCipher;
 		tPoolEntry* pPoolEntry=new tPoolEntry;
-		MIXPACKET* pMixPacket=pPoolEntry->packet;
+		MIXPACKET* pMixPacket=&pPoolEntry->packet;
 		SINT32 ret;
 		CASingleSocketGroup oSocketGroup(false);
 		oSocketGroup.add(*(pMix->m_pMuxOut));
