@@ -83,7 +83,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define MIX_CASCADE_PROTOCOL_VERSION "0.2"
 #endif
 
-#ifdef _WIN32
+#if defined (_WIN32) &&!defined(__CYGWIN__)
+		//For Visual C++    #if defined(_MSC_VER)
+		//For Borland C++    #if defined(__BCPLUSPLUS__)
     #if _MSC_VER > 1000
     #pragma once
     #endif // _MSC_VER > 1000
@@ -162,7 +164,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
     	#include <sys/filio.h>
     	#define MSG_NOSIGNAL 0
     #endif
-	#endif
+	#endif //Have config.h
 
 	#ifdef HAVE_FILIO
 		#include <sys/filio.h>

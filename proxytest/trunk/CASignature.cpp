@@ -320,6 +320,7 @@ SINT32 CASignature::signXML(DOM_Node& node,CACertStore* pIncludeCerts)
 		elemReference.appendChild(elemDigestValue);
 
 		// Signing the SignInfo block....
+
 		canonicalBuff=DOM_Output::makeCanonical(elemSignedInfo,&len);
 		if(canonicalBuff==NULL)
 			return E_UNKNOWN;
@@ -328,6 +329,7 @@ SINT32 CASignature::signXML(DOM_Node& node,CACertStore* pIncludeCerts)
 		
 		SINT32 ret=sign(canonicalBuff,len,&pdsaSig);
 		delete[] canonicalBuff;
+
 		if(ret!=E_SUCCESS)
 			{
 				DSA_SIG_free(pdsaSig);
