@@ -323,6 +323,9 @@ SINT32 CASignature::signXML(DOM_Node& node,CACertStore* pIncludeCerts)
 			return E_UNKNOWN;
 		
 		DSA_SIG* pdsaSig=NULL;
+		CAMsg::printMsg(LOG_DEBUG,"to Sig value len: %u\n",len);
+		CAMsg::printMsg(LOG_DEBUG,"Sig value (0-19): %x, %x, %x, %x, %x, %x, %x, %x, %x, %x, %x, %x, %x, %x, %x, %x, %x, %x, %x, %x\n",canonicalBuff[0],canonicalBuff[1],canonicalBuff[2],canonicalBuff[3],canonicalBuff[4],canonicalBuff[5],canonicalBuff[6],canonicalBuff[7],canonicalBuff[8],canonicalBuff[9],canonicalBuff[10],canonicalBuff[11],canonicalBuff[12],canonicalBuff[13],canonicalBuff[14],canonicalBuff[15],canonicalBuff[16],canonicalBuff[17],canonicalBuff[18],canonicalBuff[19]);
+		
 		SINT32 ret=sign(canonicalBuff,len,&pdsaSig);
 		delete[] canonicalBuff;
 		if(ret!=E_SUCCESS)
@@ -334,6 +337,9 @@ SINT32 CASignature::signXML(DOM_Node& node,CACertStore* pIncludeCerts)
 													//(Due to be compatible to the standarad r and s must be 20 bytes each) 
 		BN_bn2bin(pdsaSig->r,tmpBuff+20-BN_num_bytes(pdsaSig->r)); //so r is 20 bytes with leading '0'...
 		BN_bn2bin(pdsaSig->s,tmpBuff+40-BN_num_bytes(pdsaSig->s));
+		CAMsg::printMsg(LOG_DEBUG,"Sig value r: %x, %x, %x, %x, %x, %x, %x, %x, %x, %x, %x, %x, %x, %x, %x, %x, %x, %x, %x, %x\n",tmpBuff[0],tmpBuff[1],tmpBuff[2],tmpBuff[3],tmpBuff[4],tmpBuff[5],tmpBuff[6],tmpBuff[7],tmpBuff[8],tmpBuff[9],tmpBuff[10],tmpBuff[11],tmpBuff[12],tmpBuff[13],tmpBuff[14],tmpBuff[15],tmpBuff[16],tmpBuff[17],tmpBuff[18],tmpBuff[19]);
+		CAMsg::printMsg(LOG_DEBUG,"Sig value s: %x, %x, %x, %x, %x, %x, %x, %x, %x, %x, %x, %x, %x, %x, %x, %x, %x, %x, %x, %x\n",tmpBuff[20],tmpBuff[21],tmpBuff[22],tmpBuff[23],tmpBuff[24],tmpBuff[25],tmpBuff[26],tmpBuff[27],tmpBuff[28],tmpBuff[29],tmpBuff[30],tmpBuff[31],tmpBuff[32],tmpBuff[33],tmpBuff[34],tmpBuff[35],tmpBuff[36],tmpBuff[37],tmpBuff[38],tmpBuff[39]);
+		
 		DSA_SIG_free(pdsaSig);
 
 		UINT sigSize=255;

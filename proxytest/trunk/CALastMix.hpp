@@ -36,6 +36,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASignature.hpp"
 #include "CAUtil.hpp"
 #include "CAQueue.hpp"
+#include "CAInfoService.hpp"
 #ifdef LOG_CRIME
 	#include "tre/regex.h"
 #endif
@@ -44,8 +45,12 @@ class CALastMix:public CAMix
 
 	{
 		public:
-			CALastMix(){m_pMuxIn=NULL;m_pSignature=NULL;}
-			virtual ~CALastMix(){if(m_pSignature!=NULL) delete m_pSignature;}
+			CALastMix()
+				{
+					m_pMuxIn=NULL;m_pSignature=NULL;
+					m_pRSA=NULL;m_pInfoService=NULL;
+				}
+			virtual ~CALastMix(){clean();}
 			SINT32 reconfigure();
 		private:
 			SINT32 loop();
@@ -64,21 +69,22 @@ class CALastMix:public CAMix
 			CAQueue*							m_pQueueSendToMix;
 			CACacheLoadBalancing	m_oCacheLB;
 			CASocketAddrINet			maddrSocks;
-			CAASymCipher					mRSA;
+			CAASymCipher*					m_pRSA;
 			CASignature*					m_pSignature;
+			CAInfoService*				m_pInfoService;
 #ifdef LOG_CRIME
-			regex_t* m_pCrimeRegExps;
-			UINT32 m_nCrimeRegExp;
+			regex_t*							m_pCrimeRegExps;
+			UINT32								m_nCrimeRegExp;
 #endif
 
 		private:
-			friend THREAD_RETURN lm_loopSendToMix(void* param);
-			friend THREAD_RETURN lm_loopLog(void*);
-			volatile bool m_bRunLog;
-			volatile UINT32 m_logUploadedPackets;
-			volatile UINT64 m_logUploadedBytes;
-			volatile UINT32 m_logDownloadedPackets;
-			volatile UINT64 m_logDownloadedBytes;
+			friend THREAD_RETURN	lm_loopSendToMix(void* param);
+			friend THREAD_RETURN	lm_loopLog(void*);
+			volatile bool					m_bRunLog;
+			volatile UINT32				m_logUploadedPackets;
+			volatile UINT64				m_logUploadedBytes;
+			volatile UINT32				m_logDownloadedPackets;
+			volatile UINT64				m_logDownloadedBytes;
 	};
 
 #endif

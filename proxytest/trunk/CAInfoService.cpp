@@ -168,9 +168,11 @@ SINT32 CAInfoService::sendStatus()
 				UINT8 buffMixedPackets[50];
 				print64(buffMixedPackets,tmpPackets);
 				UINT64 currentMillis;
-				getcurrentTimeMillis(currentMillis);
 				UINT8 tmpStrCurrentMillis[50];
-				print64(tmpStrCurrentMillis,currentMillis);
+				if(getcurrentTimeMillis(currentMillis)==E_SUCCESS)
+					print64(tmpStrCurrentMillis,currentMillis);
+				else
+					tmpStrCurrentMillis[0]=0;
 				sprintf((char*)tmpBuff,XML_MIX_CASCADE_STATUS,strMixId,tmpRisk,buffMixedPackets,tmpUser,tmpTraffic,tmpStrCurrentMillis);
 				m_pSignature->signXML(tmpBuff,strlen((char*)tmpBuff),buff,&buffLen);
 				sprintf((char*)buffHeader,"POST /feedback HTTP/1.0\r\nContent-Length: %u\r\n\r\n",buffLen);

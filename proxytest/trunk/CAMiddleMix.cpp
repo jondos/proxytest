@@ -356,6 +356,15 @@ SINT32 CAMiddleMix::init()
 			}
 		((CASocket*)*m_pMuxOut)->setRecvBuff(50*MIXPACKET_SIZE);
 		((CASocket*)*m_pMuxOut)->setSendBuff(50*MIXPACKET_SIZE);
+
+//We now tell the worl that we are waiting...
+		if(m_pSignature!=NULL&&options.isInfoServiceEnabled())
+			{
+				m_pInfoService=new CAInfoService();
+				m_pInfoService->setSignature(m_pSignature);
+				m_pInfoService->sendHelo();
+				m_pInfoService->start();
+			}
 #define RETRIES 100
 #define RETRYTIME 30
 		CAMsg::printMsg(LOG_INFO,"Init: Try to connect to next Mix...\n");
@@ -500,14 +509,6 @@ ERR:
 
 SINT32 CAMiddleMix::loop()
 	{
-		CAInfoService* pInfoService=NULL;
-		if(m_pSignature!=NULL&&options.isInfoServiceEnabled())
-			{
-				pInfoService=new CAInfoService();
-				pInfoService->setSignature(m_pSignature);
-				pInfoService->sendHelo();
-				pInfoService->start();
-			}
 		MIXPACKET* pMixPacket=new MIXPACKET;
 		HCHANNEL channelOut;
 		CASymCipher* pCipher;
@@ -630,12 +631,13 @@ ERR:
 		#ifdef USE_POOL
 			delete pPool;
 		#endif
-		if(pInfoService!=NULL)
-			delete pInfoService;
 		return E_UNKNOWN;
 	}
 SINT32 CAMiddleMix::clean()
 	{
+		if(m_pInfoService!=NULL)
+			delete m_pInfoService;
+		m_pInfoService=NULL;
 		if(m_pMuxIn!=NULL)
 			{
 				m_pMuxIn->close();
