@@ -262,6 +262,14 @@ Note: At the moment this is binary - but will use XML in the future.
 
 int main(int argc, const char* argv[])
 	{		
+	/*	CAQueue oQ;
+		UINT32 l,b;
+		l=4;
+		SINT32 r=oQ.getOrWait((UINT8*)&b,&l,5000);
+		oQ.add(&b,4);
+		r=oQ.getOrWait((UINT8*)&b,&l,5000);
+		r=oQ.getOrWait((UINT8*)&b,&l,5000);
+		*/
 		pMix=NULL;
 
 		int i;
