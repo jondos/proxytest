@@ -451,7 +451,7 @@ END_THREAD:
 	}
 */
 
-#define NO_ACCEPTLOOPUSER
+#define NO_LOOPACCEPTUSER
 
 SINT32 CAFirstMix::loop()
 	{
