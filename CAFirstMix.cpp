@@ -346,7 +346,6 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 										ret=((CASocket*)pNewMuxSocket)->getPeerIP(peerIP);
 										if(ret!=E_SUCCESS||pIPList->insertIP(peerIP)<0)
 											{
-												pNewMuxSocket->close();
 												delete pNewMuxSocket;
 											}
 										else
@@ -578,14 +577,19 @@ END_THREAD:
 
 SINT32 CAFirstMix::clean()
 	{
-		#ifdef _DEBUG
-			CAMsg::printMsg(LOG_DEBUG,"CAFirstMix::clean() start\n");
-		#endif
-		CAMsg::printMsg(LOG_CRIT,"Stopping InfoService....\n");
-		CAMsg::printMsg	(LOG_CRIT,"Memory usage before: %u\n",getMemoryUsage());	
-		m_pInfoService->stop();
-		CAMsg::printMsg	(LOG_CRIT,"Memory usage after: %u\n",getMemoryUsage());	
-		CAMsg::printMsg(LOG_CRIT,"Stopped InfoService!\n");
+		if(m_pInfoService!=NULL)
+			{
+				#ifdef _DEBUG
+					CAMsg::printMsg(LOG_DEBUG,"CAFirstMix::clean() start\n");
+				#endif
+				CAMsg::printMsg(LOG_CRIT,"Stopping InfoService....\n");
+				CAMsg::printMsg	(LOG_CRIT,"Memory usage before: %u\n",getMemoryUsage());	
+				m_pInfoService->stop();
+				CAMsg::printMsg	(LOG_CRIT,"Memory usage after: %u\n",getMemoryUsage());	
+				CAMsg::printMsg(LOG_CRIT,"Stopped InfoService!\n");
+				delete m_pInfoService;
+			}
+		m_pInfoService=NULL;
 
 		if(m_pthreadAcceptUsers!=NULL)
 			delete m_pthreadAcceptUsers;
@@ -593,9 +597,6 @@ SINT32 CAFirstMix::clean()
 		if(m_pthreadSendToMix!=NULL)
 			delete m_pthreadSendToMix;
 		m_pthreadAcceptUsers=NULL;
-		if(m_pInfoService!=NULL)
-			delete m_pInfoService;
-		m_pInfoService=NULL;
 		if(m_arrSocketsIn!=NULL)
 			delete[] m_arrSocketsIn;
 		m_arrSocketsIn=NULL;
