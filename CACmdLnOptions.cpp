@@ -188,8 +188,11 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 					DOMParser parser;
 					MemBufInputSource in(tmpChar,len,"tmpConfigBuff");
 					parser.parse(in);
-					docMixXml=parser.getDocument();
 					delete[] tmpChar;
+					if(parser.getErrorCount()>0)
+						CAMsg::printMsg(LOG_CRIT,"There were errors parsing the config file: %s\n",configfile);
+					else	
+						docMixXml=parser.getDocument();
 				}
 			free(configfile);
 		}
@@ -715,7 +718,8 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		getDOMChildByName(elemGeneral,(UINT8*)"MixID",elemMixID,false);
 		if(elemMixID==NULL)
 			return E_UNKNOWN;
-		getDOMElementValue(elemMixID,tmpBuff,&tmpLen);
+		if(getDOMElementValue(elemMixID,tmpBuff,&tmpLen)!=E_SUCCESS)
+			return E_UNKNOWN;
 		strtrim(tmpBuff);
 		m_strMixID=new char[strlen((char*)tmpBuff)+1];
 		strcpy(m_strMixID,(char*) tmpBuff);
