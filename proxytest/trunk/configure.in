@@ -349,11 +349,11 @@ LIBS="$LIBS -lxerces-depdom"
 
 dnl Check for Postgresql libs if (needed if compiled with payment support)
 if test "x$PAYMENT" != "x" ; then
-AC_MSG_CHECKING([for PostgreSQL libs])
-saved_LIBS="$LIBS"
-PAYMENT_LIB="-libpq"
-LIBS="$LIBS $PAYMENT_LIB"
-AC_LINK_IFELSE([AC_LANG_PROGRAM([
+    AC_MSG_CHECKING([for PostgreSQL libs])
+    saved_LIBS="$LIBS"
+    PAYMENT_LIB="-libpq"
+    LIBS="$LIBS $PAYMENT_LIB"
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([
 				#include <postgresql/libpq-fe.h>
 				], [PQfinish(0);
 				])],[AC_MSG_RESULT(libpq found)],
@@ -364,8 +364,8 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM([
 				    #include <postgresql/libpq-fe.h>
 				    ], [PQfinish(0);
 				    ])],[AC_MSG_RESULT(libpq++ found)],
-				    AC_MSG_ERROR(PostgreSQL library (libpq or libpq++) NOT found - please install them)])
-				]
+				    [AC_MSG_ERROR(PostgreSQL library libpq or libpq++ NOT found - please install them)])
+				])
 
 LIBS="$saved_LIBS"
 fi
