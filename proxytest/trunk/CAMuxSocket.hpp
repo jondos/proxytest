@@ -12,8 +12,9 @@ typedef unsigned int HCHANNEL;
 typedef struct t_MuxPacket
 	{
 		HCHANNEL channel;
-		int len;
-		int type;
+		unsigned short len;
+		unsigned char type;
+		unsigned char reserved;
 		char data[DATA_SIZE];
 	} MUXPACKET;
 
