@@ -328,8 +328,6 @@ See \ref XMLMixCascadeStatus "[XML]" for a description of the XML struct send.
 
 int main(int argc, const char* argv[])
 	{
-		CAQueue* qw=new CAQueue();
-		delete qw;
 		pMix=NULL;
 
 		int i;
