@@ -1311,29 +1311,6 @@ trio_xstring_append(trio_string_t *self,
 }
 
 
-/*
- * trio_xstring_append_char
- */
-/*TRIO_PUBLIC int
-trio_xstring_append_char(trio_string_t *self,
-			 char character)
-{
-  assert(self);
-
-  if (self->length >= trio_string_size(self))
-    {
-      if (!TrioStringGrow(self, 0))
-	goto error;
-    }
-  self->content[self->length] = character;
-  self->length++;
-  return TRUE;
-  
- error:
-  return FALSE;
-}
-*/
-
 /**
    Search for the first occurrence of second parameter in the first.
    

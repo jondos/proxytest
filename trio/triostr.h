@@ -102,7 +102,7 @@ int trio_string_match_case(trio_string_t *self, trio_string_t *other);
 char *trio_string_substring(trio_string_t *self, trio_string_t *other);
 int trio_string_upper(trio_string_t *self);
 
-int trio_xstring_append_char(trio_string_t *self, char character);
+//int trio_xstring_append_char(trio_string_t *self, char character);
 int trio_xstring_append(trio_string_t *self, const char *other);
 int trio_xstring_contains(trio_string_t *self, const char *other);
 int trio_xstring_copy(trio_string_t *self, const char *other);
