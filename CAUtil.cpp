@@ -908,3 +908,45 @@ bool checkAndInsert(UINT8 hash, UINT8* value)
 					}
 			}
 	}
+
+
+/**
+ * Parses a timestamp in JDBC timestamp escape format (as it comes from the BI)
+ * and outputs the value in seconds since the epoch.
+ *
+ * @param strTimestamp the string containing the timestamp
+ * @param seconds an integer variable that gets the seconds value.
+ */
+SINT32 parseJdbcTimestamp(const UINT8 * strTimestamp, UINT32& seconds)
+{
+	struct tm time;
+	SINT32 rc;
+	
+	// parse the formatted string
+	rc = sscanf((const char*)strTimestamp, "%d-%d-%d %d:%d:%d", 
+			&time.tm_year, &time.tm_mon, &time.tm_mday, &time.tm_hour, 
+			&time.tm_min, &time.tm_sec);
+	if(rc!=6) return E_UNKNOWN; // parsing error
+	
+	// convert values to struct tm semantic
+	if(time.tm_year<1970) return E_UNKNOWN;	
+	time.tm_year-=1900;
+	if(time.tm_mon<1 || time.tm_mon>12) return E_UNKNOWN;
+	time.tm_mon-=1;
+	seconds = (UINT32)mktime(&time);
+	if(seconds<0) return E_UNKNOWN;
+	
+	return E_SUCCESS;
+}
+
+
+
+/**
+ * Parses a 64bit integer
+ */
+//SINT32 parseU64(const UINT8 * str, UINT64& value)
+//{
+//	value = (UINT64) atoll(str);
+//	return E_SUCCESS;
+//}
+
