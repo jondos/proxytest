@@ -29,6 +29,7 @@ proxytest_SOURCES = CAASymCipher.cpp \
 		    CAQueue.cpp \
 		    CASemaphore.cpp\
 		    CASignature.cpp \
+		    CASingleSocketGroup.cpp\
 		    CASocket.cpp \
 		    CASocketAddrINet.cpp \
 		    CASocketAddrUnix.cpp \
@@ -63,6 +64,7 @@ proxytest_SOURCES = CAASymCipher.cpp \
 		    CAQueue.hpp \
 		    CASemaphore.hpp\
 		    CASignature.hpp \
+		    CASingleSocketGroup.hpp\
 		    CASocket.hpp \
 		    CASocketAddr.hpp \
 		    CASockerAddrINet.hpp \
