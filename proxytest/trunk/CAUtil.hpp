@@ -128,7 +128,7 @@ inline UINT32 div64(UINT64& op1,UINT32 op2)
 #endif
 	}
 
-inline boolean isGreater64(UINT64& op1,UINT64& op2)
+inline bool isGreater64(UINT64& op1,UINT64& op2)
 	{
 #if !defined(HAVE_NATIVE_UINT64)
 		if(op1.high>op2.high)
