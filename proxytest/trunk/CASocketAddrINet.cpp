@@ -28,8 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "StdAfx.h"
 #include "CASocketAddrINet.hpp"
 
-bool CASocketAddrINet::m_bIsCsInitialized=false;
-CAMutex CASocketAddrINet::m_csGet;
+CAMutex* CASocketAddrINet::m_pcsGet=new CAMutex();
 
 /** Must be called once before using one of the CAsocketAddrINet functions */
 /*SINT32 CASocketAddrINet::init()
@@ -98,16 +97,16 @@ SINT32 CASocketAddrINet::setAddr(const UINT8* szIP,UINT16 port)
 				newAddr=inet_addr((const char*)szIP); //is it a doted string (a.b.c.d) ?
 				if(newAddr==INADDR_NONE) //if not try to find the hostname
 					{
-						m_csGet.lock();
+						m_pcsGet->lock();
 						HOSTENT* hostent=gethostbyname((const char*)szIP); //lookup
 						if(hostent!=NULL) //get it!
 							memcpy(&newAddr,hostent->h_addr_list[0],hostent->h_length);
 						else
 							{
-								m_csGet.unlock();
+								m_pcsGet->unlock();
 								return E_UNKNOWN_HOST; //not found!
 							}
-						m_csGet.unlock();
+						m_pcsGet->unlock();
 					}
 			}
 		sin_addr.s_addr=newAddr;
@@ -147,7 +146,7 @@ SINT32 CASocketAddrINet::getHostName(UINT8* buff,UINT32 len)
 		if(buff==NULL)
 			return E_UNSPECIFIED;
 		SINT32 ret;
-		m_csGet.lock();
+		m_pcsGet->lock();
 		HOSTENT* hosten=gethostbyaddr((const char*)&sin_addr,4,AF_INET);
 		if(hosten==NULL||hosten->h_name==NULL)
 			ret=E_UNKNOWN_HOST;
@@ -158,7 +157,7 @@ SINT32 CASocketAddrINet::getHostName(UINT8* buff,UINT32 len)
 				strcpy((char*)buff,hosten->h_name);
 				ret=E_SUCCESS;
 			}
-		m_csGet.unlock();
+		m_pcsGet->unlock();
 		return ret;
 	}
 
@@ -206,7 +205,7 @@ SINT32 CASocketAddrINet::getLocalHostName(UINT8* buff,UINT32 len)
 		if(buff==NULL)
 			return E_UNSPECIFIED;
 		SINT32 ret;
-		m_csGet.lock();
+		m_pcsGet->lock();
 		if(gethostname((char*)buff,len)==-1)
 			ret=E_SPACE;
 		else
@@ -222,7 +221,7 @@ SINT32 CASocketAddrINet::getLocalHostName(UINT8* buff,UINT32 len)
 						ret=E_SUCCESS;
 					}
 			}
-		m_csGet.unlock();
+		m_pcsGet->unlock();
 		return ret;
 	}
 
@@ -235,7 +234,7 @@ SINT32 CASocketAddrINet::getLocalHostIP(UINT8 ip[4])
 	{
 		SINT32 ret;
 		char buff[256];
-		m_csGet.lock();
+		m_pcsGet->lock();
 		if(gethostname(buff,256)==-1)
 			ret=E_UNKNOWN;
 		else
@@ -249,7 +248,7 @@ SINT32 CASocketAddrINet::getLocalHostIP(UINT8 ip[4])
 						ret=E_SUCCESS;
 					}
 			}
-		m_csGet.unlock();
+		m_pcsGet->unlock();
 		return ret;
 	}
 

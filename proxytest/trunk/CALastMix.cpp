@@ -337,7 +337,7 @@ THREAD_RETURN lm_loopSendToMix(void* param)
 #ifdef LOG_PACKET_TIMES
 		CATimedQueue* pQueue=pLastMix->m_pQueueSendToMix;
 #else	
-		CAQueue* pQueue=((CAFirstMix*)param)->m_pQueueSendToMix;
+		CAQueue* pQueue=pLastMix->m_pQueueSendToMix;
 #endif		
 		CAMuxSocket* pMuxSocket=pLastMix->m_pMuxIn;
 #ifdef LOG_PACKET_TIMES
