@@ -401,7 +401,9 @@ THREAD_RETURN loopDownStream(void *p)
 		SINT32 ret;
 		CASingleSocketGroup oSocketGroup;
 		oSocketGroup.add(*(pMix->m_pMuxOut));
-		CAPool pPool=new Pool(POOL_SIZE);
+#ifdef USE_POOL		
+		CAPool* pPool=new Pool(POOL_SIZE);
+#endif
 		for(;;)
 			{
 				ret=oSocketGroup.select(false,1000);
@@ -436,7 +438,9 @@ THREAD_RETURN loopDownStream(void *p)
 										pMixPacket->channel=channelIn;
 										pCipher->decryptAES2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 										pCipher->unlock();
-										pPool->pool(pMixPacket);
+										#ifdef USE_POOL
+											pPool->pool(pMixPacket);
+										#endif
 										if(pMix->m_pMuxIn->send(pMixPacket)==SOCKET_ERROR)
 											goto ERR;
 //									}
@@ -453,7 +457,9 @@ THREAD_RETURN loopDownStream(void *p)
 ERR:
 		CAMsg::printMsg(LOG_CRIT,"loopDownStream -- Exiting!\n");
 		delete pMixPacket;
-		delete pPool;
+		#ifdef USE_POOL
+			delete pPool;
+		#endif
 		pMix->m_pMuxIn->close();
 		pMix->m_pMuxOut->close();
 		THREAD_RETURN_SUCCESS;		
