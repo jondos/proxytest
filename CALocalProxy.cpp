@@ -162,7 +162,7 @@ SINT32 CALocalProxy::init()
 SINT32 CALocalProxy::loop()
 	{
 		CASocketList  oSocketList;
-		CASocketGroup oSocketGroup;
+		CASocketGroup oSocketGroup(false);
 		oSocketGroup.add(m_socketIn);
 		UINT16 socksPort=options.getSOCKSServerPort();
 		bool bHaveSocks=(socksPort!=0xFFFF);
@@ -188,7 +188,7 @@ SINT32 CALocalProxy::loop()
 		for(;;)
 			{
 				// Add timeout to select to allow for a replay attack to take place.
-				if((countRead=oSocketGroup.select(false, 100))==SOCKET_ERROR)
+				if((countRead=oSocketGroup.select(100))==SOCKET_ERROR)
 					{
 						sSleep(1);
 						continue;

@@ -32,31 +32,28 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 class CASocketGroup
 	{
 		public:
-			CASocketGroup();
+			CASocketGroup(bool bWrite);
 			~CASocketGroup()
 				{
 					#ifdef HAVE_POLL
-						delete[] m_pollfd_read;
-						delete[] m_pollfd_write;
+						delete[] m_pollfd;
 					#endif
 				}
 			
-			SINT32 add(CASocket&s);
-			SINT32 add(CAMuxSocket&s);
+			inline SINT32 setPoolForWrite(bool bWrite);
+			inline SINT32 add(CASocket&s);
+			inline SINT32 add(CAMuxSocket&s);
 			SINT32 remove(CASocket&s);
 			SINT32 remove(CAMuxSocket&s);
 			SINT32 select();
-			SINT32 select(bool bWrite,UINT32 time_ms);
+			SINT32 select(UINT32 time_ms);
 
 			bool isSignaled(CASocket&s)
 				{
 					#ifndef HAVE_POLL
 						return FD_ISSET((SOCKET)s,&m_signaled_set)!=0;
 					#else
-						if(m_bWriteQueried)
-							return m_pollfd_write[(SOCKET)s].revents!=0;
-						else
-							return m_pollfd_read[(SOCKET)s].revents!=0;
+						return m_pollfd[(SOCKET)s].revents!=0;
 					#endif
 				}
 
@@ -65,10 +62,7 @@ class CASocketGroup
 					#ifndef HAVE_POLL
 						return FD_ISSET((SOCKET)*ps,&m_signaled_set)!=0;
 					#else
-						if(m_bWriteQueried)
-							return m_pollfd_write[(SOCKET)*ps].revents!=0;
-						else
-							return m_pollfd_read[(SOCKET)*ps].revents!=0;
+						return m_pollfd[(SOCKET)*ps].revents!=0;
 					#endif
 				}
 
@@ -77,25 +71,21 @@ class CASocketGroup
 					#ifndef HAVE_POLL
 						return FD_ISSET((SOCKET)s,&m_signaled_set)!=0;
 					#else
-						if(m_bWriteQueried)
-							return m_pollfd_write[(SOCKET)s].revents!=0;
-						else
-							return m_pollfd_read[(SOCKET)s].revents!=0;
+						return m_pollfd[(SOCKET)s].revents!=0;
 					#endif
 				}
 
-		protected:
+		private:
 			#ifndef HAVE_POLL
 				fd_set m_fdset;
 				fd_set m_signaled_set;
+				fd_set* m_set_read,*m_set_write;
 				#ifndef _WIN32
-						int m_max;
+					UINT32 m_max;
 				#endif
 			#else
-				struct pollfd* m_pollfd_write;
-				struct pollfd* m_pollfd_read;
-				int m_max;
-				bool m_bWriteQueried;
+				struct pollfd* m_pollfd;
+				UINT32 m_max;
 			#endif
 			CAMutex m_csFD_SET;
 	};

@@ -232,11 +232,11 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 msTimeout)
 		getcurrentTimeMillis(timeE);
 		add64(timeE,msTimeout);
 		UINT32 dt=msTimeout;
-		CASingleSocketGroup oSocketGroup;
+		CASingleSocketGroup oSocketGroup(false);
 		oSocketGroup.add(*this);
 		for(;;)
 			{
-				ret=oSocketGroup.select(false,dt);
+				ret=oSocketGroup.select(dt);
 				if(ret!=1)
 					{
 						m_csReceive.unlock();

@@ -32,10 +32,15 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 typedef CASocketGroup CASingleSocketGroup;
 #else
 #include "CAMuxSocket.hpp"
+/** Not thread safe!*/
 class CASingleSocketGroup
 	{
 		public:
-			CASingleSocketGroup(){m_pollfd=new struct pollfd;}
+			CASingleSocketGroup(bool bWrite)
+				{
+					m_pollfd=new struct pollfd;
+					setPoolForWrite(bWrite);
+				}
 			~CASingleSocketGroup(){delete m_pollfd;}
 			
 			SINT32 add(CASocket&s)
@@ -50,15 +55,39 @@ class CASingleSocketGroup
 					return E_SUCCESS;
 				}
 
+			SINT32 setPoolForWrite(bWrite)
+				{
+					if(bWrite)
+						m_pollfd->events=POLLOUT;
+					else
+						m_pollfd->events=POLLIN;
+					return E_SUCCESS;
+				}
+
 			SINT32 select()
 				{
-					m_pollfd->events=POLLIN;
 					return ::poll(m_pollfd,1,-1);
 				}
 			
-			SINT32 select(bool bWrite,UINT32 time_ms);
+			SINT32 select(UINT32 time_ms)
+				{
+					int ret=::poll(m_pollfd,1,time_ms);
+					if(ret==0)
+						{
+							return E_TIMEDOUT;
+						}
+					if(ret==SOCKET_ERROR)
+						{
+							#ifdef _DEBUG
+								ret=GET_NET_ERROR;
+								CAMsg::printMsg(LOG_DEBUG,"SocketGroup Select-Fehler: %i\n",ret);
+							#endif
+							return E_UNKNOWN;
+						}
+				}
 
-		protected:
+
+		private:
 			struct pollfd* m_pollfd;
 	};
 #endif

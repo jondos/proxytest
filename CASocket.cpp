@@ -394,9 +394,9 @@ SINT32 CASocket::sendFully(const UINT8* buff,UINT32 len)
 					return E_SUCCESS;
 				else if(ret==E_AGAIN)
 					{
-						CASingleSocketGroup ossg;
+						CASingleSocketGroup ossg(true);
 						ossg.add(*this);
-						ret=ossg.select(false,1000);
+						ret=ossg.select(1000);
 						if(ret>=0||ret==E_TIMEDOUT)
 							continue;
 						return E_UNKNOWN;
