@@ -15,6 +15,7 @@
     #include <conio.h>
     #include <process.h>
     #define THREAD_RETURN void
+		#define THREAD_RETURN_ERROR return
 #else
     #include <sys/socket.h>
     #include <netinet/in.h>
@@ -35,10 +36,10 @@
     #define CRITICAL_SECTION pthread_mutex_t
     #define DeleteCriticalSection(p) pthread_mutex_destroy(p)
     #define InitializeCriticalSection(p) pthread_mutex_init(p,NULL)
-    #define EnterCriticalSection(p) //pthread_mutex_lock(p)
-    #define LeaveCriticalSection(p) //pthread_mutex_unlock(p)
+    #define EnterCriticalSection(p) pthread_mutex_lock(p)
+    #define LeaveCriticalSection(p) pthread_mutex_unlock(p)
     #define THREAD_RETURN void*
-    #define THREAD_RETURN_ERROR NULL
+    #define THREAD_RETURN_ERROR return(NULL)
 #endif
 #include <stdio.h>
 #include <time.h>
