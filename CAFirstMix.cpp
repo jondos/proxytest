@@ -638,6 +638,7 @@ SINT32 CAFirstMix::loop()
 																pCipher->decryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 																m_pMuxOut->send(pMixPacket,tmpBuff);
 																m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
+																pEntry->pHead->trafficIn++;
 																incMixedPackets();
 															}
 														else if(pEntry==NULL&&(pMixPacket->flags==CHANNEL_OPEN_OLD||pMixPacket->flags==CHANNEL_OPEN_NEW))
@@ -658,6 +659,7 @@ SINT32 CAFirstMix::loop()
 																	{
 																		m_pMuxOut->send(pMixPacket,tmpBuff);
 																		m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
+																		pEntry->pHead->trafficIn++;
 																		incMixedPackets();
 																		#ifdef _DEBUG
 																			CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",pMixPacket->channel);
@@ -746,7 +748,6 @@ SINT32 CAFirstMix::loop()
 												pEntry->bIsSuspended=true;
 												pEntry->pHead->cSuspend++;
 											}
-	
 										incMixedPackets();
 									}
 								else
@@ -774,6 +775,7 @@ SINT32 CAFirstMix::loop()
 								ret=((CASocket*)pfmHashEntry->pMuxSocket)->send(tmpBuff,len);
 								if(ret>0)
 									{
+										pfmHashEntry->trafficOut++;
 										pfmHashEntry->pQueueSend->remove((UINT32*)&ret);
 #define USER_SEND_BUFFER_RESUME 10000
 										if(pfmHashEntry->cSuspend>0&&

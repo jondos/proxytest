@@ -30,7 +30,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAUtil.hpp"
 #include "CAMsg.hpp"
 
-#define MAX_HASH_KEY 1025
+#define MAX_HASH_KEY 8113
 
 CAFirstMixChannelList::CAFirstMixChannelList()
 	{
@@ -83,7 +83,9 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,CAQueue* pQueueSend)
 		pHashTableEntry->pMuxSocket=pMuxSocket;
 		pHashTableEntry->pQueueSend=pQueueSend;
 		pHashTableEntry->cNumberOfChannels=0;
-		
+		pHashTableEntry->trafficIn=0;
+		pHashTableEntry->trafficOut=0;
+
 		//now insert the new connection in the list of all open connections
 		if(m_listHashTableHead==NULL) //if first one
 			{
@@ -301,6 +303,7 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 				pEntry=pTmpEntry;
 			}
 
+		CAMsg::printMsg(LOG_DEBUG,"Traffic was: IN: %u  --  OUT: %u\n",pHashTableEntry->trafficIn,pHashTableEntry->trafficOut);
 		memset(pHashTableEntry,0,sizeof(fmHashTableEntry)); //'delete' the connection from the connection hash table 
 		m_Mutex.unlock();
 		return E_SUCCESS;
