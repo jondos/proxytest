@@ -82,7 +82,7 @@ class CAMiddleMixChannelList
 		private:
 			SINT32 CAMiddleMixChannelList::getOutToIn_intern_without_lock(HCHANNEL* channelIn, HCHANNEL channelOut,CASymCipher** ppCipher)
 				{
-					mmChannelListEntry* pEntry=m_pHashTableIn[channelOut&0x0000FFFF];
+					mmChannelListEntry* pEntry=m_pHashTableOut[channelOut&0x0000FFFF];
 					while(pEntry!=NULL)
 						{
 							if(pEntry->channelOut==channelOut)
