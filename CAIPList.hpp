@@ -46,8 +46,8 @@ typedef struct _iplist_t* PIPLIST;
 
 /** The purpose of this class is to store a list of IP-Addresses. If an
 IP-Address is inserted more than 'x' times, than an error is returned.
-The First mix uses this functionalty to do some basic Denial Of Service defens.
-If some one tries to do connection flooding to the First Mix, only 'x' connections
+The First mix uses this functionalty to do some basic Denial Of Service defense.
+If someone tries to do connection flooding to the First Mix, only 'x' connections
 are accepted and the others are droped. 
 The internal organisation is a hash-table with overrun lists. The hashtable has
 0x10000 buckets. The last two bytes of an IP-Address are the hash-key.
@@ -72,7 +72,7 @@ class CAIPList
 		protected:
 			UINT32 m_allowedConnections;
 			PIPLIST* m_HashTable;
-			UINT8* m_Random; //seams to be the best value for MD5, which operats on x*512-64 bit (52*8+4*8=512-64)
+			UINT8* m_Random; //seems to be the best value for MD5, which operates on x*512-64 bit (52*8+4*8=512-64)
 			CAMutex m_Mutex;
 	};
 #endif

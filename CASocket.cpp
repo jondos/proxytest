@@ -95,7 +95,7 @@ SINT32 CASocket::listen(UINT16 port)
 
 SINT32 CASocket::accept(CASocket &s)
 	{
-		if(m_bSocketIsClosed) //the accept socket should not be closde!!
+		if(m_bSocketIsClosed) //the accept socket should not be closed!!
 			return E_SOCKETCLOSED;
 		if(!s.m_bSocketIsClosed) //but the new socket should be closed!!!
 			return E_UNKNOWN;
