@@ -42,7 +42,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define PAYMENT_SUPPORT
 //#define PSEUDO_LOG
 //#define NEW_PROTOCOL
-//#define NEW_KEY2USER_PROTOCOL
+#define NEW_KEY2USER_PROTOCOL
 #define DELAY_CHANNELS
 #ifdef DELAY_CHANNELS
 	#define DELAY_CHANNEL_TRAFFIC 10000 //Traffic in bytes after which (download direction) the channel is delayed
