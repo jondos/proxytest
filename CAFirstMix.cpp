@@ -670,6 +670,9 @@ ERR:
 
 SINT32 CAFirstMix::clean()
 	{
+		#ifdef _DEBUG
+			CAMsg::printMsg("CAFirstMix::clean() start\n");
+		#endif
 		if(m_pInfoService!=NULL)
 			delete m_pInfoService;
 		m_pInfoService=NULL;
@@ -692,5 +695,8 @@ SINT32 CAFirstMix::clean()
 		if(m_pRSA!=NULL)
 			delete m_pRSA;
 		m_pRSA=NULL;
+		#ifdef _DEBUG
+			CAMsg::printMsg("CAFirstMix::clean() finished\n");
+		#endif
 		return E_SUCCESS;
 	}
