@@ -160,14 +160,18 @@ SINT32 CAInfoService::sendStatus()
 			
 #define XML_MIX_CASCADE_STATUS "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\
 <MixCascadeStatus id=\"%s\" currentRisk=\"%i\" mixedPackets=\"%s\" nrOfActiveUsers=\"%i\" trafficSituation=\"%i\"\
- ></MixCascadeStatus>"
+ LastUpdate=\"%s\"></MixCascadeStatus>"
 				
 				UINT32 buffLen=1024;
 				UINT8* buff=new UINT8[buffLen];
 				UINT8 tmpBuff[1024];
 				UINT8 buffMixedPackets[50];
 				print64(buffMixedPackets,tmpPackets);
-				sprintf((char*)tmpBuff,XML_MIX_CASCADE_STATUS,strMixId,tmpRisk,buffMixedPackets,tmpUser,tmpTraffic);
+				UINT64 currentMillis;
+				getcurrentTimeMillis(currentMillis);
+				UINT8 tmpStrCurrentMillis[50];
+				print64(tmpStrCurrentMillis,currentMillis);
+				sprintf((char*)tmpBuff,XML_MIX_CASCADE_STATUS,strMixId,tmpRisk,buffMixedPackets,tmpUser,tmpTraffic,tmpStrCurrentMillis);
 				m_pSignature->signXML(tmpBuff,strlen((char*)tmpBuff),buff,&buffLen);
 				sprintf((char*)buffHeader,"POST /feedback HTTP/1.0\r\nContent-Length: %u\r\n\r\n",buffLen);
 				oSocket.send(buffHeader,strlen((char*)buffHeader));

@@ -1179,8 +1179,15 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 				delete oListener.addr;
 			}
 		
-		elemRoot.appendChild(docCascade.importNode(elemMixes,true));
-
+		DOM_Node elemMixesDocCascade=docCascade.importNode(elemMixes,false);
+		elemRoot.appendChild(elemMixesDocCascade);
+		DOM_Node node=elemMixes.getFirstChild();
+		while(node!=NULL)
+			{
+				if(node.getNodeType()==DOM_Node::ELEMENT_NODE&&node.getNodeName().equals("Mix"))
+					elemMixesDocCascade.appendChild(docCascade.importNode(node,false));
+				node=node.getNextSibling();
+			}
 		
 		tmpB=DOM_Output::dumpToMem(docCascade,&tlen);
 		m_strXmlMixCascadeInfo=new UINT8[tlen+1];

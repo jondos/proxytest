@@ -14,4 +14,15 @@ This is the index of all XML structs used in the project.
 3. Mix-Cascade info (and info about the FirstMix) send from the
 FirstMix to the InfoService.
 \verbinclude FirstMixToInfoService.xml 
+
+\par \anchor XMLMixCascadeStatus
+4. Mix-Cascade status send from the
+FirstMix to the InfoService.
+\verbinclude MixCascadeStatus.xml 
+
+\par \anchor XMLMixHELO
+5. Mix-HELO send from the
+Middle- or LastMixFirst to the InfoService to announce itself.
+\verbinclude MixHELO.xml 
+
 */

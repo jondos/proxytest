@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Mix id="...">
+  <Name>..</Name>
+  <Location>
+  ...
+  </Location>
+  <Operator>
+    <Organisation>..</Organisation>
+    <URL>..</URL>
+  </Operator>
+  <Software>
+    <Version>..</Version>
+  </Software>
+  <Signature>..</Signature>
+</Mix>
