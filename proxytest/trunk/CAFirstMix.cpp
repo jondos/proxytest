@@ -995,10 +995,9 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		oParser.parse(oInput);
 		DOM_Document doc=oParser.getDocument();
 		DOM_Element elemMixes=doc.getDocumentElement();
-		char* tmpStr=elemMixes.getAttribute("count").transcode();
-		UINT32 count=atol(tmpStr);
-		delete tmpStr;
-
+		int count=0;
+		getDOMElementAttribute(elemMixes,"count",&count);
+		
 		DOM_Node child=elemMixes.getLastChild();
 		
 		m_KeyInfoBuff=new UINT8[(count+1)*256];
@@ -1127,11 +1126,12 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		
 		elemRoot.appendChild(docCascade.importNode(elemMixes,true));
 
-		tlen=2048;
+		
+		UINT8* tmpB=DOM_Output::dumpToMem(docCascade,&tlen);
 		m_strXmlMixCascadeInfo=new UINT8[tlen+1];
-		DOM_Output::dumpToMem(docCascade,m_strXmlMixCascadeInfo,&tlen);
+		memcpy(m_strXmlMixCascadeInfo,tmpB,tlen);
 		m_strXmlMixCascadeInfo[tlen]=0;
-
+		delete[]tmpB;
 		return E_SUCCESS;
 	}
 
