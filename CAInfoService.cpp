@@ -103,7 +103,7 @@ THREAD_RETURN InfoLoop(void *p)
 		if(strncmp((char*)buff,"ithif46",7)==0)
 			strcpy((char*)buff,"mix.inf.tu-dresden.de");
 //end hack....
-		sprintf(strAnonServer,"%u.%u.%u.%u%3A%u",buff[0],buff[1],buff[2],buff[3],options.getServerPort());
+		sprintf(strAnonServer,"%u.%u.%u.%u%%3A%u",buff[0],buff[1],buff[2],buff[3],options.getServerPort());
 		int helocount=10;
 		while(pInfoService->getRun())
 			{
