@@ -34,6 +34,7 @@ CALastMixChannelList::CALastMixChannelList()
 		memset(m_HashTable,0,0x10000*sizeof(LP_lmChannelListEntry));
 		m_listSockets=NULL;
 		m_listSocketsNext=NULL;
+		m_nChannels=0;
 	}
 
 CALastMixChannelList::~CALastMixChannelList()
@@ -91,6 +92,7 @@ SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCip
 			}
 		if(m_listSocketsNext==NULL)
 			m_listSocketsNext=m_listSockets;
+		m_nChannels++;
 		return E_SUCCESS;
 	}
 
@@ -123,7 +125,7 @@ SINT32 CALastMixChannelList::removeChannel(HCHANNEL channel)
 						if(pEntry->list_Sockets.next!=NULL)
 							pEntry->list_Sockets.next->list_Sockets.prev=pEntry->list_Sockets.prev;
 
-						
+						m_nChannels--;					
 						return E_SUCCESS;
 					}
 				pEntry=pEntry->list_Channels.next;
