@@ -60,6 +60,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define E_TIMEDOUT WSAETIMEDOUT
 		#define E_CONNREFUSED WSAECONNREFUSED
 		#define MSG_DONTWAIT 0
+		#define HAVE_FIONREAD
 		#define msleep(i) Sleep(i) 
 		#ifdef __cplusplus
 			#include <string>
@@ -116,7 +117,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
     typedef struct sockaddr* LPSOCKADDR;
     #define SOCKET int
     typedef struct hostent HOSTENT;
-    #define ioctlsocket(a,b,c) ioctl(a,b,c)
+		#define HAVE_FIONREAD
+		#define ioctlsocket(a,b,c) ioctl(a,b,c)
     #define closesocket(s) close(s)
     #define SOCKET_ERROR -1
     #define INVALID_SOCKET -1

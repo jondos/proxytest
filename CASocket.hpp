@@ -46,7 +46,10 @@ class CASocket
 			SINT32 close();
 			SINT32 close(int mode);
 			int send(UINT8* buff,UINT32 len);
-			int available();
+#ifdef HAVE_FIONREAD
+			#define HAVE_AVAILABLE
+			SINT32 available();
+#endif
 			int receive(UINT8* buff,UINT32 len);
 			SINT32 receiveFully(UINT8* buff,UINT32 len);
 			SINT32 receiveFully(UINT8* buff,UINT32 len,SINT32 timeout);
