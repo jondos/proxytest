@@ -667,6 +667,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 						m_strLogDir=new char[strlen((char*)tmpBuff)+1];
 						strcpy(m_strLogDir,(char*)tmpBuff);
 					}
+				tmpLen=255;
 				getDOMChildByName(elemLogging,(UINT8*)"SpecialFile",elem,false);
 				if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS)
 					{
