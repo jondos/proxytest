@@ -38,6 +38,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAInfoService.hpp"
 #include "CACertStore.hpp"
 #include "CABase64.hpp"
+#include "CAPool.hpp"
 #include "xml/DOM_Output.hpp"
 
 extern CACmdLnOptions options;
