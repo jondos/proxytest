@@ -110,15 +110,14 @@ freebsd-x86-gcc-lthread:
 freebsd-x86-gcc-pthread:
 	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -fomit-frame-pointer -O3' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lpthread' 'LIBDIR=-L/usr/local/lib -L/usr/local/lib/pth' _all_aes 
 
-_all_aes: $(OBJS) libpopt.a libxml.a libaes.a
+_all_aes: $(OBJS) libpopt.a libxml.a libaes.a libtrio.a
 	$(CC) -o proxytest $(DEBUG) $(CPPFLAGS) $(OBJS) $(LIBDIR) $(LIBS)
 
 libpopt.a:
 	cd popt;$(MAKE) 'CC=$(CC)' 'DEBUG=$(DEBUG)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)'
 
-#httptunnel.a:
-#	cd httptunnel;$(MAKE) 'CC=$(CC)' 'DEBUG=$(DEBUG)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)';
-#
+libtrio.a:
+	cd trio;$(MAKE) 'CC=$(CC)' 'DEBUG=$(DEBUG)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)'
 
 libxml.a: 
 	cd xml;$(MAKE) 'CC=$(CC)' 'DEBUG=$(DEBUG)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)';
@@ -129,7 +128,7 @@ libaes.a:
 clean:
 	rm -f $(OBJS)
 	cd popt; $(MAKE) clean;
-#	cd httptunnel;$(MAKE) clean;
+	cd trio;$(MAKE) clean;
 	cd xml;$(MAKE) clean;
 	cd aes;$(MAKE) clean;
 	rm -f proxytest

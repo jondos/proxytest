@@ -98,7 +98,7 @@ SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 #ifdef HAVE_VSNPRINTF
 		vsnprintf(oMsg.m_strMsgBuff+20+STRMSGTYPES_SIZE,1024,format,ap);
 #else
-	  trio_vsnprintf(oMsg.m_strMsgBuff+20+STRMSGTYPES_SIZE,format,ap);
+	  trio_vsnprintf(oMsg.m_strMsgBuff+20+STRMSGTYPES_SIZE,1024,format,ap);
 #endif
 		va_end(ap);
 		switch(oMsg.m_uLogType)

@@ -254,6 +254,21 @@ SOURCE=.\trio\triodef.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\trio\trionan.cpp
+
+!IF  "$(CFG)" == "proxytest - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=.\trio\trionan.h
 # End Source File
 # Begin Source File
