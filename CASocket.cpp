@@ -325,8 +325,10 @@ int CASocket::receive(UINT8* buff,UINT32 len)
 				ret=::recv(m_Socket,(char*)buff,len,MSG_NOSIGNAL);
 			}
 	  while(ret==SOCKET_ERROR&&(ef=errno)==EINTR);
-	  if(ret==SOCKET_ERROR)
+#ifdef _DEBUG
+		if(ret==SOCKET_ERROR)
 	      CAMsg::printMsg(LOG_DEBUG,"Receive error: %i\n",ef);
+#endif
 	  return ret;	    	    
 	}
 

@@ -137,30 +137,34 @@ int main(int argc, const char* argv[])
 			signal(SIGPIPE,SIG_IGN);
 	#endif
 #endif
-		CARoundTripTime* pRTT=new CARoundTripTime();
 		CAMix* pMix=NULL;
-	  CAMsg::printMsg(LOG_INFO,"Starting RoundTripTime...\n");
-		if(pRTT->start()!=E_SUCCESS)
-			{
-				CAMsg::printMsg(LOG_CRIT,"RoundTripTime Startup FAILED - Exiting!\n");
-				goto EXIT;
-			}
+		CARoundTripTime* pRTT=NULL;
 		if(options.isLocalProxy())
 			{
 				pMix=new CALocalProxy();
 			}
-		else if(options.isFirstMix())
-			{
-				CAMsg::printMsg(LOG_INFO,"I am the First MIX..\n");
-				pMix=new CAFirstMix();
-			}
-		else if(options.isMiddleMix())
-			{
-				CAMsg::printMsg(LOG_INFO,"I am a Middle MIX..\n");
-				pMix=new CAMiddleMix();
-			}
 		else
-			pMix=new CALastMix();
+			{
+				pRTT=new CARoundTripTime();
+				CAMsg::printMsg(LOG_INFO,"Starting RoundTripTime...\n");
+				if(pRTT->start()!=E_SUCCESS)
+					{
+						CAMsg::printMsg(LOG_CRIT,"RoundTripTime Startup FAILED - Exiting!\n");
+						goto EXIT;
+					}
+				else if(options.isFirstMix())
+					{
+						CAMsg::printMsg(LOG_INFO,"I am the First MIX..\n");
+						pMix=new CAFirstMix();
+					}
+				else if(options.isMiddleMix())
+					{
+						CAMsg::printMsg(LOG_INFO,"I am a Middle MIX..\n");
+						pMix=new CAMiddleMix();
+					}
+				else
+					pMix=new CALastMix();
+			}
 	  CAMsg::printMsg(LOG_INFO,"Starting MIX...\n");
 		if(pMix->start()!=E_SUCCESS)
 			CAMsg::printMsg(LOG_CRIT,"Error during MIX-Startup!\n");

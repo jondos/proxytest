@@ -376,7 +376,7 @@ LOOP_START:
 #ifdef _ASYNC
 //													tmpSocket->setASyncSend(true,-1,0,10000,this);
 #endif													
-													int payLen=ntohs(oMuxPacket.payload.len);
+													UINT16 payLen=ntohs(oMuxPacket.payload.len);
 													#ifdef _DEBUG
 														oMuxPacket.payload.data[ntohs(oMuxPacket.payload.len)]=0;
 														CAMsg::printMsg(LOG_DEBUG,"%u\n%s",ntohs(oMuxPacket.payload.len),oMuxPacket.payload.data);
