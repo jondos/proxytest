@@ -2,9 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="AllTest"
-	ProjectGUID="{1DE75B05-314A-4E97-B281-5D1075F7CF2D}"
-	RootNamespace="AllTest"
+	Name="BulletinBoard"
+	ProjectGUID="{17916053-4B43-46CF-ABB3-709AE4E3DA78}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -13,20 +12,19 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="AllTest/Debug"
-			IntermediateDirectory="AllTest/Debug"
+			OutputDirectory="Debug"
+			IntermediateDirectory="Debug"
 			ConfigurationType="1"
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;G:\xerces-c-src_2_5_0\src&quot;;&quot;G:\xerces-c-src_2_5_0\src\xercesc&quot;;&quot;G:\openssl-0.9.7c\inc32&quot;;G:\proxytest\pthread\include;&quot;G:\cppunit-1.9.14\include&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;__UNIT_TEST__"
+				AdditionalIncludeDirectories="&quot;G:\postgres-client-lib\include\postgresql&quot;;&quot;G:\postgres-client-lib\include&quot;;&quot;G:\xerces-c-src_2_5_0\src\xercesc&quot;;&quot;G:\xerces-c-src_2_5_0\src&quot;;&quot;g:\openssl-0.9.7c\inc32&quot;;..\pthread\include;n:\mysql\include;&quot;g:\zlib-1.1.4&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="../StdAfx.h"
+				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="4"/>
@@ -34,12 +32,12 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="cppunitd_dll.lib proxytest-lib.lib ws2_32.lib ssleay32.lib libeay32.lib pthreadVC.lib xerces-c_2D.lib zlib.lib"
-				OutputFile="$(OutDir)/AllTest.exe"
+				AdditionalDependencies="proxytest-lib.lib ws2_32.lib ssleay32.lib libeay32.lib pthreadVC.lib xerces-c_2D.lib zlib.lib"
+				OutputFile="$(OutDir)/BulletinBoard.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;G:\cppunit-1.9.14\lib&quot;;&quot;G:\proxytest\proxytest-lib\Debug&quot;;&quot;G:\xerces-c-src_2_5_0\build\win32\vc7\debug&quot;;&quot;g:\openssl-0.9.7c\out32dll&quot;;pthread\lib;n:\mysql\lib\debug;&quot;g:\zlib-1.1.4&quot;"
+				AdditionalLibraryDirectories="&quot;G:\proxytest\proxytest-lib\Debug&quot;;&quot;G:\xerces-c-src_2_5_0\build\win32\vc7\debug&quot;;&quot;g:\openssl-0.9.7c\out32.dbg&quot;;..\pthread\lib;n:\mysql\lib\debug;&quot;g:\zlib-1.1.4&quot;"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/AllTest.pdb"
+				ProgramDatabaseFile="$(OutDir)/BulletinBoard.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
@@ -81,7 +79,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/AllTest.exe"
+				OutputFile="$(OutDir)/BulletinBoard.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
@@ -112,8 +110,8 @@
 	</Configurations>
 	<References>
 		<ProjectReference
-			ReferencedProjectIdentifier="{150377B0-CA8F-4031-A0B8-45A3001F4F81}"
-			Name="proxytest-lib"/>
+			ReferencedProjectIdentifier="{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}"
+			Name="FlashMix-lib"/>
 	</References>
 	<Files>
 		<Filter
@@ -121,34 +119,13 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath=".\test\AllTests.cpp">
-			</File>
-			<File
-				RelativePath=".\test\AllTestsCA.cpp">
-			</File>
-			<File
-				RelativePath=".\test\CAFirstMixChannelListTest.cpp">
-			</File>
-			<File
-				RelativePath=".\test\PoolSpeedTest.cpp">
-			</File>
-			<File
-				RelativePath=".\test\SampleTest.cpp">
+				RelativePath=".\BulletinBoard.cpp">
 			</File>
 		</Filter>
 		<Filter
 			Name="Headerdateien"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
-			<File
-				RelativePath=".\test\AllTestsCA.hpp">
-			</File>
-			<File
-				RelativePath=".\test\CAFirstMixChannelListTest.hpp">
-			</File>
-			<File
-				RelativePath=".\test\SampleTest.hpp">
-			</File>
 		</Filter>
 	</Files>
 	<Globals>

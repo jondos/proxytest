@@ -30,7 +30,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketAddrINet.hpp"
 #include "CASingleSocketGroup.hpp"
 #ifdef _DEBUG
-	extern int sockets;
+	int sockets;
 #endif
 #include "CAMsg.hpp"
 #include "CAUtil.hpp"
