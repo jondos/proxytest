@@ -28,10 +28,68 @@
 #include "xmlstream.h"
 
 #ifdef __cplusplus
-#include <vector>
+//#include <vector>
 //#include <string>
 
 //XML_BEGIN_NAMESPACE
+
+/** Vector of const char**/
+class ElementStack
+	{
+		public:
+			ElementStack()
+				{
+					m_Elements=new const char*[16];
+					m_Capacity=16;
+					m_Size=0;
+				}
+
+			~ElementStack()
+				{
+					delete m_Elements;
+				}
+
+			bool empty()
+				{
+					return m_Size==0;//is vector empty ?
+				}
+
+			void push_back(const char* e) //put an element at the end of the vector
+				{
+					if(m_Capacity<=m_Size)
+						{
+							const char** tmp=m_Elements;
+							m_Capacity+=16;
+							m_Elements=new const char*[m_Capacity];
+							memcpy(m_Elements,tmp,m_Size*sizeof(const char*));
+						}
+					m_Elements[m_Size++]=e;
+				}
+			
+			UINT32 size() //number of elements in vector
+				{
+					return m_Size;
+				}
+			
+			const char* back()
+				{
+					if(m_Size>0)
+						return m_Elements[m_Size-1];
+					else
+						return NULL;
+				}//returns referenc to last elemt of vector
+			
+			void pop_back() //removes last element form vector
+				{
+					m_Size--;
+				}
+
+		private:
+			const char** m_Elements;
+			UINT32 m_Capacity;
+			UINT32 m_Size;
+};
+
 
 /**
 	Utility class for saving XML data files to an OutputStream.
@@ -121,7 +179,7 @@ public:
 private:
 	XMLOutputStream &mStream;
 	int mLevel;					// nesting level
-	typedef std::vector<const char *> ElementStack;
+	//typedef std::vector<const char *> ElementStack;
 	ElementStack mElements;		// needed to write EndElement tag name
 	bool mAttributes;			// used for sanity-checking
 };
