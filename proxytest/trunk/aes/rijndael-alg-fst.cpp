@@ -183,7 +183,7 @@ int rijndaelKeySched (word8 k[MAXKC][4],/* int keyBits,*/ word8 W[MAXROUNDS+1][4
 	return 0;
 }	
 */
-int rijndaelEncrypt (word8 a[16], word8 b[16], word8 rk[MAXROUNDS+1][4][4])
+__inline int rijndaelEncrypt (word8 a[16], word8 b[16], word8 rk[MAXROUNDS+1][4][4])
 {
 	/* Encryption of one block. 
 	 */
