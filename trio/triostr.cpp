@@ -118,7 +118,7 @@ trio_destroy(char *string)
    @param string String to measure.
    @return Number of characters in @string.
 */
-TRIO_PUBLIC TRIO_INLINE size_t
+TRIO_PUBLIC /*TRIO_INLINE*/ size_t
 trio_length(const char *string)
 {
   return strlen(string);
