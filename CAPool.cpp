@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "CAPool.hpp"
 #include "CAUtil.hpp"
+#include "CAMsg.hpp"
 
 CAPool::CAPool(UINT32 poolsize)
 	{
