@@ -32,11 +32,13 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 CASocketAddrUnix::CASocketAddrUnix()
 	{
+		sun_family=AF_LOCAL
+		memset(sun_path,0,sizeof(sun_path));
 	}
 
-CASocketAddrUnix::~CASocketAddrUnix()
-	{
-	}
+//CASocketAddrUnix::~CASocketAddrUnix()
+//	{
+//	}
 
 SINT32 CASocketAddrUnix::getSize()
 	{

@@ -33,11 +33,14 @@ CRITICAL_SECTION CASocketAddrINet::csGet;
 
 CASocketAddrINet::CASocketAddrINet()
 	{
+		sin_family=AF_INET;
+		sin_addr.s_addr=INADDR_ANY;
+		sin_port=0;
 	}
 
-CASocketAddrINet::~CASocketAddrINet()
-	{
-	}
+//CASocketAddrINet::~CASocketAddrINet()
+//	{
+//	}
 
 
 CASocketAddrINet::CASocketAddrINet(char* szIP,UINT16 port)
