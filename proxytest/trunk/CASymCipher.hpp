@@ -46,7 +46,7 @@ class CASymCipher:public CALockAble
 			CASymCipher()
 				{
 					m_bKeySet=false;
-					m_keyAES=new keyInstance[1];
+					m_keyAES=new AES_KEY;/*keyInstance[1];*/
 					m_iv1=new UINT8[16];
 					m_iv2=new UINT8[16];
 				}
@@ -54,7 +54,7 @@ class CASymCipher:public CALockAble
 			~CASymCipher()
 				{
 					waitForDestroy();
-					delete[] m_keyAES;
+					delete m_keyAES;
 					delete[] m_iv1;
 					delete[] m_iv2;
 				}
@@ -79,7 +79,7 @@ class CASymCipher:public CALockAble
 			SINT32 crypt1(const UINT8* in,UINT8* out,UINT32 len);
 			SINT32 crypt2(const UINT8* in,UINT8* out,UINT32 len);
 		protected:
-			keyInstance* m_keyAES;
+			/*keyInstance**/ AES_KEY* m_keyAES;
 			UINT8* m_iv1;
 			UINT8* m_iv2;
 			bool m_bKeySet;

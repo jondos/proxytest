@@ -35,7 +35,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	*/
 SINT32 CASymCipher::setKey(const UINT8* key)
 	{
-		makeKey(*m_keyAES,(char*)key);
+		//makeKey(*m_keyAES,(char*)key);
+		AES_set_encrypt_key(key,128,m_keyAES);
 		memset(m_iv1,0,16);
 		memset(m_iv2,0,16);
 		m_bKeySet=true;
@@ -59,7 +60,8 @@ SINT32 CASymCipher::crypt1(const UINT8* in,UINT8* out,UINT32 len)
 		UINT32 i=0;
     while(i+15<len)
     	{
-				rijndaelEncrypt (m_iv1, m_iv1, *m_keyAES);
+				//rijndaelEncrypt (m_iv1, m_iv1, *m_keyAES);
+				AES_encrypt(m_iv1,m_iv1,m_keyAES);
 				out[i]=in[i]^m_iv1[0];
 				i++;
 				out[i]=in[i]^m_iv1[1];
@@ -95,7 +97,8 @@ SINT32 CASymCipher::crypt1(const UINT8* in,UINT8* out,UINT32 len)
 			}
 		if(i<len) //In this case len-i<16 !
 			{
-				rijndaelEncrypt (m_iv1, m_iv1, *m_keyAES);
+				//rijndaelEncrypt (m_iv1, m_iv1, *m_keyAES);
+				AES_encrypt(m_iv1,m_iv1,m_keyAES);
 				len-=i;
 				for(UINT32 k=0;k<len;k++)
 				 {
@@ -118,7 +121,8 @@ SINT32 CASymCipher::crypt2(const UINT8* in,UINT8* out,UINT32 len)
 		UINT32 i=0;
 		while(i+15<len)
 			{
-				rijndaelEncrypt (m_iv2, m_iv2, *m_keyAES);
+				//rijndaelEncrypt (m_iv2, m_iv2, *m_keyAES);
+				AES_encrypt(m_iv2,m_iv2,m_keyAES);
 				out[i]=in[i]^m_iv2[0];
 				i++;
 				out[i]=in[i]^m_iv2[1];
@@ -154,7 +158,8 @@ SINT32 CASymCipher::crypt2(const UINT8* in,UINT8* out,UINT32 len)
 			}
 		if(i<len)
 			{
-				rijndaelEncrypt (m_iv2, m_iv2, *m_keyAES);
+				AES_encrypt(m_iv2,m_iv2,m_keyAES);
+				//rijndaelEncrypt (m_iv2, m_iv2, *m_keyAES);
 				len-=i;
 				for(UINT32 k=0;k<len;k++)
 				 {

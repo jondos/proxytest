@@ -132,7 +132,7 @@ freebsd-x86-gcc-pthread:
 linux-x86-gcc-webdeploy:
 	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -O0' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
 
-_all_aes: $(OBJS) libpopt.a libxml.a libaes.a libtrio.a libtre.a libmixa.a
+_all_aes: $(OBJS) libpopt.a libxml.a libtrio.a libtre.a libmixa.a
 	$(CC) -o proxytest $(DEBUG) $(CPPFLAGS) $(OBJS) $(LIBDIR) $(LIBS)
 
 libpopt.a:
@@ -147,9 +147,6 @@ libtre.a:
 libxml.a: 
 	cd xml;$(MAKE) 'CC=$(CC)' 'DEBUG=$(DEBUG)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)';
 
-libaes.a: 
-	cd aes;$(MAKE) 'CC=$(CC)' 'DEBUG=$(DEBUG)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)';
-
 libmixa.a: 
 	cd TypeA;$(MAKE) 'CC=$(CC)' 'DEBUG=$(DEBUG)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)';
 
@@ -159,6 +156,5 @@ clean:
 	cd trio;$(MAKE) clean;
 	cd tre;$(MAKE) clean;
 	cd xml;$(MAKE) clean;
-	cd aes;$(MAKE) clean;
 	cd TypeA;$(MAKE) clean;
 	rm -f proxytest

@@ -194,7 +194,21 @@ class CACmdLnOptions
 					return m_arCrimeRegExps;
 				}
 #endif
-		friend THREAD_RETURN threadReConfigure(void *param);
+#ifdef PAYMENT
+// added by Bastian Voigt:
+// getter functions for the payment config options
+			SINT32 getJPIHost(UINT8* host,UINT32 len);
+			UINT16 getJPIPort();
+			
+			// accounting database
+			SINT32 getDatabaseHost(UINT8 * host, UINT32 len);
+			UINT16 getDatabasePort();
+			SINT32 getDatabaseName(UINT8 * name, UINT32 len);
+			SINT32 getDatabaseUsername(UINT8 * user, UINT32 len);
+			SINT32 getDatabasePassword(UINT8 * pass, UINT32 len);
+#endif	
+
+			friend THREAD_RETURN threadReConfigure(void *param);
 		private:
 			UINT8*	m_strConfigFile; //the filename of the config file
 			bool		m_bIsRunReConfigure; //true, if an async reconfigure is under way
@@ -234,6 +248,20 @@ class CACmdLnOptions
 			regex_t* m_arCrimeRegExps;
 			UINT32 m_nCrimeRegExps;
 #endif
+
+#ifdef PAYMENT
+// added by Bastian Voigt:
+// getter functions for the payment config options
+	private:
+			UINT8 * m_strJPIHost;
+			UINT16 m_iJPIPort;
+			UINT8 * m_strDatabaseHost;
+			UINT8 * m_strDatabaseName;
+			UINT8 * m_strDatabaseUser;
+			UINT8 * m_strDatabasePassword;
+			UINT16 m_iDatabasePort;
+#endif
+
 		private:
 			SINT32 setNewValues(CACmdLnOptions& newOptions);
 			SINT32 readXmlConfiguration(DOM_Document& docConfig,const UINT8* const configFileName);
