@@ -95,7 +95,7 @@ SINT32 CASocket::connect(LPCASOCKETADDR psa)
 
 SINT32 CASocket::connect(LPCASOCKETADDR psa,UINT retry,UINT32 time)
 	{
-		CAMsg::printMsg(LOG_DEBUG,"Socket:connect\n");
+//		CAMsg::printMsg(LOG_DEBUG,"Socket:connect\n");
 		localPort=-1;
 		if(m_Socket==0&&create()==SOCKET_ERROR)
 			{
@@ -109,9 +109,9 @@ SINT32 CASocket::connect(LPCASOCKETADDR psa,UINT retry,UINT32 time)
 		int addr_len=sizeof(*addr);
 		for(UINT i=0;i<retry;i++)
 			{
-				CAMsg::printMsg(LOG_DEBUG,"Socket:connect-connect\n");
+//				CAMsg::printMsg(LOG_DEBUG,"Socket:connect-connect\n");
 				err=::connect(m_Socket,addr,addr_len);
-				CAMsg::printMsg(LOG_DEBUG,"Socket:connect-connect-finished err: %i\n",err);
+//				CAMsg::printMsg(LOG_DEBUG,"Socket:connect-connect-finished err: %i\n",err);
 				if(err!=0)
 					{  
 						err=GETERROR;
