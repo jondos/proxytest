@@ -39,6 +39,7 @@ class CALocalProxy:public CAMix
 		private:
 			SINT32 loop();
 			SINT32 init();
+			SINT32 clean(){return E_SUCCESS;}
 		private:
 			CASocket socketIn;
 			CASocket socketSOCKSIn;

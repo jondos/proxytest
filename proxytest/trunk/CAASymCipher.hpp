@@ -33,6 +33,7 @@ class CAASymCipher
 		public:
 			CAASymCipher();
 			~CAASymCipher();
+			SINT32 destroy();
 			SINT32 decrypt(UINT8* from,UINT8* to);
 			SINT32 encrypt(UINT8* from,UINT8* to);
 			SINT32 generateKeyPair(UINT32 size);

@@ -31,6 +31,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #include "CAMix.hpp"
 #include "CAMuxSocket.hpp"
+#include "CAASymCipher.hpp"
+#include "CASignature.hpp"
 class CAFirstMix:public CAMix
 	{
 		public:
@@ -39,10 +41,21 @@ class CAFirstMix:public CAMix
 		private:
 			SINT32 loop();
 			SINT32 init();
+#ifdef PROT2
+			SINT32 clean();
+			SINT32 initOnce();
+#endif
 		private:
 			CASocket socketIn;
 			CAMuxSocket muxOut;
+#ifndef PROT2
 			UINT8* recvBuff;
+#else
+			UINT8* mKeyInfoBuff;
+			UINT16 mKeyInfoSize;
+			CAASymCipher mRSA;
+			CASignature mSignature;
+#endif
 	};
 
 #endif

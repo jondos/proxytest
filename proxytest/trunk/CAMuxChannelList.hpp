@@ -50,6 +50,7 @@ class CAMuxChannelList
 	{
 		public:
 			CAMuxChannelList();
+			~CAMuxChannelList();
 			int add(CAMuxSocket* pMuxSocket);
 			MUXLISTENTRY* get(CAMuxSocket* pMuxSocket);
 			bool remove(CAMuxSocket* pMuxSocket,MUXLISTENTRY* pEntry);
