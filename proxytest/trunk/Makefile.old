@@ -81,6 +81,9 @@ linux-x86-gcc-static:
 linux-x86-gcc-debug:
 	$(MAKE) 'CC=gcc' 'CPPFLAGS=-static -Wall -O0 -D_REENTRANT' 'DEBUG=-g -D_DEBUG' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lstdc++' 'LIBDIR=-L/usr/local/ssl/lib' _all 
 
+linux-x86-icc-async:
+	$(MAKE) 'CC=icc' 'CPPFLAGS=-DPROT2 -D_ASYNC -D_REENTRANT' 'INCLUDE=-I. -I/usr/local/ssl/include -I/opt/intel/compiler50/ia32/include' 'LIBS=$(LIBS) ./aes/libaes.a' 'LIBDIR=-L/usr/local/ssl/lib -L/opt/intel/compiler50/ia32/lib' _all_aes 
+
 solaris-ultrasparc-gcc:
 	$(MAKE) 'CC=gcc -mcpu=ultrasparc' 'CPPFLAGS=-O3 -D_REENTRANT' 'LIBS=$(LIBS) -lstdc++ -lsocket -lnsl' _all 
 
