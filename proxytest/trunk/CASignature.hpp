@@ -49,6 +49,5 @@ class CASignature
 		private:
 			DSA* m_pDSA;
 			SINT32 parseSignKeyXML(UINT8* buff,UINT32 len);
-			//SINT32 makeXMLCanonical(UINT8* in,UINT32 len,UINT8* out,UINT32 *outlen);
 	};
 #endif
