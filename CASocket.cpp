@@ -361,7 +361,10 @@ SINT32 CASocket::getSendSpace()
 		if(ioctlsocket(m_Socket,TIOCOUTQ,&ul)==SOCKET_ERROR)
 			return SOCKET_ERROR;
 		else
+		{
+			CAMsg::printMsg("Unsent data now: %i\n",ul);
 			return sl-(SINT32)ul;
+		}
 #else
 		return E_UNKNOWN;
 #endif
