@@ -2,12 +2,12 @@
 .SUFFIXES: .o .cpp	
 
 CC=gcc
-INCLUDE = -I. -I/sun/ikt/sk13/openssl/include
-LIBS	= -L/usr/local/ssl/lib -L/sun/ikt/sk13/openssl/lib ./popt/popt.a ./httptunnel/httptunnel.a -lcrypto
+INCLUDE = -I. -I/home/imis/mix/openssl/include -I/sun/ikt/sk13/openssl/include
+LIBS	= -L/usr/local/ssl/lib -L/home/imis/mix/openssl/lib -L/sun/ikt/sk13/openssl/lib ./popt/popt.a ./httptunnel/httptunnel.a -lcrypto
 #-lpthread 
 CPPFLAGS =-O3 -Wall 
 #-D_REENTRANT
-#DEBUG =-D_DEBUG -g
+DEBUG =-D_DEBUG -g
 
 OBJS_ALL=CASocket.o\
 	CASocketGroup.o\

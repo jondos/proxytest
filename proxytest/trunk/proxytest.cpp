@@ -716,7 +716,8 @@ int doFirstMix()
 		char strTarget[255];
 		options.getTargetHost(strTarget,255);
 		addrNext.setAddr(strTarget,options.getTargetPort());
-		CAMsg::printMsg(LOG_INFO,"Try connectiong to next Mix...");
+printf(strTarget);		
+CAMsg::printMsg(LOG_INFO,"Try connectiong to next Mix...%s:%u",strTarget,options.getTargetPort());
 		((CASocket*)fmIOPair->muxOut)->create();
 		((CASocket*)fmIOPair->muxOut)->setSendBuff(50*sizeof(MUXPACKET));
 		((CASocket*)fmIOPair->muxOut)->setRecvBuff(50*sizeof(MUXPACKET));
