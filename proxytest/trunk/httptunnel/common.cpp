@@ -5,17 +5,6 @@ Copyright (C) 1999 Lars Brinkhoff.  See COPYING for terms and conditions.
 
 Code common to both htc and hts.
 */
-/*
-#include <time.h>
-#include <stdio.h>
-#include <netdb.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <syslog.h>
-#include <termios.h>
-#include <sys/poll.h>
-*/
 #include "common.h"
 #include "tunnel.h"
 
@@ -116,98 +105,70 @@ log_annoying (char *fmt0, ...)
 }
 #endif
 
-int
-server_socket (int port, int backlog)
-{
-  struct sockaddr_in address;
-  int i, s;
+int server_socket (int port, int backlog)
+	{
+		struct sockaddr_in address;
+		int i, s;
 
-  s = socket (PF_INET, SOCK_STREAM, 0);
-  if (s == -1)
-    return -1;
+		s = socket (PF_INET, SOCK_STREAM, 0);
+		if (s == -1)
+			return -1;
   
-  i = 1;
-  if (setsockopt (s, SOL_SOCKET, SO_REUSEADDR, (const char *)&i, sizeof i) == -1)
-    {
-      log_error ("server_socket: setsockopt SO_REUSEADDR: %s",
-		 strerror (errno));
-    }
+		i = 1;
+		if (setsockopt (s, SOL_SOCKET, SO_REUSEADDR, (const char *)&i, sizeof i) == -1)
+			{
+				log_error ("server_socket: setsockopt SO_REUSEADDR: %s",
+			 strerror (errno));
+			}
 
-  address.sin_family = PF_INET;
-  address.sin_port = htons ((short)port);
-  address.sin_addr.s_addr = INADDR_ANY;
+		address.sin_family = PF_INET;
+		address.sin_port = htons ((short)port);
+		address.sin_addr.s_addr = INADDR_ANY;
   
-  if (bind (s, (struct sockaddr *)&address, sizeof (address)) == -1)
-    {
-      closesocket (s);
-      return -1;
-    }
+		if (bind (s, (struct sockaddr *)&address, sizeof (address)) == -1)
+			{
+				closesocket (s);
+				return -1;
+			}
 
-  if (listen (s, (unsigned)backlog) == -1)
-    {
-      closesocket (s);
-      return -1;
-    } 
+		if (listen (s, (unsigned)backlog) == -1)
+			{
+				closesocket (s);
+				return -1;
+			} 
 
-  return s;
-}
+		return s;
+	}
 
-int
-set_address (struct sockaddr_in *address, const char *host, int port)
-{
-  address->sin_family = PF_INET;
-  address->sin_port = htons ((short)port);
-  address->sin_addr.s_addr = inet_addr (host);
+int set_address (struct sockaddr_in *address, const char *host, int port)
+	{
+		address->sin_family = PF_INET;
+		address->sin_port = htons ((short)port);
+		address->sin_addr.s_addr = inet_addr (host);
 
-  if (address->sin_addr.s_addr == INADDR_NONE)
-    {
-      struct hostent *ent;
-      unsigned int ip;
+		if (address->sin_addr.s_addr == INADDR_NONE)
+			{
+				struct hostent *ent;
+				unsigned int ip;
 
-      log_annoying ("set_address: gethostbyname (\"%s\")", host);
-      ent = gethostbyname (host);
-      log_annoying ("set_address: ent = %p", ent);
-      if (ent == 0)
-	return -1;
+				log_annoying ("set_address: gethostbyname (\"%s\")", host);
+				ent = gethostbyname (host);
+				log_annoying ("set_address: ent = %p", ent);
+				if (ent == 0)
+		return -1;
 
-      memcpy(&address->sin_addr.s_addr, ent->h_addr, (unsigned)ent->h_length);
-      ip = ntohl (address->sin_addr.s_addr);
-      log_annoying ("set_address: host = %d.%d.%d.%d",
-		     ip >> 24,
-		    (ip >> 16) & 0xff,
-		    (ip >>  8) & 0xff,
-		     ip        & 0xff);
-    }
+				memcpy(&address->sin_addr.s_addr, ent->h_addr, (unsigned)ent->h_length);
+				ip = ntohl (address->sin_addr.s_addr);
+				log_annoying ("set_address: host = %d.%d.%d.%d",
+					 ip >> 24,
+					(ip >> 16) & 0xff,
+					(ip >>  8) & 0xff,
+					 ip        & 0xff);
+			}
 
-  return 0;
-}
-/*
-int
-open_device (char *device)
-{
-  struct termios t;
-  int fd;
+		return 0;
+	}
 
-  fd = open (device, O_RDWR | O_NONBLOCK);
-  if (fd == -1)
-    return -1;
-  
-  if (tcgetattr (fd, &t) == -1)
-    {
-      if (errno == ENOTTY || errno == EINVAL)
-	return fd;
-      else
-	return -1;
-    }
-  t.c_iflag = 0;
-  t.c_oflag = 0;
-  t.c_lflag = 0;
-  if (tcsetattr (fd, TCSANOW, &t) == -1)
-    return -1;
-
-  return fd;
-}
-*/
 #ifdef DEBUG_MODE
 void
 dump_buf (FILE *f, unsigned char *buf, size_t len)
@@ -239,6 +200,7 @@ dump_buf (FILE *f, unsigned char *buf, size_t len)
 }
 #endif
 
+/*
 int
 handle_device_input (Tunnel *tunnel, int fd, int events)
 {
@@ -320,7 +282,7 @@ log_annoying ("handle_tunnel_input: tunnel_read() = %d\n", n);
 
   return -1;
 }
-
+**/
 void
 name_and_port (const char *nameport, char **name, int *port)
 {

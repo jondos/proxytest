@@ -1,4 +1,4 @@
-#ifdef HAVE_CONFIG_H
+/*#ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
@@ -15,10 +15,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-
+*/
 #ifdef __NeXT
 /* access macros are not declared in non posix mode in unistd.h -
  don't try to use posix on NeXTstep 3.3 ! */
@@ -55,4 +56,4 @@ char *alloca ();
 #endif  /* HAVE_MCHECK_H && defined(__GNUC__) */
 
 
-#include "popt.h"
+//#include "popt.h"

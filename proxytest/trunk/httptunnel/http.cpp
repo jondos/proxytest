@@ -14,9 +14,7 @@ over multiple lines.
 #include "http.h"
 //#include "common.h"
 
-static inline ssize_t
-http_method (int fd, Http_destination *dest,
-	     Http_method method, ssize_t length)
+static inline ssize_t http_method (int fd, Http_destination *dest,Http_method method, ssize_t length)
 {
   char str[1024]; /* FIXME: possible buffer overflow */
   Http_request *request;
@@ -28,16 +26,16 @@ http_method (int fd, Http_destination *dest,
       return -1;
     }
 
-  if (dest->proxy_name == NULL)
+  if (dest->m_proxy_name == NULL)
     sprintf (str, "/index.html");
   else
-    sprintf (str, "http://%s:%d/index.html", dest->host_name, dest->host_port);
+    sprintf (str, "http://%s:%d/index.html", dest->m_host_name, dest->host_port);
 
   request = http_create_request (method, str, 1, 1);
   if (request == NULL)
     return -1;
 
-  sprintf (str, "%s:%d", dest->host_name, dest->host_port);
+  sprintf (str, "%s:%d", dest->m_host_name, dest->host_port);
   http_add_header (&request->header, "Host", str);
 
   if (length >= 0)

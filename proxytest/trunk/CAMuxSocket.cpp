@@ -6,6 +6,8 @@
 #endif
 
 #include "httptunnel/common.h"
+char buff[255];
+
 CAMuxSocket::CAMuxSocket()
 	{
 		bIsTunneld=false;
@@ -53,7 +55,6 @@ int CAMuxSocket::connect(LPSOCKETADDR psa)
 			}
 		else
 			{
-				char buff[255];
 				psa->getHostName(buff,255);
 				m_pTunnel=tunnel_new_client (buff, psa->getPort(),m_szTunnelHost,m_uTunnelPort,
 			   0/*DEFAULT_CONTENT_LENGTH*//*sizeof(MUXPACKET)*/);

@@ -75,8 +75,8 @@ extern int server_socket (int port, int backlog);
 extern int set_address (struct sockaddr_in *address,
 			const char *host, int port);
 extern int open_device (char *device);
-extern int handle_device_input (Tunnel *tunnel, int fd, int events);
-extern int handle_tunnel_input (Tunnel *tunnel, int fd, int events);
+//extern int handle_device_input (Tunnel *tunnel, int fd, int events);
+//extern int handle_tunnel_input (Tunnel *tunnel, int fd, int events);
 extern void name_and_port (const char *nameport, char **name, int *port);
 extern int atoi_with_postfix (const char *s_);
 extern RETSIGTYPE log_sigpipe (int);
@@ -121,8 +121,7 @@ read_all (int fd, void *buf, size_t len)
   return r;
 }
 
-static inline ssize_t
-write_all (int fd, void *data, size_t len)
+static inline ssize_t write_all (int fd, void *data, size_t len)
 {
   ssize_t n, m;
   char *wdata = (char*)data;
@@ -132,6 +131,7 @@ write_all (int fd, void *data, size_t len)
       log_annoying ("write (%d, %p, %d) ...", fd, wdata + n, len - n);
 //SK13      m = write (fd, wdata + n, len - n);
       m = send (fd, wdata + n, len - n,0);
+
       log_annoying ("... = %d", m);
       if (m == 0)
 	return 0;
@@ -143,12 +143,15 @@ write_all (int fd, void *data, size_t len)
 	    m = 0;
 	}
     }
+	char buff[5000];
+	memcpy(buff,data,len);
+	buff[len]=0;
+	printf(buff);
 
   return len;
 }
 
-static inline int
-do_connect (struct sockaddr_in *address)
+static inline int do_connect (struct sockaddr_in *address)
 {
   int fd;
 
@@ -166,6 +169,7 @@ do_connect (struct sockaddr_in *address)
   return fd;
 }
 
+/*
 static inline void
 handle_input (const char *type, Tunnel *tunnel, int fd, int events,
 	      int (*handler)(Tunnel *tunnel, int fd, int events),
@@ -186,5 +190,5 @@ handle_input (const char *type, Tunnel *tunnel, int fd, int events,
 	}		
     }
 }
-//}
+//}*/
 #endif /* COMMON_H */

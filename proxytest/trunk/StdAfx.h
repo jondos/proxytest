@@ -79,8 +79,10 @@
 #include <time.h>
 #include <sys/types.h>
 #include <fcntl.h>
+#include <limits.h>
 #include <sys/stat.h>
 #include <signal.h>
+#include <errno.h>
 #include "popt/system.h"
 #include <openssl/blowfish.h>
 		// ZU ERLEDIGEN: Verweisen Sie hier auf zusätzliche Header-Dateien, die Ihr Programm benötigt
