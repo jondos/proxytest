@@ -61,6 +61,33 @@ UINT32 strtrim(UINT8* s)
 		return size;
 	}
 
+UINT8* bytes2hex(const void* bytes,UINT32 len)
+	{
+		if(bytes==NULL||len==0)
+			return NULL;
+		UINT8* buff=new UINT8[len*3+1];
+		UINT32 aktInd=0;
+		for(UINT32 i=0;i<len;i++)
+			{
+				UINT8 b1=((UINT8*)bytes)[i];
+				UINT8 b=(b1>>4);
+				if(b>9)
+					b+=55;
+				else
+					b+=48;
+				buff[aktInd++]=b;
+				b=(b1&0x0F);
+				if(b>9)
+					b+=55;
+				else
+					b+=48;
+				buff[aktInd++]=b;
+				buff[aktInd++]=32;
+			}
+		buff[len*3]=0;
+		return buff;
+	}
+
 /**
 *	Removes leading and ending whitespaces (chars<=32) from a byte array.
 *		@param src input byte array

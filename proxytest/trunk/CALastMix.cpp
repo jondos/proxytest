@@ -140,12 +140,12 @@ SINT32 CALastMix::init()
 
 		m_bRestart=false;
 		//Starting thread for Step 1a
-		m_pthreadReadFromMix=new CAThread();
+		m_pthreadReadFromMix=new CAThread((UINT8*)"CALastMix - ReadFromMix");
 		m_pthreadReadFromMix->setMainLoop(lm_loopReadFromMix);
 		m_pthreadReadFromMix->start(this);
 		
 		//Starting thread for Step 4		
-		m_pthreadSendToMix=new CAThread();
+		m_pthreadSendToMix=new CAThread((UINT8*)"CALastMix - SendToMix");
 		m_pthreadSendToMix->setMainLoop(lm_loopSendToMix);
 		m_pthreadSendToMix->start(this);
 

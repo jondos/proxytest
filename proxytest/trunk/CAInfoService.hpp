@@ -77,7 +77,7 @@ class CAInfoService
 			CASignature*	m_pSignature;
 			CACertStore*	m_pcertstoreOwnCerts;
 			CAMix*				m_pMix;
-			CAThread			m_threadRunLoop;
+			CAThread*			m_pthreadRunLoop;
 			UINT64				m_lastMixedPackets;
 			UINT32				m_minuts;
 			SINT32				m_expectedMixRelPos;
