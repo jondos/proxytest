@@ -17,7 +17,7 @@ class CALockAble
 			SINT32 unlock()
 				{
 					m_ConVar.lock();
-					m_nLookCount--;
+					m_nLockCount--;
 					m_ConVar.unlock();
 					return E_SUCCESS;
 				}
