@@ -625,20 +625,6 @@ int doFirstMix()
 		    }
 		
 		
-/*		fmIOPair->muxHttpIn.useTunnel("anon.inf.tu-dresden.de",2020);
-		printf("Before Connected");
-		if(fmIOPair->muxHttpIn.accept(4040)==SOCKET_ERROR)
-			{
-					CAMsg::printMsg(LOG_CRIT,"Cannot HTTP listen\n");
-			}
-		printf("Connected");
-		
-		MUXPACKET oPack;
-		int len=fmIOPair->muxHttpIn.receive(&oPack);
-		printf("Recevied: %u",len);
-		fmIOPair->muxHttpIn.close();
-		return -1;
-*/
 		CASocketAddr addrNext;
 		char strTarget[255];
 		options.getTargetHost(strTarget,255);
