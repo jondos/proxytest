@@ -510,7 +510,7 @@ SOURCE=.\CALocalProxy.hpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\CALookAble.hpp
+SOURCE=.\CALockAble.hpp
 # End Source File
 # Begin Source File
 
