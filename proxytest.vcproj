@@ -1967,6 +1967,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\CATempIPBlockList.cpp">
+			</File>
+			<File
 				RelativePath="CAThread.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -2941,6 +2944,9 @@
 			</File>
 			<File
 				RelativePath="CASymCipher.hpp">
+			</File>
+			<File
+				RelativePath=".\CATempIPBlockList.hpp">
 			</File>
 			<File
 				RelativePath="CAThread.hpp">
