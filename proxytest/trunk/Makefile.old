@@ -58,13 +58,13 @@ linux-x86-gcc:
 	$(MAKE) 'CC=gcc' 'CPPFLAGS=-Wall -Wcast-align -fomit-frame-pointer -march=i686 -O3 -D_REENTRANT' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=-L/usr/local/ssl/lib' _all_aes 
 
 linux-x86-gcc-async:
-	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -fomit-frame-pointer -march=i686 -O3' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lpthread -lstdc++ ' 'LIBDIR=-L/usr/local/ssl/lib' _all_aes 
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -finline-functions -fomit-frame-pointer -march=i686 -O3' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lpthread -lstdc++ ' 'LIBDIR=-L/usr/local/ssl/lib' _all_aes 
 
 linux-x86-gcc-async-static:
 	$(MAKE) 'CC=gcc' 'CPPFLAGS=-static -D_ASYNC -D_REENTRANT -Wall -Wcast-align -fomit-frame-pointer -march=i686 -O3' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=-L/usr/local/ssl/lib' _all_aes 
 
 linux-k6-gcc-async:
-	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -fomit-frame-pointer -march=k6 -O3' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=-L/usr/local/ssl/lib' _all_aes 
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -finline-functions -fomit-frame-pointer -march=k6 -O3' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=-L/usr/local/ssl/lib' _all_aes 
 
 linux-x86-gcc-debug-async:
 	$(MAKE) 'CC=gcc' 'CPPFLAGS=-ggdb -D_DEBUG -D_REENTRANT -D_ASYNC -Wall -Wcast-align -march=i686' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=-L/usr/local/ssl/lib' _all_aes 
