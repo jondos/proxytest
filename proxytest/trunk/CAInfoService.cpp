@@ -100,7 +100,7 @@ THREAD_RETURN InfoLoop(void *p)
 		CASocketAddr::getLocalHostName((UINT8*)buff,255);
 		
 //*>> Beginn very ugly hack for anon.inf.tu-dresden.de --> new Concepts needed!!!!!1		
-		if(strncmp(strAnonServer,"ithif77",7)==0)
+		if(strncmp(strAnonServer,"ithif46",7)==0)
 			strcpy(strAnonServer,"anon.inf.tu-dresden.de");
 //end hack....
 		sprintf(strAnonServer,"%s%%3A%u",buff,options.getServerPort());
@@ -221,7 +221,7 @@ SINT32 CAInfoService::sendHelo()
 				oxmlOut.BeginElementAttrs("MixCascade");
 				CASocketAddr::getLocalHostName((UINT8*)hostname,255);
 //*>> Beginn very ugly hack for anon.inf.tu-dresden.de --> new Concepts needed!!!!!1		
-		if(strncmp((char*)hostname,"ithif77",7)==0)
+		if(strncmp((char*)hostname,"ithif46",7)==0)
 			strcpy((char*)hostname,"anon.inf.tu-dresden.de");
 //end hack....
 				sprintf(buff,"%s%%3A%u",hostname,options.getServerPort());
