@@ -57,7 +57,7 @@ class CAConditionVariable:public CAMutex
 					return E_UNKNOWN;
 				}
 
-			/** Very ugly sholty to delete uncommented function!
+			/** Very ugly shortly to be deleted, uncommented function!
 				*/
 			SINT32 wait(CAMutex& oMutex)
 				{

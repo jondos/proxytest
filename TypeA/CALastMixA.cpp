@@ -41,19 +41,22 @@ SINT32 CALastMixA::loop()
 		CALastMixChannelList* pChannelList=new CALastMixChannelList;
 		CASocketGroup osocketgroupCacheRead;
 		CASocketGroup osocketgroupCacheWrite;
-		CASingleSocketGroup osocketgroupMixIn;
-		MIXPACKET* pMixPacket=new MIXPACKET;
+		//CASingleSocketGroup osocketgroupMixIn;
+		#ifdef LOG_PACKET_TIMES
+			tPoolEntry* pPoolEntry=new tPoolEntry;
+			MIXPACKET* pMixPacket=&pPoolEntry->mixpacket;
+		#else
+			MIXPACKET* pMixPacket=new MIXPACKET;
+		#endif	
 		SINT32 ret;
 		SINT32 countRead;
 		lmChannelListEntry* pChannelListEntry;
 		UINT8 rsaBuff[RSA_SIZE];
 		//CONNECTION* tmpCon;
 //		HCHANNEL tmpID;
-		m_pQueueSendToMix=new CAQueue();
 		UINT8* tmpBuff=new UINT8[MIXPACKET_SIZE];
-		osocketgroupMixIn.add(*m_pMuxIn);
-		((CASocket*)*m_pMuxIn)->setNonBlocking(true);
-		m_pMuxIn->setCrypt(true);
+		//osocketgroupMixIn.add(*m_pMuxIn);
+		//((CASocket*)*m_pMuxIn)->setNonBlocking(true);
 		bool bAktiv;
 		UINT32 countCacheAddresses=m_oCacheLB.getElementCount();
 		m_logUploadedPackets=m_logDownloadedPackets=0;
@@ -67,38 +70,23 @@ SINT32 CALastMixA::loop()
 			UINT64 current_millis;
 			UINT32 diff_time; 
 		#endif
-		#ifdef USE_POOL
-			CAPool* pPool=new CAPool(MIX_POOL_SIZE);
-		#endif
-		CAThread threadSendToMix;
-		threadSendToMix.setMainLoop(lm_loopSendToMix);
-		threadSendToMix.start(this);
 
 		for(;;)
 			{
 				bAktiv=false;
-//Step one.. reading from previous Mix
-// reading maximal number of current channels packets
-				countRead=osocketgroupMixIn.select(false,0);
-				if(countRead==1)
+//Step 1a reading from previous Mix --> now in separate thread
+//Step 1b processing MixPackets from previous mix
+// processing maximal number of current channels packets
+				if(m_pQueueReadFromMix->getSize()>=MIXPACKET_SIZE)
 					{
 						bAktiv=true;
 						UINT32 channels=pChannelList->getSize()+1;
-						for(UINT32 k=0;k<channels;k++)
+						for(UINT32 k=0;k<channels&&m_pQueueReadFromMix->getSize()>=MIXPACKET_SIZE;k++)
 							{
-								ret=m_pMuxIn->receive(pMixPacket,0);
-								if(ret==SOCKET_ERROR)
-									{
-										CAMsg::printMsg(LOG_CRIT,"Channel to previous mix closed -- Restarting!\n");
-										goto ERR;
-									}
-								if(ret!=MIXPACKET_SIZE)
-									break;
-								//else one packet received
+								ret=MIXPACKET_SIZE;
+								ret=m_pQueueReadFromMix->get((UINT8*)pMixPacket,&ret);
+								// one packet received
 								m_logUploadedPackets++;
-								#ifdef USE_POOL
-									pPool->pool(pMixPacket);
-								#endif
 								pChannelListEntry=pChannelList->get(pMixPacket->channel);
 								if(pChannelListEntry==NULL)
 									{
@@ -200,7 +188,7 @@ SINT32 CALastMixA::loop()
 																		getcurrentTimeMillis(current_millis);
 																		pChannelList->add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue(),current_millis,payLen);
 																	#else
-																		pChannelList->add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue());
+																		pChannelList->add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue(PAYLOAD_SIZE));
 																	#endif
 																	osocketgroupCacheRead.add(*tmpSocket);
 																}
@@ -412,12 +400,15 @@ SINT32 CALastMixA::loop()
 
 ERR:
 		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
+		m_bRestart=true;
 		m_pMuxIn->close();
 		UINT8 b;
 		m_pQueueSendToMix->add(&b,1);
 		CAMsg::printMsg(LOG_CRIT,"Wait for LoopSendToMix!\n");
-		threadSendToMix.join(); //will not join if queue is empty (and so wating)!!!
+		m_pthreadSendToMix->join(); //will not join if queue is empty (and so wating)!!!
 		m_bRunLog=false;
+		CAMsg::printMsg(LOG_CRIT,"Wait for LoopReadFromMix!\n");
+		m_pthreadReadFromMix->join();
 		pChannelListEntry=pChannelList->getFirstSocket();
 		while(pChannelListEntry!=NULL)
 			{
@@ -430,11 +421,6 @@ ERR:
 		delete pChannelList;
 		delete []tmpBuff;
 		delete pMixPacket;
-		delete m_pQueueSendToMix;
-		m_pQueueSendToMix=NULL;
-		#ifdef USE_POOL
-			delete pPool;
-		#endif
 		oLogThread.join();
 #endif //! NEW_MIX_TYPE
 		return E_UNKNOWN;

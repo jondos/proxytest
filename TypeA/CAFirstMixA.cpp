@@ -38,14 +38,17 @@ extern CACmdLnOptions options;
 SINT32 CAFirstMixA::loop()
 	{
 #ifndef NEW_MIX_TYPE
-		CASingleSocketGroup osocketgroupMixOut;
+	//	CASingleSocketGroup osocketgroupMixOut;
 		SINT32 countRead;
-		MIXPACKET* pMixPacket=new MIXPACKET;
+		#ifdef LOG_PACKET_TIMES
+			tPoolEntry* pPoolEntry=new tPoolEntry;
+			MIXPACKET* pMixPacket=&pPoolEntry->mixpacket;
+		#else
+			MIXPACKET* pMixPacket=new MIXPACKET;
+		#endif	
 		m_nUser=0;
-		m_bRestart=false;
 		SINT32 ret;
-		osocketgroupMixOut.add(*m_pMuxOut);
-		m_pMuxOut->setCrypt(true);
+		//osocketgroupMixOut.add(*m_pMuxOut);
 	
 		UINT8* tmpBuff=new UINT8[MIXPACKET_SIZE];
 		CAMsg::printMsg(LOG_DEBUG,"Starting Message Loop... \n");
@@ -59,11 +62,11 @@ SINT32 CAFirstMixA::loop()
 //		threadReadFromUsers.setMainLoop(loopReadFromUsers);
 //		threadReadFromUsers.start(this);
 
-		#ifdef USE_POOL
-			CAPool* pPool=new CAPool(MIX_POOL_SIZE);
+		#ifdef LOG_PACKET_TIMES
+			UINT64 upload_packet_timestamp;
+			UINT64 download_packet_timestamp;
 		#endif
-
-		for(;;)	                                                          /* the main mix loop as long as there are things that are not handled by threads. */
+		while(!m_bRestart)	                                                          /* the main mix loop as long as there are things that are not handled by threads. */
 			{
 				bAktiv=false;
 //LOOP_START:
@@ -89,6 +92,9 @@ SINT32 CAFirstMixA::loop()
 								if(m_psocketgroupUsersRead->isSignaled(*pMuxSocket))	// if this one seems to have data
 									{
 										countRead--;
+										#ifdef LOG_PACKET_TIMES
+											getcurrentTimeMillis(upload_packet_timestamp);
+										#endif	
 										ret=pMuxSocket->receive(pMixPacket,0);
 										if(ret==SOCKET_ERROR/*||pHashEntry->accessUntil<time()*/) 
 											{																								// remove dead connections
@@ -110,13 +116,20 @@ SINT32 CAFirstMixA::loop()
 														getRandom(pMixPacket->data,DATA_SIZE);
 														pMixPacket->flags=CHANNEL_CLOSE;
 														pMixPacket->channel=pEntry->channelOut;
-														//m_pMuxOut->send(pMixPacket,tmpBuff);
-														m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE);
+														#ifdef LOG_PACKET_TIMES
+															upload_packet_timestamp=0;
+															m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE,upload_packet_timestamp);
+														#else
+															m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE);
+														#endif
 														delete pEntry->pCipher;
 														pEntry=m_pChannelList->getNextChannel(pEntry);
 													}
 												ASSERT(pHashEntry->pQueueSend!=NULL,"Send queue is NULL");
 												delete pHashEntry->pQueueSend;
+												#ifdef FIRST_MIX_SYMMETRIC
+													delete pHashEntry->pSymCipher;
+												#endif	
 												m_pChannelList->remove(pMuxSocket);
 												delete pMuxSocket;
 												decUsers();
@@ -144,7 +157,12 @@ SINT32 CAFirstMixA::loop()
 													{ 
 														getRandom(pMixPacket->data,DATA_SIZE);
 														pMuxSocket->send(pMixPacket,tmpBuff);
-														pHashEntry->pQueueSend->add(tmpBuff,MIXPACKET_SIZE);
+														#ifdef LOG_PACKET_TIMES
+															download_packet_timestamp=0;
+															pHashEntry->pQueueSend->add(tmpBuff,MIXPACKET_SIZE,download_packet_timestamp);
+														#else			
+															pHashEntry->pQueueSend->add(tmpBuff,MIXPACKET_SIZE);
+														#endif	
 														m_psocketgroupUsersWrite->add(*pMuxSocket); 
 													}
 												else if(pMixPacket->flags==CHANNEL_CLOSE)			// closing one mix-channel (not the JAP<->mix connection!)
@@ -155,8 +173,12 @@ SINT32 CAFirstMixA::loop()
 															{
 																pMixPacket->channel=pEntry->channelOut;
 																getRandom(pMixPacket->data,DATA_SIZE);
-																//m_pMuxOut->send(pMixPacket,tmpBuff);
-																m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE);
+																#ifdef LOG_PACKET_TIMES
+																	upload_packet_timestamp=0;
+																	m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE,upload_packet_timestamp);
+																#else
+																	m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE);
+																#endif
 																#ifdef LOG_CHANNEL
 																	//pEntry->packetsInFromUser++;
 																	getcurrentTimeMillis(current_time);
@@ -184,18 +206,25 @@ SINT32 CAFirstMixA::loop()
 																pMixPacket->channel=pEntry->channelOut;
 																pCipher=pEntry->pCipher;
 																pCipher->crypt1(pMixPacket->data,pMixPacket->data,DATA_SIZE);
-																//m_pMuxOut->send(pMixPacket,tmpBuff);            // prepare packet for sending (apply symmetric cypher to first block)
-																m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE); // queue the packet for sending to the next mix.
+																#ifdef LOG_PACKET_TIMES                           // queue the packet for sending to the next mix.
+																	m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE,upload_packet_timestamp);
+																#else
+																	m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE);
+																#endif
 																incMixedPackets();
 																#ifdef LOG_CHANNEL
 																	pEntry->packetsInFromUser++;
 																#endif
 															}
 														else if(pEntry==NULL&&pMixPacket->flags==CHANNEL_OPEN)  // open a new mix channel
-														{ // stefan: muesste das nicht vor die behandlung von CHANNEL_DATA? oder gilt OPEN => !DATA ? 
-														   //es gilt: open -> data
-																m_pRSA->decrypt(pMixPacket->data,rsaBuff); // stefan: das hier ist doch eine ziemlich kostspielige operation. sollte das pruefen auf Max_Number_Of_Channels nicht vorher passieren? --> ok sollte aufs TODO ...
-																#ifdef REPLAY_DETECTION
+															{ // stefan: muesste das nicht vor die behandlung von CHANNEL_DATA? oder gilt OPEN => !DATA ? 
+																//es gilt: open -> data
+																#ifdef FIRST_MIX_SYMMETRIC
+																	pHashEntry->pSymCipher->crypt1(pMixPacket->data,rsaBuff,KEY_SIZE);
+																#else
+																	m_pRSA->decrypt(pMixPacket->data,rsaBuff); // stefan: das hier ist doch eine ziemlich kostspielige operation. sollte das pruefen auf Max_Number_Of_Channels nicht vorher passieren? --> ok sollte aufs TODO ...
+																#endif
+																#ifdef REPLAY_DETECTION //TODO: For Symmetric case...
 																	if(!validTimestampAndFingerprint(rsaBuff, KEY_SIZE, (rsaBuff+KEY_SIZE)))
 																		{
 																			CAMsg::printMsg(LOG_INFO,"Duplicate packet ignored.\n");
@@ -204,10 +233,15 @@ SINT32 CAFirstMixA::loop()
 																#endif
 																pCipher= new CASymCipher();
 																pCipher->setKey(rsaBuff);
-																pCipher->crypt1(pMixPacket->data+RSA_SIZE,
-																								 pMixPacket->data+RSA_SIZE-(KEY_SIZE+TIMESTAMP_SIZE),
-																								 DATA_SIZE-RSA_SIZE);
-																memcpy(pMixPacket->data,rsaBuff+KEY_SIZE+TIMESTAMP_SIZE,RSA_SIZE-(KEY_SIZE+TIMESTAMP_SIZE));																
+																#ifdef FIRST_MIX_SYMMETRIC
+																	pCipher->crypt1(pMixPacket->data+KEY_SIZE,pMixPacket->data,DATA_SIZE-KEY_SIZE);
+																#else
+																	pCipher->crypt1(pMixPacket->data+RSA_SIZE,
+																									pMixPacket->data+RSA_SIZE-(KEY_SIZE+TIMESTAMP_SIZE),
+																									DATA_SIZE-RSA_SIZE);
+																	memcpy(pMixPacket->data,rsaBuff+KEY_SIZE+TIMESTAMP_SIZE,RSA_SIZE-(KEY_SIZE+TIMESTAMP_SIZE));
+																#endif																	
+																getRandom(pMixPacket->data+DATA_SIZE-(KEY_SIZE+TIMESTAMP_SIZE),KEY_SIZE+TIMESTAMP_SIZE);
 																#ifdef LOG_CHANNEL
 																	HCHANNEL tmpC=pMixPacket->channel;
 																#endif
@@ -220,8 +254,11 @@ SINT32 CAFirstMixA::loop()
 																		#ifdef LOG_CHANNEL
 																			m_pChannelList->get(pMuxSocket,tmpC)->packetsInFromUser++;
 																		#endif
-																		//m_pMuxOut->send(pMixPacket,tmpBuff);
-																		m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE);
+																		#ifdef LOG_PACKET_TIMES                          
+																			m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE,upload_packet_timestamp);
+																		#else
+																			m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE);
+																		#endif
 																		incMixedPackets();
 																		#ifdef _DEBUG
 																			CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",pMixPacket->channel);
@@ -240,22 +277,28 @@ SINT32 CAFirstMixA::loop()
 // Now in a separate Thread (see loopSendToMix())
 
 //Step 4
-//Reading from Mix				
+//Stepa 4a Receiving form Mix to Queue now in separat Thread
+//Step 4b Proccesing MixPackets received from Mix
+//todo check for error!!!
 				countRead=m_nUser+1;
-				while(countRead>0&&osocketgroupMixOut.select(false,0)==1)
+				while(countRead>0&&m_pQueueReadFromMix->getSize()>=MIXPACKET_SIZE)
 					{
 						bAktiv=true;
 						countRead--;
-						ret=m_pMuxOut->receive(pMixPacket,0);
-						if(ret==SOCKET_ERROR)
-							{
-								CAMsg::printMsg(LOG_CRIT,"Mux-Out-Channel Receiving Data Error - Exiting!\n");
-								goto ERR;
-							}
-						if(ret!=MIXPACKET_SIZE)
-							break;
+						ret=MIXPACKET_SIZE;
+						m_pQueueReadFromMix->get((UINT8*)pMixPacket,&ret);
+						#ifdef LOG_PACKET_TIMES
+							getcurrentTimeMicros(download_packet_timestamp);
+						#endif	
 						#ifdef USE_POOL
-							pPool->pool(pMixPacket);
+							#ifdef LOG_PACKET_TIMES
+//								set64(pPoolEntry->overall_timestamp,download_packet_timestamp);
+//								set64(pPoolEntry->pool_timestamp,download_packet_timestamp);
+//								pPool->pool(pPoolEntry);
+//								set64(download_packet_timestamp,pPoolEntry->overall_timestamp);
+							#else
+//								pPool->pool((tPoolEntry*)pMixPacket);
+							#endif	
 						#endif
 						if(pMixPacket->flags==CHANNEL_CLOSE) //close event
 							{
@@ -268,7 +311,11 @@ SINT32 CAFirstMixA::loop()
 										pMixPacket->channel=pEntry->channelIn;
 										getRandom(pMixPacket->data,DATA_SIZE);
 										pEntry->pHead->pMuxSocket->send(pMixPacket,tmpBuff);
-										pEntry->pHead->pQueueSend->add(tmpBuff,MIXPACKET_SIZE);
+										#ifdef LOG_PACKET_TIMES
+											pEntry->pHead->pQueueSend->add(tmpBuff,MIXPACKET_SIZE,download_packet_timestamp);
+										#else
+											pEntry->pHead->pQueueSend->add(tmpBuff,MIXPACKET_SIZE);
+										#endif	
 										#ifdef LOG_CHANNEL
 											pEntry->pHead->trafficOut++;
 											//pEntry->packetsOutToUser++;
@@ -306,8 +353,12 @@ SINT32 CAFirstMixA::loop()
 										pMixPacket->channel=pEntry->channelIn;
 										pEntry->pCipher->crypt2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 										
-										pEntry->pHead->pMuxSocket->send(pMixPacket,tmpBuff);
-										pEntry->pHead->pQueueSend->add(tmpBuff,MIXPACKET_SIZE);
+										pEntry->pHead->pMuxSocket->prepareForSend(pMixPacket);
+										#ifdef LOG_PACKET_TIMES
+											pEntry->pHead->pQueueSend->add(pMixPacket,MIXPACKET_SIZE,download_packet_timestamp);
+										#else
+											pEntry->pHead->pQueueSend->add(pMixPacket,MIXPACKET_SIZE);
+										#endif	
 										#ifdef LOG_CHANNEL
 											pEntry->pHead->trafficOut++;
 											pEntry->packetsOutToUser++;
@@ -323,8 +374,12 @@ SINT32 CAFirstMixA::loop()
 												#ifdef _DEBUG
 													CAMsg::printMsg(LOG_INFO,"Sending suspend for channel: %u\n",pMixPacket->channel);
 												#endif												
-												//m_pMuxOut->send(pMixPacket,tmpBuff);
-												m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE);
+												#ifdef LOG_PACKET_TIMES
+													setZero64(upload_packet_timestamp);
+													m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE,upload_packet_timestamp);
+												#else
+													m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE);
+												#endif
 												
 												pEntry->bIsSuspended=true;
 												pEntry->pHead->cSuspend++;
@@ -356,11 +411,30 @@ SINT32 CAFirstMixA::loop()
 							{
 								countRead--;
 								UINT32 len=MIXPACKET_SIZE;
+								#ifdef LOG_PACKET_TIMES
+									len-=pfmHashEntry->uAlreadySendPacketSize;
+								#endif	
 								pfmHashEntry->pQueueSend->peek(tmpBuff,&len); //We only make a peek() here because we do not know if sending will succeed or not (because send() is non blocking there!)
 								ret=((CASocket*)pfmHashEntry->pMuxSocket)->send(tmpBuff,len);
 								if(ret>0)
 									{
 										pfmHashEntry->pQueueSend->remove((UINT32*)&ret);
+										#ifdef LOG_PACKET_TIMES
+											pfmHashEntry->uAlreadySendPacketSize+=ret;
+											if(pfmHashEntry->uAlreadySendPacketSize==MIXPACKET_SIZE)
+												{
+													pfmHashEntry->uAlreadySendPacketSize=0;
+													UINT64 timestamp;
+													ret=sizeof(timestamp);
+													pfmHashEntry->pQueueSend->get((UINT8*)&timestamp,(UINT32*)&ret);
+													if(timestamp!=0)
+														{
+															UINT64 tmpU64;
+															getcurrentTimeMicros(tmpU64);
+															CAMsg::printMsg(LOG_CRIT,"Download Packet processing time (arrival <--> send): %u µs\n",diff64(tmpU64,timestamp));
+														}
+												}
+										#endif
 #define USER_SEND_BUFFER_RESUME 10000
 										if( pfmHashEntry->cSuspend > 0 &&
 												pfmHashEntry->pQueueSend->getSize() < USER_SEND_BUFFER_RESUME)
@@ -374,7 +448,12 @@ SINT32 CAFirstMixA::loop()
 																pMixPacket->flags=CHANNEL_RESUME;
 																pMixPacket->channel=pEntry->channelOut;
 																//m_pMuxOut->send(pMixPacket,tmpBuff);
-																m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE);
+																#ifdef LOG_PACKET_TIMES
+																	upload_packet_timestamp=0;
+																	m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE,upload_packet_timestamp);
+																#else
+																	m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE);
+																#endif
 																pEntry->bIsSuspended=false;	
 															}
 														
@@ -404,13 +483,19 @@ ERR:
 			m_arrSocketsIn[i].close();
 		//writng one byte to the queue...
 		UINT8 b;
-		m_pQueueSendToMix->add(&b,1);
+		#ifdef LOG_PACKET_TIMES
+			m_pQueueSendToMix->add(&b,1,upload_packet_timestamp);
+		#else
+			m_pQueueSendToMix->add(&b,1);
+		#endif
 //#if !defined(_DEBUG) && !defined(NO_LOOPACCEPTUSER)
 		CAMsg::printMsg(LOG_CRIT,"Wait for LoopAcceptUsers!\n");
 		m_pthreadAcceptUsers->join();
 //#endif
 		CAMsg::printMsg(LOG_CRIT,"Wait for LoopSendToMix!\n");
 		m_pthreadSendToMix->join(); //will not join if queue is empty (and so wating)!!!
+		CAMsg::printMsg(LOG_CRIT,"Wait for LoopReadFromMix!\n");
+		m_pthreadReadFromMix->join();
 		//waits until all login threads terminates....
 		// we have to be sure that the Accept thread was alread stoped!
 		m_pthreadsLogin->destroy(true);
@@ -421,6 +506,9 @@ ERR:
 			{
 				CAMuxSocket * pMuxSocket=pHashEntry->pMuxSocket;
 				delete pHashEntry->pQueueSend;
+				#ifdef FIRST_MIX_SYMMETRIC
+					delete pHashEntry->pSymCipher; 
+				#endif
 
 				fmChannelListEntry* pEntry=m_pChannelList->getFirstChannelForSocket(pHashEntry->pMuxSocket);
 				while(pEntry!=NULL)
@@ -437,9 +525,6 @@ ERR:
 		CAMsg::printMsg	(LOG_CRIT,"Memory usage after: %u\n",getMemoryUsage());	
 		delete pMixPacket;
 		delete []tmpBuff;
-		#ifdef USE_POOL
-			delete pPool;
-		#endif
 		CAMsg::printMsg(LOG_CRIT,"Main Loop exited!!\n");
 #endif //!MIX_NEW_TYP
 		return E_UNKNOWN;

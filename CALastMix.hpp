@@ -49,6 +49,8 @@ class CALastMix:public CAMix
 				{
 					m_pMuxIn=NULL;m_pSignature=NULL;
 					m_pRSA=NULL;m_pInfoService=NULL;
+					m_pthreadSendToMix=m_pthreadReadFromMix=NULL;
+					m_pQueueSendToMix=m_pQueueReadFromMix=NULL;
 				}
 			virtual ~CALastMix(){clean();}
 			SINT32 reconfigure();
@@ -65,13 +67,17 @@ class CALastMix:public CAMix
 #endif
 
 		protected:
+			volatile bool					m_bRestart;
 			CAMuxSocket*					m_pMuxIn;
 			CAQueue*							m_pQueueSendToMix;
+			CAQueue*							m_pQueueReadFromMix;
 			CACacheLoadBalancing	m_oCacheLB;
 			CASocketAddrINet			maddrSocks;
 			CAASymCipher*					m_pRSA;
 			CASignature*					m_pSignature;
 			CAInfoService*				m_pInfoService;
+			CAThread*							m_pthreadSendToMix;
+			CAThread*							m_pthreadReadFromMix;
 #ifdef LOG_CRIME
 			regex_t*							m_pCrimeRegExps;
 			UINT32								m_nCrimeRegExp;
@@ -79,6 +85,7 @@ class CALastMix:public CAMix
 
 		protected:
 			friend THREAD_RETURN	lm_loopSendToMix(void* param);
+			friend THREAD_RETURN	lm_loopReadFromMix(void* pParam);
 			friend THREAD_RETURN	lm_loopLog(void*);
 			volatile bool					m_bRunLog;
 			volatile UINT32				m_logUploadedPackets;

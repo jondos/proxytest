@@ -450,7 +450,7 @@ THREAD_RETURN mm_loopDownStream(void *p)
 									pMixPacket->channel=DUMMY_CHANNEL;
 									pMixPacket->flags=CHANNEL_CLOSE;
 									getRandom(pMixPacket->data,DATA_SIZE);
-									pPool->pool(pMixPacket);
+									pPool->pool((tPoolEntry*)pMixPacket);
 									if(pMix->m_pMuxIn->send(pMixPacket)==SOCKET_ERROR)
 										goto ERR;								
 								#endif
@@ -479,7 +479,7 @@ THREAD_RETURN mm_loopDownStream(void *p)
 								{
 									pMixPacket->flags=CHANNEL_CLOSE;
 									getRandom(pMixPacket->data,DATA_SIZE);
-									pPool->pool(pMixPacket);
+									pPool->pool((tPoolEntry*)pMixPacket);
 									if(pMix->m_pMuxIn->send(pMixPacket)==SOCKET_ERROR)
 										goto ERR;								
 								}
@@ -496,7 +496,7 @@ THREAD_RETURN mm_loopDownStream(void *p)
 								pCipher->crypt2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 								pCipher->unlock();
 								#ifdef USE_POOL
-									pPool->pool(pMixPacket);
+									pPool->pool((tPoolEntry*)pMixPacket);
 								#endif
 								if(pMix->m_pMuxIn->send(pMixPacket)==SOCKET_ERROR)
 									goto ERR;
@@ -551,7 +551,7 @@ SINT32 CAMiddleMix::loop()
 									pMixPacket->channel=DUMMY_CHANNEL;
 									pMixPacket->flags=CHANNEL_CLOSE;
 									getRandom(pMixPacket->data,DATA_SIZE);
-									pPool->pool(pMixPacket);
+									pPool->pool((tPoolEntry*)pMixPacket);
 									if(m_pMuxOut->send(pMixPacket)==SOCKET_ERROR)
 										goto ERR;								
 								#endif
@@ -580,7 +580,7 @@ SINT32 CAMiddleMix::loop()
 								{
 									pMixPacket->flags=CHANNEL_CLOSE;
 									getRandom(pMixPacket->data,DATA_SIZE);
-									pPool->pool(pMixPacket);
+									pPool->pool((tPoolEntry*)pMixPacket);
 									if(m_pMuxOut->send(pMixPacket)==SOCKET_ERROR)
 										goto ERR;								
 								}
@@ -607,10 +607,11 @@ SINT32 CAMiddleMix::loop()
 																				pMixPacket->data+RSA_SIZE-(KEY_SIZE+TIMESTAMP_SIZE),
 																				DATA_SIZE-RSA_SIZE);
 										memcpy(pMixPacket->data,tmpRSABuff+KEY_SIZE+TIMESTAMP_SIZE,RSA_SIZE-(KEY_SIZE+TIMESTAMP_SIZE));
+										getRandom(pMixPacket->data+DATA_SIZE-(KEY_SIZE+TIMESTAMP_SIZE),KEY_SIZE+TIMESTAMP_SIZE);
 										m_pMiddleMixChannelList->add(pMixPacket->channel,pCipher,&channelOut);
 										pMixPacket->channel=channelOut;
 										#ifdef USE_POOL
-											pPool->pool(pMixPacket);
+											pPool->pool((tPoolEntry*)pMixPacket);
 										#endif
 										if(m_pMuxOut->send(pMixPacket)==SOCKET_ERROR)
 											goto ERR;
@@ -622,7 +623,7 @@ SINT32 CAMiddleMix::loop()
 									pCipher->crypt1(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 									pCipher->unlock();
 									#ifdef USE_POOL
-										pPool->pool(pMixPacket);
+										pPool->pool((tPoolEntry*)pMixPacket);
 									#endif
 									if(m_pMuxOut->send(pMixPacket)==SOCKET_ERROR)
 										goto ERR;

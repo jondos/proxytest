@@ -40,6 +40,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAUtil.hpp"
 #include "CAThread.hpp"
 #include "CAThreadPool.hpp"
+#include "CATimedQueue.hpp"
 #ifdef PAYMENT
 #include "CAAccountingInstance.hpp"
 #endif
@@ -54,6 +55,7 @@ class CAFirstMix:public CAMix
 					m_nMixedPackets=0;
 					m_nSocketsIn=0;
 					m_pQueueSendToMix=NULL;
+					m_pQueueReadFromMix=NULL;
 					m_pIPList=NULL;
 					m_arrSocketsIn=NULL;
 					m_pRSA=NULL;
@@ -64,6 +66,7 @@ class CAFirstMix:public CAMix
 					m_docMixCascadeInfo=NULL;
 					m_xmlKeyInfoBuff=NULL;
 					m_pthreadSendToMix=NULL;
+					m_pthreadReadFromMix=NULL;
 					m_pthreadAcceptUsers=NULL;
 					m_pthreadsLogin=NULL;
 				}
@@ -103,6 +106,7 @@ class CAFirstMix:public CAMix
 					
 			
 		friend THREAD_RETURN fm_loopSendToMix(void*);
+		friend THREAD_RETURN fm_loopReadFromMix(void*);
 		friend THREAD_RETURN fm_loopAcceptUsers(void*);
 		friend THREAD_RETURN fm_loopReadFromUsers(void*);
 		friend THREAD_RETURN fm_loopDoUserLogin(void* param);
@@ -139,7 +143,12 @@ class CAFirstMix:public CAMix
 			SINT32 doUserLogin(CAMuxSocket* pNewUSer,UINT8 perrIP[4]);
 		protected:	
 			CAIPList* m_pIPList;
+#ifdef LOG_PACKET_TIMES
+			CATimedQueue* m_pQueueSendToMix;
+#else			
 			CAQueue* m_pQueueSendToMix;
+#endif			
+			CAQueue* m_pQueueReadFromMix;
 			CAFirstMixChannelList* m_pChannelList;
 			volatile UINT32 m_nUser;
 			UINT32 m_nSocketsIn; //number of usable ListenerInterface (non 'virtual')
@@ -164,6 +173,7 @@ class CAFirstMix:public CAMix
 			CAThread* m_pthreadAcceptUsers;
 			CAThreadPool* m_pthreadsLogin;
 			CAThread* m_pthreadSendToMix;
+			CAThread* m_pthreadReadFromMix;
 			#ifdef PAYMENT
 				CAAccountingInstance * m_pAccountingInstance;
 			#endif

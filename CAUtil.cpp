@@ -192,6 +192,34 @@ SINT32 getcurrentTimeMillis(UINT64& u64Time)
 	  #endif
 	}
 
+/** Gets the current Systemtime in micros seconds. Depending on the operating system,
+  * the time may not be so accurat. 
+	* @param u64Time - 64 bit Integer, in which the current time is placed
+	* @retval E_UNKNOWN, if an error occurs
+	*	@retval	E_SUCCESS, otherwise
+*/
+SINT32 getcurrentTimeMicros(UINT64& u64Time)
+	{
+		#ifdef _WIN32
+			timeb timebuffer;
+			ftime(&timebuffer);
+			/* Hack what should be solved better...*/
+			u64Time=((UINT64)timebuffer.time)*1000000+((UINT64)timebuffer.millitm)*1000;
+			/* end of hack..*/
+			return E_SUCCESS;
+	  #else //we dont use ftime due to a bug in glibc2.0
+		//we use gettimeofday() in order to get the millis...
+			struct timeval tv;
+			gettimeofday(&tv,NULL); //getting millis...
+			#ifdef HAVE_NATIVE_UINT64
+				u64Time=((UINT64)tv.tv_sec)*1000000+((UINT64)tv.tv_usec);
+				return E_SUCCESS;
+			#else
+				return E_UNKNOWN;
+			#endif
+	  #endif
+	}
+
 SINT32 initRandom()
 	{
 		#if _WIN32

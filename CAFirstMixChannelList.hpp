@@ -29,6 +29,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define __CAFRISTMIXCHANNELLIST__
 #include "CAMuxSocket.hpp"
 #include "CAQueue.hpp"
+#include "CATimedQueue.hpp"
 #include "CASymCipher.hpp"
 #include "CAMutex.hpp"
 #include "CAMsg.hpp"
@@ -61,7 +62,12 @@ struct t_fmhashtableentry
 	{
 		public:
 			CAMuxSocket*	pMuxSocket;
+#ifdef LOG_PACKET_TIMES
+			CATimedQueue* pQueueSend;
+			UINT32        uAlreadySendPacketSize;
+#else				
 			CAQueue*			pQueueSend;
+#endif			
 			UINT32				cSuspend;
 #ifdef LOG_CHANNEL
 			UINT32				trafficIn;
@@ -72,6 +78,9 @@ struct t_fmhashtableentry
 #ifdef PAYMENT
 	aiAccountingInfo * pAccountingInfo;
 #endif
+#ifdef FIRST_MIX_SYMMETRIC
+			CASymCipher*  pSymCipher;
+#endif			
 			UINT8					peerIP[4]; //needed for flooding control
 		private:
 			UINT32				cNumberOfChannels;
@@ -181,7 +190,11 @@ class CAFirstMixChannelList
 			CAFirstMixChannelList();
 			~CAFirstMixChannelList();
 		
-			SINT32 add(CAMuxSocket* pMuxSocket,UINT8 peerIP[4],CAQueue* pQueueSend);
+#ifdef LOG_PACKET_TIMES	
+			SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,UINT8 peerIP[4],CATimedQueue* pQueueSend);
+#else
+			SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,UINT8 peerIP[4],CAQueue* pQueueSend);
+#endif
 			SINT32 addChannel(CAMuxSocket* pMuxSocket,HCHANNEL channelIn,CASymCipher* pCipher,HCHANNEL* channelOut);
 			
 			fmChannelListEntry* get(CAMuxSocket* pMuxSocket,HCHANNEL channelIn);

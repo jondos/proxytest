@@ -151,6 +151,19 @@ SINT32 CAMuxSocket::send(MIXPACKET *pPacket,UINT8* buff)
 		m_csSend.unlock();
 		return ret;
 	}
+	
+SINT32 CAMuxSocket::prepareForSend(MIXPACKET *pinoutPacket)
+	{	
+		m_csSend.lock();
+		pinoutPacket->channel=htonl(pinoutPacket->channel);
+#ifndef NEW_MIX_TYPE
+		pinoutPacket->flags=htons(pinoutPacket->flags);
+#endif
+		m_oCipherOut.crypt1(((UINT8*)pinoutPacket),((UINT8*)pinoutPacket),16);
+		m_csSend.unlock();
+		return MIXPACKET_SIZE;
+	}
+	
 
 SINT32 CAMuxSocket::receive(MIXPACKET* pPacket)
 	{

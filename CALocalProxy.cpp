@@ -130,13 +130,15 @@ SINT32 CALocalProxy::init()
 				
 				CAMsg::printMsg(LOG_INFO," connected!\n");
 				UINT16 size;
-				((CASocket*)m_muxOut)->receive((UINT8*)&size,2);
-				((CASocket*)m_muxOut)->receive(&m_chainlen,1);
-				if(m_chainlen=='<')//assuming XML
+				UINT8 byte;
+				((CASocket*)m_muxOut)->receiveFully((UINT8*)&size,2);
+				((CASocket*)m_muxOut)->receiveFully((UINT8*)&byte,1);
+				CAMsg::printMsg(LOG_INFO,"Received Key Info!\n");
+				if(byte=='<')//assuming XML
 					{
 						size=ntohs(size);
 						UINT8* buff=new UINT8[size+1];
-						buff[0]=m_chainlen;
+						buff[0]=byte;
 						((CASocket*)m_muxOut)->receiveFully(buff+1,size-1);
 						buff[size]=0;
 						SINT32 ret=processKeyExchange(buff,size);
@@ -146,20 +148,7 @@ SINT32 CALocalProxy::init()
 					}
 				else
 					{
-						CAMsg::printMsg(LOG_INFO,"Chain-Length: %d\n",m_chainlen);
-						size=ntohs(size)-1;
-						UINT8* buff=new UINT8[size];
-						((CASocket*)m_muxOut)->receiveFully(buff,size);
-						m_arRSA=new CAASymCipher[m_chainlen];
-						int aktIndex=0;
-						for(int i=0;i<m_chainlen;i++)
-							{
-								int len=size;
-								m_arRSA[i].setPublicKey(buff+aktIndex,(UINT32*)&len);
-								size-=len;
-								aktIndex+=len;
-							}
-						delete[] buff;
+						return E_UNKNOWN;
 					}
 				return E_SUCCESS;
 			}
@@ -365,10 +354,10 @@ SINT32 CALocalProxy::loop()
 												if(!tmpCon->pCiphers[0].isKeyValid()) //First time --> rsa key
 													{
 														//Has to bee optimized!!!!
-														unsigned char buff[DATA_SIZE];
-														int size=DATA_SIZE-KEY_SIZE-TIMESTAMP_SIZE;
+														UINT8 buff[DATA_SIZE];
+														UINT32 size=DATA_SIZE-KEY_SIZE-TIMESTAMP_SIZE;
 														//tmpCon->pCipher->generateEncryptionKey(); //generate Key
-														for(int c=0;c<m_chainlen;c++)
+														for(UINT32 c=0;c<m_chainlen;c++)
 															{
 																getRandom(buff,KEY_SIZE);
 																buff[0]&=0x7F; // Hack for RSA to ensure m < n !!!!!
@@ -386,9 +375,17 @@ SINT32 CALocalProxy::loop()
 																	currentTimestamp(buff+KEY_SIZE,true);
 																#endif
 																memcpy(buff+KEY_SIZE+TIMESTAMP_SIZE,pMixPacket->data,size);
-																m_arRSA[c].encrypt(buff,buff);
-																// Does RSA_SIZE need to be increased by RSA_SIZE/KEY_SIZE*TIMESTAMP_SIZE?
-																tmpCon->pCiphers[c].crypt1(buff+RSA_SIZE,buff+RSA_SIZE,DATA_SIZE-RSA_SIZE);
+																if(m_MixCascadeProtocolVersion==MIX_CASCADE_PROTOCOL_VERSION_0_4&&c==m_chainlen-1)
+																	{
+																		m_pSymCipher->crypt1(buff,buff,KEY_SIZE);
+																		tmpCon->pCiphers[c].crypt1(buff+KEY_SIZE,buff+KEY_SIZE,DATA_SIZE-KEY_SIZE);
+																	}
+																else
+																	{
+																		m_arRSA[c].encrypt(buff,buff);
+																		// Does RSA_SIZE need to be increased by RSA_SIZE/KEY_SIZE*TIMESTAMP_SIZE?
+																		tmpCon->pCiphers[c].crypt1(buff+RSA_SIZE,buff+RSA_SIZE,DATA_SIZE-RSA_SIZE);
+																	}	
 																memcpy(pMixPacket->data,buff,DATA_SIZE);
 																size-=KEY_SIZE+TIMESTAMP_SIZE;
 																len+=KEY_SIZE+TIMESTAMP_SIZE;
@@ -397,7 +394,7 @@ SINT32 CALocalProxy::loop()
 													}
 												else //sonst
 													{
-														for(int c=0;c<m_chainlen;c++)
+														for(UINT32 c=0;c<m_chainlen;c++)
 															tmpCon->pCiphers[c].crypt1(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 														pMixPacket->flags=CHANNEL_DATA;
 													}
@@ -466,6 +463,7 @@ SINT32 CALocalProxy::clean()
 
 SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 	{
+		CAMsg::printMsg(LOG_INFO,"Login process and key exchange started...\n");
 		//Parsing KeyInfo received from Mix n+1
 		MemBufInputSource oInput(buff,len,"localoproxy");
 		DOMParser oParser;
@@ -477,7 +475,27 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 				return E_UNKNOWN;
 			}
 
+
 		DOM_Element root=doc.getDocumentElement();
+		DOM_Element elemVersion;
+		getDOMChildByName(root,(UINT8*)"MixProtocolVersion",elemVersion,false);
+		UINT8 strVersion[255];
+		UINT32 tmpLen=255;
+		if(getDOMElementValue(elemVersion,strVersion,&tmpLen)==E_SUCCESS)
+			{
+			printf("hier\n");
+				if(tmpLen==3&&memcmp(strVersion,"0.4",3)==0)
+					{
+						CAMsg::printMsg(LOG_INFO,"MixCascadeProtocolVersion: 0.4\n");
+						m_MixCascadeProtocolVersion=MIX_CASCADE_PROTOCOL_VERSION_0_4;
+						m_pSymCipher=new CASymCipher();
+						UINT8 key[16];
+						memset(key,0,16);
+						m_pSymCipher->setKey(key);
+					}	
+				else
+						m_MixCascadeProtocolVersion=MIX_CASCADE_PROTOCOL_VERSION_0_3;
+			}
 		DOM_Element elemMixes;
 		getDOMChildByName(root,(UINT8*)"Mixes",elemMixes,false);
 		int chainlen=-1;
@@ -487,7 +505,7 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 		UINT32 i=0;
 		m_arRSA=new CAASymCipher[m_chainlen];
 		DOM_Node child=elemMixes.getLastChild();
-		while(child!=NULL&&chainlen>0)
+		while(child!= NULL&&chainlen>0)
 			{
 				if(child.getNodeName().equals("Mix"))
 					{
@@ -514,6 +532,7 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 		m_arRSA[m_chainlen-1].encrypt(oPacket.data,oPacket.data);
 		m_muxOut.send(&oPacket);
 		m_muxOut.setCrypt(true);
+		CAMsg::printMsg(LOG_INFO,"Login process and key exchange finished!\n");		
 		return E_SUCCESS;
 	}
 #endif //!NEW_MIX_TYPE

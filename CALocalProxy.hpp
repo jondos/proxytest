@@ -38,7 +38,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 class CALocalProxy:public CAMix
 	{
 		public:
-			CALocalProxy(){m_arRSA=NULL;}
+			CALocalProxy()
+				{
+					m_arRSA=NULL;
+					m_pSymCipher=NULL;
+				}
 			virtual ~CALocalProxy(){clean();}
 
 			
@@ -57,8 +61,10 @@ class CALocalProxy:public CAMix
 			CASocket m_socketIn;
 			CASocket m_socketSOCKSIn;
 			CAMuxSocket m_muxOut;
-			UINT8 m_chainlen;
+			UINT32 m_chainlen;
+			UINT32 m_MixCascadeProtocolVersion;
 			CAASymCipher* m_arRSA;
+			CASymCipher* m_pSymCipher;
 	};
 #endif //!NEW_MIX_TYPE
 #endif

@@ -110,6 +110,7 @@ SINT32 CAASymCipher::generateKeyPair(UINT32 size)
 	*@see getPublicKeySize()
 	*@see setPublicKey()
 	*/
+	/*
 SINT32 CAASymCipher::getPublicKey(UINT8* buff,UINT32 *len)
 	{
 		if(m_pRSA==NULL||buff==NULL)
@@ -130,7 +131,7 @@ SINT32 CAASymCipher::getPublicKey(UINT8* buff,UINT32 *len)
 		aktIndex+=BN_num_bytes(m_pRSA->e);
 		*len=aktIndex;
 		return E_SUCCESS;
-	}
+	}*/
 
 /** Returns the number of bytes needed to store we public key. This is the number of bytes needed for a
 	* call of getPublicKey().
@@ -138,12 +139,12 @@ SINT32 CAASymCipher::getPublicKey(UINT8* buff,UINT32 *len)
 	*        number of bytes otherwise
 	*@see getPublicKey
 	*/
-SINT32 CAASymCipher::getPublicKeySize()
+/*SINT32 CAASymCipher::getPublicKeySize()
 	{
 		if(m_pRSA==NULL||m_pRSA->n==NULL||m_pRSA->e==NULL)
 			return E_UNKNOWN;
 		return (SINT32)BN_num_bytes(m_pRSA->n)+BN_num_bytes(m_pRSA->e)+4;
-	}
+	}*/
 
 /** Sets the public key to the vaules stored in \c key. The format must match the format described for getPublicKey(). 
 	*@param key byte array which holds the new public key
@@ -152,7 +153,7 @@ SINT32 CAASymCipher::getPublicKeySize()
 	*@retval E_SUCCESS otherwise
 	*@see getPublicKey
 	*/
-SINT32 CAASymCipher::setPublicKey(UINT8* key,UINT32* len)
+/*SINT32 CAASymCipher::setPublicKey(UINT8* key,UINT32* len)
 	{
 		UINT32 aktIndex;
 		UINT32 availBytes;
@@ -195,6 +196,7 @@ _ERROR:
 		m_pRSA=NULL;
 		return E_UNKNOWN;
 	}
+*/
 
 /** Stores the public key in \c buff as XML. The format is as follows:
 	*

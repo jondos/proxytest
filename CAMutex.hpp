@@ -38,7 +38,7 @@ class CAMutex
 					pthread_mutex_init(m_pMutex,NULL);
 				}
 
-			~CAMutex()
+			virtual ~CAMutex()
 				{
 					pthread_mutex_destroy(m_pMutex);
 					delete m_pMutex;
