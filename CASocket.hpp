@@ -67,7 +67,7 @@ class CASocket
 			SINT32 getSendTimeOut();
 			SINT32 setRecvBuff(UINT32 r);
 			SINT32 getRecvBuff();
-			SINT32 setSendBuff(UINT32 r);
+			SINT32 setSendBuff(SINT32 r);
 			SINT32 getSendBuff();
 			SINT32 getSendSpace();
 			SINT32 setKeepAlive(bool b);
@@ -84,6 +84,7 @@ class CASocket
 			int m_closeMode;
 			// temporary hack...
 			int m_localPort;
+			SINT32 m_aktSendBuffer;
 			bool m_bASyncSend;
 			static CASocketASyncSend* m_pASyncSend;
 	};
