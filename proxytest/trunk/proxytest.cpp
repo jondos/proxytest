@@ -279,7 +279,6 @@ int main(int argc, const char* argv[])
 		else
 			CAMsg::printMsg(LOG_DEBUG,"CAQueue::test() passed!\n");
 
-		exit(0);
 		options.parse(argc,argv);
 		UINT8 buff[255];
 #ifndef WIN32

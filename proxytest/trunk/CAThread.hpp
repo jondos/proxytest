@@ -1,7 +1,7 @@
 #ifndef __CATHREAD__
 #define __CATHREAD__
 typedef void *(*THREAD_MAIN_TYP)(void *);
-
+#include "CAConditionVariable.hpp"
 class CAThread
 	{
 		public:
@@ -20,9 +20,27 @@ class CAThread
 					else
 						return E_UNKNOWN;
 				}
+
+/*			SINT32 sleep(UINT32 msSeconds)
+				{
+					m_CondVar.lock();
+					m_CondVar.wait(msSeconds);
+					m_CondVar.unlock();
+					return E_SUCCESS;
+				}
+
+			SINT32 wakeup()
+				{
+					m_CondVar.lock();
+					m_CondVar.unlock();
+					m_CondVar.signal();
+					return E_SUCCESS;
+				}
+*/
 		private:
 			THREAD_MAIN_TYP m_fncMainLoop;
 	 		pthread_t* m_pThread;
+			CAConditionVariable m_CondVar;
 	};
 #endif
 

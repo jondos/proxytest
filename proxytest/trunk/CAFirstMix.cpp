@@ -309,7 +309,7 @@ SINT32 CAFirstMix::loop()
 		//HCHANNEL lastChannelId=1;
 		MIXPACKET* pMixPacket=new MIXPACKET;
 //		CAInfoService oInfoService(this);
-		//UINT32 nUser=0;
+		m_nUser=0;
 		SINT32 ret;
 		UINT8 rsaBuff[RSA_SIZE];
 //		UINT32 maxSocketsIn;

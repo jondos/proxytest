@@ -23,6 +23,15 @@ class CAConditionVariable:public CAMutex
 					return E_UNKNOWN;
 				}
 
+/*			SINT32 wait(UINT32 msSeconds)
+				{
+					struct timespec t;
+					t
+					if(pthread_cond_timedwait(m_pCondVar,m_pMutex,&t)==0)
+						return E_SUCCESS;
+					return E_UNKNOWN;
+				}
+*/
 			SINT32 signal()
 				{
 					if(pthread_cond_signal(m_pCondVar)==0)
