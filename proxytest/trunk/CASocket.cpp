@@ -42,6 +42,7 @@ CASocket::CASocket()
 	{
 		m_Socket=0;
 		m_closeMode=0;
+		m_bSocketIsClosed=true;
 	}
 
 SINT32 CASocket::create()
@@ -51,8 +52,10 @@ SINT32 CASocket::create()
 
 SINT32 CASocket::create(int type)
 	{
-		if(m_Socket==0)
+		if(m_bSocketIsClosed)
 			m_Socket=socket(type,SOCK_STREAM,0);
+		else
+			return E_UNKNOWN;
 		if(m_Socket==INVALID_SOCKET)
 			{
 				int er=GET_NET_ERROR;
@@ -62,16 +65,20 @@ SINT32 CASocket::create(int type)
 					CAMsg::printMsg(LOG_CRIT,"Couldt not create a new Socket! - Error: %i\n",er);
 				return SOCKET_ERROR;
 			}
+		m_bSocketIsClosed=false;
 		return E_SUCCESS;
 	}
 
 SINT32 CASocket::listen(CASocketAddr & psa)
 	{
 		int type=psa.getType();
-		if(m_Socket==0&&create(type)==SOCKET_ERROR)
+		if(m_bSocketIsClosed&&create(type)==SOCKET_ERROR)
 			return SOCKET_ERROR;
 		if(::bind(m_Socket,psa.LPSOCKADDR(),psa.getSize())==SOCKET_ERROR)
-		    return SOCKET_ERROR;
+			{
+				close();
+				return SOCKET_ERROR;
+			}
 		return ::listen(m_Socket,SOMAXCONN);
 	}
 			
@@ -105,7 +112,7 @@ SINT32 CASocket::connect(CASocketAddr & psa)
 SINT32 CASocket::connect(CASocketAddr & psa,UINT retry,UINT32 time)
 	{
 //		CAMsg::printMsg(LOG_DEBUG,"Socket:connect\n");
-		if(m_Socket==0&&create()==SOCKET_ERROR)
+		if(m_bSocketIsClosed&&create()==SOCKET_ERROR)
 			{
 				return SOCKET_ERROR;
 			}
@@ -142,7 +149,7 @@ SINT32 CASocket::connect(CASocketAddr & psa,UINT retry,UINT32 time)
 
 SINT32 CASocket::connect(CASocketAddr & psa,UINT msTimeOut)
 	{
-		if(m_Socket==0&&create(psa.getType())==SOCKET_ERROR)
+		if(m_bSocketIsClosed&&create(psa.getType())==SOCKET_ERROR)
 			{
 				return SOCKET_ERROR;
 			}
@@ -186,16 +193,14 @@ SINT32 CASocket::connect(CASocketAddr & psa,UINT msTimeOut)
 #endif		
 		if(err!=1) //timeout or error
 			{
-				::close(m_Socket);
-				m_Socket=-1;
+				close();
 				return E_UNKNOWN;
 			}
 		socklen_t len=sizeof(err);
 		err=0;
 		if(::getsockopt(m_Socket,SOL_SOCKET,SO_ERROR,(char*)&err,&len)<0||err!=0) //error by connect
 			{
-				::close(m_Socket);
-				m_Socket=-1;
+				close();
 				return E_UNKNOWN;
 			}
 		setNonBlocking(bWasNonBlocking);
@@ -206,7 +211,7 @@ SINT32 CASocket::close()
 	{
 		m_csClose.lock();
 		int ret;
-		if(m_Socket!=0)
+		if(!m_bSocketIsClosed)
 			{
 #ifdef _DEBUG				
 				if(::closesocket(m_Socket)==SOCKET_ERROR)
@@ -217,7 +222,8 @@ SINT32 CASocket::close()
 #else
 				::closesocket(m_Socket);
 #endif
-				m_Socket=0;
+				m_bSocketIsClosed=true;
+				m_closeMode=0;
 				ret=E_SUCCESS;
 			}
 		else
