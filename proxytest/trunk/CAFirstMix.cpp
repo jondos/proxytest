@@ -63,11 +63,12 @@ SINT32 CAFirstMix::init()
 				CAMsg::printMsg(LOG_INFO," connected!\n");
 				UINT16 len;
 				((CASocket*)muxOut)->receive((UINT8*)&len,2);
-				CAMsg::printMsg(LOG_CRIT,"Received Key Inof lenght %u\n",ntohs(len));
+				CAMsg::printMsg(LOG_CRIT,"Received Key Info lenght %u\n",ntohs(len));
 				recvBuff=new unsigned char[ntohs(len)+2];
 				memcpy(recvBuff,&len,2);
+				CAMsg::printMsg(LOG_DEBUG,"Try to receive the rest..\n");
 				((CASocket*)muxOut)->receive(recvBuff+2,ntohs(len));
-				CAMsg::printMsg(LOG_CRIT,"Received Key Info...\n");
+				CAMsg::printMsg(LOG_CRIT,"Received Key Info!\n");
 				return E_SUCCESS;
 			}
 		else

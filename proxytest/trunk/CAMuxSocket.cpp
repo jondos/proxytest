@@ -147,7 +147,7 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 #else
 int CAMuxSocket::send(MUXPACKET *pPacket)
 	{
-		int MuxPacketSize=sizeof(MUXPACKET);
+		int MuxPacketSize=MUXPACKET_SIZE;//sizeof(MUXPACKET);
 		int aktIndex=0;
 		int len=0;
 		pPacket->channel=htonl(pPacket->channel);
@@ -232,7 +232,7 @@ int CAMuxSocket::receive(MUXPACKET* pPacket)
 #else
 int CAMuxSocket::receive(MUXPACKET* pPacket)
 	{
-		int MuxPacketSize=sizeof(MUXPACKET);
+		int MuxPacketSize=MUXPACKET_SIZE;//sizeof(MUXPACKET);
 		int aktIndex=0;
 		int len=0;
 //		if(!bIsTunneld)
@@ -240,6 +240,9 @@ int CAMuxSocket::receive(MUXPACKET* pPacket)
 				do
 					{
 						len=m_Socket.receive(((UINT8*)pPacket)+aktIndex,MuxPacketSize);
+				#ifdef _DEBUG
+					CAMsg::printMsg(LOG_DEBUG,"MuxSocket-Received %u bytes!\n",len);
+				#endif
 						MuxPacketSize-=len;
 						aktIndex+=len;
 					} while(len>0&&MuxPacketSize>0);
