@@ -325,7 +325,7 @@ THREAD_RETURN mmIO(void* v)
 									}
 							}
 						else
-							mmIOPair->muxOut.close(outChannel);
+							mmIOPair->muxOut.close(oMuxPacket.channel);
 					}
 			}
 		THREAD_RETURN_SUCCESS;

@@ -23,7 +23,7 @@ class CAMuxSocket
 		public:
 			CAMuxSocket();
 			~CAMuxSocket(){}
-			int accept(int port);
+			int accept(unsigned short port);
 			int connect(LPSOCKETADDR psa);
 			int close();
 			int send(HCHANNEL channel_id,char* buff,unsigned short len);
