@@ -242,7 +242,22 @@ SINT32 CAMuxSocket::receive(MUXPACKET* pPacket)
 		SINT32 ret;
 
 		ret=m_Socket.receiveFully((UINT8*)pPacket,MUXPACKET_SIZE);
-
+		int ret;
+		int pos=0;
+	  do
+			{
+				ret=receive(buff+pos,len);
+				if(ret<=0)
+				{
+				    CAMsg::printMsg(LOG_DEBUG,"ReceiveFully receive error ret=%i\n",ret);
+				    
+					return E_UNKNOWN;
+				}
+				pos+=ret;
+				len-=ret;
+			}
+	  while(len>0);
+	  return E_SUCCESS;	    	
 //		if(!bIsTunneld)
 //			{
 			//	do
