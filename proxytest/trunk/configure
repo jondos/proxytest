@@ -3762,6 +3762,8 @@ BANDWIDTH_LIMIT_THROUGHPUT=""
 if test "${enable_bandwidth_limitation_throughput+set}" = set; then
   enableval="$enable_bandwidth_limitation_throughput"
 
+	echo "Through"
+	echo $enableval
 		if test "x$enableval" != "xno" ; then
 		    BANDWIDTH_LIMIT_THROUGHPUT="-DDELAY_CHANNELS"
 		    if test "x$enableval" != "xyes" ; then
