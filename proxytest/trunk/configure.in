@@ -62,12 +62,34 @@ m68k*)
 	;;
 esac
 
+dnl Architecture dependend compiler optimisations
+MARCH=""
+AC_ARG_WITH(arch,
+	[  --with-arch=i386|i486     Specify architecure for optimisation ],
+	[
+		if test "x$withval" != "$xno" ; then
+			MARCH="-march=$withval"
+		fi
+	]
+)
 
-case "$host_cpu" in
-i686)
-    OFLAGS="$OFLAGS -march=i686"
-    ;;
-esac
+dnl auto selection --> skip if selecte manually
+if test -z "$MARCH"; then
+    case "$host_cpu" in
+	i686)
+	    MARCH="-march=i686"
+	;;
+    esac
+fi
+AC_MSG_NOTICE([Architecture flags used for optimisations: $MARCH])
+OFLAGS="$OFLAGS $MARCH"
+
+dnl Static?
+AC_ARG_ENABLE(static,
+	    [--enable-static     Static linking],
+	    [CFLAGS="$CFLAGS -static"
+	     CXXFLAGS="$CXXFLAGS -static"
+	    ])
 
 dnl Checks for Headers
 AC_HEADER_STDC
