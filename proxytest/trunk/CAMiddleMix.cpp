@@ -415,7 +415,8 @@ SINT32 CAMiddleMix::loop()
 							{
 								if(oMuxPacket.flags==CHANNEL_CLOSE)
 									{
-										muxOut.close(oConnection.outChannel);
+										if(muxOut.close(oConnection.outChannel)==SOCKET_ERROR)
+											goto ERR;
 										oSocketList.remove(oMuxPacket.channel);
 									}
 								else
@@ -449,12 +450,16 @@ NEXT:
 									}
 								else
 									{
-										muxIn.close(oConnection.id);
+										if(muxIn.close(oConnection.id)==SOCKET_ERROR)
+											goto ERR;
 										oSocketList.remove(oConnection.id);
 									}
 							}
 						else
-							muxOut.close(oMuxPacket.channel);
+							{
+								if(muxOut.close(oMuxPacket.channel)==SOCKET_ERROR)
+									goto ERR;
+							}
 					}
 			}
 ERR:
