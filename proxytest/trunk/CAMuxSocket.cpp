@@ -49,6 +49,7 @@ int CAMuxSocket::useTunnel(char* proxyhost,UINT16 proxyport)
 		return 0;
 	}
 */
+#ifndef PROT2
 int CAMuxSocket::accept(UINT16 port)
 	{
 //		if(!bIsTunneld)
@@ -72,7 +73,22 @@ int CAMuxSocket::accept(UINT16 port)
 			}
 */		return 0;
 	}
-			
+#else
+int CAMuxSocket::accept(UINT16 port)
+	{
+		CASocket oSocket;
+		oSocket.create();
+		oSocket.setReuseAddr(true);
+		if(oSocket.listen(port)==SOCKET_ERROR)
+			return SOCKET_ERROR;
+		if(oSocket.accept(m_Socket)==SOCKET_ERROR)
+			return SOCKET_ERROR;
+		oSocket.close();
+		m_Socket.setRecvLowWat(sizeof(MUXPACKET));
+		return E_SUCCESS;
+	}
+#endif		
+	
 SINT32 CAMuxSocket::connect(LPCASOCKETADDR psa)
 	{
 		return connect(psa,1,0);

@@ -49,11 +49,12 @@ class CASocket
 			int receive(UINT8* buff,UINT32 len);
 			operator SOCKET(){return m_Socket;}
 			int getLocalPort();
-			int setReuseAddr(bool b);
-			int setRecvLowWat(UINT32 r);
-			int setRecvBuff(UINT32 r);
-			int setSendBuff(UINT32 r);
-			int setKeepAlive(bool b);
+			SINT32 setReuseAddr(bool b);
+			SINT32 setRecvLowWat(UINT32 r);
+			SINT32 setRecvBuff(UINT32 r);
+			SINT32 setSendBuff(UINT32 r);
+			SINT32 setKeepAlive(bool b);
+			SINT32 setKeepAlive(UINT32 sec);
 		private:
 			SOCKET m_Socket;
 			#ifdef _REENTRANT
