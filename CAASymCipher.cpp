@@ -73,10 +73,46 @@ int CAASymCipher::getPublicKey(unsigned char* buff,int *len)
 		return 0;
 	}
 
-int __inline CAASymCipher::getPublicKeySize()
+int CAASymCipher::getPublicKeySize()
 	{
 		if(rsa==NULL||rsa->n==NULL||rsa->e==NULL)
 			return -1;
 		return BN_num_bytes(rsa->n)+BN_num_bytes(rsa->e)+4;
 	}
 
+int CAASymCipher::setPublicKey(unsigned char* key,int* len)
+	{
+		rsa=RSA_new();
+		int aktIndex=0;
+		unsigned short size=ntohs(*((unsigned short*)key));
+		aktIndex+=2;
+		rsa->n=BN_new();
+		BN_bin2bn(key+aktIndex,size,rsa->n);
+		aktIndex+=size;
+		size=ntohs(*((unsigned short*)(key+aktIndex)));
+		aktIndex+=2;
+		rsa->e=BN_new();
+		BN_bin2bn(key+aktIndex,size,rsa->e);
+		aktIndex+=size;
+
+	/*	BIGNUM bn1;
+		BN_init(&bn1);
+		BN_one(&bn1);
+		BIGNUM tbn;
+		BN_init(&tbn);
+		BN_sub(&tbn,rsa->p,&bn1);
+		BN_CTX ctx;
+		BN_CTX_init(&ctx);
+		rsa->dmp1=BN_new();
+		BN_mod(rsa->dmp1,rsa->d,&tbn,&ctx);
+		BN_sub(&tbn,rsa->q,&bn1);
+		rsa->dmq1=BN_new();
+		BN_mod(rsa->dmq1,rsa->d,&tbn,&ctx);
+		rsa->iqmp=BN_new();
+		BN_mod_inverse(rsa->iqmp,rsa->q,rsa->p,&ctx);
+	*/
+		*len=aktIndex;
+	
+		//	int i=RSA_check_key(rsa);
+		return 0;
+	}
