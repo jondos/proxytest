@@ -76,7 +76,7 @@ SINT32 CAFirstMix::init()
 #ifndef _WIN32
         //we have to be a temporaly superuser if port <1024...
 				int old_uid=geteuid();
-				if(oListener.addr->getType==AF_INET&&((CASocketAddrINet*)oListener.addr)->getPort()<1024)
+				if(oListener.addr->getType()==AF_INET&&((CASocketAddrINet*)oListener.addr)->getPort()<1024)
 					{
 						if(seteuid(0)==-1) //changing to root
 							CAMsg::printMsg(LOG_CRIT,"Setuid failed!\n");
