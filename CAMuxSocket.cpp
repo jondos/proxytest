@@ -254,6 +254,7 @@ UINT32 CAMuxSocket::sigCrime(HCHANNEL channel_id,UINT8* buff)
 		getRandom(&v);
 		v&=0x0000FF00;
 		oPacket.flags=(CHANNEL_SIG_CRIME|v);
+		send(&oPacket,buff);
 		return (v>>8);
 	}
 #endif
