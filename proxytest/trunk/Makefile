@@ -13,6 +13,7 @@ OBJS_ALL=CASocket.o\
 	CAMixSocket.o\
 	CASocketAddr.o\
 	CASocketList.o\
+	CACmdLnOptions.o\
 	proxytest.o
 
 OBJS=$(OBJS_ALL)
@@ -20,14 +21,20 @@ OBJS=$(OBJS_ALL)
 .cpp.o:
 	$(CC) -c $(CPPFLAGS) $(DEBUG) $< $(LDFLAGS) -o $@
 
-all: $(OBJS) 
-	$(CC) -o proxytest $(OBJS) $(LIBS)
+popt.a:
+	$(CC) -c  $(DEBUG) -DHAVE_STRERROR ./popt/popt.c -o ./popt/popt.o
+	$(CC) -c  $(DEBUG) -DHAVE_STRERROR ./popt/poptparse.c -o ./popt/poptparse.o
+	$(CC) -c  $(DEBUG) -DHAVE_STRERROR ./popt/findme.c -o ./popt/findme.o
+	ar -rcs ./popt/popt.a ./popt/popt.o ./popt/poptparse.o ./popt/findme.o
+
+all: $(OBJS) popt.a
+	$(CC) -o proxytest $(OBJS) ./popt/popt.a $(LIBS)
 
 all_sun: $(OBJS) 
 	$(CC) -o proxytest $(OBJS) $(LIBS) -lsocket -lnsl
 
-debug: $(OBJS)
-	$(CC) -o proxytest $(OBJS) $(LIBS)
+debug: $(OBJS) popt.a
+	$(CC) -o proxytest $(OBJS) ./popt/popt.a $(LIBS)
 
 clean:
 	- rm $(OBJS)
