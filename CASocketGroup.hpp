@@ -39,9 +39,21 @@ class CASocketGroup
 			SINT32 remove(CAMuxSocket&s);
 			SINT32 select();
 			SINT32 select(bool bWrite,UINT32 time_ms);
-			bool isSignaled(CASocket&s);
-			bool isSignaled(CASocket*ps);
-			bool isSignaled(CAMuxSocket&s);
+			bool isSignaled(CASocket&s)
+				{
+					return FD_ISSET((SOCKET)s,&m_signaled_set)!=0;
+				}
+
+			bool isSignaled(CASocket*ps)
+				{
+					return FD_ISSET((SOCKET)*ps,&m_signaled_set)!=0;
+				}
+
+			bool isSignaled(CAMuxSocket&s)
+				{
+					return FD_ISSET((SOCKET)s,&m_signaled_set)!=0;
+				}
+
 		protected:
 			fd_set m_fdset;
 			fd_set m_signaled_set;

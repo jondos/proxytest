@@ -34,11 +34,28 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 class CASymCipher
 	{
 		public:
-			CASymCipher(){m_bEncKeySet=false;m_keyAES=new keyInstance[1];m_iv=new UINT8[16];m_iv2=new UINT8[16];}
+			CASymCipher()
+				{
+					m_bEncKeySet=false;
+					m_keyAES=new keyInstance[1];
+					m_iv=new UINT8[16];
+					m_iv2=new UINT8[16];
+				}
+
+			~CASymCipher()
+				{
+					delete[] m_keyAES;
+					delete[] m_iv;
+					delete[] m_iv2;
+				}
 	//		SINT32 generateEncryptionKey();
 	//		SINT32 getEncryptionKey(UINT8* key);
 	//		SINT32 setEncryptionKey(UINT8* key);
-			bool isEncyptionKeyValid();
+			bool isEncyptionKeyValid()
+				{
+					return m_bEncKeySet;
+				}
+
 	//		SINT32 setDecryptionKey(UINT8* key);
 		//	SINT32 encrypt(UINT8* in,UINT32 len);
 		//	SINT32 decrypt(UINT8* in,UINT8* out,UINT32 len);

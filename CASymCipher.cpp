@@ -37,10 +37,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		return E_SUCCESS;
 	}
 */
-bool CASymCipher::isEncyptionKeyValid()
-	{
-		return m_bEncKeySet;
-	}
 
 /*
 SINT32 CASymCipher::generateEncryptionKey()
