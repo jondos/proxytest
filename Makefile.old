@@ -15,7 +15,6 @@ LIBS	= ./popt/popt.a ./xml/xml.a ./aes/libaes.a -lcrypto
 MAKE=make -f Makefile.old
 
 OBJS_ALL=CASocket.o\
-	CASocketASyncSend.o\
 	CAQueue.o\
 	CASingleSocketGroup.o\
 	CASocketGroup.o\
