@@ -97,7 +97,7 @@ void CACmdLnOptions::clean()
 			delete m_pPrevMixCertificate;
   }
     
-int CACmdLnOptions::parse(int argc,const char** argv)
+SINT32 CACmdLnOptions::parse(int argc,const char** argv)
     {
 	//int ret;
 	
@@ -327,11 +327,10 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 		bMiddleMix=true;
 	else 
 		bLastMix=true;
-
 	//This is only for mixes - not for local proxy
 	if(!bLocalProxy)
 		{
-		//Now we could setup the MixID
+/*		//Now we could setup the MixID
 		//either form ConfigFile or from Host/Port
 			if(docMixXml!=NULL)
 				{
@@ -401,7 +400,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 			memcpy(m_strMixXml,tmpXml,xmlLen);
 			m_strMixXml[xmlLen]=0;
 			delete[] tmpXml;
-
+*/
 			UINT8 tmpCertDir[2048];
 			UINT8 tmpFileName[2048];
 			UINT8* buff=NULL;
@@ -460,10 +459,11 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 			buff=readFile(tmpFileName,&size);
 			m_pPrevMixCertificate=CACertificate::decode(buff,size,CERT_DER);
 			delete buff;
-		}
-
-	return E_SUCCESS;
 	
+		}
+	if(!bLocalProxy)
+		return processXmlConfiguration(docMixXml);
+	return E_SUCCESS;
  }
 
 bool CACmdLnOptions::getDaemon()
@@ -661,5 +661,72 @@ SINT32 CACmdLnOptions::generateTemplate()
 			return E_UNKNOWN;
 		write(handle,XML_CONFIG_TEMPLATE,strlen(XML_CONFIG_TEMPLATE));
 		close(handle);
+		return E_SUCCESS;
+	}
+
+SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
+	{
+		if(docConfig==NULL)
+			return E_UNKNOWN;
+		DOM_Element elemRoot=docConfig.getDocumentElement();
+		
+		//get MixID
+		DOM_Element elemMixID;
+		getDOMChildByName(elemRoot,(UINT8*)"MixID",elemMixID,false);
+		if(elemMixID==NULL)
+			return E_UNKNOWN;
+		UINT8 tmpBuff[255];
+		UINT32 tmpLen=255;
+		getDOMElementValue(elemMixID,tmpBuff,&tmpLen);
+		strtrim(tmpBuff);
+		m_strMixID=new char[strlen((char*)tmpBuff)+1];
+		strcpy(m_strMixID,(char*) tmpBuff);
+			
+		//construct a XML-String, which describes the Mix (send via Infoservice.Helo())
+		DOM_Document docMixXml=DOM_Document::createDocument();
+		DOM_Element elemMix=docMixXml.createElement("Mix");
+		elemMix.setAttribute("id",DOMString(m_strMixID));
+		docMixXml.appendChild(elemMix);
+		
+		//Inserting the Name if given...
+		DOM_Element elemMixName;
+		getDOMChildByName(elemRoot,(UINT8*)"MixName",elemMixName,false);
+		if(elemMixName!=NULL)
+			{
+				tmpLen=255;
+				getDOMElementValue(elemMixName,tmpBuff,&tmpLen);
+				DOM_Element elemName=docMixXml.createElement("Name");
+				setDOMElementValue(elemName,tmpBuff);
+				elemMix.appendChild(elemName);
+			}
+
+		//Import the Description if given
+		DOM_Element elemMixDescription;
+		getDOMChildByName(elemRoot,(UINT8*)"Description",elemMixDescription,false);
+		if(elemMixDescription!=NULL)
+			{
+				DOM_Node tmpChild=elemMixDescription.getFirstChild();
+				while(tmpChild!=NULL)
+					{
+						elemMix.appendChild(docMixXml.importNode(tmpChild,true));
+						tmpChild=tmpChild.getNextSibling();
+					}
+			}
+		//Set Software-Version...
+		DOM_Element elemSoftware=docMixXml.createElement("Software");
+		DOM_Element elemVersion=docMixXml.createElement("Version");
+		setDOMElementValue(elemVersion,(UINT8*)MIX_VERSION);
+		elemSoftware.appendChild(elemVersion);
+		elemMix.appendChild(elemSoftware);
+
+		
+		//Make an String from the Doc
+		UINT32 xmlLen=0;
+		UINT8* tmpXml=DOM_Output::dumpToMem(docMixXml,&xmlLen);
+		m_strMixXml=new char[xmlLen+1];
+		memcpy(m_strMixXml,tmpXml,xmlLen);
+		m_strMixXml[xmlLen]=0;
+		delete[] tmpXml;
+
 		return E_SUCCESS;
 	}
