@@ -377,20 +377,26 @@ SINT32 CAFirstMix::loop()
 SINT32 CAFirstMix::initOnce()
 	{
 		CAMsg::printMsg(LOG_DEBUG,"Starting FirstMix InitOnce\n");
+		SINT32 ret=E_UNKNOWN;
+		int handle;
+		SINT32 len;
 		UINT8* fileBuff=new UINT8[2048];
-		options.getKeyFileName(fileBuff,2048);
-		int handle=open((char*)fileBuff,O_BINARY|O_RDONLY);
+		if(fileBuff==NULL||options.getKeyFileName(fileBuff,2048)!=E_SUCCESS)
+			goto END;
+		handle=open((char*)fileBuff,O_BINARY|O_RDONLY);
 		if(handle==-1)
-			return E_UNKNOWN;
-		SINT32 len=read(handle,fileBuff,2048);
+			goto END;
+		len=read(handle,fileBuff,2048);
 		close(handle);
+		if(len<1)
+			goto END;
 		if(mSignature.setSignKey(fileBuff,len,SIGKEY_XML)!=E_SUCCESS)
-			{
-				delete fileBuff;
-				return E_UNKNOWN;
-			}
+			goto END;
+		ret=E_SUCCESS;
+END:		
 		delete fileBuff;
-		return E_SUCCESS;
+		return ret;
+
 	}
 
 SINT32 CAFirstMix::init()
