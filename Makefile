@@ -3,9 +3,11 @@
 
 CC=gcc
 INCLUDE = 
-LIBS	= -L/usr/local/ssl/lib -lpthread -lcrypto
-CPPFLAGS = -D_REENTRANT -O3 -Wall
-#DEBUG =-D_DEBUG -g
+LIBS	= -L/usr/local/ssl/lib -lcrypto
+#-lpthread 
+CPPFLAGS =-O3 -Wall 
+#-D_REENTRANT
+#DEBUG =-g
 
 OBJS_ALL=CASocket.o\
 	CASocketGroup.o\
