@@ -411,8 +411,11 @@ SINT32 CAFirstMix::init()
 				CAMsg::printMsg(LOG_CRIT,"Cannot create SOCKET for connection to next Mix!\n");
 				return E_UNKNOWN;
 			}
-		((CASocket*)muxOut)->setSendBuff(50*MUXPACKET_SIZE);
-		((CASocket*)muxOut)->setRecvBuff(50*MUXPACKET_SIZE);
+		((CASocket*)muxOut)->setSendBuff(500*MUXPACKET_SIZE);
+		((CASocket*)muxOut)->setRecvBuff(500*MUXPACKET_SIZE);
+		if(((CASocket*)muxOut)->setSendLowWat(MUXPACKET_SIZE)!=E_SUCCESS)
+			CAMsg::printMsg(LOG_INFO,"SOCKET Option SENDLOWWAT not set!\n");
+	
 		if(muxOut.connect(&addrNext,10,10)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Cannot connect to next Mix!\n");
@@ -497,6 +500,7 @@ SINT32 CAFirstMix::loop()
 
 		for(;;)
 			{
+LOOP_START:
 				if((countRead=oSocketGroup.select())==SOCKET_ERROR)
 					{
 						CAMsg::printMsg(LOG_ERR,"SELECT Error %u - Connection from Browser!\n",errno);
@@ -674,6 +678,8 @@ SINT32 CAFirstMix::loop()
 							{
 								if(oSocketGroup.isSignaled(*tmpMuxListEntry->pMuxSocket))
 									{
+										if(oSocketGroupMuxOut.select(true,0)!=1)
+											goto LOOP_START;
 										countRead--;
 										ret=tmpMuxListEntry->pMuxSocket->receive(&oMuxPacket,0);
 										if(ret==SOCKET_ERROR)

@@ -57,13 +57,13 @@ class CASocket
 			int getLocalPort();
 			SINT32 setReuseAddr(bool b);
 			SINT32 setRecvLowWat(UINT32 r);
+			SINT32 setSendLowWat(UINT32 r);
 			SINT32 setRecvBuff(UINT32 r);
 			SINT32 setSendBuff(UINT32 r);
 			SINT32 setKeepAlive(bool b);
 			SINT32 setKeepAlive(UINT32 sec);
 			SINT32 setASyncSend(bool b,SINT32 size,CASocketASyncSendResume* pResume);
 		private:
-			SINT32 setSendLowWat(UINT32 r);
 			SOCKET m_Socket;
 			#ifdef _REENTRANT
 				CRITICAL_SECTION csClose;
