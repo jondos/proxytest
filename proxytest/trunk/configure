@@ -10504,6 +10504,11 @@ _ACEOF
 
 
 
+
+tryssldir="/usr/local/openssl /usr/lib/openssl \
+                         /usr/local/ssl /usr/lib/ssl /usr/local /usr/pkg \
+                         /opt /opt/openssl $HOME/ssl $HOME/openssl"
+
 # Check whether --with-ssl-dir or --without-ssl-dir was given.
 if test "${with_ssl_dir+set}" = set; then
   withval="$with_ssl_dir"
@@ -10528,9 +10533,7 @@ if test "${ac_cv_openssldir+set}" = set; then
 else
 
 
-	for ssldir in "" $tryssldir /usr/local/openssl /usr/lib/openssl \
-                         /usr/local/ssl /usr/lib/ssl /usr/local /usr/pkg \
-                         /opt /opt/openssl $HOME/ssl $HOME/openssl ; do
+	for ssldir in "" $tryssldir ; do
 		if test ! -z "$ssldir" ; then
 			LDFLAGS="$saved_LDFLAGS -L$ssldir/lib -L$ssldir"
 			CFLAGS="$saved_CFLAGS -I$ssldir/include"
@@ -10561,6 +10564,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 
 #include <string.h>
 #include <openssl/rand.h>
+#include <openssl/aes.h>
 int main(void)
 {
 	char a[2048];
@@ -10603,8 +10607,8 @@ fi
 	done
 
 	if test -z "$found_crypto" ; then
-		{ { echo "$as_me:$LINENO: error: Could not find working SSLeay / OpenSSL libraries, please install" >&5
-echo "$as_me: error: Could not find working SSLeay / OpenSSL libraries, please install" >&2;}
+		{ { echo "$as_me:$LINENO: error: Could not find working SSLeay / OpenSSL libraries (>=0.9.7), please install" >&5
+echo "$as_me: error: Could not find working SSLeay / OpenSSL libraries (>=0.9.7), please install" >&2;}
    { (exit 1); exit 1; }; }
 	fi
 	if test -z "$ssldir" ; then

@@ -221,7 +221,13 @@ AC_CHECK_SIZEOF(__uint64_t)
 
 dnl Checks for libraries.
 
+
+
 dnl Check for OpenSSL libs and includes. Adopted from OpenSSH configure.in
+dnl defualt palce to look for OpenSSL --> may be overwriten by the option below!
+tryssldir="/usr/local/openssl /usr/lib/openssl \
+                         /usr/local/ssl /usr/lib/ssl /usr/local /usr/pkg \
+                         /opt /opt/openssl $HOME/ssl $HOME/openssl"
 AC_ARG_WITH(ssl-dir,
 	AS_HELP_STRING([--with-ssl-dir=PATH],[Specify path to OpenSSL installation]),
 	[
@@ -239,9 +245,7 @@ if test "x$prefix" != "xNONE" ; then
 fi
 AC_CACHE_CHECK([for OpenSSL directory], ac_cv_openssldir, [
 
-	for ssldir in "" $tryssldir /usr/local/openssl /usr/lib/openssl \
-                         /usr/local/ssl /usr/lib/ssl /usr/local /usr/pkg \
-                         /opt /opt/openssl $HOME/ssl $HOME/openssl ; do
+	for ssldir in "" $tryssldir ; do
 		if test ! -z "$ssldir" ; then
 			LDFLAGS="$saved_LDFLAGS -L$ssldir/lib -L$ssldir"
 			CFLAGS="$saved_CFLAGS -I$ssldir/include"
@@ -259,6 +263,7 @@ AC_CACHE_CHECK([for OpenSSL directory], ac_cv_openssldir, [
 		AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <string.h>
 #include <openssl/rand.h>
+#include <openssl/aes.h>
 int main(void) 
 {
 	char a[2048];
@@ -278,7 +283,7 @@ int main(void)
 	done
 
 	if test -z "$found_crypto" ; then
-		AC_MSG_ERROR([Could not find working SSLeay / OpenSSL libraries, please install])	
+		AC_MSG_ERROR([Could not find working SSLeay / OpenSSL libraries (>=0.9.7), please install])	
 	fi
 	if test -z "$ssldir" ; then
 		ssldir="(system)"
