@@ -79,7 +79,7 @@ SINT32 CALocalProxy::init()
 				((CASocket*)muxOut)->receive((UINT8*)&size,2);
 				((CASocket*)muxOut)->receive(&chainlen,1);
 				CAMsg::printMsg(LOG_INFO,"Chain-Length: %d\n",chainlen);
-				size=ntohs(size)-3; //MUST be changed back to 1 !!!
+				size=ntohs(size)-1;
 				UINT8* buff=new UINT8[size];
 				((CASocket*)muxOut)->receiveFully(buff,size);
 				arRSA=new CAASymCipher[chainlen];

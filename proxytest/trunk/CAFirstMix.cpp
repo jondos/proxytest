@@ -1020,7 +1020,7 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		m_pRSA->getPublicKey(m_KeyInfoBuff+m_KeyInfoSize,&tlen);
 		m_KeyInfoSize+=tlen;
 
-		UINT16 tmp=htons(m_KeyInfoSize);
+		UINT16 tmp=htons(m_KeyInfoSize-2);
 		memcpy(m_KeyInfoBuff,&tmp,2);
 		m_KeyInfoBuff[2]=count+1;
 
