@@ -153,6 +153,7 @@ SINT32 CAFirstMix::loop()
 							}
 						else
 							{
+
 								#ifdef _DEBUG
 									int ret=((CASocket*)newMuxSocket)->setKeepAlive(true);
 									if(ret==SOCKET_ERROR)
@@ -492,7 +493,8 @@ SINT32 CAFirstMix::init()
 					return E_UNKNOWN;
 		    }
       }
-    return E_SUCCESS;
+    m_pIPList=new CAIPList();
+		return E_SUCCESS;
 	}
 
 
@@ -530,6 +532,8 @@ SINT32 CAFirstMix::loop()
 		oInfoService.sendHelo();
 		oInfoService.start();
 
+		UINT8 ip[4];
+
 		for(;;)
 			{
 LOOP_START:
@@ -553,6 +557,15 @@ LOOP_START:
 							}
 						else
 							{
+//Prüfen ob schon vorhanden..	
+									((CASocket*)pnewMuxSocket)->getPeerIP(ip);
+									if(m_pIPList->insertIP(ip)<0)
+										{
+											pnewMuxSocket->close();
+											delete pnewMuxSocket;
+											continue;
+										}
+//Weiter wie bisher...								
 								#ifdef _DEBUG
 									int ret=((CASocket*)pnewMuxSocket)->setKeepAlive(true);
 									if(ret!=E_SUCCESS)
@@ -584,6 +597,15 @@ LOOP_START:
 							}
 						else
 							{
+//Prüfen ob schon vorhanden..	
+								((CASocket*)pnewMuxSocket)->getPeerIP(ip);
+								if(m_pIPList->insertIP(ip)<0)
+									{
+										pnewMuxSocket->close();
+										delete pnewMuxSocket;
+										continue;
+									}
+//Weiter wie bisher...
 								#ifdef _DEBUG
 									int ret=((CASocket*)pnewMuxSocket)->setKeepAlive(true);
 									if(ret!=E_SUCCESS)
@@ -638,6 +660,8 @@ LOOP_START:
 											{
 												oMuxPacket.channel=tmpReverseEntry->inChannel;
 												tmpReverseEntry->pCipher->decryptAES2(oMuxPacket.data,oMuxPacket.data,DATA_SIZE);
+												//TODO: Test for SOCKET_ERROR!!!!
+												
 												if(tmpReverseEntry->pMuxSocket->send(&oMuxPacket)==E_QUEUEFULL)
 													{
 														EnterCriticalSection(&csResume);
@@ -690,6 +714,8 @@ LOOP_START:
 										ret=tmpMuxListEntry->pMuxSocket->receive(&oMuxPacket,0);
 										if(ret==SOCKET_ERROR)
 											{
+												((CASocket*)tmpMuxListEntry->pMuxSocket)->getPeerIP(ip);
+												m_pIPList->removeIP(ip);
 												deleteResume(tmpMuxListEntry->pMuxSocket);
 												MUXLISTENTRY otmpEntry;
 												if(oMuxChannelList.remove(tmpMuxListEntry->pMuxSocket,&otmpEntry))
@@ -807,6 +833,8 @@ SINT32 CAFirstMix::clean()
     muxOut.close();
 		mRSA.destroy();
 		oSuspendList.clear();
+		delete m_pIPList;
+		m_pIPList=NULL;
 		return E_SUCCESS;
 	}
 
