@@ -185,9 +185,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#ifndef INADDR_NONE
 		#define INADDR_NONE -1
 	#endif
-    #ifndef AF_LOCAL
-	#define AF_LOCAL AF_UNIX
-    #endif
+  #ifndef AF_LOCAL
+		#define AF_LOCAL AF_UNIX
+  #endif
 #endif
 
 
