@@ -330,7 +330,7 @@ SINT32 CAFirstMixA::loop()
 						else
 							{//flag !=close
 								#if defined(_DEBUG) && !defined(__MIX_TEST)
-									CAMsg::printMsg(LOG_DEBUG,"Sending Data to Browser!");
+									CAMsg::printMsg(LOG_DEBUG,"Sending Data to Browser!\n");
 								#endif
 								fmChannelList* pEntry=m_pChannelList->get(pMixPacket->channel);
 								if(pEntry!=NULL)
