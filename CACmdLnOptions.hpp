@@ -157,6 +157,19 @@ class CACmdLnOptions
 					return NULL;
 				}
 
+     /** Returns if the encrpyted Log could/should be used**/
+			bool isEncryptedLogEnabled()
+			{
+				return m_bIsEncryptedLogEnabled;
+			}
+
+			/** Set to true if the encrpyted log could/should be used**/
+			SINT32 enabledEncryptedLogEnabled(bool b)
+			{
+				m_bIsEncryptedLogEnabled=b;
+				return E_SUCCESS;
+			}
+
 			/** Returns a certificate which contains a key which could be used for log encryption*/
 			CACertificate* getLogEncryptionKey()
 				{
@@ -236,6 +249,8 @@ class CACmdLnOptions
 			DOM_Document m_docMixInfo;
 			//char*		m_strMixXml;
 			char*		m_strMixID;
+
+			bool m_bIsEncryptedLogEnabled;
 
 			TargetInterface*			m_arTargetInterfaces;
 			UINT32								m_cnTargets;
