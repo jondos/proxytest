@@ -340,7 +340,7 @@ LOOP_START:
 		
 										CASymCipher* newCipher=new CASymCipher();
 										mRSA.decrypt(oMuxPacket.data,rsaBuff);
-										newCipher->setDecryptionKeyAES(rsaBuff);
+										newCipher->setKeyAES(rsaBuff);
 										newCipher->decryptAES(oMuxPacket.data+RSA_SIZE,
 																					oMuxPacket.data+RSA_SIZE-KEY_SIZE,
 																					DATA_SIZE-RSA_SIZE);

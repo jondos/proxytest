@@ -29,6 +29,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CAMUXSOCKET__
 #define __CAMUXSOCKET__
 #include "CASocket.hpp"
+#include "CASymCipher.hpp"
 //#include "httptunnel/tunnel.h"
 
 typedef UINT32 HCHANNEL;
@@ -117,10 +118,15 @@ class CAMuxSocket
 												//else
 													//return tunnel_pollin_fd(m_pTunnel);
 													}
-			private:
+			SINT32 setCrypt(bool b){bIsCrypted=b;}
+
+		private:
 				CASocket m_Socket;
 				UINT32 m_aktBuffPos;
 				UINT8* m_Buff;
+				CASymCipher ocipherIn;
+				CASymCipher ocipherOut;
+				bool bIsCrypted;
 	//		bool bIsTunneld;
 	//		Tunnel* m_pTunnel;
 	//		char *m_szTunnelHost;

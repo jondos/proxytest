@@ -397,7 +397,7 @@ SINT32 CAMiddleMix::loop()
 										#endif
 										CASymCipher* newCipher=new CASymCipher();
 										mRSA.decrypt((unsigned char*)oMuxPacket.data,tmpRSABuff);
-										newCipher->setDecryptionKeyAES(tmpRSABuff);
+										newCipher->setKeyAES(tmpRSABuff);
 										newCipher->decryptAES(oMuxPacket.data+RSA_SIZE,
 																					oMuxPacket.data+RSA_SIZE-KEY_SIZE,
 																					DATA_SIZE-RSA_SIZE);
