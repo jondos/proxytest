@@ -329,8 +329,8 @@ Debug(dc::malloc.on());
 			#endif
 		#endif
 		
-				CALastMixChannelList::test();
-				exit(0);
+//				CALastMixChannelList::test();
+//				exit(0);
 	
 /*		UINT8 buff1[1024];
 		UINT32 len=1024;
