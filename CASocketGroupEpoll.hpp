@@ -31,7 +31,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocket.hpp"
 #include "CAMuxSocket.hpp"
 #include "CAMutex.hpp"
-
+#ifdef DEBUG
+	#include "CAMsg.hpp"
+#endif
 class CASocketGroupEpoll
 	{
 		public:
