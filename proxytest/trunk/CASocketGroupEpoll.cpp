@@ -28,11 +28,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "StdAfx.h"
 #include "CASocketGroupEpoll.hpp"
 #ifdef HAVE_EPOLL
-CASocketGroupEpoll::CASocketGroupEpoll(bool bWrite)
+CASocketGroupEpoll::CASocketGroupEpoll(bool bWrite):
 	{
-		m_hEPFD=epoll_create(1/*MAX_POLLFD*/);
+		m_hEPFD=epoll_create(MAXPOOL_FD);
 		m_pEpollEvent=new struct epoll_event;
-		m_pEvents=new struct epoll_event[MAX_POLLFD];
+		m_pEvents=new struct epoll_event[MAXPOOL_FD];
 		setPoolForWrite(bWrite);
 	}
 

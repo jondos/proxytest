@@ -86,7 +86,7 @@ class CASocketGroupEpoll
 			SINT32 select()
 				{
 					m_csFD_SET.lock();
-					m_iNumOfReadyFD=epoll_wait(m_hEPFD,m_pEvents,/*MAX_POLLFD*/1,-1);
+					m_iNumOfReadyFD=epoll_wait(m_hEPFD,m_pEvents,MAX_POLLFD,-1);
 					if(m_iNumOfReadyFD>0)
 						{
 							m_csFD_SET.unlock();
@@ -106,7 +106,7 @@ class CASocketGroupEpoll
 			SINT32 select(UINT32 time_ms)
 				{
 					m_csFD_SET.lock();
-					m_iNumOfReadyFD=epoll_wait(m_hEPFD,m_pEvents,1/*MAX_POLLFD*/,time_ms);
+					m_iNumOfReadyFD=epoll_wait(m_hEPFD,m_pEvents,MAX_POLLFD,time_ms);
 					if(m_iNumOfReadyFD>0)
 						{
 							m_csFD_SET.unlock();
