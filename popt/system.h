@@ -26,9 +26,14 @@
 #include <libc.h>
 #endif
 
+
+#ifdef __ICC
+#define HAVE_ALLOCA_H
+#define alloca(size) _alloca(size)
+#else
 /* AIX requires this to be the first thing in the file.  */ 
 #ifndef __GNUC__
-# if HAVE_ALLOCA_H
+# ifdef HAVE_ALLOCA_H
 #  include <alloca.h>
 # else
 #  ifdef _AIX
@@ -45,7 +50,7 @@ char *alloca ();
 #ifdef _WIN32
 	#define alloca _alloca
 #endif
-
+#endif
 /*@only@*/ char * xstrdup (const char *str);
 
 #if HAVE_MCHECK_H && defined(__GNUC__)
