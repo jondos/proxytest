@@ -2,9 +2,11 @@
 #include "../CASocket.hpp"
 #include "../CASocketGroup.hpp"
 #include "../CAUtil.hpp"
+#include "../CACmdLnOptions.hpp"
+CACmdLnOptions options;
 int main()
 {
-	printf("Waiting for 1000 (dead) connections...");
+	printf("Waiting for 2000 (dead) connections...");
 	#ifdef _WIN32
 		int err=0;
 		WSADATA wsadata;
@@ -13,8 +15,9 @@ int main()
 	CASocket oSocketAccept;
 	CASocketGroup oGroup(false);
 	oSocketAccept.create();
+	oSocketAccept.setReuseAddr(true);
 	oSocketAccept.listen(5000);
-	for(int i=0;i<1000;i++)
+	for(int i=0;i<2000;i++)
 	{
 		CASocket* pTmp=new CASocket();
 		if(oSocketAccept.accept(*pTmp)!=E_SUCCESS)
@@ -31,7 +34,7 @@ int main()
 		printf("Test: %u ",i);
 		UINT64 current,end;
 		getcurrentTimeMillis(current);
-		for(int j=0;j<100000;j++)
+		for(int j=0;j<10000;j++)
 		{
 			oGroup.select(0);
 		}
