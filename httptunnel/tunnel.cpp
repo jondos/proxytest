@@ -109,17 +109,15 @@ tunnel_is_connected (Tunnel *tunnel)
   return !tunnel_is_disconnected (tunnel);
 }
 
-static inline int
-tunnel_is_server (Tunnel *tunnel)
-{
-  return tunnel->dest.host_name == NULL;
-}
+static inline int tunnel_is_server (Tunnel *tunnel)
+	{
+		return tunnel->dest.m_host_name == NULL;
+	}
 
-static inline int
-tunnel_is_client (Tunnel *tunnel)
-{
-  return !tunnel_is_server (tunnel);
-}
+static inline int tunnel_is_client (Tunnel *tunnel)
+	{
+		return !tunnel_is_server (tunnel);
+	}
 
 #if 1
 static int
@@ -311,11 +309,10 @@ tunnel_out_setsockopts (int fd)
   return 0;
 }
 
-static void
-tunnel_out_disconnect (Tunnel *tunnel)
-{
-  if (tunnel_is_disconnected (tunnel))
-    return;
+static void tunnel_out_disconnect (Tunnel *tunnel)
+	{
+		if (tunnel_is_disconnected (tunnel))
+			return;
 
 #ifdef DEBUG_MODE
   if (tunnel_is_client (tunnel) &&
@@ -1258,9 +1255,14 @@ tunnel_new_server (int port, size_t content_length)
   tunnel->in_fd = -1;
   tunnel->out_fd = -1;
   tunnel->server_socket = -1;
-  tunnel->dest.host_name = NULL;
+  tunnel->dest.m_host_name = NULL;
   tunnel->dest.host_port = port;
-  tunnel->buf_ptr = tunnel->buf;
+  
+//SK13
+	tunnel->dest.m_proxy_name=NULL;
+	tunnel->dest.proxy_port=-1;
+	
+	tunnel->buf_ptr = tunnel->buf;
   tunnel->buf_len = 0;
   /* -1 to allow for TUNNEL_DISCONNECT */
   tunnel->content_length = content_length - 1;
@@ -1282,10 +1284,8 @@ tunnel_new_server (int port, size_t content_length)
   return tunnel;
 }
 
-Tunnel *
-tunnel_new_client (const char *host, int host_port,
-		   const char *proxy, int proxy_port,
-		   size_t content_length)
+Tunnel * tunnel_new_client (const char *host, int host_port,
+		   const char *proxy, int proxy_port,size_t content_length)
 {
   const char *remote;
   int remote_port;
@@ -1305,9 +1305,16 @@ tunnel_new_client (const char *host, int host_port,
   tunnel->in_fd = -1;
   tunnel->out_fd = -1;
   tunnel->server_socket = -1;
-  tunnel->dest.host_name = host;
-  tunnel->dest.host_port = host_port;
-  tunnel->dest.proxy_name = proxy;
+  tunnel->dest.m_host_name =new char[strlen(host)+1];
+  strcpy(tunnel->dest.m_host_name,host);
+	tunnel->dest.host_port = host_port;
+  if(proxy!=NULL)
+		{
+			tunnel->dest.m_proxy_name =new char[strlen(proxy)+1];
+			strcpy(tunnel->dest.m_proxy_name,proxy);
+		}
+	else
+		tunnel->dest.m_proxy_name=NULL;
   tunnel->dest.proxy_port = proxy_port;
   tunnel->dest.proxy_authorization = NULL;
   tunnel->dest.user_agent = NULL;
@@ -1321,14 +1328,14 @@ tunnel_new_client (const char *host, int host_port,
   tunnel->out_total_data = 0;
   tunnel->strict_content_length = FALSE;
 
-  if (tunnel->dest.proxy_name == NULL)
+  if (tunnel->dest.m_proxy_name == NULL)
     {
-      remote = tunnel->dest.host_name;
+      remote = tunnel->dest.m_host_name;
       remote_port = tunnel->dest.host_port;
     }
   else
     {
-      remote = tunnel->dest.proxy_name;
+      remote = tunnel->dest.m_proxy_name;
       remote_port = tunnel->dest.proxy_port;
     }
 

@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "CACmdLnOptions.hpp"
+#include "./popt/popt.h"
 CACmdLnOptions::CACmdLnOptions()
   {
 		bDaemon=false;

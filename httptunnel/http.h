@@ -46,14 +46,14 @@ typedef struct
 } Http_response;
 
 typedef struct
-{
-  const char *host_name;
-  int host_port;
-  const char *proxy_name;
-  int proxy_port;
-  const char *proxy_authorization;
-  const char *user_agent;
-} Http_destination;
+	{
+		char* m_host_name;
+		int host_port;
+		char* m_proxy_name;
+		int proxy_port;
+		const char *proxy_authorization;
+		const char *user_agent;
+	} Http_destination;
 
 extern ssize_t http_get (int fd, Http_destination *dest);
 extern ssize_t http_put (int fd, Http_destination *dest,
