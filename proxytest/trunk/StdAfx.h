@@ -56,7 +56,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //Some constants
 #define LAST_MIX_TO_PROXY_CONNECT_TIMEOUT 2000 //Connection timeout for last mix to proxy connections 2 Seconds...
 #define MIX_POOL_SIZE 10  //packets in the Mix pool
-#define MAX_POOL_TIMEOUT //home long to wait before a dummy is put in the pool
+#define MAX_POOL_TIMEOUT 100 //home long to wait (in ms) before a dummy is put in the pool
 #define DUMMY_CHANNEL 0
 
 #ifdef _WIN32
