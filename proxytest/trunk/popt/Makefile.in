@@ -193,10 +193,6 @@ distdir: $(DISTFILES)
 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
 	  fi; \
 	done
-popt.o: popt.c ../StdAfx.h system.h popt.h ../config.h poptint.h
-popthelp.o: popthelp.c ../StdAfx.h system.h popt.h poptint.h
-poptparse.o: poptparse.c ../StdAfx.h system.h popt.h
-
 info-am:
 info: info-am
 dvi-am:

@@ -76,12 +76,12 @@ sbin_PROGRAMS = proxytest
 proxytest_SOURCES = CAASymCipher.cpp CABase64.cpp CACmdLnOptions.cpp 		    CADatagramSocket.cpp CAFirstMix.cpp CAInfoService.cpp 		    CALastMix.cpp CALocalProxy.cpp CAMiddleMix.cpp 		    CAMix.cpp CAMsg.cpp CAMuxChannelList.cpp 		    CAMuxSocket.cpp CARoundTripTime.cpp CASignature.cpp 		    CASocket.cpp CASocketAddr.cpp CASocketGroup.cpp 		    CASocketList.cpp CASymCipher.cpp CAUtil.cpp StdAfx.cpp 		    proxytest.cpp 		    CAASymCipher.hpp CAMix.hpp CASocketList.hpp CABase64.hpp 		    CAMsg.hpp CASymCipher.hpp CACmdLnOptions.hpp 		    CAMuxChannelList.hpp CAUtil.hpp CADatagramSocket.hpp 		    CAMuxSocket.hpp StdAfx.h CAFirstMix.hpp 		    CARoundTripTime.hpp CAInfoService.hpp CASignature.hpp 		    CALastMix.hpp CASocket.hpp CALocalProxy.hpp 		    CASocketAddr.hpp CAMiddleMix.hpp CASocketGroup.hpp 
 
 
-proxytest_LDADD = $(top_srcdir)/xml/libxml.a 		  $(top_srcdir)/httptunnel/libhttptunnel.a 		  $(top_srcdir)/popt/libpopt.a
+proxytest_LDADD = $(top_srcdir)/xml/libxml.a 		  $(top_srcdir)/aes/libaes.a 		  $(top_srcdir)/popt/libpopt.a
 
 
 EXTRA_DIST = README proxytest.doxy proxytest.dsp proxytest.dsw
 
-SUBDIRS = popt xml httptunnel
+SUBDIRS = popt xml aes
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = config.h
@@ -100,7 +100,7 @@ CAMuxSocket.o CARoundTripTime.o CASignature.o CASocket.o CASocketAddr.o \
 CASocketGroup.o CASocketList.o CASymCipher.o CAUtil.o StdAfx.o \
 proxytest.o
 proxytest_DEPENDENCIES =  $(top_srcdir)/xml/libxml.a \
-$(top_srcdir)/httptunnel/libhttptunnel.a $(top_srcdir)/popt/libpopt.a
+$(top_srcdir)/aes/libaes.a $(top_srcdir)/popt/libpopt.a
 proxytest_LDFLAGS = 
 CXXFLAGS = @CXXFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -110,9 +110,9 @@ CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
-DIST_COMMON =  README ./stamp-h.in ChangeLog Makefile.am Makefile.in \
-acconfig.h aclocal.m4 config.guess config.h.in config.sub configure \
-configure.in install-sh missing mkinstalldirs
+DIST_COMMON =  ./stamp-h.in Makefile.am Makefile.in acconfig.h \
+aclocal.m4 config.guess config.h.in config.sub configure configure.in \
+install-sh missing mkinstalldirs
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
@@ -365,76 +365,6 @@ distdir: $(DISTFILES)
 	      || exit 1; \
 	  fi; \
 	done
-CAASymCipher.o: CAASymCipher.cpp StdAfx.h popt/system.h popt/popt.h \
-	CAASymCipher.hpp
-CABase64.o: CABase64.cpp StdAfx.h popt/system.h popt/popt.h CABase64.hpp
-CACmdLnOptions.o: CACmdLnOptions.cpp StdAfx.h popt/system.h popt/popt.h \
-	CACmdLnOptions.hpp
-CADatagramSocket.o: CADatagramSocket.cpp StdAfx.h popt/system.h \
-	popt/popt.h CADatagramSocket.hpp CASocketAddr.hpp
-CAFirstMix.o: CAFirstMix.cpp StdAfx.h popt/system.h popt/popt.h \
-	CAFirstMix.hpp CAMix.hpp CAMuxSocket.hpp CASocket.hpp \
-	CASocketAddr.hpp httptunnel/tunnel.h httptunnel/config.h \
-	CASocketGroup.hpp CAMsg.hpp CACmdLnOptions.hpp \
-	CAMuxChannelList.hpp CASocketList.hpp CASymCipher.hpp \
-	CAASymCipher.hpp CAInfoService.hpp CASignature.hpp
-CAInfoService.o: CAInfoService.cpp StdAfx.h popt/system.h popt/popt.h \
-	CAInfoService.hpp CASignature.hpp CASocket.hpp CASocketAddr.hpp \
-	xml/xmloutput.h xml/xmlstream.h xml/xmlconfig.h \
-	CACmdLnOptions.hpp
-CALastMix.o: CALastMix.cpp StdAfx.h popt/system.h popt/popt.h \
-	CALastMix.hpp CAMix.hpp CAMuxSocket.hpp CASocket.hpp \
-	CASocketAddr.hpp httptunnel/tunnel.h httptunnel/config.h \
-	CAASymCipher.hpp CASocketList.hpp CASymCipher.hpp \
-	CASocketGroup.hpp CAMsg.hpp CACmdLnOptions.hpp
-CALocalProxy.o: CALocalProxy.cpp StdAfx.h popt/system.h popt/popt.h \
-	CALocalProxy.hpp CAMix.hpp CAMuxSocket.hpp CASocket.hpp \
-	CASocketAddr.hpp httptunnel/tunnel.h httptunnel/config.h \
-	CAASymCipher.hpp CASocketList.hpp CASymCipher.hpp \
-	CASocketGroup.hpp CAMsg.hpp CACmdLnOptions.hpp
-CAMiddleMix.o: CAMiddleMix.cpp StdAfx.h popt/system.h popt/popt.h \
-	CAMiddleMix.hpp CAMix.hpp CAMuxSocket.hpp CASocket.hpp \
-	CASocketAddr.hpp httptunnel/tunnel.h httptunnel/config.h \
-	CAASymCipher.hpp CASocketList.hpp CASymCipher.hpp \
-	CASocketGroup.hpp CAMsg.hpp CACmdLnOptions.hpp
-CAMix.o: CAMix.cpp StdAfx.h popt/system.h popt/popt.h CAMix.hpp
-CAMsg.o: CAMsg.cpp StdAfx.h popt/system.h popt/popt.h CAMsg.hpp \
-	CACmdLnOptions.hpp
-CAMuxChannelList.o: CAMuxChannelList.cpp StdAfx.h popt/system.h \
-	popt/popt.h CAMuxChannelList.hpp CAMuxSocket.hpp CASocket.hpp \
-	CASocketAddr.hpp httptunnel/tunnel.h httptunnel/config.h \
-	CASocketList.hpp CASymCipher.hpp
-CAMuxSocket.o: CAMuxSocket.cpp StdAfx.h popt/system.h popt/popt.h \
-	CASocketAddr.hpp CAMuxSocket.hpp CASocket.hpp \
-	httptunnel/tunnel.h httptunnel/config.h httptunnel/common.h
-CARoundTripTime.o: CARoundTripTime.cpp StdAfx.h popt/system.h \
-	popt/popt.h CARoundTripTime.hpp CADatagramSocket.hpp \
-	CASocketAddr.hpp CACmdLnOptions.hpp CAUtil.hpp
-CASignature.o: CASignature.cpp StdAfx.h popt/system.h popt/popt.h \
-	CASignature.hpp CABase64.hpp CAUtil.hpp xml/xmlstream.h \
-	xml/xmlconfig.h xml/xmlinput.h
-CASocket.o: CASocket.cpp StdAfx.h popt/system.h popt/popt.h CASocket.hpp \
-	CASocketAddr.hpp
-CASocketAddr.o: CASocketAddr.cpp StdAfx.h popt/system.h popt/popt.h \
-	CASocketAddr.hpp
-CASocketGroup.o: CASocketGroup.cpp StdAfx.h popt/system.h popt/popt.h \
-	CASocket.hpp CASocketAddr.hpp CASocketGroup.hpp CAMuxSocket.hpp \
-	httptunnel/tunnel.h httptunnel/config.h
-CASocketList.o: CASocketList.cpp StdAfx.h popt/system.h popt/popt.h \
-	CASocketList.hpp CAMuxSocket.hpp CASocket.hpp CASocketAddr.hpp \
-	httptunnel/tunnel.h httptunnel/config.h CASymCipher.hpp
-CASymCipher.o: CASymCipher.cpp StdAfx.h popt/system.h popt/popt.h \
-	CASymCipher.hpp
-CAUtil.o: CAUtil.cpp StdAfx.h popt/system.h popt/popt.h
-StdAfx.o: StdAfx.cpp StdAfx.h popt/system.h popt/popt.h
-proxytest.o: proxytest.cpp StdAfx.h popt/system.h popt/popt.h \
-	CASocket.hpp CASocketAddr.hpp CASocketGroup.hpp CAMuxSocket.hpp \
-	httptunnel/tunnel.h httptunnel/config.h CACmdLnOptions.hpp \
-	CAMsg.hpp CASocketList.hpp CASymCipher.hpp CAMuxChannelList.hpp \
-	CAASymCipher.hpp CAInfoService.hpp CASignature.hpp \
-	CADatagramSocket.hpp CARoundTripTime.hpp CAUtil.hpp CAMix.hpp \
-	CAMiddleMix.hpp CAFirstMix.hpp CALastMix.hpp CALocalProxy.hpp
-
 info-am:
 info: info-recursive
 dvi-am:

@@ -29,7 +29,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CAMUXSOCKET__
 #define __CAMUXSOCKET__
 #include "CASocket.hpp"
-#include "httptunnel/tunnel.h"
+//#include "httptunnel/tunnel.h"
 
 typedef UINT32 HCHANNEL;
 #define MUX_HTTP  0 
@@ -95,7 +95,7 @@ class CAMuxSocket
 		public:
 			CAMuxSocket();
 			~CAMuxSocket(){}
-			int useTunnel(char* proxyhost,UINT16 proxyport);
+//			int useTunnel(char* proxyhost,UINT16 proxyport);
 			int accept(UINT16 port);
 			SINT32 connect(LPCASOCKETADDR psa);
 			SINT32 connect(LPCASOCKETADDR psa,UINT retry,UINT32 time);
@@ -104,16 +104,16 @@ class CAMuxSocket
 			int receive(MUXPACKET *pPacket);
 			int close(HCHANNEL channel_id);
 			operator CASocket*(){return &m_Socket;}
-			operator SOCKET(){if(!bIsTunneld)
+			operator SOCKET(){//if(!bIsTunneld)
 														return (SOCKET)m_Socket;
-												else
-													return tunnel_pollin_fd(m_pTunnel);}
-	
-		private:
+												//else
+													//return tunnel_pollin_fd(m_pTunnel);
+													}
+			private:
 			CASocket m_Socket;
-			bool bIsTunneld;
-			Tunnel* m_pTunnel;
-			char *m_szTunnelHost;
-			UINT16 m_uTunnelPort;
+	//		bool bIsTunneld;
+	//		Tunnel* m_pTunnel;
+	//		char *m_szTunnelHost;
+	//		UINT16 m_uTunnelPort;
 	};
 #endif

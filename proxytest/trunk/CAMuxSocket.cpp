@@ -32,14 +32,14 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include "CAMsg.hpp"
 #endif
 
-#include "httptunnel/common.h"
+//#include "httptunnel/common.h"
 char buff[255];
 
 CAMuxSocket::CAMuxSocket()
 	{
-		bIsTunneld=false;
+//		bIsTunneld=false;
 	}
-	
+/*	
 int CAMuxSocket::useTunnel(char* proxyhost,UINT16 proxyport)
 	{
 		m_szTunnelHost=new char[strlen(proxyhost)+1];
@@ -48,11 +48,11 @@ int CAMuxSocket::useTunnel(char* proxyhost,UINT16 proxyport)
 		bIsTunneld=true;
 		return 0;
 	}
-
+*/
 int CAMuxSocket::accept(UINT16 port)
 	{
-		if(!bIsTunneld)
-			{
+//		if(!bIsTunneld)
+//			{
 				CASocket oSocket;
 				oSocket.create();
 				oSocket.setReuseAddr(true);
@@ -62,15 +62,15 @@ int CAMuxSocket::accept(UINT16 port)
 					return SOCKET_ERROR;
 				oSocket.close();
 				m_Socket.setRecvLowWat(sizeof(MUXPACKET));
-			}
+/*			}
 		else
 			{
-				m_pTunnel=tunnel_new_server (port,0/*DEFAULT_CONTENT_LENGTH*//*sizeof(MUXPACKET)*/);
+				m_pTunnel=tunnel_new_server (port,0);//DEFAULT_CONTENT_LENGTH//sizeof(MUXPACKET));
 				if(m_pTunnel==NULL)
 				    return SOCKET_ERROR;
 				tunnel_accept(m_pTunnel);
 			}
-		return 0;
+*/		return 0;
 	}
 			
 SINT32 CAMuxSocket::connect(LPCASOCKETADDR psa)
@@ -80,29 +80,30 @@ SINT32 CAMuxSocket::connect(LPCASOCKETADDR psa)
 
 SINT32 CAMuxSocket::connect(LPCASOCKETADDR psa,UINT retry,UINT32 time)
 	{
-		if(!bIsTunneld)
-			{
+//		if(!bIsTunneld)
+//			{
 				m_Socket.setRecvLowWat(sizeof(MUXPACKET));
 				return m_Socket.connect(psa,retry,time);
-			}
+/*			}
 		else
 			{
+
 				psa->getHostName((UINT8*)buff,255);
 				m_pTunnel=tunnel_new_client (buff, psa->getPort(),m_szTunnelHost,m_uTunnelPort,
-				 0/*DEFAULT_CONTENT_LENGTH*//*sizeof(MUXPACKET)*/);
+				 0//DEFAULT_CONTENT_LENGTH//sizeof(MUXPACKET));
 				return tunnel_connect(m_pTunnel);
 			}
-	}
+*/	}
 			
 int CAMuxSocket::close()
 	{
-		if(!bIsTunneld)
-			{
+//		if(!bIsTunneld)
+//			{
 				return m_Socket.close();
-			}
+/*			}
 		else
 			return tunnel_close(m_pTunnel);
-	}
+*/	}
 
 #ifndef PROT2
 int CAMuxSocket::send(MUXPACKET *pPacket)
@@ -113,15 +114,15 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 		pPacket->channel=htonl(pPacket->channel);
 		pPacket->len=htons(pPacket->len);
 
-		if(!bIsTunneld)
-			{
+//		if(!bIsTunneld)
+//			{
 				do
 					{
 						len=m_Socket.send(((UINT8*)pPacket)+aktIndex,MuxPacketSize);
 						MuxPacketSize-=len;
 						aktIndex+=len;
 					} while(len>0&&MuxPacketSize>0);
-			}
+/*			}
 		else
 			{		
 				do
@@ -132,6 +133,7 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 //						aktIndex+=len;
 					} while(len>0&&MuxPacketSize>0);	
 			}
+*/
 		if(len==SOCKET_ERROR)
 			{
 				#ifdef _DEBUG
@@ -151,15 +153,15 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 		pPacket->channel=htonl(pPacket->channel);
 //		pPacket->len=htons(pPacket->len);
 
-		if(!bIsTunneld)
-			{
+//		if(!bIsTunneld)
+//			{
 				do
 					{
 						len=m_Socket.send(((UINT8*)pPacket)+aktIndex,MuxPacketSize);
 						MuxPacketSize-=len;
 						aktIndex+=len;
 					} while(len>0&&MuxPacketSize>0);
-			}
+/*			}
 		else
 			{		
 				do
@@ -170,6 +172,7 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 //						aktIndex+=len;
 					} while(len>0&&MuxPacketSize>0);	
 			}
+*/
 		if(len==SOCKET_ERROR)
 			{
 				#ifdef _DEBUG
@@ -188,15 +191,15 @@ int CAMuxSocket::receive(MUXPACKET* pPacket)
 		int MuxPacketSize=sizeof(MUXPACKET);
 		int aktIndex=0;
 		int len=0;
-		if(!bIsTunneld)
-			{
+//		if(!bIsTunneld)
+//			{
 				do
 					{
 						len=m_Socket.receive(((UINT8*)pPacket)+aktIndex,MuxPacketSize);
 						MuxPacketSize-=len;
 						aktIndex+=len;
 					} while(len>0&&MuxPacketSize>0);
-			}
+/*			}
 		else
 			{
 				do
@@ -210,6 +213,7 @@ int CAMuxSocket::receive(MUXPACKET* pPacket)
 //						aktIndex+=len;
 					} while(len>0&&MuxPacketSize>0);
 			}
+*/
 		if(len==SOCKET_ERROR||len==0)
 			{
 				#ifdef _DEBUG
@@ -231,15 +235,15 @@ int CAMuxSocket::receive(MUXPACKET* pPacket)
 		int MuxPacketSize=sizeof(MUXPACKET);
 		int aktIndex=0;
 		int len=0;
-		if(!bIsTunneld)
-			{
+//		if(!bIsTunneld)
+//			{
 				do
 					{
 						len=m_Socket.receive(((UINT8*)pPacket)+aktIndex,MuxPacketSize);
 						MuxPacketSize-=len;
 						aktIndex+=len;
 					} while(len>0&&MuxPacketSize>0);
-			}
+/*			}
 		else
 			{
 				do
@@ -253,6 +257,7 @@ int CAMuxSocket::receive(MUXPACKET* pPacket)
 //						aktIndex+=len;
 					} while(len>0&&MuxPacketSize>0);
 			}
+*/
 		if(len==SOCKET_ERROR||len==0)
 			{
 				#ifdef _DEBUG

@@ -22,9 +22,9 @@ proxytest_SOURCES = CAASymCipher.cpp CABase64.cpp CACmdLnOptions.cpp \
 		    CASocketAddr.hpp CAMiddleMix.hpp CASocketGroup.hpp 
 
 proxytest_LDADD = $(top_srcdir)/xml/libxml.a \
-		  $(top_srcdir)/httptunnel/libhttptunnel.a \
+		  $(top_srcdir)/aes/libaes.a \
 		  $(top_srcdir)/popt/libpopt.a
 
 EXTRA_DIST = README proxytest.doxy proxytest.dsp proxytest.dsw
 
-SUBDIRS = popt xml httptunnel
+SUBDIRS = popt xml aes
