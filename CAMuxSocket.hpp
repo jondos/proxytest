@@ -106,7 +106,9 @@ class CAMuxSocket
 			int close(HCHANNEL channel_id);
 			operator CASocket*(){return &m_Socket;}
 			operator SOCKET(){return (SOCKET)m_Socket;
-													}
+			
+//			SINT32 getSendSpace(){return m_Socket.getSendSpace();}
+													
 			SINT32 setCrypt(bool b);
 		private:
 				CASocket m_Socket;

@@ -57,6 +57,7 @@ class CASocketASyncSend
 			SINT32 stop();
 			//Sets the limit after which send will generate E_QUEUEFULL error
 			SINT32 setSendQueueSoftLimit(UINT32 limit){m_SendQueueSoftLimit=limit;return E_SUCCESS;}
+			
 			SINT32 setSendQueueLowWater(UINT32 lowwater){m_SendQueueLowWater=lowwater;return E_SUCCESS;}
 			//The resume method is called with a Socket, if the Queuesize of this sockete falls below SendQueueLowWater
 			SINT32 setResume(CASocketASyncSendResume* resume){pResume=resume;return E_SUCCESS;}

@@ -62,6 +62,10 @@ THREAD_RETURN SocketASyncSendLoop(void* p)
 									{
 										len=min(sendSpace,len);
 									}
+								else
+								{ //if we could not find out how big the sendspace is
+										len=MIXPACKET_SIZE;
+									}
 								if(akt->pQueue->get(buff,(UINT32*)&len)==E_SUCCESS)
 									akt->pSocket->send(buff,len,true);
 								if(akt->bwasOverFull&&akt->pQueue->getSize()<pASyncSend->m_SendQueueLowWater)
