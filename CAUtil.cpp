@@ -357,6 +357,17 @@ SINT32 getDOMElementValue(DOM_Element& elem,UINT32* value)
 		return E_SUCCESS;
 	}
 
+SINT32 getDOMElementValue(DOM_Element& elem,UINT16* value)
+	{
+		UINT32 tmp;
+		if(getDOMElementValue(elem,&tmp)!=E_SUCCESS)
+			return E_UNKNOWN;
+		if(tmp>0xFFFF)
+			return E_UNKNOWN;
+		*value=(UINT16)tmp;
+		return E_SUCCESS;
+	}
+
 SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, UINT8* xml, UINT32* xmllen,CAASymCipher* pRSA)
 	{
 #define XML_ENCODE_KEY_TEMPLATE "<EncryptedKey><EncryptionMethod Algorithm=\"RSA\"/><CipherData><CipherValue>%s</CipherValue></CipherData></EncryptedKey>"

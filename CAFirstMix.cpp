@@ -60,6 +60,7 @@ SINT32 CAFirstMix::initOnce()
 
 SINT32 CAFirstMix::init()
 	{
+		m_nMixedPackets=0; //reset to zero after each restart (at the moment neccessary for infoservice)
 		//Establishing all Listeners
 		m_nSocketsIn=options.getListenerInterfaceCount();
 		m_arrSocketsIn=new CASocket[m_nSocketsIn];

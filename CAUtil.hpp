@@ -55,6 +55,7 @@ SINT32 filelength(int handle);
 
 SINT32 setDOMElementValue(DOM_Element& elem,UINT32 value);
 SINT32 getDOMElementValue(DOM_Element& elem,UINT32* value);
+SINT32 getDOMElementValue(DOM_Element& elem,UINT16* value);
 SINT32 setDOMElementValue(DOM_Element& elem,UINT8* value);
 SINT32 getDOMElementValue(DOM_Element& elem,UINT8* value,UINT32* len);
 
