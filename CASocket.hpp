@@ -53,9 +53,9 @@ class CASocket
 			SINT32 receiveFully(UINT8* buff,UINT32 len);
 			SINT32 receiveFully(UINT8* buff,UINT32 len,UINT16 msTimeOut);
 			/** Returns the number of the Socket used. Which will be always the same number,
-			** even after close(), until the Socket
-			** is recreated using create()
-			** @return number of the associated socket
+				* even after close(), until the Socket
+				* is recreated using create()
+				* @return number of the associated socket
 			**/
 			operator SOCKET(){return m_Socket;}
 			SINT32 getLocalPort();

@@ -28,7 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CATHREAD__
 #define __CATHREAD__
 typedef void *(*THREAD_MAIN_TYP)(void *);
-#include "CAConditionVariable.hpp"
+//#include "CAConditionVariable.hpp"
 class CAThread
 	{
 		public:
@@ -79,7 +79,7 @@ class CAThread
 		private:
 			THREAD_MAIN_TYP m_fncMainLoop;
 	 		pthread_t* m_pThread;
-			CAConditionVariable m_CondVar;
+			//CAConditionVariable m_CondVar;
 	};
 #endif
 
