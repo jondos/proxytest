@@ -132,6 +132,85 @@ target_alias = @target_alias@
 
 AUTOMAKE_OPTIONS = foreign
 sbin_PROGRAMS = proxytest
+proxytest_SOURCES = CAASymCipher.cpp \
+		    CABase64.cpp \
+		    CACacheLoadBalancing.cpp\
+		    CACertificate.cpp\
+		    CACertStore.cpp\
+		    CACmdLnOptions.cpp \
+		    CAConditionVariable.cpp\
+		    CADatabase.cpp\
+		    CADatagramSocket.cpp \
+		    CAFirstMix.cpp \
+		    CAFirstMixChannelList.cpp \
+		    CAInfoService.cpp \
+		    CAIPList.cpp \
+		    CALastMix.cpp \
+		    CALastMixChannelList.cpp\
+		    CAListenerInterface.cpp\
+		    CALocalProxy.cpp \
+		    CAMiddleMix.cpp \
+		    CAMiddleMixChannelList.cpp \
+		    CAMix.cpp \
+		    CAMsg.cpp \
+		    CAMutex.cpp\
+		    CAMuxSocket.cpp \
+		    CAPayment.cpp\
+		    CAQueue.cpp \
+		    CASemaphore.cpp\
+		    CASignature.cpp \
+		    CASingleSocketGroup.cpp\
+		    CASocket.cpp \
+		    CASocketAddrINet.cpp \
+		    CASocketAddrUnix.cpp \
+		    CASocketGroup.cpp \
+		    CASocketList.cpp \
+		    CASymCipher.cpp \
+		    CAThread.cpp \
+		    CAUtil.cpp \
+		    StdAfx.cpp \
+		    proxytest.cpp \
+		    CAASymCipher.hpp \
+		    CABase64.hpp \
+		    CACacheLoadBalancing.hpp\
+		    CACertificate.hpp\
+		    CACertStore.hpp\
+		    CAConditionVariable.hpp\
+		    CACmdLnOptions.hpp \
+		    CADatabase.hpp\
+		    CADatagramSocket.hpp\
+		    CAFirstMix.hpp \
+		    CAFirstMixChannelList.hpp \
+		    CAInfoService.hpp \
+		    CAIPList.hpp \
+		    CALastMix.hpp \
+		    CALastMixChannelList.hpp\
+		    CAListenerInterface.hpp\
+		    CALocalProxy.hpp \
+		    CALockAble.hpp\
+		    CAMiddleMix.hpp \
+		    CAMiddleMixChannelList.hpp \
+		    CAMix.hpp \
+		    CAMsg.hpp \
+		    CAMutex.hpp\
+		    CAMuxSocket.hpp \
+		    CAPayment.hpp\
+		    CAQueue.hpp \
+		    CASemaphore.hpp\
+		    CASignature.hpp \
+		    CASingleSocketGroup.hpp\
+		    CASocket.hpp \
+		    CASocketAddr.hpp \
+		    CASocketAddrINet.hpp \
+		    CASocketAddrUnix.hpp \
+		    CASocketGroup.hpp \
+		    CASocketList.hpp \
+		    CASymCipher.hpp \
+		    CAThread.hpp \
+		    CAUtil.hpp \
+		    StdAfx.h \
+		    basetypedefs.h
+
 
 proxytest_LDADD = $(top_srcdir)/xml/libxml.a \
 		  $(top_srcdir)/aes/libaes.a \
@@ -152,8 +231,24 @@ CONFIG_CLEAN_FILES =
 sbin_PROGRAMS = proxytest$(EXEEXT)
 PROGRAMS = $(sbin_PROGRAMS)
 
-proxytest_SOURCES = proxytest.c
-proxytest_OBJECTS = proxytest.$(OBJEXT)
+am_proxytest_OBJECTS = CAASymCipher.$(OBJEXT) CABase64.$(OBJEXT) \
+	CACacheLoadBalancing.$(OBJEXT) CACertificate.$(OBJEXT) \
+	CACertStore.$(OBJEXT) CACmdLnOptions.$(OBJEXT) \
+	CAConditionVariable.$(OBJEXT) CADatabase.$(OBJEXT) \
+	CADatagramSocket.$(OBJEXT) CAFirstMix.$(OBJEXT) \
+	CAFirstMixChannelList.$(OBJEXT) CAInfoService.$(OBJEXT) \
+	CAIPList.$(OBJEXT) CALastMix.$(OBJEXT) \
+	CALastMixChannelList.$(OBJEXT) CAListenerInterface.$(OBJEXT) \
+	CALocalProxy.$(OBJEXT) CAMiddleMix.$(OBJEXT) \
+	CAMiddleMixChannelList.$(OBJEXT) CAMix.$(OBJEXT) \
+	CAMsg.$(OBJEXT) CAMutex.$(OBJEXT) CAMuxSocket.$(OBJEXT) \
+	CAPayment.$(OBJEXT) CAQueue.$(OBJEXT) CASemaphore.$(OBJEXT) \
+	CASignature.$(OBJEXT) CASingleSocketGroup.$(OBJEXT) \
+	CASocket.$(OBJEXT) CASocketAddrINet.$(OBJEXT) \
+	CASocketAddrUnix.$(OBJEXT) CASocketGroup.$(OBJEXT) \
+	CASocketList.$(OBJEXT) CASymCipher.$(OBJEXT) CAThread.$(OBJEXT) \
+	CAUtil.$(OBJEXT) StdAfx.$(OBJEXT) proxytest.$(OBJEXT)
+proxytest_OBJECTS = $(am_proxytest_OBJECTS)
 proxytest_DEPENDENCIES = $(top_srcdir)/xml/libxml.a \
 	$(top_srcdir)/aes/libaes.a $(top_srcdir)/popt/libpopt.a \
 	$(top_srcdir)/trio/libtrio.a $(top_srcdir)/tre/libtre.a \
@@ -163,12 +258,49 @@ proxytest_LDFLAGS =
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I.
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/proxytest.Po
+@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/CAASymCipher.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CABase64.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CACacheLoadBalancing.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CACertStore.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CACertificate.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CACmdLnOptions.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CAConditionVariable.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CADatabase.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CADatagramSocket.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CAFirstMix.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CAFirstMixChannelList.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CAIPList.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CAInfoService.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CALastMix.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CALastMixChannelList.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CAListenerInterface.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CALocalProxy.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CAMiddleMix.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CAMiddleMixChannelList.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CAMix.Po ./$(DEPDIR)/CAMsg.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CAMutex.Po ./$(DEPDIR)/CAMuxSocket.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CAPayment.Po ./$(DEPDIR)/CAQueue.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CASemaphore.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CASignature.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CASingleSocketGroup.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CASocket.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CASocketAddrINet.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CASocketAddrUnix.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CASocketGroup.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CASocketList.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CASymCipher.Po ./$(DEPDIR)/CAThread.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CAUtil.Po ./$(DEPDIR)/StdAfx.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/proxytest.Po
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLD = $(CXX)
+CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
+	-o $@
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = proxytest.c
+DIST_SOURCES = $(proxytest_SOURCES)
 
 RECURSIVE_TARGETS = info-recursive dvi-recursive pdf-recursive \
 	ps-recursive install-info-recursive uninstall-info-recursive \
@@ -179,13 +311,13 @@ DIST_COMMON = README $(srcdir)/Makefile.in $(srcdir)/configure INSTALL \
 	Makefile.am aclocal.m4 config.guess config.h.in config.sub \
 	configure configure.in depcomp install-sh missing mkinstalldirs
 DIST_SUBDIRS = $(SUBDIRS)
-SOURCES = proxytest.c
+SOURCES = $(proxytest_SOURCES)
 
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
 .SUFFIXES:
-.SUFFIXES: .c .o .obj
+.SUFFIXES: .cpp .o .obj
 
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno
@@ -245,7 +377,7 @@ clean-sbinPROGRAMS:
 	-test -z "$(sbin_PROGRAMS)" || rm -f $(sbin_PROGRAMS)
 proxytest$(EXEEXT): $(proxytest_OBJECTS) $(proxytest_DEPENDENCIES) 
 	@rm -f proxytest$(EXEEXT)
-	$(LINK) $(proxytest_LDFLAGS) $(proxytest_OBJECTS) $(proxytest_LDADD) $(LIBS)
+	$(CXXLINK) $(proxytest_LDFLAGS) $(proxytest_OBJECTS) $(proxytest_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
@@ -253,29 +385,66 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAASymCipher.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CABase64.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CACacheLoadBalancing.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CACertStore.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CACertificate.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CACmdLnOptions.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAConditionVariable.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CADatabase.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CADatagramSocket.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAFirstMix.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAFirstMixChannelList.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAIPList.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAInfoService.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CALastMix.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CALastMixChannelList.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAListenerInterface.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CALocalProxy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMiddleMix.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMiddleMixChannelList.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMix.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMsg.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMutex.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMuxSocket.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAPayment.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAQueue.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASemaphore.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASignature.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASingleSocketGroup.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASocket.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASocketAddrINet.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASocketAddrUnix.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASocketGroup.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASocketList.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASymCipher.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAThread.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAUtil.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/StdAfx.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/proxytest.Po@am__quote@
 
-.c.o:
-@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" \
-@am__fastdepCC_TRUE@	  -c -o $@ `test -f '$<' || echo '$(srcdir)/'`$<; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; \
-@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; \
-@am__fastdepCC_TRUE@	fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(COMPILE) -c `test -f '$<' || echo '$(srcdir)/'`$<
+.cpp.o:
+@am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" \
+@am__fastdepCXX_TRUE@	  -c -o $@ `test -f '$<' || echo '$(srcdir)/'`$<; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; \
+@am__fastdepCXX_TRUE@	else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; \
+@am__fastdepCXX_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `test -f '$<' || echo '$(srcdir)/'`$<
 
-.c.obj:
-@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" \
-@am__fastdepCC_TRUE@	  -c -o $@ `if test -f '$<'; then $(CYGPATH_W) '$<'; else $(CYGPATH_W) '$(srcdir)/$<'; fi`; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; \
-@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; \
-@am__fastdepCC_TRUE@	fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(COMPILE) -c `if test -f '$<'; then $(CYGPATH_W) '$<'; else $(CYGPATH_W) '$(srcdir)/$<'; fi`
+.cpp.obj:
+@am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" \
+@am__fastdepCXX_TRUE@	  -c -o $@ `if test -f '$<'; then $(CYGPATH_W) '$<'; else $(CYGPATH_W) '$(srcdir)/$<'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; \
+@am__fastdepCXX_TRUE@	else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; \
+@am__fastdepCXX_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `if test -f '$<'; then $(CYGPATH_W) '$<'; else $(CYGPATH_W) '$(srcdir)/$<'; fi`
 uninstall-info-am:
 
 # This directory's subdirectories are mostly independent; you can cd

@@ -83,15 +83,15 @@ proxytest_SOURCES = CAASymCipher.cpp \
 		    CAUtil.hpp \
 		    StdAfx.h \
 		    basetypedefs.h\
-		    TypeA/CAFirstMixA.hpp\
-		    TypeA/CAFirstMixA.cpp
+
 
 proxytest_LDADD = $(top_srcdir)/xml/libxml.a \
 		  $(top_srcdir)/aes/libaes.a \
 		  $(top_srcdir)/popt/libpopt.a \
 		  $(top_srcdir)/trio/libtrio.a \
-		  $(top_srcdir)/tre/libtre.a
+		  $(top_srcdir)/tre/libtre.a \
+		  $(top_srcdir)/TypeA/libmixa.a
 
 EXTRA_DIST = README proxytest.doxy proxytest.dsp proxytest.dsw
 
-SUBDIRS = popt xml aes trio tre
+SUBDIRS = popt xml aes trio tre TypeA
