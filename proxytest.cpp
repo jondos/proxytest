@@ -1094,6 +1094,7 @@ int main(int argc, const char* argv[])
 				}
 #endif
 	    CAMsg::printMsg(LOG_INFO,"Anon proxy started!\n");
+	    CAMsg::printMsg(LOG_INFO,"Using: %s!\n",OPENSSL_VERSION_TEXT);
 #ifdef _DEBUG
 		sockets=0;
 #endif
