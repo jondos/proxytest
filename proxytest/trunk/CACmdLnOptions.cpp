@@ -171,7 +171,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 	int iVersion=0;
 	char* configfile=NULL;
 	int iAutoReconnect=0;
-	DOM_Document docMixXml;
+	//DOM_Document docMixXml;
 	poptOption options[]=
 	 {
 		{"localproxy",'j',POPT_ARG_NONE,&iLocalProxy,0,"act as local proxy",NULL},
@@ -207,7 +207,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 		m_bAutoReconnect=true;
 	if(configfile!=NULL)
 		{
-			SINT32 ret=readXmlConfiguration(docMixXml,(UINT8*)configfile);
+			SINT32 ret=readXmlConfiguration(m_docMixXml,(UINT8*)configfile);
 			if(ret==E_FILE_OPEN)
 				CAMsg::printMsg(LOG_CRIT,"Couldt not open config file: %s\n",configfile);
 			else if(ret==E_FILE_READ)
@@ -323,7 +323,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 	m_iSOCKSServerPort=SOCKSport;
 	if(!m_bLocalProxy)
 		{
-			ret=processXmlConfiguration(docMixXml);
+			ret=processXmlConfiguration(m_docMixXml);
 			if(ret!=E_SUCCESS)
 				return ret;
 		}
