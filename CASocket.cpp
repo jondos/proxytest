@@ -121,7 +121,7 @@ SINT32 CASocket::connect(CASocketAddr & psa)
 		return connect(psa,1,0);
 	}
 
-SINT32 CASocket::connect(CASocketAddr & psa,UINT retry,UINT32 time)
+SINT32 CASocket::connect(CASocketAddr & psa,UINT32 retry,UINT32 time)
 	{
 //		CAMsg::printMsg(LOG_DEBUG,"Socket:connect\n");
 		if(m_bSocketIsClosed&&create()!=E_SUCCESS)
@@ -134,7 +134,7 @@ SINT32 CASocket::connect(CASocketAddr & psa,UINT retry,UINT32 time)
 		int err=0;
 		LPSOCKADDR addr=psa.LPSOCKADDR();
 		int addr_len=psa.getSize();
-		for(UINT i=0;i<retry;i++)
+		for(UINT32 i=0;i<retry;i++)
 			{
 //				CAMsg::printMsg(LOG_DEBUG,"Socket:connect-connect\n");
 				err=::connect(m_Socket,addr,addr_len);
@@ -159,7 +159,7 @@ SINT32 CASocket::connect(CASocketAddr & psa,UINT retry,UINT32 time)
 	}
 			
 
-SINT32 CASocket::connect(CASocketAddr & psa,UINT msTimeOut)
+SINT32 CASocket::connect(CASocketAddr & psa,UINT32 msTimeOut)
 	{
 		if(m_bSocketIsClosed&&create(psa.getType())!=E_SUCCESS)
 			{
@@ -377,17 +377,6 @@ SINT32 CASocket::sendFully(const UINT8* buff,UINT32 len)
 			}
 	}
 
-#ifdef HAVE_FIONREAD
-SINT32 CASocket::available()
-	{
-		unsigned long ul;
-		if(ioctlsocket(m_Socket,FIONREAD,&ul)==SOCKET_ERROR)
-			return SOCKET_ERROR;
-		else
-			return (int)ul;
-	}
-#endif
-
 /** Will receive some bytes from the socket. May block or not depending on whatever this socket
 	* was set to blocking or non-blocking mode.
 	* Warning: If socket is in blocking mode and receive is called, recevie will block until some
@@ -453,10 +442,11 @@ SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len)
 *
 * Lots of work TODO!!!!!
 */
-SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len,SINT32 msTimeOut)
+SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len,UINT16 msTimeOut)
 	{
 		SINT32 ret;
-		SINT32 dt=msTimeOut/2;
+		UINT16 dt=msTimeOut/2+1;
+		SINT32 timeoutLeft=msTimeOut;
 		do
 			{
 				#ifdef HAVE_AVAILABLE
@@ -477,9 +467,9 @@ SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len,SINT32 msTimeOut)
 						return E_SUCCESS;	    	    
 					}
 				msSleep(dt);
-				msTimeOut-=dt;
+				timeoutLeft-=dt;
 			}
-		while(msTimeOut>0);
+		while(timeoutLeft>0);
 		return E_TIMEDOUT;
 	}
 

@@ -27,7 +27,7 @@
 
 #include "xmlstream.h"
 
-#ifdef __cplusplus
+//#ifdef __cplusplus
 //#include <vector>
 //#include <string>
 
@@ -187,6 +187,6 @@ private:
 
 //XML_END_NAMESPACE
 
-#endif	/* __cplusplus */
+//#endif	/* __cplusplus */
 
 #endif	// XMLOUT_H

@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /G6 /MD /W3 /GX /O2 /I "g:\openssl-0.9.6a\inc32" /I ".\pthread\include" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "_REENTRANT" /Yu"stdafx.h" /FD /c
+# ADD CPP /nologo /G6 /MD /W3 /GX /O2 /I "g:\openssl-0.9.6b\inc32" /I ".\pthread\include" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "_REENTRANT" /Yu"stdafx.h" /FD /c
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
 # ADD RSC /l 0x407 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -51,7 +51,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
-# ADD LINK32 ws2_32.lib kernel32.lib libeay32.lib gdi32.lib pthreadvce.lib /nologo /subsystem:console /machine:I386 /libpath:"g:\openssl-0.9.6a\out32dll.dbg" /libpath:"pthread\lib"
+# ADD LINK32 ws2_32.lib kernel32.lib libeay32.lib gdi32.lib pthreadvce.lib /nologo /subsystem:console /machine:I386 /libpath:"g:\openssl-0.9.6b\out32dll.dbg" /libpath:"pthread\lib"
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
 
@@ -221,6 +221,8 @@ SOURCE=.\xml\xmlinput.h
 SOURCE=.\xml\xmlinput_c.cpp
 
 !IF  "$(CFG)" == "proxytest - Win32 Release"
+
+# SUBTRACT CPP /YX /Yc /Yu
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
 

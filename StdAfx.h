@@ -52,14 +52,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define ERR_INTERN_WOULDBLOCK	WSAEWOULDBLOCK
 		#define ERR_INTERN_SOCKET_CLOSED WSAENOTSOCK
 		#define MSG_DONTWAIT 0
-		#define HAVE_FIONREAD
-/*		#ifdef __cplusplus
-			#include <string>
-			#include <vector>
-			#define STRING std::string
-			#define VECTOR std::vector
-		#endif
-*/
 		#define HAVE_VSNPRINTF
 		#define vsnprintf _vsnprintf
 
@@ -77,106 +69,88 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#endif
 
   #ifdef HAVE_CONFIG_H  
-	 #include "config.h"
-	 #ifndef HAVE_SOCKLEN_T 
-		typedef int socklent_t;
-	 #endif
+		#include "config.h"
+		#ifndef HAVE_SOCKLEN_T 
+			typedef int socklent_t;
+		#endif
 	#else
-	 #define HAVE_UNIX_DOMAIN_PROTOCOL
-	 #define HAVE_VSNPRINTF
-	#define HAVE_POLL
+		#define HAVE_UNIX_DOMAIN_PROTOCOL
+		#define HAVE_VSNPRINTF
+		#define HAVE_POLL
 		#ifndef __linux
-	     #define HAVE_TCP_KEEPALIVE
-	 #endif
-	 #ifdef __sgi
-		 #undef HAVE_TCP_KEEPALIVE
-	 #endif
-	 #ifdef __FreeBSD__
-		 #undef HAVE_TCP_KEEPALIVE
-	 #endif
-	 #ifndef __FreeBSD__
-	 #ifndef __linux
+			#define HAVE_TCP_KEEPALIVE
+		#endif
+		#ifdef __sgi
+			#undef HAVE_TCP_KEEPALIVE
+		#endif
+		#ifdef __FreeBSD__
+			#undef HAVE_TCP_KEEPALIVE
+		#endif
+		#if !defined(__FreeBSD__)&&!defined(__linux)
     	typedef int socklen_t;
-	 #endif
-	 #endif
+		#endif
     #ifndef O_BINARY
-	#define O_BINARY 0
+			#define O_BINARY 0
     #endif
     #ifndef MAX_PATH
-	#define MAX_PATH 4096
+			#define MAX_PATH 4096
     #endif
-		#define HAVE_FIONREAD
 		#ifdef __sgi
 			#undef HAVE_VSNPRINTF
 			#include <alloca.h>
-//			#include <ctype.h>
 		#endif
     #ifndef __linux 
     	#include <sys/filio.h>
     	#define MSG_NOSIGNAL 0
     #endif
 	#endif 
-#ifdef HAVE_FILIO
-    	#include <sys/filio.h>
-#endif			
-#ifdef HAVE_POLL
-    	#include <poll.h>
-#endif			
-		#include <sys/ioctl.h>
-		#include <sys/types.h>
-    #include <sys/socket.h>
-    #include <pwd.h>
-    #include <sys/un.h>
-		#include <sys/poll.h>
-    #include <sys/time.h>
-    #include <netinet/in.h>
-		#ifndef INADDR_NONE
-    	#define INADDR_NONE -1
-		#endif
-    #include <arpa/inet.h>
-    #include <netdb.h>
-//    #include <pthread.h>
-    #include <unistd.h>
-    #include <stdlib.h>
-    #include <strings.h>
-    #include <syslog.h>
-    #include <stdarg.h>
-    #include <memory.h>
-    #include <sys/resource.h>       
-		#include <ctype.h>
-    typedef struct sockaddr* LPSOCKADDR;
-    #define SOCKET int
-    typedef struct hostent HOSTENT;
-		#define ioctlsocket(a,b,c) ioctl(a,b,c)
-    #define closesocket(s) close(s)
-    #define SOCKET_ERROR -1
-    #define INVALID_SOCKET -1
-    #define SD_RECEIVE 0
-    #define SD_SEND 1
-    #define SD_BOTH 2
-    #define GET_NET_ERROR (errno)
-		#define GETERROR (errno) 
-		#define ERR_INTERN_TIMEDOUT ETIMEDOUT
-		#define ERR_INTERN_CONNREFUSED ECONNREFUSED
-		#define ERR_INTERN_WOULDBLOCK EAGAIN
-		#define ERR_INTERN_SOCKET_CLOSED EBADF
-/*		#ifdef __cplusplus
-		#ifdef __sgi	
-			#include <vector.h>
-			#include <mstring.h>
-			extern "C++" {typedef basic_string <char> string;}
-			#define STRING string
-			#define VECTOR vector
-		#else
-		 #include <string>
-		 #include <vector>
-			#define STRING std::string
-			#define VECTOR std::vector
-		#endif
-		#endif
-*/    #ifndef min
-	#define min(a,b) ((a<b)?(a):(b))
-    #endif	
+
+	#ifdef HAVE_FILIO
+		#include <sys/filio.h>
+	#endif			
+	#ifdef HAVE_POLL
+		#include <poll.h>
+	#endif			
+	#include <sys/ioctl.h>
+	#include <sys/types.h>
+  #include <sys/socket.h>
+  #include <pwd.h>
+  #include <sys/un.h>
+	#include <sys/poll.h>
+  #include <sys/time.h>
+  #include <netinet/in.h>
+	#ifndef INADDR_NONE
+		#define INADDR_NONE -1
+	#endif
+  #include <arpa/inet.h>
+  #include <netdb.h>
+  #include <unistd.h>
+  #include <stdlib.h>
+  #include <strings.h>
+  #include <syslog.h>
+  #include <stdarg.h>
+  #include <memory.h>
+  #include <sys/resource.h>       
+	#include <ctype.h>
+  typedef struct sockaddr* LPSOCKADDR;
+  #define SOCKET int
+  typedef struct hostent HOSTENT;
+	#define ioctlsocket(a,b,c) ioctl(a,b,c)
+  #define closesocket(s) close(s)
+  #define SOCKET_ERROR -1
+  #define INVALID_SOCKET -1
+  #define SD_RECEIVE 0
+  #define SD_SEND 1
+  #define SD_BOTH 2
+  #define GET_NET_ERROR (errno)
+	#define GETERROR (errno) 
+	#define ERR_INTERN_TIMEDOUT ETIMEDOUT
+	#define ERR_INTERN_CONNREFUSED ECONNREFUSED
+	#define ERR_INTERN_WOULDBLOCK EAGAIN
+	#define ERR_INTERN_SOCKET_CLOSED EBADF
+  #ifndef min
+		#define min(a,b) ((a<b)?(a):(b))
+  #endif	
 	#if __linux
 		#include <linux/types.h>
 		typedef __u32 UINT32;
@@ -257,7 +231,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include <errno.h>
 #include "popt/system.h"
 #include "popt/popt.h"
-//#include <openssl/blowfish.h>
 #include <openssl/rsa.h>
 #include <openssl/dsa.h>
 #include <openssl/sha.h>

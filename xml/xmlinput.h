@@ -477,8 +477,8 @@ public:
 
 private:
 	struct InputImpl *impl;	// implementation
-	static XML_Error elementHandler(struct ::XML_Input_ *input, struct ::XML_Element_ *elem, const ::XML_Handler *handler, void *userData);
-	static XML_Error dataHandler(struct ::XML_Input_ *input, const ::XML_Char *data, size_t len, const ::XML_Handler *handler, void *userData);
+	static XML_Error elementHandler(struct ::XML_Input_ *input, struct ::XML_Element_ *elem, const XML_Handler *handler, void *userData);
+	static XML_Error dataHandler(struct ::XML_Input_ *input, const XML_Char *data, size_t len, const XML_Handler *handler, void *userData);
 };
 
 /**
