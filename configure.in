@@ -45,14 +45,23 @@ case "$host" in
 *-*-irix*)
         CFLAGS="$CFLAGS "
         ;;
-alpha*)
-	CXXFLAGS="$CXXFLAGS -mieee"
-	;;	
 *)
 	;;
 esac
 
-OFLAGS="-O3"
+case "$host" in
+alpha*)
+	CXXFLAGS="$CXXFLAGS -mieee"
+	;;
+m68k*)
+        OFLAGS="-O0"
+        ;;	
+*)
+        OFLAGS="-O3"
+	;;
+esac
+
+
 case "$host_cpu" in
 i686)
     OFLAGS="$OFLAGS -march=i686"
