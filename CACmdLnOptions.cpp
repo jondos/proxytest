@@ -297,6 +297,7 @@ SINT32 CACmdLnOptions::reread()
 			return E_UNKNOWN;
 		m_csReConfigure.lock();
 		m_bIsRunReConfigure=true;
+		m_threadReConfigure.setMainLoop(threadReConfigure);
 		m_threadReConfigure.start(this);
 		m_csReConfigure.unlock();
 		return E_SUCCESS;
