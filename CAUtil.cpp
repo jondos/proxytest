@@ -486,7 +486,7 @@ void currentTimestamp(UINT8* buff,bool bInNetworkByteOrder)
 		time_t now = time(NULL);
 
 		// January 1 of every year is the start of the epoch.
-		struct tm tm_epoch = *gmtime(&now);
+		struct tm tm_epoch = *localtime(&now);
 		tm_epoch.tm_sec = tm_epoch.tm_min = tm_epoch.tm_hour = tm_epoch.tm_mday = tm_epoch.tm_mon = 0;
 		time_t epoch = mktime(&tm_epoch);
 

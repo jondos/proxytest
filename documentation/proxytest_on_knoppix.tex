@@ -2,7 +2,7 @@
 \setlength{\parindent}{0pt}
 
 \usepackage{url}
-
+\usepackage{hyperref}
 \begin{document}
 
 %\newenvironment{myoutput} { \begin{center}\framebox[1.05\width]\{\begin{minipage}[c]{0.8\textwidth} \small\{ \begin{verbatim} } { \end{verbatim}\} \end{minipage} \} \end{center} }
@@ -41,15 +41,15 @@ A config.xml file for proxytest.
 
 Download the .iso image and also download the \verb|knoppix-customize| tool.
 
-using \verb|knoppix-customize| add \verb|home=scan| and \berb|myconf=scan|
+using \verb|knoppix-customize| add \verb|home=scan| and \verb|myconf=scan|
 to the default kernel options.
 
-\begin{verbose}
+\begin{verbatim}
 
 echo "home=scan" | knoppix-customize --action set_append_opt --image knoppix.iso 
 echo "myconf=scan" | knoppix-customize --action set_append_opt --image knoppix.iso 
 
-\end{verbose}
+\end{verbatim}
 
 
 % ---------------------------------------------------------------------
