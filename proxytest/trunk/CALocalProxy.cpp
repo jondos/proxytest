@@ -576,16 +576,15 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 			}
 		//Now sending SymKeys....
 		MIXPACKET oPacket;
+		getRandom((UINT8*)&oPacket,MIXPACKET_SIZE);
 		oPacket.flags=0;
 		oPacket.channel=0;
 		UINT8 keys[32];
 		getRandom(keys,32);
 		m_muxOut.setReceiveKey(keys,16);
 		m_muxOut.setSendKey(keys+16,16);
-		getRandom(oPacket.data,DATA_SIZE);
 		memcpy(oPacket.data,"KEYPACKET",9);
 		memcpy(oPacket.data+9,keys,32);
-		memset(oPacket.data+9+32,0,DATA_SIZE-9-32);
 		m_arRSA[m_chainlen-1].encrypt(oPacket.data,oPacket.data);
 		m_muxOut.send(&oPacket);
 		m_muxOut.setCrypt(true);
