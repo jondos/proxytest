@@ -351,14 +351,14 @@ dnl Check for Postgresql libs if (needed if compiled with payment support)
 if test "x$PAYMENT" != "x" ; then
     AC_MSG_CHECKING([for PostgreSQL libs])
     saved_LIBS="$LIBS"
-    PAYMENT_LIB="-libpq"
+    PAYMENT_LIB="-lpq"
     LIBS="$LIBS $PAYMENT_LIB"
     AC_LINK_IFELSE([AC_LANG_PROGRAM([
 				#include <postgresql/libpq-fe.h>
 				], [PQfinish(0);
 				])],[AC_MSG_RESULT(libpq found)],
 				[dnl libpq not found trying libpq++
-				    PAYMENT_LIB="-libpq++"
+				    PAYMENT_LIB="-lpq++"
 				    LIBS="$saved_LIBS $PAYMENT_LIB"
 				    AC_LINK_IFELSE([AC_LANG_PROGRAM([
 				    #include <postgresql/libpq-fe.h>
