@@ -96,7 +96,9 @@ SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 					return E_UNKNOWN;
 			}
 #ifdef HAVE_VSNPRINTF
+		printf("h4.1\n");
 		vsnprintf(oMsg.m_strMsgBuff+20+STRMSGTYPES_SIZE,1024,format,ap);
+		printf("h4.2\n");
 #else
 	  vsprintf(oMsg.m_strMsgBuff+20+STRMSGTYPES_SIZE,format,ap);
 #endif
