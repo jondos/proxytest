@@ -167,10 +167,11 @@ class CAFirstMix:public CAMix
 			CASocket* m_arrSocketsIn;
 #ifdef HAVE_EPOLL
 			CASocketGroupEpoll* m_psocketgroupUsersRead;
+			CASocketGroupEpoll* m_psocketgroupUsersWrite;
 #else
 			CASocketGroup* m_psocketgroupUsersRead;
-#endif
 			CASocketGroup* m_psocketgroupUsersWrite;
+#endif
 			CAInfoService* m_pInfoService;
 			CAMuxSocket* m_pMuxOut;
 	

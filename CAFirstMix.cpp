@@ -211,10 +211,11 @@ SINT32 CAFirstMix::init()
 		m_pChannelList=new CAFirstMixChannelList();
 #ifdef HAVE_EPOLL
 		m_psocketgroupUsersRead=new CASocketGroupEpoll(false);
+		m_psocketgroupUsersWrite=new CASocketGroupEpoll(true);
 #else
 		m_psocketgroupUsersRead=new CASocketGroup(false);
-#endif
 		m_psocketgroupUsersWrite=new CASocketGroup(true);
+#endif
 		m_pInfoService=new CAInfoService(this);
 
 		m_pthreadsLogin=new CAThreadPool(NUM_LOGIN_WORKER_TRHEADS,MAX_LOGIN_QUEUE,false);
