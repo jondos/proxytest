@@ -129,7 +129,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    basetypedefs.h
 
 
-proxytest_LDADD = $(top_srcdir)/xml/libxml.a \
+mix_LDADD = $(top_srcdir)/xml/libxml.a \
 		  $(top_srcdir)/popt/libpopt.a \
 		  $(top_srcdir)/trio/libtrio.a \
 		  $(top_srcdir)/tre/libtre.a \
