@@ -59,7 +59,7 @@ class CAFirstMix:public CAMix
 					m_psocketgroupUsersRead=m_psocketgroupUsersWrite=NULL;
 					m_pChannelList=NULL;
 					m_pMuxOut=NULL;
-					m_strXmlMixCascadeInfo=NULL;
+					m_docMixCascadeInfo=NULL;
 					m_xmlKeyInfoBuff=NULL;
 				}
 			virtual ~CAFirstMix(){}
@@ -85,14 +85,16 @@ class CAFirstMix:public CAMix
 				}
 			
 			/** Returns the Mix-Cascade info which should be send to the InfoService.
-				* The status message ist a XML struct returned in \c buff. 
-				* There is no \\0 after the XML (so it is not a string!)
+				* This is NOT a copy!
 				*
-				* @param buff byte array, where the XML struct would be stored
-				* @param len	on input contains the size of \c buff
-				*							on output contains the size of the XML struct
+				* @param docMixCascadeInfo where the XML struct would be stored
+				* @retval E_SUCCESS
 				*/
-			SINT32 getMixCascadeInfo(UINT8* buff,UINT32*len);
+			SINT32 getMixCascadeInfo(DOM_Document& docMixCascadeInfo)
+				{
+					docMixCascadeInfo=m_docMixCascadeInfo;
+					return E_SUCCESS;
+				}
 					
 			
 		friend THREAD_RETURN loopSendToMix(void*);
@@ -146,7 +148,8 @@ class CAFirstMix:public CAMix
 			UINT8* m_xmlKeyInfoBuff;
 			UINT16 m_xmlKeyInfoSize;
 
-			UINT8* m_strXmlMixCascadeInfo;
+			//UINT8* m_strXmlMixCascadeInfo;
+			DOM_Document m_docMixCascadeInfo;
 			UINT64 m_nMixedPackets;
 			CAASymCipher* m_pRSA;
 			CASignature* m_pSignature;

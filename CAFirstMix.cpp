@@ -989,9 +989,7 @@ SINT32 CAFirstMix::clean()
 		if(m_xmlKeyInfoBuff!=NULL)
 			delete []m_xmlKeyInfoBuff;
 		m_xmlKeyInfoBuff=NULL;
-		if(m_strXmlMixCascadeInfo!=NULL)
-			delete []m_strXmlMixCascadeInfo;
-		m_strXmlMixCascadeInfo=NULL;
+		m_docMixCascadeInfo=NULL;
 		#ifdef _DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"CAFirstMix::clean() finished\n");
 		#endif
@@ -1152,20 +1150,21 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 				child=child.getNextSibling();
 			}
 		
-		UINT8* tmpBuff=new UINT8[2048];
-		tlen=2048;
-		options.getMixXml(tmpBuff,&tlen);
-		MemBufInputSource oInput1(tmpBuff,tlen,"tmp1");
-		oParser.parse(oInput1);
-		DOM_Document docMix=oParser.getDocument();
-		DOM_Node nodeMix=doc.importNode(docMix.getFirstChild(),true);
+		//UINT8* tmpBuff=new UINT8[2048];
+		//tlen=2048;
+		DOM_Document docMixInfo;
+		options.getMixXml(docMixInfo);
+		//MemBufInputSource oInput1(tmpBuff,tlen,"tmp1");
+		//oParser.parse(oInput1);
+		//DOM_Document docMix=oParser.getDocument();
+		DOM_Node nodeMix=doc.importNode(docMixInfo.getFirstChild(),true);
 		elemMixes.insertBefore(nodeMix,elemMixes.getFirstChild());
 		setDOMElementAttribute(elemMixes,"count",count+1);
-		delete tmpBuff;
+		//delete tmpBuff;
 
 	//CascadeInfo		
-		DOM_Document docCascade=DOM_Document::createDocument();
-		DOM_Element elemRoot=docCascade.createElement("MixCascade");
+		m_docMixCascadeInfo=DOM_Document::createDocument();
+		DOM_Element elemRoot=m_docMixCascadeInfo.createElement("MixCascade");
 
 
 		UINT8 id[50];
@@ -1179,17 +1178,17 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 			{
 				return E_UNKNOWN;
 			}
-		docCascade.appendChild(elemRoot);
-		DOM_Element elem=docCascade.createElement("Name");
-		DOM_Text text=docCascade.createTextNode(DOMString((char*)name));
+		m_docMixCascadeInfo.appendChild(elemRoot);
+		DOM_Element elem=m_docMixCascadeInfo.createElement("Name");
+		DOM_Text text=m_docMixCascadeInfo.createTextNode(DOMString((char*)name));
 		elem.appendChild(text);
 		elemRoot.appendChild(elem);
 		
 		UINT8 hostname[255];
 		UINT8 ip[255];
-		elem=docCascade.createElement("Network");
+		elem=m_docMixCascadeInfo.createElement("Network");
 		elemRoot.appendChild(elem);
-		DOM_Element elemListenerInterfaces=docCascade.createElement("ListenerInterfaces");
+		DOM_Element elemListenerInterfaces=m_docMixCascadeInfo.createElement("ListenerInterfaces");
 		elem.appendChild(elemListenerInterfaces);
 		
 		for(UINT32 i=1;i<=options.getListenerInterfaceCount();i++)
@@ -1197,22 +1196,22 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 				options.getListenerInterface(oListener,i);
 				if(oListener.type==RAW_TCP)
 					{
-						DOM_Element elemListenerInterface=docCascade.createElement("ListenerInterface");
+						DOM_Element elemListenerInterface=m_docMixCascadeInfo.createElement("ListenerInterface");
 						elemListenerInterfaces.appendChild(elemListenerInterface);
-						elem=docCascade.createElement("Type");
+						elem=m_docMixCascadeInfo.createElement("Type");
 						elemListenerInterface.appendChild(elem);
 						setDOMElementValue(elem,(UINT8*)"RAW/TCP");
-						elem=docCascade.createElement("Port");
+						elem=m_docMixCascadeInfo.createElement("Port");
 						elemListenerInterface.appendChild(elem);
 						setDOMElementValue(elem,((CASocketAddrINet*)oListener.addr)->getPort());
 						if(oListener.hostname!=NULL)
 							strcpy((char*)hostname,(char*)oListener.hostname);
 						else 
 							((CASocketAddrINet*)oListener.addr)->getIPAsStr(hostname,255);
-						elem=docCascade.createElement("Host");
+						elem=m_docMixCascadeInfo.createElement("Host");
 						elemListenerInterface.appendChild(elem);
 						setDOMElementValue(elem,hostname);
-						elem=docCascade.createElement("IP");
+						elem=m_docMixCascadeInfo.createElement("IP");
 						elemListenerInterface.appendChild(elem);
 						((CASocketAddrINet*)oListener.addr)->getIPAsStr(ip,255);
 						setDOMElementValue(elem,ip);
@@ -1220,7 +1219,7 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 				delete oListener.addr;
 			}
 		
-		DOM_Node elemMixesDocCascade=docCascade.importNode(elemMixes,false);
+		DOM_Node elemMixesDocCascade=m_docMixCascadeInfo.importNode(elemMixes,false);
 		elemRoot.appendChild(elemMixesDocCascade);
 		DOM_Node node=elemMixes.getFirstChild();
 		bool bIsFirst=true;
@@ -1228,27 +1227,11 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 			{
 				if(node.getNodeType()==DOM_Node::ELEMENT_NODE&&node.getNodeName().equals("Mix"))
 					{
-						elemMixesDocCascade.appendChild(docCascade.importNode(node,bIsFirst));
+						elemMixesDocCascade.appendChild(m_docMixCascadeInfo.importNode(node,bIsFirst));
 						bIsFirst=false;
 					}
 				node=node.getNextSibling();
 			}
 		
-		tmpB=DOM_Output::dumpToMem(docCascade,&tlen);
-		m_strXmlMixCascadeInfo=new UINT8[tlen+1];
-		memcpy(m_strXmlMixCascadeInfo,tmpB,tlen);
-		m_strXmlMixCascadeInfo[tlen]=0;
-		delete[]tmpB;
-		return E_SUCCESS;
-	}
-
-SINT32 CAFirstMix::getMixCascadeInfo(UINT8* buff,UINT32*len)
-	{
-		UINT32 xmlMixCascadeInfoLen=strlen((char*)m_strXmlMixCascadeInfo);
-		if(buff==NULL||len==NULL||*len<xmlMixCascadeInfoLen)
-			return E_UNKNOWN;
-		
-		memcpy(buff,m_strXmlMixCascadeInfo,xmlMixCascadeInfoLen);
-		*len=xmlMixCascadeInfoLen;
 		return E_SUCCESS;
 	}

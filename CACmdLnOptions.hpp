@@ -179,8 +179,10 @@ class CACmdLnOptions
 					return m_bCompressedLogs;
 				}
 			SINT32 getUser(UINT8* user,UINT32 len);
+
 			/** Get the XML describing the Mix. this is not a string!*/
-			SINT32 getMixXml(UINT8* strxml,UINT32* len);
+			//SINT32 getMixXml(UINT8* strxml,UINT32* len);
+			SINT32 getMixXml(DOM_Document &docMixInfo);
 			bool isLocalProxy();
 			bool isFirstMix();
 			bool isMiddleMix();
@@ -223,7 +225,8 @@ class CACmdLnOptions
 			bool		m_bCompressedLogs;
 			char*		m_strUser;
 			SINT32	m_nrOfOpenFiles; //How many open files (sockets) should we use
-			char*		m_strMixXml;
+			DOM_Document m_docMixInfo;
+			//char*		m_strMixXml;
 			char*		m_strMixID;
 
 			TargetInterface*		m_arTargetInterfaces;

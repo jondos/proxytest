@@ -42,7 +42,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_bLocalProxy=m_bFirstMix=m_bLastMix=m_bMiddleMix=false;
 		m_iTargetPort=m_iSOCKSPort=m_iSOCKSServerPort=m_iInfoServerPort=0xFFFF;
 		m_strTargetHost=m_strSOCKSHost=m_strInfoServerHost=NULL;
-		m_strMixXml=m_strUser=m_strCascadeName=m_strLogDir=m_strSpecialLogDir=NULL;
+		m_strUser=m_strCascadeName=m_strLogDir=m_strSpecialLogDir=NULL;
 		m_arTargetInterfaces=NULL;
 		m_cnTargets=0;
 		m_arListenerInterfaces=NULL;
@@ -56,6 +56,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_bCompressedLogs=false;
 		m_bAutoReconnect=false;
 		m_strConfigFile=NULL;
+		m_docMixInfo=NULL;
   }
 
 CACmdLnOptions::~CACmdLnOptions()
@@ -123,8 +124,7 @@ void CACmdLnOptions::clean()
 			delete[] m_strSpecialLogDir;
 		if(m_strUser!=NULL)
 			delete[] m_strUser;
-		if(m_strMixXml!=NULL)
-			delete[] m_strMixXml;
+		m_docMixInfo=NULL;
 		if(m_strMixID!=NULL)
 			delete[] m_strMixID;
 		clearTargetInterfaces();
@@ -533,23 +533,14 @@ bool CACmdLnOptions::isLocalProxy()
 			return m_bLocalProxy;
     }
 
-/** Copies the bytes of the XML tree describing the Mix into buffXml. There is no
-	*	terminatin '0' appended!
-	* @param buffXml destination byte array
-	*	@param len size of the destination byte array
-	*					on return the number of copied bytes
-	*	@retval E_SUCCESS, if it was successful
-	* @retval E_UNKNOWN, in case of an error (for instance if the destination buffer is to small)
+/** Returns the XML tree describing the Mix . This is NOT a copy!
+	* @param docMixInfo destination for the XML tree
+	*	@retval E_SUCCESS if it was successful
+	* @retval E_UNKNOWN in case of an error 
 */
-SINT32 CACmdLnOptions::getMixXml(UINT8* buffXml,UINT32* len)
+SINT32 CACmdLnOptions::getMixXml(DOM_Document& docMixInfo)
 	{
-		if(buffXml==NULL||m_strMixXml==NULL||len==NULL)
-			return E_UNKNOWN;
-		UINT32 strMixXmlLen=strlen(m_strMixXml);
-		if(*len<strMixXmlLen)
-			return E_UNKNOWN;
-		memcpy(buffXml,m_strMixXml,strMixXmlLen);
-		*len=strMixXmlLen;
+		docMixInfo=m_docMixInfo;
 		return E_SUCCESS;
 	}
 
@@ -1024,17 +1015,17 @@ SKIP_NEXT_MIX:
 				delete targetInterfaceNextMix;
 			}
 		//construct a XML-String, which describes the Mix (send via Infoservice.Helo())
-		DOM_Document docMixXml=DOM_Document::createDocument();
-		DOM_Element elemMix=docMixXml.createElement("Mix");
+		m_docMixInfo=DOM_Document::createDocument();
+		DOM_Element elemMix=m_docMixInfo.createElement("Mix");
 		elemMix.setAttribute("id",DOMString(m_strMixID));
-		docMixXml.appendChild(elemMix);
+		m_docMixInfo.appendChild(elemMix);
 		
 		//Inserting the Name if given...
 		getDOMChildByName(elemGeneral,(UINT8*)"MixName",elem,false);
 		tmpLen=255;
 		if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS)
 			{
-				DOM_Element elemName=docMixXml.createElement("Name");
+				DOM_Element elemName=m_docMixInfo.createElement("Name");
 				setDOMElementValue(elemName,tmpBuff);
 				elemMix.appendChild(elemName);
 			}
@@ -1047,26 +1038,17 @@ SKIP_NEXT_MIX:
 				DOM_Node tmpChild=elemMixDescription.getFirstChild();
 				while(tmpChild!=NULL)
 					{
-						elemMix.appendChild(docMixXml.importNode(tmpChild,true));
+						elemMix.appendChild(m_docMixInfo.importNode(tmpChild,true));
 						tmpChild=tmpChild.getNextSibling();
 					}
 			}
 		
 		//Set Software-Version...
-		DOM_Element elemSoftware=docMixXml.createElement("Software");
-		DOM_Element elemVersion=docMixXml.createElement("Version");
+		DOM_Element elemSoftware=m_docMixInfo.createElement("Software");
+		DOM_Element elemVersion=m_docMixInfo.createElement("Version");
 		setDOMElementValue(elemVersion,(UINT8*)MIX_VERSION);
 		elemSoftware.appendChild(elemVersion);
 		elemMix.appendChild(elemSoftware);
-
-		
-		//Make an String from the Doc
-		UINT32 xmlLen=0;
-		UINT8* tmpXml=DOM_Output::dumpToMem(docMixXml,&xmlLen);
-		m_strMixXml=new char[xmlLen+1];
-		memcpy(m_strMixXml,tmpXml,xmlLen);
-		m_strMixXml[xmlLen]=0;
-		delete[] tmpXml;
 
 #ifdef LOG_CRIME
 		m_arCrimeRegExps=NULL;
