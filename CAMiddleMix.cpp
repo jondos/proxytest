@@ -132,8 +132,7 @@ SINT32 CAMiddleMix::init()
 			}
 
 
-
-		if(m_MuxIn.accept(*pAddrListen)==SOCKET_ERROR)
+		if(m_MuxIn.accept(*pAddrListen)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Error waiting for previous Mix... -- Exiting!\n");				
 				delete recvBuff;

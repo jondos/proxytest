@@ -86,7 +86,7 @@ SINT32 CADatagramSocket::close()
 SINT32 CADatagramSocket::bind(CASocketAddr & from)
 	{
 //		localPort=-1;
-		if(m_Socket==0&&create(from.getType())==SOCKET_ERROR)
+		if(m_Socket==0&&create(from.getType())!=E_SUCCESS)
 			return SOCKET_ERROR;
 		if(::bind(m_Socket,from.LPSOCKADDR(),from.getSize())==SOCKET_ERROR)
 		    return SOCKET_ERROR;
