@@ -6,7 +6,7 @@
 AUTOMAKE_OPTIONS = foreign
 
 noinst_LIBRARIES = libtre.a
-libtre_a_SOURCES = regexec.c regcomp.c tre-mem.c tre-match-backtrack.c tre-match-parallel.c
+libtre_a_SOURCES = regexec.cpp regcomp.cpp tre-mem.cpp tre-match-backtrack.cpp tre-match-parallel.cpp
 
 includes = @INCLUDES@
 
