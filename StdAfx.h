@@ -54,7 +54,9 @@
     #define WSAGetLastError() errno
 
     #ifndef __linux
-    	#define INADDR_NONE -1
+	#ifndef INADDR_NONE
+    	    #define INADDR_NONE -1
+	#endif
     	#define socklen_t int
     	#include <sys/filio.h>
     	#define MSG_NOSIGNAL 0
@@ -77,6 +79,10 @@
     #define THREAD_RETURN_SUCCESS return (NULL)
     
     #define min(a,b) ((a<b)?(a):(b))
+    #ifdef __sgi
+	#include <alloca.h>
+	#include <ctype.h>
+    #endif
 #endif
 #include <stdio.h>
 #include <time.h>

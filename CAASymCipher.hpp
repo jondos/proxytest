@@ -13,3 +13,4 @@ class CAASymCipher
 		private:
 			RSA* rsa;
 	};
+

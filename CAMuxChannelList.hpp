@@ -37,3 +37,4 @@ class CAMuxChannelList
 			MUXLISTENTRY* aktEnumPos;
 			REVERSEMUXLIST* reverselist;
 	};
+

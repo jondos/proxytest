@@ -21,8 +21,8 @@ int poptDupArgv(int argc, const char **argv,
 	nb += strlen(argv[i]) + 1;
     }
 	
-    dst = malloc(nb);
-    argv2 = (void *) dst;
+    dst = (char *)malloc(nb);
+    argv2 = (const char**) dst;
     dst += (argc + 1) * sizeof(*argv);
 
     for (i = 0; i < argc; i++) {
@@ -41,10 +41,10 @@ int poptParseArgvString(const char * s, int * argcPtr, const char *** argvPtr)
     const char * src;
     char quote = '\0';
     int argvAlloced = POPT_ARGV_ARRAY_GROW_DELTA;
-    const char ** argv = malloc(sizeof(*argv) * argvAlloced);
+    const char ** argv = (const char **)malloc(sizeof(*argv) * argvAlloced);
     int argc = 0;
     int buflen = strlen(s) + 1;
-    char * buf = memset(alloca(buflen), 0, buflen);
+    char * buf = (char*)memset(alloca(buflen), 0, buflen);
 
     argv[argc] = buf;
 
@@ -66,7 +66,7 @@ int poptParseArgvString(const char * s, int * argcPtr, const char *** argvPtr)
 		buf++, argc++;
 		if (argc == argvAlloced) {
 		    argvAlloced += POPT_ARGV_ARRAY_GROW_DELTA;
-		    argv = realloc(argv, sizeof(*argv) * argvAlloced);
+		    argv = (const char**)realloc(argv, sizeof(*argv) * argvAlloced);
 		}
 		argv[argc] = buf;
 	    }
