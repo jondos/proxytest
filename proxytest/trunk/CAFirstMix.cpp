@@ -698,14 +698,14 @@ END_THREAD:
 
 SINT32 CAFirstMix::clean()
 	{
+		#ifdef _DEBUG
+			CAMsg::printMsg(LOG_DEBUG,"CAFirstMix::clean() start\n");
+		#endif
 		if(m_pthreadsLogin!=NULL)
 			delete m_pthreadsLogin;
 		m_pthreadsLogin=NULL;	
 		if(m_pInfoService!=NULL)
 			{
-				#ifdef _DEBUG
-					CAMsg::printMsg(LOG_DEBUG,"CAFirstMix::clean() start\n");
-				#endif
 				CAMsg::printMsg(LOG_CRIT,"Stopping InfoService....\n");
 				CAMsg::printMsg	(LOG_CRIT,"Memory usage before: %u\n",getMemoryUsage());	
 				m_pInfoService->stop();

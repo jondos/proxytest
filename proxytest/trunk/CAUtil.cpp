@@ -31,6 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef DEBUG
 	#include "CAMsg.hpp"
 #endif
+#include "xml/DOM_Output.hpp"
 /**
 *	Removes leading and ending whitespaces (chars<=32) from a zero terminated string.
 *		@param s input string (null terminated)
@@ -556,6 +557,32 @@ SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, DOM_Node & root,CAASymCi
 						*keylen=16;
 			}
 		memcpy(key,buff+128-(*keylen),(*keylen));
+		return E_SUCCESS;
+	}
+
+/** The resulting encrypted xml struct is as follows:
+	* <EncryptedData Type='http://www.w3.org/2001/04/xmlenc#Element'>
+	*		<EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#aes128-cbc"/>
+	*   <ds:KeyInfo xmlns:ds='http://www.w3.org/2000/09/xmldsig#'>
+	*			<EncryptedKey>
+	*				<EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"/>
+	*				<CipherData>
+	*					<CipherValue>...</CipherValue>					
+	*				</CipherData>
+	*			</EncryptedKey>
+	*		</ds:KeyInfo>
+	*		<CipherData>
+	*			<CipherValue>...</CipherValue>
+	*		</CipherData>
+	*	</EncryptedData>
+	*/
+SINT32 encryptXMLElement(DOM_Node & node, CAASymCipher* pRSA)
+	{
+		DOM_Document doc=node.getOwnerDocument();
+		DOM_Element elemEncData=doc.createElement("EncryptedData");
+		UINT32 size=0;
+		UINT8* elemBuff=DOM_Output::dumpToMem(node,&size);
+		DOM_Element elemCipherData=doc.createElement("CipherData");
 		return E_SUCCESS;
 	}
 

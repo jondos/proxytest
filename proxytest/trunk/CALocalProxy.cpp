@@ -483,7 +483,6 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 		UINT32 tmpLen=255;
 		if(getDOMElementValue(elemVersion,strVersion,&tmpLen)==E_SUCCESS)
 			{
-			printf("hier\n");
 				if(tmpLen==3&&memcmp(strVersion,"0.4",3)==0)
 					{
 						CAMsg::printMsg(LOG_INFO,"MixCascadeProtocolVersion: 0.4\n");
