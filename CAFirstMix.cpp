@@ -709,7 +709,6 @@ LOOP_START:
 													}
 												nUser--;
 												oInfoService.setLevel(nUser,-1,-1);
-//												oInfoService.setMixedPackets(m_MixedPackets);
 											}
 										else if(ret==E_AGAIN)
 											{
