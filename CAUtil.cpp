@@ -269,13 +269,20 @@ SINT32 getDOMElementAttribute(DOM_Element& elem,char* attr,int* value)
 		return E_SUCCESS;
 	}
 
-SINT32 getDOMChildByName(const DOM_Node& node,UINT8* name,DOM_Node& child)
+SINT32 getDOMChildByName(const DOM_Node& node,UINT8* name,DOM_Node& child,bool deep)
 	{
 		child=node.getFirstChild();
 		while(child!=NULL)
 			{
 				if(child.getNodeName().equals((char*)name))
 					return E_SUCCESS;
+				if(deep)
+					{
+						DOM_Node n=child;
+						if(getDOMChildByName(n,name,child,deep)==E_SUCCESS)
+							return E_SUCCESS;
+						child=n;
+					}
 				child=child.getNextSibling();
 			}
 		return E_UNKNOWN;
@@ -320,18 +327,19 @@ SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, UINT8* xml, UINT32* xmlle
 		return E_SUCCESS;
 	}
 
-SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, UINT8* xml, UINT32 xmllen,CAASymCipher* pRSA)
+SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, const UINT8* const xml, UINT32 xmllen,CAASymCipher* pRSA)
 	{
-		MemBufInputSource oInput(xml,xmllen,"sigverify");
+		MemBufInputSource oInput(xml,xmllen,"decodekey");
 		DOMParser oParser;
 		oParser.parse(oInput);
 		DOM_Document doc=oParser.getDocument();
 		DOM_Element root=doc.getDocumentElement();
-		if(!root.getNodeName().equals("CipherValue"))
+		DOM_Element elemCipherValue;
+		if(getDOMChildByName(root,(UINT8*)"CipherValue",elemCipherValue,true)!=E_SUCCESS)
 			return E_UNKNOWN;
 		UINT8 buff[2048];
 		UINT32 bufflen=2048;
-		if(getDOMElementValue(root,buff,&bufflen)!=E_SUCCESS)
+		if(getDOMElementValue(elemCipherValue,buff,&bufflen)!=E_SUCCESS)
 			return E_UNKNOWN;
 		CABase64::decode(buff,bufflen,buff,&bufflen);
 		pRSA->decrypt(buff,buff);

@@ -328,7 +328,7 @@ SINT32 CASignature::verify(UINT8* in,UINT32 inlen,UINT8* sig,UINT32 siglen)
 		return E_UNKNOWN;
 	}
 
-SINT32 CASignature::verifyXML(UINT8* in,UINT32 inlen)
+SINT32 CASignature::verifyXML(const UINT8* const in,UINT32 inlen)
 	{
 		MemBufInputSource oInput(in,inlen,"sigverify");
 		DOMParser oParser;
