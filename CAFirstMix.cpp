@@ -41,6 +41,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASignature.hpp"
 #include "CABase64.hpp"
 #include "xml/DOM_Output.hpp"
+#include "CAPool.hpp"
 
 extern CACmdLnOptions options;
 
@@ -202,6 +203,7 @@ THREAD_RETURN loopSendToMix(void* param)
 				if(pSocket->sendFully(buff,len)!=E_SUCCESS)
 					break;
 			}*/
+#ifndef USE_POOL
 		for(;;)
 			{
 				len=MIXPACKET_SIZE;
@@ -211,6 +213,28 @@ THREAD_RETURN loopSendToMix(void* param)
 				if(pMuxSocket->send((MIXPACKET*)buff)!=MIXPACKET_SIZE)
 					break;
 			}
+#else
+		CAPool* pPool=new CAPool(MIX_POOL_SIZE);
+		MIXPACKET* pMixPacket=new MIXPACKET;
+		for(;;)
+			{
+				len=MIXPACKET_SIZE;
+				SINT32 ret=pQueue->getOrWait((UINT8*)pMixPacket,&len,MIX_POOL_TIMEOUT);
+				if(ret==E_TIMEDOUT)
+					{
+						pMixPacket->flags=0;
+						pMixPacket->channel=DUMMY_CHANNEL;
+						getRandom(pMixPacket->data,DATA_SIZE);
+					}
+				else if(ret!=E_SUCCESS||len!=MIXPACKET_SIZE)
+					break;
+				pPool->pool(pMixPacket);
+				if(pMuxSocket->send((MIXPACKET*)buff)!=MIXPACKET_SIZE)
+					break;
+			}
+		delete pMixPacket;
+		delete pPool;
+#endif
 		delete []buff;
 		CAMsg::printMsg(LOG_DEBUG,"Exiting Thread SendToMix\n");
 		THREAD_RETURN_SUCCESS;

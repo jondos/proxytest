@@ -50,6 +50,27 @@ class CAConditionVariable:public CAMutex
 					return E_UNKNOWN;
 				}
 
+			/** Waits for a signal or for a timeout.
+				* Note: lock() must be called before wait() and unlock() 
+				* must be called if proccessing ends.
+				* @param msTimeout timout value in millis seconds
+				* @retval E_SUCCESS if signaled
+				* @retval E_TIMEDOUT if timout was reached
+				* @retval E_UNKNOWN if an error occured
+				*/
+			SINT32 wait(UINT32 msTimeout)
+				{
+					timespec to;
+					to.tv_sec = time(NULL) + msTimeout/1000;
+          to.tv_nsec = (msTimeout%1000)*1000;
+					int ret=pthread_cond_timedwait(m_pCondVar,m_pMutex,&to);
+					if(ret==0)
+						return E_SUCCESS;
+					else if(ret==ETIMEDOUT)
+						return E_TIMEDOUT;
+					return E_UNKNOWN;
+				}
+
 /*			SINT32 wait(UINT32 msSeconds)
 				{
 					struct timespec t;

@@ -230,6 +230,35 @@ SINT32 CAQueue::getOrWait(UINT8* pbuff,UINT32* psize)
 		return ret;
 	}
 
+/** Gets data from the Queue or waits until some data is available, 
+	* if the Queue is empty or a timeout is reached.
+	* The data is removed from the Queue.
+  * @param pbuff pointer to a buffer, there the data should be stored
+	* @param psize on call contains the size of pbuff, on return contains 
+	*								the size of returned data
+	* @param msTimeout timeout in milli seconds
+	* @retval E_SUCCESS if succesful
+	* @retval E_IMEDOUT if timeout was reached
+	* @retval E_UNKNOWN in case of an error
+	*/
+SINT32 CAQueue::getOrWait(UINT8* pbuff,UINT32* psize,UINT32 msTimeout)
+	{
+		m_convarSize.lock();
+		SINT32 ret;
+		while(m_Queue==NULL)
+			{
+				ret=m_convarSize.wait(msTimeout);
+				if(ret==E_TIMEDOUT)
+					{
+						m_convarSize.unlock();
+						return E_TIMEDOUT;
+					}
+			}		
+		ret=get(pbuff,psize);
+		m_convarSize.unlock();
+		return ret;
+	}
+
 	/** Peeks data from the Queue. The data is NOT removed from the Queue.
   * @param pbuff pointer to a buffer, where the data should be stored
 	* @param psize on call contains the size of pbuff, 

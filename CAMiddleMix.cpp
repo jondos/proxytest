@@ -421,7 +421,7 @@ THREAD_RETURN loopDownStream(void *p)
 				#ifndef USE_POOL			
 					ret=oSocketGroup.select(false,1000);
 				#else
-					ret=oSocketGroup.select(false,MAX_POOL_TIMEOUT);
+					ret=oSocketGroup.select(false,MIX_POOL_TIMEOUT);
 				#endif
 				if(ret!=1)
 					{
@@ -528,7 +528,7 @@ SINT32 CAMiddleMix::loop()
 				#ifndef USE_POOL			
 					ret=oSocketGroup.select(false,1000);
 				#else
-					ret=oSocketGroup.select(false,MAX_POOL_TIMEOUT);
+					ret=oSocketGroup.select(false,MIX_POOL_TIMEOUT);
 				#endif
 				if(ret!=1)
 					{

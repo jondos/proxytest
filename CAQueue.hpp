@@ -64,6 +64,7 @@ class CAQueue
 			SINT32 add(const void* buff,UINT32 size);
 			SINT32 get(UINT8* pbuff,UINT32* psize);
 			SINT32 getOrWait(UINT8* pbuff,UINT32* psize);
+			SINT32 getOrWait(UINT8* pbuff,UINT32* psize,UINT32 msTimeOut);
 			SINT32 peek(UINT8* pbuff,UINT32* psize);
 			SINT32 remove(UINT32* psize);
 			
