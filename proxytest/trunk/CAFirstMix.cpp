@@ -724,10 +724,10 @@ SINT32 CAFirstMix::loop()
 														   //es gilt: open -> data
 																m_pRSA->decrypt(pMixPacket->data,rsaBuff); // stefan: das hier ist doch eine ziemlich kostspielige operation. sollte das pruefen auf Max_Number_Of_Channels nicht vorher passieren? --> ok sollte aufs TODO ...
 																#ifdef REPLAY_DETECTION
-																	if(validTimestampAndFingerprint(rsaBuff, KEY_SIZE, (rsaBuff+KEY_SIZE)))
+																	if(!validTimestampAndFingerprint(rsaBuff, KEY_SIZE, (rsaBuff+KEY_SIZE)))
 																		{
-																			goto NEXT_USER_CONNECTION;
 																			CAMsg::printMsg(LOG_INFO,"Duplicate packet ignored.\n");
+																			goto NEXT_USER_CONNECTION;
 																		}
 																#endif
 																pCipher= new CASymCipher();
