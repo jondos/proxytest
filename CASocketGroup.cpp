@@ -200,10 +200,10 @@ SINT32 CASocketGroup::select(bool bWrite,UINT32 ms)
 			if(bWrite)
 				{
 					for(int i=0;i<m_max;i++)
-						m_pollfd_read[i].event=POLLOUT;
+						m_pollfd_read[i].events=POLLOUT;
 					ret=::poll(m_pollfd_read,m_max,ms);
 					for(int i=0;i<m_max;i++)
-						m_pollfd_read[i].event=POLLIN; //back to default...
+						m_pollfd_read[i].events=POLLIN; //back to default...
 				}
 			else
 				{
