@@ -864,24 +864,24 @@ Optional Features:
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
   --enable-static         Static linking
-
-Optional Packages:
-  --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
-  --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
-  --with-arch=i386|i486|i586|i686|pentium3
-                          Specify architecure for optimisation
   --with-pool=POOLSIZE    Specify if to build a pool mix and optionally the
                           poolsize
   --with-bandwidthlimitation=LIMITATION_START
                           Specify if to build with bandwith limitation and
                           optionally the number of bytes which are transferred
                           without any limitation
+  --with-debug            Enable debug mode
+  --with-crime-detection  Enable crime detection mode
+
+Optional Packages:
+  --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
+  --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+  --with-arch=i386|i486|i586|i686|pentium3
+                          Specify architecure for optimisation
   --with-ssl-dir=PATH     Specify path to OpenSSL installation
   --with-xml-include=PATH Specify path to XERCES-C include files (without a
                           trailing '/xercesc')
   --with-xml-lib=PATH     Specify path to XERCES-C library files
-  --with-debug            Enable debug mode
-  --with-crime-detection  Enable crime detection mode
 
 Some influential environment variables:
   CC          C compiler command
@@ -3708,8 +3708,6 @@ if test -z "$MARCH"; then
 	;;
     esac
 fi
-{ echo "$as_me:$LINENO: Architecture flags used for optimisations: $MARCH" >&5
-echo "$as_me: Architecture flags used for optimisations: $MARCH" >&6;}
 OFLAGS="$OFLAGS $MARCH"
 
 # Check whether --enable-static or --disable-static was given.
@@ -3722,10 +3720,9 @@ fi;
 
 
 POOL=""
-
-# Check whether --with-pool or --without-pool was given.
-if test "${with_pool+set}" = set; then
-  withval="$with_pool"
+# Check whether --enable-pool or --disable-pool was given.
+if test "${enable_pool+set}" = set; then
+  enableval="$enable_pool"
 
 		if test "x$withval" != "$xno" ; then
 		    POOL="-DUSE_POOL"
@@ -3738,12 +3735,12 @@ if test "${with_pool+set}" = set; then
 fi;
 
 BANDWIDTH_LIMIT=""
+# Check whether --enable-bandwithlimitation or --disable-bandwithlimitation was given.
+if test "${enable_bandwithlimitation+set}" = set; then
+  enableval="$enable_bandwithlimitation"
 
-# Check whether --with-bandwithlimitation or --without-bandwithlimitation was given.
-if test "${with_bandwithlimitation+set}" = set; then
-  withval="$with_bandwithlimitation"
-
-	echo "hier"
+	{ echo "$as_me:$LINENO: hier" >&5
+echo "$as_me: hier" >&6;}
 		if test "x$withval" != "$xno" ; then
 		    BANDWIDTH_LIMIT="-DDELAY_CHANNELS"
 		    if test "x$withval" != "$xyes" ; then
@@ -10111,27 +10108,21 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
+# Check whether --enable-debug or --disable-debug was given.
+if test "${enable_debug+set}" = set; then
+  enableval="$enable_debug"
 
-# Check whether --with-debug or --without-debug was given.
-if test "${with_debug+set}" = set; then
-  withval="$with_debug"
-
-		if test "x$withval" != "$xno" ; then
-			CFLAGS="$CFLAGS -g -D_DEBUG"
-			OFLAGS=""
-		fi
+	    CFLAGS="$CFLAGS -g -D_DEBUG"
+	    OFLAGS=""
 
 
 fi;
 
+# Check whether --enable-crime-detection or --disable-crime-detection was given.
+if test "${enable_crime_detection+set}" = set; then
+  enableval="$enable_crime_detection"
 
-# Check whether --with-crime-detection or --without-crime-detection was given.
-if test "${with_crime_detection+set}" = set; then
-  withval="$with_crime_detection"
-
-		if test "x$withval" != "$xno" ; then
-			CFLAGS="$CFLAGS -DLOG_CRIME"
-		fi
+	    CFLAGS="$CFLAGS -DLOG_CRIME"
 
 
 fi;
