@@ -584,7 +584,7 @@ LOOP_START:
 											pnewMuxSocket->close();
 											delete pnewMuxSocket;
 										}
-//									else
+									else
 										{
 //Weiter wie bisher...								
 											#ifdef _DEBUG
