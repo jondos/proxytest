@@ -157,7 +157,7 @@ SINT32 CASocket::connect(LPCASOCKETADDR psa,UINT msTimeOut)
 #endif
 #ifndef _WIN32
 		int flags=fcntl(m_Socket,F_GETFL,0);
-		fcntl(m_Socket,F_SETFL,flasg|O_NONBLOCK);
+		fcntl(m_Socket,F_SETFL,flags|O_NONBLOCK);
 #else
 		unsigned long flags=1;
 		ioctlsocket(m_Socket,FIONBIO,&flags);
