@@ -2667,7 +2667,7 @@ if test "${with_xml_lib+set}" = set; then
 		fi
 
 fi;
-LIBS="$LIBS -L$xmllibdir -lxercesc"
+LIBS="$LIBS -L$xmllibdir -lxerces-c"
 
 cat >conftest.$ac_ext <<_ACEOF
 #line 2673 "configure"

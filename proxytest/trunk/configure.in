@@ -149,7 +149,7 @@ AC_ARG_WITH(xml-lib,
 		fi
 	]
 )
-LIBS="$LIBS -L$xmllibdir -lxercesc"
+LIBS="$LIBS -L$xmllibdir -lxerces-c"
 
 AC_TRY_LINK([#include "util/PlatformUtils.hpp"],[XMLPlatformUtils::Initialize()],AC_MSG_RESULT([XercesC-Lib found]),
 		AC_MSG_ERROR([Xerces-C Lib NOT found - please use --with-xml-lib]))
