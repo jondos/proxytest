@@ -64,9 +64,9 @@ SINT32 CASocketGroup::add(CAMuxSocket&s)
 		    if(max<((SOCKET)s)+1)
 			max=((SOCKET)s)+1;
 		#endif
-		//#ifdef _DEBUG
-				CAMsg::printMsg(LOG_DEBUG,"CASocketGroutp: Added SOCKET: %u\n",(SOCKET)s);
-		//#endif
+		#ifdef _DEBUG
+				CAMsg::printMsg(LOG_DEBUG,"CASocketGroup: Added SOCKET: %u\n",(SOCKET)s);
+		#endif
 		FD_SET((SOCKET)s,&m_fdset);
 		LeaveCriticalSection(&csFD_SET);
 		return E_SUCCESS;
