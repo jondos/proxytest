@@ -81,7 +81,7 @@ SINT32 CASocket::listen(const CASocketAddr& psa)
 				UINT8* path=((CASocketAddrUnix&)psa).getPath();
 				if(path!=NULL)
 					{
-						unlink(path);
+						unlink((char*)path);
 						delete path;
 					}
 			}
