@@ -210,12 +210,17 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#endif
 #endif
 
+//Error constants...
+
 #define E_SUCCESS 0
 #define E_UNKNOWN -1
 #define E_UNSPECIFIED -100 // A Parameter was not specified/not set
+#define E_SPACE -101//there was not enough memory (or space in a buffer)
 #define E_QUEUEFULL -200 // If a Send Queue contains more data then a defined number
 #define E_AGAIN -300 //If something was'nt completed und should request again later..
 #define E_TIMEDOUT -301 //An opertion has timed out
+#define E_UNKNOWN_HOST -400 // A hostname could not be resolved
+
 #include <assert.h>
 #include <stdio.h>
 #include <time.h>

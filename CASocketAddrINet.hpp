@@ -28,6 +28,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CASOCKETADDRINET__
 #define __CASOCKETADDRINET__
 #include "CASocketAddr.hpp"
+
+/** This class represents a socket address for Internet (IP) connections. */
 class CASocketAddrINet:public CASocketAddr,sockaddr_in
 	{
 		public:
@@ -35,22 +37,22 @@ class CASocketAddrINet:public CASocketAddr,sockaddr_in
 			static SINT32 destroy();
 			int getType(){return AF_INET;}
 			CASocketAddrINet();
-			//~CASocketAddrINet();
-		//	virtual operator LPSOCKADDR(){
-		//		return (::LPSOCKADDR)this;}			
-			::LPSOCKADDR LPSOCKADDR(){return (::LPSOCKADDR)(static_cast<sockaddr_in*>(this));}			
-			SINT32 getSize();
-			/*TCP/IP*/
-			CASocketAddrINet(char* szIP,UINT16 port);
 			CASocketAddrINet(UINT16 port);
+
+			/** Makes a cast to struct SOCKADDR* */
+			::LPSOCKADDR LPSOCKADDR(){return (::LPSOCKADDR)(static_cast<sockaddr_in*>(this));}			
+
+			/** Returns the Size of the SOCKADDR struct used.
+				* @return sizeof(sockaddr_in)
+				*/
+			SINT32 getSize(){return sizeof(sockaddr_in);}
 			
-			/*TCP/IP*/
 			SINT32 setAddr(char* szIP,UINT16 port);
       SINT32 setPort(UINT16 port);
       UINT16 getPort();
 			SINT32 getHostName(UINT8* buff,UINT32 len);
 			static SINT32 getLocalHostName(UINT8* buff,UINT32 len);
-			static SINT32 getLocalHostIP(UINT8* ip);
+			static SINT32 getLocalHostIP(UINT8 ip[4]);
 //			operator LPSOCKADDR(){return (::LPSOCKADDR)m_pAddr;}
 
 

@@ -2,7 +2,7 @@
 #---------------------------------------------------------------------------
 # General configuration options
 #---------------------------------------------------------------------------
-PROJECT_NAME           = "MIXe for Privacy and Anonymity in the Internet"
+PROJECT_NAME           = "Mixe for Privacy and Anonymity in the Internet"
 PROJECT_NUMBER         = 
 OUTPUT_DIRECTORY       = ./doc
 OUTPUT_LANGUAGE        = English
@@ -116,7 +116,7 @@ EXPAND_ONLY_PREDEF     = NO
 SEARCH_INCLUDES        = YES
 INCLUDE_PATH           = 
 INCLUDE_FILE_PATTERNS  = 
-PREDEFINED             = PROT2
+PREDEFINED             = AES,PROT2,_ASYNC,HAVE_UNIX_DOMAIN_PROTOCOL
 EXPAND_AS_DEFINED      = 
 #---------------------------------------------------------------------------
 # Configuration::addtions related to external references   
