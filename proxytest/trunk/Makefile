@@ -50,7 +50,7 @@ linux-x86-gcc-debug:
 	$(MAKE) 'CC=gcc' 'CPPFLAGS=-static -Wall -O0 -D_REENTRANT' 'DEBUG=-g -D_DEBUG' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lstdc++' 'LIBDIR=-L/usr/local/ssl/lib' _all 
 
 solaris-ultrasparc-gcc:
-	$(MAKE) 'CC=gcc -mcpu=ultrasparc' 'CPPFLAGS=-O3 -D_REENTRANT' 'LIBS=$(LIBS) -lstdc++' _all 
+	$(MAKE) 'CC=gcc -mcpu=ultrasparc' 'CPPFLAGS=-O3 -D_REENTRANT' 'LIBS=$(LIBS) -lstdc++ -lsocket -lnsl' _all 
 
 irix-64-cc:
 	$(MAKE) 'CC=CC -r10000 -mips4 -64' 'CPPFLAGS=-fullwarn -Ofast=IP27 -D_REENTRANT' 'LIBS=$(LIBS)' _all 
