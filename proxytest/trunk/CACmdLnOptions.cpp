@@ -848,6 +848,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 								tmpLen=255;
 								if(getDOMElementValue(elemType,tmpBuff,&tmpLen)!=E_SUCCESS)
 									continue;
+								strtrim(tmpBuff);
 								if(strcmp((char*)tmpBuff,"RAW/TCP")==0)
 									type=RAW_TCP;
 								else if(strcmp((char*)tmpBuff,"RAW/UNIX")==0)
@@ -902,6 +903,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 										if(getDOMElementValue(elemFile,tmpBuff,&tmpLen)!=E_SUCCESS)
 											continue;
 										tmpBuff[tmpLen]=0;
+										strtrim(tmpBuff);
 										addr=new CASocketAddrUnix;
 										if(((CASocketAddrUnix*)addr)->setPath((char*)tmpBuff)!=E_SUCCESS)
 											continue;
