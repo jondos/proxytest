@@ -95,6 +95,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	 #endif
 	#endif 
 		#include <sys/ioctl.h>
+		#include <sys/types.h>
     #include <sys/socket.h>
     #include <sys/un.h>
 		#define HAVE_UNIX_DOMAIN_PROTOCOL
@@ -207,6 +208,17 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		typedef int16_t SINT16;
 		typedef uint8_t UINT8;
 		typedef int8_t SINT8;
+	#else     	
+		#warning This seams to be a currently not supported plattform - may be things go wrong! 
+		#warning Please report the plattform, so that it could be added 
+		typedef unsigned int UINT32;
+		typedef signed int SINT32;
+		typedef unsigned int UINT;
+		typedef signed int SINT;
+		typedef unsigned short UINT16;
+		typedef signed short SINT16;
+		typedef unsigned char UINT8;
+		typedef signed char SINT8;
 	#endif
 #endif
 
