@@ -266,6 +266,7 @@ int doLocalProxy()
 //				lpIOPair->muxOut.setDecryptionKey(key);
 //				lpIOPair->muxOut.setEncryptionKey(key);
 				((CASocket*)lpIOPair->muxOut)->receive((char*)&lpIOPair->chainlen,1);
+				CAMsg::printMsg(LOG_INFO,"Chain-Length: %d\n",lpIOPair->chainlen);
 				lpIO(lpIOPair);
 				ret=0;
 			}
@@ -289,16 +290,19 @@ struct MMPair
 THREAD_RETURN mmIO(void* v)
 	{
 		MMPair* mmIOPair=(MMPair*)v;
+		CAMuxSocket& muxOut=mmIOPair->muxOut;
+		CAMuxSocket& muxIn=mmIOPair->muxIn;
 		CASocketGroup oSocketGroup;
-		oSocketGroup.add(mmIOPair->muxIn);
-		oSocketGroup.add(mmIOPair->muxOut);
+		oSocketGroup.add(muxIn);
+		oSocketGroup.add(muxOut);
 		CASocketList oSocketList;
-//		char buff[1001];
-		HCHANNEL /*inChannel,outChannel,*/lastId;
+		HCHANNEL lastId;
 		lastId=1;
 		int len;
 		CONNECTION oConnection;
 		MUXPACKET oMuxPacket;
+		unsigned char key[16];
+		memset(key,0,16);
 		for(;;)
 			{
 				if(oSocketGroup.select()==SOCKET_ERROR)
@@ -306,9 +310,9 @@ THREAD_RETURN mmIO(void* v)
 						sleep(1);
 						continue;
 					}
-				if(oSocketGroup.isSignaled(mmIOPair->muxIn))
+				if(oSocketGroup.isSignaled(muxIn))
 					{
-						len=mmIOPair->muxIn.receive(&oMuxPacket);
+						len=muxIn.receive(&oMuxPacket);
 						if(len==SOCKET_ERROR)
 							{
 								CAMsg::printMsg(LOG_CRIT,"Fehler beim Empfangen -- Exiting!\n");
@@ -321,9 +325,13 @@ THREAD_RETURN mmIO(void* v)
 										#ifdef _DEBUG
 										    CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
 										#endif
-										oSocketList.add(oMuxPacket.channel,lastId);
+										CASymCipher* newCipher=new CASymCipher;
+										newCipher->setDecryptionKey(key);
+										newCipher->setEncryptionKey(key);
+										oSocketList.add(oMuxPacket.channel,lastId,newCipher);
 										oMuxPacket.channel=lastId;
-										mmIOPair->muxOut.send(&oMuxPacket);
+										newCipher->decrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
+										muxOut.send(&oMuxPacket);
 										lastId++;
 									}
 							}
@@ -331,20 +339,21 @@ THREAD_RETURN mmIO(void* v)
 							{
 								if(len==0)
 									{
-										mmIOPair->muxOut.close(oConnection.outChannel);
+										muxOut.close(oConnection.outChannel);
 										oSocketList.remove(oMuxPacket.channel);
 									}
 								else
 									{
 										oMuxPacket.channel=oConnection.outChannel;
-										mmIOPair->muxOut.send(&oMuxPacket);
+										oConnection.pCipher->decrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
+										muxOut.send(&oMuxPacket);
 									}
 							}
 					}
 				
-				if(oSocketGroup.isSignaled(mmIOPair->muxOut))
+				if(oSocketGroup.isSignaled(muxOut))
 					{
-						len=mmIOPair->muxOut.receive(&oMuxPacket);
+						len=muxOut.receive(&oMuxPacket);
 						if(len==SOCKET_ERROR)
 							{
 								CAMsg::printMsg(LOG_CRIT,"Fehler beim Empfangen -- Exiting!\n");
@@ -355,16 +364,17 @@ THREAD_RETURN mmIO(void* v)
 								if(len!=0)
 									{
 										oMuxPacket.channel=oConnection.id;
-										mmIOPair->muxIn.send(&oMuxPacket);
+										oConnection.pCipher->decrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
+										muxIn.send(&oMuxPacket);
 									}
 								else
 									{
-										mmIOPair->muxIn.close(oConnection.id);
+										muxIn.close(oConnection.id);
 										oSocketList.remove(oConnection.id);
 									}
 							}
 						else
-							mmIOPair->muxOut.close(oMuxPacket.channel);
+							muxOut.close(oMuxPacket.channel);
 					}
 			}
 		THREAD_RETURN_SUCCESS;
