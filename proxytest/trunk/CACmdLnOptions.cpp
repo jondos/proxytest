@@ -761,9 +761,9 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 				getDOMChildByName(elemLogging,(UINT8*)"File",elem,false);
 				if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS)
 					{
-						strLogDir=new char[tmpLen+1];
-						memcpy(strLogDir,tmpBuff,tmpLen);
-						strLogDir[tmpLen]=0;
+						strtrim(tmpBuff);
+						strLogDir=new char[strlen((char*)tmpBuff)+1];
+						strcpy(strLogDir,(char*)tmpBuff);
 					}				
 			}
 
@@ -812,9 +812,9 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		tmpLen=255;
 		if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS)
 			{
-				strInfoServerHost=new char[tmpLen+1];
-				memcpy(strInfoServerHost,tmpBuff,tmpLen);
-				strInfoServerHost[tmpLen]=0;
+				strtrim(tmpBuff);
+				strInfoServerHost=new char[strlen((char*)tmpBuff)+1];
+				strcpy(strInfoServerHost,(char*)tmpBuff);
 			}
 		getDOMChildByName(elemInfoService,(UINT8*)"Port",elem,false);
 		if(getDOMElementValue(elem,&tmp)==E_SUCCESS)
@@ -835,7 +835,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 						UINT32 type=0;
 						CASocketAddr* addr=NULL;
 //						UINT8* hostname=NULL;
-						UINT32 port;
+						UINT16 port;
 						for(UINT32 i=0;i<m_cnListenerInterfaces;i++)
 							{
 								if(addr!=NULL)

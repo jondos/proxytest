@@ -62,6 +62,8 @@ CAInfoService::CAInfoService()
 		m_pFirstMix=NULL;
 		m_bRun=false;
 		m_pSignature=NULL;
+		m_minuts=0;
+		m_lastMixedPackets=0;
 	}
 
 CAInfoService::CAInfoService(CAFirstMix* pFirstMix)
@@ -69,6 +71,8 @@ CAInfoService::CAInfoService(CAFirstMix* pFirstMix)
 		m_pFirstMix=pFirstMix;
 		m_bRun=false;
 		m_pSignature=NULL;
+		m_minuts=0;
+		m_lastMixedPackets=0;
 	}
 
 CAInfoService::~CAInfoService()
