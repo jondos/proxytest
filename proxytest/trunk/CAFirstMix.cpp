@@ -1,28 +1,28 @@
 /*
-Copyright (c) 2000, The JAP-Team 
+Copyright (c) 2000, The JAP-Team
 All rights reserved.
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-	- Redistributions of source code must retain the above copyright notice, 
+	- Redistributions of source code must retain the above copyright notice,
 	  this list of conditions and the following disclaimer.
 
-	- Redistributions in binary form must reproduce the above copyright notice, 
-	  this list of conditions and the following disclaimer in the documentation and/or 
+	- Redistributions in binary form must reproduce the above copyright notice,
+	  this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
-	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors 
-	  may be used to endorse or promote products derived from this software without specific 
-		prior written permission. 
+	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
+	  may be used to endorse or promote products derived from this software without specific
+		prior written permission.
 
-	
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS 
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
 AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
 BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
-OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
@@ -111,7 +111,7 @@ SINT32 CAFirstMix::init()
 						if(seteuid(0)==-1) //changing to root
 							CAMsg::printMsg(LOG_CRIT,"Setuid failed!\n");
 					}
-#endif				
+#endif
 				SINT32 ret=m_arrSocketsIn[aktSocket].listen(*pAddr);
 				delete pAddr;
 #ifndef _WIN32
@@ -119,13 +119,13 @@ SINT32 CAFirstMix::init()
 #endif
 				if(ret!=E_SUCCESS)
 					{
-            CAMsg::printMsg(LOG_CRIT,"Socket error while listening on interface %d: %s\n",i,strerror(errno));
+            CAMsg::printMsg(LOG_CRIT,"Socket error while listening on interface %d\n",i);
 						return E_UNKNOWN;
 					}
 				aktSocket++;
 			}
 
-		
+
 		CASocketAddr* pAddrNext=NULL;
 		for(i=0;i<options.getTargetInterfaceCount();i++)
 			{
@@ -209,9 +209,9 @@ SINT32 CAFirstMix::init()
 				CAMsg::printMsg(LOG_CRIT,"Error in establishing secure communication with next Mix!\n");
 				delete []recvBuff;
 				return E_UNKNOWN;
-			}			
+			}
     */
-		
+
 #ifdef PAYMENT
 		m_pAccountingInstance = CAAccountingInstance::getInstance();
 #endif
@@ -244,7 +244,7 @@ SINT32 CAFirstMix::init()
 		m_pthreadReadFromMix=new CAThread();
 		m_pthreadReadFromMix->setMainLoop(fm_loopReadFromMix);
 		m_pthreadReadFromMix->start(this);
-		
+
 		//Starting InfoService
     /*    if(m_pInfoService == NULL)
         {
@@ -263,7 +263,7 @@ SINT32 CAFirstMix::init()
 		m_pLogPacketStats=new CALogPacketStats();
 		m_pLogPacketStats->setLogIntervallInMinutes(FM_PACKET_STATS_LOG_INTERVALL);
 		m_pLogPacketStats->start();
-#endif		
+#endif
 		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix init() succeded\n");
 		return E_SUCCESS;
 }
@@ -309,7 +309,7 @@ SINT32 CAFirstMix::processKeyExchange()
 		int count=0;
     if(getDOMElementAttribute(elemMixes,"count",&count)!=E_SUCCESS)
         return E_UNKNOWN;
- /* 
+ /*
 		@todo DOn not why we do this here - probablyy it has something todo with the
 		dynamic mix config, but makes not sense at all for me...
 
@@ -477,7 +477,7 @@ THREAD_RETURN fm_loopSendToMix(void* param)
 		CAFirstMix* pFirstMix=(CAFirstMix*)param;
 		CAQueue* pQueue=((CAFirstMix*)param)->m_pQueueSendToMix;
 		CAMuxSocket* pMuxSocket=pFirstMix->m_pMuxOut;
-		
+
 		UINT32 len;
 		SINT32 ret;
 #ifndef USE_POOL
@@ -496,8 +496,8 @@ THREAD_RETURN fm_loopSendToMix(void* param)
 					{
 						getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
 						pFirstMix->m_pLogPacketStats->addToTimeingStats(*pQueueEntry,pMixPacket->flags,true);
-					}	
-#endif					
+					}
+#endif
 			}
 		delete pQueueEntry;
 #else
@@ -515,13 +515,13 @@ THREAD_RETURN fm_loopSendToMix(void* param)
 						getRandom(pMixPacket->data,DATA_SIZE);
 						#ifdef LOG_PACKET_TIMES
 							setZero64(pPoolEntry->timestamp_proccessing_start);
-						#endif	
+						#endif
 					}
 				else if(ret!=E_SUCCESS||len!=sizeof(tQueueEntry))
 					break;
 				#ifdef LOG_PACKET_TIMES
 					getcurrentTimeMicros(pPoolEntry->pool_timestamp_in);
-				#endif		
+				#endif
 				pPool->pool(pPoolEntry);
 				#ifdef LOG_PACKET_TIMES
 					getcurrentTimeMicros(pPoolEntry->pool_timestamp_out);
@@ -533,8 +533,8 @@ THREAD_RETURN fm_loopSendToMix(void* param)
 						{
 							getcurrentTimeMicros(pPoolEntry->timestamp_proccessing_end);
 							pFirstMix->m_pLogPacketStats->addToTimeingStats(*pPoolEntry,pMixPacket->flags,true);
-						}	
-				#endif	
+						}
+				#endif
 			}
 		delete pPoolEntry;
 		delete pPool;
@@ -559,7 +559,7 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 		#ifdef USE_POOL
 			CAPool* pPool=new CAPool(MIX_POOL_SIZE);
 		#endif
-		
+
 		while(!pFirstMix->m_bRestart)
 			{
 				if(pQueue->getSize()>MAX_READ_FROM_NEXT_MIX_QUEUE_SIZE)
@@ -567,7 +567,7 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 						msSleep(200);
 						continue;
 					}
-				SINT32 ret=pSocketGroup->select(MIX_POOL_TIMEOUT);	
+				SINT32 ret=pSocketGroup->select(MIX_POOL_TIMEOUT);
 				if(ret==E_TIMEDOUT)
 					{
 						#ifdef USE_POOL
@@ -578,8 +578,8 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 								setZero64(pQueueEntry->timestamp_proccessing_start);
 							#endif
 						#else
-							continue;	
-						#endif	
+							continue;
+						#endif
 					}
 				else if(ret>0)
 					{
@@ -601,16 +601,16 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 					#ifdef LOG_PACKET_TIMES
 						getcurrentTimeMicros(pQueueEntry->pool_timestamp_out);
 					#endif
-				#endif	
-				pQueue->add(pMixPacket,sizeof(tQueueEntry));	
+				#endif
+				pQueue->add(pMixPacket,sizeof(tQueueEntry));
 			}
 		delete pQueueEntry;
 		#ifdef USE_POOL
 			delete pPool;
-		#endif	
+		#endif
 		THREAD_RETURN_SUCCESS;
 	}
-	
+
 struct T_UserLoginData
 	{
 		CAMuxSocket* pNewUser;
@@ -652,7 +652,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 				CAMsg::printMsg(LOG_DEBUG,"UserAcceptLoop: countRead=%i\n",countRead);
 #endif
 				while(countRead>0&&i<nSocketsIn)
-					{						
+					{
 						if(osocketgroupAccept.isSignaled(socketsIn[i]))
 							{
 								countRead--;
@@ -670,7 +670,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 									}
 								else
 									{
-										//Pruefen ob schon vorhanden..	
+										//Pruefen ob schon vorhanden..
 										ret=((CASocket*)pNewMuxSocket)->getPeerIP(peerIP);
 										#ifdef PAYMENT
 											if(ret!=E_SUCCESS||pIPList->insertIP(peerIP)<0 ||
@@ -707,9 +707,9 @@ THREAD_RETURN fm_loopDoUserLogin(void* param)
 		delete d;
 		THREAD_RETURN_SUCCESS;
 	}
-	
+
 /** Sends and receives all data neccessary for a User to "login".
-	* This means sending the public key of the Mixes and receiving the 
+	* This means sending the public key of the Mixes and receiving the
 	* sym keys of JAP. This is done in a thread on a per user basis
 	* @todo Cleanup of runing thread if mix restarts...
 ***/
@@ -737,7 +737,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 #ifndef FIRST_MIX_SYMMETRIC
 		MIXPACKET oMixPacket;
 		((CASocket*)pNewUser)->setNonBlocking(true);	                    // stefan: sendet das send in der letzten zeile doch noch nicht? wenn doch, kann dann ein JAP nicht durch verweigern der annahme hier den mix blockieren? vermutlich nciht, aber andersherum faend ich das einleuchtender.
-		if(pNewUser->receive(&oMixPacket,FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT)!=MIXPACKET_SIZE) //wait at most FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT 
+		if(pNewUser->receive(&oMixPacket,FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT)!=MIXPACKET_SIZE) //wait at most FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT
 																																																	// milliseconds for user to send sym key
 			{
 				delete pNewUser;
@@ -832,7 +832,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 #endif
 		CAQueue* tmpQueue=new CAQueue(sizeof(tQueueEntry));
 		if(m_pChannelList->add(pNewUser,peerIP,tmpQueue)!=E_SUCCESS)// adding user connection to mix->JAP channel list (stefan: sollte das nicht connection list sein? --> es handelt sich um eine Datenstruktu fŸr Connections/Channels ).
-			{	
+			{
 				m_pIPList->removeIP(peerIP);
 				delete tmpQueue;
 				delete pNewUser;
@@ -861,12 +861,12 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 #ifdef HAVE_EPOLL
 		m_psocketgroupUsersRead->add(*pNewUser,m_pChannelList->get(pNewUser)); // add user socket to the established ones that we read data from.
 		#ifdef WITH_CONTROL_CHANNELS
-			m_psocketgroupUsersWrite->add(*pNewUser,m_pChannelList->get(pNewUser)); 
+			m_psocketgroupUsersWrite->add(*pNewUser,m_pChannelList->get(pNewUser));
 		#endif
 #else
 		m_psocketgroupUsersRead->add(*pNewUser); // add user socket to the established ones that we read data from.
 		#ifdef WITH_CONTROL_CHANNELS
-			m_psocketgroupUsersWrite->add(*pNewUser); 
+			m_psocketgroupUsersWrite->add(*pNewUser);
 		#endif
 #endif
 		return E_SUCCESS;
@@ -886,7 +886,7 @@ THREAD_RETURN loopReadFromUsers(void* param)
 		CAMuxSocket* pNextMix=pFirstMix->m_pMuxOut;
 
 		CAMuxSocket* pMuxSocket;
-		
+
 		SINT32 countRead;
 		SINT32 ret;
 		UINT8* ip=new UINT8[4];
@@ -897,7 +897,7 @@ THREAD_RETURN loopReadFromUsers(void* param)
 		fmHashTableEntry* pHashEntry;
 		fmChannelListEntry* pEntry;
 		CASymCipher* pCipher=NULL;
-	
+
 		for(;;)
 			{
 				countRead=psocketgroupUsersRead->select(false,1000); //if we sleep here forever, we will not notice new sockets...
@@ -1013,7 +1013,7 @@ SINT32 CAFirstMix::clean()
 		#endif
 		if(m_pthreadsLogin!=NULL)
 			delete m_pthreadsLogin;
-		m_pthreadsLogin=NULL;	
+		m_pthreadsLogin=NULL;
     //     if(m_pInfoService!=NULL)
     //     {
     //         CAMsg::printMsg(LOG_CRIT,"Stopping InfoService....\n");
@@ -1092,7 +1092,7 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff, UINT16 len)
 		CAMsg::printMsg(LOG_DEBUG,"Get KeyInfo (foolowing line)\n");
 		CAMsg::printMsg(LOG_DEBUG,"%s\n",recvBuff);
 
-		
+
 		DOMParser oParser;
 		MemBufInputSource oInput(recvBuff,len,"tmp");
 		oParser.parse(oInput);
@@ -1103,9 +1103,9 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff, UINT16 len)
 		int count=0;
 		if(getDOMElementAttribute(elemMixes,"count",&count)!=E_SUCCESS)
 			return E_UNKNOWN;
-		
+
 		DOM_Node child=elemMixes.getLastChild();
-		
+
 		//tmp XML-Structure for constructing the XML which is send to each user
 		DOM_Document docXmlKeyInfo=DOM_Document::createDocument();
 		DOM_Element elemRootKey=docXmlKeyInfo.createElement("MixCascade");
@@ -1116,7 +1116,7 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff, UINT16 len)
 		elemRootKey.appendChild(elemMixProtocolVersion);
 		DOM_Node elemMixesKey=docXmlKeyInfo.importNode(elemMixes,true);
 		elemRootKey.appendChild(elemMixesKey);
-		
+
 		UINT32 tlen;
 		while(child!=NULL)
 			{
@@ -1130,8 +1130,8 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff, UINT16 len)
 				child=child.getPreviousSibling();
 			}
 		tlen=256;
-	
-	
+
+
 		//Inserting own Key in XML-Key struct
 		DOM_DocumentFragment docfragKey;
 		m_pRSA->getPublicKeyAsDocumentFragment(docfragKey);
@@ -1146,7 +1146,7 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff, UINT16 len)
 		if(ownCert==NULL)
 			{
 				CAMsg::printMsg(LOG_DEBUG,"Own Test Cert is NULL -- so it could not be inserted into signed KeyInfo send to users...\n");
-			}	
+			}
 		CACertStore* tmpCertStore=new CACertStore();
 		tmpCertStore->add(ownCert);
 		if(m_pSignature->signXML(elemRootKey,tmpCertStore)!=E_SUCCESS)
@@ -1155,7 +1155,7 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff, UINT16 len)
 			}
 		delete ownCert;
 		delete tmpCertStore;
-		
+
 		tlen=0;
 		UINT8* tmpB=DOM_Output::dumpToMem(docXmlKeyInfo,&tlen);
 		m_xmlKeyInfoBuff=new UINT8[tlen+2];
@@ -1233,9 +1233,9 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff, UINT16 len)
 					}
 				child=child.getNextSibling();
 			}
-		
 
-	//CascadeInfo		
+
+	//CascadeInfo
 		m_docMixCascadeInfo=DOM_Document::createDocument();
 		DOM_Element elemRoot=m_docMixCascadeInfo.createElement("MixCascade");
 
@@ -1243,7 +1243,7 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff, UINT16 len)
 		UINT8 id[50];
 		options.getMixId(id,50);
 		elemRoot.setAttribute(DOMString("id"),DOMString((char*)id));
-		
+
 		UINT8 name[255];
 		if(options.getCascadeName(name,255)!=E_SUCCESS)
 			{
@@ -1254,12 +1254,12 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff, UINT16 len)
 		DOM_Text text=m_docMixCascadeInfo.createTextNode(DOMString((char*)name));
 		elem.appendChild(text);
 		elemRoot.appendChild(elem);
-		
+
 		elem=m_docMixCascadeInfo.createElement("Network");
 		elemRoot.appendChild(elem);
 		DOM_Element elemListenerInterfaces=m_docMixCascadeInfo.createElement("ListenerInterfaces");
 		elem.appendChild(elemListenerInterfaces);
-		
+
 		for(UINT32 i=1;i<=options.getListenerInterfaceCount();i++)
 			{
 				CAListenerInterface* pListener=options.getListenerInterface(i);
@@ -1272,14 +1272,14 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff, UINT16 len)
 					}
 				delete pListener;
 			}
-		
+
 		DOM_Element elemThisMix=m_docMixCascadeInfo.createElement("Mix");
 		elemThisMix.setAttribute(DOMString("id"),DOMString((char*)id));
 		DOM_Node elemMixesDocCascade=m_docMixCascadeInfo.createElement("Mixes");
 		elemMixesDocCascade.appendChild(elemThisMix);
 		count=1;
 		elemRoot.appendChild(elemMixesDocCascade);
-		
+
 		DOM_Node node=elemMixes.getFirstChild();
 		while(node!=NULL)
 			{
