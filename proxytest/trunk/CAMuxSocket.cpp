@@ -62,31 +62,6 @@ SINT32 CAMuxSocket::setCrypt(bool b)
 	}
 
 
-#ifndef PROT2
-int CAMuxSocket::accept(UINT16 port)
-	{
-//		if(!bIsTunneld)
-//			{
-				CASocket oSocket;
-				oSocket.create();
-				oSocket.setReuseAddr(true);
-				if(oSocket.listen(port)==SOCKET_ERROR)
-					return SOCKET_ERROR;
-				if(oSocket.accept(m_Socket)==SOCKET_ERROR)
-					return SOCKET_ERROR;
-				oSocket.close();
-				m_Socket.setRecvLowWat(sizeof(MUXPACKET));
-/*			}
-		else
-			{
-				m_pTunnel=tunnel_new_server (port,0);//DEFAULT_CONTENT_LENGTH//sizeof(MUXPACKET));
-				if(m_pTunnel==NULL)
-				    return SOCKET_ERROR;
-				tunnel_accept(m_pTunnel);
-			}
-*/		return 0;
-	}
-#else
 SINT32 CAMuxSocket::accept(UINT16 port)
 	{
 		CASocket oSocket;
@@ -115,8 +90,6 @@ SINT32 CAMuxSocket::accept(CASocketAddr& oAddr)
 		return E_SUCCESS;
 	}
 
-#endif
-
 SINT32 CAMuxSocket::connect(CASocketAddr & psa)
 	{
 		return connect(psa,1,0);
@@ -124,71 +97,14 @@ SINT32 CAMuxSocket::connect(CASocketAddr & psa)
 
 SINT32 CAMuxSocket::connect(CASocketAddr & psa,UINT retry,UINT32 time)
 	{
-//		if(!bIsTunneld)
-//			{
-				m_Socket.setRecvLowWat(MIXPACKET_SIZE);
-				return m_Socket.connect(psa,retry,time);
-/*			}
-		else
-			{
-
-				psa->getHostName((UINT8*)buff,255);
-				m_pTunnel=tunnel_new_client (buff, psa->getPort(),m_szTunnelHost,m_uTunnelPort,
-				 0//DEFAULT_CONTENT_LENGTH//sizeof(MUXPACKET));
-				return tunnel_connect(m_pTunnel);
-			}
-*/	}
+		m_Socket.setRecvLowWat(MIXPACKET_SIZE);
+		return m_Socket.connect(psa,retry,time);
+	}
 			
 int CAMuxSocket::close()
 	{
-//		if(!bIsTunneld)
-//			{
-				return m_Socket.close();
-/*			}
-		else
-			return tunnel_close(m_pTunnel);
-*/	}
-
-#ifndef PROT2
-int CAMuxSocket::send(MIXPACKET *pPacket)
-	{
-		int MuxPacketSize=sizeof(MUXPACKET);
-		int aktIndex=0;
-		int len=0;
-		pPacket->channel=htonl(pPacket->channel);
-		pPacket->len=htons(pPacket->len);
-
-//		if(!bIsTunneld)
-//			{
-				do
-					{
-						len=m_Socket.send(((UINT8*)pPacket)+aktIndex,MuxPacketSize);
-						MuxPacketSize-=len;
-						aktIndex+=len;
-					} while(len>0&&MuxPacketSize>0);
-/*			}
-		else
-			{		
-				do
-					{
-						len=tunnel_write(m_pTunnel,(void*)"fghj",4);//((char*)pPacket)+aktIndex,MuxPacketSize);
-						return 0;
-//						MuxPacketSize-=len;
-//						aktIndex+=len;
-					} while(len>0&&MuxPacketSize>0);	
-			}
-*/
-		if(len==SOCKET_ERROR)
-			{
-				#ifdef _DEBUG
-					CAMsg::printMsg(LOG_DEBUG,"MuxSocket-Send-Error!\n");
-					CAMsg::printMsg(LOG_DEBUG,"SOCKET-ERROR: %i\n",WSAGetLastError());
-				#endif
-				return SOCKET_ERROR;
-			}
-		return sizeof(MUXPACKET);
+		return m_Socket.close();
 	}
-#else
 
 int CAMuxSocket::send(MIXPACKET *pPacket)
 	{
@@ -217,53 +133,7 @@ int CAMuxSocket::send(MIXPACKET *pPacket)
 		LeaveCriticalSection(&csSend);
 		return ret;
 	}
-#endif
 
-#ifndef PROT2
-int CAMuxSocket::receive(MIXPACKET* pPacket)
-	{
-		int MuxPacketSize=sizeof(MUXPACKET);
-		int aktIndex=0;
-		int len=0;
-//		if(!bIsTunneld)
-//			{
-				do
-					{
-						len=m_Socket.receive(((UINT8*)pPacket)+aktIndex,MuxPacketSize);
-						MuxPacketSize-=len;
-						aktIndex+=len;
-					} while(len>0&&MuxPacketSize>0);
-/*			}
-		else
-			{
-				do
-					{
-						char buff[6];
-						len=tunnel_read(m_pTunnel,buff,1);//((char*)pPacket)+aktIndex,MuxPacketSize);
-						buff[5]=0;
-						printf(buff);
-						return 0;
-//						MuxPacketSize-=len;
-//						aktIndex+=len;
-					} while(len>0&&MuxPacketSize>0);
-			}
-*/
-		if(len==SOCKET_ERROR||len==0)
-			{
-				#ifdef _DEBUG
-					CAMsg::printMsg(LOG_DEBUG,"MuxSocket-Receive - ungültiges Packet!\n");
-					CAMsg::printMsg(LOG_DEBUG,"Data-Len %i\n",len);
-					if(len==SOCKET_ERROR)
-						CAMsg::printMsg(LOG_DEBUG,"SOCKET-ERROR: %i\n",WSAGetLastError());
-				#endif
-				return SOCKET_ERROR;
-			}
-
-		pPacket->len=ntohs(pPacket->len);	
-		pPacket->channel=ntohl(pPacket->channel);
-		return pPacket->len;
-	}
-#else
 SINT32 CAMuxSocket::receive(MIXPACKET* pPacket)
 	{
 		EnterCriticalSection(&csReceive);
@@ -348,17 +218,7 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 timeout)
 		LeaveCriticalSection(&csReceive);
 		return E_AGAIN;
 	}
-#endif
 
-#ifndef PROT2
-int CAMuxSocket::close(HCHANNEL channel_id)
-	{
-		MUXPACKET oPacket;
-		oPacket.channel=channel_id;
-		oPacket.len=0;
-		return send(&oPacket);
-	}
-#else
 int CAMuxSocket::close(HCHANNEL channel_id)
 	{
 		MIXPACKET oPacket;
@@ -366,4 +226,3 @@ int CAMuxSocket::close(HCHANNEL channel_id)
 		oPacket.flags=CHANNEL_CLOSE;
 		return send(&oPacket);
 	}
-#endif

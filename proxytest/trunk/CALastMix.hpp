@@ -44,21 +44,12 @@ class CALastMix:public CAMix,CASocketASyncSendResume
 		private:
 			SINT32 loop();
 			SINT32 init();
-#ifdef PROT2
 			SINT32 clean();
-#endif
 		private:
 			CAMuxSocket		muxIn;
-#ifndef PROT2
-
-			CASocketAddr	addrSquid;
-			CASocketAddr	addrSocks;
-			CAASymCipher* pRSA;
-#else
 			CASocketAddrINet	maddrSquid;
 			CASocketAddrINet	maddrSocks;
 			CAASymCipher mRSA;
-#endif
 		public:
 			void resume(CASocket* pSocket);
 		private:

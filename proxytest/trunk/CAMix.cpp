@@ -28,16 +28,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "StdAfx.h"
 #include "CAMix.hpp"
 
-#ifndef PROT2
-SINT32 CAMix::start()
-	{
-		if(init()==E_SUCCESS)
-			return loop();
-		else
-			return E_UNKNOWN;
-	}
-
-#else
 SINT32 CAMix::start()
 	{
 		if(initOnce()!=E_SUCCESS)
@@ -50,4 +40,3 @@ SINT32 CAMix::start()
 				sleep(60);
 			}
 	}
-#endif
