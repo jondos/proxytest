@@ -45,8 +45,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAUtil.hpp"
 #include "CAMix.hpp"
 #include "CAMiddleMix.hpp"
-#include "CAFirstMix.hpp"
-#include "CALastMix.hpp"
+#include "TypeA/CAFirstMixA.hpp"
+#include "TypeA/CALastMixA.hpp"
 #include "CALocalProxy.hpp"
 #include "CASymCipher.hpp"
 #include "CABase64.hpp"
@@ -73,7 +73,11 @@ CAMutex* pOpenSSLMutexes;
 
 // The Mix....
 CAMix* pMix=NULL;
-
+/*
+#include <crypto++/integer.h>
+#include <crypto++/rsa.h>
+#include <crypto++/osrng.h>
+*/
 typedef struct
 {
 	unsigned short len;
@@ -274,6 +278,7 @@ No data is transmitted during this step.
 
 \li Step 3: Mix 3 sends its public key  to Mix 2 (signed with its signature key).
 See \ref XMLInterMixInitSendFromLast "[XML]" for a description of the XML struct send in this step. 
+The <Nonce/> is a random byte string of length=16 (chosen by Mix 3) used for replay detection.
 
 \li Step 4: Mix 2 generates and sends a symmetric key to Mix 3, encrypted with the public key 
 of Mix 3, signed by Mix 2. 
@@ -283,6 +288,7 @@ The first 16 bytes a used as a key for
 inter-mix encryption of packets send from Mix \e n-1 to Mix \e n (e.g. upstream direction).
 The next 16 byte are used as IV for this cipher. The next 16 bytes are used as
 key for downstream direction and the last 16 bytes are the IV for this cipher.
+To detect replay attacks Mix 3 checks if the <Nonce/> element sent from Mix 2 is equal to SHA1(<Nonce/> chosen by Mix 3 in Step 3).  
 
 \li Step 5,6,7: This steps are equal to step 2,3,4. Mix 1 establishes a TCP/IP-connection
 with Mix 2. Mix 2 send it publick key to Mix 1 and Mix 1 generates and sends 
@@ -295,15 +301,13 @@ a symmetric key to Mix 2.
 -# JAP opens a TCP/IP connection to a FirstMix
 -# FirstMix sends information about the cascade (including public keys of the Mixes) to the JAP.
 See \ref XMLMixKeyInfo "[XML]" for a description of the XML struct send. 
--# JAP sends a special MixPacket, containing only 2 symmetric keys and IVs encrypted with the
+-# JAP sends a special MixPacket, containing only 2 symmetric keys (IV is all '0') encrypted with the
 public key of the FirstMix. This keys are used for link encryption between JAP and FirstMix.
 Note: At the moment this is binary - but will use XML in the future.
 The data part of this MixPacket is as follows:
 	- the ASCII string: "KEYPACKET"
-	- 16 random bytes used as symmetric key for packets send from JAP to Mix 
-	- 16 random bytes used as IV for this symetric cipher
 	- 16 random bytes used as symetric key for packets send from Mix to JAP 
-	- 16 random bytes used as IV for this symmetric cipher
+	- 16 random bytes used as symmetric key for packets send from JAP to Mix 
 	.
 
 -# Normal MixPacket exchange according to the mix protocol.
@@ -462,6 +466,36 @@ int main(int argc, const char* argv[])
 				sleep(100000);
 				exit(0);
 			}		
+*/
+/*
+			CAASymCipher oRSA;
+			oRSA.generateKeyPair(1024);
+			UINT8 from[200],to[200];
+			getRandom(from,200);
+			UINT64 st,en;
+			from[0]&=0x0F;
+			getcurrentTimeMillis(st);
+			//for(int i=0;i<10000;i++)
+				oRSA.decrypt(from,to);
+			getcurrentTimeMillis(en);
+			//printf("Dauer: %u\n",diff64(en,st));
+			
+			CryptoPP::AutoSeededRandomPool rng;
+			CryptoPP::InvertibleRSAFunction privkey;
+			privkey.Initialize(rng,1024);
+//			privkey.Precompute(10);
+			CryptoPP::Integer inte(from,128);
+			CryptoPP::Integer oint;
+			getcurrentTimeMillis(st);
+			for(int i=0;i<100;i++)
+				//privkey.ApplyFunction(inte);
+				privkey.CalculateInverse(rng,inte);
+			getcurrentTimeMillis(en);
+			printf("Dauer: %u\n",diff64(en,st));
+
+			CryptoPP::Integer ointz(to,128);
+			int r=ointz.Compare(oint);
+			exit(0);
 */
 #if defined(_WIN32) && defined(_DEBUG)
 /*			_CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_FILE );
@@ -716,9 +750,9 @@ Debug(dc::malloc.on());
 					{
 						CAMsg::printMsg(LOG_INFO,"I am the First MIX..\n");
 						#if !defined(NEW_MIX_TYPE)
-							pMix=new CAFirstMix();
+							pMix=new CAFirstMixA();
 						#else
-							pMix=new CAFirstMixNewProtocol();
+							pMix=new CAFirstMixB();
 						#endif
 					}
 				else if(options.isMiddleMix())
@@ -728,9 +762,9 @@ Debug(dc::malloc.on());
 					}
 				else
 						#if !defined(NEW_MIX_TYPE)
-							pMix=new CALastMix();
+							pMix=new CALastMixA();
 						#else
-							pMix=new CALastMixNewProtocol();
+							pMix=new CALastMixB();
 						#endif
 			}
 	  CAMsg::printMsg(LOG_INFO,"Starting MIX...\n");
