@@ -19,6 +19,7 @@ CASocket::CASocket()
 		closeMode=0;
 		localPort=-1;
 	}
+
 int CASocket::create()
 	{
 		if(m_Socket==0)
@@ -61,6 +62,11 @@ int CASocket::accept(CASocket &s)
 			
 int CASocket::connect(LPSOCKETADDR psa)
 	{
+		return connect(psa,1,0);
+	}
+
+int CASocket::connect(LPSOCKETADDR psa,int retry,int time)
+	{
 		localPort=-1;
 		if(m_Socket==0&&create()==SOCKET_ERROR)
 			{
@@ -69,10 +75,24 @@ int CASocket::connect(LPSOCKETADDR psa)
 #ifdef _DEBUG
 		sockets++;
 #endif
-		if(::connect(m_Socket,(LPSOCKADDR)psa,sizeof(*psa))!=0)
-		    return SOCKET_ERROR;
-		else
-		    return 0;	    
+		int err=0;
+		for(int i=0;i<retry;i++)
+			{
+				if(::connect(m_Socket,(LPSOCKADDR)psa,sizeof(*psa))!=0)
+					{  
+						err=GETERROR();
+						printf("Con-Error: %i",err);
+						if(err!=E_TIMEDOUT&&err!=E_CONNREFUSED)
+							return SOCKET_ERROR;
+						#ifdef _DEBUG
+							CAMsg::printMsg(LOG_DEBUG,"Cannot connect... retrying\n");
+						#endif
+						sleep(time);
+					}
+				else
+						return E_SUCCESS;
+			}
+		return err;
 	}
 			
 int CASocket::close()

@@ -21,7 +21,7 @@ int CASocketAddr::setAddr(char* szIP,unsigned short port)
 			{
 				HOSTENT* hostent=gethostbyname(szIP);
 				if(hostent==NULL)
-					sin_addr.s_addr=0;
+					sin_addr.s_addr=INADDR_NONE;
 				else
 					memcpy(&sin_addr.s_addr,hostent->h_addr_list[0],hostent->h_length);
 			}

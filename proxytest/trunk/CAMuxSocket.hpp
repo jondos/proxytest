@@ -27,6 +27,7 @@ class CAMuxSocket
 			int useTunnel(char* proxyhost,unsigned short proxyport);
 			int accept(unsigned short port);
 			int connect(LPSOCKETADDR psa);
+			int connect(LPSOCKETADDR psa,int retry,int time);
 			int close();
 			int send(MUXPACKET *pPacket);
 			int receive(MUXPACKET *pPacket);
@@ -36,7 +37,7 @@ class CAMuxSocket
 														return (SOCKET)m_Socket;
 												else
 													return tunnel_pollin_fd(m_pTunnel);}
-
+	
 		private:
 			CASocket m_Socket;
 			bool bIsTunneld;

@@ -26,7 +26,10 @@
     #define THREAD_RETURN void
     #define THREAD_RETURN_ERROR return
     #define THREAD_RETURN_SUCCESS return
-    #define sleep(i) Sleep(i*1000)		
+    #define sleep(i) Sleep(i*1000)
+		#define GETERROR WSAGetLastError
+		#define E_TIMEDOUT WSAETIMEDOUT
+		#define E_CONNREFUSED WSAECONNREFUSED
 #else
     #include <sys/ioctl.h>
     #include <sys/socket.h>
@@ -79,11 +82,17 @@
     #define THREAD_RETURN_SUCCESS return (NULL)
     
     #define min(a,b) ((a<b)?(a):(b))
-    #ifdef __sgi
-	#include <alloca.h>
-	#include <ctype.h>
+		#define GETERROR errno 
+		#define E_TIMEDOUT ETIMEDOUT
+		#define E_CONNREFUSED ECONNREFUSED
+		#ifdef __sgi
+			#include <alloca.h>
+			#include <ctype.h>
     #endif
 #endif
+
+#define E_SUCCESS 0		
+
 #include <stdio.h>
 #include <time.h>
 #include <sys/types.h>

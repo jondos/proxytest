@@ -2,6 +2,9 @@
 #define __CASOCKET__
 #include "CASocketAddr.hpp"
 #include "CASymCipher.hpp"
+
+
+
 class CASocket
 	{
 		public:
@@ -14,6 +17,7 @@ class CASocket
 			int listen(unsigned short port);
 			int accept(CASocket &s);
 			int connect(LPSOCKETADDR psa);
+			int connect(LPSOCKETADDR psa,int retry,int time);
 			int close();
 			int close(int mode);
 			int send(char* buff,int len);
