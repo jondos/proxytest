@@ -253,7 +253,10 @@ SINT32 CALocalProxy::loop()
 												if(tmpSocket!=NULL)
 													{
 														oSocketGroup.remove(*tmpSocket);
-														muxOut.close(tmpCon->outChannel);
+														pMixPacket->flags=CHANNEL_CLOSE;
+														pMixPacket->channel=tmpCon->outChannel;
+														getRandom(pMixPacket->data,DATA_SIZE);
+														muxOut.send(pMixPacket);
 														tmpSocket->close();
 														delete tmpSocket;
 													}

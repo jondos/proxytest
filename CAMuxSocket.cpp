@@ -229,7 +229,7 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 timeout)
 		return E_AGAIN;
 	}
 
-int CAMuxSocket::close(HCHANNEL channel_id)
+/*int CAMuxSocket::close(HCHANNEL channel_id)
 	{
 		MIXPACKET oPacket;
 		oPacket.channel=channel_id;
@@ -243,7 +243,7 @@ int CAMuxSocket::close(HCHANNEL channel_id,UINT8* buff)
 		oPacket.channel=channel_id;
 		oPacket.flags=CHANNEL_CLOSE;
 		return send(&oPacket,buff);
-	}
+	}*/
 
 #ifdef LOG_CRIME
 UINT32 CAMuxSocket::sigCrime(HCHANNEL channel_id,UINT8* buff)

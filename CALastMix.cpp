@@ -399,7 +399,9 @@ SINT32 CALastMix::loop()
 															#endif
 															delete tmpSocket;
 															delete newCipher;
-															m_pMuxIn->close(pMixPacket->channel,tmpBuff);
+															getRandom(pMixPacket->data,DATA_SIZE);
+															pMixPacket->flags=CHANNEL_CLOSE;
+															m_pMuxIn->send(pMixPacket,tmpBuff);
 															oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);			
 															m_logDownloadedPackets++;	
 													}
@@ -431,7 +433,9 @@ SINT32 CALastMix::loop()
 																	tmpSocket->close();
 																	delete tmpSocket;
 																	delete newCipher;
-																	m_pMuxIn->close(pMixPacket->channel,tmpBuff);
+																	getRandom(pMixPacket->data,DATA_SIZE);
+																	pMixPacket->flags=CHANNEL_CLOSE;
+																	m_pMuxIn->send(pMixPacket,tmpBuff);
 																	oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);			
 																	m_logDownloadedPackets++;	
 																}
@@ -503,7 +507,9 @@ SINT32 CALastMix::loop()
 														delete pChannelListEntry->pCipher;
 														delete pChannelListEntry->pQueueSend;
 														pChannelList->removeChannel(pMixPacket->channel);
-														m_pMuxIn->close(pMixPacket->channel,tmpBuff);
+														getRandom(pMixPacket->data,DATA_SIZE);
+														pMixPacket->flags=CHANNEL_CLOSE;
+														m_pMuxIn->send(pMixPacket,tmpBuff);
 														oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);
 														m_logDownloadedPackets++;	
 													}
@@ -553,7 +559,10 @@ SINT32 CALastMix::loop()
 														delete pChannelListEntry->pSocket;
 														delete pChannelListEntry->pCipher;
 														delete pChannelListEntry->pQueueSend;
-														m_pMuxIn->close(pChannelListEntry->channelIn,tmpBuff);
+														pMixPacket->flags=CHANNEL_CLOSE;
+														getRandom(pMixPacket->data,DATA_SIZE);
+														pMixPacket->channel=pChannelListEntry->channelIn;
+														m_pMuxIn->send(pMixPacket,tmpBuff);
 														oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);			
 														m_logDownloadedPackets++;	
 														pChannelList->removeChannel(pChannelListEntry->channelIn);											 
@@ -599,7 +608,10 @@ SINT32 CALastMix::loop()
 														delete pChannelListEntry->pSocket;
 														delete pChannelListEntry->pCipher;
 														delete pChannelListEntry->pQueueSend;
-														m_pMuxIn->close(pChannelListEntry->channelIn,tmpBuff);
+														pMixPacket->flags=CHANNEL_CLOSE;
+														pMixPacket->channel=pChannelListEntry->channelIn;
+														getRandom(pMixPacket->data,DATA_SIZE);
+														m_pMuxIn->send(pMixPacket,tmpBuff);
 														pChannelList->removeChannel(pChannelListEntry->channelIn);
 														oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);			
 														m_logDownloadedPackets++;	

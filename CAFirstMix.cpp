@@ -579,7 +579,10 @@ SINT32 CAFirstMix::loop()
 												pEntry=m_pChannelList->getFirstChannelForSocket(pMuxSocket);
 												while(pEntry!=NULL)
 													{
-														m_pMuxOut->close(pEntry->channelOut,tmpBuff);
+														getRandom(pMixPacket->data,DATA_SIZE);
+														pMixPacket->flags=CHANNEL_CLOSE;
+														pMixPacket->channel=pEntry->channelOut;
+														m_pMuxOut->send(pMixPacket,tmpBuff);
 														m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
 														delete pEntry->pCipher;
 														pEntry=m_pChannelList->getNextChannel(pEntry);
@@ -633,7 +636,9 @@ SINT32 CAFirstMix::loop()
 														pEntry=m_pChannelList->get(pMuxSocket,pMixPacket->channel);
 														if(pEntry!=NULL)
 															{
-																m_pMuxOut->close(pEntry->channelOut,tmpBuff);
+																pMixPacket->channel=pEntry->channelOut;
+																getRandom(pMixPacket->data,DATA_SIZE);
+																m_pMuxOut->send(pMixPacket,tmpBuff);
 																m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
 																#ifdef LOG_CHANNEL
 																	//pEntry->packetsInFromUser++;
@@ -744,7 +749,9 @@ SINT32 CAFirstMix::loop()
 								fmChannelList* pEntry=m_pChannelList->get(pMixPacket->channel);
 								if(pEntry!=NULL)
 									{
-										pEntry->pHead->pMuxSocket->close(pEntry->channelIn,tmpBuff);
+										pMixPacket->channel=pEntry->channelIn;
+										getRandom(pMixPacket->data,DATA_SIZE);
+										pEntry->pHead->pMuxSocket->send(pMixPacket,tmpBuff);
 										pEntry->pHead->pQueueSend->add(tmpBuff,MIXPACKET_SIZE);
 										#ifdef LOG_CHANNEL
 											pEntry->pHead->trafficOut++;
