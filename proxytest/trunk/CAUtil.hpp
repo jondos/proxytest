@@ -317,7 +317,7 @@ SINT32 parseU64(const UINT8 * str, UINT64& value);
 
 /** Clones an OpenSSL DSA structure
 	*/
-DSA* DSA_clone(DSA* dsa)
+inline DSA* DSA_clone(DSA* dsa)
 	{
 		if(dsa==NULL)
 			return NULL;
