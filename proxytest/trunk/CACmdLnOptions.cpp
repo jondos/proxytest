@@ -106,7 +106,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 	int iTemplate=0;
   int bHttps=0;
   char* target=NULL;
-	int serverrttport=-1;
+//	int serverrttport=-1;
 	int mix=-1;
 	int SOCKSport=-1;
 	char* socks=NULL;

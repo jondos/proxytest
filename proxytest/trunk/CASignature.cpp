@@ -72,8 +72,9 @@ SINT32 CASignature::generateSignKey(UINT32 size)
 		return E_SUCCESS;
 	}
 
-SINT32 CASignature::setSignKey(DOM_Node& node,UINT32 type,char* passwd)
+SINT32 CASignature::setSignKey(const DOM_Node& n,UINT32 type,char* passwd)
 	{
+		DOM_Node node=n; 
 		switch(type)
 			{
 				case SIGKEY_PKCS12:

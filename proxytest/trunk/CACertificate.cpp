@@ -36,8 +36,9 @@ CACertificate::CACertificate()
 		m_pCert=NULL;
 	}
 
-CACertificate* CACertificate::decode(DOM_Node &node,UINT32 type,char* passwd)
+CACertificate* CACertificate::decode(const DOM_Node &n,UINT32 type,char* passwd)
 	{
+		DOM_Node node=n;
 		switch(type)
 			{
 				case CERT_PKCS12:					
