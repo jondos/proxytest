@@ -10,19 +10,10 @@ THREAD_RETURN SocketASyncSendLoop(void* p)
 		SINT32 ret;
 		while(true)
 			{
-				#ifdef _DEBUG
-					CAMsg::printMsg(LOG_DEBUG,"Asyncron Sending--SELECT\n");
-				#endif
 				if((ret=pASyncSend->m_oSocketGroup.select(true,50))==E_UNKNOWN||ret==E_TIMEDOUT) //bugy...
 					{
-						#ifdef _DEBUG
-							CAMsg::printMsg(LOG_DEBUG,"Asyncron Sending--SELECT returned: %i\n",ret);
-						#endif
 						continue;
 					}
-				#ifdef _DEBUG
-					CAMsg::printMsg(LOG_DEBUG,"Asyncron Sending--SELECT returned: %i\n",ret);
-				#endif
 				EnterCriticalSection(&pASyncSend->cs);
 				_t_socket_list* akt=pASyncSend->m_Sockets;
 				_t_socket_list* tmp;
@@ -33,11 +24,8 @@ THREAD_RETURN SocketASyncSendLoop(void* p)
 							{
 								ret--;
 								UINT32 len=BUFF_SIZE;
-								akt->pQueue->getNext(buff,&len);
-								#ifdef _DEBUG
-										CAMsg::printMsg(LOG_DEBUG,"Preparing Sending asynchron...\n");
-								#endif
-								::send((SOCKET)*(akt->pSocket),(char*)buff,len,0);
+								if(akt->pQueue->getNext(buff,&len)==E_SUCCESS))
+									::send((SOCKET)*(akt->pSocket),(char*)buff,len,0);
 								if(akt->pQueue->isEmpty())
 									{
 										pASyncSend->m_oSocketGroup.remove(*akt->pSocket);
@@ -68,9 +56,6 @@ THREAD_RETURN SocketASyncSendLoop(void* p)
 SINT32 CASocketASyncSend::send(CASocket* pSocket,UINT8* buff,UINT32 size)
 	{
 		EnterCriticalSection(&cs);
-#ifdef _DEBUG
-		CAMsg::printMsg(LOG_DEBUG,"Preparing Sending asynchron...\n");
-#endif
 		SINT32 ret;
 		if(m_Sockets==NULL)
 			{
