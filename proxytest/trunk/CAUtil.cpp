@@ -51,22 +51,22 @@ SINT32 memtrim(UINT8* dest,const UINT8* src,UINT32 size)
 */
 SINT32 getcurrentTimeMillis(BIGNUM* bnTime)
 	{
-	  #ifdef _WIN32
-		struct _timeb timebuffer;
-		_ftime(&timebuffer);
-		/* Hack what should be solved better...*/
-		BN_set_word(bnTime,timebuffer.time);
-		BN_mul_word(bnTime,1000);
-		BN_add_word(bnTime,timebuffer.millitm);
-		/* end of hack..*/
-		return E_SUCCESS;
-	    #else //we dont use ftime due to a bug in glibc2.0
+		#ifdef _WIN32
+			struct _timeb timebuffer;
+			_ftime(&timebuffer);
+			/* Hack what should be solved better...*/
+			BN_set_word(bnTime,timebuffer.time);
+			BN_mul_word(bnTime,1000);
+			BN_add_word(bnTime,timebuffer.millitm);
+			/* end of hack..*/
+			return E_SUCCESS;
+	  #else //we dont use ftime due to a bug in glibc2.0
 		//we use gettimeofday() in order to get the millis...
-		struct timeval tv;
-		gettimeofday(&tv,NULL); //getting millis...
-		BN_set_word(bnTime,tv.tv_sec);
-		BN_mul_word(bnTime,1000);
-		BN_add_word(bnTime,tv.tv_usec/1000);
-		return E_SUCCESS;
-	    #endif
+			struct timeval tv;
+			gettimeofday(&tv,NULL); //getting millis...
+			BN_set_word(bnTime,tv.tv_sec);
+			BN_mul_word(bnTime,1000);
+			BN_add_word(bnTime,tv.tv_usec/1000);
+			return E_SUCCESS;
+	  #endif
 	}

@@ -1,3 +1,5 @@
+#ifndef __CAASYMCIPHER__
+#define __CAASYMCIPHER__
 #define RSA_SIZE 128
 class CAASymCipher
 	{
@@ -14,3 +16,4 @@ class CAASymCipher
 			RSA* rsa;
 	};
 
+#endif

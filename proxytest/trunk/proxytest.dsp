@@ -341,7 +341,27 @@ SOURCE=.\CADatagramSocket.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CAFirstMix.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\CAInfoService.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CALastMix.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CALocalProxy.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CAMiddleMix.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CAMix.cpp
 # End Source File
 # Begin Source File
 
@@ -418,7 +438,27 @@ SOURCE=.\CADatagramSocket.hpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CAFirstMix.hpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\CAInfoService.hpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CALastMix.hpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CALocalProxy.hpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CAMiddleMix.hpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CAMix.hpp
 # End Source File
 # Begin Source File
 

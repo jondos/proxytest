@@ -1,3 +1,6 @@
+#ifndef __CACMDLNOPTIONS__
+#define __CACMDLNOPTIONS__
+
 class CACmdLnOptions
     {
 	public:
@@ -39,3 +42,4 @@ class CACmdLnOptions
 			char* strCascadeName;  
 			char* strLogDir;  
 	};
+#endif
