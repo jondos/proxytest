@@ -100,7 +100,10 @@ SINT32 CALastMixChannelList::removeChannel(HCHANNEL channel)
 		while(pEntry!=NULL)
 			{
 				if(pEntry->channelIn==channel)
-					{//remove from HashTable
+					{
+						if(m_listSocketsNext==pEntry) //removing next enumeration Element...
+							m_listSocketsNext=m_listSocketsNext->list_Sockets.next; //adjusting!
+//remove from HashTable
 						if(pEntry->list_Channels.prev==NULL)
 							m_HashTable[hash]=pEntry->list_Channels.next;
 						else
@@ -118,7 +121,8 @@ SINT32 CALastMixChannelList::removeChannel(HCHANNEL channel)
 							pEntry->list_Sockets.prev->list_Sockets.next=pEntry->list_Sockets.next;
 						if(pEntry->list_Sockets.next!=NULL)
 							pEntry->list_Sockets.next->list_Sockets.prev=pEntry->list_Sockets.prev;
-						//TODO: Adjust m_nextListsocket
+
+						
 						return E_SUCCESS;
 					}
 				pEntry=pEntry->list_Channels.next;
