@@ -398,7 +398,7 @@ Debug(dc::malloc.on());
 				lim.rlim_cur = lim.rlim_max = maxFiles;
 				if (setrlimit(RLIMIT_NOFILE, &lim) != 0) 
 					{
-						CAMsg::printMsg(LOG_CRIT,"Could not set MAX open files to: %u -- Exiting!\n",maxFiles");
+						CAMsg::printMsg(LOG_CRIT,"Could not set MAX open files to: %u -- Exiting!\n",maxFiles);
 						exit(1);
 					}
 			}
