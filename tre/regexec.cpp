@@ -277,12 +277,6 @@ regawexec(const regex_t *preg, const wchar_t *str,
 
 #endif /* TRE_APPROX */
 
-int testTre()
-	{
-		if(sizeof(void*)!=sizeof(int))
-			printf("Ooops... sizeof(void*)!=sizeof(int) --> Causing trouble in tre!\n");
-		return 0;
-	}	
 
 #endif //LOG_CRIME
 /* EOF */
