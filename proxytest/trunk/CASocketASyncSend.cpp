@@ -190,8 +190,10 @@ SINT32 CASocketASyncSend::close(CASocket* pSocket)
 			{
 				if(akt->pSocket==pSocket)
 					{
+#ifdef _DEBUG						
 						if(!akt->pQueue->isEmpty())
 							CAMsg::printMsg(LOG_INFO,"Deleting non empty send queue!\n");
+#endif
 						delete akt->pQueue;
 						if(before!=NULL)
 							before->next=akt->next;
