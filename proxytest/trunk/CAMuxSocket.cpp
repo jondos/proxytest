@@ -42,19 +42,11 @@ CAMuxSocket::CAMuxSocket()
 
 SINT32 CAMuxSocket::setCrypt(bool b)
 	{
-		csSend.lock();
-		csReceive.lock();
+		m_csSend.lock();
+		m_csReceive.lock();
 		m_bIsCrypted=b;
-/*		if(b)
-			{
-				UINT8 nullkey[16];
-				memset(nullkey,0,16);
-				m_oCipherIn.setKeyAES(nullkey);
-				m_oCipherOut.setKeyAES(nullkey);
-			}
-*/
-		csReceive.unlock();
-		csSend.unlock();
+		m_csReceive.unlock();
+		m_csSend.unlock();
 		return E_SUCCESS;
 	}
 
@@ -109,7 +101,7 @@ int CAMuxSocket::close()
 
 int CAMuxSocket::send(MIXPACKET *pPacket)
 	{
-		csSend.lock();
+		m_csSend.lock();
 		int ret;
 		UINT8 tmpBuff[16];
 		memcpy(tmpBuff,pPacket,16);
@@ -129,13 +121,13 @@ int CAMuxSocket::send(MIXPACKET *pPacket)
 		else
 			ret=MIXPACKET_SIZE;
 		memcpy(pPacket,tmpBuff,16);
-		csSend.unlock();
+		m_csSend.unlock();
 		return ret;
 	}
 
 int CAMuxSocket::send(MIXPACKET *pPacket,UINT8* buff)
 	{
-		csSend.lock();
+		m_csSend.lock();
 		int ret;
 		UINT8 tmpBuff[16];
 		memcpy(tmpBuff,pPacket,16);
@@ -146,23 +138,23 @@ int CAMuxSocket::send(MIXPACKET *pPacket,UINT8* buff)
 		memcpy(buff,((UINT8*)pPacket),MIXPACKET_SIZE);
 		ret=MIXPACKET_SIZE;
 		memcpy(pPacket,tmpBuff,16);
-		csSend.unlock();
+		m_csSend.unlock();
 		return ret;
 	}
 
 SINT32 CAMuxSocket::receive(MIXPACKET* pPacket)
 	{
-		csReceive.lock();
+		m_csReceive.lock();
 		if(m_Socket.receiveFully((UINT8*)pPacket,MIXPACKET_SIZE)!=E_SUCCESS)
 			{
-				csReceive.unlock();
+				m_csReceive.unlock();
 				return SOCKET_ERROR;
 			}
 		if(m_bIsCrypted)
     	m_oCipherIn.decryptAES((UINT8*)pPacket,(UINT8*)pPacket,16);
 		pPacket->channel=ntohl(pPacket->channel);
 		pPacket->flags=ntohs(pPacket->flags);
-		csReceive.unlock();
+		m_csReceive.unlock();
 		return MIXPACKET_SIZE;
 	}
 
@@ -173,12 +165,12 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket)
 //TODO: Bug if socket is in non_blocking mode!!
 SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 timeout)
 	{
-		csReceive.lock();
+		m_csReceive.lock();
 		SINT32 len=MIXPACKET_SIZE-m_aktBuffPos;
 		SINT32 ret=m_Socket.receive(m_Buff+m_aktBuffPos,len);
 		if(ret<=0&&ret!=E_AGAIN) //if socket was set in non-blocking mode
 			{
-				csReceive.unlock();
+				m_csReceive.unlock();
 				return E_UNKNOWN;
 			}
 		if(ret==len) //whole packet recieved
@@ -189,14 +181,14 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 timeout)
 				pPacket->channel=ntohl(pPacket->channel);
 				pPacket->flags=ntohs(pPacket->flags);
 				m_aktBuffPos=0;
-				csReceive.unlock();
+				m_csReceive.unlock();
 				return MIXPACKET_SIZE;
 			}
 		if(ret>0) //some new bytes arrived
 			m_aktBuffPos+=ret;
 		if(timeout==0) //we should not wait any more
 			{
-				csReceive.unlock();
+				m_csReceive.unlock();
 				return E_AGAIN;
 			}
 		UINT32 timeE=time(NULL)+timeout;
@@ -208,13 +200,13 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 timeout)
 				ret=oSocketGroup.select(false,dt);
 				if(ret!=1)
 					{
-						csReceive.unlock();
+						m_csReceive.unlock();
 						return E_UNKNOWN;
 					}
 				ret=m_Socket.receive(m_Buff+m_aktBuffPos,len);
 				if(ret<=0&&ret!=E_AGAIN)
 					{
-						csReceive.unlock();
+						m_csReceive.unlock();
 						return E_UNKNOWN;
 					}
 				if(ret==len)
@@ -225,14 +217,14 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 timeout)
 						pPacket->channel=ntohl(pPacket->channel);
 						pPacket->flags=ntohs(pPacket->flags);
 						m_aktBuffPos=0;
-						csReceive.unlock();
+						m_csReceive.unlock();
 						return MIXPACKET_SIZE;
 					}
 				if(ret>0)
 					m_aktBuffPos+=ret;
 				dt=timeE-time(NULL);
 			}	while(dt>0);
-		csReceive.unlock();
+		m_csReceive.unlock();
 		return E_AGAIN;
 	}
 

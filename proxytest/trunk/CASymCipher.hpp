@@ -50,19 +50,11 @@ class CASymCipher:public CALockAble
 					delete[] m_iv;
 					delete[] m_iv2;
 				}
-	//		SINT32 generateEncryptionKey();
-	//		SINT32 getEncryptionKey(UINT8* key);
-	//		SINT32 setEncryptionKey(UINT8* key);
 			bool isEncyptionKeyValid()
 				{
 					return m_bEncKeySet;
 				}
 
-	//		SINT32 setDecryptionKey(UINT8* key);
-		//	SINT32 encrypt(UINT8* in,UINT32 len);
-		//	SINT32 decrypt(UINT8* in,UINT8* out,UINT32 len);
-	//		SINT32 generateEncryptionKeyAES();
-	//		SINT32 setEncryptionKeyAES(UINT8* key);
 			SINT32 setKeyAES(UINT8* key);
 			SINT32 decryptAES(UINT8* in,UINT8* out,UINT32 len);
 			SINT32 decryptAES2(UINT8* in,UINT8* out,UINT32 len);

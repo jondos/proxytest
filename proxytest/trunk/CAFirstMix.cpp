@@ -601,10 +601,10 @@ SINT32 CAFirstMix::loop()
 										else if(ret==MIXPACKET_SIZE)
 											{
 												#ifdef NEW_KEY2USER_PROTOCOL
-													if(!pEntry->pMuxSocket->getIsEncrypted())//Encryption is not set yet -> 
-																																	 //so we assume that this is
-																																	//the first packet of a connection
-																																	//which contains the key
+													if(!pMuxSocket->getIsEncrypted())//Encryption is not set yet -> 
+																													 //so we assume that this is
+																													//the first packet of a connection
+																													//which contains the key
 														{
 															m_pRSA->decrypt(pMixPacket->data,rsaBuff);
 															if(memcmp("KEYPACKET",pMixPacket->data,9)!=0)
@@ -620,8 +620,8 @@ SINT32 CAFirstMix::loop()
 																}
 															else
 																{
-																	pEntry->pMuxSocket->setKeyAES(rsaBuff,16);
-																	pEntry->pMuxSocket->setCrypted(true);
+																	pMuxSocket->setKeyAES(rsaBuff+9,16);
+																	pMuxSocket->setCrypted(true);
 																}
 															goto NEXT_USER_CONNECTION;
 														}
