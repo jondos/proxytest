@@ -230,6 +230,23 @@ int main(int argc, const char* argv[])
 				exit(0);
 			}		
 */
+#ifdef _DEBUG
+	#ifdef _WIN32
+/*			_CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_FILE );
+			_CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDOUT );
+			_CrtSetReportMode( _CRT_ERROR, _CRTDBG_MODE_FILE );
+			_CrtSetReportFile( _CRT_ERROR, _CRTDBG_FILE_STDOUT );
+			_CrtSetReportMode( _CRT_ASSERT, _CRTDBG_MODE_FILE );
+			_CrtSetReportFile( _CRT_ASSERT, _CRTDBG_FILE_STDOUT );
+*/
+			UINT32 tmpDbgFlag = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
+			tmpDbgFlag |= _CRTDBG_ALLOC_MEM_DF;
+			tmpDbgFlag |=_CRTDBG_LEAK_CHECK_DF;
+			_CrtSetDbgFlag(tmpDbgFlag);
+			_CrtMemState s1, s2, s3;
+	#endif
+
+#endif 
 		//some test....
 		if(MIXPACKET_SIZE!=sizeof(MIXPACKET))
 			{
@@ -288,7 +305,11 @@ int main(int argc, const char* argv[])
 		else
 			CAMsg::printMsg(LOG_DEBUG,"CAQueue::test() passed!\n");
 
+		CAFirstMixChannelList::test();
 		options.parse(argc,argv);
+#ifdef _WIN32
+		_CrtMemCheckpoint( &s1 );
+#endif
 		UINT8 buff[255];
 #ifndef WIN32
 		if(options.getUser(buff,255)==E_SUCCESS) //switching user
@@ -377,7 +398,12 @@ int main(int argc, const char* argv[])
 		#ifdef _WIN32		
 			WSACleanup();
 		#endif
-		
 		CAMsg::printMsg(LOG_CRIT,"Terminating Programm!\n");
+#ifdef _WIN32
+		_CrtMemCheckpoint( &s2 );
+		if ( _CrtMemDifference( &s3, &s1, &s2 ) )
+      _CrtMemDumpStatistics( &s3 );
+#endif
+
 		return 0;
 	}
