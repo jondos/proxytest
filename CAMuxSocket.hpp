@@ -108,7 +108,8 @@ class CAMuxSocket
 			int close(HCHANNEL channel_id,UINT8* buff);
 			operator CASocket*(){return &m_Socket;}
 			operator SOCKET(){return (SOCKET)m_Socket;}
-			
+			SOCKET getSocket(){return (SOCKET)m_Socket;}
+
 			/*SINT32 getSendSpace()
 				{
 					SINT32 s=m_Socket.getSendSpace();
