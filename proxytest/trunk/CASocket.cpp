@@ -390,12 +390,14 @@ SINT32 CASocket::sendFully(const UINT8* buff,UINT32 len)
 
 /** Will receive some bytes from the socket. May block or not depending on whatever this socket
 	* was set to blocking or non-blocking mode.
-	* Warning: If socket is in blocking mode and receive is called, recevie will block until some
+	* Warning: If socket is in blocking mode and receive is called, receive will block until some
 	* data is available, EVEN IF AN OTHER THREAD WILL CLOSE THIS SOCKET!
-@return SOCKET_ERROR if an error occured
-@retval E_AGAIN, if socket was in non-blocking mode and receive would block or a timeout was reached
-@retval 0 if socket was gracefully closed
-@return the number of bytes received (always >0)
+	* @param buff the buffer which get the received data
+	* @param len size of buff
+	*	@return SOCKET_ERROR if an error occured
+	* @retval E_AGAIN, if socket was in non-blocking mode and receive would block or a timeout was reached
+	* @retval 0 if socket was gracefully closed
+	* @return the number of bytes received (always >0)
 **/
 SINT32 CASocket::receive(UINT8* buff,UINT32 len)
 	{
@@ -444,15 +446,16 @@ SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len)
 	}
 
 /** Trys to receive all bytes. After the timout value has elpased, the error E_TIMEDOUT is returned
-*Woudn't work correctly on Windows....
-*@param len on input holds the number of bytes which should be read,
-						on return gives the number of bytes which are read before the timeout
-*@retval E_TIMEDOUT, if not all byts could be read
-*@retval E_UNKNOWN, if an error occured
-*@retval E_SUCCESS, if all bytes could be read
-*
-* Lots of work TODO!!!!!
-*/
+	* Would not work correctly on Windows....
+	* @param len	on input holds the number of bytes which should be read,
+	*							on return gives the number of bytes which are read before the timeout
+	*	@param msTimeOut the timout in milli seconds
+	* @retval E_TIMEDOUT, if not all byts could be read
+	* @retval E_UNKNOWN, if an error occured
+	* @retval E_SUCCESS, if all bytes could be read
+	*
+	* Lots of work TODO!!!!!
+	*/
 SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len,UINT16 msTimeOut)
 	{
 		SINT32 ret;

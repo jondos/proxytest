@@ -62,6 +62,7 @@ CAFirstMixChannelList::~CAFirstMixChannelList()
 		
 /** Adds a new TCP/IP connection (a new user) to the channel list.
 	* @param pMuxSocket the new connection (from a user)
+	* @param peerIP the IP of the user, so that we can remove it later from the CAIPList
 	* @param pQueueSend the send-queue to use for this connection
 	* @retval E_UNKNOWN in case of an error
 	* @retval E_SUCCESS if successful
@@ -321,7 +322,7 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 	}
 
 /** Removes a single channel from the list.
-	* @param pMuxsocket the connection from the user
+	* @param pMuxSocket the connection from the user
 	* @param channelIn the channel, which should be removed
 	* @retval E_SUCCESS if successful
 	* @retval E_UNKNOWN in case of an error

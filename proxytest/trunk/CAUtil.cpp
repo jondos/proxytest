@@ -183,7 +183,7 @@ SINT32 getRandom(UINT32* val)
 
 /** Gets some random bytes.
 	@param buff - buff which is filled with randomness
-	@prama len - number of bytes requested
+	@param len - number of bytes requested
 	@retval E_UNKNOWN, if an error occured
 	@retval E_SUCCESS, if successful
 */
