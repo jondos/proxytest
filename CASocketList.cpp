@@ -50,7 +50,15 @@ CASocketList::~CASocketList()
 //		DeleteCriticalSection(&cs);
 	}
 
-int CASocketList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher)
+/** Add a new channel to the channel-list.
+*	@param id - channel-id of the new channel
+*	@param pSocket - a CASocket assoziated with the channel
+*	@param pCipher - a CASymCipher assoziated with the channel
+*	@return E_SUCCESS, if no error occurs
+*	        E_UNKNOWN, otherwise
+*
+*/
+SINT32 CASocketList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher)
 	{
 //		EnterCriticalSection(&cs);
 		CONNECTIONLIST* tmp;
@@ -59,7 +67,7 @@ int CASocketList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher)
 					if(increasePool()==SOCKET_ERROR)
 						{
 //							LeaveCriticalSection(&cs);
-							return SOCKET_ERROR;
+							return E_UNKNOWN;
 						}
 		    }
 		tmp=pool;
@@ -70,10 +78,10 @@ int CASocketList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher)
 		connections->pCipher=pCipher;
 		connections->id=id;
 //		LeaveCriticalSection(&cs);
-		return id;
+		return E_SUCCESS;
 	}
 
-int CASocketList::add(HCHANNEL in,HCHANNEL out,CASymCipher* pCipher)
+SINT32 CASocketList::add(HCHANNEL in,HCHANNEL out,CASymCipher* pCipher)
 	{
 //		EnterCriticalSection(&cs);
 		CONNECTIONLIST* tmp;
@@ -82,7 +90,7 @@ int CASocketList::add(HCHANNEL in,HCHANNEL out,CASymCipher* pCipher)
 					if(increasePool()==SOCKET_ERROR)
 						{
 //							LeaveCriticalSection(&cs);
-							return SOCKET_ERROR;
+							return E_UNKNOWN;
 						}
 		    }
 		tmp=pool;
@@ -93,28 +101,15 @@ int CASocketList::add(HCHANNEL in,HCHANNEL out,CASymCipher* pCipher)
 		connections->pCipher=pCipher;
 		connections->id=in;
 //		LeaveCriticalSection(&cs);
-		return 0;
+		return E_SUCCESS;
 	}
-/*
-CASocket* CASocketList::get(HCHANNEL id)
-	{
-		EnterCriticalSection(&cs);
-		CONNECTIONLIST* tmp;
-		tmp=connections;
-		CASocket* ret;
-		while(tmp!=NULL)
-			{
-				if(tmp->id==id)
-					{
-						ret=tmp->pSocket;
-						LeaveCriticalSection(&cs);
-						return ret;
-					}
-				tmp=tmp->next;
-			}
-		LeaveCriticalSection(&cs);
-		return NULL;
-	}
+
+/** Gets a copy of an entry form the channel-list.
+* @param in - the channel-id for wich the entry is requested
+*	@param out - the object, that will hold the copy
+*	@return true - if the channel was found
+	        false - otherwise
+*
 */
 bool	CASocketList::get(HCHANNEL in,CONNECTION* out)
 	{
@@ -125,8 +120,7 @@ bool	CASocketList::get(HCHANNEL in,CONNECTION* out)
 			{
 				if(tmp->id==in)
 					{
-						out->outChannel=tmp->outChannel;
-						out->pCipher=tmp->pCipher;
+						memcpy(out,tmp,sizeof(CONNECTION));
 //						LeaveCriticalSection(&cs);
 						return true;
 					}
@@ -136,6 +130,13 @@ bool	CASocketList::get(HCHANNEL in,CONNECTION* out)
 		return false;
 	}
 
+/** Gets a copy of an entry form the channel-list.
+* @param in - the object, that will hold the copy
+*	@param out - the assoziated(output) channel-id for wich the entry is requested
+*	@return true - if the channel was found
+	        false - otherwise
+*
+*/
 bool	CASocketList::get(CONNECTION* in,HCHANNEL out)
 	{
 //		EnterCriticalSection(&cs);
@@ -145,8 +146,7 @@ bool	CASocketList::get(CONNECTION* in,HCHANNEL out)
 			{
 				if(tmp->outChannel==out)
 					{
-						in->id=tmp->id;
-						in->pCipher=tmp->pCipher;
+						memcpy(in,tmp,sizeof(CONNECTION));
 //						LeaveCriticalSection(&cs);
 						return true;
 					}
@@ -155,6 +155,7 @@ bool	CASocketList::get(CONNECTION* in,HCHANNEL out)
 //		LeaveCriticalSection(&cs);
 		return false;
 	}
+
 
 CASocket* CASocketList::remove(HCHANNEL id)
 	{
@@ -186,12 +187,20 @@ CASocket* CASocketList::remove(HCHANNEL id)
 		return NULL;
 	}
 
+/** Gets the first entry of the channel-list.
+*	@return the first entry of the channel list (this is not a copy!!)
+*
+*/	 
 CONNECTION* CASocketList::getFirst()
 	{
 		aktEnumPos=connections;
 		return aktEnumPos;
 	}
 
+/** Gets the next entry of the channel-list.
+*	@return the next entry of the channel list (this is not a copy!!)
+*
+*/	 
 CONNECTION* CASocketList::getNext()
 	{
 		if(aktEnumPos!=NULL)

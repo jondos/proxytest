@@ -995,9 +995,9 @@ THREAD_RETURN lmIO(void *v)
 												oSocketGroup.remove(*(tmpCon->pSocket));
 												tmpCon->pSocket->close();
 												lmIOPair->muxIn.close(tmpCon->id);
-												oSocketList.remove(tmpCon->id);
 												delete tmpCon->pSocket;
 												delete tmpCon->pCipher;
+												oSocketList.remove(tmpCon->id);
 												break;
 											}
 										else 
