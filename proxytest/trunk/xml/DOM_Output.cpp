@@ -42,14 +42,14 @@ const XMLCh  DOM_Output::m_1_0[4] =
     chDigit_1,chPeriod,chDigit_0, chNull
 	};	
 
-const XMLCh  DOM_Output::m_XML[39] =
+const XMLCh  DOM_Output::m_XML[41] =
 {
     chOpenAngle,chQuestion,chLatin_x,chLatin_m,chLatin_l,chSpace, //<?xml 
 		chLatin_v,chLatin_e,chLatin_r,chLatin_s,chLatin_i,chLatin_o,chLatin_n,chEqual, //version=
 		chDoubleQuote,chDigit_1,chPeriod,chDigit_0,chDoubleQuote,chSpace,	 //"1.0" 
 		chLatin_e,chLatin_n,chLatin_c,chLatin_o,chLatin_d,chLatin_i,chLatin_n,chLatin_g,chEqual, //encoding=	
 		chDoubleQuote,chLatin_U, chLatin_T,chLatin_F, chDash,chDigit_8, chDoubleQuote, //"UTF-8"
-		chQuestion,chCloseAngle,chNull
+		chQuestion,chCloseAngle,chCR,chLF,chNull
 };	
 
 

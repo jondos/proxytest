@@ -32,6 +32,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "../CAInfoService.hpp"
 #include "../CAPool.hpp"
 #include "../CACmdLnOptions.hpp"
+#include "../CAAccountingInstance.hpp"
 #ifdef HAVE_EPOLL
 	#include "../CASocketGroupEpoll.hpp"
 #endif
@@ -163,9 +164,10 @@ SINT32 CAFirstMixA::loop()
 #endif
 #ifdef PAYMENT
 												// payment code added by Bastian Voigt
-												if(m_pAccountingInstance->handleJapPacket( pMixPacket, pHashEntry ) != 0) 
+												if(m_pAccountingInstance->handleJapPacket( pMixPacket, pHashEntry ) != 1) 
 													{
 														// this jap is evil! terminate connection and add IP to blacklist
+														CAMsg::printMsg(LOG_DEBUG, "Detected evil Jap.. closing connection! Removing IP..\n\n");
 														m_pIPList->removeIP(pHashEntry->peerIP);
 														m_psocketgroupUsersRead->remove(*(CASocket*)pMuxSocket);
 														m_psocketgroupUsersWrite->remove(*(CASocket*)pMuxSocket);
@@ -214,7 +216,7 @@ SINT32 CAFirstMixA::loop()
 														#ifdef _DEBUG
 														else
 															{
-																	CAMsg::printMsg(LOG_DEBUG,"Invalid ID to close from Browser!\n");
+//																	CAMsg::printMsg(LOG_DEBUG,"Invalid ID to close from Browser!\n");
 															}
 														#endif
 													}
@@ -287,7 +289,7 @@ SINT32 CAFirstMixA::loop()
 																		m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));
 																		incMixedPackets();
 																		#ifdef _DEBUG
-																			CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",pMixPacket->channel);
+//																			CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",pMixPacket->channel);
 																		#endif
 																	}
 															}
@@ -325,7 +327,7 @@ NEXT_USER:
 						if(pMixPacket->flags==CHANNEL_CLOSE) //close event
 							{
 								#if defined(_DEBUG) && !defined(__MIX_TEST)
-									CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u ...\n",pMixPacket->channel);
+//									CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u ...\n",pMixPacket->channel);
 								#endif
 								fmChannelList* pEntry=m_pChannelList->get(pMixPacket->channel);
 								if(pEntry!=NULL)
@@ -359,7 +361,7 @@ NEXT_USER:
 						else
 							{//flag !=close
 								#if defined(_DEBUG) && !defined(__MIX_TEST)
-									CAMsg::printMsg(LOG_DEBUG,"Sending Data to Browser!\n");
+//									CAMsg::printMsg(LOG_DEBUG,"Sending Data to Browser!\n");
 								#endif
 								fmChannelList* pEntry=m_pChannelList->get(pMixPacket->channel);
 								if(pEntry!=NULL)
@@ -417,7 +419,9 @@ NEXT_USER:
 										#ifdef _DEBUG
 											if(pMixPacket->flags!=CHANNEL_DUMMY)
 												{
-													CAMsg::printMsg(LOG_DEBUG,"Error Sending Data to Browser -- Channel-Id %u no valid!\n",pMixPacket->channel);
+/*													CAMsg::printMsg(LOG_DEBUG,"Error Sending Data to Browser -- "
+															"Channel-Id %u not valid!\n",pMixPacket->channel
+														);*/
 													#ifdef LOG_CHANNEL
 														CAMsg::printMsg(LOG_INFO,"Packet late arrive for channel: %u\n",pMixPacket->channel);
 													#endif
@@ -464,6 +468,12 @@ NEXT_USER:
 										pfmHashEntry->uAlreadySendPacketSize+=ret;
 										if(pfmHashEntry->uAlreadySendPacketSize==MIXPACKET_SIZE)
 											{
+												#ifdef PAYMENT
+													// count packet for payment
+													CAAccountingInstance::getInstance()->handleJapPacket(
+															&(pfmHashEntry->oQueueEntry.packet),
+															pfmHashEntry);
+												#endif
 												pfmHashEntry->uAlreadySendPacketSize=0;
 												#ifdef LOG_PACKET_TIMES
 													if(!isZero64(pfmHashEntry->oQueueEntry.timestamp_proccessing_start))

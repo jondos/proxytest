@@ -146,6 +146,9 @@ SINT32 CAAccountingDBInterface::getCostConfirmation(UINT64 accountNumber, CAXMLC
 //	UINT32 reslen;
 	
 	sprintf( (char *)query, (char *)queryF, accountNumber);
+	#ifdef DEBUG
+		CAMsg::printMsg(LOG_DEBUG, "CAAccountingDBInterface: executing query %s\n", query);
+	#endif
 	result = PQexec(m_dbConn, (char *)query);
 	if(PQresultStatus(result)!=PGRES_TUPLES_OK) 
 	{
@@ -155,7 +158,9 @@ SINT32 CAAccountingDBInterface::getCostConfirmation(UINT64 accountNumber, CAXMLC
 	}
 	if(PQntuples(result)!=1) 
 	{
+		#ifdef DEBUG
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingDBInterface: XMLCC not found.\n");
+		#endif
 		return E_NOT_FOUND;
 	}
 	

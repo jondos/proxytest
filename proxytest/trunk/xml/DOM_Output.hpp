@@ -123,6 +123,7 @@ class DOM_Output
 	{
 		public:
 			/** Dumps the node and all childs into buff.
+				* Note that the string is NOT null-terminated.
 				* @param node Node to dump
 				* @param buff buffer in which to copy the XML-chars
 				* @param size contains the size of buff, on return contains the number of XML-CHars copied
@@ -140,6 +141,7 @@ class DOM_Output
 
 			
 			/** Dumps the Node an returns a pointer to the memory.
+				* Note that the string is NOT null-terminated.
 				* @param node Node to dump
 				* @param size on return contains the number of XML-Chars copied
 				* @return a pointer to a newls allocated buff, which must be delete[] by the caller
@@ -206,7 +208,7 @@ class DOM_Output
 			SINT32 dumpNode(DOM_Node& toWrite,bool bCanonical);
 			XMLFormatter* m_pFormatter;
 			MemFormatTarget* m_pFormatTarget;
-			static const XMLCh  m_XML[39]; 
+			static const XMLCh  m_XML[41]; 
 			static const XMLCh  m_UTF8[6]; 
 			static const XMLCh  m_1_0[4]; 
 };
