@@ -74,6 +74,13 @@ typedef UINT32 HCHANNEL;
 		};
 	#pragma pack( pop, t_MixPacket )
 #else
+	struct t_MixPacketPayload
+		{
+			UINT16 len;
+			UINT8 type;
+			UINT8 data[PAYLOAD_SIZE];
+		} __attribute__ ((__packed__));
+
 	struct t_MixPacket
 		{
 			HCHANNEL channel;
@@ -81,12 +88,7 @@ typedef UINT32 HCHANNEL;
 			union
 				{
 					UINT8		data[DATA_SIZE];
-					struct t_MixPacketPayload
-						{
-							UINT16 len;
-							UINT8 type;
-							UINT8 data[PAYLOAD_SIZE];
-					} payload;
+					struct t_MixPacketPayload payload;
 				};
 		} __attribute__ ((__packed__)); // MUXPACKET __attribute__ ((__packed__));
 #endif //WIN32 
