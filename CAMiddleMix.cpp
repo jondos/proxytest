@@ -173,6 +173,7 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 						((CASocket*)m_pMuxOut)->send((UINT8*)&size,2);
 						((CASocket*)m_pMuxOut)->send(out,outlen);
 						delete[] out;
+						bFoundNextMix=true;
 						break;
 					}
 				child=child.getNextSibling();
