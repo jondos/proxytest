@@ -49,6 +49,7 @@ OBJS_ALL=CASocket.o\
 	CADatabase.o\
 	CACertificate.o\
 	CACertStore.o\
+	CAPool.o\
 	proxytest.o
 
 OBJS=$(OBJS_ALL)
