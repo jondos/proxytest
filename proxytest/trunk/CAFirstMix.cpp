@@ -566,6 +566,15 @@ SINT32 CAFirstMix::loop()
 													#else
 														((CASocket*)pnewMuxSocket)->setKeepAlive(true);
 													#endif
+													/*
+														ADDITIONAL PREREQUISITE:
+														The timestamps in the messages require the user to sync his time
+														with the time of the cascade. Hence, the current time needs to be
+														added to the data that is sent to the user below.
+														For the mixes that form the cascade, the synchronization can be
+														left to an external protocol such as NTP. Unfortunately, this is
+														not enforceable for all users.
+													*/
 													((CASocket*)pnewMuxSocket)->send(m_xmlKeyInfoBuff,m_xmlKeyInfoSize);  // send the mix-keys to JAP
 													((CASocket*)pnewMuxSocket)->setNonBlocking(true);	                    // stefan: sendet das send in der letzten zeile doch noch nicht? wenn doch, kann dann ein JAP nicht durch verweigern der annahme hier den mix blockieren? vermutlich nciht, aber andersherum faend ich das einleuchtender.
 													// es kann nicht blockieren unter der Annahme das der TCP-Sendbuffer > m_xmlKeyInfoSize ist....
@@ -713,13 +722,20 @@ SINT32 CAFirstMix::loop()
 														else if(pEntry==NULL&&pMixPacket->flags==CHANNEL_OPEN)  // open a new mix channel
 														{ // stefan: muesste das nicht vor die behandlung von CHANNEL_DATA? oder gilt OPEN => !DATA ? 
 														   //es gilt: open -> data
-																pCipher= new CASymCipher();
 																m_pRSA->decrypt(pMixPacket->data,rsaBuff); // stefan: das hier ist doch eine ziemlich kostspielige operation. sollte das pruefen auf Max_Number_Of_Channels nicht vorher passieren? --> ok sollte aufs TODO ...
+																#ifdef REPLAY_DETECTION
+																	if(validTimestampAndFingerprint(rsaBuff, KEY_SIZE, (rsaBuff+KEY_SIZE)))
+																		{
+																			goto NEXT_USER_CONNECTION;
+																			CAMsg::printMsg(LOG_INFO,"Duplicate packet ignored.\n");
+																		}
+																#endif
+																pCipher= new CASymCipher();
 																pCipher->setKeyAES(rsaBuff);
 																pCipher->decryptAES(pMixPacket->data+RSA_SIZE,
-																								 pMixPacket->data+RSA_SIZE-KEY_SIZE,
+																								 pMixPacket->data+RSA_SIZE-(KEY_SIZE+TIMESTAMP_SIZE),
 																								 DATA_SIZE-RSA_SIZE);
-																memcpy(pMixPacket->data,rsaBuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
+																memcpy(pMixPacket->data,rsaBuff+KEY_SIZE+TIMESTAMP_SIZE,RSA_SIZE-(KEY_SIZE+TIMESTAMP_SIZE));																
 																#ifdef LOG_CHANNEL
 																	HCHANNEL tmpC=pMixPacket->channel;
 																#endif
@@ -773,7 +789,7 @@ SINT32 CAFirstMix::loop()
 						if(pMixPacket->flags==CHANNEL_CLOSE) //close event
 							{
 								#if defined(_DEBUG) && !defined(__MIX_TEST)
-									CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u ... ",pMixPacket->channel);
+									CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u ...\n",pMixPacket->channel);
 								#endif
 								fmChannelList* pEntry=m_pChannelList->get(pMixPacket->channel);
 								if(pEntry!=NULL)
@@ -1039,7 +1055,7 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		setDOMElementAttribute(elemRootKey,"version",(UINT8*)"0.1"); //set the Version of the XML to 0.1
 		docXmlKeyInfo.appendChild(elemRootKey);
 		DOM_Element elemMixProtocolVersion=docXmlKeyInfo.createElement("MixProtocolVersion");
-		setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.2");
+		setDOMElementValue(elemMixProtocolVersion,(UINT8*)MIX_CASCADE_PROTOCOL_VERSION);
 		elemRootKey.appendChild(elemMixProtocolVersion);
 		DOM_Node elemMixesKey=docXmlKeyInfo.importNode(elemMixes,true);
 		elemRootKey.appendChild(elemMixesKey);

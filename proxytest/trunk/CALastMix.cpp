@@ -437,14 +437,25 @@ SINT32 CALastMix::loop()
 												#if defined(_DEBUG1) 
 														CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
 												#endif
-				
-												CASymCipher* newCipher=new CASymCipher();
+												
 												mRSA.decrypt(pMixPacket->data,rsaBuff);
+												#ifdef WITH_TIMESTAMP
+													//CAMsg::printMsg(LOG_DEBUG,"Timestamp is: %X %X\n", *(rsaBuff+KEY_SIZE), *(rsaBuff+KEY_SIZE+1));
+												#endif
+												#ifdef REPLAY_DETECTION
+													if(!validTimestampAndFingerprint(rsaBuff, KEY_SIZE, (rsaBuff+KEY_SIZE)))
+														{
+															CAMsg::printMsg(LOG_INFO,"Duplicate packet ignored.\n");
+															continue;
+														}
+												#endif
+												CASymCipher* newCipher=new CASymCipher();
 												newCipher->setKeyAES(rsaBuff);
 												newCipher->decryptAES(pMixPacket->data+RSA_SIZE,
-																							pMixPacket->data+RSA_SIZE-KEY_SIZE,
+																							pMixPacket->data+RSA_SIZE-(KEY_SIZE+TIMESTAMP_SIZE),
 																							DATA_SIZE-RSA_SIZE);
-												memcpy(pMixPacket->data,rsaBuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
+												memcpy(	pMixPacket->data,rsaBuff+KEY_SIZE+TIMESTAMP_SIZE,
+																RSA_SIZE-(KEY_SIZE+TIMESTAMP_SIZE));
 												CASocket* tmpSocket=new CASocket;										
 												int ret;
 												if(pMixPacket->payload.type==MIX_PAYLOAD_SOCKS)

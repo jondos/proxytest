@@ -582,13 +582,20 @@ SINT32 CAMiddleMix::loop()
 										#ifdef _DEBUG
 												CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
 										#endif
-										pCipher=new CASymCipher();
 										m_pRSA->decrypt(pMixPacket->data,tmpRSABuff);
+										#ifdef REPLAY_DETECTION
+											if(!validTimestampAndFingerprint(tmpRSABuff, KEY_SIZE, (tmpRSABuff+KEY_SIZE)))
+												{
+													CAMsg::printMsg(LOG_INFO,"Duplicate packet ignored.\n");
+													continue;
+												}
+										#endif
+										pCipher=new CASymCipher();
 										pCipher->setKeyAES(tmpRSABuff);
 										pCipher->decryptAES(pMixPacket->data+RSA_SIZE,
-																				pMixPacket->data+RSA_SIZE-KEY_SIZE,
+																				pMixPacket->data+RSA_SIZE-(KEY_SIZE+TIMESTAMP_SIZE),
 																				DATA_SIZE-RSA_SIZE);
-										memcpy(pMixPacket->data,tmpRSABuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
+										memcpy(pMixPacket->data,tmpRSABuff+KEY_SIZE+TIMESTAMP_SIZE,RSA_SIZE-(KEY_SIZE+TIMESTAMP_SIZE));
 										m_pMiddleMixChannelList->add(pMixPacket->channel,pCipher,&channelOut);
 										pMixPacket->channel=channelOut;
 										#ifdef USE_POOL

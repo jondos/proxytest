@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.02.26"
+#define MIX_VERSION "00.02.27"
 
 
 //#define LOG_CHANNEL
@@ -53,11 +53,23 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define NO_PARKING //to disable control flow
 //#define USE_POOL
 
+//#define WITH_TIMESTAMP // Add timestamps to the channel-open packets.
+
 //Some constants
 #define LAST_MIX_TO_PROXY_CONNECT_TIMEOUT 2000 //Connection timeout for last mix to proxy connections 2 Seconds...
 #define MIX_POOL_SIZE 10  //packets in the Mix pool
 #define MIX_POOL_TIMEOUT 100 //home long to wait (in ms) before a dummy is put in the pool
 #define DUMMY_CHANNEL 0
+
+#ifdef WITH_TIMESTAMP
+	// Enable replay detection. Requires WITH_TIMESTAMP
+	#define REPLAY_DETECTION
+	#define TIMESTAMP_SIZE 	2
+	#define MIX_CASCADE_PROTOCOL_VERSION "0.3"
+#else
+	#define TIMESTAMP_SIZE 	0
+	#define MIX_CASCADE_PROTOCOL_VERSION "0.2"
+#endif
 
 #ifdef _WIN32
     #if _MSC_VER > 1000
