@@ -10,7 +10,7 @@ proxytest_SOURCES = CAASymCipher.cpp CABase64.cpp CACmdLnOptions.cpp \
 		    CALastMix.cpp CALocalProxy.cpp CAMiddleMix.cpp \
 		    CAMix.cpp CAMsg.cpp CAMuxChannelList.cpp \
 		    CAMuxSocket.cpp CARoundTripTime.cpp CASignature.cpp \
-		    CASocket.cpp CASocketAddr.cpp CASocketGroup.cpp \
+		    CASocket.cpp CASocketASyncSend.cpp CAQueue.cpp CASocketAddr.cpp CASocketGroup.cpp \
 		    CASocketList.cpp CASymCipher.cpp CAUtil.cpp StdAfx.cpp \
 		    proxytest.cpp \
 		    CAASymCipher.hpp CAMix.hpp CASocketList.hpp CABase64.hpp \
@@ -18,7 +18,7 @@ proxytest_SOURCES = CAASymCipher.cpp CABase64.cpp CACmdLnOptions.cpp \
 		    CAMuxChannelList.hpp CAUtil.hpp CADatagramSocket.hpp \
 		    CAMuxSocket.hpp StdAfx.h CAFirstMix.hpp \
 		    CARoundTripTime.hpp CAInfoService.hpp CASignature.hpp \
-		    CALastMix.hpp CASocket.hpp CALocalProxy.hpp \
+		    CALastMix.hpp CASocket.hpp CASocketASyncSend.hpp CAQueue.hpp CALocalProxy.hpp \
 		    CASocketAddr.hpp CAMiddleMix.hpp CASocketGroup.hpp 
 
 proxytest_LDADD = $(top_srcdir)/xml/libxml.a \

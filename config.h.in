@@ -5,6 +5,8 @@
 
 #undef HAVE_OPENSSL
 #undef HAVE_STRERROR
+
+/* Define if you have the vsnprintf function.  */
 #undef HAVE_VSNPRINTF
 
 /* Name of package */
