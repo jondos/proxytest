@@ -28,8 +28,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "CASocketAddr.hpp"
-class CASocketASyncSend;
-class CASocketASyncSendResume;
+
 class CASocket
 	{
 		public:
@@ -46,18 +45,18 @@ class CASocket
 			SINT32 connect(CASocketAddr& psa,UINT retry,UINT32 msWaitTime);
 			SINT32 connect(CASocketAddr& psa,UINT32 msTimeOut);
 			SINT32 close();
-			SINT32 close(int mode);
-			int send(const UINT8* buff,UINT32 len,bool bDisableAsync=false);
-			int sendTimeOut(const UINT8* buff,UINT32 len,UINT32 msTimeOut);
+			SINT32 close(UINT32 mode);
+			SINT32 send(const UINT8* buff,UINT32 len);
+			SINT32 sendTimeOut(const UINT8* buff,UINT32 len,UINT32 msTimeOut);
 #ifdef HAVE_FIONREAD
 			#define HAVE_AVAILABLE
 			SINT32 available();
 #endif
-			int receive(UINT8* buff,UINT32 len);
+			SINT32 receive(UINT8* buff,UINT32 len);
 			SINT32 receiveFully(UINT8* buff,UINT32 len);
 			SINT32 receiveFully(UINT8* buff,UINT32 len,SINT32 timeout);
 			operator SOCKET(){return m_Socket;}
-			int getLocalPort();
+			SINT32 getLocalPort();
 			SINT32 getPeerIP(UINT8 ip[4]);
 			SINT32 setReuseAddr(bool b);
 			SINT32 setRecvLowWat(UINT32 r);
@@ -69,23 +68,15 @@ class CASocket
 			SINT32 getRecvBuff();
 			SINT32 setSendBuff(SINT32 r);
 			SINT32 getSendBuff();
-			//SINT32 getSendSpace();
 			SINT32 setKeepAlive(bool b);
 			SINT32 setKeepAlive(UINT32 sec);
 			SINT32 setNonBlocking(bool b);
 			SINT32 getNonBlocking(bool* b);
-			//SINT32 setASyncSend(bool b,SINT32 size,UINT32 lowwater,UINT32 SendQueueSoftLimit,CASocketASyncSendResume* pResume);
 		private:
-			UINT8 m_ipPeer[4];
 			SOCKET m_Socket;
 			#ifdef _REENTRANT
 				CRITICAL_SECTION m_csClose;
 			#endif
-			int m_closeMode;
-			// temporary hack...
-			int m_localPort;
-			SINT32 m_aktSendBuffer;
-			bool m_bASyncSend;
-			static CASocketASyncSend* m_pASyncSend;
+			UINT32 m_closeMode;
 	};
 #endif

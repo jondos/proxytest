@@ -34,9 +34,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAASymCipher.hpp"
 #include "CASignature.hpp"
 #include "CAMuxChannelList.hpp"
-#include "CASocketASyncSend.hpp"
 #include "CAIPList.hpp" 
-class CAFirstMix:public CAMix/*,CASocketASyncSendResume*/
+class CAFirstMix:public CAMix
 	{
 		public:
 			CAFirstMix(){/*InitializeCriticalSection(&csResume);*/m_MixedPackets=0;}
@@ -57,7 +56,6 @@ class CAFirstMix:public CAMix/*,CASocketASyncSendResume*/
 			CASignature mSignature;
 			CAMuxChannelList oSuspendList;
 		public:
-//			void resume(CASocket* pSocket);
 			SINT32 getMixedPackets(UINT32* ppackets)
 				{
 					if(ppackets!=NULL)
@@ -69,9 +67,6 @@ class CAFirstMix:public CAMix/*,CASocketASyncSendResume*/
 				}
 		private:	
 			CAIPList* m_pIPList;
-//			CRITICAL_SECTION csResume;
-//			void deleteResume(CAMuxSocket* pMuxSocket);
-//			void deleteResume(CAMuxSocket*pMuxSocket,HCHANNEL outCahnnel);
 	};
 
 #endif

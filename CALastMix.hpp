@@ -31,17 +31,16 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMix.hpp"
 #include "CAMuxSocket.hpp"
 #include "CAASymCipher.hpp"
-#include "CASocketASyncSend.hpp"
 #include "CASocketList.hpp"
 #include "CASocketAddrINet.hpp"
 #include "CACacheLoadBalancing.hpp"
 
-class CALastMix:public CAMix,CASocketASyncSendResume
+class CALastMix:public CAMix
 
 	{
 		public:
-			CALastMix(){InitializeCriticalSection(&csResume);}
-			virtual ~CALastMix(){DeleteCriticalSection(&csResume);}
+			CALastMix(){}
+			virtual ~CALastMix(){}
 		private:
 			SINT32 loop();
 			SINT32 init();
@@ -52,12 +51,8 @@ class CALastMix:public CAMix,CASocketASyncSendResume
 			CACacheLoadBalancing m_oCacheLB;
 			CASocketAddrINet	maddrSocks;
 			CAASymCipher mRSA;
-		public:
-			void resume(CASocket* pSocket);
 		private:
-			CRITICAL_SECTION csResume;
 			CASocketList oSuspendList;
-			void deleteResume(HCHANNEL id);
 
 	};
 

@@ -591,7 +591,7 @@ SINT32 CALastMix::loop()
 										countRead--;
 										SINT32 len=1000;
 										tmpCon->pSendQueue->peek(tmpBuff,(UINT32*)&len);
-										len=tmpCon->pSocket->send(tmpBuff,len,true);
+										len=tmpCon->pSocket->send(tmpBuff,len);
 										if(len>0)
 											{
 												tmpCon->pSendQueue->remove((UINT32*)&len);
@@ -718,25 +718,4 @@ SINT32 CALastMix::clean()
 		oSuspendList.clear();
 		return E_SUCCESS;
 	}
-
-void CALastMix::resume(CASocket* pSocket)
-	{
-		EnterCriticalSection(&csResume);
-		CONNECTION oConnection;
-		if(oSuspendList.get(&oConnection,pSocket))
-			{
-				MIXPACKET oMixPacket;
-				oMixPacket.flags=CHANNEL_RESUME;
-				oMixPacket.channel=oConnection.id;
-				muxIn.send(&oMixPacket);
-				oSuspendList.remove(oConnection.id);
-			}
-		LeaveCriticalSection(&csResume);
-	}
-void CALastMix::deleteResume(HCHANNEL id)
-{
-		EnterCriticalSection(&csResume);
-		oSuspendList.remove(id);
-		LeaveCriticalSection(&csResume);
-}
 
