@@ -82,7 +82,10 @@ SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 					strcat(oMsg.m_strMsgBuff,oMsg.m_strMsgTypes[3]);
 				break;
 				case LOG_INFO:
+					printf("h4.11\n");
 					strcat(oMsg.m_strMsgBuff,oMsg.m_strMsgTypes[2]);
+					printf("h4.12\n");
+
 				break;
 				case LOG_CRIT:
 					strcat(oMsg.m_strMsgBuff,oMsg.m_strMsgTypes[1]);
