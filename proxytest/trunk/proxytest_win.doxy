@@ -60,7 +60,6 @@ WARN_LOGFILE           =
 INPUT                  = . \
                          xml \
                          popt \
-                         aes\
                          TypeA \
                          TypeB \
                          documentation/xml \

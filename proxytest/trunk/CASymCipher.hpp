@@ -30,7 +30,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #define KEY_SIZE 16
 
-#include "aes/rijndael-api-fst.h"
 #include "CALockAble.hpp"
 
 /** This class could be used for encryption/decryption of data (streams) with
