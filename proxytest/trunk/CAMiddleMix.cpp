@@ -31,6 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketGroup.hpp"
 #include "CAMsg.hpp"
 #include "CACmdLnOptions.hpp"
+#include "CASocketAddrINet.hpp"
 
 extern CACmdLnOptions options;
 
@@ -258,7 +259,7 @@ SINT32 CAMiddleMix::init()
 		
 		UINT8 strTarget[255];
 		options.getTargetHost(strTarget,255);
-		CASocketAddr nextMix;
+		CASocketAddrINet nextMix;
 		nextMix.setAddr((char*)strTarget,options.getTargetPort());
 		
 		if(((CASocket*)muxOut)->create()!=E_SUCCESS)
@@ -271,7 +272,7 @@ SINT32 CAMiddleMix::init()
 #define RETRIES 100
 #define RETRYTIME 30
 		CAMsg::printMsg(LOG_INFO,"Init: Try to connect to next Mix: %s...\n",strTarget);
-		if(muxOut.connect(&nextMix,RETRIES,RETRYTIME)!=E_SUCCESS)
+		if(muxOut.connect(nextMix,RETRIES,RETRYTIME)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Cannot connect to next Mix -- Exiting!\n");
 				return E_UNKNOWN;

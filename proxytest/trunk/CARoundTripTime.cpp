@@ -31,6 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CACmdLnOptions.hpp"
 #include "CAUtil.hpp"
 #include "CAMsg.hpp"
+#include "CASocketAddrINet.hpp"
 extern CACmdLnOptions options;
 
 THREAD_RETURN RoundTripTimeLoop(void *p)
@@ -40,11 +41,11 @@ THREAD_RETURN RoundTripTimeLoop(void *p)
 		CARoundTripTime* pRTT=(CARoundTripTime*)p;
 
 		UINT8 localPortAndIP[6];
-		CASocketAddr::getLocalHostIP(localPortAndIP);
+		CASocketAddrINet::getLocalHostIP(localPortAndIP);
 		tmpPort=htons(pRTT->m_localPort);
 		memcpy(localPortAndIP+4,&tmpPort,2);
 		
-		CASocketAddr addrNextMix;
+		CASocketAddrINet addrNextMix;
 		ret=options.getTargetRTTPort();
 		if(ret==E_UNSPECIFIED)
 			tmpPort=options.getTargetPort()+1;
@@ -53,7 +54,7 @@ THREAD_RETURN RoundTripTimeLoop(void *p)
 		UINT8* buff=new UINT8[4096];
 		options.getTargetHost(buff,4096);
 		addrNextMix.setAddr((char*)buff,tmpPort);
-		CASocketAddr to;
+		CASocketAddrINet to;
 //		to.sin_family=AF_INET;
 		BIGNUM* bnTmp=BN_new();
 		BIGNUM* bnTmp2=BN_new();
@@ -75,9 +76,9 @@ THREAD_RETURN RoundTripTimeLoop(void *p)
 										memcpy(buff+8+len,localPortAndIP,6); //inserting (return) Port and IP
 										len+=6;
 #ifndef _DEBUG
-										pRTT->m_oSocket.send(buff+8,len,&addrNextMix);
+										pRTT->m_oSocket.send(buff+8,len,addrNextMix);
 #else
-										len=pRTT->m_oSocket.send(buff+8,len,&addrNextMix);
+										len=pRTT->m_oSocket.send(buff+8,len,addrNextMix);
 										if(len!=E_SUCCESS)
 											CAMsg::printMsg(LOG_DEBUG,"Couldn't send a RRT-Packet.\n");
 #endif
@@ -97,7 +98,7 @@ THREAD_RETURN RoundTripTimeLoop(void *p)
 										sprintf(szip,"%u.%u.%u.%u",ip[0],ip[1],ip[2],ip[3]);
 										to.setAddr(szip,port);
 										len-=6; // Removed return IP/Port
-										pRTT->m_oSocket.send(buff,len,&to);
+										pRTT->m_oSocket.send(buff,len,to);
 									}
 							}
 						else //what to do if last mix...
@@ -111,7 +112,7 @@ THREAD_RETURN RoundTripTimeLoop(void *p)
 								to.setAddr(szip,port);
 								len-=6; // Removed return IP/Port
 								buff[8]=0; // Cleared Header...
-								pRTT->m_oSocket.send(buff+8,len,&to);
+								pRTT->m_oSocket.send(buff+8,len,to);
 							}
 					}
 			}

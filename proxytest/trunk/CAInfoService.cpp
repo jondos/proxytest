@@ -31,6 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "xml/xmloutput.h"
 #include "CACmdLnOptions.hpp"
 #include "CAMsg.hpp"
+#include "CASocketAddrINet.hpp"
 extern CACmdLnOptions options;
 
 /**
@@ -128,7 +129,7 @@ THREAD_RETURN InfoLoop(void *p)
 	{
 		CAInfoService* pInfoService=(CAInfoService*)p;
 		CASocket oSocket;
-		CASocketAddr oAddr;
+		CASocketAddrINet oAddr;
 		CASignature* pSignature=pInfoService->getSignature();
 		UINT8* buff=new UINT8[1024];
 		UINT8 buffHeader[255];
@@ -140,7 +141,7 @@ THREAD_RETURN InfoLoop(void *p)
 		UINT32 buffLen;
 		char strAnonServer[255];
 	//	CASocketAddr::getLocalHostName((UINT8*)buff,255);
-		CASocketAddr::getLocalHostIP(buff);
+		CASocketAddrINet::getLocalHostIP(buff);
 //*>> Beginn very ugly hack for anon.inf.tu-dresden.de --> new Concepts needed!!!!!1		
 //		if(strncmp((char*)buff,"ithif46",7)==0)
 //			strcpy((char*)buff,"mix.inf.tu-dresden.de");
@@ -149,7 +150,7 @@ THREAD_RETURN InfoLoop(void *p)
 		int helocount=10;
 		while(pInfoService->getRun())
 			{
-				if(oSocket.connect(&oAddr)==E_SUCCESS)
+				if(oSocket.connect(oAddr)==E_SUCCESS)
 					{
 						oBufferStream.reset();
 						oxmlOut.BeginDocument("1.0","UTF-8",true);
@@ -272,14 +273,14 @@ int CAInfoService::stop()
 SINT32 CAInfoService::sendHelo()
 	{
 		CASocket oSocket;
-		CASocketAddr oAddr;
+		CASocketAddrINet oAddr;
 		UINT8 hostname[255];
 		UINT8 id[50];
 		UINT8 buffHeader[255];
 		if(options.getInfoServerHost(hostname,255)!=E_SUCCESS)
 			return E_UNKNOWN;
 		oAddr.setAddr((char*)hostname,options.getInfoServerPort());
-		if(oSocket.connect(&oAddr)==E_SUCCESS)
+		if(oSocket.connect(oAddr)==E_SUCCESS)
 			{
 				BufferOutputStream oBufferStream(1024,1024);
 				UINT8* buff=new UINT8[1024];
@@ -290,14 +291,14 @@ SINT32 CAInfoService::sendHelo()
 				UINT buffLen;
 				oxmlOut.BeginDocument("1.0","UTF-8",true);
 				oxmlOut.BeginElementAttrs("MixCascade");
-				CASocketAddr::getLocalHostIP(buff);
+				CASocketAddrINet::getLocalHostIP(buff);
 				sprintf((char*)id,"%u.%u.%u.%u%%3A%u",buff[0],buff[1],buff[2],buff[3],options.getServerPort());
 				oxmlOut.WriteAttr("id",(char*)id);
 				oxmlOut.EndAttrs();
 				if(options.getCascadeName(buff,1024)!=E_SUCCESS)
 					{if(buff!=NULL)delete buff;return E_UNKNOWN;}
 				oxmlOut.WriteElement("Name",(char*)buff);
-				CASocketAddr::getLocalHostName(hostname,255);
+				CASocketAddrINet::getLocalHostName(hostname,255);
 //*>> Beginn very ugly hack for anon.inf.tu-dresden.de --> new Concepts needed!!!!!1
 				if(strncmp((char*)hostname,"ithif46",7)==0)
 				    strcpy((char*)hostname,"mix.inf.tu-dresden.de");

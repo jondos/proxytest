@@ -107,10 +107,10 @@ class CAMuxSocket
 					DeleteCriticalSection(&csSend);
 					DeleteCriticalSection(&csReceive);
 				}
-			int accept(UINT16 port);
+			SINT32 accept(UINT16 port);
 			SINT32 accept(CASocketAddr & oAddr);
-			SINT32 connect(LPCASOCKETADDR psa);
-			SINT32 connect(LPCASOCKETADDR psa,UINT retry,UINT32 time);
+			SINT32 connect(CASocketAddr& psa);
+			SINT32 connect(CASocketAddr& psa,UINT retry,UINT32 time);
 			int close();
 			int send(MUXPACKET *pPacket);
 			SINT32 receive(MUXPACKET *pPacket);

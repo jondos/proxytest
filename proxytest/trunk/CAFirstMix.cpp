@@ -33,6 +33,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMuxChannelList.hpp"
 #include "CAASymCipher.hpp"
 #include "CAInfoService.hpp"
+#include "CASocketAddrINet.hpp"
+#include "CASocketAddrUnix.hpp"
 
 extern CACmdLnOptions options;
 
@@ -402,15 +404,27 @@ END:
 
 SINT32 CAFirstMix::init()
 	{
-		CASocketAddr addrNext;
+		CASocketAddr* pAddrNext=NULL;
 		UINT8 strTarget[255];
 		options.getTargetHost(strTarget,255);
 		if(strTarget[0]=='/') //Unix-Domain
-			addrNext.setPath((char*)strTarget);
+			{
+#ifdef HAVE_UNIX_DOMAIN_PROTOCOL
+				pAddrNext=new CASocketAddrUnix();
+				pAddrNext->setPath((char*)strTarget);
+				CAMsg::printMsg(LOG_INFO,"Try connecting to next Mix on Unix-Domain-Socket: %s\n");
+#else
+				CAMsg::printMsg(LOG_CRIT,"I do not understand the Unix Domain Protocol!\n");
+				return E_UNKNOWN;
+#endif
+			}
 		else
-			addrNext.setAddr((char*)strTarget,options.getTargetPort());
-		CAMsg::printMsg(LOG_INFO,"Try connecting to next Mix: %s:%u ...\n",strTarget,options.getTargetPort());
-		if(((CASocket*)muxOut)->create(addrNext.getType())!=E_SUCCESS)
+			{
+				pAddrNext=new CASocketAddrINet();
+				((CASocketAddrINet*)pAddrNext)->setAddr((char*)strTarget,options.getTargetPort());
+				CAMsg::printMsg(LOG_INFO,"Try connecting to next Mix: %s:%u ...\n",strTarget,options.getTargetPort());
+			}
+		if(((CASocket*)muxOut)->create(pAddrNext->m_Type)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Cannot create SOCKET for connection to next Mix!\n");
 				return E_UNKNOWN;
@@ -424,11 +438,14 @@ SINT32 CAFirstMix::init()
 		CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET SendLowWatSize: %i\n",((CASocket*)muxOut)->getSendLowWat());
 
 
-		if(muxOut.connect(&addrNext,10,10)!=E_SUCCESS)
+		if(muxOut.connect(*pAddrNext,10,10)!=E_SUCCESS)
 			{
+				delete pAddrNext;
 				CAMsg::printMsg(LOG_CRIT,"Cannot connect to next Mix!\n");
 				return E_UNKNOWN;
 			}
+		delete pAddrNext;
+
 		CAMsg::printMsg(LOG_INFO," connected!\n");
 //		sleep(1);
 		if(((CASocket*)muxOut)->setKeepAlive((UINT32)1800)!=E_SUCCESS)
@@ -467,10 +484,10 @@ SINT32 CAFirstMix::init()
 		mKeyInfoSize+=keySize;
 		(*(UINT16*)mKeyInfoBuff)=htons(mKeyInfoSize-2);
 
-		CASocketAddr socketAddrIn(options.getServerPort());
+		CASocketAddrINet socketAddrIn(options.getServerPort());
 		socketIn.create();
 		socketIn.setReuseAddr(true);
-		if(socketIn.listen(&socketAddrIn)==SOCKET_ERROR)
+		if(socketIn.listen(socketAddrIn)==SOCKET_ERROR)
 		    {
 					CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
 					return E_UNKNOWN;
@@ -486,7 +503,7 @@ SINT32 CAFirstMix::init()
 				if(seteuid(getuid())==-1)
 					CAMsg::printMsg(LOG_CRIT,"Setuid failed!\n");
 #endif				
-				SINT32 ret=m_socketHttpsIn.listen(&socketAddrIn);
+				SINT32 ret=m_socketHttpsIn.listen(socketAddrIn);
 #ifndef _WIN32
 				seteuid(old_uid);
 #endif

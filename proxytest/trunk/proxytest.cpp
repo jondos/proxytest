@@ -31,7 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "StdAfx.h"
 #include "CASocket.hpp"
 #include "CASocketGroup.hpp"
-#include "CASocketAddr.hpp"
+#include "CASocketAddrINet.hpp"
 #include "CACmdLnOptions.hpp"
 #include "CAMsg.hpp"
 #include "CAMuxSocket.hpp"
@@ -128,7 +128,7 @@ int main(int argc, const char* argv[])
 				if(options.getLogDir((UINT8*)buff,255)==E_SUCCESS)
 					CAMsg::setOptions(MSG_FILE);
 			}
-		CASocketAddr::init();
+		CASocketAddrINet::init();
 	  CAMsg::printMsg(LOG_INFO,"Anon proxy started!\n");
 	  CAMsg::printMsg(LOG_INFO,"Using: %s!\n",OPENSSL_VERSION_TEXT);
 #ifdef _DEBUG
@@ -178,7 +178,7 @@ int main(int argc, const char* argv[])
 EXIT:
 		delete pRTT;
 		delete pMix;
-		CASocketAddr::destroy();
+		CASocketAddrINet::destroy();
 		#ifdef _WIN32		
 			WSACleanup();
 		#endif

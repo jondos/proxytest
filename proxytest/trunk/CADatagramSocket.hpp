@@ -37,12 +37,13 @@ class CADatagramSocket
 			~CADatagramSocket(){close();DeleteCriticalSection(&csClose);}
 
 			SINT32 create();
+			SINT32 create(int type);
 			
 			SINT32 close();
-			SINT32 bind(LPCASOCKETADDR psa);
+			SINT32 bind(CASocketAddr& psa);
 			SINT32 bind(UINT16 port);
-			SINT32 send(UINT8* buff,UINT32 len,LPCASOCKETADDR to);
-			SINT32 receive(UINT8* buff,UINT32 len,LPCASOCKETADDR from);
+			SINT32 send(UINT8* buff,UINT32 len,CASocketAddr& to);
+			SINT32 receive(UINT8* buff,UINT32 len,CASocketAddr* from);
 			operator SOCKET(){return m_Socket;}
 //			SINT32 getLocalPort();
 /*			int setReuseAddr(bool b);

@@ -27,40 +27,15 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CASOCKETADDR__
 #define __CASOCKETADDR__
-class CASocketAddr/*:public sockaddr_in*/
+class CASocketAddr
 	{
 		public:
-			static SINT32 init();
-			static SINT32 destroy();
 			CASocketAddr();
 			~CASocketAddr();
 			
-			SINT32 getType(){return m_Type;}
-			SINT32 getSize();
-			/*TCP/IP*/
-			CASocketAddr(char* szIP,UINT16 port);
-			CASocketAddr(UINT16 port);
-			
-			/*UNIX-Domain*/
-			CASocketAddr(char* szPath);
-			
-			/*TCP/IP*/
-			SINT32 setAddr(char* szIP,UINT16 port);
-      SINT32 setPort(UINT16 port);
-      UINT16 getPort();
-			SINT32 getHostName(UINT8* buff,UINT32 len);
-			static SINT32 getLocalHostName(UINT8* buff,UINT32 len);
-			static SINT32 getLocalHostIP(UINT8* ip);
-			operator LPSOCKADDR(){return (::LPSOCKADDR)m_pAddr;}
-
-			/*UNIX-Domain*/
-			SINT32 setPath(char* path);
-
-		private:
-			static CRITICAL_SECTION csGet;
-			static bool bIsCsInitialized;
-			void* m_pAddr; //may sockaddr_in or sockaddr_un
-			SINT32 m_Type;
+			static const int  m_Type;
+			virtual SINT32 getSize()=0;
+			operator LPSOCKADDR(){return (::LPSOCKADDR)this;}
 	};
 
 typedef CASocketAddr* LPCASOCKETADDR;
