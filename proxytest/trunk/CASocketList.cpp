@@ -49,6 +49,28 @@ int CASocketList::add(HCHANNEL id,CASocket* pSocket)
 		return ret;
 	}
 
+int CASocketList::add(HCHANNEL in,HCHANNEL out)
+	{
+		EnterCriticalSection(&cs);
+		CONNECTIONLIST* tmp;
+		int ret;
+		if(pool==NULL)
+		    {
+					ret=SOCKET_ERROR;
+		    }
+		else
+		    {
+					tmp=pool;
+					pool=pool->next;
+					tmp->next=connections;
+					connections=tmp;
+					connections->outChannel=out;
+					connections->id=in;
+					ret=0;
+		    }
+		LeaveCriticalSection(&cs);
+		return ret;
+	}
 /*
 int CASocketList::add(HCHANNEL id,CASocket* pSocket)
 	{
@@ -108,6 +130,44 @@ CASocket* CASocketList::get(HCHANNEL id)
 			}
 		LeaveCriticalSection(&cs);
 		return NULL;
+	}
+
+bool	CASocketList::get(HCHANNEL in,HCHANNEL* out)
+	{
+		EnterCriticalSection(&cs);
+		CONNECTIONLIST* tmp;
+		tmp=connections;
+		while(tmp!=NULL)
+			{
+				if(tmp->id==in)
+					{
+						*out=tmp->outChannel;
+						LeaveCriticalSection(&cs);
+						return true;
+					}
+				tmp=tmp->next;
+			}
+		LeaveCriticalSection(&cs);
+		return false;
+	}
+
+bool	CASocketList::get(HCHANNEL* in,HCHANNEL out)
+	{
+		EnterCriticalSection(&cs);
+		CONNECTIONLIST* tmp;
+		tmp=connections;
+		while(tmp!=NULL)
+			{
+				if(tmp->outChannel==out)
+					{
+						*in=tmp->id;
+						LeaveCriticalSection(&cs);
+						return true;
+					}
+				tmp=tmp->next;
+			}
+		LeaveCriticalSection(&cs);
+		return false;
 	}
 
 CASocket* CASocketList::remove(HCHANNEL id)

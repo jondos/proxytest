@@ -129,30 +129,33 @@ THREAD_RETURN mmIO(void* v)
 		CASocketGroup oSocketGroup;
 		oSocketGroup.add(mmIOPair->muxIn);
 		oSocketGroup.add(mmIOPair->muxOut);
+		CASocketList oSocketList;
 		char buff[1001];
+		HCHANNEL inChannel,outChannel,lastId;
+		lastId=1;
+		int len;
 		while(true)
 			{
 				if(oSocketGroup.select()==SOCKET_ERROR)
 					{
 						sleep(1);
-						continue;
 					}
-				if(oSocketGroup.isSignaled(mmIOPair->muxIn))
+				else if(oSocketGroup.isSignaled(mmIOPair->muxIn))
 					{
-						int len=mmIOPair->muxIn.receive(&channel,buff,1000);
+						len=mmIOPair->muxIn.receive(&inChannel,buff,1000);
 						if(len==SOCKET_ERROR)
 							{
+								CAMsg::printMsg(LOG_CRIT,"Fehler beim Empfangen -- Exiting!\n");
+								exit(-1);
 							}
-						HCHANNEL outChannel
-						oSocketList.get(channel);
-						if(!oSocketList.get(channel,&outChannel))
+						if(!oSocketList.get(inChannel,&outChannel))
 							{
 								if(len!=0)
 									{
 										#ifdef _DEBUG
 										    CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
 										#endif
-										oSocketList.add(channel,lastId);
+										oSocketList.add(inChannel,lastId);
 										mmIOPair->muxOut.send(lastId,buff,len);
 										lastId++;
 									}
@@ -161,8 +164,8 @@ THREAD_RETURN mmIO(void* v)
 							{
 								if(len==0)
 									{
-										lmIOPair->muxIn.close(channel);
-										oSocketList.remove(channel);
+										mmIOPair->muxIn.close(inChannel);
+										oSocketList.remove(inChannel);
 									}
 								else
 									{
@@ -170,12 +173,26 @@ THREAD_RETURN mmIO(void* v)
 									}
 							}
 					}
-						mmIOPair->muxOut.send(channel,buff,len);
-					}
 				else
 					{
-						int len=mmIOPair->muxOut.receive(&channel,buff,1000);
-						mmIOPair->muxIn.send(channel,buff,len);
+						int len=mmIOPair->muxOut.receive(&outChannel,buff,1000);
+						if(len==SOCKET_ERROR)
+							{
+								CAMsg::printMsg(LOG_CRIT,"Fehler beim Empfangen -- Exiting!\n");
+								exit(-1);
+							}
+						if(oSocketList.get(&inChannel,outChannel))
+							{
+								if(len!=0)
+									{
+										mmIOPair->muxIn.send(inChannel,buff,len);
+									}
+								else
+									{
+										mmIOPair->muxIn.close(inChannel);
+										oSocketList.remove(inChannel);
+									}
+							}
 					}
 			}
 		THREAD_RETURN_SUCCESS;
@@ -205,11 +222,11 @@ int doMiddleMix()
 		return 0;
 	}
 
-struct FMPair
+typedef struct t_FMPair
 	{
 		CASocket socketIn;
 		CAMuxSocket muxOut;
-	};
+	} FMPair;
 
 THREAD_RETURN fmIO(void *v)
 	{

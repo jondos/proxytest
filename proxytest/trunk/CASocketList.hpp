@@ -3,8 +3,12 @@
 
 typedef struct connlist
 	{
-		CASocket* pSocket;
 		HCHANNEL id;
+		union
+			{
+				CASocket* pSocket;
+				HCHANNEL outChannel;
+			};
 		connlist* next;
 	} CONNECTIONLIST,CONNECTION;
 		
@@ -17,7 +21,10 @@ class CASocketList
 			~CASocketList();
 //			int add(CASocket* pSocket);
 			int add(HCHANNEL id,CASocket* pSocket);
+			int add(HCHANNEL in,HCHANNEL out);
 			CASocket* get(HCHANNEL id);
+			bool	get(HCHANNEL in,HCHANNEL* out);
+			bool	get(HCHANNEL* in,HCHANNEL out);
 			CASocket* remove(HCHANNEL id);
 			CONNECTION* getFirst();
 			CONNECTION* getNext();
