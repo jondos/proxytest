@@ -125,8 +125,6 @@ int CAMuxSocket::send(MIXPACKET *pPacket)
 				#endif
 				ret=SOCKET_ERROR;
 			}
-		else if(ret==E_QUEUEFULL)
-			ret=E_QUEUEFULL;
 		else
 			ret=MIXPACKET_SIZE;
 		memcpy(pPacket,tmpBuff,16);
