@@ -51,6 +51,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #endif
 //#define LOG_CRIME  
 //#define NO_PARKING //to disable control flow
+#define NO_LOOPACCEPTUSER //to disable user accept thread for First Mix
+
 //#define USE_POOL
 //#define NEW_MIX_TYPE // to enable the new 1:x mix protocol
 
