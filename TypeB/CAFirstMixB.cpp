@@ -6,7 +6,7 @@
 #ifndef NO_LOOPACCEPTUSER
 	#define NO_LOOPACCEPTUSER
 #endif
-
+#ifdef NEW_MIX_TYPE
 SINT32 CAFirstMixB::loop()
 	{
 		CASingleSocketGroup osocketgroupMixOut;
@@ -512,3 +512,4 @@ SINT32 CAFirstMixB::loop()
 		CAMsg::printMsg(LOG_CRIT,"Main Loop exited!!\n");
 		return E_UNKNOWN;
 	}
+#endif

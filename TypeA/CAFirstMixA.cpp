@@ -117,7 +117,7 @@ SINT32 CAFirstMixA::loop()
 														pMixPacket->flags=CHANNEL_CLOSE;
 														pMixPacket->channel=pEntry->channelOut;
 														#ifdef LOG_PACKET_TIMES
-															upload_packet_timestamp=0;
+															setZero64(upload_packet_timestamp);
 															m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE,upload_packet_timestamp);
 														#else
 															m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE);
@@ -158,7 +158,7 @@ SINT32 CAFirstMixA::loop()
 														getRandom(pMixPacket->data,DATA_SIZE);
 														pMuxSocket->send(pMixPacket,tmpBuff);
 														#ifdef LOG_PACKET_TIMES
-															download_packet_timestamp=0;
+															setZero64(download_packet_timestamp);
 															pHashEntry->pQueueSend->add(tmpBuff,MIXPACKET_SIZE,download_packet_timestamp);
 														#else			
 															pHashEntry->pQueueSend->add(tmpBuff,MIXPACKET_SIZE);
@@ -174,7 +174,6 @@ SINT32 CAFirstMixA::loop()
 																pMixPacket->channel=pEntry->channelOut;
 																getRandom(pMixPacket->data,DATA_SIZE);
 																#ifdef LOG_PACKET_TIMES
-																	upload_packet_timestamp=0;
 																	m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE,upload_packet_timestamp);
 																#else
 																	m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE);
@@ -427,11 +426,11 @@ SINT32 CAFirstMixA::loop()
 													UINT64 timestamp;
 													ret=sizeof(timestamp);
 													pfmHashEntry->pQueueSend->get((UINT8*)&timestamp,(UINT32*)&ret);
-													if(timestamp!=0)
+													if(!isZero64(timestamp))
 														{
 															UINT64 tmpU64;
 															getcurrentTimeMicros(tmpU64);
-															addToTimeingStats(diff64(tmpU64,timestamp),false,false);
+															addToTimeingStats(diff64(tmpU64,timestamp),((MIXPACKET*)tmpBuff)->flags,false);
 															CAMsg::printMsg(LOG_CRIT,"Download Packet processing time (arrival <--> send): %u µs\n",diff64(tmpU64,timestamp));
 														}
 												}
@@ -450,7 +449,7 @@ SINT32 CAFirstMixA::loop()
 																pMixPacket->channel=pEntry->channelOut;
 																//m_pMuxOut->send(pMixPacket,tmpBuff);
 																#ifdef LOG_PACKET_TIMES
-																	upload_packet_timestamp=0;
+																	setZero64(upload_packet_timestamp);
 																	m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE,upload_packet_timestamp);
 																#else
 																	m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE);

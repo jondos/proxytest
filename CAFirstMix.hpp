@@ -149,13 +149,17 @@ class CAFirstMix:public CAMix
 #ifdef LOG_PACKET_TIMES
 			CATimedQueue* m_pQueueSendToMix;
 			CAMutex m_csTimeingStats;
-			SINT32 addToTimeingStats(UINT32 proccessingTime,bool bData,bool bUpstream);
+			SINT32 addToTimeingStats(UINT32 proccessingTime,UINT32 uType,bool bUpstream);
 			SINT32 resetTimeingStats();
 			SINT32 logTimeingStats();
 			UINT32 m_timingMaxDataPacketUpstream,m_timingMaxDataPacketDownStream;
 			UINT32 m_timingMinDataPacketUpstream,m_timingMinDataPacketDownStream;
 			UINT32 m_timingCountDataPacketsUpstream,m_timingCountDataPacketsDownStream;
 			UINT64 m_timingSumDataPacketUpstream,m_timingSumDataPacketDownStream;
+			UINT32 m_timingMaxClosePacketUpstream,m_timingMaxClosePacketDownStream;
+			UINT32 m_timingMinClosePacketUpstream,m_timingMinClosePacketDownStream;
+			UINT32 m_timingCountClosePacketsUpstream,m_timingCountClosePacketsDownStream;
+			UINT64 m_timingSumClosePacketUpstream,m_timingSumClosePacketDownStream;
 			UINT32 m_timingMaxOpenPacketUpstream,m_timingMinOpenPacketUpstream;
 			UINT32 m_timingCountOpenPacketsUpstream;
 			UINT64 m_timingSumOpenPacketUpstream;
