@@ -85,18 +85,18 @@ SINT32 CASocketGroup::add(CAMuxSocket&s)
 		m_csFD_SET.lock();
 		#ifndef HAVE_POLL
 			#ifndef _WIN32
-					if(m_max<((SOCKET)s)+1)
-				m_max=((SOCKET)s)+1;
+			if(m_max<(s.getSocket())+1)
+				m_max=(s.getSocket())+1;
 			#endif
 //			#ifdef _DEBUG
 //					CAMsg::printMsg(LOG_DEBUG,"CASocketGroup: Added SOCKET: %u\n",(SOCKET)s);
 //			#endif
-			FD_SET((SOCKET)s,&m_fdset);
+			FD_SET(s.getSocket(),&m_fdset);
 		#else
-			m_pollfd_read[(SOCKET)s].fd=(SOCKET)s;
-			m_pollfd_write[(SOCKET)s].fd=(SOCKET)s;			
-			if(m_max<((SOCKET)s)+1)
-				m_max=((SOCKET)s)+1;
+		m_pollfd_read[s.getSocket()].fd=s.getSocket();
+		m_pollfd_write[s.getSocket()].fd=s.getSocket();			
+		if(m_max<(s.getSocket())+1)
+			m_max=(s.getSocket())+1;
 		#endif
 		m_csFD_SET.unlock();
 		return E_SUCCESS;
