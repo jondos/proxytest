@@ -44,6 +44,7 @@ OBJS_ALL=CASocket.o\
 	CASemaphore.o\
 	CAMutex.o\
 	CAConditionVariable.o\
+	CAMiddleMixChannelList.o\
 	proxytest.o
 
 OBJS=$(OBJS_ALL)
