@@ -67,9 +67,9 @@ SINT32 CASocketGroup::add(CASocket&s)
 				m_max=((SOCKET)s)+1;
 			#endif
 			FD_SET((SOCKET)s,&m_fdset);
-			#ifdef _DEBUG
-				CAMsg::printMsg(LOG_DEBUG,"CASocketGroutp: Added SOCKET: %u\n",(SOCKET)s);
-			#endif
+//			#ifdef _DEBUG
+//				CAMsg::printMsg(LOG_DEBUG,"CASocketGroutp: Added SOCKET: %u\n",(SOCKET)s);
+//			#endif
 		#else
 			m_pollfd_read[(SOCKET)s].fd=(SOCKET)s;
 			m_pollfd_write[(SOCKET)s].fd=(SOCKET)s;
@@ -88,9 +88,9 @@ SINT32 CASocketGroup::add(CAMuxSocket&s)
 					if(m_max<((SOCKET)s)+1)
 				m_max=((SOCKET)s)+1;
 			#endif
-			#ifdef _DEBUG
-					CAMsg::printMsg(LOG_DEBUG,"CASocketGroup: Added SOCKET: %u\n",(SOCKET)s);
-			#endif
+//			#ifdef _DEBUG
+//					CAMsg::printMsg(LOG_DEBUG,"CASocketGroup: Added SOCKET: %u\n",(SOCKET)s);
+//			#endif
 			FD_SET((SOCKET)s,&m_fdset);
 		#else
 			m_pollfd_read[(SOCKET)s].fd=(SOCKET)s;
@@ -106,9 +106,9 @@ SINT32 CASocketGroup::remove(CASocket&s)
 	{
 		EnterCriticalSection(&m_csFD_SET);
 		#ifndef HAVE_POLL
-			#ifdef _DEBUG
-				CAMsg::printMsg(LOG_DEBUG,"CASocketGroutp: Removed SOCKET: %u\n",(SOCKET)s);
-			#endif
+//			#ifdef _DEBUG
+//				CAMsg::printMsg(LOG_DEBUG,"CASocketGroutp: Removed SOCKET: %u\n",(SOCKET)s);
+//			#endif
 			FD_CLR((SOCKET)s,&m_fdset);
 		#else
 			m_pollfd_read[(SOCKET)s].fd=-1;
@@ -122,9 +122,9 @@ SINT32 CASocketGroup::remove(CAMuxSocket&s)
 	{
 		EnterCriticalSection(&m_csFD_SET);
 		#ifndef HAVE_POLL
-			#ifdef _DEBUG
-				CAMsg::printMsg(LOG_DEBUG,"CASocketGroutp: Removed SOCKET: %u\n",(SOCKET)s);
-			#endif
+//			#ifdef _DEBUG
+//				CAMsg::printMsg(LOG_DEBUG,"CASocketGroutp: Removed SOCKET: %u\n",(SOCKET)s);
+//			#endif
 			FD_CLR((SOCKET)s,&m_fdset);
 		#else
 			m_pollfd_read[(SOCKET)s].fd=-1;
