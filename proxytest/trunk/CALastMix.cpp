@@ -119,21 +119,22 @@ SINT32 CALastMix::init()
 				pAddrListen=new CASocketAddrINet();
 				((CASocketAddrINet*)pAddrListen)->setAddr(path,options.getServerPort());
 			}
-		if(muxIn.accept(*pAddrListen)!=E_SUCCESS)
+		m_pMuxIn=new CAMuxSocket();
+		if(m_pMuxIn->accept(*pAddrListen)!=E_SUCCESS)
 		    {
 					delete pAddrListen;
 					CAMsg::printMsg(LOG_CRIT," failed!\n");
 					return E_UNKNOWN;
 		    }
 		delete pAddrListen;
-		((CASocket*)muxIn)->setRecvBuff(500*MIXPACKET_SIZE);
-		((CASocket*)muxIn)->setSendBuff(500*MIXPACKET_SIZE);
-		if(((CASocket*)muxIn)->setSendLowWat(MIXPACKET_SIZE)!=E_SUCCESS)
+		((CASocket*)*m_pMuxIn)->setRecvBuff(500*MIXPACKET_SIZE);
+		((CASocket*)*m_pMuxIn)->setSendBuff(500*MIXPACKET_SIZE);
+		if(((CASocket*)*m_pMuxIn)->setSendLowWat(MIXPACKET_SIZE)!=E_SUCCESS)
 			CAMsg::printMsg(LOG_INFO,"SOCKET Option SENDLOWWAT not set!\n");
-		if(((CASocket*)muxIn)->setKeepAlive((UINT32)1800)!=E_SUCCESS)
+		if(((CASocket*)*m_pMuxIn)->setKeepAlive((UINT32)1800)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_INFO,"Socket option TCP-KEEP-ALIVE returned an error - so not set!\n");
-				if(((CASocket*)muxIn)->setKeepAlive(true)!=E_SUCCESS)
+				if(((CASocket*)*m_pMuxIn)->setKeepAlive(true)!=E_SUCCESS)
 					CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
 			}
 		
@@ -176,7 +177,7 @@ SINT32 CALastMix::init()
 		memcpy(buff,&tmp,2);		
 #endif
 		CAMsg::printMsg(LOG_INFO,"Sending Infos (chain length and RSA-Key, Message-Size %u)\n",messageSize);
-		if(((CASocket*)muxIn)->send(buff,messageSize)!=messageSize)
+		if(((CASocket*)*m_pMuxIn)->send(buff,messageSize)!=messageSize)
 			{
 				CAMsg::printMsg(LOG_ERR,"Error sending Key-Info!\n");
 				delete []buff;
@@ -204,9 +205,9 @@ SINT32 CALastMix::loop()
 		HCHANNEL tmpID;
 		CAQueue oqueueMixIn;
 		UINT8* tmpBuff=new UINT8[MIXPACKET_SIZE];
-		osocketgroupMixIn.add(muxIn);
-		((CASocket*)muxIn)->setNonBlocking(true);
-		muxIn.setCrypt(true);
+		osocketgroupMixIn.add(*m_pMuxIn);
+		((CASocket*)*m_pMuxIn)->setNonBlocking(true);
+		m_pMuxIn->setCrypt(true);
 		bool bAktiv;
 		UINT32 countCacheAddresses=m_oCacheLB.getElementCount();
 		CAInfoService* pInfoService=NULL;
@@ -229,7 +230,7 @@ SINT32 CALastMix::loop()
 						UINT32 channels=oSocketList.getSize()+1;
 						for(UINT32 k=0;k<channels;k++)
 							{
-								ret=muxIn.receive(pMixPacket,0);
+								ret=m_pMuxIn->receive(pMixPacket,0);
 								if(ret==SOCKET_ERROR)
 									{
 										CAMsg::printMsg(LOG_CRIT,"Channel to previous mix closed -- Restarting!\n");
@@ -278,7 +279,7 @@ SINT32 CALastMix::loop()
 															#endif
 															delete tmpSocket;
 															delete newCipher;
-															muxIn.close(pMixPacket->channel,tmpBuff);
+															m_pMuxIn->close(pMixPacket->channel,tmpBuff);
 															oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);			
 														}
 												else
@@ -298,7 +299,7 @@ SINT32 CALastMix::loop()
 																	tmpSocket->close();
 																	delete tmpSocket;
 																	delete newCipher;
-																	muxIn.close(pMixPacket->channel,tmpBuff);
+																	m_pMuxIn->close(pMixPacket->channel,tmpBuff);
 																	oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);			
 																}
 															else
@@ -347,7 +348,7 @@ SINT32 CALastMix::loop()
 														delete oConnection.pCipher;
 														delete oConnection.pSendQueue;
 														oSocketList.remove(pMixPacket->channel);
-														muxIn.close(pMixPacket->channel,tmpBuff);
+														m_pMuxIn->close(pMixPacket->channel,tmpBuff);
 														oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);			
 													}
 												else
@@ -392,7 +393,7 @@ SINT32 CALastMix::loop()
 														delete tmpCon->pSocket;
 														delete tmpCon->pCipher;
 														delete tmpCon->pSendQueue;
-														muxIn.close(tmpCon->id,tmpBuff);
+														m_pMuxIn->close(tmpCon->id,tmpBuff);
 														oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);			
 														oSocketList.remove(tmpCon->id);											 
 													}
@@ -428,7 +429,7 @@ SINT32 CALastMix::loop()
 														delete tmpCon->pSendQueue;
 														tmpID=tmpCon->id;
 														oSocketList.remove(tmpID);
-														muxIn.close(tmpID,tmpBuff);
+														m_pMuxIn->close(tmpID,tmpBuff);
 														oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);			
 													}
 												else 
@@ -438,7 +439,7 @@ SINT32 CALastMix::loop()
 														pMixPacket->payload.len=htons((UINT16)ret);
 														pMixPacket->payload.type=0;
 														tmpCon->pCipher->decryptAES2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
-														muxIn.send(pMixPacket,tmpBuff);
+														m_pMuxIn->send(pMixPacket,tmpBuff);
 														oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);
 													}
 											}
@@ -460,7 +461,7 @@ SINT32 CALastMix::loop()
 								countRead--;
 								UINT32 len=MIXPACKET_SIZE;
 								oqueueMixIn.peek(tmpBuff,&len);
-								ret=((CASocket*)muxIn)->send(tmpBuff,len);
+								ret=((CASocket*)*m_pMuxIn)->send(tmpBuff,len);
 								if(ret>0)
 									{
 										oqueueMixIn.remove((UINT32*)&ret);
@@ -502,7 +503,12 @@ ERR:
 
 SINT32 CALastMix::clean()
 	{
-		muxIn.close();
+		if(m_pMuxIn!=NULL)
+			{
+				m_pMuxIn->close();
+				delete m_pMuxIn;
+			}
+		m_pMuxIn=NULL;
 		mRSA.destroy();
 		oSuspendList.clear();
 		return E_SUCCESS;
