@@ -488,10 +488,10 @@ SINT32 CALastMix::clean()
 	{
 		muxIn.close();
 		mRSA.destroy();
-	//	oSuspendList.clear();
+		oSuspendList.clear();
 		return E_SUCCESS;
 	}
-/*
+
 void CALastMix::resume(CASocket* pSocket)
 	{
 		EnterCriticalSection(&csResume);
@@ -512,5 +512,5 @@ void CALastMix::deleteResume(HCHANNEL id)
 		oSuspendList.remove(id);
 		LeaveCriticalSection(&csResume);
 }
-*/
+
 #endif

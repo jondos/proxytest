@@ -32,11 +32,12 @@ class CASocketGroup
 	{
 		public:
 			CASocketGroup();
-			int add(CASocket&s);
-			int add(CAMuxSocket&s);
-			int remove(CASocket&s);
-			int remove(CAMuxSocket&s);
-			int select();
+			~CASocketGroup(){DeleteCriticalSection(&csFD_SET);}
+			SINT32 add(CASocket&s);
+			SINT32 add(CAMuxSocket&s);
+			SINT32 remove(CASocket&s);
+			SINT32 remove(CAMuxSocket&s);
+			SINT32 select();
 			SINT32 select(bool bWrite,UINT32 time_ms);
 			bool isSignaled(CASocket&s);
 			bool isSignaled(CASocket*ps);
@@ -44,6 +45,7 @@ class CASocketGroup
 		protected:
 			fd_set m_fdset;
 			fd_set m_signaled_set;
+			CRITICAL_SECTION csFD_SET;
 			#ifndef _WIN32
 			    int max;
 			#endif
