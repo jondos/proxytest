@@ -46,10 +46,9 @@ class CASignature
 			SINT32 verifyXML(UINT8* in,UINT32 inlen);
 			SINT32 verifyXML(DOM_Node& node,CACertStore* pTrustedCerts=NULL);
 			SINT32 getSignatureSize();
-			SINT32 getXMLSignatureSize();
 		private:
 			DSA* m_pDSA;
 			SINT32 parseSignKeyXML(UINT8* buff,UINT32 len);
-			SINT32 makeXMLCanonical(UINT8* in,UINT32 len,UINT8* out,UINT32 *outlen);
+			//SINT32 makeXMLCanonical(UINT8* in,UINT32 len,UINT8* out,UINT32 *outlen);
 	};
 #endif

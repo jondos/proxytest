@@ -20,21 +20,6 @@ const XMLCh  DOM_Output::m_XML[39] =
 		chQuestion,chCloseAngle,chNull
 };	
 
-void DOM_Output::dumpToMem(DOM_Node &node,UINT8* buff,UINT32* size)
-	{
-		DOM_Output out;
-		out.dumpNode(node,false);
-		out.m_pFormatTarget->dumpMem(buff,size);
-	}
-
-SINT32 DOM_Output::makeCanonical(DOM_Node &node,UINT8* buff,UINT32* size)
-	{
-		DOM_Output out;
-		if(	out.dumpNode(node,true)!=E_SUCCESS||
-				out.m_pFormatTarget->dumpMem(buff,size)!=E_SUCCESS)
-			return E_UNKNOWN;
-		return E_SUCCESS;
-	}
 
 XMLFormatter& operator<< (XMLFormatter& strm, const DOMString& s)
 {

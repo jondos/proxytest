@@ -154,7 +154,7 @@ SINT32 CALastMix::processKeyExchange()
 		CAMsg::printMsg(LOG_INFO,"Sending Infos (chain length and RSA-Key, Message-Size %u)\n",len);
 		
 		if(	((CASocket*)*m_pMuxIn)->send((UINT8*)&tmp,2)!=2 ||
-				((CASocket*)*m_pMuxIn)->send(messageBuff,len)!=len)
+				((CASocket*)*m_pMuxIn)->send(messageBuff,len)!=(SINT32)len)
 			{
 				CAMsg::printMsg(LOG_ERR,"Error sending Key-Info!\n");
 				delete []messageBuff;
@@ -166,7 +166,7 @@ SINT32 CALastMix::processKeyExchange()
 		((CASocket*)*m_pMuxIn)->receive((UINT8*)&tmp,2);
 		len=ntohs(tmp);
 		messageBuff=new UINT8[len+1]; //+1 for the closing Zero
-		if(((CASocket*)*m_pMuxIn)->receive(messageBuff,len)!=len)
+		if(((CASocket*)*m_pMuxIn)->receive(messageBuff,len)!=(SINT32)len)
 			{
 				CAMsg::printMsg(LOG_ERR,"Error receiving symetric key!\n");
 				delete []messageBuff;
