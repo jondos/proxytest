@@ -74,8 +74,7 @@ VERSION = @VERSION@
 AUTOMAKE_OPTIONS = foreign
 
 noinst_LIBRARIES = libxml.a
-libxml_a_SOURCES = xmloutput.cpp xmlinput.cpp xmlinput_c.c 		   xmlconfig.h xmlinput.h xmlinputp.h xmloutput.h 		   xmlstream.h 
-
+libxml_a_SOURCES = DOM_Output.cpp DOM_Output.hpp
 
 includes = @INCLUDES@
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -89,7 +88,7 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 libxml_a_LIBADD = 
-libxml_a_OBJECTS =  xmloutput.o xmlinput.o xmlinput_c.o
+libxml_a_OBJECTS =  DOM_Output.o
 AR = ar
 CXXFLAGS = @CXXFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -106,7 +105,7 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = gtar
 GZIP_ENV = --best
-DEP_FILES =  .deps/xmlinput.P .deps/xmlinput_c.P .deps/xmloutput.P
+DEP_FILES =  .deps/DOM_Output.P
 SOURCES = $(libxml_a_SOURCES)
 OBJECTS = $(libxml_a_OBJECTS)
 

@@ -6,7 +6,7 @@
 AUTOMAKE_OPTIONS = foreign
 
 noinst_LIBRARIES = libpopt.a
-libpopt_a_SOURCES = popt.c poptparse.c popthelp.c \
+libpopt_a_SOURCES = popt.cpp poptparse.cpp popthelp.cpp \
 		    popt.h poptint.h system.h 
 
 includes = @INCLUDES@

@@ -58,8 +58,8 @@ SINT32 CASignature::parseSignKeyXML(UINT8* buff,UINT32 len)
 		MemBufInputSource oInput(buff,len,"sigkey");
 		DOMParser oParser;
 		oParser.parse(oInput);
-		DOM_Document& doc=oParser.getDocument();
-		DOM_Element& rootKeyInfo=doc.getDocumentElement();
+		DOM_Document doc=oParser.getDocument();
+		DOM_Element rootKeyInfo=doc.getDocumentElement();
 		if(!rootKeyInfo.getNodeName().equals("KeyInfo"))
 			return E_UNKNOWN;
 		DOM_Node elemKeyValue;
@@ -70,11 +70,11 @@ SINT32 CASignature::parseSignKeyXML(UINT8* buff,UINT32 len)
 		UINT8 tbuff[4096];
 		UINT32 tlen=4096;
 		DSA* tmpDSA=DSA_new();
-		DOM_Node& child=elemKeyValue.getFirstChild();
+		DOM_Node child=elemKeyValue.getFirstChild();
 		while(child!=NULL)
 			{
-				DOMString& name=child.getNodeName();
-				DOM_Node &text=child.getFirstChild();
+				DOMString name=child.getNodeName();
+				DOM_Node text=child.getFirstChild();
 				if(!text.isNull())
 					{
 						char* tmpStr=text.getNodeValue().transcode();
@@ -313,8 +313,8 @@ SINT32 CASignature::makeXMLCanonical(UINT8* in,UINT32 inlen,UINT8* out,UINT32* o
 		MemBufInputSource oInput(in,inlen,"tmpCanonical");
 		DOMParser oParser;
 		oParser.parse(oInput);
-		DOM_Document& doc=oParser.getDocument();
-		DOM_Element& elem=doc.getDocumentElement();
+		DOM_Document doc=oParser.getDocument();
+		DOM_Element elem=doc.getDocumentElement();
 		DOM_Output::makeCanonical(elem,out,outlen);
 		return E_SUCCESS;
 	}
