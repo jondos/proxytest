@@ -189,6 +189,9 @@ SINT32 CALastMix::processKeyExchange()
 				delete []buff;
 				return E_UNKNOWN;
 			}
+		buff[messageSize]=0;
+		CAMsg::printMsg(LOG_INFO,"Symmetric Key Info received is:\n");
+		CAMsg::printMsg(LOG_INFO,"%s\n",(char*)buff);		
 		UINT8 key[50];
 		keySize=50;
 		decodeXMLEncryptedKey(key,&keySize,buff,messageSize,&mRSA);

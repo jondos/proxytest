@@ -1055,7 +1055,7 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 						UINT32 bufflen=400;
 						encodeXMLEncryptedKey(key,16,buff,&bufflen,&oRSA);
 						m_pMuxOut->setKey(key);
-						UINT16 size=ntohs(bufflen);
+						UINT16 size=htons(bufflen);
 						((CASocket*)m_pMuxOut)->send((UINT8*)&size,2);
 						((CASocket*)m_pMuxOut)->send(buff,bufflen);
 						break;
