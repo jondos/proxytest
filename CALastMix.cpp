@@ -268,18 +268,23 @@ SINT32 CALastMix::init()
 		UINT32 keySize=mRSA.getPublicKeySize();
 		UINT16 messageSize=keySize+1;
 		UINT8* buff=new UINT8[messageSize+2];
-		(*(UINT16*)buff)=htons(messageSize);
+		UINT16 tmp=htons(messageSize);
+		memcpy(buff,&tmp,2);
 		buff[2]=1; //chainlen
 		mRSA.getPublicKey(buff+3,&keySize);
-		((CASocket*)muxIn)->send(buff,messageSize+2);
-		
+		if(((CASocket*)muxIn)->send(buff,messageSize+2)!=messageSize+2)
+			{
+				CAMsg::printMsg(LOG_ERR,"Error sending Key-Info!\n");
+				delete buff;
+				return E_UNKNOWN;
+			}
 		UINT8 strTarget[255];
 		options.getTargetHost(strTarget,255);
 		maddrSquid.setAddr((char*)strTarget,options.getTargetPort());
 
 		options.getSOCKSHost(strTarget,255);
 		maddrSocks.setAddr((char*)strTarget,options.getSOCKSPort());
-		
+		delete buff;
 		return E_SUCCESS;
 	}
 
