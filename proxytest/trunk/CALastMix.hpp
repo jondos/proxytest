@@ -35,6 +35,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketAddrINet.hpp"
 #include "CACacheLoadBalancing.hpp"
 #include "CASignature.hpp"
+#include "CAUtil.hpp"
 
 class CALastMix:public CAMix
 
@@ -60,9 +61,9 @@ class CALastMix:public CAMix
 			friend THREAD_RETURN loopLog(void*);
 			volatile bool m_bRunLog;
 			volatile UINT32 m_logUploadedPackets;
-			volatile UINT32 m_logUploadedBytes;
+			volatile UINT64 m_logUploadedBytes;
 			volatile UINT32 m_logDownloadedPackets;
-			volatile UINT32 m_logDownloadedBytes;
+			volatile UINT64 m_logDownloadedBytes;
 	};
 
 #endif
