@@ -264,7 +264,7 @@ SINT32 CALastMix::init()
 			}
 		
 		CAMsg::printMsg(LOG_INFO,"connected!\n");
-		CAMsg::printMsg(LOG_INFO,"Sending Infos (chain length and RSA-Key)\n");
+		CAMsg::printMsg(LOG_INFO,"Sending Infos (chain length and RSA-Key, RSA-Keysize %u)\n",mRSA.getPublicKeySize());
 		UINT32 keySize=mRSA.getPublicKeySize();
 		UINT16 messageSize=keySize+1;
 		UINT8* buff=new UINT8[messageSize+2];
