@@ -33,6 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASignature.hpp"
 #include "CACertificate.hpp"
 #include "CAThread.hpp"
+#include "CAMix.hpp"
 #ifdef LOG_CRIME
 	#include "tre/regex.h"
 #endif
@@ -71,7 +72,7 @@ class CACmdLnOptions
 	    ~CACmdLnOptions();
 			void clean();
 			SINT32 parse(int argc,const char** arg);
-			SINT32 reread();
+			SINT32 reread(CAMix* pMix);
 	    bool getDaemon();
       //bool getProxySupport();
 
@@ -105,6 +106,19 @@ class CACmdLnOptions
 	   
 			//if we have more than one Target (currently only Caches are possible...)
 			UINT32 getTargetInterfaceCount(){return m_cnTargets;}
+
+			/** Fills a \c TargetInterface struct with the values which belongs to
+				* the target interface \c nr.
+				* This is actual a copy of all values, so the caller is responsible 
+				* for destroying them after use!
+				*
+				* @param oTargetInterface \c TargetInterface struct, which gets filles with
+				*															the values of target interface \c nr
+				*	@param nr the index of the target interface, for whcih information
+				*					is request (starting with 1 for the first interface)
+				* @retval E_SUCCESS if successful
+				* @retval E_UNKNOWN if \c nr is out of range
+				*/
 			SINT32 getTargetInterface(TargetInterface& oTargetInterface, UINT32 nr)
 				{
 					if(nr>0&&nr<=m_cnTargets)
@@ -188,6 +202,7 @@ class CACmdLnOptions
 #endif
 		friend THREAD_RETURN threadReConfigure(void *param);
 		private:
+			UINT8*	m_strConfigFile; //the filename of the config file
 			bool		m_bIsRunReConfigure; //true, if an async reconfigure is under way 
 	    CAMutex m_csReConfigure; //Ensures that reconfigure is running only once at the same time;
 			CAThread m_threadReConfigure; //Thread, that does the actual reconfigure work
@@ -223,6 +238,9 @@ class CACmdLnOptions
 			UINT32 m_nCrimeRegExps;
 #endif
 		private:
+			SINT32 setNewValues(CACmdLnOptions& newOptions);
+			SINT32 readXmlConfiguration(DOM_Document& docConfig,const UINT8* const configFileName);
 			SINT32 processXmlConfiguration(DOM_Document& docConfig);
+			SINT32 clearTargetInterfaces();
 	};
 #endif

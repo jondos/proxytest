@@ -28,6 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "StdAfx.h"
 #include "CACmdLnOptions.hpp"
 #include "CAUtil.hpp"
+#include "CAMix.hpp"
 #include "CAMsg.hpp"
 #include "CASocketAddrINet.hpp"
 #include "xml/DOM_Output.hpp"
@@ -54,6 +55,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_pNextMixCertificate=NULL;
 		m_bCompressedLogs=false;
 		m_bAutoReconnect=false;
+		m_strConfigFile=NULL;
   }
 
 CACmdLnOptions::~CACmdLnOptions()
@@ -61,8 +63,28 @@ CACmdLnOptions::~CACmdLnOptions()
 		clean();
 	}
 
+/** Deletes all information about the target interfaces.
+	*/
+SINT32 CACmdLnOptions::clearTargetInterfaces()
+	{
+		if(m_arTargetInterfaces!=NULL)
+			{
+				for(UINT32 i=0;i<m_cnTargets;i++)
+					delete m_arTargetInterfaces[i].addr;
+				delete[] m_arTargetInterfaces;
+			}
+		m_cnTargets=0;
+		m_arTargetInterfaces=NULL;
+		return E_SUCCESS;
+	}
+
 void CACmdLnOptions::clean()
   {
+		if(m_strConfigFile!=NULL)
+			{
+				delete[] m_strConfigFile;
+				m_strConfigFile=NULL;
+			}
 		if(m_strTargetHost!=NULL)
 			{
 				delete[] m_strTargetHost;
@@ -85,10 +107,7 @@ void CACmdLnOptions::clean()
 			delete[] m_strMixXml;
 		if(m_strMixID!=NULL)
 			delete[] m_strMixID;
-		if(m_arTargetInterfaces!=NULL)
-			{
-				delete[] m_arTargetInterfaces;
-			}
+		clearTargetInterfaces();
 		if(m_pSignKey!=NULL)
 			delete m_pSignKey;
 		if(m_pOwnCertificate!=NULL)
@@ -149,25 +168,17 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 		m_bAutoReconnect=true;
 	if(configfile!=NULL)
 		{
-			
-			int handle;
-			handle=open(configfile,O_BINARY|O_RDONLY);
-			if(handle==-1)
+			SINT32 ret=readXmlConfiguration(docMixXml,(UINT8*)configfile);	
+			if(ret==E_FILE_OPEN)		
+				CAMsg::printMsg(LOG_CRIT,"Couldt not open config file: %s\n",configfile);
+			else if(ret==E_FILE_READ)
 				CAMsg::printMsg(LOG_CRIT,"Couldt not read config file: %s\n",configfile);
-			else
+			else if(ret==E_XML_PARSE)
+				CAMsg::printMsg(LOG_CRIT,"Couldt not parse config file: %s\n",configfile);
+			else			
 				{
-					SINT32 len=filelength(handle);
-					UINT8* tmpChar=new UINT8[len];
-					read(handle,tmpChar,len);
-					close(handle);
-					DOMParser parser;
-					MemBufInputSource in(tmpChar,len,"tmpConfigBuff");
-					parser.parse(in);
-					delete[] tmpChar;
-					if(parser.getErrorCount()>0)
-						CAMsg::printMsg(LOG_CRIT,"There were errors parsing the config file: %s\n",configfile);
-					else	
-						docMixXml=parser.getDocument();
+					m_strConfigFile=new UINT8[strlen(configfile)+1];
+					memcpy(m_strConfigFile,configfile,strlen(configfile)+1);
 				}
 			free(configfile);
 		}
@@ -285,32 +296,83 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 	return E_SUCCESS;
  }
 
+struct t_CMNDLN_REREAD_PARAMS
+	{
+		CACmdLnOptions* pCmdLnOptions;
+		CAMix* pMix;
+	};
+
+/** Copies options from \c newOptions. Only those options which are specified
+	* in \c newOptions are copied. The others are left uuntouched!
+	* 
+	* @param newOptions \c CACmdLnOptions object from which the new values are copied
+	* @retval E_UNKNOWN if an error occurs
+	* @retval E_SUCCESS otherwise
+	*/
+SINT32 CACmdLnOptions::setNewValues(CACmdLnOptions& newOptions)
+	{
+		//Copy Targets
+		if(newOptions.getTargetInterfaceCount()>0)
+			{
+				clearTargetInterfaces();
+				m_cnTargets=newOptions.getTargetInterfaceCount();
+				m_arTargetInterfaces=new TargetInterface[m_cnTargets];
+				for(UINT32 i=0;i<m_cnTargets;i++)
+					newOptions.getTargetInterface(m_arTargetInterfaces[i],i+1);
+			}
+		return E_SUCCESS;
+	}
+
+
 /** Rereads the configuration file (if one was given on startup) and reconfigures
 	* the mix according to the new values. This is done asyncronous. A new thread is
 	* started, which does the actual work.
 	* @retval E_SUCCESS if successful
 	* @retval E_UNKNOWN if an error occurs
 	*/
-SINT32 CACmdLnOptions::reread()
+SINT32 CACmdLnOptions::reread(CAMix* pMix)
 	{
 		if(m_bIsRunReConfigure)
 			return E_UNKNOWN;
 		m_csReConfigure.lock();
 		m_bIsRunReConfigure=true;
 		m_threadReConfigure.setMainLoop(threadReConfigure);
-		m_threadReConfigure.start(this);
+		t_CMNDLN_REREAD_PARAMS* param=new t_CMNDLN_REREAD_PARAMS;
+		param->pCmdLnOptions=this;
+		param->pMix=pMix;
+		m_threadReConfigure.start(param);
 		m_csReConfigure.unlock();
 		return E_SUCCESS;
 	}
 
 /** Thread that does the actual reconfigure work. Only one is running at the same time.
-	* @param param pointer to the \c CAComdLnOptions object
+	* @param param pointer to a \c t_CMNDLN_REREAD_PARAMS stuct containing a
+	* CACmdLnOptions object pointer and a CMix object pointer.
 	*/
 THREAD_RETURN threadReConfigure(void *param)
 	{
-		CACmdLnOptions* pOptions=(CACmdLnOptions*)param;
+		CACmdLnOptions* pOptions=((t_CMNDLN_REREAD_PARAMS*)param)->pCmdLnOptions;
+		CAMix* pMix=((t_CMNDLN_REREAD_PARAMS*)param)->pMix;
 		pOptions->m_csReConfigure.lock();
 		CAMsg::printMsg(LOG_DEBUG,"ReConfiguration of the Mix is under way....\n");
+		CACmdLnOptions otmpOptions;
+		DOM_Document docConfig;
+		if(otmpOptions.readXmlConfiguration(docConfig,pOptions->m_strConfigFile)!=E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_DEBUG,"Could not re-read the config file!\n");
+				goto REREAD_FINISH;
+			}
+		CAMsg::printMsg(LOG_DEBUG,"Re-readed config file -- start processing config file!\n");
+		if(otmpOptions.processXmlConfiguration(docConfig)!=E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_DEBUG,"Re-readed config file -- could not process configuration!\n");
+				goto REREAD_FINISH;
+			}			
+		pOptions->setNewValues(otmpOptions);
+		if(pMix!=NULL)
+			pMix->reconfigure();
+
+REREAD_FINISH:
 		pOptions->m_bIsRunReConfigure=false;
 		CAMsg::printMsg(LOG_DEBUG,"ReConfiguration of the Mix finished!\n");
 		pOptions->m_csReConfigure.unlock();
@@ -460,6 +522,44 @@ SINT32 CACmdLnOptions::getMixXml(UINT8* buffXml,UINT32* len)
 		return E_SUCCESS;
 	}
 
+/** Tries to read the XML configuration file \c configFile and parses (but not process) it.
+	* Returns the parsed document as \c DOM_Document.
+	* @param docConfig on return contains the parsed XMl document
+	* @param configFile file name of the XML config file
+	* @retval E_SUCCESS if successful
+	* @retval E_FILE_OPEN if error in opening the file
+	* @retval E_FILE_READ if not the whole file could be read
+	* @retval E_XML_PARSE if the file could not be parsed
+	*/
+SINT32 CACmdLnOptions::readXmlConfiguration(DOM_Document& docConfig,const UINT8* const configFile)
+	{
+		int handle;
+		handle=open((char*)configFile,O_BINARY|O_RDONLY);
+		if(handle==-1)
+			return E_FILE_OPEN;
+		SINT32 len=filelength(handle);
+		UINT8* tmpChar=new UINT8[len];
+		int ret=read(handle,tmpChar,len);
+		close(handle);
+		if(ret!=len)
+			return E_FILE_READ;
+		DOMParser parser;
+		MemBufInputSource in(tmpChar,len,"tmpConfigBuff");
+		parser.parse(in);
+		delete[] tmpChar;
+		if(parser.getErrorCount()>0)
+			return E_XML_PARSE;
+		docConfig=parser.getDocument();
+		return E_SUCCESS;
+	}
+
+/** Processes a XML configuration document. This sets the values of the 
+	* options to the values found in the XML document.
+	* Note that only the values are changed, which are given in the XML document!
+	* @param docConfig the configuration as XML document
+	* @retval E_UNKNOWN if an error occurs
+	* @retval E_SUCCESS otherwise
+	*/
 SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 	{
 		if(docConfig==NULL)

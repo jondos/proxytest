@@ -250,6 +250,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define E_TIMEDOUT -301 //An opertion has timed out
 #define E_SOCKETCLOSED -302 //An operation which required an open socket uses a closed socket
 #define E_UNKNOWN_HOST -400 // A hostname could not be resolved
+#define E_FILE_OPEN -500 //Error in opening a file
+#define E_FILE_READ -501 //Error in opening a file
+#define E_XML_PARSE -600 //Error in parsing XML
 
 #include <assert.h>
 
