@@ -25,31 +25,26 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
-#include "StdAfx.h"
 #ifdef HAVE_UNIX_DOMAIN_PROTOCOL
-#include "CASocketAddrUnix.hpp"
-const int CASocketAddrUnix::m_Type=AF_LOCAL;
+	#ifndef __CASOCKETADDRUNIX__
+	#define __CASOCKETADDRUNIX__
+	#include "CASocketAddr.hpp"
+	class CASocketAddrUnix:public CASocketAddr,sockaddr_un
+		{
+			public:
+				CASocketAddrUnix();
+				~CASocketAddrUnix();
+				
+				static const int m_Type;
+				SINT32 getSize();
+				
+				/*UNIX-Domain*/
+				CASocketAddr(char* szPath);
+				
 
+				/*UNIX-Domain*/
+				SINT32 setPath(char* path);
+		};
 
-CASocketAddrUnix::CASocketAddrUnix()
-	{
-	}
-
-CASocketAddrUnix::~CASocketAddrUnix()
-	{
-	}
-
-SINT32 CASocketAddrINet::getSize()
-	{
-		return sizeof(sockaddr_un);
-	}
-
-
-SINT32 CASocketAddrUnix::setPath(char* path)
-	{
-		sun_family=AF_LOCAL;
-//		((sockaddr_un*)m_pAddr)->sun_len=strlen(path);
-		strcpy(sun_path,path);
-		return E_SUCCESS;
-	}
+	#endif
 #endif
