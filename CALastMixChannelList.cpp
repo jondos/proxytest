@@ -27,6 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #include "StdAfx.h"
 #include "CALastMixChannelList.hpp"
+#include "CAUtil.hpp"
 
 CALastMixChannelList::CALastMixChannelList()
 	{
@@ -46,8 +47,8 @@ CALastMixChannelList::~CALastMixChannelList()
 				while(akt!=NULL)
 					{
 						tmp=akt;
-						delete akt;
-						akt=tmp->list_Channels.next;
+						akt=akt->list_Channels.next;
+						delete tmp;
 					}
 			}
 		delete[] m_HashTable;
@@ -90,8 +91,8 @@ SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCip
 				m_listSockets->list_Sockets.prev=pNewEntry;
 				m_listSockets=pNewEntry;				
 			}
-		if(m_listSocketsNext==NULL)
-			m_listSocketsNext=m_listSockets;
+		//if(m_listSocketsNext==NULL)
+		//	m_listSocketsNext=m_listSockets;
 		m_nChannels++;
 		return E_SUCCESS;
 	}
@@ -124,7 +125,7 @@ SINT32 CALastMixChannelList::removeChannel(HCHANNEL channel)
 							pEntry->list_Sockets.prev->list_Sockets.next=pEntry->list_Sockets.next;
 						if(pEntry->list_Sockets.next!=NULL)
 							pEntry->list_Sockets.next->list_Sockets.prev=pEntry->list_Sockets.prev;
-
+						delete pEntry;
 						m_nChannels--;					
 						return E_SUCCESS;
 					}
@@ -132,3 +133,48 @@ SINT32 CALastMixChannelList::removeChannel(HCHANNEL channel)
 			}
 		return E_SUCCESS;
 	}
+
+SINT32 CALastMixChannelList::test()
+				{
+					CALastMixChannelList oList;
+					UINT32 c;
+					UINT32 rand;
+					for(int i=0;i<10;i++)
+						{
+							getRandom(&c);
+							oList.add(c,NULL,NULL,NULL);
+						}
+					for(i=0;i<10;i++)
+						{
+							lmChannelListEntry* akt=oList.getFirstSocket();
+							while(akt!=NULL)
+								{
+									getRandom(&rand);
+									if(rand<0x7FFFFFFF)
+										{
+											getRandom(&c);
+											oList.add(c,NULL,NULL,NULL);
+										}
+									getRandom(&rand);
+									if(rand<0x7FFFFFFF)
+										oList.removeChannel(akt->channelIn);
+									getRandom(&rand);
+								/*	if(rand<0x0FFFFFFF)
+										for(int i=0;i<5;i++)
+											{
+												getRandom(&c);
+												oList.add(c,NULL,NULL,NULL);
+											}
+									*/getRandom(&rand);
+									if(rand<0x7FFFFFFF)
+										for(int i=0;i<10000;i++)
+											{
+												getRandom(&c);
+												oList.removeChannel(c);
+											}
+									akt=oList.getNextSocket();
+								}
+						}
+					return 0;
+				}
+	

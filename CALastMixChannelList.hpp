@@ -107,6 +107,7 @@ class CALastMixChannelList
 			SINT32 removeChannel(HCHANNEL channelIn);
 			UINT32 getSize(){return m_nChannels;}		
 			static SINT32 test();
+
 		private:
 			UINT32 m_nChannels; //Number of channels in list
 			///The Hash-Table of all channels.

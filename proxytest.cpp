@@ -53,6 +53,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CADatabase.hpp"
 #include "CACertificate.hpp"
 #include "CACertStore.hpp"
+#include "CALastMixChannelList.hpp"
 #include "xml/DOM_Output.hpp"
 //#include "CAPayment.hpp"
 //#ifdef _WIN32
@@ -327,7 +328,9 @@ Debug(dc::malloc.on());
 				RAND_seed(randbuff,sizeof(randbuff));
 			#endif
 		#endif
-
+		
+				CALastMixChannelList::test();
+				exit(0);
 	
 /*		UINT8 buff1[1024];
 		UINT32 len=1024;
