@@ -294,6 +294,7 @@ THREAD_RETURN fmIO(void *v)
 												if(tmpSocket!=NULL)
 													{
 														oSocketGroup.remove(*tmpSocket);
+														fmIOPair->muxOut.close(tmpCon->id);
 														tmpSocket->close();
 														delete tmpSocket;
 													}
