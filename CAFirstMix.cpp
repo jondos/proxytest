@@ -36,6 +36,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 extern CACmdLnOptions options;
 
+
+#ifndef PROT2
 SINT32 CAFirstMix::init()
 	{
 		CASocketAddr socketAddrIn(options.getServerPort());
@@ -75,7 +77,6 @@ SINT32 CAFirstMix::init()
 			}
 	}
 
-#ifndef PROT2
 SINT32 CAFirstMix::loop()
 	{
 		CAMuxChannelList  oMuxChannelList;
@@ -372,59 +373,96 @@ SINT32 CAFirstMix::loop()
 	}
 
 #else
-SINT32 CAFirstMix::loop()
+SINT32 CAFirstMix::initOnce()
 	{
-		CAMuxChannelList  oMuxChannelList;
-		CASocketGroup oSocketGroup;
-		oSocketGroup.add(socketIn);
-		oSocketGroup.add(muxOut);
-		HCHANNEL lastChannelId=1;
-		MUXPACKET oMuxPacket;
-		CONNECTION oConnection;
-		int len;
-		CAMuxSocket* newMuxSocket;
-		MUXLISTENTRY* tmpEntry;
-		REVERSEMUXLISTENTRY* tmpReverseEntry;
-		UINT8 buff[RSA_SIZE];
-		int countRead=0;
-		CAASymCipher oRSA;
-		oRSA.generateKeyPair(1024);
-		UINT32 keySize=oRSA.getPublicKeySize();
-		UINT16 infoSize=ntohs((*(UINT16*)recvBuff))+2;
-		UINT8* infoBuff=new UINT8[infoSize+keySize]; 
-		memcpy(infoBuff,recvBuff,infoSize);
-		infoBuff[2]++; //chainlen erhoehen
-		oRSA.getPublicKey(infoBuff+infoSize,&keySize);
-		infoSize+=keySize;
-		(*(UINT16*)infoBuff)=htons(infoSize-2);
-		#ifdef _DEBUG
-			CAMsg::printMsg(LOG_DEBUG,"New Key Info size: %u\n",infoSize);
-		#endif
-		#ifdef _DEBUG
-		 CAMsg::printMsg(LOG_DEBUG,"Size of MuxPacket: %u\n",sizeof(oMuxPacket));
-		 CAMsg::printMsg(LOG_DEBUG,"Pointer: %p,%p,%p\n",&oMuxPacket.channel,&oMuxPacket.flags,oMuxPacket.data);
-		#endif
-		CAInfoService oInfoService;
-		// reading SingKey....
 		UINT8* fileBuff=new UINT8[2048];
 		options.getKeyFileName(fileBuff,2048);
 		int handle=open((char*)fileBuff,O_BINARY|O_RDONLY);
 		if(handle==-1)
 			return E_UNKNOWN;
-		len=read(handle,fileBuff,2048);
+		SINT32 len=read(handle,fileBuff,2048);
 		close(handle);
-		CASignature oSignature;
-		if(oSignature.setSignKey(fileBuff,len,SIGKEY_XML)==-1)
+		if(mSignature.setSignKey(fileBuff,len,SIGKEY_XML)==-1)
 			{
 				delete fileBuff;
 				return E_UNKNOWN;
 			}
 		delete fileBuff;
-		oInfoService.setSignature(&oSignature);
+		return E_SUCCESS;
+	}
+
+SINT32 CAFirstMix::init()
+	{		
+		CASocketAddr addrNext;
+		UINT8 strTarget[255];
+		options.getTargetHost(strTarget,255);
+		addrNext.setAddr((char*)strTarget,options.getTargetPort());
+		CAMsg::printMsg(LOG_INFO,"Try connectiong to next Mix... %s:%u",strTarget,options.getTargetPort());
+		((CASocket*)muxOut)->create();
+		((CASocket*)muxOut)->setSendBuff(50*sizeof(MUXPACKET));
+		((CASocket*)muxOut)->setRecvBuff(50*sizeof(MUXPACKET));
+		if(muxOut.connect(&addrNext,10,10)!=E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Cannot connect to next Mix!\n");
+				return E_UNKNOWN;
+			}
+		CAMsg::printMsg(LOG_INFO," connected!\n");
+		UINT16 len;
+		((CASocket*)muxOut)->receive((UINT8*)&len,2);
+		CAMsg::printMsg(LOG_CRIT,"Received Key Info lenght %u\n",ntohs(len));
+		UINT8* recvBuff=new unsigned char[ntohs(len)+2];
+		memcpy(recvBuff,&len,2);
+		((CASocket*)muxOut)->receive(recvBuff+2,ntohs(len));
+		CAMsg::printMsg(LOG_CRIT,"Received Key Info...\n");
+
+		mRSA.generateKeyPair(1024);
+		UINT32 keySize=mRSA.getPublicKeySize();
+		mKeyInfoSize=ntohs((*(UINT16*)recvBuff))+2;
+		mKeyInfoBuff=new UINT8[mKeyInfoSize+keySize]; 
+		memcpy(mKeyInfoBuff,recvBuff,mKeyInfoSize);
+		delete recvBuff;
+		mKeyInfoBuff[2]++; //chainlen erhoehen
+		mRSA.getPublicKey(mKeyInfoBuff+mKeyInfoSize,&keySize);
+		mKeyInfoSize+=keySize;
+		(*(UINT16*)mKeyInfoBuff)=htons(mKeyInfoSize-2);
+		
+		CASocketAddr socketAddrIn(options.getServerPort());
+		socketIn.create();
+		socketIn.setReuseAddr(true);
+		if(socketIn.listen(&socketAddrIn)==SOCKET_ERROR)
+		    {
+					CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
+					return E_UNKNOWN;
+		    }
+		return E_SUCCESS;
+	}
+
+
+SINT32 CAFirstMix::loop()
+	{
+		CAMuxChannelList  oMuxChannelList;
+		REVERSEMUXLISTENTRY* tmpReverseEntry;
+		MUXLISTENTRY* tmpMuxListEntry;
+	
+		CASocketGroup oSocketGroup;
+		CAMuxSocket* pnewMuxSocket;
+		SINT32 countRead;
+		HCHANNEL lastChannelId=1;
+		MUXPACKET oMuxPacket;
+		CONNECTION oConnection;
+		CAInfoService oInfoService;
+		UINT32 nUser=0;
+		SINT32 ret;
+		UINT8 rsaBuff[RSA_SIZE];
+
+		oSocketGroup.add(socketIn);
+		oSocketGroup.add(muxOut);
+
+		oInfoService.setSignature(&mSignature);
 		oInfoService.setLevel(0,-1,-1);
 		oInfoService.sendHelo();
 		oInfoService.start();
-		int nUser=0;
+
 		for(;;)
 			{
 				if((countRead=oSocketGroup.select())==SOCKET_ERROR)
@@ -439,32 +477,32 @@ SINT32 CAFirstMix::loop()
 						#ifdef _DEBUG
 							CAMsg::printMsg(LOG_DEBUG,"New Connection from Browser!\n");
 						#endif
-						newMuxSocket=new CAMuxSocket;
-						if(socketIn.accept(*(CASocket*)newMuxSocket)==SOCKET_ERROR)
+						pnewMuxSocket=new CAMuxSocket;
+						if(socketIn.accept(*(CASocket*)pnewMuxSocket)==SOCKET_ERROR)
 							{
 								CAMsg::printMsg(LOG_ERR,"Accept Error %u - Connection from Browser!\n",errno);
-								delete newMuxSocket;
+								delete pnewMuxSocket;
 							}
 						else
 							{
 								#ifdef _DEBUG
-									int ret=((CASocket*)newMuxSocket)->setKeepAlive(true);
+									int ret=((CASocket*)pnewMuxSocket)->setKeepAlive(true);
 									if(ret==SOCKET_ERROR)
 										CAMsg::printMsg(LOG_DEBUG,"Fehler bei KeepAlive!");
 								#else
-									((CASocket*)newMuxSocket)->setKeepAlive(true);
+									((CASocket*)pnewMuxSocket)->setKeepAlive(true);
 								#endif
-								((CASocket*)newMuxSocket)->send(infoBuff,infoSize);
-								oMuxChannelList.add(newMuxSocket);
+								((CASocket*)pnewMuxSocket)->send(mKeyInfoBuff,mKeyInfoSize);
+								oMuxChannelList.add(pnewMuxSocket);
 								nUser++;
 								oInfoService.setLevel(nUser,-1,-1);
-								oSocketGroup.add(*newMuxSocket);
+								oSocketGroup.add(*pnewMuxSocket);
 							}
 					}
 				if(oSocketGroup.isSignaled(muxOut))
 						{
-							len=muxOut.receive(&oMuxPacket);
-							if(len!=SOCKET_ERROR&&oMuxPacket.flags!=0) //close event
+							ret=muxOut.receive(&oMuxPacket);
+							if(ret!=SOCKET_ERROR&&oMuxPacket.flags!=0) //close event
 								{
 									#ifdef _DEBUG
 										CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u ... ",oMuxPacket.channel);
@@ -479,10 +517,10 @@ SINT32 CAFirstMix::loop()
 											#endif
 										}
 								}
-							else if(len==SOCKET_ERROR)
+							else if(ret==SOCKET_ERROR)
 								{
 									CAMsg::printMsg(LOG_CRIT,"Mux-Channel Receiving Data Error - Exiting!\n");									
-									exit(-1);
+									goto ERR;
 								}
 							else
 								{
@@ -493,11 +531,7 @@ SINT32 CAFirstMix::loop()
 									if(tmpReverseEntry!=NULL)
 										{
 											oMuxPacket.channel=tmpReverseEntry->inChannel;
-#ifndef AES
-											tmpReverseEntry->pCipher->decrypt((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
-#else
-											tmpReverseEntry->pCipher->decryptAES((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
-#endif
+											tmpReverseEntry->pCipher->decryptAES(oMuxPacket.data,oMuxPacket.data,DATA_SIZE);
 											tmpReverseEntry->pMuxSocket->send(&oMuxPacket);
 										}
 									else
@@ -569,17 +603,17 @@ SINT32 CAFirstMix::loop()
 				//	}
 				if(countRead>0)
 					{
-						tmpEntry=oMuxChannelList.getFirst();
-						while(tmpEntry!=NULL&&countRead>0)
+						tmpMuxListEntry=oMuxChannelList.getFirst();
+						while(tmpMuxListEntry!=NULL&&countRead>0)
 							{
-								if(oSocketGroup.isSignaled(*tmpEntry->pMuxSocket))
+								if(oSocketGroup.isSignaled(*tmpMuxListEntry->pMuxSocket))
 									{
 										countRead--;
-										len=tmpEntry->pMuxSocket->receive(&oMuxPacket);
-										if(len==SOCKET_ERROR)
+										ret=tmpMuxListEntry->pMuxSocket->receive(&oMuxPacket);
+										if(ret==SOCKET_ERROR)
 											{
 												MUXLISTENTRY otmpEntry;
-												if(oMuxChannelList.remove(tmpEntry->pMuxSocket,&otmpEntry))
+												if(oMuxChannelList.remove(tmpMuxListEntry->pMuxSocket,&otmpEntry))
 													{
 														oSocketGroup.remove(*(CASocket*)otmpEntry.pMuxSocket);
 														CONNECTION* tmpCon=otmpEntry.pSocketList->getFirst();
@@ -600,7 +634,7 @@ SINT32 CAFirstMix::loop()
 											{
 												if(oMuxPacket.flags!=0)
 													{
-														if(oMuxChannelList.get(tmpEntry,oMuxPacket.channel,&oConnection))
+														if(oMuxChannelList.get(tmpMuxListEntry,oMuxPacket.channel,&oConnection))
 															{
 																muxOut.close(oConnection.outChannel);
 																oMuxChannelList.remove(oConnection.outChannel,NULL);
@@ -616,54 +650,64 @@ SINT32 CAFirstMix::loop()
 												else
 													{
 														CASymCipher* pCipher=NULL;
-														if(oMuxChannelList.get(tmpEntry,oMuxPacket.channel,&oConnection))
+														if(oMuxChannelList.get(tmpMuxListEntry,oMuxPacket.channel,&oConnection))
 															{
 																oMuxPacket.channel=oConnection.outChannel;
 																pCipher=oConnection.pCipher;
-#ifndef AES
-																pCipher->decrypt((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
-#else
 																pCipher->decryptAES((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
-#endif
 														}
 														else
 															{
 																pCipher= new CASymCipher();
-																oRSA.decrypt((unsigned char*)oMuxPacket.data,buff);
-#ifndef AES
-																pCipher->setDecryptionKey(buff);
-//																pCipher->setEncryptionKey(buff);
-																pCipher->decrypt((unsigned char*)oMuxPacket.data+RSA_SIZE,
-																								 (unsigned char*)oMuxPacket.data+RSA_SIZE-KEY_SIZE,
+																mRSA.decrypt(oMuxPacket.data,rsaBuff);
+																pCipher->setDecryptionKeyAES(rsaBuff);
+																pCipher->decryptAES(oMuxPacket.data+RSA_SIZE,
+																								 oMuxPacket.data+RSA_SIZE-KEY_SIZE,
 																								 DATA_SIZE-RSA_SIZE);
-#else
-																pCipher->setDecryptionKeyAES(buff);
-//																pCipher->setEncryptionKeyAES(buff);
-																pCipher->decryptAES((unsigned char*)oMuxPacket.data+RSA_SIZE,
-																								 (unsigned char*)oMuxPacket.data+RSA_SIZE-KEY_SIZE,
-																								 DATA_SIZE-RSA_SIZE);
-#endif
-																memcpy(oMuxPacket.data,buff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
+																memcpy(oMuxPacket.data,rsaBuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
 																
-																oMuxChannelList.add(tmpEntry,oMuxPacket.channel,lastChannelId,pCipher);
+																oMuxChannelList.add(tmpMuxListEntry,oMuxPacket.channel,lastChannelId,pCipher);
 																#ifdef _DEBUG
 																	CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",lastChannelId);
 																#endif
 																oMuxPacket.channel=lastChannelId++;
-																//oMuxPacket.len=oMuxPacket.len-16;
 															}
 														if(muxOut.send(&oMuxPacket)==SOCKET_ERROR)
 															{
 																CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Exiting!\n");									
-																exit(-1);
+																goto ERR;
 															}
 												}
 											}
 									}
-								tmpEntry=oMuxChannelList.getNext();
+								tmpMuxListEntry=oMuxChannelList.getNext();
 							}
 					}
 			}
+ERR:
+		socketIn.close();
+		muxOut.close();
+		tmpMuxListEntry=oMuxChannelList.getFirst();
+		while(tmpMuxListEntry!=NULL)
+			{
+				tmpMuxListEntry->pMuxSocket->close();
+				delete tmpMuxListEntry->pMuxSocket;
+				
+				CONNECTION* tmpCon=tmpMuxListEntry->pSocketList->getFirst();
+				while(tmpCon!=NULL)
+					{
+						delete tmpCon->pCipher;
+						tmpCon=tmpMuxListEntry->pSocketList->getNext();
+					}
+				tmpMuxListEntry=oMuxChannelList.getNext();
+			}
+
+		return E_UNKNOWN;
+	}
+
+SINT32 CAFirstMix::clean()
+	{
+		mRSA.destroy();
 		return E_SUCCESS;
 	}
 

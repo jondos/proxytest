@@ -40,11 +40,21 @@ class CALastMix:public CAMix
 		private:
 			SINT32 loop();
 			SINT32 init();
+#ifdef PROT2
+			SINT32 clean();
+#endif
 		private:
 			CAMuxSocket		muxIn;
+#ifndef PROT2
+
 			CASocketAddr	addrSquid;
 			CASocketAddr	addrSocks;
 			CAASymCipher* pRSA;
+#else
+			CASocketAddr	maddrSquid;
+			CASocketAddr	maddrSocks;
+			CAASymCipher mRSA;
+#endif
 	};
 
 #endif

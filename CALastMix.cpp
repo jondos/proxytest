@@ -34,6 +34,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 extern CACmdLnOptions options;
 
+
+
+#ifndef PROT2
 SINT32 CALastMix::init()
 	{
 		pRSA=new CAASymCipher();
@@ -67,7 +70,6 @@ SINT32 CALastMix::init()
 		return E_SUCCESS;
 	}
 
-#ifndef PROT2
 SINT32 CALastMix::loop()
 	{
 		CASocketList  oSocketList;
@@ -236,16 +238,50 @@ SINT32 CALastMix::loop()
 	}
 
 #else
+SINT32 CALastMix::init()
+	{
+		mRSA.generateKeyPair(1024);
+		CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...");
+		if(muxIn.accept(options.getServerPort())==SOCKET_ERROR)
+		    {
+					CAMsg::printMsg(LOG_CRIT," failed!\n");
+					return E_UNKNOWN;
+		    }
+		((CASocket*)muxIn)->setRecvBuff(50*sizeof(MUXPACKET));
+		((CASocket*)muxIn)->setSendBuff(50*sizeof(MUXPACKET));
+		
+		CAMsg::printMsg(LOG_INFO,"connected!\n");
+		CAMsg::printMsg(LOG_INFO,"Sending Infos (chain length and RSA-Key)\n");
+		UINT32 keySize=mRSA.getPublicKeySize();
+		UINT16 messageSize=keySize+1;
+		UINT8* buff=new UINT8[messageSize+2];
+		(*(UINT16*)buff)=htons(messageSize);
+		buff[2]=1; //chainlen
+		mRSA.getPublicKey(buff+3,&keySize);
+		((CASocket*)muxIn)->send(buff,messageSize+2);
+		
+		UINT8 strTarget[255];
+		options.getTargetHost(strTarget,255);
+		maddrSquid.setAddr((char*)strTarget,options.getTargetPort());
+
+		options.getSOCKSHost(strTarget,255);
+		maddrSocks.setAddr((char*)strTarget,options.getSOCKSPort());
+		
+		return E_SUCCESS;
+	}
+
 SINT32 CALastMix::loop()
 	{
 		CASocketList  oSocketList;
 		CASocketGroup oSocketGroup;
-		oSocketGroup.add(muxIn);
 		MUXPACKET oMuxPacket;
-		int len;
-		int countRead;
+		SINT32 ret;
+		SINT32 countRead;
 		CONNECTION oConnection;
-		unsigned char buff[RSA_SIZE];
+		UINT8 rsaBuff[RSA_SIZE];
+		CONNECTION* tmpCon;
+		
+		oSocketGroup.add(muxIn);
 		for(;;)
 			{
 					if((countRead=oSocketGroup.select())==SOCKET_ERROR)
@@ -256,11 +292,11 @@ SINT32 CALastMix::loop()
 				if(oSocketGroup.isSignaled(muxIn))
 					{
 						countRead--;
-						len=muxIn.receive(&oMuxPacket);
-						if(len==SOCKET_ERROR)
+						ret=muxIn.receive(&oMuxPacket);
+						if(ret==SOCKET_ERROR)
 							{
 								CAMsg::printMsg(LOG_CRIT,"Channel to previous mix closed -- Exiting!\n");
-								exit(-1);
+								goto ERR;
 							}
 						if(!oSocketList.get(oMuxPacket.channel,&oConnection))
 							{
@@ -271,19 +307,19 @@ SINT32 CALastMix::loop()
 										#endif
 		
 										CASymCipher* newCipher=new CASymCipher();
-										pRSA->decrypt((unsigned char*)oMuxPacket.data,buff);
-										newCipher->setDecryptionKeyAES(buff);
-										newCipher->decryptAES((unsigned char*)oMuxPacket.data+RSA_SIZE,
-																			 (unsigned char*)oMuxPacket.data+RSA_SIZE-KEY_SIZE,
-																			 DATA_SIZE-RSA_SIZE);
-										memcpy(oMuxPacket.data,buff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
+										mRSA.decrypt(oMuxPacket.data,rsaBuff);
+										newCipher->setDecryptionKeyAES(rsaBuff);
+										newCipher->decryptAES(oMuxPacket.data+RSA_SIZE,
+																					oMuxPacket.data+RSA_SIZE-KEY_SIZE,
+																					DATA_SIZE-RSA_SIZE);
+										memcpy(oMuxPacket.data,rsaBuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
 												
 										CASocket* tmpSocket=new CASocket;										
 										int ret;
 										if(oMuxPacket.payload.type==MUX_SOCKS)
-											ret=tmpSocket->connect(&addrSocks);
+											ret=tmpSocket->connect(&maddrSocks);
 										else
-											ret=tmpSocket->connect(&addrSquid);	
+											ret=tmpSocket->connect(&maddrSquid);	
 										if(ret!=E_SUCCESS)
 										    {
 	    										#ifdef _DEBUG
@@ -320,7 +356,7 @@ SINT32 CALastMix::loop()
 									}
 								else
 									{
-										CAMsg::printMsg(LOG_CRIT,"Should never be here!!! New Channel wich Chaneel detroy packet!\n");
+										CAMsg::printMsg(LOG_CRIT,"Should never be here!!! New Channel wich Channel detroy packet!\n");
 									}
 							}
 						else
@@ -336,19 +372,13 @@ SINT32 CALastMix::loop()
 									}
 								else
 									{
-#ifndef AES
-										oConnection.pCipher->decrypt((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
-#else
-										oConnection.pCipher->decryptAES((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
-#endif
-										
-		//								PAYLOAD* pPayload=(PAYLOAD*)&(oMuxPacket.data);		
+										oConnection.pCipher->decryptAES(oMuxPacket.data,oMuxPacket.data,DATA_SIZE);
 										#ifdef _DEBUG
 											oMuxPacket.payload.data[ntohs(oMuxPacket.payload.len)]=0;
 											CAMsg::printMsg(LOG_DEBUG,"%u\n%s",ntohs(oMuxPacket.payload.len),oMuxPacket.payload.data);
 										#endif
-										len=oConnection.pSocket->send(oMuxPacket.payload.data,ntohs(oMuxPacket.payload.len));
-										if(len==SOCKET_ERROR)
+										ret=oConnection.pSocket->send(oMuxPacket.payload.data,ntohs(oMuxPacket.payload.len));
+										if(ret==SOCKET_ERROR)
 											{
 												oSocketGroup.remove(*(oConnection.pSocket));
 												oConnection.pSocket->close();
@@ -362,7 +392,6 @@ SINT32 CALastMix::loop()
 					}
 				if(countRead>0)
 					{
-						CONNECTION* tmpCon;
 						tmpCon=oSocketList.getFirst();
 						while(tmpCon!=NULL&&countRead>0)
 							{
@@ -372,9 +401,8 @@ SINT32 CALastMix::loop()
 										#ifdef _DEBUG
 										    CAMsg::printMsg(LOG_DEBUG,"Receiving Data from Squid!");
 										#endif
-										//PAYLOAD* pPayload=(PAYLOAD*)&(oMuxPacket.data);		
-										len=tmpCon->pSocket->receive(oMuxPacket.payload.data,PAYLOAD_SIZE);
-										if(len==SOCKET_ERROR||len==0)
+										ret=tmpCon->pSocket->receive(oMuxPacket.payload.data,PAYLOAD_SIZE);
+										if(ret==SOCKET_ERROR||ret==0)
 											{
 												#ifdef _DEBUG
 														CAMsg::printMsg(LOG_DEBUG,"Closing Connection from Squid!\n");
@@ -385,19 +413,18 @@ SINT32 CALastMix::loop()
 												delete tmpCon->pSocket;
 												delete tmpCon->pCipher;
 												oSocketList.remove(tmpCon->id);
-												break;
 											}
 										else 
 											{
 												oMuxPacket.channel=tmpCon->id;
 												oMuxPacket.flags=0;
-												oMuxPacket.payload.len=htons((UINT16)len);
+												oMuxPacket.payload.len=htons((UINT16)ret);
 												oMuxPacket.payload.type=0;
 												tmpCon->pCipher->decryptAES(oMuxPacket.data,oMuxPacket.data,DATA_SIZE);
 												if(muxIn.send(&oMuxPacket)==SOCKET_ERROR)
 													{
 														CAMsg::printMsg(LOG_CRIT,"Mux Data Sending Error - Exiting!\n");
-														exit(-1);
+														goto ERR;
 													}
 											}
 									}
@@ -405,6 +432,22 @@ SINT32 CALastMix::loop()
 							}
 					}
 			}
+ERR:
+		tmpCon=oSocketList.getFirst();
+		while(tmpCon!=NULL)
+			{
+				delete tmpCon->pCipher;
+				tmpCon->pSocket->close();
+				delete tmpCon->pSocket;
+				tmpCon=tmpCon->next;
+			}
+		return E_UNKNOWN;
+	}
+
+SINT32 CALastMix::clean()
+	{
+		muxIn.close();
+		mRSA.destroy();
 		return E_SUCCESS;
 	}
 

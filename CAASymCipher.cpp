@@ -36,7 +36,14 @@ CAASymCipher::CAASymCipher()
 
 CAASymCipher::~CAASymCipher()
 	{
+		destroy();
+	}
+
+SINT32 CAASymCipher::destroy()
+	{
 		RSA_free(rsa);
+		rsa=NULL;
+		return E_SUCCESS;
 	}
 
 /** Decrypts exactly one block which is stored in @c from. 

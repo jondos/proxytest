@@ -39,10 +39,18 @@ class CAMiddleMix:public CAMix
 		private:
 			SINT32 loop();
 			SINT32 init();
+#ifdef PROT2
+			SINT32 clean();
+#endif
 		private:
 			CAMuxSocket muxIn;
 			CAMuxSocket muxOut;
+#ifndef PROT2
 			CAASymCipher oRSA;
+
+#else
+			CAASymCipher mRSA;
+#endif
 	};
 
 #endif

@@ -36,43 +36,59 @@ typedef UINT32 HCHANNEL;
 #define MUX_SOCKS 1
 
 #ifndef PROT2
-#define DATA_SIZE 1000 // Size of Data in a single Mux Packet
+	#define DATA_SIZE 1000 // Size of Data in a single Mux Packet
 
-
-typedef struct t_MuxPacket
-	{
-		HCHANNEL channel;
-		UINT16	len;
-		UINT8		type;
-		UINT8		reserved;
-		UINT8		data[DATA_SIZE];
-	} MUXPACKET;
+	typedef struct t_MuxPacket
+		{
+			HCHANNEL channel;
+			UINT16	len;
+			UINT8		type;
+			UINT8		reserved;
+			UINT8		data[DATA_SIZE];
+		} MUXPACKET;
 
 #else
 
-#define DATA_SIZE 992
-#define PAYLOAD_SIZE 989
-//#pragma pack( push, t_MuxPacket )
-//#pragma pack(1)
+	#define DATA_SIZE 992
+	#define PAYLOAD_SIZE 989
 
-typedef struct t_MuxPacket
-	{
-		HCHANNEL channel;
-		UINT16  flags;
-		union
+	#ifdef WIN32
+		#pragma pack( push, t_MuxPacket )
+		#pragma pack(1)
+		typedef struct t_MuxPacket
 			{
-				UINT8		data[DATA_SIZE];
-				struct t_MuxPacketPayload
+				HCHANNEL channel;
+				UINT16  flags;
+				union
 					{
-						UINT16 len;
-						UINT8 type;
-						UINT8 data[PAYLOAD_SIZE];
-				} payload;
-			};
-	} __attribute__ ((__packed__)) MUXPACKET __attribute__ ((__packed__));
-//#pragma pack( pop, t_MuxPacket )
-
-#endif
+						UINT8		data[DATA_SIZE];
+						struct t_MuxPacketPayload
+							{
+								UINT16 len;
+								UINT8 type;
+								UINT8 data[PAYLOAD_SIZE];
+						} payload;
+					};
+			} MUXPACKET;
+		#pragma pack( pop, t_MuxPacket )
+	#else
+		typedef struct t_MuxPacket
+			{
+				HCHANNEL channel;
+				UINT16  flags;
+				union
+					{
+						UINT8		data[DATA_SIZE];
+						struct t_MuxPacketPayload
+							{
+								UINT16 len;
+								UINT8 type;
+								UINT8 data[PAYLOAD_SIZE];
+						} payload;
+					};
+			} __attribute__ ((__packed__)) MUXPACKET __attribute__ ((__packed__));
+	#endif //WIN32 
+#endif //PROT2
 
 class CAMuxSocket
 	{
