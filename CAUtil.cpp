@@ -161,6 +161,7 @@ SINT32 getcurrentTime(timespec& t)
 			gettimeofday(&tv,NULL); //getting millis...
 			t.tv_sec=tv.tv_sec;
 			t.tv_nsec=tv.tv_usec*1000;
+			return E_SUCCESS;
 	  #endif
 	}
 
