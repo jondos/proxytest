@@ -132,17 +132,17 @@ bool CACmdLnOptions::getDaemon()
 	return bDaemon;
     }
     
-int CACmdLnOptions::getServerPort()
+UINT16 CACmdLnOptions::getServerPort()
     {
 	return iServerPort;
     }
     
-int CACmdLnOptions::getSOCKSServerPort()
+UINT16 CACmdLnOptions::getSOCKSServerPort()
   {
 		return iSOCKSServerPort;
   }
 
-int CACmdLnOptions::getTargetPort()
+UINT16 CACmdLnOptions::getTargetPort()
     {
 	return iTargetPort;
     }
@@ -170,7 +170,7 @@ SINT32 CACmdLnOptions::getSOCKSHost(UINT8* host,UINT32 len)
 				return E_UNKNOWN;
 		if(len<=(int)strlen(strSOCKSHost))
 				{
-					return E_UNKOWN;		
+					return E_UNKNOWN;		
 				}
 		strcpy((char*)host,strSOCKSHost);
 		return (SINT32)strlen(strSOCKSHost);
