@@ -119,7 +119,7 @@ SINT32 CADatabase::stop()
 		return m_oThread.join();
 	}
 
-THREAD_RETURN loopMaintenance(void *param)
+static THREAD_RETURN loopMaintenance(void *param)
 	{
 		CADatabase* pDatabase=(CADatabase*)param;
 		pDatabase->m_bRun=true;

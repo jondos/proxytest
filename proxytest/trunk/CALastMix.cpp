@@ -282,7 +282,7 @@ SINT32 CALastMix::reconfigure()
 		return E_SUCCESS;
 	}
 
-THREAD_RETURN loopLog(void* param)
+static THREAD_RETURN loopLog(void* param)
 	{
 		CALastMix* pLastMix=(CALastMix*)param;
 		pLastMix->m_bRunLog=true;
@@ -312,7 +312,7 @@ THREAD_RETURN loopLog(void* param)
 1. Close connection to next mix
 2. put a byte in the Mix-Output-Queue
 */
-THREAD_RETURN lm_loopSendToMix(void* param)
+static THREAD_RETURN lm_loopSendToMix(void* param)
 	{
 		CAQueue* pQueue=((CALastMix*)param)->m_pQueueSendToMix;
 		CAMuxSocket* pMuxSocket=((CALastMix*)param)->m_pMuxIn;
@@ -398,7 +398,7 @@ SINT32 CALastMix::loop()
 			UINT32 diff_time; 
 		#endif
 		CAThread threadSendToMix;
-		threadSendToMix.setMainLoop(loopSendToMix);
+		threadSendToMix.setMainLoop(lm_loopSendToMix);
 		threadSendToMix.start(this);
 
 		for(;;)

@@ -53,7 +53,7 @@ class CAMiddleMix:public CAMix
 			CAASymCipher* m_pRSA;
 			CASignature* m_pSignature;
 			CAMiddleMixChannelList* m_pMiddleMixChannelList;
-			friend THREAD_RETURN loopDownStream(void *p);
+			friend static THREAD_RETURN loopDownStream(void *p);
 	};
 
 #endif
