@@ -37,25 +37,27 @@ class CASingleSocketGroup
 		public:
 			CASingleSocketGroup(){m_pollfd=new struct pollfd;}
 			~CASingleSocketGroup(){delete m_pollfd;}
-			SINT32 add(CASocket&s);
-			SINT32 add(CAMuxSocket&s);
-			SINT32 select();
+			
+			SINT32 add(CASocket&s)
+				{
+					m_pollfd->fd=(SOCKET)s;
+					return E_SUCCESS;
+				}
+
+			SINT32 add(CAMuxSocket&s)
+				{
+					m_pollfd->fd=(SOCKET)s;
+					return E_SUCCESS;
+				}
+
+			SINT32 select()
+				{
+					m_pollfd->events=POLLIN;
+					return ::poll(m_pollfd,1,-1);
+				}
+			
 			SINT32 select(bool bWrite,UINT32 time_ms);
-/*			bool isSignaled(CASocket&s)
-				{
-					return FD_ISSET((SOCKET)s,&m_signaled_set)!=0;
-				}
 
-			bool isSignaled(CASocket*ps)
-				{
-					return FD_ISSET((SOCKET)*ps,&m_signaled_set)!=0;
-				}
-
-			bool isSignaled(CAMuxSocket&s)
-				{
-					return FD_ISSET((SOCKET)s,&m_signaled_set)!=0;
-				}
-*/
 		protected:
 			struct pollfd* m_pollfd;
 	};

@@ -32,7 +32,15 @@ class CASocketGroup
 	{
 		public:
 			CASocketGroup();
-			~CASocketGroup(){DeleteCriticalSection(&m_csFD_SET);}
+			~CASocketGroup()
+				{
+					DeleteCriticalSection(&m_csFD_SET);
+					#ifdef HAVE_POLL
+						delete[] m_pollfd_read;
+						delete[] m_pollfd_write;
+					#endif
+				}
+			
 			SINT32 add(CASocket&s);
 			SINT32 add(CAMuxSocket&s);
 			SINT32 remove(CASocket&s);
@@ -41,25 +49,42 @@ class CASocketGroup
 			SINT32 select(bool bWrite,UINT32 time_ms);
 			bool isSignaled(CASocket&s)
 				{
-					return FD_ISSET((SOCKET)s,&m_signaled_set)!=0;
+					#ifndef HAVE_POLL
+						return FD_ISSET((SOCKET)s,&m_signaled_set)!=0;
+					#else
+						return m_pollfd[(SOCKET)s]->revents!=0;
+					#endif
 				}
 
 			bool isSignaled(CASocket*ps)
 				{
-					return FD_ISSET((SOCKET)*ps,&m_signaled_set)!=0;
+					#ifndef HAVE_POLL
+						return FD_ISSET((SOCKET)*ps,&m_signaled_set)!=0;
+					#else
+						return m_pollfd[(SOCKET)*ps]->revents!=0;
+					#endif
 				}
 
 			bool isSignaled(CAMuxSocket&s)
 				{
-					return FD_ISSET((SOCKET)s,&m_signaled_set)!=0;
+					#ifndef HAVE_POLL
+						return FD_ISSET((SOCKET)s,&m_signaled_set)!=0;
+					#else
+						return m_pollfd[(SOCKET)s]->revents!=0;
+					#endif
 				}
 
 		protected:
-			fd_set m_fdset;
-			fd_set m_signaled_set;
-			CRITICAL_SECTION m_csFD_SET;
-			#ifndef _WIN32
-			    int m_max;
+			#ifndef HAVE_POLL
+				fd_set m_fdset;
+				fd_set m_signaled_set;
+				#ifndef _WIN32
+						int m_max;
+				#endif
+			#else
+				struct pollfd* m_pollfd_write;
+				struct pollfd* m_pollfd_read;
 			#endif
+			CRITICAL_SECTION m_csFD_SET;
 	};
 #endif

@@ -32,26 +32,44 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include "CAMsg.hpp"
 //#endif
 
+#define MAX_POLLFD 1024
 CASocketGroup::CASocketGroup()
 	{
-		FD_ZERO(&m_fdset);
-		FD_ZERO(&m_signaled_set);
-		InitializeCriticalSection(&m_csFD_SET);
-		#ifndef _WIN32
-		    m_max=0;
+		#ifndef HAVE_POLL
+			FD_ZERO(&m_fdset);
+			FD_ZERO(&m_signaled_set);
+			#ifndef _WIN32
+				  m_max=0;
+			#endif
+		#else
+			m_pollfd_read=new struct pollfd[MAX_POLLFD];
+			memset(m_pollfd_read,0,sizeof(struct pollfd)*MAX_POLLFD);
+			m_pollfd_write=new struct pollfd[MAX_POLLFD];
+			memset(m_pollfd_write,0,sizeof(struct pollfd)*MAX_POLLFD);
+			for(int i=0;i<MAX_POLLFD;i++)
+				{
+					m_pollfd_read[i].events=POLLIN;
+					m_pollfd_write[i].events=POLLOUT;	
+				}
 		#endif
+		InitializeCriticalSection(&m_csFD_SET);
 	}
 			
 SINT32 CASocketGroup::add(CASocket&s)
 	{
 		EnterCriticalSection(&m_csFD_SET);
-		#ifndef _WIN32
-		    if(m_max<((SOCKET)s)+1)
-			m_max=((SOCKET)s)+1;
-		#endif
-		FD_SET((SOCKET)s,&m_fdset);
-		#ifdef _DEBUG
-			CAMsg::printMsg(LOG_DEBUG,"CASocketGroutp: Added SOCKET: %u\n",(SOCKET)s);
+		#ifndef HAVE_POLL
+			#ifndef _WIN32
+					if(m_max<((SOCKET)s)+1)
+				m_max=((SOCKET)s)+1;
+			#endif
+			FD_SET((SOCKET)s,&m_fdset);
+			#ifdef _DEBUG
+				CAMsg::printMsg(LOG_DEBUG,"CASocketGroutp: Added SOCKET: %u\n",(SOCKET)s);
+			#endif
+		#else
+			m_pollfd_read[(SOCKET)s].fd=(SOCKET)s;
+			m_pollfd_write[(SOCKET)s].fd=(SOCKET)s;
 		#endif
 		LeaveCriticalSection(&m_csFD_SET);
 		return E_SUCCESS;
@@ -60,14 +78,19 @@ SINT32 CASocketGroup::add(CASocket&s)
 SINT32 CASocketGroup::add(CAMuxSocket&s)
 	{
 		EnterCriticalSection(&m_csFD_SET);
-		#ifndef _WIN32
-		    if(m_max<((SOCKET)s)+1)
-			m_max=((SOCKET)s)+1;
+		#ifndef HAVE_POLL
+			#ifndef _WIN32
+					if(m_max<((SOCKET)s)+1)
+				m_max=((SOCKET)s)+1;
+			#endif
+			#ifdef _DEBUG
+					CAMsg::printMsg(LOG_DEBUG,"CASocketGroup: Added SOCKET: %u\n",(SOCKET)s);
+			#endif
+			FD_SET((SOCKET)s,&m_fdset);
+		#else
+			m_pollfd_read[(SOCKET)s].fd=(SOCKET)s;
+			m_pollfd_write[(SOCKET)s].fd=(SOCKET)s;			
 		#endif
-		#ifdef _DEBUG
-				CAMsg::printMsg(LOG_DEBUG,"CASocketGroup: Added SOCKET: %u\n",(SOCKET)s);
-		#endif
-		FD_SET((SOCKET)s,&m_fdset);
 		LeaveCriticalSection(&m_csFD_SET);
 		return E_SUCCESS;
 	}
@@ -75,10 +98,15 @@ SINT32 CASocketGroup::add(CAMuxSocket&s)
 SINT32 CASocketGroup::remove(CASocket&s)
 	{
 		EnterCriticalSection(&m_csFD_SET);
-		#ifdef _DEBUG
-			CAMsg::printMsg(LOG_DEBUG,"CASocketGroutp: Removed SOCKET: %u\n",(SOCKET)s);
+		#ifndef HAVE_POLL
+			#ifdef _DEBUG
+				CAMsg::printMsg(LOG_DEBUG,"CASocketGroutp: Removed SOCKET: %u\n",(SOCKET)s);
+			#endif
+			FD_CLR((SOCKET)s,&m_fdset);
+		#else
+			m_pollfd_read[(SOCKET)s].fd=0;
+			m_pollfd_write[(SOCKET)s].fd=0;			
 		#endif
-		FD_CLR((SOCKET)s,&m_fdset);
 		LeaveCriticalSection(&m_csFD_SET);
 		return E_SUCCESS;
 	}
@@ -86,71 +114,90 @@ SINT32 CASocketGroup::remove(CASocket&s)
 SINT32 CASocketGroup::remove(CAMuxSocket&s)
 	{
 		EnterCriticalSection(&m_csFD_SET);
-		#ifdef _DEBUG
-			CAMsg::printMsg(LOG_DEBUG,"CASocketGroutp: Removed SOCKET: %u\n",(SOCKET)s);
+		#ifndef HAVE_POLL
+			#ifdef _DEBUG
+				CAMsg::printMsg(LOG_DEBUG,"CASocketGroutp: Removed SOCKET: %u\n",(SOCKET)s);
+			#endif
+			FD_CLR((SOCKET)s,&m_fdset);
+		#else
+			m_pollfd_read[(SOCKET)s].fd=0;
+			m_pollfd_write[(SOCKET)s].fd=0;			
 		#endif
-		FD_CLR((SOCKET)s,&m_fdset);
 		LeaveCriticalSection(&m_csFD_SET);
 		return E_SUCCESS;
 	}
 
 SINT32 CASocketGroup::select()
 	{
-		EnterCriticalSection(&m_csFD_SET);
-		memcpy(&m_signaled_set,&m_fdset,sizeof(fd_set));
-		LeaveCriticalSection(&m_csFD_SET);
-		#ifdef _DEBUG
-			#ifdef _WIN32
-			    int ret=::select(0,&m_signaled_set,NULL,NULL,NULL);
+		#ifndef HAVE_POLL
+			EnterCriticalSection(&m_csFD_SET);
+			memcpy(&m_signaled_set,&m_fdset,sizeof(fd_set));
+			LeaveCriticalSection(&m_csFD_SET);
+			#ifdef _DEBUG
+				#ifdef _WIN32
+						int ret=::select(0,&m_signaled_set,NULL,NULL,NULL);
+				#else
+						int ret=::select(max,&m_signaled_set,NULL,NULL,NULL);
+				#endif			    
+				if(ret==SOCKET_ERROR)
+					{
+						CAMsg::printMsg(LOG_DEBUG,"SocketGroup Select-Fehler: %i\n",WSAGetLastError());
+					}
+				return ret;
 			#else
-			    int ret=::select(max,&m_signaled_set,NULL,NULL,NULL);
-			#endif			    
-			if(ret==SOCKET_ERROR)
-				{
-					CAMsg::printMsg(LOG_DEBUG,"SocketGroup Select-Fehler: %i\n",WSAGetLastError());
-				}
-			return ret;
+				#ifdef _WIN32
+						return ::select(0,&m_signaled_set,NULL,NULL,NULL);
+				#else
+						return ::select(m_max,&m_signaled_set,NULL,NULL,NULL);
+				#endif			    
+			#endif
 		#else
-			#ifdef _WIN32
-			    return ::select(0,&m_signaled_set,NULL,NULL,NULL);
-			#else
-			    return ::select(m_max,&m_signaled_set,NULL,NULL,NULL);
-			#endif			    
+						ret ::poll(m_pollfd_read,MAX_POLLFD,-1);
 		#endif
-
 	}
 
 SINT32 CASocketGroup::select(bool bWrite,UINT32 ms)
 	{
-		EnterCriticalSection(&m_csFD_SET);
-		memcpy(&m_signaled_set,&m_fdset,sizeof(fd_set));
-		LeaveCriticalSection(&m_csFD_SET);
-		fd_set* set_read,*set_write;
-		timeval ti;
-		ti.tv_sec=0;
-		ti.tv_usec=ms*1000;
-		if(!bWrite)
-			{
-				set_read=&m_signaled_set;
-				set_write=NULL;
-					
-			}
-		else
-			{
-				set_read=NULL;
-				set_write=&m_signaled_set;
-			}
-		SINT32 ret;
-		#ifdef _WIN32
-				if(m_signaled_set.fd_count==0)
-					{
-						Sleep(ms);
-						ret=0;
-					}
-				else
-					ret=::select(0,set_read,set_write,NULL,&ti);
+		#ifndef HAVE_POLL
+			EnterCriticalSection(&m_csFD_SET);
+			memcpy(&m_signaled_set,&m_fdset,sizeof(fd_set));
+			LeaveCriticalSection(&m_csFD_SET);
+			fd_set* set_read,*set_write;
+			timeval ti;
+			ti.tv_sec=0;
+			ti.tv_usec=ms*1000;
+			if(!bWrite)
+				{
+					set_read=&m_signaled_set;
+					set_write=NULL;
+						
+				}
+			else
+				{
+					set_read=NULL;
+					set_write=&m_signaled_set;
+				}
+			SINT32 ret;
+			#ifdef _WIN32
+					if(m_signaled_set.fd_count==0)
+						{
+							Sleep(ms);
+							ret=0;
+						}
+					else
+						ret=::select(0,set_read,set_write,NULL,&ti);
+			#else
+					ret=::select(m_max,set_read,set_write,NULL,&ti);
+			#endif
 		#else
-			  ret=::select(m_max,set_read,set_write,NULL,&ti);
+			if(bWrite)
+				{
+					ret=::poll(m_pollfd_write,MAX_POLLFD,ms);
+				}
+			else
+				{
+					ret=::poll(m_pollfd_read,MAX_POLLFD,ms);
+				}
 		#endif
 		if(ret==0)
 			{

@@ -34,23 +34,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#endif
 
 			
-SINT32 CASingleSocketGroup::add(CASocket&s)
-	{
-		m_pollfd->fd=(SOCKET)s;
-		return E_SUCCESS;
-	}
-
-SINT32 CASingleSocketGroup::add(CAMuxSocket&s)
-	{
-		m_pollfd->fd=(SOCKET)s;
-		return E_SUCCESS;
-	}
-
-SINT32 CASingleSocketGroup::select()
-	{
-		m_pollfd->events=POLLIN;
-    return ::poll(m_pollfd,1,-1);
-	}
 
 SINT32 CASingleSocketGroup::select(bool bWrite,UINT32 ms)
 	{
