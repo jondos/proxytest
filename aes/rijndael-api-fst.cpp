@@ -10,7 +10,7 @@
 #include "rijndael-alg-fst.h"
 #include "rijndael-api-fst.h"
 
-int makeKey(keyInstance *key, BYTE direction, int keyLen, char *keyMaterial)
+int makeKey(keyInstance *key, /*BYTE direction,*/ int keyLen, char *keyMaterial)
 {
 	word8 k[MAXKC][4];
 	int i;//, j, t;
@@ -19,12 +19,12 @@ int makeKey(keyInstance *key, BYTE direction, int keyLen, char *keyMaterial)
 		return BAD_KEY_INSTANCE;
 	}
 
-	if ((direction == DIR_ENCRYPT) || (direction == DIR_DECRYPT)) {
+	/*if ((direction == DIR_ENCRYPT) || (direction == DIR_DECRYPT)) {
 		key->direction = direction;
 	} else {
 		return BAD_KEY_DIR;
 	}
-
+*/
 	if ((keyLen == 128) || (keyLen == 192) || (keyLen == 256)) { 
 		key->keyLen = keyLen;
 	} else {
@@ -53,13 +53,13 @@ int makeKey(keyInstance *key, BYTE direction, int keyLen, char *keyMaterial)
 	*/	
 		k[i / 4][i % 4] = keyMaterial[i];//sk13 =(word8) j; 
 	}
-	rijndaelKeySched (k, key->keyLen, key->keySched);
-	if (direction == DIR_DECRYPT)
-		rijndaelKeyEnctoDec (key->keyLen, key->keySched);
+	rijndaelKeySched (k, /*key->keyLen,*/ key->keySched);
+//	if (direction == DIR_DECRYPT)
+//		rijndaelKeyEnctoDec (key->keyLen, key->keySched);
 
 	return TRUE;
 }
-
+/*
 int cipherInit(cipherInstance *cipher, BYTE mode, char *IV)
 {
 	int i, j, t;
@@ -91,8 +91,8 @@ int cipherInit(cipherInstance *cipher, BYTE mode, char *IV)
 
 	return TRUE;
 }
-
-
+*/
+/*
 int blockEncrypt(cipherInstance *cipher,
 	keyInstance *key, BYTE *input, int inputLen, BYTE *outBuffer)
 {
@@ -186,7 +186,8 @@ int blockEncrypt(cipherInstance *cipher,
 	
 	return numBlocks*128;
 }
-
+*/
+/*
 int blockDecrypt(cipherInstance *cipher,
 	keyInstance *key, BYTE *input, int inputLen, BYTE *outBuffer)
 {
@@ -215,7 +216,7 @@ int blockDecrypt(cipherInstance *cipher,
 		break;
 		
 	case MODE_CBC:
-		/* first block */ 
+		// first block  
 
 		rijndaelDecrypt (input, block, key->keySched);
 #if STRICT_ALIGN
@@ -231,7 +232,7 @@ int blockDecrypt(cipherInstance *cipher,
   		*((word32*)(outBuffer+12)) = *((word32*)(block+12)) ^ *((word32*)(cipher->IV+12));
 #endif
 		
-		/* next blocks */
+		// next blocks 
 		for (i = numBlocks-1; i > 0; i--) { 
 		
 			rijndaelDecrypt (input, block, key->keySched);
@@ -294,7 +295,7 @@ int blockDecrypt(cipherInstance *cipher,
 	
 	return numBlocks*128;
 }
-
+*/
 
 /**
  *	cipherUpdateRounds:
@@ -306,7 +307,7 @@ int blockDecrypt(cipherInstance *cipher,
  *		TRUE - on success
  *		BAD_CIPHER_STATE - cipher in bad state (e.g., not initialized)
  */
-int cipherUpdateRounds(cipherInstance *cipher,
+/*int cipherUpdateRounds(cipherInstance *cipher,
 	keyInstance *key, BYTE *input, int inputLen, BYTE *outBuffer, int rounds)
 {
 	int j;
@@ -318,7 +319,7 @@ int cipherUpdateRounds(cipherInstance *cipher,
 	}
 
 	for (j = 3; j >= 0; j--) {
-		/* parse input stream into rectangular array */
+		// parse input stream into rectangular array 
   		*((word32*)block[j]) = *((word32*)(input+4*j));
 	}
 
@@ -335,9 +336,10 @@ int cipherUpdateRounds(cipherInstance *cipher,
 	} 
 
 	for (j = 3; j >= 0; j--) {
-		/* parse rectangular array into output ciphertext bytes */
+		// parse rectangular array into output ciphertext bytes 
 		*((word32*)(outBuffer+4*j)) = *((word32*)block[j]);
 	}
 	
 	return TRUE;
 }
+*/

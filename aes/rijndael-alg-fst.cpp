@@ -115,7 +115,7 @@ void InvMixColumn(word8 a[4][4], word8 BC) {
 
 }
 
-int rijndaelKeySched (word8 k[MAXKC][4], int keyBits, word8 W[MAXROUNDS+1][4][4])
+int rijndaelKeySched (word8 k[MAXKC][4],/* int keyBits,*/ word8 W[MAXROUNDS+1][4][4])
 {
 	/* Calculate the necessary round keys
 	 * The number of calculations depends on keyBits and blockBits
@@ -173,7 +173,7 @@ int rijndaelKeySched (word8 k[MAXKC][4], int keyBits, word8 W[MAXROUNDS+1][4][4]
 	return 0;
 }
 
-int rijndaelKeyEnctoDec (int keyBits, word8 W[MAXROUNDS+1][4][4])
+/*int rijndaelKeyEnctoDec (int keyBits, word8 W[MAXROUNDS+1][4][4])
 {
 	int r;
 
@@ -182,7 +182,7 @@ int rijndaelKeyEnctoDec (int keyBits, word8 W[MAXROUNDS+1][4][4])
 	}
 	return 0;
 }	
-
+*/
 int rijndaelEncrypt (word8 a[16], word8 b[16], word8 rk[MAXROUNDS+1][4][4])
 {
 	/* Encryption of one block. 
@@ -328,7 +328,7 @@ int rijndaelEncryptRound (word8 a[4][4],
 	return 0;
 }   
 
-
+/*
 int rijndaelDecrypt (word8 a[16], word8 b[16], word8 rk[MAXROUNDS+1][4][4])
 {
 	int r;
@@ -377,7 +377,7 @@ int rijndaelDecrypt (word8 a[16], word8 b[16], word8 rk[MAXROUNDS+1][4][4])
            ^ *((word32*)T7[temp[1][2]]) 
            ^ *((word32*)T8[temp[0][3]]);
    }
-   /* last round is special */   
+   // last round is special    
 	*((word32*)temp[0]) = *((word32*)b) ^ *((word32*)rk[1][0]);
 	*((word32*)temp[1]) = *((word32*)(b+4)) ^ *((word32*)rk[1][1]);
 	*((word32*)temp[2]) = *((word32*)(b+8)) ^ *((word32*)rk[1][2]);
@@ -406,7 +406,7 @@ int rijndaelDecrypt (word8 a[16], word8 b[16], word8 rk[MAXROUNDS+1][4][4])
 	return 0;
 }
 
-
+*/
 int rijndaelDecryptRound (word8 a[4][4],  
 	word8 rk[MAXROUNDS+1][4][4], int rounds)
 /* Decrypt only a certain number of rounds.

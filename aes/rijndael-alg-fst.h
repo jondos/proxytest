@@ -13,15 +13,15 @@ typedef unsigned int		word32;
 
 extern int ROUNDS;
 
-int rijndaelKeySched (word8 k[MAXKC][4], int keyBits,  
+int rijndaelKeySched (word8 k[MAXKC][4], /*int keyBits,*/  
 		word8 rk[MAXROUNDS+1][4][4]);
-int rijndaelKeyEnctoDec (int keyBits, word8 W[MAXROUNDS+1][4][4]);
+//int rijndaelKeyEnctoDec (int keyBits, word8 W[MAXROUNDS+1][4][4]);
 int rijndaelEncrypt (word8 a[16], word8 b[16], 
 		word8 rk[MAXROUNDS+1][4][4]);
 int rijndaelEncryptRound (word8 a[4][4],  
 		word8 rk[MAXROUNDS+1][4][4], int rounds);
-int rijndaelDecrypt (word8 a[16], word8 b[16],
-		word8 rk[MAXROUNDS+1][4][4]);
+//int rijndaelDecrypt (word8 a[16], word8 b[16],
+//		word8 rk[MAXROUNDS+1][4][4]);
 int rijndaelDecryptRound (word8 a[4][4],  
 		word8 rk[MAXROUNDS+1][4][4], int rounds);
 
