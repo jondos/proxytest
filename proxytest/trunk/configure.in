@@ -36,7 +36,6 @@ case "$host" in
 	;;
 esac
 
-AC_LANG(C++)
 
 dnl Checks for libraries.
 
@@ -122,6 +121,8 @@ if (test ! -z "$ac_cv_openssldir" && test "x$ac_cv_openssldir" != "x(system)") ;
 	fi
 fi
 LIBS="$saved_LIBS -lcrypto"
+
+AC_LANG(C++)
 
 xmlincludedir="/usr/local/include/xercesc"
 dnl Check for XML libs and includes.
