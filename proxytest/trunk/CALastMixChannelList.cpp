@@ -139,7 +139,8 @@ SINT32 CALastMixChannelList::test()
 					CALastMixChannelList oList;
 					UINT32 c;
 					UINT32 rand;
-					for(int i=0;i<100;i++)
+					int i,j;
+					for(i=0;i<100;i++)
 						{
 							getRandom(&c);
 							oList.add(c,NULL,NULL,NULL);
@@ -160,14 +161,14 @@ SINT32 CALastMixChannelList::test()
 										oList.removeChannel(akt->channelIn);
 									getRandom(&rand);
 									if(rand<0x0FFFFFFF)
-										for(int i=0;i<5;i++)
+										for(j=0;j<5;j++)
 											{
 												getRandom(&c);
 												oList.add(c,NULL,NULL,NULL);
 											}
 									getRandom(&rand);
 									if(rand<0x7FFFFFFF)
-										for(int i=0;i<10000;i++)
+										for(j=0;j<10000;j++)
 											{
 												getRandom(&c);
 												oList.removeChannel(c);
