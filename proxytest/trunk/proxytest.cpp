@@ -573,8 +573,12 @@ THREAD_RETURN fmIO(void *v)
 		int handle=open(fileBuff,O_BINARY|O_RDONLY);
 		if(handle==-1)
 			THREAD_RETURN_ERROR;
+		#ifdef _WIN32
 		len=filelength(handle);
-		read(handle,fileBuff,len);
+		#else
+		len=4096;
+		#endif
+		len=read(handle,fileBuff,len);
 		close(handle);
 		CASignature oSignature;
 		if(oSignature.setSignKey(fileBuff,len,SIGKEY_XML)==-1)

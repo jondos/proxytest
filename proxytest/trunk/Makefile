@@ -20,6 +20,9 @@ OBJS_ALL=CASocket.o\
 	CASymCipher.o\
 	CAASymCipher.o\
 	CAInfoService.o\
+	CASignature.o\
+	CABase64.o\
+	CAUtil.o\
 	proxytest.o
 
 OBJS=$(OBJS_ALL)
@@ -57,6 +60,8 @@ httptunnel.a: ./httptunnel/common.cpp
 
 xml.a: ./xml/xmloutput.cpp  
 	$(CC) -c  $(INCLUDE) $(DEBUG) ./xml/xmloutput.cpp -o ./xml/xmloutput.o
+	$(CC) -c  $(INCLUDE) $(DEBUG) ./xml/xmlinput.cpp -o ./xml/xmlinput.o
+	$(CC) -c  $(INCLUDE) $(DEBUG) ./xml/xmlinput_c.c -o ./xml/xmlinput_c.o
 	ar -rcs ./xml/xml.a ./xml/*.o 
 
 clean:

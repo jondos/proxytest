@@ -37,14 +37,13 @@ BEGIN C INTERFACE
 */
 
 struct XML_Input_;
-typedef struct XML_Input_ XML_Input;
+//typedef struct XML_Input_ XML_Input;
 struct XML_Element_;
-typedef struct XML_Element_ XML_Element;
+//typedef struct XML_Element_ XML_Element;
 struct XML_Attribute_;
-typedef struct XML_Attribute_ XML_Attribute;
+//typedef struct XML_Attribute_ XML_Attribute;
 struct XML_InputStream_;		/* declared in xmlstream.h */
-typedef struct XML_InputStream_ XML_InputStream;
-
+//typedef struct XML_InputStream_ XML_InputStream;
 /**
 	Input processing errors
 */
@@ -81,7 +80,7 @@ typedef enum XML_HandlerType_
 /**
 	Prototype for a custom element handler procedure
 */
-typedef XML_Error (*XML_HandlerProc)(XML_Element *elem, void *userData);
+typedef XML_Error (*XML_HandlerProc)(struct XML_Element_ *elem, void *userData);
 typedef XML_Error (*XML_DataProc)(const XML_Char *data, size_t len, void *userData);
 
 /* begin specifications for handler-specific extra data */
@@ -154,14 +153,15 @@ struct XML_ListHandler_
 	XML_Handler - specifies how to deal with specific elements. Stored in
 	a (usually static) array and passed to processing functions.
 */
+typedef struct _dummy {void * dummy[3];} t_dummy;
 typedef struct XML_Handler_
 {
 	const char *name;		/* name of element (or NULL for a generic handler) */
 	XML_HandlerType type;	/* type of handler */
 	size_t offset;			/* offset of destination address */
 	size_t size;			/* size of destination object */
-	union {
-		struct { void *dummy[3]; };
+	union  {
+		struct _dummy dummy;
 		struct XML_ElementHandler_ Element;
 		struct XML_DataHandler_ Data;
 		struct XML_ChainHandler_ Chain;
@@ -172,7 +172,7 @@ typedef struct XML_Handler_
 		struct XML_BoolHandler_ Bool;
 		struct XML_CStringHandler_ CString;
 		struct XML_ListHandler_ List;
-	};
+	}u;
 } XML_Handler;
 
 #define XML_MEMBER_OFFSET(object, member)	offsetof(object, member)
@@ -223,38 +223,38 @@ typedef struct XML_Handler_
 
 #define XML_HANDLER_END			{ NULL, XML_Handler_None }
 
-XML_Input *XML_InputCreate(XML_InputStream *stream);
-void XML_InputFree(XML_Input *input);
-void XML_InputSetUserData(XML_Input *input, void *userData);
-void *XML_InputGetUserData(const XML_Input *input);
-XML_Error XML_InputProcess(XML_Input *input, const XML_Handler handlers[], void *userData);
-XML_Error XML_InputGetError(const XML_Input *input);
-int XML_InputGetLine(const XML_Input *input);
-int XML_InputGetColumn(const XML_Input *input);
-int XML_InputGetOffset(const XML_Input *input);
+struct XML_Input_ *XML_InputCreate(XML_InputStream *stream);
+void XML_InputFree(struct XML_Input_ *input);
+void XML_InputSetUserData(struct XML_Input_ *input, void *userData);
+void *XML_InputGetUserData(const struct XML_Input_ *input);
+XML_Error XML_InputProcess(struct XML_Input_ *input, const XML_Handler handlers[], void *userData);
+XML_Error XML_InputGetError(const struct XML_Input_ *input);
+int XML_InputGetLine(const struct XML_Input_ *input);
+int XML_InputGetColumn(const struct XML_Input_ *input);
+int XML_InputGetOffset(const struct XML_Input_ *input);
 const XML_Char *XML_InputGetErrorString(XML_Error error);
 
-XML_Error XML_ElementProcess(XML_Element *elem, const XML_Handler handlers[], void *userData);
-XML_Error XML_ElementReadData(XML_Element *elem, XML_Char *data, size_t *readSize);
-const XML_Char *XML_ElementGetName(const XML_Element *elem);
-const XML_Input *XML_ElementGetInput(const XML_Element *elem);
-int XML_ElementGetLevel(const XML_Element *elem);
-int XML_ElementIsEmpty(const XML_Element *elem);
-XML_Error XML_ElementGetError(const XML_Element *elem);
+XML_Error XML_ElementProcess(struct XML_Element_ *elem, const XML_Handler handlers[], void *userData);
+XML_Error XML_ElementReadData(struct XML_Element_ *elem, XML_Char *data, size_t *readSize);
+const XML_Char *XML_ElementGetName(const struct XML_Element_ *elem);
+const struct XML_Input_ *XML_ElementGetInput(const struct XML_Element_ *elem);
+int XML_ElementGetLevel(const struct XML_Element_ *elem);
+int XML_ElementIsEmpty(const struct XML_Element_ *elem);
+XML_Error XML_ElementGetError(const struct XML_Element_ *elem);
 
-int XML_ElementGetNumAttrs(const XML_Element *elem);
-const XML_Char *XML_ElementGetAttrName(const XML_Element *elem, int index);
-const XML_Char *XML_ElementGetAttrValue(const XML_Element *elem, int index);
-const XML_Attribute *XML_ElementFindAttr(const XML_Element *elem, const XML_Char *name);
-const XML_Attribute *XML_ElementGetAttrList(const XML_Element *elem);
-const XML_Attribute *XML_AttrGetNext(const XML_Attribute *attr);
-const XML_Char *XML_AttrGetName(const XML_Attribute *attr);
-const XML_Char *XML_AttrGetValue(const XML_Attribute *attr);
-int XML_AttrGetInt(const XML_Attribute *attr, int defValue);
-unsigned int XML_AttrGetUInt(const XML_Attribute *attr, unsigned int defValue);
-float XML_AttrGetFloat(const XML_Attribute *attr, float defValue);
-double XML_AttrGetDouble(const XML_Attribute *attr, double defValue);
-int XML_AttrGetBoolean(const XML_Attribute *attr, int defValue);
+int XML_ElementGetNumAttrs(const struct XML_Element_ *elem);
+const XML_Char *XML_ElementGetAttrName(const struct XML_Element_ *elem, int index);
+const XML_Char *XML_ElementGetAttrValue(const struct XML_Element_ *elem, int index);
+const struct XML_Attribute_ *XML_ElementFindAttr(const struct XML_Element_ *elem, const XML_Char *name);
+const struct XML_Attribute_ *XML_ElementGetAttrList(const struct XML_Element_ *elem);
+const struct XML_Attribute_ *XML_AttrGetNext(const struct XML_Attribute_ *attr);
+const XML_Char *XML_AttrGetName(const struct XML_Attribute_ *attr);
+const XML_Char *XML_AttrGetValue(const struct XML_Attribute_ *attr);
+int XML_AttrGetInt(const struct XML_Attribute_ *attr, int defValue);
+unsigned int XML_AttrGetUInt(const struct XML_Attribute_ *attr, unsigned int defValue);
+float XML_AttrGetFloat(const struct XML_Attribute_ *attr, float defValue);
+double XML_AttrGetDouble(const struct XML_Attribute_ *attr, double defValue);
+int XML_AttrGetBoolean(const struct XML_Attribute_ *attr, int defValue);
 
 #ifdef __cplusplus
 }	// extern "C"
@@ -390,8 +390,8 @@ public:
 	const XML_Char *GetValue() const;
 
 private:
-	Attribute(const ::XML_Attribute *attr);
-	const XML_Attribute *attr;
+	Attribute(const struct ::XML_Attribute_ *attr);
+	const struct XML_Attribute_ *attr;
 };
 
 /**
@@ -448,9 +448,9 @@ public:
 	bool IsEmpty() const;
 
 private:
-	Element(XML_Element *element);
+	Element(struct XML_Element_ *element);
 
-	XML_Element *element;
+	struct XML_Element_ *element;
 };
 
 /**
@@ -490,8 +490,8 @@ public:
 
 private:
 	struct InputImpl *impl;	// implementation
-	static XML_Error elementHandler(::XML_Input *input, ::XML_Element *elem, const ::XML_Handler *handler, void *userData);
-	static XML_Error dataHandler(::XML_Input *input, const ::XML_Char *data, size_t len, const ::XML_Handler *handler, void *userData);
+	static XML_Error elementHandler(struct ::XML_Input_ *input, struct ::XML_Element_ *elem, const ::XML_Handler *handler, void *userData);
+	static XML_Error dataHandler(struct ::XML_Input_ *input, const ::XML_Char *data, size_t len, const ::XML_Handler *handler, void *userData);
 };
 
 /**
