@@ -164,12 +164,12 @@ class CAFirstMixChannelList
 			LP_fmChannelListEntry newChannelListEntry()
 				{
 					m_aktAlloc+=sizeof(fmChannelListEntry);
-					return (LP_fmChannelListEntry)new fmChannelListEntry;
 					if(m_maxAlloc<m_aktAlloc)
 						{
 							m_maxAlloc=m_aktAlloc;
 							CAMsg::printMsg(LOG_DEBUG,"FirstMixChannelList current alloc: %u\n",m_aktAlloc);
 						}
+					return (LP_fmChannelListEntry)new fmChannelListEntry;
 				}
 			void deleteChannelListEntry(LP_fmChannelListEntry entry)
 				{
