@@ -4,13 +4,13 @@ class CASocketAddr:public sockaddr_in
 	{
 		public:
 			CASocketAddr();
-			CASocketAddr(char* szIP,unsigned short port);
-			CASocketAddr(unsigned short port);
+			CASocketAddr(char* szIP,UINT16 port);
+			CASocketAddr(UINT16 port);
 
-			int setAddr(char* szIP,unsigned short port);
-			unsigned short getPort();
-			int getHostName(char* buff,int len);
-			static int getLocalHostName(char* buff,int len);
+			int setAddr(char* szIP,UINT16 port);
+			UINT16 getPort();
+			SINT32 getHostName(UINT8* buff,UINT32 len);
+			static SINT32 getLocalHostName(UINT8* buff,UINT32 len);
 			operator LPSOCKADDR(){return (::LPSOCKADDR)this;}
 
 	};

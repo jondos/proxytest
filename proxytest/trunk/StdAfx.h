@@ -36,6 +36,16 @@
 			#define STRING std::string
 			#define VECTOR std::vector
 		#endif
+	//	#ifndef UINT32
+	//		typedef unsigned long UINT32;
+	//	#endif
+		typedef signed long SINT32;
+		typedef unsigned int UINT;
+		typedef signed int SINT;
+		typedef unsigned short UINT16;
+		typedef signed short SINT16;
+		typedef unsigned char UINT8;
+		typedef signed char SINT8;
 #else
     #include <sys/ioctl.h>
     #include <sys/socket.h>
@@ -120,7 +130,8 @@
 
 #endif
 
-#define E_SUCCESS 0		
+#define E_SUCCESS 0
+#define E_UNKNOWN -1
 #include <assert.h>
 #include <stdio.h>
 #include <time.h>

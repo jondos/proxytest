@@ -13,10 +13,10 @@ typedef unsigned int HCHANNEL;
 typedef struct t_MuxPacket
 	{
 		HCHANNEL channel;
-		unsigned short len;
-		unsigned char type;
-		unsigned char reserved;
-		char data[DATA_SIZE];
+		UINT16	len;
+		UINT8		type;
+		UINT8		reserved;
+		UINT8		data[DATA_SIZE];
 	} MUXPACKET;
 
 class CAMuxSocket
@@ -24,10 +24,10 @@ class CAMuxSocket
 		public:
 			CAMuxSocket();
 			~CAMuxSocket(){}
-			int useTunnel(char* proxyhost,unsigned short proxyport);
-			int accept(unsigned short port);
-			int connect(LPSOCKETADDR psa);
-			int connect(LPSOCKETADDR psa,int retry,int time);
+			int useTunnel(char* proxyhost,UINT16 proxyport);
+			int accept(UINT16 port);
+			SINT32 connect(LPSOCKETADDR psa);
+			SINT32 connect(LPSOCKETADDR psa,UINT retry,UINT32 time);
 			int close();
 			int send(MUXPACKET *pPacket);
 			int receive(MUXPACKET *pPacket);
@@ -43,6 +43,6 @@ class CAMuxSocket
 			bool bIsTunneld;
 			Tunnel* m_pTunnel;
 			char *m_szTunnelHost;
-			unsigned short m_uTunnelPort;
+			UINT16 m_uTunnelPort;
 	};
 #endif

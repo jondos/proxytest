@@ -46,12 +46,12 @@ int CAMuxSocket::accept(unsigned short port)
 		return 0;
 	}
 			
-int CAMuxSocket::connect(LPSOCKETADDR psa)
+SINT32 CAMuxSocket::connect(LPSOCKETADDR psa)
 	{
 		return connect(psa,1,0);
 	}
 
-int CAMuxSocket::connect(LPSOCKETADDR psa,int retry,int time)
+SINT32 CAMuxSocket::connect(LPSOCKETADDR psa,UINT retry,UINT32 time)
 	{
 		if(!bIsTunneld)
 			{
@@ -60,7 +60,7 @@ int CAMuxSocket::connect(LPSOCKETADDR psa,int retry,int time)
 			}
 		else
 			{
-				psa->getHostName(buff,255);
+				psa->getHostName((UINT8*)buff,255);
 				m_pTunnel=tunnel_new_client (buff, psa->getPort(),m_szTunnelHost,m_uTunnelPort,
 				 0/*DEFAULT_CONTENT_LENGTH*//*sizeof(MUXPACKET)*/);
 				return tunnel_connect(m_pTunnel);
@@ -89,7 +89,7 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 			{
 				do
 					{
-						len=m_Socket.send(((char*)pPacket)+aktIndex,MuxPacketSize);
+						len=m_Socket.send(((UINT8*)pPacket)+aktIndex,MuxPacketSize);
 						MuxPacketSize-=len;
 						aktIndex+=len;
 					} while(len>0&&MuxPacketSize>0);
@@ -124,7 +124,7 @@ int CAMuxSocket::receive(MUXPACKET* pPacket)
 			{
 				do
 					{
-						len=m_Socket.receive(((char*)pPacket)+aktIndex,MuxPacketSize);
+						len=m_Socket.receive(((UINT8*)pPacket)+aktIndex,MuxPacketSize);
 						MuxPacketSize-=len;
 						aktIndex+=len;
 					} while(len>0&&MuxPacketSize>0);

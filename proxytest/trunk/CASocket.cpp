@@ -29,7 +29,8 @@ int CASocket::create()
 		localPort=-1;
 		return 0;
 	}
-int CASocket::listen(LPSOCKETADDR psa)
+
+SINT32 CASocket::listen(LPSOCKETADDR psa)
 	{
 		localPort=-1;
 		if(m_Socket==0&&create()==SOCKET_ERROR)
@@ -39,7 +40,7 @@ int CASocket::listen(LPSOCKETADDR psa)
 		return ::listen(m_Socket,SOMAXCONN);
 	}
 			
-int CASocket::listen(unsigned short port)
+SINT32 CASocket::listen(UINT16 port)
 	{
 		CASocketAddr oSocketAddr(port);
 		return listen(&oSocketAddr);
@@ -65,7 +66,7 @@ int CASocket::connect(LPSOCKETADDR psa)
 		return connect(psa,1,0);
 	}
 
-int CASocket::connect(LPSOCKETADDR psa,int retry,int time)
+int CASocket::connect(LPSOCKETADDR psa,UINT retry,UINT32 time)
 	{
 		localPort=-1;
 		if(m_Socket==0&&create()==SOCKET_ERROR)
@@ -76,7 +77,7 @@ int CASocket::connect(LPSOCKETADDR psa,int retry,int time)
 		sockets++;
 #endif
 		int err=0;
-		for(int i=0;i<retry;i++)
+		for(UINT i=0;i<retry;i++)
 			{
 				if(::connect(m_Socket,(LPSOCKADDR)psa,sizeof(*psa))!=0)
 					{  
@@ -143,15 +144,15 @@ int CASocket::close(int mode)
 		return ret;
 	}
 			
-int CASocket::send(char* buff,int len)
+int CASocket::send(UINT8* buff,UINT32 len)
 	{
-	    int ret;	
-	    do
-		{
-		    ret=::send(m_Socket,buff,len,MSG_NOSIGNAL);
-		}
-	    while(ret==SOCKET_ERROR&&errno==EINTR);
-	    return ret;	    	    
+	  int ret;	
+	  do
+			{
+		    ret=::send(m_Socket,(char*)buff,len,MSG_NOSIGNAL);
+			}
+	  while(ret==SOCKET_ERROR&&errno==EINTR);
+	  return ret;	    	    
 	}
 
 int CASocket::available()
@@ -163,15 +164,15 @@ int CASocket::available()
 			return (int)ul;
 	}
 
-int CASocket::receive(char* buff,int len)
+int CASocket::receive(UINT8* buff,UINT32 len)
 	{
-	    int ret;	
-	    do
-		{
-		    ret=::recv(m_Socket,buff,len,MSG_NOSIGNAL);
-		}
-	    while(ret==SOCKET_ERROR&&errno==EINTR);
-	    return ret;	    	    
+		int ret;	
+	  do
+			{
+				ret=::recv(m_Socket,(char*)buff,len,MSG_NOSIGNAL);
+			}
+	  while(ret==SOCKET_ERROR&&errno==EINTR);
+	  return ret;	    	    
 	}
 
 int CASocket::getLocalPort()
@@ -195,19 +196,19 @@ int CASocket::setReuseAddr(bool b)
 		return setsockopt(m_Socket,SOL_SOCKET,SO_REUSEADDR,(char*)&val,sizeof(val));
 	}
 
-int CASocket::setRecvLowWat(int r)
+int CASocket::setRecvLowWat(UINT32 r)
 	{
 		int val=r;
 		return setsockopt(m_Socket,SOL_SOCKET,SO_RCVLOWAT,(char*)&val,sizeof(val));
 	}
 
-int CASocket::setRecvBuff(int r)
+int CASocket::setRecvBuff(UINT32 r)
 	{
 		int val=r;
 		return setsockopt(m_Socket,SOL_SOCKET,SO_RCVBUF,(char*)&val,sizeof(val));	
 	}
 
-int CASocket::setSendBuff(int r)
+int CASocket::setSendBuff(UINT32 r)
 	{
 		int val=r;
 		return setsockopt(m_Socket,SOL_SOCKET,SO_SNDBUF,(char*)&val,sizeof(val));	

@@ -6,16 +6,16 @@ class CASymCipher
 	{
 		public:
 			CASymCipher(){bEncKeySet=false;}
-			int generateEncryptionKey();
-			int getEncryptionKey(unsigned char* key);
-			int setEncryptionKey(unsigned char* key);
+			SINT32 generateEncryptionKey();
+			SINT32 getEncryptionKey(UINT8* key);
+			SINT32 setEncryptionKey(UINT8* key);
 			bool isEncyptionKeyValid();
-			int setDecryptionKey(unsigned char* key);
-			int encrypt(unsigned char* in,int len);
-			int decrypt(unsigned char* in,unsigned char* out,int len);
+			SINT32 setDecryptionKey(UINT8* key);
+			SINT32 encrypt(UINT8* in,UINT32 len);
+			SINT32 decrypt(UINT8* in,UINT8* out,UINT32 len);
 		protected:
 			BF_KEY keyEnc,keyDec;
-			unsigned char rawKeyEnc[16];
+			UINT8 rawKeyEnc[16];
 			bool bEncKeySet;
 	};
 

@@ -44,22 +44,22 @@ int CAASymCipher::encrypt(unsigned char* from,unsigned char* to)
 		return RSA_public_encrypt(128,from,to,rsa,RSA_NO_PADDING);		
 	}
 
-int CAASymCipher::generateKeyPair(int size)
+SINT32 CAASymCipher::generateKeyPair(UINT32 size)
 	{
 		RSA_free(rsa);
 		rsa=RSA_generate_key(size,65537,NULL,NULL);
 		if(rsa==NULL)
-			return -1;
+			return E_UNKNOWN;
 		else
-			return 0;
+			return E_SUCCESS;
 	}
 
-int CAASymCipher::getPublicKey(unsigned char* buff,int *len)
+SINT32 CAASymCipher::getPublicKey(UINT8* buff,UINT32 *len)
 	{
 		if(buff==NULL||*len<getPublicKeySize())
 			return -1;
 		int aktIndex=0;
-		unsigned short size=htons(BN_num_bytes(rsa->n));
+		UINT16 size=htons(BN_num_bytes(rsa->n));
 		memcpy(buff,&size,sizeof(size));
 		aktIndex+=sizeof(size);
 		BN_bn2bin(rsa->n,buff+aktIndex);
@@ -70,21 +70,21 @@ int CAASymCipher::getPublicKey(unsigned char* buff,int *len)
 		BN_bn2bin(rsa->e,buff+aktIndex);
 		aktIndex+=BN_num_bytes(rsa->e);
 		*len=aktIndex;
-		return 0;
+		return E_SUCCESS;
 	}
 
-int CAASymCipher::getPublicKeySize()
+SINT32 CAASymCipher::getPublicKeySize()
 	{
 		if(rsa==NULL||rsa->n==NULL||rsa->e==NULL)
 			return -1;
-		return BN_num_bytes(rsa->n)+BN_num_bytes(rsa->e)+4;
+		return (SINT32)BN_num_bytes(rsa->n)+BN_num_bytes(rsa->e)+4;
 	}
 
-int CAASymCipher::setPublicKey(unsigned char* key,int* len)
+SINT32 CAASymCipher::setPublicKey(UINT8* key,UINT32* len)
 	{
 		rsa=RSA_new();
 		int aktIndex=0;
-		unsigned short size=ntohs(*((unsigned short*)key));
+		UINT16 size=ntohs(*((UINT16*)key)); //may be bugy!!!!!
 		aktIndex+=2;
 		rsa->n=BN_new();
 		BN_bin2bn(key+aktIndex,size,rsa->n);
@@ -94,26 +94,7 @@ int CAASymCipher::setPublicKey(unsigned char* key,int* len)
 		rsa->e=BN_new();
 		BN_bin2bn(key+aktIndex,size,rsa->e);
 		aktIndex+=size;
-
-	/*	BIGNUM bn1;
-		BN_init(&bn1);
-		BN_one(&bn1);
-		BIGNUM tbn;
-		BN_init(&tbn);
-		BN_sub(&tbn,rsa->p,&bn1);
-		BN_CTX ctx;
-		BN_CTX_init(&ctx);
-		rsa->dmp1=BN_new();
-		BN_mod(rsa->dmp1,rsa->d,&tbn,&ctx);
-		BN_sub(&tbn,rsa->q,&bn1);
-		rsa->dmq1=BN_new();
-		BN_mod(rsa->dmq1,rsa->d,&tbn,&ctx);
-		rsa->iqmp=BN_new();
-		BN_mod_inverse(rsa->iqmp,rsa->q,rsa->p,&ctx);
-	*/
 		*len=aktIndex;
-	
-		//	int i=RSA_check_key(rsa);
-		return 0;
+		return E_SUCCESS;
 	}
 	
