@@ -446,7 +446,7 @@ LOOP_START:
 										#endif
 										ret=ntohs(oMuxPacket.payload.len);
 										if(ret>=0&&ret<=PAYLOAD_SIZE)
-											ret=oConnection.pSocket->send(oMuxPacket.payload.data,ret,_SEND_TIMEOUT);
+											ret=oConnection.pSocket->sendTimeOut(oMuxPacket.payload.data,ret,_SEND_TIMEOUT);
 										else
 											ret=SOCKET_ERROR;
 										if(ret==SOCKET_ERROR)
