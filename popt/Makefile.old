@@ -1,4 +1,4 @@
-popt.a: popt.c poptparse.c popthelp.c
+libpopt.a: popt.c poptparse.c popthelp.c
 	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) -DHAVE_STRERROR popt.c -o popt.o
 	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) -DHAVE_STRERROR poptparse.c -o poptparse.o
 	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) -DHAVE_STRERROR popthelp.c -o popthelp.o

@@ -1,4 +1,4 @@
-xml.a: xmloutput.cpp xmlinput.cpp xmlinput_c.cpp  
+libxml.a: xmloutput.cpp xmlinput.cpp xmlinput_c.cpp  
 	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) xmloutput.cpp -o xmloutput.o
 	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) xmlinput.cpp -o xmlinput.o
 	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) xmlinput_c.cpp -o xmlinput_c.o

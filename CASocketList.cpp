@@ -44,7 +44,7 @@ SINT32 CASocketList::increasePool()
 		_MEMBLOCK* tmpMem=new _MEMBLOCK;
 		if(tmpMem==NULL)
 			{
-				delete tmp;
+				delete[] tmp;
 				return E_UNKNOWN;
 			}
 		memset(tmp,0,sizeof(CONNECTIONLIST)*POOL_SIZE);
@@ -94,7 +94,7 @@ SINT32 CASocketList::clear()
 		tmp=m_Memlist;
 		while(tmp!=NULL)
 			{
-				delete tmp->mem;
+				delete []tmp->mem;
 				m_Memlist=tmp;
 				tmp=tmp->next;
 				delete m_Memlist;

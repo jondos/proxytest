@@ -127,10 +127,10 @@ SINT32 CALastMix::init()
 		if(((CASocket*)muxIn)->send(buff,messageSize+2)!=messageSize+2)
 			{
 				CAMsg::printMsg(LOG_ERR,"Error sending Key-Info!\n");
-				delete buff;
+				delete []buff;
 				return E_UNKNOWN;
 			}
-		delete buff;
+		delete []buff;
 		return E_SUCCESS;
 	}
 
@@ -430,7 +430,7 @@ ERR:
 				delete tmpCon->pSocket;
 				tmpCon=tmpCon->next;
 			}
-		delete tmpBuff;
+		delete []tmpBuff;
 		delete pMixPacket;
 		return E_UNKNOWN;
 	}
