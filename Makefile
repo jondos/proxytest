@@ -3,8 +3,8 @@
 
 CC=gcc
 #CC=CC -mips4 -64
-INCLUDE = -I. -I/home/imis/mix/openssl64/include -I/sun/ikt/sk13/openssl/include
-LIBS	= -L/usr/local/ssl/lib -L/home/imis/mix/openssl64/lib -L/sun/ikt/sk13/openssl/lib ./popt/popt.a ./httptunnel/httptunnel.a -lcrypto
+INCLUDE = -I. -I/usr/users/sya/sk13/openssl/include -I/home/imis/mix/openssl64/include -I/sun/ikt/sk13/openssl/include
+LIBS	= -L/usr/users/sya/sk13/openssl/lib -L/home/imis/mix/openssl64/lib -L/sun/ikt/sk13/openssl/lib ./popt/popt.a ./httptunnel/httptunnel.a -lcrypto
 #-lpthread 
 #CPPFLAGS =-O3 -Wall 
 CPPFLAGS =-O3
