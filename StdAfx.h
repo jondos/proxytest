@@ -138,6 +138,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#include <sys/ioctl.h>
 		#include <sys/types.h>
     #include <sys/socket.h>
+    #include <pwd.h>
     #include <sys/un.h>
 		#include <sys/poll.h>
     #include <sys/time.h>

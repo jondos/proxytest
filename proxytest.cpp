@@ -266,12 +266,12 @@ int main(int argc, const char* argv[])
 #ifndef WIN32
 		if(options.getUser(buff,255)==E_SUCCESS) //switching user
 			{
-				strcut passwd* pwd=getpwnam(user);
+				struct passwd* pwd=getpwnam((char*)buff);
 				if(pwd==NULL||seteuid(pwd->pw_uid)==-1)
-					CAMsg::printMsg(LOG_ERROR,"Could not switch to effective user %s!\n",buff);
+					CAMsg::printMsg(LOG_ERR,"Could not switch to effective user %s!\n",buff);
 			}
 		if(geteuid()==0)
-			CAMsg::printMsg(LOG_WARN,"Warning - Running as root!\n",buff);
+			CAMsg::printMsg(LOG_INFO,"Warning - Running as root!\n");
 #endif
 		
 		if(options.getDaemon())
