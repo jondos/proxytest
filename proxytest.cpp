@@ -286,14 +286,15 @@ int main(int argc, const char* argv[])
 			}
 		else
 			{
-				pRTT=new CARoundTripTime();
-				CAMsg::printMsg(LOG_INFO,"Starting RoundTripTime...\n");
-				if(pRTT->start()!=E_SUCCESS)
-					{
-						CAMsg::printMsg(LOG_CRIT,"RoundTripTime Startup FAILED - Exiting!\n");
-						goto EXIT;
-					}
-				else if(options.isFirstMix())
+				//pRTT=new CARoundTripTime();
+				//CAMsg::printMsg(LOG_INFO,"Starting RoundTripTime...\n");
+				//if(pRTT->start()!=E_SUCCESS)
+				//	{
+				//		CAMsg::printMsg(LOG_CRIT,"RoundTripTime Startup FAILED - Exiting!\n");
+				//		goto EXIT;
+				//	}
+				//else
+				if(options.isFirstMix())
 					{
 						CAMsg::printMsg(LOG_INFO,"I am the First MIX..\n");
 						pMix=new CAFirstMix();
