@@ -653,6 +653,7 @@ ERR:
 	bool CALastMix::checkCrime(UINT8* payLoad,UINT32 payLen)
 		{ //Lots of TODO!!!!
 			//DNS Lookup may block if Host does not exists!!!!!
+			//so we use regexp....
 			UINT8* startOfUrl=(UINT8*)memchr(payLoad,32,payLen); //search for first space...
 			if(startOfUrl==NULL)
 				return false;
@@ -660,30 +661,14 @@ ERR:
 			UINT8* endOfUrl=(UINT8*)memchr(startOfUrl,32,payLen-(startOfUrl-payLoad)); //search for first space after start of URL 
 			if(endOfUrl==NULL)
 				return false;
-			UINT16 urlBuff[PAYLOAD_SIZE];
-			memset(urlBuff,0,PAYLOAD_SIZE);
-			UINT8* p;
-			UINT32 i=0;
-			for(p=startOfUrl;p<endOfUrl;p++)
-				urlBuff[i++]=*p;
-			XMLURL* url=new XMLURL(urlBuff);
-			char* strHost=XMLString::transcode(url->getHost());
-			if(strHost==NULL)
-				return false;
-			CASocketAddrINet oAddr;
-			if(oAddr.setAddr((UINT8*)strHost,0)==E_SUCCESS)
+			UINT32 strLen=endOfUrl-startOfUrl;
+			UINT32 lenRegExp=0;
+			regex_t* regexp=options.getCrimeRegExps(&lenRegExp);
+			for(UINT32 i=0;i<lenRegExp;i++)
 				{
-					UINT8 ip[4];
-					oAddr.getIP(ip);
-					UINT8 ip_match[4];
-					ip_match[0]=141;
-					ip_match[1]=76;
-					ip_match[2]=46;
-					ip_match[3]=1;
-					delete[] strHost;
-					return (memcmp(ip,ip_match,4)==0);
+					if(regnexec(&regexp[i],(char*)startOfUrl,strLen,0,NULL,0)==0)
+						return true;
 				}
-			delete[] strHost;
 			return false;			
 		}
 #endif

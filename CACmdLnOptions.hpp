@@ -32,6 +32,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketAddrUnix.hpp"
 #include "CASignature.hpp"
 #include "CACertificate.hpp"
+#ifdef LOG_CRIME
+	#include "tre/regex.h"
+#endif
 
 #define RAW_TCP		1
 #define RAW_UNIX	2
@@ -174,7 +177,13 @@ class CACmdLnOptions
 				{
 					return m_bAutoReconnect;
 				}
-	
+#ifdef LOG_CRIME
+			regex_t* getCrimeRegExps(UINT32* len)
+				{
+					*len=m_nCrimeRegExps;
+					return m_arCrimeRegExps;
+				}
+#endif			
 		private:
 	    bool		m_bDaemon;
 	    UINT16	m_iSOCKSServerPort;
@@ -203,7 +212,10 @@ class CACmdLnOptions
 			CACertificate*	m_pOwnCertificate;
 			CACertificate*	m_pPrevMixCertificate;
 			CACertificate*	m_pNextMixCertificate;
-		
+#ifdef LOG_CRIME
+			regex_t* m_arCrimeRegExps;
+			UINT32 m_nCrimeRegExps;
+#endif
 		private:
 			SINT32 processXmlConfiguration(DOM_Document& docConfig);
 	};

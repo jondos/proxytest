@@ -8,7 +8,7 @@ XERCESC_LIB=/usr/local/lib
 
 INCLUDE = -I. -I${OPENSSL_INC} -I/usr/users/sya/sk13/openssl/include -I/home/imis/mix/openssl64/include -I/sun/ikt/sk13/openssl/include -I${XERCESC_INC} -I${HOME}/xercesc/include/xercesc
 LIBDIR= -L${OPENSSL_LIB} -L/usr/users/sya/sk13/openssl/lib -L/home/imis/mix/openssl64/lib -L/sun/ikt/sk13/openssl/lib -L/usr/local/lib -L${XERCESC_LIB} -L${HOME}/xercesc/lib
-LIBS	= ./popt/libpopt.a ./xml/libxml.a ./trio/libtrio.a ./aes/libaes.a -lcrypto -lm -lxerces-c
+LIBS	= ./popt/libpopt.a ./xml/libxml.a ./trio/libtrio.a ./trio/libtre.a ./aes/libaes.a -lcrypto -lm -lxerces-c
 
 MAKE=make -f Makefile.old
 
@@ -128,7 +128,7 @@ freebsd-x86-gcc-pthread:
 linux-x86-gcc-webdeploy:
 	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -O0' 'INCLUDE=$(INCLUDE)' 'LIBS=./libxerces-c.a ./popt/libpopt.a ./xml/libxml.a ./trio/libtrio.a ./aes/libaes.a -lcrypto -lm -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
 
-_all_aes: $(OBJS) libpopt.a libxml.a libaes.a libtrio.a
+_all_aes: $(OBJS) libpopt.a libxml.a libaes.a libtrio.a libtre.a
 	$(CC) -o proxytest $(DEBUG) $(CPPFLAGS) $(OBJS) $(LIBDIR) $(LIBS)
 
 libpopt.a:
@@ -136,6 +136,9 @@ libpopt.a:
 
 libtrio.a:
 	cd trio;$(MAKE) 'CC=$(CC)' 'DEBUG=$(DEBUG)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)'
+
+libtre.a:
+	cd tre;$(MAKE) 'CC=$(CC)' 'DEBUG=$(DEBUG)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)'
 
 libxml.a: 
 	cd xml;$(MAKE) 'CC=$(CC)' 'DEBUG=$(DEBUG)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)';
@@ -147,6 +150,7 @@ clean:
 	rm -f $(OBJS)
 	cd popt; $(MAKE) clean;
 	cd trio;$(MAKE) clean;
+	cd tre;$(MAKE) clean;
 	cd xml;$(MAKE) clean;
 	cd aes;$(MAKE) clean;
 	rm -f proxytest
