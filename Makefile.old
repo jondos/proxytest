@@ -8,7 +8,7 @@ XERCESC_LIB=/usr/local/lib
 
 INCLUDE = -I. -I${OPENSSL_INC} -I/usr/users/sya/sk13/openssl/include -I/home/imis/mix/openssl64/include -I/sun/ikt/sk13/openssl/include -I${XERCESC_INC} -I${HOME}/xercesc/include/xercesc
 LIBDIR= -L${OPENSSL_LIB} -L/usr/users/sya/sk13/openssl/lib -L/home/imis/mix/openssl64/lib -L/sun/ikt/sk13/openssl/lib -L/usr/local/lib -L${XERCESC_LIB} -L${HOME}/xercesc/lib
-LIBS	= ./popt/libpopt.a ./xml/libxml.a ./trio/libtrio.a ./aes/libaes.a -lcrypto -lm -lxercesc
+LIBS	= ./popt/libpopt.a ./xml/libxml.a ./trio/libtrio.a ./aes/libaes.a -lcrypto -lm -lxerces-c
 
 MAKE=make -f Makefile.old
 
