@@ -120,11 +120,7 @@ SINT32 CASocketList::setThreadSafe(bool b)
 *	        E_UNKNOWN, otherwise
 *
 */
-#ifdef LOG_CHANNEL
-SINT32 CASocketList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue,UINT64 time,UINT32 initalUpload)
-#else
-SINT32 CASocketList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue)
-#endif
+SINT32 CASocketList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher)
 	{
 		if(m_bThreadSafe)
 			cs.lock();
@@ -144,41 +140,8 @@ SINT32 CASocketList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQu
 		m_Connections=tmp;
 		m_Connections->pSocket=pSocket;
 		m_Connections->pCipher=pCipher;
-		m_Connections->pSendQueue=pQueue;
-		m_Connections->id=id;
-#ifdef LOG_CHANNEL
-		m_Connections->u32Download=0;
-		m_Connections->u32Upload=initalUpload;
-		set64(m_Connections->time_created,time);
-#endif
-		m_Size++;
-		if(m_bThreadSafe)
-			cs.unlock();
-		return E_SUCCESS;
-	}
+		m_Connections->outChannel=id;
 
-SINT32 CASocketList::add(HCHANNEL in,HCHANNEL out,CASymCipher* pCipher)
-	{
-		if(m_bThreadSafe)
-			cs.lock();
-		CONNECTIONLIST* tmp;
-		if(m_Pool==NULL)
-		  {
-				if(increasePool()!=E_SUCCESS)
-					{
-						if(m_bThreadSafe)
-							cs.unlock();
-						return E_UNKNOWN;
-					}
-		  }
-		tmp=m_Pool;
-		m_Pool=m_Pool->next;
-		tmp->next=m_Connections;
-		m_Connections=tmp;
-		m_Connections->outChannel=out;
-		m_Connections->pCipher=pCipher;
-		m_Connections->pSendQueue=NULL;
-		m_Connections->id=in;
 		m_Size++;
 		if(m_bThreadSafe)
 			cs.unlock();
@@ -192,7 +155,7 @@ SINT32 CASocketList::add(HCHANNEL in,HCHANNEL out,CASymCipher* pCipher)
 	        false - otherwise
 *
 */
-bool	CASocketList::get(HCHANNEL in,CONNECTION* out)
+SINT32 CASocketList::get(HCHANNEL in,CONNECTION* out)
 	{
 		if(m_bThreadSafe)
 			cs.lock();
@@ -200,76 +163,18 @@ bool	CASocketList::get(HCHANNEL in,CONNECTION* out)
 		tmp=m_Connections;
 		while(tmp!=NULL)
 			{
-				if(tmp->id==in)
+				if(tmp->outChannel==in)
 					{
 						memcpy(out,tmp,sizeof(CONNECTION));
 						if(m_bThreadSafe)
 							cs.unlock();
-						return true;
+						return E_SUCCESS;
 					}
 				tmp=tmp->next;
 			}
 		if(m_bThreadSafe)
 			cs.unlock();
-		return false;
-	}
-
-/** Gets a copy of an entry form the channel-list.
-* @param in - the object, that will hold the copy
-*	@param out - the assoziated(output) channel-id for wich the entry is requested
-*	@return true - if the channel was found
-	        false - otherwise
-*
-*/
-bool	CASocketList::get(CONNECTION* in,HCHANNEL out)
-	{
-		if(m_bThreadSafe)
-			cs.lock();
-		CONNECTIONLIST* tmp;
-		tmp=m_Connections;
-		while(tmp!=NULL)
-			{
-				if(tmp->outChannel==out)
-					{
-						memcpy(in,tmp,sizeof(CONNECTION));
-						if(m_bThreadSafe)
-							cs.unlock();
-						return true;
-					}
-				tmp=tmp->next;
-			}
-		if(m_bThreadSafe)
-			cs.unlock();
-		return false;
-	}
-
-/** Gets a copy of an entry form the channel-list.
-* @param in - the object, that will hold the copy
-*	@param pSocket - the assoziated(output) socket for wich the entry is requested
-*	@return true - if the channel was found
-	        false - otherwise
-*
-*/
-bool	CASocketList::get(CONNECTION* in,CASocket* pSocket)
-	{
-		if(m_bThreadSafe)
-			cs.lock();
-		CONNECTIONLIST* tmp;
-		tmp=m_Connections;
-		while(tmp!=NULL)
-			{
-				if(tmp->pSocket==pSocket)
-					{
-						memcpy(in,tmp,sizeof(CONNECTION));
-						if(m_bThreadSafe)
-							cs.unlock();
-						return true;
-					}
-				tmp=tmp->next;
-			}
-		if(m_bThreadSafe)
-			cs.unlock();
-		return false;
+		return E_UNKNOWN;
 	}
 
 CASocket* CASocketList::remove(HCHANNEL id)
@@ -282,7 +187,7 @@ CASocket* CASocketList::remove(HCHANNEL id)
 		before=NULL;
 		while(tmp!=NULL)
 			{
-				if(tmp->id==id)
+				if(tmp->outChannel==id)
 					{
 						if(m_AktEnumPos==tmp)
 							m_AktEnumPos=tmp->next;
