@@ -605,7 +605,7 @@ SINT32 CAFirstMix::loop()
 										m_pChannelList->remove(pMuxSocket);
 										pMuxSocket->close();
 										delete pMuxSocket;
-										incUsers();
+										decUsers();
 									}
 								else if(ret==MIXPACKET_SIZE)
 									{
