@@ -29,8 +29,24 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CACMDLNOPTIONS__
 #define __CACMDLNOPTIONS__
 #include "CASocketAddrINet.hpp"
+#include "CASocketAddrUnix.hpp"
 #include "CASignature.hpp"
 #include "CACertificate.hpp"
+
+#define RAW_TCP		1
+#define RAW_UNIX	2
+#define SSL_TCP		3
+#define SSL_UNIX	4
+
+struct t_ListenerInterface
+	{
+		UINT32 type;
+		CASocketAddr* addr;
+		UINT8* hostname; 
+	};
+
+typedef struct t_ListenerInterface ListenerInterface;
+
 class CACmdLnOptions
     {
 	public:
@@ -39,35 +55,51 @@ class CACmdLnOptions
 			void clean();
 			SINT32 parse(int argc,const char** arg);
 	    bool getDaemon();
-      bool getProxySupport();
+      //bool getProxySupport();
+
+			SINT32 getMixId(UINT8* id,UINT32 len);
 	   
 
-			UINT16 getServerPort();
+//			UINT16 getServerPort();
 			/*For IP (Host) AND Unix Domain Sockets*/
-	    SINT32 getServerHost(UINT8* path,UINT32 len);
+//	    SINT32 getServerHost(UINT8* path,UINT32 len);
 			
-			SINT32 getMixId(UINT8* id,UINT32 len);
 //			SINT32 getServerRTTPort();
 			UINT16 getSOCKSServerPort();
 	    
+			UINT32 getListenerInterfaceCount(){return m_cnListenerInterfaces;}
+			SINT32 getListenerInterface(ListenerInterface& oListenerInterface, UINT32 nr)		
+				{
+					if(nr>0&&nr<=m_cnListenerInterfaces)
+						{
+							oListenerInterface.type=m_arListenerInterfaces[nr-1].type;
+							oListenerInterface.hostname=m_arListenerInterfaces[nr-1].hostname;
+							oListenerInterface.addr=m_arListenerInterfaces[nr-1].addr->clone();
+							return E_SUCCESS;
+						}
+					else
+						return E_UNKNOWN;
+				};
+			
 			//for historic reason gives always the first entry in the possible target list
 			UINT16 getTargetPort();
 	    SINT32 getTargetRTTPort();
 			SINT32 getTargetHost(UINT8* host,UINT32 len);
 	   
 			//if we have more than one Target (currently only Caches are possible...)
-			UINT32 getTargetCount(){return cntTargets;}
+			UINT32 getTargetCount(){return m_cnTargets;}
 			SINT32 getTargetAddr(CASocketAddrINet& oAddr, UINT32 nr)
 				{
-					if(nr>0&&nr<=cntTargets)
+					if(nr>0&&nr<=m_cnTargets)
 						{
-							oAddr=pTargets[nr-1];
+							oAddr=m_arTargets[nr-1];
 							return E_SUCCESS;
 						}
 					else
 						return E_UNKNOWN;
 				};
 
+			
 			UINT16 getSOCKSPort();
 	    SINT32 getSOCKSHost(UINT8* host,UINT32 len);
 	    UINT16 getInfoServerPort();
@@ -125,14 +157,14 @@ class CACmdLnOptions
 				}
 	protected:
 	    bool bDaemon;
-      bool m_bHttps;
-	    UINT16 iServerPort;
+      //bool m_bHttps;
+	    //UINT16 iServerPort;
 //			SINT32 iServerRTTPort;
 	    UINT16 iSOCKSServerPort;
 	    UINT16 iTargetPort; //only for the first target...
 	    SINT32 iTargetRTTPort; //only for the first target
 			char* strTargetHost; //only for the first target...
-	    char* strServerHost; //Host or Unix Domain Socket
+	    //char* strServerHost; //Host or Unix Domain Socket
 			char* strSOCKSHost;
 	    UINT16 iSOCKSPort;
 	    char* strInfoServerHost;
@@ -146,8 +178,10 @@ class CACmdLnOptions
 			char* m_strMixXml;
 			char* m_strMixID;
 
-			CASocketAddrINet* pTargets;
-			UINT32 cntTargets;
+			CASocketAddrINet* m_arTargets;
+			UINT32 m_cnTargets;
+			ListenerInterface* m_arListenerInterfaces;
+			UINT32 m_cnListenerInterfaces;
 			
 			CASignature* m_pSignKey;
 			CACertificate* m_pOwnCertificate;

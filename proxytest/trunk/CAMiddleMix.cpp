@@ -47,6 +47,11 @@ SINT32 CAMiddleMix::initOnce()
 			{
 				return E_UNKNOWN;
 			}
+		if(options.getListenerInterfaceCount()<1)
+			{
+				CAMsg::printMsg(LOG_CRIT,"No ListenerInterfaces specified!\n");
+				return E_UNKNOWN;
+			}
 		return E_SUCCESS;
 	}
 
@@ -211,7 +216,6 @@ SINT32 CAMiddleMix::init()
 		
 		UINT8 strTarget[255];
 		memset(strTarget,0,255);
-		UINT8 path[255];
 		CASocketAddr* pAddrNext;
 		options.getTargetHost(strTarget,255);
 		if(strTarget[0]=='/') //unix domain
@@ -257,29 +261,10 @@ SINT32 CAMiddleMix::init()
 					CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
 			}
 		
-		CASocketAddr* pAddrListen;
-		memset(path,0,255);
-		if(options.getServerHost(path,255)==E_SUCCESS&&path[0]=='/') //unix domain
-			{
-#ifdef HAVE_UNIX_DOMAIN_PROTOCOL
-				pAddrListen=new CASocketAddrUnix();
-				((CASocketAddrUnix*)pAddrListen)->setPath((char*)path);
-#else
-				CAMsg::printMsg(LOG_CRIT,"I do not understand the Unix Domain Protocol!\n");
-				return E_UNKNOWN;
-#endif
-			}
-		else
-			{
-				pAddrListen=new CASocketAddrINet();
-				if(path[0]==0) //empty host
-					((CASocketAddrINet*)pAddrListen)->setPort(options.getServerPort());
-				else	
-					((CASocketAddrINet*)pAddrListen)->setAddr(path,options.getServerPort());
-			}
-
+		ListenerInterface oListener;
+		options.getListenerInterface(oListener,1);
 		m_pMuxIn=new CAMuxSocket();
-		if(m_pMuxIn->accept(*pAddrListen)!=E_SUCCESS)
+		if(m_pMuxIn->accept(*oListener.addr)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Error waiting for previous Mix... -- Exiting!\n");				
 				return E_UNKNOWN;

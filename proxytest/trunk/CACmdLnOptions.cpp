@@ -34,14 +34,16 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 CACmdLnOptions::CACmdLnOptions()
   {
-		bDaemon=m_bHttps=false;
+		bDaemon=false;
 		bLocalProxy=bFirstMix=bLastMix=bMiddleMix=false;
-		iTargetPort=iSOCKSPort=iServerPort=iSOCKSServerPort=iInfoServerPort=0xFFFF;
+		iTargetPort=iSOCKSPort=iSOCKSServerPort=iInfoServerPort=0xFFFF;
 		iTargetRTTPort=/*iServerRTTPort=*/-1;
-		strServerHost=strTargetHost=strSOCKSHost=strInfoServerHost=NULL;
+		strTargetHost=strSOCKSHost=strInfoServerHost=NULL;
 		m_strMixXml=m_strUser=strCascadeName=strLogDir=NULL;
-		pTargets=NULL;
-		cntTargets=0;
+		m_arTargets=NULL;
+		m_cnTargets=0;
+		m_arListenerInterfaces=NULL;
+		m_cnListenerInterfaces=0;
 		m_nrOfOpenFiles=-1;
 		m_strMixID=NULL;
 		m_pSignKey=NULL;
@@ -62,10 +64,6 @@ void CACmdLnOptions::clean()
 			{
 				delete[] strTargetHost;
 	    }
-		if(strServerHost!=NULL)
-			{
-				delete[] strServerHost;
-	    }
 		if(strSOCKSHost!=NULL)
 			{
 				delete[] strSOCKSHost;
@@ -84,9 +82,9 @@ void CACmdLnOptions::clean()
 			delete[] m_strMixXml;
 		if(m_strMixID!=NULL)
 			delete[] m_strMixID;
-		if(pTargets!=NULL)
+		if(m_arTargets!=NULL)
 			{
-				delete[] pTargets;
+				delete[] m_arTargets;
 			}
 		if(m_pSignKey!=NULL)
 			delete m_pSignKey;
@@ -101,10 +99,10 @@ void CACmdLnOptions::clean()
 SINT32 CACmdLnOptions::parse(int argc,const char** argv)
     {
 	//int ret;
-	
+	ListenerInterface* pCmndLineListener=NULL;
 	int iDaemon=0;
 	int iTemplate=0;
-  int bHttps=0;
+//  int bHttps=0;
   char* target=NULL;
 //	int serverrttport=-1;
 	int mix=-1;
@@ -125,8 +123,8 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 	 {
 		{"daemon",'d',POPT_ARG_NONE,&iDaemon,0,"start as daemon",NULL},
 		{"next",'n',POPT_ARG_STRING,&target,0,"next mix/http-proxy(s)","<path|{ip:port[,rttport][;ip:port]*}>"},
-		{"port",'p',POPT_ARG_STRING,&serverPort,0,"listening [host:]port|path","<[host:]port|path>"},
-		{"https",'h',POPT_ARG_NONE,&bHttps,0,"support proxy requests",NULL},
+		{"port",'p',POPT_ARG_STRING,&serverPort,0,"ONLY FOR LOCAL PROXY!: listening [host:]port|path","<[host:]port|path>"},
+//		{"https",'h',POPT_ARG_NONE,&bHttps,0,"support proxy requests",NULL},
 //		{"rttport",'r',POPT_ARG_INT,&serverrttport,0,"round trip time port","<portnumber>"},
 		{"mix",'m',POPT_ARG_INT,&mix,0,"local|first|middle|last mix","<0|1|2|3>"},
 		{"socksport",'s',POPT_ARG_INT,&SOCKSport,0,"listening port for socks","<portnumber>"},
@@ -165,6 +163,15 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 			exit(0);
 		}
 
+	if(mix==0)
+		bLocalProxy=true;
+	else if(mix==1)
+		bFirstMix=true;
+	else if(mix==2)
+		bMiddleMix=true;
+	else 
+		bLastMix=true;
+
 	if(configfile!=NULL)
 		{
 			
@@ -190,10 +197,6 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 	    bDaemon=false;
 	else
 	    bDaemon=true;
-  if(bHttps==0)
-  	m_bHttps=false;
-  else
-  	m_bHttps=true;
   if(target!=NULL)
 	    {
 				char* tmpStr;
@@ -204,14 +207,14 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 				 }
 				else
 					{
-						cntTargets=1;
+						m_cnTargets=1;
 						UINT32 i;
 						for(i=0;i<strlen(target);i++)
 							{
 								if(target[i]==';')
-									cntTargets++;
+									m_cnTargets++;
 							}
-						pTargets=new CASocketAddrINet[cntTargets];
+						m_arTargets=new CASocketAddrINet[m_cnTargets];
 						tmpStr=strtok(target,";");
 						char tmpHostname[255];
 						int tmpPort;
@@ -241,7 +244,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 												strcpy(tmpHostname,tmpStr);
 											}
 									}
-								pTargets[i].setAddr((UINT8*)tmpHostname,tmpPort);
+								m_arTargets[i].setAddr((UINT8*)tmpHostname,tmpPort);
 								if(i==0)
 									{
 										strTargetHost=new char[strlen(tmpHostname)+1];
@@ -300,42 +303,47 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 					strcpy(m_strUser,user);
 					free(user);	
 	    }
-*/	if(serverPort!=NULL)
+*/	if(serverPort!=NULL&&bLocalProxy)
 		{
+			m_arListenerInterfaces=new ListenerInterface[1]; 
+			m_cnListenerInterfaces=1;
 			char* tmpStr;
 			if(serverPort[0]=='/') //Unix Domain Socket
 			 {
-				strServerHost=new char[strlen(serverPort)+1];
-				strcpy(strServerHost,serverPort);
-			 }
-			else if((tmpStr=strchr(serverPort,':'))!=NULL) //host:port
-				{
-					strServerHost=new char[tmpStr-serverPort+1];
-					(*tmpStr)=0;
-					strcpy(strServerHost,serverPort);
-					iServerPort=(int)atol(tmpStr+1);
+					m_arListenerInterfaces[0].type=RAW_UNIX;
+#ifdef HAVE_UNIX_DOMAIN_PROTOCOL
+					m_arListenerInterfaces[0].addr=new CASocketAddrUnix(serverPort);
+#endif
+					m_arListenerInterfaces[0].hostname=NULL;
 				}
-			else //port only ?
+			else //Internet Socket
 				{
-					if(strServerHost!=NULL)
-						delete strServerHost;
-					strServerHost=NULL;
-					iServerPort=(int)atol(serverPort);
+					char* strServerHost=NULL; 
+					int iServerPort;
+					if((tmpStr=strchr(serverPort,':'))!=NULL) //host:port
+						{
+							strServerHost=new char[tmpStr-serverPort+1];
+							(*tmpStr)=0;
+							strcpy(strServerHost,serverPort);
+							iServerPort=(int)atol(tmpStr+1);
+						}
+					else //port only ?
+						{
+							iServerPort=(int)atol(serverPort);
+						}
+					m_arListenerInterfaces[0].type=RAW_TCP;
+					m_arListenerInterfaces[0].addr=new CASocketAddrINet;
+					((CASocketAddrINet*)m_arListenerInterfaces[0].addr)->setAddr((UINT8*)strServerHost,iServerPort);
+					m_arListenerInterfaces[0].hostname=(UINT8*)strServerHost;
+					delete [] strServerHost;
 				}
 			free(serverPort);
 		}
+
 //	if(serverrttport!=-1)
 //		iServerRTTPort=serverrttport;
 	iSOCKSServerPort=SOCKSport;
 //	m_nrOfOpenFiles=nrOfOpenFiles;
-	if(mix==0)
-		bLocalProxy=true;
-	else if(mix==1)
-		bFirstMix=true;
-	else if(mix==2)
-		bMiddleMix=true;
-	else 
-		bLastMix=true;
 	//This is only for mixes - not for local proxy
 /*	if(!bLocalProxy)
 		{
@@ -478,7 +486,11 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 		}
 */
 	if(!bLocalProxy)
-		return processXmlConfiguration(docMixXml);
+		{
+			ret=processXmlConfiguration(docMixXml);
+			if(ret!=E_SUCCESS)
+				return ret;
+		}
 	return E_SUCCESS;
  }
 
@@ -487,23 +499,24 @@ bool CACmdLnOptions::getDaemon()
 		return bDaemon;
   }
 
-bool CACmdLnOptions::getProxySupport()
+/*bool CACmdLnOptions::getProxySupport()
 	{
   	return m_bHttps;
   }
-UINT16 CACmdLnOptions::getServerPort()
+*/
+/*UINT16 CACmdLnOptions::getServerPort()
   {
 		return iServerPort;
   }
-    
-SINT32 CACmdLnOptions::getServerHost(UINT8* path,UINT32 len)
+*/    
+/*SINT32 CACmdLnOptions::getServerHost(UINT8* path,UINT32 len)
 	{
 		if(path==NULL||strServerHost==NULL||len<=strlen(strServerHost))
 			return E_UNKNOWN;
 		strcpy((char*)path,strServerHost);
 		return E_SUCCESS;
 	}
-
+*/
 SINT32 CACmdLnOptions::getMixId(UINT8* id,UINT32 len)
 	{
 		if(len<24||m_strMixID==NULL) //we need 24 chars (including final \0)
@@ -806,6 +819,103 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		if(getDOMElementValue(elem,&tmp)==E_SUCCESS)
 			iInfoServerPort=tmp;
 
+		//get ListenerInterfaces
+		DOM_Element elemListenerInterfaces;
+		getDOMChildByName(elemNetwork,(UINT8*)"ListenerInterfaces",elemListenerInterfaces,false);
+		if(elemListenerInterfaces!=NULL)
+			{
+				DOM_NodeList nlListenerInterfaces;
+				nlListenerInterfaces=elemListenerInterfaces.getElementsByTagName("ListenerInterface");
+				m_cnListenerInterfaces=nlListenerInterfaces.getLength();
+				if(m_cnListenerInterfaces>0)
+					{
+						m_arListenerInterfaces=new ListenerInterface[m_cnListenerInterfaces]; 
+						UINT32 aktInterface=0;
+						UINT32 type=0;
+						CASocketAddr* addr=NULL;
+						UINT8* hostname=NULL;
+						UINT32 port;
+						for(UINT32 i=0;i<m_cnListenerInterfaces;i++)
+							{
+								if(addr!=NULL)
+									delete addr;
+								addr=NULL;
+								DOM_Node elemListenerInterface;
+								elemListenerInterface=nlListenerInterfaces.item(i);
+								DOM_Element elemType;
+								getDOMChildByName(elemListenerInterface,(UINT8*)"Type",elemType,false);
+								tmpLen=255;
+								if(getDOMElementValue(elemType,tmpBuff,&tmpLen)!=E_SUCCESS)
+									continue;
+								if(strcmp((char*)tmpBuff,"RAW/TCP")==0)
+									type=RAW_TCP;
+								else if(strcmp((char*)tmpBuff,"RAW/UNIX")==0)
+									type=RAW_UNIX;
+								else if(strcmp((char*)tmpBuff,"SSL/TCP")==0)
+									type=SSL_TCP;
+								else if(strcmp((char*)tmpBuff,"SSL/UNIX")==0)
+									type=SSL_UNIX;
+								else
+									continue;
+								if(type==SSL_TCP||type==RAW_TCP)
+									{
+										DOM_Element elemIP;
+										DOM_Element elemPort;
+										DOM_Element elemHost;
+										getDOMChildByName(elemListenerInterface,(UINT8*)"Port",elemPort,false);
+										if(getDOMElementValue(elemPort,&port)!=E_SUCCESS)
+											continue;
+
+										addr=new CASocketAddrINet;
+										getDOMChildByName(elemListenerInterface,(UINT8*)"IP",elemIP,false);
+										if(elemIP!=NULL)
+											{
+												UINT8 buffIP[50];
+												UINT32 buffIPLen=50;
+												if(getDOMElementValue(elemIP,buffIP,&buffIPLen)!=E_SUCCESS)
+													continue;
+												if(((CASocketAddrINet*)addr)->setAddr(buffIP,port)!=E_SUCCESS)
+													continue;
+											}
+										m_arListenerInterfaces[aktInterface].hostname=NULL;
+										getDOMChildByName(elemListenerInterface,(UINT8*)"Host",elemHost,false);
+										tmpLen=255;										
+										if(getDOMElementValue(elemHost,tmpBuff,&tmpLen)==E_SUCCESS)
+											{
+												tmpBuff[tmpLen]=0;
+												if(elemIP==NULL&&((CASocketAddrINet*)addr)->setAddr(tmpBuff,port)!=E_SUCCESS)
+													continue;
+												m_arListenerInterfaces[aktInterface].hostname=new UINT8[tmpLen+1];
+												memcpy(m_arListenerInterfaces[aktInterface].hostname,tmpBuff,tmpLen);
+												m_arListenerInterfaces[aktInterface].hostname[tmpLen]=0;
+											}
+										else if(elemIP==NULL)
+											continue;
+									}
+								else
+		#ifdef HAVE_UNIX_DOMAIN_PROTOCOL
+									{
+										DOM_Element elemFile;
+										getDOMChildByName(elemListenerInterface,(UINT8*)"File",elemFile,false);
+										tmpLen=255;
+										if(getDOMElementValue(elemFile,tmpBuff,&tmpLen)!=E_SUCCESS)
+											continue;
+										if(((CASocketAddrUnix*)addr)->setAddr(tmpBuff)!=E_SUCCESS)
+											continue;
+										m_arListenerInterfaces[aktInterface].hostname=NULL;
+									}
+		#else
+									continue;
+		#endif
+								m_arListenerInterfaces[aktInterface].type=type;
+								m_arListenerInterfaces[aktInterface].addr=addr->clone();
+								delete addr;
+								addr=NULL;
+								aktInterface++;
+							}
+						m_cnListenerInterfaces=aktInterface;
+					}
+			}
 		//construct a XML-String, which describes the Mix (send via Infoservice.Helo())
 		DOM_Document docMixXml=DOM_Document::createDocument();
 		DOM_Element elemMix=docMixXml.createElement("Mix");

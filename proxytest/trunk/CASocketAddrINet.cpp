@@ -70,7 +70,17 @@ CASocketAddrINet::CASocketAddrINet(UINT16 port)
 		sin_addr.s_addr=INADDR_ANY;
 	}
 
-/** Sets the address to szIP and port. szIP could be either a hostname or an IP-Address of the form a.b.c.d .
+/**Constructs an IP-Address from an other IP Adress */
+CASocketAddrINet::CASocketAddrINet(const CASocketAddrINet& addr)
+	{
+		sin_family=AF_INET;
+		sin_port=addr.sin_port;
+		sin_addr.s_addr=addr.sin_addr.s_addr;
+	}
+
+/** Sets the address to szIP and port. szIP could be either a hostname or an 
+  * IP-Address of the form a.b.c.d . If szIP==NULL, the the IP-Adredress ist set 
+	* to ANY local IP Address
 	* @param szIP new value for IP-Address or hostname (zero terminated string)
 	* @param port new value for port
 	* @retval E_SUCCESS if no error occurs
@@ -79,22 +89,25 @@ CASocketAddrINet::CASocketAddrINet(UINT16 port)
 	*/
 SINT32 CASocketAddrINet::setAddr(const UINT8* szIP,UINT16 port)
 	{
-		UINT32 newAddr=inet_addr((const char*)szIP); //is it a doted string (a.b.c.d) ?
-		if(newAddr==INADDR_NONE) //if not try to find the hostname
+		UINT32 newAddr=INADDR_ANY;
+		if(szIP!=NULL)
 			{
-				m_csGet.lock();
-				HOSTENT* hostent=gethostbyname((const char*)szIP); //lookup
-				if(hostent!=NULL) //get it!
-					memcpy(&sin_addr.s_addr,hostent->h_addr_list[0],hostent->h_length);
-				else
+				newAddr=inet_addr((const char*)szIP); //is it a doted string (a.b.c.d) ?
+				if(newAddr==INADDR_NONE) //if not try to find the hostname
 					{
+						m_csGet.lock();
+						HOSTENT* hostent=gethostbyname((const char*)szIP); //lookup
+						if(hostent!=NULL) //get it!
+							memcpy(&newAddr,hostent->h_addr_list[0],hostent->h_length);
+						else
+							{
+								m_csGet.unlock();
+								return E_UNKNOWN_HOST; //not found!
+							}
 						m_csGet.unlock();
-						return E_UNKNOWN_HOST; //not found!
 					}
-				m_csGet.unlock();
 			}
-		else
-			sin_addr.s_addr=newAddr;
+		sin_addr.s_addr=newAddr;
 		sin_port=htons(port);
 		return E_SUCCESS;
 	}

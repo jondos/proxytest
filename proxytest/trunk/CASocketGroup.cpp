@@ -135,7 +135,7 @@ SINT32 CASocketGroup::remove(CAMuxSocket&s)
 
 SINT32 CASocketGroup::select()
 	{
-			#ifndef HAVE_POLL
+		#ifndef HAVE_POLL
 			m_csFD_SET.lock();
 			memcpy(&m_signaled_set,&m_fdset,sizeof(fd_set));
 			m_csFD_SET.unlock();

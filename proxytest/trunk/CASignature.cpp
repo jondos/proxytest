@@ -350,8 +350,20 @@ SINT32 CASignature::signXML(DOM_Node &node,CACertStore* pIncludeCerts)
 		return E_SUCCESS;
 	}
 
+/** Set the key for signature testing to the one include in pCert. If pCert ==NULL clears the
+	* signature test key
+	* @param pCert Certificate including the test key
+	* @retval E_SUCCESS, if succesful
+	* @retval E_UNKNOWN otherwise
+*/
 SINT32 CASignature::setVerifyKey(CACertificate* pCert)
 	{
+		if(pCert==NULL)
+			{
+				DSA_free(m_pDSA);
+				m_pDSA=NULL;
+				return E_SUCCESS;
+			}
 		EVP_PKEY *key=X509_get_pubkey(pCert->m_pCert);
 		if(EVP_PKEY_type(key->type)!=EVP_PKEY_DSA)
 			{
@@ -368,6 +380,8 @@ SINT32 CASignature::setVerifyKey(CACertificate* pCert)
 
 SINT32 CASignature::verify(UINT8* in,UINT32 inlen,UINT8* sig,UINT32 siglen)
 	{
+		if(m_pDSA==NULL)
+			return E_UNKNOWN;
 		UINT8 dgst[SHA_DIGEST_LENGTH];
 		SHA1(in,inlen,dgst);
 		if(DSA_verify(0,dgst,SHA_DIGEST_LENGTH,sig,siglen,m_pDSA)==1)

@@ -39,6 +39,13 @@ class CASocketAddrINet:public CASocketAddr,private sockaddr_in
 			CASocketAddrINet();
 			CASocketAddrINet(UINT16 port);
 
+			CASocketAddrINet(const CASocketAddrINet& addr);
+
+			CASocketAddr* clone()
+				{
+					return new CASocketAddrINet(*this);
+				}
+			
 			/** Makes a cast to struct SOCKADDR* */
 			::LPSOCKADDR LPSOCKADDR(){return (::LPSOCKADDR)(static_cast<sockaddr_in*>(this));}			
 
@@ -56,6 +63,10 @@ class CASocketAddrINet:public CASocketAddr,private sockaddr_in
 			SINT32 getHostName(UINT8* buff,UINT32 len);
 			SINT32 getIP(UINT8 buff[4]);
 			SINT32 getIPAsStr(UINT8* buff,UINT32 len);
+			bool	 isAnyIP()
+				{
+					return sin_addr.s_addr==INADDR_ANY;	
+				}
 			static SINT32 getLocalHostName(UINT8* buff,UINT32 len);
 			static SINT32 getLocalHostIP(UINT8 ip[4]);
 //			operator LPSOCKADDR(){return (::LPSOCKADDR)m_pAddr;}

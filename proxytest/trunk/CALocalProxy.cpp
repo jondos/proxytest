@@ -38,15 +38,14 @@ extern CACmdLnOptions options;
 
 SINT32 CALocalProxy::init()
 	{
+		ListenerInterface oListener;
+		options.getListenerInterface(oListener,1);
 		CASocketAddrINet socketAddrIn;
-		UINT8 buff[255];
-		if(options.getServerHost(buff,255)!=E_SUCCESS)
-			socketAddrIn.setAddr((UINT8*)"127.0.0.1",options.getServerPort());
-		else
-			socketAddrIn.setAddr(buff,options.getServerPort());
 		socketIn.create();
 		socketIn.setReuseAddr(true);
-		if(socketIn.listen(socketAddrIn)!=E_SUCCESS)
+		if(((CASocketAddrINet*)oListener.addr)->isAnyIP())
+			((CASocketAddrINet*)oListener.addr)->setAddr((UINT8*)"127.0.0.1",((CASocketAddrINet*)oListener.addr)->getPort());
+		if(socketIn.listen(*oListener.addr)!=E_SUCCESS)
 		    {
 					CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
 					return E_UNKNOWN;
