@@ -376,7 +376,7 @@ LOOP_START:
 												
 										CASocket* tmpSocket=new CASocket;										
 										int ret;
-										if(oMixPacket.payload.type==MIX_PAYLOAD_SOCKS)
+										if(oMixPacket.payload.type==MIX_PAYLOAD__SOCKS)
 											ret=tmpSocket->connect(maddrSocks,_CONNECT_TIMEOUT); 
 										else
 											{
