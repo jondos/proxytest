@@ -56,6 +56,11 @@ class CASocket
 			SINT32 receive(UINT8* buff,UINT32 len);
 			SINT32 receiveFully(UINT8* buff,UINT32 len);
 			SINT32 receiveFully(UINT8* buff,UINT32 len,SINT32 timeout);
+			/** Returns the number of the Socket used. Which will be always the same number,
+			** even after close(), until the Socket
+			** is recreated using create()
+			** @ret number of the associated socket
+			**/
 			operator SOCKET(){return m_Socket;}
 			SINT32 getLocalPort();
 			SINT32 getPeerIP(UINT8 ip[4]);
@@ -74,6 +79,10 @@ class CASocket
 			SINT32 setNonBlocking(bool b);
 			SINT32 getNonBlocking(bool* b);
 		private:
+			bool m_bSocketIsClosed; //this is a flag, which shows, if the m_Socket is valid
+													//we should not set m_Sockt to -1 or so after close,
+													//because the Socket value ist needed sometimes even after close!!!
+													// (because it is used as a Key in lookups for instance as a HashValue etc.)
 			SOCKET m_Socket;
 			CAMutex m_csClose;
 			UINT32 m_closeMode;

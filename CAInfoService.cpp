@@ -219,8 +219,8 @@ CAInfoService::CAInfoService(CAFirstMix* pFirstMix,UINT32 numberOfMixes)
 //		iUser=iRisk=iTraffic=-1;
 		m_pFirstMix=pFirstMix;
 		m_NumberOfMixes=numberOfMixes;
-		bRun=false;
-		pSignature=NULL;
+		m_bRun=false;
+		m_pSignature=NULL;
 	}
 
 CAInfoService::~CAInfoService()
@@ -251,7 +251,7 @@ SINT32 CAInfoService::setMixedPackets(UINT32 nPackets)
 
 SINT32 CAInfoService::setSignature(CASignature* pSig)
 	{
-		pSignature=pSig;
+		m_pSignature=pSig;
 		return E_SUCCESS;
 	}
 
@@ -278,19 +278,19 @@ SINT32 CAInfoService::getMixedPackets(UINT32* ppackets)
 		//return E_SUCCESS;
 	}
 
-int CAInfoService::start()
+SINT32 CAInfoService::start()
 	{
-		if(pSignature==NULL)
-			return -1;
-		bRun=true;
+		if(m_pSignature==NULL)
+			return E_UNKNOWN;
+		m_bRun=true;
 		m_threadRunLoop.setMainLoop(InfoLoop);
 		return m_threadRunLoop.start(this);
 	}
 
-int CAInfoService::stop()
+SINT32 CAInfoService::stop()
 	{
-		bRun=false;
-		return 0;
+		m_bRun=false;
+		return E_SUCCESS;
 	}
 
 SINT32 CAInfoService::sendHelo()
@@ -346,7 +346,7 @@ SINT32 CAInfoService::sendHelo()
 				oxmlOut.EndElement();
 				oxmlOut.EndDocument();
 				buffLen=1024;
-				if(pSignature->signXML(oBufferStream.getBuff(),oBufferStream.getBufferSize(),(UINT8*)buff,&buffLen)!=E_SUCCESS)
+				if(m_pSignature->signXML(oBufferStream.getBuff(),oBufferStream.getBufferSize(),(UINT8*)buff,&buffLen)!=E_SUCCESS)
 					{delete buff;return E_UNKNOWN;}
 				sprintf((char*)buffHeader,"POST /helo HTTP/1.0\r\nContent-Length: %u\r\n\r\n",buffLen);
 				oSocket.send(buffHeader,strlen((char*)buffHeader));
