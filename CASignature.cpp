@@ -200,107 +200,33 @@ SINT32 CASignature::getSignatureSize()
 		return DSA_size(m_pDSA);
 	}
 
-const char *XMLSIGINFO_TEMPLATE=
-"<SignedInfo>\n\t\t<Reference URI=\"\">\n\t\t<DigestValue>%s</DigestValue>\n\t</Reference>\n\t</SignedInfo>";
-const char *XMLSIG_TEMPLATE=
-"<Signature>\n\t%s\n<SignatureValue>%s</SignatureValue>\n</Signature>";
-const char *XMLSIG_TEMPLATE_WITH_KEYINFO=
-"<Signature>\n\t%s\n<SignatureValue>%s</SignatureValue>\n<KeyInfo>%s</KeyInfo>\n</Signature>";
-
 SINT32 CASignature::signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen,CACertStore* pIncludeCerts)
 	{
-		if(in==NULL||inlen<1||out==NULL||*outlen<inlen+getXMLSignatureSize())
+		if(in==NULL||inlen<1||out==NULL||*outlen==NULL)
 			return E_UNKNOWN;
 		
-		//Calculating the Digest...
-		UINT32 len=*outlen;
-		if(makeXMLCanonical(in,inlen,out,&len)!=E_SUCCESS)
-			return E_UNKNOWN;
-		UINT8 dgst[SHA_DIGEST_LENGTH];
-		SHA1(out,len,dgst);
-		UINT8 tmpBuff[10240]; //HAS TO BE CHANGED
-		len=1024;
-		if(CABase64::encode(dgst,SHA_DIGEST_LENGTH,tmpBuff,&len)!=E_SUCCESS)
-			return E_UNKNOWN;
-		tmpBuff[len]=0;
-
-		//Creating the Sig-InfoBlock....
-		sprintf((char*)out,XMLSIGINFO_TEMPLATE,tmpBuff);
-		
-		// Signing the SignInfo block....
-		len=1024;//*outlen;
-		if(makeXMLCanonical(out,(UINT32)strlen((char*)out),tmpBuff,&len)!=E_SUCCESS)
-			return E_UNKNOWN;
-		UINT sigSize=255;
-		UINT8 sig[255];
-		UINT8* c=sig;
-		if(sign(tmpBuff,len,sig,&sigSize)!=E_SUCCESS)
-			return E_UNKNOWN;
-		
-		//Making Base64-Encode r and s
-		STACK* a=NULL;
-		d2i_ASN1_SET(&a,&c,sigSize,(char *(*)(void))d2i_ASN1_INTEGER,NULL,V_ASN1_SEQUENCE,V_ASN1_UNIVERSAL);
-		BIGNUM* s =BN_new();
-		ASN1_INTEGER* i=(ASN1_INTEGER*)sk_pop(a);
-		ASN1_INTEGER_to_BN(i,s);
-		ASN1_INTEGER_free(i);
-		BIGNUM* r =BN_new();
-		i=(ASN1_INTEGER*)sk_pop(a);
-		ASN1_INTEGER_to_BN(i,r);
-		ASN1_INTEGER_free(i);
-		sk_free(a);
-
-		memset(tmpBuff,0,40); //make first 40 bytes '0' --> if r or s is less then 20 bytes long! 
-													//(Due to be compatible to the standarad r and s must be 20 bytes each) 
-		BN_bn2bin(r,tmpBuff+20-BN_num_bytes(r)); //so r is 20 bytes with leading '0'...
-		BN_bn2bin(s,tmpBuff+40-BN_num_bytes(s));
-		BN_free(r);
-		BN_free(s);
-
-		sigSize=255;
-		if(CABase64::encode(tmpBuff,40,sig,&sigSize)!=E_SUCCESS)
-			return E_UNKNOWN;
-		sig[sigSize]=0;
-
-		//Makeing the whole Signature-Block....
-		if(pIncludeCerts!=NULL)
-			{
-				//Making KeyInfo-Block
-				UINT32 keyInfoSize=pIncludeCerts->getNumber()*1500; //HACK!
-				UINT8* strKeyInfo=new UINT8[keyInfoSize];	
-				pIncludeCerts->encode(strKeyInfo,&keyInfoSize,XML_X509DATA);
-				strKeyInfo[keyInfoSize]=0;
-				sprintf((char*)tmpBuff,XMLSIG_TEMPLATE_WITH_KEYINFO,out,sig,strKeyInfo);
-				delete[] strKeyInfo;
-			}
-		else
-			sprintf((char*)tmpBuff,XMLSIG_TEMPLATE,out,sig);
-
-		// Find the last closing tag (</...>) and insert the <Signature> Element just before
-		int pos=inlen-1;
-		while(pos>=0&&in[pos]!='<')
-			pos--;
-		if(pos<0)
-			return E_UNKNOWN;
-		*outlen=pos;
-		memcpy(out,in,*outlen);
-		memcpy(out+(*outlen),tmpBuff,strlen((char*)tmpBuff));
-		*outlen+=strlen((char*)tmpBuff);
-		memcpy(out+(*outlen),in+pos,inlen-pos);
-		(*outlen)+=inlen-pos;
-		return E_SUCCESS;
+		MemBufInputSource oInput(in,inlen,"signxml");
+		DOMParser oParser;
+		oParser.parse(oInput);
+		DOM_Document doc=oParser.getDocument();
+		DOM_Element root=doc.getDocumentElement();
+		signXML(root,pIncludeCerts);
+		return DOM_Output::dumpToMem(root,out,outlen);
 	}
 
 SINT32 CASignature::signXML(DOM_Node &node,CACertStore* pIncludeCerts)
 	{
 		//Calculating the Digest...
-		UINT8* buff=new UINT8[10000];
-		UINT32 len=10000;
-		DOM_Output::makeCanonical(node,buff,&len);
-		
+		UINT32 len=0;
+		UINT8* canonicalBuff=DOM_Output::makeCanonical(node,&len);
+		if(canonicalBuff==NULL)
+			return E_UNKNOWN;
+
 		UINT8 dgst[SHA_DIGEST_LENGTH];
-		SHA1(buff,len,dgst);
-		UINT8 tmpBuff[10240]; //HAS TO BE CHANGED
+		SHA1(canonicalBuff,len,dgst);
+		delete[]canonicalBuff;
+
+		UINT8 tmpBuff[1024];
 		len=1024;
 		if(CABase64::encode(dgst,SHA_DIGEST_LENGTH,tmpBuff,&len)!=E_SUCCESS)
 			return E_UNKNOWN;
@@ -318,13 +244,16 @@ SINT32 CASignature::signXML(DOM_Node &node,CACertStore* pIncludeCerts)
 		elemReference.appendChild(elemDigestValue);
 
 		// Signing the SignInfo block....
-		len=10000;//*outlen;
-		DOM_Output::makeCanonical(elemSignedInfo,buff,&len);
+		canonicalBuff=DOM_Output::makeCanonical(elemSignedInfo,&len);
+		if(canonicalBuff==NULL)
+			return E_UNKNOWN;
 		
 		UINT sigSize=255;
 		UINT8 sig[255];
 		UINT8* c=sig;
-		if(sign(buff,len,sig,&sigSize)!=E_SUCCESS)
+		SINT32 ret=sign(canonicalBuff,len,sig,&sigSize);
+		delete[] canonicalBuff;
+		if(ret!=E_SUCCESS)
 			return E_UNKNOWN;
 		
 		//Making Base64-Encode r and s
@@ -503,10 +432,7 @@ SINT32 CASignature::verifyXML(DOM_Node& root,CACertStore* trustedCerts)
 		return E_SUCCESS;
 	}
 
-SINT32 CASignature::getXMLSignatureSize()
-	{
-		return (SINT32)strlen(XMLSIG_TEMPLATE)+strlen(XMLSIGINFO_TEMPLATE)+/*size of DigestValue*/+20+/*sizeof SignatureValue*/+40;
-	}
+
 /*
 typedef struct
 	{
@@ -592,6 +518,7 @@ static void smakeXMLCanonicalElementHandler(XMLElement &elem, void *userData)
 
 	}
 */
+/*
 SINT32 CASignature::makeXMLCanonical(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen)
 	{
 		MemBufInputSource oInput(in,inlen,"tmpCanonical");
@@ -602,3 +529,4 @@ SINT32 CASignature::makeXMLCanonical(UINT8* in,UINT32 inlen,UINT8* out,UINT32* o
 		DOM_Output::makeCanonical(elem,out,outlen);
 		return E_SUCCESS;
 	}
+*/

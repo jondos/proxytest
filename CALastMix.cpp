@@ -130,22 +130,16 @@ SINT32 CALastMix::init()
 
 SINT32 CALastMix::processKeyExchange()
 	{
-		UINT16 messageSize=0;
-		UINT32 keySize=0;
-		UINT8* buff=NULL;
-		buff=new UINT8[2048];
-		
-		
 		DOM_Document doc=DOM_Document::createDocument();
 		DOM_Element elemMixes=doc.createElement("Mixes");
 		setDOMElementAttribute(elemMixes,"count",1);
 		doc.appendChild(elemMixes);
 		DOM_Element elemMix=doc.createElement("Mix");
-		options.getMixId(buff,50);
-		elemMix.setAttribute("id",(char*)buff);
+		UINT8 idBuff[50];
+		options.getMixId(idBuff,50);
+		elemMix.setAttribute("id",(char*)idBuff);
 		elemMixes.appendChild(elemMix);
 
-		keySize=2048;
 		DOM_DocumentFragment tmpDocFrag;
 		mRSA.getPublicKeyAsDocumentFragment(tmpDocFrag);
 		DOM_Node nodeRsaKey=doc.importNode(tmpDocFrag,true);
@@ -154,47 +148,52 @@ SINT32 CALastMix::processKeyExchange()
 
 		m_pSignature->signXML(elemMix);
 		
-		keySize=2048;
-		DOM_Output::dumpToMem(doc,buff+2,&keySize);
-		messageSize=keySize+2;		
-		UINT16 tmp=htons(messageSize-2);
-		memcpy(buff,&tmp,2);
-		CAMsg::printMsg(LOG_INFO,"Sending Infos (chain length and RSA-Key, Message-Size %u)\n",messageSize);
-		if(((CASocket*)*m_pMuxIn)->send(buff,messageSize)!=messageSize)
+		UINT32 len=0;
+		UINT8* messageBuff=DOM_Output::dumpToMem(doc,&len);
+		UINT16 tmp=htons(len);
+		CAMsg::printMsg(LOG_INFO,"Sending Infos (chain length and RSA-Key, Message-Size %u)\n",len);
+		
+		if(	((CASocket*)*m_pMuxIn)->send((UINT8*)&tmp,2)!=2 ||
+				((CASocket*)*m_pMuxIn)->send(messageBuff,len)!=len)
 			{
 				CAMsg::printMsg(LOG_ERR,"Error sending Key-Info!\n");
-				delete []buff;
+				delete []messageBuff;
 				return E_UNKNOWN;
 			}
+		delete messageBuff;
+		
 		//Now receiving the symmetric key
-		((CASocket*)*m_pMuxIn)->receive((UINT8*)&messageSize,2);
-		messageSize=ntohs(messageSize);
-		if(((CASocket*)*m_pMuxIn)->receive(buff,messageSize)!=messageSize)
+		((CASocket*)*m_pMuxIn)->receive((UINT8*)&tmp,2);
+		len=ntohs(tmp);
+		messageBuff=new UINT8[len+1]; //+1 for the closing Zero
+		if(((CASocket*)*m_pMuxIn)->receive(messageBuff,len)!=len)
 			{
 				CAMsg::printMsg(LOG_ERR,"Error receiving symetric key!\n");
-				delete []buff;
+				delete []messageBuff;
 				return E_UNKNOWN;
 			}
-		buff[messageSize]=0;
+		messageBuff[len]=0;
 		CAMsg::printMsg(LOG_INFO,"Symmetric Key Info received is:\n");
-		CAMsg::printMsg(LOG_INFO,"%s\n",(char*)buff);		
+		CAMsg::printMsg(LOG_INFO,"%s\n",(char*)messageBuff);		
 		//verify signature
 		CASignature oSig;
 		CACertificate* pCert=options.getPrevMixTestCertificate();
 		oSig.setVerifyKey(pCert);
 		delete pCert;
-		if(oSig.verifyXML(buff,messageSize)!=E_SUCCESS)
+		if(oSig.verifyXML(messageBuff,len)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Couldt not verify the symetric key!\n");		
-				delete []buff;
+				delete []messageBuff;
 				return E_UNKNOWN;
 			}
 		CAMsg::printMsg(LOG_INFO,"Verified the symetric key!\n");		
-	
+		
 		UINT8 key[50];
-		keySize=50;
-		decodeXMLEncryptedKey(key,&keySize,buff,messageSize,&mRSA);
-		delete []buff;
+		UINT32 keySize=50;
+		SINT32 ret=decodeXMLEncryptedKey(key,&keySize,messageBuff,len,&mRSA);
+		delete []messageBuff;
+		if(ret!=E_SUCCESS)
+			return E_UNKNOWN;
 		m_pMuxIn->setKey(key);
 		return E_SUCCESS;
 	}
