@@ -37,13 +37,16 @@ CAListenerInterface* CAListenerInterface::getInstance(NetworkType type,const UIN
 
 CAListenerInterface* CAListenerInterface::getInstance(NetworkType type,const UINT8* hostnameOrIP,UINT16 port)
 	{
-		if(	(type!=RAW_TCP&&type!=SSL_TCP)||
-					hostnameOrIP==NULL)
+		if(	(type!=RAW_TCP&&type!=SSL_TCP))
 			return NULL;
 		CAListenerInterface* pListener=new CAListenerInterface();
 		pListener->m_Type=type;
 		pListener->m_pAddr=new CASocketAddrINet();
-		((CASocketAddrINet*)pListener->m_pAddr)->setAddr(hostnameOrIP,port);
+		if(((CASocketAddrINet*)pListener->m_pAddr)->setAddr(hostnameOrIP,port)!=E_SUCCESS)
+			{
+				delete pListener;
+				pListener=NULL;
+			}
 		return pListener;
 	}
 
