@@ -355,6 +355,9 @@
 		</Configuration>
 	</Configurations>
 	<References>
+		<ProjectReference
+			ReferencedProjectIdentifier="{150377B0-CA8F-4031-A0B8-45A3001F4F81}"
+			Name="proxytest-lib"/>
 	</References>
 	<Files>
 		<Filter

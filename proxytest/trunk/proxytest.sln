@@ -12,6 +12,22 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AllTest", "AllTests.vcproj"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FlashMix-lib", "FlashMix\FlashMix-lib.vcproj", "{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FlashMix", "FlashMix\FlashMix.vcproj", "{17916053-4B43-46CF-ABB3-709AE4E3DA78}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FlashMixUser", "FlashMix\FlashMixUser.vcproj", "{17916053-4B43-46CF-ABB3-709AE4E3DA78}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BulletinBoard", "FlashMix\BulletinBoard.vcproj", "{17916053-4B43-46CF-ABB3-709AE4E3DA78}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -51,6 +67,46 @@ Global
 		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Release.Build.0 = Release|Win32
 		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.VTune.ActiveCfg = Release|Win32
 		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.VTune.Build.0 = Release|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Debug.ActiveCfg = Debug|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Debug.Build.0 = Debug|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Mit Xerces 2.0.0.ActiveCfg = Release|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Mit Xerces 2.0.0.Build.0 = Release|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Mit Xerces 2.3 dev.ActiveCfg = Release|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Mit Xerces 2.3 dev.Build.0 = Release|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Release.ActiveCfg = Release|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Release.Build.0 = Release|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.VTune.ActiveCfg = Release|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.VTune.Build.0 = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Debug.ActiveCfg = Debug|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Debug.Build.0 = Debug|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Mit Xerces 2.0.0.ActiveCfg = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Mit Xerces 2.0.0.Build.0 = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Mit Xerces 2.3 dev.ActiveCfg = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Mit Xerces 2.3 dev.Build.0 = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Release.ActiveCfg = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Release.Build.0 = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.VTune.ActiveCfg = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.VTune.Build.0 = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Debug.ActiveCfg = Debug|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Debug.Build.0 = Debug|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Mit Xerces 2.0.0.ActiveCfg = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Mit Xerces 2.0.0.Build.0 = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Mit Xerces 2.3 dev.ActiveCfg = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Mit Xerces 2.3 dev.Build.0 = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Release.ActiveCfg = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Release.Build.0 = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.VTune.ActiveCfg = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.VTune.Build.0 = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Debug.ActiveCfg = Debug|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Debug.Build.0 = Debug|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Mit Xerces 2.0.0.ActiveCfg = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Mit Xerces 2.0.0.Build.0 = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Mit Xerces 2.3 dev.ActiveCfg = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Mit Xerces 2.3 dev.Build.0 = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Release.ActiveCfg = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Release.Build.0 = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.VTune.ActiveCfg = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.VTune.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionItems) = postSolution
 		documentation\docMixConfig.template = documentation\docMixConfig.template

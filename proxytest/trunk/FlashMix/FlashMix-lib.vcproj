@@ -2,9 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="AllTest"
-	ProjectGUID="{1DE75B05-314A-4E97-B281-5D1075F7CF2D}"
-	RootNamespace="AllTest"
+	Name="FlashMix-lib"
+	ProjectGUID="{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -13,35 +12,27 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="AllTest/Debug"
-			IntermediateDirectory="AllTest/Debug"
-			ConfigurationType="1"
+			OutputDirectory="Debug"
+			IntermediateDirectory="Debug"
+			ConfigurationType="4"
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;G:\xerces-c-src_2_5_0\src&quot;;&quot;G:\xerces-c-src_2_5_0\src\xercesc&quot;;&quot;G:\openssl-0.9.7c\inc32&quot;;G:\proxytest\pthread\include;&quot;G:\cppunit-1.9.14\include&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;__UNIT_TEST__"
+				AdditionalIncludeDirectories="&quot;G:\postgres-client-lib\include\postgresql&quot;;&quot;G:\postgres-client-lib\include&quot;;&quot;G:\xerces-c-src_2_5_0\src\xercesc&quot;;&quot;G:\xerces-c-src_2_5_0\src&quot;;&quot;g:\openssl-0.9.7c\inc32&quot;;..\pthread\include;n:\mysql\include;&quot;g:\zlib-1.1.4&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="../StdAfx.h"
+				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="4"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="cppunitd_dll.lib proxytest-lib.lib ws2_32.lib ssleay32.lib libeay32.lib pthreadVC.lib xerces-c_2D.lib zlib.lib"
-				OutputFile="$(OutDir)/AllTest.exe"
-				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;G:\cppunit-1.9.14\lib&quot;;&quot;G:\proxytest\proxytest-lib\Debug&quot;;&quot;G:\xerces-c-src_2_5_0\build\win32\vc7\debug&quot;;&quot;g:\openssl-0.9.7c\out32dll&quot;;pthread\lib;n:\mysql\lib\debug;&quot;g:\zlib-1.1.4&quot;"
-				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/AllTest.pdb"
-				SubSystem="1"
-				TargetMachine="1"/>
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)/FlashMix-lib.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -56,8 +47,6 @@
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCWebDeploymentTool"/>
 			<Tool
 				Name="VCManagedWrapperGeneratorTool"/>
 			<Tool
@@ -67,27 +56,21 @@
 			Name="Release|Win32"
 			OutputDirectory="Release"
 			IntermediateDirectory="Release"
-			ConfigurationType="1"
+			ConfigurationType="4"
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="4"
-				UsePrecompiledHeader="3"
+				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="3"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
-				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/AllTest.exe"
-				LinkIncremental="1"
-				GenerateDebugInformation="TRUE"
-				SubSystem="1"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				TargetMachine="1"/>
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)/FlashMix-lib.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -102,8 +85,6 @@
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCWebDeploymentTool"/>
 			<Tool
 				Name="VCManagedWrapperGeneratorTool"/>
 			<Tool
@@ -121,19 +102,28 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath=".\test\AllTests.cpp">
+				RelativePath=".\Array.cpp">
 			</File>
 			<File
-				RelativePath=".\test\AllTestsCA.cpp">
+				RelativePath=".\CABNSend.cpp">
 			</File>
 			<File
-				RelativePath=".\test\CAFirstMixChannelListTest.cpp">
+				RelativePath=".\CABulletinBoard.cpp">
 			</File>
 			<File
-				RelativePath=".\test\PoolSpeedTest.cpp">
+				RelativePath=".\CAFlashMix.cpp">
 			</File>
 			<File
-				RelativePath=".\test\SampleTest.cpp">
+				RelativePath=".\CAMainThread.cpp">
+			</File>
+			<File
+				RelativePath=".\elgamal.cpp">
+			</File>
+			<File
+				RelativePath=".\FlashMixGlobal.cpp">
+			</File>
+			<File
+				RelativePath=".\uBubbleSort.cpp">
 			</File>
 		</Filter>
 		<Filter
@@ -141,13 +131,28 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
-				RelativePath=".\test\AllTestsCA.hpp">
+				RelativePath=".\Array.hpp">
 			</File>
 			<File
-				RelativePath=".\test\CAFirstMixChannelListTest.hpp">
+				RelativePath=".\CABNSend.hpp">
 			</File>
 			<File
-				RelativePath=".\test\SampleTest.hpp">
+				RelativePath=".\CABulletinBoard.hpp">
+			</File>
+			<File
+				RelativePath=".\CAFlashMix.hpp">
+			</File>
+			<File
+				RelativePath=".\CAMainThread.hpp">
+			</File>
+			<File
+				RelativePath=".\elgamal.hpp">
+			</File>
+			<File
+				RelativePath=".\FlashMixGlobal.hpp">
+			</File>
+			<File
+				RelativePath=".\uBubbleSort.hpp">
 			</File>
 		</Filter>
 	</Files>
