@@ -449,7 +449,7 @@ SINT32 CACmdLnOptions::setNextMix(DOM_Document& doc)
 SINT32 CACmdLnOptions::setPrevMix(DOM_Document& doc)
 {
 		CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - start\n");
-    DOM_Element elemRoot = doc.getDocumentElement();
+		DOM_Element elemRoot = doc.getDocumentElement();
     
     //getCertificates if given...
     DOM_Element elemSig;

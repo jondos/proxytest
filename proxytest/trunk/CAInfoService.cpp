@@ -333,9 +333,13 @@ SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param)
                 ret = oSocket.receive(recvBuff, len);
                 if(ret <= 0)
                 {
+										delete recvBuff;
                     oSocket.close();
                     goto ERR;
                 }
+								recvBuff[len]=0;
+								CAMsg::printMsg(LOG_DEBUG,"Received from Infoservice:\n");
+								CAMsg::printMsg(LOG_DEBUG,(char*)recvBuff);
             }
         }
 
