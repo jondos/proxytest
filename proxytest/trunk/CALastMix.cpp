@@ -553,7 +553,7 @@ SINT32 CALastMix::loop()
 															set64(pChannelListEntry->timeNextSend,aktTime);
 															UINT32 delayTime=(ret>>5);
 															delayTime+=(ret>>4);
-															add64(pChannelListEntry->timeNextSend,deleayTime/*DELAY_CHANNEL_SEND_INTERVALL*/);
+															add64(pChannelListEntry->timeNextSend,delayTime/*DELAY_CHANNEL_SEND_INTERVALL*/);
 														#endif
 													}
 											}
