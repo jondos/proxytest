@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.01.70"
+#define MIX_VERSION "00.01.71"
 
 //#define LOG_CHANNEL
 //#define COMPRESSED_LOGS
@@ -50,7 +50,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	//Delay is at the moment constant (max . Channel-Traffic: 10 KByte/s)
 //	#define DELAY_CHANNEL_SEND_INTERVALL 100 //Minimum time between two delayed packets (in ms)
 #endif
-#define LOG_CRIME  
+//#define LOG_CRIME  
 //#define NO_PARKING //to disable control flow
 
 //Some constants

@@ -148,7 +148,10 @@ SINT32 CALastMix::init()
 			}
 		
 		CAMsg::printMsg(LOG_INFO,"connected!\n");
-	
+#ifdef LOG_CRIME
+		m_nCrimeRegExp=0;
+		m_pCrimeRegExps=options.getCrimeRegExps(&m_nCrimeRegExp);
+#endif	
 		return processKeyExchange();
 	}
 
@@ -662,11 +665,9 @@ ERR:
 			if(endOfUrl==NULL)
 				return false;
 			UINT32 strLen=endOfUrl-startOfUrl;
-			UINT32 lenRegExp=0;
-			regex_t* regexp=options.getCrimeRegExps(&lenRegExp);
-			for(UINT32 i=0;i<lenRegExp;i++)
+			for(UINT32 i=0;i<m_nCrimeRegExp;i++)
 				{
-					if(regnexec(&regexp[i],(char*)startOfUrl,strLen,0,NULL,0)==0)
+					if(regnexec(&m_pCrimeRegExps[i],(char*)startOfUrl,strLen,0,NULL,0)==0)
 						return true;
 				}
 			return false;			
