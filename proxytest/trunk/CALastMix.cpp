@@ -551,7 +551,9 @@ SINT32 CALastMix::loop()
 														m_logDownloadedPackets++;
 														#ifdef DELAY_CHANNELS
 															set64(pChannelListEntry->timeNextSend,aktTime);
-															add64(pChannelListEntry->timeNextSend,DELAY_CHANNEL_SEND_INTERVALL);
+															UINT32 delayTime=(ret>>5);
+															delayTime+=(ret>>4);
+															add64(pChannelListEntry->timeNextSend,deleayTime/*DELAY_CHANNEL_SEND_INTERVALL*/);
 														#endif
 													}
 											}
