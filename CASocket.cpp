@@ -370,7 +370,10 @@ SINT32 CASocket::available()
 	}
 #endif
 
-	/**
+/** Will receive some bytes from the socket. May block or not depending on whatever this socket
+	* was set to blocking or non-blocking mode.
+	* Warning: If socket is in blocking mode and receive is called, recevie will block until some
+	* data is available, EVEN IF AN OTHER THREAD WILL CLOSE THIS SOCKET!
 @return SOCKET_ERROR if an error occured
 @retval E_AGAIN, if socket was in non-blocking mode and receive would block or a timeout was reached
 @retval 0 if socket was gracefully closed
