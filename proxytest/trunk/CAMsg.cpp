@@ -29,7 +29,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "trio/trio.hpp"
 #include "CAMsg.hpp"
 #include "CACmdLnOptions.hpp"
-#define FILENAME_SPECIALLOG "/special"
+#include "CAAsymCipher.hpp"
+#include "CASymCipher.hpp"
+#include "CAUtil.hpp"
+#include "CABase64.hpp"
+#define FILENAME_ENCRYPTEDLOG "/encrypted_messages"
 #define FILENAME_INFOLOG "/messages"
 #define FILENAME_INFOLOG_GZ "/messages.gz"
 
@@ -46,18 +50,19 @@ CAMsg::CAMsg()
 			m_strMsgBuff=new char[MAX_MSG_SIZE+1+20+STRMSGTYPES_SIZE];
 			m_uLogType=MSG_STDOUT;
 			m_hFileInfo=-1;
-			m_hFileSpecial=-1;
+			m_hFileEncrypted=-1;
 			m_strLogFile=new char[1024];
 			m_strMsgBuff[0]='[';
 #ifdef COMPRESSED_LOGS
 			m_gzFileInfo=NULL;
 #endif
+			m_pCipher=NULL;
 		}
 
 CAMsg::~CAMsg()
     {
 			closeLog();
-			closeSpecialLog();
+			closeEncryptedLog();
 			delete[] m_strMsgBuff;
 			delete[] m_strLogFile;
 		}
@@ -99,7 +104,7 @@ SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 				case LOG_ERR:
 					strcat(oMsg.m_strMsgBuff,oMsg.m_strMsgTypes[0]);
 				break;
-				case LOG_SPECIAL:
+				case LOG_ENCRYPTED:
 					strcat(oMsg.m_strMsgBuff,oMsg.m_strMsgTypes[4]);
 				break;
 				default:
@@ -113,10 +118,24 @@ SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 	  trio_vsnprintf(oMsg.m_strMsgBuff+20+STRMSGTYPES_SIZE,MAX_MSG_SIZE,format,ap);
 #endif
 		va_end(ap);
-		if(type==LOG_SPECIAL)
+		if(type==LOG_ENCRYPTED)
 			{
-				if(write(oMsg.m_hFileSpecial,oMsg.m_strMsgBuff,strlen(oMsg.m_strMsgBuff))==-1)
-					ret=E_UNKNOWN;
+				ret=strlen(oMsg.m_strMsgBuff);
+				if(	oMsg.m_pCipher==NULL)
+					{
+						ret=E_UNKNOWN;
+					}
+				else
+					{
+						UINT8 bp[MAX_MSG_SIZE];
+						AES_ofb128_encrypt((UINT8*)oMsg.m_strMsgBuff,
+																bp,ret,
+																&(oMsg.m_pCipher->oKey),
+																oMsg.m_pCipher->iv,
+																&(oMsg.m_pCipher->iv_off));
+						if(write(oMsg.m_hFileEncrypted,bp,ret)!=ret)
+							ret=E_UNKNOWN;
+				 }
 			}
 		else
 			{
@@ -223,19 +242,63 @@ SINT32 CAMsg::openLog(UINT32 type)
 		return E_SUCCESS;
 	}
 
-SINT32 CAMsg::openSpecialLog()
+/** Open a log, where the logged messages are store encrypted.
+	* The file format is as follows:
+	*	NEWLINE
+	*	"----Start of EncryptionKey----"
+	* NEWLINE
+	* 128 random bytes (BASE64 encoded of RSA encrpyted block) which are used as sym key (16 bytes starting form 50. byte) and IV (next 16 bytes)
+	* NEWLINE
+	* "-----End of EncryptionKey-----"
+	* NEWLINE
+	* encrpyted messages
+	*
+	* The message is encrypted using AES-128-OFB.
+	*/
+	SINT32 CAMsg::openEncryptedLog()
 	{
+		CACertificate* pCert=options.getLogEncryptionKey();
+		if(pCert==NULL)
+			return E_UNKNOWN;
+		CAASymCipher oRSA;
+		SINT32 ret=oRSA.setPublicKey(pCert);
+		delete pCert;
+		if(ret!=E_SUCCESS)
+			return E_UNKNOWN;
 		UINT8 buff[1024];
-		if(options.getSpecialLogDir(buff,1024)!=E_SUCCESS)
+		if(options.getEncryptedLogDir(buff,1024)!=E_SUCCESS)
 			if(options.getLogDir(buff,1024)!=E_SUCCESS)
 				return E_UNKNOWN;
-		strcat((char*)buff,FILENAME_SPECIALLOG);
-		oMsg.m_hFileSpecial=open((char*)buff,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE,S_IREAD|S_IWRITE);										
+		strcat((char*)buff,FILENAME_ENCRYPTEDLOG);
+		oMsg.m_hFileEncrypted=open((char*)buff,O_APPEND|O_CREAT|O_WRONLY|O_LARGEFILE|O_BINARY,S_IREAD|S_IWRITE);										
+		if(oMsg.m_hFileEncrypted<=0)
+			{
+				oMsg.m_hFileEncrypted=-1;
+				return E_UNKNOWN;
+			}
+		//create sym enc key and write it to the file (enc with pub enc key)
+		write(oMsg.m_hFileEncrypted,"\n----Start of EncryptionKey----\n",32);
+		UINT8 keyandiv[128];
+		getRandom(keyandiv,128);
+		keyandiv[0]&=0x7F;
+		oMsg.m_pCipher=new t_LogEncCipher;
+		AES_set_encrypt_key(keyandiv+50,128,&oMsg.m_pCipher->oKey);
+		memcpy(oMsg.m_pCipher->iv,keyandiv+66,16);
+		oMsg.m_pCipher->iv_off=0;
+		UINT8 out[255];
+		UINT32 outlen=255;
+		oRSA.encrypt(keyandiv,keyandiv);
+		CABase64::encode(keyandiv,128,out,&outlen);
+		write(oMsg.m_hFileEncrypted,out,outlen);
+		write(oMsg.m_hFileEncrypted,"-----End of EncryptionKey-----\n",31);
 		return E_SUCCESS;
 	}
 
-SINT32 CAMsg::closeSpecialLog()
+SINT32 CAMsg::closeEncryptedLog()
 	{
-		close(oMsg.m_hFileSpecial);
+		close(oMsg.m_hFileEncrypted);
+		delete oMsg.m_pCipher;
+		oMsg.m_pCipher=NULL;
+		oMsg.m_hFileEncrypted=-1;
 		return E_SUCCESS;
 	}

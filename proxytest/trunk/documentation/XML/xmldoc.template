@@ -30,4 +30,7 @@ Middle- or LastMix to the InfoService to announce itself.
 FirstMix to the JAP.
 \verbinclude FirstMixToJAP.xml 
 
+\par \anchor XMLSignature
+7. Signature Element
+\verbinclude XMLSignature.xml
 */

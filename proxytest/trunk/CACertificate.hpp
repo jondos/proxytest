@@ -32,6 +32,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define CERT_PKCS12 3
 #define CERT_X509CERTIFICATE 4
 class CASignature;
+class CAASymCipher;
+class CASSLContext;
 class CACertificate
 	{
 		public:
@@ -48,10 +50,13 @@ class CACertificate
 			SINT32 encode(UINT8* buff,UINT32* bufflen,UINT32 type);
 			SINT32 encode(DOM_DocumentFragment& docFrag,DOM_Document& doc);
 					
-		protected:
-			CACertificate();
 		friend class CASignature;
+		friend class CAASymCipher;
+		friend class CASSLContext;
 		private:
+			CACertificate();
+		private:
+			X509* getX509(){return m_pCert;}
 			X509* m_pCert;
 	};
 #endif

@@ -41,25 +41,36 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define LOG_INFO	2 
 	#define LOG_DEBUG 3
 #endif
-#define LOG_SPECIAL 255
+#define LOG_ENCRYPTED 255
 
 #include "CAMutex.hpp"
+#include "CASymCipher.hpp"
+
+struct S_LOGENCCIPHER
+{
+	UINT8 iv[16];
+	int iv_off;
+	AES_KEY oKey;
+};
+
+typedef S_LOGENCCIPHER t_LogEncCipher;
+
 class CAMsg
 	{
-		protected:
+		private:
 			CAMsg(); //Singleton!
 			static CAMsg oMsg;
 		public:
 			~CAMsg();
 			static SINT32 setLogOptions(UINT32 options);
 			static SINT32 printMsg(UINT32 typ,char* format,...);
-			static SINT32 openSpecialLog();
-			static SINT32 closeSpecialLog();
-		protected:
+			static SINT32 openEncryptedLog();
+			static SINT32 closeEncryptedLog();
+		private:
 			SINT32 openLog(UINT32 type);
 			SINT32 closeLog();
 			UINT32 m_uLogType;
-			int m_hFileSpecial;
+			int m_hFileEncrypted;
 			int m_hFileInfo;
 			char *m_strMsgBuff;
 			char *m_strLogFile; 
@@ -68,5 +79,6 @@ class CAMsg
 #ifdef COMPRESSED_LOGS
 			gzFile m_gzFileInfo;
 #endif
+			t_LogEncCipher* m_pCipher;
    };
 #endif

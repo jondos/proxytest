@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.03.01"
+#define MIX_VERSION "00.03.02"
 
 
 //#define LOG_CHANNEL
@@ -240,6 +240,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include <errno.h>
 #include "popt/system.h"
 #include "popt/popt.h"
+#include <openssl/ssl.h>
 #include <openssl/rsa.h>
 #include <openssl/dsa.h>
 #include <openssl/sha.h>

@@ -42,7 +42,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_bLocalProxy=m_bFirstMix=m_bLastMix=m_bMiddleMix=false;
 		m_iTargetPort=m_iSOCKSPort=m_iSOCKSServerPort=m_iInfoServerPort=0xFFFF;
 		m_strTargetHost=m_strSOCKSHost=m_strInfoServerHost=NULL;
-		m_strUser=m_strCascadeName=m_strLogDir=m_strSpecialLogDir=NULL;
+		m_strUser=m_strCascadeName=m_strLogDir=m_strEncryptedLogDir=NULL;
 		m_arTargetInterfaces=NULL;
 		m_cnTargets=0;
 		m_arListenerInterfaces=NULL;
@@ -57,6 +57,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_bAutoReconnect=false;
 		m_strConfigFile=NULL;
 		m_docMixInfo=NULL;
+		m_pLogEncryptionCertificate=NULL;
   }
 
 CACmdLnOptions::~CACmdLnOptions()
@@ -119,8 +120,8 @@ void CACmdLnOptions::clean()
 			delete[] m_strCascadeName;
 		if(m_strLogDir!=NULL)
 			delete[] m_strLogDir;
-		if(m_strSpecialLogDir!=NULL)
-			delete[] m_strSpecialLogDir;
+		if(m_strEncryptedLogDir!=NULL)
+			delete[] m_strEncryptedLogDir;
 		if(m_strUser!=NULL)
 			delete[] m_strUser;
 		m_docMixInfo=NULL;
@@ -136,7 +137,9 @@ void CACmdLnOptions::clean()
 			delete m_pNextMixCertificate;
 		if(m_pPrevMixCertificate!=NULL)
 			delete m_pPrevMixCertificate;
-  }
+		if(m_pLogEncryptionCertificate!=NULL)
+			delete m_pLogEncryptionCertificate;
+	}
     
 SINT32 CACmdLnOptions::parse(int argc,const char** argv)
     {
@@ -484,13 +487,13 @@ SINT32 CACmdLnOptions::getLogDir(UINT8* name,UINT32 len)
 		return E_SUCCESS;
   }
 
-SINT32 CACmdLnOptions::getSpecialLogDir(UINT8* name,UINT32 len)
+SINT32 CACmdLnOptions::getEncryptedLogDir(UINT8* name,UINT32 len)
   {
-		if(m_strSpecialLogDir==NULL||name==NULL)
+		if(m_strEncryptedLogDir==NULL||name==NULL)
 				return E_UNKNOWN;
-		if(len<=(UINT32)strlen(m_strSpecialLogDir))
+		if(len<=(UINT32)strlen(m_strEncryptedLogDir))
 			return E_UNKNOWN;		
-		strcpy((char*)name,m_strSpecialLogDir);
+		strcpy((char*)name,m_strEncryptedLogDir);
 		return E_SUCCESS;
   }
 
@@ -651,17 +654,27 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 						m_strLogDir=new char[strlen((char*)tmpBuff)+1];
 						strcpy(m_strLogDir,(char*)tmpBuff);
 					}
-				tmpLen=255;
-				getDOMChildByName(elemLogging,(UINT8*)"SpecialFile",elem,false);
-				if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS)
+				DOM_Element elemEncLog;
+				//get Encrypted Log Info
+				if(getDOMChildByName(elemLogging,(UINT8*)"EncryptedLog",elemEncLog,false)==E_SUCCESS)
 					{
-						strtrim(tmpBuff);
-						m_strSpecialLogDir=new char[strlen((char*)tmpBuff)+1];
-						strcpy(m_strSpecialLogDir,(char*)tmpBuff);
-					}				
+						getDOMChildByName(elemEncLog,(UINT8*)"File",elem,false);
+						tmpLen=255;
+						if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS)
+							{
+								strtrim(tmpBuff);
+								m_strEncryptedLogDir=new char[strlen((char*)tmpBuff)+1];
+								strcpy(m_strEncryptedLogDir,(char*)tmpBuff);
+							}
+						DOM_Element elemKeyInfo;
+						DOM_Element elemX509Data;
+						if(getDOMChildByName(elemEncLog,(UINT8*)"KeyInfo",elemKeyInfo,false)==E_SUCCESS&&
+							getDOMChildByName(elemKeyInfo,(UINT8*)"X509Data",elemX509Data,false)==E_SUCCESS)
+							{
+								m_pLogEncryptionCertificate=CACertificate::decode(elemX509Data.getFirstChild(),CERT_X509CERTIFICATE);
+							}
+					}
 			}
-
-
 		//getCertificates if given...
 		DOM_Element elemCertificates;
 		getDOMChildByName(elemRoot,(UINT8*)"Certificates",elemCertificates,false);

@@ -116,8 +116,8 @@ SINT32 CALastMixA::loop()
 														}
 												#endif
 												CASymCipher* newCipher=new CASymCipher();
-												newCipher->setKeyAES(rsaBuff);
-												newCipher->decryptAES(pMixPacket->data+RSA_SIZE,
+												newCipher->setKey(rsaBuff);
+												newCipher->crypt1(pMixPacket->data+RSA_SIZE,
 																							pMixPacket->data+RSA_SIZE-(KEY_SIZE+TIMESTAMP_SIZE),
 																							DATA_SIZE-RSA_SIZE);
 												memcpy(	pMixPacket->data,rsaBuff+KEY_SIZE+TIMESTAMP_SIZE,
@@ -169,7 +169,7 @@ SINT32 CALastMixA::loop()
 																		memcpy(crimeBuff,pMixPacket->payload.data,payLen);
 																		UINT32 id=m_pMuxIn->sigCrime(pMixPacket->channel,tmpBuff);
 																		m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
-																		CAMsg::printMsg(LOG_SPECIAL,"Crime detected -- ID: %u -- Content: \n%s\n",id,crimeBuff,payLen);
+																		CAMsg::printMsg(LOG_ENCRYPTED,"Crime detected -- ID: %u -- Content: \n%s\n",id,crimeBuff,payLen);
 																	}
 															#endif
 															if(payLen>PAYLOAD_SIZE||tmpSocket->sendTimeOut(pMixPacket->payload.data,payLen,LAST_MIX_TO_PROXY_SEND_TIMEOUT)==SOCKET_ERROR)
@@ -230,7 +230,7 @@ SINT32 CALastMixA::loop()
 												#ifdef LOG_CHANNEL
 													pChannelListEntry->packetsDataInFromUser++;
 												#endif
-												pChannelListEntry->pCipher->decryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+												pChannelListEntry->pCipher->crypt1(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 												ret=ntohs(pMixPacket->payload.len);
 												if(ret>=0&&ret<=PAYLOAD_SIZE)
 													{
@@ -369,7 +369,7 @@ SINT32 CALastMixA::loop()
 														pMixPacket->flags=CHANNEL_DATA;
 														pMixPacket->payload.len=htons((UINT16)ret);
 														pMixPacket->payload.type=0;
-														pChannelListEntry->pCipher->decryptAES2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+														pChannelListEntry->pCipher->crypt2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 														m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE);
 														m_logDownloadedPackets++;
 														#if defined(LOG_CHANNEL)

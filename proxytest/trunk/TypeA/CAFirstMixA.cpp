@@ -277,7 +277,7 @@ SINT32 CAFirstMixA::loop()
 															{
 																pMixPacket->channel=pEntry->channelOut;
 																pCipher=pEntry->pCipher;
-																pCipher->decryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+																pCipher->crypt1(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 																//m_pMuxOut->send(pMixPacket,tmpBuff);            // prepare packet for sending (apply symmetric cypher to first block)
 																m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE); // queue the packet for sending to the next mix.
 																incMixedPackets();
@@ -297,8 +297,8 @@ SINT32 CAFirstMixA::loop()
 																		}
 																#endif
 																pCipher= new CASymCipher();
-																pCipher->setKeyAES(rsaBuff);
-																pCipher->decryptAES(pMixPacket->data+RSA_SIZE,
+																pCipher->setKey(rsaBuff);
+																pCipher->crypt1(pMixPacket->data+RSA_SIZE,
 																								 pMixPacket->data+RSA_SIZE-(KEY_SIZE+TIMESTAMP_SIZE),
 																								 DATA_SIZE-RSA_SIZE);
 																memcpy(pMixPacket->data,rsaBuff+KEY_SIZE+TIMESTAMP_SIZE,RSA_SIZE-(KEY_SIZE+TIMESTAMP_SIZE));																
@@ -391,12 +391,12 @@ SINT32 CAFirstMixA::loop()
 											if((pMixPacket->flags&CHANNEL_SIG_CRIME)==CHANNEL_SIG_CRIME)
 												{
 													UINT32 id=(pMixPacket->flags>>8)&0x000000FF;
-													CAMsg::printMsg(LOG_SPECIAL,"Detecting crime activity - ID: %u -- In-IP is: %u.%u.%u.%u \n",id,pEntry->pHead->peerIP[0],pEntry->pHead->peerIP[1],pEntry->pHead->peerIP[2],pEntry->pHead->peerIP[3]);
+													CAMsg::printMsg(LOG_ENCRYPTED,"Detecting crime activity - ID: %u -- In-IP is: %u.%u.%u.%u \n",id,pEntry->pHead->peerIP[0],pEntry->pHead->peerIP[1],pEntry->pHead->peerIP[2],pEntry->pHead->peerIP[3]);
 													continue;
 												}
 										#endif
 										pMixPacket->channel=pEntry->channelIn;
-										pEntry->pCipher->decryptAES2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+										pEntry->pCipher->crypt2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 										
 										pEntry->pHead->pMuxSocket->send(pMixPacket,tmpBuff);
 										pEntry->pHead->pQueueSend->add(tmpBuff,MIXPACKET_SIZE);

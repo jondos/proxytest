@@ -25,7 +25,7 @@
 				Optimization="0"
 				OptimizeForProcessor="2"
 				AdditionalIncludeDirectories="r:\;g:\openssl-0.9.7\inc32,.\pthread\include,h:\xml-xerces\c\src\xercesc,h:\xml-xerces\c\src,n:\mysql\include,g:\zlib-1.1.4"
-				PreprocessorDefinitions="WIN32;_CONSOLE;_DEBUG;_REENTRANT;__MIX_TEST;__CLEANUP_C"
+				PreprocessorDefinitions="WIN32;_CONSOLE;_DEBUG;_REENTRANT;__MIX_TEST;__CLEANUP_C;"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				BufferSecurityCheck="TRUE"
@@ -47,7 +47,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib libeay32.lib pthreadVC.lib xerces-c_2D.lib zlib.lib"
+				AdditionalDependencies="ws2_32.lib ssleay32.lib libeay32.lib pthreadVC.lib xerces-c_2D.lib zlib.lib"
 				OutputFile=".\Debug/proxytest.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
@@ -1903,6 +1903,12 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\CASSLClientSocket.cpp">
+			</File>
+			<File
+				RelativePath=".\CASSLContext.cpp">
+			</File>
+			<File
 				RelativePath="CASymCipher.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -2316,240 +2322,6 @@
 				<File
 					RelativePath="popt\system.h">
 				</File>
-				<Filter
-					Name="trio"
-					Filter="">
-					<File
-						RelativePath="trio\trio.cpp">
-						<FileConfiguration
-							Name="Debug|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								Optimization="0"
-								AdditionalIncludeDirectories=""
-								PreprocessorDefinitions=""
-								BasicRuntimeChecks="3"
-								UsePrecompiledHeader="0"
-								BrowseInformation="1"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								Optimization="2"
-								AdditionalIncludeDirectories=""
-								PreprocessorDefinitions=""
-								UsePrecompiledHeader="0"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="VTune|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								Optimization="3"
-								PreprocessorDefinitions=""/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Mit Xerces 2.0.0|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								Optimization="0"
-								AdditionalIncludeDirectories=""
-								PreprocessorDefinitions=""
-								BasicRuntimeChecks="3"
-								UsePrecompiledHeader="0"
-								BrowseInformation="1"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Mit Xerces 2.3 dev|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								Optimization="0"
-								AdditionalIncludeDirectories=""
-								PreprocessorDefinitions=""
-								BasicRuntimeChecks="3"
-								UsePrecompiledHeader="0"
-								BrowseInformation="1"/>
-						</FileConfiguration>
-					</File>
-					<File
-						RelativePath="trio\trio.hpp">
-					</File>
-					<File
-						RelativePath="trio\triodef.h">
-					</File>
-					<File
-						RelativePath="trio\trionan.cpp">
-						<FileConfiguration
-							Name="Debug|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								Optimization="0"
-								AdditionalIncludeDirectories=""
-								PreprocessorDefinitions=""
-								BasicRuntimeChecks="3"
-								UsePrecompiledHeader="0"
-								BrowseInformation="1"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								Optimization="2"
-								AdditionalIncludeDirectories=""
-								PreprocessorDefinitions=""
-								UsePrecompiledHeader="0"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="VTune|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								Optimization="3"
-								PreprocessorDefinitions=""/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Mit Xerces 2.0.0|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								Optimization="0"
-								AdditionalIncludeDirectories=""
-								PreprocessorDefinitions=""
-								BasicRuntimeChecks="3"
-								UsePrecompiledHeader="0"
-								BrowseInformation="1"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Mit Xerces 2.3 dev|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								Optimization="0"
-								AdditionalIncludeDirectories=""
-								PreprocessorDefinitions=""
-								BasicRuntimeChecks="3"
-								UsePrecompiledHeader="0"
-								BrowseInformation="1"/>
-						</FileConfiguration>
-					</File>
-					<File
-						RelativePath="trio\trionan.h">
-					</File>
-					<File
-						RelativePath="trio\triop.h">
-					</File>
-					<File
-						RelativePath="trio\triostr.cpp">
-						<FileConfiguration
-							Name="Debug|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								Optimization="0"
-								AdditionalIncludeDirectories=""
-								PreprocessorDefinitions=""
-								BasicRuntimeChecks="3"
-								UsePrecompiledHeader="0"
-								BrowseInformation="1"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								Optimization="2"
-								AdditionalIncludeDirectories=""
-								PreprocessorDefinitions=""
-								UsePrecompiledHeader="0"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="VTune|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								Optimization="3"
-								PreprocessorDefinitions=""/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Mit Xerces 2.0.0|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								Optimization="0"
-								AdditionalIncludeDirectories=""
-								PreprocessorDefinitions=""
-								BasicRuntimeChecks="3"
-								UsePrecompiledHeader="0"
-								BrowseInformation="1"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Mit Xerces 2.3 dev|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								Optimization="0"
-								AdditionalIncludeDirectories=""
-								PreprocessorDefinitions=""
-								BasicRuntimeChecks="3"
-								UsePrecompiledHeader="0"
-								BrowseInformation="1"/>
-						</FileConfiguration>
-					</File>
-					<File
-						RelativePath="trio\triostr.h">
-					</File>
-				</Filter>
-			</Filter>
-			<Filter
-				Name="xml"
-				Filter="">
-				<File
-					RelativePath="xml\DOM_Output.cpp">
-					<FileConfiguration
-						Name="Debug|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="0"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-							BasicRuntimeChecks="3"
-							UsePrecompiledHeader="0"
-							BrowseInformation="1"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="2"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-							UsePrecompiledHeader="0"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="VTune|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="3"
-							PreprocessorDefinitions=""/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Mit Xerces 2.0.0|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="0"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-							BasicRuntimeChecks="3"
-							UsePrecompiledHeader="0"
-							BrowseInformation="1"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Mit Xerces 2.3 dev|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							Optimization="0"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-							BasicRuntimeChecks="3"
-							UsePrecompiledHeader="0"
-							BrowseInformation="1"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="xml\DOM_Output.hpp">
-				</File>
 			</Filter>
 			<Filter
 				Name="aes"
@@ -2829,6 +2601,240 @@
 					</FileConfiguration>
 				</File>
 			</Filter>
+			<Filter
+				Name="trio"
+				Filter="">
+				<File
+					RelativePath="trio\trio.cpp">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"
+							UsePrecompiledHeader="0"
+							BrowseInformation="1"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							UsePrecompiledHeader="0"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="VTune|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="3"
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Mit Xerces 2.0.0|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"
+							UsePrecompiledHeader="0"
+							BrowseInformation="1"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Mit Xerces 2.3 dev|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"
+							UsePrecompiledHeader="0"
+							BrowseInformation="1"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="trio\trio.hpp">
+				</File>
+				<File
+					RelativePath="trio\triodef.h">
+				</File>
+				<File
+					RelativePath="trio\trionan.cpp">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"
+							UsePrecompiledHeader="0"
+							BrowseInformation="1"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							UsePrecompiledHeader="0"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="VTune|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="3"
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Mit Xerces 2.0.0|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"
+							UsePrecompiledHeader="0"
+							BrowseInformation="1"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Mit Xerces 2.3 dev|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"
+							UsePrecompiledHeader="0"
+							BrowseInformation="1"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="trio\trionan.h">
+				</File>
+				<File
+					RelativePath="trio\triop.h">
+				</File>
+				<File
+					RelativePath="trio\triostr.cpp">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"
+							UsePrecompiledHeader="0"
+							BrowseInformation="1"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							UsePrecompiledHeader="0"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="VTune|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="3"
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Mit Xerces 2.0.0|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"
+							UsePrecompiledHeader="0"
+							BrowseInformation="1"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Mit Xerces 2.3 dev|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"
+							UsePrecompiledHeader="0"
+							BrowseInformation="1"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="trio\triostr.h">
+				</File>
+			</Filter>
+			<Filter
+				Name="xml"
+				Filter="">
+				<File
+					RelativePath="xml\DOM_Output.cpp">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"
+							UsePrecompiledHeader="0"
+							BrowseInformation="1"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="2"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							UsePrecompiledHeader="0"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="VTune|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="3"
+							PreprocessorDefinitions=""/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Mit Xerces 2.0.0|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"
+							UsePrecompiledHeader="0"
+							BrowseInformation="1"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Mit Xerces 2.3 dev|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							BasicRuntimeChecks="3"
+							UsePrecompiledHeader="0"
+							BrowseInformation="1"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="xml\DOM_Output.hpp">
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header-Dateien"
@@ -2946,6 +2952,12 @@
 			</File>
 			<File
 				RelativePath="CASocketList.hpp">
+			</File>
+			<File
+				RelativePath=".\CASSLClientSocket.hpp">
+			</File>
+			<File
+				RelativePath=".\CASSLContext.hpp">
 			</File>
 			<File
 				RelativePath="CASymCipher.hpp">

@@ -29,69 +29,91 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASymCipher.hpp"
 //AES
 
-SINT32 CASymCipher::setKeyAES(UINT8* key)
+/** Sets the key used for encryption/decryption. Also resets the IV to zero!
+	* @param key 16 random bytes used as key 
+	* @retval E_SUCCESS
+	*/
+SINT32 CASymCipher::setKey(const UINT8* key)
 	{
 		makeKey(*m_keyAES,(char*)key);
-		memset(m_iv,0,16);
+		memset(m_iv1,0,16);
 		memset(m_iv2,0,16);
-		m_bEncKeySet=true;
+		m_bKeySet=true;
 		return E_SUCCESS;
 	}
 
-
-SINT32 CASymCipher::decryptAES(UINT8* in,UINT8* out,UINT32 len)
+/** Encryptes/Decrpytes in to out using iv1. AES is used for encryption and the encryption
+	* is done with a special
+	* 128bit-OFB mode: In the case that (len mod 16 !=0) the unused cipher
+	* output bits are discarded and NOT used next time encryptAES() is called.
+	* That means that every time encrpytAES() is called at first new cipher output
+	* is created by calling AES-encrypt(iv).
+	* @param in input (plain text) bytes
+	* @param out output (encrpyted) bytes
+	* @param len len of input. because the cipher preserves the size, 
+	*													len of output=len of input
+	* @retval E_SUCCESS
+	*/
+SINT32 CASymCipher::crypt1(const UINT8* in,UINT8* out,UINT32 len)
 	{
 		UINT32 i=0;
     while(i+15<len)
     	{
-				rijndaelEncrypt (m_iv, m_iv, *m_keyAES);
-				out[i]=in[i]^m_iv[0];
+				rijndaelEncrypt (m_iv1, m_iv1, *m_keyAES);
+				out[i]=in[i]^m_iv1[0];
 				i++;
-				out[i]=in[i]^m_iv[1];
+				out[i]=in[i]^m_iv1[1];
 				i++;
-				out[i]=in[i]^m_iv[2];
+				out[i]=in[i]^m_iv1[2];
 				i++;
-				out[i]=in[i]^m_iv[3];
+				out[i]=in[i]^m_iv1[3];
 				i++;
-				out[i]=in[i]^m_iv[4];
+				out[i]=in[i]^m_iv1[4];
 				i++;
-				out[i]=in[i]^m_iv[5];
+				out[i]=in[i]^m_iv1[5];
 				i++;
-				out[i]=in[i]^m_iv[6];
+				out[i]=in[i]^m_iv1[6];
 				i++;
-				out[i]=in[i]^m_iv[7];
+				out[i]=in[i]^m_iv1[7];
 				i++;
-				out[i]=in[i]^m_iv[8];
+				out[i]=in[i]^m_iv1[8];
 				i++;
-				out[i]=in[i]^m_iv[9];
+				out[i]=in[i]^m_iv1[9];
 				i++;
-				out[i]=in[i]^m_iv[10];
+				out[i]=in[i]^m_iv1[10];
 				i++;
-				out[i]=in[i]^m_iv[11];
+				out[i]=in[i]^m_iv1[11];
 				i++;
-				out[i]=in[i]^m_iv[12];
+				out[i]=in[i]^m_iv1[12];
 				i++;
-				out[i]=in[i]^m_iv[13];
+				out[i]=in[i]^m_iv1[13];
 				i++;
-				out[i]=in[i]^m_iv[14];
+				out[i]=in[i]^m_iv1[14];
 				i++;
-				out[i]=in[i]^m_iv[15];
+				out[i]=in[i]^m_iv1[15];
 				i++;
 			}
 		if(i<len) //In this case len-i<16 !
 			{
-				rijndaelEncrypt (m_iv, m_iv, *m_keyAES);
+				rijndaelEncrypt (m_iv1, m_iv1, *m_keyAES);
 				len-=i;
 				for(UINT32 k=0;k<len;k++)
 				 {
-					 out[i]=in[i]^m_iv[k];
+					 out[i]=in[i]^m_iv1[k];
 					 i++;
 					}
 			}
 		return E_SUCCESS;
 	}
 
-SINT32 CASymCipher::decryptAES2(UINT8* in,UINT8* out,UINT32 len)
+/** Decryptes in to out using iv2.
+	* @param in input (encrypted) bytes
+	* @param out output (decrpyted) bytes
+	* @param len len of input. because the cipher preserves the size, 
+	*													len of output=len of input
+	* @retval E_SUCCESS
+	*/
+SINT32 CASymCipher::crypt2(const UINT8* in,UINT8* out,UINT32 len)
 	{
 		UINT32 i=0;
 		while(i+15<len)
@@ -142,56 +164,57 @@ SINT32 CASymCipher::decryptAES2(UINT8* in,UINT8* out,UINT32 len)
 			}
 		return E_SUCCESS;
 	}
-
-SINT32 CASymCipher::encryptAES(UINT8* in,UINT8* out,UINT32 len)
+/*
+SINT32 CASymCipher::encrypt1(const UINT8* in,UINT8* out,UINT32 len)
 	{
 		UINT32 i=0;
 		while(i+15<len)
 			{
-				rijndaelEncrypt (m_iv, m_iv, *m_keyAES);
+				rijndaelEncrypt (m_iv1, m_iv1, *m_keyAES);
 
-				out[i]=in[i]^m_iv[0];
+				out[i]=in[i]^m_iv1[0];
 				i++;
-				out[i]=in[i]^m_iv[1];
+				out[i]=in[i]^m_iv1[1];
 				i++;
-				out[i]=in[i]^m_iv[2];
+				out[i]=in[i]^m_iv1[2];
 				i++;
-				out[i]=in[i]^m_iv[3];
+				out[i]=in[i]^m_iv1[3];
 				i++;
-				out[i]=in[i]^m_iv[4];
+				out[i]=in[i]^m_iv1[4];
 				i++;
-				out[i]=in[i]^m_iv[5];
+				out[i]=in[i]^m_iv1[5];
 				i++;
-				out[i]=in[i]^m_iv[6];
+				out[i]=in[i]^m_iv1[6];
 				i++;
-				out[i]=in[i]^m_iv[7];
+				out[i]=in[i]^m_iv1[7];
 				i++;
-				out[i]=in[i]^m_iv[8];
+				out[i]=in[i]^m_iv1[8];
 				i++;
-				out[i]=in[i]^m_iv[9];
+				out[i]=in[i]^m_iv1[9];
 				i++;
-				out[i]=in[i]^m_iv[10];
+				out[i]=in[i]^m_iv1[10];
 				i++;
-				out[i]=in[i]^m_iv[11];
+				out[i]=in[i]^m_iv1[11];
 				i++;
-				out[i]=in[i]^m_iv[12];
+				out[i]=in[i]^m_iv1[12];
 				i++;
-				out[i]=in[i]^m_iv[13];
+				out[i]=in[i]^m_iv1[13];
 				i++;
-				out[i]=in[i]^m_iv[14];
+				out[i]=in[i]^m_iv1[14];
 				i++;
-				out[i]=in[i]^m_iv[15];
+				out[i]=in[i]^m_iv1[15];
 				i++;
 			}
 		if(i<len)
 			{
-				rijndaelEncrypt (m_iv, m_iv, *m_keyAES);
+				rijndaelEncrypt (m_iv1, m_iv1, *m_keyAES);
 				len-=i;
 				for(UINT32 k=0;k<len;k++)
 				 {
-					 out[i]=in[i]^m_iv[k];
+					 out[i]=in[i]^m_iv1[k];
 					 i++;
 					}
 			}
 		return E_SUCCESS;
 	}
+*/
