@@ -275,19 +275,25 @@ SINT32 setDOMElementValue(DOM_Element& elem,UINT8* value)
 		return E_SUCCESS;
 	}
 
-SINT32 setDOMElementAttribute(DOM_Element& elem,char* attr,int value)
+SINT32 setDOMElementAttribute(DOM_Element& elem,char* attrName,UINT8* value)
 	{
-		UINT8 tmp[10];
-		sprintf((char*)tmp,"%i",value);
-		elem.setAttribute(attr,DOMString((char*)tmp));
+		elem.setAttribute(attrName,DOMString((char*)value));
 		return E_SUCCESS;
 	}
 
-SINT32 getDOMElementAttribute(DOM_Element& elem,char* attr,int* value)
+SINT32 setDOMElementAttribute(DOM_Element& elem,char* attrName,int value)
 	{
-		if(elem==NULL||attr==NULL||value==NULL)
+		UINT8 tmp[10];
+		sprintf((char*)tmp,"%i",value);
+		elem.setAttribute(attrName,DOMString((char*)tmp));
+		return E_SUCCESS;
+	}
+
+SINT32 getDOMElementAttribute(DOM_Element& elem,char* attrName,int* value)
+	{
+		if(elem==NULL||attrName==NULL||value==NULL)
 			return E_UNKNOWN;
-		char* tmpStr=elem.getAttribute(attr).transcode();
+		char* tmpStr=elem.getAttribute(attrName).transcode();
 		*value=atol(tmpStr);
 		delete tmpStr;
 		return E_SUCCESS;

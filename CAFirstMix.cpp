@@ -1043,7 +1043,11 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		//tmp XML-Structure for constructing the XML which is send to each user
 		DOM_Document docXmlKeyInfo=DOM_Document::createDocument();
 		DOM_Element elemRootKey=docXmlKeyInfo.createElement("MixCascade");
+		setDOMElementAttribute(elemRootKey,"version",(UINT8*)"0.1"); //set the Version of the XML to 0.1
 		docXmlKeyInfo.appendChild(elemRootKey);
+		DOM_Element elemMixProtocolVersion=docXmlKeyInfo.createElement("MixProtocolVersion");
+		setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.2");
+		elemRootKey.appendChild(elemMixProtocolVersion);
 		DOM_Node elemMixesKey=docXmlKeyInfo.importNode(elemMixes,true);
 		elemRootKey.appendChild(elemMixesKey);
 		
