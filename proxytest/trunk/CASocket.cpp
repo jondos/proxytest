@@ -454,7 +454,7 @@ SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len)
 				ret=receive(buff+pos,len);
 				if(ret<=0)
 					{
-						if(ret=E_AGAIN)
+						if(ret==E_AGAIN)
 							{
 								msSleep(100);
 								continue;
@@ -500,7 +500,7 @@ SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len,UINT32 msTimeOut)
 						pos+=ret;
 						len-=ret;
 					}
-				else if(ret=E_TIMEDOUT)
+				else if(ret==E_TIMEDOUT)
 					return E_TIMEDOUT;
 				if(len==0)
 					return E_SUCCESS;
