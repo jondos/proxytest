@@ -41,7 +41,7 @@ SINT32 CAPool::pool(MIXPACKET* pMixPacket)
 		UINT32 v;
 		getRandom(&v);
 		v=v%m_uPoolSize;
-		CAMsg::out(LOG_DEBUG,"Try to pool out %u . Element\n",v);
+		CAMsg::printMsg(LOG_DEBUG,"Try to pool out %u . Element\n",v);
 		tPoolListEntry* tmpEntry=m_pPoolList;
 		while(v>0)
 			{
@@ -49,7 +49,7 @@ SINT32 CAPool::pool(MIXPACKET* pMixPacket)
 				v--;
 			}
 		HCHANNEL id=tmpEntry->mixpacket.channel;
-		CAMsg::out(LOG_DEBUG,"Channel id is:  %u\n",id);
+		CAMsg::printMsg(LOG_DEBUG,"Channel id is:  %u\n",id);
 	
 		tPoolListEntry* pEntryOut=tmpEntry;
 		tmpEntry=m_pPoolList;
@@ -85,7 +85,7 @@ SINT32 CAPool::pool(MIXPACKET* pMixPacket)
 				pPrevEntry->next=pEntryOut->next;
 				m_pEntry=pEntryOut;		
 			}		
-		CAMsg::out(LOG_DEBUG,"pool() finished!\n",v);			
+		CAMsg::printMsg(LOG_DEBUG,"pool() finished!\n",v);			
 		return E_SUCCESS;
 	}
 		
