@@ -1053,7 +1053,7 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 			}	
 		CACertStore* tmpCertStore=new CACertStore();
 		tmpCertStore->add(ownCert);
-		if(m_pSignature->signXML(elemRootKey/*,tmpCertStore*/)!=E_SUCCESS)
+		if(m_pSignature->signXML(elemRootKey,tmpCertStore)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_DEBUG,"Could not sign KeyInfo send to users...\n");
 			}
