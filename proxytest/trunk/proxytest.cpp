@@ -123,51 +123,61 @@ struct MMPair
 		CAMuxSocket muxOut;
 	};
 
-THREAD_RETURN mmInToOut(void* v)
+THREAD_RETURN mmIO(void* v)
 	{
 		MMPair* mmIOPair=(MMPair*)v;
-		char* buff=new char[1001];
-		if(buff==NULL)
-		    {
-					CAMsg::printMsg(LOG_ERR,"Out of Memory!\n");
-					THREAD_RETURN_ERROR;
-		    }
+		CASocketGroup oSocketGroup;
+		oSocketGroup.add(mmIOPair->muxIn);
+		oSocketGroup.add(mmIOPair->muxOut);
+		char buff[1001];
 		while(true)
 			{
-				HCHANNEL channel;
-				int len=mmIOPair->muxIn.receive(&channel,buff,1000);
-				if(len==SOCKET_ERROR||len==0)
+				if(oSocketGroup.select()==SOCKET_ERROR)
 					{
-						break;
+						sleep(1);
+						continue;
 					}
-				if(mmIOPair->muxOut.send(channel,buff,len)==SOCKET_ERROR)
-					break;
-			}
-		delete buff;		
-		THREAD_RETURN_SUCCESS;
-	}
-
-THREAD_RETURN mmOutToIn(void* v)
-	{
-		MMPair* mmIOPair=(MMPair*)v;
-		char* buff=new char[1001];
-		if(buff==NULL)
-		    {
-					CAMsg::printMsg(LOG_ERR,"Out of Memory!\n");
-					THREAD_RETURN_ERROR;
-		    }
-		while(true)
-			{
-				HCHANNEL channel;
-				int len=mmIOPair->muxOut.receive(&channel,buff,1000);
-				if(len==SOCKET_ERROR||len==0)
+				if(oSocketGroup.isSignaled(mmIOPair->muxIn))
 					{
-						break;
+						int len=mmIOPair->muxIn.receive(&channel,buff,1000);
+						if(len==SOCKET_ERROR)
+							{
+							}
+						HCHANNEL outChannel
+						oSocketList.get(channel);
+						if(!oSocketList.get(channel,&outChannel))
+							{
+								if(len!=0)
+									{
+										#ifdef _DEBUG
+										    CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
+										#endif
+										oSocketList.add(channel,lastId);
+										mmIOPair->muxOut.send(lastId,buff,len);
+										lastId++;
+									}
+							}
+						else
+							{
+								if(len==0)
+									{
+										lmIOPair->muxIn.close(channel);
+										oSocketList.remove(channel);
+									}
+								else
+									{
+										mmIOPair->muxOut.send(outChannel,buff,len);
+									}
+							}
 					}
-				if(mmIOPair->muxIn.send(channel,buff,len)==SOCKET_ERROR)
-					break;
+						mmIOPair->muxOut.send(channel,buff,len);
+					}
+				else
+					{
+						int len=mmIOPair->muxOut.receive(&channel,buff,1000);
+						mmIOPair->muxIn.send(channel,buff,len);
+					}
 			}
-		delete buff;		
 		THREAD_RETURN_SUCCESS;
 	}
 
@@ -178,18 +188,19 @@ int doMiddleMix()
 		char strTarget[255];
 		options.getTargetHost(strTarget,255);
 		nextMix.setAddr(strTarget,options.getTargetPort());
-		mmIOPair->muxOut.connect(&nextMix);
-		mmIOPair->muxIn.accept(options.getServerPort());
-		#ifdef _WIN32
-		    _beginthread(mmInToOut,0,mmIOPair);
-		    _beginthread(mmOutToIn,0,mmIOPair);
-		    WaitForSingleObject(hEventThreadEnde,INFINITE);
-		#else
-		    pthread_t p1,p2;
-		    int err;
-		    err=pthread_create(&p1,NULL,mmInToOut,mmIOPair);
-		    err=pthread_create(&p2,NULL,mmOutToIn,mmIOPair);
-		#endif
+		if(mmIOPair->muxOut.connect(&nextMix)==SOCKET_ERROR)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Cannot connect to next Mix -- Exiting!\n");
+				delete mmIOPair;
+				return SOCKET_ERROR;
+			}
+		if(mmIOPair->muxIn.accept(options.getServerPort())==SOCKET_ERROR)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Error waiting for previous Mix... -- Exiting!\n");
+				delete mmIOPair;
+				return SOCKET_ERROR;
+			}
+		mmIO(mmIOPair);
 		delete mmIOPair;
 		return 0;
 	}

@@ -23,6 +23,16 @@ int CASocketGroup::add(CASocket&s)
 		return 0;
 	}
 
+int CASocketGroup::add(CAMuxSocket&s)
+	{
+		#ifndef _WIN32
+		    if(max<((SOCKET)s)+1)
+			max=((SOCKET)s)+1;
+		#endif
+		FD_SET((SOCKET)s,&m_fdset);
+		return 0;
+	}
+
 int CASocketGroup::remove(CASocket&s)
 	{
 		FD_CLR((SOCKET)s,&m_fdset);
@@ -54,6 +64,11 @@ int CASocketGroup::select()
 	}
 			
 bool CASocketGroup::isSignaled(CASocket&s)
+	{
+		return FD_ISSET((SOCKET)s,&m_signaled_set)!=0;
+	}
+
+bool CASocketGroup::isSignaled(CAMuxSocket&s)
 	{
 		return FD_ISSET((SOCKET)s,&m_signaled_set)!=0;
 	}
