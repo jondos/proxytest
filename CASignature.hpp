@@ -45,6 +45,10 @@ class CASignature
 			SINT32 signXML(DOM_Node& node,CACertStore* pIncludeCerts=NULL);
 			SINT32 signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen,CACertStore* pIncludeCerts=NULL);
 			SINT32 setVerifyKey(CACertificate* pCert);
+			/**
+			 * Parses the XML representation of a DSA public key
+			 */
+			SINT32 setVerifyKey(const DOM_Element& xmlKey);
 //			SINT32 verify(UINT8* in,UINT32 inlen,UINT8* sig,UINT32 siglen);
 			SINT32 verifyXML(const UINT8* const in,UINT32 inlen);
 			SINT32 verifyXML(DOM_Node& node,CACertStore* pTrustedCerts=NULL);
@@ -57,5 +61,11 @@ class CASignature
 			SINT32 verify(UINT8* in,UINT32 inlen,DSA_SIG* dsaSig);
 			SINT32 sign(UINT8* in,UINT32 inlen,DSA_SIG** dsaSig);
 			SINT32 encodeRS(UINT8* out,UINT32* outLen,DSA_SIG* pdsaSig);
+			
+			/**
+			* Converts a DSA signature from the XML Signature format to the
+			* openSSL R/S BigNumber format.
+			*/
+			SINT32 CASignature::decodeRS(const UINT8* in, const UINT32 inLen, DSA_SIG* pDsaSig);
 	};
 #endif

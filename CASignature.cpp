@@ -409,6 +409,155 @@ SINT32 CASignature::setVerifyKey(CACertificate* pCert)
 		m_pDSA=tmpDSA;
 		return E_SUCCESS;
 	}
+	
+/**
+ * Parses the XML representation of a DSA public key
+ */
+SINT32 CASignature::setVerifyKey(const DOM_Element& xmlKey)
+{
+	UINT8 decodeBuffer[4096];
+	UINT32 len = 4096, encodedLen = 0;
+	DSA * tmpDSA = NULL;
+	
+	if(xmlKey==NULL)
+	{
+		DSA_free(m_pDSA);
+		m_pDSA = NULL;
+		return E_SUCCESS;
+	}
+	char * tmpStr = xmlKey.getTagName().transcode();
+	if(strcmp(tmpStr, "JapPublicKey")!=0)
+	{
+		CAMsg::printMsg(LOG_DEBUG, 
+				"CASignature::setVerifyKey(): no JapPublicKey!"
+				"Tagname is %s", tmpStr);
+		delete[] tmpStr;
+		return E_UNKNOWN;
+	}
+	delete[] tmpStr;
+
+
+	if( getDOMElementAttribute(xmlKey,"version",decodeBuffer,&len)!=E_SUCCESS || 
+		strcmp((char*)decodeBuffer, "1.0")!=0 )
+	{
+		CAMsg::printMsg(LOG_DEBUG, 
+				"CASignature::setVerifyKey(): JapPublicKey has unknown version %s. "
+				"Version 1.0 expected!", tmpStr);
+		return E_UNKNOWN;
+	}
+	
+	DOM_Element elemDsaKey;
+	if(getDOMChildByName(xmlKey, (UINT8*)"DSAKeyValue", elemDsaKey, false)
+			!=E_SUCCESS)
+		{
+			CAMsg::printMsg(LOG_DEBUG, 
+					"CASignature::setVerifyKey(): DSAKeyValue not found!");
+			return E_UNKNOWN;
+		}
+	
+	tmpDSA=DSA_new();
+	
+	// parse "Y"
+	DOM_Element elem;
+	if(getDOMChildByName(xmlKey, (UINT8*)"Y", elem, false)
+			!=E_SUCCESS)
+		{
+			return E_UNKNOWN;
+		}
+	len=4096;
+	if(getDOMElementValue(elem, decodeBuffer, &len)!=E_SUCCESS)
+	{
+		DSA_free(tmpDSA);
+		return E_UNKNOWN;
+	}
+	encodedLen = len; len = 4096;
+	if(CABase64::decode(decodeBuffer, encodedLen, decodeBuffer, &len)!=E_SUCCESS)
+	{
+		DSA_free(tmpDSA);
+		return E_UNKNOWN;
+	}
+	tmpDSA->pub_key = BN_bin2bn(decodeBuffer,len,NULL);
+
+
+	// parse "G"
+	len = 4096;
+	if(getDOMChildByName(xmlKey, (UINT8*)"G", elem, false)
+			!=E_SUCCESS)
+		{
+			DSA_free(tmpDSA);
+			return E_UNKNOWN;
+		}
+	if(getDOMElementValue(elem, decodeBuffer, &len)!=E_SUCCESS)
+	{
+		DSA_free(tmpDSA);
+		return E_UNKNOWN;
+	}
+	encodedLen = len; len = 4096;
+	if(CABase64::decode(decodeBuffer, encodedLen, decodeBuffer, &len)!=E_SUCCESS)
+	{
+		DSA_free(tmpDSA);
+		return E_UNKNOWN;
+	}
+	tmpDSA->g=BN_bin2bn(decodeBuffer,len,NULL);
+		
+	
+	// parse "P"
+	len = 4096;
+	if(getDOMChildByName(xmlKey, (UINT8*)"P", elem, false)
+			!=E_SUCCESS)
+		{
+			DSA_free(tmpDSA);
+			return E_UNKNOWN;
+		}
+	if(getDOMElementValue(elem, decodeBuffer, &len)!=E_SUCCESS)
+	{
+		DSA_free(tmpDSA);
+		return E_UNKNOWN;
+	}
+	encodedLen = len; len = 4096;
+	if(CABase64::decode(decodeBuffer, encodedLen, decodeBuffer, &len)!=E_SUCCESS)
+	{
+		DSA_free(tmpDSA);
+		return E_UNKNOWN;
+	}
+	tmpDSA->p=BN_bin2bn(decodeBuffer,len,NULL);
+
+
+	// parse "Q"
+	len = 4096;
+	if(getDOMChildByName(xmlKey, (UINT8*)"Q", elem, false)
+			!=E_SUCCESS)
+		{
+			DSA_free(tmpDSA);
+			return E_UNKNOWN;
+		}
+	if(getDOMElementValue(elem, decodeBuffer, &len)!=E_SUCCESS)
+	{
+		DSA_free(tmpDSA);
+		return E_UNKNOWN;
+	}
+	encodedLen = len; 
+	len = 1024;
+	if(CABase64::decode(decodeBuffer, encodedLen, decodeBuffer, &len)!=E_SUCCESS)
+	{
+		DSA_free(tmpDSA);
+		return E_UNKNOWN;
+	}
+	tmpDSA->q=BN_bin2bn(decodeBuffer,len,NULL);
+	
+	if( tmpDSA->pub_key!=NULL && tmpDSA->g!=NULL && tmpDSA->p!=NULL && tmpDSA->q!=NULL)
+	{
+		if(m_pDSA!=NULL) 
+		{
+			DSA_free(m_pDSA);
+		}
+		m_pDSA = tmpDSA;
+		return E_SUCCESS;
+	}
+	DSA_free(tmpDSA);
+	return E_UNKNOWN;
+}
+
 
 SINT32 CASignature::verify(UINT8* in,UINT32 inlen,DSA_SIG* dsaSig)
 	{
@@ -540,4 +689,14 @@ SINT32 CASignature::encodeRS(UINT8* out,UINT32* outLen,DSA_SIG* pdsaSig)
 		*outLen=40;
 		return E_SUCCESS;
 	}
+
+	
+SINT32 CASignature::decodeRS(const UINT8* in, const UINT32 inLen, DSA_SIG* pDsaSig)
+{
+	ASSERT(pDsaSig!=NULL, "DSA_SIG is null");
+	ASSERT(inLen>20, "Inbuffer is <=20 bytes");
+	pDsaSig->r = BN_bin2bn(in, 20, NULL);
+	pDsaSig->s = BN_bin2bn(in+20, inLen-20, NULL);
+	return E_SUCCESS;
+}
 

@@ -66,6 +66,7 @@ SINT32 setDOMElementAttribute(DOM_Node& elem,const char* attrName,int value);
 SINT32 getDOMElementAttribute(const DOM_Element& elem,const char* attrName,int* value);
 SINT32 setDOMElementAttribute(DOM_Node& elem,const char* attrName,const UINT8* value);
 SINT32 getDOMElementAttribute(const DOM_Node& elem,const char* attrName,bool& value);
+SINT32 getDOMElementAttribute(const DOM_Element& elem,const char* attrName,UINT8* value,UINT32* len);
 
 SINT32 getDOMChildByName(const DOM_Node& node,const UINT8* const name,DOM_Node& child,bool deep=false);
 
