@@ -157,6 +157,7 @@ SINT32 CAFirstMix::init()
 		CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET SendBuffSize: %i\n",((CASocket*)(*m_pMuxOut))->getSendBuff());
 		CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET SendLowWatSize: %i\n",((CASocket*)(*m_pMuxOut))->getSendLowWat());
 
+		CAMsg::printMsg(LOG_INFO,"Try to connect to next Mix...\n");
 
 		if(m_pMuxOut->connect(*pAddrNext,10,10)!=E_SUCCESS)
 			{
