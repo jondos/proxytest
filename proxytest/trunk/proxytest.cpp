@@ -198,22 +198,25 @@ All this connections are multiplexed over the one connection to the first mix JA
 Every connection from the browser is called a \em channel (mix channel or anonymous channel). 
 A first mix sends the stream of packets (from multiple channels) from multiple users to the next mix.
 All over one TCP/IP connection. So JAP and the mixes have to multiplex/demultiplex the channels.
-A channel can transport only fixed sized packets. These packets are called \em mix-packets. 
+A channel can transport only fixed sized packets. These packets are called \em MixPackets. 
 So a first mix for instance gets many packets from different users in parallel 
 and sends them to the next mix in a serialized way. (see Figure 2)
 
-\image html JAPMixPacketMux.gif "Figure 2: Mux/DeMux of fixed sized mix-packets"
+\image html JAPMixPacketMux.gif "Figure 2: Mux/DeMux of fixed sized MixPackets"
 
 
-Each mix-packet has a size of #MIXPACKET_SIZE (998) bytes. 
+Each MixPacket has a size of #MIXPACKET_SIZE (998) bytes (. 
 The header of each packet is as follows (see also: #MIXPACKET):
-\li 4 bytes \c channel-id
+\li 4 bytes \c channel-ID
 \li 2 bytes \c flags
-\li #DATA_SIZE (992) bytes  \c content (transported bytes)
+\li #DATA_SIZE (992) bytes  \c data (transported bytes)
 
-The content bytes have different meanings in different situations and mixes.
+\image html MixPacketGeneral.gif "Figure 3: General format of a MixPacket
+
+
+The data bytes have different meanings in different situations and mixes.
 For instance the content itself is meaningful only at the last mix (because of multiple encryptions)
-The format of the content (at the last mix) is:
+The format of the data (at the last mix) is:
 \li 2 bytes \c len
 \li 1 byte \c type
 \li #PAYLOAD_SIZE (989) bytes \c payload
@@ -225,17 +228,25 @@ The channel-id is changed in every mix. Also the content bytes changes in every 
 because each mix will perform a single encryption/decryption.
 
 \subsection docInterMixEncryption Inter-Mix Encryption
-The stream of mix-packets between to mixes is encrypted using AES-128/128 in OFB-128 mode. Exactly only the
-first part of each mix-packet is encrpyted. (see Figure 3)
+The stream of MixPackets between to mixes is encrypted using AES-128/128 in OFB-128 mode. Exactly only the
+first part of each MixPacket is encrpyted. (see Figure 3)
 
 \image html JAPInterMixEncryption.gif "Figure 3: Encryption between two mixes"
 	
-The encryption is done, so that an attacker could not see the channel-id and flags of a mix-packet. OFB is chosen, so that
-an attacker could not replay a mix-packed. If he replays a mix-packed, than at least the channel-id 
-changes after decrypting. If this mix-packed was the first packed of a channel, than the cryptographic keys
-for this channel will change to (because of the content format for the first packed of a channel, explained later). 
+The encryption is done, so that an attacker could not see the channel-id and flags of a MixPacket. OFB is chosen, so that
+an attacker could not replay a MixPacket. If he replays a MixPacket, than at least the channel-id 
+changes after decrypting. If this MixPacket was the first packet of a channel, than the cryptographic keys
+for this channel will change to (because of the content format for the first packet of a channel, explained later). 
 
 For Upstream and Downstream different keys are used.
+
+\subsection docChannelSetup AnonChannel establishment
+Before data could be sent through an AnonChannel one has to be established. 
+This is done by sending ChannelOpen messages through the mixes.
+Figure 4 shows the format of such a message how it would arrive for example 
+at the last mix.
+
+\image html MixPacketChannelOpen.gif "Figure 4: ChannelOpen packet (example for the last mix)"
 
 \section docCascadeInit Initialisation of a Cascade
 
