@@ -830,8 +830,9 @@ SINT32 CAFirstMix::loop()
 																pMixPacket->channel=pEntry->channelOut;
 																m_pMuxOut->send(pMixPacket,tmpBuff);
 																m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
+																pEntry->bIsSuspended=false;	
 															}
-	
+														
 														pEntry=m_pChannelList->getNextChannel(pEntry);
 													}
 												pfmHashEntry->cSuspend=0;

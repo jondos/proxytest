@@ -31,9 +31,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAUtil.hpp"
 #include "CAThread.hpp"
 
+#ifdef DO_TRACE
 UINT32 CAQueue::m_aktAlloc=0;
 UINT32 CAQueue::m_maxAlloc=0;
-
+#endif
 /** Deletes this Queue and all stored data*/
 CAQueue::~CAQueue()
 	{
