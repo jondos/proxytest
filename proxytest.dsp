@@ -67,7 +67,7 @@ LINK32=xilink6.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /G6 /Zp8 /MDd /W4 /Gm /GX /ZI /Od /I "g:\openssl-0.9.5a\inc32" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "_DEBUG" /D "_REENTRANT" /D "AES" /D "PROT2" /FAcs /FR /Yu"stdafx.h" /FD /GZ /c
+# ADD CPP /nologo /G6 /MDd /W4 /Gm /GX /ZI /Od /I "g:\openssl-0.9.5a\inc32" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "_DEBUG" /D "_REENTRANT" /D "AES" /D "PROT2" /FAcs /FR /Yu"stdafx.h" /FD /GZ /c
 # ADD BASE RSC /l 0x407 /d "_DEBUG"
 # ADD RSC /l 0x407 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -119,7 +119,22 @@ LINK32=xilink6.exe
 # Begin Source File
 
 SOURCE=.\popt\popt.c
+
+!IF  "$(CFG)" == "proxytest - Win32 Release"
+
 # SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
+
+# ADD CPP /W3
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
@@ -135,6 +150,7 @@ SOURCE=.\popt\popthelp.c
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
 
+# ADD CPP /W3
 # SUBTRACT CPP /YX /Yc /Yu
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
@@ -149,7 +165,22 @@ SOURCE=.\popt\poptint.h
 # Begin Source File
 
 SOURCE=.\popt\poptparse.c
+
+!IF  "$(CFG)" == "proxytest - Win32 Release"
+
 # SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
+
+# ADD CPP /W3
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
@@ -169,6 +200,7 @@ SOURCE=.\httptunnel\common.cpp
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
 
+# ADD CPP /W3
 # SUBTRACT CPP /YX /Yc /Yu
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
@@ -215,6 +247,7 @@ SOURCE=.\httptunnel\poll.cpp
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
 
+# ADD CPP /W3
 # SUBTRACT CPP /YX /Yc /Yu
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
@@ -236,6 +269,7 @@ SOURCE=.\httptunnel\tunnel.cpp
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
 
+# ADD CPP /W3
 # SUBTRACT CPP /YX /Yc /Yu
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
@@ -265,6 +299,7 @@ SOURCE=.\xml\xmlinput.cpp
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
 
+# ADD CPP /W3
 # SUBTRACT CPP /YX /Yc /Yu
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
@@ -286,6 +321,7 @@ SOURCE=.\xml\xmlinput_c.c
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
 
+# ADD CPP /W3
 # SUBTRACT CPP /YX /Yc /Yu
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
@@ -307,6 +343,7 @@ SOURCE=.\xml\xmloutput.cpp
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
 
+# ADD CPP /W3
 # SUBTRACT CPP /YX /Yc /Yu
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
