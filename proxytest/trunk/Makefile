@@ -27,6 +27,8 @@ OBJS_ALL=CASocket.o\
 	CASignature.o\
 	CABase64.o\
 	CAUtil.o\
+	CADatagramSocket.o\
+	CARoundTripTime.o\
 	proxytest.o
 
 OBJS=$(OBJS_ALL)
@@ -41,10 +43,10 @@ all:
 	@echo 'solaris-ultrasparc-gcc, irix-64-cc'
 
 linux-x86-gcc:
-	$(MAKE) 'CC=gcc' 'CPPFLAGS=-Wall -Wcast-align -fomit-frame-pointer -m486 -O3 -D_REENTRANT' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lstdc++' 'LIBDIR=-L/usr/local/ssl/lib' _all 
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-Wall -Wcast-align -fomit-frame-pointer -march=i686 -O3 -D_REENTRANT' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lstdc++' 'LIBDIR=-L/usr/local/ssl/lib' _all 
 
 linux-x86-gcc-static:
-	$(MAKE) 'CC=gcc' 'CPPFLAGS=-static -Wall -Wcast-align -fomit-frame-pointer -m486 -O3 -D_REENTRANT' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lstdc++' 'LIBDIR=-L/usr/local/ssl/lib' _all 
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-static -Wall -Wcast-align -fomit-frame-pointer -march=i686 -O3 -D_REENTRANT' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lstdc++' 'LIBDIR=-L/usr/local/ssl/lib' _all 
 
 linux-x86-gcc-debug:
 	$(MAKE) 'CC=gcc' 'CPPFLAGS=-static -Wall -O0 -D_REENTRANT' 'DEBUG=-g -D_DEBUG' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lstdc++' 'LIBDIR=-L/usr/local/ssl/lib' _all 
