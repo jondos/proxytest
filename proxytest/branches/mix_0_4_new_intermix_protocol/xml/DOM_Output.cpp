@@ -6,9 +6,14 @@ static const XMLCh  gEndElement[] = { chOpenAngle, chForwardSlash, chNull };
 
 
 const XMLCh  DOM_Output::m_UTF8[6] =
-{
+	{
     chLatin_U, chLatin_T,chLatin_F, chDash,chDigit_8, chNull
-};	
+	};	
+
+const XMLCh  DOM_Output::m_1_0[4] =
+	{
+    chDigit_1,chPeriod,chDigit_0, chNull
+	};	
 
 const XMLCh  DOM_Output::m_XML[39] =
 {
