@@ -39,7 +39,7 @@ CASocketAddrUnix::~CASocketAddrUnix()
 	{
 	}
 
-SINT32 CASocketAddrINet::getSize()
+SINT32 CASocketAddrUnix::getSize()
 	{
 		return sizeof(sockaddr_un);
 	}

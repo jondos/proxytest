@@ -267,7 +267,7 @@ SINT32 CALastMix::init()
 		if(options.getServerPath(path,255)==E_SUCCESS) //unix domain
 			{
 #ifdef HAVE_UNIX_DOMAIN_PROTOCOL
-				pAddrListen=new CAsocketAddrUnix();
+				pAddrListen=new CASocketAddrUnix();
 				((CASocketAddrUnix*)pAddrListen)->setPath((char*)path);
 #else
 				CAMsg::printMsg(LOG_CRIT,"I do not understand the Unix Domain Protocol!\n");
