@@ -87,12 +87,18 @@ SINT32 CAFirstMixA::loop()
 						countRead=m_psocketgroupUsersRead->select(/*false,*/0);				// how many JAP<->mix connections have received data from their coresponding JAP
 						if(countRead>0)
 							bAktiv=true;
-						#ifdef HAVE_EPOLL
+#ifdef HAVE_EPOLL
+						//if we have epool we do not need to search the whole list
+						//of connected JAPs to find the ones who have sent data
+						//as epool will return ONLY these connections.
 						fmHashTableEntry* pHashEntry=(fmHashTableEntry*)m_psocketgroupUsersRead->getFirstSignaledSocketData();
 						while(pHashEntry!=NULL)
 							{
 								CAMuxSocket* pMuxSocket=pHashEntry->pMuxSocket;
-						#else
+#else
+						//if we do not have epoll we have to go to the whole
+						//list of open connections to find the ones which
+						//actually have sent some data
 						fmHashTableEntry* pHashEntry=m_pChannelList->getFirst();
 						while(pHashEntry!=NULL&&countRead>0)											// iterate through all connections as long as there is at least one active left
 							{
@@ -100,7 +106,7 @@ SINT32 CAFirstMixA::loop()
 								if(m_psocketgroupUsersRead->isSignaled(*pMuxSocket))	// if this one seems to have data
 									{
 										countRead--;
-						#endif
+#endif
 										ret=pMuxSocket->receive(pMixPacket,0);
 										#if defined LOG_PACKET_TIMES||defined(LOG_CHANNEL)
 											getcurrentTimeMicros(upload_packet_timestamp);
@@ -170,8 +176,12 @@ SINT32 CAFirstMixA::loop()
 															pHashEntry->pQueueSend->add(tmpBuff,MIXPACKET_SIZE,upload_packet_timestamp);
 														#else			
 															pHashEntry->pQueueSend->add(tmpBuff,MIXPACKET_SIZE);
-														#endif	
-														m_psocketgroupUsersWrite->add(*pMuxSocket); 
+														#endif
+														#ifdef HAVE_EPOLL
+															m_psocketgroupUsersWrite->add(*pMuxSocket,pHashEntry); 
+														#else
+															m_psocketgroupUsersWrite->add(*pMuxSocket); 
+														#endif
 													}
 												else if(pMixPacket->flags==CHANNEL_CLOSE)			// closing one mix-channel (not the JAP<->mix connection!)
 													{
@@ -339,7 +349,11 @@ SINT32 CAFirstMixA::loop()
 																								pEntry->channelIn,pEntry->pHead->id,pEntry->packetsInFromUser,pEntry->packetsOutToUser,pEntry->timeCreated,current_time,diff_time);
 										#endif
 										
-										m_psocketgroupUsersWrite->add(*pEntry->pHead->pMuxSocket);
+										#ifdef HAVE_EPOLL
+											m_psocketgroupUsersWrite->add(*pEntry->pHead->pMuxSocket,*pEntry->pHead); 
+										#else
+											m_psocketgroupUsersWrite->add(*pEntry->pHead->pMuxSocket); 
+										#endif
 										delete pEntry->pCipher;
 	
 										m_pChannelList->removeChannel(pEntry->pHead->pMuxSocket,pEntry->channelIn);
@@ -377,7 +391,12 @@ SINT32 CAFirstMixA::loop()
 											pEntry->pHead->trafficOut++;
 											pEntry->packetsOutToUser++;
 										#endif
-										m_psocketgroupUsersWrite->add(*pEntry->pHead->pMuxSocket);
+										#ifdef HAVE_EPOLL
+											m_psocketgroupUsersWrite->add(*pEntry->pHead->pMuxSocket,*pEntry->pHead); 
+										#else
+											m_psocketgroupUsersWrite->add(*pEntry->pHead->pMuxSocket); 
+										#endif
+		
 #ifndef NO_PARKING
 #define MAX_USER_SEND_QUEUE 100000
 										if(pEntry->pHead->pQueueSend->getSize()>MAX_USER_SEND_QUEUE&&
@@ -415,15 +434,21 @@ SINT32 CAFirstMixA::loop()
 
 //Step 5 
 //Writing to users...
-				fmHashTableEntry* pfmHashEntry=m_pChannelList->getFirst();
 				countRead=m_psocketgroupUsersWrite->select(/*true,*/0);
 				if(countRead>0)
 					bAktiv=true;
+#ifdef HAVE_EPOLL		
+				fmHashTableEntry* pfmHashEntry=(fmHashTableEntry*)m_psocketgroupUsersWrite->getFirstSignaledSocketData();
+				while(pfmHashEntry!=NULL)
+					{
+#else
+				fmHashTableEntry* pfmHashEntry=m_pChannelList->getFirst();
 				while(countRead>0&&pfmHashEntry!=NULL)
 					{
 						if(m_psocketgroupUsersWrite->isSignaled(*pfmHashEntry->pMuxSocket))
 							{
 								countRead--;
+#endif
 								UINT32 len=MIXPACKET_SIZE;
 								#ifdef LOG_PACKET_TIMES
 									len-=pfmHashEntry->uAlreadySendPacketSize;
@@ -484,9 +509,12 @@ SINT32 CAFirstMixA::loop()
 											}
 									}
 								//todo error handling
-
-							}
+#ifdef HAVE_EPOLL
+						pfmHashEntry=m_psocketgroupUsersWrite->getNextSignaledSocketData();
+#else
+							}//if is socket signaled
 						pfmHashEntry=m_pChannelList->getNext();
+#endif
 					}
 				if(!bAktiv)
 				  msSleep(100);
