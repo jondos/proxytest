@@ -48,15 +48,18 @@ extern CACmdLnOptions options;
 
 SINT32 CALastMix::initOnce()
 	{
-		UINT32 cntTargets=options.getTargetCount();
+		UINT32 cntTargets=options.getTargetInterfaceCount();
 		if(cntTargets==0)
 			return E_UNKNOWN;
-		CASocketAddrINet oAddr;
+//		CASocketAddrINet oAddr;
 		UINT32 i;
 		for(i=1;i<=cntTargets;i++)
 			{
-				options.getTargetAddr(oAddr,i);
-				m_oCacheLB.add(oAddr);
+				TargetInterface oTargetInterface;
+				options.getTargetInterface(oTargetInterface,i);
+				if(oTargetInterface.target_type==TARGET_HTTP_PROXY)
+					m_oCacheLB.add(oTargetInterface.addr);
+				delete oTargetInterface.addr;
 			}
 		CAMsg::printMsg(LOG_DEBUG,"This mix will use the following proxies:\n");
 		for(i=0;i<m_oCacheLB.getElementCount();i++)

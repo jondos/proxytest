@@ -64,7 +64,8 @@ SINT32 CAFirstMix::init()
 		//Establishing all Listeners
 		m_nSocketsIn=options.getListenerInterfaceCount();
 		m_arrSocketsIn=new CASocket[m_nSocketsIn];
-		for(UINT i=1;i<=m_nSocketsIn;i++)
+		UINT32 i;
+		for(i=1;i<=m_nSocketsIn;i++)
 			{
 				ListenerInterface oListener;
 				if(options.getListenerInterface(oListener,i)!=E_SUCCESS)

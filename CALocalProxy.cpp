@@ -63,8 +63,8 @@ SINT32 CALocalProxy::init()
 			}
 		CASocketAddrINet addrNext;
 		UINT8 strTarget[255];
-		options.getTargetHost(strTarget,255);
-		addrNext.setAddr(strTarget,options.getTargetPort());
+		options.getMixHost(strTarget,255);
+		addrNext.setAddr(strTarget,options.getMixPort());
 		CAMsg::printMsg(LOG_INFO,"Try connecting to next Mix...\ncvs u");
 
 		((CASocket*)muxOut)->create();
