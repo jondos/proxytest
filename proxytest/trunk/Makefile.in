@@ -68,11 +68,11 @@ am_proxytest_OBJECTS = CAASymCipher.$(OBJEXT) CABase64.$(OBJEXT) \
 	CAFirstMixChannelList.$(OBJEXT) CAInfoService.$(OBJEXT) \
 	CAIPList.$(OBJEXT) CALastMix.$(OBJEXT) \
 	CALastMixChannelList.$(OBJEXT) CAListenerInterface.$(OBJEXT) \
-	CALocalProxy.$(OBJEXT) CAMiddleMix.$(OBJEXT) \
-	CAMiddleMixChannelList.$(OBJEXT) CAMix.$(OBJEXT) \
-	CAMsg.$(OBJEXT) CAMutex.$(OBJEXT) CAMuxSocket.$(OBJEXT) \
-	CAPayment.$(OBJEXT) CAPool.$(OBJEXT) CAQueue.$(OBJEXT) \
-	CASemaphore.$(OBJEXT) CASignature.$(OBJEXT) \
+	CALocalProxy.$(OBJEXT) CALogPacketStats.$(OBJEXT) \
+	CAMiddleMix.$(OBJEXT) CAMiddleMixChannelList.$(OBJEXT) \
+	CAMix.$(OBJEXT) CAMsg.$(OBJEXT) CAMutex.$(OBJEXT) \
+	CAMuxSocket.$(OBJEXT) CAPayment.$(OBJEXT) CAPool.$(OBJEXT) \
+	CAQueue.$(OBJEXT) CASemaphore.$(OBJEXT) CASignature.$(OBJEXT) \
 	CASingleSocketGroup.$(OBJEXT) CASocket.$(OBJEXT) \
 	CASocketAddrINet.$(OBJEXT) CASocketAddrUnix.$(OBJEXT) \
 	CASocketGroup.$(OBJEXT) CASocketList.$(OBJEXT) \
@@ -103,6 +103,7 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/CALastMixChannelList.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CAListenerInterface.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CALocalProxy.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CALogPacketStats.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CAMiddleMix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CAMiddleMixChannelList.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CAMix.Po ./$(DEPDIR)/CAMsg.Po \
@@ -258,6 +259,7 @@ proxytest_SOURCES = CAASymCipher.cpp \
 		    CALastMixChannelList.cpp\
 		    CAListenerInterface.cpp\
 		    CALocalProxy.cpp \
+		    CALogPacketStats.cpp\
 		    CAMiddleMix.cpp \
 		    CAMiddleMixChannelList.cpp \
 		    CAMix.cpp \
@@ -300,6 +302,7 @@ proxytest_SOURCES = CAASymCipher.cpp \
 		    CAListenerInterface.hpp\
 		    CALocalProxy.hpp \
 		    CALockAble.hpp\
+		    CALogPacketStats.hpp\
 		    CAMiddleMix.hpp \
 		    CAMiddleMixChannelList.hpp \
 		    CAMix.hpp \
@@ -439,6 +442,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CALastMixChannelList.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAListenerInterface.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CALocalProxy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CALogPacketStats.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMiddleMix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMiddleMixChannelList.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMix.Po@am__quote@
