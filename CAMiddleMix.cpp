@@ -497,7 +497,7 @@ THREAD_RETURN mm_loopDownStream(void *p)
 					}
 			}
 ERR:
-		CAMsg::printMsg(LOG_CRIT,"loopDownStream -- Exiting!\n");
+		CAMsg::printMsg(LOG_CRIT,"loopDownStream -- Exiting clean ups...\n");
 		pMix->m_bRun=false;
 		delete pPoolEntry;
 		#ifdef USE_POOL
@@ -505,6 +505,7 @@ ERR:
 		#endif
 		pMix->m_pMuxIn->close();
 		pMix->m_pMuxOut->close();
+		CAMsg::printMsg(LOG_CRIT,"loopDownStream -- Now Exiting!\n");
 #endif //!NEW_MIX_TYPE
 		THREAD_RETURN_SUCCESS;		
 	}
@@ -627,19 +628,19 @@ SINT32 CAMiddleMix::loop()
 					}
 			}
 ERR:
-		CAMsg::printMsg(LOG_CRIT,"Preparing for restart...\n");
+		CAMsg::printMsg(LOG_CRIT,"loop(): Preparing for restart...\n");
 		m_bRun=false;
 		m_pMuxIn->close();
 		m_pMuxOut->close();
 		oThread.join();		
 
-		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
 		delete tmpRSABuff;
 		delete pPoolEntry;
 		#ifdef USE_POOL
 			delete pPool;
 		#endif
 #endif //!NEW_MIX_TYPE
+		CAMsg::printMsg(LOG_CRIT,"loop(): Seams that we are restarting now!!\n");
 		return E_UNKNOWN;
 	}
 SINT32 CAMiddleMix::clean()
