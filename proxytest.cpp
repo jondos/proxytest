@@ -180,6 +180,8 @@ int main(int argc, const char* argv[])
 				SINT32 s;
 				u=5000;
 				s=oSocketClient.setSendBuff(5000);
+				s=oSocketClient.getSendBuff();
+				CAMsg::printMsg(LOG_DEBUG,"SendBuff now: %i\n",s);
 				s=oSocketClient.getSendSpace();
 				CAMsg::printMsg(LOG_DEBUG,"SendSpace now: %i\n",s);
 				UINT8 buff[1000];
