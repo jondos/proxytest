@@ -93,7 +93,7 @@ SINT32 CAFirstMixA::loop()
 									{
 										countRead--;
 										#ifdef LOG_PACKET_TIMES
-											getcurrentTimeMillis(upload_packet_timestamp);
+											getcurrentTimeMicros(upload_packet_timestamp);
 										#endif	
 										ret=pMuxSocket->receive(pMixPacket,0);
 										if(ret==SOCKET_ERROR/*||pHashEntry->accessUntil<time()*/) 
@@ -431,6 +431,7 @@ SINT32 CAFirstMixA::loop()
 														{
 															UINT64 tmpU64;
 															getcurrentTimeMicros(tmpU64);
+															addToTimeingStats(diff64(tmpU64,timestamp),false,false);
 															CAMsg::printMsg(LOG_CRIT,"Download Packet processing time (arrival <--> send): %u µs\n",diff64(tmpU64,timestamp));
 														}
 												}
@@ -481,12 +482,13 @@ SINT32 CAFirstMixA::loop()
 		m_pMuxOut->close();
 		for(UINT32 i=0;i<m_nSocketsIn;i++)
 			m_arrSocketsIn[i].close();
-		//writng one byte to the queue...
-		UINT8 b;
+		//writng some bytes to the queue...
+		UINT8 b[MIXPACKET_SIZE+1];
 		#ifdef LOG_PACKET_TIMES
-			m_pQueueSendToMix->add(&b,1,upload_packet_timestamp);
+			m_bRunLog=false;
+			m_pQueueSendToMix->add(b,MIXPACKET_SIZE+1,upload_packet_timestamp);
 		#else
-			m_pQueueSendToMix->add(&b,1);
+			m_pQueueSendToMix->add(b,MIXPACKET_SIZE+1);
 		#endif
 //#if !defined(_DEBUG) && !defined(NO_LOOPACCEPTUSER)
 		CAMsg::printMsg(LOG_CRIT,"Wait for LoopAcceptUsers!\n");
@@ -496,6 +498,10 @@ SINT32 CAFirstMixA::loop()
 		m_pthreadSendToMix->join(); //will not join if queue is empty (and so wating)!!!
 		CAMsg::printMsg(LOG_CRIT,"Wait for LoopReadFromMix!\n");
 		m_pthreadReadFromMix->join();
+		#ifdef LOG_PACKET_TIMES
+			CAMsg::printMsg(LOG_CRIT,"Wait for LoopLog!\n");
+			m_pthreadLog->join();
+		#endif	
 		//waits until all login threads terminates....
 		// we have to be sure that the Accept thread was alread stoped!
 		m_pthreadsLogin->destroy(true);

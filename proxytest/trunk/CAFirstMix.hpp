@@ -69,6 +69,9 @@ class CAFirstMix:public CAMix
 					m_pthreadReadFromMix=NULL;
 					m_pthreadAcceptUsers=NULL;
 					m_pthreadsLogin=NULL;
+					#ifdef LOG_PACKET_TIMES
+						m_pthreadLog=NULL;
+					#endif	
 				}
 			virtual ~CAFirstMix(){}
 		protected:
@@ -145,6 +148,21 @@ class CAFirstMix:public CAMix
 			CAIPList* m_pIPList;
 #ifdef LOG_PACKET_TIMES
 			CATimedQueue* m_pQueueSendToMix;
+			CAMutex m_csTimeingStats;
+			SINT32 addToTimeingStats(UINT32 proccessingTime,bool bData,bool bUpstream);
+			SINT32 resetTimeingStats();
+			SINT32 logTimeingStats();
+			UINT32 m_timingMaxDataPacketUpstream,m_timingMaxDataPacketDownStream;
+			UINT32 m_timingMinDataPacketUpstream,m_timingMinDataPacketDownStream;
+			UINT32 m_timingCountDataPacketsUpstream,m_timingCountDataPacketsDownStream;
+			UINT64 m_timingSumDataPacketUpstream,m_timingSumDataPacketDownStream;
+			UINT32 m_timingMaxOpenPacketUpstream,m_timingMinOpenPacketUpstream;
+			UINT32 m_timingCountOpenPacketsUpstream;
+			UINT64 m_timingSumOpenPacketUpstream;
+			friend THREAD_RETURN	fm_loopLog(void*);
+			volatile bool					m_bRunLog;
+			CAThread*							m_pthreadLog;
+
 #else			
 			CAQueue* m_pQueueSendToMix;
 #endif			

@@ -71,7 +71,7 @@ SINT32 CALastMixA::loop()
 			UINT32 diff_time; 
 		#endif
 
-		for(;;)
+		while(!m_bRestart)
 			{
 				bAktiv=false;
 //Step 1a reading from previous Mix --> now in separate thread
@@ -409,6 +409,7 @@ ERR:
 		m_bRunLog=false;
 		CAMsg::printMsg(LOG_CRIT,"Wait for LoopReadFromMix!\n");
 		m_pthreadReadFromMix->join();
+		CAMsg::printMsg(LOG_CRIT,"done.\n");
 		pChannelListEntry=pChannelList->getFirstSocket();
 		while(pChannelListEntry!=NULL)
 			{
