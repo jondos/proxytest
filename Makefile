@@ -53,10 +53,10 @@ solaris-ultrasparc-gcc:
 	$(MAKE) 'CC=gcc -mcpu=ultrasparc' 'CPPFLAGS=-O3 -D_REENTRANT' 'LIBS=$(LIBS) -lstdc++' _all 
 
 irix-64-cc:
-	$(MAKE) 'CC=CC -mips4 -64' 'CPPFLAGS=-O3 -D_REENTRANT' 'LIBS=$(LIBS) -lstdc++' _all 
+	$(MAKE) 'CC=CC -r10000 -mips4 -64' 'CPPFLAGS=-fullwarn -Ofast=IP27 -D_REENTRANT' 'LIBS=$(LIBS)' _all 
 
 _all: $(OBJS) httptunnel.a popt.a xml.a
-	$(CC) -o proxytest $(OBJS) $(LIBDIR) $(LIBS) 
+	$(CC) -o proxytest $(DEBUG) $(CPPFLAGS) $(OBJS) $(LIBDIR) $(LIBS) 
 
 popt.a:
 	cd popt;$(MAKE) 'CC=$(CC)' 'DEBUG=$(DEBUG)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)'

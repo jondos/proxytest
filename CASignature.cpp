@@ -15,7 +15,7 @@ class BufferInputStream:public XML::InputStream
 				}
 		int read(XML_Char *buf, size_t bufLen)
 			{
-				unsigned int size=min(bufLen,len-pos);
+				unsigned int size=(unsigned int)min(bufLen,len-pos);
 				if(size==0)
 					return 0;
 				memcpy(buf,buffer+pos,size);
@@ -61,7 +61,7 @@ int CASignature::setSignKey(char* buff,int len,int type)
 static void sDSAKeyParamValueHandler(XML::Element &elem, void *userData)
 {
 	char buff[4096];
-	int len=elem.ReadData(buff,4096);
+	int len=(int)elem.ReadData(buff,4096);
 	
 	unsigned int decLen=4096;
 	char decBuff[4096];
@@ -194,7 +194,7 @@ int CASignature::signXML(char* in,unsigned int inlen,char* out,unsigned int *out
 		
 		// Signing the SignInfo block....
 		len=1024;//*outlen;
-		makeXMLCanonical(out,strlen(out),tmpBuff,&len);
+		makeXMLCanonical(out,(unsigned int)strlen(out),tmpBuff,&len);
 		unsigned int sigSize=255;
 		unsigned char sig[255];
 		unsigned char* c=sig;
@@ -253,7 +253,7 @@ int CASignature::signXML(char* in,unsigned int inlen,char* out,unsigned int *out
 
 int CASignature::getXMLSignatureSize()
 	{
-		return strlen(XMLSIG_TEMPLATE)+strlen(XMLSIGINFO_TEMPLATE)+/*size of DigestValue*/+20+/*sizeof SignatureValue*/+40;
+		return (int)strlen(XMLSIG_TEMPLATE)+strlen(XMLSIGINFO_TEMPLATE)+/*size of DigestValue*/+20+/*sizeof SignatureValue*/+40;
 	}
 
 typedef struct
@@ -294,7 +294,7 @@ static void smakeXMLCanonicalElementHandler(XML::Element &elem, void *userData)
 		if(pData->err!=0)
 			return;
 		char* name=(char*)elem.GetName();
-		int namelen=strlen(name);
+		int namelen=(int)strlen(name);
 		if(pData->outlen-pData->pos<2*namelen+5)
 			{
 				pData->err=-1;
@@ -311,12 +311,12 @@ static void smakeXMLCanonicalElementHandler(XML::Element &elem, void *userData)
 						char* attrname=(char*)attr.GetName();
 						char* attrvalue=(char*)attr.GetValue();
 						pData->out[pData->pos++]=' ';
-						int len=strlen(attrname);
+						int len=(int)strlen(attrname);
 						memcpy(pData->out+pData->pos,attrname,len);
 						pData->pos+=len;
 						pData->out[pData->pos++]='=';
 						pData->out[pData->pos++]='\"';
-						len=strlen(attrvalue);
+						len=(int)strlen(attrvalue);
 						memcpy(pData->out+pData->pos,attrvalue,len);
 						pData->pos+=len;
 						pData->out[pData->pos++]='\"';
