@@ -620,8 +620,8 @@ SINT32 CAFirstMix::loop()
 																}
 															else
 																{
-																	pMuxSocket->setKeyAES(rsaBuff+9,16);
-																	pMuxSocket->setCrypted(true);
+																	pMuxSocket->setKey(rsaBuff+9,16);
+																	pMuxSocket->setCrypt(true);
 																}
 															goto NEXT_USER_CONNECTION;
 														}
