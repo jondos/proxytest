@@ -58,7 +58,7 @@ SINT32 CAFirstMixB::loop()
 		threadSendToMix.setMainLoop(fm_loopSendToMix);
 		threadSendToMix.start(this);
 
-		for(;;)	                                                          // the main mix loop as long as there are things that are not handled by threads. 
+		while(!m_bRestart)	                                                          // the main mix loop as long as there are things that are not handled by threads. 
 			{
 				bAktiv=false;
 //LOOP_START:
