@@ -45,7 +45,7 @@ class CASocketAddr
 			virtual SINT32 getSize() const =0;
 
 			/** Casts to a SOCKADDR struct **/
-			virtual	const ::LPSOCKADDR LPSOCKADDR() const =0;
+			virtual	const SOCKADDR* LPSOCKADDR() const =0;
 			//	virtual operator LPSOCKADDR()=0;
 
 	};

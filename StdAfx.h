@@ -200,7 +200,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
   #include <memory.h>
   #include <sys/resource.h>
 	#include <ctype.h>
-  typedef struct sockaddr* LPSOCKADDR;
+    typedef struct sockaddr SOCKADDR;	
+  typedef SOCKADDR* LPSOCKADDR;
   #define SOCKET int
   typedef struct hostent HOSTENT;
 	#define ioctlsocket(a,b,c) ioctl(a,b,c)
