@@ -84,7 +84,7 @@ SINT32 CALastMixA::loop()
 						for(UINT32 k=0;k<channels&&m_pQueueReadFromMix->getSize()>=MIXPACKET_SIZE;k++)
 							{
 								ret=MIXPACKET_SIZE;
-								ret=m_pQueueReadFromMix->get((UINT8*)pMixPacket,&ret);
+								ret=m_pQueueReadFromMix->get((UINT8*)pMixPacket,(UINT32*)&ret);
 								// one packet received
 								m_logUploadedPackets++;
 								pChannelListEntry=pChannelList->get(pMixPacket->channel);

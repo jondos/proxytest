@@ -32,10 +32,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 struct _t_queue
 	{
-		volatile UINT8* pBuff;
-		volatile struct _t_queue* next;
-		volatile UINT32 size;
-		volatile UINT32 index;
+		UINT8* pBuff;
+		struct _t_queue* next;
+		UINT32 size;
+		UINT32 index;
 	};
 
 typedef struct _t_queue QUEUE;
@@ -94,11 +94,11 @@ class CAQueue
 			static SINT32 test();
 		
 		private:
-			volatile QUEUE* m_Queue; 
-			volatile QUEUE* m_lastElem;
-			volatile UINT32 m_nQueueSize;
+			QUEUE* m_Queue; 
+			QUEUE* m_lastElem;
+			UINT32 m_nQueueSize;
 			UINT32 m_nExpectedElementSize;
-			volatile QUEUE* m_pHeap;
+			QUEUE* m_pHeap;
 			CAMutex* m_pcsQueue;
 			CAConditionVariable* m_pconvarSize;
 
