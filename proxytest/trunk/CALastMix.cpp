@@ -313,6 +313,7 @@ SINT32 CALastMix::loop()
 		
 		oSocketGroup.add(muxIn);
 		oSocketGroupMuxIn.add(muxIn);
+		muxIn.setCrypt(true);
 		for(;;)
 			{
 LOOP_START:
