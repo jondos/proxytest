@@ -31,15 +31,16 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketGroup.hpp"
 #include "CAMsg.hpp"
 #include "CACmdLnOptions.hpp"
+#include "CASocketAddrINet.hpp"
 
 extern CACmdLnOptions options;
 
 SINT32 CALocalProxy::init()
 	{
-		CASocketAddr socketAddrIn("127.0.0.1",options.getServerPort());
+		CASocketAddrINet socketAddrIn("127.0.0.1",options.getServerPort());
 		socketIn.create();
 		socketIn.setReuseAddr(true);
-		if(socketIn.listen(&socketAddrIn)==SOCKET_ERROR)
+		if(socketIn.listen(socketAddrIn)==SOCKET_ERROR)
 		    {
 					CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
 					return E_UNKNOWN;
@@ -49,13 +50,13 @@ SINT32 CALocalProxy::init()
 				socketAddrIn.setAddr("127.0.0.1",options.getSOCKSServerPort());
 				socketSOCKSIn.create();
 				socketSOCKSIn.setReuseAddr(true);
-				if(socketSOCKSIn.listen(&socketAddrIn)==SOCKET_ERROR)
+				if(socketSOCKSIn.listen(socketAddrIn)==SOCKET_ERROR)
 						{
 							CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
 							return E_UNKNOWN;
 						}
 			}
-		CASocketAddr addrNext;
+		CASocketAddrINet addrNext;
 		UINT8 strTarget[255];
 		options.getTargetHost(strTarget,255);
 		addrNext.setAddr((char*)strTarget,options.getTargetPort());
@@ -64,7 +65,7 @@ SINT32 CALocalProxy::init()
 		((CASocket*)muxOut)->create();
 		((CASocket*)muxOut)->setSendBuff(sizeof(MUXPACKET)*50);
 		((CASocket*)muxOut)->setRecvBuff(sizeof(MUXPACKET)*50);
-		if(muxOut.connect(&addrNext)==E_SUCCESS)
+		if(muxOut.connect(addrNext)==E_SUCCESS)
 			{
 				
 				CAMsg::printMsg(LOG_INFO," connected!\n");

@@ -87,7 +87,7 @@ int CAMuxSocket::accept(UINT16 port)
 */		return 0;
 	}
 #else
-int CAMuxSocket::accept(UINT16 port)
+SINT32 CAMuxSocket::accept(UINT16 port)
 	{
 		CASocket oSocket;
 		oSocket.create();
@@ -104,9 +104,9 @@ int CAMuxSocket::accept(UINT16 port)
 SINT32 CAMuxSocket::accept(CASocketAddr& oAddr)
 	{
 		CASocket oSocket;
-		oSocket.create(oAddr.getType());
+		oSocket.create(oAddr.m_Type);
 		oSocket.setReuseAddr(true);
-		if(oSocket.listen(&oAddr)==SOCKET_ERROR)
+		if(oSocket.listen(oAddr)==SOCKET_ERROR)
 			return SOCKET_ERROR;
 		if(oSocket.accept(m_Socket)==SOCKET_ERROR)
 			return SOCKET_ERROR;
@@ -117,12 +117,12 @@ SINT32 CAMuxSocket::accept(CASocketAddr& oAddr)
 
 #endif
 
-SINT32 CAMuxSocket::connect(LPCASOCKETADDR psa)
+SINT32 CAMuxSocket::connect(CASocketAddr & psa)
 	{
 		return connect(psa,1,0);
 	}
 
-SINT32 CAMuxSocket::connect(LPCASOCKETADDR psa,UINT retry,UINT32 time)
+SINT32 CAMuxSocket::connect(CASocketAddr & psa,UINT retry,UINT32 time)
 	{
 //		if(!bIsTunneld)
 //			{

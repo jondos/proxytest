@@ -393,6 +393,14 @@ SOURCE=.\CASocketAddr.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CASocketAddrINet.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CASocketAddrUnix.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\CASocketASyncSend.cpp
 # End Source File
 # Begin Source File
@@ -517,6 +525,14 @@ SOURCE=.\CASocket.hpp
 # Begin Source File
 
 SOURCE=.\CASocketAddr.hpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CASocketAddrINet.hpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CASocketAddrUnix.hpp
 # End Source File
 # Begin Source File
 

@@ -27,7 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #include "StdAfx.h"
 #include "CADatagramSocket.hpp"
-
+#include "CASocketAddrINet.hpp"
 
 
 #ifdef _DEBUG
@@ -44,15 +44,20 @@ CADatagramSocket::CADatagramSocket()
 
 SINT32 CADatagramSocket::create()
 	{
-		if(m_Socket==0)
-			m_Socket=::socket(AF_INET,SOCK_DGRAM,0);
-		if(m_Socket==INVALID_SOCKET)
-			return SOCKET_ERROR;
-//		localPort=-1;
-		return 0;
+		return create(AF_INET);
 	}
 
 			
+SINT32 CADatagramSocket::create(int type)
+	{
+		if(m_Socket==0)
+			m_Socket=::socket(type,SOCK_DGRAM,0);
+		if(m_Socket==INVALID_SOCKET)
+			return SOCKET_ERROR;
+//		localPort=-1;
+		return E_SUCCESS;
+	}
+
 SINT32 CADatagramSocket::close()
 	{
 //		EnterCriticalSection(&csClose);
@@ -79,33 +84,32 @@ SINT32 CADatagramSocket::close()
 	}
 
 			
-SINT32 CADatagramSocket::bind(LPCASOCKETADDR from)
+SINT32 CADatagramSocket::bind(CASocketAddr & from)
 	{
 //		localPort=-1;
-		if(m_Socket==0&&create()==SOCKET_ERROR)
+		if(m_Socket==0&&create(from.m_Type)==SOCKET_ERROR)
 			return SOCKET_ERROR;
 		
-		LPSOCKADDR fr=(LPSOCKADDR)(*from);
-		if(::bind(m_Socket,fr,from->getSize())==SOCKET_ERROR)
+		if(::bind(m_Socket,(LPSOCKADDR)from,from.getSize())==SOCKET_ERROR)
 		    return SOCKET_ERROR;
 		return E_SUCCESS;
 	}
 
 SINT32 CADatagramSocket::bind(UINT16 port)
 	{
-		CASocketAddr oSocketAddr(port);
-		return bind(&oSocketAddr);
+		CASocketAddrINet oSocketAddr(port);
+		return bind(oSocketAddr);
 	}
 
-SINT32 CADatagramSocket::send(UINT8* buff,UINT32 len,LPCASOCKETADDR to)
+SINT32 CADatagramSocket::send(UINT8* buff,UINT32 len,CASocketAddr & to)
 	{
-    		if(::sendto(m_Socket,(char*)buff,len,MSG_NOSIGNAL,(LPSOCKADDR)to,to->getSize())==SOCKET_ERROR)
+    		if(::sendto(m_Socket,(char*)buff,len,MSG_NOSIGNAL,(LPSOCKADDR)to,to.getSize())==SOCKET_ERROR)
 			return E_UNKNOWN;
 		return E_SUCCESS;	    	    
 	}
 
 
-SINT32 CADatagramSocket::receive(UINT8* buff,UINT32 len,LPCASOCKETADDR from)
+SINT32 CADatagramSocket::receive(UINT8* buff,UINT32 len,CASocketAddr* from)
 	{
 		int ret;	
 		if(from!=NULL)

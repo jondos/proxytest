@@ -70,7 +70,6 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 	int iDaemon=0;
   int bHttps=0;
   char* target=NULL;
-	int port=-1;
 	int serverrttport=-1;
 	int mix=-1;
 	int SOCKSport=-1;

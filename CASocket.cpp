@@ -28,6 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "StdAfx.h"
 #include "CASocket.hpp"
 #include "CASocketASyncSend.hpp"
+#include "CASocketAddrINet.hpp"
 #ifdef _DEBUG
 	extern int sockets;
 #endif
@@ -70,21 +71,21 @@ SINT32 CASocket::create(int type)
 		return E_SUCCESS;
 	}
 
-SINT32 CASocket::listen(LPCASOCKETADDR psa)
+SINT32 CASocket::listen(CASocketAddr & psa)
 	{
 		localPort=-1;
-		int type=psa->getType();
+		int type=psa.m_Type;
 		if(m_Socket==0&&create(type)==SOCKET_ERROR)
 			return SOCKET_ERROR;
-		if(::bind(m_Socket,(LPSOCKADDR)(*psa),psa->getSize())==SOCKET_ERROR)
+		if(::bind(m_Socket,(LPSOCKADDR)psa,psa.getSize())==SOCKET_ERROR)
 		    return SOCKET_ERROR;
 		return ::listen(m_Socket,SOMAXCONN);
 	}
 			
 SINT32 CASocket::listen(UINT16 port)
 	{
-		CASocketAddr oSocketAddr(port);
-		return listen(&oSocketAddr);
+		CASocketAddrINet oSocketAddrINet(port);
+		return listen(oSocketAddrINet);
 	}
 
 SINT32 CASocket::accept(CASocket &s)
@@ -107,12 +108,12 @@ SINT32 CASocket::accept(CASocket &s)
 	}
 
 			
-SINT32 CASocket::connect(LPCASOCKETADDR psa)
+SINT32 CASocket::connect(CASocketAddr & psa)
 	{
 		return connect(psa,1,0);
 	}
 
-SINT32 CASocket::connect(LPCASOCKETADDR psa,UINT retry,UINT32 time)
+SINT32 CASocket::connect(CASocketAddr & psa,UINT retry,UINT32 time)
 	{
 //		CAMsg::printMsg(LOG_DEBUG,"Socket:connect\n");
 		localPort=-1;
@@ -124,8 +125,8 @@ SINT32 CASocket::connect(LPCASOCKETADDR psa,UINT retry,UINT32 time)
 		sockets++;
 #endif
 		int err=0;
-		LPSOCKADDR addr=(LPSOCKADDR)(*psa);
-		int addr_len=psa->getSize();
+		LPSOCKADDR addr=(LPSOCKADDR)psa;
+		int addr_len=psa.getSize();
 		for(UINT i=0;i<retry;i++)
 			{
 //				CAMsg::printMsg(LOG_DEBUG,"Socket:connect-connect\n");
@@ -151,7 +152,7 @@ SINT32 CASocket::connect(LPCASOCKETADDR psa,UINT retry,UINT32 time)
 	}
 			
 
-SINT32 CASocket::connect(LPCASOCKETADDR psa,UINT msTimeOut)
+SINT32 CASocket::connect(CASocketAddr & psa,UINT msTimeOut)
 	{
 		localPort=-1;
 		if(m_Socket==0&&create()==SOCKET_ERROR)
@@ -165,8 +166,8 @@ SINT32 CASocket::connect(LPCASOCKETADDR psa,UINT msTimeOut)
 		getNonBlocking(&bWasNonBlocking);
 		setNonBlocking(true);
 		int err=0;
-		LPSOCKADDR addr=(LPSOCKADDR)(*psa);
-		int addr_len=psa->getSize();
+		LPSOCKADDR addr=(LPSOCKADDR)psa;
+		int addr_len=psa.getSize();
 		
 		err=::connect(m_Socket,addr,addr_len);
 		if(err==0)
@@ -348,7 +349,7 @@ SINT32 CASocket::available()
 int CASocket::receive(UINT8* buff,UINT32 len)
 	{
 		int ret;	
-	  int ef;
+	  int ef=0;
 	  do
 			{
 				ret=::recv(m_Socket,(char*)buff,len,MSG_NOSIGNAL);

@@ -31,6 +31,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketGroup.hpp"
 #include "CAMsg.hpp"
 #include "CACmdLnOptions.hpp"
+#include "CASocketAddrUnix.hpp"
+#include "CASocketAddrINet.hpp"
+
+
 extern CACmdLnOptions options;
 
 
@@ -258,17 +262,30 @@ SINT32 CALastMix::init()
 				return E_UNKNOWN;
 			}
 		CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...\n");
-		CASocketAddr oAddrListen;
+		CASocketAddr* pAddrListen;
 		UINT8 path[255];
 		if(options.getServerPath(path,255)==E_SUCCESS) //unix domain
-			oAddrListen.setPath((char*)path);
+			{
+#ifdef HAVE_UNIX_DOMAIN_PROTOCOL
+				pAddrListen=new CAsocketAddrUnix();
+				((CASocketAddrUnix*)pAddrListen)->setPath((char*)path);
+#else
+				CAMsg::printMsg(LOG_CRIT,"I do not understand the Unix Domain Protocol!\n");
+				return E_UNKNOWN;
+#endif
+			}
 		else
-			oAddrListen.setPort(options.getServerPort());
-		if(muxIn.accept(oAddrListen)==SOCKET_ERROR)
+			{
+				pAddrListen=new CASocketAddrINet();
+				((CASocketAddrINet*)pAddrListen)->setPort(options.getServerPort());
+			}
+		if(muxIn.accept(*pAddrListen)==SOCKET_ERROR)
 		    {
+					delete pAddrListen;
 					CAMsg::printMsg(LOG_CRIT," failed!\n");
 					return E_UNKNOWN;
 		    }
+		delete pAddrListen;
 		((CASocket*)muxIn)->setRecvBuff(500*MUXPACKET_SIZE);
 		((CASocket*)muxIn)->setSendBuff(500*MUXPACKET_SIZE);
 		if(((CASocket*)muxIn)->setSendLowWat(MUXPACKET_SIZE)!=E_SUCCESS)
@@ -360,13 +377,13 @@ LOOP_START:
 										CASocket* tmpSocket=new CASocket;										
 										int ret;
 										if(oMuxPacket.payload.type==MUX_SOCKS)
-											ret=tmpSocket->connect(&maddrSocks,_CONNECT_TIMEOUT); 
+											ret=tmpSocket->connect(maddrSocks,_CONNECT_TIMEOUT); 
 										else
 											{
 												tmpSocket->create();
 												tmpSocket->setRecvBuff(50000);
 												tmpSocket->setSendBuff(5000);
-												ret=tmpSocket->connect(&maddrSquid,_CONNECT_TIMEOUT);
+												ret=tmpSocket->connect(maddrSquid,_CONNECT_TIMEOUT);
 											}	
 										if(ret!=E_SUCCESS)
 										    {

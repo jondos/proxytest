@@ -33,6 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAASymCipher.hpp"
 #include "CASocketASyncSend.hpp"
 #include "CASocketList.hpp"
+#include "CASocketAddrINet.hpp"
 
 class CALastMix:public CAMix,CASocketASyncSendResume
 
@@ -54,8 +55,8 @@ class CALastMix:public CAMix,CASocketASyncSendResume
 			CASocketAddr	addrSocks;
 			CAASymCipher* pRSA;
 #else
-			CASocketAddr	maddrSquid;
-			CASocketAddr	maddrSocks;
+			CASocketAddrINet	maddrSquid;
+			CASocketAddrINet	maddrSocks;
 			CAASymCipher mRSA;
 #endif
 		public:
