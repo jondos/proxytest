@@ -59,6 +59,12 @@
 			#define InitializeCriticalSection(p) pthread_mutex_init(p,NULL)
 			#define EnterCriticalSection(p) pthread_mutex_lock(p)
 			#define LeaveCriticalSection(p) pthread_mutex_unlock(p)
+		#else
+			#define CRITICAL_SECTION 
+			#define DeleteCriticalSection(p) 
+			#define InitializeCriticalSection(p) 
+			#define EnterCriticalSection(p) 
+			#define LeaveCriticalSection(p) 
 		#endif
 		#define THREAD_RETURN void*
     #define THREAD_RETURN_ERROR return(NULL)
