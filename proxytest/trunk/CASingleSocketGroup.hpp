@@ -27,6 +27,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CASINGLESOCKETGROUP__
 #define __CASINGLESOCKETGROUP__
+#ifdef _DEBUG
+	#include "CAMsg.hpp"
+#endif
 /** Not thread safe!*/
 #if !defined(HAVE_POLL)&&!defined(HAVE_EPOLL)
 	#include "CASocketGroup.hpp"

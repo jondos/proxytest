@@ -73,7 +73,7 @@ class CASocketGroupEpoll
 					m_csFD_SET.lock();
 					if(epoll_ctl(m_hEPFD,EPOLL_CTL_DEL,(SOCKET)s,m_pEpollEvent)!=0)
 						ret=E_UNKNOWN;
-					ASSERT(ret==E_SUCCESS),"Error in Epoll socket group remove")
+					ASSERT(ret==E_SUCCESS,"Error in Epoll socket group remove")
 					m_csFD_SET.unlock();
 					return ret;
 				}
@@ -84,7 +84,7 @@ class CASocketGroupEpoll
 					m_csFD_SET.lock();
 					if(epoll_ctl(m_hEPFD,EPOLL_CTL_DEL,s.getSocket(),m_pEpollEvent)!=0)
 						ret=E_UNKNOWN;
-					ASSERT(ret==E_SUCCESS),"Error in Epoll socket group remove")
+					ASSERT(ret==E_SUCCESS,"Error in Epoll socket group remove")
 					m_csFD_SET.unlock();
 					return ret;
 				}
