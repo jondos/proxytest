@@ -814,7 +814,9 @@ ERR:
 		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
 		m_bRestart=true;
 		CAMsg::printMsg(LOG_CRIT,"Stopping InfoService....\n");
+		CAMsg::printMsg	(LOG_CRIT,"Memeory usage before: %u\n",getMemoryUsage());	
 		m_pInfoService->stop();
+		CAMsg::printMsg	(LOG_CRIT,"Memeory usage after: %u\n",getMemoryUsage());	
 		CAMsg::printMsg(LOG_CRIT,"Stopped InfoService!\n");
 		m_pMuxOut->close();
 		for(UINT32  i=0;i<m_nSocketsIn;i++)
@@ -827,6 +829,8 @@ ERR:
 		CAMsg::printMsg(LOG_CRIT,"Wait for LoopSendToMix!\n");
 		threadSendToMix.join(); //will not join if queue is empty (and so wating)!!!
 //		threadReadFromUsers.join(); 
+		CAMsg::printMsg(LOG_CRIT,"Before deleting CAFirstMixChannelList()!\n");
+		CAMsg::printMsg	(LOG_CRIT,"Memeory usage before: %u\n",getMemoryUsage());	
 		fmHashTableEntry* pHashEntry=m_pChannelList->getFirst();
 		while(pHashEntry!=NULL)
 			{
@@ -845,6 +849,7 @@ ERR:
 				delete pMuxSocket;
 				pHashEntry=m_pChannelList->getNext();
 			}
+		CAMsg::printMsg	(LOG_CRIT,"Memeory usage after: %u\n",getMemoryUsage());	
 		delete pMixPacket;
 		delete tmpBuff;
 		CAMsg::printMsg(LOG_CRIT,"Main Loop exited!!\n");

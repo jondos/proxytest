@@ -180,3 +180,14 @@ SINT32 sSleep(UINT16 sec)
 		#endif
 		return E_SUCCESS;
 	}
+
+UINT32 getMemoryUsage()
+	{
+#ifndef _WIN32
+		struct rusage usage;
+		getrusage(RUSAGE_BOTH,&usage);
+		return usage.ru_idrss;
+#else
+	return 0;
+#endif
+	}

@@ -226,7 +226,6 @@ CAInfoService::CAInfoService(CAFirstMix* pFirstMix,UINT32 numberOfMixes)
 CAInfoService::~CAInfoService()
 	{
 		stop();
-		m_threadRunLoop.join();
 	}
 /*
 SINT32 CAInfoService::setLevel(SINT32 user,SINT32 risk,SINT32 traffic)
@@ -289,7 +288,11 @@ SINT32 CAInfoService::start()
 
 SINT32 CAInfoService::stop()
 	{
-		m_bRun=false;
+		if(m_bRun)
+			{
+				m_bRun=false;
+				m_threadRunLoop.join();
+			}
 		return E_SUCCESS;
 	}
 
