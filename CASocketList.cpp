@@ -304,7 +304,7 @@ CASocket* CASocketList::remove(HCHANNEL id)
 *	@return the first entry of the channel list (this is not a copy!!)
 *
 */	 
-CONNECTION* CASocketList::getFirst()
+CONNECTION*  CASocketList::getFirst()
 	{
 		m_AktEnumPos=m_Connections;
 		return m_AktEnumPos;
@@ -314,7 +314,7 @@ CONNECTION* CASocketList::getFirst()
 *	@return the next entry of the channel list (this is not a copy!!)
 *
 */	 
-CONNECTION* CASocketList::getNext()
+inline CONNECTION* CASocketList::getNext()
 	{
 		if(m_AktEnumPos!=NULL)
 			m_AktEnumPos=m_AktEnumPos->next;
