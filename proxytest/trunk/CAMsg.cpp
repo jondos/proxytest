@@ -74,8 +74,11 @@ SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 		SINT32 ret=E_SUCCESS;
 
 		//Date is: yyyy/mm/dd-hh:mm:ss   -- the size is: 19 
+		printf("h1\n");
 		time_t currtime=time(NULL);
+		printf("h2\n");
 		strftime(oMsg.m_strMsgBuff+1,255,"%Y/%m/%d-%H:%M:%S",localtime(&currtime));
+		printf("h3\n");
 		switch(type)
 			{
 				case LOG_DEBUG:
