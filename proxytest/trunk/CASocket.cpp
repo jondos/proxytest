@@ -640,7 +640,7 @@ SINT32 CASocket::getNonBlocking(bool* b)
 		#endif
 		return E_SUCCESS;
 	}
-
+/*
 SINT32 CASocket::setASyncSend(bool b,SINT32 estimatedSendSize,UINT32 lowwater,UINT32 SendQueueSoftLimit,CASocketASyncSendResume* pResume)
 	{
 		if(b)
@@ -662,3 +662,4 @@ SINT32 CASocket::setASyncSend(bool b,SINT32 estimatedSendSize,UINT32 lowwater,UI
 
 		return E_SUCCESS;
 	}
+*/

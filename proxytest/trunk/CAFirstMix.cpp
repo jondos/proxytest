@@ -676,12 +676,7 @@ SINT32 CAFirstMix::loop()
 										nUser--;
 										oInfoService.setLevel(nUser,-1,-1);
 									}
-								else if(ret==E_AGAIN)
-									{
-										tmpMuxListEntry=oMuxChannelList.getNext();
-										continue;
-									}
-								else
+								else if(ret==MIXPACKET_SIZE)
 									{
 										if(oMixPacket.flags==CHANNEL_CLOSE)
 											{
@@ -854,6 +849,7 @@ SINT32 CAFirstMix::loop()
 								//todo error handling
 
 							}
+						tmpMuxListEntry=oMuxChannelList.getNext();
 					}
 			}
 ERR:

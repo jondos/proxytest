@@ -74,7 +74,7 @@ class CASocket
 			SINT32 setKeepAlive(UINT32 sec);
 			SINT32 setNonBlocking(bool b);
 			SINT32 getNonBlocking(bool* b);
-			SINT32 setASyncSend(bool b,SINT32 size,UINT32 lowwater,UINT32 SendQueueSoftLimit,CASocketASyncSendResume* pResume);
+			//SINT32 setASyncSend(bool b,SINT32 size,UINT32 lowwater,UINT32 SendQueueSoftLimit,CASocketASyncSendResume* pResume);
 		private:
 			UINT8 m_ipPeer[4];
 			SOCKET m_Socket;
