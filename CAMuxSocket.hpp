@@ -30,7 +30,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define __CAMUXSOCKET__
 #include "CASocket.hpp"
 #include "CASymCipher.hpp"
-//#include "httptunnel/tunnel.h"
 
 typedef UINT32 HCHANNEL;
 #define MUX_HTTP  0 
@@ -102,8 +101,12 @@ class CAMuxSocket
 	{
 		public:
 			CAMuxSocket();
-			~CAMuxSocket(){delete m_Buff;}
-//			int useTunnel(char* proxyhost,UINT16 proxyport);
+			~CAMuxSocket()
+				{
+					delete m_Buff;
+					DeleteCriticalSection(&csSend);
+					DeleteCriticalSection(&csReceive);
+				}
 			int accept(UINT16 port);
 			SINT32 connect(LPCASOCKETADDR psa);
 			SINT32 connect(LPCASOCKETADDR psa,UINT retry,UINT32 time);
@@ -113,10 +116,7 @@ class CAMuxSocket
 			SINT32 receive(MUXPACKET *pPacket,UINT32 timeout);
 			int close(HCHANNEL channel_id);
 			operator CASocket*(){return &m_Socket;}
-			operator SOCKET(){//if(!bIsTunneld)
-														return (SOCKET)m_Socket;
-												//else
-													//return tunnel_pollin_fd(m_pTunnel);
+			operator SOCKET(){return (SOCKET)m_Socket;
 													}
 			SINT32 setCrypt(bool b);
 		private:
@@ -126,9 +126,7 @@ class CAMuxSocket
 				CASymCipher ocipherIn;
 				CASymCipher ocipherOut;
 				bool bIsCrypted;
-	//		bool bIsTunneld;
-	//		Tunnel* m_pTunnel;
-	//		char *m_szTunnelHost;
-	//		UINT16 m_uTunnelPort;
+				CRITICAL_SECTION csSend;
+				CRITICAL_SECTION csReceive;
 	};
 #endif

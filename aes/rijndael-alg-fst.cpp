@@ -91,10 +91,10 @@ void MixColumn(word8 a[4][4], word8 BC) {
 		
 	for(j = 0; j < BC; j++)
 		for(i = 0; i < 4; i++)
-			b[j][i] = mul(2,a[j][i])
+			b[j][i] = (word8)(mul(2,a[j][i])
 				^ mul(3,a[j][(i + 1) % 4])
 				^ a[j][(i + 2) % 4]
-				^ a[j][(i + 3) % 4];
+				^ a[j][(i + 3) % 4]);
 	for(i = 0; i < 4; i++)
 		for(j = 0; j < BC; j++)
 			a[j][i] = b[j][i];
