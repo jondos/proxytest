@@ -71,6 +71,8 @@ SINT32 CALastMix::initOnce()
 				CAMsg::printMsg(LOG_CRIT,"No ListenerInterfaces specified!\n");
 				return E_UNKNOWN;
 			}
+    if(options.getCascadeXML() != NULL)
+    	initMixCascadeInfo(options.getCascadeXML());
 		return E_SUCCESS;
 	}
 
@@ -83,15 +85,6 @@ SINT32 CALastMix::init()
 				return E_UNKNOWN;
 			}
 		
-		if(m_pSignature!=NULL&&options.isInfoServiceEnabled())
-			{
-				m_pInfoService=new CAInfoService();
-				CACertificate* tmp=options.getOwnCertificate();
-				m_pInfoService->setSignature(m_pSignature,tmp);
-				delete tmp;
-				m_pInfoService->start();
-			}
-
 		CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...\n");
 		CAListenerInterface*  pListener=NULL;
 		pListener=options.getListenerInterface(1);
@@ -120,6 +113,20 @@ SINT32 CALastMix::init()
 			}
 		
 		CAMsg::printMsg(LOG_INFO,"connected!\n");
+    
+    
+//     if(m_pSignature!=NULL&&options.isInfoServiceEnabled())
+//     {
+//         if(m_pInfoService == NULL)
+//         {
+//             m_pInfoService=new CAInfoService();
+//             CACertificate* tmp=options.getOwnCertificate();
+//             m_pInfoService->setSignature(m_pSignature,tmp);
+//             delete tmp;
+//         }
+//         m_pInfoService->start();
+//     }
+
 #ifdef LOG_CRIME
 		m_nCrimeRegExp=0;
 		m_pCrimeRegExps=options.getCrimeRegExps(&m_nCrimeRegExp);
@@ -167,6 +174,9 @@ SINT32 CALastMix::processKeyExchange()
 		DOM_Document doc=DOM_Document::createDocument();
 		DOM_Element elemMixes=doc.createElement("Mixes");
 		setDOMElementAttribute(elemMixes,"count",1);
+    UINT8 cName[128];
+    options.getCascadeName(cName,128);
+    setDOMElementAttribute(elemMixes,"cascadeName",cName);
 		doc.appendChild(elemMixes);
 		DOM_Element elemMix=doc.createElement("Mix");
 		UINT8 idBuff[50];
@@ -536,12 +546,13 @@ SINT32 CALastMix::setTargets()
 	}			
 
 SINT32 CALastMix::clean()
+{
+/*    if(m_pInfoService!=NULL)
 	{
-		if(m_pInfoService!=NULL)
-			{
+    	m_pInfoService->stop();
 				delete m_pInfoService;
-			}
 		m_pInfoService=NULL;
+    }*/
 		if(m_pMuxIn!=NULL)
 			{
 				m_pMuxIn->close();
@@ -566,3 +577,10 @@ SINT32 CALastMix::clean()
 		return E_SUCCESS;
 	}
 
+SINT32 CALastMix::initMixCascadeInfo(DOM_Element& mixes)
+{
+    SINT32 r = CAMix::initMixCascadeInfo(mixes);
+    DOM_Element cascade = m_docMixCascadeInfo.getDocumentElement();
+    setDOMElementAttribute(cascade,"create",(UINT8*)"true");
+    return r;
+}

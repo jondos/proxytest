@@ -446,7 +446,11 @@ Debug(dc::malloc.on());
 		
 		exit(0);*/		
 		//end temp
-		options.parse(argc,argv);
+		if(options.parse(argc,argv) != E_SUCCESS)
+		{
+			CAMsg::printMsg(LOG_CRIT,"Error: Cannot parse configuration file!\n");
+			goto EXIT;
+		}
 
 		if(!(options.isFirstMix()||options.isMiddleMix()||options.isLastMix()||options.isLocalProxy()))
 			{

@@ -178,13 +178,30 @@ class CACmdLnOptions
 					return NULL;
 				}
 
+			DOM_Element& getCascadeXML()
+			{
+					return m_oCascadeXML;
+			}
+
 			SINT32 getCascadeName(UINT8* name,UINT32 len);
+    
+			// added by ronin <ronin2@web.de>
+			SINT32 setCascadeName(char* name)
+			{
+    		if(m_strCascadeName!=NULL)
+					delete m_strCascadeName;
+				m_strCascadeName = new char[strlen(name)+1];
+				strcpy(m_strCascadeName,name);
+				return E_SUCCESS;
+			}
+    
 			SINT32 getLogDir(UINT8* name,UINT32 len);
 			SINT32 getEncryptedLogDir(UINT8* name,UINT32 len);
 			bool getCompressLogs()
 				{
 					return m_bCompressedLogs;
 				}
+			
 			SINT32 getUser(UINT8* user,UINT32 len);
 
 			/** Get the XML describing the Mix. this is not a string!*/
@@ -224,6 +241,12 @@ class CACmdLnOptions
 			SINT32 getDatabasePassword(UINT8 * pass, UINT32 len);
 #endif	
 
+    // added by ronin <ronin2@web.de>
+    // needed for autoconfiguration
+			SINT32 setNextMix(DOM_Document&);
+			SINT32 setPrevMix(DOM_Document&);
+			bool acceptReconfiguration() { return m_bAcceptReconfiguration; }
+
 			friend THREAD_RETURN threadReConfigure(void *param);
 		private:
 			UINT8*	m_strConfigFile; //the filename of the config file
@@ -247,6 +270,8 @@ class CACmdLnOptions
 			char*		m_strUser;
 			SINT32	m_nrOfOpenFiles; //How many open files (sockets) should we use
 			DOM_Document m_docMixInfo;
+			DOM_Document m_docMixXml;
+    
 			//char*		m_strMixXml;
 			char*		m_strMixID;
 
@@ -262,6 +287,11 @@ class CACmdLnOptions
 			CACertificate*	m_pPrevMixCertificate;
 			CACertificate*	m_pNextMixCertificate;
 			CACertificate*	m_pLogEncryptionCertificate;
+
+    // added by ronin <ronin2@web.de>
+    DOM_Element m_oCascadeXML;
+    bool m_bAcceptReconfiguration;
+
 #ifdef LOG_CRIME
 			regex_t* m_arCrimeRegExps;
 			UINT32 m_nCrimeRegExps;
@@ -283,6 +313,7 @@ class CACmdLnOptions
 		private:
 			SINT32 setNewValues(CACmdLnOptions& newOptions);
 			SINT32 readXmlConfiguration(DOM_Document& docConfig,const UINT8* const configFileName);
+			SINT32 readXmlConfiguration(DOM_Document& docConfig,const UINT8* const buf, UINT32 len);
 			SINT32 processXmlConfiguration(DOM_Document& docConfig);
 			SINT32 clearTargetInterfaces();
 			SINT32 clearListenerInterfaces();

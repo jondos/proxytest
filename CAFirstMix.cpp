@@ -86,7 +86,7 @@ SINT32 CAFirstMix::init()
 				pListener=options.getListenerInterface(i);
 				if(pListener==NULL)
 					{
-						CAMsg::printMsg(LOG_CRIT,"Cannot listen (1)\n");
+            CAMsg::printMsg(LOG_CRIT,"Error: Listener interface invalid.\n");
 						return E_UNKNOWN;
 					}
 				if(pListener->isVirtual())
@@ -114,7 +114,7 @@ SINT32 CAFirstMix::init()
 #endif
 				if(ret!=E_SUCCESS)
 					{
-						CAMsg::printMsg(LOG_CRIT,"Cannot listen (2)\n");
+            CAMsg::printMsg(LOG_CRIT,"Socket error while listening on interface %d: %s\n",i,strerror(errno));
 						return E_UNKNOWN;
 					}
 				aktSocket++;
@@ -169,6 +169,16 @@ SINT32 CAFirstMix::init()
 					CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
 			}
 
+
+    if(processKeyExchange()!=E_SUCCESS)
+    {
+        CAMsg::printMsg(LOG_CRIT,"Error in establishing secure communication with next Mix!\n");
+        return E_UNKNOWN;
+    }
+
+
+    // moved to processKeyExchange()
+    /*
 		UINT16 len;
 		if(((CASocket*)(*m_pMuxOut))->receiveFully((UINT8*)&len,2)!=E_SUCCESS)
 			{
@@ -188,13 +198,14 @@ SINT32 CAFirstMix::init()
 				return E_UNKNOWN;
 			}
 		CAMsg::printMsg(LOG_CRIT,"Received Key Info...\n");
-		recvBuff[len]=0; //get the Key's from the other mixes (and the Mix-Id's...!)
+        recvBuff[len]=0; //get the Keys from the other mixes (and the Mix-Id's...!)
 		if(initMixCascadeInfo(recvBuff,len+1)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Error in establishing secure communication with next Mix!\n");
 				delete []recvBuff;
 				return E_UNKNOWN;
 			}			
+    */
 		
 #ifdef PAYMENT
 		m_pAccountingInstance = CAAccountingInstance::getInstance();
@@ -211,7 +222,6 @@ SINT32 CAFirstMix::init()
 		m_psocketgroupUsersRead=new CASocketGroup(false);
 		m_psocketgroupUsersWrite=new CASocketGroup(true);
 #endif
-		m_pInfoService=new CAInfoService(this);
 
 		m_pthreadsLogin=new CAThreadPool(NUM_LOGIN_WORKER_TRHEADS,MAX_LOGIN_QUEUE,false);
 
@@ -231,12 +241,17 @@ SINT32 CAFirstMix::init()
 		m_pthreadReadFromMix->start(this);
 		
 		//Starting InfoService
+    /*    if(m_pInfoService == NULL)
+        {
+            m_pInfoService=new CAInfoService(this);
 		CACertificate* tmp=options.getOwnCertificate();
 		m_pInfoService->setSignature(m_pSignature,tmp);
 		delete tmp;
+        }
 		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix InfoService - Signature set\n");
 		m_pInfoService->start();
 		CAMsg::printMsg(LOG_DEBUG,"InfoService Loop started\n");
+    */
 
 		//Starting thread for logging
 #ifdef LOG_PACKET_TIMES
@@ -246,8 +261,202 @@ SINT32 CAFirstMix::init()
 #endif		
 		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix init() succeded\n");
 		return E_SUCCESS;
-	}
+}
 
+/*
+*@DOCME
+*/
+SINT32 CAFirstMix::processKeyExchange()
+{
+    UINT8* recvBuff=NULL;
+    UINT16 len;
+
+
+    if(((CASocket*)(*m_pMuxOut))->receiveFully((UINT8*)&len,2)!=E_SUCCESS)
+    {
+        CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info lenght!\n");
+        return E_UNKNOWN;
+    }
+    len=ntohs(len);
+    CAMsg::printMsg(LOG_CRIT,"Received Key Info lenght %u\n",len);
+    recvBuff=new UINT8[len+1];
+
+    if(((CASocket*)(*m_pMuxOut))->receiveFully(recvBuff,len)!=E_SUCCESS)
+    {
+        CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info!\n");
+        delete []recvBuff;
+        return E_UNKNOWN;
+    }
+    recvBuff[len]=0;
+    //get the Keys from the other mixes (and the Mix-Id's...!)
+    CAMsg::printMsg(LOG_INFO,"Received Key Info...\n");
+    CAMsg::printMsg(LOG_DEBUG,"%s\n",recvBuff);
+
+    MemBufInputSource oInput(recvBuff,len,"tmp");
+    DOMParser oParser;
+    oParser.parse(oInput);
+    DOM_Document doc=oParser.getDocument();
+    CAMsg::printMsg(LOG_DEBUG,"%s:%d\n",__FILE__,__LINE__);
+    DOM_Element elemMixes=doc.getDocumentElement();
+
+    if(elemMixes==NULL)
+        return E_UNKNOWN;
+    int count=0;
+    if(getDOMElementAttribute(elemMixes,"count",&count)!=E_SUCCESS)
+        return E_UNKNOWN;
+    char *cascadeName;
+    cascadeName = elemMixes.getAttribute("cascadeName").transcode();
+    if(cascadeName == NULL)
+        return E_UNKNOWN;
+    options.setCascadeName(cascadeName);
+
+    m_pRSA=new CAASymCipher;
+    m_pRSA->generateKeyPair(1024);
+
+    DOM_Node child=elemMixes.getLastChild();
+
+    //tmp XML-Structure for constructing the XML which is send to each user
+    DOM_Document docXmlKeyInfo=DOM_Document::createDocument();
+    DOM_Element elemRootKey=docXmlKeyInfo.createElement("MixCascade");
+    setDOMElementAttribute(elemRootKey,"version",(UINT8*)"0.1"); //set the Version of the XML to 0.1
+    docXmlKeyInfo.appendChild(elemRootKey);
+    DOM_Element elemMixProtocolVersion=docXmlKeyInfo.createElement("MixProtocolVersion");
+    setDOMElementValue(elemMixProtocolVersion,(UINT8*)MIX_CASCADE_PROTOCOL_VERSION);
+    elemRootKey.appendChild(elemMixProtocolVersion);
+    DOM_Node elemMixesKey=docXmlKeyInfo.importNode(elemMixes,true);
+    elemRootKey.appendChild(elemMixesKey);
+
+    UINT32 tlen;
+    while(child!=NULL)
+    {
+        if(child.getNodeName().equals("Mix"))
+        {
+            DOM_Node rsaKey=child.getFirstChild();
+            CAASymCipher oRSA;
+            oRSA.setPublicKeyAsDOMNode(rsaKey);
+            tlen=256;
+        }
+        child=child.getPreviousSibling();
+    }
+    tlen=256;
+
+    //Inserting own Key in XML-Key struct
+    DOM_DocumentFragment docfragKey;
+    m_pRSA->getPublicKeyAsDocumentFragment(docfragKey);
+    DOM_Element elemOwnMix=docXmlKeyInfo.createElement("Mix");
+    UINT8 buffId[255];
+    options.getMixId(buffId,255);
+    elemOwnMix.setAttribute("id",DOMString((char*)buffId));
+    elemOwnMix.appendChild(docXmlKeyInfo.importNode(docfragKey,true));
+    elemMixesKey.insertBefore(elemOwnMix,elemMixesKey.getFirstChild());
+    setDOMElementAttribute((DOM_Element&)elemMixesKey,"count",count+1);
+    CACertificate* ownCert=options.getOwnCertificate();
+    if(ownCert==NULL)
+    {
+        CAMsg::printMsg(LOG_DEBUG,"Own Test Cert is NULL -- so it could not be inserted into signed KeyInfo send to users...\n");
+	}
+    CACertStore* tmpCertStore=new CACertStore();
+    tmpCertStore->add
+    (ownCert);
+    if(m_pSignature->signXML(elemRootKey,tmpCertStore)!=E_SUCCESS)
+    {
+        CAMsg::printMsg(LOG_DEBUG,"Could not sign KeyInfo send to users...\n");
+    }
+    delete ownCert;
+    delete tmpCertStore;
+
+    tlen=0;
+    UINT8* tmpB=DOM_Output::dumpToMem(docXmlKeyInfo,&tlen);
+    m_xmlKeyInfoBuff=new UINT8[tlen+2];
+    memcpy(m_xmlKeyInfoBuff+2,tmpB,tlen);
+    UINT16 s=htons((UINT16)tlen);
+    memcpy(	m_xmlKeyInfoBuff,&s,2);
+    m_xmlKeyInfoSize=(UINT16)tlen+2;
+    delete []tmpB;
+
+    //Sending symetric key...
+    child=elemMixes.getFirstChild();
+    while(child!=NULL)
+    {
+        if(child.getNodeName().equals("Mix"))
+        {
+            //check Signature....
+            CAMsg::printMsg(LOG_DEBUG,"Try to verify next mix signature...\n");
+            CASignature oSig;
+            CACertificate* nextCert=options.getNextMixTestCertificate();
+            oSig.setVerifyKey(nextCert);
+            SINT32 ret=oSig.verifyXML(child,NULL);
+            delete nextCert;
+            if(ret!=E_SUCCESS)
+            {
+                CAMsg::printMsg(LOG_DEBUG,"failed!\n");
+                return E_UNKNOWN;
+            }
+            CAMsg::printMsg(LOG_DEBUG,"success!\n");
+            DOM_Node rsaKey=child.getFirstChild();
+            CAASymCipher oRSA;
+            oRSA.setPublicKeyAsDOMNode(rsaKey);
+            DOM_Element elemNonce;
+            getDOMChildByName(child,(UINT8*)"Nonce",elemNonce,false);
+            UINT8 arNonce[1024];
+            if(elemNonce!=NULL)
+            {
+                UINT32 lenNonce=1024;
+                UINT32 tmpLen=1024;
+                getDOMElementValue(elemNonce,arNonce,&lenNonce);
+                CABase64::decode(arNonce,lenNonce,arNonce,&tmpLen);
+                lenNonce=tmpLen;
+                tmpLen=1024;
+                CABase64::encode(SHA1(arNonce,lenNonce,NULL),SHA_DIGEST_LENGTH,
+                                 arNonce,&tmpLen);
+                arNonce[tmpLen]=0;
+            }
+            UINT8 key[64];
+            getRandom(key,64);
+            //UINT8 buff[400];
+            //UINT32 bufflen=400;
+            DOM_DocumentFragment docfragSymKey;
+            encodeXMLEncryptedKey(key,64,docfragSymKey,&oRSA);
+            DOM_Document docSymKey=DOM_Document::createDocument();
+            docSymKey.appendChild(docSymKey.importNode(docfragSymKey,true));
+            DOM_Element elemRoot=docSymKey.getDocumentElement();
+            if(elemNonce!=NULL)
+            {
+                DOM_Element elemNonceHash=docSymKey.createElement("Nonce");
+                setDOMElementValue(elemNonceHash,arNonce);
+                elemRoot.appendChild(elemNonceHash);
+            }
+            UINT32 outlen=5000;
+            UINT8* out=new UINT8[outlen];
+
+            m_pSignature->signXML(elemRoot);
+            DOM_Output::dumpToMem(docSymKey,out,&outlen);
+            m_pMuxOut->setSendKey(key,32);
+            m_pMuxOut->setReceiveKey(key+32,32);
+            UINT16 size=htons((UINT16)outlen);
+            ((CASocket*)m_pMuxOut)->send((UINT8*)&size,2);
+            ((CASocket*)m_pMuxOut)->send(out,outlen);
+            m_pMuxOut->setCrypt(true);
+            delete[] out;
+            break;
+        }
+        child=child.getNextSibling();
+    }
+
+    if(CAMix::initMixCascadeInfo(elemMixes)!=E_SUCCESS)
+    {
+        CAMsg::printMsg(LOG_CRIT,"Error initializing cascade info.\n");
+        delete []recvBuff;
+        return E_UNKNOWN;
+    }
+    else
+    {
+        if(m_pInfoService != NULL)
+            m_pInfoService->sendCascadeHelo();
+    }
+
+    return E_SUCCESS;
+}
 
 /**How to end this thread:
 0. set bRestart=true;
@@ -783,16 +992,16 @@ SINT32 CAFirstMix::clean()
 		if(m_pthreadsLogin!=NULL)
 			delete m_pthreadsLogin;
 		m_pthreadsLogin=NULL;	
-		if(m_pInfoService!=NULL)
-			{
-				CAMsg::printMsg(LOG_CRIT,"Stopping InfoService....\n");
-				CAMsg::printMsg	(LOG_CRIT,"Memory usage before: %u\n",getMemoryUsage());	
-				m_pInfoService->stop();
-				CAMsg::printMsg	(LOG_CRIT,"Memory usage after: %u\n",getMemoryUsage());	
-				CAMsg::printMsg(LOG_CRIT,"Stopped InfoService!\n");
-				delete m_pInfoService;
-			}
-		m_pInfoService=NULL;
+    //     if(m_pInfoService!=NULL)
+    //     {
+    //         CAMsg::printMsg(LOG_CRIT,"Stopping InfoService....\n");
+    //         CAMsg::printMsg	(LOG_CRIT,"Memory usage before: %u\n",getMemoryUsage());
+    //         m_pInfoService->stop();
+    //         CAMsg::printMsg	(LOG_CRIT,"Memory usage after: %u\n",getMemoryUsage());
+    //         CAMsg::printMsg(LOG_CRIT,"Stopped InfoService!\n");
+    //         delete m_pInfoService;
+    //     }
+    //     m_pInfoService=NULL;
 
 		if(m_pthreadAcceptUsers!=NULL)
 			delete m_pthreadAcceptUsers;
@@ -845,12 +1054,15 @@ SINT32 CAFirstMix::clean()
 		return E_SUCCESS;
 	}
 
-	/** This will initialize the XML Cascade Info send to the InfoService and
+/**
+ * @deprecated first part of this method moved to processKeyExchange(), rest moved to CAMix.cpp
+ * This will initialize the XML Cascade Info send to the InfoService and
   * the Key struct which is send to each user which connects
-	* This function is called from init()
-	*/
-SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
-	{ 
+* This function is called from init()
+* @DOCME
+*/
+SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff, UINT16 len)
+{
 		//Parse the input, which is the XML send from the previos mix, containing keys and id's
 		if(recvBuff==NULL||len==0)
 			return E_UNKNOWN;

@@ -73,7 +73,7 @@ SINT32 CAMiddleMix::initOnce()
 	* @retval E_SUCCESS if KeyExchange with Mix \e n+1 and Mix \e n-1 was succesful
 	*	@retval E_UNKNOWN otherwise
 	*/
-SINT32 CAMiddleMix::proccessKeyExchange()
+SINT32 CAMiddleMix::processKeyExchange()
 	{
 		UINT8* recvBuff=NULL;		
 		UINT16 len;
@@ -329,6 +329,7 @@ SINT32 CAMiddleMix::init()
 				return E_UNKNOWN;		
 			}
 		
+    // connect to next mix    
 		CASocketAddr* pAddrNext=NULL;
 		for(UINT32 i=0;i<options.getTargetInterfaceCount();i++)
 			{
@@ -357,15 +358,6 @@ SINT32 CAMiddleMix::init()
 		((CASocket*)*m_pMuxOut)->setRecvBuff(50*MIXPACKET_SIZE);
 		((CASocket*)*m_pMuxOut)->setSendBuff(50*MIXPACKET_SIZE);
 
-//We now tell the world that we are waiting...
-		if(m_pSignature!=NULL&&options.isInfoServiceEnabled())
-			{
-				m_pInfoService=new CAInfoService();
-				CACertificate* tmp=options.getOwnCertificate();
-				m_pInfoService->setSignature(m_pSignature,tmp);
-				delete tmp;
-				m_pInfoService->start();
-			}
 #define RETRIES 100
 #define RETRYTIME 30
 		CAMsg::printMsg(LOG_INFO,"Init: Try to connect to next Mix...\n");
@@ -383,6 +375,7 @@ SINT32 CAMiddleMix::init()
 					CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
 			}
 		
+    CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...\n");    
 		CAListenerInterface* pListener=NULL;
 		const CASocketAddr* pAddr=NULL;
 		pListener=options.getListenerInterface(1);
@@ -406,11 +399,10 @@ SINT32 CAMiddleMix::init()
 					CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
 			}
 		
-
-		if(proccessKeyExchange()!=E_SUCCESS)
+    if((ret = processKeyExchange())!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Error in proccessKeyExchange()!\n");
-				return E_UNKNOWN;
+        return ret;
 			}
 	
 
@@ -651,10 +643,15 @@ ERR:
 		return E_UNKNOWN;
 	}
 SINT32 CAMiddleMix::clean()
-	{
+{
+    /*
 		if(m_pInfoService!=NULL)
+    {
+        m_pInfoService->stop();
 			delete m_pInfoService;
 		m_pInfoService=NULL;
+    }
+    */
 		if(m_pMuxIn!=NULL)
 			{
 				m_pMuxIn->close();

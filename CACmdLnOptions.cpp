@@ -355,7 +355,139 @@ SINT32 CACmdLnOptions::setNewValues(CACmdLnOptions& newOptions)
 					newOptions.getTargetInterface(m_arTargetInterfaces[i],i+1);
 			}
 		return E_SUCCESS;
+}
+
+/** Modifies the next mix settings (target interface and certificate) according to
+* the specified options object. Target interfaces are only copied if they denote a
+* next mix. HTTP and SOCKS proxy settings are ignored.
+* @param xmlData a string containing XML data with the new options
+* @param len the length of the string
+* 
+*/
+SINT32 CACmdLnOptions::setNextMix(DOM_Document& doc)
+{
+    DOM_Element elemRoot = doc.getDocumentElement();
+
+    //getCertificates if given...
+    DOM_Element elemSig;
+    getDOMChildByName(elemRoot,(UINT8*)"Signature",elemSig,false);
+    //Own Certiticate first
+    //nextMixCertificate if given
+    DOM_Element elemCert;
+    getDOMChildByName(elemSig,(UINT8*)"X509Data",elemCert,true);
+    if(elemSig!=NULL)
+        m_pNextMixCertificate = CACertificate::decode(elemCert.getFirstChild(),CERT_X509CERTIFICATE);
+
+    DOM_Element elemOptionsRoot = m_docMixXml.getDocumentElement();
+    DOM_Element elemOptionsCerts;
+    getDOMChildByName(elemOptionsRoot, (UINT8*) "Certificates", elemOptionsCerts, false);
+    DOM_Element elemOptionsNextMixCert;
+
+    if(getDOMChildByName(elemOptionsRoot, (UINT8*) "NextMixCertificate", elemOptionsNextMixCert, false) != E_SUCCESS)
+    {
+        elemOptionsNextMixCert = m_docMixXml.createElement("NextMixCertificate");
+        elemOptionsCerts.appendChild(elemOptionsNextMixCert);
+        elemOptionsNextMixCert.appendChild(m_docMixXml.importNode(elemCert.getFirstChild(),true));
+    }
+    else
+    {
+        if(elemOptionsNextMixCert.hasChildNodes())
+        {
+            elemOptionsNextMixCert.replaceChild(                                         m_docMixXml.importNode(elemCert.getFirstChild(),true),
+                    elemOptionsNextMixCert.getFirstChild());
+        }
+        else
+        {
+            elemOptionsNextMixCert.appendChild(m_docMixXml.importNode(elemCert.getFirstChild(),true));
+        }
+    }
+
+    DOM_Element elemNextMix;
+    getDOMChildByName(elemRoot,(UINT8*)"ListenerInterface",elemNextMix,true);
+
+    DOM_Element elemOptionsNetwork;
+    DOM_Element elemOptionsNextMixInterface;
+
+    if(getDOMChildByName(elemOptionsRoot, (UINT8*) "Network", elemOptionsNetwork, false) != E_SUCCESS)
+    {
+        elemOptionsNetwork = m_docMixXml.createElement("Network");
+        elemOptionsRoot.appendChild(elemOptionsNetwork);
+    }
+
+    if(getDOMChildByName(elemOptionsNetwork, (UINT8*) "NextMix", elemOptionsNextMixInterface, false) != E_SUCCESS)
+    {
+        elemOptionsNextMixInterface = m_docMixXml.createElement("NextMix");
+        elemOptionsNetwork.appendChild(elemOptionsNextMixInterface);
+    }
+    else
+    {
+        while(elemOptionsNextMixInterface.hasChildNodes())
+        {
+            elemOptionsNextMixInterface.removeChild(elemOptionsNextMixInterface.getFirstChild());
+        }
+    }
+
+    DOM_Node interfaceData = elemNextMix.getFirstChild();
+    while(interfaceData != NULL)
+    {
+        elemOptionsNextMixInterface.appendChild(m_docMixXml.importNode(interfaceData,true));
+        interfaceData = interfaceData.getNextSibling();
+    }
+
+    return processXmlConfiguration(m_docMixXml);
+}
+
+/** Modifies the next mix settings (target interface and certificate) according to
+* the specified options object. Target interfaces are only copied if they denote a
+* next mix. HTTP and SOCKS proxy settings are ignored.
+* @param xmlData a string containing XML data with the new options
+* @param len the length of the string
+* 
+*/
+SINT32 CACmdLnOptions::setPrevMix(DOM_Document& doc)
+{
+    DOM_Element elemRoot = doc.getDocumentElement();
+    
+    //getCertificates if given...
+    DOM_Element elemSig;
+    getDOMChildByName(elemRoot,(UINT8*)"Signature",elemSig,false);
+    //Own Certiticate first
+    //nextMixCertificate if given
+    DOM_Element elemCert;
+    getDOMChildByName(elemSig,(UINT8*)"X509Data",elemCert,true);
+    if(elemCert!=NULL)
+    {
+
+        DOM_Element elemOptionsRoot = m_docMixXml.getDocumentElement();
+        DOM_Element elemOptionsCerts;
+        getDOMChildByName(elemOptionsRoot, (UINT8*) "Certificates", elemOptionsCerts, false);
+        DOM_Element elemOptionsPrevMixCert;
+
+        if(getDOMChildByName(elemOptionsRoot, (UINT8*) "PrevMixCertificate", elemOptionsPrevMixCert, false) != E_SUCCESS)
+        {
+            elemOptionsPrevMixCert = m_docMixXml.createElement("PrevMixCertificate");
+            elemOptionsCerts.appendChild(elemOptionsPrevMixCert);
+            elemOptionsPrevMixCert.appendChild(m_docMixXml.importNode(elemCert.getFirstChild(),true));
+        }
+        else
+        {
+            if(elemOptionsPrevMixCert.hasChildNodes())
+            {
+                elemOptionsPrevMixCert.replaceChild(                                         m_docMixXml.importNode(elemCert.getFirstChild(),true),
+                        elemOptionsPrevMixCert.getFirstChild());
+            }
+            else
+            {
+                elemOptionsPrevMixCert.appendChild(m_docMixXml.importNode(elemCert.getFirstChild(),true));
+            }
 	}
+
+	return processXmlConfiguration(m_docMixXml);
+    }
+    return E_UNKNOWN;
+}
+
+
 
 
 /** Rereads the configuration file (if one was given on startup) and reconfigures
@@ -654,15 +786,30 @@ SINT32 CACmdLnOptions::readXmlConfiguration(DOM_Document& docConfig,const UINT8*
 		close(handle);
 		if(ret!=len)
 			return E_FILE_READ;
+    SINT32 retVal = readXmlConfiguration(docConfig, tmpChar, len);
+    delete[] tmpChar;
+    return retVal;
+}
+
+/** Tries to read the XML configuration from byte array \c buf. The parsed XML document
+	* is parsed only, not processed.
+	* Returns the parsed document as a \c DOM_Document.
+	* @param docConfig on return contains the parsed XMl document
+	* @param buf a byte array containing the XML data
+	* @param len the length of the byte array
+	* @retval E_SUCCESS if successful
+	* @retval E_XML_PARSE if the data could not be parsed
+	*/
+SINT32 CACmdLnOptions::readXmlConfiguration(DOM_Document& docConfig,const UINT8* const buf, UINT32 len)
+{
 		DOMParser parser;
-		MemBufInputSource in(tmpChar,len,"tmpConfigBuff");
+    MemBufInputSource in(buf,len,"tmpConfigBuff");
 		parser.parse(in);
-		delete[] tmpChar;
 		if(parser.getErrorCount()>0)
 			return E_XML_PARSE;
 		docConfig=parser.getDocument();
 		return E_SUCCESS;
-	}
+}
 
 /** Processes a XML configuration document. This sets the values of the
 	* options to the values found in the XML document.
@@ -909,6 +1056,12 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		getDOMChildByName(elemRoot,(UINT8*)"Network",elemNetwork,false);
 		DOM_Element elemInfoService;
 		getDOMChildByName(elemNetwork,(UINT8*)"InfoService",elemInfoService,false);
+    DOM_Element elemAllowReconfig;
+    getDOMChildByName(elemInfoService,(UINT8*)"AllowAutoConfiguration",elemAllowReconfig,false);
+    if(getDOMElementValue(elemAllowReconfig,tmpBuff,&tmpLen)==E_SUCCESS)
+    {
+        m_bAcceptReconfiguration = (strcmp("True",(char*)tmpBuff) == 0);
+    }
 		getDOMChildByName(elemInfoService,(UINT8*)"Host",elem,false);
 		tmpLen=255;
 		if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS)
@@ -981,6 +1134,9 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 					{
 						DOM_Element elemPort;
 						DOM_Element elemHost;
+            DOM_Element elemIP;
+            UINT8 buffHost[255];
+            UINT32 buffHostLen=255;
 						UINT16 port;
 						getDOMChildByName(elemNextMix,(UINT8*)"Port",elemPort,false);
 						if(getDOMElementValue(elemPort,&port)!=E_SUCCESS)
@@ -990,16 +1146,22 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 						getDOMChildByName(elemNextMix,(UINT8*)"Host",elemHost,false);
 						if(elemHost!=NULL)
 							{
-								UINT8 buffHost[255];
-								UINT32 buffHostLen=255;
 								if(getDOMElementValue(elemHost,buffHost,&buffHostLen)!=E_SUCCESS)
 									goto SKIP_NEXT_MIX;
 								if(((CASocketAddrINet*)addr)->setAddr(buffHost,port)!=E_SUCCESS)
 									goto SKIP_NEXT_MIX;
 							}
 						else
+            {
+                getDOMChildByName(elemNextMix,(UINT8*)"IP",elemIP,false);
+                if(elemIP == NULL || getDOMElementValue(elemIP,buffHost,&buffHostLen)!=E_SUCCESS)
+                    goto SKIP_NEXT_MIX;
+                if(((CASocketAddrINet*)addr)->setAddr(buffHost,port)!=E_SUCCESS)
 							goto SKIP_NEXT_MIX;
 					}
+
+            CAMsg::printMsg(LOG_INFO, "Setting target interface: %s:%d\n", buffHost, port);
+        }
 				else
 #ifdef HAVE_UNIX_DOMAIN_PROTOCOL
 					{
@@ -1158,6 +1320,20 @@ SKIP_NEXT_MIX:
 				elemMix.appendChild(elemName);
 			}
 
+    //Inserting the min. cascade length if given...
+    getDOMChildByName(elemGeneral,(UINT8*)"MinCascadeLength",elem,false);
+    if(elem != NULL)
+    {
+    	elemMix.appendChild(m_docMixInfo.importNode(elem, true));
+    }
+
+    //Inserting the min. cascade length if given...
+    getDOMChildByName(elemGeneral,(UINT8*)"MixType",elem,false);
+    if(elem != NULL)
+    {
+    	elemMix.appendChild(m_docMixInfo.importNode(elem, true));
+    }    
+        
 		//Import the Description if given
 		DOM_Element elemMixDescription;
 		getDOMChildByName(elemRoot,(UINT8*)"Description",elemMixDescription,false);
@@ -1170,6 +1346,10 @@ SKIP_NEXT_MIX:
 						tmpChild=tmpChild.getNextSibling();
 					}
 			}
+
+    // import listener interfaces element; this is needed for cascade auto configuration
+    // -- inserted by ronin <ronin2@web.de> 2004-08-16
+    elemMix.appendChild(m_docMixInfo.importNode(elemListenerInterfaces,true));
 
 		//Set Software-Version...
 		DOM_Element elemSoftware=m_docMixInfo.createElement("Software");
@@ -1211,5 +1391,60 @@ SKIP_NEXT_MIX:
 
 #endif
 
-		return E_SUCCESS;
+    tmpLen=255;
+    getDOMChildByName(elemGeneral,(UINT8*)"MixID",elemMixID,false);
+    if(elemMixID==NULL)
+        return E_UNKNOWN;
+    if(getDOMElementValue(elemMixID,tmpBuff,&tmpLen)!=E_SUCCESS)
+        return E_UNKNOWN;
+    strtrim(tmpBuff);
+    m_strMixID=new char[strlen((char*)tmpBuff)+1];
+    strcpy(m_strMixID,(char*) tmpBuff);
+    //getMixType
+    DOM_Element elemMixType;
+    getDOMChildByName(elemGeneral,(UINT8*)"MixType",elemMixType,false);
+    tmpLen=255;
+    if(getDOMElementValue(elemMixType,tmpBuff,&tmpLen)==E_SUCCESS)
+    {
+        if(memcmp(tmpBuff,"FirstMix",8)==0)
+            m_bFirstMix=true;
+        else if (memcmp(tmpBuff,"MiddleMix",9)==0)
+            m_bMiddleMix=true;
+        else if (memcmp(tmpBuff,"LastMix",7)==0)
+            m_bLastMix=true;
+    }
+
+    //getCascadeName
+    getDOMChildByName(elemGeneral,(UINT8*)"CascadeName",elem,false);
+    tmpLen=255;
+    if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS)
+    {
+        m_strCascadeName=new char[tmpLen+1];
+        memcpy(m_strCascadeName,tmpBuff,tmpLen);
+        m_strCascadeName[tmpLen]=0;
 	}
+
+    DOM_Element elemCascade;
+    SINT32 haveCascade = getDOMChildByName(elemRoot,(UINT8*)"MixCascade",elemCascade,false);
+
+    if(isLastMix() && haveCascade != E_SUCCESS && getPrevMixTestCertificate() == NULL)
+    {
+        CAMsg::printMsg(LOG_CRIT,"Error in configuration: You must either specify cascade info or the previous mix's certificate.\n");
+        return E_UNKNOWN;
+    }
+
+    if(isLastMix() && haveCascade == E_SUCCESS)
+    {
+        getDOMChildByName(elemRoot,(UINT8*)"MixCascade",m_oCascadeXML,false);
+
+        DOM_NodeList nl = m_oCascadeXML.getElementsByTagName("Mix");
+        UINT16 len = nl.getLength();
+        if(len == 0)
+        {
+            CAMsg::printMsg(LOG_CRIT,"Error in configuration: Empty cascade specified.\n");
+            return E_UNKNOWN;
+        }
+    }
+
+    return E_SUCCESS;
+}

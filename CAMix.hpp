@@ -27,16 +27,69 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CAMIX__
 #define __CAMIX__
+
+extern class CACmdLnOptions options;
+
+class CASignature;
+class CAInfoService;
+//class DOM_Element;
+
 class CAMix
 	{
 		public:
+			CAMix();
 			virtual ~CAMix(){}
 			SINT32 start();
 			virtual SINT32 reconfigure(){return E_SUCCESS;}
+			/** Returns the Mix-Cascade info which should be send to the InfoService.
+    		* This is NOT a copy!
+    		*
+    		* @param docMixCascadeInfo where the XML struct would be stored
+    		* @retval E_SUCCESS
+    		*/
+			SINT32 getMixCascadeInfo(DOM_Document& docMixCascadeInfo)
+			{
+					if(m_docMixCascadeInfo != NULL)
+					{
+							docMixCascadeInfo=m_docMixCascadeInfo;
+							return E_SUCCESS;
+					}
+					else
+					{
+							return E_UNKNOWN;
+					}
+			}
+
+			// added by ronin <ronin2@web.de>
+			bool acceptsReconfiguration()
+			{
+					return m_acceptReconfiguration;
+			}
+
 		protected:
 			virtual SINT32 clean()=0;
 			virtual SINT32 initOnce(){return E_SUCCESS;}
 			virtual SINT32 init()=0;
 			virtual SINT32 loop()=0;
+
+			// added by ronin <ronin2@web.de>
+			virtual SINT32 processKeyExchange()
+			{
+					return E_SUCCESS;
+			}
+			// added by ronin <ronin2@web.de>
+			virtual SINT32 initMixCascadeInfo(DOM_Element&);
+
+			CASignature* m_pSignature;
+			CAInfoService* m_pInfoService;
+
+	    bool m_acceptReconfiguration;
+
+			// added by ronin <ronin2@web.de>
+			DOM_Document m_docMixCascadeInfo;
+		
+		private:
+			// added by ronin <ronin2@web.de>
+			bool needAutoConfig();
 	};
 #endif

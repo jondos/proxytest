@@ -52,9 +52,9 @@ class CAInfoService;
 
 
 class CAFirstMix:public CAMix
-	{
-		public:
-			CAFirstMix()
+{
+public:
+    CAFirstMix() : CAMix()
 				{
 					m_nMixedPackets=0;
 					m_nSocketsIn=0;
@@ -74,18 +74,28 @@ class CAFirstMix:public CAMix
 					m_pthreadReadFromMix=NULL;
 					m_pthreadAcceptUsers=NULL;
 					m_pthreadsLogin=NULL;
-					#ifdef LOG_PACKET_TIMES
+#ifdef LOG_PACKET_TIMES
+
 						m_pLogPacketStats=NULL;
-					#endif	
+#endif
+
 				}
-			virtual ~CAFirstMix(){}
-		protected:
+    virtual ~CAFirstMix()
+    {}
+protected:
 			virtual SINT32 loop()=0;
 			SINT32 init();
 			SINT32 clean();
 			SINT32 initOnce();
-			SINT32 initMixCascadeInfo(UINT8* recvBuff,UINT32 len);
-		public:
+
+    //added by ronin <ronin2@web.de>
+    virtual SINT32 processKeyExchange();
+    
+    // deprecated
+    SINT32 initMixCascadeInfo(UINT8*,UINT16);
+    
+    
+public:
 			SINT32 getMixedPackets(UINT64& ppackets)
 				{
 					set64(ppackets,m_nMixedPackets);
@@ -100,18 +110,19 @@ class CAFirstMix:public CAMix
 					return E_SUCCESS;
 				}
 			
-			/** Returns the Mix-Cascade info which should be send to the InfoService.
+    /* Moved to CAMix.hpp
+    ** Returns the Mix-Cascade info which should be send to the InfoService.
 				* This is NOT a copy!
 				*
 				* @param docMixCascadeInfo where the XML struct would be stored
 				* @retval E_SUCCESS
-				*/
+    	*
 			SINT32 getMixCascadeInfo(DOM_Document& docMixCascadeInfo)
 				{
 					docMixCascadeInfo=m_docMixCascadeInfo;
 					return E_SUCCESS;
 				}
-					
+*/
 			
 		friend THREAD_RETURN fm_loopSendToMix(void*);
 		friend THREAD_RETURN fm_loopReadFromMix(void*);
@@ -119,7 +130,7 @@ class CAFirstMix:public CAMix
 		friend THREAD_RETURN fm_loopReadFromUsers(void*);
 		friend THREAD_RETURN fm_loopDoUserLogin(void* param);
 
-		protected:
+protected:
 			SINT32 incUsers()
 				{
 					m_mutexUser.lock();
@@ -149,26 +160,31 @@ class CAFirstMix:public CAMix
 					return m_bRestart;
 				}
 			SINT32 doUserLogin(CAMuxSocket* pNewUSer,UINT8 perrIP[4]);
-		protected:	
+protected:
 			CAIPList* m_pIPList;
 			CAQueue* m_pQueueSendToMix;
 			CAQueue* m_pQueueReadFromMix;
-			#ifdef LOG_PACKET_TIMES
+#ifdef LOG_PACKET_TIMES
+
 				CALogPacketStats* m_pLogPacketStats;
-			#endif
+#endif
+
 			CAFirstMixChannelList* m_pChannelList;
 			volatile UINT32 m_nUser;
 			UINT32 m_nSocketsIn; //number of usable ListenerInterface (non 'virtual')
 			volatile bool m_bRestart;
 			CASocket* m_arrSocketsIn;
 #ifdef HAVE_EPOLL
+
 			CASocketGroupEpoll* m_psocketgroupUsersRead;
 			CASocketGroupEpoll* m_psocketgroupUsersWrite;
 #else
+
 			CASocketGroup* m_psocketgroupUsersRead;
 			CASocketGroup* m_psocketgroupUsersWrite;
 #endif
-			CAInfoService* m_pInfoService;
+    // moved to CAMix
+    //CAInfoService* m_pInfoService;
 			CAMuxSocket* m_pMuxOut;
 	
 			UINT8* m_xmlKeyInfoBuff;
@@ -177,7 +193,8 @@ class CAFirstMix:public CAMix
 			DOM_Document m_docMixCascadeInfo;
 			UINT64 m_nMixedPackets;
 			CAASymCipher* m_pRSA;
-			CASignature* m_pSignature;
+    // moved to CAMix
+    //CASignature* m_pSignature;
 			CAMutex m_mutexUser;
 			CAMutex m_mutexMixedPackets;
 			CAMutex m_mutexLoginThreads;
@@ -186,9 +203,11 @@ class CAFirstMix:public CAMix
 			CAThreadPool* m_pthreadsLogin;
 			CAThread* m_pthreadSendToMix;
 			CAThread* m_pthreadReadFromMix;
-			#ifdef PAYMENT
+#ifdef PAYMENT
+
 				CAAccountingInstance * m_pAccountingInstance;
-			#endif
-	};
+#endif
+
+};
 
 #endif
