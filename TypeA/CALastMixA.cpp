@@ -31,6 +31,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "../CASingleSocketGroup.hpp"
 #include "../CAPool.hpp"
 
+extern CACmdLnOptions options;
+
 SINT32 CALastMixA::loop()
 	{
 #ifndef NEW_MIX_TYPE
