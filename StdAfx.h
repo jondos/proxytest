@@ -81,9 +81,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		typedef signed char SINT8;
 #else
   #ifdef HAVE_CONFIG_H  
-	#include "config.h"
-	#endif
-	#define HAVE_VSNPRINTF
+	 #include "config.h"
+	#else
+	 #define HAVE_VSNPRINTF
+	#endif 
 		#include <sys/ioctl.h>
     #include <sys/socket.h>
     #include <sys/poll.h>
@@ -144,8 +145,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define E_TIMEDOUT ETIMEDOUT
 		#define E_CONNREFUSED ECONNREFUSED
 		#ifdef __sgi
-			#define HAVE_VSYSLOG 1
-#undef HAVE_VSNPRINTF
+			#undef HAVE_VSNPRINTF
 			#include <alloca.h>
 			#include <ctype.h>
 		#endif

@@ -142,6 +142,9 @@ AC_ARG_WITH(prot2,
 	]
 )
 
+
+AC_CHECK_FUNCS(vsnprintf)
+
 if test "x$GCC" = "xyes" ; then
    CPPFLAGS="-Wall -D_REENTRANT"   
 else
