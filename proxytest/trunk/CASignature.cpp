@@ -38,7 +38,8 @@ CASignature::CASignature()
 
 CASignature::~CASignature()
 	{
-		DSA_free(m_pDSA);
+		if(m_pDSA!=NULL)
+			DSA_free(m_pDSA);
 	}
 
 
