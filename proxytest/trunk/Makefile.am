@@ -12,6 +12,7 @@ proxytest_SOURCES = CAASymCipher.cpp \
 		    CACertStore.cpp\
 		    CACmdLnOptions.cpp \
 		    CAConditionVariable.cpp\
+		    CAControlChannelDispatcher.cpp\
 		    CADatabase.cpp\
 		    CADatagramSocket.cpp \
 		    CAFirstMix.cpp \
@@ -52,6 +53,7 @@ proxytest_SOURCES = CAASymCipher.cpp \
 		    CACertificate.hpp\
 		    CACertStore.hpp\
 		    CAConditionVariable.hpp\
+		    CAControlChannelDispatcher.hpp\
 		    CACmdLnOptions.hpp \
 		    CADatabase.hpp\
 		    CADatagramSocket.hpp\
