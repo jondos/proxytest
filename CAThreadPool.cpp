@@ -12,7 +12,7 @@ CAThreadPool::CAThreadPool(	UINT32 num_worker_threads,
 														UINT32 max_queue_size,
 														bool	 b_do_not_block_when_full)
 	{
-  int i, rtn;
+  UINT i;
   
   /* initialize fields */
   m_NumThreads = num_worker_threads;
@@ -41,7 +41,6 @@ CAThreadPool::CAThreadPool(	UINT32 num_worker_threads,
 	*/
 SINT32 CAThreadPool::addRequest(THREAD_MAIN_TYP routine, void *args)
 {
-  int rtn;
 	m_mutexQueue.lock();
   tpool_work_t *workp;
 
@@ -89,7 +88,6 @@ SINT32 CAThreadPool::addRequest(THREAD_MAIN_TYP routine, void *args)
 
 SINT32 CAThreadPool::destroy(bool bWaitForFinish)
 	{
-		int i,rtn;
 		tpool_work_t *cur_nodep;
 		m_mutexQueue.lock();
 		// Is a shutdown already in progress?
@@ -118,7 +116,7 @@ SINT32 CAThreadPool::destroy(bool bWaitForFinish)
 		m_condNotFull.broadcast();
 
 		// Wait for workers to exit 
-		for(i=0; i < m_NumThreads; i++) 
+		for(UINT32 i=0; i < m_NumThreads; i++) 
 			{
 				m_parThreads[i]->join();
 			}
@@ -136,7 +134,6 @@ SINT32 CAThreadPool::destroy(bool bWaitForFinish)
 THREAD_RETURN worker_thread_main_loop(void *arg)
 {
   CAThreadPool* pPool = (CAThreadPool*)arg; 
-  int rtn;
   tpool_work_t	*my_workp;
 	
   for(;;)
