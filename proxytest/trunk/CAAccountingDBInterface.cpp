@@ -136,7 +136,7 @@ SINT32 CAAccountingDBInterface::terminateDBConnection()
  * @return E_SPACE, if the buffer is too small. In this case len contains the
  * minimum number of bytes needed
  */
-SINT32 CAAccountingDBInterface::getCostConfirmation(UINT64 accountNumber, CAXMLCostConfirmation *pCC)
+SINT32 CAAccountingDBInterface::getCostConfirmation(UINT64 accountNumber, CAXMLCostConfirmation **pCC)
 {
 	if(!m_bConnected) return E_NOT_CONNECTED;
 	UINT8 queryF[] = "SELECT XMLCC FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER=%lld";
@@ -165,7 +165,7 @@ SINT32 CAAccountingDBInterface::getCostConfirmation(UINT64 accountNumber, CAXMLC
 	}
 	
 	xmlCC = (UINT8*) PQgetvalue(result, 0, 0);
-	pCC = new CAXMLCostConfirmation(xmlCC);
+	*pCC = new CAXMLCostConfirmation(xmlCC);
 	return E_SUCCESS;
 }
 
