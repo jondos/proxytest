@@ -93,6 +93,10 @@ class CAConditionVariable:public CAMutex
 					return E_UNKNOWN;
 				}
 
+			/** Signals this object. A thread waiting on this object will awake.
+				* Note: lock() must be called before signal() and unlock() 
+				* must be called if proccessing ends.
+				*/
 			SINT32 signal()
 				{
 					if(pthread_cond_signal(m_pCondVar)==0)
