@@ -877,10 +877,11 @@ Optional Packages:
                           optionally the number of bytes which are transferred
                           without any limitation
   --with-ssl-dir=PATH     Specify path to OpenSSL installation
-  --with-xml-include=PATH     Specify path to XERCES-C include files (without a trailing '/xercesc')
+  --with-xml-include=PATH Specify path to XERCES-C include files (without a
+                          trailing '/xercesc')
   --with-xml-lib=PATH     Specify path to XERCES-C library files
-  --with-debug		  Enable debug mode
-  --with-crime-detection		  Enable crime detection mode
+  --with-debug            Enable debug mode
+  --with-crime-detection  Enable crime detection mode
 
 Some influential environment variables:
   CC          C compiler command
@@ -3742,6 +3743,7 @@ BANDWIDTH_LIMIT=""
 if test "${with_bandwithlimitation+set}" = set; then
   withval="$with_bandwithlimitation"
 
+	echo "hier"
 		if test "x$withval" != "$xno" ; then
 		    BANDWIDTH_LIMIT="-DDELAY_CHANNELS"
 		    if test "x$withval" != "$xyes" ; then
