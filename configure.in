@@ -3,10 +3,10 @@ dnl Autoconfiguration files for proxytest (a MiX proxy)
 dnl Konrad Rieck <kr@r0q.cx>
 dnl
 
-AC_INIT
+AC_INIT(proxytest.cpp)
+AM_INIT_AUTOMAKE(proxytest, 0.0.1)
 AC_PREREQ(2.50)
 AC_CONFIG_SRCDIR([proxytest.cpp])
-AM_INIT_AUTOMAKE(proxytest, 0.0.1)
 AM_CONFIG_HEADER(config.h)
 AC_CANONICAL_HOST
 
@@ -17,8 +17,6 @@ AC_PROG_CC
 AC_PROG_CXX 
 AC_PROG_INSTALL
 AC_PROG_RANLIB
-
-CFLAGS="$CFLGS -D_ASYNC"
 
 case "$host" in
 *-*-solaris*)
@@ -162,5 +160,5 @@ fi
 
 CXXFLAGS=$CFLAGS
 
-AC_CONFIG_FILES(Makefile popt/Makefile xml/Makefile aes/Makefile)
-AC_OUTPUT
+AC_OUTPUT(Makefile popt/Makefile xml/Makefile aes/Makefile)
+dnl AC_OUTPUT
