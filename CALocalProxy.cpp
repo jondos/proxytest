@@ -186,7 +186,6 @@ SINT32 CALocalProxy::loop()
 											#ifdef _DEBUG
 												CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u ... ",oMuxPacket.channel);
 											#endif
-											//TODO: deleting cipher...
 											/*tmpSocket=*/oSocketList.remove(oMuxPacket.channel);
 											if(oConnection.pSocket!=NULL)
 												{
@@ -257,7 +256,7 @@ SINT32 CALocalProxy::loop()
 																tmpCon->pCipher[c].setKeyAES(buff);
 																memcpy(buff+KEY_SIZE,oMuxPacket.data,size);
 																arRSA[c].encrypt(buff,buff);
-																tmpCon->pCipher[c].decryptAES(buff+RSA_SIZE,buff+RSA_SIZE,DATA_SIZE-RSA_SIZE);
+																tmpCon->pCipher[c].encryptAES(buff+RSA_SIZE,buff+RSA_SIZE,DATA_SIZE-RSA_SIZE);
 																memcpy(oMuxPacket.data,buff,DATA_SIZE);
 																size-=KEY_SIZE;
 																len+=KEY_SIZE;
@@ -267,7 +266,7 @@ SINT32 CALocalProxy::loop()
 												else //sonst
 													{
 														for(int c=0;c<chainlen;c++)
-															tmpCon->pCipher[c].decryptAES((unsigned char*)oMuxPacket.data,oMuxPacket.data,DATA_SIZE);
+															tmpCon->pCipher[c].encryptAES((unsigned char*)oMuxPacket.data,oMuxPacket.data,DATA_SIZE);
 														oMuxPacket.flags=CHANNEL_DATA;
 													}
 												if(muxOut.send(&oMuxPacket)==SOCKET_ERROR)
