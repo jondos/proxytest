@@ -44,7 +44,7 @@ class CACertificate
 				}
 			
 			static CACertificate* decode(UINT8* buff,UINT32 bufflen,UINT32 type,char* passwd=NULL);
-			static CACertificate* decode(DOM_Node&node,UINT32 type,char* passwd=NULL);
+			static CACertificate* decode(const DOM_Node&node,UINT32 type,char* passwd=NULL);
 			SINT32 encode(UINT8* buff,UINT32* bufflen,UINT32 type);
 			SINT32 encode(DOM_DocumentFragment& docFrag,DOM_Document& doc);
 					
