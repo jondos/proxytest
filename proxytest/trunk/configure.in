@@ -314,6 +314,27 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM([
 ], [XMLPlatformUtils::Initialize()
 ])],[AC_MSG_RESULT(found)],[AC_MSG_ERROR(Xerces-C Lib NOT found - please use --with-xml-lib)])
 
+AC_MSG_CHECKING([if libxerces-depdom is needed])
+AC_LINK_IFELSE([AC_LANG_PROGRAM([
+#include "util/XercesDefs.hpp"
+#include "util/PlatformUtils.hpp"
+#if (XERCES_VERSION_MAJOR >1)
+    #include <dom/deprecated/DOM.hpp>
+    #include <dom/deprecated/DOMParser.hpp>
+#else
+    #include <dom/DOM.hpp>
+    #include <parsers/DOMParser.hpp>
+#endif
+#if (_XERCES_VERSION >= 20200)
+    XERCES_CPP_NAMESPACE_USE
+#endif
+], [XMLPlatformUtils::Initialize();		DOM_Document doc=DOM_Document::createDocument();
+
+])],[AC_MSG_RESULT(No)],[AC_MSG_RESULT(Yes)
+LIBS="$LIBS libxerces-depdom"
+])
+
+
 
 AC_LANG_POP(C++)
 
