@@ -6,7 +6,7 @@ dnl
 AC_INIT
 AC_CONFIG_SRCDIR([proxytest.cpp])
 AM_INIT_AUTOMAKE(proxytest, 0.0.1)
-AC_PREREQ(2.53)
+AC_PREREQ(2.57)
 AC_CONFIG_SRCDIR([proxytest.cpp])
 AM_CONFIG_HEADER(config.h)
 AC_CANONICAL_HOST
@@ -111,8 +111,7 @@ AC_CACHE_CHECK([for OpenSSL directory], ac_cv_openssldir, [
 
 		# Basic test to check for compatible version and correct 
                 # linking, *does not* test for RSA - that comes later.
-		AC_TRY_RUN(
-			[
+		AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <string.h>
 #include <openssl/rand.h>
 int main(void) 
@@ -122,12 +121,11 @@ int main(void)
 	RAND_add(a, sizeof(a), sizeof(a));
 	return(RAND_status() <= 0);
 }
-			],
-			[
+			]])],[
 				found_crypto=1
 				break;
-			], []
-		)
+			],[
+		],[])
 
 		if test ! -z "$found_crypto" ; then
 			break;
@@ -191,16 +189,14 @@ AC_ARG_WITH(xml-lib,
 XMLLIBFLAGS="-L$xmllibdir -lxerces-c"
 LIBS="$LIBS $XMLLIBFLAGS"
 
-AC_TRY_LINK([
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 #include "util/XercesDefs.hpp"
 #include "util/PlatformUtils.hpp"
 #if (_XERCES_VERSION >= 20200)
     XERCES_CPP_NAMESPACE_USE
 #endif
-],
-[XMLPlatformUtils::Initialize()
-],AC_MSG_RESULT([XercesC-Lib found]),
-		AC_MSG_ERROR([Xerces-C Lib NOT found - please use --with-xml-lib]))
+]], [[XMLPlatformUtils::Initialize()
+]])],[AC_MSG_RESULT(XercesC-Lib found)],[AC_MSG_ERROR(Xerces-C Lib NOT found - please use --with-xml-lib)])
 
 
 AC_LANG([C])
