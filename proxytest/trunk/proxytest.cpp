@@ -368,14 +368,15 @@ Debug(dc::malloc.on());
 		write(handle,out,outlen);
 		close(handle);
 */
-#ifdef DEBUG
+#ifdef _DEBUG
 		//		CADatabase::test();
 		if(CAQueue::test()!=E_SUCCESS)
 			CAMsg::printMsg(LOG_CRIT,"CAQueue::test() NOT passed! Exiting\n");
 		else
 			CAMsg::printMsg(LOG_DEBUG,"CAQueue::test() passed!\n");
 
-		CAFirstMixChannelList::test();
+		CALastMixChannelList::test();
+		exit(0);
 		//Testing msSleep
 		CAMsg::printMsg(LOG_DEBUG,"Should sleep now for aprox 2 seconds....\n");
 		UINT32 start=time(NULL);

@@ -498,6 +498,10 @@ SINT32 CAFirstMix::loop()
 		//Starting thread for Step 2
 		UINT8 peerIP[4];
 		UINT8 rsaBuff[RSA_SIZE];
+#ifdef LOG_CHANNEL
+		UINT64 current_time;
+		UINT32 diff_time;
+#endif
 //		CAThread threadReadFromUsers;
 //		threadReadFromUsers.setMainLoop(loopReadFromUsers);
 //		threadReadFromUsers.start(this);
@@ -595,7 +599,13 @@ SINT32 CAFirstMix::loop()
 										ret=pMuxSocket->receive(pMixPacket,0);
 										if(ret==SOCKET_ERROR/*||pHashEntry->accessUntil<time()*/)
 											{
-												m_pIPList->removeIP(pHashEntry->peerIP);
+												#ifndef LOG_CHANNEL
+													m_pIPList->removeIP(pHashEntry->peerIP);
+												#else
+													getcurrentTimeMillis(current_time);
+													diff_time=diff64(current_time,pHashEntry->timeCreated);
+													m_pIPList->removeIP(pHashEntry->peerIP,diff_time,pHashEntry->trafficIn,pHashEntry->trafficOut);
+												#endif
 												m_psocketgroupUsersRead->remove(*(CASocket*)pMuxSocket);
 												m_psocketgroupUsersWrite->remove(*(CASocket*)pMuxSocket);
 												fmChannelListEntry* pEntry;
