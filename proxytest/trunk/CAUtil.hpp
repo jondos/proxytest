@@ -68,7 +68,7 @@ SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, const UINT8* const xml, 
 
 inline void set64(UINT64& op1,UINT32 op2)
 	{
-#if !defined(_WIN32)&&!defined(__linux)
+#if !defined(HAVE_NATIVE_UINT64)
 		op1.low=op2;
 		op1.high=0;
 #else
@@ -78,7 +78,7 @@ inline void set64(UINT64& op1,UINT32 op2)
 
 inline void set64(UINT64& op1,UINT64 op2)
 	{
-#if !defined(_WIN32)&&!defined(__linux)
+#if !defined(HAVE_NATIVE_UINT64)
 		op1.low=op2.low;
 		op1.high=op2.high;
 #else
@@ -88,7 +88,7 @@ inline void set64(UINT64& op1,UINT64 op2)
 
 inline void add64(UINT64& op1,UINT32 op2)
 	{
-#if !defined(_WIN32)&&!defined(__linux)
+#if !defined(HAVE_NATIVE_UINT64)
 		UINT32 t=op1.low;
 		op1.low+=op2;
 		if(op1.low<t)
@@ -100,7 +100,7 @@ inline void add64(UINT64& op1,UINT32 op2)
 
 inline void inc64(UINT64& op1)
 	{
-#if !defined(_WIN32)&&!defined(__linux)
+#if !defined(HAVE_NATIVE_UINT64)
 	op1.low++;
 	if(op1.low==0)
 		op1.high++;
@@ -111,7 +111,7 @@ inline void inc64(UINT64& op1)
 
 inline UINT32 diff64(UINT64& bigop,UINT64& smallop)
 	{
-		#if !defined(_WIN32)&&!defined(__linux)
+		#if !defined(HAVE_NATIVE_UINT64)
 			return (UINT32) -1; //TODO!!!
 		#else
 			return (UINT32)(bigop-smallop);
@@ -120,7 +120,7 @@ inline UINT32 diff64(UINT64& bigop,UINT64& smallop)
 
 inline UINT32 div64(UINT64& op1,UINT32 op2)
 	{
-#if !defined(_WIN32)&&!defined(__linux)
+#if !defined(HAVE_NATVIE_UINT64)
 		return (UINT32) -1; //TODO!!!
 #else
 		return (UINT32)op1/op2;
@@ -131,7 +131,7 @@ inline void print64(UINT8* buff,UINT64& op)
 	{
 #if defined(_WIN32)
 		_ui64toa(op,(char*)buff,10);
-#elif defined(__linux)
+#elif defined(__linux)||defined(__sgi)
 		sprintf((char*)buff,"%Lu",op);
 #else
 		sprintf((char*)buff,"(%lu:%lu)",op.high,op.low);

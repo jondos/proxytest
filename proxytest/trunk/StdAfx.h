@@ -65,6 +65,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define HAVE_VSNPRINTF
 		#define vsnprintf _vsnprintf
 
+	#define HAVE_NATIVE_UINT64
+
 		typedef signed long SINT32;
 		typedef unsigned int UINT;
 		typedef signed int SINT;
@@ -167,6 +169,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
   #endif	
 	#if defined(__linux)
 		#include <linux/types.h>
+	#define HAVE_NATIVE_UINT64
+	typedef unsigned long long UINT64;
 		typedef __u32 UINT32;
 		typedef __s32 SINT32;
 		typedef unsigned int UINT;
@@ -176,7 +180,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		typedef __u8 UINT8;
 		typedef __s8 SINT8;
 	#elif defined(__sgi)
-		typedef __uint32_t UINT32;
+	#define HAVE_NATIVE_UINT64
+	typedef __uint64_t UINT64;	
+	 typedef __uint32_t UINT32;
 		typedef __int32_t SINT32;
 		typedef unsigned int UINT;
 		typedef signed int SINT;
@@ -208,9 +214,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #endif
 
-#ifdef __linux
-	typedef unsigned long long UINT64;
-#elif !defined(_WIN32)
+#if !defined(HAVE_NATIVE_UINT64)
     typedef struct __UINT64__t_
 	{
 		UINT32 high;
