@@ -100,7 +100,7 @@ DIST_COMMON =  Makefile.am Makefile.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 DEP_FILES =  .deps/popt.P .deps/popthelp.P .deps/poptparse.P
 SOURCES = $(libpopt_a_SOURCES)
