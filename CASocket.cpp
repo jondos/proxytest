@@ -226,6 +226,20 @@ int CASocket::receive(UINT8* buff,UINT32 len)
 	  return ret;	    	    
 	}
 
+SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len)
+	{
+		int ret;
+		int pos=0;
+	  do
+			{
+				ret=receive(buff+pos,len);
+				pos+=ret;
+				len-=ret;
+			}
+	  while(ret>0&&len>0);
+	  return ret;	    	    
+	}
+
 int CASocket::getLocalPort()
 	{
 		if(localPort==-1)
