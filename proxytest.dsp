@@ -261,6 +261,8 @@ SOURCE=.\xml\xmlinput.cpp
 
 !IF  "$(CFG)" == "proxytest - Win32 Release"
 
+# SUBTRACT CPP /YX /Yc /Yu
+
 !ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
 
 # SUBTRACT CPP /YX /Yc /Yu
@@ -279,6 +281,8 @@ SOURCE=.\xml\xmlinput.h
 SOURCE=.\xml\xmlinput_c.c
 
 !IF  "$(CFG)" == "proxytest - Win32 Release"
+
+# SUBTRACT CPP /YX /Yc /Yu
 
 !ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
 
