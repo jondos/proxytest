@@ -348,10 +348,9 @@ SINT32 CALastMix::loop()
 										    }
 										else
 										    {    
-//#ifdef _ASYNC
-//													tmpSocket->setASyncSend(true,-1,this);
-//#endif													
-													//tmpSocket->setASyncSend(true);
+#ifdef _ASYNC
+													tmpSocket->setASyncSend(true,-1,this);
+#endif													
 													int payLen=ntohs(oMuxPacket.payload.len);
 													#ifdef _DEBUG
 														oMuxPacket.payload.data[ntohs(oMuxPacket.payload.len)]=0;
@@ -385,7 +384,7 @@ SINT32 CALastMix::loop()
 									{
 										oSocketGroup.remove(*(oConnection.pSocket));
 										oConnection.pSocket->close();
-//										deleteResume(oMuxPacket.channel);
+										deleteResume(oMuxPacket.channel);
 										muxIn.close(oMuxPacket.channel);
 										oSocketList.remove(oMuxPacket.channel);
 										delete oConnection.pSocket;
@@ -415,9 +414,9 @@ SINT32 CALastMix::loop()
 												oSocketList.remove(oMuxPacket.channel);
 												delete oConnection.pSocket;
 												delete oConnection.pCipher;
-//												deleteResume(oMuxPacket.channel);
+												deleteResume(oMuxPacket.channel);
 											}
-/*										else if(ret==E_QUEUEFULL)
+										else if(ret==E_QUEUEFULL)
 											{
 												EnterCriticalSection(&csResume);
 												oSuspendList.add(oMuxPacket.channel,oConnection.pSocket,NULL);
@@ -426,7 +425,7 @@ SINT32 CALastMix::loop()
 												muxIn.send(&oMuxPacket);
 												LeaveCriticalSection(&csResume);
 											}
-*/									}
+									}
 							}
 					}
 				if(countRead>0)
@@ -452,7 +451,7 @@ SINT32 CALastMix::loop()
 												delete tmpCon->pSocket;
 												delete tmpCon->pCipher;
 												oSocketList.remove(tmpCon->id);
-//												deleteResume(tmpCon->id);
+												deleteResume(tmpCon->id);
 											}
 										else 
 											{
