@@ -60,7 +60,8 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(sbindir)"
 sbinPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(sbin_PROGRAMS)
-am_proxytest_OBJECTS = CAASymCipher.$(OBJEXT) CABase64.$(OBJEXT) \
+am_proxytest_OBJECTS = CAAbstractControlChannel.$(OBJEXT) \
+	CAASymCipher.$(OBJEXT) CABase64.$(OBJEXT) \
 	CACacheLoadBalancing.$(OBJEXT) CACertificate.$(OBJEXT) \
 	CACertStore.$(OBJEXT) CACmdLnOptions.$(OBJEXT) \
 	CAConditionVariable.$(OBJEXT) \
@@ -88,6 +89,7 @@ DEFAULT_INCLUDES = -I. -I$(srcdir) -I.
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/CAASymCipher.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/CAAbstractControlChannel.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CABase64.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CACacheLoadBalancing.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CACertStore.Po \
@@ -243,7 +245,8 @@ sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 AUTOMAKE_OPTIONS = foreign
-proxytest_SOURCES = CAASymCipher.cpp \
+proxytest_SOURCES = CAAbstractControlChannel.cpp\
+		    CAASymCipher.cpp \
 		    CABase64.cpp \
 		    CACacheLoadBalancing.cpp\
 		    CACertificate.cpp\
@@ -285,6 +288,7 @@ proxytest_SOURCES = CAASymCipher.cpp \
 		    CAUtil.cpp \
 		    StdAfx.cpp \
 		    proxytest.cpp \
+		    CAAbstractControlChannel.hpp\
 		    CAASymCipher.hpp \
 		    CABase64.hpp \
 		    CACacheLoadBalancing.hpp\
@@ -427,6 +431,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAASymCipher.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAAbstractControlChannel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CABase64.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CACacheLoadBalancing.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CACertStore.Po@am__quote@
