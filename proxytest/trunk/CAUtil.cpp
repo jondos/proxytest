@@ -44,9 +44,11 @@ UINT32 strtrim(UINT8* s)
 		end--;
 		UINT32 start=0;
 		UINT32 size;
-		while(start<end&&s[start]<=32)
+		while(start<=end&&s[start]<=32)
 			start++;
-		while(end>=start&&s[end]<=32)
+		if(start>end) //empty string....
+			return 0;
+		while(end>start&&s[end]<=32)
 			end--;
 		size=(end+1)-start;
 		memmove(s,s+start,size);
@@ -71,9 +73,11 @@ SINT32 memtrim(UINT8* dest,const UINT8* src,UINT32 size)
 			return E_UNSPECIFIED;
 		UINT32 start=0;
 		UINT32 end=size-1;
-		while(start<end&&src[start]<=32)
+		while(start<=end&&src[start]<=32)
 			start++;
-		while(end>=start&&src[end]<=32)
+		if(start>end) //empty string....
+			return 0;
+		while(end>start&&src[end]<=32)
 			end--;
 		size=(end+1)-start;
 		memmove(dest,src+start,size);
