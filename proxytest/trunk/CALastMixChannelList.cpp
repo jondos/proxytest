@@ -178,4 +178,3 @@ SINT32 CALastMixChannelList::test()
 						}
 					return 0;
 				}
-	
