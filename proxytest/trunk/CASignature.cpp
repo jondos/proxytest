@@ -32,33 +32,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "xml/xmlstream.h"
 #include "xml/xmlinput.h"
 
-class BufferInputStream:public XMLInputStream
-	{
-		public:
-			BufferInputStream(UINT8* buff,UINT32 l)
-				{
-					buffer=buff;
-					len=l;
-					pos=0;
-				}
-
-		int read(XML_Char *buf, size_t bufLen)
-			{
-				UINT32 size=(UINT32)min(bufLen,len-pos);
-				if(size==0)
-					return 0;
-				memcpy(buf,buffer+pos,size);
-				pos+=size;
-				return size;
-			}
-
-		private:
-			UINT8* buffer;
-			UINT32 pos;
-			UINT32 len;
-	};
-
-
 CASignature::CASignature()
 	{
 		m_pDSA=NULL;

@@ -100,6 +100,7 @@ SINT32 CALastMix::init()
 				CAMsg::printMsg(LOG_CRIT,"Could not generate a valid key pair\n");
 				return E_UNKNOWN;
 			}
+
 		CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...\n");
 		CASocketAddr* pAddrListen;
 		UINT8 path[255];
@@ -137,15 +138,45 @@ SINT32 CALastMix::init()
 			}
 		
 		CAMsg::printMsg(LOG_INFO,"connected!\n");
-		CAMsg::printMsg(LOG_INFO,"Sending Infos (chain length and RSA-Key, RSA-Keysize %u)\n",mRSA.getPublicKeySize());
-		UINT32 keySize=mRSA.getPublicKeySize();
-		UINT16 messageSize=keySize+1;
-		UINT8* buff=new UINT8[messageSize+2];
+		
+		UINT16 messageSize=0;
+		UINT32 keySize=0;
+		UINT8* buff=NULL;
+#ifndef NEW_KEY_PROTOCOL		
+		keySize=mRSA.getPublicKeySize();
+		messageSize=keySize+1;
+		buff=new UINT8[messageSize+2];
 		UINT16 tmp=htons(messageSize);
 		memcpy(buff,&tmp,2);
 		buff[2]=1; //chainlen
 		mRSA.getPublicKey(buff+3,&keySize);
-		if(((CASocket*)muxIn)->send(buff,messageSize+2)!=messageSize+2)
+		messageSize+=2;
+#else
+		//Constructing the XML Key Info in buff
+		buff=new UINT8[1024];
+		keySize=1024;
+		UINT32 aktIndex=2; //First two bytes for len reserved
+		//Beginn with: <?XML version="1.0"?><Mixes count="1"><Mix id="  
+		memcpy(buff+aktIndex,"<?XML version=\"1.0\"?><Mixes count=\"1\"><Mix id=\"",47);
+		aktIndex+=47;
+		//than insert the Mix id
+		options.getMixId(buff+aktIndex,50);
+		aktIndex=strlen((char*)buff);
+		//the closing chars for the <Mix> tag
+		memcpy(buff+aktIndex,"\">",2);
+		aktIndex+=2;
+		//the Key Value
+		mRSA.getPublicKeyAsXML(buff+aktIndex,&keySize);
+		aktIndex+=keySize;
+		//the closing Mix and Mixes tags
+		memcpy(buff+aktIndex,"</Mix></Mixes>",14);
+		aktIndex+=14;
+		messageSize=aktIndex;		
+		UINT16 tmp=htons(messageSize-2);
+		memcpy(buff,&tmp,2);		
+#endif
+		CAMsg::printMsg(LOG_INFO,"Sending Infos (chain length and RSA-Key, Message-Size %u)\n",messageSize);
+		if(((CASocket*)muxIn)->send(buff,messageSize)!=messageSize)
 			{
 				CAMsg::printMsg(LOG_ERR,"Error sending Key-Info!\n");
 				delete []buff;

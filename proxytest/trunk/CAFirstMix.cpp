@@ -38,6 +38,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketAddrUnix.hpp"
 #include "CAThread.hpp"
 #include "CAUtil.hpp"
+#include "xml/xmlinput.h"
 
 extern CACmdLnOptions options;
 
@@ -128,6 +129,9 @@ SINT32 CAFirstMix::init()
 				return E_UNKNOWN;
 			}
 		CAMsg::printMsg(LOG_CRIT,"Received Key Info lenght %u\n",ntohs(len));
+		m_pRSA=new CAASymCipher;
+		m_pRSA->generateKeyPair(1024);
+#ifndef NEW_KEY_PROTOCOL 
 		UINT8* recvBuff=new UINT8[ntohs(len)+2];
 		memcpy(recvBuff,&len,2);
 
@@ -138,8 +142,7 @@ SINT32 CAFirstMix::init()
 				return E_UNKNOWN;
 			}
 		CAMsg::printMsg(LOG_CRIT,"Received Key Info...\n");
-		m_pRSA=new CAASymCipher;
-		m_pRSA->generateKeyPair(1024);
+
 		UINT32 keySize=m_pRSA->getPublicKeySize();
 		m_KeyInfoSize=ntohs((*(UINT16*)recvBuff))+2;
 		m_KeyInfoBuff=new UINT8[m_KeyInfoSize+keySize];
@@ -150,7 +153,21 @@ SINT32 CAFirstMix::init()
 		m_pRSA->getPublicKey(m_KeyInfoBuff+m_KeyInfoSize,&keySize);
 		m_KeyInfoSize+=keySize;
 		(*(UINT16*)m_KeyInfoBuff)=htons(m_KeyInfoSize-2);
+		initMixCascadeInfo(NULL,m_KeyInfoBuff[2]);			
+#else
+		len=ntohs(len);
+		UINT8* recvBuff=new UINT8[len+1];
 
+		if(((CASocket*)(*m_pMuxOut))->receiveFully(recvBuff,len)!=E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info!\n");
+				delete []recvBuff;
+				return E_UNKNOWN;
+			}
+		CAMsg::printMsg(LOG_CRIT,"Received Key Info...\n");
+		recvBuff[len]=0; //get the Key's from the other mixes (and the Mix-Id's...!)
+		initMixCascadeInfo(recvBuff,len+1);			
+#endif
 		
 		CASocketAddrINet socketAddrIn;
 		UINT8 serverHost[255];
@@ -199,7 +216,7 @@ SINT32 CAFirstMix::init()
 		m_pChannelList=new CAFirstMixChannelList();
 		m_psocketgroupUsersRead=new CASocketGroup;
 		m_psocketgroupUsersWrite=new CASocketGroup;
-		m_pInfoService=new CAInfoService(this,numberOfMixes);
+		m_pInfoService=new CAInfoService(this);
 		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix init() succeded\n");
 		return E_SUCCESS;
 	}
@@ -927,8 +944,187 @@ SINT32 CAFirstMix::clean()
 		if(m_KeyInfoBuff!=NULL)
 			delete []m_KeyInfoBuff;
 		m_KeyInfoBuff=NULL;
+		if(m_strXmlMixCascadeInfo!=NULL)
+			delete []m_strXmlMixCascadeInfo;
+		m_strXmlMixCascadeInfo=NULL;
 		#ifdef _DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"CAFirstMix::clean() finished\n");
 		#endif
+		return E_SUCCESS;
+	}
+
+ struct internal_mix_handler_data_struct
+	{
+		UINT32 mixcount;
+		UINT8* keyBuff;
+		UINT32 keyBuffSize;
+		UINT8* cascadeInfo;
+		BufferInputStream* input;
+	};
+	
+typedef struct internal_mix_handler_data_struct INTERNAL_MIX_HANDLER_STRUCT;
+
+static void sMixHandler(XMLElement &elem, void *userData)
+	{
+		INTERNAL_MIX_HANDLER_STRUCT* data=(INTERNAL_MIX_HANDLER_STRUCT*)userData;
+		CAASymCipher oRSA;
+		UINT32 aktPos=elem.GetInput().GetOffset();
+		UINT32 size=data->input->getSize()-aktPos;
+		oRSA.setPublicKeyAsXML(data->input->getBuffer()+aktPos,&size);
+		UINT32 len=1024;
+		oRSA.getPublicKey(data->keyBuff+data->keyBuffSize,&len);
+		data->keyBuffSize+=len;
+		XMLAttribute attrs=elem.GetAttrList();
+		while(strcmp(attrs.GetName(),"id")!=0)
+			attrs=attrs.GetNext();
+		strcat((char*)data->cascadeInfo,"<Mix id=\"");
+		strcat((char*)data->cascadeInfo,attrs.GetValue());
+		strcat((char*)data->cascadeInfo,"\"></Mix>");
+	}
+
+static void sMixesHandler(XMLElement &elem, void *userData)
+	{	
+		INTERNAL_MIX_HANDLER_STRUCT* data=(INTERNAL_MIX_HANDLER_STRUCT*)userData;
+		// set up initial handler for RSA-Key
+		XMLHandler handlers[] = 
+			{
+				XMLHandler("Mix",sMixHandler),
+				XMLHandler::END
+			};
+		XMLAttribute attrs=elem.GetAttrList();
+		while(strcmp(attrs.GetName(),"count")!=0)
+			{
+				attrs=attrs.GetNext();
+			}
+		data->mixcount=atol(attrs.GetValue());
+		sprintf((char*)data->cascadeInfo,"<Mixes count=\"%u\">",data->mixcount+1);
+		UINT8 tmpBuff[50];
+		options.getMixId(tmpBuff,50);
+		sprintf((char*)data->cascadeInfo+strlen((char*)data->cascadeInfo),"<Mix id=\"%s\"></Mix>",tmpBuff);
+		elem.Process(handlers,userData);
+		strcat((char*)data->cascadeInfo,"</Mixes>");
+	}
+
+/** This will initialize the XML Cascade Info send to the InfoService and
+  * the Key struct which is send to each user which connects
+	* This function is called from init()
+	*/
+SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
+	{ 
+#ifdef NEW_KEY_PROTOCOL
+		//Parse the input, which is the XML send from the previos mix, containing keys and id's
+		if(recvBuff==NULL||len==0)
+			return E_UNKNOWN;
+
+		BufferInputStream* pStream=new BufferInputStream(recvBuff,len);
+		XMLInput input(*pStream);
+		// set up initial handler for RSA-Key
+		XMLHandler handlers[] = 
+			{
+				XMLHandler("Mixes",sMixesHandler),
+				XMLHandler::END
+			};
+	
+		INTERNAL_MIX_HANDLER_STRUCT tmpData;
+		memset(&tmpData,0,sizeof(tmpData));
+		tmpData.input=pStream;
+		tmpData.keyBuff=new UINT8[6000];
+		len=6000;
+		m_pRSA->getPublicKey(tmpData.keyBuff+3,&len);
+		tmpData.keyBuffSize=len+3;
+		tmpData.cascadeInfo=new UINT8[10000]; //onyl for <Mixes>....</Mixes>
+		try
+			{
+				input.Process(handlers, &tmpData);
+			}
+		catch (const XMLParseException &e)
+			{
+				delete pStream;
+				return E_UNKNOWN;
+			}
+		delete pStream;
+		UINT16 tmp=htons(tmpData.keyBuffSize);
+		memcpy(tmpData.keyBuff,&tmp,2);
+		m_KeyInfoBuff=tmpData.keyBuff;
+		m_KeyInfoSize=tmpData.keyBuffSize;
+		m_KeyInfoBuff[2]=tmpData.mixcount+1;
+
+//CascadInfo
+		BufferOutputStream oBufferStream(1024,1024);
+		XMLOutput oxmlOut(oBufferStream);
+		oBufferStream.reset();
+		oxmlOut.BeginDocument("1.0","UTF-8",true);
+		oxmlOut.BeginElementAttrs("MixCascade");
+		UINT8 hostname[255];
+		UINT8 id[50];
+		if(options.getServerHost(hostname,255)!=E_SUCCESS)
+			{
+				CASocketAddrINet::getLocalHostName(hostname,255);
+			}
+		options.getMixId(id,50);
+		oxmlOut.WriteAttr("id",(char*)id);
+		oxmlOut.EndAttrs();
+		UINT8 name[255];
+		if(options.getCascadeName(name,255)!=E_SUCCESS)
+			{
+				return E_UNKNOWN;
+			}
+		oxmlOut.WriteElement("Name",(char*)name);
+		oxmlOut.WriteElement("IP",(char*)hostname);
+		oxmlOut.WriteElement("Port",(int)options.getServerPort());
+		if(options.getProxySupport())
+      oxmlOut.WriteElement("ProxyPort",(int)443);
+		oxmlOut.writeString((char*)tmpData.cascadeInfo);
+		oxmlOut.EndElement();
+		oxmlOut.EndDocument();
+		len=oBufferStream.getBufferSize();
+		m_strXmlMixCascadeInfo=new UINT8[len+1];
+		memcpy(m_strXmlMixCascadeInfo,oBufferStream.getBuff(),len);
+		m_strXmlMixCascadeInfo[len]=0;
+#else
+		BufferOutputStream oBufferStream(1024,1024);
+		XMLOutput oxmlOut(oBufferStream);
+		oBufferStream.reset();
+		oxmlOut.BeginDocument("1.0","UTF-8",true);
+		oxmlOut.BeginElementAttrs("MixCascade");
+		UINT8 hostname[255];
+		UINT8 id[50];
+		if(options.getServerHost(hostname,255)!=E_SUCCESS)
+			{
+				CASocketAddrINet::getLocalHostName(hostname,255);
+			}
+		options.getMixId(id,50);
+		oxmlOut.WriteAttr("id",(char*)id);
+		oxmlOut.EndAttrs();
+		UINT8 name[255];
+		if(options.getCascadeName(name,255)!=E_SUCCESS)
+			{
+				return E_UNKNOWN;
+			}
+		oxmlOut.WriteElement("Name",(char*)name);
+		oxmlOut.WriteElement("IP",(char*)hostname);
+		oxmlOut.WriteElement("Port",(int)options.getServerPort());
+		if(options.getProxySupport())
+      oxmlOut.WriteElement("ProxyPort",(int)443);
+		oxmlOut.BeginElementAttrs("Mixes");
+		oxmlOut.WriteAttr("count",(int)len);
+		oxmlOut.EndAttrs();
+		oxmlOut.EndElement();
+		oxmlOut.EndElement();
+		oxmlOut.EndDocument();
+		len=oBufferStream.getBufferSize();
+		m_strXmlMixCascadeInfo=new UINT8[len+1];
+		memcpy(m_strXmlMixCascadeInfo,oBufferStream.getBuff(),len);
+		m_strXmlMixCascadeInfo[len]=0;
+#endif
+		return E_SUCCESS;
+	}
+
+SINT32 CAFirstMix::getMixCascadeInfo(UINT8* buff,UINT32*len)
+	{
+		if(buff==NULL||len==NULL||*len<strlen((char*)m_strXmlMixCascadeInfo))
+			return E_UNKNOWN;
+		strcpy((char*)buff,(char*)m_strXmlMixCascadeInfo);
+		*len=strlen((char*)m_strXmlMixCascadeInfo)+1;
 		return E_SUCCESS;
 	}

@@ -139,4 +139,47 @@ class BufferOutputStream:public XMLOutputStream
 			UINT32 m_used; ///The number of bytes already used of the buffer
 			UINT32 m_grow; ///The number of bytes by which the buffer should grow if neccesary
 	};
+
+
+class BufferInputStream:public XMLInputStream
+	{
+		public:
+			BufferInputStream(UINT8* buff,UINT32 l)
+				{
+					buffer=buff;
+					len=l;
+					pos=0;
+				}
+
+		int read(XML_Char *buf, size_t bufLen)
+			{
+				UINT32 size=(UINT32)min(bufLen,len-pos);
+				if(size==0)
+					return 0;
+				memcpy(buf,buffer+pos,size);
+				pos+=size;
+				return size;
+			}
+
+		UINT32 getPos()
+			{
+				return pos;
+			}
+
+		UINT32 getSize()
+			{
+				return len;
+			}
+
+		UINT8* getBuffer()
+			{
+				return buffer;
+			}
+
+		private:
+			UINT8* buffer;
+			UINT32 pos;
+			UINT32 len;
+	};
+
 #endif
