@@ -156,7 +156,7 @@ SINT32 getcurrentTimeMillis(UINT64& u64Time)
 			struct _timeb timebuffer;
 			_ftime(&timebuffer);
 			/* Hack what should be solved better...*/
-			u64Time=timebuffer.time*1000+timebuffer.millitm;
+			u64Time=((UINT64)timebuffer.time)*1000+((UINT64)timebuffer.millitm);
 			/* end of hack..*/
 			return E_SUCCESS;
 	  #else //we dont use ftime due to a bug in glibc2.0
