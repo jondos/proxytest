@@ -228,7 +228,7 @@ class CACmdLnOptions
 		private:
 			UINT8*	m_strConfigFile; //the filename of the config file
 			bool		m_bIsRunReConfigure; //true, if an async reconfigure is under way
-	    CAMutex m_csReConfigure; //Ensures that reconfigure is running only once at the same time;
+	    CAMutex* m_pcsReConfigure; //Ensures that reconfigure is running only once at the same time;
 			CAThread m_threadReConfigure; //Thread, that does the actual reconfigure work
 			bool		m_bDaemon;
 	    UINT16	m_iSOCKSServerPort;

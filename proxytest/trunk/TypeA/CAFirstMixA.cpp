@@ -398,7 +398,6 @@ SINT32 CAFirstMixA::loop()
 										#endif
 		
 #ifndef NO_PARKING
-#define MAX_USER_SEND_QUEUE 100000
 										if(pEntry->pHead->pQueueSend->getSize()>MAX_USER_SEND_QUEUE&&
 												!pEntry->bIsSuspended)
 											{

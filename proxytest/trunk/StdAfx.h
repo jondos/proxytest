@@ -77,6 +77,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define NUM_LOGIN_WORKER_TRHEADS 50 //How many working threads for login ??
 #define MAX_LOGIN_QUEUE 500 //how many waiting entries in the login queue ??
 
+#define MAX_USER_SEND_QUEUE 100000 //How many bytes could be in each User's send queue, before we suspend the belonging channels
+
 #ifndef MIX_POOL_SIZE
 	#define MIX_POOL_SIZE 10  //packets in the Mix pool
 #endif
