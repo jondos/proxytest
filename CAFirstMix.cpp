@@ -1230,8 +1230,8 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		elem.appendChild(text);
 		elemRoot.appendChild(elem);
 		
-		UINT8 hostname[255];
-		UINT8 ip[255];
+		//UINT8 hostname[255];
+		//UINT8 ip[255];
 		elem=m_docMixCascadeInfo.createElement("Network");
 		elemRoot.appendChild(elem);
 		DOM_Element elemListenerInterfaces=m_docMixCascadeInfo.createElement("ListenerInterfaces");

@@ -170,7 +170,7 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 						m_pMuxOut->setReceiveKey(key+32,32);
 						UINT32 outlen=0;
 						UINT8* out=DOM_Output::dumpToMem(docSymKey,&outlen);
-						UINT16 size=htons(outlen);
+						UINT16 size=htons((UINT16)outlen);
 						((CASocket*)m_pMuxOut)->send((UINT8*)&size,2);
 						((CASocket*)m_pMuxOut)->send(out,outlen);
 						delete[] out;
@@ -244,11 +244,11 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 		#ifdef _DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"New Key Info size: %u\n",outlen);
 		#endif
-		len=htons(outlen);
+		len=htons((UINT16)outlen);
 		memcpy(out,&len,2);
 		ret=((CASocket*)*m_pMuxIn)->send(out,outlen+2);
 		delete[] out;
-		if(ret!=outlen+2)
+		if(ret<0||(UINT32)ret!=outlen+2)
 			{
 				CAMsg::printMsg(LOG_DEBUG,"Error sending new New Key Info\n");
 				return E_UNKNOWN;

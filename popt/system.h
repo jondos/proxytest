@@ -1,25 +1,3 @@
-/*#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include <ctype.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <limits.h>
-
-#if HAVE_MCHECK_H 
-#include <mcheck.h>
-#endif
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-*/
 #ifdef __NeXT
 /* access macros are not declared in non posix mode in unistd.h -
  don't try to use posix on NeXTstep 3.3 ! */
@@ -28,28 +6,32 @@
 
 
 #ifdef __ICC
-#define HAVE_ALLOCA_H
-#define alloca(size) _alloca(size)
+	#define HAVE_ALLOCA_H
+	#define alloca(size) _alloca(size)
 #else
 /* AIX requires this to be the first thing in the file.  */ 
-#ifndef __GNUC__
-# ifdef HAVE_ALLOCA_H
-#  include <alloca.h>
-# else
-#  ifdef _AIX
-#pragma alloca
-#  else
-#   ifndef alloca /* predefined by HP cc +Olibcalls */
-char *alloca ();
-#   endif
-#  endif
-# endif
-#elif defined(__GNUC__) && defined(__STRICT_ANSI__)
-#define alloca __builtin_alloca
-#endif
-#ifdef _WIN32
-	#define alloca _alloca
-#endif
+	#ifndef __GNUC__
+		#ifdef HAVE_ALLOCA_H
+			#include <alloca.h>
+		#else
+			#ifdef _AIX
+				#pragma alloca
+			#else
+				#ifndef alloca /* predefined by HP cc +Olibcalls */
+					char *alloca ();
+				#endif
+			#endif
+		#endif
+	#elif defined(__GNUC__) && defined(__STRICT_ANSI__)
+		#define alloca __builtin_alloca
+	#else
+		#ifdef HAVE_ALLOCA_H
+			#include <alloca.h>
+		#endif
+	#endif
+	#ifdef _WIN32
+		#define alloca _alloca
+	#endif
 #endif
 /*@only@*/ char * xstrdup (const char *str);
 
@@ -59,6 +41,3 @@ char *alloca ();
 #else
 #define	xstrdup(_str)	strdup(_str)
 #endif  /* HAVE_MCHECK_H && defined(__GNUC__) */
-
-
-//#include "popt.h"
