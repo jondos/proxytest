@@ -49,6 +49,7 @@ class CAFirstMix:public CAMix,CASocketASyncSendResume
 #endif
 		private:
 			CASocket		socketIn;
+      CASocket		m_socketHttpsIn;
 			CAMuxSocket muxOut;
 #ifndef PROT2
 			UINT8* recvBuff;

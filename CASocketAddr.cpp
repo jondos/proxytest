@@ -79,7 +79,13 @@ SINT32 CASocketAddr::setAddr(char* szIP,UINT16 port)
 			}
 		return E_SUCCESS;
 	}
-			
+
+SINT32 CASocketAddr::setPort(UINT16 port)
+	{
+		sin_port=htons(port);
+		return E_SUCCESS;
+	}
+
 CASocketAddr::CASocketAddr(UINT16 port)
 	{
 		sin_family=AF_INET;

@@ -37,7 +37,8 @@ class CASocketAddr:public sockaddr_in
 			CASocketAddr(UINT16 port);
 
 			SINT32 setAddr(char* szIP,UINT16 port);
-			UINT16 getPort();
+      SINT32 setPort(UINT16 port);
+      UINT16 getPort();
 			SINT32 getHostName(UINT8* buff,UINT32 len);
 			static SINT32 getLocalHostName(UINT8* buff,UINT32 len);
 			static SINT32 getLocalHostIP(UINT8* ip);

@@ -36,6 +36,7 @@ class CACmdLnOptions
 	    ~CACmdLnOptions();
 	    int parse(int argc,const char** arg);
 	    bool getDaemon();
+      bool getProxySupport();
 	    UINT16 getServerPort();
 	    SINT32 getServerRTTPort();
 			UINT16 getSOCKSServerPort();
@@ -55,6 +56,7 @@ class CACmdLnOptions
 			bool isLastMix();
 	protected:
 	    bool bDaemon;
+      bool m_bHttps;
 	    UINT16 iServerPort;
 			SINT32 iServerRTTPort;
 	    UINT16 iSOCKSServerPort;
@@ -67,7 +69,7 @@ class CACmdLnOptions
 	    UINT16 iInfoServerPort;
 			char* strKeyFileName;
 			bool bLocalProxy,bFirstMix,bMiddleMix,bLastMix;
-			char* strCascadeName;  
-			char* strLogDir;  
+			char* strCascadeName;
+			char* strLogDir;
 	};
 #endif
