@@ -121,9 +121,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //			#include <ctype.h>
 		#endif
     #ifndef __linux 
-	#ifndef INADDR_NONE
-    	    #define INADDR_NONE -1
-	#endif
     	#include <sys/filio.h>
     	#define MSG_NOSIGNAL 0
     #endif
@@ -142,6 +139,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#include <sys/poll.h>
     #include <sys/time.h>
     #include <netinet/in.h>
+		#ifndef INADDR_NONE
+    	#define INADDR_NONE -1
+		#endif
     #include <arpa/inet.h>
     #include <netdb.h>
 //    #include <pthread.h>
