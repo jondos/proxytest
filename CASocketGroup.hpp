@@ -3,6 +3,7 @@ class CASocketGroup
 		public:
 			CASocketGroup();
 			int add(CASocket&s);
+			int remove(CASocket&s);
 			int select();
 			bool isSignaled(CASocket&s);
 		protected:

@@ -5,27 +5,31 @@ CAMsg CAMsg::oMsg;
 
 CAMsg::CAMsg()
     {
-	isLog=false;
+			isLog=false;
     }
 
 CAMsg::~CAMsg()
     {
-	if(isLog)
-	    {
-		closelog();
-	    }	
+			if(isLog)
+				{
+					#ifndef _WIN32
+						::closelog();
+					#endif
+				}		
     }
     
 int CAMsg::setOptions(int options)
     {
-	if(options&MSG_LOG)
-	    {
-		if(oMsg.isLog)
-		    return 0;
-		openlog("AnonMix",0,LOG_USER);
-		oMsg.isLog=true;
-	    }
-	return 0;
+			if(options&MSG_LOG)
+					{
+						if(oMsg.isLog)
+								return 0;
+						#ifndef _WIN32
+							openlog("AnonMix",0,LOG_USER);
+						#endif
+						oMsg.isLog=true;
+					}
+			return 0;
     }
 
 int CAMsg::printMsg(int type,char* format,...)
@@ -34,7 +38,9 @@ int CAMsg::printMsg(int type,char* format,...)
 	va_start(ap,format);
 	if(oMsg.isLog)
 	    {
-		syslog(type,format,ap);
+				#ifndef _WIN32
+					syslog(type,format,ap);
+				#endif
 	    }
 	else
 	    {

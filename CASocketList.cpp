@@ -17,6 +17,7 @@ CASocketList::CASocketList()
 				tmp->pSocket=NULL;
 			}
 		tmp->next=NULL;
+		aktEnumPos=NULL;
 		InitializeCriticalSection(&cs);
 	}
 
@@ -43,6 +44,45 @@ int CASocketList::add(CASocket* pSocket)
 			connections->pSocket=pSocket;
 			ret=connections->id;
 		    }
+		LeaveCriticalSection(&cs);
+		return ret;
+	}
+
+int CASocketList::add(int id,CASocket* pSocket)
+	{
+		EnterCriticalSection(&cs);
+		CONNECTIONLIST* tmp;
+		int ret;
+		if(pool==NULL)
+		    {
+					ret=SOCKET_ERROR;
+		    }
+		else
+		    {
+					CONNECTIONLIST* before=NULL;
+					tmp=pool;
+					while(tmp!=NULL)
+						{
+							if(tmp->id==id)
+								{
+									tmp->pSocket=pSocket;
+									if(before!=NULL)
+										{
+											before->next=tmp->next;
+										}
+									else
+										pool=tmp->next;
+									tmp->next=connections;
+									connections=tmp;
+									ret=connections->id;
+									goto ende;
+								}
+							before=tmp;
+							tmp=tmp->next;
+						}
+					ret=-1;
+			}
+ende:
 		LeaveCriticalSection(&cs);
 		return ret;
 	}
@@ -93,4 +133,17 @@ CASocket* CASocketList::remove(int id)
 			}
 		LeaveCriticalSection(&cs);
 		return NULL;
+	}
+
+CONNECTION* CASocketList::getFirst()
+	{
+		aktEnumPos=connections;
+		return aktEnumPos;
+	}
+
+CONNECTION* CASocketList::getNext()
+	{
+		if(aktEnumPos!=NULL)
+			aktEnumPos=aktEnumPos->next;
+		return aktEnumPos;
 	}

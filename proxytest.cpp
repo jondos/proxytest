@@ -8,6 +8,11 @@
 #include "CASocketAddr.hpp"
 #include "CACmdLnOptions.hpp"
 #include "CAMsg.hpp"
+#include "CAMuxSocket.hpp"
+#include "CASocketList.hpp"
+HANDLE hEventThreadEnde;
+CACmdLnOptions options;
+
 CRITICAL_SECTION csClose;
 typedef struct
 {
@@ -40,6 +45,7 @@ typedef struct
 	#endif
 #endif
 
+		/*
 THREAD_RETURN proxytomix(void* tmpPair)
 	{
 		CASocket* inSocket=((CASocketToMix*)tmpPair)->in;	
@@ -107,13 +113,293 @@ THREAD_RETURN mixtoproxy(void* tmpPair)
 #endif
 		THREAD_RETURN_SUCCESS;
 	}
+*/
+
+struct MMPair
+	{
+		CAMuxSocket muxIn;
+		CAMuxSocket muxOut;
+	};
+
+THREAD_RETURN mmInToOut(void* v)
+	{
+		MMPair* mmIOPair=(MMPair*)v;
+		char* buff=new char[1001];
+		if(buff==NULL)
+		    {
+					CAMsg::printMsg(LOG_ERR,"Out of Memory!\n");
+					THREAD_RETURN_ERROR;
+		    }
+		while(true)
+			{
+				HCHANNEL channel;
+				int len=mmIOPair->muxIn.receive(&channel,buff,1000);
+				if(len==SOCKET_ERROR||len==0)
+					{
+						break;
+					}
+				if(mmIOPair->muxOut.send(channel,buff,len)==SOCKET_ERROR)
+					break;
+			}
+		delete buff;		
+	}
+
+THREAD_RETURN mmOutToIn(void* v)
+	{
+		MMPair* mmIOPair=(MMPair*)v;
+		char* buff=new char[1001];
+		if(buff==NULL)
+		    {
+					CAMsg::printMsg(LOG_ERR,"Out of Memory!\n");
+					THREAD_RETURN_ERROR;
+		    }
+		while(true)
+			{
+				HCHANNEL channel;
+				int len=mmIOPair->muxOut.receive(&channel,buff,1000);
+				if(len==SOCKET_ERROR||len==0)
+					{
+						break;
+					}
+				if(mmIOPair->muxIn.send(channel,buff,len)==SOCKET_ERROR)
+					break;
+			}
+		delete buff;		
+	}
+
+int doMiddleMix()
+	{
+		CASocketAddr nextMix;
+		MMPair* mmIOPair=new MMPair;
+		char strTarget[255];
+		options.getTargetHost(strTarget,255);
+		nextMix.setAddr(strTarget,options.getTargetPort());
+		mmIOPair->muxOut.connect(&nextMix);
+		mmIOPair->muxIn.accept(options.getServerPort());
+		_beginthread(mmInToOut,0,mmIOPair);
+		_beginthread(mmOutToIn,0,mmIOPair);
+		WaitForSingleObject(hEventThreadEnde,INFINITE);
+		delete mmIOPair;
+		return 0;
+	}
+
+struct FMPair
+	{
+		CASocket socketIn;
+		CAMuxSocket muxOut;
+	};
+
+THREAD_RETURN fmIO(void *v)
+	{
+		FMPair* fmIOPair=(FMPair*)v;
+		CASocketList  oSocketList;
+		CASocketGroup oSocketGroup;
+		oSocketGroup.add(fmIOPair->socketIn);
+		oSocketGroup.add(*((CASocket*)fmIOPair->muxOut));
+		
+		char buff[1001];
+		while(true)
+			{
+				oSocketGroup.select();
+				if(oSocketGroup.isSignaled(fmIOPair->socketIn))
+					{
+						CASocket* newSocket=new CASocket;
+						fmIOPair->socketIn.accept(*newSocket);
+						oSocketList.add(newSocket);
+						oSocketGroup.add(*newSocket);
+					}
+				else
+					if(oSocketGroup.isSignaled((*(CASocket*)fmIOPair->muxOut)))
+						{
+							HCHANNEL channel;
+							int len;
+							len=fmIOPair->muxOut.receive(&channel,buff,1000);
+							if(len==0)
+								{
+									CASocket* tmpSocket=oSocketList.remove(channel);
+									oSocketGroup.remove(*tmpSocket);
+									tmpSocket->close();
+									delete tmpSocket;
+								}
+							else
+								{
+									CASocket* tmpSocket=oSocketList.get(channel);
+									tmpSocket->send(buff,len);
+								}
+						}
+				else
+					{
+						CONNECTION* tmpCon;
+						tmpCon=oSocketList.getFirst();
+						while(tmpCon!=NULL)
+							{
+								if(oSocketGroup.isSignaled(*tmpCon->pSocket))
+									{
+										int len=tmpCon->pSocket->receive(buff,1000);
+										if(len==SOCKET_ERROR||len==0)
+											{
+												CASocket* tmpSocket=oSocketList.remove(tmpCon->id);
+												oSocketGroup.remove(*tmpSocket);
+												tmpSocket->close();
+												delete tmpSocket;
+												break;
+											}
+										if(fmIOPair->muxOut.send(tmpCon->id,buff,len)==SOCKET_ERROR)
+											break;
+										break;
+									}
+								tmpCon=oSocketList.getNext();
+							}
+					}
+			}
+	}
+
+int doFirstMix()
+	{
+		int ret;	
+		CASocketAddr socketAddrIn(options.getServerPort());
+		FMPair* fmIOPair=new FMPair;
+		if(fmIOPair->socketIn.listen(&socketAddrIn)==SOCKET_ERROR)
+		    {
+					CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
+					return -1;
+		    }
+		CASocketAddr addrNext;
+		char strTarget[255];
+		options.getTargetHost(strTarget,255);
+		addrNext.setAddr(strTarget,options.getTargetPort());
+		if(fmIOPair->muxOut.connect(&addrNext)!=SOCKET_ERROR)
+			{
+				fmIO(fmIOPair);
+				ret=0;
+			}
+		else
+			{
+				CAMsg::printMsg(LOG_CRIT,"Cannot connect to next Mix!\n");
+				ret=-1;
+			}
+	//	WaitForSingleObject(hEventThreadEnde,INFINITE);
+		delete fmIOPair;
+		return ret;
+	}
+
+struct LMPair
+	{
+		CAMuxSocket muxIn;
+		CASocketAddr addrSquid;
+	};
+
+THREAD_RETURN lmIO(void *v)
+	{
+		LMPair* lmIOPair=(LMPair*)v;
+		CASocketList  oSocketList;
+		CASocketGroup oSocketGroup;
+		oSocketGroup.add(*((CASocket*)lmIOPair->muxIn));
+		char buff[1001];
+		while(true)
+			{
+				if(oSocketGroup.select()==SOCKET_ERROR)
+					{
+						sleep(1);
+						continue;
+					}
+				if(oSocketGroup.isSignaled(*((CASocket*)lmIOPair->muxIn)))
+					{
+						HCHANNEL channel;
+						int len;
+						len=lmIOPair->muxIn.receive(&channel,buff,1000);
+						CASocket* tmpSocket=oSocketList.get(channel);
+						if(tmpSocket==NULL)
+							{
+								if(len!=0)
+									{
+										tmpSocket=new CASocket;
+										tmpSocket->connect(&lmIOPair->addrSquid);
+										oSocketList.add(channel,tmpSocket);
+										oSocketGroup.add(*tmpSocket);
+										tmpSocket->send(buff,len);
+									}
+							}
+						else
+							{
+								if(len==0)
+									{
+										oSocketGroup.remove(*tmpSocket);
+										tmpSocket->close();
+										lmIOPair->muxIn.send(channel,buff,0);
+										oSocketList.remove(channel);
+										delete tmpSocket;
+									}
+								else
+									{
+										len=tmpSocket->send(buff,len);
+										if(len==SOCKET_ERROR)
+											{
+												oSocketGroup.remove(*tmpSocket);
+												tmpSocket->close();
+												lmIOPair->muxIn.send(channel,buff,0);
+												oSocketList.remove(channel);
+												delete tmpSocket;
+											}
+									}
+							}
+					}
+				else
+					{
+						CONNECTION* tmpCon;
+						tmpCon=oSocketList.getFirst();
+						while(tmpCon!=NULL)
+							{
+								if(oSocketGroup.isSignaled(*(tmpCon->pSocket)))
+									{
+										int len=tmpCon->pSocket->receive(buff,1000);
+										if(len==SOCKET_ERROR||len==0)
+											{
+												oSocketGroup.remove(*tmpCon->pSocket);
+												tmpCon->pSocket->close();
+												lmIOPair->muxIn.send(tmpCon->id,buff,0);
+												oSocketList.remove(tmpCon->id);
+												delete tmpCon->pSocket;
+												break;
+											}
+										if(lmIOPair->muxIn.send(tmpCon->id,buff,len)==SOCKET_ERROR)
+											{
+												break;
+											}
+										break;
+									}
+								tmpCon=oSocketList.getNext();
+							}
+					}
+			}
+	}
+
+int doLastMix()
+	{
+		LMPair* lmIOPair=new LMPair;
+		if(lmIOPair->muxIn.accept(options.getServerPort())==SOCKET_ERROR)
+		    {
+					CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
+					delete lmIOPair;
+					return -1;
+		    }
+		char strTarget[255];
+		options.getTargetHost(strTarget,255);
+		lmIOPair->addrSquid.setAddr(strTarget,options.getTargetPort());
+	//	_beginthread(lmIO,0,lmIOPair);
+		lmIO(lmIOPair);
+		//WaitForSingleObject(hEventThreadEnde,INFINITE);
+		delete lmIOPair;
+		return 0;
+	}
+
 
 int main(int argc, const char* argv[])
 	{
 	
-	    CACmdLnOptions options;
 	    options.parse(argc,argv);
-	    if(options.getDaemon())
+#ifndef _WIN32
+			if(options.getDaemon())
 		{
 		    CAMsg::setOptions(MSG_LOG);
 		    pid_t pid;
@@ -124,9 +410,8 @@ int main(int argc, const char* argv[])
 		    chdir("/");
 		    umask(0);		    
 		}
+#endif
 	    CAMsg::printMsg(LOG_INFO,"Anon proxy started!\n");
-	    char strTargetHost[255];
-	    options.getTargetHost(strTargetHost,255);
 #ifdef _DEBUG
 		sockets=0;
 #endif
@@ -136,7 +421,7 @@ int main(int argc, const char* argv[])
 		err=WSAStartup(0x0202,&wsadata);
 		#endif
 		
-		InitializeCriticalSection(&csClose);
+/*		InitializeCriticalSection(&csClose);
 		CASocketAddr socketAddrIn(options.getServerPort());
 		socketAddrSquid.setAddr(strTargetHost,options.getTargetPort());
 		CASocket socketIn;
@@ -145,7 +430,8 @@ int main(int argc, const char* argv[])
 			CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
 			exit(-1);
 		    }
-//		time_t t=time(NULL);
+*/
+	//		time_t t=time(NULL);
 //		strftime(buff,BUFF_SIZE,"%Y%m%d-%H%M%S",localtime(&t));
 //		int handle=open(buff,_O_BINARY|_O_CREAT|_O_RDWR,S_IWRITE);
 #ifndef _WIN32
@@ -155,7 +441,17 @@ int main(int argc, const char* argv[])
 			signal(SIGPIPE,SIG_IGN);
 	#endif
 #endif
-		while(
+		if(options.isFirstMix())
+			{
+				doFirstMix();
+			}
+		else if(options.isMiddleMix())
+			{
+				doMiddleMix();
+			}
+		else
+			doLastMix();
+/*		while(
 		#ifdef _WIN32
 		!_kbhit()
 		#else
@@ -221,7 +517,8 @@ int main(int argc, const char* argv[])
 		CAMsg::printMsg(LOG_INFO,"Exiting...\n");	
 		socketIn.close();
 //	close(handle);
-#ifdef _WIN32		
+*/
+	#ifdef _WIN32		
 WSACleanup();
 #endif
 		DeleteCriticalSection(&csClose);
