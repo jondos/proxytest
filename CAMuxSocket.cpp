@@ -237,38 +237,43 @@ int CAMuxSocket::receive(MUXPACKET* pPacket)
 #else
 SINT32 CAMuxSocket::receive(MUXPACKET* pPacket)
 	{
-//		int MuxPacketSize=MUXPACKET_SIZE;//sizeof(MUXPACKET);
-//		int aktIndex=0;
-		SINT32 ret;
+		int MuxPacketSize=MUXPACKET_SIZE;//sizeof(MUXPACKET);
+		int aktIndex=0;
+//		SINT32 len=0;
 
-		ret=m_Socket.receiveFully((UINT8*)pPacket,MUXPACKET_SIZE);
+//		ret=m_Socket.receiveFully((UINT8*)pPacket,MUXPACKET_SIZE);
+
+//		ret=m_Socket.receiveFully((UINT8*)pPacket,MUXPACKET_SIZE);
 		int ret;
 		int pos=0;
-	  do
+	  int len=MuxPacketSize;
+		ret=m_Socket.receiveFully((UINT8*)pPacket,MUXPACKET_SIZE);
+
+/*		do
 			{
-				ret=receive(buff+pos,len);
-				if(ret<=0)
+				ret=m_Socket.receive(((UINT8*)pPacket)+pos,len);
+*/				if(ret<0)
 				{
 				    CAMsg::printMsg(LOG_DEBUG,"ReceiveFully receive error ret=%i\n",ret);
 				    
 					return E_UNKNOWN;
 				}
-				pos+=ret;
+/*				pos+=ret;
 				len-=ret;
 			}
 	  while(len>0);
-	  return E_SUCCESS;	    	
+*/	  //return E_SUCCESS;	    	
 //		if(!bIsTunneld)
 //			{
-			//	do
-			//		{
-		//				len=m_Socket.receive(((UINT8*)pPacket)+aktIndex,MuxPacketSize);
-		//		#ifdef _DEBUG
-		//			CAMsg::printMsg(LOG_DEBUG,"MuxSocket-Received %u bytes!\n",len);
-		//		#endif
-		//				MuxPacketSize-=len;
-		//				aktIndex+=len;
-		//			} while(len>0&&MuxPacketSize>0);
+//				do
+//					{
+//						len=m_Socket.receive(((UINT8*)pPacket)+aktIndex,MuxPacketSize);
+//				#ifdef _DEBUG
+//					CAMsg::printMsg(LOG_DEBUG,"MuxSocket-Received %u bytes!\n",len);
+//				#endif
+//						MuxPacketSize-=len;
+//						aktIndex+=len;
+//					} while(len>0&&MuxPacketSize>0);
 /*			}
 		else
 			{
@@ -284,16 +289,16 @@ SINT32 CAMuxSocket::receive(MUXPACKET* pPacket)
 					} while(len>0&&MuxPacketSize>0);
 			}
 */
-		if(/*len==SOCKET_ERROR||len==0*/ret!=MUXPACKET_SIZE)
-			{
-				#ifdef _DEBUG
-					CAMsg::printMsg(LOG_DEBUG,"MuxSocket-Receive - ungültiges Packet!\n");
-					CAMsg::printMsg(LOG_DEBUG,"Data-Len %i\n",ret);
-					if(ret==SOCKET_ERROR)
-						CAMsg::printMsg(LOG_DEBUG,"SOCKET-ERROR: %i\n",WSAGetLastError());
-				#endif
-				return SOCKET_ERROR;
-			}
+	//	if(len==SOCKET_ERROR||len==0/*ret!=MUXPACKET_SIZE*/)
+//			{
+//				#ifdef _DEBUG
+//					CAMsg::printMsg(LOG_DEBUG,"MuxSocket-Receive - ungültiges Packet!\n");
+//					CAMsg::printMsg(LOG_DEBUG,"Data-Len %i\n",len);
+//					if(len==SOCKET_ERROR)
+//						CAMsg::printMsg(LOG_DEBUG,"SOCKET-ERROR: %i\n",WSAGetLastError());
+//				#endif
+//				return SOCKET_ERROR;
+//			}
 
 //		pPacket->len=ntohs(pPacket->len);	
 		pPacket->channel=ntohl(pPacket->channel);
