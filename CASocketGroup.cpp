@@ -132,7 +132,6 @@ SINT32 CASocketGroup::select()
 /** Waits for events on the sockets. If after ms milliseconds no event occurs, E_TIMEDOUT is returned
 	* @param time_ms - maximum milliseconds to wait
 	* @retval E_TIMEDOUT, if other ms milliseconds no event occurs
-	* @retval 0, if no socket was read/writeable
 	* @retval E_UNKNOWN, if an error occured
 	* @return number of read/writeable sockets
 	*/
@@ -152,7 +151,7 @@ SINT32 CASocketGroup::select(UINT32 time_ms)
 					if(m_signaled_set.fd_count==0)
 						{
 							Sleep(time_ms);
-							ret=0;
+							ret=E_TIMEDOUT;
 						}
 					else
 						ret=::select(0,m_set_read,m_set_write,NULL,&ti);
@@ -173,7 +172,7 @@ SINT32 CASocketGroup::select(UINT32 time_ms)
 					CAMsg::printMsg(LOG_DEBUG,"SocketGroup Select-Fehler: %i\n",ret);
 				#endif
 				if(ret==EINTR)
-					return 0;
+					return E_TIMEDOUT;
 				return E_UNKNOWN;
 			}
 		return ret;

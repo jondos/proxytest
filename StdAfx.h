@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.03.32"
+#define MIX_VERSION "00.03.33"
 
 
 //#define LOG_CHANNEL
@@ -44,7 +44,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define PAYMENT_SUPPORT (outdated --> to be removed)
 //#define PSEUDO_LOG
 //#define DELAY_CHANNELS //to enable max channel bandwidth
-
+//#define HAVE_EPOLL //define if you have epoll support on your (Linux) system
 #ifdef DELAY_CHANNELS
 	#define DELAY_CHANNEL_TRAFFIC 10000 //Traffic in bytes after which (download direction) the channel is delayed
 	//Delay is at the moment constant (max . Channel-Traffic: 10 KByte/s)
@@ -187,6 +187,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#endif
 	#ifdef HAVE_POLL
 		#include <poll.h>
+	#endif
+	#ifdef HAVE_EPOLL
+		#include <sys/epoll.h>
 	#endif
 	#include <sys/ioctl.h>
 	#include <sys/types.h>
