@@ -37,7 +37,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define FILENAME_INFOLOG "/messages"
 #define FILENAME_INFOLOG_GZ "/messages.gz"
 
-#define MAX_MSG_SIZE 2048
+#define MAX_MSG_SIZE 4096
 extern CACmdLnOptions options;
 
 CAMsg* CAMsg::pMsg=new CAMsg();

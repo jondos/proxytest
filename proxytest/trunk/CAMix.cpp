@@ -122,11 +122,11 @@ bool CAMix::needAutoConfig()
             }
 			}
 
-        if(options.getNextMixTestCertificate() == NULL)
+        if(!options.hasNextMixTestCertificate())
             ret = true;
     }
 
-    if(!options.isFirstMix() && options.getPrevMixTestCertificate() == NULL)
+    if(!options.isFirstMix() && !options.hasPrevMixTestCertificate())
         ret = true;
 
     return ret;
