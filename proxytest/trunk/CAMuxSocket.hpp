@@ -30,11 +30,11 @@ class CAMuxSocket
 			int close();
 		//	int send(HCHANNEL channel_id,char* buff,unsigned short len);
 	//		int send(MUXPACKET *pPacket);
-			int send(MUXPACKET *pPacket,CASymCipher* pCipher=NULL);
+			int send(MUXPACKET *pPacket);
 			//int receive(HCHANNEL* channel_id,char* buff,unsigned short len);
 //			int receive(MUXPACKET *pPacket);
-			int receive(MUXPACKET *pPacket,CASymCipher* pCipher=NULL);
-			int close(HCHANNEL channel_id,CASymCipher* pCipher=NULL);
+			int receive(MUXPACKET *pPacket);
+			int close(HCHANNEL channel_id);
 	//		operator CASocket*(){return &m_Socket;}
 			operator SOCKET(){if(!bIsTunneld)
 														return (SOCKET)m_Socket;

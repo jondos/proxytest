@@ -6,6 +6,7 @@ typedef struct ReverseMuxList_t
 		CAMuxSocket* pMuxSocket;
 		HCHANNEL inChannel;
 		HCHANNEL outChannel;
+		CASymCipher* pCipher;
 		ReverseMuxList_t* next;
 	} REVERSEMUXLIST,REVERSEMUXLISTENTRY;
 
@@ -25,7 +26,7 @@ class CAMuxChannelList
 			int add(CAMuxSocket* pMuxSocket);
 			MUXLISTENTRY* get(CAMuxSocket* pMuxSocket);
 			bool remove(CAMuxSocket* pMuxSocket,MUXLISTENTRY* pEntry);
-			int add(MUXLISTENTRY* pEntry,HCHANNEL in,HCHANNEL out);
+			int add(MUXLISTENTRY* pEntry,HCHANNEL in,HCHANNEL out,CASymCipher* pCipher);
 			bool get(MUXLISTENTRY* pEntry,HCHANNEL in,CONNECTION* out);
 			REVERSEMUXLISTENTRY* get(HCHANNEL out);
 			bool remove(HCHANNEL out,REVERSEMUXLISTENTRY* reverseEntry);
