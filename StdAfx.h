@@ -165,7 +165,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
   #ifndef min
 		#define min(a,b) ((a<b)?(a):(b))
   #endif	
-	#if __linux
+	#if defined(__linux)
 		#include <linux/types.h>
 		typedef __u32 UINT32;
 		typedef __s32 SINT32;
@@ -175,7 +175,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		typedef __s16 SINT16;
 		typedef __u8 UINT8;
 		typedef __s8 SINT8;
-	#elif __sgi
+	#elif defined(__sgi)
 		typedef __uint32_t UINT32;
 		typedef __int32_t SINT32;
 		typedef unsigned int UINT;
@@ -184,7 +184,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		typedef signed short SINT16;
 		typedef unsigned char UINT8;
 		typedef signed char SINT8;
-	#elif __sun    	
+	#elif defined(__sun)    	
 		typedef uint32_t UINT32;
 		typedef int32_t SINT32;
 		typedef unsigned int UINT;
