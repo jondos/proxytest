@@ -270,8 +270,8 @@ int main(int argc, const char* argv[])
 		r=oQ.getOrWait((UINT8*)&b,&l,5000);
 		r=oQ.getOrWait((UINT8*)&b,&l,5000);
 		*/
-		UINT16 timestamp;
-		currentTimestamp((UINT8*)&timestamp);
+//		UINT16 timestamp;
+//		currentTimestamp((UINT8*)&timestamp);
 		pMix=NULL;
 
 		int i;
