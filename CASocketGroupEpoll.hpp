@@ -122,7 +122,7 @@ class CASocketGroupEpoll
 					SINT32 socket=(SOCKET)s;
 					for(SINT32 i=0;i<m_iNumOfReadyFD;i++)
 						{
-							if(s==m_pEvents->data.fd)
+							if(socket==m_pEvents->data.fd)
 								return true;
 						}
 					return false;
@@ -133,7 +133,7 @@ class CASocketGroupEpoll
 					SINT32 socket=(SOCKET)*ps;
 					for(SINT32 i=0;i<m_iNumOfReadyFD;i++)
 						{
-							if(s==m_pEvents->data.fd)
+							if(socket==m_pEvents->data.fd)
 								return true;
 						}
 					return false;
@@ -144,7 +144,7 @@ class CASocketGroupEpoll
 					SINT32 socket=s.getSocket();
 					for(SINT32 i=0;i<m_iNumOfReadyFD;i++)
 						{
-							if(s==m_pEvents->data.fd)
+							if(socket==m_pEvents->data.fd)
 								return true;
 						}
 					return false;
