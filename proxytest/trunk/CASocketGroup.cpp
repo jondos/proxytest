@@ -197,15 +197,16 @@ SINT32 CASocketGroup::select(bool bWrite,UINT32 ms)
 					ret=::select(m_max,set_read,set_write,NULL,&ti);
 			#endif
 		#else
-			if(bWrite)
-				{
-					ret=::poll(m_pollfd_write,m_max,ms);
-					m_bWriteQueried=true;
-				}
-			else
-				{
-					ret=::poll(m_pollfd_read,m_max,ms);
-					m_bWriteQueried=false;
+				if(bWrite)
+					{
+						ret=::poll(m_pollfd_write,m_max,ms);
+						m_bWriteQueried=true;
+					}
+				else
+					{
+						ret=::poll(m_pollfd_read,m_max,ms);
+						m_bWriteQueried=false;
+					}
 				}
 		#endif
 		if(ret==0)
@@ -214,9 +215,12 @@ SINT32 CASocketGroup::select(bool bWrite,UINT32 ms)
 			}
 		if(ret==SOCKET_ERROR)
 			{
+				ret=GET_NET_ERROR;
 				#ifdef _DEBUG
-					CAMsg::printMsg(LOG_DEBUG,"SocketGroup Select-Fehler: %i\n",GET_NET_ERROR);
+					CAMsg::printMsg(LOG_DEBUG,"SocketGroup Select-Fehler: %i\n",ret);
 				#endif
+				if(ret==EINTR)
+					return 0;
 				return E_UNKNOWN;
 			}
 		return ret;
