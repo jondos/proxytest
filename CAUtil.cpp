@@ -143,4 +143,40 @@ SINT32 getRandom(UINT8* buff,UINT32 len)
 		return E_SUCCESS;
 	}
 
+/** Sleeps ms milliseconds*/
+SINT32 msSleep(UINT16 ms)
+	{//Do not us usleep for this --> because it doesnt seam to work on irix, multithreaded
+		#ifdef _WIN32
+			Sleep(ms);
+		#else
+			struct timespec req;
+			struct timespec rem;
+			req.tv_sec=ms/1000;
+			req.tv_nsec=(ms%1000)*1000;
+			while(nanosleep(&req,&rem)==-1)
+				{
+					req.tv_sec=rem.tv_sec;
+					req.tv_nsec=rem.tv_nsec;
+				}
+		#endif
+		return E_SUCCESS;
+	}
 
+/** Sleeps sec Seconds*/
+SINT32 sSleep(UINT16 sec)
+	{
+		#ifdef _WIN32
+			Sleep(sec*1000);
+		#else
+			struct timespec req;
+			struct timespec rem;
+			req.tv_sec=sec;
+			req.tv_nsec=0;
+			while(nanosleep(&req,&rem)==-1)
+				{
+					req.tv_sec=rem.tv_sec;
+					req.tv_nsec=rem.tv_nsec;
+				}
+		#endif
+		return E_SUCCESS;
+	}

@@ -44,35 +44,19 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define MSG_NOSIGNAL 0 
     #include <io.h>
     #include <conio.h>
- //   #include <process.h>
 		#include <sys/timeb.h>
-//		#ifndef _REENTRANT
-//			#define CRITICAL_SECTION 
-//			#define DeleteCriticalSection(p) 
-//			#define InitializeCriticalSection(p) 
-//			#define EnterCriticalSection(p) 
-//			#define LeaveCriticalSection(p) 
-//		#endif
-//    #define THREAD_RETURN void
- //   #define THREAD_RETURN_ERROR return
- //   #define THREAD_RETURN_SUCCESS return
-    #define sleep(i) Sleep(i*1000)
 		#define GET_NET_ERROR (WSAGetLastError())
 		#define ERR_INTERN_TIMEDOUT WSAETIMEDOUT
 		#define ERR_INTERN_CONNREFUSED WSAECONNREFUSED
 		#define ERR_INTERN_WOULDBLOCK	WSAEWOULDBLOCK
 		#define MSG_DONTWAIT 0
 		#define HAVE_FIONREAD
-		#define msSleep(i) Sleep(i) 
 		#ifdef __cplusplus
 			#include <string>
 			#include <vector>
 			#define STRING std::string
 			#define VECTOR std::vector
 		#endif
-	//	#ifndef UINT32
-	//		typedef unsigned long UINT32;
-	//	#endif
 
 		#define HAVE_VSNPRINTF
 		#define vsnprintf _vsnprintf
@@ -163,8 +147,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
     #define SD_SEND 1
     #define SD_BOTH 2
     #define GET_NET_ERROR (errno)
-		#define msSleep(i) usleep(i*1000)
-//		#define GETERROR (errno) 
+		#define GETERROR (errno) 
 		#define ERR_INTERN_TIMEDOUT ETIMEDOUT
 		#define ERR_INTERN_CONNREFUSED ECONNREFUSED
 		#define ERR_INTERN_WOULDBLOCK EAGAIN

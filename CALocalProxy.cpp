@@ -123,7 +123,7 @@ SINT32 CALocalProxy::loop()
 			{
 				if((countRead=oSocketGroup.select())==SOCKET_ERROR)
 					{
-						sleep(1);
+						sSleep(1);
 						continue;
 					}
 				if(oSocketGroup.isSignaled(socketIn))
