@@ -595,7 +595,7 @@ THREAD_RETURN fmIO(void *v)
 								((CASocket*)newMuxSocket)->send((char*)infoBuff,infoSize);
 								oMuxChannelList.add(newMuxSocket);
 								nUser++;
-								oInfoService.setLevel(nUser,rand()%100,rand()%100);
+								oInfoService.setLevel(nUser,-1,-1);
 								oSocketGroup.add(*newMuxSocket);
 							}
 					}
