@@ -226,6 +226,17 @@ SINT32 CASignature::getSignatureSize()
 		return DSA_size(m_pDSA);
 	}
 
+/** Signs an XML Document.
+	* @param in source byte array of the XML Document, which should be signed
+	* @param inlen size of the source byte array
+	* @param out destination byte array which on return contains the XML Document including the XML Signature
+	* @param outlen size of destination byte array, on return contains the len of the signed XML document
+	* @param pIncludeCerts points to a CACertStore, which holds CACertificates, 
+	*					which should be included in the XML Signature for easy verification 
+	*	@retval E_SUCCESS, if the Signature could be successful created
+	* @retval E_SPACE, if the destination byte array is to small for the signed XML Document
+	* @retval E_UNKNOWN, otherwise
+*/
 SINT32 CASignature::signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen,CACertStore* pIncludeCerts)
 	{
 		if(in==NULL||inlen<1||out==NULL||outlen==NULL)
@@ -235,11 +246,21 @@ SINT32 CASignature::signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen,CAC
 		DOMParser oParser;
 		oParser.parse(oInput);
 		DOM_Document doc=oParser.getDocument();
+		if(doc==NULL)
+			return E_UNKNOWN;
 		DOM_Element root=doc.getDocumentElement();
-		signXML(root,pIncludeCerts);
+		if(signXML(root,pIncludeCerts)!=E_SUCCESS)
+			return E_UNKNOWN;
 		return DOM_Output::dumpToMem(root,out,outlen);
 	}
 
+/** Signs a DOM Node. The XML Signature is include in the XML Tree as a Child of the Node.
+	* @param node Node which should be signed 
+	* @param pIncludeCerts points to a CACertStore, which holds CACertificates, 
+	*					which should be included in the XML Signature for easy verification 
+	*	@retval E_SUCCESS, if the Signature could be successful created
+	* @retval E_UNKNOWN, otherwise
+*/
 SINT32 CASignature::signXML(DOM_Node &node,CACertStore* pIncludeCerts)
 	{
 		//Calculating the Digest...
@@ -459,100 +480,3 @@ SINT32 CASignature::verifyXML(DOM_Node& root,CACertStore* trustedCerts)
 	}
 
 
-/*
-typedef struct
-	{
-		UINT8* out;
-		UINT32 outlen;
-		UINT32 pos;
-		SINT32 err;
-	} XMLCanonicalHandlerData;
-
-static void smakeXMLCanonicalDataHandler(const XML_Char *data, size_t len, void *userData)
-	{
-		XMLCanonicalHandlerData* pData=(XMLCanonicalHandlerData*)userData;
-		if(pData->err!=0)
-			return;
-		UINT8* buff=new UINT8[len];
-		len=memtrim(buff,(UINT8*)data,len);
-		if(len==0)
-			{
-				delete []buff;
-				return;
-			}
-
-		if(pData->outlen-pData->pos<len)
-			{
-				pData->err=-1;
-				delete []buff;
-				return;
-			}
-		memcpy(pData->out+pData->pos,buff,len);
-		pData->pos+=len;
-		delete []buff;
-	}*/
-/*
-static void smakeXMLCanonicalElementHandler(XMLElement &elem, void *userData)
-	{
-		XMLCanonicalHandlerData* pData=(XMLCanonicalHandlerData*)userData;
-		if(pData->err!=0)
-			return;
-		char* name=(char*)elem.GetName();
-		UINT32 namelen=strlen(name);
-		if(pData->outlen-pData->pos<2*namelen+5)
-			{
-				pData->err=-1;
-				return;
-			}
-		pData->out[pData->pos++]='<';
-		memcpy(pData->out+pData->pos,name,namelen);
-		pData->pos+=namelen;
-		if(elem.NumAttributes()>0)
-			{
-				XMLAttribute attr=elem.GetAttrList();
-				while(attr)
-					{
-						char* attrname=(char*)attr.GetName();
-						char* attrvalue=(char*)attr.GetValue();
-						pData->out[pData->pos++]=' ';
-						int len=(int)strlen(attrname);
-						memcpy(pData->out+pData->pos,attrname,len);
-						pData->pos+=len;
-						pData->out[pData->pos++]='=';
-						pData->out[pData->pos++]='\"';
-						len=(int)strlen(attrvalue);
-						memcpy(pData->out+pData->pos,attrvalue,len);
-						pData->pos+=len;
-						pData->out[pData->pos++]='\"';
-						attr=attr.GetNext();
-					}
-			}
-		pData->out[pData->pos++]='>';
-		//procces children...
-		static XMLHandler handlers[] = {
-		XMLHandler(smakeXMLCanonicalElementHandler),
-		XMLHandler(smakeXMLCanonicalDataHandler),
-		XMLHandler::END
-		};
-		elem.Process(handlers,userData);
-		//closing tag...
-		pData->out[pData->pos++]='<';
-		pData->out[pData->pos++]='/';
-		memcpy(pData->out+pData->pos,name,namelen);
-		pData->pos+=namelen;
-		pData->out[pData->pos++]='>';
-
-	}
-*/
-/*
-SINT32 CASignature::makeXMLCanonical(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen)
-	{
-		MemBufInputSource oInput(in,inlen,"tmpCanonical");
-		DOMParser oParser;
-		oParser.parse(oInput);
-		DOM_Document doc=oParser.getDocument();
-		DOM_Element elem=doc.getDocumentElement();
-		DOM_Output::makeCanonical(elem,out,outlen);
-		return E_SUCCESS;
-	}
-*/

@@ -180,9 +180,9 @@ SINT32 CAInfoService::sendHelo()
 		CASocketAddrINet oAddr;
 		UINT8 hostname[255];
 		UINT8 buffHeader[255];
-		UINT32 xmlBuffLen=2048;
+		UINT32 xmlBuffLen=4096;
 		UINT8* xmlBuff=new UINT8[xmlBuffLen];
-		UINT32 sendBuffLen=2048;
+		UINT32 sendBuffLen=4096;
 		UINT8* sendBuff=new UINT8[sendBuffLen];
 		if(xmlBuff==NULL||sendBuff==NULL||options.getInfoServerHost(hostname,255)!=E_SUCCESS)
 			goto ERR;
