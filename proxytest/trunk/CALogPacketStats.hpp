@@ -53,7 +53,8 @@ class CALogPacketStats
 
 			SINT32 start();
 			SINT32 stop();
-			SINT32 addToTimeingStats(UINT32 proccessingTime,UINT32 uType,bool bUpstream);
+			SINT32 addToTimeingStats(	const tQueueEntry& oQueueEntry,
+																UINT32 uType,bool bUpstream);
 			SINT32 resetTimeingStats();
 			SINT32 logTimeingStats();
 		
@@ -71,6 +72,15 @@ class CALogPacketStats
 			UINT32 m_timingMaxOpenPacketUpstream,m_timingMinOpenPacketUpstream;
 			UINT32 m_timingCountOpenPacketsUpstream;
 			UINT64 m_timingSumOpenPacketUpstream;
+
+			#ifdef USE_POOL
+				UINT32 m_timingMaxPoolPacketUpstream,m_timingMaxPoolPacketDownStream;
+				UINT32 m_timingMinPoolPacketUpstream,m_timingMinPoolPacketDownStream;
+				UINT32 m_timingCountPoolPacketsUpstream;
+				UINT64 m_timingSumPoolPacketUpstream;
+				UINT32 m_timingCountPoolPacketsDownStream;
+				UINT64 m_timingSumPoolPacketDownStream;
+			#endif
 			friend THREAD_RETURN	loopLogPacketStats(void*);
 			volatile bool					m_bRunLog;
 			CAThread*							m_pthreadLog;

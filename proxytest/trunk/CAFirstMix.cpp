@@ -262,9 +262,6 @@ THREAD_RETURN fm_loopSendToMix(void* param)
 		
 		UINT32 len;
 		SINT32 ret;
-#ifdef LOG_PACKET_TIMES
-		UINT64 tmpU64;
-#endif		
 #ifndef USE_POOL
 		tQueueEntry* pQueueEntry=new tQueueEntry;
 		MIXPACKET* pMixPacket=&pQueueEntry->packet;
@@ -277,13 +274,10 @@ THREAD_RETURN fm_loopSendToMix(void* param)
 				if(pMuxSocket->send(pMixPacket)!=MIXPACKET_SIZE)
 					break;
 #ifdef LOG_PACKET_TIMES
- 				if(!isZero64(pQueueEntry->timestamp))
+ 				if(!isZero64(pQueueEntry->timestamp_proccessing_start))
 					{
-						getcurrentTimeMicros(tmpU64);
-						pFirstMix->m_pLogPacketStats->addToTimeingStats(diff64(tmpU64,pQueueEntry->timestamp),pMixPacket->flags,true);
-						#ifdef _DEBUG
-							CAMsg::printMsg(LOG_CRIT,"Upload Packet processing time (arrival <--> send): %u µs\n",diff64(tmpU64,pQueueEntry->timestamp));
-						#endif
+						getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
+						pFirstMix->m_pLogPacketStats->addToTimeingStats(*pQueueEntry,pMixPacket->flags,true);
 					}	
 #endif					
 			}
@@ -302,7 +296,7 @@ THREAD_RETURN fm_loopSendToMix(void* param)
 						pMixPacket->channel=DUMMY_CHANNEL;
 						getRandom(pMixPacket->data,DATA_SIZE);
 						#ifdef LOG_PACKET_TIMES
-							setZero64(pPoolEntry->timestamp);
+							setZero64(pPoolEntry->timestamp_proccessing_start);
 						#endif	
 					}
 				else if(ret!=E_SUCCESS||len!=sizeof(tQueueEntry))
@@ -317,14 +311,10 @@ THREAD_RETURN fm_loopSendToMix(void* param)
 				if(pMuxSocket->send(pMixPacket)!=MIXPACKET_SIZE)
 					break;
 				#ifdef LOG_PACKET_TIMES
-					if(!isZero64(pPoolEntry->timestamp))
+					if(!isZero64(pPoolEntry->timestamp_proccessing_start))
 						{
-							getcurrentTimeMicros(tmpU64);
-							#ifdef _DEBUG
-								CAMsg::printMsg(LOG_CRIT,"Upload Packet processing time (arrival <--> send): %u µs [Pool Time: %u µs]\n",
-																					diff64(tmpU64,pPoolEntry->timestamp),
-																					diff64(pPoolEntry->pool_timestamp_out,pPoolEntry->pool_timestamp_in));
-							#endif
+							getcurrentTimeMicros(pPoolEntry->timestamp_proccessing_end);
+							pFirstMix->m_pLogPacketStats->addToTimeingStats(*pPoolEntry,pMixPacket->flags,true);
 						}	
 				#endif	
 			}
@@ -367,7 +357,7 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 							pMixPacket->channel=DUMMY_CHANNEL;
 							getRandom(pMixPacket->data,DATA_SIZE);
 							#ifdef LOG_PACKET_TIMES
-								setZero64(pQueueEntry->timestamp);
+								setZero64(pQueueEntry->timestamp_proccessing_start);
 							#endif
 						#else
 							continue;	
@@ -377,7 +367,7 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 					{
 						ret=pMuxSocket->receive(pMixPacket);
 						#ifdef LOG_PACKET_TIMES
-							getcurrentTimeMicros(pQueueEntry->timestamp);
+							getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_start);
 						#endif
 						if(ret!=MIXPACKET_SIZE)
 							{
@@ -858,9 +848,9 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 		UINT8* tmpB=DOM_Output::dumpToMem(docXmlKeyInfo,&tlen);
 		m_xmlKeyInfoBuff=new UINT8[tlen+2];
 		memcpy(m_xmlKeyInfoBuff+2,tmpB,tlen);
-		UINT16 s=htons(tlen);
+		UINT16 s=htons((UINT16)tlen);
 		memcpy(	m_xmlKeyInfoBuff,&s,2);
-		m_xmlKeyInfoSize=tlen+2;
+		m_xmlKeyInfoSize=(UINT16)tlen+2;
 		delete []tmpB;
 
 		//Sending symetric key...
@@ -922,7 +912,7 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff,UINT32 len)
 						DOM_Output::dumpToMem(docSymKey,out,&outlen);
 						m_pMuxOut->setSendKey(key,32);
 						m_pMuxOut->setReceiveKey(key+32,32);
-						UINT16 size=htons(outlen);
+						UINT16 size=htons((UINT16)outlen);
 						((CASocket*)m_pMuxOut)->send((UINT8*)&size,2);
 						((CASocket*)m_pMuxOut)->send(out,outlen);
 						m_pMuxOut->setCrypt(true);

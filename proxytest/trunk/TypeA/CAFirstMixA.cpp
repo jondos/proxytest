@@ -110,7 +110,7 @@ SINT32 CAFirstMixA::loop()
 #endif
 										ret=pMuxSocket->receive(pMixPacket,0);
 										#if defined LOG_PACKET_TIMES||defined(LOG_CHANNEL)
-											getcurrentTimeMicros(pQueueEntry->timestamp);
+											getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_start);
 										#endif	
 										if(ret==SOCKET_ERROR/*||pHashEntry->accessUntil<time()*/) 
 											{	
@@ -132,7 +132,7 @@ SINT32 CAFirstMixA::loop()
 														pMixPacket->flags=CHANNEL_CLOSE;
 														pMixPacket->channel=pEntry->channelOut;
 														#ifdef LOG_PACKET_TIMES
-															setZero64(pQueueEntry->timestamp);
+															setZero64(pQueueEntry->timestamp_proccessing_start);
 														#endif
 														m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));
 														delete pEntry->pCipher;
@@ -171,7 +171,7 @@ SINT32 CAFirstMixA::loop()
 														getRandom(pMixPacket->data,DATA_SIZE);
 														pHashEntry->pMuxSocket->prepareForSend(pMixPacket);
 														#ifdef LOG_PACKET_TIMES
-															setZero64(pQueueEntry->timestamp);
+															setZero64(pQueueEntry->timestamp_proccessing_start);
 														#endif
 														pHashEntry->pQueueSend->add(pMixPacket,sizeof(tQueueEntry));
 														#ifdef HAVE_EPOLL
@@ -371,7 +371,7 @@ SINT32 CAFirstMixA::loop()
 													CAMsg::printMsg(LOG_INFO,"Sending suspend for channel: %u\n",pMixPacket->channel);
 												#endif												
 												#ifdef LOG_PACKET_TIMES
-													setZero64(pQueueEntry->timestamp);
+													setZero64(pQueueEntry->timestamp_proccessing_start);
 												#endif
 												m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));
 												
@@ -432,14 +432,10 @@ SINT32 CAFirstMixA::loop()
 											if(pfmHashEntry->uAlreadySendPacketSize==MIXPACKET_SIZE)
 												{
 													pfmHashEntry->uAlreadySendPacketSize=0;
-													if(!isZero64(pfmHashEntry->oQueueEntry.timestamp))
+													if(!isZero64(pfmHashEntry->oQueueEntry.timestamp_proccessing_start))
 														{
-															UINT64 tmpU64;
-															getcurrentTimeMicros(tmpU64);
-															m_pLogPacketStats->addToTimeingStats(diff64(tmpU64,pfmHashEntry->oQueueEntry.timestamp),CHANNEL_DATA,false);
-															#ifdef _DEBUG
-																CAMsg::printMsg(LOG_CRIT,"Download Packet processing time (arrival <--> send): %u µs\n",diff64(tmpU64,pfmHashEntry->oQueueEntry.timestamp));
-															#endif
+															getcurrentTimeMicros(pfmHashEntry->oQueueEntry.timestamp_proccessing_end);
+															m_pLogPacketStats->addToTimeingStats(pfmHashEntry->oQueueEntry,CHANNEL_DATA,false);
 														}
 												}
 										#endif
@@ -457,7 +453,7 @@ SINT32 CAFirstMixA::loop()
 																pMixPacket->channel=pEntry->channelOut;
 																//m_pMuxOut->send(pMixPacket,tmpBuff);
 																#ifdef LOG_PACKET_TIMES
-																	setZero64(pQueueEntry->timestamp);
+																	setZero64(pQueueEntry->timestamp_proccessing_start);
 																#endif
 																m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));
 																pEntry->bIsSuspended=false;	
