@@ -76,12 +76,12 @@ typedef struct XML_OutputStream_
 //
 // C++ Interface
 //
-XML_BEGIN_NAMESPACE
+//XML_BEGIN_NAMESPACE
 
 /**
 	Input Stream interface required by XML::Input.
 */
-class InputStream
+class XMLInputStream
 {
 public:
 	/** read up to bufLen characters from an input source and place in buf.
@@ -95,7 +95,7 @@ public:
 /**
 	Output Stream interface required by XML::Output.
 */
-class OutputStream
+class XMLOutputStream
 {
 public:
 	/** write up to bufLen characters to an output source
@@ -107,7 +107,7 @@ public:
 	virtual int write(const char *buf, size_t bufLen) = 0;
 };
 
-XML_END_NAMESPACE
+//XML_END_NAMESPACE
 #endif	// __cplusplus
 
 #endif	// XMLSTREAM_H

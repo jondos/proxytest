@@ -24,7 +24,7 @@
 #define XMLINPUT_H
 
 #include "xmlconfig.h"
-//#include <stddef.h>		/* offsetof */
+#include <stddef.h>		/* offsetof */
 
 #ifdef __cplusplus
 	extern "C" {
@@ -37,13 +37,10 @@ BEGIN C INTERFACE
 */
 
 struct XML_Input_;
-//typedef struct XML_Input_ XML_Input;
 struct XML_Element_;
-//typedef struct XML_Element_ XML_Element;
 struct XML_Attribute_;
-//typedef struct XML_Attribute_ XML_Attribute;
 struct XML_InputStream_;		/* declared in xmlstream.h */
-//typedef struct XML_InputStream_ XML_InputStream;
+
 /**
 	Input processing errors
 */
@@ -153,15 +150,14 @@ struct XML_ListHandler_
 	XML_Handler - specifies how to deal with specific elements. Stored in
 	a (usually static) array and passed to processing functions.
 */
-typedef struct _dummy {void * dummy[3];} t_dummy;
 typedef struct XML_Handler_
 {
 	const char *name;		/* name of element (or NULL for a generic handler) */
 	XML_HandlerType type;	/* type of handler */
 	size_t offset;			/* offset of destination address */
 	size_t size;			/* size of destination object */
-	union  {
-		struct _dummy dummy;
+	union {
+		struct { void *dummy[3]; } Dummy;
 		struct XML_ElementHandler_ Element;
 		struct XML_DataHandler_ Data;
 		struct XML_ChainHandler_ Chain;
@@ -172,58 +168,44 @@ typedef struct XML_Handler_
 		struct XML_BoolHandler_ Bool;
 		struct XML_CStringHandler_ CString;
 		struct XML_ListHandler_ List;
-	}u;
+	} info;
 } XML_Handler;
 
 #define XML_MEMBER_OFFSET(object, member)	offsetof(object, member)
 #define XML_MEMBER_SIZE(object, member)		sizeof(((object *)0)->member)
 #define XML_OBJECT_MEMBER(object, member)	XML_MEMBER_OFFSET(object, member), XML_MEMBER_SIZE(object, member)
 
-#define XML_DATA_HANDLER(name, proc, data) \
-	{ name, XML_Handler_Data, 0, 0, { (void *)proc, (void *)data, NULL } }
+#define XML_DATA_HANDLER(name, proc, data) 	{ name, XML_Handler_Data, 0, 0, { (void *)proc, (void *)data, NULL } }
 
-#define XML_CDATA_HANDLER(name, proc, data) \
-	{ name, XML_Handler_CDATA, 0, 0, { (void *)proc, (void *)data, NULL } }
+#define XML_CDATA_HANDLER(name, proc, data) { name, XML_Handler_CDATA, 0, 0, { (void *)proc, (void *)data, NULL } }
 
-#define XML_COMMENT_HANDLER(name, proc, data) \
-	{ name, XML_Handler_Comment, 0, 0, { (void *)proc, (void *)data, NULL } }
+#define XML_COMMENT_HANDLER(name, proc, data) { name, XML_Handler_Comment, 0, 0, { (void *)proc, (void *)data, NULL } }
 
-#define XML_ELEMENT_HANDLER(name, proc, data) \
-	{ name, XML_Handler_Element, 0, 0, { (void *)proc, (void *)data, NULL } }
+#define XML_ELEMENT_HANDLER(name, proc, data) { name, XML_Handler_Element, 0, 0, { (void *)proc, (void *)data, NULL } }
 
-#define XML_ELEMENT_HANDLER_MEMBER(name, proc, object, member) \
-	{ name, XML_Handler_Element, XML_OBJECT_MEMBER(object, member), { (void *)proc, NULL, NULL} }
+#define XML_ELEMENT_HANDLER_MEMBER(name, proc, object, member) { name, XML_Handler_Element, XML_OBJECT_MEMBER(object, member), { (void *)proc, NULL, NULL} }
 
-#define XML_INT_HANDLER(name, object, member, minVal, maxVal) \
-	{ name, XML_Handler_Int, XML_OBJECT_MEMBER(object, member), { NULL, (void *)minVal, (void *)maxVal } }
+#define XML_INT_HANDLER(name, object, member, minVal, maxVal) { name, XML_Handler_Int, XML_OBJECT_MEMBER(object, member), { NULL, (void *)minVal, (void *)maxVal } }
 
-#define XML_UINT_HANDLER(name, object, member, minVal, maxVal) \
-	{ name, XML_Handler_UInt, XML_OBJECT_MEMBER(object, member), { NULL, (void *)minVal, (void *)maxVal } }
+#define XML_UINT_HANDLER(name, object, member, minVal, maxVal) { name, XML_Handler_UInt, XML_OBJECT_MEMBER(object, member), { NULL, (void *)minVal, (void *)maxVal } }
 
-#define XML_FLOAT_HANDLER(name, object, member, minVal, maxVal) \
-	{ name, XML_Handler_Float, XML_OBJECT_MEMBER(object, member), { NULL, (void *)minVal, (void *)maxVal } }
+#define XML_FLOAT_HANDLER(name, object, member, minVal, maxVal) { name, XML_Handler_Float, XML_OBJECT_MEMBER(object, member), { NULL, (void *)minVal, (void *)maxVal } }
 
-#define XML_DOUBLE_HANDLER(name, object, member, minVal, maxVal) \
-	{ name, XML_Handler_Double, XML_OBJECT_MEMBER(object, member), { NULL, (void *)minVal, (void *)maxVal } }
+#define XML_DOUBLE_HANDLER(name, object, member, minVal, maxVal) { name, XML_Handler_Double, XML_OBJECT_MEMBER(object, member), { NULL, (void *)minVal, (void *)maxVal } }
 
-#define XML_BOOL_HANDLER(name, object, member) \
-	{ name, XML_Handler_Bool, XML_OBJECT_MEMBER(object, member), { NULL, NULL, NULL } }
+#define XML_BOOL_HANDLER(name, object, member) { name, XML_Handler_Bool, XML_OBJECT_MEMBER(object, member), { NULL, NULL, NULL } }
 
-#define XML_LIST_HANDLER(name, object, member, list, listSize) \
-	{ name, XML_Handler_List, XML_OBJECT_MEMBER(object, member), { NULL, (void *)list, (void *)listSize } }
+#define XML_LIST_HANDLER(name, object, member, list, listSize) { name, XML_Handler_List, XML_OBJECT_MEMBER(object, member), { NULL, (void *)list, (void *)listSize } }
 
-#define XML_STRING_HANDLER(name, object, member, maxLen) \
-	{ name, XML_Handler_CString, XML_OBJECT_MEMBER(object, member), { NULL, (void *)maxLen, (void *)NULL } }
+#define XML_STRING_HANDLER(name, object, member, maxLen) { name, XML_Handler_CString, XML_OBJECT_MEMBER(object, member), { NULL, (void *)maxLen, (void *)NULL } }
 
-#define XML_CHAIN_HANDLER(handlers, userData) \
-	{ NULL, XML_Handler_Chain, 0, 0, { (void *)handlers, (void *)userData, NULL } }
+#define XML_CHAIN_HANDLER(handlers, userData) { NULL, XML_Handler_Chain, 0, 0, { (void *)handlers, (void *)userData, NULL } }
 
-#define XML_CHAIN_HANDLER_MEMBER(handlers, object, member) \
-	{ NULL, XML_Handler_Chain, XML_OBJECT_MEMBER(object, member), { (void *)handlers, NULL, NULL } }
+#define XML_CHAIN_HANDLER_MEMBER(handlers, object, member) { NULL, XML_Handler_Chain, XML_OBJECT_MEMBER(object, member), { (void *)handlers, NULL, NULL } }
 
 #define XML_HANDLER_END			{ NULL, XML_Handler_None }
 
-struct XML_Input_ *XML_InputCreate(XML_InputStream *stream);
+struct XML_Input_ *XML_InputCreate(struct XML_InputStream_ *stream);
 void XML_InputFree(struct XML_Input_ *input);
 void XML_InputSetUserData(struct XML_Input_ *input, void *userData);
 void *XML_InputGetUserData(const struct XML_Input_ *input);
@@ -255,6 +237,8 @@ unsigned int XML_AttrGetUInt(const struct XML_Attribute_ *attr, unsigned int def
 float XML_AttrGetFloat(const struct XML_Attribute_ *attr, float defValue);
 double XML_AttrGetDouble(const struct XML_Attribute_ *attr, double defValue);
 int XML_AttrGetBoolean(const struct XML_Attribute_ *attr, int defValue);
+int XML_IsWhiteSpace(XML_Char c);
+int XML_StringsMatch(const XML_Char *s1, const XML_Char *s2);
 
 #ifdef __cplusplus
 }	// extern "C"
@@ -263,22 +247,25 @@ int XML_AttrGetBoolean(const struct XML_Attribute_ *attr, int defValue);
 // BEGIN C++ INTERFACE
 // ------------------------------------------------------------------------------
 
-XML_BEGIN_NAMESPACE
+//XML_BEGIN_NAMESPACE
 
-class InputStream;	// xmlstream.h
-class Input;
-class Handler;
-class Element;
+class XMLInputStream;	// xmlstream.h
+class XMLInput;
+class XMLHandler;
+class XMLElement;
 
 typedef ::XML_Error Error;
 typedef ::XML_Char Char;
+
+inline bool IsWhiteSpace(XML_Char c) { return XML_IsWhiteSpace(c) != 0; }
+inline bool StringsMatch(const XML_Char *s1, const XML_Char *s2) { return XML_StringsMatch(s1, s2) != 0; }
 
 /** pointer to a function that handles elements
 	Applications must implement element handler callbacks using this signature
 	@param element	the current element
 	@param userData the user-specific data passed in the Handler data or Parse() method
 */
-typedef void (*HandlerProc)(Element &element, void *userData);
+typedef void (*HandlerProc)(XMLElement &element, void *userData);
 
 /** pointer to a function that handles element data
 	Applications must implement data handler callbacks using this signature
@@ -295,7 +282,7 @@ typedef void (*DataProc)(const XML_Char *data, size_t len, void *userData);
 	is passed to the HandlerProc, otherwise the user-data passed to the Parse()
 	method is passed.
 */
-class Handler : public ::XML_Handler
+class XMLHandler : public ::XML_Handler
 {
 friend class Input;
 public:
@@ -304,7 +291,7 @@ public:
 		@param proc			the HandlerProc to call
 		@param userData		the data to pass to the HandlerProc (or NULL)
 	*/
-	Handler(const XML_Char *elemName, HandlerProc proc, void *userData = NULL);
+	XMLHandler(const XML_Char *elemName, HandlerProc proc, void *userData = NULL);
 
 	/** specify a generic handler that is called when an element is encountered
 		that does not have a specific handler.
@@ -314,20 +301,20 @@ public:
 		@param proc			the HandlerProc to call
 		@param userData		the data to pass to the HandlerProc (or NULL)
 	*/
-	Handler(HandlerProc proc, void *userData = NULL);
+	XMLHandler(HandlerProc proc, void *userData = NULL);
 
 	/** specify a handler that is called when element data is read
 		@param proc			the DataProc to call
 		@param userData		the data to pass to the DataProc (or NULL)
 	*/
-	Handler(DataProc proc, void *userData = NULL);
+	XMLHandler(DataProc proc, void *userData = NULL);
 
 	/** specify a handler that is called when data of the desired type is read
 		@param typw			XML_Handler_[Data | CDATA | Comment]
 		@param proc			the DataProc to call
 		@param userData		the data to pass to the DataProc (or NULL)
 	*/
-	Handler(XML_HandlerType type, DataProc proc, void *userData = NULL);
+	XMLHandler(XML_HandlerType type, DataProc proc, void *userData = NULL);
 
 	/** specify a separate list of handlers as if the list was embedded at
 		this point in the handler list. This allows inserting a handler
@@ -335,7 +322,7 @@ public:
 		@param handlers		the list of handlers to include
 		@param userData		the user-data to use for the handlers
 	*/
-	Handler(const Handler handlers[], void *userData = NULL);
+	XMLHandler(const XMLHandler handlers[], void *userData = NULL);
 
 	/** specify a handler for an element containing a single (signed) integer value.
 		@param elemName		the element name to handle
@@ -343,45 +330,45 @@ public:
 		@param minVal		the minimal value to clamp to, (if minVal or maxVal != 0)
 		@param maxVal		the maximum value to clamp to, (if minVal or maxVal != 0)
 	*/
-	Handler(const XML_Char *elemName, int *value, int minVal = 0, int maxVal = 0);
-	Handler(const XML_Char *elemName, unsigned int *value, unsigned int minVal = 0, unsigned int maxVal = 0);
-	Handler(const XML_Char *elemName, float *value, float minVal = 0.0f, float maxVal = 0.0f);
-	Handler(const XML_Char *elemName, double *value, double *minVal = NULL, double *maxVal = NULL);
-	Handler(const XML_Char *elemName, bool *value);
-	Handler(const XML_Char *elemName, int *value, const XML_Char * const*list, size_t size);
-	Handler(const XML_Char *elemName, XML_Char *value, size_t maxLen);
-	Handler(const XML_Char *elemName, XML_HandlerType type, size_t offset, size_t size);
-	Handler(const XML_Char *elemName, const XML_Char *const list[], int listSize, size_t offset, size_t size);
+	XMLHandler(const XML_Char *elemName, int *value, int minVal = 0, int maxVal = 0);
+	XMLHandler(const XML_Char *elemName, unsigned int *value, unsigned int minVal = 0, unsigned int maxVal = 0);
+	XMLHandler(const XML_Char *elemName, float *value, float minVal = 0.0f, float maxVal = 0.0f);
+	XMLHandler(const XML_Char *elemName, double *value, double *minVal = NULL, double *maxVal = NULL);
+	XMLHandler(const XML_Char *elemName, bool *value);
+	XMLHandler(const XML_Char *elemName, int *value, const XML_Char * const*list, size_t size);
+	XMLHandler(const XML_Char *elemName, XML_Char *value, size_t maxLen);
+	XMLHandler(const XML_Char *elemName, XML_HandlerType type, size_t offset, size_t size);
+	XMLHandler(const XML_Char *elemName, const XML_Char *const list[], int listSize, size_t offset, size_t size);
 
 	/// return the name of the element the handler handles (or NULL if generic)
 	const XML_Char *GetName() const;
 
 	/// special handler to specify the end of a handler list
-	static const Handler END;
+	static const XMLHandler END;
 
 private:
-	Handler();
+	XMLHandler();
 };
 
 /**
 	Represents a single attribute containing a name and value. Use GetNext()
 	to get to the next attribute.
 */
-class Attribute
+class XMLAttribute
 {
-friend class Element;
+friend class XMLElement;
 public:
 	/// copy constructor
-	Attribute(const Attribute &rhs);
+	XMLAttribute(const XMLAttribute &rhs);
 
 	/// assignment operator
-	Attribute &operator=(const Attribute &rhs);
+	XMLAttribute &operator=(const XMLAttribute &rhs);
 
 	/// returns false if the attribute is past the end of the attribute list
 	operator bool() const;
 
 	/// return the next attribute
-	Attribute GetNext() const;
+	XMLAttribute GetNext() const;
 
 	/// return the attribute name
 	const XML_Char *GetName() const;
@@ -390,7 +377,7 @@ public:
 	const XML_Char *GetValue() const;
 
 private:
-	Attribute(const struct ::XML_Attribute_ *attr);
+	XMLAttribute(const struct ::XML_Attribute_ *attr);
 	const struct XML_Attribute_ *attr;
 };
 
@@ -398,9 +385,9 @@ private:
 	Represents a single element, which possibly contains zero or more
 	Attributes, zero or more child Elements, or data
 */
-class Element
+class XMLElement
 {
-friend class Input;
+friend class XMLInput;
 public:
 	/// return the element name
 	const XML_Char *GetName() const;
@@ -408,10 +395,10 @@ public:
 	/// return the number of attributes found
 	int NumAttributes() const;
 
-	Attribute GetAttrList() const;
+	XMLAttribute GetAttrList() const;
 
 	/// return the attribute value with the specified name
-//	void GetAttribute(const XML_Char *name, XML_Char *str) const;
+	void GetAttribute(const XML_Char *name, XML_Char *str) const;
 
 	/** find the specified attribute and return it, using the default
 		value if the attribute is not found.
@@ -440,15 +427,15 @@ public:
 	size_t ReadData(XML_Char *buf, size_t len);
 
 	/// parse nested child elements based on new set of handlers
-	void Process(const Handler handlers[], void *userData);
+	void Process(const XMLHandler handlers[], void *userData);
 
 	/// return the Input object associated with this element
-	const Input &GetInput() const;
+	const XMLInput &GetInput() const;
 
 	bool IsEmpty() const;
 
 private:
-	Element(struct XML_Element_ *element);
+	XMLElement(struct XML_Element_ *element);
 
 	struct XML_Element_ *element;
 };
@@ -456,19 +443,19 @@ private:
 /**
 	Parse an XML input stream using per-element handler callbacks
 */
-class Input
+class XMLInput
 {
-friend class Element;
-friend class ParseException;
+friend class XMLElement;
+friend class XMLParseException;
 public:
 	/// constructor
-	Input(InputStream &stream);
+	XMLInput(XMLInputStream &stream);
 
 	/// destructor
-	~Input();
+	~XMLInput();
 
 	/// parse elements based on set of handlers
-	void Process(const Handler handlers[], void *userData);
+	void Process(const XMLHandler handlers[], void *userData);
 
 	/// return the current line number
 	int GetLine() const;
@@ -497,11 +484,11 @@ private:
 /**
 	All parsing-related exceptions are derived from ParseException.
 */
-class ParseException
+class XMLParseException
 {
-friend class Input;
+friend class XMLInput;
 public:
-	ParseException(const Input &input);
+	XMLParseException(const XMLInput &input);
 
 	/// return the line the exception occured at
 	int GetLine() const { return line; }
@@ -522,14 +509,14 @@ protected:
 	int offset;
 };
 
-class InvalidValue : public ParseException
+class InvalidValue : public XMLParseException
 {
 public:
-	InvalidValue(const Input &input);
-	InvalidValue(const Input &input, int line, int column);
+	InvalidValue(const XMLInput &input);
+	InvalidValue(const XMLInput &input, int line, int column);
 };
 
-XML_END_NAMESPACE
+//XML_END_NAMESPACE
 #endif	// __cplusplus
 
 #endif	// XMLINPUT_H

@@ -22,8 +22,8 @@
 	http://www.gnu.org/copyleft/lgpl.html
 */
 
-#include "xmlinput.h"
 #include "xmlstream.h"
+#include "xmlinput.h"
 
 #define XML_TOKEN_MAX		2048 	/* maximum length of a run */
 #define XML_ELEM_NAME_MAX	80		/* maximum element name length */
@@ -45,18 +45,17 @@ typedef struct XML_Element_
 {
 	struct XML_Input_ *input;
 	XML_Char name[XML_ELEM_NAME_MAX];
-	XML_Attribute *attrs;		/* attribute list */
+	struct XML_Attribute_ *attrs;		/* attribute list */
 	int level;					/* element level (0 is root) */
 	int empty;					/* "empty" element */
 } XML_Element;
-
 
 typedef XML_Error (*ElementHandlerProc)(struct XML_Input_ *input, XML_Element *elem, const XML_Handler *handler, void *userData);
 typedef XML_Error (*DataHandlerProc)(struct XML_Input_ *input, const XML_Char *data, size_t len, const XML_Handler *handler, void *userData);
 
 typedef struct XML_Input_
 {
-	XML_InputStream *stream;	/* input source */
+	struct XML_InputStream_ *stream;	/* input source */
 	int level;					/* current nest level */
 	int column;					/* current column */
 	int line;					/* current line number */

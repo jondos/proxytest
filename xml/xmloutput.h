@@ -28,19 +28,21 @@
 #include "xmlstream.h"
 
 #ifdef __cplusplus
+#include <vector>
+//#include <string>
 
-XML_BEGIN_NAMESPACE
+//XML_BEGIN_NAMESPACE
 
 /**
 	Utility class for saving XML data files to an OutputStream.
 	Keeps track of element nesting level and assists with writing
 	attribute lists.
 */
-class Output
+class XMLOutput
 {
 public:
 	/// Constructor - initialize and Output object from an OutputStream
-	Output(OutputStream &stream);
+	XMLOutput(XMLOutputStream &stream);
 
 	/** Write the beginning ?xml processing instruction - call before
 		any other method
@@ -77,8 +79,6 @@ public:
 	*/
 	void EndAttrs(Mode mode = indent);
 
-	/// write the /*std::*/string attribute
-	void WriteAttr(const char *name, const STRING &value);
 	/// write a "C" string attribute
 	void WriteAttr(const char *name, const char *value);
 	/// write an integer attribute
@@ -95,7 +95,7 @@ public:
 	void Indent();
 
 	/// write out a "terse" element with the specified data
-	void WriteElement(const char *name, const STRING &value);
+	//void WriteElement(const char *name, const std::string &value);
 	/// write out a "terse" element with the specified data
 	void WriteElement(const char *name, const char *value);
 	/// write out a "terse" element with the specified data
@@ -107,26 +107,26 @@ public:
 	/// write out a "terse" element with the specified data
 	void WriteElement(const char *name, bool value);
 
-	Output &operator<<(const STRING &str);
-	Output &operator<<(const char *str);
-	Output &operator<<(int value);
-	Output &operator<<(unsigned int value);
-	Output &operator<<(double value);
-	Output &operator<<(bool value);
+	//XMLOutput &operator<<(const std::string &str);
+	XMLOutput &operator<<(const char *str);
+	XMLOutput &operator<<(int value);
+	XMLOutput &operator<<(unsigned int value);
+	XMLOutput &operator<<(double value);
+	XMLOutput &operator<<(bool value);
 
 	void write(const char *str, size_t len);
 	void writeString(const char *str);
 	void writeLine(const char *str);
 
 private:
-	OutputStream &mStream;
+	XMLOutputStream &mStream;
 	int mLevel;					// nesting level
-	typedef VECTOR<const char *> ElementStack;
+	typedef std::vector<const char *> ElementStack;
 	ElementStack mElements;		// needed to write EndElement tag name
 	bool mAttributes;			// used for sanity-checking
 };
 
-XML_END_NAMESPACE
+//XML_END_NAMESPACE
 
 #endif	/* __cplusplus */
 

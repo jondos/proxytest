@@ -19,41 +19,41 @@
 
 	http://www.gnu.org/copyleft/lgpl.html
 */
-
 #include "../StdAfx.h"
-#include "xmlstream.h"
 #include "xmlinputp.h"
+#include "xmlstream.h"
 //#include <assert.h>	// assert()
 //#include <stdio.h>	// sprintf()
+//#include <string.h>	// memset()
 
-XML_BEGIN_NAMESPACE
+//XML_BEGIN_NAMESPACE
 
 struct InputImpl
 {
 	::XML_InputStream adapter;
-	InputStream *stream;
+	XMLInputStream *stream;
 	::XML_Input *input;
 	void *userData;
 };
 
-// convert XML_Element to XML::Element and handle exceptions
-::XML_Error Input::elementHandler(::XML_Input *input, ::XML_Element *elem, const ::XML_Handler *handler, void *userData)
+// convert XML_Element to XML::XMLElement and handle exceptions
+::XML_Error XMLInput::elementHandler(::XML_Input *input, ::XML_Element *elem, const ::XML_Handler *handler, void *userData)
 {
-	Element e(elem);
-	HandlerProc proc = (HandlerProc)handler->u.Element.proc;
+	XMLElement e(elem);
+	HandlerProc proc = (HandlerProc)handler->info.Element.proc;
 	try {
-		(*proc)(e, handler->u.Element.userData ? handler->u.Element.userData : userData);
+		(*proc)(e, handler->info.Element.userData ? handler->info.Element.userData : userData);
 	}
-	catch (const ParseException &e)
+	catch (const XMLParseException &e)
 	{
 		return e.GetError();
 	}
 	return ::XML_Error_None;
 }
 
-::XML_Error Input::dataHandler(::XML_Input *input, const ::XML_Char *data, size_t len, const ::XML_Handler *handler, void *userData)
+::XML_Error XMLInput::dataHandler(::XML_Input *input, const ::XML_Char *data, size_t len, const ::XML_Handler *handler, void *userData)
 {
-	DataProc proc = (DataProc)handler->u.Data.proc;
+	DataProc proc = (DataProc)handler->info.Data.proc;
 	(*proc)(data, len, userData);
 	return ::XML_Error_None;
 }
@@ -66,7 +66,7 @@ static int sInputReadProc(::XML_InputStream *str, ::XML_Char *buf, size_t bufLen
 	return impl->stream->read(buf, bufLen);
 }
 
-Input::Input(InputStream &stream) : impl(new InputImpl)
+XMLInput::XMLInput(XMLInputStream &stream) : impl(new InputImpl)
 {
 	impl->stream = &stream;
 	impl->adapter.readProc = sInputReadProc;
@@ -77,45 +77,45 @@ Input::Input(InputStream &stream) : impl(new InputImpl)
 	impl->userData = NULL;
 }
 
-Input::~Input()
+XMLInput::~XMLInput()
 {
 	::XML_InputFree(impl->input);
 	delete impl;
 }
 
-void Input::Process(const Handler handlers[], void *userData)
+void XMLInput::Process(const XMLHandler handlers[], void *userData)
 {
 	::XML_Error error = ::XML_InputProcess(impl->input, (const ::XML_Handler *)handlers, userData);
 	if (error != ::XML_Error_None)
-		throw ParseException(*this);
+		throw XMLParseException(*this);
 }
 
-int Input::GetLine() const
+int XMLInput::GetLine() const
 {
 	return ::XML_InputGetLine(impl->input);
 }
 
-int Input::GetColumn() const
+int XMLInput::GetColumn() const
 {
 	return ::XML_InputGetColumn(impl->input);
 }
 
-int Input::GetOffset() const
+int XMLInput::GetOffset() const
 {
 	return ::XML_InputGetOffset(impl->input);
 }
 
-void Input::SetUserData(void *userData)
+void XMLInput::SetUserData(void *userData)
 {
 	impl->userData = userData;
 }
 
-void *Input::GetUserData() const
+void *XMLInput::GetUserData() const
 {
 	return impl->userData;
 }
 
-::XML_Error Input::GetError() const
+::XML_Error XMLInput::GetError() const
 {
 	return ::XML_InputGetError(impl->input);
 }
@@ -124,15 +124,15 @@ void *Input::GetUserData() const
 // Handler
 //
 
-const Handler Handler::END;
+const XMLHandler XMLHandler::END;
 
-Handler::Handler()
+XMLHandler::XMLHandler()
 {
 	name = NULL;
 	type = ::XML_Handler_None;
 }
 
-Handler::Handler(const ::XML_Char *elemName, HandlerProc proc, void *userData)
+XMLHandler::XMLHandler(const ::XML_Char *elemName, HandlerProc proc, void *userData)
 {
 	assert(elemName);
 	assert(proc);
@@ -140,33 +140,33 @@ Handler::Handler(const ::XML_Char *elemName, HandlerProc proc, void *userData)
 	name = elemName;
 	type = ::XML_Handler_Element;
 	offset = size = 0;
-	u.Element.proc = (::XML_HandlerProc)proc;
-	u.Element.userData = userData;
+	info.Element.proc = (::XML_HandlerProc)proc;
+	info.Element.userData = userData;
 }
 
-Handler::Handler(HandlerProc proc, void *userData)
+XMLHandler::XMLHandler(HandlerProc proc, void *userData)
 {
 	assert(proc);
 
 	name = NULL;
 	type = ::XML_Handler_Element;
 	offset = size = 0;
-	u.Element.proc = (::XML_HandlerProc)proc;
-	u.Element.userData = userData;
+	info.Element.proc = (::XML_HandlerProc)proc;
+	info.Element.userData = userData;
 }
 
-Handler::Handler(DataProc proc, void *userData)
+XMLHandler::XMLHandler(DataProc proc, void *userData)
 {
 	assert(proc);
 
 	name = NULL;
 	type = ::XML_Handler_Data;
 	offset = size = 0;
-	u.Data.proc = (::XML_DataProc)proc;
-	u.Data.userData = userData;
+	info.Data.proc = (::XML_DataProc)proc;
+	info.Data.userData = userData;
 }
 
-Handler::Handler(XML_HandlerType type, DataProc proc, void *userData)
+XMLHandler::XMLHandler(XML_HandlerType type, DataProc proc, void *userData)
 {
 	assert(proc);
 	assert(type == XML_Handler_Data || type == XML_Handler_CDATA || type == XML_Handler_Comment);
@@ -174,22 +174,22 @@ Handler::Handler(XML_HandlerType type, DataProc proc, void *userData)
 	name = NULL;
 	this->type = type;
 	offset = size = 0;
-	u.Data.proc = (::XML_DataProc)proc;
-	u.Data.userData = userData;
+	info.Data.proc = (::XML_DataProc)proc;
+	info.Data.userData = userData;
 }
 
-Handler::Handler(const Handler handlers[], void *userData)
+XMLHandler::XMLHandler(const XMLHandler handlers[], void *userData)
 {
 	assert(handlers);
 
 	name = NULL;
 	type = ::XML_Handler_Chain;
 	offset = size = 0;
-	u.Chain.handlers = handlers;
-	u.Chain.userData = userData;
+	info.Chain.handlers = handlers;
+	info.Chain.userData = userData;
 }
 
-Handler::Handler(const ::XML_Char *elemName, int *value, int minVal, int maxVal)
+XMLHandler::XMLHandler(const ::XML_Char *elemName, int *value, int minVal, int maxVal)
 {
 	assert(elemName);
 	assert(value);
@@ -198,12 +198,12 @@ Handler::Handler(const ::XML_Char *elemName, int *value, int minVal, int maxVal)
 	type = ::XML_Handler_Int;
 	offset = 0;
 	size = sizeof(int);
-	u.Int.result = value;
-	u.Int.minVal = minVal;
-	u.Int.maxVal = maxVal;
+	info.Int.result = value;
+	info.Int.minVal = minVal;
+	info.Int.maxVal = maxVal;
 }
 
-Handler::Handler(const ::XML_Char *elemName, unsigned int *value, unsigned int minVal, unsigned int maxVal)
+XMLHandler::XMLHandler(const ::XML_Char *elemName, unsigned int *value, unsigned int minVal, unsigned int maxVal)
 {
 	assert(elemName);
 	assert(value);
@@ -212,12 +212,12 @@ Handler::Handler(const ::XML_Char *elemName, unsigned int *value, unsigned int m
 	type = ::XML_Handler_UInt;
 	offset = 0;
 	size = sizeof(unsigned int);
-	u.UInt.result = value;
-	u.UInt.minVal = minVal;
-	u.UInt.maxVal = maxVal;
+	info.UInt.result = value;
+	info.UInt.minVal = minVal;
+	info.UInt.maxVal = maxVal;
 }
 
-Handler::Handler(const ::XML_Char *elemName, float *value, float minVal, float maxVal)
+XMLHandler::XMLHandler(const ::XML_Char *elemName, float *value, float minVal, float maxVal)
 {
 	assert(elemName);
 	assert(value);
@@ -226,12 +226,12 @@ Handler::Handler(const ::XML_Char *elemName, float *value, float minVal, float m
 	type = ::XML_Handler_Float;
 	offset = 0;
 	size = sizeof(float);
-	u.Float.result = value;
-	u.Float.minVal = minVal;
-	u.Float.maxVal = maxVal;
+	info.Float.result = value;
+	info.Float.minVal = minVal;
+	info.Float.maxVal = maxVal;
 }
 
-Handler::Handler(const ::XML_Char *elemName, double *value, double *minVal, double *maxVal)
+XMLHandler::XMLHandler(const ::XML_Char *elemName, double *value, double *minVal, double *maxVal)
 {
 	assert(elemName);
 	assert(value);
@@ -240,12 +240,12 @@ Handler::Handler(const ::XML_Char *elemName, double *value, double *minVal, doub
 	type = ::XML_Handler_Double;
 	offset = 0;
 	size = sizeof(double);
-	u.Double.result = value;
-	u.Double.minVal = minVal;
-	u.Double.maxVal = maxVal;
+	info.Double.result = value;
+	info.Double.minVal = minVal;
+	info.Double.maxVal = maxVal;
 }
 
-Handler::Handler(const ::XML_Char *elemName, bool *value)
+XMLHandler::XMLHandler(const ::XML_Char *elemName, bool *value)
 {
 	assert(elemName);
 	assert(value);
@@ -254,10 +254,10 @@ Handler::Handler(const ::XML_Char *elemName, bool *value)
 	type = ::XML_Handler_Bool;
 	offset = 0;
 	size = sizeof(bool);
-	u.Bool.result = (int *)value;
+	info.Bool.result = (int *)value;
 }
 
-Handler::Handler(const ::XML_Char *elemName, int *value, const ::XML_Char * const*list, size_t size)
+XMLHandler::XMLHandler(const ::XML_Char *elemName, int *value, const ::XML_Char * const*list, size_t size)
 {
 	assert(elemName);
 	assert(value);
@@ -266,12 +266,12 @@ Handler::Handler(const ::XML_Char *elemName, int *value, const ::XML_Char * cons
 	type = ::XML_Handler_List;
 	offset = 0;
 	size = sizeof(int);
-	u.List.result = value;
-	u.List.list = list;
-	u.List.listSize = size;
+	info.List.result = value;
+	info.List.list = list;
+	info.List.listSize = size;
 }
 
-Handler::Handler(const ::XML_Char *elemName, ::XML_Char *value, size_t maxLen)
+XMLHandler::XMLHandler(const ::XML_Char *elemName, ::XML_Char *value, size_t maxLen)
 {
 	assert(elemName);
 	assert(value);
@@ -280,25 +280,23 @@ Handler::Handler(const ::XML_Char *elemName, ::XML_Char *value, size_t maxLen)
 	type = ::XML_Handler_CString;
 	offset = 0;
 	size = sizeof(::XML_Char);
-	u.CString.result = value;
-	u.CString.maxLen = maxLen;
+	info.CString.result = value;
+	info.CString.maxLen = maxLen;
 }
 
-Handler::Handler(const ::XML_Char *elemName, ::XML_HandlerType type, size_t offset, size_t size)
+XMLHandler::XMLHandler(const ::XML_Char *elemName, ::XML_HandlerType type, size_t offset, size_t size)
 {
 	assert(elemName);
+
+	::memset(this, 0, sizeof(XMLHandler));
 
 	name = elemName;
 	this->type = type;
 	this->offset = offset;
 	this->size = size;
-
-	this->u.dummy.dummy[0] = NULL;
-	this->u.dummy.dummy[1] = NULL;
-	this->u.dummy.dummy[2] = NULL;
 }
 
-Handler::Handler(const ::XML_Char *elemName, const ::XML_Char *const list[], int listSize, size_t offset, size_t size)
+XMLHandler::XMLHandler(const ::XML_Char *elemName, const ::XML_Char *const list[], int listSize, size_t offset, size_t size)
 {
 	assert(elemName);
 	assert(list);
@@ -307,133 +305,133 @@ Handler::Handler(const ::XML_Char *elemName, const ::XML_Char *const list[], int
 	this->type = ::XML_Handler_List;
 	this->offset = offset;
 	this->size = size;
-	this->u.List.result = NULL;
-	this->u.List.list = list;
-	this->u.List.listSize = listSize;
+	this->info.List.result = NULL;
+	this->info.List.list = list;
+	this->info.List.listSize = listSize;
 }
 
-const ::XML_Char *Handler::GetName() const
+const ::XML_Char *XMLHandler::GetName() const
 {
 	return name;
 }
 
-Attribute::Attribute(const ::XML_Attribute *attr) : attr(attr)
+XMLAttribute::XMLAttribute(const ::XML_Attribute *attr) : attr(attr)
 {
 }
 
-Attribute::Attribute(const Attribute &rhs) : attr(rhs.attr)
+XMLAttribute::XMLAttribute(const XMLAttribute &rhs) : attr(rhs.attr)
 {
 }
 
-Attribute &Attribute::operator=(const Attribute &rhs)
+XMLAttribute &XMLAttribute::operator=(const XMLAttribute &rhs)
 {
 	attr = rhs.attr;
 	return *this;
 }
 
-Attribute Attribute::GetNext() const
+XMLAttribute XMLAttribute::GetNext() const
 {
 	assert(attr);
-	return Attribute(::XML_AttrGetNext(attr));
+	return XMLAttribute(::XML_AttrGetNext(attr));
 }
 
-const XML_Char *Attribute::GetName() const
+const XML_Char *XMLAttribute::GetName() const
 {
 	assert(attr);
 	return ::XML_AttrGetName(attr);
 }
 
-const XML_Char *Attribute::GetValue() const
+const XML_Char *XMLAttribute::GetValue() const
 {
 	assert(attr);
 	return ::XML_AttrGetValue(attr);
 }
 
-Attribute::operator bool() const
+XMLAttribute::operator bool() const
 {
 	return attr != NULL;
 }
 
 
 //
-// Element
+// XMLElement
 //
 
-Element::Element(::XML_Element *elem)
+XMLElement::XMLElement(::XML_Element *elem)
 {
 	assert(elem);
 	element = elem;
 }
 
-const ::XML_Char *Element::GetName() const
+const ::XML_Char *XMLElement::GetName() const
 {
 	return element->name;
 }
 
-int Element::NumAttributes() const
+int XMLElement::NumAttributes() const
 {
 	return ::XML_ElementGetNumAttrs(element);
 }
 
-Attribute Element::GetAttrList() const
+XMLAttribute XMLElement::GetAttrList() const
 {
-	return Attribute(::XML_ElementGetAttrList(element));
+	return XMLAttribute(::XML_ElementGetAttrList(element));
 }
 
-const ::XML_Char *Element::GetAttribute(const ::XML_Char *name, const ::XML_Char *def) const
+const ::XML_Char *XMLElement::GetAttribute(const ::XML_Char *name, const ::XML_Char *def) const
 {
 	const ::XML_Attribute *attr = ::XML_ElementFindAttr(element, name);
 	return attr ? attr->value : def;
 }
 
-void Element::GetAttribute(const ::XML_Char *name, int &value, int defValue) const
+void XMLElement::GetAttribute(const ::XML_Char *name, int &value, int defValue) const
 {
 	value = ::XML_AttrGetInt(::XML_ElementFindAttr(element, name), defValue);
 }
 
-void Element::GetAttribute(const ::XML_Char *name, unsigned int &value, unsigned int defValue) const
+void XMLElement::GetAttribute(const ::XML_Char *name, unsigned int &value, unsigned int defValue) const
 {
 	value = ::XML_AttrGetUInt(::XML_ElementFindAttr(element, name), defValue);
 }
 
-void Element::GetAttribute(const ::XML_Char *name, double &value, double defValue) const
+void XMLElement::GetAttribute(const ::XML_Char *name, double &value, double defValue) const
 {
 	value = ::XML_AttrGetDouble(::XML_ElementFindAttr(element, name), defValue);
 }
 
-void Element::GetAttribute(const ::XML_Char *name, float &value, float defValue) const
+void XMLElement::GetAttribute(const ::XML_Char *name, float &value, float defValue) const
 {
 	value = ::XML_AttrGetFloat(::XML_ElementFindAttr(element, name), defValue);
 }
 
-void Element::GetAttribute(const ::XML_Char *name, bool &value, bool defValue) const
+void XMLElement::GetAttribute(const ::XML_Char *name, bool &value, bool defValue) const
 {
 	value = ::XML_AttrGetBoolean(::XML_ElementFindAttr(element, name), defValue) != 0;
 }
 
-size_t Element::ReadData(::XML_Char *buf, size_t len)
+size_t XMLElement::ReadData(::XML_Char *buf, size_t len)
 {
 	::XML_Error error = ::XML_ElementReadData(element, buf, &len);
 	if (error != ::XML_Error_None)
-		throw ParseException(GetInput());
+		throw XMLParseException(GetInput());
 	return len;
 }
 
-void Element::Process(const Handler handlers[], void *userData)
+void XMLElement::Process(const XMLHandler handlers[], void *userData)
 {
 	::XML_Error error = ::XML_ElementProcess(element, handlers, userData);
 	if (error != ::XML_Error_None)
-		throw ParseException(GetInput());
+		throw XMLParseException(GetInput());
 }
 
-const Input &Element::GetInput() const
+const XMLInput &XMLElement::GetInput() const
 {
-	Input *input = (Input *)element->input->userData;
+	XMLInput *input = (XMLInput *)element->input->userData;
 	assert(input);
 	return *input;
 }
 
-bool Element::IsEmpty() const
+bool XMLElement::IsEmpty() const
 {
 	return element->empty != 0;
 }
@@ -442,7 +440,7 @@ bool Element::IsEmpty() const
 // Exceptions
 //
 
-ParseException::ParseException(const Input &input)
+XMLParseException::XMLParseException(const XMLInput &input)
 {
 	error = input.GetError();
 	line = input.GetLine();
@@ -450,18 +448,18 @@ ParseException::ParseException(const Input &input)
 	offset = input.GetOffset();
 }
 
-const ::XML_Char *ParseException::What() const
+const ::XML_Char *XMLParseException::What() const
 {
 	return ::XML_InputGetErrorString(error);
 }
 
-InvalidValue::InvalidValue(const Input &input) : ParseException(input)
+InvalidValue::InvalidValue(const XMLInput &input) : XMLParseException(input)
 {
 	// possibly thrown by user code so assign error code here
 	this->error = ::XML_Error_InvalidValue;
 }
 
-InvalidValue::InvalidValue(const Input &input, int line, int column) : ParseException(input)
+InvalidValue::InvalidValue(const XMLInput &input, int line, int column) : XMLParseException(input)
 {
 	// possibly thrown by user code so assign error code here
 	this->error = ::XML_Error_InvalidValue;
@@ -469,5 +467,5 @@ InvalidValue::InvalidValue(const Input &input, int line, int column) : ParseExce
 	this->column = column;
 }
 
-XML_END_NAMESPACE
+//XML_END_NAMESPACE
 

@@ -23,11 +23,11 @@
 #ifndef XMLCONFIG_H
 #define XMLCONFIG_H
 
-#ifdef __cplusplus
+/*#ifdef __cplusplus
 	#define XML_BEGIN_NAMESPACE	namespace XML {
 	#define XML_END_NAMESPACE	}
 #endif
-
+*/
 //#include <stdlib.h>
 
 #ifdef XML_UNICODE
