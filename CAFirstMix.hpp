@@ -40,7 +40,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAUtil.hpp"
 #include "CAThread.hpp"
 #include "CAThreadPool.hpp"
-#include "CATimedQueue.hpp"
 #ifdef PAYMENT
 #include "CAAccountingInstance.hpp"
 #endif
@@ -152,14 +151,19 @@ class CAFirstMix:public CAMix
 			SINT32 doUserLogin(CAMuxSocket* pNewUSer,UINT8 perrIP[4]);
 		protected:	
 			CAIPList* m_pIPList;
-#ifdef LOG_PACKET_TIMES
-			CATimedQueue* m_pQueueSendToMix;
-			CATimedQueue* m_pQueueReadFromMix;
-			CALogPacketStats* m_pLogPacketStats;
-#else			
+			struct t_queue_entry
+				{
+					MIXPACKET packet;
+					#ifdef LOG_PACKET_TIMES
+						UINT64 timestamp;
+					#endif
+				};
+			typedef struct t_queue_entry tQueueEntry;
 			CAQueue* m_pQueueSendToMix;
 			CAQueue* m_pQueueReadFromMix;
-#endif			
+			#ifdef LOG_PACKET_TIMES
+				CALogPacketStats* m_pLogPacketStats;
+			#endif
 			CAFirstMixChannelList* m_pChannelList;
 			volatile UINT32 m_nUser;
 			UINT32 m_nSocketsIn; //number of usable ListenerInterface (non 'virtual')

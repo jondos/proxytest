@@ -201,13 +201,8 @@ SINT32 CAFirstMix::init()
 #endif
 
 		m_pIPList=new CAIPList();
-#ifdef LOG_PACKET_TIMES
-		m_pQueueSendToMix=new CATimedQueue(MIXPACKET_SIZE);
-		m_pQueueReadFromMix=new CATimedQueue(MIXPACKET_SIZE);
-#else		
-		m_pQueueSendToMix=new CAQueue(MIXPACKET_SIZE);
-		m_pQueueReadFromMix=new CAQueue(MIXPACKET_SIZE);
-#endif		
+		m_pQueueSendToMix=new CAQueue(sizeof(CAFirstMix::tQueueEntry));
+		m_pQueueReadFromMix=new CAQueue(sizeof(CAFirstMix::tQueueEntry));
 		m_pChannelList=new CAFirstMixChannelList();
 #ifdef HAVE_EPOLL
 		m_psocketgroupUsersRead=new CASocketGroupEpoll(false);
@@ -262,46 +257,38 @@ SINT32 CAFirstMix::init()
 THREAD_RETURN fm_loopSendToMix(void* param)
 	{
 		CAFirstMix* pFirstMix=(CAFirstMix*)param;
-#ifdef LOG_PACKET_TIMES
-		CATimedQueue* pQueue=pFirstMix->m_pQueueSendToMix;
-#else	
 		CAQueue* pQueue=((CAFirstMix*)param)->m_pQueueSendToMix;
-#endif		
 		CAMuxSocket* pMuxSocket=pFirstMix->m_pMuxOut;
 		
 		UINT32 len;
 		SINT32 ret;
 #ifdef LOG_PACKET_TIMES
-		UINT64 timestamp;
 		UINT64 tmpU64;
 		UINT64 pool_timestamp;
 #endif		
 #ifndef USE_POOL
-		UINT8* buff=new UINT8[0xFFFF];
+		CAFirstMix::tQueueEntry* pQueueEntry=new CAFirstMix::tQueueEntry;
+		MIXPACKET* pMixPacket=&pQueueEntry->packet;
 		while(!pFirstMix->m_bRestart)
 			{
-				len=MIXPACKET_SIZE;
-#ifdef LOG_PACKET_TIMES
-				ret=pQueue->getOrWait(buff,&len,timestamp);
-#else				
-				ret=pQueue->getOrWait(buff,&len);
-#endif				
-				if(ret!=E_SUCCESS||len!=MIXPACKET_SIZE)
+				len=sizeof(CAFirstMix::tQueueEntry);
+				ret=pQueue->getOrWait((UINT8*)pQueueEntry,&len);
+				if(ret!=E_SUCCESS||len!=sizeof(CAFirstMix::tQueueEntry))
 					break;
-				if(pMuxSocket->send((MIXPACKET*)buff)!=MIXPACKET_SIZE)
+				if(pMuxSocket->send(pMixPacket)!=MIXPACKET_SIZE)
 					break;
 #ifdef LOG_PACKET_TIMES
- 				if(!isZero64(timestamp))
+ 				if(!isZero64(pQueueEntry->timestamp))
 					{
 						getcurrentTimeMicros(tmpU64);
-						pFirstMix->m_pLogPacketStats->addToTimeingStats(diff64(tmpU64,timestamp),((MIXPACKET*)buff)->flags,true);
+						pFirstMix->m_pLogPacketStats->addToTimeingStats(diff64(tmpU64,pQueueEntry->timestamp),pMixPacket->flags,true);
 						#ifdef _DEBUG
-							CAMsg::printMsg(LOG_CRIT,"Upload Packet processing time (arrival <--> send): %u µs\n",diff64(tmpU64,timestamp));
+							CAMsg::printMsg(LOG_CRIT,"Upload Packet processing time (arrival <--> send): %u µs\n",diff64(tmpU64,pQueueEntry->timestamp));
 						#endif
 					}	
 #endif					
 			}
-		delete []buff;
+		delete pQueueEntry;
 #else
 		CAPool* pPool=new CAPool(MIX_POOL_SIZE);
 		tPoolEntry* pPoolEntry=new tPoolEntry;
@@ -364,13 +351,9 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 	{
 		CAFirstMix* pFirstMix=(CAFirstMix*)pParam;
 		CAMuxSocket* pMuxSocket=pFirstMix->m_pMuxOut;
-		#ifdef LOG_PACKET_TIMES
-			UINT64 time_stamp;
-			CATimedQueue* pQueue=pFirstMix->m_pQueueReadFromMix;
-		#else		
-			CAQueue* pQueue=pFirstMix->m_pQueueReadFromMix;
-		#endif
-		MIXPACKET* pMixPacket=new MIXPACKET;
+		CAQueue* pQueue=pFirstMix->m_pQueueReadFromMix;
+		CAFirstMix::tQueueEntry* pQueueEntry=new CAFirstMix::tQueueEntry;
+		MIXPACKET* pMixPacket=&pQueueEntry->packet;
 		CASingleSocketGroup* pSocketGroup=new CASingleSocketGroup(false);
 		pSocketGroup->add(*pMuxSocket);
 		#ifdef USE_POOL
@@ -400,7 +383,7 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 					{
 						ret=pMuxSocket->receive(pMixPacket);
 						#ifdef LOG_PACKET_TIMES
-							getcurrentTimeMicros(time_stamp);
+							getcurrentTimeMicros(pQueueEntry->timestamp);
 						#endif
 					}
 				if(ret!=MIXPACKET_SIZE)
@@ -411,13 +394,9 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 				#ifdef USE_POOL
 					pPool->pool((tPoolEntry*)pMixPacket);
 				#endif	
-				#ifdef LOG_PACKET_TIMES
-					pQueue->add(pMixPacket,MIXPACKET_SIZE,time_stamp);	
-				#else
-					pQueue->add(pMixPacket,MIXPACKET_SIZE);	
-				#endif
+				pQueue->add(pMixPacket,sizeof(CAFirstMix::tQueueEntry));	
 			}
-		delete pMixPacket;
+		delete pQueueEntry;
 		#ifdef USE_POOL
 			delete pPool;
 		#endif	
@@ -565,11 +544,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		pNewUser->setKey(oMixPacket.data+9,32);
 		pNewUser->setCrypt(true);
 
-#ifdef LOG_PACKET_TIMES
-		CATimedQueue* tmpQueue=new CATimedQueue(MIXPACKET_SIZE);
-#else
-		CAQueue* tmpQueue=new CAQueue(MIXPACKET_SIZE);
-#endif
+		CAQueue* tmpQueue=new CAQueue(sizeof(CAFirstMix::tQueueEntry));
 		if(m_pChannelList->add(pNewUser,peerIP,tmpQueue)!=E_SUCCESS)// adding user connection to mix->JAP channel list (stefan: sollte das nicht connection list sein? --> es handelt sich um eine Datenstruktu fŸr Connections/Channels ).
 			{	
 				m_pIPList->removeIP(peerIP);

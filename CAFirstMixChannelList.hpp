@@ -67,12 +67,10 @@ struct t_fmhashtableentry
 	{
 		public:
 			CAMuxSocket*	pMuxSocket;
-#ifdef LOG_PACKET_TIMES
-			CATimedQueue* pQueueSend;
-			UINT32        uAlreadySendPacketSize;
-#else				
 			CAQueue*			pQueueSend;
-#endif			
+#ifdef LOG_PACKET_TIMES
+			UINT32        uAlreadySendPacketSize;
+#endif
 			UINT32				cSuspend;
 #ifdef LOG_CHANNEL
 			UINT32				trafficIn;
@@ -195,11 +193,7 @@ class CAFirstMixChannelList
 			CAFirstMixChannelList();
 			~CAFirstMixChannelList();
 		
-#ifdef LOG_PACKET_TIMES	
-			SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,UINT8 peerIP[4],CATimedQueue* pQueueSend);
-#else
 			SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,UINT8 peerIP[4],CAQueue* pQueueSend);
-#endif
 			SINT32 addChannel(CAMuxSocket* pMuxSocket,HCHANNEL channelIn,CASymCipher* pCipher,HCHANNEL* channelOut);
 			
 			fmChannelListEntry* get(CAMuxSocket* pMuxSocket,HCHANNEL channelIn);
