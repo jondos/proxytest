@@ -93,6 +93,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	 #ifdef __sgi
 		 #undef HAVE_TCP_KEEPALIVE
 	 #endif
+	 #ifdef __FreeBSD__
+		 #undef HAVE_TCP_KEEPALIVE
+	 #endif
 	#endif 
 		#include <sys/ioctl.h>
 		#include <sys/types.h>
@@ -135,7 +138,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#ifndef INADDR_NONE
     	    #define INADDR_NONE -1
 	#endif
+#ifndef __FreeBSD__
     	#define socklen_t int
+#endif
     	#include <sys/filio.h>
     	#define MSG_NOSIGNAL 0
     #endif
