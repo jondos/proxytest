@@ -28,9 +28,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "StdAfx.h"
 #include "CASocket.hpp"
 #include "CASocketGroup.hpp"
-#ifdef _DEBUG
+//#ifdef _DEBUG
 	#include "CAMsg.hpp"
-#endif
+//#endif
 
 CASocketGroup::CASocketGroup()
 	{
@@ -64,9 +64,9 @@ SINT32 CASocketGroup::add(CAMuxSocket&s)
 		    if(max<((SOCKET)s)+1)
 			max=((SOCKET)s)+1;
 		#endif
-		#ifdef _DEBUG
+		//#ifdef _DEBUG
 				CAMsg::printMsg(LOG_DEBUG,"CASocketGroutp: Added SOCKET: %u\n",(SOCKET)s);
-		#endif
+		//#endif
 		FD_SET((SOCKET)s,&m_fdset);
 		LeaveCriticalSection(&csFD_SET);
 		return E_SUCCESS;
