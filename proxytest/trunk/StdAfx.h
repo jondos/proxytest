@@ -43,13 +43,13 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define PSEUDO_LOG
 //#define NEW_PROTOCOL
 //#define NEW_KEY2USER_PROTOCOL
-#define DELAY_CHANNELS
+//#define DELAY_CHANNELS
 #ifdef DELAY_CHANNELS
 	#define DELAY_CHANNEL_TRAFFIC 10000 //Traffic in bytes after which (download direction) the channel is delayed
 	//Delay is at the moment constant (max . Channel-Traffic: 10 KByte/s)
 //	#define DELAY_CHANNEL_SEND_INTERVALL 100 //Minimum time between two delayed packets (in ms)
 #endif
-//#define LOG_CRIME
+#define LOG_CRIME
 
 //Some constants
 #define LAST_MIX_TO_PROXY_CONNECT_TIMEOUT 2000 //Connection timeout for last mix to proxy connections 2 Seconds...
