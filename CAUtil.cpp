@@ -246,6 +246,13 @@ SINT32 setDOMElementValue(DOM_Element& elem,UINT32 text)
 		return E_SUCCESS;
 	}
 
+SINT32 setDOMElementValue(DOM_Element& elem,UINT8* value)
+	{
+		DOM_Text t=elem.getOwnerDocument().createTextNode(DOMString((char*)value));
+		elem.appendChild(t);
+		return E_SUCCESS;
+	}
+
 SINT32 setDOMElementAttribute(DOM_Element& elem,char* attr,int value)
 	{
 		UINT8 tmp[10];
@@ -266,6 +273,20 @@ SINT32 getDOMChildByName(const DOM_Node& node,UINT8* name,DOM_Node& child)
 		return E_UNKNOWN;
 	}
 
+SINT32 getDOMElementValue(DOM_Element& elem,UINT8* value,UINT32* valuelen)
+	{
+		DOM_Node text=elem.getFirstChild();
+		if(!text.isNull())
+			{
+				DOMString str=text.getNodeValue();
+
+				char* tmpStr=str.transcode();
+				*valuelen=str.length();
+				memcpy(value,tmpStr,*valuelen);
+				return E_SUCCESS;
+			}
+		return E_UNKNOWN;
+	}
 SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, UINT8* xml, UINT32* xmllen,CAASymCipher* pRSA)
 	{
 #define XML_ENCODE_KEY_TEMPLATE "<EncryptedKey><EncryptionMethod Algorithm=\"RSA\"/><CipherData><CipherValue>%s</CipherValue></CipherData></EncryptedKey>"
@@ -295,3 +316,14 @@ SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, UINT8* xml, UINT32 xmlle
 		return E_SUCCESS;
 	}
 
+UINT8* readFile(UINT8* name,UINT32* size)
+	{
+		int handle=open((char*)name,O_BINARY|O_RDONLY);
+		if(handle<0)
+			return NULL;
+		*size=filelength(handle);
+		UINT8* buff=new UINT8[*size];
+		read(handle,buff,*size);
+		close(handle);
+		return buff;
+	}

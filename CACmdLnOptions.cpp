@@ -38,10 +38,14 @@ CACmdLnOptions::CACmdLnOptions()
 		iTargetPort=iSOCKSPort=iServerPort=iSOCKSServerPort=iInfoServerPort=0xFFFF;
 		iTargetRTTPort=iServerRTTPort=-1;
 		strServerHost=strTargetHost=strSOCKSHost=strInfoServerHost=NULL;
-		m_strMixXml=m_strUser=strKeyFileName=strCascadeName=strLogDir=NULL;
+		m_strMixXml=m_strUser=strCascadeName=strLogDir=NULL;
 		pTargets=NULL;
 		cntTargets=0;
 		m_strMixID=NULL;
+		m_pSignKey=NULL;
+		m_pOwnCertificate=NULL;
+		m_pPrevMixCertificate=NULL;
+		m_pNextMixCertificate=NULL;
   }
 CACmdLnOptions::~CACmdLnOptions()
 	{
@@ -66,8 +70,6 @@ void CACmdLnOptions::clean()
 			{
 				delete[] strInfoServerHost;
 	    }
-		if(strKeyFileName!=NULL)
-			delete[] strKeyFileName;
 		if(strCascadeName!=NULL)
 			delete[] strCascadeName;
 		if(strLogDir!=NULL)
@@ -82,6 +84,14 @@ void CACmdLnOptions::clean()
 			{
 				delete[] pTargets;
 			}
+		if(m_pSignKey!=NULL)
+			delete m_pSignKey;
+		if(m_pOwnCertificate!=NULL)
+			delete m_pOwnCertificate;
+		if(m_pNextMixCertificate!=NULL)
+			delete m_pNextMixCertificate;
+		if(m_pPrevMixCertificate!=NULL)
+			delete m_pPrevMixCertificate;
   }
     
 int CACmdLnOptions::parse(int argc,const char** argv)
@@ -97,12 +107,13 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 	int SOCKSport=-1;
 	char* socks=NULL;
 	char* infoserver=NULL;
-	char* keyfile=NULL;
+	char* certsdir=NULL;
 	char* cascadename=NULL;
 	char* logdir=NULL;
 	char* serverPort=NULL;
 	char* user=NULL;
 	char* configfile=NULL;
+  int bXmlKey=0;
 
 	poptOption options[]=
 	 {
@@ -115,7 +126,8 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 		{"socksport",'s',POPT_ARG_INT,&SOCKSport,0,"listening port for socks","<portnumber>"},
 		{"socksproxy",'o',POPT_ARG_STRING,&socks,0,"socks proxy","<ip:port>"},
 		{"infoserver",'i',POPT_ARG_STRING,&infoserver,0,"info server","<ip:port>"},
-		{"key",'k',POPT_ARG_STRING,&keyfile,0,"sign key file","<file>"},
+		{"certs",'e',POPT_ARG_STRING,&certsdir,0,"certs and key directory which the files: own.pfx (or privkey.xml), next.cer, prev.cer","<dir>"},
+		{"xmlkey",'x',POPT_ARG_NONE,&bXmlKey,0,"sign key is in XML-Format",NULL},
 		{"name",'a',POPT_ARG_STRING,&cascadename,0,"name of the cascade","<string>"},
 		{"logdir",'l',POPT_ARG_STRING,&logdir,0,"directory where log files go to","<dir>"},
 		{"user",'u',POPT_ARG_STRING,&user,0,"effective user","<user>"},
@@ -243,12 +255,6 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 						}
 				free(infoserver);	
 	    }
-	if(keyfile!=NULL)
-	    {
-					strKeyFileName=new char[strlen(keyfile)+1];
-					strcpy(strKeyFileName,keyfile);
-					free(keyfile);	
-	    }
 	if(cascadename!=NULL)
 	    {
 					strCascadeName=new char[strlen(cascadename)+1];
@@ -343,6 +349,66 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 			strcat((char*)m_strMixXml,(char*)id);
 			strcat((char*)m_strMixXml,"\"></Mix>");
 		}
+
+	UINT8 tmpCertDir[2048];
+	UINT8 tmpFileName[2048];
+	UINT8* buff=NULL;
+	UINT32 size;
+	if(certsdir!=NULL)
+		{
+			strcpy((char*)tmpCertDir,certsdir);
+			free(certsdir);				
+		}
+	else
+		tmpCertDir[0]=0;
+	//Try to load SignKey
+	if(bXmlKey)
+		{
+			strcpy((char*)tmpFileName,(char*)tmpCertDir);
+			strcat((char*)tmpFileName,"/privkey.xml");
+			buff=readFile(tmpFileName,&size);
+			if(buff!=NULL)
+				{
+					m_pSignKey=new CASignature();
+					m_pSignKey->setSignKey(buff,size,SIGKEY_XML);
+				}
+		}
+	else
+		{
+			strcpy((char*)tmpFileName,(char*)tmpCertDir);
+			strcat((char*)tmpFileName,"/own.pfx");
+			UINT8* buff=readFile(tmpFileName,&size);
+			if(buff!=NULL)
+				{
+					m_pSignKey=new CASignature();
+					UINT8 passwd[500];
+					passwd[0]=0;
+					if(m_pSignKey->setSignKey(buff,size,SIGKEY_PKCS12)!=E_SUCCESS)
+						{//Maybe not an empty passwd
+							printf("I need a passwd for the SignKey: ");
+							scanf("%s",(char*)passwd); //This is a typicall Buffer Overflow :-)
+							if(m_pSignKey->setSignKey(buff,size,SIGKEY_PKCS12,(char*)passwd)!=E_SUCCESS)
+								{
+									delete m_pSignKey;
+									m_pSignKey=NULL;
+								}
+						}
+					m_pOwnCertificate=CACertificate::decode(buff,size,CERT_PKCS12,(char*)passwd);
+				}
+		}
+	delete buff;
+	//Try to load Certificates
+	strcpy((char*)tmpFileName,(char*)tmpCertDir);
+	strcat((char*)tmpFileName,"/next.cer");
+	buff=readFile(tmpFileName,&size);
+	m_pNextMixCertificate=CACertificate::decode(buff,size,CERT_DER);
+	delete buff;
+	strcpy((char*)tmpFileName,(char*)tmpCertDir);
+	strcat((char*)tmpFileName,"/prev.cer");
+	buff=readFile(tmpFileName,&size);
+	m_pPrevMixCertificate=CACertificate::decode(buff,size,CERT_DER);
+	delete buff;
+
 	return E_SUCCESS;
 	
  }
@@ -464,18 +530,6 @@ SINT32 CACmdLnOptions::getInfoServerHost(UINT8* host,UINT32 len)
 					return E_UNKNOWN;		
 				}
 		strcpy((char*)host,strInfoServerHost);
-		return E_SUCCESS;
-  }
-
-SINT32 CACmdLnOptions::getKeyFileName(UINT8* filename,UINT32 len)
-  {
-		if(strKeyFileName==NULL)
-				return E_UNKNOWN;
-		if(len<=(UINT32)strlen(strKeyFileName))
-				{
-					return E_UNKNOWN;		
-				}
-		strcpy((char*)filename,strKeyFileName);
 		return E_SUCCESS;
   }
 

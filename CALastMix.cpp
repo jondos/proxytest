@@ -36,6 +36,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketAddrINet.hpp"
 #include "CAUtil.hpp"
 #include "CAInfoService.hpp"
+#include "CACertStore.hpp"
+#include "xml/DOM_Output.hpp"
 
 extern CACmdLnOptions options;
 
@@ -70,26 +72,9 @@ SINT32 CALastMix::initOnce()
 		options.getSOCKSHost(strTarget,255);
 		maddrSocks.setAddr(strTarget,options.getSOCKSPort());
 
-		int handle;
-		SINT32 len;
-		UINT8* fileBuff=new UINT8[2048];
-		if(fileBuff==NULL||options.getKeyFileName(fileBuff,2048)!=E_SUCCESS)
-			goto END;
-		handle=open((char*)fileBuff,O_BINARY|O_RDONLY);
-		if(handle==-1)
-			goto END;
-		len=read(handle,fileBuff,2048);
-		close(handle);
-		if(len<1)
-			goto END;
-		m_pSignature=new CASignature();
-		if(m_pSignature->setSignKey(fileBuff,len,SIGKEY_XML)!=E_SUCCESS)
-			{
-				delete m_pSignature;
-				m_pSignature=NULL;
-			}
-END:		
-		delete []fileBuff;
+		m_pSignature=options.getSignKey();
+		if(m_pSignature==NULL)
+			return E_UNKNOWN;
 		return E_SUCCESS;
 	}
 
@@ -148,31 +133,32 @@ SINT32 CALastMix::processKeyExchange()
 		UINT16 messageSize=0;
 		UINT32 keySize=0;
 		UINT8* buff=NULL;
-		//Constructing the XML Key Info in buff
-		buff=new UINT8[1024];
-		keySize=1024;
-		UINT32 aktIndex=2; //First two bytes for len reserved
-		//Beginn with: <?XML version="1.0"?><Mixes count="1"><Mix id="  
-		memcpy(buff+aktIndex,"<?xml version=\"1.0\"?><Mixes count=\"1\"><Mix id=\"",47);
-		aktIndex+=47;
-		//than insert the Mix id
-		options.getMixId(buff+aktIndex,50);
-		aktIndex=strlen((char*)buff+2)+2;
-		//the closing chars for the <Mix> tag
-		memcpy(buff+aktIndex,"\">",2);
-		aktIndex+=2;
-		//the Key Value
-		mRSA.getPublicKeyAsXML(buff+aktIndex,&keySize);
-		aktIndex+=keySize;
-		//the closing Mix and Mixes tags
-		memcpy(buff+aktIndex,"</Mix></Mixes>",14);
-		aktIndex+=14;
-		messageSize=aktIndex;		
+		buff=new UINT8[2048];
+		
+		
+		DOM_Document doc=DOM_Document::createDocument();
+		DOM_Element elemMixes=doc.createElement("Mixes");
+		setDOMElementAttribute(elemMixes,"count",1);
+		doc.appendChild(elemMixes);
+		DOM_Element elemMix=doc.createElement("Mix");
+		options.getMixId(buff,50);
+		elemMix.setAttribute("id",(char*)buff);
+		elemMixes.appendChild(elemMix);
+
+		keySize=2048;
+		DOM_DocumentFragment tmpDocFrag;
+		mRSA.getPublicKeyAsDocumentFragment(tmpDocFrag);
+		DOM_Node nodeRsaKey=doc.importNode(tmpDocFrag,true);
+		elemMix.appendChild(nodeRsaKey);
+		tmpDocFrag=0;
+
+		m_pSignature->signXML(elemMix);
+		
+		keySize=2048;
+		DOM_Output::dumpToMem(doc,buff+2,&keySize);
+		messageSize=keySize+2;		
 		UINT16 tmp=htons(messageSize-2);
 		memcpy(buff,&tmp,2);
-		buff[aktIndex]=0;
-		CAMsg::printMsg(LOG_INFO,"Key Info is:\n");
-		CAMsg::printMsg(LOG_INFO,"%s\n",(char*)buff+2);		
 		CAMsg::printMsg(LOG_INFO,"Sending Infos (chain length and RSA-Key, Message-Size %u)\n",messageSize);
 		if(((CASocket*)*m_pMuxIn)->send(buff,messageSize)!=messageSize)
 			{
@@ -192,6 +178,19 @@ SINT32 CALastMix::processKeyExchange()
 		buff[messageSize]=0;
 		CAMsg::printMsg(LOG_INFO,"Symmetric Key Info received is:\n");
 		CAMsg::printMsg(LOG_INFO,"%s\n",(char*)buff);		
+		//verify signature
+		CASignature oSig;
+		CACertificate* pCert=options.getPrevMixTestCertificate();
+		oSig.setVerifyKey(pCert);
+		delete pCert;
+		if(oSig.verifyXML(buff,messageSize)!=E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Couldt not verify the symetric key!\n");		
+				delete []buff;
+				return E_UNKNOWN;
+			}
+		CAMsg::printMsg(LOG_INFO,"Verified the symetric key!\n");		
+	
 		UINT8 key[50];
 		keySize=50;
 		decodeXMLEncryptedKey(key,&keySize,buff,messageSize,&mRSA);

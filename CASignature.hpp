@@ -28,14 +28,23 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CASIGNATURE__
 #define __CASIGNATURE__
 #define SIGKEY_XML 1
+#define SIGKEY_PKCS12 2
+#include "CACertStore.hpp"
 class CASignature
 	{
 		public:
 			CASignature();
 			~CASignature();
-			SINT32 setSignKey(UINT8* buff,UINT32 len,UINT32 type);
+			CASignature* clone();
+			SINT32 generateSignKey(UINT32 size);
+			SINT32 setSignKey(UINT8* buff,UINT32 len,UINT32 type,char* passwd=NULL);
 			SINT32 sign(UINT8* in,UINT32 inlen,UINT8* sig,UINT32* siglen);
-			SINT32 signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen);
+			SINT32 signXML(DOM_Node& node,CACertStore* pIncludeCerts=NULL);
+			SINT32 signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen,CACertStore* pIncludeCerts=NULL);
+			SINT32 setVerifyKey(CACertificate* pCert);
+			SINT32 verify(UINT8* in,UINT32 inlen,UINT8* sig,UINT32 siglen);
+			SINT32 verifyXML(UINT8* in,UINT32 inlen);
+			SINT32 verifyXML(DOM_Node& node,CACertStore* pTrustedCerts=NULL);
 			SINT32 getSignatureSize();
 			SINT32 getXMLSignatureSize();
 		private:

@@ -25,5 +25,33 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
-#include "StdAfx.h"
-#include "CASemaphore.hpp"
+#ifndef __CA_CERTSTORE__
+#define __CA_CERTSTORE__
+
+#include "CACertificate.hpp"
+#define XML_X509DATA 2
+struct __t_certstore_list
+	{
+		CACertificate* pCert;
+		struct __t_certstore_list* next;
+	};
+typedef struct __t_certstore_list CERTSTORE_ENTRY;
+typedef CERTSTORE_ENTRY* LP_CERTSTORE_ENTRY;
+
+class CACertStore
+	{
+		public:
+			CACertStore();
+			~CACertStore();
+			SINT32 add(CACertificate* cert);
+			CACertificate* getFirst();
+			CACertificate* getNext();
+			UINT32 getNumber(){return m_cCerts;}
+			static CACertStore* decode(UINT8* buff,UINT32 bufflen,UINT32 type);
+			SINT32 encode(UINT8* buff,UINT32* bufflen,UINT32 type);
+			SINT32 encode(DOM_DocumentFragment& docFrag,DOM_Document& doc);
+		private:
+			LP_CERTSTORE_ENTRY m_pCertList;
+			UINT32 m_cCerts;
+	};
+#endif

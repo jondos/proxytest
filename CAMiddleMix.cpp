@@ -42,27 +42,11 @@ extern CACmdLnOptions options;
 SINT32 CAMiddleMix::initOnce()
 	{
 		CAMsg::printMsg(LOG_DEBUG,"Starting MiddleMix InitOnce\n");
-		int handle;
-		SINT32 len;
-		UINT8* fileBuff=new UINT8[2048];
-		if(fileBuff==NULL||options.getKeyFileName(fileBuff,2048)!=E_SUCCESS)
-			goto END;
-		handle=open((char*)fileBuff,O_BINARY|O_RDONLY);
-		if(handle==-1)
-			goto END;
-		len=read(handle,fileBuff,2048);
-		close(handle);
-		if(len<1)
-			goto END;
-		m_pSignature=new CASignature();
-		if(m_pSignature->setSignKey(fileBuff,len,SIGKEY_XML)!=E_SUCCESS)
+		m_pSignature=options.getSignKey();
+		if(m_pSignature==NULL)
 			{
-				delete m_pSignature;
-				m_pSignature=NULL;
-				goto END;
+				return E_UNKNOWN;
 			}
-END:		
-		delete []fileBuff;
 		return E_SUCCESS;
 	}
 
@@ -107,18 +91,31 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 			{
 				if(child.getNodeName().equals("Mix"))
 					{
+						//check Signature....
+						CASignature oSig;
+						CACertificate* nextCert=options.getNextMixTestCertificate();
+						oSig.setVerifyKey(nextCert);
+						SINT32 ret=oSig.verifyXML(child,NULL);
+						delete nextCert;
+						if(ret!=E_SUCCESS)
+							return E_UNKNOWN;
+
 						DOM_Node rsaKey=child.getFirstChild();
 						CAASymCipher oRSA;
 						oRSA.setPublicKeyAsDOMNode(rsaKey);
 						UINT8 key[16];
 						getRandom(key,16);
-						UINT8 buff[400];
-						UINT32 bufflen=400;
+						UINT8 buff[4000];
+						UINT32 bufflen=4000;
+						UINT32 outlen=bufflen+5000;
+						UINT8* out=new UINT8[outlen];
 						encodeXMLEncryptedKey(key,16,buff,&bufflen,&oRSA);
+						m_pSignature->signXML(buff,bufflen,out,&outlen);
 						m_pMuxOut->setKey(key);
-						UINT16 size=htons(bufflen);
+						UINT16 size=htons(outlen);
 						((CASocket*)m_pMuxOut)->send((UINT8*)&size,2);
-						((CASocket*)m_pMuxOut)->send(buff,bufflen);
+						((CASocket*)m_pMuxOut)->send(out,outlen);
+						delete[] out;
 						break;
 					}
 				child=child.getNextSibling();
@@ -141,10 +138,12 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 		options.getMixId(tmpBuff,50); //the mix id...
 		mixNode.setAttribute("id",DOMString((char*)tmpBuff));
 
-		DOM_DocumentFragment* pDocFragment=NULL;
+		DOM_DocumentFragment pDocFragment;
 		m_pRSA->getPublicKeyAsDocumentFragment(pDocFragment); //the key
-		mixNode.appendChild(doc.importNode(*pDocFragment,true));
-		delete pDocFragment;
+		mixNode.appendChild(doc.importNode(pDocFragment,true));
+		pDocFragment=0;
+		
+		m_pSignature->signXML(mixNode);
 		
 		root.insertBefore(mixNode,root.getFirstChild());
 //		root.appendChild(mixNode);
@@ -178,6 +177,19 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 		recvBuff[len]=0;
 		CAMsg::printMsg(LOG_INFO,"Symmetric Key Info received is:\n");
 		CAMsg::printMsg(LOG_INFO,"%s\n",(char*)recvBuff);		
+		//verify signature
+		CASignature oSig;
+		CACertificate* pCert=options.getPrevMixTestCertificate();
+		oSig.setVerifyKey(pCert);
+		delete pCert;
+		if(oSig.verifyXML(recvBuff,len)!=E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Couldt not verify the symetric key!\n");		
+				delete []recvBuff;
+				return E_UNKNOWN;
+			}
+		CAMsg::printMsg(LOG_INFO,"Verified the symetric key!\n");		
+
 		UINT8 key[50];
 		UINT32 keySize=50;
 		decodeXMLEncryptedKey(key,&keySize,recvBuff,len,m_pRSA);

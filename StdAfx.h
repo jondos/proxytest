@@ -240,6 +240,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include <openssl/rand.h>
 #include <openssl/evp.h>
 #include <openssl/asn1.h>
+#include <openssl/pkcs12.h>
+#include <openssl/x509v3.h>
 
 //For DOM
 #include <util/PlatformUtils.hpp>
