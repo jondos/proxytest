@@ -144,9 +144,16 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 						while(tmpStr!=NULL)
 							{
 								char* tmpStr1=strchr(tmpStr,':');
-								memcpy(tmpHostname,tmpStr,tmpStr1-tmpStr);
-								tmpHostname[tmpStr1-tmpStr]=0;
-								tmpPort=(int)atol(tmpStr1+1);
+								if(tmpStr1!=NULL)
+									{
+										memcpy(tmpHostname,tmpStr,tmpStr1-tmpStr);
+										tmpHostname[tmpStr1-tmpStr]=0;
+										tmpPort=(int)atol(tmpStr1+1);
+									}
+								else
+									{//TODO what if not in right form ?
+										continue;
+									}
 								pTargets[i].setAddr(tmpHostname,tmpPort);
 								if(i==0)
 									{
@@ -367,7 +374,7 @@ SINT32 CACmdLnOptions::getCascadeName(UINT8* name,UINT32 len)
 
 SINT32 CACmdLnOptions::getLogDir(UINT8* name,UINT32 len)
   {
-		if(strLogDir==NULL)
+		if(strLogDir==NULL||name==NULL)
 				return E_UNKNOWN;
 		if(len<=(UINT32)strlen(strLogDir))
 				{
@@ -379,7 +386,7 @@ SINT32 CACmdLnOptions::getLogDir(UINT8* name,UINT32 len)
 
 SINT32 CACmdLnOptions::getUser(UINT8* user,UINT32 len)
   {
-		if(strUser==NULL)
+		if(strUser==NULL||user==NULL)
 				return E_UNKNOWN;
 		if(len<=(UINT32)strlen(strUser))
 				{
