@@ -230,13 +230,15 @@ SINT32 CASocket::close()
 					CAMsg::printMsg(LOG_DEBUG,"Fehler bei setsockopt - LINGER!\n");
 	*/			
 				if(m_bASyncSend)
-					m_pASyncSend->close(this);			
+					m_pASyncSend->close(this);
+#ifdef _DEBUG				
 				if(::closesocket(m_Socket)==SOCKET_ERROR)
 					{
 						CAMsg::printMsg(LOG_DEBUG,"Fehler bei CASocket::closesocket\n -- %i",GETERROR);
 					}
-#ifdef _DEBUG
 				sockets--;
+#else
+				::closesocket(m_Socket);
 #endif
 				m_Socket=0;
 				ret=E_SUCCESS;
