@@ -120,7 +120,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib libeay32.lib pthreadvce.lib xerces-c_2D.lib"
+				AdditionalDependencies="ws2_32.lib  ssleay32.lib libeay32.lib pthreadvce.lib xerces-c_2D.lib"
 				OutputFile=".\Release/proxytest.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
@@ -2577,6 +2577,12 @@
 							Name="VCCLCompilerTool"
 							PrecompiledHeaderThrough="../stdafx.h"/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\TypeA\CALastMixA.cpp">
@@ -2585,6 +2591,12 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							PrecompiledHeaderThrough="../stdafx.h"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"/>
 					</FileConfiguration>
 				</File>
 			</Filter>
@@ -2599,6 +2611,12 @@
 							Name="VCCLCompilerTool"
 							PrecompiledHeaderThrough="../stdafx.h"/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\TypeB\CALastMixB.cpp">
@@ -2607,6 +2625,12 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							PrecompiledHeaderThrough="../stdafx.h"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"/>
 					</FileConfiguration>
 				</File>
 			</Filter>
