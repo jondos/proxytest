@@ -3758,12 +3758,10 @@ if test "${enable_bandwidth_limitation+set}" = set; then
 
 fi;
 BANDWIDTH_LIMIT_THROUGHPUT=""
-# Check whether --enable-bandwidth-throughput or --disable-bandwidth-throughput was given.
-if test "${enable_bandwidth_throughput+set}" = set; then
-  enableval="$enable_bandwidth_throughput"
+# Check whether --enable-bandwidth-limitation-throughput or --disable-bandwidth-limitation-throughput was given.
+if test "${enable_bandwidth_limitation_throughput+set}" = set; then
+  enableval="$enable_bandwidth_limitation_throughput"
 
-	echo "Through"
-	echo $enableval
 		if test "x$enableval" != "xno" ; then
 		    BANDWIDTH_LIMIT_THROUGHPUT="-DDELAY_CHANNELS"
 		    if test "x$enableval" != "xyes" ; then
@@ -10774,7 +10772,7 @@ if test "${enable_crime_detection+set}" = set; then
 fi;
 
 
-CFLAGS="$CFLAGS $POOL $BANDWIDTH_LIMIT $BANDWITH_LIMIT_THROUGHPUT $PAYMENT $OFLAGS"
+CFLAGS="$CFLAGS $POOL $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $OFLAGS"
 CXXFLAGS=$CFLAGS
 LIBS="$LIBS $PAYMENT_LIB"
 
