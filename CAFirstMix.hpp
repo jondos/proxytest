@@ -156,10 +156,10 @@ class CAFirstMix:public CAMix
 			UINT32 m_timingMinDataPacketUpstream,m_timingMinDataPacketDownStream;
 			UINT32 m_timingCountDataPacketsUpstream,m_timingCountDataPacketsDownStream;
 			UINT64 m_timingSumDataPacketUpstream,m_timingSumDataPacketDownStream;
-			UINT32 m_timingMaxClosePacketUpstream,m_timingMaxClosePacketDownStream;
-			UINT32 m_timingMinClosePacketUpstream,m_timingMinClosePacketDownStream;
-			UINT32 m_timingCountClosePacketsUpstream,m_timingCountClosePacketsDownStream;
-			UINT64 m_timingSumClosePacketUpstream,m_timingSumClosePacketDownStream;
+			UINT32 m_timingMaxClosePacketUpstream;
+			UINT32 m_timingMinClosePacketUpstream;
+			UINT32 m_timingCountClosePacketsUpstream;
+			UINT64 m_timingSumClosePacketUpstream;
 			UINT32 m_timingMaxOpenPacketUpstream,m_timingMinOpenPacketUpstream;
 			UINT32 m_timingCountOpenPacketsUpstream;
 			UINT64 m_timingSumOpenPacketUpstream;
