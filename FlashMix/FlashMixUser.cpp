@@ -171,7 +171,7 @@ int main( int argc, char * argv[] )
 
 //        coutbn(bnMsg);
 
-        if (result == E_SUCCESS);
+        if (result == E_SUCCESS)
             if (ELGAMAL_encrypt(&bnEncA, &bnEncB, elGroupKey, bnMsg) == 0)
                 result = E_UNKNOWN;
 

@@ -100,13 +100,13 @@ SINT32 CAQueue::add(const void* buff,UINT32 size)
 				memcpy(m_lastElem->pBuff,buff,size);
 			}
 		m_nQueueSize+=size;
-	//	m_convarSize.unlock();
 		m_pcsQueue->unlock();
 		m_pconvarSize->signal();
 		return E_SUCCESS;
 	}
 
-/** Gets data from the Queue. The data is removed from the Queue
+/** Gets up to psize number of bytes from the Queue. 
+	* The data is removed from the Queue.
   * @param pbuff pointer to a buffer, there the data should be stored
 	* @param psize on call contains the size of pbuff, on return contains 
 	*								the size of returned data
@@ -157,8 +157,9 @@ SINT32 CAQueue::get(UINT8* pbuff,UINT32* psize)
 		return E_SUCCESS;
 	}
 
-/** Gets data from the Queue or waits until some data is available, if the Queue is empty.
-	* The data is removed from the Queue
+/** Gets data from the Queue or waits until some data is available,
+	* if the Queue is empty.
+	* The data is removed from the Queue.
   * @param pbuff pointer to a buffer, there the data should be stored
 	* @param psize on call contains the size of pbuff, on return contains 
 	*								the size of returned data
@@ -183,7 +184,7 @@ SINT32 CAQueue::getOrWait(UINT8* pbuff,UINT32* psize)
 	*								the size of returned data
 	* @param msTimeout timeout in milli seconds
 	* @retval E_SUCCESS if succesful
-	* @retval E_IMEDOUT if timeout was reached
+	* @retval E_TIMEDOUT if timeout was reached
 	* @retval E_UNKNOWN in case of an error
 	*/
 SINT32 CAQueue::getOrWait(UINT8* pbuff,UINT32* psize,UINT32 msTimeout)
