@@ -43,6 +43,7 @@ typedef struct t_LPPair
 		CASocket socketIn;
 		CASocket socketSOCKSIn;
 		CAMuxSocket muxOut;
+		unsigned char chainlen;
 	} LPPair;
 
 THREAD_RETURN lpIO(void *v)
@@ -63,6 +64,7 @@ THREAD_RETURN lpIO(void *v)
 		CONNECTION oConnection;		
 		unsigned char key[16];
 		memset(key,0,16);
+		unsigned char chainlen=lpIOPair->chainlen;
 		for(;;)
 			{
 				if((countRead=oSocketGroup.select())==SOCKET_ERROR)
@@ -132,7 +134,8 @@ THREAD_RETURN lpIO(void *v)
 								}
 							else
 								{
-									oConnection.pCipher->decrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
+									for(int c=0;c<chainlen;c++)
+										oConnection.pCipher->encrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
 									len=oMuxPacket.len;
 									if(len==0)
 										{
@@ -194,7 +197,8 @@ THREAD_RETURN lpIO(void *v)
 													{
 														oMuxPacket.type=MUX_HTTP;
 													}
-												tmpCon->pCipher->decrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
+												for(int c=0;c<chainlen;c++)
+													tmpCon->pCipher->encrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
 												if(lpIOPair->muxOut.send(&oMuxPacket)==SOCKET_ERROR)
 													{
 														CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Exiting!\n");									
@@ -255,11 +259,13 @@ int doLocalProxy()
 //		((CASocket*)lpIOPair->muxOut)->setRecvBuff(sizeof(MUXPACKET)*50);
 		if(lpIOPair->muxOut.connect(&addrNext)!=SOCKET_ERROR)
 			{
+				
 				CAMsg::printMsg(LOG_INFO," connected!\n");
 //				unsigned char key[16];
 //				memset(key,0,16);
 //				lpIOPair->muxOut.setDecryptionKey(key);
 //				lpIOPair->muxOut.setEncryptionKey(key);
+				lpIOPair->chainlen=2;
 				lpIO(lpIOPair);
 				ret=0;
 			}
@@ -685,6 +691,8 @@ THREAD_RETURN lmIO(void *v)
 		int len;
 		int countRead;
 		CONNECTION oConnection;
+		unsigned char key[16];
+		memset(key,0,16);
 		for(;;)
 			{
 				if((countRead=oSocketGroup.select())==SOCKET_ERROR)
@@ -725,15 +733,20 @@ THREAD_RETURN lmIO(void *v)
 										    }
 										else
 										    {    
+													CASymCipher* newCipher=new CASymCipher();
+													newCipher->setDecryptionKey(key);
+													newCipher->setEncryptionKey(key);
+													newCipher->decrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
 													if(tmpSocket->send(oMuxPacket.data,len)==SOCKET_ERROR)
 														{
 															tmpSocket->close();
 															lmIOPair->muxIn.close(oMuxPacket.channel);
 															delete tmpSocket;
+															delete newCipher;
 														}
 													else
 														{
-															oSocketList.add(oMuxPacket.channel,tmpSocket);
+															oSocketList.add(oMuxPacket.channel,tmpSocket,newCipher);
 															oSocketGroup.add(*tmpSocket);
 														}
 										    }
@@ -748,9 +761,11 @@ THREAD_RETURN lmIO(void *v)
 										lmIOPair->muxIn.close(oMuxPacket.channel);
 										oSocketList.remove(oMuxPacket.channel);
 										delete oConnection.pSocket;
+										delete oConnection.pCipher;
 									}
 								else
 									{
+										oConnection.pCipher->decrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
 										len=oConnection.pSocket->send(oMuxPacket.data,len);
 										if(len==SOCKET_ERROR)
 											{
@@ -759,6 +774,7 @@ THREAD_RETURN lmIO(void *v)
 												lmIOPair->muxIn.close(oMuxPacket.channel);
 												oSocketList.remove(oMuxPacket.channel);
 												delete oConnection.pSocket;
+												delete oConnection.pCipher;
 											}
 									}
 							}
@@ -775,8 +791,8 @@ THREAD_RETURN lmIO(void *v)
 										#ifdef _DEBUG
 										    CAMsg::printMsg(LOG_DEBUG,"Receiving Data from Squid!");
 										#endif
-										do
-											{
+//										do
+//											{
 												len=tmpCon->pSocket->receive(oMuxPacket.data,1000);
 												if(len==SOCKET_ERROR||len==0)
 													{
@@ -788,20 +804,22 @@ THREAD_RETURN lmIO(void *v)
 														lmIOPair->muxIn.close(tmpCon->id);
 														oSocketList.remove(tmpCon->id);
 														delete tmpCon->pSocket;
+														delete tmpCon->pCipher;
 														break;
 													}
 												else 
 													{
 														oMuxPacket.channel=tmpCon->id;
 														oMuxPacket.len=(unsigned short)len;
+														tmpCon->pCipher->decrypt((unsigned char*)oMuxPacket.data,DATA_SIZE);
 														if(lmIOPair->muxIn.send(&oMuxPacket)==SOCKET_ERROR)
 															{
 																CAMsg::printMsg(LOG_CRIT,"Mux Data Sending Error - Exiting!\n");
 																exit(-1);
 															}
 													}
-											}
-										while(tmpCon->pSocket->available()>=1000);
+//											}
+//										while(tmpCon->pSocket->available()>=1000);
 									}
 								tmpCon=oSocketList.getNext();
 							}
