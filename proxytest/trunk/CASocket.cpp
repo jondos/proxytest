@@ -72,14 +72,19 @@ SINT32 CASocket::create(int type)
 SINT32 CASocket::listen(CASocketAddr & psa)
 	{
 		int type=psa.getType();
-		if(m_bSocketIsClosed&&create(type)==SOCKET_ERROR)
-			return SOCKET_ERROR;
+		if(m_bSocketIsClosed&&create(type)!=E_SUCCESS)
+			return E_UNKNOWN;
 		if(::bind(m_Socket,psa.LPSOCKADDR(),psa.getSize())==SOCKET_ERROR)
 			{
 				close();
-				return SOCKET_ERROR;
+				return E_UNKNOWN;
 			}
-		return ::listen(m_Socket,SOMAXCONN);
+		if(::listen(m_Socket,SOMAXCONN)==SOCKET_ERROR)
+			{
+				close();
+				return E_UNKNOWN;
+			}
+		return E_SUCCESS;
 	}
 			
 SINT32 CASocket::listen(UINT16 port)
@@ -90,16 +95,23 @@ SINT32 CASocket::listen(UINT16 port)
 
 SINT32 CASocket::accept(CASocket &s)
 	{
+		if(m_bSocketIsClosed) //the accept socket should not be closde!!
+			return E_SOCKETCLOSED;
+		if(!s.m_bSocketIsClosed) //but the new socket should be closed!!!
+			return E_UNKNOWN;
 		s.m_Socket=::accept(m_Socket,NULL,NULL);
 		if(s.m_Socket==SOCKET_ERROR)
 			{
 				s.m_Socket=0;
-				return SOCKET_ERROR;
+				if(GET_NET_ERROR==ERR_INTERN_SOCKET_CLOSED)
+					return E_SOCKETCLOSED;
+				return E_UNKNOWN;
 			}
 
 #ifdef _DEBUG
 		sockets++;
 #endif
+		s.m_bSocketIsClosed=false;
 		return E_SUCCESS;
 	}
 
@@ -112,9 +124,9 @@ SINT32 CASocket::connect(CASocketAddr & psa)
 SINT32 CASocket::connect(CASocketAddr & psa,UINT retry,UINT32 time)
 	{
 //		CAMsg::printMsg(LOG_DEBUG,"Socket:connect\n");
-		if(m_bSocketIsClosed&&create()==SOCKET_ERROR)
+		if(m_bSocketIsClosed&&create()!=E_SUCCESS)
 			{
-				return SOCKET_ERROR;
+				return E_UNKNOWN;
 			}
 #ifdef _DEBUG
 		sockets++;
@@ -134,7 +146,7 @@ SINT32 CASocket::connect(CASocketAddr & psa,UINT retry,UINT32 time)
 						 CAMsg::printMsg(LOG_DEBUG,"Con-Error: %i\n",err);
 						#endif
 						if(err!=ERR_INTERN_TIMEDOUT&&err!=ERR_INTERN_CONNREFUSED)
-							return SOCKET_ERROR; //Should be better.....
+							return E_UNKNOWN; //Should be better.....
 						#ifdef _DEBUG
 							CAMsg::printMsg(LOG_DEBUG,"Cannot connect... retrying\n");
 						#endif						
@@ -149,9 +161,9 @@ SINT32 CASocket::connect(CASocketAddr & psa,UINT retry,UINT32 time)
 
 SINT32 CASocket::connect(CASocketAddr & psa,UINT msTimeOut)
 	{
-		if(m_bSocketIsClosed&&create(psa.getType())==SOCKET_ERROR)
+		if(m_bSocketIsClosed&&create(psa.getType())!=E_SUCCESS)
 			{
-				return SOCKET_ERROR;
+				return E_UNKNOWN;
 			}
 #ifdef _DEBUG
 		sockets++;
@@ -227,7 +239,7 @@ SINT32 CASocket::close()
 				ret=E_SUCCESS;
 			}
 		else
-			ret=SOCKET_ERROR;
+			ret=E_UNKNOWN;
 		m_csClose.unlock();
 		return ret;
 	}

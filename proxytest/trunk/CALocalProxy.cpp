@@ -46,7 +46,7 @@ SINT32 CALocalProxy::init()
 			socketAddrIn.setAddr(buff,options.getServerPort());
 		socketIn.create();
 		socketIn.setReuseAddr(true);
-		if(socketIn.listen(socketAddrIn)==SOCKET_ERROR)
+		if(socketIn.listen(socketAddrIn)!=E_SUCCESS)
 		    {
 					CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
 					return E_UNKNOWN;
@@ -56,7 +56,7 @@ SINT32 CALocalProxy::init()
 				socketAddrIn.setAddr((UINT8*)"127.0.0.1",options.getSOCKSServerPort());
 				socketSOCKSIn.create();
 				socketSOCKSIn.setReuseAddr(true);
-				if(socketSOCKSIn.listen(socketAddrIn)==SOCKET_ERROR)
+				if(socketSOCKSIn.listen(socketAddrIn)!=E_SUCCESS)
 						{
 							CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
 							return E_UNKNOWN;
@@ -133,7 +133,7 @@ SINT32 CALocalProxy::loop()
 							CAMsg::printMsg(LOG_DEBUG,"New Connection from Browser!\n");
 						#endif
 						newSocket=new CASocket;
-						if(socketIn.accept(*newSocket)==SOCKET_ERROR)
+						if(socketIn.accept(*newSocket)!=E_SUCCESS)
 							{
 								#ifdef _DEBUG
 									CAMsg::printMsg(LOG_DEBUG,"Accept Error - Connection from Browser!\n");
@@ -154,7 +154,7 @@ SINT32 CALocalProxy::loop()
 							CAMsg::printMsg(LOG_DEBUG,"New Connection from SOCKS!\n");
 						#endif
 						newSocket=new CASocket;
-						if(socketSOCKSIn.accept(*newSocket)==SOCKET_ERROR)
+						if(socketSOCKSIn.accept(*newSocket)!=E_SUCCESS)
 							{
 								#ifdef _DEBUG
 									CAMsg::printMsg(LOG_DEBUG,"Accept Error - Connection from SOCKS!\n");

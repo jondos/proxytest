@@ -97,7 +97,7 @@ SINT32 CALastMix::init()
 				pAddrListen=new CASocketAddrINet();
 				((CASocketAddrINet*)pAddrListen)->setAddr(path,options.getServerPort());
 			}
-		if(muxIn.accept(*pAddrListen)==SOCKET_ERROR)
+		if(muxIn.accept(*pAddrListen)!=E_SUCCESS)
 		    {
 					delete pAddrListen;
 					CAMsg::printMsg(LOG_CRIT," failed!\n");

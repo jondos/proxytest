@@ -50,6 +50,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define ERR_INTERN_TIMEDOUT WSAETIMEDOUT
 		#define ERR_INTERN_CONNREFUSED WSAECONNREFUSED
 		#define ERR_INTERN_WOULDBLOCK	WSAEWOULDBLOCK
+		#define ERR_INTERN_SOCKET_CLOSED WSAENOTSOCK
 		#define MSG_DONTWAIT 0
 		#define HAVE_FIONREAD
 /*		#ifdef __cplusplus
@@ -152,6 +153,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define ERR_INTERN_TIMEDOUT ETIMEDOUT
 		#define ERR_INTERN_CONNREFUSED ECONNREFUSED
 		#define ERR_INTERN_WOULDBLOCK EAGAIN
+		#define ERR_INTERN_SOCKET_CLOSED EBADF
 /*		#ifdef __cplusplus
 		#ifdef __sgi	
 			#include <vector.h>
@@ -220,6 +222,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define E_QUEUEFULL -200 // If a Send Queue contains more data then a defined number
 #define E_AGAIN -300 //If something was'nt completed und should request again later..
 #define E_TIMEDOUT -301 //An opertion has timed out
+#define E_SOCKETCLOSED -302 //An operation which required an open socket uses a closed socket
 #define E_UNKNOWN_HOST -400 // A hostname could not be resolved
 
 #include <assert.h>

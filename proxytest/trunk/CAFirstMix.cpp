@@ -167,7 +167,7 @@ SINT32 CAFirstMix::init()
 		
 		m_arrSocketsIn[0].create();
 		m_arrSocketsIn[0].setReuseAddr(true);
-		if(m_arrSocketsIn[0].listen(socketAddrIn)==SOCKET_ERROR)
+		if(m_arrSocketsIn[0].listen(socketAddrIn)!=E_SUCCESS)
 		    {
 					CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
 					return E_UNKNOWN;
@@ -188,11 +188,11 @@ SINT32 CAFirstMix::init()
 #ifndef _WIN32
 				seteuid(old_uid);
 #endif
-				if(ret==SOCKET_ERROR)
-		    {
-					CAMsg::printMsg(LOG_CRIT,"Cannot listen on HTTPS-Port\n");
-					return E_UNKNOWN;
-		    }
+				if(ret!=E_SUCCESS)
+					{
+						CAMsg::printMsg(LOG_CRIT,"Cannot listen on HTTPS-Port\n");
+						return E_UNKNOWN;
+					}
       }
     m_pIPList=new CAIPList();
 		m_pQueueSendToMix=new CAQueue();
@@ -273,10 +273,13 @@ THREAD_RETURN loopAcceptUsers(void* param)
 									CAMsg::printMsg(LOG_DEBUG,"New direct Connection from Browser!\n");
 								#endif
 								pNewMuxSocket=new CAMuxSocket;
-								if(socketsIn[i].accept(*(CASocket*)pNewMuxSocket)==SOCKET_ERROR)
+								ret=socketsIn[i].accept(*(CASocket*)pNewMuxSocket);
+								if(ret!=E_SUCCESS)
 									{
 										CAMsg::printMsg(LOG_ERR,"Accept Error %u - direct Connection from Browser!\n",GET_NET_ERROR);
 										delete pNewMuxSocket;
+										if(ret==E_SOCKETCLOSED&&pFirstMix->getRestart()) //Hm, should we restart ??
+											goto END_THREAD;
 									}
 								else
 									{
