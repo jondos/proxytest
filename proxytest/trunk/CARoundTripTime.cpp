@@ -30,21 +30,27 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketAddr.hpp"
 #include "CACmdLnOptions.hpp"
 #include "CAUtil.hpp"
+#include "CAMsg.hpp"
 extern CACmdLnOptions options;
 
 THREAD_RETURN RoundTripTimeLoop(void *p)
 	{
 		CARoundTripTime* pRTT=(CARoundTripTime*)p;
 		CASocketAddr addrNextMix;
-		SINT32 tmpPort=options.getTargetRTTPort();
-		if(tmpPort==E_UNSPECIFIED)
+		SINT32 ret=options.getTargetRTTPort();
+		UINT16 tmpPort;
+		if(ret==E_UNSPECIFIED)
 			tmpPort=options.getTargetPort()+1;
+		else
+			tmpPort=(UINT16)ret;
 		UINT8* buff=new UINT8[4096];
 		options.getTargetHost(buff,4096);
 		addrNextMix.setAddr((char*)buff,tmpPort);
-		tmpPort=options.getServerRTTPort();
-		if(tmpPort==E_UNSPECIFIED)
+		ret=options.getServerRTTPort();
+		if(ret==E_UNSPECIFIED)
 			tmpPort=options.getServerPort()+1;
+		else
+			tmpPort=(UINT16)ret;
 		CADatagramSocket oSocket;
 		oSocket.bind(tmpPort);
 		UINT8 localPortAndIP[6];
@@ -72,7 +78,13 @@ THREAD_RETURN RoundTripTimeLoop(void *p)
 										len+=8;
 										memcpy(buff+8+len,localPortAndIP,6); //inserting (return) Port and IP
 										len+=6;
+#ifndef _DEBUG
 										oSocket.send(buff+8,len,&addrNextMix);
+#else
+										len=oSocket.send(buff+8,len,&addrNextMix);
+										if(len!=E_SUCCESS)
+											CAMsg::printMsg(LOG_DEBUG,"Couldn't send a RRT-Packet.\n");
+#endif
 									}
 								else //Rueckweg
 									{
