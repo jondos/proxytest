@@ -1,6 +1,6 @@
-#include "stdafx.h"
-#include "camixchannel.hpp"
-#include "camixsocket.hpp"
+#include "StdAfx.h"
+#include "CAMixChannel.hpp"
+#include "CAMixSocket.hpp"
 
 extern CAMixChannel oMixChannel;
 extern int sockets;

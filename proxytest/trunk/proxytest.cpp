@@ -1,7 +1,7 @@
 // proxytest.cpp : Definiert den Einsprungpunkt für die Konsolenanwendung.
 //
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "CASocket.hpp"
 #include "CAMixSocket.hpp"
 #include "CASocketGroup.hpp"
@@ -29,8 +29,10 @@ typedef struct
 int main(int argc, char* argv[])
 	{
 		int err=0;
+		#ifdef _WIN32
 		WSADATA wsadata;
 		err=WSAStartup(0x0202,&wsadata);
+		#endif
 	fd_set read_set;
 	FD_ZERO(&read_set);
 	SOCKET socketIn=socket(AF_INET,SOCK_STREAM,0);
@@ -154,7 +156,9 @@ int main(int argc, char* argv[])
 				}
 		}
 	close(handle);
+	#ifdef _WIN32
 	WSACleanup();
+	#endif
 	return 0;
 }
 */
@@ -203,7 +207,7 @@ void proxy(void* tmpSocket)
 		delete inSocket;
 	}
 */
-void proxytomix(void* tmpPair)
+THREAD_RETURN proxytomix(void* tmpPair)
 	{
 		CASocket* inSocket=((CASocketToMix*)tmpPair)->in;	
 		CAMixSocket* outSocket=((CASocketToMix*)tmpPair)->out;	
@@ -216,7 +220,7 @@ void proxytomix(void* tmpPair)
 						break;
 					}
 				buff[len]=0;
-				printf(buff);
+//				printf(buff);
 				if(outSocket->send(buff,len)==SOCKET_ERROR)
 					break;
 			}
@@ -225,11 +229,11 @@ void proxytomix(void* tmpPair)
 			delete inSocket;
 		if(outSocket->close(SD_SEND)==0)
 			delete outSocket;
-		delete tmpPair;
+		delete (CASocketToMix*)tmpPair;
 		LeaveCriticalSection(&csClose);
 	}
 
-void mixtoproxy(void* tmpPair)
+THREAD_RETURN mixtoproxy(void* tmpPair)
 	{
 		CAMixSocket* inSocket=((CAMixToSocket*)tmpPair)->in;	
 		CASocket* outSocket=((CAMixToSocket*)tmpPair)->out;	
@@ -249,7 +253,7 @@ void mixtoproxy(void* tmpPair)
 			delete inSocket;
 		if(outSocket->close(SD_SEND)==0)
 			delete outSocket;
-		delete tmpPair;
+		delete (CAMixToSocket*)tmpPair;
 		LeaveCriticalSection(&csClose);
 	}
 
@@ -257,17 +261,29 @@ int main(int argc, char* argv[])
 	{
 		sockets=0;
 		int err=0;
+		#ifdef _WIN32
 		WSADATA wsadata;
 		err=WSAStartup(0x0202,&wsadata);
+		#endif
 		InitializeCriticalSection(&csClose);
 		CASocketAddr socketAddrIn(1999);
 		socketAddrSquid.setAddr(argv[1],atol(argv[2]));
 		CASocket socketIn;
-		socketIn.listen(&socketAddrIn);
+		if(socketIn.listen(&socketAddrIn)==SOCKET_ERROR)
+		    {
+			printf("Cannot listen\n");
+			exit(-1);
+		    }
 //		time_t t=time(NULL);
 //		strftime(buff,BUFF_SIZE,"%Y%m%d-%H%M%S",localtime(&t));
 //		int handle=open(buff,_O_BINARY|_O_CREAT|_O_RDWR,S_IWRITE);
-		while(!_kbhit())
+		while(
+		#ifdef _WIN32
+		!_kbhit()
+		#else
+		true
+		#endif
+		)
 			{
 				CAMixToSocket* tmpPair2=new CAMixToSocket();
 				CASocketToMix* tmpPair1=new CASocketToMix();
@@ -275,15 +291,24 @@ int main(int argc, char* argv[])
 				socketIn.accept(*tmpPair1->in);
 				tmpPair1->out=new CAMixSocket();
 				tmpPair1->out->connect(&socketAddrSquid);
+				
 				tmpPair2->in=tmpPair1->out;
 				tmpPair2->out=tmpPair1->in;
+				#ifdef _WIN32
 				_beginthread(proxytomix,0,tmpPair1);
 				_beginthread(mixtoproxy,0,tmpPair2);
+				#else
+				pthread_t p1,p2;
+				pthread_create(&p1,NULL,proxytomix,tmpPair1);
+				pthread_create(&p2,NULL,mixtoproxy,tmpPair2);
+				#endif
 				printf("%i\n",sockets);
 			}
 		socketIn.close();
 //	close(handle);
-		WSACleanup();
+#ifdef _WIN32		
+WSACleanup();
+#endif
 		DeleteCriticalSection(&csClose);
 		return 0;
 	}

@@ -1,5 +1,5 @@
-#include "casocketaddr.hpp"
-#include "casocketlist.hpp"
+#include "CASocketAddr.hpp"
+#include "CASocketList.hpp"
 
 class CAMixChannel
 	{

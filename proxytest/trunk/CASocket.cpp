@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "CASocketAddr.hpp"
 #include "CASocket.hpp"
 extern int sockets;
@@ -18,7 +18,8 @@ int CASocket::listen(LPSOCKETADDR psa)
 	{
 		if(m_Socket==0)
 			m_Socket=socket(AF_INET,SOCK_STREAM,0);
-		::bind(m_Socket,(LPSOCKADDR)psa,sizeof(*psa));
+		if(::bind(m_Socket,(LPSOCKADDR)psa,sizeof(*psa))==SOCKET_ERROR)
+		    return SOCKET_ERROR;
 		return ::listen(m_Socket,SOMAXCONN);
 	}
 			

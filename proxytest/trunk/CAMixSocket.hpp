@@ -1,4 +1,4 @@
-#include "casocketaddr.hpp"
+#include "CASocketAddr.hpp"
 class CAMixSocket
 	{
 		public:
