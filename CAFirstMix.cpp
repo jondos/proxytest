@@ -536,7 +536,7 @@ SINT32 CAFirstMix::loop()
 							ret=muxOut.receive(&oMuxPacket);
 							if(ret==SOCKET_ERROR)
 								{
-									CAMsg::printMsg(LOG_CRIT,"Mux-Channel Receiving Data Error - Exiting!\n");									
+									CAMsg::printMsg(LOG_CRIT,"Mux-Out-Channel Receiving Data Error - Exiting!\n");									
 									goto ERR;
 								}
 							if(oMuxPacket.flags==CHANNEL_CLOSE) //close event
