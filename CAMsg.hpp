@@ -8,6 +8,7 @@
 	#define LOG_INFO 0 
 	#define LOG_DEBUG 0
 #endif
+
 class CAMsg
     {
 	protected:
@@ -16,8 +17,8 @@ class CAMsg
 	    static CAMsg oMsg;
 	public:
 	    ~CAMsg();
-	    static int setOptions(int options);
-	    static int printMsg(int typ,char* format,...);
+	    static SINT32 setOptions(UINT32 options);
+	    static SINT32 printMsg(UINT32 typ,char* format,...);
 	protected:
 	    bool isLog;
     };

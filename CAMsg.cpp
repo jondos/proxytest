@@ -18,7 +18,7 @@ CAMsg::~CAMsg()
 				}		
     }
     
-int CAMsg::setOptions(int options)
+SINT32 CAMsg::setOptions(UINT32 options)
     {
 			if(options&MSG_LOG)
 					{
@@ -29,10 +29,10 @@ int CAMsg::setOptions(int options)
 						#endif
 						oMsg.isLog=true;
 					}
-			return 0;
+			return E_SUCCESS;
     }
 
-int CAMsg::printMsg(int type,char* format,...)
+SINT32 CAMsg::printMsg(UINT32 type,char* format,...)
 	{
 		va_list ap;
 		va_start(ap,format);
@@ -53,5 +53,5 @@ int CAMsg::printMsg(int type,char* format,...)
 				vprintf(format,ap);
 	    }
 		va_end(ap);
-		return 0;
+		return E_SUCCESS;
   }

@@ -41,27 +41,27 @@ CASocketAddr::CASocketAddr(unsigned short port)
 		sin_addr.s_addr=INADDR_ANY;
 	}
 
-int CASocketAddr::getHostName(char* buff,int len)
+SINT32 CASocketAddr::getHostName(UINT8* buff,UINT32 len)
 	{
 		HOSTENT* hosten=gethostbyaddr((const char*)&sin_addr,4,AF_INET);
 		if(hosten==NULL||hosten->h_name==NULL||strlen(hosten->h_name)>=len)
 		 return SOCKET_ERROR;
-		strcpy(buff,hosten->h_name);
-		return 0;
+		strcpy((char*)buff,hosten->h_name);
+		return E_SUCCESS;
 	}
 
-unsigned short CASocketAddr::getPort()
+UINT16 CASocketAddr::getPort()
 	{
 		return ntohs(sin_port);
 	}
 
-int CASocketAddr::getLocalHostName(char* buff,int len)
+SINT32 CASocketAddr::getLocalHostName(UINT8* buff,UINT32 len)
 	{
-		if(gethostname(buff,len)==-1)
+		if(gethostname((char*)buff,len)==-1)
 			return SOCKET_ERROR;
-		HOSTENT* hosten=gethostbyname(buff);
+		HOSTENT* hosten=gethostbyname((char*)buff);
 		if(hosten==NULL||hosten->h_name==NULL||strlen(hosten->h_name)>=len)
 			return SOCKET_ERROR;
-		strcpy(buff,hosten->h_name);
-		return 0;
+		strcpy((char*)buff,hosten->h_name);
+		return E_SUCCESS;
 	}

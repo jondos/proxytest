@@ -17,9 +17,9 @@ extern CACmdLnOptions options;
 class BufferOutputStream:public XML::OutputStream
 	{
 		public:
-			BufferOutputStream(unsigned int initsize,unsigned int g)
+			BufferOutputStream(UINT32 initsize,UINT32 g)
 				{
-					buffer=(char*)malloc(initsize);
+					buffer=(UINT8*)malloc(initsize);
 					size=initsize;
 					used=0;
 					grow=g;
@@ -35,34 +35,34 @@ class BufferOutputStream:public XML::OutputStream
 					if(size-used<bufLen)
 						{
 							size+=grow;
-							buffer=(char*)realloc(buffer,size);
+							buffer=(UINT8*)realloc(buffer,size);
 						}
 					memcpy(buffer+used,buf,bufLen);
 					used+=bufLen;
 					return bufLen;
 				}
 
-			char* getBuff()
+			UINT8* getBuff()
 				{
 					return buffer;
 				}
 			
-			unsigned int getBufferSize()
+			UINT32 getBufferSize()
 				{
 					return used;	
 				}
 
-			int reset()
+			SINT32 reset()
 				{
 					used=0;
-					return 0;
+					return E_SUCCESS;
 				}
 
 		private:
-			char* buffer;
-			unsigned int size;
-			unsigned int used;
-			unsigned int grow;
+			UINT8* buffer;
+			UINT32 size;
+			UINT32 used;
+			UINT32 grow;
 	};
 
 THREAD_RETURN InfoLoop(void *p)
@@ -76,10 +76,10 @@ THREAD_RETURN InfoLoop(void *p)
 		oAddr.setAddr(buff,options.getInfoServerPort());
 		BufferOutputStream oBufferStream(1024,1024);
 		XML::Output oxmlOut(oBufferStream);
-		int nUser,nRisk,nTraffic;
-		unsigned int buffLen;
+		UINT32 nUser,nRisk,nTraffic;
+		UINT32 buffLen;
 		char strAnonServer[255];
-		CASocketAddr::getLocalHostName(buff,255);
+		CASocketAddr::getLocalHostName((UINT8*)buff,255);
 		
 //*>> Beginn very ugly hack for anon.inf.tu-dresden.de --> new Concepts needed!!!!!1		
 		if(strncmp(strAnonServer,"ithif77",7)==0)
@@ -96,16 +96,16 @@ THREAD_RETURN InfoLoop(void *p)
 						oxmlOut.BeginElementAttrs("MixCascadeStatus");
 						oxmlOut.WriteAttr("id",strAnonServer);
 						pInfoService->getLevel(&nUser,&nRisk,&nTraffic);
-						oxmlOut.WriteAttr("nrOfActiveUsers",nUser);
-						oxmlOut.WriteAttr("currentRisk",nRisk);
-						oxmlOut.WriteAttr("trafficSituation",nTraffic);
+						oxmlOut.WriteAttr("nrOfActiveUsers",(int)nUser);
+						oxmlOut.WriteAttr("currentRisk",(int)nRisk);
+						oxmlOut.WriteAttr("trafficSituation",(int)nTraffic);
 						oxmlOut.EndAttrs();
 						oxmlOut.EndElement();
 						oxmlOut.EndDocument();
 						buffLen=1024;
-						pSignature->signXML(oBufferStream.getBuff(),oBufferStream.getBufferSize(),buff,&buffLen);
-						oSocket.send("POST /feedback HTTP/1.0\r\n\r\n",27);
-						oSocket.send(buff,buffLen);
+						pSignature->signXML(oBufferStream.getBuff(),oBufferStream.getBufferSize(),(UINT8*)buff,&buffLen);
+						oSocket.send((UINT8*)"POST /feedback HTTP/1.0\r\n\r\n",27);
+						oSocket.send((UINT8*)buff,buffLen);
 					}
 				oSocket.close();	
 				if(helocount==0)
@@ -133,7 +133,7 @@ CAInfoService::~CAInfoService()
 		DeleteCriticalSection(&csLevel);
 	}
 
-int CAInfoService::setLevel(int user,int risk,int traffic)
+SINT32 CAInfoService::setLevel(UINT32 user,UINT32 risk,UINT32 traffic)
 	{
 		EnterCriticalSection(&csLevel);
 		nUser=user;
@@ -143,13 +143,13 @@ int CAInfoService::setLevel(int user,int risk,int traffic)
 		return 0;
 	}
 
-int CAInfoService::setSignature(CASignature* pSig)
+SINT32 CAInfoService::setSignature(CASignature* pSig)
 	{
 		pSignature=pSig;
-		return 0;
+		return E_SUCCESS;
 	}
 
-int CAInfoService::getLevel(int* puser,int* prisk,int* ptraffic)
+SINT32 CAInfoService::getLevel(UINT32* puser,UINT32* prisk,UINT32* ptraffic)
 	{
 		EnterCriticalSection(&csLevel);
 		if(puser!=NULL)
@@ -159,7 +159,7 @@ int CAInfoService::getLevel(int* puser,int* prisk,int* ptraffic)
 		if(prisk!=NULL)
 			*prisk=nRisk;
 		LeaveCriticalSection(&csLevel);
-		return 0;
+		return E_SUCCESS;
 	}
 
 int CAInfoService::start()
@@ -195,10 +195,10 @@ int CAInfoService::sendHelo()
 				char* buff=new char[1024];
 				XML::Output oxmlOut(oBufferStream);
 				oBufferStream.reset();
-				unsigned int buffLen;
+				UINT buffLen;
 				oxmlOut.BeginDocument("1.0","UTF-8",true);
 				oxmlOut.BeginElementAttrs("MixCascade");
-				CASocketAddr::getLocalHostName(hostname,255);
+				CASocketAddr::getLocalHostName((UINT8*)hostname,255);
 //*>> Beginn very ugly hack for anon.inf.tu-dresden.de --> new Concepts needed!!!!!1		
 		if(strncmp(hostname,"ithif77",7)==0)
 			strcpy(hostname,"anon.inf.tu-dresden.de");
@@ -213,9 +213,9 @@ int CAInfoService::sendHelo()
 				oxmlOut.EndElement();
 				oxmlOut.EndDocument();
 				buffLen=1024;
-				pSignature->signXML(oBufferStream.getBuff(),oBufferStream.getBufferSize(),buff,&buffLen);
-				oSocket.send("POST /helo HTTP/1.0\r\n\r\n",23);
-				oSocket.send(buff,buffLen);
+				pSignature->signXML(oBufferStream.getBuff(),oBufferStream.getBufferSize(),(UINT8*)buff,&buffLen);
+				oSocket.send((UINT8*)"POST /helo HTTP/1.0\r\n\r\n",23);
+				oSocket.send((UINT8*)buff,buffLen);
 				oSocket.close();
 				delete buff;		
 				return 0;				

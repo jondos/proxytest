@@ -147,74 +147,74 @@ int CACmdLnOptions::getTargetPort()
 	return iTargetPort;
     }
     
-int CACmdLnOptions::getTargetHost(char* host,int len)
+SINT32 CACmdLnOptions::getTargetHost(UINT8* host,UINT32 len)
   {
 		if(strTargetHost==NULL)
-				return -1;
+				return E_UNKNOWN;
 		if(len<=(int)strlen(strTargetHost))
 				{
-					return -1;		
+					return E_UNKNOWN;		
 				}
-		strcpy(host,strTargetHost);
-		return (int)strlen(strTargetHost);
+		strcpy((char*)host,strTargetHost);
+		return (SINT32)strlen(strTargetHost);
   }
 
-int CACmdLnOptions::getSOCKSPort()
+UINT16 CACmdLnOptions::getSOCKSPort()
   {
 		return iSOCKSPort;
   }
     
-int CACmdLnOptions::getSOCKSHost(char* host,int len)
+SINT32 CACmdLnOptions::getSOCKSHost(UINT8* host,UINT32 len)
   {
 		if(strSOCKSHost==NULL)
-				return -1;
+				return E_UNKNOWN;
 		if(len<=(int)strlen(strSOCKSHost))
 				{
-					return -1;		
+					return E_UNKOWN;		
 				}
-		strcpy(host,strSOCKSHost);
-		return strlen(strSOCKSHost);
+		strcpy((char*)host,strSOCKSHost);
+		return (SINT32)strlen(strSOCKSHost);
   }
 
-int CACmdLnOptions::getInfoServerPort()
+UINT16 CACmdLnOptions::getInfoServerPort()
   {
 		return iInfoServerPort;
   }
     
-int CACmdLnOptions::getInfoServerHost(char* host,int len)
+SINT32 CACmdLnOptions::getInfoServerHost(UINT8* host,UINT32 len)
   {
 		if(strInfoServerHost==NULL)
-				return -1;
+				return E_UNKNOWN;
 		if(len<=(int)strlen(strInfoServerHost))
 				{
-					return -1;		
+					return E_UNKNOWN;		
 				}
-		strcpy(host,strInfoServerHost);
-		return (int)strlen(strInfoServerHost);
+		strcpy((char*)host,strInfoServerHost);
+		return (SINT32)strlen(strInfoServerHost);
   }
 
-int CACmdLnOptions::getKeyFileName(char* filename,int len)
+SINT32 CACmdLnOptions::getKeyFileName(UINT8* filename,UINT32 len)
   {
 		if(strKeyFileName==NULL)
-				return -1;
+				return E_UNKNOWN;
 		if(len<=(int)strlen(strKeyFileName))
 				{
-					return -1;		
+					return E_UNKNOWN;		
 				}
-		strcpy(filename,strKeyFileName);
-		return (int)strlen(strKeyFileName);
+		strcpy((char*)filename,strKeyFileName);
+		return (SINT32)strlen(strKeyFileName);
   }
 
-int CACmdLnOptions::getCascadeName(char* name,int len)
+SINT32 CACmdLnOptions::getCascadeName(UINT8* name,UINT32 len)
   {
 		if(strCascadeName==NULL)
-				return -1;
+				return E_UNKNOWN;
 		if(len<=(int)strlen(strCascadeName))
 				{
-					return -1;		
+					return E_UNKNOWN;		
 				}
-		strcpy(name,strCascadeName);
-		return (int)strlen(strCascadeName);
+		strcpy((char*)name,strCascadeName);
+		return (SINT32)strlen(strCascadeName);
   }
 
 bool CACmdLnOptions::isFirstMix()

@@ -6,14 +6,14 @@ class CASignature
 		public:
 			CASignature();
 			~CASignature();
-			int setSignKey(char* buff,int len,int type);
-			int sign(unsigned char* in,int inlen,unsigned char* sig,unsigned int* siglen);
-			int signXML(char* in,unsigned int inlen,char* out,unsigned int* outlen);
-			int getSignatureSize();
-			int getXMLSignatureSize();
+			SINT32 setSignKey(UINT8* buff,UINT32 len,int type);
+			SINT32 sign(UINT8* in,UINT32 inlen,UINT8* sig,UINT32* siglen);
+			SINT32 signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen);
+			SINT32 getSignatureSize();
+			SINT32 getXMLSignatureSize();
 		private:
 			DSA* dsa;
-			int parseSignKeyXML(char* buff,int len);
-			int makeXMLCanonical(char* in,unsigned int len,char* out,unsigned int *outlen);
+			SINT32 parseSignKeyXML(UINT8* buff,UINT32 len);
+			SINT32 makeXMLCanonical(UINT8* in,UINT32 len,UINT8* out,UINT32 *outlen);
 	};
 #endif
