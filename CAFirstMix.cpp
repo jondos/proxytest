@@ -688,7 +688,9 @@ SINT32 CAFirstMix::loop()
 																								 pMixPacket->data+RSA_SIZE-KEY_SIZE,
 																								 DATA_SIZE-RSA_SIZE);
 																memcpy(pMixPacket->data,rsaBuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
-
+																#ifdef LOG_CHANNEL
+																	HCHANNEL tmpC=pMixPacket->channel;
+																#endif
 																if(m_pChannelList->addChannel(pMuxSocket,pMixPacket->channel,pCipher,&pMixPacket->channel)!=E_SUCCESS)
 																	{ //todo move up ?
 																		delete pCipher;
@@ -696,7 +698,7 @@ SINT32 CAFirstMix::loop()
 																else
 																	{
 																		#ifdef LOG_CHANNEL
-																			m_pChannelList->get(pMuxSocket,pMixPacket->channel)->packetsInFromUser++;
+																			m_pChannelList->get(pMuxSocket,tmpC)->packetsInFromUser++;
 																		#endif
 																		m_pMuxOut->send(pMixPacket,tmpBuff);
 																		m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
