@@ -730,6 +730,9 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 	if(pCC!=NULL)
 		{
 			pAccInfo->transferredBytes += pCC->getTransferredBytes();
+			#ifdef DEBUG
+				CAMsg::printMsg(LOG_DEBUG, "TransferredBytes is now %lld\n", pAccInfo->transferredBytes);
+			#endif
 			pAccInfo->confirmedBytes = pCC->getTransferredBytes();
 			delete pCC;
 		}
@@ -903,6 +906,11 @@ void CAAccountingInstance::handleBalanceCertificate(fmHashTableEntry *pHashEntry
 		#endif
 		return;
 	}
+	#ifdef DEBUG
+	else {
+		CAMsg::printMsg(LOG_DEBUG, "Balance: deposit=%lld\n", newDeposit);
+	}
+	#endif
 	
 	// parse & set spent
 	if( (getDOMChildByName( root, (UINT8*)"Spent", elGeneral, false ) != E_SUCCESS) ||
@@ -915,6 +923,11 @@ void CAAccountingInstance::handleBalanceCertificate(fmHashTableEntry *pHashEntry
 		#endif
 		return;
 	}
+	#ifdef DEBUG
+	else {
+		CAMsg::printMsg(LOG_DEBUG, "Balance: Spent=%lld\n", newSpent);
+	}
+	#endif
 	
 	// some checks for empty accounts
 	if(	(newDeposit-newSpent <= MIN_BALANCE ) ||
@@ -958,7 +971,6 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 	if ( pHashEntry->pAccountingInfo != 0 )
 		{
 			pAccInfo = pHashEntry->pAccountingInfo;
-			
 			if ( pAccInfo->pPublicKey )
 				{
 					delete pAccInfo->pPublicKey;
