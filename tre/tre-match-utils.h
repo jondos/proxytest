@@ -170,3 +170,4 @@ neg_char_classes_match(tre_ctype_t *classes, tre_cint_t wc, int icase)
       classes++;
   return 0; /* No match. */
 }
+

@@ -43,9 +43,9 @@
 #include "../StdAfx.h"
 #ifdef LOG_CRIME
 #include "tre-config.h"
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif /* HAVE_CONFIG_H */
+//#ifdef HAVE_CONFIG_H
+//#include <config.h>
+//#endif /* HAVE_CONFIG_H */
 
 /* AIX requires this to be the first thing in the file.  */
 #ifndef __GNUC__
@@ -62,9 +62,9 @@ char *alloca ();
 # endif
 #endif
 
-#include <assert.h>
-#include <stdlib.h>
-#include <string.h>
+//#include <assert.h>
+//#include <stdlib.h>
+//#include <string.h>
 #ifdef HAVE_WCHAR_H
 #include <wchar.h>
 #endif /* HAVE_WCHAR_H */
@@ -74,9 +74,9 @@ char *alloca ();
 #ifndef TRE_WCHAR
 #include <ctype.h>
 #endif /* !TRE_WCHAR */
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif /* HAVE_MALLOC_H */
+//#ifdef HAVE_MALLOC_H
+//#include <malloc.h>
+//#endif /* HAVE_MALLOC_H */
 
 #include "tre-internal.h"
 #include "tre-mem.h"

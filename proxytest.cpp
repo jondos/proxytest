@@ -55,6 +55,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CACertStore.hpp"
 #include "CALastMixChannelList.hpp"
 #include "xml/DOM_Output.hpp"
+#ifdef LOG_CRIME
+#include "tre/regex.h"
+#endif
 //#include "CAPayment.hpp"
 //#ifdef _WIN32
 //HANDLE hEventThreadEnde;
@@ -338,6 +341,9 @@ Debug(dc::malloc.on());
 				exit(-1);
 			}
 				
+#ifdef LOG_CRIME
+			testTre();
+#endif
 		//startup
 		#ifdef _WIN32
 			int err=0;

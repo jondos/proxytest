@@ -24,9 +24,9 @@
 
 #include "tre-config.h"
 
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif /* HAVE_SYS_TYPES_H */
+//#ifdef HAVE_SYS_TYPES_H
+//#include <sys/types.h>
+//#endif /* HAVE_SYS_TYPES_H */
 
 #ifdef TRE_USE_SYSTEM_REGEX_H
 /* Include the system regex.h to make TRE ABI compatible with the
@@ -34,9 +34,9 @@
 #include TRE_SYSTEM_REGEX_H_PATH
 #endif /* TRE_USE_SYSTEM_REGEX_H */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+//#ifdef __cplusplus
+//extern "C" {
+//#endif
 
 #ifdef TRE_USE_SYSTEM_REGEX_H
 
@@ -162,9 +162,10 @@ int regawnexec(const regex_t *preg, const wchar_t *string, size_t len,
 #endif /* TRE_WCHAR */
 #endif /* TRE_APPROX */
 
-#ifdef __cplusplus
-}
-#endif
+//#ifdef __cplusplus
+//}
+//#endif
+int testTre();
 #endif				/* TRE_REGEX_H */
 
 //#endif //LOG_CRIME

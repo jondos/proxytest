@@ -73,7 +73,7 @@ void xmalloc_configure(int fail_after);
 
 #else /* !MALLOC_DEBUGGING */
 
-#include <stdlib.h>
+//#include <stdlib.h>
 
 #define xmalloc(size) malloc(size)
 #define xcalloc(nmemb, size) calloc(nmemb, size)

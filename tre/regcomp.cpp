@@ -22,18 +22,18 @@
 #ifdef LOG_CRIME
 #include "tre-config.h"
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif /* HAVE_CONFIG_H */
+//#ifdef HAVE_CONFIG_H
+//#include <config.h>
+//#endif /* HAVE_CONFIG_H */
 
 #define _GNU_SOURCE
 
-#include <assert.h>
+//#include <assert.h>
 #ifdef TRE_DEBUG
 #include <errno.h>
 #endif /* TRE_DEBUG */
-#include <stdlib.h>
-#include <string.h>
+//#include <stdlib.h>
+//#include <string.h>
 #ifdef HAVE_WCHAR_H
 #include <wchar.h>
 #endif /* HAVE_WCHAR_H */
@@ -49,8 +49,6 @@
 #include "regex.h"
 #include "xmalloc.h"
 
-
-
 /*
   Stack functions.
 */
@@ -170,8 +168,16 @@ tre_stack_pop(tre_stack_t *s)
   return s->stack[--s->ptr];
 }
 
+/* Pops the topmost int off of stack `s' and returns it.  The stack must
+   not be empty. */
+inline static int
+tre_stack_pop_int(tre_stack_t *s)
+{
+  return (int)s->stack[--s->ptr];
+}
 
-
+
+
 /*
   Regex AST stuff.
 */
@@ -592,7 +598,7 @@ ast_add_tags(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree,
 
 	case ADDTAGS_SET_SUBMATCH_END:
 	  {
-	    int id = (int)tre_stack_pop(stack);
+	    int id = tre_stack_pop_int(stack);
 	    int i;
 
 	    /* Add end of this submatch to regset. */
@@ -927,13 +933,13 @@ ast_add_tags(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree,
 	    if (first_pass)
 	      {
 		node->num_tags = ((tre_iteration_t *)node->obj)->arg->num_tags
-		  + (int)tre_stack_pop(stack);
+		  + tre_stack_pop_int(stack);
 		minimal_tag = -1;
 	      }
 	    else
 	      {
-		minimal = (int)tre_stack_pop(stack);
-		enter_tag = (int)tre_stack_pop(stack);
+		minimal = tre_stack_pop_int(stack);
+		enter_tag = tre_stack_pop_int(stack);
 		if (minimal)
 		  minimal_tag = enter_tag;
 	      }
@@ -953,8 +959,8 @@ ast_add_tags(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree,
 
 	case ADDTAGS_AFTER_CAT_LEFT:
 	  {
-	    int new_tag = (int)tre_stack_pop(stack);
-	    next_tag = (int)tre_stack_pop(stack);
+	    int new_tag = tre_stack_pop_int(stack);
+	    next_tag = tre_stack_pop_int(stack);
 	    DPRINT(("After cat left, tag = %d, next_tag = %d\n",
 		    tag, next_tag));
 	    if (new_tag >= 0)
@@ -990,7 +996,7 @@ ast_add_tags(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree,
 	    tre_ast_node_t *right = (tre_ast_node_t *)tre_stack_pop(stack);
 	    DPRINT(("After union right\n"));
 	    node =(tre_ast_node_t *) tre_stack_pop(stack);
-	    added_tags = (int)tre_stack_pop(stack);
+	    added_tags = tre_stack_pop_int(stack);
 	    if (first_pass)
 	      {
 		node->num_tags = ((tre_union_t *)node->obj)->left->num_tags
@@ -998,8 +1004,8 @@ ast_add_tags(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree,
 		  + ((node->num_submatches > 0) ? 2 : 0);
 	      }
 	    regset =(int*) tre_stack_pop(stack);
-	    tag_left = (int)tre_stack_pop(stack);
-	    tag_right = (int)tre_stack_pop(stack);
+	    tag_left = tre_stack_pop_int(stack);
+	    tag_right = tre_stack_pop_int(stack);
 
 	    /* Add tags after both children, the left child gets a smaller
 	       tag than the right child.  This guarantees that we prefer
@@ -3237,7 +3243,7 @@ parse_re(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t **root_node,
 
 	case PARSE_MARK_FOR_SUBMATCH:
 	  {
-	    int submatch_id = (int)tre_stack_pop(stack);
+	    int submatch_id = tre_stack_pop_int(stack);
 	    prev_atom =(tre_char_t *) tre_stack_pop(stack);
 	    atom_smid = submatch_id;
 
