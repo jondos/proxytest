@@ -29,7 +29,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #include "CASocketAddr.hpp"
 class CASocketASyncSend;
-
+class CAFirstMix;
 class CASocket
 	{
 		public:
@@ -57,7 +57,7 @@ class CASocket
 			SINT32 setSendBuff(UINT32 r);
 			SINT32 setKeepAlive(bool b);
 			SINT32 setKeepAlive(UINT32 sec);
-			SINT32 setASyncSend(bool b,SINT32 size=-1);
+			SINT32 setASyncSend(bool b,SINT32 size,CAFirstMix* pMix);
 		private:
 			SINT32 setSendLowWat(UINT32 r);
 			SOCKET m_Socket;

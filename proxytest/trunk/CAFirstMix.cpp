@@ -514,7 +514,9 @@ SINT32 CAFirstMix::loop()
 								#else
 									((CASocket*)pnewMuxSocket)->setKeepAlive(true);
 								#endif
-								//((CASocket*)pnewMuxSocket)->setASyncSend(true,MUXPACKET_SIZE);
+#ifdef _ASYNC
+								((CASocket*)pnewMuxSocket)->setASyncSend(true,MUXPACKET_SIZE,this);
+#endif
 								((CASocket*)pnewMuxSocket)->send(mKeyInfoBuff,mKeyInfoSize);
 								oMuxChannelList.add(pnewMuxSocket);
 								nUser++;
@@ -525,7 +527,7 @@ SINT32 CAFirstMix::loop()
 				if(oSocketGroup.isSignaled(muxOut))
 						{
 							ret=muxOut.receive(&oMuxPacket);
-							if(ret!=SOCKET_ERROR&&oMuxPacket.flags!=0) //close event
+							if(ret!=SOCKET_ERROR&&oMuxPacket.flags==CHANNEL_CLOSE) //close event
 								{
 									#ifdef _DEBUG
 										CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u ... ",oMuxPacket.channel);
@@ -538,6 +540,7 @@ SINT32 CAFirstMix::loop()
 											#ifdef _DEBUG
 												CAMsg::printMsg(LOG_DEBUG,"closed!\n");
 											#endif
+											deleteResume(otmpReverseEntry.pMuxSocket,otmpReverseEntry.outChannel);
 										}
 								}
 							else if(ret==SOCKET_ERROR)
@@ -555,7 +558,26 @@ SINT32 CAFirstMix::loop()
 										{
 											oMuxPacket.channel=tmpReverseEntry->inChannel;
 											tmpReverseEntry->pCipher->decryptAES(oMuxPacket.data,oMuxPacket.data,DATA_SIZE);
-											tmpReverseEntry->pMuxSocket->send(&oMuxPacket);
+											if(tmpReverseEntry->pMuxSocket->send(&oMuxPacket)==E_QUEUEFULL)
+												{
+													EnterCriticalSection(&csResume);
+													MUXLISTENTRY* pml=oSuspendList.get(tmpReverseEntry->pMuxSocket);
+													CONNECTION oCon;
+													if(pml==NULL||!pml->pSocketList->get(&oCon,tmpReverseEntry->outChannel))
+														{
+															oMuxPacket.channel=tmpReverseEntry->outChannel;
+															oMuxPacket.flags=CHANNEL_SUSPEND;
+															CAMsg::printMsg(LOG_INFO,"Sending suspend for channel: %u\n",oMuxPacket.channel);
+															muxOut.send(&oMuxPacket);
+															if(pml==NULL)
+																{
+																	oSuspendList.add(tmpReverseEntry->pMuxSocket);
+																	pml=oSuspendList.get(tmpReverseEntry->pMuxSocket);
+																}
+															pml->pSocketList->add(tmpReverseEntry->inChannel,tmpReverseEntry->outChannel,NULL);
+														}
+													LeaveCriticalSection(&csResume);
+												}
 										}
 									else
 										{
@@ -637,6 +659,7 @@ SINT32 CAFirstMix::loop()
 										ret=tmpMuxListEntry->pMuxSocket->receive(&oMuxPacket);
 										if(ret==SOCKET_ERROR)
 											{
+												deleteResume(tmpMuxListEntry->pMuxSocket);
 												MUXLISTENTRY otmpEntry;
 												if(oMuxChannelList.remove(tmpMuxListEntry->pMuxSocket,&otmpEntry))
 													{
@@ -664,6 +687,7 @@ SINT32 CAFirstMix::loop()
 																muxOut.close(oConnection.outChannel);
 																oMuxChannelList.remove(oConnection.outChannel,NULL);
 																delete oConnection.pCipher;
+																deleteResume(tmpMuxListEntry->pMuxSocket,oConnection.outChannel);
 															}
 														else
 															{
@@ -735,7 +759,51 @@ SINT32 CAFirstMix::clean()
 		socketIn.close();
 		muxOut.close();
 		mRSA.destroy();
+		oSuspendList.clear();
 		return E_SUCCESS;
 	}
 
+void CAFirstMix::resume(CASocket* pSocket)
+	{
+		EnterCriticalSection(&csResume);
+		MUXLISTENTRY* pml=oSuspendList.getFirst();
+		while(pml!=NULL)
+			{
+				if((SOCKET)pml->pMuxSocket==(SOCKET)pSocket)
+					{
+						CONNECTION* pcon=pml->pSocketList->getFirst();
+						while(pcon!=NULL)
+							{
+								MUXPACKET oMuxPacket;
+								oMuxPacket.flags=CHANNEL_RESUME;
+								oMuxPacket.channel=pcon->outChannel;
+								muxOut.send(&oMuxPacket);
+								pcon=pml->pSocketList->getNext();
+							}
+						MUXLISTENTRY oEntry;
+						oSuspendList.remove(pml->pMuxSocket,&oEntry);
+						delete oEntry.pSocketList;
+						LeaveCriticalSection(&csResume);
+						return;
+					}
+				pml=oSuspendList.getNext();
+			}
+		LeaveCriticalSection(&csResume);
+	}
+
+void CAFirstMix::deleteResume(CAMuxSocket* pSocket)
+	{
+		EnterCriticalSection(&csResume);
+		MUXLISTENTRY oEntry;
+		if(oSuspendList.remove(pSocket,&oEntry))
+			delete oEntry.pSocketList;
+		LeaveCriticalSection(&csResume);
+	}
+
+void CAFirstMix::deleteResume(CAMuxSocket* pSocket,HCHANNEL outChannel)
+	{
+		EnterCriticalSection(&csResume);
+		oSuspendList.remove(outChannel,NULL);
+		LeaveCriticalSection(&csResume);
+	}
 #endif

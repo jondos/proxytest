@@ -2,11 +2,13 @@
 #include "CASocket.hpp"
 #include "CAQueue.hpp"
 
+class CAFirstMix;
 
 typedef struct __t_socket_list
 	{
 		CASocket* pSocket;
 		CAQueue* pQueue;
+		bool bwasOverFull;
 		__t_socket_list* next;
 } _t_socket_list;
 THREAD_RETURN SocketASyncSendLoop(void* p);
@@ -28,5 +30,8 @@ class CASocketASyncSend
 			#ifdef _REENTRANT
 				CRITICAL_SECTION cs;
 			#endif
-	
+
+				public:
+					void setFirstMix(CAFirstMix* pMix){pFirstMix=pMix;}
+				CAFirstMix* pFirstMix;
 	};

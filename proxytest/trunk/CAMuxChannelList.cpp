@@ -37,6 +37,11 @@ CAMuxChannelList::CAMuxChannelList()
 
 CAMuxChannelList::~CAMuxChannelList()
 	{
+		clear();
+	}
+
+SINT32 CAMuxChannelList::clear()
+	{
 		MUXLISTENTRY* tmpEntry=list;
 		while(tmpEntry!=NULL)
 			{
@@ -52,6 +57,9 @@ CAMuxChannelList::~CAMuxChannelList()
 				tmpReverseEntry=tmpReverseEntry->next;
 				delete reverselist;
 			}
+		list=NULL;
+		reverselist=NULL;
+		aktEnumPos=NULL;
 	}
 
 int CAMuxChannelList::add(CAMuxSocket* pMuxSocket)

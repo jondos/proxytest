@@ -53,6 +53,12 @@ typedef UINT32 HCHANNEL;
 	#define PAYLOAD_SIZE 		989
 	#define MUXPACKET_SIZE 	998
 
+	#define CHANNEL_DATA		0x00
+	#define CHANNEL_OPEN		0x00
+	#define CHANNEL_CLOSE		0x01
+	#define CHANNEL_SUSPEND 0x02
+	#define	CHANNEL_RESUME	0x04
+
 	#if defined(WIN32) ||defined(__sgi)
 		#pragma pack( push, t_MuxPacket )
 		#pragma pack(1)

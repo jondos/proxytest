@@ -1,7 +1,7 @@
 #include "StdAfx.h"
 #include "CASocketASyncSend.hpp"
 #include "CAMsg.hpp"
-
+#include "CAFirstMix.hpp"
 THREAD_RETURN SocketASyncSendLoop(void* p)
 	{
 		CASocketASyncSend* pASyncSend=(CASocketASyncSend*)p;
@@ -26,6 +26,13 @@ THREAD_RETURN SocketASyncSendLoop(void* p)
 								UINT32 len=BUFF_SIZE;
 								if(akt->pQueue->getNext(buff,&len)==E_SUCCESS)
 									::send((SOCKET)*(akt->pSocket),(char*)buff,len,0);
+#define BUFFLOWLEVEL 10
+								if(akt->bwasOverFull&&akt->pQueue->getSize()<BUFFLOWLEVEL)
+									{
+										CAMsg::printMsg(LOG_INFO,"Resumeing...\n");
+										pASyncSend->pFirstMix->resume(akt->pSocket);
+										akt->bwasOverFull=false;
+									}
 								if(akt->pQueue->isEmpty())
 									{
 										pASyncSend->m_oSocketGroup.remove(*akt->pSocket);
@@ -53,6 +60,8 @@ THREAD_RETURN SocketASyncSendLoop(void* p)
 			}
 	}
 
+#define SENDQUEUEFULLSIZE 100
+
 SINT32 CASocketASyncSend::send(CASocket* pSocket,UINT8* buff,UINT32 size)
 	{
 		EnterCriticalSection(&cs);
@@ -64,8 +73,9 @@ SINT32 CASocketASyncSend::send(CASocket* pSocket,UINT8* buff,UINT32 size)
 				m_Sockets->pSocket=pSocket;
 				m_Sockets->pQueue=new CAQueue();
 				m_Sockets->pQueue->add(buff,size);
+				m_Sockets->bwasOverFull=false;
 				m_oSocketGroup.add(*pSocket);
-				ret=E_SUCCESS;
+				ret=size;
 			}
 		else
 			{
@@ -74,9 +84,16 @@ SINT32 CASocketASyncSend::send(CASocket* pSocket,UINT8* buff,UINT32 size)
 					{
 						if(akt->pSocket==pSocket)
 							{
-								akt->pQueue->add(buff,size);
+								ret=akt->pQueue->add(buff,size);
+								if(ret>SENDQUEUEFULLSIZE)
+									{
+										akt->bwasOverFull=true;
+										ret=E_QUEUEFULL;
+									}
+								else 
+									ret=size;
 								LeaveCriticalSection(&cs);
-								return E_SUCCESS;
+								return ret;
 							}
 						akt=akt->next;
 					}
@@ -86,8 +103,9 @@ SINT32 CASocketASyncSend::send(CASocket* pSocket,UINT8* buff,UINT32 size)
 				akt->pSocket=pSocket;
 				akt->pQueue=new CAQueue();
 				akt->pQueue->add(buff,size);
+				akt->bwasOverFull=false;
 				m_oSocketGroup.add(*pSocket);
-				ret=E_SUCCESS;
+				ret=size;
 			}
 		LeaveCriticalSection(&cs);
 		return ret;

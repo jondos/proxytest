@@ -14,6 +14,7 @@ class CAQueue
 			~CAQueue();
 			SINT32 add(UINT8* buff,UINT32 size);
 			SINT32 getNext(UINT8* pbuff,UINT32* psize);
+			SINT32 getSize(){return m_nQueueSize;}
 			bool isEmpty(){return m_Queue==NULL;}
 		private:
 			QUEUE* m_Queue;

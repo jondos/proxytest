@@ -540,6 +540,10 @@ SOURCE=.\CABase64.hpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CACallback.hpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\CACmdLnOptions.hpp
 # End Source File
 # Begin Source File

@@ -40,10 +40,10 @@ SINT32 CAQueue::add(UINT8* buff,UINT32 size)
 		if(m_nQueueSize>m_nMaxQueueSize)
 			{
 				m_nMaxQueueSize=m_nQueueSize;
-				CAMsg::printMsg(LOG_DEBUG,"Max Queue Size now: %u\n",m_nMaxQueueSize);
+		//		CAMsg::printMsg(LOG_DEBUG,"Max Queue Size now: %u\n",m_nMaxQueueSize);
 			}
 		LeaveCriticalSection(&csQueue);
-		return E_SUCCESS;
+		return m_nQueueSize;
 	}
 			
 SINT32 CAQueue::getNext(UINT8* pbuff,UINT32* psize)
