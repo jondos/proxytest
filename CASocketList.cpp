@@ -112,8 +112,7 @@ SINT32 CASocketList::setThreadSafe(bool b)
 		return E_SUCCESS;
 	}
 
-/** Add a new channel to the channel-list.
-*	@param id channel-id of the new channel
+/** Add a new channel to the channel-list. The id for that channel is randomly choosen.
 *	@param pSocket a CASocket assoziated with the channel
 *	@param pCiphers an array of CASymCipher assoziated with the channel
 *	@return E_SUCCESS if no error occurs
