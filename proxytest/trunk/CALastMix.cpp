@@ -247,12 +247,12 @@ SINT32 CALastMix::processKeyExchange()
 		UINT32 keySize=150;
 		SINT32 ret=decodeXMLEncryptedKey(key,&keySize,messageBuff,len,&mRSA);
 		delete []messageBuff;
-		if(ret!=E_SUCCESS)
+		if(ret!=E_SUCCESS||keySize!=64)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Couldt not decrypt the symetric key!\n");		
 				return E_UNKNOWN;
 			}
-		if(m_pMuxIn->setKey(key,keySize)!=E_SUCCESS)
+		if(m_pMuxIn->setReceiveKey(key,32)!=E_SUCCESS||m_pMuxIn->setSendKey(key+32,32))
 			{
 				CAMsg::printMsg(LOG_CRIT,"Couldt not set the symetric key to be used by the MuxSocket!\n");		
 				return E_UNKNOWN;
