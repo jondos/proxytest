@@ -37,6 +37,13 @@ class CATimedQueue
 		SINT32 add(const void* pbuff,UINT32 size,const UINT64& timestamp);
 		SINT32 getOrWait(UINT8* pbuff,UINT32* psize,UINT64& timestamp);
 		SINT32 getOrWait(UINT8* pbuff,UINT32* psize,UINT64& timestamp,UINT32 ms_TimeOut);
+		SINT32 get(UINT8* pbuff,UINT32* psize,UINT64& timestamp)
+			{
+				UINT32 len=sizeof(UINT64);
+				m_pQueue->get(pbuff,psize);
+				return m_pQueue->get((UINT8*)timestamp,&len);
+			}
+
 		SINT32 get(UINT8* pbuff,UINT32* psize)
 			{
 				return m_pQueue->get(pbuff,psize);
