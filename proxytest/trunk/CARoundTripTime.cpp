@@ -71,7 +71,6 @@ THREAD_RETURN RoundTripTimeLoop(void *p)
 										len+=8;
 										memcpy(buff+8+len,localPortAndIP,6); //inserting (return) Port and IP
 										len+=6;
-										sleep(5);
 										oSocket.send(buff+8,len,&addrNextMix);
 									}
 								else //Rueckweg
