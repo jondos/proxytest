@@ -354,6 +354,7 @@ OpenSSL_add_all_algorithms();
 			_CrtSetDbgFlag(tmpDbgFlag);
 			_CrtMemState s1, s2, s3;
 #endif
+
 //Switch on debug infos
 #ifdef CWDEBUG
 Debug(libcw_do.on());

@@ -352,16 +352,6 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 											}
 										else
 											{
-												/*
-												CAThread* pThread=new CAThread();
-												pThread->setMainLoop(fm_loopDoUserLogin);
-												t_UserLoginData* d=new t_UserLoginData;
-												d->pNewUser=pNewMuxSocket;
-												d->pMix=pFirstMix;
-												memcpy(d->peerIP,peerIP,4);
-												pFirstMix->incLoginThreads();
-												pThread->start(d,true);
-												*/
 												t_UserLoginData* d=new t_UserLoginData;
 												d->pNewUser=pNewMuxSocket;
 												d->pMix=pFirstMix;
