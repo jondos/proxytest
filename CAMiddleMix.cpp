@@ -258,7 +258,11 @@ SINT32 CAMiddleMix::init()
 		CASocketAddr nextMix;
 		nextMix.setAddr((char*)strTarget,options.getTargetPort());
 		
-		((CASocket*)muxOut)->create();
+		if(((CASocket*)muxOut)->create()!=E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Init: Cannot create SOCKET for outgoing conncetion...\n");
+				return E_UNKNOWN;
+			}
 		((CASocket*)muxOut)->setRecvBuff(50*MUXPACKET_SIZE);
 		((CASocket*)muxOut)->setSendBuff(50*MUXPACKET_SIZE);
 #define RETRIES 100
@@ -289,6 +293,8 @@ SINT32 CAMiddleMix::init()
 			return E_UNKNOWN;
 		CAMsg::printMsg(LOG_INFO,"Received Key Info lenght %u\n",ntohs(keyLen));
 		recvBuff=new unsigned char[ntohs(keyLen)+2];
+		if(recvBuff==NULL)
+			return E_UNKNOWN;
 		memcpy(recvBuff,&keyLen,2);
 		if(((CASocket*)muxOut)->receiveFully(recvBuff+2,ntohs(keyLen))!=E_SUCCESS)
 			{
@@ -322,6 +328,11 @@ SINT32 CAMiddleMix::init()
 				return E_UNKNOWN;
 			}
 		infoBuff=new unsigned char[infoSize+keySize]; 
+		if(infoBuff==NULL)
+			{
+				delete recvBuff;
+				return E_UNKNOWN;
+			}
 		memcpy(infoBuff,recvBuff,infoSize);
 		delete recvBuff;
 		

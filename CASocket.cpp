@@ -142,7 +142,9 @@ SINT32 CASocket::close()
 	*/			
 				if(m_bASyncSend)
 					m_pASyncSend->close(this);			
-				::closesocket(m_Socket);
+				if(::closesocket(m_Socket)==SOCKET_ERROR)
+					CAMsg::printMsg(LOG_DEBUG,"Fehler bei CASocket::closesocket\n");
+
 #ifdef _DEBUG
 				sockets--;
 #endif
