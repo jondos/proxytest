@@ -733,6 +733,8 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 						m_arListenerInterfaces=new ListenerInterface[m_cnListenerInterfaces]; 
 						UINT32 aktInterface=0;
 						UINT32 type=0;
+						bool bHidden=false;
+						bool bVirtual=false;
 						CASocketAddr* addr=NULL;
 //						UINT8* hostname=NULL;
 						UINT16 port;
@@ -743,6 +745,12 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 								addr=NULL;
 								DOM_Node elemListenerInterface;
 								elemListenerInterface=nlListenerInterfaces.item(i);
+								bHidden=false;
+								bVirtual=false;
+								getDOMElementAttribute(elemListenerInterface,"hidden",bHidden);
+								getDOMElementAttribute(elemListenerInterface,"virtual",bVirtual);
+								m_arListenerInterfaces[aktInterface].bHidden=bHidden;
+								m_arListenerInterfaces[aktInterface].bVirtual=bVirtual;
 								DOM_Element elemType;
 								getDOMChildByName(elemListenerInterface,(UINT8*)"NetworkProtocol",elemType,false);
 								tmpLen=255;

@@ -307,10 +307,30 @@ SINT32 getDOMElementAttribute(DOM_Element& elem,char* attrName,int* value)
 			return E_UNKNOWN;
 		char* tmpStr=elem.getAttribute(attrName).transcode();
 		*value=atol(tmpStr);
-		delete tmpStr;
+		delete[] tmpStr;
 		return E_SUCCESS;
 	}
 
+SINT32 getDOMElementAttribute(DOM_Node& elem,char* attrName,bool& value)
+	{
+		if(	elem==NULL||elem.getNodeType()!=DOM_Node::ELEMENT_NODE||
+				attrName==NULL)
+			return E_UNKNOWN;
+		SINT32 ret=E_UNSPECIFIED;
+		char* tmpStr=static_cast<DOM_Element&>(elem).getAttribute(attrName).transcode();
+		if(stricmp(tmpStr,"true")==0)
+			{
+				value=true;
+				ret=E_SUCCESS;
+			}
+		else if(stricmp(tmpStr,"false")==0)
+			{
+				value=false;
+				ret=E_SUCCESS;
+			}
+		delete[] tmpStr;
+		return ret;
+	}
 SINT32 getDOMChildByName(const DOM_Node& node,const UINT8* const name,DOM_Node& child,bool deep)
 	{
 		if(node==NULL)
@@ -387,6 +407,7 @@ SINT32 getDOMElementValue(DOM_Element& elem,UINT16* value)
 		*value=(UINT16)tmp;
 		return E_SUCCESS;
 	}
+
 
 void __encryptKey(UINT8* key,UINT32 keylen,UINT8* outBuff,UINT32* outLen,CAASymCipher* pRSA)
 	{

@@ -133,7 +133,7 @@ class CAFirstMix:public CAMix
 			CAQueue* m_pQueueSendToMix;
 			CAFirstMixChannelList* m_pChannelList;
 			UINT32 m_nUser;
-			UINT32 m_nSocketsIn;
+			UINT32 m_nSocketsIn; //number of usable ListenerInterface (non 'virtual')
 			volatile bool m_bRestart;
 			CASocket* m_arrSocketsIn;
 			CASocketGroup* m_psocketgroupUsersRead;
