@@ -177,7 +177,7 @@ SINT32 CASocket::connect(LPCASOCKETADDR psa,UINT msTimeOut)
 		if(err!=EINPROGRESS)
 			return E_UNKNOWN;
 #endif
-		FD_SET readSet,writeSet;
+		fd_set readSet,writeSet;
 		FD_ZERO(&readSet);
 		FD_ZERO(&writeSet);
 		FD_SET(m_Socket,&readSet);
