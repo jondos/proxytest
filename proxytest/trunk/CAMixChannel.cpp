@@ -36,7 +36,7 @@ int CAMixChannel::connect(LPSOCKETADDR psa)
 					ret=SOCKET_ERROR;
 		    }
 		else
-		    ret=connections.add(pSocket);
+		    ret=connections.add(0,pSocket);
 		LeaveCriticalSection(&csConnect);
 		return ret;
 	}
