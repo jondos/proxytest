@@ -30,6 +30,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocket.hpp"
 #include "xml/xmloutput.h"
 #include "CACmdLnOptions.hpp"
+#include "CAMsg.hpp"
 extern CACmdLnOptions options;
 
 /**
@@ -277,7 +278,7 @@ SINT32 CAInfoService::sendHelo()
 		if(oSocket.connect(&oAddr)==E_SUCCESS)
 			{
 				BufferOutputStream oBufferStream(1024,1024);
-				char* buff=new char[1024];
+				UINT8* buff=new UINT8[1024];
 				if(buff==NULL)
 					return E_UNKNOWN;
 				XML::Output oxmlOut(oBufferStream);
@@ -285,18 +286,18 @@ SINT32 CAInfoService::sendHelo()
 				UINT buffLen;
 				oxmlOut.BeginDocument("1.0","UTF-8",true);
 				oxmlOut.BeginElementAttrs("MixCascade");
-				CASocketAddr::getLocalHostIP((UINT8*)buff);
+				CASocketAddr::getLocalHostIP(buff);
 				sprintf((char*)id,"%u.%u.%u.%u%%3A%u",buff[0],buff[1],buff[2],buff[3],options.getServerPort());
 				oxmlOut.WriteAttr("id",(char*)id);
 				oxmlOut.EndAttrs();
-				if(options.getCascadeName((UINT8*)buff,1024)!=E_SUCCESS)
+				if(options.getCascadeName(buff,1024)!=E_SUCCESS)
 					{if(buff!=NULL)delete buff;return E_UNKNOWN;}
 				oxmlOut.WriteElement("Name",(char*)buff);
 				CASocketAddr::getLocalHostName(hostname,255);
-//*>> Beginn very ugly hack for anon.inf.tu-dresden.de --> new Concepts needed!!!!!1		
+//*>> Beginn very ugly hack for anon.inf.tu-dresden.de --> new Concepts needed!!!!!1
 				if(strncmp((char*)hostname,"ithif46",7)==0)
 				    strcpy((char*)hostname,"mix.inf.tu-dresden.de");
-				sprintf(buff,"%s%%3A%u",hostname,options.getServerPort());
+				sprintf((char*)buff,"%s%%3A%u",hostname,options.getServerPort());
 				oxmlOut.WriteElement("IP",(char*)buff);
 				oxmlOut.WriteElement("Port",(int)options.getServerPort());
         if(options.getProxySupport())
