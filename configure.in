@@ -3,12 +3,11 @@ dnl Autoconfiguration files for proxytest (a MiX proxy)
 dnl Konrad Rieck <kr@r0q.cx>
 dnl
 
-AC_INIT
-AC_CONFIG_SRCDIR([proxytest.cpp])
-AM_INIT_AUTOMAKE(proxytest, 0.0.1)
+AC_INIT([proxytest],[0.0.2])
+AM_INIT_AUTOMAKE
 AC_PREREQ(2.57)
 AC_CONFIG_SRCDIR([proxytest.cpp])
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS([config.h])
 AC_CANONICAL_HOST
 
 
