@@ -30,7 +30,7 @@ CACmdLnOptions::~CACmdLnOptions()
     
 int CACmdLnOptions::parse(int argc,const char** argv)
     {
-	int ret;
+	//int ret;
 	
 	int iDaemon=0;
 	char* target=NULL;
@@ -55,7 +55,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 		NULL,0,NULL,NULL}
 	};
 	poptContext ctx=poptGetContext(NULL,argc,argv,options,0);
-	ret=poptGetNextOpt(ctx);
+	poptGetNextOpt(ctx);
 	poptFreeContext(ctx);
 	if(iDaemon==0)
 	    bDaemon=false;
@@ -69,7 +69,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 					strTargetHost=new char[tmpStr-target+1];
 					(*tmpStr)=0;
 					strcpy(strTargetHost,target);
-					iTargetPort=atol(tmpStr+1);
+					iTargetPort=(int)atol(tmpStr+1);
 						}
 				free(target);	
 	    }
@@ -81,7 +81,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 					strSOCKSHost=new char[tmpStr-socks+1];
 					(*tmpStr)=0;
 					strcpy(strSOCKSHost,socks);
-					iSOCKSPort=atol(tmpStr+1);
+					iSOCKSPort=(int)atol(tmpStr+1);
 						}
 				free(socks);	
 	    }
@@ -93,7 +93,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 					strInfoServerHost=new char[tmpStr-infoserver+1];
 					(*tmpStr)=0;
 					strcpy(strInfoServerHost,infoserver);
-					iInfoServerPort=atol(tmpStr+1);
+					iInfoServerPort=(int)atol(tmpStr+1);
 						}
 				free(infoserver);	
 	    }
@@ -143,10 +143,10 @@ int CACmdLnOptions::getTargetHost(char* host,int len)
 				return -1;
 		if(len<=(int)strlen(strTargetHost))
 				{
-					return strlen(strTargetHost)+1;		
+					return -1;		
 				}
 		strcpy(host,strTargetHost);
-		return strlen(strTargetHost);
+		return (int)strlen(strTargetHost);
   }
 
 int CACmdLnOptions::getSOCKSPort()
@@ -160,7 +160,7 @@ int CACmdLnOptions::getSOCKSHost(char* host,int len)
 				return -1;
 		if(len<=(int)strlen(strSOCKSHost))
 				{
-					return strlen(strSOCKSHost)+1;		
+					return -1;		
 				}
 		strcpy(host,strSOCKSHost);
 		return strlen(strSOCKSHost);
@@ -177,10 +177,10 @@ int CACmdLnOptions::getInfoServerHost(char* host,int len)
 				return -1;
 		if(len<=(int)strlen(strInfoServerHost))
 				{
-					return strlen(strInfoServerHost)+1;		
+					return -1;		
 				}
 		strcpy(host,strInfoServerHost);
-		return strlen(strInfoServerHost);
+		return (int)strlen(strInfoServerHost);
   }
 
 int CACmdLnOptions::getKeyFileName(char* filename,int len)
@@ -189,10 +189,10 @@ int CACmdLnOptions::getKeyFileName(char* filename,int len)
 				return -1;
 		if(len<=(int)strlen(strKeyFileName))
 				{
-					return strlen(strKeyFileName)+1;		
+					return -1;		
 				}
 		strcpy(filename,strKeyFileName);
-		return strlen(strKeyFileName);
+		return (int)strlen(strKeyFileName);
   }
 
 bool CACmdLnOptions::isFirstMix()

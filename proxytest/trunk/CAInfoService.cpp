@@ -102,6 +102,7 @@ THREAD_RETURN InfoLoop(void *p)
 				sleep(60);
 			}
 		delete buff;
+		THREAD_RETURN_SUCCESS;
 	}
 
 CAInfoService::CAInfoService()

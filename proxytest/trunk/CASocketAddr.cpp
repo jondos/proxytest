@@ -44,6 +44,8 @@ CASocketAddr::CASocketAddr(unsigned short port)
 int CASocketAddr::getHostName(char* buff,int len)
 	{
 		HOSTENT* hosten=gethostbyaddr((const char*)&sin_addr,4,AF_INET);
+		if(hosten==NULL||hosten->h_name==NULL||strlen(hosten->h_name)>=len)
+		 return SOCKET_ERROR;
 		strcpy(buff,hosten->h_name);
 		return 0;
 	}

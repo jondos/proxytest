@@ -160,7 +160,7 @@ int CASocket::available()
 		if(ioctlsocket(m_Socket,FIONREAD,&ul)==SOCKET_ERROR)
 			return SOCKET_ERROR;
 		else
-			return ul;
+			return (int)ul;
 	}
 
 int CASocket::receive(char* buff,int len)

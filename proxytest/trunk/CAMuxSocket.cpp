@@ -100,8 +100,8 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 					{
 						len=tunnel_write(m_pTunnel,(void*)"fghj",4);//((char*)pPacket)+aktIndex,MuxPacketSize);
 						return 0;
-						MuxPacketSize-=len;
-						aktIndex+=len;
+//						MuxPacketSize-=len;
+//						aktIndex+=len;
 					} while(len>0&&MuxPacketSize>0);	
 			}
 		if(len==SOCKET_ERROR)
@@ -138,8 +138,8 @@ int CAMuxSocket::receive(MUXPACKET* pPacket)
 						buff[5]=0;
 						printf(buff);
 						return 0;
-						MuxPacketSize-=len;
-						aktIndex+=len;
+//						MuxPacketSize-=len;
+//						aktIndex+=len;
 					} while(len>0&&MuxPacketSize>0);
 			}
 		if(len==SOCKET_ERROR||len==0)
