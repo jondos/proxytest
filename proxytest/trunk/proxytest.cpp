@@ -75,15 +75,26 @@ typedef struct
 	#endif
 #endif
 
+void cleanup()
+	{
+		UINT8 strPidFile[512];
+		if(options.getPidFile(strPidFile,512)==E_SUCCESS)
+			{
+				remove((char*)strPidFile);
+			}
+	}
+
 void signal_term( int sig)
 	{
 		CAMsg::printMsg(LOG_INFO,"Hm.. Signal SIG_TERM received... exiting!\n");
+		cleanup();
 		exit(0);
 	}
 
 void signal_interrupt( int sig)
 	{
 		CAMsg::printMsg(LOG_INFO,"Hm.. Strg+C pressed... exiting!\n");
+		cleanup();
 		exit(0);
 	}
 
