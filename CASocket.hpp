@@ -20,6 +20,7 @@ class CASocket
 			int receive(char* buff,int len,CASymCipher& oCipher);
 			operator SOCKET(){return m_Socket;}
 			int getLocalPort();
+			int setReuseAddr(bool b);
 		private:
 			SOCKET m_Socket;
 			CRITICAL_SECTION csClose;

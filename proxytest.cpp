@@ -206,6 +206,7 @@ int doLocalProxy()
 		int ret;	
 		CASocketAddr socketAddrIn("127.0.0.1",options.getServerPort());
 		LPPair* lpIOPair=new LPPair;
+		lpIOPair->socketIn.setReuseAddr(true);
 		if(lpIOPair->socketIn.listen(&socketAddrIn)==SOCKET_ERROR)
 		    {
 					CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
@@ -214,6 +215,7 @@ int doLocalProxy()
 		if(options.getSOCKSServerPort()!=-1)
 			{
 				socketAddrIn.setAddr("127.0.0.1",options.getSOCKSServerPort());
+				lpIOPair->socketSOCKSIn.setReuseAddr(true);
 				if(lpIOPair->socketSOCKSIn.listen(&socketAddrIn)==SOCKET_ERROR)
 						{
 							CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
@@ -524,6 +526,7 @@ int doFirstMix()
 		int ret;	
 		CASocketAddr socketAddrIn(options.getServerPort());
 		FMPair* fmIOPair=new FMPair;
+		fmIOPair->socketIn.setReuseAddr(true);
 		if(fmIOPair->socketIn.listen(&socketAddrIn)==SOCKET_ERROR)
 		    {
 					CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
