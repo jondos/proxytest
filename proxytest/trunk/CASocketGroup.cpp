@@ -167,17 +167,3 @@ SINT32 CASocketGroup::select(bool bWrite,UINT32 ms)
 		return ret;
 	}
 			
-bool CASocketGroup::isSignaled(CASocket&s)
-	{
-		return FD_ISSET((SOCKET)s,&m_signaled_set)!=0;
-	}
-
-bool CASocketGroup::isSignaled(CASocket*ps)
-	{
-		return FD_ISSET((SOCKET)*ps,&m_signaled_set)!=0;
-	}
-
-bool CASocketGroup::isSignaled(CAMuxSocket&s)
-	{
-		return FD_ISSET((SOCKET)s,&m_signaled_set)!=0;
-	}
