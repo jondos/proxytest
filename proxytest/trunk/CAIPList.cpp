@@ -33,10 +33,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	* The default number #MAXIP_CONNECTIONS of allowed insertions is used*/ 
 CAIPList::CAIPList()
 	{	
+		m_Random=new UINT8[56];
 		m_HashTable=new PIPLIST[0x10000];
 		memset(m_HashTable,0,0x10000*sizeof(PIPLIST));
 		m_allowedConnections=MAX_IP_CONNECTIONS;
-		getRandom(m_Random,sizeof(m_Random));
+		getRandom(m_Random,56);
 	}
 
 /**Constructs a empty CAIPList, there allowedConnections insertions 
@@ -45,10 +46,11 @@ are allowed, until an error is returned.
 */
 CAIPList::CAIPList(UINT32 allowedConnections)
 	{
+		m_Random=new UINT8[56];
 		m_HashTable=new PIPLIST[0x10000];
 		memset(m_HashTable,0,0x10000*sizeof(PIPLIST));
 		m_allowedConnections=allowedConnections;
-		getRandom(m_Random,sizeof(m_Random));
+		getRandom(m_Random,56);
 	}
 
 /** Deletes the IPList and frees all used resources*/
@@ -65,6 +67,7 @@ CAIPList::~CAIPList()
 						delete tmpEntry;
 					}
 			}
+		delete [] m_Random;
 		delete [] m_HashTable;
 	}
 
@@ -85,7 +88,7 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 			{
 				UINT8 hash[16];
 				memcpy(m_Random,ip,4);
-				MD5(m_Random,sizeof(m_Random),hash);
+				MD5(m_Random,56,hash);
 #ifndef PSEUDO_LOG
 				CAMsg::printMsg(LOG_DEBUG,"Inserting IP-Address: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X !\n",hash[0],hash[1],hash[2],hash[3],hash[4],hash[5],hash[6],hash[7],hash[8],hash[9],hash[10],hash[11],hash[12],hash[13],hash[14],hash[15]);
 #else
@@ -159,7 +162,7 @@ SINT32 CAIPList::removeIP(const UINT8 ip[4])
 									{
 										UINT8 hash[16];
 										memcpy(m_Random,ip,4);
-										MD5(m_Random,sizeof(m_Random),hash);
+										MD5(m_Random,56,hash);
 										CAMsg::printMsg(LOG_DEBUG,"Removing IP-Address: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X !\n",hash[0],hash[1],hash[2],hash[3],hash[4],hash[5],hash[6],hash[7],hash[8],hash[9],hash[10],hash[11],hash[12],hash[13],hash[14],hash[15]);
 										if(before==NULL)
 											m_HashTable[hashvalue]=NULL;

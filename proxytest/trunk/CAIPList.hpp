@@ -33,9 +33,9 @@ It stores the first two bytes of an IP-Address, how often this IP-Address was in
 and a pointer to the next element of the list*/
 struct _iplist_t
 	{
-		UINT8 ip[2]; /** First to Bytes of the IP-Address*/
-		UINT8 count; /** Count of insertions*/ 
 		struct _iplist_t* next; /**Next element, NULL if element is the last one*/
+		UINT8 ip[2]; /** First two Bytes of the IP-Address*/
+		UINT8 count; /** Count of insertions*/ 
 	};
 
 typedef struct _iplist_t IPLISTENTRY;
@@ -68,7 +68,7 @@ class CAIPList
 		protected:
 			UINT32 m_allowedConnections;
 			PIPLIST* m_HashTable;
-			UINT8 m_Random[56]; //seams to be the best value for MD5, which operats on x*512-64 bit (52*8+4*8=512-64)
+			UINT8* m_Random; //seams to be the best value for MD5, which operats on x*512-64 bit (52*8+4*8=512-64)
 			CAMutex m_Mutex;
 	};
 #endif
