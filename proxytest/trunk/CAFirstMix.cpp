@@ -228,7 +228,7 @@ SINT32 CAFirstMix::loop()
 		CAMuxSocket* pnewMuxSocket;
 		SINT32 countRead;
 		//HCHANNEL lastChannelId=1;
-		MIXPACKET oMixPacket;
+		MIXPACKET* pMixPacket=new MIXPACKET;
 		CAInfoService oInfoService(this);
 		UINT32 nUser=0;
 		SINT32 ret;
@@ -342,7 +342,7 @@ SINT32 CAFirstMix::loop()
 						if(osocketgroupUsersRead.isSignaled(*pMuxSocket))
 							{
 								countRead--;
-								ret=pMuxSocket->receive(&oMixPacket,0);
+								ret=pMuxSocket->receive(pMixPacket,0);
 								if(ret==SOCKET_ERROR)
 									{
 										((CASocket*)pMuxSocket)->getPeerIP(ip);
@@ -368,16 +368,16 @@ SINT32 CAFirstMix::loop()
 									}
 								else if(ret==MIXPACKET_SIZE)
 									{
-										if(oMixPacket.flags==CHANNEL_CLOSE)
+										if(pMixPacket->flags==CHANNEL_CLOSE)
 											{
 												fmChannelListEntry* pEntry;
-												pEntry=oChannelList.get(pMuxSocket,oMixPacket.channel);
+												pEntry=oChannelList.get(pMuxSocket,pMixPacket->channel);
 												if(pEntry!=NULL)
 													{
 														muxOut.close(pEntry->channelOut,tmpBuff);
 														m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
                             delete pEntry->pCipher;
-														oChannelList.remove(pMuxSocket,oMixPacket.channel);
+														oChannelList.remove(pMuxSocket,pMixPacket->channel);
 													}
 												else
 													{
@@ -390,30 +390,30 @@ SINT32 CAFirstMix::loop()
 											{
 												CASymCipher* pCipher=NULL;
 												fmChannelListEntry* pEntry;
-												pEntry=oChannelList.get(pMuxSocket,oMixPacket.channel);
+												pEntry=oChannelList.get(pMuxSocket,pMixPacket->channel);
 												if(pEntry!=NULL)
 													{
-														oMixPacket.channel=pEntry->channelOut;
+														pMixPacket->channel=pEntry->channelOut;
 														pCipher=pEntry->pCipher;
-														pCipher->decryptAES(oMixPacket.data,oMixPacket.data,DATA_SIZE);
+														pCipher->decryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 													}
 												else
 													{
 														pCipher= new CASymCipher();
-														mRSA.decrypt(oMixPacket.data,rsaBuff);
+														mRSA.decrypt(pMixPacket->data,rsaBuff);
 														pCipher->setKeyAES(rsaBuff);
-														pCipher->decryptAES(oMixPacket.data+RSA_SIZE,
-																						 oMixPacket.data+RSA_SIZE-KEY_SIZE,
+														pCipher->decryptAES(pMixPacket->data+RSA_SIZE,
+																						 pMixPacket->data+RSA_SIZE-KEY_SIZE,
 																						 DATA_SIZE-RSA_SIZE);
-														memcpy(oMixPacket.data,rsaBuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
+														memcpy(pMixPacket->data,rsaBuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
 
-														oChannelList.add(pMuxSocket,oMixPacket.channel/*,lastChannelId*/,pCipher,&oMixPacket.channel);
+														oChannelList.add(pMuxSocket,pMixPacket->channel,pCipher,&pMixPacket->channel);
 														#ifdef _DEBUG
-															CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",oMixPacket.channel);
+															CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",pMixPacket->channel);
 														#endif
 														//oMixPacket.channel=lastChannelId++;
 													}
-												muxOut.send(&oMixPacket,tmpBuff);
+												muxOut.send(pMixPacket,tmpBuff);
 												m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
 												m_MixedPackets++;
 											}
@@ -434,7 +434,7 @@ SINT32 CAFirstMix::loop()
 					{
 						bAktiv=true;
 						countRead--;
-						ret=muxOut.receive(&oMixPacket,0);
+						ret=muxOut.receive(pMixPacket,0);
 						if(ret==SOCKET_ERROR)
 							{
 								CAMsg::printMsg(LOG_CRIT,"Mux-Out-Channel Receiving Data Error - Exiting!\n");
@@ -442,12 +442,12 @@ SINT32 CAFirstMix::loop()
 							}
 						if(ret!=MIXPACKET_SIZE)
 							break;
-						if(oMixPacket.flags==CHANNEL_CLOSE) //close event
+						if(pMixPacket->flags==CHANNEL_CLOSE) //close event
 							{
 								#ifdef _DEBUG
-									CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u ... ",oMixPacket.channel);
+									CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u ... ",pMixPacket->channel);
 								#endif
-								fmChannelList* pEntry=oChannelList.get(oMixPacket.channel);
+								fmChannelList* pEntry=oChannelList.get(pMixPacket->channel);
 								if(pEntry!=NULL)
 									{
 										pEntry->pHead->pMuxSocket->close(pEntry->channelIn,tmpBuff);
@@ -462,25 +462,25 @@ SINT32 CAFirstMix::loop()
 								#ifdef _DEBUG
 									CAMsg::printMsg(LOG_DEBUG,"Sending Data to Browser!");
 								#endif
-								fmChannelList* pEntry=oChannelList.get(oMixPacket.channel);
+								fmChannelList* pEntry=oChannelList.get(pMixPacket->channel);
 								if(pEntry!=NULL)
 									{
-										oMixPacket.channel=pEntry->channelIn;
-										pEntry->pCipher->decryptAES2(oMixPacket.data,oMixPacket.data,DATA_SIZE);
+										pMixPacket->channel=pEntry->channelIn;
+										pEntry->pCipher->decryptAES2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 										
-										pEntry->pHead->pMuxSocket->send(&oMixPacket,tmpBuff);
+										pEntry->pHead->pMuxSocket->send(pMixPacket,tmpBuff);
 										pEntry->pHead->pQueueSend->add(tmpBuff,MIXPACKET_SIZE);
 										osocketgroupUsersWrite.add(*pEntry->pHead->pMuxSocket);
 #define MAX_USER_SEND_QUEUE 100000
 										if(pEntry->pHead->pQueueSend->getSize()>MAX_USER_SEND_QUEUE&&
 												!pEntry->bIsSuspended)
 											{
-												oMixPacket.channel=pEntry->channelOut;
-												oMixPacket.flags=CHANNEL_SUSPEND;
+												pMixPacket->channel=pEntry->channelOut;
+												pMixPacket->flags=CHANNEL_SUSPEND;
 												#ifdef _DEBUG
-													CAMsg::printMsg(LOG_INFO,"Sending suspend for channel: %u\n",oMixPacket.channel);
+													CAMsg::printMsg(LOG_INFO,"Sending suspend for channel: %u\n",pMixPacket->channel);
 												#endif
-												muxOut.send(&oMixPacket,tmpBuff);
+												muxOut.send(pMixPacket,tmpBuff);
 												m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
 												
 												pEntry->bIsSuspended=true;
@@ -491,7 +491,7 @@ SINT32 CAFirstMix::loop()
 								else
 									{
 										#ifdef _DEBUG
-											CAMsg::printMsg(LOG_DEBUG,"Error Sending Data to Browser -- Channel-Id %u no valid!\n",oMixPacket.channel);
+											CAMsg::printMsg(LOG_DEBUG,"Error Sending Data to Browser -- Channel-Id %u no valid!\n",pMixPacket->channel);
 										#endif
 									}
 							}
@@ -524,9 +524,9 @@ SINT32 CAFirstMix::loop()
 													{
 														if(pEntry->bIsSuspended)
 															{
-																oMixPacket.flags=CHANNEL_RESUME;
-																oMixPacket.channel=pEntry->channelOut;
-																muxOut.send(&oMixPacket,tmpBuff);
+																pMixPacket->flags=CHANNEL_RESUME;
+																pMixPacket->channel=pEntry->channelOut;
+																muxOut.send(pMixPacket,tmpBuff);
 																m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
 															}
 														pEntry=oChannelList.getNextChannel(pEntry);
@@ -565,6 +565,8 @@ ERR:
 				pHashEntry=oChannelList.getNext();
 			}
 		threadSendToMix.join();
+		delete m_pQueueSendToMix;
+		delete pMixPacket;
 		return E_UNKNOWN;
 	}
 
