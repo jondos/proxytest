@@ -87,6 +87,7 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,UINT8 peerIP[4],CAQueu
 		pHashTableEntry->trafficIn=0;
 		pHashTableEntry->trafficOut=0;
 		getcurrentTimeMillis(pHashTableEntry->timeCreated);
+		getRandom((UINT8*)&pHashTableEntry->id,8);
 #endif
 		memcpy(pHashTableEntry->peerIP,peerIP,4);
 
@@ -153,6 +154,14 @@ SINT32 CAFirstMixChannelList::addChannel(CAMuxSocket* pMuxSocket,HCHANNEL channe
 		pNewEntry->channelOut=*channelOut;
 		pNewEntry->bIsSuspended=false;
 		pNewEntry->pHead=pHashTableEntry;
+
+#ifdef LOG_CHANNEL
+		pNewEntry->packetsInFromUser=0;
+		pNewEntry->packetsOutToUser=0;
+		getcurrentTimeMillis(pNewEntry->timeCreated);
+#endif
+
+		
 		//add to the channel list for the given connection
 		if(pEntry==NULL) //First Entry to the channel list
 			{
