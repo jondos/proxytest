@@ -177,7 +177,7 @@ SINT32 CALastMix::init()
 		memcpy(buff,&tmp,2);
 		buff[aktIndex]=0;
 		CAMsg::printMsg(LOG_INFO,"Key Info is:\n");
-		CAMsg::printMsg(LOG_INFO,"%s\n"(char*)buff+2);		
+		CAMsg::printMsg(LOG_INFO,"%s\n",(char*)buff+2);		
 #endif
 		CAMsg::printMsg(LOG_INFO,"Sending Infos (chain length and RSA-Key, Message-Size %u)\n",messageSize);
 		if(((CASocket*)*m_pMuxIn)->send(buff,messageSize)!=messageSize)
