@@ -15,10 +15,17 @@
     #include <io.h>
     #include <conio.h>
     #include <process.h>
+		#ifndef _REENTRANT
+			#define CRITICAL_SECTION 
+			#define DeleteCriticalSection(p) 
+			#define InitializeCriticalSection(p) 
+			#define EnterCriticalSection(p) 
+			#define LeaveCriticalSection(p) 
+		#endif
     #define THREAD_RETURN void
     #define THREAD_RETURN_ERROR return
     #define THREAD_RETURN_SUCCESS return
-    #define sleep(i) Sleep(i*1000)
+    #define sleep(i) Sleep(i*1000)		
 #else
     #include <sys/ioctl.h>
     #include <sys/socket.h>
@@ -45,13 +52,15 @@
 
     #ifndef __linux
     	#define INADDR_NONE -1
-    #endif    
-    #define CRITICAL_SECTION pthread_mutex_t
-    #define DeleteCriticalSection(p) pthread_mutex_destroy(p)
-    #define InitializeCriticalSection(p) pthread_mutex_init(p,NULL)
-    #define EnterCriticalSection(p) pthread_mutex_lock(p)
-    #define LeaveCriticalSection(p) pthread_mutex_unlock(p)
-    #define THREAD_RETURN void*
+    #endif
+		#ifdef _REENTRANT
+			#define CRITICAL_SECTION pthread_mutex_t
+			#define DeleteCriticalSection(p) pthread_mutex_destroy(p)
+			#define InitializeCriticalSection(p) pthread_mutex_init(p,NULL)
+			#define EnterCriticalSection(p) pthread_mutex_lock(p)
+			#define LeaveCriticalSection(p) pthread_mutex_unlock(p)
+		#endif
+		#define THREAD_RETURN void*
     #define THREAD_RETURN_ERROR return(NULL)
     #define THREAD_RETURN_SUCCESS return (NULL)
 #endif

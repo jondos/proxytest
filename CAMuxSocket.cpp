@@ -19,11 +19,13 @@ int CAMuxSocket::accept(unsigned short port)
 		if(oSocket.accept(m_Socket)==SOCKET_ERROR)
 			return SOCKET_ERROR;
 		oSocket.close();
+		m_Socket.setRecvLowWat(sizeof(MUXPACKET));
 		return 0;
 	}
 			
 int CAMuxSocket::connect(LPSOCKETADDR psa)
 	{
+		m_Socket.setRecvLowWat(sizeof(MUXPACKET));
 		return m_Socket.connect(psa);	    
 	}
 			
