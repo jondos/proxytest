@@ -18,7 +18,6 @@ OBJS_ALL=CASocket.o\
 	CASocketASyncSend.o\
 	CAQueue.o\
 	CASocketGroup.o\
-	CASocketAddr.o\
 	CASocketAddrINet.o\
 	CASocketAddrUnix.o\
 	CASocketList.o\
