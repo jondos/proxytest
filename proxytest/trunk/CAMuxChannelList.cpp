@@ -177,3 +177,5 @@ MUXLISTENTRY* CAMuxChannelList::getNext()
 		aktEnumPos=aktEnumPos->next;
 		return aktEnumPos;
 	}
+
+	

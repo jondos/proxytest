@@ -116,3 +116,5 @@ int CAASymCipher::setPublicKey(unsigned char* key,int* len)
 		//	int i=RSA_check_key(rsa);
 		return 0;
 	}
+
+	

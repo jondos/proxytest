@@ -35,7 +35,7 @@ getTableTranslationDomain(const struct poptOption *table)
       opt->longName || opt->shortName || opt->arg;
       opt++) {
     if(opt->argInfo == POPT_ARG_INTL_DOMAIN)
-      return opt->arg;
+      return (const char* const)opt->arg;
   }
 
   return NULL;
@@ -65,7 +65,7 @@ static void singleOptionHelp(FILE * f, int maxLeftCol,
     char * left;
     const char * argDescrip = getArgDescrip(opt, translation_domain);
 
-    left = malloc(maxLeftCol + 1);
+    left = (char*)malloc(maxLeftCol + 1);
     *left = '\0';
 
     if (opt->longName && opt->shortName)
@@ -111,24 +111,24 @@ out:
 static int maxArgWidth(const struct poptOption * opt,
 		       const char * translation_domain) {
     int max = 0;
-    int this;
+    int thiS;
     const char * s;
     
     while (opt->longName || opt->shortName || opt->arg) {
 	if ((opt->argInfo & POPT_ARG_MASK) == POPT_ARG_INCLUDE_TABLE) {
-	    this = maxArgWidth(opt->arg, translation_domain);
-	    if (this > max) max = this;
+	    thiS = maxArgWidth((poptOption*)opt->arg, translation_domain);
+	    if (thiS > max) max = thiS;
 	} else if (!(opt->argInfo & POPT_ARGFLAG_DOC_HIDDEN)) {
-	    this = opt->shortName ? 2 : 0;
+	    thiS = opt->shortName ? 2 : 0;
 	    if (opt->longName) {
-		if (this) this += 2;
-		this += strlen(opt->longName) + 2;
+		if (thiS) thiS += 2;
+		thiS += strlen(opt->longName) + 2;
 	    }
 
 	    s = getArgDescrip(opt, translation_domain);
 	    if (s)
-		this += strlen(s) + 1;
-	    if (this > max) max = this;
+		thiS += strlen(s) + 1;
+	    if (thiS > max) max = thiS;
 	}
 
 	opt++;
@@ -154,14 +154,14 @@ static void singleTableHelp(FILE * f, const struct poptOption * table,
     opt = table;
     while (opt->longName || opt->shortName || opt->arg) {
 	if ((opt->argInfo & POPT_ARG_MASK) == POPT_ARG_INCLUDE_TABLE) {
-	    sub_transdom = getTableTranslationDomain(opt->arg);
+	    sub_transdom = getTableTranslationDomain((poptOption*)opt->arg);
 	    if(!sub_transdom)
 		sub_transdom = translation_domain;
 	    
 	    if (opt->descrip)
 		fprintf(f, "\n%s\n", D_(sub_transdom, opt->descrip));
 
-	    singleTableHelp(f, opt->arg, left, sub_transdom);
+	    singleTableHelp(f, (poptOption*)opt->arg, left, sub_transdom);
 	}
 	opt++;
     }
@@ -240,7 +240,7 @@ static int singleTableUsage(FILE * f, int cursor, const struct poptOption * tabl
         if ((opt->argInfo & POPT_ARG_MASK) == POPT_ARG_INTL_DOMAIN)
 	    translation_domain = (const char *)opt->arg;
 	else if ((opt->argInfo & POPT_ARG_MASK) == POPT_ARG_INCLUDE_TABLE) 
-	    cursor = singleTableUsage(f, cursor, opt->arg,
+	    cursor = singleTableUsage(f, cursor, (poptOption*)opt->arg,
 				      translation_domain);
 	else if ((opt->longName || opt->shortName) && 
 		 !(opt->argInfo & POPT_ARGFLAG_DOC_HIDDEN))
@@ -267,7 +267,7 @@ static int showShortOptions(const struct poptOption * opt, FILE * f,
 	if (opt->shortName && !(opt->argInfo & POPT_ARG_MASK))
 	    str[strlen(str)] = opt->shortName;
 	else if ((opt->argInfo & POPT_ARG_MASK) == POPT_ARG_INCLUDE_TABLE)
-	    showShortOptions(opt->arg, f, str);
+	    showShortOptions((poptOption*)opt->arg, f, str);
 
 	opt++;
     } 

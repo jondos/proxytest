@@ -35,7 +35,7 @@ static void invokeCallbacks(poptContext con, const struct poptOption * table,
 
     while (opt->longName || opt->shortName || opt->arg) {
 	if ((opt->argInfo & POPT_ARG_MASK) == POPT_ARG_INCLUDE_TABLE) {
-	    invokeCallbacks(con, opt->arg, post);
+	    invokeCallbacks(con,(struct poptOption*) opt->arg, post);
 	} else if (((opt->argInfo & POPT_ARG_MASK) == POPT_ARG_CALLBACK) &&
 		   ((!post && (opt->argInfo & POPT_CBFLAG_PRE)) ||
 		    ( post && (opt->argInfo & POPT_CBFLAG_POST)))) {
@@ -49,7 +49,7 @@ static void invokeCallbacks(poptContext con, const struct poptOption * table,
 
 poptContext poptGetContext(const char * name, int argc, const char ** argv,
 			   const struct poptOption * options, int flags) {
-    poptContext con = malloc(sizeof(*con));
+    poptContext con = (poptContext)malloc(sizeof(*con));
 
     memset(con, 0, sizeof(*con));
 
@@ -61,7 +61,7 @@ poptContext poptGetContext(const char * name, int argc, const char ** argv,
     if (!(flags & POPT_CONTEXT_KEEP_FIRST))
 	con->os->next = 1;			/* skip argv[0] */
 
-    con->leftovers = calloc( (argc + 1), sizeof(char *) );
+    con->leftovers = (const char**)calloc( (argc + 1), sizeof(char *) );
     con->options = options;
     con->aliases = NULL;
     con->numAliases = 0;
@@ -69,7 +69,7 @@ poptContext poptGetContext(const char * name, int argc, const char ** argv,
     con->execs = NULL;
     con->numExecs = 0;
     con->finalArgvAlloced = argc * 2;
-    con->finalArgv = calloc( con->finalArgvAlloced, sizeof(*con->finalArgv) );
+    con->finalArgv = (const char**)calloc( con->finalArgvAlloced, sizeof(*con->finalArgv) );
     con->execAbsolute = 1;
     con->arg_strip = NULL;
 
@@ -77,7 +77,7 @@ poptContext poptGetContext(const char * name, int argc, const char ** argv,
 	con->flags |= POPT_CONTEXT_POSIXMEHARDER;
 
     if (name)
-	con->appName = strcpy(malloc(strlen(name) + 1), name);
+	con->appName = strcpy((char*)malloc(strlen(name) + 1), name);
 
     invokeCallbacks(con, con->options, 0);
 
@@ -162,12 +162,12 @@ static int handleExec(poptContext con, char * longName, char shortName) {
        time 'round */
     if ((con->finalArgvCount + 1) >= (con->finalArgvAlloced)) {
 	con->finalArgvAlloced += 10;
-	con->finalArgv = realloc(con->finalArgv,
+	con->finalArgv = (const char**)realloc(con->finalArgv,
 			sizeof(*con->finalArgv) * con->finalArgvAlloced);
     }
 
     i = con->finalArgvCount++;
-    {	char *s  = malloc((longName ? strlen(longName) : 0) + 3);
+    {	char *s  =(char*) malloc((longName ? strlen(longName) : 0) + 3);
 	if (longName)
 	    sprintf(s, "--%s", longName);
 	else
@@ -291,7 +291,7 @@ findOption(const struct poptOption * table, const char * longName,
 
     while (opt->longName || opt->shortName || opt->arg) {
 	if ((opt->argInfo & POPT_ARG_MASK) == POPT_ARG_INCLUDE_TABLE) {
-	    opt2 = findOption(opt->arg, longName, shortName, callback,
+	    opt2 = findOption((poptOption*)opt->arg, longName, shortName, callback,
 			      callbackData, singleDash);
 	    if (opt2) {
 		if (*callback && !*callbackData)
@@ -322,7 +322,7 @@ findOption(const struct poptOption * table, const char * longName,
     return opt;
 }
 
-static const char *findNextArg(poptContext con, unsigned argx, int delete)
+static const char *findNextArg(poptContext con, unsigned argx, int deletE)
 {
     struct optionStackEntry * os = con->os;
     const char * arg;
@@ -337,8 +337,8 @@ static const char *findNextArg(poptContext con, unsigned argx, int delete)
 	    if (*os->argv[i] == '-') continue;
 	    if (--argx > 0) continue;
 	    arg = os->argv[i];
-	    if (delete) {
-		if (os->argb == NULL) os->argb = PBM_ALLOC(os->argc);
+	    if (deletE) {
+		if (os->argb == NULL) os->argb = (pbm_set*)PBM_ALLOC(os->argc);
 		PBM_SET(i, os->argb);
 	    }
 	    break;
@@ -356,7 +356,7 @@ static /*@only@*/ const char * expandNextArg(poptContext con, const char * s)
     size_t tn = strlen(s) + 1;
     char c;
 
-    te = t = malloc(tn);;
+    te = t = (char*)malloc(tn);;
     while ((c = *s++) != '\0') {
 	switch (c) {
 #if 0	/* XXX can't do this */
@@ -374,7 +374,7 @@ static /*@only@*/ const char * expandNextArg(poptContext con, const char * s)
 	    alen = strlen(a);
 	    tn += alen;
 	    *te = '\0';
-	    t = realloc(t, tn);
+	    t = (char*)realloc(t, tn);
 	    te = t + strlen(t);
 	    strncpy(te, a, alen); te += alen;
 	    continue;
@@ -385,14 +385,14 @@ static /*@only@*/ const char * expandNextArg(poptContext con, const char * s)
 	*te++ = c;
     }
     *te = '\0';
-    t = realloc(t, strlen(t)+1);	/* XXX memory leak, hard to plug */
+    t = (char*)realloc(t, strlen(t)+1);	/* XXX memory leak, hard to plug */
     return t;
 }
 
 static void poptStripArg(poptContext con, int which)
 {
     if(con->arg_strip == NULL) {
-	con->arg_strip = PBM_ALLOC(con->optionStack[0].argc);
+	con->arg_strip = (pbm_set*)PBM_ALLOC(con->optionStack[0].argc);
     }
     PBM_SET(which, con->arg_strip);
 }
@@ -441,7 +441,7 @@ int poptGetNextOpt(poptContext con)
 
 	    /* Make a copy we can hack at */
 	    localOptString = optString =
-			strcpy(alloca(strlen(origOptString) + 1),
+			strcpy((char*)alloca(strlen(origOptString) + 1),
 			origOptString);
 
 	    if (!optString[0])
@@ -592,11 +592,11 @@ int poptGetNextOpt(poptContext con)
 
 	if ((con->finalArgvCount + 2) >= (con->finalArgvAlloced)) {
 	    con->finalArgvAlloced += 10;
-	    con->finalArgv = realloc(con->finalArgv,
+	    con->finalArgv = (const char**)realloc(con->finalArgv,
 			    sizeof(*con->finalArgv) * con->finalArgvAlloced);
 	}
 
-	{    char *s = malloc((opt->longName ? strlen(opt->longName) : 0) + 3);
+	{    char *s = (char*)malloc((opt->longName ? strlen(opt->longName) : 0) + 3);
 	    if (opt->longName)
 		sprintf(s, "--%s", opt->longName);
 	    else
@@ -674,14 +674,14 @@ int poptAddAlias(poptContext con, struct poptAlias newAlias,
 
     /* SunOS won't realloc(NULL, ...) */
     if (!con->aliases)
-	con->aliases = malloc(sizeof(newAlias) * con->numAliases);
+	con->aliases = (poptAlias*)malloc(sizeof(newAlias) * con->numAliases);
     else
-	con->aliases = realloc(con->aliases,
+	con->aliases = (poptAlias*)realloc(con->aliases,
 			       sizeof(newAlias) * con->numAliases);
     alias = con->aliases + aliasNum;
 
     alias->longName = (newAlias.longName)
-	? strcpy(malloc(strlen(newAlias.longName) + 1), newAlias.longName)
+	? strcpy((char*)malloc(strlen(newAlias.longName) + 1), newAlias.longName)
 	: NULL;
     alias->shortName = newAlias.shortName;
     alias->argc = newAlias.argc;
