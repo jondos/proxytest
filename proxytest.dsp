@@ -127,6 +127,23 @@ SOURCE=.\popt\popt.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\popt\popthelp.c
+
+!IF  "$(CFG)" == "proxytest - Win32 Release"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "proxytest - Win32 VTune"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=.\popt\poptint.h
 # End Source File
 # Begin Source File

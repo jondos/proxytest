@@ -320,6 +320,7 @@ struct MMPair
 	{
 		CAMuxSocket muxIn;
 		CAMuxSocket muxOut;
+		unsigned char* recvBuff;
 	};
 
 THREAD_RETURN mmIO(void* v)
@@ -336,8 +337,26 @@ THREAD_RETURN mmIO(void* v)
 		int len;
 		CONNECTION oConnection;
 		MUXPACKET oMuxPacket;
-		unsigned char key[16];
-		memset(key,0,16);
+
+		CAASymCipher oRSA;
+		oRSA.generateKeyPair(1024);
+		int keySize=oRSA.getPublicKeySize();
+		unsigned char buff[RSA_SIZE];
+		unsigned short infoSize=ntohs((*(unsigned short*)mmIOPair->recvBuff))+2;
+		unsigned char* infoBuff=new unsigned char[infoSize+keySize]; 
+		memcpy(infoBuff,mmIOPair->recvBuff,infoSize);
+		infoBuff[2]++; //chainlen erhöhen
+		oRSA.getPublicKey(infoBuff+infoSize,&keySize);
+		infoSize+=keySize;
+		(*(unsigned short*)infoBuff)=htons(infoSize-2);
+		#ifdef _DEBUG
+			CAMsg::printMsg(LOG_DEBUG,"New Key Info size: %u\n",infoSize);
+		#endif
+		if(((CASocket*)mmIOPair->muxIn)->send((char*)infoBuff,infoSize)==-1)
+			CAMsg::printMsg(LOG_DEBUG,"Error sending new New Key Info\n");
+		else
+			CAMsg::printMsg(LOG_DEBUG,"Sending new New Key Info succeded\n");
+		
 		for(;;)
 			{
 				if(oSocketGroup.select()==SOCKET_ERROR)
@@ -360,12 +379,19 @@ THREAD_RETURN mmIO(void* v)
 										#ifdef _DEBUG
 										    CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
 										#endif
-										CASymCipher* newCipher=new CASymCipher;
-										newCipher->setDecryptionKey(key);
-										newCipher->setEncryptionKey(key);
+										CASymCipher* newCipher=new CASymCipher();
+										oRSA.decrypt((unsigned char*)oMuxPacket.data,buff);
+										newCipher->setDecryptionKey(buff);
+										newCipher->setEncryptionKey(buff);
+										newCipher->decrypt((unsigned char*)oMuxPacket.data+RSA_SIZE,
+																			 (unsigned char*)oMuxPacket.data+RSA_SIZE-KEY_SIZE,
+																			 DATA_SIZE-RSA_SIZE);
+										memcpy(oMuxPacket.data,buff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
+										
+										oMuxPacket.len=oMuxPacket.len-16;
+
 										oSocketList.add(oMuxPacket.channel,lastId,newCipher);
 										oMuxPacket.channel=lastId;
-										newCipher->decrypt((unsigned char*)oMuxPacket.data,(unsigned char*)oMuxPacket.data,DATA_SIZE);
 										mmIOPair->muxOut.send(&oMuxPacket);
 										lastId++;
 									}
@@ -431,8 +457,14 @@ int doMiddleMix()
 				delete mmIOPair;
 				return SOCKET_ERROR;
 			}
-		char chainlen;
-		((CASocket*)mmIOPair->muxOut)->receive(&chainlen,1);
+		CAMsg::printMsg(LOG_INFO," connected!\n");
+		unsigned short len;
+		((CASocket*)mmIOPair->muxOut)->receive((char*)&len,2);
+		CAMsg::printMsg(LOG_CRIT,"Received Key Info lenght %u\n",ntohs(len));
+		mmIOPair->recvBuff=new unsigned char[ntohs(len)+2];
+		memcpy(mmIOPair->recvBuff,&len,2);
+		((CASocket*)mmIOPair->muxOut)->receive((char*)mmIOPair->recvBuff+2,ntohs(len));
+		CAMsg::printMsg(LOG_CRIT,"Received Key Info...\n");
 		if(mmIOPair->muxIn.accept(options.getServerPort())==SOCKET_ERROR)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Error waiting for previous Mix... -- Exiting!\n");
@@ -441,8 +473,6 @@ int doMiddleMix()
 			}
 		((CASocket*)mmIOPair->muxIn)->setRecvBuff(50*sizeof(MUXPACKET));
 		((CASocket*)mmIOPair->muxIn)->setSendBuff(50*sizeof(MUXPACKET));
-		chainlen++;
-		((CASocket*)mmIOPair->muxIn)->send(&chainlen,1);
 		mmIO(mmIOPair);
 		delete mmIOPair;
 		return 0;
@@ -716,8 +746,7 @@ int doFirstMix()
 		char strTarget[255];
 		options.getTargetHost(strTarget,255);
 		addrNext.setAddr(strTarget,options.getTargetPort());
-printf(strTarget);		
-CAMsg::printMsg(LOG_INFO,"Try connectiong to next Mix...%s:%u",strTarget,options.getTargetPort());
+		CAMsg::printMsg(LOG_INFO,"Try connectiong to next Mix... %s:%u",strTarget,options.getTargetPort());
 		((CASocket*)fmIOPair->muxOut)->create();
 		((CASocket*)fmIOPair->muxOut)->setSendBuff(50*sizeof(MUXPACKET));
 		((CASocket*)fmIOPair->muxOut)->setRecvBuff(50*sizeof(MUXPACKET));
