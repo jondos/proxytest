@@ -462,6 +462,7 @@ SINT32 CACmdLnOptions::setPrevMix(DOM_Document& doc)
     {
 				CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - elem cert found in data from infoservice\n");
         DOM_Element elemOptionsRoot = m_docMixXml.getDocumentElement();
+				CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - got  current options root element\n");
         DOM_Element elemOptionsCerts;
         getDOMChildByName(elemOptionsRoot, (UINT8*) "Certificates", elemOptionsCerts, false);
         DOM_Element elemOptionsPrevMixCert;
