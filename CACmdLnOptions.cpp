@@ -149,24 +149,24 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 										memcpy(tmpHostname,tmpStr,tmpStr1-tmpStr);
 										tmpHostname[tmpStr1-tmpStr]=0;
 										tmpPort=(int)atol(tmpStr1+1);
-										pTargets[i].setAddr(tmpHostname,tmpPort);
 									}
 								else
 									{//TODO what if not in right form ?
 										//try if it is a number --> use it as port
+										//and use 'localhost' as traget-host 
 										tmpPort=(int)atol(tmpStr);
 										if(tmpPort!=0) //we get it
 											{
-												tmpHostname[0]=0;
-												pTargets[i].setPort(tmpPort);
+												strcpy(tmpHostname,"localhost");
 											}
 										else //we try to use it as host and use the default port
 											{
-#define DEFAULT_TRAGET_PORT 6544
-												tmpPort=DEFAULT_TRAGET_PORT;
-												pTargets[i].setAddr(tmpStr,tmpPort);
+#define DEFAULT_TARGET_PORT 6544
+												tmpPort=DEFAULT_TARGET_PORT;
+												strcpy(tmpHostname,tmpStr);
 											}
 									}
+								pTargets[i].setAddr(tmpHostname,tmpPort);
 								if(i==0)
 									{
 										strTargetHost=new char[strlen(tmpHostname)+1];
