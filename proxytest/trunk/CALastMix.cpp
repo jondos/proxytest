@@ -62,10 +62,6 @@ SINT32 CALastMix::initOnce()
 				CAMsg::printMsg(LOG_CRIT,"Could not set Targets (proxies)!\n");
 				return E_UNKNOWN;
 			}
-		
-		UINT8 strTarget[255];
-		options.getSOCKSHost(strTarget,255);
-		maddrSocks.setAddr(strTarget,options.getSOCKSPort());
 
 		m_pSignature=options.getSignKey();
 		if(m_pSignature==NULL)
@@ -457,24 +453,35 @@ SINT32 CALastMix::setTargets()
 				CAMsg::printMsg(LOG_CRIT,"No Targets (proxies) specified!\n");
 				return E_UNKNOWN;
 			}
-		m_oCacheLB.clean();
+		m_pCacheLB->clean();
+		m_pSocksLB->clean();
 		UINT32 i;
 		for(i=1;i<=cntTargets;i++)
 			{
 				TargetInterface oTargetInterface;
 				options.getTargetInterface(oTargetInterface,i);
 				if(oTargetInterface.target_type==TARGET_HTTP_PROXY)
-					m_oCacheLB.add(oTargetInterface.addr);
+					m_pCacheLB->add(oTargetInterface.addr);
+				else if(oTargetInterface.target_type==TARGET_SOCKS_PROXY)
+					m_pSocksLB->add(oTargetInterface.addr);
 				delete oTargetInterface.addr;
 			}
 		CAMsg::printMsg(LOG_DEBUG,"This mix will use the following proxies:\n");
-		for(i=0;i<m_oCacheLB.getElementCount();i++)
+		for(i=0;i<m_pCacheLB->getElementCount();i++)
 			{
-				CASocketAddrINet* pAddr=m_oCacheLB.get();
+				CASocketAddrINet* pAddr=m_pCacheLB->get();
 				UINT8 ip[4];
 				pAddr->getIP(ip);
 				UINT32 port=pAddr->getPort();
-				CAMsg::printMsg(LOG_DEBUG,"%u. Proxy's Address: %u.%u.%u.%u:%u\n",i+1,ip[0],ip[1],ip[2],ip[3],port);
+				CAMsg::printMsg(LOG_DEBUG,"%u. HTTP Proxy's Address: %u.%u.%u.%u:%u\n",i+1,ip[0],ip[1],ip[2],ip[3],port);
+			}
+		for(i=0;i<m_pSocksLB->getElementCount();i++)
+			{
+				CASocketAddrINet* pAddr=m_pSocksLB->get();
+				UINT8 ip[4];
+				pAddr->getIP(ip);
+				UINT32 port=pAddr->getPort();
+				CAMsg::printMsg(LOG_DEBUG,"%u. SOCKS Proxy's Address: %u.%u.%u.%u:%u\n",i+1,ip[0],ip[1],ip[2],ip[3],port);
 			}
 		return E_SUCCESS;
 	}			

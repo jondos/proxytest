@@ -58,7 +58,7 @@ SINT32 CALastMixA::loop()
 		//osocketgroupMixIn.add(*m_pMuxIn);
 		//((CASocket*)*m_pMuxIn)->setNonBlocking(true);
 		bool bAktiv;
-		UINT32 countCacheAddresses=m_oCacheLB.getElementCount();
+		UINT32 countCacheAddresses=m_pCacheLB->getElementCount();
 		m_logUploadedPackets=m_logDownloadedPackets=0;
 		set64((UINT64&)m_logUploadedBytes,(UINT32)0);
 		set64((UINT64&)m_logDownloadedBytes,(UINT32)0);
@@ -114,23 +114,20 @@ SINT32 CALastMixA::loop()
 																							DATA_SIZE-RSA_SIZE);
 												memcpy(	pMixPacket->data,rsaBuff+KEY_SIZE+TIMESTAMP_SIZE,
 																RSA_SIZE-(KEY_SIZE+TIMESTAMP_SIZE));
-												CASocket* tmpSocket=new CASocket;										
-												int ret;
+												CASocket* tmpSocket=new CASocket;
+												CACacheLoadBalancing* ptmpLB=m_pCacheLB;
+												int ret=E_UNKNOWN;
 												if(pMixPacket->payload.type==MIX_PAYLOAD_SOCKS)
-													ret=tmpSocket->connect(maddrSocks,LAST_MIX_TO_PROXY_CONNECT_TIMEOUT); 
-												else
+													ptmpLB=m_pSocksLB;
+												for(UINT32 count=0;count<ptmpLB->getElementCount();count++)
 													{
-														UINT32 count=0;
-														do
-															{
-																tmpSocket->close();
-																tmpSocket->create();
-																tmpSocket->setRecvBuff(50000);
-																tmpSocket->setSendBuff(5000);
-																ret=tmpSocket->connect(*m_oCacheLB.get(),LAST_MIX_TO_PROXY_CONNECT_TIMEOUT);
-																count++;
-															}
-														while(ret!=E_SUCCESS&&count<countCacheAddresses);
+														tmpSocket->create();
+														tmpSocket->setRecvBuff(50000);
+														tmpSocket->setSendBuff(5000);
+														ret=tmpSocket->connect(*m_pCacheLB->get(),LAST_MIX_TO_PROXY_CONNECT_TIMEOUT);
+														if(ret==E_SUCCESS)
+															break;
+														tmpSocket->close();
 													}	
 												if(ret!=E_SUCCESS)
 														{
