@@ -41,6 +41,7 @@ proxytest_SOURCES = CAASymCipher.cpp \
 		    CASocketList.cpp \
 		    CASymCipher.cpp \
 		    CAThread.cpp \
+		    CAThreadPool.cpp\
 		    CAUtil.cpp \
 		    StdAfx.cpp \
 		    proxytest.cpp \
@@ -82,6 +83,7 @@ proxytest_SOURCES = CAASymCipher.cpp \
 		    CASocketList.hpp \
 		    CASymCipher.hpp \
 		    CAThread.hpp \
+		    CAThreadPool.hpp\
 		    CAUtil.hpp \
 		    StdAfx.h \
 		    basetypedefs.h
