@@ -62,12 +62,12 @@ SINT32 CALocalProxy::init()
 		ListenerInterface oListener;
 		
 		CASocketAddrINet socketAddrIn;
-		socketIn.create();
-		socketIn.setReuseAddr(true);
+		m_socketIn.create();
+		m_socketIn.setReuseAddr(true);
 		options.getListenerInterface(oListener,1);
 		if(((CASocketAddrINet*)oListener.addr)->isAnyIP())
 			((CASocketAddrINet*)oListener.addr)->setAddr((UINT8*)"127.0.0.1",((CASocketAddrINet*)oListener.addr)->getPort());
-		if(socketIn.listen(*oListener.addr)!=E_SUCCESS)
+		if(m_socketIn.listen(*oListener.addr)!=E_SUCCESS)
 		  {
 				CAMsg::printMsg(LOG_CRIT,"Cannot listen (1)\n");
 				delete oListener.addr;
@@ -77,9 +77,9 @@ SINT32 CALocalProxy::init()
 		if(options.getSOCKSServerPort()!=(UINT16)-1)
 			{
 				socketAddrIn.setAddr((UINT8*)"127.0.0.1",options.getSOCKSServerPort());
-				socketSOCKSIn.create();
-				socketSOCKSIn.setReuseAddr(true);
-				if(socketSOCKSIn.listen(socketAddrIn)!=E_SUCCESS)
+				m_socketSOCKSIn.create();
+				m_socketSOCKSIn.setReuseAddr(true);
+				if(m_socketSOCKSIn.listen(socketAddrIn)!=E_SUCCESS)
 					{
 						CAMsg::printMsg(LOG_CRIT,"Cannot listen (2)\n");
 						return E_UNKNOWN;
@@ -91,30 +91,45 @@ SINT32 CALocalProxy::init()
 		addrNext.setAddr(strTarget,options.getMixPort());
 		CAMsg::printMsg(LOG_INFO,"Try connecting to next Mix...\n");
 
-		((CASocket*)muxOut)->create();
-		((CASocket*)muxOut)->setSendBuff(MIXPACKET_SIZE*50);
-		((CASocket*)muxOut)->setRecvBuff(MIXPACKET_SIZE*50);
-		if(muxOut.connect(addrNext)==E_SUCCESS)
+		((CASocket*)m_muxOut)->create();
+		((CASocket*)m_muxOut)->setSendBuff(MIXPACKET_SIZE*50);
+		((CASocket*)m_muxOut)->setRecvBuff(MIXPACKET_SIZE*50);
+		if(m_muxOut.connect(addrNext)==E_SUCCESS)
 			{
 				
 				CAMsg::printMsg(LOG_INFO," connected!\n");
 				UINT16 size;
-				((CASocket*)muxOut)->receive((UINT8*)&size,2);
-				((CASocket*)muxOut)->receive(&chainlen,1);
-				CAMsg::printMsg(LOG_INFO,"Chain-Length: %d\n",chainlen);
-				size=ntohs(size)-1;
-				UINT8* buff=new UINT8[size];
-				((CASocket*)muxOut)->receiveFully(buff,size);
-				arRSA=new CAASymCipher[chainlen];
-				int aktIndex=0;
-				for(int i=0;i<chainlen;i++)
+				((CASocket*)m_muxOut)->receive((UINT8*)&size,2);
+				((CASocket*)m_muxOut)->receive(&m_chainlen,1);
+				if(m_chainlen='<')//assuming XML
 					{
-						int len=size;
-						arRSA[i].setPublicKey(buff+aktIndex,(UINT32*)&len);
-						size-=len;
-						aktIndex+=len;
+						size=ntohs(size);
+						UINT8* buff=new UINT8[size+1];
+						buff[0]=m_chainlen;
+						((CASocket*)m_muxOut)->receiveFully(buff+1,size-1);
+						buff[size]=0;
+						SINT32 ret=processKeyExchange(buff,size);
+						delete []  buff;
+						if(ret!=E_SUCCESS)
+							return E_UNKNOWN;
 					}
-				delete[] buff;
+				else
+					{
+						CAMsg::printMsg(LOG_INFO,"Chain-Length: %d\n",m_chainlen);
+						size=ntohs(size)-1;
+						UINT8* buff=new UINT8[size];
+						((CASocket*)m_muxOut)->receiveFully(buff,size);
+						m_arRSA=new CAASymCipher[m_chainlen];
+						int aktIndex=0;
+						for(int i=0;i<m_chainlen;i++)
+							{
+								int len=size;
+								m_arRSA[i].setPublicKey(buff+aktIndex,(UINT32*)&len);
+								size-=len;
+								aktIndex+=len;
+							}
+						delete[] buff;
+					}
 				return E_SUCCESS;
 			}
 		else
@@ -128,12 +143,12 @@ SINT32 CALocalProxy::loop()
 	{
 		CASocketList  oSocketList;
 		CASocketGroup oSocketGroup;
-		oSocketGroup.add(socketIn);
+		oSocketGroup.add(m_socketIn);
 		UINT16 socksPort=options.getSOCKSServerPort();
 		bool bHaveSocks=(socksPort!=0xFFFF);
 		if(bHaveSocks)
-			oSocketGroup.add(socketSOCKSIn);
-		oSocketGroup.add(muxOut);
+			oSocketGroup.add(m_socketSOCKSIn);
+		oSocketGroup.add(m_muxOut);
 		HCHANNEL lastChannelId=1;
 		MIXPACKET* pMixPacket=new MIXPACKET;
 
@@ -150,14 +165,14 @@ SINT32 CALocalProxy::loop()
 						sSleep(1);
 						continue;
 					}
-				if(oSocketGroup.isSignaled(socketIn))
+				if(oSocketGroup.isSignaled(m_socketIn))
 					{
 						countRead--;
 						#ifdef _DEBUG
 							CAMsg::printMsg(LOG_DEBUG,"New Connection from Browser!\n");
 						#endif
 						newSocket=new CASocket;
-						if(socketIn.accept(*newSocket)!=E_SUCCESS)
+						if(m_socketIn.accept(*newSocket)!=E_SUCCESS)
 							{
 								#ifdef _DEBUG
 									CAMsg::printMsg(LOG_DEBUG,"Accept Error - Connection from Browser!\n");
@@ -166,19 +181,19 @@ SINT32 CALocalProxy::loop()
 							}
 						else
 							{
-								newCipher=new CASymCipher[chainlen];
+								newCipher=new CASymCipher[m_chainlen];
 								oSocketList.add(lastChannelId++,newSocket,newCipher);
 								oSocketGroup.add(*newSocket);
 							}
 					}
-				if(bHaveSocks&&oSocketGroup.isSignaled(socketSOCKSIn))
+				if(bHaveSocks&&oSocketGroup.isSignaled(m_socketSOCKSIn))
 					{
 						countRead--;
 						#ifdef _DEBUG
 							CAMsg::printMsg(LOG_DEBUG,"New Connection from SOCKS!\n");
 						#endif
 						newSocket=new CASocket;
-						if(socketSOCKSIn.accept(*newSocket)!=E_SUCCESS)
+						if(m_socketSOCKSIn.accept(*newSocket)!=E_SUCCESS)
 							{
 								#ifdef _DEBUG
 									CAMsg::printMsg(LOG_DEBUG,"Accept Error - Connection from SOCKS!\n");
@@ -187,15 +202,15 @@ SINT32 CALocalProxy::loop()
 							}
 						else
 							{
-								newCipher=new CASymCipher[chainlen];
+								newCipher=new CASymCipher[m_chainlen];
 								oSocketList.add(lastChannelId++,newSocket,newCipher);
 								oSocketGroup.add(*newSocket);
 							}
 					}
-				if(oSocketGroup.isSignaled(muxOut))
+				if(oSocketGroup.isSignaled(m_muxOut))
 						{
 							countRead--;	
-							ret=muxOut.receive(pMixPacket);
+							ret=m_muxOut.receive(pMixPacket);
 							if(ret==SOCKET_ERROR)
 								{
 									CAMsg::printMsg(LOG_CRIT,"Mux-Channel Receiving Data Error - Exiting!\n");									
@@ -224,7 +239,7 @@ SINT32 CALocalProxy::loop()
 										}
 									else
 										{
-											for(int c=0;c<chainlen;c++)
+											for(int c=0;c<m_chainlen;c++)
 												oConnection.pCiphers[c].decryptAES2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 											#ifdef _DEBUG
 												CAMsg::printMsg(LOG_DEBUG,"Sending Data to Browser!");
@@ -243,7 +258,7 @@ SINT32 CALocalProxy::loop()
 									{
 										countRead--;
 										if(!tmpCon->pCiphers[0].isEncyptionKeyValid())
-											len=tmpCon->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE-chainlen*16);
+											len=tmpCon->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE-m_chainlen*16);
 										else
 											len=tmpCon->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE);
 										if(len==SOCKET_ERROR||len==0)
@@ -256,7 +271,7 @@ SINT32 CALocalProxy::loop()
 														pMixPacket->flags=CHANNEL_CLOSE;
 														pMixPacket->channel=tmpCon->outChannel;
 														getRandom(pMixPacket->data,DATA_SIZE);
-														muxOut.send(pMixPacket);
+														m_muxOut.send(pMixPacket);
 														tmpSocket->close();
 														delete tmpSocket;
 													}
@@ -279,13 +294,13 @@ SINT32 CALocalProxy::loop()
 														unsigned char buff[DATA_SIZE];
 														int size=DATA_SIZE-16;
 														//tmpCon->pCipher->generateEncryptionKey(); //generate Key
-														for(int c=0;c<chainlen;c++)
+														for(int c=0;c<m_chainlen;c++)
 															{
 																getRandom(buff,16);
 																buff[0]&=0x7F; // Hack for RSA to ensure m < n !!!!!
 																tmpCon->pCiphers[c].setKeyAES(buff);
 																memcpy(buff+KEY_SIZE,pMixPacket->data,size);
-																arRSA[c].encrypt(buff,buff);
+																m_arRSA[c].encrypt(buff,buff);
 																tmpCon->pCiphers[c].encryptAES(buff+RSA_SIZE,buff+RSA_SIZE,DATA_SIZE-RSA_SIZE);
 																memcpy(pMixPacket->data,buff,DATA_SIZE);
 																size-=KEY_SIZE;
@@ -295,11 +310,11 @@ SINT32 CALocalProxy::loop()
 													}
 												else //sonst
 													{
-														for(int c=0;c<chainlen;c++)
+														for(int c=0;c<m_chainlen;c++)
 															tmpCon->pCiphers[c].encryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 														pMixPacket->flags=CHANNEL_DATA;
 													}
-												if(muxOut.send(pMixPacket)==SOCKET_ERROR)
+												if(m_muxOut.send(pMixPacket)==SOCKET_ERROR)
 													{
 														CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Exiting!\n");									
 														ret=E_UNKNOWN;
@@ -331,11 +346,64 @@ MIX_CONNECTION_ERROR:
 
 SINT32 CALocalProxy::clean()
 	{
-		socketIn.close();
-		socketSOCKSIn.close();
-		muxOut.close();
-		if(arRSA!=NULL)
-			delete[] arRSA;
-		arRSA=NULL;
+		m_socketIn.close();
+		m_socketSOCKSIn.close();
+		m_muxOut.close();
+		if(m_arRSA!=NULL)
+			delete[] m_arRSA;
+		m_arRSA=NULL;
 		return E_SUCCESS;
 	}
+
+SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
+	{
+		//Parsing KeyInfo received from Mix n+1
+		MemBufInputSource oInput(buff,len,"localoproxy");
+		DOMParser oParser;
+		oParser.parse(oInput);		
+		DOM_Document doc=oParser.getDocument();
+		if(doc.isNull())
+			{
+				CAMsg::printMsg(LOG_INFO,"Error parsing Key Info from Mix!\n");
+				return E_UNKNOWN;
+			}
+
+		DOM_Element root=doc.getDocumentElement();
+		DOM_Element elemMixes;
+		getDOMChildByName(root,(UINT8*)"Mixes",elemMixes,false);
+		int chainlen=-1;
+		if(elemMixes==NULL||getDOMElementAttribute(elemMixes,"count",&chainlen)!=E_SUCCESS)
+			return E_UNKNOWN;
+		m_chainlen=(UINT32)chainlen;
+		UINT32 i=0;
+		m_arRSA=new CAASymCipher[m_chainlen];
+		DOM_Node child=elemMixes.getFirstChild();
+		while(child!=NULL&&chainlen>0)
+			{
+				if(child.getNodeName().equals("Mix"))
+					{
+						if(m_arRSA[i++].setPublicKeyAsDOMNode(child.getFirstChild())!=E_SUCCESS)
+							return E_UNKNOWN;						
+						chainlen--;
+					}
+				child=child.getNextSibling();
+			}
+		if(chainlen!=0)
+			return E_UNKNOWN;
+		//Now sending SymKeys....
+		MIXPACKET oPacket;
+		oPacket.flags=0;
+		oPacket.channel=0;
+		UINT8 keys[32];
+		getRandom(keys,32);
+		m_muxOut.setReceiveKey(keys,16);
+		m_muxOut.setSendKey(keys+16,16);
+		getRandom(oPacket.data,DATA_SIZE);
+		memcpy(oPacket.data,"KEYPACKET",9);
+		memcpy(oPacket.data+9,keys,32);
+		m_arRSA[0].encrypt(oPacket.data,oPacket.data);
+		m_muxOut.send(&oPacket);
+		m_muxOut.setCrypt(true);
+		return E_SUCCESS;
+	}
+

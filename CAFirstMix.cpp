@@ -190,14 +190,23 @@ SINT32 CAFirstMix::init()
 THREAD_RETURN loopSendToMix(void* param)
 	{
 		CAQueue* pQueue=((CAFirstMix*)param)->m_pQueueSendToMix;
-		CASocket* pSocket=(CASocket *)(*((CAFirstMix*)param)->m_pMuxOut);
+//		CASocket* pSocket=(CASocket *)(*((CAFirstMix*)param)->m_pMuxOut);
+		CAMuxSocket* pMuxSocket=((CAFirstMix*)param)->m_pMuxOut;
+		
 		UINT8* buff=new UINT8[0xFFFF];
 		UINT32 len;
-		for(;;)
+/*		for(;;)
 			{
 				len=0xFFFF;
 				pQueue->getOrWait(buff,&len);
 				if(pSocket->sendFully(buff,len)!=E_SUCCESS)
+					break;
+			}*/
+		for(;;)
+			{
+				len=MIXPACKET_SIZE;
+				pQueue->getOrWait(buff,&len);
+				if(pMuxSocket->send((MIXPACKET*)buff)!=E_SUCCESS)
 					break;
 			}
 		delete []buff;
@@ -583,8 +592,8 @@ SINT32 CAFirstMix::loop()
 														getRandom(pMixPacket->data,DATA_SIZE);
 														pMixPacket->flags=CHANNEL_CLOSE;
 														pMixPacket->channel=pEntry->channelOut;
-														m_pMuxOut->send(pMixPacket,tmpBuff);
-														m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
+														//m_pMuxOut->send(pMixPacket,tmpBuff);
+														m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE);
 														delete pEntry->pCipher;
 														pEntry=m_pChannelList->getNextChannel(pEntry);
 													}
@@ -640,8 +649,8 @@ SINT32 CAFirstMix::loop()
 															{
 																pMixPacket->channel=pEntry->channelOut;
 																getRandom(pMixPacket->data,DATA_SIZE);
-																m_pMuxOut->send(pMixPacket,tmpBuff);
-																m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
+																//m_pMuxOut->send(pMixPacket,tmpBuff);
+																m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE);
 																#ifdef LOG_CHANNEL
 																	//pEntry->packetsInFromUser++;
 																	getcurrentTimeMillis(current_time);
@@ -669,8 +678,8 @@ SINT32 CAFirstMix::loop()
 																pMixPacket->channel=pEntry->channelOut;
 																pCipher=pEntry->pCipher;
 																pCipher->decryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
-																m_pMuxOut->send(pMixPacket,tmpBuff);            // prepare packet for sending (apply symmetric cypher to first block)
-																m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE); // queue the packet for sending to the next mix.
+																//m_pMuxOut->send(pMixPacket,tmpBuff);            // prepare packet for sending (apply symmetric cypher to first block)
+																m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE); // queue the packet for sending to the next mix.
 																incMixedPackets();
 																#ifdef LOG_CHANNEL
 																	pEntry->packetsInFromUser++;
@@ -698,8 +707,8 @@ SINT32 CAFirstMix::loop()
 																		#ifdef LOG_CHANNEL
 																			m_pChannelList->get(pMuxSocket,tmpC)->packetsInFromUser++;
 																		#endif
-																		m_pMuxOut->send(pMixPacket,tmpBuff);
-																		m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
+																		//m_pMuxOut->send(pMixPacket,tmpBuff);
+																		m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE);
 																		incMixedPackets();
 																		#ifdef _DEBUG
 																			CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",pMixPacket->channel);
@@ -720,13 +729,19 @@ SINT32 CAFirstMix::loop()
 
 // if not _DEBUG or NO_LOOP_SEND_TO_MIX defined
 #if defined (_DEBUG) || defined(NO_LOOP_SEND_TO_MIX)
-		SINT32 sendlen=0x0FFFF;
+	/*	SINT32 sendlen=0x0FFFF;
 		if(osocketgroupMixOut.select(true,0)==1&&m_pQueueSendToMix->peek(sendbuff,(UINT32*)&sendlen)==E_SUCCESS)
 			{
 				bAktiv=true;
 				sendlen=((CASocket*)m_pMuxOut)->send(sendbuff,sendlen);
 				if(sendlen>0)
 					m_pQueueSendToMix->remove((UINT32*)&sendlen);
+			}*/
+		SINT32 sendlen=MIXPACKET_SIZE;
+		if(osocketgroupMixOut.select(true,0)==1&&m_pQueueSendToMix->get(sendbuff,(UINT32*)&sendlen)==E_SUCCESS)
+			{
+				bAktiv=true;
+				m_pMuxOut->send((MIXPACKET*)sendbuff);
 			}
 #endif
 //Step 4
@@ -807,8 +822,8 @@ SINT32 CAFirstMix::loop()
 												#ifdef _DEBUG
 													CAMsg::printMsg(LOG_INFO,"Sending suspend for channel: %u\n",pMixPacket->channel);
 												#endif												
-												m_pMuxOut->send(pMixPacket,tmpBuff);
-												m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
+												//m_pMuxOut->send(pMixPacket,tmpBuff);
+												m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE);
 												
 												pEntry->bIsSuspended=true;
 												pEntry->pHead->cSuspend++;
@@ -857,8 +872,8 @@ SINT32 CAFirstMix::loop()
 															{
 																pMixPacket->flags=CHANNEL_RESUME;
 																pMixPacket->channel=pEntry->channelOut;
-																m_pMuxOut->send(pMixPacket,tmpBuff);
-																m_pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
+																//m_pMuxOut->send(pMixPacket,tmpBuff);
+																m_pQueueSendToMix->add(pMixPacket,MIXPACKET_SIZE);
 																pEntry->bIsSuspended=false;	
 															}
 														
