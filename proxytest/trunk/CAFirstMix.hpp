@@ -40,10 +40,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAUtil.hpp"
 class CAInfoService;
 
-static THREAD_RETURN loopSendToMix(void*);
-static THREAD_RETURN loopAcceptUsers(void*);
-static THREAD_RETURN loopReadFromUsers(void*);
-
 class CAFirstMix:public CAMix
 	{
 		public:
@@ -97,9 +93,9 @@ class CAFirstMix:public CAMix
 				}
 					
 			
-		friend THREAD_RETURN loopSendToMix(void*);
-		friend THREAD_RETURN loopAcceptUsers(void*);
-		friend THREAD_RETURN loopReadFromUsers(void*);
+		friend THREAD_RETURN fm_loopSendToMix(void*);
+		friend THREAD_RETURN fm_loopAcceptUsers(void*);
+		friend THREAD_RETURN fm_loopReadFromUsers(void*);
 
 		private:
 			SINT32 incUsers()

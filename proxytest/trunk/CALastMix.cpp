@@ -282,7 +282,7 @@ SINT32 CALastMix::reconfigure()
 		return E_SUCCESS;
 	}
 
-static THREAD_RETURN loopLog(void* param)
+static THREAD_RETURN lm_loopLog(void* param)
 	{
 		CALastMix* pLastMix=(CALastMix*)param;
 		pLastMix->m_bRunLog=true;
@@ -390,7 +390,7 @@ SINT32 CALastMix::loop()
 		set64((UINT64&)m_logUploadedBytes,(UINT32)0);
 		set64((UINT64&)m_logDownloadedBytes,(UINT32)0);
 		CAThread oLogThread;
-		oLogThread.setMainLoop(loopLog);
+		oLogThread.setMainLoop(lm_loopLog);
 		oLogThread.start(this);
 
 		#ifdef LOG_CHANNEL

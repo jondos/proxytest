@@ -404,7 +404,7 @@ SINT32 CAMiddleMix::init()
 	}
 
 	
-static THREAD_RETURN loopDownStream(void *p)
+static THREAD_RETURN mm_loopDownStream(void *p)
 	{
 		CAMiddleMix* pMix=(CAMiddleMix*)p;
 		HCHANNEL channelIn;
@@ -521,7 +521,7 @@ SINT32 CAMiddleMix::loop()
 			CAPool* pPool=new CAPool(MIX_POOL_SIZE);
 		#endif
 		CAThread oThread;
-		oThread.setMainLoop(loopDownStream);
+		oThread.setMainLoop(mm_loopDownStream);
 		oThread.start(this);
 		for(;;)
 			{

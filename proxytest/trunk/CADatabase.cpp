@@ -108,7 +108,7 @@ SINT32 CADatabase::insert(UINT8 key[16])
 
 SINT32 CADatabase::start()
 	{
-		m_oThread.setMainLoop(loopMaintenance);
+		m_oThread.setMainLoop(db_loopMaintenance);
 		m_Clock=(time(NULL)-m_refTime)/SECONDS_PER_CLOCK;
 		return m_oThread.start(this);
 	}
@@ -119,7 +119,7 @@ SINT32 CADatabase::stop()
 		return m_oThread.join();
 	}
 
-static THREAD_RETURN loopMaintenance(void *param)
+static THREAD_RETURN db_loopMaintenance(void *param)
 	{
 		CADatabase* pDatabase=(CADatabase*)param;
 		pDatabase->m_bRun=true;

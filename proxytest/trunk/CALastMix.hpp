@@ -40,9 +40,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include "tre/regex.h"
 #endif
 
-static THREAD_RETURN lm_loopSendToMix(void* param);
-static THREAD_RETURN loopLog(void*);
-
 class CALastMix:public CAMix
 
 	{
@@ -76,7 +73,7 @@ class CALastMix:public CAMix
 
 		private:
 			friend THREAD_RETURN lm_loopSendToMix(void* param);
-			friend THREAD_RETURN loopLog(void*);
+			friend THREAD_RETURN lm_loopLog(void*);
 			volatile bool m_bRunLog;
 			volatile UINT32 m_logUploadedPackets;
 			volatile UINT64 m_logUploadedBytes;

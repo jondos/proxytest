@@ -188,7 +188,7 @@ SINT32 CAFirstMix::init()
 1. Close connection to next mix
 2. put a byte in the Mix-Output-Queue
 */
-static THREAD_RETURN loopSendToMix(void* param)
+static THREAD_RETURN fm_loopSendToMix(void* param)
 	{
 		CAQueue* pQueue=((CAFirstMix*)param)->m_pQueueSendToMix;
 //		CASocket* pSocket=(CASocket *)(*((CAFirstMix*)param)->m_pMuxOut);
@@ -244,7 +244,7 @@ static THREAD_RETURN loopSendToMix(void* param)
 1. Set m_bRestart in firstMix to true
 2. close all accept sockets
 */
-static THREAD_RETURN loopAcceptUsers(void* param)
+static THREAD_RETURN fm_loopAcceptUsers(void* param)
 	{
 		CAFirstMix* pFirstMix=(CAFirstMix*)param;
 		CASocket* socketsIn=pFirstMix->m_arrSocketsIn;
@@ -511,7 +511,7 @@ SINT32 CAFirstMix::loop()
 
 		//Starting thread for Step 4
 		CAThread threadSendToMix;
-		threadSendToMix.setMainLoop(loopSendToMix);
+		threadSendToMix.setMainLoop(fm_loopSendToMix);
 		threadSendToMix.start(this);
 
 		for(;;)	                                                          /* the main mix loop as long as there are things that are not handled by threads. */
