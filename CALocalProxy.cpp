@@ -31,6 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketGroup.hpp"
 #include "CAMsg.hpp"
 #include "CACmdLnOptions.hpp"
+#include "CAUtil.hpp"
 #include "CASocketAddrINet.hpp"
 
 extern CACmdLnOptions options;
@@ -252,7 +253,7 @@ SINT32 CALocalProxy::loop()
 														//tmpCon->pCipher->generateEncryptionKey(); //generate Key
 														for(int c=0;c<chainlen;c++)
 															{
-																RAND_bytes(buff,16);
+																getRandom(buff,16);
 																buff[0]&=0x7F; // Hack for RSA to ensure m < n !!!!!
 																tmpCon->pCipher[c].setKeyAES(buff);
 																memcpy(buff+KEY_SIZE,oMixPacket.data,size);

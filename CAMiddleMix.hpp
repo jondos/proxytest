@@ -46,9 +46,7 @@ class CAMiddleMix:public CAMix
 			CAMuxSocket m_MuxOut;
 			CAASymCipher m_RSA;
 			CASocketList m_oSocketList;
-#ifdef _ASYNC
 			friend THREAD_RETURN loopDownStream(void *p);
-#endif
 	};
 
 #endif

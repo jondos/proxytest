@@ -35,6 +35,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASignature.hpp"
 //#include "CAMuxChannelList.hpp"
 #include "CAIPList.hpp" 
+#include "CAQueue.hpp"
+
+THREAD_RETURN loopSendToMix(void *param);
+
 class CAFirstMix:public CAMix
 	{
 		public:
@@ -65,8 +69,10 @@ class CAFirstMix:public CAMix
 						}
 					return E_UNKNOWN;
 				}
+		friend THREAD_RETURN loopSendToMix(void*);
 		private:	
 			CAIPList* m_pIPList;
+			CAQueue* m_pQueueSendToMix;
 	};
 
 #endif

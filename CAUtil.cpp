@@ -113,3 +113,21 @@ SINT32 getcurrentTimeMillis(BIGNUM* bnTime)
 			return E_SUCCESS;
 	  #endif
 	}
+
+SINT32 getRandom(UINT32* val)
+	{
+		ASSERT(val!=NULL,"VAL should be not NULL");
+		RAND_pseudo_bytes((UINT8*)val,4);
+		RAND_bytes((UINT8*)val,4);
+		return E_SUCCESS;
+	}
+
+SINT32 getRandom(UINT8* buff,UINT32 len)
+	{
+		ASSERT(buff!=NULL,"BUFF should be not NULL")
+		RAND_pseudo_bytes(buff,len);
+		RAND_bytes(buff,len);		
+		return E_SUCCESS;
+	}
+
+

@@ -133,12 +133,8 @@ SINT32 CARoundTripTime::start()
 		if(m_oSocket.bind(m_localPort)!=E_SUCCESS)
 			return E_UNKNOWN;
 		m_bRun=true;
-		#ifdef _WIN32
-		 _beginthread(RoundTripTimeLoop,0,this);
-		#else
-		 pthread_t othread;
-		 pthread_create(&othread,NULL,RoundTripTimeLoop,this);
-		#endif
+		pthread_t othread;
+		pthread_create(&othread,NULL,RoundTripTimeLoop,this);
 		return E_SUCCESS;
 	}
 
