@@ -757,7 +757,7 @@ THREAD_RETURN fmIO(void *v)
 														delete otmpEntry.pSocketList;
 													}
 												nUser--;
-												oInfoService.setLevel(nUser,rand()%100,rand()%100);
+												oInfoService.setLevel(nUser,0,0);
 											}
 										else
 											{

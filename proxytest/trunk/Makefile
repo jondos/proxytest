@@ -46,30 +46,18 @@ all_sgi: $(OBJS) httptunnel.a popt.a xml.a
 debug: $(OBJS) popt.a httptunnel.a xml.a
 	$(CC) -o proxytest $(OBJS) $(LIBS)
 
-popt.a: ./popt/popt.c ./popt/poptparse.c ./popt/popthelp.c
-	$(CC) -c  $(INCLUDE) $(DEBUG) -DHAVE_STRERROR ./popt/popt.c -o ./popt/popt.o
-	$(CC) -c  $(INCLUDE) $(DEBUG) -DHAVE_STRERROR ./popt/poptparse.c -o ./popt/poptparse.o
-	$(CC) -c  $(INCLUDE) $(DEBUG) -DHAVE_STRERROR ./popt/popthelp.c -o ./popt/popthelp.o
-	ar -rcs ./popt/popt.a ./popt/popt.o ./popt/poptparse.o ./popt/popthelp.o 
+popt.a:
+	cd popt;$(MAKE)
 
-httptunnel.a: ./httptunnel/common.cpp  
-	$(CC) -c  $(INCLUDE) $(DEBUG) ./httptunnel/common.cpp -o ./httptunnel/common.o
-	$(CC) -c  $(INCLUDE) $(DEBUG) ./httptunnel/http.cpp -o ./httptunnel/http.o
-	$(CC) -c  $(INCLUDE) $(DEBUG) ./httptunnel/tunnel.cpp -o ./httptunnel/tunnel.o
-	ar -rcs ./httptunnel/httptunnel.a ./httptunnel/*.o 
+httptunnel.a:
+	cd httptunnel;$(MAKE);
 
-xml.a: ./xml/xmloutput.cpp  
-	$(CC) -c  $(INCLUDE) $(DEBUG) ./xml/xmloutput.cpp -o ./xml/xmloutput.o
-	$(CC) -c  $(INCLUDE) $(DEBUG) ./xml/xmlinput.cpp -o ./xml/xmlinput.o
-	$(CC) -c  $(INCLUDE) $(DEBUG) ./xml/xmlinput_c.c -o ./xml/xmlinput_c.o
-	ar -rcs ./xml/xml.a ./xml/*.o 
+xml.a: 
+	cd xml;$(MAKE);
 
 clean:
-	- rm $(OBJS)
-	- rm ./popt/*.o
-	- rm ./popt/*.a
-	- rm ./httptunnel/*.o
-	- rm ./httptunnel/*.a
-	- rm ./xml/*.o
-	- rm ./xml/*.a
-	- rm proxytest
+	rm -f $(OBJS)
+	cd popt; $(MAKE) clean;
+	cd httptunnel;$(MAKE) clean;
+	cd xml;$(MAKE) clean;
+	rm -f proxytest
