@@ -337,7 +337,7 @@ SINT32 CASocket::setSendLowWat(UINT32 r)
 SINT32 CASocket::getSendLowWat()
 	{
 		int val;
-		int size=sizeof(val);
+		socklen_t size=sizeof(val);
 		if(getsockopt(m_Socket,SOL_SOCKET,SO_SNDLOWAT,(char*)&val,&size)==SOCKET_ERROR)
 			return E_UNKNOWN;
 		else
@@ -353,7 +353,7 @@ SINT32 CASocket::setRecvBuff(UINT32 r)
 SINT32 CASocket::getRecvBuff()
 	{
 		int val;
-		int size=sizeof(val);
+		socklen_t size=sizeof(val);
 		if(getsockopt(m_Socket,SOL_SOCKET,SO_RCVBUF,(char*)&val,&size)==SOCKET_ERROR)
 			return E_UNKNOWN;
 		else
@@ -369,7 +369,7 @@ SINT32 CASocket::setSendBuff(UINT32 r)
 SINT32 CASocket::getSendBuff()
 	{
 		int val;
-		int size=sizeof(val);
+		socklen_t size=sizeof(val);
 		if(getsockopt(m_Socket,SOL_SOCKET,SO_SNDBUF,(char*)&val,&size)==SOCKET_ERROR)
 			return E_UNKNOWN;
 		else
