@@ -758,7 +758,7 @@ SINT32 CAFirstMix::loop()
 				while(countRead>0&&osocketgroupMixOut.select(false,0)==1)
 					{
 						countRead--;
-						ret=muxOut.receive(&oMixPacket);
+						ret=muxOut.receive(&oMixPacket,0);
 						if(ret==SOCKET_ERROR)
 							{
 								CAMsg::printMsg(LOG_CRIT,"Mux-Out-Channel Receiving Data Error - Exiting!\n");
