@@ -222,7 +222,19 @@ SINT32 CAMiddleMix::proccessKeyExchange()
 		setDOMElementValue(elemNonce,tmpBuff);
 		mixNode.appendChild(elemNonce);
 		
-		m_pSignature->signXML(mixNode);
+		CACertificate* ownCert=options.getOwnCertificate();
+		if(ownCert==NULL)
+			{
+				CAMsg::printMsg(LOG_DEBUG,"Own Test Cert is NULL -- so it could not be inserted into signed KeyInfo send to users...\n");
+			}	
+		CACertStore* tmpCertStore=new CACertStore();
+		tmpCertStore->add(ownCert);
+		if(m_pSignature->signXML(mixNode,tmpCertStore)!=E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_DEBUG,"Could not sign KeyInfo send to users...\n");
+			}
+		delete ownCert;
+		delete tmpCertStore;
 		
 		root.insertBefore(mixNode,root.getFirstChild());
 

@@ -180,7 +180,19 @@ SINT32 CALastMix::processKeyExchange()
 		setDOMElementValue(elemNonce,tmpBuff);
 		elemMix.appendChild(elemNonce);
 		
-		m_pSignature->signXML(elemMix);
+		CACertificate* ownCert=options.getOwnCertificate();
+		if(ownCert==NULL)
+			{
+				CAMsg::printMsg(LOG_DEBUG,"Own Test Cert is NULL -- so it could not be inserted into signed KeyInfo send to users...\n");
+			}	
+		CACertStore* tmpCertStore=new CACertStore();
+		tmpCertStore->add(ownCert);
+		if(m_pSignature->signXML(elemMix,tmpCertStore)!=E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_DEBUG,"Could not sign KeyInfo send to users...\n");
+			}
+		delete ownCert;
+		delete tmpCertStore;
 		
 		UINT32 len=0;
 		UINT8* messageBuff=DOM_Output::dumpToMem(doc,&len);
