@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.03.58"
+#define MIX_VERSION "00.03.59"
 
 #if defined(DEBUG)|| defined(_DEBUG)
 	#undef DEBUG
@@ -79,7 +79,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT 30000 //Timout in waiting for login information to receive from JAP (10 seconds)
 #define LAST_MIX_TO_PROXY_CONNECT_TIMEOUT 2000 //Connection timeout for last mix to proxy connections 2 Seconds...
 #define LAST_MIX_TO_PROXY_SEND_TIMEOUT (UINT32)5000 //5 Seconds...
-
+#define MIX_TO_INFOSERVICE_TIMEOUT 10000 //How long to wait than communicating with the InfoService? (ms)
 #define NUM_LOGIN_WORKER_TRHEADS 50 //How many working threads for login ??
 #define MAX_LOGIN_QUEUE 500 //how many waiting entries in the login queue ??
 

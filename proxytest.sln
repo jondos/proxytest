@@ -3,16 +3,40 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "proxytest-lib", "proxytest-
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "proxytest", "proxytest.vcproj", "{150377B0-CA8F-4031-A0B8-45A3001F4F81}"
+	ProjectSection(ProjectDependencies) = postProject
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81} = {150377B0-CA8F-4031-A0B8-45A3001F4F81}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
+		Mit Xerces 2.0.0 = Mit Xerces 2.0.0
+		Mit Xerces 2.3 dev = Mit Xerces 2.3 dev
 		Release = Release
+		VTune = VTune
 	EndGlobalSection
 	GlobalSection(ProjectConfiguration) = postSolution
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Debug.ActiveCfg = Debug|Win32
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Debug.Build.0 = Debug|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Mit Xerces 2.0.0.ActiveCfg = Mit Xerces 2.0.0|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Mit Xerces 2.0.0.Build.0 = Mit Xerces 2.0.0|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Mit Xerces 2.3 dev.ActiveCfg = Mit Xerces 2.3 dev|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Mit Xerces 2.3 dev.Build.0 = Mit Xerces 2.3 dev|Win32
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Release.ActiveCfg = Release|Win32
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Release.Build.0 = Release|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.VTune.ActiveCfg = VTune|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.VTune.Build.0 = VTune|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Debug.ActiveCfg = Debug|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Debug.Build.0 = Debug|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Mit Xerces 2.0.0.ActiveCfg = Mit Xerces 2.0.0|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Mit Xerces 2.0.0.Build.0 = Mit Xerces 2.0.0|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Mit Xerces 2.3 dev.ActiveCfg = Mit Xerces 2.3 dev|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Mit Xerces 2.3 dev.Build.0 = Mit Xerces 2.3 dev|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Release.ActiveCfg = Release|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Release.Build.0 = Release|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.VTune.ActiveCfg = VTune|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.VTune.Build.0 = VTune|Win32
 	EndGlobalSection
 	GlobalSection(SolutionItems) = postSolution
 		documentation\docMixConfig.template = documentation\docMixConfig.template
