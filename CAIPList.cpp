@@ -29,10 +29,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAIPList.hpp"
 #include "CAMsg.hpp"
 
-/**Constructs a empty CAIPList. The default number of allowed insertions is used*/ 
+/**Constructs a empty CAIPList. The default number #MAXIP_CONNECTIONS of allowed insertions is used*/ 
 CAIPList::CAIPList()
 	{	
-		CAIPList(MAX_IP_CONNECTIONS);
+		m_HashTable=new PIPLIST[0x10000];
+		memset(m_HashTable,0,0x10000*sizeof(PIPLIST));
+		m_allowedConnections=MAX_IP_CONNECTIONS;
 	}
 
 /**Constructs a empty CAIPList, there allowedConnections insertions 
