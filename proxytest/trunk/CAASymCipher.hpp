@@ -6,6 +6,9 @@ class CAASymCipher
 			~CAASymCipher();
 			int decrypt(unsigned char* from,unsigned char* to);
 			int encrypt(unsigned char* from,unsigned char* to);
+			int generateKeyPair(int size);
+			int getPublicKey(unsigned char* buff,int *len);
+			int getPublicKeySize();
 		private:
 			RSA* rsa;
 	};

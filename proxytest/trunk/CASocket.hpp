@@ -33,5 +33,7 @@ class CASocket
 				CRITICAL_SECTION csClose;
 			#endif
 			int closeMode;
+			// temporary hack...
+			int localPort;
 	};
 #endif

@@ -232,7 +232,7 @@ SOURCE=.\httptunnel\tunnel.h
 # End Group
 # Begin Source File
 
-SOURCE=.\CAAsymCipher.cpp
+SOURCE=.\CAASymCipher.cpp
 # End Source File
 # Begin Source File
 
@@ -249,6 +249,10 @@ SOURCE=.\CAMuxChannelList.cpp
 # Begin Source File
 
 SOURCE=.\CAMuxSocket.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CASignature.cpp
 # End Source File
 # Begin Source File
 
@@ -302,6 +306,10 @@ SOURCE=.\CAMuxChannelList.hpp
 # Begin Source File
 
 SOURCE=.\CAMuxSocket.hpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CASignature.hpp
 # End Source File
 # Begin Source File
 
