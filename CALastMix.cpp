@@ -443,134 +443,132 @@ SINT32 CALastMix::loop()
 				bAktiv=false;
 //Step one.. reading from previous Mix
 // reading maximal number of current channels packets
-				UINT32 channels=oSocketList.getSize()+1;
-				for(UINT32 k=0;k<channels;k++)
+				countRead=osocketgroupMixIn.select(false,0);
+				if(countRead==1)
 					{
-						countRead=osocketgroupMixIn.select(false,0);
-						if(countRead!=1)
-							break;
-						else
+						bAktiv=true;
+						UINT32 channels=oSocketList.getSize()+1;
+						for(UINT32 k=0;k<channels;k++)
 							{
-								bAktiv=true;
 								ret=muxIn.receive(pMixPacket,0);
 								if(ret==SOCKET_ERROR)
 									{
 										CAMsg::printMsg(LOG_CRIT,"Channel to previous mix closed -- Restarting!\n");
 										goto ERR;
 									}
-								if(ret==MIXPACKET_SIZE) //one packet received
+								if(ret!=MIXPACKET_SIZE)
+									break;
+								//else one packet received
+								if(!oSocketList.get(pMixPacket->channel,&oConnection))
 									{
-										if(!oSocketList.get(pMixPacket->channel,&oConnection))
+										if(pMixPacket->flags==CHANNEL_OPEN)
 											{
-												if(pMixPacket->flags==CHANNEL_OPEN)
+												#ifdef _DEBUG
+														CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
+												#endif
+				
+												CASymCipher* newCipher=new CASymCipher();
+												mRSA.decrypt(pMixPacket->data,rsaBuff);
+												newCipher->setKeyAES(rsaBuff);
+												newCipher->decryptAES(pMixPacket->data+RSA_SIZE,
+																							pMixPacket->data+RSA_SIZE-KEY_SIZE,
+																							DATA_SIZE-RSA_SIZE);
+												memcpy(pMixPacket->data,rsaBuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
+														
+												CASocket* tmpSocket=new CASocket;										
+												int ret;
+												if(pMixPacket->payload.type==MIX_PAYLOAD_SOCKS)
+													ret=tmpSocket->connect(maddrSocks,_CONNECT_TIMEOUT); 
+												else
 													{
-														#ifdef _DEBUG
-																CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
-														#endif
-						
-														CASymCipher* newCipher=new CASymCipher();
-														mRSA.decrypt(pMixPacket->data,rsaBuff);
-														newCipher->setKeyAES(rsaBuff);
-														newCipher->decryptAES(pMixPacket->data+RSA_SIZE,
-																									pMixPacket->data+RSA_SIZE-KEY_SIZE,
-																									DATA_SIZE-RSA_SIZE);
-														memcpy(pMixPacket->data,rsaBuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
-																
-														CASocket* tmpSocket=new CASocket;										
-														int ret;
-														if(pMixPacket->payload.type==MIX_PAYLOAD_SOCKS)
-															ret=tmpSocket->connect(maddrSocks,_CONNECT_TIMEOUT); 
-														else
+														UINT32 count=0;
+														do
 															{
-																UINT32 count=0;
-																do
-																	{
-																		tmpSocket->close();
-																		tmpSocket->create();
-																		tmpSocket->setRecvBuff(50000);
-																		tmpSocket->setSendBuff(5000);
-																		ret=tmpSocket->connect(*m_oCacheLB.get(),_CONNECT_TIMEOUT);
-																		count++;
-																	}
-																while(ret!=E_SUCCESS&&count<m_oCacheLB.getElementCount());
-															}	
-														if(ret!=E_SUCCESS)
+																tmpSocket->close();
+																tmpSocket->create();
+																tmpSocket->setRecvBuff(50000);
+																tmpSocket->setSendBuff(5000);
+																ret=tmpSocket->connect(*m_oCacheLB.get(),_CONNECT_TIMEOUT);
+																count++;
+															}
+														while(ret!=E_SUCCESS&&count<m_oCacheLB.getElementCount());
+													}	
+												if(ret!=E_SUCCESS)
+														{
+	    												#ifdef _DEBUG
+																CAMsg::printMsg(LOG_DEBUG,"Cannot connect to Squid!\n");
+															#endif
+															delete tmpSocket;
+															delete newCipher;
+															muxIn.close(pMixPacket->channel,tmpBuff);
+															oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);			
+														}
+												else
+														{    
+															UINT16 payLen=ntohs(pMixPacket->payload.len);
+															if(payLen>PAYLOAD_SIZE||tmpSocket->sendTimeOut(pMixPacket->payload.data,payLen,_SEND_TIMEOUT)==SOCKET_ERROR)
 																{
-	    														#ifdef _DEBUG
-																		CAMsg::printMsg(LOG_DEBUG,"Cannot connect to Squid!\n");
+																	#ifdef _DEBUG
+																		CAMsg::printMsg(LOG_DEBUG,"Error sending Data to Squid!");
 																	#endif
+																	tmpSocket->close();
 																	delete tmpSocket;
 																	delete newCipher;
 																	muxIn.close(pMixPacket->channel,tmpBuff);
 																	oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);			
 																}
-														else
-																{    
-																	UINT16 payLen=ntohs(pMixPacket->payload.len);
-																	if(payLen>PAYLOAD_SIZE||tmpSocket->sendTimeOut(pMixPacket->payload.data,payLen,_SEND_TIMEOUT)==SOCKET_ERROR)
-																		{
-																			#ifdef _DEBUG
-																				CAMsg::printMsg(LOG_DEBUG,"Error sending Data to Squid!");
-																			#endif
-																			tmpSocket->close();
-																			delete tmpSocket;
-																			delete newCipher;
-																			muxIn.close(pMixPacket->channel,tmpBuff);
-																			oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);			
-																		}
-																	else
-																		{
-																			tmpSocket->setNonBlocking(true);
-																			oSocketList.add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue());
-																			osocketgroupCacheRead.add(*tmpSocket);
-																		}
+															else
+																{
+																	tmpSocket->setNonBlocking(true);
+																	oSocketList.add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue());
+																	osocketgroupCacheRead.add(*tmpSocket);
 																}
-													}
+														}
+											}
+									}
+								else
+									{
+										if(pMixPacket->flags==CHANNEL_CLOSE)
+											{
+												osocketgroupCacheRead.remove(*(oConnection.pSocket));
+												osocketgroupCacheWrite.remove(*(oConnection.pSocket));
+												oConnection.pSocket->close();
+												oSocketList.remove(pMixPacket->channel);
+												delete oConnection.pSocket;
+												delete oConnection.pCipher;
+												delete oConnection.pSendQueue;										
+											}
+										else if(pMixPacket->flags==CHANNEL_SUSPEND)
+											{
+												osocketgroupCacheRead.remove(*(oConnection.pSocket));
+											}
+										else if(pMixPacket->flags==CHANNEL_RESUME)
+											{
+												osocketgroupCacheRead.add(*(oConnection.pSocket));
 											}
 										else
 											{
-												if(pMixPacket->flags==CHANNEL_CLOSE)
+												oConnection.pCipher->decryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+												ret=ntohs(pMixPacket->payload.len);
+												if(ret>=0&&ret<=PAYLOAD_SIZE)
+													ret=oConnection.pSendQueue->add(pMixPacket->payload.data,ret);
+												else
+													ret=SOCKET_ERROR;
+												if(ret==SOCKET_ERROR)
 													{
 														osocketgroupCacheRead.remove(*(oConnection.pSocket));
 														osocketgroupCacheWrite.remove(*(oConnection.pSocket));
 														oConnection.pSocket->close();
-														oSocketList.remove(pMixPacket->channel);
 														delete oConnection.pSocket;
 														delete oConnection.pCipher;
-														delete oConnection.pSendQueue;										
-													}
-												else if(pMixPacket->flags==CHANNEL_SUSPEND)
-													{
-														osocketgroupCacheRead.remove(*(oConnection.pSocket));
-													}
-												else if(pMixPacket->flags==CHANNEL_RESUME)
-													{
-														osocketgroupCacheRead.add(*(oConnection.pSocket));
+														delete oConnection.pSendQueue;
+														oSocketList.remove(pMixPacket->channel);
+														muxIn.close(pMixPacket->channel,tmpBuff);
+														oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);			
 													}
 												else
 													{
-														oConnection.pCipher->decryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
-														ret=ntohs(pMixPacket->payload.len);
-														if(ret>=0&&ret<=PAYLOAD_SIZE)
-															ret=oConnection.pSendQueue->add(pMixPacket->payload.data,ret);
-														else
-															ret=SOCKET_ERROR;
-														if(ret==SOCKET_ERROR)
-															{
-																osocketgroupCacheRead.remove(*(oConnection.pSocket));
-																osocketgroupCacheWrite.remove(*(oConnection.pSocket));
-																oConnection.pSocket->close();
-																delete oConnection.pSocket;
-																delete oConnection.pCipher;
-																delete oConnection.pSendQueue;
-																oSocketList.remove(pMixPacket->channel);
-																muxIn.close(pMixPacket->channel,tmpBuff);
-																oqueueMixIn.add(tmpBuff,MIXPACKET_SIZE);			
-															}
-														else
-															{
-																osocketgroupCacheWrite.add(*(oConnection.pSocket));
-															}
+														osocketgroupCacheWrite.add(*(oConnection.pSocket));
 													}
 											}
 									}
@@ -669,22 +667,25 @@ SINT32 CALastMix::loop()
 //end Step 3
 
 //Step 4 Writing to previous Mix
-				countRead=oSocketList.getSize()+1;
-				while(countRead>0&&!oqueueMixIn.isEmpty()&&osocketgroupMixIn.select(true,0)==1)
+				if(osocketgroupMixIn.select(true,0)==1)
 					{
-						bAktiv=true;
-						countRead--;
-						UINT32 len=MIXPACKET_SIZE;
-						oqueueMixIn.peek(tmpBuff,&len);
-						ret=((CASocket*)muxIn)->send(tmpBuff,len);
-						if(ret>0)
+						countRead=oSocketList.getSize()+1;
+						while(countRead>0&&!oqueueMixIn.isEmpty())
 							{
-								oqueueMixIn.remove((UINT32*)&ret);
+								bAktiv=true;
+								countRead--;
+								UINT32 len=MIXPACKET_SIZE;
+								oqueueMixIn.peek(tmpBuff,&len);
+								ret=((CASocket*)muxIn)->send(tmpBuff,len);
+								if(ret>0)
+									{
+										oqueueMixIn.remove((UINT32*)&ret);
+									}
+								else if(ret==E_AGAIN)
+									break;
+								else
+									goto ERR;
 							}
-						else if(ret==E_AGAIN)
-							break;
-						else
-							goto ERR;
 					}
 //end step 4
 				if(!bAktiv)
