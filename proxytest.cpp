@@ -190,6 +190,9 @@ Many different cascades could exist at the same time, but JAP can select one and
 Also a mix could only be part of one and only one cascade. If a mix is not part of a cascade, we call it a \em free mix.
 Free mixes are not useable for JAP, but could be connected to build a new cascade.
   
+Beside JAPs and Mixes we have added a third component to our system: the \em InfoService. 
+The InfoService is more or less a database which stores information about 
+the system like available MixCascades, status of Mixes etc.
 \subsection docMux Mulitplexing and Demultiplexing
 
 JAP acts as a local proxy for the browser. 
@@ -250,6 +253,8 @@ at the last mix.
 
 \section docCascadeInit Initialisation of a Cascade
 
+If a Mix startsup it reads its configuration information from a file. See \ref pageMixConfig "[MixConfig]" for more information.
+
 \image html JAPCascadeInit.gif "Figure 6: Steps during Cascade initialisation (3 Mix example)
 
 Figure 6 shows the steps which take place, than a Cascade starts. These steps are illustrated using a 3 Mix example.
@@ -279,31 +284,59 @@ key for downstream direction and the last 16 bytes are the IV for this cipher.
 with Mix 2. Mix 2 send it publick key to Mix 1 and Mix 1 generates and sends 
 a symmetric key to Mix 2.
 
-\section docMixInfoService Communication between Mix and InfoService
-
-\image html JAPMixInfoService.gif "Figure 7: Communication between Mix and InfoService"
-
-\li 1. HELO-Message send from each mix to the InfoService every 10 minutes to announce itself.  
-See \ref XMLMixHELO "[XML]" for a description of the XML struct send. 
-
-\li 2. Status-Message send from the FirstMix to the InfoService every minute to update the current
-status of the Mix cascade including Number of Users, Traffic situation etc.
-See \ref XMLMixCascadeStatus "[XML]" for a description of the XML struct send. 
-
 \section docMixJap Communication between Mix and JAP
 
-\image html JAPMixJap.gif "Figure 8: Communication between Mix and JAP"
+\image html JAPMixJap.gif "Figure 7: Communication between Mix and JAP"
 
-\li 1. JAP opens a TCP/IP connection to a FirstMix
-
-\li 2. FirstMix sends information about the cascade (including public keys of the Mixes) to the JAP.
+-# JAP opens a TCP/IP connection to a FirstMix
+-# FirstMix sends information about the cascade (including public keys of the Mixes) to the JAP.
 See \ref XMLMixKeyInfo "[XML]" for a description of the XML struct send. 
-
-\li 3. JAP sends a special MixPacket, containing only 2 symmetric keys encrypted with the
+-# JAP sends a special MixPacket, containing only 2 symmetric keys and IVs encrypted with the
 public key of the FirstMix. This keys are used for link encryption between JAP and FirstMix.
 Note: At the moment this is binary - but will use XML in the future.
+The data part of this MixPacket is as follows:
+	- the ASCII string: "KEYPACKET"
+	- 16 random bytes used as symmetric key for packets send from JAP to Mix 
+	- 16 random bytes used as IV for this symetric cipher
+	- 16 random bytes used as symetric key for packets send from Mix to JAP 
+	- 16 random bytes used as IV for this symmetric cipher
+	.
 
-\li 4. Normal MixPacket exchange according to the mix protocol.
+-# Normal MixPacket exchange according to the mix protocol.
+
+\section docInfoService Communication with the InfoService
+HTTP GET/POST-requests are used for communication with the InfoService. 
+The filename part of the URL specifies the command (action) to be executed and
+additional information is transfered as XML struct in the body of the HTTP message.
+Example:
+
+\verbatim
+POST /status HTTP/1.0
+Content-Type: text/xml
+Content-Length: 251
+
+<?xml version="1.0" encoding="utf-8" ?> 
+<MixCascadeStatus id="testmix" 
+                  mixedPackets="567899"
+                  nrOfActiveUsers="235"
+                  trafficSituation="78"
+                  LastUpdate="126940258075">
+</MixCascadeStatus>
+\endverbatim
+
+\subsection docMixInfoService Communication between Mix and InfoService
+
+\image html JAPMixInfoService.gif "Figure 8: Communication between Mix and InfoService"
+
+\li 1. HELO-Messages send from each mix to the InfoService every 10 minutes to announce itself.  
+This is a POST request and the command name is: "helo".
+See \ref XMLMixHELO "[XML]" for a description of the XML struct send. 
+
+\li 2. Status-Messages send from the FirstMix to the InfoService every minute to update the current
+status of the MixCascade including Number of Users, Traffic situation etc.
+This is a POST request and the command name is: "status".
+See \ref XMLMixCascadeStatus "[XML]" for a description of the XML struct send. 
+
 */
 
 int main(int argc, const char* argv[])
