@@ -375,8 +375,8 @@ Debug(dc::malloc.on());
 		else
 			CAMsg::printMsg(LOG_DEBUG,"CAQueue::test() passed!\n");
 
-		CALastMixChannelList::test();
-		exit(0);
+		//CALastMixChannelList::test();
+		//exit(0);
 		//Testing msSleep
 		CAMsg::printMsg(LOG_DEBUG,"Should sleep now for aprox 2 seconds....\n");
 		UINT32 start=time(NULL);
