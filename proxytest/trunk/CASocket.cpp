@@ -347,7 +347,7 @@ SINT32 CASocket::getSendSpace()
 	{
 #ifdef HAVE_TIOCOUTQ
 		UINT32 ul;
-		SINT32 sl=m_aktSendBuff;
+		SINT32 sl=m_aktSendBuffer;
 		if(sl<=0)
 			{
 				sl=getSendBuff();

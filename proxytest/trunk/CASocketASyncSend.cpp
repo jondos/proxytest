@@ -56,14 +56,13 @@ THREAD_RETURN SocketASyncSendLoop(void* p)
 						if(pASyncSend->m_oSocketGroup.isSignaled(akt->pSocket))
 							{
 								ret--;
-								UINT32 len=BUFF_SIZE;
+								SINT32 len=BUFF_SIZE;
 								SINT32 sendSpace=akt->pSocket->getSendSpace();
 								if(sendSpace>0)
 									{
-										CAMsg::printMsg(LOG_DEBUG,"Send space now: %u\n",sendSpace);
 										len=min(sendSpace,len);
 									}
-								if(akt->pQueue->getNext(buff,&len)==E_SUCCESS)
+								if(akt->pQueue->getNext(buff,(UINT32*)&len)==E_SUCCESS)
 									akt->pSocket->send(buff,len,true);
 								if(akt->bwasOverFull&&akt->pQueue->getSize()<pASyncSend->m_SendQueueLowWater)
 									{
