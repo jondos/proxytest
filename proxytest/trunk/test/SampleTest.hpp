@@ -28,6 +28,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __SAMPLETEST__
 #define __SAMPLETEST__
 
+#include "StdAfx.h"
+#include <cppunit/extensions/HelperMacros.h>
+#include <cppunit/TestFixture.h>
+
 /* As Sample is a fictive class, it can not really be imported. */
 //#include "../Sample.hpp"
 
@@ -37,10 +41,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
  */
 class SampleTest : public CppUnit::TestFixture
 {
-	public:
+	private:
 	SINT32 m_One;
 	bool m_bTwo;
 
+	public:
 	/**
 	* Method is run before each test, for example for object creation.
 	*/

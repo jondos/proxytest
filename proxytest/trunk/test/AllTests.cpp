@@ -25,11 +25,10 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
-
-#include "../StdAfx.h"
-#include "../CACmdLnOptions.hpp"
+#include "StdAfx.h"
+#include <cppunit/ui/text/TestRunner.h>
+#include "CACmdLnOptions.hpp"
 #include "AllTestsCA.hpp"
-//#include "CAFirstMixChannelListTest.hpp"
 
 #ifdef _DEBUG
 int sockets;
@@ -42,32 +41,29 @@ CACmdLnOptions options;
 * available. It prints the results to the standard output.
 */
 int main(void) {
+
 	#if defined(HAVE_CRTDBG)
-//			_CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_FILE );
-//			_CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDOUT );
-//			_CrtSetReportMode( _CRT_ERROR, _CRTDBG_MODE_FILE );
-//			_CrtSetReportFile( _CRT_ERROR, _CRTDBG_FILE_STDOUT );
-//			_CrtSetReportMode( _CRT_ASSERT, _CRTDBG_MODE_FILE );
-//			_CrtSetReportFile( _CRT_ASSERT, _CRTDBG_FILE_STDOUT );
-			WSADATA wsadata;
-			WSAStartup(0x0202,&wsadata);
+//	_CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_FILE );
+//	_CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDOUT );
+//	_CrtSetReportMode( _CRT_ERROR, _CRTDBG_MODE_FILE );
+//	_CrtSetReportFile( _CRT_ERROR, _CRTDBG_FILE_STDOUT );
+//	_CrtSetReportMode( _CRT_ASSERT, _CRTDBG_MODE_FILE );
+//	_CrtSetReportFile( _CRT_ASSERT, _CRTDBG_FILE_STDOUT );
+	WSADATA wsadata;
+	WSAStartup(0x0202,&wsadata);
 
-			UINT32 tmpDbgFlag = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
-			tmpDbgFlag |= _CRTDBG_ALLOC_MEM_DF;
-			tmpDbgFlag |=_CRTDBG_LEAK_CHECK_DF;
-			_CrtSetDbgFlag(tmpDbgFlag);
-			_CrtMemState s1, s2, s3;
-#endif
+	UINT32 tmpDbgFlag = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
+	tmpDbgFlag |= _CRTDBG_ALLOC_MEM_DF;
+	tmpDbgFlag |=_CRTDBG_LEAK_CHECK_DF;
+	_CrtSetDbgFlag(tmpDbgFlag);
+	_CrtMemState s1, s2, s3;
+	#endif
 
 
-        CppUnit::TextUi::TestRunner runner;
-		/* Add your test suites here. */
-        runner.addTest(AllTestsCA::suite());
-        runner.run();
-
-			//	CAFirstMixChannelListTest* p=new CAFirstMixChannelListTest();
-			//		p->doThreadedTest();
-			//	delete p;
-        return 0;
+	CppUnit::TextUi::TestRunner runner;
+	/* Add your test suites here. */
+    runner.addTest(AllTestsCA::suite());
+    runner.run();
+    return 0;
 }
 
