@@ -58,6 +58,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_strConfigFile=NULL;
 		m_docMixInfo=NULL;
 		m_pLogEncryptionCertificate=NULL;
+		m_bIsEncryptedLogEnabled=false;
  }
 
 CACmdLnOptions::~CACmdLnOptions()
@@ -731,6 +732,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 				//get Encrypted Log Info
 				if(getDOMChildByName(elemLogging,(UINT8*)"EncryptedLog",elemEncLog,false)==E_SUCCESS)
 					{
+						m_bIsEncryptedLogEnabled=true;
 						getDOMChildByName(elemEncLog,(UINT8*)"File",elem,false);
 						tmpLen=255;
 						if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS)
@@ -747,6 +749,8 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 								m_pLogEncryptionCertificate=CACertificate::decode(elemX509Data.getFirstChild(),CERT_X509CERTIFICATE);
 							}
 					}
+				else
+					m_bIsEncryptedLogEnabled=false;
 			}
 		//getCertificates if given...
 		DOM_Element elemCertificates;

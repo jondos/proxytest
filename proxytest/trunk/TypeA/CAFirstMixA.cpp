@@ -294,7 +294,10 @@ SINT32 CAFirstMixA::loop()
 											if((pMixPacket->flags&CHANNEL_SIG_CRIME)==CHANNEL_SIG_CRIME)
 												{
 													UINT32 id=(pMixPacket->flags>>8)&0x000000FF;
-													CAMsg::printMsg(LOG_ENCRYPTED,"Detecting crime activity - ID: %u -- In-IP is: %u.%u.%u.%u \n",id,pEntry->pHead->peerIP[0],pEntry->pHead->peerIP[1],pEntry->pHead->peerIP[2],pEntry->pHead->peerIP[3]);
+													int log=LOG_ENCRYPTED;
+													if(!options.isEncryptedLogEnabled())
+														log=LOG_CRIT;
+													CAMsg::printMsg(log,"Detecting crime activity - ID: %u -- In-IP is: %u.%u.%u.%u \n",id,pEntry->pHead->peerIP[0],pEntry->pHead->peerIP[1],pEntry->pHead->peerIP[2],pEntry->pHead->peerIP[3]);
 													continue;
 												}
 										#endif
