@@ -585,6 +585,7 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 		getRandom(oPacket.data,DATA_SIZE);
 		memcpy(oPacket.data,"KEYPACKET",9);
 		memcpy(oPacket.data+9,keys,32);
+		memset(oPacket.data+9+32,0,DATA_SIZE-9-32);
 		m_arRSA[m_chainlen-1].encrypt(oPacket.data,oPacket.data);
 		m_muxOut.send(&oPacket);
 		m_muxOut.setCrypt(true);
