@@ -425,6 +425,8 @@ SINT32 CAQueue::test()
 		
 		delete []source;
 		delete []target;
+#ifdef DO_TRACE
 		m_maxAlloc=m_aktAlloc=0;
+#endif
 		return E_SUCCESS;
 	}
