@@ -1,0 +1,9 @@
+libtrio.a: trio.cpp triostr.cpp trionan.cpp
+	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) trio.cpp -otrio.o
+	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) -DHAVE_STRERROR poptparse.cpp -o poptparse.o
+	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) -DHAVE_STRERROR popthelp.cpp -o popthelp.o
+	ar -rcs libpopt.a popt.o poptparse.o popthelp.o 
+
+clean:
+	rm -f *.o
+	rm -f libpopt.a

@@ -289,7 +289,8 @@ Debug(dc::malloc.on());
 		//Testing msSleep
 		CAMsg::printMsg(LOG_DEBUG,"Should sleep now for aprox 2 seconds....\n");
 		UINT32 start=time(NULL);
-		msSleep(2000);
+		for(int i=0;i<10;i++)
+		msSleep(200);
 		start=time(NULL)-start;
 		CAMsg::printMsg(LOG_DEBUG,"done! Takes %u seconds\n",start);
 		//end Testin msSleep
