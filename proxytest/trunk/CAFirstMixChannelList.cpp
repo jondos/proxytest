@@ -139,6 +139,7 @@ SINT32 CAFirstMixChannelList::addChannel(CAMuxSocket* pMuxSocket,HCHANNEL channe
 			}
 		m_HashTableOutChannels[hashkey]=pNewEntry;
 		pHashTableEntry->cNumberOfChannels++;
+		CAMsg::printMsg(LOG_DEBUG,"Channels now: %u\n",pHashTableEntry->cNumberOfChannels);
 		m_Mutex.unlock();
 		return E_SUCCESS;
 	}
@@ -336,6 +337,7 @@ SINT32 CAFirstMixChannelList::removeChannel(CAMuxSocket* pMuxSocket,HCHANNEL cha
 							}
 						delete pEntry;
 						pHashTableEntry->cNumberOfChannels--;
+						CAMsg::printMsg(LOG_DEBUG,"Channels now: %u\n",pHashTableEntry->cNumberOfChannels);
 						m_Mutex.unlock();
 						return E_SUCCESS;
 					}
