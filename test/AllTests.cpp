@@ -40,7 +40,7 @@ CACmdLnOptions options;
 * This function runs all tests of the project an is needed if no gui testrunner is
 * available. It prints the results to the standard output.
 */
-int main1(void) {
+int main(void) {
 
 	#if defined(HAVE_CRTDBG)
 //	_CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_FILE );
