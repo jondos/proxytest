@@ -67,6 +67,19 @@ SINT32 CASocketAddr::destroy()
 		return E_SUCCESS;
 	}
 
+
+SINT32 CASocketAddr::getSize()
+	{
+		if(m_pAddr==NULL)
+			return E_UNKNOWN;
+		if(m_Type==AF_INET)
+			return sizeof(sockaddr_in);
+#ifndef _WIN32
+		if(m_Type==AF_LOCAL)
+			return sizeof(sockaddr_un);
+#endif
+		return E_UNKNOWN;
+	}
 SINT32 CASocketAddr::setAddr(char* szIP,UINT16 port)
 	{
 		m_pAddr=new sockaddr_in;

@@ -84,7 +84,9 @@ SINT32 CADatagramSocket::bind(LPCASOCKETADDR from)
 //		localPort=-1;
 		if(m_Socket==0&&create()==SOCKET_ERROR)
 			return SOCKET_ERROR;
-		if(::bind(m_Socket,(LPSOCKADDR)from,sizeof(*from))==SOCKET_ERROR)
+		
+		LPSOCKADDR fr=(LPSOCKADDR)(*from);
+		if(::bind(m_Socket,fr,from->getSize())==SOCKET_ERROR)
 		    return SOCKET_ERROR;
 		return E_SUCCESS;
 	}
@@ -97,7 +99,7 @@ SINT32 CADatagramSocket::bind(UINT16 port)
 
 SINT32 CADatagramSocket::send(UINT8* buff,UINT32 len,LPCASOCKETADDR to)
 	{
-    		if(::sendto(m_Socket,(char*)buff,len,MSG_NOSIGNAL,(LPSOCKADDR)to,sizeof(*to))==SOCKET_ERROR)
+    		if(::sendto(m_Socket,(char*)buff,len,MSG_NOSIGNAL,(LPSOCKADDR)to,to->getSize())==SOCKET_ERROR)
 			return E_UNKNOWN;
 		return E_SUCCESS;	    	    
 	}
@@ -108,7 +110,7 @@ SINT32 CADatagramSocket::receive(UINT8* buff,UINT32 len,LPCASOCKETADDR from)
 		int ret;	
 		if(from!=NULL)
 			{
-				socklen_t fromlen=sizeof(*from);
+				socklen_t fromlen=from->getSize();
 				ret=::recvfrom(m_Socket,(char*)buff,len,MSG_NOSIGNAL,(LPSOCKADDR)from,&fromlen);
 			}
 		else

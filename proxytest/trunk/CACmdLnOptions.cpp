@@ -84,7 +84,7 @@ int CACmdLnOptions::parse(int argc,const char** argv)
 	 {
 		{"daemon",'d',POPT_ARG_NONE,&iDaemon,0,"start as daemon",NULL},
 		{"next",'n',POPT_ARG_STRING,&target,0,"next mix/http-proxy","<ip:port[,rttport]>"},
-		{"port|path",'p',POPT_ARG_STRING,&serverPort,0,"listening port|path","<portnumber|path>"},
+		{"port",'p',POPT_ARG_STRING,&serverPort,0,"listening port|path","<portnumber|path>"},
 		{"https",'h',POPT_ARG_NONE,&bHttps,0,"support proxy requests",NULL},
 		{"rttport",'r',POPT_ARG_INT,&serverrttport,0,"round trip time port","<portnumber>"},
 		{"mix",'m',POPT_ARG_INT,&mix,0,"local|first|middle|last mix","<0|1|2|3>"},
