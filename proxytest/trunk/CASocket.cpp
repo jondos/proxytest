@@ -240,7 +240,11 @@ SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len)
 			{
 				ret=receive(buff+pos,len);
 				if(ret<=0)
+				{
+				    CAMsg::printMsg(LOG_DEBUG,"ReceiveFully receive error ret=%i\n",ret);
+				    
 					return E_UNKNOWN;
+				}
 				pos+=ret;
 				len-=ret;
 			}

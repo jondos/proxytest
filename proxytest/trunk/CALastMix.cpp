@@ -267,7 +267,7 @@ SINT32 CALastMix::init()
 			}
 		
 		CAMsg::printMsg(LOG_INFO,"connected!\n");
-		sleep(1);
+//		sleep(1);
 		CAMsg::printMsg(LOG_INFO,"Sending Infos (chain length and RSA-Key, RSA-Keysize %u)\n",mRSA.getPublicKeySize());
 		UINT32 keySize=mRSA.getPublicKeySize();
 		UINT16 messageSize=keySize+1;
@@ -289,7 +289,7 @@ SINT32 CALastMix::init()
 		options.getSOCKSHost(strTarget,255);
 		maddrSocks.setAddr((char*)strTarget,options.getSOCKSPort());
 		delete buff;
-		sleep(1);
+		sleep(4);
 		return E_SUCCESS;
 	}
 
@@ -312,6 +312,7 @@ SINT32 CALastMix::loop()
 						sleep(1);
 						continue;
 					}
+		CAMsg::printMsg(LOG_INFO,"Select returns: %i\n",countRead);
 				if(oSocketGroup.isSignaled(muxIn))
 					{
 						countRead--;
@@ -355,7 +356,7 @@ SINT32 CALastMix::loop()
 										else
 										    {    
 #ifdef _ASYNC
-													tmpSocket->setASyncSend(true,-1,this);
+//													tmpSocket->setASyncSend(true,-1,this);
 #endif													
 													int payLen=ntohs(oMuxPacket.payload.len);
 													#ifdef _DEBUG
