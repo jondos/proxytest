@@ -244,8 +244,8 @@ LOOP_START:
 						else
 							{
 //Prüfen ob schon vorhanden..	
-									((CASocket*)pnewMuxSocket)->getPeerIP(ip);
-									if(m_pIPList->insertIP(ip)<0)
+									ret=((CASocket*)pnewMuxSocket)->getPeerIP(ip);
+									if(ret!=E_SUCCESS||m_pIPList->insertIP(ip)<0)
 										{
 											pnewMuxSocket->close();
 											delete pnewMuxSocket;
