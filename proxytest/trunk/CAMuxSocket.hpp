@@ -93,7 +93,7 @@ class CAMuxSocket
 			CAMuxSocket();
 			~CAMuxSocket()
 				{
-					delete m_Buff;
+					delete []m_Buff;
 				}
 			SINT32 accept(UINT16 port);
 			SINT32 accept(CASocketAddr & oAddr);

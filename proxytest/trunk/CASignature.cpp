@@ -295,19 +295,19 @@ static void smakeXMLCanonicalDataHandler(const XML_Char *data, size_t len, void 
 		len=memtrim(buff,(UINT8*)data,len);
 		if(len==0)
 			{
-				delete buff;
+				delete []buff;
 				return;
 			}
 
 		if(pData->outlen-pData->pos<len)
 			{
 				pData->err=-1;
-				delete buff;
+				delete []buff;
 				return;
 			}
 		memcpy(pData->out+pData->pos,buff,len);
 		pData->pos+=len;
-		delete buff;
+		delete []buff;
 	}
 
 static void smakeXMLCanonicalElementHandler(XMLElement &elem, void *userData)

@@ -134,7 +134,7 @@ SINT32 CAQueue::get(UINT8* pbuff,UINT32* psize)
 				pbuff+=m_Queue->size;
 				space-=m_Queue->size;
 				m_nQueueSize-=m_Queue->size;
-				delete m_Queue->pBuff;
+				delete []m_Queue->pBuff;
 				QUEUE* tmp=m_Queue;
 				m_Queue=m_Queue->next;
 				delete tmp;
@@ -231,7 +231,7 @@ SINT32 CAQueue::remove(UINT32* psize)
 				*psize+=m_Queue->size;
 				space-=m_Queue->size;
 				m_nQueueSize-=m_Queue->size;
-				delete m_Queue->pBuff;
+				delete []m_Queue->pBuff;
 				QUEUE* tmp=m_Queue;
 				m_Queue=m_Queue->next;
 				delete tmp;
@@ -359,7 +359,7 @@ SINT32 CAQueue::test()
 		if(memcmp(source,target,TEST_SIZE)!=0)
 			return E_UNKNOWN;
 		
-		delete source;
-		delete target;
+		delete []source;
+		delete []target;
 		return E_SUCCESS;
 	}

@@ -46,7 +46,7 @@ class ElementStack
 
 			~ElementStack()
 				{
-					delete m_Elements;
+					delete []m_Elements;
 				}
 
 			bool empty()
@@ -62,6 +62,7 @@ class ElementStack
 							m_Capacity+=16;
 							m_Elements=new const char*[m_Capacity];
 							memcpy(m_Elements,tmp,m_Size*sizeof(const char*));
+							delete [] tmp;
 						}
 					m_Elements[m_Size++]=e;
 				}

@@ -25,7 +25,7 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
-// proxytest.cpp : Definiert den Einsprungpunkt für die Konsolenanwendung.
+// proxytest.cpp : Definiert den Einsprungpunkt fuer die Konsolenanwendung.
 //
 
 #include "StdAfx.h"
@@ -247,7 +247,11 @@ int main(int argc, const char* argv[])
 	#endif
 
 #endif 
-
+//Switch on debug infos
+#ifdef CWDEBUG
+Debug(libcw_do.on());
+Debug(dc::malloc.on());
+#endif
 			//some test....
 		if(MIXPACKET_SIZE!=sizeof(MIXPACKET))
 			{
@@ -405,6 +409,8 @@ int main(int argc, const char* argv[])
 		if ( _CrtMemDifference( &s3, &s1, &s2 ) )
       _CrtMemDumpStatistics( &s3 );
 #endif
-
+#ifdef CWDEBUG
+Debug(list_allocations_on(libcw_do));
+#endif
 		return 0;
 	}

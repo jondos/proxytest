@@ -62,7 +62,7 @@ SINT32 CAFirstMix::initOnce()
 			goto END;
 		ret=E_SUCCESS;
 END:		
-		delete fileBuff;
+		delete []fileBuff;
 		return ret;
 
 	}
@@ -134,7 +134,7 @@ SINT32 CAFirstMix::init()
 		if(((CASocket*)(*m_pMuxOut))->receiveFully(recvBuff+2,ntohs(len))!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info!\n");
-				delete recvBuff;
+				delete []recvBuff;
 				return E_UNKNOWN;
 			}
 		CAMsg::printMsg(LOG_CRIT,"Received Key Info...\n");
@@ -144,7 +144,7 @@ SINT32 CAFirstMix::init()
 		m_KeyInfoSize=ntohs((*(UINT16*)recvBuff))+2;
 		m_KeyInfoBuff=new UINT8[m_KeyInfoSize+keySize];
 		memcpy(m_KeyInfoBuff,recvBuff,m_KeyInfoSize);
-		delete recvBuff;
+		delete []recvBuff;
 		m_KeyInfoBuff[2]++; //chainlen erhoehen
 		UINT32 numberOfMixes=m_KeyInfoBuff[2];
 		m_pRSA->getPublicKey(m_KeyInfoBuff+m_KeyInfoSize,&keySize);
@@ -222,7 +222,7 @@ THREAD_RETURN loopSendToMix(void* param)
 				if(pSocket->sendFully(buff,len)!=E_SUCCESS)
 					break;
 			}
-		delete buff;
+		delete []buff;
 		CAMsg::printMsg(LOG_DEBUG,"Exiting Thread SendToMix\n");
 		THREAD_RETURN_SUCCESS;
 	}
@@ -312,7 +312,7 @@ THREAD_RETURN loopAcceptUsers(void* param)
 					}
 			}
 END_THREAD:
-		delete ip;
+		delete []ip;
 		CAMsg::printMsg(LOG_DEBUG,"Exiting Thread AcceptUser\n");
 		THREAD_RETURN_SUCCESS;
 	}
@@ -851,7 +851,7 @@ ERR:
 			}
 		CAMsg::printMsg	(LOG_CRIT,"Memeory usage after: %u\n",getMemoryUsage());	
 		delete pMixPacket;
-		delete tmpBuff;
+		delete []tmpBuff;
 		CAMsg::printMsg(LOG_CRIT,"Main Loop exited!!\n");
 		return E_UNKNOWN;
 	}
@@ -897,7 +897,7 @@ SINT32 CAFirstMix::clean()
 			delete m_pRSA;
 		m_pRSA=NULL;
 		if(m_KeyInfoBuff!=NULL)
-			delete m_KeyInfoBuff;
+			delete []m_KeyInfoBuff;
 		m_KeyInfoBuff=NULL;
 		#ifdef _DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"CAFirstMix::clean() finished\n");

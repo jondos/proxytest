@@ -210,7 +210,7 @@ THREAD_RETURN InfoLoop(void *p)
 				 helocount--;
 				sSleep(60);
 			}
-		delete buff;
+		delete []buff;
 		THREAD_RETURN_SUCCESS;
 	}
 
@@ -334,7 +334,7 @@ SINT32 CAInfoService::sendHelo()
 				oxmlOut.EndAttrs();
 				if(options.getCascadeName(buff,1024)!=E_SUCCESS)
 					{
-						delete buff;
+						delete []buff;
 						return E_UNKNOWN;
 					}
 				oxmlOut.WriteElement("Name",(char*)buff);
@@ -350,12 +350,12 @@ SINT32 CAInfoService::sendHelo()
 				oxmlOut.EndDocument();
 				buffLen=1024;
 				if(m_pSignature->signXML(oBufferStream.getBuff(),oBufferStream.getBufferSize(),(UINT8*)buff,&buffLen)!=E_SUCCESS)
-					{delete buff;return E_UNKNOWN;}
+					{delete []buff;return E_UNKNOWN;}
 				sprintf((char*)buffHeader,"POST /helo HTTP/1.0\r\nContent-Length: %u\r\n\r\n",buffLen);
 				oSocket.send(buffHeader,strlen((char*)buffHeader));
 				oSocket.send(buff,buffLen);
 				oSocket.close();
-				delete buff;		
+				delete []buff;		
 				return E_SUCCESS;	
 /*_LABEL_ERROR:
 				if(buff!=NULL)

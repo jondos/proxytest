@@ -71,6 +71,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		typedef unsigned char UINT8;
 		typedef signed char SINT8;
 #else
+	#if defined(CWDEBUG) &&defined(__cplusplus)
+	    #include <libcw/sysd.h>
+	    #include <libcw/debug.h>
+	#endif
+
   #ifdef HAVE_CONFIG_H  
 	 #include "config.h"
 	 #ifndef HAVE_SOCKLEN_T 
@@ -136,7 +141,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
     #include <strings.h>
     #include <syslog.h>
     #include <stdarg.h>
-    #include <memory.h>       
+    #include <memory.h>
+    #include <sys/resource.h>       
 		#include <ctype.h>
     typedef struct sockaddr* LPSOCKADDR;
     #define SOCKET int
@@ -211,6 +217,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		typedef unsigned char UINT8;
 		typedef signed char SINT8;
 	#endif
+
 #endif
 
 //Error constants...
