@@ -70,7 +70,7 @@ SINT32 CALastMix::init()
 		CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...\n");
 		CASocketAddr* pAddrListen;
 		UINT8 path[255];
-		if(options.getServerHost(path,255)==E_SUCCESS) //unix domain
+		if(options.getServerHost(path,255)==E_SUCCESS&&path[0]=='/') //unix domain
 			{
 #ifdef HAVE_UNIX_DOMAIN_PROTOCOL
 				pAddrListen=new CASocketAddrUnix();
