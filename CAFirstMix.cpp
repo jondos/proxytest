@@ -323,7 +323,7 @@ THREAD_RETURN loopReadFromUsers(void* param)
 	
 		for(;;)
 			{
-				countRead=psocketgroupUsersRead->select(false,1000); //if we sleep her forever, we will not notice new sockets...
+				countRead=psocketgroupUsersRead->select(false,1000); //if we sleep here forever, we will not notice new sockets...
 				if(countRead<0)
 					{ //check for error
 						if(pFirstMix->getRestart()||countRead!=E_TIMEDOUT)
@@ -829,14 +829,14 @@ SINT32 CAFirstMix::loop()
 							{
 								countRead--;
 								UINT32 len=MIXPACKET_SIZE;
-								pfmHashEntry->pQueueSend->peek(tmpBuff,&len);
+								pfmHashEntry->pQueueSend->peek(tmpBuff,&len); //We only make a peek() here because we do not know if sending will succeed or not (because send() is non blocking there!)
 								ret=((CASocket*)pfmHashEntry->pMuxSocket)->send(tmpBuff,len);
 								if(ret>0)
 									{
 										pfmHashEntry->pQueueSend->remove((UINT32*)&ret);
 #define USER_SEND_BUFFER_RESUME 10000
-										if(pfmHashEntry->cSuspend>0&&
-												pfmHashEntry->pQueueSend->getSize()<USER_SEND_BUFFER_RESUME)
+										if( pfmHashEntry->cSuspend > 0 &&
+												pfmHashEntry->pQueueSend->getSize() < USER_SEND_BUFFER_RESUME)
 											{
 												fmChannelListEntry* pEntry;
 												pEntry=m_pChannelList->getFirstChannelForSocket(pfmHashEntry->pMuxSocket);
