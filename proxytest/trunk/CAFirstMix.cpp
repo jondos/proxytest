@@ -54,7 +54,7 @@ SINT32 CAFirstMix::init()
 		UINT8 strTarget[255];
 		options.getTargetHost(strTarget,255);
 		addrNext.setAddr((char*)strTarget,options.getTargetPort());
-		CAMsg::printMsg(LOG_INFO,"Try connectiong to next Mix... %s:%u",strTarget,options.getTargetPort());
+		CAMsg::printMsg(LOG_INFO,"Try connectiong to next Mix... %s:%u\n",strTarget,options.getTargetPort());
 		((CASocket*)muxOut)->create();
 		((CASocket*)muxOut)->setSendBuff(50*sizeof(MUXPACKET));
 		((CASocket*)muxOut)->setRecvBuff(50*sizeof(MUXPACKET));
