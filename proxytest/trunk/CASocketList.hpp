@@ -58,8 +58,26 @@ class CASocketList
 			
 			CASocket* remove(HCHANNEL id);
 			SINT32 clear();
-			CONNECTION* getFirst();
-			CONNECTION* getNext();
+			/** Gets the first entry of the channel-list.
+			*	@return the first entry of the channel list (this is not a copy!!)
+			*
+			*/	 
+			CONNECTION*  getFirst()
+				{
+					m_AktEnumPos=m_Connections;
+					return m_AktEnumPos;
+				}
+
+			/** Gets the next entry of the channel-list.
+			*	@return the next entry of the channel list (this is not a copy!!)
+			*
+			*/	 
+			CONNECTION* getNext()
+				{
+					if(m_AktEnumPos!=NULL)
+						m_AktEnumPos=m_AktEnumPos->next;
+					return m_AktEnumPos;
+				}
 
 			SINT32 setThreadSafe(bool b);
 		protected:

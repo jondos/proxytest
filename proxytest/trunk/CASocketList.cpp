@@ -300,23 +300,3 @@ CASocket* CASocketList::remove(HCHANNEL id)
 		return NULL;
 	}
 
-/** Gets the first entry of the channel-list.
-*	@return the first entry of the channel list (this is not a copy!!)
-*
-*/	 
-CONNECTION*  CASocketList::getFirst()
-	{
-		m_AktEnumPos=m_Connections;
-		return m_AktEnumPos;
-	}
-
-/** Gets the next entry of the channel-list.
-*	@return the next entry of the channel list (this is not a copy!!)
-*
-*/	 
-inline CONNECTION* CASocketList::getNext()
-	{
-		if(m_AktEnumPos!=NULL)
-			m_AktEnumPos=m_AktEnumPos->next;
-		return m_AktEnumPos;
-	}
