@@ -10,6 +10,46 @@
 
 extern CACmdLnOptions options;
 
+SINT32 CAFirstMix::init()
+	{
+		int ret;	
+		CASocketAddr socketAddrIn(options.getServerPort());
+		socketIn.create();
+		socketIn.setReuseAddr(true);
+		if(socketIn.listen(&socketAddrIn)==SOCKET_ERROR)
+		    {
+					CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
+					return E_UNKNOWN;
+		    }
+		
+		
+		CASocketAddr addrNext;
+		UINT8 strTarget[255];
+		options.getTargetHost(strTarget,255);
+		addrNext.setAddr((char*)strTarget,options.getTargetPort());
+		CAMsg::printMsg(LOG_INFO,"Try connectiong to next Mix... %s:%u",strTarget,options.getTargetPort());
+		((CASocket*)muxOut)->create();
+		((CASocket*)muxOut)->setSendBuff(50*sizeof(MUXPACKET));
+		((CASocket*)muxOut)->setRecvBuff(50*sizeof(MUXPACKET));
+		if(muxOut.connect(&addrNext,10,10)==E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_INFO," connected!\n");
+				UINT16 len;
+				((CASocket*)muxOut)->receive((UINT8*)&len,2);
+				CAMsg::printMsg(LOG_CRIT,"Received Key Inof lenght %u\n",ntohs(len));
+				recvBuff=new unsigned char[ntohs(len)+2];
+				memcpy(recvBuff,&len,2);
+				((CASocket*)muxOut)->receive(recvBuff+2,ntohs(len));
+				CAMsg::printMsg(LOG_CRIT,"Received Key Info...\n");
+				return E_SUCCESS();
+			}
+		else
+			{
+				CAMsg::printMsg(LOG_CRIT,"Cannot connect to next Mix!\n");
+				return E_UNKNOWN;
+			}
+	}
+
 SINT32 CAFirstMix::loop()
 	{
 		CAMuxChannelList  oMuxChannelList;
@@ -289,42 +329,3 @@ SINT32 CAFirstMix::loop()
 		return E_SUCCESS;
 	}
 
-SINT32 CAFirstMix::start()
-	{
-		int ret;	
-		CASocketAddr socketAddrIn(options.getServerPort());
-		socketIn.create();
-		socketIn.setReuseAddr(true);
-		if(socketIn.listen(&socketAddrIn)==SOCKET_ERROR)
-		    {
-					CAMsg::printMsg(LOG_CRIT,"Cannot listen\n");
-					return -1;
-		    }
-		
-		
-		CASocketAddr addrNext;
-		UINT8 strTarget[255];
-		options.getTargetHost(strTarget,255);
-		addrNext.setAddr((char*)strTarget,options.getTargetPort());
-		CAMsg::printMsg(LOG_INFO,"Try connectiong to next Mix... %s:%u",strTarget,options.getTargetPort());
-		((CASocket*)muxOut)->create();
-		((CASocket*)muxOut)->setSendBuff(50*sizeof(MUXPACKET));
-		((CASocket*)muxOut)->setRecvBuff(50*sizeof(MUXPACKET));
-		if(muxOut.connect(&addrNext,10,10)==E_SUCCESS)
-			{
-				CAMsg::printMsg(LOG_INFO," connected!\n");
-				UINT16 len;
-				((CASocket*)muxOut)->receive((UINT8*)&len,2);
-				CAMsg::printMsg(LOG_CRIT,"Received Key Inof lenght %u\n",ntohs(len));
-				recvBuff=new unsigned char[ntohs(len)+2];
-				memcpy(recvBuff,&len,2);
-				((CASocket*)muxOut)->receive(recvBuff+2,ntohs(len));
-				CAMsg::printMsg(LOG_CRIT,"Received Key Info...\n");
-				return loop();
-			}
-		else
-			{
-				CAMsg::printMsg(LOG_CRIT,"Cannot connect to next Mix!\n");
-				return E_UNKNOWN;
-			}
-	}

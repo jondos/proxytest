@@ -9,9 +9,9 @@ class CAMiddleMix:public CAMix
 		public:
 			CAMiddleMix(){};
 			~CAMiddleMix(){};
-			SINT32 start();
 		private:
 			SINT32 loop();
+			SINT32 init();
 		private:
 			CAMuxSocket muxIn;
 			CAMuxSocket muxOut;

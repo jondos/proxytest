@@ -9,9 +9,9 @@ class CAFirstMix:public CAMix
 		public:
 			CAFirstMix(){};
 			~CAFirstMix(){};
-			SINT32 start();
 		private:
 			SINT32 loop();
+			SINT32 init();
 		private:
 			CASocket socketIn;
 			CAMuxSocket muxOut;

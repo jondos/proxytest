@@ -6,12 +6,12 @@ class CAASymCipher
 		public:
 			CAASymCipher();
 			~CAASymCipher();
-			int decrypt(UINT8* from,UINT8* to);
-			int encrypt(UINT8* from,UINT8* to);
+			SINT32 decrypt(UINT8* from,UINT8* to);
+			SINT32 encrypt(UINT8* from,UINT8* to);
 			SINT32 generateKeyPair(UINT32 size);
 			SINT32 getPublicKey(UINT8* buff,UINT32 *len);
 			SINT32 getPublicKeySize();
-			SINT32 setPublicKey(UINT8* buff,UINT32 *len);
+			SINT32 setPublicKey(UINT8* buff,UINT32* len);
 		private:
 			RSA* rsa;
 	};

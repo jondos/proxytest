@@ -7,6 +7,39 @@
 
 extern CACmdLnOptions options;
 
+SINT32 CALastMix::init()
+	{
+		pRSA=new CAASymCipher();
+		pRSA->generateKeyPair(1024);
+		CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...");
+		if(muxIn.accept(options.getServerPort())==SOCKET_ERROR)
+		    {
+					CAMsg::printMsg(LOG_CRIT," failed!\n");
+					return E_UNKNOWN;
+		    }
+		((CASocket*)muxIn)->setRecvBuff(50*sizeof(MUXPACKET));
+		((CASocket*)muxIn)->setSendBuff(50*sizeof(MUXPACKET));
+		
+		CAMsg::printMsg(LOG_INFO,"connected!\n");
+		CAMsg::printMsg(LOG_INFO,"Sending Infos (chain length and RSA-Key)\n");
+		UINT32 keySize=pRSA->getPublicKeySize();
+		UINT16 messageSize=keySize+1;
+		UINT8* buff=new UINT8[messageSize+2];
+		(*(UINT16*)buff)=htons(messageSize);
+		buff[2]=1; //chainlen
+		pRSA->getPublicKey(buff+3,&keySize);
+		((CASocket*)muxIn)->send(buff,messageSize+2);
+		
+		UINT8 strTarget[255];
+		options.getTargetHost(strTarget,255);
+		addrSquid.setAddr((char*)strTarget,options.getTargetPort());
+
+		options.getSOCKSHost(strTarget,255);
+		addrSocks.setAddr((char*)strTarget,options.getSOCKSPort());
+		
+		return E_SUCCESS();
+	}
+
 SINT32 CALastMix::loop()
 	{
 		CASocketList  oSocketList;
@@ -158,35 +191,3 @@ SINT32 CALastMix::loop()
 		return E_SUCCESS;
 	}
 
-SINT32 CALastMix::start()
-	{
-		pRSA=new CAASymCipher();
-		pRSA->generateKeyPair(1024);
-		CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...");
-		if(muxIn.accept(options.getServerPort())==SOCKET_ERROR)
-		    {
-					CAMsg::printMsg(LOG_CRIT," failed!\n");
-					return E_UNKNOWN;
-		    }
-		((CASocket*)muxIn)->setRecvBuff(50*sizeof(MUXPACKET));
-		((CASocket*)muxIn)->setSendBuff(50*sizeof(MUXPACKET));
-		
-		CAMsg::printMsg(LOG_INFO,"connected!\n");
-		CAMsg::printMsg(LOG_INFO,"Sending Infos (chain length and RSA-Key)\n");
-		UINT32 keySize=pRSA->getPublicKeySize();
-		UINT16 messageSize=keySize+1;
-		UINT8* buff=new UINT8[messageSize+2];
-		(*(UINT16*)buff)=htons(messageSize);
-		buff[2]=1; //chainlen
-		pRSA->getPublicKey(buff+3,&keySize);
-		((CASocket*)muxIn)->send(buff,messageSize+2);
-		
-		UINT8 strTarget[255];
-		options.getTargetHost(strTarget,255);
-		addrSquid.setAddr((char*)strTarget,options.getTargetPort());
-
-		options.getSOCKSHost(strTarget,255);
-		addrSocks.setAddr((char*)strTarget,options.getSOCKSPort());
-		
-		return loop();
-	}
