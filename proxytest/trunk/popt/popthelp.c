@@ -4,7 +4,7 @@
    file accompanying popt source distributions, available from 
    ftp://ftp.redhat.com/pub/code/popt */
 
-#include "system.h"
+#include "../StdAfx.h"
 #include "poptint.h"
 
 static void displayArgs(poptContext con,

@@ -87,6 +87,7 @@
 #include <signal.h>
 #include <errno.h>
 #include "popt/system.h"
+#include "popt/popt.h"
 #include <openssl/blowfish.h>
 #include <openssl/rsa.h>
 #include <openssl/dsa.h>

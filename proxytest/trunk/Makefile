@@ -36,10 +36,11 @@ all_sun: $(OBJS)
 debug: $(OBJS) popt.a httptunnel.a
 	$(CC) -o proxytest $(OBJS) $(LIBS)
 
-popt.a: ./popt/popt.c ./popt/poptparse.c 
+popt.a: ./popt/popt.c ./popt/poptparse.c ./popt/popthelp.c
 	$(CC) -c  $(INCLUDE) $(DEBUG) -DHAVE_STRERROR ./popt/popt.c -o ./popt/popt.o
 	$(CC) -c  $(INCLUDE) $(DEBUG) -DHAVE_STRERROR ./popt/poptparse.c -o ./popt/poptparse.o
-	ar -rcs ./popt/popt.a ./popt/popt.o ./popt/poptparse.o 
+	$(CC) -c  $(INCLUDE) $(DEBUG) -DHAVE_STRERROR ./popt/popthelp.c -o ./popt/popthelp.o
+	ar -rcs ./popt/popt.a ./popt/popt.o ./popt/poptparse.o ./popt/popthelp.o 
 
 httptunnel.a: ./httptunnel/common.cpp  
 	$(CC) -c  $(INCLUDE) $(DEBUG) ./httptunnel/common.cpp -o ./httptunnel/common.o
