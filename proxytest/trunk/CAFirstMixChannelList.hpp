@@ -145,6 +145,8 @@ class CAFirstMixChannelList
 					
 			fmHashTableEntry* getFirst();
 			fmHashTableEntry* getNext();
+			fmHashTableEntry* get(CAMuxSocket* pMuxSocket);
+
 		
 			fmChannelListEntry* getFirstChannelForSocket(CAMuxSocket* pMuxSocket);
 			fmChannelListEntry* getNextChannel(fmChannelListEntry* pEntry);
