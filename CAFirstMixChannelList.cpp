@@ -400,8 +400,8 @@ SINT32 CAFirstMixChannelList::test()
 		_CrtMemState s1, s2, s3;
 		_CrtMemCheckpoint( &s1 );
 #endif
-		UINT32 /*channelIn,*/channelOut;
-		for(int i=0;i<50;i++)
+		UINT32 /*channelIn,*/i,channelOut;
+		for(i=0;i<50;i++)
 			pList->addChannel(pMuxSocket,i,NULL,&channelOut);
 		for(i=0;i<50;i++)
 			pList->removeChannel(pMuxSocket,i);
