@@ -128,11 +128,10 @@ typedef struct t_firstmixchannellist fmChannelList;
 typedef struct t_firstmixchannellist fmChannelListEntry; 
 typedef fmChannelListEntry* LP_fmChannelListEntry;
 
-/** Data structure that stores all information about the currently open Mix channels.
-	* See \ref pageFirstMixChannelList for more information.
-	*/
-/**  \page pagefirstMixChannelList Data structures for storing the Mix channel table of the first Mix
+/**  \page pageFirstMixChannelList Data structures for storing the Mix channel table of the first Mix
+	*  \section docFirstMixChannelList Data structures for storing the Mix channel table of the first Mix
 	*	 The following data structures are used to store and access all information necassary to process a MixPacket.
+	*
 	* \image html FirstMixChannelTable.png "Table 1: Necessary data stored in the Channel Table"
 	*
 	*  Table 1 gives an idea about the information which must be stored.
@@ -171,6 +170,10 @@ typedef fmChannelListEntry* LP_fmChannelListEntry;
 	* overrun lists (\link CAFirstMixChannelList#m_HashTableOutChannels m_HashTableOutChannels \endlink). The last two bytes from the Channel-ID are used as Hashkey.
 	* The elements of this Hashtable are pointers to Channellistentries. The overrun lists are 
 	* stored in the list_OutChannelHashTable element of each Channellistentry.
+	*/
+
+/** Data structure that stores all information about the currently open Mix channels.
+	* See \ref pageFirstMixChannelList "[FirstMixChannelList]" for more information.
 	*/
 class CAFirstMixChannelList
 	{
