@@ -108,9 +108,12 @@ SINT32 CAASymCipher::generateKeyPair(UINT32 size)
 	*/
 SINT32 CAASymCipher::getPublicKey(UINT8* buff,UINT32 *len)
 	{
-		if(rsa==NULL||buff==NULL||(*len)<getPublicKeySize())
+		if(rsa==NULL||buff==NULL)
 			return E_UNKNOWN;
-		int aktIndex=0;
+		SINT32 keySize=getPublicKeySize();
+		if(keySize<=0||(*len)<(UINT32)keySize)
+			return E_UNKNOWN;
+		UINT32 aktIndex=0;
 		UINT16 size=htons(BN_num_bytes(rsa->n));
 		memcpy(buff,&size,sizeof(size));
 		aktIndex+=sizeof(size);

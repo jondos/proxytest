@@ -244,6 +244,12 @@ SINT32 CALastMix::loop()
 	}
 
 #else
+
+/*******************************************************************************/
+// ----------START NEW VERSION -----------------------
+//---------------------------------------------------------
+/********************************************************************************/
+
 SINT32 CALastMix::init()
 	{
 		if(mRSA.generateKeyPair(1024)!=E_SUCCESS)
@@ -338,9 +344,9 @@ SINT32 CALastMix::loop()
 										CASocket* tmpSocket=new CASocket;										
 										int ret;
 										if(oMuxPacket.payload.type==MUX_SOCKS)
-											ret=tmpSocket->connect(&maddrSocks);
+											ret=tmpSocket->connect(&maddrSocks); //may be block
 										else
-											ret=tmpSocket->connect(&maddrSquid);	
+											ret=tmpSocket->connect(&maddrSquid);	//may be block
 										if(ret!=E_SUCCESS)
 										    {
 	    										#ifdef _DEBUG
