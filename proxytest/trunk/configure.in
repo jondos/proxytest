@@ -34,14 +34,14 @@ else
    exit 
 fi
 
-LIBS="$LIBS -L/usr/lib -L/usr/local/lib"
+DEFAULTLIBS="$LIBS -L/usr/lib -L/usr/local/lib"
 
 case "$host" in
 *-*-solaris*)
-        LIBS="$LIBS -lnsl -lsocket -lposix4"
+        DEFAULTLIBS="$LIBS -lnsl -lsocket -lposix4"
         ;;
 *-*-linux*)
-        LIBS="$LIBS -lpthread"
+        DEFAULTLIBS="$LIBS -lpthread"
 	;;
 *-*-irix*)
         CFLAGS="$CFLAGS "
@@ -105,6 +105,8 @@ AC_ARG_WITH(pool,
 		fi
 	]
 )
+
+LIBS="$DEFAULTLIBS"
 
 dnl Checks for Headers
 AC_HEADER_STDC
@@ -252,8 +254,8 @@ AC_ARG_WITH(xml-include,
 		fi
 	]
 )
-XMLINCLUDEFLAGS="-I/usr/include/xercesc -I$xmlincludedir -I$xmlincludedir/xercesc"
-CFLAGS="$CFLAGS $XMLINCLUDEFLAGS"
+XMLINCLUDEFLAGS="-I$xmlincludedir -I$xmlincludedir/xercesc -I/usr/include/xercesc"
+CFLAGS="$XMLINCLUDEFLAGS $CFLAGS "
 CXXFLAGS=$CFLAGS
 AC_MSG_NOTICE([Xerces-C tests])
 AC_CHECK_HEADER([dom/DOM.hpp],,
@@ -270,7 +272,7 @@ AC_ARG_WITH(xml-lib,
 	]
 )
 XMLLIBFLAGS="-L$xmllibdir -lxerces-c"
-LIBS="$LIBS $XMLLIBFLAGS"
+LIBS="$XMLLIBFLAGS $LIBS "
 AC_MSG_CHECKING([for libxerces-c])
 AC_LINK_IFELSE([AC_LANG_PROGRAM([
 #include "util/XercesDefs.hpp"
