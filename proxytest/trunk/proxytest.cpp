@@ -57,6 +57,7 @@ CAMutex* pOpenSSLMutexes;
 // The Mix....
 CAMix* pMix=NULL;
 
+
 typedef struct
 {
 	unsigned short len;
@@ -398,6 +399,8 @@ Debug(dc::malloc.on());
 			UINT32 start;
 #endif
 		initRandom();
+
+
 		options.parse(argc,argv);
 
 		if(!(options.isFirstMix()||options.isMiddleMix()||options.isLastMix()||options.isLocalProxy()))
