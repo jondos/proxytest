@@ -607,7 +607,7 @@ SINT32 CAFirstMix::loop()
 																													//which contains the key
 														{
 															m_pRSA->decrypt(pMixPacket->data,rsaBuff);
-															if(memcmp("KEYPACKET",pMixPacket->data,9)!=0)
+															if(memcmp("KEYPACKET",rsaBuff,9)!=0)
 																{
 																	m_pIPList->removeIP(pHashEntry->peerIP);
 																	m_psocketgroupUsersRead->remove(*(CASocket*)pMuxSocket);

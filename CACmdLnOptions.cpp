@@ -576,7 +576,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 								DOM_Node elemListenerInterface;
 								elemListenerInterface=nlListenerInterfaces.item(i);
 								DOM_Element elemType;
-								getDOMChildByName(elemListenerInterface,(UINT8*)"Type",elemType,false);
+								getDOMChildByName(elemListenerInterface,(UINT8*)"NetworkProtocol",elemType,false);
 								tmpLen=255;
 								if(getDOMElementValue(elemType,tmpBuff,&tmpLen)!=E_SUCCESS)
 									continue;
@@ -665,7 +665,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 				UINT32 type;
 				CASocketAddr* addr=NULL;
 				DOM_Element elemType;
-				getDOMChildByName(elemNextMix,(UINT8*)"Type",elemType,false);
+				getDOMChildByName(elemNextMix,(UINT8*)"NetworkProtocol",elemType,false);
 				tmpLen=255;
 				if(getDOMElementValue(elemType,tmpBuff,&tmpLen)!=E_SUCCESS)
 					goto SKIP_NEXT_MIX;
@@ -753,7 +753,7 @@ SKIP_NEXT_MIX:
 								DOM_Node elemTargetInterface;
 								elemTargetInterface=nlTargetInterfaces.item(i);
 								DOM_Element elemType;
-								getDOMChildByName(elemTargetInterface,(UINT8*)"Type",elemType,false);
+								getDOMChildByName(elemTargetInterface,(UINT8*)"NetworkProtocol",elemType,false);
 								tmpLen=255;
 								if(getDOMElementValue(elemType,tmpBuff,&tmpLen)!=E_SUCCESS)
 									continue;
