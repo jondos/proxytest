@@ -93,7 +93,7 @@ protected:
     virtual SINT32 processKeyExchange();
     
     // deprecated
-    SINT32 initMixCascadeInfo(UINT8*,UINT16);
+    //SINT32 initMixCascadeInfo(UINT8*,UINT16);
     
     
 public:

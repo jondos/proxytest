@@ -295,21 +295,26 @@ SINT32 CAFirstMix::processKeyExchange()
     MemBufInputSource oInput(recvBuff,len,"tmp");
     DOMParser oParser;
     oParser.parse(oInput);
-    DOM_Document doc=oParser.getDocument();
-    CAMsg::printMsg(LOG_DEBUG,"%s:%d\n",__FILE__,__LINE__);
-    DOM_Element elemMixes=doc.getDocumentElement();
+    delete []recvBuff;
 
+		DOM_Document doc=oParser.getDocument();
+    DOM_Element elemMixes=doc.getDocumentElement();
     if(elemMixes==NULL)
         return E_UNKNOWN;
-    int count=0;
+		int count=0;
     if(getDOMElementAttribute(elemMixes,"count",&count)!=E_SUCCESS)
         return E_UNKNOWN;
-    char *cascadeName;
+ /* 
+		@todo DOn not why we do this here - probablyy it has something todo with the
+		dynamic mix config, but makes not sense at all for me...
+
+		getDOMElementAttribute(elemMixescascadeNaem
+		char *cascadeName;
     cascadeName = elemMixes.getAttribute("cascadeName").transcode();
     if(cascadeName == NULL)
         return E_UNKNOWN;
     options.setCascadeName(cascadeName);
-
+*/
     m_pRSA=new CAASymCipher;
     m_pRSA->generateKeyPair(1024);
 
@@ -443,10 +448,9 @@ SINT32 CAFirstMix::processKeyExchange()
         child=child.getNextSibling();
     }
 
-    if(CAMix::initMixCascadeInfo(elemMixes)!=E_SUCCESS)
+    if(initMixCascadeInfo(elemMixes)!=E_SUCCESS)
     {
         CAMsg::printMsg(LOG_CRIT,"Error initializing cascade info.\n");
-        delete []recvBuff;
         return E_UNKNOWN;
     }
     else
@@ -1063,7 +1067,7 @@ SINT32 CAFirstMix::clean()
   * the Key struct which is send to each user which connects
 * This function is called from init()
 * @DOCME
-*/
+*//*
 SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff, UINT16 len)
 {
 		//Parse the input, which is the XML send from the previos mix, containing keys and id's
@@ -1244,7 +1248,7 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff, UINT16 len)
 		for(UINT32 i=1;i<=options.getListenerInterfaceCount();i++)
 			{
 				CAListenerInterface* pListener=options.getListenerInterface(i);
-				if(pListener->isHidden()){/*do nothing*/}
+				if(pListener->isHidden()){//do nothing}
 				else if(pListener->getType()==RAW_TCP)
 					{
 						DOM_DocumentFragment docFrag;
@@ -1274,3 +1278,4 @@ SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff, UINT16 len)
 		setDOMElementAttribute(elemMixesDocCascade,"count",count);
 		return E_SUCCESS;
 	}
+*/
