@@ -402,7 +402,7 @@ THREAD_RETURN loopDownStream(void *p)
 		CASingleSocketGroup oSocketGroup;
 		oSocketGroup.add(*(pMix->m_pMuxOut));
 #ifdef USE_POOL		
-		CAPool* pPool=new Pool(POOL_SIZE);
+		CAPool* pPool=new CAPool(POOL_SIZE);
 #endif
 		for(;;)
 			{
