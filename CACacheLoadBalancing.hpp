@@ -31,7 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 struct t_cachelb_list
 	{
-		CASocketAddrINet oAddr;
+		CASocketAddrINet* pAddr;
 		struct t_cachelb_list* next;
 	};
 
@@ -50,7 +50,7 @@ class CACacheLoadBalancing
 					pSelectedEntry=NULL;
 				}
 			~CACacheLoadBalancing();
-			SINT32 add(const CASocketAddrINet & pAddr);
+			SINT32 add(CASocketAddr* const pAddr);
 			
 			/** Gets the 'next' Address according to the Load-Balancing algorithm. 
 			  * This is the Address which should be used for a connection to a cache proxy.
@@ -61,7 +61,7 @@ class CACacheLoadBalancing
 					if(pSelectedEntry==NULL)
 						return NULL;
 					pSelectedEntry=pSelectedEntry->next;
-					return &pSelectedEntry->oAddr;
+					return pSelectedEntry->pAddr;
 				}
 
 			/* Gets the number of Addresses added.

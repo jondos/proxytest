@@ -38,6 +38,7 @@ CACacheLoadBalancing::~CACacheLoadBalancing()
 					pEntry=NULL;
 				else 
 					pEntry=pSelectedEntry->next;
+				delete pSelectedEntry->pAddr;
 				delete pSelectedEntry;
 				pSelectedEntry=pEntry;
 			}			
@@ -48,12 +49,14 @@ CACacheLoadBalancing::~CACacheLoadBalancing()
  * @retval E_UNKNOWN, in case of an error
  * @retval E_SUCCESS, if succesful
  */
-SINT32 CACacheLoadBalancing::add(const CASocketAddrINet& oAddr)
+SINT32 CACacheLoadBalancing::add(CASocketAddr* const pAddr)
 	{
+		if(pAddr->getType()!=AF_INET)
+			return E_UNKNOWN;
 		CACHE_LB_ENTRY* pEntry=new CACHE_LB_ENTRY;
 		if(pEntry==NULL)
 			return E_UNKNOWN;
-		pEntry->oAddr=oAddr;
+		pEntry->pAddr=(CASocketAddrINet*)pAddr->clone();
 		if(pSelectedEntry==NULL)
 			{
 				pSelectedEntry=pEntry;

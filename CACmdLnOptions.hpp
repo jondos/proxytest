@@ -47,6 +47,19 @@ struct t_ListenerInterface
 
 typedef struct t_ListenerInterface ListenerInterface;
 
+#define TARGET_MIX					1
+#define TARGET_HTTP_PROXY		2	
+#define TARGET_SOCKS_PROXY	3
+
+struct t_TargetInterface
+	{
+		UINT32 target_type;
+		UINT32 net_type;
+		CASocketAddr* addr;
+	};
+
+typedef struct t_TargetInterface TargetInterface;
+
 class CACmdLnOptions
     {
 	public:
@@ -81,18 +94,19 @@ class CACmdLnOptions
 						return E_UNKNOWN;
 				};
 			
-			//for historic reason gives always the first entry in the possible target list
-			UINT16 getTargetPort();
-	    SINT32 getTargetRTTPort();
-			SINT32 getTargetHost(UINT8* host,UINT32 len);
+			//this is only for the local proxy
+			UINT16 getMixPort();
+			SINT32 getMixHost(UINT8* host,UINT32 len);
 	   
 			//if we have more than one Target (currently only Caches are possible...)
-			UINT32 getTargetCount(){return m_cnTargets;}
-			SINT32 getTargetAddr(CASocketAddrINet& oAddr, UINT32 nr)
+			UINT32 getTargetInterfaceCount(){return m_cnTargets;}
+			SINT32 getTargetInterface(TargetInterface& oTargetInterface, UINT32 nr)
 				{
 					if(nr>0&&nr<=m_cnTargets)
 						{
-							oAddr=m_arTargets[nr-1];
+							oTargetInterface.net_type=m_arTargetInterfaces[nr-1].net_type;
+							oTargetInterface.target_type=m_arTargetInterfaces[nr-1].target_type;
+							oTargetInterface.addr=m_arTargetInterfaces[nr-1].addr->clone();
 							return E_SUCCESS;
 						}
 					else
@@ -142,7 +156,7 @@ class CACmdLnOptions
 			SINT32 getLogDir(UINT8* name,UINT32 len);
 			bool getCompressLogs()
 				{
-					return bCompressedLogs;
+					return m_bCompressedLogs;
 				}
 			SINT32 getUser(UINT8* user,UINT32 len);
 			/** Get the XML describing the Mix. this is not a string!*/
@@ -153,42 +167,38 @@ class CACmdLnOptions
 			bool isLastMix();
 			bool isInfoServiceEnabled()
 				{
-					return strInfoServerHost!=NULL;
+					return m_strInfoServerHost!=NULL;
 				}
-	protected:
-	    bool bDaemon;
-      //bool m_bHttps;
-	    //UINT16 iServerPort;
-//			SINT32 iServerRTTPort;
-	    UINT16 iSOCKSServerPort;
-	    UINT16 iTargetPort; //only for the first target...
-	    SINT32 iTargetRTTPort; //only for the first target
-			char* strTargetHost; //only for the first target...
-	    //char* strServerHost; //Host or Unix Domain Socket
-			char* strSOCKSHost;
-	    UINT16 iSOCKSPort;
-	    char* strInfoServerHost;
-	    UINT16 iInfoServerPort;
-			bool bLocalProxy,bFirstMix,bMiddleMix,bLastMix;
-			char* strCascadeName;
-			char* strLogDir;
-			bool bCompressedLogs;
-			char* m_strUser;
-			SINT32 m_nrOfOpenFiles; //How many open files (sockets) should we use
-			char* m_strMixXml;
-			char* m_strMixID;
-
-			CASocketAddrINet* m_arTargets;
-			UINT32 m_cnTargets;
-			ListenerInterface* m_arListenerInterfaces;
-			UINT32 m_cnListenerInterfaces;
-			
-			CASignature* m_pSignKey;
-			CACertificate* m_pOwnCertificate;
-			CACertificate* m_pPrevMixCertificate;
-			CACertificate* m_pNextMixCertificate;
+	
 		private:
-			SINT32 generateTemplate();
+	    bool		m_bDaemon;
+	    UINT16	m_iSOCKSServerPort;
+	    UINT16	m_iTargetPort; //only for the local proxy...
+			char*		m_strTargetHost; //only for the local proxy...
+			char*		m_strSOCKSHost;
+	    UINT16	m_iSOCKSPort;
+	    char*		m_strInfoServerHost;
+	    UINT16	m_iInfoServerPort;
+			bool		m_bLocalProxy,m_bFirstMix,m_bMiddleMix,m_bLastMix;
+			char*		m_strCascadeName;
+			char*		m_strLogDir;
+			bool		m_bCompressedLogs;
+			char*		m_strUser;
+			SINT32	m_nrOfOpenFiles; //How many open files (sockets) should we use
+			char*		m_strMixXml;
+			char*		m_strMixID;
+
+			TargetInterface*		m_arTargetInterfaces;
+			UINT32							m_cnTargets;
+			ListenerInterface*	m_arListenerInterfaces;
+			UINT32							m_cnListenerInterfaces;
+			
+			CASignature*		m_pSignKey;
+			CACertificate*	m_pOwnCertificate;
+			CACertificate*	m_pPrevMixCertificate;
+			CACertificate*	m_pNextMixCertificate;
+		
+		private:
 			SINT32 processXmlConfiguration(DOM_Document& docConfig);
 	};
 #endif
