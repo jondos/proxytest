@@ -197,7 +197,7 @@ UINT16 infoSize;
 		UINT32 aktIndex=2;
 		memcpy(infoBuff+aktIndex,recvBuff,infoSize);
 		aktIndex+=infoSize;
-		ltoa(count,(char*)infoBuff+aktIndex,10);
+		sprintf((char*)infoBuff+aktIndex,"%u",count);
 		aktIndex=strlen((char*)infoBuff);
 		//now the have the right count in the output buff
 		start_pos=end_pos;
