@@ -54,7 +54,7 @@ SINT32 CACacheLoadBalancing::add(CASocketAddrINet* pAddr)
 		if(paktEntry==NULL)
 			{
 				paktEntry=pEntry;
-				pEntry->next=paktEntry;
+				paktEntry->next=paktEntry;
 			}
 		else
 			{

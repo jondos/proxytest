@@ -32,7 +32,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 struct t_cachelb_list
 	{
 		CASocketAddrINet* pAddr;
-		t_cachelb_list* next;
+		struct t_cachelb_list* next;
 	};
 
 typedef t_cachelb_list CACHE_LB_ENTRY; 
