@@ -864,14 +864,15 @@ Optional Features:
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
   --enable-static         Static linking
-  --with-pool=POOLSIZE    Specify if to build a pool mix and optionally the
+  --enable-pool=POOLSIZE  Specify if to build a pool mix and optionally the
                           poolsize
-  --with-bandwidthlimitation=LIMITATION_START
+  --enable-bandwidthlimitation=LIMITATION_START
                           Specify if to build with bandwith limitation and
                           optionally the number of bytes which are transferred
                           without any limitation
-  --with-debug            Enable debug mode
-  --with-crime-detection  Enable crime detection mode
+  --enable-debug          Enable debug mode
+  --enable-crime-detection
+                          Enable crime detection mode
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -3713,8 +3714,11 @@ OFLAGS="$OFLAGS $MARCH"
 # Check whether --enable-static or --disable-static was given.
 if test "${enable_static+set}" = set; then
   enableval="$enable_static"
-  CFLAGS="$CFLAGS -static"
-	     CXXFLAGS="$CXXFLAGS -static"
+
+		if test "x$withval" != "$xno" ; then
+		    CFLAGS="$CFLAGS -static"
+	    	    CXXFLAGS="$CXXFLAGS -static"
+		fi
 
 fi;
 
@@ -10112,8 +10116,10 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 if test "${enable_debug+set}" = set; then
   enableval="$enable_debug"
 
-	    CFLAGS="$CFLAGS -g -D_DEBUG"
-	    OFLAGS=""
+	    if test "x$withval" != "$xno" ; then
+		CFLAGS="$CFLAGS -g -D_DEBUG"
+		OFLAGS=""
+	    fi
 
 
 fi;
@@ -10122,7 +10128,9 @@ fi;
 if test "${enable_crime_detection+set}" = set; then
   enableval="$enable_crime_detection"
 
-	    CFLAGS="$CFLAGS -DLOG_CRIME"
+	    if test "x$withval" != "$xno" ; then
+		CFLAGS="$CFLAGS -DLOG_CRIME"
+	    fi
 
 
 fi;

@@ -94,15 +94,18 @@ OFLAGS="$OFLAGS $MARCH"
 dnl Static?
 AC_ARG_ENABLE(static,
 	    AS_HELP_STRING([--enable-static],[Static linking]),
-	    [CFLAGS="$CFLAGS -static"
-	     CXXFLAGS="$CXXFLAGS -static"
+	    [
+		if test "x$withval" != "$xno" ; then
+		    CFLAGS="$CFLAGS -static"
+	    	    CXXFLAGS="$CXXFLAGS -static"
+		fi    
 	    ])
 
 
 dnl pool mix ??
 POOL=""
 AC_ARG_ENABLE(pool,
-	AS_HELP_STRING([--with-pool=POOLSIZE],[Specify if to build a pool mix and optionally the poolsize]),
+	AS_HELP_STRING([--enable-pool=POOLSIZE],[Specify if to build a pool mix and optionally the poolsize]),
 	[
 		if test "x$withval" != "$xno" ; then
 		    POOL="-DUSE_POOL"
@@ -116,7 +119,7 @@ AC_ARG_ENABLE(pool,
 dnl delay channels ??
 BANDWIDTH_LIMIT=""
 AC_ARG_ENABLE(bandwithlimitation,
-	AS_HELP_STRING([--with-bandwidthlimitation=LIMITATION_START],
+	AS_HELP_STRING([--enable-bandwidthlimitation=LIMITATION_START],
 			[Specify if to build with bandwith limitation and optionally the number of bytes which are transferred without any limitation]),
 	[
 	AC_MSG_NOTICE([hier])
@@ -312,17 +315,21 @@ AC_LANG_POP(C++)
 
 
 AC_ARG_ENABLE(debug,
-	AS_HELP_STRING([--with-debug],[Enable debug mode]),
+	AS_HELP_STRING([--enable-debug],[Enable debug mode]),
 	[
-	    CFLAGS="$CFLAGS -g -D_DEBUG"
-	    OFLAGS=""
+	    if test "x$withval" != "$xno" ; then
+		CFLAGS="$CFLAGS -g -D_DEBUG"
+		OFLAGS=""
+	    fi
 	]
 )
 
 AC_ARG_ENABLE(crime-detection,
-	AS_HELP_STRING([--with-crime-detection],[Enable crime detection mode]),
+	AS_HELP_STRING([--enable-crime-detection],[Enable crime detection mode]),
 	[
-	    CFLAGS="$CFLAGS -DLOG_CRIME"
+	    if test "x$withval" != "$xno" ; then
+		CFLAGS="$CFLAGS -DLOG_CRIME"
+	    fi	
 	]
 )
 
