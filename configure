@@ -9065,7 +9065,7 @@ fi;
 CFLAGS="$CFLAGS $OFLAGS"
 CXXFLAGS=$CFLAGS
 
-                                                            ac_config_files="$ac_config_files Makefile popt/Makefile xml/Makefile aes/Makefile trio/Makefile tre/Makefile"
+                                                                      ac_config_files="$ac_config_files Makefile popt/Makefile xml/Makefile aes/Makefile trio/Makefile tre/Makefile TypeA/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -9635,6 +9635,7 @@ do
   "aes/Makefile" ) CONFIG_FILES="$CONFIG_FILES aes/Makefile" ;;
   "trio/Makefile" ) CONFIG_FILES="$CONFIG_FILES trio/Makefile" ;;
   "tre/Makefile" ) CONFIG_FILES="$CONFIG_FILES tre/Makefile" ;;
+  "TypeA/Makefile" ) CONFIG_FILES="$CONFIG_FILES TypeA/Makefile" ;;
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
   "config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
