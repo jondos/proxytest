@@ -1,28 +1,28 @@
 /*
-Copyright (c) 2000, The JAP-Team 
+Copyright (c) 2000, The JAP-Team
 All rights reserved.
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-	- Redistributions of source code must retain the above copyright notice, 
+	- Redistributions of source code must retain the above copyright notice,
 	  this list of conditions and the following disclaimer.
 
-	- Redistributions in binary form must reproduce the above copyright notice, 
-	  this list of conditions and the following disclaimer in the documentation and/or 
+	- Redistributions in binary form must reproduce the above copyright notice,
+	  this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
-	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors 
-	  may be used to endorse or promote products derived from this software without specific 
-		prior written permission. 
+	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
+	  may be used to endorse or promote products derived from this software without specific
+		prior written permission.
 
-	
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS 
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
 AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
 BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
-OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
@@ -58,7 +58,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_strConfigFile=NULL;
 		m_docMixInfo=NULL;
 		m_pLogEncryptionCertificate=NULL;
-  }
+ }
 
 CACmdLnOptions::~CACmdLnOptions()
 	{
@@ -140,7 +140,7 @@ void CACmdLnOptions::clean()
 		if(m_pLogEncryptionCertificate!=NULL)
 			delete m_pLogEncryptionCertificate;
 	}
-    
+
 SINT32 CACmdLnOptions::parse(int argc,const char** argv)
     {
 	int iDaemon=0;
@@ -190,14 +190,14 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 		m_bAutoReconnect=true;
 	if(configfile!=NULL)
 		{
-			SINT32 ret=readXmlConfiguration(docMixXml,(UINT8*)configfile);	
-			if(ret==E_FILE_OPEN)		
+			SINT32 ret=readXmlConfiguration(docMixXml,(UINT8*)configfile);
+			if(ret==E_FILE_OPEN)
 				CAMsg::printMsg(LOG_CRIT,"Couldt not open config file: %s\n",configfile);
 			else if(ret==E_FILE_READ)
 				CAMsg::printMsg(LOG_CRIT,"Couldt not read config file: %s\n",configfile);
 			else if(ret==E_XML_PARSE)
 				CAMsg::printMsg(LOG_CRIT,"Couldt not parse config file: %s\n",configfile);
-			else			
+			else
 				{
 					m_strConfigFile=new UINT8[strlen(configfile)+1];
 					memcpy(m_strConfigFile,configfile,strlen(configfile)+1);
@@ -229,7 +229,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 						else
 							{//TODO what if not in right form ?
 								//try if it is a number --> use it as port
-								//and use 'localhost' as traget-host 
+								//and use 'localhost' as traget-host
 								tmpPort=(int)atol(target);
 								if(tmpPort!=0) //we get it
 									{
@@ -258,13 +258,13 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 					strcpy(m_strSOCKSHost,socks);
 					m_iSOCKSPort=(int)atol(tmpStr+1);
 						}
-				free(socks);	
+				free(socks);
 	    }
 	if(logdir!=NULL)
 	    {
 					m_strLogDir=new char[strlen(logdir)+1];
 					strcpy(m_strLogDir,logdir);
-					free(logdir);	
+					free(logdir);
 	    }
 	if(iCompressedLogs==0)
 		m_bCompressedLogs=false;
@@ -272,7 +272,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 		m_bCompressedLogs=true;
 	if(serverPort!=NULL&&m_bLocalProxy)
 		{
-			m_arListenerInterfaces=new CAListenerInterface*[1]; 
+			m_arListenerInterfaces=new CAListenerInterface*[1];
 			m_arListenerInterfaces[0]=NULL;
 			m_cnListenerInterfaces=0;
 			char* tmpStr;
@@ -282,7 +282,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 				}
 			else //Internet Socket
 				{
-					char* strServerHost=NULL; 
+					char* strServerHost=NULL;
 					int iServerPort;
 					if((tmpStr=strchr(serverPort,':'))!=NULL) //host:port
 						{
@@ -321,7 +321,7 @@ struct t_CMNDLN_REREAD_PARAMS
 
 /** Copies options from \c newOptions. Only those options which are specified
 	* in \c newOptions are copied. The others are left uuntouched!
-	* 
+	*
 	* @param newOptions \c CACmdLnOptions object from which the new values are copied
 	* @retval E_UNKNOWN if an error occurs
 	* @retval E_SUCCESS otherwise
@@ -384,7 +384,7 @@ THREAD_RETURN threadReConfigure(void *param)
 			{
 				CAMsg::printMsg(LOG_DEBUG,"Re-readed config file -- could not process configuration!\n");
 				goto REREAD_FINISH;
-			}			
+			}
 		pOptions->setNewValues(otmpOptions);
 		if(pMix!=NULL)
 			pMix->reconfigure();
@@ -405,7 +405,7 @@ SINT32 CACmdLnOptions::getMixId(UINT8* id,UINT32 len)
 	{
 		if(len<24||m_strMixID==NULL) //we need 24 chars (including final \0)
 			return E_UNKNOWN;
-		strcpy((char*)id,m_strMixID);		
+		strcpy((char*)id,m_strMixID);
 		return E_SUCCESS;
 	}
 
@@ -419,7 +419,7 @@ UINT16 CACmdLnOptions::getMixPort()
 	{
 		return m_iTargetPort;
   }
-    
+
 
 SINT32 CACmdLnOptions::getMixHost(UINT8* host,UINT32 len)
   {
@@ -427,7 +427,7 @@ SINT32 CACmdLnOptions::getMixHost(UINT8* host,UINT32 len)
 				return E_UNKNOWN;
 		if(len<=(UINT32)strlen(m_strTargetHost))
 				{
-					return E_UNKNOWN;		
+					return E_UNKNOWN;
 				}
 		strcpy((char*)host,m_strTargetHost);
 		return E_SUCCESS;
@@ -437,14 +437,14 @@ UINT16 CACmdLnOptions::getSOCKSPort()
   {
 		return m_iSOCKSPort;
   }
-    
+
 SINT32 CACmdLnOptions::getSOCKSHost(UINT8* host,UINT32 len)
   {
 		if(m_strSOCKSHost==NULL)
 				return E_UNKNOWN;
 		if(len<=(UINT32)strlen(m_strSOCKSHost))
 				{
-					return E_UNKNOWN;		
+					return E_UNKNOWN;
 				}
 		strcpy((char*)host,m_strSOCKSHost);
 		return (SINT32)strlen(m_strSOCKSHost);
@@ -454,7 +454,7 @@ UINT16 CACmdLnOptions::getInfoServerPort()
   {
 		return m_iInfoServerPort;
   }
-    
+
 SINT32 CACmdLnOptions::getInfoServerHost(UINT8* host,UINT32 len)
   {
 		if((m_strInfoServerHost==NULL)||(len<=(UINT32)strlen(m_strInfoServerHost)))
@@ -469,7 +469,7 @@ SINT32 CACmdLnOptions::getCascadeName(UINT8* name,UINT32 len)
 				return E_UNKNOWN;
 		if(len<=(UINT32)strlen(m_strCascadeName))
 				{
-					return E_UNKNOWN;		
+					return E_UNKNOWN;
 				}
 		strcpy((char*)name,m_strCascadeName);
 		return E_SUCCESS;
@@ -481,7 +481,7 @@ SINT32 CACmdLnOptions::getLogDir(UINT8* name,UINT32 len)
 				return E_UNKNOWN;
 		if(len<=(UINT32)strlen(m_strLogDir))
 				{
-					return E_UNKNOWN;		
+					return E_UNKNOWN;
 				}
 		strcpy((char*)name,m_strLogDir);
 		return E_SUCCESS;
@@ -492,7 +492,7 @@ SINT32 CACmdLnOptions::getEncryptedLogDir(UINT8* name,UINT32 len)
 		if(m_strEncryptedLogDir==NULL||name==NULL)
 				return E_UNKNOWN;
 		if(len<=(UINT32)strlen(m_strEncryptedLogDir))
-			return E_UNKNOWN;		
+			return E_UNKNOWN;
 		strcpy((char*)name,m_strEncryptedLogDir);
 		return E_SUCCESS;
   }
@@ -503,7 +503,7 @@ SINT32 CACmdLnOptions::getUser(UINT8* user,UINT32 len)
 				return E_UNKNOWN;
 		if(len<=(UINT32)strlen(m_strUser))
 				{
-					return E_UNKNOWN;		
+					return E_UNKNOWN;
 				}
 		strcpy((char*)user,m_strUser);
 		return E_SUCCESS;
@@ -532,7 +532,7 @@ bool CACmdLnOptions::isLocalProxy()
 /** Returns the XML tree describing the Mix . This is NOT a copy!
 	* @param docMixInfo destination for the XML tree
 	*	@retval E_SUCCESS if it was successful
-	* @retval E_UNKNOWN in case of an error 
+	* @retval E_UNKNOWN in case of an error
 */
 SINT32 CACmdLnOptions::getMixXml(DOM_Document& docMixInfo)
 	{
@@ -571,7 +571,7 @@ SINT32 CACmdLnOptions::readXmlConfiguration(DOM_Document& docConfig,const UINT8*
 		return E_SUCCESS;
 	}
 
-/** Processes a XML configuration document. This sets the values of the 
+/** Processes a XML configuration document. This sets the values of the
 	* options to the values found in the XML document.
 	* Note that only the values are changed, which are given in the XML document!
 	* @param docConfig the configuration as XML document
@@ -621,7 +621,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 				memcpy(m_strCascadeName,tmpBuff,tmpLen);
 				m_strCascadeName[tmpLen]=0;
 			}
-		
+
 		//get Username to run as...
 		getDOMChildByName(elemGeneral,(UINT8*)"UserID",elem,false);
 		tmpLen=255;
@@ -640,7 +640,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		getDOMChildByName(elemGeneral,(UINT8*)"Daemon",elem,false);
 		tmpLen=255;
 		if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS&&memcmp(tmpBuff,"True",4)==0)
-			m_bDaemon=true;		
+			m_bDaemon=true;
 		//get Logging
 		DOM_Element elemLogging;
 		getDOMChildByName(elemGeneral,(UINT8*)"Logging",elemLogging,false);
@@ -689,7 +689,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 				if(m_pSignKey->setSignKey(elemOwnCert.getFirstChild(),SIGKEY_PKCS12)!=E_SUCCESS)
 					{//Maybe not an empty passwd
 						printf("I need a passwd for the SignKey: ");
-						scanf("%400[^\n]",(char*)passwd); 
+						scanf("%400[^\n]",(char*)passwd);
 						if(m_pSignKey->setSignKey(elemOwnCert.getFirstChild(),SIGKEY_PKCS12,(char*)passwd)!=E_SUCCESS)
 							{
 								CAMsg::printMsg(LOG_CRIT,"Couldt not read own signature key!\n");
@@ -723,7 +723,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		getDOMChildByName(elemJPI, (UINT8*)"Host", elem, false);
 		tmpLen = 255;
 		if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) {
-			
+
 			strtrim(tmpBuff);
 			m_strJPIHost = new char[strlen((char*)tmpBuff)+1];
 			strcpy(m_strJPIHost, (char *) tmpBuff);
@@ -764,7 +764,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 				m_cnListenerInterfaces=nlListenerInterfaces.getLength();
 				if(m_cnListenerInterfaces>0)
 					{
-						m_arListenerInterfaces=new CAListenerInterface*[m_cnListenerInterfaces]; 
+						m_arListenerInterfaces=new CAListenerInterface*[m_cnListenerInterfaces];
 						UINT32 aktInterface=0;
 //						UINT32 type=0;
 //						bool bHidden=false;
@@ -858,7 +858,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 SKIP_NEXT_MIX:
 				delete addr;
 			}
-		
+
 		//Next Proxies
 		DOM_Element elemProxies;
 		getDOMChildByName(elemNetwork,(UINT8*)"Proxies",elemProxies,false);
@@ -869,7 +869,7 @@ SKIP_NEXT_MIX:
 				m_cnTargets+=nlTargetInterfaces.getLength();
 				if(nlTargetInterfaces.getLength()>0)
 					{
-						m_arTargetInterfaces=new TargetInterface[m_cnTargets]; 
+						m_arTargetInterfaces=new TargetInterface[m_cnTargets];
 						UINT32 aktInterface=0;
 						NetworkType type=UNKNOWN_NETWORKTYPE;
 						UINT32 proxy_type=0;
@@ -911,8 +911,8 @@ SKIP_NEXT_MIX:
 									proxy_type=TARGET_HTTP_PROXY;
 								else
 									continue;
-								
-								
+
+
 								if(type==SSL_TCP||type==RAW_TCP)
 									{
 										DOM_Element elemPort;
@@ -962,7 +962,7 @@ SKIP_NEXT_MIX:
 						m_cnTargets=aktInterface;
 					}
 			}//end if elemProxies!=null
-		//add NextMixInterface to the End of the List...		
+		//add NextMixInterface to the End of the List...
 		if(targetInterfaceNextMix!=NULL)
 			{
 				if(m_arTargetInterfaces==NULL)
@@ -980,7 +980,7 @@ SKIP_NEXT_MIX:
 		DOM_Element elemMix=m_docMixInfo.createElement("Mix");
 		elemMix.setAttribute("id",DOMString(m_strMixID));
 		m_docMixInfo.appendChild(elemMix);
-		
+
 		//Inserting the Name if given...
 		getDOMChildByName(elemGeneral,(UINT8*)"MixName",elem,false);
 		tmpLen=255;
@@ -1003,7 +1003,7 @@ SKIP_NEXT_MIX:
 						tmpChild=tmpChild.getNextSibling();
 					}
 			}
-		
+
 		//Set Software-Version...
 		DOM_Element elemSoftware=m_docMixInfo.createElement("Software");
 		DOM_Element elemVersion=m_docMixInfo.createElement("Version");

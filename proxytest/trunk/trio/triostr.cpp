@@ -148,11 +148,11 @@ TrioDuplicateMax(const char *source, size_t size)
 
 /**
    Append @p source at the end of @p target.
-   
+
    @param target Target string.
    @param source Source string.
    @return Boolean value indicating success or failure.
-   
+
    @pre @p target must point to a memory chunk with sufficient room to
    contain the @p target string and @p source string.
    @pre No boundary checking is performed, so insufficient memory will
@@ -165,19 +165,19 @@ trio_append(char *target,
 {
   assert(target);
   assert(source);
-  
+
   return (strcat(target, source) != NULL);
 }
 
 
 /**
    Append at most @p max characters from @p source to @p target.
-   
+
    @param target Target string.
    @param max Maximum number of characters to append.
    @param source Source string.
    @return Boolean value indicating success or failure.
-   
+
    @pre @p target must point to a memory chuck with sufficient room to
    contain the @p target string and the @p source string (at most @p max
    characters).
@@ -191,12 +191,12 @@ trio_append_max(char *target,
 		const char *source)
 {
   size_t length;
-  
+
   assert(target);
   assert(source);
 
   length = trio_length(target);
-  
+
   if (max > length)
     {
       strncat(target, source, max - length - 1);
@@ -218,18 +218,18 @@ trio_contains(const char *string,
 {
   assert(string);
   assert(substring);
-  
+
   return (0 != strstr(string, substring));
 }
 
 
 /**
    Copy @p source to @p target.
-   
+
    @param target Target string.
    @param source Source string.
    @return Boolean value indicating success or failure.
-   
+
    @pre @p target must point to a memory chunk with sufficient room to
    contain the @p source string.
    @pre No boundary checking is performed, so insufficient memory will
@@ -250,12 +250,12 @@ trio_copy(char *target,
 
 /**
    Copy at most @p max characters from @p source to @p target.
-   
+
    @param target Target string.
    @param max Maximum number of characters to append.
    @param source Source string.
    @return Boolean value indicating success or failure.
-   
+
    @pre @p target must point to a memory chunk with sufficient room to
    contain the @p source string (at most @p max characters).
    @pre No boundary checking is performed, so insufficient memory will
@@ -279,10 +279,10 @@ trio_copy_max(char *target,
 
 /**
    Duplicate @p source.
-   
+
    @param source Source string.
    @return A copy of the @p source string.
-   
+
    @post @p target will be zero terminated.
 */
 TRIO_PUBLIC char *
@@ -294,11 +294,11 @@ trio_duplicate(const char *source)
 
 /**
    Duplicate at most @p max characters of @p source.
-   
+
    @param source Source string.
    @param max Maximum number of characters to duplicate.
    @return A copy of the @p source string.
-   
+
    @post @p target will be zero terminated.
 */
 TRIO_PUBLIC char *
@@ -321,11 +321,11 @@ trio_duplicate_max(const char *source,
 
 /**
    Compare if two strings are equal.
-   
+
    @param first First string.
    @param second Second string.
    @return Boolean indicating whether the two strings are equal or not.
-   
+
    Case-insensitive comparison.
 */
 TRIO_PUBLIC int
@@ -358,11 +358,11 @@ trio_equal(const char *first,
 
 /**
    Compare if two strings are equal.
-   
+
    @param first First string.
    @param second Second string.
    @return Boolean indicating whether the two strings are equal or not.
-   
+
    Case-sensitive comparison.
 */
 TRIO_PUBLIC int
@@ -382,12 +382,12 @@ trio_equal_case(const char *first,
 
 /**
    Compare if two strings up until the first @p max characters are equal.
-   
+
    @param first First string.
    @param max Maximum number of characters to compare.
    @param second Second string.
    @return Boolean indicating whether the two strings are equal or not.
-   
+
    Case-sensitive comparison.
 */
 TRIO_PUBLIC int
@@ -408,7 +408,7 @@ trio_equal_case_max(const char *first,
 
 /**
    Compare if two strings are equal.
-   
+
    @param first First string.
    @param second Second string.
    @return Boolean indicating whether the two strings are equal or not.
@@ -432,12 +432,12 @@ trio_equal_locale(const char *first,
 
 /**
    Compare if two strings up until the first @p max characters are equal.
-   
+
    @param first First string.
    @param max Maximum number of characters to compare.
    @param second Second string.
    @return Boolean indicating whether the two strings are equal or not.
-   
+
    Case-insensitive comparison.
 */
 TRIO_PUBLIC int
@@ -511,7 +511,7 @@ trio_format_date_max(char *target,
   assert(format);
   assert(datetime);
   assert(max > 0);
-  
+
   return strftime(target, max, format, datetime);
 }
 
@@ -534,7 +534,7 @@ trio_hash(const char *string,
   char ch;
 
   assert(string);
-  
+
   switch (type)
     {
     case TRIO_HASH_PLAIN:
@@ -559,14 +559,14 @@ trio_hash(const char *string,
    @param character Character to be found.
    @param A pointer to the found character, or NULL if character was not found.
  */
-TRIO_PUBLIC TRIO_INLINE char *
+/*TRIO_PUBLIC TRIO_INLINE char *
 trio_index(const char *string,
 	   char character)
 {
   assert(string);
 
   return strchr(string, character);
-}
+}*/
 
 
 /**
@@ -576,14 +576,14 @@ trio_index(const char *string,
    @param character Character to be found.
    @param A pointer to the found character, or NULL if character was not found.
  */
-TRIO_PUBLIC TRIO_INLINE char *
+/*TRIO_PUBLIC TRIO_INLINE char *
 trio_index_last(const char *string,
 		char character)
 {
   assert(string);
 
   return strchr(string, character);
-}
+}*/
 
 
 /**
@@ -609,7 +609,7 @@ trio_lower(char *target)
    @return Boolean value indicating success or failure.
 
    Case-insensitive comparison.
-   
+
    The following wildcards can be used
    @li @c * Match any number of characters.
    @li @c ? Match a single character.
@@ -620,7 +620,7 @@ trio_match(const char *string,
 {
   assert(string);
   assert(pattern);
-  
+
   for (; ('*' != *pattern); ++pattern, ++string)
     {
       if (NIL == *string)
@@ -645,7 +645,7 @@ trio_match(const char *string,
 	}
     }
   while (*string++);
-  
+
   return FALSE;
 }
 
@@ -658,7 +658,7 @@ trio_match(const char *string,
    @return Boolean value indicating success or failure.
 
    Case-sensitive comparison.
-   
+
    The following wildcards can be used
    @li @c * Match any number of characters.
    @li @c ? Match a single character.
@@ -669,7 +669,7 @@ trio_match_case(const char *string,
 {
   assert(string);
   assert(pattern);
-  
+
   for (; ('*' != *pattern); ++pattern, ++string)
     {
       if (NIL == *string)
@@ -694,7 +694,7 @@ trio_match_case(const char *string,
 	}
     }
   while (*string++);
-  
+
   return FALSE;
 }
 
@@ -717,7 +717,7 @@ trio_span_function(char *target,
   assert(target);
   assert(source);
   assert(Function);
-  
+
   while (*source != NIL)
     {
       *target++ = Function(*source++);
@@ -735,7 +735,7 @@ trio_span_function(char *target,
    @return Pointer to first occurrence of @p substring in @p string, or NULL
    if no match was found.
 */
-TRIO_PUBLIC TRIO_INLINE char *
+/*TRIO_PUBLIC TRIO_INLINE char *
 trio_substring(const char *string,
 	       const char *substring)
 {
@@ -743,7 +743,7 @@ trio_substring(const char *string,
   assert(substring);
 
   return strstr(string, substring);
-}
+}*/
 
 
 /**
@@ -766,7 +766,7 @@ trio_substring_max(const char *string,
 
   assert(string);
   assert(substring);
-  
+
   size = trio_length(substring);
   if (size <= max)
     {
@@ -796,7 +796,7 @@ TRIO_PUBLIC TRIO_INLINE char *
 trio_tokenize(char *string, const char *delimiters)
 {
   assert(delimiters);
-  
+
   return strtok(string, delimiters);
 }
 
@@ -926,7 +926,7 @@ trio_to_double(const char *source,
 	    }
 	}
     }
-  
+
   value = (double)integer;
   if (fraction != 0)
     {
@@ -984,7 +984,7 @@ trio_to_long(const char *string,
 {
   assert(string);
   assert((base >= 2) && (base <= 36));
-  
+
   return strtol(string, endp, base);
 }
 
@@ -1003,7 +1003,7 @@ trio_to_unsigned_long(const char *string,
 {
   assert(string);
   assert((base >= 2) && (base <= 36));
-  
+
   return strtoul(string, endp, base);
 }
 
@@ -1044,7 +1044,7 @@ TRIO_PRIVATE trio_string_t *
 TrioStringAlloc(void)
 {
   trio_string_t *self;
-  
+
   self = (trio_string_t *)TRIO_MALLOC(sizeof(trio_string_t));
   if (self)
     {
@@ -1073,7 +1073,7 @@ TrioStringGrow(trio_string_t *self,
   new_size = (delta == 0)
     ? ( (self->allocated == 0) ? 1 : self->allocated * 2 )
     : self->allocated + delta;
-  
+
   new_content = (char *)TRIO_REALLOC(self->content, new_size);
   if (new_content)
     {
@@ -1105,7 +1105,7 @@ TrioStringGrowTo(trio_string_t *self,
 
 /**
    Create a new dynamic string.
-   
+
    @param initial_size Initial size of the buffer.
    @return Newly allocated dynamic string, or NULL if memory allocation failed.
 */
@@ -1135,14 +1135,14 @@ trio_string_create(int initial_size)
 
 /**
    Deallocate the dynamic string and its contents.
-   
+
    @param self Dynamic string
 */
 TRIO_PUBLIC void
 trio_string_destroy(trio_string_t *self)
 {
   assert(self);
-  
+
   if (self)
     {
       trio_destroy(self->content);
@@ -1153,11 +1153,11 @@ trio_string_destroy(trio_string_t *self)
 
 /**
    Get a pointer to the content.
-   
+
    @param self Dynamic string.
    @param offset Offset into content.
    @return Pointer to the content.
-   
+
    @p Offset can be zero, positive, or negative. If @p offset is zero,
    then the start of the content will be returned. If @p offset is positive,
    then a pointer to @p offset number of characters from the beginning of the
@@ -1169,7 +1169,7 @@ trio_string_destroy(trio_string_t *self)
 trio_string_get(trio_string_t *self, int offset)
 {
   char *result = NULL;
-  
+
   assert(self);
 
   if (self->content != NULL)
@@ -1201,10 +1201,10 @@ trio_string_get(trio_string_t *self, int offset)
 
 /**
    Extract the content.
-   
+
    @param self Dynamic String
    @return Content of dynamic string.
-   
+
    The content is removed from the dynamic string. This enables destruction
    of the dynamic string without deallocation of the content.
 */
@@ -1212,7 +1212,7 @@ TRIO_PUBLIC char *
 trio_string_extract(trio_string_t *self)
 {
   char *result;
-  
+
   assert(self);
 
   result = self->content;
@@ -1225,13 +1225,13 @@ trio_string_extract(trio_string_t *self)
 
 /**
    Set the content of the dynamic string.
-   
+
    @param self Dynamic String
    @param buffer The new content.
-   
+
    Sets the content of the dynamic string to a copy @p buffer.
    An existing content will be deallocated first, if necessary.
-   
+
    @remark
    This function will make a copy of @p buffer.
    You are responsible for deallocating @p buffer yourself.
@@ -1261,7 +1261,7 @@ trio_string_size(trio_string_t *self)
 
 /**
    Append the second string to the first.
-   
+
    @param self Dynamic string to be modified.
    @param other Dynamic string to copy from.
    @return Boolean value indicating success or failure.
@@ -1271,7 +1271,7 @@ trio_string_append(trio_string_t *self,
 		   trio_string_t *other)
 {
   size_t length;
-  
+
   assert(self);
   assert(other);
 
@@ -1281,7 +1281,7 @@ trio_string_append(trio_string_t *self,
   trio_copy(&self->content[self->length], other->content);
   self->length = length;
   return TRUE;
-  
+
  error:
   return FALSE;
 }
@@ -1295,7 +1295,7 @@ trio_xstring_append(trio_string_t *self,
 		    const char *other)
 {
   size_t length;
-  
+
   assert(self);
   assert(other);
 
@@ -1305,7 +1305,7 @@ trio_xstring_append(trio_string_t *self,
   trio_copy(&self->content[self->length], other);
   self->length = length;
   return TRUE;
-  
+
  error:
   return FALSE;
 }
@@ -1313,7 +1313,7 @@ trio_xstring_append(trio_string_t *self,
 
 /**
    Search for the first occurrence of second parameter in the first.
-   
+
    @param self Dynamic string to be modified.
    @param other Dynamic string to copy from.
    @return Boolean value indicating success or failure.
@@ -1380,7 +1380,7 @@ TRIO_PUBLIC trio_string_t *
 trio_string_duplicate(trio_string_t *other)
 {
   trio_string_t *self;
-  
+
   assert(other);
 
   self = TrioStringAlloc();
@@ -1408,7 +1408,7 @@ TRIO_PUBLIC trio_string_t *
 trio_xstring_duplicate(const char *other)
 {
   trio_string_t *self;
-  
+
   assert(other);
 
   self = TrioStringAlloc();
@@ -1563,27 +1563,27 @@ trio_string_format_date_max(trio_string_t *self,
 /*
  * trio_string_index
  */
-TRIO_PUBLIC char *
+/*TRIO_PUBLIC char *
 trio_string_index(trio_string_t *self,
 		  int character)
 {
   assert(self);
 
   return trio_index(self->content, character);
-}
+}*/
 
 
 /*
  * trio_string_index_last
  */
-TRIO_PUBLIC char *
+/*TRIO_PUBLIC char *
 trio_string_index_last(trio_string_t *self,
 		       int character)
 {
   assert(self);
 
   return trio_index_last(self->content, character);
-}
+}*/
 
 
 /*
@@ -1673,7 +1673,7 @@ trio_xstring_match_case(trio_string_t *self,
 /*
  * trio_string_substring
  */
-TRIO_PUBLIC char *
+/*TRIO_PUBLIC char *
 trio_string_substring(trio_string_t *self,
 		      trio_string_t *other)
 {
@@ -1681,13 +1681,13 @@ trio_string_substring(trio_string_t *self,
   assert(other);
 
   return trio_substring(self->content, other->content);
-}
+}*/
 
 
 /*
  * trio_xstring_substring
  */
-TRIO_PUBLIC char *
+/*TRIO_PUBLIC char *
 trio_xstring_substring(trio_string_t *self,
 		       const char *other)
 {
@@ -1695,7 +1695,7 @@ trio_xstring_substring(trio_string_t *self,
   assert(other);
 
   return trio_substring(self->content, other);
-}
+}*/
 
 
 /*

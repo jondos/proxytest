@@ -504,7 +504,7 @@ SINT32 CAFirstMixChannelList::test()
 		((CASocket*)pMuxSocket)->create();
 		UINT8 peerIP[4];
 		pList->add(pMuxSocket,peerIP,NULL);
-#if defined(_WIN32) && defined(_DEBUG)
+#if defined(HAVE_CRTDBG)
 		_CrtMemState s1, s2, s3;
 		_CrtMemCheckpoint( &s1 );
 #endif
@@ -513,7 +513,7 @@ SINT32 CAFirstMixChannelList::test()
 			pList->addChannel(pMuxSocket,i,NULL,&channelOut);
 		for(i=0;i<50;i++)
 			pList->removeChannel(pMuxSocket,i);
-#if defined(_WIN32) && defined(_DEBUG)
+#if defined(HAVE_CRTDBG)
 		_CrtMemCheckpoint( &s2 );
 		if ( _CrtMemDifference( &s3, &s1, &s2 ) )
       _CrtMemDumpStatistics( &s3 );

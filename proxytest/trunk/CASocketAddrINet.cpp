@@ -1,28 +1,28 @@
 /*
-Copyright (c) 2000, The JAP-Team 
+Copyright (c) 2000, The JAP-Team
 All rights reserved.
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-	- Redistributions of source code must retain the above copyright notice, 
+	- Redistributions of source code must retain the above copyright notice,
 	  this list of conditions and the following disclaimer.
 
-	- Redistributions in binary form must reproduce the above copyright notice, 
-	  this list of conditions and the following disclaimer in the documentation and/or 
+	- Redistributions in binary form must reproduce the above copyright notice,
+	  this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
-	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors 
-	  may be used to endorse or promote products derived from this software without specific 
-		prior written permission. 
+	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
+	  may be used to endorse or promote products derived from this software without specific
+		prior written permission.
 
-	
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS 
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
 AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
 BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
-OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
@@ -41,7 +41,7 @@ CAMutex CASocketAddrINet::m_csGet;
 		return E_SUCCESS;
 	}
 */
-/** Should be called if CASocketAddrINEt functions are not longer needed. If needed again 
+/** Should be called if CASocketAddrINEt functions are not longer needed. If needed again
        init() must be called */
 /*SINT32 CASocketAddrINet::destroy()
 	{
@@ -81,13 +81,13 @@ CASocketAddrINet::CASocketAddrINet(const CASocketAddrINet& addr)
 		sin_addr.s_addr=addr.sin_addr.s_addr;
 	}
 
-/** Sets the address to szIP and port. szIP could be either a hostname or an 
-  * IP-Address of the form a.b.c.d . If szIP==NULL, the the IP-Adredress ist set 
+/** Sets the address to szIP and port. szIP could be either a hostname or an
+  * IP-Address of the form a.b.c.d . If szIP==NULL, the the IP-Adredress ist set
 	* to ANY local IP Address
 	* @param szIP new value for IP-Address or hostname (zero terminated string)
 	* @param port new value for port
 	* @retval E_SUCCESS if no error occurs
-	* @retval E_UNKNOWN_HOST if the hostname couldt not be resolved (or the ip is wrong). 
+	* @retval E_UNKNOWN_HOST if the hostname couldt not be resolved (or the ip is wrong).
 	*                        In this case the old values are NOT changed.
 	*/
 SINT32 CASocketAddrINet::setAddr(const UINT8* szIP,UINT16 port)
@@ -168,7 +168,7 @@ SINT32 CASocketAddrINet::getHostName(UINT8* buff,UINT32 len)
 	*/
 SINT32 CASocketAddrINet::getIP(UINT8 buff[4])
 	{
-		memcpy(buff,&sin_addr.s_addr,4);		
+		memcpy(buff,&sin_addr.s_addr,4);
 		return E_SUCCESS;
 	}
 
