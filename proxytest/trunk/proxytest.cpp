@@ -194,11 +194,14 @@ For Upstream and Downstream different keys are used.
 
 int main(int argc, const char* argv[])
 	{		
+		CAMix* pMix=NULL;
+		int i;
+		UINT32 start;
 		//Setup Routines
-			XMLPlatformUtils::Initialize();	
-			OpenSSL_add_all_algorithms();
-			pOpenSSLMutexes=new CAMutex[CRYPTO_num_locks()];
-			CRYPTO_set_locking_callback((void (*)(int,int,const char *,int))openssl_locking_callback);	
+		XMLPlatformUtils::Initialize();	
+		OpenSSL_add_all_algorithms();
+		pOpenSSLMutexes=new CAMutex[CRYPTO_num_locks()];
+		CRYPTO_set_locking_callback((void (*)(int,int,const char *,int))openssl_locking_callback);	
 
 	/*		UINT8 buffz[162];
 			memset(buffz,65,162);
@@ -352,6 +355,13 @@ Debug(dc::malloc.on());
 		#endif
 
 		options.parse(argc,argv);
+		if(!(options.isFirstMix()||options.isMiddleMix()||options.isLastMix()||options.isLocalProxy()))
+			{
+				CAMsg::printMsg(LOG_CRIT,"You must specifiy, whcih kind of Mix you want to run!\n");
+				CAMsg::printMsg(LOG_CRIT,"Use -j or -c\n");
+				CAMsg::printMsg(LOG_CRIT,"Exiting...\n");
+				goto EXIT;
+			}
 			
 /*		UINT8 buff1[1024];
 		UINT32 len=1024;
@@ -402,18 +412,18 @@ Debug(dc::malloc.on());
 */
 #ifdef _DEBUG
 		//		CADatabase::test();
-		if(CAQueue::test()!=E_SUCCESS)
-			CAMsg::printMsg(LOG_CRIT,"CAQueue::test() NOT passed! Exiting\n");
-		else
-			CAMsg::printMsg(LOG_DEBUG,"CAQueue::test() passed!\n");
+//		if(CAQueue::test()!=E_SUCCESS)
+//			CAMsg::printMsg(LOG_CRIT,"CAQueue::test() NOT passed! Exiting\n");
+//		else
+//			CAMsg::printMsg(LOG_DEBUG,"CAQueue::test() passed!\n");
 
 		//CALastMixChannelList::test();
 		//exit(0);
 		//Testing msSleep
 		CAMsg::printMsg(LOG_DEBUG,"Should sleep now for aprox 2 seconds....\n");
-		UINT32 start=time(NULL);
-		for(int i=0;i<10;i++)
-		msSleep(200);
+		start=time(NULL);
+		for(i=0;i<10;i++)
+			msSleep(200);
 		start=time(NULL)-start;
 		CAMsg::printMsg(LOG_DEBUG,"done! Takes %u seconds\n",start);
 		//end Testin msSleep
@@ -423,6 +433,7 @@ Debug(dc::malloc.on());
 		_CrtMemCheckpoint( &s1 );
 #endif
 		UINT8 buff[255];
+
 #ifndef WIN32
 		SINT32 maxFiles=options.getMaxOpenFiles();
 		if(maxFiles>0)
@@ -496,7 +507,6 @@ Debug(dc::malloc.on());
 #endif
 		signal(SIGINT,signal_interrupt);
 		signal(SIGTERM,signal_term);
-		CAMix* pMix=NULL;
 //		CARoundTripTime* pRTT=NULL;
 		if(options.isLocalProxy())
 			{
@@ -528,9 +538,10 @@ Debug(dc::malloc.on());
 	  CAMsg::printMsg(LOG_INFO,"Starting MIX...\n");
 		if(pMix->start()!=E_SUCCESS)
 			CAMsg::printMsg(LOG_CRIT,"Error during MIX-Startup!\n");
-//EXIT:
+EXIT:
 //		delete pRTT;
-		delete pMix;
+		if(pMix!=NULL)
+			delete pMix;
 //		CASocketAddrINet::destroy();
 		#ifdef _WIN32		
 			WSACleanup();
