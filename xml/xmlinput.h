@@ -26,10 +26,10 @@
 #include "xmlconfig.h"
 #include <stddef.h>		/* offsetof */
 
-#ifdef __cplusplus
+/*#ifdef __cplusplus
 	extern "C" {
 #endif
-
+*/
 /*
 ------------------------------------------------------------------------------
 BEGIN C INTERFACE
@@ -240,8 +240,8 @@ int XML_AttrGetBoolean(const struct XML_Attribute_ *attr, int defValue);
 int XML_IsWhiteSpace(XML_Char c);
 int XML_StringsMatch(const XML_Char *s1, const XML_Char *s2);
 
-#ifdef __cplusplus
-}	// extern "C"
+//#ifdef __cplusplus
+//}	// extern "C"
 
 // ------------------------------------------------------------------------------
 // BEGIN C++ INTERFACE
@@ -517,7 +517,7 @@ public:
 };
 
 //XML_END_NAMESPACE
-#endif	// __cplusplus
+//#endif	// __cplusplus
 
 #endif	// XMLINPUT_H
 

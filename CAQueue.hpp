@@ -81,10 +81,16 @@ class CAQueue
 			static SINT32 test();
 		
 		private:
+#ifdef _DEBUG 
+			QUEUE* volatile m_Queue; 
+			QUEUE* volatile m_lastElem;
+			volatile UINT32 m_nQueueSize;
+#else
 			QUEUE* m_Queue;
 			QUEUE* m_lastElem;
+			UINT32 m_nQueueSize;
+#endif
 			CAMutex m_csQueue;
 			CAConditionVariable m_convarSize;
-			UINT32 m_nQueueSize;
 	};
 #endif
