@@ -232,6 +232,10 @@ SOURCE=.\httptunnel\tunnel.h
 # End Group
 # Begin Source File
 
+SOURCE=.\CAAsymCipher.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\CACmdLnOptions.cpp
 # End Source File
 # Begin Source File
@@ -279,6 +283,10 @@ SOURCE=.\StdAfx.cpp
 # Begin Group "Header-Dateien"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
+# Begin Source File
+
+SOURCE=.\CAASymCipher.hpp
+# End Source File
 # Begin Source File
 
 SOURCE=.\CACmdLnOptions.hpp

@@ -88,6 +88,7 @@
 #include <errno.h>
 #include "popt/system.h"
 #include <openssl/blowfish.h>
+#include <openssl/rsa.h>
 		// ZU ERLEDIGEN: Verweisen Sie hier auf zusätzliche Header-Dateien, die Ihr Programm benötigt
 
 //{{AFX_INSERT_LOCATION}}
