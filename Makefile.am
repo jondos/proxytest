@@ -15,7 +15,6 @@ proxytest_SOURCES = CAASymCipher.cpp \
 										CAIPList.cpp \
 		   							CALastMix.cpp \
 										CALocalProxy.cpp \
-										CALoadBalancing.cpp \
 										CAMiddleMix.cpp \
 		   							CAMix.cpp \
 										CAMsg.cpp \
@@ -43,7 +42,6 @@ proxytest_SOURCES = CAASymCipher.cpp \
 										CAInfoService.hpp \
 										CAIPList.hpp \
 										CALastMix.hpp \
-										CALoadBalancing.hpp \
 										CALocalProxy.hpp \
 										CAMiddleMix.hpp \
 										CAMix.hpp \
