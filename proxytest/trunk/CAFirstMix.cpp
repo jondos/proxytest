@@ -671,7 +671,7 @@ SINT32 CAFirstMix::loop()
 								if(oSocketGroup.isSignaled(*tmpMuxListEntry->pMuxSocket))
 									{
 										countRead--;
-										ret=tmpMuxListEntry->pMuxSocket->receive(&oMuxPacket,100);
+										ret=tmpMuxListEntry->pMuxSocket->receive(&oMuxPacket,0);
 										if(ret==SOCKET_ERROR)
 											{
 												deleteResume(tmpMuxListEntry->pMuxSocket);

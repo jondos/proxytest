@@ -31,7 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef _DEBUG
 	#include "CAMsg.hpp"
 #endif
-
+#include "CASocketGroup.hpp"
 //#include "httptunnel/common.h"
 char buff[255];
 
@@ -269,7 +269,36 @@ SINT32 CAMuxSocket::receive(MUXPACKET* pPacket,UINT32 timeout)
 				m_aktBuffPos=0;
 				return MUXPACKET_SIZE;
 			}
-		return E_AGAIN;	
+		m_aktBuffPos+=ret;
+		if(timeout==0)
+			return E_AGAIN;	
+		UINT32 timeE=time(NULL)+timeout;
+		SINT32 dt=timeout;
+		CASocketGroup oSocketGroup;
+		oSocketGroup.add(*this);
+		do
+			{
+				ret=oSocketGroup.select(false,dt);
+				if(ret<0)
+					return E_UNKNOWN;
+				if(ret==1)
+					{
+						ret=m_Socket.receive(m_Buff+m_aktBuffPos,len);
+						if(ret<=0)
+							return E_UNKNOWN;
+						if(ret==len)
+							{
+								memcpy(pPacket,m_Buff,MUXPACKET_SIZE);
+								pPacket->channel=ntohl(pPacket->channel);
+								pPacket->flags=ntohs(pPacket->flags);
+								m_aktBuffPos=0;
+								return MUXPACKET_SIZE;
+							}
+						m_aktBuffPos+=ret;
+					}
+				dt=timeE-time(NULL);
+			}	while(dt>0);
+		return E_AGAIN;
 	}
 #endif
 
