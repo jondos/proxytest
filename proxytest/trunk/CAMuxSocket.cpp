@@ -11,7 +11,6 @@ char buff[255];
 CAMuxSocket::CAMuxSocket()
 	{
 		bIsTunneld=false;
-//		bDecrypt=bEncrypt=false;
 	}
 	
 int CAMuxSocket::useTunnel(char* proxyhost,unsigned short proxyport)
@@ -73,34 +72,14 @@ int CAMuxSocket::close()
 			return tunnel_close(m_pTunnel);
 	}
 
-/*			
-int CAMuxSocket::send(HCHANNEL channel_id,char* buff,unsigned short bufflen)
-	{
-		if(bufflen>DATA_SIZE)
-			return SOCKET_ERROR;
-		MUXPACKET MuxPacket;
-		memcpy(MuxPacket.data,buff,bufflen);
-		MuxPacket.channel=channel_id;
-		MuxPacket.len=bufflen;
-		return send(&MuxPacket);
-	}
-*/	
 int CAMuxSocket::send(MUXPACKET *pPacket)
 	{
-			
-//		pPacket->data[pPacket->len]=0;
-//		printf("%s\n",pPacket->data);
-	
-	
 		int MuxPacketSize=sizeof(MUXPACKET);
 		int aktIndex=0;
 		int len=0;
 		pPacket->channel=htonl(pPacket->channel);
 		pPacket->len=htons(pPacket->len);
-		
-		
-		
-		
+
 		if(!bIsTunneld)
 			{
 				do
@@ -130,25 +109,7 @@ int CAMuxSocket::send(MUXPACKET *pPacket)
 			}
 		return sizeof(MUXPACKET);
 	}
-/*		
-int CAMuxSocket::receive(HCHANNEL* channel_id,char* buff,unsigned short bufflen)
-	{
-		MUXPACKET MuxPacket;
-		if(receive(&MuxPacket)==SOCKET_ERROR)
-			return SOCKET_ERROR;
-		if(MuxPacket.len>bufflen)
-			{
-				#ifdef _DEBUG
-					CAMsg::printMsg(LOG_DEBUG,"MuxSocket-Receive - ungültiges Packet!\n");
-					CAMsg::printMsg(LOG_DEBUG,"Data-Len %i\n",MuxPacket.len);
-				#endif
-				return SOCKET_ERROR;
-			}
-		*channel_id=MuxPacket.channel;
-		memcpy(buff,MuxPacket.data,MuxPacket.len);
-		return MuxPacket.len;
-	}
-*/
+
 int CAMuxSocket::receive(MUXPACKET* pPacket)
 	{
 		int MuxPacketSize=sizeof(MUXPACKET);
@@ -199,19 +160,3 @@ int CAMuxSocket::close(HCHANNEL channel_id)
 		oPacket.len=0;
 		return send(&oPacket);
 	}
-
-/*
-int CAMuxSocket::setDecryptionKey(unsigned char* key)
-	{
-		oSymCipher.setDecryptionKey(key);
-		bDecrypt=true;
-		return 0;
-	}
-
-int CAMuxSocket::setEncryptionKey(unsigned char* key)
-	{
-		oSymCipher.setEncryptionKey(key);
-		bEncrypt=true;
-		return 0;
-	}
-	*/
