@@ -28,10 +28,8 @@ fi
 
 CFLAGS=""
 CXXFLAGS=""
-dnl CFLAGS="$CFLAGS -I. -I/usr/include -I/usr/local/include"
-dnl CPPFLAGS=$CFLAGS
-dnl CXXFLAGS=$CFLAGS
 LIBS="$LIBS -L/usr/lib -L/usr/local/lib"
+
 case "$host" in
 *-*-solaris*)
         LIBS="$LIBS -lnsl -lsocket"
@@ -52,6 +50,28 @@ i686)
     OFLAGS="$OFLAGS -march=i686"
     ;;
 esac
+
+dnl Checks for Headers
+AC_HEADER_STDC
+AC_CHECK_HEADERS(sys/filio.h)
+
+dnl Checks for library functions.
+AC_FUNC_ALLOCA
+AC_CHECK_FUNCS([strerror])
+AC_CHECK_FUNCS(vsnprintf)
+
+dnl Checks for declarations.
+AC_CHECK_DECL(TCP_KEEPALIVE,[AC_DEFINE(HAVE_TCP_KEEPALIVE,,[Define if your OS supports the TCP socket option TCP_KEEPALIVE])],[],[#include <sys/socket.h>])
+AC_CHECK_DECL(AF_UNIX,[AC_DEFINE(HAVE_UNIX_DOMAIN_PROTOCOL,,[Define if your OS supports the Unix Domain protocol])],[],[#include <sys/socket.h>])
+AC_CHECK_DECL(O_BINARY,[],[AC_DEFINE(O_BINARY,0,[This flag is used in open(), in order to open a file in binary mode])])
+AC_CHECK_DECL(MAX_PATH,[],[AC_DEFINE(MAX_PATH,4096,[This is the maximum length of a file system path])])
+AC_CHECK_DECL(INADDR_NONE,[],[AC_DEFINE(INADDR_NONE,-1,[This is the value, which is returned from inet_addr(), in case of an error])],[#include <netinet/in.h>])
+AC_CHECK_DECL(FIONREAD,[AC_DEFINE(HAVE_FIONREAD,,[This is a flag to ioctl() to get the number of available bytes on a socket])],[],[#include <sys/ioctl.h>])
+AC_CHECK_DECL(MSG_NOSIGNAL,[],[AC_DEFINE(MSG_NOSIGNAL,0,[This is a flag to read(), to tell the os to get no signals])],[#include <sys/socket.h>])
+
+dnl Checks for types
+AC_CHECK_TYPE(socklen_t,[AC_DEFINE(HAVE_SOCKLEN_T,,[Define if the type socklen_t is available])],[],[#include <sys/socket.h>])
+
 
 dnl Checks for libraries.
 
@@ -138,10 +158,11 @@ if (test ! -z "$ac_cv_openssldir" && test "x$ac_cv_openssldir" != "x(system)") ;
 fi
 LIBS="$saved_LIBS -lcrypto"
 
-AC_LANG(C++)
 
+dnl Check for Xerces-C
+AC_LANG(C++)
+dnl Check for XML includes.
 xmlincludedir="/usr/local/include"
-dnl Check for XML libs and includes.
 AC_ARG_WITH(xml-include,
 	[  --with-xml-include=PATH     Specify path to XERCES-C include files (without a trailing '/xercesc')],
 	[
@@ -150,8 +171,8 @@ AC_ARG_WITH(xml-include,
 		fi
 	]
 )
-CFLAGS="$CFLAGS -I/usr/include/xercesc -I$xmlincludedir -I$xmlincludedir/xercesc"
-CPPFLAGS=$CFLAGS
+XMLINCLUDEFLAGS="-I/usr/include/xercesc -I$xmlincludedir -I$xmlincludedir/xercesc"
+CFLAGS="$CFLAGS $XMLINCLUDEFLAGS"
 CXXFLAGS=$CFLAGS
 AC_CHECK_HEADER([dom/DOM.hpp],AC_MSG_RESULT([Xerces-C includes found]),
 		AC_MSG_ERROR([Xerces-C includes NOT found - please use --with-xml-include]),[//Check])
@@ -166,19 +187,15 @@ AC_ARG_WITH(xml-lib,
 		fi
 	]
 )
-LIBS="$LIBS -L$xmllibdir -lxerces-c"
+XMLLIBFLAGS="-L$xmllibdir -lxerces-c"
+LIBS="$LIBS $XMLLIBFLAGS"
 
 AC_TRY_LINK([#include "util/PlatformUtils.hpp"],[XMLPlatformUtils::Initialize()],AC_MSG_RESULT([XercesC-Lib found]),
 		AC_MSG_ERROR([Xerces-C Lib NOT found - please use --with-xml-lib]))
 
 
-dnl Checks for header files.
 AC_LANG([C])
-AC_HEADER_STDC
 
-dnl Checks for library functions.
-dnl AC_CHECK_FUNC(strerror,AC_DEFINE(HAVE_STRERROR,,[Define if you have strerror()]))
-AC_CHECK_FUNCS([strerror])
 
 AC_ARG_WITH(debug,
 	[  --with-debug		  Enable debug mode],
@@ -190,25 +207,8 @@ AC_ARG_WITH(debug,
 )
 
 
-AC_CHECK_FUNCS(vsnprintf)
-
-AC_CHECK_DECL(TCP_KEEPALIVE,[AC_DEFINE(HAVE_TCP_KEEPALIVE,,[Define if your OS supports the TCP socket option TCP_KEEPALIVE])],[],[#include <sys/socket.h>])
-AC_CHECK_DECL(AF_UNIX,[AC_DEFINE(HAVE_UNIX_DOMAIN_PROTOCOL,,[Define if your OS supports the Unix Domain protocol])],[],[#include <sys/socket.h>])
-AC_CHECK_TYPE(socklen_t,[AC_DEFINE(HAVE_SOCKLEN_T,,[Define if the type socklen_t is available])],[],[#include <sys/socket.h>])
-AC_CHECK_DECL(O_BINARY,[],[AC_DEFINE(O_BINARY,0,[This flag is used in open(), in order to open a file in binary mode])])
-AC_CHECK_DECL(MAX_PATH,[],[AC_DEFINE(MAX_PATH,4096,[This is the maximum length of a file system path])])
-AC_CHECK_DECL(INADDR_NONE,[],[AC_DEFINE(INADDR_NONE,-1,[This is the value, which is returned from inet_addr(), in case of an error])],[#include <netinet/in.h>])
-AC_CHECK_DECL(FIONREAD,[AC_DEFINE(HAVE_FIONREAD,,[This is a flag to ioctl() to get the number of available bytes on a socket])],[],[#include <sys/ioctl.h>])
-AC_CHECK_DECL(MSG_NOSIGNAL,[],[AC_DEFINE(MSG_NOSIGNAL,0,[This is a flag to read(), to tell the os to get no signals])],[#include <sys/socket.h>])
-AC_CHECK_HEADERS(sys/filio.h)
-
-
-AC_FUNC_ALLOCA
-
-
 CFLAGS="$CFLAGS $OFLAGS"
 CXXFLAGS=$CFLAGS
 
 AC_CONFIG_FILES([Makefile popt/Makefile xml/Makefile aes/Makefile trio/Makefile])
 AC_OUTPUT
-dnl AC_OUTPUT
