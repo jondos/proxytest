@@ -133,6 +133,15 @@ AC_ARG_WITH(debug,
 	]
 )
 
+AC_ARG_WITH(prot2,
+	[  --with-prot2		  Enable Protocol Version 0.2],
+	[
+		if test "x$withval" != "$xno" ; then
+			CFLAGS="$CFLAGS -DPROT2"
+		fi
+	]
+)
+
 if test "x$GCC" = "xyes" ; then
    CPPFLAGS="-Wall -D_REENTRANT"   
 else
