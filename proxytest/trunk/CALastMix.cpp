@@ -246,7 +246,11 @@ SINT32 CALastMix::loop()
 #else
 SINT32 CALastMix::init()
 	{
-		mRSA.generateKeyPair(1024);
+		if(mRSA.generateKeyPair(1024)!=E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Could not generate a valid key pair\n");
+				return E_UNKNOWN;
+			}
 		CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...\n");
 		if(muxIn.accept(options.getServerPort())==SOCKET_ERROR)
 		    {
