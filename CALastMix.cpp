@@ -280,7 +280,7 @@ SINT32 CALastMix::processKeyExchange()
 				CAMsg::printMsg(LOG_CRIT,"Couldt not decrypt the symetric key!\n");		
 				return E_UNKNOWN;
 			}
-		if(m_pMuxIn->setReceiveKey(key,32)!=E_SUCCESS||m_pMuxIn->setSendKey(key+32,32))
+		if(m_pMuxIn->setReceiveKey(key,32)!=E_SUCCESS||m_pMuxIn->setSendKey(key+32,32)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Couldt not set the symetric key to be used by the MuxSocket!\n");		
 				return E_UNKNOWN;
