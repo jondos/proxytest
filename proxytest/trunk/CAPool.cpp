@@ -33,10 +33,16 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 CAPool::CAPool(UINT32 poolsize)
 	{
 		m_uPoolSize=poolsize;
+		m_uRandMax=0xFFFFFFFF;
+		m_uRandMax-=m_uRandMax%m_uPoolSize;
 		m_pPoolList=new tPoolListEntry;
-		getRandom(m_pPoolList->mixpacket.data,DATA_SIZE);
-		m_pPoolList->mixpacket.flags=CHANNEL_CLOSE;
-		m_pPoolList->mixpacket.channel=0;
+		getRandom(m_pPoolList->poolentry.mixpacket.data,DATA_SIZE);
+		m_pPoolList->poolentry.mixpacket.flags=CHANNEL_CLOSE;
+		m_pPoolList->poolentry.mixpacket.channel=0;
+#ifdef LOG_PACKET_TIMES
+		setZero64(m_pPoolList->poolentry.overall_timestamp);
+		setZero64(m_pPoolList->poolentry.pool_timestamp);
+#endif				
 		m_pPoolList->next=NULL;
 		m_pLastEntry=m_pPoolList;
 		m_arChannelIDs=new HCHANNEL[poolsize];
@@ -44,9 +50,13 @@ CAPool::CAPool(UINT32 poolsize)
 		for(UINT32 i=1;i<poolsize;i++)
 			{
 				tPoolListEntry* tmpEntry=new tPoolListEntry;
-				getRandom(tmpEntry->mixpacket.data,DATA_SIZE);
-				tmpEntry->mixpacket.flags=CHANNEL_CLOSE;
-				tmpEntry->mixpacket.channel=0;
+				getRandom(tmpEntry->poolentry.mixpacket.data,DATA_SIZE);
+				tmpEntry->poolentry.mixpacket.flags=CHANNEL_CLOSE;
+				tmpEntry->poolentry.mixpacket.channel=0;
+				#ifdef LOG_PACKET_TIMES
+					setZero64(tmpEntry->poolentry.overall_timestamp);
+					setZero64(tmpEntry->poolentry.pool_timestamp);
+				#endif				
 				tmpEntry->next=m_pPoolList;
 				m_pPoolList=tmpEntry;
 				m_arChannelIDs[i]=0;
@@ -67,16 +77,23 @@ CAPool::~CAPool()
 		delete[] m_arChannelIDs;
 	}
 	
-SINT32 CAPool::pool(MIXPACKET* pMixPacket)
+SINT32 CAPool::pool(tPoolEntry* pPoolEntry)
 	{
 		UINT32 v;
-		getRandom(&v);
-		v=v%m_uPoolSize;
+		for(;;)
+			{
+				getRandom(&v);
+				if(v<m_uRandMax)
+					{
+						v%=m_uPoolSize;
+						break;
+					}
+			}
 		HCHANNEL id=m_arChannelIDs[v];
-		m_arChannelIDs[v]=pMixPacket->channel;
+		m_arChannelIDs[v]=pPoolEntry->mixpacket.channel;
 		tPoolListEntry* pPrevEntry=NULL;		
 		tPoolListEntry* pEntryOut=m_pPoolList;
-		while(pEntryOut->mixpacket.channel!=id)
+		while(pEntryOut->poolentry.mixpacket.channel!=id)
 			{
 				pPrevEntry=pEntryOut;
 				pEntryOut=pEntryOut->next;	
@@ -84,8 +101,8 @@ SINT32 CAPool::pool(MIXPACKET* pMixPacket)
 
 		if(pEntryOut==m_pPoolList) //first element to remove)
 			{
-				memcpy(&m_pEntry->mixpacket,pMixPacket,MIXPACKET_SIZE);
-				memcpy(pMixPacket,&pEntryOut->mixpacket,MIXPACKET_SIZE);
+				memcpy(&m_pEntry->poolentry,pPoolEntry,sizeof(tPoolEntry));
+				memcpy(pPoolEntry,&pEntryOut->poolentry,sizeof(tPoolEntry));
 				m_pPoolList=m_pPoolList->next;
 				m_pLastEntry->next=m_pEntry;
 				m_pLastEntry=m_pEntry;
@@ -94,8 +111,8 @@ SINT32 CAPool::pool(MIXPACKET* pMixPacket)
 			}
 		else
 			{
-				memcpy(&m_pEntry->mixpacket,pMixPacket,MIXPACKET_SIZE);
-				memcpy(pMixPacket,&pEntryOut->mixpacket,MIXPACKET_SIZE);
+				memcpy(&m_pEntry->poolentry,pPoolEntry,sizeof(tPoolEntry));
+				memcpy(pPoolEntry,&pEntryOut->poolentry,sizeof(tPoolEntry));
 				m_pLastEntry->next=m_pEntry;
 				m_pLastEntry=m_pEntry;
 				m_pLastEntry->next=NULL;

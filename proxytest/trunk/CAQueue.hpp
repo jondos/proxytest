@@ -32,33 +32,34 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 struct _t_queue
 	{
-		UINT8* pBuff;
-		_t_queue* next;
-		UINT32 size;
-#ifdef DO_TRACE
-		UINT32 allocSize;
-		_t_queue* shadow_this;
-		UINT8* shadow_pBuff;
-#endif
+		volatile UINT8* pBuff;
+		volatile struct _t_queue* next;
+		volatile UINT32 size;
+		volatile UINT32 index;
 	};
 
 typedef struct _t_queue QUEUE;
 
 /** This is a simple FIFO-Queue. You can add data and get them back.
 	* This class is thread safe.
-	* TODO: The dandling of getAndWit is not correct because remove could intercept....
+	* TODO: The handling of getAndWait is not correct because remove could intercept....
 	* Maybe we do not neeed an other Mutex other than then ConVar....
 	*/
 class CAQueue
 	{
 		public:
-			CAQueue()
+			/** Give the size of the amount of data what you will add in one step. Used for optimizations.
+				* Use expectedElementSize=0, if you hav no idea about the typicall amount of data added in one call to add().
+				*/
+			CAQueue(UINT32 expectedElementSize=0)
 				{
 					m_Queue=NULL;
+					m_nExpectedElementSize=expectedElementSize;
 					m_nQueueSize=0;
-#ifdef DO_TRACE
-					CAMsg::printMsg(LOG_DEBUG,"CAQueue creating QUEUE [%p]\n",this);
-#endif
+					m_pcsQueue=new CAMutex();
+					m_pconvarSize=new CAConditionVariable();
+					m_pHeap=NULL;
+					incHeap();
 				}
 			~CAQueue();
 			SINT32 add(const void* buff,UINT32 size);
@@ -73,6 +74,8 @@ class CAQueue
 				*/
 			UINT32 getSize()
 				{
+					m_pcsQueue->lock();
+					m_pcsQueue->unlock();
 					return m_nQueueSize;
 				}
 			
@@ -91,63 +94,28 @@ class CAQueue
 			static SINT32 test();
 		
 		private:
-#ifdef _DEBUG 
-			QUEUE* volatile m_Queue; 
-			QUEUE* volatile m_lastElem;
+			volatile QUEUE* m_Queue; 
+			volatile QUEUE* m_lastElem;
 			volatile UINT32 m_nQueueSize;
-#else
-			QUEUE* m_Queue;
-			QUEUE* m_lastElem;
-			UINT32 m_nQueueSize;
-#endif
-			CAMutex m_csQueue;
-			CAConditionVariable m_convarSize;
-#ifdef DO_TRACE
-			static UINT32 m_aktAlloc;
-			static UINT32 m_maxAlloc;
-			
-			QUEUE* newQUEUE()
-				{
-					m_aktAlloc+=sizeof(QUEUE);
-					if(m_maxAlloc<m_aktAlloc)
-						{
-							m_maxAlloc=m_aktAlloc;
-							CAMsg::printMsg(LOG_DEBUG,"CAQueue current alloc: %u Current Size (of this[%p] queue) %u\n",m_aktAlloc,this,m_nQueueSize);
-						}
-					QUEUE* pQueue=new QUEUE;
-					pQueue->shadow_this=pQueue;
-					return pQueue;
-				}
-			
-			void deleteQUEUE(QUEUE* entry)
-				{
-					m_aktAlloc-=sizeof(QUEUE);
-					if(entry!=entry->shadow_this)
-							CAMsg::printMsg(LOG_CRIT,"CAQueue deleting QUEUE: this!=shadow_this!!\n");
-					delete entry;
-				}
+			UINT32 m_nExpectedElementSize;
+			volatile QUEUE* m_pHeap;
+			CAMutex* m_pcsQueue;
+			CAConditionVariable* m_pconvarSize;
 
-			UINT8* newUINT8Buff(UINT32 size)
+			SINT32 incHeap()
 				{
-					m_aktAlloc+=size;
-					if(m_maxAlloc<m_aktAlloc)
+					QUEUE* pEntry;
+					for(int i=0;i<100;i++)
 						{
-							m_maxAlloc=m_aktAlloc;
-							CAMsg::printMsg(LOG_DEBUG,"CAQueue current alloc: %u Current Size (of this[%p] queue) %u\n",m_aktAlloc,this,m_nQueueSize);
+							pEntry=new QUEUE;
+							pEntry->next=m_pHeap;
+							if(m_nExpectedElementSize>0)
+								pEntry->pBuff=new UINT8[m_nExpectedElementSize];
+							else
+								pEntry->pBuff=NULL;	
+							m_pHeap=pEntry;
 						}
-					return (UINT8*)new UINT8[size];
+					return E_SUCCESS;	
 				}
-
-			void deleteUINT8Buff(UINT8* entry,UINT8* shadow,UINT32 size)
-				{
-					if(entry!=shadow)
-						{
-							CAMsg::printMsg(LOG_CRIT,"CAQueue deleting QUEUE-Buff: pBuff!=shadow!!\n");
-						}
-					m_aktAlloc-=size;
-					delete[] entry;
-				}
-
-#endif
 	};
 #endif

@@ -29,10 +29,21 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define __CAPOOL__
 #include "CAMuxSocket.hpp"
 
+struct t_pool_entry
+	{
+		MIXPACKET mixpacket;
+		#ifdef LOG_PACKET_TIMES
+			UINT64 overall_timestamp;
+			UINT64 pool_timestamp;
+		#endif	
+	};
+	
+typedef struct t_pool_entry tPoolEntry; 	
+	
 struct t_pool_list
 	{
 		struct t_pool_list * next;
-		MIXPACKET mixpacket;
+		struct t_pool_entry poolentry;
 	};
 
 typedef t_pool_list tPoolListEntry;
@@ -45,13 +56,14 @@ class CAPool
 			CAPool(UINT32 poolsize);
 			~CAPool();
 			
-			SINT32 pool(MIXPACKET* pMixPacket); 
+			SINT32 pool(tPoolEntry* pPoolEntry); 
 		
 		private:
 			tPoolListEntry* m_pPoolList;
 			tPoolListEntry* m_pLastEntry;
 			tPoolListEntry* m_pEntry;
 			HCHANNEL* m_arChannelIDs;
-			UINT32 m_uPoolSize;		
+			UINT32 m_uPoolSize;
+			UINT32 m_uRandMax;
 	};
 #endif

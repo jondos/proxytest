@@ -38,6 +38,7 @@ char* strins(const char* src,const char * pos,const char* ins);
 
 SINT32 getcurrentTime(timespec& t); 
 SINT32 getcurrentTimeMillis(UINT64& u64Time);
+SINT32 getcurrentTimeMicros(UINT64& u64Time);
 
 SINT32 initRandom();
 SINT32 getRandom(UINT8* buff,UINT32 len);
@@ -92,6 +93,16 @@ inline void set64(UINT64& op1,UINT64 op2)
 #endif
 	}
 
+inline void setZero64(UINT64& op1)
+	{
+#if !defined(HAVE_NATIVE_UINT64)
+		op1.low=0;
+		op1.high=0;
+#else
+		op1=0;
+#endif
+	}
+	
 inline void add64(UINT64& op1,UINT32 op2)
 	{
 #if !defined(HAVE_NATIVE_UINT64)
@@ -154,6 +165,16 @@ inline bool isEqual64(UINT64& op1,UINT64& op2)
 		return op1==op2;
 #endif
 	}
+	
+inline bool isZero64(UINT64& op1)
+	{
+#if !defined(HAVE_NATIVE_UINT64)
+		return (op1.high==0)&&op1.low==0;
+#else
+		return op1==0;
+#endif
+	}
+	
 /*inline void print64(UINT8* buff,UINT64& op)
 	{
 		#if defined(HAVE_NATIVE_UINT64)

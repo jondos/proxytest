@@ -21,7 +21,7 @@ CAListenerInterface::~CAListenerInterface(void)
 
 CAListenerInterface* CAListenerInterface::getInstance(NetworkType type,const UINT8* file)
 	{
-		#ifdef HAVE_UNIX_DOMAIN
+		#ifdef HAVE_UNIX_DOMAIN_PROTOCOL
 			if(	(type!=RAW_UNIX&&type!=SSL_UNIX)||
 					file==NULL)
 				return NULL;

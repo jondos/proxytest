@@ -127,7 +127,24 @@ SINT32 CALastMix::init()
 		m_nCrimeRegExp=0;
 		m_pCrimeRegExps=options.getCrimeRegExps(&m_nCrimeRegExp);
 #endif	
-		return processKeyExchange();
+		ret=processKeyExchange();
+		if(ret!=E_SUCCESS)
+			return ret;
+		
+		m_pQueueSendToMix=new CAQueue(MIXPACKET_SIZE);
+		m_pQueueReadFromMix=new CAQueue(MIXPACKET_SIZE);
+
+		m_bRestart=false;
+		//Starting thread for Step 1a
+		m_pthreadReadFromMix=new CAThread();
+		m_pthreadReadFromMix->setMainLoop(lm_loopReadFromMix);
+		m_pthreadReadFromMix->start(this);
+		
+		//Starting thread for Step 4		
+		m_pthreadSendToMix=new CAThread();
+		m_pthreadSendToMix->setMainLoop(lm_loopSendToMix);
+		m_pthreadSendToMix->start(this);
+		return E_SUCCESS;
 	}
 
 /** Processes the startup communication with the preceeding mix.
@@ -263,6 +280,7 @@ SINT32 CALastMix::processKeyExchange()
 				CAMsg::printMsg(LOG_CRIT,"Couldt not set the symetric key to be used by the MuxSocket!\n");		
 				return E_UNKNOWN;
 			}
+		m_pMuxIn->setCrypt(true);
 		return E_SUCCESS;
 	}
 
@@ -300,18 +318,20 @@ THREAD_RETURN lm_loopLog(void* param)
 	}
 
 /**How to end this thread:
+0. set m_bRestart=true;
 1. Close connection to next mix
 2. put a byte in the Mix-Output-Queue
 */
 THREAD_RETURN lm_loopSendToMix(void* param)
 	{
-		CAQueue* pQueue=((CALastMix*)param)->m_pQueueSendToMix;
-		CAMuxSocket* pMuxSocket=((CALastMix*)param)->m_pMuxIn;
+		CALastMix* pLastMix=(CALastMix*)param;
+		CAQueue* pQueue=pLastMix->m_pQueueSendToMix;
+		CAMuxSocket* pMuxSocket=pLastMix->m_pMuxIn;
 		
 		UINT32 len;
 #ifndef USE_POOL
 		UINT8* buff=new UINT8[0xFFFF];
-		for(;;)
+		while(!pLastMix->m_bRestart)
 			{
 				len=MIXPACKET_SIZE;
 				SINT32 ret=pQueue->getOrWait(buff,&len);
@@ -323,27 +343,81 @@ THREAD_RETURN lm_loopSendToMix(void* param)
 		delete []buff;
 #else
 		CAPool* pPool=new CAPool(MIX_POOL_SIZE);
-		MIXPACKET* pMixPacket=new MIXPACKET;
-		for(;;)
+		tPoolEntry* pPoolEntry=new tPoolEntry;
+		while(!pLastMix->m_bRestart)
 			{
 				len=MIXPACKET_SIZE;
-				SINT32 ret=pQueue->getOrWait((UINT8*)pMixPacket,&len,MIX_POOL_TIMEOUT);
+				SINT32 ret=pQueue->getOrWait((UINT8*)pPoolEntry,&len,MIX_POOL_TIMEOUT);
 				if(ret==E_TIMEDOUT)
 					{
-						pMixPacket->flags=0;
-						pMixPacket->channel=DUMMY_CHANNEL;
-						getRandom(pMixPacket->data,DATA_SIZE);
+						pPoolEntry->mixpacket.flags=0;
+						pPoolEntry->mixpacket.channel=DUMMY_CHANNEL;
+						getRandom(pPoolEntry->mixpacket.data,DATA_SIZE);
 					}
 				else if(ret!=E_SUCCESS||len!=MIXPACKET_SIZE)
 					break;
-				pPool->pool(pMixPacket);
-				if(pMuxSocket->send(pMixPacket)!=MIXPACKET_SIZE)
+				pPool->pool(pPoolEntry);
+				if(pMuxSocket->send(&pPoolEntry->mixpacket)!=MIXPACKET_SIZE)
 					break;
 			}
-		delete pMixPacket;
+		delete pPoolEntry;
 		delete pPool;
 #endif
 		CAMsg::printMsg(LOG_DEBUG,"Exiting Thread SendToMix\n");
+		THREAD_RETURN_SUCCESS;
+	}
+
+#define MAX_READ_FROM_PREV_MIX_QUEUE_SIZE	10000000
+/* How to end this thread:
+ * 1. set m_brestart=true
+ */  	
+THREAD_RETURN lm_loopReadFromMix(void *pParam)
+	{
+		CALastMix* pLastMix=(CALastMix*)pParam;
+		CAMuxSocket* pMuxSocket=pLastMix->m_pMuxIn;
+		CAQueue* pQueue=pLastMix->m_pQueueReadFromMix;
+		MIXPACKET* pMixPacket=new MIXPACKET;
+		CASingleSocketGroup* pSocketGroup=new CASingleSocketGroup();
+		pSocketGroup->add(*pMuxSocket);
+		#ifdef USE_POOL
+			CAPool* pPool=new CAPool(MIX_POOL_SIZE);
+		#endif
+		
+		while(!pLastMix->m_bRestart)
+			{
+				if(pQueue->getSize()>MAX_READ_FROM_PREV_MIX_QUEUE_SIZE)
+					{
+						msSleep(200);
+						continue;
+					}
+				SINT32 ret=pSocketGroup->select(false,MIX_POOL_TIMEOUT);	
+				if(ret==E_TIMEDOUT)
+					{
+						#ifdef USE_POOL
+							pMixPacket->flags=0;
+							pMixPacket->channel=DUMMY_CHANNEL;
+							getRandom(pMixPacket->data,DATA_SIZE);
+							ret=MIXPACKET_SIZE;
+						#else
+							continue;	
+						#endif	
+					}
+				else if(ret>0)
+					ret=pMuxSocket->receive(pMixPacket);
+				if(ret!=MIXPACKET_SIZE)
+					{
+						pLastMix->m_bRestart=true;
+						break;
+					}
+				#ifdef USE_POOL
+					pPool->pool((tPoolEntry*)pMixPacket);
+				#endif		
+				pQueue->add(pMixPacket,MIXPACKET_SIZE);	
+			}
+		delete pMixPacket;
+		#ifdef USE_POOL
+			delete pPool;
+		#endif			
 		THREAD_RETURN_SUCCESS;
 	}
 
@@ -421,7 +495,18 @@ SINT32 CALastMix::clean()
 		if(m_pRSA!=NULL)
 			delete m_pRSA;
 		m_pRSA=NULL;
-//		oSuspendList.clear();
+		if(m_pthreadSendToMix!=NULL)
+			delete m_pthreadSendToMix;
+		m_pthreadSendToMix=NULL;	
+		if(m_pQueueSendToMix!=NULL)
+			delete m_pQueueSendToMix;
+		m_pQueueSendToMix=NULL;	
+		if(m_pthreadReadFromMix!=NULL)
+			delete m_pthreadReadFromMix;
+		m_pthreadReadFromMix=NULL;	
+		if(m_pQueueReadFromMix!=NULL)
+			delete m_pQueueReadFromMix;
+		m_pQueueReadFromMix=NULL;	
 		return E_SUCCESS;
 	}
 

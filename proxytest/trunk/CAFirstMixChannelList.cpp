@@ -71,7 +71,11 @@ CAFirstMixChannelList::~CAFirstMixChannelList()
 	* @retval E_UNKNOWN in case of an error
 	* @retval E_SUCCESS if successful
 	*/
+#ifdef LOG_PACKET_TIMES	
+SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,UINT8 peerIP[4],CATimedQueue* pQueueSend)
+#else
 SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,UINT8 peerIP[4],CAQueue* pQueueSend)
+#endif
 	{
 		if(pMuxSocket==NULL)
 			return E_UNKNOWN;
@@ -87,6 +91,9 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,UINT8 peerIP[4],CAQueu
 			}
 		pHashTableEntry->pMuxSocket=pMuxSocket;
 		pHashTableEntry->pQueueSend=pQueueSend;
+#ifdef LOG_PACKET_TIMES
+		pHashTableEntry->uAlreadySendPacketSize=0;
+#endif		
 		pHashTableEntry->cNumberOfChannels=0;
 #ifdef LOG_CHANNEL
 		pHashTableEntry->trafficIn=0;

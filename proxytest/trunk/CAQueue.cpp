@@ -31,37 +31,27 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAUtil.hpp"
 #include "CAThread.hpp"
 
-#ifdef DO_TRACE
-UINT32 CAQueue::m_aktAlloc=0;
-UINT32 CAQueue::m_maxAlloc=0;
-#endif
 /** Deletes this Queue and all stored data*/
 CAQueue::~CAQueue()
 	{
-		m_csQueue.lock();
-#ifdef DO_TRACE
-		CAMsg::printMsg(LOG_DEBUG,"CAQueue deleting - current alloc: %u Current Size (of this[%p] queue) %u\n",m_aktAlloc,this,m_nQueueSize);
-#endif
-		
+		m_pcsQueue->lock();
 		while(m_Queue!=NULL)
 			{
-#ifndef DO_TRACE
 				delete m_Queue->pBuff;
-#else
-				deleteUINT8Buff(m_Queue->pBuff,m_Queue->shadow_pBuff,m_Queue->allocSize);
-#endif
 				m_lastElem=m_Queue;
 				m_Queue=m_Queue->next;
-#ifndef DO_TRACE
 				delete m_lastElem;
-#else
-				deleteQUEUE(m_lastElem);
-#endif
 			}
-#ifdef DO_TRACE
-		CAMsg::printMsg(LOG_DEBUG,"CAQueue deleted QUEUE [%p] Current alloc now: %u\n",this,m_aktAlloc);
-#endif
-		m_csQueue.unlock();
+		while(m_pHeap!=NULL)
+			{
+				delete m_pHeap->pBuff;
+				m_lastElem=m_pHeap;
+				m_pHeap=m_pHeap->next;
+				delete m_pHeap;
+			}
+		m_pcsQueue->unlock();
+		delete m_pcsQueue;
+		delete m_pconvarSize;
 	}
 
 /** Adds data to the Queue.
@@ -76,81 +66,43 @@ SINT32 CAQueue::add(const void* buff,UINT32 size)
 			return E_SUCCESS;
 		if(buff==NULL)
 			return E_UNKNOWN;
-		m_csQueue.lock();
+		m_pcsQueue->lock();
+		if(m_pHeap==NULL)
+			incHeap();
 		if(m_Queue==NULL)
 			{
-#ifndef DO_TRACE
-				m_Queue=new QUEUE;
-#else
-				m_Queue=newQUEUE();
-#endif
-				if(m_Queue==NULL)
+				m_Queue=m_pHeap;
+				m_pHeap=m_pHeap->next;
+				if(size>m_nExpectedElementSize)
 					{
-						m_csQueue.unlock();
-						return E_UNKNOWN;
-					}
-#ifndef DO_TRACE
-				m_Queue->pBuff=new UINT8[size];
-#else
-				m_Queue->pBuff=newUINT8Buff(size);
-				m_Queue->allocSize=size;
-				m_Queue->shadow_pBuff=m_Queue->pBuff;
-#endif
-				if(m_Queue->pBuff==NULL)
-					{
-#ifndef DO_TRACE
-						delete m_Queue;
-#else
-						deleteQUEUE(m_Queue);
-#endif
-						m_Queue=NULL;
-						m_csQueue.unlock();
-						return E_UNKNOWN;
+						delete m_Queue->pBuff;
+						m_Queue->pBuff=new UINT8[size];
 					}
 				m_Queue->next=NULL;
+				m_Queue->index=0;
 				m_Queue->size=size;
 				memcpy(m_Queue->pBuff,buff,size);
 				m_lastElem=m_Queue;
 			}
 		else
 			{
-#ifndef DO_TRACE
-				m_lastElem->next=new QUEUE;
-#else
-				m_lastElem->next=newQUEUE();
-#endif
-				if(m_lastElem->next==NULL)
+				m_lastElem->next=m_pHeap;
+				m_lastElem=m_pHeap;
+				m_pHeap=m_pHeap->next;
+				if(size>m_nExpectedElementSize)
 					{
-						m_csQueue.unlock();
-						return E_UNKNOWN;
+						delete m_lastElem->pBuff;
+						m_lastElem->pBuff=new UINT8[size];
 					}
-#ifndef DO_TRACE
-				m_lastElem->next->pBuff=new UINT8[size];
-#else
-				m_lastElem->next->pBuff=newUINT8Buff(size);
-				m_lastElem->next->allocSize=size;
-				m_lastElem->next->shadow_pBuff=m_lastElem->next->pBuff;
-#endif
-				if(m_lastElem->next->pBuff==NULL)
-					{
-#ifndef DO_TRACE
-						delete m_lastElem->next;
-#else
-						deleteQUEUE(m_lastElem->next);
-#endif
-						m_lastElem->next=NULL;
-						m_csQueue.unlock();
-						return E_UNKNOWN;
-					}
-				m_lastElem=m_lastElem->next;
 				m_lastElem->next=NULL;
 				m_lastElem->size=size;
+				m_lastElem->index=0;
 				memcpy(m_lastElem->pBuff,buff,size);
 			}
 		m_nQueueSize+=size;
 	//	m_convarSize.unlock();
-		m_csQueue.unlock();
-		m_convarSize.signal();
+		m_pcsQueue->unlock();
+		m_pconvarSize->signal();
 		return E_SUCCESS;
 	}
 
@@ -172,43 +124,36 @@ SINT32 CAQueue::get(UINT8* pbuff,UINT32* psize)
 				*psize=0;
 				return E_SUCCESS;
 			}
-		m_csQueue.lock();
+		m_pcsQueue->lock();
 		UINT32 space=*psize;
 		*psize=0;
 		while(space>=m_Queue->size)
 			{
-				memcpy(pbuff,m_Queue->pBuff,m_Queue->size);
+				memcpy(pbuff,m_Queue->pBuff+m_Queue->index,m_Queue->size);
 				*psize+=m_Queue->size;
 				pbuff+=m_Queue->size;
 				space-=m_Queue->size;
 				m_nQueueSize-=m_Queue->size;
-#ifndef DO_TRACE
-				delete []m_Queue->pBuff;
-#else
-				deleteUINT8Buff(m_Queue->pBuff,m_Queue->shadow_pBuff,m_Queue->allocSize);
-#endif
 				QUEUE* tmp=m_Queue;
 				m_Queue=m_Queue->next;
-#ifndef DO_TRACE
-				delete tmp;
-#else
-				deleteQUEUE(tmp);
-#endif
+				tmp->next=m_pHeap;
+				m_pHeap=tmp;
 				if(m_Queue==NULL)
 					{
-						m_csQueue.unlock();
+						m_pcsQueue->unlock();
 						return E_SUCCESS;
 					}
 			}
 		if(space>0)
 			{
-				memcpy(pbuff,m_Queue->pBuff,space);
+				memcpy(pbuff,m_Queue->pBuff+m_Queue->index,space);
 				*psize+=space;
 				m_Queue->size-=space;
+				m_Queue->index+=space;
 				m_nQueueSize-=space;
-				memmove(m_Queue->pBuff,m_Queue->pBuff+space,m_Queue->size);
+				//memmove(m_Queue->pBuff,m_Queue->pBuff+space,m_Queue->size);
 			}
-		m_csQueue.unlock();
+		m_pcsQueue->unlock();
 		return E_SUCCESS;
 	}
 
@@ -222,11 +167,11 @@ SINT32 CAQueue::get(UINT8* pbuff,UINT32* psize)
 	*/
 SINT32 CAQueue::getOrWait(UINT8* pbuff,UINT32* psize)
 	{
-		m_convarSize.lock();
+		m_pconvarSize->lock();
 		while(m_Queue==NULL)
-			m_convarSize.wait();
+			m_pconvarSize->wait();
 		SINT32 ret=get(pbuff,psize);
-		m_convarSize.unlock();
+		m_pconvarSize->unlock();
 		return ret;
 	}
 
@@ -243,19 +188,19 @@ SINT32 CAQueue::getOrWait(UINT8* pbuff,UINT32* psize)
 	*/
 SINT32 CAQueue::getOrWait(UINT8* pbuff,UINT32* psize,UINT32 msTimeout)
 	{
-		m_convarSize.lock();
+		m_pconvarSize->lock();
 		SINT32 ret;
 		while(m_Queue==NULL)
 			{
-				ret=m_convarSize.wait(msTimeout);
+				ret=m_pconvarSize->wait(msTimeout);
 				if(ret==E_TIMEDOUT)
 					{
-						m_convarSize.unlock();
+						m_pconvarSize->unlock();
 						return E_TIMEDOUT;
 					}
 			}		
 		ret=get(pbuff,psize);
-		m_convarSize.unlock();
+		m_pconvarSize->unlock();
 		return ret;
 	}
 
@@ -272,26 +217,26 @@ SINT32 CAQueue::peek(UINT8* pbuff,UINT32* psize)
 			return E_UNKNOWN;
 		if(*psize==0)
 			return E_SUCCESS;
-		m_csQueue.lock();
+		m_pcsQueue->lock();
 		UINT32 space=*psize;
 		*psize=0;
 		QUEUE* tmpQueue=m_Queue;
 		while(space>=tmpQueue->size)
 			{
-				memcpy(pbuff,tmpQueue->pBuff,tmpQueue->size);
+				memcpy(pbuff,tmpQueue->pBuff+tmpQueue->index,tmpQueue->size);
 				*psize+=tmpQueue->size;
 				pbuff+=tmpQueue->size;
 				space-=tmpQueue->size;
 				tmpQueue=tmpQueue->next;
 				if(tmpQueue==NULL)
 					{
-						m_csQueue.unlock();
+						m_pcsQueue->unlock();
 						return E_SUCCESS;
 					}
 			}
-		memcpy(pbuff,tmpQueue->pBuff,space);
+		memcpy(pbuff,tmpQueue->pBuff+tmpQueue->index,space);
 		*psize+=space;
-		m_csQueue.unlock();
+		m_pcsQueue->unlock();
 		return E_SUCCESS;
 	}	
 	
@@ -308,7 +253,7 @@ SINT32 CAQueue::remove(UINT32* psize)
 			return E_UNKNOWN;
 		if(*psize==0)
 			return E_SUCCESS;
-		m_csQueue.lock();
+		m_pcsQueue->lock();
 		UINT32 space=*psize;
 		*psize=0;
 		while(space>=m_Queue->size)
@@ -316,21 +261,13 @@ SINT32 CAQueue::remove(UINT32* psize)
 				*psize+=m_Queue->size;
 				space-=m_Queue->size;
 				m_nQueueSize-=m_Queue->size;
-#ifndef DO_TRACE
-				delete []m_Queue->pBuff;
-#else
-				deleteUINT8Buff(m_Queue->pBuff,m_Queue->shadow_pBuff,m_Queue->allocSize);
-#endif
 				QUEUE* tmp=m_Queue;
 				m_Queue=m_Queue->next;
-#ifndef DO_TRACE
-				delete tmp;
-#else
-				deleteQUEUE(tmp);
-#endif
+				tmp->next=m_pHeap;
+				m_pHeap=tmp;
 				if(m_Queue==NULL)
 					{
-						m_csQueue.unlock();
+						m_pcsQueue->unlock();
 						return E_SUCCESS;
 					}
 			}
@@ -339,9 +276,10 @@ SINT32 CAQueue::remove(UINT32* psize)
 				*psize+=space;
 				m_Queue->size-=space;
 				m_nQueueSize-=space;
-				memmove(m_Queue->pBuff,m_Queue->pBuff+space,m_Queue->size);
+				m_Queue->index+=space;
+				//memmove(m_Queue->pBuff,m_Queue->pBuff+space,m_Queue->size);
 			}
-		m_csQueue.unlock();
+		m_pcsQueue->unlock();
 		return E_SUCCESS;
 	}
 
@@ -392,7 +330,7 @@ THREAD_RETURN consumer(void* param)
 
 SINT32 CAQueue::test()
 	{
-		CAQueue oQueue;
+		CAQueue oQueue(1000);
 		#define TEST_SIZE 1000000
 		UINT8* source=new UINT8[TEST_SIZE];
 		UINT8* target=new UINT8[TEST_SIZE];
@@ -454,9 +392,5 @@ SINT32 CAQueue::test()
 		
 		delete []source;
 		delete []target;
-#ifdef DO_TRACE
-		m_maxAlloc=m_aktAlloc=0;
-#endif
-
 		return E_SUCCESS;
 	}

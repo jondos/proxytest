@@ -164,6 +164,7 @@ class CAMuxSocket
 			SINT32 close();
 			SINT32 send(MIXPACKET *pPacket);
 			SINT32 send(MIXPACKET *pPacket,UINT8* buff);
+			SINT32 prepareForSend(MIXPACKET* inoutPacket);
 			SINT32 receive(MIXPACKET *pPacket);
 			SINT32 receive(MIXPACKET *pPacket,UINT32 timeout);
 			//int close(HCHANNEL channel_id);

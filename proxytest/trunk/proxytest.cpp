@@ -400,7 +400,48 @@ Debug(dc::malloc.on());
 #endif
 		initRandom();
 
-
+		//temp
+		/*for(;;){
+		CAQueue* pQueue=new CAQueue(MIXPACKET_SIZE);
+		UINT8 buff3[MIXPACKET_SIZE];
+		UINT64 t1,t2;
+		getcurrentTimeMicros(t1);
+		int h=1000;
+		for(int k=0;k<1000;k++)
+		{
+		for(int i=0;i<h;i++)
+			pQueue->add(buff3,MIXPACKET_SIZE);
+		UINT32 le=MIXPACKET_SIZE;
+		for(int i=0;i<h;i++)
+				pQueue->get(buff3,&le);
+				}
+		getcurrentTimeMicros(t2);
+		printf("Queue Time: %u µs\n",diff64(t2,t1));
+		delete pQueue;
+		UINT8 buff23[MIXPACKET_SIZE*h];
+		UINT32 aktIndex=0;
+		getcurrentTimeMicros(t1);
+		for(int k=0;k<1000;k++)
+		{
+		aktIndex=0;
+		for(int i=0;i<h;i++)
+		{
+			memcpy(buff23+aktIndex,buff3,MIXPACKET_SIZE);
+			aktIndex+=MIXPACKET_SIZE;
+			}
+		for(int i=0;i<h;i++)
+		{
+			aktIndex-=MIXPACKET_SIZE;
+				memcpy(buff3,buff23+aktIndex,MIXPACKET_SIZE);
+				}
+				}
+		getcurrentTimeMicros(t2);
+		printf("Array Time: %u µs\n",diff64(t2,t1));
+		}
+		
+		
+		exit(0);*/		
+		//end temp
 		options.parse(argc,argv);
 
 		if(!(options.isFirstMix()||options.isMiddleMix()||options.isLastMix()||options.isLocalProxy()))
