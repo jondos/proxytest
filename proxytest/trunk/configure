@@ -5531,7 +5531,7 @@ fi
 done
 
 
-if test $USE_EPOLL!=0 then
+if test "$USE_EPOLL"!="0" then
     echo "$as_me:$LINENO: checking for epoll_wait" >&5
 echo $ECHO_N "checking for epoll_wait... $ECHO_C" >&6
 if test "${ac_cv_func_epoll_wait+set}" = set; then
