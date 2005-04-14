@@ -101,7 +101,16 @@ AC_ARG_ENABLE(static,
 		fi    
 	    ])
 
-
+dnl Without epoll?
+USE_EPOLL=1
+AC_ARG_ENABLE(epoll,
+	    AS_HELP_STRING([--disable-epoll],[do not use epoll]),
+	    [
+		if test "x$enableval" == "xno" ; then
+		    USE_EPOLL=0
+		fi    
+	    ])
+echo "Epoll: $USE_EPOLL"
 dnl pool mix ??
 POOL=""
 AC_ARG_ENABLE(pool,
