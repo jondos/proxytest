@@ -182,7 +182,7 @@ AC_CHECK_FUNCS([snprintf])
 AC_CHECK_FUNCS([atoll])
 AC_CHECK_FUNCS([poll])
 
-if test $USE_EPOLL!=0 then
+if test "$USE_EPOLL"!="0" then
     AC_CHECK_FUNC([epoll_wait],AC_DEFINE(HAVE_EPOLL,1,[Define if your OS support the epoll() syscall]))
 fi;
 dnl Checks for declarations.
