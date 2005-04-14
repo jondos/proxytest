@@ -186,7 +186,7 @@ dnl even if epoll exist it may be unfunctional...
 if test "$USE_EPOLL"!="0" ; then
     AC_CHECK_FUNC([epoll_wait],
 	[	
-	    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include "sys/epoll.h"]],[[int handle;handle=epoll_create(1);if(handle==-1)exit(-1);]])],
+	    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include "sys/epoll.h"]],[[int handle;handle=epoll_creat(1);if(handle==-1)exit(-1);]])],
 		[
 		    AC_DEFINE(HAVE_EPOLL,1,[Define if your OS support the epoll() syscall])
 		],[])
