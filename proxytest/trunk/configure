@@ -5630,7 +5630,7 @@ _ACEOF
 
 fi
 
-fi;
+fi
 echo "$as_me:$LINENO: checking whether TCP_KEEPALIVE is declared" >&5
 echo $ECHO_N "checking whether TCP_KEEPALIVE is declared... $ECHO_C" >&6
 if test "${ac_cv_have_decl_TCP_KEEPALIVE+set}" = set; then

@@ -184,7 +184,7 @@ AC_CHECK_FUNCS([poll])
 
 if test "$USE_EPOLL"!="0" then
     AC_CHECK_FUNC([epoll_wait],AC_DEFINE(HAVE_EPOLL,1,[Define if your OS support the epoll() syscall]))
-fi;
+fi
 dnl Checks for declarations.
 AC_CHECK_DECL(TCP_KEEPALIVE,[AC_DEFINE(HAVE_TCP_KEEPALIVE,,[Define if your OS supports the TCP socket option TCP_KEEPALIVE])],[],[
 #include <sys/types.h>
