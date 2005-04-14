@@ -3738,7 +3738,6 @@ if test "${enable_epoll+set}" = set; then
 		fi
 
 fi;
-echo "Epoll: $USE_EPOLL"
 POOL=""
 # Check whether --enable-pool or --disable-pool was given.
 if test "${enable_pool+set}" = set; then
@@ -5531,7 +5530,9 @@ _ACEOF
 fi
 done
 
-echo "$as_me:$LINENO: checking for epoll_wait" >&5
+
+if test $USE_EPOLL!=0 then
+    echo "$as_me:$LINENO: checking for epoll_wait" >&5
 echo $ECHO_N "checking for epoll_wait... $ECHO_C" >&6
 if test "${ac_cv_func_epoll_wait+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -5629,7 +5630,7 @@ _ACEOF
 
 fi
 
-
+fi;
 echo "$as_me:$LINENO: checking whether TCP_KEEPALIVE is declared" >&5
 echo $ECHO_N "checking whether TCP_KEEPALIVE is declared... $ECHO_C" >&6
 if test "${ac_cv_have_decl_TCP_KEEPALIVE+set}" = set; then
