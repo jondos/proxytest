@@ -110,6 +110,7 @@ AC_ARG_ENABLE(epoll,
 		    USE_EPOLL=0
 		fi    
 	    ])
+echo "Epool $USE_EPOLL"
 dnl pool mix ??
 POOL=""
 AC_ARG_ENABLE(pool,

@@ -3738,6 +3738,7 @@ if test "${enable_epoll+set}" = set; then
 		fi
 
 fi;
+echo "Epool $USE_EPOLL"
 POOL=""
 # Check whether --enable-pool or --disable-pool was given.
 if test "${enable_pool+set}" = set; then
