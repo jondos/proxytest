@@ -38,6 +38,9 @@ CAIPList::CAIPList()
 		memset(m_HashTable,0,0x10000*sizeof(PIPLIST));
 		m_allowedConnections=MAX_IP_CONNECTIONS;
 		getRandom(m_Random,56);
+#ifdef COUNTRY_STATS
+		initCountryStats();
+#endif
 	}
 
 /**Constructs a empty CAIPList, there allowedConnections insertions 
@@ -51,6 +54,9 @@ CAIPList::CAIPList(UINT32 allowedConnections)
 		memset(m_HashTable,0,0x10000*sizeof(PIPLIST));
 		m_allowedConnections=allowedConnections;
 		getRandom(m_Random,56);
+#ifdef COUNTRY_STATS
+		initCountryStats();
+#endif
 	}
 
 /** Deletes the IPList and frees all used resources*/
@@ -69,6 +75,7 @@ CAIPList::~CAIPList()
 			}
 		delete [] m_Random;
 		delete [] m_HashTable;
+		deleteCountryStats();
 	}
 
 /** Inserts the IP-Address into the list. 
@@ -196,3 +203,95 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 				return 0;
 			}	
 	}
+
+#ifdef COUNTRY_STATS
+#define COUNTRY_STATS_DB "CountryStats"
+#define NR_OF_COUNTRIES 228
+
+SINT32 CAIPList::initCountryStats()
+	{
+		m_CountryStats=NULL;
+		if(m_mysqlCon!=NULL)
+			return E_UNKNOWN;
+		m_mysqlCon=new MYSQL;
+		mysql_init(m_mysqlCon);
+		MYSQL* tmp=NULL;
+		tmp=mysql_real_connect(m_mysqlCon,NULL,NULL,NULL,COUNTRY_STATS_DB,0,NULL,0);
+		if(tmp==NULL)
+			{
+				my_thread_end();
+				mysql_close(m_mysqlCon);
+				delete m_mysqlCon;
+				m_mysqlCon=NULL;
+				return E_UNKNOWN;
+			}
+		m_CountryStats=new UINT32[NR_OF_COUNTRIES+1];
+		memset(m_CountryStats,0,sizeof(UINT32)*(NR_OF_COUNTRIES+1));
+		return E_SUCCESS;
+	}
+
+SINT32 CAIPList::deleteCountryStats()
+	{
+		if(m_mysqlCon!=NULL)
+			{
+				my_thread_end();
+				mysql_close(m_mysqlCon);
+				delete m_mysqlCon;
+				m_mysqlCon=NULL;
+			}
+		if(m_CountryStats!=NULL)
+			delete[] m_CountryStats;
+		m_CountryStats=NULL;
+		return E_SUCCESS;
+	}
+
+SINT32 CAIPList::updateCountryStats(UINT8* ip,bool bRemove)
+	{
+		UINT32 u32ip=ip[0]<<24|ip[1]<<16|ip[2]<<8|ip[3];
+		char query[1024];
+		sprintf(query,"SELECT id FROM ip2c WHERE ip_lo<=\"%u\" and ip_hi>=\"%u\" LIMIT 1",u32ip,u32ip);
+		int ret=mysql_query(m_mysqlCon,query);
+		if(ret!=0)
+			return E_UNKNOWN;
+		MYSQL_RES* result=mysql_store_result(m_mysqlCon);
+		if(result==NULL)
+			return E_UNKNOWN;
+		MYSQL_ROW row=mysql_fetch_row(result);
+		int countryID=0;
+		if(row!=NULL)
+			{
+				countryID=atol(row[0]);
+			}
+		mysql_free_result(result);
+		if(bRemove)
+			m_CountryStats[countryID]--;
+		else
+			m_CountryStats[countryID]++;
+	}
+
+THREAD_RETURN iplist_loopDoLogCountries(void* param)
+	{
+		CAIPList* pIPList=(CAIPList*)param;
+		UINT32 s=30;
+		while(pIPList->m_bRunLogCountries)
+			{
+				if(s==30)
+					{
+						UINT8 aktDate[255];
+						strftime(aktDate,255,"%d",);
+						char query[1024];
+						sprintf(query,"INSERT into stats (date,id,count) VALUES (\"%s\",\"%%u\",\"%%u\")",aktDate);
+
+						for(UINT32 i=0;i<NR_OF_COUNTRIES+1;i++)
+							{
+								char aktQuery[1024];
+								sprintf(aktQuery,query,i,m_CountryStats[i]);
+								int ret=mysql_query(m_mysqlCon,aktQuery);
+							}
+						s=0;
+					}
+				sSleep(10);
+				s++;
+			}
+	}
+#endif

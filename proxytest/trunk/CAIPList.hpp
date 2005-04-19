@@ -73,5 +73,13 @@ class CAIPList
 			PIPLIST* m_HashTable;
 			UINT8* m_Random; //seems to be the best value for MD5, which operates on x*512-64 bit (52*8+4*8=512-64)
 			CAMutex m_Mutex;
+
+#ifdef COUNTRY_STATS
+			SINT32 initCountryStats();
+			SINT32 deleteCountryStats();
+			SINT32 updateCountryStats(UINT8* ip,bool bRemove);
+			UINT32* m_CountryStats;
+			MYSQL* m_mysqlCon;
+#endif
 	};
 #endif
