@@ -313,7 +313,9 @@ THREAD_RETURN iplist_loopDoLogCountries(void* param)
 							{
 								char aktQuery[1024];
 								sprintf(aktQuery,query,i,pIPList->m_CountryStats[i]);
+								pIPList->m_Mutex.lock();
 								int ret=mysql_query(pIPList->m_mysqlCon,aktQuery);
+								pIPList->m_Mutex.unlock();
 							}
 						s=0;
 					}
