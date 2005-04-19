@@ -222,8 +222,6 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 SINT32 CAIPList::initCountryStats()
 	{
 		m_CountryStats=NULL;
-		if(m_mysqlCon!=NULL)
-			return E_UNKNOWN;
 		m_mysqlCon=new MYSQL;
 		mysql_init(m_mysqlCon);
 		MYSQL* tmp=NULL;
@@ -237,6 +235,7 @@ SINT32 CAIPList::initCountryStats()
 				m_mysqlCon=NULL;
 				return E_UNKNOWN;
 			}
+		CAMsg::printMsg(LOG_DEBUG,"Connected to CountryStats DB!\n");
 		m_CountryStats=new UINT32[NR_OF_COUNTRIES+1];
 		memset(m_CountryStats,0,sizeof(UINT32)*(NR_OF_COUNTRIES+1));
 		m_threadLogLoop=new CAThread();
