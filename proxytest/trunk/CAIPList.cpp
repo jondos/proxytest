@@ -29,6 +29,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAIPList.hpp"
 #include "CAMsg.hpp"
 #include "CAUtil.hpp"
+#include "CACmdLnOptions.hpp"
+
+extern CACmdLnOptions options;
+
 /** Constructs an empty CAIPList. 
 	* The default number #MAX_IP_CONNECTIONS of allowed insertions is used*/ 
 CAIPList::CAIPList()
