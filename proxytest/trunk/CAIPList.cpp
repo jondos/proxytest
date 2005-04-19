@@ -267,7 +267,7 @@ SINT32 CAIPList::updateCountryStats(const UINT8 ip[4],UINT32 a_countryID,bool bR
 	{
 		if(!bRemove)
 			{
-				int countryID=a_countryID;
+				UINT32 countryID=a_countryID;
 				if(ip!=NULL)
 					{
 						UINT32 u32ip=ip[0]<<24|ip[1]<<16|ip[2]<<8|ip[3];
@@ -282,11 +282,10 @@ SINT32 CAIPList::updateCountryStats(const UINT8 ip[4],UINT32 a_countryID,bool bR
 							return E_UNKNOWN;
 						CAMsg::printMsg(LOG_DEBUG,"DO country stats query gives a result...\n");	
 						MYSQL_ROW row=mysql_fetch_row(result);
-						int countryID=0;
 						if(row!=NULL)
 							{
-								CAMsg::printMsg(LOG_DEBUG,"DO country stats query result: %s\n",row[0]);							
-								countryID=atol(row[0]);
+								countryID=atoi(row[0]);
+								CAMsg::printMsg(LOG_DEBUG,"DO country stats query result (raw,countryid): (%s,%u)\n",row[0],countryID);														
 							}
 						mysql_free_result(result);
 					}
