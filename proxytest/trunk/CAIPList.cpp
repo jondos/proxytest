@@ -307,7 +307,7 @@ THREAD_RETURN iplist_loopDoLogCountries(void* param)
 					{
 						UINT8 aktDate[255];
 						time_t aktTime=time(NULL);
-						strftime(aktDate,255,"%Y%m%d%M%H%S",gmtime(&aktTime));
+						strftime((char*)aktDate,255,"%Y%m%d%M%H%S",gmtime(&aktTime));
 						char query[1024];
 						sprintf(query,"INSERT into stats (date,id,count) VALUES (\"%s\",\"%%u\",\"%%u\")",aktDate);
 
