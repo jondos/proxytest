@@ -274,16 +274,19 @@ SINT32 CAIPList::updateCountryStats(const UINT8 ip[4],UINT32 a_countryID,bool bR
 						UINT32 u32ip=ip[0]<<24|ip[1]<<16|ip[2]<<8|ip[3];
 						char query[1024];
 						sprintf(query,"SELECT id FROM ip2c WHERE ip_lo<=\"%u\" and ip_hi>=\"%u\" LIMIT 1",u32ip,u32ip);
+						CAMsg::printMsg(LOG_DEBUG,"DO country stats query: %s\n",query);
 						int ret=mysql_query(m_mysqlCon,query);
 						if(ret!=0)
 							return E_UNKNOWN;
 						MYSQL_RES* result=mysql_store_result(m_mysqlCon);
 						if(result==NULL)
 							return E_UNKNOWN;
+						CAMsg::printMsg(LOG_DEBUG,"DO country stats query gives a result...\n");	
 						MYSQL_ROW row=mysql_fetch_row(result);
 						int countryID=0;
 						if(row!=NULL)
 							{
+								CAMsg::printMsg(LOG_DEBUG,"DO country stats query result: %s\n",row[0]);							
 								countryID=atol(row[0]);
 							}
 						mysql_free_result(result);
