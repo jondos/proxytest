@@ -28,6 +28,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CA_IP_LIST
 #define __CA_IP_LIST
 #include "CAMutex.hpp"
+#ifdef COUNTRY_STATS
+	#include "CAThread.hpp"
+#endif	
 /** This structure is used for building the IP-List. 
 It stores the first two bytes of an IP-Address, how often this IP-Address was inserted
 and a pointer to the next element of the list*/
@@ -35,7 +38,10 @@ struct _iplist_t
 	{
 		struct _iplist_t* next; /**Next element, NULL if element is the last one*/
 		UINT8 ip[2]; /** First two Bytes of the IP-Address*/
-		UINT8 count; /** Count of insertions*/ 
+		UINT8 count; /** Count of insertions*/
+#ifdef COUNTRY_STATS
+		UINT32 countryID; /** CountryID of this IP Address*/
+#endif				
 	};
 
 typedef struct _iplist_t IPLISTENTRY;
@@ -77,9 +83,12 @@ class CAIPList
 #ifdef COUNTRY_STATS
 			SINT32 initCountryStats();
 			SINT32 deleteCountryStats();
-			SINT32 updateCountryStats(UINT8* ip,bool bRemove);
+			SINT32 updateCountryStats(UINT8* ip,UINT32 a_countryID,bool bRemove);
+			volatile bool m_bRunLogCountries;
 			UINT32* m_CountryStats;
+			CAThread* m_threadLogLoop;
 			MYSQL* m_mysqlCon;
+			friend THREAD_RETURN iplist_loopDoLogCountries(void* param);
 #endif
 	};
 #endif
