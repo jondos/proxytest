@@ -75,7 +75,9 @@ CAIPList::~CAIPList()
 			}
 		delete [] m_Random;
 		delete [] m_HashTable;
+#ifdef COUNTRY_STATS		
 		deleteCountryStats();
+#endif		
 	}
 
 /** Inserts the IP-Address into the list. 
@@ -105,6 +107,9 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 				memcpy(entry->ip,ip,2);
 				entry->count=1;
 				entry->next=NULL;
+#ifdef COUNTRY_STATS
+				entry->countryID=updateCountryStats(ip,0,false);
+#endif				
 				m_HashTable[hashvalue]=entry;
 				m_Mutex.unlock();
 				return entry->count;
@@ -128,6 +133,9 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 										return E_UNKNOWN;
 									}
 								entry->count++;
+#ifdef COUNTRY_STATS
+								updateCountryStats(NULL,entry->countryID,false);
+#endif
 								m_Mutex.unlock();
 								return entry->count;
 							}
@@ -171,6 +179,9 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 						if(memcmp(entry->ip,ip,2)==0)
 							{
 								entry->count--;
+#ifdef COUNTRY_STATS
+								updateCountryStats(NULL,entry->countryID,true);
+#endif								
 								if(entry->count==0)
 									{
 										#ifndef PSEUDO_LOG
@@ -227,11 +238,18 @@ SINT32 CAIPList::initCountryStats()
 			}
 		m_CountryStats=new UINT32[NR_OF_COUNTRIES+1];
 		memset(m_CountryStats,0,sizeof(UINT32)*(NR_OF_COUNTRIES+1));
+		m_threadLogLoop=new CAThread();
+		m_threadLogLoop->setMainLoop(iplist_loopDoLogCountries);
+		m_bRunLogCountries=true;
+		m_threadLogLoop->start(this,true);
 		return E_SUCCESS;
 	}
 
 SINT32 CAIPList::deleteCountryStats()
 	{
+		m_bRunLogCountries=false;
+		m_threadLogLoop->join();
+		delete m_threadLogLoop;
 		if(m_mysqlCon!=NULL)
 			{
 				my_thread_end();
@@ -245,28 +263,38 @@ SINT32 CAIPList::deleteCountryStats()
 		return E_SUCCESS;
 	}
 
-SINT32 CAIPList::updateCountryStats(UINT8* ip,bool bRemove)
+SINT32 CAIPList::updateCountryStats(UINT8* ip,UINT32 a_countryID,bool bRemove)
 	{
-		UINT32 u32ip=ip[0]<<24|ip[1]<<16|ip[2]<<8|ip[3];
-		char query[1024];
-		sprintf(query,"SELECT id FROM ip2c WHERE ip_lo<=\"%u\" and ip_hi>=\"%u\" LIMIT 1",u32ip,u32ip);
-		int ret=mysql_query(m_mysqlCon,query);
-		if(ret!=0)
-			return E_UNKNOWN;
-		MYSQL_RES* result=mysql_store_result(m_mysqlCon);
-		if(result==NULL)
-			return E_UNKNOWN;
-		MYSQL_ROW row=mysql_fetch_row(result);
-		int countryID=0;
-		if(row!=NULL)
+		if(!bRemove)
 			{
-				countryID=atol(row[0]);
+				int countryID;
+				if(ip!=NULL)
+					{
+						UINT32 u32ip=ip[0]<<24|ip[1]<<16|ip[2]<<8|ip[3];
+						char query[1024];
+						sprintf(query,"SELECT id FROM ip2c WHERE ip_lo<=\"%u\" and ip_hi>=\"%u\" LIMIT 1",u32ip,u32ip);
+						int ret=mysql_query(m_mysqlCon,query);
+						if(ret!=0)
+							return E_UNKNOWN;
+						MYSQL_RES* result=mysql_store_result(m_mysqlCon);
+						if(result==NULL)
+							return E_UNKNOWN;
+						MYSQL_ROW row=mysql_fetch_row(result);
+						int countryID=0;
+						if(row!=NULL)
+							{
+								countryID=atol(row[0]);
+							}
+						mysql_free_result(result);
+					}
+				else
+					countryID=a_countryID;
+				m_CountryStats[countryID]++;
+				return countryID;
 			}
-		mysql_free_result(result);
-		if(bRemove)
-			m_CountryStats[countryID]--;
 		else
-			m_CountryStats[countryID]++;
+			m_CountryStats[a_countryID]--;
+		return E_SUCCESS;
 	}
 
 THREAD_RETURN iplist_loopDoLogCountries(void* param)
@@ -278,20 +306,22 @@ THREAD_RETURN iplist_loopDoLogCountries(void* param)
 				if(s==30)
 					{
 						UINT8 aktDate[255];
-						strftime(aktDate,255,"%d",);
+						time_t aktTime=time(NULL);
+						strftime(aktDate,255,"%Y%m%d%M%H%S",gmtime(&aktTime));
 						char query[1024];
 						sprintf(query,"INSERT into stats (date,id,count) VALUES (\"%s\",\"%%u\",\"%%u\")",aktDate);
 
 						for(UINT32 i=0;i<NR_OF_COUNTRIES+1;i++)
 							{
 								char aktQuery[1024];
-								sprintf(aktQuery,query,i,m_CountryStats[i]);
-								int ret=mysql_query(m_mysqlCon,aktQuery);
+								sprintf(aktQuery,query,i,pIPList->m_CountryStats[i]);
+								int ret=mysql_query(pIPList->m_mysqlCon,aktQuery);
 							}
 						s=0;
 					}
 				sSleep(10);
 				s++;
 			}
+		THREAD_RETURN_SUCCESS;	
 	}
 #endif
