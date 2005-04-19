@@ -267,7 +267,7 @@ SINT32 CAIPList::updateCountryStats(const UINT8 ip[4],UINT32 a_countryID,bool bR
 	{
 		if(!bRemove)
 			{
-				int countryID;
+				int countryID=a_countryID;
 				if(ip!=NULL)
 					{
 						UINT32 u32ip=ip[0]<<24|ip[1]<<16|ip[2]<<8|ip[3];
@@ -287,8 +287,6 @@ SINT32 CAIPList::updateCountryStats(const UINT8 ip[4],UINT32 a_countryID,bool bR
 							}
 						mysql_free_result(result);
 					}
-				else
-					countryID=a_countryID;
 				m_CountryStats[countryID]++;
 				return countryID;
 			}
