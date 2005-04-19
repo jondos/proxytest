@@ -308,17 +308,20 @@ THREAD_RETURN iplist_loopDoLogCountries(void* param)
 					{
 						UINT8 aktDate[255];
 						time_t aktTime=time(NULL);
-						strftime((char*)aktDate,255,"%Y%m%d%M%H%S",gmtime(&aktTime));
+						strftime((char*)aktDate,255,"%Y%m%d%H%M%S",gmtime(&aktTime));
 						char query[1024];
 						sprintf(query,"INSERT into stats (date,id,count) VALUES (\"%s\",\"%%u\",\"%%u\")",aktDate);
 
 						for(UINT32 i=0;i<NR_OF_COUNTRIES+1;i++)
 							{
-								char aktQuery[1024];
-								sprintf(aktQuery,query,i,pIPList->m_CountryStats[i]);
-								pIPList->m_Mutex.lock();
-								int ret=mysql_query(pIPList->m_mysqlCon,aktQuery);
-								pIPList->m_Mutex.unlock();
+								if(pIPList->m_CountryStats[i]>0)
+									{
+										char aktQuery[1024];
+										sprintf(aktQuery,query,i,pIPList->m_CountryStats[i]);
+										pIPList->m_Mutex.lock();
+										int ret=mysql_query(pIPList->m_mysqlCon,aktQuery);
+										pIPList->m_Mutex.unlock();
+									}
 							}
 						s=0;
 					}
