@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.03.70"
+#define MIX_VERSION "00.03.71"
 
 #if defined(DEBUG)|| defined(_DEBUG)
 	#undef DEBUG
@@ -49,6 +49,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define PSEUDO_LOG
 //#define DELAY_CHANNELS //to enable max channel bandwidth
 //#define HAVE_EPOLL //define if you have epoll support on your (Linux) system
+//#define COUNTRY_STATS //collect stats about countries users come from
 #ifdef DELAY_CHANNELS
 	#ifndef DELAY_CHANNEL_TRAFFIC
 		#define DELAY_CHANNEL_TRAFFIC 10000 //Traffic in bytes after which (download direction) the channel is delayed
@@ -381,7 +382,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #endif
 
 //For MySQL
-#ifdef PAYMENT_SUPPORT
+#if defined (PAYMENT_SUPPORT) ||defined(COUNTRY_STATS)
 #include <mysql.h>
 #endif
 
