@@ -236,6 +236,11 @@ SINT32 CAIPList::initCountryStats()
 				return E_UNKNOWN;
 			}
 		CAMsg::printMsg(LOG_DEBUG,"Connected to CountryStats DB!\n");
+		char query[1024];
+		UINT8 buff[255];
+		options.getCascadeName(buff,255);
+		sprintf(query,"CREATE TABLE IF NOT EXISTS `stats_%s` (date timestamp,id int,count int)",buff);
+		mysql_query(m_mysqlCon,query);
 		m_CountryStats=new UINT32[NR_OF_COUNTRIES+1];
 		memset(m_CountryStats,0,sizeof(UINT32)*(NR_OF_COUNTRIES+1));
 		m_threadLogLoop=new CAThread();
