@@ -263,7 +263,7 @@ SINT32 CAIPList::deleteCountryStats()
 		return E_SUCCESS;
 	}
 
-SINT32 CAIPList::updateCountryStats(UINT8* ip,UINT32 a_countryID,bool bRemove)
+SINT32 CAIPList::updateCountryStats(const UINT8 ip[4],UINT32 a_countryID,bool bRemove)
 	{
 		if(!bRemove)
 			{
