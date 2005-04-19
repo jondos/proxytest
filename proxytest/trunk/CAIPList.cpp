@@ -310,6 +310,9 @@ THREAD_RETURN iplist_loopDoLogCountries(void* param)
 	{
 		CAIPList* pIPList=(CAIPList*)param;
 		UINT32 s=30;
+		UINT8 buff[255];
+		options.getCascadeName(buff,255);
+
 		while(pIPList->m_bRunLogCountries)
 			{
 				if(s==30)
@@ -318,7 +321,7 @@ THREAD_RETURN iplist_loopDoLogCountries(void* param)
 						time_t aktTime=time(NULL);
 						strftime((char*)aktDate,255,"%Y%m%d%H%M%S",gmtime(&aktTime));
 						char query[1024];
-						sprintf(query,"INSERT into stats (date,id,count) VALUES (\"%s\",\"%%u\",\"%%u\")",aktDate);
+						sprintf(query,"INSERT into `stats_%s` (date,id,count) VALUES (\"%s\",\"%%u\",\"%%u\")",buff,aktDate);
 
 						for(UINT32 i=0;i<NR_OF_COUNTRIES+1;i++)
 							{
