@@ -151,6 +151,9 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 				memcpy(entry->ip,ip,2);
 				entry->count=1;
 				entry->next=NULL;
+#ifdef COUNTRY_STATS
+				entry->countryID=updateCountryStats(ip,0,false);
+#endif				
 				m_Mutex.unlock();
 				return entry->count;
 			}	
@@ -282,20 +285,21 @@ SINT32 CAIPList::updateCountryStats(const UINT8 ip[4],UINT32 a_countryID,bool bR
 						UINT32 u32ip=ip[0]<<24|ip[1]<<16|ip[2]<<8|ip[3];
 						char query[1024];
 						sprintf(query,"SELECT id FROM ip2c WHERE ip_lo<=\"%u\" and ip_hi>=\"%u\" LIMIT 1",u32ip,u32ip);
-						CAMsg::printMsg(LOG_DEBUG,"DO country stats query: %s\n",query);
 						int ret=mysql_query(m_mysqlCon,query);
 						if(ret!=0)
 							return E_UNKNOWN;
 						MYSQL_RES* result=mysql_store_result(m_mysqlCon);
 						if(result==NULL)
 							return E_UNKNOWN;
-						CAMsg::printMsg(LOG_DEBUG,"DO country stats query gives a result...\n");	
 						MYSQL_ROW row=mysql_fetch_row(result);
 						if(row!=NULL)
 							{
 								countryID=atoi(row[0]);
-								CAMsg::printMsg(LOG_DEBUG,"DO country stats query result (raw,countryid): (%s,%u)\n",row[0],countryID);														
 							}
+						else
+							{
+								CAMsg::printMsg(LOG_DEBUG,"DO country stats query result no result for ip %u)\n",u32ip);														
+							}	
 						mysql_free_result(result);
 					}
 				m_CountryStats[countryID]++;
