@@ -995,7 +995,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 				if(m_pSignKey->setSignKey(elemOwnCert.getFirstChild(),SIGKEY_PKCS12)!=E_SUCCESS)
 					{//Maybe not an empty passwd
 						printf("I need a passwd for the SignKey: ");
-						scanf("%400[^\n]",(char*)passwd);
+						scanf("%400[^\n]%*1[\n]",(char*)passwd);
 						if(m_pSignKey->setSignKey(elemOwnCert.getFirstChild(),SIGKEY_PKCS12,(char*)passwd)!=E_SUCCESS)
 							{
 								CAMsg::printMsg(LOG_CRIT,"Could not read own signature key!\n");

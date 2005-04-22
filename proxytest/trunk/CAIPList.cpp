@@ -232,7 +232,7 @@ SINT32 CAIPList::initCountryStats()
 		m_mysqlCon=new MYSQL;
 		mysql_init(m_mysqlCon);
 		MYSQL* tmp=NULL;
-		tmp=mysql_real_connect(m_mysqlCon,NULL,NULL,NULL,COUNTRY_STATS_DB,0,NULL,0);
+		tmp=mysql_real_connect(m_mysqlCon,NULL,"root",NULL,COUNTRY_STATS_DB,0,NULL,0);
 		if(tmp==NULL)
 			{
 				CAMsg::printMsg(LOG_DEBUG,"Could not connet to CountryStats DB!\n");
