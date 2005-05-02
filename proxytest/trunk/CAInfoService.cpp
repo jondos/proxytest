@@ -350,7 +350,8 @@ SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param)
                 ret = oSocket.receiveFully(recvBuff, len);
                 if(ret!=E_SUCCESS)
                 {
-										delete recvBuff;
+										delete []recvBuff;
+                    recvBuff=NULL;
                     oSocket.close();
                     goto ERR;
                 }
@@ -370,6 +371,7 @@ SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param)
             oParser.parse(oInput);
             DOM_Document doc=oParser.getDocument();
             delete[] recvBuff;
+            recvBuff=NULL;
             DOM_Element root;
             if(!doc.isNull() && (root = doc.getDocumentElement()) != NULL)
             {

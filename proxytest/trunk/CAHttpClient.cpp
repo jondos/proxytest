@@ -65,7 +65,7 @@ SINT32 CAHttpClient::sendGetRequest(UINT8 * url)
 				ret = m_pSocket->send(requestS, len);
 			}
 		while(ret == E_AGAIN);
-		delete requestS;
+		delete[] requestS;
 		if(ret == E_UNKNOWN)
 			{ // socket error
 				return E_UNKNOWN;
@@ -107,7 +107,7 @@ SINT32 CAHttpClient::sendPostRequest(const UINT8 * url, const UINT8 * data, cons
 		buf=new UINT8[bufsize];
 		memcpy(buf, requestS, len);
 		memcpy(buf+len, data, dataLen);
-		buf[len+dataLen]='\0';
+		buf[len+dataLen]=0;
 		#ifdef DEBUG
 			CAMsg::printMsg(LOG_DEBUG, "HttpClient now sending: %s\n", buf);
 		#endif
@@ -120,8 +120,8 @@ SINT32 CAHttpClient::sendPostRequest(const UINT8 * url, const UINT8 * data, cons
 				ret = m_pSocket->send(buf, bufsize);
 			}
 		while(ret == E_AGAIN);
-		delete requestS;
-		delete buf;
+		delete[] requestS;
+		delete[] buf;
 		if(ret == E_UNKNOWN)
 			{ // socket error
 				return E_UNKNOWN;
