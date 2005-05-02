@@ -275,6 +275,14 @@ SINT32 CAIPList::deleteCountryStats()
 		return E_SUCCESS;
 	}
 
+/** Update the statisitics of the countries users come from. The dependency between the argumenst is as follow:
+	* @param bRemove if true the number of users of a given country is decreased, if false it is increased
+	* @param a_countryID the country the user comes from. Must be set if bRemove==true. If bRemove==false and ip==NULL, than
+	*        if also must be set to the country the user comes from. In case ip!=NULL if holdes the default country id, if no country for the ip could be found
+	* @param ip the ip the user comes from. this ip is looked up in the databse to find the corresponding country. it is only used if bRemove==false. If no country for
+	*         that ip could be found a_countryID is used as default value 
+  * @return the countryID which was asigned  to the user. This may be the default value a_countryID, if no country could be found.
+**/  
 SINT32 CAIPList::updateCountryStats(const UINT8 ip[4],UINT32 a_countryID,bool bRemove)
 	{
 		if(!bRemove)
@@ -287,10 +295,10 @@ SINT32 CAIPList::updateCountryStats(const UINT8 ip[4],UINT32 a_countryID,bool bR
 						sprintf(query,"SELECT id FROM ip2c WHERE ip_lo<=\"%u\" and ip_hi>=\"%u\" LIMIT 1",u32ip,u32ip);
 						int ret=mysql_query(m_mysqlCon,query);
 						if(ret!=0)
-							return E_UNKNOWN;
+							goto RET;
 						MYSQL_RES* result=mysql_store_result(m_mysqlCon);
 						if(result==NULL)
-							return E_UNKNOWN;
+							goto RET;
 						MYSQL_ROW row=mysql_fetch_row(result);
 						if(row!=NULL)
 							{
@@ -307,7 +315,7 @@ SINT32 CAIPList::updateCountryStats(const UINT8 ip[4],UINT32 a_countryID,bool bR
 			}
 		else
 			m_CountryStats[a_countryID]--;
-		return E_SUCCESS;
+		return a_countryID;
 	}
 
 THREAD_RETURN iplist_loopDoLogCountries(void* param)
