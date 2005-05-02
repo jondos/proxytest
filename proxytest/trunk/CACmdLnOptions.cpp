@@ -1217,25 +1217,30 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 							goto SKIP_NEXT_MIX;
 
 						addr=new CASocketAddrINet;
+						bool bAddrIsSet=false;
 						getDOMChildByName(elemNextMix,(UINT8*)"Host",elemHost,false);
+						/* The rules for <Host> and <IP> are as follows:
+							* 1. if <Host> is given and not empty take the <Host> value for the address of the next mix; if not go to 2
+							* 2. if <IP> if given and not empty take <IP> value for the address of the next mix; if not goto 3.
+							* 3. this entry for the next mix is invalid!*/
 						if(elemHost!=NULL)
 							{
-								if(getDOMElementValue(elemHost,buffHost,&buffHostLen)!=E_SUCCESS)
-									goto SKIP_NEXT_MIX;
-								if(((CASocketAddrINet*)addr)->setAddr(buffHost,port)!=E_SUCCESS)
-									goto SKIP_NEXT_MIX;
+								if(getDOMElementValue(elemHost,buffHost,&buffHostLen)==E_SUCCESS&&
+                  ((CASocketAddrINet*)addr)->setAddr(buffHost,port)==E_SUCCESS)
+								{
+									bAddrIsSet=true;
+								}
 							}
-						else
-            {
+						if(!bAddrIsSet)//now try <IP>
+							{
                 getDOMChildByName(elemNextMix,(UINT8*)"IP",elemIP,false);
                 if(elemIP == NULL || getDOMElementValue(elemIP,buffHost,&buffHostLen)!=E_SUCCESS)
                     goto SKIP_NEXT_MIX;
                 if(((CASocketAddrINet*)addr)->setAddr(buffHost,port)!=E_SUCCESS)
-							goto SKIP_NEXT_MIX;
-					}
-
+									goto SKIP_NEXT_MIX;
+							}
             CAMsg::printMsg(LOG_INFO, "Setting target interface: %s:%d\n", buffHost, port);
-        }
+					}
 				else
 #ifdef HAVE_UNIX_DOMAIN_PROTOCOL
 					{
