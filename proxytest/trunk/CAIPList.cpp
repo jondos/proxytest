@@ -224,7 +224,7 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 
 #ifdef COUNTRY_STATS
 #define COUNTRY_STATS_DB "CountryStats"
-#define NR_OF_COUNTRIES 228
+#define NR_OF_COUNTRIES 250
 
 SINT32 CAIPList::initCountryStats()
 	{
@@ -310,6 +310,7 @@ SINT32 CAIPList::updateCountryStats(const UINT8 ip[4],UINT32 a_countryID,bool bR
 							}	
 						mysql_free_result(result);
 					}
+RET:
 				m_CountryStats[countryID]++;
 				return countryID;
 			}
