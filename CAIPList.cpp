@@ -328,7 +328,7 @@ THREAD_RETURN iplist_loopDoLogCountries(void* param)
 
 		while(pIPList->m_bRunLogCountries)
 			{
-				if(s==30)
+				if(s==LOG_COUNTRIES_INTERVALL)
 					{
 						UINT8 aktDate[255];
 						time_t aktTime=time(NULL);
