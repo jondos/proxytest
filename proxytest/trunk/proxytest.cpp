@@ -602,7 +602,11 @@ Debug(dc::malloc.on());
 	#else
 			signal(SIGPIPE,SIG_IGN);
 	#endif
-			signal(SIGHUP,signal_hup);
+		struct sigaction newAction;
+		newAction.sa_handler=signal_hup;
+		newAction.sa_flags=0;
+		sigaction(SIGHUP,&newAction,NULL);
+		//signal(SIGHUP,signal_hup);
 #endif
 		signal(SIGINT,signal_interrupt);
 		signal(SIGTERM,signal_term);
