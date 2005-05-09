@@ -562,7 +562,7 @@ THREAD_RETURN threadReConfigure(void *param)
 	{
 		CACmdLnOptions* pOptions=((t_CMNDLN_REREAD_PARAMS*)param)->pCmdLnOptions;
 		CAMix* pMix=((t_CMNDLN_REREAD_PARAMS*)param)->pMix;
-		pOptions->m_pcsReConfigure->lock();
+		//pOptions->m_pcsReConfigure->lock();
 		CAMsg::printMsg(LOG_DEBUG,"ReConfiguration of the Mix is under way....\n");
 		CACmdLnOptions otmpOptions;
 		DOM_Document docConfig;
@@ -583,7 +583,7 @@ THREAD_RETURN threadReConfigure(void *param)
 
 REREAD_FINISH:
 		CAMsg::printMsg(LOG_DEBUG,"ReConfiguration of the Mix finished!\n");
-		pOptions->m_pcsReConfigure->unlock();
+		//pOptions->m_pcsReConfigure->unlock();
 		pOptions->m_bIsRunReConfigure=false;
 		THREAD_RETURN_SUCCESS;
 	}
