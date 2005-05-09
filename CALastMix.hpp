@@ -41,6 +41,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include "tre/regex.h"
 #endif
 #include "CALogPacketStats.hpp"
+#include "CALastMixChannelList.hpp"
 
 class CALastMix:public CAMix
 
@@ -50,6 +51,7 @@ class CALastMix:public CAMix
 				{
 					m_pMuxIn=NULL;m_pSignature=NULL;
 					m_pRSA=NULL;m_pInfoService=NULL;
+					m_pChannelList=NULL;
 					m_pthreadSendToMix=m_pthreadReadFromMix=NULL;
 					m_pQueueSendToMix=m_pQueueReadFromMix=NULL;
 					m_pCacheLB=new CACacheLoadBalancing();
@@ -100,6 +102,8 @@ class CALastMix:public CAMix
 			//CAInfoService*				m_pInfoService;
 			CAThread*							m_pthreadSendToMix;
 			CAThread*							m_pthreadReadFromMix;
+			CALastMixChannelList* m_pChannelList;
+
 #ifdef LOG_CRIME
 			regex_t*							m_pCrimeRegExps;
 			UINT32								m_nCrimeRegExp;

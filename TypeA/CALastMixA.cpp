@@ -50,7 +50,11 @@ SINT32 CALastMixA::loop()
 	{
 #ifndef NEW_MIX_TYPE
 		//CASocketList  oSocketList;
-		CALastMixChannelList* pChannelList=new CALastMixChannelList;
+#ifdef DELAY_CHANNELS
+		m_pChannelList->setDelayParameters(	options.getDelayChannelUnlimitTraffic(),
+																			options.getDelayChannelBucketGrow(),
+																			options.getDelayChannelBucketGrowIntervall());	
+#endif		
 #ifdef HAVE_EPOLL	
 		CASocketGroupEpoll osocketgroupCacheRead(false);
 		CASocketGroupEpoll osocketgroupCacheWrite(true);
@@ -87,7 +91,7 @@ SINT32 CALastMixA::loop()
 				if(m_pQueueReadFromMix->getSize()>=sizeof(tQueueEntry))
 					{
 						bAktiv=true;
-						UINT32 channels=pChannelList->getSize()+1;
+						UINT32 channels=m_pChannelList->getSize()+1;
 						for(UINT32 k=0;k<channels&&m_pQueueReadFromMix->getSize()>=sizeof(tQueueEntry);k++)
 							{
 								ret=sizeof(tQueueEntry);
@@ -97,7 +101,7 @@ SINT32 CALastMixA::loop()
 								#endif
 							// one packet received
 								m_logUploadedPackets++;
-								pChannelListEntry=pChannelList->get(pMixPacket->channel);
+								pChannelListEntry=m_pChannelList->get(pMixPacket->channel);
 								if(pChannelListEntry==NULL)
 									{
 										if(pMixPacket->flags==CHANNEL_OPEN)
@@ -201,12 +205,12 @@ SINT32 CALastMixA::loop()
 																{
 																	tmpSocket->setNonBlocking(true);
 																	#ifdef LOG_CHANNEL
-																		pChannelList->add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue(),pQueueEntry->timestamp_proccessing_start,payLen);
+																		m_pChannelList->add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue(),pQueueEntry->timestamp_proccessing_start,payLen);
 																	#else
-																		pChannelList->add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue(PAYLOAD_SIZE));
+																		m_pChannelList->add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue(PAYLOAD_SIZE));
 																	#endif
 #ifdef HAVE_EPOLL
-																	osocketgroupCacheRead.add(*tmpSocket,pChannelList->get(pMixPacket->channel));
+																	osocketgroupCacheRead.add(*tmpSocket,m_pChannelList->get(pMixPacket->channel));
 #else
 																	osocketgroupCacheRead.add(*tmpSocket);
 #endif
@@ -228,7 +232,7 @@ SINT32 CALastMixA::loop()
 												delete pChannelListEntry->pSocket;
 												delete pChannelListEntry->pCipher;
 												delete pChannelListEntry->pQueueSend;										
-												pChannelList->removeChannel(pMixPacket->channel);
+												m_pChannelList->removeChannel(pMixPacket->channel);
 												#ifdef LOG_PACKET_TIMES
 													getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
 													set64(pQueueEntry->timestamp_proccessing_end_OP,pQueueEntry->timestamp_proccessing_end);
@@ -284,7 +288,7 @@ SINT32 CALastMixA::loop()
 														delete pChannelListEntry->pSocket;
 														delete pChannelListEntry->pCipher;
 														delete pChannelListEntry->pQueueSend;
-														pChannelList->removeChannel(pMixPacket->channel);
+														m_pChannelList->removeChannel(pMixPacket->channel);
 														getRandom(pMixPacket->data,DATA_SIZE);
 														pMixPacket->flags=CHANNEL_CLOSE;
 														#ifdef LOG_PACKET_TIMES
@@ -321,7 +325,7 @@ SINT32 CALastMixA::loop()
 						while(pChannelListEntry!=NULL)
 							{
 #else
-						pChannelListEntry=pChannelList->getFirstSocket();
+						pChannelListEntry=m_pChannelList->getFirstSocket();
 						while(pChannelListEntry!=NULL&&countRead>0)
 							{
 								if(osocketgroupCacheWrite.isSignaled(*(pChannelListEntry->pSocket)))
@@ -362,14 +366,14 @@ SINT32 CALastMixA::loop()
 														#endif
 														m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));			
 														m_logDownloadedPackets++;	
-														pChannelList->removeChannel(pChannelListEntry->channelIn);											 
+														m_pChannelList->removeChannel(pChannelListEntry->channelIn);											 
 													}
 											}
 #ifdef HAVE_EPOLL
 								pChannelListEntry=(lmChannelListEntry*)osocketgroupCacheWrite.getNextSignaledSocketData();
 #else
 									}
-								pChannelListEntry=pChannelList->getNextSocket();
+								pChannelListEntry=m_pChannelList->getNextSocket();
 #endif
 							}
 					}
@@ -385,7 +389,7 @@ SINT32 CALastMixA::loop()
 						while(pChannelListEntry!=NULL)
 							{
 #else
-						pChannelListEntry=pChannelList->getFirstSocket();
+						pChannelListEntry=m_pChannelList->getFirstSocket();
 						while(pChannelListEntry!=NULL&&countRead>0)
 							{
 								if(osocketgroupCacheRead.isSignaled(*(pChannelListEntry->pSocket)))
@@ -424,7 +428,7 @@ SINT32 CALastMixA::loop()
 														pMixPacket->flags=CHANNEL_CLOSE;
 														pMixPacket->channel=pChannelListEntry->channelIn;
 														getRandom(pMixPacket->data,DATA_SIZE);
-														pChannelList->removeChannel(pChannelListEntry->channelIn);
+														m_pChannelList->removeChannel(pChannelListEntry->channelIn);
 														#ifdef LOG_PACKET_TIMES
 															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
 														#endif
@@ -461,7 +465,7 @@ SINT32 CALastMixA::loop()
 								pChannelListEntry=(lmChannelListEntry*)osocketgroupCacheRead.getNextSignaledSocketData();
 #else
 									}
-								pChannelListEntry=pChannelList->getNextSocket();
+								pChannelListEntry=m_pChannelList->getNextSocket();
 #endif
 							}
 					}
@@ -495,16 +499,15 @@ SINT32 CALastMixA::loop()
 			CAMsg::printMsg(LOG_CRIT,"Wait for LoopLogPacketStats to terminate!\n");
 			m_pLogPacketStats->stop();
 		#endif	
-		pChannelListEntry=pChannelList->getFirstSocket();
+		pChannelListEntry=m_pChannelList->getFirstSocket();
 		while(pChannelListEntry!=NULL)
 			{
 				delete pChannelListEntry->pCipher;
 				delete pChannelListEntry->pQueueSend;
 				pChannelListEntry->pSocket->close();
 				delete pChannelListEntry->pSocket;
-				pChannelListEntry=pChannelList->getNextSocket();
+				pChannelListEntry=m_pChannelList->getNextSocket();
 			}
-		delete pChannelList;
 		delete []tmpBuff;
 		delete pQueueEntry;
 		oLogThread.join();

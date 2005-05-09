@@ -37,8 +37,12 @@ CALastMixChannelList::CALastMixChannelList()
 		m_listSocketsNext=NULL;
 		m_nChannels=0;
 #ifdef DELAY_CHANNELS
+		m_u32DelayChannelUnlimitTraffic=DELAY_CHANNEL_TRAFFIC;
+		m_u32DelayChannelBucketGrow=DELAY_BUCKET_GROW;
+		m_u32DelayChannelBucketGrowIntervall=DELAY_BUCKET_GROW_INTERVALL;
 		m_pDelayBuckets=new UINT32*[MAX_POLLFD];
 		memset(m_pDelayBuckets,0,sizeof(UINT32*)*MAX_POLLFD);
+		m_pMutexDelayChannel=new CAMutex();
 		m_pThreadDelayBucketsLoop=new CAThread();
 		m_bDelayBucketsLoopRun=true;
 		m_pThreadDelayBucketsLoop->setMainLoop(fml_loopDelayBuckets);
@@ -64,6 +68,7 @@ CALastMixChannelList::~CALastMixChannelList()
 		m_bDelayBucketsLoopRun=false;
 		m_pThreadDelayBucketsLoop->join();
 		delete m_pThreadDelayBucketsLoop;
+		delete m_pMutexDelayChannel;
 		delete []m_pDelayBuckets;
 #endif
 	}
@@ -91,7 +96,7 @@ CALastMixChannelList::~CALastMixChannelList()
 		pNewEntry->trafficOutToUser=0;
 #endif
 #ifdef DELAY_CHANNELS
-		pNewEntry->delayBucket=DELAY_CHANNEL_TRAFFIC; //can always send some first packets
+		pNewEntry->delayBucket=m_u32DelayChannelUnlimitTraffic; //can always send some first packets
 		for(UINT32 i=0;i<MAX_POLLFD;i++)
 			{
 				if(m_pDelayBuckets[i]==NULL)
@@ -163,7 +168,9 @@ SINT32 CALastMixChannelList::removeChannel(HCHANNEL channel)
 						if(pEntry->list_Sockets.next!=NULL)
 							pEntry->list_Sockets.next->list_Sockets.prev=pEntry->list_Sockets.prev;
 						#ifdef DELAY_CHANNELS
+							m_pMutexDelayChannel->lock();
 							m_pDelayBuckets[pEntry->delayBucketID]=NULL;
+							m_pMutexDelayChannel->unlock();
 						#endif
 						delete pEntry;
 						m_nChannels--;					
@@ -229,11 +236,24 @@ SINT32 CALastMixChannelList::test()
 			UINT32** pDelayBuckets=pChannelList->m_pDelayBuckets;
 			while(pChannelList->m_bDelayBucketsLoopRun)
 				{
+					pChannelList->m_pMutexDelayChannel->lock();
+					UINT32 u32BucketGrow=pChannelList->m_u32DelayChannelBucketGrow;
 					for(UINT32 i=0;i<MAX_POLLFD;i++)
 						if(pDelayBuckets[i]!=NULL)
-							*(pDelayBuckets[i])+=DELAY_BUCKET_GROW;
-					msSleep(DELAY_BUCKET_GROW_INTERVALL);
+							*(pDelayBuckets[i])+=u32BucketGrow;
+					pChannelList->m_pMutexDelayChannel->unlock();		
+					msSleep(pChannelList->m_u32DelayChannelBucketGrowIntervall);
 				}
 			THREAD_RETURN_SUCCESS;
 		}
+		
+	void CALastMixChannelList::setDelayParameters(UINT32 unlimitTraffic,UINT32 bucketGrow,UINT32 intervall)
+		{///todo change the UnlimitTraffic bytes for already existing channels
+			m_pMutexDelayChannel->lock();
+			m_u32DelayChannelUnlimitTraffic=unlimitTraffic;
+			m_u32DelayChannelBucketGrow=bucketGrow;
+			m_u32DelayChannelBucketGrowIntervall=intervall;
+			m_pMutexDelayChannel->unlock();		
+		}																												
+		
 #endif

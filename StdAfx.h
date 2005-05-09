@@ -47,7 +47,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define COMPRESSED_LOGS
 //#define DO_TRACE
 //#define PSEUDO_LOG
-//#define DELAY_CHANNELS //to enable max channel bandwidth
+#define DELAY_CHANNELS //to enable max channel bandwidth
 //#define HAVE_EPOLL //define if you have epoll support on your (Linux) system
 //#define COUNTRY_STATS //collect stats about countries users come from
 #ifdef DELAY_CHANNELS
