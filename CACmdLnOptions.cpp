@@ -540,17 +540,18 @@ SINT32 CACmdLnOptions::reread(CAMix* pMix)
 	{
 		if(m_bIsRunReConfigure)
 			return E_UNKNOWN;
-		CAMsg::printMsg(LOG_DEBUG,"Re-readed before lock\n");
-		m_pcsReConfigure->lock();
-		CAMsg::printMsg(LOG_DEBUG,"Re-readed after lock\n");
+		//CAMsg::printMsg(LOG_DEBUG,"Re-readed before lock\n");
+		//m_pcsReConfigure->lock();
+		//CAMsg::printMsg(LOG_DEBUG,"Re-readed after lock\n");
 		m_bIsRunReConfigure=true;
+		m_threadReConfigure.setDaemon(true);
 		m_threadReConfigure.setMainLoop(threadReConfigure);
 		CAMsg::printMsg(LOG_DEBUG,"Re-read After set thread loop\n");
 		t_CMNDLN_REREAD_PARAMS* param=new t_CMNDLN_REREAD_PARAMS;
 		param->pCmdLnOptions=this;
 		param->pMix=pMix;
 		m_threadReConfigure.start(param);
-		m_pcsReConfigure->unlock();
+		//m_pcsReConfigure->unlock();
 		return E_SUCCESS;
 	}
 
@@ -582,9 +583,9 @@ THREAD_RETURN threadReConfigure(void *param)
 			pMix->reconfigure();
 
 REREAD_FINISH:
-		pOptions->m_bIsRunReConfigure=false;
 		CAMsg::printMsg(LOG_DEBUG,"ReConfiguration of the Mix finished!\n");
 		pOptions->m_pcsReConfigure->unlock();
+		pOptions->m_bIsRunReConfigure=false;
 		THREAD_RETURN_SUCCESS;
 	}
 
