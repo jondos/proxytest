@@ -155,7 +155,7 @@ SINT32 CALastMix::init()
 		m_pLogPacketStats->setLogIntervallInMinutes(LM_PACKET_STATS_LOG_INTERVALL);
 		m_pLogPacketStats->start();
 #endif		
-
+		m_pChannelList=new CALastMixChannelList;
 		return E_SUCCESS;
 	}
 
@@ -312,6 +312,14 @@ SINT32 CALastMix::reconfigure()
 		CAMsg::printMsg(LOG_DEBUG,"Re-read cache proxies\n");
 		if(setTargets()!=E_SUCCESS)
 			CAMsg::printMsg(LOG_DEBUG,"Could not set new cache proxies\n");
+		CAMsg::printMsg(LOG_DEBUG,"Set new ressources limitation parameters\n");
+#ifdef DELAY_CHANNELS
+		CAMsg::printMsg(LOG_DEBUG,"Set new ressources limitation parameters\n");
+		if(m_pChannelList!=NULL)
+			m_pChannelList->setDelayParameters(	options.getDelayChannelUnlimitTraffic(),
+																					options.getDelayChannelBucketGrow(),
+																					options.getDelayChannelBucketGrowIntervall());	
+#endif		
 		return E_SUCCESS;
 	}
 
@@ -591,6 +599,9 @@ SINT32 CALastMix::clean()
 		if(m_pQueueReadFromMix!=NULL)
 			delete m_pQueueReadFromMix;
 		m_pQueueReadFromMix=NULL;	
+		if(m_pChannelList!=NULL)
+			delete m_pChannelList;
+		m_pChannelList=NULL;
 		return E_SUCCESS;
 	}
 

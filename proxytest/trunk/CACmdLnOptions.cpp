@@ -1,30 +1,31 @@
 /*
-Copyright (c) 2000, The JAP-Team
+Copyright (c) 2000, The JAP-Team 
 All rights reserved.
-Redistribution and use in source and binary forms, with or without modification,
+Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:
 
-	- Redistributions of source code must retain the above copyright notice,
+	- Redistributions of source code must retain the above copyright notice, 
 	  this list of conditions and the following disclaimer.
 
-	- Redistributions in binary form must reproduce the above copyright notice,
-	  this list of conditions and the following disclaimer in the documentation and/or
+	- Redistributions in binary form must reproduce the above copyright notice, 
+	  this list of conditions and the following disclaimer in the documentation and/or 
 		other materials provided with the distribution.
 
-	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
-	  may be used to endorse or promote products derived from this software without specific
-		prior written permission.
+	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors 
+	  may be used to endorse or promote products derived from this software without specific 
+		prior written permission. 
 
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+	
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS 
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
 AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
 BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
-OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
+OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
+
 #include "StdAfx.h"
 #include "CACmdLnOptions.hpp"
 #include "CAUtil.hpp"
@@ -367,6 +368,12 @@ SINT32 CACmdLnOptions::setNewValues(CACmdLnOptions& newOptions)
 				for(UINT32 i=0;i<m_cnTargets;i++)
 					newOptions.getTargetInterface(m_arTargetInterfaces[i],i+1);
 			}
+#ifdef DELAY_CHANNELS			
+		//Copy ressources limitation
+		m_u32DelayChannelUnlimitTraffic=newOptions.getDelayChannelUnlimitTraffic();
+		m_u32DelayChannelBucketGrow=newOptions.getDelayChannelBucketGrow();
+		m_u32DelayChannelBucketGrowIntervall=newOptions.getDelayChannelBucketGrowIntervall();
+#endif			
 		return E_SUCCESS;
 }
 
@@ -1468,6 +1475,34 @@ SKIP_NEXT_MIX:
 			}
 		CAMsg::printMsg(LOG_DEBUG,"Loading Crime Detection Data finished\n");
 
+#endif
+#ifdef DELAY_CHANNELS
+		///reads the parameters for the ressource limitation
+		//this is at the moment:
+		//<Ressources>
+		//<UnlimitTraffic></UnlimitTraffic>    #Number of bytes without resource limitation
+		//<BytesPerIntervall></BytesPerIntervall>   #upper limit of number of bytes which are processed per channel per time intervall
+		//<Intervall></Intervall>  #duration of one intervall in ms 
+		//</Ressources>
+		CAMsg::printMsg(LOG_INFO,"Loading Parameters for Resources limitation....\n");
+		m_u32DelayChannelUnlimitTraffic=DELAY_CHANNEL_TRAFFIC;	
+		m_u32DelayChannelBucketGrow=DELAY_BUCKET_GROW;	
+		m_u32DelayChannelBucketGrowIntervall=DELAY_BUCKET_GROW_INTERVALL;	
+		DOM_Element elemRessources;
+		getDOMChildByName(elemRoot,(UINT8*)"Ressources",elemRessources,false);
+		if(elemRessources!=NULL)
+			{
+				UINT32 u32;
+				if(	getDOMChildByName(elemRessources,(UINT8*)"UnlimitTraffic",elem,false)==E_SUCCESS&&
+						getDOMElementValue(elem,&u32)==E_SUCCESS)
+					m_u32DelayChannelUnlimitTraffic=u32;
+				if(	getDOMChildByName(elemRessources,(UINT8*)"BytesPerIntervall",elem,false)==E_SUCCESS&&
+						getDOMElementValue(elem,&u32)==E_SUCCESS)
+					m_u32DelayChannelBucketGrow=u32;
+				if(	getDOMChildByName(elemRessources,(UINT8*)"Intervall",elem,false)==E_SUCCESS&&
+						getDOMElementValue(elem,&u32)==E_SUCCESS)
+					m_u32DelayChannelBucketGrowIntervall=u32;
+			}
 #endif
 
     tmpLen=255;

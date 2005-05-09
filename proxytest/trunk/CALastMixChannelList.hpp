@@ -137,8 +137,16 @@ class CALastMixChannelList
 			#ifdef DELAY_CHANNELS
 				UINT32** m_pDelayBuckets;
 				CAThread* m_pThreadDelayBucketsLoop;
+				CAMutex* m_pMutexDelayChannel;
 				bool m_bDelayBucketsLoopRun;
 				friend THREAD_RETURN fml_loopDelayBuckets(void*);
+				//Parameters
+				volatile UINT32	m_u32DelayChannelUnlimitTraffic;  //how much traffic without any delay?
+				volatile UINT32 m_u32DelayChannelBucketGrow; //how many bytes to put in each bucket per time intervall
+				volatile UINT32 m_u32DelayChannelBucketGrowIntervall; //duration of one time intervall in ms
+																															//therefore the allowed bandwith=BucketGrow/Intervall*1000 [bytes/s]
+				public:
+					void setDelayParameters(UINT32 unlimitTraffic,UINT32 bucketGrow,UINT32 intervall);																												
 			#endif
 	};
 #endif

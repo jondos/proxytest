@@ -240,6 +240,22 @@ class CACmdLnOptions
 					return m_arCrimeRegExps;
 				}
 #endif
+
+#ifdef DELAY_CHANNELS
+			UINT32 getDelayChannelUnlimitTraffic()
+				{
+					return m_u32DelayChannelUnlimitTraffic;
+				}	
+			UINT32 getDelayChannelBucketGrow()
+				{
+					return m_u32DelayChannelBucketGrow;
+				}
+			UINT32 getDelayChannelBucketGrowIntervall()
+				{
+					return m_u32DelayChannelBucketGrowIntervall;
+				}
+#endif
+
 #ifdef PAYMENT
 // added by Bastian Voigt:
 // getter functions for the payment config options
@@ -315,6 +331,11 @@ class CACmdLnOptions
 #ifdef LOG_CRIME
 			regex_t* m_arCrimeRegExps;
 			UINT32 m_nCrimeRegExps;
+#endif
+#ifdef DELAY_CHANNELS
+		UINT32 m_u32DelayChannelUnlimitTraffic;	
+		UINT32 m_u32DelayChannelBucketGrow;	
+		UINT32 m_u32DelayChannelBucketGrowIntervall;	
 #endif
 
 #ifdef PAYMENT
