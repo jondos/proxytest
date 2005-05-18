@@ -248,11 +248,14 @@ SINT32 CALastMixChannelList::test()
 		}
 		
 	void CALastMixChannelList::setDelayParameters(UINT32 unlimitTraffic,UINT32 bucketGrow,UINT32 intervall)
-		{///todo change the UnlimitTraffic bytes for already existing channels
+		{
 			m_pMutexDelayChannel->lock();
 			m_u32DelayChannelUnlimitTraffic=unlimitTraffic;
 			m_u32DelayChannelBucketGrow=bucketGrow;
 			m_u32DelayChannelBucketGrowIntervall=intervall;
+			for(UINT32 i=0;i<MAX_POLLFD;i++)
+				if(pDelayBuckets[i]!=NULL)
+					*(pDelayBuckets[i])=m_u32DelayChannelUnlimitTraffic;
 			m_pMutexDelayChannel->unlock();		
 		}																												
 		

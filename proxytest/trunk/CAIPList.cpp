@@ -314,15 +314,17 @@ RET:
 				m_CountryStats[countryID]++;
 				return countryID;
 			}
-		else
-			m_CountryStats[a_countryID]--;
+		else//bRemove
+			{
+				m_CountryStats[a_countryID]--;
+			}
 		return a_countryID;
 	}
 
 THREAD_RETURN iplist_loopDoLogCountries(void* param)
 	{
 		CAIPList* pIPList=(CAIPList*)param;
-		UINT32 s=30;
+		UINT32 s=0;
 		UINT8 buff[255];
 		options.getCascadeName(buff,255);
 
@@ -335,18 +337,17 @@ THREAD_RETURN iplist_loopDoLogCountries(void* param)
 						strftime((char*)aktDate,255,"%Y%m%d%H%M%S",gmtime(&aktTime));
 						char query[1024];
 						sprintf(query,"INSERT into `stats_%s` (date,id,count) VALUES (\"%s\",\"%%u\",\"%%u\")",buff,aktDate);
-
+						pIPList->m_Mutex.lock();
 						for(UINT32 i=0;i<NR_OF_COUNTRIES+1;i++)
 							{
 								if(pIPList->m_CountryStats[i]>0)
 									{
 										char aktQuery[1024];
 										sprintf(aktQuery,query,i,pIPList->m_CountryStats[i]);
-										pIPList->m_Mutex.lock();
 										int ret=mysql_query(pIPList->m_mysqlCon,aktQuery);
-										pIPList->m_Mutex.unlock();
 									}
 							}
+						pIPList->m_Mutex.unlock();
 						s=0;
 					}
 				sSleep(10);
