@@ -39,7 +39,7 @@ CAIPList::CAIPList()
 	{	
 		m_Random=new UINT8[56];
 		m_HashTable=new PIPLIST[0x10000];
-		memset(m_HashTable,0,0x10000*sizeof(PIPLIST));
+		memset((void*)m_HashTable,0,0x10000*sizeof(PIPLIST));
 		m_allowedConnections=MAX_IP_CONNECTIONS;
 		getRandom(m_Random,56);
 #ifdef COUNTRY_STATS
@@ -55,7 +55,7 @@ CAIPList::CAIPList(UINT32 allowedConnections)
 	{
 		m_Random=new UINT8[56];
 		m_HashTable=new PIPLIST[0x10000];
-		memset(m_HashTable,0,0x10000*sizeof(PIPLIST));
+		memset((void*)m_HashTable,0,0x10000*sizeof(PIPLIST));
 		m_allowedConnections=allowedConnections;
 		getRandom(m_Random,56);
 #ifdef COUNTRY_STATS
@@ -68,7 +68,7 @@ CAIPList::~CAIPList()
 	{
 		for(UINT32 i=0;i<=0xFFFF;i++)
 			{
-				PIPLIST entry=m_HashTable[i];
+				VOLATILE_PIPLIST entry=m_HashTable[i];
 				PIPLIST tmpEntry;
 				while(entry!=NULL)
 					{	
@@ -88,6 +88,9 @@ CAIPList::~CAIPList()
   * If the IP-Address is already in the list then the number of insert()
 	* called for this IP-Adress is returned. If this number is larger than m_allowedConnections
 	* an error is returned.
+	* Intern handelt es sich um eine Hashtabelle mit Ueberlaufliste. Die letzten 16 Bit der IP-Adresse bilden dabei den
+	* Hashkey. Die Hashtabelle hat 16^2 Eintraege. In den Ueberlauflisten der einzelnen Hasheintraege sind die ersten 16 Bit der 
+	* IP-Adresse gespeichert.
 	* @param ip the IP-Address to insert
 	* @return number of inserts for this IP-Address
   * @retval E_UNKNOWN if an error occured or an IP is inserted more than m_allowedConnections times
@@ -98,7 +101,7 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 		m_Mutex.lock();
 		PIPLIST entry=m_HashTable[hashvalue];
 		if(entry==NULL)
-			{
+			{//Hashkey nicht in der Hashtabelle gefunden --> neuer Eintrag in Hashtabelle
 #ifndef PSEUDO_LOG
 				UINT8 hash[16];
 				memcpy(m_Random,ip,4);
@@ -119,7 +122,7 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 				return entry->count;
 			}
 		else
-			{
+			{//Hashkey in HAstabelle gefunden --> such in Ueberlaufliste nach Eintrag bzw. lege neuen Eitnrag an
 				PIPLIST last;
 				do
 					{
@@ -146,6 +149,7 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 						last=entry;
 						entry=entry->next;
 					} while(entry!=NULL);
+//Nicht in der Ueberlaufliste gefunden
 				last->next=new IPLISTENTRY;
 				entry=last->next;
 				memcpy(entry->ip,ip,2);
@@ -176,7 +180,7 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 		if(entry==NULL)
 			{
 				m_Mutex.unlock();
-				CAMsg::printMsg(LOG_INFO,"Try to remove Ip which is not in list - possible inconsistences in IPList!\n");
+				CAMsg::printMsg(LOG_INFO,"Try to remove Ip which is not in the hashtablle of the IP-list - possible inconsistences in IPList!\n");
 				return 0;
 			}
 		else
