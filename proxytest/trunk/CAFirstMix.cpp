@@ -842,7 +842,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		((CASocket*)pNewUser)->send(xml_buff,u32+2);
 		delete xml_buff;
 		((CASocket*)pNewUser)->setNonBlocking(true);
-#endif
+#endif //FIRST_MIX_SYMMETRIC
 		CAQueue* tmpQueue=new CAQueue(sizeof(tQueueEntry));
 		if(m_pChannelList->add(pNewUser,peerIP,tmpQueue)!=E_SUCCESS)// adding user connection to mix->JAP channel list (stefan: sollte das nicht connection list sein? --> es handelt sich um eine Datenstruktu fŸr Connections/Channels ).
 			{

@@ -73,7 +73,7 @@ CAFirstMixChannelList::~CAFirstMixChannelList()
 	* @retval E_UNKNOWN in case of an error
 	* @retval E_SUCCESS if successful
 	*/
-SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,UINT8 peerIP[4],CAQueue* pQueueSend)
+SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8 peerIP[4],CAQueue* pQueueSend)
 	{
 		if(pMuxSocket==NULL)
 			return E_UNKNOWN;
