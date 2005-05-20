@@ -31,21 +31,23 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef COUNTRY_STATS
 	#include "CAThread.hpp"
 #endif	
+
+typedef struct _iplist_t IPLISTENTRY;
+typedef struct _iplist_t* PIPLIST;
+typedef volatile PIPLIST VOLATILE_PIPLIST;
+
 /** This structure is used for building the IP-List. 
 It stores the first two bytes of an IP-Address, how often this IP-Address was inserted
 and a pointer to the next element of the list*/
 struct _iplist_t
 	{
-		struct _iplist_t* next; /**Next element, NULL if element is the last one*/
+		VOLATILE_PIPLIST next; /**Next element, NULL if element is the last one*/
 		UINT8 ip[2]; /** First two Bytes of the IP-Address*/
-		UINT8 count; /** Count of insertions*/
+		volatile UINT8 count; /** Count of insertions*/
 #ifdef COUNTRY_STATS
 		UINT32 countryID; /** CountryID of this IP Address*/
 #endif				
 	};
-
-typedef struct _iplist_t IPLISTENTRY;
-typedef struct _iplist_t* PIPLIST;
 
 /** The default value of allowed insertions, until insertIP() will return an error*/
 #define MAX_IP_CONNECTIONS 10
@@ -76,7 +78,7 @@ class CAIPList
 #endif
 		private:
 			UINT32 m_allowedConnections;
-			PIPLIST* m_HashTable;
+			volatile VOLATILE_PIPLIST* m_HashTable;
 			UINT8* m_Random; //seems to be the best value for MD5, which operates on x*512-64 bit (52*8+4*8=512-64)
 			CAMutex m_Mutex;
 
@@ -85,7 +87,7 @@ class CAIPList
 			SINT32 deleteCountryStats();
 			SINT32 updateCountryStats(const UINT8 ip[4],UINT32 a_countryID,bool bRemove);
 			volatile bool m_bRunLogCountries;
-			UINT32* m_CountryStats;
+			volatile UINT32* m_CountryStats;
 			CAThread* m_threadLogLoop;
 			MYSQL* m_mysqlCon;
 			friend THREAD_RETURN iplist_loopDoLogCountries(void* param);
