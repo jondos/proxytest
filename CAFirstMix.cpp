@@ -697,7 +697,10 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 												d->pNewUser=pNewMuxSocket;
 												d->pMix=pFirstMix;
 												memcpy(d->peerIP,peerIP,4);
-												pthreadsLogin->addRequest(fm_loopDoUserLogin,d);
+												if(pthreadsLogin->addRequest(fm_loopDoUserLogin,d)!=E_SUCCESS)
+													{
+														CAMsg::printMsg(LOG_DEBUG,"Could not add an login request to the login thread pool!\n");
+													}
 											}
 									}
 							}
