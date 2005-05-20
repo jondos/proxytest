@@ -255,7 +255,7 @@ SINT32 CAIPList::initCountryStats()
 		sprintf(query,"CREATE TABLE IF NOT EXISTS `stats_%s` (date timestamp,id int,count int)",buff);
 		mysql_query(m_mysqlCon,query);
 		m_CountryStats=new UINT32[NR_OF_COUNTRIES+1];
-		memset(m_CountryStats,0,sizeof(UINT32)*(NR_OF_COUNTRIES+1));
+		memset((void*)m_CountryStats,0,sizeof(UINT32)*(NR_OF_COUNTRIES+1));
 		m_threadLogLoop=new CAThread();
 		m_threadLogLoop->setMainLoop(iplist_loopDoLogCountries);
 		m_bRunLogCountries=true;
