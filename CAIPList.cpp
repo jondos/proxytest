@@ -176,6 +176,7 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 		if(entry==NULL)
 			{
 				m_Mutex.unlock();
+				CAMsg::printMsg(LOG_WARN,"Try to remove Ip which is not in list - possible inconsistences in IPList!\n");
 				return 0;
 			}
 		else
@@ -218,6 +219,7 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 						entry=entry->next;
 					}
 				m_Mutex.unlock();
+				CAMsg::printMsg(LOG_WARN,"Try to remove Ip which is not in list - possible inconsistences in IPList!\n");
 				return 0;
 			}	
 	}
