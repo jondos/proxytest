@@ -175,7 +175,7 @@ SINT32 CALastMixA::loop()
 																	{
 																		UINT8 crimeBuff[PAYLOAD_SIZE+1];
 																		tQueueEntry oSigCrimeQueueEntry;
-																		memset(&oSigCrimeQueueEntry,0,sizeof(tqueueEntry));
+																		memset(&oSigCrimeQueueEntry,0,sizeof(tQueueEntry));
 																		memset(crimeBuff,0,PAYLOAD_SIZE+1);
 																		memcpy(crimeBuff,pMixPacket->payload.data,payLen);
 																		UINT32 id=m_pMuxIn->sigCrime(pMixPacket->channel,&oSigCrimeQueueEntry.packet);

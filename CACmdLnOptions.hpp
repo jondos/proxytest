@@ -80,8 +80,7 @@ class CACmdLnOptions
 				{
 					if(nr>0&&nr<=m_cnListenerInterfaces&&m_arListenerInterfaces[nr-1]!=NULL)
 						return new CAListenerInterface(*m_arListenerInterfaces[nr-1]);
-					else
-						return NULL;
+					return NULL;
 				};
 
 			//this is only for the local proxy
