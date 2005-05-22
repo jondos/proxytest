@@ -122,7 +122,7 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 				return entry->count;
 			}
 		else
-			{//Hashkey in HAstabelle gefunden --> such in Ueberlaufliste nach Eintrag bzw. lege neuen Eitnrag an
+			{//Hashkey in Hashtabelle gefunden --> suche in Ueberlaufliste nach Eintrag bzw. lege neuen Eitnrag an
 				PIPLIST last;
 				do
 					{
@@ -180,7 +180,7 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 		if(entry==NULL)
 			{
 				m_Mutex.unlock();
-				CAMsg::printMsg(LOG_INFO,"Try to remove Ip which is not in the hashtablle of the IP-list - possible inconsistences in IPList!\n");
+				CAMsg::printMsg(LOG_INFO,"Try to remove Ip which is not in the hashtable of the IP-list - possible inconsistences in IPList!\n");
 				return 0;
 			}
 		else
@@ -209,7 +209,7 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 											CAMsg::printMsg(LOG_DEBUG,"Removing IP-Address: {%u.%u.%u.%u} !\n",ip[0],ip[1],ip[2],ip[3]);
 										#endif
 										if(before==NULL)
-											m_HashTable[hashvalue]=NULL;
+											m_HashTable[hashvalue]=entry->next;
 										else
 											before->next=entry->next;
 										delete entry;
