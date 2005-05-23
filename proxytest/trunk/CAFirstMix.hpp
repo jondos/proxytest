@@ -79,7 +79,10 @@ public:
 
 						m_pLogPacketStats=NULL;
 #endif
-
+#ifdef COUNTRY_STATS
+						m_PacketsPerCountryIN=m_PacketsPerCountryOUT=m_CountryStats=NULL;
+						m_mysqlCon=NULL;
+#endif
 				}
     virtual ~CAFirstMix()
     {}
