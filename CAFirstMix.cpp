@@ -1141,8 +1141,12 @@ SINT32 CAFirstMix::initCountryStats()
 SINT32 CAFirstMix::deleteCountryStats()
 	{
 		m_bRunLogCountries=false;
-		m_threadLogLoop->join();
-		delete m_threadLogLoop;
+		if(m_threadLogLoop!=NULL)
+			{
+				m_threadLogLoop->join();
+				delete m_threadLogLoop;
+				m_threadLogLoop=NULL;
+			}
 		if(m_mysqlCon!=NULL)
 			{
 				my_thread_end();
