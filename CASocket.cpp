@@ -92,7 +92,7 @@ SINT32 CASocket::listen(const CASocketAddr& psa)
 					{
 						SINT32 ret=::unlink((char*)path);
 						if(ret!=0)
-							CAMSg::printMsg(LOG_ERR,"CASocket::listen() -- could not unlink unix domain socket file name %s -- a call to bind or listen may fail...\n",path);
+							CAMsg::printMsg(LOG_ERR,"CASocket::listen() -- could not unlink unix domain socket file name %s -- a call to bind or listen may fail...\n",path);
 						delete path;
 					}
 			}
