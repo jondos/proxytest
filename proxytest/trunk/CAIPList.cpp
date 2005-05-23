@@ -42,9 +42,6 @@ CAIPList::CAIPList()
 		memset((void*)m_HashTable,0,0x10000*sizeof(PIPLIST));
 		m_allowedConnections=MAX_IP_CONNECTIONS;
 		getRandom(m_Random,56);
-#ifdef COUNTRY_STATS
-		initCountryStats();
-#endif
 	}
 
 /**Constructs a empty CAIPList, there allowedConnections insertions 
@@ -58,9 +55,6 @@ CAIPList::CAIPList(UINT32 allowedConnections)
 		memset((void*)m_HashTable,0,0x10000*sizeof(PIPLIST));
 		m_allowedConnections=allowedConnections;
 		getRandom(m_Random,56);
-#ifdef COUNTRY_STATS
-		initCountryStats();
-#endif
 	}
 
 /** Deletes the IPList and frees all used resources*/
@@ -79,9 +73,6 @@ CAIPList::~CAIPList()
 			}
 		delete [] m_Random;
 		delete [] m_HashTable;
-#ifdef COUNTRY_STATS		
-		deleteCountryStats();
-#endif		
 	}
 
 /** Inserts the IP-Address into the list. 
@@ -114,9 +105,6 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 				memcpy(entry->ip,ip,2);
 				entry->count=1;
 				entry->next=NULL;
-#ifdef COUNTRY_STATS
-				entry->countryID=updateCountryStats(ip,0,false);
-#endif				
 				m_HashTable[hashvalue]=entry;
 				m_Mutex.unlock();
 				return entry->count;
@@ -140,9 +128,6 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 										return E_UNKNOWN;
 									}
 								entry->count++;
-#ifdef COUNTRY_STATS
-								updateCountryStats(NULL,entry->countryID,false);
-#endif
 								m_Mutex.unlock();
 								return entry->count;
 							}
@@ -155,9 +140,6 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 				memcpy(entry->ip,ip,2);
 				entry->count=1;
 				entry->next=NULL;
-#ifdef COUNTRY_STATS
-				entry->countryID=updateCountryStats(ip,0,false);
-#endif				
 				m_Mutex.unlock();
 				return entry->count;
 			}	
@@ -168,7 +150,7 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 	* @return the remaining count of inserts for this IP-Address. 
 	* @retval 0 if IP-Address is delete form the list
 	*/
-#ifndef LOG_CHANNEL
+#ifndef LOG_TRAFFIC_PER_USER
 	SINT32 CAIPList::removeIP(const UINT8 ip[4])
 #else
 	SINT32 CAIPList::removeIP(const UINT8 ip[4],UINT32 time,UINT32 trafficIn,UINT32 trafficOut)
@@ -191,9 +173,6 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 						if(memcmp(entry->ip,ip,2)==0)
 							{
 								entry->count--;
-#ifdef COUNTRY_STATS
-								updateCountryStats(NULL,entry->countryID,true);
-#endif								
 								if(entry->count==0)
 									{
 										#ifndef PSEUDO_LOG
@@ -228,137 +207,3 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 			}	
 	}
 
-#ifdef COUNTRY_STATS
-#define COUNTRY_STATS_DB "CountryStats"
-#define NR_OF_COUNTRIES 250
-
-SINT32 CAIPList::initCountryStats()
-	{
-		m_CountryStats=NULL;
-		m_mysqlCon=new MYSQL;
-		mysql_init(m_mysqlCon);
-		MYSQL* tmp=NULL;
-		tmp=mysql_real_connect(m_mysqlCon,NULL,"root",NULL,COUNTRY_STATS_DB,0,NULL,0);
-		if(tmp==NULL)
-			{
-				CAMsg::printMsg(LOG_DEBUG,"Could not connet to CountryStats DB!\n");
-				my_thread_end();
-				mysql_close(m_mysqlCon);
-				delete m_mysqlCon;
-				m_mysqlCon=NULL;
-				return E_UNKNOWN;
-			}
-		CAMsg::printMsg(LOG_DEBUG,"Connected to CountryStats DB!\n");
-		char query[1024];
-		UINT8 buff[255];
-		options.getCascadeName(buff,255);
-		sprintf(query,"CREATE TABLE IF NOT EXISTS `stats_%s` (date timestamp,id int,count int)",buff);
-		mysql_query(m_mysqlCon,query);
-		m_CountryStats=new UINT32[NR_OF_COUNTRIES+1];
-		memset((void*)m_CountryStats,0,sizeof(UINT32)*(NR_OF_COUNTRIES+1));
-		m_threadLogLoop=new CAThread();
-		m_threadLogLoop->setMainLoop(iplist_loopDoLogCountries);
-		m_bRunLogCountries=true;
-		m_threadLogLoop->start(this,true);
-		return E_SUCCESS;
-	}
-
-SINT32 CAIPList::deleteCountryStats()
-	{
-		m_bRunLogCountries=false;
-		m_threadLogLoop->join();
-		delete m_threadLogLoop;
-		if(m_mysqlCon!=NULL)
-			{
-				my_thread_end();
-				mysql_close(m_mysqlCon);
-				delete m_mysqlCon;
-				m_mysqlCon=NULL;
-			}
-		if(m_CountryStats!=NULL)
-			delete[] m_CountryStats;
-		m_CountryStats=NULL;
-		return E_SUCCESS;
-	}
-
-/** Update the statisitics of the countries users come from. The dependency between the argumenst is as follow:
-	* @param bRemove if true the number of users of a given country is decreased, if false it is increased
-	* @param a_countryID the country the user comes from. Must be set if bRemove==true. If bRemove==false and ip==NULL, than
-	*        if also must be set to the country the user comes from. In case ip!=NULL if holdes the default country id, if no country for the ip could be found
-	* @param ip the ip the user comes from. this ip is looked up in the databse to find the corresponding country. it is only used if bRemove==false. If no country for
-	*         that ip could be found a_countryID is used as default value 
-  * @return the countryID which was asigned  to the user. This may be the default value a_countryID, if no country could be found.
-**/  
-SINT32 CAIPList::updateCountryStats(const UINT8 ip[4],UINT32 a_countryID,bool bRemove)
-	{
-		if(!bRemove)
-			{
-				UINT32 countryID=a_countryID;
-				if(ip!=NULL)
-					{
-						UINT32 u32ip=ip[0]<<24|ip[1]<<16|ip[2]<<8|ip[3];
-						char query[1024];
-						sprintf(query,"SELECT id FROM ip2c WHERE ip_lo<=\"%u\" and ip_hi>=\"%u\" LIMIT 1",u32ip,u32ip);
-						int ret=mysql_query(m_mysqlCon,query);
-						if(ret!=0)
-							goto RET;
-						MYSQL_RES* result=mysql_store_result(m_mysqlCon);
-						if(result==NULL)
-							goto RET;
-						MYSQL_ROW row=mysql_fetch_row(result);
-						if(row!=NULL)
-							{
-								countryID=atoi(row[0]);
-							}
-						else
-							{
-								CAMsg::printMsg(LOG_DEBUG,"DO country stats query result no result for ip %u)\n",u32ip);														
-							}	
-						mysql_free_result(result);
-					}
-RET:
-				m_CountryStats[countryID]++;
-				return countryID;
-			}
-		else//bRemove
-			{
-				m_CountryStats[a_countryID]--;
-			}
-		return a_countryID;
-	}
-
-THREAD_RETURN iplist_loopDoLogCountries(void* param)
-	{
-		CAIPList* pIPList=(CAIPList*)param;
-		UINT32 s=0;
-		UINT8 buff[255];
-		options.getCascadeName(buff,255);
-
-		while(pIPList->m_bRunLogCountries)
-			{
-				if(s==LOG_COUNTRIES_INTERVALL)
-					{
-						UINT8 aktDate[255];
-						time_t aktTime=time(NULL);
-						strftime((char*)aktDate,255,"%Y%m%d%H%M%S",gmtime(&aktTime));
-						char query[1024];
-						sprintf(query,"INSERT into `stats_%s` (date,id,count) VALUES (\"%s\",\"%%u\",\"%%u\")",buff,aktDate);
-						pIPList->m_Mutex.lock();
-						for(UINT32 i=0;i<NR_OF_COUNTRIES+1;i++)
-							{
-								if(pIPList->m_CountryStats[i]>0)
-									{
-										char aktQuery[1024];
-										sprintf(aktQuery,query,i,pIPList->m_CountryStats[i]);
-										int ret=mysql_query(pIPList->m_mysqlCon,aktQuery);
-									}
-							}
-						pIPList->m_Mutex.unlock();
-						s=0;
-					}
-				sSleep(10);
-				s++;
-			}
-		THREAD_RETURN_SUCCESS;	
-	}
-#endif

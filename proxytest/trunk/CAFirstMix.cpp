@@ -218,6 +218,9 @@ SINT32 CAFirstMix::init()
 #endif
 
 		m_pIPList=new CAIPList();
+#ifdef COUNTRY_STATS
+		initCountryStats();
+#endif		
 		m_pQueueSendToMix=new CAQueue(sizeof(tQueueEntry));
 		m_pQueueReadFromMix=new CAQueue(sizeof(tQueueEntry));
 		m_pChannelList=new CAFirstMixChannelList();
@@ -851,7 +854,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 				delete pNewUser;
 				return E_UNKNOWN;
 			}
-#if defined(PAYMENT)||defined(FIRST_MIX_SYMMETRIC)||defined(WITH_CONTROL_CHANNELS_TEST)
+#if defined(PAYMENT)||defined(FIRST_MIX_SYMMETRIC)||defined(WITH_CONTROL_CHANNELS_TEST)||defined(COUNTRY_STATS)
 		fmHashTableEntry* pHashEntry=m_pChannelList->get(pNewUser);
 #endif
 #ifdef PAYMENT
@@ -870,7 +873,11 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 #ifdef WITH_CONTROL_CHANNELS_TEST
 		pHashEntry->pControlChannelDispatcher->registerControlChannel(new CAControlChannelTest());
 #endif
-		incUsers();																	// increment the user counter by one
+		#ifdef COUNTRY_STATS
+			incUsers(pHashEntry);
+		#else
+			incUsers();
+		#endif	
 #ifdef HAVE_EPOLL
 		m_psocketgroupUsersRead->add(*pNewUser,m_pChannelList->get(pNewUser)); // add user socket to the established ones that we read data from.
 		#ifdef WITH_CONTROL_CHANNELS
@@ -1058,6 +1065,9 @@ SINT32 CAFirstMix::clean()
 				delete m_pMuxOut;
 			}
 		m_pMuxOut=NULL;
+#ifdef COUNTRY_STATS
+		deleteCountryStats();
+#endif		
 		if(m_pIPList!=NULL)
 			delete m_pIPList;
 		m_pIPList=NULL;
@@ -1088,6 +1098,152 @@ SINT32 CAFirstMix::clean()
 		#endif
 		return E_SUCCESS;
 	}
+
+#ifdef COUNTRY_STATS
+#define COUNTRY_STATS_DB "CountryStats"
+#define NR_OF_COUNTRIES 250
+
+SINT32 CAFirstMix::initCountryStats()
+	{
+		m_CountryStats=NULL;
+		m_mysqlCon=new MYSQL;
+		mysql_init(m_mysqlCon);
+		MYSQL* tmp=NULL;
+		tmp=mysql_real_connect(m_mysqlCon,NULL,"root",NULL,COUNTRY_STATS_DB,0,NULL,0);
+		if(tmp==NULL)
+			{
+				CAMsg::printMsg(LOG_DEBUG,"Could not connet to CountryStats DB!\n");
+				my_thread_end();
+				mysql_close(m_mysqlCon);
+				delete m_mysqlCon;
+				m_mysqlCon=NULL;
+				return E_UNKNOWN;
+			}
+		CAMsg::printMsg(LOG_DEBUG,"Connected to CountryStats DB!\n");
+		char query[1024];
+		UINT8 buff[255];
+		options.getCascadeName(buff,255);
+		sprintf(query,"CREATE TABLE IF NOT EXISTS `stats_%s` (date timestamp,id int,count int,packets_in int,packets_out int)",buff);
+		mysql_query(m_mysqlCon,query);
+		m_CountryStats=new UINT32[NR_OF_COUNTRIES+1];
+		memset((void*)m_CountryStats,0,sizeof(UINT32)*(NR_OF_COUNTRIES+1));
+		m_PacketsPerCountryIN=new UINT32[NR_OF_COUNTRIES+1];
+		memset((void*)m_PacketsPerCountryIN,0,sizeof(UINT32)*(NR_OF_COUNTRIES+1));
+		m_PacketsPerCountryOUT=new UINT32[NR_OF_COUNTRIES+1];
+		memset((void*)m_PacketsPerCountryOUT,0,sizeof(UINT32)*(NR_OF_COUNTRIES+1));
+		m_threadLogLoop=new CAThread();
+		m_threadLogLoop->setMainLoop(iplist_loopDoLogCountries);
+		m_bRunLogCountries=true;
+		m_threadLogLoop->start(this,true);
+		return E_SUCCESS;
+	}
+
+SINT32 CAFirstMix::deleteCountryStats()
+	{
+		m_bRunLogCountries=false;
+		m_threadLogLoop->join();
+		delete m_threadLogLoop;
+		if(m_mysqlCon!=NULL)
+			{
+				my_thread_end();
+				mysql_close(m_mysqlCon);
+				delete m_mysqlCon;
+				m_mysqlCon=NULL;
+			}
+		if(m_CountryStats!=NULL)
+			delete[] m_CountryStats;
+		m_CountryStats=NULL;
+		if(m_PacketsPerCountryIN!=NULL)
+			delete[] m_PacketsPerCountryIN;
+		m_PacketsPerCountryIN=NULL;
+		if(m_PacketsPerCountryOUT!=NULL)
+			delete[] m_PacketsPerCountryOUT;
+		m_PacketsPerCountryOUT=NULL;
+		return E_SUCCESS;
+	}
+
+/** Update the statisitics of the countries users come from. The dependency between the argumenst is as follow:
+	* @param bRemove if true the number of users of a given country is decreased, if false it is increased
+	* @param a_countryID the country the user comes from. Must be set if bRemove==true. If bRemove==false and ip==NULL, than
+	*        if also must be set to the country the user comes from. In case ip!=NULL if holdes the default country id, if no country for the ip could be found
+	* @param ip the ip the user comes from. this ip is looked up in the databse to find the corresponding country. it is only used if bRemove==false. If no country for
+	*         that ip could be found a_countryID is used as default value 
+  * @return the countryID which was asigned  to the user. This may be the default value a_countryID, if no country could be found.
+**/  
+SINT32 CAFirstMix::updateCountryStats(const UINT8 ip[4],UINT32 a_countryID,bool bRemove)
+	{
+		if(!bRemove)
+			{
+				UINT32 countryID=a_countryID;
+				if(ip!=NULL)
+					{
+						UINT32 u32ip=ip[0]<<24|ip[1]<<16|ip[2]<<8|ip[3];
+						char query[1024];
+						sprintf(query,"SELECT id FROM ip2c WHERE ip_lo<=\"%u\" and ip_hi>=\"%u\" LIMIT 1",u32ip,u32ip);
+						int ret=mysql_query(m_mysqlCon,query);
+						if(ret!=0)
+							goto RET;
+						MYSQL_RES* result=mysql_store_result(m_mysqlCon);
+						if(result==NULL)
+							goto RET;
+						MYSQL_ROW row=mysql_fetch_row(result);
+						if(row!=NULL)
+							{
+								countryID=atoi(row[0]);
+							}
+						else
+							{
+								CAMsg::printMsg(LOG_DEBUG,"DO country stats query result no result for ip %u)\n",u32ip);														
+							}	
+						mysql_free_result(result);
+					}
+RET:
+				m_CountryStats[countryID]++;
+				return countryID;
+			}
+		else//bRemove
+			{
+				m_CountryStats[a_countryID]--;
+			}
+		return a_countryID;
+	}
+
+THREAD_RETURN iplist_loopDoLogCountries(void* param)
+	{
+		CAFirstMix* pIPList=(CAFirstMix*)param;
+		UINT32 s=0;
+		UINT8 buff[255];
+		options.getCascadeName(buff,255);
+
+		while(pIPList->m_bRunLogCountries)
+			{
+				if(s==LOG_COUNTRIES_INTERVALL)
+					{
+						UINT8 aktDate[255];
+						time_t aktTime=time(NULL);
+						strftime((char*)aktDate,255,"%Y%m%d%H%M%S",gmtime(&aktTime));
+						char query[1024];
+						sprintf(query,"INSERT into `stats_%s` (date,id,count,packets_in,packets_out) VALUES (\"%s\",\"%%u\",\"%%u\",\"%%u\",\"%%u\")",buff,aktDate);
+						pIPList->m_mutexUser.lock();
+						for(UINT32 i=0;i<NR_OF_COUNTRIES+1;i++)
+							{
+								if(pIPList->m_CountryStats[i]>0)
+									{
+										char aktQuery[1024];
+										sprintf(aktQuery,query,i,pIPList->m_CountryStats[i],pIPList->m_PacketsPerCountryIN[i],pIPList->m_PacketsPerCountryOUT[i]);
+										pIPList->m_PacketsPerCountryIN[i]=pIPList->m_PacketsPerCountryOUT[i]=0;
+										mysql_query(pIPList->m_mysqlCon,aktQuery);
+									}
+							}
+						pIPList->m_mutexUser.unlock();
+						s=0;
+					}
+				sSleep(10);
+				s++;
+			}
+		THREAD_RETURN_SUCCESS;	
+	}
+#endif
 
 /**
  * @deprecated first part of this method moved to processKeyExchange(), rest moved to CAMix.cpp

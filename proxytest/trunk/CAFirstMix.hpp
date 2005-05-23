@@ -132,18 +132,32 @@ public:
 		friend THREAD_RETURN fm_loopDoUserLogin(void* param);
 
 protected:
+#ifndef COUNTRY_STATS
 			SINT32 incUsers()
+#else
+			SINT32 incUsers(LP_fmHashTableEntry pHashEntry)
+#endif
 				{
 					m_mutexUser.lock();
 					m_nUser++;
+					#ifdef COUNTRY_STATS
+						pHashEntry->countryID=updateCountryStats(pHashEntry->peerIP,0,false);
+					#endif
 					m_mutexUser.unlock();
 					return E_SUCCESS;
 				}
 			
+#ifndef COUNTRY_STATS
 			SINT32 decUsers()
+#else
+			SINT32 decUsers(LP_fmHashTableEntry pHashEntry)
+#endif
 				{
 					m_mutexUser.lock();
 					m_nUser--;
+					#ifdef COUNTRY_STATS
+						updateCountryStats(NULL,pHashEntry->countryID,true);
+					#endif					
 					m_mutexUser.unlock();
 					return E_SUCCESS;
 				}
@@ -207,6 +221,22 @@ protected:
 #ifdef PAYMENT
 
 				CAAccountingInstance * m_pAccountingInstance;
+#endif
+
+#ifdef COUNTRY_STATS
+		private:
+			SINT32 initCountryStats();
+			SINT32 deleteCountryStats();
+			SINT32 updateCountryStats(const UINT8 ip[4],UINT32 a_countryID,bool bRemove);
+			volatile bool m_bRunLogCountries;
+			volatile UINT32* m_CountryStats;
+		protected:	
+			volatile UINT32* m_PacketsPerCountryIN;
+			volatile UINT32* m_PacketsPerCountryOUT;
+		private:	
+			CAThread* m_threadLogLoop;
+			MYSQL* m_mysqlCon;
+			friend THREAD_RETURN iplist_loopDoLogCountries(void* param);
 #endif
 
 };

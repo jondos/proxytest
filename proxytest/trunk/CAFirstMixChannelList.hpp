@@ -141,7 +141,7 @@ struct t_fmhashtableentry
 			UINT32        uAlreadySendPacketSize;
 			tQueueEntry		oQueueEntry;
 			UINT32				cSuspend;
-#ifdef LOG_CHANNEL
+#ifdef LOG_TRAFFIC_PER_USER
 			UINT32				trafficIn;
 			UINT32				trafficOut;
 			UINT64				timeCreated;
@@ -154,6 +154,10 @@ struct t_fmhashtableentry
 			CASymCipher*  pSymCipher;
 #endif			
 			UINT8					peerIP[4]; //needed for flooding control
+#ifdef COUNTRY_STATS
+			UINT32 countryID; /** CountryID of this IP Address*/
+#endif				
+			
 		private:
 			UINT32				cNumberOfChannels;
 			struct t_firstmixchannellist* pChannelList;

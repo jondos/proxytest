@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.03.77"
+#define MIX_VERSION "00.03.78"
 
 #if defined(DEBUG)|| defined(_DEBUG)
 	#undef DEBUG
@@ -42,7 +42,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define DEBUG
 	#define _DEBUG
 #endif
-//#define LOG_CHANNEL
+//#define LOG_TRAFFIC_PER_USER //Log detail for traffic per user
+//#define LOG_CHANNEL //Log detail for traffic per cahnnel
 //#define LOG_PACKET_TIMES //computes statistics about the processing time each packet needs
 //#define COMPRESSED_LOGS
 //#define DO_TRACE
@@ -50,7 +51,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define DELAY_CHANNELS //to enable max channel bandwidth
 //#define HAVE_EPOLL //define if you have epoll support on your (Linux) system
 //#define COUNTRY_STATS //collect stats about countries users come from
-//#define LOG_COUNTRIES_INTERVALL //how often to log the country stats (multiplied by 10 seconds)
+#define LOG_COUNTRIES_INTERVALL 6 //how often to log the country stats (multiplied by 10 seconds)
 #ifdef DELAY_CHANNELS
 	#ifndef DELAY_CHANNEL_TRAFFIC
 		#define DELAY_CHANNEL_TRAFFIC 10000 //Traffic in bytes after which (download direction) the channel is delayed
@@ -109,6 +110,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define MIX_CASCADE_PROTOCOL_VERSION_0_3 3 //with reply detection
 #define MIX_CASCADE_PROTOCOL_VERSION_0_2 2 //noraml protocol
 
+#if (defined(LOG_CHANNEL)) && !defined(LOG_TRAFFIC_PER_USER)
+	#define LOG_TRAFFIC_PER_USER
+#endif	
 #ifdef PAYMENT
 	#define WITH_CONTROL_CHANNELS
 #endif
