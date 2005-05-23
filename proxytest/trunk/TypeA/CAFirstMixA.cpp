@@ -144,13 +144,13 @@ SINT32 CAFirstMixA::loop()
 												#ifdef FIRST_MIX_SYMMETRIC
 													delete pHashEntry->pSymCipher;
 												#endif	
-												m_pChannelList->remove(pMuxSocket);
-												delete pMuxSocket;
 												#ifdef COUNTRY_STATS
 													decUsers(pHashEntry);
 												#else
 													decUsers();
 												#endif	
+												m_pChannelList->remove(pMuxSocket);
+												delete pMuxSocket;
 											}
 										else if(ret==MIXPACKET_SIZE) 											// we've read enough data for a whole mix packet. nice!
 											{
