@@ -82,6 +82,7 @@ public:
 #ifdef COUNTRY_STATS
 						m_PacketsPerCountryIN=m_PacketsPerCountryOUT=m_CountryStats=NULL;
 						m_mysqlCon=NULL;
+						m_threadLogLoop=NULL;
 #endif
 				}
     virtual ~CAFirstMix()
