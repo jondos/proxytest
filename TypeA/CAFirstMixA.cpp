@@ -58,7 +58,7 @@ SINT32 CAFirstMixA::loop()
 		CAMsg::printMsg(LOG_DEBUG,"Starting Message Loop... \n");
 		bool bAktiv;
 		UINT8 rsaBuff[RSA_SIZE];
-#ifdef LOG_CHANNEL
+#ifdef LOG_TRAFFIC_PER_USER
 		UINT64 current_time;
 		UINT32 diff_time;
 		CAMsg::printMsg(LOG_DEBUG,"Channel log formats:\n");
@@ -69,10 +69,6 @@ SINT32 CAFirstMixA::loop()
 //		threadReadFromUsers.setMainLoop(loopReadFromUsers);
 //		threadReadFromUsers.start(this);
 
-		//#if defined(LOG_PACKET_TIMES)||defined(LOG_CHANNEL)
-			//UINT64 upload_packet_timestamp;
-			//UINT64 download_packet_timestamp;
-		//#endif
 		while(!m_bRestart)	                                                          /* the main mix loop as long as there are things that are not handled by threads. */
 			{
 				bAktiv=false;
@@ -120,7 +116,7 @@ SINT32 CAFirstMixA::loop()
 										if(ret==SOCKET_ERROR/*||pHashEntry->accessUntil<time()*/) 
 											{	
 																											// remove dead connections
-												#ifdef LOG_CHANNEL
+												#ifdef LOG_TRAFFIC_PER_USER
 													getcurrentTimeMillis(current_time);
 													diff_time=diff64(current_time,pHashEntry->timeCreated);
 													m_pIPList->removeIP(pHashEntry->peerIP,diff_time,pHashEntry->trafficIn,pHashEntry->trafficOut);
@@ -150,13 +146,20 @@ SINT32 CAFirstMixA::loop()
 												#endif	
 												m_pChannelList->remove(pMuxSocket);
 												delete pMuxSocket;
-												decUsers();
+												#ifdef COUNTRY_STATS
+													decUsers(pHashEntry);
+												#else
+													decUsers();
+												#endif	
 											}
 										else if(ret==MIXPACKET_SIZE) 											// we've read enough data for a whole mix packet. nice!
 											{
-												#ifdef LOG_CHANNEL
+												#ifdef LOG_TRAFFIC_PER_USER
 													pHashEntry->trafficIn++;
 												#endif
+												#ifdef COUNTRY_STATS
+													m_PacketsPerCountryIN[pHashEntry->countryID]++;
+												#endif	
 #ifdef WITH_CONTROL_CHANNELS		
 												//New control channel code...!
 												if(pHashEntry->pControlChannelDispatcher->proccessMixPacket(pMixPacket))
@@ -340,8 +343,13 @@ NEXT_USER:
 											getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
 										#endif
 										pEntry->pHead->pQueueSend->add(pMixPacket,sizeof(tQueueEntry));
-										#ifdef LOG_CHANNEL
+										#ifdef LOG_TRAFFIC_PER_USER
 											pEntry->pHead->trafficOut++;
+										#endif
+										#ifdef COUNTRY_STATS
+											m_PacketsPerCountryOUT[pEntry->pHead->countryID]++;
+										#endif	
+										#ifdef LOG_CHANNEL	
 											//pEntry->packetsOutToUser++;
 											getcurrentTimeMicros(current_time);
 											diff_time=diff64(current_time,pEntry->timeCreated);
@@ -386,8 +394,13 @@ NEXT_USER:
 											getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
 										#endif
 										pEntry->pHead->pQueueSend->add(pMixPacket,sizeof(tQueueEntry));
-										#ifdef LOG_CHANNEL
+										#ifdef LOG_TRAFFIC_PER_USER
 											pEntry->pHead->trafficOut++;
+										#endif
+										#ifdef COUNTRY_STATS
+											m_PacketsPerCountryOUT[pEntry->pHead->countryID]++;
+										#endif	
+										#ifdef LOG_CGANNEL	
 											pEntry->packetsOutToUser++;
 										#endif
 										#ifdef HAVE_EPOLL

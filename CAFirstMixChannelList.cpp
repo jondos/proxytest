@@ -92,7 +92,7 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8 peerIP[4],
 		pHashTableEntry->pControlChannelDispatcher=new CAControlChannelDispatcher(pQueueSend);
 		pHashTableEntry->uAlreadySendPacketSize=0;
 		pHashTableEntry->cNumberOfChannels=0;
-#ifdef LOG_CHANNEL
+#ifdef LOG_TRAFFIC_PER_USER
 		pHashTableEntry->trafficIn=0;
 		pHashTableEntry->trafficOut=0;
 		getcurrentTimeMillis(pHashTableEntry->timeCreated);
