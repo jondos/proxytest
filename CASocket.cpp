@@ -80,7 +80,7 @@ SINT32 CASocket::listen(const CASocketAddr& psa)
 		SINT32 type=psa.getType();
 		if(m_bSocketIsClosed&&create(type)!=E_SUCCESS)
 			return E_UNKNOWN;
-#ifdef HAVE_UNIX_DOMAIN
+#ifdef HAVE_UNIX_DOMAIN_PROTOCOL
 		//we have to delete the file before...
 		if(psa.getType()==AF_LOCAL)
 			{
