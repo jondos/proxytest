@@ -49,7 +49,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define DO_TRACE
 //#define PSEUDO_LOG
 //#define DELAY_CHANNELS //to enable max channel bandwidth
-#define DELAY_USERS //to enable max per user bandwidth
+//#define DELAY_USERS //to enable max per user bandwidth
 //#define HAVE_EPOLL //define if you have epoll support on your (Linux) system
 //#define COUNTRY_STATS //collect stats about countries users come from
 #define LOG_COUNTRIES_INTERVALL 6 //how often to log the country stats (multiplied by 10 seconds)
