@@ -179,6 +179,11 @@ protected:
 					return m_bRestart;
 				}
 			SINT32 doUserLogin(CAMuxSocket* pNewUSer,UINT8 perrIP[4]);
+			
+#ifdef DELAY_USERS
+			SINT32 reconfigure();
+#endif
+			
 protected:
 			CAIPList* m_pIPList;
 			CAQueue* m_pQueueSendToMix;

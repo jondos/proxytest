@@ -312,7 +312,6 @@ SINT32 CALastMix::reconfigure()
 		CAMsg::printMsg(LOG_DEBUG,"Re-read cache proxies\n");
 		if(setTargets()!=E_SUCCESS)
 			CAMsg::printMsg(LOG_DEBUG,"Could not set new cache proxies\n");
-		CAMsg::printMsg(LOG_DEBUG,"Set new ressources limitation parameters\n");
 #ifdef DELAY_CHANNELS
 		CAMsg::printMsg(LOG_DEBUG,"Set new ressources limitation parameters\n");
 		if(m_pChannelList!=NULL)

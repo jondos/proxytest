@@ -51,6 +51,19 @@ CAFirstMixChannelList::CAFirstMixChannelList()
 #ifdef DO_TRACE
 	m_aktAlloc=m_maxAlloc=0;
 #endif
+#ifdef DELAY_USERS
+		m_u32DelayChannelUnlimitTraffic=DELAY_USERS_TRAFFIC;
+		m_u32DelayChannelBucketGrow=DELAY_USERS_BUCKET_GROW;
+		m_u32DelayChannelBucketGrowIntervall=DELAY_USERS_BUCKET_GROW_INTERVALL;
+		m_pDelayBuckets=new UINT32*[MAX_POLLFD];
+		memset(m_pDelayBuckets,0,sizeof(UINT32*)*MAX_POLLFD);
+		m_pMutexDelayChannel=new CAMutex();
+		m_pThreadDelayBucketsLoop=new CAThread();
+		m_bDelayBucketsLoopRun=true;
+		m_pThreadDelayBucketsLoop->setMainLoop(fml_loopDelayBuckets);
+		m_pThreadDelayBucketsLoop->start(this);
+#endif
+
 //#ifdef PAYMENT
 //	m_pAccountingInstance = CAAccountingInstance::getInstance();
 //#endif
@@ -58,12 +71,20 @@ CAFirstMixChannelList::CAFirstMixChannelList()
 
 CAFirstMixChannelList::~CAFirstMixChannelList()
 	{
+#ifdef DELAY_USERS
+		m_bDelayBucketsLoopRun=false;
+		m_pThreadDelayBucketsLoop->join();
+		delete m_pThreadDelayBucketsLoop;
+		delete m_pMutexDelayChannel;
+		delete []m_pDelayBuckets;
+#endif
 		for(int i=0;i<MAX_HASH_KEY;i++)
 				{
 					delete m_HashTable[i];
 				}
 		delete []m_HashTable;
 		delete []m_HashTableOutChannels;
+		
 	}
 		
 /** Adds a new TCP/IP connection (a new user) to the channel list.
@@ -99,6 +120,18 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8 peerIP[4],
 		getRandom((UINT8*)&pHashTableEntry->id,8);
 #endif
 		memcpy(pHashTableEntry->peerIP,peerIP,4);
+#ifdef DELAY_USERS
+		pHashTableEntry->delayBucket=m_u32DelayChannelUnlimitTraffic; //can always send some first packets
+		for(UINT32 i=0;i<MAX_POLLFD;i++)
+			{
+				if(m_pDelayBuckets[i]==NULL)
+					{
+						pHashTableEntry->delayBucketID=i;
+						break;
+					}
+			}
+		m_pDelayBuckets[pHashTableEntry->delayBucketID]=&pHashTableEntry->delayBucket;
+#endif
 
 		//now insert the new connection in the list of all open connections
 		if(m_listHashTableHead==NULL) //if first one
@@ -274,6 +307,11 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 				m_Mutex.unlock();
 				return E_UNKNOWN;
 			}
+	#ifdef DELAY_USERS
+		m_pMutexDelayChannel->lock();
+		m_pDelayBuckets[pHashTableEntry->delayBucketID]=NULL;
+		m_pMutexDelayChannel->unlock();
+	#endif
 		delete pHashTableEntry->pControlChannelDispatcher;
 		if(m_listHashTableNext==pHashTableEntry) //adjust the enumeration over all connections (@see getNext())
 			m_listHashTableNext=pHashTableEntry->list_HashEntries.next;
@@ -551,3 +589,35 @@ SINT32 CAFirstMixChannelList::test()
 		delete pList;
 		return E_SUCCESS;
 	}
+	
+#ifdef DELAY_USERS
+	THREAD_RETURN fml_loopDelayBuckets(void* param)
+		{
+			CAFirstMixChannelList* pChannelList=(CAFirstMixChannelList*)param;
+			UINT32** pDelayBuckets=pChannelList->m_pDelayBuckets;
+			while(pChannelList->m_bDelayBucketsLoopRun)
+				{
+					pChannelList->m_pMutexDelayChannel->lock();
+					UINT32 u32BucketGrow=pChannelList->m_u32DelayChannelBucketGrow;
+					for(UINT32 i=0;i<MAX_POLLFD;i++)
+						if(pDelayBuckets[i]!=NULL)
+							*(pDelayBuckets[i])+=u32BucketGrow;
+					pChannelList->m_pMutexDelayChannel->unlock();		
+					msSleep(pChannelList->m_u32DelayChannelBucketGrowIntervall);
+				}
+			THREAD_RETURN_SUCCESS;
+		}
+		
+	void CAFirstMixChannelList::setDelayParameters(UINT32 unlimitTraffic,UINT32 bucketGrow,UINT32 intervall)
+		{
+			m_pMutexDelayChannel->lock();
+			m_u32DelayChannelUnlimitTraffic=unlimitTraffic;
+			m_u32DelayChannelBucketGrow=bucketGrow;
+			m_u32DelayChannelBucketGrowIntervall=intervall;
+			for(UINT32 i=0;i<MAX_POLLFD;i++)
+				if(m_pDelayBuckets[i]!=NULL)
+					*(m_pDelayBuckets[i])=m_u32DelayChannelUnlimitTraffic;
+			m_pMutexDelayChannel->unlock();		
+		}																												
+		
+#endif	
