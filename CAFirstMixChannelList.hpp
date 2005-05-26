@@ -33,7 +33,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMutex.hpp"
 #include "CAMsg.hpp"
 #include "CAControlChannelDispatcher.hpp"
-
+#ifdef DELAY_USERS
+	#include "CAThread.hpp"
+#endif	
 #ifdef PAYMENT
 //#include "CAAccountingInstance.hpp"
 
@@ -157,6 +159,10 @@ struct t_fmhashtableentry
 #ifdef COUNTRY_STATS
 			UINT32 countryID; /** CountryID of this IP Address*/
 #endif				
+#ifdef DELAY_USERS
+			UINT32				delayBucket;
+			UINT32				delayBucketID;
+#endif
 			
 		private:
 			UINT32				cNumberOfChannels;
@@ -334,7 +340,20 @@ class CAFirstMixChannelList
 //#ifdef PAYMENT
 //			CAAccountingInstance *m_pAccountingInstance;
 //#endif
-
+			#ifdef DELAY_USERS
+				UINT32** m_pDelayBuckets;
+				CAThread* m_pThreadDelayBucketsLoop;
+				CAMutex* m_pMutexDelayChannel;
+				bool m_bDelayBucketsLoopRun;
+				friend THREAD_RETURN fml_loopDelayBuckets(void*);
+				//Parameters
+				volatile UINT32	m_u32DelayChannelUnlimitTraffic;  //how many packets without any delay?
+				volatile UINT32 m_u32DelayChannelBucketGrow; //how many packets to put in each bucket per time intervall
+				volatile UINT32 m_u32DelayChannelBucketGrowIntervall; //duration of one time intervall in ms
+																															//therefore the allowed max bandwith=BucketGrow/Intervall*1000 *PAYLOAD_SIZE[bytes/s]
+				public:
+					void setDelayParameters(UINT32 unlimitTraffic,UINT32 bucketGrow,UINT32 intervall);																												
+			#endif
 #ifdef DO_TRACE
 			UINT32 m_aktAlloc;
 			UINT32 m_maxAlloc;

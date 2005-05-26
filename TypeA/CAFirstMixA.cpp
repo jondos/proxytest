@@ -41,6 +41,12 @@ extern CACmdLnOptions options;
 SINT32 CAFirstMixA::loop()
 	{
 #ifndef NEW_MIX_TYPE
+#ifdef DELAY_USERS
+		m_pChannelList->setDelayParameters(	options.getDelayChannelUnlimitTraffic(),
+																			options.getDelayChannelBucketGrow(),
+																			options.getDelayChannelBucketGrowIntervall());	
+#endif		
+
 	//	CASingleSocketGroup osocketgroupMixOut;
 		SINT32 countRead;
 		//#ifdef LOG_PACKET_TIMES
@@ -465,6 +471,10 @@ NEXT_USER:
 							{
 								countRead--;
 #endif
+#ifdef DELAY_USERS
+								if(pfmHashEntry->delayBucket>0)
+								{
+#endif
 #ifdef WITH_CONTROL_CHANNELS
 								if(pfmHashEntry->pQueueSend->getSize()>0)
 								{
@@ -488,6 +498,9 @@ NEXT_USER:
 													CAAccountingInstance::getInstance()->handleJapPacket(
 															&(pfmHashEntry->oQueueEntry.packet),
 															pfmHashEntry);
+												#endif
+												#ifdef DELAY_USERS
+													pfmHashEntry->delayBucket--;
 												#endif
 												pfmHashEntry->uAlreadySendPacketSize=0;
 												#ifdef LOG_PACKET_TIMES
@@ -532,7 +545,9 @@ NEXT_USER:
 #ifdef WITH_CONTROL_CHANNELS
 								}
 #endif
-
+#ifdef DELAY_USERS
+								}
+#endif
 									//todo error handling
 #ifdef HAVE_EPOLL
 						pfmHashEntry=(fmHashTableEntry*)m_psocketgroupUsersWrite->getNextSignaledSocketData();

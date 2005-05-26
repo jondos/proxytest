@@ -139,7 +139,7 @@ class CALastMixChannelList
 				CAThread* m_pThreadDelayBucketsLoop;
 				CAMutex* m_pMutexDelayChannel;
 				bool m_bDelayBucketsLoopRun;
-				friend THREAD_RETURN fml_loopDelayBuckets(void*);
+				friend THREAD_RETURN lml_loopDelayBuckets(void*);
 				//Parameters
 				volatile UINT32	m_u32DelayChannelUnlimitTraffic;  //how much traffic without any delay?
 				volatile UINT32 m_u32DelayChannelBucketGrow; //how many bytes to put in each bucket per time intervall

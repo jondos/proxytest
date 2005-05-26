@@ -1099,6 +1099,21 @@ SINT32 CAFirstMix::clean()
 		return E_SUCCESS;
 	}
 
+#ifdef DELAY_USERS
+SINT32 CAFirstMix::reconfigure()
+	{
+		CAMsg::printMsg(LOG_DEBUG,"Reconfiguring First Mix\n");
+#ifdef DELAY_USERS
+		CAMsg::printMsg(LOG_DEBUG,"Set new ressources limitation parameters\n");
+		if(m_pChannelList!=NULL)
+			m_pChannelList->setDelayParameters(	options.getDelayChannelUnlimitTraffic(),
+																					options.getDelayChannelBucketGrow(),
+																					options.getDelayChannelBucketGrowIntervall());	
+#endif		
+		return E_SUCCESS;
+	}
+#endif
+
 #ifdef COUNTRY_STATS
 #define COUNTRY_STATS_DB "CountryStats"
 #define NR_OF_COUNTRIES 250

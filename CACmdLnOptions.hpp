@@ -240,7 +240,7 @@ class CACmdLnOptions
 				}
 #endif
 
-#ifdef DELAY_CHANNELS
+#if defined(DELAY_CHANNELS)||defined(DELAY_USERS)
 			UINT32 getDelayChannelUnlimitTraffic()
 				{
 					return m_u32DelayChannelUnlimitTraffic;
@@ -331,7 +331,7 @@ class CACmdLnOptions
 			regex_t* m_arCrimeRegExps;
 			UINT32 m_nCrimeRegExps;
 #endif
-#ifdef DELAY_CHANNELS
+#if defined (DELAY_CHANNELS) ||defined(DELAY_USERS)
 		UINT32 m_u32DelayChannelUnlimitTraffic;	
 		UINT32 m_u32DelayChannelBucketGrow;	
 		UINT32 m_u32DelayChannelBucketGrowIntervall;	

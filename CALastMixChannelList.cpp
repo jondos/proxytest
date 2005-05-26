@@ -45,13 +45,20 @@ CALastMixChannelList::CALastMixChannelList()
 		m_pMutexDelayChannel=new CAMutex();
 		m_pThreadDelayBucketsLoop=new CAThread();
 		m_bDelayBucketsLoopRun=true;
-		m_pThreadDelayBucketsLoop->setMainLoop(fml_loopDelayBuckets);
+		m_pThreadDelayBucketsLoop->setMainLoop(lml_loopDelayBuckets);
 		m_pThreadDelayBucketsLoop->start(this);
 #endif
 	}
 
 CALastMixChannelList::~CALastMixChannelList()
 	{
+#ifdef DELAY_CHANNELS
+		m_bDelayBucketsLoopRun=false;
+		m_pThreadDelayBucketsLoop->join();
+		delete m_pThreadDelayBucketsLoop;
+		delete m_pMutexDelayChannel;
+		delete []m_pDelayBuckets;
+#endif
 		for(UINT32 i=0;i<0x10000;i++)
 			{
 				lmChannelListEntry* akt=m_HashTable[i];
@@ -64,13 +71,6 @@ CALastMixChannelList::~CALastMixChannelList()
 					}
 			}
 		delete[] m_HashTable;
-#ifdef DELAY_CHANNELS
-		m_bDelayBucketsLoopRun=false;
-		m_pThreadDelayBucketsLoop->join();
-		delete m_pThreadDelayBucketsLoop;
-		delete m_pMutexDelayChannel;
-		delete []m_pDelayBuckets;
-#endif
 	}
 
 #ifndef LOG_CHANNEL
@@ -230,7 +230,7 @@ SINT32 CALastMixChannelList::test()
 				}
 
 #ifdef DELAY_CHANNELS
-	THREAD_RETURN fml_loopDelayBuckets(void* param)
+	THREAD_RETURN lml_loopDelayBuckets(void* param)
 		{
 			CALastMixChannelList* pChannelList=(CALastMixChannelList*)param;
 			UINT32** pDelayBuckets=pChannelList->m_pDelayBuckets;

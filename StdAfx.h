@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.03.78"
+#define MIX_VERSION "00.03.79"
 
 #if defined(DEBUG)|| defined(_DEBUG)
 	#undef DEBUG
@@ -49,6 +49,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define DO_TRACE
 //#define PSEUDO_LOG
 //#define DELAY_CHANNELS //to enable max channel bandwidth
+#define DELAY_USERS //to enable max per user bandwidth
 //#define HAVE_EPOLL //define if you have epoll support on your (Linux) system
 //#define COUNTRY_STATS //collect stats about countries users come from
 #define LOG_COUNTRIES_INTERVALL 6 //how often to log the country stats (multiplied by 10 seconds)
@@ -65,6 +66,21 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#else
 		#define DELAY_BUCKET_GROW_INTERVALL (1000/DELAY_CHANNEL_KBYTE_PER_SECOND) //Time in ms
 		#define DELAY_BUCKET_GROW PAYLOAD_SIZE //Grow in bytes
+	#endif	
+#endif
+#ifdef DELAY_USERS
+	#ifndef DELAY_USERS_TRAFFIC
+		#define DELAY_USERS_TRAFFIC 100 //Traffic in packets after which (download direction) the user is delayed
+	#endif
+	//Delay is at the moment constant and calculate as
+	// 1000/DELAY_BUCKET_GROW_INTERVALL*DELAY_BUCKET_GROW bytes/s
+	#ifndef DELAY_USERS_PACKETS_PER_SECOND
+		#define DELAY_USERS_BUCKET_GROW_INTERVALL 100 //Time in ms
+		#define DELAY_USERS_BUCKET_GROW 10 //Grow in packets
+	//so we have around 10 KByte/s at the moment
+	#else
+		#define DELAY_USERS_BUCKET_GROW_INTERVALL 1000 //Time in ms
+		#define DELAY_USERS_BUCKET_GROW DELAY_USERS_PACKETS_PER_SECOND //Grow in bytes
 	#endif	
 #endif
 //#define LOG_CRIME

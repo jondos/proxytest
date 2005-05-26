@@ -368,7 +368,7 @@ SINT32 CACmdLnOptions::setNewValues(CACmdLnOptions& newOptions)
 				for(UINT32 i=0;i<m_cnTargets;i++)
 					newOptions.getTargetInterface(m_arTargetInterfaces[i],i+1);
 			}
-#ifdef DELAY_CHANNELS			
+#if defined( DELAY_CHANNELS)||defined(DELAY_USERS)			
 		//Copy ressources limitation
 		m_u32DelayChannelUnlimitTraffic=newOptions.getDelayChannelUnlimitTraffic();
 		m_u32DelayChannelBucketGrow=newOptions.getDelayChannelBucketGrow();
@@ -1476,18 +1476,37 @@ SKIP_NEXT_MIX:
 		CAMsg::printMsg(LOG_DEBUG,"Loading Crime Detection Data finished\n");
 
 #endif
-#ifdef DELAY_CHANNELS
-		///reads the parameters for the ressource limitation
+#if defined (DELAY_CHANNELS) ||defined(DELAY_USERS)
+		///reads the parameters for the ressource limitation for last mix/first mix
 		//this is at the moment:
 		//<Ressources>
-		//<UnlimitTraffic></UnlimitTraffic>    #Number of bytes without resource limitation
-		//<BytesPerIntervall></BytesPerIntervall>   #upper limit of number of bytes which are processed per channel per time intervall
+		//<UnlimitTraffic></UnlimitTraffic>    #Number of bytes/packets without resource limitation
+		//<BytesPerIntervall></BytesPerIntervall>   #upper limit of number of bytes/packets which are processed per channel/per user per time intervall
 		//<Intervall></Intervall>  #duration of one intervall in ms 
 		//</Ressources>
 		CAMsg::printMsg(LOG_INFO,"Loading Parameters for Resources limitation....\n");
+#if defined(DELAY_CHANNELS)&&defined(DELAY_USERS)
+		if(isFirstMix())
+			{
+				m_u32DelayChannelUnlimitTraffic=DELAY_USERS_TRAFFIC;	
+				m_u32DelayChannelBucketGrow=DELAY_USERS_BUCKET_GROW;	
+				m_u32DelayChannelBucketGrowIntervall=DELAY_USERS_BUCKET_GROW_INTERVALL;	
+			}	
+		else
+			{
+				m_u32DelayChannelUnlimitTraffic=DELAY_CHANNEL_TRAFFIC;	
+				m_u32DelayChannelBucketGrow=DELAY_BUCKET_GROW;	
+				m_u32DelayChannelBucketGrowIntervall=DELAY_BUCKET_GROW_INTERVALL;	
+			}	
+#elif defined(DELAY_CHANNELS)
 		m_u32DelayChannelUnlimitTraffic=DELAY_CHANNEL_TRAFFIC;	
 		m_u32DelayChannelBucketGrow=DELAY_BUCKET_GROW;	
 		m_u32DelayChannelBucketGrowIntervall=DELAY_BUCKET_GROW_INTERVALL;	
+#else
+		m_u32DelayChannelUnlimitTraffic=DELAY_USERS_TRAFFIC;	
+		m_u32DelayChannelBucketGrow=DELAY_USERS_BUCKET_GROW;	
+		m_u32DelayChannelBucketGrowIntervall=DELAY_USERS_BUCKET_GROW_INTERVALL;	
+#endif
 		DOM_Element elemRessources;
 		getDOMChildByName(elemRoot,(UINT8*)"Ressources",elemRessources,false);
 		if(elemRessources!=NULL)
