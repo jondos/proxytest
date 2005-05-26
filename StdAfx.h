@@ -404,7 +404,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 //For MySQL
 #if defined (PAYMENT_SUPPORT) ||defined(COUNTRY_STATS)
-#include <mysql.h>
+#include <mysql/mysql.h>
 #endif
 
 //For Payment
