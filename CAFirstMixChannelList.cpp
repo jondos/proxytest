@@ -111,7 +111,7 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8 peerIP[4],
 		pHashTableEntry->pMuxSocket=pMuxSocket;
 		pHashTableEntry->pQueueSend=pQueueSend;
 		pHashTableEntry->pControlChannelDispatcher=new CAControlChannelDispatcher(pQueueSend);
-		pHashTableEntry->uAlreadySendPacketSize=0;
+		pHashTableEntry->uAlreadySendPacketSize=-1;
 		pHashTableEntry->cNumberOfChannels=0;
 #ifdef LOG_TRAFFIC_PER_USER
 		pHashTableEntry->trafficIn=0;
