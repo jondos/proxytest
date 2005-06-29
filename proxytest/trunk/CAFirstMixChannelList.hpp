@@ -140,7 +140,7 @@ struct t_fmhashtableentry
 			CAMuxSocket*	pMuxSocket;
 			CAQueue*			pQueueSend;
 			CAControlChannelDispatcher* pControlChannelDispatcher;
-			UINT32        uAlreadySendPacketSize;
+			SINT32        uAlreadySendPacketSize;
 			tQueueEntry		oQueueEntry;
 			UINT32				cSuspend;
 #ifdef LOG_TRAFFIC_PER_USER

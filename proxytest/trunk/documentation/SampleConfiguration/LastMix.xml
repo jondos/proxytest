@@ -22,7 +22,7 @@
                 <NetworkProtocol>RAW/TCP</NetworkProtocol>
                 <Host>localhost</Host>
                 <IP>127.0.0.1</IP>
-                <Port>80</Port>
+                <Port>3128</Port>
             </Proxy>
         </Proxies>
         <InfoService>

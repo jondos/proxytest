@@ -481,10 +481,11 @@ NEXT_USER:
 								bAktiv=true;
 #endif
 								UINT32 len=sizeof(tQueueEntry);
-								if(pfmHashEntry->uAlreadySendPacketSize==0)
+								if(pfmHashEntry->uAlreadySendPacketSize==-1)
 									{
-										pfmHashEntry->pQueueSend->get((UINT8*)&pfmHashEntry->oQueueEntry,&len); //We only make a peek() here because we do not know if sending will succeed or not (because send() is non blocking there!)
+										pfmHashEntry->pQueueSend->get((UINT8*)&pfmHashEntry->oQueueEntry,&len); 
 										pfmHashEntry->pMuxSocket->prepareForSend(&(pfmHashEntry->oQueueEntry.packet));
+										pfmHashEntry->uAlreadySendPacketSize=0;
 									}
 								len=MIXPACKET_SIZE-pfmHashEntry->uAlreadySendPacketSize;
 								ret=((CASocket*)pfmHashEntry->pMuxSocket)->send(((UINT8*)&(pfmHashEntry->oQueueEntry))+pfmHashEntry->uAlreadySendPacketSize,len);
@@ -502,7 +503,7 @@ NEXT_USER:
 												#ifdef DELAY_USERS
 													pfmHashEntry->delayBucket--;
 												#endif
-												pfmHashEntry->uAlreadySendPacketSize=0;
+												pfmHashEntry->uAlreadySendPacketSize=-1;
 												#ifdef LOG_PACKET_TIMES
 													if(!isZero64(pfmHashEntry->oQueueEntry.timestamp_proccessing_start))
 														{
@@ -527,6 +528,10 @@ NEXT_USER:
 																#ifdef LOG_PACKET_TIMES
 																	setZero64(pQueueEntry->timestamp_proccessing_start);
 																#endif
+																#ifdef _DEBUG
+																	CAMsg::printMsg(LOG_INFO,"Sending resume for channel: %u\n",pMixPacket->channel);
+																#endif												
+
 																m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));
 																pEntry->bIsSuspended=false;	
 															}

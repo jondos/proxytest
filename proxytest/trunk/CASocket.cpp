@@ -322,7 +322,15 @@ SINT32 CASocket::send(const UINT8* buff,UINT32 len)
 		if(ret==SOCKET_ERROR)
 			{
 				if(ef==ERR_INTERN_WOULDBLOCK)
-					return E_AGAIN;
+					{
+						#ifdef _DEBUG
+							CAMsg::printMsg(LOG_DEBUG,"Fehler beim Socket-send: E_AGAIN\n");
+						#endif
+						return E_AGAIN;
+					}
+				#ifdef _DEBUG
+					CAMsg::printMsg(LOG_DEBUG,"Fehler beim Socket-send:E_UNKNOWN (ef=%i)\n",ef);
+				#endif
 				return E_UNKNOWN;
 			}
 	  return ret;	    	    
