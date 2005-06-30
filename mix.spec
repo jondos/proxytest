@@ -47,7 +47,7 @@ rm -rf $RPM_BUILD_ROOT
 /etc/init.d/rc5.d/S70mix
 
 %changelog
+*Tue Jun 28 2005 JAP-Team <jap@inf.tu-dresden.de> 
+-Fixed a Bug in the First Mix
 *Tue Jun 7 2005 JAP-Team <jap@inf.tu-dresden.de> 
 -Initial build
-*Tue Jun 30 2005 JAP-Team <jap@inf.tu-dresden.de> 
-Fixed a Bug in the First Mix
