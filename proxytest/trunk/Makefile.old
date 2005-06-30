@@ -143,7 +143,7 @@ freebsd-x86-gcc-pthread:
 	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -fomit-frame-pointer -O3' 'INCLUDE=-I. -I/usr/local/ssl/include' 'LIBS=$(LIBS) -lpthread' 'LIBDIR=-L/usr/local/lib -L/usr/local/lib/pth' _all_aes 
 
 linux-x86-gcc-webdeploy:
-	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -O0' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -O0' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++ -lxerces-depdom' 'LIBDIR=$(LIBDIR)' _all_aes 
 
 _all_aes: $(OBJS) libpopt.a libxml.a libtrio.a libtre.a libmixa.a
 	$(CC) -o proxytest $(DEBUG) $(CPPFLAGS) $(OBJS) $(LIBDIR) $(LIBS)
