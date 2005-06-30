@@ -1,6 +1,6 @@
 Summary: Mix Server of the AN.ON project
 Name: Mix
-Version: 00.03.79
+Version: 00.03.80
 Release: 1
 URL: http//anon.inf.tu-dresden.de/
 Source0: mix.src.tgz
@@ -49,3 +49,5 @@ rm -rf $RPM_BUILD_ROOT
 %changelog
 *Tue Jun 7 2005 JAP-Team <jap@inf.tu-dresden.de> 
 -Initial build
+*Tue Jun 30 2005 JAP-Team <jap@inf.tu-dresden.de> 
+Fixed a Bug in the First Mix
