@@ -1476,13 +1476,14 @@ SKIP_NEXT_MIX:
 		CAMsg::printMsg(LOG_DEBUG,"Loading Crime Detection Data finished\n");
 
 #endif
-#if defined (DELAY_CHANNELS) ||defined(DELAY_USERS)
+#if defined (DELAY_CHANNELS) ||defined(DELAY_USERS)||defined(DELAY_CHANNELS_LATENCY)
 		///reads the parameters for the ressource limitation for last mix/first mix
 		//this is at the moment:
 		//<Ressources>
 		//<UnlimitTraffic></UnlimitTraffic>    #Number of bytes/packets without resource limitation
 		//<BytesPerIntervall></BytesPerIntervall>   #upper limit of number of bytes/packets which are processed per channel/per user per time intervall
-		//<Intervall></Intervall>  #duration of one intervall in ms 
+		//<Intervall></Intervall>  #duration of one intervall in ms
+		//<Latency></Latency> #minimum Latency per channel in ms
 		//</Ressources>
 		CAMsg::printMsg(LOG_INFO,"Loading Parameters for Resources limitation....\n");
 #if defined(DELAY_CHANNELS)&&defined(DELAY_USERS)
@@ -1502,16 +1503,20 @@ SKIP_NEXT_MIX:
 		m_u32DelayChannelUnlimitTraffic=DELAY_CHANNEL_TRAFFIC;	
 		m_u32DelayChannelBucketGrow=DELAY_BUCKET_GROW;	
 		m_u32DelayChannelBucketGrowIntervall=DELAY_BUCKET_GROW_INTERVALL;	
-#else
+#elif defined (DELAY_USERS)
 		m_u32DelayChannelUnlimitTraffic=DELAY_USERS_TRAFFIC;	
 		m_u32DelayChannelBucketGrow=DELAY_USERS_BUCKET_GROW;	
 		m_u32DelayChannelBucketGrowIntervall=DELAY_USERS_BUCKET_GROW_INTERVALL;	
+#endif
+#if defined(DELAY_CHANNELS_LATENCY)
+		m_u32DelayChannelLatency=DELAY_CHANNEL_LATENCY;	
 #endif
 		DOM_Element elemRessources;
 		getDOMChildByName(elemRoot,(UINT8*)"Ressources",elemRessources,false);
 		if(elemRessources!=NULL)
 			{
 				UINT32 u32;
+#if defined (DELAY_CHANNELS) ||defined(DELAY_USERS)
 				if(	getDOMChildByName(elemRessources,(UINT8*)"UnlimitTraffic",elem,false)==E_SUCCESS&&
 						getDOMElementValue(elem,&u32)==E_SUCCESS)
 					m_u32DelayChannelUnlimitTraffic=u32;
@@ -1521,6 +1526,12 @@ SKIP_NEXT_MIX:
 				if(	getDOMChildByName(elemRessources,(UINT8*)"Intervall",elem,false)==E_SUCCESS&&
 						getDOMElementValue(elem,&u32)==E_SUCCESS)
 					m_u32DelayChannelBucketGrowIntervall=u32;
+#endif
+#if defined (DELAY_CHANNELS_LATENCY)
+				if(	getDOMChildByName(elemRessources,(UINT8*)"Latency",elem,false)==E_SUCCESS&&
+						getDOMElementValue(elem,&u32)==E_SUCCESS)
+					m_u32DelayChannelLatency=u32;
+#endif
 			}
 #endif
 

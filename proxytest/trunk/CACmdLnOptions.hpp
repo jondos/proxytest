@@ -255,6 +255,15 @@ class CACmdLnOptions
 				}
 #endif
 
+#if defined(DELAY_CHANNELS_LATENCY)
+				/** Channel Latency in ms*/
+			UINT32 getDelayChannelLatency()
+				{
+					return m_u32DelayChannelLatency;
+				}	
+#endif
+
+
 #ifdef PAYMENT
 // added by Bastian Voigt:
 // getter functions for the payment config options
@@ -335,6 +344,10 @@ class CACmdLnOptions
 		UINT32 m_u32DelayChannelUnlimitTraffic;	
 		UINT32 m_u32DelayChannelBucketGrow;	
 		UINT32 m_u32DelayChannelBucketGrowIntervall;	
+#endif
+
+#if defined (DELAY_CHANNELS_LATENCY)
+		UINT32 m_u32DelayChannelLatency;	
 #endif
 
 #ifdef PAYMENT
