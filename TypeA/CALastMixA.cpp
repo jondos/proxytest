@@ -55,6 +55,9 @@ SINT32 CALastMixA::loop()
 																			options.getDelayChannelBucketGrow(),
 																			options.getDelayChannelBucketGrowIntervall());	
 #endif		
+#ifdef DELAY_CHANNELS_LATENCY
+		m_pChannelList->setDelayLatencyParameters(	options.getDelayChannelLatency());
+#endif		
 #ifdef HAVE_EPOLL	
 		CASocketGroupEpoll osocketgroupCacheRead(false);
 		CASocketGroupEpoll osocketgroupCacheWrite(true);
