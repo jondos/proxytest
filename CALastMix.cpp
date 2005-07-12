@@ -322,7 +322,9 @@ SINT32 CALastMix::reconfigure()
 																					options.getDelayChannelBucketGrowIntervall());
 		#endif
 		#if defined (DELAY_CHANNELS_LATENCY)
-			m_pChannelList->setDelayLatencyParameters(	options.getDelayChannelLatency());
+			UINT32 utemp=options.getDelayChannelLatency();
+			CAMsg::printMsg(LOG_DEBUG,"Set new latency: %u ms\n");
+			m_pChannelList->setDelayLatencyParameters(	utemp);
 		#endif
 		}
 #endif		
