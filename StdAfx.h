@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.03.80"
+#define MIX_VERSION "00.03.81"
 
 #if defined(DEBUG)|| defined(_DEBUG)
 	#undef DEBUG
@@ -50,6 +50,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define PSEUDO_LOG
 //#define DELAY_CHANNELS //to enable max channel bandwidth
 //#define DELAY_USERS //to enable max per user bandwidth
+//#define DELAY_CHANNELS_LATENCY //to enable min latency per channel
 //#define HAVE_EPOLL //define if you have epoll support on your (Linux) system
 //#define COUNTRY_STATS //collect stats about countries users come from
 #define LOG_COUNTRIES_INTERVALL 6 //how often to log the country stats (multiplied by 10 seconds)
@@ -82,6 +83,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define DELAY_USERS_BUCKET_GROW_INTERVALL 1000 //Time in ms
 		#define DELAY_USERS_BUCKET_GROW DELAY_USERS_PACKETS_PER_SECOND //Grow in bytes
 	#endif	
+#endif
+#ifdef DELAY_CHANNELS_LATENCY
+	#define DELAY_CHANNEL_LATENCY 1000 //min latency defaults to 1 second
 #endif
 //#define LOG_CRIME
 //#define PAYMENT //to enable payment support, now use configure --enable-payment..

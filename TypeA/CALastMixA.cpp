@@ -205,8 +205,12 @@ SINT32 CALastMixA::loop()
 															else
 																{
 																	tmpSocket->setNonBlocking(true);
-																	#ifdef LOG_CHANNEL
+																	#if defined (LOG_CHANNEL)
 																		m_pChannelList->add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue(),pQueueEntry->timestamp_proccessing_start,payLen);
+																	#elif defined (DELAY_CHANNELS_LATENCY)
+																		UINT64 u64temp;
+																		getcurrentTimeMillis(u64temp);
+																		m_pChannelList->add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue(PAYLOAD_SIZE),u64temp);
 																	#else
 																		m_pChannelList->add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue(PAYLOAD_SIZE));
 																	#endif
@@ -387,6 +391,10 @@ SINT32 CALastMixA::loop()
 //Step 3 Reading from Cache....
 #define MAX_MIXIN_SEND_QUEUE_SIZE 1000000
 				countRead=osocketgroupCacheRead.select(0);
+#ifdef DELAY_CHANNELS_LATENCY
+				UINT64 current_time_millis;
+				getcurrentTimeMillis(current_time_millis);
+#endif
 				if(countRead>0)
 					{
 #ifdef HAVE_EPOLL
@@ -404,6 +412,9 @@ SINT32 CALastMixA::loop()
 										if(m_pQueueSendToMix->getSize()<MAX_MIXIN_SEND_QUEUE_SIZE
 												#ifdef DELAY_CHANNELS
 													&&(pChannelListEntry->delayBucket>0)
+												#endif
+												#ifdef DELAY_CHANNELS_LATENCY
+													&&(isGreater64(current_time_millis,pChannelListEntry->timeCreated))
 												#endif
 											)
 											{

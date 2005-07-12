@@ -312,12 +312,19 @@ SINT32 CALastMix::reconfigure()
 		CAMsg::printMsg(LOG_DEBUG,"Re-read cache proxies\n");
 		if(setTargets()!=E_SUCCESS)
 			CAMsg::printMsg(LOG_DEBUG,"Could not set new cache proxies\n");
-#ifdef DELAY_CHANNELS
+#if defined (DELAY_CHANNELS)||defined (DELAY_CHANNELS_LATENCY)
 		CAMsg::printMsg(LOG_DEBUG,"Set new ressources limitation parameters\n");
 		if(m_pChannelList!=NULL)
+		{
+		#if defined (DELAY_CHANNELS)
 			m_pChannelList->setDelayParameters(	options.getDelayChannelUnlimitTraffic(),
 																					options.getDelayChannelBucketGrow(),
-																					options.getDelayChannelBucketGrowIntervall());	
+																					options.getDelayChannelBucketGrowIntervall());
+		#endif
+		#if defined (DELAY_CHANNELS_LATENCY)
+			m_pChannelList->setDelayLatencyParameters(	options.getDelayChannelLatency());
+		#endif
+		}
 #endif		
 		return E_SUCCESS;
 	}

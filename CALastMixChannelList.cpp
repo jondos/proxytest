@@ -48,6 +48,9 @@ CALastMixChannelList::CALastMixChannelList()
 		m_pThreadDelayBucketsLoop->setMainLoop(lml_loopDelayBuckets);
 		m_pThreadDelayBucketsLoop->start(this);
 #endif
+#ifdef DELAY_CHANNELS_LATENCY
+		m_u32DelayChannelLatency=DELAY_CHANNEL_LATENCY;
+#endif
 	}
 
 CALastMixChannelList::~CALastMixChannelList()
@@ -73,10 +76,12 @@ CALastMixChannelList::~CALastMixChannelList()
 		delete[] m_HashTable;
 	}
 
-#ifndef LOG_CHANNEL
-	SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue)
-#else
+#if defined (LOG_CHANNEL) 
 	SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue,UINT64 time, UINT32 trafficInFromUser)
+#elif defined (DELAY_CHANNELS_LATENCY)
+	SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue,UINT64 time)
+#else
+	SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue)
 #endif
 	{
 		UINT32 hash=id&0x0000FFFF;
@@ -86,9 +91,11 @@ CALastMixChannelList::~CALastMixChannelList()
 		pNewEntry->pCipher=pCipher;
 		pNewEntry->pSocket=pSocket;
 		pNewEntry->pQueueSend=pQueue;
+#if defined (LOG_CHANNEL) ||defined (DELAY_CHANNELS_LATENCY)
+		pNewEntry->timeCreated=time+m_u32DelayChannelLatency;
+#endif
 #ifdef LOG_CHANNEL
 		pNewEntry->trafficInFromUser=trafficInFromUser;
-		pNewEntry->timeCreated=time;
 		pNewEntry->packetsDataInFromUser=1;
 		pNewEntry->packetsDataOutToUser=0;
 #endif
@@ -183,7 +190,7 @@ SINT32 CALastMixChannelList::removeChannel(HCHANNEL channel)
 
 SINT32 CALastMixChannelList::test()
 				{
-#ifndef LOG_CHANNEL
+#if !defined (LOG_CHANNEL)&&!defined(DELAY_CHANNELS_LATENCY)
 					CALastMixChannelList oList;
 					UINT32 c;
 					UINT32 rand;
@@ -258,5 +265,11 @@ SINT32 CALastMixChannelList::test()
 					*(m_pDelayBuckets[i])=m_u32DelayChannelUnlimitTraffic;
 			m_pMutexDelayChannel->unlock();		
 		}																												
-		
+#endif
+
+#ifdef DELAY_CHANNELS_LATENCY
+	void CALastMixChannelList::setDelayLatencyParameters(UINT32 latency)
+		{
+			m_u32DelayChannelLatency=latency;
+		}
 #endif

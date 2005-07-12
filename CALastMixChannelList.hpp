@@ -48,8 +48,10 @@ struct t_lastmixchannellist
 			UINT32				delayBucket;
 			UINT32				delayBucketID;
 #endif
-#ifdef LOG_CHANNEL
+#if defined (LOG_CHANNEL)||defined (DELAY_CHANNELS_LATENCY)
 			UINT64				timeCreated;
+#endif
+#ifdef LOG_CHANNEL
 			UINT32				trafficInFromUser;
 			UINT32				packetsDataOutToUser;
 			UINT32				packetsDataInFromUser;
@@ -84,10 +86,12 @@ class CALastMixChannelList
 			CALastMixChannelList();
 			~CALastMixChannelList();
 
-#ifndef LOG_CHANNEL			
-			SINT32 add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue);
-#else
+#ifdef LOG_CHANNEL			
 			SINT32 add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue,UINT64 time,UINT32 trafficIn);
+#elif defined(DELAY_CHANNELS_LATENCY)
+			SINT32 add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue,UINT64 time);
+#else
+			SINT32 add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue);
 #endif
 			lmChannelListEntry* get(HCHANNEL channelIn)
 				{
@@ -147,6 +151,12 @@ class CALastMixChannelList
 																															//therefore the allowed bandwith=BucketGrow/Intervall*1000 [bytes/s]
 				public:
 					void setDelayParameters(UINT32 unlimitTraffic,UINT32 bucketGrow,UINT32 intervall);																												
+			#endif
+			#ifdef DELAY_CHANNELS_LATENCY
+				//Parameters
+				volatile UINT32	m_u32DelayChannelLatency;  //min latency in ms
+				public:
+					void setDelayLatencyParameters(UINT32 latency);																												
 			#endif
 	};
 #endif
