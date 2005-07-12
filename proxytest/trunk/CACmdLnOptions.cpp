@@ -351,7 +351,7 @@ struct t_CMNDLN_REREAD_PARAMS
 	};
 
 /** Copies options from \c newOptions. Only those options which are specified
-	* in \c newOptions are copied. The others are left uuntouched!
+	* in \c newOptions are copied. The others are left untouched!
 	*
 	* @param newOptions \c CACmdLnOptions object from which the new values are copied
 	* @retval E_UNKNOWN if an error occurs
@@ -374,6 +374,10 @@ SINT32 CACmdLnOptions::setNewValues(CACmdLnOptions& newOptions)
 		m_u32DelayChannelBucketGrow=newOptions.getDelayChannelBucketGrow();
 		m_u32DelayChannelBucketGrowIntervall=newOptions.getDelayChannelBucketGrowIntervall();
 #endif			
+#if defined( DELAY_CHANNELS_LATENCY)			
+		//Copy ressources limitation
+		m_u32DelayChannelLatency=newOptions.getDelayChannelLatency();
+#endif
 		return E_SUCCESS;
 }
 
