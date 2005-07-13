@@ -48,8 +48,11 @@ struct t_lastmixchannellist
 			UINT32				delayBucket;
 			UINT32				delayBucketID;
 #endif
-#if defined (LOG_CHANNEL)||defined (DELAY_CHANNELS_LATENCY)
+#if defined (LOG_CHANNEL)
 			UINT64				timeCreated;
+#endif
+#if defined (DELAY_CHANNELS_LATENCY)
+			UINT64				timeLatency;
 #endif
 #ifdef LOG_CHANNEL
 			UINT32				trafficInFromUser;
