@@ -60,8 +60,8 @@ class CAQueue
 					m_nQueueSize=0;
 					m_pcsQueue=new CAMutex();
 					m_pconvarSize=new CAConditionVariable();
-					m_pHeap=NULL;
-					incHeap();
+					//m_pHeap=NULL;
+					//incHeap();
 				}
 			~CAQueue();
 			SINT32 add(const void* buff,UINT32 size);
@@ -100,11 +100,11 @@ class CAQueue
 			QUEUE* m_lastElem;
 			UINT32 m_nQueueSize;
 			UINT32 m_nExpectedElementSize;
-			QUEUE* m_pHeap;
+			//QUEUE* m_pHeap;
 			CAMutex* m_pcsQueue;
 			CAConditionVariable* m_pconvarSize;
 
-			SINT32 incHeap()
+	/*		SINT32 incHeap()
 				{
 					QUEUE* pEntry;
 					for(int i=0;i<100;i++)
@@ -118,6 +118,6 @@ class CAQueue
 							m_pHeap=pEntry;
 						}
 					return E_SUCCESS;	
-				}
+				}*/
 	};
 #endif

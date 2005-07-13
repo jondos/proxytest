@@ -42,13 +42,13 @@ CAQueue::~CAQueue()
 				m_Queue=m_Queue->next;
 				delete m_lastElem;
 			}
-		while(m_pHeap!=NULL)
+/*		while(m_pHeap!=NULL)
 			{
 				delete[] m_pHeap->pBuff;
 				m_lastElem=m_pHeap;
 				m_pHeap=m_pHeap->next;
 				delete m_lastElem;
-			}
+			}*/
 		m_pcsQueue->unlock();
 		delete m_pcsQueue;
 		delete m_pconvarSize;
@@ -67,17 +67,19 @@ SINT32 CAQueue::add(const void* buff,UINT32 size)
 		if(buff==NULL)
 			return E_UNKNOWN;
 		m_pcsQueue->lock();
-		if(m_pHeap==NULL)
-			incHeap();
+		//if(m_pHeap==NULL)
+		//	incHeap();
 		if(m_Queue==NULL)
 			{
-				m_Queue=m_pHeap;
+				/*m_Queue=m_pHeap;
 				m_pHeap=m_pHeap->next;
 				if(size>m_nExpectedElementSize)
 					{
 						delete[] m_Queue->pBuff;
 						m_Queue->pBuff=new UINT8[size];
-					}
+					}*/
+				m_Queue=new QUEUE;
+				m_Queue->pBuff=new UINT8[size];
 				m_Queue->next=NULL;
 				m_Queue->index=0;
 				m_Queue->size=size;
@@ -86,14 +88,18 @@ SINT32 CAQueue::add(const void* buff,UINT32 size)
 			}
 		else
 			{
-				m_lastElem->next=m_pHeap;
+/*				m_lastElem->next=m_pHeap;
 				m_lastElem=m_pHeap;
 				m_pHeap=m_pHeap->next;
 				if(size>m_nExpectedElementSize)
 					{
 						delete[] m_lastElem->pBuff;
 						m_lastElem->pBuff=new UINT8[size];
-					}
+					}*/
+				m_lastElem->next=new QUEUE;
+				m_lastElem=m_lastElem->next;
+				m_lastElem->pBuff=new UINT8[size];
+					
 				m_lastElem->next=NULL;
 				m_lastElem->size=size;
 				m_lastElem->index=0;
@@ -136,8 +142,10 @@ SINT32 CAQueue::get(UINT8* pbuff,UINT32* psize)
 				m_nQueueSize-=m_Queue->size;
 				QUEUE* tmp=m_Queue;
 				m_Queue=m_Queue->next;
-				tmp->next=m_pHeap;
-				m_pHeap=tmp;
+				//tmp->next=m_pHeap;
+				//m_pHeap=tmp;
+				delete[] tmp->pBuff;
+				delete tmp;
 				if(m_Queue==NULL)
 					{
 						m_pcsQueue->unlock();
@@ -264,8 +272,10 @@ SINT32 CAQueue::remove(UINT32* psize)
 				m_nQueueSize-=m_Queue->size;
 				QUEUE* tmp=m_Queue;
 				m_Queue=m_Queue->next;
-				tmp->next=m_pHeap;
-				m_pHeap=tmp;
+//				tmp->next=m_pHeap;
+//				m_pHeap=tmp;
+				delete[] tmp->pBuff;
+				delete tmp;
 				if(m_Queue==NULL)
 					{
 						m_pcsQueue->unlock();
