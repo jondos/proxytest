@@ -91,8 +91,11 @@ CALastMixChannelList::~CALastMixChannelList()
 		pNewEntry->pCipher=pCipher;
 		pNewEntry->pSocket=pSocket;
 		pNewEntry->pQueueSend=pQueue;
-#if defined (LOG_CHANNEL) ||defined (DELAY_CHANNELS_LATENCY)
-		pNewEntry->timeCreated=time+m_u32DelayChannelLatency;
+#if defined (LOG_CHANNEL)
+		pNewEntry->timeCreated=time;
+#endif
+#if defined (DELAY_CHANNELS_LATENCY)
+		pNewEntry->timeLatency=time+m_u32DelayChannelLatency;
 #endif
 #ifdef LOG_CHANNEL
 		pNewEntry->trafficInFromUser=trafficInFromUser;
