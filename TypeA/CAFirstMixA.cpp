@@ -416,10 +416,10 @@ NEXT_USER:
 										#endif
 		
 #ifndef NO_PARKING
-										UINT32 uQueueSize=pEntry->pHead->pQueueSend->getSize();
-										if(uQueueSize>200000)
-											CAMsg::printMsg(LOG_INFO,"User Send Queue size is now %u\n",uQueueSize);
-										if(uQueueSize>MAX_USER_SEND_QUEUE&&
+//										UINT32 uQueueSize=pEntry->pHead->pQueueSend->getSize();
+//										if(uQueueSize>200000)
+//											CAMsg::printMsg(LOG_INFO,"User Send Queue size is now %u\n",uQueueSize);
+										if(pEntry->pHead->pQueueSend->getSize()>MAX_USER_SEND_QUEUE&&
 												!pEntry->bIsSuspended)
 											{
 												pMixPacket->channel=pEntry->channelOut;
