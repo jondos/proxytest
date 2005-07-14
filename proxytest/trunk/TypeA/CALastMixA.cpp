@@ -481,6 +481,7 @@ SINT32 CALastMixA::loop()
 														if(pChannelListEntry->sendmeCounter==FLOW_CONTROL_SENDME_SOFT_LIMIT)
 															{
 																pMixPacket->payload.len|=NEW_FLOW_CONTROL_FLAG;
+																CAMsg::printMsg(LOG_DEBUG,"Send sendme request\n");
 															}
 														#endif
 														pChannelListEntry->pCipher->crypt2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
