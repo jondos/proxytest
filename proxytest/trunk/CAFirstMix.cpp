@@ -1121,8 +1121,7 @@ SINT32 CAFirstMix::reconfigure()
 SINT32 CAFirstMix::initCountryStats()
 	{
 		m_CountryStats=NULL;
-		m_mysqlCon=new MYSQL;
-		mysql_init(m_mysqlCon);
+		m_mysqlCon=mysql_init(NULL);
 		MYSQL* tmp=NULL;
 		tmp=mysql_real_connect(m_mysqlCon,NULL,"root",NULL,COUNTRY_STATS_DB,0,NULL,0);
 		if(tmp==NULL)
@@ -1130,7 +1129,6 @@ SINT32 CAFirstMix::initCountryStats()
 				CAMsg::printMsg(LOG_DEBUG,"Could not connet to CountryStats DB!\n");
 				my_thread_end();
 				mysql_close(m_mysqlCon);
-				delete m_mysqlCon;
 				m_mysqlCon=NULL;
 				return E_UNKNOWN;
 			}
@@ -1139,7 +1137,11 @@ SINT32 CAFirstMix::initCountryStats()
 		UINT8 buff[255];
 		options.getCascadeName(buff,255);
 		sprintf(query,"CREATE TABLE IF NOT EXISTS `stats_%s` (date timestamp,id int,count int,packets_in int,packets_out int)",buff);
-		mysql_query(m_mysqlCon,query);
+		SINT32 ret=mysql_query(m_mysqlCon,query);
+		if(ret!=0)
+		{
+				CAMsg::printMsg(LOG_WARN,"CountryStats DB - create table for %s failed!\n",buff);
+		}
 		m_CountryStats=new UINT32[NR_OF_COUNTRIES+1];
 		memset((void*)m_CountryStats,0,sizeof(UINT32)*(NR_OF_COUNTRIES+1));
 		m_PacketsPerCountryIN=new UINT32[NR_OF_COUNTRIES+1];
@@ -1166,7 +1168,6 @@ SINT32 CAFirstMix::deleteCountryStats()
 			{
 				my_thread_end();
 				mysql_close(m_mysqlCon);
-				delete m_mysqlCon;
 				m_mysqlCon=NULL;
 			}
 		if(m_CountryStats!=NULL)
@@ -1201,10 +1202,16 @@ SINT32 CAFirstMix::updateCountryStats(const UINT8 ip[4],UINT32 a_countryID,bool 
 						sprintf(query,"SELECT id FROM ip2c WHERE ip_lo<=\"%u\" and ip_hi>=\"%u\" LIMIT 1",u32ip,u32ip);
 						int ret=mysql_query(m_mysqlCon,query);
 						if(ret!=0)
-							goto RET;
+							{
+								CAMsg::printMsg(LOG_WARN,"CountryStatsDB - updateCountryStats - error (%i) in finding countryid for ip %u\n",ret,u32ip);														
+								goto RET;
+							}
 						MYSQL_RES* result=mysql_store_result(m_mysqlCon);
 						if(result==NULL)
-							goto RET;
+							{
+								CAMsg::printMsg(LOG_WARN,"CountryStatsDB - updateCountryStats - error in retriving results of the query\n");														
+								goto RET;
+							}
 						MYSQL_ROW row=mysql_fetch_row(result);
 						if(row!=NULL)
 							{
@@ -1233,7 +1240,7 @@ THREAD_RETURN iplist_loopDoLogCountries(void* param)
 		UINT32 s=0;
 		UINT8 buff[255];
 		options.getCascadeName(buff,255);
-
+		mysql_thread_init();
 		while(pIPList->m_bRunLogCountries)
 			{
 				if(s==LOG_COUNTRIES_INTERVALL)
@@ -1251,7 +1258,11 @@ THREAD_RETURN iplist_loopDoLogCountries(void* param)
 										char aktQuery[1024];
 										sprintf(aktQuery,query,i,pIPList->m_CountryStats[i],pIPList->m_PacketsPerCountryIN[i],pIPList->m_PacketsPerCountryOUT[i]);
 										pIPList->m_PacketsPerCountryIN[i]=pIPList->m_PacketsPerCountryOUT[i]=0;
-										mysql_query(pIPList->m_mysqlCon,aktQuery);
+										SINT32 ret=mysql_query(pIPList->m_mysqlCon,aktQuery);
+										if(ret!=0)
+										{
+											CAMsg::printMsg(LOG_WARN,"CountryStats DB - failed to update CountryStats DB with new values - error %i\n",ret);
+										}
 									}
 							}
 						pIPList->m_mutexUser.unlock();
@@ -1260,6 +1271,7 @@ THREAD_RETURN iplist_loopDoLogCountries(void* param)
 				sSleep(10);
 				s++;
 			}
+		mysql_thread_end();
 		THREAD_RETURN_SUCCESS;	
 	}
 #endif
