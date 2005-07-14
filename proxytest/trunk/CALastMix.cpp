@@ -184,11 +184,16 @@ SINT32 CALastMix::processKeyExchange()
 		elemMix.setAttribute("id",(char*)idBuff);
 		elemMixes.appendChild(elemMix);
 
-		//Inserting MixProtocol Version (0.3)
+		//Inserting MixProtocol Version 
+		// Version 0.3  - "normal", initial mix protocol
+		// Version 0.4  - with new flow control
 		DOM_Element elemMixProtocolVersion=doc.createElement("MixProtocolVersion");
 		elemMix.appendChild(elemMixProtocolVersion);
+#ifdef NEW_FLOW_CONTROL
+		setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.4");
+#else		
 		setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.3");
-
+#endif
 		//Inserting RSA-Key
 		DOM_DocumentFragment tmpDocFrag;
 		m_pRSA->getPublicKeyAsDocumentFragment(tmpDocFrag);

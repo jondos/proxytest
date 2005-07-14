@@ -62,6 +62,9 @@ struct t_lastmixchannellist
 #if defined (LOG_CHANNEL)
 			UINT32				trafficOutToUser;
 #endif
+#ifdef NEW_FLOW_CONTROL
+			SINT32				sendmeCounter; //this counts how many packets are sent to the user without an ack recevied yet.
+#endif
 		private:
 			struct
 				{
