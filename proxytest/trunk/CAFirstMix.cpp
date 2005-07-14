@@ -1140,7 +1140,7 @@ SINT32 CAFirstMix::initCountryStats()
 		SINT32 ret=mysql_query(m_mysqlCon,query);
 		if(ret!=0)
 		{
-				CAMsg::printMsg(LOG_WARN,"CountryStats DB - create table for %s failed!\n",buff);
+				CAMsg::printMsg(LOG_INFO,"CountryStats DB - create table for %s failed!\n",buff);
 		}
 		m_CountryStats=new UINT32[NR_OF_COUNTRIES+1];
 		memset((void*)m_CountryStats,0,sizeof(UINT32)*(NR_OF_COUNTRIES+1));
@@ -1203,13 +1203,13 @@ SINT32 CAFirstMix::updateCountryStats(const UINT8 ip[4],UINT32 a_countryID,bool 
 						int ret=mysql_query(m_mysqlCon,query);
 						if(ret!=0)
 							{
-								CAMsg::printMsg(LOG_WARN,"CountryStatsDB - updateCountryStats - error (%i) in finding countryid for ip %u\n",ret,u32ip);														
+								CAMsg::printMsg(LOG_INFO,"CountryStatsDB - updateCountryStats - error (%i) in finding countryid for ip %u\n",ret,u32ip);														
 								goto RET;
 							}
 						MYSQL_RES* result=mysql_store_result(m_mysqlCon);
 						if(result==NULL)
 							{
-								CAMsg::printMsg(LOG_WARN,"CountryStatsDB - updateCountryStats - error in retriving results of the query\n");														
+								CAMsg::printMsg(LOG_INFO,"CountryStatsDB - updateCountryStats - error in retriving results of the query\n");														
 								goto RET;
 							}
 						MYSQL_ROW row=mysql_fetch_row(result);
@@ -1261,7 +1261,7 @@ THREAD_RETURN iplist_loopDoLogCountries(void* param)
 										SINT32 ret=mysql_query(pIPList->m_mysqlCon,aktQuery);
 										if(ret!=0)
 										{
-											CAMsg::printMsg(LOG_WARN,"CountryStats DB - failed to update CountryStats DB with new values - error %i\n",ret);
+											CAMsg::printMsg(LOG_INFO,"CountryStats DB - failed to update CountryStats DB with new values - error %i\n",ret);
 										}
 									}
 							}
