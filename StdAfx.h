@@ -97,6 +97,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define NEW_MIX_TYPE // to enable the new 1:x mix protocol
 //#define WITH_CONTROL_CHANNELS //enable Control channels
 //#define WITH_CONTROL_CHANNELS_TEST //enable a Test Channel
+//#define NEW_FLOW_CONTROL //enable for the new flow control mechanism
 
 //#define WITH_TIMESTAMP // Add timestamps to the channel-open packets.
 #define TIMESTAMP_SIZE 0
@@ -112,6 +113,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define MAX_LOGIN_QUEUE 500 //how many waiting entries in the login queue ??
 
 #define MAX_USER_SEND_QUEUE 100000 //How many bytes could be in each User's send queue, before we suspend the belonging channels
+
+#define FLOW_CONTROL_SENDME_HARD_LIMIT 95 //last mix stops sending after this unack packets
+#define FLOW_CONTROL_SENDME_SOFT_LIMIT 80 //last mix sends request for 'SENDME' after this unack packets
 
 #ifndef MIX_POOL_SIZE
 	#define MIX_POOL_SIZE 10  //packets in the Mix pool

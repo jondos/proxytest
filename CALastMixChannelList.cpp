@@ -105,6 +105,9 @@ CALastMixChannelList::~CALastMixChannelList()
 #if defined (LOG_CHANNEL)
 		pNewEntry->trafficOutToUser=0;
 #endif
+#ifdef NEW_FLOW_CONTROL
+		pNewEntry->sendmeCounter=0;
+#endif		
 #ifdef DELAY_CHANNELS
 		pNewEntry->delayBucket=m_u32DelayChannelUnlimitTraffic; //can always send some first packets
 		for(UINT32 i=0;i<MAX_POLLFD;i++)

@@ -276,6 +276,13 @@ SINT32 CALastMixA::loop()
 												#endif
 												pChannelListEntry->pCipher->crypt1(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 												ret=ntohs(pMixPacket->payload.len);
+												#ifdef NEW_FLOW_CONTROL
+												if(ret&NEW_FLOW_CONTROL_FLAG)
+													{
+														pChannelListEntry->sendmeCounter=max(0,pChannelListEntry->sendmeCounter-FLOW_CONTROL_SENDME_SOFT_LIMIT);
+														ret&=(!NEW_FLOW_CONTROL_FLAG);
+													}
+												#endif
 												if(ret>=0&&ret<=PAYLOAD_SIZE)
 													{
 														#ifdef LOG_CHANNEL
@@ -419,6 +426,9 @@ SINT32 CALastMixA::loop()
 												#ifdef DELAY_CHANNELS_LATENCY
 													&&(isGreater64(current_time_millis,pChannelListEntry->timeLatency))
 												#endif
+												#ifdef NEW_FLOW_CONTROL
+													&&(pChannelListEntry->sendmeCounter<FLOW_CONTROL_SENDME_HARD_LIMIT)
+												#endif
 											)
 											{
 												bAktiv=true;
@@ -467,6 +477,12 @@ SINT32 CALastMixA::loop()
 														pMixPacket->flags=CHANNEL_DATA;
 														pMixPacket->payload.len=htons((UINT16)ret);
 														pMixPacket->payload.type=0;
+														#ifdef NEW_FLOW_CONTROL
+														if(pChannelListEntry->sendmeCounter==FLOW_CONTROL_SENDME_SOFT_LIMIT)
+															{
+																pMixPacket->payload.len|=NEW_FLOW_CONTROL_FLAG;
+															}
+														#endif
 														pChannelListEntry->pCipher->crypt2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 														#ifdef LOG_PACKET_TIMES
 															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
@@ -475,7 +491,10 @@ SINT32 CALastMixA::loop()
 														m_logDownloadedPackets++;
 														#if defined(LOG_CHANNEL)
 															pChannelListEntry->packetsDataOutToUser++;
-														#endif													
+														#endif
+														#ifdef NEW_FLOW_CONTROL
+															pChannelListEntry->sendmeCounter++;
+														#endif
 													}
 											}
 										else
