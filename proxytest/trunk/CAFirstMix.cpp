@@ -1216,6 +1216,7 @@ SINT32 CAFirstMix::updateCountryStats(const UINT8 ip[4],UINT32 a_countryID,bool 
 						if(row!=NULL)
 							{
 								countryID=atoi(row[0]);
+								CAMsg::printMsg(LOG_DEBUG,"Country ID for ip %u is %u\n",u32ip,countryID);														
 							}
 						else
 							{
@@ -1224,7 +1225,6 @@ SINT32 CAFirstMix::updateCountryStats(const UINT8 ip[4],UINT32 a_countryID,bool 
 						mysql_free_result(result);
 					}
 RET:
-				CAMsg::printMsg(LOG_DEBUG,"Country ID for ip %u is %u\n",u32ip,countryID);														
 				m_CountryStats[countryID]++;
 				return countryID;
 			}
