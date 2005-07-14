@@ -1224,6 +1224,7 @@ SINT32 CAFirstMix::updateCountryStats(const UINT8 ip[4],UINT32 a_countryID,bool 
 						mysql_free_result(result);
 					}
 RET:
+				CAMsg::printMsg(LOG_DEBUG,"Country ID for ip %u is %u\n",u32ip,countryID);														
 				m_CountryStats[countryID]++;
 				return countryID;
 			}
@@ -1236,6 +1237,7 @@ RET:
 
 THREAD_RETURN iplist_loopDoLogCountries(void* param)
 	{
+		CAMsg::printMsg(LOG_DEBUG,"Starting iplist_loopDoLogCountries\n");														
 		CAFirstMix* pIPList=(CAFirstMix*)param;
 		UINT32 s=0;
 		UINT8 buff[255];
@@ -1272,6 +1274,7 @@ THREAD_RETURN iplist_loopDoLogCountries(void* param)
 				s++;
 			}
 		mysql_thread_end();
+		CAMsg::printMsg(LOG_DEBUG,"Exiting iplist_loopDoLogCountries\n");														
 		THREAD_RETURN_SUCCESS;	
 	}
 #endif
