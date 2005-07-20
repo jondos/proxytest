@@ -181,37 +181,9 @@ SINT32 CAFirstMix::init()
         CAMsg::printMsg(LOG_CRIT,"Error in establishing secure communication with next Mix!\n");
         return E_UNKNOWN;
     }
-
-
-    // moved to processKeyExchange()
-    /*
-		UINT16 len;
-		if(((CASocket*)(*m_pMuxOut))->receiveFully((UINT8*)&len,2)!=E_SUCCESS)
-			{
-				CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info lenght!\n");
-				return E_UNKNOWN;
-			}
-		CAMsg::printMsg(LOG_CRIT,"Received Key Info lenght %u\n",ntohs(len));
-		m_pRSA=new CAASymCipher;
-		m_pRSA->generateKeyPair(1024);
-		len=ntohs(len);
-		UINT8* recvBuff=new UINT8[len+1];
-
-		if(((CASocket*)(*m_pMuxOut))->receiveFully(recvBuff,len)!=E_SUCCESS)
-			{
-				CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info!\n");
-				delete []recvBuff;
-				return E_UNKNOWN;
-			}
-		CAMsg::printMsg(LOG_CRIT,"Received Key Info...\n");
-        recvBuff[len]=0; //get the Keys from the other mixes (and the Mix-Id's...!)
-		if(initMixCascadeInfo(recvBuff,len+1)!=E_SUCCESS)
-			{
-				CAMsg::printMsg(LOG_CRIT,"Error in establishing secure communication with next Mix!\n");
-				delete []recvBuff;
-				return E_UNKNOWN;
-			}
-    */
+#ifdef REPLAY_DETECTION
+			m_pReplayDB=new CADatabase(time(NULL));
+#endif
 
 #ifdef PAYMENT
 		m_pAccountingInstance = CAAccountingInstance::getInstance();
@@ -1093,6 +1065,15 @@ SINT32 CAFirstMix::clean()
 			delete []m_xmlKeyInfoBuff;
 		m_xmlKeyInfoBuff=NULL;
 		m_docMixCascadeInfo=NULL;
+#ifdef REPLAY_DETECTION
+		if(m_pReplayDB!=NULL)
+			{
+				m_pReplayDB->stop();
+				delete m_pReplayDB;
+				m_pReplayDB=NULL;
+			}
+#endif
+		
 		#ifdef _DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"CAFirstMix::clean() finished\n");
 		#endif

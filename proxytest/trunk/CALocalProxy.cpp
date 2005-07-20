@@ -330,7 +330,7 @@ SINT32 CALocalProxy::loop()
 										countRead--;
 										getRandom(pMixPacket->payload.data,PAYLOAD_SIZE);
 										if(!tmpCon->pCiphers[0].isKeyValid())
-											len=tmpCon->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE-m_chainlen*(KEY_SIZE + TIMESTAMP_SIZE));
+											len=tmpCon->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE-m_chainlen*KEY_SIZE);
 										else
 											len=tmpCon->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE);
 										if(len==SOCKET_ERROR||len==0)
@@ -364,7 +364,7 @@ SINT32 CALocalProxy::loop()
 													{
 														//Has to bee optimized!!!!
 														UINT8 buff[DATA_SIZE];
-														UINT32 size=DATA_SIZE-KEY_SIZE-TIMESTAMP_SIZE;
+														UINT32 size=DATA_SIZE-KEY_SIZE;
 														//tmpCon->pCipher->generateEncryptionKey(); //generate Key
 														for(UINT32 c=0;c<m_chainlen;c++)
 															{
@@ -381,9 +381,10 @@ SINT32 CALocalProxy::loop()
 																	packet (from 8 to 7).
 																*/
 																#ifdef WITH_TIMESTAMP
-																	currentTimestamp(buff+KEY_SIZE,true);
+																	//TODO insert timesampt
+																	//currentTimestamp(buff+KEY_SIZE,true);
 																#endif
-																memcpy(buff+KEY_SIZE+TIMESTAMP_SIZE,pMixPacket->data,size);
+																memcpy(buff+KEY_SIZE,pMixPacket->data,size);
 																if(m_MixCascadeProtocolVersion==MIX_CASCADE_PROTOCOL_VERSION_0_4&&c==m_chainlen-1)
 																	{
 																		m_pSymCipher->crypt1(buff,buff,KEY_SIZE);
@@ -396,8 +397,8 @@ SINT32 CALocalProxy::loop()
 																		tmpCon->pCiphers[c].crypt1(buff+RSA_SIZE,buff+RSA_SIZE,DATA_SIZE-RSA_SIZE);
 																	}	
 																memcpy(pMixPacket->data,buff,DATA_SIZE);
-																size-=KEY_SIZE+TIMESTAMP_SIZE;
-																len+=KEY_SIZE+TIMESTAMP_SIZE;
+																size-=KEY_SIZE;
+																len+=KEY_SIZE;
 															}
 														pMixPacket->flags=CHANNEL_OPEN;
 													}

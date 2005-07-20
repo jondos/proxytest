@@ -281,17 +281,6 @@ inline void print64(UINT8* buff,UINT64 num)
 
 UINT8* readFile(UINT8* name,UINT32* size);
 
-/*
- Timestamp related functions
- */
-void currentTimestamp(UINT8* buff,bool bInNetworkByteOrder=false);
- 
-/*
- Checking for duplicates
-*/
-bool validTimestampAndFingerprint(UINT8* fingerprint, UINT16 len, UINT8* timestamp_buff);
-
-
 /**
  * Parses a timestamp in JDBC timestamp escape format (as it comes from the BI)
  * and outputs the value in milliseconds since the epoch.

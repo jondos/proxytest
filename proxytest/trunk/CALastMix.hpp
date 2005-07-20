@@ -42,7 +42,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #endif
 #include "CALogPacketStats.hpp"
 #include "CALastMixChannelList.hpp"
-
 class CALastMix:public CAMix
 
 	{
@@ -98,8 +97,6 @@ class CALastMix:public CAMix
 			CACacheLoadBalancing*	m_pCacheLB;
 			CACacheLoadBalancing* m_pSocksLB;
 			CAASymCipher*					m_pRSA;
-			//CASignature*					m_pSignature;
-			//CAInfoService*				m_pInfoService;
 			CAThread*							m_pthreadSendToMix;
 			CAThread*							m_pthreadReadFromMix;
 			CALastMixChannelList* m_pChannelList;
@@ -108,7 +105,7 @@ class CALastMix:public CAMix
 			regex_t*							m_pCrimeRegExps;
 			UINT32								m_nCrimeRegExp;
 #endif
-
+			
 		protected:
 			friend THREAD_RETURN	lm_loopSendToMix(void* param);
 			friend THREAD_RETURN	lm_loopReadFromMix(void* pParam);

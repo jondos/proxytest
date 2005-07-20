@@ -32,7 +32,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 typedef struct __t_database_entry
 	{
 		__t_database_entry* next;
-		UINT8 key[14];
+		UINT8 key[6];
 	} t_databaseEntry; 
 
 typedef t_databaseEntry* LP_databaseEntry;
@@ -42,7 +42,7 @@ class CADatabase
 		public:
 			CADatabase(UINT32 m_refTime);
 			~CADatabase();
-			SINT32 insert(UINT8 key[16]);
+			SINT32 insert(UINT8 timestamp[2],UINT8 key[16]);
 			SINT32 start();
 			SINT32 stop();
 			static SINT32 test();

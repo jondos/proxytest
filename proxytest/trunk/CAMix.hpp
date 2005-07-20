@@ -33,6 +33,9 @@ extern class CACmdLnOptions options;
 class CASignature;
 class CAInfoService;
 //class DOM_Element;
+#ifdef REPLAY_DETECTION
+	#include "CADatabase.hpp"
+#endif	
 
 class CAMix
 	{
@@ -87,6 +90,9 @@ class CAMix
 
 			// added by ronin <ronin2@web.de>
 			DOM_Document m_docMixCascadeInfo;
+#ifdef REPLAY_DETECTION
+			CADatabase*						m_pReplayDB;
+#endif
 		
 		private:
 			// added by ronin <ronin2@web.de>
