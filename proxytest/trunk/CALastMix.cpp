@@ -121,6 +121,7 @@ SINT32 CALastMix::init()
 			return ret;
 #ifdef REPLAY_DETECTION
 		m_pReplayDB=new CADatabase();
+		m_pReplayDB->start();
 #endif		
 		m_pQueueSendToMix=new CAQueue(sizeof(tQueueEntry));
 		m_pQueueReadFromMix=new CAQueue(sizeof(tQueueEntry));
