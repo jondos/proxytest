@@ -182,7 +182,8 @@ SINT32 CAFirstMix::init()
         return E_UNKNOWN;
     }
 #ifdef REPLAY_DETECTION
-			m_pReplayDB=new CADatabase(time(NULL));
+			m_pReplayDB=new CADatabase();
+			m_pReplayDB->start();
 #endif
 
 #ifdef PAYMENT

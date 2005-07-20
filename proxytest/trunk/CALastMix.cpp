@@ -103,8 +103,6 @@ SINT32 CALastMix::init()
 		    }
 		((CASocket*)*m_pMuxIn)->setRecvBuff(500*MIXPACKET_SIZE);
 		((CASocket*)*m_pMuxIn)->setSendBuff(500*MIXPACKET_SIZE);
-		//if(((CASocket*)*m_pMuxIn)->setSendLowWat(MIXPACKET_SIZE)!=E_SUCCESS)
-		//	CAMsg::printMsg(LOG_INFO,"SOCKET Option SENDLOWWAT not set!\n");
 		if(((CASocket*)*m_pMuxIn)->setKeepAlive((UINT32)1800)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_INFO,"Socket option TCP-KEEP-ALIVE returned an error - so not set!\n");
@@ -113,19 +111,6 @@ SINT32 CALastMix::init()
 			}
 		
 		CAMsg::printMsg(LOG_INFO,"connected!\n");
-    
-    
-//     if(m_pSignature!=NULL&&options.isInfoServiceEnabled())
-//     {
-//         if(m_pInfoService == NULL)
-//         {
-//             m_pInfoService=new CAInfoService();
-//             CACertificate* tmp=options.getOwnCertificate();
-//             m_pInfoService->setSignature(m_pSignature,tmp);
-//             delete tmp;
-//         }
-//         m_pInfoService->start();
-//     }
 
 #ifdef LOG_CRIME
 		m_nCrimeRegExp=0;
@@ -134,7 +119,9 @@ SINT32 CALastMix::init()
 		ret=processKeyExchange();
 		if(ret!=E_SUCCESS)
 			return ret;
-		
+#ifdef REPLAY_DETECTION
+		m_pReplayDB=new CADatabase();
+#endif		
 		m_pQueueSendToMix=new CAQueue(sizeof(tQueueEntry));
 		m_pQueueReadFromMix=new CAQueue(sizeof(tQueueEntry));
 

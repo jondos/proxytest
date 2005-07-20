@@ -40,9 +40,9 @@ typedef t_databaseEntry* LP_databaseEntry;
 class CADatabase
 	{
 		public:
-			CADatabase(UINT32 m_refTime);
+			CADatabase();
 			~CADatabase();
-			SINT32 insert(UINT8 timestamp[2],UINT8 key[16]);
+			SINT32 insert(UINT8 key[16]);
 			SINT32 start();
 			SINT32 stop();
 			static SINT32 test();
@@ -51,11 +51,13 @@ class CADatabase
 
 			SINT32 nextClock();
 			LP_databaseEntry* m_currDatabase;
-			LP_databaseEntry* m_prevDatabase;
 			LP_databaseEntry* m_nextDatabase;
+			LP_databaseEntry* m_prevDatabase;
 			bool m_bRun;
-			UINT32 m_refTime;
-			UINT32 m_Clock;
+			UINT32 m_refTime; //the seconds since epoch for januar the 1st this year
+			UINT32 m_currentClock; //the current 'intervall' since januar the first this year
+			UINT32 getSecondsForNewYear(); //returns the seconds since epoch for januar 1st his year
+			SINT32 getClockForTime(UINT32); //returns the intervall for the seconds since epoch
 			CAMutex m_oMutex;
-			CAThread m_oThread;
+			CAThread* m_pThread;
 	};
