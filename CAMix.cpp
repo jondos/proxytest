@@ -36,7 +36,10 @@ CAMix::CAMix()
     m_acceptReconfiguration = options.acceptReconfiguration();
 		m_pSignature=NULL;
 		m_pInfoService=NULL;
-}
+		#ifdef REPLAY_DETECTION
+			m_pReplayDB=NULL;
+		#endif
+	}
 
 SINT32 CAMix::start()
 {

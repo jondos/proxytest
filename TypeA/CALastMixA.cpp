@@ -114,23 +114,20 @@ SINT32 CALastMixA::loop()
 												#endif
 												
 												m_pRSA->decrypt(pMixPacket->data,rsaBuff);
-												#ifdef WITH_TIMESTAMP
-													//CAMsg::printMsg(LOG_DEBUG,"Timestamp is: %X %X\n", *(rsaBuff+KEY_SIZE), *(rsaBuff+KEY_SIZE+1));
-												#endif
 												#ifdef REPLAY_DETECTION
-													if(!validTimestampAndFingerprint(rsaBuff, KEY_SIZE, (rsaBuff+KEY_SIZE)))
+													if(m_pReplayDB->insert(rsaBuff+KEY_SIZE-2, rsaBuff)!=E_SUCCESS)
 														{
-															CAMsg::printMsg(LOG_INFO,"Duplicate packet ignored.\n");
+															CAMsg::printMsg(LOG_INFO,"Replay: Duplicate packet ignored.\n");
 															continue;
 														}
 												#endif
 												CASymCipher* newCipher=new CASymCipher();
 												newCipher->setKey(rsaBuff);
 												newCipher->crypt1(pMixPacket->data+RSA_SIZE,
-																							pMixPacket->data+RSA_SIZE-(KEY_SIZE+TIMESTAMP_SIZE),
+																							pMixPacket->data+RSA_SIZE-KEY_SIZE,
 																							DATA_SIZE-RSA_SIZE);
-												memcpy(	pMixPacket->data,rsaBuff+KEY_SIZE+TIMESTAMP_SIZE,
-																RSA_SIZE-(KEY_SIZE+TIMESTAMP_SIZE));
+												memcpy(	pMixPacket->data,rsaBuff+KEY_SIZE,
+																RSA_SIZE-KEY_SIZE);
 												#ifdef LOG_PACKET_TIMES
 													getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
 												#endif

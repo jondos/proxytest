@@ -257,11 +257,11 @@ SINT32 CAFirstMixA::loop()
 																#else
 																	m_pRSA->decrypt(pMixPacket->data,rsaBuff); // stefan: das hier ist doch eine ziemlich kostspielige operation. sollte das pruefen auf Max_Number_Of_Channels nicht vorher passieren? --> ok sollte aufs TODO ...
 																#endif
-																#ifdef REPLAY_DETECTION //TODO: For Symmetric case...
-																	if(!validTimestampAndFingerprint(rsaBuff, KEY_SIZE, (rsaBuff+KEY_SIZE)))
+																#if defined (REPLAY_DETECTION) &&!defined(FIRST_MIX_SYMMETRC) 
+																	if(m_pReplayDB->insert(rsaBuff+KEY_SIZE-2, rsaBuff)!=E_SUCCESS)
 																		{
-																			CAMsg::printMsg(LOG_INFO,"Duplicate packet ignored.\n");
-																			goto NEXT_USER_CONNECTION;
+																			CAMsg::printMsg(LOG_INFO,"Replay: Duplicate packet ignored.\n");
+																			goto NEXT_USER;
 																		}
 																#endif
 																pCipher= new CASymCipher();
@@ -273,11 +273,11 @@ SINT32 CAFirstMixA::loop()
 																	pCipher->crypt1(pMixPacket->data+KEY_SIZE,pMixPacket->data,DATA_SIZE-KEY_SIZE);
 																#else
 																	pCipher->crypt1(pMixPacket->data+RSA_SIZE,
-																									pMixPacket->data+RSA_SIZE-(KEY_SIZE+TIMESTAMP_SIZE),
+																									pMixPacket->data+RSA_SIZE-KEY_SIZE,
 																									DATA_SIZE-RSA_SIZE);
-																	memcpy(pMixPacket->data,rsaBuff+KEY_SIZE+TIMESTAMP_SIZE,RSA_SIZE-(KEY_SIZE+TIMESTAMP_SIZE));
+																	memcpy(pMixPacket->data,rsaBuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
 																#endif																	
-																getRandom(pMixPacket->data+DATA_SIZE-(KEY_SIZE+TIMESTAMP_SIZE),KEY_SIZE+TIMESTAMP_SIZE);
+																getRandom(pMixPacket->data+DATA_SIZE-KEY_SIZE,KEY_SIZE);
 																#ifdef LOG_CHANNEL
 																	HCHANNEL tmpC=pMixPacket->channel;
 																#endif
@@ -309,7 +309,7 @@ NEXT_USER:
 									pHashEntry=(fmHashTableEntry*)m_psocketgroupUsersRead->getNextSignaledSocketData();
 								#else
 									}//if is signaled
-#ifdef WITH_CONTROL_CHANNELS
+#if defined (WITH_CONTROL_CHANNELS)||defined(REPLAY_DETECTION)
 NEXT_USER:
 #endif
 									pHashEntry=m_pChannelList->getNext();

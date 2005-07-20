@@ -100,7 +100,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define NEW_FLOW_CONTROL //enable for the new flow control mechanism
 
 //#define WITH_TIMESTAMP // Add timestamps to the channel-open packets.
-#define TIMESTAMP_SIZE 0
+//#define TIMESTAMP_SIZE 0
 
 //Some constants
 #define MAX_POLLFD 8192 //How many sockets to support at max
@@ -148,8 +148,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#ifdef WITH_TIMESTAMP
 		// Enable replay detection. Requires WITH_TIMESTAMP
 		#define REPLAY_DETECTION
-		#undef TIMESTAMP_SIZE
-		#define TIMESTAMP_SIZE 	2
+		//#undef TIMESTAMP_SIZE
+		//#define TIMESTAMP_SIZE 	2
 		#define MIX_CASCADE_PROTOCOL_VERSION "0.3"
 	#else
 		#define MIX_CASCADE_PROTOCOL_VERSION "0.2"

@@ -59,7 +59,7 @@ CADatabase::~CADatabase()
 		m_oMutex.unlock();
 	}
 
-SINT32 CADatabase::insert(UINT8 key[16])
+SINT32 CADatabase::insert(UINT8 timestamp[2],UINT8 key[16])
 	{
 		m_oMutex.lock();
 		UINT16 hashKey=(key[14]<<8)|key[15];
@@ -68,7 +68,7 @@ SINT32 CADatabase::insert(UINT8 key[16])
 			{
 				LP_databaseEntry newEntry=new t_databaseEntry;
 				newEntry->next=NULL;
-				memcpy(newEntry->key,key,14);
+				memcpy(newEntry->key,key,6);
 				m_currDatabase[hashKey]=newEntry;
 				m_oMutex.unlock();
 				return E_SUCCESS;
@@ -78,7 +78,7 @@ SINT32 CADatabase::insert(UINT8 key[16])
 				LP_databaseEntry before=NULL;
 				do
 					{
-						int ret=memcmp(key,hashList->key,14);
+						int ret=memcmp(key,hashList->key,6);
 						if(ret==0)
 							{
 								m_oMutex.unlock();
@@ -91,7 +91,7 @@ SINT32 CADatabase::insert(UINT8 key[16])
 					} while(hashList!=NULL);
 				LP_databaseEntry newEntry=new t_databaseEntry;
 				newEntry->next=hashList;
-				memcpy(newEntry->key,key,14);				
+				memcpy(newEntry->key,key,6);				
 				if(before==NULL)
 					{
 						m_currDatabase[hashKey]=newEntry;
@@ -167,12 +167,12 @@ SINT32 CADatabase::test()
 		for(i=0;i<20;i++)
 			{
 				getRandom(key,1);
-				oDatabase.insert(key);
+				oDatabase.insert(key,key);///TODO WRONG - fixme
 			}
 		for(i=0;i<200000;i++)
 			{
 				getRandom(key,16);
-				oDatabase.insert(key);
+				oDatabase.insert(key,key);//TODO WRONG - Fixme
 			}
 		oDatabase.stop();
 //check it
