@@ -115,7 +115,7 @@ SINT32 CALastMixA::loop()
 												
 												m_pRSA->decrypt(pMixPacket->data,rsaBuff);
 												#ifdef REPLAY_DETECTION
-													if(m_pReplayDB->insert(rsaBuff+KEY_SIZE-2, rsaBuff)!=E_SUCCESS)
+													if(m_pReplayDB->insert(rsaBuff)!=E_SUCCESS)
 														{
 															CAMsg::printMsg(LOG_INFO,"Replay: Duplicate packet ignored.\n");
 															continue;

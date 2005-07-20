@@ -593,7 +593,7 @@ SINT32 CAMiddleMix::loop()
 										#endif
 										m_pRSA->decrypt(pMixPacket->data,tmpRSABuff);
 										#ifdef REPLAY_DETECTION
-											if(m_pReplayDB->insert(tmpRSABuff+KEY_SIZE-2, tmpRSABuff)!=E_SUCCESS)
+											if(m_pReplayDB->insert(tmpRSABuff)!=E_SUCCESS)
 												{
 													CAMsg::printMsg(LOG_INFO,"Replay: Duplicate packet ignored.\n");
 													continue;

@@ -29,21 +29,24 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CADatabase.hpp"
 #include "CAUtil.hpp"
 
-#define SECONDS_PER_CLOCK 10
-CADatabase::CADatabase(UINT32 refTime)
+#define SECONDS_PER_INTERVALL 600
+
+CADatabase::CADatabase()
 	{
 		m_currDatabase=new LP_databaseEntry[0x10000];
 		memset(m_currDatabase,0,sizeof(LP_databaseEntry)*0x10000);
-		m_prevDatabase=new LP_databaseEntry[0x10000];
-		memset(m_prevDatabase,0,sizeof(LP_databaseEntry)*0x10000);
 		m_nextDatabase=new LP_databaseEntry[0x10000];
 		memset(m_nextDatabase,0,sizeof(LP_databaseEntry)*0x10000);
-		m_refTime=refTime;
+		m_prevDatabase=new LP_databaseEntry[0x10000];
+		memset(m_prevDatabase,0,sizeof(LP_databaseEntry)*0x10000);
+		m_refTime=getSecondsForNewYear();
+		m_pThread=NULL;
 	}
 
 CADatabase::~CADatabase()
 	{
 		m_oMutex.lock();
+		stop();
 		for(UINT32 i=0;i<0x10000;i++)
 			{
 				LP_databaseEntry tmp,tmp1;
@@ -56,20 +59,53 @@ CADatabase::~CADatabase()
 					}
 			}
 		delete [] m_currDatabase;
+		for(UINT32 i=0;i<0x10000;i++)
+			{
+				LP_databaseEntry tmp,tmp1;
+				tmp=m_nextDatabase[i];
+				while(tmp!=NULL)
+					{
+						tmp1=tmp;
+						tmp=tmp->next;
+						delete tmp1;
+					}
+			}
+		delete [] m_nextDatabase;
+		for(UINT32 i=0;i<0x10000;i++)
+			{
+				LP_databaseEntry tmp,tmp1;
+				tmp=m_prevDatabase[i];
+				while(tmp!=NULL)
+					{
+						tmp1=tmp;
+						tmp=tmp->next;
+						delete tmp1;
+					}
+			}
+		delete [] m_prevDatabase;
 		m_oMutex.unlock();
 	}
 
-SINT32 CADatabase::insert(UINT8 timestamp[2],UINT8 key[16])
+/** Inserts this key in the replay DB. The last two bytes are the timestamp*/
+SINT32 CADatabase::insert(UINT8 key[16])
 	{
 		m_oMutex.lock();
-		UINT16 hashKey=(key[14]<<8)|key[15];
-		LP_databaseEntry hashList=m_currDatabase[hashKey];
+		UINT16 timestamp=(key[14]<<8)|key[15];
+		if(timestamp<m_currentClock-1||timestamp>m_currentClock+1)
+			return E_UNKNOWN;
+		LP_databaseEntry* aktDB=m_currDatabase;
+		if(timestamp>m_currentClock)
+			aktDB=m_nextDatabase;
+		else if(timestamp>m_currentClock)
+			aktDB=m_prevDatabase;
+		UINT16 hashKey=(key[8]<<8)|key[9];
+		LP_databaseEntry hashList=aktDB[hashKey];
 		if(hashList==NULL)
 			{
 				LP_databaseEntry newEntry=new t_databaseEntry;
 				newEntry->next=NULL;
 				memcpy(newEntry->key,key,6);
-				m_currDatabase[hashKey]=newEntry;
+				aktDB[hashKey]=newEntry;
 				m_oMutex.unlock();
 				return E_SUCCESS;
 			}
@@ -94,7 +130,7 @@ SINT32 CADatabase::insert(UINT8 timestamp[2],UINT8 key[16])
 				memcpy(newEntry->key,key,6);				
 				if(before==NULL)
 					{
-						m_currDatabase[hashKey]=newEntry;
+						aktDB[hashKey]=newEntry;
 					}
 				else
 					{
@@ -108,15 +144,23 @@ SINT32 CADatabase::insert(UINT8 timestamp[2],UINT8 key[16])
 
 SINT32 CADatabase::start()
 	{
-		m_oThread.setMainLoop(db_loopMaintenance);
-		m_Clock=(time(NULL)-m_refTime)/SECONDS_PER_CLOCK;
-		return m_oThread.start(this);
+		m_pThread=new CAThread();
+		m_pThread->setMainLoop(db_loopMaintenance);
+		m_currentClock=getClockForTime(time(NULL));
+		return m_pThread->start(this);
 	}
 
 SINT32 CADatabase::stop()
 	{
 		m_bRun=false;
-		return m_oThread.join();
+		SINT32 ret=E_SUCCESS;
+		if(m_pThread!=NULL)
+			{
+				ret=m_pThread->join();
+				delete m_pThread;
+				m_pThread=NULL;
+			}
+		return ret;
 	}
 
 THREAD_RETURN db_loopMaintenance(void *param)
@@ -125,9 +169,9 @@ THREAD_RETURN db_loopMaintenance(void *param)
 		pDatabase->m_bRun=true;
 		while(pDatabase->m_bRun)
 			{
-				UINT32 secondsTilNextClock=((pDatabase->m_Clock+1)*SECONDS_PER_CLOCK)+pDatabase->m_refTime-time(NULL);
-				sSleep(secondsTilNextClock);
-				if(pDatabase->m_bRun)
+				sSleep(10);
+				UINT32 secondsTilNextClock=((pDatabase->m_currentClock+1)*SECONDS_PER_INTERVALL)+pDatabase->m_refTime-time(NULL);
+				if(secondsTilNextClock<=0&&pDatabase->m_bRun)
 					pDatabase->nextClock();
 			}
 		THREAD_RETURN_SUCCESS;
@@ -136,7 +180,7 @@ THREAD_RETURN db_loopMaintenance(void *param)
 SINT32 CADatabase::nextClock()
 	{
 		m_oMutex.lock();
-		m_Clock++;
+		m_currentClock=getClockForTime(time(NULL));
 		for(UINT32 i=0;i<0x10000;i++)
 			{
 				LP_databaseEntry tmp,tmp1;
@@ -159,7 +203,7 @@ SINT32 CADatabase::nextClock()
 
 SINT32 CADatabase::test()
 	{
-		CADatabase oDatabase(time(NULL));
+		CADatabase oDatabase;
 		oDatabase.start();
 		UINT8 key[16];
 		memset(key,0,16);
@@ -167,12 +211,12 @@ SINT32 CADatabase::test()
 		for(i=0;i<20;i++)
 			{
 				getRandom(key,1);
-				oDatabase.insert(key,key);///TODO WRONG - fixme
+				oDatabase.insert(key);///TODO WRONG - fixme
 			}
 		for(i=0;i<200000;i++)
 			{
 				getRandom(key,16);
-				oDatabase.insert(key,key);//TODO WRONG - Fixme
+				oDatabase.insert(key);//TODO WRONG - Fixme
 			}
 		oDatabase.stop();
 //check it
@@ -187,4 +231,28 @@ SINT32 CADatabase::test()
 					}
 			}
 		return E_SUCCESS;
+	}
+
+UINT32 CADatabase::getSecondsForNewYear()
+	{
+		struct tm otm;
+		memset(&otm,0,sizeof(struct tm));
+		time_t aktTime=time(NULL);
+		otm.tm_year=localtime(&aktTime)->tm_year;
+		otm.tm_mday=1;
+		time_t nearlyNewYear=mktime(&otm)+36000;
+		struct tm otm1,otm2;
+		memcpy(&otm1,localtime(&nearlyNewYear),sizeof(struct tm));
+		memcpy(&otm2,gmtime(&nearlyNewYear),sizeof(struct tm));
+		time_t t1=mktime(&otm1);
+		time_t t2=mktime(&otm2);
+		time_t diffToGMT=t1-t2;
+		otm.tm_year=localtime(&aktTime)->tm_year;
+		otm.tm_isdst=otm1.tm_isdst;
+		return mktime(&otm)+diffToGMT;
+	}
+
+SINT32 CADatabase::getClockForTime(UINT32 time)
+	{
+		return (time-m_refTime)/SECONDS_PER_INTERVALL;
 	}
