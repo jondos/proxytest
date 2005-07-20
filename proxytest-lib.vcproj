@@ -339,9 +339,6 @@
 			Name="Quellcodedateien"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
 			<File
-				RelativePath=".\A128BitNumber.cpp">
-			</File>
-			<File
 				RelativePath=".\CAAbstractControlChannel.cpp">
 			</File>
 			<File
@@ -1535,9 +1532,6 @@
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\CAReplay.cpp">
 			</File>
 			<File
 				RelativePath="CASemaphore.cpp">
@@ -2793,9 +2787,6 @@
 			Name="Header-Dateien"
 			Filter="h;hpp;hxx;hm;inl">
 			<File
-				RelativePath=".\A128BitNumber.hpp">
-			</File>
-			<File
 				RelativePath=".\basetypedefs.h">
 			</File>
 			<File
@@ -2917,9 +2908,6 @@
 			</File>
 			<File
 				RelativePath="CAQueue.hpp">
-			</File>
-			<File
-				RelativePath=".\CAReplay.hpp">
 			</File>
 			<File
 				RelativePath="CASemaphore.hpp">
