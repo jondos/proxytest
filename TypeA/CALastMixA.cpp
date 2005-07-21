@@ -148,7 +148,7 @@ SINT32 CALastMixA::loop()
 													}	
 												if(ret!=E_SUCCESS)
 														{
-	    												#ifdef _DEBUG
+	    												#if defined (_DEBUG) || defined (DELAY_CHANNELS_LATENCY)
 																CAMsg::printMsg(LOG_DEBUG,"Cannot connect to Squid!\n");
 															#endif
 															delete tmpSocket;
