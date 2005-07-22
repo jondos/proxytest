@@ -39,7 +39,7 @@ CADatabase::CADatabase()
 		memset(m_nextDatabase,0,sizeof(LP_databaseEntry)*0x10000);
 		m_prevDatabase=new LP_databaseEntry[0x10000];
 		memset(m_prevDatabase,0,sizeof(LP_databaseEntry)*0x10000);
-		m_refTime=getSecondsForNewYear();
+		m_refTime=time(NULL);
 		m_pThread=NULL;
 	}
 
@@ -146,7 +146,6 @@ SINT32 CADatabase::start()
 	{
 		m_pThread=new CAThread();
 		m_pThread->setMainLoop(db_loopMaintenance);
-		m_currentClock=getClockForTime(time(NULL));
 		return m_pThread->start(this);
 	}
 
@@ -167,6 +166,7 @@ THREAD_RETURN db_loopMaintenance(void *param)
 	{
 		CADatabase* pDatabase=(CADatabase*)param;
 		pDatabase->m_bRun=true;
+		pDatabase->m_currentClock=pDatabase->getClockForTime(time(NULL));
 		while(pDatabase->m_bRun)
 			{
 				sSleep(10);
@@ -233,24 +233,14 @@ SINT32 CADatabase::test()
 		return E_SUCCESS;
 	}
 
-UINT32 CADatabase::getSecondsForNewYear()
+SINT32 CADatabase::getCurrentReplayTimestamp(tReplayTimestamp& replayTimestamp)
 	{
-		struct tm otm;
-		memset(&otm,0,sizeof(struct tm));
 		time_t aktTime=time(NULL);
-		otm.tm_year=localtime(&aktTime)->tm_year;
-		otm.tm_mday=1;
-		time_t nearlyNewYear=mktime(&otm)+36000;
-		struct tm otm1,otm2;
-		memcpy(&otm1,localtime(&nearlyNewYear),sizeof(struct tm));
-		memcpy(&otm2,gmtime(&nearlyNewYear),sizeof(struct tm));
-		time_t t1=mktime(&otm1);
-		time_t t2=mktime(&otm2);
-		time_t diffToGMT=t1-t2;
-		otm.tm_year=localtime(&aktTime)->tm_year;
-		otm.tm_isdst=otm1.tm_isdst;
-		return mktime(&otm)+diffToGMT;
+		replayTimestamp.interval=getClockForTime(aktTime);
+		replayTimestamp.offset=(aktTime-m_refTime)%SECONDS_PER_INTERVALL;
+		return E_SUCCESS;
 	}
+
 
 SINT32 CADatabase::getClockForTime(UINT32 time)
 	{

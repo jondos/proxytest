@@ -45,6 +45,8 @@ class CADatabase
 			SINT32 insert(UINT8 key[16]);
 			SINT32 start();
 			SINT32 stop();
+			/** Returns the current Replay timestamp for this database*/
+			SINT32 getCurrentReplayTimestamp(tReplayTimestamp& replayTimestamp);
 			static SINT32 test();
 		private:
 			friend THREAD_RETURN db_loopMaintenance(void *param);
@@ -54,9 +56,8 @@ class CADatabase
 			LP_databaseEntry* m_nextDatabase;
 			LP_databaseEntry* m_prevDatabase;
 			bool m_bRun;
-			UINT32 m_refTime; //the seconds since epoch for januar the 1st this year
-			UINT32 m_currentClock; //the current 'intervall' since januar the first this year
-			UINT32 getSecondsForNewYear(); //returns the seconds since epoch for januar 1st his year
+			UINT32 m_refTime; //the seconds since epoch for the start of interval 0
+			UINT32 m_currentClock; //the current 'interval' since m_refTimer
 			SINT32 getClockForTime(UINT32); //returns the intervall for the seconds since epoch
 			CAMutex m_oMutex;
 			CAThread* m_pThread;

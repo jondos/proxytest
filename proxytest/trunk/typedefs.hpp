@@ -172,4 +172,13 @@ typedef struct t_queue_entry tQueueEntry;
 //normaly this is just the packet
 typedef tQueueEntry tPoolEntry; 	
 
+///the Replaytimestamp type
+struct t_replay_timestamp
+	{
+		UINT interval; //the current interval number
+		UINT offset; //seconds since start of this interval
+	};
+
+typedef struct t_replay_timestamp tReplayTimestamp;
+
 #endif
