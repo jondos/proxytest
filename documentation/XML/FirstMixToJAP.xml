@@ -1,17 +1,22 @@
 <?xml version="1.0" ?>
 <MixCascade version="0.1">
-	<MixProtocolVersion>
-		<!-- "0.2" ==> "normal" mix proctocol
-				 "0.3" ==> with timestamp
-		--></MixProtocolVersion>
-	<Mixes count="..">
-		<Mix id="..">
-			<RSAKeyValue>...</RSAKeyValue> <!--- PubKey of FirstMix -->
-		</Mix>
-		<Mix id=".">
-			<RSAKeyValue>...</RSAKeyValue> <!--- PubKey of second Mix etc. -->
-			<Signature>..</Signature> <!--- from Mix -->
-		</Mix>
-	</Mixes>
-	<Signature>..</Signature> <!--- from FirstMix -->
+  <MixProtocolVersion>
+    <!-- "0.2" ==> "normal" mix proctocol
+         "0.3" ==> with timestamp/replay detection
+    --></MixProtocolVersion>
+  <Mixes count="..">
+    <Mix id="..">
+      <MixProtocolVersion>...</MixProtocolVersion>
+      <RSAKeyValue>...</RSAKeyValue> <!--- PubKey of FirstMix -->
+      <Replay> <!-- information for replay detection mechanisms if supported by protocol -->
+        <ReplayTimestamp interval=".." offset=".."/> <!-- replay timestamp on the mix -->
+          <!-- interval give the number of the current interval on the mix; offset gives the seconds since start of this interval -->
+      </Replay>
+    </Mix>
+    <Mix id=".">
+      <RSAKeyValue>...</RSAKeyValue> <!--- PubKey of second Mix etc. -->
+      <Signature>..</Signature> <!--- from Mix -->
+    </Mix>
+  </Mixes>
+  <Signature>..</Signature> <!--- from FirstMix -->
 </MixCascade>

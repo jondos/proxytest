@@ -313,8 +313,9 @@ SINT32 CAFirstMix::processKeyExchange()
     DOM_Node elemMixesKey=docXmlKeyInfo.importNode(elemMixes,true);
     elemRootKey.appendChild(elemMixesKey);
 
-    UINT32 tlen;
-    while(child!=NULL)
+    //UINT32 tlen;
+    /* //remove because it seems to be useless...
+		while(child!=NULL)
     {
         if(child.getNodeName().equals("Mix"))
         {
@@ -324,8 +325,8 @@ SINT32 CAFirstMix::processKeyExchange()
             tlen=256;
         }
         child=child.getPreviousSibling();
-    }
-    tlen=256;
+    }*/
+    //tlen=256;
 
     //Inserting own Key in XML-Key struct
     DOM_DocumentFragment docfragKey;
@@ -334,7 +335,14 @@ SINT32 CAFirstMix::processKeyExchange()
     UINT8 buffId[255];
     options.getMixId(buffId,255);
     elemOwnMix.setAttribute("id",DOMString((char*)buffId));
-    elemOwnMix.appendChild(docXmlKeyInfo.importNode(docfragKey,true));
+#ifdef REPLAY_DETECTION
+		///TODO very fast hack - fixme
+		//insert a placeholder here for the <Replay> information which is sent to the user later on
+		DOM_Element elemReplay=docXmlKeyInfo.createElement("Replay");
+		setDOMElementValue(elemReplay,(UINT8*)"%s");
+		elemOwnMix.appendChild(elemReplay);
+#endif
+		elemOwnMix.appendChild(docXmlKeyInfo.importNode(docfragKey,true));
     elemMixesKey.insertBefore(elemOwnMix,elemMixesKey.getFirstChild());
     setDOMElementAttribute((DOM_Element&)elemMixesKey,"count",count+1);
     CACertificate* ownCert=options.getOwnCertificate();
@@ -352,7 +360,7 @@ SINT32 CAFirstMix::processKeyExchange()
     delete ownCert;
     delete tmpCertStore;
 
-    tlen=0;
+    UINT32 tlen=0;
     UINT8* tmpB=DOM_Output::dumpToMem(docXmlKeyInfo,&tlen);
     m_xmlKeyInfoBuff=new UINT8[tlen+2];
     memcpy(m_xmlKeyInfoBuff+2,tmpB,tlen);
@@ -711,6 +719,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		#else
 			((CASocket*)pNewUser)->setKeepAlive(true);
 		#endif
+#ifdef REPLAY_DETECTION
 		/*
 			ADDITIONAL PREREQUISITE:
 			The timestamps in the messages require the user to sync his time
@@ -720,7 +729,22 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 			left to an external protocol such as NTP. Unfortunately, this is
 			not enforceable for all users.
 		*/
+			///very ugly! fixme!
+		const char* strTemplate="<ReplayTimestamp interval=\"%u\" offset=\"%u\"/>";
+		tReplayTimestamp replaytimestamp;
+		m_pReplayDB->getCurrentReplayTimestamp(replaytimestamp);
+		UINT8 tmpBuff[255];
+		sprintf((char*)tmpBuff,strTemplate,replaytimestamp.interval,replaytimestamp.offset);
+		UINT8* keyInfo=new UINT8[m_xmlKeyInfoSize+strlen((char*)tmpBuff)+255];
+		m_xmlKeyInfoBuff[m_xmlKeyInfoSize-1]=0;
+		sprintf((char*)keyInfo+2,(char*)m_xmlKeyInfoBuff+2,tmpBuff);
+		UINT32 len=strlen((char*)keyInfo+2);
+		keyInfo[0]=len>>8;
+		keyInfo[1]=len&0xFF;
+		((CASocket*)pNewUser)->send(keyInfo,len+2);
+#else
 		((CASocket*)pNewUser)->send(m_xmlKeyInfoBuff,m_xmlKeyInfoSize);  // send the mix-keys to JAP
+#endif
 		// es kann nicht blockieren unter der Annahme das der TCP-Sendbuffer > m_xmlKeyInfoSize ist....
 		//wait for keys from user
 #ifndef FIRST_MIX_SYMMETRIC
