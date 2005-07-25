@@ -402,8 +402,9 @@ SINT32 CALastMixA::loop()
 				UINT64 current_time_millis;
 				getcurrentTimeMillis(current_time_millis);
 #endif
-				if(countRead>0)
+				if(countRead>0&&m_pQueueSendToMix->getSize()<MAX_MIXIN_SEND_QUEUE_SIZE)
 					{
+						bAktiv=true;
 #ifdef HAVE_EPOLL
 						pChannelListEntry=(lmChannelListEntry*)osocketgroupCacheRead.getFirstSignaledSocketData();
 						while(pChannelListEntry!=NULL)
@@ -416,7 +417,12 @@ SINT32 CALastMixA::loop()
 									{
 										countRead--;
 #endif
-										if(m_pQueueSendToMix->getSize()<MAX_MIXIN_SEND_QUEUE_SIZE
+#if defined(DELAY_CHANNELS)||defined(DELAY_CHANNELS_LATENCY)||defined(NEW_FLOW_CONTROL)
+	#define NEED_IF_12
+#endif
+										#ifdef NEED_IF_12
+										if(true
+										#endif
 												#ifdef DELAY_CHANNELS
 													&&(pChannelListEntry->delayBucket>0)
 												#endif
@@ -426,9 +432,10 @@ SINT32 CALastMixA::loop()
 												#ifdef NEW_FLOW_CONTROL
 													&&(pChannelListEntry->sendmeCounter<FLOW_CONTROL_SENDME_HARD_LIMIT)
 												#endif
+											#ifdef NEED_IF_12	
 											)
+											#endif
 											{
-												bAktiv=true;
 												#ifndef DELAY_CHANNELS
 													ret=pChannelListEntry->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE);
 												#else
@@ -498,8 +505,6 @@ SINT32 CALastMixA::loop()
 														#endif
 													}
 											}
-										else
-											break;
 #ifdef HAVE_EPOLL
 								pChannelListEntry=(lmChannelListEntry*)osocketgroupCacheRead.getNextSignaledSocketData();
 #else

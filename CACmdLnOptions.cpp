@@ -32,6 +32,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMix.hpp"
 #include "CAMsg.hpp"
 #include "CASocketAddrINet.hpp"
+#include "CASocket.hpp"
 #include "CAXMLBI.hpp"
 #include "xml/DOM_Output.hpp"
 #ifdef LOG_CRIME
@@ -206,6 +207,16 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 	if(iVersion!=0)
 		{
 			printf(MIX_VERSION_INFO);
+			for(UINT32 t=0;t<10000;t++)
+				{
+					CASocket* pSocket=new CASocket;
+					if(pSocket->create()!=E_SUCCESS)
+						{
+							printf("Max open sockets: %u\n",t);
+							exit(0);
+						}
+				}
+			printf("Max open sockets: >10000\n");
 			exit(0);
 		}
 
