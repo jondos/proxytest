@@ -44,7 +44,7 @@ struct _iplist_t
 	};
 
 /** The default value of allowed insertions, until insertIP() will return an error*/
-#define MAX_IP_CONNECTIONS 10
+#define MAX_IP_CONNECTIONS CLIENTS_PER_IP
 
 /** The purpose of this class is to store a list of IP-Addresses. If an
 IP-Address is inserted more than 'x' times, than an error is returned.

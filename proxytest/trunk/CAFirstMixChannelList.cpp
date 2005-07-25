@@ -159,7 +159,7 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8 peerIP[4],
 	}
 
 ///The maximum number of channels allowed per connection
-#define MAX_NUMBER_OF_CHANNELS 50
+#define MAX_NUMBER_OF_CHANNELS CHANNELS_PER_CLIENT
 
 /** Adds a new channel for a given connection to the channel list. 
 	* Also a new out-channel id is generated and returned.
