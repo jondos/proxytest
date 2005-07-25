@@ -75,7 +75,7 @@ class CAAbstractControlChannel
 
   protected:
 		/** Processes some bytes of a message we get 
-				from the communication channel.  The reassemble this fragments
+				from the communication channel.  We reassemble this fragments
 				in a buffer. If all parts are received we call proccessMessagesComplete()*/
 		virtual SINT32 proccessMessage(UINT8* msg, UINT32 msglen)=0;
 

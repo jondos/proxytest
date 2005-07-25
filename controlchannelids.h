@@ -25,16 +25,6 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
-#include "StdAfx.h"
-#ifdef WITH_CONTROL_CHANNELS_TEST
-#include "CAControlChannelTest.hpp"
-
-CAControlChannelTest::CAControlChannelTest(void)
-	:CASyncControlChannel(TEST_CONTROL_CHANNEL_ID,false)
-	{
-	}
-
-CAControlChannelTest::~CAControlChannelTest(void)
-	{
-	}
-#endif
+#define ACCOUNT_CONTROL_CHANNEL_ID	2 //For the payment
+#define REPLAY_CONTROL_CHANNEL_ID		3 //for replay detection
+#define TEST_CONTROL_CHANNEL_ID		255 //the 'ech' test control channel

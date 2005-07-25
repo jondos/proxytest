@@ -33,7 +33,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAQueue.hpp"
 
 /** An asynchronous control channel. This means, that every message is
-  * placed in a queue. You can than read messages from this Queue*/
+  * placed in a queue. You can than read messages from this Queue
+	* NOTE: NOT IMPLEMENTED YET!
+	*/
 class CAASyncControlChannel : public CAAbstractControlChannel
 	{
 		public:	

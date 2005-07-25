@@ -53,7 +53,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define DELAY_CHANNELS_LATENCY //to enable min latency per channel
 //#define HAVE_EPOLL //define if you have epoll support on your (Linux) system
 //#define COUNTRY_STATS //collect stats about countries users come from
-#define LOG_COUNTRIES_INTERVALL 6 //how often to log the country stats (multiplied by 10 seconds)
+#ifdef COUNTRY_STATS
+	#define LOG_COUNTRIES_INTERVALL 6 //how often to log the country stats (multiplied by 10 seconds)
+#endif
 #ifdef DELAY_CHANNELS
 	#ifndef DELAY_CHANNEL_TRAFFIC
 		#define DELAY_CHANNEL_TRAFFIC 10000 //Traffic in bytes after which (download direction) the channel is delayed
@@ -135,7 +137,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define MIX_CASCADE_PROTOCOL_VERSION_0_5 5  //with control channels
 #define MIX_CASCADE_PROTOCOL_VERSION_0_4 4  //symmetric communication to first mix
 #define MIX_CASCADE_PROTOCOL_VERSION_0_3 3 //with reply detection
-#define MIX_CASCADE_PROTOCOL_VERSION_0_2 2 //noraml protocol
+#define MIX_CASCADE_PROTOCOL_VERSION_0_2 2 //normal protocol
 
 #if (defined(LOG_CHANNEL)) && !defined(LOG_TRAFFIC_PER_USER)
 	#define LOG_TRAFFIC_PER_USER
