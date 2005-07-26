@@ -175,12 +175,12 @@ SINT32 CAFirstMix::init()
 					CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
 			}
 
-
     if(processKeyExchange()!=E_SUCCESS)
     {
         CAMsg::printMsg(LOG_CRIT,"Error in establishing secure communication with next Mix!\n");
         return E_UNKNOWN;
     }
+
 #ifdef REPLAY_DETECTION
 			m_pReplayDB=new CADatabase();
 			m_pReplayDB->start();
@@ -203,6 +203,10 @@ SINT32 CAFirstMix::init()
 #else
 		m_psocketgroupUsersRead=new CASocketGroup(false);
 		m_psocketgroupUsersWrite=new CASocketGroup(true);
+#endif
+
+#ifdef WITH_CONTROL_CHANNELS
+		m_pMuxOutControlChannelDispatcher=new CAControlChannelDispatcher(m_pQueueSendToMix);
 #endif
 
 		m_pthreadsLogin=new CAThreadPool(NUM_LOGIN_WORKER_TRHEADS,MAX_LOGIN_QUEUE,false);
@@ -335,13 +339,6 @@ SINT32 CAFirstMix::processKeyExchange()
     UINT8 buffId[255];
     options.getMixId(buffId,255);
     elemOwnMix.setAttribute("id",DOMString((char*)buffId));
-#ifdef REPLAY_DETECTION
-		///TODO very fast hack - fixme
-		//insert a placeholder here for the <Replay> information which is sent to the user later on
-		DOM_Element elemReplay=docXmlKeyInfo.createElement("Replay");
-		setDOMElementValue(elemReplay,(UINT8*)"%s");
-		elemOwnMix.appendChild(elemReplay);
-#endif
 		elemOwnMix.appendChild(docXmlKeyInfo.importNode(docfragKey,true));
     elemMixesKey.insertBefore(elemOwnMix,elemMixesKey.getFirstChild());
     setDOMElementAttribute((DOM_Element&)elemMixesKey,"count",count+1);
@@ -552,7 +549,9 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 		#ifdef USE_POOL
 			CAPool* pPool=new CAPool(MIX_POOL_SIZE);
 		#endif
-
+#ifdef WITH_CONTROL_CHANNELS
+		CAControlChannelDispatcher* pControlChannelDispatcher=pFirstMix->m_pMuxOutControlChannelDispatcher;
+#endif
 		while(!pFirstMix->m_bRestart)
 			{
 				if(pQueue->getSize()>MAX_READ_FROM_NEXT_MIX_QUEUE_SIZE)
@@ -587,6 +586,9 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 								break;
 							}
 					}
+				#ifdef WITH_CONTROL_CHANNELS
+					pControlChannelDispatcher->proccessMixPacket(pMixPacket);
+				#endif
 				#ifdef USE_POOL
 					#ifdef LOG_PACKET_TIMES
 						getcurrentTimeMicros(pQueueEntry->pool_timestamp_in);
@@ -719,32 +721,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		#else
 			((CASocket*)pNewUser)->setKeepAlive(true);
 		#endif
-#ifdef REPLAY_DETECTION
-		/*
-			ADDITIONAL PREREQUISITE:
-			The timestamps in the messages require the user to sync his time
-			with the time of the cascade. Hence, the current time needs to be
-			added to the data that is sent to the user below.
-			For the mixes that form the cascade, the synchronization can be
-			left to an external protocol such as NTP. Unfortunately, this is
-			not enforceable for all users.
-		*/
-			///very ugly! fixme!
-		const char* strTemplate="<ReplayTimestamp interval=\"%u\" offset=\"%u\"/>";
-		tReplayTimestamp replaytimestamp;
-		m_pReplayDB->getCurrentReplayTimestamp(replaytimestamp);
-		UINT8 tmpBuff[255];
-		sprintf((char*)tmpBuff,strTemplate,replaytimestamp.interval,replaytimestamp.offset);
-		UINT8* keyInfo=new UINT8[m_xmlKeyInfoSize+strlen((char*)tmpBuff)+255];
-		m_xmlKeyInfoBuff[m_xmlKeyInfoSize-1]=0;
-		sprintf((char*)keyInfo+2,(char*)m_xmlKeyInfoBuff+2,tmpBuff);
-		UINT32 len=strlen((char*)keyInfo+2);
-		keyInfo[0]=len>>8;
-		keyInfo[1]=len&0xFF;
-		((CASocket*)pNewUser)->send(keyInfo,len+2);
-#else
 		((CASocket*)pNewUser)->send(m_xmlKeyInfoBuff,m_xmlKeyInfoSize);  // send the mix-keys to JAP
-#endif
 		// es kann nicht blockieren unter der Annahme das der TCP-Sendbuffer > m_xmlKeyInfoSize ist....
 		//wait for keys from user
 #ifndef FIRST_MIX_SYMMETRIC
@@ -1056,6 +1033,15 @@ SINT32 CAFirstMix::clean()
 		if(m_arrSocketsIn!=NULL)
 			delete[] m_arrSocketsIn;
 		m_arrSocketsIn=NULL;
+
+#ifdef WITH_CONTROL_CHANNELS
+			if(m_pMuxOutControlChannelDispatcher!=NULL)
+			{
+				delete m_pMuxOutControlChannelDispatcher;
+			}
+			m_pMuxOutControlChannelDispatcher=NULL;
+#endif
+
 		if(m_pMuxOut!=NULL)
 			{
 				m_pMuxOut->close();

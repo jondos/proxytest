@@ -97,12 +97,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define USE_POOL
 //#define FIRST_MIX_SYMMETRIC //to enable use of only symmetric encryption for first mix
 //#define NEW_MIX_TYPE // to enable the new 1:x mix protocol
-//#define WITH_CONTROL_CHANNELS //enable Control channels
-//#define WITH_CONTROL_CHANNELS_TEST //enable a Test Channel
+#define WITH_CONTROL_CHANNELS //enable Control channels
+#define WITH_CONTROL_CHANNELS_TEST //enable a Test Channel
 //#define NEW_FLOW_CONTROL //enable for the new flow control mechanism
 
-//#define WITH_TIMESTAMP // Add timestamps to the channel-open packets.
-//#define TIMESTAMP_SIZE 0
+#define REPLAY_DETECTION // enable to prevent replay of mix packets
 
 //Some constants
 #define MAX_POLLFD 8192 //How many sockets to support at max
@@ -150,11 +149,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #elif defined(FIRST_MIX_SYMMETRIC)
 	#define MIX_CASCADE_PROTOCOL_VERSION "0.4"
 #else
-	#ifdef WITH_TIMESTAMP
-		// Enable replay detection. Requires WITH_TIMESTAMP
-		#define REPLAY_DETECTION
-		//#undef TIMESTAMP_SIZE
-		//#define TIMESTAMP_SIZE 	2
+	#ifdef REPLAY_DETECTION
 		#define MIX_CASCADE_PROTOCOL_VERSION "0.3"
 	#else
 		#define MIX_CASCADE_PROTOCOL_VERSION "0.2"
@@ -448,4 +443,5 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #include "basetypedefs.h"
 #include "typedefs.hpp"
+#include "controlchannelids.h"
 #endif // !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)

@@ -68,7 +68,12 @@ class CALastMix:public CAMix
 				}
 
 			SINT32 reconfigure();
-		protected:
+			tMixType getType()
+				{
+					return CAMix::LAST_MIX;
+				}
+
+	protected:
 			virtual SINT32 loop()=0;
 			SINT32 init();
 			SINT32 initOnce();

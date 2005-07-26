@@ -39,6 +39,10 @@ CAMix::CAMix()
 		#ifdef REPLAY_DETECTION
 			m_pReplayDB=NULL;
 		#endif
+#ifdef WITH_CONTROL_CHANNELS
+		m_pMuxOutControlChannelDispatcher=NULL;
+		m_pMuxInControlChannelDispatcher=NULL;
+#endif		
 	}
 
 SINT32 CAMix::start()

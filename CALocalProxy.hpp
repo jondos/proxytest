@@ -44,6 +44,10 @@ class CALocalProxy:public CAMix
 					m_pSymCipher=NULL;
 				}
 			virtual ~CALocalProxy(){clean();}
+			tMixType getType()
+				{
+					return CAMix::JAP;
+				}
 
 			
 			// signals the main loop whether to capture or replay packets
