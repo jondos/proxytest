@@ -97,11 +97,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define USE_POOL
 //#define FIRST_MIX_SYMMETRIC //to enable use of only symmetric encryption for first mix
 //#define NEW_MIX_TYPE // to enable the new 1:x mix protocol
-#define WITH_CONTROL_CHANNELS //enable Control channels
-#define WITH_CONTROL_CHANNELS_TEST //enable a Test Channel
+//#define WITH_CONTROL_CHANNELS //enable Control channels
+//#define WITH_CONTROL_CHANNELS_TEST //enable a Test Channel
 //#define NEW_FLOW_CONTROL //enable for the new flow control mechanism
 
-#define REPLAY_DETECTION // enable to prevent replay of mix packets
+//#define REPLAY_DETECTION // enable to prevent replay of mix packets
 
 //Some constants
 #define MAX_POLLFD 8192 //How many sockets to support at max
