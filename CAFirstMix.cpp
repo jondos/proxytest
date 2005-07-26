@@ -49,7 +49,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include "CAAccountingControlChannel.hpp"
 #endif
 extern CACmdLnOptions options;
-
+#include "CAReplayControlChannel.hpp"
 
 SINT32 CAFirstMix::initOnce()
 	{
@@ -208,7 +208,9 @@ SINT32 CAFirstMix::init()
 #ifdef WITH_CONTROL_CHANNELS
 		m_pMuxOutControlChannelDispatcher=new CAControlChannelDispatcher(m_pQueueSendToMix);
 #endif
-
+#ifdef REPLAY_DETECTION
+		m_pReplayMsgProc=new CAReplayCtrlChannelMsgProc(this);
+#endif
 		m_pthreadsLogin=new CAThreadPool(NUM_LOGIN_WORKER_TRHEADS,MAX_LOGIN_QUEUE,false);
 
 		//Starting thread for Step 1
@@ -847,6 +849,9 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 #ifdef WITH_CONTROL_CHANNELS_TEST
 		pHashEntry->pControlChannelDispatcher->registerControlChannel(new CAControlChannelTest());
 #endif
+#ifdef REPLAY_DETECTION
+		pHashEntry->pControlChannelDispatcher->registerControlChannel(new CAReplayControlChannel(m_pReplayMsgProc));
+#endif
 		#ifdef COUNTRY_STATS
 			incUsers(pHashEntry);
 		#else
@@ -1033,6 +1038,13 @@ SINT32 CAFirstMix::clean()
 		if(m_arrSocketsIn!=NULL)
 			delete[] m_arrSocketsIn;
 		m_arrSocketsIn=NULL;
+#ifdef REPLAY_DETECTION
+		if(m_pReplayMsgProc!=NULL)
+			{
+				delete m_pReplayMsgProc;
+			}
+		m_pReplayMsgProc=NULL;
+#endif
 
 #ifdef WITH_CONTROL_CHANNELS
 			if(m_pMuxOutControlChannelDispatcher!=NULL)

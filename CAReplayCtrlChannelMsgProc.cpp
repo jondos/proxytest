@@ -48,6 +48,10 @@ CAReplayCtrlChannelMsgProc::CAReplayCtrlChannelMsgProc(CAMix* pMix)
 			}
 	}
 
+CAReplayCtrlChannelMsgProc::~CAReplayCtrlChannelMsgProc()
+	{
+	}
+
 SINT32 CAReplayCtrlChannelMsgProc::proccessGetTimestamps(CAReplayControlChannel* pReceiver)
 	{
 		return E_SUCCESS;
