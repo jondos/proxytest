@@ -126,6 +126,10 @@ SINT32 CALastMix::init()
 		m_pQueueSendToMix=new CAQueue(sizeof(tQueueEntry));
 		m_pQueueReadFromMix=new CAQueue(sizeof(tQueueEntry));
 
+#ifdef WITH_CONTROL_CHANNELS
+		m_pMuxInControlChannelDispatcher=new CAControlChannelDispatcher(m_pQueueSendToMix);
+#endif
+
 		m_bRestart=false;
 		//Starting thread for Step 1a
 		m_pthreadReadFromMix=new CAThread((UINT8*)"CALastMix - ReadFromMix");
@@ -573,12 +577,15 @@ SINT32 CALastMix::setTargets()
 
 SINT32 CALastMix::clean()
 {
-/*    if(m_pInfoService!=NULL)
-	{
-    	m_pInfoService->stop();
-				delete m_pInfoService;
-		m_pInfoService=NULL;
-    }*/
+
+#ifdef WITH_CONTROL_CHANNELS
+		if(m_pMuxInControlChannelDispatcher!=NULL)
+			{
+				delete m_pMuxInControlChannelDispatcher;
+			}
+		m_pMuxInControlChannelDispatcher=NULL;
+#endif
+
 		if(m_pMuxIn!=NULL)
 			{
 				m_pMuxIn->close();

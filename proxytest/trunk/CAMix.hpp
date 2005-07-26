@@ -36,14 +36,27 @@ class CAInfoService;
 #ifdef REPLAY_DETECTION
 	#include "CADatabase.hpp"
 #endif	
+class CAControlChannelDispatcher;
+
 
 class CAMix
 	{
+		public:
+			enum tMixType
+				{
+					FIRST_MIX,
+					MIDDLE_MIX,
+					LAST_MIX,
+					JAP
+				};
+		
 		public:
 			CAMix();
 			virtual ~CAMix(){}
 			SINT32 start();
 			virtual SINT32 reconfigure(){return E_SUCCESS;}
+			virtual tMixType getType()=0;
+
 			/** Returns the Mix-Cascade info which should be send to the InfoService.
     		* This is NOT a copy!
     		*
@@ -69,6 +82,19 @@ class CAMix
 					return m_acceptReconfiguration;
 			}
 
+#ifdef WITH_CONTROL_CHANNELS
+			CAControlChannelDispatcher* getDownstreamControlChannelDispatcher()
+				{
+					return m_pMuxInControlChannelDispatcher;
+				}
+#endif		
+#ifdef REPLAY_DETECTION
+			CADatabase* getReplayDB()
+				{
+					return m_pReplayDB;
+				}
+#endif	
+
 		protected:
 			virtual SINT32 clean()=0;
 			virtual SINT32 initOnce(){return E_SUCCESS;}
@@ -93,7 +119,10 @@ class CAMix
 #ifdef REPLAY_DETECTION
 			CADatabase*						m_pReplayDB;
 #endif
-		
+#ifdef WITH_CONTROL_CHANNELS
+			CAControlChannelDispatcher* m_pMuxOutControlChannelDispatcher;
+			CAControlChannelDispatcher* m_pMuxInControlChannelDispatcher;
+#endif		
 		private:
 			// added by ronin <ronin2@web.de>
 			bool needAutoConfig();

@@ -1534,6 +1534,12 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\CAReplayControlChannel.cpp">
+			</File>
+			<File
+				RelativePath=".\CAReplayCtrlChannelMsgProc.cpp">
+			</File>
+			<File
 				RelativePath="CASemaphore.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -2908,6 +2914,12 @@
 			</File>
 			<File
 				RelativePath="CAQueue.hpp">
+			</File>
+			<File
+				RelativePath=".\CAReplayControlChannel.hpp">
+			</File>
+			<File
+				RelativePath=".\CAReplayCtrlChannelMsgProc.hpp">
 			</File>
 			<File
 				RelativePath="CASemaphore.hpp">

@@ -52,7 +52,7 @@ class CAAbstractControlChannel
 			* @retval E_SUCCESS, if the message that successful send
 			* @retval E_UNKNOWN, in case of an error
 			*/
-		SINT32 sendMessage(DOM_Document& docMsg)
+		SINT32 sendXMLMessage(DOM_Document& docMsg)
 			{
 				UINT32 tlen=0xFFFF+2;
 				UINT8 tmpB[0xFFFF+2];
@@ -61,9 +61,28 @@ class CAAbstractControlChannel
 					{
 						return E_SPACE;
 					}
-				tmpB[0]=tlen>>8;
-				tmpB[1]=tlen&0xFF;
+				tmpB[0]=(UINT8)(tlen>>8);
+				tmpB[1]=(UINT8)(tlen&0xFF);
 				return m_pDispatcher->sendMessages(m_ID,m_bIsEncrypted,tmpB,tlen+2);
+			}
+
+	/** Call to send a XML message via this control channel.
+			*	@retval E_SPACE, if the serialized XML message is bigger than
+			*										0xFFFF bytes
+			* @retval E_SUCCESS, if the message that successful send
+			* @retval E_UNKNOWN, in case of an error
+			*/
+		SINT32 sendXMLMessage(const UINT8* msgXML,UINT32 msgLen)
+			{
+				if(msgLen>0xFFFF)
+					{
+						return E_SPACE;
+					}
+				UINT8 tmpB[0xFFFF+2];
+				memcpy(tmpB+2,msgXML,msgLen);
+				tmpB[0]=(UINT8)(msgLen>>8);
+				tmpB[1]=(UINT8)(msgLen&0xFF);
+				return m_pDispatcher->sendMessages(m_ID,m_bIsEncrypted,tmpB,msgLen+2);
 			}
 
 		UINT32 getID()

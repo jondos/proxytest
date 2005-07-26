@@ -76,17 +76,20 @@ public:
 					m_pthreadAcceptUsers=NULL;
 					m_pthreadsLogin=NULL;
 #ifdef LOG_PACKET_TIMES
-
-						m_pLogPacketStats=NULL;
+					m_pLogPacketStats=NULL;
 #endif
 #ifdef COUNTRY_STATS
-						m_PacketsPerCountryIN=m_PacketsPerCountryOUT=m_CountryStats=NULL;
-						m_mysqlCon=NULL;
-						m_threadLogLoop=NULL;
+					m_PacketsPerCountryIN=m_PacketsPerCountryOUT=m_CountryStats=NULL;
+					m_mysqlCon=NULL;
+					m_threadLogLoop=NULL;
 #endif
 				}
-    virtual ~CAFirstMix()
-    {}
+    virtual ~CAFirstMix(){}
+		tMixType getType()
+			{
+				return CAMix::FIRST_MIX;
+			}
+
 protected:
 			virtual SINT32 loop()=0;
 			SINT32 init();
@@ -114,20 +117,6 @@ public:
 					*ptraffic=-1;
 					return E_SUCCESS;
 				}
-			
-    /* Moved to CAMix.hpp
-    ** Returns the Mix-Cascade info which should be send to the InfoService.
-				* This is NOT a copy!
-				*
-				* @param docMixCascadeInfo where the XML struct would be stored
-				* @retval E_SUCCESS
-    	*
-			SINT32 getMixCascadeInfo(DOM_Document& docMixCascadeInfo)
-				{
-					docMixCascadeInfo=m_docMixCascadeInfo;
-					return E_SUCCESS;
-				}
-*/
 			
 		friend THREAD_RETURN fm_loopSendToMix(void*);
 		friend THREAD_RETURN fm_loopReadFromMix(void*);

@@ -45,7 +45,7 @@ public:
 		DOM_Document* myDoc=new DOM_Document;
 		*myDoc=DOM_Document::createDocument();
 		myDoc->appendChild(myDoc->importNode(doc.getDocumentElement(),true));
-		return sendMessage(*myDoc);
+		return sendXMLMessage(*myDoc);
 	}
 };
 #endif

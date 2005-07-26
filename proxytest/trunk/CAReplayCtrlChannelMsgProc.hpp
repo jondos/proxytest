@@ -25,58 +25,42 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
-#ifndef __CAMIDDLEMIX__
-#define __CAMIDDLEMIX__
+#ifndef CA_REPLAY_CONTROL_CHANNEL_MSG_PROC
+#define CA_REPLAY_CONTROL_CHANNEL_MSG_PROC
+#include "CAThread.hpp"
+class CAMix;
+class CAReplayControlChannel;
 
-#include "CAMix.hpp"
-#include "CAMuxSocket.hpp"
-#include "CAASymCipher.hpp"
-#include "CAMiddleMixChannelList.hpp"
-#include "CASignature.hpp"
-#include "CAInfoService.hpp"
+class CAReplayCtrlChannelMsgProc
+{
+	public:
+		/** Initialises the replay control channel messages processor with the necessary information.*/
+		CAReplayCtrlChannelMsgProc(CAMix* pMix);
+		~CAReplayCtrlChannelMsgProc();
 
-class CAMiddleMix:public CAMix
-	{
-		public:
-			CAMiddleMix():CAMix()
-				{
-					m_pMiddleMixChannelList=NULL;
-					m_pMuxOut=NULL;m_pMuxIn=NULL;m_pRSA=NULL;m_pSignature=NULL;
-					m_pInfoService=NULL;
-				}
-			virtual ~CAMiddleMix(){clean();};
-			tMixType getType()
-				{
-					return CAMix::MIDDLE_MIX;
-				}
+		/** Propagates downstream the current replay timestamp*/ 
+		SINT32 propagateCurrentReplayTimestamp();
 
-		private:
-			SINT32 loop();
-			SINT32 init();
-			SINT32 initOnce();
-			SINT32 clean();
-			
-    /**
-    * This method is not applicable to middle mixes; it does nothing
-    * @param d ignored
-    * @retval E_SUCCESS in any case
-    */
-    virtual SINT32 initMixCascadeInfo(DOM_Element& d)
-    {
-        return E_SUCCESS;
-    }
-    
-    virtual SINT32 processKeyExchange();
 
-private:
-			CAMuxSocket* m_pMuxIn;
-			CAMuxSocket* m_pMuxOut;
-			CAASymCipher* m_pRSA;
-			//CASignature* m_pSignature;
-			volatile bool m_bRun;
-			CAMiddleMixChannelList* m_pMiddleMixChannelList;
-			//CAInfoService* m_pInfoService;
-			friend THREAD_RETURN mm_loopDownStream(void *p);
-	};
+		/** Sends the current replay timestamp periodically on the downstream replay control channel*/
+		SINT32 startTimeStampPorpagation(UINT32 minutesPropagationIntervall);	
 
+		/** proccesses a getTimeStamp request on a reply control channel*/
+		SINT32 proccessGetTimestamp(CAReplayControlChannel* pReceiver,UINT8 strMixID);
+
+		/** proccesses a getTimeStamps request on a reply control channel*/
+		SINT32 proccessGetTimestamps(CAReplayControlChannel* pReceiver);
+
+	private:
+		/** Initalises the tmeplate which is used in response to the getTimeStamps request */
+		SINT32 initTimestampsMessageTemplate();
+		friend THREAD_RETURN rp_loopPropagateTimestamp(void*);
+		CAMix* m_pMix;
+		CAReplayControlChannel* m_pDownstreamReplayControlChannel;
+		UINT32 m_u32PropagationInterval;
+		CAThread* m_pThreadTimestampPropagation;
+		UINT8* m_strGetTimestampsRepsonseMessageTemplate;
+		UINT32 m_u32GetTimestampsRepsonseMessageTemplateLen;
+		volatile bool m_bRun;
+};
 #endif
