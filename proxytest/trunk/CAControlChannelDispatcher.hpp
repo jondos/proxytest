@@ -52,7 +52,7 @@ class CAControlChannelDispatcher
 
 		~CAControlChannelDispatcher()
 			{
-				delete m_arControlChannels;
+				delete[] m_arControlChannels;
 				delete m_pQueueEntry;
 			}
 

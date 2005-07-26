@@ -35,6 +35,7 @@ class CAInfoService;
 //class DOM_Element;
 #ifdef REPLAY_DETECTION
 	#include "CADatabase.hpp"
+	#include "CAReplayCtrlChannelMsgProc.hpp"
 #endif	
 class CAControlChannelDispatcher;
 
@@ -118,6 +119,7 @@ class CAMix
 			DOM_Document m_docMixCascadeInfo;
 #ifdef REPLAY_DETECTION
 			CADatabase*						m_pReplayDB;
+			CAReplayCtrlChannelMsgProc* m_pReplayMsgProc;
 #endif
 #ifdef WITH_CONTROL_CHANNELS
 			CAControlChannelDispatcher* m_pMuxOutControlChannelDispatcher;
