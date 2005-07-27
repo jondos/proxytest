@@ -166,7 +166,9 @@ THREAD_RETURN db_loopMaintenance(void *param)
 	{
 		CADatabase* pDatabase=(CADatabase*)param;
 		pDatabase->m_bRun=true;
-		pDatabase->m_currentClock=pDatabase->getClockForTime(time(NULL));
+		tReplayTimestamp rt;
+		pDatabase->getCurrentReplayTimestamp(rt);
+		pDatabase->m_currentClock=rt.interval;
 		while(pDatabase->m_bRun)
 			{
 				sSleep(10);
@@ -180,7 +182,9 @@ THREAD_RETURN db_loopMaintenance(void *param)
 SINT32 CADatabase::nextClock()
 	{
 		m_oMutex.lock();
-		m_currentClock=getClockForTime(time(NULL));
+		tReplayTimestamp rt;
+		getCurrentReplayTimestamp(rt);
+		m_currentClock=rt.interval;
 		for(UINT32 i=0;i<0x10000;i++)
 			{
 				LP_databaseEntry tmp,tmp1;
@@ -235,14 +239,14 @@ SINT32 CADatabase::test()
 
 SINT32 CADatabase::getCurrentReplayTimestamp(tReplayTimestamp& replayTimestamp)
 	{
-		time_t aktTime=time(NULL);
-		replayTimestamp.interval=getClockForTime(aktTime);
-		replayTimestamp.offset=(aktTime-m_refTime)%SECONDS_PER_INTERVALL;
-		return E_SUCCESS;
+		return getReplayTimestampForTime(replayTimestamp,time(NULL),m_refTime);
 	}
 
 
-SINT32 CADatabase::getClockForTime(UINT32 time)
+SINT32 CADatabase::getReplayTimestampForTime(tReplayTimestamp& replayTimestamp,UINT32 aktTime,UINT32 refTime)
 	{
-		return (time-m_refTime)/SECONDS_PER_INTERVALL;
+		UINT32 timeDiff=aktTime-refTime;
+		replayTimestamp.interval=timeDiff/SECONDS_PER_INTERVALL;
+		replayTimestamp.offset=timeDiff%SECONDS_PER_INTERVALL;
+		return E_SUCCESS;
 	}

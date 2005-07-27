@@ -133,9 +133,15 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define LOG_PACKET_TIMES
 #endif
 
+#if defined (REPLAY_DETECTION)&&!defined(WITH_CONTROL_CHANNELS)
+	#define WITH_CONTROL_CHANNELS
+#endif
+
+#define MIX_CASCADE_PROTOCOL_VERSION_0_7 7  //with replay detection + control channels
+#define MIX_CASCADE_PROTOCOL_VERSION_0_6 6  //with new flow control
 #define MIX_CASCADE_PROTOCOL_VERSION_0_5 5  //with control channels
 #define MIX_CASCADE_PROTOCOL_VERSION_0_4 4  //symmetric communication to first mix
-#define MIX_CASCADE_PROTOCOL_VERSION_0_3 3 //with reply detection
+#define MIX_CASCADE_PROTOCOL_VERSION_0_3 3 //with reply detection [deprecated - not in use anymore!]
 #define MIX_CASCADE_PROTOCOL_VERSION_0_2 2 //normal protocol
 
 #if (defined(LOG_CHANNEL)) && !defined(LOG_TRAFFIC_PER_USER)
@@ -144,16 +150,14 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef PAYMENT
 	#define WITH_CONTROL_CHANNELS
 #endif
-#ifdef WITH_CONTROL_CHANNELS
+#ifdef REPLAY_DETECTION
+	#define MIX_CASCADE_PROTOCOL_VERSION "0.7"
+#elif defined WITH_CONTROL_CHANNELS
 	#define MIX_CASCADE_PROTOCOL_VERSION "0.5"
 #elif defined(FIRST_MIX_SYMMETRIC)
 	#define MIX_CASCADE_PROTOCOL_VERSION "0.4"
 #else
-	#ifdef REPLAY_DETECTION
-		#define MIX_CASCADE_PROTOCOL_VERSION "0.3"
-	#else
-		#define MIX_CASCADE_PROTOCOL_VERSION "0.2"
-	#endif
+	#define MIX_CASCADE_PROTOCOL_VERSION "0.2"
 #endif
 
 #if defined (_WIN32) &&!defined(__CYGWIN__)

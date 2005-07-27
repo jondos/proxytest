@@ -47,6 +47,10 @@ class CADatabase
 			SINT32 stop();
 			/** Returns the current Replay timestamp for this database*/
 			SINT32 getCurrentReplayTimestamp(tReplayTimestamp& replayTimestamp);
+			
+			/** Returns the replay timestamp for this refernece time (seconds since epoch) and time*/
+			static SINT32 getReplayTimestampForTime(tReplayTimestamp& replayTimestamp,UINT32 aktTime,UINT32 refTime);
+
 			static SINT32 test();
 		private:
 			friend THREAD_RETURN db_loopMaintenance(void *param);
@@ -58,7 +62,6 @@ class CADatabase
 			bool m_bRun;
 			UINT32 m_refTime; //the seconds since epoch for the start of interval 0
 			UINT32 m_currentClock; //the current 'interval' since m_refTimer
-			SINT32 getClockForTime(UINT32); //returns the intervall for the seconds since epoch
 			CAMutex m_oMutex;
 			CAThread* m_pThread;
 	};
