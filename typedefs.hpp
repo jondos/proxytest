@@ -181,4 +181,12 @@ struct t_replay_timestamp
 
 typedef struct t_replay_timestamp tReplayTimestamp;
 
+struct t_mix_parameters
+	{
+		//stores the mix id of the mix
+		UINT8* m_strMixID;
+		/// stores the local time in seconds since epoch for interval '0' for this mix
+		UINT32 m_u32ReplayRefTime;
+	};
+typedef struct t_mix_parameters tMixParameters;
 #endif

@@ -31,6 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMix.hpp"
 #include "CAReplayControlChannel.hpp"
 #include "CACmdLnOptions.hpp"
+#include "CAFirstMix.hpp"
 
 CAReplayCtrlChannelMsgProc::CAReplayCtrlChannelMsgProc(CAMix* pMix)
 	{
@@ -54,7 +55,24 @@ CAReplayCtrlChannelMsgProc::~CAReplayCtrlChannelMsgProc()
 
 SINT32 CAReplayCtrlChannelMsgProc::proccessGetTimestamps(CAReplayControlChannel* pReceiver)
 	{
-		return E_SUCCESS;
+		//Only for the first mix get timestamps is supported for the moment!
+		if(m_pMix->getType()!=CAMix::FIRST_MIX)
+			{
+				return E_UNKNOWN;
+			}
+		CAFirstMix* pMix=(CAFirstMix*)m_pMix;
+		UINT8* buff=new UINT8[m_u32GetTimestampsRepsonseMessageTemplateLen+512];
+		tMixParameters* mixParameters=pMix->getMixParameters();
+		time_t aktTime=time(NULL);
+		for(UINT32 i=0;i<pMix->getMixCount();i++)
+			{
+				tReplayTimestamp rt;
+				CADatabase::getReplayTimestampForTime(rt,aktTime,mixParameters[i].m_u32ReplayRefTime);
+				sprintf((char*)buff,(char*)m_strGetTimestampsRepsonseMessageTemplate,rt.interval,rt.offset);
+			}
+		SINT32 ret=pReceiver->sendXMLMessage(buff,strlen((char*)buff));
+		delete[] buff;
+		return ret;
 	}
 
 SINT32 CAReplayCtrlChannelMsgProc::propagateCurrentReplayTimestamp()
@@ -100,7 +118,7 @@ THREAD_RETURN rp_loopPropagateTimestamp(void* param)
 		THREAD_RETURN_SUCCESS;
 	}
 
-/** We initialise the tmplate used to generate the idividual responses to gettimesampts requests
+/** We initialise the template used to generate the idividual responses to gettimestamps requests
 	* according to the mix ids of the cascade. We later use this template to generate the
 	* responses quickly.
 	*/
@@ -111,13 +129,28 @@ SINT32 CAReplayCtrlChannelMsgProc::initTimestampsMessageTemplate()
 			{
 				return E_UNKNOWN;
 			}
-		DOM_Document docMixCascadeInfo;
-		m_pMix->getMixCascadeInfo(docMixCascadeInfo);
+		CAFirstMix* pMix=(CAFirstMix*)m_pMix;
 		DOM_Document docTemplate=DOM_Document::createDocument();
-		DOM_Element elemMixes;
-		if(getDOMChildByName(docMixCascadeInfo,(UINT8*)"Mixes",elemMixes,true)!=E_SUCCESS)
-			return E_UNKNOWN;
-		docTemplate.appendChild(docTemplate.importNode(elemMixes,true));
-		m_strGetTimestampsRepsonseMessageTemplate=DOM_Output::dumpToMem(docTemplate,&m_u32GetTimestampsRepsonseMessageTemplateLen);
+		DOM_Element elemMixes=docTemplate.createElement("Mixes");
+		docTemplate.appendChild(elemMixes);
+		tMixParameters* mixParameters=pMix->getMixParameters();
+		for(UINT32 i=0;i<pMix->getMixCount();i++)
+			{
+				DOM_Element elemMix=docTemplate.createElement("Mix");
+				setDOMElementAttribute(elemMix,"id",mixParameters[i].m_strMixID);
+				DOM_Element elemReplay=docTemplate.createElement("Replay");
+				elemMix.appendChild(elemReplay);
+				DOM_Element elemReplayTimestamp=docTemplate.createElement("ReplayTimestamp");
+				setDOMElementAttribute(elemReplayTimestamp,"interval",(UINT8*)"%u");
+				setDOMElementAttribute(elemReplayTimestamp,"offset",(UINT8*)"%u");
+				elemReplay.appendChild(elemReplayTimestamp);
+				elemMixes.appendChild(elemMix);
+			}
+		UINT8* buff=DOM_Output::dumpToMem(docTemplate,&m_u32GetTimestampsRepsonseMessageTemplateLen);
+		m_strGetTimestampsRepsonseMessageTemplate=new UINT8[m_u32GetTimestampsRepsonseMessageTemplateLen+1];
+		memcpy(m_strGetTimestampsRepsonseMessageTemplate,buff,m_u32GetTimestampsRepsonseMessageTemplateLen);
+		m_strGetTimestampsRepsonseMessageTemplate[m_u32GetTimestampsRepsonseMessageTemplateLen]=0;
+		m_u32GetTimestampsRepsonseMessageTemplateLen++;
+		delete[] buff;
 		return E_SUCCESS;
 	}

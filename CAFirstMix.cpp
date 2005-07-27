@@ -437,7 +437,9 @@ SINT32 CAFirstMix::processKeyExchange()
         }
         child=child.getNextSibling();
     }
-
+		///initialises MixParameters struct
+		if(initMixParameters(elemMixes)!=E_SUCCESS)
+			return E_UNKNOWN;
     if(initMixCascadeInfo(elemMixes)!=E_SUCCESS)
     {
         CAMsg::printMsg(LOG_CRIT,"Error initializing cascade info.\n");
@@ -1096,7 +1098,16 @@ SINT32 CAFirstMix::clean()
 				m_pReplayDB=NULL;
 			}
 #endif
-		
+		if(m_arMixParameters!=NULL)
+			{
+				for(UINT32 i=0;i<m_u32MixCount;i++)
+					{
+						delete m_arMixParameters[i].m_strMixID;
+					}
+				delete[] m_arMixParameters;
+			}
+			m_arMixParameters=NULL;
+			m_u32MixCount=0;
 		#ifdef _DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"CAFirstMix::clean() finished\n");
 		#endif
@@ -1117,6 +1128,32 @@ SINT32 CAFirstMix::reconfigure()
 		return E_SUCCESS;
 	}
 #endif
+
+/** set u32MixCount and m_arMixParameters from the <Mixes> element received from the second mix.*/
+SINT32 CAFirstMix::initMixParameters(DOM_Element& elemMixes)
+	{
+		DOM_NodeList nl=elemMixes.getElementsByTagName("Mix");
+		m_u32MixCount=nl.getLength()+1;
+		m_arMixParameters=new tMixParameters[m_u32MixCount];
+		memset(m_arMixParameters,0,sizeof(tMixParameters)*m_u32MixCount);
+		UINT8 buff[255];
+		options.getMixId(buff,255);
+		UINT32 len=strlen((char*)buff)+1;
+		m_arMixParameters[0].m_strMixID=new UINT8[len];
+		memcpy(m_arMixParameters[0].m_strMixID,buff,len);
+		UINT32 aktMix=1;
+		for(UINT32 i=0;i<nl.getLength();i++)
+			{
+				DOM_Node child=nl.item(i);
+				len=255;
+				getDOMElementAttribute(child,"id",buff,&len);
+				m_arMixParameters[aktMix].m_strMixID=new UINT8[len+1];
+				memcpy(m_arMixParameters[aktMix].m_strMixID,buff,len);
+				m_arMixParameters[aktMix].m_strMixID[len]=0;
+				aktMix++;
+			}
+		return E_SUCCESS;
+	}
 
 #ifdef COUNTRY_STATS
 #define COUNTRY_STATS_DB "CountryStats"
@@ -1282,223 +1319,4 @@ THREAD_RETURN iplist_loopDoLogCountries(void* param)
 		THREAD_RETURN_SUCCESS;	
 	}
 #endif
-
-/**
- * @deprecated first part of this method moved to processKeyExchange(), rest moved to CAMix.cpp
- * This will initialize the XML Cascade Info send to the InfoService and
-  * the Key struct which is send to each user which connects
-* This function is called from init()
-* @DOCME
-*//*
-SINT32 CAFirstMix::initMixCascadeInfo(UINT8* recvBuff, UINT16 len)
-{
-		//Parse the input, which is the XML send from the previos mix, containing keys and id's
-		if(recvBuff==NULL||len==0)
-			return E_UNKNOWN;
-
-		CAMsg::printMsg(LOG_DEBUG,"Get KeyInfo (foolowing line)\n");
-		CAMsg::printMsg(LOG_DEBUG,"%s\n",recvBuff);
-
-
-		DOMParser oParser;
-		MemBufInputSource oInput(recvBuff,len,"tmp");
-		oParser.parse(oInput);
-		DOM_Document doc=oParser.getDocument();
-		DOM_Element elemMixes=doc.getDocumentElement();
-		if(elemMixes==NULL)
-			return E_UNKNOWN;
-		int count=0;
-		if(getDOMElementAttribute(elemMixes,"count",&count)!=E_SUCCESS)
-			return E_UNKNOWN;
-
-		DOM_Node child=elemMixes.getLastChild();
-
-		//tmp XML-Structure for constructing the XML which is send to each user
-		DOM_Document docXmlKeyInfo=DOM_Document::createDocument();
-		DOM_Element elemRootKey=docXmlKeyInfo.createElement("MixCascade");
-		setDOMElementAttribute(elemRootKey,"version",(UINT8*)"0.1"); //set the Version of the XML to 0.1
-		docXmlKeyInfo.appendChild(elemRootKey);
-		DOM_Element elemMixProtocolVersion=docXmlKeyInfo.createElement("MixProtocolVersion");
-		setDOMElementValue(elemMixProtocolVersion,(UINT8*)MIX_CASCADE_PROTOCOL_VERSION);
-		elemRootKey.appendChild(elemMixProtocolVersion);
-		DOM_Node elemMixesKey=docXmlKeyInfo.importNode(elemMixes,true);
-		elemRootKey.appendChild(elemMixesKey);
-
-		UINT32 tlen;
-		while(child!=NULL)
-			{
-				if(child.getNodeName().equals("Mix"))
-					{
-						DOM_Node rsaKey=child.getFirstChild();
-						CAASymCipher oRSA;
-						oRSA.setPublicKeyAsDOMNode(rsaKey);
-						tlen=256;
-					}
-				child=child.getPreviousSibling();
-			}
-		tlen=256;
-
-
-		//Inserting own Key in XML-Key struct
-		DOM_DocumentFragment docfragKey;
-		m_pRSA->getPublicKeyAsDocumentFragment(docfragKey);
-		DOM_Element elemOwnMix=docXmlKeyInfo.createElement("Mix");
-		UINT8 buffId[255];
-		options.getMixId(buffId,255);
-		elemOwnMix.setAttribute("id",DOMString((char*)buffId));
-		elemOwnMix.appendChild(docXmlKeyInfo.importNode(docfragKey,true));
-		elemMixesKey.insertBefore(elemOwnMix,elemMixesKey.getFirstChild());
-		setDOMElementAttribute((DOM_Element&)elemMixesKey,"count",count+1);
-		CACertificate* ownCert=options.getOwnCertificate();
-		if(ownCert==NULL)
-			{
-				CAMsg::printMsg(LOG_DEBUG,"Own Test Cert is NULL -- so it could not be inserted into signed KeyInfo send to users...\n");
-			}
-		CACertStore* tmpCertStore=new CACertStore();
-		tmpCertStore->add(ownCert);
-		if(m_pSignature->signXML(elemRootKey,tmpCertStore)!=E_SUCCESS)
-			{
-				CAMsg::printMsg(LOG_DEBUG,"Could not sign KeyInfo send to users...\n");
-			}
-		delete ownCert;
-		delete tmpCertStore;
-
-		tlen=0;
-		UINT8* tmpB=DOM_Output::dumpToMem(docXmlKeyInfo,&tlen);
-		m_xmlKeyInfoBuff=new UINT8[tlen+2];
-		memcpy(m_xmlKeyInfoBuff+2,tmpB,tlen);
-		UINT16 s=htons((UINT16)tlen);
-		memcpy(	m_xmlKeyInfoBuff,&s,2);
-		m_xmlKeyInfoSize=(UINT16)tlen+2;
-		delete []tmpB;
-
-		//Sending symetric key...
-		child=elemMixes.getFirstChild();
-		while(child!=NULL)
-			{
-				if(child.getNodeName().equals("Mix"))
-					{
-						//check Signature....
-						CAMsg::printMsg(LOG_DEBUG,"Try to verify next mix signature...\n");
-						CASignature oSig;
-						CACertificate* nextCert=options.getNextMixTestCertificate();
-						oSig.setVerifyKey(nextCert);
-						SINT32 ret=oSig.verifyXML(child,NULL);
-						delete nextCert;
-						if(ret!=E_SUCCESS)
-							{
-								CAMsg::printMsg(LOG_DEBUG,"failed!\n");
-									return E_UNKNOWN;
-							}
-						CAMsg::printMsg(LOG_DEBUG,"success!\n");
-						DOM_Node rsaKey=child.getFirstChild();
-						CAASymCipher oRSA;
-						oRSA.setPublicKeyAsDOMNode(rsaKey);
-						DOM_Element elemNonce;
-						getDOMChildByName(child,(UINT8*)"Nonce",elemNonce,false);
-						UINT8 arNonce[1024];
-						if(elemNonce!=NULL)
-							{
-								UINT32 lenNonce=1024;
-								UINT32 tmpLen=1024;
-								getDOMElementValue(elemNonce,arNonce,&lenNonce);
-								CABase64::decode(arNonce,lenNonce,arNonce,&tmpLen);
-								lenNonce=tmpLen;
-								tmpLen=1024;
-								CABase64::encode(SHA1(arNonce,lenNonce,NULL),SHA_DIGEST_LENGTH,
-																	arNonce,&tmpLen);
-								arNonce[tmpLen]=0;
-							}
-						UINT8 key[64];
-						getRandom(key,64);
-						//UINT8 buff[400];
-						//UINT32 bufflen=400;
-						DOM_DocumentFragment docfragSymKey;
-						encodeXMLEncryptedKey(key,64,docfragSymKey,&oRSA);
-						DOM_Document docSymKey=DOM_Document::createDocument();
-						docSymKey.appendChild(docSymKey.importNode(docfragSymKey,true));
-						DOM_Element elemRoot=docSymKey.getDocumentElement();
-						if(elemNonce!=NULL)
-							{
-								DOM_Element elemNonceHash=docSymKey.createElement("Nonce");
-								setDOMElementValue(elemNonceHash,arNonce);
-								elemRoot.appendChild(elemNonceHash);
-							}
-						UINT32 outlen=5000;
-						UINT8* out=new UINT8[outlen];
-
-						m_pSignature->signXML(elemRoot);
-						DOM_Output::dumpToMem(docSymKey,out,&outlen);
-						m_pMuxOut->setSendKey(key,32);
-						m_pMuxOut->setReceiveKey(key+32,32);
-						UINT16 size=htons((UINT16)outlen);
-						((CASocket*)m_pMuxOut)->send((UINT8*)&size,2);
-						((CASocket*)m_pMuxOut)->send(out,outlen);
-						m_pMuxOut->setCrypt(true);
-						delete[] out;
-						break;
-					}
-				child=child.getNextSibling();
-			}
-
-
-	//CascadeInfo
-		m_docMixCascadeInfo=DOM_Document::createDocument();
-		DOM_Element elemRoot=m_docMixCascadeInfo.createElement("MixCascade");
-
-
-		UINT8 id[50];
-		options.getMixId(id,50);
-		elemRoot.setAttribute(DOMString("id"),DOMString((char*)id));
-
-		UINT8 name[255];
-		if(options.getCascadeName(name,255)!=E_SUCCESS)
-			{
-				return E_UNKNOWN;
-			}
-		m_docMixCascadeInfo.appendChild(elemRoot);
-		DOM_Element elem=m_docMixCascadeInfo.createElement("Name");
-		DOM_Text text=m_docMixCascadeInfo.createTextNode(DOMString((char*)name));
-		elem.appendChild(text);
-		elemRoot.appendChild(elem);
-
-		elem=m_docMixCascadeInfo.createElement("Network");
-		elemRoot.appendChild(elem);
-		DOM_Element elemListenerInterfaces=m_docMixCascadeInfo.createElement("ListenerInterfaces");
-		elem.appendChild(elemListenerInterfaces);
-
-		for(UINT32 i=1;i<=options.getListenerInterfaceCount();i++)
-			{
-				CAListenerInterface* pListener=options.getListenerInterface(i);
-				if(pListener->isHidden()){//do nothing}
-				else if(pListener->getType()==RAW_TCP)
-					{
-						DOM_DocumentFragment docFrag;
-						pListener->toDOMFragment(docFrag,m_docMixCascadeInfo);
-						elemListenerInterfaces.appendChild(docFrag);
-					}
-				delete pListener;
-			}
-
-		DOM_Element elemThisMix=m_docMixCascadeInfo.createElement("Mix");
-		elemThisMix.setAttribute(DOMString("id"),DOMString((char*)id));
-		DOM_Node elemMixesDocCascade=m_docMixCascadeInfo.createElement("Mixes");
-		elemMixesDocCascade.appendChild(elemThisMix);
-		count=1;
-		elemRoot.appendChild(elemMixesDocCascade);
-
-		DOM_Node node=elemMixes.getFirstChild();
-		while(node!=NULL)
-			{
-				if(node.getNodeType()==DOM_Node::ELEMENT_NODE&&node.getNodeName().equals("Mix"))
-					{
-						elemMixesDocCascade.appendChild(m_docMixCascadeInfo.importNode(node,false));
-						count++;
-					}
-				node=node.getNextSibling();
-			}
-		setDOMElementAttribute(elemMixesDocCascade,"count",count);
-		return E_SUCCESS;
-	}
-*/
 

@@ -50,7 +50,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 class CAInfoService;
 
-
 class CAFirstMix:public CAMix
 {
 public:
@@ -83,6 +82,7 @@ public:
 					m_mysqlCon=NULL;
 					m_threadLogLoop=NULL;
 #endif
+					m_arMixParameters=NULL;
 				}
     virtual ~CAFirstMix(){}
 		tMixType getType()
@@ -99,8 +99,8 @@ protected:
     //added by ronin <ronin2@web.de>
     virtual SINT32 processKeyExchange();
     
-    // deprecated
-    //SINT32 initMixCascadeInfo(UINT8*,UINT16);
+		/** Initialises the MixParameters info for each mix form the <Mixes> element received from the second mix.*/
+    SINT32 initMixParameters(DOM_Element& elemMixes);
     
     
 public:
@@ -123,6 +123,17 @@ public:
 		friend THREAD_RETURN fm_loopAcceptUsers(void*);
 		friend THREAD_RETURN fm_loopReadFromUsers(void*);
 		friend THREAD_RETURN fm_loopDoUserLogin(void* param);
+
+		//How many mixes are in the cascade?
+		SINT32 getMixCount()
+			{
+				return m_u32MixCount;
+			}
+		///Returns the ordered list of the mix parameters from the first mix to the last mix. 
+		tMixParameters *getMixParameters()
+			{
+				return m_arMixParameters;
+			}
 
 protected:
 #ifndef COUNTRY_STATS
@@ -187,6 +198,11 @@ protected:
 			UINT32 m_nSocketsIn; //number of usable ListenerInterface (non 'virtual')
 			volatile bool m_bRestart;
 			CASocket* m_arrSocketsIn;
+			//how many mixes are in the cascade?
+			UINT32	m_u32MixCount;
+			//stores the mix parameters for each mix 
+			tMixParameters* m_arMixParameters;
+
 #ifdef HAVE_EPOLL
 
 			CASocketGroupEpoll* m_psocketgroupUsersRead;
@@ -236,7 +252,6 @@ protected:
 			MYSQL* m_mysqlCon;
 			friend THREAD_RETURN iplist_loopDoLogCountries(void* param);
 #endif
-
 };
 
 #endif

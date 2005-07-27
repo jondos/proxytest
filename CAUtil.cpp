@@ -420,11 +420,11 @@ SINT32 setDOMElementAttribute(DOM_Node& elem,const char* attrName,int value)
 		return E_SUCCESS;
 	}
 
-SINT32 getDOMElementAttribute(const DOM_Element& elem,const char* attrName,UINT8* value,UINT32* len)
+SINT32 getDOMElementAttribute(const DOM_Node& elem,const char* attrName,UINT8* value,UINT32* len)
 	{
-		if(elem==NULL||attrName==NULL||value==NULL||len==NULL)
+		if(elem==NULL||attrName==NULL||value==NULL||len==NULL||elem.getNodeType()!=DOM_Node::ELEMENT_NODE)
 			return E_UNKNOWN;
-		char* tmpStr=elem.getAttribute(attrName).transcode();
+		char* tmpStr=static_cast<const DOM_Element&>(elem).getAttribute(attrName).transcode();
 		UINT32 l=strlen(tmpStr);
 		if(l>=*len)
 			{
@@ -437,11 +437,11 @@ SINT32 getDOMElementAttribute(const DOM_Element& elem,const char* attrName,UINT8
 		return E_SUCCESS;
 	}
 
-SINT32 getDOMElementAttribute(const DOM_Element& elem,const char* attrName,int* value)
+SINT32 getDOMElementAttribute(const DOM_Node& elem,const char* attrName,int* value)
 	{
-		if(elem==NULL||attrName==NULL||value==NULL)
+		if(elem==NULL||attrName==NULL||value==NULL||elem.getNodeType()!=DOM_Node::ELEMENT_NODE)
 			return E_UNKNOWN;
-		char* tmpStr=elem.getAttribute(attrName).transcode();
+		char* tmpStr=static_cast<const DOM_Element&>(elem).getAttribute(attrName).transcode();
 		*value=atol(tmpStr);
 		delete[] tmpStr;
 		return E_SUCCESS;
