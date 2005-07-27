@@ -55,6 +55,8 @@ class CAControlChannelDispatcher
 				delete[] m_arControlChannels;
 				delete m_pQueueEntry;
 			}
+			
+		void deleteAllControlChannels(void);
 
 		/** Registers a control channel for receiving messages*/		
     SINT32 registerControlChannel(CAAbstractControlChannel* pControlChannel);

@@ -43,6 +43,16 @@ SINT32 CAControlChannelDispatcher::removeControlChannel(UINT32 id)
 		return E_SUCCESS;
 	}
 
+void CAControlChannelDispatcher::deleteAllControlChannels()
+	{
+		for(UINT32 i=0;i<256;i++)
+			{
+				if(m_arControlChannels[i]!=NULL)
+					delete m_arControlChannels[i];
+				m_arControlChannels[i]=NULL;			
+			}
+	}
+	
 bool CAControlChannelDispatcher::proccessMixPacket(MIXPACKET* pPacket)
 	{
 		if(pPacket->channel<256&&pPacket->channel>0)

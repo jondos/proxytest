@@ -312,7 +312,8 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 		m_pDelayBuckets[pHashTableEntry->delayBucketID]=NULL;
 		m_pMutexDelayChannel->unlock();
 	#endif
-		delete pHashTableEntry->pControlChannelDispatcher;
+		pHashTableEntry->pControlChannelDispatcher->deleteAllControlChannels();
+		delete pHashTableEntry->pControlChannelDispatcher; //deletes the dispatcher and all associated control channels
 		if(m_listHashTableNext==pHashTableEntry) //adjust the enumeration over all connections (@see getNext())
 			m_listHashTableNext=pHashTableEntry->list_HashEntries.next;
 		
