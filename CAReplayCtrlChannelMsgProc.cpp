@@ -117,7 +117,7 @@ SINT32 CAReplayCtrlChannelMsgProc::proccessGetTimestamp(CAReplayControlChannel* 
 			{
 				tReplayTimestamp rt;
 				m_pMix->getReplayDB()->getCurrentReplayTimestamp(rt);
-				const char* strTemplate="<?xml version=\"1.0\" encoding=\"UTF-8\"?><Mix id=\"%s\"><Replay><ReplayTimestamp interval=\"%u\" offset=\"%u\"/><Replay></Mix>";
+				const char* strTemplate="<?xml version=\"1.0\" encoding=\"UTF-8\"?><Mix id=\"%s\"><Replay><ReplayTimestamp interval=\"%u\" offset=\"%u\"/></Replay></Mix>";
 				sprintf((char*)msgBuff,strTemplate,buff,rt.interval,rt.offset);
 				return pReceiver->sendXMLMessage(msgBuff,strlen((char*)msgBuff));
 			}
