@@ -60,6 +60,8 @@ OBJS_ALL=CASocket.o\
 	CAControlChannelDispatcher.o\
 	CAAbstractControlChannel.o\
 	CAHttpClient.o\
+	CAReplayCtrlChannelMsgProc.o\
+	CAReplayControlChannel.o\
 	proxytest.o
 
 OBJS=$(OBJS_ALL)
