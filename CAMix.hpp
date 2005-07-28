@@ -88,6 +88,10 @@ class CAMix
 				{
 					return m_pMuxInControlChannelDispatcher;
 				}
+			CAControlChannelDispatcher* getUpstreamControlChannelDispatcher()
+				{
+					return m_pMuxOutControlChannelDispatcher;
+				}
 #endif		
 #ifdef REPLAY_DETECTION
 			CADatabase* getReplayDB()

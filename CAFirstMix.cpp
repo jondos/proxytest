@@ -866,7 +866,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 				delete pNewUser;
 				return E_UNKNOWN;
 			}
-#if defined(PAYMENT)||defined(FIRST_MIX_SYMMETRIC)||defined(WITH_CONTROL_CHANNELS_TEST)||defined(COUNTRY_STATS)
+#if defined(PAYMENT)||defined(FIRST_MIX_SYMMETRIC)||defined(WITH_CONTROL_CHANNELS_TEST)||defined(COUNTRY_STATS)||defined(REPLAY_DETECTION)
 		fmHashTableEntry* pHashEntry=m_pChannelList->get(pNewUser);
 #endif
 #ifdef PAYMENT

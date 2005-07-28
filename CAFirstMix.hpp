@@ -135,6 +135,11 @@ public:
 				return m_arMixParameters;
 			}
 
+		/**Sets the parameters for the mix specified in the params.m_strMixID field. Only the values which are set are copied
+			* to the stored parameters of the mixes of this cascade.
+			*/
+		SINT32 setMixParameters(const tMixParameters& params);
+
 protected:
 #ifndef COUNTRY_STATS
 			SINT32 incUsers()

@@ -39,4 +39,38 @@ CAReplayControlChannel::CAReplayControlChannel(CAReplayCtrlChannelMsgProc* pProc
 CAReplayControlChannel::~CAReplayControlChannel(void)
 	{
 	}
+
+SINT32 CAReplayControlChannel::processXMLMessage(DOM_Document& doc)
+	{
+		DOM_Element elemRoot=doc.getDocumentElement();
+		if(elemRoot.getNodeName().equals("GetTimestamps"))
+			{
+				m_pProcessor->proccessGetTimestamps(this);
+			}
+		else if(elemRoot.getNodeName().equals("GetTimestamp"))
+			{
+				UINT8 buff[255];
+				UINT32 bufflen=255;
+				getDOMElementAttribute(elemRoot,"id",buff,&bufflen);
+				buff[bufflen]=0;
+				m_pProcessor->proccessGetTimestamp(this,buff);
+			}
+		else if(elemRoot.getNodeName().equals("Mix"))
+			{
+				UINT8 buff[255];
+				UINT32 bufflen=255;
+				getDOMElementAttribute(elemRoot,"id",buff,&bufflen);
+				buff[bufflen]=0;
+				tReplayTimestamp rt;
+				DOM_Node child;
+				getDOMChildByName(elemRoot,(UINT8*)"Replay",child);
+				DOM_Node elemReplayTimestamp;
+				getDOMChildByName(child,(UINT8*)"ReplayTimestamp",elemReplayTimestamp);
+				getDOMElementAttribute(elemReplayTimestamp,"offset",rt.offset);
+				getDOMElementAttribute(elemReplayTimestamp,"interval",rt.interval);
+				m_pProcessor->proccessGotTimestamp(this,buff,rt);
+			}
+		return E_SUCCESS;
+	}
+
 #endif

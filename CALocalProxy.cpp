@@ -530,7 +530,7 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 		}
 		DOM_Element elemMixes;
 		getDOMChildByName(root,(UINT8*)"Mixes",elemMixes,false);
-		int chainlen=-1;
+		SINT32 chainlen=-1;
 		if(elemMixes==NULL||getDOMElementAttribute(elemMixes,"count",&chainlen)!=E_SUCCESS)
 			{
 #ifdef _DEBUG

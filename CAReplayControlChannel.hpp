@@ -44,15 +44,7 @@ class CAReplayControlChannel :
 		/** Reads incoming replay timestamps  or dtimestamp request and delegates them to the 
 			* associated CAReplayCorelChannelMsgProc
 			*/
-		SINT32 processXMLMessage(DOM_Document& doc)
-		{
-			DOM_Element elemRoot=doc.getDocumentElement();
-			if(elemRoot.getNodeName().equals("GetTimestamps"))
-				{
-					m_pProcessor->proccessGetTimestamps(this);
-				}
-			return E_SUCCESS;
-		}
+		SINT32 processXMLMessage(DOM_Document& doc);
 
 	private:
 		CAReplayCtrlChannelMsgProc* m_pProcessor;

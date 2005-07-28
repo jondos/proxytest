@@ -84,7 +84,7 @@ SINT32 CAXMLErrorMessage::setValues(DOM_Element &elemRoot)
 	UINT32 strGeneralLen = 256;
 	SINT32 tmp;
 	SINT32 rc;
-	if( ((rc=getDOMElementAttribute(elemRoot, "code", (int*)&tmp)) !=E_SUCCESS) ||
+	if( ((rc=getDOMElementAttribute(elemRoot, "code", &tmp)) !=E_SUCCESS) ||
 			((rc=getDOMElementValue(elemRoot, strGeneral, &strGeneralLen)) !=E_SUCCESS)
 		)
 	{
