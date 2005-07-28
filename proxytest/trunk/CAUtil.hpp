@@ -92,9 +92,11 @@ SINT32 setDOMElementValue(DOM_Element& elem,const UINT8* value);
  */
 SINT32 getDOMElementValue(const DOM_Node& elem,UINT8* value,UINT32* len);
 
-SINT32 setDOMElementAttribute(DOM_Node& elem,const char* attrName,int value);
-SINT32 getDOMElementAttribute(const DOM_Node& elem,const char* attrName,int* value);
+SINT32 setDOMElementAttribute(DOM_Node& elem,const char* attrName,SINT32 value);
 SINT32 setDOMElementAttribute(DOM_Node& elem,const char* attrName,const UINT8* value);
+
+SINT32 getDOMElementAttribute(const DOM_Node& elem,const char* attrName,SINT32* value);
+SINT32 getDOMElementAttribute(const DOM_Node& elem,const char* attrName,UINT32& value);
 SINT32 getDOMElementAttribute(const DOM_Node& elem,const char* attrName,bool& value);
 SINT32 getDOMElementAttribute(const DOM_Node& elem,const char* attrName,UINT8* value,UINT32* len);
 
