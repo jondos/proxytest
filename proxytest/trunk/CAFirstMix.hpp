@@ -257,6 +257,11 @@ protected:
 			MYSQL* m_mysqlCon;
 			friend THREAD_RETURN iplist_loopDoLogCountries(void* param);
 #endif
+
+#ifdef REPLAY_DETECTION
+		private:
+			SINT32 sendReplayTimestampRequestsToAllMixes();
+#endif
 };
 
 #endif

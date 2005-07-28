@@ -26,6 +26,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
+#ifdef REPLAY_DETECTION
 #include "CAReplayCtrlChannelMsgProc.hpp"
 #include "CAReplayControlChannel.hpp"
 #include "CAMix.hpp"
@@ -245,3 +246,12 @@ SINT32 CAReplayCtrlChannelMsgProc::proccessGotTimestamp(CAReplayControlChannel* 
 		return E_SUCCESS;
 	}
 
+SINT32 CAReplayCtrlChannelMsgProc::sendGetTimestamp(const UINT8* strMixID)
+	{
+		UINT8 msgBuff[512];
+		const char* strTemplate="<?xml version=\"1.0\" encoding=\"UTF-8\"?><GetTimestamp id=\"%s\"/>";
+		sprintf((char*)msgBuff,strTemplate,strMixID);
+		return m_pUpstreamReplayControlChannel->sendXMLMessage(msgBuff,strlen((char*)msgBuff));
+	}
+
+#endif //REPLAY_DETECTION

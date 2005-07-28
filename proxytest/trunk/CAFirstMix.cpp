@@ -230,26 +230,13 @@ SINT32 CAFirstMix::init()
 		m_pthreadReadFromMix->setMainLoop(fm_loopReadFromMix);
 		m_pthreadReadFromMix->start(this);
 
-		//Starting InfoService
-    /*    if(m_pInfoService == NULL)
-        {
-            m_pInfoService=new CAInfoService(this);
-		CACertificate* tmp=options.getOwnCertificate();
-		m_pInfoService->setSignature(m_pSignature,tmp);
-		delete tmp;
-        }
-		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix InfoService - Signature set\n");
-		m_pInfoService->start();
-		CAMsg::printMsg(LOG_DEBUG,"InfoService Loop started\n");
-    */
-
 		//Starting thread for logging
 #ifdef LOG_PACKET_TIMES
 		m_pLogPacketStats=new CALogPacketStats();
 		m_pLogPacketStats->setLogIntervallInMinutes(FM_PACKET_STATS_LOG_INTERVALL);
 		m_pLogPacketStats->start();
 #endif
-#ifdef WITH_REPLAY_DETECTION
+#ifdef REPLAY_DETECTION
 		sendReplayTimestampRequestsToAllMixes();
 #endif
 		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix init() succeded\n");
@@ -1188,6 +1175,18 @@ SINT32 CAFirstMix::initMixParameters(DOM_Element& elemMixes)
 			}
 		return E_SUCCESS;
 	}
+
+
+#ifdef REPLAY_DETECTION
+SINT32 CAFirstMix::sendReplayTimestampRequestsToAllMixes()
+	{
+		for(UINT32 i=1;i<m_u32MixCount;i++)
+			{
+				m_pReplayMsgProc->sendGetTimestamp(m_arMixParameters[i].m_strMixID);
+			}
+		return E_SUCCESS;
+	}
+#endif //REPLAY_DETECTION
 
 #ifdef COUNTRY_STATS
 #define COUNTRY_STATS_DB "CountryStats"

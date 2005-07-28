@@ -59,6 +59,9 @@ class CAReplayCtrlChannelMsgProc
 		/** proccesses a received replay timestamp rt from mix strMixID*/
 		SINT32 proccessGotTimestamp(CAReplayControlChannel* pReceiver,UINT8* strMixID,tReplayTimestamp& rt);
 
+		/** Sends upstram a request for the replay timestamp for the given mix*/
+		SINT32 sendGetTimestamp(const UINT8* strMixID);
+
 private:
 		/** Initalises the tmeplate which is used in response to the getTimeStamps request */
 		SINT32 initTimestampsMessageTemplate();
