@@ -143,6 +143,7 @@ SINT32 CADatabase::insert(UINT8 key[16])
 SINT32 CADatabase::start()
 	{
 		m_pThread=new CAThread();
+		m_bRun=true;
 		m_pThread->setMainLoop(db_loopMaintenance);
 		return m_pThread->start(this);
 	}
@@ -163,14 +164,13 @@ SINT32 CADatabase::stop()
 THREAD_RETURN db_loopMaintenance(void *param)
 	{
 		CADatabase* pDatabase=(CADatabase*)param;
-		pDatabase->m_bRun=true;
 		tReplayTimestamp rt;
 		pDatabase->getCurrentReplayTimestamp(rt);
 		pDatabase->m_currentClock=rt.interval;
 		while(pDatabase->m_bRun)
 			{
 				sSleep(10);
-				UINT32 secondsTilNextClock=((pDatabase->m_currentClock+1)*SECONDS_PER_INTERVALL)+pDatabase->m_refTime-time(NULL);
+				SINT32 secondsTilNextClock=((pDatabase->m_currentClock+1)*SECONDS_PER_INTERVALL)+pDatabase->m_refTime-time(NULL);
 				if(secondsTilNextClock<=0&&pDatabase->m_bRun)
 					pDatabase->nextClock();
 			}

@@ -53,7 +53,10 @@ class CASocketGroup
 								if(m_max<((SOCKET)s)+1)
 							m_max=((SOCKET)s)+1;
 						#endif
+						#pragma warning( push )
+						#pragma warning( disable : 4127 ) //Disable: Bedingter Ausdruck ist konstant
 						FD_SET((SOCKET)s,&m_fdset);
+						#pragma warning( pop )
 					#else
 						m_pollfd[(SOCKET)s].fd=(SOCKET)s;
 						if(m_max<((SOCKET)s)+1)
@@ -71,7 +74,10 @@ class CASocketGroup
 						if(m_max<(s.getSocket())+1)
 							m_max=(s.getSocket())+1;
 						#endif
+						#pragma warning( push )
+						#pragma warning( disable : 4127 ) //Disable: Bedingter Ausdruck ist konstant
 						FD_SET(s.getSocket(),&m_fdset);
+						#pragma warning( pop )
 					#else
 					m_pollfd[s.getSocket()].fd=s.getSocket();
 					if(m_max<(s.getSocket())+1)

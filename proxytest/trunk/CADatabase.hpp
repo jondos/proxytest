@@ -75,9 +75,9 @@ class CADatabase
 			LP_databaseEntry* m_currDatabase;
 			LP_databaseEntry* m_nextDatabase;
 			LP_databaseEntry* m_prevDatabase;
-			bool m_bRun;
+			volatile bool m_bRun;
 			UINT32 m_refTime; //the seconds since epoch for the start of interval 0
-			SINT32 m_currentClock; //the current 'interval' since m_refTimer
+			volatile SINT32 m_currentClock; //the current 'interval' since m_refTimer
 			CAMutex m_oMutex;
 			CAThread* m_pThread;
 	};

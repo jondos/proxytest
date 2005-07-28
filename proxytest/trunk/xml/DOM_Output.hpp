@@ -46,7 +46,7 @@ class MemFormatTarget: public XMLFormatTarget
 				}
 
 			virtual void writeChars(const XMLByte* const toWrite, const unsigned int count,
-															XMLFormatter* const formatter)
+															XMLFormatter* const /*formatter*/)
 				{
 					const XMLByte* write=toWrite;
 					UINT32 c=count;
