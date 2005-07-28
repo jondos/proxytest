@@ -654,7 +654,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 			{
 				if(pFirstMix->m_arMixParameters[i].m_u32ReplayRefTime==0)//not set yet
 					{
-						msSleep(100);//wait a littel bit and try again
+						msSleep(100);//wait a little bit and try again
 						continue;
 					}
 				i++;

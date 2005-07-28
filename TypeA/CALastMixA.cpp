@@ -102,7 +102,14 @@ SINT32 CALastMixA::loop()
 								#ifdef LOG_PACKET_TIMES
 									getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_start_OP);
 								#endif
-							// one packet received
+#ifdef WITH_CONTROL_CHANNELS								
+								if(pMixPacket->channel<256)
+									{
+										m_pMuxInControlChannelDispatcher->proccessMixPacket(pMixPacket);
+										continue;
+									}
+#endif
+								// one packet received
 								m_logUploadedPackets++;
 								pChannelListEntry=m_pChannelList->get(pMixPacket->channel);
 								if(pChannelListEntry==NULL)
