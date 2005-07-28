@@ -37,6 +37,8 @@ typedef struct __t_database_entry
 
 typedef t_databaseEntry* LP_databaseEntry;
 
+#define SECONDS_PER_INTERVALL 600
+
 class CADatabase
 	{
 		public:
@@ -47,9 +49,23 @@ class CADatabase
 			SINT32 stop();
 			/** Returns the current Replay timestamp for this database*/
 			SINT32 getCurrentReplayTimestamp(tReplayTimestamp& replayTimestamp);
+
+			/** Returns the local time in seconds since epoch for replay timestamp='0' for this database*/
+			UINT32 getRefTime()
+				{
+					return m_refTime;
+				}
 			
-			/** Returns the replay timestamp for this refernece time (seconds since epoch) and time*/
+			/** Returns the replay timestamp for this reference time (seconds since epoch) and time*/
 			static SINT32 getReplayTimestampForTime(tReplayTimestamp& replayTimestamp,UINT32 aktTime,UINT32 refTime);
+
+			/** Returns the refernce time (seconds since epoch) for the given replay timestamp*/
+			static SINT32 getTimeForReplayTimestamp(UINT32& refTime,tReplayTimestamp replayTimestamp)
+				{
+					time_t now=time(NULL);
+					refTime=now-replayTimestamp.interval*SECONDS_PER_INTERVALL-replayTimestamp.offset;
+					return E_SUCCESS;
+				}
 
 			static SINT32 test();
 		private:
