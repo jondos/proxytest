@@ -184,6 +184,8 @@ SINT32 CAFirstMix::init()
 #ifdef REPLAY_DETECTION
 			m_pReplayDB=new CADatabase();
 			m_pReplayDB->start();
+			//set the refTime of the first mix in the mix parameters array
+			m_arMixParameters[0].m_u32ReplayRefTime=m_pReplayDB->getRefTime();
 #endif
 
 #ifdef PAYMENT
@@ -247,6 +249,9 @@ SINT32 CAFirstMix::init()
 		m_pLogPacketStats->setLogIntervallInMinutes(FM_PACKET_STATS_LOG_INTERVALL);
 		m_pLogPacketStats->start();
 #endif
+#ifdef WITH_REPLAY_DETECTION
+		sendReplayTimestampRequestsToAllMixes();
+#endif
 		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix init() succeded\n");
 		return E_SUCCESS;
 }
@@ -289,7 +294,7 @@ SINT32 CAFirstMix::processKeyExchange()
     DOM_Element elemMixes=doc.getDocumentElement();
     if(elemMixes==NULL)
         return E_UNKNOWN;
-		int count=0;
+		SINT32 count=0;
     if(getDOMElementAttribute(elemMixes,"count",&count)!=E_SUCCESS)
         return E_UNKNOWN;
  /*
@@ -453,6 +458,21 @@ SINT32 CAFirstMix::processKeyExchange()
 		CAMsg::printMsg(LOG_DEBUG,"Keyexchange finished!\n");
     return E_SUCCESS;
 }
+
+
+SINT32 CAFirstMix::setMixParameters(const tMixParameters& params)
+	{
+		for(UINT32 i=0;i<this->m_u32MixCount;i++)
+			{
+				if(strcmp((char*)m_arMixParameters[i].m_strMixID,(char*)params.m_strMixID)==0)
+					{
+						m_arMixParameters[i].m_u32ReplayRefTime=params.m_u32ReplayRefTime;
+						return E_SUCCESS;
+					}
+			}
+		return E_SUCCESS;
+	}
+
 
 /**How to end this thread:
 0. set bRestart=true;
@@ -638,7 +658,21 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 		SINT32 countRead;
 		SINT32 ret;
 		for(i=0;i<nSocketsIn;i++)
-			osocketgroupAccept.add(socketsIn[i]);
+			{
+				osocketgroupAccept.add(socketsIn[i]);
+			}
+#ifdef REPLAY_DETECTION //before we can start to accept users we have to nesure that we received the replay timestamps form the over mixes
+		i=0;
+		while(!pFirstMix->getRestart()&&i<pFirstMix->m_u32MixCount)
+			{
+				if(pFirstMix->m_arMixParameters[i].m_u32ReplayRefTime==0)//not set yet
+					{
+						msSleep(100);//wait a littel bit and try again
+						continue;
+					}
+				i++;
+			}
+#endif
 		while(!pFirstMix->getRestart())
 			{
 				countRead=osocketgroupAccept.select(10000);

@@ -29,8 +29,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CADatabase.hpp"
 #include "CAUtil.hpp"
 
-#define SECONDS_PER_INTERVALL 600
-
 CADatabase::CADatabase()
 	{
 		m_currDatabase=new LP_databaseEntry[0x10000];
