@@ -173,7 +173,7 @@ SINT32 CASocket::connect(CASocketAddr & psa,UINT32 retry,UINT32 time)
 						#ifdef _DEBUG
 							CAMsg::printMsg(LOG_DEBUG,"Cannot connect... retrying\n");
 						#endif						
-						sSleep(time);
+						sSleep((UINT16)time);
 					}
 				else
 						return E_SUCCESS;
@@ -222,8 +222,11 @@ SINT32 CASocket::connect(CASocketAddr & psa,UINT32 msTimeOut)
 		fd_set readSet,writeSet;
 		FD_ZERO(&readSet);
 		FD_ZERO(&writeSet);
+		#pragma warning( push )
+		#pragma warning( disable : 4127 ) //Disable: Bedingter Ausdruck ist konstant
 		FD_SET(m_Socket,&readSet);
 		FD_SET(m_Socket,&writeSet);
+		#pragma warning( pop )
 		err=::select(m_Socket+1,&readSet,&writeSet,NULL,&tval);
 #else
 		struct pollfd opollfd;

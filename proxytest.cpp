@@ -92,28 +92,28 @@ void removePidFile()
 			}
 	}
 
-void signal_term( int sig)
+void signal_term( int )
 	{
 		CAMsg::printMsg(LOG_INFO,"Hm.. Signal SIG_TERM received... exiting!\n");
 		removePidFile();
 		exit(0);
 	}
 
-void signal_interrupt( int sig)
+void signal_interrupt( int)
 	{
 		CAMsg::printMsg(LOG_INFO,"Hm.. Strg+C pressed... exiting!\n");
 		removePidFile();
 		exit(0);
 	}
 
-void signal_hup(int sig)
+void signal_hup(int)
 	{
 		options.reread(pMix);
 	}
 
 
 ///Callbackfunction for looking required by OpenSSL
-void openssl_locking_callback(int mode, int type, char *file, int line)
+void openssl_locking_callback(int mode, int type, char * /*file*/, int /*line*/)
 	{
 		if (mode & CRYPTO_LOCK)
 			{
@@ -128,6 +128,8 @@ void openssl_locking_callback(int mode, int type, char *file, int line)
 ///Check what the sizes of base types are as expected -- if not kill the programm
 void checkSizesOfBaseTypes()
 	{
+		#pragma warning( push )
+		#pragma warning( disable : 4127 ) //Disable: Bedingter Ausdruck ist konstant
 		if(sizeof(SINT8)!=1)
 			{
 				CAMsg::printMsg(LOG_CRIT,"sizeof(SINT8) != 1 --> maybe a compiler (optimization) problem!\n");
@@ -165,6 +167,7 @@ void checkSizesOfBaseTypes()
 					exit(-1);
 				}
 		#endif
+		#pragma warning( pop )
 	}
 
 /**do necessary initialisations of libraries etc.*/
