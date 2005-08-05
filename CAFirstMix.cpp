@@ -598,7 +598,12 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 							}
 					}
 				#ifdef WITH_CONTROL_CHANNELS
-					pControlChannelDispatcher->proccessMixPacket(pMixPacket);
+					if(pMixPacket->channel<256)
+						{
+							CAMsg::printMsg(LOG_DEBUG,"CAFirstMix - sent a packet from the next mix to the ControlChanelDispatcher... \n");
+							pControlChannelDispatcher->proccessMixPacket(pMixPacket);
+							continue;
+						}
 				#endif
 				#ifdef USE_POOL
 					#ifdef LOG_PACKET_TIMES
