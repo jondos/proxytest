@@ -27,7 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CATHREAD__
 #define __CATHREAD__
-
+#include "CAMsg.hpp"
 typedef void *(*THREAD_MAIN_TYP)(void *);
 /**
 	Some example on CAThread:
