@@ -58,7 +58,17 @@ SINT32 CAThread::start(void* param,bool bDaemon)
 		if(m_fncMainLoop==NULL)
 			return E_UNKNOWN;
 		m_pThread=new pthread_t;
-		pthread_create(m_pThread,NULL,m_fncMainLoop,param);
+		#ifdef DEBUG
+			CAMsg::printMsg(LOG_DEBUG, "CAThread::start() - creating thread\n");
+		#endif
+
+		if(pthread_create(m_pThread,NULL,m_fncMainLoop,param)!=0)
+			{
+				CAMsg::printMsg(LOG_WARN, "CAThread::start() - creating new thread failed!\n");
+				delete m_pThread;
+				m_pThread=NULL;
+				return E_UNKNOWN;
+			}
 		if(m_strName!=NULL)
 			{
 				UINT8* temp=bytes2hex(m_pThread,sizeof(pthread_t));
