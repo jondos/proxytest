@@ -42,7 +42,10 @@ CAReplayControlChannel::~CAReplayControlChannel(void)
 
 SINT32 CAReplayControlChannel::processXMLMessage(DOM_Document& doc)
 	{
+		CAMsg::printMsg(LOG_DEBUG,"CAReplayControlChannel::processXMLMessage()\n",msglen);
 		DOM_Element elemRoot=doc.getDocumentElement();
+		if(elemRoot==NULL)
+			return E_UNKNOWN;
 		if(elemRoot.getNodeName().equals("GetTimestamps"))
 			{
 				m_pProcessor->proccessGetTimestamps(this);
@@ -57,17 +60,20 @@ SINT32 CAReplayControlChannel::processXMLMessage(DOM_Document& doc)
 			}
 		else if(elemRoot.getNodeName().equals("Mix"))
 			{
+				CAMsg::printMsg(LOG_DEBUG,"CAReplayControlChannel::processXMLMessage() - got a timestamp\n");
 				UINT8 buff[255];
 				UINT32 bufflen=255;
-				getDOMElementAttribute(elemRoot,"id",buff,&bufflen);
+				if(getDOMElementAttribute(elemRoot,"id",buff,&bufflen)!=E_SUCCESS)
+					return E_UNKNOWN;
 				buff[bufflen]=0;
 				tReplayTimestamp rt;
 				DOM_Node child;
 				getDOMChildByName(elemRoot,(UINT8*)"Replay",child);
 				DOM_Node elemReplayTimestamp;
 				getDOMChildByName(child,(UINT8*)"ReplayTimestamp",elemReplayTimestamp);
-				getDOMElementAttribute(elemReplayTimestamp,"offset",rt.offset);
-				getDOMElementAttribute(elemReplayTimestamp,"interval",rt.interval);
+				if(	getDOMElementAttribute(elemReplayTimestamp,"offset",rt.offset)!=E_SUCCESS||
+						getDOMElementAttribute(elemReplayTimestamp,"interval",rt.interval!=E_SUCCESS)
+					return E_UNKNOWN;
 				m_pProcessor->proccessGotTimestamp(this,buff,rt);
 			}
 		return E_SUCCESS;
