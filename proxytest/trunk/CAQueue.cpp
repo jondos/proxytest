@@ -318,8 +318,8 @@ THREAD_RETURN producer(void* param)
 					msSleep(rand()%100);
 				}
 		if(pTest->pQueue->add(pTest->buff+count,pTest->len)!=E_SUCCESS)
-			THREAD_RETURN_ERROR;
-		THREAD_RETURN_SUCCESS;*/
+			THREAD_RETURN_ERROR;*/
+		THREAD_RETURN_SUCCESS;
 	}
 
 THREAD_RETURN consumer(void* param)
