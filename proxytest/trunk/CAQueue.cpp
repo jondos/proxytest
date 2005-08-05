@@ -306,7 +306,7 @@ THREAD_RETURN producer(void* param)
 		struct __queue_test* pTest=(struct __queue_test *)param;
 		UINT32 count=0;
 		UINT32 aktSize;
-		while(pTest->len>10)
+		/*while(pTest->len>10)
 				{
 					aktSize=rand();
 					aktSize%=0xFFFF;
@@ -318,7 +318,7 @@ THREAD_RETURN producer(void* param)
 					msSleep(rand()%100);
 				}
 		if(pTest->pQueue->add(pTest->buff+count,pTest->len)!=E_SUCCESS)
-			THREAD_RETURN_ERROR;
+			THREAD_RETURN_ERROR;*/
 		THREAD_RETURN_SUCCESS;
 	}
 
@@ -327,7 +327,7 @@ THREAD_RETURN consumer(void* param)
 		struct __queue_test* pTest=(struct __queue_test *)param;
 		UINT32 count=0;
 		UINT32 aktSize;
-		do
+/*		do
 			{
 				aktSize=rand();
 				aktSize%=0xFFFF;
@@ -336,7 +336,7 @@ THREAD_RETURN consumer(void* param)
 				count+=aktSize;
 				pTest->len-=aktSize;
 			}while(pTest->len>10);
-		THREAD_RETURN_SUCCESS;
+*/		THREAD_RETURN_SUCCESS;
 	}
 
 SINT32 CAQueue::test()
@@ -395,13 +395,13 @@ SINT32 CAQueue::test()
 		t2.buff=target;
 		t2.len=t1.len=TEST_SIZE;
 		t2.pQueue=t1.pQueue=&oQueue;
-/*		othreadProducer.start(&t1);
+		othreadProducer.start(&t1);
 		othreadConsumer.start(&t2);
 		othreadProducer.join();
 		othreadConsumer.join();
 		if(memcmp(source,target,TEST_SIZE)!=0)
 			return E_UNKNOWN;
-	*/	
+		
 		delete []source;
 		delete []target;
 		return E_SUCCESS;
