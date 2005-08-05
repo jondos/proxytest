@@ -386,7 +386,7 @@ SINT32 CAQueue::test()
 			return E_UNKNOWN;
 		
 		//Multiple Threads....
-	/*	CAThread othreadProducer;
+		CAThread othreadProducer;
 		CAThread othreadConsumer;
 		othreadProducer.setMainLoop(producer);
 		othreadConsumer.setMainLoop(consumer);
@@ -395,7 +395,7 @@ SINT32 CAQueue::test()
 		t2.buff=target;
 		t2.len=t1.len=TEST_SIZE;
 		t2.pQueue=t1.pQueue=&oQueue;
-		othreadProducer.start(&t1);
+/*		othreadProducer.start(&t1);
 		othreadConsumer.start(&t2);
 		othreadProducer.join();
 		othreadConsumer.join();
