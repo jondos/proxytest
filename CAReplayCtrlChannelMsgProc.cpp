@@ -60,6 +60,7 @@ CAReplayCtrlChannelMsgProc::CAReplayCtrlChannelMsgProc(CAMix* pMix)
 
 CAReplayCtrlChannelMsgProc::~CAReplayCtrlChannelMsgProc()
 	{
+		CAMsg::printMsg(LOG_DEBUG,"CAReplayCtrlChannelMsgProc::~CAReplayCtrlChannelMsgProc()");
 		stopTimeStampPorpagation();
 		CAControlChannelDispatcher* pDispatcher=m_pMix->getDownstreamControlChannelDispatcher();
 		if(pDispatcher!=NULL)
