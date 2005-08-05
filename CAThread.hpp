@@ -71,12 +71,18 @@ class CAThread
 						return E_SUCCESS;
 					if(pthread_join(*m_pThread,NULL)==0)
 						{
+							#ifdef DEBUG
+								CAMsg::printMsg(LOG_DEBUG,"CAThread - join() successful\n");
+							#endif	
 							delete m_pThread;
 							m_pThread=NULL;
 							return E_SUCCESS;
 						}
 					else
-						return E_UNKNOWN;
+						{
+							CAMsg::printMsg(LOG_ERR,"CAThread - join() not successful\n");
+							return E_UNKNOWN;
+						}
 				}
 
 /*			SINT32 sleep(UINT32 msSeconds)
