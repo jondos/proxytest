@@ -531,6 +531,7 @@ Debug(dc::malloc.on());
 
 		if(options.getDaemon())
 			{
+				CAMsg::printMsg(LOG_DEBUG,"starting as daemon\n");
 				#ifndef _WIN32
 					if(options.getLogDir(buff,255)==E_SUCCESS)
 						{
