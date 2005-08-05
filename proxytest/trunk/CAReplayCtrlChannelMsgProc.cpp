@@ -227,7 +227,6 @@ SINT32 CAReplayCtrlChannelMsgProc::proccessGotTimestamp(CAReplayControlChannel* 
 	{
 		//if not first mix just forwards them down the drain...
 		CAMsg::printMsg(LOG_DEBUG,"CAReplayCtrlChannelMsgProc::proccessGotTimestamp() \n");
-		return E_SUCCESS;
 		if(m_pMix->getType()!=CAMix::FIRST_MIX)
 			{
 				UINT8 msgBuff[1024];
