@@ -397,7 +397,7 @@ SINT32 CAQueue::test()
 		t2.pQueue=t1.pQueue=&oQueue;
 		othreadProducer.start(&t1);
 	//	othreadConsumer.start(&t2);
-		othreadProducer.join();
+	//	othreadProducer.join();
 	//	othreadConsumer.join();
 		if(memcmp(source,target,TEST_SIZE)!=0)
 			return E_UNKNOWN;
