@@ -395,7 +395,7 @@ SINT32 CAQueue::test()
 		t2.buff=target;
 		t2.len=t1.len=TEST_SIZE;
 		t2.pQueue=t1.pQueue=&oQueue;
-		//othreadProducer.start(&t1);
+		pthreadProducer->start(&t1);
 	//	othreadConsumer.start(&t2);
 		pthreadProducer->join();
 		pthreadConsumer->join();
