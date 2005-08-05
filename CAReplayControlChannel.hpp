@@ -44,7 +44,7 @@ class CAReplayControlChannel :
 		/** Reads incoming replay timestamps  or dtimestamp request and delegates them to the 
 			* associated CAReplayCorelChannelMsgProc
 			*/
-		SINT32 processXMLMessage(DOM_Document& doc);
+		virtual SINT32 processXMLMessage(DOM_Document& doc);
 
 	private:
 		CAReplayCtrlChannelMsgProc* m_pProcessor;

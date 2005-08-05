@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 CAReplayControlChannel::CAReplayControlChannel(CAReplayCtrlChannelMsgProc* pProcessor)
 	:CASyncControlChannel(REPLAY_CONTROL_CHANNEL_ID,false)
 	{
-		CAMsg::printMsg(LOG_DEBUG,"CAReplayControlChannel - constructor\n");
+		CAMsg::printMsg(LOG_DEBUG,"CAReplayControlChannel - constructor - pProcessor=%p\n",pProcessor);
 		m_pProcessor=pProcessor;
 	}
 
@@ -75,7 +75,7 @@ SINT32 CAReplayControlChannel::processXMLMessage(DOM_Document& doc)
 				if(	getDOMElementAttribute(elemReplayTimestamp,"offset",rt.offset)!=E_SUCCESS||
 						getDOMElementAttribute(elemReplayTimestamp,"interval",rt.interval)!=E_SUCCESS)
 					return E_UNKNOWN;
-				CAMsg::printMsg(LOG_DEBUG,"CAReplayControlChannel::processXMLMessage() - call m_pProcessor->proccessGotTimestamp()\n");
+				CAMsg::printMsg(LOG_DEBUG,"CAReplayControlChannel::processXMLMessage() - call m_pProcessor->proccessGotTimestamp() - m_pProcessor=%p\n",m_pProcessor);
 				m_pProcessor->proccessGotTimestamp(this,buff,rt);
 			}
 		return E_SUCCESS;
