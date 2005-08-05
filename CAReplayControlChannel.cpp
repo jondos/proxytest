@@ -74,6 +74,7 @@ SINT32 CAReplayControlChannel::processXMLMessage(DOM_Document& doc)
 				if(	getDOMElementAttribute(elemReplayTimestamp,"offset",rt.offset)!=E_SUCCESS||
 						getDOMElementAttribute(elemReplayTimestamp,"interval",rt.interval)!=E_SUCCESS)
 					return E_UNKNOWN;
+				CAMsg::printMsg(LOG_DEBUG,"CAReplayControlChannel::processXMLMessage() - call m_pProcessor->proccessGotTimestamp()\n");
 				m_pProcessor->proccessGotTimestamp(this,buff,rt);
 			}
 		return E_SUCCESS;
