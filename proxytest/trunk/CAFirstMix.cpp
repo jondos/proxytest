@@ -75,11 +75,13 @@ SINT32 CAFirstMix::initOnce()
 				CAMsg::printMsg(LOG_CRIT,"No useable ListenerInterfaces specified (maybe wrong values or all are 'virtual'!\n");
 				return E_UNKNOWN;
 			}
+		CAMsg::printMsg(LOG_DEBUG,"Starting FirstMix InitOnce - finished\n");
 		return E_SUCCESS;
 	}
 
 SINT32 CAFirstMix::init()
 	{
+		CAMsg::printMsg(LOG_DEBUG,"Starting FirstMix Init\n");
 		m_nMixedPackets=0; //reset to zero after each restart (at the moment neccessary for infoservice)
 		m_bRestart=false;
 		//Establishing all Listeners
@@ -124,6 +126,7 @@ SINT32 CAFirstMix::init()
 					}
 				aktSocket++;
 			}
+		CAMsg::printMsg(LOG_DEBUG,"FirstMix Init - listening on all interfaces\n");
 
 
 		CASocketAddr* pAddrNext=NULL;
