@@ -43,7 +43,7 @@ CAReplayControlChannel::~CAReplayControlChannel(void)
 
 SINT32 CAReplayControlChannel::processXMLMessage(DOM_Document& doc)
 	{
-		CAMsg::printMsg(LOG_DEBUG,"CAReplayCtrlChannelMsgProc::proccessGotTimestamp() - MixID: %s\n",strMixID);
+		CAMsg::printMsg(LOG_DEBUG,"CAReplayCtrlChannelMsgProc::proccessGotTimestamp() - MixID: %s\n");
 		DOM_Element elemRoot=doc.getDocumentElement();
 		if(elemRoot==NULL)
 			return E_UNKNOWN;
