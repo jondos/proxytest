@@ -82,6 +82,8 @@ class CASyncControlChannel : public CAAbstractControlChannel
 		/** Parses the bytes in m_MsgBuff and calls processXMLMessage()*/		
 		SINT32 proccessMessageComplete()
 			{
+				m_MsgBuff[m_aktIndex]=0;
+				CAMsg::printMsg(LOG_DEBUG,"CASnycControlChannel::proccessMessageComplete() - msg=%s\n",m_MsgBuff);
 				MemBufInputSource oInput(m_MsgBuff,m_aktIndex,"synchannel");
 				DOMParser oParser;
 				oParser.parse(oInput);

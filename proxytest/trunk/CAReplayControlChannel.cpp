@@ -42,7 +42,7 @@ CAReplayControlChannel::~CAReplayControlChannel(void)
 
 SINT32 CAReplayControlChannel::processXMLMessage(DOM_Document& doc)
 	{
-		CAMsg::printMsg(LOG_DEBUG,"CAReplayControlChannel::processXMLMessage()\n",msglen);
+		CAMsg::printMsg(LOG_DEBUG,"CAReplayControlChannel::processXMLMessage()\n");
 		DOM_Element elemRoot=doc.getDocumentElement();
 		if(elemRoot==NULL)
 			return E_UNKNOWN;
@@ -72,7 +72,7 @@ SINT32 CAReplayControlChannel::processXMLMessage(DOM_Document& doc)
 				DOM_Node elemReplayTimestamp;
 				getDOMChildByName(child,(UINT8*)"ReplayTimestamp",elemReplayTimestamp);
 				if(	getDOMElementAttribute(elemReplayTimestamp,"offset",rt.offset)!=E_SUCCESS||
-						getDOMElementAttribute(elemReplayTimestamp,"interval",rt.interval!=E_SUCCESS)
+						getDOMElementAttribute(elemReplayTimestamp,"interval",rt.interval)!=E_SUCCESS)
 					return E_UNKNOWN;
 				m_pProcessor->proccessGotTimestamp(this,buff,rt);
 			}
