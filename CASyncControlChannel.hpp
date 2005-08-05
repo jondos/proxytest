@@ -92,6 +92,7 @@ class CASyncControlChannel : public CAAbstractControlChannel
 				DOM_Document doc=oParser.getDocument();
 				if(doc==NULL)
 					return E_UNKNOWN;
+				CAMsg::printMsg(LOG_DEBUG,"CASnycControlChannel::proccessMessageComplete() call processXMLMessage()\n");
 				return processXMLMessage(doc);
 			}
 
