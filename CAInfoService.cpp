@@ -44,6 +44,7 @@ const char * STRINGS_REQUEST_COMMANDS[3]={"configure","helo","mixinfo/"};
 
 static THREAD_RETURN InfoLoop(void *p)
 	{
+		CAMsg::printMsg(LOG_DEBUG, "CAInoService - InfoLoop() started\n");
 		CAInfoService* pInfoService=(CAInfoService*)p;
 		int helocount=0;
 		bool bIsFirst=true; //send our own certifcate only the first time
@@ -161,9 +162,14 @@ SINT32 CAInfoService::stop()
 /** POSTs mix status to the InfoService. [only first mix does this at the moment]
 	* @retval E_UNKNOWN if something goes wrong
 	* @retval E_SUCCESS otherwise
+	*
 	*/
+	///todo use httpclient class
 SINT32 CAInfoService::sendStatus(bool bIncludeCerts)
 	{
+		#ifdef DEBUG
+			CAMsg::printMsg(LOG_DEBUG, "CAInfoService::sendStatus()\n");
+		#endif
 		if(!options.isFirstMix())
 			return E_SUCCESS;
 		CASocket oSocket;
@@ -172,14 +178,18 @@ SINT32 CAInfoService::sendStatus(bool bIncludeCerts)
 		UINT8 buffHeader[255];
 		SINT32 tmpUser,tmpRisk,tmpTraffic;
 		UINT64 tmpPackets;
-		CAHttpClient httpClient;
+		//CAHttpClient httpClient;
 		
 		if(options.getInfoServerHost(hostname,255)!=E_SUCCESS)
 			return E_UNKNOWN;
 		oAddr.setAddr(hostname,options.getInfoServerPort());
 		if(oSocket.connect(oAddr)!=E_SUCCESS)
 			return E_UNKNOWN;
-		httpClient.setSocket(&oSocket);
+		#ifdef DEBUG
+			CAMsg::printMsg(LOG_DEBUG, "CAInfoService::sendStatus() - connected to InfoService\n");
+		#endif
+			
+		//httpClient.setSocket(&oSocket);
 		UINT8 strMixId[255];
 		options.getMixId(strMixId,255);
 		
@@ -232,6 +242,10 @@ SINT32 CAInfoService::sendStatus(bool bIncludeCerts)
 		sprintf((char*)buffHeader,"POST /feedback HTTP/1.0\r\nContent-Length: %u\r\n\r\n",buffLen);
 		oSocket.sendFully(buffHeader,strlen((char*)buffHeader));
 		SINT32 ret=oSocket.sendFully(buff,buffLen);
+		#ifdef DEBUG
+			CAMsg::printMsg(LOG_DEBUG, "CAInfoService::sendStatus() - Msg sent\n");
+		#endif
+
 		delete[] buff;
 		oSocket.close();	
 		if(ret==E_SUCCESS)
