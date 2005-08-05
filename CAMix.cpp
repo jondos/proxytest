@@ -53,6 +53,7 @@ SINT32 CAMix::start()
 
     if(m_pSignature != NULL && options.isInfoServiceEnabled())
 			{
+				CAMsg::printMsg(LOG_DEBUG, "CAMix start: creating InfoService object\n");
         m_pInfoService=new CAInfoService(this);
         m_pInfoService->setSignature(m_pSignature,options.getOwnCertificate());
 
@@ -60,6 +61,7 @@ SINT32 CAMix::start()
         bool needReconf = needAutoConfig();
 
         m_pInfoService->setConfiguring(allowReconf && needReconf);
+				CAMsg::printMsg(LOG_DEBUG, "CAMix start: starting InfoService\n");
         m_pInfoService->start();
         while(allowReconf && needReconf)
         {
