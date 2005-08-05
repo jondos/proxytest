@@ -386,7 +386,7 @@ SINT32 CAQueue::test()
 			return E_UNKNOWN;
 		
 		//Multiple Threads....
-		CAThread othreadProducer;
+	/*	CAThread othreadProducer;
 		CAThread othreadConsumer;
 		othreadProducer.setMainLoop(producer);
 		othreadConsumer.setMainLoop(consumer);
@@ -401,7 +401,7 @@ SINT32 CAQueue::test()
 		othreadConsumer.join();
 		if(memcmp(source,target,TEST_SIZE)!=0)
 			return E_UNKNOWN;
-		
+	*/	
 		delete []source;
 		delete []target;
 		return E_SUCCESS;

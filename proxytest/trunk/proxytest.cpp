@@ -479,10 +479,10 @@ Debug(dc::malloc.on());
 			}
 
 
-/*
+
 #ifdef _DEBUG
 		//		CADatabase::test();
-		if(CAQueue::test()!=E_SUCCESS)
+/*		if(CAQueue::test()!=E_SUCCESS)
 			CAMsg::printMsg(LOG_CRIT,"CAQueue::test() NOT passed! Exiting\n");
 		else
 			CAMsg::printMsg(LOG_DEBUG,"CAQueue::test() passed!\n");
@@ -490,7 +490,7 @@ Debug(dc::malloc.on());
 		//CALastMixChannelList::test();
 		//exit(0);
 		//Testing msSleep
-		CAMsg::printMsg(LOG_DEBUG,"Should sleep now for aprox 2 seconds....\n");
+	*/	CAMsg::printMsg(LOG_DEBUG,"Should sleep now for aprox 2 seconds....\n");
 		start=time(NULL);
 		for(i=0;i<10;i++)
 			msSleep(200);
@@ -499,7 +499,7 @@ Debug(dc::malloc.on());
 		//end Testin msSleep
 
 #endif
-*/
+
 #ifdef HAVE_CRTDBG
 		_CrtMemCheckpoint( &s1 );
 #endif
