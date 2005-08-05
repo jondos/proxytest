@@ -555,6 +555,7 @@ Debug(dc::malloc.on());
 							}
 					#endif
 					pid_t pid;
+					CAMsg::printMsg(LOG_DEBUG,"daemon - before fork()\n");
 					pid=fork();
 					if(pid!=0)
 						{
