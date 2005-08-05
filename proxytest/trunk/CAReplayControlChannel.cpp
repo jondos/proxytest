@@ -33,6 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 CAReplayControlChannel::CAReplayControlChannel(CAReplayCtrlChannelMsgProc* pProcessor)
 	:CASyncControlChannel(REPLAY_CONTROL_CHANNEL_ID,false)
 	{
+		CAMsg::printMsg(LOG_DEBUG,"CAReplayControlChannel - constructor\n");
 		m_pProcessor=pProcessor;
 	}
 
@@ -42,7 +43,7 @@ CAReplayControlChannel::~CAReplayControlChannel(void)
 
 SINT32 CAReplayControlChannel::processXMLMessage(DOM_Document& doc)
 	{
-		CAMsg::printMsg(LOG_DEBUG,"CAReplayControlChannel::processXMLMessage()\n");
+		CAMsg::printMsg(LOG_DEBUG,"CAReplayCtrlChannelMsgProc::proccessGotTimestamp() - MixID: %s\n",strMixID);
 		DOM_Element elemRoot=doc.getDocumentElement();
 		if(elemRoot==NULL)
 			return E_UNKNOWN;
