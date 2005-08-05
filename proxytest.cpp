@@ -528,7 +528,6 @@ Debug(dc::malloc.on());
 		if(geteuid()==0)
 			CAMsg::printMsg(LOG_INFO,"Warning - Running as root!\n");
 #endif
-
 		if(options.getDaemon())
 			{
 				CAMsg::printMsg(LOG_DEBUG,"starting as daemon\n");
