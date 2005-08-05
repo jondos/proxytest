@@ -69,6 +69,9 @@ SINT32 CAThread::start(void* param,bool bDaemon)
 				m_pThread=NULL;
 				return E_UNKNOWN;
 			}
+		#ifdef DEBUG
+			CAMsg::printMsg(LOG_DEBUG, "CAThread::start() - thread created sucessful\n");
+		#endif
 		if(m_strName!=NULL)
 			{
 				UINT8* temp=bytes2hex(m_pThread,sizeof(pthread_t));

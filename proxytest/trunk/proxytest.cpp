@@ -479,7 +479,7 @@ Debug(dc::malloc.on());
 			}
 
 
-
+/*
 #ifdef _DEBUG
 		//		CADatabase::test();
 		if(CAQueue::test()!=E_SUCCESS)
@@ -499,6 +499,7 @@ Debug(dc::malloc.on());
 		//end Testin msSleep
 
 #endif
+*/
 #ifdef HAVE_CRTDBG
 		_CrtMemCheckpoint( &s1 );
 #endif
