@@ -341,7 +341,7 @@ THREAD_RETURN consumer(void* param)
 
 SINT32 CAQueue::test()
 	{
-		CAQueue oQueue(1000);
+		CAQueue* pQueue=new CAQueue(1000);
 		#define TEST_SIZE 1000000
 		UINT8* source=new UINT8[TEST_SIZE];
 		UINT8* target=new UINT8[TEST_SIZE];
@@ -359,24 +359,24 @@ SINT32 CAQueue::test()
 					aktSize=rand();
 					aktSize%=0xFFFF;
 					aktSize%=(TEST_SIZE-count);
-					if(oQueue.add(source+count,aktSize)!=E_SUCCESS)
+					if(pQueue->add(source+count,aktSize)!=E_SUCCESS)
 						return E_UNKNOWN;
 					count+=aktSize;
-					if(oQueue.getSize()!=count)
+					if(pQueue->getSize()!=count)
 						return E_UNKNOWN;
 				}
-		if(oQueue.add(source+count,TEST_SIZE-count)!=E_SUCCESS)
+		if(pQueue->add(source+count,TEST_SIZE-count)!=E_SUCCESS)
 			return E_UNKNOWN;
-		if(oQueue.getSize()!=TEST_SIZE)
+		if(pQueue->getSize()!=TEST_SIZE)
 			return E_UNKNOWN;
 		
 		//getting
 		count=0;
-		while(!oQueue.isEmpty())
+		while(!pQueue->isEmpty())
 			{
 				aktSize=rand();
 				aktSize%=0xFFFF;
-				if(oQueue.get(target+count,&aktSize)!=E_SUCCESS)
+				if(pQueue->get(target+count,&aktSize)!=E_SUCCESS)
 					return E_UNKNOWN;
 				count+=aktSize;
 			}
@@ -394,11 +394,14 @@ SINT32 CAQueue::test()
 		t1.buff=source;
 		t2.buff=target;
 		t2.len=t1.len=TEST_SIZE;
-		t2.pQueue=t1.pQueue=&oQueue;
+		t2.pQueue=t1.pQueue=pQueue;
 		pthreadProducer->start(&t1);
 	//	othreadConsumer.start(&t2);
 		pthreadProducer->join();
 		pthreadConsumer->join();
+		delete pthreadProducer;
+		delete pthreadConsumer;
+		delete pQueue;
 		if(memcmp(source,target,TEST_SIZE)!=0)
 			return E_UNKNOWN;
 		
