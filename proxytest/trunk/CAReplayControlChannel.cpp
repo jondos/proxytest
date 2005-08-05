@@ -76,7 +76,7 @@ SINT32 CAReplayControlChannel::processXMLMessage(DOM_Document& doc)
 						getDOMElementAttribute(elemReplayTimestamp,"interval",rt.interval)!=E_SUCCESS)
 					return E_UNKNOWN;
 				CAMsg::printMsg(LOG_DEBUG,"CAReplayControlChannel::processXMLMessage() - call m_pProcessor->proccessGotTimestamp() - m_pProcessor=%p\n",m_pProcessor);
-				//m_pProcessor->proccessGotTimestamp(this,buff,rt);
+				m_pProcessor->proccessGotTimestamp(NULL,NULL,rt);
 			}
 		return E_SUCCESS;
 	}

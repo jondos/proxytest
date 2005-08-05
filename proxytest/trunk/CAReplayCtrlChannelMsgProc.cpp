@@ -36,6 +36,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 CAReplayCtrlChannelMsgProc::CAReplayCtrlChannelMsgProc(CAMix* pMix)
 	{
+		CAMsg::printMsg(LOG_DEBUG,"CAReplayCtrlChannelMsgProc - constructor - this=%p\n",this);
 		m_strGetTimestampsRepsonseMessageTemplate=NULL;
 		m_pDownstreamReplayControlChannel=NULL;
 		m_pUpstreamReplayControlChannel=NULL;
@@ -43,12 +44,14 @@ CAReplayCtrlChannelMsgProc::CAReplayCtrlChannelMsgProc(CAMix* pMix)
 		CAControlChannelDispatcher* pDispatcher=m_pMix->getDownstreamControlChannelDispatcher();
 		if(pDispatcher!=NULL)
 			{
+				CAMsg::printMsg(LOG_DEBUG,"CAReplayCtrlChannelMsgProc - constructor - registering downstream replay control channel\n",this);
 				m_pDownstreamReplayControlChannel=new CAReplayControlChannel(this);
 				pDispatcher->registerControlChannel(m_pDownstreamReplayControlChannel);
 			}
 		pDispatcher=m_pMix->getUpstreamControlChannelDispatcher();
 		if(pDispatcher!=NULL)
 			{
+				CAMsg::printMsg(LOG_DEBUG,"CAReplayCtrlChannelMsgProc - constructor - registering upstream replay control channel\n",this);
 				m_pUpstreamReplayControlChannel=new CAReplayControlChannel(this);
 				pDispatcher->registerControlChannel(m_pUpstreamReplayControlChannel);
 			}
