@@ -557,7 +557,11 @@ Debug(dc::malloc.on());
 					pid_t pid;
 					pid=fork();
 					if(pid!=0)
-						exit(EXIT_SUCCESS);
+						{
+							CAMsg::printMsg("Exiting parent!\n");
+							exit(EXIT_SUCCESS);
+						}		
+					CAMsg::printMsg("child after fork...\n");
 					setsid();
 					#ifndef DO_TRACE
 					chdir("/");
