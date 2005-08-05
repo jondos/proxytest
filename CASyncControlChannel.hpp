@@ -53,11 +53,13 @@ class CASyncControlChannel : public CAAbstractControlChannel
 	protected:
 		SINT32 proccessMessage(UINT8* msg, UINT32 msglen)
 			{
+				CAMsg::printMsg(LOG_DEBUG,"CASnycControlChannel::proccessMessage - msglen=%u\n",msglen);
 				if(m_MsgBytesLeft==0)//start of new XML Msg
 					{
 						if(msglen<2)//this should never happen...
 							return E_UNKNOWN;
 						m_MsgBytesLeft=(msg[0]<<8)|msg[1];
+						CAMsg::printMsg(LOG_DEBUG,"CASnycControlChannel::proccessMessage - start of a new msg of len=%u\n",m_MsgBytesLeft);
 						msglen-=2;
 						m_aktIndex=msglen;
 						m_MsgBytesLeft-=msglen;
