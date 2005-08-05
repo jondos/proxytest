@@ -649,6 +649,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 				osocketgroupAccept.add(socketsIn[i]);
 			}
 #ifdef REPLAY_DETECTION //before we can start to accept users we have to nesure that we received the replay timestamps form the over mixes
+		CAMsg::printMsg(LOG_DEBUG,"Waiting for Replay Timestamp from next mixes\n");
 		i=0;
 		while(!pFirstMix->getRestart()&&i<pFirstMix->m_u32MixCount)
 			{
@@ -659,6 +660,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 					}
 				i++;
 			}
+		CAMsg::printMsg(LOG_DEBUG,"All Replay Timestamp received\n");
 #endif
 		while(!pFirstMix->getRestart())
 			{

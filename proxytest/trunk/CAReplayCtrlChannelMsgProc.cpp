@@ -233,6 +233,7 @@ SINT32 CAReplayCtrlChannelMsgProc::proccessGotTimestamp(CAReplayControlChannel* 
 				return m_pDownstreamReplayControlChannel->sendXMLMessage(msgBuff,strlen((char*)msgBuff));
 			}
 		//First mix --> update mix parameters
+		CAMsg::printMsg(LOG_DEBUG,"CAReplayCtrlChannelMsgProc::proccessGotTimestamp() - MixID: %s\n",strMixID);
 		UINT32 refTime;
 		CADatabase::getTimeForReplayTimestamp(refTime,rt);
 		CAFirstMix* pMix=(CAFirstMix*)m_pMix;
