@@ -101,7 +101,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define WITH_CONTROL_CHANNELS_TEST //enable a Test Channel
 //#define NEW_FLOW_CONTROL //enable for the new flow control mechanism
 
-//#define REPLAY_DETECTION // enable to prevent replay of mix packets
+#define REPLAY_DETECTION // enable to prevent replay of mix packets
 #define REPLAY_TIMESTAMP_PROPAGATION_INTERVALL 15 //How often (in minutes) should the current replay timestamps be propagate
 
 //Some constants
