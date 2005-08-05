@@ -146,6 +146,10 @@ SINT32 CAInfoService::start()
 		set64(m_lastMixedPackets,(UINT32)0);
 		m_minuts=1;
 		m_pthreadRunLoop->setMainLoop(InfoLoop);
+		#ifdef DEBUG
+			CAMsg::printMsg(LOG_DEBUG, "CAInfoService::start() - starting InfoService thread\n");
+		#endif
+		
 		return m_pthreadRunLoop->start(this);
 	}
 
