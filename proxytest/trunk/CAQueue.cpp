@@ -386,10 +386,10 @@ SINT32 CAQueue::test()
 			return E_UNKNOWN;
 		
 		//Multiple Threads....
-		CAThread othreadProducer;
-		CAThread othreadConsumer;
-		othreadProducer.setMainLoop(producer);
-		othreadConsumer.setMainLoop(consumer);
+		CAThread* pthreadProducer=new CAThread();
+		CAThread* pthreadConsumer=new CAThread();
+		pthreadProducer->setMainLoop(producer);
+		pthreadConsumer->setMainLoop(consumer);
 		struct __queue_test t1,t2;
 		t1.buff=source;
 		t2.buff=target;
@@ -397,8 +397,8 @@ SINT32 CAQueue::test()
 		t2.pQueue=t1.pQueue=&oQueue;
 		//othreadProducer.start(&t1);
 	//	othreadConsumer.start(&t2);
-		othreadProducer.join();
-		othreadConsumer.join();
+		pthreadProducer->join();
+		pthreadConsumer->join();
 		if(memcmp(source,target,TEST_SIZE)!=0)
 			return E_UNKNOWN;
 		
