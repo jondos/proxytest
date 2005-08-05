@@ -44,6 +44,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CAPool.cpp\
 		    CAQueue.cpp \
 		    CAReplayControlChannel.cpp\
+		    CAReplayCtrlChannelMsgProc.cpp\
 		    CASemaphore.cpp\
 		    CASignature.cpp \
 		    CASingleSocketGroup.cpp\
@@ -106,6 +107,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CAPool.hpp\
 		    CAQueue.hpp \
 		    CAReplayControlChannel.hpp\
+		    CAReplayCtrlChannelMsgProc.hpp\
 		    CASemaphore.hpp\
 		    CASignature.hpp \
 		    CASingleSocketGroup.hpp\
