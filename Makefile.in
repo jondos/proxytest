@@ -81,17 +81,17 @@ am_mix_OBJECTS = CAAbstractControlChannel.$(OBJEXT) \
 	CAMix.$(OBJEXT) CAMsg.$(OBJEXT) CAMutex.$(OBJEXT) \
 	CAMuxSocket.$(OBJEXT) CAPayment.$(OBJEXT) CAPool.$(OBJEXT) \
 	CAQueue.$(OBJEXT) CAReplayControlChannel.$(OBJEXT) \
-	CASemaphore.$(OBJEXT) CASignature.$(OBJEXT) \
-	CASingleSocketGroup.$(OBJEXT) CASocket.$(OBJEXT) \
-	CASocketAddrINet.$(OBJEXT) CASocketAddrUnix.$(OBJEXT) \
-	CASocketGroup.$(OBJEXT) CASocketGroupEpoll.$(OBJEXT) \
-	CASocketList.$(OBJEXT) CATLSClientSocket.$(OBJEXT) \
-	CASSLContext.$(OBJEXT) CASymCipher.$(OBJEXT) \
-	CASyncControlChannel.$(OBJEXT) CATempIPBlockList.$(OBJEXT) \
-	CAThread.$(OBJEXT) CAThreadPool.$(OBJEXT) CAUtil.$(OBJEXT) \
-	CAXMLBI.$(OBJEXT) CAXMLCostConfirmation.$(OBJEXT) \
-	CAXMLErrorMessage.$(OBJEXT) StdAfx.$(OBJEXT) \
-	proxytest.$(OBJEXT)
+	CAReplayCtrlChannelMsgProc.$(OBJEXT) CASemaphore.$(OBJEXT) \
+	CASignature.$(OBJEXT) CASingleSocketGroup.$(OBJEXT) \
+	CASocket.$(OBJEXT) CASocketAddrINet.$(OBJEXT) \
+	CASocketAddrUnix.$(OBJEXT) CASocketGroup.$(OBJEXT) \
+	CASocketGroupEpoll.$(OBJEXT) CASocketList.$(OBJEXT) \
+	CATLSClientSocket.$(OBJEXT) CASSLContext.$(OBJEXT) \
+	CASymCipher.$(OBJEXT) CASyncControlChannel.$(OBJEXT) \
+	CATempIPBlockList.$(OBJEXT) CAThread.$(OBJEXT) \
+	CAThreadPool.$(OBJEXT) CAUtil.$(OBJEXT) CAXMLBI.$(OBJEXT) \
+	CAXMLCostConfirmation.$(OBJEXT) CAXMLErrorMessage.$(OBJEXT) \
+	StdAfx.$(OBJEXT) proxytest.$(OBJEXT)
 mix_OBJECTS = $(am_mix_OBJECTS)
 mix_DEPENDENCIES = $(top_srcdir)/xml/libxml.a \
 	$(top_srcdir)/popt/libpopt.a $(top_srcdir)/trio/libtrio.a \
@@ -261,6 +261,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CAPool.cpp\
 		    CAQueue.cpp \
 		    CAReplayControlChannel.cpp\
+		    CAReplayCtrlChannelMsgProc.cpp\
 		    CASemaphore.cpp\
 		    CASignature.cpp \
 		    CASingleSocketGroup.cpp\
@@ -323,6 +324,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CAPool.hpp\
 		    CAQueue.hpp \
 		    CAReplayControlChannel.hpp\
+		    CAReplayCtrlChannelMsgProc.hpp\
 		    CASemaphore.hpp\
 		    CASignature.hpp \
 		    CASingleSocketGroup.hpp\
@@ -482,6 +484,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAPool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAQueue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAReplayControlChannel.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAReplayCtrlChannelMsgProc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASSLContext.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASemaphore.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASignature.Po@am__quote@
