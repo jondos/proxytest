@@ -44,7 +44,7 @@ class CALocalProxy:public CAMix
 					m_pSymCipher=NULL;
 				}
 			virtual ~CALocalProxy(){clean();}
-			tMixType getType()
+			tMixType getType() const
 				{
 					return CAMix::JAP;
 				}

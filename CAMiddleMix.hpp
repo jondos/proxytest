@@ -45,7 +45,7 @@ class CAMiddleMix:public CAMix
 					m_pInfoService=NULL;
 				}
 			virtual ~CAMiddleMix(){clean();};
-			tMixType getType()
+			tMixType getType() const
 				{
 					return CAMix::MIDDLE_MIX;
 				}
