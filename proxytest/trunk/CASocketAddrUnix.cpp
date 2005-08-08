@@ -66,7 +66,7 @@ SINT32 CASocketAddrUnix::setPath(const char* path)
 	* @retval NULL if path was no specified yet
 	* @retval copy of the path value
 	*/
-UINT8* CASocketAddrUnix::getPath()
+UINT8* CASocketAddrUnix::getPath() const
 	{
 		UINT32 len=strlen(sun_path);
 		if(len==0)
