@@ -88,7 +88,7 @@ class CASocketAddrINet:private sockaddr_in,public CASocketAddr
 					UINT8 tmpbuff[255];
 					if(getIPAsStr(tmpbuff,255)!=E_SUCCESS)
 						return E_UNKNOWN;
-					if(snprintf((char*)buff,bufflen,"INet address: %s:%u",buff,getPort())<0)
+					if(snprintf((char*)buff,bufflen,"INet address: %s:%u",tmpbuff,getPort())<0)
 						return E_SPACE;
 					return E_SUCCESS;
 				}

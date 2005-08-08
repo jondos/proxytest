@@ -66,7 +66,22 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 					}			
 				
 				SINT32 setPath(const char* path);
-				UINT8* getPath();
+				UINT8* getPath() const;
+
+				virtual SINT32 toString(UINT8* buff,UINT32 bufflen) const
+					{
+						UINT8* tmppath=getPath();
+						if(tmppath==NULL)
+							return E_UNKNOWN;
+						SINT32 ret=snprintf((char*)buff,bufflen,"Unix address: %s",tmppath);
+						delete[]tmppath;
+						if(ret<0)
+							{
+								return E_SPACE;
+							}
+						return E_SUCCESS;
+					}
+
 		};
 
 	#endif
