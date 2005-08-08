@@ -71,10 +71,10 @@ class CASocketAddrINet:private sockaddr_in,public CASocketAddr
 			SINT32 setAddr(const UINT8* szIP,UINT16 port);
       SINT32 setIP(UINT8 ip[4]);
 			SINT32 setPort(UINT16 port);
-      UINT16 getPort();
-			SINT32 getHostName(UINT8* buff,UINT32 len);
-			SINT32 getIP(UINT8 buff[4]);
-			SINT32 getIPAsStr(UINT8* buff,UINT32 len);
+      UINT16 getPort() const;
+			SINT32 getHostName(UINT8* buff,UINT32 len)const;
+			SINT32 getIP(UINT8 buff[4]) const;
+			SINT32 getIPAsStr(UINT8* buff,UINT32 len) const;
 			bool	 isAnyIP()
 				{
 					return sin_addr.s_addr==INADDR_ANY;
@@ -83,7 +83,15 @@ class CASocketAddrINet:private sockaddr_in,public CASocketAddr
 			static SINT32 getLocalHostIP(UINT8 ip[4]);
 //			operator LPSOCKADDR(){return (::LPSOCKADDR)m_pAddr;}
 
-
+			virtual SINT32 toString(UINT8* buff,UINT32 bufflen) const
+				{
+					UINT8 tmpbuff[255];
+					if(getIPAsStr(tmpbuff,255)!=E_SUCCESS)
+						return E_UNKNOWN;
+					if(snprintf((char*)buff,bufflen,"INet address: %s:%u",buff,getPort())<0)
+						return E_SPACE;
+					return E_SUCCESS;
+				}
 		private:
 			static CAMutex* m_pcsGet;
 	};

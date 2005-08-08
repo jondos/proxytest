@@ -128,7 +128,7 @@ SINT32 CASocketAddrINet::setPort(UINT16 port)
 /** Returns the port value of the address.
 	* @return port
 	*/
-UINT16 CASocketAddrINet::getPort()
+UINT16 CASocketAddrINet::getPort() const
 	{
 		return ntohs(sin_port);
 	}
@@ -141,7 +141,7 @@ UINT16 CASocketAddrINet::getPort()
 	* @retval E_UNSPECIFIED if buff was NULL
 	* @retval E_SPACE if size of the buffer is to small
 	*/
-SINT32 CASocketAddrINet::getHostName(UINT8* buff,UINT32 len)
+SINT32 CASocketAddrINet::getHostName(UINT8* buff,UINT32 len) const
 	{
 		if(buff==NULL)
 			return E_UNSPECIFIED;
@@ -165,7 +165,7 @@ SINT32 CASocketAddrINet::getHostName(UINT8* buff,UINT32 len)
 	* @param buff buffer for the returned IP-Address (4 Bytes)
 	* @retval E_SUCCESS if no error occured
 	*/
-SINT32 CASocketAddrINet::getIP(UINT8 buff[4])
+SINT32 CASocketAddrINet::getIP(UINT8 buff[4]) const
 	{
 		memcpy(buff,&sin_addr.s_addr,4);
 		return E_SUCCESS;
@@ -186,7 +186,7 @@ SINT32 CASocketAddrINet::setIP(UINT8 ip[4])
 	* @param len buffer-space
 	* @retval E_SUCCESS if no error occured
 	*/
-SINT32 CASocketAddrINet::getIPAsStr(UINT8* buff,UINT32 len)
+SINT32 CASocketAddrINet::getIPAsStr(UINT8* buff,UINT32 len) const
 	{
 		if(buff==NULL)
 			return E_UNKNOWN;

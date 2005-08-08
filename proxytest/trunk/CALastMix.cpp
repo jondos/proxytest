@@ -32,7 +32,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASingleSocketGroup.hpp"
 #include "CAMsg.hpp"
 #include "CACmdLnOptions.hpp"
-#include "CASocketAddrUnix.hpp"
+#ifdef HAVE_UNIX_DOMAIN_PROTOCOL
+	#include "CASocketAddrUnix.hpp"
+#endif
 #include "CACertStore.hpp"
 #include "CABase64.hpp"
 #include "CAPool.hpp"

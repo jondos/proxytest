@@ -35,7 +35,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAASymCipher.hpp"
 #include "CAInfoService.hpp"
 #include "CASocketAddrINet.hpp"
-#include "CASocketAddrUnix.hpp"
+#ifdef HAVE_UNIX_DOMAIN_PROTOCOL
+	#include "CASocketAddrUnix.hpp"
+#endif
 #include "CAThread.hpp"
 #include "CAUtil.hpp"
 #include "CASignature.hpp"
@@ -104,6 +106,9 @@ SINT32 CAFirstMix::init()
 				m_arrSocketsIn[aktSocket].create();
 				m_arrSocketsIn[aktSocket].setReuseAddr(true);
 				CASocketAddr* pAddr=pListener->getAddr();
+				UINT8 buff[255];
+				pAddr->toString(buff,255);
+				CAMsg::printMsg(LOG_DEBUG,"Listening on Interface: %s\n",buff);
 				delete pListener;
 #ifndef _WIN32
 				//we have to be a temporaly superuser if port <1024...
