@@ -164,6 +164,18 @@ AC_ARG_ENABLE(payment,
 	]
 )
 
+dnl replay detection ??
+REPLAY_DETECTION=""
+AC_ARG_ENABLE(replay_detection,
+	AS_HELP_STRING([--enable-replay_detection],
+			[Specify if to build with replay detection support]),
+	[
+		if test "x$enableval" != "xno" ; then
+		    REPLAY_DETECTION="-DREPLAY_DETECTION"
+		fi
+	]
+)
+
 LIBS="$DEFAULTLIBS"
 
 dnl Checks for Headers
@@ -434,7 +446,7 @@ AC_ARG_ENABLE(crime-detection,
 )
 
 
-CFLAGS="$CFLAGS $POOL $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $OFLAGS"
+CFLAGS="$CFLAGS $POOL $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $REPLAY_DETECTION $OFLAGS"
 CXXFLAGS=$CFLAGS
 LIBS="$LIBS $PAYMENT_LIB"
 

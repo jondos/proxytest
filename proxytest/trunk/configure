@@ -876,6 +876,8 @@ Optional Features:
                           optionally the limit in kByte/s of each
                           communication channel
   --enable-payment        Specify if to build with payment support
+  --enable-replay_detection
+                          Specify if to build with replay detection support
   --enable-debug          Enable debug mode
   --enable-crime-detection
                           Enable crime detection mode
@@ -3789,6 +3791,18 @@ if test "${enable_payment+set}" = set; then
 
 		if test "x$enableval" != "xno" ; then
 		    PAYMENT="-DPAYMENT"
+		fi
+
+
+fi;
+
+REPLAY_DETECTION=""
+# Check whether --enable-replay_detection or --disable-replay_detection was given.
+if test "${enable_replay_detection+set}" = set; then
+  enableval="$enable_replay_detection"
+
+		if test "x$enableval" != "xno" ; then
+		    REPLAY_DETECTION="-DREPLAY_DETECTION"
 		fi
 
 
@@ -11067,7 +11081,7 @@ if test "${enable_crime_detection+set}" = set; then
 fi;
 
 
-CFLAGS="$CFLAGS $POOL $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $OFLAGS"
+CFLAGS="$CFLAGS $POOL $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $REPLAY_DETECTION $OFLAGS"
 CXXFLAGS=$CFLAGS
 LIBS="$LIBS $PAYMENT_LIB"
 
