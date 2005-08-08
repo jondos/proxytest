@@ -235,6 +235,9 @@ SINT32 CADatabase::test()
 		return E_SUCCESS;
 	}
 
+/** Returns the current replay timestamp for this database.
+	* @param replayTimestamp stores the current replay timestamp
+	*/
 SINT32 CADatabase::getCurrentReplayTimestamp(tReplayTimestamp& replayTimestamp)
 	{
 		return getReplayTimestampForTime(replayTimestamp,time(NULL),m_refTime);

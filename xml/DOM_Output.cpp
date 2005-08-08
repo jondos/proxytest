@@ -75,7 +75,7 @@ XMLFormatter& operator<< (XMLFormatter& strm, const DOMString& s)
 	* @retval E_SUCCESS if successful
 	* @retval E_UNKNOWN otherwise
 */
-SINT32 DOM_Output::dumpNode(DOM_Node& toWrite,bool bCanonical)
+SINT32 DOM_Output::dumpNode(const DOM_Node& toWrite,bool bCanonical)
 	{
     if(toWrite==0)
 			return E_UNKNOWN;

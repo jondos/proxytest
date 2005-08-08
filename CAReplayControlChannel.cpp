@@ -30,10 +30,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAReplayControlChannel.hpp"
 #include "CAReplayCtrlChannelMsgProc.hpp"
 
-CAReplayControlChannel::CAReplayControlChannel(CAReplayCtrlChannelMsgProc* pProcessor)
+CAReplayControlChannel::CAReplayControlChannel(const CAReplayCtrlChannelMsgProc* pProcessor)
 	:CASyncControlChannel(REPLAY_CONTROL_CHANNEL_ID,false)
 	{
-		CAMsg::printMsg(LOG_DEBUG,"CAReplayControlChannel - constructor - pProcessor=%p\n",pProcessor);
+		#ifdef DEBUG
+			CAMsg::printMsg(LOG_DEBUG,"CAReplayControlChannel - constructor - pProcessor=%p\n",pProcessor);
+		#endif	
 		m_pProcessor=pProcessor;
 	}
 
@@ -41,27 +43,34 @@ CAReplayControlChannel::~CAReplayControlChannel(void)
 	{
 	}
 
-SINT32 CAReplayControlChannel::processXMLMessage(DOM_Document& doc)
+SINT32 CAReplayControlChannel::processXMLMessage(const DOM_Document& doc)
 	{
-		CAMsg::printMsg(LOG_DEBUG,"CAReplayControlChannel::processXMLMessage()\n");
+		#ifdef DEBUG
+			CAMsg::printMsg(LOG_DEBUG,"CAReplayControlChannel::processXMLMessage()\n");
+		#endif
 		DOM_Element elemRoot=doc.getDocumentElement();
 		if(elemRoot==NULL)
 			return E_UNKNOWN;
-		if(elemRoot.getNodeName().equals("GetTimestamps"))
+		DOMString rootNodeName;
+		rootNodeName=elemRoot.getNodeName();	
+		if(rootNodeName.equals("GetTimestamps"))
 			{
 				m_pProcessor->proccessGetTimestamps(this);
 			}
-		else if(elemRoot.getNodeName().equals("GetTimestamp"))
+		else if(rootNodeName.equals("GetTimestamp"))
 			{
 				UINT8 buff[255];
 				UINT32 bufflen=255;
-				getDOMElementAttribute(elemRoot,"id",buff,&bufflen);
+				if(getDOMElementAttribute(elemRoot,"id",buff,&bufflen)!=E_SUCCESS)
+					return E_UNKNOWN;
 				buff[bufflen]=0;
 				m_pProcessor->proccessGetTimestamp(this,buff);
 			}
-		else if(elemRoot.getNodeName().equals("Mix"))
+		else if(rootNodeName.equals("Mix"))
 			{
-				CAMsg::printMsg(LOG_DEBUG,"CAReplayControlChannel::processXMLMessage() - got a timestamp\n");
+				#ifdef DEBUG
+					CAMsg::printMsg(LOG_DEBUG,"CAReplayControlChannel::processXMLMessage() - got a timestamp\n");
+				#endif
 				UINT8 buff[255];
 				UINT32 bufflen=255;
 				if(getDOMElementAttribute(elemRoot,"id",buff,&bufflen)!=E_SUCCESS)
@@ -75,7 +84,9 @@ SINT32 CAReplayControlChannel::processXMLMessage(DOM_Document& doc)
 				if(	getDOMElementAttribute(elemReplayTimestamp,"offset",rt.offset)!=E_SUCCESS||
 						getDOMElementAttribute(elemReplayTimestamp,"interval",rt.interval)!=E_SUCCESS)
 					return E_UNKNOWN;
-				CAMsg::printMsg(LOG_DEBUG,"CAReplayControlChannel::processXMLMessage() - call m_pProcessor->proccessGotTimestamp() - m_pProcessor=%p\n",m_pProcessor);
+				#ifdef DEBUG
+					CAMsg::printMsg(LOG_DEBUG,"CAReplayControlChannel::processXMLMessage() - call m_pProcessor->proccessGotTimestamp() - m_pProcessor=%p\n",m_pProcessor);
+				#endif
 				m_pProcessor->proccessGotTimestamp(this,buff,rt);
 			}
 		return E_SUCCESS;

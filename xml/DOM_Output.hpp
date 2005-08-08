@@ -131,7 +131,7 @@ class DOM_Output
 				* @return E_SPACE if buff is to small
 				* @return E_UNKNOWN if an error occurs
 				*/
-			static SINT32 dumpToMem(DOM_Node& node,UINT8* buff, UINT32* size)
+			static SINT32 dumpToMem(const DOM_Node& node,UINT8* buff, UINT32* size)
 				{
 					DOM_Output out;
 					if(	out.dumpNode(node,false)!=E_SUCCESS)
@@ -205,7 +205,7 @@ class DOM_Output
 					delete m_pFormatter;
 				}
 
-			SINT32 dumpNode(DOM_Node& toWrite,bool bCanonical);
+			SINT32 dumpNode(const DOM_Node& toWrite,bool bCanonical);
 			XMLFormatter* m_pFormatter;
 			MemFormatTarget* m_pFormatTarget;
 			static const XMLCh  m_XML[41]; 

@@ -48,10 +48,14 @@ class CAControlChannelDispatcher
 				m_pMixPacket=&m_pQueueEntry->packet;
 				m_arControlChannels=new CAAbstractControlChannel*[256];
 				memset(m_arControlChannels,0,256*sizeof(CAAbstractControlChannel*));
+				m_pcsSendMsg=new CAMutex();
+				m_pcsRegisterChannel=new CAMutex();
 			}
 
 		~CAControlChannelDispatcher()
 			{
+				delete m_pcsSendMsg;
+				delete m_pcsRegisterChannel;
 				delete[] m_arControlChannels;
 				delete m_pQueueEntry;
 			}
@@ -62,15 +66,14 @@ class CAControlChannelDispatcher
     SINT32 registerControlChannel(CAAbstractControlChannel* pControlChannel);
     SINT32 removeControlChannel(UINT32 id);
 
-    bool proccessMixPacket(MIXPACKET* pPacket);
-		SINT32 sendMessages(UINT32 id,bool m_bIsEncrypted,UINT8* msg,UINT32 msglen);
+    bool proccessMixPacket(const MIXPACKET* pPacket);
+		SINT32 sendMessages(UINT32 id,bool m_bIsEncrypted,const UINT8* msg,UINT32 msglen) const;
   private:
 		CAQueue* m_pSendQueue;
 		MIXPACKET* m_pMixPacket;
     CAAbstractControlChannel** m_arControlChannels;
 		tQueueEntry* m_pQueueEntry;
+		CAMutex* m_pcsSendMsg;
+		CAMutex* m_pcsRegisterChannel;
 };
-
-
-
 #endif

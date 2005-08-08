@@ -180,7 +180,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 	int iAutoReconnect=0;
 	char* strPidFile=NULL;
 	//DOM_Document docMixXml;
-	poptOption options[]=
+	poptOption theOptions[]=
 	 {
 		{"localproxy",'j',POPT_ARG_NONE,&iLocalProxy,0,"act as local proxy",NULL},
 		{"daemon",'d',POPT_ARG_NONE,&iDaemon,0,"start as daemon [only for local proxy]",NULL},
@@ -199,8 +199,8 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 		{NULL,0,0,
 		NULL,0,NULL,NULL}
 	};
-	poptContext ctx=poptGetContext(NULL,argc,argv,options,0);
-	int ret=poptGetNextOpt(ctx);
+	poptContext ctx=poptGetContext(NULL,argc,argv,theOptions,0);
+	SINT32 ret=poptGetNextOpt(ctx);
 	while(ret==POPT_ERROR_BADOPT)
 		ret=poptGetNextOpt(ctx);
 	poptFreeContext(ctx);
@@ -226,7 +226,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 		m_bAutoReconnect=true;
 	if(configfile!=NULL)
 		{
-			SINT32 ret=readXmlConfiguration(m_docMixXml,(UINT8*)configfile);
+			ret=readXmlConfiguration(m_docMixXml,(UINT8*)configfile);
 			if(ret==E_FILE_OPEN)
 				CAMsg::printMsg(LOG_CRIT,"Couldt not open config file: %s\n",configfile);
 			else if(ret==E_FILE_READ)

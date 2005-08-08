@@ -34,9 +34,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CACmdLnOptions.hpp"
 #include "CAFirstMix.hpp"
 
-CAReplayCtrlChannelMsgProc::CAReplayCtrlChannelMsgProc(CAMix* pMix)
+CAReplayCtrlChannelMsgProc::CAReplayCtrlChannelMsgProc(const CAMix* pMix)
 	{
-		CAMsg::printMsg(LOG_DEBUG,"CAReplayCtrlChannelMsgProc - constructor - this=%p\n",this);
+		#ifdef DEUBG
+			CAMsg::printMsg(LOG_DEBUG,"CAReplayCtrlChannelMsgProc - constructor - this=%p\n",this);
+		#endif
 		m_strGetTimestampsRepsonseMessageTemplate=NULL;
 		m_pDownstreamReplayControlChannel=NULL;
 		m_pUpstreamReplayControlChannel=NULL;
@@ -44,26 +46,32 @@ CAReplayCtrlChannelMsgProc::CAReplayCtrlChannelMsgProc(CAMix* pMix)
 		CAControlChannelDispatcher* pDispatcher=m_pMix->getDownstreamControlChannelDispatcher();
 		if(pDispatcher!=NULL)
 			{
-				CAMsg::printMsg(LOG_DEBUG,"CAReplayCtrlChannelMsgProc - constructor - registering downstream replay control channel\n",this);
+				#ifdef DEBUG
+					CAMsg::printMsg(LOG_DEBUG,"CAReplayCtrlChannelMsgProc - constructor - registering downstream replay control channel\n",this);
+				#endif	
 				m_pDownstreamReplayControlChannel=new CAReplayControlChannel(this);
 				pDispatcher->registerControlChannel(m_pDownstreamReplayControlChannel);
 			}
 		pDispatcher=m_pMix->getUpstreamControlChannelDispatcher();
 		if(pDispatcher!=NULL)
 			{
-				CAMsg::printMsg(LOG_DEBUG,"CAReplayCtrlChannelMsgProc - constructor - registering upstream replay control channel\n",this);
+				#ifdef DEBUG
+					CAMsg::printMsg(LOG_DEBUG,"CAReplayCtrlChannelMsgProc - constructor - registering upstream replay control channel\n",this);
+				#endif
 				m_pUpstreamReplayControlChannel=new CAReplayControlChannel(this);
 				pDispatcher->registerControlChannel(m_pUpstreamReplayControlChannel);
 			}
-		if(pMix->getType()==CAMix::FIRST_MIX)
+/*		if(pMix->getType()==CAMix::FIRST_MIX)
 			{
 				initTimestampsMessageTemplate();
-			}
+			}*/
 	}
 
 CAReplayCtrlChannelMsgProc::~CAReplayCtrlChannelMsgProc()
 	{
-		CAMsg::printMsg(LOG_DEBUG,"CAReplayCtrlChannelMsgProc::~CAReplayCtrlChannelMsgProc()");
+		#ifdef DEBUG
+			CAMsg::printMsg(LOG_DEBUG,"CAReplayCtrlChannelMsgProc::~CAReplayCtrlChannelMsgProc()");
+		#endif
 		stopTimeStampPorpagation();
 		CAControlChannelDispatcher* pDispatcher=m_pMix->getDownstreamControlChannelDispatcher();
 		if(pDispatcher!=NULL)
@@ -80,7 +88,7 @@ CAReplayCtrlChannelMsgProc::~CAReplayCtrlChannelMsgProc()
 		delete m_strGetTimestampsRepsonseMessageTemplate;
 	}
 
-SINT32 CAReplayCtrlChannelMsgProc::proccessGetTimestamps(CAReplayControlChannel* pReceiver)
+SINT32 CAReplayCtrlChannelMsgProc::proccessGetTimestamps(const CAReplayControlChannel* pReceiver)
 	{
 		//Only for the first mix get timestamps is supported for the moment!
 		if(m_pMix->getType()!=CAMix::FIRST_MIX)
@@ -108,11 +116,10 @@ SINT32 CAReplayCtrlChannelMsgProc::proccessGetTimestamps(CAReplayControlChannel*
 				elemReplay.appendChild(elemReplayTimestamp);
 				elemMixes.appendChild(elemMix);
 			}
-		SINT32 ret=pReceiver->sendXMLMessage(docTemplate);
-		return ret;
+		return pReceiver->sendXMLMessage(docTemplate);
 	}
 
-SINT32 CAReplayCtrlChannelMsgProc::proccessGetTimestamp(CAReplayControlChannel* pReceiver,UINT8* strMixID)
+SINT32 CAReplayCtrlChannelMsgProc::proccessGetTimestamp(const CAReplayControlChannel* pReceiver,const UINT8* strMixID)
 	{
 		UINT8 buff[255];
 		UINT8 msgBuff[1024];
@@ -131,7 +138,7 @@ SINT32 CAReplayCtrlChannelMsgProc::proccessGetTimestamp(CAReplayControlChannel* 
 				sprintf((char*)msgBuff,strTemplate,buff);
 				return m_pUpstreamReplayControlChannel->sendXMLMessage(msgBuff,strlen((char*)msgBuff));
 			}
-		return E_SUCCESS;
+		return E_SUCCESS;	
 	}
 
 SINT32 CAReplayCtrlChannelMsgProc::propagateCurrentReplayTimestamp()
@@ -193,6 +200,7 @@ THREAD_RETURN rp_loopPropagateTimestamp(void* param)
 	* according to the mix ids of the cascade. We later use this template to generate the
 	* responses quickly.
 	*/
+/*	
 SINT32 CAReplayCtrlChannelMsgProc::initTimestampsMessageTemplate()
 	{
 		//Only for the first mix get timestamps is supported for the moment!
@@ -225,11 +233,14 @@ SINT32 CAReplayCtrlChannelMsgProc::initTimestampsMessageTemplate()
 		delete[] buff;
 		return E_SUCCESS;
 	}
+*/
 
-SINT32 CAReplayCtrlChannelMsgProc::proccessGotTimestamp(CAReplayControlChannel* pReceiver,UINT8* strMixID,tReplayTimestamp& rt)
+SINT32 CAReplayCtrlChannelMsgProc::proccessGotTimestamp(const CAReplayControlChannel* pReceiver,const UINT8* strMixID,const tReplayTimestamp& rt)
 	{
 		//if not first mix just forwards them down the drain...
-		CAMsg::printMsg(LOG_DEBUG,"CAReplayCtrlChannelMsgProc::proccessGotTimestamp() \n");
+		#ifdef DEBUG
+			CAMsg::printMsg(LOG_DEBUG,"CAReplayCtrlChannelMsgProc::proccessGotTimestamp() \n");
+		#endif
 		if(m_pMix->getType()!=CAMix::FIRST_MIX)
 			{
 				UINT8 msgBuff[1024];
@@ -238,7 +249,9 @@ SINT32 CAReplayCtrlChannelMsgProc::proccessGotTimestamp(CAReplayControlChannel* 
 				return m_pDownstreamReplayControlChannel->sendXMLMessage(msgBuff,strlen((char*)msgBuff));
 			}
 		//First mix --> update mix parameters
-		CAMsg::printMsg(LOG_DEBUG,"CAReplayCtrlChannelMsgProc::proccessGotTimestamp() - MixID: %s\n",strMixID);
+		#ifdef DEBUG
+			CAMsg::printMsg(LOG_DEBUG,"CAReplayCtrlChannelMsgProc::proccessGotTimestamp() - MixID: %s\n",strMixID);
+		#endif
 		UINT32 refTime;
 		CADatabase::getTimeForReplayTimestamp(refTime,rt);
 		CAFirstMix* pMix=(CAFirstMix*)m_pMix;
@@ -254,6 +267,8 @@ SINT32 CAReplayCtrlChannelMsgProc::proccessGotTimestamp(CAReplayControlChannel* 
 
 SINT32 CAReplayCtrlChannelMsgProc::sendGetTimestamp(const UINT8* strMixID)
 	{
+		if(strMixID==NULL||strlen((const char*)strMixID)>400)
+			return E_UNKNOWN;
 		UINT8 msgBuff[512];
 		const char* strTemplate="<?xml version=\"1.0\" encoding=\"UTF-8\"?><GetTimestamp id=\"%s\"/>";
 		sprintf((char*)msgBuff,strTemplate,strMixID);
