@@ -84,17 +84,18 @@ class CAMix
 			}
 
 #ifdef WITH_CONTROL_CHANNELS
-			CAControlChannelDispatcher* getDownstreamControlChannelDispatcher()
+			CAControlChannelDispatcher* getDownstreamControlChannelDispatcher() const
 				{
 					return m_pMuxInControlChannelDispatcher;
 				}
-			CAControlChannelDispatcher* getUpstreamControlChannelDispatcher()
+				
+			CAControlChannelDispatcher* getUpstreamControlChannelDispatcher() const
 				{
 					return m_pMuxOutControlChannelDispatcher;
 				}
 #endif		
 #ifdef REPLAY_DETECTION
-			CADatabase* getReplayDB()
+			CADatabase* getReplayDB() const
 				{
 					return m_pReplayDB;
 				}

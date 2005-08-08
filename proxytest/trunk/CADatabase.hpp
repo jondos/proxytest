@@ -48,16 +48,16 @@ class CADatabase
 			SINT32 start();
 			SINT32 stop();
 			/** Returns the current Replay timestamp for this database.*/
-			SINT32 getCurrentReplayTimestamp(tReplayTimestamp& replayTimestamp);
+			SINT32 getCurrentReplayTimestamp(tReplayTimestamp& replayTimestamp) const;
 
 			/** Returns the local time in seconds since epoch for replay timestamp='0' for this database*/
-			UINT32 getRefTime()
+			UINT32 getRefTime() const
 				{
 					return m_refTime;
 				}
 			
 			/** Returns the replay timestamp for this reference time (seconds since epoch) and time*/
-			static SINT32 getReplayTimestampForTime(tReplayTimestamp& replayTimestamp,UINT32 aktTime,UINT32 refTime);
+			static SINT32 getReplayTimestampForTime(tReplayTimestamp& replayTimestamp,UINT32 aktTime,UINT32 refTime) const;
 
 			/** Returns the refernce time (seconds since epoch) for the given replay timestamp*/
 			static SINT32 getTimeForReplayTimestamp(UINT32& refTime,tReplayTimestamp replayTimestamp)

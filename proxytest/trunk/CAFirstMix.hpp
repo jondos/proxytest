@@ -85,7 +85,7 @@ public:
 					m_arMixParameters=NULL;
 				}
     virtual ~CAFirstMix(){}
-		tMixType getType()
+		tMixType getType() const
 			{
 				return CAMix::FIRST_MIX;
 			}
@@ -104,13 +104,13 @@ protected:
     
     
 public:
-			SINT32 getMixedPackets(UINT64& ppackets)
+			SINT32 getMixedPackets(UINT64& ppackets) const
 				{
 					set64(ppackets,m_nMixedPackets);
 					return E_SUCCESS;
 				}
 
-			SINT32 getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic)
+			SINT32 getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic) const
 				{
 					*puser=(SINT32)m_nUser;
 					*prisk=-1;
@@ -179,7 +179,7 @@ protected:
 					return E_SUCCESS;
 				}
 
-			bool getRestart()
+			bool getRestart() const
 				{
 					return m_bRestart;
 				}
