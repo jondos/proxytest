@@ -47,7 +47,7 @@ class CADatabase
 			SINT32 insert(UINT8 key[16]);
 			SINT32 start();
 			SINT32 stop();
-			/** Returns the current Replay timestamp for this database*/
+			/** Returns the current Replay timestamp for this database.*/
 			SINT32 getCurrentReplayTimestamp(tReplayTimestamp& replayTimestamp);
 
 			/** Returns the local time in seconds since epoch for replay timestamp='0' for this database*/

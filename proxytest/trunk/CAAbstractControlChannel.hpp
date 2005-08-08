@@ -46,13 +46,14 @@ class CAAbstractControlChannel
 				m_pDispatcher=NULL;
 			}
     
-		/** Call to send a XML message via this control channel.
+		/** Call to send a XML message via this control channel. Note that this message can not be bigger than 64 KBytes.
+			* @param docMsg XML document to sent over this control channel
 			*	@retval E_SPACE, if the serialized XML message is bigger than
 			*										0xFFFF bytes
 			* @retval E_SUCCESS, if the message that successful send
 			* @retval E_UNKNOWN, in case of an error
 			*/
-		SINT32 sendXMLMessage(DOM_Document& docMsg)
+		SINT32 sendXMLMessage(const DOM_Document& docMsg)
 			{
 				UINT32 tlen=0xFFFF+2;
 				UINT8 tmpB[0xFFFF+2];
@@ -67,6 +68,8 @@ class CAAbstractControlChannel
 			}
 
 	/** Call to send a XML message via this control channel.
+			* @param msgXML buffer which holds the serialized XML message
+			* @param msgLen size of msgXML
 			*	@retval E_SPACE, if the serialized XML message is bigger than
 			*										0xFFFF bytes
 			* @retval E_SUCCESS, if the message that successful send
@@ -85,6 +88,9 @@ class CAAbstractControlChannel
 				return m_pDispatcher->sendMessages(m_ID,m_bIsEncrypted,tmpB,msgLen+2);
 			}
 
+		/** Returns the id of this control channel.
+			* @retval id of control channel
+			*/
 		UINT32 getID()
 			{
 				return m_ID;
@@ -93,24 +99,24 @@ class CAAbstractControlChannel
     bool isEncrypted();
 
   protected:
-		/** Processes some bytes of a message we get 
+		/** Processes some bytes of a message we got 
 				from the communication channel.  We reassemble this fragments
 				in a buffer. If all parts are received we call proccessMessagesComplete()*/
-		virtual SINT32 proccessMessage(UINT8* msg, UINT32 msglen)=0;
+		virtual SINT32 proccessMessage(const UINT8* msg, UINT32 msglen)=0;
 
 		/** Called if a whole messages was received, which should be delivered
 			* to the final recipient*/
 		virtual SINT32 proccessMessageComplete()=0;
 
 		/** Sets the Dispatcher*/
-		SINT32 setDispatcher(CAControlChannelDispatcher* pDispatcher)
+		SINT32 setDispatcher(const CAControlChannelDispatcher* pDispatcher)
 			{
 				m_pDispatcher=pDispatcher;
 				return E_SUCCESS;
 			}
 
 		friend class CAControlChannelDispatcher;
-		CAControlChannelDispatcher* m_pDispatcher;
+		const CAControlChannelDispatcher* m_pDispatcher;
 		bool m_bIsEncrypted;
     UINT32 m_ID;
 };

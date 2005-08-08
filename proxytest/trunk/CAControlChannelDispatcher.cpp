@@ -32,28 +32,39 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 SINT32 CAControlChannelDispatcher::registerControlChannel(CAAbstractControlChannel* pControlChannel)
 	{
+		if(pControlChannel==NULL||pControlChannel->getID()>255)
+			return E_UNKNOWN;
+		m_pcsRegisterChannel->lock();
 		pControlChannel->setDispatcher(this);
 		m_arControlChannels[pControlChannel->getID()]= pControlChannel;
+		m_pcsRegisterChannel->unlock();
 		return E_SUCCESS;
 	}
 
 SINT32 CAControlChannelDispatcher::removeControlChannel(UINT32 id)
 	{
+		if(id>255)
+			return E_UNKNOWN;
+		m_pcsRegisterChannel->lock();
 		m_arControlChannels[id]=NULL;
+		m_pcsRegisterChannel->unlock();
 		return E_SUCCESS;
 	}
 
+/** Deregisters all control channels and calls delete on every registered control channel object.*/
 void CAControlChannelDispatcher::deleteAllControlChannels()
 	{
+		m_pcsRegisterChannel->lock();
 		for(UINT32 i=0;i<256;i++)
 			{
 				if(m_arControlChannels[i]!=NULL)
 					delete m_arControlChannels[i];
 				m_arControlChannels[i]=NULL;			
 			}
+		m_pcsRegisterChannel->unlock();
 	}
 	
-bool CAControlChannelDispatcher::proccessMixPacket(MIXPACKET* pPacket)
+bool CAControlChannelDispatcher::proccessMixPacket(const MIXPACKET* pPacket)
 	{
 		if(pPacket->channel<256&&pPacket->channel>0)
 			{
@@ -67,8 +78,9 @@ bool CAControlChannelDispatcher::proccessMixPacket(MIXPACKET* pPacket)
 		return false;
 	}
 
-SINT32 CAControlChannelDispatcher::sendMessages(UINT32 id,bool m_bIsEncrypted,UINT8* msg,UINT32 msglen)
+SINT32 CAControlChannelDispatcher::sendMessages(UINT32 id,bool m_bIsEncrypted,const UINT8* msg,UINT32 msglen) const
 	{
+		m_pcsSendMsg->lock();
 		m_pMixPacket->channel=id;
 		UINT32 aktIndex=0;
 		while(msglen>0)
@@ -86,5 +98,6 @@ SINT32 CAControlChannelDispatcher::sendMessages(UINT32 id,bool m_bIsEncrypted,UI
 				aktIndex+=m_pMixPacket->flags;
 				msglen-=m_pMixPacket->flags;
 			}
+		m_pcsSendMsg->unlock();	
 		return E_SUCCESS;
 	}

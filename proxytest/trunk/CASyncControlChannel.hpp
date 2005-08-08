@@ -35,6 +35,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 class CASyncControlChannel : public CAAbstractControlChannel
 {
 	public:
+			/** Constructor for a synchronized (e.g. received messages are proccessed imedially) control channel.
+				* @param id id of the control channel
+				* @param bIsEncrypted if true the control channel is encrypted - NOT IMPLEMENTED at the moment
+				*/
 		  CASyncControlChannel(UINT8 id, bool bIsEncrypted):  
 					CAAbstractControlChannel(id,bIsEncrypted)
 				{
@@ -48,18 +52,22 @@ class CASyncControlChannel : public CAAbstractControlChannel
 			* If you need to store it for later processing, make a copy of
 			* the DOM_Document using docMsg.cloneNode(true)
 			*/
-		virtual SINT32 processXMLMessage(DOM_Document& docMsg)=0;
+		virtual SINT32 processXMLMessage(const DOM_Document& docMsg)=0;
 
 	protected:
-		SINT32 proccessMessage(UINT8* msg, UINT32 msglen)
+		SINT32 proccessMessage(const UINT8* msg, UINT32 msglen)
 			{
-				CAMsg::printMsg(LOG_DEBUG,"CASnycControlChannel::proccessMessage - msglen=%u\n",msglen);
+				#ifdef DEBUG
+					CAMsg::printMsg(LOG_DEBUG,"CASnycControlChannel::proccessMessage - msglen=%u\n",msglen);
+				#endif
 				if(m_MsgBytesLeft==0)//start of new XML Msg
 					{
 						if(msglen<2)//this should never happen...
 							return E_UNKNOWN;
 						m_MsgBytesLeft=(msg[0]<<8)|msg[1];
-						CAMsg::printMsg(LOG_DEBUG,"CASnycControlChannel::proccessMessage - start of a new msg of len=%u\n",m_MsgBytesLeft);
+						#ifdef DEBUG
+							CAMsg::printMsg(LOG_DEBUG,"CASnycControlChannel::proccessMessage - start of a new msg of len=%u\n",m_MsgBytesLeft);
+						#endif
 						msglen-=2;
 						m_aktIndex=msglen;
 						m_MsgBytesLeft-=msglen;
@@ -82,8 +90,15 @@ class CASyncControlChannel : public CAAbstractControlChannel
 		/** Parses the bytes in m_MsgBuff and calls processXMLMessage()*/		
 		SINT32 proccessMessageComplete()
 			{
-				m_MsgBuff[m_aktIndex]=0;
-				CAMsg::printMsg(LOG_DEBUG,"CASnycControlChannel::proccessMessageComplete() - msg=%s\n",m_MsgBuff);
+				#ifdef DEBUG
+					if(m_aktIndex<0xFFFF)
+						{
+							m_MsgBuff[m_aktIndex]=0;
+							CAMsg::printMsg(LOG_DEBUG,"CASnycControlChannel::proccessMessageComplete() - msg=%s\n",m_MsgBuff);
+						}
+					else
+						CAMsg::printMsg(LOG_DEBUG,"CASnycControlChannel::proccessMessageComplete() \n");
+				#endif
 				MemBufInputSource oInput(m_MsgBuff,m_aktIndex,"synchannel");
 				DOMParser oParser;
 				oParser.parse(oInput);
@@ -92,7 +107,9 @@ class CASyncControlChannel : public CAAbstractControlChannel
 				DOM_Document doc=oParser.getDocument();
 				if(doc==NULL)
 					return E_UNKNOWN;
-				CAMsg::printMsg(LOG_DEBUG,"CASnycControlChannel::proccessMessageComplete() call processXMLMessage()\n");
+				#ifdef DEBUG
+					CAMsg::printMsg(LOG_DEBUG,"CASnycControlChannel::proccessMessageComplete() call processXMLMessage()\n");
+				#endif
 				return processXMLMessage(doc);
 			}
 

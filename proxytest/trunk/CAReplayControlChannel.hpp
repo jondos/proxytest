@@ -27,7 +27,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CA_REPLAY_CONTROL_CHANNEL
 #define	__CA_REPLAY_CONTROL_CHANNEL
-#ifdef REPLAY_DETECTION
 #include "CASyncControlChannel.hpp"
 
 #include "CAReplayCtrlChannelMsgProc.hpp"
@@ -38,16 +37,16 @@ class CAReplayControlChannel :
 	public CASyncControlChannel
 {
 	public:
-		CAReplayControlChannel(CAReplayCtrlChannelMsgProc* pProcessor);
+		CAReplayControlChannel(const CAReplayCtrlChannelMsgProc* pProcessor);
 		virtual ~CAReplayControlChannel(void);
 
-		/** Reads incoming replay timestamps  or dtimestamp request and delegates them to the 
-			* associated CAReplayCorelChannelMsgProc
+		/** Reads incoming replay timestamps  or timestamp requests and delegates them to the 
+			* associated CAReplayCtrlChannelMsgProc
+			* @see CAReplayCtrlChannelMsgProc
 			*/
-		virtual SINT32 processXMLMessage(DOM_Document& doc);
+		virtual SINT32 processXMLMessage(const DOM_Document& doc);
 
 	private:
 		CAReplayCtrlChannelMsgProc* m_pProcessor;
 };
-#endif
 #endif //__CA_REPLAY_CONTROL_CHANNEL

@@ -140,7 +140,7 @@ SINT32 CALastMixA::loop()
 												#endif
 												CASocket* tmpSocket=new CASocket;
 												CACacheLoadBalancing* ptmpLB=m_pCacheLB;
-												int ret=E_UNKNOWN;
+												ret=E_UNKNOWN;
 												if(pMixPacket->payload.type==MIX_PAYLOAD_SOCKS)
 													ptmpLB=m_pSocksLB;
 												for(UINT32 count=0;count<ptmpLB->getElementCount();count++)

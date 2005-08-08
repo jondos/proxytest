@@ -35,7 +35,7 @@ class CAReplayCtrlChannelMsgProc
 {
 	public:
 		/** Initialises the replay control channel messages processor with the necessary information.*/
-		CAReplayCtrlChannelMsgProc(CAMix* pMix);
+		CAReplayCtrlChannelMsgProc(const CAMix* pMix);
 		~CAReplayCtrlChannelMsgProc();
 
 		/** Propagates downstream the current replay timestamp*/ 
@@ -49,24 +49,24 @@ class CAReplayCtrlChannelMsgProc
 		SINT32 stopTimeStampPorpagation();	
 
 		/** proccesses a getTimeStamps request on a reply control channel*/
-		SINT32 proccessGetTimestamps(CAReplayControlChannel* pReceiver);
+		SINT32 proccessGetTimestamps(const CAReplayControlChannel* pReceiver);
 
 		/** proccesses a getTimeStamp request on a reply control channel
 		*@param strMIxID the mix id for which the timestamp is request or null
 		*/
-		SINT32 proccessGetTimestamp(CAReplayControlChannel* pReceiver,UINT8* strMixID);
+		SINT32 proccessGetTimestamp(const CAReplayControlChannel* pReceiver,const UINT8* strMixID);
 
 		/** proccesses a received replay timestamp rt from mix strMixID*/
-		SINT32 proccessGotTimestamp(CAReplayControlChannel* pReceiver,UINT8* strMixID,tReplayTimestamp& rt);
+		SINT32 proccessGotTimestamp(const CAReplayControlChannel* pReceiver,const UINT8* strMixID,const tReplayTimestamp& rt);
 
 		/** Sends upstram a request for the replay timestamp for the given mix*/
 		SINT32 sendGetTimestamp(const UINT8* strMixID);
 
 private:
 		/** Initalises the tmeplate which is used in response to the getTimeStamps request */
-		SINT32 initTimestampsMessageTemplate();
+		//SINT32 initTimestampsMessageTemplate();
 		friend THREAD_RETURN rp_loopPropagateTimestamp(void*);
-		CAMix* m_pMix;
+		const CAMix* m_pMix;
 		CAReplayControlChannel* m_pDownstreamReplayControlChannel;
 		CAReplayControlChannel* m_pUpstreamReplayControlChannel;
 		UINT32 m_u32PropagationInterval;

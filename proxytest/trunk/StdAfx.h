@@ -34,7 +34,18 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.03.87"
+#define MIX_VERSION "00.03.88"
+
+//Define all features if we are running in documentation creation mode
+#ifdef DOXYGEN
+	#define REPLAY_DETECTION
+	#define DELAY_USERS
+	#define COUNTRY_STATS
+	#define USE_POOL
+	#define PAYMENT
+	#define HAVE_UNIX_DOMAIN_PROTOCOL
+	#define HAVE_EPOLL
+#endif	
 
 #if defined(DEBUG)|| defined(_DEBUG)
 	#undef DEBUG
@@ -42,6 +53,14 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define DEBUG
 	#define _DEBUG
 #endif
+
+//Define all features if we are running in documentation creation mode
+#ifdef DOXYGEN
+	#define REPLAY_DETECTION
+	#define DELAY_USERS
+	#define COUNTRY_STATS
+#endif	
+
 //#define LOG_TRAFFIC_PER_USER //Log detail for traffic per user
 //#define LOG_CHANNEL //Log detail for traffic per cahnnel
 //#define LOG_PACKET_TIMES //computes statistics about the processing time each packet needs
