@@ -68,7 +68,7 @@ class CALastMix:public CAMix
 				}
 
 			SINT32 reconfigure();
-			tMixType getType()
+			tMixType getType() const
 				{
 					return CAMix::LAST_MIX;
 				}

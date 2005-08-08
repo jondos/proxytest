@@ -57,7 +57,7 @@ class CADatabase
 				}
 			
 			/** Returns the replay timestamp for this reference time (seconds since epoch) and time*/
-			static SINT32 getReplayTimestampForTime(tReplayTimestamp& replayTimestamp,UINT32 aktTime,UINT32 refTime) const;
+			static SINT32 getReplayTimestampForTime(tReplayTimestamp& replayTimestamp,UINT32 aktTime,UINT32 refTime);
 
 			/** Returns the refernce time (seconds since epoch) for the given replay timestamp*/
 			static SINT32 getTimeForReplayTimestamp(UINT32& refTime,tReplayTimestamp replayTimestamp)

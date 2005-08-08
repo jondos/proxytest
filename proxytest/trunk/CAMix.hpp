@@ -56,7 +56,7 @@ class CAMix
 			virtual ~CAMix(){}
 			SINT32 start();
 			virtual SINT32 reconfigure(){return E_SUCCESS;}
-			virtual tMixType getType()=0;
+			virtual tMixType getType() const =0;
 
 			/** Returns the Mix-Cascade info which should be send to the InfoService.
     		* This is NOT a copy!

@@ -88,7 +88,7 @@ CAReplayCtrlChannelMsgProc::~CAReplayCtrlChannelMsgProc()
 		delete m_strGetTimestampsRepsonseMessageTemplate;
 	}
 
-SINT32 CAReplayCtrlChannelMsgProc::proccessGetTimestamps(const CAReplayControlChannel* pReceiver)
+SINT32 CAReplayCtrlChannelMsgProc::proccessGetTimestamps(const CAReplayControlChannel* pReceiver) const
 	{
 		//Only for the first mix get timestamps is supported for the moment!
 		if(m_pMix->getType()!=CAMix::FIRST_MIX)
@@ -119,7 +119,7 @@ SINT32 CAReplayCtrlChannelMsgProc::proccessGetTimestamps(const CAReplayControlCh
 		return pReceiver->sendXMLMessage(docTemplate);
 	}
 
-SINT32 CAReplayCtrlChannelMsgProc::proccessGetTimestamp(const CAReplayControlChannel* pReceiver,const UINT8* strMixID)
+SINT32 CAReplayCtrlChannelMsgProc::proccessGetTimestamp(const CAReplayControlChannel* pReceiver,const UINT8* strMixID) const
 	{
 		UINT8 buff[255];
 		UINT8 msgBuff[1024];
@@ -235,7 +235,7 @@ SINT32 CAReplayCtrlChannelMsgProc::initTimestampsMessageTemplate()
 	}
 */
 
-SINT32 CAReplayCtrlChannelMsgProc::proccessGotTimestamp(const CAReplayControlChannel* pReceiver,const UINT8* strMixID,const tReplayTimestamp& rt)
+SINT32 CAReplayCtrlChannelMsgProc::proccessGotTimestamp(const CAReplayControlChannel* pReceiver,const UINT8* strMixID,const tReplayTimestamp& rt) const
 	{
 		//if not first mix just forwards them down the drain...
 		#ifdef DEBUG

@@ -53,7 +53,7 @@ class CAAbstractControlChannel
 			* @retval E_SUCCESS, if the message that successful send
 			* @retval E_UNKNOWN, in case of an error
 			*/
-		SINT32 sendXMLMessage(const DOM_Document& docMsg)
+		SINT32 sendXMLMessage(const DOM_Document& docMsg) const
 			{
 				UINT32 tlen=0xFFFF+2;
 				UINT8 tmpB[0xFFFF+2];
@@ -75,7 +75,7 @@ class CAAbstractControlChannel
 			* @retval E_SUCCESS, if the message that successful send
 			* @retval E_UNKNOWN, in case of an error
 			*/
-		SINT32 sendXMLMessage(const UINT8* msgXML,UINT32 msgLen)
+		SINT32 sendXMLMessage(const UINT8* msgXML,UINT32 msgLen) const
 			{
 				if(msgLen>0xFFFF)
 					{
