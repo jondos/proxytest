@@ -84,6 +84,7 @@ SINT32 CAFirstMix::initOnce()
 SINT32 CAFirstMix::init()
 	{
 		CAMsg::printMsg(LOG_DEBUG,"Starting FirstMix Init\n");
+		UINT8 buff[255];
 		m_nMixedPackets=0; //reset to zero after each restart (at the moment neccessary for infoservice)
 		m_bRestart=false;
 		//Establishing all Listeners
@@ -106,7 +107,6 @@ SINT32 CAFirstMix::init()
 				m_arrSocketsIn[aktSocket].create();
 				m_arrSocketsIn[aktSocket].setReuseAddr(true);
 				CASocketAddr* pAddr=pListener->getAddr();
-				UINT8 buff[255];
 				pAddr->toString(buff,255);
 				CAMsg::printMsg(LOG_DEBUG,"Listening on Interface: %s\n",buff);
 				delete pListener;
