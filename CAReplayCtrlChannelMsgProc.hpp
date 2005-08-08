@@ -49,7 +49,7 @@ class CAReplayCtrlChannelMsgProc
 		SINT32 stopTimeStampPorpagation();	
 
 		/** proccesses a getTimeStamps request on a reply control channel*/
-		SINT32 proccessGetTimestamps(const CAReplayControlChannel* pReceiver);
+		SINT32 proccessGetTimestamps(const CAReplayControlChannel* pReceiver) const;
 
 		/** proccesses a getTimeStamp request on a reply control channel
 		*@param strMIxID the mix id for which the timestamp is request or null
