@@ -47,6 +47,6 @@ class CAReplayControlChannel :
 		virtual SINT32 processXMLMessage(const DOM_Document& doc);
 
 	private:
-		CAReplayCtrlChannelMsgProc* m_pProcessor;
+		const CAReplayCtrlChannelMsgProc* m_pProcessor;
 };
 #endif //__CA_REPLAY_CONTROL_CHANNEL
