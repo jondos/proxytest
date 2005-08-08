@@ -54,10 +54,10 @@ class CAReplayCtrlChannelMsgProc
 		/** proccesses a getTimeStamp request on a reply control channel
 		*@param strMIxID the mix id for which the timestamp is request or null
 		*/
-		SINT32 proccessGetTimestamp(const CAReplayControlChannel* pReceiver,const UINT8* strMixID);
+		SINT32 proccessGetTimestamp(const CAReplayControlChannel* pReceiver,const UINT8* strMixID) const;
 
 		/** proccesses a received replay timestamp rt from mix strMixID*/
-		SINT32 proccessGotTimestamp(const CAReplayControlChannel* pReceiver,const UINT8* strMixID,const tReplayTimestamp& rt);
+		SINT32 proccessGotTimestamp(const CAReplayControlChannel* pReceiver,const UINT8* strMixID,const tReplayTimestamp& rt) const;
 
 		/** Sends upstram a request for the replay timestamp for the given mix*/
 		SINT32 sendGetTimestamp(const UINT8* strMixID);
