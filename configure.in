@@ -68,7 +68,7 @@ m68k*)
         OFLAGS="-O0"
         ;;	
 *)
-	if test "x$OFLAGS" != "x" ; then
+	if test "x$OFLAGS" == "x" ; then
 	    OFLAGS="-O3"
 	fi
 	;;
