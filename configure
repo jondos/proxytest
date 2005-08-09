@@ -3652,6 +3652,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 CFLAGS=""
 CXXFLAGS=""
+OFLAGS=""
 
 if test "x$GCC" = "xyes" ; then
    CFLAGS="-Wall -D_REENTRANT"
@@ -3677,6 +3678,7 @@ case "$host" in
 	DEFAULTLIBS="$LIBS -L/usr/local/lib -liconv -lc_r";
 	CFLAGS="$CFLAGS -pthread";
 	CXXFLAGS="$CXXFLAGS -pthread";
+	OFLAGS="-O0"
 	;;
 *-*-netbsd*)
 	DEFAULTLIBS="$LIBS -L/usr/pkg/lib -liconv -lpthread"
@@ -3693,7 +3695,9 @@ m68k*)
         OFLAGS="-O0"
         ;;
 *)
-        OFLAGS="-O3"
+	if test "x$OFLAGS" != "x" ; then
+	    OFLAGS="-O3"
+	fi
 	;;
 esac
 
