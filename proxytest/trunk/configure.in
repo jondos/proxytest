@@ -47,7 +47,7 @@ case "$host" in
         CFLAGS="$CFLAGS "
         ;;
 *-*-freebsd*)
-	DEFAULTLIBS="$LIBS -L/usr/local/lib -liconv";
+	DEFAULTLIBS="$LIBS -L/usr/local/lib -liconv -lc_r";
 	CFLAGS="$CFLAGS -pthread";
 	CXXFLAGS="$CXXFLAGS -pthread";
 	;;
