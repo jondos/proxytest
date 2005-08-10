@@ -37,13 +37,10 @@ CAMix::CAMix()
 		m_pSignature=NULL;
 		m_pInfoService=NULL;
 		#ifdef REPLAY_DETECTION
-			m_pReplayDB=NULL;
 			m_pReplayMsgProc=NULL;
 		#endif
-#ifdef WITH_CONTROL_CHANNELS
 		m_pMuxOutControlChannelDispatcher=NULL;
 		m_pMuxInControlChannelDispatcher=NULL;
-#endif		
 	}
 
 SINT32 CAMix::start()

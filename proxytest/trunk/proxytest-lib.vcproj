@@ -1291,6 +1291,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\CAMixWithReplayDB.cpp">
+			</File>
+			<File
 				RelativePath="CAMsg.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -2896,6 +2899,9 @@
 			</File>
 			<File
 				RelativePath="CAMix.hpp">
+			</File>
+			<File
+				RelativePath=".\CAMixWithReplayDB.hpp">
 			</File>
 			<File
 				RelativePath="CAMsg.hpp">

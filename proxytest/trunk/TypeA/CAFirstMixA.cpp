@@ -166,11 +166,12 @@ SINT32 CAFirstMixA::loop()
 												#ifdef COUNTRY_STATS
 													m_PacketsPerCountryIN[pHashEntry->countryID]++;
 												#endif	
-#ifdef WITH_CONTROL_CHANNELS		
 												//New control channel code...!
-												if(pHashEntry->pControlChannelDispatcher->proccessMixPacket(pMixPacket))
-													goto NEXT_USER;
-#endif
+												if(pMixPacket->channel>0&&pMixPacket->channel<256)
+													{
+														pHashEntry->pControlChannelDispatcher->proccessMixPacket(pMixPacket);
+														goto NEXT_USER;
+													}
 #ifdef PAYMENT
 												// payment code added by Bastian Voigt
 												if(m_pAccountingInstance->handleJapPacket( pMixPacket, pHashEntry ) != 1) 
@@ -257,13 +258,6 @@ SINT32 CAFirstMixA::loop()
 																#else
 																	m_pRSA->decrypt(pMixPacket->data,rsaBuff); // stefan: das hier ist doch eine ziemlich kostspielige operation. sollte das pruefen auf Max_Number_Of_Channels nicht vorher passieren? --> ok sollte aufs TODO ...
 																#endif
-																#if defined (REPLAY_DETECTION) &&!defined(FIRST_MIX_SYMMETRC) 
-																	if(m_pReplayDB->insert(rsaBuff)!=E_SUCCESS)
-																		{
-																			CAMsg::printMsg(LOG_INFO,"Replay: Duplicate packet ignored.\n");
-																			goto NEXT_USER;
-																		}
-																#endif
 																pCipher= new CASymCipher();
 																pCipher->setKey(rsaBuff);
 																#ifdef FIRST_MIX_SYMMETRIC
@@ -309,9 +303,7 @@ NEXT_USER:
 									pHashEntry=(fmHashTableEntry*)m_psocketgroupUsersRead->getNextSignaledSocketData();
 								#else
 									}//if is signaled
-#if defined (WITH_CONTROL_CHANNELS)||defined(REPLAY_DETECTION)
 NEXT_USER:
-#endif
 									pHashEntry=m_pChannelList->getNext();
 								#endif
 							}
@@ -458,10 +450,6 @@ NEXT_USER:
 //Step 5 
 //Writing to users...
 				countRead=m_psocketgroupUsersWrite->select(/*true,*/0);
-#ifndef WITH_CONTROL_CHANNELS
-				if(countRead>0)
-					bAktiv=true;
-#endif
 #ifdef HAVE_EPOLL		
 				fmHashTableEntry* pfmHashEntry=(fmHashTableEntry*)m_psocketgroupUsersWrite->getFirstSignaledSocketData();
 				while(pfmHashEntry!=NULL)
@@ -478,11 +466,9 @@ NEXT_USER:
 								if(pfmHashEntry->delayBucket>0)
 								{
 #endif
-#ifdef WITH_CONTROL_CHANNELS
 								if(pfmHashEntry->pQueueSend->getSize()>0)
 								{
 								bAktiv=true;
-#endif
 								UINT32 len=sizeof(tQueueEntry);
 								if(pfmHashEntry->uAlreadySendPacketSize==-1)
 									{
@@ -543,16 +529,8 @@ NEXT_USER:
 													}
 												pfmHashEntry->cSuspend=0;
 											}
-#ifndef WITH_CONTROL_CHANNELS
-										if(pfmHashEntry->pQueueSend->isEmpty())
-											{
-												m_psocketgroupUsersWrite->remove(*pfmHashEntry->pMuxSocket);
-											}
-#endif
 									}
-#ifdef WITH_CONTROL_CHANNELS
 								}
-#endif
 #ifdef DELAY_USERS
 								}
 #endif

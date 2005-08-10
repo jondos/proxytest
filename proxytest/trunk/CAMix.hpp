@@ -34,7 +34,6 @@ class CASignature;
 class CAInfoService;
 //class DOM_Element;
 #ifdef REPLAY_DETECTION
-	#include "CADatabase.hpp"
 	#include "CAReplayCtrlChannelMsgProc.hpp"
 #endif	
 class CAControlChannelDispatcher;
@@ -83,7 +82,6 @@ class CAMix
 					return m_acceptReconfiguration;
 			}
 
-#ifdef WITH_CONTROL_CHANNELS
 			CAControlChannelDispatcher* getDownstreamControlChannelDispatcher() const
 				{
 					return m_pMuxInControlChannelDispatcher;
@@ -93,14 +91,6 @@ class CAMix
 				{
 					return m_pMuxOutControlChannelDispatcher;
 				}
-#endif		
-#ifdef REPLAY_DETECTION
-			CADatabase* getReplayDB() const
-				{
-					return m_pReplayDB;
-				}
-#endif	
-
 		protected:
 			virtual SINT32 clean()=0;
 			virtual SINT32 initOnce(){return E_SUCCESS;}
@@ -123,13 +113,10 @@ class CAMix
 			// added by ronin <ronin2@web.de>
 			DOM_Document m_docMixCascadeInfo;
 #ifdef REPLAY_DETECTION
-			CADatabase*						m_pReplayDB;
 			CAReplayCtrlChannelMsgProc* m_pReplayMsgProc;
 #endif
-#ifdef WITH_CONTROL_CHANNELS
 			CAControlChannelDispatcher* m_pMuxOutControlChannelDispatcher;
 			CAControlChannelDispatcher* m_pMuxInControlChannelDispatcher;
-#endif		
 		private:
 			// added by ronin <ronin2@web.de>
 			bool needAutoConfig();

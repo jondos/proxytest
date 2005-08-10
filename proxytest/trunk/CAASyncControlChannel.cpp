@@ -27,12 +27,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 
 #include "StdAfx.h"
-#ifdef WITH_CONTROL_CHANNELS
 #include "CAASyncControlChannel.hpp"
 
 SINT32 CAASyncControlChannel::proccessMessage(UINT8* msg, UINT32 msglen)
 {
 	return E_SUCCESS;
 }
-#endif
 

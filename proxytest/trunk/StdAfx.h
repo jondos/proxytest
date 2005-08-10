@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.03.89"
+#define MIX_VERSION "00.03.90"
 
 //Define all features if we are running in documentation creation mode
 #ifdef DOXYGEN
@@ -116,11 +116,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define USE_POOL
 //#define FIRST_MIX_SYMMETRIC //to enable use of only symmetric encryption for first mix
 //#define NEW_MIX_TYPE // to enable the new 1:x mix protocol
-//#define WITH_CONTROL_CHANNELS //enable Control channels
-//#define WITH_CONTROL_CHANNELS_TEST //enable a Test Channel
+//#define WITH_CONTROL_CHANNELS_TEST //enable a Test control Channel
 //#define NEW_FLOW_CONTROL //enable for the new flow control mechanism
 
-//#define REPLAY_DETECTION // enable to prevent replay of mix packets
+#define REPLAY_DETECTION // enable to prevent replay of mix packets
 #define REPLAY_TIMESTAMP_PROPAGATION_INTERVALL 15 //How often (in minutes) should the current replay timestamps be propagate
 
 //Some constants
@@ -153,13 +152,14 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define LOG_PACKET_TIMES
 #endif
 
-#if defined (REPLAY_DETECTION)&&!defined(WITH_CONTROL_CHANNELS)
-	#define WITH_CONTROL_CHANNELS
+#if defined (REPLAY_DETECTION)&&!defined(FIRST_MIX_SYMMETRIC)
+	#define FIRST_MIX_SYMMETRIC
 #endif
 
-#define MIX_CASCADE_PROTOCOL_VERSION_0_7 7  //with replay detection + control channels
+#define MIX_CASCADE_PROTOCOL_VERSION_0_8 8  //with replay detection + control channels + first mix symmetric
+#define MIX_CASCADE_PROTOCOL_VERSION_0_7 7  //with replay detection + control channels (obsolete)
 #define MIX_CASCADE_PROTOCOL_VERSION_0_6 6  //with new flow control
-#define MIX_CASCADE_PROTOCOL_VERSION_0_5 5  //with control channels
+#define MIX_CASCADE_PROTOCOL_VERSION_0_5 5  //with control channels (obsolte - allway with control channels)
 #define MIX_CASCADE_PROTOCOL_VERSION_0_4 4  //symmetric communication to first mix
 #define MIX_CASCADE_PROTOCOL_VERSION_0_3 3 //with reply detection [deprecated - not in use anymore!]
 #define MIX_CASCADE_PROTOCOL_VERSION_0_2 2 //normal protocol
@@ -167,13 +167,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if (defined(LOG_CHANNEL)) && !defined(LOG_TRAFFIC_PER_USER)
 	#define LOG_TRAFFIC_PER_USER
 #endif	
-#ifdef PAYMENT
-	#define WITH_CONTROL_CHANNELS
-#endif
 #ifdef REPLAY_DETECTION
-	#define MIX_CASCADE_PROTOCOL_VERSION "0.7"
-#elif defined WITH_CONTROL_CHANNELS
-	#define MIX_CASCADE_PROTOCOL_VERSION "0.5"
+	#define MIX_CASCADE_PROTOCOL_VERSION "0.8"
 #elif defined(FIRST_MIX_SYMMETRIC)
 	#define MIX_CASCADE_PROTOCOL_VERSION "0.4"
 #else

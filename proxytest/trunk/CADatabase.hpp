@@ -28,7 +28,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #include "CAMutex.hpp"
 #include "CAThread.hpp"
-
+#ifndef __CA_DATABASE__
+#define __CA_DATABASE__
 typedef struct __t_database_entry
 	{
 		__t_database_entry* next;
@@ -81,3 +82,4 @@ class CADatabase
 			CAMutex m_oMutex;
 			CAThread* m_pThread;
 	};
+#endif //__CA_DATABASE__
