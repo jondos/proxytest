@@ -24,7 +24,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				OptimizeForProcessor="2"
-				AdditionalIncludeDirectories="$(INCLUDE_XERCES_C);$(INCLUDE_XERCES_C)\xercesc;$(INCLUDE_OPENSSL);$(INCLUDE_PTHREADS);$(INCLUDE_ZLIB);$(INCLUDE_MYSQL);"
+				AdditionalIncludeDirectories="&quot;$(INCLUDE_XERCES_C)&quot;;&quot;$(INCLUDE_XERCES_C)\xercesc&quot;;&quot;$(INCLUDE_OPENSSL)&quot;;&quot;$(INCLUDE_PTHREADS)&quot;;&quot;$(INCLUDE_ZLIB)&quot;;&quot;$(INCLUDE_MYSQL)&quot;;&quot;$(INCLUDE_POSTGRES_CLIENT_LIB)\postgresql&quot;;&quot;$(INCLUDE_POSTGRES_CLIENT_LIB)&quot;"
 				PreprocessorDefinitions="WIN32;_CONSOLE;_DEBUG;_REENTRANT;__MIX_TEST;__CLEANUP_C;"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -47,11 +47,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="proxytest-lib.lib ws2_32.lib ssleay32.lib libeay32.lib pthreadVC.lib xerces-c_2D.lib zlib.lib"
+				AdditionalDependencies="proxytest-lib.lib ws2_32.lib ssleay32.lib libeay32.lib pthreadVC.lib xerces-c_2D.lib zlib.lib libpqdll.lib"
 				OutputFile="$(OutDir)\proxytest.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories=".\proxytest-lib\Debug;$(LIB_XERCES_C_DEBUG);$(LIB_OPENSSL);$(LIB_PTHREADS);$(LIB_ZLIB);$(LIB_MYSQL_DEBUG)"
+				AdditionalLibraryDirectories="&quot;.\proxytest-lib\Debug&quot;;&quot;G:\postgres-client-lib\lib&quot;;&quot;$(LIB_XERCES_C_DEBUG)&quot;;&quot;$(LIB_OPENSSL)&quot;;&quot;$(LIB_PTHREADS)&quot;;&quot;$(LIB_ZLIB)&quot;;&quot;$(LIB_MYSQL_DEBUG)&quot;"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)\proxytest.pdb"
 				GenerateMapFile="TRUE"
