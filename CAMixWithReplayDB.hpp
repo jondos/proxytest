@@ -25,10 +25,13 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
-/** This calss (interface) adds the functionality used by last and middle mixes to detecte replays*/
+
+#ifndef _CA_MIX_WITH_REPLAY_DB_
+#define _CA_MIX_WITH_REPLAY_DB_
 #include "CADatabase.hpp"
 #include "CAMix.hpp"
 
+/** This class (interface) adds the functionality used by last and middle mixes to detecte replays*/
 class CAMixWithReplayDB:public CAMix
 	{
 		public:
@@ -41,3 +44,4 @@ class CAMixWithReplayDB:public CAMix
 		protected:
 			CADatabase*						m_pReplayDB;
 	};
+#endif //_CA_MIX_WITH_REPLAY_DB_
