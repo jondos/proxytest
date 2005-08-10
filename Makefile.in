@@ -78,9 +78,10 @@ am_mix_OBJECTS = CAAbstractControlChannel.$(OBJEXT) \
 	CALastMixChannelList.$(OBJEXT) CAListenerInterface.$(OBJEXT) \
 	CALocalProxy.$(OBJEXT) CALogPacketStats.$(OBJEXT) \
 	CAMiddleMix.$(OBJEXT) CAMiddleMixChannelList.$(OBJEXT) \
-	CAMix.$(OBJEXT) CAMsg.$(OBJEXT) CAMutex.$(OBJEXT) \
-	CAMuxSocket.$(OBJEXT) CAPayment.$(OBJEXT) CAPool.$(OBJEXT) \
-	CAQueue.$(OBJEXT) CAReplayControlChannel.$(OBJEXT) \
+	CAMix.$(OBJEXT) CAMixWithReplayDB.$(OBJEXT) CAMsg.$(OBJEXT) \
+	CAMutex.$(OBJEXT) CAMuxSocket.$(OBJEXT) CAPayment.$(OBJEXT) \
+	CAPool.$(OBJEXT) CAQueue.$(OBJEXT) \
+	CAReplayControlChannel.$(OBJEXT) \
 	CAReplayCtrlChannelMsgProc.$(OBJEXT) CASemaphore.$(OBJEXT) \
 	CASignature.$(OBJEXT) CASingleSocketGroup.$(OBJEXT) \
 	CASocket.$(OBJEXT) CASocketAddrINet.$(OBJEXT) \
@@ -254,6 +255,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CAMiddleMix.cpp \
 		    CAMiddleMixChannelList.cpp \
 		    CAMix.cpp \
+		    CAMixWithReplayDB.cpp\
 		    CAMsg.cpp \
 		    CAMutex.cpp\
 		    CAMuxSocket.cpp \
@@ -317,6 +319,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CAMiddleMix.hpp \
 		    CAMiddleMixChannelList.hpp \
 		    CAMix.hpp \
+		    CAMixWithReplayDB.hpp\
 		    CAMsg.hpp \
 		    CAMutex.hpp\
 		    CAMuxSocket.hpp \
@@ -477,6 +480,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMiddleMix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMiddleMixChannelList.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMix.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMixWithReplayDB.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMsg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMutex.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMuxSocket.Po@am__quote@

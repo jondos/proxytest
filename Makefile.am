@@ -37,6 +37,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CAMiddleMix.cpp \
 		    CAMiddleMixChannelList.cpp \
 		    CAMix.cpp \
+		    CAMixWithReplayDB.cpp\
 		    CAMsg.cpp \
 		    CAMutex.cpp\
 		    CAMuxSocket.cpp \
@@ -100,6 +101,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CAMiddleMix.hpp \
 		    CAMiddleMixChannelList.hpp \
 		    CAMix.hpp \
+		    CAMixWithReplayDB.hpp\
 		    CAMsg.hpp \
 		    CAMutex.hpp\
 		    CAMuxSocket.hpp \
