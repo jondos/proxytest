@@ -49,7 +49,7 @@ public:
 		
     virtual ~CAAccountingControlChannel();
 		
-		SINT32 processXMLMessage(DOM_Document &a_doc);
+		virtual SINT32 processXMLMessage(const DOM_Document &a_doc);
 
 private:
 		fmHashTableEntry * m_pHashEntry;
