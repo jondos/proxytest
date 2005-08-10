@@ -162,7 +162,7 @@ SINT32 CAAccountingInstance::handleJapPacket( MIXPACKET *pPacket, fmHashTableEnt
 				CAXMLErrorMessage msg(CAXMLErrorMessage::ERR_ACCOUNT_EMPTY);
 				DOM_Document doc;
 				msg.toXmlDocument(doc);
-				pAccInfo->pControlChannel->sendMessage(doc);
+				pAccInfo->pControlChannel->sendXMLMessage(doc);
 				pAccInfo->authFlags |= AUTH_FATAL_ERROR;
 				m_Mutex.unlock();
 				return 3;
@@ -180,7 +180,7 @@ SINT32 CAAccountingInstance::handleJapPacket( MIXPACKET *pPacket, fmHashTableEnt
 				CAXMLErrorMessage msg(CAXMLErrorMessage::ERR_NO_CONFIRMATION);
 				DOM_Document doc;
 				msg.toXmlDocument(doc);
-				pAccInfo->pControlChannel->sendMessage(doc);
+				pAccInfo->pControlChannel->sendXMLMessage(doc);
 				pAccInfo->authFlags |= AUTH_FATAL_ERROR;
 				m_Mutex.unlock();
 				return 3;
@@ -204,7 +204,7 @@ SINT32 CAAccountingInstance::handleJapPacket( MIXPACKET *pPacket, fmHashTableEnt
 						CAXMLErrorMessage msg(CAXMLErrorMessage::ERR_NO_CONFIRMATION);
 						DOM_Document doc;
 						msg.toXmlDocument(doc);
-						pAccInfo->pControlChannel->sendMessage(doc);
+						pAccInfo->pControlChannel->sendXMLMessage(doc);
 						pAccInfo->authFlags |= AUTH_FATAL_ERROR;
 						m_Mutex.unlock();
 						return 3;
@@ -223,7 +223,7 @@ SINT32 CAAccountingInstance::handleJapPacket( MIXPACKET *pPacket, fmHashTableEnt
 					CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending REMINDER CC request.\n");
 					#endif
 					makeCCRequest(pAccInfo->accountNumber, pAccInfo->transferredBytes, doc);
-					pAccInfo->pControlChannel->sendMessage(doc);
+					pAccInfo->pControlChannel->sendXMLMessage(doc);
 					pAccInfo->authFlags |= AUTH_SENT_SECOND_CC_REQUEST;
 					pAccInfo->lastRequestSeconds = now.tv_sec;
 					m_Mutex.unlock();
@@ -243,7 +243,7 @@ SINT32 CAAccountingInstance::handleJapPacket( MIXPACKET *pPacket, fmHashTableEnt
 				CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending CC request.\n");
 				#endif
 				makeCCRequest(pAccInfo->accountNumber, pAccInfo->transferredBytes, doc);
-				pAccInfo->pControlChannel->sendMessage(doc);
+				pAccInfo->pControlChannel->sendXMLMessage(doc);
 				pAccInfo->authFlags |= AUTH_SENT_CC_REQUEST;
 				pAccInfo->lastRequestSeconds = now.tv_sec;
 				m_Mutex.unlock();
@@ -276,7 +276,7 @@ SINT32 CAAccountingInstance::handleJapPacket( MIXPACKET *pPacket, fmHashTableEnt
 							CAXMLErrorMessage msg(CAXMLErrorMessage::ERR_NO_BALANCE);
 							DOM_Document doc;
 							msg.toXmlDocument(doc);
-							pAccInfo->pControlChannel->sendMessage(doc);
+							pAccInfo->pControlChannel->sendXMLMessage(doc);
 							pAccInfo->authFlags |= AUTH_FATAL_ERROR;
 							m_Mutex.unlock();
 							return 3;
@@ -297,7 +297,7 @@ SINT32 CAAccountingInstance::handleJapPacket( MIXPACKET *pPacket, fmHashTableEnt
 						#endif
 						makeBalanceRequest((SINT32)now.tv_sec-600, doc);
 						pAccInfo->reqbalMinSeconds = now.tv_sec - 600;
-						pAccInfo->pControlChannel->sendMessage(doc);
+						pAccInfo->pControlChannel->sendXMLMessage(doc);
 						pAccInfo->authFlags |= AUTH_SENT_SECOND_BALANCE_REQUEST;
 						pAccInfo->lastRequestSeconds = now.tv_sec;
 						m_Mutex.unlock();
@@ -318,7 +318,7 @@ SINT32 CAAccountingInstance::handleJapPacket( MIXPACKET *pPacket, fmHashTableEnt
 					CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending balance request.\n");
 					#endif
 					pAccInfo->reqbalMinSeconds = now.tv_sec - 600;
-					pAccInfo->pControlChannel->sendMessage(doc);
+					pAccInfo->pControlChannel->sendXMLMessage(doc);
 					pAccInfo->authFlags |= AUTH_SENT_BALANCE_REQUEST;
 					pAccInfo->lastRequestSeconds = now.tv_sec;
 					m_Mutex.unlock();
@@ -353,7 +353,7 @@ SINT32 CAAccountingInstance::handleJapPacket( MIXPACKET *pPacket, fmHashTableEnt
 					CAXMLErrorMessage msg(CAXMLErrorMessage::ERR_NO_ACCOUNTCERT);
 					DOM_Document doc;
 					msg.toXmlDocument(doc);
-					pAccInfo->pControlChannel->sendMessage(doc);
+					pAccInfo->pControlChannel->sendXMLMessage(doc);
 					pAccInfo->authFlags |= AUTH_FATAL_ERROR;
 					m_Mutex.unlock();
 					return 2;
@@ -369,7 +369,7 @@ SINT32 CAAccountingInstance::handleJapPacket( MIXPACKET *pPacket, fmHashTableEnt
 				#endif
 				DOM_Document doc;
 				makeAccountRequest(doc);
-				pAccInfo->pControlChannel->sendMessage(doc);
+				pAccInfo->pControlChannel->sendXMLMessage(doc);
 				pAccInfo->authFlags |= AUTH_SENT_SECOND_ACCOUNT_REQUEST;
 				pAccInfo->lastRequestSeconds = now.tv_sec;
 			}
@@ -384,7 +384,7 @@ SINT32 CAAccountingInstance::handleJapPacket( MIXPACKET *pPacket, fmHashTableEnt
 			#endif
 			DOM_Document doc;
 			makeAccountRequest(doc);
-			pAccInfo->pControlChannel->sendMessage(doc);
+			pAccInfo->pControlChannel->sendXMLMessage(doc);
 			pAccInfo->authFlags |= AUTH_SENT_ACCOUNT_REQUEST;
 			pAccInfo->lastRequestSeconds = now.tv_sec;
 			m_Mutex.unlock();
@@ -392,9 +392,7 @@ SINT32 CAAccountingInstance::handleJapPacket( MIXPACKET *pPacket, fmHashTableEnt
 		}
 	}
 	CAMsg::printMsg(LOG_ERR, 
-			"Unknown error in CAAccountingInstance::handleJapPacket()."
-			"..... this should never happen!\n"
-		);
+			"Unknown error in CAAccountingInstance::handleJapPacket().... this should never happen!\n");
 	return 4;
 }
 
@@ -567,7 +565,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 				);
 			DOM_Document errDoc;
 			err.toXmlDocument(errDoc);
-			pAccInfo->pControlChannel->sendMessage(errDoc);
+			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
 			m_Mutex.unlock();
 			return ;
 		}
@@ -581,7 +579,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 			CAXMLErrorMessage err(CAXMLErrorMessage::ERR_WRONG_FORMAT);
 			DOM_Document errDoc;
 			err.toXmlDocument(errDoc);
-			pAccInfo->pControlChannel->sendMessage(errDoc);
+			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
 			m_Mutex.unlock();
 			return ;
 		}
@@ -593,7 +591,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 			CAXMLErrorMessage err(CAXMLErrorMessage::ERR_KEY_NOT_FOUND);
 			DOM_Document errDoc;
 			err.toXmlDocument(errDoc);
-			pAccInfo->pControlChannel->sendMessage(errDoc);
+			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
 			m_Mutex.unlock();
 			return ;
 		}
@@ -611,7 +609,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 			CAXMLErrorMessage err(CAXMLErrorMessage::ERR_INTERNAL_SERVER_ERROR);
 			DOM_Document errDoc;
 			err.toXmlDocument(errDoc);
-			pAccInfo->pControlChannel->sendMessage(errDoc);
+			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
 			m_Mutex.unlock();
 			return ;
 		}
@@ -624,7 +622,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 			CAXMLErrorMessage err(CAXMLErrorMessage::ERR_BAD_SIGNATURE, (UINT8*)"Your account certificate is invalid");
 			DOM_Document errDoc;
 			err.toXmlDocument(errDoc);
-			pAccInfo->pControlChannel->sendMessage(errDoc);
+			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
 			pAccInfo->authFlags |= AUTH_FAKE | AUTH_GOT_ACCOUNTCERT;
 			pAccInfo->authFlags &= ~AUTH_ACCOUNT_OK;
 			m_Mutex.unlock();
@@ -653,7 +651,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 	setDOMElementValue( elemPanic, b64Challenge );
 
 	// send XML struct to Jap & set auth flags
-	pAccInfo->pControlChannel->sendMessage(doc);
+	pAccInfo->pControlChannel->sendXMLMessage(doc);
 	pAccInfo->authFlags = AUTH_CHALLENGE_SENT | AUTH_GOT_ACCOUNTCERT;
 	pAccInfo->lastRequestSeconds = now.tv_sec;
 	m_Mutex.unlock();
@@ -810,7 +808,7 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,D
 			CAXMLErrorMessage err(CAXMLErrorMessage::ERR_WRONG_DATA, (UINT8*)"Your CostConfirmation has a wrong AI name");
 			DOM_Document errDoc;
 			err.toXmlDocument(errDoc);
-			pAccInfo->pControlChannel->sendMessage(errDoc);
+			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
 			delete[] pAiID;
 			return ;
 		}
@@ -825,7 +823,7 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,D
 				(UINT8*)"Your CostConfirmation has a wrong number of transferred bytes");
 			DOM_Document errDoc;
 			err.toXmlDocument(errDoc);
-			pAccInfo->pControlChannel->sendMessage(errDoc);
+			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
 			m_Mutex.unlock();
 			return ;
 		}
