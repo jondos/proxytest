@@ -2093,6 +2093,9 @@
 				RelativePath=".\CAXMLBI.cpp">
 			</File>
 			<File
+				RelativePath=".\CAXMLCostConfirmation.cpp">
+			</File>
+			<File
 				RelativePath=".\CAXMLErrorMessage.cpp">
 			</File>
 			<File
@@ -2983,6 +2986,9 @@
 			</File>
 			<File
 				RelativePath=".\CAXMLBI.hpp">
+			</File>
+			<File
+				RelativePath=".\CAXMLCostConfirmation.hpp">
 			</File>
 			<File
 				RelativePath=".\CAXMLErrorMessage.hpp">
