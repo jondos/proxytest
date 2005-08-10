@@ -29,10 +29,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef REPLAY_DETECTION
 #include "CAReplayCtrlChannelMsgProc.hpp"
 #include "CAReplayControlChannel.hpp"
+#include "CAMixWithReplayDB.hpp"
 #include "CAMix.hpp"
 #include "CAReplayControlChannel.hpp"
 #include "CACmdLnOptions.hpp"
 #include "CAFirstMix.hpp"
+#include "CADatabase.hpp"
 
 CAReplayCtrlChannelMsgProc::CAReplayCtrlChannelMsgProc(const CAMix* pMix)
 	{
@@ -102,7 +104,7 @@ SINT32 CAReplayCtrlChannelMsgProc::proccessGetTimestamps(const CAReplayControlCh
 		docTemplate.appendChild(elemMixes);
 		tMixParameters* mixParameters=pMix->getMixParameters();
 		time_t aktTime=time(NULL);
-		for(SINT32 i=0;i<pMix->getMixCount();i++)
+		for(SINT32 i=0;i<pMix->getMixCount()-1;i++)
 			{
 				DOM_Element elemMix=docTemplate.createElement("Mix");
 				setDOMElementAttribute(elemMix,"id",mixParameters[i].m_strMixID);
@@ -124,15 +126,19 @@ SINT32 CAReplayCtrlChannelMsgProc::proccessGetTimestamp(const CAReplayControlCha
 		UINT8 buff[255];
 		UINT8 msgBuff[1024];
 		options.getMixId(buff,255);
-		if(strMixID==NULL||strncmp((char*)strMixID,(char*)buff,255)==0)
+		if(strMixID==NULL||strncmp((char*)strMixID,(char*)buff,255)==0)//our own replay db timestamp is requested
 			{
+				//First Mixes do not have a replay DB!
+				if(m_pMix->getType()==CAMix::FIRST_MIX)
+					return E_SUCCESS;
 				tReplayTimestamp rt;
-				m_pMix->getReplayDB()->getCurrentReplayTimestamp(rt);
+				const CAMixWithReplayDB* pMix=(CAMixWithReplayDB*)m_pMix;
+				pMix->getReplayDB()->getCurrentReplayTimestamp(rt);
 				const char* strTemplate="<?xml version=\"1.0\" encoding=\"UTF-8\"?><Mix id=\"%s\"><Replay><ReplayTimestamp interval=\"%u\" offset=\"%u\"/></Replay></Mix>";
 				sprintf((char*)msgBuff,strTemplate,buff,rt.interval,rt.offset);
 				return pReceiver->sendXMLMessage(msgBuff,strlen((char*)msgBuff));
 			}
-		else if(m_pUpstreamReplayControlChannel!=NULL&&strMixID!=NULL)
+		else if(m_pUpstreamReplayControlChannel!=NULL&&strMixID!=NULL)//the replay timestamp of some other mix is requested
 			{
 				const char* strTemplate="<?xml version=\"1.0\" encoding=\"UTF-8\"?><GetTimestamp id=\"%s\"/>";
 				sprintf((char*)msgBuff,strTemplate,buff);
@@ -147,7 +153,7 @@ SINT32 CAReplayCtrlChannelMsgProc::propagateCurrentReplayTimestamp()
 			return E_UNKNOWN;
 		const char* strMsgTemplate="<?xml version=\"1.0\" encoding=\"UTF-8\"?><Mix id=\"%s\"><Replay><ReplayTimestamp interval=\"%u\" offset=\"%u\"/></Replay></Mix>"; 
 		tReplayTimestamp replayTimestamp;
-		m_pMix->getReplayDB()->getCurrentReplayTimestamp(replayTimestamp);
+		((CAMixWithReplayDB*)m_pMix)->getReplayDB()->getCurrentReplayTimestamp(replayTimestamp);
 		UINT8 buff[255];
 		UINT8* msgBuff=new UINT8[1024];
 		options.getMixId(buff,255);

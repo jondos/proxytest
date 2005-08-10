@@ -128,9 +128,7 @@ SINT32 CALastMix::init()
 		m_pQueueSendToMix=new CAQueue(sizeof(tQueueEntry));
 		m_pQueueReadFromMix=new CAQueue(sizeof(tQueueEntry));
 
-#ifdef WITH_CONTROL_CHANNELS
 		m_pMuxInControlChannelDispatcher=new CAControlChannelDispatcher(m_pQueueSendToMix);
-#endif
 #ifdef REPLAY_DETECTION
 		m_pReplayMsgProc=new CAReplayCtrlChannelMsgProc(this);
 		m_pReplayMsgProc->startTimeStampPorpagation(REPLAY_TIMESTAMP_PROPAGATION_INTERVALL);
@@ -591,13 +589,11 @@ SINT32 CALastMix::clean()
 		m_pReplayMsgProc=NULL;
 #endif
 
-#ifdef WITH_CONTROL_CHANNELS
 		if(m_pMuxInControlChannelDispatcher!=NULL)
 			{
 				delete m_pMuxInControlChannelDispatcher;
 			}
 		m_pMuxInControlChannelDispatcher=NULL;
-#endif
 
 		if(m_pMuxIn!=NULL)
 			{

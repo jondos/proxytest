@@ -42,11 +42,16 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #endif
 #include "CALogPacketStats.hpp"
 #include "CALastMixChannelList.hpp"
-class CALastMix:public CAMix
-
+#include "CAMixWithReplayDB.hpp"
+class CALastMix:public 
+#ifdef REPLAY_DETECTION
+	CAMixWithReplayDB
+#else
+	CAMix
+#endif
 	{
 		public:
-			CALastMix():CAMix()
+			CALastMix()
 				{
 					m_pMuxIn=NULL;m_pSignature=NULL;
 					m_pRSA=NULL;m_pInfoService=NULL;

@@ -190,13 +190,6 @@ SINT32 CAFirstMix::init()
         return E_UNKNOWN;
     }
 
-#ifdef REPLAY_DETECTION
-			m_pReplayDB=new CADatabase();
-			m_pReplayDB->start();
-			//set the refTime of the first mix in the mix parameters array
-			m_arMixParameters[0].m_u32ReplayRefTime=m_pReplayDB->getRefTime();
-#endif
-
 #ifdef PAYMENT
 		m_pAccountingInstance = CAAccountingInstance::getInstance();
 #endif
@@ -216,9 +209,7 @@ SINT32 CAFirstMix::init()
 		m_psocketgroupUsersWrite=new CASocketGroup(true);
 #endif
 
-#ifdef WITH_CONTROL_CHANNELS
 		m_pMuxOutControlChannelDispatcher=new CAControlChannelDispatcher(m_pQueueSendToMix);
-#endif
 #ifdef REPLAY_DETECTION
 		m_pReplayMsgProc=new CAReplayCtrlChannelMsgProc(this);
 #endif
@@ -458,7 +449,7 @@ SINT32 CAFirstMix::processKeyExchange()
 
 SINT32 CAFirstMix::setMixParameters(const tMixParameters& params)
 	{
-		for(UINT32 i=0;i<this->m_u32MixCount;i++)
+		for(UINT32 i=0;i<m_u32MixCount-1;i++)
 			{
 				if(strcmp((char*)m_arMixParameters[i].m_strMixID,(char*)params.m_strMixID)==0)
 					{
@@ -569,9 +560,7 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 		#ifdef USE_POOL
 			CAPool* pPool=new CAPool(MIX_POOL_SIZE);
 		#endif
-#ifdef WITH_CONTROL_CHANNELS
 		CAControlChannelDispatcher* pControlChannelDispatcher=pFirstMix->m_pMuxOutControlChannelDispatcher;
-#endif
 		while(!pFirstMix->m_bRestart)
 			{
 				if(pQueue->getSize()>MAX_READ_FROM_NEXT_MIX_QUEUE_SIZE)
@@ -606,14 +595,14 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 								break;
 							}
 					}
-				#ifdef WITH_CONTROL_CHANNELS
-					if(pMixPacket->channel<256)
+					if(pMixPacket->channel>0&&pMixPacket->channel<256)
 						{
-							CAMsg::printMsg(LOG_DEBUG,"CAFirstMix - sent a packet from the next mix to the ControlChanelDispatcher... \n");
+							#ifdef DEBUG
+								CAMsg::printMsg(LOG_DEBUG,"CAFirstMix - sent a packet from the next mix to the ControlChanelDispatcher... \n");
+							#endif
 							pControlChannelDispatcher->proccessMixPacket(pMixPacket);
 							continue;
 						}
-				#endif
 				#ifdef USE_POOL
 					#ifdef LOG_PACKET_TIMES
 						getcurrentTimeMicros(pQueueEntry->pool_timestamp_in);
@@ -665,7 +654,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 #ifdef REPLAY_DETECTION //before we can start to accept users we have to nesure that we received the replay timestamps form the over mixes
 		CAMsg::printMsg(LOG_DEBUG,"Waiting for Replay Timestamp from next mixes\n");
 		i=0;
-		while(!pFirstMix->getRestart()&&i<pFirstMix->m_u32MixCount)
+		while(!pFirstMix->getRestart()&&i<pFirstMix->m_u32MixCount-1)
 			{
 				if(pFirstMix->m_arMixParameters[i].m_u32ReplayRefTime==0)//not set yet
 					{
@@ -898,14 +887,10 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		#endif	
 #ifdef HAVE_EPOLL
 		m_psocketgroupUsersRead->add(*pNewUser,m_pChannelList->get(pNewUser)); // add user socket to the established ones that we read data from.
-		#ifdef WITH_CONTROL_CHANNELS
-			m_psocketgroupUsersWrite->add(*pNewUser,m_pChannelList->get(pNewUser));
-		#endif
+		m_psocketgroupUsersWrite->add(*pNewUser,m_pChannelList->get(pNewUser));
 #else
 		m_psocketgroupUsersRead->add(*pNewUser); // add user socket to the established ones that we read data from.
-		#ifdef WITH_CONTROL_CHANNELS
-			m_psocketgroupUsersWrite->add(*pNewUser);
-		#endif
+		m_psocketgroupUsersWrite->add(*pNewUser);
 #endif
 		return E_SUCCESS;
 	}
@@ -1085,13 +1070,11 @@ SINT32 CAFirstMix::clean()
 		m_pReplayMsgProc=NULL;
 #endif
 
-#ifdef WITH_CONTROL_CHANNELS
-			if(m_pMuxOutControlChannelDispatcher!=NULL)
-			{
-				delete m_pMuxOutControlChannelDispatcher;
-			}
-			m_pMuxOutControlChannelDispatcher=NULL;
-#endif
+		if(m_pMuxOutControlChannelDispatcher!=NULL)
+		{
+			delete m_pMuxOutControlChannelDispatcher;
+		}
+		m_pMuxOutControlChannelDispatcher=NULL;
 
 		if(m_pMuxOut!=NULL)
 			{
@@ -1127,17 +1110,9 @@ SINT32 CAFirstMix::clean()
 			delete []m_xmlKeyInfoBuff;
 		m_xmlKeyInfoBuff=NULL;
 		m_docMixCascadeInfo=NULL;
-#ifdef REPLAY_DETECTION
-		if(m_pReplayDB!=NULL)
-			{
-				m_pReplayDB->stop();
-				delete m_pReplayDB;
-				m_pReplayDB=NULL;
-			}
-#endif
 		if(m_arMixParameters!=NULL)
 			{
-				for(UINT32 i=0;i<m_u32MixCount;i++)
+				for(UINT32 i=0;i<m_u32MixCount-1;i++)
 					{
 						delete m_arMixParameters[i].m_strMixID;
 					}
@@ -1170,15 +1145,13 @@ SINT32 CAFirstMix::reconfigure()
 SINT32 CAFirstMix::initMixParameters(DOM_Element& elemMixes)
 	{
 		DOM_NodeList nl=elemMixes.getElementsByTagName("Mix");
-		m_u32MixCount=nl.getLength()+1;
+		m_u32MixCount=nl.getLength();
 		m_arMixParameters=new tMixParameters[m_u32MixCount];
 		memset(m_arMixParameters,0,sizeof(tMixParameters)*m_u32MixCount);
 		UINT8 buff[255];
 		options.getMixId(buff,255);
 		UINT32 len=strlen((char*)buff)+1;
-		m_arMixParameters[0].m_strMixID=new UINT8[len];
-		memcpy(m_arMixParameters[0].m_strMixID,buff,len);
-		UINT32 aktMix=1;
+		UINT32 aktMix=0;
 		for(UINT32 i=0;i<nl.getLength();i++)
 			{
 				DOM_Node child=nl.item(i);
@@ -1189,6 +1162,7 @@ SINT32 CAFirstMix::initMixParameters(DOM_Element& elemMixes)
 				m_arMixParameters[aktMix].m_strMixID[len]=0;
 				aktMix++;
 			}
+		m_u32MixCount++;
 		return E_SUCCESS;
 	}
 
@@ -1196,7 +1170,7 @@ SINT32 CAFirstMix::initMixParameters(DOM_Element& elemMixes)
 #ifdef REPLAY_DETECTION
 SINT32 CAFirstMix::sendReplayTimestampRequestsToAllMixes()
 	{
-		for(UINT32 i=1;i<m_u32MixCount;i++)
+		for(UINT32 i=0;i<m_u32MixCount-1;i++)
 			{
 				m_pReplayMsgProc->sendGetTimestamp(m_arMixParameters[i].m_strMixID);
 			}

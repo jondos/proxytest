@@ -25,6 +25,19 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
+/** This calss (interface) adds the functionality used by last and middle mixes to detecte replays*/
+#include "CADatabase.hpp"
+#include "CAMix.hpp"
 
-#include "StdAfx.h"
-#include "CASyncControlChannel.hpp"
+class CAMixWithReplayDB:public CAMix
+	{
+		public:
+			CAMixWithReplayDB();
+			CADatabase* getReplayDB() const
+				{
+					return m_pReplayDB;
+				}
+		
+		protected:
+			CADatabase*						m_pReplayDB;
+	};
