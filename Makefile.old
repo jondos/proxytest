@@ -62,6 +62,7 @@ OBJS_ALL=CASocket.o\
 	CAHttpClient.o\
 	CAReplayCtrlChannelMsgProc.o\
 	CAReplayControlChannel.o\
+	CAMixWithReplayDB.o\
 	proxytest.o
 
 OBJS=$(OBJS_ALL)
