@@ -478,8 +478,10 @@ Debug(dc::malloc.on());
 				goto EXIT;
 			}
 
-
-
+#ifdef DATABASE_PERFORMANCE_TEST
+			CADatabase::measurePerformance((UINT8*)"dbperformace.log",1,10000001,500000,10,100000);
+			exit(0);
+#endif
 #ifdef _DEBUG
 		//		CADatabase::test();
 		if(CAQueue::test()!=E_SUCCESS)

@@ -122,6 +122,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define REPLAY_DETECTION // enable to prevent replay of mix packets
 #define REPLAY_TIMESTAMP_PROPAGATION_INTERVALL 15 //How often (in minutes) should the current replay timestamps be propagate
 
+#define DATABASE_PERFORMANCE_TEST //to performe a performance test of the replay db
 //Some constants
 #define MAX_POLLFD 8192 //How many sockets to support at max
 

@@ -38,6 +38,7 @@ CADatabase::CADatabase()
 		m_prevDatabase=new LP_databaseEntry[0x10000];
 		memset(m_prevDatabase,0,sizeof(LP_databaseEntry)*0x10000);
 		m_refTime=time(NULL);
+		m_currentClock=0;
 		m_pThread=NULL;
 	}
 
@@ -90,7 +91,10 @@ SINT32 CADatabase::insert(UINT8 key[16])
 		m_oMutex.lock();
 		UINT16 timestamp=(key[14]<<8)|key[15];
 		if(timestamp<m_currentClock-1||timestamp>m_currentClock+1)
-			return E_UNKNOWN;
+			{
+				m_oMutex.unlock();
+				return E_UNKNOWN;
+			}
 		LP_databaseEntry* aktDB=m_currDatabase;
 		if(timestamp>m_currentClock)
 			aktDB=m_nextDatabase;
@@ -249,5 +253,127 @@ SINT32 CADatabase::getReplayTimestampForTime(tReplayTimestamp& replayTimestamp,U
 		UINT32 timeDiff=aktTime-refTime;
 		replayTimestamp.interval=timeDiff/SECONDS_PER_INTERVALL;
 		replayTimestamp.offset=timeDiff%SECONDS_PER_INTERVALL;
+		return E_SUCCESS;
+	}
+
+
+SINT32 CADatabase::measurePerformance(	UINT8* strLogFile,
+																				UINT32 lowerBoundEntries,
+																				UINT32 upperBoundEntries,
+																				UINT32 stepBy,
+																				UINT32 meassuresPerStep,
+																				UINT32 insertsPerMeasure)
+	{
+		initRandom();
+		CADatabase* pDatabase=NULL;
+		UINT32 aktNrOfEntries=lowerBoundEntries;
+		UINT8* key=new UINT8[insertsPerMeasure*16];
+		UINT8* aktKey;
+		SINT32 file=open((char*)strLogFile,O_CREAT|O_WRONLY|O_LARGEFILE|O_TRUNC,S_IREAD|S_IWRITE);
+		char buff[255];
+		const char* atemplate="%u,%u,%u\n";
+		const char* header="The format is as follows: Number of Entries in DB, Number of Inserts done, Total time for Inserts (in micro seconds)\n";
+		write(file,header,strlen(header));
+		while(aktNrOfEntries<=upperBoundEntries)
+			{
+				CAMsg::printMsg(LOG_DEBUG,"Starting measurement with %u entries in the replay database\n",aktNrOfEntries);
+				for(UINT32 i=0;i<meassuresPerStep;i++)
+					{
+						pDatabase=new CADatabase();
+						pDatabase->fill(aktNrOfEntries);
+						UINT64 startTime,endTime;
+						getcurrentTimeMicros(startTime);
+						aktKey=key;
+						getRandom(key,insertsPerMeasure*16);
+						for(UINT32 j=0;j<insertsPerMeasure;j++)
+							{
+								pDatabase->simulateInsert(aktKey);
+								aktKey+=16;
+							}
+						getcurrentTimeMicros(endTime);
+						sprintf(buff,atemplate,aktNrOfEntries,insertsPerMeasure,diff64(endTime,startTime));
+						write(file,buff,strlen(buff));
+						delete pDatabase;
+					}
+				aktNrOfEntries+=stepBy;
+			}
+		delete[] key;
+		return E_SUCCESS;
+	}
+
+SINT32 CADatabase::fill(UINT32 nrOfEntries)
+	{
+		UINT32 i=0;
+		UINT8 key[16];
+		key[14]=0;
+		key[15]=0;
+		while(i<nrOfEntries)
+			{
+				getRandom(key,14);
+				if(insert(key)==E_SUCCESS)
+					i++;
+			}
+		return E_SUCCESS;
+	}
+
+SINT32 CADatabase::simulateInsert(UINT8 key[16])
+	{
+		m_oMutex.lock();
+		t_databaseEntry siEntry;
+		UINT16 timestamp=(key[14]<<8)|key[15];
+		if(timestamp<m_currentClock-1||timestamp>m_currentClock+1)
+		{
+			//do nothing as we are simulate insert
+		}
+		LP_databaseEntry* aktDB=m_currDatabase;
+		LP_databaseEntry* aktDB1;
+		if(timestamp>m_currentClock)
+			aktDB1=m_nextDatabase;
+		else if(timestamp>m_currentClock)
+			aktDB1=m_prevDatabase;
+		UINT16 hashKey=(key[8]<<8)|key[9];
+		LP_databaseEntry hashList=aktDB[hashKey];
+		if(hashList==NULL)
+			{
+				LP_databaseEntry newEntry=&siEntry;
+				newEntry->next=NULL;
+				memcpy(newEntry->key,key,6);
+				siEntry.next=newEntry;
+				//aktDB[hashKey]=newEntry;
+				m_oMutex.unlock();
+				return E_SUCCESS;
+			}
+		else
+			{
+				LP_databaseEntry before=NULL;
+				do
+					{
+						int ret=memcmp(key,hashList->key,6);
+						if(ret==0)
+							{
+								m_oMutex.unlock();
+								return E_UNKNOWN;
+							}
+						if(ret<0)
+							break;
+						before=hashList;
+						hashList=hashList->next;
+					} while(hashList!=NULL);
+				LP_databaseEntry newEntry=&siEntry;
+				newEntry->next=hashList;
+				memcpy(newEntry->key,key,6);				
+				if(before==NULL)
+					{
+						siEntry.next=newEntry;
+						//aktDB[hashKey]=newEntry;
+					}
+				else
+					{
+						siEntry.next=newEntry;
+						//before->next=newEntry;
+					}
+
+			}
+		m_oMutex.unlock();
 		return E_SUCCESS;
 	}
