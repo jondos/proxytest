@@ -1277,10 +1277,13 @@ SINT32 CAFirstMix::updateCountryStats(const UINT8 ip[4],UINT32 a_countryID,bool 
 								goto RET;
 							}
 						MYSQL_ROW row=mysql_fetch_row(result);
-						if(row!=NULL)
+						SINT32 t;
+						if(row!=NULL&&(t=atoi(row[0]))>0&&t<=NR_OF_COUNTRIES)
 							{
-								countryID=atoi(row[0]);
-								CAMsg::printMsg(LOG_DEBUG,"Country ID for ip %u is %u\n",u32ip,countryID);														
+								countryID=t;
+								#ifdef DEBUG
+									CAMsg::printMsg(LOG_DEBUG,"Country ID for ip %u is %u\n",u32ip,countryID);
+								#endif
 							}
 						else
 							{
