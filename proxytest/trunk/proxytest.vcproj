@@ -47,11 +47,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="proxytest-lib.lib ws2_32.lib ssleay32.lib libeay32.lib pthreadVC.lib xerces-c_2D.lib zlib.lib libpqdll.lib"
+				AdditionalDependencies="proxytest-lib.lib ws2_32.lib ssleay32.lib libeay32.lib pthreadVC.lib xerces-c_2D.lib zlib.lib libpqdll.lib $(NOINHERIT)"
 				OutputFile="$(OutDir)\proxytest.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="&quot;.\proxytest-lib\Debug&quot;;&quot;G:\postgres-client-lib\lib&quot;;&quot;$(LIB_XERCES_C_DEBUG)&quot;;&quot;$(LIB_OPENSSL)&quot;;&quot;$(LIB_PTHREADS)&quot;;&quot;$(LIB_ZLIB)&quot;;&quot;$(LIB_MYSQL_DEBUG)&quot;"
+				AdditionalLibraryDirectories="&quot;.\proxytest-lib\Debug&quot;;&quot;$(LIB_XERCES_C_DEBUG)&quot;;&quot;$(LIB_OPENSSL)&quot;;&quot;$(LIB_PTHREADS)&quot;;&quot;$(LIB_ZLIB)&quot;;&quot;$(LIB_POSTGRES)&quot;"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)\proxytest.pdb"
 				GenerateMapFile="TRUE"
@@ -95,7 +95,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				GlobalOptimizations="TRUE"
-				InlineFunctionExpansion="1"
+				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="TRUE"
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="TRUE"

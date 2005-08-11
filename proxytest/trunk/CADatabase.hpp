@@ -69,10 +69,37 @@ class CADatabase
 				}
 
 			static SINT32 test();
+			/** This mehtod can be used to measure the performance of the Replay database. The results are stored in a file in csv format.
+				* Ths method will do several measures with different numbers of elements in the database. These number could be specified
+				* using owerBoundEntries,upperBoundEntries and stepBy.
+				*
+				* @param strLogFile the log file name
+				* @param lowerBoundEntries the number of entries in the database (at beginn)
+				* @param upperBoundEntries the number of entries in the database (at end)
+				* @param stepBy how many entries should be added for each new measurement
+				* @param meassuresPerStep how many measure values should be generate per step. That means that the experiement is repeated this many times.
+				* @param insertsPerMeasure one measure value will be the time: (Total Insertion Time)/insertsPerMeasure
+				*/
+			static SINT32 measurePerformance(	UINT8* strLogFile,
+																				UINT32 lowerBoundEntries,
+																				UINT32 upperBoundEntries,
+																				UINT32 stepBy,
+																				UINT32 meassuresPerStep,
+																				UINT32 insertsPerMeasure);
 		private:
 			friend THREAD_RETURN db_loopMaintenance(void *param);
 
 			SINT32 nextClock();
+			/** Pre fills the database with nrOfEntries random entries
+				* @param nrOfEntries number of entries to put in the database
+				*/
+			SINT32 fill(UINT32 nrOfEntries);
+
+			/** This is a modified copy of insert() which simulates the insert() function as close as possible without actually changing
+			  * the replay database
+				*/
+			SINT32 simulateInsert(UINT8 key[16]);
+
 			LP_databaseEntry* m_currDatabase;
 			LP_databaseEntry* m_nextDatabase;
 			LP_databaseEntry* m_prevDatabase;
