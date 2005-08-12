@@ -31,116 +31,83 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 CADatabase::CADatabase()
 	{
-		m_currDatabase=new LP_databaseEntry[0x10000];
-		memset(m_currDatabase,0,sizeof(LP_databaseEntry)*0x10000);
-		m_nextDatabase=new LP_databaseEntry[0x10000];
-		memset(m_nextDatabase,0,sizeof(LP_databaseEntry)*0x10000);
-		m_prevDatabase=new LP_databaseEntry[0x10000];
-		memset(m_prevDatabase,0,sizeof(LP_databaseEntry)*0x10000);
-		m_currDBSize=0;
-		m_prevDBSize=0;
-		m_nextDBSize=0;
+		m_currDatabase=createDBInfo();
+		m_prevDatabase=createDBInfo();
+		m_nextDatabase=createDBInfo();
 		m_refTime=time(NULL);
 		m_currentClock=0;
 		m_pThread=NULL;
+		m_pMutex=new CAMutex();
 	}
 
+t_databaseInfo* CADatabase::createDBInfo()
+	{
+		t_databaseInfo* pInfo=new t_databaseInfo;
+		memset(pInfo,0,sizeof(t_databaseInfo));
+		return pInfo;
+	}
+	
 CADatabase::~CADatabase()
 	{
-		m_oMutex.lock();
+		m_pMutex->lock();
 		stop();
 		deleteDB(m_currDatabase);
 		deleteDB(m_nextDatabase);
 		deleteDB(m_prevDatabase);
-		m_oMutex.unlock();
+		m_pMutex->unlock();
+		delete m_pMutex;
 	}
 
-SINT32 CADatabase::clearDB(LP_databaseEntry*& pHashTable)
+SINT32 CADatabase::clearDB(t_databaseInfo* pDBInfo)
 	{
-		for(UINT32 i=0;i<0x10000;i++)
+		while(pDBInfo->m_pHeap!=NULL)
 			{
-				LP_databaseEntry tmp,tmp1;
-				tmp=pHashTable[i];
-				LP_databaseEntry stack[10000];
-				SINT32 stackIndex=-1;
-				while ( tmp != NULL || stackIndex>=0 )
-					{
-						for (; tmp != NULL; tmp = tmp->left )
-							{
-								stack[++stackIndex]=tmp;//add to stack
-								if(stackIndex>9998)
-									{
-										CAMsg::printMsg(LOG_CRIT,"Could not delete the replay database - stack full!\n");
-										return E_SPACE;
-									}
-							}
-						if ( stack[stackIndex] != NULL )
-							{
-								tmp = stack[stackIndex]->right;
-								stack[++stackIndex]=NULL;
-								if(stackIndex>9998)
-									{
-										CAMsg::printMsg(LOG_CRIT,"Could not delete the replay database - stack full!\n");
-										return E_SPACE;
-									}
-							}
-						else
-							{
-								stackIndex--;
-								#ifdef DEBUG
-									memset(stack[stackIndex],0,sizeof(t_databaseEntry));
-								#endif
-								delete stack[stackIndex];
-									stackIndex--;
-								tmp = NULL;
-							}
-					}
+				pDBInfo->m_pLastHeap=pDBInfo->m_pHeap;
+				pDBInfo->m_pHeap=pDBInfo->m_pHeap->next;
+				delete pDBInfo->m_pLastHeap;
 			}
-		memset(pHashTable,0,sizeof(LP_databaseEntry)*0x10000);
+		memset(pDBInfo,0,sizeof(t_databaseInfo));
 		return E_SUCCESS;
 	}
 
-SINT32 CADatabase::deleteDB(LP_databaseEntry*& pHashTable)
+SINT32 CADatabase::deleteDB(t_databaseInfo*& pDBInfo)
 	{
-		clearDB(pHashTable);
-		delete [] pHashTable;
-		pHashTable=NULL;
+		clearDB(pDBInfo);
+		delete pDBInfo;
+		pDBInfo=NULL;
 		return E_SUCCESS;
 	}
 	
 /** Inserts this key in the replay DB. The last two bytes are the timestamp*/
 SINT32 CADatabase::insert(UINT8 key[16])
 	{
-		m_oMutex.lock();
+		m_pMutex->lock();
 		UINT16 timestamp=(key[14]<<8)|key[15];
 		if(timestamp<m_currentClock-1||timestamp>m_currentClock+1)
 			{
-				m_oMutex.unlock();
+				m_pMutex->unlock();
 				return E_UNKNOWN;
 			}
-		LP_databaseEntry* aktDB=m_currDatabase;
-		UINT32* counter=&m_currDBSize;
+		t_databaseInfo* aktDB=m_currDatabase;
 		if(timestamp>m_currentClock)
 			{
 				aktDB=m_nextDatabase;
-				counter=&m_nextDBSize;
 			}
 		else if(timestamp<m_currentClock)
 			{
 				aktDB=m_prevDatabase;
-				counter=&m_prevDBSize;
 			}
 		UINT16 hashKey=(key[8]<<8)|key[9];
-		LP_databaseEntry hashList=aktDB[hashKey];
+		LP_databaseEntry hashList=aktDB->m_pHashTable[hashKey];
 		if(hashList==NULL)
 			{
-				LP_databaseEntry newEntry=new t_databaseEntry;
+				LP_databaseEntry newEntry=getNewDBEntry(aktDB);
 				newEntry->left=NULL;
 				newEntry->right=NULL;
 				memcpy(newEntry->key,key,6);
-				aktDB[hashKey]=newEntry;
-				*counter++;
-				m_oMutex.unlock();
+				aktDB->m_pHashTable[hashKey]=newEntry;
+				aktDB->m_u32Size++;
+				m_pMutex->unlock();
 				return E_SUCCESS;
 			}
 		else
@@ -152,7 +119,7 @@ SINT32 CADatabase::insert(UINT8 key[16])
 						ret=memcmp(key,hashList->key,6);
 						if(ret==0)
 							{
-								m_oMutex.unlock();
+								m_pMutex->unlock();
 								return E_UNKNOWN;
 							}
 						before=hashList;	
@@ -165,7 +132,7 @@ SINT32 CADatabase::insert(UINT8 key[16])
 								hashList=hashList->left;
 							}
 					} while(hashList!=NULL);
-				LP_databaseEntry newEntry=new t_databaseEntry;
+				LP_databaseEntry newEntry=getNewDBEntry(aktDB);
 				newEntry->left=newEntry->right=NULL;
 				memcpy(newEntry->key,key,6);				
 				if(ret<0)
@@ -176,8 +143,8 @@ SINT32 CADatabase::insert(UINT8 key[16])
 						before->left=newEntry;
 
 			}
-		*counter++;	
-		m_oMutex.unlock();
+		aktDB->m_u32Size++;	
+		m_pMutex->unlock();
 		return E_SUCCESS;
 	}
 
@@ -220,20 +187,17 @@ THREAD_RETURN db_loopMaintenance(void *param)
 
 SINT32 CADatabase::nextClock()
 	{
-		m_oMutex.lock();
+		m_pMutex->lock();
 		tReplayTimestamp rt;
 		getCurrentReplayTimestamp(rt);
 		m_currentClock=rt.interval;
-		CAMsg::printMsg(LOG_DEBUG,"Replay DB Size was: %u\n",m_prevDBSize);
+		CAMsg::printMsg(LOG_DEBUG,"Replay DB Size was: %u\n",m_prevDatabase->m_u32Size);
 		clearDB(m_prevDatabase);
-		LP_databaseEntry* tmpDB=m_prevDatabase;
+		t_databaseInfo* tmpDB=m_prevDatabase;
 		m_prevDatabase=m_currDatabase;
-		m_prevDBSize=m_currDBSize;
 		m_currDatabase=m_nextDatabase;
-		m_currDBSize=m_nextDBSize;
 		m_nextDatabase=tmpDB;
-		m_nextDBSize=0;
-		m_oMutex.unlock();
+		m_pMutex->unlock();
 		return E_SUCCESS;
 	}
 
@@ -324,6 +288,7 @@ SINT32 CADatabase::measurePerformance(	UINT8* strLogFile,
 						getcurrentTimeMicros(endTime);
 						sprintf(buff,atemplate,aktNrOfEntries,insertsPerMeasure,diff64(endTime,startTime));
 						write(file,buff,strlen(buff));
+						printf("Start delete \n");
 						getcurrentTimeMicros(startTime);
 						delete pDatabase;
 						getcurrentTimeMicros(endTime);
@@ -352,29 +317,33 @@ SINT32 CADatabase::fill(UINT32 nrOfEntries)
 
 SINT32 CADatabase::simulateInsert(UINT8 key[16])
 	{
-		m_oMutex.lock();
+		m_pMutex->lock();
 		UINT16 timestamp=(key[14]<<8)|key[15];
 		if(timestamp<m_currentClock-1||timestamp>m_currentClock+1)
 			{
-			//do nothing
+				//m_pMutex->unlock();
+				//return E_UNKNOWN;
 			}
-		LP_databaseEntry* aktDB=m_currDatabase;
-		LP_databaseEntry* aktDB1=m_currDatabase;
+		t_databaseInfo* aktDB=m_currDatabase;
 		if(timestamp>m_currentClock)
-			aktDB1=m_nextDatabase;
+			{
+				//aktDB=m_nextDatabase;
+			}
 		else if(timestamp<m_currentClock)
-			aktDB1=m_prevDatabase;
+			{
+				//aktDB=m_prevDatabase;
+			}
 		UINT16 hashKey=(key[8]<<8)|key[9];
-		LP_databaseEntry hashList=aktDB[hashKey];
-		t_databaseEntry si;
+		LP_databaseEntry hashList=aktDB->m_pHashTable[hashKey];
 		if(hashList==NULL)
 			{
-				LP_databaseEntry newEntry=&si;
+				LP_databaseEntry newEntry=getNewDBEntry(aktDB);
 				newEntry->left=NULL;
 				newEntry->right=NULL;
 				memcpy(newEntry->key,key,6);
-				//aktDB[hashKey]=newEntry;
-				m_oMutex.unlock();
+				//aktDB->m_pHashTable[hashKey]=newEntry;
+				aktDB->m_u32Size++;
+				m_pMutex->unlock();
 				return E_SUCCESS;
 			}
 		else
@@ -386,7 +355,7 @@ SINT32 CADatabase::simulateInsert(UINT8 key[16])
 						ret=memcmp(key,hashList->key,6);
 						if(ret==0)
 							{
-								m_oMutex.unlock();
+								m_pMutex->unlock();
 								return E_UNKNOWN;
 							}
 						before=hashList;	
@@ -399,17 +368,18 @@ SINT32 CADatabase::simulateInsert(UINT8 key[16])
 								hashList=hashList->left;
 							}
 					} while(hashList!=NULL);
-				LP_databaseEntry newEntry=&si;//new t_databaseEntry;
+				LP_databaseEntry newEntry=getNewDBEntry(aktDB);
 				newEntry->left=newEntry->right=NULL;
 				memcpy(newEntry->key,key,6);				
 				if(ret<0)
 					{
-						before->right=before->right;
+						//before->right=newEntry;
 					}
 				else
-						before->left=before->left;
+						//before->left=newEntry;
 
 			}
-		m_oMutex.unlock();
-		return E_SUCCESS;
+		aktDB->m_u32Size++;	
+		m_pMutex->unlock();
+		return E_SUCCESS;	
 	}
