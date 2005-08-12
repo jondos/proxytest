@@ -376,6 +376,8 @@ SINT32 CADatabase::simulateInsert(UINT8 key[16])
 						//before->right=newEntry;
 					}
 				else
+				{
+				}
 						//before->left=newEntry;
 
 			}

@@ -39,6 +39,24 @@ typedef struct __t_database_entry
 
 typedef t_databaseEntry* LP_databaseEntry;
 
+#define DB_ENTRIES_PER_HEAP 1000
+
+typedef struct __t_database_heap
+	{
+		t_databaseEntry m_pEntries[DB_ENTRIES_PER_HEAP];
+		__t_database_heap* next;
+	} t_databaseHeap;
+	
+//Stores management info for this database
+typedef struct __t_database_info
+	{
+		LP_databaseEntry	m_pHashTable[0x10000];
+		UINT32						m_u32Size;
+		t_databaseHeap*		m_pHeap;
+		t_databaseHeap*		m_pLastHeap;
+		SINT32						m_s32FreeEntries;
+	} t_databaseInfo;
+	
 #define SECONDS_PER_INTERVALL 600
 
 class CADatabase
@@ -89,16 +107,37 @@ class CADatabase
 																				UINT32 insertsPerMeasure);
 		private:
 			friend THREAD_RETURN db_loopMaintenance(void *param);
+			LP_databaseEntry getNewDBEntry(t_databaseInfo* pDB)
+				{
+					if(pDB->m_pHeap==NULL)
+						{
+							pDB->m_pHeap=new t_databaseHeap;
+							pDB->m_pHeap->next=NULL;
+							pDB->m_pLastHeap=pDB->m_pHeap;
+							pDB->m_s32FreeEntries=DB_ENTRIES_PER_HEAP;
+						}
+					else if(pDB->m_s32FreeEntries==0)
+						{
+							pDB->m_pLastHeap->next=new t_databaseHeap;
+							pDB->m_pLastHeap=pDB->m_pLastHeap->next;
+							pDB->m_pLastHeap->next=NULL;
+							pDB->m_s32FreeEntries=DB_ENTRIES_PER_HEAP;
+						}
+					return &pDB->m_pLastHeap->m_pEntries[--pDB->m_s32FreeEntries];	
+				}
+			 
+			/** Creates and initialises a dbinfo struct*/
+			t_databaseInfo* createDBInfo();
 			
 			/** clears the whole database pDB - but does not delete the hashtable pDB
 				* @param pDB database to delete
 				*/
-			SINT32 clearDB(LP_databaseEntry*& pDB);
+			SINT32 clearDB(t_databaseInfo* pDB);
 			
 			/** Deletes the whole database pDB.
 				* @param pDB database to delete
 				*/
-			SINT32 deleteDB(LP_databaseEntry*& pDB);
+			SINT32 deleteDB(t_databaseInfo*& pDB);
 
 			SINT32 nextClock();
 			/** Pre fills the database with nrOfEntries random entries
@@ -111,16 +150,13 @@ class CADatabase
 				*/
 			SINT32 simulateInsert(UINT8 key[16]);
 
-			LP_databaseEntry* m_currDatabase;
-			LP_databaseEntry* m_nextDatabase;
-			LP_databaseEntry* m_prevDatabase;
-			UINT32 m_currDBSize;
-			UINT32 m_nextDBSize;
-			UINT32 m_prevDBSize;
+			t_databaseInfo* m_currDatabase;
+			t_databaseInfo* m_nextDatabase;
+			t_databaseInfo* m_prevDatabase;
 			volatile bool m_bRun;
 			UINT32 m_refTime; //the seconds since epoch for the start of interval 0
 			volatile SINT32 m_currentClock; //the current 'interval' since m_refTimer
-			CAMutex m_oMutex;
+			CAMutex*	m_pMutex;
 			CAThread* m_pThread;
 	};
 #endif //__CA_DATABASE__
