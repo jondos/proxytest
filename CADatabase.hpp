@@ -114,6 +114,9 @@ class CADatabase
 			LP_databaseEntry* m_currDatabase;
 			LP_databaseEntry* m_nextDatabase;
 			LP_databaseEntry* m_prevDatabase;
+			UINT32 m_currDBSize;
+			UINT32 m_nextDBSize;
+			UINT32 m_prevDBSize;
 			volatile bool m_bRun;
 			UINT32 m_refTime; //the seconds since epoch for the start of interval 0
 			volatile SINT32 m_currentClock; //the current 'interval' since m_refTimer

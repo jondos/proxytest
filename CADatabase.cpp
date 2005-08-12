@@ -37,6 +37,9 @@ CADatabase::CADatabase()
 		memset(m_nextDatabase,0,sizeof(LP_databaseEntry)*0x10000);
 		m_prevDatabase=new LP_databaseEntry[0x10000];
 		memset(m_prevDatabase,0,sizeof(LP_databaseEntry)*0x10000);
+		m_currDBSize=0;
+		m_prevDBSize=0;
+		m_nextDBSize=0;
 		m_refTime=time(NULL);
 		m_currentClock=0;
 		m_pThread=NULL;
@@ -54,7 +57,6 @@ CADatabase::~CADatabase()
 
 SINT32 CADatabase::clearDB(LP_databaseEntry*& pHashTable)
 	{
-		UINT32 deleteCount=0;
 		for(UINT32 i=0;i<0x10000;i++)
 			{
 				LP_databaseEntry tmp,tmp1;
@@ -76,6 +78,11 @@ SINT32 CADatabase::clearDB(LP_databaseEntry*& pHashTable)
 							{
 								tmp = stack[stackIndex]->right;
 								stack[++stackIndex]=NULL;
+								if(stackIndex>9998)
+									{
+										CAMsg::printMsg(LOG_CRIT,"Could not delete the replay database - stack full!\n");
+										return E_SPACE;
+									}
 							}
 						else
 							{
@@ -84,13 +91,11 @@ SINT32 CADatabase::clearDB(LP_databaseEntry*& pHashTable)
 									memset(stack[stackIndex],0,sizeof(t_databaseEntry));
 								#endif
 								delete stack[stackIndex];
-								deleteCount++;
-								stackIndex--;
+									stackIndex--;
 								tmp = NULL;
 							}
 					}
 			}
-			CAMsg::printMsg(LOG_DEBUG,"DeleteCount %u\n",deleteCount);
 		memset(pHashTable,0,sizeof(LP_databaseEntry)*0x10000);
 		return E_SUCCESS;
 	}
@@ -114,10 +119,17 @@ SINT32 CADatabase::insert(UINT8 key[16])
 				return E_UNKNOWN;
 			}
 		LP_databaseEntry* aktDB=m_currDatabase;
+		UINT32* counter=&m_currDBSize;
 		if(timestamp>m_currentClock)
-			aktDB=m_nextDatabase;
+			{
+				aktDB=m_nextDatabase;
+				counter=&m_nextDBSize;
+			}
 		else if(timestamp<m_currentClock)
-			aktDB=m_prevDatabase;
+			{
+				aktDB=m_prevDatabase;
+				counter=&m_prevDBSize;
+			}
 		UINT16 hashKey=(key[8]<<8)|key[9];
 		LP_databaseEntry hashList=aktDB[hashKey];
 		if(hashList==NULL)
@@ -127,6 +139,7 @@ SINT32 CADatabase::insert(UINT8 key[16])
 				newEntry->right=NULL;
 				memcpy(newEntry->key,key,6);
 				aktDB[hashKey]=newEntry;
+				*counter++;
 				m_oMutex.unlock();
 				return E_SUCCESS;
 			}
@@ -163,6 +176,7 @@ SINT32 CADatabase::insert(UINT8 key[16])
 						before->left=newEntry;
 
 			}
+		*counter++;	
 		m_oMutex.unlock();
 		return E_SUCCESS;
 	}
@@ -210,11 +224,15 @@ SINT32 CADatabase::nextClock()
 		tReplayTimestamp rt;
 		getCurrentReplayTimestamp(rt);
 		m_currentClock=rt.interval;
+		CAMsg::printMsg(LOG_DEBUG,"Replay DB Size was: %u\n",m_prevDBSize);
 		clearDB(m_prevDatabase);
 		LP_databaseEntry* tmpDB=m_prevDatabase;
 		m_prevDatabase=m_currDatabase;
+		m_prevDBSize=m_currDBSize;
 		m_currDatabase=m_nextDatabase;
-		m_nextDatabase=tmpDB;		
+		m_currDBSize=m_nextDBSize;
+		m_nextDatabase=tmpDB;
+		m_nextDBSize=0;
 		m_oMutex.unlock();
 		return E_SUCCESS;
 	}
@@ -306,7 +324,10 @@ SINT32 CADatabase::measurePerformance(	UINT8* strLogFile,
 						getcurrentTimeMicros(endTime);
 						sprintf(buff,atemplate,aktNrOfEntries,insertsPerMeasure,diff64(endTime,startTime));
 						write(file,buff,strlen(buff));
+						getcurrentTimeMicros(startTime);
 						delete pDatabase;
+						getcurrentTimeMicros(endTime);
+						printf("delete takes %u microsecs\n",diff64(endTime,startTime));
 					}
 				aktNrOfEntries+=stepBy;
 			}
