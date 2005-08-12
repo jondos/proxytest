@@ -54,6 +54,7 @@ CADatabase::~CADatabase()
 
 SINT32 CADatabase::clearDB(LP_databaseEntry*& pHashTable)
 	{
+		UINT32 deleteCount=0;
 		for(UINT32 i=0;i<0x10000;i++)
 			{
 				LP_databaseEntry tmp,tmp1;
@@ -79,12 +80,17 @@ SINT32 CADatabase::clearDB(LP_databaseEntry*& pHashTable)
 						else
 							{
 								stackIndex--;
+								#ifdef DEBUG
+									memset(stack[stackIndex],0,sizeof(t_databaseEntry));
+								#endif
 								delete stack[stackIndex];
+								deleteCount++;
 								stackIndex--;
 								tmp = NULL;
 							}
 					}
 			}
+			CAMsg::printMsg(LOG_DEBUG,"DeleteCount %u\n",deleteCount);
 		memset(pHashTable,0,sizeof(LP_databaseEntry)*0x10000);
 		return E_SUCCESS;
 	}
