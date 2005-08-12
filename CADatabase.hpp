@@ -32,7 +32,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define __CA_DATABASE__
 typedef struct __t_database_entry
 	{
-		__t_database_entry* next;
+		__t_database_entry* left;
+		__t_database_entry* right;
 		UINT8 key[6];
 	} t_databaseEntry; 
 
@@ -88,6 +89,16 @@ class CADatabase
 																				UINT32 insertsPerMeasure);
 		private:
 			friend THREAD_RETURN db_loopMaintenance(void *param);
+			
+			/** clears the whole database pDB - but does not delete the hashtable pDB
+				* @param pDB database to delete
+				*/
+			SINT32 clearDB(LP_databaseEntry*& pDB);
+			
+			/** Deletes the whole database pDB.
+				* @param pDB database to delete
+				*/
+			SINT32 deleteDB(LP_databaseEntry*& pDB);
 
 			SINT32 nextClock();
 			/** Pre fills the database with nrOfEntries random entries
