@@ -54,10 +54,36 @@ CADatabase::~CADatabase()
 
 SINT32 CADatabase::clearDB(LP_databaseEntry*& pHashTable)
 	{
-			for(UINT32 i=0;i<0x10000;i++)
+		for(UINT32 i=0;i<0x10000;i++)
 			{
 				LP_databaseEntry tmp,tmp1;
 				tmp=pHashTable[i];
+				LP_databaseEntry stack[10000];
+				SINT32 stackIndex=-1;
+				while ( tmp != NULL || stackIndex>=0 )
+					{
+						for (; tmp != NULL; tmp = tmp->left )
+							{
+								stack[++stackIndex]=tmp;//add to stack
+								if(stackIndex>9998)
+									{
+										CAMsg::printMsg(LOG_CRIT,"Could not delete the replay database - stack full!\n");
+										return E_SPACE;
+									}
+							}
+						if ( stack[stackIndex] != NULL )
+							{
+								tmp = stack[stackIndex]->right;
+								stack[++stackIndex]=NULL;
+							}
+						else
+							{
+								stackIndex--;
+								delete stack[stackIndex];
+								stackIndex--;
+								tmp = NULL;
+							}
+					}
 			}
 		memset(pHashTable,0,sizeof(LP_databaseEntry)*0x10000);
 		return E_SUCCESS;
