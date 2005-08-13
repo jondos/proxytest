@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.03.91"
+#define MIX_VERSION "00.03.93"
 
 //Define all features if we are running in documentation creation mode
 #ifdef DOXYGEN
@@ -119,7 +119,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define WITH_CONTROL_CHANNELS_TEST //enable a Test control Channel
 //#define NEW_FLOW_CONTROL //enable for the new flow control mechanism
 
-//#define REPLAY_DETECTION // enable to prevent replay of mix packets
+#define REPLAY_DETECTION // enable to prevent replay of mix packets
 #define REPLAY_TIMESTAMP_PROPAGATION_INTERVALL 15 //How often (in minutes) should the current replay timestamps be propagate
 
 //#define DATABASE_PERFORMANCE_TEST //to performe a performance test of the replay db
