@@ -166,10 +166,12 @@ SINT32 CAReplayCtrlChannelMsgProc::propagateCurrentReplayTimestamp()
 			{
 				return E_UNKNOWN;
 			}
+		CAMsg::printMsg(LOG_DEBUG,"Got timestamp successfully\n");
 		UINT8 buff[255];
 		UINT8* msgBuff=new UINT8[1024];
 		options.getMixId(buff,255);
 		sprintf((char*)msgBuff,strMsgTemplate,buff,replayTimestamp.interval,replayTimestamp.offset);
+		CAMsg::printMsg(LOG_DEBUG,"Msg to sent is %s\n",msgBuff);
 		m_pDownstreamReplayControlChannel->sendXMLMessage(msgBuff,strlen((char*)msgBuff));
 		delete msgBuff;
 		CAMsg::printMsg(LOG_DEBUG,"Replay timestamp propagation finished\n");
