@@ -80,6 +80,7 @@ bool CAControlChannelDispatcher::proccessMixPacket(const MIXPACKET* pPacket)
 
 SINT32 CAControlChannelDispatcher::sendMessages(UINT32 id,bool m_bIsEncrypted,const UINT8* msg,UINT32 msglen) const
 	{
+	CAMsg::printMsg(LOG_DEBUG,"dispatch - sendMesg()\n");
 		m_pcsSendMsg->lock();
 		m_pMixPacket->channel=id;
 		UINT32 aktIndex=0;

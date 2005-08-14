@@ -155,7 +155,6 @@ SINT32 CAReplayCtrlChannelMsgProc::propagateCurrentReplayTimestamp()
 		const char* strMsgTemplate="<?xml version=\"1.0\" encoding=\"UTF-8\"?><Mix id=\"%s\"><Replay><ReplayTimestamp interval=\"%u\" offset=\"%u\"/></Replay></Mix>"; 
 		tReplayTimestamp replayTimestamp;
 		CAMixWithReplayDB* pMix=((CAMixWithReplayDB*)m_pMix);
-		CAMsg::printMsg(LOG_DEBUG,"try to access replay db\n");
 		if(pMix==NULL||pMix->getReplayDB()==NULL)
 			{
 				CAMsg::printMsg(LOG_CRIT,"CAReplayCtrlChannelMsgProc::propagateCurrentReplayTimestamp() replay db ==NULL!\n");
@@ -166,7 +165,6 @@ SINT32 CAReplayCtrlChannelMsgProc::propagateCurrentReplayTimestamp()
 			{
 				return E_UNKNOWN;
 			}
-		CAMsg::printMsg(LOG_DEBUG,"Got timestamp successfully\n");
 		UINT8 buff[255];
 		UINT8* msgBuff=new UINT8[1024];
 		options.getMixId(buff,255);
