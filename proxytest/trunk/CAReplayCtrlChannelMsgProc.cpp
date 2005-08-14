@@ -149,17 +149,27 @@ SINT32 CAReplayCtrlChannelMsgProc::proccessGetTimestamp(const CAReplayControlCha
 
 SINT32 CAReplayCtrlChannelMsgProc::propagateCurrentReplayTimestamp()
 	{
+		CAMsg::printMsg(LOG_DEBUG,"Start replay timestamp propagation\n");
 		if(m_pDownstreamReplayControlChannel==NULL)
 			return E_UNKNOWN;
 		const char* strMsgTemplate="<?xml version=\"1.0\" encoding=\"UTF-8\"?><Mix id=\"%s\"><Replay><ReplayTimestamp interval=\"%u\" offset=\"%u\"/></Replay></Mix>"; 
 		tReplayTimestamp replayTimestamp;
-		((CAMixWithReplayDB*)m_pMix)->getReplayDB()->getCurrentReplayTimestamp(replayTimestamp);
+		CAMixWithReplayDB* pMix=((CAMixWithReplayDB*)m_pMix);
+		if(pMix==NULL||pMix->getReplayDB()==NULL)
+			{
+				return E_UNKNOWN;
+			}
+		if(pMix->getReplayDB()->getCurrentReplayTimestamp(replayTimestamp)!=E_SUCCESS)
+			{
+				return E_UNKOWN;
+			}
 		UINT8 buff[255];
 		UINT8* msgBuff=new UINT8[1024];
 		options.getMixId(buff,255);
 		sprintf((char*)msgBuff,strMsgTemplate,buff,replayTimestamp.interval,replayTimestamp.offset);
 		m_pDownstreamReplayControlChannel->sendXMLMessage(msgBuff,strlen((char*)msgBuff));
 		delete msgBuff;
+		CAMsg::printMsg(LOG_DEBUG,"Replay timestamp propagation finished\n");
 		return E_SUCCESS;
 	}
 
