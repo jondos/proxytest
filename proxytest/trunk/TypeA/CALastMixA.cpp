@@ -59,11 +59,11 @@ SINT32 CALastMixA::loop()
 		m_pChannelList->setDelayLatencyParameters(	options.getDelayChannelLatency());
 #endif		
 #ifdef HAVE_EPOLL	
-		CASocketGroupEpoll osocketgroupCacheRead(false);
-		CASocketGroupEpoll osocketgroupCacheWrite(true);
+		CASocketGroupEpoll* psocketgroupCacheRead=new CASocketGroupEpoll(false);
+		CASocketGroupEpoll* psocketgroupCacheWrite=new CASocketGroupEpoll(true);
 #else
-		CASocketGroup osocketgroupCacheRead(false);
-		CASocketGroup osocketgroupCacheWrite(true);
+		CASocketGroup* psocketgroupCacheRead=new CASocketGroup(false);
+		CASocketGroup* psocketgroupCacheWrite=new CASocketGroup(true);
 #endif
 		tQueueEntry* pQueueEntry=new tQueueEntry;
 		MIXPACKET* pMixPacket=&pQueueEntry->packet;
@@ -76,9 +76,9 @@ SINT32 CALastMixA::loop()
 		m_logUploadedPackets=m_logDownloadedPackets=0;
 		set64((UINT64&)m_logUploadedBytes,(UINT32)0);
 		set64((UINT64&)m_logDownloadedBytes,(UINT32)0);
-		CAThread oLogThread((UINT8*)"CALastMixA - LogLoop");
-		oLogThread.setMainLoop(lm_loopLog);
-		oLogThread.start(this);
+		CAThread* pLogThread=new CAThread((UINT8*)"CALastMixA - LogLoop");
+		pLogThread->setMainLoop(lm_loopLog);
+		pLogThread->start(this);
 
 		#ifdef LOG_CHANNEL
 			UINT32 diff_time; 
@@ -220,9 +220,9 @@ SINT32 CALastMixA::loop()
 																		m_pChannelList->add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue(PAYLOAD_SIZE));
 																	#endif
 #ifdef HAVE_EPOLL
-																	osocketgroupCacheRead.add(*tmpSocket,m_pChannelList->get(pMixPacket->channel));
+																	psocketgroupCacheRead->add(*tmpSocket,m_pChannelList->get(pMixPacket->channel));
 #else
-																	osocketgroupCacheRead.add(*tmpSocket);
+																	psocketgroupCacheRead->add(*tmpSocket);
 #endif
 																	#ifdef LOG_PACKET_TIMES
 																		getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
@@ -236,8 +236,8 @@ SINT32 CALastMixA::loop()
 									{//channellsit entry !=NULL
 										if(pMixPacket->flags==CHANNEL_CLOSE)
 											{
-												osocketgroupCacheRead.remove(*(pChannelListEntry->pSocket));
-												osocketgroupCacheWrite.remove(*(pChannelListEntry->pSocket));
+												psocketgroupCacheRead->remove(*(pChannelListEntry->pSocket));
+												psocketgroupCacheWrite->remove(*(pChannelListEntry->pSocket));
 												pChannelListEntry->pSocket->close();
 												delete pChannelListEntry->pSocket;
 												delete pChannelListEntry->pCipher;
@@ -257,7 +257,7 @@ SINT32 CALastMixA::loop()
 												#ifdef _DEBUG
 													CAMsg::printMsg(LOG_DEBUG,"Suspending channel %u Socket: %u\n",pMixPacket->channel,(SOCKET)(*pChannelListEntry->pSocket));
 												#endif
-												osocketgroupCacheRead.remove(*(pChannelListEntry->pSocket));
+												psocketgroupCacheRead->remove(*(pChannelListEntry->pSocket));
 											}
 										else if(pMixPacket->flags==CHANNEL_RESUME)
 											{
@@ -266,9 +266,9 @@ SINT32 CALastMixA::loop()
 												#endif
 	
 #ifdef HAVE_EPOLL
-												osocketgroupCacheRead.add(*(pChannelListEntry->pSocket),pChannelListEntry);
+												psocketgroupCacheRead->add(*(pChannelListEntry->pSocket),pChannelListEntry);
 #else
-												osocketgroupCacheRead.add(*(pChannelListEntry->pSocket));
+												psocketgroupCacheRead->add(*(pChannelListEntry->pSocket));
 #endif
 											}
 										else if(pMixPacket->flags==CHANNEL_DATA)
@@ -299,8 +299,8 @@ SINT32 CALastMixA::loop()
 													ret=SOCKET_ERROR;
 												if(ret==SOCKET_ERROR)
 													{
-														osocketgroupCacheRead.remove(*(pChannelListEntry->pSocket));
-														osocketgroupCacheWrite.remove(*(pChannelListEntry->pSocket));
+														psocketgroupCacheRead->remove(*(pChannelListEntry->pSocket));
+														psocketgroupCacheWrite->remove(*(pChannelListEntry->pSocket));
 														pChannelListEntry->pSocket->close();
 														#ifdef LOG_CHANNEL
 															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
@@ -321,9 +321,9 @@ SINT32 CALastMixA::loop()
 												else
 													{
 #ifdef HAVE_EPOLL
-														osocketgroupCacheWrite.add(*(pChannelListEntry->pSocket),pChannelListEntry);
+														psocketgroupCacheWrite->add(*(pChannelListEntry->pSocket),pChannelListEntry);
 #else
-														osocketgroupCacheWrite.add(*(pChannelListEntry->pSocket));
+														psocketgroupCacheWrite->add(*(pChannelListEntry->pSocket));
 #endif
 														#ifdef LOG_PACKET_TIMES
 															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
@@ -337,19 +337,19 @@ SINT32 CALastMixA::loop()
 //end Step 1
 
 //Step 2 Sending to Cache...
-				countRead=osocketgroupCacheWrite.select(0);
+				countRead=psocketgroupCacheWrite->select(0);
 				if(countRead>0)
 					{
 						bAktiv=true;
 #ifdef HAVE_EPOLL
-						pChannelListEntry=(lmChannelListEntry*)osocketgroupCacheWrite.getFirstSignaledSocketData();
+						pChannelListEntry=(lmChannelListEntry*)psocketgroupCacheWrite->getFirstSignaledSocketData();
 						while(pChannelListEntry!=NULL)
 							{
 #else
 						pChannelListEntry=m_pChannelList->getFirstSocket();
 						while(pChannelListEntry!=NULL&&countRead>0)
 							{
-								if(osocketgroupCacheWrite.isSignaled(*(pChannelListEntry->pSocket)))
+								if(psocketgroupCacheWrite->isSignaled(*(pChannelListEntry->pSocket)))
 									{
 										countRead--;
 #endif
@@ -362,15 +362,15 @@ SINT32 CALastMixA::loop()
 												pChannelListEntry->pQueueSend->remove((UINT32*)&len);
 												if(pChannelListEntry->pQueueSend->isEmpty())
 													{
-														osocketgroupCacheWrite.remove(*(pChannelListEntry->pSocket));
+														psocketgroupCacheWrite->remove(*(pChannelListEntry->pSocket));
 													}
 											}
 										else
 											{
 												if(len==SOCKET_ERROR)
 													{ //do something if send error
-														osocketgroupCacheRead.remove(*(pChannelListEntry->pSocket));
-														osocketgroupCacheWrite.remove(*(pChannelListEntry->pSocket));
+														psocketgroupCacheRead->remove(*(pChannelListEntry->pSocket));
+														psocketgroupCacheWrite->remove(*(pChannelListEntry->pSocket));
 														pChannelListEntry->pSocket->close();
 														#ifdef LOG_CHANNEL
 															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
@@ -391,7 +391,7 @@ SINT32 CALastMixA::loop()
 													}
 											}
 #ifdef HAVE_EPOLL
-								pChannelListEntry=(lmChannelListEntry*)osocketgroupCacheWrite.getNextSignaledSocketData();
+								pChannelListEntry=(lmChannelListEntry*)psocketgroupCacheWrite->getNextSignaledSocketData();
 #else
 									}
 								pChannelListEntry=m_pChannelList->getNextSocket();
@@ -402,7 +402,7 @@ SINT32 CALastMixA::loop()
 
 //Step 3 Reading from Cache....
 #define MAX_MIXIN_SEND_QUEUE_SIZE 1000000
-				countRead=osocketgroupCacheRead.select(0);
+				countRead=psocketgroupCacheRead->select(0);
 #ifdef DELAY_CHANNELS_LATENCY
 				UINT64 current_time_millis;
 				getcurrentTimeMillis(current_time_millis);
@@ -418,7 +418,7 @@ SINT32 CALastMixA::loop()
 						pChannelListEntry=m_pChannelList->getFirstSocket();
 						while(pChannelListEntry!=NULL&&countRead>0)
 							{
-								if(osocketgroupCacheRead.isSignaled(*(pChannelListEntry->pSocket)))
+								if(psocketgroupCacheRead->isSignaled(*(pChannelListEntry->pSocket)))
 									{
 										countRead--;
 #endif
@@ -453,8 +453,8 @@ SINT32 CALastMixA::loop()
 												#endif
 												if(ret==SOCKET_ERROR||ret==0)
 													{
-														osocketgroupCacheRead.remove(*(pChannelListEntry->pSocket));
-														osocketgroupCacheWrite.remove(*(pChannelListEntry->pSocket));
+														psocketgroupCacheRead->remove(*(pChannelListEntry->pSocket));
+														psocketgroupCacheWrite->remove(*(pChannelListEntry->pSocket));
 														pChannelListEntry->pSocket->close();
 														#ifdef LOG_CHANNEL
 															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
@@ -559,7 +559,10 @@ SINT32 CALastMixA::loop()
 			}
 		delete []tmpBuff;
 		delete pQueueEntry;
-		oLogThread.join();
+		pLogThread->join();
+		delete pLogThread;
+		delete psocketgroupCacheWrite;
+		delete psocketgroupCacheRead;
 #endif //! NEW_MIX_TYPE
 		return E_UNKNOWN;
 	}
