@@ -161,7 +161,7 @@ SINT32 CAReplayCtrlChannelMsgProc::propagateCurrentReplayTimestamp()
 			}
 		if(pMix->getReplayDB()->getCurrentReplayTimestamp(replayTimestamp)!=E_SUCCESS)
 			{
-				return E_UNKOWN;
+				return E_UNKNOWN;
 			}
 		UINT8 buff[255];
 		UINT8* msgBuff=new UINT8[1024];
