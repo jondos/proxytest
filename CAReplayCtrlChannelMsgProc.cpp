@@ -52,6 +52,7 @@ CAReplayCtrlChannelMsgProc::CAReplayCtrlChannelMsgProc(const CAMix* pMix)
 					CAMsg::printMsg(LOG_DEBUG,"CAReplayCtrlChannelMsgProc - constructor - registering downstream replay control channel\n",this);
 				#endif	
 				m_pDownstreamReplayControlChannel=new CAReplayControlChannel(this);
+		CAMsg::printMsg(LOG_DEBUG,"m_pDownstreamReplayControlChannel= %p\n",m_pDownstreamReplayControlChannel);
 				pDispatcher->registerControlChannel(m_pDownstreamReplayControlChannel);
 			}
 		pDispatcher=m_pMix->getUpstreamControlChannelDispatcher();
@@ -171,7 +172,6 @@ SINT32 CAReplayCtrlChannelMsgProc::propagateCurrentReplayTimestamp()
 		sprintf((char*)msgBuff,strMsgTemplate,buff,replayTimestamp.interval,replayTimestamp.offset);
 		CAMsg::printMsg(LOG_DEBUG,"Msg to sent is %s\n",msgBuff);
 		CAMsg::printMsg(LOG_DEBUG,"m_pDownstreamReplayControlChannel= %p\n",m_pDownstreamReplayControlChannel);
-		CAMsg::printMsg(LOG_DEBUG,"m_pDownstreamReplayControlChannel::sendXMLMessage= %p\n",&(m_pDownstreamReplayControlChannel->sendXMLMessage));
 		m_pDownstreamReplayControlChannel->sendXMLMessage(msgBuff,strlen((char*)msgBuff));
 		delete msgBuff;
 		CAMsg::printMsg(LOG_DEBUG,"Replay timestamp propagation finished\n");
