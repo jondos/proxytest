@@ -104,7 +104,7 @@ SINT32 CADatabase::insert(UINT8 key[16])
 				LP_databaseEntry newEntry=getNewDBEntry(aktDB);
 				newEntry->left=NULL;
 				newEntry->right=NULL;
-				memcpy(newEntry->key,key,6);
+				newEntry->key=key[0]<<24|key[1]<<16|key[2]<<8|key[3];
 				aktDB->m_pHashTable[hashKey]=newEntry;
 				aktDB->m_u32Size++;
 				m_pMutex->unlock();
@@ -112,18 +112,20 @@ SINT32 CADatabase::insert(UINT8 key[16])
 			}
 		else
 			{
-				SINT32 ret;
+				UINT32 ret;
 				LP_databaseEntry before=NULL;
 				do
 					{
-						ret=memcmp(key,hashList->key,6);
-						if(ret==0)
+					
+						ret=key[0]<<24|key[1]<<16|key[2]<<8|key[3];
+						//newEntry->keymemcmp(key,hashList->key,6);
+						if(ret==hashList->key)
 							{
 								m_pMutex->unlock();
 								return E_UNKNOWN;
 							}
 						before=hashList;	
-						if(ret<0)
+						if(hashList->key<ret)
 							{
 								hashList=hashList->right;
 							}
@@ -134,8 +136,9 @@ SINT32 CADatabase::insert(UINT8 key[16])
 					} while(hashList!=NULL);
 				LP_databaseEntry newEntry=getNewDBEntry(aktDB);
 				newEntry->left=newEntry->right=NULL;
-				memcpy(newEntry->key,key,6);				
-				if(ret<0)
+				//memcpy(newEntry->key,key,6);				
+				newEntry->key=ret;
+				if(before->key<ret)
 					{
 						before->right=newEntry;
 					}
@@ -321,8 +324,8 @@ SINT32 CADatabase::simulateInsert(UINT8 key[16])
 		UINT16 timestamp=(key[14]<<8)|key[15];
 		if(timestamp<m_currentClock-1||timestamp>m_currentClock+1)
 			{
-				//m_pMutex->unlock();
-				//return E_UNKNOWN;
+				m_pMutex->unlock();
+				return E_UNKNOWN;
 			}
 		t_databaseInfo* aktDB=m_currDatabase;
 		if(timestamp>m_currentClock)
@@ -340,7 +343,7 @@ SINT32 CADatabase::simulateInsert(UINT8 key[16])
 				LP_databaseEntry newEntry=getNewDBEntry(aktDB);
 				newEntry->left=NULL;
 				newEntry->right=NULL;
-				memcpy(newEntry->key,key,6);
+				newEntry->key=key[0]<<24|key[1]<<16|key[2]<<8|key[3];
 				//aktDB->m_pHashTable[hashKey]=newEntry;
 				aktDB->m_u32Size++;
 				m_pMutex->unlock();
@@ -348,18 +351,20 @@ SINT32 CADatabase::simulateInsert(UINT8 key[16])
 			}
 		else
 			{
-				SINT32 ret;
+				UINT32 ret;
 				LP_databaseEntry before=NULL;
 				do
 					{
-						ret=memcmp(key,hashList->key,6);
-						if(ret==0)
+					
+						ret=key[0]<<24|key[1]<<16|key[2]<<8|key[3];
+						//newEntry->keymemcmp(key,hashList->key,6);
+						if(ret==hashList->key)
 							{
 								m_pMutex->unlock();
 								return E_UNKNOWN;
 							}
 						before=hashList;	
-						if(ret<0)
+						if(hashList->key<ret)
 							{
 								hashList=hashList->right;
 							}
@@ -370,16 +375,16 @@ SINT32 CADatabase::simulateInsert(UINT8 key[16])
 					} while(hashList!=NULL);
 				LP_databaseEntry newEntry=getNewDBEntry(aktDB);
 				newEntry->left=newEntry->right=NULL;
-				memcpy(newEntry->key,key,6);				
-				if(ret<0)
+				//memcpy(newEntry->key,key,6);				
+				newEntry->key=ret;
+				if(before->key<ret)
 					{
 						//before->right=newEntry;
 					}
 				else
-				{
-				}
+					{
 						//before->left=newEntry;
-
+					}
 			}
 		aktDB->m_u32Size++;	
 		m_pMutex->unlock();
