@@ -34,7 +34,7 @@ typedef struct __t_database_entry
 	{
 		__t_database_entry* left;
 		__t_database_entry* right;
-		UINT8 key[6];
+		UINT32 key;
 	} t_databaseEntry; 
 
 typedef t_databaseEntry* LP_databaseEntry;
