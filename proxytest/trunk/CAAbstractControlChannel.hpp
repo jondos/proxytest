@@ -92,7 +92,7 @@ class CAAbstractControlChannel
 		/** Returns the id of this control channel.
 			* @retval id of control channel
 			*/
-		UINT32 getID()
+		UINT32 getID() const
 			{
 				return m_ID;
 			}
