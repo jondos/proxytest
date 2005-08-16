@@ -112,12 +112,10 @@ SINT32 CADatabase::insert(UINT8 key[16])
 			}
 		else
 			{
-				UINT32 ret;
+				UINT32 ret=key[0]<<24|key[1]<<16|key[2]<<8|key[3];;
 				LP_databaseEntry before=NULL;
 				do
 					{
-					
-						ret=key[0]<<24|key[1]<<16|key[2]<<8|key[3];
 						//newEntry->keymemcmp(key,hashList->key,6);
 						if(ret==hashList->key)
 							{
@@ -351,12 +349,10 @@ SINT32 CADatabase::simulateInsert(UINT8 key[16])
 			}
 		else
 			{
-				UINT32 ret;
+				UINT32 ret=key[0]<<24|key[1]<<16|key[2]<<8|key[3];
 				LP_databaseEntry before=NULL;
 				do
 					{
-					
-						ret=key[0]<<24|key[1]<<16|key[2]<<8|key[3];
 						//newEntry->keymemcmp(key,hashList->key,6);
 						if(ret==hashList->key)
 							{
