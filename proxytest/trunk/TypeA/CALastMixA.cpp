@@ -511,7 +511,7 @@ SINT32 CALastMixA::loop()
 													}
 											}
 #ifdef HAVE_EPOLL
-								pChannelListEntry=(lmChannelListEntry*)osocketgroupCacheRead.getNextSignaledSocketData();
+								pChannelListEntry=(lmChannelListEntry*)psocketgroupCacheRead->getNextSignaledSocketData();
 #else
 									}
 								pChannelListEntry=m_pChannelList->getNextSocket();
