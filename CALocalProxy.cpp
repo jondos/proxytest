@@ -33,6 +33,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CACmdLnOptions.hpp"
 #include "CAUtil.hpp"
 #include "CASocketAddrINet.hpp"
+#include "CABase64.hpp"
+#include "xml/DOM_Output.hpp"
 #ifndef NEW_MIX_TYPE
 extern CACmdLnOptions options;
 // signals the main loop whether to capture or replay packets
@@ -500,10 +502,6 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 					{
 						CAMsg::printMsg(LOG_INFO,"MixCascadeProtocolVersion: 0.4\n");
 						m_MixCascadeProtocolVersion=MIX_CASCADE_PROTOCOL_VERSION_0_4;
-						m_pSymCipher=new CASymCipher();
-						UINT8 key[16];
-						memset(key,0,16);
-						m_pSymCipher->setKey(key);
 					}	
 				else if(memcmp(strVersion,"0.3",3)==0)
 					{
@@ -575,20 +573,90 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 				return E_UNKNOWN;
 #endif
 			}
+		
 		//Now sending SymKeys....
-		MIXPACKET oPacket;
-		getRandom((UINT8*)&oPacket,MIXPACKET_SIZE);
-		oPacket.flags=0;
-		oPacket.channel=0;
-		UINT8 keys[32];
-		getRandom(keys,32);
-		m_muxOut.setReceiveKey(keys,16);
-		m_muxOut.setSendKey(keys+16,16);
-		memcpy(oPacket.data,"KEYPACKET",9);
-		memcpy(oPacket.data+9,keys,32);
-		m_arRSA[m_chainlen-1].encrypt(oPacket.data,oPacket.data);
-		m_muxOut.send(&oPacket);
-		m_muxOut.setCrypt(true);
+		if(m_MixCascadeProtocolVersion==MIX_CASCADE_PROTOCOL_VERSION_0_2)
+			{
+				MIXPACKET oPacket;
+				getRandom((UINT8*)&oPacket,MIXPACKET_SIZE);
+				oPacket.flags=0;
+				oPacket.channel=0;
+				UINT8 keys[32];
+				getRandom(keys,32);
+				m_muxOut.setReceiveKey(keys,16);
+				m_muxOut.setSendKey(keys+16,16);
+				memcpy(oPacket.data,"KEYPACKET",9);
+				memcpy(oPacket.data+9,keys,32);
+				m_arRSA[m_chainlen-1].encrypt(oPacket.data,oPacket.data);
+				m_muxOut.send(&oPacket);
+				m_muxOut.setCrypt(true);
+			}
+		else
+			{
+	      DOM_Document doc=DOM_Document::createDocument();
+   			DOM_Element e = doc.createElement("JAPKeyExchange");
+				doc.appendChild(e);
+				e.setAttribute("version", "0.1");
+				DOM_Element elemLinkEnc = doc.createElement("LinkEncryption");
+				UINT8 linkKeys[64];
+				getRandom(linkKeys,64);
+				m_pSymCipher=new CASymCipher();
+				m_pSymCipher->setKey(linkKeys);
+				m_pSymCipher->setIVs(linkKeys+32);
+				UINT8 outBuff[512];
+				UINT32 outlen=512;
+				CABase64::encode(linkKeys,64,outBuff,&outlen);
+				outBuff[outlen]=0;
+				setDOMElementValue(elemLinkEnc,outBuff);
+				e.appendChild(elemLinkEnc);
+				DOM_Element elemMixEnc = doc.createElement("MixEncryption");
+				UINT8 mixKeys[32];
+				getRandom(mixKeys,32);
+				outlen=512;
+				CABase64::encode(mixKeys,32,outBuff,&outlen);
+				outBuff[outlen]=0;
+				setDOMElementValue(elemMixEnc,outBuff);
+				e.appendChild(elemMixEnc);
+				encryptXMLElement(e,&m_arRSA[0]);
+				UINT32 size;
+				UINT8* buff=DOM_Output::dumpToMem(doc,&size);
+				UINT16 size2=htons(size);
+				((CASocket*)&m_muxOut)->send((UINT8*)&size2,2);
+				((CASocket*)&m_muxOut)->send(buff,size);
+				delete[] buff;
+				// Checking Signature send from Mix
+				((CASocket*)&m_muxOut)->receive((UINT8*)&size2,2);
+				size2=ntohs(size2);
+				/*byte[] tmpBuff = new byte[xml_buff.length + 2];
+				System.arraycopy(xml_buff, 0, tmpBuff, 2, xml_buff.length);
+				tmpBuff[0] = (byte) ( (xml_buff.length >> 8) & 0x00FF);
+				tmpBuff[1] = (byte) (xml_buff.length & 0x00FF);
+				int len = m_inDataStream.readShort();
+				byte[] mixSigBuff = new byte[len];
+				m_inDataStream.readFully(mixSigBuff);*/
+				buff=new UINT8[size2];
+				((CASocket*)&m_muxOut)->receiveFully(buff,size2);
+				delete[] buff;
+				/*doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new
+					ByteArrayInputStream(mixSigBuff));
+				root = doc.getDocumentElement();
+				if (!root.getNodeName().equals("Signature"))
+				{
+					return ErrorCodes.E_UNKNOWN;
+				}
+				Node elemSigValue = XMLUtil.getFirstChildByName(root, "SignatureValue");
+				String strSigValue = XMLUtil.parseValue(elemSigValue, null);
+				byte[] sigValue = Base64.decode(strSigValue);
+				JAPCertificate certs[] = JAPSignature.getAppendedCertificates(nodeSig);
+				JAPSignature sig = new JAPSignature();
+				sig.initVerify(certs[0].getPublicKey());
+				if (!sig.verify(tmpBuff, sigValue, true))
+				{
+					return ErrorCodes.E_UNKNOWN;
+				}
+				setEnableEncryption(true);
+				*/
+			}
 		CAMsg::printMsg(LOG_INFO,"Login process and key exchange finished!\n");		
 		return E_SUCCESS;
 	}

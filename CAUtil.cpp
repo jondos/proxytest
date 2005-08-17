@@ -692,6 +692,18 @@ SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, DOM_Node & root,CAASymCi
 	*		</CipherData>
 	*	</EncryptedData>
 	*/
+SINT32 encryptXMLElement(DOM_Node & node, CAASymCipher* pRSA)
+	{
+		DOM_Document doc=DOM_Document::createDocument();
+		DOM_Element elemRoot=doc.createElement("EncryptedData");
+		DOM_Element elemKeyInfo=doc.createElement("ds:KeyInfo");
+		elemRoot.appendChild(elemKeyInfo);
+		DOM_Element elemEncKey=doc.createElement("EncryptedKey");
+		elemKeyInfo.appendChild(elemEncKey);
+		doc.appendChild(elemRoot);
+		return E_SUCCESS;
+	}
+
 SINT32 decryptXMLElement(DOM_Node & node, CAASymCipher* pRSA)
 	{
 		DOM_Document doc=node.getOwnerDocument();
