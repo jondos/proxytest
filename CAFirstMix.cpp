@@ -1259,6 +1259,11 @@ SINT32 CAFirstMix::updateCountryStats(const UINT8 ip[4],UINT32 a_countryID,bool 
 								#ifdef DEBUG
 									CAMsg::printMsg(LOG_DEBUG,"Country ID for ip %u is %u\n",u32ip,countryID);
 								#endif
+								//temp hack
+								if(countryID==99)
+								{
+									CAMsg::printMsg(LOG_DEBUG,"Country ID for ip %u.%u.%u.%u is %u\n",ip[0],ip[1],ip[2],ip[3],countryID);
+								}
 							}
 						else
 							{
