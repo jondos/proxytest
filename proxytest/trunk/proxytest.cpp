@@ -480,7 +480,7 @@ Debug(dc::malloc.on());
 			}
 
 #ifdef DATABASE_PERFORMANCE_TEST
-			CADatabase::measurePerformance((UINT8*)"dbperformace.log",10000001,10000001,500000,1,1);
+			CADatabase::measurePerformance((UINT8*)"dbperformace.log",10000001,10000001,500000,1,100000);
 			exit(0);
 #endif
 #ifdef _DEBUG

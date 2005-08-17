@@ -147,9 +147,7 @@ SINT32 CAFirstMixA::loop()
 													}
 												ASSERT(pHashEntry->pQueueSend!=NULL,"Send queue is NULL");
 												delete pHashEntry->pQueueSend;
-												#ifdef FIRST_MIX_SYMMETRIC
-													delete pHashEntry->pSymCipher;
-												#endif	
+												delete pHashEntry->pSymCipher;
 												#ifdef COUNTRY_STATS
 													decUsers(pHashEntry);
 												#else
@@ -253,24 +251,13 @@ SINT32 CAFirstMixA::loop()
 														else if(pEntry==NULL&&pMixPacket->flags==CHANNEL_OPEN)  // open a new mix channel
 															{ // stefan: muesste das nicht vor die behandlung von CHANNEL_DATA? oder gilt OPEN => !DATA ? 
 																//es gilt: open -> data
-																#ifdef FIRST_MIX_SYMMETRIC
-																	pHashEntry->pSymCipher->crypt1(pMixPacket->data,rsaBuff,KEY_SIZE);
-																#else
-																	m_pRSA->decrypt(pMixPacket->data,rsaBuff); // stefan: das hier ist doch eine ziemlich kostspielige operation. sollte das pruefen auf Max_Number_Of_Channels nicht vorher passieren? --> ok sollte aufs TODO ...
-																#endif
+																pHashEntry->pSymCipher->crypt1(pMixPacket->data,rsaBuff,KEY_SIZE);
 																pCipher= new CASymCipher();
 																pCipher->setKey(rsaBuff);
-																#ifdef FIRST_MIX_SYMMETRIC
-																	for(int i=0;i<16;i++)
-																		rsaBuff[i]=0xFF;
-																	pCipher->setIV2(rsaBuff);
-																	pCipher->crypt1(pMixPacket->data+KEY_SIZE,pMixPacket->data,DATA_SIZE-KEY_SIZE);
-																#else
-																	pCipher->crypt1(pMixPacket->data+RSA_SIZE,
-																									pMixPacket->data+RSA_SIZE-KEY_SIZE,
-																									DATA_SIZE-RSA_SIZE);
-																	memcpy(pMixPacket->data,rsaBuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
-																#endif																	
+																for(int i=0;i<16;i++)
+																	rsaBuff[i]=0xFF;
+																pCipher->setIV2(rsaBuff);
+																pCipher->crypt1(pMixPacket->data+KEY_SIZE,pMixPacket->data,DATA_SIZE-KEY_SIZE);
 																getRandom(pMixPacket->data+DATA_SIZE-KEY_SIZE,KEY_SIZE);
 																#ifdef LOG_CHANNEL
 																	HCHANNEL tmpC=pMixPacket->channel;
@@ -577,9 +564,7 @@ NEXT_USER:
 			{
 				CAMuxSocket * pMuxSocket=pHashEntry->pMuxSocket;
 				delete pHashEntry->pQueueSend;
-				#ifdef FIRST_MIX_SYMMETRIC
-					delete pHashEntry->pSymCipher; 
-				#endif
+				delete pHashEntry->pSymCipher; 
 
 				fmChannelListEntry* pEntry=m_pChannelList->getFirstChannelForSocket(pHashEntry->pMuxSocket);
 				while(pEntry!=NULL)
