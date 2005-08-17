@@ -152,9 +152,7 @@ struct t_fmhashtableentry
 #ifdef PAYMENT
 	aiAccountingInfo * pAccountingInfo;
 #endif
-#ifdef FIRST_MIX_SYMMETRIC
 			CASymCipher*  pSymCipher;
-#endif			
 			UINT8					peerIP[4]; //needed for flooding control
 #ifdef COUNTRY_STATS
 			UINT32 countryID; /** CountryID of this IP Address*/

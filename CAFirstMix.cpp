@@ -754,26 +754,6 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		((CASocket*)pNewUser)->send(m_xmlKeyInfoBuff,m_xmlKeyInfoSize);  // send the mix-keys to JAP
 		// es kann nicht blockieren unter der Annahme das der TCP-Sendbuffer > m_xmlKeyInfoSize ist....
 		//wait for keys from user
-#ifndef FIRST_MIX_SYMMETRIC
-		MIXPACKET oMixPacket;
-		((CASocket*)pNewUser)->setNonBlocking(true);	                    // stefan: sendet das send in der letzten zeile doch noch nicht? wenn doch, kann dann ein JAP nicht durch verweigern der annahme hier den mix blockieren? vermutlich nciht, aber andersherum faend ich das einleuchtender.
-		if(pNewUser->receive(&oMixPacket,FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT)!=MIXPACKET_SIZE) //wait at most FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT
-																																																	// milliseconds for user to send sym key
-			{
-				delete pNewUser;
-				m_pIPList->removeIP(peerIP);
-				return E_UNKNOWN;
-			}
-		m_pRSA->decrypt(oMixPacket.data,oMixPacket.data);
-		if(memcmp("KEYPACKET",oMixPacket.data,9)!=0)
-			{
-				m_pIPList->removeIP(peerIP);
-				delete pNewUser;
-				return E_UNKNOWN;
-			}
-		pNewUser->setKey(oMixPacket.data+9,32);
-		pNewUser->setCrypt(true);
-#else
 		UINT16 xml_len;
 		if(((CASocket*)pNewUser)->receiveFully((UINT8*)&xml_len,2,FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT)!=E_SUCCESS)
 			{
@@ -849,7 +829,6 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		((CASocket*)pNewUser)->send(xml_buff,u32+2);
 		delete xml_buff;
 		((CASocket*)pNewUser)->setNonBlocking(true);
-#endif //FIRST_MIX_SYMMETRIC
 		CAQueue* tmpQueue=new CAQueue(sizeof(tQueueEntry));
 		if(m_pChannelList->add(pNewUser,peerIP,tmpQueue)!=E_SUCCESS)// adding user connection to mix->JAP channel list (stefan: sollte das nicht connection list sein? --> es handelt sich um eine Datenstruktu fŸr Connections/Channels ).
 			{
@@ -858,22 +837,18 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 				delete pNewUser;
 				return E_UNKNOWN;
 			}
-#if defined(PAYMENT)||defined(FIRST_MIX_SYMMETRIC)||defined(WITH_CONTROL_CHANNELS_TEST)||defined(COUNTRY_STATS)||defined(REPLAY_DETECTION)
 		fmHashTableEntry* pHashEntry=m_pChannelList->get(pNewUser);
-#endif
 #ifdef PAYMENT
 		// register AI control channel
 		//CAAccountingControlChannel * pTmp = new CAAccountingControlChannel(pHashEntry);
 		pHashEntry->pControlChannelDispatcher->registerControlChannel(new CAAccountingControlChannel(pHashEntry));
 #endif
-#ifdef FIRST_MIX_SYMMETRIC
 		pHashEntry->pSymCipher=new CASymCipher();
 		pHashEntry->pSymCipher->setKey(mixKey);
 		pHashEntry->pSymCipher->setIVs(mixKey+16);
 		pNewUser->setReceiveKey(linkKey,32);
 		pNewUser->setSendKey(linkKey+32,32);
 		pNewUser->setCrypt(true);
-#endif
 #ifdef WITH_CONTROL_CHANNELS_TEST
 		pHashEntry->pControlChannelDispatcher->registerControlChannel(new CAControlChannelTest());
 #endif
