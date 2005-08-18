@@ -637,6 +637,8 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 				buff=new UINT8[size2];
 				((CASocket*)&m_muxOut)->receiveFully(buff,size2);
 				delete[] buff;
+				m_muxOut.setSendKey(mixKeys,16);
+				m_muxOut.setReceiveKey(mixKeys+16,16);
 				/*doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new
 					ByteArrayInputStream(mixSigBuff));
 				root = doc.getDocumentElement();
