@@ -368,8 +368,6 @@ int main(int argc, const char* argv[])
 		pMix=NULL;
 		int i;
 		SINT32 maxFiles;
-		init();
-		
 #if defined(HAVE_CRTDBG)
 //			_CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_FILE );
 //			_CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDOUT );
@@ -378,18 +376,19 @@ int main(int argc, const char* argv[])
 //			_CrtSetReportMode( _CRT_ASSERT, _CRTDBG_MODE_FILE );
 //			_CrtSetReportFile( _CRT_ASSERT, _CRTDBG_FILE_STDOUT );
 
-			UINT32 tmpDbgFlag = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
-			tmpDbgFlag |= _CRTDBG_ALLOC_MEM_DF;
-			tmpDbgFlag |=_CRTDBG_LEAK_CHECK_DF;
-			_CrtSetDbgFlag(tmpDbgFlag);
-			_CrtMemState s1, s2, s3;
+		UINT32 tmpDbgFlag = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
+		tmpDbgFlag |= _CRTDBG_ALLOC_MEM_DF;
+		tmpDbgFlag |=_CRTDBG_LEAK_CHECK_DF;
+		_CrtSetDbgFlag(tmpDbgFlag);
+		_CrtMemState s1, s2, s3;
+		_CrtMemCheckpoint( &s1 );
 #endif
-
 //Switch on debug infos
 #ifdef CWDEBUG
-Debug(libcw_do.on());
-Debug(dc::malloc.on());
+		Debug(libcw_do.on());
+		Debug(dc::malloc.on());
 #endif
+		init();
 			//some test....
 		checkSizesOfBaseTypes();
 #ifndef NEW_MIX_TYPE
@@ -501,10 +500,6 @@ Debug(dc::malloc.on());
 		CAMsg::printMsg(LOG_DEBUG,"done! Takes %u seconds\n",start);
 		//end Testin msSleep
 
-#endif
-
-#ifdef HAVE_CRTDBG
-		_CrtMemCheckpoint( &s1 );
 #endif
 		UINT8 buff[255];
 
@@ -712,18 +707,20 @@ EXIT:
 //OpenSSL Cleanup
 		CRYPTO_set_locking_callback(NULL);
 		delete []pOpenSSLMutexes;
+		CASocketAddrINet::cleanup();
 //XML Cleanup
 		//Note: We have to destroy all XML Objects and all objects that uses XML Objects BEFORE
 		//we terminate the XML lib!
 		XMLPlatformUtils::Terminate();
 		CAMsg::printMsg(LOG_CRIT,"Terminating Programm!\n");
+		CAMsg::cleanup();
 #if defined(HAVE_CRTDBG)
 		_CrtMemCheckpoint( &s2 );
 		if ( _CrtMemDifference( &s3, &s1, &s2 ) )
       _CrtMemDumpStatistics( &s3 );
 #endif
 #ifdef CWDEBUG
-Debug(list_allocations_on(libcw_do));
+		Debug(list_allocations_on(libcw_do));
 #endif
 		return 0;
 	}

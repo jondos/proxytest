@@ -337,7 +337,6 @@ SINT32 CALocalProxy::loop()
 											len=tmpCon->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE);
 										if(len==SOCKET_ERROR||len==0)
 											{
-												//TODO delete cipher..
 												CASocket* tmpSocket=oSocketList.remove(tmpCon->outChannel);
 												if(tmpSocket!=NULL)
 													{
@@ -348,6 +347,7 @@ SINT32 CALocalProxy::loop()
 														m_muxOut.send(pMixPacket);
 														tmpSocket->close();
 														delete tmpSocket;
+														delete [] tmpCon->pCiphers;
 													}
 											}
 										else 
@@ -390,6 +390,9 @@ SINT32 CALocalProxy::loop()
 																if(m_MixCascadeProtocolVersion==MIX_CASCADE_PROTOCOL_VERSION_0_4&&c==m_chainlen-1)
 																	{
 																		m_pSymCipher->crypt1(buff,buff,KEY_SIZE);
+																		UINT8 iv[16];
+																		memset(iv,0xFF,16);
+																		tmpCon->pCiphers[c].setIV2(iv);
 																		tmpCon->pCiphers[c].crypt1(buff+KEY_SIZE,buff+KEY_SIZE,DATA_SIZE-KEY_SIZE);
 																	}
 																else
@@ -470,6 +473,9 @@ SINT32 CALocalProxy::clean()
 		if(m_arRSA!=NULL)
 			delete[] m_arRSA;
 		m_arRSA=NULL;
+		if(m_pSymCipher!=NULL)
+			delete m_pSymCipher;
+		m_pSymCipher=NULL;
 		return E_SUCCESS;
 	}
 
@@ -600,9 +606,6 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 				DOM_Element elemLinkEnc = doc.createElement("LinkEncryption");
 				UINT8 linkKeys[64];
 				getRandom(linkKeys,64);
-				m_pSymCipher=new CASymCipher();
-				m_pSymCipher->setKey(linkKeys);
-				m_pSymCipher->setIVs(linkKeys+32);
 				UINT8 outBuff[512];
 				UINT32 outlen=512;
 				CABase64::encode(linkKeys,64,outBuff,&outlen);
@@ -612,20 +615,23 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 				DOM_Element elemMixEnc = doc.createElement("MixEncryption");
 				UINT8 mixKeys[32];
 				getRandom(mixKeys,32);
+				m_pSymCipher=new CASymCipher();
+				m_pSymCipher->setKey(mixKeys);
+				m_pSymCipher->setIVs(mixKeys+16);
 				outlen=512;
 				CABase64::encode(mixKeys,32,outBuff,&outlen);
 				outBuff[outlen]=0;
 				setDOMElementValue(elemMixEnc,outBuff);
 				e.appendChild(elemMixEnc);
-				encryptXMLElement(e,&m_arRSA[0]);
+				encryptXMLElement(doc,&m_arRSA[m_chainlen-1]);
 				UINT32 size;
 				UINT8* buff=DOM_Output::dumpToMem(doc,&size);
 				UINT16 size2=htons(size);
-				((CASocket*)&m_muxOut)->send((UINT8*)&size2,2);
-				((CASocket*)&m_muxOut)->send(buff,size);
+				SINT32 ret=((CASocket*)&m_muxOut)->send((UINT8*)&size2,2);
+				ret=((CASocket*)&m_muxOut)->send(buff,size);
 				delete[] buff;
 				// Checking Signature send from Mix
-				((CASocket*)&m_muxOut)->receive((UINT8*)&size2,2);
+				ret=((CASocket*)&m_muxOut)->receiveFully((UINT8*)&size2,2);
 				size2=ntohs(size2);
 				/*byte[] tmpBuff = new byte[xml_buff.length + 2];
 				System.arraycopy(xml_buff, 0, tmpBuff, 2, xml_buff.length);
@@ -635,10 +641,11 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 				byte[] mixSigBuff = new byte[len];
 				m_inDataStream.readFully(mixSigBuff);*/
 				buff=new UINT8[size2];
-				((CASocket*)&m_muxOut)->receiveFully(buff,size2);
+				ret=((CASocket*)&m_muxOut)->receiveFully(buff,size2);
 				delete[] buff;
-				m_muxOut.setSendKey(mixKeys,16);
-				m_muxOut.setReceiveKey(mixKeys+16,16);
+				m_muxOut.setSendKey(linkKeys,32);
+				m_muxOut.setReceiveKey(linkKeys+32,32);
+				m_muxOut.setCrypt(true);
 				/*doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new
 					ByteArrayInputStream(mixSigBuff));
 				root = doc.getDocumentElement();

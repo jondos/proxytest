@@ -692,16 +692,28 @@ SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, DOM_Node & root,CAASymCi
 	*		</CipherData>
 	*	</EncryptedData>
 	*/
-SINT32 encryptXMLElement(DOM_Node & node, CAASymCipher* pRSA)
+SINT32 encryptXMLElement(DOM_Node node, CAASymCipher* pRSA)
 	{
-		DOM_Document doc=DOM_Document::createDocument();
+		DOM_Document doc;
+		DOM_Node parent;
+		if(node.getNodeType()==DOM_Node::DOCUMENT_NODE)
+			{
+				doc=(DOM_Document&)node;
+				parent=doc;
+				node=doc.getDocumentElement();
+			}
+		else
+			{
+				doc=node.getOwnerDocument();
+				parent=node.getParentNode();
+			}
 		DOM_Element elemRoot=doc.createElement("EncryptedData");
 		DOM_Element elemKeyInfo=doc.createElement("ds:KeyInfo");
 		elemRoot.appendChild(elemKeyInfo);
 		DOM_Element elemEncKey=doc.createElement("EncryptedKey");
 		elemKeyInfo.appendChild(elemEncKey);
 		DOM_Element elemCipherData=doc.createElement("CipherData");
-		elemKeyInfo.appendChild(elemCipherData);
+		elemEncKey.appendChild(elemCipherData);
 		DOM_Element elemCipherValue=doc.createElement("CipherValue");
 		elemCipherData.appendChild(elemCipherValue);
 		UINT8 key[32];
@@ -714,7 +726,6 @@ SINT32 encryptXMLElement(DOM_Node & node, CAASymCipher* pRSA)
 		CABase64::encode(buff,bufflen,outbuff,&outbufflen);
 		outbuff[outbufflen]=0;
 		setDOMElementValue(elemCipherValue,outbuff);
-		doc.appendChild(elemRoot);
 		CASymCipher *pSymCipher=new CASymCipher();
 		pSymCipher->setKey(key,true);
 		pSymCipher->setIVs(key+16);
@@ -730,10 +741,19 @@ SINT32 encryptXMLElement(DOM_Node & node, CAASymCipher* pRSA)
 		CABase64::encode(outbuff,outbufflen,buff,&bufflen);
 		buff[bufflen]=0;
 		setDOMElementValue(elemCipherValue,buff);
+		if(parent.getNodeType()==DOM_Node::DOCUMENT_NODE)
+			{
+				parent.removeChild(node);
+				parent.appendChild(elemRoot);
+			}
+		else
+			{
+				parent.replaceChild(elemRoot,node);
+			}
 		return E_SUCCESS;
 	}
 
-SINT32 decryptXMLElement(DOM_Node & node, CAASymCipher* pRSA)
+SINT32 decryptXMLElement(DOM_Node node, CAASymCipher* pRSA)
 	{
 		DOM_Document doc=node.getOwnerDocument();
 		if(!node.getNodeName().equals("EncryptedData"))
