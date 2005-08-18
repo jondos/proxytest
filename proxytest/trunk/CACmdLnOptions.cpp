@@ -68,8 +68,14 @@ CACmdLnOptions::CACmdLnOptions()
 
 CACmdLnOptions::~CACmdLnOptions()
 	{
+		cleanup();
+	}
+
+SINT32 CACmdLnOptions::cleanup()
+	{
 		clean();
 		delete m_pcsReConfigure;
+		return E_SUCCESS;
 	}
 
 /** Deletes all information about the target interfaces.

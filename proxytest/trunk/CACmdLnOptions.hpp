@@ -61,6 +61,7 @@ class CACmdLnOptions
 	public:
 	    CACmdLnOptions();
 	    ~CACmdLnOptions();
+			SINT32 cleanup();
 			void clean();
 			SINT32 parse(int argc,const char** arg);
 			SINT32 reread(CAMix* pMix);
