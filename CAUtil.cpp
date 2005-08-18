@@ -700,7 +700,36 @@ SINT32 encryptXMLElement(DOM_Node & node, CAASymCipher* pRSA)
 		elemRoot.appendChild(elemKeyInfo);
 		DOM_Element elemEncKey=doc.createElement("EncryptedKey");
 		elemKeyInfo.appendChild(elemEncKey);
+		DOM_Element elemCipherData=doc.createElement("CipherData");
+		elemKeyInfo.appendChild(elemCipherData);
+		DOM_Element elemCipherValue=doc.createElement("CipherValue");
+		elemCipherData.appendChild(elemCipherValue);
+		UINT8 key[32];
+		getRandom(key,32);
+		UINT8 buff[1000];
+		UINT32 bufflen=255;
+		pRSA->encryptOAEP(key,32,buff,&bufflen);
+		UINT8 outbuff[1000];
+		UINT32 outbufflen=255;
+		CABase64::encode(buff,bufflen,outbuff,&outbufflen);
+		outbuff[outbufflen]=0;
+		setDOMElementValue(elemCipherValue,outbuff);
 		doc.appendChild(elemRoot);
+		CASymCipher *pSymCipher=new CASymCipher();
+		pSymCipher->setKey(key,true);
+		pSymCipher->setIVs(key+16);
+		elemCipherData=doc.createElement("CipherData");
+		elemRoot.appendChild(elemCipherData);
+		elemCipherValue=doc.createElement("CipherValue");
+		elemCipherData.appendChild(elemCipherValue);
+		UINT8* b=DOM_Output::dumpToMem(node,&bufflen);
+		outbufflen=1000;
+		pSymCipher->encrypt1CBCwithPKCS7(b,bufflen,outbuff,&outbufflen);
+		delete []b;
+		bufflen=1000;
+		CABase64::encode(outbuff,outbufflen,buff,&bufflen);
+		buff[bufflen]=0;
+		setDOMElementValue(elemCipherValue,buff);
 		return E_SUCCESS;
 	}
 
@@ -744,7 +773,7 @@ SINT32 decryptXMLElement(DOM_Node & node, CAASymCipher* pRSA)
 				return E_UNKNOWN;
 			}
 		CABase64::decode(cipherValue,len,cipherValue,&len);
-		SINT32 ret=pSymCipher->crypt1CBCwithPKCS7(cipherValue,cipherValue,&len);
+		SINT32 ret=pSymCipher->decrypt1CBCwithPKCS7(cipherValue,cipherValue,&len);
 		delete pSymCipher;
 		if(ret!=E_SUCCESS)
 			{

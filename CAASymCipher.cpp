@@ -67,12 +67,28 @@ SINT32 CAASymCipher::decrypt(const UINT8* from,UINT8* to)
 	*@param from one OAEP encoded block of cipher text
 	*@param to the plain text
 	*@param len on return contains the size of the plaintext
-	*@retval NULL in case of an error
+	*@retval E_UNKNOWN in case of an error
 	*@retval E_SUCCESS otherwise
 	*/
 SINT32 CAASymCipher::decryptOAEP(const UINT8* from,UINT8* to,UINT32* len)
 	{
 		SINT32 ret=RSA_private_decrypt(RSA_SIZE,from,to,m_pRSA,RSA_PKCS1_OAEP_PADDING);
+		if(ret<0)
+			return E_UNKNOWN;
+		*len=ret;
+		return E_SUCCESS;
+	}
+	
+/** Encrypts one block using OAEP padding. 
+	*@param from one of plain text
+	*@param to the OAEP encoded cipher text
+	*@param len on return contains the size of the ciphertext
+	*@retval E_UNKNOWN in case of an error
+	*@retval E_SUCCESS otherwise
+	*/
+SINT32 CAASymCipher::encryptOAEP(const UINT8* from,UINT32 fromlen,UINT8* to,UINT32* len)
+	{
+		SINT32 ret=RSA_public_encrypt(fromlen,from,to,m_pRSA,RSA_PKCS1_OAEP_PADDING);
 		if(ret<0)
 			return E_UNKNOWN;
 		*len=ret;

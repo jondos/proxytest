@@ -183,15 +183,15 @@ SINT32 CASymCipher::crypt2(const UINT8* in,UINT8* out,UINT32 len)
 		return E_SUCCESS;
 	}
 
-/** Decryptes in to out using iv1. AES is used for encryption and the encryption
+/** En-/Decryptes in to out using iv1. AES is used for en-/dcryption and the cryption
 	* is done with CBC mode and PKCS7 padding.
-	* @param in input (plain text) bytes
-	* @param out output (encrpyted) bytes
-	* @param len len of input. on return the plaintext len, 
-	*													which is always < len of input
+	* @param in input (plain or ciphertext) bytes
+	* @param out output (plain or ciphertext) bytes
+	* @param len len of input. on return the output len, 
+	*													which is always <= len of input
 	* @retval E_SUCCESS
 	*/
-SINT32 CASymCipher::crypt1CBCwithPKCS7(const UINT8* in,UINT8* out,UINT32* len)
+SINT32 CASymCipher::decrypt1CBCwithPKCS7(const UINT8* in,UINT8* out,UINT32* len)
 	{
 		AES_cbc_encrypt(in,out,*len,m_keyAES,m_iv1,AES_DECRYPT);
 		//Now remove padding
@@ -204,6 +204,29 @@ SINT32 CASymCipher::crypt1CBCwithPKCS7(const UINT8* in,UINT8* out,UINT32* len)
 		*len-=pad;			
 		return E_SUCCESS;
 	}
+
+/** En-/Decryptes in to out using iv1. AES is used for en-/dcryption and the cryption
+	* is done with CBC mode and PKCS7 padding.
+	* @param in input (plain or ciphertext) bytes
+	* @param out output (plain or ciphertext) bytes
+	* @param len len of input. on return the output len, 
+	*													which is always <= len of input
+	* @retval E_SUCCESS
+	*/
+SINT32 CASymCipher::encrypt1CBCwithPKCS7(const UINT8* in,UINT32 inlen,UINT8* out,UINT32* len)
+	{
+		UINT32 padlen=16-inlen%16;
+		UINT8* tmp=new UINT8[inlen+padlen];
+		memcpy(tmp,in,inlen);
+		for(UINT32 i=inlen;i<inlen+padlen;i++)
+			{
+				tmp[i]=padlen;
+			}
+		AES_cbc_encrypt(tmp,out,inlen+padlen,m_keyAES,m_iv1,AES_ENCRYPT);
+		delete []tmp;
+		*len-=inlen+padlen;			
+		return E_SUCCESS;
+	}	
 
 /*
 SINT32 CASymCipher::encrypt1(const UINT8* in,UINT8* out,UINT32 len)
