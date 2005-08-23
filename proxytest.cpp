@@ -383,6 +383,7 @@ int main(int argc, const char* argv[])
 		_CrtMemState s1, s2, s3;
 		_CrtMemCheckpoint( &s1 );
 #endif
+
 //Switch on debug infos
 #ifdef CWDEBUG
 		Debug(libcw_do.on());

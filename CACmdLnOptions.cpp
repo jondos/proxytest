@@ -185,6 +185,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 	char* configfile=NULL;
 	int iAutoReconnect=0;
 	char* strPidFile=NULL;
+	int iCreateConf=0;
 	//DOM_Document docMixXml;
 	poptOption theOptions[]=
 	 {
@@ -201,6 +202,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 		{"config",'c',POPT_ARG_STRING,&configfile,0,"config file to use [for a real Mix in a cascade]","<file>"},
 		{"version",'v',POPT_ARG_NONE,&iVersion,0,"show version",NULL},
 		{"pidfile",'r',POPT_ARG_STRING,&strPidFile,0,"file where the PID will be stored","<file>"},
+		{"createConf",0,POPT_ARG_NONE,&iCreateConf,0,"creates a generic configuration for MixOnCD",NULL},
 		POPT_AUTOHELP
 		{NULL,0,0,
 		NULL,0,NULL,NULL}
@@ -225,7 +227,11 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 			printf("Max open sockets: >10000\n");
 			exit(0);
 		}
-
+	if(iCreateConf!=0)
+		{
+			createMixOnCDConfiguration(NULL);
+			exit(0);
+		}
 	if(iLocalProxy!=0)
 		m_bLocalProxy=true;
 	if(m_bLocalProxy&&iAutoReconnect!=0)
@@ -1613,3 +1619,87 @@ SKIP_NEXT_MIX:
 
     return E_SUCCESS;
 }
+
+/**
+	* @param strFileName filename of the file in which the default configuration is stored, if NULL stdout is used
+	*/
+SINT32 CACmdLnOptions::createMixOnCDConfiguration(const UINT8* strFileName)
+	{
+		CASignature* pSignature=new CASignature();
+		pSignature->generateSignKey(1024);
+		DOM_Document doc=DOM_Document::createDocument();
+		DOM_Element elemRoot=doc.createElement("MixConfiguration");
+		doc.appendChild(elemRoot);
+		setDOMElementAttribute(elemRoot,"version",(UINT8*)"0.5");
+		DOM_Element elemGeneral=doc.createElement("General");
+		elemRoot.appendChild(elemGeneral);
+		DOM_Element elemTmp=doc.createElement("MixType");
+		setDOMElementValue(elemTmp,(UINT8*)"FirstMix");
+		elemGeneral.appendChild(elemTmp);
+		elemTmp=doc.createElement("CascadeName");
+		setDOMElementValue(elemTmp,(UINT8*)"Dynamic Cascade");
+		elemGeneral.appendChild(elemTmp);
+		elemTmp=doc.createElement("MixName");
+		setDOMElementValue(elemTmp,(UINT8*)"Dynamic Mix");
+		elemGeneral.appendChild(elemTmp);
+		elemTmp=doc.createElement("UserID");
+		setDOMElementValue(elemTmp,(UINT8*)"mix");
+		elemGeneral.appendChild(elemTmp);
+		DOM_Element elemLogging=doc.createElement("Logging");
+		elemGeneral.appendChild(elemLogging);
+		elemTmp=doc.createElement("SysLog");
+		setDOMElementValue(elemTmp,(UINT8*)"True");
+		elemLogging.appendChild(elemTmp);
+		DOM_Element elemNet=doc.createElement("Network");
+		elemRoot.appendChild(elemNet);
+		DOM_Element elemIS=doc.createElement("InfoService");
+		elemNet.appendChild(elemIS);
+		elemTmp=doc.createElement("Host");
+		setDOMElementValue(elemTmp,(UINT8*)"141.76.46.91");
+		elemIS.appendChild(elemTmp);
+		elemTmp=doc.createElement("Port");
+		setDOMElementValue(elemTmp,(UINT8*)"80");
+		elemIS.appendChild(elemTmp);
+		elemTmp=doc.createElement("AllowAutoConfiguration");
+		setDOMElementValue(elemTmp,(UINT8*)"True");
+		elemIS.appendChild(elemTmp);
+		DOM_Element elemListeners=doc.createElement("ListenerInterfaces");
+		elemNet.appendChild(elemListeners);
+		DOM_Element elemListener=doc.createElement("ListenerInterface");
+		elemListeners.appendChild(elemListener);
+		elemTmp=doc.createElement("Port");
+		setDOMElementValue(elemTmp,(UINT8*)"6544");
+		elemListener.appendChild(elemTmp);
+		elemTmp=doc.createElement("NetworkProtocol");
+		setDOMElementValue(elemTmp,(UINT8*)"RAW/TCP");
+		elemListener.appendChild(elemTmp);
+		DOM_Element elemCerts=doc.createElement("Certificates");
+		elemRoot.appendChild(elemCerts);
+		DOM_Element elemOwnCert=doc.createElement("OwnCertificate");
+		elemCerts.appendChild(elemOwnCert);
+		DOM_DocumentFragment docFrag;
+		pSignature->getSignKey(docFrag,doc);		
+		elemOwnCert.appendChild(docFrag);
+		CACertificate* pCert;
+		pSignature->getVerifyKey(&pCert);
+		pCert->encode(docFrag,doc);
+		elemOwnCert.appendChild(docFrag);
+		delete pCert;
+		delete pSignature;
+		UINT32 len;
+		UINT8* buff=DOM_Output::dumpToMem(doc,&len);
+		if(strFileName!=NULL)
+			{
+				SINT32 handle;
+				handle=open((const char*)strFileName,O_CREAT|O_TRUNC);
+				write(handle,buff,len);
+				close(handle);
+			}
+		else
+			{
+				fwrite(buff,len,1,stdout);
+				fflush(stdout);
+			}
+		delete[] buff;	
+		return E_SUCCESS;
+	}

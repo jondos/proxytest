@@ -71,6 +71,29 @@ SINT32 CASignature::generateSignKey(UINT32 size)
 		return E_SUCCESS;
 	}
 
+SINT32 CASignature::getSignKey(DOM_DocumentFragment& node,DOM_Document& doc)
+	{
+		CACertificate* pCert;
+		getVerifyKey(&pCert);
+		EVP_PKEY* pPKey=EVP_PKEY_new();
+		EVP_PKEY_set1_DSA(pPKey,m_pDSA);		
+		PKCS12* pPKCS12=PKCS12_create(NULL,NULL, pPKey,pCert->m_pCert,NULL,0,0,0,0,0);
+		delete pCert;
+		EVP_PKEY_free(pPKey);
+		UINT8* buff;
+		SINT32 len=i2d_PKCS12(pPKCS12,&buff);
+		UINT32 outlen=2*len;
+		UINT8* outbuff=new UINT8[outlen];
+		CABase64::encode(buff,len,outbuff,&outlen);
+		outbuff[outlen]=0;
+		OPENSSL_free(buff);
+		node=doc.createDocumentFragment();
+		DOM_Element elem=doc.createElement("X509PKCS12");
+		node.appendChild(elem);
+		setDOMElementValue(elem,outbuff);
+		return E_SUCCESS;
+	}
+
 SINT32 CASignature::setSignKey(const DOM_Node& n,UINT32 type,const char* passwd)
 	{
 		DOM_Node node=n; 
@@ -375,6 +398,25 @@ SINT32 CASignature::signXML(DOM_Node& node,CACertStore* pIncludeCerts)
 					}
 			}
 		elemRoot.appendChild(elemSignature);
+		return E_SUCCESS;
+	}
+
+
+SINT32 CASignature::getVerifyKey(CACertificate** ppCert)
+	{
+		//We need this DAS key as EVP key...
+		EVP_PKEY* pPKey=EVP_PKEY_new();
+		EVP_PKEY_set1_DSA(pPKey,m_pDSA);
+		*ppCert=new CACertificate();
+		(*ppCert)->m_pCert=X509_new();
+		X509_set_version((*ppCert)->m_pCert,2);
+		ASN1_TIME* pTime=ASN1_TIME_new();
+		ASN1_TIME_set(pTime,time(NULL));
+		X509_set_notBefore((*ppCert)->m_pCert,pTime);
+		X509_set_notAfter((*ppCert)->m_pCert,pTime);
+		X509_set_pubkey((*ppCert)->m_pCert,pPKey);
+		X509_sign((*ppCert)->m_pCert,pPKey,EVP_sha1());
+		EVP_PKEY_free(pPKey);
 		return E_SUCCESS;
 	}
 
