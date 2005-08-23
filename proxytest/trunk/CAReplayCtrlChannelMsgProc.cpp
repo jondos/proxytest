@@ -52,7 +52,7 @@ CAReplayCtrlChannelMsgProc::CAReplayCtrlChannelMsgProc(const CAMix* pMix)
 					CAMsg::printMsg(LOG_DEBUG,"CAReplayCtrlChannelMsgProc - constructor - registering downstream replay control channel\n",this);
 				#endif	
 				m_pDownstreamReplayControlChannel=new CAReplayControlChannel(this);
-		CAMsg::printMsg(LOG_DEBUG,"m_pDownstreamReplayControlChannel= %p\n",m_pDownstreamReplayControlChannel);
+				CAMsg::printMsg(LOG_DEBUG,"m_pDownstreamReplayControlChannel= %p\n",m_pDownstreamReplayControlChannel);
 				pDispatcher->registerControlChannel(m_pDownstreamReplayControlChannel);
 			}
 		pDispatcher=m_pMix->getUpstreamControlChannelDispatcher();

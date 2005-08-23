@@ -294,6 +294,9 @@ class CACmdLnOptions
 			bool acceptReconfiguration() { return m_bAcceptReconfiguration; }
 
 			friend THREAD_RETURN threadReConfigure(void *param);
+			
+			/** Writes a default configuration file into the file named by filename*/
+			static SINT32 createMixOnCDConfiguration(const UINT8* strFileName);
 		private:
 			UINT8*	m_strConfigFile; //the filename of the config file
 			bool		m_bIsRunReConfigure; //true, if an async reconfigure is under way
