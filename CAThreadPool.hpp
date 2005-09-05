@@ -33,19 +33,19 @@ class CAThreadPool
 			friend THREAD_RETURN worker_thread_main_loop(void *args);
 		private:
 			/* pool characteristics */
-			UINT32	m_NumThreads;
-      UINT32  m_MaxQueueSize;
-			bool		m_bDoNotBlockWhenFull;
+			UINT32				m_NumThreads;
+      UINT32				m_MaxQueueSize;
+			bool					m_bDoNotBlockWhenFull;
       /* pool state */
-			CAThread**	m_parThreads;
+			CAThread**		m_parThreads;
       volatile UINT32	m_CurQueueSize;
 			tpool_work_t*	m_pQueueHead;
 			tpool_work_t*	m_pQueueTail;
 			volatile bool		m_bQueueClosed;
       volatile bool		m_bShutdown;
 			/* pool synchronization */
-      CAMutex	m_mutexQueue;
-      CAConditionVariable	m_condNotEmpty;
-      CAConditionVariable	m_condNotFull;
-      CAConditionVariable	m_condEmpty;
+      CAMutex*							m_pmutexQueue;
+      CAConditionVariable*	m_pcondNotEmpty;
+      CAConditionVariable*	m_pcondNotFull;
+      CAConditionVariable*	m_pcondEmpty;
 	};

@@ -12,27 +12,31 @@ CAThreadPool::CAThreadPool(	UINT32 num_worker_threads,
 														UINT32 max_queue_size,
 														bool	 b_do_not_block_when_full)
 	{
-  UINT i;
-  
-  /* initialize fields */
-  m_NumThreads = num_worker_threads;
-  m_MaxQueueSize = max_queue_size;
-  m_bDoNotBlockWhenFull = b_do_not_block_when_full;
-	m_parThreads=new CAThread*[num_worker_threads];
-  m_CurQueueSize = 0;
-  m_pQueueHead = NULL; 
-  m_pQueueTail = NULL;
-  m_bQueueClosed = false;  
-  m_bShutdown = false; 
+		UINT i;
+	  
+		/* initialize fields */
+		m_NumThreads = num_worker_threads;
+		m_MaxQueueSize = max_queue_size;
+		m_bDoNotBlockWhenFull = b_do_not_block_when_full;
+		m_parThreads=new CAThread*[num_worker_threads];
+		m_CurQueueSize = 0;
+		m_pQueueHead = NULL; 
+		m_pQueueTail = NULL;
+		m_bQueueClosed = false;  
+		m_bShutdown = false; 
+		m_pmutexQueue=new CAMutex();
+		m_pcondEmpty=new CAConditionVariable();
+		m_pcondNotEmpty=new CAConditionVariable();
+		m_pcondNotFull=new CAConditionVariable();
 
-  /* create threads */
-  for (i = 0; i != num_worker_threads; i++) 
-		{
-			m_parThreads[i]=new CAThread();
-			m_parThreads[i]->setMainLoop(worker_thread_main_loop);
-			m_parThreads[i]->start(this);
-		}
-}
+		/* create threads */
+		for (i = 0; i != num_worker_threads; i++) 
+			{
+				m_parThreads[i]=new CAThread();
+				m_parThreads[i]->setMainLoop(worker_thread_main_loop);
+				m_parThreads[i]->start(this);
+			}
+	}
 
 /** Adds a new reuest (task) to this threadpool.
 	* @retval E_SPACe if there was  no more space in the waiting queue 
@@ -41,26 +45,27 @@ CAThreadPool::CAThreadPool(	UINT32 num_worker_threads,
 	*/
 SINT32 CAThreadPool::addRequest(THREAD_MAIN_TYP routine, void *args)
 {
-	m_mutexQueue.lock();
+	m_pmutexQueue->lock();
   tpool_work_t *workp;
 
   // no space and this caller doesn't want to wait 
   if ((m_CurQueueSize == m_MaxQueueSize) && m_bDoNotBlockWhenFull) 
 		{
-			m_mutexQueue.unlock();
+			m_pmutexQueue->unlock();
 			return E_SPACE;
 		}
 
   while((m_CurQueueSize == m_MaxQueueSize) && 
 				(!(m_bShutdown || m_bQueueClosed))  )
 		{
-			m_condNotFull.wait(m_mutexQueue);
-  }
+			CAMsg::printMsg(LOG_INFO,"CAThreadPool::addRequest() -the Thread pool is full...waiting!\n");
+			m_pcondNotFull->wait(m_pmutexQueue);
+		}
 
   // the pool is in the process of being destroyed 
   if (m_bShutdown || m_bQueueClosed)
 		{
-			m_mutexQueue.unlock();
+			m_pmutexQueue->unlock();
 			return E_UNKNOWN;
 		}
 
@@ -73,7 +78,7 @@ SINT32 CAThreadPool::addRequest(THREAD_MAIN_TYP routine, void *args)
   if (m_CurQueueSize == 0)
 		{
 			m_pQueueTail = m_pQueueHead = workp;
-			m_condNotEmpty.broadcast();
+			m_pcondNotEmpty->broadcast();
 		}
 	else
 		{
@@ -82,18 +87,18 @@ SINT32 CAThreadPool::addRequest(THREAD_MAIN_TYP routine, void *args)
 		}
 
   m_CurQueueSize++; 
-	m_mutexQueue.unlock();
+	m_pmutexQueue->unlock();
   return E_SUCCESS;
 }
 
 SINT32 CAThreadPool::destroy(bool bWaitForFinish)
 	{
 		tpool_work_t *cur_nodep;
-		m_mutexQueue.lock();
+		m_pmutexQueue->lock();
 		// Is a shutdown already in progress?
 		if (m_bQueueClosed || m_bShutdown)
 			{
-				m_mutexQueue.unlock();
+				m_pmutexQueue->unlock();
 				return E_SUCCESS;
 			}
 
@@ -104,16 +109,16 @@ SINT32 CAThreadPool::destroy(bool bWaitForFinish)
 			{
 				while (m_CurQueueSize != 0)
 					{
-						m_condEmpty.wait(m_mutexQueue);
+						m_pcondEmpty->wait(m_pmutexQueue);
 					}
 			}
 
 		m_bShutdown = true;
-		m_mutexQueue.unlock();
+		m_pmutexQueue->unlock();
 
 		// Wake up any workers so they recheck shutdown flag 
-		m_condNotEmpty.broadcast();
-		m_condNotFull.broadcast();
+		m_pcondNotEmpty->broadcast();
+		m_pcondNotFull->broadcast();
 
 		// Wait for workers to exit 
 		for(UINT32 i=0; i < m_NumThreads; i++) 
@@ -128,6 +133,11 @@ SINT32 CAThreadPool::destroy(bool bWaitForFinish)
 				m_pQueueHead = m_pQueueHead->next;
 				delete cur_nodep;
 			}
+		delete m_pmutexQueue;
+		delete m_pcondEmpty;
+		delete m_pcondNotEmpty;
+		delete m_pcondNotFull;
+
 		return E_SUCCESS;
 	}
 
@@ -139,16 +149,16 @@ THREAD_RETURN worker_thread_main_loop(void *arg)
   for(;;)
 		{
     // Check queue for work  
-			pPool->m_mutexQueue.lock();
+			pPool->m_pmutexQueue->lock();
 			while ((pPool->m_CurQueueSize == 0) && (!pPool->m_bShutdown))
 				{
-					pPool->m_condNotEmpty.wait(pPool->m_mutexQueue);
+					pPool->m_pcondNotEmpty->wait(pPool->m_pmutexQueue);
 				}
 			//sSleep(5); 
 			// Has a shutdown started while i was sleeping? 
 			if (pPool->m_bShutdown)
 				{
-					pPool->m_mutexQueue.unlock();
+					pPool->m_pmutexQueue->unlock();
 					THREAD_RETURN_SUCCESS;
 				}
 
@@ -163,11 +173,11 @@ THREAD_RETURN worker_thread_main_loop(void *arg)
 			// Handle waiting add_work threads 
 			if ((!pPool->m_bDoNotBlockWhenFull) &&
 					(pPool->m_CurQueueSize ==  (pPool->m_MaxQueueSize - 1))) 
-					pPool->m_condNotFull.broadcast();
+					pPool->m_pcondNotFull->broadcast();
 			// Handle waiting destroyer threads 
 			if (pPool->m_CurQueueSize == 0)
-				pPool->m_condEmpty.signal();
-			pPool->m_mutexQueue.unlock();
+				pPool->m_pcondEmpty->signal();
+			pPool->m_pmutexQueue->unlock();
       
 			// Do this work item 
 			(*(my_workp->routine))(my_workp->arg);

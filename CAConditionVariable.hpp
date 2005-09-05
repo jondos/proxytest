@@ -66,6 +66,15 @@ class CAConditionVariable:public CAMutex
 					return E_UNKNOWN;
 				}
 
+			/** Very ugly shortly to be deleted, uncommented function!
+				*/
+			SINT32 wait(CAMutex* pMutex)
+				{
+					if(pthread_cond_wait(m_pCondVar,pMutex->m_pMutex)==0)
+						return E_SUCCESS;
+					return E_UNKNOWN;
+				}
+	
 				/** Waits for a signal or for a timeout.
 				* Note: lock() must be called before wait() and unlock() 
 				* must be called if proccessing ends.

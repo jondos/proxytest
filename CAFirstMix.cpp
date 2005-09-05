@@ -641,7 +641,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 		CAIPList* pIPList=pFirstMix->m_pIPList;
 		CAThreadPool* pthreadsLogin=pFirstMix->m_pthreadsLogin;
 		UINT32 nSocketsIn=pFirstMix->m_nSocketsIn;
-		CASocketGroup osocketgroupAccept(false);
+		CASocketGroup* psocketgroupAccept=new CASocketGroup(false);
 		CAMuxSocket* pNewMuxSocket;
 		UINT8* peerIP=new UINT8[4];
 		UINT32 i=0;
@@ -649,7 +649,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 		SINT32 ret;
 		for(i=0;i<nSocketsIn;i++)
 			{
-				osocketgroupAccept.add(socketsIn[i]);
+				psocketgroupAccept->add(socketsIn[i]);
 			}
 #ifdef REPLAY_DETECTION //before we can start to accept users we have to nesure that we received the replay timestamps form the over mixes
 		CAMsg::printMsg(LOG_DEBUG,"Waiting for Replay Timestamp from next mixes\n");
@@ -667,7 +667,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 #endif
 		while(!pFirstMix->getRestart())
 			{
-				countRead=osocketgroupAccept.select(10000);
+				countRead=psocketgroupAccept->select(10000);
 				if(countRead<0)
 					{ //check for Error - are we restarting ?
 						if(pFirstMix->getRestart()||countRead!=E_TIMEDOUT)
@@ -679,7 +679,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 #endif
 				while(countRead>0&&i<nSocketsIn)
 					{
-						if(osocketgroupAccept.isSignaled(socketsIn[i]))
+						if(psocketgroupAccept->isSignaled(socketsIn[i]))
 							{
 								countRead--;
 								#ifdef _DEBUG
@@ -725,6 +725,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 			}
 END_THREAD:
 		delete []peerIP;
+		delete psocketgroupAccept;
 		CAMsg::printMsg(LOG_DEBUG,"Exiting Thread AcceptUser\n");
 		THREAD_RETURN_SUCCESS;
 	}

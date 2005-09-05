@@ -55,6 +55,9 @@ class CAFirstMix:public CAMix
 public:
     CAFirstMix() : CAMix()
 				{
+					m_pmutexUser=new CAMutex();
+					m_pmutexMixedPackets=new CAMutex();
+					m_pmutexLoginThreads=new CAMutex();
 					m_nMixedPackets=0;
 					m_nUser=0;
 					m_nSocketsIn=0;
@@ -84,7 +87,14 @@ public:
 #endif
 					m_arMixParameters=NULL;
 				}
-    virtual ~CAFirstMix(){}
+
+    virtual ~CAFirstMix()
+			{
+				delete m_pmutexUser;
+				delete m_pmutexMixedPackets;
+				delete m_pmutexLoginThreads;
+			}
+
 		tMixType getType() const
 			{
 				return CAMix::FIRST_MIX;
@@ -147,12 +157,12 @@ protected:
 			SINT32 incUsers(LP_fmHashTableEntry pHashEntry)
 #endif
 				{
-					m_mutexUser.lock();
+					m_pmutexUser->lock();
 					m_nUser++;
 					#ifdef COUNTRY_STATS
 						pHashEntry->countryID=updateCountryStats(pHashEntry->peerIP,0,false);
 					#endif
-					m_mutexUser.unlock();
+					m_pmutexUser->unlock();
 					return E_SUCCESS;
 				}
 			
@@ -162,20 +172,20 @@ protected:
 			SINT32 decUsers(LP_fmHashTableEntry pHashEntry)
 #endif
 				{
-					m_mutexUser.lock();
+					m_pmutexUser->lock();
 					m_nUser--;
 					#ifdef COUNTRY_STATS
 						updateCountryStats(NULL,pHashEntry->countryID,true);
 					#endif					
-					m_mutexUser.unlock();
+					m_pmutexUser->unlock();
 					return E_SUCCESS;
 				}
 
 			SINT32 incMixedPackets()
 				{
-					m_mutexMixedPackets.lock();
+					m_pmutexMixedPackets->lock();
 					inc64(m_nMixedPackets);
-					m_mutexMixedPackets.unlock();
+					m_pmutexMixedPackets->unlock();
 					return E_SUCCESS;
 				}
 
@@ -229,9 +239,9 @@ protected:
 			CAASymCipher* m_pRSA;
     // moved to CAMix
     //CASignature* m_pSignature;
-			CAMutex m_mutexUser;
-			CAMutex m_mutexMixedPackets;
-			CAMutex m_mutexLoginThreads;
+			CAMutex* m_pmutexUser;
+			CAMutex* m_pmutexMixedPackets;
+			CAMutex* m_pmutexLoginThreads;
 
 			CAThread* m_pthreadAcceptUsers;
 			CAThreadPool* m_pthreadsLogin;
