@@ -420,6 +420,18 @@ SINT32 CASignature::getVerifyKey(CACertificate** ppCert)
 		return E_SUCCESS;
 	}
 
+/** Calculates a SHA hash of the public key, which is represented as SubjectPublicKeyInfo
+	*/
+SINT32 CASignature::getVerifyKeyHash(UINT8* buff,UINT32* len)
+	{
+		 UINT8* tmpBuff;
+		 int l=i2d_DSA_PUBKEY(m_pDSA,&tmpBuff);
+		 SHA1(tmpBuff,l,buff);
+		 *len=SHA_DIGEST_LENGTH;
+		 OPENSSL_free(tmpBuff);
+		 return E_SUCCESS;
+	}
+
 /** Set the key for signature testing to the one include in pCert. If pCert ==NULL clears the
 	* signature test key
 	* @param pCert Certificate including the test key
