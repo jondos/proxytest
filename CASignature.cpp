@@ -80,7 +80,7 @@ SINT32 CASignature::getSignKey(DOM_DocumentFragment& node,DOM_Document& doc)
 		PKCS12* pPKCS12=PKCS12_create(NULL,NULL, pPKey,pCert->m_pCert,NULL,0,0,0,0,0);
 		delete pCert;
 		EVP_PKEY_free(pPKey);
-		UINT8* buff;
+		UINT8* buff=NULL;
 		SINT32 len=i2d_PKCS12(pPKCS12,&buff);
 		UINT32 outlen=2*len;
 		UINT8* outbuff=new UINT8[outlen];
@@ -424,7 +424,7 @@ SINT32 CASignature::getVerifyKey(CACertificate** ppCert)
 	*/
 SINT32 CASignature::getVerifyKeyHash(UINT8* buff,UINT32* len)
 	{
-		 UINT8* tmpBuff;
+		 UINT8* tmpBuff=NULL;
 		 int l=i2d_DSA_PUBKEY(m_pDSA,&tmpBuff);
 		 SHA1(tmpBuff,l,buff);
 		 *len=SHA_DIGEST_LENGTH;
