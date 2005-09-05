@@ -1300,7 +1300,7 @@ THREAD_RETURN iplist_loopDoLogCountries(void* param)
 						strftime((char*)aktDate,255,"%Y%m%d%H%M%S",gmtime(&aktTime));
 						char query[1024];
 						sprintf(query,"INSERT into `stats_%s` (date,id,count,packets_in,packets_out) VALUES (\"%s\",\"%%u\",\"%%u\",\"%%u\",\"%%u\")",buff,aktDate);
-						pIPList->m_mutexUser.lock();
+						pIPList->m_pmutexUser->lock();
 						for(UINT32 i=0;i<NR_OF_COUNTRIES+1;i++)
 							{
 								if(pIPList->m_CountryStats[i]>0)
@@ -1315,7 +1315,7 @@ THREAD_RETURN iplist_loopDoLogCountries(void* param)
 										}
 									}
 							}
-						pIPList->m_mutexUser.unlock();
+						pIPList->m_pmutexUser->unlock();
 						s=0;
 					}
 				sSleep(10);
