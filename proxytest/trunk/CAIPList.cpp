@@ -37,6 +37,7 @@ extern CACmdLnOptions options;
 	* The default number #MAX_IP_CONNECTIONS of allowed insertions is used*/ 
 CAIPList::CAIPList()
 	{	
+		m_pMutex=new CAMutex();
 		m_Random=new UINT8[56];
 		m_HashTable=new PIPLIST[0x10000];
 		memset((void*)m_HashTable,0,0x10000*sizeof(PIPLIST));
@@ -50,6 +51,7 @@ are allowed, until an error is returned.
 */
 CAIPList::CAIPList(UINT32 allowedConnections)
 	{
+		m_pMutex=new CAMutex();
 		m_Random=new UINT8[56];
 		m_HashTable=new PIPLIST[0x10000];
 		memset((void*)m_HashTable,0,0x10000*sizeof(PIPLIST));
@@ -73,6 +75,7 @@ CAIPList::~CAIPList()
 			}
 		delete [] m_Random;
 		delete [] m_HashTable;
+		delete m_pMutex;
 	}
 
 /** Inserts the IP-Address into the list. 
@@ -89,7 +92,7 @@ CAIPList::~CAIPList()
 SINT32 CAIPList::insertIP(const UINT8 ip[4])
 	{
 		UINT16 hashvalue=(ip[2]<<8)|ip[3];
-		m_Mutex.lock();
+		m_pMutex->lock();
 		PIPLIST entry=m_HashTable[hashvalue];
 		if(entry==NULL)
 			{//Hashkey nicht in der Hashtabelle gefunden --> neuer Eintrag in Hashtabelle
@@ -106,7 +109,7 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 				entry->count=1;
 				entry->next=NULL;
 				m_HashTable[hashvalue]=entry;
-				m_Mutex.unlock();
+				m_pMutex->unlock();
 				return entry->count;
 			}
 		else
@@ -124,11 +127,11 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 										#if !defined(PSEUDO_LOG)&&defined(FIREWALL_SUPPORT)
 											CAMsg::printMsg(LOG_CRIT,"possible Flooding Attack from: %u.%u.%u.%u !\n",ip[0],ip[1],ip[2],ip[3]);
 										#endif
-										m_Mutex.unlock();
+										m_pMutex->unlock();
 										return E_UNKNOWN;
 									}
 								entry->count++;
-								m_Mutex.unlock();
+								m_pMutex->unlock();
 								return entry->count;
 							}
 						last=entry;
@@ -140,7 +143,7 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 				memcpy(entry->ip,ip,2);
 				entry->count=1;
 				entry->next=NULL;
-				m_Mutex.unlock();
+				m_pMutex->unlock();
 				return entry->count;
 			}	
 	}
@@ -157,11 +160,11 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 #endif
 	{
 		UINT16 hashvalue=(ip[2]<<8)|ip[3];
-		m_Mutex.lock();
+		m_pMutex->lock();
 		PIPLIST entry=m_HashTable[hashvalue];
 		if(entry==NULL)
 			{
-				m_Mutex.unlock();
+				m_pMutex->unlock();
 				CAMsg::printMsg(LOG_INFO,"Try to remove Ip which is not in the hashtable of the IP-list - possible inconsistences in IPList!\n");
 				return 0;
 			}
@@ -192,16 +195,16 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 										else
 											before->next=entry->next;
 										delete entry;
-										m_Mutex.unlock();
+										m_pMutex->unlock();
 										return 0;
 									}
-								m_Mutex.unlock();
+								m_pMutex->unlock();
 								return entry->count;
 							}
 						before=entry;
 						entry=entry->next;
 					}
-				m_Mutex.unlock();
+				m_pMutex->unlock();
 				CAMsg::printMsg(LOG_INFO,"Try to remove Ip which is not in list - possible inconsistences in IPList!\n");
 				return 0;
 			}	

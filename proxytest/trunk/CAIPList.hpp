@@ -71,10 +71,10 @@ class CAIPList
 			SINT32 removeIP(const UINT8 ip[4],UINT32 time=0,UINT32 trafficIn=0,UINT32 trafficOut=0);
 #endif
 		private:
-			UINT32 m_allowedConnections;
-			volatile VOLATILE_PIPLIST* m_HashTable;
-			UINT8* m_Random; //seems to be the best value for MD5, which operates on x*512-64 bit (52*8+4*8=512-64)
-			CAMutex m_Mutex;
+			UINT32		m_allowedConnections;
+			volatile	VOLATILE_PIPLIST* m_HashTable;
+			UINT8*		m_Random; //seems to be the best value for MD5, which operates on x*512-64 bit (52*8+4*8=512-64)
+			CAMutex*	m_pMutex;
 
 
 	};
