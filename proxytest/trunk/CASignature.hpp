@@ -53,6 +53,7 @@ class CASignature
 			SINT32 setVerifyKey(const DOM_Element& xmlKey);
 			/** Get the public key as XML encoded X509 certificate*/ 
 			SINT32 getVerifyKey(CACertificate**);
+			SINT32 getVerifyKeyHash(UINT8* buff,UINT32* len);
 
 //			SINT32 verify(UINT8* in,UINT32 inlen,UINT8* sig,UINT32 siglen);
 			SINT32 verifyXML(const UINT8* const in,UINT32 inlen);

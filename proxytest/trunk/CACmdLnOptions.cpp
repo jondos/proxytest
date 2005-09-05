@@ -35,6 +35,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocket.hpp"
 #include "CAXMLBI.hpp"
 #include "xml/DOM_Output.hpp"
+#include "CABase64.hpp"
 #ifdef LOG_CRIME
 	#include "tre/regex.h"
 #endif
@@ -1635,6 +1636,16 @@ SINT32 CACmdLnOptions::createMixOnCDConfiguration(const UINT8* strFileName)
 		elemRoot.appendChild(elemGeneral);
 		DOM_Element elemTmp=doc.createElement("MixType");
 		setDOMElementValue(elemTmp,(UINT8*)"FirstMix");
+		elemGeneral.appendChild(elemTmp);
+		elemTmp=doc.createElement("MixID");
+		UINT8 hash[255];
+		UINT32 hashlen=255;
+		pSignature->getVerifyKeyHash(hash,&hashlen);
+		UINT8 tmpBuff[255];
+		UINT32 tmpBuffLen=255;
+		CABase64::encode(hash,hashlen,tmpBuff,&tmpBuffLen);
+		tmpBuff[tmpBuffLen]=0;
+		setDOMElementValue(elemTmp,tmpBuff);
 		elemGeneral.appendChild(elemTmp);
 		elemTmp=doc.createElement("CascadeName");
 		setDOMElementValue(elemTmp,(UINT8*)"Dynamic Cascade");
