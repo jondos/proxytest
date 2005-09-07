@@ -49,8 +49,9 @@ class CACertificate
 					return tmp;
 				}
 			
-			static CACertificate* decode(UINT8* buff,UINT32 bufflen,UINT32 type,char* passwd=NULL);
-			static CACertificate* decode(const DOM_Node&node,UINT32 type,char* passwd=NULL);
+			/** Extracts a certificate from an encoded (DER,XML) form.*/
+			static CACertificate* decode(const UINT8* buff,UINT32 bufflen,UINT32 type,const char* passwd=NULL);
+			static CACertificate* decode(const DOM_Node&node,UINT32 type,const char* passwd=NULL);
 			SINT32 encode(UINT8* buff,UINT32* bufflen,UINT32 type);
 			SINT32 encode(DOM_DocumentFragment& docFrag,DOM_Document& doc);
 					
