@@ -215,7 +215,7 @@ AC_CHECK_DECL(TCP_KEEPALIVE,[AC_DEFINE(HAVE_TCP_KEEPALIVE,,[Define if your OS su
 AC_CHECK_DECL(AF_UNIX,[AC_DEFINE(HAVE_UNIX_DOMAIN_PROTOCOL,,[Define if your OS supports the Unix Domain protocol])],[],[
 #include <sys/types.h>
 #include <sys/socket.h>])
-AC_CHECK_DECL(O_BINARY,[],[AC_DEFINE(O_BINARY,0,[This flag is used in open(), in order to open a file in binary mode])])
+AC_CHECK_DECL(O_BINARY,[],[AC_DEFINE(O_BINARY,0,[This flag is used in open(), in order to open a file in binary mode])],[],[#include <sys/fcntl.h>])
 AC_CHECK_DECL(MAX_PATH,[],[AC_DEFINE(MAX_PATH,4096,[This is the maximum length of a file system path])])
 AC_CHECK_DECL(INADDR_NONE,[],[AC_DEFINE(INADDR_NONE,-1,[This is the value, which is returned from inet_addr(), in case of an error])],[
 #include <sys/types.h>
