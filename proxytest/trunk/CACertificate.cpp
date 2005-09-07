@@ -38,7 +38,7 @@ CACertificate::CACertificate()
 		m_pCert=NULL;
 	}
 
-CACertificate* CACertificate::decode(const DOM_Node &n,UINT32 type,char* passwd)
+CACertificate* CACertificate::decode(const DOM_Node &n,UINT32 type,const char* passwd)
 	{
 		DOM_Node node=n;
 		switch(type)
@@ -93,12 +93,12 @@ CACertificate* CACertificate::decode(const DOM_Node &n,UINT32 type,char* passwd)
 		return NULL;
 	}
 
-CACertificate* CACertificate::decode(UINT8* buff,UINT32 bufflen,UINT32 type,char* passwd)
+CACertificate* CACertificate::decode(const UINT8* buff,UINT32 bufflen,UINT32 type,const char* passwd)
 	{
 		if(buff==NULL)
 			return NULL;
 		X509* tmpCert=NULL;
-		UINT8* tmp;
+		const UINT8* tmp;
 		PKCS12* tmpPKCS12;
 		switch(type)
 			{

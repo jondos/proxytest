@@ -364,6 +364,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include <openssl/rsa.h>
 #include <openssl/dsa.h>
 #include <openssl/sha.h>
+#include <openssl/md5.h>
 #include <openssl/rand.h>
 #include <openssl/aes.h>
 #include <openssl/evp.h>

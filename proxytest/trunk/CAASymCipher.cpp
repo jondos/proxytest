@@ -48,6 +48,17 @@ SINT32 CAASymCipher::destroy()
 		return E_SUCCESS;
 	}
 
+inline void setRSAFlags(RSA* pRSA)
+	{
+		if(pRSA==NULL)
+			return;
+		pRSA->flags|=RSA_FLAG_THREAD_SAFE;
+		pRSA->flags|=RSA_FLAG_NO_BLINDING;
+#if OPENSSL_VERSION_NUMBER	> 0x0090703fL
+		pRSA->flags|=RSA_FLAG_NO_EXP_CONSTTIME;
+#endif
+	}
+
 /** Decrypts exactly one block which is stored in @c from. 
 	*The result of the decryption is stored in @c to.
 	*@param from one block of cipher text
@@ -118,8 +129,7 @@ SINT32 CAASymCipher::generateKeyPair(UINT32 size)
 	{
 		RSA_free(m_pRSA);
 		m_pRSA=RSA_generate_key(size,65537,NULL,NULL);
-		m_pRSA->flags|=RSA_FLAG_THREAD_SAFE;
-		m_pRSA->flags|=RSA_FLAG_NO_BLINDING;
+		setRSAFlags(m_pRSA);
 		if(m_pRSA==NULL)
 			return E_UNKNOWN;
 		else
@@ -351,8 +361,7 @@ SINT32 CAASymCipher::setPublicKeyAsDOMNode(DOM_Node& node)
 								if(m_pRSA!=NULL)
 									RSA_free(m_pRSA);
 								m_pRSA=tmpRSA;
-								m_pRSA->flags|=RSA_FLAG_THREAD_SAFE;
-								m_pRSA->flags|=RSA_FLAG_NO_BLINDING;
+								setRSAFlags(m_pRSA);
 								return E_SUCCESS;
 							}
 						RSA_free(tmpRSA);
@@ -381,7 +390,6 @@ SINT32 CAASymCipher::setPublicKey(const CACertificate* pCert)
 		if(m_pRSA!=NULL)
 			RSA_free(m_pRSA);
 		m_pRSA=r;
-		m_pRSA->flags|=RSA_FLAG_THREAD_SAFE;
-		m_pRSA->flags|=RSA_FLAG_NO_BLINDING;
+		setRSAFlags(m_pRSA);
 		return E_SUCCESS;
 	}
