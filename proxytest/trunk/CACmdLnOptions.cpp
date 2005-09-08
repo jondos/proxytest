@@ -1195,12 +1195,6 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 					{
 						m_arListenerInterfaces=new CAListenerInterface*[m_cnListenerInterfaces];
 						UINT32 aktInterface=0;
-//						UINT32 type=0;
-//						bool bHidden=false;
-//						bool bVirtual=false;
-//						CASocketAddr* addr=NULL;
-//						UINT8* hostname=NULL;
-//						UINT16 port;
 						for(UINT32 i=0;i<m_cnListenerInterfaces;i++)
 							{
 								DOM_Node elemListenerInterface;

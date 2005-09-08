@@ -104,12 +104,18 @@ CACertificate* CACertificate::decode(const UINT8* buff,UINT32 bufflen,UINT32 typ
 			{
 				case CERT_DER:
 					tmp=buff;
-					tmpCert=d2i_X509(NULL,&tmp,bufflen);
+					#if OPENSSL_VERSION_NUMBER	> 0x0090705fL
+						tmpCert=d2i_X509(NULL,&tmp,bufflen);
+					#else
+						tmpCert=d2i_X509(NULL,(UINT8**)&tmp,bufflen);
+					#endif
 				break;
 				case CERT_PKCS12:
-					tmpPKCS12=d2i_PKCS12(NULL,&buff,bufflen);	
-					//EVP_PKEY* key=NULL;
-					//X509* cert=NULL;
+					#if OPENSSL_VERSION_NUMBER	> 0x0090705fL
+						tmpPKCS12=d2i_PKCS12(NULL,&buff,bufflen);	
+					#else
+						tmpPKCS12=d2i_PKCS12(NULL,(UINT8**)&buff,bufflen);	
+					#endif
 					if(PKCS12_parse(tmpPKCS12,passwd,NULL,&tmpCert,NULL)!=1)
 						return NULL;
 				break;
@@ -126,7 +132,11 @@ CACertificate* CACertificate::decode(const UINT8* buff,UINT32 bufflen,UINT32 typ
 					getDOMElementValue(root,tmpBuff,&tmpBuffSize);
 					CABase64::decode(tmpBuff,tmpBuffSize,tmpBuff,&tmpBuffSize);
 					tmp=tmpBuff;
-					tmpCert=d2i_X509(NULL,&tmp,tmpBuffSize);
+					#if OPENSSL_VERSION_NUMBER	> 0x0090705fL
+						tmpCert=d2i_X509(NULL,&tmp,tmpBuffSize);
+					#else
+						tmpCert=d2i_X509(NULL,(UINT8**)&tmp,tmpBuffSize);
+					#endif
 					delete[] tmpBuff;
 				break;
 			}
