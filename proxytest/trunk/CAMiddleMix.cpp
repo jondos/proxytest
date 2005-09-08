@@ -379,10 +379,23 @@ SINT32 CAMiddleMix::init()
 		
     CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...\n");    
 		CAListenerInterface* pListener=NULL;
+		UINT32 interfaces=options.getListenerInterfaceCount();
+		for(UINT32 i=1;i<=interfaces;i++)
+			{
+				pListener=options.getListenerInterface(i);
+				if(!pListener->isVirtual())
+					break;
+				delete pListener;
+				pListener=NULL;
+			}
+		if(pListener==NULL)
+			{
+				CAMsg::printMsg(LOG_CRIT," failed!\n");
+				CAMsg::printMsg(LOG_CRIT,"Reason: no useable (non virtual) interface found!\n");
+				return E_UNKNOWN;
+			}
 		const CASocketAddr* pAddr=NULL;
-		pListener=options.getListenerInterface(1);
-		if(pListener!=NULL)
-			pAddr=pListener->getAddr();
+		pAddr=pListener->getAddr();
 		delete pListener;
 		m_pMuxIn=new CAMuxSocket();
 		SINT32 ret=m_pMuxIn->accept(*pAddr);

@@ -89,10 +89,23 @@ SINT32 CALastMix::init()
 		
 		CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...\n");
 		CAListenerInterface*  pListener=NULL;
-		pListener=options.getListenerInterface(1);
+		UINT32 interfaces=options.getListenerInterfaceCount();
+		for(UINT32 i=1;i<=interfaces;i++)
+			{
+				pListener=options.getListenerInterface(i);
+				if(!pListener->isVirtual())
+					break;
+				delete pListener;
+				pListener=NULL;
+			}
+		if(pListener==NULL)
+			{
+				CAMsg::printMsg(LOG_CRIT," failed!\n");
+				CAMsg::printMsg(LOG_CRIT,"Reason: no useable (non virtual) interface found!\n");
+				return E_UNKNOWN;
+			}
 		const CASocketAddr* pAddr=NULL;
-		if(pListener!=NULL)
-			pAddr=pListener->getAddr();
+		pAddr=pListener->getAddr();
 		delete pListener;
 		m_pMuxIn=new CAMuxSocket();
 		SINT32 ret=m_pMuxIn->accept(*pAddr);
@@ -223,7 +236,7 @@ SINT32 CALastMix::processKeyExchange()
 		
 		UINT32 len=0;
 		UINT8* messageBuff=DOM_Output::dumpToMem(doc,&len);
-		UINT16 tmp=htons(len);
+		UINT16 tmp=htons((UINT16)len);
 		CAMsg::printMsg(LOG_INFO,"Sending Infos (chain length and RSA-Key, Message-Size %u)\n",len);
 		
 		if(	((CASocket*)*m_pMuxIn)->send((UINT8*)&tmp,2)!=2 ||
