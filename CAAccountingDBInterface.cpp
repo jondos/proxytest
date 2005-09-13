@@ -138,14 +138,17 @@ SINT32 CAAccountingDBInterface::terminateDBConnection()
  */
 SINT32 CAAccountingDBInterface::getCostConfirmation(UINT64 accountNumber, CAXMLCostConfirmation **pCC)
 {
-	if(!m_bConnected) return E_NOT_CONNECTED;
-	UINT8 queryF[] = "SELECT XMLCC FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER=%lld";
+	if(!m_bConnected) 
+		return E_NOT_CONNECTED;
+	const char* queryF = "SELECT XMLCC FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER=%s";
 	UINT8 query[128];
 	UINT8 * xmlCC;
 	PGresult * result;
 //	UINT32 reslen;
 	
-	sprintf( (char *)query, (char *)queryF, accountNumber);
+	UINT8 tmp[32];
+	print64(tmp,accountNumber);
+	sprintf( (char *)query, queryF, tmp);
 	#ifdef DEBUG
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingDBInterface: executing query %s\n", query);
 	#endif
@@ -182,22 +185,23 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 	#ifndef HAVE_NATIVE_UINT64
 		#warning Native UINT64 type not available - CostConfirmation Database might be non-functional
 	#endif
-	UINT8 query1F[] = "SELECT COUNT(*) FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER=%lld";
-	UINT8 query2F[] = "INSERT INTO COSTCONFIRMATIONS VALUES (%lld, %lld, '%s', %d)";
-	UINT8 query3F[] = 
-		"UPDATE COSTCONFIRMATIONS SET BYTES=%lld, XMLCC='%s', SETTLED=%d "
-		"WHERE ACCOUNTNUMBER=%lld";
+	const char* query1F = "SELECT COUNT(*) FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER=%s";
+	const char* query2F = "INSERT INTO COSTCONFIRMATIONS VALUES (%s, %s, '%s', %d)";
+	const char* query3F = "UPDATE COSTCONFIRMATIONS SET BYTES=%s, XMLCC='%s', SETTLED=%d WHERE ACCOUNTNUMBER=%s";
 	UINT8 * query;
 	UINT8 * pStrCC;
 	UINT32 size;
 	PGresult * pResult;
 		
-	if(!m_bConnected) return E_NOT_CONNECTED;
+	if(!m_bConnected) 
+		return E_NOT_CONNECTED;
 	pStrCC = cc.toXmlString(size);
 	
 	// Test: is there already an entry with this accountno.?
-	query = new UINT8[ strlen((char*)query1F) + strlen((char*)pStrCC) + 128 ];
-	sprintf( (char*)query, (char*)query1F, cc.getAccountNumber());
+	query = new UINT8[ strlen(query1F) + strlen((char*)pStrCC) + 128 ];
+	UINT8 strAccountNumber[32];
+	print64(strAccountNumber,cc.getAccountNumber());
+	sprintf( (char*)query, query1F, strAccountNumber);
 	
 	// to receive result in binary format...
 	pResult = PQexec(m_dbConn, (char*)query);
@@ -226,16 +230,20 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 	CAMsg::printMsg(LOG_DEBUG, "DB store -> pVal ist %s, atoi gibt %d\n", pVal, atoi((char*)pVal));
 	if(atoi( (char*)pVal ) == 0)
 		{
+			UINT8 tmp2[32];
+			print64(tmp2,cc.getTransferredBytes());
 			sprintf( // do insert
-					(char*)query, (char*)query2F, 
-					cc.getAccountNumber(), cc.getTransferredBytes(), 
+					(char*)query, query2F, 
+					strAccountNumber, tmp2, 
 					pStrCC, 0);
 		}
 	else
 		{
+			UINT8 tmp2[32];
+			print64(tmp2,cc.getTransferredBytes());
 			sprintf( // do update
 					(char*)query, (char*) query3F,
-					cc.getTransferredBytes(), pStrCC, 0, cc.getAccountNumber()
+					tmp2, pStrCC, 0, strAccountNumber
 				);
 		}
 	
@@ -293,13 +301,16 @@ SINT32 CAAccountingDBInterface::getUnsettledCostConfirmations(CAQueue &q)
 	*/
 SINT32 CAAccountingDBInterface::markAsSettled(UINT64 accountNumber)
 {
-	UINT8 queryF[] = "UPDATE COSTCONFIRMATIONS SET SETTLED=1 WHERE ACCOUNTNUMBER=%lld";
+	const char* queryF = "UPDATE COSTCONFIRMATIONS SET SETTLED=1 WHERE ACCOUNTNUMBER=%s";
 	UINT8 * query;
 	PGresult * result;
 	
-	if(!m_bConnected) return E_NOT_CONNECTED;
-	query = new UINT8[strlen((char*)queryF)+32];
-	sprintf((char *)query, (char*)queryF, accountNumber);
+	if(!m_bConnected) 
+		return E_NOT_CONNECTED;
+	UINT8 tmp[32];
+	print64(tmp,accountNumber);
+	query = new UINT8[strlen(queryF)+32];
+	sprintf((char *)query, queryF, tmp);
 	result = PQexec(m_dbConn, (char *)query);
 	delete[] query;
 	if(PQresultStatus(result) != PGRES_TUPLES_OK)

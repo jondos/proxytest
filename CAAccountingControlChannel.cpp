@@ -83,7 +83,6 @@ SINT32 CAAccountingControlChannel::processXMLMessage(const DOM_Document &a_doc)
 	root = a_doc.getFirstChild();
 	if(root == NULL)
 	{
-		delete pItem;
 		return E_UNKNOWN;
 	}
 	pDoc->appendChild(pDoc->importNode(root, true));

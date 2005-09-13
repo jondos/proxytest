@@ -110,7 +110,6 @@ CAAccountingInstance::~CAAccountingInstance()
  * It counts the payload of normal packets and tells the mix when a connection 
  * should be closed because the user is not willing to pay.
  * 
- * @return 0 if the packet is an JAP->AI packet (caller should drop it)
  * @return 1 everything is OK, packet should be forwarded to next mix
  * @return 2 user did not send accountcertificate, connection should be closed
  * @return 3 user  did not send a cost confirmation 
@@ -415,7 +414,7 @@ SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UIN
 	elemCC.appendChild(elemAiName);
 	
 	DOM_Element elemAccount = doc.createElement("AccountNumber");
-	setDOMElementValue(elemAccount, (UINT64)accountNumber);
+	setDOMElementValue(elemAccount, accountNumber);
 	elemCC.appendChild(elemAccount);
 
 	DOM_Element elemBytes = doc.createElement("TransferredBytes");
@@ -726,7 +725,9 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 		{
 			pAccInfo->transferredBytes += pCC->getTransferredBytes();
 			#ifdef DEBUG
-				CAMsg::printMsg(LOG_DEBUG, "TransferredBytes is now %lld\n", pAccInfo->transferredBytes);
+				UINT8 tmp[32];
+				print64(tmp,pAccInfo->transferredBytes);
+				CAMsg::printMsg(LOG_DEBUG, "TransferredBytes is now %s\n", tmp);
 			#endif
 			pAccInfo->confirmedBytes = pCC->getTransferredBytes();
 			delete pCC;
@@ -818,7 +819,9 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,D
 	m_Mutex.lock();
 	if(cc.getTransferredBytes() < pAccInfo->confirmedBytes )
 		{
-			CAMsg::printMsg( LOG_INFO, "CostConfirmation has Wrong Number of Bytes (%lld). Ignoring...\n", cc.getTransferredBytes() );
+			UINT8 tmp[32];
+			print64(tmp,cc.getTransferredBytes());
+			CAMsg::printMsg( LOG_INFO, "CostConfirmation has Wrong Number of Bytes (%s). Ignoring...\n", tmp );
 			CAXMLErrorMessage err(CAXMLErrorMessage::ERR_WRONG_DATA, 
 				(UINT8*)"Your CostConfirmation has a wrong number of transferred bytes");
 			DOM_Document errDoc;
@@ -902,9 +905,12 @@ void CAAccountingInstance::handleBalanceCertificate(fmHashTableEntry *pHashEntry
 		return;
 	}
 	#ifdef DEBUG
-	else {
-		CAMsg::printMsg(LOG_DEBUG, "Balance: deposit=%lld\n", newDeposit);
-	}
+	else 
+		{
+			UINT8 tmp[32];
+			print64(tmp,newDeposit);
+			CAMsg::printMsg(LOG_DEBUG, "Balance: deposit=%s\n", tmp);
+		}
 	#endif
 	
 	// parse & set spent
@@ -919,9 +925,12 @@ void CAAccountingInstance::handleBalanceCertificate(fmHashTableEntry *pHashEntry
 		return;
 	}
 	#ifdef DEBUG
-	else {
-		CAMsg::printMsg(LOG_DEBUG, "Balance: Spent=%lld\n", newSpent);
-	}
+	else 
+		{
+			UINT8 tmp[32];
+			print64(tmp,newSpent);
+			CAMsg::printMsg(LOG_DEBUG, "Balance: Spent=%s\n", tmp);
+		}
 	#endif
 	
 	// some checks for empty accounts

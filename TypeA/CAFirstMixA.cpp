@@ -176,13 +176,29 @@ SINT32 CAFirstMixA::loop()
 													{
 														// this jap is evil! terminate connection and add IP to blacklist
 														CAMsg::printMsg(LOG_DEBUG, "Detected evil Jap.. closing connection! Removing IP..\n\n");
+														fmChannelListEntry* pEntry;
+														pEntry=m_pChannelList->getFirstChannelForSocket(pMuxSocket);
+														while(pEntry!=NULL)
+															{
+																getRandom(pMixPacket->data,DATA_SIZE);
+																pMixPacket->flags=CHANNEL_CLOSE;
+																pMixPacket->channel=pEntry->channelOut;
+																#ifdef LOG_PACKET_TIMES
+																	setZero64(pQueueEntry->timestamp_proccessing_start);
+																#endif
+																m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));
+																delete pEntry->pCipher;
+																pEntry=m_pChannelList->getNextChannel(pEntry);
+															}
 														m_pIPList->removeIP(pHashEntry->peerIP);
 														m_psocketgroupUsersRead->remove(*(CASocket*)pMuxSocket);
 														m_psocketgroupUsersWrite->remove(*(CASocket*)pMuxSocket);
 														delete pHashEntry->pQueueSend;
+														delete pHashEntry->pSymCipher;
 														m_pChannelList->remove(pMuxSocket);
 														delete pMuxSocket;
 														decUsers();
+														goto NEXT_USER;
 													}
 #endif
 												if(pMixPacket->flags==CHANNEL_DUMMY)					// just a dummy to keep the connection alife in e.g. NAT gateways 
