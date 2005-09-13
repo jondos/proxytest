@@ -425,7 +425,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //For Payment
 #ifdef PAYMENT
     #ifdef HAVE_CONFIG_H
-	#ifdef HAVE_POSTGRESQL_LIBPQ-FE_H
+	#ifdef HAVE_POSTGRESQL_LIBPQ_FE_H
 	    #include <postgresql/libpq-fe.h>
 	#else
 	    #include <libfq-fe.h>
