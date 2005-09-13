@@ -405,19 +405,34 @@ LIBS="$LIBS -lxerces-depdom"
 
 dnl Check for Postgresql libs if (needed if compiled with payment support)
 if test "x$PAYMENT" != "x" ; then
+    AC_MSG_CHECKING([for PostgreSQL includes])
+    AC_CHECK_HEADERS([postgresql/libpq-fe.h],[AC_MSG_RESULT(found)],[
+						AC_CHECK_HEADERS([libpq-fe.h],[AC_MSG_RESULT(found)],[
+										    AC_MSG_ERROR(PostgreSQL include file libpq-fe.h not found!)
+										    ]
+						]
+		    )
     AC_MSG_CHECKING([for PostgreSQL libs])
     saved_LIBS="$LIBS"
     PAYMENT_LIB="-lpq"
     LIBS="$LIBS $PAYMENT_LIB"
     AC_LINK_IFELSE([AC_LANG_PROGRAM([
+				#ifdef HAVE_POSTGRESQL_LIBPQ-FE_H
 				#include <postgresql/libpq-fe.h>
+				#else
+				#include <libpq-fe.h>
+				#endif
 				], [PQfinish(0);
 				])],[AC_MSG_RESULT(libpq found)],
 				[dnl libpq not found trying libpq++
 				    PAYMENT_LIB="-lpq++"
 				    LIBS="$saved_LIBS $PAYMENT_LIB"
 				    AC_LINK_IFELSE([AC_LANG_PROGRAM([
-				    #include <postgresql/libpq-fe.h>
+					#ifdef HAVE_POSTGRESQL_LIBPQ-FE_H
+					#include <postgresql/libpq-fe.h>
+					#else
+					#include <libpq-fe.h>
+					#endif
 				    ], [PQfinish(0);
 				    ])],[AC_MSG_RESULT(libpq++ found)],
 				    [AC_MSG_ERROR(PostgreSQL library libpq or libpq++ NOT found - please install them)])
