@@ -228,22 +228,6 @@ inline bool isZero64(UINT64& op1)
 #endif
 	}
 	
-/*inline void print64(UINT8* buff,UINT64& op)
-	{
-		#if defined(HAVE_NATIVE_UINT64)
-			#if defined(_WIN32)
-				_ui64toa(op,(char*)buff,10);
-			#elif defined(__linux)||defined(__sgi)||defined(__FreeBSD__) //TODO: check if for FreeBSD it is correct
-				sprintf((char*)buff,"%Lu",op);
-			#elif defined(__APPLE__) //TODO: Check if this is ok...
-				sprintf((char*)buff,"%llu",op);
-			#endif
-		#else //no native UINT_64
-			sprintf((char*)buff,"(%lu:%lu)",op.high,op.low);
-		#endif
-	}
-*/
-
 inline void print64(UINT8* buff,UINT64 num)
 	{
 		#ifdef HAVE_NATIVE_UINT64
