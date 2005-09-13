@@ -428,12 +428,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#ifdef HAVE_POSTGRESQL_LIBPQ_FE_H
 	    #include <postgresql/libpq-fe.h>
 	#else
-	    #include <libfq-fe.h>
+	    #include <libpq-fe.h>
 	#endif
     #elif defined(__FreeBSD__)
-	#include <libfq-fe.h>
+	#include <libpq-fe.h>
     #else
-	#include <postgresql/libfq-fe.h>
+	#include <postgresql/libpq-fe.h>
     #endif
 #endif
 //Compressed Logs
