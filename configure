@@ -10949,8 +10949,8 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 if test "x$PAYMENT" != "x" ; then
-    echo "$as_me:$LINENO: checking for PostgreSQL includes" >&5
-echo $ECHO_N "checking for PostgreSQL includes... $ECHO_C" >&6
+    { echo "$as_me:$LINENO: PostgreSQL tests" >&5
+echo "$as_me: PostgreSQL tests" >&6;}
 
 for ac_header in postgresql/libpq-fe.h
 do
@@ -11096,8 +11096,7 @@ if test `eval echo '${'$as_ac_Header'}'` = yes; then
   cat >>confdefs.h <<_ACEOF
 #define `echo "HAVE_$ac_header" | $as_tr_cpp` 1
 _ACEOF
- echo "$as_me:$LINENO: result: found" >&5
-echo "${ECHO_T}found" >&6
+
 else
 
 
@@ -11245,8 +11244,7 @@ if test `eval echo '${'$as_ac_Header'}'` = yes; then
   cat >>confdefs.h <<_ACEOF
 #define `echo "HAVE_$ac_header" | $as_tr_cpp` 1
 _ACEOF
- echo "$as_me:$LINENO: result: found" >&5
-echo "${ECHO_T}found" >&6
+
 else
 
 										    { { echo "$as_me:$LINENO: error: PostgreSQL include file libpq-fe.h not found!" >&5
