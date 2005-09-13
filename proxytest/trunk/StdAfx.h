@@ -418,13 +418,23 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #endif
 
 //For MySQL
-#if defined (PAYMENT_SUPPORT) ||defined(COUNTRY_STATS)
-#include <mysql/mysql.h>
+#if defined(COUNTRY_STATS)
+    #include <mysql/mysql.h>
 #endif
 
 //For Payment
 #ifdef PAYMENT
-	#include <postgresql/libpq-fe.h>
+    #ifdef HAVE_CONFIG_H
+	#ifdef HAVE_POSTGRESQL_LIBPQ-FE_H
+	    #include <postgresql/libpq-fe.h>
+	#else
+	    #include <libfq-fe.h>
+	#endif
+    #elif defined(__FreeBSD__)
+	#include <libfq-fe.h>
+    #else
+	#include <postgresql/libfq-fe.h>
+    #endif
 #endif
 //Compressed Logs
 #ifdef COMPRESSED_LOGS
