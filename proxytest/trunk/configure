@@ -3720,8 +3720,8 @@ fi;
 if test "${with_bits+set}" = set; then
   withval="$with_bits"
 
-		if test "x$with" != "xno" ; then
-			MARCH="$MARCH -m{$withval}"
+		if test "x$withval" != "xno" ; then
+			MARCH="$MARCH -m${withval}"
 		fi
 
 

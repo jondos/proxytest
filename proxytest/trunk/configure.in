@@ -89,8 +89,8 @@ dnl bits for environment
 AC_ARG_WITH(bits,
 	AS_HELP_STRING([--with-bits=32|64],[Generate code for a 32-bit or 64-bit environment]),
 	[
-		if test "x$with" != "xno" ; then
-			MARCH="$MARCH -m{$withval}"
+		if test "x$withval" != "xno" ; then
+			MARCH="$MARCH -m${withval}"
 		fi
 	]
 )
