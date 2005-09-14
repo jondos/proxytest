@@ -27,9 +27,12 @@ class CAThreadPool
 			CAThreadPool(	UINT32 num_worker_threads, 
 																	UINT32 max_queue_size,
 																	bool	 b_do_not_block_when_full);
-			~CAThreadPool(){destroy(true);}
-			SINT32 addRequest(THREAD_MAIN_TYP, void *args);
+			~CAThreadPool()
+				{
+					destroy(true);
+				}
 			SINT32 destroy(bool bWaitForFinish);
+			SINT32 addRequest(THREAD_MAIN_TYP, void *args);
 			friend THREAD_RETURN worker_thread_main_loop(void *args);
 		private:
 			/* pool characteristics */
@@ -37,10 +40,10 @@ class CAThreadPool
       UINT32				m_MaxQueueSize;
 			bool					m_bDoNotBlockWhenFull;
       /* pool state */
-			CAThread**		m_parThreads;
+			CAThread**			m_parThreads;
       volatile UINT32	m_CurQueueSize;
-			tpool_work_t*	m_pQueueHead;
-			tpool_work_t*	m_pQueueTail;
+			tpool_work_t*		m_pQueueHead;
+			tpool_work_t*		m_pQueueTail;
 			volatile bool		m_bQueueClosed;
       volatile bool		m_bShutdown;
 			/* pool synchronization */

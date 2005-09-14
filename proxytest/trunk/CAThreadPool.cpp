@@ -94,14 +94,13 @@ SINT32 CAThreadPool::addRequest(THREAD_MAIN_TYP routine, void *args)
 SINT32 CAThreadPool::destroy(bool bWaitForFinish)
 	{
 		tpool_work_t *cur_nodep;
-		m_pmutexQueue->lock();
 		// Is a shutdown already in progress?
 		if (m_bQueueClosed || m_bShutdown)
 			{
-				m_pmutexQueue->unlock();
 				return E_SUCCESS;
 			}
 
+		m_pmutexQueue->lock();
 		m_bQueueClosed = true;
 		// If the finish flag is set, wait for workers to 
 		//   drain queue  
