@@ -173,7 +173,7 @@ SINT32 CAMsg::printMsg(UINT32 type,const char* format,...)
 						break;
 		#endif
 						case MSG_STDOUT:
-							printf(pMsg->m_strMsgBuff);
+							printf("%s",pMsg->m_strMsgBuff);
 						break;
 						default:
 						ret=E_UNKNOWN;
