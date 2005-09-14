@@ -3709,7 +3709,7 @@ if test "${with_arch+set}" = set; then
   withval="$with_arch"
 
 		if test "x$enableval" != "xno" ; then
-			MARCH="-march=$enableval"
+			MARCH="-march=${enableval}"
 		fi
 
 
@@ -3721,7 +3721,7 @@ if test "${with_bits+set}" = set; then
   withval="$with_bits"
 
 		if test "x$enableval" != "xno" ; then
-			MARCH="$MARCH -m$enableval"
+			MARCH="$MARCH -m{$enableval}"
 		fi
 
 
