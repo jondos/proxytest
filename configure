@@ -885,8 +885,9 @@ Optional Features:
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
-  --with-arch=i386|i486|i586|i686|pentium3
+  --with-arch=i386|i486|i586|i686|pentium3|opteron
                           Specify architecure for optimisation
+  --with-bits=32|64       Generate code for a 32-bit or 64-bit environment
   --with-ssl-dir=PATH     Specify path to OpenSSL installation
   --with-xml-include=PATH Specify path to XERCES-C include files (without a
                           trailing '/xercesc')
@@ -3709,6 +3710,18 @@ if test "${with_arch+set}" = set; then
 
 		if test "x$enableval" != "xno" ; then
 			MARCH="-march=$enableval"
+		fi
+
+
+fi;
+
+
+# Check whether --with-bits or --without-bits was given.
+if test "${with_bits+set}" = set; then
+  withval="$with_bits"
+
+		if test "x$enableval" != "xno" ; then
+			MARCH="$MARCH -m$enableval"
 		fi
 
 
