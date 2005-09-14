@@ -278,9 +278,9 @@ SINT32 CADatabase::measurePerformance(	UINT8* strLogFile,
 						pDatabase=new CADatabase();
 						pDatabase->fill(aktNrOfEntries);
 						UINT64 startTime,endTime;
-						getcurrentTimeMicros(startTime);
-						aktKey=key;
 						getRandom(key,insertsPerMeasure*16);
+						aktKey=key;
+						getcurrentTimeMicros(startTime);
 						for(UINT32 j=0;j<insertsPerMeasure;j++)
 							{
 								pDatabase->simulateInsert(aktKey);
@@ -322,8 +322,8 @@ SINT32 CADatabase::simulateInsert(UINT8 key[16])
 		UINT16 timestamp=(key[14]<<8)|key[15];
 		if(timestamp<m_currentClock-1||timestamp>m_currentClock+1)
 			{
-				m_pMutex->unlock();
-				return E_UNKNOWN;
+				//m_pMutex->unlock();
+				//return E_UNKNOWN;
 			}
 		t_databaseInfo* aktDB=m_currDatabase;
 		if(timestamp>m_currentClock)
