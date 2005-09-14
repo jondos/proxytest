@@ -77,10 +77,20 @@ esac
 dnl Architecture dependend compiler optimisations
 MARCH=""
 AC_ARG_WITH(arch,
-	AS_HELP_STRING([--with-arch=i386|i486|i586|i686|pentium3],[Specify architecure for optimisation]),
+	AS_HELP_STRING([--with-arch=i386|i486|i586|i686|pentium3|opteron],[Specify architecure for optimisation]),
 	[
 		if test "x$enableval" != "xno" ; then
 			MARCH="-march=$enableval"
+		fi
+	]
+)
+
+dnl bits for environment
+AC_ARG_WITH(bits,
+	AS_HELP_STRING([--with-bits=32|64],[Generate code for a 32-bit or 64-bit environment]),
+	[
+		if test "x$enableval" != "xno" ; then
+			MARCH="$MARCH -m$enableval"
 		fi
 	]
 )
