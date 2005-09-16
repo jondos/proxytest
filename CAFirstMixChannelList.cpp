@@ -32,7 +32,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define MAX_HASH_KEY 8113
 
 #ifdef PAYMENT
-#include "CAAccountingInstance.hpp"
+	#include "CAAccountingInstance.hpp"
 #endif
 
 CAFirstMixChannelList::CAFirstMixChannelList()
@@ -147,13 +147,6 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8 peerIP[4],
 				m_listHashTableHead->list_HashEntries.prev=pHashTableEntry;
 				m_listHashTableHead=pHashTableEntry;				
 			}
-#ifdef PAYMENT
-		// init accounting instance for this user
-		CAAccountingInstance *pAccInst;
-		pAccInst = CAAccountingInstance::getInstance();
-//		pAccInst->initTableEntry(pHashTableEntry);
-//		m_pAccountingInstance->initTableEntry(pHashTableEntry);
-#endif
 		m_Mutex.unlock();
 		return E_SUCCESS;
 	}
@@ -391,10 +384,7 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 			}
 #ifdef PAYMENT
 		// cleanup accounting information
-		CAAccountingInstance * pAccInst;
-		pAccInst = CAAccountingInstance::getInstance();
-		pAccInst->cleanupTableEntry(pHashTableEntry);
-	//	m_pAccountingInstance->cleanupTableEntry(pHashTableEntry);
+		CAAccountingInstance::cleanupTableEntry(pHashTableEntry);
 #endif
 		memset(pHashTableEntry,0,sizeof(fmHashTableEntry)); //'delete' the connection from the connection hash table 
 		m_Mutex.unlock();

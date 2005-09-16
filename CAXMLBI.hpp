@@ -68,7 +68,7 @@ class CAXMLBI : public CAAbstractXMLEncodable
 			}
 		
 		/** returns the hostname of the host on which this BI is running */
-		UINT8 * getHostName()
+		UINT8* getHostName()
 			{
 				return m_pHostName;
 			}

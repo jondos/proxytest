@@ -172,7 +172,7 @@ SINT32 CAFirstMixA::loop()
 													}
 #ifdef PAYMENT
 												// payment code added by Bastian Voigt
-												if(m_pAccountingInstance->handleJapPacket( pMixPacket, pHashEntry ) != 1) 
+													if(CAAccountingInstance::handleJapPacket(pHashEntry ) != 1) 
 													{
 														// this jap is evil! terminate connection and add IP to blacklist
 														CAMsg::printMsg(LOG_DEBUG, "Detected evil Jap.. closing connection! Removing IP..\n\n");
@@ -488,9 +488,7 @@ NEXT_USER:
 											{
 												#ifdef PAYMENT
 													// count packet for payment
-													CAAccountingInstance::getInstance()->handleJapPacket(
-															&(pfmHashEntry->oQueueEntry.packet),
-															pfmHashEntry);
+													CAAccountingInstance::handleJapPacket(pfmHashEntry);
 												#endif
 												#ifdef DELAY_USERS
 													pfmHashEntry->delayBucket--;

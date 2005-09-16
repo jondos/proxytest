@@ -42,30 +42,29 @@ extern CACmdLnOptions options;
  * @param useTLS if nonzero, a TLS socket is used.
  */
 CAAccountingBIInterface::CAAccountingBIInterface(UINT32 useTLS)
-{
-	// init some vars
-	m_bUseTLS = useTLS;
-	if(useTLS)
 	{
-		m_pSocket = new CATLSClientSocket();
+		// init some vars
+		m_bUseTLS = useTLS;
+		m_pSocket =NULL;
+		if(useTLS)
+			{
+				m_pSocket = new CATLSClientSocket();
+			}
+		else
+			{
+				m_pSocket = new CASocket();
+			}
 	}
-	else
-	{
-		m_pSocket = new CASocket();
-	}
-}
-
-
 
 /**
  * Destructor
  */
 CAAccountingBIInterface::~CAAccountingBIInterface()
-{
-	terminateBIConnection();
-	if(m_pSocket)
-		delete m_pSocket;
-}
+	{
+		terminateBIConnection();
+		if(m_pSocket!=NULL)
+			delete m_pSocket;
+	}
 
 
 
@@ -73,35 +72,39 @@ CAAccountingBIInterface::~CAAccountingBIInterface()
  * Initiate HTTP(s) connection to the BI (JPI)
  */
 SINT32 CAAccountingBIInterface::initBIConnection()
-{
-	CASocketAddrINet address;
-	SINT32 rc;
-	CAXMLBI * pBI;
-	
-	// fetch BI address
-	if(!(pBI = options.getBI()))
 	{
-		CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface: could not get JPI hostname");
+		CASocketAddrINet address;
+		SINT32 rc;
+		CAXMLBI* pBI= options.getBI();
+		
+		// fetch BI address
+		if(pBI == NULL)
+			{
+				CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface: could not get JPI hostname\n");
+				m_connected = false;
+				return E_UNKNOWN;
+			}
+		address.setAddr(pBI->getHostName(), pBI->getPortNumber());
+		
+		// connect
+		rc=m_pSocket->connect(address);
+		if(rc!=E_SUCCESS)
+			{
+				UINT8 buf[64];
+				address.getHostName(buf, 64);
+				CAMsg::printMsg(
+						LOG_ERR, 
+						"CAAccountingBIInterface: could not connect to BI at %s:%i. Reason: %i\n", 
+						buf, address.getPort(), rc
+					);
+				m_connected = false;
+				return E_UNKNOWN;
+			}
+		
+		m_httpClient.setSocket(m_pSocket);
+		m_connected = true;
+		return E_SUCCESS;
 	}
-	address.setAddr(pBI->getHostName(), pBI->getPortNumber());
-	
-	// connect
-	if((rc=m_pSocket->connect(address))!=E_SUCCESS)
-		{
-			UINT8 buf[64];
-			address.getHostName(buf, 64);
-			CAMsg::printMsg(
-					LOG_ERR, 
-					"CAAccountingBIInterface: could not connect to BI at %s:%d. Reasion: %d\n", 
-					buf, address.getPort(), rc
-				);
-			m_connected = false;
-			return E_UNKNOWN;
-		}
-	m_httpClient.setSocket(m_pSocket);
-	m_connected = true;
-	return E_SUCCESS;
-}
 
 
 
@@ -109,13 +112,13 @@ SINT32 CAAccountingBIInterface::initBIConnection()
  * Terminate HTTP(s) connection to the BI (JPI)
  */
 SINT32 CAAccountingBIInterface::terminateBIConnection()
-{
-	if(m_connected)
-		{
-			m_pSocket->close();
-		}
-	return E_SUCCESS;
-}
+	{
+		if(m_connected)
+			{
+				m_pSocket->close();
+			}
+		return E_SUCCESS;
+	}
 
 
 
@@ -124,32 +127,38 @@ SINT32 CAAccountingBIInterface::terminateBIConnection()
  * TODO: Error handling
  */
 CAXMLErrorMessage * CAAccountingBIInterface::settle(CAXMLCostConfirmation &cc)
-{
-	UINT8 * pStrCC;
-	UINT8* response;
-	UINT32 contentLen, status;
-	CAXMLErrorMessage *pErrMsg;
-	
-	pStrCC = cc.toXmlString(contentLen);
-	if(m_httpClient.sendPostRequest((UINT8*)"/settle", pStrCC, strlen((char*)pStrCC))
-		!= E_SUCCESS)
 	{
+		UINT8 * pStrCC;
+		UINT8* response;
+		UINT32 contentLen, status;
+		CAXMLErrorMessage *pErrMsg;
+	
+		pStrCC = cc.toXmlString(contentLen);
+		if(	pStrCC==NULL||
+				m_httpClient.sendPostRequest((UINT8*)"/settle", pStrCC, strlen((char*)pStrCC))!= E_SUCCESS)
+			{
+				delete[] pStrCC;
+				return NULL;
+			}
 		delete[] pStrCC;
-		return NULL;
-	}
-	delete[] pStrCC;
 	
-	if(m_httpClient.parseHTTPHeader(&contentLen, &status)!=E_SUCCESS ||
-		 (status!=200) || (contentLen==0))
-	{
-		return NULL;
+		if(m_httpClient.parseHTTPHeader(&contentLen, &status)!=E_SUCCESS ||
+			(status!=200) || (contentLen==0))
+			{
+				return NULL;
+			}
+		response = new UINT8[contentLen+1];
+		if(m_pSocket->receiveFully(response, contentLen)!=E_SUCCESS)
+			{
+				delete[] response;
+				return NULL;
+			}
+		
+		response[contentLen]='\0';
+		pErrMsg = new CAXMLErrorMessage(response);
+		delete[] response;
+		return pErrMsg;
 	}
-	response = new UINT8[contentLen+1];
-	m_pSocket->receiveFully(response, contentLen);
-	response[contentLen]='\0';
-	pErrMsg = new CAXMLErrorMessage(response);
-	return pErrMsg;
-}
 
 
 /*

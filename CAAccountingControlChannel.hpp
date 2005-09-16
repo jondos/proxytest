@@ -33,8 +33,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASyncControlChannel.hpp"
 #include "CAFirstMixChannelList.hpp"
 
-class CAAccountingInstance;
-
 /**
 implementation of a per-user control-channel for the AccountingInstance. 
 All incoming messages are appended to the AccountingInstance queue where 
@@ -43,17 +41,13 @@ they are processed in an own thread.
 @author Bastian Voigt
 */
 class CAAccountingControlChannel : public CASyncControlChannel
-{
-public:
-    CAAccountingControlChannel(fmHashTableEntry * pHashEntry);
-		
-    virtual ~CAAccountingControlChannel();
-		
-		virtual SINT32 processXMLMessage(const DOM_Document &a_doc);
+	{
+		public:
+			CAAccountingControlChannel(fmHashTableEntry * pHashEntry);
+			virtual ~CAAccountingControlChannel();
+			SINT32 processXMLMessage(const DOM_Document &a_doc);
 
-private:
-		fmHashTableEntry * m_pHashEntry;
-		static CAAccountingInstance * ms_pAccountingInstance;
-};
-
+		private:
+			fmHashTableEntry * m_pHashEntry;
+	};
 #endif

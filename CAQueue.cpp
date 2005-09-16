@@ -34,6 +34,15 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 /** Deletes this Queue and all stored data*/
 CAQueue::~CAQueue()
 	{
+		clean();
+		delete m_pcsQueue;
+		delete m_pconvarSize;
+	}
+
+/** Removes any stored data from the Queue.
+	*/
+SINT32 CAQueue::clean()
+	{
 		m_pcsQueue->lock();
 		while(m_Queue!=NULL)
 			{
@@ -49,11 +58,11 @@ CAQueue::~CAQueue()
 				m_pHeap=m_pHeap->next;
 				delete m_lastElem;
 			}*/
+		m_nQueueSize=0;
+		m_lastElem=NULL;
 		m_pcsQueue->unlock();
-		delete m_pcsQueue;
-		delete m_pconvarSize;
+		return E_SUCCESS;
 	}
-
 /** Adds data to the Queue.
 	* @param buff pointer to the data buffer
 	* @param size size of data to add

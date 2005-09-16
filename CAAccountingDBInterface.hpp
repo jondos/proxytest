@@ -38,60 +38,58 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
   * in a postgresql database
   */
 class CAAccountingDBInterface
-{
-public: 
-	CAAccountingDBInterface();
-	~CAAccountingDBInterface();
+	{
+		public: 
+			CAAccountingDBInterface();
+			~CAAccountingDBInterface();
 
-	/**
-	* Initiates the database connection. 
-	* This function is called inside the aiThread
-	*
-	* @return E_NOT_CONNECTED if the connection could not be established
-	* @return E_UNKNOWN if we are already connected
-	* @return E_SUCCESS if all is OK
-	*/
-	SINT32 initDBConnection();
-	
-	/**
-	* Terminates the database connection
-	* @return E_SUCCESS
-	*/
-	SINT32 terminateDBConnection();
-	
-	/**
-	* Creates the tables we need in the DB
-	*
-	* @return E_SUCCESS if all is OK
-	* @return E_UNKNOWN if the query could not be executed
-	* @return E_NOT_CONNECTED if we are not connected to the DB
-	*/
-	SINT32 createTables();
-	
-	
-	SINT32 dropTables();
-	
-	SINT32 storeCostConfirmation(CAXMLCostConfirmation &cc);
+			/**
+			* Initiates the database connection. 
+			* This function is called inside the aiThread
+			*
+			* @return E_NOT_CONNECTED if the connection could not be established
+			* @return E_UNKNOWN if we are already connected
+			* @return E_SUCCESS if all is OK
+			*/
+			SINT32 initDBConnection();
+			
+			/**
+			* Terminates the database connection
+			* @return E_SUCCESS
+			*/
+			SINT32 terminateDBConnection();
+			
+			/**
+			* Creates the tables we need in the DB
+			*
+			* @return E_SUCCESS if all is OK
+			* @return E_UNKNOWN if the query could not be executed
+			* @return E_NOT_CONNECTED if we are not connected to the DB
+			*/
+			//SINT32 createTables();						
+			//SINT32 dropTables();
+			
+			SINT32 storeCostConfirmation(CAXMLCostConfirmation &cc);
 
-	SINT32 getCostConfirmation(UINT64 accountNumber, CAXMLCostConfirmation **pCC);
-	
-	
-	/**
-	 * Fills the CAQueue with all non-settled cost confirmations
-	 *
-	 */
-	SINT32 getUnsettledCostConfirmations(CAQueue &q);
-	
-	/**
-	 * Marks this account as settled.
-	 * @todo what to do if there was a new CC stored while we were busy settling the old one?
-	 */
-	SINT32 markAsSettled(UINT64 accountNumber);
+			SINT32 getCostConfirmation(UINT64 accountNumber, CAXMLCostConfirmation **pCC);
+			
+			
+			/**
+			* Fills the CAQueue with all non-settled cost confirmations
+			*
+			*/
+			SINT32 getUnsettledCostConfirmations(CAQueue &q);
+			
+			/**
+			* Marks this account as settled.
+			* @todo what to do if there was a new CC stored while we were busy settling the old one?
+			*/
+			SINT32 markAsSettled(UINT64 accountNumber);
 
-private:
-	/** connection to postgreSQL database */
-	PGconn * m_dbConn;
-	bool m_bConnected;
-};
+		private:
+			/** connection to postgreSQL database */
+			PGconn * m_dbConn;
+			bool m_bConnected;
+	};
 #endif //PAYMENT
 #endif

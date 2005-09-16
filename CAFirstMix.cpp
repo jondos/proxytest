@@ -189,11 +189,6 @@ SINT32 CAFirstMix::init()
         CAMsg::printMsg(LOG_CRIT,"Error in establishing secure communication with next Mix!\n");
         return E_UNKNOWN;
     }
-
-#ifdef PAYMENT
-		m_pAccountingInstance = CAAccountingInstance::getInstance();
-#endif
-
 		m_pIPList=new CAIPList();
 #ifdef COUNTRY_STATS
 		initCountryStats();
@@ -213,6 +208,11 @@ SINT32 CAFirstMix::init()
 #ifdef REPLAY_DETECTION
 		m_pReplayMsgProc=new CAReplayCtrlChannelMsgProc(this);
 #endif
+
+#ifdef PAYMENT
+		CAAccountingInstance::init();
+#endif
+
 		m_pthreadsLogin=new CAThreadPool(NUM_LOGIN_WORKER_TRHEADS,MAX_LOGIN_QUEUE,false);
 
 		//Starting thread for Step 1
@@ -700,7 +700,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 										ret=((CASocket*)pNewMuxSocket)->getPeerIP(peerIP);
 										#ifdef PAYMENT
 											if(ret!=E_SUCCESS||pIPList->insertIP(peerIP)<0 ||
-												pFirstMix->m_pAccountingInstance->isIPAddressBlocked(peerIP))
+												CAAccountingInstance::isIPAddressBlocked(peerIP))
 										#else
 											if(ret!=E_SUCCESS||pIPList->insertIP(peerIP)<0)
 										#endif
@@ -1030,6 +1030,9 @@ SINT32 CAFirstMix::clean()
 		if(m_pthreadSendToMix!=NULL)
 			delete m_pthreadSendToMix;
 		m_pthreadSendToMix=NULL;
+#ifdef PAYMENT
+		CAAccountingInstance::clean();
+#endif
 		#ifdef LOG_PACKET_TIMES
 		if(m_pLogPacketStats!=NULL)
 			delete m_pLogPacketStats;

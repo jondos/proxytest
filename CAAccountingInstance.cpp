@@ -55,8 +55,7 @@ CAAccountingInstance * CAAccountingInstance::ms_pInstance = NULL;
  * private Constructor
  */
 CAAccountingInstance::CAAccountingInstance()
-	{
-	
+	{	
 		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance initialising\n" );
 		m_pQueue = new CAQueue();
 		m_pIPBlockList = new CATempIPBlockList(60000);
@@ -64,10 +63,10 @@ CAAccountingInstance::CAAccountingInstance()
 		// initialize Database connection
 		m_dbInterface = new CAAccountingDBInterface();
 		if(m_dbInterface->initDBConnection() != E_SUCCESS)
-		{
-			CAMsg::printMsg( LOG_ERR, "**************** AccountingInstance: Could not connect to DB!");
-			exit(1);
-		}
+			{
+				CAMsg::printMsg( LOG_ERR, "**************** AccountingInstance: Could not connect to DB!\n");
+				exit(1);
+			}
 	
 		// initialize JPI signataure tester
 		m_AiName = new UINT8[256];
@@ -86,8 +85,6 @@ CAAccountingInstance::CAAccountingInstance()
 		m_pSettleThread = new CAAccountingSettleThread();
 	}
 
-
-
 /**
  * private desctructor
  */
@@ -97,6 +94,7 @@ CAAccountingInstance::~CAAccountingInstance()
 		m_bThreadRunning = false;
 		m_pThread->join();
 		delete m_pThread;
+		delete m_pSettleThread;
 		//delete m_biInterface;
 		delete m_dbInterface;
 		delete m_pIPBlockList;
@@ -113,372 +111,338 @@ CAAccountingInstance::~CAAccountingInstance()
  * @return 1 everything is OK, packet should be forwarded to next mix
  * @return 2 user did not send accountcertificate, connection should be closed
  * @return 3 user  did not send a cost confirmation 
- * or somehow tried to fake authentication, connection should be closed
+ *						or somehow tried to fake authentication, connection should be closed
  * @return 4 AuthState unknown (internal error, should not happen)
  */
-SINT32 CAAccountingInstance::handleJapPacket( MIXPACKET *pPacket, fmHashTableEntry *pHashEntry)
-{
-	aiAccountingInfo * pAccInfo;
-	timespec now;	
-	getcurrentTime(now);
-	pAccInfo = pHashEntry->pAccountingInfo;
-	
-	
-	m_Mutex.lock();
-	pAccInfo->transferredBytes += sizeof(MIXPACKET); // count the packet	
-	
-	if(pAccInfo->authFlags & (AUTH_FATAL_ERROR))
+SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 	{
-		// there was an error earlier..
-		return 3;
-	}
+		aiAccountingInfo * pAccInfo;
+		pAccInfo = pHashEntry->pAccountingInfo;
 	
-	if(pAccInfo->authFlags & (AUTH_GOT_ACCOUNTCERT) )
-	{
-	
-		//----------------------------------------------------------
-		// authentication process not properly finished
-		if( pAccInfo->authFlags & AUTH_FAKE )
-			{
-				m_Mutex.unlock();
-				CAMsg::printMsg( LOG_DEBUG, "AccountingInstance: AUTH_FAKE flag is set ... byebye\n");
-				return 3;
-			}
-		if( !(pAccInfo->authFlags & AUTH_ACCOUNT_OK) )
-		{
-			// we did not yet receive the response to the challenge...
-			if(now.tv_sec >= pAccInfo->lastRequestSeconds + REQUEST_TIMEOUT)
-			{
-				m_Mutex.unlock();
-				CAMsg::printMsg( LOG_DEBUG, "AccountingInstance: Jap refused to send response to challenge (Request Timeout)...\n");
-				return 3;
-			}
-		}
+		ms_pInstance->m_Mutex.lock();
+		pAccInfo->transferredBytes += MIXPACKET_SIZE; // count the packet	
 		
-		if( pAccInfo->authFlags & AUTH_ACCOUNT_EMPTY )
+		if(pAccInfo->authFlags & (AUTH_FATAL_ERROR))
 			{
-				CAMsg::printMsg( LOG_DEBUG, "AccountingInstance: Account is empty. Closing connection.\n");
-				CAXMLErrorMessage msg(CAXMLErrorMessage::ERR_ACCOUNT_EMPTY);
-				DOM_Document doc;
-				msg.toXmlDocument(doc);
-				pAccInfo->pControlChannel->sendXMLMessage(doc);
-				pAccInfo->authFlags |= AUTH_FATAL_ERROR;
-				m_Mutex.unlock();
-				return 3;
-			}
-
-		//----------------------------------------------------------
-		// Hardlimit corstconfirmation check
-		else if ((pAccInfo->transferredBytes-pAccInfo->confirmedBytes) >= m_iHardLimitBytes)
-			{
-				#ifdef DEBUG
-				CAMsg::printMsg( LOG_DEBUG, "Accounting instance: User refused "
-													"to send cost confirmation (HARDLIMIT EXCEEDED).\n");
-				#endif
-				m_pIPBlockList->insertIP( pHashEntry->peerIP );
-				CAXMLErrorMessage msg(CAXMLErrorMessage::ERR_NO_CONFIRMATION);
-				DOM_Document doc;
-				msg.toXmlDocument(doc);
-				pAccInfo->pControlChannel->sendXMLMessage(doc);
-				pAccInfo->authFlags |= AUTH_FATAL_ERROR;
-				m_Mutex.unlock();
+				// there was an error earlier..
+				ms_pInstance->m_Mutex.unlock();
 				return 3;
 			}
 	
-		//-------------------------------------------------------
-		// check: is it time to request a new cost confirmation?
-		else if( (pAccInfo->transferredBytes-pAccInfo->confirmedBytes) >= m_iSoftLimitBytes)
-		{
-			if( (pAccInfo->authFlags & AUTH_SENT_CC_REQUEST) )
+		if(pAccInfo->authFlags & (AUTH_GOT_ACCOUNTCERT) )
 			{
-				if( (pAccInfo->authFlags & AUTH_SENT_SECOND_CC_REQUEST))
-				{
-					if(now.tv_sec >= pAccInfo->lastRequestSeconds + REQUEST_TIMEOUT)
+				//----------------------------------------------------------
+				// authentication process not properly finished
+				if( pAccInfo->authFlags & AUTH_FAKE )
+					{
+						ms_pInstance->m_Mutex.unlock();
+						pAccInfo->authFlags |= AUTH_FATAL_ERROR;
+						CAMsg::printMsg( LOG_DEBUG, "AccountingInstance: AUTH_FAKE flag is set ... byebye\n");
+						return 3;
+					}
+				if( !(pAccInfo->authFlags & AUTH_ACCOUNT_OK) )
+					{
+						// we did not yet receive the response to the challenge...
+						time_t theTime=time(NULL);	
+						if(theTime >= pAccInfo->lastRequestSeconds + REQUEST_TIMEOUT)
+							{
+								ms_pInstance->m_Mutex.unlock();
+								pAccInfo->authFlags |= AUTH_FATAL_ERROR;
+								CAMsg::printMsg( LOG_DEBUG, "AccountingInstance: Jap refused to send response to challenge (Request Timeout)...\n");
+								return 3;
+							}
+					}
+		
+				if( pAccInfo->authFlags & AUTH_ACCOUNT_EMPTY )
+					{
+						CAMsg::printMsg( LOG_DEBUG, "AccountingInstance: Account is empty. Closing connection.\n");
+						CAXMLErrorMessage msg(CAXMLErrorMessage::ERR_ACCOUNT_EMPTY);
+						DOM_Document doc;
+						msg.toXmlDocument(doc);
+						pAccInfo->pControlChannel->sendXMLMessage(doc);
+						pAccInfo->authFlags |= AUTH_FATAL_ERROR;
+						ms_pInstance->m_Mutex.unlock();
+						return 3;
+					}
+
+				//----------------------------------------------------------
+				// Hardlimit corstconfirmation check
+				UINT32 unconfirmedBytes=diff64(pAccInfo->transferredBytes,pAccInfo->confirmedBytes);
+				if (unconfirmedBytes >= ms_pInstance->m_iHardLimitBytes)
 					{
 						#ifdef DEBUG
-						CAMsg::printMsg( LOG_DEBUG, "Accounting instance: User refused "
-															"to send cost confirmation (REQUEST TIMEOUT).\n");
+							CAMsg::printMsg( LOG_DEBUG, "Accounting instance: User refused "
+																					"to send cost confirmation (HARDLIMIT EXCEEDED).\n");
 						#endif
-						m_pIPBlockList->insertIP( pHashEntry->peerIP );
+						ms_pInstance->m_pIPBlockList->insertIP( pHashEntry->peerIP );
 						CAXMLErrorMessage msg(CAXMLErrorMessage::ERR_NO_CONFIRMATION);
 						DOM_Document doc;
 						msg.toXmlDocument(doc);
 						pAccInfo->pControlChannel->sendXMLMessage(doc);
 						pAccInfo->authFlags |= AUTH_FATAL_ERROR;
-						m_Mutex.unlock();
+						ms_pInstance->m_Mutex.unlock();
 						return 3;
 					}
-					else
+	
+				//-------------------------------------------------------
+				// check: is it time to request a new cost confirmation?
+				if( unconfirmedBytes >= ms_pInstance->m_iSoftLimitBytes)
 					{
-						m_Mutex.unlock();
+						time_t  theTime=time(NULL);
+						if( (pAccInfo->authFlags & AUTH_SENT_CC_REQUEST) )
+							{//we have sent a first CC request
+								if( (pAccInfo->authFlags & AUTH_SENT_SECOND_CC_REQUEST))
+									{//we have also sent a second request
+										if(theTime >= pAccInfo->lastRequestSeconds + REQUEST_TIMEOUT)
+											{//but did not get an answer --> evil JAP!
+												#ifdef DEBUG
+													CAMsg::printMsg( LOG_DEBUG, "Accounting instance: User refused "
+																					"to send cost confirmation (REQUEST TIMEOUT).\n");
+												#endif
+												ms_pInstance->m_pIPBlockList->insertIP( pHashEntry->peerIP );
+												CAXMLErrorMessage msg(CAXMLErrorMessage::ERR_NO_CONFIRMATION);
+												DOM_Document doc;
+												msg.toXmlDocument(doc);
+												pAccInfo->pControlChannel->sendXMLMessage(doc);
+												pAccInfo->authFlags |= AUTH_FATAL_ERROR;
+												ms_pInstance->m_Mutex.unlock();
+												return 3;
+											}
+										ms_pInstance->m_Mutex.unlock();
+										return 1;
+									}
+								if(theTime >= pAccInfo->lastRequestSeconds + REQUEST_TIMEOUT)
+									{
+										// we send a reminder...
+										DOM_Document doc;
+										#ifdef DEBUG
+											CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending REMINDER CC request.\n");
+										#endif
+										CAAccountingInstance::makeCCRequest(pAccInfo->accountNumber, pAccInfo->transferredBytes, doc);
+										pAccInfo->pControlChannel->sendXMLMessage(doc);
+										pAccInfo->authFlags |= AUTH_SENT_SECOND_CC_REQUEST;
+										pAccInfo->lastRequestSeconds = theTime;
+										ms_pInstance->m_Mutex.unlock();
+										return 1;
+									}
+								//still waiting for the answer to the CC reqeust
+								ms_pInstance->m_Mutex.unlock();
+								return 1;
+							}//we have sent a CC request
+						// no CC request sent yet --> send a first CC request
+						DOM_Document doc;
+						#ifdef DEBUG
+							CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending first CC request.\n");
+						#endif
+						makeCCRequest(pAccInfo->accountNumber, pAccInfo->transferredBytes, doc);
+						pAccInfo->pControlChannel->sendXMLMessage(doc);
+						pAccInfo->authFlags |= AUTH_SENT_CC_REQUEST;
+						pAccInfo->lastRequestSeconds = theTime;
+						ms_pInstance->m_Mutex.unlock();
 						return 1;
-					}
-				}
-				else if(now.tv_sec >= pAccInfo->lastRequestSeconds + REQUEST_TIMEOUT)
-				{
-					// send a reminder...
-					DOM_Document doc;
-					#ifdef DEBUG
-					CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending REMINDER CC request.\n");
-					#endif
-					makeCCRequest(pAccInfo->accountNumber, pAccInfo->transferredBytes, doc);
-					pAccInfo->pControlChannel->sendXMLMessage(doc);
-					pAccInfo->authFlags |= AUTH_SENT_SECOND_CC_REQUEST;
-					pAccInfo->lastRequestSeconds = now.tv_sec;
-					m_Mutex.unlock();
-					return 1;
-				}
-				else
-				{
-					m_Mutex.unlock();
-					return 1;
-				}
-			}
-			else
-			{
-				// send a first CC request
-				DOM_Document doc;
-				#ifdef DEBUG
-				CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending CC request.\n");
-				#endif
-				makeCCRequest(pAccInfo->accountNumber, pAccInfo->transferredBytes, doc);
-				pAccInfo->pControlChannel->sendXMLMessage(doc);
-				pAccInfo->authFlags |= AUTH_SENT_CC_REQUEST;
-				pAccInfo->lastRequestSeconds = now.tv_sec;
-				m_Mutex.unlock();
-				return 1;
-			}
-		}
-		else
-		{
-			//--------------------------------------------------------------
-			// check: do we need a new balance certificate for the account?
-			/// TODO: Make the numbers vvv configurable
-			if( (( (pAccInfo->transferredBytes - pAccInfo->lastbalTransferredBytes) >=
+					}//soft limit exceeded
+				//everything is fine --> but do we need a new balance cert?
+				//@todo move this to a separate thread?!
+				//--------------------------------------------------------------
+				// check: do we need a new balance certificate for the account?
+				/// TODO: Make the numbers vvv configurable
+				if( (( (pAccInfo->transferredBytes - pAccInfo->lastbalTransferredBytes) >=
 					((pAccInfo->lastbalDeposit - pAccInfo->lastbalSpent) / 33))&&
 					((pAccInfo->transferredBytes - pAccInfo->lastbalTransferredBytes) >= 256*1024))
 					|| (pAccInfo->lastbalDeposit == 0))
-			{
-				if( (pAccInfo->authFlags & AUTH_SENT_BALANCE_REQUEST) )
-				{
-					if( (pAccInfo->authFlags & AUTH_SENT_SECOND_BALANCE_REQUEST))
 					{
-						if(now.tv_sec >= pAccInfo->lastRequestSeconds + REQUEST_TIMEOUT)
-						{
-							#ifdef DEBUG
-							CAMsg::printMsg( LOG_DEBUG, "Accounting instance: User refused "
-																"to send balance cert (request Timeout).\n",
-																pAccInfo->accountNumber, pHashEntry->peerIP[ 0 ], pHashEntry->peerIP[ 1 ],
-																pHashEntry->peerIP[ 2 ], pHashEntry->peerIP[ 3 ] );
-							#endif
-							m_pIPBlockList->insertIP( pHashEntry->peerIP );
-							CAXMLErrorMessage msg(CAXMLErrorMessage::ERR_NO_BALANCE);
-							DOM_Document doc;
-							msg.toXmlDocument(doc);
-							pAccInfo->pControlChannel->sendXMLMessage(doc);
-							pAccInfo->authFlags |= AUTH_FATAL_ERROR;
-							m_Mutex.unlock();
-							return 3;
-						}
-						else
-						{
-							m_Mutex.unlock();
-							return 1;
-						}
-					}
-					else if(now.tv_sec >= pAccInfo->lastRequestSeconds + REQUEST_TIMEOUT)
-					{
-						// send a reminder...
-						// TODO adjust "newerThan" value
+						if( (pAccInfo->authFlags & AUTH_SENT_BALANCE_REQUEST) )
+							{
+								if( (pAccInfo->authFlags & AUTH_SENT_SECOND_BALANCE_REQUEST))
+									{
+										time_t theTime=time(NULL);
+										if(theTime >= pAccInfo->lastRequestSeconds + REQUEST_TIMEOUT)
+											{
+												#ifdef DEBUG
+													CAMsg::printMsg( LOG_DEBUG, "Accounting instance: User refused "
+																											"to send balance cert (request Timeout).\n",
+																											pAccInfo->accountNumber, pHashEntry->peerIP[ 0 ], pHashEntry->peerIP[ 1 ],
+																											pHashEntry->peerIP[ 2 ], pHashEntry->peerIP[ 3 ] );
+												#endif
+												ms_pInstance->m_pIPBlockList->insertIP( pHashEntry->peerIP );
+												CAXMLErrorMessage msg(CAXMLErrorMessage::ERR_NO_BALANCE);
+												DOM_Document doc;
+												msg.toXmlDocument(doc);
+												pAccInfo->pControlChannel->sendXMLMessage(doc);
+												pAccInfo->authFlags |= AUTH_FATAL_ERROR;
+												ms_pInstance->m_Mutex.unlock();
+												return 3;
+											}
+										ms_pInstance->m_Mutex.unlock();
+										return 1;
+									}
+								time_t theTime=time(NULL);
+								if(theTime >= pAccInfo->lastRequestSeconds + REQUEST_TIMEOUT)
+									{
+										// send a reminder...
+										// TODO adjust "newerThan" value
+										DOM_Document doc;
+										#ifdef DEBUG
+											CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending REMINDER balance request.\n");
+										#endif
+										CAAccountingInstance::makeBalanceRequest((SINT32)theTime-600, doc);
+										pAccInfo->reqbalMinSeconds = theTime - 600;
+										pAccInfo->pControlChannel->sendXMLMessage(doc);
+										pAccInfo->authFlags |= AUTH_SENT_SECOND_BALANCE_REQUEST;
+										pAccInfo->lastRequestSeconds = theTime;
+										ms_pInstance->m_Mutex.unlock();
+										return 1;
+									}
+								ms_pInstance->m_Mutex.unlock();
+								return 1;
+							}
+						// send a first CC request
 						DOM_Document doc;
+						time_t theTime=time(NULL);
+						CAAccountingInstance::makeBalanceRequest(theTime-600, doc);
 						#ifdef DEBUG
-						CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending REMINDER balance request.\n");
+							CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending balance request.\n");
 						#endif
-						makeBalanceRequest((SINT32)now.tv_sec-600, doc);
-						pAccInfo->reqbalMinSeconds = now.tv_sec - 600;
+						pAccInfo->reqbalMinSeconds = theTime - 600;
 						pAccInfo->pControlChannel->sendXMLMessage(doc);
-						pAccInfo->authFlags |= AUTH_SENT_SECOND_BALANCE_REQUEST;
-						pAccInfo->lastRequestSeconds = now.tv_sec;
-						m_Mutex.unlock();
+						pAccInfo->authFlags |= AUTH_SENT_BALANCE_REQUEST;
+						pAccInfo->lastRequestSeconds = theTime;
+						ms_pInstance->m_Mutex.unlock();
 						return 1;
 					}
-					else
-					{
-						m_Mutex.unlock();
-						return 1;
-					}
-				}
-				else
-				{
-					// send a first CC request
-					DOM_Document doc;
-					makeBalanceRequest(now.tv_sec-600, doc);
-					#ifdef DEBUG
-					CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending balance request.\n");
-					#endif
-					pAccInfo->reqbalMinSeconds = now.tv_sec - 600;
-					pAccInfo->pControlChannel->sendXMLMessage(doc);
-					pAccInfo->authFlags |= AUTH_SENT_BALANCE_REQUEST;
-					pAccInfo->lastRequestSeconds = now.tv_sec;
-					m_Mutex.unlock();
-					return 1;
-				}
-			}
-			else
-			{
-				// let the packet pass thru
-				m_Mutex.unlock();
+				//really everything is fine! let the packet pass thru
+				ms_pInstance->m_Mutex.unlock();
 				return 1;
 			}
-		}
-	}
-	else
-	{
 		//---------------------------------------------------------
 		// we have no accountcert from the user, let's request one
-		
 		if(pAccInfo->authFlags & AUTH_SENT_ACCOUNT_REQUEST)
-		{
-			if(pAccInfo->authFlags & AUTH_SENT_SECOND_ACCOUNT_REQUEST)
 			{
-				// just wait for answer
-				if(now.tv_sec >= pAccInfo->lastRequestSeconds + REQUEST_TIMEOUT)
-				{
-					// timeout
-					#ifdef DEBUG
-					CAMsg::printMsg( LOG_DEBUG, "Accounting instance: User refused "
-												"to send account certificate.(request timeout)\n");
-					#endif
-					CAXMLErrorMessage msg(CAXMLErrorMessage::ERR_NO_ACCOUNTCERT);
-					DOM_Document doc;
-					msg.toXmlDocument(doc);
-					pAccInfo->pControlChannel->sendXMLMessage(doc);
-					pAccInfo->authFlags |= AUTH_FATAL_ERROR;
-					m_Mutex.unlock();
-					return 2;
-				}
-				m_Mutex.unlock();
+				if(pAccInfo->authFlags & AUTH_SENT_SECOND_ACCOUNT_REQUEST)
+					{
+						// just wait for answer
+						time_t theTime=time(NULL);
+						if(theTime >= pAccInfo->lastRequestSeconds + REQUEST_TIMEOUT)
+							{
+								// timeout
+								#ifdef DEBUG
+									CAMsg::printMsg( LOG_DEBUG, "Accounting instance: User refused "
+																							"to send account certificate.(request timeout)\n");
+								#endif
+								CAXMLErrorMessage msg(CAXMLErrorMessage::ERR_NO_ACCOUNTCERT);
+								DOM_Document doc;
+								msg.toXmlDocument(doc);
+								pAccInfo->pControlChannel->sendXMLMessage(doc);
+								pAccInfo->authFlags |= AUTH_FATAL_ERROR;
+								ms_pInstance->m_Mutex.unlock();
+								return 2;
+							}
+						ms_pInstance->m_Mutex.unlock();
+						return 1;
+					}
+				time_t theTime=time(NULL);
+				if(theTime >= pAccInfo->lastRequestSeconds + REQUEST_TIMEOUT)
+					{
+						// send reminder
+						#ifdef DEBUG
+							CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending REMINDER account request.\n");
+						#endif
+						DOM_Document doc;
+						CAAccountingInstance::makeAccountRequest(doc);
+						pAccInfo->pControlChannel->sendXMLMessage(doc);
+						pAccInfo->authFlags |= AUTH_SENT_SECOND_ACCOUNT_REQUEST;
+						pAccInfo->lastRequestSeconds = theTime;
+					}
+				ms_pInstance->m_Mutex.unlock();
 				return 1;
 			}
-			if(now.tv_sec >= pAccInfo->lastRequestSeconds + REQUEST_TIMEOUT)
-			{
-				// send reminder
-				#ifdef DEBUG
-				CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending REMINDER account request.\n");
-				#endif
-				DOM_Document doc;
-				makeAccountRequest(doc);
-				pAccInfo->pControlChannel->sendXMLMessage(doc);
-				pAccInfo->authFlags |= AUTH_SENT_SECOND_ACCOUNT_REQUEST;
-				pAccInfo->lastRequestSeconds = now.tv_sec;
-			}
-			m_Mutex.unlock();
-			return 1;
-		}
-		else
-		{
-			// send first request
-			#ifdef DEBUG
+		// send first request
+		#ifdef DEBUG
 			CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending account request.\n");
-			#endif
-			DOM_Document doc;
-			makeAccountRequest(doc);
-			pAccInfo->pControlChannel->sendXMLMessage(doc);
-			pAccInfo->authFlags |= AUTH_SENT_ACCOUNT_REQUEST;
-			pAccInfo->lastRequestSeconds = now.tv_sec;
-			m_Mutex.unlock();
-			return 1;
-		}
+		#endif
+		time_t theTime=time(NULL);
+		DOM_Document doc;
+		CAAccountingInstance::makeAccountRequest(doc);
+		pAccInfo->pControlChannel->sendXMLMessage(doc);
+		pAccInfo->authFlags |= AUTH_SENT_ACCOUNT_REQUEST;
+		pAccInfo->lastRequestSeconds = theTime;
+		ms_pInstance->m_Mutex.unlock();
+		return 1;
 	}
-	CAMsg::printMsg(LOG_ERR, 
-			"Unknown error in CAAccountingInstance::handleJapPacket().... this should never happen!\n");
-	return 4;
-}
 
-
-/** TODO: maybe make this an own CAAbstractXMLEncodable subclass */
+/** @todo makt the faster by not using DOM!*/
 SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UINT64 transferredBytes, DOM_Document& doc)
-{
-	// create a DOM CostConfirmation document
-	doc = DOM_Document::createDocument();
-	DOM_Element elemRoot = doc.createElement("PayRequest");
-	elemRoot.setAttribute("version", "1.0");
-	doc.appendChild(elemRoot);
-	
-	DOM_Element elemCC = doc.createElement("CC");
-	elemCC.setAttribute("version", "1.0");
-	elemRoot.appendChild(elemCC);
-	
-	DOM_Element elemAiName = doc.createElement("AiID");
-	setDOMElementValue(elemAiName, m_AiName);
-	elemCC.appendChild(elemAiName);
-	
-	DOM_Element elemAccount = doc.createElement("AccountNumber");
-	setDOMElementValue(elemAccount, accountNumber);
-	elemCC.appendChild(elemAccount);
+	{
+		// create a DOM CostConfirmation document
+		doc = DOM_Document::createDocument();
+		DOM_Element elemRoot = doc.createElement("PayRequest");
+		elemRoot.setAttribute("version", "1.0");
+		doc.appendChild(elemRoot);
+		DOM_Element elemCC = doc.createElement("CC");
+		elemCC.setAttribute("version", "1.0");
+		elemRoot.appendChild(elemCC);
+		DOM_Element elemAiName = doc.createElement("AiID");
+		setDOMElementValue(elemAiName, ms_pInstance->m_AiName);
+		elemCC.appendChild(elemAiName);	
+		DOM_Element elemAccount = doc.createElement("AccountNumber");
+		setDOMElementValue(elemAccount, accountNumber);
+		elemCC.appendChild(elemAccount);
+		DOM_Element elemBytes = doc.createElement("TransferredBytes");
+		setDOMElementValue(elemBytes, transferredBytes);
+		elemCC.appendChild(elemBytes);
+		return E_SUCCESS;
+	}
 
-	DOM_Element elemBytes = doc.createElement("TransferredBytes");
-	setDOMElementValue(elemBytes, transferredBytes);
-	elemCC.appendChild(elemBytes);
-	
-	return E_SUCCESS;
-}
-
-/** TODO: maybe make this an own CAAbstractXMLEncodable subclass */
+/** @todo makt the faster by not using DOM!*/
 SINT32 CAAccountingInstance::makeBalanceRequest(const SINT32 seconds, DOM_Document &doc)
-{
-	UINT8 timeBuf[128];
-	UINT32 timeBufLen = 128;
-	
-	doc = DOM_Document::createDocument();
-	DOM_Element elemRoot = doc.createElement("PayRequest");
-	elemRoot.setAttribute("version", "1.0");
-	doc.appendChild(elemRoot);
-	DOM_Element elemAcc = doc.createElement("BalanceRequest");
-	elemRoot.appendChild(elemAcc);
-	DOM_Element elemDate = doc.createElement("NewerThan");
-	elemAcc.appendChild(elemDate);
-	formatJdbcTimestamp(seconds, timeBuf, timeBufLen);
-	setDOMElementValue(elemDate, timeBuf);
-	return E_SUCCESS;
-}
+	{
+		UINT8 timeBuf[128];
+		UINT32 timeBufLen = 128;
+		doc = DOM_Document::createDocument();
+		DOM_Element elemRoot = doc.createElement("PayRequest");
+		elemRoot.setAttribute("version", "1.0");
+		doc.appendChild(elemRoot);
+		DOM_Element elemAcc = doc.createElement("BalanceRequest");
+		elemRoot.appendChild(elemAcc);
+		DOM_Element elemDate = doc.createElement("NewerThan");
+		elemAcc.appendChild(elemDate);
+		formatJdbcTimestamp(seconds, timeBuf, timeBufLen);
+		setDOMElementValue(elemDate, timeBuf);
+		return E_SUCCESS;
+	}
 
-/** TODO: maybe make this an own CAAbstractXMLEncodable subclass */
+/** @todo makt the faster by not using DOM!*/
 SINT32 CAAccountingInstance::makeAccountRequest(DOM_Document &doc)
-{
-	doc = DOM_Document::createDocument();
-	DOM_Element elemRoot = doc.createElement("PayRequest");
-	elemRoot.setAttribute("version", "1.0");
-	doc.appendChild(elemRoot);
-	DOM_Element elemAcc = doc.createElement("AccountRequest");
-	elemRoot.appendChild(elemAcc);
-	return E_SUCCESS;
-}
-
-
+	{
+		doc = DOM_Document::createDocument();
+		DOM_Element elemRoot = doc.createElement("PayRequest");
+		elemRoot.setAttribute("version", "1.0");
+		doc.appendChild(elemRoot);
+		DOM_Element elemAcc = doc.createElement("AccountRequest");
+		elemRoot.appendChild(elemAcc);
+		return E_SUCCESS;
+	}
 
 /**
  * The Main Loop of the accounting instance thread.
  * Reads messages out of the queue and processes them
  */
 THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
-{
-	CAAccountingInstance * instance;
-	aiQueueItem item;
-	UINT32 itemSize;
-	instance = ( CAAccountingInstance * ) param;
-	CAMsg::printMsg( LOG_DEBUG, "AI Thread starting\n" );
+	{
+		CAAccountingInstance * instance;
+		aiQueueItem item;
+		UINT32 itemSize;
+		instance = ( CAAccountingInstance * ) param;
+		CAMsg::printMsg( LOG_DEBUG, "AI Thread starting\n" );
 
-	while ( instance->m_bThreadRunning )
-		{
-			itemSize = sizeof( aiQueueItem );
-			instance->m_pQueue->getOrWait( (UINT8*)&item, &itemSize );
-			instance->processJapMessage( item.pHashEntry, item.pDomDoc );
-			//delete item.domDoc; (??)
-		}
-		
-	return (THREAD_RETURN)0;
-}
+		while ( instance->m_bThreadRunning )
+			{
+				itemSize = sizeof( aiQueueItem );
+				instance->m_pQueue->getOrWait( (UINT8*)&item, &itemSize );
+				instance->processJapMessage( item.pHashEntry, item.pDomDoc );
+			}
+		THREAD_RETURN_SUCCESS;
+	}
 
 
 
@@ -490,50 +454,49 @@ THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
  * function
  */
 void CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,DOM_Document * pDomDoc)
-{
-	DOM_Element root = pDomDoc->getDocumentElement();
-	char * docElementName = root.getTagName().transcode();
+	{
+		DOM_Element root = pDomDoc->getDocumentElement();
+		char * docElementName = root.getTagName().transcode();
 
-	// what type of message is it?
-	if ( strcmp( docElementName, "AccountCertificate" ) == 0 )
-		{
-			#ifdef DEBUG
-				CAMsg::printMsg( LOG_DEBUG, "Received an AccountCertificate. Calling handleAccountCertificate()\n" );
-			#endif
-			handleAccountCertificate( pHashEntry, root );
-		}
-	else if ( strcmp( docElementName, "Response" ) == 0)
-		{
-			#ifdef DEBUG
-				CAMsg::printMsg( LOG_DEBUG, "Received a Response (challenge-response)\n");
-			#endif
-			handleChallengeResponse( pHashEntry, root );
-		}
-	else if ( strcmp( docElementName, "CC" ) == 0 )
-		{
-			#ifdef DEBUG
-				CAMsg::printMsg( LOG_DEBUG, "Received a CC. Calling handleCostConfirmation()\n" );
-			#endif
-			handleCostConfirmation( pHashEntry, root );
-		}
-	else if ( strcmp( docElementName, "Balance" ) == 0 )
-		{
-			#ifdef DEBUG
-				CAMsg::printMsg( LOG_DEBUG, "Received a BalanceCertificate. Calling handleBalanceCertificate()\n" );
-			#endif
-			handleBalanceCertificate( pHashEntry, root );
-		}
-	else
-		{
-			CAMsg::printMsg( 
-					LOG_ERR, 
-					"AI Received XML message with unknown root element \"%s\". Ignoring...\n",
-					docElementName 
-				);
-		}
-	delete pDomDoc;
-	delete [] docElementName;
-}
+		// what type of message is it?
+		if ( strcmp( docElementName, "AccountCertificate" ) == 0 )
+			{
+				#ifdef DEBUG
+					CAMsg::printMsg( LOG_DEBUG, "Received an AccountCertificate. Calling handleAccountCertificate()\n" );
+				#endif
+				handleAccountCertificate( pHashEntry, root );
+			}
+		else if ( strcmp( docElementName, "Response" ) == 0)
+			{
+				#ifdef DEBUG
+					CAMsg::printMsg( LOG_DEBUG, "Received a Response (challenge-response)\n");
+				#endif
+				handleChallengeResponse( pHashEntry, root );
+			}
+		else if ( strcmp( docElementName, "CC" ) == 0 )
+			{
+				#ifdef DEBUG
+					CAMsg::printMsg( LOG_DEBUG, "Received a CC. Calling handleCostConfirmation()\n" );
+				#endif
+				handleCostConfirmation( pHashEntry, root );
+			}
+		else if ( strcmp( docElementName, "Balance" ) == 0 )
+			{
+				#ifdef DEBUG
+					CAMsg::printMsg( LOG_DEBUG, "Received a BalanceCertificate. Calling handleBalanceCertificate()\n" );
+				#endif
+				handleBalanceCertificate( pHashEntry, root );
+			}
+		else
+			{
+				CAMsg::printMsg( LOG_ERR, 
+													"AI Received XML message with unknown root element \"%s\". Ignoring...\n",
+														docElementName 
+												);
+			}
+		delete pDomDoc;
+		delete [] docElementName;
+	}
 
 
 /**
@@ -699,7 +662,7 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 	//m_Mutex.lock();
 	// check signature
 	CASignature * sigTester = pHashEntry->pAccountingInfo->pPublicKey;
-		#pragma message Signature verifying must be implemented here !!!!!!!!!!
+		#pragma message (__FILE__ "(665) Signature verifying must be implemented here !!!!!!!!!! ")
 	//sigTester->decodeRS( decodeBuffer, decodeBufferLen, pDsaSig );
 	/// TODO: Really do signature checking here...
 /*	if ( sigTester->verifyDER( pHashEntry->pAccountingInfo->pChallenge, 222, decodeBuffer, decodeBufferLen ) 
@@ -957,11 +920,11 @@ void CAAccountingInstance::handleBalanceCertificate(fmHashTableEntry *pHashEntry
  * data structures
  */
 SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
-{
-	pHashEntry->pAccountingInfo = new aiAccountingInfo;
-	memset( pHashEntry->pAccountingInfo, 0, sizeof( aiAccountingInfo ) );
-	return E_SUCCESS;
-}
+	{
+		pHashEntry->pAccountingInfo = new aiAccountingInfo;
+		memset( pHashEntry->pAccountingInfo, 0, sizeof( aiAccountingInfo ) );
+		return E_SUCCESS;
+	}
 
 
 
@@ -971,23 +934,23 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
  * @todo rewrite
  */
 SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
-{
-	aiAccountingInfo * pAccInfo;
-	if ( pHashEntry->pAccountingInfo != 0 )
-		{
-			pAccInfo = pHashEntry->pAccountingInfo;
-			if ( pAccInfo->pPublicKey )
-				{
-					delete pAccInfo->pPublicKey;
-				}
-			if ( pAccInfo->pChallenge )
-				{
-					delete [] pAccInfo->pChallenge;
-				}
-			delete pHashEntry->pAccountingInfo;
-		}
-	return E_SUCCESS;
-}
+	{
+		aiAccountingInfo * pAccInfo;
+		if ( pHashEntry->pAccountingInfo != NULL)
+			{
+				pAccInfo = pHashEntry->pAccountingInfo;
+				if ( pAccInfo->pPublicKey!=NULL )
+					{
+						delete pAccInfo->pPublicKey;
+					}
+				if ( pAccInfo->pChallenge!=NULL )
+					{
+						delete [] pAccInfo->pChallenge;
+					}
+				delete pHashEntry->pAccountingInfo;
+			}
+		return E_SUCCESS;
+	}
 
 
 
