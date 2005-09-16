@@ -56,6 +56,7 @@ class CAQueue
 			CAQueue(UINT32 expectedElementSize=0)
 				{
 					m_Queue=NULL;
+					m_lastElem=NULL;
 					m_nExpectedElementSize=expectedElementSize;
 					m_nQueueSize=0;
 					m_pcsQueue=new CAMutex();
@@ -70,6 +71,7 @@ class CAQueue
 			SINT32 getOrWait(UINT8* pbuff,UINT32* psize,UINT32 msTimeOut);
 			SINT32 peek(UINT8* pbuff,UINT32* psize);
 			SINT32 remove(UINT32* psize);
+			SINT32 clean();
 			
 			/** Returns the size of stored data in byte.
 				* @return size of Queue

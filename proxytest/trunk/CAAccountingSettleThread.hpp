@@ -32,9 +32,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAThread.hpp"
 
 struct t_aiSettleItem
-{
-	DOM_Document doc;
-};
+	{
+		DOM_Document doc;
+	};
+
 typedef struct t_aiSettleItem aiSettleItem;
 
 
@@ -45,15 +46,14 @@ typedef struct t_aiSettleItem aiSettleItem;
  * @todo make SLEEP_SECONDS a configure option
  */
 class CAAccountingSettleThread
-{
-public:
-	CAAccountingSettleThread();
-	~CAAccountingSettleThread();
+	{
+		public:
+			CAAccountingSettleThread();
+			~CAAccountingSettleThread();
 	
-private:
-	static THREAD_RETURN CAAccountingSettleThread::mainLoop(void * param);
-	
-	CAThread * m_pThread;
-};
-
+		private:
+			static THREAD_RETURN mainLoop(void * param);
+			CAThread* m_pThread;
+			volatile bool m_bRun;
+	};
 #endif

@@ -53,10 +53,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 
 struct t_aiqueueitem
-{
-	DOM_Document * pDomDoc;
-	fmHashTableEntry * pHashEntry;
-};
+	{
+		DOM_Document*				pDomDoc;
+		fmHashTableEntry*		pHashEntry;
+	};
 typedef struct t_aiqueueitem aiQueueItem;
 
 extern CACmdLnOptions options;
@@ -72,39 +72,38 @@ extern CACmdLnOptions options;
  */
 class CAAccountingInstance
 {
-	friend class CAAccountingControlChannel;
-
 public:
 
 	/**
 	 * Returns a reference to the Singleton instance
 	 */
-	static inline CAAccountingInstance *getInstance()
+	static SINT32 init()
 		{
-			if(ms_pInstance!=NULL)
-				{
-					return ms_pInstance;
-				}
-			else
-				{
-					ms_pInstance = new CAAccountingInstance();
-					return ms_pInstance;
-				}
+				ms_pInstance = new CAAccountingInstance();
+				return E_SUCCESS;
 		}
 		
+	static SINT32 clean()
+		{
+			delete ms_pInstance;
+			ms_pInstance=NULL;
+			return E_SUCCESS;
+		}
 
 	/**
 	 * This should always be called when closing a JAP connection
 	 * to cleanup the data structures
 	 */
-	SINT32 cleanupTableEntry(fmHashTableEntry * pHashEntry);
-	
-	SINT32 initTableEntry(fmHashTableEntry * pHashEntry);
-
+	static SINT32 cleanupTableEntry(fmHashTableEntry * pHashEntry);	
+	static SINT32 initTableEntry(fmHashTableEntry * pHashEntry);
+	static SINT32 queueItem(aiQueueItem* pItem)
+		{
+			return ms_pInstance->m_pQueue->add(pItem,sizeof(aiQueueItem));
+		}
 	/**
 	 * This should be called by the FirstMix for every incoming Jap packet
 	 */
-	SINT32 handleJapPacket( MIXPACKET *packet, fmHashTableEntry *pHashEntry );
+	static SINT32 handleJapPacket(fmHashTableEntry *pHashEntry );
 
 	/**
 	 * Check if an IP address is temporarily blocked by the accounting instance.
@@ -112,9 +111,9 @@ public:
 	 * @retval 1 if the given IP is blocked
 	 * @retval 0 if it is not blocked
 	 */
-	inline SINT32 isIPAddressBlocked(const UINT8 ip[4])
+	static SINT32 isIPAddressBlocked(const UINT8 ip[4])
 		{
-			return m_pIPBlockList->checkIP(ip); 
+			return ms_pInstance->m_pIPBlockList->checkIP(ip); 
 		}
 	
 
@@ -154,9 +153,9 @@ private:
 	void handleChallengeResponse(fmHashTableEntry *pHashEntry, const DOM_Element &root);
 
 				
-	SINT32 makeCCRequest( const UINT64 accountNumber, const UINT64 transferredBytes, DOM_Document& doc);
-	SINT32 makeBalanceRequest(const SINT32 seconds, DOM_Document &doc);
-	SINT32 makeAccountRequest(DOM_Document &doc);
+	static SINT32 makeCCRequest( const UINT64 accountNumber, const UINT64 transferredBytes, DOM_Document& doc);
+	static SINT32 makeBalanceRequest(const SINT32 seconds, DOM_Document &doc);
+	static SINT32 makeAccountRequest(DOM_Document &doc);
 	
 	
 	/**

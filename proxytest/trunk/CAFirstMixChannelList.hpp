@@ -37,7 +37,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include "CAThread.hpp"
 #endif	
 #ifdef PAYMENT
-//#include "CAAccountingInstance.hpp"
 
 /**
  * These flags are used to represent the state
@@ -150,7 +149,7 @@ struct t_fmhashtableentry
 			UINT64				id;
 #endif
 #ifdef PAYMENT
-	aiAccountingInfo * pAccountingInfo;
+			aiAccountingInfo * pAccountingInfo;
 #endif
 			CASymCipher*  pSymCipher;
 			UINT8					peerIP[4]; //needed for flooding control

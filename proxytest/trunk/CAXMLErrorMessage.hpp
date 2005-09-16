@@ -39,52 +39,56 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
  * @author Bastian Voigt
  */
 class CAXMLErrorMessage : public CAAbstractXMLEncodable
-{
-public:
-	/**
-	 * Creates an errorMessage object. The errorcode should be one of the
-	 * above ERR_* constants.
-	 * @param errorCode UINT32 one of the above constants
-	 * @param message String a human-readable description of the error
-	 */
-	CAXMLErrorMessage(const UINT32 errorCode, UINT8 * message);
+	{
+		public:
+			/**
+			* Creates an errorMessage object. The errorcode should be one of the
+			* above ERR_* constants.
+			* @param errorCode UINT32 one of the above constants
+			* @param message String a human-readable description of the error
+			*/
+			CAXMLErrorMessage(const UINT32 errorCode, UINT8 * message);
 
-	/**
-	 * Uses a default description String
-	 * @param errorCode UINT32
-	 */
-	CAXMLErrorMessage(UINT32 errorCode);
-	
-	/**
-	 * Parses the string XML representation
-	 */
-	CAXMLErrorMessage(UINT8 * strXmlData);
-	
+			/**
+			* Uses a default description String
+			* @param errorCode UINT32
+			*/
+			CAXMLErrorMessage(UINT32 errorCode);
+		
+			/**
+			* Parses the string XML representation
+			*/
+			CAXMLErrorMessage(UINT8 * strXmlData);
+		
+			~CAXMLErrorMessage();
+			
+			SINT32 toXmlElement(DOM_Document &a_doc, DOM_Element &elemRoot);
+			UINT32 getErrorCode() 
+				{
+					return m_iErrorCode;
+				}
+			
+			UINT8* getDescription()
+				{
+					return m_strErrMsg;
+				}
 
-	~CAXMLErrorMessage();
-	SINT32 toXmlElement(DOM_Document &a_doc, DOM_Element &elemRoot);
-	
-	UINT32 getErrorCode() {return m_iErrorCode;}
-	UINT8* getDescription() {return m_strErrMsg;}
+			static const UINT32 ERR_OK = 0;
+			static const UINT32 ERR_INTERNAL_SERVER_ERROR = 1;
+			static const UINT32 ERR_WRONG_FORMAT = 2;
+			static const UINT32 ERR_WRONG_DATA = 3;
+			static const UINT32 ERR_KEY_NOT_FOUND = 4;
+			static const UINT32 ERR_BAD_SIGNATURE = 5;
+			static const UINT32 ERR_BAD_REQUEST = 6;
+			static const UINT32 ERR_NO_ACCOUNTCERT = 7;
+			static const UINT32 ERR_NO_BALANCE = 8;
+			static const UINT32 ERR_NO_CONFIRMATION = 9;
+			static const UINT32 ERR_ACCOUNT_EMPTY = 10;
 
-	static const UINT32 ERR_OK = 0;
-	static const UINT32 ERR_INTERNAL_SERVER_ERROR = 1;
-	static const UINT32 ERR_WRONG_FORMAT = 2;
-	static const UINT32 ERR_WRONG_DATA = 3;
-	static const UINT32 ERR_KEY_NOT_FOUND = 4;
-	static const UINT32 ERR_BAD_SIGNATURE = 5;
-	static const UINT32 ERR_BAD_REQUEST = 6;
-	static const UINT32 ERR_NO_ACCOUNTCERT = 7;
-	static const UINT32 ERR_NO_BALANCE = 8;
-	static const UINT32 ERR_NO_CONFIRMATION = 9;
-	static const UINT32 ERR_ACCOUNT_EMPTY = 10;
-
-private: 
-
-	SINT32 setValues(DOM_Element &elemRoot);
-	
-	UINT32 m_iErrorCode;
-	UINT8 * m_strErrMsg;
-};
+		private: 
+			SINT32 setValues(DOM_Element &elemRoot);
+			UINT32 m_iErrorCode;
+			UINT8 * m_strErrMsg;
+	};
 
 #endif

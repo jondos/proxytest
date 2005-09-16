@@ -65,6 +65,14 @@ CACmdLnOptions::CACmdLnOptions()
 		m_bIsEncryptedLogEnabled=false;
 		m_pcsReConfigure=new CAMutex();
 		m_strPidFile=NULL;
+#ifdef PAYMENT
+		m_pBI=NULL;
+		m_strDatabaseHost=NULL;
+		m_strDatabaseName=NULL;
+		m_strDatabaseUser=NULL;
+		m_strDatabasePassword=NULL;
+		m_strAiID=NULL;
+#endif
  }
 
 CACmdLnOptions::~CACmdLnOptions()
@@ -671,75 +679,75 @@ SINT32 CACmdLnOptions::getSOCKSHost(UINT8* host,UINT32 len)
   }
 
 #ifdef PAYMENT
-CAXMLBI * CACmdLnOptions::getBI()
-			{
+CAXMLBI* CACmdLnOptions::getBI()
+	{
 		return m_pBI;
-			}
+	}
 
 SINT32 CACmdLnOptions::getDatabaseHost(UINT8 * host, UINT32 len)
-{
-	if(m_strDatabaseHost==NULL)
+	{
+		if(m_strDatabaseHost==NULL)
 			return E_UNKNOWN;
-	if(len<=(UINT32)strlen((char *)m_strDatabaseHost))
+		if(len<=(UINT32)strlen((char *)m_strDatabaseHost))
 			{
 				return E_UNKNOWN;
 			}
-	strcpy((char*)host,(char *)m_strDatabaseHost);
-	return (SINT32)strlen((char *)m_strDatabaseHost);	
+		strcpy((char*)host,(char *)m_strDatabaseHost);
+		return E_SUCCESS;	
 }
 
 UINT16 CACmdLnOptions::getDatabasePort()
-{
-	return m_iDatabasePort;
-}
+	{
+		return m_iDatabasePort;
+	}
 
 SINT32 CACmdLnOptions::getDatabaseName(UINT8 * name, UINT32 len)
-{
-	if(m_strDatabaseName==NULL)
+	{
+		if(m_strDatabaseName==NULL)
 			return E_UNKNOWN;
-	if(len<=(UINT32)strlen((char *)m_strDatabaseName))
+		if(len<=(UINT32)strlen((char *)m_strDatabaseName))
 			{
 				return E_UNKNOWN;
 			}
-	strcpy((char*)name,(char *)m_strDatabaseName);
-	return (SINT32)strlen((char *)m_strDatabaseName);	
-}
+		strcpy((char*)name,(char *)m_strDatabaseName);
+		return E_SUCCESS;	
+	}
 
 SINT32 CACmdLnOptions::getDatabaseUsername(UINT8 * user, UINT32 len)
-{
-	if(m_strDatabaseUser==NULL)
+	{
+		if(m_strDatabaseUser==NULL)
 			return E_UNKNOWN;
-	if(len<=(UINT32)strlen((char *)m_strDatabaseUser))
+		if(len<=(UINT32)strlen((char *)m_strDatabaseUser))
 			{
 				return E_UNKNOWN;
 			}
-	strcpy((char*)user,(char *)m_strDatabaseUser);
-	return (SINT32)strlen((char *)m_strDatabaseUser);	
-}
+		strcpy((char*)user,(char *)m_strDatabaseUser);
+		return E_SUCCESS;	
+	}
 
 SINT32 CACmdLnOptions::getDatabasePassword(UINT8 * pass, UINT32 len)
-{
-	if(m_strDatabasePassword==NULL)
+	{
+		if(m_strDatabasePassword==NULL)
 			return E_UNKNOWN;
-	if(len<=(UINT32)strlen((char *)m_strDatabasePassword))
+		if(len<=(UINT32)strlen((char *)m_strDatabasePassword))
 			{
 				return E_UNKNOWN;
 			}
-	strcpy((char*)pass,(char *)m_strDatabasePassword);
-	return (SINT32)strlen((char *)m_strDatabasePassword);	
-}
+		strcpy((char*)pass,(char *)m_strDatabasePassword);
+		return E_SUCCESS;	
+	}
 
 SINT32 CACmdLnOptions::getAiID(UINT8 * id, UINT32 len)
-{
-	if(m_strAiID==NULL)
+	{
+		if(m_strAiID==NULL)
 			return E_UNKNOWN;
-	if(len<=(UINT32)strlen((char *)m_strAiID))
+		if(len<=(UINT32)strlen((char *)m_strAiID))
 			{
 				return E_UNKNOWN;
 			}
-	strcpy((char*)id,(char *)m_strAiID);
-	return (SINT32)strlen((char *)m_strAiID);
-}
+		strcpy((char*)id,(char *)m_strAiID);
+		return E_SUCCESS;
+	}
 
 SINT32 CACmdLnOptions::getPaymentHardLimit(UINT32 *pHardLimit)
 	{
@@ -1057,77 +1065,78 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 
 		DOM_Element elemAccounting;
 		getDOMChildByName(elemRoot,(UINT8*)"Accounting",elemAccounting,false);
-		if(elemAccounting != NULL) {
-			DOM_Element elemJPI;
-			CAXMLBI * pBI=0;
-			getDOMChildByName(elemAccounting, CAXMLBI::getXMLElementName(), elemJPI, false);
-			if(elemJPI!=NULL)
-				pBI = new CAXMLBI(elemJPI);
-			if(pBI)
-				m_pBI = pBI;
-			else
-				m_pBI = 0;
-			
-		
-			getDOMChildByName(elemAccounting, (UINT8*)"SoftLimit", elem, false);
-			if(getDOMElementValue(elem, &tmp)==E_SUCCESS)
+		if(elemAccounting != NULL) 
 			{
-				m_iPaymentSoftLimit = tmp;
-				}
-				
-			getDOMChildByName(elemAccounting, (UINT8*)"HardLimit", elem, false);
-			if(getDOMElementValue(elem, &tmp)==E_SUCCESS)
-			{
-				m_iPaymentHardLimit = tmp;
-			}
-			getDOMChildByName(elemAccounting, (UINT8*)"SettleInterval", elem, false);
-			if(getDOMElementValue(elem, &tmp)==E_SUCCESS)
-			{
-				m_iPaymentSettleInterval = tmp;
-				}
-			
-			// get DB Username
-			getDOMChildByName(elemAccounting, (UINT8*)"AiID", elem, false);
-			tmpLen = 255;
-			if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) {
-				strtrim(tmpBuff);
-				m_strAiID = new UINT8[strlen((char*)tmpBuff)+1];
-				strcpy((char *)m_strAiID, (char *) tmpBuff);
-			}
-
-			
-			DOM_Element elemDatabase;
-			getDOMChildByName(elemAccounting, (UINT8*)"Database", elemDatabase, false);
-			if(elemDatabase != NULL) {
-				// get DB Hostname
-				getDOMChildByName(elemDatabase, (UINT8*)"Host", elem, false);
-				tmpLen = 255;
-				if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) {
-					strtrim(tmpBuff);
-					m_strDatabaseHost = new UINT8[strlen((char*)tmpBuff)+1];
-					strcpy((char *)m_strDatabaseHost, (char *) tmpBuff);
-				}
-				// get Database Port
-				getDOMChildByName(elemDatabase, (UINT8*)"Port", elem, false);
-				if(getDOMElementValue(elem, &tmp)==E_SUCCESS) {
-					m_iDatabasePort = tmp;
-				}
-				// get DB Name
-				getDOMChildByName(elemDatabase, (UINT8*)"DBName", elem, false);
-				tmpLen = 255;
-				if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) {
-					strtrim(tmpBuff);
-					m_strDatabaseName = new UINT8[strlen((char*)tmpBuff)+1];
-					strcpy((char *)m_strDatabaseName, (char *) tmpBuff);
-				}
+				DOM_Element elemJPI;
+				CAXMLBI* pBI=NULL;
+				getDOMChildByName(elemAccounting, CAXMLBI::getXMLElementName(), elemJPI, false);
+				if(elemJPI!=NULL)
+					pBI = new CAXMLBI(elemJPI);
+				if(pBI!=NULL)
+					m_pBI = pBI;
+				else
+					m_pBI = NULL;
+				getDOMChildByName(elemAccounting, (UINT8*)"SoftLimit", elem, false);
+				if(getDOMElementValue(elem, &tmp)==E_SUCCESS)
+					{
+						m_iPaymentSoftLimit = tmp;
+					}
+				getDOMChildByName(elemAccounting, (UINT8*)"HardLimit", elem, false);
+				if(getDOMElementValue(elem, &tmp)==E_SUCCESS)
+					{
+						m_iPaymentHardLimit = tmp;
+					}
+				getDOMChildByName(elemAccounting, (UINT8*)"SettleInterval", elem, false);
+				if(getDOMElementValue(elem, &tmp)==E_SUCCESS)
+					{
+						m_iPaymentSettleInterval = tmp;
+					}
 				// get DB Username
-				getDOMChildByName(elemDatabase, (UINT8*)"Username", elem, false);
+				getDOMChildByName(elemAccounting, (UINT8*)"AiID", elem, false);
 				tmpLen = 255;
-				if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) {
-					strtrim(tmpBuff);
-					m_strDatabaseUser = new UINT8[strlen((char*)tmpBuff)+1];
-					strcpy((char *)m_strDatabaseUser, (char *) tmpBuff);
-				}
+				if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) 
+					{
+						strtrim(tmpBuff);
+						m_strAiID = new UINT8[strlen((char*)tmpBuff)+1];
+						strcpy((char *)m_strAiID, (char *) tmpBuff);
+					}
+				DOM_Element elemDatabase;
+				getDOMChildByName(elemAccounting, (UINT8*)"Database", elemDatabase, false);
+				if(elemDatabase != NULL) 
+					{
+						// get DB Hostname
+						getDOMChildByName(elemDatabase, (UINT8*)"Host", elem, false);
+						tmpLen = 255;
+						if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) 
+							{
+								strtrim(tmpBuff);
+								m_strDatabaseHost = new UINT8[strlen((char*)tmpBuff)+1];
+								strcpy((char *)m_strDatabaseHost, (char *) tmpBuff);
+							}
+						// get Database Port
+						getDOMChildByName(elemDatabase, (UINT8*)"Port", elem, false);
+						if(getDOMElementValue(elem, &tmp)==E_SUCCESS) 
+							{
+								m_iDatabasePort = tmp;
+							}
+						// get DB Name
+						getDOMChildByName(elemDatabase, (UINT8*)"DBName", elem, false);
+						tmpLen = 255;
+						if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) 
+							{
+								strtrim(tmpBuff);
+								m_strDatabaseName = new UINT8[strlen((char*)tmpBuff)+1];
+								strcpy((char *)m_strDatabaseName, (char *) tmpBuff);
+							}
+						// get DB Username
+						getDOMChildByName(elemDatabase, (UINT8*)"Username", elem, false);
+						tmpLen = 255;
+						if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) 
+							{
+								strtrim(tmpBuff);
+								m_strDatabaseUser = new UINT8[strlen((char*)tmpBuff)+1];
+								strcpy((char *)m_strDatabaseUser, (char *) tmpBuff);
+							}
 /*				getDOMChildByName(elemDatabase, (UINT8*)"Password", elem, false);
 				tmpLen = 255;
 				if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) {
@@ -1136,26 +1145,27 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 					strcpy(m_strDatabasePassword, (char *) tmpBuff);
 				}*/
 				// don't read password from XML but from stdin:
-				UINT8 dbpass[500];
-				dbpass[0]=0;
-				printf("Please enter password for postgresql user %s at %s: ",m_strDatabaseUser, m_strDatabaseHost);
-				scanf("%400[^\n]%*1[\n]",(char*)dbpass); 
-				int len = strlen((char *)dbpass);
-				if(len>0) 
-				{
-					m_strDatabasePassword = new UINT8[len+1];
-					strcpy((char *)m_strDatabasePassword, (char *)dbpass);
+						UINT8 dbpass[500];
+						dbpass[0]=0;
+						printf("Please enter password for postgresql user %s at %s: ",m_strDatabaseUser, m_strDatabaseHost);
+						scanf("%400[^\n]%*1[\n]",(char*)dbpass); 
+						int len = strlen((char *)dbpass);
+						if(len>0) 
+							{
+								m_strDatabasePassword = new UINT8[len+1];
+								strcpy((char *)m_strDatabasePassword, (char *)dbpass);
+							}
+						else
+							{
+								m_strDatabasePassword = new UINT8[1];
+								m_strDatabasePassword[0] = '\0';
+							}	
 				}
-				else
-				{
-					m_strDatabasePassword = new UINT8[1];
-					m_strDatabasePassword[0] = '\0';
-				}	
+		}
+		else 
+			{
+				CAMsg::printMsg( 17, "No accounting instance info found in configfile. Payment will not work!\n");
 			}
-		}
-		else {
-			CAMsg::printMsg( 17, "No accounting instance info found in configfile. Payment will not work!");
-		}
 
 #endif /* ifdef PAYMENT */
 

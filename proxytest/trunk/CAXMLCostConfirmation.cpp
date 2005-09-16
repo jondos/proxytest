@@ -49,54 +49,54 @@ UINT8 * CAXMLCostConfirmation::getXMLElementName()
 }
 
 CAXMLCostConfirmation::~CAXMLCostConfirmation()
-{
-	if(m_pStrAiName)
-		delete[] m_pStrAiName;
-}
+	{
+		if(m_pStrAiName!=NULL)
+			delete[] m_pStrAiName;
+	}
 
 
 SINT32 CAXMLCostConfirmation::setValues(DOM_Element &elemRoot)
-{
-	DOM_Element elem; 
-	UINT8 strGeneral[128];
-	UINT32 strGeneralLen = 128;
-	
-	char * strTagname = elemRoot.getTagName().transcode();
-	if( (strcmp((char *)strTagname, (char *)getXMLElementName())!=0) )
 	{
+		DOM_Element elem; 
+		UINT8 strGeneral[128];
+		UINT32 strGeneralLen = 128;
+	
+		char * strTagname = elemRoot.getTagName().transcode();
+		if( (strcmp((char *)strTagname, (char *)getXMLElementName())!=0) )
+			{
+				delete[] strTagname;
+				return E_UNKNOWN;
+			}
 		delete[] strTagname;
-		return E_UNKNOWN;
-	}
-	delete[] strTagname;
 	
-	// parse AI Name
-	getDOMChildByName(elemRoot, (UINT8*)"AiID", elem, false);
-	getDOMElementValue(elem, strGeneral, &strGeneralLen);
-	if(m_pStrAiName) delete[] m_pStrAiName;
-	m_pStrAiName = new UINT8[strGeneralLen+1];
-	strcpy((char*)m_pStrAiName, (char*)strGeneral);
+		// parse AI Name
+		getDOMChildByName(elemRoot, (UINT8*)"AiID", elem, false);
+		getDOMElementValue(elem, strGeneral, &strGeneralLen);
+		if(m_pStrAiName!=NULL) 
+			delete[] m_pStrAiName;
+		m_pStrAiName = new UINT8[strGeneralLen+1];
+		strcpy((char*)m_pStrAiName, (char*)strGeneral);
 	
-	// parse accountnumber
-	getDOMChildByName(elemRoot, (UINT8*)"AccountNumber", elem, false);
-	getDOMElementValue(elem, m_lAccountNumber);
+		// parse accountnumber
+		getDOMChildByName(elemRoot, (UINT8*)"AccountNumber", elem, false);
+		getDOMElementValue(elem, m_lAccountNumber);
 	
-	// parse transferredBytes
-	getDOMChildByName(elemRoot, (UINT8*)"TransferredBytes", elem, false);
-	getDOMElementValue(elem, m_lTransferredBytes);
+		// parse transferredBytes
+		getDOMChildByName(elemRoot, (UINT8*)"TransferredBytes", elem, false);
+		getDOMElementValue(elem, m_lTransferredBytes);
 	
 	// parse signature
-	getDOMChildByName(elemRoot, (UINT8*)"Signature", elem, false);
-	if(elem.isNull())
-	{
-		CAMsg::printMsg(LOG_DEBUG, "CAXMLCostConfirmation::setValues(): not signed!!!");
+		getDOMChildByName(elemRoot, (UINT8*)"Signature", elem, false);
+		if(elem.isNull())
+			{
+				CAMsg::printMsg(LOG_DEBUG, "CAXMLCostConfirmation::setValues(): not signed!!!\n");
+			}
+		else
+			{
+				setSignature(elem);
+			}
+		return E_SUCCESS;
 	}
-	else
-	{
-		setSignature(elem);
-	}
-
-	return E_SUCCESS;
-}
 
 
 SINT32 CAXMLCostConfirmation::toXmlElement(DOM_Document &a_doc, DOM_Element &elemRoot)

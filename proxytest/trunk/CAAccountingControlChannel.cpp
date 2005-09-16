@@ -30,30 +30,25 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef PAYMENT
 #include "CAAccountingControlChannel.hpp"
 
-CAAccountingInstance * CAAccountingControlChannel::ms_pAccountingInstance=NULL;
-
-
 /**
  Creates a new accounting controlchannel and stores a pointer to this
  in the pHashEntry.
 */
 CAAccountingControlChannel::CAAccountingControlChannel(fmHashTableEntry * pHashEntry)
  : CASyncControlChannel(ACCOUNT_CONTROL_CHANNEL_ID, true)
-{
-	m_pHashEntry = pHashEntry;
-	if(!ms_pAccountingInstance)
-		ms_pAccountingInstance = CAAccountingInstance::getInstance();
-	ms_pAccountingInstance->initTableEntry(pHashEntry);
-	pHashEntry->pAccountingInfo->pControlChannel = this;
-}
+	{
+		m_pHashEntry = pHashEntry;
+		CAAccountingInstance::initTableEntry(pHashEntry);
+		pHashEntry->pAccountingInfo->pControlChannel = this;
+	}
 
 
 CAAccountingControlChannel::~CAAccountingControlChannel()
-{
-	// todo cleanup hashtable entry
-	CAMsg::printMsg(LOG_DEBUG, "~CAAccountingControlChannel destructor");
-	ms_pAccountingInstance->cleanupTableEntry(m_pHashEntry);
-}
+	{
+		// todo cleanup hashtable entry
+		CAMsg::printMsg(LOG_DEBUG, "~CAAccountingControlChannel destructor\n");
+		CAAccountingInstance::cleanupTableEntry(m_pHashEntry);
+	}
 
 
 /**
@@ -61,36 +56,26 @@ CAAccountingControlChannel::~CAAccountingControlChannel()
 * will be processed asynchronously
 */
 SINT32 CAAccountingControlChannel::processXMLMessage(const DOM_Document &a_doc)
-{
-	aiQueueItem * pItem;
-	DOM_Document * pDoc;
-	DOM_Node root;
-	
-/*	#ifdef _DEBUG
-		UINT32 size=0; // dump message to logfile
-		UINT8 * pDump = DOM_Output::dumpToMem(a_doc, &size);
-		if(pDump != NULL)
-			{
-				CAMsg::printMsg(LOG_DEBUG, "Received ControlChannel msg: %s", pDump);
-				delete[] pDump;
-			}
-	#endif*/
-	
-	// it is necessary to clone the document here 
-	// because a_doc will be deleted after this function returns..
-	pDoc = new DOM_Document;
-	*pDoc = DOM_Document::createDocument();
-	root = a_doc.getFirstChild();
-	if(root == NULL)
 	{
-		return E_UNKNOWN;
-	}
-	pDoc->appendChild(pDoc->importNode(root, true));
+		aiQueueItem * pItem;
+		DOM_Document * pDoc;
+		DOM_Node root;
+		
+		// it is necessary to clone the document here 
+		// because a_doc will be deleted after this function returns..
+		pDoc = new DOM_Document;
+		*pDoc = DOM_Document::createDocument();
+		root = a_doc.getFirstChild();
+		if(root == NULL)
+			{
+				return E_UNKNOWN;
+			}
+		pDoc->appendChild(pDoc->importNode(root, true));
 	
-	pItem = new aiQueueItem;
-	pItem->pDomDoc = pDoc;
-	pItem->pHashEntry = m_pHashEntry;
-	ms_pAccountingInstance->m_pQueue->add(pItem, sizeof(aiQueueItem));
-	return E_SUCCESS;
-}
+		pItem = new aiQueueItem;
+		pItem->pDomDoc = pDoc;
+		pItem->pHashEntry = m_pHashEntry;
+		CAAccountingInstance::queueItem(pItem);
+		return E_SUCCESS;
+	}
 #endif

@@ -247,10 +247,6 @@ protected:
 			CAThreadPool* m_pthreadsLogin;
 			CAThread* m_pthreadSendToMix;
 			CAThread* m_pthreadReadFromMix;
-#ifdef PAYMENT
-
-				CAAccountingInstance * m_pAccountingInstance;
-#endif
 
 #ifdef COUNTRY_STATS
 		private:

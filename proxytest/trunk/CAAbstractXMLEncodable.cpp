@@ -29,33 +29,25 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAAbstractXMLEncodable.hpp"
 #include "xml/DOM_Output.hpp"
 
-/*CAAbstractXMLEncodable::CAAbstractXMLEncodable()
-{
-}*/
-
 SINT32 CAAbstractXMLEncodable::toXmlDocument(DOM_Document &doc)
-{
-	DOM_Element elemRoot;
-	doc = DOM_Document::createDocument();
-	this->toXmlElement(doc, elemRoot);
-	doc.appendChild(elemRoot);
-	return E_SUCCESS;
-}
+	{
+		DOM_Element elemRoot;
+		doc = DOM_Document::createDocument();
+		toXmlElement(doc, elemRoot);
+		doc.appendChild(elemRoot);
+		return E_SUCCESS;
+	}
 
-UINT8 * CAAbstractXMLEncodable::toXmlString(UINT32 &size)
-{
-	DOM_Document doc;
-	//DOM_Element elemRoot;
-	UINT8 *tmp, *tmp2;
-	toXmlDocument(doc);
-	
-	//elemRoot = doc.getDocumentElement();
-	tmp = DOM_Output::dumpToMem(doc, &size);
-	
-	// put null at the end...
-	tmp2 = new UINT8[size+1];
-	memcpy(tmp2, tmp, size);
-	tmp2[size]='\0';
-	delete[] tmp;
-	return tmp2;
-}
+UINT8* CAAbstractXMLEncodable::toXmlString(UINT32 &size)
+	{
+		DOM_Document doc;
+		UINT8 *tmp, *tmp2;
+		toXmlDocument(doc);
+		tmp = DOM_Output::dumpToMem(doc, &size);
+		// put null at the end...
+		tmp2 = new UINT8[size+1];
+		memcpy(tmp2, tmp, size);
+		tmp2[size]='\0';
+		delete[] tmp;
+		return tmp2;
+	}
