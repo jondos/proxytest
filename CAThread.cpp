@@ -51,8 +51,6 @@ CAThread::CAThread(const UINT8* strName)
 			}
 	}
 
-/** A daemon thread is a dettached thread, which will not
-  * preserve  a join state */
 SINT32 CAThread::start(void* param,bool bDaemon)
 	{
 		if(m_fncMainLoop==NULL)

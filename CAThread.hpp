@@ -28,28 +28,66 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CATHREAD__
 #define __CATHREAD__
 #include "CAMsg.hpp"
-typedef void *(*THREAD_MAIN_TYP)(void *);
-/**
-	Some example on CAThread:
 
-	THREAD_RETURN_TYPE doSomeThing(void* param)
+/** Defines the type of the main function of the thread. The main function has one argument of type void*.
+	*	The exit points of the main function should be THREAD_RETURN_SUCCESS or THREAD_RETRUN_ERROR. 
+	*
+	*	Example:
+	* @code
+	*	
+	*	THREAD_RETURN myMainFunction(void* param)
+	*		{
+	*				doSomething;
+	*				THREAD_RETURN_SUCCESS;
+	*   }
+	* @endcode
+	**/
+typedef THREAD_RETURN(*THREAD_MAIN_TYP)(void *);
+
+/** @defgroup threading Classes for multithreaded programming
+	*
+	* There exists several classes to support multi-threading. Some of these classes deal with creating and executing
+	* of threads, where others a for synchronisation among the threads.
+	*/
+/**
+	* @ingroup threading
+	*
+	* This class could be used for creating a new thread. The function which should be executed within this thread could be set 
+	* be using the setMainLoop() method.
+	*
+*
+*	Some example on using CAThread:
+
+* First one needs to define a function which should be executed within the thread:
+@code
+	THREAD_RETURN doSomeThing(void* param)
 		{
 			THREAD_RETURN_SUCCESS
 		}
-	
+	@endcode
+*
+* Now we can create the thread, set the main function, start the thread and wait for the thread to finish execution:
 
+	@code
 	CAThread* pThread=new CAThread();
 	pThread->setMainLoop(doSomeThing);
 	pThread->start(theParams);
 	pThread->join();
 	delete pThread;
-
+	@endcode
 	*/
 class CAThread
 	{
 		public:
+			/** Creates a CAThread object but no actual thread.
+				*/
 			CAThread();
+
+			/** Creates a CAThread object but no actual thread.
+				* @param strName a name for this thread, usefull mostly for debugging
+				*/
 			CAThread(const UINT8* strName);
+			
 			~CAThread()
 				{
 					if(m_pThread!=NULL)
@@ -57,14 +95,36 @@ class CAThread
 					if(m_strName!=NULL)
 						delete m_strName;
 				}
-
+			
+			/** Sets the main function which will be executed within this thread.
+				*
+				* @param fnc the fuction to be executed
+				*	@retval E_SUCCESS
+				*/
 			SINT32 setMainLoop(THREAD_MAIN_TYP fnc)
 				{
 					m_fncMainLoop=fnc;
 					return E_SUCCESS;
 				}
-			
+
+			/** Starts the execution of the main function of this thread. The main function could be set
+			  * with setMainLoop().
+				*
+				* @param param a pointer which is used as argument to the main function
+				* @param bDaemon true, if this thread should be a deamon thread. A daemon thread is a dettached thread, which will not
+				* preserve a join state. A daemon thread will automatically release resources which 
+				*	are associated with the thread. Normaly this is done by calling join().
+				*						The default value is false.
+				* @retval E_SUCCESS if the thread could be started successfully
+				* @retval E_UNKNOWN otherwise
+				*/								 
 			SINT32 start(void* param,bool bDaemon=false);
+			
+			/** Waits for the main function to finish execution. A call of this method will block until the main
+				* function exits.
+				* @retval E_SUCCESS if successful
+				* @retval E_UNKNOWN otherwise
+				*/
 			SINT32 join()
 				{
 					if(m_pThread==NULL)
@@ -104,8 +164,7 @@ class CAThread
 		private:
 			THREAD_MAIN_TYP m_fncMainLoop;
 	 		pthread_t* m_pThread;
-			UINT8* m_strName; //a name mostly for debuging purpose...
-			//CAConditionVariable m_CondVar;
+			UINT8* m_strName; //< a name mostly for debuging purpose...
 	};
 #endif
 
