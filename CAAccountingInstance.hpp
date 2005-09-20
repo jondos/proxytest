@@ -116,13 +116,6 @@ public:
 			return ms_pInstance->m_pIPBlockList->checkIP(ip); 
 		}
 	
-
-private:
-
-	CAAccountingInstance(); //Singleton!
-	~CAAccountingInstance();
-
-
 	/**
 	* Handle a user (xml) message sent to us by the Jap through the ControlChannel
 	*  
@@ -130,7 +123,12 @@ private:
 	* what type of message we have and calls the appropriate handle...() 
 	* function
 	*/
-	void CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry, DOM_Document * pDomDoc);
+	SINT32 static processJapMessage(fmHashTableEntry * pHashEntry,const DOM_Document& a_DomDoc);
+
+private:
+
+	CAAccountingInstance(); //Singleton!
+	~CAAccountingInstance();
 
 	/**
 	* Handles a cost confirmation sent by a jap
