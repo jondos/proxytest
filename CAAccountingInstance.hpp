@@ -143,7 +143,7 @@ private:
 	/**
 	 * Handles a balance certificate
 	 */
-	void handleBalanceCertificate(fmHashTableEntry *pHashEntry, const DOM_Element &root);
+	SINT32 handleBalanceCertificate(fmHashTableEntry *pHashEntry, const DOM_Element &root);
 	
 	/**
 	 * Checks the response of the challenge-response auth.
