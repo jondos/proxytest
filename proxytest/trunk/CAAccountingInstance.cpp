@@ -76,11 +76,11 @@ CAAccountingInstance::CAAccountingInstance()
 		options.getPaymentSoftLimit(&m_iSoftLimitBytes);
 	
 		// launch AI thread
-		m_pThread = new CAThread();
+		/*m_pThread = new CAThread();
 		m_pThread->setMainLoop( aiThreadMainLoop );
 		m_bThreadRunning = true;
 		m_pThread->start( this );
-		
+		*/
 		// launch BI settleThread
 		m_pSettleThread = new CAAccountingSettleThread();
 	}
@@ -92,8 +92,8 @@ CAAccountingInstance::~CAAccountingInstance()
 	{
 		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance dying\n" );
 		m_bThreadRunning = false;
-		m_pThread->join();
-		delete m_pThread;
+		//m_pThread->join();
+		//delete m_pThread;
 		delete m_pSettleThread;
 		//delete m_biInterface;
 		delete m_dbInterface;
@@ -427,7 +427,7 @@ SINT32 CAAccountingInstance::makeAccountRequest(DOM_Document &doc)
  * The Main Loop of the accounting instance thread.
  * Reads messages out of the queue and processes them
  */
-THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
+/*THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
 	{
 		CAAccountingInstance * instance;
 		aiQueueItem item;
@@ -443,7 +443,7 @@ THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
 			}
 		THREAD_RETURN_SUCCESS;
 	}
-
+*/
 
 
 /**
@@ -453,9 +453,9 @@ THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
  * what type of message we have and calls the appropriate handle...() 
  * function
  */
-void CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,DOM_Document * pDomDoc)
+SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,const DOM_Document& a_DomDoc)
 	{
-		DOM_Element root = pDomDoc->getDocumentElement();
+		DOM_Element root = a_DomDoc.getDocumentElement();
 		char * docElementName = root.getTagName().transcode();
 
 		// what type of message is it?
@@ -464,28 +464,28 @@ void CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,DOM_D
 				#ifdef DEBUG
 					CAMsg::printMsg( LOG_DEBUG, "Received an AccountCertificate. Calling handleAccountCertificate()\n" );
 				#endif
-				handleAccountCertificate( pHashEntry, root );
+				ms_pInstance->handleAccountCertificate( pHashEntry, root );
 			}
 		else if ( strcmp( docElementName, "Response" ) == 0)
 			{
 				#ifdef DEBUG
 					CAMsg::printMsg( LOG_DEBUG, "Received a Response (challenge-response)\n");
 				#endif
-				handleChallengeResponse( pHashEntry, root );
+				ms_pInstance->handleChallengeResponse( pHashEntry, root );
 			}
 		else if ( strcmp( docElementName, "CC" ) == 0 )
 			{
 				#ifdef DEBUG
 					CAMsg::printMsg( LOG_DEBUG, "Received a CC. Calling handleCostConfirmation()\n" );
 				#endif
-				handleCostConfirmation( pHashEntry, root );
+				ms_pInstance->handleCostConfirmation( pHashEntry, root );
 			}
 		else if ( strcmp( docElementName, "Balance" ) == 0 )
 			{
 				#ifdef DEBUG
 					CAMsg::printMsg( LOG_DEBUG, "Received a BalanceCertificate. Calling handleBalanceCertificate()\n" );
 				#endif
-				handleBalanceCertificate( pHashEntry, root );
+				ms_pInstance->handleBalanceCertificate( pHashEntry, root );
 			}
 		else
 			{
@@ -494,8 +494,9 @@ void CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,DOM_D
 														docElementName 
 												);
 			}
-		delete pDomDoc;
+		//delete pDomDoc;
 		delete [] docElementName;
+		return E_SUCCESS;
 	}
 
 
