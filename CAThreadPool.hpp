@@ -21,6 +21,9 @@ typedef struct tpool_work tpool_work_t;
 
 THREAD_RETURN worker_thread_main_loop(void *args);
 
+/** This class bla bla
+ * 
+ */ 
 class CAThreadPool 
 	{
 		public:
@@ -31,6 +34,9 @@ class CAThreadPool
 				{
 					destroy(true);
 				}
+				/**
+				 * 
+				 */ 
 			SINT32 destroy(bool bWaitForFinish);
 			SINT32 addRequest(THREAD_MAIN_TYP, void *args);
 			friend THREAD_RETURN worker_thread_main_loop(void *args);

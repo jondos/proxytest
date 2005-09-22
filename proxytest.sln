@@ -110,6 +110,7 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionItems) = postSolution
 		documentation\docMixConfig.template = documentation\docMixConfig.template
+		documentation\docPayment.template = documentation\docPayment.template
 		documentation\docPool.template = documentation\docPool.template
 		documentation\XML\FirstMixToInfoService.xml = documentation\XML\FirstMixToInfoService.xml
 		documentation\XML\FirstMixToJAP.xml = documentation\XML\FirstMixToJAP.xml
@@ -119,6 +120,7 @@ Global
 		documentation\XML\MixCascadeStatus.xml = documentation\XML\MixCascadeStatus.xml
 		documentation\XML\MixHELO.xml = documentation\XML\MixHELO.xml
 		proxytest_win_short.doxy = proxytest_win_short.doxy
+		documentation\docPaymentSetup.template = documentation\docPaymentSetup.template
 		documentation\XML\xmldoc.template = documentation\XML\xmldoc.template
 		documentation\XML\XMLSignature.xml = documentation\XML\XMLSignature.xml
 	EndGlobalSection
