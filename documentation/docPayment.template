@@ -80,7 +80,7 @@ Mixbetreiber, Banken). Dies wird durch digital signierte Nachweise erzielt.
 
 Beim Anonymisierungsdienst JAP kann der Nutzer zwischen verschiedenen
 Mixkaskaden frei wählen. Generell werden die Mixe einer Kaskade nicht
-einzeln bezahlt, sondern eine Kaskaden-zentrale \emph{Abrechnungsinstanz} (AI). 
+einzeln bezahlt, sondern eine Kaskaden-zentrale <var>Abrechnungsinstanz</var> (AI). 
 Auf Grund der statischen Struktur einer Kaskade (insbesondere gleiches Datenvolumen für alle Mixe) 
 kann diese Instanz das Geld auf die beteiligten Mixe verteilen. 
 Als Vorteil ergeben sich geringerer Aufwand und Komplexität des gesamten Bezahlsystems. 
@@ -90,13 +90,13 @@ Der hohe Aufwand für ein anonymes (kontobasiertes) Bezahlsystem ist daher nicht 
 zumal diese Verfahren (\zb~\cite{anonKredit}, \cite{anonNummernkonto}) selbst wieder auf einen Anonymisierungsdienst zurückgreifen.
 
 Der Nutzer besitzt unter einem Pseudonym ein
-\emph{Guthabenkonto}, von dem die Kosten abgebucht werden. Dieses muss er
+<var>Guthabenkonto</var>, von dem die Kosten abgebucht werden. Dieses muss er
 zuvor mit Hilfe verfügbarer Zahlungsmethoden aufladen. Abhängig von der
 gewählten Zahlungsmethode braucht der Nutzer seine Identität jedoch gegenüber dem
 Geldinstitut und der Konto-verwaltenden Stelle nicht offenzulegen.
 
 Damit er nicht bei jeder Mixkaskade ein separates
-aufzuladendes Konto benötigt, verwaltet eine Anonymisierungsdienst-zentrale \emph{Bezahlinstanz} (BI)
+aufzuladendes Konto benötigt, verwaltet eine Anonymisierungsdienst-zentrale <var>Bezahlinstanz</var> (BI)
 die Nutzerkonten. Der Nutzer bezahlt bei
 ihr für den Dienst und erhält die Möglichkeit, ihn unter freier
 Auswahl der Kaskaden zu nutzen. Von der BI erhalten die
@@ -157,7 +157,8 @@ nachfolgende Challenge:
 </Challenge>	
 @endverbatim
 
-Beim Beginn einer Sitzung kann der JAP mittels HTTP POST Request an die URL <tt>"/authenticate"</tt> eine Challenge anfordern. Dazu sendet er
+Beim Beginn einer Sitzung kann der JAP mittels HTTP POST Request an die URL <tt>/authenticate</tt> eine Challenge 
+anfordern. Dazu sendet er
 im HTTP Body sein Kontozertifikat mit.
 
 Als Response erwartet die BI eine Signatur über das Element <tt>\<DontPanic\></tt> (inklusive der Tags) vom JAP. 
@@ -180,7 +181,7 @@ eines Signatursystems. Der private Schlüssel
 bleibt dabei im Vertrauensbereich des Nutzers. Mit ihm authentisiert sich der
 Nutzer gegenüber den Abrechnungsinstanzen und der Bezahlinstanz und
 signiert unten näher erläuterte Kostenbestätigungen.  Der öffentliche
-Schlüssel wird als Nutzerpseudonym \f$P\f$ an ein Konto bei der BI gebunden (Abbildung~\ref{kontoanmeldung}).
+Schlüssel wird als Nutzerpseudonym <var>P</var> an ein Konto bei der BI gebunden (Abbildung~\ref{kontoanmeldung}).
 
 @latexonly
 \begin{figure}[ht]
@@ -201,9 +202,14 @@ Die BI erzeugt eine für sie eindeutige
 Kontonummer <var>KN</var> und legt unter dieser ein Konto für den Nutzer an.
 Der öffentliche Schlüssel und die Kontonummer werden zusammen von der BI
 signiert und das resultierende Kontozertifikat
-$$=(BI,P,\textit{KN},t_{\text{creation}},S_{\text{BI}})$$ an den JAP
-zurückgesendet.  $BI$ ist dabei ein eindeutiger Identifikator der Bezahlinstanz, $S_{\text{BI}}$ ist die digitale Signatur der BI über
-$BI,P,\textit{KN}$ und $t_{\text{creation}}$. Der Zeitpunkt $t_{\text{creation}}$
+
+$$=(BI,P,\textit{KN},t_{\text{creation}},S_{\text{BI}})$$
+
+ an den JAP
+zurückgesendet.  <var>BI</var> ist dabei ein eindeutiger Identifikator der Bezahlinstanz, <var>S</var><sub>BI</sub> ist die 
+digitale Signatur
+ der BI über
+<var>BI, P, KN</var> und <var>t</var><sub>creation</sub>. Der Zeitpunkt <var>t</var><sub>creation</sub>
 gibt an, wann das Konto eröffnet wurde. Um ein "Fluten" der Daten mit unbenutzten Konten zu verhindern, werden 
 nicht aufgeladene Konten nach einer gewissen Zeit aus der Datenbank gelöscht.
 
@@ -230,10 +236,10 @@ Anschliessend wird ein Kontozertifikat generiert:
 @verbatim
 <?xml version="1.0" ?>
 <AccountCertificate version="1.0">
- 	<AccountNumber> 123456789012 </AccountNumber>
- 	<JapPublicKey>
-     ... public key xml data (siehe oben)
-  </JapPublicKey>
+  <AccountNumber> 123456789012 </AccountNumber>
+ 	  <JapPublicKey>
+      ... public key xml data (siehe oben)
+    </JapPublicKey>
   <CreationTime> YYYY-MM-DD HH:MM:SS </CreationTime>
   <BiID> eindeutige ID der BI </BiID>
   <Signature>
@@ -242,8 +248,8 @@ Anschliessend wird ein Kontozertifikat generiert:
 </AccountCertificate>
 @endverbatim
 
-In der Datenbanktabelle <tt>ACCOUNTS</tt> wird ein neuer Eintrag angelegt mit der erzeugten Kontonummer, 
-dem Zeitstempel der Erzeugung, sowie dem zugehörigen öffentlichen Schlüssel. Die Werte <tt>DEPOSIT</tt> und <tt>SPENT</tt>
+In der Datenbanktabelle <tt>ACCOUNTS</tt> wird ein neuer Eintrag mit der erzeugten Kontonummer, 
+dem Zeitstempel der Erzeugung, sowie dem zugehörigen öffentlichen Schlüssel angelegt. Die Werte <tt>DEPOSIT</tt> und <tt>SPENT</tt>
  werden auf Null gesetzt.
 Der Wert <tt>DEPOSITVALIDTIME</tt> wird auf den Wert von <tt>CREATIONTIME</tt> gesetzt.
 
@@ -255,7 +261,7 @@ Zugangsvorraussetzung zu dem Konto.
 Zur Dienstnutzung muss das angemeldete Pseudonymkonto aufgeladen werden.  Der
 JAP erfragt dafür bei der BI eine Überweisungsnummer <var>ÜN</var> als einmal gültiges
 Transaktionspseudonym. Die Überweisungsnummer wird durch die BI generiert,
-dort vermerkt und dem JAP zusammen mit der Pseudonymkontonummer und dem aktuellen \f$G_{\max}\f$ von ihr
+dort vermerkt und dem JAP zusammen mit der Pseudonymkontonummer und dem aktuellen <var>G</var><sub>max</sub> von ihr
 signiert übermittelt. Pro Konto können dabei nicht mehrere Aufladetransaktionen parallel durchgeführt werden.
 
 Der Nutzer muss nun die Zahlung unter Angabe der Überweisungsnummer mit
@@ -303,7 +309,7 @@ Die BI generiert nachfolgendes Transaktionszertifikat:
 Die BI erzeugt ausserdem einen Eintrag in der Datenbanktabelle <tt>TRANSFERS</tt>. Der Wert <tt>USED</tt> wird 
 dabei auf <tt>false</tt> gesetzt. 
 Die BI überträgt nun das oben erstellte Transaktionszertifikat an den Nutzer zusammen mit einer URL,
- wo genaue Erläuterungen zur Bezahlung und zur Benutzung von elektronischen Bezahlverfahren hinterlegt sind....  
+ wo genaue Erläuterungen zur Bezahlung und zur Benutzung von elektronischen Bezahlverfahren hinterlegt sind. 
 
 \subsubsection secBalance Kontostandsabfrage
 
