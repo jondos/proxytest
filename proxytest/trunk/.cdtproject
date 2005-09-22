@@ -14,12 +14,12 @@
 <item id="org.eclipse.cdt.core.pathentry">
 <pathentry kind="con" path="org.eclipse.cdt.make.core.DISCOVERED_SCANNER_INFO"/>
 <pathentry excluding="CVS/" kind="src" path="popt"/>
-<pathentry excluding="popt/|xml/|tre/|trio/|TypeA/|CVS/|doc/|doc_short/|docImages/|documentation/|FlashMix/|GenerateMixCert/|linux/|logFirstMix/|logLastMix/|Model Folder/|neuesMixProtokoll/|.#CAAbstractXMLSignable.hpp.1.1|$projectdir/|alltest/|bak/|Debug/|pthread/|Release/|test/|TypeB/|windows/|proxyauswertung/|proxytest/|proxytest-lib/|*.o" kind="src" path=""/>
+<pathentry excluding="*/*|*.o|.deps/|$projectdir/|alltest/|bak/|Debug/|doc/|doc_short/|docImages/|documentation/|FlashMix/|GenerateMixCert/|linux/|logFirstMix/|logLastMix/|Model Folder/|neuesMixProtokoll/|popt/|proxyauswertung/|proxytest/|proxytest-lib/|pthread/|Release/|test/|tre/|trio/|TypeA/|TypeB/|windows/|xml/" kind="src" path=""/>
 <pathentry excluding="CVS/" kind="src" path="xml"/>
 <pathentry excluding="CVS/" kind="src" path="TypeA"/>
 <pathentry excluding="CVS/" kind="src" path="trio"/>
 <pathentry excluding="CVS/" kind="src" path="tre"/>
-<pathentry excluding="docImages/" kind="out" path=""/>
+<pathentry excluding="*.o" kind="out" path=""/>
 </item>
 <item id="cdt_indexer">
 <indexEnabled indexValue="true"/>
