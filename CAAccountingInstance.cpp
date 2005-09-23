@@ -398,43 +398,42 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
  *   (receive a new acc.cert. though we already have one)
  */
 void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry, DOM_Element &root)
-{
-	tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
-	DOM_Element elGeneral;
-	timespec now;
-	getcurrentTime(now);
+	{
+		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
+		DOM_Element elGeneral;
+		timespec now;
+		getcurrentTime(now);
 
-	// check authstate of this user
-	m_Mutex.lock();
-	if(pAccInfo->authFlags&AUTH_GOT_ACCOUNTCERT)
-		{
-			#ifdef DEBUG
-				CAMsg::printMsg(LOG_DEBUG, "Already got an account cert. Ignoring!");
-			#endif
-			CAXMLErrorMessage err(
-					CAXMLErrorMessage::ERR_BAD_REQUEST, 
-					(UINT8*)"You have already sent an Account Certificate"
-				);
-			DOM_Document errDoc;
-			err.toXmlDocument(errDoc);
-			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
-			m_Mutex.unlock();
-			return ;
-		}
+		// check authstate of this user
+		m_Mutex.lock();
+		if(pAccInfo->authFlags&AUTH_GOT_ACCOUNTCERT)
+			{
+				#ifdef DEBUG
+					CAMsg::printMsg(LOG_DEBUG, "Already got an account cert. Ignoring!");
+				#endif
+				CAXMLErrorMessage err(
+						CAXMLErrorMessage::ERR_BAD_REQUEST, 
+						(UINT8*)"You have already sent an Account Certificate"
+					);
+				DOM_Document errDoc;
+				err.toXmlDocument(errDoc);
+				pAccInfo->pControlChannel->sendXMLMessage(errDoc);
+				m_Mutex.unlock();
+				return ;
+			}
 
-	// parse & set accountnumber
-	if ( getDOMChildByName( root, (UINT8 *)"AccountNumber", elGeneral, false ) != E_SUCCESS ||
-			getDOMElementValue( elGeneral, pAccInfo->accountNumber ) != E_SUCCESS ||
-			pAccInfo->accountNumber == 0 )
-		{
-			CAMsg::printMsg( LOG_ERR, "AccountCertificate has wrong or no accountnumber. Ignoring\n");
-			CAXMLErrorMessage err(CAXMLErrorMessage::ERR_WRONG_FORMAT);
-			DOM_Document errDoc;
-			err.toXmlDocument(errDoc);
-			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
-			m_Mutex.unlock();
-			return ;
-		}
+		// parse & set accountnumber
+		if ( getDOMChildByName( root, (UINT8 *)"AccountNumber", elGeneral, false ) != E_SUCCESS ||
+					getDOMElementValue( elGeneral, pAccInfo->accountNumber ) != E_SUCCESS)
+			{
+				CAMsg::printMsg( LOG_ERR, "AccountCertificate has wrong or no accountnumber. Ignoring\n");
+				CAXMLErrorMessage err(CAXMLErrorMessage::ERR_WRONG_FORMAT);
+				DOM_Document errDoc;
+				err.toXmlDocument(errDoc);
+				pAccInfo->pControlChannel->sendXMLMessage(errDoc);
+				m_Mutex.unlock();
+				return ;
+			}
 
 	// parse & set public key
 	if ( getDOMChildByName( root, (UINT8 *)"JapPublicKey", elGeneral, false ) != E_SUCCESS )
