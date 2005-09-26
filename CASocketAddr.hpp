@@ -48,11 +48,11 @@ class CASocketAddr
 			virtual	const SOCKADDR* LPSOCKADDR() const =0;
 			//	virtual operator LPSOCKADDR()=0;
 
-			/** Returns a String which describes this address in a human readable form
+			/** Returns a string which describes this address in a human readable form.
 				* @param buff buffer which stores the result
-				* @param size of buff
+				* @param bufflen size of buff
 				* @retval E_SUCCESS if successful
-				* @retval E_SPACE if buffer is to small
+				* @retval E_SPACE if the buffer is to small
 				* @retval E_UNKNOWN in case of an other error
 				*/
 			virtual SINT32 toString(UINT8* buff,UINT32 bufflen)const=0;

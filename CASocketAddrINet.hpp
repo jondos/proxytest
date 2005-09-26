@@ -84,6 +84,14 @@ class CASocketAddrINet:private sockaddr_in,public CASocketAddr
 			static SINT32 getLocalHostIP(UINT8 ip[4]);
 //			operator LPSOCKADDR(){return (::LPSOCKADDR)m_pAddr;}
 
+			/** Returns a human readable representation of this address.
+				*
+				* @param buff buffer which stores the address string
+				* @param bufflen size of the buffer
+				* @retval E_SPACE if the buffer is to small
+				* @retval E_UNKNOWN if an error occured
+				* @retval E_SUCCESS if successfull
+				*/
 			virtual SINT32 toString(UINT8* buff,UINT32 bufflen) const
 				{
 					UINT8 tmpbuff[255];

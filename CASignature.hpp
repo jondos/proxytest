@@ -64,19 +64,26 @@ class CASignature
 			/**
 			* Converts a DSA signature from the XML Signature format to the
 			* openSSL R/S BigNumber format.
+			*
+			* @param in the xml signature value
+			*	@param inLen size of the xml signature value
+			* @param pDsaSig a pointer to a DSA signature struct whose values will be set according to the xml signature value
+			* @retval E_SUCCESS if succesful
+			* @retval E_UNKNOWN otherwise
 			*/
-			SINT32 CASignature::decodeRS(const UINT8* in, const UINT32 inLen, DSA_SIG* pDsaSig);
+			SINT32 decodeRS(const UINT8* in, const UINT32 inLen, DSA_SIG* pDsaSig);
 			SINT32 verify(UINT8* in,UINT32 inlen,DSA_SIG* dsaSig);
 			
 			/**
-			* Verifies an ASN.1 DER encoded SHA1-DSA signature
+			* Verifies an ASN.1 DER encoded SHA1-DSA signature.
 			*
 			* @author Bastian Voigt
 			* @param in the document that was signed
-			* @param inlen, the document length
+			* @param inlen the document length
 			* @param dsaSig the DER encoded signature
 			* @param sigLen the signature length (normally 46 bytes)
-			* @return E_SUCCESS if the signature is valid
+			* @retval E_SUCCESS if the signature is valid
+			* @retval E_UNKNOWN otherwise
 			*/
 			SINT32 verifyDER(UINT8* in, UINT32 inlen, const UINT8 * dsaSig, const UINT32 sigLen);
 			
