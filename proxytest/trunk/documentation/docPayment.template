@@ -1,5 +1,5 @@
 /** \page docPayment Momentane Implementierung des Bezahlsystems für AN.ON
-@latexonly
+@manonly
 \documentclass{article}
 \usepackage[ngerman]{babel}
 \usepackage[latin1]{inputenc}
@@ -14,9 +14,10 @@
 \newcommand{\KBN}{\textit{KBN}\ }
 \newboolean{pdf}
 \setboolean{pdf}{false}
+@endmanonly
+@latexonly
 \author{Stefan Köpsell, Andreas Müller, Bastian Voigt\\sk13@inf.tu-dresden.de, am12@inf.tu-dresden.de, bastian.voigt@inf.fu-berlin.de}
 \title{Momentane Implementierung des Bezahlsystems für AN.ON}
-\begin{document}
 \maketitle
 
 \begin{abstract} Vorgestellt wird ein Bezahlsystem für einen
@@ -34,14 +35,14 @@ Nachweisen geahndet werden.
 
 "JAP" ist ein Mixkaskaden-basierter Dienst zur Anonymisierung von
 HTTP-Verbindungen für den anonymen Zugriff auf das World Wide Web
-\cite{webmix}. Jeder Nutzer muss sich dazu ein gleichnamiges Programm als lokalen Proxy für
+[BeFK01]. Jeder Nutzer muss sich dazu ein gleichnamiges Programm als lokalen Proxy für
 seinen Browser installieren. JAP dient als Schnittstelle zu sogenannten
 Mixkaskaden, über die die Kommunikation zu den Zielservern im Internet (um-)geleitet wird.  
 
 Ein Mix ist im wesentlichen ein Server, der mehrfach
 verschlüsselte Datenpakete empfängt, zwischenpuffert, umkodiert (durch
 Entschlüsselung eine "Verschlüsselungsschale" entfernt) und
-umsortiert wieder ausgibt \cite{Chaum81}. Werden mehrere Mixe in Form einer 
+umsortiert wieder ausgibt [Chau81]. Werden mehrere Mixe in Form einer 
 statischen Kette hintereinandergeschaltet, so spricht man von
 einer Kaskade. 
 
@@ -58,11 +59,11 @@ Beispielsweise "sieht" ein Angreifer, wer welches "Bitmuster"
 an den ersten Mix gesendet hat. 
 
 Jedem Mixbetreiber entstehen Kosten, die hauptsächlich durch das
-Datenvolumen der zu bearbeitenden Mixpakete verursacht werden \cite{leipzig}.
+Datenvolumen der zu bearbeitenden Mixpakete verursacht werden [BFRW02].
 Eine faire Möglichkeit zur Deckung der anfallenden Kosten besteht darin, diese
 auf die Nutzer umzulegen.
 
-Bisherige Ansätze \cite{bezahl1, bezahl2,bezahl3} nutzen zur Bezahlung der Mixpakete anonyme digitale
+Bisherige Ansätze [FrJe98], [FrJW98],[BaNe99] nutzen zur Bezahlung der Mixpakete anonyme digitale
 Münzen. Diese werden vom Nutzer bei einer Bank erworben und den Mixpaketen
 mitgegeben. Da momentan keine Bank digitale Münzen anbietet, sind diese
 Verfahren nicht praktikabel. Zudem hat eine Bezahlung mit digitalen Münzen
@@ -88,7 +89,7 @@ Als Vorteil ergeben sich geringerer Aufwand und Komplexität des gesamten Bezahls
 Die AI befindet sich vor dem ersten Mix und kennt daher gemäß Angreifermodell die Zuordnung 
 von abzurechnenden Datenpaketen zu Nutzern.
 Der hohe Aufwand für ein anonymes (kontobasiertes) Bezahlsystem ist daher nicht notwendig, 
-zumal diese Verfahren (z. B. ~\cite{anonKredit}, \cite{anonNummernkonto}) selbst wieder 
+zumal diese Verfahren (z. B. [LoMP94], [BüPf89]) selbst wieder 
 auf einen Anonymisierungsdienst zurückgreifen.
 
 Der Nutzer besitzt unter einem Pseudonym ein
@@ -105,7 +106,7 @@ Auswahl der Kaskaden zu nutzen. Von der BI erhalten die
 Abrechnungsinstanzen der Mixkaskaden die Kontoinformationen und rechnen die
 Kosten der Nutzer ab. Die Abrechnungsinstanzen haben eine (temporäre) Verbindung zur Bezahlinstanz.  
 
-@latexonly
+@manonly
 \begin{figure}[ht]
 \begin{center}
    \scalebox{0.5}{
@@ -115,8 +116,9 @@ Kosten der Nutzer ab. Die Abrechnungsinstanzen haben eine (temporäre) Verbindung
   \label{architektur}
   \end{center}
   \end{figure}
-@endlatexonly
+@endmanonly
 \image html bezahlarchitektur_paper.png "Abbildung 1: Architektur des Bezahlsystems"
+\image latex bezahlarchitektur_paper.png "Abbildung 1: Architektur des Bezahlsystems"
 
 Das Bezahlsystem besteht somit aus den Komponenten: 
 Bezahlinstanz, Abrechnungsinstanzen und lokale Proxies der Nutzer (Abbildung @latexonly~\ref{architektur}@endlatexonly @htmlonly 1@endhtmlonly).
@@ -470,7 +472,7 @@ wann er welche Kostenbestätigung der AI übermitteln muss (Abbildung@latexonly~\r
 Zur Minimierung von Übertragungs-
 und Rechenaufwand wird nicht jedes
 Bestätigungsintervall durch eine <var>signierte</var> Erklärung bestätigt, sondern 
-das in \cite{pedersen} beschriebene Tickpayment-Verfahren genutzt.  
+das in [Ped97] beschriebene Tickpayment-Verfahren genutzt.  
 In jeder signierten Bestätigung <var>B</var><sub>S</sub> ist zusätzlich der Endwert einer
 Tickfolge enthalten. Eine Tickfolge ist eine Folge von Werten, die der Nutzer
 ausgehend von einem zufälligen Wert mit einer Einwegfunktion generiert und
@@ -784,7 +786,7 @@ Anonymisierungsdienst JAP integriert. Anschließend soll eine Evaluierung
 Beteiligung der "echten" Nutzer des Dienstes geschehen (allerdings
 zunächst unter Verwendung von "Spielgeld").
 
-@latexonly
+@manonly
 \begin{thebibliography}{9999999}
 
 \bibitem[BaNe99]{bezahl3} Matthias Baumgart, Heike Neumann. \textit{Bezahlen von Mix-Netz-Diensten}. Verläßliche IT-Systeme -- VIS 1999, Vieweg-Verlag, 1999
@@ -812,35 +814,30 @@ Pseudonyms}. Communications of the ACM 24/2, 1981, 84--88.
 
 \end{thebibliography}
 \appendix
-@endlatexonly
+@endmanonly
 
 \subsection secLiteratur Literatur
 
-\bibitem[BaNe99]{bezahl3} Matthias Baumgart, Heike Neumann. \textit{Bezahlen von Mix-Netz-Diensten}. Verläßliche IT-Systeme -- VIS 1999, Vieweg-Verlag, 1999
+[BaNe99] Matthias Baumgart, Heike Neumann. <var>Bezahlen von Mix-Netz-Diensten</var>. Verläßliche IT-Systeme -- VIS 1999, Vieweg-Verlag, 1999
 
-\bibitem[BeFK01]{webmix}
-Oliver Berthold, Hannes Federrath, Stefan Köpsell. \textit{Web MIXes: A system for anonymous and unobservable Internet access}.
+[BeFK01] Oliver Berthold, Hannes Federrath, Stefan Köpsell. <var>Web MIXes: A system for anonymous and unobservable Internet access</var>.
 in: Hannes Federrath (Ed.): Designing Privacy Enhancing Technologies. Proc. Workshop on Design Issues in Anonymity and Unobservability, 
 LNCS 2009, Springer-Verlag, Heidelberg 2001, 115--129.
 
-\bibitem[BFRW02]{leipzig} Thomas Butzlaff, Florian Jäger, Björn Rober, David Weber, Andreas Wilm. \textit{Praxisprojekt: JAP -- Anonymität im Internet}. Handelshochschule Leipzig, Dezember 2002.
+[BFRW02] Thomas Butzlaff, Florian Jäger, Björn Rober, David Weber, Andreas Wilm. <var>Praxisprojekt: JAP -- Anonymität im Internet</var>. Handelshochschule Leipzig, Dezember 2002.
 
-\bibitem[B"uPf89]{anonNummernkonto} Holger B"urk, Andreas Pfitzmann. \textit{Digital Payment Systems Enabling Security and Unobservability}. Computers \& Security 8/5, 1989, 399--416.
+[BüPf89] Holger Bürk, Andreas Pfitzmann. <var>Digital Payment Systems Enabling Security and Unobservability</var>. Computers \& Security 8/5, 1989, 399--416.
 
-\bibitem[Chau81]{Chaum81}
-David Chaum. \textit{Untraceable Electronic Mail, Return Addresses, and Digital
-Pseudonyms}. Communications of the ACM 24/2, 1981, 84--88. 
+[Chau81] David Chaum. <var>Untraceable Electronic Mail, Return Addresses, and Digital
+Pseudonyms</var>. Communications of the ACM 24/2, 1981, 84--88. 
 
-\bibitem[FrJe98]{bezahl1}	Elke Franz, Anja Jerichow. \textit{A Mix-Mediated Anonymity Service and Its Payment}. ESORICS '98 (5th European Symposium on Research in Computer Security), Louvain-la-Neuve, LNCS 1485, Springer, Berlin, 1998, 313--327.
+[FrJe98] Elke Franz, Anja Jerichow. <var>A Mix-Mediated Anonymity Service and Its Payment</var>. ESORICS '98 (5th European Symposium on Research in Computer Security), Louvain-la-Neuve, LNCS 1485, Springer, Berlin, 1998, 313--327.
 
-\bibitem[FrJW98]{bezahl2} Elke Franz, Anja Jerichow, Guntram Wicke. \textit{Payment Scheme for Mixes Providing Anonymity}. IFIP Working Conference on Electronic Commerce 98, LNCS 1402, Springer, Berlin 1998, 94--108.
+[FrJW98] Elke Franz, Anja Jerichow, Guntram Wicke. <var>Payment Scheme for Mixes Providing Anonymity</var>. IFIP Working Conference on Electronic Commerce 98, LNCS 1402, Springer, Berlin 1998, 94--108.
 
-\bibitem[LoMP94]{anonKredit} S. Low, N. Maxemchuk, and Sanjoy Paul. \textit{Anonymous credit cards}. 2nd ACM Conference on Computer and Communications Security, Fairfax, Virginia, ACM Press, 1994, 108--117.
+[LoMP94] S. Low, N. Maxemchuk, and Sanjoy Paul. <var>Anonymous credit cards</var>. 2nd ACM Conference on Computer and Communications Security, Fairfax, Virginia, ACM Press, 1994, 108--117.
 
-\bibitem[Ped97]{pedersen}	Torben P. Pedersen. \textit{Electronic Payments of Small Amounts}. Security Protocols 96, LNCS 1189, Springer, Berlin, 1997, 59--68.
-
-\end{thebibliography}
-\appendix
+[Ped97]	Torben P. Pedersen. <var>Electronic Payments of Small Amounts</var>. Security Protocols 96, LNCS 1189, Springer, Berlin, 1997, 59--68.
 
 
 \section secAnhnag Anhang
@@ -887,8 +884,5 @@ Felder:
                                                   Inanspruchnahme des Dienstes
   XMLCC            (Zeichenkette;VARCHAR(2000)) - letzte unterschriebene Kostenbestätigung
 @endverbatim
-@latexonly
-\end{document}
-@endlatexonly
 
 */

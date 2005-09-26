@@ -42,29 +42,46 @@ class CAReplayCtrlChannelMsgProc
 		SINT32 propagateCurrentReplayTimestamp();
 
 
-		/** Sends the current replay timestamp periodically on the downstream replay control channel*/
+		/** Sends the current replay timestamp periodically on the downstream replay control channel
+			*
+			* @param minutesPropagationIntervall says, how often (in minutes) should the timestamp information be sent
+			*/
 		SINT32 startTimeStampPorpagation(UINT32 minutesPropagationIntervall);	
 
 		/** Stops the timestamp propagation*/
 		SINT32 stopTimeStampPorpagation();	
 
-		/** proccesses a getTimeStamps request on a reply control channel*/
+		/** Proccesses a getTimeStamps request on a reply control channel
+			*
+			* @param pReceiver the control chanel which receives the getTimeStamps request
+			* @retval E_SUCCESS if the request could be processed successfully
+			* @retval E_UNKNOWN otherwise
+			*/
 		SINT32 proccessGetTimestamps(const CAReplayControlChannel* pReceiver) const;
 
-		/** proccesses a getTimeStamp request on a reply control channel
-		*@param strMIxID the mix id for which the timestamp is request or null
+		/** Proccesses a getTimeStamp request on a reply control channel.
+			*
+			* @param pReceiver the control channel which receives the request 
+			* @param strMixID the mix id for which the timestamp is requested. If NULL we timestamp of this mix is requested.
+			* @retval E_SUCCESS if the request could be processed successfully
+			* @retval E_UNKNOWN otherwise
 		*/
 		SINT32 proccessGetTimestamp(const CAReplayControlChannel* pReceiver,const UINT8* strMixID) const;
 
-		/** proccesses a received replay timestamp rt from mix strMixID*/
+		/** Proccesses a received replay timestamp rt from mix strMixID
+			*
+			* @param pReceiver the control channel which receives the timestamp
+			* @param strMixID the mix id of the mix which sends the timestamp
+			* @param rt the timestamp
+			* @retval E_SUCCESS if the timestamp was preocessed successfully
+			* @retval E_UNKNOWN otherwise
+			*/
 		SINT32 proccessGotTimestamp(const CAReplayControlChannel* pReceiver,const UINT8* strMixID,const tReplayTimestamp& rt) const;
 
 		/** Sends upstram a request for the replay timestamp for the given mix*/
 		SINT32 sendGetTimestamp(const UINT8* strMixID);
 
 private:
-		/** Initalises the tmeplate which is used in response to the getTimeStamps request */
-		//SINT32 initTimestampsMessageTemplate();
 		friend THREAD_RETURN rp_loopPropagateTimestamp(void*);
 		const CAMix* m_pMix;
 		CAReplayControlChannel* m_pDownstreamReplayControlChannel;

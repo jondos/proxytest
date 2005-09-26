@@ -90,8 +90,9 @@ SINT32 CAASymCipher::decryptOAEP(const UINT8* from,UINT8* to,UINT32* len)
 		return E_SUCCESS;
 	}
 	
-/** Encrypts one block using OAEP padding. 
-	*@param from one of plain text
+/** Encrypts one block of plain text using OAEP padding. 
+	*@param from pointer to one block of plain text
+	*@param fromlen size of the plain text
 	*@param to the OAEP encoded cipher text
 	*@param len on return contains the size of the ciphertext
 	*@retval E_UNKNOWN in case of an error

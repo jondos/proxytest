@@ -37,7 +37,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 				CASocketAddrUnix(const CASocketAddrUnix& addr);
 				
 				/**Returns the type (family) of the socket this address is for (always AF_LOCAL)
-					* @return AF_LOCAL
+					* @retval AF_LOCAL
 					*/
 				SINT32 getType() const
 					{
@@ -45,6 +45,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 					}
 				
 
+				/** Creates a new copy of this address
+					*
+					* @return a copy of this address
+					*/
 				CASocketAddr* clone() const
 					{
 						return new CASocketAddrUnix(*this);
@@ -65,9 +69,26 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 						return (const ::LPSOCKADDR)(static_cast<const sockaddr_un*>(this));
 					}			
 				
+				/** Sets the path of this unix address.
+					* @param path the new path of this address
+					* @retval E_SUCCESS if succesful
+					* @retval E_UNKNOWN otherwise
+					*/
 				SINT32 setPath(const char* path);
+				
+				/** Retruns the path of this address
+					*
+					* @return the path of this address or NULL if not set
+					*/
 				UINT8* getPath() const;
 
+				/** Returns a human readable string describing this address.
+					* @param buff buffer which holds the string
+					* @param bufflen size of the buffer
+					* @retval E_SPACE if the bufvfer is to small for the string
+					* @retval E_UNKNOWN if an error occured
+					* @retval E_SUCCESS if successfull
+					*/
 				virtual SINT32 toString(UINT8* buff,UINT32 bufflen) const
 					{
 						UINT8* tmppath=getPath();
