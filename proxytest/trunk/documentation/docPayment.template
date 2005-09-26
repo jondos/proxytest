@@ -299,11 +299,12 @@ Die BI generiert nachfolgendes Transaktionszertifikat:
 
 @verbatim
 <?xml version="1.0" ?>
-<TransferCertificate version"1.0">
+<TransferCertificate version"1.1">
   <AccountNumber> ... </AccountNumber>
   <TransferNumber> ... </TransferNumber>
   <Deposit> ... </Deposit>
   <ValidTime> Gültigkeitsende der Transaktionsnummer </ValidTime>
+  <WebPayURL> [since version 1.1] Url der Web-Seite, auf der die Bezahlung erfolgt</WebPayURL>
   <Signature>
     ... Signature der BI
   </Signature>	
@@ -312,8 +313,9 @@ Die BI generiert nachfolgendes Transaktionszertifikat:
 
 Die BI erzeugt ausserdem einen Eintrag in der Datenbanktabelle <tt>TRANSFERS</tt>. Der Wert <tt>USED</tt> wird 
 dabei auf <tt>false</tt> gesetzt. 
-Die BI überträgt nun das oben erstellte Transaktionszertifikat an den Nutzer zusammen mit einer URL,
- wo genaue Erläuterungen zur Bezahlung und zur Benutzung von elektronischen Bezahlverfahren hinterlegt sind. 
+Die BI überträgt nun das oben erstellte Transaktionszertifikat an den Nutzer zusammen mit einer URL (<tt>\<WebPayURL\></tt>),
+ wo genaue Erläuterungen zur Bezahlung und zur Benutzung von elektronischen Bezahlverfahren hinterlegt sind. Dabei wird diese URL
+ vom JAP mit dem Parameter <tt>transfernum</tt> aufgerufen.
 
 \subsubsection secBalance Kontostandsabfrage
 

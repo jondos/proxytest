@@ -192,7 +192,6 @@ If you do not use the default BI, than you have to make some modifications in th
 
 - exchange the BI.cer with the public certifcate of your BI
 - set PIHOST and PIPORT in JAPConstants to the values of your BI
-- change anon.pay.xml.XMLTransCert.getBaseUrl() to match the location of the BI PHP files
 
 Start JAP with the -pay option:
 
