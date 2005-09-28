@@ -482,51 +482,6 @@ int main(int argc, const char* argv[])
 			CADatabase::measurePerformance((UINT8*)"dbperformace.log",1,10000001,500000,10,100000);
 			exit(0);
 #endif
-#ifdef _DEBUG
-		//		CADatabase::test();
-		if(CAQueue::test()!=E_SUCCESS)
-			CAMsg::printMsg(LOG_CRIT,"CAQueue::test() NOT passed! Exiting\n");
-		else
-			CAMsg::printMsg(LOG_DEBUG,"CAQueue::test() passed!\n");
-
-		//CALastMixChannelList::test();
-		//exit(0);
-		//Testing msSleep
-		CAMsg::printMsg(LOG_DEBUG,"Should sleep now for aprox 2 seconds....\n");
-		start=time(NULL);
-		for(i=0;i<10;i++)
-			msSleep(200);
-		start=time(NULL)-start;
-		CAMsg::printMsg(LOG_DEBUG,"done! Takes %u seconds\n",start);
-		//end Testin msSleep
-
-#endif
-		UINT8 buff[255];
-
-#ifndef WIN32
-		maxFiles=options.getMaxOpenFiles();
-		if(maxFiles>0)
-			{
-				struct rlimit lim;
-				// Set the new MAX open files limit
-				lim.rlim_cur = lim.rlim_max = maxFiles;
-				if (setrlimit(RLIMIT_NOFILE, &lim) != 0)
-					{
-						CAMsg::printMsg(LOG_CRIT,"Could not set MAX open files to: %u -- Exiting!\n",maxFiles);
-						exit(EXIT_FAILURE);
-					}
-			}
-		if(options.getUser(buff,255)==E_SUCCESS) //switching user
-			{
-				struct passwd* pwd=getpwnam((char*)buff);
-				if(pwd==NULL||seteuid(pwd->pw_uid)==-1)
-					CAMsg::printMsg(LOG_ERR,"Could not switch to effective user %s!\n",buff);
-				else
-					CAMsg::printMsg(LOG_INFO,"Switched to effective user %s!\n",buff);
-			}
-		if(geteuid()==0)
-			CAMsg::printMsg(LOG_INFO,"Warning - Running as root!\n");
-#endif
 		if(options.getDaemon())
 			{
 				CAMsg::printMsg(LOG_DEBUG,"starting as daemon\n");
@@ -590,8 +545,54 @@ int main(int argc, const char* argv[])
 								else
 									options.enableEncryptedLog(false);
 							}
-#endif
+				#endif
 			}
+
+#ifdef _DEBUG
+		//		CADatabase::test();
+		if(CAQueue::test()!=E_SUCCESS)
+			CAMsg::printMsg(LOG_CRIT,"CAQueue::test() NOT passed! Exiting\n");
+		else
+			CAMsg::printMsg(LOG_DEBUG,"CAQueue::test() passed!\n");
+
+		//CALastMixChannelList::test();
+		//exit(0);
+		//Testing msSleep
+		CAMsg::printMsg(LOG_DEBUG,"Should sleep now for aprox 2 seconds....\n");
+		start=time(NULL);
+		for(i=0;i<10;i++)
+			msSleep(200);
+		start=time(NULL)-start;
+		CAMsg::printMsg(LOG_DEBUG,"done! Takes %u seconds\n",start);
+		//end Testin msSleep
+
+#endif
+		UINT8 buff[255];
+
+#ifndef WIN32
+		maxFiles=options.getMaxOpenFiles();
+		if(maxFiles>0)
+			{
+				struct rlimit lim;
+				// Set the new MAX open files limit
+				lim.rlim_cur = lim.rlim_max = maxFiles;
+				if (setrlimit(RLIMIT_NOFILE, &lim) != 0)
+					{
+						CAMsg::printMsg(LOG_CRIT,"Could not set MAX open files to: %u -- Exiting!\n",maxFiles);
+						exit(EXIT_FAILURE);
+					}
+			}
+		if(options.getUser(buff,255)==E_SUCCESS) //switching user
+			{
+				struct passwd* pwd=getpwnam((char*)buff);
+				if(pwd==NULL||seteuid(pwd->pw_uid)==-1)
+					CAMsg::printMsg(LOG_ERR,"Could not switch to effective user %s!\n",buff);
+				else
+					CAMsg::printMsg(LOG_INFO,"Switched to effective user %s!\n",buff);
+			}
+		if(geteuid()==0)
+			CAMsg::printMsg(LOG_INFO,"Warning - Running as root!\n");
+#endif
 //			CAMsg::printMsg(LOG_ENCRYPTED,"Test: Anon proxy started!\n");
 //			CAMsg::printMsg(LOG_ENCRYPTED,"Test2: Anon proxy started!\n");
 //			CAMsg::printMsg(LOG_ENCRYPTED,"Test3: Anon proxy started!\n");
