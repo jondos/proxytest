@@ -46,6 +46,9 @@
 /* This is a flag to open() to do synchronized I/O */
 #undef HAVE_O_SYNC
 
+/* Define to 1 if you have the <pgsql/libpq-fe.h> header file. */
+#undef HAVE_PGSQL_LIBPQ_FE_H
+
 /* Define to 1 if you have the `poll' function. */
 #undef HAVE_POLL
 

@@ -420,13 +420,17 @@ AC_LANG_POP(C++)
 dnl Check for Postgresql libs if (needed if compiled with payment support)
 if test "x$PAYMENT" != "x" ; then
     AC_MSG_NOTICE([PostgreSQL tests])
+    dnl we check for <postgresql/libq-fe.h>,<pgsql/libpq-fe.h> and <libpq-fe.h>
     AC_CHECK_HEADERS([postgresql/libpq-fe.h],[],[
-						AC_CHECK_HEADERS([libpq-fe.h],[],[
-										    AC_MSG_ERROR([PostgreSQL include file libpq-fe.h not found!])
-										    ]
-								)		    
+						AC_CHECK_HEADERS([pgsql/libpq-fe.h],[],[
+											AC_CHECK_HEADERS([libpq-fe.h],[],[
+													AC_MSG_ERROR([PostgreSQL include file libpq-fe.h not found!])
+															]
+													)		    
+											]
+								)			
 						]
-		    )
+		    )		    
     AC_MSG_CHECKING([for PostgreSQL libs])
     saved_LIBS="$LIBS"
     PAYMENT_LIB="-lpq"
@@ -434,6 +438,8 @@ if test "x$PAYMENT" != "x" ; then
     AC_LINK_IFELSE([AC_LANG_PROGRAM([
 				#ifdef HAVE_POSTGRESQL_LIBPQ_FE_H
 				#include <postgresql/libpq-fe.h>
+				#elif defined(HAVE_PGSQL_LIBPQ_FE_H)
+				#include <pgsql/libpq-fe.h>
 				#else
 				#include <libpq-fe.h>
 				#endif
@@ -445,6 +451,8 @@ if test "x$PAYMENT" != "x" ; then
 				    AC_LINK_IFELSE([AC_LANG_PROGRAM([
 					#ifdef HAVE_POSTGRESQL_LIBPQ_FE_H
 					#include <postgresql/libpq-fe.h>
+					#elif defined(HAVE_PGSQL_LIBPQ_FE_H)
+					#include <pgsql/libpq-fe.h>
 					#else
 					#include <libpq-fe.h>
 					#endif
