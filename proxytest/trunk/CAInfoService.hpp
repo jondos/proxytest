@@ -68,7 +68,6 @@ class CAInfoService
 					m_bConfiguring = a_configuring;
 			}
 
-			//	CASignature* getSignature(){return m_pSignature;}
 		private:
 			// added by ronin <ronin2@web.de>
 			SINT32 handleConfigEvent(DOM_Document& doc);

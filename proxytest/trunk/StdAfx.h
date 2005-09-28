@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.04.06"
+#define MIX_VERSION "00.04.07"
 
 //Define all features if we are running in documentation creation mode
 #ifdef DOXYGEN
@@ -424,17 +424,19 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 //For Payment
 #ifdef PAYMENT
-    #ifdef HAVE_CONFIG_H
-	#ifdef HAVE_POSTGRESQL_LIBPQ_FE_H
+	#ifdef HAVE_CONFIG_H
+		#ifdef HAVE_POSTGRESQL_LIBPQ_FE_H
 	    #include <postgresql/libpq-fe.h>
-	#else
+		#elif define(HAVE_PGSQL_LIBPQ_FE_H)
+	    #include <pgsql/libpq-fe.h>
+		#else
 	    #include <libpq-fe.h>
-	#endif
-    #elif defined(__FreeBSD__)
-	#include <libpq-fe.h>
-    #else
-	#include <postgresql/libpq-fe.h>
-    #endif
+		#endif
+  #elif defined(__FreeBSD__)
+		#include <libpq-fe.h>
+			#else
+		#include <postgresql/libpq-fe.h>
+  #endif
 #endif
 //Compressed Logs
 #ifdef COMPRESSED_LOGS
