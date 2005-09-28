@@ -482,6 +482,7 @@ int main(int argc, const char* argv[])
 			CADatabase::measurePerformance((UINT8*)"dbperformace.log",1,10000001,500000,10,100000);
 			exit(0);
 #endif
+		UINT8 buff[255];
 		if(options.getDaemon())
 			{
 				CAMsg::printMsg(LOG_DEBUG,"starting as daemon\n");
@@ -567,7 +568,6 @@ int main(int argc, const char* argv[])
 		//end Testin msSleep
 
 #endif
-		UINT8 buff[255];
 
 #ifndef WIN32
 		maxFiles=options.getMaxOpenFiles();
