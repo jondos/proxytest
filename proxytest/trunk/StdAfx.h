@@ -427,7 +427,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#ifdef HAVE_CONFIG_H
 		#ifdef HAVE_POSTGRESQL_LIBPQ_FE_H
 	    #include <postgresql/libpq-fe.h>
-		#elif define(HAVE_PGSQL_LIBPQ_FE_H)
+		#elif defined(HAVE_PGSQL_LIBPQ_FE_H)
 	    #include <pgsql/libpq-fe.h>
 		#else
 	    #include <libpq-fe.h>
