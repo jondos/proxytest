@@ -182,5 +182,4 @@ THREAD_RETURN worker_thread_main_loop(void *arg)
 			(*(my_workp->routine))(my_workp->arg);
 			delete my_workp;
   } 
-  THREAD_RETURN_SUCCESS;            
 }

@@ -372,7 +372,7 @@ SINT32 CASocket::sendTimeOut(const UINT8* buff,UINT32 len,UINT32 msTimeOut)
 						ret=send(buff,len);
 						if(ret==E_AGAIN)
 							{
-								msSleep(msTimeOut);
+								msSleep((UINT16)msTimeOut);
 								ret=send(buff,len);
 							}
 						setNonBlocking(bWasNonBlocking);

@@ -47,7 +47,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="proxytest-lib.lib ws2_32.lib ssleay32.lib libeay32.lib pthreadVC.lib xerces-c_2D.lib zlib.lib libpqdll.lib $(NOINHERIT)"
+				AdditionalDependencies="proxytest-lib.lib ws2_32.lib ssleay32.lib libeay32.lib pthreadVC.lib xerces-c_2D.lib xerces-depdom_2D.lib zlib.lib libpqdll.lib $(NOINHERIT)"
 				OutputFile="$(OutDir)\proxytest.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
