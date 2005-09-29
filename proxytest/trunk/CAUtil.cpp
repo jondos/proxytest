@@ -835,8 +835,8 @@ SINT32 parseU64(const UINT8 * str, UINT64& value)
 			return E_SUCCESS;
 		#else
 			#warning parseU64() is not implemented for platforms without atoll() support!!!
+			return E_UNKNOWN;
 		#endif
-		return E_UNKNOWN;
 	#else
 		#warning parseU64() is not implemented for platforms without native UINT64 support!!!
 		///@todo code if we do not have native UINT64

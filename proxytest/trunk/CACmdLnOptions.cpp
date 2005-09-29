@@ -275,19 +275,19 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 				else
 					{
 						char tmpHostname[255];
-						int tmpPort;
+						SINT32 tmpPort;
 						char* tmpStr1=strchr(target,':');
 						if(tmpStr1!=NULL)
 							{
 								memcpy(tmpHostname,target,tmpStr1-target);
 								tmpHostname[tmpStr1-target]=0;
-								tmpPort=(int)atol(tmpStr1+1);
+								tmpPort=(SINT32)atol(tmpStr1+1);
 							}
 						else
 							{//TODO what if not in right form ?
 								//try if it is a number --> use it as port
 								//and use 'localhost' as traget-host
-								tmpPort=(int)atol(target);
+								tmpPort=(SINT32)atol(target);
 								if(tmpPort!=0) //we get it
 									{
 										strcpy(tmpHostname,"localhost");
@@ -301,7 +301,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 							}
 						m_strTargetHost=new char[strlen(tmpHostname)+1];
 						strcpy(m_strTargetHost,tmpHostname);
-						m_iTargetPort=tmpPort;
+						m_iTargetPort=(UINT16)tmpPort;
 					}
 				free(target);
 	    }
@@ -309,12 +309,12 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 			{
 				char* tmpStr;
 				if((tmpStr=strchr(socks,':'))!=NULL)
-						{
-					m_strSOCKSHost=new char[tmpStr-socks+1];
-					(*tmpStr)=0;
-					strcpy(m_strSOCKSHost,socks);
-					m_iSOCKSPort=(int)atol(tmpStr+1);
-						}
+					{
+						m_strSOCKSHost=new char[tmpStr-socks+1];
+						(*tmpStr)=0;
+						strcpy(m_strSOCKSHost,socks);
+						m_iSOCKSPort=(UINT16)atol(tmpStr+1);
+					}
 				free(socks);
 	    }
 	if(logdir!=NULL)
@@ -346,19 +346,19 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 			else //Internet Socket
 				{
 					char* strServerHost=NULL;
-					int iServerPort;
+					SINT32 iServerPort;
 					if((tmpStr=strchr(serverPort,':'))!=NULL) //host:port
 						{
 							strServerHost=new char[tmpStr-serverPort+1];
 							(*tmpStr)=0;
 							strcpy(strServerHost,serverPort);
-							iServerPort=(int)atol(tmpStr+1);
+							iServerPort=(SINT32)atol(tmpStr+1);
 						}
 					else //port only ?
 						{
-							iServerPort=(int)atol(serverPort);
+							iServerPort=(SINT32)atol(serverPort);
 						}
-						m_arListenerInterfaces[0]=CAListenerInterface::getInstance(RAW_TCP,(UINT8*)strServerHost,iServerPort);
+						m_arListenerInterfaces[0]=CAListenerInterface::getInstance(RAW_TCP,(UINT8*)strServerHost,(UINT16)iServerPort);
 					delete [] strServerHost;
 				}
 			free(serverPort);
@@ -366,7 +366,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 				m_cnListenerInterfaces=1;
 		}
 
-	m_iSOCKSServerPort=SOCKSport;
+	m_iSOCKSServerPort=(UINT16)SOCKSport;
 	if(!m_bLocalProxy)
 		{
 			ret=processXmlConfiguration(m_docMixXml);
@@ -1191,7 +1191,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 			}
 		getDOMChildByName(elemInfoService,(UINT8*)"Port",elem,false);
 		if(getDOMElementValue(elem,&tmp)==E_SUCCESS)
-			m_iInfoServerPort=tmp;
+			m_iInfoServerPort=(UINT16)tmp;
 
 		//get ListenerInterfaces
 		DOM_Element elemListenerInterfaces;
@@ -1614,7 +1614,7 @@ SKIP_NEXT_MIX:
         getDOMChildByName(elemRoot,(UINT8*)"MixCascade",m_oCascadeXML,false);
 
         DOM_NodeList nl = m_oCascadeXML.getElementsByTagName("Mix");
-        UINT16 len = nl.getLength();
+        UINT16 len = (UINT16)nl.getLength();
         if(len == 0)
         {
             CAMsg::printMsg(LOG_CRIT,"Error in configuration: Empty cascade specified.\n");

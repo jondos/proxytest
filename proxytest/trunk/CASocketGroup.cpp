@@ -81,7 +81,10 @@ SINT32 CASocketGroup::remove(CASocket&s)
 	{
 		m_csFD_SET.lock();
 		#ifndef HAVE_POLL
+			#pragma warning( push )
+			#pragma warning( disable : 4127 ) //Disable: Bedingter Ausdruck ist konstant
 			FD_CLR((SOCKET)s,&m_fdset);
+			#pragma warning (pop)
 		#else
 			m_pollfd[(SOCKET)s].fd=-1;			
 		#endif
@@ -93,7 +96,10 @@ SINT32 CASocketGroup::remove(CAMuxSocket&s)
 	{
 		m_csFD_SET.lock();
 		#ifndef HAVE_POLL
+			#pragma warning( push )
+			#pragma warning( disable : 4127 ) //Disable: Bedingter Ausdruck ist konstant
 			FD_CLR((SOCKET)s,&m_fdset);
+			#pragma warning (pop)
 		#else
 			m_pollfd[(SOCKET)s].fd=-1;
 		#endif
