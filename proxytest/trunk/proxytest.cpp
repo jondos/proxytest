@@ -367,7 +367,7 @@ int main(int argc, const char* argv[])
 	{
 		pMix=NULL;
 		int i;
-		SINT32 maxFiles;
+		SINT32 maxFiles,ret;
 #if defined(HAVE_CRTDBG)
 //			_CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_FILE );
 //			_CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDOUT );
@@ -468,7 +468,7 @@ int main(int argc, const char* argv[])
 				else
 					CAMsg::setLogOptions(MSG_FILE);
 			}
-		SINT32 ret=CAMsg::openEncryptedLog();
+		ret=CAMsg::openEncryptedLog();
 #ifdef LOG_CRIME
 		if(ret!=E_SUCCESS)
 			{
