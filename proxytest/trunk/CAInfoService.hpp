@@ -54,7 +54,10 @@ class CAInfoService
 			SINT32 stop();
 			SINT32 getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic);
 			SINT32 getMixedPackets(UINT64& ppackets);
-			bool isRunning(){return m_bRun;}
+			bool isRunning()
+				{
+					return m_bRun;
+				}
 			SINT32 setSignature(CASignature* pSignature,CACertificate* ownCert);
 
 			// added by ronin <ronin2@web.de>
