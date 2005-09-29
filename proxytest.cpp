@@ -421,48 +421,6 @@ int main(int argc, const char* argv[])
 			UINT32 start;
 #endif
 
-		//temp
-		/*for(;;){
-		CAQueue* pQueue=new CAQueue(MIXPACKET_SIZE);
-		UINT8 buff3[MIXPACKET_SIZE];
-		UINT64 t1,t2;
-		getcurrentTimeMicros(t1);
-		int h=1000;
-		for(int k=0;k<1000;k++)
-		{
-		for(int i=0;i<h;i++)
-			pQueue->add(buff3,MIXPACKET_SIZE);
-		UINT32 le=MIXPACKET_SIZE;
-		for(int i=0;i<h;i++)
-				pQueue->get(buff3,&le);
-				}
-		getcurrentTimeMicros(t2);
-		printf("Queue Time: %u µs\n",diff64(t2,t1));
-		delete pQueue;
-		UINT8 buff23[MIXPACKET_SIZE*h];
-		UINT32 aktIndex=0;
-		getcurrentTimeMicros(t1);
-		for(int k=0;k<1000;k++)
-		{
-		aktIndex=0;
-		for(int i=0;i<h;i++)
-		{
-			memcpy(buff23+aktIndex,buff3,MIXPACKET_SIZE);
-			aktIndex+=MIXPACKET_SIZE;
-			}
-		for(int i=0;i<h;i++)
-		{
-			aktIndex-=MIXPACKET_SIZE;
-				memcpy(buff3,buff23+aktIndex,MIXPACKET_SIZE);
-				}
-				}
-		getcurrentTimeMicros(t2);
-		printf("Array Time: %u µs\n",diff64(t2,t1));
-		}
-		
-		
-		exit(0);*/		
-		//end temp
 		if(options.parse(argc,argv) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_CRIT,"Error: Cannot parse configuration file!\n");
@@ -483,71 +441,45 @@ int main(int argc, const char* argv[])
 			exit(0);
 #endif
 		UINT8 buff[255];
+#ifndef _WIN32
 		if(options.getDaemon())
 			{
 				CAMsg::printMsg(LOG_DEBUG,"starting as daemon\n");
-				#ifndef _WIN32
-					if(options.getLogDir(buff,255)==E_SUCCESS)
-						{
-							if(options.getCompressLogs())
-								CAMsg::setLogOptions(MSG_COMPRESSED_FILE);
-							else
-								CAMsg::setLogOptions(MSG_FILE);
-						}
-					else
-						CAMsg::setLogOptions(MSG_LOG);
-					SINT32 ret=CAMsg::openEncryptedLog();
-					#ifdef LOG_CRIME
-					if(ret!=E_SUCCESS)
-							{
-								if(options.isEncryptedLogEnabled())
-									{
-										CAMsg::printMsg(LOG_ERR,"Could not open encrypted log - exiting!\n");
-										exit(EXIT_FAILURE);
-									}
-								else
-									options.enableEncryptedLog(false);
-							}
-					#endif
-					pid_t pid;
-					CAMsg::printMsg(LOG_DEBUG,"daemon - before fork()\n");
-					pid=fork();
-					if(pid!=0)
-						{
-							CAMsg::printMsg(LOG_DEBUG,"Exiting parent!\n");
-							exit(EXIT_SUCCESS);
-						}		
-					CAMsg::printMsg(LOG_DEBUG,"child after fork...\n");
-					setsid();
-					#ifndef DO_TRACE
+				pid_t pid;
+				CAMsg::printMsg(LOG_DEBUG,"daemon - before fork()\n");
+				pid=fork();
+				if(pid!=0)
+					{
+						CAMsg::printMsg(LOG_DEBUG,"Exiting parent!\n");
+						exit(EXIT_SUCCESS);
+					}		
+				CAMsg::printMsg(LOG_DEBUG,"child after fork...\n");
+				setsid();
+				#ifndef DO_TRACE
 					chdir("/");
 					umask(0);
-					#endif
 				#endif
-			}
-		else
+#endif
+		if(options.getLogDir((UINT8*)buff,255)==E_SUCCESS)
 			{
-				if(options.getLogDir((UINT8*)buff,255)==E_SUCCESS)
-					{
-						if(options.getCompressLogs())
-							CAMsg::setLogOptions(MSG_COMPRESSED_FILE);
-						else
-							CAMsg::setLogOptions(MSG_FILE);
-					}
-				SINT32 ret=CAMsg::openEncryptedLog();
-				#ifdef LOG_CRIME
-					if(ret!=E_SUCCESS)
-							{
-								if(options.isEncryptedLogEnabled())
-									{
-										CAMsg::printMsg(LOG_ERR,"Could not open encrypted log - exiting!\n");
-										exit(EXIT_FAILURE);
-									}
-								else
-									options.enableEncryptedLog(false);
-							}
-				#endif
+				if(options.getCompressLogs())
+					CAMsg::setLogOptions(MSG_COMPRESSED_FILE);
+				else
+					CAMsg::setLogOptions(MSG_FILE);
 			}
+		SINT32 ret=CAMsg::openEncryptedLog();
+#ifdef LOG_CRIME
+		if(ret!=E_SUCCESS)
+			{
+				if(options.isEncryptedLogEnabled())
+					{
+						CAMsg::printMsg(LOG_ERR,"Could not open encrypted log - exiting!\n");
+						exit(EXIT_FAILURE);
+					}
+				else
+					options.enableEncryptedLog(false);
+			}
+#endif
 
 #ifdef _DEBUG
 		//		CADatabase::test();
