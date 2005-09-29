@@ -459,6 +459,7 @@ int main(int argc, const char* argv[])
 					chdir("/");
 					umask(0);
 				#endif
+			}
 #endif
 		if(options.getLogDir((UINT8*)buff,255)==E_SUCCESS)
 			{
