@@ -27,25 +27,26 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CAMUTEX__
 #define __CAMUTEX__
-#ifdef _DEBUG
-#include "CAMsg.hpp"
-#endif
 class CAConditionVariable;
 class CAMutex
 	{
 		public:
+#ifndef DEBUG
 			CAMutex()
 				{
 					m_pMutex=new pthread_mutex_t;
-					ASSERT(pthread_mutex_init(m_pMutex,NULL)==0,"Muxtex init failed!");
+					pthread_mutex_init(m_pMutex,NULL);
 				}
 
 			virtual ~CAMutex()
 				{
-					ASSERT(pthread_mutex_destroy(m_pMutex)==0,"Mutex detroy failed!");
+					pthread_mutex_destroy(m_pMutex);
 					delete m_pMutex;
 				}
-
+#else
+			CAMutex();
+			virtual ~CAMutex();
+#endif
 			SINT32 lock()
 				{
 					if(pthread_mutex_lock(m_pMutex)==0)
