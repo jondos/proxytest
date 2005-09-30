@@ -41,7 +41,7 @@ CAReplayCtrlChannelMsgProc::CAReplayCtrlChannelMsgProc(const CAMix* pMix)
 		#ifdef DEUBG
 			CAMsg::printMsg(LOG_DEBUG,"CAReplayCtrlChannelMsgProc - constructor - this=%p\n",this);
 		#endif
-		m_strGetTimestampsRepsonseMessageTemplate=NULL;
+		//m_strGetTimestampsRepsonseMessageTemplate=NULL;
 		m_pDownstreamReplayControlChannel=NULL;
 		m_pUpstreamReplayControlChannel=NULL;
 		m_pMix=pMix;
@@ -88,7 +88,7 @@ CAReplayCtrlChannelMsgProc::~CAReplayCtrlChannelMsgProc()
 				pDispatcher->removeControlChannel(m_pUpstreamReplayControlChannel->getID());
 				delete m_pUpstreamReplayControlChannel;
 			}
-		delete m_strGetTimestampsRepsonseMessageTemplate;
+		//delete m_strGetTimestampsRepsonseMessageTemplate;
 	}
 
 SINT32 CAReplayCtrlChannelMsgProc::proccessGetTimestamps(const CAReplayControlChannel* pReceiver) const

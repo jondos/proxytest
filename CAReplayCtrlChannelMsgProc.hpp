@@ -88,8 +88,8 @@ private:
 		CAReplayControlChannel* m_pUpstreamReplayControlChannel;
 		UINT32 m_u32PropagationInterval;
 		CAThread* m_pThreadTimestampPropagation;
-		UINT8* m_strGetTimestampsRepsonseMessageTemplate;
-		UINT32 m_u32GetTimestampsRepsonseMessageTemplateLen;
+		//UINT8* m_strGetTimestampsRepsonseMessageTemplate;
+		//UINT32 m_u32GetTimestampsRepsonseMessageTemplateLen;
 		volatile bool m_bRun;
 };
 #endif
