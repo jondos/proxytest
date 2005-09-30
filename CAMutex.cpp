@@ -36,7 +36,7 @@ CAMutex::CAMutex()
 		ASSERT(pthread_mutex_init(m_pMutex,NULL)==0,"Muxtex init failed!");
 	}
 
-virtual CAMutex::~CAMutex()
+CAMutex::~CAMutex()
 	{
 		ASSERT(pthread_mutex_destroy(m_pMutex)==0,"Mutex detroy failed!");
 		delete m_pMutex;
