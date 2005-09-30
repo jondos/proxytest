@@ -27,7 +27,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CAMUTEX__
 #define __CAMUTEX__
-
+#ifdef _DEBUG
+#include "CAMsg.hpp"
+#endif
 class CAConditionVariable;
 class CAMutex
 	{
