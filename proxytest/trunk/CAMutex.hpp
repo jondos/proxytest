@@ -35,12 +35,12 @@ class CAMutex
 			CAMutex()
 				{
 					m_pMutex=new pthread_mutex_t;
-					pthread_mutex_init(m_pMutex,NULL);
+					ASSERT(pthread_mutex_init(m_pMutex,NULL)==0),"Muxtex init failed!);
 				}
 
 			virtual ~CAMutex()
 				{
-					pthread_mutex_destroy(m_pMutex);
+					ASSERT(pthread_mutex_destroy(m_pMutex)==0),Mutex detroy failed!");
 					delete m_pMutex;
 				}
 
