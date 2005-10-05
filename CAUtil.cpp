@@ -558,7 +558,6 @@ SINT32 getDOMElementValue(const DOM_Element& elem,UINT32* value)
 
 SINT32 getDOMElementValue(const DOM_Element& elem, UINT64 &value)
 {
-	ASSERT(value!=NULL, "Value is null");
 	ASSERT(elem!=NULL, "Element is NULL");
 	UINT8 buf[256];
 	UINT32 bufLen = 256;

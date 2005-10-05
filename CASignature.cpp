@@ -663,7 +663,7 @@ SINT32 CASignature::verifyXML(const UINT8* const in,UINT32 inlen)
 	}
 
 
-/** Verifies a XML Signature under node root */
+/** Verifies a XML Signature under node root. @Note This removes the \<Signature\> node! */
 SINT32 CASignature::verifyXML(DOM_Node& root,CACertStore* trustedCerts)
 	{
 		DOM_Element elemSignature;

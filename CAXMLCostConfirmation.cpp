@@ -6,35 +6,23 @@
 UINT8* CAXMLCostConfirmation::ms_pStrElemName=NULL;
 
 CAXMLCostConfirmation::CAXMLCostConfirmation(UINT8 * strXmlData) 
-	: CAAbstractXMLSignable()
 {
 	// parse XML
 	MemBufInputSource oInput( strXmlData, strlen((char*)strXmlData), "XMLCostConfirmation" );
 	DOMParser oParser;
 	oParser.parse( oInput );
-	DOM_Document doc = oParser.getDocument();
-	DOM_Element elemRoot = doc.getDocumentElement();
-	//if(!ms_pStrElemName) initXMLElementName();
+	m_domDocument = oParser.getDocument();
 	m_pStrAiName = NULL;
-	setValues(elemRoot);
+	setValues();
 }
 
-
-CAXMLCostConfirmation::CAXMLCostConfirmation(DOM_Document &doc)
-	: CAAbstractXMLSignable()
-{
-	DOM_Element elemRoot = doc.getDocumentElement();
-	//if(!ms_pStrElemName) initXMLElementName();
-	m_pStrAiName = NULL;
-	setValues(elemRoot);
-}
 
 CAXMLCostConfirmation::CAXMLCostConfirmation(DOM_Element &elemRoot)
-	: CAAbstractXMLSignable()
 {
-	//if(!ms_pStrElemName) initXMLElementName();
 	m_pStrAiName = NULL;
-	setValues(elemRoot);
+	m_domDocument=DOM_Document::createDocument();
+	m_domDocument.appendChild(m_domDocument.importNode(elemRoot,true));
+	setValues();
 }
 
 UINT8 * CAXMLCostConfirmation::getXMLElementName()
@@ -52,11 +40,13 @@ CAXMLCostConfirmation::~CAXMLCostConfirmation()
 	{
 		if(m_pStrAiName!=NULL)
 			delete[] m_pStrAiName;
+		m_domDocument=NULL;
 	}
 
 
-SINT32 CAXMLCostConfirmation::setValues(DOM_Element &elemRoot)
+SINT32 CAXMLCostConfirmation::setValues()
 	{
+		DOM_Element elemRoot=m_domDocument.getDocumentElement();
 		DOM_Element elem; 
 		UINT8 strGeneral[128];
 		UINT32 strGeneralLen = 128;
@@ -85,48 +75,5 @@ SINT32 CAXMLCostConfirmation::setValues(DOM_Element &elemRoot)
 		getDOMChildByName(elemRoot, (UINT8*)"TransferredBytes", elem, false);
 		getDOMElementValue(elem, m_lTransferredBytes);
 	
-	// parse signature
-		getDOMChildByName(elemRoot, (UINT8*)"Signature", elem, false);
-		if(elem.isNull())
-			{
-				CAMsg::printMsg(LOG_DEBUG, "CAXMLCostConfirmation::setValues(): not signed!!!\n");
-			}
-		else
-			{
-				setSignature(elem);
-			}
 		return E_SUCCESS;
 	}
-
-
-SINT32 CAXMLCostConfirmation::toXmlElement(DOM_Document &a_doc, DOM_Element &elemRoot)
-{
-	elemRoot = a_doc.createElement((char *)getXMLElementName());
-	setDOMElementAttribute(elemRoot, "version", (UINT8*)"1.0");
-	
-	DOM_Element elem = a_doc.createElement("AiID");
-	setDOMElementValue(elem, m_pStrAiName);
-	elemRoot.appendChild(elem);
-		
-	elem = a_doc.createElement("TransferredBytes");
-	setDOMElementValue(elem, m_lTransferredBytes);
-	elemRoot.appendChild(elem);
-	
-	elem = a_doc.createElement("AccountNumber");
-	setDOMElementValue(elem, m_lAccountNumber);
-	elemRoot.appendChild(elem);
-	
-	
-	if(!m_signature.isNull())
-	{
-		DOM_Element elemSig1 = m_signature.getDocumentElement();
-		DOM_Node elemSig = a_doc.importNode(elemSig1, true);
-		elemRoot.appendChild(elemSig);
-	}
-	else
-	{
-		CAMsg::printMsg(LOG_DEBUG, "toXmlElement signature is NULL!!\n");
-	}
-	
-	return E_SUCCESS;
-}
