@@ -45,6 +45,10 @@ class CAAbstractControlChannel
 				m_ID=id;
 				m_pDispatcher=NULL;
 			}
+			
+		virtual ~CAAbstractControlChannel()
+			{
+			}
     
 		/** Call to send a XML message via this control channel. Note that this message can not be bigger than 64 KBytes.
 			* @param docMsg XML document to sent over this control channel

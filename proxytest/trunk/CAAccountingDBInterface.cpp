@@ -206,12 +206,16 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 		if(!m_bConnected) 
 			return E_NOT_CONNECTED;
 		
-		pStrCC = cc.toXmlString(size);
-		if(pStrCC==NULL)
-			return E_UNKNOWN;
+		pStrCC = new UINT8[8192];
+		size=8192;
+		if(cc.toXMLString(pStrCC,&size)!=E_SUCCESS)
+			{
+				delete[] pStrCC;
+				return E_UNKNOWN;
+			}
 
 		// Test: is there already an entry with this accountno.?
-		query = new UINT8[ strlen(query1F) + strlen((char*)pStrCC) + 128 ];
+		query = new UINT8[ strlen(query1F) + size + 128 ];
 		UINT8 strAccountNumber[32];
 		print64(strAccountNumber,cc.getAccountNumber());
 		sprintf( (char*)query, query1F, strAccountNumber);
@@ -242,7 +246,9 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 	
 		// put query together (either insert or update)
 		UINT8* pVal = (UINT8*)PQgetvalue(pResult, 0, 0);
-		CAMsg::printMsg(LOG_DEBUG, "DB store -> pVal ist %s, atoi gibt %i\n", pVal, atoi((char*)pVal));
+		#ifdef DEBUG
+			CAMsg::printMsg(LOG_DEBUG, "DB store -> pVal ist %s, atoi gibt %i\n", pVal, atoi((char*)pVal));
+		#endif
 		if(atoi( (char*)pVal ) == 0)
 			{
 				UINT8 tmp2[32];

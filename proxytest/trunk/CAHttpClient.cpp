@@ -87,11 +87,9 @@ SINT32 CAHttpClient::sendGetRequest(UINT8 * url)
 */
 SINT32 CAHttpClient::sendPostRequest(const UINT8 * url, const UINT8 * data, const UINT32 dataLen)
 	{
-		UINT8 requestF[] = "POST %s HTTP/1.0\r\nContent-length: %d\r\n\r\n";
+		UINT8 requestF[] = "POST %s HTTP/1.0\r\nContent-length: %u\r\n\r\n";
 		UINT32 len;
 		UINT8* requestS;
-		UINT32 bufsize;
-		UINT8* buf;
 		
 		if(!m_pSocket)
 			{
@@ -103,26 +101,17 @@ SINT32 CAHttpClient::sendPostRequest(const UINT8 * url, const UINT8 * data, cons
 		requestS=new UINT8[len+1];
 		sprintf((char *)requestS, (char *)requestF, (char *)url, dataLen);
 		len = strlen((char *)requestS);
-		bufsize = len + dataLen +1;
-		buf=new UINT8[bufsize];
-		memcpy(buf, requestS, len);
-		memcpy(buf+len, data, dataLen);
-		buf[len+dataLen]=0;
 		#ifdef DEBUG
-			CAMsg::printMsg(LOG_DEBUG, "HttpClient now sending: %s\n", buf);
+			CAMsg::printMsg(LOG_DEBUG, "HttpClient now sending: %s\n", requestS);
 		#endif
-	
-		// send it
-		/// TODO: use sendFully() here
-		int ret = 0;
-		do
-			{
-				ret = m_pSocket->send(buf, bufsize);
-			}
-		while(ret == E_AGAIN);
+		SINT32 ret=m_pSocket->sendFully(requestS,len);
 		delete[] requestS;
-		delete[] buf;
-		if(ret == E_UNKNOWN)
+		if(ret!=E_SUCCESS)
+			{
+				return E_UNKNOWN;
+			}
+		ret=m_pSocket->sendFully(data,dataLen);
+		if(ret != E_SUCCESS)
 			{ // socket error
 				return E_UNKNOWN;
 			}

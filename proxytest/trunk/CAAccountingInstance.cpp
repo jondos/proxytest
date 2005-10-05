@@ -611,10 +611,11 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,D
 			return ;
 		}
 		
+	CAXMLCostConfirmation cc(root);
 		
 	// for debugging only: test signature the oldschool way
 	// warning this removes the signature from doc!!!
-/*	if ( (!pAccInfo->pPublicKey)||
+	if ( pAccInfo->pPublicKey==NULL||
 			(pAccInfo->pPublicKey->verifyXML( (DOM_Node &)root ) != E_SUCCESS ))
 		{
 			// wrong signature
@@ -622,25 +623,9 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,D
 			CAXMLErrorMessage err(CAXMLErrorMessage::ERR_BAD_SIGNATURE, (UINT8*)"CostConfirmation has bad signature");
 			DOM_Document errDoc;
 			err.toXmlDocument(errDoc);
-			pAccInfo->pControlChannel->sendMessage(errDoc);
+			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
 			m_Mutex.unlock();
 			return ;
-		}*/
-		
-
-	CAXMLCostConfirmation cc(root);
-	
-	// TODO: Make this work.... :-//
-	if( cc.verifySignature( *(pAccInfo->pPublicKey)) != E_SUCCESS)
-		{
-			// wrong signature
-			CAMsg::printMsg( LOG_INFO, "CostConfirmation has INVALID SIGNATURE! (IGNORING)\n" );
-			/*CAXMLErrorMessage err(CAXMLErrorMessage::ERR_BAD_SIGNATURE, (UINT8*)"CostConfirmation has bad signature");
-			DOM_Document errDoc;
-			err.toXmlDocument(errDoc);
-			pAccInfo->pControlChannel->sendMessage(errDoc);
-			m_Mutex.unlock();
-			return ;*/
 		}
 	#ifdef DEBUG
 	else
@@ -701,7 +686,6 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,D
  */
 SINT32 CAAccountingInstance::handleBalanceCertificate(fmHashTableEntry *pHashEntry, const DOM_Element &root)
 	{
-		CASignature * pSigTester;
 		UINT8 strGeneral[ 256 ];
 		UINT32 strGeneralLen = 256;
 		UINT64 newDeposit, newSpent;
@@ -711,7 +695,6 @@ SINT32 CAAccountingInstance::handleBalanceCertificate(fmHashTableEntry *pHashEnt
 	
 		// test signature
 		m_Mutex.lock();
-		//pSigTester = pHashEntry->pAccountingInfo->pPublicKey;
 		if( !m_pJpiVerifyingInstance || 
 				(m_pJpiVerifyingInstance->verifyXML( (DOM_Node &)root, (CACertStore *)NULL ) != E_SUCCESS) 
 			)

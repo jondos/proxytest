@@ -133,9 +133,9 @@ CAXMLErrorMessage * CAAccountingBIInterface::settle(CAXMLCostConfirmation &cc)
 		UINT32 contentLen, status;
 		CAXMLErrorMessage *pErrMsg;
 	
-		pStrCC = cc.toXmlString(contentLen);
+		pStrCC = cc.dumpToMem(&contentLen);
 		if(	pStrCC==NULL||
-				m_httpClient.sendPostRequest((UINT8*)"/settle", pStrCC, strlen((char*)pStrCC))!= E_SUCCESS)
+				m_httpClient.sendPostRequest((UINT8*)"/settle", pStrCC,contentLen)!= E_SUCCESS)
 			{
 				delete[] pStrCC;
 				return NULL;
