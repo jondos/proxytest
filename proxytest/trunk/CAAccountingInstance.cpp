@@ -817,6 +817,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 						delete [] pAccInfo->pChallenge;
 					}
 				delete pHashEntry->pAccountingInfo;
+				pHashEntry->pAccountingInfo=NULL;
 			}
 		return E_SUCCESS;
 	}

@@ -84,7 +84,7 @@ SINT32 CAAccountingBIInterface::initBIConnection()
 				m_connected = false;
 				return E_UNKNOWN;
 			}
-		address.setAddr(pBI->getHostName(), pBI->getPortNumber());
+		address.setAddr(pBI->getHostName(), (UINT16)pBI->getPortNumber());
 		
 		// connect
 		rc=m_pSocket->connect(address);

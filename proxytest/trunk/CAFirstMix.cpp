@@ -809,8 +809,8 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 				return E_UNKNOWN;
 			}
 		//Sending Signature....
-		xml_buff[0]=xml_len>>8;
-		xml_buff[1]=xml_len&0xFF;
+		xml_buff[0]=(UINT8)(xml_len>>8);
+		xml_buff[1]=(UINT8)(xml_len&0xFF);
 		UINT8 sig[255];
 		UINT32 siglen=255;
 		m_pSignature->sign(xml_buff,xml_len+2,sig,&siglen);
@@ -825,20 +825,20 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		setDOMElementValue(elemSigValue,sig);
 		u32=xml_len;
 		DOM_Output::dumpToMem(docSig,xml_buff+2,&u32);
-		xml_buff[0]=u32>>8;
-		xml_buff[1]=u32&0xFF;
+		xml_buff[0]=(UINT8)(u32>>8);
+		xml_buff[1]=(UINT8)(u32&0xFF);
 		((CASocket*)pNewUser)->send(xml_buff,u32+2);
 		delete xml_buff;
 		((CASocket*)pNewUser)->setNonBlocking(true);
 		CAQueue* tmpQueue=new CAQueue(sizeof(tQueueEntry));
-		if(m_pChannelList->add(pNewUser,peerIP,tmpQueue)!=E_SUCCESS)// adding user connection to mix->JAP channel list (stefan: sollte das nicht connection list sein? --> es handelt sich um eine Datenstruktu fŸr Connections/Channels ).
+		fmHashTableEntry* pHashEntry=m_pChannelList->add(pNewUser,peerIP,tmpQueue);
+		if(pHashEntry==NULL)// adding user connection to mix->JAP channel list (stefan: sollte das nicht connection list sein? --> es handelt sich um eine Datenstruktu fŸr Connections/Channels ).
 			{
 				m_pIPList->removeIP(peerIP);
 				delete tmpQueue;
 				delete pNewUser;
 				return E_UNKNOWN;
 			}
-		fmHashTableEntry* pHashEntry=m_pChannelList->get(pNewUser);
 #ifdef PAYMENT
 		// register AI control channel
 		//CAAccountingControlChannel * pTmp = new CAAccountingControlChannel(pHashEntry);
