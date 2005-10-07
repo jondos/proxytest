@@ -78,7 +78,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 		CAXMLBI* pBI = options.getBI();
 		if(pBI==NULL)
 			THREAD_RETURN_ERROR;
-		biAddr.setAddr(pBI->getHostName(), pBI->getPortNumber());
+		biAddr.setAddr(pBI->getHostName(), (UINT16)pBI->getPortNumber());
 		options.getPaymentSettleInterval(&sleepInterval);
 
 		volatile bool* bRun=(volatile bool*)pParam;
@@ -88,7 +88,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				#ifdef DEBUG
 					CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread going to sleep...\n");
 				#endif
-				sSleep(sleepInterval);
+				sSleep((UINT16)sleepInterval);
 				#ifdef DEBUG
 					CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread Waking up...\n");
 				#endif

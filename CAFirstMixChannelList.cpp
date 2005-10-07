@@ -63,10 +63,6 @@ CAFirstMixChannelList::CAFirstMixChannelList()
 		m_pThreadDelayBucketsLoop->setMainLoop(fml_loopDelayBuckets);
 		m_pThreadDelayBucketsLoop->start(this);
 #endif
-
-//#ifdef PAYMENT
-//	m_pAccountingInstance = CAAccountingInstance::getInstance();
-//#endif
 	}
 
 CAFirstMixChannelList::~CAFirstMixChannelList()
@@ -91,22 +87,22 @@ CAFirstMixChannelList::~CAFirstMixChannelList()
 	* @param pMuxSocket the new connection (from a user)
 	* @param peerIP the IP of the user, so that we can remove it later from the CAIPList
 	* @param pQueueSend the send-queue to use for this connection
-	* @retval E_UNKNOWN in case of an error
-	* @retval E_SUCCESS if successful
+	* @retval the fmHashTableEntry of the newly added connection
+	* @retval NULL if an error occured
 	*/
-SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8 peerIP[4],CAQueue* pQueueSend)
+fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8 peerIP[4],CAQueue* pQueueSend)
 	{
 		if(pMuxSocket==NULL)
-			return E_UNKNOWN;
+			return NULL;
 		SINT32 hashkey=pMuxSocket->getSocket();
 		if(hashkey>MAX_HASH_KEY-1||hashkey<0)
-			return E_UNKNOWN;
+			return NULL;
 		m_Mutex.lock();
 		fmHashTableEntry* pHashTableEntry=m_HashTable[hashkey];
 		if(pHashTableEntry->pMuxSocket!=NULL) //the entry in the hashtable for this socket (hashkey) must be empty
 			{
 				m_Mutex.unlock();
-				return E_UNKNOWN;
+				return NULL;
 			}
 		pHashTableEntry->pMuxSocket=pMuxSocket;
 		pHashTableEntry->pQueueSend=pQueueSend;
@@ -118,6 +114,9 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8 peerIP[4],
 		pHashTableEntry->trafficOut=0;
 		getcurrentTimeMillis(pHashTableEntry->timeCreated);
 		getRandom((UINT8*)&pHashTableEntry->id,8);
+#endif
+#ifdef PAYMENT
+		pHashTableEntry->pAccountingInfo=NULL;
 #endif
 		memcpy(pHashTableEntry->peerIP,peerIP,4);
 #ifdef DELAY_USERS
@@ -148,7 +147,7 @@ SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8 peerIP[4],
 				m_listHashTableHead=pHashTableEntry;				
 			}
 		m_Mutex.unlock();
-		return E_SUCCESS;
+		return pHashTableEntry;
 	}
 
 ///The maximum number of channels allowed per connection

@@ -57,9 +57,6 @@ struct t_fmhashtableentry
 			UINT64				timeCreated;
 			UINT64				id;
 #endif
-#ifdef PAYMENT
-			tAiAccountingInfo* pAccountingInfo;
-#endif
 			CASymCipher*  pSymCipher;
 			UINT8					peerIP[4]; //needed for flooding control
 #ifdef COUNTRY_STATS
@@ -81,6 +78,12 @@ struct t_fmhashtableentry
 				} list_HashEntries;
 
 		friend class CAFirstMixChannelList;
+#ifdef PAYMENT
+		private:
+			tAiAccountingInfo* pAccountingInfo;
+		friend class CAAccountingInstance;
+		friend class CAAccountingControlChannel;
+#endif
 	};
 
 typedef struct t_fmhashtableentry fmHashTableEntry;
@@ -178,7 +181,7 @@ class CAFirstMixChannelList
 			CAFirstMixChannelList();
 			~CAFirstMixChannelList();
 		
-			SINT32 CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8 peerIP[4],CAQueue* pQueueSend);
+			fmHashTableEntry* add(CAMuxSocket* pMuxSocket,const UINT8 peerIP[4],CAQueue* pQueueSend);
 			SINT32 addChannel(CAMuxSocket* pMuxSocket,HCHANNEL channelIn,CASymCipher* pCipher,HCHANNEL* channelOut);
 			
 			fmChannelListEntry* get(CAMuxSocket* pMuxSocket,HCHANNEL channelIn);

@@ -46,7 +46,9 @@ CAAccountingControlChannel::CAAccountingControlChannel(fmHashTableEntry * pHashE
 CAAccountingControlChannel::~CAAccountingControlChannel()
 	{
 		// todo cleanup hashtable entry
-		CAMsg::printMsg(LOG_DEBUG, "~CAAccountingControlChannel destructor\n");
+		#ifdef DEBUG
+			CAMsg::printMsg(LOG_DEBUG, "~CAAccountingControlChannel destructor\n");
+		#endif
 		CAAccountingInstance::cleanupTableEntry(m_pHashEntry);
 	}
 

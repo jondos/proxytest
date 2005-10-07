@@ -151,7 +151,7 @@ CAListenerInterface* CAListenerInterface::getInstance(const DOM_Node& elemListen
 						UINT32 buffIPLen=50;
 						if(getDOMElementValue(elemIP,buffIP,&buffIPLen)!=E_SUCCESS)
 							goto ERR;
-						if(((CASocketAddrINet*)pListener->m_pAddr)->setAddr(buffIP,port)!=E_SUCCESS)
+						if(((CASocketAddrINet*)pListener->m_pAddr)->setAddr(buffIP,(UINT16)port)!=E_SUCCESS)
 							goto ERR;
 					}
 				getDOMChildByName(elemListenerInterface,(UINT8*)"Host",elemHost,false);
@@ -159,7 +159,7 @@ CAListenerInterface* CAListenerInterface::getInstance(const DOM_Node& elemListen
 				if(getDOMElementValue(elemHost,tmpBuff,&tmpLen)==E_SUCCESS)
 					{
 						tmpBuff[tmpLen]=0;
-						if(elemIP==NULL&&((CASocketAddrINet*)pListener->m_pAddr)->setAddr(tmpBuff,port)!=E_SUCCESS)
+						if(elemIP==NULL&&((CASocketAddrINet*)pListener->m_pAddr)->setAddr(tmpBuff,(UINT16)port)!=E_SUCCESS)
 							goto ERR;
 						pListener->m_strHostname=new UINT8[tmpLen+1];
 						memcpy(pListener->m_strHostname,tmpBuff,tmpLen);

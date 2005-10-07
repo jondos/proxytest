@@ -96,7 +96,7 @@ SINT32 CAControlChannelDispatcher::sendMessages(UINT32 id,bool m_bIsEncrypted,co
 					}
 				else
 					{
-						m_pMixPacket->flags=msglen;
+						m_pMixPacket->flags=(UINT16)msglen;
 					}
 				memcpy(m_pMixPacket->data,msg+aktIndex,m_pMixPacket->flags);
 				m_pSendQueue->add(m_pQueueEntry,sizeof(tQueueEntry));
