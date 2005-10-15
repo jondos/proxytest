@@ -51,26 +51,29 @@ CAThread::CAThread(const UINT8* strName)
 			}
 	}
 
-SINT32 CAThread::start(void* param,bool bDaemon)
+SINT32 CAThread::start(void* param,bool bDaemon,bool bSilent)
 	{
 		if(m_fncMainLoop==NULL)
 			return E_UNKNOWN;
 		m_pThread=new pthread_t;
 		#ifdef DEBUG
-			CAMsg::printMsg(LOG_DEBUG, "CAThread::start() - creating thread\n");
+			if(!bSilent)
+				CAMsg::printMsg(LOG_DEBUG, "CAThread::start() - creating thread\n");
 		#endif
 
 		if(pthread_create(m_pThread,NULL,m_fncMainLoop,param)!=0)
 			{
-				CAMsg::printMsg(LOG_ERR, "CAThread::start() - creating new thread failed!\n");
+				if(!bSilent)
+					CAMsg::printMsg(LOG_ERR, "CAThread::start() - creating new thread failed!\n");
 				delete m_pThread;
 				m_pThread=NULL;
 				return E_UNKNOWN;
 			}
 		#ifdef DEBUG
-			CAMsg::printMsg(LOG_DEBUG, "CAThread::start() - thread created sucessful\n");
+			if(!bSilent)
+				CAMsg::printMsg(LOG_DEBUG, "CAThread::start() - thread created sucessful\n");
 		#endif
-		if(m_strName!=NULL)
+		if(m_strName!=NULL&&!bSilent)
 			{
 				UINT8* temp=bytes2hex(m_pThread,sizeof(pthread_t));
 				CAMsg::printMsg(LOG_DEBUG,"Thread with name: %s created - pthread_t: %s\n",m_strName,temp);

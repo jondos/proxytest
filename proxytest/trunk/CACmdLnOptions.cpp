@@ -569,6 +569,7 @@ SINT32 CACmdLnOptions::setPrevMix(DOM_Document& doc)
 /** Rereads the configuration file (if one was given on startup) and reconfigures
 	* the mix according to the new values. This is done asyncronous. A new thread is
 	* started, which does the actual work.
+	* Note: We have to avoid an blocking on any mutex, as this function typically is called from a signal handler - and who knows which mutexes are blocked if this happend...
 	* @retval E_SUCCESS if successful
 	* @retval E_UNKNOWN if an error occurs
 	*/
@@ -576,17 +577,12 @@ SINT32 CACmdLnOptions::reread(CAMix* pMix)
 	{
 		if(m_bIsRunReConfigure)
 			return E_UNKNOWN;
-		//CAMsg::printMsg(LOG_DEBUG,"Re-readed before lock\n");
-		//m_pcsReConfigure->lock();
-		//CAMsg::printMsg(LOG_DEBUG,"Re-readed after lock\n");
 		m_bIsRunReConfigure=true;
 		m_threadReConfigure.setMainLoop(threadReConfigure);
-		CAMsg::printMsg(LOG_DEBUG,"Re-read After set thread loop\n");
 		t_CMNDLN_REREAD_PARAMS* param=new t_CMNDLN_REREAD_PARAMS;
 		param->pCmdLnOptions=this;
 		param->pMix=pMix;
-		m_threadReConfigure.start(param,true);
-		//m_pcsReConfigure->unlock();
+		m_threadReConfigure.start(param,true,false);
 		return E_SUCCESS;
 	}
 
