@@ -112,13 +112,14 @@ class CAThread
 				*
 				* @param param a pointer which is used as argument to the main function
 				* @param bDaemon true, if this thread should be a deamon thread. A daemon thread is a dettached thread, which will not
+				* @param bSilent if true, no (log) messages about thats going on are produced. This is especially helpful to avoid any blocking on any mutex during a call to start().
 				* preserve a join state. A daemon thread will automatically release resources which 
 				*	are associated with the thread. Normaly this is done by calling join().
 				*						The default value is false.
 				* @retval E_SUCCESS if the thread could be started successfully
 				* @retval E_UNKNOWN otherwise
 				*/								 
-			SINT32 start(void* param,bool bDaemon=false);
+			SINT32 start(void* param,bool bDaemon=false,bool bSilent=false);
 			
 			/** Waits for the main function to finish execution. A call of this method will block until the main
 				* function exits.
