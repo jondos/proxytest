@@ -435,6 +435,26 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 				return ;
 			}
 
+		// parse & set payment instance id
+		len=256;
+		pAccInfo->pstrBIID=new UINT8[256];
+		if ( getDOMChildByName( root, (UINT8 *)"BiID", elGeneral, false ) != E_SUCCESS ||
+			 getDOMElementValue( elGeneral,pAccInfo->pstrBIID, &len ) != E_SUCCESS)
+			{
+				delete[] pAccInfo->pstrBIID;
+				pAccInfo->pstrBIID=NULL;
+				CAMsg::printMsg( LOG_ERR, "AccountCertificate has no Payment Instance ID. Ignoring\n");
+				CAXMLErrorMessage err(CAXMLErrorMessage::ERR_WRONG_FORMAT);
+				DOM_Document errDoc;
+				err.toXmlDocument(errDoc);
+				pAccInfo->pControlChannel->sendXMLMessage(errDoc);
+				m_Mutex.unlock();
+				return ;
+			}
+		#ifdef DEBUG
+			CAMsg::printMsg(LOG_DEBUG, "Stored payment instance ID: %s\n", pAccInfo->strBIID);
+		#endif
+
 	// parse & set public key
 	if ( getDOMChildByName( root, (UINT8 *)"JapPublicKey", elGeneral, false ) != E_SUCCESS )
 		{
@@ -815,6 +835,10 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 				if ( pAccInfo->pChallenge!=NULL )
 					{
 						delete [] pAccInfo->pChallenge;
+					}
+				if ( pAccInfo->pstrBIID!=NULL )
+					{
+						delete [] pAccInfo->pstrBIID;
 					}
 				delete pHashEntry->pAccountingInfo;
 				pHashEntry->pAccountingInfo=NULL;
