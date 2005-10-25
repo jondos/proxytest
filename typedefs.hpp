@@ -279,6 +279,9 @@ struct t_accountinginfo
 
 	/** timestamp when last PayRequest was sent */
 	SINT32 lastRequestSeconds;
+	
+	/** ID of payment instance belogig to this account */
+	UINT8* pstrBIID;
 };
 typedef struct t_accountinginfo tAiAccountingInfo;
 
