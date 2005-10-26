@@ -436,7 +436,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 			}
 
 		// parse & set payment instance id
-		len=256;
+		UINT32 len=256;
 		pAccInfo->pstrBIID=new UINT8[256];
 		if ( getDOMChildByName( root, (UINT8 *)"BiID", elGeneral, false ) != E_SUCCESS ||
 			 getDOMElementValue( elGeneral,pAccInfo->pstrBIID, &len ) != E_SUCCESS)
@@ -452,7 +452,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 				return ;
 			}
 		#ifdef DEBUG
-			CAMsg::printMsg(LOG_DEBUG, "Stored payment instance ID: %s\n", pAccInfo->strBIID);
+			CAMsg::printMsg(LOG_DEBUG, "Stored payment instance ID: %s\n", pAccInfo->pstrBIID);
 		#endif
 
 	// parse & set public key
