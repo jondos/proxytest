@@ -46,6 +46,7 @@ CAAccountingSettleThread::CAAccountingSettleThread()
 		m_pThread = new CAThread();
 		m_pThread->setMainLoop( mainLoop );
 		CAMsg::printMsg(LOG_DEBUG, "Now launching Accounting SettleThread...\n");
+		m_pPIList = NULL;
 		m_bRun=true;
 		m_pThread->start((void*)&m_bRun);
 	}
@@ -56,6 +57,7 @@ CAAccountingSettleThread::~CAAccountingSettleThread()
 		m_bRun=false;
 		m_pThread->join();
 		delete m_pThread;
+///@TODO delete m_pPIList !
 	}
 
 /**
@@ -157,5 +159,48 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				dbConn.terminateDBConnection();
 			}//while
 		THREAD_RETURN_SUCCESS;
+	}
+
+/** Adds information about a PI to the list of known PIs.
+	* @retval E_SPACE if not enough space for storing the information is available
+	* @retval E_UNKNOWN in case of an error
+	* @retval E_SUCCESS if PI is added to the list successfully
+	*/
+SINT32 CAAccountingSettleThread::addKnownPI(const UINT8* a_pstrID, const UINT8* a_pstrHost, UINT32 a_port, const CACertificate* a_pCert) 
+	{
+		if(a_pstrID==NULL||a_pstrHost==NULL||a_pCert==NULL)
+			return E_UNKNOWN;
+		tPaymentInstanceListEntry* pEntry = new tPaymentInstanceListEntry;
+		memset(pEntry,0,sizeof(tPaymentInstanceListEntry));
+		UINT32 len=strlen((const char*)a_pstrID);
+		if(len>255)
+			return E_SPACE;
+		memcpy(pEntry->arstrPIID, a_pstrID,len+1);
+		len=strlen((const char*)a_pstrHost);
+		if(len>255)
+			return E_SPACE;
+		memcpy(pEntry->arstrHost, a_pstrHost,len+1);
+		pEntry->u32Port = a_port;
+		pEntry->pCertificate = a_pCert->clone();
+		pEntry->next = m_pPIList;
+		m_pPIList = pEntry;
+		return E_SUCCESS;
+	}
+
+/** Returns a tPaymentListEntry for the requested PI. If the PI is not in the list, NULL is returned
+  *@note The original list item is returned NOT a copy!
+	*/
+tPaymentInstanceListEntry* CAAccountingSettleThread::getPI(UINT8* a_pstrID)
+	{
+		tPaymentInstanceListEntry* pEntry = m_pPIList;
+		while(pEntry!=NULL)
+			{
+				if(strcmp((const char*)pEntry->arstrPIID, (const char*)a_pstrID) == 0 )
+					{
+						return pEntry;
+					}
+				pEntry = pEntry->next;
+		}
+		return NULL;
 	}
 #endif //PAYMENT
