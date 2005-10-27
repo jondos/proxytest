@@ -601,6 +601,8 @@ SINT32 CAFirstMixChannelList::test()
 	void CAFirstMixChannelList::setDelayParameters(UINT32 unlimitTraffic,UINT32 bucketGrow,UINT32 intervall)
 		{
 			m_pMutexDelayChannel->lock();
+			CAMsg::printMsg(LOG_DEBUG,"CAFirstMixChannelList - Set new traffic limit per user- unlimit: %u bucketgrow: %u intervall %u\n",
+				unlimitTraffic,bucketGrow,intervall);
 			m_u32DelayChannelUnlimitTraffic=unlimitTraffic;
 			m_u32DelayChannelBucketGrow=bucketGrow;
 			m_u32DelayChannelBucketGrowIntervall=intervall;

@@ -337,7 +337,6 @@ SINT32 CALastMix::reconfigure()
 		#endif
 		#if defined (DELAY_CHANNELS_LATENCY)
 			UINT32 utemp=options.getDelayChannelLatency();
-			CAMsg::printMsg(LOG_DEBUG,"Set new latency: %u ms\n",utemp);
 			m_pChannelList->setDelayLatencyParameters(	utemp);
 		#endif
 		}
