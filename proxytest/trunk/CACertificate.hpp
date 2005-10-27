@@ -42,7 +42,7 @@ class CACertificate
 	
 		public:
 			~CACertificate(){X509_free(m_pCert);}
-			CACertificate* clone()
+			CACertificate* clone() const
 				{
 					CACertificate* tmp=new CACertificate;
 					tmp->m_pCert=X509_dup(m_pCert);

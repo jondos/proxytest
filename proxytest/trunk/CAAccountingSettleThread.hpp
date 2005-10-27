@@ -38,6 +38,18 @@ struct t_aiSettleItem
 
 typedef struct t_aiSettleItem aiSettleItem;
 
+/** This structure holds information about known Payment Instances */
+struct t_paymentInstanceListNode
+{
+	t_paymentInstanceListNode* next;
+	CACertificate* pCertificate;
+	UINT32 u32Port;
+	UINT8 arstrPIID[256];
+	UINT8 arstrHost[256];
+};
+
+typedef struct t_paymentInstanceListNode tPaymentInstanceListEntry; 
+
 
 /**
  * A thread that settles CCs with the BI.
@@ -53,7 +65,10 @@ class CAAccountingSettleThread
 	
 		private:
 			static THREAD_RETURN mainLoop(void * param);
+			SINT32 addKnownPI(const UINT8* a_pstrID, const UINT8* a_pstrHost, UINT32 port, const CACertificate* a_pCert); 
+			tPaymentInstanceListEntry* getPI(UINT8* pstrID);
 			CAThread* m_pThread;
 			volatile bool m_bRun;
+			tPaymentInstanceListEntry* m_pPIList;
 	};
 #endif
