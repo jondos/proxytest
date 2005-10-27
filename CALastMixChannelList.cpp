@@ -278,7 +278,7 @@ SINT32 CALastMixChannelList::test()
 #ifdef DELAY_CHANNELS_LATENCY
 	void CALastMixChannelList::setDelayLatencyParameters(UINT32 latency)
 		{
-			CAMsg::printMsg(LOG_DEBUG,"CALastMixChannelList - Set new latency: %u ms\n",utemp);
+			CAMsg::printMsg(LOG_DEBUG,"CALastMixChannelList - Set new latency: %u ms\n",latency);
 			m_u32DelayChannelLatency=latency;
 		}
 #endif
