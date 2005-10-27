@@ -263,6 +263,8 @@ SINT32 CALastMixChannelList::test()
 	void CALastMixChannelList::setDelayParameters(UINT32 unlimitTraffic,UINT32 bucketGrow,UINT32 intervall)
 		{
 			m_pMutexDelayChannel->lock();
+			CAMsg::printMsg(LOG_DEBUG,"CALastMixChannelList - Set new traffic limit per channel- unlimit: %u bucketgrow: %u intervall %u\n",
+				unlimitTraffic,bucketGrow,intervall);
 			m_u32DelayChannelUnlimitTraffic=unlimitTraffic;
 			m_u32DelayChannelBucketGrow=bucketGrow;
 			m_u32DelayChannelBucketGrowIntervall=intervall;
@@ -276,6 +278,7 @@ SINT32 CALastMixChannelList::test()
 #ifdef DELAY_CHANNELS_LATENCY
 	void CALastMixChannelList::setDelayLatencyParameters(UINT32 latency)
 		{
+			CAMsg::printMsg(LOG_DEBUG,"CALastMixChannelList - Set new latency: %u ms\n",utemp);
 			m_u32DelayChannelLatency=latency;
 		}
 #endif
