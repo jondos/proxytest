@@ -92,6 +92,9 @@ public:
 	 */
 	SINT32 parseHTTPHeader(UINT32* contentLength, UINT32 * statusCode=NULL);
 	
+	/** Retruns the content of the response*/
+	SINT32 getContent(UINT8* a_pContent, UINT32* a_pLength);
+	
 private:
 
 	/** the socket connection to the http server */
