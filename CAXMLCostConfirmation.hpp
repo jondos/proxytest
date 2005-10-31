@@ -33,18 +33,38 @@ public:
 	UINT64 getTransferredBytes() {return m_lTransferredBytes;}
 	UINT64 getAccountNumber() {return m_lAccountNumber;}
 	
-	/** @return a newly allocated buffer which must be deleted by the caller */
+	/** @return a newly allocated buffer which must be deleted by the caller 
+	* retval NULL if AI-ID was not set
+	*/
 	UINT8 * getAiID() 
 		{
 			UINT8 * pTmpStr = NULL;
-			if(m_pStrAiName)
-			{
-				pTmpStr = new UINT8[strlen((char*)m_pStrAiName)+1];
-				strcpy((char*)pTmpStr, (char*)m_pStrAiName);
-			}
+			if(m_pStrAiName!=NULL)
+				{
+					pTmpStr = new UINT8[strlen((char*)m_pStrAiName)+1];
+					strcpy((char*)pTmpStr, (char*)m_pStrAiName);
+				}
 			return pTmpStr;
 		}
-	static UINT8 * getXMLElementName();
+	
+	/** @return a newly allocated buffer which must be deleted by the caller 
+	* retval NULL if AI-ID was not set
+	*/
+	UINT8* getPIID() 
+		{
+			UINT8* pTmpStr = NULL;
+			if(m_pStrPIID!=NULL)
+				{
+					pTmpStr = new UINT8[strlen((char*)m_pStrPIID)+1];
+					strcpy((char*)pTmpStr, (char*)m_pStrPIID);
+				}
+			return pTmpStr;
+		}
+		
+	static const UINT8* const getXMLElementName()
+		{
+			return ms_pStrElemName;
+		}
 
 private:
 	//static void initXMLElementName();
@@ -53,8 +73,9 @@ private:
 	UINT64				m_lTransferredBytes;
 	UINT64				m_lAccountNumber;
 	UINT8*				m_pStrAiName;
+	UINT8*				m_pStrPIID;
 	DOM_Document	m_domDocument;
-	static UINT8* ms_pStrElemName;
+	static const UINT8* const ms_pStrElemName;
 };
 
 #endif
