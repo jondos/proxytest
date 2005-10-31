@@ -519,10 +519,11 @@ Dies bedeutet das jede dieser vereinfachten Kostenbestätigungen durch den Kontoi
 Die zugehörige XML Struktur ist wie folgend:
 
 @verbatim
-<CC version "1.0">
+<CC version "1.1">
   <AiID> ... </AiID>
   <AccountNumber> ... </AccountNumber>
   <TransferredBytes>... </TransferredBytes>
+  <PIID> eindeutige ID der BI </PIID>
   <Signature>
    ... Signature des Kontoinhabers
   </Signature>
@@ -538,7 +539,7 @@ JAP und AI wird dabei nicht betrachtet):
 -# Die AI sendet ein Challenge (siehe oben)
 -# Der JAP sendet ein Response (siehe oben)
 -# Die AI sendet die letzte vom JAP erhaltene Kostenbestätigung. Sollte der JAP sich zumn ersten mal 
-bei der Kaskade anmelden, so wird eine leere Kostenbestätigung <tt>\<CC&nbsp;version="1.0"/\></tt> gesendet.
+bei der Kaskade anmelden, so wird eine leere Kostenbestätigung <tt>\<CC&nbsp;version="1.1"/\></tt> gesendet.
 
 Während der Benutzung des Dienstes durch den JAP sendet der Mix an diesen Aufforderungen zur Quittierung 
 der erbrachten Dienstleistung:
@@ -551,7 +552,7 @@ der erbrachten Dienstleistung:
                                            das angegeben 
                                            Datum sein
   </BalanceRequest> 
-  <CC version="1.0"> optional //Kostenbestätigung die 
+  <CC version="1.1"> optional //Kostenbestätigung die 
                                 unterschrieben werden soll
                                 (siehe oben)
     <AiID>... </AiID>  // eindeutiger ID der AI
