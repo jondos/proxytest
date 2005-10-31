@@ -36,6 +36,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASingleSocketGroup.hpp"
 #include "CALastMix.hpp"
 #include "CAHttpClient.hpp"
+#include "CACertificate.hpp"
+#include "CAXMLBI.hpp";
 
 extern CACmdLnOptions options;
 
@@ -44,7 +46,7 @@ const char * STRINGS_REQUEST_COMMANDS[3]={"configure","helo","mixinfo/"};
 
 static THREAD_RETURN InfoLoop(void *p)
 	{
-		CAMsg::printMsg(LOG_DEBUG, "CAInoService - InfoLoop() started\n");
+		CAMsg::printMsg(LOG_DEBUG, "CAInfoService - InfoLoop() started\n");
 		CAInfoService* pInfoService=(CAInfoService*)p;
 		int helocount=0;
 		bool bIsFirst=true; //send our own certifcate only the first time
@@ -588,3 +590,92 @@ SINT32 CAInfoService::handleConfigEvent(DOM_Document& doc)
     return E_SUCCESS;
 }
 
+/** Gets a payment instance from the InfoService */
+SINT32 CAInfoService::getPaymentInstance(UINT8* a_pstrPIID,CAXMLBI** a_pXMLBI)
+	{
+		CASocket socket;
+		CASocketAddrINet address;
+		UINT8 hostname[255];
+		UINT8 request[255];
+		CAHttpClient httpClient;
+		UINT32 status, contentLength;
+	
+		//Connect to InfoService
+		if(options.getInfoServerHost(hostname,255)!=E_SUCCESS)
+			return E_UNKNOWN;
+	
+		address.setAddr(hostname,options.getInfoServerPort());
+	
+		if(socket.connect(address)!=E_SUCCESS)
+			return E_UNKNOWN;
+	
+		#ifdef DEBUG
+			CAMsg::printMsg(LOG_DEBUG, "CAInfoService::getPaymentInstance() - connected to InfoService\n");
+		#endif
+	
+		//Send request
+		httpClient.setSocket(&socket);
+		sprintf((char*) request, "/paymentinstance/%s", (char*) a_pstrPIID);
+		httpClient.sendGetRequest(request);
+		httpClient.parseHTTPHeader(&contentLength, &status);
+		#ifdef DEBUG
+			CAMsg::printMsg(LOG_DEBUG, "CAInfoService::getPaymentInstance() - Request sent, HTTP status: %i, content length: %i\n", status, contentLength);
+		#endif	
+		if(status!=200||contentLength>0x00FFFF)
+			{
+				return E_UNKNOWN;
+			}
+			
+		UINT8* content=new UINT8[contentLength+1];
+		if(httpClient.getContent(content, &contentLength)!=E_SUCCESS)
+			{
+				delete []content;
+				return E_UNKNOWN;
+			}
+		socket.close();
+		//Parse XML
+		MemBufInputSource oInput( content, contentLength, "PaymentInstance" );
+		DOMParser oParser;
+		oParser.parse( oInput );
+		delete []content;
+		DOM_Document doc = oParser.getDocument();
+		if(doc==NULL)
+			return E_UNKNOWN;
+		DOM_Element elemRoot=doc.getDocumentElement();
+/*
+		DOM_Element elem;
+		UINT8 strGeneral[256];
+		UINT32 strGeneralLen = 255;
+	
+		//Parse PI Certificate
+		DOM_Element elemCert;
+		getDOMChildByName(elemRoot, (UINT8*)"Certificate", elem, false);
+		getDOMChildByName(elem, (UINT8*)"X509Certificate", elemCert, false);
+		CACertificate *pPICert = CACertificate::decode(elemCert, CERT_X509CERTIFICATE, NULL);
+	
+		//Parse PI Host
+		UINT8* pStrPIHost;
+		DOM_Element elemNet;
+		DOM_Element elemListeners;
+		DOM_Element elemListener;
+		getDOMChildByName(elemRoot, (UINT8*)"Network", elemNet, false);
+		getDOMChildByName(elemNet, (UINT8*)"ListenerInterfaces", elemListeners, false);
+		getDOMChildByName(elemListeners, (UINT8*)"ListenerInterface", elemListener, false);
+		getDOMChildByName(elemListener, (UINT8*)"Host", elem, false);
+		getDOMElementValue(elem, strGeneral, &strGeneralLen);
+		pStrPIHost = new UINT8[strGeneralLen+1];
+		strcpy((char*)pStrPIHost, (char*)strGeneral);
+	
+	//Parse PI Port
+	UINT32 piPort;
+	getDOMChildByName(elemListener, (UINT8*)"Port", elem, false);
+	getDOMElementValue(elem, &piPort);
+	
+	//Construct CAXMLBI
+	UINT8 strPIID[strlen((const char*)a_pstrPIID)];
+	strcpy((char*)strPIID, (const char*)a_pstrPIID);
+	return new CAXMLBI(strPIID, pStrPIHost, piPort, pPICert);
+	*/
+	///TODO: use CAXMLBI::geteInstance() to construct an CAXMLBI object!
+	return E_UNKNOWN;
+}
