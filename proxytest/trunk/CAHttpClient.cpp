@@ -182,8 +182,38 @@ SINT32 CAHttpClient::parseHTTPHeader(UINT32* contentLength, UINT32 * statusCode)
 			{
 				*contentLength = (UINT32) atol(line+16);
 			}
+			#ifdef DEBUG
+				CAMsg::printMsg(LOG_DEBUG,"Server returned: '%s'.\n",line);
+			#endif	
 		}
 		while(strlen(line) > 0);
 		delete[] line;
 		return ret2;
 	}
+
+/** Gets the content of a HTTP response
+* @param a_pContent buff which receives the content 
+* @param a_pLength on input contains the size of a_pContent, on return contains the number of received bytes
+* @retval E_NOT_CONNECTED if socket is not connected
+* @retval E_SUCCESS if successful
+*/
+SINT32 CAHttpClient::getContent(UINT8* a_pContent, UINT32* a_pLength)
+	{
+		if(m_pSocket==NULL)
+			{
+				return E_NOT_CONNECTED;
+			}
+			
+		UINT32 aktIndex = 0;
+		UINT32 len=*a_pLength;
+		while(len>0)
+			{
+				SINT32 ret=m_pSocket->receive(a_pContent+aktIndex,len);
+				if(ret<=0)
+					break;
+				aktIndex+=ret;
+				len-=ret;	
+			}
+		*a_pLength=aktIndex;	
+		return E_SUCCESS;
+}
