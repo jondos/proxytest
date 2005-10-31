@@ -32,6 +32,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAThread.hpp"
 #include "CAMutex.hpp"
 #include "CACmdLnOptions.hpp"
+#include "CAXMLBI.hpp"
 
 #define REQUEST_TYPE_POST 0
 #define REQUEST_TYPE_GET	1
@@ -54,6 +55,7 @@ class CAInfoService
 			SINT32 stop();
 			SINT32 getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic);
 			SINT32 getMixedPackets(UINT64& ppackets);
+			SINT32 getPaymentInstance(UINT8* a_pstrPIID,CAXMLBI** pXMLBI);
 			bool isRunning()
 				{
 					return m_bRun;
