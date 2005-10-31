@@ -268,7 +268,7 @@ SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UIN
 		elemRoot.setAttribute("version", "1.0");
 		doc.appendChild(elemRoot);
 		DOM_Element elemCC = doc.createElement("CC");
-		elemCC.setAttribute("version", "1.0");
+		elemCC.setAttribute("version", "1.1");
 		elemRoot.appendChild(elemCC);
 		DOM_Element elemAiName = doc.createElement("AiID");
 		setDOMElementValue(elemAiName, ms_pInstance->m_AiName);
