@@ -5,27 +5,48 @@
 
 const UINT8* const CAXMLCostConfirmation::ms_pStrElemName=(UINT8*)"CC";
 
-CAXMLCostConfirmation::CAXMLCostConfirmation(UINT8 * strXmlData) 
+CAXMLCostConfirmation::CAXMLCostConfirmation() 
 	{
-		// parse XML
-		MemBufInputSource oInput( strXmlData, strlen((char*)strXmlData), "XMLCostConfirmation" );
-		DOMParser oParser;
-		oParser.parse( oInput );
-		m_domDocument = oParser.getDocument();
+		m_domDocument = NULL;
 		m_pStrAiName = NULL;
 		m_pStrPIID = NULL;
-		setValues();
 	}
 
 
-	CAXMLCostConfirmation::CAXMLCostConfirmation(DOM_Element &elemRoot)
-		{
-			m_pStrAiName = NULL;
-			m_pStrPIID = NULL;
-			m_domDocument=DOM_Document::createDocument();
-			m_domDocument.appendChild(m_domDocument.importNode(elemRoot,true));
-			setValues();
+CAXMLCostConfirmation* CAXMLCostConfirmation::getInstance(UINT8 * strXmlData,UINT32 strXmlDataLen)
+	{
+		// parse XML
+		if(strXmlData==NULL)
+			return NULL;
+		MemBufInputSource oInput( strXmlData, strXmlDataLen, "XMLCostConfirmation" );
+		DOMParser oParser;
+		oParser.parse( oInput );
+		CAXMLCostConfirmation* pCC=new CAXMLCostConfirmation();
+		pCC->m_domDocument = oParser.getDocument();
+		if(pCC->setValues()!=E_SUCCESS)
+			{
+				delete pCC;
+				return NULL;
+			}
+		return pCC;
 	}
+
+CAXMLCostConfirmation* CAXMLCostConfirmation::getInstance(DOM_Element &elemRoot)
+	{
+		if(elemRoot==NULL)
+			return NULL;
+		CAXMLCostConfirmation* pCC=new CAXMLCostConfirmation();
+		pCC->m_domDocument=DOM_Document::createDocument();
+		pCC->m_domDocument.appendChild(pCC->m_domDocument.importNode(elemRoot,true));
+		if(pCC->setValues()!=E_SUCCESS)
+			{
+				delete pCC;
+				return NULL;
+			}
+		return pCC;
+	}
+
+
 
 CAXMLCostConfirmation::~CAXMLCostConfirmation()
 	{
@@ -52,6 +73,16 @@ SINT32 CAXMLCostConfirmation::setValues()
 			}
 		delete[] strTagname;
 	
+		// parse accountnumber
+		getDOMChildByName(elemRoot, (UINT8*)"AccountNumber", elem, false);
+		if(getDOMElementValue(elem, m_lAccountNumber)!=E_SUCCESS)
+			return E_UNKNOWN;
+
+		// parse transferredBytes
+		getDOMChildByName(elemRoot, (UINT8*)"TransferredBytes", elem, false);
+		if(getDOMElementValue(elem, m_lTransferredBytes)!=E_SUCCESS)
+			return E_UNKNOWN;
+
 		// parse AI Name
 		getDOMChildByName(elemRoot, (UINT8*)"AiID", elem, false);
 		if(m_pStrAiName!=NULL) 
@@ -64,15 +95,11 @@ SINT32 CAXMLCostConfirmation::setValues()
 				m_pStrAiName = new UINT8[strGeneralLen+1];
 				memcpy(m_pStrAiName, strGeneral,strGeneralLen+1);
 			}
-			
-		// parse accountnumber
-		getDOMChildByName(elemRoot, (UINT8*)"AccountNumber", elem, false);
-		getDOMElementValue(elem, m_lAccountNumber);
+		else
+			{
+				return E_UNKNOWN;
+			}
 	
-		// parse transferredBytes
-		getDOMChildByName(elemRoot, (UINT8*)"TransferredBytes", elem, false);
-		getDOMElementValue(elem, m_lTransferredBytes);
-		
 		// parse PIID
 		if(m_pStrPIID!=NULL) 
 			delete[] m_pStrPIID;
@@ -83,6 +110,11 @@ SINT32 CAXMLCostConfirmation::setValues()
 			{
 				m_pStrPIID = new UINT8[strGeneralLen+1];
 				memcpy(m_pStrPIID, strGeneral,strGeneralLen+1);
-			}	
+			}
+		else
+			{
+				delete[] m_pStrAiName;
+				return E_UNKNOWN;
+			}
 		return E_SUCCESS;
 	}

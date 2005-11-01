@@ -631,8 +631,12 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,D
 			return ;
 		}
 		
-	CAXMLCostConfirmation cc(root);
-		
+	CAXMLCostConfirmation* pCC = CAXMLCostConfirmation::getInstance(root);
+	if(pCC==NULL)
+		{
+			m_Mutex.unlock();
+			return ;
+		}
 	// for debugging only: test signature the oldschool way
 	// warning this removes the signature from doc!!!
 	if ( pAccInfo->pPublicKey==NULL||
@@ -644,6 +648,7 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,D
 			DOM_Document errDoc;
 			err.toXmlDocument(errDoc);
 			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
+			delete pCC;
 			m_Mutex.unlock();
 			return ;
 		}
@@ -657,7 +662,7 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,D
 	
 
 	// parse and check AI name
-	UINT8 * pAiID = cc.getAiID();
+	UINT8* pAiID = pCC->getAiID();
 	if( strcmp( (char *)pAiID, (char *)m_AiName ) != 0)
 		{
 			CAMsg::printMsg( LOG_INFO, "CostConfirmation has wrong AIName %s. Ignoring...\n", pAiID );
@@ -666,33 +671,36 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,D
 			err.toXmlDocument(errDoc);
 			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
 			delete[] pAiID;
+			delete pCC;
 			return ;
 		}
 	delete[] pAiID;
 
 	// parse & set transferredBytes
 	m_Mutex.lock();
-	if(cc.getTransferredBytes() < pAccInfo->confirmedBytes )
+	if(pCC->getTransferredBytes() < pAccInfo->confirmedBytes )
 		{
 			UINT8 tmp[32];
-			print64(tmp,cc.getTransferredBytes());
+			print64(tmp,pCC->getTransferredBytes());
 			CAMsg::printMsg( LOG_INFO, "CostConfirmation has Wrong Number of Bytes (%s). Ignoring...\n", tmp );
 			CAXMLErrorMessage err(CAXMLErrorMessage::ERR_WRONG_DATA, 
 				(UINT8*)"Your CostConfirmation has a wrong number of transferred bytes");
 			DOM_Document errDoc;
 			err.toXmlDocument(errDoc);
 			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
+			delete pCC;
 			m_Mutex.unlock();
 			return ;
 		}
-	pAccInfo->confirmedBytes = cc.getTransferredBytes();
+	pAccInfo->confirmedBytes = pCC->getTransferredBytes();
 	if(pAccInfo->confirmedBytes >= pAccInfo->reqConfirmBytes)
 	{
 		pAccInfo->authFlags &= ~AUTH_SENT_CC_REQUEST;
 	}
 	m_Mutex.unlock();
 	
-	m_dbInterface->storeCostConfirmation( cc );
+	m_dbInterface->storeCostConfirmation(*pCC);
+	delete pCC;
 	return ;
 }
 
