@@ -131,15 +131,16 @@ SINT32 CAAccountingDBInterface::terminateDBConnection()
 	}
 
 /**
- * gets the latest cost confirmation stored for the given user account.
+ * Gets the latest cost confirmation stored for the given user account.
  *
  * @param accountNumber the account for which the cost confirmation is requested
- * @param pCC on return sotres the Cost confirmation, NULL in case of an error 
+ * @param pCC on return contains a pointer to the Cost confirmation (the caller is responsible for deleting this object),
+ * NULL in case of an error 
  *
- * @return E_SUCCESS, if everything is OK
- * @return E_NOT_CONNECTED, if the DB query could not be executed
- * @return E_NOT_FOUND, if there was no XMLCC found
- * @return E_UNKOWN in case of a general error
+ * @retval E_SUCCESS, if everything is OK
+ * @retval E_NOT_CONNECTED, if the DB query could not be executed
+ * @retval E_NOT_FOUND, if there was no XMLCC found
+ * @retval E_UNKOWN in case of a general error
  */
 SINT32 CAAccountingDBInterface::getCostConfirmation(UINT64 accountNumber, CAXMLCostConfirmation **pCC)
 	{
@@ -176,8 +177,10 @@ SINT32 CAAccountingDBInterface::getCostConfirmation(UINT64 accountNumber, CAXMLC
 			}
 	
 		xmlCC = (UINT8*) PQgetvalue(result, 0, 0);
-		*pCC = new CAXMLCostConfirmation(xmlCC);
+		*pCC = CAXMLCostConfirmation::getInstance(xmlCC,strlen((char*)xmlCC));
 		PQclear(result);
+		if(*pCC==NULL)
+			return E_UNKNOWN;
 		return E_SUCCESS;
 	}
 
@@ -289,16 +292,20 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 
 
 /**
-	* Fills the CAQueue with all non-settled cost confirmations
+	* Fills the CAQueue with pointer to all non-settled cost confirmations. The caller is responsible for deleating this cost confirmations.
+	* @retval E_NOT_CONNECTED if a connection to the DB could not be established
+	* @retval E_UNKNOWN in case of a general error
+	* @retval E_SUCCESS if the information from the databse could be retrieved successful. Not that this does not 
+	* mean that the number of returned unsettled cost confirmations is greater than zero.
 	*
 	*/
-SINT32 CAAccountingDBInterface::getUnsettledCostConfirmations(CAQueue &q)
+SINT32 CAAccountingDBInterface::getUnsettledCostConfirmations(CAQueue& q)
 	{
 		const char* query= "SELECT XMLCC FROM COSTCONFIRMATIONS WHERE SETTLED=0";
-		PGresult * result;
+		PGresult* result;
 		SINT32 numTuples, i;
-		UINT8 * pTmpStr;
-		CAXMLCostConfirmation * pCC;
+		UINT8* pTmpStr;
+		CAXMLCostConfirmation* pCC;
 		
 		if(!m_bConnected) 
 			return E_NOT_CONNECTED;
@@ -313,10 +320,12 @@ SINT32 CAAccountingDBInterface::getUnsettledCostConfirmations(CAQueue &q)
 		for(i=0; i<numTuples; i++)
 			{
 				pTmpStr = (UINT8*)PQgetvalue(result, i, 0);
-				pCC = new CAXMLCostConfirmation( pTmpStr );
-				q.add(&pCC, sizeof(CAXMLCostConfirmation *));
-			}
-		
+				if( (pTmpStr!=NULL)&&
+						( (pCC = CAXMLCostConfirmation::getInstance(pTmpStr,strlen((char*)pTmpStr)) )!=NULL))
+					{
+						q.add(pCC, sizeof(CAXMLCostConfirmation *));
+					}
+			}		
 		PQclear(result);
 		return E_SUCCESS;
 	}
@@ -324,6 +333,8 @@ SINT32 CAAccountingDBInterface::getUnsettledCostConfirmations(CAQueue &q)
 /**
 	* Marks this account as settled.
 	* @todo what to do if there was a new CC stored while we were busy settling the old one?
+	* @retval E_NOT_CONNECTED if a connection to the DB could not be established
+	* @retval E_UNKNOWN in case of a general error
 	*/
 SINT32 CAAccountingDBInterface::markAsSettled(UINT64 accountNumber)
 	{

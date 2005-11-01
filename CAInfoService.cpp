@@ -37,7 +37,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CALastMix.hpp"
 #include "CAHttpClient.hpp"
 #include "CACertificate.hpp"
-#include "CAXMLBI.hpp";
+#include "CAXMLBI.hpp"
 
 extern CACmdLnOptions options;
 
