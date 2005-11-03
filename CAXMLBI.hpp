@@ -44,14 +44,14 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 class CAXMLBI : public CAAbstractXMLEncodable
 {
 	public:
-		CAXMLBI(const UINT8 * biName, const UINT8 * hostName, const int portNumber, CACertificate * pCert);
-		CAXMLBI(DOM_Element & elemRoot);
+		static CAXMLBI* getInstance(const UINT8 * biID, const UINT8 * hostName, const int portNumber, CACertificate * pCert);
+		static CAXMLBI* getInstance(DOM_Element & elemRoot);
 		~CAXMLBI();
 			
 		/** returns the BI's unique name (identifier) */
-		UINT8 * getName()
+		UINT8 * getID()
 			{
-				return m_pBiName;
+				return m_pBiID;
 			}
 		
 		/** returns a CASignature object for veriying this BI's signatures 
@@ -81,27 +81,21 @@ class CAXMLBI : public CAAbstractXMLEncodable
 			
 		SINT32 toXmlElement(DOM_Document &a_doc, DOM_Element &elemRoot);
 		
-		static UINT8 * getXMLElementName()
+		static const UINT8* const getXMLElementName()
 			{
-				if(!CAXMLBI::ms_pXmlElemName)
-				{
-					UINT8 name[] = "BI";
-					CAXMLBI::ms_pXmlElemName = new UINT8[strlen((char*)name)+1];
-					strcpy((char*)CAXMLBI::ms_pXmlElemName, (char*)name);
-				}
 				return CAXMLBI::ms_pXmlElemName;
 			}
 			
 	
 	private:
 		SINT32 setValues(DOM_Element &elemRoot);
-		UINT8 * m_pBiName;
+		UINT8 * m_pBiID;
 		UINT8 * m_pHostName;
 		CACertificate * m_pCert;
 		CASignature * m_pVeryfire;
 		UINT32 m_iPortNumber;
-		
-		static UINT8 * ms_pXmlElemName;
+		CAXMLBI();
+		static const UINT8* const ms_pXmlElemName;
 };
 
 #endif

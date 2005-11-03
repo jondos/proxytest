@@ -280,7 +280,7 @@ class CACmdLnOptions
 			SINT32 getDatabaseUsername(UINT8 * user, UINT32 len);
 			SINT32 getDatabasePassword(UINT8 * pass, UINT32 len);
 			SINT32 getAiID(UINT8 * id, UINT32 len);
-			CAXMLBI * getBI();
+			CAXMLBI* getBI();
 			SINT32 getPaymentHardLimit(UINT32 *pHardLimit);
 			SINT32 getPaymentSoftLimit(UINT32 *pSoftLimit);
 			SINT32 getPaymentSettleInterval(UINT32 *pInterval);

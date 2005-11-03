@@ -675,6 +675,11 @@ SINT32 CACmdLnOptions::getSOCKSHost(UINT8* host,UINT32 len)
   }
 
 #ifdef PAYMENT
+/**Returns an CAXMLBI object, which describes the BI this AI uses. This is not a copy of the 
+  * CAXMLBI object. The caller should not delete it!
+	* @retval NULL if BI was not set in the configuration file
+	* @return information stored inthe configuration file about the BI
+	*/
 CAXMLBI* CACmdLnOptions::getBI()
 	{
 		return m_pBI;
@@ -1064,14 +1069,8 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		if(elemAccounting != NULL) 
 			{
 				DOM_Element elemJPI;
-				CAXMLBI* pBI=NULL;
 				getDOMChildByName(elemAccounting, CAXMLBI::getXMLElementName(), elemJPI, false);
-				if(elemJPI!=NULL)
-					pBI = new CAXMLBI(elemJPI);
-				if(pBI!=NULL)
-					m_pBI = pBI;
-				else
-					m_pBI = NULL;
+				m_pBI = CAXMLBI::getInstance(elemJPI);
 				getDOMChildByName(elemAccounting, (UINT8*)"SoftLimit", elem, false);
 				if(getDOMElementValue(elem, &tmp)==E_SUCCESS)
 					{

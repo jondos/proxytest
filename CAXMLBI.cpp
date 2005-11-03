@@ -28,39 +28,61 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "StdAfx.h"
 #include "CAXMLBI.hpp"
 
-UINT8 * CAXMLBI::ms_pXmlElemName=0;
+const UINT8* const CAXMLBI::ms_pXmlElemName=(UINT8*)"PaymentInstance";
 
-CAXMLBI::CAXMLBI(const UINT8 * biName, const UINT8 * hostName, const int portNumber, CACertificate * pCert)
+CAXMLBI::CAXMLBI()
 	: CAAbstractXMLEncodable()
 	{
-		m_pCert = pCert;
-		m_pBiName = new UINT8[strlen((char*)biName)+1];
-		strcpy((char*)m_pBiName, (char*)biName);
-		m_pHostName = new UINT8[strlen((char*)hostName)+1];
-		strcpy((char*)m_pHostName, (char*)hostName);
-		m_iPortNumber = portNumber;
-		m_pVeryfire = 0;
+		m_pVeryfire = NULL;
+		m_pBiID = NULL;
+		m_pHostName = NULL;
+		m_pCert = NULL;
 	}
 
-CAXMLBI::CAXMLBI(DOM_Element & elemRoot)
-	: CAAbstractXMLEncodable()
+CAXMLBI* CAXMLBI::getInstance(const UINT8 * biID, const UINT8 * hostName, const int portNumber, CACertificate * pCert)
 	{
-		m_pVeryfire = 0;
-		m_pBiName = 0;
-		m_pHostName = 0;
-		m_pCert = 0;
-		setValues(elemRoot);
+		if(biID==NULL||hostName==NULL)
+			{
+				return NULL;
+			}
+		CAXMLBI* pBI = new CAXMLBI();		
+		if(pCert!=NULL)
+			{
+				pBI->m_pCert = pCert->clone();
+			}
+		pBI->m_pBiID = new UINT8[strlen((char*)biID)+1];
+		strcpy((char*)pBI->m_pBiID, (char*)biID);
+		pBI->m_pHostName = new UINT8[strlen((char*)hostName)+1];
+		strcpy((char*)pBI->m_pHostName, (char*)hostName);
+		pBI->m_iPortNumber = portNumber;
+		pBI->m_pVeryfire = NULL;
+		return pBI;
+	}
+
+CAXMLBI* CAXMLBI::getInstance(DOM_Element & elemRoot)
+	{
+		if (elemRoot == NULL)
+			{
+				return NULL;
+			}
+		CAXMLBI* pPI = new CAXMLBI();
+		if(pPI->setValues(elemRoot)!=E_SUCCESS)
+			{
+				delete pPI;
+				return NULL;
+			}
+		return pPI;
 	}
 
 CAXMLBI::~CAXMLBI()
 	{
-		if(m_pCert)
+		if(m_pCert!=NULL)
 			delete m_pCert;
-		if(m_pVeryfire)
+		if(m_pVeryfire!=NULL)
 			delete m_pVeryfire;
-		if(m_pBiName)
-			delete m_pBiName;
-		if(m_pHostName)
+		if(m_pBiID!=NULL)
+			delete m_pBiID;
+		if(m_pHostName!=NULL)
 			delete m_pHostName;
 	}
 
@@ -68,8 +90,8 @@ SINT32 CAXMLBI::setValues(DOM_Element &elemRoot)
 	{
 		UINT8 * rootName;
 		DOM_Element elem;
-		UINT8 tmp[256];
-		UINT32 tmpLen;
+		UINT8 strGeneral[256];
+		UINT32 strGeneralLen = 255;
 		
 		rootName = (UINT8*) (elemRoot.getTagName().transcode());
 		if(strcmp((char*)rootName, (char*)CAXMLBI::getXMLElementName())!=0)
@@ -79,90 +101,75 @@ SINT32 CAXMLBI::setValues(DOM_Element &elemRoot)
 		}
 		delete[] rootName;
 		
-		getDOMChildByName(elemRoot, (UINT8*)"BIName", elem, false); 
-		if(m_pBiName) 
+		//Parse ID
+		if(getDOMElementAttribute(elemRoot, "id", strGeneral, &strGeneralLen)==E_SUCCESS)
 			{
-				delete m_pBiName;
-				m_pBiName = 0;
-			}
-		if(elem!=NULL)
-			{
-				tmpLen = 256;
-				getDOMElementValue(elem, tmp, &tmpLen);
-				if(tmpLen>0)
-					{
-						m_pBiName = new UINT8[tmpLen+1];
-						strcpy((char *)m_pBiName, (char *)tmp);
-					}
-			}
-			
-		getDOMChildByName(elemRoot, (UINT8*)"HostName", elem, false);
-		if(m_pHostName) 
-			{
-				delete m_pHostName;
-				m_pHostName = 0;
-			}
-		if(elem!=NULL)
-			{
-				tmpLen = 256;
-				getDOMElementValue(elem, tmp, &tmpLen);
-				if(tmpLen>0)
-					{
-						
-						m_pHostName = new UINT8[tmpLen+1];
-						strcpy((char *)m_pHostName, (char *)tmp);
-					}
-			}
-			
-		getDOMChildByName(elemRoot, (UINT8*)"PortNumber", elem, false); 
-		if(elem!=NULL)
-			{
-				getDOMElementValue(elem, &m_iPortNumber);
+				m_pBiID = new UINT8[strGeneralLen+1];
+				memcpy(m_pBiID,strGeneral,strGeneralLen);
 			}
 		else 
 			{
-				m_iPortNumber = 0;
+				return E_UNKNOWN;
 			}
 		
-		getDOMChildByName(elemRoot, (UINT8*)"TestCertificate", elem, false);
-		if(m_pCert) 
+		//Parse PI Certificate
+		DOM_Element elemCert;
+		getDOMChildByName(elemRoot, (UINT8*)"Certificate", elem, false);
+		getDOMChildByName(elem, (UINT8*)"X509Certificate", elemCert, false);
+		CACertificate *pPICert = CACertificate::decode(elemCert, CERT_X509CERTIFICATE, NULL);
+		if (pPICert != NULL)
 			{
-				delete m_pCert;
-				m_pCert = NULL;
+				m_pCert = pPICert;
 			}
-		if (elem != NULL)
-			{
-				DOM_Element elemCert;
-				getDOMChildByName(elem, CACertificate::getXmlElementName(), elemCert, false);
-				CACertificate * pCert = CACertificate::decode(elemCert, CERT_X509CERTIFICATE);
-				if(pCert!=NULL)
-					m_pCert = pCert;
-			}
+			
+		//Parse PI Host
+		DOM_Element elemNet;
+		DOM_Element elemListeners;
+		DOM_Element elemListener;
+		getDOMChildByName(elemRoot, (UINT8*)"Network", elemNet, false);
+		getDOMChildByName(elemNet, (UINT8*)"ListenerInterfaces", elemListeners, false);
+		getDOMChildByName(elemListeners, (UINT8*)"ListenerInterface", elemListener, false);
+		getDOMChildByName(elemListener, (UINT8*)"Host", elem, false);
+		getDOMElementValue(elem, strGeneral, &strGeneralLen);
+		m_pHostName = new UINT8[strGeneralLen+1];
+		strcpy((char*)m_pHostName, (char*)strGeneral);
+
+		//Parse PI Port
+		getDOMChildByName(elemListener, (UINT8*)"Port", elem, false);
+		getDOMElementValue(elem, &m_iPortNumber);
+
 		return E_SUCCESS;
 	}
 	
 SINT32 CAXMLBI::toXmlElement(DOM_Document &a_doc, DOM_Element &elemRoot)
 	{
 		elemRoot = a_doc.createElement((char *)getXMLElementName());
-		setDOMElementAttribute(elemRoot, "version", (UINT8*)"1.0");
+		setDOMElementAttribute(elemRoot, "id", m_pBiID);
 		
-		DOM_Element elemName = a_doc.createElement("BIName");
-		elemRoot.appendChild(elemName);
-		setDOMElementValue(elemName, m_pBiName);
-		
-		elemName = a_doc.createElement("HostName");
-		elemRoot.appendChild(elemName);
-		setDOMElementValue(elemName, m_pHostName);
-		
-		elemName = a_doc.createElement("PortNumber");
-		elemRoot.appendChild(elemName);
-		setDOMElementValue(elemName, m_iPortNumber);
-		
+		//Set network settings
+		DOM_Element elemNet = a_doc.createElement("Network");
+		elemRoot.appendChild(elemNet);
+		DOM_Element elemListeners = a_doc.createElement("ListenerInterfaces");
+		elemNet.appendChild(elemListeners);	
+		DOM_Element elemListener = a_doc.createElement("ListenerInterface");
+		elemListeners.appendChild(elemListener);
+		//Set Hostname
+		DOM_Element elemHost = a_doc.createElement("Host");
+		elemListener.appendChild(elemHost);
+		setDOMElementValue(elemHost, m_pHostName);
+		//Set Port
+		DOM_Element elemPort = a_doc.createElement("Port");
+		elemListener.appendChild(elemPort);
+		setDOMElementValue(elemPort, m_iPortNumber);
+		//Set Cert
 		if(m_pCert!=NULL)
 		{
+			DOM_Element elemCert = a_doc.createElement("Certificate");
+			elemRoot.appendChild(elemCert);
+			
 			DOM_DocumentFragment tmpFrag;
 			m_pCert->encode(tmpFrag, a_doc);
-			elemRoot.appendChild(tmpFrag);
+			elemCert.appendChild(tmpFrag);
 		}
 		
 		return E_SUCCESS;
