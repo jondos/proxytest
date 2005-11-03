@@ -71,7 +71,10 @@ CAAccountingInstance::CAAccountingInstance()
 		// initialize JPI signataure tester
 		m_AiName = new UINT8[256];
 		options.getAiID(m_AiName, 256);
+		if (options.getBI() != NULL)
+		{
 		m_pJpiVerifyingInstance = options.getBI()->getVerifier();
+		}
 		options.getPaymentHardLimit(&m_iHardLimitBytes);
 		options.getPaymentSoftLimit(&m_iSoftLimitBytes);
 	
