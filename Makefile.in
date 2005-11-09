@@ -87,12 +87,12 @@ am_mix_OBJECTS = CAAbstractControlChannel.$(OBJEXT) \
 	CASocket.$(OBJEXT) CASocketAddrINet.$(OBJEXT) \
 	CASocketAddrUnix.$(OBJEXT) CASocketGroup.$(OBJEXT) \
 	CASocketGroupEpoll.$(OBJEXT) CASocketList.$(OBJEXT) \
-	CATLSClientSocket.$(OBJEXT) CASSLContext.$(OBJEXT) \
-	CASymCipher.$(OBJEXT) CASyncControlChannel.$(OBJEXT) \
-	CATempIPBlockList.$(OBJEXT) CAThread.$(OBJEXT) \
-	CAThreadPool.$(OBJEXT) CAUtil.$(OBJEXT) CAXMLBI.$(OBJEXT) \
-	CAXMLCostConfirmation.$(OBJEXT) CAXMLErrorMessage.$(OBJEXT) \
-	StdAfx.$(OBJEXT) proxytest.$(OBJEXT)
+	CATLSClientSocket.$(OBJEXT) CASymCipher.$(OBJEXT) \
+	CASyncControlChannel.$(OBJEXT) CATempIPBlockList.$(OBJEXT) \
+	CAThread.$(OBJEXT) CAThreadPool.$(OBJEXT) CAUtil.$(OBJEXT) \
+	CAXMLBI.$(OBJEXT) CAXMLCostConfirmation.$(OBJEXT) \
+	CAXMLErrorMessage.$(OBJEXT) StdAfx.$(OBJEXT) \
+	proxytest.$(OBJEXT)
 mix_OBJECTS = $(am_mix_OBJECTS)
 mix_DEPENDENCIES = $(top_srcdir)/xml/libxml.a \
 	$(top_srcdir)/popt/libpopt.a $(top_srcdir)/trio/libtrio.a \
@@ -274,7 +274,6 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CASocketGroupEpoll.cpp\
 		    CASocketList.cpp \
 		    CATLSClientSocket.cpp\
-		    CASSLContext.cpp\
 		    CASymCipher.cpp \
 		    CASyncControlChannel.cpp\
 		    CATempIPBlockList.cpp\
@@ -339,7 +338,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CASocketGroupEpoll.hpp\
 		    CASocketList.hpp \
 		    CATLSClientSocket.hpp\
-		    CASSLContext.hpp\
+		    CAClientSocket.hpp\
 		    CASymCipher.hpp \
 		    CASyncControlChannel.hpp \
 		    CATempIPBlockList.hpp\
@@ -489,7 +488,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAQueue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAReplayControlChannel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAReplayCtrlChannelMsgProc.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASSLContext.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASemaphore.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASignature.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASingleSocketGroup.Po@am__quote@
