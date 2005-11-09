@@ -502,7 +502,7 @@ SINT32 CAInfoService::sendCascadeHelo()
 						goto ERR;
 				//Receive answer --> 200 Ok or failure
 				//HTTP/1.1 200 Ok
-				if(oSocket.receiveFully(buffHeader,12,MIX_TO_INFOSERVICE_TIMEOUT)!=E_SUCCESS)
+				if(oSocket.receiveFullyT(buffHeader,12,MIX_TO_INFOSERVICE_TIMEOUT)!=E_SUCCESS)
 					goto ERR;
 				if(memcmp(buffHeader+9,"200",3)!=0)
 					goto ERR;
