@@ -51,6 +51,10 @@ class CAMuxSocket
 			SINT32 prepareForSend(MIXPACKET* inoutPacket);
 			SINT32 receive(MIXPACKET *pPacket);
 			SINT32 receive(MIXPACKET *pPacket,UINT32 timeout);
+			SINT32 receiveFully(UINT8* buff,UINT32 len)
+				{
+					return m_Socket.receiveFully(buff,len);
+				}
 			//int close(HCHANNEL channel_id);
 			//int close(HCHANNEL channel_id,UINT8* buff);
 #ifdef LOG_CRIME

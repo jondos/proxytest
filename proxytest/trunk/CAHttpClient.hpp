@@ -28,7 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CAHTTPCLIENT_HPP
 #define __CAHTTPCLIENT_HPP
 
-#include "CASocket.hpp"
+#include "CAClientSocket.hpp"
 #include "CAMsg.hpp"
 
 /**
@@ -43,7 +43,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 class CAHttpClient
 {
 public:
-	CAHttpClient(CASocket * pSocket)
+	CAHttpClient(CAClientSocket * pSocket)
 		{
 			m_pSocket = pSocket;
 		}
@@ -55,7 +55,7 @@ public:
 
 	~CAHttpClient() {}
 	
-	SINT32 setSocket(CASocket * pSocket)
+	SINT32 setSocket(CAClientSocket* pSocket)
 		{
 			m_pSocket = pSocket;
 			return E_SUCCESS;
@@ -98,7 +98,7 @@ public:
 private:
 
 	/** the socket connection to the http server */
-	CASocket * m_pSocket;
+	CAClientSocket * m_pSocket;
 };
 
 #endif

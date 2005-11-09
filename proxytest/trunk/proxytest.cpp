@@ -46,6 +46,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include "TypeB/CALastMixB.hpp"
 #endif
 #include "CALogPacketStats.hpp"
+#include "CATLSClientSocket.hpp"
 //#include "CAPayment.hpp"
 //#ifdef _WIN32
 //HANDLE hEventThreadEnde;
@@ -177,6 +178,7 @@ void init()
 		OpenSSL_add_all_algorithms();
 		pOpenSSLMutexes=new CAMutex[CRYPTO_num_locks()];
 		CRYPTO_set_locking_callback((void (*)(int,int,const char *,int))openssl_locking_callback);
+		SSL_library_init();
 		CAMsg::init();
 		CASocketAddrINet::init();
 		//startup
@@ -420,7 +422,19 @@ int main(int argc, const char* argv[])
 #ifdef _DEBUG
 			UINT32 start;
 #endif
-
+	/*	CATLSClientSocket ssl;
+		CASocketAddrINet addr;
+		addr.setAddr((const UINT8*)"127.0.0.1",(UINT16)3456);
+		UINT32 len1;
+		UINT8* pt=readFile((UINT8*)"/Users/sk13/Documents/projects/jap/testkey.der",&len1);
+		CACertificate* pCer=CACertificate::decode(pt,len1,CERT_DER);
+		ssl.setServerCertificate(pCer);
+		printf("try connect\n");
+		ssl.connect(addr,1,0);
+		ssl.receiveFully(pt,3);
+		
+		exit(0);
+*/
 		if(options.parse(argc,argv) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_CRIT,"Error: Cannot parse configuration file!\n");
@@ -481,6 +495,7 @@ int main(int argc, const char* argv[])
 					options.enableEncryptedLog(false);
 			}
 #endif
+
 
 #ifdef _DEBUG
 		//		CADatabase::test();

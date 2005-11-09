@@ -28,16 +28,17 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "CASocketAddr.hpp"
+#include "CAClientSocket.hpp"
 #include "CAMutex.hpp"
 #ifdef _DEBUG
 	extern int sockets;
 #endif
 
-class CASocket
+class CASocket:public CAClientSocket
 	{
 		public:
 			CASocket();
-			virtual ~CASocket(){close();}
+			~CASocket(){close();}
 
 			SINT32 create();
 			SINT32 create(int type);
@@ -45,22 +46,25 @@ class CASocket
 			SINT32 listen(const CASocketAddr& psa);
 			SINT32 listen(UINT16 port);
 			SINT32 accept(CASocket &s);
-			virtual SINT32 connect(CASocketAddr& psa)
+			SINT32 connect(CASocketAddr& psa)
 				{
 					return connect(psa,1,0);
 				}
 				
-			virtual SINT32 connect(CASocketAddr& psa,UINT32 retry,UINT32 msWaitTime);
-			virtual SINT32 connect(CASocketAddr& psa,UINT32 msTimeOut);
+			SINT32 connect(CASocketAddr& psa,UINT32 retry,UINT32 msWaitTime);
+			SINT32 connect(CASocketAddr& psa,UINT32 msTimeOut);
 			
-			virtual SINT32 close();
+			SINT32 close();
 /* it seems that this function is not used:
 			SINT32 close(UINT32 mode);*/
-			virtual SINT32 send(const UINT8* buff,UINT32 len);
+			SINT32 send(const UINT8* buff,UINT32 len);
 			SINT32 sendFully(const UINT8* buff,UINT32 len);
 			SINT32 sendTimeOut(const UINT8* buff,UINT32 len,UINT32 msTimeOut);
-			virtual SINT32 receive(UINT8* buff,UINT32 len);
-			SINT32 receiveFully(UINT8* buff,UINT32 len);
+			SINT32 receive(UINT8* buff,UINT32 len);
+			SINT32 receiveFully(UINT8* buff,UINT32 len)
+				{
+					return CAClientSocket::receiveFully(buff,len);
+				}
 			SINT32 receiveFully(UINT8* buff,UINT32 len,UINT32 msTimeOut);
 			/** Returns the number of the Socket used. Which will be always the same number,
 				* even after close(), until the Socket

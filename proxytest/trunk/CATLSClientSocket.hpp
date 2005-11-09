@@ -32,7 +32,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketAddr.hpp"
 #include "CASocket.hpp"
 #include "CAMsg.hpp"
-
+#include "CACertificate.hpp"
 /**
  * This class can be used to establish a TLS / SSL encrypted connection to a server.
  * Though this class has listen() and accept() functions, these should not be used!
@@ -41,13 +41,13 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
  * Note: This uses /dev/urandom and might cause problems on systems other than linux
  *  @author Bastian Voigt
  */
-class CATLSClientSocket : public CASocket
+class CATLSClientSocket:public CAClientSocket
 {
 
 public: 
 	CATLSClientSocket();
-
-	SINT32 send(const UINT8* buff,UINT32 len);
+	~CATLSClientSocket();
+	SINT32 sendFully(const UINT8* buff,UINT32 len);
 	SINT32 receive(UINT8* buff,UINT32 len);
 	SINT32 close();
 
@@ -55,25 +55,23 @@ public:
 	SINT32 connect(CASocketAddr & psa, UINT32 retry, UINT32 msWaitTime);
 	
 	SINT32 connect(CASocketAddr & psa)
-	{
-		return connect(psa, 1, 0);
-	}
-
-	/** don't use this */
-/*	SINT32 connect(CASocketAddr& psa,UINT32 msTimeOut) 
 		{
-			CAMsg::printMsg(LOG_ERR, "Don't use TLSClientSocket::connect(CASocketAddr&, UINT32) !!");
-			return E_UNKNOWN;
-		}*/
+			return connect(psa, 1, 0);
+		}
 
-
+	/** Sets the Certifcate we accept as server identifikation. Set to NULL if you do not want
+	* any certificate checking. 
+	*@Note At the moment only a depth of verification path of zero or one is supported!
+	*/
+	SINT32 setServerCertificate(CACertificate* pCert);
+		
 private:
-	SINT32 initSSLObject();
-	SINT32 doTCPConnect(CASocketAddr & psa, UINT32 retry, UINT32 msWaitTime);
 	SINT32 doTLSConnect(CASocketAddr &psa);
 	
-	SSL * m_SSL;
-
+	SSL*						m_pSSL;
+	SSL_CTX*				m_pCtx;
+	CASocket*				m_pSocket;
+	CACertificate*	m_pRootCert;
 	/** is the TLS layer established ? */
 	bool m_bConnectedTLS;
 };

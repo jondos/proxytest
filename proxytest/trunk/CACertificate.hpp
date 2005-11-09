@@ -34,11 +34,13 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 class CASignature;
 class CAASymCipher;
 class CASSLContext;
+class CATLSClientSocket;
 class CACertificate
 	{
 		friend class CASignature;
 		friend class CAASymCipher;
 		friend class CASSLContext;
+		friend class CATLSClientSocket;
 	
 		public:
 			~CACertificate(){X509_free(m_pCert);}

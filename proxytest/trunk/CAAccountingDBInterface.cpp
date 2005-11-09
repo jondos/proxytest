@@ -323,7 +323,7 @@ SINT32 CAAccountingDBInterface::getUnsettledCostConfirmations(CAQueue& q)
 				if( (pTmpStr!=NULL)&&
 						( (pCC = CAXMLCostConfirmation::getInstance(pTmpStr,strlen((char*)pTmpStr)) )!=NULL))
 					{
-						q.add(pCC, sizeof(CAXMLCostConfirmation *));
+						q.add(&pCC, sizeof(CAXMLCostConfirmation *));
 					}
 			}		
 		PQclear(result);

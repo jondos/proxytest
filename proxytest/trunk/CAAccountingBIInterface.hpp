@@ -44,7 +44,7 @@ class CAAccountingBIInterface
 {
 
 public: 
-	CAAccountingBIInterface(UINT32 useSSL);
+	CAAccountingBIInterface();
 	~CAAccountingBIInterface();
 
 	SINT32 initBIConnection();
@@ -67,9 +67,8 @@ public:
 private:
 	
 	bool m_connected;
-	CASocket * m_pSocket;
-	UINT32 m_bUseTLS;
-	CAHttpClient m_httpClient;
+	CATLSClientSocket* m_pSocket;
+	CAHttpClient				m_httpClient;
 };
 
 #endif
