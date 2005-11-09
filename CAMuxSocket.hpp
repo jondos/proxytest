@@ -31,6 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocket.hpp"
 #include "CASymCipher.hpp"
 #include "CAMutex.hpp"
+#include "CATLSClientSocket.hpp"
 
 class CAMuxSocket
 	{
@@ -51,6 +52,8 @@ class CAMuxSocket
 			SINT32 prepareForSend(MIXPACKET* inoutPacket);
 			SINT32 receive(MIXPACKET *pPacket);
 			SINT32 receive(MIXPACKET *pPacket,UINT32 timeout);
+			
+			/** Receives some "plain" bytes from the underlying socket - just a convinient function...*/
 			SINT32 receiveFully(UINT8* buff,UINT32 len)
 				{
 					return m_Socket.receiveFully(buff,len);

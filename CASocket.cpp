@@ -470,7 +470,7 @@ SINT32 CASocket::receive(UINT8* buff,UINT32 len)
 	* @retval E_SUCCESS if all bytes could be read
 	*
 	*/
-SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len,UINT32 msTimeOut)
+SINT32 CASocket::receiveFullyT(UINT8* buff,UINT32 len,UINT32 msTimeOut)
 	{
 		SINT32 ret;
 		UINT32 pos=0;
