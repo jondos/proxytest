@@ -56,7 +56,6 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CASocketGroupEpoll.cpp\
 		    CASocketList.cpp \
 		    CATLSClientSocket.cpp\
-		    CASSLContext.cpp\
 		    CASymCipher.cpp \
 		    CASyncControlChannel.cpp\
 		    CATempIPBlockList.cpp\
@@ -121,7 +120,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CASocketGroupEpoll.hpp\
 		    CASocketList.hpp \
 		    CATLSClientSocket.hpp\
-		    CASSLContext.hpp\
+		    CAClientSocket.hpp\
 		    CASymCipher.hpp \
 		    CASyncControlChannel.hpp \
 		    CATempIPBlockList.hpp\
