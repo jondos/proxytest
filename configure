@@ -10726,7 +10726,7 @@ _ACEOF
 		blibpath="$blibpath:$ssldir:$ssldir/lib"
 	fi
 fi
-LIBS="$saved_LIBS -lcrypto"
+LIBS="$saved_LIBS -lcrypto -lssl"
 
 
 ac_ext=cc
