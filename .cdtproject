@@ -2,24 +2,30 @@
 <?eclipse-cdt version="2.0"?>
 
 <cdtproject id="org.eclipse.cdt.make.core.make">
-<extension id="org.eclipse.cdt.core.PE" point="org.eclipse.cdt.core.BinaryParser"/>
-<extension id="org.eclipse.cdt.core.Cygwin_PE" point="org.eclipse.cdt.core.BinaryParser">
+<extension point="org.eclipse.cdt.core.BinaryParser" id="org.eclipse.cdt.core.PE"/>
+<extension point="org.eclipse.cdt.core.BinaryParser" id="org.eclipse.cdt.core.Cygwin_PE">
 <attribute key="addr2line" value="addr2line"/>
 <attribute key="cygpath" value="cygpath"/>
 <attribute key="c++filt" value="c++filt"/>
 <attribute key="nm" value="nm"/>
 </extension>
-<extension id="org.eclipse.cdt.core.domsourceindexer" point="org.eclipse.cdt.core.CIndexer"/>
+<extension point="org.eclipse.cdt.core.BinaryParser" id="org.eclipse.cdt.core.ELF"/>
+<extension point="org.eclipse.cdt.core.BinaryParser" id="org.eclipse.cdt.core.GNU_ELF">
+<attribute key="addr2line" value="addr2line"/>
+<attribute key="c++filt" value="c++filt"/>
+</extension>
+<extension point="org.eclipse.cdt.core.CIndexer" id="org.eclipse.cdt.core.domsourceindexer"/>
 <data>
 <item id="org.eclipse.cdt.core.pathentry">
 <pathentry kind="con" path="org.eclipse.cdt.make.core.DISCOVERED_SCANNER_INFO"/>
-<pathentry excluding="CVS/" kind="src" path="popt"/>
-<pathentry excluding="*/*|*.o|.deps/|$projectdir/|alltest/|bak/|Debug/|doc/|doc_short/|docImages/|documentation/|FlashMix/|GenerateMixCert/|linux/|logFirstMix/|logLastMix/|Model Folder/|neuesMixProtokoll/|popt/|proxyauswertung/|proxytest/|proxytest-lib/|pthread/|Release/|test/|tre/|trio/|TypeA/|TypeB/|windows/|xml/" kind="src" path=""/>
-<pathentry excluding="CVS/" kind="src" path="xml"/>
-<pathentry excluding="CVS/" kind="src" path="TypeA"/>
-<pathentry excluding="CVS/" kind="src" path="trio"/>
-<pathentry excluding="CVS/" kind="src" path="tre"/>
-<pathentry excluding="*.o" kind="out" path=""/>
+<pathentry kind="src" path="popt" excluding="CVS/"/>
+<pathentry kind="src" path="" excluding="*/*|*.o|.deps/|$projectdir/|alltest/|bak/|Debug/|doc/|doc_short/|docImages/|documentation/|FlashMix/|GenerateMixCert/|linux/|logFirstMix/|logLastMix/|Model Folder/|neuesMixProtokoll/|popt/|proxyauswertung/|proxytest/|proxytest-lib/|pthread/|Release/|test/|tre/|trio/|TypeA/|TypeB/|windows/|xml/"/>
+<pathentry kind="src" path="xml" excluding="CVS/"/>
+<pathentry kind="src" path="TypeA" excluding="CVS/"/>
+<pathentry kind="src" path="trio" excluding="CVS/"/>
+<pathentry kind="src" path="tre" excluding="CVS/"/>
+<pathentry kind="out" path="" excluding="*.o"/>
+<pathentry kind="inc" path="" include="/sw/include" system="true"/>
 </item>
 <item id="cdt_indexer">
 <indexEnabled indexValue="true"/>

@@ -58,15 +58,9 @@ SINT32 CAHttpClient::sendGetRequest(UINT8 * url)
 		#endif
 		
 		// send it
-		/// TODO: use sendFully() here
-		SINT32 ret = 0;
-		do
-			{
-				ret = m_pSocket->send(requestS, len);
-			}
-		while(ret == E_AGAIN);
+		SINT32 ret = m_pSocket->sendFully(requestS,len);
 		delete[] requestS;
-		if(ret == E_UNKNOWN)
+		if(ret != E_SUCCESS)
 			{ // socket error
 				return E_UNKNOWN;
 			}

@@ -459,37 +459,6 @@ SINT32 CASocket::receive(UINT8* buff,UINT32 len)
 	  return ret;	    	    
 	}
 
-/** Receives all len bytes. This blocks until all bytes are received or an error occured.
-	* @return E_UNKNOWN, in case of an error
-	* @return E_SUCCESS otherwise
-***/
-SINT32 CASocket::receiveFully(UINT8* buff,UINT32 len)
-	{
-		SINT32 ret;
-		UINT32 pos=0;
-	  do
-			{
-				ret=receive(buff+pos,len);
-//#ifdef _DEBUG
-//				CAMsg::printMsg(LOG_DEBUG,"CASocket::receiveFully - call to receive returned: %i\n",ret);
-//#endif
-				if(ret<=0)
-					{
-						if(ret==E_AGAIN)
-							{
-								msSleep(100);
-								continue;
-							}
-						else
-							return E_UNKNOWN;
-					}
-				pos+=ret;
-				len-=ret;
-			}
-	  while(len>0);
-	  return E_SUCCESS;	    	    
-	}
-
 /** Trys to receive all bytes. If after the timeout value has elapsed, 
 	* not all bytes are received
 	* the error E_TIMEDOUT is returned.

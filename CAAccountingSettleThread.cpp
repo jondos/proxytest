@@ -66,7 +66,7 @@ CAAccountingSettleThread::~CAAccountingSettleThread()
  */
 THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 	{
-		CAAccountingBIInterface biConn(0 /* no tls, for now */);
+		CAAccountingBIInterface biConn;
 		CAAccountingDBInterface dbConn;
 		CAXMLErrorMessage * pErrMsg;
 		CAXMLCostConfirmation * pCC;

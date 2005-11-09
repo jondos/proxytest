@@ -39,21 +39,11 @@ extern CACmdLnOptions options;
 /**
  * Constructor
  * Initiates the DB connection
- * @param useTLS if nonzero, a TLS socket is used.
  */
-CAAccountingBIInterface::CAAccountingBIInterface(UINT32 useTLS)
+CAAccountingBIInterface::CAAccountingBIInterface()
 	{
-		// init some vars
-		m_bUseTLS = useTLS;
 		m_pSocket =NULL;
-		if(useTLS)
-			{
-				m_pSocket = new CATLSClientSocket();
-			}
-		else
-			{
-				m_pSocket = new CASocket();
-			}
+		m_pSocket = new CATLSClientSocket();
 	}
 
 /**
