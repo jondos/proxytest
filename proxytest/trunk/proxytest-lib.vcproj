@@ -1930,9 +1930,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\CASSLContext.cpp">
-			</File>
-			<File
 				RelativePath="CASymCipher.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -2960,10 +2957,7 @@
 			<File
 				RelativePath="CASocketList.hpp">
 			</File>
-			<File
-				RelativePath=".\CASSLContext.hpp">
-			</File>
-			<File
+				<File
 				RelativePath="CASymCipher.hpp">
 			</File>
 			<File
