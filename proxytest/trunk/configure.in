@@ -348,7 +348,7 @@ if (test ! -z "$ac_cv_openssldir" && test "x$ac_cv_openssldir" != "x(system)") ;
 		blibpath="$blibpath:$ssldir:$ssldir/lib"
 	fi
 fi
-LIBS="$saved_LIBS -lcrypto"
+LIBS="$saved_LIBS -lcrypto -lssl"
 
 
 dnl Check for Xerces-C
