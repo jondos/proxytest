@@ -183,9 +183,9 @@ SINT32 CALastMix::processKeyExchange()
 		DOM_Document doc=DOM_Document::createDocument();
 		DOM_Element elemMixes=doc.createElement("Mixes");
 		setDOMElementAttribute(elemMixes,"count",1);
-    UINT8 cName[128];
-    options.getCascadeName(cName,128);
-    setDOMElementAttribute(elemMixes,"cascadeName",cName);
+    //UINT8 cName[128];
+    //options.getCascadeName(cName,128);
+    //setDOMElementAttribute(elemMixes,"cascadeName",cName);
 		doc.appendChild(elemMixes);
 		DOM_Element elemMix=doc.createElement("Mix");
 		UINT8 idBuff[50];
