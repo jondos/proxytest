@@ -262,6 +262,31 @@ Der Wert <tt>DEPOSITVALIDTIME</tt> wird auf den Wert von <tt>CREATIONTIME</tt> g
 Das Kontozertifikat wird an den JAP gesendet. Dieser speichert es zusammen mit dem zugehörigen geheimen Schlüssel als 
 Zugangsvorraussetzung zu dem Konto.
 
+\subsubsection secPayOptions Bezahlmöglichkeiten
+
+Will der JAP von der Bezahlinstanz erfahren, welche Zahlungsverfahren diese zur Aufladung eines Kontos akzeptiert, so sendet er einen GET-Request 
+mit dem URL <tt>/paymentoptions</tt> an die Bezahlinstanz. Diese antwortet mit einer XML-Struktur der folgenden Form:
+
+@verbatim
+<PaymentOptions version="1.0">
+    <Currency>...akzeptierte Bezahlwährung</Currency>
+    <PaymentOption name="...Name der Bezahloption" type="...Typ (aktiv/passiv)">
+        <Heading lang="...Sprachkürzel für den Tagwert">...Überschrift</Heading>
+        <DetailedInfo lang="...Sprachkürzel">...Genaue Information über das Zahlungsverfahren</DetailedInfo>
+        <ExtraInfo type="...Typ der Zusatzinformation (text/link/phone...)" lang="...Sprachkürzel">...Zusatzinformationen wie z.B. Bankverbindung oder PayPal-Link</ExtraInfo>
+    <PaymentOption name="..." type="...">
+        <Heading lang="...">...</Heading>
+        <DetailedInfo lang="...">...</DetailedInfo>
+        <input ref="..."><label lang="...">...XForms-kompatibles Eingabefeld</label></input>
+    </PaymentOption>
+</PaymentOptions>
+@endverbatim
+
+Dabei können die Tags <tt>Currency, Heading, DetailedInfo, ExtraInfo</tt> und <tt>input</tt> mehrfach vorkommen. Außer für den Tag <tt>Currency</tt> müssen dabei unterschiedliche Sprachkürzel im Attribut <tt>lang</tt> angegeben werden.
+
+Der JAP kann anhand der übermittelten Informationen beim Aufladevorgang einen Dialog mit den entsprechenden Informationen anzeigen. Enthält die von der Bezahlinstanz übermittelte XML-Strukur <tt>input</tt>-Tags (nur bei passiven Verfahren), so muss der JAP die geforderten Informationen vom Benutzer abfragen und an die Bezahlinstanz übermitteln (Anmerkung: Die Art der Übermittlung muss noch spezifiziert werden).
+
+
 \subsubsection secPayChargeAccount Kontoaufladung
 
 Zur Dienstnutzung muss das angemeldete Pseudonymkonto aufgeladen werden.  Der
