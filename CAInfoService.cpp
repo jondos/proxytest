@@ -590,6 +590,7 @@ SINT32 CAInfoService::handleConfigEvent(DOM_Document& doc)
     return E_SUCCESS;
 }
 
+#ifdef PAYMENT
 /** Gets a payment instance from the InfoService.
 	@param a_pstrPIID id of the payment instacne for which the information is requested
 	@retval E_SUCCESS if succesful
@@ -658,3 +659,4 @@ SINT32 CAInfoService::getPaymentInstance(const UINT8* a_pstrPIID,CAXMLBI** a_pXM
 				return E_UNKNOWN;
 			}
 	}
+#endif
