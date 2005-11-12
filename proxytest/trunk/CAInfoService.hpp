@@ -55,7 +55,9 @@ class CAInfoService
 			SINT32 stop();
 			SINT32 getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic);
 			SINT32 getMixedPackets(UINT64& ppackets);
+#ifdef PAYMENT			
 			SINT32 getPaymentInstance(const UINT8* a_pstrPIID,CAXMLBI** pXMLBI);
+#endif
 			bool isRunning()
 				{
 					return m_bRun;
