@@ -246,7 +246,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 		if(pAccInfo->authFlags & AUTH_SENT_ACCOUNT_REQUEST)
 			{
 				ms_pInstance->m_Mutex.unlock();
-				return 1;
+				return 2;
 			}
 		// send first request
 		#ifdef DEBUG
