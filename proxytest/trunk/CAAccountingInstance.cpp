@@ -122,6 +122,28 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 		tAiAccountingInfo* pAccInfo=pHashEntry->pAccountingInfo;
 	
 		ms_pInstance->m_Mutex.lock();
+
+		//Handle free surfing period
+		time_t theTime =time(NULL);
+		if (pAccInfo->surfingFree == 0)
+		{
+			CAMsg::printMsg( LOG_DEBUG, "New user may surf for free.\n");
+			pAccInfo->connectionTime = theTime;
+			pAccInfo->surfingFree = 1;
+		}
+		
+		if (pAccInfo->surfingFree == 1 && (pAccInfo->connectionTime+120 < theTime))
+		{
+			pAccInfo->surfingFree = 2;
+			CAMsg::printMsg( LOG_DEBUG, "Free surfing period exceeded.\n");
+		}
+		
+		if (pAccInfo->surfingFree == 1)
+		{
+			ms_pInstance->m_Mutex.unlock();
+			return 1;
+		}
+		
 		pAccInfo->transferredBytes += MIXPACKET_SIZE; // count the packet	
 		
 		if(pAccInfo->authFlags & (AUTH_FATAL_ERROR))
@@ -246,13 +268,13 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 		if(pAccInfo->authFlags & AUTH_SENT_ACCOUNT_REQUEST)
 			{
 				ms_pInstance->m_Mutex.unlock();
-				return 2;
+				return 1;
 			}
 		// send first request
 		#ifdef DEBUG
 			CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending account request.\n");
 		#endif
-		time_t theTime=time(NULL);
+		//time_t theTime=time(NULL);
 		DOM_Document doc;
 		CAAccountingInstance::makeAccountRequest(doc);
 		pAccInfo->pControlChannel->sendXMLMessage(doc);

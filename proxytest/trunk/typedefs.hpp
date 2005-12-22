@@ -282,6 +282,12 @@ struct t_accountinginfo
 	
 	/** ID of payment instance belogig to this account */
 	UINT8* pstrBIID;
+	
+	/** indicates if user is surfing for free (0 = User has not surfed for free, 1 = User is currently surfing for free, 2 = User has exceeded free surfing period*/
+	UINT32 surfingFree;
+	
+	/** stores connection time for enabling free surfing period */
+	SINT32 connectionTime;
 };
 typedef struct t_accountinginfo tAiAccountingInfo;
 
