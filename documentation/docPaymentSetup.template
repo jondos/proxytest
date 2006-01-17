@@ -6,12 +6,8 @@ configuring the first mix of a cascde to support payment. The payment instance m
 users. For a detail describtion of how the payment works lock \ref docPayment "here":
 
 \section secPayBI Setting up the payment instance (BI)
-The payment instance consists of two parts
-- a java server application
-- a web based PHP scripting part
 
-
-\subsection secPayBIJava Installation des Java-Teils
+\subsection secPayBIJava Installation
 
 \subsubsection secPayBIGeneral Voraussetzungen
 
@@ -91,43 +87,6 @@ Now you are finished with setting up the BI java server. You should have a look 
  to see if the BI is running.
 (The location and name of the log file could be specified in the configuration file)
 
-\subsection secPayBIPHP Installation des PHP-Teils
-
-Für den PHP-Teil wird ein bereits installierter Webserver mit PHP-Modul
-(z.B. Apache 1.3 oder Apache 2.x) vorausgesetzt.
-
-1. Das komplette Verzeichnis htdocs/ dorthin kopieren, wo der
-Webserver drauf zugreifen kann (z.B. /var/www/pay)
-
-2. Im htdocs-Verzeichnis befindet sich die Datei
-paypal-verify.php. Hier kann eine Emailadresse eingetragen werden, an
-die Fehler- und eventuelle Debugmeldungen zugesendet werden sollen,
-sowie einige weitere Einstellungen die dort in Kommentaren erklärt
-werden
-
-3. Ebenfalls im htdocs-Verzeichnis liegt die Datei functions.php. Hier
-müssen in der Funktion connectToDatabase() die entspr. Zugangsdaten
-für die Datenbank eingetragen werden. Und bitte danach das Backup
-"functions.php~" bzw. "functions.php.bak" o.ä.
-der Datei wieder löschen, sonst liefert der Apache es mitsamt dem
-Datenbankpasswort als Quelltext an böswillige Kiddies aus!
-
-4. Das Verzeichnis htdocs/admin muss .htaccess-geschützt werden, denn
-mit den dort liegenden Skripten kann man alle möglichen Änderungen an
-der Datenbank machen. Eine Dummy-htaccess-Datei ist schon dabei, muss
-nur noch angepasst werden
-
-
-5. Wer jetzt ganz sicher gehen will, führt noch folgendes aus:
-
-cd htdocs
-find -name "*" -type d -exec touch {}/index.html \;
-find -name "*~" -exec rm {} \;
-
-Nur im Hauptverzeichnis htdocs sollte es keine index.html geben, weil
-hier schon die index.php liegt.
-
-
 \section secPayMix Setting up the mix cascade with payment support
 
 First of all you should be familar with setting up an ordinary mix cascade.
@@ -187,7 +146,7 @@ Save your configuration file and start the mix cascade as usual. You should see 
 
 \subsection secPayJAP Using JAP with a payment cascade.
 
-First of all you need a JAP >=00.05.027.
+First of all you need a JAP >=00.05.055.
 If you do not use the default BI, than you have to make some modifications in the source code of JAP:
 
 - exchange the BI.cer with the public certifcate of your BI

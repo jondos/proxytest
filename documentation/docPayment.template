@@ -324,12 +324,12 @@ Die BI generiert nachfolgendes Transaktionszertifikat:
 
 @verbatim
 <?xml version="1.0" ?>
-<TransferCertificate version"1.1">
+<TransferCertificate version"1.2">
   <AccountNumber> ... </AccountNumber>
   <TransferNumber> ... </TransferNumber>
   <Deposit> ... </Deposit>
   <ValidTime> Gültigkeitsende der Transaktionsnummer </ValidTime>
-  <WebPayURL> [since version 1.1] Url der Web-Seite, auf der die Bezahlung erfolgt</WebPayURL>
+  <ReceivedDate> Datum, an dem das Zertifikat vom JAP empfangen wurde </ReceivedDate>
   <Signature>
     ... Signature der BI
   </Signature>	
@@ -338,10 +338,7 @@ Die BI generiert nachfolgendes Transaktionszertifikat:
 
 Die BI erzeugt ausserdem einen Eintrag in der Datenbanktabelle <tt>TRANSFERS</tt>. Der Wert <tt>USED</tt> wird 
 dabei auf <tt>false</tt> gesetzt. 
-Die BI überträgt nun das oben erstellte Transaktionszertifikat an den Nutzer zusammen mit einer URL (<tt>\<WebPayURL\></tt>),
- wo genaue Erläuterungen zur Bezahlung und zur Benutzung von elektronischen Bezahlverfahren hinterlegt sind. Dabei wird diese URL
- vom JAP mit dem Parameter <tt>transfernum</tt> aufgerufen.
-
+Die BI überträgt nun das oben erstellte Transaktionszertifikat an den Nutzer.
 \subsubsection secBalance Kontostandsabfrage
 
 Wünscht der Nutzer eine aktuelle Kontostandsinformation, so sendet er eine entsprechende Anfrage an die BI.
@@ -892,6 +889,8 @@ Felder:
   VALIDTIME        (Zeitpunkt;       TIMESTAMP) - Gültigkeitsende der Transaktionsnummer 
   USED             (Boolean;           BOOLEAN) - gibt an ob die Transkationsnummer bereits 
                                                   für Zahlungen verwendet wurde
+  USEDTIME         (64 Bit Integer; BIGINTEGER) - Gibt das Datum an, an dem die Transaktionsnummer
+                                                  zur Zahlung benutzt wurde
 @endverbatim
 \subsection secBITable BI Kostenbestätigungen pro Konto und Kaskade
 @verbatim
