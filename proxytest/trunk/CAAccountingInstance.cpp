@@ -125,7 +125,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 
 		//Handle free surfing period
 		time_t theTime =time(NULL);
-		if (pAccInfo->surfingFree == 0)
+		/*if (pAccInfo->surfingFree == 0)
 		{
 			CAMsg::printMsg( LOG_DEBUG, "New user may surf for free.\n");
 			pAccInfo->connectionTime = theTime;
@@ -142,7 +142,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 		{
 			ms_pInstance->m_Mutex.unlock();
 			return 1;
-		}
+		}*/
 		
 		pAccInfo->transferredBytes += MIXPACKET_SIZE; // count the packet	
 		
@@ -268,7 +268,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 		if(pAccInfo->authFlags & AUTH_SENT_ACCOUNT_REQUEST)
 			{
 				ms_pInstance->m_Mutex.unlock();
-				return 1;
+				return 2;
 			}
 		// send first request
 		#ifdef DEBUG
