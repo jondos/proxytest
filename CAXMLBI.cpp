@@ -126,11 +126,20 @@ SINT32 CAXMLBI::setValues(DOM_Element &elemRoot)
 		DOM_Element elemNet;
 		DOM_Element elemListeners;
 		DOM_Element elemListener;
+		DOM_Element elemHost;
 		getDOMChildByName(elemRoot, (UINT8*)"Network", elemNet, false);
 		getDOMChildByName(elemNet, (UINT8*)"ListenerInterfaces", elemListeners, false);
 		getDOMChildByName(elemListeners, (UINT8*)"ListenerInterface", elemListener, false);
-		getDOMChildByName(elemListener, (UINT8*)"Host", elem, false);
-		getDOMElementValue(elem, strGeneral, &strGeneralLen);
+		getDOMChildByName(elemListener, (UINT8*)"Host", elemHost, false);
+		strGeneralLen=255;
+		if(getDOMElementValue(elemHost, strGeneral, &strGeneralLen)!=E_SUCCESS)
+			{
+				delete [] m_pBiID;
+				m_pBiID=NULL;
+				delete m_pCert;
+				m_pCert=NULL;
+				return E_UNKNOWN;
+			}
 		m_pHostName = new UINT8[strGeneralLen+1];
 		strcpy((char*)m_pHostName, (char*)strGeneral);
 
