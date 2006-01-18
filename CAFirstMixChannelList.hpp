@@ -79,6 +79,8 @@ struct t_fmhashtableentry
 
 		friend class CAFirstMixChannelList;
 #ifdef PAYMENT
+		public:
+			bool bCountPacket;
 		private:
 			tAiAccountingInfo* pAccountingInfo;
 		friend class CAAccountingInstance;

@@ -127,12 +127,16 @@ SINT32 CAXMLBI::setValues(DOM_Element &elemRoot)
 		DOM_Element elemListeners;
 		DOM_Element elemListener;
 		DOM_Element elemHost;
+		DOM_Element elemPort;
 		getDOMChildByName(elemRoot, (UINT8*)"Network", elemNet, false);
 		getDOMChildByName(elemNet, (UINT8*)"ListenerInterfaces", elemListeners, false);
 		getDOMChildByName(elemListeners, (UINT8*)"ListenerInterface", elemListener, false);
 		getDOMChildByName(elemListener, (UINT8*)"Host", elemHost, false);
+		getDOMChildByName(elemListener, (UINT8*)"Port", elemPort, false);
 		strGeneralLen=255;
-		if(getDOMElementValue(elemHost, strGeneral, &strGeneralLen)!=E_SUCCESS)
+		//Parse PI Host and Port
+		if(	getDOMElementValue(elemHost, strGeneral, &strGeneralLen)!=E_SUCCESS||
+				getDOMElementValue(elemPort, &m_iPortNumber)!=E_SUCCESS)
 			{
 				delete [] m_pBiID;
 				m_pBiID=NULL;
@@ -142,11 +146,6 @@ SINT32 CAXMLBI::setValues(DOM_Element &elemRoot)
 			}
 		m_pHostName = new UINT8[strGeneralLen+1];
 		strcpy((char*)m_pHostName, (char*)strGeneral);
-
-		//Parse PI Port
-		getDOMChildByName(elemListener, (UINT8*)"Port", elem, false);
-		getDOMElementValue(elem, &m_iPortNumber);
-
 		return E_SUCCESS;
 	}
 	

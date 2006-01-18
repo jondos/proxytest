@@ -476,9 +476,16 @@ NEXT_USER:
 								if(pfmHashEntry->uAlreadySendPacketSize==-1)
 									{
 										pfmHashEntry->pQueueSend->get((UINT8*)&pfmHashEntry->oQueueEntry,&len); 
+										#ifdef PAYMENT
+											//do not count control channel packets!
+											if(pfmHashEntry->oQueueEntry.packet.channel>0&&pfmHashEntry->oQueueEntry.packet.channel<256)
+												pfmHashEntry->bCountPacket=false;
+											else
+												pfmHashEntry->bCountPacket=true;
+										#endif
 										pfmHashEntry->pMuxSocket->prepareForSend(&(pfmHashEntry->oQueueEntry.packet));
 										pfmHashEntry->uAlreadySendPacketSize=0;
-									}
+										}
 								len=MIXPACKET_SIZE-pfmHashEntry->uAlreadySendPacketSize;
 								ret=((CASocket*)pfmHashEntry->pMuxSocket)->send(((UINT8*)&(pfmHashEntry->oQueueEntry))+pfmHashEntry->uAlreadySendPacketSize,len);
 								if(ret>0)
@@ -487,8 +494,11 @@ NEXT_USER:
 										if(pfmHashEntry->uAlreadySendPacketSize==MIXPACKET_SIZE)
 											{
 												#ifdef PAYMENT
-													// count packet for payment
-													CAAccountingInstance::handleJapPacket(pfmHashEntry);
+													if(pfmHashEntry->bCountPacket)
+														{
+															// count packet for payment
+															CAAccountingInstance::handleJapPacket(pfmHashEntry);
+														}
 												#endif
 												#ifdef DELAY_USERS
 													pfmHashEntry->delayBucket--;
