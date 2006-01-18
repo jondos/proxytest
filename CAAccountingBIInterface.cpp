@@ -74,13 +74,14 @@ SINT32 CAAccountingBIInterface::initBIConnection()
 				m_connected = false;
 				return E_UNKNOWN;
 			}
-		address.setAddr(pBI->getHostName(), (UINT16)pBI->getPortNumber());
-		
+		CAMsg::printMsg(LOG_DEBUG,"CAAccountingBIInterface: try to connect to BI at %s:%i.\n",pBI->getHostName(),pBI->getPortNumber());
+		address.setAddr(pBI->getHostName(), (UINT16)pBI->getPortNumber());		
 		// connect
 		rc=m_pSocket->connect(address);
 		if(rc!=E_SUCCESS)
 			{
 				UINT8 buf[64];
+				memset(buf,0,64);
 				address.getHostName(buf, 64);
 				CAMsg::printMsg(
 						LOG_ERR, 
@@ -90,7 +91,6 @@ SINT32 CAAccountingBIInterface::initBIConnection()
 				m_connected = false;
 				return E_UNKNOWN;
 			}
-		
 		m_httpClient.setSocket(m_pSocket);
 		m_connected = true;
 		return E_SUCCESS;
