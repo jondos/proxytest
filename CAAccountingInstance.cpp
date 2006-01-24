@@ -115,7 +115,6 @@ CAAccountingInstance::~CAAccountingInstance()
  * @return 2 user did not send accountcertificate, connection should be closed
  * @return 3 user  did not send a cost confirmation 
  *						or somehow tried to fake authentication, connection should be closed
- * @return 4 AuthState unknown (internal error, should not happen)
  */
 SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 	{
@@ -264,11 +263,16 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 			}
 		
 		//---------------------------------------------------------
-		// we have no accountcert from the user, let's request one
+		// we have no accountcert from the user, but we have already sent the request
 		if(pAccInfo->authFlags & AUTH_SENT_ACCOUNT_REQUEST)
 			{
-				ms_pInstance->m_Mutex.unlock();
-				return 2;
+				int ret=2;
+				if(pAccInfo->lastRequestSeconds<theTime+PAYMENT_ACCOUNT_CERT_TIMEOUT)
+					{
+						ret = 3;
+					}
+  			ms_pInstance->m_Mutex.unlock();
+				return ret;
 			}
 		// send first request
 		#ifdef DEBUG

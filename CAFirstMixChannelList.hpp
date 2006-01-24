@@ -81,7 +81,7 @@ struct t_fmhashtableentry
 #ifdef PAYMENT
 		public:
 			bool bCountPacket;
-		private:
+ 		private:
 			tAiAccountingInfo* pAccountingInfo;
 		friend class CAAccountingInstance;
 		friend class CAAccountingControlChannel;
