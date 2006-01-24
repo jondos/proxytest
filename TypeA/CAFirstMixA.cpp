@@ -172,10 +172,15 @@ SINT32 CAFirstMixA::loop()
 													}
 #ifdef PAYMENT
 												// payment code added by Bastian Voigt
-													if(CAAccountingInstance::handleJapPacket(pHashEntry ) != 1) 
+												SINT32 ret = CAAccountingInstance::handleJapPacket(pHashEntry );  
+												if (ret == 2)
+													{
+														goto NEXT_USER;
+													}													
+												if(ret == 3) 
 													{
 														// this jap is evil! terminate connection and add IP to blacklist
-														CAMsg::printMsg(LOG_DEBUG, "Detected evil Jap.. closing connection! Removing IP..\n\n");
+														CAMsg::printMsg(LOG_DEBUG, "Detected evil Jap.. closing connection! Removing IP..\n\n", ret);
 														fmChannelListEntry* pEntry;
 														pEntry=m_pChannelList->getFirstChannelForSocket(pMuxSocket);
 														while(pEntry!=NULL)
