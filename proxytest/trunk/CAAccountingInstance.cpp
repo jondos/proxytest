@@ -267,7 +267,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 		if(pAccInfo->authFlags & AUTH_SENT_ACCOUNT_REQUEST)
 			{
 				int ret=2;
-				if(pAccInfo->lastRequestSeconds<theTime+PAYMENT_ACCOUNT_CERT_TIMEOUT)
+				if(pAccInfo->lastRequestSeconds+PAYMENT_ACCOUNT_CERT_TIMEOUT<theTime)
 					{
 						ret = 3;
 					}
