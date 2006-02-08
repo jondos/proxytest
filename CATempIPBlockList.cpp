@@ -32,42 +32,46 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 
 CATempIPBlockList::CATempIPBlockList(UINT64 validTimeMillis)
-{
-	m_validTimeMillis = validTimeMillis;
+	{
+		m_validTimeMillis = validTimeMillis;
 
-	m_hashTable=new PTEMPIPBLOCKLIST[0x10000];
-	memset(m_hashTable,0,0x10000*sizeof(PTEMPIPBLOCKLIST));
+		m_hashTable=new PTEMPIPBLOCKLIST[0x10000];
+		memset(m_hashTable,0,0x10000*sizeof(PTEMPIPBLOCKLIST));
 	
-	m_pMutex = new CAMutex();
+		m_pMutex = new CAMutex();
 	
-	// launch cleanup thread
-	m_pCleanupThread = new CAThread();
-	m_bRunCleanupThread=true;
-	m_pCleanupThread->setMainLoop(cleanupThreadMainLoop);
-	m_pCleanupThread->start(this);
-}
+		// launch cleanup thread
+		m_pCleanupThread = new CAThread();
+		m_bRunCleanupThread=true;
+		m_pCleanupThread->setMainLoop(cleanupThreadMainLoop);
+		m_pCleanupThread->start(this);
+	}
 
 
 
 CATempIPBlockList::~CATempIPBlockList()
-{
-	CAMsg::printMsg(LOG_DEBUG, "CATmpIPBlockList terminating..");
-	m_pCleanupThread->join(); //wait for cleanupthread to wakeup and exit
-	//Now stop the cleanup thread...
-	m_bRunCleanupThread=false;
-	//its safe to delet it because we have the lock...
-	for(UINT32 i=0;i<=0xFFFF;i++) {
-		PTEMPIPBLOCKLIST entry=m_hashTable[i];
-		PTEMPIPBLOCKLIST tmpEntry;
-		while(entry!=NULL) {
-			tmpEntry=entry;
-			entry=entry->next;
-			delete tmpEntry;
-		}
+	{
+		CAMsg::printMsg(LOG_DEBUG, "CATmpIPBlockList terminating..\n");
+		//Now stop the cleanup thread...
+		m_bRunCleanupThread=false;
+		m_pCleanupThread->join(); //wait for cleanupthread to wakeup and exit
+		m_pMutex->lock();
+		//its safe to delet it because we have the lock...
+		for(UINT32 i=0;i<=0xFFFF;i++) 
+			{
+				PTEMPIPBLOCKLIST entry=m_hashTable[i];
+				PTEMPIPBLOCKLIST tmpEntry;
+				while(entry!=NULL)
+					{
+						tmpEntry=entry;
+						entry=entry->next;
+						delete tmpEntry;
+					}
+			}
+		delete [] m_hashTable;
+		m_pMutex->unlock();
+		delete m_pMutex;
 	}
-	delete [] m_hashTable;
-	delete m_pMutex;
-}
 
 
 
@@ -161,35 +165,41 @@ SINT32 CATempIPBlockList::checkIP(const UINT8 ip[4])
  * the cleanup thread main loop 
  */
 THREAD_RETURN CATempIPBlockList::cleanupThreadMainLoop(void *param)
-{
-	CATempIPBlockList * instance;
-	instance = (CATempIPBlockList *)param;
-	while(instance->m_bRunCleanupThread) {				
-		// do cleanup
-		UINT64 now;
-		getcurrentTimeMillis(now);
-		instance->m_pMutex->lock();
-		for(UINT32 i=0;i<=0xFFFF;i++) {
-			PTEMPIPBLOCKLIST entry=instance->m_hashTable[i];
-			PTEMPIPBLOCKLIST previous = NULL;
-			while(entry!=NULL) {
-				if(entry->validTimeMillis <= now) {
-					// entry can be removed
-					if(previous==NULL) {
-						CAMsg::printMsg(LOG_DEBUG, "CATmpIPBlockList: removing entry...");
-						instance->m_hashTable[i] = entry->next;
-						previous=entry->next;
-						delete entry; 
-						entry=previous;
-						previous=NULL;
-					}
+	{
+		CATempIPBlockList * instance;
+		instance = (CATempIPBlockList *)param;
+		while(instance->m_bRunCleanupThread) 
+			{				
+				// do cleanup
+				UINT64 now;
+				getcurrentTimeMillis(now);
+				instance->m_pMutex->lock();
+				for(UINT32 i=0;i<=0xFFFF;i++) 
+					{
+						PTEMPIPBLOCKLIST entry=instance->m_hashTable[i];
+						PTEMPIPBLOCKLIST previous = NULL;
+						while(entry!=NULL)
+							{
+								if(entry->validTimeMillis <= now) 
+									{
+										// entry can be removed
+										if(previous==NULL)
+											{
+												CAMsg::printMsg(LOG_DEBUG, "CATmpIPBlockList: removing entry...");
+												instance->m_hashTable[i] = entry->next;
+												previous=entry->next;
+												delete entry; 
+												entry=previous;
+												previous=NULL;
+										}
+								else
+									{
+										previous->next = entry->next;
+										delete entry;
+										entry = previous->next;
+									}
+							}
 					else {
-						previous->next = entry->next;
-						delete entry;
-						entry = previous->next;
-					}
-				}
-				else {
 					// entry is still valid
 					previous = entry;
 					entry = entry->next;
@@ -198,7 +208,7 @@ THREAD_RETURN CATempIPBlockList::cleanupThreadMainLoop(void *param)
 		}
 		instance->m_pMutex->unlock();
 
-		// let the thread sleep for 10 minutes
+		// let the thread sleep for 1 minute
 		sSleep(CLEANUP_THREAD_SLEEP_INTERVAL);
 	}
 	return E_SUCCESS;

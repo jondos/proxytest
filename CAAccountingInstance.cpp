@@ -72,9 +72,9 @@ CAAccountingInstance::CAAccountingInstance()
 		m_AiName = new UINT8[256];
 		options.getAiID(m_AiName, 256);
 		if (options.getBI() != NULL)
-		{
-		m_pJpiVerifyingInstance = options.getBI()->getVerifier();
-		}
+			{
+				m_pJpiVerifyingInstance = options.getBI()->getVerifier();
+			}
 		options.getPaymentHardLimit(&m_iHardLimitBytes);
 		options.getPaymentSoftLimit(&m_iSoftLimitBytes);
 	
@@ -102,6 +102,7 @@ CAAccountingInstance::~CAAccountingInstance()
 		delete m_dbInterface;
 		delete m_pIPBlockList;
 		delete m_pQueue;
+		delete[] m_AiName;
 	}
 
 

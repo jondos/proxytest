@@ -29,27 +29,22 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef CATEMPIPBLOCKLIST_HPP
 #define CATEMPIPBLOCKLIST_HPP
 
-#define CLEANUP_THREAD_SLEEP_INTERVAL 600 //sleeptime in seconds
 #include "CAThread.hpp"
 #include "CAMutex.hpp"
 
 struct _tempipblocklist_t
-{
-	/** Next element, NULL if element is the last one */
-	struct _tempipblocklist_t* next; 
+	{
+		/** Next element, NULL if element is the last one */
+		struct _tempipblocklist_t* next; 
 	
-	/** First two Bytes of the IP-Address */
-	UINT8 ip[2];
-	
-	/** Entry is valid until getCurrentTimeMillis() > validTimeMillis */
-	UINT64 validTimeMillis; 
-};
+		/** Entry is valid until getCurrentTimeMillis() > validTimeMillis */
+		UINT64 validTimeMillis; 
+		/** First two Bytes of the IP-Address */
+		UINT8 ip[2];
+	};
 
-typedef struct _tempipblocklist_t TEMPIPBLOCKLISTENTRY;
-typedef struct _tempipblocklist_t* PTEMPIPBLOCKLIST;
-
-
-
+typedef struct _tempipblocklist_t		TEMPIPBLOCKLISTENTRY;
+typedef struct _tempipblocklist_t*	PTEMPIPBLOCKLIST;
 
 /**
  * The purpose of this class is storing the IPs of JAP users who tried to
