@@ -104,14 +104,14 @@ CACertificate* CACertificate::decode(const UINT8* buff,UINT32 bufflen,UINT32 typ
 			{
 				case CERT_DER:
 					tmp=buff;
-					#if OPENSSL_VERSION_NUMBER	> 0x0090704fL
+					#if OPENSSL_VERSION_NUMBER	> 0x0090705fL
 						tmpCert=d2i_X509(NULL,&tmp,bufflen);
 					#else
 						tmpCert=d2i_X509(NULL,(UINT8**)&tmp,bufflen);
 					#endif
 				break;
 				case CERT_PKCS12:
-					#if OPENSSL_VERSION_NUMBER	> 0x0090704fL
+					#if OPENSSL_VERSION_NUMBER	> 0x0090705fL
 						tmpPKCS12=d2i_PKCS12(NULL,&buff,bufflen);	
 					#else
 						tmpPKCS12=d2i_PKCS12(NULL,(UINT8**)&buff,bufflen);	
