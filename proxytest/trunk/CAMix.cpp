@@ -228,6 +228,15 @@ SINT32 CAMix::initMixCascadeInfo(DOM_Element& mixes)
     if(cascadeID != NULL)
 				setDOMElementAttribute(elemRoot,"id",cascadeID);
     setDOMElementAttribute(elemMixesDocCascade,"count",count);
-    return E_SUCCESS;
+    
+		
+  DOM_Node elemPayment=m_docMixCascadeInfo.createElement("Payment");
+	elemRoot.appendChild(elemPayment);
+#ifdef PAYMENT
+	setDOMElementAttribute(elemPayment,"required",(UINT8*)"true");
+#else
+	setDOMElementAttribute(elemPayment,"required",(UINT8*)"false");
+#endif
+		return E_SUCCESS;
 }
 
