@@ -303,7 +303,7 @@ SINT32 CAFirstMix::processKeyExchange()
     //tmp XML-Structure for constructing the XML which is send to each user
     DOM_Document docXmlKeyInfo=DOM_Document::createDocument();
     DOM_Element elemRootKey=docXmlKeyInfo.createElement("MixCascade");
-    setDOMElementAttribute(elemRootKey,"version",(UINT8*)"0.1"); //set the Version of the XML to 0.1
+    setDOMElementAttribute(elemRootKey,"version",(UINT8*)"0.2"); //set the Version of the XML to 0.2
     docXmlKeyInfo.appendChild(elemRootKey);
     DOM_Element elemMixProtocolVersion=docXmlKeyInfo.createElement("MixProtocolVersion");
     setDOMElementValue(elemMixProtocolVersion,(UINT8*)MIX_CASCADE_PROTOCOL_VERSION);
@@ -336,7 +336,17 @@ SINT32 CAFirstMix::processKeyExchange()
 		elemOwnMix.appendChild(docXmlKeyInfo.importNode(docfragKey,true));
     elemMixesKey.insertBefore(elemOwnMix,elemMixesKey.getFirstChild());
     setDOMElementAttribute((DOM_Element&)elemMixesKey,"count",count+1);
-    CACertificate* ownCert=options.getOwnCertificate();
+    
+	  DOM_Node elemPayment=docXmlKeyInfo.createElement("Payment");
+		elemRootKey.appendChild(elemPayment);
+		#ifdef PAYMENT
+			setDOMElementAttribute(elemPayment,"required",(UINT8*)"true");
+		#else
+			setDOMElementAttribute(elemPayment,"required",(UINT8*)"false");
+		#endif
+
+		//dign the xml struct send to each jap user
+		CACertificate* ownCert=options.getOwnCertificate();
     if(ownCert==NULL)
     {
         CAMsg::printMsg(LOG_DEBUG,"Own Test Cert is NULL -- so it could not be inserted into signed KeyInfo send to users...\n");
