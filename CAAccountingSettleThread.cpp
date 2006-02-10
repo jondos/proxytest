@@ -35,11 +35,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAXMLCostConfirmation.hpp"
 #include "CAXMLErrorMessage.hpp"
 
-//#define SLEEP_SECONDS 20
-
-
-
-
 CAAccountingSettleThread::CAAccountingSettleThread()
 	{
 		// launch AI thread
@@ -48,7 +43,7 @@ CAAccountingSettleThread::CAAccountingSettleThread()
 		CAMsg::printMsg(LOG_DEBUG, "Now launching Accounting SettleThread...\n");
 		m_pPIList = NULL;
 		m_bRun=true;
-		m_pThread->start((void*)&m_bRun);
+		m_pThread->start(this);
 	}
 
 
@@ -66,6 +61,7 @@ CAAccountingSettleThread::~CAAccountingSettleThread()
  */
 THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 	{
+		CAAccountingSettleThread* m_pAccountingSettleThread=(CAAccountingSettleThread*)pParam;
 		CAAccountingBIInterface biConn;
 		CAAccountingDBInterface dbConn;
 		CAXMLErrorMessage * pErrMsg;
@@ -79,13 +75,14 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 	
 		CAXMLBI* pBI = options.getBI();
 		if(pBI==NULL)
-			THREAD_RETURN_ERROR;
+			{
+				CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread; Uuupss.. No BI given --> dying!\n");
+				THREAD_RETURN_ERROR;
+			}
 		biAddr.setAddr(pBI->getHostName(), (UINT16)pBI->getPortNumber());
 		options.getPaymentSettleInterval(&sleepInterval);
 
-		volatile bool* bRun=(volatile bool*)pParam;
-	
-		while(*bRun)
+		while(m_pAccountingSettleThread->m_bRun)
 			{
 				#ifdef DEBUG
 					CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread going to sleep...\n");
@@ -94,70 +91,57 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				#ifdef DEBUG
 					CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread Waking up...\n");
 				#endif
-				if(!(*bRun))
-					break;
+				if(!m_pAccountingSettleThread->m_bRun)
+					{
+						CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Leaving run loop\n");
+						break;
+					}
 				if(dbConn.initDBConnection()!=E_SUCCESS)
 					{
 						CAMsg::printMsg(LOG_ERR, "SettleThread could not connect to Database. Retrying later...\n");
 						continue;
 					}
-				dbConn.getUnsettledCostConfirmations(q);
-				if(!q.isEmpty())
+				if(biConn.initBIConnection()!=E_SUCCESS)
 					{
-						if(biConn.initBIConnection()!=E_SUCCESS)
-							{
-								CAMsg::printMsg(LOG_DEBUG, "SettleThread: could not connect to BI. Retrying later...\n");
-								//delet all CC's from the queue
-								while(!q.isEmpty())
-									{
-										size = sizeof(CAXMLCostConfirmation*);
-										if(q.get((UINT8*)(&pCC), &size)!=E_SUCCESS)
-											{
-												CAMsg::printMsg(LOG_ERR, "SettleThread: could not get next item from queue\n");
-												break;
-											}
-										delete pCC;
-									}
-								q.clean();
-								biConn.terminateBIConnection();
-								dbConn.terminateDBConnection();
-								continue;
-							}
-						do
-							{
-								// get the next CC from the queue
-								size = sizeof(pCC);
-								if(q.get((UINT8*)(&pCC), &size)!=E_SUCCESS)
-									{
-										CAMsg::printMsg(LOG_ERR, "SettleThread: could not get next item from queue\n");
-										q.clean();
-										break;
-									}
-								pErrMsg = biConn.settle( *pCC );
-							
-								// check returncode
-								if(!pErrMsg)
-									{
-										CAMsg::printMsg(LOG_ERR, "SettleThread: Communication with BI failed!\n");
-									}
-								else if(pErrMsg->getErrorCode()!=pErrMsg->ERR_OK)
-									{
-										CAMsg::printMsg(LOG_ERR, "SettleThread: BI reported error no. %d (%s)\n",
-											pErrMsg->getErrorCode(), pErrMsg->getDescription() );
-									}
-								else
-									{
-										if(dbConn.markAsSettled(pCC->getAccountNumber())!=E_SUCCESS)
-											CAMsg::printMsg(LOG_ERR, "SettleThread: Could not mark an account as settled!\n");
-									}
-								delete pCC;
-								delete pErrMsg;
-							}
-						while(!q.isEmpty());
-						biConn.terminateBIConnection();
+						CAMsg::printMsg(LOG_DEBUG, "SettleThread: could not connect to BI. Retrying later...\n");
+						dbConn.terminateDBConnection();
+						continue;
 					}
+				dbConn.getUnsettledCostConfirmations(q);
+				while(!q.isEmpty())
+					{
+						// get the next CC from the queue
+						size = sizeof(pCC);
+						if(q.get((UINT8*)(&pCC), &size)!=E_SUCCESS)
+							{
+								CAMsg::printMsg(LOG_ERR, "SettleThread: could not get next item from queue\n");
+								q.clean();
+								break;
+							}
+						pErrMsg = biConn.settle( *pCC );
+					
+						// check returncode
+						if(!pErrMsg)
+							{
+								CAMsg::printMsg(LOG_ERR, "SettleThread: Communication with BI failed!\n");
+							}
+						else if(pErrMsg->getErrorCode()!=pErrMsg->ERR_OK)
+							{
+								CAMsg::printMsg(LOG_ERR, "SettleThread: BI reported error no. %d (%s)\n",
+									pErrMsg->getErrorCode(), pErrMsg->getDescription() );
+							}
+						else
+							{
+								if(dbConn.markAsSettled(pCC->getAccountNumber())!=E_SUCCESS)
+									CAMsg::printMsg(LOG_ERR, "SettleThread: Could not mark an account as settled!\n");
+							}
+						delete pCC;
+						delete pErrMsg;
+					}
+				biConn.terminateBIConnection();
 				dbConn.terminateDBConnection();
-			}//while
+			}//main while run loop
+		CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Exiting run loop!\n");
 		THREAD_RETURN_SUCCESS;
 	}
 
