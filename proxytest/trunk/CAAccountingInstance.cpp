@@ -276,7 +276,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 				return ret;
 			}
 		// send first request
-		#ifdef DEBUG
+		/*#ifdef DEBUG
 			CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending account request.\n");
 		#endif
 		//time_t theTime=time(NULL);
@@ -285,8 +285,9 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 		pAccInfo->pControlChannel->sendXMLMessage(doc);
 		pAccInfo->authFlags |= AUTH_SENT_ACCOUNT_REQUEST;
 		pAccInfo->lastRequestSeconds = theTime;
+		*/
 		ms_pInstance->m_Mutex.unlock();
-		return 1;
+		return 2;
 	}
 
 /** @todo makt the faster by not using DOM!*/
@@ -850,6 +851,7 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 	{
 		pHashEntry->pAccountingInfo = new tAiAccountingInfo;
 		memset( pHashEntry->pAccountingInfo, 0, sizeof( tAiAccountingInfo ) );
+		pHashEntry->pAccountingInfo->authFlags |= AUTH_SENT_ACCOUNT_REQUEST;
 		return E_SUCCESS;
 	}
 
