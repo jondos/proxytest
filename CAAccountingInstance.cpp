@@ -852,6 +852,7 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 		pHashEntry->pAccountingInfo = new tAiAccountingInfo;
 		memset( pHashEntry->pAccountingInfo, 0, sizeof( tAiAccountingInfo ) );
 		pHashEntry->pAccountingInfo->authFlags |= AUTH_SENT_ACCOUNT_REQUEST;
+		pHashEntry->pAccountingInfo->lastRequestSeconds = time(NULL);
 		return E_SUCCESS;
 	}
 
