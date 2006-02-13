@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.04.21"
+#define MIX_VERSION "00.04.22"
 
 //Define all features if we are running in documentation creation mode
 #ifdef DOXYGEN
@@ -148,6 +148,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define LOG_PACKET_TIMES
 #endif
 
+#define MIX_CASCADE_PROTOCOL_VERSION_0_9 9  //with new payment protocol
 #define MIX_CASCADE_PROTOCOL_VERSION_0_8 8  //with replay detection + control channels + first mix symmetric
 #define MIX_CASCADE_PROTOCOL_VERSION_0_7 7  //with replay detection + control channels (obsolete)
 #define MIX_CASCADE_PROTOCOL_VERSION_0_6 6  //with new flow control
@@ -161,6 +162,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #endif	
 #ifdef REPLAY_DETECTION
 	#define MIX_CASCADE_PROTOCOL_VERSION "0.8"
+#elif defined(PAYMENT)
+	#define MIX_CASCADE_PROTOCOL_VERSION "0.9"
 #else
 	#define MIX_CASCADE_PROTOCOL_VERSION "0.4"
 #endif
