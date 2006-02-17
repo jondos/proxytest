@@ -132,17 +132,21 @@ CAXMLErrorMessage * CAAccountingBIInterface::settle(CAXMLCostConfirmation &cc)
 			}
 		delete[] pStrCC;
 		contentLen=0;
+		CAMsg::printMsg(LOG_DEBUG, "CAAccountingBIInterface::settle: request send!\n");
 		if(m_httpClient.parseHTTPHeader(&contentLen, &status)!=E_SUCCESS ||
 			(status!=200) || (contentLen==0))
 			{
+				CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface::settle: response fehlerhaft!\n");
 				return NULL;
 			}
+		CAMsg::printMsg(LOG_DEBUG, "CAAccountingBIInterface::settle: got response header [Status,content-Lenght]=[%i,%i]!\n",status,contentLen);
 		response = new UINT8[contentLen+1];
 		if(m_pSocket->receiveFully(response, contentLen)!=E_SUCCESS)
 			{
 				delete[] response;
 				return NULL;
 			}
+		CAMsg::printMsg(LOG_DEBUG, "CAAccountingBIInterface::settle: response body received!\n");
 		
 		response[contentLen]='\0';
 		pErrMsg = new CAXMLErrorMessage(response);
