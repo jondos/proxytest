@@ -107,7 +107,9 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 						dbConn.terminateDBConnection();
 						continue;
 					}
+				CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: DB connections established!\n");
 				dbConn.getUnsettledCostConfirmations(q);
+				CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: dbConn.getUnsettledCostConfirmations(q) finished!\n");
 				while(!q.isEmpty())
 					{
 						// get the next CC from the queue
@@ -118,10 +120,12 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 								q.clean();
 								break;
 							}
+						CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: try to settle...\n");
 						pErrMsg = biConn.settle( *pCC );
+						CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: settle done!\n");
 					
 						// check returncode
-						if(!pErrMsg)
+						if(pErrMsg==NULL)
 							{
 								CAMsg::printMsg(LOG_ERR, "SettleThread: Communication with BI failed!\n");
 							}

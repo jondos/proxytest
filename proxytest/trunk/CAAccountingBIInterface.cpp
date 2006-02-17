@@ -91,6 +91,7 @@ SINT32 CAAccountingBIInterface::initBIConnection()
 				m_connected = false;
 				return E_UNKNOWN;
 			}
+		CAMsg::printMsg(LOG_DEBUG,"CAAccountingBIInterface: BI connection established\n!");
 		m_httpClient.setSocket(m_pSocket);
 		m_connected = true;
 		return E_SUCCESS;
@@ -118,20 +119,19 @@ SINT32 CAAccountingBIInterface::terminateBIConnection()
  */
 CAXMLErrorMessage * CAAccountingBIInterface::settle(CAXMLCostConfirmation &cc)
 	{
-		UINT8 * pStrCC;
-		UINT8* response;
-		UINT32 contentLen, status;
+		UINT8 * pStrCC=NULL;
+		UINT8* response=NULL;
+		UINT32 contentLen=0, status=0;
 		CAXMLErrorMessage *pErrMsg;
 	
 		pStrCC = cc.dumpToMem(&contentLen);
-		if(	pStrCC==NULL||
-				m_httpClient.sendPostRequest((UINT8*)"/settle", pStrCC,contentLen)!= E_SUCCESS)
+		if(	pStrCC==NULL || m_httpClient.sendPostRequest((UINT8*)"/settle", pStrCC,contentLen)!= E_SUCCESS)
 			{
 				delete[] pStrCC;
 				return NULL;
 			}
 		delete[] pStrCC;
-	
+		contentLen=0;
 		if(m_httpClient.parseHTTPHeader(&contentLen, &status)!=E_SUCCESS ||
 			(status!=200) || (contentLen==0))
 			{

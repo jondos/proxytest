@@ -123,7 +123,7 @@ SINT32 CAHttpClient::parseHTTPHeader(UINT32* contentLength, UINT32 * statusCode)
 	{
 		char *line = new char[255];
 		SINT32 ret = 0;
-		SINT32 ret2 = E_SUCCESS;
+		SINT32 ret2 = E_UNKNOWN;
 		if(!m_pSocket)
 			{
 				return E_NOT_CONNECTED;
@@ -147,7 +147,7 @@ SINT32 CAHttpClient::parseHTTPHeader(UINT32* contentLength, UINT32 * statusCode)
 			}
 			while(byte != '\n' && i<255 && ret > 0);
 	
-			if(ret < 0)
+			if(ret < 0||i>=255)
 				break;
 	
 			if(strncmp(line, "HTTP", 4) == 0)
@@ -166,9 +166,10 @@ SINT32 CAHttpClient::parseHTTPHeader(UINT32* contentLength, UINT32 * statusCode)
 									"HttpClient: Error: Maybe the desired mix is not online? Retry later.\n"
 								);
 						}
-					ret2 = E_UNKNOWN;
 					break;
 				}
+				else
+					ret2=E_SUCCESS;
 			}
 			/// TODO: do it better (case insensitive compare!)
 			else if( (strncmp(line, "Content-length: ", 16) == 0) ||
@@ -179,8 +180,8 @@ SINT32 CAHttpClient::parseHTTPHeader(UINT32* contentLength, UINT32 * statusCode)
 			#ifdef DEBUG
 				CAMsg::printMsg(LOG_DEBUG,"Server returned: '%s'.\n",line);
 			#endif	
-		}
-		while(strlen(line) > 0);
+		} while(strlen(line) > 0);
+		
 		delete[] line;
 		return ret2;
 	}
