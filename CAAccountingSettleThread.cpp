@@ -101,12 +101,6 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 						CAMsg::printMsg(LOG_ERR, "SettleThread could not connect to Database. Retrying later...\n");
 						continue;
 					}
-				if(biConn.initBIConnection()!=E_SUCCESS)
-					{
-						CAMsg::printMsg(LOG_DEBUG, "SettleThread: could not connect to BI. Retrying later...\n");
-						dbConn.terminateDBConnection();
-						continue;
-					}
 				CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: DB connections established!\n");
 				dbConn.getUnsettledCostConfirmations(q);
 				CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: dbConn.getUnsettledCostConfirmations(q) finished!\n");
@@ -120,8 +114,16 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 								q.clean();
 								break;
 							}
+						if(biConn.initBIConnection()!=E_SUCCESS)
+							{
+								CAMsg::printMsg(LOG_DEBUG, "SettleThread: could not connect to BI. Retrying later...\n");
+								q.clean();
+								break;
+							}
+
 						CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: try to settle...\n");
 						pErrMsg = biConn.settle( *pCC );
+						biConn.terminateBIConnection();
 						CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: settle done!\n");
 					
 						// check returncode
@@ -142,7 +144,6 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 						delete pCC;
 						delete pErrMsg;
 					}
-				biConn.terminateBIConnection();
 				dbConn.terminateDBConnection();
 			}//main while run loop
 		CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Exiting run loop!\n");
