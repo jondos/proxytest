@@ -87,7 +87,7 @@ SINT32 CATLSClientSocket::setServerCertificate(CACertificate* pCert)
 SINT32 CATLSClientSocket::doTLSConnect(CASocketAddr &psa)
 	{
 		#ifdef DEBUG
-			CAMsg::log(LOD_DEBUG,"starting tls connect\n");
+			CAMsg::log(LOG_DEBUG,"starting tls connect\n");
 		#endif
 		if(m_bConnectedTLS) 
 			return E_UNKNOWN;
@@ -96,18 +96,18 @@ SINT32 CATLSClientSocket::doTLSConnect(CASocketAddr &psa)
 		// do the standard part of the ssl handshake	
 		int s=(SOCKET)*m_pSocket;
 		#ifdef DEBUG
-			CAMsg::log(LOD_DEBUG,"my set fd socket is %i\n",s);
+			CAMsg::log(LOG_DEBUG,"my set fd socket is %i\n",s);
 		#endif
 		SSL_set_fd( m_pSSL, s );
 		if( SSL_connect( m_pSSL ) != 1) 
 			{
-				CAMsg::log(LOD_WARN,"doTLSConnect() SSL_connect() failed!\n");
+				CAMsg::log(LOG_WARN,"doTLSConnect() SSL_connect() failed!\n");
 				close();
 				m_bConnectedTLS = false;
 				return E_UNKNOWN;
 			}
 		#ifdef DEBUG
-			CAMsg::log(LOD_DEBUG,"connect paased\n");
+			CAMsg::log(LOG_DEBUG,"connect paased\n");
 		#endif
 
 		// ssl handshake ok, now let's check the server's identity
