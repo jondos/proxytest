@@ -86,23 +86,29 @@ SINT32 CATLSClientSocket::setServerCertificate(CACertificate* pCert)
  */
 SINT32 CATLSClientSocket::doTLSConnect(CASocketAddr &psa)
 	{
-		printf("starting tls connect\n");
+		#ifdef DEBUG
+			CAMsg::log(LOD_DEBUG,"starting tls connect\n");
+		#endif
 		if(m_bConnectedTLS) 
 			return E_UNKNOWN;
 
 		m_pSSL=SSL_new(m_pCtx);
 		// do the standard part of the ssl handshake	
 		int s=(SOCKET)*m_pSocket;
-		printf("my set fd socket is %i\n",s);
+		#ifdef DEBUG
+			CAMsg::log(LOD_DEBUG,"my set fd socket is %i\n",s);
+		#endif
 		SSL_set_fd( m_pSSL, s );
 		if( SSL_connect( m_pSSL ) != 1) 
 			{
-				printf("connrect not paased\n");
+				CAMsg::log(LOD_WARN,"doTLSConnect() SSL_connect() failed!\n");
 				close();
 				m_bConnectedTLS = false;
 				return E_UNKNOWN;
 			}
-		printf("connrect paased\n");
+		#ifdef DEBUG
+			CAMsg::log(LOD_DEBUG,"connect paased\n");
+		#endif
 
 		// ssl handshake ok, now let's check the server's identity
 		// Note: This code was stolen from LinuxJournal

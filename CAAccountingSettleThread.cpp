@@ -84,13 +84,13 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 
 		while(m_pAccountingSettleThread->m_bRun)
 			{
-				#ifdef DEBUG
+//				#ifdef DEBUG
 					CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread going to sleep...\n");
-				#endif
+//				#endif
 				sSleep((UINT16)sleepInterval);
-				#ifdef DEBUG
+//				#ifdef DEBUG
 					CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread Waking up...\n");
-				#endif
+//				#endif
 				if(!m_pAccountingSettleThread->m_bRun)
 					{
 						CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Leaving run loop\n");
