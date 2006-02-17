@@ -101,7 +101,7 @@ SINT32 CATLSClientSocket::doTLSConnect(CASocketAddr &psa)
 		SSL_set_fd( m_pSSL, s );
 		if( SSL_connect( m_pSSL ) != 1) 
 			{
-				CAMsg::log(LOG_WARN,"doTLSConnect() SSL_connect() failed!\n");
+				CAMsg::log(LOG_INFO,"doTLSConnect() SSL_connect() failed!\n");
 				close();
 				m_bConnectedTLS = false;
 				return E_UNKNOWN;
