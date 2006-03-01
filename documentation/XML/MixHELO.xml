@@ -4,6 +4,16 @@
   <Location>
   ...
   </Location>
+  <Proxies> <!-- Only for the Last Mix -->
+    <Proxy>
+      <VisibleAddresses> <!-- Describes the visible addresses from the 'outside world' -->
+        <VisibleAddress>
+          <Host> <!-- Host or IP -->
+          </Host>
+        </VisibleAddress>
+      </VisibleAddresses>
+    </Proxy>
+  </Proxies>
   <Operator>
     <Organisation>..</Organisation>
     <URL>..</URL>

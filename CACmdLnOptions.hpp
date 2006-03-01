@@ -118,6 +118,18 @@ class CACmdLnOptions
 						return E_UNKNOWN;
 				};
 
+			//for last Mixes: number of outside visible addresses
+			UINT32 getVisibleAdressesCount(){return m_cnVisibleAddresses;}
+
+			/** Fills \c strAdressBuff with a outside visible adress.
+				@param strAdressBuff buffer for adress information (either hostname or IP string)
+				@param len size of strAdressBuff
+				@param nr the number of the adress we request information about (starting with 1 for the first address)
+			* @retval E_SUCCESS if successful
+			@retval E_SPACE if buffer is to small for the requested address
+				* @retval E_UNKNOWN if \c nr is out of range
+			*/
+			SINT32 getVisibleAdress(UINT8* strAdressBuff, UINT32 len,UINT32 nr);
 
 			UINT16 getSOCKSPort();
 	    SINT32 getSOCKSHost(UINT8* host,UINT32 len);
@@ -331,7 +343,9 @@ class CACmdLnOptions
 			UINT32								m_cnTargets;
 			CAListenerInterface**	m_arListenerInterfaces;
 			UINT32								m_cnListenerInterfaces;
-
+			UINT8**								m_arStrVisibleAddresses;
+			UINT32								m_cnVisibleAddresses;
+	
 			CASignature*		m_pSignKey;
 			CACertificate*	m_pOwnCertificate;
 			CACertificate*	m_pPrevMixCertificate;
@@ -379,5 +393,7 @@ class CACmdLnOptions
 			SINT32 processXmlConfiguration(DOM_Document& docConfig);
 			SINT32 clearTargetInterfaces();
 			SINT32 clearListenerInterfaces();
+			SINT32 clearVisibleAddresses();
+			SINT32 addVisibleAddresses(DOM_Node& nodeProxy);
 	};
 #endif
