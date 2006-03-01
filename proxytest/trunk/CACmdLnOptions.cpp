@@ -51,6 +51,8 @@ CACmdLnOptions::CACmdLnOptions()
 		m_cnTargets=0;
 		m_arListenerInterfaces=NULL;
 		m_cnListenerInterfaces=0;
+		m_arStrVisibleAddresses=NULL;
+		m_cnVisibleAddresses=0;
 		m_nrOfOpenFiles=-1;
 		m_strMixID=NULL;
 		m_pSignKey=NULL;
@@ -119,6 +121,28 @@ SINT32 CACmdLnOptions::clearListenerInterfaces()
 		return E_SUCCESS;
 	}
 
+/** Deletes all information about the visible addresses.
+	*/
+SINT32 CACmdLnOptions::clearVisibleAddresses()
+	{
+		if(m_arStrVisibleAddresses!=NULL)
+			{
+				for(UINT32 i=0;i<m_cnVisibleAddresses;i++)
+					delete[] m_arStrVisibleAddresses[i];
+				delete[] m_arStrVisibleAddresses;
+			}
+		m_cnVisibleAddresses=0;
+		m_arStrVisibleAddresses=NULL;
+		return E_SUCCESS;
+	}
+
+/** Add all the visible addresses to the list of visible addresses found in the XML description of the <Proxy> element given.
+	*/
+SINT32 CACmdLnOptions::addVisibleAddresses(DOM_Node& nodeProxy)
+	{
+		return E_UNKNOWN;
+	}
+
 void CACmdLnOptions::clean()
   {
 		if(m_strConfigFile!=NULL)
@@ -163,6 +187,7 @@ void CACmdLnOptions::clean()
 		m_strMixID=NULL;
 		clearTargetInterfaces();
 		clearListenerInterfaces();
+		clearVisibleAddresses();
 		if(m_pSignKey!=NULL)
 			delete m_pSignKey;
 		m_pSignKey=NULL;
@@ -1301,7 +1326,8 @@ SKIP_NEXT_MIX:
 				delete addr;
 			}
 
-		//Next Proxies
+		//Next Proxies and visible adresses
+		clearVisibleAddresses();
 		DOM_Element elemProxies;
 		getDOMChildByName(elemNetwork,(UINT8*)"Proxies",elemProxies,false);
 		if(elemProxies!=NULL)
@@ -1394,6 +1420,7 @@ SKIP_NEXT_MIX:
 		#else
 									continue;
 		#endif
+								addVisibleAddresses(elemTargetInterface);
 								m_arTargetInterfaces[aktInterface].net_type=type;
 								m_arTargetInterfaces[aktInterface].target_type=proxy_type;
 								m_arTargetInterfaces[aktInterface].addr=addr->clone();
