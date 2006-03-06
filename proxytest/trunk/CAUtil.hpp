@@ -84,7 +84,6 @@ SINT32 setDOMElementValue(DOM_Element& elem,const UINT8* value);
  * as null-terminated C String. If there is no text node
  * len is set to 0.
  * 
- * TODO: Why is elem a DOM_Node and not a DOM_Element here?
  * @param DOM_Node the element which has a text node under it
  * @param value a buffer that gets the text value
  * @param len on call contains the buffer size, on return contains the number of bytes copied
