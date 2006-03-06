@@ -137,10 +137,68 @@ SINT32 CACmdLnOptions::clearVisibleAddresses()
 	}
 
 /** Add all the visible addresses to the list of visible addresses found in the XML description of the <Proxy> element given.
+	* The structur is as follows:
+	* <Proxy>
+	*      <VisibleAddresses> <!-- Describes the visible addresses from the 'outside world' -->
+ *       <VisibleAddress>
+  *        <Host> <!-- Host or IP -->
+   *       </Host>
+   *     </VisibleAddress>
+   *   </VisibleAddresses>
+*
+	* </Proxy>
 	*/
 SINT32 CACmdLnOptions::addVisibleAddresses(DOM_Node& nodeProxy)
 	{
-		return E_UNKNOWN;
+		if(nodeProxy==NULL)
+			return E_UNKNOWN;
+		if(!nodeProxy.getNodeName().equals("Proxy"))
+			return E_UNKNOWN;
+		DOM_Node elemVisAdresses;
+		getDOMChildByName(nodeProxy,(UINT8*)"VisibleAddresses",elemVisAdresses);
+		DOM_Node elemVisAddress;
+		getDOMChildByName(elemVisAdresses,(UINT8*)"VisibleAddress",elemVisAddress);
+		while(elemVisAddress!=NULL)
+			{
+				if(elemVisAddress.getNodeName().equals("VisibleAddress"))
+					{
+						DOM_Element elemHost;
+						if(getDOMChildByName(elemVisAddress,(UINT8*)"Host",elemHost)==E_SUCCESS)
+							{
+								UINT8 tmp[255];
+								UINT32 len=255;
+								if(getDOMElementValue(elemHost,tmp,&len)==E_SUCCESS)
+									{//append the new address to the list of addresses
+										UINT8** tmpAr=new UINT8*[m_cnVisibleAddresses+1];
+										if(m_arStrVisibleAddresses!=NULL)
+											{
+												memcpy(tmpAr,m_arStrVisibleAddresses,m_cnVisibleAddresses*sizeof(UINT8*));
+												delete[] m_arStrVisibleAddresses;
+											}
+										tmpAr[m_cnVisibleAddresses]=new UINT8[len+1];
+										memcpy(tmpAr[m_cnVisibleAddresses],tmp,len+1);
+										m_cnVisibleAddresses++;
+										m_arStrVisibleAddresses=tmpAr;	
+									}
+							}
+					}
+				elemVisAddress=elemVisAddress.getNextSibling();	
+			}
+		return E_SUCCESS;
+	}
+
+SINT32 CACmdLnOptions::getVisibleAddress(UINT8* strAddressBuff, UINT32 len,UINT32 nr)
+	{
+		if(strAddressBuff==NULL||nr==0||nr>m_cnVisibleAddresses)
+			{
+				return E_UNKNOWN;
+			}
+		if(strlen((char*)m_arStrVisibleAddresses[nr-1]	)>=len)
+			{
+				return E_SPACE;
+			}
+		strcpy((char*)strAddressBuff,(char*)m_arStrVisibleAddresses[nr-1]);
+		return E_SUCCESS;	
 	}
 
 void CACmdLnOptions::clean()
@@ -1444,6 +1502,7 @@ SKIP_NEXT_MIX:
 				m_arTargetInterfaces[m_cnTargets++].addr=targetInterfaceNextMix->addr;
 				delete targetInterfaceNextMix;
 			}
+		//-----------------------------------------------------------------------------	
 		//construct a XML-String, which describes the Mix (send via Infoservice.Helo())
 		m_docMixInfo=DOM_Document::createDocument();
 		DOM_Element elemMix=m_docMixInfo.createElement("Mix");
@@ -1491,6 +1550,28 @@ SKIP_NEXT_MIX:
     // -- inserted by ronin <ronin2@web.de> 2004-08-16
     elemMix.appendChild(m_docMixInfo.importNode(elemListenerInterfaces,true));
 
+		//Set Proxy Visible Addresses if Last Mix and given
+		if(isLastMix())
+			{
+				DOM_Element elemProxies=m_docMixInfo.createElement("Proxies");
+				DOM_Element elemProxy=m_docMixInfo.createElement("Proxy");
+				DOM_Element elemVisAddresses=m_docMixInfo.createElement("VisibleAddresses");
+				elemMix.appendChild(elemProxies);
+				elemProxies.appendChild(elemProxy);
+				elemProxy.appendChild(elemVisAddresses);
+				for(UINT32 i=1;i<=getVisibleAddressesCount();i++)
+					{
+						UINT8 tmp[255];
+						UINT32 tmplen=255;
+						if(getVisibleAddress(tmp,tmplen,i)==E_SUCCESS)
+							{
+								DOM_Element elemVisAddress=m_docMixInfo.createElement("VisibleAddress");
+								setDOMElementValue(elemVisAddress,tmp);
+								elemVisAddresses.appendChild(elemVisAddress);
+							}
+					}
+			}
+		
 		//Set Software-Version...
 		DOM_Element elemSoftware=m_docMixInfo.createElement("Software");
 		DOM_Element elemVersion=m_docMixInfo.createElement("Version");

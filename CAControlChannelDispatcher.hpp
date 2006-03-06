@@ -38,7 +38,7 @@ class CAControlChannelDispatcher
 {
   public:
 		/** Constructs a new dispatcher.
-			* @param pSendQueue queue in which the mix packets are put, if
+			* @param pSendQueue send queue in which the mix packets will be puted, if
 			*  a control channel sends a message
 			*/
 		CAControlChannelDispatcher(CAQueue* pSendQueue)
@@ -68,7 +68,8 @@ class CAControlChannelDispatcher
 
     bool proccessMixPacket(const MIXPACKET* pPacket);
 		SINT32 sendMessages(UINT32 id,bool m_bIsEncrypted,const UINT8* msg,UINT32 msglen) const;
-  private:
+  
+	private:
 		CAQueue* m_pSendQueue;
 		MIXPACKET* m_pMixPacket;
     CAAbstractControlChannel** m_arControlChannels;

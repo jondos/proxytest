@@ -119,17 +119,17 @@ class CACmdLnOptions
 				};
 
 			//for last Mixes: number of outside visible addresses
-			UINT32 getVisibleAdressesCount(){return m_cnVisibleAddresses;}
+			UINT32 getVisibleAddressesCount(){return m_cnVisibleAddresses;}
 
-			/** Fills \c strAdressBuff with a outside visible adress.
-				@param strAdressBuff buffer for adress information (either hostname or IP string)
-				@param len size of strAdressBuff
+			/** Fills \c strAddressBuff with a outside visible adress.
+				@param strAddressBuff buffer for adress information (either hostname or IP string)
+				@param len size of strAddressBuff
 				@param nr the number of the adress we request information about (starting with 1 for the first address)
 			* @retval E_SUCCESS if successful
 			@retval E_SPACE if buffer is to small for the requested address
 				* @retval E_UNKNOWN if \c nr is out of range
 			*/
-			SINT32 getVisibleAdress(UINT8* strAdressBuff, UINT32 len,UINT32 nr);
+			SINT32 getVisibleAddress(UINT8* strAddressBuff, UINT32 len,UINT32 nr);
 
 			UINT16 getSOCKSPort();
 	    SINT32 getSOCKSHost(UINT8* host,UINT32 len);
