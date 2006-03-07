@@ -1566,7 +1566,9 @@ SKIP_NEXT_MIX:
 						if(getVisibleAddress(tmp,tmplen,i)==E_SUCCESS)
 							{
 								DOM_Element elemVisAddress=m_docMixInfo.createElement("VisibleAddress");
-								setDOMElementValue(elemVisAddress,tmp);
+								DOM_Element elemHost=m_docMixInfo.createElement("Host");
+								elemVisAddress.appendChild(elemHost);
+								setDOMElementValue(elemHost,tmp);
 								elemVisAddresses.appendChild(elemVisAddress);
 							}
 					}
