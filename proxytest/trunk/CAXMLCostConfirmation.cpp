@@ -5,7 +5,7 @@
 
 const UINT8* const CAXMLCostConfirmation::ms_pStrElemName=(UINT8*)"CC";
 
-CAXMLCostConfirmation::CAXMLCostConfirmation() 
+CAXMLCostConfirmation::CAXMLCostConfirmation()
 	{
 		m_domDocument = NULL;
 		m_pStrAiName = NULL;
@@ -63,8 +63,8 @@ SINT32 CAXMLCostConfirmation::setValues()
 		if(m_domDocument==NULL)
 			return E_UNKNOWN;
 		DOM_Element elemRoot=m_domDocument.getDocumentElement();
-		DOM_Element elem; 
-	
+		DOM_Element elem;
+
 		char * strTagname = elemRoot.getTagName().transcode();
 		if( (strcmp((char *)strTagname, (char *)ms_pStrElemName)!=0) )
 			{
@@ -72,7 +72,7 @@ SINT32 CAXMLCostConfirmation::setValues()
 				return E_UNKNOWN;
 			}
 		delete[] strTagname;
-	
+
 		// parse accountnumber
 		getDOMChildByName(elemRoot, (UINT8*)"AccountNumber", elem, false);
 		if(getDOMElementValue(elem, m_lAccountNumber)!=E_SUCCESS)
@@ -85,7 +85,7 @@ SINT32 CAXMLCostConfirmation::setValues()
 
 		// parse AI Name
 		getDOMChildByName(elemRoot, (UINT8*)"AiID", elem, false);
-		if(m_pStrAiName!=NULL) 
+		if(m_pStrAiName!=NULL)
 			delete[] m_pStrAiName;
 		m_pStrAiName=NULL;
 		UINT8 strGeneral[256];
@@ -99,11 +99,11 @@ SINT32 CAXMLCostConfirmation::setValues()
 			{
 				return E_UNKNOWN;
 			}
-	
+
 		// parse PIID
-		if(m_pStrPIID!=NULL) 
+		if(m_pStrPIID!=NULL)
 			delete[] m_pStrPIID;
-		m_pStrPIID=NULL;	
+		m_pStrPIID=NULL;
 		strGeneralLen=255;
 		getDOMChildByName(elemRoot, (UINT8*)"PIID", elem, false);
 		if(getDOMElementValue(elem, strGeneral, &strGeneralLen)==E_SUCCESS)
@@ -114,6 +114,7 @@ SINT32 CAXMLCostConfirmation::setValues()
 		else
 			{
 				delete[] m_pStrAiName;
+				m_pStrAiName=NULL;
 				return E_UNKNOWN;
 			}
 		return E_SUCCESS;
