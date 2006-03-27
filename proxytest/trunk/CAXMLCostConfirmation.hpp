@@ -80,6 +80,12 @@ class CAXMLCostConfirmation
 				{
 					return ms_pStrElemName;
 				}
+			
+			DOM_Document getXMLDocument()
+			{
+				return m_domDocument;
+			}
+			
 
 		private:
 			SINT32 setValues();
