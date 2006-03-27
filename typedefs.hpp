@@ -280,6 +280,9 @@ struct t_accountinginfo
 	/** timestamp when last PayRequest was sent */
 	SINT32 lastRequestSeconds;
 	
+    /** timestamp when last balance request was sent */
+	UINT32 lastBalanceRequestSeconds;
+	
 	/** ID of payment instance belogig to this account */
 	UINT8* pstrBIID;
 	

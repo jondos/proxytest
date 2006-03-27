@@ -103,6 +103,7 @@ CAAccountingInstance::~CAAccountingInstance()
 		delete m_pIPBlockList;
 		delete m_pQueue;
 		delete[] m_AiName;
+		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance dying finished\n" );
 	}
 
 
@@ -239,14 +240,23 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 					((pAccInfo->transferredBytes - pAccInfo->lastbalTransferredBytes) >= 256*1024))
 					|| (pAccInfo->lastbalDeposit == 0))
 					{
+				    time_t theTime=time(NULL);
+
 						if( (pAccInfo->authFlags & AUTH_SENT_BALANCE_REQUEST) )
 							{
-								ms_pInstance->m_Mutex.unlock();
-								return 1;
+								if (pAccInfo->lastBalanceRequestSeconds + BALANCE_REQUEST_TIMEOUT < theTime)
+									{
+										ms_pInstance->m_Mutex.unlock();
+										return 3;
+									}
+								else
+									{
+										ms_pInstance->m_Mutex.unlock();
+										return 1;
+									}
 							}
 						// send a first CC request
 						DOM_Document doc;
-						time_t theTime=time(NULL);
 						CAAccountingInstance::makeBalanceRequest(theTime-600, doc);
 						#ifdef DEBUG
 							CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending balance request.\n");
@@ -254,7 +264,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 						pAccInfo->reqbalMinSeconds = theTime - 600;
 						pAccInfo->pControlChannel->sendXMLMessage(doc);
 						pAccInfo->authFlags |= AUTH_SENT_BALANCE_REQUEST;
-						pAccInfo->lastRequestSeconds = theTime;
+						pAccInfo->lastBalanceRequestSeconds = theTime;
 						ms_pInstance->m_Mutex.unlock();
 						return 1;
 					}
@@ -633,6 +643,7 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 				CAMsg::printMsg(LOG_DEBUG, "TransferredBytes is now %s\n", tmp);
 			#endif
 			pAccInfo->confirmedBytes = pCC->getTransferredBytes();
+			pAccInfo->pControlChannel->sendXMLMessage(pCC->getXMLDocument());
 			delete pCC;
 		}
 	
