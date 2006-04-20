@@ -56,6 +56,8 @@ struct t_TargetInterface
 
 typedef struct t_TargetInterface TargetInterface;
 
+THREAD_RETURN threadReConfigure(void *param);
+
 class CACmdLnOptions
     {
 	public:

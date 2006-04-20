@@ -59,6 +59,8 @@ typedef struct __t_database_info
 	
 #define SECONDS_PER_INTERVALL 600
 
+THREAD_RETURN db_loopMaintenance(void *param);
+
 class CADatabase
 	{
 		public:
