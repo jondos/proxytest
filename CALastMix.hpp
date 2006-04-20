@@ -45,7 +45,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMixWithReplayDB.hpp"
 
 THREAD_RETURN	lm_loopLog(void*);
-
+THREAD_RETURN	lm_loopSendToMix(void* param);
+THREAD_RETURN	lm_loopReadFromMix(void* pParam);
+	
 class CALastMix:public 
 #ifdef REPLAY_DETECTION
 	CAMixWithReplayDB
