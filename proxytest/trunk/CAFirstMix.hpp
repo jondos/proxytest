@@ -50,6 +50,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 class CAInfoService;
 
+THREAD_RETURN fm_loopSendToMix(void*);
+THREAD_RETURN fm_loopReadFromMix(void*);
+THREAD_RETURN fm_loopAcceptUsers(void*);
+THREAD_RETURN fm_loopReadFromUsers(void*);
+THREAD_RETURN fm_loopDoUserLogin(void* param);
+
 class CAFirstMix:public CAMix
 {
 public:

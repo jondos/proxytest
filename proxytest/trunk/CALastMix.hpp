@@ -43,6 +43,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CALogPacketStats.hpp"
 #include "CALastMixChannelList.hpp"
 #include "CAMixWithReplayDB.hpp"
+
+THREAD_RETURN	lm_loopLog(void*);
+
 class CALastMix:public 
 #ifdef REPLAY_DETECTION
 	CAMixWithReplayDB
