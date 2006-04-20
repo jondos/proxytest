@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.04.25"
+#define MIX_VERSION "00.04.26"
 
 //Define all features if we are running in documentation creation mode
 #ifdef DOXYGEN
@@ -45,7 +45,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define PAYMENT
 	#define HAVE_UNIX_DOMAIN_PROTOCOL
 	#define HAVE_EPOLL
-#endif	
+#endif
 
 #if defined(DEBUG)|| defined(_DEBUG)
 	#undef DEBUG
@@ -81,7 +81,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#else
 		#define DELAY_BUCKET_GROW_INTERVALL (1000/DELAY_CHANNEL_KBYTE_PER_SECOND) //Time in ms
 		#define DELAY_BUCKET_GROW PAYLOAD_SIZE //Grow in bytes
-	#endif	
+	#endif
 #endif
 #ifdef DELAY_USERS
 	#ifndef DELAY_USERS_TRAFFIC
@@ -96,7 +96,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#else
 		#define DELAY_USERS_BUCKET_GROW_INTERVALL 1000 //Time in ms
 		#define DELAY_USERS_BUCKET_GROW DELAY_USERS_PACKETS_PER_SECOND //Grow in bytes
-	#endif	
+	#endif
 #endif
 #ifdef DELAY_CHANNELS_LATENCY
 	#define DELAY_CHANNEL_LATENCY 10000 //min latency defaults to 10 second
@@ -132,6 +132,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #define PAYMENT_ACCOUNT_CERT_TIMEOUT 180 //Timeout for receiving the Payment certificate in seconds
 #define CLEANUP_THREAD_SLEEP_INTERVAL 60 //sleep interval for payment blocked ip list
+#define BALANCE_REQUEST_TIMEOUT 60 //Timeout for Balance requests
 
 #define FLOW_CONTROL_SENDME_HARD_LIMIT 95 //last mix stops sending after this unack packets
 #define FLOW_CONTROL_SENDME_SOFT_LIMIT 80 //last mix sends request for 'SENDME' after this unack packets
@@ -159,7 +160,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #if (defined(LOG_CHANNEL)) && !defined(LOG_TRAFFIC_PER_USER)
 	#define LOG_TRAFFIC_PER_USER
-#endif	
+#endif
 #ifdef REPLAY_DETECTION
 	#define MIX_CASCADE_PROTOCOL_VERSION "0.8"
 #elif defined(PAYMENT)
@@ -289,7 +290,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
   #include <memory.h>
   #include <sys/resource.h>
 	#include <ctype.h>
-    typedef struct sockaddr SOCKADDR;	
+    typedef struct sockaddr SOCKADDR;
   typedef SOCKADDR* LPSOCKADDR;
   #define SOCKET int
   typedef struct hostent HOSTENT;
@@ -335,7 +336,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define E_FILE_OPEN -500 //Error in opening a file
 #define E_FILE_READ -501 //Error in opening a file
 #define E_XML_PARSE -600 //Error in parsing XML
-#define E_NOT_CONNECTED -700 //Something is not connected that should be 
+#define E_NOT_CONNECTED -700 //Something is not connected that should be
 														// (like a TCP/IP connection or a database connection)
 #define E_NOT_FOUND -701 //Something was not found
 #define E_INVALID -800 // sth is invalid (e.g. signature verifying)
@@ -408,7 +409,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef HAVE_O_SYNC
 	#ifdef HAVE_O_FSYNC
 		#define O_SYNC O_FSYNC
-	#else 
+	#else
 		#define	O_SYNC 0
 	#endif
 #endif
