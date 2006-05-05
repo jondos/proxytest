@@ -135,34 +135,34 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
-/* The size of a `signed char', as computed by sizeof. */
+/* The size of `signed char', as computed by sizeof. */
 #undef SIZEOF_SIGNED_CHAR
 
-/* The size of a `signed int', as computed by sizeof. */
+/* The size of `signed int', as computed by sizeof. */
 #undef SIZEOF_SIGNED_INT
 
-/* The size of a `signed long', as computed by sizeof. */
+/* The size of `signed long', as computed by sizeof. */
 #undef SIZEOF_SIGNED_LONG
 
-/* The size of a `signed short', as computed by sizeof. */
+/* The size of `signed short', as computed by sizeof. */
 #undef SIZEOF_SIGNED_SHORT
 
-/* The size of a `unsigned char', as computed by sizeof. */
+/* The size of `unsigned char', as computed by sizeof. */
 #undef SIZEOF_UNSIGNED_CHAR
 
-/* The size of a `unsigned int', as computed by sizeof. */
+/* The size of `unsigned int', as computed by sizeof. */
 #undef SIZEOF_UNSIGNED_INT
 
-/* The size of a `unsigned long', as computed by sizeof. */
+/* The size of `unsigned long', as computed by sizeof. */
 #undef SIZEOF_UNSIGNED_LONG
 
-/* The size of a `unsigned long long', as computed by sizeof. */
+/* The size of `unsigned long long', as computed by sizeof. */
 #undef SIZEOF_UNSIGNED_LONG_LONG
 
-/* The size of a `unsigned short', as computed by sizeof. */
+/* The size of `unsigned short', as computed by sizeof. */
 #undef SIZEOF_UNSIGNED_SHORT
 
-/* The size of a `__uint64_t', as computed by sizeof. */
+/* The size of `__uint64_t', as computed by sizeof. */
 #undef SIZEOF___UINT64_T
 
 /* If using the C implementation of alloca, define if you know the
