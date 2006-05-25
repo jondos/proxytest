@@ -1,0 +1,9 @@
+libmixa.a: CAFirstMixA.cpp CAFirstMixA.hpp CALastMixA.hpp CALastMixA.cpp  
+	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) CALastMixA.cpp -o CALastMixA.o
+	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) CAFirstMixA.cpp -o CAFirstMixA.o
+	ar -rcs libmixa.a *.o 
+
+clean:
+	rm -f *.o
+	rm -f libmixa.a
+
