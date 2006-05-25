@@ -45,7 +45,6 @@ CATLSClientSocket::CATLSClientSocket()
 CATLSClientSocket::~CATLSClientSocket()
 	{
 		close();
-		SSL_free(m_pSSL);
 		SSL_CTX_free(m_pCtx);
 		delete m_pSocket;
 		if(m_pRootCert!=NULL)
@@ -63,7 +62,11 @@ SINT32 CATLSClientSocket::close()
 				SSL_shutdown(m_pSSL);
 				m_bConnectedTLS = false;
 			}
-		SSL_free(m_pSSL);
+		if(m_pSSL!=NULL)
+			{
+				SSL_free(m_pSSL);
+			}
+		m_pSSL=NULL;
 		return m_pSocket->close();
 	}
 

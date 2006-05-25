@@ -40,6 +40,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
  *
  * Note: This uses /dev/urandom and might cause problems on systems other than linux
  *  @author Bastian Voigt
+ * @remark This class is not thread safe!
  */
 class CATLSClientSocket:public CAClientSocket
 {
