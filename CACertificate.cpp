@@ -132,7 +132,7 @@ CACertificate* CACertificate::decode(const UINT8* buff,UINT32 bufflen,UINT32 typ
 					getDOMElementValue(root,tmpBuff,&tmpBuffSize);
 					CABase64::decode(tmpBuff,tmpBuffSize,tmpBuff,&tmpBuffSize);
 					tmp=tmpBuff;
-					#if OPENSSL_VERSION_NUMBER	> 0x0090705fL
+					#if OPENSSL_VERSION_NUMBER	> 0x0090709fL
 						tmpCert=d2i_X509(NULL,&tmp,tmpBuffSize);
 					#else
 						tmpCert=d2i_X509(NULL,(UINT8**)&tmp,tmpBuffSize);
