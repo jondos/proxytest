@@ -168,10 +168,9 @@ class CASocketGroupEpoll
 
 			bool isSignaled(void* datapointer)
 				{
-					SINT32 socket=s.getSocket();
 					for(SINT32 i=0;i<m_iNumOfReadyFD;i++)
 						{
-							if(socket==m_pEvents->data.ptr)
+							if(datapointer==m_pEvents->data.ptr)
 								return true;
 						}
 					return false;
