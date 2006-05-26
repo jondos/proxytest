@@ -56,12 +56,11 @@ typedef UINT32 HCHANNEL;
 	#define NEW_FLOW_CONTROL_FLAG 0x8000
 #endif
 	
-#ifndef NEW_MIX_TYPE
 
-	#define DATA_SIZE 			992
-	#define PAYLOAD_SIZE 		989
+#define DATA_SIZE 			992
+#define PAYLOAD_SIZE 		989
 
-	#if (defined(WIN32) ||defined(__sgi))&&!defined(__GNUC__)
+#if (defined(WIN32) ||defined(__sgi))&&!defined(__GNUC__)
 		#pragma pack( push, t_MixPacket )
 		#pragma pack(1)
 		struct t_MixPacketPayload
@@ -81,14 +80,13 @@ typedef UINT32 HCHANNEL;
 					};
 			};
 		#pragma pack( pop, t_MixPacket )
-	#else
+#else
 		struct t_MixPacketPayload
 			{
 				UINT16 len;
 				UINT8 type;
 				UINT8 data[PAYLOAD_SIZE];
 			} __attribute__ ((__packed__));
-
 		struct t_MixPacket
 			{
 				HCHANNEL channel;
@@ -99,53 +97,7 @@ typedef UINT32 HCHANNEL;
 						struct t_MixPacketPayload payload;
 					};
 			} __attribute__ ((__packed__)); // MUXPACKET __attribute__ ((__packed__));
-	#endif //WIN32 
-#else //NEW_MIX_TYPE
-
-	#define DATA_SIZE 			994
-	#define PAYLOAD_SIZE 		979
-
-	#if defined(WIN32) ||defined(__sgi)
-		#pragma pack( push, t_MixPacket )
-		#pragma pack(1)
-		struct t_MixPacket
-			{
-				HCHANNEL channel;
-				union
-					{
-						UINT8		data[DATA_SIZE];
-						struct t_MixPacketPayload
-							{
-								UINT8 linkid[8];
-								UINT8 seq[4];
-								UINT8 type;
-								UINT16 len;
-								UINT8 data[PAYLOAD_SIZE];
-						} payload;
-					};
-			};
-		#pragma pack( pop, t_MixPacket )
-	#else
-		struct t_MixPacketPayload
-			{
-				UINT8 linkid[8];
-				UINT8 seq[4];
-				UINT8 type;
-				UINT16 len;
-				UINT8 data[PAYLOAD_SIZE];
-			} __attribute__ ((__packed__));
-
-		struct t_MixPacket
-			{
-				HCHANNEL channel;
-				union
-					{
-						UINT8		data[DATA_SIZE];
-						struct t_MixPacketPayload payload;
-					};
-			} __attribute__ ((__packed__)); // MUXPACKET __attribute__ ((__packed__));
-	#endif //WIN32 
-#endif //NEW_MIX_TYPE
+#endif //WIN32 
 
 typedef t_MixPacket MIXPACKET;
 
