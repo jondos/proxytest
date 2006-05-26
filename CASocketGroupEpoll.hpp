@@ -47,7 +47,7 @@ class CASocketGroupEpoll
 					m_csFD_SET.lock();
 					SOCKET socket=(SOCKET)s;
 					m_pEpollEvent->data.fd=socket;
-					m_pEpollEvent->data.ptr=datapointer;
+					//m_pEpollEvent->data.ptr=datapointer;
 					if(epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,socket,m_pEpollEvent)!=0)
 						ret=E_UNKNOWN;
 					m_csFD_SET.unlock();
