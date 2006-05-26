@@ -201,6 +201,14 @@ class CAFirstMixChannelList
 			fmChannelListEntry* getNextChannel(fmChannelListEntry* pEntry);
 		
 			static SINT32 test();
+
+      #ifdef NEW_MIX_TYPE
+        /* additional methods for TypeB first mixes */
+        SINT32 removeClientPart(CAMuxSocket* pMuxSocket);
+        void removeVacantOutChannel(fmChannelListEntry* pEntry);
+        void cleanVacantOutChannels();
+      #endif
+
 		private:
 			/** Gets the in-channel and all associated information for the given out-channel.
 				* This method is NOT thread safe (and so only for internal use)

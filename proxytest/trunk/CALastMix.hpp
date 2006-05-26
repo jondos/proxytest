@@ -41,7 +41,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include "tre/regex.h"
 #endif
 #include "CALogPacketStats.hpp"
-#include "CALastMixChannelList.hpp"
+#ifndef NEW_MIX_TYPE // not TypeB mixes
+  /* TypeB mixes are using an own implementation */
+  #include "CALastMixChannelList.hpp"
+#endif
 #include "CAMixWithReplayDB.hpp"
 
 THREAD_RETURN	lm_loopLog(void*);
@@ -60,7 +63,10 @@ class CALastMix:public
 				{
 					m_pMuxIn=NULL;m_pSignature=NULL;
 					m_pRSA=NULL;m_pInfoService=NULL;
+          #ifndef NEW_MIX_TYPE // not TypeB mixes
+            /* TypeB mixes are using an own implementation */
 					m_pChannelList=NULL;
+          #endif
 					m_pthreadSendToMix=m_pthreadReadFromMix=NULL;
 					m_pQueueSendToMix=m_pQueueReadFromMix=NULL;
 					m_pCacheLB=new CACacheLoadBalancing();
@@ -88,6 +94,9 @@ class CALastMix:public
 			SINT32 init();
 			SINT32 initOnce();
 			SINT32 clean();
+      #ifdef NEW_MIX_TYPE // TypeB mixes
+        virtual void reconfigureMix();
+      #endif
 
     // added by ronin <ronin2@web.de>
     SINT32 initMixCascadeInfo(DOM_Element&);
@@ -114,7 +123,10 @@ class CALastMix:public
 			CAASymCipher*					m_pRSA;
 			CAThread*							m_pthreadSendToMix;
 			CAThread*							m_pthreadReadFromMix;
+      #ifndef NEW_MIX_TYPE // not TypeB mixes
+        /* TypeB mixes are using an own implementation */
 			CALastMixChannelList* m_pChannelList;
+      #endif
 
 #ifdef LOG_CRIME
 			regex_t*							m_pCrimeRegExps;
