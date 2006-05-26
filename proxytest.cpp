@@ -34,16 +34,18 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMsg.hpp"
 #include "CAMix.hpp"
 #include "CAMiddleMix.hpp"
-#include "TypeA/CAFirstMixA.hpp"
-#include "TypeA/CALastMixA.hpp"
 #include "CALocalProxy.hpp"
 #include "xml/DOM_Output.hpp"
 #ifdef LOG_CRIME
 #include "tre/regex.h"
 #endif
 #ifdef NEW_MIX_TYPE
+  /* use TypeB mixes */
 	#include "TypeB/CAFirstMixB.hpp"
 	#include "TypeB/CALastMixB.hpp"
+#else
+  #include "TypeA/CAFirstMixA.hpp"
+  #include "TypeA/CALastMixA.hpp"
 #endif
 #include "CALogPacketStats.hpp"
 #include "CATLSClientSocket.hpp"

@@ -2957,7 +2957,7 @@
 			<File
 				RelativePath="CASocketList.hpp">
 			</File>
-				<File
+			<File
 				RelativePath="CASymCipher.hpp">
 			</File>
 			<File
@@ -3010,10 +3010,46 @@
 				Name="TypeB"
 				Filter="">
 				<File
+					RelativePath=".\TypeB\CAChain.cpp">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\TypeB\CAChain.hpp">
+				</File>
+				<File
+					RelativePath=".\TypeB\CAChainTable.cpp">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\TypeB\CAChainTable.hpp">
+				</File>
+				<File
 					RelativePath=".\TypeB\CAFirstMixB.hpp">
 				</File>
 				<File
 					RelativePath=".\TypeB\CALastMixB.hpp">
+				</File>
+				<File
+					RelativePath=".\TypeB\CALastMixBChannelList.cpp">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\TypeB\CALastMixBChannelList.hpp">
 				</File>
 			</Filter>
 		</Filter>

@@ -29,27 +29,49 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE
  */
-#ifndef __CALASTMIXB__
-#define __CALASTMIXB__
+#ifndef __CALASTMIXBCHANNELLIST__
+#define __CALASTMIXBCHANNELLIST__
 
-#include "../CALastMix.hpp"
-#include "CAChainTable.hpp"
+#include "../CAMuxSocket.hpp"
+#include "../CASymCipher.hpp"
+#include "../CAMutex.hpp"
+#include "CAChain.hpp"
 
-
-
-class CALastMixB: public CALastMix {
-
-  public:
-    CALastMixB();
-
-  protected:
-    SINT32 loop();
-    void reconfigureMix();
-
-  private:
-    CAChainTable* m_pChainTable;
-    CALastMixBChannelList* m_pChannelTable;
-
+struct t_deadlineEntry {
+  timespec deadline;
+  t_deadlineEntry* nextDeadline;
 };
 
-#endif //__CALASTMIXB__
+struct t_lastMixBChannelListEntry {
+  HCHANNEL channelId;   
+  CASymCipher* channelCipher;
+  class CAChain* associatedChain;
+  UINT16 remainingDownstreamPackets;
+
+  t_deadlineEntry* firstResponseDeadline;
+
+  class CALastMixBChannelList* associatedChannelList;
+
+  t_lastMixBChannelListEntry* rightEntry;
+  t_lastMixBChannelListEntry** rightEntryPointerOfLeftEntry;
+};
+
+
+class CALastMixBChannelList {
+  public:
+    CALastMixBChannelList();
+    ~CALastMixBChannelList();
+
+    t_lastMixBChannelListEntry* add(HCHANNEL a_channelId, CASymCipher* a_channelCipher, CAChain* a_associatedChain);
+    t_lastMixBChannelListEntry* get(HCHANNEL a_channelId);
+    void removeFromTable(t_lastMixBChannelListEntry* a_channelEntry);
+
+  private:
+    UINT32 m_channelTableSize;
+    t_lastMixBChannelListEntry** m_pChannelTable;    
+    CAMutex* m_pMutex;
+
+    t_lastMixBChannelListEntry* getEntryInternal(HCHANNEL a_channelId);
+
+};
+#endif //__CALASTMIXBCHANNELLIST__

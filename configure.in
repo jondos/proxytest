@@ -190,6 +190,19 @@ AC_ARG_ENABLE(replay_detection,
 	]
 )
 
+dnl type-b mixes ??
+REPLAY_DETECTION=""
+AC_ARG_ENABLE(new_mix_type,
+	AS_HELP_STRING([--enable-new_mix_type],
+			[Specify if to build with type B mixes]),
+	[
+		if test "x$enableval" != "xno" ; then
+		    NEW_MIX_TYPE="-DNEW_MIX_TYPE"
+		fi
+	]
+)
+
+
 LIBS="$DEFAULTLIBS"
 
 dnl Checks for Headers
@@ -487,9 +500,9 @@ AC_ARG_ENABLE(crime-detection,
 )
 
 
-CFLAGS="$CFLAGS $POOL $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $REPLAY_DETECTION $OFLAGS"
+CFLAGS="$CFLAGS $POOL $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $REPLAY_DETECTION $NEW_MIX_TYPE $OFLAGS"
 CXXFLAGS=$CFLAGS
 LIBS="$LIBS $PAYMENT_LIB"
 
-AC_CONFIG_FILES([Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile])
+AC_CONFIG_FILES([Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile])
 AC_OUTPUT

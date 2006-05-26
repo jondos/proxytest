@@ -29,27 +29,62 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE
  */
-#ifndef __CALASTMIXB__
-#define __CALASTMIXB__
+#ifndef __CA_CHAINTABLE__
+#define __CA_CHAINTABLE__
 
-#include "../CALastMix.hpp"
-#include "CAChainTable.hpp"
+#include "../CAMutex.hpp"
+#include "../CAThread.hpp"
+#include "CAChain.hpp"
 
+struct t_chaintableEntry {
+  t_chaintableEntry* rightEntry;
+  t_chaintableEntry** rightEntryPointerOfLeftEntry;
+  CAChain* chain;
+}; 
 
-
-class CALastMixB: public CALastMix {
-
-  public:
-    CALastMixB();
-
-  protected:
-    SINT32 loop();
-    void reconfigureMix();
-
-  private:
-    CAChainTable* m_pChainTable;
-    CALastMixBChannelList* m_pChannelTable;
-
+struct t_chaintableIterator {
+  t_chaintableEntry* currentEntry;
+  bool removeEntry;
+  UINT16 nextHashkey;
 };
 
-#endif //__CALASTMIXB__
+
+class CAChainTable {
+  public:
+    CAChainTable(void);
+    ~CAChainTable(void);
+    CAChain* getEntry(UINT8* a_chainId);
+    CAChain* createEntry();
+    void deleteEntry(UINT8* a_chainId);
+    UINT32 getSize();
+    CAChain* getFirstEntry();
+    CAChain* getNextEntry();
+    #ifdef DELAY_CHANNELS
+      void setDelayParameters(UINT32 a_initialBucketSize, UINT32 a_delayBucketGrow, UINT32 a_delayBucketGrowInterval);
+    #endif
+
+  private:
+    t_chaintableEntry** m_pChainTable;
+    CAMutex* m_pMutex;
+    UINT32 m_chaintableSize;
+    t_chaintableIterator* m_pChaintableIterator;
+
+    t_chaintableEntry* getEntryInternal(UINT8* a_chainId);
+    
+    #ifdef DELAY_CHANNELS
+      CAMutex* m_pDelayBucketMutex;
+      SINT32* m_pDelayBuckets;
+      CAThread* m_pDelayBucketsLoop;
+      volatile bool m_delayBucketsLoopRun;
+		  volatile UINT32 m_initialBucketSize;
+      volatile UINT32 m_delayBucketGrow;
+      volatile UINT32 m_delayBucketGrowInterval;
+
+      friend THREAD_RETURN lml_chaintableDelayBucketsLoop(void* a_param);
+    #endif
+
+    void removeEntryInternal(t_chaintableEntry* a_entry);
+    void getNextEntryInternal(t_chaintableIterator* a_iterator);
+
+};
+#endif //__CA_CHAINTABLE__
