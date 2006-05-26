@@ -41,25 +41,27 @@ class CASocketGroupEpoll
 			~CASocketGroupEpoll();
 			SINT32 setPoolForWrite(bool bWrite);
 			
-			SINT32 add(CASocket&s/*,void * datapointer*/)
+			/** Adds the socket s to the socket group. Additional one can set a parameter datapointer, which is
+			  * assoziated with the socke s*/
+			SINT32 add(CASocket&s,void * datapointer)
 				{
 					SINT32 ret=E_SUCCESS;
 					m_csFD_SET.lock();
 					SOCKET socket=(SOCKET)s;
-					m_pEpollEvent->data.fd=socket;
-					//m_pEpollEvent->data.ptr=datapointer;
+					m_pEpollEvent->data.ptr=datapointer;
 					if(epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,socket,m_pEpollEvent)!=0)
 						ret=E_UNKNOWN;
 					m_csFD_SET.unlock();
 					return ret;
 				}
 
+			/** Adds the socket s to the socket group. Additional one can set a parameter datapointer, which is
+			  * assoziated with the socke s*/
 			SINT32 add(CAMuxSocket&s,void * datapointer)
 				{
 					SINT32 ret=E_SUCCESS;
 					m_csFD_SET.lock();
 					SOCKET socket=s.getSocket();
-					m_pEpollEvent->data.fd=socket;
 					m_pEpollEvent->data.ptr=datapointer;
 					if(epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,socket,m_pEpollEvent)!=0)
 						ret=E_UNKNOWN;
@@ -127,7 +129,10 @@ class CASocketGroupEpoll
 					return E_UNKNOWN;
 				}
 
-			bool isSignaled(CASocket&s)
+	/**
+				* @remark temporarlly removed - can be enabled agian than requested...
+	*/
+		/*	bool isSignaled(CASocket&s)
 				{
 					SINT32 socket=(SOCKET)s;
 					for(SINT32 i=0;i<m_iNumOfReadyFD;i++)
@@ -159,7 +164,19 @@ class CASocketGroupEpoll
 						}
 					return false;
 				}
-		
+*/		
+
+			bool isSignaled(void* datapointer)
+				{
+					SINT32 socket=s.getSocket();
+					for(SINT32 i=0;i<m_iNumOfReadyFD;i++)
+						{
+							if(socket==m_pEvents->data.ptr)
+								return true;
+						}
+					return false;
+				}
+
 			void * getFirstSignaledSocketData()
 				{
 					m_iAktSignaledSocket=0;

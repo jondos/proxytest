@@ -220,7 +220,7 @@ SINT32 CALastMixA::loop()
 																		m_pChannelList->add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue(PAYLOAD_SIZE));
 																	#endif
 #ifdef HAVE_EPOLL
-																	psocketgroupCacheRead->add(*tmpSocket/*,m_pChannelList->get(pMixPacket->channel)*/);
+																	psocketgroupCacheRead->add(*tmpSocket,m_pChannelList->get(pMixPacket->channel));
 #else
 																	psocketgroupCacheRead->add(*tmpSocket);
 #endif
@@ -266,7 +266,7 @@ SINT32 CALastMixA::loop()
 												#endif
 	
 #ifdef HAVE_EPOLL
-												psocketgroupCacheRead->add(*(pChannelListEntry->pSocket)/*,pChannelListEntry*/);
+												psocketgroupCacheRead->add(*(pChannelListEntry->pSocket),pChannelListEntry);
 #else
 												psocketgroupCacheRead->add(*(pChannelListEntry->pSocket));
 #endif
@@ -321,7 +321,7 @@ SINT32 CALastMixA::loop()
 												else
 													{
 #ifdef HAVE_EPOLL
-														psocketgroupCacheWrite->add(*(pChannelListEntry->pSocket)/*,pChannelListEntry*/);
+														psocketgroupCacheWrite->add(*(pChannelListEntry->pSocket),pChannelListEntry);
 #else
 														psocketgroupCacheWrite->add(*(pChannelListEntry->pSocket));
 #endif
