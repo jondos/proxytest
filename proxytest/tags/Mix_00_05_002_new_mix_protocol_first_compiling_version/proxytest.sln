@@ -1,0 +1,132 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "proxytest-lib", "proxytest-lib.vcproj", "{150377B0-CA8F-4031-A0B8-45A3001F4F81}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "proxytest", "proxytest.vcproj", "{150377B0-CA8F-4031-A0B8-45A3001F4F81}"
+	ProjectSection(ProjectDependencies) = postProject
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81} = {150377B0-CA8F-4031-A0B8-45A3001F4F81}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AllTest", "AllTests.vcproj", "{1DE75B05-314A-4E97-B281-5D1075F7CF2D}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FlashMix-lib", "FlashMix\FlashMix-lib.vcproj", "{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FlashMix", "FlashMix\FlashMix.vcproj", "{17916053-4B43-46CF-ABB3-709AE4E3DA78}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FlashMixUser", "FlashMix\FlashMixUser.vcproj", "{17916053-4B43-46CF-ABB3-709AE4E3DA78}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BulletinBoard", "FlashMix\BulletinBoard.vcproj", "{17916053-4B43-46CF-ABB3-709AE4E3DA78}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Mit Xerces 2.0.0 = Mit Xerces 2.0.0
+		Mit Xerces 2.3 dev = Mit Xerces 2.3 dev
+		Release = Release
+		VTune = VTune
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Debug.ActiveCfg = Debug|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Debug.Build.0 = Debug|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Mit Xerces 2.0.0.ActiveCfg = Mit Xerces 2.0.0|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Mit Xerces 2.0.0.Build.0 = Mit Xerces 2.0.0|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Mit Xerces 2.3 dev.ActiveCfg = Mit Xerces 2.3 dev|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Mit Xerces 2.3 dev.Build.0 = Mit Xerces 2.3 dev|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Release.ActiveCfg = Release|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Release.Build.0 = Release|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.VTune.ActiveCfg = VTune|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.VTune.Build.0 = VTune|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Debug.ActiveCfg = Debug|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Debug.Build.0 = Debug|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Mit Xerces 2.0.0.ActiveCfg = Mit Xerces 2.0.0|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Mit Xerces 2.0.0.Build.0 = Mit Xerces 2.0.0|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Mit Xerces 2.3 dev.ActiveCfg = Mit Xerces 2.3 dev|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Mit Xerces 2.3 dev.Build.0 = Mit Xerces 2.3 dev|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Release.ActiveCfg = Release|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Release.Build.0 = Release|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.VTune.ActiveCfg = VTune|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.VTune.Build.0 = VTune|Win32
+		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Debug.ActiveCfg = Debug|Win32
+		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Debug.Build.0 = Debug|Win32
+		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Mit Xerces 2.0.0.ActiveCfg = Release|Win32
+		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Mit Xerces 2.0.0.Build.0 = Release|Win32
+		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Mit Xerces 2.3 dev.ActiveCfg = Release|Win32
+		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Mit Xerces 2.3 dev.Build.0 = Release|Win32
+		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Release.ActiveCfg = Release|Win32
+		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Release.Build.0 = Release|Win32
+		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.VTune.ActiveCfg = Release|Win32
+		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.VTune.Build.0 = Release|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Debug.ActiveCfg = Debug|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Debug.Build.0 = Debug|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Mit Xerces 2.0.0.ActiveCfg = Release|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Mit Xerces 2.0.0.Build.0 = Release|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Mit Xerces 2.3 dev.ActiveCfg = Release|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Mit Xerces 2.3 dev.Build.0 = Release|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Release.ActiveCfg = Release|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Release.Build.0 = Release|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.VTune.ActiveCfg = Release|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.VTune.Build.0 = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Debug.ActiveCfg = Debug|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Debug.Build.0 = Debug|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Mit Xerces 2.0.0.ActiveCfg = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Mit Xerces 2.0.0.Build.0 = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Mit Xerces 2.3 dev.ActiveCfg = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Mit Xerces 2.3 dev.Build.0 = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Release.ActiveCfg = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Release.Build.0 = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.VTune.ActiveCfg = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.VTune.Build.0 = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Debug.ActiveCfg = Debug|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Debug.Build.0 = Debug|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Mit Xerces 2.0.0.ActiveCfg = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Mit Xerces 2.0.0.Build.0 = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Mit Xerces 2.3 dev.ActiveCfg = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Mit Xerces 2.3 dev.Build.0 = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Release.ActiveCfg = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Release.Build.0 = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.VTune.ActiveCfg = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.VTune.Build.0 = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Debug.ActiveCfg = Debug|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Debug.Build.0 = Debug|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Mit Xerces 2.0.0.ActiveCfg = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Mit Xerces 2.0.0.Build.0 = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Mit Xerces 2.3 dev.ActiveCfg = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Mit Xerces 2.3 dev.Build.0 = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Release.ActiveCfg = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Release.Build.0 = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.VTune.ActiveCfg = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.VTune.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionItems) = postSolution
+		documentation\docMixConfig.template = documentation\docMixConfig.template
+		documentation\docPayment.template = documentation\docPayment.template
+		documentation\docPaymentSetup.template = documentation\docPaymentSetup.template
+		documentation\docPool.template = documentation\docPool.template
+		documentation\docSymmetricKeyExchange.template = documentation\docSymmetricKeyExchange.template
+		documentation\XML\FirstMixToInfoService.xml = documentation\XML\FirstMixToInfoService.xml
+		documentation\XML\FirstMixToJAP.xml = documentation\XML\FirstMixToJAP.xml
+		documentation\XML\InterMix-KeyExchange-Answer.xml = documentation\XML\InterMix-KeyExchange-Answer.xml
+		documentation\XML\InterMix-LastMix-to-Succesor.xsd = documentation\XML\InterMix-LastMix-to-Succesor.xsd
+		documentation\XML\InterMix-LastMix-to-Successor.xml = documentation\XML\InterMix-LastMix-to-Successor.xml
+		documentation\XML\MixCascadeStatus.xml = documentation\XML\MixCascadeStatus.xml
+		documentation\XML\MixHELO.xml = documentation\XML\MixHELO.xml
+		proxytest_win_short.doxy = proxytest_win_short.doxy
+		documentation\XML\xmldoc.template = documentation\XML\xmldoc.template
+		documentation\XML\XMLSignature.xml = documentation\XML\XMLSignature.xml
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal
