@@ -41,7 +41,7 @@ class CASocketGroupEpoll
 			~CASocketGroupEpoll();
 			SINT32 setPoolForWrite(bool bWrite);
 			
-			SINT32 add(CASocket&s,void * datapointer)
+			SINT32 add(CASocket&s/*,void * datapointer*/)
 				{
 					SINT32 ret=E_SUCCESS;
 					m_csFD_SET.lock();
