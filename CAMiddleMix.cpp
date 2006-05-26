@@ -430,7 +430,6 @@ SINT32 CAMiddleMix::init()
 	
 THREAD_RETURN mm_loopDownStream(void *p)
 	{
-#ifndef NEW_MIX_TYPE
 		CAMiddleMix* pMix=(CAMiddleMix*)p;
 		HCHANNEL channelIn;
 		CASymCipher* pCipher;
@@ -522,14 +521,12 @@ ERR:
 		pMix->m_pMuxIn->close();
 		pMix->m_pMuxOut->close();
 		CAMsg::printMsg(LOG_CRIT,"loopDownStream -- Now Exiting!\n");
-#endif //!NEW_MIX_TYPE
 		THREAD_RETURN_SUCCESS;		
 	}
 
 
 SINT32 CAMiddleMix::loop()
 	{
-#ifndef NEW_MIX_TYPE
 		tPoolEntry* pPoolEntry=new tPoolEntry;
 		MIXPACKET* pMixPacket=&pPoolEntry->packet;
 		HCHANNEL channelOut;
@@ -655,7 +652,6 @@ ERR:
 		#ifdef USE_POOL
 			delete pPool;
 		#endif
-#endif //!NEW_MIX_TYPE
 		CAMsg::printMsg(LOG_CRIT,"loop(): Seams that we are restarting now!!\n");
 		return E_UNKNOWN;
 	}

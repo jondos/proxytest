@@ -27,7 +27,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #include "StdAfx.h"
 #include "CALastMix.hpp"
-#include "CALastMixChannelList.hpp"
+#ifdef NEW_MIX_TYPE // TypeB mixes
+  #include "TypeB/typedefsb.hpp"
+#else // not TypeB mixes
+  /* TypeB mixes doesn't use the default-implementation */
+  #include "CALastMixChannelList.hpp"
+#endif
 #include "CASocketGroup.hpp"
 #include "CASingleSocketGroup.hpp"
 #include "CAMsg.hpp"
@@ -164,7 +169,10 @@ SINT32 CALastMix::init()
 		m_pLogPacketStats->setLogIntervallInMinutes(LM_PACKET_STATS_LOG_INTERVALL);
 		m_pLogPacketStats->start();
 #endif		
+    #ifndef NEW_MIX_TYPE // not TypeB mixes
+      /* TypeB mixes are using an own implementation */
 		m_pChannelList=new CALastMixChannelList;
+    #endif
 		return E_SUCCESS;
 	}
 
@@ -196,13 +204,29 @@ SINT32 CALastMix::processKeyExchange()
 		//Inserting MixProtocol Version 
 		// Version 0.3  - "normal", initial mix protocol
 		// Version 0.4  - with new flow control
+    // Version 0.5  - end-to-end 1:n channels (only between client and last mix)
 		DOM_Element elemMixProtocolVersion=doc.createElement("MixProtocolVersion");
 		elemMix.appendChild(elemMixProtocolVersion);
-#ifdef NEW_FLOW_CONTROL
+    #ifdef NEW_MIX_TYPE // TypeB mixes
+      setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.5");
+      DOM_Element elemDownstreamPackets = doc.createElement("DownstreamPackets");
+      setDOMElementValue(elemDownstreamPackets, (UINT32)CHANNEL_DOWNSTREAM_PACKETS);
+      elemMixProtocolVersion.appendChild(elemDownstreamPackets);
+      DOM_Element elemChannelTimeout = doc.createElement("ChannelTimeout");
+      /* let the client use our channel-timeout + 5 seconds */
+      setDOMElementValue(elemChannelTimeout, (UINT32)(CHANNEL_TIMEOUT + 5));
+      elemMixProtocolVersion.appendChild(elemChannelTimeout);
+      DOM_Element elemChainTimeout = doc.createElement("ChainTimeout");
+      /* let the client use our chain-timeout - 5 seconds */
+      setDOMElementValue(elemChainTimeout, (UINT32)(CHAIN_TIMEOUT - 5));
+      elemMixProtocolVersion.appendChild(elemChainTimeout);
+    #else
+      #ifdef NEW_FLOW_CONTROL
 		setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.4");
-#else		
+      #else    
 		setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.3");
-#endif
+      #endif
+    #endif
 		//Inserting RSA-Key
 		DOM_DocumentFragment tmpDocFrag;
 		m_pRSA->getPublicKeyAsDocumentFragment(tmpDocFrag);
@@ -320,16 +344,21 @@ SINT32 CALastMix::processKeyExchange()
 		return E_SUCCESS;
 	}
 
+#ifdef NEW_MIX_TYPE // TypeB mixes
+  void CALastMix::reconfigureMix() {
+  }
+#endif
+
 SINT32 CALastMix::reconfigure()
 	{
 		CAMsg::printMsg(LOG_DEBUG,"Reconfiguring Last Mix\n");
 		CAMsg::printMsg(LOG_DEBUG,"Re-read cache proxies\n");
 		if(setTargets()!=E_SUCCESS)
 			CAMsg::printMsg(LOG_DEBUG,"Could not set new cache proxies\n");
-#if defined (DELAY_CHANNELS)||defined (DELAY_CHANNELS_LATENCY)
+    #ifndef NEW_MIX_TYPE // not TypeB mixes
+      #if defined (DELAY_CHANNELS)||defined (DELAY_CHANNELS_LATENCY)
 		CAMsg::printMsg(LOG_DEBUG,"Set new ressources limitation parameters\n");
-		if(m_pChannelList!=NULL)
-		{
+        if(m_pChannelList!=NULL) {
 		#if defined (DELAY_CHANNELS)
 			m_pChannelList->setDelayParameters(	options.getDelayChannelUnlimitTraffic(),
 																					options.getDelayChannelBucketGrow(),
@@ -340,7 +369,10 @@ SINT32 CALastMix::reconfigure()
 			m_pChannelList->setDelayLatencyParameters(	utemp);
 		#endif
 		}
-#endif		
+      #endif
+    #else // TypeB mixes
+      reconfigureMix();
+    #endif
 		return E_SUCCESS;
 	}
 
@@ -478,8 +510,8 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 						continue;
 					}
 				SINT32 ret=pSocketGroup->select(MIX_POOL_TIMEOUT);	
-				if(ret==E_TIMEDOUT)
-					{
+        if(ret < 0) {
+          if (ret == E_TIMEDOUT) {
 						#ifdef USE_POOL
 							pMixPacket->flags=CHANNEL_DUMMY;
 							pMixPacket->channel=DUMMY_CHANNEL;
@@ -491,6 +523,14 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 							continue;	
 						#endif	
 					}
+          else {
+            /* another error occured (happens sometimes while debugging because
+             * of interruption, if a breakpoint is reached -> poll() returns
+             * errorcode EINTR)
+             */
+            continue;
+          }
+        }
 				else if(ret>0)
 					{
 						ret=pMuxSocket->receive(pMixPacket); //receives a whol MixPacket
@@ -628,9 +668,12 @@ SINT32 CALastMix::clean()
 		if(m_pQueueReadFromMix!=NULL)
 			delete m_pQueueReadFromMix;
 		m_pQueueReadFromMix=NULL;	
+    #ifndef NEW_MIX_TYPE // not TypeB mixes
+      /* TypeB mixes are using an own implementation */
 		if(m_pChannelList!=NULL)
 			delete m_pChannelList;
 		m_pChannelList=NULL;
+    #endif
 		return E_SUCCESS;
 	}
 

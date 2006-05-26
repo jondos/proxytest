@@ -390,6 +390,200 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 		return E_SUCCESS;
 	}
 
+
+#ifdef NEW_MIX_TYPE
+/* some additional methods for TypeB first mixes */
+
+/** 
+ * Removes all channels, which belongs to the given connection and 
+ * the connection itself from the list but keeps the outgoing channels.
+ * @param pMuxSocket the connection from the user
+ * @retval E_SUCCESS if successful
+ * @retval E_UNKNOWN in case of an error
+ */
+SINT32 CAFirstMixChannelList::removeClientPart(CAMuxSocket* pMuxSocket)
+  {
+    if(pMuxSocket==NULL)
+      return E_UNKNOWN;
+    SINT32 hashkey=pMuxSocket->getSocket();
+    if(hashkey>MAX_HASH_KEY-1||hashkey<0)
+      return E_UNKNOWN;
+    m_Mutex.lock();
+    fmHashTableEntry* pHashTableEntry=m_HashTable[hashkey];
+    if(pHashTableEntry->pMuxSocket==NULL) //this connection is not in the list
+      {
+        m_Mutex.unlock();
+        return E_UNKNOWN;
+      }
+    #ifdef DELAY_USERS
+      m_pMutexDelayChannel->lock();
+      m_pDelayBuckets[pHashTableEntry->delayBucketID]=NULL;
+      m_pMutexDelayChannel->unlock();
+    #endif
+    pHashTableEntry->pControlChannelDispatcher->deleteAllControlChannels();
+    delete pHashTableEntry->pControlChannelDispatcher; //deletes the dispatcher and all associated control channels
+    if(m_listHashTableNext==pHashTableEntry) //adjust the enumeration over all connections (@see getNext())
+      m_listHashTableNext=pHashTableEntry->list_HashEntries.next;
+    
+    if(pHashTableEntry->list_HashEntries.prev==NULL) //if entry is the head of the connection list
+      {
+        if(pHashTableEntry->list_HashEntries.next==NULL) //if entry is also the last (so the only one in the list..)
+          {
+            m_listHashTableHead=NULL; //list is now empty
+          }
+        else
+          {//remove the head of the list
+            m_listHashTableHead=pHashTableEntry->list_HashEntries.next; 
+            m_listHashTableHead->list_HashEntries.prev=NULL;
+          }
+      }
+    else
+      {//the connection is not the head of the list
+        if(pHashTableEntry->list_HashEntries.next==NULL)
+          {//the connection is the last element in the list
+            pHashTableEntry->list_HashEntries.prev->list_HashEntries.next=NULL;
+          }
+        else
+          {//its a simple middle element
+            pHashTableEntry->list_HashEntries.prev->list_HashEntries.next=pHashTableEntry->list_HashEntries.next;
+            pHashTableEntry->list_HashEntries.next->list_HashEntries.prev=pHashTableEntry->list_HashEntries.prev;
+          }
+      }
+    fmChannelListEntry* pEntry=pHashTableEntry->pChannelList;
+    while(pEntry!=NULL)//for all channels....
+      {
+        /* leave a dummy-entry in the out-channels-table until we receive a
+         * CLOSE-message for the channel from the last mix (else we could
+         * re-use it, while the last mix is still using the old channel),
+         * therefore set the the pointer for the in-channel-part to NULL
+         */
+        pEntry->pHead = NULL;
+        pEntry = pEntry->list_InChannelPerSocket.next;
+      }
+    #ifdef PAYMENT
+      // cleanup accounting information
+      CAAccountingInstance::cleanupTableEntry(pHashTableEntry);
+    #endif
+    memset(pHashTableEntry,0,sizeof(fmHashTableEntry)); //'delete' the connection from the connection hash table 
+    m_Mutex.unlock();
+    return E_SUCCESS;
+  }
+
+/**
+ * Removes an out-channel from the table, which is vacant (not connected to
+ * any client).
+ * @param pEntry The vacant out-channel entry.
+ */
+void CAFirstMixChannelList::removeVacantOutChannel(fmChannelListEntry* pEntry) {
+  if (pEntry != NULL) {
+    if (pEntry->pHead == NULL) {
+      /* must be a vacant channel */
+      m_Mutex.lock();
+      fmChannelListEntry* pTmpEntry;
+      /* check whether the enty is in the out-channel-table */
+      SINT32 hashkey = pEntry->channelOut & 0x0000FFFF;
+      pTmpEntry = m_HashTableOutChannels[hashkey];
+      while (pTmpEntry != NULL) {
+        if (pTmpEntry->channelOut == pEntry->channelOut) {
+          //we have found the entry
+          if (pTmpEntry->list_OutChannelHashTable.prev==NULL) { //it's the head      
+            if (pTmpEntry->list_OutChannelHashTable.next==NULL) {
+              //it's also the last Element
+              m_HashTableOutChannels[hashkey] = NULL; //empty this hash bucket
+            }
+            else {
+              pTmpEntry->list_OutChannelHashTable.next->list_OutChannelHashTable.prev=NULL;
+              m_HashTableOutChannels[hashkey]=pTmpEntry->list_OutChannelHashTable.next;
+            }
+          }
+          else {
+            //not the head
+            if (pTmpEntry->list_OutChannelHashTable.next==NULL) {
+              //but the last
+              pTmpEntry->list_OutChannelHashTable.prev->list_OutChannelHashTable.next=NULL;
+            }
+            else {
+              //a middle element
+              pTmpEntry->list_OutChannelHashTable.prev->list_OutChannelHashTable.next=pTmpEntry->list_OutChannelHashTable.next;
+              pTmpEntry->list_OutChannelHashTable.next->list_OutChannelHashTable.prev=pTmpEntry->list_OutChannelHashTable.prev;
+            }
+          }
+          break;
+        }
+        pTmpEntry=pTmpEntry->list_OutChannelHashTable.next;
+      }
+      /* entry is not in the table any more */
+      #ifndef DO_TRACE        
+        delete pEntry;
+      #else
+        deleteChannelListEntry(pEntry);
+      #endif
+      m_Mutex.unlock();
+    }
+  }
+}
+
+/**
+ * Removes all out-channels from the table, which are vacant (not connected to
+ * any client). Also the channel-cipher is deleted.
+ */
+void CAFirstMixChannelList::cleanVacantOutChannels() {
+  m_Mutex.lock();
+  SINT32 hashkey = 0;
+  do {
+    fmChannelListEntry* pTmpEntry = m_HashTableOutChannels[hashkey];
+    while (pTmpEntry != NULL) {
+      if (pTmpEntry->pHead == NULL) {
+        /* we have found a vacant channel */
+        if (pTmpEntry->list_OutChannelHashTable.prev==NULL) { //it's the head      
+          if (pTmpEntry->list_OutChannelHashTable.next==NULL) {
+            //it's also the last Element
+            m_HashTableOutChannels[hashkey] = NULL; //empty this hash bucket
+          }
+          else {
+            pTmpEntry->list_OutChannelHashTable.next->list_OutChannelHashTable.prev=NULL;
+            m_HashTableOutChannels[hashkey]=pTmpEntry->list_OutChannelHashTable.next;
+          }
+        }
+        else {
+          //not the head
+          if (pTmpEntry->list_OutChannelHashTable.next==NULL) {
+            //but the last
+            pTmpEntry->list_OutChannelHashTable.prev->list_OutChannelHashTable.next=NULL;
+          }
+          else {
+            //a middle element
+            pTmpEntry->list_OutChannelHashTable.prev->list_OutChannelHashTable.next=pTmpEntry->list_OutChannelHashTable.next;
+            pTmpEntry->list_OutChannelHashTable.next->list_OutChannelHashTable.prev=pTmpEntry->list_OutChannelHashTable.prev;
+          }
+        }
+        /* entry is removed from the table, now delete the channel-cipher */
+        delete pTmpEntry->pCipher;
+        fmChannelListEntry* pRemoveEntry = pTmpEntry;
+        pTmpEntry = pTmpEntry->list_OutChannelHashTable.next;
+        /* delete the entry */
+        #ifndef DO_TRACE        
+          delete pRemoveEntry;
+        #else
+          deleteChannelListEntry(pEntry);
+        #endif
+      }
+      else {
+        /* not a vacant channel -> try the next channel in the hashtable-line */
+        pTmpEntry = pTmpEntry->list_OutChannelHashTable.next;
+      }
+    }
+    /* we have processed a whole line of the channel-table -> process the next
+     * one
+     */
+    hashkey = (hashkey + 1) & 0x0000FFFF;
+  }
+  while (hashkey != 0);
+  /* we have processed the whole out-channel-table */
+  m_Mutex.unlock();
+}
+#endif //NEW_MIX_TYPE (TypeB first mixes)
+
 /** Removes a single channel from the list.
 	* @param pMuxSocket the connection from the user
 	* @param channelIn the channel, which should be removed
