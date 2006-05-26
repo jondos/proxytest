@@ -1306,6 +1306,7 @@ Optional Features:
   --enable-payment        Specify if to build with payment support
   --enable-replay_detection
                           Specify if to build with replay detection support
+  --enable-new_mix_type   Specify if to build with type B mixes
   --enable-debug          Enable debug mode
   --enable-crime-detection
                           Enable crime detection mode
@@ -4263,6 +4264,19 @@ if test "${enable_replay_detection+set}" = set; then
 
 
 fi
+
+
+REPLAY_DETECTION=""
+# Check whether --enable-new_mix_type was given.
+if test "${enable_new_mix_type+set}" = set; then
+  enableval=$enable_new_mix_type;
+		if test "x$enableval" != "xno" ; then
+		    NEW_MIX_TYPE="-DNEW_MIX_TYPE"
+		fi
+
+
+fi
+
 
 
 LIBS="$DEFAULTLIBS"
@@ -12221,11 +12235,11 @@ fi
 
 
 
-CFLAGS="$CFLAGS $POOL $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $REPLAY_DETECTION $OFLAGS"
+CFLAGS="$CFLAGS $POOL $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $REPLAY_DETECTION $NEW_MIX_TYPE $OFLAGS"
 CXXFLAGS=$CFLAGS
 LIBS="$LIBS $PAYMENT_LIB"
 
-ac_config_files="$ac_config_files Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile"
+ac_config_files="$ac_config_files Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -12807,6 +12821,7 @@ do
     "trio/Makefile") CONFIG_FILES="$CONFIG_FILES trio/Makefile" ;;
     "tre/Makefile") CONFIG_FILES="$CONFIG_FILES tre/Makefile" ;;
     "TypeA/Makefile") CONFIG_FILES="$CONFIG_FILES TypeA/Makefile" ;;
+    "TypeB/Makefile") CONFIG_FILES="$CONFIG_FILES TypeB/Makefile" ;;
 
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
