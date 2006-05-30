@@ -342,6 +342,26 @@ SINT32 CALastMixB::loop() {
                * dummy-chain and signal an unknown-chain-error
                */
               currentChain = m_pChainTable->createEntry();
+              if (currentChain == NULL) {
+                /* we are unable to create a new chain (maximum number of
+                 * chains - defined in MAX_POLLFD - is reached)
+                 */
+                CAMsg::printMsg(LOG_INFO, "Unable to create more than %u chains - cannot send 'unknown chain' response.\n", MAX_POLLFD);
+                delete channelCipher;
+                /* currently we have to send at least a CHANNEL-CLOSE -> reuse
+                 * our buffers for the response
+                 */
+                getRandom(currentMixPacket->data, DATA_SIZE);
+                currentMixPacket->flags = CHANNEL_CLOSE;
+                #ifdef LOG_PACKET_TIMES
+                  /* set invalid packet time for the response */
+                  setZero64(pQueueEntry->timestamp_proccessing_start);
+                #endif
+                m_pQueueSendToMix->add(currentMixPacket, sizeof(tQueueEntry));
+                m_logDownloadedPackets++;
+                /* process the next packet */
+                continue;
+              }
               currentChain->addChannel(m_pChannelTable->add(currentMixPacket->channel, channelCipher, currentChain), ((lengthAndFlags & CHAINFLAG_FAST_RESPONSE) == CHAINFLAG_FAST_RESPONSE));
               currentChain->signalUnknownChain();
             }
