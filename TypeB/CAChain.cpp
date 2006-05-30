@@ -635,4 +635,3 @@ UINT32 CAChain::sendUpstreamDataInternal(UINT32 a_maxLength) {
     m_pDelayBucketMutex->unlock();
   }
 #endif
-

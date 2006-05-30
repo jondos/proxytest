@@ -280,6 +280,7 @@ void CAChainTable::removeEntryInternal(t_chaintableEntry* a_entry) {
   delete a_entry->chain;
   /* delete the table-entry */
   delete a_entry;
+  m_chaintableSize--;
 }
 
 void CAChainTable::getNextEntryInternal(t_chaintableIterator* a_iterator) {
