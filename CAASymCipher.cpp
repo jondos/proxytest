@@ -53,7 +53,9 @@ inline void setRSAFlags(RSA* pRSA)
 		if(pRSA==NULL)
 			return;
 		pRSA->flags|=RSA_FLAG_THREAD_SAFE;
-		pRSA->flags|=RSA_FLAG_NO_BLINDING;
+		#ifdef RSA_FLAG_NO_BLINDING
+			pRSA->flags|=RSA_FLAG_NO_BLINDING;
+		#endif
 #if OPENSSL_VERSION_NUMBER	> 0x0090705fL
 		pRSA->flags|=RSA_FLAG_NO_EXP_CONSTTIME;
 #endif
@@ -231,7 +233,9 @@ SINT32 CAASymCipher::getPublicKey(UINT8* buff,UINT32 *len)
 		aktIndex+=size;
 		(*len)=aktIndex;
 		m_pRSA->flags|=RSA_FLAG_THREAD_SAFE;
-		m_pRSA->flags|=RSA_FLAG_NO_BLINDING;
+		#ifdef RSA_FLAG_NO_BLINDING
+			m_pRSA->flags|=RSA_FLAG_NO_BLINDING;
+		#endif
 		return E_SUCCESS;
 _ERROR:
 		RSA_free(m_pRSA);
