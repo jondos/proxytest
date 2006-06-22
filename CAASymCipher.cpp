@@ -56,7 +56,7 @@ inline void setRSAFlags(RSA* pRSA)
 		#ifdef RSA_FLAG_NO_BLINDING
 			pRSA->flags|=RSA_FLAG_NO_BLINDING;
 		#endif
-#if OPENSSL_VERSION_NUMBER	> 0x0090705fL
+#if OPENSSL_VERSION_NUMBER	> 0x0090707fL
 		pRSA->flags|=RSA_FLAG_NO_EXP_CONSTTIME;
 #endif
 	}
