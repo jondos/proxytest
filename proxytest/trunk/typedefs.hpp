@@ -56,6 +56,7 @@ typedef UINT32 HCHANNEL;
 	#define NEW_FLOW_CONTROL_FLAG 0x8000
 #endif
 	
+#define CONNECTION_ERROR_FLAG 0x4000
 
 #define DATA_SIZE 			992
 #define PAYLOAD_SIZE 		989
