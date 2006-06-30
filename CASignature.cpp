@@ -663,7 +663,7 @@ SINT32 CASignature::verifyXML(const UINT8* const in,UINT32 inlen)
 	}
 
 
-/** Verifies a XML Signature under node root. @Note This removes the \<Signature\> node! */
+/** Verifies a XML Signature under node root.*/
 SINT32 CASignature::verifyXML(DOM_Node& root,CACertStore* trustedCerts)
 	{
 		DOM_Element elemSignature;
@@ -747,10 +747,10 @@ SINT32 CASignature::verifyXML(DOM_Node& root,CACertStore* trustedCerts)
 				return E_UNKNOWN;
 			}
 		DSA_SIG_free(dsaSig);
-				
-		root.removeChild(elemSignature);
+		DOM_Node tmpNode=root.removeChild(elemSignature);
 		outlen=5000;
 		DOM_Output::makeCanonical(root,out,&outlen);
+		root.appendChild(tmpNode);
 		UINT8 dgst1[SHA_DIGEST_LENGTH];
 		SHA1(out,outlen,dgst1);
 		delete[] out;

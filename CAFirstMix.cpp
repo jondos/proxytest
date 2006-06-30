@@ -277,11 +277,11 @@ SINT32 CAFirstMix::processKeyExchange()
     oParser.parse(oInput);
     delete []recvBuff;
 
-		DOM_Document doc=oParser.getDocument();
+	DOM_Document doc=oParser.getDocument();
     DOM_Element elemMixes=doc.getDocumentElement();
     if(elemMixes==NULL)
-        return E_UNKNOWN;
-		SINT32 count=0;
+		return E_UNKNOWN;
+	SINT32 count=0;
     if(getDOMElementAttribute(elemMixes,"count",&count)!=E_SUCCESS)
         return E_UNKNOWN;
  /*
