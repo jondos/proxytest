@@ -53,6 +53,50 @@ typedef struct t_middlemixchannellist mmChannelListEntry;
 typedef struct t_middlemixchannellist mmHashTableEntry;
 typedef struct t_middlemixchannellist* LP_mmHashTableEntry;
 
+/**  \page pageMiddleMixChannelList Data structures for storing the Mix channel table of a middle Mix
+	*  \section docMiddleMixChannelList Data structures for storing the Mix channel table of a middle Mix
+	*	 The following data structures are used to store and access all information necassary to process a MixPacket.
+	*
+	* \image html MiddleMixChannelTable.png "Table 1: Necessary data stored in the Channel Table"
+	*
+	*  Table 1 gives an idea about the information which must be stored.
+	*  In different situations the information stored in the table has to be access
+	*  in different way for instance using different search criterias. The following situations are common:
+	* - if the Mix receives a MixPacket from the previous Mix, he has to find out, if the incoming ChannelID already exists. 
+	* - if the Mix receives a MixPacket from the next Mix, he has to find the belonging Cipher and incoming Channel-ID 
+	* using the outgoing Channel-ID as search criteria
+	*
+	* In order to satisfy all this different requirements, the data is organized in different 
+	* search structures like Hashtables and linked Lists (see Fig. 1).
+  *
+	* \image html DataStructuresOfMiddleMix.png "Figure 1: Data structures used for accessing the Channel Table Data"
+	* 
+	* There exists a Hashtable ((\link CAFirstMixChannelList#m_HashTable m_HashTable \endlink) of all TCP/IP connections from JAPs, 
+	* where each TCP/IP connections represents exactly one JAP.
+	* The SOCKET identifier of such a TCP/IP connection is used as Hashkey. The elements of this Hashtable are of
+	* the type fmHashTableEntry. In order to travers the TCP/IP connections from all JAPs, each Hashtableentry
+	* stores a pointer (next) to the next (non empty) Hashtableentry, thus forming a linked list 
+	* (actually it is a double linked list).
+	* Each Hashtableentry stores a reference to the belonging TCP/IP socket object (pMuxSocket), to a Queue
+	* used for storing the data which has to be send to the JAP (pSendQueue) and 
+	* a pointer (pChannelList) to a List of Channels belonging to the JAP.
+	* Each entry of the Channellist stores a reference (pCipher) to the Cipher object used for en-/decryption of 
+	* the MixPackets belonging to the MixChannel, the incoming (channelIn) and outgoing (channelOut) Channel-ID.
+	* Also each Channellistentry contains a reference (pHead) to the belonging Hashtableentry. 
+	* In order to traverse all Channels which belong to a JAP, the Channels are organised in a double linked list.
+	* The elements list_InChannelPersocket.next and list_InChannelPersocket.prev could be used to traverse the Channels. 
+	* This way the Mix could find the outgoing Channel-ID (and Cipher) if he receives a MixPacket from a JAP. (Note that the
+	* Mix already knows the HashtableEntry, because he has read the MixPacket from the belonging Socket).
+	* 
+	* In order to find a Channel using the outgoing Channel-ID as search criteria there exists a Hashtable with
+	* overrun lists (\link CAFirstMixChannelList#m_HashTableOutChannels m_HashTableOutChannels \endlink). The last two bytes from the Channel-ID are used as Hashkey.
+	* The elements of this Hashtable are pointers to Channellistentries. The overrun lists are 
+	* stored in the list_OutChannelHashTable element of each Channellistentry.
+	*/
+
+/** Data structure that stores all information about the currently open Mix channels.
+	* See \ref pageMiddleMixChannelList "[MiddleMixChannelList]" for more information.
+	*/
 class CAMiddleMixChannelList
 	{
 		public:

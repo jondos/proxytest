@@ -427,7 +427,7 @@ SINT32 CAMiddleMix::init()
 		return E_SUCCESS;
 	}
 
-	
+/** Processes Downstream-MixPackets.*/	
 THREAD_RETURN mm_loopDownStream(void *p)
 	{
 		CAMiddleMix* pMix=(CAMiddleMix*)p;
@@ -506,6 +506,10 @@ THREAD_RETURN mm_loopDownStream(void *p)
 								#ifdef USE_POOL
 									pPool->pool(pPoolEntry);
 								#endif
+								if((pMixPacket->flags&CHANNEL_CLOSE)!=0)
+									{//Channel close received -->remove channel form channellist
+										pMix->m_pMiddleMixChannelList->remove(channelIn);
+									}
 								if(pMix->m_pMuxIn->send(pMixPacket)==SOCKET_ERROR)
 									goto ERR;
 							}
@@ -524,7 +528,7 @@ ERR:
 		THREAD_RETURN_SUCCESS;		
 	}
 
-
+/** Processes Upstream-MixPackets.*/
 SINT32 CAMiddleMix::loop()
 	{
 		tPoolEntry* pPoolEntry=new tPoolEntry;
@@ -598,7 +602,7 @@ SINT32 CAMiddleMix::loop()
 						#endif
 						if(m_pMiddleMixChannelList->getInToOut(pMixPacket->channel,&channelOut,&pCipher)!=E_SUCCESS)
 							{//new connection ?
-								if(pMixPacket->flags==CHANNEL_OPEN)
+								if(pMixPacket->flags==CHANNEL_OPEN) //if not channel-open flag set -->drop this packet
 									{
 										#ifdef _DEBUG
 												CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
@@ -629,12 +633,16 @@ SINT32 CAMiddleMix::loop()
 							}
 						else
 							{//established connection
-									pMixPacket->channel=channelOut;
 									pCipher->crypt1(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 									pCipher->unlock();
 									#ifdef USE_POOL
 										pPool->pool(pPoolEntry);
 									#endif
+									if((pMixPacket->flags&CHANNEL_CLOSE)!=0)
+										{//Channel close received -->remove channel form channellist
+											m_pMiddleMixChannelList->remove(pMixPacket->channel);
+										}
+									pMixPacket->channel=channelOut;
 									if(m_pMuxOut->send(pMixPacket)==SOCKET_ERROR)
 										goto ERR;
 							}

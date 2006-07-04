@@ -23,7 +23,13 @@ CAMiddleMixChannelList::~CAMiddleMixChannelList()
 		m_Mutex.unlock();
 	}
 
-
+/** Adds a new Channel to the Channellist.
+	*
+	* @param channelIn incoming Channel-ID
+	* @param pCipher Cipher for recoding
+	* @param channelOut on return holds a newly created random outgoing Channel-ID
+	* @retval E_SUCCESS if Channel was successfully added to the list
+	**/
 SINT32 CAMiddleMixChannelList::add(HCHANNEL channelIn,CASymCipher* pCipher,HCHANNEL* channelOut)
 	{
 		m_Mutex.lock();
@@ -78,6 +84,11 @@ SINT32 CAMiddleMixChannelList::getInToOut(HCHANNEL channelIn, HCHANNEL* channelO
 		return E_UNKNOWN;
 	}
 
+/** Removes a channel form the channellist.
+	* @param channelIn incoming Channel-ID of the channel which should be removed
+	* @retval E_SUCCESS if channel was successfully removed from the list
+	* @retval E_UNKNOWN otherwise
+	*/
 SINT32 CAMiddleMixChannelList::remove(HCHANNEL channelIn)
 	{
 		m_Mutex.lock();
