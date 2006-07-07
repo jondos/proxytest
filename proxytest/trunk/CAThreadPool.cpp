@@ -38,7 +38,7 @@ CAThreadPool::CAThreadPool(	UINT32 num_worker_threads,
 			}
 	}
 
-/** Adds a new reuest (task) to this threadpool.
+/** Adds a new request (task) to this threadpool.
 	* @retval E_SPACe if there was  no more space in the waiting queue 
 	* and we do not want to wait for an other request to finish
 	* @retval E_SUCCESS if this request was added to the working queue

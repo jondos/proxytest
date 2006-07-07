@@ -29,6 +29,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define __CACONVAR__
 #include "CAMutex.hpp"
 #include "CAUtil.hpp"
+
 class CAConditionVariable:public CAMutex
 	{
 		public:
@@ -102,7 +103,7 @@ class CAConditionVariable:public CAMutex
 					return E_UNKNOWN;
 				}
 
-			/** Signals this object. A thread waiting on this object will awake.
+			/** Signals this object. One of the threads waiting on this object will awake.
 				* Note: lock() must be called before signal() and unlock() 
 				* must be called if proccessing ends.
 				*/
@@ -113,6 +114,10 @@ class CAConditionVariable:public CAMutex
 					return E_UNKNOWN;
 				}
 
+			/** Signals this object. All threads waiting on this object will awake.
+				* Note: lock() must be called before signal() and unlock() 
+				* must be called if proccessing ends.
+				*/
 			SINT32 broadcast()
 				{
 					if(pthread_cond_broadcast(m_pCondVar)==0)
