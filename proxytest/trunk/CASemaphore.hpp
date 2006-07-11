@@ -47,6 +47,7 @@ class CASemaphore
 			~CASemaphore()
 				{
 					sem_destroy(m_pSemaphore);
+					delete m_pSemaphore;
 				}
 
 			SINT32 up()
