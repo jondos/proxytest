@@ -28,19 +28,28 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CAMUTEX__
 #define __CAMUTEX__
 class CAConditionVariable;
+#ifndef HAVE_PTHREAD_MUTEXES
+	#include "CASemaphore.hpp"
+#endif
 class CAMutex
 	{
 		public:
-#ifndef DEBUG
+#if !defined (DEBUG) || !defined(HAVE_PTHREAD_MUTEXES)
 			CAMutex()
 				{
-					m_pMutex=new pthread_mutex_t;
-					pthread_mutex_init(m_pMutex,NULL);
+					#ifdef HAVE_PTHREAD_MUTEXES
+						m_pMutex=new pthread_mutex_t;
+						pthread_mutex_init(m_pMutex,NULL);
+					#else
+						m_pMutex=new CASemaphore(1);
+					#endif
 				}
 
 			virtual ~CAMutex()
 				{
-					pthread_mutex_destroy(m_pMutex);
+					#ifdef HAVE_PTHREAD_MUTEXES
+						pthread_mutex_destroy(m_pMutex);
+					#endif
 					delete m_pMutex;
 				}
 #else
@@ -49,20 +58,32 @@ class CAMutex
 #endif
 			SINT32 lock()
 				{
-					if(pthread_mutex_lock(m_pMutex)==0)
-						return E_SUCCESS;
-					return E_UNKNOWN;
+					#ifdef	HAVE_PTHREAD_MUTEXES
+						if(pthread_mutex_lock(m_pMutex)==0)
+							return E_SUCCESS;
+						return E_UNKNOWN;
+					#else
+						return m_pMutex->down();
+					#endif
 				}
 
 			SINT32 unlock()
 				{
-					if(pthread_mutex_unlock(m_pMutex)==0)
-						return E_SUCCESS;
-					return E_UNKNOWN;
+					#ifdef HAVE_PTHREAD_MUTEXES
+						if(pthread_mutex_unlock(m_pMutex)==0)
+							return E_SUCCESS;
+						return E_UNKNOWN;
+					#else
+						return m_pMutex->up();
+					#endif
 				}
 		
 		friend class CAConditionVariable;
 		protected:
-			pthread_mutex_t* m_pMutex;
+			#ifdef HAVE_PTHREAD_MUTEXES
+				pthread_mutex_t* m_pMutex;
+			#else
+				CASemaphore* m_pMutex;
+			#endif
 	};
 #endif

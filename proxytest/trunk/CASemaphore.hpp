@@ -27,7 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CASEMAPHORE__
 #define __CASEMAPHORE__
-#undef USE_SEMAPHORE
+
 #ifdef USE_SEMAPHORE
 class CASemaphore
 	{
@@ -38,6 +38,12 @@ class CASemaphore
 					sem_init(m_pSemaphore,0,0);
 				}
 			
+			CASemaphore(int iInitialValue)
+				{
+					m_pSemaphore=new sem_t;
+					sem_init(m_pSemaphore,0,iInitialValue);
+				}
+
 			~CASemaphore()
 				{
 					sem_destroy(m_pSemaphore);
@@ -45,7 +51,7 @@ class CASemaphore
 
 			SINT32 up()
 				{
-					if(sem_post(m_pSemaphore)==0)
+					if(sem_post(m_pSemaphore)>=0)
 						return E_SUCCESS;
 					return E_UNKNOWN;
 				}
@@ -53,7 +59,7 @@ class CASemaphore
 			SINT32 down()
 				{
 					SINT32 ret;
-					while((ret=sem_post(m_pSemaphore))==E_AGAIN);
+					while((ret=sem_wait(m_pSemaphore))==E_AGAIN);
 					if(ret==0)
 						return E_SUCCESS;
 					return E_UNKNOWN;
