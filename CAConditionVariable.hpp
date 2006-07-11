@@ -70,7 +70,7 @@ class CAConditionVariable:public CAMutex
 						return E_UNKNOWN;
 					#else
 						m_pMutex->lock();
-						unlock(); // Release the lock tha^t is associated with our cv
+						unlock(); // Release the lock that is associated with our cv
 						m_iSleepers++;
 						m_pMutex->unlock();
 						m_pSemaphore->down();
@@ -88,7 +88,7 @@ class CAConditionVariable:public CAMutex
 						return E_UNKNOWN;
 					#else
 						m_pMutex->lock();
-						oMutex.unlock(); // Release the lock tha^t is associated with our cv
+						oMutex.unlock(); // Release the lock that is associated with our cv
 						m_iSleepers++;
 						m_pMutex->unlock();
 						m_pSemaphore->down();
