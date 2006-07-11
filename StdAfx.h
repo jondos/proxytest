@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.05.08"
+#define MIX_VERSION "00.05.09"
 
 //Define all features if we are running in documentation creation mode
 #ifdef DOXYGEN
@@ -65,6 +65,18 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define DELAY_CHANNELS_LATENCY //to enable min latency per channel
 //#define HAVE_EPOLL //define if you have epoll support on your (Linux) system
 //#define COUNTRY_STATS //collect stats about countries users come from
+
+//the following definition are just for threading support beside pthread 
+#undef USE_SEMAPHORE //normally we do not need semaphores
+#define HAVE_PTHREAD_CV //normally we use the pthread conditional variables
+#define HAVE_PTHREAD_MUTEXES //normally we use the pthread mutexs
+
+#if !defined(HAVE_PTHREAD_CV) || !defined (HAVE_PTHREAD_MUTEXES) //if we do not have pthread mutexes or cvs we emulate them with semphores
+ #define USE_SEMAPHORE
+#endif
+
+#define HAVE_PTHREAD_SEMAPHORE //normally we use pthread semaphores
+
 #ifdef COUNTRY_STATS
 	#define LOG_COUNTRIES_INTERVALL 6 //how often to log the country stats (multiplied by 10 seconds)
 #endif
@@ -344,7 +356,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include <assert.h>
 
 #include <pthread.h>
-//#include <semaphore.h>
+#ifdef USE_SEMAPHORE
+	#ifdef HAVE_PTHREAD_SEMAPHORE
+		#include <semaphore.h>
+	#endif
+#endif
 #define THREAD_RETURN void*
 #define THREAD_RETURN_ERROR return(NULL)
 #define THREAD_RETURN_SUCCESS return (NULL)

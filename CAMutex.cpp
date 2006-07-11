@@ -27,7 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #include "StdAfx.h"
 #include "CAMutex.hpp"
-#ifdef DEBUG
+#if defined (DEBUG) && defined(HAVE_PTHREAD_MUTEXES)
 #include "CAMsg.hpp"
 
 CAMutex::CAMutex()
