@@ -657,8 +657,7 @@ SINT32 CAInfoService::handleConfigEvent(DOM_Document& doc)
     return E_SUCCESS;
 }
 
-SINT32 CAInfoService::getPaymentInstance(const UINT8* a_pstrPIID,CAXMLBI** a_pXMLBI,
-										 CASocketAddrINet* a_socketAddress)
+SINT32 CAInfoService::getPaymentInstance(const UINT8* a_pstrPIID,CAXMLBI** a_pXMLBI)
 {
 	SINT32 returnValue = E_UNKNOWN;
 	UINT32 nrAddresses;
@@ -681,7 +680,8 @@ SINT32 CAInfoService::getPaymentInstance(const UINT8* a_pstrPIID,CAXMLBI** a_pXM
 	@retval E_UNKNOWN if an error occured
 	@return a_pXMLBI will point to a pointer to the newly created CAXMLBI object or to NULL
 */
-SINT32 CAInfoService::getPaymentInstance(const UINT8* a_pstrPIID,CAXMLBI** a_pXMLBI)
+SINT32 CAInfoService::getPaymentInstance(const UINT8* a_pstrPIID,CAXMLBI** a_pXMLBI,
+										 CASocketAddrINet* a_socketAddress)
 	{
 		CASocket socket;
 		CASocketAddrINet address;
