@@ -48,6 +48,11 @@ class CAInfoService
 			SINT32 sendStatus(bool bIncludeCerts, CASocketAddrINet* a_socketAddress);
 			SINT32 sendMixHelo(SINT32 requestCommand,const UINT8* param,
 								CASocketAddrINet* a_socketAddress);
+		#ifdef PAYMENT			
+			SINT32 getPaymentInstance(const UINT8* a_pstrPIID,CAXMLBI** pXMLBI,
+										CASocketAddrINet* a_socketAddress);
+		#endif
+								
 		public:
 			CAInfoService();
 			CAInfoService(CAMix* pMix);
