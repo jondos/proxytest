@@ -657,6 +657,23 @@ SINT32 CAInfoService::handleConfigEvent(DOM_Document& doc)
     return E_SUCCESS;
 }
 
+SINT32 CAInfoService::getPaymentInstance(const UINT8* a_pstrPIID,CAXMLBI** a_pXMLBI,
+										 CASocketAddrINet* a_socketAddress)
+{
+	SINT32 returnValue = E_UNKNOWN;
+	UINT32 nrAddresses;
+	CASocketAddrINet** socketAddresses = options.getInfoServices(nrAddresses);
+	
+	for (UINT32 i = 0; i < nrAddresses; i++)
+	{
+		if (returnValue != E_SUCCESS)
+		{
+			returnValue = getPaymentInstance(a_pstrPIID, a_pXMLBI,socketAddresses[i]);
+		}
+	}
+	return returnValue;	
+}
+
 #ifdef PAYMENT
 /** Gets a payment instance from the InfoService.
 	@param a_pstrPIID id of the payment instacne for which the information is requested
