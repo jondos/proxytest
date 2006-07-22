@@ -165,13 +165,28 @@ SINT32 CAInfoService::stop()
 		return E_SUCCESS;
 	}
 
+SINT32 CAInfoService::sendStatus(bool bIncludeCerts)
+{
+	SINT32 returnValue = E_UNKNOWN;
+	UINT32 nrAddresses;
+	CASocketAddrINet** socketAddresses = options.getInfoServices(nrAddresses);
+	for (UINT32 i = 0; i < nrAddresses; i++)
+	{
+		if (returnValue != E_SUCCESS)
+		{
+			returnValue = sendStatus(bIncludeCerts, socketAddresses[i]);
+		}
+	}
+	return returnValue;	
+}
+
 /** POSTs mix status to the InfoService. [only first mix does this at the moment]
 	* @retval E_UNKNOWN if something goes wrong
 	* @retval E_SUCCESS otherwise
 	*
 	*/
 	///todo use httpclient class
-SINT32 CAInfoService::sendStatus(bool bIncludeCerts)
+SINT32 CAInfoService::sendStatus(bool bIncludeCerts, CASocketAddrINet* a_socketAddress)
 	{
 		#ifdef DEBUG
 			CAMsg::printMsg(LOG_DEBUG, "CAInfoService::sendStatus()\n");
@@ -186,13 +201,20 @@ SINT32 CAInfoService::sendStatus(bool bIncludeCerts)
 		UINT64 tmpPackets;
 		//CAHttpClient httpClient;
 		
-		if(options.getInfoServerHost(hostname,255)!=E_SUCCESS)
+		if (a_socketAddress == NULL)
+		{
 			return E_UNKNOWN;
-		oAddr.setAddr(hostname,options.getInfoServerPort());
+		}
+		
+		if(a_socketAddress->getHostName(hostname, 255)!=E_SUCCESS)
+		{
+			return E_UNKNOWN;
+		}
+		oAddr.setAddr(hostname,a_socketAddress->getPort());
 		if(oSocket.connect(oAddr)!=E_SUCCESS)
 			return E_UNKNOWN;
 		#ifdef DEBUG
-			CAMsg::printMsg(LOG_DEBUG, "CAInfoService::sendStatus() - connected to InfoService\n");
+			CAMsg::printMsg(LOG_DEBUG, "CAInfoService::sendStatus() - connected to InfoService %s:%d.\n", hostname, a_socketAddress->getPort());
 		#endif
 			
 		//httpClient.setSocket(&oSocket);
@@ -264,12 +286,28 @@ SINT32 CAInfoService::sendStatus(bool bIncludeCerts)
 	*/
 SINT32 CAInfoService::sendMixInfo(const UINT8* pMixID)
 {
-	return sendMixHelo(REQUEST_COMMAND_MIXINFO,pMixID);
+	return sendMixHelo(REQUEST_COMMAND_MIXINFO,pMixID, NULL);
+}
+
+SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param)
+{
+	SINT32 returnValue = E_UNKNOWN;
+	UINT32 nrAddresses;
+	CASocketAddrINet** socketAddresses = options.getInfoServices(nrAddresses);
+	for (UINT32 i = 0; i < nrAddresses; i++)
+	{
+		if (returnValue != E_SUCCESS)
+		{
+			returnValue = sendMixHelo(requestCommand, param, socketAddresses[i]);
+		}
+	}
+	return returnValue;		
 }
 
 /** POSTs the HELO message for a mix to the InfoService.
 	*/
-SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param)
+SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param,
+									CASocketAddrINet* a_socketAddress)
 {
     UINT8* recvBuff = NULL;
     SINT32 ret = E_SUCCESS;
@@ -285,6 +323,11 @@ SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param)
 
     UINT32 requestType = REQUEST_TYPE_POST;
     bool receiveAnswer = false;
+
+	if (a_socketAddress == NULL)
+	{
+		return E_UNKNOWN;
+	}
 
     if(requestCommand<0)
 			{
@@ -309,9 +352,9 @@ SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param)
 			}
 
 
-		if(options.getInfoServerHost(hostname,255)!=E_SUCCESS)
+		if(a_socketAddress->getHostName(hostname, 255)!=E_SUCCESS)
 			goto ERR;
-		oAddr.setAddr(hostname,options.getInfoServerPort());
+		oAddr.setAddr(hostname,a_socketAddress->getPort());
 
     oSocket.setRecvBuff(255);
 		if(oSocket.connect(oAddr)==E_SUCCESS)
@@ -347,7 +390,7 @@ SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param)
 				const char* strRequestCommand=STRINGS_REQUEST_COMMANDS[requestCommand];
 				const char* strRequestType=STRINGS_REQUEST_TYPES[requestType];
 
-        CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending [%s] %s to InfoService.\r\n", strRequestType,strRequestCommand);
+        CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending [%s] %s to InfoService %s:%d.\r\n", strRequestType,strRequestCommand, hostname, a_socketAddress->getPort());
 
         if(requestCommand==REQUEST_COMMAND_MIXINFO)
 					sprintf((char*)buffHeader,"%s /%s%s HTTP/1.0\r\nContent-Length: %u\r\n\r\n", strRequestType, strRequestCommand, param,sendBuffLen);
@@ -433,6 +476,21 @@ ERR:
 		return E_UNKNOWN;
 	}
 
+SINT32 CAInfoService::sendCascadeHelo()
+{
+	SINT32 returnValue = E_UNKNOWN;
+	UINT32 nrAddresses;
+	CASocketAddrINet** socketAddresses = options.getInfoServices(nrAddresses);
+	for (UINT32 i = 0; i < nrAddresses; i++)
+	{
+		if (returnValue != E_SUCCESS)
+		{
+			returnValue = sendCascadeHelo(socketAddresses[i]);
+		}
+	}
+	return returnValue;
+}
+
 /** POSTs the HELO message for a whole cascade to the InfoService.
  * If the running mix is a last mix, this method is used to inform the
  * InfoService that it wants to create a new cascade. The InfoService
@@ -441,8 +499,8 @@ ERR:
  * @param E_SUCCESS on success
  * @param E_UNKNOWN on any error
 	*/
-SINT32 CAInfoService::sendCascadeHelo()
-{
+SINT32 CAInfoService::sendCascadeHelo(CASocketAddrINet* a_socketAddress)
+{	
     if(options.isMiddleMix())
 			return E_SUCCESS;
 		CASocket oSocket;
@@ -452,10 +510,17 @@ SINT32 CAInfoService::sendCascadeHelo()
 		UINT32 sendBuffLen;
 		UINT8* sendBuff=NULL;
 		CAHttpClient httpClient;
+
+		if (a_socketAddress == NULL)
+		{
+			return E_UNKNOWN;
+		}
 		
-		if(options.getInfoServerHost(hostname,255)!=E_SUCCESS)
+		if(a_socketAddress->getHostName(hostname, 255)!=E_SUCCESS)
+		{
 			goto ERR;
-		oAddr.setAddr(hostname,options.getInfoServerPort());
+		}
+		oAddr.setAddr(hostname,a_socketAddress->getPort());
 		if(oSocket.connect(oAddr)==E_SUCCESS)
 			{
 				httpClient.setSocket(&oSocket);
@@ -489,11 +554,11 @@ SINT32 CAInfoService::sendCascadeHelo()
 
         if(options.isFirstMix())
         {
-            CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending cascade helo to InfoService.\r\n");
+            CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending cascade helo to InfoService %s:%d.\r\n", hostname, a_socketAddress->getPort());
         }
         else
         {
-            CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending cascade configuration request to InfoService.\r\n");
+            CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending cascade configuration request to InfoService %s:%d.\r\n", hostname, a_socketAddress->getPort());
         }
 
 				sprintf((char*)buffHeader,"POST /cascade HTTP/1.0\r\nContent-Length: %u\r\n\r\n",sendBuffLen);

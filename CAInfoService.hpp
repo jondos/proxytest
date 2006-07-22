@@ -43,6 +43,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 class CAInfoService
 	{
+		private:
+			SINT32 sendCascadeHelo(CASocketAddrINet* a_socketAddress);
+			SINT32 sendStatus(bool bIncludeCerts, CASocketAddrINet* a_socketAddress);
+			SINT32 sendMixHelo(SINT32 requestCommand,const UINT8* param,
+								CASocketAddrINet* a_socketAddress);
 		public:
 			CAInfoService();
 			CAInfoService(CAMix* pMix);

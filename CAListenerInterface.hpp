@@ -10,6 +10,12 @@ class CAListenerInterface
 			CAListenerInterface(void);
 		
 		public:
+			static const char* XML_ELEMENT_CONTAINER_NAME;
+			static const char* XML_ELEMENT_NAME;
+			
+			static CAListenerInterface** getInstance(
+					DOM_Element& a_elemListenerInterfaces, UINT32& r_length);
+			
 			CAListenerInterface(const CAListenerInterface& l)//Copy constructor
 				{
 					m_Type=l.m_Type;
