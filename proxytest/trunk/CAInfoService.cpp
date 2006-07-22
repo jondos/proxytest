@@ -295,7 +295,7 @@ SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param)
 	UINT32 nrAddresses;
 	CASocketAddrINet** socketAddresses = options.getInfoServices(nrAddresses);
 	for (UINT32 i = 0; i < nrAddresses; i++)
-	{CAMsg::printMsg(LOG_INFO,"Try sending helo...");
+	{
 		if (returnValue != E_SUCCESS)
 		{
 			returnValue = sendMixHelo(requestCommand, param, socketAddresses[i]);
@@ -355,8 +355,6 @@ SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param,
 		if(a_socketAddress->getHostName(hostname, 255)!=E_SUCCESS)
 			goto ERR;
 		oAddr.setAddr(hostname,a_socketAddress->getPort());
-
-	CAMsg::printMsg(LOG_INFO,"Try sending helo to %s:%d", hostname, a_socketAddress->getPort());
 
     oSocket.setRecvBuff(255);
 		if(oSocket.connect(oAddr)==E_SUCCESS)
