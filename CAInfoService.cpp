@@ -691,16 +691,16 @@ SINT32 CAInfoService::getPaymentInstance(const UINT8* a_pstrPIID,CAXMLBI** a_pXM
 		UINT32 status, contentLength;
 	
 		//Connect to InfoService
-		if(options.getInfoServerHost(hostname,255)!=E_SUCCESS)
+		if(a_socketAddress->getHostName(hostname, 255)!=E_SUCCESS)
 			return E_UNKNOWN;
 	
-		address.setAddr(hostname,options.getInfoServerPort());
+		address.setAddr(hostname,a_socketAddress->getPort());
 	
 		if(socket.connect(address)!=E_SUCCESS)
 			return E_UNKNOWN;
 	
 		#ifdef DEBUG
-			CAMsg::printMsg(LOG_DEBUG, "CAInfoService::getPaymentInstance() - connected to InfoService\n");
+			CAMsg::printMsg(LOG_DEBUG, "CAInfoService::getPaymentInstance() - connected to InfoService %s:%d\n",hostname, a_socketAddress->getPort());
 		#endif
 	
 		//Send request
