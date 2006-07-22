@@ -48,33 +48,43 @@ static THREAD_RETURN InfoLoop(void *p)
 	{
 		CAMsg::printMsg(LOG_DEBUG, "CAInfoService - InfoLoop() started\n");
 		CAInfoService* pInfoService=(CAInfoService*)p;
-		int helocount=0;
+		SINT32 helocount=0;
+		bool errorSendingCascade = false;
 		bool bIsFirst=true; //send our own certifcate only the first time
-    while(pInfoService->isRunning())
+    	while(pInfoService->isRunning())
+		{
+			if(pInfoService->sendStatus(bIsFirst)==E_SUCCESS)
 			{
-				if(pInfoService->sendStatus(bIsFirst)==E_SUCCESS)
-					bIsFirst=false;
-	// check every minute if configuring, every 10 minutes otherwise
-        if(helocount==0 || pInfoService->isConfiguring())
-					{
-            if(options.isFirstMix() || (options.isLastMix() && pInfoService->isConfiguring()))
-							{
-								if(pInfoService->sendCascadeHelo()!=E_SUCCESS)
-									{
-                    CAMsg::printMsg(LOG_ERR,"InfoService: Error: Could not send Cascade Information.\n");
-									}
-								else
-									{
-                    CAMsg::printMsg(LOG_DEBUG,"InfoService: Successfull send Cascade Information.\n");
-									}
-							}
-            pInfoService->sendMixHelo();
-						helocount=9;
-					}
-				else 
-					helocount--;
-				sSleep(60);
+				bIsFirst=false;
 			}
+	// check every minute if configuring, every 10 minutes otherwise
+        	if(helocount==0 || pInfoService->isConfiguring() || errorSendingCascade)
+			{
+            	if(options.isFirstMix() || (options.isLastMix() && pInfoService->isConfiguring()))
+				{
+					if(pInfoService->sendCascadeHelo()!=E_SUCCESS)
+					{
+						errorSendingCascade = true;
+                    	CAMsg::printMsg(LOG_ERR,"InfoService: Error: Could not send Cascade Information.\n");
+					}
+					else
+					{
+						errorSendingCascade = false;
+                   		CAMsg::printMsg(LOG_DEBUG,"InfoService: Successful sent Cascade Information.\n");
+					}
+				}
+				if(helocount==0 || pInfoService->isConfiguring())
+				{
+            		pInfoService->sendMixHelo();
+				}
+				helocount=9;
+			}
+			else
+			{ 
+				helocount--;
+			}
+			sSleep(60);
+		}
 		THREAD_RETURN_SUCCESS;
 	}
 
@@ -168,13 +178,16 @@ SINT32 CAInfoService::stop()
 SINT32 CAInfoService::sendStatus(bool bIncludeCerts)
 {
 	SINT32 returnValue = E_UNKNOWN;
+	SINT32 currentValue;
 	UINT32 nrAddresses;
-	CASocketAddrINet** socketAddresses = options.getInfoServices(nrAddresses);
+	CAListenerInterface** socketAddresses = options.getInfoServices(nrAddresses);
 	for (UINT32 i = 0; i < nrAddresses; i++)
 	{
-		if (returnValue != E_SUCCESS)
+		currentValue = sendStatus(bIncludeCerts, 
+						(CASocketAddrINet*)socketAddresses[i]->getAddr());
+		if (currentValue == E_SUCCESS)
 		{
-			returnValue = sendStatus(bIncludeCerts, socketAddresses[i]);
+			returnValue = currentValue;
 		}
 	}
 	return returnValue;	
@@ -206,7 +219,7 @@ SINT32 CAInfoService::sendStatus(bool bIncludeCerts, CASocketAddrINet* a_socketA
 			return E_UNKNOWN;
 		}
 		
-		if(a_socketAddress->getHostName(hostname, 255)!=E_SUCCESS)
+		if(a_socketAddress->getIPAsStr(hostname, 255)!=E_SUCCESS)
 		{
 			return E_UNKNOWN;
 		}
@@ -292,13 +305,16 @@ SINT32 CAInfoService::sendMixInfo(const UINT8* pMixID)
 SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param)
 {
 	SINT32 returnValue = E_UNKNOWN;
+	SINT32 currentValue;
 	UINT32 nrAddresses;
-	CASocketAddrINet** socketAddresses = options.getInfoServices(nrAddresses);
+	CAListenerInterface** socketAddresses = options.getInfoServices(nrAddresses);
 	for (UINT32 i = 0; i < nrAddresses; i++)
 	{
-		if (returnValue != E_SUCCESS)
+		currentValue = sendMixHelo(requestCommand, param, 
+						(CASocketAddrINet*)socketAddresses[i]->getAddr());
+		if (currentValue == E_SUCCESS)
 		{
-			returnValue = sendMixHelo(requestCommand, param, socketAddresses[i]);
+			returnValue = currentValue;
 		}
 	}
 	return returnValue;		
@@ -352,8 +368,10 @@ SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param,
 			}
 
 
-		if(a_socketAddress->getHostName(hostname, 255)!=E_SUCCESS)
+		if(a_socketAddress->getIPAsStr(hostname, 255)!=E_SUCCESS)
+		{
 			goto ERR;
+		}
 		oAddr.setAddr(hostname,a_socketAddress->getPort());
 
     oSocket.setRecvBuff(255);
@@ -479,14 +497,16 @@ ERR:
 SINT32 CAInfoService::sendCascadeHelo()
 {
 	SINT32 returnValue = E_UNKNOWN;
+	SINT32 currentValue;
 	UINT32 nrAddresses;
-	CASocketAddrINet** socketAddresses = options.getInfoServices(nrAddresses);
-	
+	CAListenerInterface** socketAddresses = options.getInfoServices(nrAddresses);
 	for (UINT32 i = 0; i < nrAddresses; i++)
 	{
-		if (returnValue != E_SUCCESS)
+		currentValue = sendCascadeHelo(
+						(CASocketAddrINet*)socketAddresses[i]->getAddr());
+		if (currentValue == E_SUCCESS)
 		{
-			returnValue = sendCascadeHelo(socketAddresses[i]);
+			returnValue = currentValue;
 		}
 	}
 	return returnValue;
@@ -518,7 +538,7 @@ SINT32 CAInfoService::sendCascadeHelo(CASocketAddrINet* a_socketAddress)
 		}
 		
 		
-		if(a_socketAddress->getHostName(hostname, 255)!=E_SUCCESS)
+		if(a_socketAddress->getIPAsStr(hostname, 255)!=E_SUCCESS)
 		{
 			goto ERR;
 		}
@@ -661,14 +681,16 @@ SINT32 CAInfoService::handleConfigEvent(DOM_Document& doc)
 SINT32 CAInfoService::getPaymentInstance(const UINT8* a_pstrPIID,CAXMLBI** a_pXMLBI)
 {
 	SINT32 returnValue = E_UNKNOWN;
+	SINT32 currentValue;
 	UINT32 nrAddresses;
-	CASocketAddrINet** socketAddresses = options.getInfoServices(nrAddresses);
-	
+	CAListenerInterface** socketAddresses = options.getInfoServices(nrAddresses);
 	for (UINT32 i = 0; i < nrAddresses; i++)
 	{
-		if (returnValue != E_SUCCESS)
+		currentValue = getPaymentInstance(a_pstrPIID, a_pXMLBI,
+						(CASocketAddrINet*)socketAddresses[i]->getAddr());
+		if (currentValue == E_SUCCESS)
 		{
-			returnValue = getPaymentInstance(a_pstrPIID, a_pXMLBI,socketAddresses[i]);
+			returnValue = currentValue;
 		}
 	}
 	return returnValue;	
@@ -692,8 +714,10 @@ SINT32 CAInfoService::getPaymentInstance(const UINT8* a_pstrPIID,CAXMLBI** a_pXM
 		UINT32 status, contentLength;
 	
 		//Connect to InfoService
-		if(a_socketAddress->getHostName(hostname, 255)!=E_SUCCESS)
+		if(a_socketAddress->getIPAsStr(hostname, 255)!=E_SUCCESS)
+		{
 			return E_UNKNOWN;
+		}
 	
 		address.setAddr(hostname,a_socketAddress->getPort());
 	

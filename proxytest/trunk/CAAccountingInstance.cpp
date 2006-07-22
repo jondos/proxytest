@@ -185,9 +185,10 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 						DOM_Document doc;
 						msg.toXmlDocument(doc);
 						pAccInfo->pControlChannel->sendXMLMessage(doc);
-						pAccInfo->authFlags |= AUTH_FATAL_ERROR;
+						//pAccInfo->authFlags |= AUTH_FATAL_ERROR;
 						ms_pInstance->m_Mutex.unlock();
-						return 3;
+						//return 3; // this may be an error because PI is not available - wait
+						return 2;
 					}
 
 				//----------------------------------------------------------

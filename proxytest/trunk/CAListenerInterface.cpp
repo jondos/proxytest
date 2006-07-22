@@ -28,6 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "StdAfx.h"
 #include "CAListenerInterface.hpp"
 #include "CAUtil.hpp"
+#include "CAMsg.hpp"
 #include "CASocketAddrINet.hpp"
 #ifdef HAVE_UNIX_DOMAIN_PROTOCOL
 	#include "CASocketAddrUnix.hpp"
@@ -40,11 +41,10 @@ CAListenerInterface** CAListenerInterface::getInstance(DOM_Element& a_elemListen
 													  UINT32& r_length)
 {
 	CAListenerInterface** interfaces = NULL;
-	if(a_elemListenerInterfaces!=NULL || 
-		a_elemListenerInterfaces.getNodeType()!=DOM_Node::ELEMENT_NODE)
+	if(a_elemListenerInterfaces!=NULL)
 	{
-		DOM_NodeList nlListenerInterfaces;
-		nlListenerInterfaces=a_elemListenerInterfaces.getElementsByTagName(
+		DOM_NodeList nlListenerInterfaces =
+			a_elemListenerInterfaces.getElementsByTagName(
 				CAListenerInterface::XML_ELEMENT_NAME);
 		r_length=nlListenerInterfaces.getLength();
 		if(r_length>0)
@@ -69,6 +69,7 @@ CAListenerInterface** CAListenerInterface::getInstance(DOM_Element& a_elemListen
 		r_length = 0;
 		interfaces=new CAListenerInterface*[0];
 	}
+			
 	return interfaces;
 }
 
