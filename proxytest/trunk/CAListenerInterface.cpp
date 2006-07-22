@@ -33,6 +33,45 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include "CASocketAddrUnix.hpp"
 #endif
 
+const char* CAListenerInterface::XML_ELEMENT_CONTAINER_NAME = "ListenerInterfaces";
+const char* CAListenerInterface::XML_ELEMENT_NAME = "ListenerInterface";
+
+CAListenerInterface** CAListenerInterface::getInstance(DOM_Element& a_elemListenerInterfaces, 
+													  UINT32& r_length)
+{
+	CAListenerInterface** interfaces = NULL;
+	if(a_elemListenerInterfaces!=NULL || 
+		a_elemListenerInterfaces.getNodeType()!=DOM_Node::ELEMENT_NODE)
+	{
+		DOM_NodeList nlListenerInterfaces;
+		nlListenerInterfaces=a_elemListenerInterfaces.getElementsByTagName(
+				CAListenerInterface::XML_ELEMENT_NAME);
+		r_length=nlListenerInterfaces.getLength();
+		if(r_length>0)
+		{
+			interfaces=new CAListenerInterface*[r_length];
+			UINT32 aktInterface=0;
+			for(UINT32 i=0;i<r_length;i++)
+			{
+				DOM_Node elemListenerInterface;
+				elemListenerInterface=nlListenerInterfaces.item(i);
+				CAListenerInterface* pListener=CAListenerInterface::getInstance(elemListenerInterface);
+				if(pListener!=NULL)
+				{
+					interfaces[aktInterface++]=pListener;
+				}
+			}
+			r_length=aktInterface;
+		}
+	}	
+	else
+	{
+		r_length = 0;
+		interfaces=new CAListenerInterface*[0];
+	}
+	return interfaces;
+}
+
 CAListenerInterface::CAListenerInterface(void)
 	{
 		m_bHidden=false;
@@ -111,31 +150,48 @@ SINT32	CAListenerInterface::toDOMFragment(DOM_DocumentFragment& fragment,DOM_Doc
 CAListenerInterface* CAListenerInterface::getInstance(const DOM_Node& elemListenerInterface)
 	{
 		if(	elemListenerInterface==NULL||
-				elemListenerInterface.getNodeType()!=DOM_Node::ELEMENT_NODE||
-				!elemListenerInterface.getNodeName().equals("ListenerInterface"))
+				elemListenerInterface.getNodeType()!=DOM_Node::ELEMENT_NODE)//||
+				//!elemListenerInterface.getNodeName().equals("ListenerInterface"))
 			return NULL;
 		CAListenerInterface* pListener=new CAListenerInterface();
 		getDOMElementAttribute(elemListenerInterface,"hidden",pListener->m_bHidden);
 		getDOMElementAttribute(elemListenerInterface,"virtual",pListener->m_bVirtual);
 		DOM_Element elemType;
 		getDOMChildByName(elemListenerInterface,(UINT8*)"NetworkProtocol",elemType,false);
+		if (elemType == NULL)
+		{
+			getDOMChildByName(elemListenerInterface,(UINT8*)"Type",elemType,false);
+		}
+		UINT32 tmpLen = 255;
 		UINT8 tmpBuff[255];
-		UINT32 tmpLen=255;
-		if(getDOMElementValue(elemType,tmpBuff,&tmpLen)!=E_SUCCESS)
-			goto ERR;
-		strtrim(tmpBuff);
-		if(strcmp((char*)tmpBuff,"RAW/TCP")==0)
-			pListener->m_Type=RAW_TCP;
-		else if(strcmp((char*)tmpBuff,"RAW/UNIX")==0)
-			pListener->m_Type=RAW_UNIX;
-		else if(strcmp((char*)tmpBuff,"SSL/TCP")==0)
-			pListener->m_Type=SSL_TCP;
-		else if(strcmp((char*)tmpBuff,"SSL/UNIX")==0)
-			pListener->m_Type=SSL_UNIX;
-		else
-			goto ERR;
-		if(pListener->m_Type==SSL_TCP||pListener->m_Type==RAW_TCP)
+		if (elemType != NULL)
+		{
+			if(getDOMElementValue(elemType,tmpBuff,&tmpLen)!=E_SUCCESS)
+				goto ERR;
+			strtrim(tmpBuff);
+			if(strcmp((char*)tmpBuff,"RAW/TCP")==0)
+				pListener->m_Type=RAW_TCP;
+			else if(strcmp((char*)tmpBuff,"RAW/UNIX")==0)
+				pListener->m_Type=RAW_UNIX;
+			else if(strcmp((char*)tmpBuff,"SSL/TCP")==0)
+				pListener->m_Type=SSL_TCP;
+			else if(strcmp((char*)tmpBuff,"SSL/UNIX")==0)
+				pListener->m_Type=SSL_UNIX;
+			else if (strcmp((char*)tmpBuff,"HTTP/TCP")==0)
 			{
+				pListener->m_Type=HTTP_TCP;
+			}
+			else
+				goto ERR;
+		}
+		else
+		{
+			// infoservice old style <= config version 0.61
+			pListener->m_Type=HTTP_TCP;
+		}
+		if(pListener->m_Type==SSL_TCP||pListener->m_Type==RAW_TCP
+		   ||pListener->m_Type==HTTP_TCP)
+			{ 
 				DOM_Element elemIP;
 				DOM_Element elemPort;
 				DOM_Element elemHost;

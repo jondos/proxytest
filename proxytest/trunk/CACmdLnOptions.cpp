@@ -44,8 +44,9 @@ CACmdLnOptions::CACmdLnOptions()
   {
 		m_bDaemon=m_bIsRunReConfigure=false;
 		m_bLocalProxy=m_bFirstMix=m_bLastMix=m_bMiddleMix=false;
-		m_iTargetPort=m_iSOCKSPort=m_iSOCKSServerPort=m_iInfoServerPort=0xFFFF;
-		m_strTargetHost=m_strSOCKSHost=m_strInfoServerHost=NULL;
+		m_addrInfoServices = NULL;
+		m_iTargetPort=m_iSOCKSPort=m_iSOCKSServerPort=m_addrInfoServicesSize=0xFFFF;
+		m_strTargetHost=m_strSOCKSHost=NULL;
 		m_strUser=m_strCascadeName=m_strLogDir=m_strEncryptedLogDir=NULL;
 		m_arTargetInterfaces=NULL;
 		m_cnTargets=0;
@@ -217,12 +218,16 @@ void CACmdLnOptions::clean()
 			{
 				delete[] m_strSOCKSHost;
 	    }
-		m_strSOCKSHost=NULL;
-		if(m_strInfoServerHost!=NULL)
-			{
-				delete[] m_strInfoServerHost;
+	    if (m_addrInfoServices != NULL)
+	    {
+	    	for (UINT32 i = 0; i < m_addrInfoServicesSize; i++)
+	    	{
+	    		delete m_addrInfoServices[i];
+	    	}
+	    	delete[] m_addrInfoServices;
+	    	m_addrInfoServicesSize = 0;
 	    }
-		m_strInfoServerHost=NULL;
+		m_strSOCKSHost=NULL;
 		if(m_strCascadeName!=NULL)
 			delete[] m_strCascadeName;
 		m_strCascadeName=NULL;
@@ -853,17 +858,11 @@ SINT32 CACmdLnOptions::getPaymentSettleInterval(UINT32 *pInterval)
 
 #endif /* ifdef PAYMENT */
 
-UINT16 CACmdLnOptions::getInfoServerPort()
-  {
-		return m_iInfoServerPort;
-  }
 
-SINT32 CACmdLnOptions::getInfoServerHost(UINT8* host,UINT32 len)
-  {
-		if((m_strInfoServerHost==NULL)||(len<=(UINT32)strlen(m_strInfoServerHost)))
-			return E_UNKNOWN;
-		strcpy((char*)host,m_strInfoServerHost);
-		return E_SUCCESS;
+CASocketAddrINet** CACmdLnOptions::getInfoServices(UINT32& r_size)
+ {
+ 	r_size = m_addrInfoServicesSize;
+ 	return m_addrInfoServices;
   }
 
 SINT32 CACmdLnOptions::getCascadeName(UINT8* name,UINT32 len)
@@ -1251,49 +1250,65 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		//get InfoService data
 		DOM_Element elemNetwork;
 		getDOMChildByName(elemRoot,(UINT8*)"Network",elemNetwork,false);
+		DOM_Element elemInfoServiceContainer;
 		DOM_Element elemInfoService;
-		getDOMChildByName(elemNetwork,(UINT8*)"InfoService",elemInfoService,false);
-    DOM_Element elemAllowReconfig;
-    getDOMChildByName(elemInfoService,(UINT8*)"AllowAutoConfiguration",elemAllowReconfig,false);
+		DOM_Element elemAllowReconfig;
+		getDOMChildByName(elemNetwork,(UINT8*)"InfoServices",elemInfoServiceContainer,false);
+		if (elemInfoServiceContainer ==	NULL)
+		{
+			// old configuration version <= 0.61
+			getDOMChildByName(elemNetwork,(UINT8*)"InfoService",elemInfoService,false);
+			getDOMChildByName(elemInfoService,(UINT8*)"AllowAutoConfiguration",elemAllowReconfig,false);
+
+			
+			CAListenerInterface* isListenerInterface = 
+				CAListenerInterface::getInstance(elemInfoService);
+			 
+	
+			 m_addrInfoServicesSize = 1;
+			m_addrInfoServices = new CASocketAddrINet*[m_addrInfoServicesSize];
+			m_addrInfoServices[0] = (CASocketAddrINet*)isListenerInterface->getAddr();
+			delete isListenerInterface;	
+		}
+		else
+		{
+			getDOMChildByName(elemInfoServiceContainer,(UINT8*)"AllowAutoConfiguration",elemAllowReconfig,false);
+			DOM_NodeList isList = elemInfoServiceContainer.getElementsByTagName("InfoService");
+			m_addrInfoServicesSize = 0;
+			m_addrInfoServices = new CASocketAddrINet*[isList.getLength()];
+			for (UINT32 i = 0; i < isList.getLength(); i++)
+			{
+				//get ListenerInterfaces
+				DOM_Element elemListenerInterfaces;
+				UINT32 nrListenerInterfaces;
+				getDOMChildByName(isList.item(i),(UINT8*)
+				CAListenerInterface::XML_ELEMENT_CONTAINER_NAME,elemListenerInterfaces,false);
+				CAListenerInterface** isListenerInterfaces = 
+					 CAListenerInterface::getInstance(
+						elemListenerInterfaces, nrListenerInterfaces);
+				if (nrListenerInterfaces > 0)
+				{
+					/** @todo use more than one listener interface; actually uses only first one */
+					m_addrInfoServicesSize++;
+					m_addrInfoServices[i] = (CASocketAddrINet*)isListenerInterfaces[0]->getAddr();
+				}
+			}
+		}
+		
+    
+    
     if(getDOMElementValue(elemAllowReconfig,tmpBuff,&tmpLen)==E_SUCCESS)
     {
         m_bAcceptReconfiguration = (strcmp("True",(char*)tmpBuff) == 0);
     }
-		getDOMChildByName(elemInfoService,(UINT8*)"Host",elem,false);
-		tmpLen=255;
-		if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS)
-			{
-				strtrim(tmpBuff);
-				m_strInfoServerHost=new char[strlen((char*)tmpBuff)+1];
-				strcpy(m_strInfoServerHost,(char*)tmpBuff);
-			}
-		getDOMChildByName(elemInfoService,(UINT8*)"Port",elem,false);
-		if(getDOMElementValue(elem,&tmp)==E_SUCCESS)
-			m_iInfoServerPort=(UINT16)tmp;
+		
 
 		//get ListenerInterfaces
 		DOM_Element elemListenerInterfaces;
-		getDOMChildByName(elemNetwork,(UINT8*)"ListenerInterfaces",elemListenerInterfaces,false);
-		if(elemListenerInterfaces!=NULL)
-			{
-				DOM_NodeList nlListenerInterfaces;
-				nlListenerInterfaces=elemListenerInterfaces.getElementsByTagName("ListenerInterface");
-				m_cnListenerInterfaces=nlListenerInterfaces.getLength();
-				if(m_cnListenerInterfaces>0)
-					{
-						m_arListenerInterfaces=new CAListenerInterface*[m_cnListenerInterfaces];
-						UINT32 aktInterface=0;
-						for(UINT32 i=0;i<m_cnListenerInterfaces;i++)
-							{
-								DOM_Node elemListenerInterface;
-								elemListenerInterface=nlListenerInterfaces.item(i);
-								CAListenerInterface* pListener=CAListenerInterface::getInstance(elemListenerInterface);
-								if(pListener!=NULL)
-									m_arListenerInterfaces[aktInterface++]=pListener;
-							}
-						m_cnListenerInterfaces=aktInterface;
-					}
-			}
+		getDOMChildByName(elemNetwork,(UINT8*)
+			CAListenerInterface::XML_ELEMENT_CONTAINER_NAME,elemListenerInterfaces,false);
+		m_arListenerInterfaces = CAListenerInterface::getInstance(
+			elemListenerInterfaces, m_cnListenerInterfaces);
 
 		//get TargetInterfaces
 		m_cnTargets=0;
