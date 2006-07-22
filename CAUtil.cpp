@@ -356,6 +356,7 @@ SINT32 filelength(int handle)
 	}
 #endif
 
+
 SINT32 setDOMElementValue(DOM_Element& elem,UINT32 text)
 	{
 		UINT8 tmp[10];

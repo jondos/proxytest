@@ -135,7 +135,7 @@ class CACmdLnOptions
 
 			UINT16 getSOCKSPort();
 	    SINT32 getSOCKSHost(UINT8* host,UINT32 len);
-	    CASocketAddrINet** getInfoServices(UINT32& r_size);
+	    CAListenerInterface** getInfoServices(UINT32& r_size);
 
 			SINT32 getMaxOpenFiles()
 				{
@@ -321,8 +321,8 @@ class CACmdLnOptions
 			char*		m_strTargetHost; //only for the local proxy...
 			char*		m_strSOCKSHost;
 	    UINT16	m_iSOCKSPort;
-	    CASocketAddrINet**	m_addrInfoServices;
-	    UINT16 m_addrInfoServicesSize;
+	    CAListenerInterface**	m_addrInfoServices;
+	    UINT32 m_addrInfoServicesSize;
 			bool		m_bLocalProxy,m_bFirstMix,m_bMiddleMix,m_bLastMix;
 			bool		m_bAutoReconnect; //auto reconnect if connection to first mix lost ??
 			char*		m_strCascadeName;

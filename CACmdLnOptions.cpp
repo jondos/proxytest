@@ -337,11 +337,11 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 		{
 			ret=readXmlConfiguration(m_docMixXml,(UINT8*)configfile);
 			if(ret==E_FILE_OPEN)
-				CAMsg::printMsg(LOG_CRIT,"Couldt not open config file: %s\n",configfile);
+				CAMsg::printMsg(LOG_CRIT,"Could not open config file: %s\n",configfile);
 			else if(ret==E_FILE_READ)
-				CAMsg::printMsg(LOG_CRIT,"Couldt not read config file: %s\n",configfile);
+				CAMsg::printMsg(LOG_CRIT,"Could not read config file: %s\n",configfile);
 			else if(ret==E_XML_PARSE)
-				CAMsg::printMsg(LOG_CRIT,"Couldt not parse config file: %s\n",configfile);
+				CAMsg::printMsg(LOG_CRIT,"Could not parse config file: %s\n",configfile);
 			else
 				{
 					m_strConfigFile=new UINT8[strlen(configfile)+1];
@@ -859,7 +859,7 @@ SINT32 CACmdLnOptions::getPaymentSettleInterval(UINT32 *pInterval)
 #endif /* ifdef PAYMENT */
 
 
-CASocketAddrINet** CACmdLnOptions::getInfoServices(UINT32& r_size)
+CAListenerInterface** CACmdLnOptions::getInfoServices(UINT32& r_size)
  {
  	r_size = m_addrInfoServicesSize;
  	return m_addrInfoServices;
@@ -1263,52 +1263,60 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 			
 			CAListenerInterface* isListenerInterface = 
 				CAListenerInterface::getInstance(elemInfoService);
-			 
 	
 			 m_addrInfoServicesSize = 1;
-			m_addrInfoServices = new CASocketAddrINet*[m_addrInfoServicesSize];
-			m_addrInfoServices[0] = (CASocketAddrINet*)isListenerInterface->getAddr();
-			delete isListenerInterface;	
+			m_addrInfoServices = new CAListenerInterface*[m_addrInfoServicesSize];
+			m_addrInfoServices[0] = isListenerInterface;
 		}
 		else
 		{
 			getDOMChildByName(elemInfoServiceContainer,(UINT8*)"AllowAutoConfiguration",elemAllowReconfig,false);
 			DOM_NodeList isList = elemInfoServiceContainer.getElementsByTagName("InfoService");
+			UINT32 nrListenerInterfaces;
 			m_addrInfoServicesSize = 0;
-			m_addrInfoServices = new CASocketAddrINet*[isList.getLength()];
+			m_addrInfoServices = new CAListenerInterface*[isList.getLength()];
+			CAListenerInterface** isListenerInterfaces;
 			for (UINT32 i = 0; i < isList.getLength(); i++)
 			{
 				//get ListenerInterfaces
 				DOM_Element elemListenerInterfaces;
-				UINT32 nrListenerInterfaces;
 				getDOMChildByName(isList.item(i),(UINT8*)
 				CAListenerInterface::XML_ELEMENT_CONTAINER_NAME,elemListenerInterfaces,false);
-				CAListenerInterface** isListenerInterfaces = 
+				isListenerInterfaces = 
 					 CAListenerInterface::getInstance(
 						elemListenerInterfaces, nrListenerInterfaces);
 				if (nrListenerInterfaces > 0)
 				{
-					/** @todo use more than one listener interface; actually uses only first one */
+					/** @todo Take more than one listener interface for a given IS... */
+					m_addrInfoServices[i] = isListenerInterfaces[0];
 					m_addrInfoServicesSize++;
-					m_addrInfoServices[i] = (CASocketAddrINet*)isListenerInterfaces[0]->getAddr();
+					for (UINT32 j = 1; j < nrListenerInterfaces; j++)
+					{
+						// the other interfaces are not needed...
+						delete isListenerInterfaces[j];
+					}
 				}
 			}
 		}
-		
-    
+		 
+  
     
     if(getDOMElementValue(elemAllowReconfig,tmpBuff,&tmpLen)==E_SUCCESS)
     {
         m_bAcceptReconfiguration = (strcmp("True",(char*)tmpBuff) == 0);
     }
-		
-
+		 
+ 
 		//get ListenerInterfaces
 		DOM_Element elemListenerInterfaces;
 		getDOMChildByName(elemNetwork,(UINT8*)
 			CAListenerInterface::XML_ELEMENT_CONTAINER_NAME,elemListenerInterfaces,false);
 		m_arListenerInterfaces = CAListenerInterface::getInstance(
 			elemListenerInterfaces, m_cnListenerInterfaces);
+		if (m_cnListenerInterfaces == 0)
+		{
+			return E_UNKNOWN;
+		}
 
 		//get TargetInterfaces
 		m_cnTargets=0;
