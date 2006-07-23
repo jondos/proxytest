@@ -49,6 +49,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 // the number of seconds that may pass between a pay request
 // and the jap sending its answer
 #define REQUEST_TIMEOUT 30
+#define HARD_LIMIT_TIMEOUT 30
 #define MIN_BALANCE 1024*512
 
 

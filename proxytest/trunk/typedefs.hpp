@@ -174,6 +174,8 @@ typedef struct t_mix_parameters tMixParameters;
 /** we have sent one request for an accountcertificate */
 #define AUTH_SENT_ACCOUNT_REQUEST 0x100
 
+#define AUTH_HARD_LIMIT_REACHED 0x200
+
 /** the user tried to fake something */
 #define AUTH_FAKE 0x400
 
@@ -185,6 +187,8 @@ typedef struct t_mix_parameters tMixParameters;
 
 /** a fatal error occured earlier */
 #define AUTH_FATAL_ERROR 0x2000
+
+
 
 class CASignature;
 class CAAccountingControlChannel;
@@ -229,6 +233,9 @@ struct t_accountinginfo
 	
 	/** Flags, see above AUTH_* */
 	UINT32 authFlags;
+
+	/** timestamp when last HardLimit was reached */
+	SINT32 lastHardLimitSeconds;
 
 	/** timestamp when last PayRequest was sent */
 	SINT32 lastRequestSeconds;

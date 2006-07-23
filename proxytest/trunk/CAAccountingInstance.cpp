@@ -146,13 +146,14 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 		}*/
 		
 		pAccInfo->transferredBytes += MIXPACKET_SIZE; // count the packet	
-		
 		if(pAccInfo->authFlags & (AUTH_FATAL_ERROR))
-			{
-				// there was an error earlier..
-				ms_pInstance->m_Mutex.unlock();
-				return 3;
-			}
+		{
+			// there was an error earlier..
+			ms_pInstance->m_Mutex.unlock();
+			CAMsg::printMsg( LOG_DEBUG, "AccountingInstance: should kick out user now...\n");
+			return 3;
+				//return 2;
+		}
 	
 		if(pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT )
 			{
@@ -171,10 +172,14 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 						time_t theTime=time(NULL);	
 						if(theTime >= pAccInfo->lastRequestSeconds + REQUEST_TIMEOUT)
 							{
-								ms_pInstance->m_Mutex.unlock();
-								pAccInfo->authFlags |= AUTH_FATAL_ERROR;
 								CAMsg::printMsg( LOG_DEBUG, "AccountingInstance: Jap refused to send response to challenge (Request Timeout)...\n");
-								return 3;
+								CAXMLErrorMessage msg(CAXMLErrorMessage::ERR_NO_CONFIRMATION);
+								DOM_Document doc;
+								msg.toXmlDocument(doc);
+								pAccInfo->pControlChannel->sendXMLMessage(doc);
+								pAccInfo->authFlags |= AUTH_FATAL_ERROR;
+								ms_pInstance->m_Mutex.unlock();
+								return 2;
 							}
 					}
 		
@@ -185,30 +190,42 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 						DOM_Document doc;
 						msg.toXmlDocument(doc);
 						pAccInfo->pControlChannel->sendXMLMessage(doc);
-						//pAccInfo->authFlags |= AUTH_FATAL_ERROR;
+						pAccInfo->authFlags |= AUTH_FATAL_ERROR;
 						ms_pInstance->m_Mutex.unlock();
-						//return 3; // this may be an error because PI is not available - wait
-						return 2;
+						return 2; 
 					}
 
 				//----------------------------------------------------------
 				// Hardlimit cost confirmation check
 				UINT32 unconfirmedBytes=diff64(pAccInfo->transferredBytes,pAccInfo->confirmedBytes);
 				if (unconfirmedBytes >= ms_pInstance->m_iHardLimitBytes)
+				{
+					
+					time_t theTime=time(NULL);	
+					if ((pAccInfo->authFlags & AUTH_HARD_LIMIT_REACHED) == 0)
 					{
-						#ifdef DEBUG
-							CAMsg::printMsg( LOG_DEBUG, "Accounting instance: User refused "
+						pAccInfo->authFlags |= AUTH_HARD_LIMIT_REACHED;
+						pAccInfo->lastHardLimitSeconds = theTime;
+					}
+					if(theTime >= pAccInfo->lastHardLimitSeconds + HARD_LIMIT_TIMEOUT)
+					{
+						CAMsg::printMsg( LOG_DEBUG, "Accounting instance: User refused "
 																					"to send cost confirmation (HARDLIMIT EXCEEDED).\n");
-						#endif
 						ms_pInstance->m_pIPBlockList->insertIP( pHashEntry->peerIP );
 						CAXMLErrorMessage msg(CAXMLErrorMessage::ERR_NO_CONFIRMATION);
 						DOM_Document doc;
 						msg.toXmlDocument(doc);
 						pAccInfo->pControlChannel->sendXMLMessage(doc);
 						pAccInfo->authFlags |= AUTH_FATAL_ERROR;
-						ms_pInstance->m_Mutex.unlock();
-						return 3;
+						pAccInfo->lastHardLimitSeconds = 0;
 					}
+					ms_pInstance->m_Mutex.unlock();
+					return 2;
+				}
+				else
+				{
+					pAccInfo->authFlags ^= AUTH_HARD_LIMIT_REACHED;
+				}
 	
 				//-------------------------------------------------------
 				// check: is it time to request a new cost confirmation?
@@ -247,8 +264,14 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 							{
 								if (pAccInfo->lastBalanceRequestSeconds + BALANCE_REQUEST_TIMEOUT < theTime)
 									{
+										CAMsg::printMsg(LOG_DEBUG, "AccountingInstance: Did not get balance from user! Timed out...\n");
+										CAXMLErrorMessage msg(CAXMLErrorMessage::ERR_NO_BALANCE);
+										DOM_Document doc;
+										msg.toXmlDocument(doc);
+										pAccInfo->pControlChannel->sendXMLMessage(doc);
+										pAccInfo->authFlags |= AUTH_FATAL_ERROR;
 										ms_pInstance->m_Mutex.unlock();
-										return 3;
+										return 2;
 									}
 								else
 									{
@@ -281,7 +304,13 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 				int ret=2;
 				if(pAccInfo->lastRequestSeconds+PAYMENT_ACCOUNT_CERT_TIMEOUT<theTime)
 					{
-						ret = 3;
+						CAMsg::printMsg(LOG_DEBUG, "AccountingInstance: Did not get account certificate from user!\n");
+						CAXMLErrorMessage msg(CAXMLErrorMessage::ERR_NO_ACCOUNTCERT);
+						DOM_Document doc;
+						msg.toXmlDocument(doc);
+						pAccInfo->pControlChannel->sendXMLMessage(doc);
+						pAccInfo->authFlags |= AUTH_FATAL_ERROR;
+						//ret = 3;
 					}
   			ms_pInstance->m_Mutex.unlock();
 				return ret;
