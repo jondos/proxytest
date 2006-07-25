@@ -261,12 +261,12 @@ SINT32 CALastMix::processKeyExchange()
     if(opCert==NULL)
     {
         CAMsg::printMsg(LOG_DEBUG,"Op Test Cert is NULL -- so it could not be inserted into signed KeyInfo send to users...\n");
-	}
-	// Own  Mix Certificates first, then Operator Certificates
-	for(SINT32 i = opCertsLength - 1;  i >= 0; i--)
-	{
-		tmpCertStore->add(opCert[i]); 	
-	}
+		}
+		// Own  Mix Certificates first, then Operator Certificates
+		for(SINT32 i = opCertsLength - 1;  i >= 0; i--)
+		{
+			tmpCertStore->add(opCert[i]); 	
+		}
 		tmpCertStore->add(ownCert);
     
 		if(m_pSignature->signXML(elemMix,tmpCertStore)!=E_SUCCESS)
@@ -274,7 +274,11 @@ SINT32 CALastMix::processKeyExchange()
 				CAMsg::printMsg(LOG_DEBUG,"Could not sign KeyInfo send to users...\n");
 			}
 		delete ownCert;
-    delete opCert;
+    for(UINT32 i=0;i<opCertsLength;i++)
+		{
+			delete opCert[i];
+		}
+		delete[] opCert;
 		delete tmpCertStore;
 		
 		

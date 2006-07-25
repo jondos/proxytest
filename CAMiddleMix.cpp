@@ -256,7 +256,11 @@ SINT32 CAMiddleMix::processKeyExchange()
 				CAMsg::printMsg(LOG_DEBUG,"Could not sign KeyInfo send to users...\n");
 			}
 		delete ownCert;
-    delete opCert;
+    for(UINT32 i=0;i<opCertsLength;i++)
+		{
+			delete opCert[i];
+		}
+    delete[] opCert;
 		delete tmpCertStore;
 		
 		root.insertBefore(mixNode,root.getFirstChild());

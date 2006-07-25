@@ -1162,12 +1162,10 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 			m_OpCerts = new CACertificate*[opCertList.getLength()];	
 			for (UINT32 i = 0; i < opCertList.getLength(); i++)
 			{
-				m_OpCerts[m_OpCertsLength] = 
-						CACertificate::decode(opCertList.item(i),CERT_X509CERTIFICATE);
+				m_OpCerts[m_OpCertsLength] = CACertificate::decode(opCertList.item(i),CERT_X509CERTIFICATE);
 				if (m_OpCerts[m_OpCertsLength] != NULL)
 				{
 					m_OpCertsLength++;
-					//CAMsg::printMsg(LOG_DEBUG,"Node: %s\n",OpCertList.item(j).getNodeName().transcode());
 				}
 			}
 		}		
