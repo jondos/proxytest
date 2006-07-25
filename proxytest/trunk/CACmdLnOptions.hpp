@@ -168,8 +168,7 @@ class CACmdLnOptions
 			{
 				if(m_OpCerts!=NULL && m_OpCertsLength > 0)
 				{
-					CACertificate** opCerts = 
-						new CACertificate*[m_OpCertsLength];
+					CACertificate** opCerts = new CACertificate*[m_OpCertsLength];
 					for (UINT32 i = 0; i < m_OpCertsLength; i++)
 					{
 						opCerts[i] = m_OpCerts[i]->clone();
@@ -178,8 +177,8 @@ class CACmdLnOptions
 					return opCerts;
 				}
 				r_length = 0;
-					return NULL;
-				}
+				return NULL;
+			}
 
 			bool hasPrevMixTestCertificate()
 				{

@@ -44,7 +44,7 @@ CAMix::CAMix()
 	}
 
 SINT32 CAMix::start()
-{
+	{
 		if(initOnce()!=E_SUCCESS)
 			return E_UNKNOWN;
 
@@ -55,9 +55,13 @@ SINT32 CAMix::start()
         
 		UINT32 opCertLength;
 		CACertificate** opCerts = options.getOpCertificates(opCertLength);
-		m_pInfoService->setSignature(m_pSignature, 
-			options.getOwnCertificate(), opCerts, opCertLength);
-
+		m_pInfoService->setSignature(m_pSignature, options.getOwnCertificate(), opCerts, opCertLength);
+		if(opCerts!=NULL)
+			{
+				for(UINT32 i=0;i<opCertLength;i++)
+					delete opCerts[i];
+				delete[] opCerts;
+			}
 
         bool allowReconf = options.acceptReconfiguration();
         bool needReconf = needAutoConfig();

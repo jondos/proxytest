@@ -208,7 +208,7 @@ SINT32 CAInfoService::sendStatus(bool bIncludeCerts)
 		}
 		delete pAddr;
 	}
-	delete strStatusXML;
+	delete[] strStatusXML;
 	return returnValue;	
 }
 
@@ -320,13 +320,17 @@ SINT32 CAInfoService::sendStatus(UINT8* a_strStatusXML,UINT32 a_len, CASocketAdd
 
 /** POSTs the MIXINFO message for a mix to the InfoService.
 	*/
-SINT32 CAInfoService::sendMixInfo(const UINT8* pMixID)
+/*SINT32 CAInfoService::sendMixInfo(const UINT8* pMixID)
 {
 	return sendMixHelo(REQUEST_COMMAND_MIXINFO,pMixID, NULL);
 }
-
+*/
 SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param)
 {
+	UINT32 len;
+	UINT8* strMixHeloXML=getMixHeloXMLAsString(len);
+	if(strMixHeloXML==NULL)
+		return E_UNKNOWN;
 	SINT32 returnValue = E_UNKNOWN;
 	SINT32 currentValue;
 	UINT32 nrAddresses;
@@ -334,19 +338,67 @@ SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param)
 	for (UINT32 i = 0; i < nrAddresses; i++)
 	{
 		CASocketAddrINet* pAddr=(CASocketAddrINet*)socketAddresses[i]->getAddr();
-		currentValue = sendMixHelo(requestCommand, param, pAddr);
+		currentValue = sendMixHelo(strMixHeloXML,len,requestCommand, param, pAddr);
 		if (currentValue == E_SUCCESS)
 		{
 			returnValue = currentValue;
 		}
 		delete pAddr;
 	}
+	delete[] strMixHeloXML;
 	return returnValue;		
 }
 
+
+UINT8* CAInfoService::getMixHeloXMLAsString(UINT32& a_len)
+	{
+    a_len = 0;
+
+		UINT32 sendBuffLen;
+		UINT8* sendBuff=NULL;
+			DOM_Element elemTimeStamp;
+	
+DOM_Element elemRoot;
+
+
+				DOM_Document docMixInfo;
+				if(options.getMixXml(docMixInfo)!=E_SUCCESS)
+					{
+						goto ERR;
+					}
+				//insert (or update) the Timestamp
+				elemRoot=docMixInfo.getDocumentElement();
+				if(getDOMChildByName(elemRoot,(UINT8*)"LastUpdate",elemTimeStamp,false)!=E_SUCCESS)
+					{
+						elemTimeStamp=docMixInfo.createElement("LastUpdate");
+						elemRoot.appendChild(elemTimeStamp);
+					}
+				UINT64 currentMillis;
+				getcurrentTimeMillis(currentMillis);
+				UINT8 tmpStrCurrentMillis[50];
+				print64(tmpStrCurrentMillis,currentMillis);
+				setDOMElementValue(elemTimeStamp,tmpStrCurrentMillis);
+				if(m_pSignature->signXML(docMixInfo,m_pcertstoreOwnCerts)!=E_SUCCESS)
+					{
+						goto ERR;
+					}
+				
+				sendBuff=DOM_Output::dumpToMem(docMixInfo,&sendBuffLen);
+				if(sendBuff==NULL)
+					goto ERR;
+				a_len=sendBuffLen;
+				return sendBuff;	
+			
+ERR:
+		if(sendBuff!=NULL)
+			delete []sendBuff;
+		return NULL;
+	}
+
+
 /** POSTs the HELO message for a mix to the InfoService.
 	*/
-SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param,
+SINT32 CAInfoService::sendMixHelo(UINT8* a_strMixHeloXML,UINT32 a_len,SINT32 requestCommand,const UINT8* param,
 									CASocketAddrINet* a_pSocketAddress)
 {
     UINT8* recvBuff = NULL;
@@ -356,8 +408,6 @@ SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param,
 		CASocket oSocket;
 		UINT8 hostname[255];
 		UINT8 buffHeader[255];
-		UINT32 sendBuffLen;
-		UINT8* sendBuff=NULL;
 		CAHttpClient httpClient;
 
     UINT32 requestType = REQUEST_TYPE_POST;
@@ -400,32 +450,6 @@ SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param,
 		if(oSocket.connect(*a_pSocketAddress)==E_SUCCESS)
 			{
 				httpClient.setSocket(&oSocket);
-				DOM_Document docMixInfo;
-				if(options.getMixXml(docMixInfo)!=E_SUCCESS)
-					{
-						goto ERR;
-					}
-				//insert (or update) the Timestamp
-				DOM_Element elemRoot=docMixInfo.getDocumentElement();
-				DOM_Element elemTimeStamp;
-				if(getDOMChildByName(elemRoot,(UINT8*)"LastUpdate",elemTimeStamp,false)!=E_SUCCESS)
-					{
-						elemTimeStamp=docMixInfo.createElement("LastUpdate");
-						elemRoot.appendChild(elemTimeStamp);
-					}
-				UINT64 currentMillis;
-				getcurrentTimeMillis(currentMillis);
-				UINT8 tmpStrCurrentMillis[50];
-				print64(tmpStrCurrentMillis,currentMillis);
-				setDOMElementValue(elemTimeStamp,tmpStrCurrentMillis);
-				if(m_pSignature->signXML(docMixInfo,m_pcertstoreOwnCerts)!=E_SUCCESS)
-					{
-						goto ERR;
-					}
-				
-				sendBuff=DOM_Output::dumpToMem(docMixInfo,&sendBuffLen);
-				if(sendBuff==NULL)
-					goto ERR;
 
 				const char* strRequestCommand=STRINGS_REQUEST_COMMANDS[requestCommand];
 				const char* strRequestType=STRINGS_REQUEST_TYPES[requestType];
@@ -433,15 +457,13 @@ SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param,
         CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending [%s] %s to InfoService %s:%d.\r\n", strRequestType,strRequestCommand, hostname, a_pSocketAddress->getPort());
 
         if(requestCommand==REQUEST_COMMAND_MIXINFO)
-					sprintf((char*)buffHeader,"%s /%s%s HTTP/1.0\r\nContent-Length: %u\r\n\r\n", strRequestType, strRequestCommand, param,sendBuffLen);
+					sprintf((char*)buffHeader,"%s /%s%s HTTP/1.0\r\nContent-Length: %u\r\n\r\n", strRequestType, strRequestCommand, param,a_len);
 				else
-					sprintf((char*)buffHeader,"%s /%s HTTP/1.0\r\nContent-Length: %u\r\n\r\n", strRequestType, strRequestCommand, sendBuffLen);
+					sprintf((char*)buffHeader,"%s /%s HTTP/1.0\r\nContent-Length: %u\r\n\r\n", strRequestType, strRequestCommand, a_len);
  				if(oSocket.sendFully(buffHeader,strlen((char*)buffHeader))!=E_SUCCESS||
-						oSocket.sendFully(sendBuff,sendBuffLen)!=E_SUCCESS)
+						oSocket.sendFully(a_strMixHeloXML,a_len)!=E_SUCCESS)
 					goto ERR;
 
-				delete []sendBuff;
-				sendBuff=NULL;
         if(receiveAnswer)
         {
             ret = httpClient.parseHTTPHeader(&len);
@@ -511,8 +533,6 @@ SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param,
 				return E_SUCCESS;	
 			}
 ERR:
-		if(sendBuff!=NULL)
-			delete []sendBuff;
 		return E_UNKNOWN;
 	}
 
@@ -536,6 +556,7 @@ SINT32 CAInfoService::sendCascadeHelo()
 			returnValue = currentValue;
 		}
 	}
+	delete[] strCascadeHeloXML;
 	return returnValue;
 }
 
@@ -640,7 +661,8 @@ ERR:
 
 SINT32 CAInfoService::handleConfigEvent(DOM_Document& doc)
 {
-    CAMsg::printMsg(LOG_INFO,"InfoService: Cascade info received from InfoService\n");
+	///*** Nedd redesigning!*/
+/*    CAMsg::printMsg(LOG_INFO,"InfoService: Cascade info received from InfoService\n");
 
     DOM_Element root=doc.getDocumentElement();
     DOM_Node mixesElement;
@@ -708,7 +730,9 @@ SINT32 CAInfoService::handleConfigEvent(DOM_Document& doc)
             CAMsg::printMsg(LOG_CRIT,"InfoService: Error retrieving mix info from InfoService!\n");
             return ret;
         }
-    }
+    
+		}
+		*/
     return E_SUCCESS;
 }
 
