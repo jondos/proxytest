@@ -45,6 +45,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_bDaemon=m_bIsRunReConfigure=false;
 		m_bLocalProxy=m_bFirstMix=m_bLastMix=m_bMiddleMix=false;
 		m_addrInfoServices = NULL;
+		m_addrInfoServicesSize=0;
 		m_iTargetPort=m_iSOCKSPort=m_iSOCKSServerPort=m_addrInfoServicesSize=0xFFFF;
 		m_strTargetHost=m_strSOCKSHost=NULL;
 		m_strUser=m_strCascadeName=m_strLogDir=m_strEncryptedLogDir=NULL;
@@ -875,8 +876,8 @@ SINT32 CACmdLnOptions::getPaymentSettleInterval(UINT32 *pInterval)
 
 CAListenerInterface** CACmdLnOptions::getInfoServices(UINT32& r_size)
  {
- 	r_size = m_addrInfoServicesSize;
- 	return m_addrInfoServices;
+ 		r_size = m_addrInfoServicesSize;
+ 		return m_addrInfoServices;
   }
 
 SINT32 CACmdLnOptions::getCascadeName(UINT8* name,UINT32 len)
@@ -1323,9 +1324,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 				DOM_Element elemListenerInterfaces;
 				getDOMChildByName(isList.item(i),(UINT8*)
 				CAListenerInterface::XML_ELEMENT_CONTAINER_NAME,elemListenerInterfaces,false);
-				isListenerInterfaces = 
-					 CAListenerInterface::getInstance(
-						elemListenerInterfaces, nrListenerInterfaces);
+				isListenerInterfaces = CAListenerInterface::getInstance(elemListenerInterfaces, nrListenerInterfaces);
 				if (nrListenerInterfaces > 0)
 				{
 					/** @todo Take more than one listener interface for a given IS... */

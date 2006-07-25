@@ -43,11 +43,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 class CAInfoService
 	{
-		private:
-			SINT32 sendCascadeHelo(CASocketAddrINet* a_socketAddress);
-			SINT32 sendStatus(bool bIncludeCerts, CASocketAddrINet* a_socketAddress);
-			SINT32 sendMixHelo(SINT32 requestCommand,const UINT8* param,
-								CASocketAddrINet* a_socketAddress);
 		#ifdef PAYMENT			
 			SINT32 getPaymentInstance(const UINT8* a_pstrPIID,CAXMLBI** pXMLBI,
 										CASocketAddrINet* a_socketAddress);
@@ -87,6 +82,11 @@ class CAInfoService
 			}
 
 		private:
+			SINT32 sendCascadeHelo(CASocketAddrINet* a_socketAddress);
+			UINT8* getStatusXMLAsString(bool bIncludeCerts,UINT32& len);
+			SINT32 sendStatus(UINT8* strStatusXML,UINT32 len, CASocketAddrINet* a_socketAddress);
+			SINT32 sendMixHelo(SINT32 requestCommand,const UINT8* param,
+								CASocketAddrINet* a_socketAddress);
 			// added by ronin <ronin2@web.de>
 			SINT32 handleConfigEvent(DOM_Document& doc);
 

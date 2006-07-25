@@ -9,13 +9,7 @@ class CAListenerInterface
 		private:
 			CAListenerInterface(void);
 		
-		public:
-			static const char* XML_ELEMENT_CONTAINER_NAME;
-			static const char* XML_ELEMENT_NAME;
-			
-			static CAListenerInterface** getInstance(
-					DOM_Element& a_elemListenerInterfaces, UINT32& r_length);
-			
+		public:			
 			CAListenerInterface(const CAListenerInterface& l)//Copy constructor
 				{
 					m_Type=l.m_Type;
@@ -36,10 +30,11 @@ class CAListenerInterface
 						m_strHostname=NULL;
 				}
 			CAListenerInterface& operator=(const CAListenerInterface&); //Zuweisungsoperator
+			~CAListenerInterface(void);
 			static CAListenerInterface* getInstance(const DOM_Node& node);
 			static CAListenerInterface* getInstance(NetworkType type,const UINT8* path); //constructs a Unix Domain ListenerInterface
 			static CAListenerInterface* getInstance(NetworkType type,const UINT8* hostnameOrIP,UINT16 port); //constructs a TCP/IP ListenerInterface
-			~CAListenerInterface(void);
+			static CAListenerInterface** getInstance(DOM_Element& a_elemListenerInterfaces, UINT32& r_length);
 
 		public:
 			NetworkType getType() const
@@ -47,10 +42,12 @@ class CAListenerInterface
 					return m_Type;
 				}
 			SINT32 getHostName(UINT8* buff,UINT32 bufflen) const;
+			
 			CASocketAddr* getAddr() const
 				{
 					return m_pAddr->clone();
-				};
+				}
+			
 			bool isHidden() const
 				{
 					return m_bHidden;
@@ -60,6 +57,9 @@ class CAListenerInterface
 					return m_bVirtual;
 				}
 			SINT32 toDOMFragment(DOM_DocumentFragment& fragment,DOM_Document& ownerDoc) const;
+
+			static const char* XML_ELEMENT_CONTAINER_NAME;
+			static const char* XML_ELEMENT_NAME;
 
 		private:
 			CASocketAddr* m_pAddr;
