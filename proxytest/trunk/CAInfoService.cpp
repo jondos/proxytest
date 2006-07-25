@@ -550,11 +550,13 @@ SINT32 CAInfoService::sendCascadeHelo()
 	CAListenerInterface** socketAddresses = options.getInfoServices(nrAddresses);
 	for (UINT32 i = 0; i < nrAddresses; i++)
 	{
-		currentValue = sendCascadeHelo(strCascadeHeloXML,len,(CASocketAddrINet*)socketAddresses[i]->getAddr());
+		CASocketAddrINet* pAddr=(CASocketAddrINet*)socketAddresses[i]->getAddr();
+		currentValue = sendCascadeHelo(strCascadeHeloXML,len,pAddr);
 		if (currentValue == E_SUCCESS)
 		{
 			returnValue = currentValue;
 		}
+		delete pAddr;
 	}
 	delete[] strCascadeHeloXML;
 	return returnValue;
