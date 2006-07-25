@@ -122,15 +122,26 @@ CAInfoService::~CAInfoService()
 /** Sets the signature used to sign the messages send to Infoservice.
 	* If pOwnCert!=NULL this Certifcate is included in the Signature
 	*/
-SINT32 CAInfoService::setSignature(CASignature* pSig,CACertificate* pOwnCert)
+SINT32 CAInfoService::setSignature(CASignature* pSig, CACertificate* pOwnCert,
+								CACertificate** a_opCerts, UINT32 a_opCertsLength)
 	{
 		m_pSignature=pSig;
 		if(m_pcertstoreOwnCerts!=NULL)
+		{
 			delete m_pcertstoreOwnCerts;
+		}
 		m_pcertstoreOwnCerts=NULL;
+		m_pcertstoreOwnCerts=new CACertStore();
+
+		if (a_opCerts != NULL && a_opCertsLength > 0)
+		{
+			for (SINT32 i = a_opCertsLength - 1; i >= 0; i--)
+			{
+				m_pcertstoreOwnCerts->add(a_opCerts[i]);
+			}
+		}
 		if(pOwnCert!=NULL)
 			{
-				m_pcertstoreOwnCerts=new CACertStore();
 				m_pcertstoreOwnCerts->add(pOwnCert);
 			}
 		return E_SUCCESS;

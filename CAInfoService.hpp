@@ -72,7 +72,8 @@ class CAInfoService
 				{
 					return m_bRun;
 				}
-			SINT32 setSignature(CASignature* pSignature,CACertificate* ownCert);
+			SINT32 setSignature(CASignature* pSignature, CACertificate* a_ownCert,
+								CACertificate** a_opCerts, UINT32 a_opCertsLength);
 
 			// added by ronin <ronin2@web.de>
 			bool isConfiguring()

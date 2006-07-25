@@ -244,20 +244,41 @@ SINT32 CALastMix::processKeyExchange()
 		setDOMElementValue(elemNonce,tmpBuff);
 		elemMix.appendChild(elemNonce);
 		
+/*
+ * Sending Certificates - dign the xml struct send to each jap user
+ * 
+ */	
+	// Public Own Mix Certificates
 		CACertificate* ownCert=options.getOwnCertificate();
 		if(ownCert==NULL)
 			{
 				CAMsg::printMsg(LOG_DEBUG,"Own Test Cert is NULL -- so it could not be inserted into signed KeyInfo send to users...\n");
 			}	
 		CACertStore* tmpCertStore=new CACertStore();
+    // Operator Certificates
+    UINT32 opCertsLength;
+    CACertificate** opCert=options.getOpCertificates(opCertsLength);
+    if(opCert==NULL)
+    {
+        CAMsg::printMsg(LOG_DEBUG,"Op Test Cert is NULL -- so it could not be inserted into signed KeyInfo send to users...\n");
+	}
+	// Own  Mix Certificates first, then Operator Certificates
+	for(SINT32 i = opCertsLength - 1;  i >= 0; i--)
+	{
+		tmpCertStore->add(opCert[i]); 	
+	}
 		tmpCertStore->add(ownCert);
+    
 		if(m_pSignature->signXML(elemMix,tmpCertStore)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_DEBUG,"Could not sign KeyInfo send to users...\n");
 			}
 		delete ownCert;
+    delete opCert;
 		delete tmpCertStore;
 		
+		
+
 		UINT32 len=0;
 		UINT8* messageBuff=DOM_Output::dumpToMem(doc,&len);
 		UINT16 tmp=htons((UINT16)len);

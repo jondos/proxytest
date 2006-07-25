@@ -58,6 +58,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_strMixID=NULL;
 		m_pSignKey=NULL;
 		m_pOwnCertificate=NULL;
+		m_OpCerts=NULL;
 		m_pPrevMixCertificate=NULL;
 		m_pNextMixCertificate=NULL;
 		m_bCompressedLogs=false;
@@ -257,6 +258,19 @@ void CACmdLnOptions::clean()
 		if(m_pOwnCertificate!=NULL)
 			delete m_pOwnCertificate;
 		m_pOwnCertificate=NULL;
+		// deleting whole array and array elements
+		if (m_OpCerts != NULL)
+		{
+			if (m_OpCertsLength > 0)
+			{
+			for (UINT32 i = 0; i < m_OpCertsLength; i++)
+			{
+				delete m_OpCerts[i];
+			}
+			}
+			delete m_OpCerts;
+		}
+		m_OpCerts=NULL;
 		if(m_pNextMixCertificate!=NULL)
 			delete m_pNextMixCertificate;
 		m_pNextMixCertificate=NULL;
@@ -1131,6 +1145,33 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 					}
 				m_pOwnCertificate=CACertificate::decode(elemOwnCert.getFirstChild(),CERT_PKCS12,(char*)passwd);
 			}
+
+		//then Operator Certificate
+		DOM_Element elemOpCert;
+		//CAMsg::printMsg(LOG_DEBUG,"Could not sign KeyInfo sent to users...\n");
+		getDOMChildByName(elemCertificates,(UINT8*)"OperatorOwnCertificate",elemOpCert,false);
+		//CAMsg::printMsg(LOG_DEBUG,"Node: %s\n",elemOpCert.getNodeName().transcode());
+		
+		m_OpCertsLength = 0;
+		if (elemOpCert != NULL)
+		{
+			DOM_NodeList opCertList = elemOpCert.getElementsByTagName("X509Certificate");
+		
+			m_OpCertsLength = 0;
+			m_OpCerts = new CACertificate*[opCertList.getLength()];	
+			for (UINT32 i = 0; i < opCertList.getLength(); i++)
+			{
+				m_OpCerts[m_OpCertsLength] = 
+						CACertificate::decode(opCertList.item(i),CERT_X509CERTIFICATE);
+				if (m_OpCerts[m_OpCertsLength] != NULL)
+				{
+					m_OpCertsLength++;
+					//CAMsg::printMsg(LOG_DEBUG,"Node: %s\n",OpCertList.item(j).getNodeName().transcode());
+				}
+			}
+		}		
+		
+		
 		//nextMixCertificate if given
 		DOM_Element elemNextCert;
 		getDOMChildByName(elemCertificates,(UINT8*)"NextMixCertificate",elemNextCert,false);

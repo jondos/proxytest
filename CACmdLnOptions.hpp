@@ -155,7 +155,29 @@ class CACmdLnOptions
 			CACertificate* getOwnCertificate() const
 				{
 					if(m_pOwnCertificate!=NULL)
+					{
 						return m_pOwnCertificate->clone();
+					}
+					return NULL;
+				}
+				
+			/** Returns a COPY of the Operator Certificate that mix.
+				* @return opCerts
+				*/
+			CACertificate** getOpCertificates(UINT32& r_length) const
+			{
+				if(m_OpCerts!=NULL && m_OpCertsLength > 0)
+				{
+					CACertificate** opCerts = 
+						new CACertificate*[m_OpCertsLength];
+					for (UINT32 i = 0; i < m_OpCertsLength; i++)
+					{
+						opCerts[i] = m_OpCerts[i]->clone();
+					}
+					r_length = m_OpCertsLength;
+					return opCerts;
+				}
+				r_length = 0;
 					return NULL;
 				}
 
@@ -349,6 +371,10 @@ class CACmdLnOptions
 	
 			CASignature*		m_pSignKey;
 			CACertificate*	m_pOwnCertificate;
+			
+			CACertificate** m_OpCerts;
+			UINT32 m_OpCertsLength;
+
 			CACertificate*	m_pPrevMixCertificate;
 			CACertificate*	m_pNextMixCertificate;
 			CACertificate*	m_pLogEncryptionCertificate;
