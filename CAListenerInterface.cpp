@@ -37,42 +37,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 const char* CAListenerInterface::XML_ELEMENT_CONTAINER_NAME = "ListenerInterfaces";
 const char* CAListenerInterface::XML_ELEMENT_NAME = "ListenerInterface";
 
-CAListenerInterface** CAListenerInterface::getInstance(DOM_Element& a_elemListenerInterfaces, 
-													  UINT32& r_length)
-{
-	CAListenerInterface** interfaces = NULL;
-	if(a_elemListenerInterfaces!=NULL)
-	{
-		DOM_NodeList nlListenerInterfaces =
-			a_elemListenerInterfaces.getElementsByTagName(
-				CAListenerInterface::XML_ELEMENT_NAME);
-		r_length=nlListenerInterfaces.getLength();
-		if(r_length>0)
-		{
-			interfaces=new CAListenerInterface*[r_length];
-			UINT32 aktInterface=0;
-			for(UINT32 i=0;i<r_length;i++)
-			{
-				DOM_Node elemListenerInterface;
-				elemListenerInterface=nlListenerInterfaces.item(i);
-				CAListenerInterface* pListener=CAListenerInterface::getInstance(elemListenerInterface);
-				if(pListener!=NULL)
-				{
-					interfaces[aktInterface++]=pListener;
-				}
-			}
-			r_length=aktInterface;
-		}
-	}	
-	else
-	{
-		r_length = 0;
-		interfaces=new CAListenerInterface*[0];
-	}
-			
-	return interfaces;
-}
-
 CAListenerInterface::CAListenerInterface(void)
 	{
 		m_bHidden=false;
@@ -118,6 +82,43 @@ CAListenerInterface* CAListenerInterface::getInstance(NetworkType type,const UIN
 			}
 		return pListener;
 	}
+
+CAListenerInterface** CAListenerInterface::getInstance(DOM_Element& a_elemListenerInterfaces, 
+													  UINT32& r_length)
+{
+	CAListenerInterface** interfaces = NULL;
+	if(a_elemListenerInterfaces!=NULL)
+	{
+		DOM_NodeList nlListenerInterfaces =
+			a_elemListenerInterfaces.getElementsByTagName(
+				CAListenerInterface::XML_ELEMENT_NAME);
+		r_length=nlListenerInterfaces.getLength();
+		if(r_length>0)
+		{
+			interfaces=new CAListenerInterface*[r_length];
+			UINT32 aktInterface=0;
+			for(UINT32 i=0;i<r_length;i++)
+			{
+				DOM_Node elemListenerInterface;
+				elemListenerInterface=nlListenerInterfaces.item(i);
+				CAListenerInterface* pListener=CAListenerInterface::getInstance(elemListenerInterface);
+				if(pListener!=NULL)
+				{
+					interfaces[aktInterface++]=pListener;
+				}
+			}
+			r_length=aktInterface;
+		}
+	}	
+	else
+	{
+		r_length = 0;
+		interfaces=NULL;
+	}
+			
+	return interfaces;
+}
+
 
 SINT32	CAListenerInterface::toDOMFragment(DOM_DocumentFragment& fragment,DOM_Document& ownerDoc) const
 	{
