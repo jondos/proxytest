@@ -188,6 +188,8 @@ SINT32 CAInfoService::stop()
 
 SINT32 CAInfoService::sendStatus(bool bIncludeCerts)
 {
+	if(!options.isFirstMix())
+		return E_SUCCESS;
 	SINT32 returnValue = E_UNKNOWN;
 	SINT32 currentValue;
 	UINT32 nrAddresses;
@@ -516,14 +518,19 @@ ERR:
 
 SINT32 CAInfoService::sendCascadeHelo()
 {
+  if(options.isMiddleMix())
+		return E_SUCCESS;
+	UINT32 len;
+	UINT8* strCascadeHeloXML=getCascadeHeloXMLAsString(len);
+	if(strCascadeHeloXML==NULL)
+		return E_UNKNOWN;
 	SINT32 returnValue = E_UNKNOWN;
 	SINT32 currentValue;
 	UINT32 nrAddresses;
 	CAListenerInterface** socketAddresses = options.getInfoServices(nrAddresses);
 	for (UINT32 i = 0; i < nrAddresses; i++)
 	{
-		currentValue = sendCascadeHelo(
-						(CASocketAddrINet*)socketAddresses[i]->getAddr());
+		currentValue = sendCascadeHelo(strCascadeHeloXML,len,(CASocketAddrINet*)socketAddresses[i]->getAddr());
 		if (currentValue == E_SUCCESS)
 		{
 			returnValue = currentValue;
@@ -531,6 +538,49 @@ SINT32 CAInfoService::sendCascadeHelo()
 	}
 	return returnValue;
 }
+
+UINT8* CAInfoService::getCascadeHeloXMLAsString(UINT32& a_len)
+	{	
+		a_len=0;
+ 		UINT32 sendBuffLen;
+		UINT8* sendBuff=NULL;
+		DOM_Document docMixInfo;
+		DOM_Element elemTimeStamp;
+		DOM_Element elemRoot;
+    if(m_pMix->getMixCascadeInfo(docMixInfo)!=E_SUCCESS)
+			{
+        CAMsg::printMsg(LOG_INFO,"InfoService: Error: Cascade not yet configured.\r\n");
+				goto ERR;
+			}
+		//insert (or update) the Timestamp
+		elemRoot=docMixInfo.getDocumentElement();
+		
+		if(getDOMChildByName(elemRoot,(UINT8*)"LastUpdate",elemTimeStamp,false)!=E_SUCCESS)
+			{
+				elemTimeStamp=docMixInfo.createElement("LastUpdate");
+				elemRoot.appendChild(elemTimeStamp);
+			}
+		UINT64 currentMillis;
+		getcurrentTimeMillis(currentMillis);
+		UINT8 tmpStrCurrentMillis[50];
+		print64(tmpStrCurrentMillis,currentMillis);
+		setDOMElementValue(elemTimeStamp,tmpStrCurrentMillis);
+		if(m_pSignature->signXML(docMixInfo,m_pcertstoreOwnCerts)!=E_SUCCESS)
+			{
+				goto ERR;
+			}
+				
+		sendBuff=DOM_Output::dumpToMem(docMixInfo,&sendBuffLen);
+		if(sendBuff==NULL)
+			goto ERR;
+
+		a_len=sendBuffLen;
+		return sendBuff;		
+ERR:
+		if(sendBuff!=NULL)
+			delete []sendBuff;
+		return NULL;
+	}
 
 /** POSTs the HELO message for a whole cascade to the InfoService.
  * If the running mix is a last mix, this method is used to inform the
@@ -540,15 +590,13 @@ SINT32 CAInfoService::sendCascadeHelo()
  * @param E_SUCCESS on success
  * @param E_UNKNOWN on any error
 	*/
-SINT32 CAInfoService::sendCascadeHelo(CASocketAddrINet* a_pSocketAddress)
+SINT32 CAInfoService::sendCascadeHelo(UINT8* a_strCascadeHeloXML,UINT32 a_len,CASocketAddrINet* a_pSocketAddress)
 {	
     if(options.isMiddleMix())
 			return E_SUCCESS;
 		CASocket oSocket;
 		UINT8 hostname[255];
 		UINT8 buffHeader[255];
-		UINT32 sendBuffLen;
-		UINT8* sendBuff=NULL;
 		CAHttpClient httpClient;
 
 		if (a_pSocketAddress == NULL)
@@ -564,34 +612,6 @@ SINT32 CAInfoService::sendCascadeHelo(CASocketAddrINet* a_pSocketAddress)
 		if(oSocket.connect(*a_pSocketAddress)==E_SUCCESS)
 			{
 				httpClient.setSocket(&oSocket);
-				DOM_Document docMixInfo;
-        if(m_pMix->getMixCascadeInfo(docMixInfo)!=E_SUCCESS)
-					{
-            CAMsg::printMsg(LOG_INFO,"InfoService: Error: Cascade not yet configured.\r\n");
-						goto ERR;
-					}
-				//insert (or update) the Timestamp
-				DOM_Element elemRoot=docMixInfo.getDocumentElement();
-				DOM_Element elemTimeStamp;
-				if(getDOMChildByName(elemRoot,(UINT8*)"LastUpdate",elemTimeStamp,false)!=E_SUCCESS)
-					{
-						elemTimeStamp=docMixInfo.createElement("LastUpdate");
-						elemRoot.appendChild(elemTimeStamp);
-					}
-				UINT64 currentMillis;
-				getcurrentTimeMillis(currentMillis);
-				UINT8 tmpStrCurrentMillis[50];
-				print64(tmpStrCurrentMillis,currentMillis);
-				setDOMElementValue(elemTimeStamp,tmpStrCurrentMillis);
-				if(m_pSignature->signXML(docMixInfo,m_pcertstoreOwnCerts)!=E_SUCCESS)
-					{
-						goto ERR;
-					}
-				
-				sendBuff=DOM_Output::dumpToMem(docMixInfo,&sendBuffLen);
-				if(sendBuff==NULL)
-					goto ERR;
-
         if(options.isFirstMix())
         {
             CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending cascade helo to InfoService %s:%d.\r\n", hostname, a_pSocketAddress->getPort());
@@ -601,9 +621,9 @@ SINT32 CAInfoService::sendCascadeHelo(CASocketAddrINet* a_pSocketAddress)
             CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending cascade configuration request to InfoService %s:%d.\r\n", hostname, a_pSocketAddress->getPort());
         }
 
-				sprintf((char*)buffHeader,"POST /cascade HTTP/1.0\r\nContent-Length: %u\r\n\r\n",sendBuffLen);
+				sprintf((char*)buffHeader,"POST /cascade HTTP/1.0\r\nContent-Length: %u\r\n\r\n",a_len);
 				if(	oSocket.sendFully(buffHeader,strlen((char*)buffHeader))!=E_SUCCESS||
-						oSocket.sendFully(sendBuff,sendBuffLen)!=E_SUCCESS)
+						oSocket.sendFully(a_strCascadeHeloXML,a_len)!=E_SUCCESS)
 						goto ERR;
 				//Receive answer --> 200 Ok or failure
 				//HTTP/1.1 200 Ok
@@ -612,12 +632,9 @@ SINT32 CAInfoService::sendCascadeHelo(CASocketAddrINet* a_pSocketAddress)
 				if(memcmp(buffHeader+9,"200",3)!=0)
 					goto ERR;
 				oSocket.close();
-				delete []sendBuff;
 				return E_SUCCESS;	
 			}
 ERR:
-		if(sendBuff!=NULL)
-			delete []sendBuff;
 		return E_UNKNOWN;
 }
 

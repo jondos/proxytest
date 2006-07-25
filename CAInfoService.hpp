@@ -82,7 +82,8 @@ class CAInfoService
 			}
 
 		private:
-			SINT32 sendCascadeHelo(CASocketAddrINet* a_socketAddress);
+			UINT8* getCascadeHeloXMLAsString(UINT32& len);
+			SINT32 sendCascadeHelo(UINT8* xml,UINT32 len,CASocketAddrINet* a_socketAddress);
 			UINT8* getStatusXMLAsString(bool bIncludeCerts,UINT32& len);
 			SINT32 sendStatus(UINT8* strStatusXML,UINT32 len, CASocketAddrINet* a_socketAddress);
 			SINT32 sendMixHelo(SINT32 requestCommand,const UINT8* param,
