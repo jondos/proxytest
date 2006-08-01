@@ -83,14 +83,14 @@ class CAInfoService
 
 		private:
 			UINT8* getCascadeHeloXMLAsString(UINT32& len);
-			SINT32 sendCascadeHelo(UINT8* xml,UINT32 len,CASocketAddrINet* a_socketAddress);
+			SINT32 sendCascadeHelo(const UINT8* xml,UINT32 len,const CASocketAddrINet* a_socketAddress) const;
 			UINT8* getStatusXMLAsString(bool bIncludeCerts,UINT32& len);
-			SINT32 sendStatus(UINT8* strStatusXML,UINT32 len, CASocketAddrINet* a_socketAddress);
+			SINT32 sendStatus(const UINT8* strStatusXML,UINT32 len,const CASocketAddrINet* a_socketAddress) const;
 			UINT8* getMixHeloXMLAsString(UINT32& len);
-			SINT32 sendMixHelo(UINT8* strMixHeloXML,UINT32 len,SINT32 requestCommand,const UINT8* param,
-								CASocketAddrINet* a_socketAddress);
+			SINT32 sendMixHelo(const UINT8* strMixHeloXML,UINT32 len,SINT32 requestCommand,const UINT8* param,
+								const CASocketAddrINet* a_socketAddress);
 			// added by ronin <ronin2@web.de>
-			SINT32 handleConfigEvent(DOM_Document& doc);
+			SINT32 handleConfigEvent(DOM_Document& doc) const;
 
 			volatile bool m_bRun;
 			CASignature*	m_pSignature;

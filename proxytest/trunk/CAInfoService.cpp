@@ -280,7 +280,7 @@ UINT8* CAInfoService::getStatusXMLAsString(bool bIncludeCerts,UINT32& len)
 	*
 	*/
 	///todo use httpclient class
-SINT32 CAInfoService::sendStatus(UINT8* a_strStatusXML,UINT32 a_len, CASocketAddrINet* a_pSocketAddress)
+SINT32 CAInfoService::sendStatus(const UINT8* a_strStatusXML,UINT32 a_len, const CASocketAddrINet* a_pSocketAddress) const
 	{
 		UINT8 buffHeader[512];
 		#ifdef DEBUG
@@ -398,8 +398,8 @@ ERR:
 
 /** POSTs the HELO message for a mix to the InfoService.
 	*/
-SINT32 CAInfoService::sendMixHelo(UINT8* a_strMixHeloXML,UINT32 a_len,SINT32 requestCommand,const UINT8* param,
-									CASocketAddrINet* a_pSocketAddress)
+SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT32 requestCommand,const UINT8* param,
+									const CASocketAddrINet* a_pSocketAddress)
 {
     UINT8* recvBuff = NULL;
     SINT32 ret = E_SUCCESS;
@@ -613,7 +613,7 @@ ERR:
  * @param E_SUCCESS on success
  * @param E_UNKNOWN on any error
 	*/
-SINT32 CAInfoService::sendCascadeHelo(UINT8* a_strCascadeHeloXML,UINT32 a_len,CASocketAddrINet* a_pSocketAddress)
+SINT32 CAInfoService::sendCascadeHelo(const UINT8* a_strCascadeHeloXML,UINT32 a_len,const CASocketAddrINet* a_pSocketAddress) const
 {	
     if(options.isMiddleMix())
 			return E_SUCCESS;
@@ -661,7 +661,7 @@ ERR:
 		return E_UNKNOWN;
 }
 
-SINT32 CAInfoService::handleConfigEvent(DOM_Document& doc)
+SINT32 CAInfoService::handleConfigEvent(DOM_Document& doc) const
 {
 	///*** Nedd redesigning!*/
 /*    CAMsg::printMsg(LOG_INFO,"InfoService: Cascade info received from InfoService\n");

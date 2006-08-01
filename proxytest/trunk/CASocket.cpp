@@ -144,7 +144,7 @@ SINT32 CASocket::accept(CASocket &s)
 	* @param retry - number of retries
 	* @param time - time between retries in seconds
 	*/			
-SINT32 CASocket::connect(CASocketAddr & psa,UINT32 retry,UINT32 time)
+SINT32 CASocket::connect(const CASocketAddr & psa,UINT32 retry,UINT32 time)
 	{
 //		CAMsg::printMsg(LOG_DEBUG,"Socket:connect\n");
 		if(m_bSocketIsClosed&&create()!=E_SUCCESS)
@@ -187,7 +187,7 @@ SINT32 CASocket::connect(CASocketAddr & psa,UINT32 retry,UINT32 time)
 	*	@param psa - peer
 	* @param msTimeOut - abort after msTimeOut milli seconds
 	*/
-SINT32 CASocket::connect(CASocketAddr & psa,UINT32 msTimeOut)
+SINT32 CASocket::connect(const CASocketAddr & psa,UINT32 msTimeOut)
 	{
 		if(m_bSocketIsClosed&&create(psa.getType())!=E_SUCCESS)
 			{
