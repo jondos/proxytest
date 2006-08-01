@@ -220,13 +220,14 @@ void CACmdLnOptions::clean()
 			{
 				delete[] m_strSOCKSHost;
 	    }
-	    if (m_addrInfoServices != NULL)
-	    {
+	  if (m_addrInfoServices != NULL)
+			{
 	    	for (UINT32 i = 0; i < m_addrInfoServicesSize; i++)
-	    	{
-	    		delete m_addrInfoServices[i];
-	    	}
+	    		{
+	    			delete m_addrInfoServices[i];
+	    		}
 	    	delete[] m_addrInfoServices;
+				m_addrInfoServices=NULL;
 	    	m_addrInfoServicesSize = 0;
 	    }
 		m_strSOCKSHost=NULL;
@@ -1320,13 +1321,12 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 			{
 				//get ListenerInterfaces
 				DOM_Element elemListenerInterfaces;
-				getDOMChildByName(isList.item(i),(UINT8*)
-				CAListenerInterface::XML_ELEMENT_CONTAINER_NAME,elemListenerInterfaces,false);
+				getDOMChildByName(isList.item(i),(UINT8*)CAListenerInterface::XML_ELEMENT_CONTAINER_NAME,elemListenerInterfaces,false);
 				isListenerInterfaces = CAListenerInterface::getInstance(elemListenerInterfaces, nrListenerInterfaces);
 				if (nrListenerInterfaces > 0)
 				{
 					/** @todo Take more than one listener interface for a given IS... */
-					m_addrInfoServices[i] = isListenerInterfaces[0];
+					m_addrInfoServices[m_addrInfoServicesSize] = isListenerInterfaces[0];
 					m_addrInfoServicesSize++;
 					for (UINT32 j = 1; j < nrListenerInterfaces; j++)
 					{
