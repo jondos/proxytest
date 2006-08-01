@@ -46,13 +46,13 @@ class CASocket:public CAClientSocket
 			SINT32 listen(const CASocketAddr& psa);
 			SINT32 listen(UINT16 port);
 			SINT32 accept(CASocket &s);
-			SINT32 connect(CASocketAddr& psa)
+			SINT32 connect(const CASocketAddr& psa)
 				{
 					return connect(psa,1,0);
 				}
 				
-			SINT32 connect(CASocketAddr& psa,UINT32 retry,UINT32 msWaitTime);
-			SINT32 connect(CASocketAddr& psa,UINT32 msTimeOut);
+			SINT32 connect(const CASocketAddr& psa,UINT32 retry,UINT32 msWaitTime);
+			SINT32 connect(const CASocketAddr& psa,UINT32 msTimeOut);
 			
 			SINT32 close();
 /* it seems that this function is not used:
