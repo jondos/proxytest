@@ -786,7 +786,7 @@ SINT32 CAFirstMixChannelList::test()
 					UINT32 u32MaxBucket=u32BucketGrow*10;
 					for(UINT32 i=0;i<MAX_POLLFD;i++)
 						{
-							if(pDelayBuckets[i]!=NULL&&pDelayBuckets[i]<u32MaxBucket)
+							if(pDelayBuckets[i]!=NULL&&*(pDelayBuckets[i])<u32MaxBucket)
 								*(pDelayBuckets[i])+=u32BucketGrow;
 						}
 					pChannelList->m_pMutexDelayChannel->unlock();		
