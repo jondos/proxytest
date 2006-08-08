@@ -743,7 +743,55 @@ SINT32 encryptXMLElement(DOM_Node node, CAASymCipher* pRSA)
 			}
 		return E_SUCCESS;
 	}
+#endif //ONLY_LOCAL_PROXY
 
+/** Encrypts an XML-Element by wrapping it with:
+	* <EncryptedData Type='http://www.w3.org/2001/04/xmlenc#Element'>
+	*		<EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#aes128-cbc"/>
+	*   <ds:KeyInfo xmlns:ds='http://www.w3.org/2000/09/xmldsig#'>
+	*			<EncryptedKey>
+	*				<EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"/>
+	*				<CipherData>
+	*					<CipherValue>...</CipherValue>					
+	*				</CipherData>
+	*			</EncryptedKey>
+	*		</ds:KeyInfo>
+	*		<CipherData>
+	*			<CipherValue>...</CipherValue>
+	*		</CipherData>
+	*	</EncryptedData>
+	*
+	@ret a buffer with the encyrpted element (the caller is responsible for freeing it), or NULL
+*/
+UINT8* encryptXMLElement(UINT8* inbuff,UINT32 inlen,UINT32& outlen,CAASymCipher* pRSA)
+	{
+		const char* XML_ENC_TEMPLATE="<EncryptedData><ds:KeyInfo><EncryptedKey><CipherData><CipherValue>%s</CipherValue></CipherData></EncryptedKey></ds:KeyInfo><CipherData><CipherValue>%s</CipherValue></CipherData></EncryptedData>";
+		UINT8 key[32];
+		getRandom(key,32);
+		UINT8 buff[1000];
+		UINT32 bufflen=255;
+		pRSA->encryptOAEP(key,32,buff,&bufflen);
+		UINT8 keyoutbuff[1000];
+		UINT32 keyoutbufflen=255;
+		CABase64::encode(buff,bufflen,keyoutbuff,&keyoutbufflen);
+		keyoutbuff[keyoutbufflen]=0;
+		CASymCipher *pSymCipher=new CASymCipher();
+		pSymCipher->setKey(key,true);
+		pSymCipher->setIVs(key+16);
+		UINT8* msgoutbuff=new UINT8[10000];
+		UINT32 msgoutbufflen=10000;
+		pSymCipher->encrypt1CBCwithPKCS7(inbuff,inlen,msgoutbuff,&msgoutbufflen);
+		UINT8* encmsgoutbuff=new UINT8[10000];
+		UINT32 encmsgoutbufflen=10000;
+		CABase64::encode(msgoutbuff,msgoutbufflen,encmsgoutbuff,&encmsgoutbufflen);
+		encmsgoutbuff[encmsgoutbufflen]=0;
+		sprintf((char*)msgoutbuff,XML_ENC_TEMPLATE,keyoutbuff,encmsgoutbuff);
+		outlen=strlen((char*)msgoutbuff);
+		delete[] encmsgoutbuff;
+		return msgoutbuff;
+	}
+
+#ifndef ONLY_LOCAL_PROXY
 SINT32 decryptXMLElement(DOM_Node node, CAASymCipher* pRSA)
 	{
 		DOM_Document doc=node.getOwnerDocument();

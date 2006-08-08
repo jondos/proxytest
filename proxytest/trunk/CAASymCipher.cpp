@@ -403,3 +403,25 @@ SINT32 CAASymCipher::setPublicKey(const CACertificate* pCert)
 		return E_SUCCESS;
 	}
 #endif //ONLY_LOCAL_PROXY
+
+SINT32 CAASymCipher::setPublicKey(const UINT8* m,UINT32 mlen,const UINT8* e,UINT32 elen)
+	{
+		RSA* tmpRSA=RSA_new();
+		UINT32 decLen=4096;
+		UINT8 decBuff[4096];
+		CABase64::decode(m,mlen,decBuff,&decLen);
+		tmpRSA->n=BN_bin2bn(decBuff,decLen,NULL);
+		decLen=4096;
+		CABase64::decode(e,elen,decBuff,&decLen);
+		tmpRSA->e=BN_bin2bn(decBuff,decLen,NULL);
+		if(tmpRSA->n!=NULL&&tmpRSA->e!=NULL)
+			{
+				if(m_pRSA!=NULL)
+					RSA_free(m_pRSA);
+				m_pRSA=tmpRSA;
+				setRSAFlags(m_pRSA);
+				return E_SUCCESS;
+			}
+		RSA_free(tmpRSA);
+		return E_UNKNOWN;
+	}
