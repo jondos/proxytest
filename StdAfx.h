@@ -396,6 +396,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include <openssl/pkcs12.h>
 #include <openssl/x509v3.h>
 
+#ifndef ONLY_LOCAL_PROXY
 //For DOM
 #include <util/XercesDefs.hpp>
 #include <util/PlatformUtils.hpp>
@@ -416,6 +417,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if (_XERCES_VERSION >= 20200)
     XERCES_CPP_NAMESPACE_USE
 #endif
+#endif //ONLY_LOCAL_PROXY
 
 //For large file support
 #ifndef O_LARGEFILE
