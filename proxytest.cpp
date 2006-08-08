@@ -569,8 +569,9 @@ int main(int argc, const char* argv[])
 		struct sigaction newAction;
 		newAction.sa_handler=signal_hup;
 		newAction.sa_flags=0;
-		sigaction(SIGHUP,&newAction,NULL);
-		//signal(SIGHUP,signal_hup);
+		#ifndef ONLY_LOCAL_PROXY
+			sigaction(SIGHUP,&newAction,NULL);
+		#endif
 #endif
 		signal(SIGINT,signal_interrupt);
 		signal(SIGTERM,signal_term);
