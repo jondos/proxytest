@@ -27,6 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 
 #include "StdAfx.h"
+#ifndef ONLY_LOCAL_PROXY
 #include "CAControlChannelDispatcher.hpp"
 #include "CAAbstractControlChannel.hpp"
 
@@ -106,3 +107,4 @@ SINT32 CAControlChannelDispatcher::sendMessages(UINT32 id,bool m_bIsEncrypted,co
 		m_pcsSendMsg->unlock();	
 		return E_SUCCESS;
 	}
+#endif //ONLY_LOCAL_PROXY

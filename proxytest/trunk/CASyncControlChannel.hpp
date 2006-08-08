@@ -28,6 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #ifndef _CASYNCCONTROLCHANNEL_
 #define _CASYNCCONTROLCHANNEL_
+#ifndef ONLY_LOCAL_PROXY
 #include "CAAbstractControlChannel.hpp"
 
 /** A synchronous control channel. This means, that every control message
@@ -121,3 +122,4 @@ class CASyncControlChannel : public CAAbstractControlChannel
 		UINT32 m_MsgBytesLeft;
 };
 #endif 
+#endif //ONLY_LOCAL_PROXY
