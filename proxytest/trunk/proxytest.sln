@@ -41,6 +41,7 @@ Global
 		Debug|Win32 = Debug|Win32
 		Mit Xerces 2.0.0|Win32 = Mit Xerces 2.0.0|Win32
 		Mit Xerces 2.3 dev|Win32 = Mit Xerces 2.3 dev|Win32
+		proxytest-only-local-debug|Win32 = proxytest-only-local-debug|Win32
 		Release|Win32 = Release|Win32
 		VTune|Win32 = VTune|Win32
 	EndGlobalSection
@@ -51,6 +52,8 @@ Global
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Mit Xerces 2.0.0|Win32.Build.0 = Mit Xerces 2.0.0|Win32
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Mit Xerces 2.3 dev|Win32.ActiveCfg = Mit Xerces 2.3 dev|Win32
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Mit Xerces 2.3 dev|Win32.Build.0 = Mit Xerces 2.3 dev|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.proxytest-only-local-debug|Win32.ActiveCfg = proxytest-only-local-debug|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.proxytest-only-local-debug|Win32.Build.0 = proxytest-only-local-debug|Win32
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Release|Win32.ActiveCfg = Release|Win32
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Release|Win32.Build.0 = Release|Win32
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.VTune|Win32.ActiveCfg = VTune|Win32
@@ -58,6 +61,7 @@ Global
 		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.Debug|Win32.ActiveCfg = Debug|Win32
 		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.Mit Xerces 2.0.0|Win32.ActiveCfg = Mit Xerces 2.0.0|Win32
 		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.Mit Xerces 2.3 dev|Win32.ActiveCfg = Mit Xerces 2.3 dev|Win32
+		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.proxytest-only-local-debug|Win32.ActiveCfg = proxytest-only-local-debug|Win32
 		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.Release|Win32.ActiveCfg = Release|Win32
 		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.VTune|Win32.ActiveCfg = VTune|Win32
 		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Debug|Win32.ActiveCfg = Debug|Win32
@@ -66,6 +70,7 @@ Global
 		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Mit Xerces 2.0.0|Win32.Build.0 = Release|Win32
 		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Mit Xerces 2.3 dev|Win32.ActiveCfg = Release|Win32
 		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Mit Xerces 2.3 dev|Win32.Build.0 = Release|Win32
+		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.proxytest-only-local-debug|Win32.ActiveCfg = proxytest-only-local-debug|Win32
 		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Release|Win32.ActiveCfg = Release|Win32
 		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Release|Win32.Build.0 = Release|Win32
 		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.VTune|Win32.ActiveCfg = Release|Win32
@@ -76,6 +81,7 @@ Global
 		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Mit Xerces 2.0.0|Win32.Build.0 = Release|Win32
 		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Mit Xerces 2.3 dev|Win32.ActiveCfg = Release|Win32
 		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Mit Xerces 2.3 dev|Win32.Build.0 = Release|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.proxytest-only-local-debug|Win32.ActiveCfg = proxytest-only-local-debug|Win32
 		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Release|Win32.ActiveCfg = Release|Win32
 		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Release|Win32.Build.0 = Release|Win32
 		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.VTune|Win32.ActiveCfg = Release|Win32
@@ -86,6 +92,7 @@ Global
 		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Mit Xerces 2.0.0|Win32.Build.0 = Release|Win32
 		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Mit Xerces 2.3 dev|Win32.ActiveCfg = Release|Win32
 		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Mit Xerces 2.3 dev|Win32.Build.0 = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.proxytest-only-local-debug|Win32.ActiveCfg = proxytest-only-local-debug|Win32
 		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Release|Win32.ActiveCfg = Release|Win32
 		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Release|Win32.Build.0 = Release|Win32
 		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.VTune|Win32.ActiveCfg = Release|Win32
@@ -93,11 +100,13 @@ Global
 		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.Debug|Win32.ActiveCfg = Debug|Win32
 		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.Mit Xerces 2.0.0|Win32.ActiveCfg = Release|Win32
 		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.Mit Xerces 2.3 dev|Win32.ActiveCfg = Release|Win32
+		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.proxytest-only-local-debug|Win32.ActiveCfg = proxytest-only-local-debug|Win32
 		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.Release|Win32.ActiveCfg = Release|Win32
 		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.VTune|Win32.ActiveCfg = Release|Win32
 		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.Debug|Win32.ActiveCfg = Debug|Win32
 		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.Mit Xerces 2.0.0|Win32.ActiveCfg = Release|Win32
 		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.Mit Xerces 2.3 dev|Win32.ActiveCfg = Release|Win32
+		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.proxytest-only-local-debug|Win32.ActiveCfg = proxytest-only-local-debug|Win32
 		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.Release|Win32.ActiveCfg = Release|Win32
 		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.VTune|Win32.ActiveCfg = Release|Win32
 	EndGlobalSection
