@@ -27,7 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CA_CERTSTORE__
 #define __CA_CERTSTORE__
-
+#ifndef ONLY_LOCAL_PROXY
 #include "CACertificate.hpp"
 #define XML_X509DATA 2
 struct __t_certstore_list
@@ -55,3 +55,4 @@ class CACertStore
 			UINT32 m_cCerts;
 	};
 #endif
+#endif //ONLY_LOCAL_PROXY

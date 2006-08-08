@@ -28,7 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #ifndef __CAFIRSTMIXB__
 #define __CAFIRSTMIXB__
-
+#ifndef ONLY_LOCAL_PROXY
 #include "../CAFirstMix.hpp"
 
 class CAFirstMixB:public CAFirstMix
@@ -38,3 +38,4 @@ class CAFirstMixB:public CAFirstMix
 	};
 
 #endif
+#endif //only_LOCAL_PROXY

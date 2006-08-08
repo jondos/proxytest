@@ -43,11 +43,13 @@ class CAASymCipher
 			SINT32 encryptOAEP(const UINT8* from,UINT32 fromlen,UINT8* to,UINT32* len);
 			SINT32 generateKeyPair(UINT32 size);
 			//SINT32 getPublicKey(UINT8* buff,UINT32 *len);
+#ifndef ONLY_LOCAL_PROXY
 			SINT32 getPublicKeyAsXML(UINT8* buff,UINT32* len);
 			SINT32 getPublicKeyAsDocumentFragment(DOM_DocumentFragment& pDFrag);
 			//SINT32 getPublicKeySize();
 			//SINT32 setPublicKey(UINT8* buff,UINT32* len);
 			SINT32 setPublicKey(const CACertificate* pCert);
+#endif
 			SINT32 setPublicKeyAsXML(const UINT8* buff,UINT32 len);
 			SINT32 setPublicKeyAsDOMNode(DOM_Node& node);
 		private:

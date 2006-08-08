@@ -66,7 +66,6 @@ class CACmdLnOptions
 			SINT32 cleanup();
 			void clean();
 			SINT32 parse(int argc,const char** arg);
-			SINT32 reread(CAMix* pMix);
 	    bool getDaemon();
       //bool getProxySupport();
 
@@ -79,6 +78,7 @@ class CACmdLnOptions
 
 //			SINT32 getServerRTTPort();
 			UINT16 getSOCKSServerPort();
+
 
 			UINT32 getListenerInterfaceCount(){return m_cnListenerInterfaces;}
 			CAListenerInterface* getListenerInterface(UINT32 nr)
@@ -120,6 +120,7 @@ class CACmdLnOptions
 						return E_UNKNOWN;
 				};
 
+#ifndef ONLY_LOCAL_PROXY
 			//for last Mixes: number of outside visible addresses
 			UINT32 getVisibleAddressesCount(){return m_cnVisibleAddresses;}
 
@@ -135,20 +136,22 @@ class CACmdLnOptions
 
 			UINT16 getSOCKSPort();
 	    SINT32 getSOCKSHost(UINT8* host,UINT32 len);
-	    CAListenerInterface** getInfoServices(UINT32& r_size);
+			CAListenerInterface** getInfoServices(UINT32& r_size);
+#endif //ONLY_LOCAL_PROXY
 
 			SINT32 getMaxOpenFiles()
 				{
 					return m_nrOfOpenFiles;
 				}
 
+
+#ifndef ONLY_LOCAL_PROXY
 			CASignature* getSignKey()
 				{
 					if(m_pSignKey!=NULL)
 						return m_pSignKey->clone();
 					return NULL;
 				}
-
 			/** Returns a COPY of the public test certifcate for that mix.
 				* @retval a COPY of the mix test certifcate.
 				*/
@@ -204,7 +207,6 @@ class CACmdLnOptions
 						return m_pNextMixCertificate->clone();
 					return NULL;
 				}
-
      /** Returns if the encrpyted Log could/should be used**/
 			bool isEncryptedLogEnabled()
 			{
@@ -242,20 +244,25 @@ class CACmdLnOptions
 				strcpy(m_strCascadeName,name);
 				return E_SUCCESS;
 			}
-    
-			SINT32 getLogDir(UINT8* name,UINT32 len);
+
+			SINT32 reread(CAMix* pMix);
+
+
 			SINT32 getEncryptedLogDir(UINT8* name,UINT32 len);
+
+		/** Get the XML describing the Mix. this is not a string!*/
+			//SINT32 getMixXml(UINT8* strxml,UINT32* len);
+			SINT32 getMixXml(DOM_Document &docMixInfo);
+	
+#endif //ONLY_LOCAL_PROXY			
 			bool getCompressLogs()
 				{
 					return m_bCompressedLogs;
 				}
-			
+			SINT32 getLogDir(UINT8* name,UINT32 len);
 			SINT32 getUser(UINT8* user,UINT32 len);
 			SINT32 getPidFile(UINT8* pidfile,UINT32 len);
 
-			/** Get the XML describing the Mix. this is not a string!*/
-			//SINT32 getMixXml(UINT8* strxml,UINT32* len);
-			SINT32 getMixXml(DOM_Document &docMixInfo);
 			bool isLocalProxy();
 			bool isFirstMix();
 			bool isMiddleMix();
@@ -321,7 +328,9 @@ class CACmdLnOptions
 			
 #endif	
 
-    // added by ronin <ronin2@web.de>
+
+#ifndef ONLY_LOCAL_PROXY
+			// added by ronin <ronin2@web.de>
     // needed for autoconfiguration
 			SINT32 setNextMix(DOM_Document&);
 			SINT32 setPrevMix(DOM_Document&);
@@ -331,19 +340,39 @@ class CACmdLnOptions
 			
 			/** Writes a default configuration file into the file named by filename*/
 			static SINT32 createMixOnCDConfiguration(const UINT8* strFileName);
+#endif //only_LOCAL_PROXY
 		private:
 			UINT8*	m_strConfigFile; //the filename of the config file
-			bool		m_bIsRunReConfigure; //true, if an async reconfigure is under way
-	    CAMutex* m_pcsReConfigure; //Ensures that reconfigure is running only once at the same time;
-			CAThread m_threadReConfigure; //Thread, that does the actual reconfigure work
 			bool		m_bDaemon;
 	    UINT16	m_iSOCKSServerPort;
 	    UINT16	m_iTargetPort; //only for the local proxy...
 			char*		m_strTargetHost; //only for the local proxy...
 			char*		m_strSOCKSHost;
 	    UINT16	m_iSOCKSPort;
+#ifndef ONLY_LOCAL_PROXY
+			bool		m_bIsRunReConfigure; //true, if an async reconfigure is under way
+	    CAMutex* m_pcsReConfigure; //Ensures that reconfigure is running only once at the same time;
+			CAThread m_threadReConfigure; //Thread, that does the actual reconfigure work
 	    CAListenerInterface**	m_addrInfoServices;
-	    UINT32 m_addrInfoServicesSize;
+
+			CASignature*		m_pSignKey;
+			CACertificate*	m_pOwnCertificate;
+			
+			CACertificate** m_OpCerts;
+			UINT32 m_OpCertsLength;
+
+			CACertificate*	m_pPrevMixCertificate;
+			CACertificate*	m_pNextMixCertificate;
+			CACertificate*	m_pLogEncryptionCertificate;
+
+			// added by ronin <ronin2@web.de>
+			DOM_Element m_oCascadeXML;
+			bool m_bAcceptReconfiguration;
+			DOM_Document m_docMixInfo;
+			DOM_Document m_docMixXml;
+#endif //ONLY_LOCAL_PROXY
+
+			UINT32 m_addrInfoServicesSize;
 			bool		m_bLocalProxy,m_bFirstMix,m_bMiddleMix,m_bLastMix;
 			bool		m_bAutoReconnect; //auto reconnect if connection to first mix lost ??
 			char*		m_strCascadeName;
@@ -353,8 +382,6 @@ class CACmdLnOptions
 			char*		m_strUser;
 			char*		m_strPidFile;
 			SINT32	m_nrOfOpenFiles; //How many open files (sockets) should we use
-			DOM_Document m_docMixInfo;
-			DOM_Document m_docMixXml;
     
 			//char*		m_strMixXml;
 			char*		m_strMixID;
@@ -368,19 +395,6 @@ class CACmdLnOptions
 			UINT8**								m_arStrVisibleAddresses;
 			UINT32								m_cnVisibleAddresses;
 	
-			CASignature*		m_pSignKey;
-			CACertificate*	m_pOwnCertificate;
-			
-			CACertificate** m_OpCerts;
-			UINT32 m_OpCertsLength;
-
-			CACertificate*	m_pPrevMixCertificate;
-			CACertificate*	m_pNextMixCertificate;
-			CACertificate*	m_pLogEncryptionCertificate;
-
-    // added by ronin <ronin2@web.de>
-    DOM_Element m_oCascadeXML;
-    bool m_bAcceptReconfiguration;
 
 #ifdef LOG_CRIME
 			regex_t* m_arCrimeRegExps;
@@ -414,12 +428,14 @@ class CACmdLnOptions
 
 		private:
 			SINT32 setNewValues(CACmdLnOptions& newOptions);
+#ifndef ONLY_LOCAL_PROXY
 			SINT32 readXmlConfiguration(DOM_Document& docConfig,const UINT8* const configFileName);
 			SINT32 readXmlConfiguration(DOM_Document& docConfig,const UINT8* const buf, UINT32 len);
 			SINT32 processXmlConfiguration(DOM_Document& docConfig);
-			SINT32 clearTargetInterfaces();
-			SINT32 clearListenerInterfaces();
 			SINT32 clearVisibleAddresses();
 			SINT32 addVisibleAddresses(DOM_Node& nodeProxy);
+#endif
+			SINT32 clearTargetInterfaces();
+			SINT32 clearListenerInterfaces();
 	};
 #endif

@@ -27,6 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 
 #include "StdAfx.h"
+#ifndef ONLY_LOCAL_PROXY
 #include "CACertificate.hpp"
 #include "CABase64.hpp"
 #include "CAUtil.hpp"
@@ -194,3 +195,4 @@ SINT32 CACertificate::encode(DOM_DocumentFragment& docFrag,DOM_Document& doc)
 		setDOMElementValue(elemCert,buff);
 		return E_SUCCESS;
 	}
+#endif //ONLY_LOCAL_PROXY

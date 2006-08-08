@@ -35,7 +35,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 // How many packets do you want to replay at a time?
 #define REPLAY_COUNT 16
 #ifndef NEW_MIX_TYPE
-class CALocalProxy:public CAMix
+class CALocalProxy
 	{
 		public:
 			CALocalProxy()
@@ -43,18 +43,15 @@ class CALocalProxy:public CAMix
 					m_arRSA=NULL;
 					m_pSymCipher=NULL;
 				}
-			virtual ~CALocalProxy(){clean();}
-			tMixType getType() const
-				{
-					return CAMix::JAP;
-				}
-
+			
+			~CALocalProxy(){clean();}
 			
 			// signals the main loop whether to capture or replay packets
 			static bool bCapturePackets;
 			static bool bReplayPackets;
 			static int iCapturedPackets;
-
+			SINT32 start();
+	
 		private:
 			SINT32 loop();
 			SINT32 init();

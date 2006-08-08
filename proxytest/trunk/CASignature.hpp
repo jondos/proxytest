@@ -27,6 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CASIGNATURE__
 #define __CASIGNATURE__
+#ifndef ONLY_LOCAL_PROXY
 #define SIGKEY_XML 1
 #define SIGKEY_PKCS12 2
 #include "CACertStore.hpp"
@@ -97,3 +98,4 @@ class CASignature
 			
 	};
 #endif
+#endif //ONLY_LOCAL_PROXY

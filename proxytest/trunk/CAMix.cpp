@@ -26,6 +26,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
+#ifndef ONLY_LOCAL_PROXY
 #include "CAMix.hpp"
 #include "CAUtil.hpp"
 #include "CAInfoService.hpp"
@@ -248,4 +249,4 @@ SINT32 CAMix::initMixCascadeInfo(DOM_Element& mixes)
 #endif
 		return E_SUCCESS;
 }
-
+#endif //ONLY_LOCAL_PROXY

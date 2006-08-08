@@ -28,7 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #ifndef __CATLSCLIENTSOCKET_HPP__
 #define __CATLSCLIENTSOCKET_HPP__
-
+#ifndef ONLY_LOCAL_PROXY
 #include "CASocketAddr.hpp"
 #include "CASocket.hpp"
 #include "CAMsg.hpp"
@@ -78,3 +78,4 @@ private:
 };
 
 #endif
+#endif //ONLY_LOCAL_PROXY

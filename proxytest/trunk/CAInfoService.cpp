@@ -26,6 +26,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
+#ifndef ONLY_LOCAL_PROXY 
 #include "CAInfoService.hpp"
 #include "CASocket.hpp"
 #include "CACmdLnOptions.hpp"
@@ -830,3 +831,4 @@ SINT32 CAInfoService::getPaymentInstance(const UINT8* a_pstrPIID,CAXMLBI** a_pXM
 			}
 	}
 #endif
+#endif //ONLY_LOCAL_PROXY

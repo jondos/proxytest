@@ -32,34 +32,33 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #include "CACmdLnOptions.hpp"
 #include "CAMsg.hpp"
-#include "CAMix.hpp"
-#include "CAMiddleMix.hpp"
 #include "CALocalProxy.hpp"
 #include "xml/DOM_Output.hpp"
-#ifdef LOG_CRIME
-#include "tre/regex.h"
+#ifndef ONLY_LOCAL_PROXY
+	#include "CAMix.hpp"
+	#ifdef LOG_CRIME
+		#include "tre/regex.h"
+	#endif
+	#ifdef NEW_MIX_TYPE
+		/* use TypeB mixes */
+		#include "TypeB/CAFirstMixB.hpp"
+		#include "TypeB/CALastMixB.hpp"
+	#else
+		#include "TypeA/CAFirstMixA.hpp"
+		#include "TypeA/CALastMixA.hpp"
+	#endif
+	#include "CAMiddleMix.hpp"
+	#include "CALogPacketStats.hpp"
+	#include "CATLSClientSocket.hpp"
+
+// The Mix....
+CAMix* pMix=NULL;
 #endif
-#ifdef NEW_MIX_TYPE
-  /* use TypeB mixes */
-	#include "TypeB/CAFirstMixB.hpp"
-	#include "TypeB/CALastMixB.hpp"
-#else
-  #include "TypeA/CAFirstMixA.hpp"
-  #include "TypeA/CALastMixA.hpp"
-#endif
-#include "CALogPacketStats.hpp"
-#include "CATLSClientSocket.hpp"
-//#include "CAPayment.hpp"
-//#ifdef _WIN32
-//HANDLE hEventThreadEnde;
-//#endif
 CACmdLnOptions options;
 
 //Global Locks required by OpenSSL-Library
 CAMutex* pOpenSSLMutexes;
 
-// The Mix....
-CAMix* pMix=NULL;
 
 
 typedef struct
@@ -109,11 +108,12 @@ void signal_interrupt( int)
 		exit(0);
 	}
 
+#ifndef ONLY_LOCAL_PROXY
 void signal_hup(int)
 	{
 		options.reread(pMix);
 	}
-
+#endif
 
 ///Callbackfunction for looking required by OpenSSL
 void openssl_locking_callback(int mode, int type, char * /*file*/, int /*line*/)
@@ -180,7 +180,9 @@ void init()
 		OpenSSL_add_all_algorithms();
 		pOpenSSLMutexes=new CAMutex[CRYPTO_num_locks()];
 		CRYPTO_set_locking_callback((void (*)(int,int,const char *,int))openssl_locking_callback);
+#ifndef ONLY_LOCAL_PROXY
 		SSL_library_init();
+#endif
 		CAMsg::init();
 		CASocketAddrINet::init();
 		//startup
@@ -369,7 +371,9 @@ See \ref XMLMixCascadeStatus "[XML]" for a description of the XML struct send.
 
 int main(int argc, const char* argv[])
 	{
+#ifndef ONLY_LOCAL_PROXY
 		pMix=NULL;
+#endif
 		int i;
 		SINT32 maxFiles,ret;
 #if defined(HAVE_CRTDBG)
@@ -484,7 +488,9 @@ int main(int argc, const char* argv[])
 				else
 					CAMsg::setLogOptions(MSG_FILE);
 			}
+#ifndef ONLY_LOCAL_PROXY
 		ret=CAMsg::openEncryptedLog();
+#endif
 #ifdef LOG_CRIME
 		if(ret!=E_SUCCESS)
 			{
@@ -605,7 +611,11 @@ int main(int argc, const char* argv[])
 		if(options.isLocalProxy())
 			{
 				#ifndef NEW_MIX_TYPE
-					pMix=new CALocalProxy();
+					CALocalProxy* pProxy=new CALocalProxy();
+					CAMsg::printMsg(LOG_INFO,"Starting LocalProxy...\n");
+					if(pProxy->start()!=E_SUCCESS)
+						CAMsg::printMsg(LOG_CRIT,"Error during MIX-Startup!\n");
+					delete pProxy;
 				#else
 					CAMsg::printMsg(LOG_CRIT,"Compiled without LocalProxy support!\n");
 					goto EXIT;
@@ -621,6 +631,7 @@ int main(int argc, const char* argv[])
 				//		goto EXIT;
 				//	}
 				//else
+#ifndef ONLY_LOCAL_PROXY
 				if(options.isFirstMix())
 					{
 						CAMsg::printMsg(LOG_INFO,"I am the First MIX..\n");
@@ -641,15 +652,23 @@ int main(int argc, const char* argv[])
 						#else
 							pMix=new CALastMixB();
 						#endif
+#else
+				CAMsg::printMsg(LOG_ERR,"this Mix is compile to work only as local proxy!\n");
+				goto EXIT;
+#endif
 			}
+#ifndef ONLY_LOCAL_PROXY
 	  CAMsg::printMsg(LOG_INFO,"Starting MIX...\n");
 		if(pMix->start()!=E_SUCCESS)
 			CAMsg::printMsg(LOG_CRIT,"Error during MIX-Startup!\n");
+#endif
 EXIT:
 //		delete pRTT;
+#ifndef ONLY_LOCAL_PROXY
 		if(pMix!=NULL)
 			delete pMix;
-//		CASocketAddrINet::destroy();
+#endif
+		//		CASocketAddrINet::destroy();
 		#ifdef _WIN32
 			WSACleanup();
 		#endif

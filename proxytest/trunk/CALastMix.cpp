@@ -26,6 +26,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
+#ifndef ONLY_LOCAL_PROXY
 #include "CALastMix.hpp"
 #ifdef NEW_MIX_TYPE // TypeB mixes
   #include "TypeB/typedefsb.hpp"
@@ -709,3 +710,4 @@ SINT32 CALastMix::initMixCascadeInfo(DOM_Element& mixes)
     setDOMElementAttribute(cascade,"create",(UINT8*)"true");
     return r;
 }
+#endif //ONLY_LOCAL_PROXY

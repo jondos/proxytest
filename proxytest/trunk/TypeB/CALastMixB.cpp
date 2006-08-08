@@ -30,6 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE
  */
 #include "../StdAfx.h"
+#ifndef ONLY_LOCAL_PROXY
 #include "CALastMixB.hpp"
 #include "typedefsb.hpp"
 #include "CALastMixBChannelList.hpp"
@@ -486,3 +487,4 @@ SINT32 CALastMixB::loop() {
 #endif //NEW_MIX_TYPE
   return E_UNKNOWN;
 }
+#endif //ONLY_LOCAL_PROXY

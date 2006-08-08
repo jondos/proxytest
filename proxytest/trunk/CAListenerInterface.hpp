@@ -1,6 +1,5 @@
 #ifndef _CALISTENERINTERFAC__
 #define _CALISTENERINTERFAC__
-
 #include "typedefs.hpp"
 #include "CASocketAddr.hpp"
 

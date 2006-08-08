@@ -26,6 +26,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
+#ifndef ONLY_LOCAL_PROXY
 #include "CAFirstMix.hpp"
 #include "CASocketGroup.hpp"
 #include "CASingleSocketGroup.hpp"
@@ -1365,4 +1366,4 @@ THREAD_RETURN iplist_loopDoLogCountries(void* param)
 		THREAD_RETURN_SUCCESS;	
 	}
 #endif
-
+#endif //ONLY_LOCAL_PROXY

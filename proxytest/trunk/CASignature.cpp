@@ -26,6 +26,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
+#ifndef ONLY_LOCAL_PROXY
 #include "CASignature.hpp"
 #include "CABase64.hpp"
 #include "CAUtil.hpp"
@@ -784,4 +785,4 @@ SINT32 CASignature::decodeRS(const UINT8* in, const UINT32 inLen, DSA_SIG* pDsaS
 	pDsaSig->s = BN_bin2bn(in+20, inLen-20, NULL);
 	return E_SUCCESS;
 }
-
+#endif //ONLY_LOCAL_PROXY

@@ -26,6 +26,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "../StdAfx.h"
+#ifndef ONLY_LOCAL_PROXY
 #include "CALastMixA.hpp"
 #include "../CALastMixChannelList.hpp"
 #include "../CASingleSocketGroup.hpp"
@@ -630,4 +631,4 @@ SINT32 CALastMixA::loop()
 #endif //! NEW_MIX_TYPE
 		return E_UNKNOWN;
 	}
-
+#endif //ONLY_LOCAL_PROXY

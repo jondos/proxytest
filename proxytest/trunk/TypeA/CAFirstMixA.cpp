@@ -26,6 +26,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "../StdAfx.h"
+#ifndef ONLY_LOCAL_PROXY
 #include "CAFirstMixA.hpp"
 #include "../CAThread.hpp"
 #include "../CASingleSocketGroup.hpp"
@@ -614,3 +615,4 @@ NEXT_USER:
 #endif //!MIX_NEW_TYP
 		return E_UNKNOWN;
 	}
+#endif //ONLY_LOCAL_PROXY

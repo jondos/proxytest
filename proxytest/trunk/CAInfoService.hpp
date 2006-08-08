@@ -27,6 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CAINFOSERVICE__
 #define __CAINFOSERVICE__
+#ifndef ONLY_LOCAL_PROXY
 #include "CASignature.hpp"
 #include "CAFirstMix.hpp"
 #include "CAThread.hpp"
@@ -103,3 +104,4 @@ class CAInfoService
 			bool					m_bConfiguring;
 };
 #endif
+#endif //ONLY_LOCAL_PROXY

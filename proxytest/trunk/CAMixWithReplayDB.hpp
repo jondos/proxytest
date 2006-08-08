@@ -28,6 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #ifndef _CA_MIX_WITH_REPLAY_DB_
 #define _CA_MIX_WITH_REPLAY_DB_
+#ifndef ONLY_LOCAL_PROXY
 #include "CADatabase.hpp"
 #include "CAMix.hpp"
 
@@ -45,3 +46,4 @@ class CAMixWithReplayDB:public CAMix
 			CADatabase*						m_pReplayDB;
 	};
 #endif //_CA_MIX_WITH_REPLAY_DB_
+#endif //ONLY_LOCAL_PROXY

@@ -27,7 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CALASTMIX__
 #define __CALASTMIX__
-
+#ifndef ONLY_LOCAL_PROXY
 #include "CAMix.hpp"
 #include "CAMuxSocket.hpp"
 #include "CAASymCipher.hpp"
@@ -145,3 +145,4 @@ class CALastMix:public
 	};
 
 #endif
+#endif //ONLY_LOCAL_PROXY

@@ -28,7 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #ifndef __CAFIRSTMIX__
 #define __CAFIRSTMIX__
-
+#ifndef ONLY_LOCAL_PROXY
 #include "CAMix.hpp"
 #include "CAMuxSocket.hpp"
 #include "CAASymCipher.hpp"
@@ -277,3 +277,4 @@ protected:
 };
 
 #endif
+#endif //ONLY_LOCAL_PROXY

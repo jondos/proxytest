@@ -27,6 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CACERTIFICATE__
 #define __CACERTIFICATE__
+#ifndef ONLY_LOCAL_PROXY
 #define CERT_DER 1
 #define CERT_XML_X509CERTIFICATE 2
 #define CERT_PKCS12 3
@@ -77,3 +78,4 @@ class CACertificate
 		static UINT8 * m_spXmlElementName;
 	};
 #endif
+#endif //ONLY_LOCAL_PROXY

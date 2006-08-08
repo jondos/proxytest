@@ -29,7 +29,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define __CALASTMIXA__
 
 #include "../CALastMix.hpp"
-
+#ifndef ONLY_LOCAL_PROXY
 class CALastMixA:public CALastMix
 	{
 		protected:
@@ -37,3 +37,4 @@ class CALastMixA:public CALastMix
 	};
 
 #endif
+#endif //ONLY_LOCAL_PROXY

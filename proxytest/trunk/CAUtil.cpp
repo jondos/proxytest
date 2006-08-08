@@ -356,7 +356,7 @@ SINT32 filelength(int handle)
 	}
 #endif
 
-
+#ifndef ONLY_LOCAL_PROXY
 SINT32 setDOMElementValue(DOM_Element& elem,UINT32 text)
 	{
 		UINT8 tmp[10];
@@ -811,6 +811,7 @@ SINT32 decryptXMLElement(DOM_Node node, CAASymCipher* pRSA)
 			parent.replaceChild(elemPlainRoot,node);	
 		return E_SUCCESS;
 	}
+#endif //ONLY_LOCAL_PROXY
 
 UINT8* readFile(UINT8* name,UINT32* size)
 	{

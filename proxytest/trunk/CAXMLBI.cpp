@@ -26,6 +26,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
+#ifndef ONLY_LOCAL_PROXY
 #include "CAXMLBI.hpp"
 
 const UINT8* const CAXMLBI::ms_pXmlElemName=(UINT8*)"PaymentInstance";
@@ -182,4 +183,4 @@ SINT32 CAXMLBI::toXmlElement(DOM_Document &a_doc, DOM_Element &elemRoot)
 		
 		return E_SUCCESS;
 	}
-	
+#endif //ONLY_LOCAL_PROXY
