@@ -52,6 +52,8 @@ class CAASymCipher
 			SINT32 setPublicKeyAsXML(const UINT8* buff,UINT32 len);
 			SINT32 setPublicKeyAsDOMNode(DOM_Node& node);
 #endif
+			//Set the public key from a Base64 encodes exponent and modulus
+			SINT32 setPublicKey(const UINT8* modulus,UINT32 moduluslen,const UINT8* exponent,UINT32 exponentlen);
 		private:
 			RSA* m_pRSA;
 	};

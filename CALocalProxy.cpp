@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAUtil.hpp"
 #include "CASocketAddrINet.hpp"
 #include "CABase64.hpp"
-//#include "xml/DOM_Output.hpp"
+#include "xml/DOM_Output.hpp"
 #ifndef NEW_MIX_TYPE
 extern CACmdLnOptions options;
 // signals the main loop whether to capture or replay packets
@@ -509,7 +509,7 @@ SINT32 CALocalProxy::clean()
 SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 	{
 		CAMsg::printMsg(LOG_INFO,"Login process and key exchange started...\n");
-
+#ifndef ONLY_LOCAL_PROXY
 		//Parsing KeyInfo received from Mix n+1
 		MemBufInputSource oInput(buff,len,"localoproxy");
 		DOMParser oParser;
@@ -607,7 +607,25 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 				return E_UNKNOWN;
 #endif
 			}
-		
+#else
+	m_MixCascadeProtocolVersion=MIX_CASCADE_PROTOCOL_VERSION_0_4;
+	m_chainlen=2;
+	m_arRSA=new CAASymCipher[m_chainlen];
+	UINT8* modulus;
+	UINT32 moduluslen;
+	UINT8* exponent;
+	UINT32 exponentlen;
+	modulus=(UINT8*)strstr((char*)buff,"<Modulus>")+9;
+	moduluslen=((UINT8*)strstr((char*)modulus,"</Modulus>"))-modulus;
+	exponent=(UINT8*)strstr((char*)modulus,"<Exponent>")+10;
+	exponentlen=((UINT8*)strstr((char*)exponent,"</Exponent>"))-exponent;
+	m_arRSA[1].setPublicKey(modulus,moduluslen,exponent,exponentlen);
+	modulus=(UINT8*)strstr((char*)exponent,"<Modulus>")+9;
+	moduluslen=((UINT8*)strstr((char*)modulus,"</Modulus>"))-modulus;
+	exponent=(UINT8*)strstr((char*)modulus,"<Exponent>")+10;
+	exponentlen=((UINT8*)strstr((char*)exponent,"</Exponent>"))-exponent;
+	m_arRSA[0].setPublicKey(modulus,moduluslen,exponent,exponentlen);
+#endif
 		//Now sending SymKeys....
 		if(m_MixCascadeProtocolVersion==MIX_CASCADE_PROTOCOL_VERSION_0_2)
 			{
@@ -627,7 +645,9 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 			}
 		else
 			{
-				const char XML_JAP_KEY_TEMPLATE="<?xml encoding=\"UTF-8\"?><JAPKeyExchange version=\"0.1\"><LinkEncryption>%s</LinkEncryption><MixEncryption>%s</MixEncryption></JAPKeyExchange>";
+				const char* XML_HEADER="<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+				const UINT32 XML_HEADER_SIZE=strlen(XML_HEADER);
+				const char* XML_JAP_KEY_TEMPLATE="<JAPKeyExchange version=\"0.1\"><LinkEncryption>%s</LinkEncryption><MixEncryption>%s</MixEncryption></JAPKeyExchange>";
 	      //DOM_Document doc=DOM_Document::createDocument();
    			//DOM_Element e = doc.createElement("JAPKeyExchange");
 				//doc.appendChild(e);
@@ -654,30 +674,25 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 				outBuffMixKey[outlenMixKey]=0;
 				//setDOMElementValue(elemMixEnc,outBuff);
 				//e.appendChild(elemMixEnc);
-				sprintf(buff,XML_JAP_TEMPLATE,outBuffLinkKey,outBuffMixKey);
-		MemBufInputSource oInput(buff,strlen(buff),"locaoproxy");
-		DOMParser oParser1;
-		oParser1.parse(oInput);		
-		DOM_Document doc=oParser1.getDocument();
-
-				encryptXMLElement(doc,&m_arRSA[m_chainlen-1]);
-				UINT32 size;
-				UINT8* buff=DOM_Output::dumpToMem(doc,&size);
-				UINT16 size2=htons(size);
+				sprintf((char*)buff,XML_JAP_KEY_TEMPLATE,outBuffLinkKey,outBuffMixKey);
+				UINT32 encbufflen;
+				UINT8* encbuff=encryptXMLElement(buff,strlen((char*)buff),encbufflen,&m_arRSA[m_chainlen-1]);
+				UINT16 size2=htons(encbufflen+XML_HEADER_SIZE);
 				SINT32 ret=((CASocket*)&m_muxOut)->send((UINT8*)&size2,2);
-				ret=((CASocket*)&m_muxOut)->send(buff,size);
+				ret=((CASocket*)&m_muxOut)->send((UINT8*)XML_HEADER,XML_HEADER_SIZE);
+				ret=((CASocket*)&m_muxOut)->send(encbuff,encbufflen);
+				delete[] encbuff;
 				delete[] buff;
 				// Checking Signature send from Mix
 				ret=((CASocket*)&m_muxOut)->receiveFully((UINT8*)&size2,2);
 				size2=ntohs(size2);
-				buff=new UINT8[size2];
-				ret=((CASocket*)&m_muxOut)->receiveFully(buff,size2);
-				delete[] buff;
+				UINT8* xmlbuff=new UINT8[size2];
+				ret=((CASocket*)&m_muxOut)->receiveFully(xmlbuff,size2);
+				delete[] xmlbuff;
 				m_muxOut.setSendKey(linkKeys,32);
 				m_muxOut.setReceiveKey(linkKeys+32,32);
 				m_muxOut.setCrypt(true);
 			}
-
 		CAMsg::printMsg(LOG_INFO,"Login process and key exchange finished!\n");		
 		return E_SUCCESS;
 	}
