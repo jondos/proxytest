@@ -509,7 +509,7 @@ SINT32 CALocalProxy::clean()
 SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 	{
 		CAMsg::printMsg(LOG_INFO,"Login process and key exchange started...\n");
-/*
+
 		//Parsing KeyInfo received from Mix n+1
 		MemBufInputSource oInput(buff,len,"localoproxy");
 		DOMParser oParser;
@@ -627,30 +627,39 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 			}
 		else
 			{
-	      DOM_Document doc=DOM_Document::createDocument();
-   			DOM_Element e = doc.createElement("JAPKeyExchange");
-				doc.appendChild(e);
-				e.setAttribute("version", "0.1");
-				DOM_Element elemLinkEnc = doc.createElement("LinkEncryption");
+				const char XML_JAP_KEY_TEMPLATE="<?xml encoding=\"UTF-8\"?><JAPKeyExchange version=\"0.1\"><LinkEncryption>%s</LinkEncryption><MixEncryption>%s</MixEncryption></JAPKeyExchange>";
+	      //DOM_Document doc=DOM_Document::createDocument();
+   			//DOM_Element e = doc.createElement("JAPKeyExchange");
+				//doc.appendChild(e);
+				//e.setAttribute("version", "0.1");
+				//DOM_Element elemLinkEnc = doc.createElement("LinkEncryption");
+				UINT8* buff=new UINT8[9000];
 				UINT8 linkKeys[64];
 				getRandom(linkKeys,64);
-				UINT8 outBuff[512];
-				UINT32 outlen=512;
-				CABase64::encode(linkKeys,64,outBuff,&outlen);
-				outBuff[outlen]=0;
-				setDOMElementValue(elemLinkEnc,outBuff);
-				e.appendChild(elemLinkEnc);
-				DOM_Element elemMixEnc = doc.createElement("MixEncryption");
+				UINT8 outBuffLinkKey[512];
+				UINT32 outlenLinkKey=512;
+				CABase64::encode(linkKeys,64,outBuffLinkKey,&outlenLinkKey);
+				outBuffLinkKey[outlenLinkKey]=0;
+				//setDOMElementValue(elemLinkEnc,outBuff);
+				//e.appendChild(elemLinkEnc);
+				//DOM_Element elemMixEnc = doc.createElement("MixEncryption");
 				UINT8 mixKeys[32];
 				getRandom(mixKeys,32);
 				m_pSymCipher=new CASymCipher();
 				m_pSymCipher->setKey(mixKeys);
 				m_pSymCipher->setIVs(mixKeys+16);
-				outlen=512;
-				CABase64::encode(mixKeys,32,outBuff,&outlen);
-				outBuff[outlen]=0;
-				setDOMElementValue(elemMixEnc,outBuff);
-				e.appendChild(elemMixEnc);
+				UINT8 outBuffMixKey[512];
+				UINT32 outlenMixKey=512;
+				CABase64::encode(mixKeys,32,outBuffMixKey,&outlenMixKey);
+				outBuffMixKey[outlenMixKey]=0;
+				//setDOMElementValue(elemMixEnc,outBuff);
+				//e.appendChild(elemMixEnc);
+				sprintf(buff,XML_JAP_TEMPLATE,outBuffLinkKey,outBuffMixKey);
+		MemBufInputSource oInput(buff,strlen(buff),"locaoproxy");
+		DOMParser oParser1;
+		oParser1.parse(oInput);		
+		DOM_Document doc=oParser1.getDocument();
+
 				encryptXMLElement(doc,&m_arRSA[m_chainlen-1]);
 				UINT32 size;
 				UINT8* buff=DOM_Output::dumpToMem(doc,&size);
@@ -668,7 +677,7 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 				m_muxOut.setReceiveKey(linkKeys+32,32);
 				m_muxOut.setCrypt(true);
 			}
-*/
+
 		CAMsg::printMsg(LOG_INFO,"Login process and key exchange finished!\n");		
 		return E_SUCCESS;
 	}
