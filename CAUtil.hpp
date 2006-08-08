@@ -114,6 +114,9 @@ SINT32 encryptXMLElement(DOM_Node , CAASymCipher* pRSA);
 SINT32 decryptXMLElement(DOM_Node , CAASymCipher* pRSA);
 
 #endif //ONLY_LOCAL_PROXY
+
+UINT8* encryptXMLElement(UINT8* inbuff,UINT32 inlen,UINT32& outlen,CAASymCipher* pRSA);
+
 inline void set64(UINT64& op1,UINT32 op2)
 	{
 #if !defined(HAVE_NATIVE_UINT64)
