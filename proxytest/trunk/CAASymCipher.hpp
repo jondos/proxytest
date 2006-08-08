@@ -49,9 +49,9 @@ class CAASymCipher
 			//SINT32 getPublicKeySize();
 			//SINT32 setPublicKey(UINT8* buff,UINT32* len);
 			SINT32 setPublicKey(const CACertificate* pCert);
-#endif
 			SINT32 setPublicKeyAsXML(const UINT8* buff,UINT32 len);
 			SINT32 setPublicKeyAsDOMNode(DOM_Node& node);
+#endif
 		private:
 			RSA* m_pRSA;
 	};

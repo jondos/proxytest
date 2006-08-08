@@ -33,8 +33,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CACmdLnOptions.hpp"
 #include "CAMsg.hpp"
 #include "CALocalProxy.hpp"
-#include "xml/DOM_Output.hpp"
+#include "CAQueue.hpp"
 #ifndef ONLY_LOCAL_PROXY
+	#include "xml/DOM_Output.hpp"
 	#include "CAMix.hpp"
 	#ifdef LOG_CRIME
 		#include "tre/regex.h"
