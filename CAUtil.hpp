@@ -58,6 +58,7 @@ UINT32 getMemoryUsage();
 SINT32 filelength(int handle);
 #endif
 
+#ifndef ONLY_LOCAL_PROXY
 SINT32 setDOMElementValue(DOM_Element& elem,UINT32 value);
 
 /**
@@ -112,6 +113,7 @@ SINT32 encryptXMLElement(DOM_Node , CAASymCipher* pRSA);
 /** Replaces a DOM element with a deencrypted version of this element*/
 SINT32 decryptXMLElement(DOM_Node , CAASymCipher* pRSA);
 
+#endif //ONLY_LOCAL_PROXY
 inline void set64(UINT64& op1,UINT32 op2)
 	{
 #if !defined(HAVE_NATIVE_UINT64)

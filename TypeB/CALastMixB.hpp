@@ -31,7 +31,7 @@
  */
 #ifndef __CALASTMIXB__
 #define __CALASTMIXB__
-
+#ifndef ONLY_LOCAL_PROXY
 #include "../CALastMix.hpp"
 #include "CAChainTable.hpp"
 
@@ -53,3 +53,4 @@ class CALastMixB: public CALastMix {
 };
 
 #endif //__CALASTMIXB__
+#endif//ONLY_LOCAL_PROXY

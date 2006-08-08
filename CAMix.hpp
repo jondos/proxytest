@@ -28,6 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CAMIX__
 #define __CAMIX__
 
+#ifndef ONLY_LOCAL_PROXY
 extern class CACmdLnOptions options;
 
 class CASignature;
@@ -122,3 +123,4 @@ class CAMix
 			bool needAutoConfig();
 	};
 #endif
+#endif //ONLY_LOCAL_PROXY

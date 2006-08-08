@@ -66,8 +66,10 @@ class CAMsg
 			static SINT32 cleanup(){delete pMsg;return E_SUCCESS;}
 			static SINT32 setLogOptions(UINT32 options);
 			static SINT32 printMsg(UINT32 typ,const char* format,...);
+#ifndef ONLY_LOCAL_PROXY
 			static SINT32 openEncryptedLog();
 			static SINT32 closeEncryptedLog();
+#endif //ONLY_LOCAL_PROXY
 		private:
 			SINT32 openLog(UINT32 type);
 			SINT32 closeLog();

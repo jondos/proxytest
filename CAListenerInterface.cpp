@@ -34,8 +34,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include "CASocketAddrUnix.hpp"
 #endif
 
+#ifndef ONLY_LOCAL_PROXY
 const char* CAListenerInterface::XML_ELEMENT_CONTAINER_NAME = "ListenerInterfaces";
 const char* CAListenerInterface::XML_ELEMENT_NAME = "ListenerInterface";
+#endif
 
 CAListenerInterface::CAListenerInterface(void)
 	{
@@ -83,6 +85,7 @@ CAListenerInterface* CAListenerInterface::getInstance(NetworkType type,const UIN
 		return pListener;
 	}
 
+#ifndef ONLY_LOCAL_PROXY
 CAListenerInterface** CAListenerInterface::getInstance(DOM_Element& a_elemListenerInterfaces, 
 													  UINT32& r_length)
 {
@@ -249,3 +252,4 @@ ERR:
 		delete pListener;
 		return NULL;
 }
+#endif //ONLY_LOCAL_PROXY

@@ -26,6 +26,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
+#ifndef ONLY_LOCAL_PROXY
 #include "CAMiddleMix.hpp"
 #include "CASingleSocketGroup.hpp"
 #include "CAMsg.hpp"
@@ -718,3 +719,4 @@ SINT32 CAMiddleMix::clean()
 		m_pMiddleMixChannelList=NULL;
 		return E_SUCCESS;
 	}
+#endif //ONLY_LOCAL_PROXY

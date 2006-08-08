@@ -65,6 +65,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define DELAY_CHANNELS_LATENCY //to enable min latency per channel
 //#define HAVE_EPOLL //define if you have epoll support on your (Linux) system
 //#define COUNTRY_STATS //collect stats about countries users come from
+//#define ONLY_LOCAL_PROXY //define to build only the local proxy (aka JAP)
 
 //the following definition are just for threading support beside pthread 
 #undef USE_SEMAPHORE //normally we do not need semaphores

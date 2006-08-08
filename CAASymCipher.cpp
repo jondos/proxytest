@@ -244,6 +244,7 @@ _ERROR:
 	}
 */
 
+#ifndef ONLY_LOCAL_PROXY
 /** Stores the public key in \c buff as XML. The format is as follows:
 	*
 	* \verbatim
@@ -304,6 +305,7 @@ SINT32 CAASymCipher::getPublicKeyAsDocumentFragment(DOM_DocumentFragment& dFrag)
 		dFrag.appendChild(root);
 		return E_SUCCESS;
 	}
+
 /** Sets the public key to the values stored in \c key. 
 	* The format must match the format XML described for getPublicKeyAsXML(). 
 	*@param key byte array which holds the new public key
@@ -376,7 +378,9 @@ SINT32 CAASymCipher::setPublicKeyAsDOMNode(DOM_Node& node)
 			}
 		return E_UNKNOWN;
 	}
+#endif //ONLY_LOCAL_PROXY
 
+#ifndef ONLY_LOCAL_PROXY
 /** Sets the public key which is used for encryption to the contained in the
 	*	provided certificate. The key has to be a RSA public key.
 	*	@retval E_SUCCESS if successful
@@ -398,3 +402,4 @@ SINT32 CAASymCipher::setPublicKey(const CACertificate* pCert)
 		setRSAFlags(m_pRSA);
 		return E_SUCCESS;
 	}
+#endif //ONLY_LOCAL_PROXY

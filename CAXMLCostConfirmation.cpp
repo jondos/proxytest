@@ -1,4 +1,5 @@
 #include "StdAfx.h"
+#ifndef ONLY_LOCAL_PROXY
 #include "CAXMLCostConfirmation.hpp"
 #include "CAUtil.hpp"
 #include "CAMsg.hpp"
@@ -119,3 +120,4 @@ SINT32 CAXMLCostConfirmation::setValues()
 			}
 		return E_SUCCESS;
 	}
+#endif //ONLY_LOCAL_PROXY

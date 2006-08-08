@@ -42,10 +42,23 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 CACmdLnOptions::CACmdLnOptions()
   {
-		m_bDaemon=m_bIsRunReConfigure=false;
+		m_bDaemon=false;
 		m_bLocalProxy=m_bFirstMix=m_bLastMix=m_bMiddleMix=false;
+#ifndef ONLY_LOCAL_PROXY
+		m_bIsRunReConfigure=false;
 		m_addrInfoServices = NULL;
 		m_addrInfoServicesSize=0;
+		m_pcsReConfigure=new CAMutex();
+		m_pSignKey=NULL;
+		m_pOwnCertificate=NULL;
+		m_OpCerts=NULL;
+		m_pPrevMixCertificate=NULL;
+		m_pNextMixCertificate=NULL;
+		m_bCompressedLogs=false;
+		m_pLogEncryptionCertificate=NULL;
+		m_bIsEncryptedLogEnabled=false;
+		m_docMixInfo=NULL;
+#endif //ONLY_LOCAL_PROXY
 		m_iTargetPort=m_iSOCKSPort=m_iSOCKSServerPort=m_addrInfoServicesSize=0xFFFF;
 		m_strTargetHost=m_strSOCKSHost=NULL;
 		m_strUser=m_strCascadeName=m_strLogDir=m_strEncryptedLogDir=NULL;
@@ -57,18 +70,8 @@ CACmdLnOptions::CACmdLnOptions()
 		m_cnVisibleAddresses=0;
 		m_nrOfOpenFiles=-1;
 		m_strMixID=NULL;
-		m_pSignKey=NULL;
-		m_pOwnCertificate=NULL;
-		m_OpCerts=NULL;
-		m_pPrevMixCertificate=NULL;
-		m_pNextMixCertificate=NULL;
-		m_bCompressedLogs=false;
 		m_bAutoReconnect=false;
 		m_strConfigFile=NULL;
-		m_docMixInfo=NULL;
-		m_pLogEncryptionCertificate=NULL;
-		m_bIsEncryptedLogEnabled=false;
-		m_pcsReConfigure=new CAMutex();
 		m_strPidFile=NULL;
 #ifdef PAYMENT
 		m_pBI=NULL;
@@ -88,7 +91,9 @@ CACmdLnOptions::~CACmdLnOptions()
 SINT32 CACmdLnOptions::cleanup()
 	{
 		clean();
+#ifndef ONLY_LOCAL_PROXY
 		delete m_pcsReConfigure;
+#endif
 		return E_SUCCESS;
 	}
 
@@ -124,6 +129,7 @@ SINT32 CACmdLnOptions::clearListenerInterfaces()
 		return E_SUCCESS;
 	}
 
+#ifndef ONLY_LOCAL_PROXY
 /** Deletes all information about the visible addresses.
 	*/
 SINT32 CACmdLnOptions::clearVisibleAddresses()
@@ -203,6 +209,7 @@ SINT32 CACmdLnOptions::getVisibleAddress(UINT8* strAddressBuff, UINT32 len,UINT3
 		strcpy((char*)strAddressBuff,(char*)m_arStrVisibleAddresses[nr-1]);
 		return E_SUCCESS;	
 	}
+#endif //ONLY_LOCAL_PROXY
 
 void CACmdLnOptions::clean()
   {
@@ -220,7 +227,8 @@ void CACmdLnOptions::clean()
 			{
 				delete[] m_strSOCKSHost;
 	    }
-	  if (m_addrInfoServices != NULL)
+#ifndef ONLY_LOCAL_PROXY
+		if (m_addrInfoServices != NULL)
 			{
 	    	for (UINT32 i = 0; i < m_addrInfoServicesSize; i++)
 	    		{
@@ -230,6 +238,8 @@ void CACmdLnOptions::clean()
 				m_addrInfoServices=NULL;
 	    	m_addrInfoServicesSize = 0;
 	    }
+#endif //ONLY_LOCAL_PROXY
+
 		m_strSOCKSHost=NULL;
 		if(m_strCascadeName!=NULL)
 			delete[] m_strCascadeName;
@@ -246,13 +256,14 @@ void CACmdLnOptions::clean()
 		if(m_strUser!=NULL)
 			delete[] m_strUser;
 		m_strUser=NULL;
-		if(m_docMixInfo!=NULL)
-			m_docMixInfo=NULL;
 		if(m_strMixID!=NULL)
 			delete[] m_strMixID;
 		m_strMixID=NULL;
 		clearTargetInterfaces();
 		clearListenerInterfaces();
+#ifndef ONLY_LOCAL_PROXY
+		if(m_docMixInfo!=NULL)
+			m_docMixInfo=NULL;
 		clearVisibleAddresses();
 		if(m_pSignKey!=NULL)
 			delete m_pSignKey;
@@ -282,7 +293,8 @@ void CACmdLnOptions::clean()
 		if(m_pLogEncryptionCertificate!=NULL)
 			delete m_pLogEncryptionCertificate;
 		m_pLogEncryptionCertificate=NULL;
-	}
+#endif //ONLY_LOCAL_PROXY
+}
 
 SINT32 CACmdLnOptions::parse(int argc,const char** argv)
     {
@@ -340,17 +352,20 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 			printf("Max open sockets: >10000\n");
 			exit(0);
 		}
+#ifndef ONLY_LOCAL_PROXY
 	if(iCreateConf!=0)
 		{
 			createMixOnCDConfiguration(NULL);
 			exit(0);
 		}
+#endif
 	if(iLocalProxy!=0)
 		m_bLocalProxy=true;
 	if(m_bLocalProxy&&iAutoReconnect!=0)
 		m_bAutoReconnect=true;
 	if(configfile!=NULL)
 		{
+#ifndef ONLY_LOCAL_PROXY
 			ret=readXmlConfiguration(m_docMixXml,(UINT8*)configfile);
 			if(ret==E_FILE_OPEN)
 				CAMsg::printMsg(LOG_CRIT,"Could not open config file: %s\n",configfile);
@@ -363,6 +378,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 					m_strConfigFile=new UINT8[strlen(configfile)+1];
 					memcpy(m_strConfigFile,configfile,strlen(configfile)+1);
 				}
+#endif
 			free(configfile);
 		}
 	if(iDaemon==0)
@@ -471,20 +487,24 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 		}
 
 	m_iSOCKSServerPort=(UINT16)SOCKSport;
+#ifndef ONLY_LOCAL_PROXY
 	if(!m_bLocalProxy)
 		{
 			ret=processXmlConfiguration(m_docMixXml);
 			if(ret!=E_SUCCESS)
 				return ret;
 		}
+#endif
 	return E_SUCCESS;
  }
 
+#ifndef ONLY_LOCAL_PROXY
 struct t_CMNDLN_REREAD_PARAMS
 	{
 		CACmdLnOptions* pCmdLnOptions;
 		CAMix* pMix;
 	};
+#endif //ONLY_LOCAL_PROXY
 
 /** Copies options from \c newOptions. Only those options which are specified
 	* in \c newOptions are copied. The others are left untouched!
@@ -517,6 +537,7 @@ SINT32 CACmdLnOptions::setNewValues(CACmdLnOptions& newOptions)
 		return E_SUCCESS;
 }
 
+#ifndef ONLY_LOCAL_PROXY
 /** Modifies the next mix settings (target interface and certificate) according to
 * the specified options object. Target interfaces are only copied if they denote a
 * next mix. HTTP and SOCKS proxy settings are ignored.
@@ -598,7 +619,9 @@ SINT32 CACmdLnOptions::setNextMix(DOM_Document& doc)
 		CAMsg::printMsg(LOG_DEBUG,"setNextMix() - end\n");
     return processXmlConfiguration(m_docMixXml);
 }
+#endif //ONLY_LOCAL_PROXY
 
+#ifndef ONLY_LOCAL_PROXY
 /** Modifies the next mix settings (target interface and certificate) according to
 * the specified options object. Target interfaces are only copied if they denote a
 * next mix. HTTP and SOCKS proxy settings are ignored.
@@ -666,10 +689,11 @@ SINT32 CACmdLnOptions::setPrevMix(DOM_Document& doc)
 		CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - end with error\n");
     return E_UNKNOWN;
 }
+#endif //ONLY_LOCAL_PROXY
 
 
 
-
+#ifndef ONLY_LOCAL_PROXY
 /** Rereads the configuration file (if one was given on startup) and reconfigures
 	* the mix according to the new values. This is done asyncronous. A new thread is
 	* started, which does the actual work.
@@ -723,6 +747,7 @@ REREAD_FINISH:
 		pOptions->m_bIsRunReConfigure=false;
 		THREAD_RETURN_SUCCESS;
 	}
+#endif //ONLY_LOCAL_PROXY
 
 bool CACmdLnOptions::getDaemon()
 	{
@@ -761,6 +786,7 @@ SINT32 CACmdLnOptions::getMixHost(UINT8* host,UINT32 len)
 		return E_SUCCESS;
   }
 
+#ifndef ONLY_LOCAL_PROXY
 UINT16 CACmdLnOptions::getSOCKSPort()
   {
 		return m_iSOCKSPort;
@@ -777,6 +803,7 @@ SINT32 CACmdLnOptions::getSOCKSHost(UINT8* host,UINT32 len)
 		strcpy((char*)host,m_strSOCKSHost);
 		return (SINT32)strlen(m_strSOCKSHost);
   }
+#endif //ONLY_LOCAL_PROXY
 
 #ifdef PAYMENT
 /**Returns an CAXMLBI object, which describes the BI this AI uses. This is not a copy of the 
@@ -875,12 +902,12 @@ SINT32 CACmdLnOptions::getPaymentSettleInterval(UINT32 *pInterval)
 #endif /* ifdef PAYMENT */
 
 
+#ifndef ONLY_LOCAL_PROXY
 CAListenerInterface** CACmdLnOptions::getInfoServices(UINT32& r_size)
  {
  		r_size = m_addrInfoServicesSize;
  		return m_addrInfoServices;
   }
-
 SINT32 CACmdLnOptions::getCascadeName(UINT8* name,UINT32 len)
   {
 		if(m_strCascadeName==NULL)
@@ -892,6 +919,18 @@ SINT32 CACmdLnOptions::getCascadeName(UINT8* name,UINT32 len)
 		strcpy((char*)name,m_strCascadeName);
 		return E_SUCCESS;
   }
+
+
+SINT32 CACmdLnOptions::getEncryptedLogDir(UINT8* name,UINT32 len)
+  {
+		if(m_strEncryptedLogDir==NULL||name==NULL)
+				return E_UNKNOWN;
+		if(len<=(UINT32)strlen(m_strEncryptedLogDir))
+			return E_UNKNOWN;
+		strcpy((char*)name,m_strEncryptedLogDir);
+		return E_SUCCESS;
+  }
+#endif //ONLY_LOCAL_PROXY
 
 SINT32 CACmdLnOptions::getLogDir(UINT8* name,UINT32 len)
   {
@@ -917,15 +956,6 @@ SINT32 CACmdLnOptions::getPidFile(UINT8* pidfile,UINT32 len)
 		return E_SUCCESS;
   }
 
-SINT32 CACmdLnOptions::getEncryptedLogDir(UINT8* name,UINT32 len)
-  {
-		if(m_strEncryptedLogDir==NULL||name==NULL)
-				return E_UNKNOWN;
-		if(len<=(UINT32)strlen(m_strEncryptedLogDir))
-			return E_UNKNOWN;
-		strcpy((char*)name,m_strEncryptedLogDir);
-		return E_SUCCESS;
-  }
 
 SINT32 CACmdLnOptions::getUser(UINT8* user,UINT32 len)
   {
@@ -959,6 +989,7 @@ bool CACmdLnOptions::isLocalProxy()
 			return m_bLocalProxy;
     }
 
+#ifndef ONLY_LOCAL_PROXY
 /** Returns the XML tree describing the Mix . This is NOT a copy!
 	* @param docMixInfo destination for the XML tree
 	*	@retval E_SUCCESS if it was successful
@@ -1790,7 +1821,9 @@ SKIP_NEXT_MIX:
 
     return E_SUCCESS;
 }
+#endif //ONLY_LOCAL_PROXY
 
+#ifndef ONLY_LOCAL_PROXY
 /**
 	* @param strFileName filename of the file in which the default configuration is stored, if NULL stdout is used
 	*/
@@ -1884,3 +1917,4 @@ SINT32 CACmdLnOptions::createMixOnCDConfiguration(const UINT8* strFileName)
 		delete[] buff;	
 		return E_SUCCESS;
 	}
+#endif //ONLY_LOCAL_PROXY

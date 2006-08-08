@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAUtil.hpp"
 #include "CASocketAddrINet.hpp"
 #include "CABase64.hpp"
-#include "xml/DOM_Output.hpp"
+//#include "xml/DOM_Output.hpp"
 #ifndef NEW_MIX_TYPE
 extern CACmdLnOptions options;
 // signals the main loop whether to capture or replay packets
@@ -58,6 +58,33 @@ void SIGUSR2_handler(int signum)
 		CAMsg::printMsg(LOG_DEBUG,"Starting replay of packets.\n");
 		CALocalProxy::bReplayPackets = true;
 	}
+
+
+SINT32 CALocalProxy::start()
+	{
+		if(initOnce()!=E_SUCCESS)
+			return E_UNKNOWN;
+    while(true)
+    {
+				CAMsg::printMsg(LOG_DEBUG, "CALocalProxy main: before init()\n");
+        if(init() == E_SUCCESS)
+        {
+					CAMsg::printMsg(LOG_DEBUG, "CALocalProxy main: init() returned success\n");
+          CAMsg::printMsg(LOG_INFO, "The local proxy is now on-line.\n");
+					loop();
+					CAMsg::printMsg(LOG_DEBUG, "CAMix local proxy: loop() returned, maybe connection lost.\n");
+        }
+        else
+        {
+            CAMsg::printMsg(LOG_DEBUG, "init() failed, maybe no connection.\n");
+        }
+
+				CAMsg::printMsg(LOG_DEBUG, "CALocalProxy main: before clean()\n");
+				clean();
+				CAMsg::printMsg(LOG_DEBUG, "CAMix LocalProxy: after clean()\n");
+        sSleep(20);
+    }
+}
 
 
 SINT32 CALocalProxy::initOnce()
@@ -482,6 +509,7 @@ SINT32 CALocalProxy::clean()
 SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 	{
 		CAMsg::printMsg(LOG_INFO,"Login process and key exchange started...\n");
+/*
 		//Parsing KeyInfo received from Mix n+1
 		MemBufInputSource oInput(buff,len,"localoproxy");
 		DOMParser oParser;
@@ -633,39 +661,14 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 				// Checking Signature send from Mix
 				ret=((CASocket*)&m_muxOut)->receiveFully((UINT8*)&size2,2);
 				size2=ntohs(size2);
-				/*byte[] tmpBuff = new byte[xml_buff.length + 2];
-				System.arraycopy(xml_buff, 0, tmpBuff, 2, xml_buff.length);
-				tmpBuff[0] = (byte) ( (xml_buff.length >> 8) & 0x00FF);
-				tmpBuff[1] = (byte) (xml_buff.length & 0x00FF);
-				int len = m_inDataStream.readShort();
-				byte[] mixSigBuff = new byte[len];
-				m_inDataStream.readFully(mixSigBuff);*/
 				buff=new UINT8[size2];
 				ret=((CASocket*)&m_muxOut)->receiveFully(buff,size2);
 				delete[] buff;
 				m_muxOut.setSendKey(linkKeys,32);
 				m_muxOut.setReceiveKey(linkKeys+32,32);
 				m_muxOut.setCrypt(true);
-				/*doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new
-					ByteArrayInputStream(mixSigBuff));
-				root = doc.getDocumentElement();
-				if (!root.getNodeName().equals("Signature"))
-				{
-					return ErrorCodes.E_UNKNOWN;
-				}
-				Node elemSigValue = XMLUtil.getFirstChildByName(root, "SignatureValue");
-				String strSigValue = XMLUtil.parseValue(elemSigValue, null);
-				byte[] sigValue = Base64.decode(strSigValue);
-				JAPCertificate certs[] = JAPSignature.getAppendedCertificates(nodeSig);
-				JAPSignature sig = new JAPSignature();
-				sig.initVerify(certs[0].getPublicKey());
-				if (!sig.verify(tmpBuff, sigValue, true))
-				{
-					return ErrorCodes.E_UNKNOWN;
-				}
-				setEnableEncryption(true);
-				*/
 			}
+*/
 		CAMsg::printMsg(LOG_INFO,"Login process and key exchange finished!\n");		
 		return E_SUCCESS;
 	}

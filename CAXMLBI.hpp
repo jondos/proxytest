@@ -29,10 +29,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CAXMLBI__
 #define __CAXMLBI__
 
+#ifndef ONLY_LOCAL_PROXY
 #include "CAAbstractXMLEncodable.hpp"
 #include "CACertificate.hpp"
 #include "CASignature.hpp"
-#include "StdAfx.h"
 #include "CAUtil.hpp"
 
 /**
@@ -98,4 +98,5 @@ class CAXMLBI : public CAAbstractXMLEncodable
 		static const UINT8* const ms_pXmlElemName;
 };
 
+#endif //ONLY_LOCAL_PROXY
 #endif

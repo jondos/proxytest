@@ -26,6 +26,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
+#ifndef ONLY_LOCAL_PROXY
 #include "CAXMLErrorMessage.hpp"
 
 CAXMLErrorMessage::CAXMLErrorMessage(const UINT32 errorCode, UINT8 * message)
@@ -112,3 +113,4 @@ SINT32 CAXMLErrorMessage::toXmlElement(DOM_Document &a_doc, DOM_Element &elemRoo
 		setDOMElementValue(elemRoot, m_strErrMsg);
 		return E_SUCCESS;
 	}
+#endif //ONLY_LOCAL_PROXY

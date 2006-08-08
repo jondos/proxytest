@@ -62,7 +62,9 @@ CAMsg::CAMsg()
 CAMsg::~CAMsg()
     {
 			closeLog();
+#ifndef ONLY_LOCAL_PROXY
 			closeEncryptedLog();
+#endif
 			delete[] m_strMsgBuff;
 			delete[] m_strLogFile;
 			delete m_pcsPrint;
@@ -222,7 +224,7 @@ SINT32 CAMsg::openLog(UINT32 type)
 						return E_UNKNOWN;
 					strcat(m_strLogFile,FILENAME_INFOLOG);
 					m_hFileInfo=open(m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE|O_SYNC,S_IREAD|S_IWRITE);										
-				break;
+					break;
 #ifdef COMPRESSED_LOGS
 				case MSG_COMPRESSED_FILE:
 					char logdir[255];
@@ -243,6 +245,7 @@ SINT32 CAMsg::openLog(UINT32 type)
 		return E_SUCCESS;
 	}
 
+#ifndef ONLY_LOCAL_PROXY
 /** Open a log, where the logged messages are store encrypted.
 	* The file format is as follows:
 	*	NEWLINE
@@ -303,3 +306,4 @@ SINT32 CAMsg::closeEncryptedLog()
 		pMsg->m_hFileEncrypted=-1;
 		return E_SUCCESS;
 	}
+#endif //ONLY_LOCAL_PROXY
