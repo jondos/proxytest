@@ -4308,6 +4308,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CAClientSocket.hpp"
+				>
+			</File>
+			<File
 				RelativePath="CACmdLnOptions.hpp"
 				>
 			</File>
