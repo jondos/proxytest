@@ -176,7 +176,9 @@ void checkSizesOfBaseTypes()
 /**do necessary initialisations of libraries etc.*/
 void init()
 	{
+#ifndef ONLY_LOCAL_PROXY
 		XMLPlatformUtils::Initialize();
+#endif
 		OpenSSL_add_all_algorithms();
 		pOpenSSLMutexes=new CAMutex[CRYPTO_num_locks()];
 		CRYPTO_set_locking_callback((void (*)(int,int,const char *,int))openssl_locking_callback);
@@ -682,7 +684,9 @@ EXIT:
 //XML Cleanup
 		//Note: We have to destroy all XML Objects and all objects that uses XML Objects BEFORE
 		//we terminate the XML lib!
+#ifndef ONLY_LOCAL_PROXY
 		XMLPlatformUtils::Terminate();
+#endif //ONLY_LOCAL_PROXY
 		CAMsg::printMsg(LOG_CRIT,"Terminating Programm!\n");
 		CAMsg::cleanup();
 #if defined(HAVE_CRTDBG)
