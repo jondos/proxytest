@@ -27,6 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __DOM_OUTPUT__
 #define __DOM_OUTPUT__
+#ifndef ONLY_LOCAL_PROXY
 #include "../CAQueue.hpp"
 class MemFormatTarget: public XMLFormatTarget
 	{
@@ -213,3 +214,4 @@ class DOM_Output
 			static const XMLCh  m_1_0[4]; 
 };
 #endif
+#endif //ONLY_LOCAL_PROXY

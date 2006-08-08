@@ -26,6 +26,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "../StdAfx.h"
+#ifndef ONLY_LOCAL_PROXY
 #include "DOM_Output.hpp"
 
 
@@ -376,3 +377,4 @@ SINT32 DOM_Output::dumpNode(const DOM_Node& toWrite,bool bCanonical)
     delete [] p;
     return target;
 }*/
+#endif //ONLY_LOCAL_PROXY
