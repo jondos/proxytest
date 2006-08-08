@@ -566,12 +566,12 @@ int main(int argc, const char* argv[])
 	#else
 			signal(SIGPIPE,SIG_IGN);
 	#endif
+	#ifndef ONLY_LOCAL_PROXY
 		struct sigaction newAction;
 		newAction.sa_handler=signal_hup;
 		newAction.sa_flags=0;
-		#ifndef ONLY_LOCAL_PROXY
-			sigaction(SIGHUP,&newAction,NULL);
-		#endif
+		sigaction(SIGHUP,&newAction,NULL);
+	#endif
 #endif
 		signal(SIGINT,signal_interrupt);
 		signal(SIGTERM,signal_term);
