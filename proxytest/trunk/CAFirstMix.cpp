@@ -517,7 +517,17 @@ THREAD_RETURN fm_loopSendToMix(void* param)
 		while(!pFirstMix->m_bRestart)
 			{
 				len=sizeof(tQueueEntry);
-				ret=pQueue->getOrWait((UINT8*)pQueueEntry,&len);
+				#ifdef KEEP_ALIVE_TRAFFIC
+					ret=pQueue->getOrWait((UINT8*)pQueueEntry,&len,MAX_KEEP_ALIVE_TRAFFIC_SEND_WAIT);
+					if(ret==E_TIMEDOUT)
+						{//send a dummy as keep-alvie-traffic
+							pMixPacket->flags=CHANNEL_DUMMY;
+							pMixPacket->channel=DUMMY_CHANNEL;
+							getRandom(pMixPacket->data,DATA_SIZE);
+						}else
+				#else
+					ret=pQueue->getOrWait((UINT8*)pQueueEntry,&len);
+				#endif	
 				if(ret!=E_SUCCESS||len!=sizeof(tQueueEntry))
 					{
 						CAMsg::printMsg(LOG_ERR,"CAFirstMix::lm_loopSendToMix - Error in dequeueing MixPaket\n");
