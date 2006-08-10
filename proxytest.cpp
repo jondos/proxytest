@@ -508,7 +508,7 @@ int main(int argc, const char* argv[])
 #endif
 
 
-#ifdef _DEBUG
+#if defined (_DEBUG) &&!defined(ONLY_LOCAL_PROXY)
 		//		CADatabase::test();
 		if(CAQueue::test()!=E_SUCCESS)
 			CAMsg::printMsg(LOG_CRIT,"CAQueue::test() NOT passed! Exiting\n");

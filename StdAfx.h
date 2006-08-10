@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.05.19"
+#define MIX_VERSION "00.05.20"
 
 //Define all features if we are running in documentation creation mode
 #ifdef DOXYGEN
@@ -389,18 +389,19 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "trio/trio.hpp"
 #include "popt/system.h"
 #include "popt/popt.h"
-#include <openssl/ssl.h>
 #include <openssl/rsa.h>
-#include <openssl/dsa.h>
-#include <openssl/sha.h>
-#include <openssl/md5.h>
-#include <openssl/rand.h>
 #include <openssl/aes.h>
+#include <openssl/rand.h>
 #include <openssl/evp.h>
-#include <openssl/asn1.h>
-#include <openssl/pkcs12.h>
-#include <openssl/x509v3.h>
-
+#ifndef ONLY_LOCAL_PROXY
+	#include <openssl/asn1.h>
+	#include <openssl/pkcs12.h>
+	#include <openssl/x509v3.h>
+	#include <openssl/ssl.h>
+	#include <openssl/dsa.h>
+	#include <openssl/sha.h>
+	#include <openssl/md5.h>
+#endif
 #ifndef ONLY_LOCAL_PROXY
 //For DOM
 #include <util/XercesDefs.hpp>

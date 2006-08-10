@@ -30,6 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE
  */
 #include "../StdAfx.h"
+#ifndef ONLY_LOCAL_PROXY
 #include "CAChainTable.hpp"
 #include "typedefsb.hpp"
 #include "../CAUtil.hpp"
@@ -353,4 +354,4 @@ void CAChainTable::getNextEntryInternal(t_chaintableIterator* a_iterator) {
     m_pDelayBucketMutex->unlock();    
   }                                                        
 #endif //DELAY_CHANNELS
-
+#endif//onlyLOCAL_PROXY

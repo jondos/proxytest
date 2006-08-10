@@ -31,7 +31,7 @@
  */
 #ifndef __CA_CHAIN__
 #define __CA_CHAIN__
-
+#ifndef ONLY_LOCAL_PROXY
 #include "CALastMixBChannelList.hpp"
 #include "../CASocket.hpp"
 #include "../CAQueue.hpp"
@@ -131,3 +131,4 @@ class CAChain {
     UINT32 sendUpstreamDataInternal(UINT32 a_maxLength);
 };
 #endif //__CA_CHAIN__
+#endif //ONLY_LOCAL_PROXY
