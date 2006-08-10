@@ -39,7 +39,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	* This class has a 2-in-1 feature: Two independent IVs are available. Therefore
 	* we have crypt1() and crypt2() depending on the used IV.
 	*/
-class CASymCipher:public CALockAble
+class CASymCipher
+#ifndef ONLY_LOCAL_PROXY	
+	:public CALockAble
+#endif
 	{
 		public:
 			CASymCipher()
@@ -52,7 +55,9 @@ class CASymCipher:public CALockAble
 
 			~CASymCipher()
 				{
+#ifndef ONLY_LOCAL_PROXY
 					waitForDestroy();
+#endif
 					delete m_keyAES;
 					delete[] m_iv1;
 					delete[] m_iv2;

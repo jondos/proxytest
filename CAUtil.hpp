@@ -297,6 +297,7 @@ SINT32 formatJdbcTimestamp(const SINT32 seconds, UINT8 * strTimestamp, const UIN
  */
 SINT32 parseU64(const UINT8 * str, UINT64& value);
 
+#ifndef ONLY_LOCAL_PROXY
 /** Clones an OpenSSL DSA structure
 	*/
 inline DSA* DSA_clone(DSA* dsa)
@@ -312,4 +313,5 @@ inline DSA* DSA_clone(DSA* dsa)
 			tmpDSA->priv_key=BN_dup(dsa->priv_key);
 		return tmpDSA;
 	}
+#endif //ONLY_LOCAL_PROXY
 #endif

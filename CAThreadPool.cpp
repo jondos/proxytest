@@ -5,6 +5,7 @@
  *     O'Reilly & Associates, Inc.
  */
 #include "StdAfx.h"
+#ifndef ONLY_LOCAL_PROXY
 #include "CAThreadPool.hpp"
 void *tpool_thread(void *);
 
@@ -183,3 +184,4 @@ THREAD_RETURN worker_thread_main_loop(void *arg)
 			delete my_workp;
   } 
 }
+#endif //ONLY_LOCAL_PROXY

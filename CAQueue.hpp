@@ -27,6 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CAQUEUE__
 #define __CAQUEUE__
+#ifndef ONLY_LOCAL_PROXY
 #include "CAConditionVariable.hpp"
 #include "CAMsg.hpp"
 
@@ -123,3 +124,4 @@ class CAQueue
 				}*/
 	};
 #endif
+#endif //ONLY_LOCAL_PROXY

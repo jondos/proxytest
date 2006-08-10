@@ -26,6 +26,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
+#ifndef ONLY_LOCAL_PROXY
 #include "CALastMixChannelList.hpp"
 #include "CAUtil.hpp"
 
@@ -282,3 +283,4 @@ SINT32 CALastMixChannelList::test()
 			m_u32DelayChannelLatency=latency;
 		}
 #endif
+#endif //ONLY_LOCAL_PROXY
