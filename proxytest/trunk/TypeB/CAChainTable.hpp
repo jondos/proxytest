@@ -31,7 +31,7 @@
  */
 #ifndef __CA_CHAINTABLE__
 #define __CA_CHAINTABLE__
-
+#ifndef ONLY_LOCAL_PROXY
 #include "../CAMutex.hpp"
 #include "../CAThread.hpp"
 #include "CAChain.hpp"
@@ -88,3 +88,4 @@ class CAChainTable {
 
 };
 #endif //__CA_CHAINTABLE__
+#endif //ONLY_LOCAL_PROXY

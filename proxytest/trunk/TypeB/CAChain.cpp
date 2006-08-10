@@ -30,6 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE
  */
 #include "../StdAfx.h"
+#ifndef ONLY_LOCAL_PROXY
 #include "CAChain.hpp"
 #include "typedefsb.hpp"
 #include "CALastMixBChannelList.hpp"
@@ -635,3 +636,4 @@ UINT32 CAChain::sendUpstreamDataInternal(UINT32 a_maxLength) {
     m_pDelayBucketMutex->unlock();
   }
 #endif
+#endif //ONLY_LOCAL_PROXY
