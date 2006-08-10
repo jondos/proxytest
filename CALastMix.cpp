@@ -512,6 +512,7 @@ THREAD_RETURN lm_loopSendToMix(void* param)
 	}
 
 #define MAX_READ_FROM_PREV_MIX_QUEUE_SIZE	10000000
+
 /* How to end this thread:
  * 1. set m_brestart=true
  */  	
@@ -527,7 +528,10 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 		#ifdef USE_POOL
 			CAPool* pPool=new CAPool(MIX_POOL_SIZE);
 		#endif
-		
+		#ifdef KEEP_ALIVE_TRAFFIC
+			UINT64 keepaliveNow,keepaliveLast;
+			getcurrentTimeMillis(keepaliveLast);
+		#endif
 		while(!pLastMix->m_bRestart)
 			{
 				if(pQueue->getSize()>MAX_READ_FROM_PREV_MIX_QUEUE_SIZE)
@@ -535,36 +539,51 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 						msSleep(200);
 						continue;
 					}
-				SINT32 ret=pSocketGroup->select(MIX_POOL_TIMEOUT);	
-        if(ret < 0) {
-          if (ret == E_TIMEDOUT) {
-						#ifdef USE_POOL
-							pMixPacket->flags=CHANNEL_DUMMY;
-							pMixPacket->channel=DUMMY_CHANNEL;
-							getRandom(pMixPacket->data,DATA_SIZE);
-							#ifdef LOG_PACKET_TIMES
-								setZero64(pQueueEntry->timestamp_proccessing_start);
-							#endif
-						#else
-							continue;	
-						#endif	
+#ifdef KEEP_ALIVE_TRAFFIC
+				//check if the connection is broken because we did not received a Keep_alive-Message
+				getcurrentTimeMillis(keepaliveNow);
+				UINT32 keepaliveDiff=diff64(keepaliveNow,keepaliveLast);
+				if(keepaliveDiff>MAX_KEEP_ALIVE_TRAFFIC_RECV_WAIT_TIME)
+					{
+						pLastMix->m_bRestart=true;
+						break;
 					}
-          else {
-            /* another error occured (happens sometimes while debugging because
-             * of interruption, if a breakpoint is reached -> poll() returns
-             * errorcode EINTR)
-             */
-            continue;
-          }
-        }
+#endif KEEP_ALIVE_TRAFFIC
+				SINT32 ret=pSocketGroup->select(MIX_POOL_TIMEOUT);	
+        if(ret < 0) 
+					{
+						if (ret == E_TIMEDOUT) 
+							{
+								#ifdef USE_POOL
+									pMixPacket->flags=CHANNEL_DUMMY;
+									pMixPacket->channel=DUMMY_CHANNEL;
+									getRandom(pMixPacket->data,DATA_SIZE);
+									#ifdef LOG_PACKET_TIMES
+										setZero64(pQueueEntry->timestamp_proccessing_start);
+									#endif
+								#else
+									continue;	
+								#endif	
+							}
+						else 
+							{
+								/* another error occured (happens sometimes while debugging because
+								 * of interruption, if a breakpoint is reached -> poll() returns
+								 * errorcode EINTR)
+								 * Note: Any Error on select() does not mean, that the underliny connections have some error state, because
+								 * in this case select() returns the socket and than this socket returns the error
+								 */
+								continue;
+							}
+					}
 				else if(ret>0)
 					{
-						ret=pMuxSocket->receive(pMixPacket); //receives a whol MixPacket
+						ret=pMuxSocket->receive(pMixPacket); //receives a whole MixPacket
 						#ifdef LOG_PACKET_TIMES
 							getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_start);
 						#endif
 						if(ret!=MIXPACKET_SIZE)
-							{
+							{//something goes wrong...
 								CAMsg::printMsg(LOG_ERR,"CALastMix::lm_loopReadFromMix - received returned: %i\n",ret);
 								pLastMix->m_bRestart=true;
 								break;
@@ -579,7 +598,10 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 						getcurrentTimeMicros(pQueueEntry->pool_timestamp_out);
 					#endif
 				#endif		
-				pQueue->add(pQueueEntry,sizeof(tQueueEntry));	
+				pQueue->add(pQueueEntry,sizeof(tQueueEntry));
+				#ifdef KEEP_ALIVE_TRAFFIC
+					getcurrentTimeMillis(keepaliveLast);
+				#endif
 			}
 		delete pQueueEntry;
 		#ifdef USE_POOL
