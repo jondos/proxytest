@@ -26,6 +26,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
+#ifndef ONLY_LOCAL_PROXY
 #include "CAQueue.hpp"
 #include "CAMsg.hpp"
 #include "CAUtil.hpp"
@@ -418,3 +419,4 @@ SINT32 CAQueue::test()
 		delete []target;
 		return E_SUCCESS;
 	}
+#endif //ONLY_LOCAL_PROXY

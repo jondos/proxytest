@@ -25,6 +25,7 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
+#ifndef ONLY_LOCAL_PROXY
 #include "CAConditionVariable.hpp"
 /** From this class other classes could be derived, which need some kind from "locking" in memory. Imagine for
   * instance that thread t1 creates an object o of class c and uses it. During that a second thread t2 destroies o by calling 
@@ -90,3 +91,4 @@ class CALockAble
 			/** The reference counter*/
 			UINT32 m_nLockCount;
 	};
+#endif //ONLY_LOCAL_PROXY

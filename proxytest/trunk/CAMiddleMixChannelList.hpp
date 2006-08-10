@@ -27,6 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CAMIDDLEMIXCHANNELLIST__
 #define __CAMIDDLEMIXCHANNELLIST__
+#ifndef ONLY_LOCAL_PROXY
 #include "CASymCipher.hpp"
 #include "CAMuxSocket.hpp"
 #include "CAMutex.hpp"
@@ -151,3 +152,4 @@ class CAMiddleMixChannelList
 			CAMutex m_Mutex;
 	};
 #endif
+#endif //ONLY_LOCAL_PROXY

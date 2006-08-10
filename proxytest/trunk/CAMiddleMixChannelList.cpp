@@ -1,4 +1,5 @@
 #include "StdAfx.h"
+#ifndef ONLY_LOCAL_PROXY
 #include "CAMiddleMixChannelList.hpp"
 #include "CAUtil.hpp"
 
@@ -187,3 +188,4 @@ SINT32 CAMiddleMixChannelList::test()
 						}
 					return 0;
 				}
+#endif //ONLY_LOCAL_PROXY
