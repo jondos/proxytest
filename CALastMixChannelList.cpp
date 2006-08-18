@@ -252,9 +252,12 @@ SINT32 CALastMixChannelList::test()
 				{
 					pChannelList->m_pMutexDelayChannel->lock();
 					UINT32 u32BucketGrow=pChannelList->m_u32DelayChannelBucketGrow;
+					UINT32 u32MaxBucket=u32BucketGrow*10;
 					for(UINT32 i=0;i<MAX_POLLFD;i++)
-						if(pDelayBuckets[i]!=NULL)
-							*(pDelayBuckets[i])+=u32BucketGrow;
+						{
+							if(pDelayBuckets[i]!=NULL&&*(pDelayBuckets[i])<u32MaxBucket)
+								*(pDelayBuckets[i])+=u32BucketGrow;
+						}
 					pChannelList->m_pMutexDelayChannel->unlock();		
 					msSleep(pChannelList->m_u32DelayChannelBucketGrowIntervall);
 				}

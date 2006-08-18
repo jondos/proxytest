@@ -84,4 +84,4 @@ SINT32 CAThread::start(void* param,bool bDaemon,bool bSilent)
 			pthread_detach(*m_pThread);
 		return E_SUCCESS;
 	}
-#endif ONLY_LOCAL_PROXY
+#endif //ONLY_LOCAL_PROXY
