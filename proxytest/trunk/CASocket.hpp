@@ -30,14 +30,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketAddr.hpp"
 #include "CAClientSocket.hpp"
 #include "CAMutex.hpp"
-#ifdef _DEBUG
-	extern int sockets;
-#endif
 
 class CASocket:public CAClientSocket
 	{
 		public:
-			CASocket();
+		CASocket(bool bIsReserved=false);
 			~CASocket(){close();}
 
 			SINT32 create();
@@ -84,6 +81,24 @@ class CASocket:public CAClientSocket
 			SINT32 setKeepAlive(UINT32 sec);
 			SINT32 setNonBlocking(bool b);
 			SINT32 getNonBlocking(bool* b);
+			
+			/** Sets the max number of allowed "normal" sockets.
+				* @retval E_SUCCESS if call was successful
+				* @retval E_UNKNOWN otherwise
+				*/
+			static SINT32 setMaxNormalSockets(UINT32 u)
+				{
+				m_u32MaxNormalSockets=u;
+				return E_SUCCESS;
+				}
+			
+			/** Tries to find out how many socket we can open by open as many socket as possible witthout errors.
+				* If we can open more than 10.000 sockets we stop the test and return 10000.
+				*@ret max numbers of sockets we can have open at the same time
+				*@retval E_UNKNOWN in case of some unexpected error
+			*/
+			static SINT32 getMaxOpenSockets();
+			
 		protected:
 			bool m_bSocketIsClosed; //this is a flag, which shows, if the m_Socket is valid
 													//we should not set m_Socket to -1 or so after close,
@@ -94,5 +109,10 @@ class CASocket:public CAClientSocket
 		private:			
 			CAMutex m_csClose;
 			UINT32 m_closeMode;
+			///The following two variables are use to realise "reserved" sockets. The rational behind is to ensure
+			///that we could allway crate "reserved" socket why we may fail to create normal sockets because of to many open files related restrictions
+			static UINT32 m_u32NormalSocketsOpen; //how many "normal" sockets are open
+			static UINT32 m_u32MaxNormalSockets; //how many "normal" sockets are allowed at max
+			bool m_bIsReservedSocket; ///Normal or reserved socket?
 	};
 #endif

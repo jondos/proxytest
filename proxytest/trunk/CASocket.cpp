@@ -41,22 +41,34 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define CLOSE_RECEIVE 0x02
 #define CLOSE_BOTH		0x03
 
-CASocket::CASocket()
+UINT32 CASocket::m_u32NormalSocketsOpen=0; //how many "normal" sockets are open
+UINT32 CASocket::m_u32MaxNormalSockets=0xFFFFFFFF; //how many "normal" sockets are allowed at max
+
+CASocket::CASocket(bool bIsReservedSocket)
 	{
 		m_Socket=0;
 		m_closeMode=0;
 		m_bSocketIsClosed=true;
+		m_bIsReservedSocket=bIsReservedSocket;
 	}
 
 SINT32 CASocket::create()
 	{
 		return create(AF_INET);
 	}
-
+///@todo Not thread safe!
 SINT32 CASocket::create(int type)
 	{
 		if(m_bSocketIsClosed)
+			{
+			if(m_bIsReservedSocket||m_u32NormalSocketsOpen<m_u32MaxNormalSockets)
 			m_Socket=socket(type,SOCK_STREAM,0);
+			else
+				{
+				CAMsg::printMsg(LOG_CRIT,"Couldt not create a new normal Socket -- allowed number of normal sockets exeded!\n");
+				return SOCKET_ERROR;
+				}
+			}
 		else
 			return E_UNKNOWN;
 		if(m_Socket==INVALID_SOCKET)
@@ -69,6 +81,10 @@ SINT32 CASocket::create(int type)
 				return SOCKET_ERROR;
 			}
 		m_bSocketIsClosed=false;
+		m_csClose.lock();
+		if(!m_bIsReservedSocket)
+		m_u32NormalSocketsOpen++;
+		m_csClose.unlock();
 		return E_SUCCESS;
 	}
 
@@ -122,6 +138,11 @@ SINT32 CASocket::accept(CASocket &s)
 			return E_SOCKETCLOSED;
 		if(!s.m_bSocketIsClosed) //but the new socket should be closed!!!
 			return E_UNKNOWN;
+		if(m_u32NormalSocketsOpen>=m_u32MaxNormalSockets)
+			{
+			CAMsg::printMsg(LOG_CRIT,"CASocket::accept() -- Couldt not create a new normal Socket -- allowed number of normal sockets exeded!\n");
+			return E_UNKNOWN;
+			}
 		s.m_Socket=::accept(m_Socket,NULL,NULL);
 		if(s.m_Socket==SOCKET_ERROR)
 			{
@@ -130,10 +151,9 @@ SINT32 CASocket::accept(CASocket &s)
 					return E_SOCKETCLOSED;
 				return E_UNKNOWN;
 			}
-
-#ifdef _DEBUG
-		sockets++;
-#endif
+		m_csClose.lock();
+		m_u32NormalSocketsOpen++;
+		m_csClose.unlock();
 		s.m_bSocketIsClosed=false;
 		return E_SUCCESS;
 	}
@@ -256,15 +276,9 @@ SINT32 CASocket::close()
 		int ret;
 		if(!m_bSocketIsClosed)
 			{
-#ifdef _DEBUG				
-				if(::closesocket(m_Socket)==SOCKET_ERROR)
-					{
-						CAMsg::printMsg(LOG_DEBUG,"Fehler bei CASocket::closesocket\n -- %i",GET_NET_ERROR);
-					}
-				sockets--;
-#else
 				::closesocket(m_Socket);
-#endif
+			if(!m_bIsReservedSocket)
+			m_u32NormalSocketsOpen--;
 				m_bSocketIsClosed=true;
 				m_closeMode=0;
 				ret=E_SUCCESS;
@@ -274,30 +288,6 @@ SINT32 CASocket::close()
 		m_csClose.unlock();
 		return ret;
 	}
-
-/* /// it seems that this function is never used (Bastian)
-SINT32 CASocket::close(UINT32 mode)
-	{
-//		EnterCriticalSection(&csClose);
-		::shutdown(m_Socket,mode);
-		if(mode==SD_RECEIVE||mode==SD_BOTH)
-			m_closeMode|=CLOSE_RECEIVE;
-		if(mode==SD_SEND||mode==SD_BOTH)
-			{
-				m_closeMode|=CLOSE_SEND;				
-			}
-		int ret;
-		if(m_closeMode==CLOSE_BOTH)
-			{
-				close();
-				ret=E_SUCCESS;
-			}
-		else
-			ret=1;
-//		LeaveCriticalSection(&csClose);
-		return ret;
-	}
-*/
 			
 /** Sends some data over the network. This may block, 
 	* if socket is in blocking mode.
@@ -528,29 +518,6 @@ SINT32 CASocket::setReuseAddr(bool b)
 		return setsockopt(m_Socket,SOL_SOCKET,SO_REUSEADDR,(char*)&val,sizeof(val));
 	}
 
-/*
-SINT32 CASocket::setRecvLowWat(UINT32 r)
-	{
-		int val=r;
-		return setsockopt(m_Socket,SOL_SOCKET,SO_RCVLOWAT,(char*)&val,sizeof(val));
-	}
-
-SINT32 CASocket::setSendLowWat(UINT32 r)
-	{
-		int val=r;
-		return setsockopt(m_Socket,SOL_SOCKET,SO_SNDLOWAT,(char*)&val,sizeof(val));
-	}
-
-SINT32 CASocket::getSendLowWat()
-	{
-		int val;
-		socklen_t size=sizeof(val);
-		if(getsockopt(m_Socket,SOL_SOCKET,SO_SNDLOWAT,(char*)&val,&size)==SOCKET_ERROR)
-			return E_UNKNOWN;
-		else
-			return val;
-	}
-*/
 SINT32 CASocket::setRecvBuff(UINT32 r)
 	{
 		int val=r;
@@ -675,3 +642,23 @@ SINT32 CASocket::getNonBlocking(bool* b)
 				return SOCKET_ERROR;
 		#endif
 	}
+
+SINT32 CASocket::getMaxOpenSockets()
+{
+	CASocket* parSocket=new CASocket[10001];
+	UINT32 maxSocket=0;
+	for(UINT32 t=0;t<10001;t++)
+		{
+		if(parSocket[t].create()!=E_SUCCESS)
+			{
+			maxSocket=t;
+			break;
+			}
+		}
+	for(UINT32 t=0;t<maxSocket;t++)
+		{
+		parSocket[t].close();
+		}
+	delete []parSocket;
+	return maxSocket;
+}

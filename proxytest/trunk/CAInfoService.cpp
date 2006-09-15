@@ -289,7 +289,7 @@ SINT32 CAInfoService::sendStatus(const UINT8* a_strStatusXML,UINT32 a_len, const
 		#endif
 		if(!options.isFirstMix())
 			return E_SUCCESS;
-		CASocket oSocket;
+		CASocket oSocket(true);
 		
 		if (a_pSocketAddress == NULL)
 		{
@@ -406,7 +406,7 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
     SINT32 ret = E_SUCCESS;
     UINT32 len = 0;
 
-		CASocket oSocket;
+		CASocket oSocket(true);
 		UINT8 hostname[255];
 		UINT8 buffHeader[255];
 		CAHttpClient httpClient;
@@ -618,7 +618,7 @@ SINT32 CAInfoService::sendCascadeHelo(const UINT8* a_strCascadeHeloXML,UINT32 a_
 {	
     if(options.isMiddleMix())
 			return E_SUCCESS;
-		CASocket oSocket;
+		CASocket oSocket(true);
 		UINT8 hostname[255];
 		UINT8 buffHeader[255];
 		CAHttpClient httpClient;
