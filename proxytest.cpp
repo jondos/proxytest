@@ -558,9 +558,6 @@ int main(int argc, const char* argv[])
 
 		CAMsg::printMsg(LOG_INFO,"Anon proxy started!\n");
 		CAMsg::printMsg(LOG_INFO,MIX_VERSION_INFO);
-#ifdef _DEBUG
-		sockets=0;
-#endif
 
 
 #ifndef _WIN32
@@ -636,6 +633,12 @@ int main(int argc, const char* argv[])
 				//	}
 				//else
 #ifndef ONLY_LOCAL_PROXY
+			SINT32 s32MaxSockets=CASocket::getMaxOpenSockets();
+			CAMsg::printMsg(LOG_CRIT,"Max Number of sockets we can open: %i\n",s32MaxSockets);
+			if(s32MaxSockets>100&&s32MaxSockets<10000)
+				{
+				CASocket::setMaxNormalSockets(s32MaxSockets-10);
+				}
 				if(options.isFirstMix())
 					{
 						CAMsg::printMsg(LOG_INFO,"I am the First MIX..\n");
