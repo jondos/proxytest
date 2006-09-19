@@ -86,7 +86,9 @@ typedef struct t_lastmixchannellist lmChannelList;
 typedef struct t_lastmixchannellist lmChannelListEntry; 
 typedef lmChannelListEntry* LP_lmChannelListEntry;
 
-
+			#ifdef DELAY_CHANNELS
+				THREAD_RETURN lml_loopDelayBuckets(void*);
+	    #endif
 class CALastMixChannelList
 	{
 		public:
