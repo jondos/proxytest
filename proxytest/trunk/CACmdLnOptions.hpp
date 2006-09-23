@@ -253,7 +253,17 @@ class CACmdLnOptions
 		/** Get the XML describing the Mix. this is not a string!*/
 			//SINT32 getMixXml(UINT8* strxml,UINT32* len);
 			SINT32 getMixXml(DOM_Document &docMixInfo);
-	
+			
+			UINT32 getKeepAliveSendInterval()
+				{
+				return m_u32KeepAliveSendInterval;
+				}
+
+			UINT32 getKeepAliveRecvInterval()
+				{
+				return m_u32KeepAliveRecvInterval;
+				}
+			
 #endif //ONLY_LOCAL_PROXY			
 			bool getCompressLogs()
 				{
@@ -370,6 +380,9 @@ class CACmdLnOptions
 			bool m_bAcceptReconfiguration;
 			DOM_Document m_docMixInfo;
 			DOM_Document m_docMixXml;
+			
+			UINT32 m_u32KeepAliveSendInterval;
+			UINT32 m_u32KeepAliveRecvInterval;
 #endif //ONLY_LOCAL_PROXY
 
 			UINT32 m_addrInfoServicesSize;

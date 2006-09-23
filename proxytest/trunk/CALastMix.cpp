@@ -270,6 +270,22 @@ SINT32 CALastMix::processKeyExchange()
 		}
 		tmpCertStore->add(ownCert);
     
+		
+// Add Info about KeepAlive traffic
+		DOM_Element elemKeepAlive;
+		UINT32 u32KeepAliveSendInterval=options.getKeepAliveSendInterval();
+		UINT32 u32KeepAliveRecvInterval=options.getKeepAliveRecvInterval();
+		elemKeepAlive=doc.createElement("KeepAlive");
+		DOM_Element elemKeepAliveSendInterval;
+		DOM_Element elemKeepAliveRecvInterval;
+		elemKeepAliveSendInterval=doc.createElement("SendInterval");
+		elemKeepAliveRecvInterval=doc.createElement("ReceiveInterval");
+		elemKeepAlive.appendChild(elemKeepAliveSendInterval);
+		elemKeepAlive.appendChild(elemKeepAliveRecvInterval);
+		setDOMElementValue(elemKeepAliveSendInterval,u32KeepAliveSendInterval);
+		setDOMElementValue(elemKeepAliveRecvInterval,u32KeepAliveRecvInterval);
+		elemMix.appendChild(elemKeepAlive);
+		
 		if(m_pSignature->signXML(elemMix,tmpCertStore)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_DEBUG,"Could not sign KeyInfo send to users...\n");

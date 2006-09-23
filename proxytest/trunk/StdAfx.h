@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.05.21"
+#define MIX_VERSION "00.05.22"
 
 //Define all features if we are running in documentation creation mode
 #ifdef DOXYGEN
@@ -66,7 +66,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define HAVE_EPOLL //define if you have epoll support on your (Linux) system
 //#define COUNTRY_STATS //collect stats about countries users come from
 //#define ONLY_LOCAL_PROXY //define to build only the local proxy (aka JAP)
-//#define KEEP_ALIVE_TRAFFIC //uses Keep-Alive traffic between Mixes to detect broken connections
 
 //the following definition are just for threading support beside pthread 
 #undef USE_SEMAPHORE //normally we do not need semaphores
@@ -128,9 +127,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define REPLAY_DETECTION // enable to prevent replay of mix packets
 #define REPLAY_TIMESTAMP_PROPAGATION_INTERVALL 1 //How often (in minutes) should the current replay timestamps be propagate
 
-#define MAX_KEEP_ALIVE_TRAFFIC_RECV_WAIT_TIME  60000 //How long to wait for a Keep-Alive (or any other packet)
+#define KEEP_ALIVE_TRAFFIC_RECV_WAIT_TIME  70000 //How long to wait for a Keep-Alive (or any other packet)
 																							       //before we believe that the connection is broken (in ms)
-#define MAX_KEEP_ALIVE_TRAFFIC_SEND_WAIT 50000 //How long to wait before we sent a dummy a Keep-Alive-Traffic
+#define KEEP_ALIVE_TRAFFIC_SEND_WAIT_TIME 60000 //How long to wait before we sent a dummy a Keep-Alive-Traffic
 
 //#define DATABASE_PERFORMANCE_TEST //to performe a performance test of the replay db
 //Some constants

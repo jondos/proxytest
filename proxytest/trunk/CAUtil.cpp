@@ -557,6 +557,14 @@ SINT32 getDOMElementValue(const DOM_Element& elem,UINT32* value)
 		
 		return E_SUCCESS;
 	}
+SINT32 getDOMElementValue(const DOM_Element& elem,UINT32& value, UINT32 defaultValue)
+{
+	if(getDOMElementValue(elem,&value)!=E_SUCCESS)
+		{
+		value=defaultValue;
+		}
+	return E_SUCCESS;
+}
 
 SINT32 getDOMElementValue(const DOM_Element& elem, UINT64 &value)
 {

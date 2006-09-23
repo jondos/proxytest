@@ -1763,7 +1763,16 @@ SKIP_NEXT_MIX:
 #endif
 			}
 #endif
-
+///---- Red Configuartion of KeepAliveTraffic
+		DOM_Element elemKeepAlive;
+		DOM_Element elemKeepAliveSendInterval;
+		DOM_Element elemKeepAliveRecvInterval;
+		getDOMChildByName(elemNetwork,(UINT8*)"KeepAlive",elemKeepAlive,false);
+		getDOMChildByName(elemKeepAlive,(UINT8*)"SendInterval",elemKeepAliveSendInterval,false);
+		getDOMChildByName(elemKeepAlive,(UINT8*)"ReceiveInterval",elemKeepAliveRecvInterval,false);
+		getDOMElementValue(elemKeepAliveSendInterval,m_u32KeepAliveSendInterval,KEEP_ALIVE_TRAFFIC_SEND_WAIT_TIME);
+		getDOMElementValue(elemKeepAliveRecvInterval,m_u32KeepAliveRecvInterval,KEEP_ALIVE_TRAFFIC_RECV_WAIT_TIME);
+		
     tmpLen=255;
     getDOMChildByName(elemGeneral,(UINT8*)"MixID",elemMixID,false);
     if(elemMixID==NULL)
