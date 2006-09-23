@@ -108,6 +108,9 @@ class CAMix
 
 			CASignature* m_pSignature;
 			CAInfoService* m_pInfoService;
+			
+			UINT32 m_u32KeepAliveRecvInterval;
+			UINT32 m_u32KeepAliveSendInterval;
 
 	    bool m_acceptReconfiguration;
 

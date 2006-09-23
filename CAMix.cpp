@@ -42,6 +42,8 @@ CAMix::CAMix()
 		#endif
 		m_pMuxOutControlChannelDispatcher=NULL;
 		m_pMuxInControlChannelDispatcher=NULL;
+		m_u32KeepAliveSendInterval=0;//zero means --> do not use
+		m_u32KeepAliveRecvInterval=0;//zero means --> do not use
 	}
 
 SINT32 CAMix::start()
