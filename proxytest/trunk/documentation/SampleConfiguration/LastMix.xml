@@ -25,11 +25,17 @@
                 <Port>3128</Port>
             </Proxy>
         </Proxies>
+	<InfoServices>
         <InfoService>
+	<ListenerInterfaces>
+	<ListenerInterface>
             <Host>localhost</Host>
             <IP>127.0.0.1</IP>
             <Port>3000</Port>
+	    </ListenerInterface>
+	    </ListenerInterfaces>
         </InfoService>
+	</InfoServices>
     </Network>
     <Certificates>
         <OwnCertificate>

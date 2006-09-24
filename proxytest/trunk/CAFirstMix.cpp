@@ -278,11 +278,11 @@ SINT32 CAFirstMix::processKeyExchange()
     oParser.parse(oInput);
     delete []recvBuff;
 
-	DOM_Document doc=oParser.getDocument();
+		DOM_Document doc=oParser.getDocument();
     DOM_Element elemMixes=doc.getDocumentElement();
     if(elemMixes==NULL)
 		return E_UNKNOWN;
-	SINT32 count=0;
+		SINT32 count=0;
     if(getDOMElementAttribute(elemMixes,"count",&count)!=E_SUCCESS)
         return E_UNKNOWN;
  /*
@@ -451,6 +451,34 @@ SINT32 CAFirstMix::processKeyExchange()
             }
             UINT32 outlen=5000;
             UINT8* out=new UINT8[outlen];
+						///Getting the KeepAlive Traffice...
+						DOM_Element elemKeepAlive;
+						DOM_Element elemKeepAliveSendInterval;
+						DOM_Element elemKeepAliveRecvInterval;
+						getDOMChildByName(child,(UINT8*)"KeepAlive",elemKeepAlive,false);
+						getDOMChildByName(elemKeepAlive,(UINT8*)"SendInterval",elemKeepAliveSendInterval,false);
+						getDOMChildByName(elemKeepAlive,(UINT8*)"ReceiveInterval",elemKeepAliveRecvInterval,false);
+						UINT32 tmpSendInterval,tmpRecvInterval;
+						getDOMElementValue(elemKeepAliveSendInterval,tmpSendInterval,0xFFFFFFFF); //if now send interval was given set it to "infinite"
+						getDOMElementValue(elemKeepAliveRecvInterval,tmpRecvInterval,0xFFFFFFFF); //if no recv interval was given --> set it to "infinite"
+						CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Getting offer -- SendInterval %u -- ReceiveInterval %u\n",tmpSendInterval,tmpRecvInterval);
+						// Add Info about KeepAlive traffic
+						UINT32 u32KeepAliveSendInterval=options.getKeepAliveSendInterval();
+						UINT32 u32KeepAliveRecvInterval=options.getKeepAliveRecvInterval();
+						elemKeepAlive=docSymKey.createElement("KeepAlive");
+						elemKeepAliveSendInterval=docSymKey.createElement("SendInterval");
+						elemKeepAliveRecvInterval=docSymKey.createElement("ReceiveInterval");
+						elemKeepAlive.appendChild(elemKeepAliveSendInterval);
+						elemKeepAlive.appendChild(elemKeepAliveRecvInterval);
+						setDOMElementValue(elemKeepAliveSendInterval,u32KeepAliveSendInterval);
+						setDOMElementValue(elemKeepAliveRecvInterval,u32KeepAliveRecvInterval);
+						elemRoot.appendChild(elemKeepAlive);
+						CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Offering -- SendInterval %u -- Recevie Interval %u\n",u32KeepAliveSendInterval,u32KeepAliveRecvInterval);		
+						m_u32KeepAliveSendInterval=max(u32KeepAliveSendInterval,tmpRecvInterval);
+						if(m_u32KeepAliveSendInterval>10000)
+							m_u32KeepAliveSendInterval-=10000; //make the send interval a little bit smaller than the related receive intervall
+						m_u32KeepAliveRecvInterval=max(u32KeepAliveRecvInterval,tmpSendInterval);
+						CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Calculated -- SendInterval %u -- Recevie Interval %u\n",m_u32KeepAliveSendInterval,m_u32KeepAliveRecvInterval);		
 
             m_pSignature->signXML(elemRoot);
             DOM_Output::dumpToMem(docSymKey,out,&outlen);
@@ -514,21 +542,18 @@ THREAD_RETURN fm_loopSendToMix(void* param)
 #ifndef USE_POOL
 		tQueueEntry* pQueueEntry=new tQueueEntry;
 		MIXPACKET* pMixPacket=&pQueueEntry->packet;
+		UINT32 u32KeepAliveSendInterval=pFirstMix->m_u32KeepAliveSendInterval;
 		while(!pFirstMix->m_bRestart)
 			{
 				len=sizeof(tQueueEntry);
-				#ifdef KEEP_ALIVE_TRAFFIC
-					ret=pQueue->getOrWait((UINT8*)pQueueEntry,&len,MAX_KEEP_ALIVE_TRAFFIC_SEND_WAIT);
-					if(ret==E_TIMEDOUT)
-						{//send a dummy as keep-alvie-traffic
-							pMixPacket->flags=CHANNEL_DUMMY;
-							pMixPacket->channel=DUMMY_CHANNEL;
-							getRandom(pMixPacket->data,DATA_SIZE);
-						}else
-				#else
-					ret=pQueue->getOrWait((UINT8*)pQueueEntry,&len);
-				#endif	
-				if(ret!=E_SUCCESS||len!=sizeof(tQueueEntry))
+				ret=pQueue->getOrWait((UINT8*)pQueueEntry,&len,u32KeepAliveSendInterval);
+				if(ret==E_TIMEDOUT)
+					{//send a dummy as keep-alvie-traffic
+						pMixPacket->flags=CHANNEL_DUMMY;
+						pMixPacket->channel=DUMMY_CHANNEL;
+						getRandom(pMixPacket->data,DATA_SIZE);
+					}
+				else if(ret!=E_SUCCESS||len!=sizeof(tQueueEntry))
 					{
 						CAMsg::printMsg(LOG_ERR,"CAFirstMix::lm_loopSendToMix - Error in dequeueing MixPaket\n");
 						CAMsg::printMsg(LOG_ERR,"ret=%i len=%i\n",ret,len);
@@ -607,13 +632,25 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 		#ifdef USE_POOL
 			CAPool* pPool=new CAPool(MIX_POOL_SIZE);
 		#endif
+		UINT64 keepaliveNow,keepaliveLast;
+		UINT32 u32KeepAliveRecvInterval=pFirstMix->m_u32KeepAliveRecvInterval;
+		getcurrentTimeMillis(keepaliveLast);
 		CAControlChannelDispatcher* pControlChannelDispatcher=pFirstMix->m_pMuxOutControlChannelDispatcher;
 		while(!pFirstMix->m_bRestart)
 			{
 				if(pQueue->getSize()>MAX_READ_FROM_NEXT_MIX_QUEUE_SIZE)
 					{
 						msSleep(200);
+						getcurrentTimeMillis(keepaliveLast);
 						continue;
+					}
+				//check if the connection is broken because we did not received a Keep_alive-Message
+				getcurrentTimeMillis(keepaliveNow);
+				UINT32 keepaliveDiff=diff64(keepaliveNow,keepaliveLast);
+				if(keepaliveDiff>u32KeepAliveRecvInterval)
+					{
+						pFirstMix->m_bRestart=true;
+						break;
 					}
 				SINT32 ret=pSocketGroup->select(MIX_POOL_TIMEOUT);
 				if(ret==E_TIMEDOUT)
@@ -660,6 +697,7 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 					#endif
 				#endif
 				pQueue->add(pMixPacket,sizeof(tQueueEntry));
+				getcurrentTimeMillis(keepaliveLast);
 			}
 		delete pQueueEntry;
 		#ifdef USE_POOL

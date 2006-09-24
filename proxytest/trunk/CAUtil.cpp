@@ -545,6 +545,7 @@ SINT32 getDOMElementValue(const DOM_Node& elem,UINT8* value,UINT32* valuelen)
 		return E_SUCCESS;
 	}
 
+
 SINT32 getDOMElementValue(const DOM_Element& elem,UINT32* value)
 	{
 		ASSERT(value!=NULL,"Value is null");
@@ -559,10 +560,13 @@ SINT32 getDOMElementValue(const DOM_Element& elem,UINT32* value)
 	}
 SINT32 getDOMElementValue(const DOM_Element& elem,UINT32& value, UINT32 defaultValue)
 {
-	if(getDOMElementValue(elem,&value)!=E_SUCCESS)
+	UINT32 v;
+	if(getDOMElementValue(elem,&v)!=E_SUCCESS)
 		{
 		value=defaultValue;
 		}
+	else
+	value=v;	
 	return E_SUCCESS;
 }
 
