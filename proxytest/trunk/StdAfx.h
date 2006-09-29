@@ -67,7 +67,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define COUNTRY_STATS //collect stats about countries users come from
 //#define ONLY_LOCAL_PROXY //define to build only the local proxy (aka JAP)
 /* LERNGRUPPE: define this to get dynamic mixes */
-#define DYNAMIC_MIX
+//#define DYNAMIC_MIX
 
 //the following definition are just for threading support beside pthread 
 #undef USE_SEMAPHORE //normally we do not need semaphores

@@ -1231,6 +1231,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\CADynaNetworking.cpp"
+				>
+			</File>
+			<File
 				RelativePath="CAFirstMix.cpp"
 				>
 				<FileConfiguration
@@ -4333,6 +4337,10 @@
 			</File>
 			<File
 				RelativePath="CADatagramSocket.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\CADynaNetworking.hpp"
 				>
 			</File>
 			<File
