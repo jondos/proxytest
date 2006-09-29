@@ -69,13 +69,20 @@ class CACertificate
 					return CACertificate::m_spXmlElementName;
 				}
 			
-					
+                /* LERNGRUPPE */
+                /* SubjectKeyIdentifier Extension handling */
+		SINT32 getSubjectKeyIdentifier(UINT8* r_ski, UINT32 *r_skiLen);
+                SINT32 setSubjectKeyIdentifier( UINT8* a_value, UINT32 a_valueLen );
+                SINT32 setSubjectKeyIdentifier();	
 		private:
 			CACertificate();
 		private:
 			X509* getX509(){return m_pCert;}
 			X509* m_pCert;
 		static UINT8 * m_spXmlElementName;
+                /* LERNGRUPPE */
+                /* SubjectKeyIdentifier Extension handling */
+                SINT32 removeColons(UINT8* a_cSki, UINT32 a_cSkiLen, UINT8 *&r_ski, UINT32 *r_skiLen);
 	};
 #endif
 #endif //ONLY_LOCAL_PROXY

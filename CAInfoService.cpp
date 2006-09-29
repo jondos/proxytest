@@ -644,8 +644,19 @@ SINT32 CAInfoService::sendCascadeHelo(const UINT8* a_strCascadeHeloXML,UINT32 a_
         {
             CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending cascade configuration request to InfoService %s:%d.\r\n", hostname, a_pSocketAddress->getPort());
         }
-
+        // LERNGRUPPE
+        // Semi-dynamic cascades are temporary cascades, not yet established! InfoService can cope with them now
+        // using the /dynacascade command
+        if( options.isLastMix() && m_bConfiguring )
+        {
+            sprintf((char*)buffHeader,"POST /dynacascade HTTP/1.0\r\nContent-Length: %u\r\n\r\n",a_len);
+        }
+        else
+        {
 				sprintf((char*)buffHeader,"POST /cascade HTTP/1.0\r\nContent-Length: %u\r\n\r\n",a_len);
+        }
+
+// 				sprintf((char*)buffHeader,"POST /cascade HTTP/1.0\r\nContent-Length: %u\r\n\r\n",a_len);
 				if(	oSocket.sendFully(buffHeader,strlen((char*)buffHeader))!=E_SUCCESS||
 						oSocket.sendFully(a_strCascadeHeloXML,a_len)!=E_SUCCESS)
 						goto ERR;

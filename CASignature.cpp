@@ -414,12 +414,23 @@ SINT32 CASignature::getVerifyKey(CACertificate** ppCert)
 		EVP_PKEY_set1_DSA(pPKey,m_pDSA);
 		*ppCert=new CACertificate();
 		(*ppCert)->m_pCert=X509_new();
-		X509_set_version((*ppCert)->m_pCert,2);
+    // LERNGRUPPE 
+    // We nned to use Version 3 to use extensions
+// 		X509_set_version((*ppCert)->m_pCert,2);
+ 		X509_set_version((*ppCert)->m_pCert,3);
 		ASN1_TIME* pTime=ASN1_TIME_new();
 		ASN1_TIME_set(pTime,time(NULL));
 		X509_set_notBefore((*ppCert)->m_pCert,pTime);
 		X509_set_notAfter((*ppCert)->m_pCert,pTime);
 		X509_set_pubkey((*ppCert)->m_pCert,pPKey);
+// LERNGRUPPE 
+// Add the subjectKeyIdentifier-Extension to the certificate
+                if( (*ppCert)->setSubjectKeyIdentifier() != E_SUCCESS )
+                {
+                    CAMsg::printMsg( LOG_ERR, "Couldn't add the SKI to the certificate!\n");
+                    return E_UNKNOWN;
+                }
+
 		X509_sign((*ppCert)->m_pCert,pPKey,EVP_sha1());
 		EVP_PKEY_free(pPKey);
 		return E_SUCCESS;
@@ -785,4 +796,8 @@ SINT32 CASignature::decodeRS(const UINT8* in, const UINT32 inLen, DSA_SIG* pDsaS
 	pDsaSig->s = BN_bin2bn(in+20, inLen-20, NULL);
 	return E_SUCCESS;
 }
+
+
+
+
 #endif //ONLY_LOCAL_PROXY
