@@ -662,3 +662,22 @@ SINT32 CASocket::getMaxOpenSockets()
 	delete []parSocket;
 	return maxSocket;
 }
+
+/**
+ * LERNGRUPPE
+ * Returns the source address of the socket
+ * @return r_Ip the source IP address
+ * @retval E_SUCCESS upon success
+ * @retval SOCKET_ERROR otherwise
+ *
+ * @TODO: Question: Correct for Unix domain sockets?
+ */
+SINT32 CASocket::getLocalIP(UINT32* r_Ip)
+{
+      struct sockaddr_in addr;
+      socklen_t namelen=sizeof(struct sockaddr_in);
+      if(getsockname(m_Socket,(struct sockaddr*)&addr,&namelen)==SOCKET_ERROR)
+              return SOCKET_ERROR;
+      *r_Ip =  addr.sin_addr.s_addr;
+      return E_SUCCESS;
+}

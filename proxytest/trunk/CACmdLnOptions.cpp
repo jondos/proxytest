@@ -36,6 +36,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAXMLBI.hpp"
 #include "xml/DOM_Output.hpp"
 #include "CABase64.hpp"
+#include "CADynaNetworking.hpp"
 #ifdef LOG_CRIME
 	#include "tre/regex.h"
 #endif
@@ -363,6 +364,31 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 		m_bLocalProxy=true;
 	if(m_bLocalProxy&&iAutoReconnect!=0)
 		m_bAutoReconnect=true;
+
+    /* LERNGRUPPE: Also try to use default config file for Mix Category 1 */
+    if(configfile == NULL)
+    {
+        configfile = (char*) malloc(sizeof(char) * (strlen(DEFAULT_CONFIG_FILE)+1));
+        strncpy(configfile, DEFAULT_CONFIG_FILE, (strlen(DEFAULT_CONFIG_FILE)+1));
+
+#if defined (_WIN32) &&!defined(__CYGWIN__)
+// R_OK is not defined in Windows POSIX implementation
+#define R_OK 4
+#endif
+
+        int err = access(configfile, R_OK);
+        if( err )
+        {
+            if(configfile != NULL)
+            {
+                free(configfile);
+                configfile = NULL;
+            }
+        }
+    }
+    /* END LERNGRUPPE */
+
+
 	if(configfile!=NULL)
 		{
 #ifndef ONLY_LOCAL_PROXY
@@ -414,7 +440,8 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 									}
 								else //we try to use it as host and use the default port
 									{
-#define DEFAULT_TARGET_PORT 6544
+/* LERNGRUPPE moved the define to CACmdLnOption.hpp because we need it elsewhere too */
+//#define DEFAULT_TARGET_PORT 6544
 										tmpPort=DEFAULT_TARGET_PORT;
 										strcpy(tmpHostname,target);
 									}
@@ -491,10 +518,48 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 	if(!m_bLocalProxy)
 		{
 			ret=processXmlConfiguration(m_docMixXml);
+#ifndef DYNAMIC_MIX
 			if(ret!=E_SUCCESS)
 				return ret;
 		}
-#endif
+#else
+    /* LERNGRUPPE: Let's try to recover and build a default configuration */
+    if(ret!=E_SUCCESS)
+    {
+        createDefaultConfiguration();
+        ret=processXmlConfiguration(m_docMixXml);
+        if(ret!=E_SUCCESS) 
+            return ret;
+    }
+                }
+    /*  Ok, at this point we should make sure that we have a minimal configuration.
+    If not we try to fill up the missing parameters with default values*/
+    if( checkCertificates() != E_SUCCESS )
+    {
+        CAMsg::printMsg(LOG_CRIT, "I was not able to get a working certificate, please check the configuration! Exiting now\n");
+        exit(0);
+    }
+    UINT32 running = 0;
+    CAMsg::printMsg( LOG_INFO, "I will now test if I have enough information about InfoServices...\n");
+    if( checkInfoServices(&running) != E_SUCCESS )
+    {
+        /** @todo what shall the mix-operator do? ask AN.ON team? */
+        CAMsg::printMsg(LOG_CRIT, "Problems with InfoServices\nI need at least %i running InfoServices, but i only know about %i at the moment.\n", MIN_INFOSERVICES, running);
+        exit(0);
+    }
+    CAMsg::printMsg( LOG_INFO, "InfoService information ok\n");
+    if( checkListenerInterfaces() != E_SUCCESS )
+    {
+        CAMsg::printMsg(LOG_CRIT, "I don't have any usefull ListenerInterfaces and I canot determine one. please check the configuration! Hints should have been given\n");
+        exit(0);
+    }
+    if( checkMixId() != E_SUCCESS)
+    {
+        CAMsg::printMsg(LOG_CRIT, "ARGS, I don't have an unique ID, cannot create one! Exiting now\n");
+        exit(0);
+    }
+#endif // DYNAMIC_MIX
+#endif //ONLY_LOCAL_PROXY
 	return E_SUCCESS;
  }
 
@@ -1088,6 +1153,21 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 					m_bLastMix=true;
 			}
 
+		// LERNGRUPPE
+		// get Dynamic flag
+		m_bDynamic = false;
+		getDOMChildByName(elemGeneral,(UINT8*)"Dynamic",elem,false);
+		if(elem != NULL)
+		{
+    			if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS)
+    			{
+        			m_bDynamic = (strcmp("True",(char*)tmpBuff) == 0);
+    			}
+
+		}
+		if(m_bDynamic)
+			CAMsg::printMsg( LOG_DEBUG, "I am a dynamic mix\n");
+
 		//getCascadeName
 		getDOMChildByName(elemGeneral,(UINT8*)"CascadeName",elem,false);
 		tmpLen=255;
@@ -1382,11 +1462,14 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 			CAListenerInterface::XML_ELEMENT_CONTAINER_NAME,elemListenerInterfaces,false);
 		m_arListenerInterfaces = CAListenerInterface::getInstance(
 			elemListenerInterfaces, m_cnListenerInterfaces);
+
+#ifndef DYNAMIC_MIX
+    /* LERNGRUPPE: ListenerInterfaces may be configured dynamically */
 		if (m_cnListenerInterfaces == 0)
 		{
 			return E_UNKNOWN;
 		}
-
+#endif
 		//get TargetInterfaces
 		m_cnTargets=0;
 		TargetInterface* targetInterfaceNextMix=NULL;
@@ -1625,6 +1708,13 @@ SKIP_NEXT_MIX:
     	elemMix.appendChild(m_docMixInfo.importNode(elem, true));
     }    
         
+    // LERNGRUPPE: insert dynamic flag
+    getDOMChildByName(elemGeneral,(UINT8*)"Dynamic",elem,false);
+    if(elem != NULL)
+    {
+    	elemMix.appendChild(m_docMixInfo.importNode(elem, true));
+    }    
+    
 		//Import the Description if given
 		DOM_Element elemMixDescription;
 		getDOMChildByName(elemRoot,(UINT8*)"Description",elemMixDescription,false);
@@ -1637,10 +1727,14 @@ SKIP_NEXT_MIX:
 						tmpChild=tmpChild.getNextSibling();
 					}
 			}
-
+    /* LERNGRUPPE: This only works if ListenerInterfaces were given in the config-file, otherwise we crash here -> not good, better test for NULL */
+    if(elemListenerInterfaces != NULL)
+    {
     // import listener interfaces element; this is needed for cascade auto configuration
     // -- inserted by ronin <ronin2@web.de> 2004-08-16
     elemMix.appendChild(m_docMixInfo.importNode(elemListenerInterfaces,true));
+    }
+    /* END LERNGRUPPE */
 
 		//Set Proxy Visible Addresses if Last Mix and given
 		if(isLastMix())
@@ -1809,12 +1903,14 @@ SKIP_NEXT_MIX:
     DOM_Element elemCascade;
     SINT32 haveCascade = getDOMChildByName(elemRoot,(UINT8*)"MixCascade",elemCascade,false);
 
+#ifndef DYNAMIC_MIX
+    /* LERNGRUPPE: This is no error in the fully dynamic model */
     if(isLastMix() && haveCascade != E_SUCCESS && getPrevMixTestCertificate() == NULL)
     {
         CAMsg::printMsg(LOG_CRIT,"Error in configuration: You must either specify cascade info or the previous mix's certificate.\n");
         return E_UNKNOWN;
     }
-
+#endif
     if(isLastMix() && haveCascade == E_SUCCESS)
     {
         getDOMChildByName(elemRoot,(UINT8*)"MixCascade",m_oCascadeXML,false);
@@ -1833,9 +1929,389 @@ SKIP_NEXT_MIX:
 #endif //ONLY_LOCAL_PROXY
 
 #ifndef ONLY_LOCAL_PROXY
+#ifdef DYNAMIC_MIX
+
 /**
+  * LERNGRUPPE: Compatablility function. Beware! It's no longer static
 	* @param strFileName filename of the file in which the default configuration is stored, if NULL stdout is used
 	*/
+SINT32 CACmdLnOptions::createMixOnCDConfiguration(const UINT8* strFileName)
+{
+	DOM_Document doc = DOM_Document::createDocument();
+	buildDefaultConfig(doc);
+	saveToFile(doc, strFileName);
+//     DOM_Element elemListener=p_doc.createElement("ListenerInterface");
+//     elemListeners.appendChild(elemListener);
+//     elemTmp=p_doc.createElement("Port");
+//     setDOMElementValue(elemTmp,(UINT8*)"6544");
+//     elemListener.appendChild(elemTmp);
+//     elemTmp=p_doc.createElement("NetworkProtocol");
+//     setDOMElementValue(elemTmp,(UINT8*)"RAW/TCP");
+//     elemListener.appendChild(elemTmp);
+
+	return E_SUCCESS;
+}
+
+/**
+  * LERNGRUPPE
+  * Creates a default configuration for this mix. The configuration is then used to start up
+  * the mix! This default-config will be written to DEFAULT_CONFIG_FILE for use in the next
+  * startups of this mix
+  * @retval E_UNKNOWN if an error occurs
+  * @retval E_SUCCESS otherwise
+  */
+SINT32 CACmdLnOptions::createDefaultConfiguration()
+{
+    m_docMixXml = DOM_Document::createDocument();
+    buildDefaultConfig(m_docMixXml);
+    saveToFile(m_docMixXml, (const UINT8*)DEFAULT_CONFIG_FILE);
+
+    char *configfile = (char*) malloc(sizeof(char) * (strlen(DEFAULT_CONFIG_FILE)));
+    strcpy(configfile, DEFAULT_CONFIG_FILE);
+
+    // Set default config file for possible reread attempt
+    m_strConfigFile=new UINT8[ strlen(DEFAULT_CONFIG_FILE)+1 ];
+    memcpy(m_strConfigFile,DEFAULT_CONFIG_FILE, strlen(DEFAULT_CONFIG_FILE)+1);
+    return E_SUCCESS;
+}
+
+/**
+  * LERNGRUPPE
+  * Creates a default mix configuration.
+  * @return r_doc The XML Document containing the default mix configuration
+  * @retval E_SUCCESS
+  */
+SINT32 CACmdLnOptions::buildDefaultConfig(DOM_Document doc)
+{
+    CASignature* pSignature=new CASignature();
+    pSignature->generateSignKey(1024);
+    DOM_Element elemRoot=doc.createElement("MixConfiguration");
+    doc.appendChild(elemRoot);
+    setDOMElementAttribute(elemRoot,"version",(UINT8*)"0.5");
+    DOM_Element elemGeneral=doc.createElement("General");
+    elemRoot.appendChild(elemGeneral);
+
+    /** @todo MixType can be chosen randomly between FirstMix and MiddleMix but not LastMix! */
+    DOM_Element elemTmp=doc.createElement("MixType");
+    setDOMElementValue(elemTmp,(UINT8*)"MiddleMix");
+    elemGeneral.appendChild(elemTmp);
+
+    /** MixID must be the SubjectKeyIdentifier of the mix' certificate */
+    elemTmp=doc.createElement("MixID");
+    CACertificate* pCert;
+    pSignature->getVerifyKey(&pCert);
+    UINT8 buf[255];
+    UINT32 len = 255;
+    pCert->getSubjectKeyIdentifier( buf, &len);
+    setDOMElementValue(elemTmp,buf);
+    elemGeneral.appendChild(elemTmp);
+    elemTmp=doc.createElement("Dynamic");
+    setDOMElementValue(elemTmp,(UINT8*)"True");
+    elemGeneral.appendChild(elemTmp);
+
+    elemTmp=doc.createElement("CascadeName");
+    setDOMElementValue(elemTmp,(UINT8*)"Dynamic Cascade");
+    elemGeneral.appendChild(elemTmp);
+    elemTmp=doc.createElement("MixName");
+    setDOMElementValue(elemTmp,(UINT8*)"Dynamic Mix");
+    elemGeneral.appendChild(elemTmp);
+    elemTmp=doc.createElement("UserID");
+    setDOMElementValue(elemTmp,(UINT8*)"mix");
+    elemGeneral.appendChild(elemTmp);
+    DOM_Element elemLogging=doc.createElement("Logging");
+    elemGeneral.appendChild(elemLogging);
+    elemTmp=doc.createElement("SysLog");
+    setDOMElementValue(elemTmp,(UINT8*)"True");
+    elemLogging.appendChild(elemTmp);
+    DOM_Element elemNet=doc.createElement("Network");
+    elemRoot.appendChild(elemNet);
+    /** @todo Add a list of default InfoServices to the default configuration */
+    DOM_Element elemIS=doc.createElement("InfoService");
+    elemNet.appendChild(elemIS);
+    elemTmp=doc.createElement("Host");
+    setDOMElementValue(elemTmp,(UINT8*)"141.76.46.91");
+    elemIS.appendChild(elemTmp);
+    elemTmp=doc.createElement("Port");
+    setDOMElementValue(elemTmp,(UINT8*)"80");
+    elemIS.appendChild(elemTmp);
+    elemTmp=doc.createElement("AllowAutoConfiguration");
+    setDOMElementValue(elemTmp,(UINT8*)"True");
+    elemIS.appendChild(elemTmp);
+
+    /** We add this for compatability reasons. ListenerInterfaces can be determined dynamically now */
+    DOM_Element elemListeners=doc.createElement("ListenerInterfaces");
+    elemNet.appendChild(elemListeners);
+    DOM_Element elemListener=doc.createElement("ListenerInterface");
+    elemListeners.appendChild(elemListener);
+    elemTmp=doc.createElement("Port");
+    setDOMElementValue(elemTmp,(UINT8*)"6544");
+    elemListener.appendChild(elemTmp);
+    elemTmp=doc.createElement("NetworkProtocol");
+    setDOMElementValue(elemTmp,(UINT8*)"RAW/TCP");
+    elemListener.appendChild(elemTmp);
+
+    DOM_Element elemCerts=doc.createElement("Certificates");
+    elemRoot.appendChild(elemCerts);
+    DOM_Element elemOwnCert=doc.createElement("OwnCertificate");
+    elemCerts.appendChild(elemOwnCert);
+    DOM_DocumentFragment docFrag;
+    pSignature->getSignKey(docFrag,doc);
+    elemOwnCert.appendChild(docFrag);
+
+    pCert->encode(docFrag,doc);
+    elemOwnCert.appendChild(docFrag);
+
+    /** @todo Add Description section because InfoService doesn't accept MixInfos without Location or Operator */
+    delete pCert;
+    delete pSignature;
+    return E_SUCCESS;
+}
+
+/**
+  * Saves the given XML Document to a file
+  * @param a_doc The XML Document to be saved
+  * @param a_strFileName The name of the file to be saved to
+  * @retval E_SUCCESS
+  */
+SINT32 CACmdLnOptions::saveToFile(DOM_Document p_doc, const UINT8* p_strFileName)
+{
+    /** @todo Check for errors */
+    UINT32 len;
+    UINT8* buff = DOM_Output::dumpToMem(p_doc,&len);
+    if(p_strFileName!=NULL)
+    {
+        FILE *handle;
+        handle=fopen((const char*)p_strFileName, "w");
+        fwrite(buff,len,1,handle);
+        fflush(handle);
+        fclose(handle);
+    }
+    else
+    {
+        fwrite(buff,len,1,stdout);
+        fflush(stdout);
+    }
+    delete[] buff;
+    return E_SUCCESS;
+}
+
+/**
+  * Adds a ListenerInterface to the configuration. Information is parsed out of a_elem
+  * @param a_elem A XML Element containing information about the ListenerInterface to be added
+  * @retval E_SUCCESS upon successful addition
+  * @retval E_UNKNOWN otherwise
+  */
+SINT32 CACmdLnOptions::addListenerInterface(DOM_Element a_elem)
+{
+    CAListenerInterface *pListener = CAListenerInterface::getInstance(a_elem);
+    if(pListener == NULL)
+        return E_UNKNOWN;
+
+    if(m_arListenerInterfaces != NULL && m_cnListenerInterfaces > 0)
+    {
+        CAListenerInterface **tmp = new CAListenerInterface*[m_cnListenerInterfaces + 1];
+        for(unsigned int i = 0; i < m_cnListenerInterfaces; i++)
+        {
+            tmp[i] = m_arListenerInterfaces[i];
+        }
+        delete[] m_arListenerInterfaces;
+        m_arListenerInterfaces=NULL;
+        m_arListenerInterfaces = tmp;
+        m_cnListenerInterfaces++;
+    }
+    else
+    {
+        m_arListenerInterfaces = new CAListenerInterface*[1];
+        m_cnListenerInterfaces = 1;
+    }
+
+    m_arListenerInterfaces[m_cnListenerInterfaces-1] = pListener;
+    return E_SUCCESS;
+
+}
+
+/**
+  * Resets the network configuration of this mix. All known ListenerInterfaces in m_arListenerInterfaces will
+  * be deleted, the information purged from m_docMixInfo and m_cnListenerInterfaces reset to 0
+  * @retval E_SUCCESS
+  */
+SINT32 CACmdLnOptions::resetNetworkConfiguration()
+{
+    DOM_Element elemRoot = m_docMixInfo.getDocumentElement();
+    if(elemRoot != NULL)
+    {
+        DOM_Element elemListeners;
+        getDOMChildByName(elemRoot,(UINT8*)"ListenerInterfaces",elemListeners,false);
+        if(elemListeners != NULL)
+        {
+            elemRoot.removeChild( elemListeners );
+        }
+    }
+
+    if( m_arListenerInterfaces != NULL )
+    {
+        delete[] m_arListenerInterfaces;
+        m_arListenerInterfaces=NULL;
+    }
+    m_cnListenerInterfaces = 0;
+
+    return E_SUCCESS;
+}
+
+/**
+  * Tests if we have at least one usable ListenerInterface. If we don't, we try to determine
+  * the needed information and create a ListenerInterface. This test includes a connectivity test.
+  * @retval E_SUCCESS if we have at least one usable ListenerInterface and it is reachable
+  * @retval E_UNKNOWN otherwise
+  */
+SINT32 CACmdLnOptions::checkListenerInterfaces()
+{
+    SINT32 result = E_UNKNOWN;
+
+    UINT32 interfaces = getListenerInterfaceCount();
+    CAListenerInterface *pListener = NULL;
+    CADynaNetworking *dyn = new CADynaNetworking();
+
+    for( UINT32 i = 1; i <= interfaces; i++ )
+    {
+        pListener = getListenerInterface(i);
+        if(!pListener->isVirtual())
+        {
+            result = E_SUCCESS;
+            break;
+        }
+        delete pListener;
+        pListener=NULL;
+    }
+    if( pListener == NULL )
+    {
+        /** @todo Maybe we could use another port here? From the config? From the commandline? */
+        result = dyn->updateNetworkConfiguration(DEFAULT_TARGET_PORT);
+        if( result != E_SUCCESS )
+            goto error;
+    }
+    if( dyn->verifyConnectivity() != E_SUCCESS )
+    {
+        CAMsg::printMsg( LOG_CRIT, "Your mix is not reachable from the internet.\n Please make sure that your open port %i in your firewall and forward this port to this machine.\n", DEFAULT_TARGET_PORT);
+    }
+error:
+    delete dyn;
+    return result;
+}
+
+/**
+  * LERNGRUPPE
+  * Perform a test if we have at least MIN_INFOSERVICES working 
+  * InfoServices. We can not work correctly without them
+  * @return r_runningInfoServices The actual number of runnung InfoServices
+  * @retval E_SUCCESS if we have the InfoServices
+  * @retval E_UNKOWN otherwise
+*/
+SINT32 CACmdLnOptions::checkInfoServices(UINT32 *r_runningInfoServices)
+{
+
+    UINT32 i;
+    
+    if(m_addrInfoServicesSize < MIN_INFOSERVICES)
+        return E_UNKNOWN;
+
+    /** @todo Better test if these InfoServices are reachable */
+    for(i = 0; i < m_addrInfoServicesSize; i++)
+    {
+        CASocket socket;
+        socket.setSendTimeOut(1000);
+        if(socket.connect( *m_addrInfoServices[i]->getAddr() )== E_SUCCESS )
+        {
+            (*r_runningInfoServices)++;
+        }
+        socket.close();
+    }
+    if((*r_runningInfoServices) < MIN_INFOSERVICES)
+        return E_UNKNOWN;
+
+    return E_SUCCESS;
+}
+
+/**
+  * Checks if all certificate information is ok. 
+  * @retval E_SUCCESS if test succeeds
+  * @retval E_UNKNOWN otherwise
+*/
+SINT32 CACmdLnOptions::checkCertificates()
+{
+    /** @todo implement test. if signkey and cert are NULL here, then we parsed a user-defined config
+        file without certificates in it. So we need to create a signkey and add it to the mix config. Possibly
+        save it to the config file the user gave us so that in subsequent startups the certs don't change */
+    return E_SUCCESS;
+}
+
+/**
+  * Checks if the ID of this mix is ok. A MixID is ok if it equals( 
+  * the SubjectKeyIdentifier of the mix' certificate
+  * @retval E_SUCCESS if the test is successfull
+  * @retval E_UNKNOWN otherwise
+  */
+SINT32 CACmdLnOptions::checkMixId()
+{
+    UINT8 ski[255];
+    UINT32 len = 255;
+    if( m_pOwnCertificate->getSubjectKeyIdentifier( ski, &len ) != E_SUCCESS )
+        return E_UNKNOWN;
+
+    CAMsg::printMsg( LOG_DEBUG, "\nID : (%s)\n SKI: (%s)\n", m_strMixID, ski);
+    if( strcmp( (const char*)m_strMixID, (const char*)ski ) != 0 )
+        return E_UNKNOWN;
+    return E_SUCCESS;
+}
+
+/**
+  * Returns a random InfoService's address from the list of the known InfoServices
+  * @return r_address The address of the random InfoService
+  * @retval E_SUCCESS if successfull
+  * @retval E_UNKNOWN otherwise
+  */
+SINT32 CACmdLnOptions::getRandomInfoService(CASocketAddrINet *&r_address)
+{
+    UINT32 nrAddresses;
+    CAListenerInterface** socketAddresses = options.getInfoServices(nrAddresses);
+    if( socketAddresses == NULL )
+    {
+        CAMsg::printMsg( LOG_ERR, "Unable to get a list of InfoServices from the options, check your configuration!\n");
+        return E_UNKNOWN;
+    }
+    UINT32 index = getRandom(nrAddresses);
+
+    CAListenerInterface *infoService = socketAddresses[index];
+    if( infoService == NULL || infoService->getAddr() == NULL)
+    {
+        CAMsg::printMsg( LOG_ERR, "Randomly chosen InfoService is NULL, that's bad!\n");
+        return E_UNKNOWN;
+    }
+
+    r_address = (CASocketAddrINet*)infoService->getAddr();
+
+#ifdef DEBUG
+    UINT8 buf[2048];
+    UINT32 len;
+    r_address->getHostName( buf, len );
+    CAMsg::printMsg( LOG_DEBUG, "getRandomInfoService: Chose InfoServer with hostname %s\n", buf);
+#endif
+    return E_SUCCESS;
+}
+
+/**
+  * Returns a random number between 0 and a_max
+  * @param a_max Max value of the returned random
+  * @retval The random number
+  */
+UINT32 CACmdLnOptions::getRandom(UINT32 a_max)
+{
+    UINT32 result = (UINT32) (a_max * (rand() / (RAND_MAX + 1.0)));
+    return result;
+}
+
+#else//ifdef DYNAMIC_MIX
+
 SINT32 CACmdLnOptions::createMixOnCDConfiguration(const UINT8* strFileName)
 	{
 		CASignature* pSignature=new CASignature();
@@ -1858,6 +2334,9 @@ SINT32 CACmdLnOptions::createMixOnCDConfiguration(const UINT8* strFileName)
 		CABase64::encode(hash,hashlen,tmpBuff,&tmpBuffLen);
 		tmpBuff[tmpBuffLen]=0;
 		setDOMElementValue(elemTmp,tmpBuff);
+		elemGeneral.appendChild(elemTmp);
+		elemTmp=doc.createElement("Dynamic");
+		setDOMElementValue(elemTmp,(UINT8*)"True");
 		elemGeneral.appendChild(elemTmp);
 		elemTmp=doc.createElement("CascadeName");
 		setDOMElementValue(elemTmp,(UINT8*)"Dynamic Cascade");
@@ -1926,4 +2405,5 @@ SINT32 CACmdLnOptions::createMixOnCDConfiguration(const UINT8* strFileName)
 		delete[] buff;	
 		return E_SUCCESS;
 	}
+#endif //DYNAMIC_MIX
 #endif //ONLY_LOCAL_PROXY

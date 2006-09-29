@@ -98,7 +98,7 @@ class CASocket:public CAClientSocket
 				*@retval E_UNKNOWN in case of some unexpected error
 			*/
 			static SINT32 getMaxOpenSockets();
-			
+			SINT32 getLocalIP(UINT32* r_Ip);
 		protected:
 			bool m_bSocketIsClosed; //this is a flag, which shows, if the m_Socket is valid
 													//we should not set m_Socket to -1 or so after close,

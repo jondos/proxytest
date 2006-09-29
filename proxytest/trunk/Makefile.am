@@ -24,6 +24,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CAControlChannelTest.cpp\
 		    CADatabase.cpp\
 		    CADatagramSocket.cpp \
+		    CADynaNetworking.cpp \
 		    CAFirstMix.cpp \
 		    CAFirstMixChannelList.cpp \
 		    CAHttpClient.cpp \
@@ -86,6 +87,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CACmdLnOptions.hpp \
 		    CADatabase.hpp\
 		    CADatagramSocket.hpp\
+		    CADynaNetworking.hpp \
 		    CAFirstMix.hpp \
 		    CAFirstMixChannelList.hpp \
 		    CAHttpClient.hpp \

@@ -47,6 +47,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define TARGET_HTTP_PROXY		2
 #define TARGET_SOCKS_PROXY	3
 
+// LERNGRUPPE moved this define from CACmdLnOptions.cpp
+#define DEFAULT_TARGET_PORT 6544
+#define DEFAULT_CONFIG_FILE "default.xml"
+#define MIN_INFOSERVICES 1
+// END LERNGRUPPE
+
 struct t_TargetInterface
 	{
 		UINT32 target_type;
@@ -348,10 +354,32 @@ class CACmdLnOptions
 
 			friend THREAD_RETURN threadReConfigure(void *param);
 			
+			/* LERNGRUPPE (refactoring + new) */
+#ifndef DYNAMIC_MIX
 			/** Writes a default configuration file into the file named by filename*/
 			static SINT32 createMixOnCDConfiguration(const UINT8* strFileName);
-#endif //only_LOCAL_PROXY
+#else
+			SINT32 createMixOnCDConfiguration(const UINT8* strFileName);
+			SINT32 createDefaultConfiguration();
+			SINT32 saveToFile(DOM_Document a_doc, const UINT8* a_strFileName);
+			SINT32 addListenerInterface(DOM_Element a_elem);
+			SINT32 resetNetworkConfiguration();
+                        SINT32 getRandomInfoService(CASocketAddrINet *&r_address);
+			bool isDynamic() { return m_bDynamic; }
+#endif // DYNAMIC_MIX
 		private:
+#ifdef DYNAMIC_MIX
+                        UINT32 getRandom(UINT32 a_max);
+			SINT32 buildDefaultConfig(DOM_Document a_doc);
+			SINT32 checkInfoServices(UINT32 *r_runningInfoServices);
+			SINT32 checkMixId();
+			SINT32 checkListenerInterfaces();
+			SINT32 checkCertificates();
+#endif //DYNAMIC_MIX
+			bool m_bDynamic;
+			/* END LERNGRUPPE */
+
+#endif //only_LOCAL_PROXY
 			UINT8*	m_strConfigFile; //the filename of the config file
 			bool		m_bDaemon;
 	    UINT16	m_iSOCKSServerPort;
