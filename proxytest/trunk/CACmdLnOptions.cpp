@@ -2029,7 +2029,7 @@ SINT32 CACmdLnOptions::buildDefaultConfig(DOM_Document doc)
     DOM_Element elemIS=doc.createElement("InfoService");
     elemNet.appendChild(elemIS);
     elemTmp=doc.createElement("Host");
-    setDOMElementValue(elemTmp,(UINT8*)"141.76.46.91");
+    setDOMElementValue(elemTmp,(UINT8*)DEFAULT_INFOSERVICE);
     elemIS.appendChild(elemTmp);
     elemTmp=doc.createElement("Port");
     setDOMElementValue(elemTmp,(UINT8*)"80");
