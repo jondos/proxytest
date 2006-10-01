@@ -2026,22 +2026,28 @@ SINT32 CACmdLnOptions::buildDefaultConfig(DOM_Document doc)
     DOM_Element elemNet=doc.createElement("Network");
     elemRoot.appendChild(elemNet);
     /** @todo Add a list of default InfoServices to the default configuration */
-    DOM_Element elemIS=doc.createElement("InfoService");
-    elemNet.appendChild(elemIS);
-    elemTmp=doc.createElement("Host");
+    DOM_Element elemISs=doc.createElement("InfoServices");
+		elemNet.appendChild(elemISs);
+		DOM_Element elemIS=doc.createElement("InfoService");
+    elemISs.appendChild(elemIS);
+    DOM_Element elemListeners=doc.createElement("ListenerInterfaces");
+		elemIS.appendChild(elemListeners);
+		DOM_Element elemListener=doc.createElement("ListenerInterface");
+		elemListeners.appendChild(elemListener);
+		elemTmp=doc.createElement("Host");
     setDOMElementValue(elemTmp,(UINT8*)DEFAULT_INFOSERVICE);
-    elemIS.appendChild(elemTmp);
+    elemListener.appendChild(elemTmp);
     elemTmp=doc.createElement("Port");
     setDOMElementValue(elemTmp,(UINT8*)"80");
-    elemIS.appendChild(elemTmp);
+    elemListener.appendChild(elemTmp);
     elemTmp=doc.createElement("AllowAutoConfiguration");
     setDOMElementValue(elemTmp,(UINT8*)"True");
-    elemIS.appendChild(elemTmp);
+    elemISs.appendChild(elemTmp);
 
     /** We add this for compatability reasons. ListenerInterfaces can be determined dynamically now */
-    DOM_Element elemListeners=doc.createElement("ListenerInterfaces");
+    elemListeners=doc.createElement("ListenerInterfaces");
     elemNet.appendChild(elemListeners);
-    DOM_Element elemListener=doc.createElement("ListenerInterface");
+		elemListener=doc.createElement("ListenerInterface");
     elemListeners.appendChild(elemListener);
     elemTmp=doc.createElement("Port");
     setDOMElementValue(elemTmp,(UINT8*)"6544");
