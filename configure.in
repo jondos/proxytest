@@ -202,6 +202,16 @@ AC_ARG_ENABLE(new_mix_type,
 	]
 )
 
+dnl dynamic mix ??
+DYNAMIC=""
+AC_ARG_ENABLE(dynamic,
+	AS_HELP_STRING([--enable-dynamic],[Specify if to build a  mix for a dynamic cascade]),
+	[
+		if test "x$enableval" != "xno" ; then
+		    POOL="-DDYNAMIC_MIX"
+		fi
+	]
+)
 
 LIBS="$DEFAULTLIBS"
 

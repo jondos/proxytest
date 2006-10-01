@@ -72,9 +72,10 @@ am_mix_OBJECTS = CAAbstractControlChannel.$(OBJEXT) \
 	CACmdLnOptions.$(OBJEXT) CAConditionVariable.$(OBJEXT) \
 	CAControlChannelDispatcher.$(OBJEXT) \
 	CAControlChannelTest.$(OBJEXT) CADatabase.$(OBJEXT) \
-	CADatagramSocket.$(OBJEXT) CAFirstMix.$(OBJEXT) \
-	CAFirstMixChannelList.$(OBJEXT) CAHttpClient.$(OBJEXT) \
-	CAInfoService.$(OBJEXT) CAIPList.$(OBJEXT) CALastMix.$(OBJEXT) \
+	CADatagramSocket.$(OBJEXT) CADynaNetworking.$(OBJEXT) \
+	CAFirstMix.$(OBJEXT) CAFirstMixChannelList.$(OBJEXT) \
+	CAHttpClient.$(OBJEXT) CAInfoService.$(OBJEXT) \
+	CAIPList.$(OBJEXT) CALastMix.$(OBJEXT) \
 	CALastMixChannelList.$(OBJEXT) CAListenerInterface.$(OBJEXT) \
 	CALocalProxy.$(OBJEXT) CALogPacketStats.$(OBJEXT) \
 	CAMiddleMix.$(OBJEXT) CAMiddleMixChannelList.$(OBJEXT) \
@@ -96,8 +97,7 @@ am_mix_OBJECTS = CAAbstractControlChannel.$(OBJEXT) \
 mix_OBJECTS = $(am_mix_OBJECTS)
 mix_DEPENDENCIES = $(top_srcdir)/xml/libxml.a \
 	$(top_srcdir)/popt/libpopt.a $(top_srcdir)/trio/libtrio.a \
-	$(top_srcdir)/tre/libtre.a $(top_srcdir)/TypeA/libmixa.a \
-	$(top_srcdir)/TypeB/libmixb.a
+	$(top_srcdir)/tre/libtre.a $(top_srcdir)/TypeA/libmixa.a
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I.
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -249,6 +249,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CAControlChannelTest.cpp\
 		    CADatabase.cpp\
 		    CADatagramSocket.cpp \
+		    CADynaNetworking.cpp \
 		    CAFirstMix.cpp \
 		    CAFirstMixChannelList.cpp \
 		    CAHttpClient.cpp \
@@ -311,6 +312,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CACmdLnOptions.hpp \
 		    CADatabase.hpp\
 		    CADatagramSocket.hpp\
+		    CADynaNetworking.hpp \
 		    CAFirstMix.hpp \
 		    CAFirstMixChannelList.hpp \
 		    CAHttpClient.hpp \
@@ -362,11 +364,10 @@ mix_LDADD = $(top_srcdir)/xml/libxml.a \
 		  $(top_srcdir)/popt/libpopt.a \
 		  $(top_srcdir)/trio/libtrio.a \
 		  $(top_srcdir)/tre/libtre.a \
-		  $(top_srcdir)/TypeA/libmixa.a\
-		  $(top_srcdir)/TypeB/libmixb.a
+		  $(top_srcdir)/TypeA/libmixa.a
 
 EXTRA_DIST = README proxytest.doxy proxytest.dsp proxytest.dsw
-SUBDIRS = popt xml trio tre TypeA TypeB
+SUBDIRS = popt xml trio tre TypeA
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -474,6 +475,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAControlChannelTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CADatabase.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CADatagramSocket.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CADynaNetworking.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAFirstMix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAFirstMixChannelList.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAHttpClient.Po@am__quote@
