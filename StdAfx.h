@@ -67,7 +67,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define COUNTRY_STATS //collect stats about countries users come from
 //#define ONLY_LOCAL_PROXY //define to build only the local proxy (aka JAP)
 /* LERNGRUPPE: define this to get dynamic mixes */
-//#define DYNAMIC_MIX
+#define DYNAMIC_MIX
 
 //the following definition are just for threading support beside pthread 
 #undef USE_SEMAPHORE //normally we do not need semaphores
@@ -155,6 +155,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #define FLOW_CONTROL_SENDME_HARD_LIMIT 95 //last mix stops sending after this unack packets
 #define FLOW_CONTROL_SENDME_SOFT_LIMIT 80 //last mix sends request for 'SENDME' after this unack packets
+
+
+#define DEFAULT_INFOSERVICE "141.76.45.37"
 
 #ifndef MIX_POOL_SIZE
 	#define MIX_POOL_SIZE 10  //packets in the Mix pool
