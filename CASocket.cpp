@@ -132,6 +132,12 @@ SINT32 CASocket::listen(UINT16 port)
 		return listen(oSocketAddrINet);
 	}
 
+/** Accepts a new connection. The new socket is returned in s.
+  * @retval E_SUCCESS if successful
+	* @retval E_SOCKETCLOSED if the listening socket was closed
+	* @retval E_SOCKET_LIMIT if the could not create a new socket for the new connection
+	* @retval E_UNKNOWN otherwise
+	*/
 SINT32 CASocket::accept(CASocket &s)
 	{
 		if(m_bSocketIsClosed) //the accept socket should not be closed!!
@@ -140,8 +146,8 @@ SINT32 CASocket::accept(CASocket &s)
 			return E_UNKNOWN;
 		if(m_u32NormalSocketsOpen>=m_u32MaxNormalSockets)
 			{
-			CAMsg::printMsg(LOG_CRIT,"CASocket::accept() -- Couldt not create a new normal Socket -- allowed number of normal sockets exeded!\n");
-			return E_UNKNOWN;
+				CAMsg::printMsg(LOG_CRIT,"CASocket::accept() -- Couldt not create a new normal Socket -- allowed number of normal sockets exeded!\n");
+				return E_SOCKET_LIMIT;
 			}
 		s.m_Socket=::accept(m_Socket,NULL,NULL);
 		if(s.m_Socket==SOCKET_ERROR)
