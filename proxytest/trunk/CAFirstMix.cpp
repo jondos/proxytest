@@ -778,6 +778,10 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 										delete pNewMuxSocket;
 										if(ret==E_SOCKETCLOSED&&pFirstMix->getRestart()) //Hm, should we restart ??
 											goto END_THREAD;
+										else if(ret==E_SOCKET_LIMIT) // Hm no free sockets - wait some time to hope to get a free one...
+											{
+												msSleep(400);
+											}
 									}
 								else
 									{

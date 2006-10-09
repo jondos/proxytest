@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.05.23"
+#define MIX_VERSION "00.05.24"
 
 //Define all features if we are running in documentation creation mode
 #ifdef DOXYGEN
@@ -67,7 +67,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define COUNTRY_STATS //collect stats about countries users come from
 //#define ONLY_LOCAL_PROXY //define to build only the local proxy (aka JAP)
 /* LERNGRUPPE: define this to get dynamic mixes */
-#define DYNAMIC_MIX
+//#define DYNAMIC_MIX
 
 //the following definition are just for threading support beside pthread 
 #undef USE_SEMAPHORE //normally we do not need semaphores
@@ -354,6 +354,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define E_SOCKET_LISTEN -303 //An error occured during listen
 #define E_SOCKET_ACCEPT -304 //An error occured during accept
 #define E_SOCKET_BIND -305 //An error occured during bind
+#define E_SOCKET_LIMIT -306 //An error occurde because we run out of available sockets
 #define E_UNKNOWN_HOST -400 // A hostname could not be resolved
 #define E_FILE_OPEN -500 //Error in opening a file
 #define E_FILE_READ -501 //Error in opening a file
