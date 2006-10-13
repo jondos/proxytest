@@ -4299,19 +4299,17 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-CFLAGS=""
-CXXFLAGS=""
 OFLAGS=""
 
 if test "x$GCC" = "xyes" ; then
-   CFLAGS="-Wall -D_REENTRANT"
-   CXXFLAGS=$CFLAGS
+   CFLAGS="$CFLAGS -Wall -D_REENTRANT"
+   CXXFLAGS="$CXXFLAGS -Wall -D_REENTRANT"
 else
    echo "You need the GNU C Compiler to compile proxytest."
    exit
 fi
 
-DEFAULTLIBS="$LIBS -L/usr/lib -L/usr/local/lib"
+DEFAULTLIBS="$LIBS" #-L/usr/lib -L/usr/local/lib"
 
 case "$host" in
 *-*-solaris*)
@@ -6573,6 +6571,7 @@ fi
 done
 
 
+if test "$cross_compiling" != yes; then
 if test "x$USE_EPOLL" != "x0" ; then
     { echo "$as_me:$LINENO: checking for epoll_wait" >&5
 echo $ECHO_N "checking for epoll_wait... $ECHO_C" >&6; }
@@ -6735,6 +6734,7 @@ fi
 
 fi
 
+fi
 fi
 { echo "$as_me:$LINENO: checking whether TCP_KEEPALIVE is declared" >&5
 echo $ECHO_N "checking whether TCP_KEEPALIVE is declared... $ECHO_C" >&6; }
@@ -12808,6 +12808,7 @@ else
 
 		LIBS="$saved_LIBS -lcrypto"
 
+		if test "$cross_compiling" != yes; then
 		# Basic test to check for compatible version and correct
                 # linking, *does not* test for RSA - that comes later.
 		if test "$cross_compiling" = yes; then
@@ -12824,16 +12825,16 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
-#include <string.h>
-#include <openssl/rand.h>
-#include <openssl/aes.h>
-int main(void)
-{
+				#include <string.h>
+				#include <openssl/rand.h>
+				#include <openssl/aes.h>
+				int main(void)
+				{
 	char a[2048];
 	memset(a, 0, sizeof(a));
 	RAND_add(a, sizeof(a), sizeof(a));
 	return(RAND_status() <= 0);
-}
+				}
 
 _ACEOF
 rm -f conftest$ac_exeext
@@ -12873,7 +12874,9 @@ rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext conftest.$a
 fi
 
 
-
+		else
+			found_crypto=1
+		fi
 		if test ! -z "$found_crypto" ; then
 			break;
 		fi
@@ -12932,8 +12935,8 @@ if test "${with_xml_include+set}" = set; then
 fi
 
 XMLINCLUDEFLAGS="-I$xmlincludedir -I$xmlincludedir/xercesc -I/usr/include/xercesc"
-CFLAGS="$XMLINCLUDEFLAGS $CFLAGS "
-CXXFLAGS=$CFLAGS
+CFLAGS="$CFLAGS $XMLINCLUDEFLAGS "
+CXXFLAGS="$CXXFLAGS $XMLINCLUDEFLAGS "
 { echo "$as_me:$LINENO: Xerces-C tests" >&5
 echo "$as_me: Xerces-C tests" >&6;}
 { echo "$as_me:$LINENO: checking for dom/DOM.hpp" >&5
@@ -13873,7 +13876,7 @@ fi
 
 
 CFLAGS="$CFLAGS $POOL $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $REPLAY_DETECTION $NEW_MIX_TYPE $OFLAGS"
-CXXFLAGS=$CFLAGS
+CXXFLAGS="$CXXFLAGS $POOL $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $REPLAY_DETECTION $NEW_MIX_TYPE $OFLAGS"
 LIBS="$LIBS $PAYMENT_LIB"
 
 ac_config_files="$ac_config_files Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile"
