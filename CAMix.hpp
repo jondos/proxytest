@@ -98,13 +98,19 @@ class CAMix
 			virtual SINT32 init()=0;
 			virtual SINT32 loop()=0;
 
+			SINT32 addMixInfo(DOM_Node& a_element, bool a_bForceFirstNode);
+		
+
 			// added by ronin <ronin2@web.de>
 			virtual SINT32 processKeyExchange()
 			{
 					return E_SUCCESS;
 			}
+			
 			// added by ronin <ronin2@web.de>
 			virtual SINT32 initMixCascadeInfo(DOM_Element& elemMixes);
+
+			SINT32 signXML(DOM_Node& a_element);
 
 			CASignature* m_pSignature;
 			CAInfoService* m_pInfoService;

@@ -501,6 +501,26 @@ SINT32 getDOMChildByName(const DOM_Node& node,const UINT8* const name,DOM_Node& 
 			}
 		return E_UNKNOWN;
 	}
+	
+SINT32 getLastDOMChildByName(const DOM_Node& node,const UINT8* const name,DOM_Node& a_child)
+	{
+		if(node==NULL)
+			{
+				return E_UNKNOWN;
+			}
+		DOM_Node child;
+		child=node.getLastChild();
+		while(child!=NULL)
+			{
+				if(child.getNodeName().equals((char*)name))
+					{
+						a_child = child; // found a child
+						return E_SUCCESS;
+					}
+				child=child.getPreviousSibling();
+			}
+		return E_UNKNOWN;
+	}
 
 /** 
  * Returns the content of the text node(s) under elem

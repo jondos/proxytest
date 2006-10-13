@@ -202,7 +202,11 @@ SINT32 CAMiddleMix::processKeyExchange()
 		count++;
 		setDOMElementAttribute(root,"count",count);
 		
-		DOM_Element mixNode=doc.createElement(DOMString("Mix"));
+		addMixInfo(root, true);
+		DOM_Element mixNode;
+		getDOMChildByName(root, (UINT8*)"Mix", mixNode, false);
+		
+		
 		UINT8 tmpBuff[50];
 		options.getMixId(tmpBuff,50); //the mix id...
 		mixNode.setAttribute("id",DOMString((char*)tmpBuff));
@@ -225,46 +229,13 @@ SINT32 CAMiddleMix::processKeyExchange()
 		setDOMElementValue(elemNonce,tmpBuff);
 		mixNode.appendChild(elemNonce);
 		
-		
-
-/*
- * Sending Certificates - dign the xml struct send to each jap user
- * 
- */	
-	// Public Own Mix Certificates
-		CACertificate* ownCert=options.getOwnCertificate();
-		if(ownCert==NULL)
-			{
-				CAMsg::printMsg(LOG_DEBUG,"Own Test Cert is NULL -- so it could not be inserted into signed KeyInfo send to users...\n");
-			}	
-		CACertStore* tmpCertStore=new CACertStore();
-    // Operator Certificates
-    UINT32 opCertsLength;
-    CACertificate** opCert=options.getOpCertificates(opCertsLength);
-    if(opCert==NULL)
-    {
-        CAMsg::printMsg(LOG_DEBUG,"Op Test Cert is NULL -- so it could not be inserted into signed KeyInfo send to users...\n");
-	}
-	// Own  Mix Certificates first, then Operator Certificates
-	for(SINT32 i = opCertsLength - 1;  i >=0; i--)
-	{
-		tmpCertStore->add(opCert[i]); 	
-	}
-		tmpCertStore->add(ownCert);
-    
-		if(m_pSignature->signXML(mixNode,tmpCertStore)!=E_SUCCESS)
+		// create signature
+		if(signXML(mixNode)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_DEBUG,"Could not sign KeyInfo send to users...\n");
 			}
-		delete ownCert;
-    for(UINT32 i=0;i<opCertsLength;i++)
-		{
-			delete opCert[i];
-		}
-    delete[] opCert;
-		delete tmpCertStore;
 		
-		root.insertBefore(mixNode,root.getFirstChild());
+		
 
 		UINT8* out=new UINT8[0xFFFF];
 		UINT32 outlen=0xFFFD;
@@ -314,7 +285,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 		delete pCert;
 		if(oSig.verifyXML(elemRoot)!=E_SUCCESS)
 			{
-				CAMsg::printMsg(LOG_CRIT,"Couldt not verify the symetric key form Mix n-1!\n");		
+				CAMsg::printMsg(LOG_CRIT,"Could not verify the symetric key form Mix n-1!\n");		
 				return E_UNKNOWN;
 			}
 		//Verifying nonce
@@ -328,10 +299,10 @@ SINT32 CAMiddleMix::processKeyExchange()
 			memcmp(SHA1(arNonce,16,NULL),tmpBuff,SHA_DIGEST_LENGTH)!=0
 			)
 			{
-				CAMsg::printMsg(LOG_CRIT,"Couldt not verify the Nonce!\n");		
+				CAMsg::printMsg(LOG_CRIT,"Could not verify the Nonce!\n");		
 				return E_UNKNOWN;
 			}
-		CAMsg::printMsg(LOG_INFO,"Verified the symetric key!\n");		
+		CAMsg::printMsg(LOG_INFO,"Verified the symmetric key!\n");		
 
 		UINT8 key[150];
 		UINT32 keySize=150;
@@ -339,7 +310,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 		ret=decodeXMLEncryptedKey(key,&keySize,elemRoot,m_pRSA);
 		if(ret!=E_SUCCESS||keySize!=64)
 			{
-				CAMsg::printMsg(LOG_CRIT,"Couldt not set the symetric key to be used by the MuxSocket!\n");		
+				CAMsg::printMsg(LOG_CRIT,"Could not set the symmetric key to be used by the MuxSocket!\n");		
 				return E_UNKNOWN;
 			}
 		m_pMuxIn->setReceiveKey(key,32);
