@@ -73,8 +73,9 @@ am_mix_OBJECTS = CAAbstractControlChannel.$(OBJEXT) \
 	CAControlChannelDispatcher.$(OBJEXT) \
 	CAControlChannelTest.$(OBJEXT) CADatabase.$(OBJEXT) \
 	CADatagramSocket.$(OBJEXT) CADynaNetworking.$(OBJEXT) \
-	CAFirstMix.$(OBJEXT) CAFirstMixChannelList.$(OBJEXT) \
-	CAHttpClient.$(OBJEXT) CAInfoService.$(OBJEXT) \
+	CADynamicCascadeConfigurator.$(OBJEXT) CAFirstMix.$(OBJEXT) \
+	CAFirstMixChannelList.$(OBJEXT) CAHttpClient.$(OBJEXT) \
+	CAInfoService.$(OBJEXT) CAInfoServiceAware.$(OBJEXT) \
 	CAIPList.$(OBJEXT) CALastMix.$(OBJEXT) \
 	CALastMixChannelList.$(OBJEXT) CAListenerInterface.$(OBJEXT) \
 	CALocalProxy.$(OBJEXT) CALogPacketStats.$(OBJEXT) \
@@ -250,10 +251,12 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CADatabase.cpp\
 		    CADatagramSocket.cpp \
 		    CADynaNetworking.cpp \
+		    CADynamicCascadeConfigurator.cpp \
 		    CAFirstMix.cpp \
 		    CAFirstMixChannelList.cpp \
 		    CAHttpClient.cpp \
 		    CAInfoService.cpp \
+				CAInfoServiceAware.cpp \
 		    CAIPList.cpp \
 		    CALastMix.cpp \
 		    CALastMixChannelList.cpp\
@@ -313,10 +316,12 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CADatabase.hpp\
 		    CADatagramSocket.hpp\
 		    CADynaNetworking.hpp \
+		    CADynamicCascadeConfigurator.hpp \
 		    CAFirstMix.hpp \
 		    CAFirstMixChannelList.hpp \
 		    CAHttpClient.hpp \
 		    CAInfoService.hpp \
+				CAInfoServiceAware.hpp \
 		    CAIPList.hpp \
 		    CALastMix.hpp \
 		    CALastMixChannelList.hpp\
@@ -476,11 +481,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CADatabase.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CADatagramSocket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CADynaNetworking.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CADynamicCascadeConfigurator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAFirstMix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAFirstMixChannelList.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAHttpClient.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAIPList.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAInfoService.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAInfoServiceAware.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CALastMix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CALastMixChannelList.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAListenerInterface.Po@am__quote@
