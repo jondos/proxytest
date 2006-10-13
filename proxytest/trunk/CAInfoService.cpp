@@ -118,6 +118,19 @@ static THREAD_RETURN InfoLoop(void *p)
 								}
 						}
 				}
+#ifdef DYNAMIC_MIX
+			// LERNGRUPPE
+			// Check regulary for new cascade information
+			/** @todo Implement a reasonable interval, as cascades are created only once a day at most.
+				* This could be used for semi-dynamic cascades too.
+				* Note that increasing the delay might cause problems in CAMix::start (MiddleMixes entering 
+				*::init and so on
+				*/
+			if( options.isDynamic() )
+			{
+				pInfoService->dynamicCascadeConfiguration();
+			}
+#endif
 			currentTime=time(NULL);
 			//@TODO BUGGy -- because it assumes knowledge about update times, which are configurable in StdAfx.hpp
 			// wait 60 seconds at most
@@ -142,6 +155,73 @@ static THREAD_RETURN InfoLoop(void *p)
 		}
 		THREAD_RETURN_SUCCESS;
 	}
+#ifdef DYNAMIC_MIX
+/**
+  * LERNGRUPPE
+  * Asks a random InfoService if there exist new cascade information for this mix.
+  * If so, the reconfiguration is started
+  * @retval E_UNKOWN if an error occurs 
+  * @retval E_SUCCESS otherwise
+  */
+SINT32 CAInfoService::dynamicCascadeConfiguration()
+{
+	SINT32 ret = E_UNKNOWN;
+	CADynamicCascadeConfigurator *configurator = NULL;
+
+	/** @todo maybe use a mutex here so that no second dynamicCascadeConfiguration can begin */
+	if(m_bReconfig) return E_SUCCESS;
+	CASocket socket;
+	CASocketAddrINet *address;
+	CAHttpClient httpClient;
+
+	UINT32 status, contentLength;
+	UINT8 buff[255];
+	UINT8 bufMixId[60];
+	UINT32 mixIdLen = 60;
+	options.getMixId( bufMixId, mixIdLen );
+	sprintf((char*)buff, "/newcascadeinformationavailable/%s",bufMixId ); 
+	if( options.getRandomInfoService(address) != E_SUCCESS)
+	{
+		CAMsg::printMsg( LOG_ERR, "Unable to get a random InfoService - This will cause problems! Check your configuration!\n");
+		return E_UNKNOWN;
+	}
+	if(socket.connect(*address)!=E_SUCCESS)
+	{
+		ret = E_UNKNOWN;
+		goto EXIT;
+	}
+	//Send request
+	httpClient.setSocket(&socket);
+	httpClient.sendGetRequest(buff);
+	httpClient.parseHTTPHeader(&contentLength, &status);
+	if(status!=200)
+	{
+		socket.close();
+		ret = E_SUCCESS;
+		goto EXIT;
+	}
+	CAMsg::printMsg( LOG_DEBUG, "Starting dynamic reconfiguration...\n");
+	m_bReconfig = true;
+		
+	configurator = new CADynamicCascadeConfigurator( m_pSignature, m_pMix );
+	ret = configurator->configure();
+	/** @todo Is this really safe? State of configuration is unknown here, reset should work though */
+	if(ret != E_SUCCESS)
+	{
+		options.resetNextMix();
+		options.resetPrevMix();
+		options.setCascadeProposal(NULL, 0);
+		m_pMix->dynaReconfigure(false);
+	}	
+	m_bReconfig = false;
+	if(configurator != NULL)
+		delete configurator;
+	
+EXIT:
+	delete address;
+	return ret;
+}
+#endif
 
 CAInfoService::CAInfoService()
 {
@@ -153,6 +233,9 @@ CAInfoService::CAInfoService()
 		m_lastMixedPackets=0;
     m_expectedMixRelPos = 0;
 		m_pthreadRunLoop=new CAThread((UINT8*)"InfoServiceThread");
+#ifdef DYNAMIC_MIX
+		m_bReconfig = false;
+#endif
 }
 
 CAInfoService::CAInfoService(CAMix* pMix)
@@ -166,6 +249,9 @@ CAInfoService::CAInfoService(CAMix* pMix)
     m_expectedMixRelPos = 0;
 		m_pthreadRunLoop=new CAThread((UINT8*)"InfoServiceThread");
 		m_pMix=pMix;
+#ifdef DYNAMIC_MIX
+		m_bReconfig = false;
+#endif
 	}
 
 CAInfoService::~CAInfoService()
