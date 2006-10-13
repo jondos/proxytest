@@ -57,6 +57,13 @@ class CAMix
 			SINT32 start();
 			virtual SINT32 reconfigure(){return E_SUCCESS;}
 			virtual tMixType getType() const =0;
+#ifdef DYNAMIC_MIX
+			void setReconfiguring(bool a_val)
+			{
+				m_bReconfiguring = a_val;
+			}
+			SINT32 dynaReconfigure(bool a_bChangeMixType);
+#endif
 
 			/** Returns the Mix-Cascade info which should be send to the InfoService.
     		* This is NOT a copy!
@@ -93,6 +100,12 @@ class CAMix
 					return m_pMuxOutControlChannelDispatcher;
 				}
 		protected:
+#ifdef DYNAMIC_MIX
+			virtual void stopCascade() =0;
+			bool m_bLoop;
+			bool m_bLooping;
+#endif
+			bool m_bReconfiguring;
 			virtual SINT32 clean()=0;
 			virtual SINT32 initOnce(){return E_SUCCESS;}
 			virtual SINT32 init()=0;

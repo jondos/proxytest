@@ -83,6 +83,15 @@ private:
 			CAMiddleMixChannelList* m_pMiddleMixChannelList;
 			//CAInfoService* m_pInfoService;
 			friend THREAD_RETURN mm_loopDownStream(void *p);
+#ifdef DYNAMIC_MIX
+protected:
+			void stopCascade()
+			{
+				m_bRun = false;
+			}
+#endif
 	};
+
+
 
 #endif

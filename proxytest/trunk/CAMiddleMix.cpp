@@ -395,6 +395,11 @@ SINT32 CAMiddleMix::init()
 		pAddr=pListener->getAddr();
 		delete pListener;
 		m_pMuxIn=new CAMuxSocket();
+		// LERNGRUPPE Do not block if we are currently reconfiguring
+		if(/*!m_bLoop ||*/ m_bReconfiguring)
+		{
+			return E_UNKNOWN;
+		}
 		SINT32 ret=m_pMuxIn->accept(*pAddr);
 		delete pAddr;
 		if(ret!=E_SUCCESS)

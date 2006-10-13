@@ -57,7 +57,7 @@ class CAListenerInterface
 				{
 					return m_bVirtual;
 				}
-
+			char* getHostname() { return (char*)m_strHostname; }
 #ifndef ONLY_LOCAL_PROXY
 			SINT32 toDOMFragment(DOM_DocumentFragment& fragment,DOM_Document& ownerDoc) const;
 			static const char* XML_ELEMENT_CONTAINER_NAME;

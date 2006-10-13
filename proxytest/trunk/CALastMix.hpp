@@ -90,6 +90,12 @@ class CALastMix:public
 				}
 
 	protected:
+#ifdef DYNAMIC_MIX
+			void stopCascade()
+			{
+				m_bRestart = true;
+			}
+#endif
 			virtual SINT32 loop()=0;
 			SINT32 init();
 			SINT32 initOnce();

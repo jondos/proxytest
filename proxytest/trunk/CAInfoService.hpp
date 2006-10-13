@@ -89,6 +89,10 @@ class CAInfoService
 	
 			UINT8* getStatusXMLAsString(bool bIncludeCerts,UINT32& len);
 			
+#ifdef DYNAMIC_MIX
+			/** LERNGRUPPE */
+			SINT32 dynamicCascadeConfiguration();
+#endif
 		public:
 			static const UINT64 MINUTE;
 			static const UINT64 SEND_CASCADE_INFO_WAIT;
@@ -117,6 +121,9 @@ class CAInfoService
 			UINT32				m_minuts;
 			SINT32				m_expectedMixRelPos;
 			bool					m_bConfiguring;
+#ifdef DYNAMIC_MIX
+			bool m_bReconfig;
+#endif
 };
 #endif
 #endif //ONLY_LOCAL_PROXY
