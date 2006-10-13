@@ -1404,19 +1404,22 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		m_bDynamic = false;
 		getDOMChildByName(elemGeneral,(UINT8*)"Dynamic",elem,false);
 		if(elem != NULL)
-		{
+			{
     			if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS)
     			{
         			m_bDynamic = (strcmp("True",(char*)tmpBuff) == 0);
     			}
 
-		}
+			}
 		if(m_bDynamic)
 			CAMsg::printMsg( LOG_DEBUG, "I am a dynamic mix\n");
 
 		//getCascadeName
 		getDOMChildByName(elemGeneral,(UINT8*)"CascadeName",elem,false);
 		tmpLen=255;
+#ifdef DYNAMIC_MIX
+		bool bNeedCascadeNameFromMixID=false;
+#endif
 		if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS)
 			{
 				m_strCascadeName=new char[tmpLen+1];
@@ -1425,8 +1428,9 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 			}
 #ifdef DYNAMIC_MIX
 			/* LERNGRUPPE: Dynamic Mixes must have a cascade name, as MiddleMixes may be reconfigured to be FirstMixes */
-			else
+		else
 			{
+				bNeedCascadeNameFromMixID=true;
 				m_strCascadeName = new char[strlen(m_strMixID) + 1];
 				strncpy(m_strCascadeName, m_strMixID, strlen(m_strMixID)+1);
 			}
@@ -1495,27 +1499,27 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		getDOMChildByName(elemCertificates,(UINT8*)"OwnCertificate",elemOwnCert,false);
 		if (elemOwnCert == NULL)
 			{
-			return E_UNKNOWN;
-		}
+				return E_UNKNOWN;
+			}
 		
-				m_pSignKey=new CASignature();
-				UINT8 passwd[500];
-				passwd[0]=0;
-				if(m_pSignKey->setSignKey(elemOwnCert.getFirstChild(),SIGKEY_PKCS12)!=E_SUCCESS)
-					{//Maybe not an empty passwd
-						printf("I need a passwd for the SignKey: ");
-						scanf("%400[^\n]%*1[\n]",(char*)passwd);
-						if(m_pSignKey->setSignKey(elemOwnCert.getFirstChild(),SIGKEY_PKCS12,(char*)passwd)!=E_SUCCESS)
-							{
-								CAMsg::printMsg(LOG_CRIT,"Could not read own signature key!\n");
-								delete m_pSignKey;
-								m_pSignKey=NULL;
-							}
+		m_pSignKey=new CASignature();
+		UINT8 passwd[500];
+		passwd[0]=0;
+		if(m_pSignKey->setSignKey(elemOwnCert.getFirstChild(),SIGKEY_PKCS12)!=E_SUCCESS)
+			{//Maybe not an empty passwd
+				printf("I need a passwd for the SignKey: ");
+				scanf("%400[^\n]%*1[\n]",(char*)passwd);
+				if(m_pSignKey->setSignKey(elemOwnCert.getFirstChild(),SIGKEY_PKCS12,(char*)passwd)!=E_SUCCESS)
+					{
+						CAMsg::printMsg(LOG_CRIT,"Could not read own signature key!\n");
+						delete m_pSignKey;
+						m_pSignKey=NULL;
 					}
-				m_pOwnCertificate=CACertificate::decode(elemOwnCert.getFirstChild(),CERT_PKCS12,(char*)passwd);
+			}
+		m_pOwnCertificate=CACertificate::decode(elemOwnCert.getFirstChild(),CERT_PKCS12,(char*)passwd);
 		if (m_pOwnCertificate == NULL)
-		{
-			return E_UNKNOWN;
+			{
+				return E_UNKNOWN;
 			}
 
 		
@@ -1538,6 +1542,14 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		m_strMixID=new char[strlen((char*)tmpBuff)+1];
 		strcpy(m_strMixID,(char*) tmpBuff);		
 
+#ifdef DYNAMIC_MIX
+			/* LERNGRUPPE: Dynamic Mixes must have a cascade name, as MiddleMixes may be reconfigured to be FirstMixes */
+		if(bNeedCascadeNameFromMixID)
+			{
+				m_strCascadeName = new char[strlen(m_strMixID) + 1];
+				strncpy(m_strCascadeName, m_strMixID, strlen(m_strMixID)+1);
+			}
+#endif
 
 		//then Operator Certificate
 		DOM_Element elemOpCert;
@@ -1713,7 +1725,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		//get ListenerInterfaces
 		DOM_Element elemListenerInterfaces;
 		getDOMChildByName(elemNetwork,(UINT8*)
-			CAListenerInterface::XML_ELEMENT_CONTAINER_NAME,elemListenerInterfaces,false);
+		CAListenerInterface::XML_ELEMENT_CONTAINER_NAME,elemListenerInterfaces,false);
 		m_arListenerInterfaces = CAListenerInterface::getInstance(
 			elemListenerInterfaces, m_cnListenerInterfaces);
 
@@ -2337,30 +2349,30 @@ SINT32 CACmdLnOptions::buildDefaultConfig(DOM_Document doc)
     /** @todo Add a list of default InfoServices to the default configuration */
     DOM_Element elemISs=doc.createElement("InfoServices");
 		elemNet.appendChild(elemISs);
-	elemTmp=doc.createElement("AllowAutoConfiguration");
-	setDOMElementValue(elemTmp,(UINT8*)"True");
-	elemISs.appendChild(elemTmp);
+		elemTmp=doc.createElement("AllowAutoConfiguration");
+		setDOMElementValue(elemTmp,(UINT8*)"True");
+		elemISs.appendChild(elemTmp);
 
 		DOM_Element elemIS=doc.createElement("InfoService");
     elemISs.appendChild(elemIS);
-	DOM_Element elemISListeners=doc.createElement("ListenerInterfaces");
-	elemIS.appendChild(elemISListeners);
-	DOM_Element elemISLi=doc.createElement("ListenerInterface");
-	elemISListeners.appendChild(elemISLi);
+		DOM_Element elemISListeners=doc.createElement("ListenerInterfaces");
+		elemIS.appendChild(elemISListeners);
+		DOM_Element elemISLi=doc.createElement("ListenerInterface");
+		elemISListeners.appendChild(elemISLi);
 		elemTmp=doc.createElement("Host");
     setDOMElementValue(elemTmp,(UINT8*)DEFAULT_INFOSERVICE);
-    elemListener.appendChild(elemTmp);
+    elemISLi.appendChild(elemTmp);
     elemTmp=doc.createElement("Port");
     setDOMElementValue(elemTmp,(UINT8*)"80");
-    elemListener.appendChild(elemTmp);
+    elemISLi.appendChild(elemTmp);
     elemTmp=doc.createElement("AllowAutoConfiguration");
     setDOMElementValue(elemTmp,(UINT8*)"True");
     elemISs.appendChild(elemTmp);
 
     /** We add this for compatability reasons. ListenerInterfaces can be determined dynamically now */
-    elemListeners=doc.createElement("ListenerInterfaces");
+    DOM_Element elemListeners=doc.createElement("ListenerInterfaces");
     elemNet.appendChild(elemListeners);
-		elemListener=doc.createElement("ListenerInterface");
+		DOM_Element elemListener=doc.createElement("ListenerInterface");
     elemListeners.appendChild(elemListener);
     elemTmp=doc.createElement("Port");
     setDOMElementValue(elemTmp,(UINT8*)"6544");
