@@ -1063,8 +1063,22 @@ bool CACmdLnOptions::isLocalProxy()
 SINT32 CACmdLnOptions::getMixXml(DOM_Document& docMixInfo)
 	{
 		docMixInfo=m_docMixInfo;
-		return E_SUCCESS;
+	//insert (or update) the Timestamp
+	DOM_Element elemTimeStamp;
+	DOM_Element elemRoot=docMixInfo.getDocumentElement();
+	if(getDOMChildByName(elemRoot,(UINT8*)"LastUpdate",elemTimeStamp,false)!=E_SUCCESS)
+	{
+		elemTimeStamp=docMixInfo.createElement("LastUpdate");
+		elemRoot.appendChild(elemTimeStamp);
 	}
+	UINT64 currentMillis;
+	getcurrentTimeMillis(currentMillis);
+	UINT8 tmpStrCurrentMillis[50];
+	print64(tmpStrCurrentMillis,currentMillis);
+	setDOMElementValue(elemTimeStamp,tmpStrCurrentMillis);		
+	
+		return E_SUCCESS;
+}
 
 /** Tries to read the XML configuration file \c configFile and parses (but not process) it.
 	* Returns the parsed document as \c DOM_Document.
@@ -1127,18 +1141,10 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		DOM_Element elemGeneral;
 		getDOMChildByName(elemRoot,(UINT8*)"General",elemGeneral,false);
 
-		//get MixID
 		UINT8 tmpBuff[255];
 		UINT32 tmpLen=255;
-		DOM_Element elemMixID;
-		getDOMChildByName(elemGeneral,(UINT8*)"MixID",elemMixID,false);
-		if(elemMixID==NULL)
-			return E_UNKNOWN;
-		if(getDOMElementValue(elemMixID,tmpBuff,&tmpLen)!=E_SUCCESS)
-			return E_UNKNOWN;
-		strtrim(tmpBuff);
-		m_strMixID=new char[strlen((char*)tmpBuff)+1];
-		strcpy(m_strMixID,(char*) tmpBuff);
+		
+		
 		//getMixType
 		DOM_Element elem;
 		getDOMChildByName(elemGeneral,(UINT8*)"MixType",elem,false);
@@ -1240,8 +1246,11 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		//Own Certiticate first
 		DOM_Element elemOwnCert;
 		getDOMChildByName(elemCertificates,(UINT8*)"OwnCertificate",elemOwnCert,false);
-		if(elemOwnCert!=NULL)
+		if (elemOwnCert == NULL)
 			{
+			return E_UNKNOWN;
+		}
+		
 				m_pSignKey=new CASignature();
 				UINT8 passwd[500];
 				passwd[0]=0;
@@ -1257,7 +1266,31 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 							}
 					}
 				m_pOwnCertificate=CACertificate::decode(elemOwnCert.getFirstChild(),CERT_PKCS12,(char*)passwd);
+		if (m_pOwnCertificate == NULL)
+		{
+			return E_UNKNOWN;
 			}
+
+		
+		//get MixID
+		tmpLen=255;
+		if (m_pOwnCertificate->getSubjectKeyIdentifier(tmpBuff, &tmpLen) != E_SUCCESS)
+		{
+			DOM_Element elemMixID;
+			getDOMChildByName(elemGeneral,(UINT8*)"MixID",elemMixID,false);
+			if(elemMixID==NULL)
+			{
+				return E_UNKNOWN;
+			}
+			if(getDOMElementValue(elemMixID,tmpBuff,&tmpLen)!=E_SUCCESS)
+			{
+				return E_UNKNOWN;
+			}
+		}
+		strtrim(tmpBuff);
+		m_strMixID=new char[strlen((char*)tmpBuff)+1];
+		strcpy(m_strMixID,(char*) tmpBuff);		
+
 
 		//then Operator Certificate
 		DOM_Element elemOpCert;
@@ -1867,15 +1900,6 @@ SKIP_NEXT_MIX:
 		getDOMElementValue(elemKeepAliveSendInterval,m_u32KeepAliveSendInterval,KEEP_ALIVE_TRAFFIC_SEND_WAIT_TIME);
 		getDOMElementValue(elemKeepAliveRecvInterval,m_u32KeepAliveRecvInterval,KEEP_ALIVE_TRAFFIC_RECV_WAIT_TIME);
 		
-    tmpLen=255;
-    getDOMChildByName(elemGeneral,(UINT8*)"MixID",elemMixID,false);
-    if(elemMixID==NULL)
-        return E_UNKNOWN;
-    if(getDOMElementValue(elemMixID,tmpBuff,&tmpLen)!=E_SUCCESS)
-        return E_UNKNOWN;
-    strtrim(tmpBuff);
-    m_strMixID=new char[strlen((char*)tmpBuff)+1];
-    strcpy(m_strMixID,(char*) tmpBuff);
     //getMixType
     DOM_Element elemMixType;
     getDOMChildByName(elemGeneral,(UINT8*)"MixType",elemMixType,false);

@@ -196,11 +196,10 @@ SINT32 CALastMix::processKeyExchange()
     //options.getCascadeName(cName,128);
     //setDOMElementAttribute(elemMixes,"cascadeName",cName);
 		doc.appendChild(elemMixes);
-		DOM_Element elemMix=doc.createElement("Mix");
-		UINT8 idBuff[50];
-		options.getMixId(idBuff,50);
-		elemMix.setAttribute("id",(char*)idBuff);
-		elemMixes.appendChild(elemMix);
+		
+		addMixInfo(elemMixes, false);
+		DOM_Element elemMix;
+		getDOMChildByName(elemMixes, (UINT8*)"Mix", elemMix, false);
 
 		//Inserting MixProtocol Version 
 		// Version 0.3  - "normal", initial mix protocol
@@ -245,30 +244,6 @@ SINT32 CALastMix::processKeyExchange()
 		setDOMElementValue(elemNonce,tmpBuff);
 		elemMix.appendChild(elemNonce);
 		
-/*
- * Sending Certificates - dign the xml struct send to each jap user
- * 
- */	
-	// Public Own Mix Certificates
-		CACertificate* ownCert=options.getOwnCertificate();
-		if(ownCert==NULL)
-			{
-				CAMsg::printMsg(LOG_DEBUG,"Own Test Cert is NULL -- so it could not be inserted into signed KeyInfo send to users...\n");
-			}	
-		CACertStore* tmpCertStore=new CACertStore();
-    // Operator Certificates
-    UINT32 opCertsLength;
-    CACertificate** opCert=options.getOpCertificates(opCertsLength);
-    if(opCert==NULL)
-    {
-        CAMsg::printMsg(LOG_DEBUG,"Op Test Cert is NULL -- so it could not be inserted into signed KeyInfo send to users...\n");
-		}
-		// Own  Mix Certificates first, then Operator Certificates
-		for(SINT32 i = opCertsLength - 1;  i >= 0; i--)
-		{
-			tmpCertStore->add(opCert[i]); 	
-		}
-		tmpCertStore->add(ownCert);
     
 		
 // Add Info about KeepAlive traffic
@@ -285,20 +260,13 @@ SINT32 CALastMix::processKeyExchange()
 		setDOMElementValue(elemKeepAliveSendInterval,u32KeepAliveSendInterval);
 		setDOMElementValue(elemKeepAliveRecvInterval,u32KeepAliveRecvInterval);
 		elemMix.appendChild(elemKeepAlive);
-		CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Offering -- SendInterval %u -- Recevie Interval %u\n",u32KeepAliveSendInterval,u32KeepAliveRecvInterval);		
-		if(m_pSignature->signXML(elemMix,tmpCertStore)!=E_SUCCESS)
-			{
-				CAMsg::printMsg(LOG_DEBUG,"Could not sign KeyInfo send to users...\n");
-			}
-		delete ownCert;
-    for(UINT32 i=0;i<opCertsLength;i++)
+		CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Offering -- SendInterval %u -- Receive Interval %u\n",u32KeepAliveSendInterval,u32KeepAliveRecvInterval);		
+		
+		// create signature
+		if (signXML(elemMix) != E_SUCCESS)
 		{
-			delete opCert[i];
+			CAMsg::printMsg(LOG_DEBUG,"Could not sign KeyInfo sent to users...\n");
 		}
-		delete[] opCert;
-		delete tmpCertStore;
-		
-		
 
 		UINT32 len=0;
 		UINT8* messageBuff=DOM_Output::dumpToMem(doc,&len);
@@ -341,7 +309,7 @@ SINT32 CALastMix::processKeyExchange()
 		delete pCert;
 		if(oSig.verifyXML(messageBuff,len)!=E_SUCCESS)
 			{
-				CAMsg::printMsg(LOG_CRIT,"Couldt not verify the symetric key!\n");		
+				CAMsg::printMsg(LOG_CRIT,"Could not verify the symetric key!\n");		
 				delete []messageBuff;
 				return E_UNKNOWN;
 			}
@@ -392,12 +360,12 @@ SINT32 CALastMix::processKeyExchange()
 		UINT32 tmpSendInterval,tmpRecvInterval;
 		getDOMElementValue(elemKeepAliveSendInterval,tmpSendInterval,0xFFFFFFFF); //if now send interval was given set it to "infinite"
 		getDOMElementValue(elemKeepAliveRecvInterval,tmpRecvInterval,0xFFFFFFFF); //if no recv interval was given --> set it to "infinite"
-		CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Getting offer -- SendInterval %u -- Recevie Interval %u\n",tmpSendInterval,tmpRecvInterval);		
+		CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Getting offer -- SendInterval %u -- Receive Interval %u\n",tmpSendInterval,tmpRecvInterval);		
 		m_u32KeepAliveSendInterval=max(u32KeepAliveSendInterval,tmpRecvInterval);
 		if(m_u32KeepAliveSendInterval>10000)
 			m_u32KeepAliveSendInterval-=10000; //make the send interval a little bit smaller than the related receive intervall
 		m_u32KeepAliveRecvInterval=max(u32KeepAliveRecvInterval,tmpSendInterval);
-		CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Calculated -- SendInterval %u -- Recevie Interval %u\n",m_u32KeepAliveSendInterval,m_u32KeepAliveRecvInterval);		
+		CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Calculated -- SendInterval %u -- Receive Interval %u\n",m_u32KeepAliveSendInterval,m_u32KeepAliveRecvInterval);		
 		return E_SUCCESS;
 	}
 

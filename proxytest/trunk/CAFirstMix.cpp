@@ -301,7 +301,7 @@ SINT32 CAFirstMix::processKeyExchange()
 
     DOM_Node child=elemMixes.getLastChild();
 
-    //tmp XML-Structure for constructing the XML which is send to each user
+    //tmp XML-Structure for constructing the XML which is sent to each user
     DOM_Document docXmlKeyInfo=DOM_Document::createDocument();
     DOM_Element elemRootKey=docXmlKeyInfo.createElement("MixCascade");
     setDOMElementAttribute(elemRootKey,"version",(UINT8*)"0.2"); //set the Version of the XML to 0.2
@@ -330,13 +330,17 @@ SINT32 CAFirstMix::processKeyExchange()
     //Inserting own Key in XML-Key struct
     DOM_DocumentFragment docfragKey;
     m_pRSA->getPublicKeyAsDocumentFragment(docfragKey);
-    DOM_Element elemOwnMix=docXmlKeyInfo.createElement("Mix");
-    UINT8 buffId[255];
-    options.getMixId(buffId,255);
-    elemOwnMix.setAttribute("id",DOMString((char*)buffId));
+    addMixInfo(elemMixesKey, true);
+    DOM_Element elemOwnMix;
+    	getDOMChildByName(elemMixesKey, (UINT8*)"Mix", elemOwnMix, false);
 		elemOwnMix.appendChild(docXmlKeyInfo.importNode(docfragKey,true));
-    elemMixesKey.insertBefore(elemOwnMix,elemMixesKey.getFirstChild());
+	if (signXML(elemOwnMix) != E_SUCCESS)
+	{
+		CAMsg::printMsg(LOG_DEBUG,"Could not sign MixInfo sent to users...\n");
+	}
+	
     setDOMElementAttribute((DOM_Element&)elemMixesKey,"count",count+1);
+    
     
 	  DOM_Node elemPayment=docXmlKeyInfo.createElement("Payment");
 		elemRootKey.appendChild(elemPayment);
@@ -346,46 +350,11 @@ SINT32 CAFirstMix::processKeyExchange()
 			setDOMElementAttribute(elemPayment,"required",(UINT8*)"false");
 		#endif
 
-/*
- * Sending Certificates - dign the xml struct send to each jap user
- * 
- */	
-	// Public Own Mix Certificates
-		CACertificate* ownCert=options.getOwnCertificate();
-    if(ownCert==NULL)
+	// create signature
+	if (signXML(elemRootKey) != E_SUCCESS)
     {
-        CAMsg::printMsg(LOG_DEBUG,"Own Test Cert is NULL -- so it could not be inserted into signed KeyInfo send to users...\n");
+		CAMsg::printMsg(LOG_DEBUG,"Could not sign KeyInfo sent to users...\n");
 		}
-    CACertStore* tmpCertStore=new CACertStore();
-    
-    // Operator Certificates
-    UINT32 opCertsLength;
-    CACertificate** opCert=options.getOpCertificates(opCertsLength);
-    if(opCert==NULL)
-    {
-        CAMsg::printMsg(LOG_DEBUG,"Op Test Cert is NULL -- so it could not be inserted into signed KeyInfo send to users...\n");
-		}
-		else
-		{
-			// Own  Mix Certificates first, then Operator Certificates
-			for(SINT32 i = opCertsLength - 1;  i >=0; i--)
-			{
-				tmpCertStore->add(opCert[i]); 	
-			}
-		}
-    tmpCertStore->add(ownCert);
-    
-    if(m_pSignature->signXML(elemRootKey,tmpCertStore)!=E_SUCCESS)
-    {
-        CAMsg::printMsg(LOG_DEBUG,"Could not sign KeyInfo send to users...\n");
-    }
-    delete ownCert;
-    for(UINT32 i=0;i<opCertsLength;i++)
-		{
-			delete opCert[i];
-		}
-		delete[] opCert;
-    delete tmpCertStore;
 
     
     UINT32 tlen=0;
@@ -473,12 +442,12 @@ SINT32 CAFirstMix::processKeyExchange()
 						setDOMElementValue(elemKeepAliveSendInterval,u32KeepAliveSendInterval);
 						setDOMElementValue(elemKeepAliveRecvInterval,u32KeepAliveRecvInterval);
 						elemRoot.appendChild(elemKeepAlive);
-						CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Offering -- SendInterval %u -- Recevie Interval %u\n",u32KeepAliveSendInterval,u32KeepAliveRecvInterval);		
+						CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Offering -- SendInterval %u -- Receive Interval %u\n",u32KeepAliveSendInterval,u32KeepAliveRecvInterval);		
 						m_u32KeepAliveSendInterval=max(u32KeepAliveSendInterval,tmpRecvInterval);
 						if(m_u32KeepAliveSendInterval>10000)
 							m_u32KeepAliveSendInterval-=10000; //make the send interval a little bit smaller than the related receive intervall
 						m_u32KeepAliveRecvInterval=max(u32KeepAliveRecvInterval,tmpSendInterval);
-						CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Calculated -- SendInterval %u -- Recevie Interval %u\n",m_u32KeepAliveSendInterval,m_u32KeepAliveRecvInterval);		
+						CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Calculated -- SendInterval %u -- Receive Interval %u\n",m_u32KeepAliveSendInterval,m_u32KeepAliveRecvInterval);		
 
             m_pSignature->signXML(elemRoot);
             DOM_Output::dumpToMem(docSymKey,out,&outlen);
@@ -736,7 +705,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 			{
 				psocketgroupAccept->add(socketsIn[i]);
 			}
-#ifdef REPLAY_DETECTION //before we can start to accept users we have to nesure that we received the replay timestamps form the over mixes
+#ifdef REPLAY_DETECTION //before we can start to accept users we have to ensure that we received the replay timestamps form the over mixes
 		CAMsg::printMsg(LOG_DEBUG,"Waiting for Replay Timestamp from next mixes\n");
 		i=0;
 		while(!pFirstMix->getRestart()&&i<pFirstMix->m_u32MixCount-1)

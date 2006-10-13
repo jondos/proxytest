@@ -82,10 +82,24 @@ class CAInfoService
 					m_bConfiguring = a_configuring;
 			}
 
+			void setSerial(UINT64 a_serial)
+			{
+				m_serial = a_serial;
+			}
+	
+			UINT8* getStatusXMLAsString(bool bIncludeCerts,UINT32& len);
+			
+		public:
+			static const UINT64 MINUTE;
+			static const UINT64 SEND_CASCADE_INFO_WAIT;
+			static const UINT64 SEND_MIX_INFO_WAIT;
+			static const UINT64 SEND_STATUS_INFO_WAIT;
+			static const UINT32 SEND_INFO_TIMEOUT;
+			
 		private:
 			UINT8* getCascadeHeloXMLAsString(UINT32& len);
 			SINT32 sendCascadeHelo(const UINT8* xml,UINT32 len,const CASocketAddrINet* a_socketAddress) const;
-			UINT8* getStatusXMLAsString(bool bIncludeCerts,UINT32& len);
+			
 			SINT32 sendStatus(const UINT8* strStatusXML,UINT32 len,const CASocketAddrINet* a_socketAddress) const;
 			UINT8* getMixHeloXMLAsString(UINT32& len);
 			SINT32 sendMixHelo(const UINT8* strMixHeloXML,UINT32 len,SINT32 requestCommand,const UINT8* param,
@@ -99,6 +113,7 @@ class CAInfoService
 			CAMix*				m_pMix;
 			CAThread*			m_pthreadRunLoop;
 			UINT64				m_lastMixedPackets;
+			UINT64				m_serial;
 			UINT32				m_minuts;
 			SINT32				m_expectedMixRelPos;
 			bool					m_bConfiguring;

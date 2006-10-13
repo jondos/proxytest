@@ -104,6 +104,7 @@ SINT32 getDOMElementAttribute(const DOM_Node& elem,const char* attrName,bool& va
 SINT32 getDOMElementAttribute(const DOM_Node& elem,const char* attrName,UINT8* value,UINT32* len);
 
 SINT32 getDOMChildByName(const DOM_Node& node,const UINT8* const name,DOM_Node& child,bool deep=false);
+SINT32 getLastDOMChildByName(const DOM_Node& node,const UINT8* const name,DOM_Node& a_child);
 
 SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, UINT8* xml, UINT32* xmllen,CAASymCipher* pRSA);
 SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, DOM_DocumentFragment& docFrag,CAASymCipher* pRSA);

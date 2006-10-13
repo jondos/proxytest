@@ -59,6 +59,14 @@ SINT32 CAMix::start()
 		UINT32 opCertLength;
 		CACertificate** opCerts = options.getOpCertificates(opCertLength);
 		m_pInfoService->setSignature(m_pSignature, options.getOwnCertificate(), opCerts, opCertLength);
+		
+		UINT64 currentMillis;
+		if (getcurrentTimeMillis(currentMillis) != E_SUCCESS)
+		{
+			currentMillis = 0;
+		}
+		m_pInfoService->setSerial(currentMillis);
+		
 		if(opCerts!=NULL)
 			{
 				for(UINT32 i=0;i<opCertLength;i++)
@@ -70,8 +78,11 @@ SINT32 CAMix::start()
         bool needReconf = needAutoConfig();
 
         m_pInfoService->setConfiguring(allowReconf && needReconf);
+        if (allowReconf && needReconf)
+        {
 				CAMsg::printMsg(LOG_DEBUG, "CAMix start: starting InfoService\n");
         m_pInfoService->start();
+        }
         while(allowReconf && needReconf)
         {
             CAMsg::printMsg(LOG_INFO, "No next mix or no prev. mix certificate specified. Waiting for auto-config from InfoService.\n");
@@ -91,7 +102,10 @@ SINT32 CAMix::start()
             {
                 m_pInfoService->setConfiguring(false);
                 if( ! m_pInfoService->isRunning())
+                {
+                	CAMsg::printMsg(LOG_DEBUG, "CAMix start: starting InfoService\n");
                     m_pInfoService->start();
+            }
             }
 
             CAMsg::printMsg(LOG_INFO, "The mix is now on-line.\n");
@@ -202,13 +216,23 @@ SINT32 CAMix::initMixCascadeInfo(DOM_Element& mixes)
         }
         delete pListener;
     }	
-    DOM_Element elemThisMix=m_docMixCascadeInfo.createElement("Mix");
-    setDOMElementAttribute(elemThisMix,"id",id);
+    
     DOM_Node elemMixesDocCascade=m_docMixCascadeInfo.createElement("Mixes");
+    DOM_Element elemMix;
     count=1;
     if(options.isFirstMix())
     {
-        elemMixesDocCascade.appendChild(elemThisMix);
+    	addMixInfo(elemMixesDocCascade, false);
+		getDOMChildByName(elemMixesDocCascade, (UINT8*)"Mix", elemMix, false);
+    	// create signature
+		if (signXML(elemMix) != E_SUCCESS)
+		{
+			CAMsg::printMsg(LOG_DEBUG,"Could not sign KeyInfo sent to users...\n");
+		}
+    	//if(m_pSignature->signXML(docMixInfo,m_pcertstoreOwnCerts)!=E_SUCCESS)
+		//m_pSignature, options.getOwnCertificate()    	
+		/*
+        elemMixesDocCascade.appendChild(elemThisMix);*/
     }
     elemRoot.appendChild(elemMixesDocCascade);
 
@@ -220,7 +244,7 @@ SINT32 CAMix::initMixCascadeInfo(DOM_Element& mixes)
     {
         if(node.getNodeType()==DOM_Node::ELEMENT_NODE&&node.getNodeName().equals("Mix"))
         {
-            elemMixesDocCascade.appendChild(m_docMixCascadeInfo.importNode(node,false));
+            elemMixesDocCascade.appendChild(m_docMixCascadeInfo.importNode(node,true));
             count++;
  //           cascadeId = static_cast<const DOM_Element&>(node).getAttribute("id").transcode();
         }
@@ -229,7 +253,13 @@ SINT32 CAMix::initMixCascadeInfo(DOM_Element& mixes)
 
     if(options.isLastMix())
     {
-        elemMixesDocCascade.appendChild(elemThisMix);
+        addMixInfo(elemMixesDocCascade, false);
+		getLastDOMChildByName(elemMixesDocCascade, (UINT8*)"Mix", elemMix);
+    	// create signature
+		if (signXML(elemMix) != E_SUCCESS)
+		{
+			CAMsg::printMsg(LOG_DEBUG,"Could not sign KeyInfo sent to users...\n");
+		}
         cascadeID = id;
     }
 		else if(options.isFirstMix())
@@ -251,4 +281,68 @@ SINT32 CAMix::initMixCascadeInfo(DOM_Element& mixes)
 #endif
 		return E_SUCCESS;
 }
+
+SINT32 CAMix::addMixInfo(DOM_Node& a_element, bool a_bForceFirstNode)
+{
+	// this is a complete mixinfo node to be sent to the InfoService
+	DOM_Document docMixInfo;
+	if(options.getMixXml(docMixInfo)!=E_SUCCESS)
+	{
+		return E_UNKNOWN;
+	}
+	DOM_Node nodeMixInfo = a_element.getOwnerDocument().importNode(
+		docMixInfo.getDocumentElement(), true);
+	if (a_bForceFirstNode && a_element.hasChildNodes())
+	{
+		a_element.insertBefore(nodeMixInfo, a_element.getFirstChild());
+	}
+	else
+	{
+		a_element.appendChild(nodeMixInfo);
+	}
+	return E_SUCCESS;
+}
+
+SINT32 CAMix::signXML(DOM_Node& a_element)
+{
+    CACertStore* tmpCertStore=new CACertStore();
+    
+    CACertificate* ownCert=options.getOwnCertificate();
+    if(ownCert==NULL)
+    {
+        CAMsg::printMsg(LOG_DEBUG,"Own Test Cert is NULL!\n");
+	}
+    
+    // Operator Certificates
+    UINT32 opCertsLength;
+    CACertificate** opCert=options.getOpCertificates(opCertsLength);
+    if(opCert==NULL)
+    {
+        CAMsg::printMsg(LOG_DEBUG,"Op Test Cert is NULL!\n");
+		}
+		else
+		{
+			// Own  Mix Certificates first, then Operator Certificates
+			for(SINT32 i = opCertsLength - 1;  i >=0; i--)
+			{
+				tmpCertStore->add(opCert[i]); 	
+			}
+		}
+    tmpCertStore->add(ownCert);
+    
+    if(m_pSignature->signXML(a_element, tmpCertStore)!=E_SUCCESS)
+    {
+       return E_UNKNOWN;
+    }
+    delete ownCert;
+    for(UINT32 i=0;i<opCertsLength;i++)
+		{
+			delete opCert[i];
+		}
+		delete[] opCert;
+    delete tmpCertStore;	
+    
+    return E_SUCCESS;
+}
+
 #endif //ONLY_LOCAL_PROXY
