@@ -36,22 +36,18 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAListenerInterface.hpp"
 #include "CASocketAddrINet.hpp"
 #include "CAThread.hpp"
+#include "CAInfoServiceAware.hpp"
 
 #define MAX_CONTENT_LENGTH 0x00FFFF
 
-class CADynaNetworking
+class CADynaNetworking : CAInfoServiceAware
 {
 public:
     CADynaNetworking();
     ~CADynaNetworking();
     SINT32 verifyConnectivity();
     SINT32 updateNetworkConfiguration(UINT16 a_port);
-//     SINT32 signXMLInternal(DOM_Node& node);
     CAListenerInterface *getWorkingListenerInterface();
-/*    void setPingToken(UINT8* a_pingToken)
-    {
-        this->m_pingToken = a_pingToken;
-    }*/
 private:
     SINT32 resolveInternalIp(UINT8* r_strIp);
     SINT32 resolveExternalIp(UINT8* r_strIp, UINT32 len);
@@ -59,11 +55,10 @@ private:
     SINT32 createListenerInterface(DOM_Element r_elemListeners, DOM_Document a_ownerDoc);
     SINT32 getInterfaceIp(UINT32* r_ip);
     bool isInternalIp(UINT32 p_ip);
-    SINT32 sendInfoserviceRequest(UINT8 *a_strRequest, const UINT8* a_strRoot, DOM_Element *r_elemRoot, UINT8* postData, UINT32 postLen);
-    SINT32 sendConnectivityRequest(const UINT8* a_strRoot, DOM_Element *r_elemRoot, UINT32 a_port);
+    SINT32 sendConnectivityRequest(DOM_Element *r_elemRoot, UINT32 a_port);
     /*CAThread	m_pthreadConnectivtyLoop; */
 
 
 };
 #endif //DYNAMIC_MIX
-#endif
+#endif 

@@ -25,10 +25,12 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CADatabase.cpp\
 		    CADatagramSocket.cpp \
 		    CADynaNetworking.cpp \
+		    CADynamicCascadeConfigurator.cpp \
 		    CAFirstMix.cpp \
 		    CAFirstMixChannelList.cpp \
 		    CAHttpClient.cpp \
 		    CAInfoService.cpp \
+				CAInfoServiceAware.cpp \
 		    CAIPList.cpp \
 		    CALastMix.cpp \
 		    CALastMixChannelList.cpp\
@@ -88,10 +90,12 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CADatabase.hpp\
 		    CADatagramSocket.hpp\
 		    CADynaNetworking.hpp \
+		    CADynamicCascadeConfigurator.hpp \
 		    CAFirstMix.hpp \
 		    CAFirstMixChannelList.hpp \
 		    CAHttpClient.hpp \
 		    CAInfoService.hpp \
+				CAInfoServiceAware.hpp \
 		    CAIPList.hpp \
 		    CALastMix.hpp \
 		    CALastMixChannelList.hpp\

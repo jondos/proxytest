@@ -111,7 +111,12 @@ protected:
 			SINT32 init();
 			SINT32 clean();
 			SINT32 initOnce();
-
+#ifdef DYNAMIC_MIX
+			void stopCascade()
+			{
+				m_bRestart = true;
+			}
+#endif
     //added by ronin <ronin2@web.de>
     virtual SINT32 processKeyExchange();
     

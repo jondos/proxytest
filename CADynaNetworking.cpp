@@ -38,7 +38,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketAddr.hpp"
 #include "xml/DOM_Output.hpp"
 
-CADynaNetworking::CADynaNetworking()
+CADynaNetworking::CADynaNetworking() : CAInfoServiceAware()
 {}
 
 CADynaNetworking::~CADynaNetworking()
@@ -68,7 +68,6 @@ SINT32 CADynaNetworking::updateNetworkConfiguration(UINT16 a_port)
     {
         return E_UNKNOWN;
     }
-
     if( resolveExternalIp( externalIp, len ) == E_UNKNOWN )
     {
         return E_UNKNOWN;
@@ -181,6 +180,10 @@ CAListenerInterface *CADynaNetworking::getWorkingListenerInterface()
 static THREAD_RETURN ConnectivityLoop(void *p)
 {
     CADynaNetworking* parent = (CADynaNetworking*)p;
+    char buff[1024];
+    UINT32 len = 1024;
+    SINT32 rLen;
+    char *pechoRequest = NULL;
 
 #ifdef DEBUG
     CAMsg::printMsg(LOG_DEBUG, "CADynaNetworking - ConnectivityLoop() started\n");
@@ -194,39 +197,41 @@ static THREAD_RETURN ConnectivityLoop(void *p)
 
     CASocket serverSocket;
     CASocket socket;
-    if( serverSocket.listen( *pListener->getAddr())  != E_SUCCESS )
+    CASocketAddrINet *address = (CASocketAddrINet*)pListener->getAddr();
+    if( serverSocket.listen( *address )  != E_SUCCESS )
     {
         CAMsg::printMsg(LOG_ERR, "CADynaNetworking - ConnectivityLoop - Unable to listen to standard port, aborting\n");
-        THREAD_RETURN_ERROR;
+        goto EXIT;
     }
 #ifdef DEBUG
-    CAMsg::printMsg(LOG_ERR, "CADynaNetworking - ConnectivityLoop - Ok, li  stening...\n");
+    CAMsg::printMsg(LOG_ERR, "CADynaNetworking - ConnectivityLoop - Ok, listening...\n");
 #endif
     if( serverSocket.accept(socket) != E_SUCCESS)
     {
         CAMsg::printMsg(LOG_ERR, "CADynaNetworking - ConnectivityLoop - Unable to accept on standard port, aborting\n");
-        THREAD_RETURN_ERROR;
+        goto EXIT;
     }
 #ifdef DEBUG
     CAMsg::printMsg(LOG_ERR, "CADynaNetworking - ConnectivityLoop - Ok, i accepted\n");
 #endif
-    char buff[1024];
-    UINT32 len = 1024;
-    SINT32 rLen = socket.receive( (UINT8*)buff, len );
+    rLen = socket.receive( (UINT8*)buff, len );
 #ifdef DEBUG
     CAMsg::printMsg(LOG_DEBUG, "CADynaNetworking - ConnectivityLoop - Received %i Bits: (%s)\n", rLen, buff);
 #endif
-    char* pechoRequest=new char[rLen+1];
-    strncpy(pechoRequest, buff, rLen);
+    pechoRequest = new char[rLen+1];
+    strncpy(pechoRequest, buff, rLen+1);
 #ifdef DEBUG
     CAMsg::printMsg(LOG_DEBUG, "CADynaNetworking - ConnectivityLoop - echoRequest: (%s)\n", pechoRequest);
     CAMsg::printMsg(LOG_DEBUG, "CADynaNetworking - ConnectivityLoop - Will send: %i chars, %s\n", strlen(pechoRequest), pechoRequest);
 
 #endif
     socket.send( (const UINT8*)pechoRequest, rLen);
+    delete pechoRequest;
+EXIT:
+    if(address != NULL)
+        delete address;
     socket.close();
     serverSocket.close();
-    delete pechoRequest;
 		THREAD_RETURN_SUCCESS;
 }
 
@@ -274,7 +279,7 @@ SINT32 CADynaNetworking::verifyConnectivity()
 
     CASocket tmpSock;
     
-    if( sendConnectivityRequest( (const UINT8*)"Connectivity", &elemRoot, port) != E_SUCCESS )
+    if( sendConnectivityRequest( &elemRoot, port) != E_SUCCESS )
     {
         CAMsg::printMsg(LOG_DEBUG, "CADynaNetworking - verifyConnectivity - Unable to query Infoservice for connectivity! This might becomes a problem soon!\n");
        // Release the Thread, maybe it is still blocking in accept
@@ -323,7 +328,7 @@ error:
   * @return r_elemRoot The XML structure to be filled with the result
   * @retval E_SUCCESS
   */
-SINT32 CADynaNetworking::sendConnectivityRequest( const UINT8* a_strRoot, DOM_Element *r_elemRoot, UINT32 a_port )
+SINT32 CADynaNetworking::sendConnectivityRequest( DOM_Element *r_elemRoot, UINT32 a_port )
 {
     DOM_Document doc = DOM_Document::createDocument();
     DOM_Element elemRoot = doc.createElement("ConnectivityCheck");
@@ -334,7 +339,7 @@ SINT32 CADynaNetworking::sendConnectivityRequest( const UINT8* a_strRoot, DOM_El
 
     UINT32 lenOut;
     UINT8* buffOut = DOM_Output::dumpToMem(doc,&lenOut);
-    sendInfoserviceRequest( (UINT8*)"/connectivity", a_strRoot, r_elemRoot, buffOut, lenOut);
+    sendRandomInfoserviceRequest( (UINT8*)"/connectivity", r_elemRoot, buffOut, lenOut);
 
     return E_SUCCESS;
 }
@@ -434,7 +439,7 @@ SINT32 CADynaNetworking::resolveExternalIp(UINT8 *r_ip, UINT32 a_len)
     sprintf((char*) request, "/echoip");
 
     DOM_Element elemRoot;
-    if( sendInfoserviceRequest(request, (const UINT8*)"EchoIP", &elemRoot, NULL, 0) != E_SUCCESS )
+    if( sendRandomInfoserviceGetRequest(request, &elemRoot) != E_SUCCESS )
     {
         CAMsg::printMsg(LOG_DEBUG, "CAInfoService::getPublicIp - Unable to query Infoservice for public IP! This will be a problem soon!\n");
         return E_UNKNOWN;
@@ -473,86 +478,6 @@ bool CADynaNetworking::isInternalIp(UINT32 a_ip)
             ((a_ip & 0xffff0000) == 0xc0a80000))   /* 192.168/16 */
         return true;
     return false;
-}
-
-/**
-  * LERNGRUPPE
-  * Sends a request to the infoservice and returns the root element of the resulting XML Structure
-  * @param a_strRequest the request to be sent
-  * @param a_strRoot the name of the resulting root-element
-  * @retval E_UNKNOWN if we fail
-  * @retval E_SUCCESS if we succeed
-  * @return r_elemRoot the root element of the XML Structure
-  */
-SINT32 CADynaNetworking::sendInfoserviceRequest(UINT8 *a_strRequest, const UINT8* a_strRoot, DOM_Element *r_elemRoot, UINT8* postData, UINT32 postLen)
-{
-    CASocket socket;
-    CASocketAddrINet *address;
-    CAHttpClient httpClient;
-    UINT32 status, contentLength;
-
-    //Connect to InfoService
-    // FIXME We don't have a single IS any more, so we need to get the hostname and port of one of them
-    // 	if(options.getInfoServerHost(hostname,255)!=E_SUCCESS)
-    // 		return E_UNKNOWN;
-    //
-    // 	address.setAddr(hostname, options.getInfoServerPort());
-    // //
-    if( options.getRandomInfoService(address) != E_SUCCESS)
-    {
-        CAMsg::printMsg( LOG_ERR, "Unable to get a random InfoService - This will cause problems! Check your configuration!\n");
-        return E_UNKNOWN;
-    }
-
-    if(socket.connect(*address)!=E_SUCCESS)
-        return E_UNKNOWN;
-
-#ifdef DEBUG
-    CAMsg::printMsg(LOG_DEBUG, "CAInfoService::sendInfoserviceReqest - connected to InfoService\n");
-#endif
-
-    //Send request
-    httpClient.setSocket(&socket);
-
-    if( postData != NULL )
-        httpClient.sendPostRequest(a_strRequest, postData, postLen);
-    else
-        httpClient.sendGetRequest(a_strRequest);
-
-    httpClient.parseHTTPHeader(&contentLength, &status);
-#ifdef DEBUG
-    CAMsg::printMsg(LOG_DEBUG, "CAInfoService::sendInfoserviceReqest - Request sent, HTTP status: %i, content length: %i\n", status,
-                    contentLength);
-#endif
-
-    UINT8 *content = new UINT8[contentLength];
-    if(status!=200|| contentLength>MAX_CONTENT_LENGTH)
-    {
-        return E_UNKNOWN;
-    }
-
-    if(httpClient.getContent(content, &contentLength)!=E_SUCCESS)
-    {
-        delete []content;
-        return E_UNKNOWN;
-    }
-#ifdef DEBUG
-    CAMsg::printMsg(LOG_DEBUG, "CAInfoService::sendInfoserviceReqest - Answer was %s\n", (char*)content);
-#endif
-    socket.close();
-    
-    //Parse XML
-    MemBufInputSource oInput( content, contentLength, (char*)a_strRoot );
-    DOMParser oParser;
-    oParser.parse( oInput );
-    if( content != NULL )
-        delete[] content;
-
-    DOM_Document doc = oParser.getDocument();
-    if(doc==NULL)
-        return E_UNKNOWN;
-    *r_elemRoot=doc.getDocumentElement();
-    return E_SUCCESS;
 }
 
 #endif //DYNAMIC_MIX

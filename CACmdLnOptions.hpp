@@ -366,9 +366,41 @@ class CACmdLnOptions
 			SINT32 resetNetworkConfiguration();
                         SINT32 getRandomInfoService(CASocketAddrINet *&r_address);
 			bool isDynamic() { return m_bDynamic; }
+			SINT32 changeMixType(CAMix::tMixType a_newMixType);
+			SINT32 resetNextMix();
+			SINT32 resetPrevMix();
+			SINT32 setCascadeProposal(UINT8* a_strCascadeProposal, UINT32 a_len)
+			{
+				if(m_strLastCascadeProposal != NULL)
+				{
+ 					delete m_strLastCascadeProposal;
+					m_strLastCascadeProposal = NULL;
+				}
+				if(a_strCascadeProposal == NULL)
+					return E_SUCCESS;
+				m_strLastCascadeProposal = new UINT8[ a_len + 1 ];
+				memcpy(m_strLastCascadeProposal, a_strCascadeProposal, a_len+1);
+				return E_SUCCESS;
+			}
+			SINT32 getLastCascadeProposal(UINT8* r_strCascadeProposal, UINT32 r_len)
+			{
+				if(m_strLastCascadeProposal == NULL)
+				{
+					return E_UNKNOWN;
+				}
+				if(r_len >= strlen((char*)m_strLastCascadeProposal))
+				{
+					r_len = strlen((char*)m_strLastCascadeProposal);
+					memcpy(r_strCascadeProposal, m_strLastCascadeProposal, r_len + 1);
+					return E_SUCCESS;
+				}
+				return E_UNKNOWN;
+			}
+
 #endif // DYNAMIC_MIX
 		private:
 #ifdef DYNAMIC_MIX
+			UINT8* m_strLastCascadeProposal;
                         UINT32 getRandom(UINT32 a_max);
 			SINT32 buildDefaultConfig(DOM_Document a_doc);
 			SINT32 checkInfoServices(UINT32 *r_runningInfoServices);
@@ -377,6 +409,7 @@ class CACmdLnOptions
 			SINT32 checkCertificates();
 #endif //DYNAMIC_MIX
 			bool m_bDynamic;
+			SINT32 parseInfoServices(DOM_Element a_infoServiceNode);
 			/* END LERNGRUPPE */
 
 #endif //only_LOCAL_PROXY

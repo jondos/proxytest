@@ -44,13 +44,18 @@ CAMix::CAMix()
 		m_pMuxInControlChannelDispatcher=NULL;
 		m_u32KeepAliveSendInterval=0;//zero means --> do not use
 		m_u32KeepAliveRecvInterval=0;//zero means --> do not use
+#ifdef DYNAMIC_MIX
+		/* LERNGRUPPE: Run by default */
+		m_bLoop = true;
+		m_bReconfiguring = false;
+		m_bLooping = false;
+#endif
 	}
 
 SINT32 CAMix::start()
 	{
 		if(initOnce()!=E_SUCCESS)
 			return E_UNKNOWN;
-
     if(m_pSignature != NULL && options.isInfoServiceEnabled())
 			{
 				CAMsg::printMsg(LOG_DEBUG, "CAMix start: creating InfoService object\n");
@@ -78,22 +83,36 @@ SINT32 CAMix::start()
         bool needReconf = needAutoConfig();
 
         m_pInfoService->setConfiguring(allowReconf && needReconf);
-        if (allowReconf && needReconf)
-        {
 				CAMsg::printMsg(LOG_DEBUG, "CAMix start: starting InfoService\n");
         m_pInfoService->start();
+// 	LERNGRUPPE: Moved this loop to the beginning of the main loop to allow reconfiguration
+//         while(allowReconf && needReconf)
+//         {
+//             CAMsg::printMsg(LOG_INFO, "No next mix or no prev. mix certificate specified. Waiting for auto-config from InfoService.\n");
+// 
+//             sSleep(20);
+//             needReconf = needAutoConfig();
+//         }
         }
-        while(allowReconf && needReconf)
-        {
-            CAMsg::printMsg(LOG_INFO, "No next mix or no prev. mix certificate specified. Waiting for auto-config from InfoService.\n");
-
-            sSleep(20);
-            needReconf = needAutoConfig();
-        }
-    }
-
+		bool allowReconf = options.acceptReconfiguration();
+//     bool needReconf = needAutoConfig();
+#ifdef DYNAMIC_MIX
+		/* LERNGRUPPE: We might want to break out of this loop if the mix-type changes */
+		while(m_bLoop)
+#else
     while(true)
-    {
+#endif
+        {
+				m_pInfoService->setConfiguring(allowReconf && needAutoConfig());
+				while(allowReconf && (needAutoConfig() || m_bReconfiguring))
+				{
+					CAMsg::printMsg(LOG_DEBUG, "Not configured -> sleeping\n");
+            sSleep(20);
+        }
+#ifdef DYNAMIC_MIX
+				// if we change the mix type, we must not enter init!
+				if(!m_bLoop) goto SKIP;
+#endif
 				CAMsg::printMsg(LOG_DEBUG, "CAMix main: before init()\n");
         if(init() == E_SUCCESS)
         {
@@ -102,25 +121,34 @@ SINT32 CAMix::start()
             {
                 m_pInfoService->setConfiguring(false);
                 if( ! m_pInfoService->isRunning())
-                {
-                	CAMsg::printMsg(LOG_DEBUG, "CAMix start: starting InfoService\n");
                     m_pInfoService->start();
-            }
             }
 
             CAMsg::printMsg(LOG_INFO, "The mix is now on-line.\n");
+#ifdef DYNAMIC_MIX
+						m_bReconfiguring = false;
+						m_bLooping = true;
+#endif
 						loop();
+#ifdef DYNAMIC_MIX
+						m_bLooping = false;
+#endif
 						CAMsg::printMsg(LOG_DEBUG, "CAMix main: loop() returned, maybe connection lost.\n");
         }
         else
         {
             CAMsg::printMsg(LOG_DEBUG, "init() failed, maybe no connection.\n");
         }
-
+SKIP:
 				CAMsg::printMsg(LOG_DEBUG, "CAMix main: stopping InfoService\n");
         if(m_pInfoService != NULL)
         {
+#ifndef DYNAMIC_MIX
             if(options.acceptReconfiguration())
+#else
+						// Only keep the InfoService alive if the Mix-Type doesn't change
+						if(options.acceptReconfiguration() && m_bLoop)
+#endif
                 m_pInfoService->setConfiguring(true);
             else
                 m_pInfoService->stop();
@@ -128,8 +156,19 @@ SINT32 CAMix::start()
 				CAMsg::printMsg(LOG_DEBUG, "CAMix main: before clean()\n");
 				clean();
 				CAMsg::printMsg(LOG_DEBUG, "CAMix main: after clean()\n");
-        sSleep(20);
+#ifdef DYNAMIC_MIX
+				if(m_bLoop)
+#endif
+        sSleep(65);
     }
+#ifdef DYNAMIC_MIX
+		if(m_pInfoService != NULL && m_pInfoService->isRunning())
+		{
+			m_pInfoService->stop();
+			delete m_pInfoService;
+    }
+		return E_SUCCESS;
+#endif
 }
 
 
@@ -344,5 +383,53 @@ SINT32 CAMix::signXML(DOM_Node& a_element)
     
     return E_SUCCESS;
 }
-
+#ifdef DYNAMIC_MIX
+/**
+ * LERNGRUPPE
+  * This method does the following:
+ * 1) Set m_bLoop = false to break the main loop, if a_bChangeMixType is true
+ * 2) Disconnect the cascade
+ *
+ * The new configuration options should already be set in the CACmdLnOptions of this mixe
+ *
+ * @param a_bChangeMixType Indicates if this mix becomes another mix type (eg. MiddleMix -> FirstMix)
+ * @retval E_SUCCESS
+ */
+SINT32 CAMix::dynaReconfigure(bool a_bChangeMixType)
+{
+	m_bLoop = !a_bChangeMixType;
+	if(m_bLooping)
+		stopCascade();
+	/** @todo delete? */
+	m_docMixCascadeInfo = NULL;
+	
+	/** @todo Break a middle mix out of its init. That doesn't look really nice, maybe there is a better way to do this?
+   	*/
+	CAListenerInterface* pListener=NULL;
+	UINT32 interfaces=options.getListenerInterfaceCount();
+	for(UINT32 i=1;i<=interfaces;i++)
+	{
+		pListener=options.getListenerInterface(i);
+		if(!pListener->isVirtual())
+			break;
+		delete pListener;
+		pListener=NULL;
+	}
+	if(pListener==NULL)
+	{
+		CAMsg::printMsg(LOG_CRIT," failed!\n");
+		CAMsg::printMsg(LOG_CRIT,"Reason: no useable (non virtual) interface found!\n");
+		return E_UNKNOWN;
+	}
+	const CASocketAddr* pAddr=NULL;
+	pAddr=pListener->getAddr();
+	delete pListener;
+	CASocket tmpSock;
+	tmpSock.connect(*pAddr);
+	delete pAddr;
+	tmpSock.close();
+	m_bReconfiguring = false;
+	return E_SUCCESS;
+}
+#endif //DYNAMIC_MIX
 #endif //ONLY_LOCAL_PROXY

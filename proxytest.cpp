@@ -449,7 +449,6 @@ int main(int argc, const char* argv[])
 			CAMsg::printMsg(LOG_CRIT,"Error: Cannot parse configuration file!\n");
 			goto EXIT;
 		}
-
 		if(!(options.isFirstMix()||options.isMiddleMix()||options.isLastMix()||options.isLocalProxy()))
 			{
 				CAMsg::printMsg(LOG_CRIT,"You must specifiy, which kind of Mix you want to run!\n");
@@ -665,10 +664,49 @@ int main(int argc, const char* argv[])
 #endif
 			}
 #ifndef ONLY_LOCAL_PROXY
+#ifndef DYNAMIC_MIX
 	  CAMsg::printMsg(LOG_INFO,"Starting MIX...\n");
 		if(pMix->start()!=E_SUCCESS)
 			CAMsg::printMsg(LOG_CRIT,"Error during MIX-Startup!\n");
+#else
+    /* LERNGRUPPE */
+while(true) 
+{
+	CAMsg::printMsg(LOG_INFO,"Starting MIX...\n");
+	if(pMix->start()!=E_SUCCESS)
+	{
+		/** @todo Hmm, maybe we could remain running, but that may well result in an endless running loop eating the cpu */
+		CAMsg::printMsg(LOG_CRIT,"Error during MIX-Startup!\n");
+		goto EXIT;
+	}
+
+	/* If we got here, the mix should already be reconfigured, so we only need a new instance */
+	if(pMix!=NULL)
+		delete pMix;
+
+	if(options.isFirstMix())
+	{
+		CAMsg::printMsg(LOG_INFO,"I am now the First MIX..\n");
+#if !defined(NEW_MIX_TYPE)
+            pMix=new CAFirstMixA();
+#else
+            pMix=new CAFirstMixB();
 #endif
+	}
+	else if(options.isMiddleMix())
+	{
+		CAMsg::printMsg(LOG_INFO,"I am now a Middle MIX..\n");
+		pMix=new CAMiddleMix();
+	}
+	else
+	{
+		/* Reconfiguration of a last mix?! Not really...*/
+		CAMsg::printMsg( LOG_ERR, "Tried to reconfigure a former first/middle-Mix to a LastMix -> impossible!\n");
+		goto EXIT;
+	}
+}
+#endif //DYNAMIC_MIX
+#endif //ONLY_LOCAL_PROXY
 EXIT:
 //		delete pRTT;
 #ifndef ONLY_LOCAL_PROXY
