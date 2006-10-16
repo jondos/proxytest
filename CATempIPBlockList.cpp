@@ -211,6 +211,6 @@ THREAD_RETURN CATempIPBlockList::cleanupThreadMainLoop(void *param)
 		// let the thread sleep for 1 minute
 		sSleep(CLEANUP_THREAD_SLEEP_INTERVAL);
 	}
-	return E_SUCCESS;
+	THREAD_RETURN_SUCCESS;
 }
 
