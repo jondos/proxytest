@@ -7,6 +7,7 @@
 #include "StdAfx.h"
 #ifndef ONLY_LOCAL_PROXY
 #include "CAThreadPool.hpp"
+#include "CAMsg.hpp"
 void *tpool_thread(void *);
 
 CAThreadPool::CAThreadPool(	UINT32 num_worker_threads, 

@@ -29,6 +29,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef ONLY_LOCAL_PROXY
 #include "CADatabase.hpp"
 #include "CAUtil.hpp"
+#include "CAMsg.hpp"
 
 CADatabase::CADatabase()
 	{

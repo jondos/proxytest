@@ -230,16 +230,14 @@ AC_CHECK_FUNCS([atoll])
 AC_CHECK_FUNCS([poll])
 
 dnl even if epoll exist it may be unfunctional...
-if test "$cross_compiling" != yes; then
 if test "x$USE_EPOLL" != "x0" ; then
     AC_CHECK_FUNC([epoll_wait],
 	[	
 	    AC_RUN_IFELSE([AC_LANG_PROGRAM([[#include "sys/epoll.h"]],[[int handle;handle=epoll_create(1);if(handle==-1)exit(-1);]])],
 		[
 		    AC_DEFINE(HAVE_EPOLL,1,[Define if your OS support the epoll() syscall])
+		],[],[echo "skip epoll run test because of cross compiling"])
 		],[])
-	],[])	
-fi
 fi
 dnl Checks for declarations.
 AC_CHECK_DECL(TCP_KEEPALIVE,[AC_DEFINE(HAVE_TCP_KEEPALIVE,,[Define if your OS supports the TCP socket option TCP_KEEPALIVE])],[],[
@@ -324,7 +322,6 @@ AC_CACHE_CHECK([for OpenSSL directory], ac_cv_openssldir, [
 
 		LIBS="$saved_LIBS -lcrypto"
 
-		if test "$cross_compiling" != yes; then
 		# Basic test to check for compatible version and correct 
                 # linking, *does not* test for RSA - that comes later.
 		AC_RUN_IFELSE([AC_LANG_SOURCE([[
@@ -338,14 +335,14 @@ AC_CACHE_CHECK([for OpenSSL directory], ac_cv_openssldir, [
 	RAND_add(a, sizeof(a), sizeof(a));
 	return(RAND_status() <= 0);
 				}
-			]])],[
+				]])],
+				[
 				found_crypto=1
 				break;
 			],[
-		],[])
-		else
+				],[
 			found_crypto=1
-		fi
+					echo "skip openssl run test because of cross compiling"])
 		if test ! -z "$found_crypto" ; then
 			break;
 		fi
@@ -374,8 +371,8 @@ if (test ! -z "$ac_cv_openssldir" && test "x$ac_cv_openssldir" != "x(system)") ;
 		blibpath="$blibpath:$ssldir:$ssldir/lib"
 	fi
 fi
-LIBS="$saved_LIBS -lcrypto -lssl"
-
+LIBS="-lcrypto -lssl $saved_LIBS"
+LDFLAGS="$saved_LDFLAGS -L$with_ssl_dir"
 
 dnl Check for Xerces-C
 AC_LANG_PUSH(C++)
@@ -387,10 +384,12 @@ AC_ARG_WITH(xml-include,
 	[
 		if test "x$withval" != "xno" ; then
 			xmlincludedir=$withval
+		else
+			xmlincludedir="$xmlincludedir -I/usr/include/xercesc"
 		fi
 	]
 )
-XMLINCLUDEFLAGS="-I$xmlincludedir -I$xmlincludedir/xercesc -I/usr/include/xercesc"
+XMLINCLUDEFLAGS="-I$xmlincludedir -I$xmlincludedir/xercesc"
 CFLAGS="$CFLAGS $XMLINCLUDEFLAGS "
 CXXFLAGS="$CXXFLAGS $XMLINCLUDEFLAGS "
 AC_MSG_NOTICE([Xerces-C tests])

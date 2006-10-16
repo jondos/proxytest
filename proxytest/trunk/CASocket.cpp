@@ -65,7 +65,7 @@ SINT32 CASocket::create(int type)
 			m_Socket=socket(type,SOCK_STREAM,0);
 			else
 				{
-				CAMsg::printMsg(LOG_CRIT,"Couldt not create a new normal Socket -- allowed number of normal sockets exeded!\n");
+				CAMsg::printMsg(LOG_CRIT,"Could not create a new normal Socket -- allowed number of normal sockets exeded!\n");
 				return SOCKET_ERROR;
 				}
 			}
@@ -75,9 +75,9 @@ SINT32 CASocket::create(int type)
 			{
 				int er=GET_NET_ERROR;
 				if(er==EMFILE)
-					CAMsg::printMsg(LOG_CRIT,"Couldt not create a new Socket!\n");
+					CAMsg::printMsg(LOG_CRIT,"Could not create a new Socket!\n");
 				else
-					CAMsg::printMsg(LOG_CRIT,"Couldt not create a new Socket! - Error: %i\n",er);
+					CAMsg::printMsg(LOG_CRIT,"Could not create a new Socket! - Error: %i\n",er);
 				return SOCKET_ERROR;
 			}
 		m_bSocketIsClosed=false;
@@ -146,7 +146,7 @@ SINT32 CASocket::accept(CASocket &s)
 			return E_UNKNOWN;
 		if(m_u32NormalSocketsOpen>=m_u32MaxNormalSockets)
 			{
-				CAMsg::printMsg(LOG_CRIT,"CASocket::accept() -- Couldt not create a new normal Socket -- allowed number of normal sockets exeded!\n");
+				CAMsg::printMsg(LOG_CRIT,"CASocket::accept() -- Could not create a new normal Socket -- allowed number of normal sockets exeded!\n");
 				return E_SOCKET_LIMIT;
 			}
 		s.m_Socket=::accept(m_Socket,NULL,NULL);
