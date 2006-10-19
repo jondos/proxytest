@@ -2249,50 +2249,28 @@ SINT32 CACmdLnOptions::parseInfoServices(DOM_Element a_infoServiceNode)
 	return E_SUCCESS;
 }
 
-#ifdef DYNAMIC_MIX
 
-/**
-  * LERNGRUPPE: Compatablility function. Beware! It's no longer static
+/** Builds a default Configuration
 	* @param strFileName filename of the file in which the default configuration is stored, if NULL stdout is used
 	*/
 SINT32 CACmdLnOptions::createMixOnCDConfiguration(const UINT8* strFileName)
 {
 	DOM_Document doc = DOM_Document::createDocument();
-	buildDefaultConfig(doc);
+	//Neasty but cool...
+	bool bForLast=false;
+	if(strFileName!=NULL&&strncmp((char*)strFileName,"last",4)==0)
+			bForLast=true;
+	buildDefaultConfig(doc,bForLast);
 	saveToFile(doc, strFileName);
 	return E_SUCCESS;
 }
 
 /**
-  * LERNGRUPPE
-  * Creates a default configuration for this mix. The configuration is then used to start up
-  * the mix! This default-config will be written to DEFAULT_CONFIG_FILE for use in the next
-  * startups of this mix
-  * @retval E_UNKNOWN if an error occurs
-  * @retval E_SUCCESS otherwise
-  */
-SINT32 CACmdLnOptions::createDefaultConfiguration()
-{
-    m_docMixXml = DOM_Document::createDocument();
-    buildDefaultConfig(m_docMixXml);
-    saveToFile(m_docMixXml, (const UINT8*)DEFAULT_CONFIG_FILE);
-
-    char *configfile = (char*) malloc(sizeof(char) * (strlen(DEFAULT_CONFIG_FILE)));
-    strcpy(configfile, DEFAULT_CONFIG_FILE);
-
-    // Set default config file for possible reread attempt
-    m_strConfigFile=new UINT8[ strlen(DEFAULT_CONFIG_FILE)+1 ];
-    memcpy(m_strConfigFile,DEFAULT_CONFIG_FILE, strlen(DEFAULT_CONFIG_FILE)+1);
-    return E_SUCCESS;
-}
-
-/**
-  * LERNGRUPPE
   * Creates a default mix configuration.
   * @return r_doc The XML Document containing the default mix configuration
   * @retval E_SUCCESS
   */
-SINT32 CACmdLnOptions::buildDefaultConfig(DOM_Document doc)
+SINT32 CACmdLnOptions::buildDefaultConfig(DOM_Document doc,bool bForLastMix=false)
 {
     CASignature* pSignature=new CASignature();
     pSignature->generateSignKey(1024);
@@ -2302,12 +2280,17 @@ SINT32 CACmdLnOptions::buildDefaultConfig(DOM_Document doc)
     DOM_Element elemGeneral=doc.createElement("General");
     elemRoot.appendChild(elemGeneral);
 
-    /** @todo MixType can be chosen randomly between FirstMix and MiddleMix but not LastMix! */
+    /** @todo MixType can be chosen randomly between FirstMix and MiddleMix but not LastMix!
+		*sk13: ok this is a hack - but this way it can also create configurations for LastMixes which makes testing of the dynamic szenario much easier...
+		*/
     DOM_Element elemTmp=doc.createElement("MixType");
-    setDOMElementValue(elemTmp,(UINT8*)"MiddleMix");
+		if(bForLastMix)
+			setDOMElementValue(elemTmp,(UINT8*)"LastMix");
+		else
+			setDOMElementValue(elemTmp,(UINT8*)"FirstMix");
     elemGeneral.appendChild(elemTmp);
 
-    /** MixID must be the SubjectKeyIdentifier of the mix' certificate */
+		/** MixID must be the SubjectKeyIdentifier of the mix' certificate */
     elemTmp=doc.createElement("MixID");
     CACertificate* pCert;
     pSignature->getVerifyKey(&pCert);
@@ -2354,7 +2337,7 @@ SINT32 CACmdLnOptions::buildDefaultConfig(DOM_Document doc)
     setDOMElementValue(elemTmp,(UINT8*)DEFAULT_INFOSERVICE);
     elemISLi.appendChild(elemTmp);
     elemTmp=doc.createElement("Port");
-    setDOMElementValue(elemTmp,(UINT8*)"80");
+    setDOMElementValue(elemTmp,6543U);
     elemISLi.appendChild(elemTmp);
     elemTmp=doc.createElement("AllowAutoConfiguration");
     setDOMElementValue(elemTmp,(UINT8*)"True");
@@ -2366,7 +2349,7 @@ SINT32 CACmdLnOptions::buildDefaultConfig(DOM_Document doc)
 		DOM_Element elemListener=doc.createElement("ListenerInterface");
     elemListeners.appendChild(elemListener);
     elemTmp=doc.createElement("Port");
-    setDOMElementValue(elemTmp,(UINT8*)"6544");
+    setDOMElementValue(elemTmp,6544U);
     elemListener.appendChild(elemTmp);
     elemTmp=doc.createElement("NetworkProtocol");
     setDOMElementValue(elemTmp,(UINT8*)"RAW/TCP");
@@ -2414,6 +2397,31 @@ SINT32 CACmdLnOptions::saveToFile(DOM_Document p_doc, const UINT8* p_strFileName
         fflush(stdout);
     }
     delete[] buff;
+    return E_SUCCESS;
+}
+
+
+#ifdef DYNAMIC_MIX
+/**
+  * LERNGRUPPE
+  * Creates a default configuration for this mix. The configuration is then used to start up
+  * the mix! This default-config will be written to DEFAULT_CONFIG_FILE for use in the next
+  * startups of this mix
+  * @retval E_UNKNOWN if an error occurs
+  * @retval E_SUCCESS otherwise
+  */
+SINT32 CACmdLnOptions::createDefaultConfiguration()
+{
+    m_docMixXml = DOM_Document::createDocument();
+    buildDefaultConfig(m_docMixXml);
+    saveToFile(m_docMixXml, (const UINT8*)DEFAULT_CONFIG_FILE);
+
+    char *configfile = (char*) malloc(sizeof(char) * (strlen(DEFAULT_CONFIG_FILE)));
+    strcpy(configfile, DEFAULT_CONFIG_FILE);
+
+    // Set default config file for possible reread attempt
+    m_strConfigFile=new UINT8[ strlen(DEFAULT_CONFIG_FILE)+1 ];
+    memcpy(m_strConfigFile,DEFAULT_CONFIG_FILE, strlen(DEFAULT_CONFIG_FILE)+1);
     return E_SUCCESS;
 }
 
@@ -2692,113 +2700,5 @@ SINT32 CACmdLnOptions::changeMixType(CAMix::tMixType a_newMixType)
 	return E_SUCCESS;
 }
 
-#else//ifdef DYNAMIC_MIX
-
-SINT32 CACmdLnOptions::createMixOnCDConfiguration(const UINT8* strFileName)
-	{
-		CASignature* pSignature=new CASignature();
-		pSignature->generateSignKey(1024);
-		DOM_Document doc=DOM_Document::createDocument();
-		DOM_Element elemRoot=doc.createElement("MixConfiguration");
-		doc.appendChild(elemRoot);
-		setDOMElementAttribute(elemRoot,"version",(UINT8*)"0.5");
-		DOM_Element elemGeneral=doc.createElement("General");
-		elemRoot.appendChild(elemGeneral);
-		DOM_Element elemTmp=doc.createElement("MixType");
-		if(strncmp((char*)strFileName,"last",4)==0)
-			setDOMElementValue(elemTmp,(UINT8*)"LastMix");
-		else
-			setDOMElementValue(elemTmp,(UINT8*)"FirstMix");
-		elemGeneral.appendChild(elemTmp);
-    /** MixID must be the SubjectKeyIdentifier of the mix' certificate */
-    elemTmp=doc.createElement("MixID");
-    CACertificate* pCert;
-    pSignature->getVerifyKey(&pCert);
-    UINT8 buf[255];
-    UINT32 len = 255;
-    pCert->getSubjectKeyIdentifier( buf, &len);
-    setDOMElementValue(elemTmp,buf);
-    elemGeneral.appendChild(elemTmp);
-    elemTmp=doc.createElement("Dynamic");
-    setDOMElementValue(elemTmp,(UINT8*)"True");
-    elemGeneral.appendChild(elemTmp);
-		elemGeneral.appendChild(elemTmp);
-		elemTmp=doc.createElement("CascadeName");
-		setDOMElementValue(elemTmp,(UINT8*)"Dynamic Cascade");
-		elemGeneral.appendChild(elemTmp);
-		elemTmp=doc.createElement("MixName");
-		setDOMElementValue(elemTmp,(UINT8*)"Dynamic Mix");
-		elemGeneral.appendChild(elemTmp);
-		elemTmp=doc.createElement("UserID");
-		setDOMElementValue(elemTmp,(UINT8*)"mix");
-		elemGeneral.appendChild(elemTmp);
-		DOM_Element elemLogging=doc.createElement("Logging");
-		elemGeneral.appendChild(elemLogging);
-		elemTmp=doc.createElement("SysLog");
-		setDOMElementValue(elemTmp,(UINT8*)"True");
-		elemLogging.appendChild(elemTmp);
-		DOM_Element elemNet=doc.createElement("Network");
-		elemRoot.appendChild(elemNet);
-   /** @todo Add a list of default InfoServices to the default configuration */
-    DOM_Element elemISs=doc.createElement("InfoServices");
-		elemNet.appendChild(elemISs);
-		elemTmp=doc.createElement("AllowAutoConfiguration");
-		setDOMElementValue(elemTmp,(UINT8*)"True");
-		elemISs.appendChild(elemTmp);
-
-		DOM_Element elemIS=doc.createElement("InfoService");
-    elemISs.appendChild(elemIS);
-		DOM_Element elemISListeners=doc.createElement("ListenerInterfaces");
-		elemIS.appendChild(elemISListeners);
-		DOM_Element elemISLi=doc.createElement("ListenerInterface");
-		elemISListeners.appendChild(elemISLi);
-		elemTmp=doc.createElement("Host");
-    setDOMElementValue(elemTmp,(UINT8*)DEFAULT_INFOSERVICE);
-    elemISLi.appendChild(elemTmp);
-    elemTmp=doc.createElement("Port");
-    setDOMElementValue(elemTmp,(UINT8*)"80");
-    elemISLi.appendChild(elemTmp);
-    elemTmp=doc.createElement("AllowAutoConfiguration");
-    setDOMElementValue(elemTmp,(UINT8*)"True");
-    elemISs.appendChild(elemTmp);
-
-		DOM_Element elemListeners=doc.createElement("ListenerInterfaces");
-		elemNet.appendChild(elemListeners);
-		DOM_Element elemListener=doc.createElement("ListenerInterface");
-		elemListeners.appendChild(elemListener);
-		elemTmp=doc.createElement("Port");
-		setDOMElementValue(elemTmp,(UINT8*)"6544");
-		elemListener.appendChild(elemTmp);
-		elemTmp=doc.createElement("NetworkProtocol");
-		setDOMElementValue(elemTmp,(UINT8*)"RAW/TCP");
-		elemListener.appendChild(elemTmp);
-		DOM_Element elemCerts=doc.createElement("Certificates");
-		elemRoot.appendChild(elemCerts);
-		DOM_Element elemOwnCert=doc.createElement("OwnCertificate");
-		elemCerts.appendChild(elemOwnCert);
-		DOM_DocumentFragment docFrag;
-		pSignature->getSignKey(docFrag,doc);		
-		elemOwnCert.appendChild(docFrag);
-		pSignature->getVerifyKey(&pCert);
-		pCert->encode(docFrag,doc);
-		elemOwnCert.appendChild(docFrag);
-		delete pCert;
-		delete pSignature;
-		UINT8* buff=DOM_Output::dumpToMem(doc,&len);
-		if(strFileName!=NULL)
-			{
-				SINT32 handle;
-				handle=open((const char*)strFileName,O_WRONLY|O_CREAT|O_TRUNC|O_APPEND,S_IRUSR|S_IWUSR);
-				write(handle,buff,len);
-				close(handle);
-			}
-		else
-			{
-				fwrite(buff,len,1,stdout);
-				fflush(stdout);
-			}
-		delete[] buff;	
-		return E_SUCCESS;
-	}
 #endif //DYNAMIC_MIX
 #endif //ONLY_LOCAL_PROXY

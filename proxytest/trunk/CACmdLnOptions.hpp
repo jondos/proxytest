@@ -354,14 +354,13 @@ class CACmdLnOptions
 
 			friend THREAD_RETURN threadReConfigure(void *param);
 			
-			/* LERNGRUPPE (refactoring + new) */
-#ifndef DYNAMIC_MIX
 			/** Writes a default configuration file into the file named by filename*/
 			static SINT32 createMixOnCDConfiguration(const UINT8* strFileName);
-#else
-			SINT32 createMixOnCDConfiguration(const UINT8* strFileName);
+		static SINT32 saveToFile(DOM_Document a_doc, const UINT8* a_strFileName);
+#ifdef DYNAMIC_MIX
+			/* LERNGRUPPE (refactoring + new) */
+			//SINT32 createMixOnCDConfiguration(const UINT8* strFileName);
 			SINT32 createDefaultConfiguration();
-			SINT32 saveToFile(DOM_Document a_doc, const UINT8* a_strFileName);
 			SINT32 addListenerInterface(DOM_Element a_elem);
 			SINT32 resetNetworkConfiguration();
                         SINT32 getRandomInfoService(CASocketAddrINet *&r_address);
@@ -401,8 +400,7 @@ class CACmdLnOptions
 		private:
 #ifdef DYNAMIC_MIX
 			UINT8* m_strLastCascadeProposal;
-                        UINT32 getRandom(UINT32 a_max);
-			SINT32 buildDefaultConfig(DOM_Document a_doc);
+      UINT32 getRandom(UINT32 a_max);
 			SINT32 checkInfoServices(UINT32 *r_runningInfoServices);
 			SINT32 checkMixId();
 			SINT32 checkListenerInterfaces();
@@ -411,7 +409,7 @@ class CACmdLnOptions
 			bool m_bDynamic;
 			SINT32 parseInfoServices(DOM_Element a_infoServiceNode);
 			/* END LERNGRUPPE */
-
+			static SINT32 buildDefaultConfig(DOM_Document a_doc,bool bForLastMix);
 #endif //only_LOCAL_PROXY
 			UINT8*	m_strConfigFile; //the filename of the config file
 			bool		m_bDaemon;
