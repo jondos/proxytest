@@ -2303,6 +2303,10 @@ SINT32 CACmdLnOptions::buildDefaultConfig(DOM_Document doc,bool bForLastMix=fals
     setDOMElementValue(elemTmp,(UINT8*)"True");
     elemGeneral.appendChild(elemTmp);
 
+		elemTmp=doc.createElement("Daemon");
+    setDOMElementValue(elemTmp,(UINT8*)"True");
+    elemGeneral.appendChild(elemTmp);
+
     elemTmp=doc.createElement("CascadeName");
     setDOMElementValue(elemTmp,(UINT8*)"Dynamic Cascade");
     elemGeneral.appendChild(elemTmp);
