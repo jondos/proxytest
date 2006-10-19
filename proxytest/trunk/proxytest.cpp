@@ -481,6 +481,10 @@ int main(int argc, const char* argv[])
 					chdir("/");
 					umask(0);
 				#endif
+			 // Close out the standard file descriptors 
+        close(STDIN_FILENO);
+        close(STDOUT_FILENO);
+        close(STDERR_FILENO);			
 			}
 #endif
 		if(options.getLogDir((UINT8*)buff,255)==E_SUCCESS)
