@@ -39,10 +39,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "xml/DOM_Output.hpp"
 
 CADynaNetworking::CADynaNetworking() : CAInfoServiceAware()
-{}
+	{
+	}
 
 CADynaNetworking::~CADynaNetworking()
-{}
+	{
+	}
 
 /**
   * LERNGRUPPE
@@ -59,7 +61,7 @@ CADynaNetworking::~CADynaNetworking()
   * @returns E_UNKNOWN otherwise
   */
 SINT32 CADynaNetworking::updateNetworkConfiguration(UINT16 a_port)
-{
+	{
     UINT8 internalIp[255];
     UINT8 externalIp[255];
     UINT32 len = 255;
@@ -102,7 +104,7 @@ SINT32 CADynaNetworking::updateNetworkConfiguration(UINT16 a_port)
     CAMsg::printMsg(LOG_CRIT, (char*)buff);
 #endif
     return E_SUCCESS;
-}
+	}
 
 /**
   * LERNGRUPPE
@@ -116,8 +118,8 @@ SINT32 CADynaNetworking::updateNetworkConfiguration(UINT16 a_port)
   * @return r_elemListeners 
   * @retval E_SUCCESS upon success
 */
-SINT32 CADynaNetworking::createListenerInterface(DOM_Element r_elemListeners, DOM_Document a_ownerDoc, UINT8 *a_ip, UINT32 a_port, bool a_bHidden, bool a_bVirtual)
-{
+SINT32 CADynaNetworking::createListenerInterface(DOM_Element r_elemListeners, DOM_Document a_ownerDoc,const UINT8 *a_ip, UINT32 a_port, bool a_bHidden, bool a_bVirtual)
+	{
     DOM_Element elemTmp;
 
     DOM_Element elemListener=a_ownerDoc.createElement("ListenerInterface");
@@ -132,7 +134,7 @@ SINT32 CADynaNetworking::createListenerInterface(DOM_Element r_elemListeners, DO
     }
     r_elemListeners.appendChild(elemListener);
     elemTmp=a_ownerDoc.createElement("Port");
-    setDOMElementValue(elemTmp,port);
+    setDOMElementValue(elemTmp,a_port);
     elemListener.appendChild(elemTmp);
     elemTmp=a_ownerDoc.createElement("NetworkProtocol");
     setDOMElementValue(elemTmp,(UINT8*)"RAW/TCP");
