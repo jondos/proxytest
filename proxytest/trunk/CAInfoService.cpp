@@ -50,7 +50,7 @@ const UINT64 CAInfoService::MINUTE = 60;
 const UINT64 CAInfoService::SEND_CASCADE_INFO_WAIT = MINUTE * 10;
 const UINT64 CAInfoService::SEND_MIX_INFO_WAIT = MINUTE * 10;
 const UINT64 CAInfoService::SEND_STATUS_INFO_WAIT = MINUTE;
-const UINT32 CAInfoService::SEND_INFO_TIMEOUT = 10000; // 10 seconds timeout
+const UINT32 CAInfoService::SEND_INFO_TIMEOUT_IN_SECONDS = 10; // 10 seconds timeout
 
 static THREAD_RETURN InfoLoop(void *p)
 	{
@@ -436,12 +436,12 @@ SINT32 CAInfoService::sendStatus(const UINT8* a_strStatusXML,UINT32 a_len, const
 			return E_UNKNOWN;
 		}
 		
-		if(oSocket.connect(*a_pSocketAddress, SEND_INFO_TIMEOUT)!=E_SUCCESS)
+		if(oSocket.connect(*a_pSocketAddress, SEND_INFO_TIMEOUT_IN_SECONDS*1000)!=E_SUCCESS)
 		{
 			return E_UNKNOWN;
 		}
-		oSocket.setSendTimeOut(SEND_INFO_TIMEOUT);
-			UINT8 hostname[255];
+		oSocket.setSendTimeOut(SEND_INFO_TIMEOUT_IN_SECONDS*1000);
+		UINT8 hostname[255];
 		if(a_pSocketAddress->getIPAsStr(hostname, 255)!=E_SUCCESS)
 		{
 			oSocket.close();
@@ -580,9 +580,9 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
 		}
 		
     oSocket.setRecvBuff(255);
-		if(oSocket.connect(*a_pSocketAddress, SEND_INFO_TIMEOUT)==E_SUCCESS)
+		if(oSocket.connect(*a_pSocketAddress, SEND_INFO_TIMEOUT_IN_SECONDS*1000)==E_SUCCESS)
 			{
-				oSocket.setSendTimeOut(SEND_INFO_TIMEOUT);
+				oSocket.setSendTimeOut(SEND_INFO_TIMEOUT_IN_SECONDS*1000);
 				httpClient.setSocket(&oSocket);
 				const char* strRequestCommand=STRINGS_REQUEST_COMMANDS[requestCommand];
 				const char* strRequestType=STRINGS_REQUEST_TYPES[requestType];
@@ -784,9 +784,9 @@ SINT32 CAInfoService::sendCascadeHelo(const UINT8* a_strCascadeHeloXML,UINT32 a_
 		{
 			goto ERR;
 		}
-		if(oSocket.connect(*a_pSocketAddress, SEND_INFO_TIMEOUT)==E_SUCCESS)
+		if(oSocket.connect(*a_pSocketAddress, SEND_INFO_TIMEOUT_IN_SECONDS*1000)==E_SUCCESS)
 			{
-				oSocket.setSendTimeOut(SEND_INFO_TIMEOUT);
+				oSocket.setSendTimeOut(SEND_INFO_TIMEOUT_IN_SECONDS*1000);
 				httpClient.setSocket(&oSocket);
         if(options.isFirstMix())
 					{
