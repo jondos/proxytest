@@ -118,8 +118,6 @@ SINT32 CADynaNetworking::updateNetworkConfiguration(UINT16 a_port)
 */
 SINT32 CADynaNetworking::createListenerInterface(DOM_Element r_elemListeners, DOM_Document a_ownerDoc, UINT8 *a_ip, UINT32 a_port, bool a_bHidden, bool a_bVirtual)
 {
-    char port[4];
-    sprintf(port, "%i", a_port);
     DOM_Element elemTmp;
 
     DOM_Element elemListener=a_ownerDoc.createElement("ListenerInterface");
@@ -134,7 +132,7 @@ SINT32 CADynaNetworking::createListenerInterface(DOM_Element r_elemListeners, DO
     }
     r_elemListeners.appendChild(elemListener);
     elemTmp=a_ownerDoc.createElement("Port");
-    setDOMElementValue(elemTmp,(UINT8*)port);
+    setDOMElementValue(elemTmp,port);
     elemListener.appendChild(elemTmp);
     elemTmp=a_ownerDoc.createElement("NetworkProtocol");
     setDOMElementValue(elemTmp,(UINT8*)"RAW/TCP");
