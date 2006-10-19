@@ -473,7 +473,10 @@ SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param)
 	UINT32 len;
 	UINT8* strMixHeloXML=getMixHeloXMLAsString(len);
 	if(strMixHeloXML==NULL)
-		return E_UNKNOWN;
+		{
+			CAMsg::printMsg(LOG_DEBUG,"InfoService:sendMixHelo() -- Error: getMixHeloXMLAsString() returned NULL!\n");
+			return E_UNKNOWN;
+		}
 	SINT32 returnValue = E_UNKNOWN;
 	SINT32 currentValue;
 	UINT32 nrAddresses;
@@ -579,7 +582,7 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
     oSocket.setRecvBuff(255);
 		if(oSocket.connect(*a_pSocketAddress, SEND_INFO_TIMEOUT)==E_SUCCESS)
 			{
-			oSocket.setSendTimeOut(SEND_INFO_TIMEOUT);
+				oSocket.setSendTimeOut(SEND_INFO_TIMEOUT);
 				httpClient.setSocket(&oSocket);
 				const char* strRequestCommand=STRINGS_REQUEST_COMMANDS[requestCommand];
 				const char* strRequestType=STRINGS_REQUEST_TYPES[requestType];
@@ -587,17 +590,17 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
 
         if(requestCommand==REQUEST_COMMAND_MIXINFO)
        		{
-					sprintf((char*)buffHeader,"%s /%s%s HTTP/1.0\r\nContent-Length: %u\r\n\r\n", strRequestType, strRequestCommand, param,a_len);
+						sprintf((char*)buffHeader,"%s /%s%s HTTP/1.0\r\nContent-Length: %u\r\n\r\n", strRequestType, strRequestCommand, param,a_len);
        		}
 				else
-			{
-					sprintf((char*)buffHeader,"%s /%s HTTP/1.0\r\nContent-Length: %u\r\n\r\n", strRequestType, strRequestCommand, a_len);
-			}
+					{
+						sprintf((char*)buffHeader,"%s /%s HTTP/1.0\r\nContent-Length: %u\r\n\r\n", strRequestType, strRequestCommand, a_len);
+					}
  			if (oSocket.sendFully(buffHeader,strlen((char*)buffHeader))!=E_SUCCESS||
 						oSocket.sendFully(a_strMixHeloXML,a_len)!=E_SUCCESS)
-			{
+				{
 					goto ERR;
-			}
+				}
 
         if(receiveAnswer)
         {
@@ -668,7 +671,11 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
         }
 				return E_SUCCESS;	
 			}
-		ERR:
+		else
+			{
+        CAMsg::printMsg(LOG_DEBUG,"InfoService: sendMixHelo() connectiing to InfoService %s:%d failed!\n", hostname, a_pSocketAddress->getPort());
+			}
+ERR:
 		return E_UNKNOWN;
 	}
 
