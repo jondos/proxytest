@@ -2344,7 +2344,7 @@ SINT32 CACmdLnOptions::buildDefaultConfig(DOM_Document doc,bool bForLastMix=fals
     elemISs.appendChild(elemTmp);
 
     /** We add this for compatability reasons. ListenerInterfaces can be determined dynamically now */
-    DOM_Element elemListeners=doc.createElement("ListenerInterfaces");
+   /* DOM_Element elemListeners=doc.createElement("ListenerInterfaces");
     elemNet.appendChild(elemListeners);
 		DOM_Element elemListener=doc.createElement("ListenerInterface");
     elemListeners.appendChild(elemListener);
@@ -2354,7 +2354,26 @@ SINT32 CACmdLnOptions::buildDefaultConfig(DOM_Document doc,bool bForLastMix=fals
     elemTmp=doc.createElement("NetworkProtocol");
     setDOMElementValue(elemTmp,(UINT8*)"RAW/TCP");
     elemListener.appendChild(elemTmp);
-
+		*/
+		if(bForLastMix)
+			{
+				DOM_Element elemProxies=doc.createElement("Proxies");
+				DOM_Element elemProxy=doc.createElement("Proxy");
+				elemProxies.appendChild(elemProxy);
+				elemTmp=doc.createElement("ProxyType");
+				setDOMElementValue(elemTmp,(UINT8*)"HTTP");
+				elemProxy.appendChild(elemTmp);
+				elemTmp=doc.createElement("Host");
+				setDOMElementValue(elemTmp,(UINT8*)"127.0.0.1");
+				elemProxy.appendChild(elemTmp);
+				elemTmp=doc.createElement("Port");
+				setDOMElementValue(elemTmp,3128U);
+				elemProxy.appendChild(elemTmp);
+				elemTmp=doc.createElement("NetworkProtocol");
+				setDOMElementValue(elemTmp,(UINT8*)"RAW/TCP");
+				elemProxy.appendChild(elemTmp);
+				elemNet.appendChild(elemProxies);
+			}
     DOM_Element elemCerts=doc.createElement("Certificates");
     elemRoot.appendChild(elemCerts);
     DOM_Element elemOwnCert=doc.createElement("OwnCertificate");
