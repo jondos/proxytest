@@ -41,24 +41,21 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define MAX_CONTENT_LENGTH 0x00FFFF
 
 class CADynaNetworking : CAInfoServiceAware
-{
-public:
-    CADynaNetworking();
-    ~CADynaNetworking();
-    SINT32 verifyConnectivity();
-    SINT32 updateNetworkConfiguration(UINT16 a_port);
-    CAListenerInterface *getWorkingListenerInterface();
-private:
-    SINT32 resolveInternalIp(UINT8* r_strIp);
-    SINT32 resolveExternalIp(UINT8* r_strIp, UINT32 len);
-    SINT32 createListenerInterface(DOM_Element r_elemListeners, DOM_Document a_ownerDoc, UINT8 *a_ip, UINT32 a_port, bool a_bHidden, bool a_bVirtual);
-    SINT32 createListenerInterface(DOM_Element r_elemListeners, DOM_Document a_ownerDoc);
-    SINT32 getInterfaceIp(UINT32* r_ip);
-    bool isInternalIp(UINT32 p_ip);
-    SINT32 sendConnectivityRequest(DOM_Element *r_elemRoot, UINT32 a_port);
-    /*CAThread	m_pthreadConnectivtyLoop; */
-
-
-};
+	{
+		public:
+			CADynaNetworking();
+			~CADynaNetworking();
+			SINT32 verifyConnectivity();
+			SINT32 updateNetworkConfiguration(UINT16 a_port);
+			CAListenerInterface *getWorkingListenerInterface();
+		private:
+			SINT32 resolveInternalIp(UINT8* r_strIp);
+			SINT32 resolveExternalIp(UINT8* r_strIp, UINT32 len);
+			SINT32 createListenerInterface(DOM_Element r_elemListeners, DOM_Document a_ownerDoc,const UINT8 *a_ip, UINT32 a_port, bool a_bHidden, bool a_bVirtual);
+			SINT32 createListenerInterface(DOM_Element r_elemListeners, DOM_Document a_ownerDoc);
+			SINT32 getInterfaceIp(UINT32* r_ip);
+			bool isInternalIp(UINT32 p_ip);
+			SINT32 sendConnectivityRequest(DOM_Element *r_elemRoot, UINT32 a_port);
+	};
 #endif //DYNAMIC_MIX
 #endif 
