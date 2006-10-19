@@ -676,7 +676,7 @@ int main(int argc, const char* argv[])
 	//*sk13* Nasty think top be removed after test...
 	if(!options.isLastMix())
 		{
-		  #DEFINE LOG_OUT "/home/tudresden_dynamicmix/DynMix/"
+		  #define LOG_OUT "/home/tudresden_dynamicmix/DynMix/"
 			options.setLogDir((UINT8*)LOG_OUT,strlen(LOG_OUT));
 			CAMsg::setLogOptions(MSG_FILE);
 		}
