@@ -343,41 +343,41 @@ SINT32 CAMix::addMixInfo(DOM_Node& a_element, bool a_bForceFirstNode)
 }
 
 SINT32 CAMix::signXML(DOM_Node& a_element)
-{
+	{
     CACertStore* tmpCertStore=new CACertStore();
     
     CACertificate* ownCert=options.getOwnCertificate();
     if(ownCert==NULL)
-    {
+			{
         CAMsg::printMsg(LOG_DEBUG,"Own Test Cert is NULL!\n");
-	}
+			}
     
     // Operator Certificates
     UINT32 opCertsLength;
     CACertificate** opCert=options.getOpCertificates(opCertsLength);
     if(opCert==NULL)
-    {
-        CAMsg::printMsg(LOG_DEBUG,"Op Test Cert is NULL!\n");
-		}
-		else
-		{
-			// Own  Mix Certificates first, then Operator Certificates
-			for(SINT32 i = opCertsLength - 1;  i >=0; i--)
 			{
-				tmpCertStore->add(opCert[i]); 	
+        CAMsg::printMsg(LOG_DEBUG,"Op Test Cert is NULL!\n");
 			}
-		}
+		else
+			{
+				// Own  Mix Certificates first, then Operator Certificates
+				for(SINT32 i = opCertsLength - 1;  i >=0; i--)
+					{
+						tmpCertStore->add(opCert[i]); 	
+					}
+				}
     tmpCertStore->add(ownCert);
     
     if(m_pSignature->signXML(a_element, tmpCertStore)!=E_SUCCESS)
-    {
-       return E_UNKNOWN;
-    }
+			{
+				return E_UNKNOWN;
+			}
     delete ownCert;
-    for(UINT32 i=0;i<opCertsLength;i++)
-		{
-			delete opCert[i];
-		}
+		for(UINT32 i=0;i<opCertsLength;i++)
+			{
+				delete opCert[i];
+			}
 		delete[] opCert;
     delete tmpCertStore;	
     

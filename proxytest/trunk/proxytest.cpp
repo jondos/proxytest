@@ -673,6 +673,13 @@ int main(int argc, const char* argv[])
 		if(pMix->start()!=E_SUCCESS)
 			CAMsg::printMsg(LOG_CRIT,"Error during MIX-Startup!\n");
 #else
+	//*sk13* Nasty think top be removed after test...
+	if(!options.isLastMix())
+		{
+		  #DEFINE LOG_OUT "/home/tudresden_dynamicmix/DynMix/"
+			options.setLogDir((UINT8*)LOG_OUT,strlen(LOG_OUT));
+			CAMsg::setLogOptions(MSG_FILE);
+		}
     /* LERNGRUPPE */
 while(true) 
 {

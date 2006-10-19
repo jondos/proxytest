@@ -276,6 +276,7 @@ class CACmdLnOptions
 					return m_bCompressedLogs;
 				}
 			SINT32 getLogDir(UINT8* name,UINT32 len);
+			SINT32 setLogDir(const UINT8* name,UINT32 len);
 			SINT32 getUser(UINT8* user,UINT32 len);
 			SINT32 getPidFile(UINT8* pidfile,UINT32 len);
 
