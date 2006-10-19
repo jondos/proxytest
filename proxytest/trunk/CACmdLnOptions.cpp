@@ -1255,8 +1255,8 @@ SINT32 CACmdLnOptions::setLogDir(const UINT8* name,UINT32 len)
 			{
 				delete[] m_strLogDir;
 			}
-		m_strLogDir=new UINT8[len+1];
-		memcpy(name,m_strLogDir,len);
+		m_strLogDir=new char[len+1];
+		memcpy(m_strLogDir,name,len);
 		m_strLogDir[len]=0;
 		return E_SUCCESS;	
 	}
