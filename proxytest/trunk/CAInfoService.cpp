@@ -139,7 +139,7 @@ static THREAD_RETURN InfoLoop(void *p)
 				{
 					if (temp <= 60)
 						{
-							nextUpdate = temp;
+							nextUpdate = 60 - temp;
 						}
 					else
 						{
@@ -673,7 +673,7 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
 			}
 		else
 			{
-        CAMsg::printMsg(LOG_DEBUG,"InfoService: sendMixHelo() connectiing to InfoService %s:%d failed!\n", hostname, a_pSocketAddress->getPort());
+        CAMsg::printMsg(LOG_DEBUG,"InfoService: sendMixHelo() connecting to InfoService %s:%d failed!\n", hostname, a_pSocketAddress->getPort());
 			}
 ERR:
 		return E_UNKNOWN;
