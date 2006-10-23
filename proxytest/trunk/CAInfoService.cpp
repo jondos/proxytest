@@ -50,7 +50,7 @@ const UINT64 CAInfoService::MINUTE = 60;
 const UINT64 CAInfoService::SEND_CASCADE_INFO_WAIT = MINUTE * 10;
 const UINT64 CAInfoService::SEND_MIX_INFO_WAIT = MINUTE * 10;
 const UINT64 CAInfoService::SEND_STATUS_INFO_WAIT = MINUTE;
-const UINT32 CAInfoService::SEND_INFO_TIMEOUT_IN_SECONDS = 15; // 15 seconds timeout
+const UINT32 CAInfoService::SEND_INFO_TIMEOUT_IN_SECONDS = 20; // 20 seconds timeout
 
 static THREAD_RETURN InfoLoop(void *p)
 	{
