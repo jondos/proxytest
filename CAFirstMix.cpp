@@ -618,6 +618,7 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 				UINT32 keepaliveDiff=diff64(keepaliveNow,keepaliveLast);
 				if(keepaliveDiff>u32KeepAliveRecvInterval)
 					{
+						CAMsg::printMsg(LOG_DEBUG,"CAFirstMix::loopReadFromMix() -- restart because of KeepAlive-Traffic Timeout!\n");
 						pFirstMix->m_bRestart=true;
 						break;
 					}
@@ -644,7 +645,7 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 						if(ret!=MIXPACKET_SIZE)
 							{
 								pFirstMix->m_bRestart=true;
-								CAMsg::printMsg(LOG_ERR,"CAFirstMix::lm_loopReadFromMix - received returned: %i\n",ret);
+								CAMsg::printMsg(LOG_ERR,"CAFirstMix::lm_loopReadFromMix - received returned: %i -- restarting!\n",ret);
 								break;
 							}
 					}
