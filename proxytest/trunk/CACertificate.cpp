@@ -248,6 +248,8 @@ SINT32 CACertificate::getSubjectKeyIdentifier(UINT8* r_ski, UINT32 *r_skiLen)
   * Removes the colons from the string representation of the given SKI
   * @param a_cSkid The string from which the colons should be removed
   * @param a_cSkidLen The length of a_cSkid
+  * @param r_ski 
+  * @param r_skiLen 
   * @return r_ski The SKI as colon-free string
   * @return r_skiLen The length of r_ski
   * @retval E_SUCCESS upon successful removal

@@ -11,12 +11,12 @@ class CAXMLCostConfirmation
 		public:
 			/** Tries to create an CAXMLCostConfirmation object from the given XML string.
 				* @retval NULL if the XML data was wrong
-				* @retrun a newly allocated CAXMLCostconfirmationObject
+				* @return a newly allocated CAXMLCostconfirmationObject
 				*/
 			static CAXMLCostConfirmation* getInstance(UINT8 * strXmlData,UINT32 strXMlDataLen);
 			/** Tries to create an CAXMLCostConfirmation object from the given XML string.
 				* @retval NULL if the XML data was wrong
-				* @retrun a newly allocated CAXMLCostconfirmationObject
+				* @return a newly allocated CAXMLCostconfirmationObject
 				*/
 			static CAXMLCostConfirmation* getInstance(DOM_Element &elemRoot);
 			~CAXMLCostConfirmation();

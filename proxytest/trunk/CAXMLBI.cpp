@@ -31,8 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 const UINT8* const CAXMLBI::ms_pXmlElemName=(UINT8*)"PaymentInstance";
 
-CAXMLBI::CAXMLBI()
-	: CAAbstractXMLEncodable()
+CAXMLBI::CAXMLBI() : CAAbstractXMLEncodable()
 	{
 		m_pVeryfire = NULL;
 		m_pBiID = NULL;

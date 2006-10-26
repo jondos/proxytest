@@ -94,7 +94,7 @@ class CASocket:public CAClientSocket
 			
 			/** Tries to find out how many socket we can open by open as many socket as possible witthout errors.
 				* If we can open more than 10.000 sockets we stop the test and return 10000.
-				*@ret max numbers of sockets we can have open at the same time
+				*@retval max numbers of sockets we can have open at the same time
 				*@retval E_UNKNOWN in case of some unexpected error
 			*/
 			static SINT32 getMaxOpenSockets();

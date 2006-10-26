@@ -146,14 +146,13 @@ char* strins(const char* src,const char * pos,const char* ins)
 			return NULL;
 		return strins(src,pos-src,ins);
 	}
-
-/** Gets the current Systemtime in milli seconds. 
+/*
+// Gets the current Systemtime in milli seconds. 
 	* @param bnTime - Big Number, in which the current time is placed
 	* @retval E_UNSPECIFIED, if bnTime was NULL
 	* @retval E_UNKNOWN, if an error occurs
 	*	@retval	E_SUCCESS, otherwise
-*/
-/*SINT32 getcurrentTimeMillis(BIGNUM* bnTime)
+SINT32 getcurrentTimeMillis(BIGNUM* bnTime)
 	{
 		if(bnTime==NULL)
 			return E_UNSPECIFIED;
@@ -528,10 +527,12 @@ SINT32 getLastDOMChildByName(const DOM_Node& node,const UINT8* const name,DOM_No
  * len is set to 0.
  * 
  * TODO: Why is elem a DOM_Node and not a DOM_Element here?
- * @param DOM_Node the element which has a text node under it
+ * @param elem the element which has a text node under it
  * @param value a buffer that gets the text value
- * @param len on call contains the buffer size, on return contains the number of bytes copied
- * @return E_SPACE if the buffer is too small, E_SUCCESS otherwise, E_UNKNOWN if the element is NULL
+ * @param valuelen on call contains the buffer size, on return contains the number of bytes copied
+ * @retval E_SPACE if the buffer is too small
+ * @retval E_UNKNOWN if the element is NULL
+ * @retval E_SUCCESS otherwise
  */
 SINT32 getDOMElementValue(const DOM_Node& elem,UINT8* value,UINT32* valuelen)
 	{
@@ -701,6 +702,7 @@ SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, DOM_Node & root,CAASymCi
 	}
 
 /** The resulting encrypted xml struct is as follows:
+@verbatim
 	* <EncryptedData Type='http://www.w3.org/2001/04/xmlenc#Element'>
 	*		<EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#aes128-cbc"/>
 	*   <ds:KeyInfo xmlns:ds='http://www.w3.org/2000/09/xmldsig#'>
@@ -715,6 +717,7 @@ SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, DOM_Node & root,CAASymCi
 	*			<CipherValue>...</CipherValue>
 	*		</CipherData>
 	*	</EncryptedData>
+	*@endverbatim
 	*/
 SINT32 encryptXMLElement(DOM_Node node, CAASymCipher* pRSA)
 	{
@@ -779,22 +782,23 @@ SINT32 encryptXMLElement(DOM_Node node, CAASymCipher* pRSA)
 #endif //ONLY_LOCAL_PROXY
 
 /** Encrypts an XML-Element by wrapping it with:
-	* <EncryptedData Type='http://www.w3.org/2001/04/xmlenc#Element'>
-	*		<EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#aes128-cbc"/>
-	*   <ds:KeyInfo xmlns:ds='http://www.w3.org/2000/09/xmldsig#'>
-	*			<EncryptedKey>
-	*				<EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"/>
-	*				<CipherData>
-	*					<CipherValue>...</CipherValue>					
-	*				</CipherData>
-	*			</EncryptedKey>
-	*		</ds:KeyInfo>
-	*		<CipherData>
-	*			<CipherValue>...</CipherValue>
-	*		</CipherData>
-	*	</EncryptedData>
-	*
-	@ret a buffer with the encyrpted element (the caller is responsible for freeing it), or NULL
+*@verbatim
+	* \<EncryptedData Type='http://www.w3.org/2001/04/xmlenc#Element'>
+	*		\<EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#aes128-cbc"/>
+	*   \<ds:KeyInfo xmlns:ds='http://www.w3.org/2000/09/xmldsig#'>
+	*			\<EncryptedKey>
+	*				\<EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"/>
+	*				\<CipherData\>
+	*					\<CipherValue>...\</CipherValue>					
+	*				\</CipherData>
+	*			\</EncryptedKey>
+	*		\</ds:KeyInfo>
+	*		\<CipherData>
+	*			\<CipherValue>...\</CipherValue>
+	*		\</CipherData>
+	*	\</EncryptedData>
+	*@endverbatim
+	@return a buffer with the encyrpted element (the caller is responsible for freeing it), or NULL
 */
 UINT8* encryptXMLElement(UINT8* inbuff,UINT32 inlen,UINT32& outlen,CAASymCipher* pRSA)
 	{

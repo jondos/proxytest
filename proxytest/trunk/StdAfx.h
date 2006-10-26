@@ -36,16 +36,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #define MIX_VERSION "00.05.31"
 
-//Define all features if we are running in documentation creation mode
-#ifdef DOXYGEN
-	#define REPLAY_DETECTION
-	#define DELAY_USERS
-	#define COUNTRY_STATS
-	#define USE_POOL
-	#define PAYMENT
-	#define HAVE_UNIX_DOMAIN_PROTOCOL
-	#define HAVE_EPOLL
-#endif
+#include "doxygen.h"
 
 #if defined(DEBUG)|| defined(_DEBUG)
 	#undef DEBUG

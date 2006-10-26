@@ -676,7 +676,7 @@ SINT32 CASocket::getMaxOpenSockets()
  * @retval E_SUCCESS upon success
  * @retval SOCKET_ERROR otherwise
  *
- * @TODO: Question: Correct for Unix domain sockets?
+ * @todo: Question: Correct for Unix domain sockets?
  */
 SINT32 CASocket::getLocalIP(UINT32* r_Ip)
 {

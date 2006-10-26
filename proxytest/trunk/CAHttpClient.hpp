@@ -69,7 +69,7 @@ public:
 	* @return E_NOT_CONNECTED if the connection was lost
 	* @return E_SUCCESS if all is OK
 	*/
-	SINT32 sendGetRequest(UINT8 * url);
+	SINT32 sendGetRequest(const UINT8 * url);
 	
 	/**
 	* Sends a HTTP POST request to the server
@@ -87,7 +87,8 @@ public:
 	 * receives the HTTP header and parses the content length 
 	 * @param contentLength receives the parsed content length
 	 * @param statusCode if set, receives the http statuscode (200, 403, 404, ...)
-	 * @return E_SUCCESS if all is OK, E_UNKNOWN if the server returned a http errorcode
+	 * @retval E_SUCCESS if all is OK
+	 * @retval E_UNKNOWN if the server returned a http errorcode
 	 * TODO: Verify that "HTTP/1.1 200 OK" must be the first line!
 	 */
 	SINT32 parseHTTPHeader(UINT32* contentLength, UINT32 * statusCode=NULL);
