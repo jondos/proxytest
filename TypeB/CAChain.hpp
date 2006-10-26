@@ -31,6 +31,7 @@
  */
 #ifndef __CA_CHAIN__
 #define __CA_CHAIN__
+#include "../doxygen.h"
 #ifndef ONLY_LOCAL_PROXY
 #include "CALastMixBChannelList.hpp"
 #include "../CASocket.hpp"

@@ -3,7 +3,7 @@
 #---------------------------------------------------------------------------
 # Project related configuration options
 #---------------------------------------------------------------------------
-PROJECT_NAME           = "Mixe for Privacy and Anonymity in the Internet"
+PROJECT_NAME           = "Mixes for Privacy and Anonymity in the Internet"
 PROJECT_NUMBER         = 
 OUTPUT_DIRECTORY       = ./doc_short
 CREATE_SUBDIRS         = NO
@@ -216,7 +216,7 @@ PERL_PATH              = /usr/bin/perl
 #---------------------------------------------------------------------------
 CLASS_DIAGRAMS         = YES
 HIDE_UNDOC_RELATIONS   = NO
-HAVE_DOT               = YES
+HAVE_DOT               = NO
 CLASS_GRAPH            = YES
 COLLABORATION_GRAPH    = NO
 GROUP_GRAPHS           = NO

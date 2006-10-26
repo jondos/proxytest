@@ -211,7 +211,7 @@ bool CAMix::needAutoConfig()
 
 /** This will initialize the XML Cascade Info struct @ref XMLFirstMixToInfoService that is sent to the InfoService
 * in \c CAInfoService::sendCascadeHelo()
-* @param mixes the <Mixes> element of the XML struct we received from the succeeding mix.
+* @param mixes the \<Mixes\> element of the XML struct we received from the succeeding mix.
 * @retval E_UNKNOWN if processing produces an error
 * @retval E_SUCCESS otherwise
 */

@@ -303,7 +303,7 @@ No data is transmitted during this step.
 
 \li Step 3: Mix 3 sends its public key  to Mix 2 (signed with its signature key).
 See \ref XMLInterMixInitSendFromLast "[XML]" for a description of the XML struct send in this step.
-The <Nonce/> is a random byte string of length=16 (chosen by Mix 3) used for replay detection.
+The \<Nonce/\> is a random byte string of length=16 (chosen by Mix 3) used for replay detection.
 
 \li Step 4: Mix 2 generates and sends a symmetric key to Mix 3, encrypted with the public key
 of Mix 3, signed by Mix 2.
@@ -313,7 +313,7 @@ The first 16 bytes a used as a key for
 inter-mix encryption of packets send from Mix \e n-1 to Mix \e n (e.g. upstream direction).
 The next 16 byte are used as IV for this cipher. The next 16 bytes are used as
 key for downstream direction and the last 16 bytes are the IV for this cipher.
-To detect replay attacks Mix 3 checks if the <Nonce/> element sent from Mix 2 is equal to SHA1(<Nonce/> chosen by Mix 3 in Step 3).
+To detect replay attacks Mix 3 checks if the \<Nonce/\> element sent from Mix 2 is equal to SHA1(\<Nonce\/> chosen by Mix 3 in Step 3).
 
 \li Step 5,6,7: This steps are equal to step 2,3,4. Mix 1 establishes a TCP/IP-connection
 with Mix 2. Mix 2 send it publick key to Mix 1 and Mix 1 generates and sends

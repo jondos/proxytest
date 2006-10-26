@@ -67,7 +67,7 @@ class CAMiddleMix:public
     * @param d ignored
     * @retval E_SUCCESS in any case
     */
-    virtual SINT32 initMixCascadeInfo(DOM_Element& )
+    virtual SINT32 initMixCascadeInfo(DOM_Element& d)
     {
         return E_SUCCESS;
     }

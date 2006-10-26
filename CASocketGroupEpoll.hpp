@@ -27,6 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CASOCKETGOROPEPOLL__
 #define __CASOCKETGOROPEPOLL__
+#include "doxygen.h"
 #ifdef HAVE_EPOLL
 #include "CASocket.hpp"
 #include "CAMuxSocket.hpp"

@@ -28,6 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #ifndef __CAFIRSTMIX__
 #define __CAFIRSTMIX__
+#include "doxygen.h"
 #ifndef ONLY_LOCAL_PROXY
 #include "CAMix.hpp"
 #include "CAMuxSocket.hpp"
@@ -120,7 +121,7 @@ protected:
     //added by ronin <ronin2@web.de>
     virtual SINT32 processKeyExchange();
     
-		/** Initialises the MixParameters info for each mix form the <Mixes> element received from the second mix.*/
+		/** Initialises the MixParameters info for each mix form the \<Mixes\> element received from the second mix.*/
     SINT32 initMixParameters(DOM_Element& elemMixes);
     
     

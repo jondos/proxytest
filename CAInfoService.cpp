@@ -762,8 +762,8 @@ ERR:
  * InfoService that it wants to create a new cascade. The InfoService
  * then tells all involved mixes to join this cascade.
  * If the current mix is a middle mix, this method does nothing.
- * @param E_SUCCESS on success
- * @param E_UNKNOWN on any error
+ * @retval E_SUCCESS on success
+ * @retval E_UNKNOWN on any error
 	*/
 SINT32 CAInfoService::sendCascadeHelo(const UINT8* a_strCascadeHeloXML,UINT32 a_len,const CASocketAddrINet* a_pSocketAddress) const
 {	
@@ -772,8 +772,6 @@ SINT32 CAInfoService::sendCascadeHelo(const UINT8* a_strCascadeHeloXML,UINT32 a_
 		CASocket oSocket(true);
 		UINT8 hostname[255];
 		UINT8 buffHeader[255];
-		CAHttpClient httpClient;
-
 		if (a_pSocketAddress == NULL)
 		{
 			return E_UNKNOWN;
@@ -787,7 +785,6 @@ SINT32 CAInfoService::sendCascadeHelo(const UINT8* a_strCascadeHeloXML,UINT32 a_
 		if(oSocket.connect(*a_pSocketAddress, SEND_INFO_TIMEOUT_IN_SECONDS*1000)==E_SUCCESS)
 			{
 				oSocket.setSendTimeOut(SEND_INFO_TIMEOUT_IN_SECONDS*1000);
-				httpClient.setSocket(&oSocket);
         if(options.isFirstMix())
 					{
             CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending cascade helo to InfoService %s:%d.\r\n", hostname, a_pSocketAddress->getPort());
@@ -922,6 +919,8 @@ SINT32 CAInfoService::getPaymentInstance(const UINT8* a_pstrPIID,CAXMLBI** a_pXM
 
 /** Gets a payment instance from the InfoService.
 	@param a_pstrPIID id of the payment instacne for which the information is requested
+	@param a_pXMLBI a pointer to a pointer which on a successful return will point to a newly created CAXMLBI object
+	@param a_socketAddress adress of the InfoService from which the information is to be requested
 	@retval E_SUCCESS if succesful
 	@retval E_UNKNOWN if an error occured
 	@return a_pXMLBI will point to a pointer to the newly created CAXMLBI object or to NULL
@@ -935,7 +934,7 @@ SINT32 CAInfoService::getPaymentInstance(const UINT8* a_pstrPIID,CAXMLBI** a_pXM
 		UINT8 request[255];
 		CAHttpClient httpClient;
 		UINT32 status, contentLength;
-	
+		*a_pXMLBI=NULL;
 		//Connect to InfoService
 		if(a_socketAddress->getIPAsStr(hostname, 255)!=E_SUCCESS)
 		{

@@ -149,8 +149,9 @@ SINT32 CACmdLnOptions::clearVisibleAddresses()
 		return E_SUCCESS;
 	}
 
-/** Add all the visible addresses to the list of visible addresses found in the XML description of the <Proxy> element given.
+/** Add all the visible addresses to the list of visible addresses found in the XML description of the \<Proxy\> element given.
 	* The structur is as follows:
+	*@verbatim
 	* <Proxy>
 	*      <VisibleAddresses> <!-- Describes the visible addresses from the 'outside world' -->
  *       <VisibleAddress>
@@ -160,6 +161,7 @@ SINT32 CACmdLnOptions::clearVisibleAddresses()
    *   </VisibleAddresses>
 *
 	* </Proxy>
+	@endverbatim
 	*/
 SINT32 CACmdLnOptions::addVisibleAddresses(DOM_Node& nodeProxy)
 	{
@@ -621,9 +623,7 @@ SINT32 CACmdLnOptions::setNewValues(CACmdLnOptions& newOptions)
 /** Modifies the next mix settings (target interface and certificate) according to
 * the specified options object. Target interfaces are only copied if they denote a
 * next mix. HTTP and SOCKS proxy settings are ignored.
-* @param xmlData a string containing XML data with the new options
-* @param len the length of the string
-* 
+* @param doc a DOM document containing XML data with the new options
 */
 #ifndef DYNAMIC_MIX
 SINT32 CACmdLnOptions::setNextMix(DOM_Document& doc)
@@ -853,9 +853,7 @@ SINT32 CACmdLnOptions::setNextMix(DOM_Document& doc)
 /** Modifies the next mix settings (target interface and certificate) according to
 * the specified options object. Target interfaces are only copied if they denote a
 * next mix. HTTP and SOCKS proxy settings are ignored.
-* @param xmlData a string containing XML data with the new options
-* @param len the length of the string
-* 
+* @param doc  a DOM document containing XML data with the new options
 */
 #ifndef DYNAMIC_MIX
 SINT32 CACmdLnOptions::setPrevMix(DOM_Document& doc)
@@ -2409,8 +2407,8 @@ SINT32 CACmdLnOptions::buildDefaultConfig(DOM_Document doc,bool bForLastMix=fals
 
 /**
   * Saves the given XML Document to a file
-  * @param a_doc The XML Document to be saved
-  * @param a_strFileName The name of the file to be saved to
+  * @param p_doc The XML Document to be saved
+  * @param p_strFileName The name of the file to be saved to
   * @retval E_SUCCESS
   */
 SINT32 CACmdLnOptions::saveToFile(DOM_Document p_doc, const UINT8* p_strFileName)

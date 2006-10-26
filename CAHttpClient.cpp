@@ -32,25 +32,23 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 * Sends a HTTP GET request to the server
 *
 * @param url the local part of the URL requested (e.g. "/settle")
-* @return E_UNKNOWN on socket errors
-* @return E_NOT_CONNECTED if the connection was lost
-* @return E_SUCCESS if all is OK
+* @retval E_UNKNOWN on socket errors
+* @retval E_NOT_CONNECTED if the connection was lost
+* @retval E_SUCCESS if all is OK
 */
-SINT32 CAHttpClient::sendGetRequest(UINT8 * url)
+SINT32 CAHttpClient::sendGetRequest(const UINT8 * url)
 	{
-		UINT8 requestF[] = "GET %s HTTP/1.0\r\n\r\n";
-		UINT32 len;
-		UINT8* requestS;
-		
-		if(!m_pSocket)
+		static const UINT8 requestF[] = "GET %s HTTP/1.0\r\n\r\n";
+		static const UINT32 requestFLen=strlen((char *)requestF);
+		if(m_pSocket==NULL)
 			{
 				return E_NOT_CONNECTED;
 			}
 		
 		// put request together
-		len = strlen((char *)requestF) + strlen((char *)url);
-		requestS = new UINT8[len+1];
-		sprintf((char *)requestS, (char *)requestF, (char *)url);
+		UINT32 len = requestFLen + strlen((char *)url);
+		UINT8* requestS = new UINT8[len+1];
+		sprintf((char *)requestS, (const char *)requestF, (const char *)url);
 		len = strlen((char *)requestS);
 	
 		#ifdef DEBUG
@@ -113,14 +111,21 @@ SINT32 CAHttpClient::sendPostRequest(const UINT8 * url, const UINT8 * data, cons
 	}
 
 /** 
-	* receives the HTTP header and parses the content length 
+	* Receives the HTTP header and parses the content length 
 	* @param contentLength receives the parsed content length
 	* @param statusCode if set, receives the http statuscode (200, 403, 404, ...)
-	* @return E_SUCCESS if all is OK, E_UNKNOWN if the server returned a http errorcode
-	* TODO: Verify that "HTTP/1.1 200 OK" must be the first line!
+	* @retval E_SUCCESS if all is OK
+	* @retval E_NOT_CONNECTED if the connection to the Web-Server was lost 
+	* @retval E_UNKNOWN if the server returned a http errorcode, in this case statusCode is set to 0 and contentLength is set to 0
+	* @todo: Verify that "HTTP/1.1 200 OK" must be the first line!
+	* @todo: Maybe set an other statusCode in case of an error ?
 	*/
 SINT32 CAHttpClient::parseHTTPHeader(UINT32* contentLength, UINT32 * statusCode)
 	{
+		if(contentLength!=NULL)
+			*contentLength=0;
+		if(statusCode!=NULL)
+			*statusCode=0;
 		char *line = new char[255];
 		SINT32 ret = 0;
 		SINT32 ret2 = E_UNKNOWN;
@@ -128,60 +133,52 @@ SINT32 CAHttpClient::parseHTTPHeader(UINT32* contentLength, UINT32 * statusCode)
 			{
 				return E_NOT_CONNECTED;
 			}
-		
 		do
-		{
-			int i=0;
-			UINT8 byte = 0;
-			do
 			{
-				ret = m_pSocket->receive(&byte, 1);
-				if(byte == '\r' || byte == '\n')
-				{
-					line[i++] = 0;
-				}
-				else
-				{
-					line[i++] = byte;
-				}
-			}
-			while(byte != '\n' && i<255 && ret > 0);
+				int i=0;
+				UINT8 byte = 0;
+				do//Read a line from the WebServer
+					{
+						ret = m_pSocket->receive(&byte, 1);
+						if(byte == '\r' || byte == '\n')
+							{
+								line[i++] = 0;
+							}
+						else
+							{
+								line[i++] = byte;
+							}
+					}
+				while(byte != '\n' && i<255 && ret > 0);
 	
-			if(ret < 0||i>=255)
-				break;
-	
-			if(strncmp(line, "HTTP", 4) == 0)
-			{
-				if(statusCode!=NULL && strlen(line)>9) // parse statusCode
-				{
-					*statusCode = atoi(line+9);
-				}
-				if(strstr(line, "200 OK") == NULL)
-				{
-					CAMsg::printMsg(LOG_CRIT,"HttpClient: Error: Server returned: '%s'.\n",line);
-					if(strstr(line, "404") != NULL)
-						{
-							CAMsg::printMsg(
-									LOG_CRIT,
-									"HttpClient: Error: Maybe the desired mix is not online? Retry later.\n"
-								);
-						}
+				if(ret < 0||i>=255)
 					break;
-				}
-				else
-					ret2=E_SUCCESS;
-			}
-			/// TODO: do it better (case insensitive compare!)
-			else if( (strncmp(line, "Content-length: ", 16) == 0) ||
-				(strncmp(line, "Content-Length: ", 16) == 0))
-			{
-				*contentLength = (UINT32) atol(line+16);
-			}
-			#ifdef DEBUG
-				CAMsg::printMsg(LOG_DEBUG,"Server returned: '%s'.\n",line);
-			#endif	
-		} while(strlen(line) > 0);
 		
+				if(strncmp(line, "HTTP", 4) == 0)
+					{
+						if(statusCode!=NULL && strlen(line)>9) // parse statusCode
+							{
+								*statusCode = atoi(line+9);
+							}
+						if(strstr(line, "200 OK") == NULL)
+							{
+								CAMsg::printMsg(LOG_CRIT,"HttpClient: Error: Server returned: '%s'.\n",line);
+								break;
+							}
+						else
+							ret2=E_SUCCESS;
+					}
+				/// TODO: do it better (case insensitive compare!)
+				else if( (strncmp(line, "Content-length: ", 16) == 0) ||
+										(strncmp(line, "Content-Length: ", 16) == 0))
+					{
+						*contentLength = (UINT32) atol(line+16);
+					}
+				#ifdef DEBUG
+					CAMsg::printMsg(LOG_DEBUG,"Server returned: '%s'.\n",line);
+				#endif	
+			} 
+		while(strlen(line) > 0);//Stop reading of response lines, if an empty line was reveived...
 		delete[] line;
 		return ret2;
 	}
@@ -211,4 +208,4 @@ SINT32 CAHttpClient::getContent(UINT8* a_pContent, UINT32* a_pLength)
 			}
 		*a_pLength=aktIndex;	
 		return E_SUCCESS;
-}
+	}

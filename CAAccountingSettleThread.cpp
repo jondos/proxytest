@@ -52,7 +52,7 @@ CAAccountingSettleThread::~CAAccountingSettleThread()
 		m_bRun=false;
 		m_pThread->join();
 		delete m_pThread;
-///@TODO delete m_pPIList !
+///@todo delete m_pPIList !
 	}
 
 /**
