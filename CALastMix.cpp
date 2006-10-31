@@ -661,15 +661,15 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 		{
 			endOfUrl = (UINT8 *) memchr(startOfUrl, '\r', payLen-1-(startOfUrl - (UINT8 *)payLoad));
 
-    			if (((payLoad + payLen) >  (6 + startOfUrl)) && strncmp((char*)startOfUrl, "Host: ", 6)==0) 
+    		if (((payLoad + payLen) >  (6 + startOfUrl)) && strncmp((char*)startOfUrl, "Host: ", 6)==0) 
 			{
-      				hostname = (UINT8*) strndup((char*)(startOfUrl+6), endOfUrl-startOfUrl-6);
-      				printf("%s\n", (char*)hostname);
-      				hp = gethostbyname((char*)hostname);
-      				counter=0;
-      				while ( hp -> h_addr_list[counter] != NULL) 
+      			hostname = (UINT8*) strndup((char*)(startOfUrl+6), endOfUrl-startOfUrl-6);
+      			printf("%s\n", (char*)hostname);
+      			hp = gethostbyname((char*)hostname);
+      			counter=0;
+      			while ( hp -> h_addr_list[counter] != NULL) 
 				{
-        				ip = (UINT8*) inet_ntoa( *( struct in_addr*)( hp -> h_addr_list[counter]));
+        			ip = (UINT8*) inet_ntoa( *( struct in_addr*)( hp -> h_addr_list[counter]));
        				
 					if(ip != NULL)
 					{
@@ -682,9 +682,9 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 							}
 						}
 					}
-        				counter++;
-     				}
-    			}
+        			counter++;
+     			}
+    		}
    			startOfUrl = endOfUrl + 2;
   		} while ((endOfUrl != NULL) && (startOfUrl < (payLoad + payLen)));
 			
