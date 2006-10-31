@@ -664,10 +664,13 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
     		if (((payLoad + payLen) >  (6 + startOfUrl)) && strncmp((char*)startOfUrl, "Host: ", 6)==0) 
 			{
       			hostname = (UINT8*) strndup((char*)(startOfUrl+6), endOfUrl-startOfUrl-6);
-      			printf("%s\n", (char*)hostname);
+  				if (hostname == NULL)
+  				{
+  					continue;
+  				}
       			hp = gethostbyname((char*)hostname);
       			counter=0;
-      			while ( hp -> h_addr_list[counter] != NULL) 
+      			while (hp != NULL && hp -> h_addr_list[counter] != NULL) 
 				{
         			ip = (UINT8*) inet_ntoa( *( struct in_addr*)( hp -> h_addr_list[counter]));
        				
