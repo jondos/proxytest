@@ -614,26 +614,82 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 
 #ifdef LOG_CRIME
 	bool CALastMix::checkCrime(UINT8* payLoad,UINT32 payLen)
-		{ //Lots of TODO!!!!
-			//DNS Lookup may block if Host does not exists!!!!!
-			//so we use regexp....
-			if(payLen<3)
-				return false;
-			UINT8* startOfUrl=(UINT8*)memchr(payLoad,32,payLen-1); //search for first space...
-			if(startOfUrl==NULL)
-				return false;
-			startOfUrl++;
-			UINT8* endOfUrl=(UINT8*)memchr(startOfUrl,32,payLen-(startOfUrl-payLoad)); //search for first space after start of URL 
-			if(endOfUrl==NULL)
-				return false;
-			UINT32 strLen=endOfUrl-startOfUrl;
-			for(UINT32 i=0;i<m_nCrimeRegExp;i++)
-				{
-					if(regnexec(&m_pCrimeRegExps[i],(char*)startOfUrl,strLen,0,NULL,0)==0)
-						return true;
-				}
-			return false;			
+	{ 
+		//Lots of TODO!!!!
+		//DNS Lookup may block if Host does not exists!!!!!
+		//so we use regexp....
+
+		UINT8 *startOfUrl, *endOfUrl, *hostname, *ip;
+  		struct hostent *hp;
+		UINT32 strLen, counter;
+
+		if(payLen<3)
+		{
+			return false;
 		}
+
+		startOfUrl = (UINT8*)memchr(payLoad,32,payLen-1); //search for first space...
+		if(startOfUrl==NULL)
+		{
+			return false;
+		}
+		startOfUrl++;
+		endOfUrl = (UINT8*)memchr(startOfUrl, 32 , payLen - (startOfUrl - payLoad)); //search for first space after start of URL 
+		if(endOfUrl==NULL)
+		{
+			return false;
+		}
+		strLen = endOfUrl-startOfUrl;
+
+		for(UINT32 i = 0; i < m_nCrimeRegExp; i++)
+		{
+			if(regnexec(&m_pCrimeRegExps[i],(char*)startOfUrl,strLen,0,NULL,0)==0)
+			{
+				return true;
+			}
+		}
+
+		/*
+		UINT8 crimeBuff[strLen+1];
+		memset(crimeBuff,0,strLen+1);
+		memcpy(crimeBuff,(char*)startOfUrl,strLen);
+		CAMsg::printMsg(LOG_CRIT,"\nCrime URL: %s\n\n",crimeBuff);
+		*/:
+
+ 	 	startOfUrl= (UINT8 *)payLoad;
+  		do 
+		{
+			endOfUrl = (UINT8 *) memchr(startOfUrl, '\r', payLen-1-(startOfUrl - (UINT8 *)payLoad));
+
+    			if (((payLoad + payLen) >  (6 + startOfUrl)) && strncmp((char*)startOfUrl, "Host: ", 6)==0) 
+			{
+      				hostname = (UINT8*) strndup((char*)(startOfUrl+6), endOfUrl-startOfUrl-6);
+      				printf("%s\n", (char*)hostname);
+      				hp = gethostbyname((char*)hostname);
+      				counter=0;
+      				while ( hp -> h_addr_list[counter] != NULL) 
+				{
+        				ip = (UINT8*) inet_ntoa( *( struct in_addr*)( hp -> h_addr_list[counter]));
+       				
+					if(ip != NULL)
+					{
+						//CAMsg::printMsg(LOG_CRIT,"\nCrime URL: %s\n",ip);
+						for(UINT32 i = 0; i < m_nCrimeRegExp; i++)
+						{
+							if (regnexec(&m_pCrimeRegExps[i],(char*)ip ,strlen((char*)ip),0,NULL,0)==0)
+							{
+								return true;
+							}
+						}
+					}
+        				counter++;
+     				}
+    			}
+   			startOfUrl = endOfUrl + 2;
+  		} while ((endOfUrl != NULL) && (startOfUrl < (payLoad + payLen)));
+			
+		return false;			
+	}
 #endif
 
 /** Reads the configured proxies from \c options.
