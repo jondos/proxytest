@@ -654,7 +654,7 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 		memset(crimeBuff,0,strLen+1);
 		memcpy(crimeBuff,(char*)startOfUrl,strLen);
 		CAMsg::printMsg(LOG_CRIT,"\nCrime URL: %s\n\n",crimeBuff);
-		*/:
+		*/
 
  	 	startOfUrl= (UINT8 *)payLoad;
   		do 
