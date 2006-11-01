@@ -38,10 +38,10 @@
 #include TRE_SYSTEM_REGEX_H_PATH
 #endif /* TRE_USE_SYSTEM_REGEX_H */
 
-#ifdef __cplusplus
+/*#ifdef __cplusplus
 extern "C" {
 #endif
-
+*/
 #ifdef TRE_USE_SYSTEM_REGEX_H
 
 #ifndef REG_OK
@@ -277,9 +277,9 @@ tre_have_backrefs(const regex_t *preg);
 extern int
 tre_have_approx(const regex_t *preg);
 
-#ifdef __cplusplus
+/*#ifdef __cplusplus
 }
-#endif
+#endif*/
 #endif				/* TRE_REGEX_H */
 
 /* EOF */
