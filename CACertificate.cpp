@@ -106,7 +106,7 @@ CACertificate* CACertificate::decode(const UINT8* buff,UINT32 bufflen,UINT32 typ
 			{
 				case CERT_DER:
 					tmp=buff;
-					#if OPENSSL_VERSION_NUMBER	> 0x009070AfL
+					#if OPENSSL_VERSION_NUMBER	> 0x009070BfL
 						tmpCert=d2i_X509(NULL,&tmp,bufflen);
 					#else
 						tmpCert=d2i_X509(NULL,(UINT8**)&tmp,bufflen);
