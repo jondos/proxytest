@@ -29,18 +29,17 @@
 
 /* Define to enable wide character (wchar_t) support. */
 #undef TRE_WCHAR
-
 /* TRE version string. */
-#undef TRE_VERSION
+#define TRE_VERSION "0.7.4"
 
 /* TRE version level 1. */
-#undef TRE_VERSION_1
+#define TRE_VERSION_1 0
 
 /* TRE version level 2. */
-#undef TRE_VERSION_2
+#define TRE_VERSION_2 7
 
 /* TRE version level 3. */
-#undef TRE_VERSION_3
+#define TRE_VERSION_3 4
 
 /* Define to 1 if you have `alloca', as a function or macro. */
 #define HAVE_ALLOCA 1

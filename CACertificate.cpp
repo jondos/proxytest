@@ -106,14 +106,14 @@ CACertificate* CACertificate::decode(const UINT8* buff,UINT32 bufflen,UINT32 typ
 			{
 				case CERT_DER:
 					tmp=buff;
-					#if OPENSSL_VERSION_NUMBER	> 0x009070BfL
+					#if OPENSSL_VERSION_NUMBER	> 0x009070CfL
 						tmpCert=d2i_X509(NULL,&tmp,bufflen);
 					#else
 						tmpCert=d2i_X509(NULL,(UINT8**)&tmp,bufflen);
 					#endif
 				break;
 				case CERT_PKCS12:
-					#if OPENSSL_VERSION_NUMBER	> 0x009070AfL
+					#if OPENSSL_VERSION_NUMBER	> 0x009070CfL
 						tmpPKCS12=d2i_PKCS12(NULL,&buff,bufflen);	
 					#else
 						tmpPKCS12=d2i_PKCS12(NULL,(UINT8**)&buff,bufflen);	
@@ -134,7 +134,7 @@ CACertificate* CACertificate::decode(const UINT8* buff,UINT32 bufflen,UINT32 typ
 					getDOMElementValue(root,tmpBuff,&tmpBuffSize);
 					CABase64::decode(tmpBuff,tmpBuffSize,tmpBuff,&tmpBuffSize);
 					tmp=tmpBuff;
-					#if OPENSSL_VERSION_NUMBER	> 0x009070AfL
+					#if OPENSSL_VERSION_NUMBER	> 0x009070CfL
 						tmpCert=d2i_X509(NULL,&tmp,tmpBuffSize);
 					#else
 						tmpCert=d2i_X509(NULL,(UINT8**)&tmp,tmpBuffSize);
