@@ -57,7 +57,8 @@ libtre_a_AR = $(AR) $(ARFLAGS)
 libtre_a_LIBADD =
 am_libtre_a_OBJECTS = regexec.$(OBJEXT) regcomp.$(OBJEXT) \
 	tre-mem.$(OBJEXT) tre-match-backtrack.$(OBJEXT) \
-	tre-match-parallel.$(OBJEXT)
+	tre-match-parallel.$(OBJEXT) tre-ast.$(OBJEXT) \
+	tre-stack.$(OBJEXT) tre-compile.$(OBJEXT) tre-parse.$(OBJEXT)
 libtre_a_OBJECTS = $(am_libtre_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -171,7 +172,7 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 AUTOMAKE_OPTIONS = foreign
 noinst_LIBRARIES = libtre.a
-libtre_a_SOURCES = regexec.cpp regcomp.cpp tre-mem.cpp tre-match-backtrack.cpp tre-match-parallel.cpp
+libtre_a_SOURCES = regexec.cpp regcomp.cpp tre-mem.cpp tre-match-backtrack.cpp tre-match-parallel.cpp tre-ast.cpp tre-stack.cpp tre-compile.cpp tre-parse.cpp
 includes = @INCLUDES@
 all: all-am
 
@@ -222,9 +223,13 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/regcomp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/regexec.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tre-ast.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tre-compile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tre-match-backtrack.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tre-match-parallel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tre-mem.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tre-parse.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tre-stack.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
