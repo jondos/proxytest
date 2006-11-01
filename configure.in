@@ -372,7 +372,7 @@ if (test ! -z "$ac_cv_openssldir" && test "x$ac_cv_openssldir" != "x(system)") ;
 	fi
 fi
 LIBS="-lcrypto -lssl $saved_LIBS"
-LDFLAGS="$saved_LDFLAGS -L$with_ssl_dir"
+#LDFLAGS="$saved_LDFLAGS -L$with_ssl_dir"
 
 dnl Check for Xerces-C
 AC_LANG_PUSH(C++)

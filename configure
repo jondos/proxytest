@@ -12902,7 +12902,7 @@ _ACEOF
 	fi
 fi
 LIBS="-lcrypto -lssl $saved_LIBS"
-LDFLAGS="$saved_LDFLAGS -L$with_ssl_dir"
+#LDFLAGS="$saved_LDFLAGS -L$with_ssl_dir"
 
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
