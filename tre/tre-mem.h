@@ -1,27 +1,28 @@
 /*
   tre-mem.h - TRE memory allocator interface
 
-  Copyright (C) 2001-2003 Ville Laurikari <vl@iki.fi>
+  Copyright (c) 2001-2006 Ville Laurikari <vl@iki.fi>
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License version 2 (June
-  1991) as published by the Free Software Foundation.
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
 
-  This program is distributed in the hope that it will be useful,
+  This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
 
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 */
-//#ifdef LOG_CRIME
+
 #ifndef TRE_MEM_H
 #define TRE_MEM_H 1
 
-//#include <stdlib.h>
+#include <stdlib.h>
 
 #define TRE_MEM_BLOCK_SIZE 1024
 
@@ -42,28 +43,37 @@ typedef struct tre_mem_struct {
 
 tre_mem_t tre_mem_new_impl(int provided, void *provided_block);
 void *tre_mem_alloc_impl(tre_mem_t mem, int provided, void *provided_block,
-			 size_t size);
+			 int zero, size_t size);
 
 /* Returns a new memory allocator or NULL if out of memory. */
 #define tre_mem_new()  tre_mem_new_impl(0, NULL)
-#define tre_mem_newa() \
-  tre_mem_new_impl(1, alloca(sizeof(struct tre_mem_struct)))
 
 /* Allocates a block of `size' bytes from `mem'.  Returns a pointer to the
    allocated block or NULL if an underlying malloc() failed. */
-#define tre_mem_alloc(mem, size) tre_mem_alloc_impl(mem, 0, NULL, size)
+#define tre_mem_alloc(mem, size) tre_mem_alloc_impl(mem, 0, NULL, 0, size)
 
-/* Like tre_mem_alloc but memory is allocated with alloca() instead of
-   malloc(). */
-#define tre_mem_alloca(mem, size)                                             \
-  ((mem)->n >= (size)                                                         \
-   ? tre_mem_alloc_impl((mem), 1, NULL, (size))				      \
-   : tre_mem_alloc_impl((mem), 1, alloca(TRE_MEM_BLOCK_SIZE), (size)))
+/* Allocates a block of `size' bytes from `mem'.  Returns a pointer to the
+   allocated block or NULL if an underlying malloc() failed.  The memory
+   is set to zero. */
+#define tre_mem_calloc(mem, size) tre_mem_alloc_impl(mem, 0, NULL, 1, size)
+
+#ifdef TRE_USE_ALLOCA
+/* alloca() versions.  Like above, but memory is allocated with alloca()
+   instead of malloc(). */
+
+#define tre_mem_newa() \
+  tre_mem_new_impl(1, alloca(sizeof(struct tre_mem_struct)))
+
+#define tre_mem_alloca(mem, size)					      \
+  ((mem)->n >= (size)							      \
+   ? tre_mem_alloc_impl((mem), 1, NULL, 0, (size))			      \
+   : tre_mem_alloc_impl((mem), 1, alloca(TRE_MEM_BLOCK_SIZE), 0, (size)))
+#endif /* TRE_USE_ALLOCA */
+
 
 /* Frees the memory allocator and all memory allocated with it. */
 void tre_mem_destroy(tre_mem_t mem);
 
 #endif /* TRE_MEM_H */
 
-//#endif //LOG_CRIME
 /* EOF */
