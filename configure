@@ -6571,7 +6571,6 @@ fi
 done
 
 
-if test "$cross_compiling" != yes; then
 if test "x$USE_EPOLL" != "x0" ; then
     { echo "$as_me:$LINENO: checking for epoll_wait" >&5
 echo $ECHO_N "checking for epoll_wait... $ECHO_C" >&6; }
@@ -6673,11 +6672,7 @@ echo "${ECHO_T}$ac_cv_func_epoll_wait" >&6; }
 if test $ac_cv_func_epoll_wait = yes; then
 
 	    if test "$cross_compiling" = yes; then
-  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling
-See \`config.log' for more details." >&5
-echo "$as_me: error: cannot run test program while cross compiling
-See \`config.log' for more details." >&2;}
-   { (exit 1); exit 1; }; }
+  echo "skip epoll run test because of cross compiling"
 else
   cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
@@ -6734,7 +6729,6 @@ fi
 
 fi
 
-fi
 fi
 { echo "$as_me:$LINENO: checking whether TCP_KEEPALIVE is declared" >&5
 echo $ECHO_N "checking whether TCP_KEEPALIVE is declared... $ECHO_C" >&6; }
@@ -12808,15 +12802,12 @@ else
 
 		LIBS="$saved_LIBS -lcrypto"
 
-		if test "$cross_compiling" != yes; then
 		# Basic test to check for compatible version and correct
                 # linking, *does not* test for RSA - that comes later.
 		if test "$cross_compiling" = yes; then
-  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling
-See \`config.log' for more details." >&5
-echo "$as_me: error: cannot run test program while cross compiling
-See \`config.log' for more details." >&2;}
-   { (exit 1); exit 1; }; }
+
+			found_crypto=1
+					echo "skip openssl run test because of cross compiling"
 else
   cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
@@ -12874,9 +12865,6 @@ rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext conftest.$a
 fi
 
 
-		else
-			found_crypto=1
-		fi
 		if test ! -z "$found_crypto" ; then
 			break;
 		fi
@@ -12913,8 +12901,8 @@ _ACEOF
 		blibpath="$blibpath:$ssldir:$ssldir/lib"
 	fi
 fi
-LIBS="$saved_LIBS -lcrypto -lssl"
-
+LIBS="-lcrypto -lssl $saved_LIBS"
+LDFLAGS="$saved_LDFLAGS -L$with_ssl_dir"
 
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -12929,12 +12917,14 @@ if test "${with_xml_include+set}" = set; then
   withval=$with_xml_include;
 		if test "x$withval" != "xno" ; then
 			xmlincludedir=$withval
+		else
+			xmlincludedir="$xmlincludedir -I/usr/include/xercesc"
 		fi
 
 
 fi
 
-XMLINCLUDEFLAGS="-I$xmlincludedir -I$xmlincludedir/xercesc -I/usr/include/xercesc"
+XMLINCLUDEFLAGS="-I$xmlincludedir -I$xmlincludedir/xercesc"
 CFLAGS="$CFLAGS $XMLINCLUDEFLAGS "
 CXXFLAGS="$CXXFLAGS $XMLINCLUDEFLAGS "
 { echo "$as_me:$LINENO: Xerces-C tests" >&5
@@ -13862,12 +13852,12 @@ if test "${enable_debug+set}" = set; then
 
 fi
 
-
+CRIME=""
 # Check whether --enable-crime-detection was given.
 if test "${enable_crime_detection+set}" = set; then
   enableval=$enable_crime_detection;
 	    if test "x$enableval" != "xno" ; then
-		CFLAGS="$CFLAGS -DLOG_CRIME"
+		CRIME="-DLOG_CRIME"
 	    fi
 
 
@@ -13875,8 +13865,8 @@ fi
 
 
 
-CFLAGS="$CFLAGS $POOL $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $REPLAY_DETECTION $NEW_MIX_TYPE $OFLAGS"
-CXXFLAGS="$CXXFLAGS $POOL $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $REPLAY_DETECTION $NEW_MIX_TYPE $OFLAGS"
+CFLAGS="$CFLAGS $POOL $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS"
+CXXFLAGS="$CXXFLAGS $POOL $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS"
 LIBS="$LIBS $PAYMENT_LIB"
 
 ac_config_files="$ac_config_files Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile"

@@ -91,6 +91,9 @@ linux-pentium3-gcc-static:
 linux-pentium3-gcc:
 	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -finline-functions -fomit-frame-pointer -march=pentium3 -O3 --param large-function-growth=300 --param max-inline-insns-single=700 --param max-inline-insns-auto=600 --param inline-unit-growth=200' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
 
+linux-xeon64-gcc:
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -finline-functions -fomit-frame-pointer -march=nocona -m64 -O3' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
+
 linux-pentium3-gcc3:
 	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -finline-functions -fomit-frame-pointer -march=pentium3 -O3 --param max-inline-insns-single=700 --param max-inline-insns-auto=600' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
 
