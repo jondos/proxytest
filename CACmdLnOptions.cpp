@@ -2044,18 +2044,18 @@ SKIP_NEXT_MIX:
 		elemMix.appendChild(elemSoftware);
 
 #ifdef LOG_CRIME
-		m_arCrimeRegExps=NULL;
-		m_nCrimeRegExps=0;
-		m_arCrimeIPRegExps=NULL;
-		m_nCrimeIPRegExps=0;
+		m_arCrimeRegExpsURL=NULL;
+		m_nCrimeRegExpsURL=0;
+		m_arCrimeRegExpsPayload=NULL;
+		m_nCrimeRegExpsPayload=0;
 		CAMsg::printMsg(LOG_INFO,"Loading Crime Detection Data....\n");
 		DOM_Element elemCrimeDetection;
 		getDOMChildByName(elemRoot,(UINT8*)"CrimeDetection",elemCrimeDetection,false);
 		if(elemCrimeDetection!=NULL)
 		{
 			DOM_NodeList nlRegExp;
-			nlRegExp=elemCrimeDetection.getElementsByTagName("RegExp");
-			m_arCrimeRegExps=new regex_t[nlRegExp.getLength()];
+			nlRegExp=elemCrimeDetection.getElementsByTagName("RegExpURL");
+			m_arCrimeRegExpsURL=new regex_t[nlRegExp.getLength()];
 			for(UINT32 i=0;i<nlRegExp.getLength();i++)
 			{
 				DOM_Node tmpChild=nlRegExp.item(i);
@@ -2063,19 +2063,19 @@ SKIP_NEXT_MIX:
 				UINT8 buffRegExp[4096];
 				if(getDOMElementValue(tmpChild,buffRegExp,&lenRegExp)==E_SUCCESS)
 				{
-					if(regcomp(&m_arCrimeRegExps[m_nCrimeRegExps],(char*)buffRegExp,REG_EXTENDED|REG_ICASE|REG_NOSUB)!=0)
+					if(regcomp(&m_arCrimeRegExpsURL[m_nCrimeRegExpsURL],(char*)buffRegExp,REG_EXTENDED|REG_ICASE|REG_NOSUB)!=0)
 					{
-						CAMsg::printMsg(LOG_CRIT,"Could not compile regexp: %s\n",buffRegExp);
+						CAMsg::printMsg(LOG_CRIT,"Could not compile URL regexp: %s\n",buffRegExp);
 						exit(-1);
 					}
 					CAMsg::printMsg(LOG_DEBUG,"Looking for crime URL RegExp: %s\n",buffRegExp);
 
-					m_nCrimeRegExps++;
+					m_nCrimeRegExpsURL++;
 				}
 			}
 			
-			nlRegExp=elemCrimeDetection.getElementsByTagName("IPRegExp");
-			m_arCrimeIPRegExps=new regex_t[nlRegExp.getLength()];
+			nlRegExp=elemCrimeDetection.getElementsByTagName("RegExpPayload");
+			m_arCrimeRegExpsPayload=new regex_t[nlRegExp.getLength()];
 			for(UINT32 i=0;i<nlRegExp.getLength();i++)
 			{
 				DOM_Node tmpChild=nlRegExp.item(i);
@@ -2083,14 +2083,14 @@ SKIP_NEXT_MIX:
 				UINT8 buffRegExp[4096];
 				if(getDOMElementValue(tmpChild,buffRegExp,&lenRegExp)==E_SUCCESS)
 				{
-					if(regcomp(&m_arCrimeIPRegExps[m_nCrimeIPRegExps],(char*)buffRegExp,REG_EXTENDED|REG_ICASE|REG_NOSUB)!=0)
+					if(regcomp(&m_arCrimeRegExpsPayload[m_nCrimeRegExpsPayload],(char*)buffRegExp,REG_EXTENDED|REG_ICASE|REG_NOSUB)!=0)
 					{
-						CAMsg::printMsg(LOG_CRIT,"Could not compile regexp: %s\n",buffRegExp);
+						CAMsg::printMsg(LOG_CRIT,"Could not compile payload regexp: %s\n",buffRegExp);
 						exit(-1);
 					}
-					CAMsg::printMsg(LOG_DEBUG,"Looking for crime IP RegExp: %s\n",buffRegExp);
+					CAMsg::printMsg(LOG_DEBUG,"Looking for crime Payload RegExp: %s\n",buffRegExp);
 
-					m_nCrimeIPRegExps++;
+					m_nCrimeRegExpsPayload++;
 				}
 			}				
 		}

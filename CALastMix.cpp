@@ -134,10 +134,10 @@ SINT32 CALastMix::init()
 		CAMsg::printMsg(LOG_INFO,"connected!\n");
 
 #ifdef LOG_CRIME
-		m_nCrimeRegExp=0;
-		m_pCrimeRegExps=options.getCrimeRegExps(&m_nCrimeRegExp);
-		m_nCrimeIPRegExp = 0;
-		m_pCrimeIPRegExps = options.getCrimeIPRegExps(&m_nCrimeIPRegExp);
+		m_nCrimeRegExpsURL=0;
+		m_pCrimeRegExpsURL=options.getCrimeRegExpsURL(&m_nCrimeRegExpsURL);
+		m_nCrimeRegExpsPayload = 0;
+		m_pCrimeRegExpsPayload = options.getCrimeRegExpsPayload(&m_nCrimeRegExpsPayload);
 #endif	
 		ret=processKeyExchange();
 		if(ret!=E_SUCCESS)
@@ -615,22 +615,20 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 	}
 
 #ifdef LOG_CRIME
-	bool CALastMix::checkCrime(UINT8* payLoad,UINT32 payLen)
+	bool CALastMix::checkCrime(const UINT8* payLoad,UINT32 payLen)
 	{ 
 		//Lots of TODO!!!!
 		//DNS Lookup may block if Host does not exists!!!!!
 		//so we use regexp....
 
-		UINT8 *startOfUrl, *endOfUrl, *hostname, *ip;
-  		struct hostent *hp;
-		UINT32 strLen, counter;
-
+		UINT8 *startOfUrl, *endOfUrl;
+		UINT32 strLen;
 		if(payLen<3)
 		{
 			return false;
 		}
 
-		if (m_nCrimeRegExp > 0)
+		if (m_nCrimeRegExpsURL > 0)
 		{
 			startOfUrl = (UINT8*)memchr(payLoad,32,payLen-1); //search for first space...
 			if(startOfUrl==NULL)
@@ -646,63 +644,28 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 			}
 			strLen = endOfUrl-startOfUrl;
 	
-			for(UINT32 i = 0; i < m_nCrimeRegExp; i++)
+			for(UINT32 i = 0; i < m_nCrimeRegExpsURL; i++)
 			{
-				if(regnexec(&m_pCrimeRegExps[i],(char*)startOfUrl,strLen,0,NULL,0)==0)
+				if(regnexec(&m_pCrimeRegExpsURL[i],(char*)startOfUrl,strLen,0,NULL,0)==0)
 				{
 					return true;
 				}
 			}
 		}
 
-		/*
-		UINT8 crimeBuff[strLen+1];
-		memset(crimeBuff,0,strLen+1);
-		memcpy(crimeBuff,(char*)startOfUrl,strLen);
-		CAMsg::printMsg(LOG_CRIT,"\nCrime URL: %s\n\n",crimeBuff);
-		*/
-		if (m_nCrimeIPRegExp == 0)
-		{
-			// there are no regular expressions for IPs
-			return false;
-		}
-		
- 	 	startOfUrl= (UINT8 *)payLoad;
-  		do 
-		{
-			endOfUrl = (UINT8 *) memchr(startOfUrl, '\r', payLen-1-(startOfUrl - (UINT8 *)payLoad));
-
-    		if (((payLoad + payLen) >  (6 + startOfUrl)) && strncmp((char*)startOfUrl, "Host: ", 6)==0) 
+		if (m_nCrimeRegExpsPayload == 0)
 			{
-      			hostname = (UINT8*) strndup((char*)(startOfUrl+6), endOfUrl-startOfUrl-6);
-  				if (hostname == NULL)
-  				{
-  					continue;
-  				}
-      			hp = gethostbyname((char*)hostname);
-      			counter=0;
-      			while (hp != NULL && hp -> h_addr_list[counter] != NULL) 
-				{
-        			ip = (UINT8*) inet_ntoa( *( struct in_addr*)( hp -> h_addr_list[counter]));
-       				
-					if(ip != NULL)
-					{
-						//CAMsg::printMsg(LOG_CRIT,"\nCrime URL: %s\n",ip);
-						for(UINT32 i = 0; i < m_nCrimeIPRegExp; i++)
-						{
-							if (regnexec(&m_pCrimeIPRegExps[i],(char*)ip ,
-								strlen((char*)ip),0,NULL,0)==0)
-							{
-								return true;
-							}
-						}
-					}
-        			counter++;
-     			}
-    		}
-   			startOfUrl = endOfUrl + 2;
-  		} while ((endOfUrl != NULL) && (startOfUrl < (payLoad + payLen)));
-			
+				// there are no regular expressions for Payload
+				return false;
+			}
+		
+		for(UINT32 i = 0; i < m_nCrimeRegExpsPayload; i++)
+		{
+			if (regnexec(&m_pCrimeRegExpsPayload[i],(const char*)payLoad ,payLen,0,NULL,0)==0)
+			{
+				return true;
+			}
+		}
 		return false;			
 	}
 #endif

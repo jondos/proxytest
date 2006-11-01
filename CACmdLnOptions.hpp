@@ -294,16 +294,16 @@ class CACmdLnOptions
 					return m_bAutoReconnect;
 				}
 #ifdef LOG_CRIME
-			regex_t* getCrimeRegExps(UINT32* len)
+			regex_t* getCrimeRegExpsURL(UINT32* len)
 			{
-				*len=m_nCrimeRegExps;
-				return m_arCrimeRegExps;
+				*len=m_nCrimeRegExpsURL;
+				return m_arCrimeRegExpsURL;
 			}
 			
-			regex_t* getCrimeIPRegExps(UINT32* len)
+			regex_t* getCrimeRegExpsPayload(UINT32* len)
 			{
-				*len=m_nCrimeIPRegExps;
-				return m_arCrimeIPRegExps;
+				*len=m_nCrimeRegExpsPayload;
+				return m_arCrimeRegExpsPayload;
 			}
 #endif
 
@@ -476,10 +476,10 @@ class CACmdLnOptions
 	
 
 #ifdef LOG_CRIME
-			regex_t* m_arCrimeRegExps;
-			UINT32 m_nCrimeRegExps;
-			regex_t* m_arCrimeIPRegExps;
-			UINT32 m_nCrimeIPRegExps;
+			regex_t* m_arCrimeRegExpsURL;
+			UINT32 m_nCrimeRegExpsURL;
+			regex_t* m_arCrimeRegExpsPayload;
+			UINT32 m_nCrimeRegExpsPayload;
 #endif
 #if defined (DELAY_CHANNELS) ||defined(DELAY_USERS)
 		UINT32 m_u32DelayChannelUnlimitTraffic;	
