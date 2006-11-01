@@ -407,7 +407,9 @@ AC_ARG_WITH(xml-lib,
 	]
 )
 XMLLIBFLAGS="-L$xmllibdir -lxerces-c"
-LIBS="$XMLLIBFLAGS $LIBS "
+echo "XMLLIBFLAGS $XMLLIBFLAGS"
+echo "LIBS $LIBS"
+LIBS="$XMLLIBFLAGS $LIBS"
 AC_MSG_CHECKING([for libxerces-c])
 AC_LINK_IFELSE([AC_LANG_PROGRAM([
 #include "util/XercesDefs.hpp"

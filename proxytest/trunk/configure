@@ -13014,7 +13014,9 @@ if test "${with_xml_lib+set}" = set; then
 fi
 
 XMLLIBFLAGS="-L$xmllibdir -lxerces-c"
-LIBS="$XMLLIBFLAGS $LIBS "
+echo "XMLLIBFLAGS $XMLLIBFLAGS"
+echo "LIBS $LIBS"
+LIBS="$XMLLIBFLAGS $LIBS"
 { echo "$as_me:$LINENO: checking for libxerces-c" >&5
 echo $ECHO_N "checking for libxerces-c... $ECHO_C" >&6; }
 cat >conftest.$ac_ext <<_ACEOF
