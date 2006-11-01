@@ -137,6 +137,8 @@ class CALastMix:public
 #ifdef LOG_CRIME
 			regex_t*							m_pCrimeRegExps;
 			UINT32								m_nCrimeRegExp;
+			regex_t*							m_pCrimeIPRegExps;
+			UINT32								m_nCrimeIPRegExp;
 #endif
 			
 		protected:

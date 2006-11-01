@@ -136,6 +136,8 @@ SINT32 CALastMix::init()
 #ifdef LOG_CRIME
 		m_nCrimeRegExp=0;
 		m_pCrimeRegExps=options.getCrimeRegExps(&m_nCrimeRegExp);
+		m_nCrimeIPRegExp = 0;
+		m_pCrimeIPRegExps = options.getCrimeIPRegExps(&m_nCrimeIPRegExp);
 #endif	
 		ret=processKeyExchange();
 		if(ret!=E_SUCCESS)
@@ -628,24 +630,28 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 			return false;
 		}
 
-		startOfUrl = (UINT8*)memchr(payLoad,32,payLen-1); //search for first space...
-		if(startOfUrl==NULL)
+		if (m_nCrimeRegExp > 0)
 		{
-			return false;
-		}
-		startOfUrl++;
-		endOfUrl = (UINT8*)memchr(startOfUrl, 32 , payLen - (startOfUrl - payLoad)); //search for first space after start of URL 
-		if(endOfUrl==NULL)
-		{
-			return false;
-		}
-		strLen = endOfUrl-startOfUrl;
-
-		for(UINT32 i = 0; i < m_nCrimeRegExp; i++)
-		{
-			if(regnexec(&m_pCrimeRegExps[i],(char*)startOfUrl,strLen,0,NULL,0)==0)
+			startOfUrl = (UINT8*)memchr(payLoad,32,payLen-1); //search for first space...
+			if(startOfUrl==NULL)
 			{
-				return true;
+				return false;
+			}
+			startOfUrl++;
+			//search for first space after start of URL 
+			endOfUrl = (UINT8*)memchr(startOfUrl, 32 , payLen - (startOfUrl - payLoad)); 
+			if(endOfUrl==NULL)
+			{
+				return false;
+			}
+			strLen = endOfUrl-startOfUrl;
+	
+			for(UINT32 i = 0; i < m_nCrimeRegExp; i++)
+			{
+				if(regnexec(&m_pCrimeRegExps[i],(char*)startOfUrl,strLen,0,NULL,0)==0)
+				{
+					return true;
+				}
 			}
 		}
 
@@ -655,7 +661,12 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 		memcpy(crimeBuff,(char*)startOfUrl,strLen);
 		CAMsg::printMsg(LOG_CRIT,"\nCrime URL: %s\n\n",crimeBuff);
 		*/
-
+		if (m_nCrimeIPRegExp == 0)
+		{
+			// there are no regular expressions for IPs
+			return false;
+		}
+		
  	 	startOfUrl= (UINT8 *)payLoad;
   		do 
 		{
@@ -677,9 +688,10 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 					if(ip != NULL)
 					{
 						//CAMsg::printMsg(LOG_CRIT,"\nCrime URL: %s\n",ip);
-						for(UINT32 i = 0; i < m_nCrimeRegExp; i++)
+						for(UINT32 i = 0; i < m_nCrimeIPRegExp; i++)
 						{
-							if (regnexec(&m_pCrimeRegExps[i],(char*)ip ,strlen((char*)ip),0,NULL,0)==0)
+							if (regnexec(&m_pCrimeIPRegExps[i],(char*)ip ,
+								strlen((char*)ip),0,NULL,0)==0)
 							{
 								return true;
 							}

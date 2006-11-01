@@ -295,10 +295,16 @@ class CACmdLnOptions
 				}
 #ifdef LOG_CRIME
 			regex_t* getCrimeRegExps(UINT32* len)
-				{
-					*len=m_nCrimeRegExps;
-					return m_arCrimeRegExps;
-				}
+			{
+				*len=m_nCrimeRegExps;
+				return m_arCrimeRegExps;
+			}
+			
+			regex_t* getCrimeIPRegExps(UINT32* len)
+			{
+				*len=m_nCrimeIPRegExps;
+				return m_arCrimeIPRegExps;
+			}
 #endif
 
 #if defined(DELAY_CHANNELS)||defined(DELAY_USERS)
@@ -472,6 +478,8 @@ class CACmdLnOptions
 #ifdef LOG_CRIME
 			regex_t* m_arCrimeRegExps;
 			UINT32 m_nCrimeRegExps;
+			regex_t* m_arCrimeIPRegExps;
+			UINT32 m_nCrimeIPRegExps;
 #endif
 #if defined (DELAY_CHANNELS) ||defined(DELAY_USERS)
 		UINT32 m_u32DelayChannelUnlimitTraffic;	
