@@ -2088,7 +2088,7 @@ SKIP_NEXT_MIX:
 						CAMsg::printMsg(LOG_CRIT,"Could not compile regexp: %s\n",buffRegExp);
 						exit(-1);
 					}
-					CAMsg::printMsg(LOG_DEBUG,"Looking for crime URL RegExp: %s\n",buffRegExp);
+					CAMsg::printMsg(LOG_DEBUG,"Looking for crime IP RegExp: %s\n",buffRegExp);
 
 					m_nCrimeIPRegExps++;
 				}
