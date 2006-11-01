@@ -1,30 +1,30 @@
 /*
   regexec.c - TRE POSIX compatible matching functions (and more).
 
-  Copyright (C) 2001-2003 Ville Laurikari <vl@iki.fi>.
+  Copyright (c) 2001-2006 Ville Laurikari <vl@iki.fi>.
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License version 2 (June
-  1991) as published by the Free Software Foundation.
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
 
-  This program is distributed in the hope that it will be useful,
+  This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
 
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 */
-#include "../StdAfx.h"
-#ifdef LOG_CRIME
-#include "tre-config.h"
-//#ifdef HAVE_CONFIG_H
-//#include <config.h>
-//#endif /* HAVE_CONFIG_H */
 
-/* AIX requires this to be the first thing in the file.  */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif /* HAVE_CONFIG_H */
+
+#ifdef TRE_USE_ALLOCA
+/* AIX requires this to be the first thing in the file.	 */
 #ifndef __GNUC__
 # if HAVE_ALLOCA_H
 #  include <alloca.h>
@@ -38,10 +38,11 @@ char *alloca ();
 #  endif
 # endif
 #endif
+#endif /* TRE_USE_ALLOCA */
 
-//#include <assert.h>
-//#include <stdlib.h>
-//#include <string.h>
+#include <assert.h>
+#include <stdlib.h>
+#include <string.h>
 #ifdef HAVE_WCHAR_H
 #include <wchar.h>
 #endif /* HAVE_WCHAR_H */
@@ -51,19 +52,20 @@ char *alloca ();
 #ifndef TRE_WCHAR
 #include <ctype.h>
 #endif /* !TRE_WCHAR */
-//#ifdef HAVE_MALLOC_H
-//#include <malloc.h>
-//#endif /* HAVE_MALLOC_H */
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif /* HAVE_MALLOC_H */
+#include <limits.h>
 
-#include "regex.h"
 #include "tre-internal.h"
+#include "regex.h"
 #include "xmalloc.h"
 
 
 /* Fills the POSIX.2 regmatch_t array according to the TNFA tag and match
    endpoint values. */
 void
-tre_fill_pmatch(size_t nmatch, regmatch_t pmatch[],
+tre_fill_pmatch(size_t nmatch, regmatch_t pmatch[], int cflags,
 		const tre_tnfa_t *tnfa, int *tags, int match_eo)
 {
   tre_submatch_data_t *submatch_data;
@@ -71,7 +73,7 @@ tre_fill_pmatch(size_t nmatch, regmatch_t pmatch[],
   int *parents;
 
   i = 0;
-  if (match_eo >= 0 && !(tnfa->cflags & REG_NOSUB))
+  if (match_eo >= 0 && !(cflags & REG_NOSUB))
     {
       /* Construct submatch offsets from the tags. */
       DPRINT(("end tag = t%d = %d\n", tnfa->end_tag, match_eo));
@@ -130,9 +132,22 @@ tre_fill_pmatch(size_t nmatch, regmatch_t pmatch[],
 
 
 /*
-  Wrapper functions for POSIX compatible exact regexp matching.
+  Wrapper functions for POSIX compatible regexp matching.
 */
 
+int
+tre_have_backrefs(const regex_t *preg)
+{
+  tre_tnfa_t *tnfa = (tre_tnfa_t *)preg->TRE_REGEX_T_FIELD;
+  return tnfa->have_backrefs;
+}
+
+int
+tre_have_approx(const regex_t *preg)
+{
+  tre_tnfa_t *tnfa = (tre_tnfa_t *)preg->TRE_REGEX_T_FIELD;
+  return tnfa->have_approx;
+}
 
 static int
 tre_match(const tre_tnfa_t *tnfa, const void *string, size_t len,
@@ -141,21 +156,59 @@ tre_match(const tre_tnfa_t *tnfa, const void *string, size_t len,
 {
   reg_errcode_t status;
   int *tags = NULL, eo;
-  if (nmatch == 0)
-    eflags |= REG_NOTAGS;
-  if (tnfa->num_tags > 0 && !(eflags & REG_NOTAGS))
+  if (tnfa->num_tags > 0 && nmatch > 0)
     {
-      tags =(int*) alloca(sizeof(*tags) * tnfa->num_tags);
+#ifdef TRE_USE_ALLOCA
+      tags = alloca(sizeof(*tags) * tnfa->num_tags);
+#else /* !TRE_USE_ALLOCA */
+      tags = (int*)xmalloc(sizeof(*tags) * tnfa->num_tags);
+#endif /* !TRE_USE_ALLOCA */
       if (tags == NULL)
 	return REG_ESPACE;
     }
-  if (tnfa->have_backrefs)
-    status = tre_tnfa_run_backtrack(tnfa, string, len, type, tags, eflags, &eo);
+
+  /* Dispatch to the appropriate matcher. */
+  if (tnfa->have_backrefs || eflags & REG_BACKTRACKING_MATCHER)
+    {
+      /* The regex has back references, use the backtracking matcher. */
+      if (type == STR_USER)
+	{
+	  const tre_str_source *source =(const tre_str_source *) string;
+	  if (source->rewind == NULL || source->compare == NULL)
+	    /* The backtracking matcher requires rewind and compare
+	       capabilities from the input stream. */
+	    return REG_BADPAT;
+	}
+      status = tre_tnfa_run_backtrack(tnfa, string, len, type,
+				      tags, eflags, &eo);
+    }
+#ifdef TRE_APPROX
+  else if (tnfa->have_approx || eflags & REG_APPROX_MATCHER)
+    {
+      /* The regex uses approximate matching, use the approximate matcher. */
+      regamatch_t match;
+      regaparams_t params;
+      regaparams_default(&params);
+      params.max_err = 0;
+      params.max_cost = 0;
+      status = tre_tnfa_run_approx(tnfa, string, len, type, tags,
+				   &match, params, eflags, &eo);
+    }
+#endif /* TRE_APPROX */
   else
-    status = tre_tnfa_run_parallel(tnfa, string, len, type, tags, eflags, &eo);
+    {
+      /* Exact matching, no back references, use the parallel matcher. */
+      status = tre_tnfa_run_parallel(tnfa, string, len, type,
+				     tags, eflags, &eo);
+    }
 
   if (status == REG_OK)
-    tre_fill_pmatch(nmatch, pmatch, tnfa, tags, eo);
+    /* A match was found, so fill the submatch registers. */
+    tre_fill_pmatch(nmatch, pmatch, tnfa->cflags, tnfa, tags, eo);
+#ifndef TRE_USE_ALLOCA
+  if (tags)
+    xfree(tags);
+#endif /* !TRE_USE_ALLOCA */
   return status;
 }
 
@@ -164,14 +217,9 @@ regnexec(const regex_t *preg, const char *str, size_t len,
 	 size_t nmatch, regmatch_t pmatch[], int eflags)
 {
   tre_tnfa_t *tnfa = (tre_tnfa_t *)preg->TRE_REGEX_T_FIELD;
-#ifdef TRE_MULTIBYTE
-  if (MB_CUR_MAX == 1)
-    return tre_match(tnfa, str, len, STR_BYTE, nmatch, pmatch, eflags);
-  else
-    return tre_match(tnfa, str, len, STR_MBS, nmatch, pmatch, eflags);
-#else /* !TRE_MULTIBYTE */
-  return tre_match(tnfa, str, len, STR_BYTE, nmatch, pmatch, eflags);
-#endif /* !TRE_MULTIBYTE */
+  tre_str_type_t type = (TRE_MB_CUR_MAX == 1) ? STR_BYTE : STR_MBS;
+
+  return tre_match(tnfa, str, len, type, nmatch, pmatch, eflags);
 }
 
 int
@@ -201,6 +249,14 @@ regwexec(const regex_t *preg, const wchar_t *str,
 
 #endif /* TRE_WCHAR */
 
+int
+reguexec(const regex_t *preg, const tre_str_source *str,
+	 size_t nmatch, regmatch_t pmatch[], int eflags)
+{
+  tre_tnfa_t *tnfa = (tre_tnfa_t *)preg->TRE_REGEX_T_FIELD;
+  return tre_match(tnfa, str, -1, STR_USER, nmatch, pmatch, eflags);
+}
+
 
 #ifdef TRE_APPROX
 
@@ -215,18 +271,37 @@ tre_match_approx(const tre_tnfa_t *tnfa, const void *string, size_t len,
 {
   reg_errcode_t status;
   int *tags = NULL, eo;
-  if (match->nmatch == 0)
-    eflags |= REG_NOTAGS;
-  if (tnfa->num_tags > 0 && !(eflags & REG_NOTAGS))
+
+  /* If the regexp does not use approximate matching features, the
+     maximum cost is zero, and the approximate matcher isn't forced,
+     use the exact matcher instead. */
+  if (params.max_cost == 0 && !tnfa->have_approx
+      && !(eflags & REG_APPROX_MATCHER))
+    return tre_match(tnfa, string, len, type, match->nmatch, match->pmatch,
+		     eflags);
+
+  /* Back references are not supported by the approximate matcher. */
+  if (tnfa->have_backrefs)
+    return REG_BADPAT;
+
+  if (tnfa->num_tags > 0 && match->nmatch > 0)
     {
+#if TRE_USE_ALLOCA
       tags = alloca(sizeof(*tags) * tnfa->num_tags);
+#else /* !TRE_USE_ALLOCA */
+      tags = xmalloc(sizeof(*tags) * tnfa->num_tags);
+#endif /* !TRE_USE_ALLOCA */
       if (tags == NULL)
 	return REG_ESPACE;
     }
   status = tre_tnfa_run_approx(tnfa, string, len, type, tags,
 			       match, params, eflags, &eo);
   if (status == REG_OK)
-    tre_fill_pmatch(match->nmatch, match->pmatch, tnfa, tags, eo);
+    tre_fill_pmatch(match->nmatch, match->pmatch, tnfa->cflags, tnfa, tags, eo);
+#ifndef TRE_USE_ALLOCA
+  if (tags)
+    xfree(tags);
+#endif /* !TRE_USE_ALLOCA */
   return status;
 }
 
@@ -235,17 +310,9 @@ reganexec(const regex_t *preg, const char *str, size_t len,
 	  regamatch_t *match, regaparams_t params, int eflags)
 {
   tre_tnfa_t *tnfa = (void *)preg->TRE_REGEX_T_FIELD;
-#ifdef TRE_MULTIBYTE
-  if (MB_CUR_MAX == 1)
-    return tre_match_approx(tnfa, str, len, STR_BYTE,
-			    match, params, eflags);
-  else
-    return tre_match_approx(tnfa, str, len, STR_MBS,
-			    match, params, eflags);
-#else /* !TRE_MULTIBYTE */
-  return tre_match_approx(tnfa, str, len, STR_BYTE,
-			  match, params, eflags);
-#endif /* !TRE_MULTIBYTE */
+  tre_str_type_t type = (TRE_MB_CUR_MAX == 1) ? STR_BYTE : STR_MBS;
+
+  return tre_match_approx(tnfa, str, len, type, match, params, eflags);
 }
 
 int
@@ -275,13 +342,20 @@ regawexec(const regex_t *preg, const wchar_t *str,
 
 #endif /* TRE_WCHAR */
 
+void
+regaparams_default(regaparams_t *params)
+{
+  memset(params, 0, sizeof(*params));
+  params->cost_ins = 1;
+  params->cost_del = 1;
+  params->cost_subst = 1;
+  params->max_cost = INT_MAX;
+  params->max_ins = INT_MAX;
+  params->max_del = INT_MAX;
+  params->max_subst = INT_MAX;
+  params->max_err = INT_MAX;
+}
+
 #endif /* TRE_APPROX */
 
-#else
- //we add a dummy function to solve some linking problems...
-int __dummy__tre__dummy()
-	{
-		return 0;
-	}
-#endif //LOG_CRIME
 /* EOF */

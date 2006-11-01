@@ -1,20 +1,21 @@
 /*
   tre-mem.c - TRE memory allocator
 
-  Copyright (C) 2001-2003 Ville Laurikari <vl@iki.fi>
+  Copyright (c) 2001-2006 Ville Laurikari <vl@iki.fi>
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License version 2 (June
-  1991) as published by the Free Software Foundation.
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
 
-  This program is distributed in the hope that it will be useful,
+  This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
 
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 */
 
@@ -24,15 +25,10 @@
   cannot be freed individually, only all at once.  There can be multiple
   allocators, though.
 */
-#include "../StdAfx.h"
-#ifdef LOG_CRIME
-#include "tre-config.h"
-//#ifdef HAVE_CONFIG_H
-//#include <config.h>
-//#endif /* HAVE_CONFIG_H */
 
-//#include <stdlib.h>
-//#include <string.h>
+
+#include <stdlib.h>
+#include <string.h>
 
 #include "tre-internal.h"
 #include "tre-mem.h"
@@ -46,7 +42,7 @@ tre_mem_new_impl(int provided, void *provided_block)
   tre_mem_t mem;
   if (provided)
     {
-      mem =(tre_mem_t) provided_block;
+      mem = (tre_mem_t)provided_block;
       memset(mem, 0, sizeof(*mem));
     }
   else
@@ -78,7 +74,7 @@ tre_mem_destroy(tre_mem_t mem)
    allocated block or NULL if an underlying malloc() failed. */
 void *
 tre_mem_alloc_impl(tre_mem_t mem, int provided, void *provided_block,
-		   size_t size)
+		   int zero, size_t size)
 {
   void *ptr;
 
@@ -128,7 +124,7 @@ tre_mem_alloc_impl(tre_mem_t mem, int provided, void *provided_block,
 	    block_size = TRE_MEM_BLOCK_SIZE;
 	  DPRINT(("tre_mem_alloc: allocating new %d byte block\n",
 		  block_size));
-	  l = (tre_list_t*)xmalloc(sizeof(*l));
+	  l =(tre_list_t*) xmalloc(sizeof(*l));
 	  if (l == NULL)
 	    {
 	      mem->failed = 1;
@@ -151,17 +147,20 @@ tre_mem_alloc_impl(tre_mem_t mem, int provided, void *provided_block,
 	  mem->n = block_size;
 	}
     }
-  else
-    {
-      /* Make sure the next pointer will be aligned. */
-      size += ALIGN(mem->ptr + size, long);
-    }
+
+  /* Make sure the next pointer will be aligned. */
+  size += ALIGN(mem->ptr + size, long);
 
   /* Allocate from current block. */
   ptr = mem->ptr;
   mem->ptr += size;
   mem->n -= size;
+
+  /* Set to zero if needed. */
+  if (zero)
+    memset(ptr, 0, size);
+
   return ptr;
 }
-#endif //LOG_CRIME
+
 /* EOF */

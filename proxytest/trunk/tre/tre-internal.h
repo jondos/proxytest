@@ -1,31 +1,36 @@
 /*
   tre-internal.h - TRE internal definitions
 
-  Copyright (C) 2001-2003 Ville Laurikari <vl@iki.fi>.
+  Copyright (c) 2001-2006 Ville Laurikari <vl@iki.fi>.
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License version 2 (June
-  1991) as published by the Free Software Foundation.
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
 
-  This program is distributed in the hope that it will be useful,
+  This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
 
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 */
+
+#ifndef TRE_INTERNAL_H
+#define TRE_INTERNAL_H 1
 
 #ifdef HAVE_WCHAR_H
 #include <wchar.h>
 #endif /* HAVE_WCHAR_H */
+
 #ifdef HAVE_WCTYPE_H
-
 #include <wctype.h>
-#endif /* HAVE_WCTYPE_H */
+#endif /* !HAVE_WCTYPE_H */
 
+#include <ctype.h>
 #include "regex.h"
 
 #ifdef TRE_DEBUG
@@ -35,11 +40,15 @@
 #define DPRINT(msg) do { } while(0)
 #endif /* !TRE_DEBUG */
 
-#if defined HAVE_MBRTOWC
+#define elementsof(x)	( sizeof(x) / sizeof(x[0]) )
+
+#ifdef HAVE_MBRTOWC
 #define tre_mbrtowc(pwc, s, n, ps) (mbrtowc((pwc), (s), (n), (ps)))
-#elif defined HAVE_MBTOWC
+#else /* !HAVE_MBRTOWC */
+#ifdef HAVE_MBTOWC
 #define tre_mbrtowc(pwc, s, n, ps) (mbtowc((pwc), (s), (n)))
-#endif
+#endif /* HAVE_MBTOWC */
+#endif /* !HAVE_MBRTOWC */
 
 #ifdef TRE_MULTIBYTE
 #ifdef HAVE_MBSTATE_T
@@ -49,45 +58,84 @@
 
 /* Define the character types and functions. */
 #ifdef TRE_WCHAR
+
 /* Wide characters. */
-typedef wchar_t tre_char_t;
 typedef wint_t tre_cint_t;
-typedef wctype_t tre_ctype_t;
 #define TRE_CHAR_MAX WCHAR_MAX
+
 #ifdef TRE_MULTIBYTE
 #define TRE_MB_CUR_MAX MB_CUR_MAX
 #else /* !TRE_MULTIBYTE */
 #define TRE_MB_CUR_MAX 1
 #endif /* !TRE_MULTIBYTE */
-#define tre_isctype iswctype
+
 #define tre_isalnum iswalnum
+#define tre_isalpha iswalpha
+#ifdef HAVE_ISWBLANK
+#define tre_isblank iswblank
+#endif /* HAVE_ISWBLANK */
+#define tre_iscntrl iswcntrl
 #define tre_isdigit iswdigit
+#define tre_isgraph iswgraph
 #define tre_islower iswlower
+#define tre_isprint iswprint
+#define tre_ispunct iswpunct
+#define tre_isspace iswspace
 #define tre_isupper iswupper
+#define tre_isxdigit iswxdigit
+
 #define tre_tolower towlower
 #define tre_toupper towupper
-#define tre_ctype   wctype
 #define tre_strlen  wcslen
+
 #else /* !TRE_WCHAR */
+
 /* 8 bit characters. */
-typedef unsigned char tre_char_t;
 typedef short tre_cint_t;
-typedef int (*tre_ctype_t)(tre_cint_t);
 #define TRE_CHAR_MAX 255
 #define TRE_MB_CUR_MAX 1
-#define tre_isctype(c, type) ( (type)(c) )
-int tre_isalnum(tre_cint_t c);
-int tre_isdigit(tre_cint_t c);
-int tre_islower(tre_cint_t c);
-int tre_isupper(tre_cint_t c);
+
+#define tre_isalnum isalnum
+#define tre_isalpha isalpha
+#ifdef HAVE_ISASCII
+#define tre_isascii isascii
+#endif /* HAVE_ISASCII */
+#ifdef HAVE_ISBLANK
+#define tre_isblank isblank
+#endif /* HAVE_ISBLANK */
+#define tre_iscntrl iscntrl
+#define tre_isdigit isdigit
+#define tre_isgraph isgraph
+#define tre_islower islower
+#define tre_isprint isprint
+#define tre_ispunct ispunct
+#define tre_isspace isspace
+#define tre_isupper isupper
+#define tre_isxdigit isxdigit
+
 #define tre_tolower(c) (tre_cint_t)(tolower(c))
 #define tre_toupper(c) (tre_cint_t)(toupper(c))
-tre_ctype_t tre_ctype(const char *name);
-#define tre_strlen  strlen
+#define tre_strlen(s)  (strlen((const char*)s))
+
 #endif /* !TRE_WCHAR */
 
-#define REG_NOTAGS (REG_NOTEOL << 1)
-typedef enum { STR_WIDE, STR_BYTE, STR_MBS } tre_str_type_t;
+#if defined(TRE_WCHAR) && defined(HAVE_ISWCTYPE) && defined(HAVE_WCTYPE)
+#define TRE_USE_SYSTEM_WCTYPE 1
+#endif
+
+#ifdef TRE_USE_SYSTEM_WCTYPE
+/* Use system provided iswctype() and wctype(). */
+typedef wctype_t tre_ctype_t;
+#define tre_isctype iswctype
+#define tre_ctype   wctype
+#else /* !TRE_USE_SYSTEM_WCTYPE */
+/* Define our own versions of iswctype() and wctype(). */
+typedef int (*tre_ctype_t)(tre_cint_t);
+#define tre_isctype(c, type) ( (type)(c) )
+tre_ctype_t tre_ctype(const char *name);
+#endif /* !TRE_USE_SYSTEM_WCTYPE */
+
+typedef enum { STR_WIDE, STR_BYTE, STR_MBS, STR_USER } tre_str_type_t;
 
 /* Returns number of bytes to add to (char *)ptr to make it
    properly aligned for the type. */
@@ -101,39 +149,54 @@ typedef enum { STR_WIDE, STR_BYTE, STR_MBS } tre_str_type_t;
 #define MAX(a, b) (((a) >= (b)) ? (a) : (b))
 #define MIN(a, b) (((a) <= (b)) ? (a) : (b))
 
-/* TNFA transition definition.  Each transition has a range of accepted
-   characters, pointer to the next state and the ID number of that state,
-   a -1 -terminated array of tags, assertion bitmap, and character class
-   assertions.  A TNFA state is an array of transitions, the terminator is
-   a transition with state == NULL: */
+/* Define STRF to the correct printf formatter for strings. */
+#ifdef TRE_WCHAR
+#define STRF "ls"
+#else /* !TRE_WCHAR */
+#define STRF "s"
+#endif /* !TRE_WCHAR */
+
+/* TNFA transition type. A TNFA state is an array of transitions,
+   the terminator is a transition with NULL `state'. */
 typedef struct tnfa_transition tre_tnfa_transition_t;
 
 struct tnfa_transition {
+  /* Range of accepted characters. */
   tre_cint_t code_min;
   tre_cint_t code_max;
+  /* Pointer to the destination state. */
   tre_tnfa_transition_t *state;
+  /* ID number of the destination state. */
   int state_id;
+  /* -1 terminated array of tags (or NULL). */
   int *tags;
+  /* Matching parameters settings (or NULL). */
+  int *params;
+  /* Assertion bitmap. */
   int assertions;
+  /* Assertion parameters. */
   union {
-    tre_ctype_t o_class;
+    /* Character class assertion. */
+    tre_ctype_t tre_class;
+    /* Back reference assertion. */
     int backref;
   } u;
+  /* Negative character class assertions. */
   tre_ctype_t *neg_classes;
 };
 
 
 /* Assertions. */
-#define ASSERT_AT_BOL             1   /* Beginning of line. */
-#define ASSERT_AT_EOL             2   /* End of line. */
-#define ASSERT_CHAR_CLASS         4   /* Character class in `class'. */
-#define ASSERT_CHAR_CLASS_NEG     8   /* Character classes in `neg_classes'. */
-#define ASSERT_AT_BOW            16   /* Beginning of word. */
-#define ASSERT_AT_EOW            32   /* End of word. */
-#define ASSERT_AT_WB             64   /* Word boundary. */
-#define ASSERT_AT_WB_NEG        128   /* Not a word boundary. */
-#define ASSERT_BACKREF          256   /* A back reference in `backref'. */
-#define ASSERT_LAST             256
+#define ASSERT_AT_BOL		  1   /* Beginning of line. */
+#define ASSERT_AT_EOL		  2   /* End of line. */
+#define ASSERT_CHAR_CLASS	  4   /* Character class in `class'. */
+#define ASSERT_CHAR_CLASS_NEG	  8   /* Character classes in `neg_classes'. */
+#define ASSERT_AT_BOW		 16   /* Beginning of word. */
+#define ASSERT_AT_EOW		 32   /* End of word. */
+#define ASSERT_AT_WB		 64   /* Word boundary. */
+#define ASSERT_AT_WB_NEG	128   /* Not a word boundary. */
+#define ASSERT_BACKREF		256   /* A back reference in `backref'. */
+#define ASSERT_LAST		256
 
 /* Tag directions. */
 typedef enum {
@@ -141,6 +204,25 @@ typedef enum {
   TRE_TAG_MAXIMIZE = 1
 } tre_tag_direction_t;
 
+/* Parameters that can be changed dynamically while matching. */
+typedef enum {
+  TRE_PARAM_COST_INS	    = 0,
+  TRE_PARAM_COST_DEL	    = 1,
+  TRE_PARAM_COST_SUBST	    = 2,
+  TRE_PARAM_COST_MAX	    = 3,
+  TRE_PARAM_MAX_INS	    = 4,
+  TRE_PARAM_MAX_DEL	    = 5,
+  TRE_PARAM_MAX_SUBST	    = 6,
+  TRE_PARAM_MAX_ERR	    = 7,
+  TRE_PARAM_DEPTH	    = 8,
+  TRE_PARAM_LAST	    = 9
+} tre_param_t;
+
+/* Unset matching parameter */
+#define TRE_PARAM_UNSET -1
+
+/* Signifies the default matching parameter value. */
+#define TRE_PARAM_DEFAULT -2
 
 /* Instructions to compute submatch register values from tag values
    after a successful match.  */
@@ -170,17 +252,24 @@ struct tnfa {
   unsigned int num_submatches;
   tre_tag_direction_t *tag_directions;
   int *minimal_tags;
-  int *marker_offs;
   int num_tags;
   int num_minimals;
   int end_tag;
   int num_states;
   int cflags;
   int have_backrefs;
+  int have_approx;
+  int params_depth;
 };
 
+int
+tre_compile(regex_t *preg, const tre_char_t *regex, size_t n, int cflags);
+
 void
-tre_fill_pmatch(size_t nmatch, regmatch_t pmatch[],
+tre_free(regex_t *preg);
+
+void
+tre_fill_pmatch(size_t nmatch, regmatch_t pmatch[], int cflags,
 		const tre_tnfa_t *tnfa, int *tags, int match_eo);
 
 reg_errcode_t
@@ -205,3 +294,7 @@ tre_tnfa_run_approx(const tre_tnfa_t *tnfa, const void *string, int len,
 		    regamatch_t *match, regaparams_t params,
 		    int eflags, int *match_end_ofs);
 #endif /* TRE_APPROX */
+
+#endif /* TRE_INTERNAL_H */
+
+/* EOF */
