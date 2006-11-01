@@ -425,7 +425,7 @@ int main(int argc, const char* argv[])
 			}
 #endif
 #ifdef LOG_CRIME
-			testTre();
+//			testTre();
 #endif
 
 #ifdef _DEBUG
