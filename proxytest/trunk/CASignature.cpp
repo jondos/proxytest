@@ -136,7 +136,7 @@ SINT32 CASignature::setSignKey(const UINT8* buff,UINT32 len,UINT32 type,const ch
 					return parseSignKeyXML(buff,len);
 
 				case SIGKEY_PKCS12:
-					#if OPENSSL_VERSION_NUMBER	> 0x009070AfL
+					#if OPENSSL_VERSION_NUMBER	> 0x009070CfL
 						PKCS12* tmpPKCS12=d2i_PKCS12(NULL,(const UINT8**)&buff,len);	
 					#else
 						PKCS12* tmpPKCS12=d2i_PKCS12(NULL,(UINT8**)&buff,len);	
