@@ -113,7 +113,7 @@ class CALastMix:public
 
 			SINT32 setTargets();
 #ifdef LOG_CRIME
-			bool	 checkCrime(UINT8* payLoad,UINT32 payLen);
+			bool	 checkCrime(const UINT8* payLoad,UINT32 payLen);
 #endif
 
 		protected:
@@ -135,10 +135,10 @@ class CALastMix:public
       #endif
 
 #ifdef LOG_CRIME
-			regex_t*							m_pCrimeRegExps;
-			UINT32								m_nCrimeRegExp;
-			regex_t*							m_pCrimeIPRegExps;
-			UINT32								m_nCrimeIPRegExp;
+			regex_t*							m_pCrimeRegExpsURL;
+			UINT32								m_nCrimeRegExpsURL;
+			regex_t*							m_pCrimeRegExpsPayload;
+			UINT32								m_nCrimeRegExpsPayload;
 #endif
 			
 		protected:
