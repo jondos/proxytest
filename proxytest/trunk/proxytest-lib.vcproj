@@ -3750,6 +3750,18 @@
 					>
 				</File>
 				<File
+					RelativePath=".\tre\tre-parse.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath=".\tre\tre-stack.cpp"
 					>
 					<FileConfiguration
