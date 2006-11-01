@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.05.34"
+#define MIX_VERSION "00.05.35"
 
 #include "doxygen.h"
 
@@ -107,7 +107,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef DELAY_CHANNELS_LATENCY
 	#define DELAY_CHANNEL_LATENCY 10000 //min latency defaults to 10 second
 #endif
-#define LOG_CRIME
+//#define LOG_CRIME
 //#define PAYMENT //to enable payment support, now use configure --enable-payment..
 //#define NO_PARKING //to disable control flow
 //#define NO_LOOPACCEPTUSER //to disable user accept thread for First Mix
