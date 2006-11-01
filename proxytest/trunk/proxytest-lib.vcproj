@@ -3566,6 +3566,18 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath=".\tre\tre-ast.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath=".\tre\tre-compile.cpp"
 					>
 					<FileConfiguration

@@ -32,7 +32,7 @@ tre_ast_new_node(tre_mem_t mem, tre_ast_type_t type, size_t size)
 {
   tre_ast_node_t *node;
 
-  node = tre_mem_calloc(mem, sizeof(*node));
+  node =(tre_ast_node_t*) tre_mem_calloc(mem, sizeof(*node));
   if (!node)
     return NULL;
   node->obj = tre_mem_calloc(mem, size);
@@ -54,7 +54,7 @@ tre_ast_new_literal(tre_mem_t mem, int code_min, int code_max, int position)
   node = tre_ast_new_node(mem, LITERAL, sizeof(tre_literal_t));
   if (!node)
     return NULL;
-  lit = node->obj;
+  lit = (tre_literal_t*)node->obj;
   lit->code_min = code_min;
   lit->code_max = code_max;
   lit->position = position;
@@ -72,7 +72,7 @@ tre_ast_new_iter(tre_mem_t mem, tre_ast_node_t *arg, int min, int max,
   node = tre_ast_new_node(mem, ITERATION, sizeof(tre_iteration_t));
   if (!node)
     return NULL;
-  iter = node->obj;
+  iter =(tre_iteration_t*) node->obj;
   iter->arg = arg;
   iter->min = min;
   iter->max = max;
