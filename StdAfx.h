@@ -220,6 +220,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define atoll _atoi64
 		#define getpid _getpid
 		#define HAVE_ATOLL
+		#define _CRT_SECURE_NO_DEPRECATE
 #else
 	//__linux is not defined on power pc so we define our own __linux if __linux__ is defined
 	#if defined(__linux__) && !defined(__linux)

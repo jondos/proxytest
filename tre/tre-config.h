@@ -121,8 +121,3 @@
    if it is not supported. */
 #define inline __inline
 
-/* Avoid silly warnings about "insecure" functions. */
-#define _CRT_SECURE_NO_DEPRECATE 1
-
-
-
