@@ -300,7 +300,10 @@ SINT32 CAMsg::openLog(UINT32 type)
 
 SINT32 CAMsg::closeEncryptedLog()
 	{
-		close(pMsg->m_hFileEncrypted);
+		if(pMsg->m_hFileEncrypted>=0)
+			{
+				close(pMsg->m_hFileEncrypted);
+			}
 		delete pMsg->m_pCipher;
 		pMsg->m_pCipher=NULL;
 		pMsg->m_hFileEncrypted=-1;
