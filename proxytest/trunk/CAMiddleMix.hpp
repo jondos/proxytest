@@ -49,6 +49,9 @@ class CAMiddleMix:public
 					m_pMiddleMixChannelList=NULL;
 					m_pMuxOut=NULL;m_pMuxIn=NULL;m_pRSA=NULL;m_pSignature=NULL;
 					m_pInfoService=NULL;
+#ifdef DYNAMIC_MIX
+					m_bBreakNeeded = false;
+#endif
 				}
 			virtual ~CAMiddleMix(){clean();};
 			tMixType getType() const
@@ -61,6 +64,10 @@ class CAMiddleMix:public
 			SINT32 init();
 			SINT32 initOnce();
 			SINT32 clean();
+			SINT32 connectToNextMix(CASocketAddr* a_pAddrNext);
+#ifdef DYNAMIC_MIX
+			bool m_bBreakNeeded;
+#endif
 			
     /**
     * This method is not applicable to middle mixes; it does nothing

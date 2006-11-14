@@ -84,6 +84,10 @@ SINT32 CAFirstMix::initOnce()
 
 SINT32 CAFirstMix::init()
 	{
+#ifdef DYNAMIC_MIX
+		m_bBreakNeeded = m_bReconfigured;
+#endif
+
 		CAMsg::printMsg(LOG_DEBUG,"Starting FirstMix Init\n");
 		UINT8 buff[255];
 		m_nMixedPackets=0; //reset to zero after each restart (at the moment neccessary for infoservice)
@@ -166,13 +170,11 @@ SINT32 CAFirstMix::init()
 		CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET SendBuffSize: %i\n",((CASocket*)(*m_pMuxOut))->getSendBuff());
 		//CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET SendLowWatSize: %i\n",((CASocket*)(*m_pMuxOut))->getSendLowWat());
 
-		pAddrNext->toString(buff,255);
-		CAMsg::printMsg(LOG_INFO,"Try to connect to next Mix on %s ...\n",buff);
-
-		if(m_pMuxOut->connect(*pAddrNext,10,10)!=E_SUCCESS)
+		/** Connect to the next mix */
+		if(connectToNextMix(pAddrNext) != E_SUCCESS)
 			{
 				delete pAddrNext;
-				CAMsg::printMsg(LOG_CRIT,"Cannot connect to next Mix!\n");
+			CAMsg::printMsg(LOG_DEBUG, "CAFirstMix::init - Unable to connect to next mix\n");
 				return E_UNKNOWN;
 			}
 		delete pAddrNext;
@@ -242,6 +244,44 @@ SINT32 CAFirstMix::init()
 #endif
 		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix init() succeded\n");
 		return E_SUCCESS;
+}
+
+SINT32 CAFirstMix::connectToNextMix(CASocketAddr* a_pAddrNext)
+{
+	UINT8 buff[255];
+	a_pAddrNext->toString(buff,255);
+	CAMsg::printMsg(LOG_INFO,"Try to connect to next Mix on %s ...\n",buff);
+	SINT32 err = E_UNKNOWN;
+	for(UINT32 i=0; i < 100; i++)
+	{
+#ifdef DYNAMIC_MIX
+		/** If someone reconfigured the mix, we need to break the loop as the next mix might have changed */
+		if(m_bBreakNeeded != m_bReconfigured)
+		{
+			CAMsg::printMsg(LOG_DEBUG, "CAFirstMix::connectToNextMix - Broken the connect loop!\n");
+			break;
+		}
+#endif
+		err = m_pMuxOut->connect(*a_pAddrNext);
+		if(err != E_SUCCESS)
+		{
+			err=GET_NET_ERROR;
+#ifdef _DEBUG
+		 	CAMsg::printMsg(LOG_DEBUG,"Con-Error: %i\n",err);
+#endif
+			if(err!=ERR_INTERN_TIMEDOUT&&err!=ERR_INTERN_CONNREFUSED)
+				break;
+#ifdef _DEBUG
+			CAMsg::printMsg(LOG_DEBUG,"Cannot connect... retrying\n");
+#endif				
+			sSleep(10);
+		}
+		else
+		{
+			break;
+		}
+	}
+	return err;
 }
 
 /*
@@ -891,7 +931,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		((CASocket*)pNewUser)->setNonBlocking(true);
 		CAQueue* tmpQueue=new CAQueue(sizeof(tQueueEntry));
 		fmHashTableEntry* pHashEntry=m_pChannelList->add(pNewUser,peerIP,tmpQueue);
-		if(pHashEntry==NULL)// adding user connection to mix->JAP channel list (stefan: sollte das nicht connection list sein? --> es handelt sich um eine Datenstruktu fŸr Connections/Channels ).
+		if(pHashEntry==NULL)// adding user connection to mix->JAP channel list (stefan: sollte das nicht connection list sein? --> es handelt sich um eine Datenstruktu fr Connections/Channels ).
 			{
 				m_pIPList->removeIP(peerIP);
 				delete tmpQueue;

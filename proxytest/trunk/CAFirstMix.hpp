@@ -93,6 +93,9 @@ public:
 					m_threadLogLoop=NULL;
 #endif
 					m_arMixParameters=NULL;
+#ifdef DYNAMIC_MIX
+					m_bBreakNeeded = false;
+#endif
 				}
 
     virtual ~CAFirstMix()
@@ -107,6 +110,11 @@ public:
 				return CAMix::FIRST_MIX;
 			}
 
+#ifdef DYNAMIC_MIX
+private:
+			bool m_bBreakNeeded;
+#endif
+			SINT32 connectToNextMix(CASocketAddr* a_pAddrNext);
 protected:
 			virtual SINT32 loop()=0;
 			SINT32 init();

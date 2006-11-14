@@ -65,6 +65,10 @@ static THREAD_RETURN InfoLoop(void *p)
 		UINT32 lastMixInfoUpdate;
 		UINT32 nextUpdate;
 		UINT32 temp;
+#ifdef DYNAMIC_MIX		
+		UINT32 loops = 4;
+		UINT32 interval = 0;
+#endif
 		
 		lastCascadeUpdate=lastMixInfoUpdate=lastStatusUpdate=time(NULL); 
 		// tell the algorithm it is time to update
@@ -74,6 +78,15 @@ static THREAD_RETURN InfoLoop(void *p)
 		
     while(pInfoService->isRunning())
 		{
+#ifdef DYNAMIC_MIX		
+			/** Spliting the wait time into parts allows faster reconfiguration of dynamic mixes */
+			if(loops < 4)
+			{
+				sSleep(interval);
+				loops++;
+				continue;
+			}
+#endif
 			currentTime=time(NULL);
 			if (currentTime >= (lastStatusUpdate + CAInfoService::SEND_STATUS_INFO_WAIT))
 			{
@@ -150,12 +163,57 @@ static THREAD_RETURN InfoLoop(void *p)
 				{ 
 					nextUpdate = 60;
 				}
+#ifdef DYNAMIC_MIX
+			interval = nextUpdate / 4;
+			CAMsg::printMsg(LOG_DEBUG,"InfoService: Next update in %i seconds...interval %i\n", nextUpdate, interval);
+			loops = 0;
+#else
 			CAMsg::printMsg(LOG_DEBUG,"InfoService: Next update in %i seconds...\n", nextUpdate);
 			sSleep(nextUpdate);
+#endif
 		}
 		THREAD_RETURN_SUCCESS;
 	}
 #ifdef DYNAMIC_MIX
+
+bool CAInfoService::newCascadeAvailable()
+{
+	CASocket socket;
+	CASocketAddrINet *address = NULL;
+	CAHttpClient httpClient;
+	bool ret = false;
+
+	UINT32 status, contentLength;
+	UINT8 buff[255];
+	UINT8 bufMixId[60];
+	UINT32 mixIdLen = 60;
+	options.getMixId( bufMixId, mixIdLen );
+	sprintf((char*)buff, "/newcascadeinformationavailable/%s",bufMixId ); 
+	if( options.getRandomInfoService(address) != E_SUCCESS)
+	{
+		CAMsg::printMsg( LOG_ERR, "Unable to get a random InfoService - This will cause problems! Check your configuration!\n");
+		return false;
+	}
+	if(socket.connect(*address)!=E_SUCCESS)
+	{
+		goto EXIT;
+	}
+	//Send request
+	httpClient.setSocket(&socket);
+	httpClient.sendGetRequest(buff);
+	httpClient.parseHTTPHeader(&contentLength, &status);
+	if(status!=200)
+	{
+		socket.close();
+		ret = false;
+		goto EXIT;
+	}
+	ret = true;
+EXIT:
+	delete address;
+	return ret;	
+}
+
 /**
   * LERNGRUPPE
   * Asks a random InfoService if there exist new cascade information for this mix.
@@ -167,39 +225,12 @@ SINT32 CAInfoService::dynamicCascadeConfiguration()
 {
 	SINT32 ret = E_UNKNOWN;
 	CADynamicCascadeConfigurator *configurator = NULL;
+	
+	if(!newCascadeAvailable())
+		return E_SUCCESS;
 
 	/** @todo maybe use a mutex here so that no second dynamicCascadeConfiguration can begin */
-	if(m_bReconfig) return E_SUCCESS;
-	CASocket socket;
-	CASocketAddrINet *address;
-	CAHttpClient httpClient;
-
-	UINT32 status, contentLength;
-	UINT8 buff[255];
-	UINT8 bufMixId[60];
-	UINT32 mixIdLen = 60;
-	options.getMixId( bufMixId, mixIdLen );
-	sprintf((char*)buff, "/newcascadeinformationavailable/%s",bufMixId ); 
-	if( options.getRandomInfoService(address) != E_SUCCESS)
-	{
-		CAMsg::printMsg( LOG_ERR, "Unable to get a random InfoService - This will cause problems! Check your configuration!\n");
-		return E_UNKNOWN;
-	}
-	if(socket.connect(*address)!=E_SUCCESS)
-	{
-		ret = E_UNKNOWN;
-		goto EXIT;
-	}
-	//Send request
-	httpClient.setSocket(&socket);
-	httpClient.sendGetRequest(buff);
-	httpClient.parseHTTPHeader(&contentLength, &status);
-	if(status!=200)
-	{
-		socket.close();
-		ret = E_SUCCESS;
-		goto EXIT;
-	}
+	if(m_bReconfig) return E_SUCCESS;		
 	CAMsg::printMsg( LOG_DEBUG, "Starting dynamic reconfiguration...\n");
 	m_bReconfig = true;
 		
@@ -217,8 +248,6 @@ SINT32 CAInfoService::dynamicCascadeConfiguration()
 	if(configurator != NULL)
 		delete configurator;
 	
-EXIT:
-	delete address;
 	return ret;
 }
 #endif

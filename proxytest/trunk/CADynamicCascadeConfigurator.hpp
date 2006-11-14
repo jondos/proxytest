@@ -30,8 +30,8 @@ typedef struct _proposal_t PROPOSALLIST;
 
 
 #define MIN_MAJORITY_QUOTE(x) (UINT32)((2*x)/3)+1
-
 #define MAX_CONTENT_LENGTH 0x00FFFF
+
 class CADynamicCascadeConfigurator : CAInfoServiceAware
 {
 

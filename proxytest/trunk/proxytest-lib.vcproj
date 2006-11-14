@@ -1231,6 +1231,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\CADynamicCascadeConfigurator.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\CADynaNetworking.cpp"
 				>
 			</File>
@@ -1450,6 +1454,10 @@
 						BrowseInformation="1"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\CAInfoServiceAware.cpp"
+				>
 			</File>
 			<File
 				RelativePath="CAIPList.cpp"

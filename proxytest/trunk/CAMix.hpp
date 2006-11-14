@@ -103,7 +103,8 @@ class CAMix
 #ifdef DYNAMIC_MIX
 			virtual void stopCascade() =0;
 			bool m_bLoop;
-			bool m_bLooping;
+			bool m_bCascadeEstablished;
+			bool m_bReconfigured;
 #endif
 			bool m_bReconfiguring;
 			virtual SINT32 clean()=0;
