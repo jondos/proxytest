@@ -320,6 +320,10 @@ SINT32 CAMiddleMix::processKeyExchange()
 
 SINT32 CAMiddleMix::init()
 	{		
+#ifdef DYNAMIC_MIX
+		m_bBreakNeeded = m_bReconfigured;
+#endif
+
 		CAMsg::printMsg(LOG_INFO,"Creating Key...\n");
 		m_pRSA=new CAASymCipher();
 		if(m_pRSA->generateKeyPair(1024)!=E_SUCCESS)
@@ -357,22 +361,6 @@ SINT32 CAMiddleMix::init()
 		((CASocket*)*m_pMuxOut)->setRecvBuff(50*MIXPACKET_SIZE);
 		((CASocket*)*m_pMuxOut)->setSendBuff(50*MIXPACKET_SIZE);
 
-#define RETRIES 100
-#define RETRYTIME 30
-		CAMsg::printMsg(LOG_INFO,"Init: Try to connect to next Mix...\n");
-		if(m_pMuxOut->connect(*pAddrNext,RETRIES,RETRYTIME)!=E_SUCCESS)
-			{
-				CAMsg::printMsg(LOG_CRIT,"Cannot connect to next Mix -- Exiting!\n");
-				return E_UNKNOWN;
-			}
-//		mSocketGroup.add(muxOut);
-		CAMsg::printMsg(LOG_INFO," connected!\n");
-		if(((CASocket*)*m_pMuxOut)->setKeepAlive((UINT32)1800)!=E_SUCCESS)
-			{
-				CAMsg::printMsg(LOG_INFO,"Socket option TCP-KEEP-ALIVE returned an error - so not set!\n");
-				if(((CASocket*)*m_pMuxOut)->setKeepAlive(true)!=E_SUCCESS)
-					CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
-			}
 		
     CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...\n");    
 		CAListenerInterface* pListener=NULL;
@@ -395,11 +383,13 @@ SINT32 CAMiddleMix::init()
 		pAddr=pListener->getAddr();
 		delete pListener;
 		m_pMuxIn=new CAMuxSocket();
+#ifdef DYNAMIC_MIX
 		// LERNGRUPPE Do not block if we are currently reconfiguring
-		if(/*!m_bLoop ||*/ m_bReconfiguring)
+		if(m_bBreakNeeded != m_bReconfigured)
 		{
 			return E_UNKNOWN;
 		}
+#endif
 		SINT32 ret=m_pMuxIn->accept(*pAddr);
 		delete pAddr;
 		if(ret!=E_SUCCESS)
@@ -417,6 +407,24 @@ SINT32 CAMiddleMix::init()
 					CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
 			}
 		
+		/** Connect to next mix */
+		if(connectToNextMix(pAddrNext) != E_SUCCESS)
+		{
+			delete pAddrNext;
+			CAMsg::printMsg(LOG_DEBUG, "CAMiddleMix::init - Unable to connect to next mix\n");
+			return E_UNKNOWN;
+		}
+		delete pAddrNext;
+
+//		mSocketGroup.add(muxOut);
+		CAMsg::printMsg(LOG_INFO," connected!\n");
+		if(((CASocket*)*m_pMuxOut)->setKeepAlive((UINT32)1800)!=E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_INFO,"Socket option TCP-KEEP-ALIVE returned an error - so not set!\n");
+				if(((CASocket*)*m_pMuxOut)->setKeepAlive(true)!=E_SUCCESS)
+					CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
+			}
+
     if((ret = processKeyExchange())!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Error in proccessKeyExchange()!\n");
@@ -529,6 +537,45 @@ ERR:
 		CAMsg::printMsg(LOG_CRIT,"loopDownStream -- Now Exiting!\n");
 		THREAD_RETURN_SUCCESS;		
 	}
+
+SINT32 CAMiddleMix::connectToNextMix(CASocketAddr* a_pAddrNext)
+{
+#define RETRIES 100
+#define RETRYTIME 30
+		CAMsg::printMsg(LOG_INFO,"Init: Try to connect to next Mix...\n");
+		UINT32 i = 0;
+		SINT32 err = E_UNKNOWN;
+		for(i=0; i < RETRIES; i++)
+		{
+#ifdef DYNAMIC_MIX
+			/** If someone reconfigured the mix, we need to break the loop as ne next mix might have changed */
+			if(m_bBreakNeeded != m_bReconfigured)
+			{
+				CAMsg::printMsg(LOG_DEBUG, "CAMiddleMix::connectToNextMix - Broken the connect loop!\n");
+				break;
+			}
+#endif
+			err = m_pMuxOut->connect(*a_pAddrNext);
+			if(err != E_SUCCESS)
+			{
+				err=GET_NET_ERROR;
+#ifdef _DEBUG
+			 	CAMsg::printMsg(LOG_DEBUG,"Con-Error: %i\n",err);
+#endif
+				if(err!=ERR_INTERN_TIMEDOUT&&err!=ERR_INTERN_CONNREFUSED)
+					break;
+#ifdef _DEBUG
+				CAMsg::printMsg(LOG_DEBUG,"Cannot connect... retrying\n");
+#endif				
+				sSleep(RETRYTIME);
+			}
+			else
+			{
+				break;
+			}
+		}
+		return err;
+}
 
 /** Processes Upstream-MixPackets.*/
 SINT32 CAMiddleMix::loop()

@@ -92,6 +92,7 @@ class CAInfoService
 #ifdef DYNAMIC_MIX
 			/** LERNGRUPPE */
 			SINT32 dynamicCascadeConfiguration();
+			bool newCascadeAvailable();
 #endif
 		public:
 			static const UINT64 MINUTE;

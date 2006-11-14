@@ -117,6 +117,9 @@ SINT32 CADynamicCascadeConfigurator::configure()
 		DOM_Element elem;
 		if( sendInfoserviceGetRequest(pAddr, request, &elem) != E_SUCCESS)
 		{
+#ifdef DEBUG
+		CAMsg::printMsg( LOG_DEBUG, "CADynamicCascadeConfigurator::configure - Query %i WAS NOT SUCCESSFULL!\n", i);
+#endif
 			delete pAddr;
 			continue;
 		}
@@ -157,7 +160,11 @@ SINT32 CADynamicCascadeConfigurator::configure()
 			return reconfigureMix(*newCascade, proposal);
 		}
 	}
-	return E_UNKNOWN;
+	else
+	{
+		CAMsg::printMsg(LOG_DEBUG, "CADynamicCascadeConfigurator::configure - Vote not successful, no majority found, remaining as I am\n");
+	}
+	return E_SUCCESS;
 }
 
 /**
