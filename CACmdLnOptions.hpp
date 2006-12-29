@@ -218,6 +218,10 @@ class CACmdLnOptions
 			{
 				return m_bIsEncryptedLogEnabled;
 			}
+			bool isSyslogEnabled()
+			{
+				return m_bSyslog;
+			}
 
 			/** Set to true if the encrpyted log could/should be used**/
 			SINT32 enableEncryptedLog(bool b)
@@ -279,6 +283,11 @@ class CACmdLnOptions
 			SINT32 setLogDir(const UINT8* name,UINT32 len);
 			SINT32 getUser(UINT8* user,UINT32 len);
 			SINT32 getPidFile(UINT8* pidfile,UINT32 len);
+
+			UINT32 getMaxNrOfUsers()
+			{
+				return m_maxNrOfUsers;
+			}
 
 			bool isLocalProxy();
 			bool isFirstMix();
@@ -440,6 +449,8 @@ class CACmdLnOptions
 			CACertificate*	m_pPrevMixCertificate;
 			CACertificate*	m_pNextMixCertificate;
 			CACertificate*	m_pLogEncryptionCertificate;
+			
+			UINT32 m_maxNrOfUsers;
 
 			// added by ronin <ronin2@web.de>
 			DOM_Element m_oCascadeXML;
@@ -458,6 +469,7 @@ class CACmdLnOptions
 			char*		m_strLogDir;
 			char*		m_strEncryptedLogDir;
 			bool		m_bCompressedLogs;
+			bool		m_bSyslog;
 			char*		m_strUser;
 			char*		m_strPidFile;
 			SINT32	m_nrOfOpenFiles; //How many open files (sockets) should we use

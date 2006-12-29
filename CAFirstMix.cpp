@@ -851,6 +851,15 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		#else
 			((CASocket*)pNewUser)->setKeepAlive(true);
 		#endif
+		
+		if (options.getMaxNrOfUsers() > 0 && m_nUser >= options.getMaxNrOfUsers())
+		{
+			CAMsg::printMsg(LOG_DEBUG,"Too many users: %d (Maximum:%d)\n", m_nUser, options.getMaxNrOfUsers());
+			delete pNewUser;
+			m_pIPList->removeIP(peerIP);
+			return E_UNKNOWN;
+		}
+		
 		((CASocket*)pNewUser)->send(m_xmlKeyInfoBuff,m_xmlKeyInfoSize);  // send the mix-keys to JAP
 		// es kann nicht blockieren unter der Annahme das der TCP-Sendbuffer > m_xmlKeyInfoSize ist....
 		//wait for keys from user

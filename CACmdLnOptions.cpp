@@ -44,6 +44,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 CACmdLnOptions::CACmdLnOptions()
   {
 		m_bDaemon=false;
+		m_bSyslog=false;
 		m_bLocalProxy=m_bFirstMix=m_bLastMix=m_bMiddleMix=false;
 #ifndef ONLY_LOCAL_PROXY
 		m_bIsRunReConfigure=false;
@@ -63,6 +64,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_iTargetPort=m_iSOCKSPort=m_iSOCKSServerPort=m_addrInfoServicesSize=0xFFFF;
 		m_strTargetHost=m_strSOCKSHost=NULL;
 		m_strUser=m_strCascadeName=m_strLogDir=m_strEncryptedLogDir=NULL;
+		m_maxNrOfUsers = 0;
 		m_arTargetInterfaces=NULL;
 		m_cnTargets=0;
 		m_arListenerInterfaces=NULL;
@@ -1464,6 +1466,18 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		tmpLen=255;
 		if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS&&memcmp(tmpBuff,"True",4)==0)
 			m_bDaemon=true;
+			
+		// get max users
+		DOM_Element elemMaxUsers;
+		getDOMChildByName(elemGeneral,(UINT8*)"MaxUsers",elemMaxUsers,false);
+		if(elemMaxUsers!=NULL)
+		{
+			if(getDOMElementValue(elemMaxUsers, &tmp)==E_SUCCESS)
+			{
+				m_maxNrOfUsers = tmp;
+			}
+		}
+			
 		//get Logging
 		DOM_Element elemLogging;
 		getDOMChildByName(elemGeneral,(UINT8*)"Logging",elemLogging,false);
@@ -1477,6 +1491,13 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 						m_strLogDir=new char[strlen((char*)tmpBuff)+1];
 						strcpy(m_strLogDir,(char*)tmpBuff);
 					}
+				getDOMChildByName(elemGeneral,(UINT8*)"Syslog",elem,false);
+				tmpLen=255;
+				if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS&&memcmp(tmpBuff,"True",4)==0)
+				{
+					m_bSyslog=true;
+				}
+					
 				DOM_Element elemEncLog;
 				//get Encrypted Log Info
 				if(getDOMChildByName(elemLogging,(UINT8*)"EncryptedLog",elemEncLog,false)==E_SUCCESS)
