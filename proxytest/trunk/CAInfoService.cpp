@@ -63,7 +63,7 @@ static THREAD_RETURN InfoLoop(void *p)
 		UINT32 lastCascadeUpdate;
 		UINT32 lastStatusUpdate;
 		UINT32 lastMixInfoUpdate;
-		UINT32 nextUpdate = 1;
+		UINT32 nextUpdate;
 		bool bPreventLoop = false;
 		UINT32 temp;
 #ifdef DYNAMIC_MIX		
