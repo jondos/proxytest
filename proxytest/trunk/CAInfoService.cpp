@@ -92,19 +92,25 @@ static THREAD_RETURN InfoLoop(void *p)
 			currentTime=time(NULL);
 			if (currentTime >= (lastStatusUpdate + CAInfoService::SEND_STATUS_INFO_WAIT))
 			{
-				if(pInfoService->sendStatus(bIsFirst)==E_SUCCESS)
-					{
-						lastStatusUpdate=time(NULL);
-						bIsFirst=false;
-						bOneUpdateDone = true;
-						CAMsg::printMsg(LOG_DEBUG,"InfoService: Successfully sent Status information.\n");
-					}
+				//if(pInfoService->sendStatus(bIsFirst)==E_SUCCESS)
+				if(pInfoService->sendStatus(true)==E_SUCCESS)
+				{
+					lastStatusUpdate=time(NULL);
+					bIsFirst=false;
+					bOneUpdateDone = true;
+					CAMsg::printMsg(LOG_DEBUG,"InfoService: Successfully sent Status information.\n");
+				}
+				else
+				{
+					CAMsg::printMsg(LOG_DEBUG,"InfoService: Could not send Status information.\n");
+				}
+					
 			}
 			
 			// check every minute if configuring, every 10 minutes otherwise
 			currentTime=time(NULL);
       if (currentTime >= (lastCascadeUpdate + CAInfoService::SEND_CASCADE_INFO_WAIT) || pInfoService->isConfiguring())
-				{
+		{				
 					if (options.isFirstMix() || (options.isLastMix() && pInfoService->isConfiguring()))
 						{
 							if(pInfoService->sendCascadeHelo()!=E_SUCCESS)
@@ -430,7 +436,7 @@ UINT8* CAInfoService::getStatusXMLAsString(bool bIncludeCerts,UINT32& len)
 <MixCascadeStatus LastUpdate=\"%s\" currentRisk=\"%i\" id=\"%s\" mixedPackets=\"%s\" nrOfActiveUsers=\"%i\" trafficSituation=\"%i\"\
 ></MixCascadeStatus>"
 				
-		UINT32 buffLen=4096;
+		UINT32 buffLen=8192;
 		UINT8* buff=new UINT8[buffLen];
 		UINT8 tmpBuff[1024];
 		UINT8 buffMixedPackets[50];
@@ -444,7 +450,9 @@ UINT8* CAInfoService::getStatusXMLAsString(bool bIncludeCerts,UINT32& len)
 		sprintf((char*)tmpBuff,XML_MIX_CASCADE_STATUS,tmpStrCurrentMillis,tmpRisk,strMixId,buffMixedPackets,tmpUser,tmpTraffic);
 		CACertStore* ptmpCertStore=m_pcertstoreOwnCerts;
 		if(!bIncludeCerts)
+		{
 			ptmpCertStore=NULL;
+		}
 		if(m_pSignature->signXML(tmpBuff,strlen((char*)tmpBuff),buff,&buffLen,ptmpCertStore)!=E_SUCCESS)
 			{
 				delete[] buff;
