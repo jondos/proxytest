@@ -64,6 +64,7 @@ static THREAD_RETURN InfoLoop(void *p)
 		UINT32 lastStatusUpdate;
 		UINT32 lastMixInfoUpdate;
 		UINT32 nextUpdate = 1;
+		bool bPreventLoop = false;
 		UINT32 temp;
 #ifdef DYNAMIC_MIX		
 		UINT32 loops = 4;
@@ -152,21 +153,25 @@ static THREAD_RETURN InfoLoop(void *p)
 			{
 					if (temp <= 60)
 					{
-							nextUpdate = 60 - temp;
+						bPreventLoop = false;
+						nextUpdate = 60 - temp;
 					}
-					else if (nextUpdate <= 0)
+					else if (bPreventLoop)
 					{
 						// prevent infinite loops
+						bPreventLoop = false;
 						nextUpdate = 60;
 					}
 					else
 					{
-							nextUpdate = 0;
+						bPreventLoop = true;
+						nextUpdate = 0;
 					}
 			}
 			else
 			{ 
-					nextUpdate = 60;
+				bPreventLoop = false;
+				nextUpdate = 60;
 			}
 #ifdef DYNAMIC_MIX
 			interval = nextUpdate / 4;
