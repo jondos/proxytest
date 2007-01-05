@@ -47,6 +47,7 @@ const char * STRINGS_REQUEST_TYPES[2]={"POST","GET"};
 const char * STRINGS_REQUEST_COMMANDS[3]={"configure","helo","mixinfo/"};
 
 const UINT64 CAInfoService::MINUTE = 60;
+const UINT64 CAInfoService::SEND_LOOP_SLEEP = 60;
 const UINT64 CAInfoService::SEND_CASCADE_INFO_WAIT = MINUTE * 10;
 const UINT64 CAInfoService::SEND_MIX_INFO_WAIT = MINUTE * 10;
 const UINT64 CAInfoService::SEND_STATUS_INFO_WAIT = MINUTE;
@@ -147,20 +148,20 @@ static THREAD_RETURN InfoLoop(void *p)
 #endif
 			currentTime=time(NULL);
 			//@TODO BUGGy -- because it assumes knowledge about update times, which are configurable in StdAfx.hpp
-			// wait 60 seconds at most
+			// wait CAInfoService::SEND_LOOP_SLEEP seconds at most
 			temp = (currentTime - lastStatusUpdate);
 			if (bOneUpdateDone && temp > 0)
 			{
-					if (temp <= 60)
+					if (temp <= CAInfoService::SEND_LOOP_SLEEP)
 					{
 						bPreventLoop = false;
-						nextUpdate = 60 - temp;
+						nextUpdate = CAInfoService::SEND_LOOP_SLEEP - temp;
 					}
 					else if (bPreventLoop)
 					{
 						// prevent infinite loops
 						bPreventLoop = false;
-						nextUpdate = 60;
+						nextUpdate = CAInfoService::SEND_LOOP_SLEEP;
 					}
 					else
 					{
@@ -171,7 +172,7 @@ static THREAD_RETURN InfoLoop(void *p)
 			else
 			{ 
 				bPreventLoop = false;
-				nextUpdate = 60;
+				nextUpdate = CAInfoService::SEND_LOOP_SLEEP;
 			}
 #ifdef DYNAMIC_MIX
 			interval = nextUpdate / 4;

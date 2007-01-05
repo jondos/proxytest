@@ -96,6 +96,7 @@ class CAInfoService
 #endif
 		public:
 			static const UINT64 MINUTE;
+			static const UINT64 SEND_LOOP_SLEEP;
 			static const UINT64 SEND_CASCADE_INFO_WAIT;
 			static const UINT64 SEND_MIX_INFO_WAIT;
 			static const UINT64 SEND_STATUS_INFO_WAIT;
