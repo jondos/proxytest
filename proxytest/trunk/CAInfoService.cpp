@@ -63,7 +63,7 @@ static THREAD_RETURN InfoLoop(void *p)
 		UINT32 lastCascadeUpdate;
 		UINT32 lastStatusUpdate;
 		UINT32 lastMixInfoUpdate;
-		UINT32 nextUpdate;
+		UINT32 nextUpdate = 1;
 		UINT32 temp;
 #ifdef DYNAMIC_MIX		
 		UINT32 loops = 4;
@@ -149,20 +149,25 @@ static THREAD_RETURN InfoLoop(void *p)
 			// wait 60 seconds at most
 			temp = (currentTime - lastStatusUpdate);
 			if (bOneUpdateDone && temp > 0)
-				{
+			{
 					if (temp <= 60)
-						{
+					{
 							nextUpdate = 60 - temp;
-						}
+					}
+					else if (nextUpdate <= 0)
+					{
+						// prevent infinite loops
+						nextUpdate = 60;
+					}
 					else
-						{
+					{
 							nextUpdate = 0;
-						}
-				}
+					}
+			}
 			else
-				{ 
+			{ 
 					nextUpdate = 60;
-				}
+			}
 #ifdef DYNAMIC_MIX
 			interval = nextUpdate / 4;
 			CAMsg::printMsg(LOG_DEBUG,"InfoService: Next update in %i seconds...interval %i\n", nextUpdate, interval);
