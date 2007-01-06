@@ -92,8 +92,8 @@ static THREAD_RETURN InfoLoop(void *p)
 			currentTime=time(NULL);
 			if (currentTime >= (lastStatusUpdate + CAInfoService::SEND_STATUS_INFO_WAIT))
 			{
-				//if(pInfoService->sendStatus(bIsFirst)==E_SUCCESS)
-				if(pInfoService->sendStatus(true)==E_SUCCESS)
+				if(pInfoService->sendStatus(bIsFirst)==E_SUCCESS)
+				//if(pInfoService->sendStatus(true)==E_SUCCESS)
 				{
 					lastStatusUpdate=time(NULL);
 					bIsFirst=false;
