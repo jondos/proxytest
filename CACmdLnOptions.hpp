@@ -170,7 +170,6 @@ class CACmdLnOptions
 					return NULL;
 				}
 				
-				
 			/** Returns a COPY of the Operator Certificate that mix.
 				* @return opCerts
 				*/
