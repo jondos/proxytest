@@ -38,7 +38,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMix.hpp"
 #include "CAListenerInterface.hpp"
 #include "CAXMLBI.hpp"
-#include "CAXMLPriceCert.hpp"
 #ifdef LOG_CRIME
 	#include "tre/regex.h"
 #endif
@@ -170,15 +169,6 @@ class CACmdLnOptions
 					}
 					return NULL;
 				}
-				
-			CAXMLPriceCert* getPriceCertificate() const
-			{
-				if(m_pPriceCertificate != NULL)
-				{
-					return m_pPriceCertificate;
-				}	
-				return NULL;
-			}
 				
 				
 			/** Returns a COPY of the Operator Certificate that mix.
@@ -453,7 +443,6 @@ class CACmdLnOptions
 
 			CASignature*		m_pSignKey;
 			CACertificate*	m_pOwnCertificate;
-			CAXMLPriceCert*	m_pPriceCertificate;
 			
 			CACertificate** m_OpCerts;
 			UINT32 m_OpCertsLength;
