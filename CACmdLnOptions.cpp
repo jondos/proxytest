@@ -44,7 +44,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 CACmdLnOptions::CACmdLnOptions()
   {
 		m_bDaemon=false;
-		m_bSyslog=false;
 		m_bLocalProxy=m_bFirstMix=m_bLastMix=m_bMiddleMix=false;
 #ifndef ONLY_LOCAL_PROXY
 		m_bIsRunReConfigure=false;
@@ -64,7 +63,6 @@ CACmdLnOptions::CACmdLnOptions()
 		m_iTargetPort=m_iSOCKSPort=m_iSOCKSServerPort=m_addrInfoServicesSize=0xFFFF;
 		m_strTargetHost=m_strSOCKSHost=NULL;
 		m_strUser=m_strCascadeName=m_strLogDir=m_strEncryptedLogDir=NULL;
-		m_maxNrOfUsers = 0;
 		m_arTargetInterfaces=NULL;
 		m_cnTargets=0;
 		m_arListenerInterfaces=NULL;
@@ -83,9 +81,6 @@ CACmdLnOptions::CACmdLnOptions()
 		m_strDatabaseUser=NULL;
 		m_strDatabasePassword=NULL;
 		m_strAiID=NULL;
-#endif
-#ifdef DYNAMIC_MIX
-		m_strLastCascadeProposal = NULL;
 #endif
  }
 
@@ -151,9 +146,8 @@ SINT32 CACmdLnOptions::clearVisibleAddresses()
 		return E_SUCCESS;
 	}
 
-/** Add all the visible addresses to the list of visible addresses found in the XML description of the \<Proxy\> element given.
+/** Add all the visible addresses to the list of visible addresses found in the XML description of the <Proxy> element given.
 	* The structur is as follows:
-	*@verbatim
 	* <Proxy>
 	*      <VisibleAddresses> <!-- Describes the visible addresses from the 'outside world' -->
  *       <VisibleAddress>
@@ -163,7 +157,6 @@ SINT32 CACmdLnOptions::clearVisibleAddresses()
    *   </VisibleAddresses>
 *
 	* </Proxy>
-	@endverbatim
 	*/
 SINT32 CACmdLnOptions::addVisibleAddresses(DOM_Node& nodeProxy)
 	{
@@ -318,7 +311,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 	char* configfile=NULL;
 	int iAutoReconnect=0;
 	char* strPidFile=NULL;
-	char* strCreateConf=0;
+	int iCreateConf=0;
 	//DOM_Document docMixXml;
 	poptOption theOptions[]=
 	 {
@@ -335,7 +328,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 		{"config",'c',POPT_ARG_STRING,&configfile,0,"config file to use [for a real Mix in a cascade]","<file>"},
 		{"version",'v',POPT_ARG_NONE,&iVersion,0,"show version",NULL},
 		{"pidfile",'r',POPT_ARG_STRING,&strPidFile,0,"file where the PID will be stored","<file>"},
-		{"createConf",0,POPT_ARG_STRING,&strCreateConf,0,"creates a generic configuration for MixOnCD","[<file>]"},
+		{"createConf",0,POPT_ARG_NONE,&iCreateConf,0,"creates a generic configuration for MixOnCD",NULL},
 		POPT_AUTOHELP
 		{NULL,0,0,
 		NULL,0,NULL,NULL}
@@ -361,9 +354,9 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 			exit(0);
 		}
 #ifndef ONLY_LOCAL_PROXY
-	if(strCreateConf!=NULL)
+	if(iCreateConf!=0)
 		{
-			createMixOnCDConfiguration((UINT8*)strCreateConf);
+			createMixOnCDConfiguration(NULL);
 			exit(0);
 		}
 #endif
@@ -539,18 +532,6 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
             return ret;
     }
                 }
-#endif
-
-		/* Try to read InfoService configuration from  external file infoservices.xml */
-		DOM_Document infoservices;
-		if( readXmlConfiguration(infoservices,(UINT8*)"infoservices.xml") == E_SUCCESS )
-		{
-			CAMsg::printMsg(LOG_DEBUG, "Will now get InfoServices from infoservices.xml (this overrides the InfoServices from the default config!)\n");
-			DOM_Element elemIs=infoservices.getDocumentElement();
-			parseInfoServices(elemIs);
-		}
-
-#ifdef DYNAMIC_MIX
     /*  Ok, at this point we should make sure that we have a minimal configuration.
     If not we try to fill up the missing parameters with default values*/
     if( checkCertificates() != E_SUCCESS )
@@ -625,9 +606,10 @@ SINT32 CACmdLnOptions::setNewValues(CACmdLnOptions& newOptions)
 /** Modifies the next mix settings (target interface and certificate) according to
 * the specified options object. Target interfaces are only copied if they denote a
 * next mix. HTTP and SOCKS proxy settings are ignored.
-* @param doc a DOM document containing XML data with the new options
+* @param xmlData a string containing XML data with the new options
+* @param len the length of the string
+* 
 */
-#ifndef DYNAMIC_MIX
 SINT32 CACmdLnOptions::setNextMix(DOM_Document& doc)
 	{
 		CAMsg::printMsg(LOG_DEBUG,"setNextMix() - start\n");
@@ -702,162 +684,16 @@ SINT32 CACmdLnOptions::setNextMix(DOM_Document& doc)
 		CAMsg::printMsg(LOG_DEBUG,"setNextMix() - end\n");
     return processXmlConfiguration(m_docMixXml);
 }
-
-#else //DYNAMIC_MIX
-
-SINT32 CACmdLnOptions::setNextMix(DOM_Document& doc)
-{
-	resetNextMix();
-	/** First set the next mix's certificate */
-	DOM_Element elemRoot = doc.getDocumentElement();
-	//getCertificates if given...
-	DOM_Element elemSig;
-	getDOMChildByName(elemRoot,(UINT8*)"Signature",elemSig,false);
-	DOM_Element elemCert;
-	getDOMChildByName(elemSig,(UINT8*)"X509Data",elemCert,true);
-	if(elemCert!=NULL)
-		m_pNextMixCertificate = CACertificate::decode(elemCert.getFirstChild(),CERT_X509CERTIFICATE);
-	/** Now import the next mix's network stuff */
-	DOM_Node elemNextMix;
-	DOM_Element elemListeners;
-	// Search through the ListenerInterfaces an use a non-hidden one!
-	getDOMChildByName(elemRoot,(UINT8*)"ListenerInterfaces",elemListeners,true);
-	DOM_NodeList nlListenerInterfaces = elemListeners.getElementsByTagName(CAListenerInterface::XML_ELEMENT_NAME);
-	UINT32 len = nlListenerInterfaces.getLength();
-	bool foundNonHiddenInterface = false;
-	for(UINT32 i=0;i<len;i++)
-	{
-		elemNextMix=nlListenerInterfaces.item(i);
-		SINT32 ret = E_SUCCESS;
-		ret = getDOMElementAttribute(elemNextMix,"hidden",foundNonHiddenInterface);
-		// Interface was not hidden or "hidden"-Attribute was not specified
-		if(foundNonHiddenInterface || ret == E_UNSPECIFIED)
-		{
-			foundNonHiddenInterface = true;
-			break;
-		}
-	}
-	if(!foundNonHiddenInterface)
-	{
-		CAMsg::printMsg(LOG_ERR, "NEXT MIX HAS NO REAL LISTENERINTERFACES!\n");
-		exit(0);
-		return E_UNKNOWN;
-  }
-	/** @todo LERNGRUPPE: Here is much copied code! Refactor! */
-	clearTargetInterfaces();
-	//get TargetInterfaces
-	m_cnTargets=0;
-	TargetInterface* targetInterfaceNextMix=NULL;
-	if(elemNextMix!=NULL)
-{
-	NetworkType type;
-	CASocketAddr* addr=NULL;
-	DOM_Element elemType;
-	getDOMChildByName(elemNextMix,(UINT8*)"NetworkProtocol",elemType,false);
-	UINT8 tmpBuff[255];
-	UINT32 tmpLen=255;
-	if(getDOMElementValue(elemType,tmpBuff,&tmpLen)!=E_SUCCESS)
-		goto SKIP_NEXT_MIX;
-	strtrim(tmpBuff);
-	if(strcmp((char*)tmpBuff,"RAW/TCP")==0)
-		type=RAW_TCP;
-	else if(strcmp((char*)tmpBuff,"RAW/UNIX")==0)
-		type=RAW_UNIX;
-	else if(strcmp((char*)tmpBuff,"SSL/TCP")==0)
-		type=SSL_TCP;
-	else if(strcmp((char*)tmpBuff,"SSL/UNIX")==0)
-		type=SSL_UNIX;
-	else
-		goto SKIP_NEXT_MIX;
-	if(type==SSL_TCP||type==RAW_TCP)
-	{
-		DOM_Element elemPort;
-		DOM_Element elemHost;
-		DOM_Element elemIP;
-		UINT8 buffHost[255];
-		UINT32 buffHostLen=255;
-		UINT16 port;
-		getDOMChildByName(elemNextMix,(UINT8*)"Port",elemPort,false);
-		if(getDOMElementValue(elemPort,&port)!=E_SUCCESS)
-			goto SKIP_NEXT_MIX;
-		addr=new CASocketAddrINet;
-		bool bAddrIsSet=false;
-		getDOMChildByName(elemNextMix,(UINT8*)"Host",elemHost,false);
-			/* The rules for <Host> and <IP> are as follows:
-		* 1. if <Host> is given and not empty take the <Host> value for the address of the next mix; if not go to 2
-		* 2. if <IP> if given and not empty take <IP> value for the address of the next mix; if not goto 3.
-			* 3. this entry for the next mix is invalid!*/
-		if(elemHost!=NULL)
-		{
-			if(getDOMElementValue(elemHost,buffHost,&buffHostLen)==E_SUCCESS&&((CASocketAddrINet*)addr)->setAddr(buffHost,port)==E_SUCCESS)
-			{
-				bAddrIsSet=true;
-			}
-		}
-		if(!bAddrIsSet)//now try <IP>
-		{
-			getDOMChildByName(elemNextMix,(UINT8*)"IP",elemIP,false);
-			if(elemIP == NULL || getDOMElementValue(elemIP,buffHost,&buffHostLen)!=E_SUCCESS)
-				goto SKIP_NEXT_MIX;
-			if(((CASocketAddrINet*)addr)->setAddr(buffHost,port)!=E_SUCCESS)
-				goto SKIP_NEXT_MIX;
-		}
-		CAMsg::printMsg(LOG_INFO, "Setting target interface: %s:%d\n", buffHost, port);
-	}
-	else
-#ifdef HAVE_UNIX_DOMAIN_PROTOCOL
-
-	{
-		DOM_Element elemFile;
-		getDOMChildByName(elemNextMix,(UINT8*)"File",elemFile,false);
-		tmpLen=255;
-		if(getDOMElementValue(elemFile,tmpBuff,&tmpLen)!=E_SUCCESS)
-			goto SKIP_NEXT_MIX;
-		tmpBuff[tmpLen]=0;
-		strtrim(tmpBuff);
-		addr=new CASocketAddrUnix;
-		if(((CASocketAddrUnix*)addr)->setPath((char*)tmpBuff)!=E_SUCCESS)
-			goto SKIP_NEXT_MIX;
-	}
-#else
-			goto SKIP_NEXT_MIX;
-#endif
-		targetInterfaceNextMix=new TargetInterface;
-		targetInterfaceNextMix->target_type=TARGET_MIX;
-		targetInterfaceNextMix->net_type=type;
-		targetInterfaceNextMix->addr=addr->clone();
-		m_cnTargets=1;
-		if(targetInterfaceNextMix!=NULL)
-		{
-			if(m_arTargetInterfaces==NULL)
-			{
-				m_cnTargets=0;
-				m_arTargetInterfaces=new TargetInterface[1];
-			}
-			m_arTargetInterfaces[m_cnTargets].net_type=targetInterfaceNextMix->net_type;
-			m_arTargetInterfaces[m_cnTargets].target_type=targetInterfaceNextMix->target_type;
-			m_arTargetInterfaces[m_cnTargets++].addr=targetInterfaceNextMix->addr;
-			delete targetInterfaceNextMix;
-		}
-
-	SKIP_NEXT_MIX:
-			delete addr;
-}
-
-	CAMsg::printMsg(LOG_DEBUG,"setNextMix() - end\n");
-	return E_SUCCESS;
-}
-#endif //DYNAMIC_MIX
-
 #endif //ONLY_LOCAL_PROXY
 
 #ifndef ONLY_LOCAL_PROXY
 /** Modifies the next mix settings (target interface and certificate) according to
 * the specified options object. Target interfaces are only copied if they denote a
 * next mix. HTTP and SOCKS proxy settings are ignored.
-* @param doc  a DOM document containing XML data with the new options
+* @param xmlData a string containing XML data with the new options
+* @param len the length of the string
+* 
 */
-#ifndef DYNAMIC_MIX
 SINT32 CACmdLnOptions::setPrevMix(DOM_Document& doc)
 {
 		CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - start\n");
@@ -918,85 +754,9 @@ SINT32 CACmdLnOptions::setPrevMix(DOM_Document& doc)
 		CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - end with error\n");
     return E_UNKNOWN;
 }
-
-#else //DYNAMIC_MIX
-
-SINT32 CACmdLnOptions::setPrevMix(DOM_Document& doc)
-{
-	resetPrevMix();
-	CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - start\n");
-	DOM_Element elemRoot = doc.getDocumentElement();
-	DOM_Element elemSig;
-	getDOMChildByName(elemRoot,(UINT8*)"Signature",elemSig,false);
-	DOM_Element elemCert;
-	getDOMChildByName(elemSig,(UINT8*)"X509Data",elemCert,true);
-
-	if(elemCert!=NULL)
-	{
-		m_pPrevMixCertificate=CACertificate::decode(elemCert.getFirstChild(),CERT_X509CERTIFICATE);
-		return E_SUCCESS; //processXmlConfiguration(m_docMixXml);
-	}
-	CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - end with error\n");
-	return E_UNKNOWN;
-}
-#endif //DYNAMIC_MIX
 #endif //ONLY_LOCAL_PROXY
 
-#ifndef ONLY_LOCAL_PROXY
-#ifdef DYNAMIC_MIX
-SINT32 CACmdLnOptions::resetNextMix()
-{
-	if(m_pNextMixCertificate != NULL)
-	{
-		delete m_pNextMixCertificate;
-		m_pNextMixCertificate = NULL;
-	}
-	DOM_Element elemOptionsRoot = m_docMixXml.getDocumentElement();
-	DOM_Element elemOptionsCerts;
-	getDOMChildByName(elemOptionsRoot, (UINT8*) "Certificates", elemOptionsCerts, false);
-	DOM_Element elemTmp;
-	// Remove existing certificates
-	if(getDOMChildByName(elemOptionsCerts, (UINT8*) "PrevMixCertificate", elemTmp, false) == E_SUCCESS)
-	{
 
-		elemOptionsCerts.removeChild(elemTmp);
-	}
-	if(getDOMChildByName(elemOptionsCerts, (UINT8*) "PrevOperatorCertificate", elemTmp, false) == E_SUCCESS)
-	{
-		
-		elemOptionsCerts.removeChild(elemTmp);
-	}
-	clearTargetInterfaces();
-	return E_SUCCESS;
-}
-
-SINT32 CACmdLnOptions::resetPrevMix()
-{
-	if(m_pPrevMixCertificate != NULL)
-	{
-		delete m_pPrevMixCertificate;
-		m_pPrevMixCertificate = NULL;
-	}
-	DOM_Element elemOptionsRoot = m_docMixXml.getDocumentElement();
-	DOM_Element elemOptionsCerts;
-	getDOMChildByName(elemOptionsRoot, (UINT8*) "Certificates", elemOptionsCerts, false);
-	DOM_Element elemTmp;
-	// Remove existing certificates
-	if(getDOMChildByName(elemOptionsCerts, (UINT8*) "NextMixCertificate", elemTmp, false) == E_SUCCESS)
-	{
-		
-		elemOptionsCerts.removeChild(elemTmp);
-	}
-	if(getDOMChildByName(elemOptionsCerts, (UINT8*) "NextOperatorCertificate", elemTmp, false) == E_SUCCESS)
-	{
-		
-		elemOptionsCerts.removeChild(elemTmp);
-	}
-	return E_SUCCESS;
-
-}
-#endif //DYNAMIC_MIX
-#endif //ONLY_LOCAL_PROXY
 
 #ifndef ONLY_LOCAL_PROXY
 /** Rereads the configuration file (if one was given on startup) and reconfigures
@@ -1249,18 +1009,6 @@ SINT32 CACmdLnOptions::getLogDir(UINT8* name,UINT32 len)
 		return E_SUCCESS;
   }
 
-SINT32 CACmdLnOptions::setLogDir(const UINT8* name,UINT32 len)
-  {
-		if(m_strLogDir!=NULL)
-			{
-				delete[] m_strLogDir;
-			}
-		m_strLogDir=new char[len+1];
-		memcpy(m_strLogDir,name,len);
-		m_strLogDir[len]=0;
-		return E_SUCCESS;	
-	}
-
 SINT32 CACmdLnOptions::getPidFile(UINT8* pidfile,UINT32 len)
   {
 		if(m_strPidFile==NULL||pidfile==NULL)
@@ -1313,8 +1061,8 @@ bool CACmdLnOptions::isLocalProxy()
 	* @retval E_UNKNOWN in case of an error
 */
 SINT32 CACmdLnOptions::getMixXml(DOM_Document& docMixInfo)
-	{
-		docMixInfo=m_docMixInfo;
+{
+	docMixInfo=m_docMixInfo;
 	//insert (or update) the Timestamp
 	DOM_Element elemTimeStamp;
 	DOM_Element elemRoot=docMixInfo.getDocumentElement();
@@ -1329,7 +1077,7 @@ SINT32 CACmdLnOptions::getMixXml(DOM_Document& docMixInfo)
 	print64(tmpStrCurrentMillis,currentMillis);
 	setDOMElementValue(elemTimeStamp,tmpStrCurrentMillis);		
 	
-		return E_SUCCESS;
+	return E_SUCCESS;
 }
 
 /** Tries to read the XML configuration file \c configFile and parses (but not process) it.
@@ -1392,7 +1140,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		DOM_Element elemRoot=docConfig.getDocumentElement();
 		DOM_Element elemGeneral;
 		getDOMChildByName(elemRoot,(UINT8*)"General",elemGeneral,false);
-
+		
 		UINT8 tmpBuff[255];
 		UINT32 tmpLen=255;
 		
@@ -1416,37 +1164,26 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		m_bDynamic = false;
 		getDOMChildByName(elemGeneral,(UINT8*)"Dynamic",elem,false);
 		if(elem != NULL)
-			{
+		{
     			if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS)
     			{
         			m_bDynamic = (strcmp("True",(char*)tmpBuff) == 0);
     			}
 
-			}
+		}
 		if(m_bDynamic)
 			CAMsg::printMsg( LOG_DEBUG, "I am a dynamic mix\n");
 
 		//getCascadeName
 		getDOMChildByName(elemGeneral,(UINT8*)"CascadeName",elem,false);
 		tmpLen=255;
-#ifdef DYNAMIC_MIX
-		bool bNeedCascadeNameFromMixID=false;
-#endif
 		if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS)
 			{
 				m_strCascadeName=new char[tmpLen+1];
 				memcpy(m_strCascadeName,tmpBuff,tmpLen);
 				m_strCascadeName[tmpLen]=0;
 			}
-#ifdef DYNAMIC_MIX
-			/* LERNGRUPPE: Dynamic Mixes must have a cascade name, as MiddleMixes may be reconfigured to be FirstMixes */
-		else
-			{
-				bNeedCascadeNameFromMixID=true;
-				m_strCascadeName = new char[strlen(m_strMixID) + 1];
-				strncpy(m_strCascadeName, m_strMixID, strlen(m_strMixID)+1);
-			}
-#endif
+
 		//get Username to run as...
 		getDOMChildByName(elemGeneral,(UINT8*)"UserID",elem,false);
 		tmpLen=255;
@@ -1466,23 +1203,11 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		tmpLen=255;
 		if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS&&memcmp(tmpBuff,"True",4)==0)
 			m_bDaemon=true;
-			
-		// get max users
-		DOM_Element elemMaxUsers;
-		getDOMChildByName(elemGeneral,(UINT8*)"MaxUsers",elemMaxUsers,false);
-		if(elemMaxUsers!=NULL)
-		{
-			if(getDOMElementValue(elemMaxUsers, &tmp)==E_SUCCESS)
-			{
-				m_maxNrOfUsers = tmp;
-			}
-		}
-			
 		//get Logging
 		DOM_Element elemLogging;
 		getDOMChildByName(elemGeneral,(UINT8*)"Logging",elemLogging,false);
 		if(elemLogging!=NULL)
-			{
+		{
 				tmpLen=255;
 				getDOMChildByName(elemLogging,(UINT8*)"File",elem,false);
 				if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS)
@@ -1491,13 +1216,6 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 						m_strLogDir=new char[strlen((char*)tmpBuff)+1];
 						strcpy(m_strLogDir,(char*)tmpBuff);
 					}
-				getDOMChildByName(elemGeneral,(UINT8*)"Syslog",elem,false);
-				tmpLen=255;
-				if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS&&memcmp(tmpBuff,"True",4)==0)
-				{
-					m_bSyslog=true;
-				}
-					
 				DOM_Element elemEncLog;
 				//get Encrypted Log Info
 				if(getDOMChildByName(elemLogging,(UINT8*)"EncryptedLog",elemEncLog,false)==E_SUCCESS)
@@ -1521,7 +1239,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 					}
 				else
 					m_bIsEncryptedLogEnabled=false;
-			}
+		}
 		//getCertificates if given...
 		DOM_Element elemCertificates;
 		getDOMChildByName(elemRoot,(UINT8*)"Certificates",elemCertificates,false);
@@ -1529,30 +1247,30 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		DOM_Element elemOwnCert;
 		getDOMChildByName(elemCertificates,(UINT8*)"OwnCertificate",elemOwnCert,false);
 		if (elemOwnCert == NULL)
-			{
-				return E_UNKNOWN;
-			}
+		{
+			return E_UNKNOWN;
+		}
 		
 		m_pSignKey=new CASignature();
 		UINT8 passwd[500];
 		passwd[0]=0;
 		if(m_pSignKey->setSignKey(elemOwnCert.getFirstChild(),SIGKEY_PKCS12)!=E_SUCCESS)
-			{//Maybe not an empty passwd
+		{//Maybe not an empty passwd
 				printf("I need a passwd for the SignKey: ");
 				scanf("%400[^\n]%*1[\n]",(char*)passwd);
 				if(m_pSignKey->setSignKey(elemOwnCert.getFirstChild(),SIGKEY_PKCS12,(char*)passwd)!=E_SUCCESS)
-					{
-						CAMsg::printMsg(LOG_CRIT,"Could not read own signature key!\n");
-						delete m_pSignKey;
-						m_pSignKey=NULL;
-					}
-			}
+				{
+					CAMsg::printMsg(LOG_CRIT,"Could not read own signature key!\n");
+					delete m_pSignKey;
+					m_pSignKey=NULL;
+				}
+		}
 		m_pOwnCertificate=CACertificate::decode(elemOwnCert.getFirstChild(),CERT_PKCS12,(char*)passwd);
 		if (m_pOwnCertificate == NULL)
-			{
-				return E_UNKNOWN;
-			}
-
+		{
+			return E_UNKNOWN;
+		}
+		
 		
 		//get MixID
 		tmpLen=255;
@@ -1573,14 +1291,6 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		m_strMixID=new char[strlen((char*)tmpBuff)+1];
 		strcpy(m_strMixID,(char*) tmpBuff);		
 
-#ifdef DYNAMIC_MIX
-			/* LERNGRUPPE: Dynamic Mixes must have a cascade name, as MiddleMixes may be reconfigured to be FirstMixes */
-		if(bNeedCascadeNameFromMixID)
-			{
-				m_strCascadeName = new char[strlen(m_strMixID) + 1];
-				strncpy(m_strCascadeName, m_strMixID, strlen(m_strMixID)+1);
-			}
-#endif
 
 		//then Operator Certificate
 		DOM_Element elemOpCert;
@@ -1625,6 +1335,36 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		getDOMChildByName(elemRoot,(UINT8*)"Accounting",elemAccounting,false);
 		if(elemAccounting != NULL) 
 			{
+
+				//get price certificate
+				DOM_Element pcElem;
+				//function in CAUtil, last param is "deep", needs to be set to include child elems
+				if (elemAccounting!=NULL) CAMsg::printMsg(LOG_DEBUG, "elemAccounting still not null");
+				getDOMChildByName(elemAccounting, (UINT8*)"PriceCertificate",pcElem, false);
+				CAMsg::printMsg(LOG_DEBUG, "after parsing PriceCertificate");
+				if (pcElem == NULL)
+				{
+					CAMsg::printMsg(LOG_DEBUG, "no price certificate element found");
+				} else 
+				{
+					m_pPriceCertificate = CAXMLPriceCert::getInstance(pcElem); 
+					if (m_pPriceCertificate == NULL) {
+						CAMsg::printMsg(LOG_DEBUG, "PRICECERT PROCESSED, BUT STILL NULL");
+					}
+				}	
+				
+/*
+				//test
+				CAMsg::printMsg(LOG_DEBUG,"before writing Pricecert\n");
+				UINT32 len = 1000; 
+				UINT8*  output = new UINT8[len];
+				m_pPriceCertificate->toXMLString(output, &len);
+				CAMsg::printMsg(LOG_INFO,(const char*) output  ); //convert from UINT8* to const char* properly?	
+*/
+
+
+
+
 				DOM_Element elemJPI;
 				getDOMChildByName(elemAccounting, CAXMLBI::getXMLElementName(), elemJPI, false);
 				m_pBI = CAXMLBI::getInstance(elemJPI);
@@ -1643,15 +1383,19 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 					{
 						m_iPaymentSettleInterval = tmp;
 					}
-				// get DB Username
-				getDOMChildByName(elemAccounting, (UINT8*)"AiID", elem, false);
-				tmpLen = 255;
-				if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) 
-					{
-						strtrim(tmpBuff);
-						m_strAiID = new UINT8[strlen((char*)tmpBuff)+1];
-						strcpy((char *)m_strAiID, (char *) tmpBuff);
-					}
+					
+				// get AiID (NOT a separate element /Accounting/AiID any more, rather the subjectkeyidentifier given in the price certificate
+//				getDOMChildByName(elemAccounting, (UINT8*)"AiID", elem, false);
+//				tmpLen = 255;
+//				if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) 
+//					{
+//						strtrim(tmpBuff);
+//						m_strAiID = new UINT8[strlen((char*)tmpBuff)+1];
+//						strcpy((char *)m_strAiID, (char *) tmpBuff);
+//					}
+				m_strAiID = m_pPriceCertificate->getSubjectKeyIdentifier();
+					
+					
 				DOM_Element elemDatabase;
 				getDOMChildByName(elemAccounting, (UINT8*)"Database", elemDatabase, false);
 				if(elemDatabase != NULL) 
@@ -1689,31 +1433,39 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 								m_strDatabaseUser = new UINT8[strlen((char*)tmpBuff)+1];
 								strcpy((char *)m_strDatabaseUser, (char *) tmpBuff);
 							}
-/*				getDOMChildByName(elemDatabase, (UINT8*)"Password", elem, false);
-				tmpLen = 255;
-				if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) {
-					strtrim(tmpBuff);
-					m_strDatabasePassword = new char[strlen((char*)tmpBuff)+1];
-					strcpy(m_strDatabasePassword, (char *) tmpBuff);
-				}*/
-				// don't read password from XML but from stdin:
-						UINT8 dbpass[500];
-						dbpass[0]=0;
-						printf("Please enter password for postgresql user %s at %s: ",m_strDatabaseUser, m_strDatabaseHost);
-						scanf("%400[^\n]%*1[\n]",(char*)dbpass); 
-						int len = strlen((char *)dbpass);
-						if(len>0) 
-							{
-								m_strDatabasePassword = new UINT8[len+1];
-								strcpy((char *)m_strDatabasePassword, (char *)dbpass);
-							}
+							
+						//get DB password from xml 	
+						getDOMChildByName(elemDatabase, (UINT8*)"Password", elem, false);
+						tmpLen = 255;
+						if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) {
+							strtrim(tmpBuff);
+							m_strDatabasePassword = new UINT8[strlen((char*)tmpBuff)+1];
+							strcpy((char *) m_strDatabasePassword, (char *) tmpBuff);
+						} 
 						else
-							{
-								m_strDatabasePassword = new UINT8[1];
-								m_strDatabasePassword[0] = '\0';
-							}	
-				}
-		}
+						{
+					 
+							// if no password in xml read from stdin
+							UINT8 dbpass[500];
+							dbpass[0]=0;
+							printf("Please enter password for postgresql user %s at %s: ",m_strDatabaseUser, m_strDatabaseHost);
+							scanf("%400[^\n]%*1[\n]",(char*)dbpass); 
+							int len = strlen((char *)dbpass);
+							if(len>0) 
+								{
+									m_strDatabasePassword = new UINT8[len+1];
+									strcpy((char *)m_strDatabasePassword, (char *)dbpass);
+								}
+							else
+								{
+									m_strDatabasePassword = new UINT8[1];
+									m_strDatabasePassword[0] = '\0';
+								}
+
+						}
+							
+				} //of elem database
+		} //of elem accounting
 		else 
 			{
 				CAMsg::printMsg( 17, "No accounting instance info found in configfile. Payment will not work!\n");
@@ -1726,37 +1478,63 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		DOM_Element elemNetwork;
 		getDOMChildByName(elemRoot,(UINT8*)"Network",elemNetwork,false);
 		DOM_Element elemInfoServiceContainer;
+		DOM_Element elemInfoService;
+		DOM_Element elemAllowReconfig;
 		getDOMChildByName(elemNetwork,(UINT8*)"InfoServices",elemInfoServiceContainer,false);
 		if (elemInfoServiceContainer ==	NULL)
 		{
 			// old configuration version <= 0.61
-			DOM_Element elemInfoService;
-			DOM_Element elemAllowReconfig;
 			getDOMChildByName(elemNetwork,(UINT8*)"InfoService",elemInfoService,false);
-			/* LERNGRUPPE: There might not be any InfoService configuration in the file, but in infoservices.xml, so check this */
-			if(elemInfoService != NULL)
-			{ 
 			getDOMChildByName(elemInfoService,(UINT8*)"AllowAutoConfiguration",elemAllowReconfig,false);
-				CAListenerInterface* isListenerInterface = CAListenerInterface::getInstance(elemInfoService);
+
+			
+			CAListenerInterface* isListenerInterface = 
+				CAListenerInterface::getInstance(elemInfoService);
+	
 			 m_addrInfoServicesSize = 1;
 			m_addrInfoServices = new CAListenerInterface*[m_addrInfoServicesSize];
 			m_addrInfoServices[0] = isListenerInterface;
-				if(getDOMElementValue(elemAllowReconfig,tmpBuff,&tmpLen)==E_SUCCESS)
+		}
+		else
+		{
+			getDOMChildByName(elemInfoServiceContainer,(UINT8*)"AllowAutoConfiguration",elemAllowReconfig,false);
+			DOM_NodeList isList = elemInfoServiceContainer.getElementsByTagName("InfoService");
+			UINT32 nrListenerInterfaces;
+			m_addrInfoServicesSize = 0;
+			m_addrInfoServices = new CAListenerInterface*[isList.getLength()];
+			CAListenerInterface** isListenerInterfaces;
+			for (UINT32 i = 0; i < isList.getLength(); i++)
+			{
+				//get ListenerInterfaces
+				DOM_Element elemListenerInterfaces;
+				getDOMChildByName(isList.item(i),(UINT8*)CAListenerInterface::XML_ELEMENT_CONTAINER_NAME,elemListenerInterfaces,false);
+				isListenerInterfaces = CAListenerInterface::getInstance(elemListenerInterfaces, nrListenerInterfaces);
+				if (nrListenerInterfaces > 0)
+				{
+					/** @todo Take more than one listener interface for a given IS... */
+					m_addrInfoServices[m_addrInfoServicesSize] = isListenerInterfaces[0];
+					m_addrInfoServicesSize++;
+					for (UINT32 j = 1; j < nrListenerInterfaces; j++)
 					{
-					m_bAcceptReconfiguration = (strcmp("True",(char*)tmpBuff) == 0);
+						// the other interfaces are not needed...
+						delete isListenerInterfaces[j];
+					}
 				}
 			}
 		}
-		else
+		 
+  
+    
+    if(getDOMElementValue(elemAllowReconfig,tmpBuff,&tmpLen)==E_SUCCESS)
     {
-			// Refactored
-			parseInfoServices(elemInfoServiceContainer);
+        m_bAcceptReconfiguration = (strcmp("True",(char*)tmpBuff) == 0);
     }
 		 
+ 
 		//get ListenerInterfaces
 		DOM_Element elemListenerInterfaces;
 		getDOMChildByName(elemNetwork,(UINT8*)
-		CAListenerInterface::XML_ELEMENT_CONTAINER_NAME,elemListenerInterfaces,false);
+			CAListenerInterface::XML_ELEMENT_CONTAINER_NAME,elemListenerInterfaces,false);
 		m_arListenerInterfaces = CAListenerInterface::getInstance(
 			elemListenerInterfaces, m_cnListenerInterfaces);
 
@@ -2064,57 +1842,52 @@ SKIP_NEXT_MIX:
 		elemSoftware.appendChild(elemVersion);
 		elemMix.appendChild(elemSoftware);
 
+#ifdef PAYMENT
+		
+		//insert price certificate
+		if (getPriceCertificate() == NULL)
+		{
+			CAMsg::printMsg(LOG_DEBUG, "can't insert price certificate because it's Null");
+		} else {
+			DOM_Element pcElem;		
+			CAMsg::printMsg(LOG_DEBUG, "\n\n before inserting price certificate, line 1845\n\n");
+			getPriceCertificate()->toXmlElement(m_docMixInfo,pcElem);	
+			CAMsg::printMsg(LOG_DEBUG, "\n\n later\n\n");
+			elemMix.appendChild(pcElem);
+			CAMsg::printMsg(LOG_DEBUG,"after inserting price certificate\n");
+		}
+#endif /*payment*/
+
+
 #ifdef LOG_CRIME
-		m_arCrimeRegExpsURL=NULL;
-		m_nCrimeRegExpsURL=0;
-		m_arCrimeRegExpsPayload=NULL;
-		m_nCrimeRegExpsPayload=0;
+		m_arCrimeRegExps=NULL;
+		m_nCrimeRegExps=0;
 		CAMsg::printMsg(LOG_INFO,"Loading Crime Detection Data....\n");
 		DOM_Element elemCrimeDetection;
 		getDOMChildByName(elemRoot,(UINT8*)"CrimeDetection",elemCrimeDetection,false);
 		if(elemCrimeDetection!=NULL)
-		{
-			DOM_NodeList nlRegExp;
-			nlRegExp=elemCrimeDetection.getElementsByTagName("RegExpURL");
-			m_arCrimeRegExpsURL=new regex_t[nlRegExp.getLength()];
-			for(UINT32 i=0;i<nlRegExp.getLength();i++)
 			{
-				DOM_Node tmpChild=nlRegExp.item(i);
-				UINT32 lenRegExp=4096;
-				UINT8 buffRegExp[4096];
-				if(getDOMElementValue(tmpChild,buffRegExp,&lenRegExp)==E_SUCCESS)
-				{
-					if(regcomp(&m_arCrimeRegExpsURL[m_nCrimeRegExpsURL],(char*)buffRegExp,REG_EXTENDED|REG_ICASE|REG_NOSUB)!=0)
+				DOM_NodeList nlRegExp;
+				nlRegExp=elemCrimeDetection.getElementsByTagName("RegExp");
+				m_arCrimeRegExps=new regex_t[nlRegExp.getLength()];
+				for(UINT32 i=0;i<nlRegExp.getLength();i++)
 					{
-						CAMsg::printMsg(LOG_CRIT,"Could not compile URL regexp: %s\n",buffRegExp);
-						exit(-1);
-					}
-					CAMsg::printMsg(LOG_DEBUG,"Looking for crime URL RegExp: %s\n",buffRegExp);
+						DOM_Node tmpChild=nlRegExp.item(i);
+						UINT32 lenRegExp=4096;
+						UINT8 buffRegExp[4096];
+						if(getDOMElementValue(tmpChild,buffRegExp,&lenRegExp)==E_SUCCESS)
+							{
+								if(regcomp(&m_arCrimeRegExps[m_nCrimeRegExps],(char*)buffRegExp,REG_EXTENDED|REG_ICASE|REG_NOSUB)!=0)
+									{
+										CAMsg::printMsg(LOG_CRIT,"Could not compile regexp: %s\n",buffRegExp);
+										exit(-1);
+									}
+									CAMsg::printMsg(LOG_DEBUG,"Looking for crime URL RegExp: %s\n",buffRegExp);
 
-					m_nCrimeRegExpsURL++;
-				}
+								m_nCrimeRegExps++;
+							}
+					}
 			}
-			
-			nlRegExp=elemCrimeDetection.getElementsByTagName("RegExpPayload");
-			m_arCrimeRegExpsPayload=new regex_t[nlRegExp.getLength()];
-			for(UINT32 i=0;i<nlRegExp.getLength();i++)
-			{
-				DOM_Node tmpChild=nlRegExp.item(i);
-				UINT32 lenRegExp=4096;
-				UINT8 buffRegExp[4096];
-				if(getDOMElementValue(tmpChild,buffRegExp,&lenRegExp)==E_SUCCESS)
-				{
-					if(regcomp(&m_arCrimeRegExpsPayload[m_nCrimeRegExpsPayload],(char*)buffRegExp,REG_EXTENDED|REG_ICASE|REG_NOSUB)!=0)
-					{
-						CAMsg::printMsg(LOG_CRIT,"Could not compile payload regexp: %s\n",buffRegExp);
-						exit(-1);
-					}
-					CAMsg::printMsg(LOG_DEBUG,"Looking for crime Payload RegExp: %s\n",buffRegExp);
-
-					m_nCrimeRegExpsPayload++;
-				}
-			}				
-		}
 		CAMsg::printMsg(LOG_DEBUG,"Loading Crime Detection Data finished\n");
 
 #endif
@@ -2239,91 +2012,59 @@ SKIP_NEXT_MIX:
 #endif //ONLY_LOCAL_PROXY
 
 #ifndef ONLY_LOCAL_PROXY
+#ifdef DYNAMIC_MIX
 
 /**
-  * LERNGRUPPE
-  * Parses the \c InfoServices Node in a) a mix configuration or b) out of \c infoservices.xml
-  * (Code refactored from CACmdLnOptions::processXmlConfiguration
-  * @param a_infoServiceNode The \c InfoServices Element
-  * @retval E_SUCCESS
-  */
-SINT32 CACmdLnOptions::parseInfoServices(DOM_Element a_infoServiceNode)
-{
-	DOM_Element elemAllowReconfig;
-	getDOMChildByName(a_infoServiceNode,(UINT8*)"AllowAutoConfiguration",elemAllowReconfig,false);
-	DOM_NodeList isList = a_infoServiceNode.getElementsByTagName("InfoService");
-	/* If there are no InfoServices in the file, keep the (hopefully) previously configured InfoServices */
-	if(isList.getLength() == 0)
-	{
-		return E_SUCCESS;
-	}
-	/* If there are already InfoServices, delete them */
-	/** @todo merge could be better... */
-	if(m_addrInfoServices!=NULL)
-	{
-		for(UINT32 i=0;i<m_addrInfoServicesSize;i++)
-		{
-			delete m_addrInfoServices[i];
-		}
-		delete[] m_addrInfoServices;
-	}
-	m_addrInfoServicesSize=0;
-	m_addrInfoServices=NULL;
-
-	UINT32 nrListenerInterfaces;
-	m_addrInfoServicesSize = 0;
-	m_addrInfoServices = new CAListenerInterface*[isList.getLength()];
-	CAListenerInterface** isListenerInterfaces;
-	for (UINT32 i = 0; i < isList.getLength(); i++)
-	{
-		//get ListenerInterfaces
-		DOM_Element elemListenerInterfaces;
-		getDOMChildByName(isList.item(i),(UINT8*)CAListenerInterface::XML_ELEMENT_CONTAINER_NAME,elemListenerInterfaces,false);
-		isListenerInterfaces = CAListenerInterface::getInstance(elemListenerInterfaces, nrListenerInterfaces);
-		if (nrListenerInterfaces > 0)
-		{
-			/** @todo Take more than one listener interface for a given IS... */
-			m_addrInfoServices[m_addrInfoServicesSize] = isListenerInterfaces[0];
-			m_addrInfoServicesSize++;
-			for (UINT32 j = 1; j < nrListenerInterfaces; j++)
-			{
-				// the other interfaces are not needed...
-				delete isListenerInterfaces[j];
-			}
-		}
-	}
-	UINT8 tmpBuff[255];
-	UINT32 tmpLen=255;
-	if(getDOMElementValue(elemAllowReconfig,tmpBuff,&tmpLen)==E_SUCCESS)
-	{	
-		m_bAcceptReconfiguration = (strcmp("True",(char*)tmpBuff) == 0);
-	}
-
-	return E_SUCCESS;
-}
-
-
-/** Builds a default Configuration
+  * LERNGRUPPE: Compatablility function. Beware! It's no longer static
 	* @param strFileName filename of the file in which the default configuration is stored, if NULL stdout is used
 	*/
 SINT32 CACmdLnOptions::createMixOnCDConfiguration(const UINT8* strFileName)
 {
 	DOM_Document doc = DOM_Document::createDocument();
-	//Neasty but cool...
-	bool bForLast=false;
-	if(strFileName!=NULL&&strncmp((char*)strFileName,"last",4)==0)
-			bForLast=true;
-	buildDefaultConfig(doc,bForLast);
+	buildDefaultConfig(doc);
 	saveToFile(doc, strFileName);
+//     DOM_Element elemListener=p_doc.createElement("ListenerInterface");
+//     elemListeners.appendChild(elemListener);
+//     elemTmp=p_doc.createElement("Port");
+//     setDOMElementValue(elemTmp,(UINT8*)"6544");
+//     elemListener.appendChild(elemTmp);
+//     elemTmp=p_doc.createElement("NetworkProtocol");
+//     setDOMElementValue(elemTmp,(UINT8*)"RAW/TCP");
+//     elemListener.appendChild(elemTmp);
+
 	return E_SUCCESS;
 }
 
 /**
+  * LERNGRUPPE
+  * Creates a default configuration for this mix. The configuration is then used to start up
+  * the mix! This default-config will be written to DEFAULT_CONFIG_FILE for use in the next
+  * startups of this mix
+  * @retval E_UNKNOWN if an error occurs
+  * @retval E_SUCCESS otherwise
+  */
+SINT32 CACmdLnOptions::createDefaultConfiguration()
+{
+    m_docMixXml = DOM_Document::createDocument();
+    buildDefaultConfig(m_docMixXml);
+    saveToFile(m_docMixXml, (const UINT8*)DEFAULT_CONFIG_FILE);
+
+    char *configfile = (char*) malloc(sizeof(char) * (strlen(DEFAULT_CONFIG_FILE)));
+    strcpy(configfile, DEFAULT_CONFIG_FILE);
+
+    // Set default config file for possible reread attempt
+    m_strConfigFile=new UINT8[ strlen(DEFAULT_CONFIG_FILE)+1 ];
+    memcpy(m_strConfigFile,DEFAULT_CONFIG_FILE, strlen(DEFAULT_CONFIG_FILE)+1);
+    return E_SUCCESS;
+}
+
+/**
+  * LERNGRUPPE
   * Creates a default mix configuration.
   * @return r_doc The XML Document containing the default mix configuration
   * @retval E_SUCCESS
   */
-SINT32 CACmdLnOptions::buildDefaultConfig(DOM_Document doc,bool bForLastMix=false)
+SINT32 CACmdLnOptions::buildDefaultConfig(DOM_Document doc)
 {
     CASignature* pSignature=new CASignature();
     pSignature->generateSignKey(1024);
@@ -2333,17 +2074,12 @@ SINT32 CACmdLnOptions::buildDefaultConfig(DOM_Document doc,bool bForLastMix=fals
     DOM_Element elemGeneral=doc.createElement("General");
     elemRoot.appendChild(elemGeneral);
 
-    /** @todo MixType can be chosen randomly between FirstMix and MiddleMix but not LastMix!
-		*sk13: ok this is a hack - but this way it can also create configurations for LastMixes which makes testing of the dynamic szenario much easier...
-		*/
+    /** @todo MixType can be chosen randomly between FirstMix and MiddleMix but not LastMix! */
     DOM_Element elemTmp=doc.createElement("MixType");
-		if(bForLastMix)
-			setDOMElementValue(elemTmp,(UINT8*)"LastMix");
-		else
-			setDOMElementValue(elemTmp,(UINT8*)"FirstMix");
+    setDOMElementValue(elemTmp,(UINT8*)"MiddleMix");
     elemGeneral.appendChild(elemTmp);
 
-		/** MixID must be the SubjectKeyIdentifier of the mix' certificate */
+    /** MixID must be the SubjectKeyIdentifier of the mix' certificate */
     elemTmp=doc.createElement("MixID");
     CACertificate* pCert;
     pSignature->getVerifyKey(&pCert);
@@ -2353,10 +2089,6 @@ SINT32 CACmdLnOptions::buildDefaultConfig(DOM_Document doc,bool bForLastMix=fals
     setDOMElementValue(elemTmp,buf);
     elemGeneral.appendChild(elemTmp);
     elemTmp=doc.createElement("Dynamic");
-    setDOMElementValue(elemTmp,(UINT8*)"True");
-    elemGeneral.appendChild(elemTmp);
-
-		elemTmp=doc.createElement("Daemon");
     setDOMElementValue(elemTmp,(UINT8*)"True");
     elemGeneral.appendChild(elemTmp);
 
@@ -2376,61 +2108,31 @@ SINT32 CACmdLnOptions::buildDefaultConfig(DOM_Document doc,bool bForLastMix=fals
     elemLogging.appendChild(elemTmp);
     DOM_Element elemNet=doc.createElement("Network");
     elemRoot.appendChild(elemNet);
-    
     /** @todo Add a list of default InfoServices to the default configuration */
-    DOM_Element elemISs=doc.createElement("InfoServices");
-		elemNet.appendChild(elemISs);
-		elemTmp=doc.createElement("AllowAutoConfiguration");
-		setDOMElementValue(elemTmp,(UINT8*)"True");
-		elemISs.appendChild(elemTmp);
-
-		DOM_Element elemIS=doc.createElement("InfoService");
-    elemISs.appendChild(elemIS);
-		DOM_Element elemISListeners=doc.createElement("ListenerInterfaces");
-		elemIS.appendChild(elemISListeners);
-		DOM_Element elemISLi=doc.createElement("ListenerInterface");
-		elemISListeners.appendChild(elemISLi);
-		elemTmp=doc.createElement("Host");
-    setDOMElementValue(elemTmp,(UINT8*)DEFAULT_INFOSERVICE);
-    elemISLi.appendChild(elemTmp);
+    DOM_Element elemIS=doc.createElement("InfoService");
+    elemNet.appendChild(elemIS);
+    elemTmp=doc.createElement("Host");
+    setDOMElementValue(elemTmp,(UINT8*)"141.76.46.91");
+    elemIS.appendChild(elemTmp);
     elemTmp=doc.createElement("Port");
-    setDOMElementValue(elemTmp,6543U);
-    elemISLi.appendChild(elemTmp);
+    setDOMElementValue(elemTmp,(UINT8*)"80");
+    elemIS.appendChild(elemTmp);
     elemTmp=doc.createElement("AllowAutoConfiguration");
     setDOMElementValue(elemTmp,(UINT8*)"True");
-    elemISs.appendChild(elemTmp);
+    elemIS.appendChild(elemTmp);
 
     /** We add this for compatability reasons. ListenerInterfaces can be determined dynamically now */
-   /* DOM_Element elemListeners=doc.createElement("ListenerInterfaces");
+    DOM_Element elemListeners=doc.createElement("ListenerInterfaces");
     elemNet.appendChild(elemListeners);
-		DOM_Element elemListener=doc.createElement("ListenerInterface");
+    DOM_Element elemListener=doc.createElement("ListenerInterface");
     elemListeners.appendChild(elemListener);
     elemTmp=doc.createElement("Port");
-    setDOMElementValue(elemTmp,6544U);
+    setDOMElementValue(elemTmp,(UINT8*)"6544");
     elemListener.appendChild(elemTmp);
     elemTmp=doc.createElement("NetworkProtocol");
     setDOMElementValue(elemTmp,(UINT8*)"RAW/TCP");
     elemListener.appendChild(elemTmp);
-		*/
-		if(bForLastMix)
-			{
-				DOM_Element elemProxies=doc.createElement("Proxies");
-				DOM_Element elemProxy=doc.createElement("Proxy");
-				elemProxies.appendChild(elemProxy);
-				elemTmp=doc.createElement("ProxyType");
-				setDOMElementValue(elemTmp,(UINT8*)"HTTP");
-				elemProxy.appendChild(elemTmp);
-				elemTmp=doc.createElement("Host");
-				setDOMElementValue(elemTmp,(UINT8*)"127.0.0.1");
-				elemProxy.appendChild(elemTmp);
-				elemTmp=doc.createElement("Port");
-				setDOMElementValue(elemTmp,3128U);
-				elemProxy.appendChild(elemTmp);
-				elemTmp=doc.createElement("NetworkProtocol");
-				setDOMElementValue(elemTmp,(UINT8*)"RAW/TCP");
-				elemProxy.appendChild(elemTmp);
-				elemNet.appendChild(elemProxies);
-			}
+
     DOM_Element elemCerts=doc.createElement("Certificates");
     elemRoot.appendChild(elemCerts);
     DOM_Element elemOwnCert=doc.createElement("OwnCertificate");
@@ -2450,8 +2152,8 @@ SINT32 CACmdLnOptions::buildDefaultConfig(DOM_Document doc,bool bForLastMix=fals
 
 /**
   * Saves the given XML Document to a file
-  * @param p_doc The XML Document to be saved
-  * @param p_strFileName The name of the file to be saved to
+  * @param a_doc The XML Document to be saved
+  * @param a_strFileName The name of the file to be saved to
   * @retval E_SUCCESS
   */
 SINT32 CACmdLnOptions::saveToFile(DOM_Document p_doc, const UINT8* p_strFileName)
@@ -2473,31 +2175,6 @@ SINT32 CACmdLnOptions::saveToFile(DOM_Document p_doc, const UINT8* p_strFileName
         fflush(stdout);
     }
     delete[] buff;
-    return E_SUCCESS;
-}
-
-
-#ifdef DYNAMIC_MIX
-/**
-  * LERNGRUPPE
-  * Creates a default configuration for this mix. The configuration is then used to start up
-  * the mix! This default-config will be written to DEFAULT_CONFIG_FILE for use in the next
-  * startups of this mix
-  * @retval E_UNKNOWN if an error occurs
-  * @retval E_SUCCESS otherwise
-  */
-SINT32 CACmdLnOptions::createDefaultConfiguration()
-{
-    m_docMixXml = DOM_Document::createDocument();
-    buildDefaultConfig(m_docMixXml);
-    saveToFile(m_docMixXml, (const UINT8*)DEFAULT_CONFIG_FILE);
-
-    char *configfile = (char*) malloc(sizeof(char) * (strlen(DEFAULT_CONFIG_FILE)));
-    strcpy(configfile, DEFAULT_CONFIG_FILE);
-
-    // Set default config file for possible reread attempt
-    m_strConfigFile=new UINT8[ strlen(DEFAULT_CONFIG_FILE)+1 ];
-    memcpy(m_strConfigFile,DEFAULT_CONFIG_FILE, strlen(DEFAULT_CONFIG_FILE)+1);
     return E_SUCCESS;
 }
 
@@ -2553,7 +2230,14 @@ SINT32 CACmdLnOptions::resetNetworkConfiguration()
             elemRoot.removeChild( elemListeners );
         }
     }
-	clearListenerInterfaces();
+
+    if( m_arListenerInterfaces != NULL )
+    {
+        delete[] m_arListenerInterfaces;
+        m_arListenerInterfaces=NULL;
+    }
+    m_cnListenerInterfaces = 0;
+
     return E_SUCCESS;
 }
 
@@ -2592,7 +2276,6 @@ SINT32 CACmdLnOptions::checkListenerInterfaces()
     if( dyn->verifyConnectivity() != E_SUCCESS )
     {
         CAMsg::printMsg( LOG_CRIT, "Your mix is not reachable from the internet.\n Please make sure that your open port %i in your firewall and forward this port to this machine.\n", DEFAULT_TARGET_PORT);
-				result = E_UNKNOWN;
     }
 error:
     delete dyn;
@@ -2609,9 +2292,10 @@ error:
 */
 SINT32 CACmdLnOptions::checkInfoServices(UINT32 *r_runningInfoServices)
 {
+
     UINT32 i;
-		*r_runningInfoServices = 0;
-    if(m_addrInfoServicesSize == 0 || m_addrInfoServicesSize == 0xFFFF) // WTH?
+    
+    if(m_addrInfoServicesSize < MIN_INFOSERVICES)
         return E_UNKNOWN;
 
     /** @todo Better test if these InfoServices are reachable */
@@ -2627,6 +2311,7 @@ SINT32 CACmdLnOptions::checkInfoServices(UINT32 *r_runningInfoServices)
     }
     if((*r_runningInfoServices) < MIN_INFOSERVICES)
         return E_UNKNOWN;
+
     return E_SUCCESS;
 }
 
@@ -2664,7 +2349,6 @@ SINT32 CACmdLnOptions::checkMixId()
 
 /**
   * Returns a random InfoService's address from the list of the known InfoServices
-  * The returned InfoService is tested to be online (i.e. reachable through a socket connction) 
   * @return r_address The address of the random InfoService
   * @retval E_SUCCESS if successfull
   * @retval E_UNKNOWN otherwise
@@ -2679,34 +2363,23 @@ SINT32 CACmdLnOptions::getRandomInfoService(CASocketAddrINet *&r_address)
         return E_UNKNOWN;
     }
     UINT32 index = getRandom(nrAddresses);
-    // Search for a runnung infoservice from the random index on overlapping at nrAddresses
-	UINT32 i = (index+1) % nrAddresses;
-	while(true)
-	{
-		CASocket socket;
-		socket.setSendTimeOut(1000);
-		r_address = (CASocketAddrINet*)m_addrInfoServices[i]->getAddr();
-		if(socket.connect( *r_address )== E_SUCCESS )
+
+    CAListenerInterface *infoService = socketAddresses[index];
+    if( infoService == NULL || infoService->getAddr() == NULL)
     {
+        CAMsg::printMsg( LOG_ERR, "Randomly chosen InfoService is NULL, that's bad!\n");
+        return E_UNKNOWN;
+    }
+
+    r_address = (CASocketAddrINet*)infoService->getAddr();
+
 #ifdef DEBUG
     UINT8 buf[2048];
     UINT32 len;
     r_address->getHostName( buf, len );
-			CAMsg::printMsg( LOG_DEBUG, "getRandomInfoService: Chose InfoServer  %s:%i\n", buf, r_address->getPort());
+    CAMsg::printMsg( LOG_DEBUG, "getRandomInfoService: Chose InfoServer with hostname %s\n", buf);
 #endif
-			socket.close();
     return E_SUCCESS;
-		}
-		else
-		{
-			socket.close();
-			delete r_address;
-			r_address = NULL;
-		}
-		if(i == index) break;
-		i = (i+1) % nrAddresses;
-	}
-	return E_UNKNOWN;
 }
 
 /**
@@ -2720,61 +2393,100 @@ UINT32 CACmdLnOptions::getRandom(UINT32 a_max)
     return result;
 }
 
-/**
- * LERNGRUPPE
- * Changes the information about the type of this mix. This is needed if a 
- * FirstMix should be reconfigured as MiddleMix and vice versa. 
- * @param a_newMixType The new type of this mix
- * @retval E_SUCCESS if everything went well
- * @retval E_UNKNOWN otherwise
- */
-SINT32 CACmdLnOptions::changeMixType(CAMix::tMixType a_newMixType)
-{
-	if( a_newMixType == CAMix::LAST_MIX )
-	{
-		CAMsg::printMsg( LOG_ERR,"Trying to reconfigure a dynamic mix to LastMix, that is evil!\n");
-		return E_UNKNOWN;
-	}
+#else//ifdef DYNAMIC_MIX
 
-	if( a_newMixType == CAMix::MIDDLE_MIX && isFirstMix())
+SINT32 CACmdLnOptions::createMixOnCDConfiguration(const UINT8* strFileName)
 	{
-		CAMsg::printMsg( LOG_DEBUG,"Reconfiguring a FirstMix to MiddleMix.\n");
-		m_bFirstMix = false;
-		m_bMiddleMix = true;
-		DOM_Element elemRoot = m_docMixInfo.getDocumentElement();
-		if(elemRoot != NULL)
-		{
-			DOM_Element elemMixType;
-			getDOMChildByName(elemRoot,(UINT8*)"MixType",elemMixType,false);
-			if(elemMixType != NULL)
+		CASignature* pSignature=new CASignature();
+		pSignature->generateSignKey(1024);
+		DOM_Document doc=DOM_Document::createDocument();
+		DOM_Element elemRoot=doc.createElement("MixConfiguration");
+		doc.appendChild(elemRoot);
+		setDOMElementAttribute(elemRoot,"version",(UINT8*)"0.5");
+		DOM_Element elemGeneral=doc.createElement("General");
+		elemRoot.appendChild(elemGeneral);
+		DOM_Element elemTmp=doc.createElement("MixType");
+		setDOMElementValue(elemTmp,(UINT8*)"FirstMix");
+		elemGeneral.appendChild(elemTmp);
+		elemTmp=doc.createElement("MixID");
+		UINT8 hash[255];
+		UINT32 hashlen=255;
+		pSignature->getVerifyKeyHash(hash,&hashlen);
+		UINT8 tmpBuff[255];
+		UINT32 tmpBuffLen=255;
+		CABase64::encode(hash,hashlen,tmpBuff,&tmpBuffLen);
+		tmpBuff[tmpBuffLen]=0;
+		setDOMElementValue(elemTmp,tmpBuff);
+		elemGeneral.appendChild(elemTmp);
+		elemTmp=doc.createElement("Dynamic");
+		setDOMElementValue(elemTmp,(UINT8*)"True");
+		elemGeneral.appendChild(elemTmp);
+		elemTmp=doc.createElement("CascadeName");
+		setDOMElementValue(elemTmp,(UINT8*)"Dynamic Cascade");
+		elemGeneral.appendChild(elemTmp);
+		elemTmp=doc.createElement("MixName");
+		setDOMElementValue(elemTmp,(UINT8*)"Dynamic Mix");
+		elemGeneral.appendChild(elemTmp);
+		elemTmp=doc.createElement("UserID");
+		setDOMElementValue(elemTmp,(UINT8*)"mix");
+		elemGeneral.appendChild(elemTmp);
+		DOM_Element elemLogging=doc.createElement("Logging");
+		elemGeneral.appendChild(elemLogging);
+		elemTmp=doc.createElement("SysLog");
+		setDOMElementValue(elemTmp,(UINT8*)"True");
+		elemLogging.appendChild(elemTmp);
+		DOM_Element elemNet=doc.createElement("Network");
+		elemRoot.appendChild(elemNet);
+		DOM_Element elemIS=doc.createElement("InfoService");
+		elemNet.appendChild(elemIS);
+		elemTmp=doc.createElement("Host");
+		setDOMElementValue(elemTmp,(UINT8*)"141.76.46.91");
+		elemIS.appendChild(elemTmp);
+		elemTmp=doc.createElement("Port");
+		setDOMElementValue(elemTmp,(UINT8*)"80");
+		elemIS.appendChild(elemTmp);
+		elemTmp=doc.createElement("AllowAutoConfiguration");
+		setDOMElementValue(elemTmp,(UINT8*)"True");
+		elemIS.appendChild(elemTmp);
+		DOM_Element elemListeners=doc.createElement("ListenerInterfaces");
+		elemNet.appendChild(elemListeners);
+		DOM_Element elemListener=doc.createElement("ListenerInterface");
+		elemListeners.appendChild(elemListener);
+		elemTmp=doc.createElement("Port");
+		setDOMElementValue(elemTmp,(UINT8*)"6544");
+		elemListener.appendChild(elemTmp);
+		elemTmp=doc.createElement("NetworkProtocol");
+		setDOMElementValue(elemTmp,(UINT8*)"RAW/TCP");
+		elemListener.appendChild(elemTmp);
+		DOM_Element elemCerts=doc.createElement("Certificates");
+		elemRoot.appendChild(elemCerts);
+		DOM_Element elemOwnCert=doc.createElement("OwnCertificate");
+		elemCerts.appendChild(elemOwnCert);
+		DOM_DocumentFragment docFrag;
+		pSignature->getSignKey(docFrag,doc);		
+		elemOwnCert.appendChild(docFrag);
+		CACertificate* pCert;
+		pSignature->getVerifyKey(&pCert);
+		pCert->encode(docFrag,doc);
+		elemOwnCert.appendChild(docFrag);
+		delete pCert;
+		delete pSignature;
+		UINT32 len;
+		UINT8* buff=DOM_Output::dumpToMem(doc,&len);
+		if(strFileName!=NULL)
 			{
-				setDOMElementValue(elemMixType,(UINT8*)"MiddleMix");
+				SINT32 handle;
+				handle=open((const char*)strFileName,O_CREAT|O_TRUNC);
+				write(handle,buff,len);
+				close(handle);
 			}
-		}
-	}
-	else if( a_newMixType == CAMix::FIRST_MIX && isMiddleMix())
-	{
-		CAMsg::printMsg( LOG_DEBUG,"Reconfiguring a MiddleMix to FirstMix.\n");
-		m_bFirstMix = true;
-		m_bMiddleMix = false;
-		DOM_Element elemRoot = m_docMixInfo.getDocumentElement();
-		if(elemRoot != NULL)
-		{
-			DOM_Element elemMixType;
-			getDOMChildByName(elemRoot,(UINT8*)"MixType",elemMixType,false);
-			if(elemMixType != NULL)
+		else
 			{
-				setDOMElementValue(elemMixType,(UINT8*)"FirstMix");
+				fwrite(buff,len,1,stdout);
+				fflush(stdout);
 			}
-		}
+		delete[] buff;	
+		return E_SUCCESS;
 	}
-	else
-	{
-		CAMsg::printMsg( LOG_ERR, "Error reconfiguring the mix, some strange combination of existing and new type happened\n");
-		return E_UNKNOWN;
-	}
-	return E_SUCCESS;
-}
-
 #endif //DYNAMIC_MIX
 #endif //ONLY_LOCAL_PROXY
