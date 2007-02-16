@@ -973,6 +973,9 @@ SINT32 formatJdbcTimestamp(const SINT32 seconds, UINT8 * strTimestamp, const UIN
 {
 	struct tm * time;
 	time = localtime((time_t *) (&seconds));
+	// without this line, there are problems on 64 BIT machines!!
+	CAMsg::printMsg( LOG_DEBUG, "Year: %d Month: %d\n", time->tm_year, time->tm_mon);
+	
 	if(strftime((char *)strTimestamp, len, "%Y-%m-%d %H:%M:%S", time) == 0)
 	{
 		return E_SPACE;
