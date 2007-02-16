@@ -1689,14 +1689,17 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 								m_strDatabaseUser = new UINT8[strlen((char*)tmpBuff)+1];
 								strcpy((char *)m_strDatabaseUser, (char *) tmpBuff);
 							}
-/*				getDOMChildByName(elemDatabase, (UINT8*)"Password", elem, false);
+				getDOMChildByName(elemDatabase, (UINT8*)"Password", elem, false);
 				tmpLen = 255;
+				//read password from xml if given
 				if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) {
 					strtrim(tmpBuff);
-					m_strDatabasePassword = new char[strlen((char*)tmpBuff)+1];
+					m_strDatabasePassword = new UINT8[strlen((char*)tmpBuff)+1];
 					strcpy(m_strDatabasePassword, (char *) tmpBuff);
-				}*/
-				// don't read password from XML but from stdin:
+				}
+				else
+				{      
+				        //read password from stdin:
 						UINT8 dbpass[500];
 						dbpass[0]=0;
 						printf("Please enter password for postgresql user %s at %s: ",m_strDatabaseUser, m_strDatabaseHost);
