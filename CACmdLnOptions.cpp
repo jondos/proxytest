@@ -1695,7 +1695,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 				if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) {
 					strtrim(tmpBuff);
 					m_strDatabasePassword = new UINT8[strlen((char*)tmpBuff)+1];
-					strcpy(m_strDatabasePassword, (char *) tmpBuff);
+					strcpy((char *)m_strDatabasePassword, (char *) tmpBuff);
 				}
 				else
 				{      
@@ -1716,6 +1716,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 								m_strDatabasePassword[0] = '\0';
 							}	
 				}
+			}
 		}
 		else 
 			{
