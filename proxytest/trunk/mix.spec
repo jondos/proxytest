@@ -16,7 +16,7 @@ BuildRequires: gcc gzip gcc-c++ binutils glibc-devel openssl-devel Xerces-c-deve
 This is the Mix server, which is part of the AN.ON project
 
 %prep
-%setup -q -n proxytest
+%setup -n proxytest
 
 %build
 %{configure}
