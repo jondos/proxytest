@@ -11220,6 +11220,7 @@ if test "${with_xml_include+set}" = set; then
   withval=$with_xml_include;
 		if test "x$withval" != "xno" ; then
 			tryxmlincludedir=$withval
+		fi
 
 
 fi

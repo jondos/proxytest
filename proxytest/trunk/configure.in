@@ -384,6 +384,7 @@ AC_ARG_WITH(xml-include,
 	[
 		if test "x$withval" != "xno" ; then
 			tryxmlincludedir=$withval
+		fi
 	]
 )
 
