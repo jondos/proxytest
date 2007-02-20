@@ -11465,7 +11465,6 @@ echo "$as_me: Xerces-C tests" >&6;}
 for xmldir in "" $tryxmlincludedir ; do
 	CFLAGS="$saved_CFLAGS -I$xmldir -I$xmldir/xercesc"
 	CXXFLAGS="$saved_CXXFLAGS -I$xmldir -I$xmldir/xercesc"
-	echo $CXXFLAGS
 	if test "$cross_compiling" = yes; then
 
 			found_xmldir=1
@@ -11481,7 +11480,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 				#include <dom/DOM.hpp>
 				int main(void)
 				{
-	return 0;
+					return 0;
 				}
 
 _ACEOF
@@ -11529,38 +11528,43 @@ echo "$as_me: error: Xerces-C includes NOT found - please use --with-xml-include
    { (exit 1); exit 1; }; }
 fi
 
-xmllibdir="/usr/local/lib"
+{ echo "$as_me:$LINENO: checking for libxerces-c" >&5
+echo $ECHO_N "checking for libxerces-c... $ECHO_C" >&6; }
+saved_LIBS="$LIBS"
+saved_LDFLAGS="$LDFLAGS"
+
+tryxmllibdir="/usr/local/lib /usr/lib"
+
 
 # Check whether --with-xml-lib was given.
 if test "${with_xml_lib+set}" = set; then
   withval=$with_xml_lib;
 		if test "x$withval" != "xno" ; then
-			xmllibdir=$withval
+			tryxmllibdir=$withval
 		fi
 
 
 fi
 
 
-
-XMLLIBFLAGS="-L$xmllibdir -lxerces-c"
-echo "XMLLIBFLAGS $XMLLIBFLAGS"
-echo "LIBS $LIBS"
-LIBS="$XMLLIBFLAGS $LIBS"
-{ echo "$as_me:$LINENO: checking for libxerces-c" >&5
-echo $ECHO_N "checking for libxerces-c... $ECHO_C" >&6; }
-cat >conftest.$ac_ext <<_ACEOF
+if test "x$prefix" != "xNONE" ; then
+	tryxmllibdir="$tryxmllibdir $prefix"
+fi
+LIBS="$saved_LIBS -xerces-c"
+for xmllibdir in "" $tryxmllibdir ; do
+	LDFLAGS="$saved_LDFLAGS -L$xmllibdir"
+	cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
-#include "util/XercesDefs.hpp"
-#include "util/PlatformUtils.hpp"
-#if (_XERCES_VERSION >= 20200)
-    XERCES_CPP_NAMESPACE_USE
-#endif
+		#include "util/XercesDefs.hpp"
+		#include "util/PlatformUtils.hpp"
+		#if (_XERCES_VERSION >= 20200)
+ 		   XERCES_CPP_NAMESPACE_USE
+		#endif
 
 int
 main ()
@@ -11589,19 +11593,22 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
 	 test ! -s conftest.err
        } && test -s conftest$ac_exeext &&
        $as_test_x conftest$ac_exeext; then
-  { echo "$as_me:$LINENO: result: found" >&5
-echo "${ECHO_T}found" >&6; }
+  found_xmllib=1 break;
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-	{ { echo "$as_me:$LINENO: error: Xerces-C Lib NOT found - please use --with-xml-lib" >&5
-echo "$as_me: error: Xerces-C Lib NOT found - please use --with-xml-lib" >&2;}
-   { (exit 1); exit 1; }; }
+
 fi
 
 rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
       conftest$ac_exeext conftest.$ac_ext
+done
+if test -z "$found_xmllib"; then
+	{ { echo "$as_me:$LINENO: error: Xerces-C libs NOT found - please use --with-xml-lib" >&5
+echo "$as_me: error: Xerces-C libs NOT found - please use --with-xml-lib" >&2;}
+   { (exit 1); exit 1; }; }
+fi
 
 { echo "$as_me:$LINENO: checking if libxerces-depdom is needed" >&5
 echo $ECHO_N "checking if libxerces-depdom is needed... $ECHO_C" >&6; }

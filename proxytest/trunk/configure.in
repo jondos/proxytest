@@ -399,12 +399,11 @@ AC_MSG_NOTICE([Xerces-C tests])
 for xmldir in "" $tryxmlincludedir ; do
 	CFLAGS="$saved_CFLAGS -I$xmldir -I$xmldir/xercesc"
 	CXXFLAGS="$saved_CXXFLAGS -I$xmldir -I$xmldir/xercesc"
-	echo $CXXFLAGS
 	AC_RUN_IFELSE([AC_LANG_SOURCE([[
 				#include <dom/DOM.hpp>
 				int main(void) 
 				{
-	return 0;
+					return 0;
 				}
 				]])],
 				[
@@ -419,30 +418,41 @@ if test -z "$found_xmldir"; then
 	AC_MSG_ERROR([Xerces-C includes NOT found - please use --with-xml-include])
 fi
 
-xmllibdir="/usr/local/lib"
+dnl Check for XML libs
+AC_MSG_CHECKING([for libxerces-c])
+saved_LIBS="$LIBS"
+saved_LDFLAGS="$LDFLAGS"
+
+tryxmllibdir="/usr/local/lib /usr/lib"
+
 AC_ARG_WITH(xml-lib,
 	AS_HELP_STRING([--with-xml-lib=PATH],[Specify path to XERCES-C library files]),
 	[
 		if test "x$withval" != "xno" ; then
-			xmllibdir=$withval
+			tryxmllibdir=$withval
 		fi
 	]
 )
 
-
-XMLLIBFLAGS="-L$xmllibdir -lxerces-c"
-echo "XMLLIBFLAGS $XMLLIBFLAGS"
-echo "LIBS $LIBS"
-LIBS="$XMLLIBFLAGS $LIBS"
-AC_MSG_CHECKING([for libxerces-c])
-AC_LINK_IFELSE([AC_LANG_PROGRAM([
-#include "util/XercesDefs.hpp"
-#include "util/PlatformUtils.hpp"
-#if (_XERCES_VERSION >= 20200)
-    XERCES_CPP_NAMESPACE_USE
-#endif
-], [XMLPlatformUtils::Initialize()
-])],[AC_MSG_RESULT(found)],[AC_MSG_ERROR(Xerces-C Lib NOT found - please use --with-xml-lib)])
+if test "x$prefix" != "xNONE" ; then
+	tryxmllibdir="$tryxmllibdir $prefix"
+fi
+LIBS="$saved_LIBS -xerces-c"
+for xmllibdir in "" $tryxmllibdir ; do
+	LDFLAGS="$saved_LDFLAGS -L$xmllibdir"
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([
+		#include "util/XercesDefs.hpp"
+		#include "util/PlatformUtils.hpp"
+		#if (_XERCES_VERSION >= 20200)
+ 		   XERCES_CPP_NAMESPACE_USE
+		#endif
+		], [XMLPlatformUtils::Initialize()
+])],[found_xmllib=1 break;],[],[found_xmllib=1
+			echo "skip xml lib run test because of cross compiling"])
+done
+if test -z "$found_xmllib"; then
+	AC_MSG_ERROR([Xerces-C libs NOT found - please use --with-xml-lib])
+fi
 
 AC_MSG_CHECKING([if libxerces-depdom is needed])
 AC_LINK_IFELSE([AC_LANG_PROGRAM([
