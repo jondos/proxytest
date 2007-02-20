@@ -3,7 +3,7 @@ dnl Autoconfiguration files for proxytest (a MiX proxy)
 dnl Konrad Rieck <kr@r0q.cx>
 dnl
 
-AC_INIT([proxytest],[0.0.2])
+AC_INIT([AN.ON Mix],[00.05.039],[sk13@inf.tu-dresden.de],[mix])
 AM_INIT_AUTOMAKE
 AM_MAINTAINER_MODE
 AC_PREREQ(2.59)
@@ -454,7 +454,7 @@ for xmllibdir in "" $tryxmllibdir ; do
 		#endif
 		], [XMLPlatformUtils::Initialize()
 ])],[
-AC_MSG_RESULT([found in $xmllib])
+AC_MSG_RESULT([found in $xmllibdir])
 found_xmllib=1 break;
 ],[],[found_xmllib=1
 			AC_MSG_RESULT([skip xml lib run test because of cross compiling])
