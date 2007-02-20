@@ -1,3 +1,5 @@
+# norootforbuild
+
 Summary: Mix Server of the AN.ON project
 Name: Mix
 Version: 00.05.39
@@ -28,7 +30,7 @@ install -d ${RPM_BUILD_ROOT}/etc/init.d/rc2.d
 install -d ${RPM_BUILD_ROOT}/etc/init.d/rc3.d
 install -d ${RPM_BUILD_ROOT}/etc/init.d/rc5.d
 
-install -o root -g root -m u+x -D documentation/init.d/mix ${RPM_BUILD_ROOT}/etc/init.d/mix
+install -m u+rx -D documentation/init.d/mix ${RPM_BUILD_ROOT}/etc/init.d/mix
 ln -s ../mix ${RPM_BUILD_ROOT}/etc/init.d/rc2.d/S70mix
 ln -s ../mix ${RPM_BUILD_ROOT}/etc/init.d/rc3.d/S70mix
 ln -s ../mix ${RPM_BUILD_ROOT}/etc/init.d/rc5.d/S70mix
