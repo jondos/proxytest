@@ -16,7 +16,7 @@ BuildRequires: gcc gzip gcc-c++ binutils glibc-devel openssl-devel Xerces-c-deve
 This is the Mix server, which is part of the AN.ON project
 
 %prep
-%setup -n proxytest
+%setup -q -n proxytest
 
 %build
 %{configure}
@@ -51,7 +51,6 @@ rm -rf $RPM_BUILD_ROOT
 %changelog
 *Tue Feb 20 2007 JAP-Team <jap@inf.tu-dresden.de> 
 -Updated to the new upstream Version 00.05.39
--Bug Fixes in configure scripts
 *Tue Jun 28 2005 JAP-Team <jap@inf.tu-dresden.de> 
 -Fixed a Bug in the First Mix
 *Tue Jun 7 2005 JAP-Team <jap@inf.tu-dresden.de> 
