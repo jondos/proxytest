@@ -11473,7 +11473,9 @@ for xmldir in "" $tryxmlincludedir ; do
 	if test "$cross_compiling" = yes; then
 
 			found_xmldir=1
-			echo "skip xml include run test because of cross compiling"
+			{ echo "$as_me:$LINENO: result: skip xml include run test because of cross compiling" >&5
+echo "${ECHO_T}skip xml include run test because of cross compiling" >&6; }
+
 else
   cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
@@ -11600,7 +11602,11 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
 	 test ! -s conftest.err
        } && test -s conftest$ac_exeext &&
        $as_test_x conftest$ac_exeext; then
-  found_xmllib=1 break;
+
+{ echo "$as_me:$LINENO: result: found in $xmllib" >&5
+echo "${ECHO_T}found in $xmllib" >&6; }
+found_xmllib=1 break;
+
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5

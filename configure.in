@@ -417,7 +417,8 @@ for xmldir in "" $tryxmlincludedir ; do
 			],[
 				],[
 			found_xmldir=1
-			echo "skip xml include run test because of cross compiling"])
+			AC_MSG_RESULT([skip xml include run test because of cross compiling])
+			])
 done
 if test -z "$found_xmldir"; then
 	AC_MSG_ERROR([Xerces-C includes NOT found - please use --with-xml-include])
@@ -452,8 +453,12 @@ for xmllibdir in "" $tryxmllibdir ; do
  		   XERCES_CPP_NAMESPACE_USE
 		#endif
 		], [XMLPlatformUtils::Initialize()
-])],[found_xmllib=1 break;],[],[found_xmllib=1
-			echo "skip xml lib run test because of cross compiling"])
+])],[
+AC_MSG_RESULT([found in $xmllib])
+found_xmllib=1 break;
+],[],[found_xmllib=1
+			AC_MSG_RESULT([skip xml lib run test because of cross compiling])
+			])
 done
 if test -z "$found_xmllib"; then
 	AC_MSG_ERROR([Xerces-C libs NOT found - please use --with-xml-lib])
