@@ -437,7 +437,7 @@ AC_ARG_WITH(xml-lib,
 if test "x$prefix" != "xNONE" ; then
 	tryxmllibdir="$tryxmllibdir $prefix"
 fi
-LIBS="$saved_LIBS -xerces-c"
+LIBS="$saved_LIBS -lxerces-c"
 for xmllibdir in "" $tryxmllibdir ; do
 	LDFLAGS="$saved_LDFLAGS -L$xmllibdir"
 	AC_LINK_IFELSE([AC_LANG_PROGRAM([
