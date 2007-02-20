@@ -11434,6 +11434,10 @@ _ACEOF
 fi
 LIBS="-lcrypto -lssl $saved_LIBS"
 
+
+{ echo "$as_me:$LINENO: Xerces-C tests" >&5
+echo "$as_me: Xerces-C tests" >&6;}
+
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -11460,8 +11464,9 @@ if test "x$prefix" != "xNONE" ; then
 	tryxmlincludedir="$tryxmlincludedir $prefix"
 fi
 
-{ echo "$as_me:$LINENO: Xerces-C tests" >&5
-echo "$as_me: Xerces-C tests" >&6;}
+{ echo "$as_me:$LINENO: checking for xerces-c includes" >&5
+echo $ECHO_N "checking for xerces-c includes... $ECHO_C" >&6; }
+
 for xmldir in "" $tryxmlincludedir ; do
 	CFLAGS="$saved_CFLAGS -I$xmldir -I$xmldir/xercesc"
 	CXXFLAGS="$saved_CXXFLAGS -I$xmldir -I$xmldir/xercesc"
@@ -11505,6 +11510,8 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
 
+				{ echo "$as_me:$LINENO: result: found in $xmldir" >&5
+echo "${ECHO_T}found in $xmldir" >&6; }
 				found_xmldir=1
 				break;
 

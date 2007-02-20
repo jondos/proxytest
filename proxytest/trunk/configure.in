@@ -374,6 +374,9 @@ if (test ! -z "$ac_cv_openssldir" && test "x$ac_cv_openssldir" != "x(system)") ;
 fi
 LIBS="-lcrypto -lssl $saved_LIBS"
 
+
+AC_MSG_NOTICE([Xerces-C tests])
+
 dnl Check for Xerces-C
 AC_LANG_PUSH(C++)
 dnl Check for XML includes.
@@ -395,7 +398,8 @@ if test "x$prefix" != "xNONE" ; then
 	tryxmlincludedir="$tryxmlincludedir $prefix"
 fi
 
-AC_MSG_NOTICE([Xerces-C tests])
+AC_MSG_CHECKING([for xerces-c includes])
+
 for xmldir in "" $tryxmlincludedir ; do
 	CFLAGS="$saved_CFLAGS -I$xmldir -I$xmldir/xercesc"
 	CXXFLAGS="$saved_CXXFLAGS -I$xmldir -I$xmldir/xercesc"
@@ -407,6 +411,7 @@ for xmldir in "" $tryxmlincludedir ; do
 				}
 				]])],
 				[
+				AC_MSG_RESULT([found in $xmldir])
 				found_xmldir=1
 				break;
 			],[
