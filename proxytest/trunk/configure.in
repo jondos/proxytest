@@ -400,7 +400,20 @@ for xmldir in "" $tryxmlincludedir ; do
 	CFLAGS="$saved_CFLAGS -I$xmldir -I$xmldir/xercesc"
 	CXXFLAGS="$saved_CXXFLAGS -I$xmldir -I$xmldir/xercesc"
 	echo $CXXFLAGS
-	AC_CHECK_HEADER([dom/DOM.hpp],[found_xmldir=1 break;],[])
+	AC_RUN_IFELSE([AC_LANG_SOURCE([[
+				#include <dom/DOM.hpp>
+				int main(void) 
+				{
+	return 0;
+				}
+				]])],
+				[
+				found_xmldir=1
+				break;
+			],[
+				],[
+			found_xmldir=1
+			echo "skip xml include run test because of cross compiling"])
 done
 if test -z "$found_xmldir"; then
 	AC_MSG_ERROR([Xerces-C includes NOT found - please use --with-xml-include])
