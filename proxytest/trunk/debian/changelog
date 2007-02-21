@@ -1,0 +1,97 @@
+mix (00.05.39-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- root <root@infoservice>  Wed, 21 Feb 2007 21:23:58 +0100
+
+mix (00.04.08-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- root <root@dud90.inf.tu-dresden.de>  Thu, 29 Sep 2005 12:04:03 +0200
+
+mix (00.03.99-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- root <root@dud90.inf.tu-dresden.de>  Thu,  8 Sep 2005 13:35:40 +0200
+
+mix (00.03.98-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- root <root@dud90.inf.tu-dresden.de>  Mon,  5 Sep 2005 16:10:07 +0200
+
+mix (00.03.97-1) unstable; urgency=low
+
+  * New upstream release
+
+ --  <compile@dud90.inf.tu-dresden.de>  Mon,  5 Sep 2005 14:59:05 +0200
+
+mix (00.03.96-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- root <root@dud90.inf.tu-dresden.de>  Thu, 18 Aug 2005 21:47:02 +0200
+
+mix (00.03.80-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- root <root@localhost.localdomain>  Thu, 30 Jun 2005 14:21:33 +0200
+
+mix (00.03.79-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- root <root@localhost.localdomain>  Thu, 26 May 2005 15:21:32 +0200
+
+mix (00.03.70-3) unstable; urgency=low
+
+  * BugFix in configure.in
+  compile it without epoll() support
+
+ -- root <root@localhost.localdomain>  Mon, 18 Apr 2005 09:50:37 +0200
+
+mix (00.03.70-2) unstable; urgency=low
+
+  * BugFix in init.d script
+
+ -- JAP-Team <jap@inf.tu-dresden.de>  Wed,  9 Mar 2005 17:25:42 +0100
+
+mix (00.03.70-1) unstable; urgency=low
+
+  * New mix release with better --pidfile support
+
+ -- JAP <jap@inf.tu-dresden.de>  Wed,  9 Mar 2005 17:18:32 +0100
+
+mix (00.03.69-3) unstable; urgency=low
+
+  * Fixed some bugs in the init script
+
+ -- JAP-Team <jap@inf.tu-dresden.de>  Wed,  9 Mar 2005 17:14:48 +0100
+
+mix (00.03.69-2) unstable; urgency=low
+
+  * Fixed some bugs in the init script
+
+ -- JAP-Team <jap@inf.tu-dresden.de>  Wed,  9 Mar 2005 16:18:34 +0100
+
+mix (00.03.69-1) unstable; urgency=low
+
+  * New mix release with --pidfile support
+
+ -- JAP-Team <jap@inf.tu-dresden.de>  Wed,  9 Mar 2005 11:16:04 +0100
+
+mix (00.03.68-2) unstable; urgency=low
+
+  * Some fixes on the init script
+
+ -- JAP-Team <jap@inf.tu-dresden.de>  Tue,  8 Mar 2005 23:29:46 +0100
+
+mix (00.03.68-1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- JAP-Team <jap@inf.tu-dresden.de>  Tue,  8 Mar 2005 22:35:45 +0100
+
