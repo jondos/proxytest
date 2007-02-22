@@ -12,7 +12,7 @@ BuildRoot: %{_tmppath}/%{name}-root
 %if 0%{?suse_version}
 BuildRequires: gcc gzip gcc-c++ binutils glibc-devel openssl-devel Xerces-c-devel Xerces-c libstdc++-devel libstdc++ make
 %else
-BuildRequires: libssl-dev libxerces27-dev
+BuildRequires: gcc gzip gcc-c++ binutils glibc-devel openssl-devel libstdc++-devel libstdc++ make xerces-c-doc-2.7.0
 %endif
 
 %description
