@@ -343,8 +343,8 @@ SINT32 CAInfoService::getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic)
 
 SINT32 CAInfoService::getMixedPackets(UINT64& ppackets)
 	{
-    if(m_pMix!=NULL && options.isFirstMix())
-        return ((CAFirstMix*)m_pMix)->getMixedPackets(ppackets);
+		if(m_pMix!=NULL && options.isFirstMix())
+			return ((CAFirstMix*)m_pMix)->getMixedPackets(ppackets);
 		return E_UNKNOWN;
 	}
 
@@ -413,24 +413,26 @@ UINT8* CAInfoService::getStatusXMLAsString(bool bIncludeCerts,UINT32& len)
 		tmpUser=tmpTraffic=tmpRisk=-1;
 		set64(tmpPackets,(UINT32)-1);
 		getLevel(&tmpUser,&tmpRisk,&tmpTraffic);
-		getMixedPackets(tmpPackets);
-		UINT32 avgTraffic=div64(tmpPackets,m_minuts);
-		m_minuts++;
-		UINT32 diffTraffic=diff64(tmpPackets,m_lastMixedPackets);
-		if(avgTraffic==0)
+		SINT32 ret=getMixedPackets(tmpPackets);
+		if(ret==E_SUCCESS)
 			{
-				if(diffTraffic==0)
-					tmpTraffic=0;
+				UINT32 avgTraffic=div64(tmpPackets,m_minuts);
+				UINT32 diffTraffic=diff64(tmpPackets,m_lastMixedPackets);
+				if(avgTraffic==0)
+					{
+						if(diffTraffic==0)
+							tmpTraffic=0;
+						else
+							tmpTraffic=100;
+					}
 				else
-					tmpTraffic=100;
+					{
+						double dTmp=(double)diffTraffic/(double)avgTraffic;
+						tmpTraffic=min(SINT32(50.*dTmp),100);
+					}
+				set64(m_lastMixedPackets,tmpPackets);
 			}
-		else
-			{
-				double dTmp=(double)diffTraffic/(double)avgTraffic;
-				tmpTraffic=min(SINT32(50.*dTmp),100);
-			}
-		set64(m_lastMixedPackets,tmpPackets);
-
+		m_minuts++;
 //let the attributes in alphabetical order..
 #define XML_MIX_CASCADE_STATUS "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\
 <MixCascadeStatus LastUpdate=\"%s\" currentRisk=\"%i\" id=\"%s\" mixedPackets=\"%s\" nrOfActiveUsers=\"%i\" trafficSituation=\"%i\"\
