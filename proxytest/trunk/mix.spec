@@ -52,9 +52,19 @@ rm -rf $RPM_BUILD_ROOT
 /etc/init.d/rc5.d/S70mix
 
 %changelog
+<<<<<<< mix.spec
+* Tue Feb 20 2007 JAP-Team <jap@inf.tu-dresden.de> 
+- Updated to the new upstream Version 00.05.39
+- Bug Fixes in configure scripts
+* Tue Jun 28 2005 JAP-Team <jap@inf.tu-dresden.de> 
+- Fixed a Bug in the First Mix
+* Tue Jun 7 2005 JAP-Team <jap@inf.tu-dresden.de> 
+- Initial build
+=======
 *Tue Feb 20 2007 JAP-Team <jap@inf.tu-dresden.de> 
 -Updated to the new upstream Version 00.05.39
 *Tue Jun 28 2005 JAP-Team <jap@inf.tu-dresden.de> 
 -Fixed a Bug in the First Mix
 *Tue Jun 7 2005 JAP-Team <jap@inf.tu-dresden.de> 
 -Initial build
+>>>>>>> 1.9
