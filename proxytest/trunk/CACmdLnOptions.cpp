@@ -2694,9 +2694,9 @@ SINT32 CACmdLnOptions::getRandomInfoService(CASocketAddrINet *&r_address)
     {
 #ifdef DEBUG
     UINT8 buf[2048];
-    UINT32 len;
+    UINT32 len=2047;
     r_address->getHostName( buf, len );
-			CAMsg::printMsg( LOG_DEBUG, "getRandomInfoService: Chose InfoServer  %s:%i\n", buf, r_address->getPort());
+		CAMsg::printMsg( LOG_DEBUG, "getRandomInfoService: Chose InfoService server  %s:%i\n", buf, r_address->getPort());
 #endif
 			socket.close();
     return E_SUCCESS;

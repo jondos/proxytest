@@ -964,11 +964,11 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 #ifdef REPLAY_DETECTION
 		pHashEntry->pControlChannelDispatcher->registerControlChannel(new CAReplayControlChannel(m_pReplayMsgProc));
 #endif
-		#ifdef COUNTRY_STATS
-			incUsers(pHashEntry);
-		#else
-			incUsers();
-		#endif	
+#ifdef COUNTRY_STATS
+		incUsers(pHashEntry);
+#else
+		incUsers();
+#endif	
 #ifdef HAVE_EPOLL
 		m_psocketgroupUsersRead->add(*pNewUser,m_pChannelList->get(pNewUser)); // add user socket to the established ones that we read data from.
 		m_psocketgroupUsersWrite->add(*pNewUser,m_pChannelList->get(pNewUser));
