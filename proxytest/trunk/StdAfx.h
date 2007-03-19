@@ -60,7 +60,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 /* LERNGRUPPE: define this to get dynamic mixes */
 //#define DYNAMIC_MIX
 
-//the following definition are just for threading support beside pthread 
+//the following definition are just for threading support beside pthread
 #undef USE_SEMAPHORE //normally we do not need semaphores
 #define HAVE_PTHREAD_CV //normally we use the pthread conditional variables
 #define HAVE_PTHREAD_MUTEXES //normally we use the pthread mutexs
@@ -135,8 +135,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define LAST_MIX_TO_PROXY_CONNECT_TIMEOUT 2000 //Connection timeout for last mix to proxy connections 2 Seconds...
 #define LAST_MIX_TO_PROXY_SEND_TIMEOUT (UINT32)5000 //5 Seconds...
 #define MIX_TO_INFOSERVICE_TIMEOUT 10000 //How long to wait than communicating with the InfoService? (ms)
-#define NUM_LOGIN_WORKER_TRHEADS 300//How many working threads for login ??
-#define MAX_LOGIN_QUEUE 2000 //how many waiting entries in the login queue ??
+#define NUM_LOGIN_WORKER_TRHEADS 10//How many working threads for login *do not change this until you really know that you are doing!* ??
+#define MAX_LOGIN_QUEUE 500 //how many waiting entries in the login queue *do not change this until you really know that you are doing!*??
 
 #define MAX_USER_SEND_QUEUE 100000 //How many bytes could be in each User's send queue, before we suspend the belonging channels
 
