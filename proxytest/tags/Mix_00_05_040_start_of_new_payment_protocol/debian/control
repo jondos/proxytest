@@ -1,0 +1,13 @@
+Source: mix
+Section: net
+Priority: optional
+Maintainer: JAP-Team <jap@inf.tu-dresden.de>
+Build-Depends: debhelper (>= 4.0.0), libssl-dev (>=0.9.7), libxerces27-dev
+Standards-Version: 3.6.1
+
+Package: mix
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: The AN\.ON projects Mix software
+ bla bla
+ .

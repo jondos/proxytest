@@ -1,0 +1,50 @@
+<?xml version="1.0" ?>
+<MixCascade version="0.2">
+	<MixProtocolVersion>
+		<!-- "0.4" ==> "normal" mix proctocol
+				 "0.8" ==> with timestamp/replay detection
+         "0.9" ==> with new payment protocol
+		-->
+    ...
+	</MixProtocolVersion>
+	<Mixes count="..">
+		<Mix id="..">
+			<MixProtocolVersion>...</MixProtocolVersion>
+			<RSAKeyValue>
+				<!--- PubKey of FirstMix -->
+				...
+			</RSAKeyValue>
+			<Replay>
+				<!-- information for replay detection mechanisms
+						 if supported by protocol -->
+				<ReplayTimestamp interval=".." offset="..">
+					<!-- replay timestamp on the mix -->
+					<!-- interval give the number of the current
+							 interval on the mix; offset gives the 
+							 seconds since start of this interval -->
+				</ReplayTimestamp>
+			</Replay>
+		</Mix>
+		<Mix id=".">
+			<RSAKeyValue>
+				<!--- PubKey of FirstMix -->
+				...
+			</RSAKeyValue>
+			<Signature>
+				<!--- from the Mix -->
+				...
+			</Signature>
+		</Mix>
+	</Mixes>
+	<Payment required="true|false">
+		<!-- Since Version 0.2 -->
+		<!-- Gives payment related information to the JAP
+				 if required=="true" payment is required
+				 if required=="false" no payment is required
+		-->
+	</Payment>
+	<Signature>
+		<!--- from FirstMix -->
+		...
+	</Signature>
+</MixCascade>
