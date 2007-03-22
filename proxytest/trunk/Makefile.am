@@ -68,6 +68,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CAXMLBI.cpp \
 		    CAXMLCostConfirmation.cpp\
 		    CAXMLErrorMessage.cpp\
+		    CAXMLPriceCert.cpp\
 		    StdAfx.cpp \
 		    proxytest.cpp \
 		    CAAbstractControlChannel.hpp\
@@ -136,6 +137,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CAXMLBI.hpp \
 		    CAXMLCostConfirmation.hpp\
 		    CAXMLErrorMessage.hpp\
+		    CAXMLPriceCert.hpp\
 		    StdAfx.h \
 		    basetypedefs.h
 
