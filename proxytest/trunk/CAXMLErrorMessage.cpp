@@ -43,13 +43,23 @@ CAXMLErrorMessage::CAXMLErrorMessage(UINT32 errorCode)
 	: CAAbstractXMLEncodable()
 	{
 		UINT8 *errors[] = {
-			(UINT8*)"Success", (UINT8*)"Internal Server Error",
-			(UINT8*)"Wrong format", (UINT8*)"Wrong Data", (UINT8*)"Key not found", 
-			(UINT8*)"Bad Signature", (UINT8*)"Bad request", 
+			(UINT8*)"Success",
+			(UINT8*)"Internal Server Error",
+			(UINT8*)"Wrong format",
+			(UINT8*)"Wrong Data", 
+			(UINT8*)"Key not found", 
+			(UINT8*)"Bad Signature",
+			(UINT8*)"Bad request", 
 			(UINT8*)"You refused to send an account certificate. I will close the connection.",
 			(UINT8*)"You refused to send a current balance. I will close the connection.",
 			(UINT8*)"You refused to send a cost confirmation. I will close the connection.",
-			(UINT8*)"Your account is empty."
+			(UINT8*)"Your account is empty.",
+			(UINT8*)"Cascade is too long",
+			(UINT8*)"Database error",
+			(UINT8*)"Insufficient balance",
+			(UINT8*)"No Flatrate offered",
+			(UINT8*)"Invalid code",
+			(UINT8*)"Costconfirmation is not valid, possible attempt at doublespending!"
 		};
 		m_iErrorCode = errorCode;
 		if (m_iErrorCode < 0 || m_iErrorCode >= 11)

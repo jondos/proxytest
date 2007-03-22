@@ -1,6 +1,8 @@
 #ifndef __CAXMLCOSTCONFIRMATION__
 #define __CAXMLCOSTCONFIRMATION__
 #include "xml/DOM_Output.hpp"
+#include "CAPriceInfo.hpp"
+
 /**
 this class corresponds to anon.pay.xml.XMLEasyCC in the Java implementation
 
@@ -8,6 +10,19 @@ this class corresponds to anon.pay.xml.XMLEasyCC in the Java implementation
 */
 class CAXMLCostConfirmation
 	{
+		
+		private:
+			SINT32 setValues();
+			CAXMLCostConfirmation();
+			
+			UINT64				m_lTransferredBytes;
+			UINT64				m_lAccountNumber;
+			UINT32				m_id; //id of the CC, only set after storing it in the BI's database
+//			CAPriceInfo** 		m_priceCerts;		
+			UINT8*				m_pStrPIID;
+			DOM_Document	m_domDocument;
+			static const UINT8* const ms_pStrElemName;
+			
 		public:
 			/** Tries to create an CAXMLCostConfirmation object from the given XML string.
 				* @retval NULL if the XML data was wrong
@@ -48,22 +63,20 @@ class CAXMLCostConfirmation
 					return m_lAccountNumber;
 				}
 			
-			/** @return a newly allocated buffer which must be deleted by the caller 
-			* retval NULL if AI-ID was not set
-			*/
-			UINT8 * getAiID() 
-				{
-					UINT8 * pTmpStr = NULL;
-					if(m_pStrAiName!=NULL)
+
+			UINT32 getID() 
 						{
-							pTmpStr = new UINT8[strlen((char*)m_pStrAiName)+1];
-							strcpy((char*)pTmpStr, (char*)m_pStrAiName);
-						}
-					return pTmpStr;
+					return m_id;
 				}
 			
+//dangerous and currently not needed?			
+//			CAPriceInfo** getPriceCerts()
+//				{
+//					return m_priceCerts;	
+//				}
+			
 			/** @return a newly allocated buffer which must be deleted by the caller 
-			* retval NULL if AI-ID was not set
+			* 
 			*/
 			UINT8* getPIID() 
 				{
@@ -87,16 +100,7 @@ class CAXMLCostConfirmation
 			}
 			
 
-		private:
-			SINT32 setValues();
-			CAXMLCostConfirmation();
 			
-			UINT64				m_lTransferredBytes;
-			UINT64				m_lAccountNumber;
-			UINT8*				m_pStrAiName;
-			UINT8*				m_pStrPIID;
-			DOM_Document	m_domDocument;
-			static const UINT8* const ms_pStrElemName;
 	};
 
 #endif

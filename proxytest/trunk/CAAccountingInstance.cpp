@@ -42,6 +42,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 #include "CASignature.hpp"
 #include "CAXMLErrorMessage.hpp"
 
+//for testing purposes only
+#define JAP_DIGEST_LENGTH 28
 
 
 /**
@@ -117,8 +119,11 @@ CAAccountingInstance::~CAAccountingInstance()
  * @return 2 user did not send accountcertificate, connection should be closed
  * @return 3 user  did not send a cost confirmation 
  *						or somehow tried to fake authentication, connection should be closed
+ * 
+ * @param callingMix: the Mix instance to which the AI belongs
+ *  (needed to get cascadeInfo to extract the price certificates to include in cost confirmations) 
  */
-SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
+SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, CAMix* callingMix)
 	{
 		tAiAccountingInfo* pAccInfo=pHashEntry->pAccountingInfo;
 	
@@ -146,9 +151,10 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 		}*/
 		
 		pAccInfo->transferredBytes += MIXPACKET_SIZE; // count the packet	
+		
 		if(pAccInfo->authFlags & (AUTH_FATAL_ERROR))
 		{
-			// there was an error earlier..
+			// there was an error earlier.
 			ms_pInstance->m_Mutex.unlock();
 			CAMsg::printMsg( LOG_DEBUG, "AccountingInstance: should kick out user now...\n");
 			return 3;
@@ -196,10 +202,29 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 					}
 
 				//----------------------------------------------------------
-				// Hardlimit cost confirmation check
-				UINT32 unconfirmedBytes=diff64(pAccInfo->transferredBytes,pAccInfo->confirmedBytes);
-				if (unconfirmedBytes >= ms_pInstance->m_iHardLimitBytes)
+				// ******     Hardlimit cost confirmation check **********
+				//counting unconfirmed bytes is not necessary anymore, since we deduct from prepaid bytes
+				//UINT32 unconfirmedBytes=diff64(pAccInfo->transferredBytes,pAccInfo->confirmedBytes);
+				
+				//confirmed and transferred bytes are cumulative, so they use UINT64 to store potentially huge values
+				//prepaid Bytes as the difference will be much smaller, but might be negative, so we cast to signed int
+				UINT64 prepaidBytesUnsigned = (UINT64) (pAccInfo->confirmedBytes - pAccInfo->transferredBytes);
+				SINT32 prepaidBytes = (SINT32) prepaidBytesUnsigned;
+#ifdef DEBUG		
+				UINT64 confirmedBytes = pAccInfo->confirmedBytes;
+				UINT64 transferred = pAccInfo->transferredBytes;
+				CAMsg::printMsg(LOG_ERR, "Confirmed: %u \n",confirmedBytes);
+				CAMsg::printMsg(LOG_ERR, "transferrred: %u \n",transferred);	
+				CAMsg::printMsg(LOG_ERR, "prepaidBytes: %d \n",prepaidBytes);
+#endif					
+				if (prepaidBytes <= (SINT32) ms_pInstance->m_iHardLimitBytes)
 				{
+#ifdef DEBUG					
+					CAMsg::printMsg(LOG_ERR, "hard limit of %d bytes triggered \n", ms_pInstance->m_iHardLimitBytes);
+#endif					
+					
+					//currently nothing happens if prepaidBytes go below zero during timeout?
+					//should not be a problem, TODO: think about this more  
 					
 					time_t theTime=time(NULL);	
 					if ((pAccInfo->authFlags & AUTH_HARD_LIMIT_REACHED) == 0)
@@ -220,7 +245,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 						pAccInfo->lastHardLimitSeconds = 0;
 					}
 					ms_pInstance->m_Mutex.unlock();
-					return 2;
+					//return 2; //we still need to check softlimit to trigger a cost confirmation
 				}
 				else
 				{
@@ -228,9 +253,12 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 				}
 	
 				//-------------------------------------------------------
-				// check: is it time to request a new cost confirmation?
-				if( unconfirmedBytes >= ms_pInstance->m_iSoftLimitBytes)
+				// *** SOFT LIMIT CHECK *** is it time to request a new cost confirmation?
+				if ( prepaidBytes <= (SINT32) ms_pInstance->m_iSoftLimitBytes )
 					{
+#ifdef DEBUG
+						CAMsg::printMsg(LOG_ERR, "soft limit of %d bytes triggered \n",ms_pInstance->m_iSoftLimitBytes);
+#endif						
 						if( (pAccInfo->authFlags & AUTH_SENT_CC_REQUEST) )
 							{//we have sent a first CC request
 								//still waiting for the answer to the CC reqeust
@@ -239,60 +267,34 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 							}//we have sent a CC request
 						// no CC request sent yet --> send a first CC request
 						DOM_Document doc;
-						#ifdef DEBUG
 							CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending first CC request.\n");
-						#endif
-						makeCCRequest(pAccInfo->accountNumber, pAccInfo->transferredBytes, doc);
+						
+						//get cascadeInfo from CAMix(which makeCCRequest needs to extract the price certs
+						DOM_Document cascadeInfoDoc; 
+						callingMix->getMixCascadeInfo(cascadeInfoDoc);
+		                //send CC to jap
+		                UINT32 prepaidInterval;
+		                options.getPrepaidIntervalKbytes(&prepaidInterval);
+		                UINT64 transferredBytes = pAccInfo->transferredBytes;
+		                UINT64 bytesToConfirm = transferredBytes + (prepaidInterval * 1024); 				
+						makeCCRequest(pAccInfo->accountNumber, bytesToConfirm, doc,cascadeInfoDoc);
 						pAccInfo->pControlChannel->sendXMLMessage(doc);
+#ifdef DEBUG	
+						CAMsg::printMsg(LOG_DEBUG, "CC request sent for %u bytes \n",bytesToConfirm);
+						CAMsg::printMsg(LOG_DEBUG, "transferrred bytes: %u bytes \n",transferredBytes);
+						CAMsg::printMsg(LOG_DEBUG, "prepaid Interval: %u \n",prepaidInterval);	
+						UINT32 debuglen = 3000;
+						UINT8 debugout[3000];
+						DOM_Output::dumpToMem(doc,debugout,&debuglen);
+						debugout[debuglen] = 0;			
+						CAMsg::printMsg(LOG_DEBUG, "the CC sent looks like this: %s \n",debugout);
+#endif						
 						pAccInfo->authFlags |= AUTH_SENT_CC_REQUEST;
 						ms_pInstance->m_Mutex.unlock();
 						return 1;
-					}//soft limit exceeded
-				//everything is fine --> but do we need a new balance cert?
-				//@todo move this to a separate thread?!
-				//--------------------------------------------------------------
-				// check: do we need a new balance certificate for the account?
-				/// TODO: Make the numbers vvv configurable
-				if( (( (pAccInfo->transferredBytes - pAccInfo->lastbalTransferredBytes) >=
-					((pAccInfo->lastbalDeposit - pAccInfo->lastbalSpent) / 33))&&
-					((pAccInfo->transferredBytes - pAccInfo->lastbalTransferredBytes) >= 256*1024))
-					|| (pAccInfo->lastbalDeposit == 0))
-					{
-				    time_t theTime=time(NULL);
+					}// end of soft limit exceeded
 
-						if( (pAccInfo->authFlags & AUTH_SENT_BALANCE_REQUEST) )
-							{
-								if (pAccInfo->lastBalanceRequestSeconds + BALANCE_REQUEST_TIMEOUT < theTime)
-									{
-										CAMsg::printMsg(LOG_DEBUG, "AccountingInstance: Did not get balance from user! Timed out...\n");
-										CAXMLErrorMessage msg(CAXMLErrorMessage::ERR_NO_BALANCE);
-										DOM_Document doc;
-										msg.toXmlDocument(doc);
-										pAccInfo->pControlChannel->sendXMLMessage(doc);
-										pAccInfo->authFlags |= AUTH_FATAL_ERROR;
-										ms_pInstance->m_Mutex.unlock();
-										return 2;
-									}
-								else
-									{
-										ms_pInstance->m_Mutex.unlock();
-										return 1;
-									}
-							}
-						// send a first CC request
-						DOM_Document doc;
-						CAAccountingInstance::makeBalanceRequest(theTime-600, doc);
-						#ifdef DEBUG
-							CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending balance request.\n");
-						#endif
-						pAccInfo->reqbalMinSeconds = theTime - 600;
-						pAccInfo->pControlChannel->sendXMLMessage(doc);
-						pAccInfo->authFlags |= AUTH_SENT_BALANCE_REQUEST;
-						pAccInfo->lastBalanceRequestSeconds = theTime;
-						ms_pInstance->m_Mutex.unlock();
-						return 1;
-					}
-				//really everything is fine! let the packet pass thru
+				//everything is fine! let the packet pass thru
 				ms_pInstance->m_Mutex.unlock();
 				return 1;
 			}
@@ -301,6 +303,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 		// we have no accountcert from the user, but we have already sent the request
 		if(pAccInfo->authFlags & AUTH_SENT_ACCOUNT_REQUEST)
 			{
+				CAMsg::printMsg(LOG_DEBUG, "got no account cert, but sent request");
 				int ret=2;
 				if(pAccInfo->lastRequestSeconds+PAYMENT_ACCOUNT_CERT_TIMEOUT<theTime)
 					{
@@ -316,6 +319,13 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 				return ret;
 			}
 		// send first request
+		
+		//Elmar: has been commented out since version 1.33, why???
+		//like this, makeAccountRequest will never happen, only JAP can initiate connection
+		//using AnonClient.finishInitialization() calling AIControlChannel.sendAccountCert
+		// !!! TODO !!! either clean up completely (by removing auth state sent_acount_request etc)
+		// or reinstate !!!
+		
 		/*#ifdef DEBUG
 			CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending account request.\n");
 		#endif
@@ -331,8 +341,17 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 	}
 
 /** @todo makt the faster by not using DOM!*/
-SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UINT64 transferredBytes, DOM_Document& doc)
+SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UINT64 transferredBytes, DOM_Document& doc, DOM_Document& cascadeInfo)
 	{
+		/*
+		 * creating the xml of a new CC is really the responsability of the CAXMLCostConfirmation class
+		 * knowledge about the structure of a CC's XML should be encapsulated in it
+		 * TODO: add constructor to that class that takes accountnumber, transferredbytes etc as params
+		 *       (should use a template internally into which it only inserts accNumber and bytes,to speed things up
+		 * TODO: add toXMLElement method
+		 * then replace manually building the xml here with contructing a CAXMLCostConfirmation
+		 * and just add the xml returned by its toXMLElement method
+		 */
 		// create a DOM CostConfirmation document
 		doc = DOM_Document::createDocument();
 		DOM_Element elemRoot = doc.createElement("PayRequest");
@@ -350,36 +369,89 @@ SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UIN
 		DOM_Element elemBytes = doc.createElement("TransferredBytes");
 		setDOMElementValue(elemBytes, transferredBytes);
 		elemCC.appendChild(elemBytes);
+
+		//extract price certificate elements from cascadeInfo
+		DOM_Element cascadeInfoElem = cascadeInfo.getDocumentElement();
+		DOM_NodeList allMixes = cascadeInfoElem.getElementsByTagName("Mix");
+		int nrOfMixes = allMixes.getLength();
+		DOM_Node* mixNodes = new DOM_Node[nrOfMixes]; //so we can use separate loops for extracting, hashing and appending
+		DOM_Node curMixNode;
+		for (int i = 0; i<nrOfMixes; i++){
+			//cant use getDOMChildByName from CAUtil here yet, since it will always return the first child
+			curMixNode = allMixes.item(i); 
+			getDOMChildByName(curMixNode,(UINT8*)"PriceCertificate",mixNodes[i],true);	
+		}	 
+		
+		//hash'em, and get subjectkeyidentifiers
+		UINT8 digest[SHA_DIGEST_LENGTH];
+		UINT8** allHashes=new UINT8*[nrOfMixes];
+		UINT8** allSkis=new UINT8*[nrOfMixes];
+		DOM_Node skiNode;
+		for (int i = 0; i < nrOfMixes; i++){
+			UINT8* out=new UINT8[5000];
+			UINT32 outlen=5000;
+			
+			DOM_Output::makeCanonical(mixNodes[i],out,&outlen);		
+			out[outlen] = 0;
+#ifdef DEBUG			
+			CAMsg::printMsg(LOG_DEBUG, "price cert to be hashed: %s",out);
+#endif				
+			SHA1(out,outlen,digest);	
+			delete[] out;
+			
+			UINT8* tmpBuff = new UINT8[1024];
+			UINT32 len=1024;
+			if(CABase64::encode(digest,SHA_DIGEST_LENGTH,tmpBuff,&len)!=E_SUCCESS)
+				return E_UNKNOWN;
+			tmpBuff[len]=0;
+						
+			allHashes[i] = tmpBuff;
+			//do not delete tmpBuff here, since we're using allHashes below
+
+			if (getDOMChildByName(mixNodes[i],(UINT8*)"SubjectKeyIdentifier",skiNode,true) != E_SUCCESS)
+				{
+					CAMsg::printMsg(LOG_CRIT,"Could not get mix id from price cert");	
+				}	
+			
+			allSkis[i] =  (UINT8*) skiNode.getFirstChild().getNodeValue().transcode();
+
+		}
+		//and append to CC
+		DOM_Element elemPriceCerts = doc.createElement("PriceCertificates");
+		DOM_Element elemCert;
+		for (int i = 0; i < nrOfMixes; i++) {
+			elemCert = doc.createElement("PriceCertHash");
+			//CAMsg::printMsg(LOG_DEBUG,"hash to be inserted in cc: index %d, value %s\n",i,allHashes[i]);
+			setDOMElementValue(elemCert,allHashes[i]);
+			delete[] allHashes[i];
+			elemCert.setAttribute("id", DOMString( (const char*)allSkis[i]));
+			if (i == 0) {
+				elemCert.setAttribute("isAI","true");	
+			}
+			elemPriceCerts.appendChild(elemCert);
+		}
+		elemCC.appendChild(elemPriceCerts);
+#ifdef DEBUG 		
+		CAMsg::printMsg(LOG_DEBUG, "finished method makeCCRequest\n");
+#endif		
+		delete[] allHashes;
+		delete[] allSkis;
 		return E_SUCCESS;
 	}
 
-/** @todo makt the faster by not using DOM!*/
-SINT32 CAAccountingInstance::makeBalanceRequest(const SINT32 seconds, DOM_Document &doc)
-	{
-		UINT8 timeBuf[128];
-		UINT32 timeBufLen = 128;
-		doc = DOM_Document::createDocument();
-		DOM_Element elemRoot = doc.createElement("PayRequest");
-		elemRoot.setAttribute("version", "1.0");
-		doc.appendChild(elemRoot);
-		DOM_Element elemAcc = doc.createElement("BalanceRequest");
-		elemRoot.appendChild(elemAcc);
-		DOM_Element elemDate = doc.createElement("NewerThan");
-		elemAcc.appendChild(elemDate);
-		formatJdbcTimestamp(seconds, timeBuf, timeBufLen);
-		setDOMElementValue(elemDate, timeBuf);
-		return E_SUCCESS;
-	}
+
 
 /** @todo makt the faster by not using DOM!*/
 SINT32 CAAccountingInstance::makeAccountRequest(DOM_Document &doc)
 	{
+		CAMsg::printMsg(LOG_DEBUG, "started method makeAccountRequest\n");
 		doc = DOM_Document::createDocument();
 		DOM_Element elemRoot = doc.createElement("PayRequest");
 		elemRoot.setAttribute("version", "1.0");
 		doc.appendChild(elemRoot);
 		DOM_Element elemAcc = doc.createElement("AccountRequest");
 		elemRoot.appendChild(elemAcc);
+		CAMsg::printMsg(LOG_DEBUG, "finished method makeAccountRequest\n");
 		return E_SUCCESS;
 	}
 
@@ -421,31 +493,18 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 		// what type of message is it?
 		if ( strcmp( docElementName, "AccountCertificate" ) == 0 )
 			{
-				#ifdef DEBUG
 					CAMsg::printMsg( LOG_DEBUG, "Received an AccountCertificate. Calling handleAccountCertificate()\n" );
-				#endif
 				ms_pInstance->handleAccountCertificate( pHashEntry, root );
 			}
 		else if ( strcmp( docElementName, "Response" ) == 0)
 			{
-				#ifdef DEBUG
 					CAMsg::printMsg( LOG_DEBUG, "Received a Response (challenge-response)\n");
-				#endif
 				ms_pInstance->handleChallengeResponse( pHashEntry, root );
 			}
 		else if ( strcmp( docElementName, "CC" ) == 0 )
 			{
-				#ifdef DEBUG
 					CAMsg::printMsg( LOG_DEBUG, "Received a CC. Calling handleCostConfirmation()\n" );
-				#endif
 				ms_pInstance->handleCostConfirmation( pHashEntry, root );
-			}
-		else if ( strcmp( docElementName, "Balance" ) == 0 )
-			{
-				#ifdef DEBUG
-					CAMsg::printMsg( LOG_DEBUG, "Received a BalanceCertificate. Calling handleBalanceCertificate()\n" );
-				#endif
-				ms_pInstance->handleBalanceCertificate( pHashEntry, root );
 			}
 		else
 			{
@@ -470,6 +529,7 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
  */
 void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry, DOM_Element &root)
 	{
+		CAMsg::printMsg(LOG_DEBUG, "started method handleAccountCertificate\n");
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
 		DOM_Element elGeneral;
 		timespec now;
@@ -526,6 +586,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 			CAMsg::printMsg(LOG_DEBUG, "Stored payment instance ID: %s\n", pAccInfo->pstrBIID);
 		#endif
 
+
 	// parse & set public key
 	if ( getDOMChildByName( root, (UINT8 *)"JapPublicKey", elGeneral, false ) != E_SUCCESS )
 		{
@@ -571,9 +632,24 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 			return ;
 		}
 		
+	CAMsg::printMsg(LOG_ERR, "Checking database for previously prepaid bytes...\n");
+	SINT32 prepaidAmount = m_dbInterface->getPrepaidAmount(pAccInfo->accountNumber);
+	if (prepaidAmount > 0)
+	{
+		pAccInfo->confirmedBytes += prepaidAmount;	
+		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Got %d prepaid bytes\n",prepaidAmount);
+	}	
+	else
+	{
+		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: No database record for prepaid bytes found for this account \n");	
+	}	
+	CAMsg::printMsg(LOG_DEBUG, "number of prepaid (confirmed-transferred) bytes: %d \n",pAccInfo->confirmedBytes-pAccInfo->transferredBytes);
+		
 	UINT8 * arbChallenge;
 	UINT8 b64Challenge[ 512 ];
 	UINT32 b64Len = 512;
+
+	CAMsg::printMsg(LOG_DEBUG, "almost finished handleAccountCertificate, preparing challenge\n");
 
 	// generate random challenge data and Base64 encode it
 	arbChallenge = ( UINT8* ) malloc( 222 );
@@ -605,6 +681,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 /**
  * Handles the response to our challenge.
  * Checks the validity of the response and sets the user's authFlags
+ * Also gets the last CC of the user, and sends it to the JAP
  * accordingly.
  */
 void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry, const DOM_Element &root)
@@ -661,7 +738,7 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 		
 	pAccInfo->authFlags |= AUTH_ACCOUNT_OK;
 	
-	// fetch cost confirmation from last session if available
+	// fetch cost confirmation from last session if available, and send it
 	CAXMLCostConfirmation * pCC = NULL;
 	m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, &pCC);
 	if(pCC!=NULL)
@@ -692,6 +769,9 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
  */
 void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,DOM_Element &root)
 {
+#ifdef DEBUG
+	CAMsg::printMsg(LOG_DEBUG, "started method handleCostConfirmation\n");
+#endif
 	tAiAccountingInfo*pAccInfo=pHashEntry->pAccountingInfo;
 	m_Mutex.lock();
 	
@@ -709,6 +789,9 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,D
 			m_Mutex.unlock();
 			return ;
 		}
+	
+	
+		
 	// for debugging only: test signature the oldschool way
 	// warning this removes the signature from doc!!!
 	if ( pAccInfo->pPublicKey==NULL||
@@ -732,7 +815,7 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,D
 	#endif
 	m_Mutex.unlock();
 	
-
+/************ TODO: check pricecerthash with isAI-attribute instead *******
 	// parse and check AI name
 	UINT8* pAiID = pCC->getAiID();
 	if( strcmp( (char *)pAiID, (char *)m_AiName ) != 0)
@@ -747,9 +830,14 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,D
 			return ;
 		}
 	delete[] pAiID;
+********************/
 
 	// parse & set transferredBytes
 	m_Mutex.lock();
+	//when using Prepayment, this check is outdated, but left in to notice the most crude errors/cheats
+	//The CC's transferredBytes should be equivalent to 
+	//AccInfo's confirmed bytes + the Config's PrepaidInterval - the number of bytes transferred between
+	//requesting and receiving the CC
 	if(pCC->getTransferredBytes() < pAccInfo->confirmedBytes )
 		{
 			UINT8 tmp[32];
@@ -772,116 +860,13 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,D
 	m_Mutex.unlock();
 	
 	m_dbInterface->storeCostConfirmation(*pCC);
+	CAMsg::printMsg(LOG_DEBUG, "after store \n");
 	delete pCC;
-	return ;
+	return;
 }
 
 
 
-/**
- * Handles a balance certificate sent by the JAP.
- * Checks signature and age.
- * @todo set authFlags
- * @todo send back XMLErrorMessages on failure
- */
-SINT32 CAAccountingInstance::handleBalanceCertificate(fmHashTableEntry *pHashEntry, const DOM_Element &root)
-	{
-		UINT8 strGeneral[ 256 ];
-		UINT32 strGeneralLen = 256;
-		UINT64 newDeposit, newSpent;
-		SINT32 seconds;
-		DOM_Element elGeneral;
-		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
-	
-		// test signature
-		m_Mutex.lock();
-		if( !m_pJpiVerifyingInstance || 
-				(m_pJpiVerifyingInstance->verifyXML( (DOM_Node &)root, (CACertStore *)NULL ) != E_SUCCESS) 
-			)
-			{
-				CAMsg::printMsg( LOG_INFO, "BalanceCertificate has BAD SIGNATURE! Ignoring\n" );
-				m_Mutex.unlock();
-				return E_UNKNOWN;
-			}
-		m_Mutex.unlock();
-
-		// parse timestamp
-		if ( (getDOMChildByName( root, (UINT8*)"Timestamp", elGeneral, false ) != E_SUCCESS) 
-				|| (getDOMElementValue( elGeneral, strGeneral, &strGeneralLen ) != E_SUCCESS) )
-			{
-				return E_UNKNOWN;
-			}
-		parseJdbcTimestamp(strGeneral, seconds);
-	
-		m_Mutex.lock();
-		if(seconds < pAccInfo->reqbalMinSeconds)
-			{
-				// todo send a request again...
-				// TODO: if too old -> ask JPI for a new one
-				// if JPI is not available at present -> let user proceed for a while
-				m_Mutex.unlock();
-				return E_UNKNOWN;
-			}
-		//pAccInfo->lastbalSeconds = seconds;
-	
-		// parse & set deposit
-		if( (getDOMChildByName( root, (UINT8*)"Deposit", elGeneral, false ) != E_SUCCESS) ||
-				(getDOMElementValue( elGeneral, newDeposit ) != E_SUCCESS) ||
-				(newDeposit < pAccInfo->lastbalDeposit) )
-			{
-				m_Mutex.unlock();
-				#ifdef DEBUG
-					CAMsg::printMsg(LOG_DEBUG, "invalid deposit value...\n");
-				#endif
-				return E_UNKNOWN;
-			}
-#ifdef DEBUG
-		else 
-			{
-				UINT8 tmp[32];
-				print64(tmp,newDeposit);
-				CAMsg::printMsg(LOG_DEBUG, "Balance: deposit=%s\n", tmp);
-			}
-#endif
-	
-	// parse & set spent
-		if( (getDOMChildByName( root, (UINT8*)"Spent", elGeneral, false ) != E_SUCCESS) ||
-				(getDOMElementValue( elGeneral, newSpent ) != E_SUCCESS) ||
-				(newSpent < pAccInfo->lastbalSpent) )
-			{
-				m_Mutex.unlock();
-				#ifdef DEBUG
-					CAMsg::printMsg(LOG_DEBUG, "invalid spent value...\n");
-				#endif
-				return E_UNKNOWN;
-			}
-#ifdef DEBUG
-		else 
-			{
-				UINT8 tmp[32];
-				print64(tmp,newSpent);
-				CAMsg::printMsg(LOG_DEBUG, "Balance: Spent=%s\n", tmp);
-			}
-#endif
-	
-	// some checks for empty accounts
-		if(	(newDeposit-newSpent <= MIN_BALANCE ) ||
-				((newDeposit-newSpent-pAccInfo->transferredBytes) <= MIN_BALANCE ) 
-			)
-			{
-				// mark account as empty
-				pAccInfo->authFlags |= AUTH_ACCOUNT_EMPTY;
-			}
-	
-		pAccInfo->lastbalDeposit = newDeposit;
-		pAccInfo->lastbalSpent = newSpent;
-		pAccInfo->lastbalTransferredBytes = pAccInfo->transferredBytes;
-	
-		// everything is OK, situation normal
-		pAccInfo->authFlags &= ~AUTH_SENT_BALANCE_REQUEST;
-		m_Mutex.unlock();
-		return E_SUCCESS;
-	}
 
 
 /**
@@ -894,6 +879,7 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 		memset( pHashEntry->pAccountingInfo, 0, sizeof( tAiAccountingInfo ) );
 		pHashEntry->pAccountingInfo->authFlags |= AUTH_SENT_ACCOUNT_REQUEST;
 		pHashEntry->pAccountingInfo->lastRequestSeconds = time(NULL);
+		//getting the JAP's previously prepaid bytes happens in handleAccountCert, could be moved here?
 		return E_SUCCESS;
 	}
 
@@ -901,15 +887,31 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 
 /**
  * This should always be called when closing a JAP connection
- * to cleanup the payment data structures
- * @todo rewrite
+ * to cleanup the payment data structures and store prepaid bytes
+ 
  */
 SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 	{
-		tAiAccountingInfo* pAccInfo;
 		if ( pHashEntry->pAccountingInfo != NULL)
 			{
+				tAiAccountingInfo* pAccInfo;
 				pAccInfo = pHashEntry->pAccountingInfo;
+				
+				
+				//store prepaid bytes in database, so the user wont lose the prepaid amount by disconnecting
+				SINT32 prepaidBytes = pAccInfo->confirmedBytes - pAccInfo->transferredBytes;
+				CAAccountingDBInterface* dbInterface = new CAAccountingDBInterface(); //local variable, since method is static, but m_dbInterface is a member variable
+				if(dbInterface->initDBConnection() != E_SUCCESS)
+				{
+					CAMsg::printMsg( LOG_ERR, "Could not connect to DB, preapid bytes were lost\n");
+					delete dbInterface;
+					return E_UNKNOWN;
+				}
+				
+				dbInterface->storePrepaidAmount(pAccInfo->accountNumber,prepaidBytes);
+				delete dbInterface;
+
+				//free memory of pAccInfo
 				if ( pAccInfo->pPublicKey!=NULL )
 					{
 						delete pAccInfo->pPublicKey;
@@ -925,6 +927,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 				delete pHashEntry->pAccountingInfo;
 				pHashEntry->pAccountingInfo=NULL;
 			}
+		
 		return E_SUCCESS;
 	}
 
