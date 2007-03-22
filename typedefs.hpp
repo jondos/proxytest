@@ -159,12 +159,6 @@ typedef struct t_mix_parameters tMixParameters;
 /** format and signature of all received certificates was OK */
 #define AUTH_ACCOUNT_OK 0x2
 
-/** we have a recent balance certificate */
-#define AUTH_HAVE_RECENT_BALENCE 0x4
-
-/** we have sent one or two balance request */
-#define AUTH_SENT_BALANCE_REQUEST 0x8
-
 /** we have sent one or two CC requests */
 #define AUTH_SENT_CC_REQUEST 0x20
 
@@ -216,7 +210,7 @@ struct t_accountinginfo
 	/** the minimum timestamp for the requested XMLBalance */
 	SINT32 reqbalMinSeconds;
 	
-	/** the number of bytes that was transferred (as counted by the AI)*/
+	/** the number of bytes that was transferred (as counted by the AI)  Elmar: since last CC, or in total? */
 	UINT64 transferredBytes;
 	
 	/** the number of bytes that was confirmed by the account user */
@@ -224,6 +218,10 @@ struct t_accountinginfo
 	
 	/** the number of transferredBytes that we last asked the account user to confirm */
 	UINT64 reqConfirmBytes;
+	
+	/** number of bytes that have been prepaid by the JAP, but not yet spent */
+	//UINT64 prepaidBytes;
+	//not necessary, simply use confirmedBytes - transferredBytes
 	
 	/** the user's account number */
 	UINT64 accountNumber;

@@ -108,7 +108,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define DELAY_CHANNEL_LATENCY 10000 //min latency defaults to 10 second
 #endif
 //#define LOG_CRIME
-#define PAYMENT //to enable payment support, now use configure --enable-payment..
+//#define PAYMENT //to enable payment support, now use configure --enable-payment..
 //#define NO_PARKING //to disable control flow
 //#define NO_LOOPACCEPTUSER //to disable user accept thread for First Mix
 
