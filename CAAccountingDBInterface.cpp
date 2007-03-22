@@ -195,11 +195,13 @@ SINT32 CAAccountingDBInterface::getCostConfirmation(UINT64 accountNumber, CAXMLC
  */
 SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc )
 	{
+	
+		
 		#ifndef HAVE_NATIVE_UINT64
 			#warning Native UINT64 type not available - CostConfirmation Database might be non-functional
 		#endif
 		const char* query1F = "SELECT COUNT(*) FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER=%s";
-		const char* query2F = "INSERT INTO COSTCONFIRMATIONS VALUES (%s, %s, '%s', %d)";
+		const char* query2F = "INSERT INTO COSTCONFIRMATIONS(ACCOUNTNUMBER, BYTES, XMLCC, SETTLED) VALUES (%s, %s, '%s', %d)";
 		const char* query3F = "UPDATE COSTCONFIRMATIONS SET BYTES=%s, XMLCC='%s', SETTLED=%d WHERE ACCOUNTNUMBER=%s";
 	
 		UINT8 * query;
@@ -218,6 +220,9 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 				return E_UNKNOWN;
 			}
 
+#ifdef DEBUG
+		CAMsg::printMsg(LOG_DEBUG, "cc to store in  db:%s\n",pStrCC);			
+#endif
 		// Test: is there already an entry with this accountno.?
 		query = new UINT8[ strlen(query1F) + size + 128 ];
 		UINT8 strAccountNumber[32];
@@ -288,6 +293,7 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 			}
 		delete[] query;	
 		PQclear(pResult);
+		CAMsg::printMsg(LOG_DEBUG, "finished storing CC in DB\n");
 		return E_SUCCESS;
 	}
 
@@ -359,4 +365,81 @@ SINT32 CAAccountingDBInterface::markAsSettled(UINT64 accountNumber)
 		PQclear(result);		
 		return E_SUCCESS;
 	}
+
+/*
+ *  When terminating a connection, store the amount of bytes that the JAP account has already paid for, but not used 
+ */	
+SINT32 CAAccountingDBInterface::storePrepaidAmount(UINT64 accountNumber, SINT32 prepaidBytes)
+	{
+		const char* insertQuery = "INSERT INTO PREPAIDAMOUNTS(ACCOUNTNUMBER, PREPAIDBYTES) VALUES (%s, %d)";
+		PGresult* result;
+		UINT8 finalQuery[128];
+		UINT8 tmp[32];
+		print64(tmp,accountNumber);
+		
+		sprintf( (char *)finalQuery, insertQuery, tmp,prepaidBytes);
+		result = PQexec(m_dbConn, (char *)finalQuery);
+		if (PQresultStatus(result) != PGRES_COMMAND_OK)
+		{
+			CAMsg::printMsg(LOG_ERR, "CAAccountungDBInterface: Saving to prepaidamounts failed");
+			PQclear(result);
+			return E_UNKNOWN;	
+		}
+		PQclear(result);
+		CAMsg::printMsg(LOG_DEBUG, "Stored %d prepaid bytes for account nr. %u \n",prepaidBytes, accountNumber);
+ 
+		return E_SUCCESS;
+	}
+/*
+ * When initializing a connection, retrieve the amount of prepaid, but unused, bytes the JAP account has left over from
+ * a previous connection.
+ * Will then delete this enty from the database table prepaidamounts
+ * If the account has not been connected to this cascade before, will return zero 
+ */	
+SINT32 CAAccountingDBInterface::getPrepaidAmount(UINT64 accountNumber)	
+	{
+		//check for an entry for this accountnumber
+		const char* selectQuery = "SELECT PREPAIDBYTES FROM PREPAIDAMOUNTS WHERE ACCOUNTNUMBER=%s";
+		PGresult* result;
+		UINT8 finalQuery[128];
+		UINT8 tmp[32];
+		print64(tmp,accountNumber);
+		sprintf( (char *)finalQuery, selectQuery, tmp);
+		
+		result = PQexec(m_dbConn, (char *)finalQuery);
+		if(PQresultStatus(result)!=PGRES_TUPLES_OK) 
+			{
+				CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Database error while trying to read prepaid bytes, Reason: %s\n", PQresultErrorMessage(result));
+				PQclear(result);
+				return E_UNKNOWN;
+			}
+		
+		if(PQntuples(result)!=1) 
+			{
+				//perfectly normal, the user account simply hasnt been used with this cascade yet
+				PQclear(result);
+				return 0;
+			}
+		SINT32 nrOfBytes =  atoi(PQgetvalue(result, 0, 0)); //first row, first column
+								
+
+		//delete entry from db
+		const char* deleteQuery = "DELETE FROM PREPAIDAMOUNTS WHERE ACCOUNTNUMBER=%s";
+		PGresult* result2;
+		print64(tmp,accountNumber);
+		sprintf( (char *)finalQuery, deleteQuery, tmp);
+		
+		result2 = PQexec(m_dbConn, (char *)finalQuery);
+		if (PQresultStatus(result2) != PGRES_COMMAND_OK)
+		{
+			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Deleting read prepaidamount failed.");	
+		}
+		PQclear(result);
+		
+		return nrOfBytes;
+	}	
+	
+	
 #endif
+
+

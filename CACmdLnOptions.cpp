@@ -1192,6 +1192,12 @@ SINT32 CACmdLnOptions::getPaymentHardLimit(UINT32 *pHardLimit)
 		return E_SUCCESS;
 	}
 
+SINT32 CACmdLnOptions::getPrepaidIntervalKbytes(UINT32 *pPrepaidIntervalKbytes)
+	{
+		*pPrepaidIntervalKbytes = m_iPrepaidIntervalKbytes;
+		return E_SUCCESS;
+	}
+
 SINT32 CACmdLnOptions::getPaymentSoftLimit(UINT32 *pSoftLimit)
 	{
 		*pSoftLimit = m_iPaymentSoftLimit;
@@ -1625,6 +1631,36 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		getDOMChildByName(elemRoot,(UINT8*)"Accounting",elemAccounting,false);
 		if(elemAccounting != NULL) 
 			{
+
+				//get price certificate
+				DOM_Element pcElem;
+				//function in CAUtil, last param is "deep", needs to be set to include child elems
+				if (elemAccounting!=NULL) CAMsg::printMsg(LOG_DEBUG, "elemAccounting still not null");
+				getDOMChildByName(elemAccounting, (UINT8*)"PriceCertificate",pcElem, false);
+				CAMsg::printMsg(LOG_DEBUG, "after parsing PriceCertificate");
+				if (pcElem == NULL)
+				{
+					CAMsg::printMsg(LOG_DEBUG, "no price certificate element found");
+				} else 
+				{
+					m_pPriceCertificate = CAXMLPriceCert::getInstance(pcElem); 
+					if (m_pPriceCertificate == NULL) {
+						CAMsg::printMsg(LOG_DEBUG, "PRICECERT PROCESSED, BUT STILL NULL");
+					}
+				}	
+				
+/*
+				//test
+				CAMsg::printMsg(LOG_DEBUG,"before writing Pricecert\n");
+				UINT32 len = 1000; 
+				UINT8*  output = new UINT8[len];
+				m_pPriceCertificate->toXMLString(output, &len);
+				CAMsg::printMsg(LOG_INFO,(const char*) output  ); //convert from UINT8* to const char* properly?	
+*/
+
+
+
+
 				DOM_Element elemJPI;
 				getDOMChildByName(elemAccounting, CAXMLBI::getXMLElementName(), elemJPI, false);
 				m_pBI = CAXMLBI::getInstance(elemJPI);
@@ -1638,20 +1674,33 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 					{
 						m_iPaymentHardLimit = tmp;
 					}
+				getDOMChildByName(elemAccounting, (UINT8*)"PrepaidIntervalKbytes", elem, false);
+				if(getDOMElementValue(elem, &tmp)==E_SUCCESS)
+					{
+						m_iPrepaidIntervalKbytes = tmp;
+					}
+				else 
+					{
+					m_iPrepaidIntervalKbytes = 10240; //10 MB as safe default if not explicitly set in config file	
+					}
 				getDOMChildByName(elemAccounting, (UINT8*)"SettleInterval", elem, false);
 				if(getDOMElementValue(elem, &tmp)==E_SUCCESS)
 					{
 						m_iPaymentSettleInterval = tmp;
 					}
-				// get DB Username
-				getDOMChildByName(elemAccounting, (UINT8*)"AiID", elem, false);
-				tmpLen = 255;
-				if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) 
-					{
-						strtrim(tmpBuff);
-						m_strAiID = new UINT8[strlen((char*)tmpBuff)+1];
-						strcpy((char *)m_strAiID, (char *) tmpBuff);
-					}
+					
+				// get AiID (NOT a separate element /Accounting/AiID any more, rather the subjectkeyidentifier given in the price certificate
+//				getDOMChildByName(elemAccounting, (UINT8*)"AiID", elem, false);
+//				tmpLen = 255;
+//				if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) 
+//					{
+//						strtrim(tmpBuff);
+//						m_strAiID = new UINT8[strlen((char*)tmpBuff)+1];
+//						strcpy((char *)m_strAiID, (char *) tmpBuff);
+//					}
+				m_strAiID = m_pPriceCertificate->getSubjectKeyIdentifier();
+					
+					
 				DOM_Element elemDatabase;
 				getDOMChildByName(elemAccounting, (UINT8*)"Database", elemDatabase, false);
 				if(elemDatabase != NULL) 
@@ -1689,6 +1738,8 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 								m_strDatabaseUser = new UINT8[strlen((char*)tmpBuff)+1];
 								strcpy((char *)m_strDatabaseUser, (char *) tmpBuff);
 							}
+							
+						//get DB password from xml 	
 				getDOMChildByName(elemDatabase, (UINT8*)"Password", elem, false);
 				tmpLen = 255;
 				//read password from xml if given
@@ -1716,8 +1767,9 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 								m_strDatabasePassword[0] = '\0';
 							}	
 				}
-			}
-		}
+							
+				} //of elem database
+		} //of elem accounting
 		else 
 			{
 				CAMsg::printMsg( 17, "No accounting instance info found in configfile. Payment will not work!\n");
@@ -2067,6 +2119,32 @@ SKIP_NEXT_MIX:
 		setDOMElementValue(elemVersion,(UINT8*)MIX_VERSION);
 		elemSoftware.appendChild(elemVersion);
 		elemMix.appendChild(elemSoftware);
+
+#ifdef PAYMENT
+		
+		//insert price certificate
+		if (getPriceCertificate() == NULL)
+		{
+			CAMsg::printMsg(LOG_DEBUG, "can't insert price certificate because it's Null\n");
+		} else {
+			DOM_Element pcElem;		
+			CAMsg::printMsg(LOG_DEBUG, "\n\n before inserting price certificate, line 1845\n\n");
+			getPriceCertificate()->toXmlElement(m_docMixInfo,pcElem);	
+			CAMsg::printMsg(LOG_DEBUG, "\n\n later\n\n");
+			elemMix.appendChild(pcElem);
+			CAMsg::printMsg(LOG_DEBUG,"after inserting price certificate\n");
+		}
+		//insert prepaid interval
+		UINT32 prepaidIntervalKbytes;
+		getPrepaidIntervalKbytes(&prepaidIntervalKbytes);
+		DOM_Element elemInterval = m_docMixInfo.createElement("PrepaidIntervalKbytes");
+		setDOMElementValue(elemInterval,prepaidIntervalKbytes); 
+		elemMix.appendChild(elemInterval);	
+			
+			
+		
+#endif /*payment*/
+
 
 #ifdef LOG_CRIME
 		m_arCrimeRegExpsURL=NULL;

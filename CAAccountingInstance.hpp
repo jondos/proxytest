@@ -40,6 +40,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAAccountingControlChannel.hpp"
 #include "CAAccountingSettleThread.hpp"
 #include "CACmdLnOptions.hpp"
+#include "CAMix.hpp"
+#include "xml/DOM_Output.hpp"
 
 // we want a costconfirmation from the user for every megabyte
 // after 2megs of unconfirmed traffic we kick the user out
@@ -51,7 +53,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 // and the jap sending its answer
 #define REQUEST_TIMEOUT 30
 #define HARD_LIMIT_TIMEOUT 30
-#define MIN_BALANCE 1024*512
+#define MIN_BALANCE 50
+#define MIN_BYTES 1024*512
 
 
 struct t_aiqueueitem
@@ -105,7 +108,7 @@ public:
 	/**
 	 * This should be called by the FirstMix for every incoming Jap packet
 	 */
-	static SINT32 handleJapPacket(fmHashTableEntry *pHashEntry );
+	static SINT32 handleJapPacket(fmHashTableEntry *pHashEntry,CAMix* callingMix );
 
 	/**
 	 * Check if an IP address is temporarily blocked by the accounting instance.
@@ -142,10 +145,6 @@ private:
 	*/
 	void handleAccountCertificate( fmHashTableEntry *pHashEntry, DOM_Element &root );
 	
-	/**
-	 * Handles a balance certificate
-	 */
-	SINT32 handleBalanceCertificate(fmHashTableEntry *pHashEntry, const DOM_Element &root);
 	
 	/**
 	 * Checks the response of the challenge-response auth.
@@ -153,10 +152,8 @@ private:
 	void handleChallengeResponse(fmHashTableEntry *pHashEntry, const DOM_Element &root);
 
 				
-	static SINT32 makeCCRequest( const UINT64 accountNumber, const UINT64 transferredBytes, DOM_Document& doc);
-	static SINT32 makeBalanceRequest(const SINT32 seconds, DOM_Document &doc);
+	static SINT32 makeCCRequest( const UINT64 accountNumber, const UINT64 transferredBytes, DOM_Document& doc, DOM_Document& cascadeInfo);
 	static SINT32 makeAccountRequest(DOM_Document &doc);
-	
 	
 	/**
 	 * The main loop of the AI thread - reads messages from the queue 

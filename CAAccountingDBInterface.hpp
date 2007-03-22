@@ -87,6 +87,9 @@ class CAAccountingDBInterface
 			*/
 			SINT32 markAsSettled(UINT64 accountNumber);
 
+			SINT32 storePrepaidAmount(UINT64 accountNumber, SINT32 prepaidBytes);
+			SINT32 getPrepaidAmount(UINT64 accountNumber);
+
 		private:
 			/** connection to postgreSQL database */
 			PGconn * m_dbConn;

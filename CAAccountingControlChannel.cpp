@@ -83,3 +83,4 @@ SINT32 CAAccountingControlChannel::processXMLMessage(const DOM_Document &a_doc)
 		//return E_SUCCESS;
 	}
 #endif
+

@@ -146,13 +146,14 @@ char* strins(const char* src,const char * pos,const char* ins)
 			return NULL;
 		return strins(src,pos-src,ins);
 	}
-/*
-// Gets the current Systemtime in milli seconds. 
+
+/** Gets the current Systemtime in milli seconds. 
 	* @param bnTime - Big Number, in which the current time is placed
 	* @retval E_UNSPECIFIED, if bnTime was NULL
 	* @retval E_UNKNOWN, if an error occurs
 	*	@retval	E_SUCCESS, otherwise
-SINT32 getcurrentTimeMillis(BIGNUM* bnTime)
+*/
+/*SINT32 getcurrentTimeMillis(BIGNUM* bnTime)
 	{
 		if(bnTime==NULL)
 			return E_UNSPECIFIED;
@@ -365,6 +366,16 @@ SINT32 setDOMElementValue(DOM_Element& elem,UINT32 text)
 		return E_SUCCESS;
 	}
 
+	
+SINT32 setDOMElementValue(DOM_Element& elem,double floatValue)
+	{
+		UINT8 tmp[10];
+		sprintf((char*)tmp,"%.2f",floatValue);
+		setDOMElementValue(elem,tmp);
+		return E_SUCCESS;
+	}
+	
+
 /**
  * Sets the decimal text representation of a 64bit integer as node value
  * TODO: implement this for non-64bit platforms
@@ -376,6 +387,7 @@ SINT32 setDOMElementValue(DOM_Element & elem, const UINT64 text)
 		setDOMElementValue(elem,tmp);
 		return E_SUCCESS;
 	}
+
 
 SINT32 setDOMElementValue(DOM_Element& elem,const UINT8* value)
 	{
@@ -579,6 +591,21 @@ SINT32 getDOMElementValue(const DOM_Element& elem,UINT32* value)
 		
 		return E_SUCCESS;
 	}
+	
+SINT32 getDOMElementValue(const DOM_Element& elem,double* value)
+	{
+		ASSERT(value!=NULL,"Value is null");
+		ASSERT(elem!=NULL,"Element is NULL");
+		UINT8 buff[255];
+		UINT32 buffLen=255;
+		if(getDOMElementValue(elem,buff,&buffLen)!=E_SUCCESS)
+			return E_UNKNOWN;
+		*value=atof((char*)buff);
+		
+		return E_SUCCESS;
+	}
+	
+	
 SINT32 getDOMElementValue(const DOM_Element& elem,UINT32& value, UINT32 defaultValue)
 {
 	UINT32 v;

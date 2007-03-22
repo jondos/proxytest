@@ -94,8 +94,10 @@ SINT32 setDOMElementValue(DOM_Element& elem,const UINT8* value);
  * @return E_SPACE if the buffer is too small, E_SUCCESS otherwise, E_UNKNOWN if the element is NULL
  */
 SINT32 getDOMElementValue(const DOM_Node& elem,UINT8* value,UINT32* len);
+SINT32 getDOMElementValue(const DOM_Element& elem,double* value);
 
 SINT32 setDOMElementAttribute(DOM_Node& elem,const char* attrName,SINT32 value);
+SINT32 setDOMElementValue(DOM_Element& elem,double floatValue);
 SINT32 setDOMElementAttribute(DOM_Node& elem,const char* attrName,const UINT8* value);
 
 SINT32 getDOMElementAttribute(const DOM_Node& elem,const char* attrName,SINT32* value);

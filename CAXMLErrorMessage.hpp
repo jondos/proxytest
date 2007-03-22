@@ -84,6 +84,12 @@ class CAXMLErrorMessage : public CAAbstractXMLEncodable
 			static const UINT32 ERR_NO_BALANCE = 8;
 			static const UINT32 ERR_NO_CONFIRMATION = 9;
 			static const UINT32 ERR_ACCOUNT_EMPTY = 10;
+			static const UINT32 ERR_CASCADE_LENGTH = 11;
+			static const UINT32 ERR_DATABASE_ERROR = 12;
+			static const UINT32 ERR_INSUFFICIENT_BALANCE = 13;
+			static const UINT32 ERR_NO_FLATRATE_OFFERED = 14;
+			static const UINT32 ERR_INVALID_CODE = 15;
+			static const UINT32 ERR_INVALID_CC = 16;
 
 		private: 
 			SINT32 setValues(DOM_Element &elemRoot);

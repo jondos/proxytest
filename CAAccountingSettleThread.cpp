@@ -84,13 +84,13 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 
 		while(m_pAccountingSettleThread->m_bRun)
 			{
-//				#ifdef DEBUG
+				#ifdef DEBUG
 					CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread going to sleep...\n");
-//				#endif
+				#endif
 				sSleep((UINT16)sleepInterval);
-//				#ifdef DEBUG
+				#ifdef DEBUG
 					CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread Waking up...\n");
-//				#endif
+				#endif
 				if(!m_pAccountingSettleThread->m_bRun)
 					{
 						CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Leaving run loop\n");
@@ -101,7 +101,9 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 						CAMsg::printMsg(LOG_ERR, "SettleThread could not connect to Database. Retrying later...\n");
 						continue;
 					}
+				#ifdef DEBUG	
 				CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: DB connections established!\n");
+				#endif
 				dbConn.getUnsettledCostConfirmations(q);
 				CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: dbConn.getUnsettledCostConfirmations(q) finished!\n");
 				while(!q.isEmpty())
@@ -135,11 +137,18 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 							{
 								CAMsg::printMsg(LOG_ERR, "SettleThread: BI reported error no. %d (%s)\n",
 									pErrMsg->getErrorCode(), pErrMsg->getDescription() );
+									CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: BI reported error!\n");
 							}
 						else
 							{
-								if(dbConn.markAsSettled(pCC->getAccountNumber())!=E_SUCCESS)
+								if(dbConn.markAsSettled(pCC->getAccountNumber())==E_SUCCESS)
+								{
+									CAMsg::printMsg(LOG_ERR, "SettleThread: Costconfirmation for the account was marked as settled!\n");
+							}
+						else
+							{
 									CAMsg::printMsg(LOG_ERR, "SettleThread: Could not mark an account as settled!\n");
+							}
 							}
 						delete pCC;
 						delete pErrMsg;
