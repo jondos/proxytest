@@ -284,7 +284,7 @@ UINT8* readFile(UINT8* name,UINT32* size);
  * @param strTimestamp the string containing the timestamp
  * @param value an integer variable that gets the milliseconds value.
  */
-SINT32 parseJdbcTimestamp(const UINT8 * strTimestamp, SINT32& seconds);
+//SINT32 parseJdbcTimestamp(const UINT8 * strTimestamp, SINT32& seconds);
 
 
 /**
@@ -295,7 +295,7 @@ SINT32 parseJdbcTimestamp(const UINT8 * strTimestamp, SINT32& seconds);
  * @param len the buffer length
  * @todo think about timezone handling
  */
-SINT32 formatJdbcTimestamp(const SINT32 seconds, UINT8 * strTimestamp, const UINT32 len);
+//SINT32 formatJdbcTimestamp(const SINT32 seconds, UINT8 * strTimestamp, const UINT32 len);
 
 
 /**

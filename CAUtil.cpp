@@ -965,7 +965,7 @@ SINT32 parseU64(const UINT8 * str, UINT64& value)
  * @param seconds an integer variable that gets the seconds value.
  * @todo think about timezone handling 
  */
-SINT32 parseJdbcTimestamp(const UINT8 * strTimestamp, SINT32& seconds)
+/*SINT32 parseJdbcTimestamp(const UINT8 * strTimestamp, SINT32& seconds)
 {
 	struct tm time;
 	SINT32 rc;
@@ -985,7 +985,7 @@ SINT32 parseJdbcTimestamp(const UINT8 * strTimestamp, SINT32& seconds)
 	if(seconds<0) return E_UNKNOWN;
 	
 	return E_SUCCESS;
-}
+}*/
 
 
 /**
@@ -996,7 +996,7 @@ SINT32 parseJdbcTimestamp(const UINT8 * strTimestamp, SINT32& seconds)
  * @param len the buffer length
  * @todo think about timezone handling
  */
-SINT32 formatJdbcTimestamp(const SINT32 seconds, UINT8 * strTimestamp, const UINT32 len)
+/*SINT32 formatJdbcTimestamp(const SINT32 seconds, UINT8 * strTimestamp, const UINT32 len)
 {
 	struct tm * time;
 	time = localtime((time_t *) (&seconds));
@@ -1008,4 +1008,4 @@ SINT32 formatJdbcTimestamp(const SINT32 seconds, UINT8 * strTimestamp, const UIN
 		return E_SPACE;
 	}
 	return E_SUCCESS;
-}
+}*/
