@@ -173,7 +173,7 @@ SINT32 CAFirstMixA::loop()
 													}
 #ifdef PAYMENT
 												// payment code added by Bastian Voigt
-												SINT32 ret = CAAccountingInstance::handleJapPacket(pHashEntry );  
+												SINT32 ret = CAAccountingInstance::handleJapPacket(pHashEntry,this );  
 												if (ret == 2)
 													{
 														goto NEXT_USER;
@@ -503,7 +503,7 @@ NEXT_USER:
 													if(pfmHashEntry->bCountPacket)
 														{
 															// count packet for payment
-															CAAccountingInstance::handleJapPacket(pfmHashEntry);
+															CAAccountingInstance::handleJapPacket(pfmHashEntry,this);
 														}
 												#endif
 												#ifdef DELAY_USERS
