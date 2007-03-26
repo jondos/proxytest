@@ -325,7 +325,7 @@ SINT32 CAFirstMix::processKeyExchange()
     if(getDOMElementAttribute(elemMixes,"count",&count)!=E_SUCCESS)
         return E_UNKNOWN;
  /*
-		@todo DOn not why we do this here - probablyy it has something todo with the
+		@todo Do not know why we do this here - probably it has something todo with the
 		dynamic mix config, but makes not sense at all for me...
 
 		getDOMElementAttribute(elemMixescascadeNaem
@@ -385,6 +385,7 @@ SINT32 CAFirstMix::processKeyExchange()
 		elemRootKey.appendChild(elemPayment);
 		#ifdef PAYMENT
 			setDOMElementAttribute(elemPayment,"required",(UINT8*)"true");
+			setDOMElementAttribute(elemPayment,"version",(UINT8*)"2.0");
 		#else
 			setDOMElementAttribute(elemPayment,"required",(UINT8*)"false");
 		#endif
