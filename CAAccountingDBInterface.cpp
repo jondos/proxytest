@@ -219,10 +219,10 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 				delete[] pStrCC;
 				return E_UNKNOWN;
 			}
-
+		
 #ifdef DEBUG
-		CAMsg::printMsg(LOG_DEBUG, "cc to store in  db:%s\n",pStrCC);			
-#endif
+		CAMsg::printMsg(LOG_DEBUG, "cc to store in  db:%s\n",pStrCC);	  		
+#endif  
 		// Test: is there already an entry with this accountno.?
 		query = new UINT8[ strlen(query1F) + size + 128 ];
 		UINT8 strAccountNumber[32];
@@ -386,8 +386,7 @@ SINT32 CAAccountingDBInterface::storePrepaidAmount(UINT64 accountNumber, SINT32 
 			return E_UNKNOWN;	
 		}
 		PQclear(result);
-		CAMsg::printMsg(LOG_DEBUG, "Stored %d prepaid bytes for account nr. %u \n",prepaidBytes, accountNumber);
- 
+		CAMsg::printMsg(LOG_DEBUG, "Stored %d prepaid bytes for account nr. %u \n",prepaidBytes, accountNumber); 
 		return E_SUCCESS;
 	}
 /*
@@ -421,7 +420,7 @@ SINT32 CAAccountingDBInterface::getPrepaidAmount(UINT64 accountNumber)
 				return 0;
 			}
 		SINT32 nrOfBytes =  atoi(PQgetvalue(result, 0, 0)); //first row, first column
-								
+		PQclear(result);						
 
 		//delete entry from db
 		const char* deleteQuery = "DELETE FROM PREPAIDAMOUNTS WHERE ACCOUNTNUMBER=%s";
@@ -434,7 +433,7 @@ SINT32 CAAccountingDBInterface::getPrepaidAmount(UINT64 accountNumber)
 		{
 			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Deleting read prepaidamount failed.");	
 		}
-		PQclear(result);
+		PQclear(result2);
 		
 		return nrOfBytes;
 	}	
