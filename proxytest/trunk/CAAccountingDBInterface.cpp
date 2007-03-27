@@ -365,6 +365,33 @@ SINT32 CAAccountingDBInterface::markAsSettled(UINT64 accountNumber)
 		PQclear(result);		
 		return E_SUCCESS;
 	}
+	
+SINT32 CAAccountingDBInterface::deleteCC(UINT64 accountNumber)
+{
+	const char* deleteQuery = "DELETE FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER = %s";
+	UINT8* finalQuery;
+	PGresult* result;
+	
+	if (!m_bConnected)
+	{
+		return E_NOT_CONNECTED;	
+	}			
+	UINT8 temp[32];
+	print64(temp,accountNumber);
+	finalQuery = new UINT8[strlen(deleteQuery)+32];
+	sprintf((char *)finalQuery,deleteQuery,temp);
+	result = PQexec(m_dbConn, (char*)finalQuery);
+	CAMsg::printMsg(LOG_DEBUG, "%s\n",finalQuery);
+	delete[] finalQuery;
+	if (PQresultStatus(result) != PGRES_COMMAND_OK)
+	{
+		PQclear(result);
+		return E_UNKNOWN;
+	}		
+	PQclear(result);
+	return E_SUCCESS;
+}	
+
 
 /*
  *  When terminating a connection, store the amount of bytes that the JAP account has already paid for, but not used 

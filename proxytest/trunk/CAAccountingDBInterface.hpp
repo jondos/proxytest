@@ -86,7 +86,13 @@ class CAAccountingDBInterface
 			* @todo what to do if there was a new CC stored while we were busy settling the old one?
 			*/
 			SINT32 markAsSettled(UINT64 accountNumber);
-
+			
+			/**
+			 * if the BI reports an error while trying to settle a CC, this will be called to delete it from the database
+			 * (otherwise the AI would try forever in vain to settle the unusable CC)
+			 */
+			SINT32 deleteCC(UINT64 accountNumber);
+			
 			SINT32 storePrepaidAmount(UINT64 accountNumber, SINT32 prepaidBytes);
 			SINT32 getPrepaidAmount(UINT64 accountNumber);
 
