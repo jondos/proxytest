@@ -87,7 +87,7 @@ CAAccountingInstance::CAAccountingInstance()
 		m_pThread->start( this );
 		*/
 		// launch BI settleThread
-		m_pSettleThread = new CAAccountingSettleThread();
+		//m_pSettleThread = new CAAccountingSettleThread();
 	}
 
 /**
@@ -125,6 +125,11 @@ CAAccountingInstance::~CAAccountingInstance()
  */
 SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, CAMix* callingMix)
 	{
+		if (1==1)
+		{
+			 return 1;
+		}
+		
 		tAiAccountingInfo* pAccInfo=pHashEntry->pAccountingInfo;
 	
 		ms_pInstance->m_Mutex.lock();
