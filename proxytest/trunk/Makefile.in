@@ -41,6 +41,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+LIBOBJDIR =
 sbin_PROGRAMS = mix$(EXEEXT)
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
@@ -81,9 +82,8 @@ am_mix_OBJECTS = CAAbstractControlChannel.$(OBJEXT) \
 	CALocalProxy.$(OBJEXT) CALogPacketStats.$(OBJEXT) \
 	CAMiddleMix.$(OBJEXT) CAMiddleMixChannelList.$(OBJEXT) \
 	CAMix.$(OBJEXT) CAMixWithReplayDB.$(OBJEXT) CAMsg.$(OBJEXT) \
-	CAMutex.$(OBJEXT) CAMuxSocket.$(OBJEXT) CAPayment.$(OBJEXT) \
-	CAPool.$(OBJEXT) CAQueue.$(OBJEXT) \
-	CAReplayControlChannel.$(OBJEXT) \
+	CAMutex.$(OBJEXT) CAMuxSocket.$(OBJEXT) CAPool.$(OBJEXT) \
+	CAQueue.$(OBJEXT) CAReplayControlChannel.$(OBJEXT) \
 	CAReplayCtrlChannelMsgProc.$(OBJEXT) CASemaphore.$(OBJEXT) \
 	CASignature.$(OBJEXT) CASingleSocketGroup.$(OBJEXT) \
 	CASocket.$(OBJEXT) CASocketAddrINet.$(OBJEXT) \
@@ -271,7 +271,6 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CAMsg.cpp \
 		    CAMutex.cpp\
 		    CAMuxSocket.cpp \
-		    CAPayment.cpp\
 		    CAPool.cpp\
 		    CAQueue.cpp \
 		    CAReplayControlChannel.cpp\
@@ -338,7 +337,6 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CAMsg.hpp \
 		    CAMutex.hpp\
 		    CAMuxSocket.hpp \
-		    CAPayment.hpp\
 		    CAPool.hpp\
 		    CAQueue.hpp \
 		    CAReplayControlChannel.hpp\
@@ -503,7 +501,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMsg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMutex.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMuxSocket.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAPayment.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAPool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAQueue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAReplayControlChannel.Po@am__quote@
