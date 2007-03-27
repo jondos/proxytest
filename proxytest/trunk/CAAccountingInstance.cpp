@@ -895,15 +895,12 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
  */
 SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 	{
-		// look if this is needed
 		ms_pInstance->m_Mutex.lock();
 		
 		if ( pHashEntry->pAccountingInfo != NULL)
 			{
 				tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
 				pHashEntry->pAccountingInfo=NULL;
-				
-				ms_pInstance->m_Mutex.unlock();
 				
 				//store prepaid bytes in database, so the user wont lose the prepaid amount by disconnecting
 				SINT32 prepaidBytes = pAccInfo->confirmedBytes - pAccInfo->transferredBytes;
@@ -933,8 +930,9 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 					}
 				
 				delete pAccInfo;
-				pAccInfo = NULL;
+				pHashEntry->pAccountingInfo=NULL;
 			}
+			ms_pInstance->m_Mutex.unlock();
 		
 		return E_SUCCESS;
 	}
