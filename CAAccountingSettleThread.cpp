@@ -92,67 +92,75 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread Waking up...\n");
 				#endif
 				if(!m_pAccountingSettleThread->m_bRun)
-					{
-						CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Leaving run loop\n");
-						break;
-					}
+				{
+					CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Leaving run loop\n");
+					break;
+				}
 				if(dbConn.initDBConnection()!=E_SUCCESS)
-					{
-						CAMsg::printMsg(LOG_ERR, "SettleThread could not connect to Database. Retrying later...\n");
-						continue;
-					}
+				{
+					CAMsg::printMsg(LOG_ERR, "SettleThread could not connect to Database. Retrying later...\n");
+					continue;
+				}
 				#ifdef DEBUG	
 				CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: DB connections established!\n");
 				#endif
 				dbConn.getUnsettledCostConfirmations(q);
 				CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: dbConn.getUnsettledCostConfirmations(q) finished!\n");
 				while(!q.isEmpty())
+				{
+					// get the next CC from the queue
+					size = sizeof(pCC);
+					if(q.get((UINT8*)(&pCC), &size)!=E_SUCCESS)
 					{
-						// get the next CC from the queue
-						size = sizeof(pCC);
-						if(q.get((UINT8*)(&pCC), &size)!=E_SUCCESS)
-							{
-								CAMsg::printMsg(LOG_ERR, "SettleThread: could not get next item from queue\n");
-								q.clean();
-								break;
-							}
-						if(biConn.initBIConnection()!=E_SUCCESS)
-							{
-								CAMsg::printMsg(LOG_DEBUG, "SettleThread: could not connect to BI. Retrying later...\n");
-								q.clean();
-								break;
-							}
-
-						CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: try to settle...\n");
-						pErrMsg = biConn.settle( *pCC );
-						biConn.terminateBIConnection();
-						CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: settle done!\n");
-					
-						// check returncode
-						if(pErrMsg==NULL)
-							{
-								CAMsg::printMsg(LOG_ERR, "SettleThread: Communication with BI failed!\n");
-							}
-						else if(pErrMsg->getErrorCode()!=pErrMsg->ERR_OK)
-							{
-								CAMsg::printMsg(LOG_ERR, "SettleThread: BI reported error no. %d (%s)\n",
-									pErrMsg->getErrorCode(), pErrMsg->getDescription() );
-									CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: BI reported error!\n");
-							}
-						else
-							{
-								if(dbConn.markAsSettled(pCC->getAccountNumber())==E_SUCCESS)
-								{
-									CAMsg::printMsg(LOG_ERR, "SettleThread: Costconfirmation for the account was marked as settled!\n");
-							}
-						else
-							{
-									CAMsg::printMsg(LOG_ERR, "SettleThread: Could not mark an account as settled!\n");
-							}
-							}
-						delete pCC;
-						delete pErrMsg;
+						CAMsg::printMsg(LOG_ERR, "SettleThread: could not get next item from queue\n");
+						q.clean();
+						break;
 					}
+					if(biConn.initBIConnection()!=E_SUCCESS)
+					{
+						CAMsg::printMsg(LOG_DEBUG, "SettleThread: could not connect to BI. Retrying later...\n");
+						q.clean();
+						break;
+					}
+					CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: try to settle...\n");
+					pErrMsg = biConn.settle( *pCC );
+					biConn.terminateBIConnection();
+					CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: settle done!\n");
+				
+					// check returncode
+					if(pErrMsg==NULL)  //no returncode -> connection error
+					{
+						CAMsg::printMsg(LOG_ERR, "SettleThread: Communication with BI failed!\n");
+					}
+					else if(pErrMsg->getErrorCode()!=pErrMsg->ERR_OK)  //BI reported error
+					{
+						CAMsg::printMsg(LOG_ERR, "SettleThread: BI reported error no. %d (%s)\n",
+							pErrMsg->getErrorCode(), pErrMsg->getDescription() );
+						CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: BI reported error!\n");
+						//delete costconfirmation to avoid trying to settle an unusable CC again and again
+						if(dbConn.deleteCC(pCC->getAccountNumber()) == E_SUCCESS)
+						{
+							CAMsg::printMsg(LOG_ERR, "SettleThread: unusable cost confirmation was deleted\n");	
+						}	
+						else
+						{						
+							CAMsg::printMsg(LOG_ERR, "SettleThread: cost confirmation is unusable, but could not delete it from database\n");
+						}
+					}
+					else //settling was OK, so mark account as settled
+					{
+						if(dbConn.markAsSettled(pCC->getAccountNumber())==E_SUCCESS)
+						{ 
+							CAMsg::printMsg(LOG_ERR, "SettleThread: Costconfirmation for the account was marked as settled!\n");
+						}
+						else
+						{	
+							CAMsg::printMsg(LOG_ERR, "SettleThread: Could not mark an account as settled!\n");
+						}
+					} 
+					delete pCC;
+					delete pErrMsg;
+				}
 				dbConn.terminateDBConnection();
 			}//main while run loop
 		CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Exiting run loop!\n");
