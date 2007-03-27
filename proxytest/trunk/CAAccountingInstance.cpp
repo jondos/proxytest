@@ -160,7 +160,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, CAMix
 			return 3;
 				//return 2;
 		}
-	
+	     
 		if(pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT )
 			{
 				//----------------------------------------------------------
@@ -267,7 +267,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, CAMix
 							}//we have sent a CC request
 						// no CC request sent yet --> send a first CC request
 						DOM_Document doc;
-							CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending first CC request.\n");
+						CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending first CC request.\n");
 						
 						//get cascadeInfo from CAMix(which makeCCRequest needs to extract the price certs
 						DOM_Document cascadeInfoDoc; 
@@ -277,7 +277,9 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, CAMix
 		                options.getPrepaidIntervalKbytes(&prepaidInterval);
 		                UINT64 transferredBytes = pAccInfo->transferredBytes;
 		                UINT64 bytesToConfirm = transferredBytes + (prepaidInterval * 1024); 				
-						makeCCRequest(pAccInfo->accountNumber, bytesToConfirm, doc,cascadeInfoDoc);
+						makeCCRequest(pAccInfo->accountNumber, bytesToConfirm, doc,cascadeInfoDoc); 
+							CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending first CC request.\n");
+						 
 						pAccInfo->pControlChannel->sendXMLMessage(doc);
 #ifdef DEBUG	
 						CAMsg::printMsg(LOG_DEBUG, "CC request sent for %u bytes \n",bytesToConfirm);
@@ -369,7 +371,7 @@ SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UIN
 		DOM_Element elemBytes = doc.createElement("TransferredBytes");
 		setDOMElementValue(elemBytes, transferredBytes);
 		elemCC.appendChild(elemBytes);
-
+		
 		//extract price certificate elements from cascadeInfo
 		DOM_Element cascadeInfoElem = cascadeInfo.getDocumentElement();
 		DOM_NodeList allMixes = cascadeInfoElem.getElementsByTagName("Mix");
@@ -442,6 +444,7 @@ SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UIN
 
 
 /** @todo makt the faster by not using DOM!*/
+/*
 SINT32 CAAccountingInstance::makeAccountRequest(DOM_Document &doc)
 	{
 		CAMsg::printMsg(LOG_DEBUG, "started method makeAccountRequest\n");
@@ -453,7 +456,7 @@ SINT32 CAAccountingInstance::makeAccountRequest(DOM_Document &doc)
 		elemRoot.appendChild(elemAcc);
 		CAMsg::printMsg(LOG_DEBUG, "finished method makeAccountRequest\n");
 		return E_SUCCESS;
-	}
+	}*/
 
 /**
  * The Main Loop of the accounting instance thread.
@@ -493,17 +496,17 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 		// what type of message is it?
 		if ( strcmp( docElementName, "AccountCertificate" ) == 0 )
 			{
-					CAMsg::printMsg( LOG_DEBUG, "Received an AccountCertificate. Calling handleAccountCertificate()\n" );
+				CAMsg::printMsg( LOG_DEBUG, "Received an AccountCertificate. Calling handleAccountCertificate()\n" );
 				ms_pInstance->handleAccountCertificate( pHashEntry, root );
 			}
 		else if ( strcmp( docElementName, "Response" ) == 0)
 			{
-					CAMsg::printMsg( LOG_DEBUG, "Received a Response (challenge-response)\n");
+				CAMsg::printMsg( LOG_DEBUG, "Received a Response (challenge-response)\n");
 				ms_pInstance->handleChallengeResponse( pHashEntry, root );
 			}
 		else if ( strcmp( docElementName, "CC" ) == 0 )
 			{
-					CAMsg::printMsg( LOG_DEBUG, "Received a CC. Calling handleCostConfirmation()\n" );
+				CAMsg::printMsg( LOG_DEBUG, "Received a CC. Calling handleCostConfirmation()\n" );
 				ms_pInstance->handleCostConfirmation( pHashEntry, root );
 			}
 		else
@@ -535,7 +538,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		timespec now;
 		getcurrentTime(now);
 
-		// check authstate of this user
+		//got a previous account cert? if so, ignore this new one
 		m_Mutex.lock();
 		if(pAccInfo->authFlags&AUTH_GOT_ACCOUNTCERT)
 			{
@@ -586,6 +589,20 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 			CAMsg::printMsg(LOG_DEBUG, "Stored payment instance ID: %s\n", pAccInfo->pstrBIID);
 		#endif
 
+	//check if account was created at the correct (= current) payment instance
+	
+	const char* bi_id = (const char*)options.getBI()->getID();
+	if (strcmp( (const char*)pAccInfo->pstrBIID, bi_id ) != 0) //both type UINT8*, comparison OK?
+	{
+		CAMsg::printMsg(LOG_DEBUG, "Account certificate was not issued by current id, refusing connection\n");
+		CAXMLErrorMessage err(CAXMLErrorMessage::ERR_WRONG_DATA);
+		DOM_Document errDoc;
+		err.toXmlDocument(errDoc);
+		pAccInfo->pControlChannel->sendXMLMessage(errDoc);
+		m_Mutex.unlock();
+		return;
+		//no need to explicitly kick user out, we're simply not sending a challenge, thereby ending the connection procedure
+	}	
 
 	// parse & set public key
 	if ( getDOMChildByName( root, (UINT8 *)"JapPublicKey", elGeneral, false ) != E_SUCCESS )
@@ -631,7 +648,10 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 			m_Mutex.unlock();
 			return ;
 		}
-		
+	
+	
+	/**************** commented out for debugging purposes only ***************
+	//get previously prepaid bytes from database	
 	CAMsg::printMsg(LOG_ERR, "Checking database for previously prepaid bytes...\n");
 	SINT32 prepaidAmount = m_dbInterface->getPrepaidAmount(pAccInfo->accountNumber);
 	if (prepaidAmount > 0)
@@ -644,6 +664,9 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: No database record for prepaid bytes found for this account \n");	
 	}	
 	CAMsg::printMsg(LOG_DEBUG, "number of prepaid (confirmed-transferred) bytes: %d \n",pAccInfo->confirmedBytes-pAccInfo->transferredBytes);
+	
+	***************** end of debugging *********************/	
+		
 		
 	UINT8 * arbChallenge;
 	UINT8 b64Challenge[ 512 ];
@@ -894,23 +917,25 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 	{
 		if ( pHashEntry->pAccountingInfo != NULL)
 			{
-				tAiAccountingInfo* pAccInfo;
-				pAccInfo = pHashEntry->pAccountingInfo;
+				tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
 				
+				/****     commented out for debugging only **********************
 				
 				//store prepaid bytes in database, so the user wont lose the prepaid amount by disconnecting
 				SINT32 prepaidBytes = pAccInfo->confirmedBytes - pAccInfo->transferredBytes;
 				CAAccountingDBInterface* dbInterface = new CAAccountingDBInterface(); //local variable, since method is static, but m_dbInterface is a member variable
 				if(dbInterface->initDBConnection() != E_SUCCESS)
 				{
-					CAMsg::printMsg( LOG_ERR, "Could not connect to DB, preapid bytes were lost\n");
+					CAMsg::printMsg( LOG_ERR, "Could not connect to DB, prepaid bytes were lost\n");
 					delete dbInterface;
-					return E_UNKNOWN;
+					//do not return with an error code, since we want the rest of the method to run anyway
 				}
 				
 				dbInterface->storePrepaidAmount(pAccInfo->accountNumber,prepaidBytes);
 				delete dbInterface;
-
+				
+				*********** end of debugging *************/
+				
 				//free memory of pAccInfo
 				if ( pAccInfo->pPublicKey!=NULL )
 					{
@@ -924,6 +949,10 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 					{
 						delete [] pAccInfo->pstrBIID;
 					}
+				if (pAccInfo->pControlChannel != NULL)
+				{
+					delete pAccInfo->pControlChannel;
+				}
 				delete pHashEntry->pAccountingInfo;
 				pHashEntry->pAccountingInfo=NULL;
 			}
@@ -931,6 +960,6 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 		return E_SUCCESS;
 	}
 
-
+ 
 
 #endif /* ifdef PAYMENT */
