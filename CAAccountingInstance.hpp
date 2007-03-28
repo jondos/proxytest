@@ -51,8 +51,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 // the number of seconds that may pass between a pay request
 // and the jap sending its answer
-#define REQUEST_TIMEOUT 30
+#define REQUEST_TIMEOUT 60
 #define HARD_LIMIT_TIMEOUT 30
+#define GOODWILL_TIMEOUT 60
 #define MIN_BALANCE 50
 #define MIN_BYTES 1024*512
 
@@ -154,6 +155,11 @@ private:
 				
 	static SINT32 makeCCRequest( const UINT64 accountNumber, const UINT64 transferredBytes, DOM_Document& doc, DOM_Document& cascadeInfo);
 	static SINT32 makeAccountRequest(DOM_Document &doc);
+	
+	static SINT32 returnOK(tAiAccountingInfo* pAccInfo);
+	static SINT32 returnWait(tAiAccountingInfo* pAccInfo);
+	static SINT32 returnKickout();
+	static SINT32 returnHold();
 	
 	/**
 	 * The main loop of the AI thread - reads messages from the queue 

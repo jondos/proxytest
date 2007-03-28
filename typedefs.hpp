@@ -182,6 +182,9 @@ typedef struct t_mix_parameters tMixParameters;
 /** a fatal error occured earlier */
 #define AUTH_FATAL_ERROR 0x2000
 
+// AI is waiting for a necessary message from JAP (e.g. response to challenge)
+#define AUTH_TIMEOUT_STARTED 0x10000 
+
 
 
 class CASignature;
@@ -249,6 +252,9 @@ struct t_accountinginfo
 	
 	/** stores connection time for enabling free surfing period */
 	SINT32 connectionTime;
+	
+	//time at which a goodwill timeout was started, i.e. a necessary message from jap was not received by the AI
+	SINT32 goodwillTimeoutStarttime;
 };
 typedef struct t_accountinginfo tAiAccountingInfo;
 
