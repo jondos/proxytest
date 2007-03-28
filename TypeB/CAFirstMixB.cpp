@@ -157,18 +157,30 @@ SINT32 CAFirstMixB::loop()
                           m_PacketsPerCountryIN[pHashEntry->countryID]++;
                         #endif  
                         //New control channel code...!
-                        if(pMixPacket->channel>0&&pMixPacket->channel<256)
-                          {
-                            pHashEntry->pControlChannelDispatcher->proccessMixPacket(pMixPacket);
-                            goto NEXT_USER;
-                          }
+						SINT32 ret = 0;
+						if(pMixPacket->channel>0&&pMixPacket->channel<256)
+						{
+							if (pHashEntry->pControlChannelDispatcher->proccessMixPacket(pMixPacket))
+							{
+								goto NEXT_USER;
+							}
+							else
+							{
+								// packet is invalid and could not be processed
+								ret = 3;
+							}
+						}
 #ifdef PAYMENT
-                        // payment code added by Bastian Voigt
-                        SINT32 ret = CAAccountingInstance::handleJapPacket(pHashEntry,this );  
-                        if (ret == 2)
-                          {
-                            goto NEXT_USER;
-                          }                          
+												// payment code added by Bastian Voigt
+						if (ret == 0)
+						{
+							ret = CAAccountingInstance::handleJapPacket(pHashEntry,this );  
+						}
+						if (ret == 2)
+						{
+							goto NEXT_USER;
+						}		
+#endif													                        
                         if(ret == 3) 
                           {
                             // this jap is evil! terminate connection and add IP to blacklist
@@ -197,7 +209,7 @@ SINT32 CAFirstMixB::loop()
                             decUsers();
                             goto NEXT_USER;
                           }
-#endif
+
                         if(pMixPacket->flags==CHANNEL_DUMMY)          // just a dummy to keep the connection alife in e.g. NAT gateways 
                           { 
                             getRandom(pMixPacket->data,DATA_SIZE);
