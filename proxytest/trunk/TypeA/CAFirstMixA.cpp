@@ -176,7 +176,7 @@ SINT32 CAFirstMixA::loop()
 													else
 													{
 														// packet is invalid and could not be processed
-														ret = 3;
+														//ret = 3;
 													}
 												}
 #ifdef PAYMENT

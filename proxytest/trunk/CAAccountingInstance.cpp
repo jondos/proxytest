@@ -134,7 +134,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, CAMix
 			// there was an error earlier.
 			ms_pInstance->m_Mutex.unlock();
 			CAMsg::printMsg( LOG_DEBUG, "AccountingInstance: should kick out user now...\n");
-			return returnKickout();
+			return returnKickout(pAccInfo);
 		}
 		
 		//kick user out if a timeout was set and has since run out
@@ -144,7 +144,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, CAMix
 			if (now > pAccInfo->goodwillTimeoutStarttime + GOODWILL_TIMEOUT)
 			{
 				CAMsg::printMsg(LOG_DEBUG, "Goodwill timeout has runout, will kick out user now...\n");
-				return returnKickout();
+				return returnKickout(pAccInfo);
 			}	
 		}	
 	
@@ -160,7 +160,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, CAMix
 				ms_pInstance->m_Mutex.unlock();
 				pAccInfo->authFlags |= AUTH_FATAL_ERROR;
 				CAMsg::printMsg( LOG_DEBUG, "AccountingInstance: AUTH_FAKE flag is set ... byebye\n");
-				return returnKickout();
+				return returnKickout(pAccInfo);
 			}
 			if( !(pAccInfo->authFlags & AUTH_ACCOUNT_OK) )
 			{
@@ -318,7 +318,7 @@ SINT32 CAAccountingInstance::returnWait(tAiAccountingInfo* pAccInfo)
 /**
  *  When receiving this message, the Mix should kick the user out immediately
  */
-SINT32 CAAccountingInstance::returnKickout()
+SINT32 CAAccountingInstance::returnKickout(tAiAccountingInfo* pAccInfo)
 {
 	CAMsg::printMsg(LOG_DEBUG, "Kickout: %u\n", pAccInfo->goodwillTimeoutStarttime);
 	ms_pInstance->m_Mutex.unlock();
