@@ -311,6 +311,7 @@ SINT32 CAAccountingInstance::returnWait(tAiAccountingInfo* pAccInfo)
 {
 	ms_pInstance->m_Mutex.unlock();
 	pAccInfo->authFlags |= AUTH_TIMEOUT_STARTED;
+	CAMsg::printMsg(LOG_DEBUG, "Wait: %u\n", pAccInfo->goodwillTimeoutStarttime);
 	pAccInfo->goodwillTimeoutStarttime = time(NULL);		
 	return 2;
 }	
@@ -319,6 +320,7 @@ SINT32 CAAccountingInstance::returnWait(tAiAccountingInfo* pAccInfo)
  */
 SINT32 CAAccountingInstance::returnKickout()
 {
+	CAMsg::printMsg(LOG_DEBUG, "Kickout: %u\n", pAccInfo->goodwillTimeoutStarttime);
 	ms_pInstance->m_Mutex.unlock();
 	return 3;
 }
