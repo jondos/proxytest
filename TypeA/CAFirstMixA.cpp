@@ -175,8 +175,8 @@ SINT32 CAFirstMixA::loop()
 													}
 													else
 													{
-														// packet is invalid and could not be processed
-														//ret = 3;
+														CAMsg::printMsg(LOG_DEBUG, "Packet is invalid and could not be processed!");
+														ret = 3;
 													}
 												}
 #ifdef PAYMENT
