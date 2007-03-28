@@ -72,8 +72,10 @@ bool CAControlChannelDispatcher::proccessMixPacket(const MIXPACKET* pPacket)
 				CAAbstractControlChannel* pControlChannel=m_arControlChannels[pPacket->channel];
 				if(pControlChannel!=NULL)
 					{
-						pControlChannel->proccessMessage(pPacket->data,pPacket->flags);
-						return true;
+						if (pControlChannel->proccessMessage(pPacket->data,pPacket->flags) == E_SUCCESS)
+						{
+							return true;
+						}
 					}
 			}
 		return false;
