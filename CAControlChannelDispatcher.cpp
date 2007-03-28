@@ -81,6 +81,7 @@ bool CAControlChannelDispatcher::proccessMixPacket(const MIXPACKET* pPacket)
 				{
 					return true;		
 				}
+			}
 		return false;
 	}
 
