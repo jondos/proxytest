@@ -447,13 +447,17 @@ SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UIN
 		doc = DOM_Document::createDocument();
 		doc.importNode(m_preparedCCRequest.getDocumentElement(),true);
 		CAMsg::printMsg(LOG_DEBUG, "Test2\n");
-	    getDOMChildByName(doc.getDocumentElement(),(UINT8*)"CC",elemCC);
+	    if (getDOMChildByName(doc.getDocumentElement(),(UINT8*)"CC",elemCC) != E_SUCCESS)
+	    {
+	    	CAMsg::printMsg(LOG_DEBUG, "OOOOOO\n");
+	    }
 		CAMsg::printMsg(LOG_DEBUG, "Test3\n");
 		
 		DOM_Element elemAccount = doc.createElement("AccountNumber");
+		CAMsg::printMsg(LOG_DEBUG, "Test4\n");
 		setDOMElementValue(elemAccount, accountNumber);
 		elemCC.appendChild(elemAccount);
-		
+		CAMsg::printMsg(LOG_DEBUG, "Test5\n");
 		DOM_Element elemBytes = doc.createElement("TransferredBytes");
 		setDOMElementValue(elemBytes, transferredBytes);
 		elemCC.appendChild(elemBytes);
