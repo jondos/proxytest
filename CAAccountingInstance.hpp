@@ -83,9 +83,9 @@ public:
 	/**
 	 * Returns a reference to the Singleton instance
 	 */
-	static SINT32 init()
+	static SINT32 init(CAMix* callingMix)
 		{
-				ms_pInstance = new CAAccountingInstance();
+				ms_pInstance = new CAAccountingInstance(callingMix);
 				return E_SUCCESS;
 		}
 		
@@ -109,7 +109,7 @@ public:
 	/**
 	 * This should be called by the FirstMix for every incoming Jap packet
 	 */
-	static SINT32 handleJapPacket(fmHashTableEntry *pHashEntry,CAMix* callingMix );
+	static SINT32 handleJapPacket(fmHashTableEntry *pHashEntry);
 
 	/**
 	 * Check if an IP address is temporarily blocked by the accounting instance.
@@ -133,7 +133,7 @@ public:
 
 private:
 
-	CAAccountingInstance(); //Singleton!
+	CAAccountingInstance(CAMix* callingMix); //Singleton!
 	~CAAccountingInstance();
 
 	/**
@@ -152,8 +152,8 @@ private:
 	 */
 	void handleChallengeResponse(fmHashTableEntry *pHashEntry, const DOM_Element &root);
 
-				
-	static SINT32 makeCCRequest( const UINT64 accountNumber, const UINT64 transferredBytes, DOM_Document& doc, DOM_Document& cascadeInfo);
+	static SINT32 prepareCCRequest(CAMix* callingMix);			
+	static SINT32 makeCCRequest( const UINT64 accountNumber, const UINT64 transferredBytes, DOM_Document& doc);
 	static SINT32 makeAccountRequest(DOM_Document &doc);
 	
 	static SINT32 returnOK(tAiAccountingInfo* pAccInfo);
@@ -166,6 +166,8 @@ private:
 	 * and calls the appropriate handlers
 	 */
 	static THREAD_RETURN aiThreadMainLoop(void *param);
+	
+	static DOM_Document m_preparedCCRequest;
 	
 	/** this thread reads messages from the queue and processes them */
 	CAThread * m_pThread;
