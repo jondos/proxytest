@@ -261,7 +261,6 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 				}//we have sent a CC request
 				// no CC request sent yet --> send a first CC request
 				DOM_Document doc;
-				CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending first CC request.\n");
 				
                 //send CC to jap
                 UINT32 prepaidInterval;
