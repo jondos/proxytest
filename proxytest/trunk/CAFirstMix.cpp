@@ -213,7 +213,7 @@ SINT32 CAFirstMix::init()
 #endif
 
 #ifdef PAYMENT
-		CAAccountingInstance::init();
+		CAAccountingInstance::init(this);
 #endif
 
 		m_pthreadsLogin=new CAThreadPool(NUM_LOGIN_WORKER_TRHEADS,MAX_LOGIN_QUEUE,false);

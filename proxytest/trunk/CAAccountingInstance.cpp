@@ -46,6 +46,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 #define JAP_DIGEST_LENGTH 28
 
 
+DOM_Document CAAccountingInstance::m_preparedCCRequest;
+
 /**
  * Singleton: This is the reference to the only instance of this class
  */
@@ -56,7 +58,7 @@ CAAccountingInstance * CAAccountingInstance::ms_pInstance = NULL;
 /**
  * private Constructor
  */
-CAAccountingInstance::CAAccountingInstance()
+CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
 	{	
 		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance initialising\n" );
 		m_pQueue = new CAQueue();
@@ -80,14 +82,19 @@ CAAccountingInstance::CAAccountingInstance()
 		options.getPaymentHardLimit(&m_iHardLimitBytes);
 		options.getPaymentSoftLimit(&m_iSoftLimitBytes);
 	
+		prepareCCRequest(callingMix);
+	
 		// launch AI thread
 		/*m_pThread = new CAThread();
 		m_pThread->setMainLoop( aiThreadMainLoop );
 		m_bThreadRunning = true;
 		m_pThread->start( this );
 		*/
+		
 		// launch BI settleThread
 		m_pSettleThread = new CAAccountingSettleThread();
+		
+		
 	}
 
 /**
@@ -119,10 +126,8 @@ CAAccountingInstance::~CAAccountingInstance()
  * @return 2: we need something (cert, CC,...) from the user, hold packet and start timeout
  * @return 3: fatal error, or timeout exceeded -> kick the user out
  * 
- * @param callingMix: the Mix instance to which the AI belongs
- *  (needed to get cascadeInfo to extract the price certificates to include in cost confirmations) 
  */
-SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, CAMix* callingMix)
+SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 	{
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
 		ms_pInstance->m_Mutex.lock();
@@ -258,15 +263,12 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, CAMix
 				DOM_Document doc;
 				CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending first CC request.\n");
 				
-				//get cascadeInfo from CAMix(which makeCCRequest needs to extract the price certs
-				DOM_Document cascadeInfoDoc; 
-				callingMix->getMixCascadeInfo(cascadeInfoDoc);
                 //send CC to jap
                 UINT32 prepaidInterval;
                 options.getPrepaidIntervalKbytes(&prepaidInterval);
                 UINT64 transferredBytes = pAccInfo->transferredBytes;
                 UINT64 bytesToConfirm = transferredBytes + (prepaidInterval * 1024); 				
-				makeCCRequest(pAccInfo->accountNumber, bytesToConfirm, doc,cascadeInfoDoc);
+				makeCCRequest(pAccInfo->accountNumber, bytesToConfirm, doc);
 				CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending first CC request.\n");
 				pAccInfo->authFlags |= AUTH_SENT_CC_REQUEST;
 				pAccInfo->pControlChannel->sendXMLMessage(doc);
@@ -335,49 +337,51 @@ SINT32 CAAccountingInstance::returnHold()
 	return 2;
 }
 
-/** @todo makt the faster by not using DOM!*/
-SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UINT64 transferredBytes, DOM_Document& doc, DOM_Document& cascadeInfo)
-	{
-		/*
-		 * creating the xml of a new CC is really the responsability of the CAXMLCostConfirmation class
-		 * knowledge about the structure of a CC's XML should be encapsulated in it
-		 * TODO: add constructor to that class that takes accountnumber, transferredbytes etc as params
-		 *       (should use a template internally into which it only inserts accNumber and bytes,to speed things up
-		 * TODO: add toXMLElement method
-		 * then replace manually building the xml here with contructing a CAXMLCostConfirmation
-		 * and just add the xml returned by its toXMLElement method
-		 */
-		// create a DOM CostConfirmation document
-		doc = DOM_Document::createDocument();
-		DOM_Element elemRoot = doc.createElement("PayRequest");
-		elemRoot.setAttribute("version", "1.0");
-		doc.appendChild(elemRoot);
-		DOM_Element elemCC = doc.createElement("CC");
-		elemCC.setAttribute("version", "1.1");
-		elemRoot.appendChild(elemCC);
-		DOM_Element elemAiName = doc.createElement("AiID");
-		setDOMElementValue(elemAiName, ms_pInstance->m_AiName);
-		elemCC.appendChild(elemAiName);	
-		DOM_Element elemAccount = doc.createElement("AccountNumber");
-		setDOMElementValue(elemAccount, accountNumber);
-		elemCC.appendChild(elemAccount);
-		DOM_Element elemBytes = doc.createElement("TransferredBytes");
-		setDOMElementValue(elemBytes, transferredBytes);
-		elemCC.appendChild(elemBytes);
 
-		//extract price certificate elements from cascadeInfo
-		DOM_Element cascadeInfoElem = cascadeInfo.getDocumentElement();
-		DOM_NodeList allMixes = cascadeInfoElem.getElementsByTagName("Mix");
-		int nrOfMixes = allMixes.getLength();
-		DOM_Node* mixNodes = new DOM_Node[nrOfMixes]; //so we can use separate loops for extracting, hashing and appending
-		DOM_Node curMixNode;
-		for (int i = 0; i<nrOfMixes; i++){
-			//cant use getDOMChildByName from CAUtil here yet, since it will always return the first child
-			curMixNode = allMixes.item(i); 
-			getDOMChildByName(curMixNode,(UINT8*)"PriceCertificate",mixNodes[i],true);	
-		}	 
-		
-		//hash'em, and get subjectkeyidentifiers
+
+/**
+ * @todo make this faster by not using DOM!
+ * creating the xml of a new CC is really the responsability of the CAXMLCostConfirmation class
+ * knowledge about the structure of a CC's XML should be encapsulated in it
+ * TODO: add constructor to that class that takes accountnumber, transferredbytes etc as params
+ *       (should use a template internally into which it only inserts accNumber and bytes,to speed things up
+ * TODO: add toXMLElement method
+ * then replace manually building the xml here with contructing a CAXMLCostConfirmation
+ * and just add the xml returned by its toXMLElement method
+ * @param callingMix: the Mix instance to which the AI belongs
+ * (needed to get cascadeInfo to extract the price certificates to include in cost confirmations) 
+ */
+SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix)
+{	
+	m_preparedCCRequest = DOM_Document::createDocument();
+	
+	DOM_Element elemRoot = m_preparedCCRequest.createElement("PayRequest");
+	elemRoot.setAttribute("version", "1.0");
+	m_preparedCCRequest.appendChild(elemRoot);
+	DOM_Element elemCC = m_preparedCCRequest.createElement("CC");
+	elemCC.setAttribute("version", "1.1");
+	elemRoot.appendChild(elemCC);
+	DOM_Element elemAiName = m_preparedCCRequest.createElement("AiID");
+	setDOMElementValue(elemAiName, ms_pInstance->m_AiName);
+	elemCC.appendChild(elemAiName);	
+
+	//extract price certificate elements from cascadeInfo
+	//get cascadeInfo from CAMix(which makeCCRequest needs to extract the price certs
+	DOM_Document cascadeInfoDoc; 
+	callingMix->getMixCascadeInfo(cascadeInfoDoc);
+	
+	DOM_Element cascadeInfoElem = cascadeInfoDoc.getDocumentElement();
+	DOM_NodeList allMixes = cascadeInfoElem.getElementsByTagName("Mix");
+	int nrOfMixes = allMixes.getLength();
+	DOM_Node* mixNodes = new DOM_Node[nrOfMixes]; //so we can use separate loops for extracting, hashing and appending
+	DOM_Node curMixNode;
+	for (int i = 0; i<nrOfMixes; i++){
+		//cant use getDOMChildByName from CAUtil here yet, since it will always return the first child
+		curMixNode = allMixes.item(i); 
+		getDOMChildByName(curMixNode,(UINT8*)"PriceCertificate",mixNodes[i],true);	
+	}	 
+	
+	//hash'em, and get subjectkeyidentifiers
 		UINT8 digest[SHA_DIGEST_LENGTH];
 		UINT8** allHashes=new UINT8*[nrOfMixes];
 		UINT8** allSkis=new UINT8*[nrOfMixes];
@@ -403,25 +407,25 @@ SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UIN
 			allHashes[i] = tmpBuff;
 			//do not delete tmpBuff here, since we're using allHashes below
 
-			if (getDOMChildByName(mixNodes[i],(UINT8*)"SubjectKeyIdentifier",skiNode,true) != E_SUCCESS)
-				{
-					CAMsg::printMsg(LOG_CRIT,"Could not get mix id from price cert");	
-				}	
-			
-			allSkis[i] =  (UINT8*) skiNode.getFirstChild().getNodeValue().transcode();
+		if (getDOMChildByName(mixNodes[i],(UINT8*)"SubjectKeyIdentifier",skiNode,true) != E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Could not get mix id from price cert");	
+			}	
+		
+		allSkis[i] =  (UINT8*) skiNode.getFirstChild().getNodeValue().transcode();
 
-		}
-		//and append to CC
-		DOM_Element elemPriceCerts = doc.createElement("PriceCertificates");
-		DOM_Element elemCert;
-		for (int i = 0; i < nrOfMixes; i++) {
-			elemCert = doc.createElement("PriceCertHash");
-			//CAMsg::printMsg(LOG_DEBUG,"hash to be inserted in cc: index %d, value %s\n",i,allHashes[i]);
-			setDOMElementValue(elemCert,allHashes[i]);
-			delete[] allHashes[i];
-			elemCert.setAttribute("id", DOMString( (const char*)allSkis[i]));
-			if (i == 0) {
-				elemCert.setAttribute("isAI","true");	
+	}
+	//and append to CC
+	DOM_Element elemPriceCerts = m_preparedCCRequest.createElement("PriceCertificates");
+	DOM_Element elemCert;
+	for (int i = 0; i < nrOfMixes; i++) {
+		elemCert = m_preparedCCRequest.createElement("PriceCertHash");
+		//CAMsg::printMsg(LOG_DEBUG,"hash to be inserted in cc: index %d, value %s\n",i,allHashes[i]);
+		setDOMElementValue(elemCert,allHashes[i]);
+		delete[] allHashes[i];
+		elemCert.setAttribute("id", DOMString( (const char*)allSkis[i]));
+		if (i == 0) {
+			elemCert.setAttribute("isAI","true");	
 			}
 			elemPriceCerts.appendChild(elemCert);
 		}
@@ -431,7 +435,27 @@ SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UIN
 #endif		
         delete[] mixNodes;
 		delete[] allHashes;
-		delete[] allSkis;
+		delete[] allSkis;	
+		return E_SUCCESS;
+}
+
+
+SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UINT64 transferredBytes, DOM_Document& doc)
+	{
+		DOM_Element elemCC;
+		
+		doc = DOM_Document::createDocument();
+		doc.importNode(m_preparedCCRequest.getDocumentElement(),true);
+		
+	    getDOMChildByName(doc.getDocumentElement(),(UINT8*)"CC",elemCC);
+
+		DOM_Element elemAccount = doc.createElement("AccountNumber");
+		setDOMElementValue(elemAccount, accountNumber);
+		elemCC.appendChild(elemAccount);
+		DOM_Element elemBytes = doc.createElement("TransferredBytes");
+		setDOMElementValue(elemBytes, transferredBytes);
+		elemCC.appendChild(elemBytes);
+
 		return E_SUCCESS;
 	}
 
