@@ -152,7 +152,7 @@ private:
 	 */
 	void handleChallengeResponse(fmHashTableEntry *pHashEntry, const DOM_Element &root);
 
-	static SINT32 prepareCCRequest(CAMix* callingMix);			
+	static SINT32 prepareCCRequest(CAMix* callingMix, UINT8* a_AiName);			
 	static SINT32 makeCCRequest( const UINT64 accountNumber, const UINT64 transferredBytes, DOM_Document& doc);
 	static SINT32 makeAccountRequest(DOM_Document &doc);
 	
