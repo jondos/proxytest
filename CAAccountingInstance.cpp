@@ -132,7 +132,6 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, CAMix
 		if(pAccInfo->authFlags & (AUTH_FATAL_ERROR))
 		{
 			// there was an error earlier.
-			ms_pInstance->m_Mutex.unlock();
 			CAMsg::printMsg( LOG_DEBUG, "AccountingInstance: should kick out user now...\n");
 			return returnKickout(pAccInfo);
 		}
@@ -269,6 +268,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, CAMix
                 UINT64 bytesToConfirm = transferredBytes + (prepaidInterval * 1024); 				
 				makeCCRequest(pAccInfo->accountNumber, bytesToConfirm, doc,cascadeInfoDoc);
 				CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending first CC request.\n");
+				pAccInfo->authFlags |= AUTH_SENT_CC_REQUEST;
 				pAccInfo->pControlChannel->sendXMLMessage(doc);
 #ifdef DEBUG	
 				CAMsg::printMsg(LOG_DEBUG, "CC request sent for %u bytes \n",bytesToConfirm);
@@ -280,7 +280,6 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, CAMix
 				debugout[debuglen] = 0;			
 				CAMsg::printMsg(LOG_DEBUG, "the CC sent looks like this: %s \n",debugout);
 #endif						
-				pAccInfo->authFlags |= AUTH_SENT_CC_REQUEST;
 				return returnOK(pAccInfo);
 			}// end of soft limit exceeded
 
@@ -467,12 +466,13 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 				ms_pInstance->handleCostConfirmation( pHashEntry, root );
 			}
 		else
-			{
-				CAMsg::printMsg( LOG_ERR, 
-													"AI Received XML message with unknown root element \"%s\". Ignoring...\n",
-														docElementName 
-												);
-			}
+		{
+			CAMsg::printMsg( LOG_ERR, 
+					"AI Received XML message with unknown root element \"%s\". This is not accepted!\n",
+											docElementName 
+										);
+			return E_UNKNOWN;
+		}
 		//delete pDomDoc;
 		delete [] docElementName;
 		return E_SUCCESS;
