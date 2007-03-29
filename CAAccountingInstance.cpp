@@ -449,11 +449,12 @@ SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UIN
 		doc = DOM_Document::createDocument();
 		doc.importNode(m_preparedCCRequest.getDocumentElement(),true);
 		CAMsg::printMsg(LOG_DEBUG, "Test2\n");
+		.
 	    if (getDOMChildByName(doc.getDocumentElement(),(UINT8*)"CC",elemCC) != E_SUCCESS)
 	    {
 	    	CAMsg::printMsg(LOG_DEBUG, "OOOOOO\n");
 	    }
-		CAMsg::printMsg(LOG_DEBUG, "Test3\n");
+		CAMsg::printMsg(LOG_DEBUG, "Test: %s\n", doc.getDocumentElement().getNodeName());
 		
 		DOM_Element elemAccount = doc.createElement("AccountNumber");
 		CAMsg::printMsg(LOG_DEBUG, "Test4\n");
