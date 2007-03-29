@@ -454,7 +454,7 @@ SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UIN
 	    {
 	    	CAMsg::printMsg(LOG_DEBUG, "OOOOOO\n");
 	    }
-		CAMsg::printMsg(LOG_DEBUG, "Test: %s\n", doc.getDocumentElement().getNodeName());
+		CAMsg::printMsg(LOG_DEBUG, "Test: %s\n", doc.getDocumentElement().getNodeName().transcode());
 		
 		DOM_Element elemAccount = doc.createElement("AccountNumber");
 		CAMsg::printMsg(LOG_DEBUG, "Test4\n");
