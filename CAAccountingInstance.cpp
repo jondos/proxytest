@@ -429,6 +429,7 @@ SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UIN
 #ifdef DEBUG 		
 		CAMsg::printMsg(LOG_DEBUG, "finished method makeCCRequest\n");
 #endif		
+        delete[] mixNodes;
 		delete[] allHashes;
 		delete[] allSkis;
 		return E_SUCCESS;
