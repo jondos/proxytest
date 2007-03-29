@@ -433,6 +433,8 @@ SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName
 #ifdef DEBUG 		
 		CAMsg::printMsg(LOG_DEBUG, "finished method makeCCRequest\n");
 #endif		
+
+CAMsg::printMsg(LOG_DEBUG, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
         delete[] mixNodes;
 		delete[] allHashes;
 		delete[] allSkis;	
