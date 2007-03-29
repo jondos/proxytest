@@ -82,7 +82,7 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
 		options.getPaymentHardLimit(&m_iHardLimitBytes);
 		options.getPaymentSoftLimit(&m_iSoftLimitBytes);
 	
-		prepareCCRequest(callingMix);
+		prepareCCRequest(callingMix, m_AiName);
 	
 		// launch AI thread
 		/*m_pThread = new CAThread();
@@ -351,7 +351,7 @@ SINT32 CAAccountingInstance::returnHold()
  * @param callingMix: the Mix instance to which the AI belongs
  * (needed to get cascadeInfo to extract the price certificates to include in cost confirmations) 
  */
-SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix)
+SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName)
 {	
 	m_preparedCCRequest = DOM_Document::createDocument();
 	
@@ -362,7 +362,7 @@ SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix)
 	elemCC.setAttribute("version", "1.1");
 	elemRoot.appendChild(elemCC);
 	DOM_Element elemAiName = m_preparedCCRequest.createElement("AiID");
-	setDOMElementValue(elemAiName, ms_pInstance->m_AiName);
+	setDOMElementValue(elemAiName, a_AiName);
 	elemCC.appendChild(elemAiName);	
 
 	//extract price certificate elements from cascadeInfo
