@@ -434,7 +434,6 @@ SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName
 		CAMsg::printMsg(LOG_DEBUG, "finished method makeCCRequest\n");
 #endif		
 
-CAMsg::printMsg(LOG_DEBUG, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
         delete[] mixNodes;
 		delete[] allHashes;
 		delete[] allSkis;	
@@ -443,24 +442,17 @@ CAMsg::printMsg(LOG_DEBUG, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
 
 
 SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UINT64 transferredBytes, DOM_Document& doc)
-	{CAMsg::printMsg(LOG_DEBUG, "Test1\n");
+	{
 		DOM_Node elemCC;
 		
 		doc = DOM_Document::createDocument();
 		doc.appendChild(doc.importNode(m_preparedCCRequest.getDocumentElement(),true));
-		CAMsg::printMsg(LOG_DEBUG, "Test2\n");
 		
-	    if (getDOMChildByName(doc.getDocumentElement(),(UINT8*)"CC",elemCC) != E_SUCCESS)
-	    {
-	    	CAMsg::printMsg(LOG_DEBUG, "OOOOOO\n");
-	    }
-		CAMsg::printMsg(LOG_DEBUG, "Test: %s\n", doc.getDocumentElement().getNodeName().transcode());
+	    getDOMChildByName(doc.getDocumentElement(),(UINT8*)"CC",elemCC);
 		
 		DOM_Element elemAccount = doc.createElement("AccountNumber");
-		CAMsg::printMsg(LOG_DEBUG, "Test4\n");
 		setDOMElementValue(elemAccount, accountNumber);
 		elemCC.appendChild(elemAccount);
-		CAMsg::printMsg(LOG_DEBUG, "Test5\n");
 		DOM_Element elemBytes = doc.createElement("TransferredBytes");
 		setDOMElementValue(elemBytes, transferredBytes);
 		elemCC.appendChild(elemBytes);
