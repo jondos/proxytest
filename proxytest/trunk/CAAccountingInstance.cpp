@@ -269,7 +269,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
                 UINT64 transferredBytes = pAccInfo->transferredBytes;
                 UINT64 bytesToConfirm = transferredBytes + (prepaidInterval * 1024); 				
 				makeCCRequest(pAccInfo->accountNumber, bytesToConfirm, doc);
-				CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending first CC request.\n");
+				CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending first CC request for account nr %u.\n", pAccInfo->accountNumber);
 				pAccInfo->authFlags |= AUTH_SENT_CC_REQUEST;
 				pAccInfo->pControlChannel->sendXMLMessage(doc);
 #ifdef DEBUG	
