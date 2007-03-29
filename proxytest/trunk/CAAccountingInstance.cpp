@@ -257,6 +257,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 				if( (pAccInfo->authFlags & AUTH_SENT_CC_REQUEST) )
 				{//we have sent a first CC request
 					//still waiting for the answer to the CC reqeust
+					CAMsg::printMsg(LOG_ERR, "Waiting for CC request for account nr %u\n", pAccInfo.accountNumber);
 					returnOK(pAccInfo);
 				}//we have sent a CC request
 				// no CC request sent yet --> send a first CC request
