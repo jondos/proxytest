@@ -85,15 +85,17 @@ SINT32 CASocket::create(int type, bool a_bShowTypicalError)
 		if(m_Socket==INVALID_SOCKET)
 			{
 				int er=GET_NET_ERROR;
-				if(er==EMFILE)
-				{  
-					if (a_bShowTypicalError)
+				if (a_bShowTypicalError)
+				{
+					if(er==EMFILE)
+					{  
+						CAMsg::printMsg(LOG_CRIT,"Could not create a new Socket!\n");	
+					}
+					else
 					{
-						CAMsg::printMsg(LOG_CRIT,"Could not create a new Socket!\n");
+						CAMsg::printMsg(LOG_CRIT,"Could not create a new Socket! - Error: %i\n",er);
 					}
 				}
-				else
-					CAMsg::printMsg(LOG_CRIT,"Could not create a new Socket! - Error: %i\n",er);
 				return SOCKET_ERROR;
 			}
 		m_bSocketIsClosed=false;
@@ -611,7 +613,7 @@ SINT32 CASocket::setKeepAlive(bool b)
 
 /** Enables the socket keep-alive option with a given ping time (in seconds).
 @param sec the time intervall(in seconds) of a keep-alive message
-@return E_SUCCES if no error occured
+@return E_SUCCESS if no error occured
 @return E_UNKOWN otherwise
 */
 SINT32 CASocket::setKeepAlive(UINT32 sec)
