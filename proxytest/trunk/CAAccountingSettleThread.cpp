@@ -138,6 +138,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 							pErrMsg->getErrorCode(), pErrMsg->getDescription() );
 						CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: BI reported error!\n");
 						//delete costconfirmation to avoid trying to settle an unusable CC again and again
+						/*
 						if(dbConn.deleteCC(pCC->getAccountNumber()) == E_SUCCESS)
 						{
 							CAMsg::printMsg(LOG_ERR, "SettleThread: unusable cost confirmation was deleted\n");	
@@ -145,7 +146,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 						else
 						{						
 							CAMsg::printMsg(LOG_ERR, "SettleThread: cost confirmation is unusable, but could not delete it from database\n");
-						}
+						}*/
 					}
 					else //settling was OK, so mark account as settled
 					{
