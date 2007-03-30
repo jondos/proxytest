@@ -159,8 +159,16 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 							CAMsg::printMsg(LOG_ERR, "SettleThread: Could not mark an account as settled!\n");
 						}
 					} 
-					delete pCC;
-					delete pErrMsg;
+					if (pCC != NULL)
+					{
+						delete pCC;
+						pCC = NULL;
+					}
+					if (pErrMsg != NULL)
+					{
+						delete pErrMsg;
+						pErrMsg = NULL;
+					}
 				}
 				dbConn.terminateDBConnection();
 			}//main while run loop
