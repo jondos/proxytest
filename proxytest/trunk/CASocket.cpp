@@ -54,10 +54,21 @@ CASocket::CASocket(bool bIsReservedSocket)
 
 SINT32 CASocket::create()
 	{
-		return create(AF_INET);
+		return create(true);
 	}
-///@todo Not thread safe!
+
 SINT32 CASocket::create(int type)
+{
+	return create(type, true);
+}
+
+SINT32 CASocket::create(bool a_bShowTypicalError)
+{
+	return create(AF_INET, a_bShowTypicalError);
+}
+
+///@todo Not thread safe!
+SINT32 CASocket::create(int type, bool a_bShowTypicalError)
 	{
 		if(m_bSocketIsClosed)
 			{
@@ -75,7 +86,12 @@ SINT32 CASocket::create(int type)
 			{
 				int er=GET_NET_ERROR;
 				if(er==EMFILE)
-					CAMsg::printMsg(LOG_CRIT,"Could not create a new Socket!\n");
+				{  
+					if (a_bShowTypicalError)
+					{
+						CAMsg::printMsg(LOG_CRIT,"Could not create a new Socket!\n");
+					}
+				}
 				else
 					CAMsg::printMsg(LOG_CRIT,"Could not create a new Socket! - Error: %i\n",er);
 				return SOCKET_ERROR;
@@ -581,7 +597,7 @@ SINT32 CASocket::getSendTimeOut()
 
 /** Enables/disables the socket keep-alive option.
 @param b true if option should be enabled, false otherwise
-@return E_SUCCES if no error occured
+@return E_SUCCESS if no error occured
 @return E_UNKOWN otherwise
 */
 SINT32 CASocket::setKeepAlive(bool b)
@@ -600,12 +616,17 @@ SINT32 CASocket::setKeepAlive(bool b)
 */
 SINT32 CASocket::setKeepAlive(UINT32 sec)
 	{
+		if(setKeepAlive(true)!=E_SUCCESS)
+		{
+			return E_UNKNOWN;
+		}
+		
 #ifdef HAVE_TCP_KEEPALIVE
 		int val=sec;
-		if(setKeepAlive(true)!=E_SUCCESS)
-			return E_UNKNOWN;
 		if(setsockopt(m_Socket,IPPROTO_TCP,TCP_KEEPALIVE,(char*)&val,sizeof(val))==SOCKET_ERROR)
+		{
 			return E_UNKNOWN;
+		}
 		return E_SUCCESS;
 #else
 		return E_UNKNOWN;
@@ -655,7 +676,7 @@ SINT32 CASocket::getMaxOpenSockets()
 	UINT32 maxSocket=0;
 	for(UINT32 t=0;t<10001;t++)
 		{
-		if(parSocket[t].create()!=E_SUCCESS)
+		if(parSocket[t].create(false)!=E_SUCCESS)
 			{
 			maxSocket=t;
 			break;

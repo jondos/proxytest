@@ -106,7 +106,11 @@ class CASocket:public CAClientSocket
 													// (because it is used as a Key in lookups for instance as a HashValue etc.)
 
 			SOCKET m_Socket;
-		private:			
+		private:		
+		    SINT32 create(bool a_bShowTypicalError);	
+			SINT32 create(int type, bool a_bShowTypicalError);
+		
+		
 			CAMutex m_csClose;
 			UINT32 m_closeMode;
 			///The following two variables are use to realise "reserved" sockets. The rational behind is to ensure
