@@ -167,6 +167,8 @@ private:
 	 */
 	static THREAD_RETURN aiThreadMainLoop(void *param);
 	
+	static const UINT64 PACKETS_BEFORE_NEXT_CHECK;
+	
 	static DOM_Document m_preparedCCRequest;
 	
 	/** this thread reads messages from the queue and processes them */

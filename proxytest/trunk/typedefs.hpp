@@ -201,14 +201,8 @@ struct t_accountinginfo
 	/** the signature verifying instance for this user */
 	CASignature * pPublicKey;
 	
-	/** the last known deposit (from the last received balance cert) */
-	UINT64 lastbalDeposit;
-	
-	/** the last known spent value (from the last received balance cert) */
-	UINT64 lastbalSpent;
-	
-	/** the transferredBytes value as it was when we received the last Balance */
-	SINT32 lastbalTransferredBytes;
+	/** The number of packets transfered in this session (JAP connection) */
+	UINT64 sessionPackets;
 	
 	/** the minimum timestamp for the requested XMLBalance */
 	SINT32 reqbalMinSeconds;
