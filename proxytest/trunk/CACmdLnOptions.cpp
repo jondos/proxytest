@@ -351,7 +351,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 			for(UINT32 t=0;t<10000;t++)
 				{
 					CASocket* pSocket=new CASocket;
-					if(pSocket->create()!=E_SUCCESS)
+					if(pSocket->create(false)!=E_SUCCESS)
 						{
 							printf("Max open sockets: %u\n",t);
 							exit(0);

@@ -37,7 +37,8 @@ class CASocket:public CAClientSocket
 		CASocket(bool bIsReserved=false);
 			~CASocket(){close();}
 
-			SINT32 create();
+			SINT32 create();						
+		    SINT32 create(bool a_bShowTypicalError);
 			SINT32 create(int type);
 
 			SINT32 listen(const CASocketAddr& psa);
@@ -106,8 +107,7 @@ class CASocket:public CAClientSocket
 													// (because it is used as a Key in lookups for instance as a HashValue etc.)
 
 			SOCKET m_Socket;
-		private:		
-		    SINT32 create(bool a_bShowTypicalError);	
+		private:			
 			SINT32 create(int type, bool a_bShowTypicalError);
 		
 		
