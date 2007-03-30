@@ -94,7 +94,7 @@ am_mix_OBJECTS = CAAbstractControlChannel.$(OBJEXT) \
 	CAThread.$(OBJEXT) CAThreadPool.$(OBJEXT) CAUtil.$(OBJEXT) \
 	CAXMLBI.$(OBJEXT) CAXMLCostConfirmation.$(OBJEXT) \
 	CAXMLErrorMessage.$(OBJEXT) CAXMLPriceCert.$(OBJEXT) \
-	StdAfx.$(OBJEXT) proxytest.$(OBJEXT)
+	Hashtable.$(OBJEXT) StdAfx.$(OBJEXT) proxytest.$(OBJEXT)
 mix_OBJECTS = $(am_mix_OBJECTS)
 mix_DEPENDENCIES = $(top_srcdir)/xml/libxml.a \
 	$(top_srcdir)/popt/libpopt.a $(top_srcdir)/trio/libtrio.a \
@@ -295,6 +295,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CAXMLCostConfirmation.cpp\
 		    CAXMLErrorMessage.cpp\
 		    CAXMLPriceCert.cpp\
+		    Hashtable.cpp\
 		    StdAfx.cpp \
 		    proxytest.cpp \
 		    CAAbstractControlChannel.hpp\
@@ -363,6 +364,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CAXMLCostConfirmation.hpp\
 		    CAXMLErrorMessage.hpp\
 		    CAXMLPriceCert.hpp\
+		    Hashtable.hpp\
 		    StdAfx.h \
 		    basetypedefs.h
 
@@ -525,6 +527,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAXMLCostConfirmation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAXMLErrorMessage.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAXMLPriceCert.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Hashtable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/StdAfx.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/proxytest.Po@am__quote@
 
