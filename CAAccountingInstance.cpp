@@ -372,13 +372,18 @@ SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName
 	
 	DOM_Element cascadeInfoElem = cascadeInfoDoc.getDocumentElement();
 	DOM_NodeList allMixes = cascadeInfoElem.getElementsByTagName("Mix");
-	int nrOfMixes = allMixes.getLength();
+	UINT32 nrOfMixes = allMixes.getLength();
 	DOM_Node* mixNodes = new DOM_Node[nrOfMixes]; //so we can use separate loops for extracting, hashing and appending
+	
 	DOM_Node curMixNode;
-	for (int i = 0; i<nrOfMixes; i++){
+	for (UINT32 i = 0, j = 0, count = nrOfMixes; i < count; i++, j++){
 		//cant use getDOMChildByName from CAUtil here yet, since it will always return the first child
 		curMixNode = allMixes.item(i); 
-		getDOMChildByName(curMixNode,(UINT8*)"PriceCertificate",mixNodes[i],true);	
+		if (getDOMChildByName(curMixNode,(UINT8*)"PriceCertificate",mixNodes[j],true) != E_SUCCESS)
+		{
+			j--;
+			nrOfMixes--;
+		}
 	}	 
 	
 	//hash'em, and get subjectkeyidentifiers
@@ -386,7 +391,7 @@ SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName
 		UINT8** allHashes=new UINT8*[nrOfMixes];
 		UINT8** allSkis=new UINT8*[nrOfMixes];
 		DOM_Node skiNode;
-		for (int i = 0; i < nrOfMixes; i++){
+		for (UINT32 i = 0; i < nrOfMixes; i++){
 			UINT8* out=new UINT8[5000];
 			UINT32 outlen=5000;
 			
@@ -434,10 +439,11 @@ SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName
 		CAMsg::printMsg(LOG_DEBUG, "finished method makeCCRequest\n");
 #endif		
 
-        delete[] mixNodes;
+		delete[] mixNodes;
 		delete[] allHashes;
 		delete[] allSkis;	
 		return E_SUCCESS;
+
 }
 
 
