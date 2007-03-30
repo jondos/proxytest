@@ -195,8 +195,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 				else //timeout still running
 				{
 					return returnHold();
-				}
-					
+				}					
 			}
 	
 			if( pAccInfo->authFlags & AUTH_ACCOUNT_EMPTY )
