@@ -501,17 +501,23 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 		// what type of message is it?
 		if ( strcmp( docElementName, "AccountCertificate" ) == 0 )
 			{
+				#ifdef DEBUG
 					CAMsg::printMsg( LOG_DEBUG, "Received an AccountCertificate. Calling handleAccountCertificate()\n" );
+				#endif
 				ms_pInstance->handleAccountCertificate( pHashEntry, root );
 			}
 		else if ( strcmp( docElementName, "Response" ) == 0)
 			{
+				#ifdef DEBUG
 					CAMsg::printMsg( LOG_DEBUG, "Received a Response (challenge-response)\n");
+				#endif
 				ms_pInstance->handleChallengeResponse( pHashEntry, root );
 			}
 		else if ( strcmp( docElementName, "CC" ) == 0 )
 			{
+				#ifdef DEBUG
 					CAMsg::printMsg( LOG_DEBUG, "Received a CC. Calling handleCostConfirmation()\n" );
+				#endif
 				ms_pInstance->handleCostConfirmation( pHashEntry, root );
 			}
 		else
@@ -642,7 +648,9 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		}
 		
 	CAMsg::printMsg(LOG_ERR, "Checking database for previously prepaid bytes...\n");
-	SINT32 prepaidAmount = m_dbInterface->getPrepaidAmount(pAccInfo->accountNumber);
+	// @todo temporarily removed
+	//SINT32 prepaidAmount = m_dbInterface->getPrepaidAmount(pAccInfo->accountNumber);
+	SINT32 prepaidAmount = 0;
 	if (prepaidAmount > 0)
 	{
 		pAccInfo->confirmedBytes += prepaidAmount;	
@@ -904,13 +912,15 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 	{
 		ms_pInstance->m_Mutex.lock();
+		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
 		
-		if ( pHashEntry->pAccountingInfo != NULL)
+		if ( pAccInfo != NULL)
 			{
-				tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
 				pHashEntry->pAccountingInfo=NULL;
 				
 				//store prepaid bytes in database, so the user wont lose the prepaid amount by disconnecting
+				// @todo temporarily removed
+				/*
 				SINT32 prepaidBytes = pAccInfo->confirmedBytes - pAccInfo->transferredBytes;
 				CAAccountingDBInterface* dbInterface = new CAAccountingDBInterface(); //local variable, since method is static, but m_dbInterface is a member variable
 				if(dbInterface->initDBConnection() != E_SUCCESS)
@@ -922,7 +932,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 				
 				dbInterface->storePrepaidAmount(pAccInfo->accountNumber,prepaidBytes);
 				delete dbInterface;
-
+				*/
 				//free memory of pAccInfo
 				if ( pAccInfo->pPublicKey!=NULL )
 					{
