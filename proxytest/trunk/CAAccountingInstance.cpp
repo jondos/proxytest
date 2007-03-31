@@ -440,7 +440,7 @@ SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName
 	//and append to CC
 	DOM_Element elemPriceCerts = m_preparedCCRequest.createElement("PriceCertificates");
 	DOM_Element elemCert;
-	for (int i = 0; i < nrOfMixes; i++) {
+	for (UINT32 i = 0; i < nrOfMixes; i++) {
 		elemCert = m_preparedCCRequest.createElement("PriceCertHash");
 		//CAMsg::printMsg(LOG_DEBUG,"hash to be inserted in cc: index %d, value %s\n",i,allHashes[i]);
 		setDOMElementValue(elemCert,allHashes[i]);
@@ -545,18 +545,24 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry, DOM_Element &root)
 	{
 		CAMsg::printMsg(LOG_DEBUG, "started method handleAccountCertificate\n");
-		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
 		DOM_Element elGeneral;
 		timespec now;
 		getcurrentTime(now);
 
 		// check authstate of this user
 		m_Mutex.lock();
+		if (pHashEntry == NULL || pHashEntry->pAccountingInfo == NULL)
+		{
+			m_Mutex.unlock();
+			return;
+		}
+		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;				
+		
 		if(pAccInfo->authFlags&AUTH_GOT_ACCOUNTCERT)
 			{
-				#ifdef DEBUG
+				//#ifdef DEBUG
 					CAMsg::printMsg(LOG_DEBUG, "Already got an account cert. Ignoring!");
-				#endif
+				//#endif
 				CAXMLErrorMessage err(
 						CAXMLErrorMessage::ERR_BAD_REQUEST, 
 						(UINT8*)"You have already sent an Account Certificate"
@@ -689,6 +695,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 	pAccInfo->pControlChannel->sendXMLMessage(doc);
 	pAccInfo->authFlags = AUTH_CHALLENGE_SENT | AUTH_GOT_ACCOUNTCERT;
 	pAccInfo->lastRequestSeconds = now.tv_sec;
+	//CAMsg::printMsg("Last Account Certificate request seconds: for IP %u%u%u%u", (UINT8)pHashEntry->peerIP[0], (UINT8)pHashEntry->peerIP[1],(UINT8) pHashEntry->peerIP[2], (UINT8)pHashEntry->peerIP[3]);
 	m_Mutex.unlock();
 }
 
@@ -708,10 +715,18 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 	UINT32 usedLen;
 	DOM_Element elemPanic;
 	//DSA_SIG * pDsaSig;
+	// check current authstate
+	
+	
+	m_Mutex.lock();
+	if (pHashEntry == NULL || pHashEntry->pAccountingInfo == NULL)
+	{
+		m_Mutex.unlock();
+		return;
+	}
 	tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
 
-	// check current authstate
-	m_Mutex.lock();
+
 	if( (!(pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT)) ||
 			(!(pAccInfo->authFlags & AUTH_CHALLENGE_SENT))
 		)
@@ -726,6 +741,7 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 	if ( getDOMElementValue( root, decodeBuffer, &decodeBufferLen ) != E_SUCCESS )
 		{
 			CAMsg::printMsg( LOG_DEBUG, "ChallengeResponse has wrong XML format. Ignoring\n" );
+			m_Mutex.unlock();
 			return ;
 		}
 	usedLen = decodeBufferLen;
