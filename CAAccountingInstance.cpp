@@ -128,8 +128,14 @@ CAAccountingInstance::~CAAccountingInstance()
  */
 SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 	{
-		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
 		ms_pInstance->m_Mutex.lock();
+		
+		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
+		if (pAccInfo == NULL)
+		{
+			return returnKickout();
+		}
+		
 		pAccInfo->transferredBytes += MIXPACKET_SIZE; // count the packet	
 		pAccInfo->sessionPackets++;
 		
@@ -140,7 +146,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 #ifdef DEBUG			
 			CAMsg::printMsg( LOG_DEBUG, "AccountingInstance: should kick out user now...\n");
 #endif
-			return returnKickout(pAccInfo);
+			return returnKickout();
 		}
 		
 		// do the following tests after a lot of Mix packets only (gain speed...)
@@ -160,7 +166,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 #ifdef DEBUG							
 				CAMsg::printMsg(LOG_DEBUG, "Goodwill timeout has runout, will kick out user now...\n");
 #endif							
-				return returnKickout(pAccInfo);				
+				return returnKickout();				
 		}	
 	
 		if(!(pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT) )
@@ -172,12 +178,11 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 			// authentication process not properly finished
 			if( pAccInfo->authFlags & AUTH_FAKE )
 			{
-				ms_pInstance->m_Mutex.unlock();
 				pAccInfo->authFlags |= AUTH_FATAL_ERROR;
 #ifdef DEBUG				
 				CAMsg::printMsg( LOG_DEBUG, "AccountingInstance: AUTH_FAKE flag is set ... byebye\n");
 #endif				
-				return returnKickout(pAccInfo);
+				return returnKickout();
 			}
 			if( !(pAccInfo->authFlags & AUTH_ACCOUNT_OK) )
 			{
@@ -336,9 +341,9 @@ SINT32 CAAccountingInstance::returnWait(tAiAccountingInfo* pAccInfo)
 /**
  *  When receiving this message, the Mix should kick the user out immediately
  */
-SINT32 CAAccountingInstance::returnKickout(tAiAccountingInfo* pAccInfo)
+SINT32 CAAccountingInstance::returnKickout()
 {
-	CAMsg::printMsg(LOG_DEBUG, "Kickout: %u\n", pAccInfo->goodwillTimeoutStarttime);
+	//CAMsg::printMsg(LOG_DEBUG, "Kickout: %u\n", pAccInfo->goodwillTimeoutStarttime);
 	ms_pInstance->m_Mutex.unlock();
 	return 3;
 }
@@ -908,6 +913,7 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,D
  */
 SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 	{
+		ms_pInstance->m_Mutex.lock();
 		pHashEntry->pAccountingInfo = new tAiAccountingInfo;
 		memset( pHashEntry->pAccountingInfo, 0, sizeof( tAiAccountingInfo ) );
 		pHashEntry->pAccountingInfo->authFlags |= AUTH_SENT_ACCOUNT_REQUEST;
@@ -915,6 +921,7 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 		pHashEntry->pAccountingInfo->goodwillTimeoutStarttime = -1;
 		pHashEntry->pAccountingInfo->sessionPackets = 0;
 		//getting the JAP's previously prepaid bytes happens in handleAccountCert, could be moved here?
+		ms_pInstance->m_Mutex.unlock();
 		return E_SUCCESS;
 	}
 
