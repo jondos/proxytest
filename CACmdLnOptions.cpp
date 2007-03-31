@@ -1634,10 +1634,8 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 
 				//get price certificate
 				DOM_Element pcElem;
-				//function in CAUtil, last param is "deep", needs to be set to include child elems
-				if (elemAccounting!=NULL) CAMsg::printMsg(LOG_DEBUG, "elemAccounting still not null");
+				//function in CAUtil, last param is "deep", needs to be set to include child elems				
 				getDOMChildByName(elemAccounting, (UINT8*)"PriceCertificate",pcElem, false);
-				CAMsg::printMsg(LOG_DEBUG, "after parsing PriceCertificate");
 				if (pcElem == NULL)
 				{
 					CAMsg::printMsg(LOG_DEBUG, "no price certificate element found");
@@ -1648,17 +1646,6 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 						CAMsg::printMsg(LOG_DEBUG, "PRICECERT PROCESSED, BUT STILL NULL");
 					}
 				}	
-				
-/*
-				//test
-				CAMsg::printMsg(LOG_DEBUG,"before writing Pricecert\n");
-				UINT32 len = 1000; 
-				UINT8*  output = new UINT8[len];
-				m_pPriceCertificate->toXMLString(output, &len);
-				CAMsg::printMsg(LOG_INFO,(const char*) output  ); //convert from UINT8* to const char* properly?	
-*/
-
-
 
 
 				DOM_Element elemJPI;
@@ -1690,14 +1677,6 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 					}
 					
 				// get AiID (NOT a separate element /Accounting/AiID any more, rather the subjectkeyidentifier given in the price certificate
-//				getDOMChildByName(elemAccounting, (UINT8*)"AiID", elem, false);
-//				tmpLen = 255;
-//				if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) 
-//					{
-//						strtrim(tmpBuff);
-//						m_strAiID = new UINT8[strlen((char*)tmpBuff)+1];
-//						strcpy((char *)m_strAiID, (char *) tmpBuff);
-//					}
 				m_strAiID = m_pPriceCertificate->getSubjectKeyIdentifier();
 					
 					
@@ -2128,9 +2107,7 @@ SKIP_NEXT_MIX:
 			CAMsg::printMsg(LOG_DEBUG, "can't insert price certificate because it's Null\n");
 		} else {
 			DOM_Element pcElem;		
-			CAMsg::printMsg(LOG_DEBUG, "\n\n before inserting price certificate, line 1845\n\n");
 			getPriceCertificate()->toXmlElement(m_docMixInfo,pcElem);	
-			CAMsg::printMsg(LOG_DEBUG, "\n\n later\n\n");
 			elemMix.appendChild(pcElem);
 			CAMsg::printMsg(LOG_DEBUG,"after inserting price certificate\n");
 		}
