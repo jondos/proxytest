@@ -83,13 +83,13 @@ SINT32 CAFirstMixA::loop()
 
 //First Step
 //Checking for new connections		
-// Now in a separat Thread.... 
+// Now in a separate Thread.... 
 
 // Second Step 
 // Checking for data from users
 // Now in a separate Thread (see loopReadFromUsers())
 //Only proccess user data, if queue to next mix is not to long!!
-#define MAX_NEXT_MIX_QUEUE_SIZE 10000000 //10 MByte
+#define MAX_NEXT_MIX_QUEUE_SIZE 50000000 //50 MByte
 				if(m_pQueueSendToMix->getSize()<MAX_NEXT_MIX_QUEUE_SIZE)
 					{
 						countRead=m_psocketgroupUsersRead->select(/*false,*/0);				// how many JAP<->mix connections have received data from their coresponding JAP
@@ -590,7 +590,7 @@ NEXT_USER:
 		m_pthreadAcceptUsers->join();
 //#endif
 		CAMsg::printMsg(LOG_CRIT,"Wait for LoopSendToMix!\n");
-		m_pthreadSendToMix->join(); //will not join if queue is empty (and so wating)!!!
+		m_pthreadSendToMix->join(); //will not join if queue is empty (and so waitng)!!!
 		CAMsg::printMsg(LOG_CRIT,"Wait for LoopReadFromMix!\n");
 		m_pthreadReadFromMix->join();
 		#ifdef LOG_PACKET_TIMES
@@ -598,7 +598,7 @@ NEXT_USER:
 			m_pLogPacketStats->stop();
 		#endif	
 		//waits until all login threads terminates....
-		// we have to be sure that the Accept thread was alread stoped!
+		// we have to be sure that the Accept thread was already stopped!
 		m_pthreadsLogin->destroy(true);
 		CAMsg::printMsg(LOG_CRIT,"Before deleting CAFirstMixChannelList()!\n");
 		CAMsg::printMsg	(LOG_CRIT,"Memeory usage before: %u\n",getMemoryUsage());	
