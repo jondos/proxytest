@@ -179,7 +179,7 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 		if(entry==NULL)
 			{
 				m_pMutex->unlock();
-				CAMsg::printMsg(LOG_INFO,"Try to remove Ip which is not in the hashtable of the IP-list - possible inconsistences in IPList!\n");
+				CAMsg::printMsg(LOG_INFO,"Try to remove IP which is not in the hashtable of the IP-list - possible inconsistences in IPList!\n");
 				return 0;
 			}
 		else
@@ -195,6 +195,7 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 									if (entry->count < 0)
 									{
 										CAMsg::printMsg(LOG_CRIT,"Negative count for IP address!");
+										entry->count = 0;
 									}
 									
 									#ifndef PSEUDO_LOG
