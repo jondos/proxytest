@@ -658,10 +658,8 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 			return ;
 		}
 		
-	CAMsg::printMsg(LOG_ERR, "Checking database for previously prepaid bytes...\n");
-	// @todo temporarily removed
-	//SINT32 prepaidAmount = m_dbInterface->getPrepaidAmount(pAccInfo->accountNumber);
-	SINT32 prepaidAmount = 0;
+	CAMsg::printMsg(LOG_DEBUG, "Checking database for previously prepaid bytes...\n");
+	SINT32 prepaidAmount = m_dbInterface->getPrepaidAmount(pAccInfo->accountNumber);
 	if (prepaidAmount > 0)
 	{
 		pAccInfo->confirmedBytes += prepaidAmount;	
@@ -942,8 +940,6 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 				pHashEntry->pAccountingInfo=NULL;
 				
 				//store prepaid bytes in database, so the user wont lose the prepaid amount by disconnecting
-				// @todo temporarily removed
-				/*
 				SINT32 prepaidBytes = pAccInfo->confirmedBytes - pAccInfo->transferredBytes;
 				CAAccountingDBInterface* dbInterface = new CAAccountingDBInterface(); //local variable, since method is static, but m_dbInterface is a member variable
 				if(dbInterface->initDBConnection() != E_SUCCESS)
@@ -955,7 +951,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 				
 				dbInterface->storePrepaidAmount(pAccInfo->accountNumber,prepaidBytes);
 				delete dbInterface;
-				*/
+				
 				//free memory of pAccInfo
 				if ( pAccInfo->pPublicKey!=NULL )
 					{
