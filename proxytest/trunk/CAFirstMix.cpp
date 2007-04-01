@@ -861,7 +861,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 			return E_UNKNOWN;
 		}
 		
-		CAMsg::printMsg(LOG_DEBUG,"User login: start");
+		CAMsg::printMsg(LOG_DEBUG,"User login: start\");
 		((CASocket*)pNewUser)->send(m_xmlKeyInfoBuff,m_xmlKeyInfoSize);  // send the mix-keys to JAP
 		// es kann nicht blockieren unter der Annahme das der TCP-Sendbuffer > m_xmlKeyInfoSize ist....
 		//wait for keys from user
@@ -952,7 +952,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 #ifdef PAYMENT
 		// register AI control channel
 		//CAAccountingControlChannel * pTmp = new CAAccountingControlChannel(pHashEntry);
-		CAMsg::printMsg(LOG_DEBUG,"User login: registering payment control channel");
+		CAMsg::printMsg(LOG_DEBUG,"User login: registering payment control channel\n");
 		pHashEntry->pControlChannelDispatcher->registerControlChannel(new CAAccountingControlChannel(pHashEntry));
 #endif
 		pHashEntry->pSymCipher=new CASymCipher();
@@ -979,7 +979,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		m_psocketgroupUsersRead->add(*pNewUser); // add user socket to the established ones that we read data from.
 		m_psocketgroupUsersWrite->add(*pNewUser);
 #endif
-		CAMsg::printMsg(LOG_DEBUG,"User login: finished");
+		CAMsg::printMsg(LOG_DEBUG,"User login: finished\n");
 
 		return E_SUCCESS;
 	}
