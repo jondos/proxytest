@@ -27,6 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #include "StdAfx.h"
 #include "CASocket.hpp"
+#include "CAUtil.hpp"
 #include "CASocketAddrINet.hpp"
 #ifdef HAVE_UNIX_DOMAIN_PROTOCOL
 	#include "CASocketAddrUnix.hpp"
@@ -364,53 +365,115 @@ SINT32 CASocket::send(const UINT8* buff,UINT32 len)
 	///FIXME really buggy!!!!
 */
 SINT32 CASocket::sendTimeOut(const UINT8* buff,UINT32 len,UINT32 msTimeOut)
+{
+	SINT32 ret;
+	SINT32 aktTimeOut=0;	
+	bool bWasNonBlocking;
+	getNonBlocking(&bWasNonBlocking);
+	if(bWasNonBlocking) //we are in non-blocking mode
 	{
-	  int ret;
-		SINT32 aktTimeOut=0;	
-		bool bWasNonBlocking;
-		getNonBlocking(&bWasNonBlocking);
-		if(bWasNonBlocking) //we are in non-blocking mode
-			{
-				ret=send(buff,len);				
-			}
-		else
-			{
-				aktTimeOut=getSendTimeOut();
-				if(aktTimeOut>0&&(UINT32)aktTimeOut==msTimeOut) //we already have the right timeout
-					{
-						ret=send(buff,len);
-					}
-				else if(aktTimeOut<0||setSendTimeOut(msTimeOut)!=E_SUCCESS)
-					{//do it complicate but still to simple!!!! more work TODO
-						setNonBlocking(true);
-						ret=send(buff,len);
-						if(ret==E_AGAIN)
-							{
-								CAMsg::printMsg(LOG_DEBUG,"Send again...\n");
-								msSleep((UINT16)msTimeOut);
-								ret=send(buff,len);
-							}
-						setNonBlocking(bWasNonBlocking);
-					}
-				else
-					{
-						ret=send(buff,len);
-						setSendTimeOut(aktTimeOut);
-					}
-			}
-		return ret;	    	    
+		ret=send(buff,len);				
 	}
+	else
+	{
+		aktTimeOut=getSendTimeOut();
+		if(aktTimeOut>0&&(UINT32)aktTimeOut==msTimeOut) //we already have the right timeout
+		{
+			ret=send(buff,len);
+		}
+		else if(aktTimeOut<0||setSendTimeOut(msTimeOut)!=E_SUCCESS)
+		{//do it complicate but still to simple!!!! more work TODO
+			setNonBlocking(true);
+			ret=send(buff,len);
+			if(ret==E_AGAIN)
+				{
+					CAMsg::printMsg(LOG_DEBUG,"Send again...\n");
+					msSleep((UINT16)msTimeOut);
+					ret=send(buff,len);
+				}
+			setNonBlocking(bWasNonBlocking);
+		}
+		else
+		{
+			ret=send(buff,len);
+			setSendTimeOut(aktTimeOut);
+		}
+	}
+	return ret;	    	    
+}
 
 
 /** Sends all data over the network. This may block until all data is send.
 @param buff - the buffer of data to send
 @param len - content length
 @retval E_UNKNOWN, if an error occured
+@retval E_TIMEDOUT if the timeout was reached
 @retval E_SUCCESS, if successful
 */
 SINT32 CASocket::sendFullyTimeOut(const UINT8* buff,UINT32 len, UINT32 msTimeOut)
 {
-	return E_SUCCESS;
+	if(len==0)
+	{
+		return E_SUCCESS; //nothing to send
+	}
+	
+	SINT32 ret;
+	SINT32 aktTimeOut=0;	
+	UINT64 startupTime, currentMillis;
+	
+	
+	bool bWasNonBlocking;
+	getNonBlocking(&bWasNonBlocking);
+	aktTimeOut=getSendTimeOut();
+	getcurrentTimeMillis(startupTime);
+	
+	if(bWasNonBlocking //we are in non-blocking mode
+	   || setSendTimeOut(15000)!=E_SUCCESS) // it is not possible to set the socket timeout
+	{
+		return sendFully(buff, len);
+	}	
+	else
+	{	
+		for(;;)
+		{
+			getcurrentTimeMillis(currentMillis);
+			if (currentMillis >= (startupTime + msTimeOut))
+			{
+				CAMsg::printMsg(LOG_DEBUG,"CASocket::sendFullyTimeOut() - timed out!");
+				setSendTimeOut(aktTimeOut);
+				return E_TIMEDOUT;
+			}
+			
+			ret=send(buff,len);
+			if((UINT32)ret==len)
+			{
+				setSendTimeOut(aktTimeOut);
+				return E_SUCCESS;
+			}
+			else if(ret==E_AGAIN)
+				{
+					ret=CASingleSocketGroup::select_once(*this,true,1000);
+					if(ret>=0||ret==E_TIMEDOUT)
+						continue;
+					#ifdef _DEBUG
+						CAMsg::printMsg(LOG_DEBUG,"CASocket::sendFully() - error near select_once() ret=%i\n",ret);
+					#endif
+					setSendTimeOut(aktTimeOut);
+					return E_UNKNOWN;
+				}
+			else if(ret<0)
+				{
+					#ifdef _DEBUG
+						CAMsg::printMsg(LOG_DEBUG,"CASocket::sendFully() - send returned %i\n",ret);
+					#endif
+					setSendTimeOut(aktTimeOut);
+					return E_UNKNOWN;
+				}
+			len-=ret;
+			buff+=ret;
+		}
+		//could never be here....
+	}
 }
 
 /** Sends all data over the network. This may block until all data is send.
