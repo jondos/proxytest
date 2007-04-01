@@ -797,12 +797,12 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 									{
 										//Pruefen ob schon vorhanden..
 										ret=((CASocket*)pNewMuxSocket)->getPeerIP(peerIP);
-						/*				#ifdef PAYMENT
+										#ifdef PAYMENT
 											if(ret!=E_SUCCESS||pIPList->insertIP(peerIP)<0 ||
 												CAAccountingInstance::isIPAddressBlocked(peerIP))
-										#else*/
+										#else
 											if(ret!=E_SUCCESS||pIPList->insertIP(peerIP)<0)
-										//#endif
+										#endif
 											{
 												CAMsg::printMsg(LOG_DEBUG,"Could not insert IP address!\n");
 												delete pNewMuxSocket;
@@ -863,7 +863,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		
 		CAMsg::printMsg(LOG_DEBUG,"User login: start\n");
 		// send the mix-keys to JAP
-		if (((CASocket*)pNewUser)->sendFullyTimeOut(m_xmlKeyInfoBuff,m_xmlKeyInfoSize, 300000) != E_SUCCESS)
+		if (((CASocket*)pNewUser)->sendFullyTimeOut(m_xmlKeyInfoBuff,m_xmlKeyInfoSize, 5000) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_DEBUG,"User login: Sending login data has been interrupted!\n");
 			delete pNewUser;
@@ -877,20 +877,23 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		//wait for keys from user
 		UINT16 xml_len;
 		if(((CASocket*)pNewUser)->receiveFullyT((UINT8*)&xml_len,2,FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT)!=E_SUCCESS)
-			{
-				delete pNewUser;
-				m_pIPList->removeIP(peerIP);
-				return E_UNKNOWN;
-			}
+		{
+			delete pNewUser;
+			m_pIPList->removeIP(peerIP);
+			return E_UNKNOWN;
+		}
+		CAMsg::printMsg(LOG_DEBUG,"User login: Received first answer\n");
+		
 		xml_len=ntohs(xml_len);
 		UINT8* xml_buff=new UINT8[xml_len+2]; //+2 for size...
 		if(((CASocket*)pNewUser)->receiveFullyT(xml_buff+2,xml_len,FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT)!=E_SUCCESS)
-			{
-				delete pNewUser;
-				delete xml_buff;
-				m_pIPList->removeIP(peerIP);
-				return E_UNKNOWN;
-			}
+		{
+			delete pNewUser;
+			delete xml_buff;
+			m_pIPList->removeIP(peerIP);
+			return E_UNKNOWN;
+		}
+		CAMsg::printMsg(LOG_DEBUG,"User login: Received second answer\n");
 		DOMParser oParser;
 		MemBufInputSource oInput(xml_buff+2,xml_len,"tmp");
 		oParser.parse(oInput);
