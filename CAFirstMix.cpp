@@ -862,7 +862,15 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		}
 		
 		CAMsg::printMsg(LOG_DEBUG,"User login: start\n");
-		((CASocket*)pNewUser)->send(m_xmlKeyInfoBuff,m_xmlKeyInfoSize);  // send the mix-keys to JAP
+		// send the mix-keys to JAP
+		if (((CASocket*)pNewUser)->sendTimeOut(m_xmlKeyInfoBuff,m_xmlKeyInfoSize, 30000) > 0)
+		{
+			CAMsg::printMsg(LOG_DEBUG,"User login: Sending login data has been interrupted!\n");
+			delete pNewUser;
+			m_pIPList->removeIP(peerIP);
+			return E_UNKNOWN;
+		}
+		//((CASocket*)pNewUser)->send(m_xmlKeyInfoBuff,m_xmlKeyInfoSize);
 		// es kann nicht blockieren unter der Annahme das der TCP-Sendbuffer > m_xmlKeyInfoSize ist....
 		//wait for keys from user
 		UINT16 xml_len;

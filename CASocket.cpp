@@ -353,7 +353,7 @@ SINT32 CASocket::send(const UINT8* buff,UINT32 len)
 	  return ret;	    	    
 	}
 
-/** Sends some data over the network. Using a Timeout iff socket is in blocking mode. 
+/** Sends some data over the network. Using a Timeout if socket is in blocking mode. 
 	Otherwise E_AGAIN may returned
 	@param buff the buffer to send
 	@param len content length
