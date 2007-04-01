@@ -38,6 +38,10 @@ CAAccountingControlChannel::CAAccountingControlChannel(fmHashTableEntry * pHashE
  : CASyncControlChannel(ACCOUNT_CONTROL_CHANNEL_ID, true)
 	{
 		m_pHashEntry = pHashEntry;
+		if (m_pHashEntry == NULL)
+		{
+			CAMsg::printMsg(LOG_CRIT,"CAAccountingControlChannel: User hash entry is NULL - creating control channel will fail!");
+		}
 		CAAccountingInstance::initTableEntry(pHashEntry);
 		pHashEntry->pAccountingInfo->pControlChannel = this;
 	}
