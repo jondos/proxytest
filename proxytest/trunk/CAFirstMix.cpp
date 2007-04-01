@@ -863,7 +863,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		
 		CAMsg::printMsg(LOG_DEBUG,"User login: start\n");
 		// send the mix-keys to JAP
-		if (((CASocket*)pNewUser)->sendFullyTimeOut(m_xmlKeyInfoBuff,m_xmlKeyInfoSize, 5000) != E_SUCCESS)
+		if (((CASocket*)pNewUser)->sendFullyTimeOut(m_xmlKeyInfoBuff,m_xmlKeyInfoSize, 15000, 2000) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_DEBUG,"User login: Sending login data has been interrupted!\n");
 			delete pNewUser;
@@ -882,7 +882,6 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 			m_pIPList->removeIP(peerIP);
 			return E_UNKNOWN;
 		}
-		CAMsg::printMsg(LOG_DEBUG,"User login: Received first answer\n");
 		
 		xml_len=ntohs(xml_len);
 		UINT8* xml_buff=new UINT8[xml_len+2]; //+2 for size...
@@ -893,7 +892,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 			m_pIPList->removeIP(peerIP);
 			return E_UNKNOWN;
 		}
-		CAMsg::printMsg(LOG_DEBUG,"User login: Received second answer\n");
+		
 		DOMParser oParser;
 		MemBufInputSource oInput(xml_buff+2,xml_len,"tmp");
 		oParser.parse(oInput);
@@ -956,12 +955,12 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		CAQueue* tmpQueue=new CAQueue(sizeof(tQueueEntry));
 		fmHashTableEntry* pHashEntry=m_pChannelList->add(pNewUser,peerIP,tmpQueue);
 		if(pHashEntry==NULL)// adding user connection to mix->JAP channel list (stefan: sollte das nicht connection list sein? --> es handelt sich um eine Datenstruktu fr Connections/Channels ).
-			{
-				m_pIPList->removeIP(peerIP);
-				delete tmpQueue;
-				delete pNewUser;
-				return E_UNKNOWN;
-			}
+		{
+			m_pIPList->removeIP(peerIP);
+			delete tmpQueue;
+			delete pNewUser;
+			return E_UNKNOWN;
+		}
 #ifdef PAYMENT
 		// register AI control channel
 		//CAAccountingControlChannel * pTmp = new CAAccountingControlChannel(pHashEntry);

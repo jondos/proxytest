@@ -187,7 +187,7 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 				PIPLIST before=NULL;
 				while(entry!=NULL)
 				{
-					CAMsg::printMsg(LOG_DEBUG,"Removing IP-Address!");
+					CAMsg::printMsg(LOG_DEBUG,"Removing IP-Address!\n");
 					if(memcmp(entry->ip,ip,2)==0)
 					{
 						entry->count--;

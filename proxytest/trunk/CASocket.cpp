@@ -410,7 +410,7 @@ SINT32 CASocket::sendTimeOut(const UINT8* buff,UINT32 len,UINT32 msTimeOut)
 @retval E_TIMEDOUT if the timeout was reached
 @retval E_SUCCESS, if successful
 */
-SINT32 CASocket::sendFullyTimeOut(const UINT8* buff,UINT32 len, UINT32 msTimeOut)
+SINT32 CASocket::sendFullyTimeOut(const UINT8* buff,UINT32 len, UINT32 msTimeOut, UINT32 msTimeOutSingleSend)
 {
 	if(len==0)
 	{
@@ -432,7 +432,7 @@ SINT32 CASocket::sendFullyTimeOut(const UINT8* buff,UINT32 len, UINT32 msTimeOut
 		//we are in non-blocking mode
 		return sendFully(buff, len);
 	}	
-	else if (setSendTimeOut(2000)!=E_SUCCESS)
+	else if (setSendTimeOut(msTimeOutSingleSend)!=E_SUCCESS)
 	{
 		// it is not possible to set the socket timeout
 		CAMsg::printMsg(LOG_ERR,"CASocket::sendFullyTimeOut() - could not set socket timeout!\n");
