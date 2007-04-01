@@ -386,6 +386,7 @@ SINT32 CASocket::sendTimeOut(const UINT8* buff,UINT32 len,UINT32 msTimeOut)
 						ret=send(buff,len);
 						if(ret==E_AGAIN)
 							{
+								CAMsg::printMsg(LOG_DEBUG,"Send again...\n");
 								msSleep((UINT16)msTimeOut);
 								ret=send(buff,len);
 							}
@@ -399,6 +400,18 @@ SINT32 CASocket::sendTimeOut(const UINT8* buff,UINT32 len,UINT32 msTimeOut)
 			}
 		return ret;	    	    
 	}
+
+
+/** Sends all data over the network. This may block until all data is send.
+@param buff - the buffer of data to send
+@param len - content length
+@retval E_UNKNOWN, if an error occured
+@retval E_SUCCESS, if successful
+*/
+SINT32 CASocket::sendFullyTimeOut(const UINT8* buff,UINT32 len, UINT32 msTimeOut)
+{
+	return E_SUCCESS;
+}
 
 /** Sends all data over the network. This may block until all data is send.
 	@param buff - the buffer of data to send

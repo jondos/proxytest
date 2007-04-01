@@ -797,14 +797,14 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 									{
 										//Pruefen ob schon vorhanden..
 										ret=((CASocket*)pNewMuxSocket)->getPeerIP(peerIP);
-										#ifdef PAYMENT
+						/*				#ifdef PAYMENT
 											if(ret!=E_SUCCESS||pIPList->insertIP(peerIP)<0 ||
 												CAAccountingInstance::isIPAddressBlocked(peerIP))
-										#else
+										#else*/
 											if(ret!=E_SUCCESS||pIPList->insertIP(peerIP)<0)
-										#endif
+										//#endif
 											{
-												CAMsg::printMsg(LOG_DEBUG,"Could not insert IP address!");
+												CAMsg::printMsg(LOG_DEBUG,"Could not insert IP address!\n");
 												delete pNewMuxSocket;
 											}
 										else
@@ -863,7 +863,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		
 		CAMsg::printMsg(LOG_DEBUG,"User login: start\n");
 		// send the mix-keys to JAP
-		if (((CASocket*)pNewUser)->sendTimeOut(m_xmlKeyInfoBuff,m_xmlKeyInfoSize, 30000) > 0)
+		if (((CASocket*)pNewUser)->sendTimeOut(m_xmlKeyInfoBuff,m_xmlKeyInfoSize, 300000) > 0)
 		{
 			CAMsg::printMsg(LOG_DEBUG,"User login: Sending login data has been interrupted!\n");
 			delete pNewUser;
