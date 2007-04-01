@@ -119,8 +119,7 @@ public:
 	 */
 	static SINT32 isIPAddressBlocked(const UINT8 ip[4])
 		{
-			//return ms_pInstance->m_pIPBlockList->checkIP(ip); 
-			return 0;
+			return ms_pInstance->m_pIPBlockList->checkIP(ip); 
 		}
 	
 	/**

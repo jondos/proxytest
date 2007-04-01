@@ -61,7 +61,7 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
 	{	
 		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance initialising\n" );
 		m_pQueue = new CAQueue();
-		//m_pIPBlockList = new CATempIPBlockList(60000);
+		m_pIPBlockList = new CATempIPBlockList(60000);
 		
 		// initialize Database connection
 		m_dbInterface = new CAAccountingDBInterface();
@@ -108,7 +108,7 @@ CAAccountingInstance::~CAAccountingInstance()
 		delete m_pSettleThread;
 		//delete m_biInterface;
 		delete m_dbInterface;
-		//delete m_pIPBlockList;
+		delete m_pIPBlockList;
 		delete m_pQueue;
 		delete[] m_AiName;
 		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance dying finished\n" );
@@ -252,7 +252,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 					CAMsg::printMsg( LOG_DEBUG, "Accounting instance: User refused "		
 									"to send cost confirmation (HARDLIMIT EXCEEDED).\n");
 #endif																						
-					//ms_pInstance->m_pIPBlockList->insertIP( pHashEntry->peerIP );
+					ms_pInstance->m_pIPBlockList->insertIP( pHashEntry->peerIP );
 					CAXMLErrorMessage msg(CAXMLErrorMessage::ERR_NO_CONFIRMATION);
 					DOM_Document doc;
 					msg.toXmlDocument(doc);
