@@ -132,11 +132,11 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 								#endif
 								if(entry->count>=m_allowedConnections) //an Attack...
 									{
-										//#if !defined(PSEUDO_LOG)&&defined(FIREWALL_SUPPORT)
+										#if !defined(PSEUDO_LOG)&&defined(FIREWALL_SUPPORT)
 											CAMsg::printMsg(LOG_CRIT,"possible Flooding Attack from: %u.%u.%u.%u !\n",ip[0],ip[1],ip[2],ip[3]);
-										//#endif
-										//m_pMutex->unlock();
-										//return E_UNKNOWN;
+										#endif
+										m_pMutex->unlock();
+										return E_UNKNOWN;
 									}
 								entry->count++;
 								ret = entry->count;
@@ -186,47 +186,48 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 			{
 				PIPLIST before=NULL;
 				while(entry!=NULL)
+				{
+					CAMsg::printMsg(LOG_DEBUG,"Removing IP-Address!");
+					if(memcmp(entry->ip,ip,2)==0)
 					{
-						if(memcmp(entry->ip,ip,2)==0)
+						entry->count--;
+						if(entry->count<=0)
+						{
+							if (entry->count < 0)
 							{
-								entry->count--;
-								if(entry->count<=0)
-								{
-									if (entry->count < 0)
-									{
-										CAMsg::printMsg(LOG_CRIT,"Negative count for IP address!");
-										entry->count = 0;
-									}
-									
-									#ifndef PSEUDO_LOG
-										UINT8 hash[16];
-										memcpy(m_Random,ip,4);
-										MD5(m_Random,56,hash);
-										#ifdef LOG_TRAFFIC_PER_USER
-											CAMsg::printMsg(LOG_DEBUG,"Removing IP-Address: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X -- Time [ms]: %u  Traffic was: IN: %u  --  OUT: %u\n",hash[0],hash[1],hash[2],hash[3],hash[4],hash[5],hash[6],hash[7],hash[8],hash[9],hash[10],hash[11],hash[12],hash[13],hash[14],hash[15],time,trafficIn,trafficOut);
-										#else
-											CAMsg::printMsg(LOG_DEBUG,"Removing IP-Address: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X !\n",hash[0],hash[1],hash[2],hash[3],hash[4],hash[5],hash[6],hash[7],hash[8],hash[9],hash[10],hash[11],hash[12],hash[13],hash[14],hash[15]);
-										#endif
-									#else
-										CAMsg::printMsg(LOG_DEBUG,"Removing IP-Address: {%u.%u.%u.%u} !\n",ip[0],ip[1],ip[2],ip[3]);
-									#endif
-									if(before==NULL)
-										m_HashTable[hashvalue]=entry->next;
-									else
-										before->next=entry->next;
-									delete entry;
-									m_pMutex->unlock();
-									return 0;
-								}
-								ret = entry->count;
-								m_pMutex->unlock();
-								return ret;
+								CAMsg::printMsg(LOG_CRIT,"Negative count for IP address!");
+								entry->count = 0;
 							}
-						before=entry;
-						entry=entry->next;
+							
+							#ifndef PSEUDO_LOG
+								UINT8 hash[16];
+								memcpy(m_Random,ip,4);
+								MD5(m_Random,56,hash);
+								#ifdef LOG_TRAFFIC_PER_USER
+									CAMsg::printMsg(LOG_DEBUG,"Removing IP-Address: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X -- Time [ms]: %u  Traffic was: IN: %u  --  OUT: %u\n",hash[0],hash[1],hash[2],hash[3],hash[4],hash[5],hash[6],hash[7],hash[8],hash[9],hash[10],hash[11],hash[12],hash[13],hash[14],hash[15],time,trafficIn,trafficOut);
+								#else
+									CAMsg::printMsg(LOG_DEBUG,"Removing IP-Address: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X !\n",hash[0],hash[1],hash[2],hash[3],hash[4],hash[5],hash[6],hash[7],hash[8],hash[9],hash[10],hash[11],hash[12],hash[13],hash[14],hash[15]);
+								#endif
+							#else
+								CAMsg::printMsg(LOG_DEBUG,"Removing IP-Address: {%u.%u.%u.%u} !\n",ip[0],ip[1],ip[2],ip[3]);
+							#endif
+							if(before==NULL)
+								m_HashTable[hashvalue]=entry->next;
+							else
+								before->next=entry->next;
+							delete entry;
+							m_pMutex->unlock();
+							return 0;
+						}
+						ret = entry->count;
+						m_pMutex->unlock();
+						return ret;
 					}
+					before=entry;
+					entry=entry->next;
+				}
 				m_pMutex->unlock();
-				CAMsg::printMsg(LOG_INFO,"Try to remove Ip which is not in list - possible inconsistences in IPList!\n");
+				CAMsg::printMsg(LOG_INFO,"Try to remove IP which is not in list - possible inconsistences in IPList!\n");
 				return 0;
 			}	
 	}
