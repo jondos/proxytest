@@ -870,6 +870,8 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 			m_pIPList->removeIP(peerIP);
 			return E_UNKNOWN;
 		}
+		CAMsg::printMsg(LOG_DEBUG,"User login: login data sent\n");
+		
 		//((CASocket*)pNewUser)->send(m_xmlKeyInfoBuff,m_xmlKeyInfoSize);
 		// es kann nicht blockieren unter der Annahme das der TCP-Sendbuffer > m_xmlKeyInfoSize ist....
 		//wait for keys from user
