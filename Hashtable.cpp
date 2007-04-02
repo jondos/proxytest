@@ -7,6 +7,7 @@
 
 #include "Hashtable.hpp"
 #include "CAMsg.hpp"
+#include "CAUtil.hpp"
 
 // Every entry in the hashtable is embedded in this structure
 
@@ -102,7 +103,9 @@ Hashtable::~Hashtable()
 UINT32 Hashtable::hashUINT64(UINT64 *a_number)
 {
 	UINT32 temp = 4294967295;
-	CAMsg::printMsg( LOG_DEBUG, "Hash number: %u\n", a_number);
+	UINT8* buff = new UINT8[255];
+	print64(buff, *a_number);
+	CAMsg::printMsg( LOG_DEBUG, "Hash number: %u\n", *a_number);
 	CAMsg::printMsg( LOG_DEBUG, "Hash modulo: %u\n", temp);
 	UINT32 hash = (UINT32)((*a_number) % temp);
 	CAMsg::printMsg( LOG_DEBUG, "Hashed account number: %u\n", hash);
