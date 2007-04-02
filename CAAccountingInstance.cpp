@@ -169,8 +169,9 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 		{			
 			if (entry->authFlags & AUTH_INVALID_CC)
 			{
-				entry->authFlags &= ~AUTH_INVALID_CC;								
-				//pAccInfo->confirmedBytes = entry->confirmedBytes;
+				entry->authFlags &= ~AUTH_INVALID_CC;		
+				// insert confirmed bytes from current CC here						
+				//pAccInfo->confirmedBytes = entry->confirmedBytes;				
 				CAMsg::printMsg(LOG_DEBUG, "Found invalid CC!\n");
 			}
 			else if (entry->authFlags & AUTH_INVALID_ACCOUNT)
@@ -183,7 +184,12 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 				CAMsg::printMsg(LOG_DEBUG, "Found invalid account! Kicking out user...\n");												
 				return returnHold(pAccInfo);
 			}
-		}
+			if (entry->authFlags == 0)
+			{
+				ms_pInstance->m_settleHashtable->remove(&(pAccInfo->accountNumber));
+				delete entry;
+			}
+		}		
 		ms_pInstance->m_settleHashtable->getMutex().unlock();	
 		
 		
