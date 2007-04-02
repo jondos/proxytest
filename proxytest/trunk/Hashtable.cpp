@@ -4,9 +4,6 @@
 */
 
 #include "StdAfx.h"
-//#include <stdlib.h>
-//#include <stdarg.h>
-//#include <string.h>
 
 #include "Hashtable.hpp"
 
@@ -25,7 +22,6 @@ struct Entry
 
 UINT32 stringHash(char *c)
 {
-  //unsigned int hash = 0;
   UINT32 len = strlen(c);
   
   return(*(UINT32 *)(c+len-4));  // erstmal zum Testen
@@ -107,7 +103,7 @@ Hashtable::~Hashtable()
  *  @return isEmpty true, wenn der Hashtable leer ist, false, wenn nicht
  */
 
-bool Hashtable::IsEmpty()
+bool Hashtable::isEmpty()
 {
 	return fCount == 0;
 }
@@ -119,9 +115,9 @@ bool Hashtable::IsEmpty()
  *  @return success TRUE, wenn der Schlssel enthalten ist, FALSE, wenn nicht
  */
 
-bool Hashtable::ContainsKey(void *key)
+bool Hashtable::containsKey(void *key)
 {
-	return GetHashEntry(key) ? true : false;
+	return getHashEntry(key) ? true : false;
 }
 
 
@@ -131,9 +127,9 @@ bool Hashtable::ContainsKey(void *key)
  *  @return value der zum Schlssel gehrige Wert
  */
 
-void *Hashtable::GetValue(void *key)
+void *Hashtable::getValue(void *key)
 {
-	struct Entry *e = GetHashEntry(key);
+	struct Entry *e = getHashEntry(key);
 
 	return e ? e->e_Value : NULL;
 }
@@ -152,11 +148,11 @@ void *Hashtable::GetValue(void *key)
  *  @return succes TRUE, wenn der Eintrag hinzugefgt wurde, FALSE, wenn nicht
  */
 
-bool Hashtable::Put(void *key, void *value)
+bool Hashtable::put(void *key, void *value)
 {
 	m_mutex.lock();
 	
-	struct Entry *e = GetHashEntry(key);
+	struct Entry *e = getHashEntry(key);
 	int hash = fHashFunc(key);
 	int index;
 	
@@ -168,7 +164,7 @@ bool Hashtable::Put(void *key, void *value)
 	
 	fModCount++;
 	if (fCount >= fThreshold)
-		Rehash();
+		rehash();
 	
 	index = hash % fCapacity;
 	
@@ -199,7 +195,7 @@ bool Hashtable::Put(void *key, void *value)
  *  @return value der zum Schlssel gehrende Wert
  */
 
-void *Hashtable::Remove(void *key)
+void *Hashtable::remove(void *key)
 {
 	m_mutex.lock();
 	
@@ -238,7 +234,7 @@ void *Hashtable::Remove(void *key)
 }
 
 
-void Hashtable::MakeEmpty(SINT8 keyMode,SINT8 valueMode)
+void Hashtable::makeEmpty(SINT8 keyMode,SINT8 valueMode)
 {
 	m_mutex.lock();
 	
@@ -285,7 +281,7 @@ void Hashtable::MakeEmpty(SINT8 keyMode,SINT8 valueMode)
  *  @return success true, wenn die Kapazitt verdoppelt werden konnte, false, wenn nicht
  */
  
-bool Hashtable::Rehash()
+bool Hashtable::rehash()
 {
 	m_mutex.lock();
 	
@@ -335,7 +331,7 @@ bool Hashtable::Rehash()
  *  @return entry der gefundene Eintrag oder NULL
  */
 
-struct Entry *Hashtable::GetHashEntry(void *key)
+struct Entry *Hashtable::getHashEntry(void *key)
 {
 	m_mutex.lock();
 	

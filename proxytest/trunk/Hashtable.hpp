@@ -21,18 +21,18 @@ class Hashtable
 
 		CAMutex& getMutex();
 
-		bool IsEmpty();
-		bool ContainsKey(void *key);
-		void *GetValue(void *key);
+		bool isEmpty();
+		bool containsKey(void *key);
+		void *getValue(void *key);
 
-		bool Put(void *key,void *value);
-		void *Remove(void *key);
+		bool put(void *key,void *value);
+		void *remove(void *key);
 
-		void MakeEmpty(SINT8 keyMode = HASH_EMPTY_NONE,SINT8 valueMode = HASH_EMPTY_NONE);
+		void makeEmpty(SINT8 keyMode = HASH_EMPTY_NONE,SINT8 valueMode = HASH_EMPTY_NONE);
 		
 	protected:
-		bool Rehash();
-		struct Entry *GetHashEntry(void *key);
+		bool rehash();
+		struct Entry *getHashEntry(void *key);
 
 		SINT32	fCapacity,fCount,fThreshold,fModCount;
 		float	fLoadFactor;
