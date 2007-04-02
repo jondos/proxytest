@@ -82,7 +82,6 @@ Hashtable::Hashtable(UINT32 (*hashFunc)(void *), SINT32 (*compareFunc)(void *,vo
 
 Hashtable::~Hashtable()
 {
-	m_mutex.lock();
 	struct Entry **table = fTable;
 	
 	for(SINT32 index = fCapacity;--index >= 0;)
@@ -96,20 +95,12 @@ Hashtable::~Hashtable()
 		}
 	}
 	free(table);
-	m_mutex.unlock();
 }
 
 
 UINT32 Hashtable::hashUINT64(UINT64 *a_number)
 {
-	UINT32 temp = 4294967295;
-	UINT8* buff = new UINT8[255];
-	print64(buff, *a_number);
-	CAMsg::printMsg( LOG_DEBUG, "Hash number: %s\n", buff);
-	CAMsg::printMsg( LOG_DEBUG, "Hash modulo: %u\n", temp);
-	UINT32 hash = ((*a_number) % temp);
-	CAMsg::printMsg( LOG_DEBUG, "Hashed account number: %u\n", hash);
-  
+	UINT32 hash = ((*a_number) % 4294967295);
  	return hash;
 }
 
