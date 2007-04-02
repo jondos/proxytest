@@ -16,8 +16,8 @@ class Hashtable
 		Hashtable(UINT32 (*func)(void *), SINT32 (*func)(void *,void *), SINT32 capacity = 1000,float loadFactor = 0.75);
 		~Hashtable();
 
-		void SetHashFunction(UINT32 (*func)(void *));
-		void SetCompareFunction(SINT32 (*func)(void *,void *));
+		static UINT32 hashUINT64(UINT64 *a_number);
+		static SINT32 compareUINT64(UINT64 *a_numberA, UINT64 *a_numberB);
 
 		CAMutex& getMutex();
 
