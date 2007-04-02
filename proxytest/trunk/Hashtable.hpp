@@ -4,8 +4,7 @@
 **
 ** Copyright 2001, pinc Software. All Rights Reserved.
 */
-
-//#include "Types.h"
+#include "CAMutex.hpp"
 
 #define HASH_EMPTY_NONE (SINT8)0
 #define HASH_EMPTY_FREE (SINT8)1
@@ -19,6 +18,8 @@ class Hashtable
 
 		void SetHashFunction(UINT32 (*func)(void *));
 		void SetCompareFunction(SINT32 (*func)(void *,void *));
+
+		CAMutex* getMutex();
 
 		bool IsEmpty();
 		bool ContainsKey(void *key);
@@ -37,7 +38,10 @@ class Hashtable
 		float	fLoadFactor;
 		struct Entry **fTable;
 		UINT32	(*fHashFunc)(void *);
-		int		(*fCompareFunc)(void *,void *);
+		SINT32	(*fCompareFunc)(void *,void *);
+		
+	private:
+		CAMutex* m_mutex;
 };
 
 #endif  // HASHTABLE_H

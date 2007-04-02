@@ -457,24 +457,24 @@ SINT32 CASocket::sendFullyTimeOut(const UINT8* buff,UINT32 len, UINT32 msTimeOut
 				return E_SUCCESS;
 			}
 			else if(ret==E_AGAIN)
-				{
-					ret=CASingleSocketGroup::select_once(*this,true,1000);
-					if(ret>=0||ret==E_TIMEDOUT)
-						continue;
-					#ifdef _DEBUG
-						CAMsg::printMsg(LOG_DEBUG,"CASocket::sendFully() - error near select_once() ret=%i\n",ret);
-					#endif
-					setSendTimeOut(aktTimeOut);
-					return E_UNKNOWN;
-				}
+			{
+				ret=CASingleSocketGroup::select_once(*this,true,1000);
+				if(ret>=0||ret==E_TIMEDOUT)
+					continue;
+				#ifdef _DEBUG
+					CAMsg::printMsg(LOG_DEBUG,"CASocket::sendFully() - error near select_once() ret=%i\n",ret);
+				#endif
+				setSendTimeOut(aktTimeOut);
+				return E_UNKNOWN;
+			}
 			else if(ret<0)
-				{
-					#ifdef _DEBUG
-						CAMsg::printMsg(LOG_DEBUG,"CASocket::sendFully() - send returned %i\n",ret);
-					#endif
-					setSendTimeOut(aktTimeOut);
-					return E_UNKNOWN;
-				}
+			{
+				#ifdef _DEBUG
+					CAMsg::printMsg(LOG_DEBUG,"CASocket::sendFully() - send returned %i\n",ret);
+				#endif
+				setSendTimeOut(aktTimeOut);
+				return E_UNKNOWN;
+			}
 			len-=ret;
 			buff+=ret;
 		}

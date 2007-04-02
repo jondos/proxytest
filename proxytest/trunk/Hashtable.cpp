@@ -22,16 +22,15 @@ struct Entry
 
 /************************** standard string hash functions **************************/
 
-unsigned int stringHash(char *c)
+UINT32 stringHash(char *c)
 {
   //unsigned int hash = 0;
-  int len = strlen(c);
+  UINT32 len = strlen(c);
   
-  return(*(int *)(c+len-4));  // erstmal zum Testen
+  return(*(UINT32 *)(c+len-4));  // erstmal zum Testen
 }
 
-
-int stringCompare(char *a,char *b)
+SINT32 stringCompare(char *a,char *b)
 {
   return(!strcmp(a,b));
 }
@@ -41,15 +40,20 @@ int stringCompare(char *a,char *b)
 // #pragma mark -
 
 
+CAMutex* Hashtable::getMutex()
+{
+	return m_mutex;
+}
+
 /** Erzeugt einen neuen Hashtable nach den Vorgaben des
  *  Benutzers.
  *
  *  @param capacity die Anfangskapazitt des Hashtables. Sie wird zwar bei
- *    Bedarf vergrert, aber das kann dann etwas lnger dauern, da der Hashtable
- *    dann komplett neu aufgebaut werden mu. Voreingestellt sind 100 Eintrge.
- *  @param loadFactor die gewnschte maximale Auslastung des Hashtables.
- *    Bei kleinen Werten mu der Hashtable hufiger neu aufgebaut werden und belegt
- *    mehr Speicher, ist aber schnell. Bei groen Werten wird das Beschreiben und
+ *    Bedarf vergroessert, aber das kann dann etwas laenger dauern, da der Hashtable
+ *    dann komplett neu aufgebaut werden muss Voreingestellt sind 100 Eintrge.
+ *  @param loadFactor die gewueschte maximale Auslastung des Hashtables.
+ *    Bei kleinen Werten muss der Hashtable haeufiger neu aufgebaut werden und belegt
+ *    mehr Speicher, ist aber schnell. Bei groessen Werten wird das Beschreiben und
  *    Auslesen langsamer. Voreingestellt ist 0.75f.
  */
 
@@ -71,7 +75,8 @@ Hashtable::Hashtable(SINT32 capacity, float loadFactor)
 	fCapacity = capacity;
 
 	fHashFunc = (UINT32 (*)(void *))stringHash;
-	fCompareFunc = (int (*)(void *,void *))stringCompare;
+	fCompareFunc = (SINT32 (*)(void *,void *))stringCompare;
+	m_mutex = new CAMutex();
 }
 
 
@@ -90,6 +95,7 @@ Hashtable::~Hashtable()
 		}
 	}
 	free(table);
+	delete m_mutex;
 }
 
 
@@ -99,7 +105,7 @@ void Hashtable::SetHashFunction(UINT32 (*func)(void *))
 }
 
 
-void Hashtable::SetCompareFunction(int (*func)(void *,void *))
+void Hashtable::SetCompareFunction(SINT32 (*func)(void *,void *))
 {
 	fCompareFunc = func;
 }
