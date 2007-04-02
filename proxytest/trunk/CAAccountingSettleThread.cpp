@@ -69,6 +69,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 		CAAccountingDBInterface dbConn;
 		CAXMLErrorMessage * pErrMsg;
 		CAXMLCostConfirmation * pCC;
+		AccountHashEntry* entry = NULL;
 		UINT32 sleepInterval;
 		CAQueue q;
 		UINT32 size;
@@ -136,8 +137,26 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 						CAMsg::printMsg(LOG_ERR, "SettleThread: Communication with BI failed!\n");
 					}
 					else if(pErrMsg->getErrorCode()!=pErrMsg->ERR_OK)  //BI reported error
-					{
-						AccountHashEntry* entry = NULL;
+					{												
+						m_pAccountingSettleThread->m_accountingHashtable->getMutex().lock();						
+						UINT64 accountNumber = pCC->getAccountNumber();
+						entry = (AccountHashEntry*) (m_pAccountingSettleThread->m_accountingHashtable->getValue(&(accountNumber)));							
+						m_pAccountingSettleThread->m_accountingHashtable->getMutex().unlock();
+						
+						if (!entry)
+						{
+							entry = new AccountHashEntry;
+							entry->accountNumber = pCC->getAccountNumber();
+							entry->authFlags = 0;
+							m_pAccountingSettleThread->m_accountingHashtable->getMutex().lock();
+							m_pAccountingSettleThread->m_accountingHashtable->put(&(entry->accountNumber), entry);							
+							entry = (AccountHashEntry*) (m_pAccountingSettleThread->m_accountingHashtable->getValue(&(entry->accountNumber)));
+							if (!entry)
+							{
+								CAMsg::printMsg(LOG_CRIT, "CAAccountingSettleThread: DID NOT FOUND ENTRY THAT  HAS BEEN STORED!\n");
+							}
+							m_pAccountingSettleThread->m_accountingHashtable->getMutex().unlock();
+						}						
 						
 						CAMsg::printMsg(LOG_ERR, "SettleThread: BI reported error no. %d (%s)\n",
 							pErrMsg->getErrorCode(), pErrMsg->getDescription() );
@@ -154,33 +173,24 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 								CAMsg::printMsg(LOG_ERR, "SettleThread: cost confirmation is unusable, but could not delete it from database\n");
 							}
 						}
-						/*
 						else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_INVALID_CC)
-						{
-							entry = new AccountHashEntry;
-							entry->accountNumber = pCC->getAccountNumber();
+						{							
 							entry->authFlags |= AUTH_INVALID_CC;									
 						}	
 						else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_KEY_NOT_FOUND) 
 						{
 							// account does not exist
-							entry = new AccountHashEntry;
-							entry->accountNumber = pCC->getAccountNumber();
 							entry->authFlags |= AUTH_FAKE;							
 						}
-						
-						if (entry)
-						{
-							CAMsg::printMsg(LOG_DEBUG, "CAAccountingSettleThread: locking!\n");
-							m_pAccountingSettleThread->m_accountingHashtable->getMutex().lock();
-							CAMsg::printMsg(LOG_DEBUG, "CAAccountingSettleThread: putting!\n");
-							m_pAccountingSettleThread->m_accountingHashtable->put(&(entry->accountNumber), entry);							
-							m_pAccountingSettleThread->m_accountingHashtable->getMutex().unlock();
-							CAMsg::printMsg(LOG_DEBUG, "CAAccountingSettleThread: unlocking!\n");															
-						}*/
+					
 					}
 					else //settling was OK, so mark account as settled
 					{
+						m_pAccountingSettleThread->m_accountingHashtable->getMutex().lock();						
+						UINT64 accountNumber = pCC->getAccountNumber();
+						m_pAccountingSettleThread->m_accountingHashtable->remove(&(accountNumber));							
+						m_pAccountingSettleThread->m_accountingHashtable->getMutex().unlock();
+						
 						if(dbConn.markAsSettled(pCC->getAccountNumber())==E_SUCCESS)
 						{ 
 							CAMsg::printMsg(LOG_ERR, "SettleThread: Costconfirmation for the account was marked as settled!\n");

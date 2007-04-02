@@ -1,6 +1,34 @@
-/* Hashtable - a general purpose hash table
-**
-** Copyright 2001, pinc Software. All Rights Reserved.
+/*
+Copyright (c) 2000-2007, The JAP-Team All rights reserved.
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+ 
+- Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+ 
+- Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following
+disclaimer in the documentation and/or other materials provided
+with the distribution.
+ 
+- Neither the name of the University of Technology Dresden,
+Germany nor the names of its contributors may be used to endorse
+or promote products derived from this software without specific
+prior written permission.
+ 
+ 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE 
 */
 
 #include "StdAfx.h"
@@ -26,7 +54,7 @@ UINT32 stringHash(char *c)
 {
   UINT32 len = strlen(c);
   
-  return(*(UINT32 *)(c+len-4));  // erstmal zum Testen
+  return(*(UINT32 *)(c+len-4));  
 }
 
 SINT32 stringCompare(char *a,char *b)
@@ -44,7 +72,9 @@ CAMutex& Hashtable::getMutex()
 	return m_mutex;
 }
 
-/** Erzeugt einen neuen Hashtable nach den Vorgaben des
+
+/* Hashtable - a general purpose hash table
+ * Erzeugt einen neuen Hashtable nach den Vorgaben des
  *  Benutzers.
  *
  *  @param capacity die Anfangskapazitt des Hashtables. Sie wird zwar bei
@@ -54,53 +84,60 @@ CAMutex& Hashtable::getMutex()
  *    Bei kleinen Werten muss der Hashtable haeufiger neu aufgebaut werden und belegt
  *    mehr Speicher, ist aber schnell. Bei groessen Werten wird das Beschreiben und
  *    Auslesen langsamer. Voreingestellt ist 0.75f.
- */
-
+ * 
+**/
 Hashtable::Hashtable(UINT32 (*hashFunc)(void *), SINT32 (*compareFunc)(void *,void *), SINT32 capacity, float loadFactor)
 {
 	if (capacity < 0 || loadFactor <= 0)
+	{
 		return;
+	}
 
 	if (!capacity)
+	{
 		capacity = 1;
+	}	
 	
-	if (!(fTable = (struct Entry **)malloc(capacity * sizeof(struct Entry *))))
-		return;
-	memset(fTable,0,capacity * sizeof(struct Entry *));
+	m_table = new Entry*[capacity];
+	for (UINT32 i = 0; i < capacity; i++)
+	{
+		m_table[i] = NULL;
+	}
 	
-	fThreshold = (int)(capacity * loadFactor);
-	fModCount = 0;
-	fLoadFactor = loadFactor;
-	fCapacity = capacity;
+	m_threshold = (UINT32)(capacity * loadFactor);
+	m_modCount = 0;
+	m_count = 0;
+	m_loadFactor = loadFactor;
+	m_capacity = capacity;
 
-	//fHashFunc = (UINT32 (*)(void *))stringHash;
-	fHashFunc = hashFunc;
-	//fCompareFunc = (SINT32 (*)(void *,void *))stringCompare;
-	fCompareFunc = compareFunc;
+	//m_hashFunc = (UINT32 (*)(void *))stringHash;
+	m_hashFunc = hashFunc;
+	//m_compareFunc = (SINT32 (*)(void *,void *))stringCompare;
+	m_compareFunc = compareFunc;
 }
 
 
 Hashtable::~Hashtable()
 {
-	struct Entry **table = fTable;
+	struct Entry **table = m_table;
 	
-	for(SINT32 index = fCapacity;--index >= 0;)
+	for(SINT32 index = m_capacity;--index >= 0;)
 	{
 		struct Entry *e,*next;
 
 		for(e = table[index];e;e = next)
 		{
 			next = e->e_Next;
-			free(e);
+			delete e;
 		}
 	}
-	free(table);
+	delete table;
 }
 
 
 UINT32 Hashtable::hashUINT64(UINT64 *a_number)
 {
-	UINT32 hash = ((*a_number) % 4294967295);
+	UINT32 hash = ((*a_number) % 4294967295u);
  	return hash;
 }
 
@@ -121,14 +158,14 @@ SINT32 Hashtable::compareUINT64(UINT64 *a_numberA, UINT64 *a_numberB)
 }	
 
 
-/** Testet, ob der Hashtable leer ist.
- *
- *  @return isEmpty true, wenn der Hashtable leer ist, false, wenn nicht
+/** 
+ *  Tests if the hashtable is empty.
+ *  @return true if empty; false otherwise
  */
 
 bool Hashtable::isEmpty()
 {
-	return fCount == 0;
+	return m_count == 0;
 }
 
 
@@ -168,43 +205,46 @@ void *Hashtable::getValue(void *key)
  *
  *  @param key der Schlssel
  *  @param value der zugehrige Wert
- *  @return succes TRUE, wenn der Eintrag hinzugefgt wurde, FALSE, wenn nicht
+ *  @return the old value if a value has been overwritten, or NULL if the value did not exist before
  */
 
-bool Hashtable::put(void *key, void *value)
+void* Hashtable::put(void *key, void *value)
 {
-	CAMsg::printMsg(LOG_DEBUG, "Hashtable: putting and looking for old hash\n");
-	struct Entry *e = getHashEntry(key);
-	CAMsg::printMsg(LOG_DEBUG, "Hashtable: putting and hashing\n");
-	int hash = fHashFunc(key);
-	int index;
+	struct Entry *oldEntry = getHashEntry(key);
+	struct Entry *e = NULL;
+	UINT32 hash = m_hashFunc(key);
+	UINT32 index;
 	
-	CAMsg::printMsg(LOG_DEBUG, "Hashtable: starting to put\n");
-	if (e)
+	if (oldEntry)
 	{
-		return true;
+		value = oldEntry->e_Value;
 	}
 	
-	fModCount++;
-	if (fCount >= fThreshold)
+	m_modCount++;
+	if (m_modCount >= m_threshold)
 	{
+		
 		rehash();
 	}
 	
-	index = hash % fCapacity;
-	CAMsg::printMsg(LOG_DEBUG, "Hashtable: putting and allocating memory\n");
-	if (!(e = (struct Entry *)malloc(sizeof(struct Entry))))
-	{
-		return false;
-	}
-	
+	index = hash % m_capacity;
+
+	e = new Entry;
 	e->e_Key = key;
 	e->e_Value = value;
-	e->e_Next = fTable[index];
-	fTable[index] = e;  
-	fCount++;
 	
-	return true;
+	if (m_table[index])
+	{		
+		e->e_Next = m_table[index];
+	}
+	else
+	{
+		e->e_Next = NULL;
+	}
+	m_table[index] = e; 
+	m_count++;
+	
+	return value;
 }
 
 
@@ -224,25 +264,34 @@ void *Hashtable::remove(void *key)
 	UINT32 hash,(*func)(void *);
 	SINT32 index;
 	
-	table = fTable;
-	hash = (func = fHashFunc)(key);
-	index = hash % fCapacity;
+	table = m_table;
+	hash = (func = m_hashFunc)(key);
+	index = hash % m_capacity;
 	
 	for(e = table[index],prev = NULL;e;e = e->e_Next)
 	{
-		if ((func(e->e_Key) == hash) && fCompareFunc(e->e_Key,key))
+		if (e == NULL)
+		{
+			return NULL;
+		}
+		
+		if ((func(e->e_Key) == hash) && m_compareFunc(e->e_Key,key))
 		{
 			void *value;
 
-			fModCount++;
+			m_modCount++;
 			if (prev)
+			{
 				prev->e_Next = e->e_Next;
+			}
 			else
+			{
 				table[index] = e->e_Next;
+			}
 			
-			fCount--;
+			m_count--;
 			value = e->e_Value;
-			free(e);
+			delete e;
 
 			return value;
 		}
@@ -255,14 +304,22 @@ void *Hashtable::remove(void *key)
 
 void Hashtable::makeEmpty(SINT8 keyMode,SINT8 valueMode)
 {
-	fModCount++;
+	m_modCount++;
 
-	for(SINT32 index = fCapacity;--index >= 0;)
+	for(SINT32 index = m_capacity;--index >= 0;)
 	{
 		struct Entry *e,*next;
 
-		for(e = fTable[index];e;e = next)
+		if (!m_table[index])
 		{
+			continue;
+		}
+		for(e = m_table[index];e;e = next)
+		{
+			if (!e)
+			{
+				break;
+			}
 			switch(keyMode)
 			{
 				case HASH_EMPTY_DELETE:
@@ -282,11 +339,21 @@ void Hashtable::makeEmpty(SINT8 keyMode,SINT8 valueMode)
 					break;
 			}
 			next = e->e_Next;
-			free(e);
+			delete e;
 		}
-		fTable[index] = NULL;
+		m_table[index] = NULL;
 	}
-	fCount = 0;
+	m_count = 0;
+}
+
+UINT32 Hashtable::getSize()
+{
+	return m_count;
+}
+
+UINT32 Hashtable::getCapacity()
+{
+	return m_capacity;
 }
 
 
@@ -298,22 +365,31 @@ void Hashtable::makeEmpty(SINT8 keyMode,SINT8 valueMode)
  
 bool Hashtable::rehash()
 {
-	UINT32 (*hashCode)(void *) = fHashFunc;
-	struct Entry **oldtable = fTable,**newtable;
-	UINT32 oldCapacity = fCapacity;
+	UINT32 (*hashCode)(void *) = m_hashFunc;
+	struct Entry **oldtable = m_table,**newtable;
+	UINT32 oldCapacity = m_capacity;
 	UINT32 newCapacity,i;
 
 	newCapacity = oldCapacity * 2 + 1;
-	if (!(newtable = (struct Entry **)malloc(newCapacity * sizeof(struct Entry *))))
+	//if (!(newtable = (struct Entry **)malloc(newCapacity * sizeof(struct Entry *))))
 	{
-		return false;
+		//return false;
 	}
-	memset(newtable,0,newCapacity*sizeof(struct Entry *));
+	newtable = new Entry*[newCapacity];
+	for (UINT32 i = 0; i < newCapacity; i++)
+	{
+		newtable[i] = NULL;
+	}
 
-	fModCount++;
-	fThreshold = (UINT32)(newCapacity * fLoadFactor);
-	fTable = newtable;
-	fCapacity = newCapacity;
+	m_modCount++;
+	if (m_modCount > 10)
+	{
+		CAMsg::printMsg(LOG_INFO, "Hashtable: Too many rehash operations!\n");
+	}
+	
+	m_threshold = (UINT32)(newCapacity * m_loadFactor);
+	m_table = newtable;
+	m_capacity = newCapacity;
 
 	for(i = oldCapacity;i-- > 0;)
 	{
@@ -322,14 +398,15 @@ bool Hashtable::rehash()
 		
 		for (old = oldtable[i];old;)
 		{
-			e = old;  old = old->e_Next;
+			e = old;  
+			old = old->e_Next;
 			
 			index = hashCode(e->e_Key) % newCapacity;
 			e->e_Next = newtable[index];
 			newtable[index] = e;
 		}
 	}
-	free(oldtable);
+	delete oldtable;
 	
 	return true;
 }
@@ -347,12 +424,19 @@ struct Entry *Hashtable::getHashEntry(void *key)
 	struct Entry **table,*e;
 	UINT32 hash,(*func)(void *);
 	
-	table = fTable;
-	hash = (func = fHashFunc)(key);
+	table = m_table;
+	hash = (func = m_hashFunc)(key);
+	UINT32 index = hash % m_capacity;
 	
-	for(e = table[hash % fCapacity];e;e = e->e_Next)
+	for(e = table[index];e;e = e->e_Next)
 	{
-		if ((func(e->e_Key) == hash) && fCompareFunc(e->e_Key,key))
+		if (e == NULL)
+		{
+			return NULL;
+		}
+		
+		
+		if ((func(e->e_Key) == hash) && !m_compareFunc(e->e_Key,key))
 		{
 			return e;
 		}

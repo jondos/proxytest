@@ -91,7 +91,7 @@ SINT32 CAAccountingBIInterface::initBIConnection()
 				m_connected = false;
 				return E_UNKNOWN;
 			}
-		CAMsg::printMsg(LOG_DEBUG,"CAAccountingBIInterface: BI connection established\n!");
+		CAMsg::printMsg(LOG_DEBUG,"CAAccountingBIInterface: BI connection established!\n");
 		m_httpClient.setSocket(m_pSocket);
 		m_connected = true;
 		return E_SUCCESS;

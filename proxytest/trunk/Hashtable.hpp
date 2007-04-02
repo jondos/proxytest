@@ -24,8 +24,10 @@ class Hashtable
 		bool isEmpty();
 		bool containsKey(void *key);
 		void *getValue(void *key);
+		UINT32 getSize();
+		UINT32 getCapacity();
 
-		bool put(void *key,void *value);
+		void* put(void *key,void *value);
 		void *remove(void *key);
 
 		void makeEmpty(SINT8 keyMode = HASH_EMPTY_NONE,SINT8 valueMode = HASH_EMPTY_NONE);
@@ -34,11 +36,11 @@ class Hashtable
 		bool rehash();
 		struct Entry *getHashEntry(void *key);
 
-		SINT32	fCapacity,fCount,fThreshold,fModCount;
-		float	fLoadFactor;
-		struct Entry **fTable;
-		UINT32	(*fHashFunc)(void *);
-		SINT32	(*fCompareFunc)(void *,void *);
+		SINT32	m_capacity, m_count, m_threshold, m_modCount;
+		float	m_loadFactor;
+		struct Entry **m_table;
+		UINT32	(*m_hashFunc)(void *);
+		SINT32	(*m_compareFunc)(void *,void *);
 		
 	private:
 		CAMutex m_mutex;
