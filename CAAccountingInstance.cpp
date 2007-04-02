@@ -66,10 +66,10 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
 		// initialize Database connection
 		m_dbInterface = new CAAccountingDBInterface();
 		if(m_dbInterface->initDBConnection() != E_SUCCESS)
-			{
-				CAMsg::printMsg( LOG_ERR, "**************** AccountingInstance: Could not connect to DB!\n");
-				exit(1);
-			}
+		{
+			CAMsg::printMsg( LOG_ERR, "**************** AccountingInstance: Could not connect to DB!\n");
+			exit(1);
+		}
 	
 		// initialize JPI signataure tester
 		m_AiName = new UINT8[256];
@@ -132,7 +132,8 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 		
 		if (pHashEntry == NULL || pHashEntry->pAccountingInfo == NULL)
 		{
-			return returnKickout();
+			ms_pInstance->m_Mutex.unlock();
+			return 3;
 		}
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
 		
@@ -143,10 +144,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 		if(pAccInfo->authFlags & (AUTH_FATAL_ERROR))
 		{
 			// there was an error earlier.
-#ifdef DEBUG			
-			CAMsg::printMsg( LOG_DEBUG, "AccountingInstance: should kick out user now...\n");
-#endif
-			return returnKickout();
+			return returnKickout(pAccInfo);
 		}
 		
 		// do the following tests after a lot of Mix packets only (gain speed...)
@@ -166,7 +164,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 #ifdef DEBUG							
 				CAMsg::printMsg(LOG_DEBUG, "Goodwill timeout has runout, will kick out user now...\n");
 #endif							
-				return returnKickout();				
+				return returnHold(pAccInfo);				
 		}	
 	
 		if(!(pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT) )
@@ -178,11 +176,10 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 			// authentication process not properly finished
 			if( pAccInfo->authFlags & AUTH_FAKE )
 			{
-				pAccInfo->authFlags |= AUTH_FATAL_ERROR;
 #ifdef DEBUG				
 				CAMsg::printMsg( LOG_DEBUG, "AccountingInstance: AUTH_FAKE flag is set ... byebye\n");
 #endif				
-				return returnKickout();
+				return returnHold(pAccInfo);
 			}
 			if( !(pAccInfo->authFlags & AUTH_ACCOUNT_OK) )
 			{
@@ -194,12 +191,12 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 					DOM_Document doc;
 					msg.toXmlDocument(doc);
 					pAccInfo->pControlChannel->sendXMLMessage(doc);
-					pAccInfo->authFlags |= AUTH_FATAL_ERROR;
-					return returnHold(); //timeout over -> kick out
+					return returnHold(pAccInfo); //timeout over -> kick out
 				}
 				else //timeout still running
 				{
-					return returnHold();
+					ms_pInstance->m_Mutex.unlock();
+					return 1;
 				}					
 			}
 	
@@ -212,8 +209,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 				DOM_Document doc;
 				msg.toXmlDocument(doc);
 				pAccInfo->pControlChannel->sendXMLMessage(doc);
-				pAccInfo->authFlags |= AUTH_FATAL_ERROR;
-				return returnHold(); //no need to start goodwill timeout, setting AUTH_FATAL_ERROR will kick the user out next time 
+				return returnHold(pAccInfo); //no need to start goodwill timeout, setting AUTH_FATAL_ERROR will kick the user out next time 
 			}
 
 			//----------------------------------------------------------
@@ -257,9 +253,8 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 					DOM_Document doc;
 					msg.toXmlDocument(doc);
 					pAccInfo->pControlChannel->sendXMLMessage(doc);
-					pAccInfo->authFlags |= AUTH_FATAL_ERROR;
 					pAccInfo->lastHardLimitSeconds = 0;
-					return returnHold();
+					return returnHold(pAccInfo);
 				}
 			}
 			else
@@ -336,14 +331,14 @@ SINT32 CAAccountingInstance::returnWait(tAiAccountingInfo* pAccInfo)
 	CAMsg::printMsg(LOG_DEBUG, "Wait: %u\n", pAccInfo->goodwillTimeoutStarttime);
 	pAccInfo->goodwillTimeoutStarttime = time(NULL);		
 	ms_pInstance->m_Mutex.unlock();
-	return 2;
+	return 1;
 }	
 /**
  *  When receiving this message, the Mix should kick the user out immediately
  */
-SINT32 CAAccountingInstance::returnKickout()
+SINT32 CAAccountingInstance::returnKickout(tAiAccountingInfo* pAccInfo)
 {
-	//CAMsg::printMsg(LOG_DEBUG, "Kickout: %u\n", pAccInfo->goodwillTimeoutStarttime);
+	CAMsg::printMsg(LOG_DEBUG, "AccountingInstance: should kick out user now...");
 	ms_pInstance->m_Mutex.unlock();
 	return 3;
 }
@@ -351,12 +346,13 @@ SINT32 CAAccountingInstance::returnKickout()
 /*
  * hold packet, no timeout started 
  * (Usage: send an error message before kicking out the user:
- * set AUTH_FATAL_ERROR yourself, and then returnHold()   )
+ * sets AUTH_FATAL_ERROR )
  */
-SINT32 CAAccountingInstance::returnHold()
+SINT32 CAAccountingInstance::returnHold(tAiAccountingInfo* pAccInfo)
 {
+	pAccInfo->authFlags |= AUTH_FATAL_ERROR;
 	ms_pInstance->m_Mutex.unlock();
-	return 2;
+	return 1;
 }
 
 
