@@ -153,7 +153,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 			// there was an error earlier.
 			return returnKickout(pAccInfo);
 		}
-		
+		/*
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: locking!\n");
 		ms_pInstance->m_settleHashtable->getMutex().lock();
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: getting!\n");
@@ -180,7 +180,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 				return returnHold(pAccInfo);
 			}
 			delete entry;
-		}
+		}*/
 		
 		// do the following tests after a lot of Mix packets only (gain speed...)
 		if (pAccInfo->sessionPackets % PACKETS_BEFORE_NEXT_CHECK != 1)

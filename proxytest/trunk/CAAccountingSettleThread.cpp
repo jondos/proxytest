@@ -154,6 +154,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 								CAMsg::printMsg(LOG_ERR, "SettleThread: cost confirmation is unusable, but could not delete it from database\n");
 							}
 						}
+						/*
 						else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_INVALID_CC)
 						{
 							entry = new AccountHashEntry;
@@ -176,7 +177,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 							m_pAccountingSettleThread->m_accountingHashtable->put(&(entry->accountNumber), entry);							
 							m_pAccountingSettleThread->m_accountingHashtable->getMutex().unlock();
 							CAMsg::printMsg(LOG_DEBUG, "CAAccountingSettleThread: unlocking!\n");															
-						}
+						}*/
 					}
 					else //settling was OK, so mark account as settled
 					{
