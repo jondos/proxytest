@@ -156,9 +156,6 @@ private:
 	static SINT32 makeCCRequest( const UINT64 accountNumber, const UINT64 transferredBytes, DOM_Document& doc);
 	static SINT32 makeAccountRequest(DOM_Document &doc);
 	
-	static UINT32 accountHash(UINT64 *a_accountNumber);
-	static SINT32 accountCompare(UINT64 *a_accountA, UINT64 *a_accountB);
-	
 	static SINT32 returnOK(tAiAccountingInfo* pAccInfo);
 	static SINT32 returnWait(tAiAccountingInfo* pAccInfo);
 	static SINT32 returnKickout(tAiAccountingInfo* pAccInfo);
