@@ -164,7 +164,6 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 		
 
 		ms_pInstance->m_settleHashtable->getMutex().lock();
-		//entry = (AccountHashEntry*)ms_pInstance->m_settleHashtable->remove(&(pAccInfo->accountNumber));
 		entry = (AccountHashEntry*)ms_pInstance->m_settleHashtable->getValue(&(pAccInfo->accountNumber));				
 		if (entry != NULL)
 		{			
@@ -177,6 +176,8 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 			else if (entry->authFlags & AUTH_INVALID_ACCOUNT)
 			{
 				entry->authFlags &= ~AUTH_INVALID_ACCOUNT;
+				ms_pInstance->m_settleHashtable->remove(&(pAccInfo->accountNumber));
+				delete entry;				
 				ms_pInstance->m_settleHashtable->getMutex().unlock();		
 				
 				CAMsg::printMsg(LOG_DEBUG, "Found invalid account! Kicking out user...\n");												

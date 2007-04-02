@@ -163,6 +163,8 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 						CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: BI reported error!\n");
 						if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_KEY_NOT_FOUND)
 						{
+							entry->authFlags |= AUTH_INVALID_ACCOUNT;
+							
 							//delete costconfirmation to avoid trying to settle an unusable CC again and again					
 							if(dbConn.deleteCC(pCC->getAccountNumber()) == E_SUCCESS)
 							{
@@ -176,19 +178,17 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 						else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_INVALID_CC)
 						{							
 							entry->authFlags |= AUTH_INVALID_CC;									
-						}	
-						else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_KEY_NOT_FOUND) 
-						{
-							// account does not exist
-							entry->authFlags |= AUTH_FAKE;							
-						}
-					
+						}						
 					}
 					else //settling was OK, so mark account as settled
 					{
 						m_pAccountingSettleThread->m_accountingHashtable->getMutex().lock();						
 						UINT64 accountNumber = pCC->getAccountNumber();
-						m_pAccountingSettleThread->m_accountingHashtable->remove(&(accountNumber));							
+						entry = (AccountHashEntry*)m_pAccountingSettleThread->m_accountingHashtable->remove(&(accountNumber));
+						if (entry)
+						{
+							delete entry;
+						}
 						m_pAccountingSettleThread->m_accountingHashtable->getMutex().unlock();
 						
 						if(dbConn.markAsSettled(pCC->getAccountNumber())==E_SUCCESS)
