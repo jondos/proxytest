@@ -41,6 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 #include "CAUtil.hpp"
 #include "CASignature.hpp"
 #include "CAXMLErrorMessage.hpp"
+#include "Hashtable.hpp"
 
 //for testing purposes only
 #define JAP_DIGEST_LENGTH 28
@@ -53,6 +54,13 @@ DOM_Document CAAccountingInstance::m_preparedCCRequest;
 CAAccountingInstance * CAAccountingInstance::ms_pInstance = NULL;
 
 const UINT64 CAAccountingInstance::PACKETS_BEFORE_NEXT_CHECK = 100;
+
+struct AccountEntry
+{
+	UINT64 accountNumber;
+	UINT32 authFlags;
+};
+
 
 /**
  * private Constructor
@@ -91,10 +99,45 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
 		*/
 		
 		// launch BI settleThread
+		/*
+		m_settleHashtable = 
+			new Hashtable((UINT32 (*)(void *))accountHash, (SINT32 (*)(void *,void *))accountCompare);
+		AccountEntry* entry = new AccountEntry;
+		entry->accountNumber = 259436729521ll;
+		entry->authFlags = 0;
+		
+		m_settleHashtable->put(&(entry->accountNumber), entry);
+		*/
 		m_pSettleThread = new CAAccountingSettleThread();
-		
-		
 	}
+	
+
+
+
+UINT32 CAAccountingInstance::accountHash(UINT64 *a_accountNumber)
+{
+	CAMsg::printMsg( LOG_DEBUG, "Hash modulo: %u", 4294967295);
+	UINT32 hash = (UINT32)((*a_accountNumber) % 4294967295);
+	CAMsg::printMsg( LOG_DEBUG, "Hashed account number: %u", hash);
+  
+ 	return hash;
+}
+
+SINT32 CAAccountingInstance::accountCompare(UINT64 *a_accountA, UINT64 *a_accountB)
+{
+	if (*a_accountA == *a_accountB)
+	{
+		return 0;
+	}
+	else if (*a_accountA > *a_accountB)
+	{
+		return 1;
+	}
+	else
+	{
+		return -1;
+	}
+}		
 
 /**
  * private desctructor
@@ -106,6 +149,9 @@ CAAccountingInstance::~CAAccountingInstance()
 		//m_pThread->join();
 		//delete m_pThread;
 		delete m_pSettleThread;
+		/*
+		m_settleHashtable->makeEmpty(HASH_EMPTY_DELETE, HASH_EMPTY_DELETE);
+		delete m_settleHashtable;*/
 		//delete m_biInterface;
 		delete m_dbInterface;
 		delete m_pIPBlockList;

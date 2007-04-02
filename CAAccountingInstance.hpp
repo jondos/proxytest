@@ -40,6 +40,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAAccountingControlChannel.hpp"
 #include "CAAccountingSettleThread.hpp"
 #include "CACmdLnOptions.hpp"
+#include "Hashtable.hpp"
 #include "CAMix.hpp"
 #include "xml/DOM_Output.hpp"
 
@@ -155,6 +156,9 @@ private:
 	static SINT32 makeCCRequest( const UINT64 accountNumber, const UINT64 transferredBytes, DOM_Document& doc);
 	static SINT32 makeAccountRequest(DOM_Document &doc);
 	
+	static UINT32 accountHash(UINT64 *a_accountNumber);
+	static SINT32 accountCompare(UINT64 *a_accountA, UINT64 *a_accountB);
+	
 	static SINT32 returnOK(tAiAccountingInfo* pAccInfo);
 	static SINT32 returnWait(tAiAccountingInfo* pAccInfo);
 	static SINT32 returnKickout(tAiAccountingInfo* pAccInfo);
@@ -175,6 +179,9 @@ private:
 	
 	/** this is for synchronizing the write access to the HashEntries */
 	CAMutex m_Mutex;
+	
+	/** For information exchange between the settle thread and the accounting instance */
+	Hashtable* m_settleHashtable;
 	
 	/** the name of this accounting instance */
 	UINT8 * m_AiName;
