@@ -102,7 +102,8 @@ Hashtable::~Hashtable()
 
 UINT32 Hashtable::hashUINT64(UINT64 *a_number)
 {
-	UINT32 temp = 4294967295;
+	//UINT32 temp = 4294967295;
+	UINT32 temp = 10000;
 	UINT8* buff = new UINT8[255];
 	print64(buff, *a_number);
 	CAMsg::printMsg( LOG_DEBUG, "Hash number: %s\n", buff);
