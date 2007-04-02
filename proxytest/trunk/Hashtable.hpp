@@ -13,13 +13,13 @@
 class Hashtable
 {
 	public:
-		Hashtable(SINT32 capacity = 1000,float loadFactor = 0.75);
+		Hashtable(UINT32 (*func)(void *), SINT32 (*func)(void *,void *), SINT32 capacity = 1000,float loadFactor = 0.75);
 		~Hashtable();
 
 		void SetHashFunction(UINT32 (*func)(void *));
 		void SetCompareFunction(SINT32 (*func)(void *,void *));
 
-		CAMutex* getMutex();
+		CAMutex& getMutex();
 
 		bool IsEmpty();
 		bool ContainsKey(void *key);
@@ -41,7 +41,7 @@ class Hashtable
 		SINT32	(*fCompareFunc)(void *,void *);
 		
 	private:
-		CAMutex* m_mutex;
+		CAMutex m_mutex;
 };
 
 #endif  // HASHTABLE_H

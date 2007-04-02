@@ -22,6 +22,7 @@ struct Entry
 
 /************************** standard string hash functions **************************/
 
+
 UINT32 stringHash(char *c)
 {
   //unsigned int hash = 0;
@@ -40,7 +41,7 @@ SINT32 stringCompare(char *a,char *b)
 // #pragma mark -
 
 
-CAMutex* Hashtable::getMutex()
+CAMutex& Hashtable::getMutex()
 {
 	return m_mutex;
 }
@@ -57,7 +58,7 @@ CAMutex* Hashtable::getMutex()
  *    Auslesen langsamer. Voreingestellt ist 0.75f.
  */
 
-Hashtable::Hashtable(SINT32 capacity, float loadFactor)
+Hashtable::Hashtable(UINT32 (*hashFunc)(void *), SINT32 (*compareFunc)(void *,void *), SINT32 capacity, float loadFactor)
 {
 	if (capacity < 0 || loadFactor <= 0)
 		return;
@@ -74,14 +75,16 @@ Hashtable::Hashtable(SINT32 capacity, float loadFactor)
 	fLoadFactor = loadFactor;
 	fCapacity = capacity;
 
-	fHashFunc = (UINT32 (*)(void *))stringHash;
-	fCompareFunc = (SINT32 (*)(void *,void *))stringCompare;
-	m_mutex = new CAMutex();
+	//fHashFunc = (UINT32 (*)(void *))stringHash;
+	fHashFunc = hashFunc;
+	//fCompareFunc = (SINT32 (*)(void *,void *))stringCompare;
+	fCompareFunc = compareFunc;
 }
 
 
 Hashtable::~Hashtable()
 {
+	m_mutex.lock();
 	struct Entry **table = fTable;
 	
 	for(SINT32 index = fCapacity;--index >= 0;)
@@ -95,19 +98,7 @@ Hashtable::~Hashtable()
 		}
 	}
 	free(table);
-	delete m_mutex;
-}
-
-
-void Hashtable::SetHashFunction(UINT32 (*func)(void *))
-{
-	fHashFunc = func;
-}
-
-
-void Hashtable::SetCompareFunction(SINT32 (*func)(void *,void *))
-{
-	fCompareFunc = func;
+	m_mutex.unlock();
 }
 
 
@@ -163,12 +154,17 @@ void *Hashtable::GetValue(void *key)
 
 bool Hashtable::Put(void *key, void *value)
 {
+	m_mutex.lock();
+	
 	struct Entry *e = GetHashEntry(key);
 	int hash = fHashFunc(key);
 	int index;
 	
 	if (e)
+	{
+		m_mutex.unlock();
 		return true;
+	}
 	
 	fModCount++;
 	if (fCount >= fThreshold)
@@ -177,7 +173,10 @@ bool Hashtable::Put(void *key, void *value)
 	index = hash % fCapacity;
 	
 	if (!(e = (struct Entry *)malloc(sizeof(struct Entry))))
+	{
+		m_mutex.unlock();
 		return false;
+	}
 	
 	e->e_Key = key;
 	e->e_Value = value;
@@ -185,6 +184,7 @@ bool Hashtable::Put(void *key, void *value)
 	fTable[index] = e;  
 	fCount++;
 	
+	m_mutex.unlock();
 	return true;
 }
 
@@ -201,6 +201,8 @@ bool Hashtable::Put(void *key, void *value)
 
 void *Hashtable::Remove(void *key)
 {
+	m_mutex.lock();
+	
 	struct Entry **table,*e,*prev;
 	UINT32 hash,(*func)(void *);
 	SINT32 index;
@@ -225,16 +227,21 @@ void *Hashtable::Remove(void *key)
 			value = e->e_Value;
 			free(e);
 
+			m_mutex.unlock();
 			return value;
 		}
 		prev = e;
 	}
+	
+	m_mutex.unlock();
 	return NULL;
 }
 
 
 void Hashtable::MakeEmpty(SINT8 keyMode,SINT8 valueMode)
 {
+	m_mutex.lock();
+	
 	fModCount++;
 
 	for(SINT32 index = fCapacity;--index >= 0;)
@@ -267,6 +274,8 @@ void Hashtable::MakeEmpty(SINT8 keyMode,SINT8 valueMode)
 		fTable[index] = NULL;
 	}
 	fCount = 0;
+	
+	m_mutex.unlock();
 }
 
 
@@ -278,25 +287,30 @@ void Hashtable::MakeEmpty(SINT8 keyMode,SINT8 valueMode)
  
 bool Hashtable::Rehash()
 {
+	m_mutex.lock();
+	
 	UINT32 (*hashCode)(void *) = fHashFunc;
 	struct Entry **oldtable = fTable,**newtable;
-	int oldCapacity = fCapacity;
-	int newCapacity,i;
+	UINT32 oldCapacity = fCapacity;
+	UINT32 newCapacity,i;
 
 	newCapacity = oldCapacity * 2 + 1;
 	if (!(newtable = (struct Entry **)malloc(newCapacity * sizeof(struct Entry *))))
+	{
+		m_mutex.unlock();
 		return false;
+	}
 	memset(newtable,0,newCapacity*sizeof(struct Entry *));
 
 	fModCount++;
-	fThreshold = (int)(newCapacity * fLoadFactor);
+	fThreshold = (UINT32)(newCapacity * fLoadFactor);
 	fTable = newtable;
 	fCapacity = newCapacity;
 
 	for(i = oldCapacity;i-- > 0;)
 	{
 		struct Entry *old,*e = NULL;
-		int index;
+		UINT32 index;
 		
 		for (old = oldtable[i];old;)
 		{
@@ -308,7 +322,8 @@ bool Hashtable::Rehash()
 		}
 	}
 	free(oldtable);
-
+	
+	m_mutex.unlock();
 	return true;
 }
 
@@ -322,6 +337,8 @@ bool Hashtable::Rehash()
 
 struct Entry *Hashtable::GetHashEntry(void *key)
 {
+	m_mutex.lock();
+	
 	struct Entry **table,*e;
 	UINT32 hash,(*func)(void *);
 	
@@ -331,8 +348,13 @@ struct Entry *Hashtable::GetHashEntry(void *key)
 	for(e = table[hash % fCapacity];e;e = e->e_Next)
 	{
 		if ((func(e->e_Key) == hash) && fCompareFunc(e->e_Key,key))
+		{
+			m_mutex.unlock();
 			return e;
+		}
 	}
+	
+	m_mutex.unlock();
 	return NULL;
 }
 

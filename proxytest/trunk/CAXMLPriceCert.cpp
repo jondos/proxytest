@@ -72,7 +72,7 @@ CAXMLPriceCert* CAXMLPriceCert::getInstance(DOM_Element &elemRoot)
 {
 	if(elemRoot==NULL)
 	{
-		CAMsg::printMsg(LOG_DEBUG,"getInstance: root element is null\n");
+		CAMsg::printMsg(LOG_DEBUG,"CAXMLPriceCert::getInstance: root element is null\n");
 		return NULL;
 	}	
 	CAXMLPriceCert* pPC=new CAXMLPriceCert();
@@ -81,7 +81,7 @@ CAXMLPriceCert* CAXMLPriceCert::getInstance(DOM_Element &elemRoot)
 	if(pPC->setValues()!=E_SUCCESS)
 		{
 			delete pPC;
-			CAMsg::printMsg(LOG_DEBUG,"getInstance.setValues() FAILED \n\n");
+			CAMsg::printMsg(LOG_DEBUG,"CAXMLPriceCert::getInstance.setValues() FAILED \n");
 			return NULL;
 		}
 	CAMsg::printMsg(LOG_DEBUG,"getInstance: setValues OK\n\n");
@@ -124,10 +124,9 @@ SINT32 CAXMLPriceCert::toXmlElement(DOM_Document &a_doc, DOM_Element &elemRoot)
 
 SINT32 CAXMLPriceCert::setValues() 
 {
-	CAMsg::printMsg(LOG_DEBUG,"setValues(): started\n\n");
 	if(m_domDocument==NULL)
 	{
-		CAMsg::printMsg(LOG_DEBUG,"setValues(): no document\n\n");
+		CAMsg::printMsg(LOG_DEBUG,"setValues(): no document\n");
 		return E_UNKNOWN;
 	}
 	DOM_Element elemRoot=m_domDocument.getDocumentElement();
@@ -137,7 +136,7 @@ SINT32 CAXMLPriceCert::setValues()
 	if( (strcmp((char *)strTagname, (char *)ms_pStrElemName)!=0) )
 		{
 			delete[] strTagname;
-			CAMsg::printMsg(LOG_DEBUG,"setValues(): failed to get root elem tagname\n\n");
+			CAMsg::printMsg(LOG_DEBUG,"setValues(): failed to get root elem tagname\n");
 			return E_UNKNOWN;
 		}
 	delete[] strTagname;
@@ -157,13 +156,13 @@ SINT32 CAXMLPriceCert::setValues()
 		{
 			m_StrSubjectKeyIdentifier = new UINT8[strGeneralLen+1];
 			memcpy(m_StrSubjectKeyIdentifier, strGeneral,strGeneralLen+1);
-			CAMsg::printMsg(LOG_DEBUG,"setValues(): parsing subjectkeyidentifier OK\n\n");
+			CAMsg::printMsg(LOG_DEBUG,"setValues(): parsing subjectkeyidentifier OK\n");
 		}
 	else
 		{
 			delete[] m_StrSubjectKeyIdentifier;
 			m_StrSubjectKeyIdentifier=NULL;
-			CAMsg::printMsg(LOG_DEBUG,"setValues(): failed to parse string of subjectkeyidentifier\n\n");
+			CAMsg::printMsg(LOG_DEBUG,"setValues(): failed to parse string of subjectkeyidentifier\n");
 			return E_UNKNOWN;
 		}
 	
@@ -173,7 +172,7 @@ SINT32 CAXMLPriceCert::setValues()
 	{
 		return E_UNKNOWN;
 	}
-	CAMsg::printMsg(LOG_DEBUG,"parsing of rate OK \n\n");
+	CAMsg::printMsg(LOG_DEBUG,"parsing of rate OK \n");
 
 
 
@@ -187,13 +186,13 @@ SINT32 CAXMLPriceCert::setValues()
 		{
 			m_StrSignatureTime = new UINT8[strGeneralLen+1];
 			memcpy(m_StrSignatureTime, strGeneral,strGeneralLen+1);
-			CAMsg::printMsg(LOG_DEBUG,"setValues(): parsing SignatureTime OK\n\n");
+			CAMsg::printMsg(LOG_DEBUG,"setValues(): parsing SignatureTime OK\n");
 		}
 	else
 		{
 			delete[] m_StrSignatureTime;
 			m_StrSignatureTime=NULL;
-			CAMsg::printMsg(LOG_DEBUG,"setValues(): parsing SignatureTime failed\n\n");
+			CAMsg::printMsg(LOG_DEBUG,"setValues(): parsing SignatureTime failed\n");
 			return E_UNKNOWN;
 		}
 	
@@ -209,7 +208,7 @@ SINT32 CAXMLPriceCert::setValues()
 		{
 			m_StrBiID = new UINT8[strGeneralLen2+1];
 			memcpy(m_StrBiID, strGeneral2,strGeneralLen2+1);
-			CAMsg::printMsg(LOG_DEBUG,"setValues(): parsing BiID OK\n\n");
+			CAMsg::printMsg(LOG_DEBUG,"setValues(): parsing BiID OK\n");
 		}
 	else
 		{
@@ -227,7 +226,7 @@ SINT32 CAXMLPriceCert::setValues()
 	
 		
 	
-	CAMsg::printMsg(LOG_DEBUG,"setValues(): finished\n\n");
+	CAMsg::printMsg(LOG_DEBUG,"setValues(): finished\n");
 	return E_SUCCESS;
 }
 
