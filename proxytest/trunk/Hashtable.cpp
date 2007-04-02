@@ -6,6 +6,7 @@
 #include "StdAfx.h"
 
 #include "Hashtable.hpp"
+#include "CAMsg.hpp"
 
 // Every entry in the hashtable is embedded in this structure
 
@@ -98,6 +99,33 @@ Hashtable::~Hashtable()
 }
 
 
+UINT32 Hashtable::hashUINT64(UINT64 *a_number)
+{
+	UINT32 temp = 4294967295;
+	CAMsg::printMsg( LOG_DEBUG, "Hash modulo: %u", temp);
+	UINT32 hash = (UINT32)((*a_number) % temp);
+	CAMsg::printMsg( LOG_DEBUG, "Hashed account number: %u", hash);
+  
+ 	return hash;
+}
+
+SINT32 Hashtable::compareUINT64(UINT64 *a_numberA, UINT64 *a_numberB)
+{
+	if (*a_numberA == *a_numberB)
+	{
+		return 0;
+	}
+	else if (*a_numberA > *a_numberB)
+	{
+		return 1;
+	}
+	else
+	{
+		return -1;
+	}
+}	
+
+
 /** Testet, ob der Hashtable leer ist.
  *
  *  @return isEmpty true, wenn der Hashtable leer ist, false, wenn nicht
@@ -164,7 +192,9 @@ bool Hashtable::put(void *key, void *value)
 	
 	fModCount++;
 	if (fCount >= fThreshold)
+	{
 		rehash();
+	}
 	
 	index = hash % fCapacity;
 	

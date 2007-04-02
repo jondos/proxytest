@@ -105,8 +105,8 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
 		AccountEntry* entry = new AccountEntry;
 		entry->accountNumber = 259436729521ll;
 		entry->authFlags = 0;
-		*/
 		m_settleHashtable->put(&(entry->accountNumber), entry);
+		*/
 		
 		m_pSettleThread = new CAAccountingSettleThread();
 	}
