@@ -148,6 +148,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 							entry = new AccountHashEntry;
 							entry->accountNumber = pCC->getAccountNumber();
 							entry->authFlags = 0;
+							entry->confirmedBytes = 0;
 							m_pAccountingSettleThread->m_accountingHashtable->getMutex().lock();
 							m_pAccountingSettleThread->m_accountingHashtable->put(&(entry->accountNumber), entry);							
 							entry = (AccountHashEntry*) (m_pAccountingSettleThread->m_accountingHashtable->getValue(&(entry->accountNumber)));
@@ -177,7 +178,9 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 						}
 						else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_INVALID_CC)
 						{							
-							entry->authFlags |= AUTH_INVALID_CC;									
+							entry->authFlags |= AUTH_INVALID_CC;
+							// set the confirmed bytes to the value of the CC got from the PI
+							//entry->confirmedBytes = ??;									
 						}						
 					}
 					else //settling was OK, so mark account as settled

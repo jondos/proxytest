@@ -169,8 +169,8 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 		{			
 			if (entry->authFlags & AUTH_INVALID_CC)
 			{
-				entry->authFlags &= ~AUTH_INVALID_CC;
-				
+				entry->authFlags &= ~AUTH_INVALID_CC;								
+				//pAccInfo->confirmedBytes = entry->confirmedBytes;
 				CAMsg::printMsg(LOG_DEBUG, "Found invalid CC!\n");
 			}
 			else if (entry->authFlags & AUTH_INVALID_ACCOUNT)
