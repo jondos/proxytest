@@ -173,10 +173,13 @@ void *Hashtable::getValue(void *key)
 
 bool Hashtable::put(void *key, void *value)
 {
+	CAMsg::printMsg(LOG_DEBUG, "Hashtable: putting and looking for old hash\n");
 	struct Entry *e = getHashEntry(key);
+	CAMsg::printMsg(LOG_DEBUG, "Hashtable: putting and hashing\n");
 	int hash = fHashFunc(key);
 	int index;
 	
+	CAMsg::printMsg(LOG_DEBUG, "Hashtable: starting to put\n");
 	if (e)
 	{
 		return true;
@@ -189,7 +192,7 @@ bool Hashtable::put(void *key, void *value)
 	}
 	
 	index = hash % fCapacity;
-	
+	CAMsg::printMsg(LOG_DEBUG, "Hashtable: putting and allocating memory\n");
 	if (!(e = (struct Entry *)malloc(sizeof(struct Entry))))
 	{
 		return false;
