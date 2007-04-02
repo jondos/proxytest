@@ -152,35 +152,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 		{
 			// there was an error earlier.
 			return returnKickout(pAccInfo);
-		}
-		/*
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: locking!\n");
-		ms_pInstance->m_settleHashtable->getMutex().lock();
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: getting!\n");
-		entry = (AccountHashEntry*)ms_pInstance->m_settleHashtable->getValue(&(pAccInfo->accountNumber));
-		ms_pInstance->m_settleHashtable->getMutex().unlock();		
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: unlocking!\n");
-		if (entry != NULL)
-		{
-			CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: locking!\n");
-			ms_pInstance->m_settleHashtable->getMutex().lock();
-			CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: removing!\n");
-			ms_pInstance->m_settleHashtable->remove(&(pAccInfo->accountNumber));
-			ms_pInstance->m_settleHashtable->getMutex().unlock();
-			CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: unlocking!\n");
-			
-			if (entry->authFlags & AUTH_INVALID_CC)
-			{
-				CAMsg::printMsg(LOG_DEBUG, "Found invalid CC!\n");
-			}
-			else if (entry->authFlags & AUTH_INVALID_ACCOUNT)
-			{
-				CAMsg::printMsg(LOG_DEBUG, "Found invalid account! Kicking out user...\n");								
-				delete entry;
-				return returnHold(pAccInfo);
-			}
-			delete entry;
-		}*/
+		}	
 		
 		// do the following tests after a lot of Mix packets only (gain speed...)
 		if (pAccInfo->sessionPackets % PACKETS_BEFORE_NEXT_CHECK != 1)
@@ -189,7 +161,29 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 			ms_pInstance->m_Mutex.unlock();
 			return 1;	
 		}
-		//CAMsg::printMsg( LOG_DEBUG, "Gogogo!\n");
+		
+
+		ms_pInstance->m_settleHashtable->getMutex().lock();
+		//entry = (AccountHashEntry*)ms_pInstance->m_settleHashtable->remove(&(pAccInfo->accountNumber));
+		entry = (AccountHashEntry*)ms_pInstance->m_settleHashtable->getValue(&(pAccInfo->accountNumber));				
+		if (entry != NULL)
+		{			
+			if (entry->authFlags & AUTH_INVALID_CC)
+			{
+				entry->authFlags &= ~AUTH_INVALID_CC;
+				
+				CAMsg::printMsg(LOG_DEBUG, "Found invalid CC!\n");
+			}
+			else if (entry->authFlags & AUTH_INVALID_ACCOUNT)
+			{
+				entry->authFlags &= ~AUTH_INVALID_ACCOUNT;
+				ms_pInstance->m_settleHashtable->getMutex().unlock();		
+				
+				CAMsg::printMsg(LOG_DEBUG, "Found invalid account! Kicking out user...\n");												
+				return returnHold(pAccInfo);
+			}
+		}
+		ms_pInstance->m_settleHashtable->getMutex().unlock();	
 		
 		
 		//kick user out if a timeout was set and has since run out
