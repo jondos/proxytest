@@ -31,20 +31,23 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAAccountingBIInterface.hpp"
 #include "CAAccountingDBInterface.hpp"
 #include "CACmdLnOptions.hpp"
+#include "CAAccountingInstance.hpp"
 #include "CASocketAddrINet.hpp"
 #include "CAXMLCostConfirmation.hpp"
 #include "CAXMLErrorMessage.hpp"
+#include "Hashtable.hpp"
 
-CAAccountingSettleThread::CAAccountingSettleThread()
-	{
-		// launch AI thread
-		m_pThread = new CAThread();
-		m_pThread->setMainLoop( mainLoop );
-		CAMsg::printMsg(LOG_DEBUG, "Now launching Accounting SettleThread...\n");
-		m_pPIList = NULL;
-		m_bRun=true;
-		m_pThread->start(this);
-	}
+CAAccountingSettleThread::CAAccountingSettleThread(Hashtable* a_accountingHashtable)
+{
+	// launch AI thread
+	m_pThread = new CAThread();
+	m_pThread->setMainLoop( mainLoop );
+	CAMsg::printMsg(LOG_DEBUG, "Now launching Accounting SettleThread...\n");
+	m_pPIList = NULL;
+	m_bRun=true;
+	m_accountingHashtable = a_accountingHashtable;
+	m_pThread->start(this);
+}
 
 
 CAAccountingSettleThread::~CAAccountingSettleThread()
@@ -134,6 +137,8 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					}
 					else if(pErrMsg->getErrorCode()!=pErrMsg->ERR_OK)  //BI reported error
 					{
+						AccountHashEntry* entry = NULL;
+						
 						CAMsg::printMsg(LOG_ERR, "SettleThread: BI reported error no. %d (%s)\n",
 							pErrMsg->getErrorCode(), pErrMsg->getDescription() );
 						CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: BI reported error!\n");
@@ -148,7 +153,27 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 							{						
 								CAMsg::printMsg(LOG_ERR, "SettleThread: cost confirmation is unusable, but could not delete it from database\n");
 							}
-						}									
+						}
+						else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_INVALID_CC)
+						{
+							entry = new AccountHashEntry;
+							entry->accountNumber = pCC->getAccountNumber();
+							entry->authFlags |= AUTH_INVALID_CC;									
+						}	
+						else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_KEY_NOT_FOUND) 
+						{
+							// account does not exist
+							entry = new AccountHashEntry;
+							entry->accountNumber = pCC->getAccountNumber();
+							entry->authFlags |= AUTH_FAKE;							
+						}
+						
+						if (entry)
+						{
+							m_pAccountingSettleThread->m_accountingHashtable->getMutex().lock();
+							m_pAccountingSettleThread->m_accountingHashtable->put(&(entry->accountNumber), entry);							
+							m_pAccountingSettleThread->m_accountingHashtable->getMutex().unlock();															
+						}
 					}
 					else //settling was OK, so mark account as settled
 					{

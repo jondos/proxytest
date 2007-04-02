@@ -65,6 +65,12 @@ struct t_aiqueueitem
 	};
 typedef struct t_aiqueueitem aiQueueItem;
 
+struct AccountHashEntry
+{
+	UINT64 accountNumber;
+	UINT32 authFlags;
+};
+
 extern CACmdLnOptions options;
 
 /**

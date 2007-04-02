@@ -161,6 +161,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 		{
 			ms_pInstance->m_settleHashtable->getMutex().lock();
 			ms_pInstance->m_settleHashtable->remove(&(pAccInfo->accountNumber));
+			ms_pInstance->m_settleHashtable->getMutex().unlock();
 			
 			if (entry->authFlags & AUTH_INVALID_CC)
 			{

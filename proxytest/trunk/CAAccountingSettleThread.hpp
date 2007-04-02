@@ -30,6 +30,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define __CAACCOUNTINGSETTLETHREAD__
 
 #include "CAThread.hpp"
+#include "Hashtable.hpp"
 
 struct t_aiSettleItem
 	{
@@ -58,17 +59,18 @@ typedef struct t_paymentInstanceListNode tPaymentInstanceListEntry;
  * @todo make SLEEP_SECONDS a configure option
  */
 class CAAccountingSettleThread
-	{
-		public:
-			CAAccountingSettleThread();
-			~CAAccountingSettleThread();
-	
-		private:
-			static THREAD_RETURN mainLoop(void * param);
-			SINT32 addKnownPI(const UINT8* a_pstrID, const UINT8* a_pstrHost, UINT32 port, const CACertificate* a_pCert); 
-			tPaymentInstanceListEntry* getPI(UINT8* pstrID);
-			CAThread* m_pThread;
-			volatile bool m_bRun;
-			tPaymentInstanceListEntry* m_pPIList;
-	};
+{
+	public:
+		CAAccountingSettleThread(Hashtable* a_accountingHashtable);
+		~CAAccountingSettleThread();
+
+	private:	
+		static THREAD_RETURN mainLoop(void * param);
+		SINT32 addKnownPI(const UINT8* a_pstrID, const UINT8* a_pstrHost, UINT32 port, const CACertificate* a_pCert); 
+		tPaymentInstanceListEntry* getPI(UINT8* pstrID);
+		CAThread* m_pThread;
+		volatile bool m_bRun;
+		tPaymentInstanceListEntry* m_pPIList;
+		Hashtable* m_accountingHashtable;
+};
 #endif

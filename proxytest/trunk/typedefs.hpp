@@ -182,6 +182,11 @@ typedef struct t_mix_parameters tMixParameters;
 /** a fatal error occured earlier */
 #define AUTH_FATAL_ERROR 0x2000
 
+#define AUTH_INVALID_CC 0x4000
+
+/** Account does not exist */
+#define AUTH_INVALID_ACCOUNT 0x8000
+
 // AI is waiting for a necessary message from JAP (e.g. response to challenge)
 #define AUTH_TIMEOUT_STARTED 0x10000 
 
