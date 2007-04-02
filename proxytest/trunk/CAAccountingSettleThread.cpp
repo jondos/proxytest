@@ -170,9 +170,12 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 						
 						if (entry)
 						{
+							CAMsg::printMsg(LOG_DEBUG, "CAAccountingSettleThread: locking!\n");
 							m_pAccountingSettleThread->m_accountingHashtable->getMutex().lock();
+							CAMsg::printMsg(LOG_DEBUG, "CAAccountingSettleThread: putting!\n");
 							m_pAccountingSettleThread->m_accountingHashtable->put(&(entry->accountNumber), entry);							
-							m_pAccountingSettleThread->m_accountingHashtable->getMutex().unlock();															
+							m_pAccountingSettleThread->m_accountingHashtable->getMutex().unlock();
+							CAMsg::printMsg(LOG_DEBUG, "CAAccountingSettleThread: unlocking!\n");															
 						}
 					}
 					else //settling was OK, so mark account as settled
