@@ -55,13 +55,6 @@ CAAccountingInstance * CAAccountingInstance::ms_pInstance = NULL;
 
 const UINT64 CAAccountingInstance::PACKETS_BEFORE_NEXT_CHECK = 100;
 
-struct AccountEntry
-{
-	UINT64 accountNumber;
-	UINT32 authFlags;
-};
-
-
 /**
  * private Constructor
  */
@@ -83,9 +76,9 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
 		m_AiName = new UINT8[256];
 		options.getAiID(m_AiName, 256);
 		if (options.getBI() != NULL)
-			{
-				m_pJpiVerifyingInstance = options.getBI()->getVerifier();
-			}
+		{
+			m_pJpiVerifyingInstance = options.getBI()->getVerifier();
+		}
 		options.getPaymentHardLimit(&m_iHardLimitBytes);
 		options.getPaymentSoftLimit(&m_iSoftLimitBytes);
 	
@@ -98,18 +91,10 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
 		m_pThread->start( this );
 		*/
 		
-		// launch BI settleThread
-		/*
+		// launch BI settleThread		
 		m_settleHashtable = 
-			new Hashtable((UINT32 (*)(void *))Hashtable::hashUINT64, (SINT32 (*)(void *,void *))Hashtable::compareUINT64);
-		AccountEntry* entry = new AccountEntry;
-		entry->accountNumber = 259436729521ll;
-		entry->accountNumber = 22233344455566;
-		entry->authFlags = 0;
-		m_settleHashtable->put(&(entry->accountNumber), entry);
-		*/
-		
-		m_pSettleThread = new CAAccountingSettleThread();
+			new Hashtable((UINT32 (*)(void *))Hashtable::hashUINT64, (SINT32 (*)(void *,void *))Hashtable::compareUINT64);		
+		m_pSettleThread = new CAAccountingSettleThread(m_settleHashtable);
 	}
 		
 
@@ -123,10 +108,10 @@ CAAccountingInstance::~CAAccountingInstance()
 		//m_pThread->join();
 		//delete m_pThread;
 		delete m_pSettleThread;
-		/*
-		m_settleHashtable->makeEmpty(HASH_EMPTY_DELETE, HASH_EMPTY_DELETE);
+		
+		m_settleHashtable->makeEmpty(HASH_EMPTY_NONE, HASH_EMPTY_DELETE);
 		delete m_settleHashtable;
-		*/
+		
 		//delete m_biInterface;
 		delete m_dbInterface;
 		delete m_pIPBlockList;
@@ -157,6 +142,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 			return 3;
 		}
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
+		AccountHashEntry* entry;
 		
 		pAccInfo->transferredBytes += MIXPACKET_SIZE; // count the packet	
 		pAccInfo->sessionPackets++;
@@ -166,6 +152,25 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 		{
 			// there was an error earlier.
 			return returnKickout(pAccInfo);
+		}
+		
+		ms_pInstance->m_settleHashtable->getMutex().lock();
+		entry = (AccountHashEntry*)ms_pInstance->m_settleHashtable->getValue(&(pAccInfo->accountNumber));
+		ms_pInstance->m_settleHashtable->getMutex().unlock();		
+		if (entry != NULL)
+		{
+			ms_pInstance->m_settleHashtable->getMutex().lock();
+			ms_pInstance->m_settleHashtable->remove(&(pAccInfo->accountNumber));
+			
+			if (entry->authFlags & AUTH_INVALID_CC)
+			{
+				CAMsg::printMsg(LOG_DEBUG, "Found invalid CC!\n");
+			}
+			else if (entry->authFlags & AUTH_INVALID_ACCOUNT)
+			{
+				CAMsg::printMsg(LOG_DEBUG, "Found invalid account! Kicking out user...\n");								
+				return returnHold(pAccInfo);
+			}
 		}
 		
 		// do the following tests after a lot of Mix packets only (gain speed...)
