@@ -107,7 +107,7 @@ UINT32 Hashtable::hashUINT64(UINT64 *a_number)
 	print64(buff, *a_number);
 	CAMsg::printMsg( LOG_DEBUG, "Hash number: %s\n", buff);
 	CAMsg::printMsg( LOG_DEBUG, "Hash modulo: %u\n", temp);
-	UINT32 hash = (UINT32)((*a_number) % temp);
+	UINT32 hash = ((*a_number) % temp);
 	CAMsg::printMsg( LOG_DEBUG, "Hashed account number: %u\n", hash);
   
  	return hash;
