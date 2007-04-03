@@ -990,7 +990,7 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
  */
 SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 	{
-		ms_pInstance->m_Mutex.lock();
+		//ms_pInstance->m_Mutex.lock();
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
 		
 		if ( pAccInfo != NULL)
@@ -1005,6 +1005,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			{
 				CAMsg::printMsg( LOG_ERR, "Could not connect to DB, preapid bytes were lost\n");
 				delete dbInterface;
+				ms_pInstance->m_Mutex.unlock();
 				return E_UNKNOWN;
 			}
 			
@@ -1036,7 +1037,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			delete pAccInfo;
 			pHashEntry->pAccountingInfo=NULL;
 		}
-		ms_pInstance->m_Mutex.unlock();
+		//ms_pInstance->m_Mutex.unlock();
 		
 		return E_SUCCESS;
 	}
