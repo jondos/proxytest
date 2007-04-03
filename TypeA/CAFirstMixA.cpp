@@ -486,7 +486,8 @@ NEXT_USER:
 												#ifdef PAYMENT
 													// count packet for payment
 													if (CAAccountingInstance::handleJapPacket(pfmHashEntry, !(pfmHashEntry->bCountPacket)) == 3)
-													{												
+													{			
+														/*									
 														// this jap is evil! terminate connection and add IP to blacklist
 														CAMsg::printMsg(LOG_DEBUG, "CAFirstMixA: Detected evil Jap.. closing connection! Removing IP..\n", ret);
 														fmChannelListEntry* pEntry;
@@ -512,6 +513,7 @@ NEXT_USER:
 														delete pfmHashEntry->pMuxSocket;
 														decUsers();
 														goto NEXT_USER_WRITING;
+														*/
 													}														
 												#endif
 												#ifdef DELAY_USERS
