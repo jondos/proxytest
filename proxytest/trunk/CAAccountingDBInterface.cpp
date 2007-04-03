@@ -48,7 +48,6 @@ CAAccountingDBInterface::CAAccountingDBInterface()
  */
 CAAccountingDBInterface::~CAAccountingDBInterface()
 	{
-		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface::~CAAccountingDBInterface()\n");
 		terminateDBConnection();
 	}
 
