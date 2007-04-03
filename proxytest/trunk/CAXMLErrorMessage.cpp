@@ -148,13 +148,17 @@ SINT32 CAXMLErrorMessage::toXmlElement(DOM_Document &a_doc, DOM_Element &elemRoo
 		elemRoot = a_doc.createElement("ErrorMessage");
 		setDOMElementAttribute(elemRoot, "code", m_iErrorCode);
 		setDOMElementValue(elemRoot, m_strErrMsg);
-		DOM_Element objectRoot = a_doc.createElement("MessageObject");
-		DOM_Element objectElem;
-		//WARNING: this will fail for CAXMLCostConfirmation!!! (since it is not a subclass of CAAbstractXMLEncodable)
-		CAAbstractXMLEncodable* encodableObject = (CAAbstractXMLEncodable*) m_messageObject;
-		encodableObject->toXmlElement(a_doc,objectElem);
-		objectRoot.appendChild(objectElem);
-		elemRoot.appendChild(objectRoot);
+		
+		if (m_messageObject)
+		{
+			DOM_Element objectRoot = a_doc.createElement("MessageObject");
+			DOM_Element objectElem;
+			//WARNING: this will fail for CAXMLCostConfirmation!!! (since it is not a subclass of CAAbstractXMLEncodable)
+			CAAbstractXMLEncodable* encodableObject = (CAAbstractXMLEncodable*) m_messageObject;
+			encodableObject->toXmlElement(a_doc,objectElem);
+			objectRoot.appendChild(objectElem);
+			elemRoot.appendChild(objectRoot);
+		}
 		
 		return E_SUCCESS;
 	}
