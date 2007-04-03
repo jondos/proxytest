@@ -164,7 +164,13 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				ms_pInstance->m_Mutex.unlock();
 				return 1;
 			}
-		}			
+		}	
+		
+		if (a_bControlMessage)		
+		{
+			ms_pInstance->m_Mutex.unlock();
+			return 1;
+		}
 		
 		// do the following tests after a lot of Mix packets only (gain speed...)
 		if (pAccInfo->sessionPackets % PACKETS_BEFORE_NEXT_CHECK != 1)
