@@ -948,11 +948,11 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,D
 	{
 		pAccInfo->authFlags &= ~AUTH_SENT_CC_REQUEST;
 	}
-	m_Mutex.unlock();
 	
 	m_dbInterface->storeCostConfirmation(*pCC);
 	CAMsg::printMsg(LOG_DEBUG, "after store \n");
 	delete pCC;
+	m_Mutex.unlock();
 	return;
 }
 
