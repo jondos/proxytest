@@ -74,7 +74,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 		CAQueue q;
 		UINT32 size;
 		CASocketAddrINet biAddr;
-		bool bDeleteCC = false;
+		bool bDeleteCC;
 	
 		CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread is running...\n");
 	
@@ -160,6 +160,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 						CAMsg::printMsg(LOG_ERR, "SettleThread: BI reported error no. %d (%s)\n",
 							pErrMsg->getErrorCode(), pErrMsg->getDescription() );
 						CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: BI reported error!\n");
+						bDeleteCC = false;
 						if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_KEY_NOT_FOUND)
 						{
 							entry->authFlags |= AUTH_INVALID_ACCOUNT;
