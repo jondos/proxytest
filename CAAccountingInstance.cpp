@@ -210,8 +210,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				ms_pInstance->m_settleHashtable->remove(&(pAccInfo->accountNumber));			
 				if (entry->authFlags & AUTH_FATAL_ERROR)
 				{
-					delete entry; //do not delete before the above usage....
-					ms_pInstance->m_settleHashtable->getMutex().unlock();
+					delete entry; //do not delete before the above usage....					
 					return returnHold(pAccInfo, err);		
 				}
 				delete entry;
@@ -833,14 +832,14 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 	{
 		pAccInfo->transferredBytes += pCC->getTransferredBytes();
 		pAccInfo->confirmedBytes = pCC->getTransferredBytes();
-		#ifdef DEBUG
+		//#ifdef DEBUG
 			UINT8 tmp[32];
 			print64(tmp,pAccInfo->transferredBytes);
 			CAMsg::printMsg(LOG_DEBUG, "TransferredBytes is now %s\n", tmp);
 			UINT8 tmp[32];
 			print64(tmp,pAccInfo->confirmedBytes);
 			CAMsg::printMsg(LOG_DEBUG, "ConfirmedBytes is now %s\n", tmp);			
-		#endif
+		//#endif
 		pAccInfo->pControlChannel->sendXMLMessage(pCC->getXMLDocument());
 		delete pCC;
 	}
