@@ -116,7 +116,7 @@ public:
 	/**
 	 * This should be called by the FirstMix for every incoming Jap packet
 	 */
-	static SINT32 handleJapPacket(fmHashTableEntry *pHashEntry);
+	static SINT32 handleJapPacket(fmHashTableEntry *pHashEntry, bool a_bIsControlChannelPacket);
 
 	/**
 	 * Check if an IP address is temporarily blocked by the accounting instance.
@@ -166,7 +166,7 @@ private:
 	static SINT32 returnOK(tAiAccountingInfo* pAccInfo);
 	static SINT32 returnWait(tAiAccountingInfo* pAccInfo);
 	static SINT32 returnKickout(tAiAccountingInfo* pAccInfo);
-	static SINT32 returnHold(tAiAccountingInfo* pAccInfo);
+	static SINT32 returnHold(tAiAccountingInfo* pAccInfo, CAXMLErrorMessage* a_errorMessage);
 	
 	/**
 	 * The main loop of the AI thread - reads messages from the queue 
