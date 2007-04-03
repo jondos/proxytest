@@ -132,7 +132,7 @@ CAAccountingInstance::~CAAccountingInstance()
  * @return 3: fatal error, or timeout exceeded -> kick the user out
  * 
  */
-SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
+SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool a_bControlMessage)
 	{
 		ms_pInstance->m_Mutex.lock();
 		
@@ -153,7 +153,15 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 		if(pAccInfo->authFlags & (AUTH_FATAL_ERROR))
 		{
 			// there was an error earlier.
-			return returnKickout(pAccInfo);
+			if (a_bControlMessage)
+			{				
+				return returnKickout(pAccInfo);
+			}
+			else
+			{
+				ms_pInstance->m_Mutex.unlock();
+				return 1;
+			}
 		}	
 		
 		// do the following tests after a lot of Mix packets only (gain speed...)
