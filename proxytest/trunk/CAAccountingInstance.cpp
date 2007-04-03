@@ -165,28 +165,36 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 
 		ms_pInstance->m_settleHashtable->getMutex().lock();
 		entry = (AccountHashEntry*)ms_pInstance->m_settleHashtable->getValue(&(pAccInfo->accountNumber));				
-		if (entry != NULL)
+		if (entry)
 		{			
 			if (entry->authFlags & AUTH_INVALID_CC)
 			{
 				entry->authFlags &= ~AUTH_INVALID_CC;		
 				// insert confirmed bytes from current CC here						
-				//pAccInfo->confirmedBytes = entry->confirmedBytes;				
-				CAMsg::printMsg(LOG_DEBUG, "Found invalid CC!\n");
+				pAccInfo->confirmedBytes = entry->confirmedBytes;				
+			}
+			else if (entry->authFlags & AUTH_ACCOUNT_EMPTY)
+			{
+				entry->authFlags &= ~AUTH_ACCOUNT_EMPTY;
+				entry->authFlags |= AUTH_FATAL_ERROR;
+				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Account empty, kicking out user...\n");
 			}
 			else if (entry->authFlags & AUTH_INVALID_ACCOUNT)
 			{
 				entry->authFlags &= ~AUTH_INVALID_ACCOUNT;
-				ms_pInstance->m_settleHashtable->remove(&(pAccInfo->accountNumber));
-				delete entry;				
-				ms_pInstance->m_settleHashtable->getMutex().unlock();		
-				
-				CAMsg::printMsg(LOG_DEBUG, "Found invalid account! Kicking out user...\n");												
-				return returnHold(pAccInfo);
+				entry->authFlags |= AUTH_FATAL_ERROR;												
+				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Found invalid account! Kicking out user...\n");																
 			}
-			if (entry->authFlags == 0)
-			{
-				ms_pInstance->m_settleHashtable->remove(&(pAccInfo->accountNumber));
+			
+			if (entry->authFlags & AUTH_FATAL_ERROR || entry->authFlags == 0)
+			{							
+				ms_pInstance->m_settleHashtable->remove(&(pAccInfo->accountNumber));			
+				if (entry->authFlags & AUTH_FATAL_ERROR)
+				{
+					delete entry; //do not delete before the above usage....
+					ms_pInstance->m_settleHashtable->getMutex().unlock();
+					return returnHold(pAccInfo);		
+				}
 				delete entry;
 			}
 		}		
@@ -968,40 +976,49 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
 		
 		if ( pAccInfo != NULL)
+		{
+			pHashEntry->pAccountingInfo=NULL;
+			
+			//store prepaid bytes in database, so the user wont lose the prepaid amount by disconnecting
+			SINT32 prepaidBytes = pAccInfo->confirmedBytes - pAccInfo->transferredBytes;
+			CAAccountingDBInterface* dbInterface = new CAAccountingDBInterface(); //local variable, since method is static, but m_dbInterface is a member variable
+			AccountHashEntry* entry;
+			if(dbInterface->initDBConnection() != E_SUCCESS)
 			{
-				pHashEntry->pAccountingInfo=NULL;
-				
-				//store prepaid bytes in database, so the user wont lose the prepaid amount by disconnecting
-				SINT32 prepaidBytes = pAccInfo->confirmedBytes - pAccInfo->transferredBytes;
-				CAAccountingDBInterface* dbInterface = new CAAccountingDBInterface(); //local variable, since method is static, but m_dbInterface is a member variable
-				if(dbInterface->initDBConnection() != E_SUCCESS)
-				{
-					CAMsg::printMsg( LOG_ERR, "Could not connect to DB, preapid bytes were lost\n");
-					delete dbInterface;
-					return E_UNKNOWN;
-				}
-				
-				dbInterface->storePrepaidAmount(pAccInfo->accountNumber,prepaidBytes);
+				CAMsg::printMsg( LOG_ERR, "Could not connect to DB, preapid bytes were lost\n");
 				delete dbInterface;
-				
-				//free memory of pAccInfo
-				if ( pAccInfo->pPublicKey!=NULL )
-					{
-						delete pAccInfo->pPublicKey;
-					}
-				if ( pAccInfo->pChallenge!=NULL )
-					{
-						delete [] pAccInfo->pChallenge;
-					}
-				if ( pAccInfo->pstrBIID!=NULL )
-					{
-						delete [] pAccInfo->pstrBIID;
-					}
-				
-				delete pAccInfo;
-				pHashEntry->pAccountingInfo=NULL;
+				return E_UNKNOWN;
 			}
-			ms_pInstance->m_Mutex.unlock();
+			
+			dbInterface->storePrepaidAmount(pAccInfo->accountNumber,prepaidBytes);
+			delete dbInterface;
+			
+			ms_pInstance->m_settleHashtable->getMutex().lock();				
+			entry = (AccountHashEntry*)ms_pInstance->m_settleHashtable->remove(&(pAccInfo->accountNumber));
+			if (entry)
+			{
+				delete entry;				
+			}						
+			ms_pInstance->m_settleHashtable->getMutex().unlock();	
+			
+			//free memory of pAccInfo
+			if ( pAccInfo->pPublicKey!=NULL )
+			{
+				delete pAccInfo->pPublicKey;
+			}
+			if ( pAccInfo->pChallenge!=NULL )
+			{
+				delete [] pAccInfo->pChallenge;
+			}
+			if ( pAccInfo->pstrBIID!=NULL )
+			{
+				delete [] pAccInfo->pstrBIID;
+			}
+			
+			delete pAccInfo;
+			pHashEntry->pAccountingInfo=NULL;
+		}
+		ms_pInstance->m_Mutex.unlock();
 		
 		return E_SUCCESS;
 	}

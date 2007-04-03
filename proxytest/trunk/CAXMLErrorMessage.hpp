@@ -30,17 +30,38 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #include "CAUtil.hpp"
 #include "CAAbstractXMLEncodable.hpp"
+#include "CAXMLCostConfirmation.hpp"
 
 /**
  * This class encapsulates an error or success message.
  * In order to be indipendent from the HTTP protocol on the higher layer,
  * this is now used instead of http errorcodes.
  *
- * @author Bastian Voigt
+ * @author Bastian Voigt, Elmar Schraml
  */
 class CAXMLErrorMessage : public CAAbstractXMLEncodable
 	{
 		public:
+			//codes corresponding to various errors
+			static const UINT32 ERR_OK = 0;
+			static const UINT32 ERR_INTERNAL_SERVER_ERROR = 1;
+			static const UINT32 ERR_WRONG_FORMAT = 2;
+			static const UINT32 ERR_WRONG_DATA = 3;
+			static const UINT32 ERR_KEY_NOT_FOUND = 4;
+			static const UINT32 ERR_BAD_SIGNATURE = 5;
+			static const UINT32 ERR_BAD_REQUEST = 6;
+			static const UINT32 ERR_NO_ACCOUNTCERT = 7;
+			static const UINT32 ERR_NO_BALANCE = 8;
+			static const UINT32 ERR_NO_CONFIRMATION = 9;
+			static const UINT32 ERR_ACCOUNT_EMPTY = 10;
+			static const UINT32 ERR_CASCADE_LENGTH = 11;
+			static const UINT32 ERR_DATABASE_ERROR = 12;
+			static const UINT32 ERR_INSUFFICIENT_BALANCE = 13;
+			static const UINT32 ERR_NO_FLATRATE_OFFERED = 14;
+			static const UINT32 ERR_INVALID_CODE = 15;
+			static const UINT32 ERR_INVALID_CC = 16;
+			
+		
 			/**
 			* Creates an errorMessage object. The errorcode should be one of the
 			* above ERR_* constants.
@@ -54,6 +75,13 @@ class CAXMLErrorMessage : public CAAbstractXMLEncodable
 			* @param errorCode UINT32
 			*/
 			CAXMLErrorMessage(UINT32 errorCode);
+		
+		
+			/**
+			 * attaches an object to the error message 
+			*/
+			CAXMLErrorMessage(const UINT32 errorCode, UINT8* message, CAAbstractXMLEncodable* messageObject);
+
 		
 			/**
 			* Parses the string XML representation
@@ -73,28 +101,16 @@ class CAXMLErrorMessage : public CAAbstractXMLEncodable
 					return m_strErrMsg;
 				}
 
-			static const UINT32 ERR_OK = 0;
-			static const UINT32 ERR_INTERNAL_SERVER_ERROR = 1;
-			static const UINT32 ERR_WRONG_FORMAT = 2;
-			static const UINT32 ERR_WRONG_DATA = 3;
-			static const UINT32 ERR_KEY_NOT_FOUND = 4;
-			static const UINT32 ERR_BAD_SIGNATURE = 5;
-			static const UINT32 ERR_BAD_REQUEST = 6;
-			static const UINT32 ERR_NO_ACCOUNTCERT = 7;
-			static const UINT32 ERR_NO_BALANCE = 8;
-			static const UINT32 ERR_NO_CONFIRMATION = 9;
-			static const UINT32 ERR_ACCOUNT_EMPTY = 10;
-			static const UINT32 ERR_CASCADE_LENGTH = 11;
-			static const UINT32 ERR_DATABASE_ERROR = 12;
-			static const UINT32 ERR_INSUFFICIENT_BALANCE = 13;
-			static const UINT32 ERR_NO_FLATRATE_OFFERED = 14;
-			static const UINT32 ERR_INVALID_CODE = 15;
-			static const UINT32 ERR_INVALID_CC = 16;
+			void* getMessageObject()
+			{
+				return m_messageObject;
+			}
 
 		private: 
 			SINT32 setValues(DOM_Element &elemRoot);
 			UINT32 m_iErrorCode;
 			UINT8 * m_strErrMsg;
+			void* m_messageObject;
 	};
 
 #endif
