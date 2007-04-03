@@ -189,13 +189,13 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Found invalid account! Kicking out user...\n");																
 				err = new CAXMLErrorMessage(CAXMLErrorMessage::ERR_KEY_NOT_FOUND);
 			}
-			
+			/*
 			if (err)
 			{															
 				err->toXmlDocument(doc);			
 				delete err;
 				pAccInfo->pControlChannel->sendXMLMessage(doc);				
-			}
+			}*/
 			
 			if (entry->authFlags & AUTH_FATAL_ERROR || entry->authFlags == 0)
 			{							
