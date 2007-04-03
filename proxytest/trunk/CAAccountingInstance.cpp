@@ -142,8 +142,8 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			return 3;
 		}
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
-		AccountHashEntry* entry;
-		CAXMLErrorMessage* err;
+		AccountHashEntry* entry = NULL;
+		CAXMLErrorMessage* err = NULL;
 		
 		if (!a_bControlMessage)
 		{
