@@ -155,14 +155,14 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		if(pAccInfo->authFlags & (AUTH_FATAL_ERROR))
 		{
 			// there was an error earlier.
-			if (a_bControlMessage || pAccInfo->sessionPackets >= 5)
+			if (a_bControlMessage || pAccInfo->sessionPackets >= 10)
 			{				
 				return returnKickout(pAccInfo);
 			}
 			else
 			{
 				ms_pInstance->m_Mutex.unlock();
-				return 2;
+				return 1;
 			}
 		}			
 		
@@ -176,11 +176,14 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Gogo1!\n");
 
 		ms_pInstance->m_settleHashtable->getMutex().lock();
+		CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Gogo1:after lock!\n");
 		entry = (AccountHashEntry*)ms_pInstance->m_settleHashtable->getValue(&(pAccInfo->accountNumber));				
 		if (entry)
 		{						
+			CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Gogo1: in entry!\n");
 			if (entry->authFlags & AUTH_INVALID_CC)
 			{
+				CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Gogo1: invalid cc!\n");
 				entry->authFlags &= ~AUTH_INVALID_CC;		
 				// insert confirmed bytes from current CC here						
 				pAccInfo->transferredBytes +=  entry->confirmedBytes - pAccInfo->confirmedBytes;
@@ -188,6 +191,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			}
 			else if (entry->authFlags & AUTH_ACCOUNT_EMPTY)
 			{
+				CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Gogo1: acc empty!\n");
 				entry->authFlags &= ~AUTH_ACCOUNT_EMPTY;
 				entry->authFlags |= AUTH_FATAL_ERROR;
 				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Account empty, kicking out user...\n");				
@@ -203,6 +207,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			
 			if (err)
 			{			
+				CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Gogo1: send message...!\n");
 				DOM_Document doc;												
 				err->toXmlDocument(doc);			
 				delete err;
