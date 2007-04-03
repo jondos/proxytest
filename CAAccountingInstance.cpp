@@ -663,6 +663,10 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 			//#endif			
 			delete pCC;
 		}
+		else
+		{
+			CAMsg::printMsg(LOG_DEBUG, "Did not find cost confirmation for account %u in database.\n", pAccInfo->accountNumber);
+		}
 
 		// parse & set payment instance id
 		UINT32 len=256;
