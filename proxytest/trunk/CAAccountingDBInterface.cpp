@@ -415,7 +415,7 @@ SINT32 CAAccountingDBInterface::storePrepaidAmount(UINT64 accountNumber, SINT32 
 			return E_UNKNOWN;	
 		}
 		PQclear(result);
-		//CAMsg::printMsg(LOG_DEBUG, "Stored %d prepaid bytes for account nr. %u \n",prepaidBytes, tmp); 
+		CAMsg::printMsg(LOG_DEBUG, "Stored %d prepaid bytes for account nr. %s \n",prepaidBytes, tmp); 
 		return E_SUCCESS;
 	}
 /*

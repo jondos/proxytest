@@ -173,6 +173,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			ms_pInstance->m_Mutex.unlock();
 			return 1;	
 		}
+		CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Gogo!");
 
 		ms_pInstance->m_settleHashtable->getMutex().lock();
 		entry = (AccountHashEntry*)ms_pInstance->m_settleHashtable->getValue(&(pAccInfo->accountNumber));				
@@ -664,7 +665,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		{
 			UINT8 tmp[32];
 			print64(tmp,pAccInfo->accountNumber);
-			CAMsg::printMsg(LOG_DEBUG, "Did not find cost confirmation for account %u in database.\n", tmp);
+			CAMsg::printMsg(LOG_DEBUG, "Did not find cost confirmation for account %s in database.\n", tmp);
 		}
 
 		// parse & set payment instance id
