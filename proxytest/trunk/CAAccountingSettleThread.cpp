@@ -180,7 +180,14 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 							if (dbConn.storeCostConfirmation(*attachedCC) == E_SUCCESS)
 							{
 								CAMsg::printMsg(LOG_DEBUG, "SettleThread: stored last valid CC in DB\n");
-								dbConn.markAsSettled(attachedCC->getAccountNumber());
+								if (dbConn.markAsSettled(attachedCC->getAccountNumber()) == E_SUCCESS)
+								{ 
+									CAMsg::printMsg(LOG_ERR, "SettleThread: Costconfirmation for the account was marked as settled!\n");
+								}
+								else
+								{	
+									CAMsg::printMsg(LOG_ERR, "SettleThread: Could not mark an account as settled!\n");
+								}
 							}
 							else
 							{
