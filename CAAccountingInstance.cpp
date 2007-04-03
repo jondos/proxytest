@@ -143,6 +143,8 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 		}
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
 		AccountHashEntry* entry;
+		DOM_Document doc;
+		CAXMLErrorMessage* err;
 		
 		pAccInfo->transferredBytes += MIXPACKET_SIZE; // count the packet	
 		pAccInfo->sessionPackets++;
@@ -161,12 +163,11 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 			ms_pInstance->m_Mutex.unlock();
 			return 1;	
 		}
-		
 
 		ms_pInstance->m_settleHashtable->getMutex().lock();
 		entry = (AccountHashEntry*)ms_pInstance->m_settleHashtable->getValue(&(pAccInfo->accountNumber));				
 		if (entry)
-		{			
+		{						
 			if (entry->authFlags & AUTH_INVALID_CC)
 			{
 				entry->authFlags &= ~AUTH_INVALID_CC;		
@@ -177,13 +178,22 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 			{
 				entry->authFlags &= ~AUTH_ACCOUNT_EMPTY;
 				entry->authFlags |= AUTH_FATAL_ERROR;
-				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Account empty, kicking out user...\n");
+				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Account empty, kicking out user...\n");				
+				err = new CAXMLErrorMessage(CAXMLErrorMessage::ERR_ACCOUNT_EMPTY);
 			}
 			else if (entry->authFlags & AUTH_INVALID_ACCOUNT)
 			{
 				entry->authFlags &= ~AUTH_INVALID_ACCOUNT;
 				entry->authFlags |= AUTH_FATAL_ERROR;												
 				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Found invalid account! Kicking out user...\n");																
+				err = new CAXMLErrorMessage(CAXMLErrorMessage::ERR_KEY_NOT_FOUND);
+			}
+			
+			if (err)
+			{
+				err->toXmlDocument(doc);
+				delete err;
+				pAccInfo->pControlChannel->sendXMLMessage(doc);				
 			}
 			
 			if (entry->authFlags & AUTH_FATAL_ERROR || entry->authFlags == 0)
@@ -242,18 +252,6 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 					ms_pInstance->m_Mutex.unlock();
 					return 1;
 				}					
-			}
-	
-			if( pAccInfo->authFlags & AUTH_ACCOUNT_EMPTY )
-			{
-#ifdef DEBUG				
-				CAMsg::printMsg( LOG_DEBUG, "AccountingInstance: Account is empty. Closing connection.\n");
-#endif			
-				CAXMLErrorMessage msg(CAXMLErrorMessage::ERR_ACCOUNT_EMPTY);
-				DOM_Document doc;
-				msg.toXmlDocument(doc);
-				pAccInfo->pControlChannel->sendXMLMessage(doc);
-				return returnHold(pAccInfo); //no need to start goodwill timeout, setting AUTH_FATAL_ERROR will kick the user out next time 
 			}
 
 			//----------------------------------------------------------
@@ -382,7 +380,7 @@ SINT32 CAAccountingInstance::returnWait(tAiAccountingInfo* pAccInfo)
  */
 SINT32 CAAccountingInstance::returnKickout(tAiAccountingInfo* pAccInfo)
 {
-	CAMsg::printMsg(LOG_DEBUG, "AccountingInstance: should kick out user now...");
+	CAMsg::printMsg(LOG_DEBUG, "AccountingInstance: should kick out user now...\n");
 	ms_pInstance->m_Mutex.unlock();
 	return 3;
 }
