@@ -74,6 +74,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 		CAQueue q;
 		UINT32 size;
 		CASocketAddrINet biAddr;
+		bool bDeleteCC = false;
 	
 		CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread is running...\n");
 	
@@ -141,7 +142,6 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 						m_pAccountingSettleThread->m_accountingHashtable->getMutex().lock();						
 						UINT64 accountNumber = pCC->getAccountNumber();
 						entry = (AccountHashEntry*) (m_pAccountingSettleThread->m_accountingHashtable->getValue(&(accountNumber)));							
-						m_pAccountingSettleThread->m_accountingHashtable->getMutex().unlock();
 						
 						if (!entry)
 						{
@@ -149,14 +149,12 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 							entry->accountNumber = pCC->getAccountNumber();
 							entry->authFlags = 0;
 							entry->confirmedBytes = 0;
-							m_pAccountingSettleThread->m_accountingHashtable->getMutex().lock();
 							m_pAccountingSettleThread->m_accountingHashtable->put(&(entry->accountNumber), entry);							
 							entry = (AccountHashEntry*) (m_pAccountingSettleThread->m_accountingHashtable->getValue(&(entry->accountNumber)));
 							if (!entry)
 							{
 								CAMsg::printMsg(LOG_CRIT, "CAAccountingSettleThread: DID NOT FOUND ENTRY THAT  HAS BEEN STORED!\n");
 							}
-							m_pAccountingSettleThread->m_accountingHashtable->getMutex().unlock();
 						}						
 						
 						CAMsg::printMsg(LOG_ERR, "SettleThread: BI reported error no. %d (%s)\n",
@@ -165,7 +163,37 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 						if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_KEY_NOT_FOUND)
 						{
 							entry->authFlags |= AUTH_INVALID_ACCOUNT;
+							bDeleteCC = true;													
+						}
+						else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_ACCOUNT_EMPTY)
+						{
+							entry->authFlags |= AUTH_ACCOUNT_EMPTY;
+							bDeleteCC = true;
+						}
+						else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_INVALID_CC)
+						{							
+							entry->authFlags |= AUTH_INVALID_CC;
+							//get attached CC from error message
+							CAXMLCostConfirmation* attachedCC = (CAXMLCostConfirmation*) pErrMsg->getMessageObject();
+							CAMsg::printMsg(LOG_DEBUG, "Settle Thread: tried invalid CC, received last valid CC back\n");
+							//store it in DB
+							if (dbConn.storeCostConfirmation(*attachedCC) == E_SUCCESS)
+							{
+								CAMsg::printMsg(LOG_DEBUG, "SettleThread: stored last valid CC in DB\n");
+								dbConn.markAsSettled(attachedCC->getAccountNumber());
+							}
+							else
+							{
+								CAMsg::printMsg(LOG_ERR, "SettleThread: storing last valid CC in db failed!\n");	
+							}
 							
+							// set the confirmed bytes to the value of the CC got from the PI
+							entry->confirmedBytes = attachedCC->getTransferredBytes();									
+						}	
+						
+						m_pAccountingSettleThread->m_accountingHashtable->getMutex().unlock();				
+						if (bDeleteCC)
+						{
 							//delete costconfirmation to avoid trying to settle an unusable CC again and again					
 							if(dbConn.deleteCC(pCC->getAccountNumber()) == E_SUCCESS)
 							{
@@ -176,12 +204,6 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 								CAMsg::printMsg(LOG_ERR, "SettleThread: cost confirmation is unusable, but could not delete it from database\n");
 							}
 						}
-						else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_INVALID_CC)
-						{							
-							entry->authFlags |= AUTH_INVALID_CC;
-							// set the confirmed bytes to the value of the CC got from the PI
-							//entry->confirmedBytes = ??;									
-						}						
 					}
 					else //settling was OK, so mark account as settled
 					{

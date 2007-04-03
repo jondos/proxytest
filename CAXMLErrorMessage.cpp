@@ -62,7 +62,7 @@ CAXMLErrorMessage::CAXMLErrorMessage(UINT32 errorCode)
 			(UINT8*)"Costconfirmation is not valid, possible attempt at doublespending!"
 		};
 		m_iErrorCode = errorCode;
-		if (m_iErrorCode < 0 || m_iErrorCode >= 11)
+		if (m_iErrorCode < 0 || m_iErrorCode >= 16)
 		{
 			UINT8 defaultMsg[] = "Unknown Error";
 			m_strErrMsg = new UINT8[strlen((char *)defaultMsg)+1];
@@ -74,6 +74,18 @@ CAXMLErrorMessage::CAXMLErrorMessage(UINT32 errorCode)
 			strcpy((char *)m_strErrMsg, (char *)errors[errorCode]);
 		}
 	}
+
+
+
+CAXMLErrorMessage::CAXMLErrorMessage(const UINT32 errorCode, UINT8* message, CAAbstractXMLEncodable* messageObject)
+{
+	m_iErrorCode = errorCode;
+	m_strErrMsg = new UINT8[strlen((char *)message)+1];
+	strcpy((char *)m_strErrMsg, (char *)message);
+	
+	m_messageObject = messageObject;	
+}
+
 
 
 CAXMLErrorMessage::CAXMLErrorMessage(UINT8 * strXmlData)
@@ -105,6 +117,19 @@ SINT32 CAXMLErrorMessage::setValues(DOM_Element &elemRoot)
 	if(m_strErrMsg) delete [] m_strErrMsg;
 	m_strErrMsg = new UINT8[strGeneralLen+1];
 	strcpy((char*)m_strErrMsg, (char*)strGeneral);
+	
+	DOM_Element objectRootElem;
+	getDOMChildByName(elemRoot, (UINT8*)"MessageObject", objectRootElem, false);
+	
+	//due to lack of RTTI, we need to hardcode how to deal with each specific object type
+	if (m_iErrorCode == 16)
+	{
+		DOM_Element ccElem;
+		getDOMChildByName(objectRootElem,(UINT8*)"CC",ccElem,true);
+		m_messageObject = CAXMLCostConfirmation::getInstance(ccElem);	
+	}
+	//add code to parse other types of objects here when adding new error codes with corresponding objects
+	
 	return ERR_OK;
 }
 
@@ -113,6 +138,8 @@ CAXMLErrorMessage::~CAXMLErrorMessage()
 	{
 		if(m_strErrMsg)
 			delete [] m_strErrMsg;
+		if (m_messageObject != NULL)
+			delete m_messageObject;
 	}
 
 
@@ -121,6 +148,14 @@ SINT32 CAXMLErrorMessage::toXmlElement(DOM_Document &a_doc, DOM_Element &elemRoo
 		elemRoot = a_doc.createElement("ErrorMessage");
 		setDOMElementAttribute(elemRoot, "code", m_iErrorCode);
 		setDOMElementValue(elemRoot, m_strErrMsg);
+		DOM_Element objectRoot = a_doc.createElement("MessageObject");
+		DOM_Element objectElem;
+		//WARNING: this will fail for CAXMLCostConfirmation!!! (since it is not a subclass of CAAbstractXMLEncodable)
+		CAAbstractXMLEncodable* encodableObject = (CAAbstractXMLEncodable*) m_messageObject;
+		encodableObject->toXmlElement(a_doc,objectElem);
+		objectRoot.appendChild(objectElem);
+		elemRoot.appendChild(objectRoot);
+		
 		return E_SUCCESS;
 	}
 #endif //ONLY_LOCAL_PROXY
