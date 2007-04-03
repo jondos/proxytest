@@ -335,7 +335,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				pAccInfo->pControlChannel->sendXMLMessage(doc);
 //#ifdef DEBUG	
 				CAMsg::printMsg(LOG_DEBUG, "CC request sent for %u bytes \n",bytesToConfirm);
-				CAMsg::printMsg(LOG_DEBUG, "transferrred bytes: %u bytes \n",transferredBytes);
+				CAMsg::printMsg(LOG_DEBUG, "transferrred bytes: %u bytes \n",pAccInfo->transferredBytes);				
 				CAMsg::printMsg(LOG_DEBUG, "prepaid Interval: %u \n",prepaidInterval);	
 				UINT32 debuglen = 3000;
 				UINT8 debugout[3000];
