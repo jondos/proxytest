@@ -394,10 +394,13 @@ SINT32 CAAccountingInstance::returnKickout(tAiAccountingInfo* pAccInfo)
 SINT32 CAAccountingInstance::returnHold(tAiAccountingInfo* pAccInfo, CAXMLErrorMessage* a_errorMessage)
 {
 	if (a_errorMessage)
-	{
+	{		
 		DOM_Document doc;
+		CAMsg::printMsg(LOG_DEBUG, "Preparing message\n");
 		a_errorMessage->toXmlDocument(doc);			
+		CAMsg::printMsg(LOG_DEBUG, "Deleting message\n");
 		delete a_errorMessage;
+		CAMsg::printMsg(LOG_DEBUG, "Sending message\n");
 		pAccInfo->pControlChannel->sendXMLMessage(doc);	
 	}
 	pAccInfo->authFlags |= AUTH_FATAL_ERROR;
