@@ -832,12 +832,15 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 	if(pCC!=NULL)
 	{
 		pAccInfo->transferredBytes += pCC->getTransferredBytes();
+		pAccInfo->confirmedBytes = pCC->getTransferredBytes();
 		#ifdef DEBUG
 			UINT8 tmp[32];
 			print64(tmp,pAccInfo->transferredBytes);
 			CAMsg::printMsg(LOG_DEBUG, "TransferredBytes is now %s\n", tmp);
+			UINT8 tmp[32];
+			print64(tmp,pAccInfo->confirmedBytes);
+			CAMsg::printMsg(LOG_DEBUG, "ConfirmedBytes is now %s\n", tmp);			
 		#endif
-		pAccInfo->confirmedBytes = pCC->getTransferredBytes();
 		pAccInfo->pControlChannel->sendXMLMessage(pCC->getXMLDocument());
 		delete pCC;
 	}
