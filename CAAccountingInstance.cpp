@@ -904,7 +904,7 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,D
 			CAMsg::printMsg( LOG_DEBUG, "CostConfirmation Signature is OK.\n");
 		}
 	#endif
-	m_Mutex.unlock();
+	//m_Mutex.unlock();
 	
 /************ TODO: check pricecerthash with isAI-attribute instead *******
 	// parse and check AI name
@@ -924,7 +924,7 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,D
 ********************/
 
 	// parse & set transferredBytes
-	m_Mutex.lock();
+	//m_Mutex.lock();
 	//when using Prepayment, this check is outdated, but left in to notice the most crude errors/cheats
 	//The CC's transferredBytes should be equivalent to 
 	//AccInfo's confirmed bytes + the Config's PrepaidInterval - the number of bytes transferred between
