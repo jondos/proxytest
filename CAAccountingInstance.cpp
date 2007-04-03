@@ -155,7 +155,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		if(pAccInfo->authFlags & (AUTH_FATAL_ERROR))
 		{
 			// there was an error earlier.
-			if (a_bControlMessage || pAccInfo->sessionPackets >= 10)
+			if (a_bControlMessage || pAccInfo->sessionPackets >= 4)
 			{				
 				return returnKickout(pAccInfo);
 			}
@@ -223,8 +223,6 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		}		
 		ms_pInstance->m_settleHashtable->getMutex().unlock();	
 		
-		CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Gogo2!\n");
-		
 		//kick user out if a timeout was set and has since run out
 		if (pAccInfo->authFlags & (AUTH_TIMEOUT_STARTED) &&
 		    time(NULL) > pAccInfo->goodwillTimeoutStarttime + GOODWILL_TIMEOUT)
@@ -235,16 +233,12 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				return returnHold(pAccInfo);				
 		}	
 	
-		CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Gogo3!\n");
-	
 		if(!(pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT) )
 		{ 
 			return returnWait(pAccInfo); //dont let the packet through for now, but still wait for an account cert
 		}
 		else 
 		{
-			
-			CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Gogo4!\n");
 			// authentication process not properly finished
 			if( pAccInfo->authFlags & AUTH_FAKE )
 			{
