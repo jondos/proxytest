@@ -191,8 +191,11 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 			
 			if (err)
 			{
+				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Creating doc\n");																
 				err->toXmlDocument(doc);
+				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Deleting err\n");				
 				delete err;
+				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Sending message\n");	
 				pAccInfo->pControlChannel->sendXMLMessage(doc);				
 			}
 			
