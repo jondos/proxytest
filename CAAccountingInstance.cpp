@@ -179,7 +179,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			ms_pInstance->m_Mutex.unlock();
 			return 1;	
 		}
-		CAMsg::printMsg( LOG_DEBUG, "Gogo!\n");
+	
 		ms_pInstance->m_settleHashtable->getMutex().lock();
 		entry = (AccountHashEntry*)ms_pInstance->m_settleHashtable->getValue(&(pAccInfo->accountNumber));				
 		if (entry)
@@ -268,13 +268,13 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			//prepaid Bytes as the difference will be much smaller, but might be negative, so we cast to signed int
 			UINT64 prepaidBytesUnsigned = (UINT64) (pAccInfo->confirmedBytes - pAccInfo->transferredBytes);
 			SINT32 prepaidBytes = (SINT32) prepaidBytesUnsigned;
-#ifdef DEBUG		
+//#ifdef DEBUG		
 			UINT64 confirmedBytes = pAccInfo->confirmedBytes;
 			UINT64 transferred = pAccInfo->transferredBytes;
 			CAMsg::printMsg(LOG_ERR, "Confirmed: %u \n",confirmedBytes);
 			CAMsg::printMsg(LOG_ERR, "transferrred: %u \n",transferred);	
 			CAMsg::printMsg(LOG_ERR, "prepaidBytes: %d \n",prepaidBytes);
-#endif					
+//#endif					
 			if (prepaidBytes <= (SINT32) ms_pInstance->m_iHardLimitBytes)
 			{
 #ifdef DEBUG					
