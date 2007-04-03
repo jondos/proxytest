@@ -173,7 +173,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			ms_pInstance->m_Mutex.unlock();
 			return 1;	
 		}
-		CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Gogo!");
+		CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Gogo!\n");
 
 		ms_pInstance->m_settleHashtable->getMutex().lock();
 		entry = (AccountHashEntry*)ms_pInstance->m_settleHashtable->getValue(&(pAccInfo->accountNumber));				
