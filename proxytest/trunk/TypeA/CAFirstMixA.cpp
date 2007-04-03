@@ -194,7 +194,7 @@ SINT32 CAFirstMixA::loop()
 												if(ret == 3) 
 													{
 														// this jap is evil! terminate connection and add IP to blacklist
-														CAMsg::printMsg(LOG_DEBUG, "CAFirstMixA: Detected evil Jap.. closing connection! Removing IP..\n\n", ret);
+														CAMsg::printMsg(LOG_DEBUG, "CAFirstMixA: Detected evil Jap.. closing connection! Removing IP..\n", ret);
 														fmChannelListEntry* pEntry;
 														pEntry=m_pChannelList->getFirstChannelForSocket(pMuxSocket);
 														while(pEntry!=NULL)

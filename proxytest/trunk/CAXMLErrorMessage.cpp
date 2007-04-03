@@ -97,6 +97,7 @@ CAXMLErrorMessage::CAXMLErrorMessage(UINT8 * strXmlData)
 	DOM_Document doc = oParser.getDocument();
 	DOM_Element elemRoot = doc.getDocumentElement();
 	m_strErrMsg=NULL;
+	m_messageObject = NULL;
 	setValues(elemRoot);
 }
 
