@@ -328,12 +328,12 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
                 UINT64 confirmedBytes = pAccInfo->confirmedBytes;
                 UINT64 bytesToConfirm = confirmedBytes + (prepaidInterval * 1024); 				
 				makeCCRequest(pAccInfo->accountNumber, bytesToConfirm, doc);
-#ifdef DEBUG				
+//#ifdef DEBUG				
 				CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending first CC request for account nr %u.\n", pAccInfo->accountNumber);
-#endif					
+//#endif					
 				pAccInfo->authFlags |= AUTH_SENT_CC_REQUEST;
 				pAccInfo->pControlChannel->sendXMLMessage(doc);
-#ifdef DEBUG	
+//#ifdef DEBUG	
 				CAMsg::printMsg(LOG_DEBUG, "CC request sent for %u bytes \n",bytesToConfirm);
 				CAMsg::printMsg(LOG_DEBUG, "transferrred bytes: %u bytes \n",transferredBytes);
 				CAMsg::printMsg(LOG_DEBUG, "prepaid Interval: %u \n",prepaidInterval);	
@@ -342,7 +342,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				DOM_Output::dumpToMem(doc,debugout,&debuglen);
 				debugout[debuglen] = 0;			
 				CAMsg::printMsg(LOG_DEBUG, "the CC sent looks like this: %s \n",debugout);
-#endif						
+//#endif						
 				return returnOK(pAccInfo);
 			}// end of soft limit exceeded
 
@@ -711,8 +711,8 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		}
 		
 	CAMsg::printMsg(LOG_DEBUG, "Checking database for previously prepaid bytes...\n");
-	SINT32 prepaidAmount = m_dbInterface->getPrepaidAmount(pAccInfo->accountNumber);
-	//SINT32 prepaidAmount = 0;
+	//SINT32 prepaidAmount = m_dbInterface->getPrepaidAmount(pAccInfo->accountNumber);
+	SINT32 prepaidAmount = 0;
 	if (prepaidAmount > 0)
 	{
 		pAccInfo->confirmedBytes += prepaidAmount;	
