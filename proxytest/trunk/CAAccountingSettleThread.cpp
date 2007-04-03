@@ -110,7 +110,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: DB connections established!\n");
 				#endif
 				dbConn.getUnsettledCostConfirmations(q);
-				CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: dbConn.getUnsettledCostConfirmations(q) finished!\n");
+				//CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: dbConn.getUnsettledCostConfirmations(q) finished!\n");
 				while(!q.isEmpty())
 				{
 					// get the next CC from the queue
