@@ -382,6 +382,7 @@ SINT32 CAAccountingInstance::returnWait(tAiAccountingInfo* pAccInfo)
 SINT32 CAAccountingInstance::returnKickout(tAiAccountingInfo* pAccInfo)
 {
 	CAMsg::printMsg(LOG_DEBUG, "AccountingInstance: should kick out user now...\n");
+	pAccInfo->transferredBytes = pAccInfo->confirmedBytes;
 	ms_pInstance->m_Mutex.unlock();
 	return 3;
 }
