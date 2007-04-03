@@ -278,13 +278,13 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			//prepaid Bytes as the difference will be much smaller, but might be negative, so we cast to signed int
 			UINT64 prepaidBytesUnsigned = (UINT64) (pAccInfo->confirmedBytes - pAccInfo->transferredBytes);
 			SINT32 prepaidBytes = (SINT32) prepaidBytesUnsigned;
-#ifdef DEBUG		
+//#ifdef DEBUG		
 			UINT64 confirmedBytes = pAccInfo->confirmedBytes;
 			UINT64 transferred = pAccInfo->transferredBytes;
 			CAMsg::printMsg(LOG_ERR, "Confirmed: %u \n",confirmedBytes);
 			CAMsg::printMsg(LOG_ERR, "transferrred: %u \n",transferred);	
 			CAMsg::printMsg(LOG_ERR, "prepaidBytes: %d \n",prepaidBytes);
-#endif					
+//#endif					
 			if (prepaidBytes <= (SINT32) ms_pInstance->m_iHardLimitBytes)
 			{
 #ifdef DEBUG					
@@ -338,24 +338,26 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
                 //send CC to jap
                 UINT32 prepaidInterval;
                 options.getPrepaidIntervalKbytes(&prepaidInterval);
-                UINT64 transferredBytes = pAccInfo->transferredBytes;
-                UINT64 bytesToConfirm = transferredBytes + (prepaidInterval * 1024); 				
+                UINT64 confirmedBytes = pAccInfo->confirmedBytes;
+                UINT64 bytesToConfirm = confirmedBytes + (prepaidInterval * 1024); 				
 				makeCCRequest(pAccInfo->accountNumber, bytesToConfirm, doc);
 #ifdef DEBUG				
 				CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending first CC request for account nr %u.\n", pAccInfo->accountNumber);
 #endif					
 				pAccInfo->authFlags |= AUTH_SENT_CC_REQUEST;
 				pAccInfo->pControlChannel->sendXMLMessage(doc);
-#ifdef DEBUG	
+//#ifdef DEBUG	
 				CAMsg::printMsg(LOG_DEBUG, "CC request sent for %u bytes \n",bytesToConfirm);
-				CAMsg::printMsg(LOG_DEBUG, "transferrred bytes: %u bytes \n",transferredBytes);
+				CAMsg::printMsg(LOG_DEBUG, "transferrred bytes: %u bytes \n",pAccInfo->transferredBytes);
 				CAMsg::printMsg(LOG_DEBUG, "prepaid Interval: %u \n",prepaidInterval);	
+				/*
 				UINT32 debuglen = 3000;
 				UINT8 debugout[3000];
 				DOM_Output::dumpToMem(doc,debugout,&debuglen);
 				debugout[debuglen] = 0;			
 				CAMsg::printMsg(LOG_DEBUG, "the CC sent looks like this: %s \n",debugout);
-#endif						
+				*/
+//#endif						
 				return returnOK(pAccInfo);
 			}// end of soft limit exceeded
 
@@ -397,6 +399,7 @@ SINT32 CAAccountingInstance::returnKickout(tAiAccountingInfo* pAccInfo)
 {
 	CAMsg::printMsg(LOG_DEBUG, "AccountingInstance: should kick out user now...\n");
 	pAccInfo->sessionPackets = 0;
+	pAccInfo->transferredBytes = pAccInfo->confirmedBytes;
 	ms_pInstance->m_Mutex.unlock();
 	return 3;
 }
@@ -1001,6 +1004,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			{
 				CAMsg::printMsg( LOG_ERR, "Could not connect to DB, preapid bytes were lost\n");
 				delete dbInterface;
+				ms_pInstance->m_Mutex.unlock();
 				return E_UNKNOWN;
 			}
 			
