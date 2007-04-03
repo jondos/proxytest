@@ -172,6 +172,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 			{
 				entry->authFlags &= ~AUTH_INVALID_CC;		
 				// insert confirmed bytes from current CC here						
+				pAccInfo->transferredBytes +=  entry->confirmedBytes - pAccInfo->confirmedBytes;
 				pAccInfo->confirmedBytes = entry->confirmedBytes;				
 			}
 			else if (entry->authFlags & AUTH_ACCOUNT_EMPTY)
