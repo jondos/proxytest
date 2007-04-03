@@ -116,7 +116,7 @@ public:
 	/**
 	 * This should be called by the FirstMix for every incoming Jap packet
 	 */
-	static SINT32 handleJapPacket(fmHashTableEntry *pHashEntry);
+	static SINT32 handleJapPacket(fmHashTableEntry *pHashEntry, bool a_bControlMessage);
 
 	/**
 	 * Check if an IP address is temporarily blocked by the accounting instance.
