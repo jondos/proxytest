@@ -324,8 +324,8 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
                 //send CC to jap
                 UINT32 prepaidInterval;
                 options.getPrepaidIntervalKbytes(&prepaidInterval);
-                UINT64 transferredBytes = pAccInfo->transferredBytes;
-                UINT64 bytesToConfirm = transferredBytes + (prepaidInterval * 1024); 				
+                UINT64 confirmedBytes = pAccInfo->confirmedBytes;
+                UINT64 bytesToConfirm = confirmedBytes + (prepaidInterval * 1024); 				
 				makeCCRequest(pAccInfo->accountNumber, bytesToConfirm, doc);
 #ifdef DEBUG				
 				CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending first CC request for account nr %u.\n", pAccInfo->accountNumber);
@@ -706,7 +706,8 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		}
 		
 	CAMsg::printMsg(LOG_DEBUG, "Checking database for previously prepaid bytes...\n");
-	SINT32 prepaidAmount = m_dbInterface->getPrepaidAmount(pAccInfo->accountNumber);
+	//SINT32 prepaidAmount = m_dbInterface->getPrepaidAmount(pAccInfo->accountNumber);
+	SINT32 prepaidAmount = 0;
 	if (prepaidAmount > 0)
 	{
 		pAccInfo->confirmedBytes += prepaidAmount;	
