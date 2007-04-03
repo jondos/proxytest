@@ -367,7 +367,7 @@ SINT32 CAAccountingDBInterface::markAsSettled(UINT64 accountNumber)
 	
 SINT32 CAAccountingDBInterface::deleteCC(UINT64 accountNumber)
 {
-	const char* deleteQuery = "DELETE FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER = %s";
+	const char* deleteQuery = "DELETE FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER = %s AND SETTLED = 0";
 	UINT8* finalQuery;
 	PGresult* result;
 	
@@ -415,7 +415,9 @@ SINT32 CAAccountingDBInterface::storePrepaidAmount(UINT64 accountNumber, SINT32 
 			return E_UNKNOWN;	
 		}
 		PQclear(result);
-		CAMsg::printMsg(LOG_DEBUG, "Stored %d prepaid bytes for account nr. %u \n",prepaidBytes, accountNumber); 
+		UINT8 tmp[32];
+		print64(tmp,accountNumber);
+		CAMsg::printMsg(LOG_DEBUG, "Stored %d prepaid bytes for account nr. %u \n",prepaidBytes, tmp); 
 		return E_SUCCESS;
 	}
 /*
