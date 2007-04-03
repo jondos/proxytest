@@ -129,6 +129,10 @@ SINT32 CAXMLErrorMessage::setValues(DOM_Element &elemRoot)
 		getDOMChildByName(objectRootElem,(UINT8*)"CC",ccElem,true);
 		m_messageObject = CAXMLCostConfirmation::getInstance(ccElem);	
 	}
+	else
+	{
+		m_messageObject = NULL;
+	}
 	//add code to parse other types of objects here when adding new error codes with corresponding objects
 	
 	return ERR_OK;
@@ -149,9 +153,10 @@ SINT32 CAXMLErrorMessage::toXmlElement(DOM_Document &a_doc, DOM_Element &elemRoo
 		elemRoot = a_doc.createElement("ErrorMessage");
 		setDOMElementAttribute(elemRoot, "code", m_iErrorCode);
 		setDOMElementValue(elemRoot, m_strErrMsg);
-		
+		CAMsg::printMsg(LOG_DEBUG, "Entering error message\n");
 		if (m_messageObject)
 		{
+			CAMsg::printMsg(LOG_DEBUG, "Preparing message object\n");
 			DOM_Element objectRoot = a_doc.createElement("MessageObject");
 			DOM_Element objectElem;
 			//WARNING: this will fail for CAXMLCostConfirmation!!! (since it is not a subclass of CAAbstractXMLEncodable)
