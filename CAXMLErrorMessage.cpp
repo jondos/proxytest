@@ -35,6 +35,7 @@ CAXMLErrorMessage::CAXMLErrorMessage(const UINT32 errorCode, UINT8 * message)
 		m_iErrorCode = errorCode;
 		m_strErrMsg = new UINT8[strlen((char *)message)+1];
 		strcpy((char *)m_strErrMsg, (char *)message);
+		m_messageObject = NULL;
 	}
 
 
@@ -73,6 +74,7 @@ CAXMLErrorMessage::CAXMLErrorMessage(UINT32 errorCode)
 			m_strErrMsg = new UINT8[strlen((char *)errors[errorCode])+1];
 			strcpy((char *)m_strErrMsg, (char *)errors[errorCode]);
 		}
+		m_messageObject = NULL;
 	}
 
 

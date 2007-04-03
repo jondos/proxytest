@@ -143,7 +143,6 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		}
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
 		AccountHashEntry* entry;
-		DOM_Document doc;
 		CAXMLErrorMessage* err;
 		
 		if (!a_bControlMessage)
@@ -203,13 +202,14 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Found invalid account! Kicking out user...\n");																
 				err = new CAXMLErrorMessage(CAXMLErrorMessage::ERR_KEY_NOT_FOUND);
 			}
-			/*
+			
 			if (err)
-			{															
+			{			
+				DOM_Document doc;												
 				err->toXmlDocument(doc);			
 				delete err;
 				pAccInfo->pControlChannel->sendXMLMessage(doc);				
-			}*/
+			}
 			
 			if (entry->authFlags & AUTH_FATAL_ERROR || entry->authFlags == 0)
 			{							
@@ -639,15 +639,30 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		// parse & set accountnumber
 		if ( getDOMChildByName( root, (UINT8 *)"AccountNumber", elGeneral, false ) != E_SUCCESS ||
 					getDOMElementValue( elGeneral, pAccInfo->accountNumber ) != E_SUCCESS)
-			{
-				CAMsg::printMsg( LOG_ERR, "AccountCertificate has wrong or no accountnumber. Ignoring\n");
-				CAXMLErrorMessage err(CAXMLErrorMessage::ERR_WRONG_FORMAT);
-				DOM_Document errDoc;
-				err.toXmlDocument(errDoc);
-				pAccInfo->pControlChannel->sendXMLMessage(errDoc);
-				m_Mutex.unlock();
-				return ;
-			}
+		{
+			CAMsg::printMsg( LOG_ERR, "AccountCertificate has wrong or no accountnumber. Ignoring\n");
+			CAXMLErrorMessage err(CAXMLErrorMessage::ERR_WRONG_FORMAT);
+			DOM_Document errDoc;
+			err.toXmlDocument(errDoc);
+			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
+			m_Mutex.unlock();
+			return ;
+		}
+		
+		// fetch cost confirmation from last session if available, and retrieve information
+		CAXMLCostConfirmation * pCC = NULL;
+		m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, &pCC);
+		if(pCC!=NULL)
+		{
+			pAccInfo->transferredBytes += pCC->getTransferredBytes();
+			pAccInfo->confirmedBytes = pCC->getTransferredBytes();
+			#ifdef DEBUG
+				UINT8 tmp[32];
+				print64(tmp,pAccInfo->transferredBytes);
+				CAMsg::printMsg(LOG_DEBUG, "TransferredBytes is now %s\n", tmp);
+			#endif			
+			delete pCC;
+		}
 
 		// parse & set payment instance id
 		UINT32 len=256;
@@ -836,13 +851,6 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 	m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, &pCC);
 	if(pCC!=NULL)
 	{
-		pAccInfo->transferredBytes += pCC->getTransferredBytes();
-		#ifdef DEBUG
-			UINT8 tmp[32];
-			print64(tmp,pAccInfo->transferredBytes);
-			CAMsg::printMsg(LOG_DEBUG, "TransferredBytes is now %s\n", tmp);
-		#endif
-		pAccInfo->confirmedBytes = pCC->getTransferredBytes();
 		pAccInfo->pControlChannel->sendXMLMessage(pCC->getXMLDocument());
 		delete pCC;
 	}
