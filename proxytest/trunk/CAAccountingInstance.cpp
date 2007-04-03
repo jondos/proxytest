@@ -146,14 +146,17 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		DOM_Document doc;
 		CAXMLErrorMessage* err;
 		
-		pAccInfo->transferredBytes += MIXPACKET_SIZE; // count the packet	
-		pAccInfo->sessionPackets++;
+		if (!a_bControlMessage)
+		{
+			pAccInfo->transferredBytes += MIXPACKET_SIZE; // count the packet	
+			pAccInfo->sessionPackets++;
+		}
 		
 		//kick user out after previous error
 		if(pAccInfo->authFlags & (AUTH_FATAL_ERROR))
 		{
 			// there was an error earlier.
-			if (a_bControlMessage)
+			if (a_bControlMessage || pAccInfo->sessionPackets >= 5)
 			{				
 				return returnKickout(pAccInfo);
 			}
@@ -163,6 +166,9 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				return 1;
 			}
 		}	
+		
+		
+		
 		
 		// do the following tests after a lot of Mix packets only (gain speed...)
 		if (pAccInfo->sessionPackets % PACKETS_BEFORE_NEXT_CHECK != 1)
@@ -390,6 +396,7 @@ SINT32 CAAccountingInstance::returnWait(tAiAccountingInfo* pAccInfo)
 SINT32 CAAccountingInstance::returnKickout(tAiAccountingInfo* pAccInfo)
 {
 	CAMsg::printMsg(LOG_DEBUG, "AccountingInstance: should kick out user now...\n");
+	pAccInfo->sessionPackets = 0;
 	ms_pInstance->m_Mutex.unlock();
 	return 3;
 }
