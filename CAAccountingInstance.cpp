@@ -132,7 +132,7 @@ CAAccountingInstance::~CAAccountingInstance()
  * @return 3: fatal error, or timeout exceeded -> kick the user out
  * 
  */
-SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
+SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool a_bIsControlChannelPacket)
 	{
 		ms_pInstance->m_Mutex.lock();
 		
@@ -142,19 +142,35 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 			return 3;
 		}
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
-		AccountHashEntry* entry;
-		DOM_Document doc;
-		CAXMLErrorMessage* err;
+		AccountHashEntry* entry;		
+		CAXMLErrorMessage* err = NULL;
 		
-		pAccInfo->transferredBytes += MIXPACKET_SIZE; // count the packet	
-		pAccInfo->sessionPackets++;
+		
 		
 		//kick user out after previous error
 		if(pAccInfo->authFlags & (AUTH_FATAL_ERROR))
 		{
-			// there was an error earlier.
-			return returnKickout(pAccInfo);
+			// let the channel error message through
+			if (a_bIsControlChannelPacket) 
+			{
+				// there was an error earlier.
+				return returnKickout(pAccInfo);
+			}
+			else
+			{
+				ms_pInstance->m_Mutex.unlock();
+				return 2;
+			}
 		}	
+		
+		if (a_bIsControlChannelPacket) 
+		{
+			ms_pInstance->m_Mutex.unlock();
+			return 1;
+		}
+		
+		pAccInfo->transferredBytes += MIXPACKET_SIZE; // count the packet	
+		pAccInfo->sessionPackets++;
 		
 		// do the following tests after a lot of Mix packets only (gain speed...)
 		if (pAccInfo->sessionPackets % PACKETS_BEFORE_NEXT_CHECK != 1)
@@ -189,13 +205,6 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 				err = new CAXMLErrorMessage(CAXMLErrorMessage::ERR_KEY_NOT_FOUND);
 			}
 			
-			if (err)
-			{															
-				err->toXmlDocument(doc);			
-				delete err;
-				pAccInfo->pControlChannel->sendXMLMessage(doc);				
-			}
-			
 			if (entry->authFlags & AUTH_FATAL_ERROR || entry->authFlags == 0)
 			{							
 				ms_pInstance->m_settleHashtable->remove(&(pAccInfo->accountNumber));			
@@ -203,7 +212,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 				{
 					delete entry; //do not delete before the above usage....
 					ms_pInstance->m_settleHashtable->getMutex().unlock();
-					return returnHold(pAccInfo);		
+					return returnHold(pAccInfo, err);		
 				}
 				delete entry;
 			}
@@ -218,7 +227,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 #ifdef DEBUG							
 				CAMsg::printMsg(LOG_DEBUG, "Goodwill timeout has runout, will kick out user now...\n");
 #endif							
-				return returnHold(pAccInfo);				
+				return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_NO_ACCOUNTCERT));				
 		}	
 	
 		if(!(pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT) )
@@ -233,19 +242,15 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 #ifdef DEBUG				
 				CAMsg::printMsg( LOG_DEBUG, "AccountingInstance: AUTH_FAKE flag is set ... byebye\n");
 #endif				
-				return returnHold(pAccInfo);
+				return returnHold(pAccInfo, NULL);
 			}
 			if( !(pAccInfo->authFlags & AUTH_ACCOUNT_OK) )
 			{
 				// we did not yet receive the response to the challenge...
 				if(time(NULL) >= pAccInfo->lastRequestSeconds + REQUEST_TIMEOUT)
 				{
-					CAMsg::printMsg( LOG_DEBUG, "AccountingInstance: Jap refused to send response to challenge (Request Timeout)...\n");
-					CAXMLErrorMessage msg(CAXMLErrorMessage::ERR_NO_ACCOUNTCERT);
-					DOM_Document doc;
-					msg.toXmlDocument(doc);
-					pAccInfo->pControlChannel->sendXMLMessage(doc);
-					return returnHold(pAccInfo); //timeout over -> kick out
+					CAMsg::printMsg( LOG_DEBUG, "AccountingInstance: Jap refused to send response to challenge (Request Timeout)...\n");					
+					return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_NO_ACCOUNTCERT)); //timeout over -> kick out
 				}
 				else //timeout still running
 				{
@@ -291,12 +296,8 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry)
 									"to send cost confirmation (HARDLIMIT EXCEEDED).\n");
 #endif																						
 					ms_pInstance->m_pIPBlockList->insertIP( pHashEntry->peerIP );
-					CAXMLErrorMessage msg(CAXMLErrorMessage::ERR_NO_CONFIRMATION);
-					DOM_Document doc;
-					msg.toXmlDocument(doc);
-					pAccInfo->pControlChannel->sendXMLMessage(doc);
 					pAccInfo->lastHardLimitSeconds = 0;
-					return returnHold(pAccInfo);
+					return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_NO_CONFIRMATION));
 				}
 			}
 			else
@@ -390,11 +391,19 @@ SINT32 CAAccountingInstance::returnKickout(tAiAccountingInfo* pAccInfo)
  * (Usage: send an error message before kicking out the user:
  * sets AUTH_FATAL_ERROR )
  */
-SINT32 CAAccountingInstance::returnHold(tAiAccountingInfo* pAccInfo)
+SINT32 CAAccountingInstance::returnHold(tAiAccountingInfo* pAccInfo, CAXMLErrorMessage* a_errorMessage)
 {
+	if (a_errorMessage)
+	{
+		DOM_Document doc;
+		a_errorMessage->toXmlDocument(doc);			
+		delete a_errorMessage;
+		pAccInfo->pControlChannel->sendXMLMessage(doc);	
+	}
 	pAccInfo->authFlags |= AUTH_FATAL_ERROR;
+	pAccInfo->sessionPackets = 0;
 	ms_pInstance->m_Mutex.unlock();
-	return 1;
+	return 2;
 }
 
 

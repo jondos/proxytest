@@ -493,7 +493,10 @@ NEXT_USER:
                           if(pfmHashEntry->bCountPacket)
                             {
                               // count packet for payment
-                              CAAccountingInstance::handleJapPacket(pfmHashEntry);
+								if (CAAccountingInstance::handleJapPacket(pfmHashEntry) == 2)
+								{
+									goto NEXT_USER_WRITING;
+								}
                             }
                         #endif
                         #ifdef DELAY_USERS
@@ -515,9 +518,11 @@ NEXT_USER:
 #endif
                   //todo error handling
 #ifdef HAVE_EPOLL
+NEXT_USER_WRITING:
             pfmHashEntry=(fmHashTableEntry*)m_psocketgroupUsersWrite->getNextSignaledSocketData();
 #else
               }//if is socket signaled
+NEXT_USER_WRITING:              
             pfmHashEntry=m_pChannelList->getNext();
 #endif
           }

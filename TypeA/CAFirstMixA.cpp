@@ -175,7 +175,7 @@ SINT32 CAFirstMixA::loop()
 													}
 													else
 													{
-														CAMsg::printMsg(LOG_DEBUG, "Packet is invalid and could not be processed!\n");
+														CAMsg::printMsg(LOG_DEBUG, "Control channel packet is invalid and could not be processed!\n");
 														ret = 3;
 													}
 												}
@@ -183,42 +183,13 @@ SINT32 CAFirstMixA::loop()
 												// payment code added by Bastian Voigt
 												if (ret == 0)
 												{
-													ret = CAAccountingInstance::handleJapPacket(pHashEntry);  
+													ret = CAAccountingInstance::handleJapPacket(pHashEntry, false);  
 												}
 												if (ret == 2)
 												{
 													goto NEXT_USER;
 												}		
-#endif													
-											
-												if(ret == 3) 
-													{
-														// this jap is evil! terminate connection and add IP to blacklist
-														CAMsg::printMsg(LOG_DEBUG, "CAFirstMixA: Detected evil Jap.. closing connection! Removing IP..\n", ret);
-														fmChannelListEntry* pEntry;
-														pEntry=m_pChannelList->getFirstChannelForSocket(pMuxSocket);
-														while(pEntry!=NULL)
-															{
-																getRandom(pMixPacket->data,DATA_SIZE);
-																pMixPacket->flags=CHANNEL_CLOSE;
-																pMixPacket->channel=pEntry->channelOut;
-																#ifdef LOG_PACKET_TIMES
-																	setZero64(pQueueEntry->timestamp_proccessing_start);
-																#endif
-																m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));
-																delete pEntry->pCipher;
-																pEntry=m_pChannelList->getNextChannel(pEntry);
-															}
-														m_pIPList->removeIP(pHashEntry->peerIP);
-														m_psocketgroupUsersRead->remove(*(CASocket*)pMuxSocket);
-														m_psocketgroupUsersWrite->remove(*(CASocket*)pMuxSocket);
-														delete pHashEntry->pQueueSend;
-														delete pHashEntry->pSymCipher;
-														m_pChannelList->remove(pMuxSocket);
-														delete pMuxSocket;
-														decUsers();
-														goto NEXT_USER;
-													}
+#endif																														
 
 												if(pMixPacket->flags==CHANNEL_DUMMY)					// just a dummy to keep the connection alife in e.g. NAT gateways 
 													{ 
@@ -513,11 +484,35 @@ NEXT_USER:
 										if(pfmHashEntry->uAlreadySendPacketSize==MIXPACKET_SIZE)
 											{
 												#ifdef PAYMENT
-													if(pfmHashEntry->bCountPacket)
-														{
-															// count packet for payment
-															CAAccountingInstance::handleJapPacket(pfmHashEntry);
-														}
+													// count packet for payment
+													if (CAAccountingInstance::handleJapPacket(pfmHashEntry, !(pfmHashEntry->bCountPacket)) == 3)
+													{												
+														// this jap is evil! terminate connection and add IP to blacklist
+														CAMsg::printMsg(LOG_DEBUG, "CAFirstMixA: Detected evil Jap.. closing connection! Removing IP..\n", ret);
+														fmChannelListEntry* pEntry;
+														pEntry=m_pChannelList->getFirstChannelForSocket((CAMuxSocket*)pfmHashEntry->pMuxSocket);
+														while(pEntry!=NULL)
+															{
+																getRandom(pMixPacket->data,DATA_SIZE);
+																pMixPacket->flags=CHANNEL_CLOSE;
+																pMixPacket->channel=pEntry->channelOut;
+																#ifdef LOG_PACKET_TIMES
+																	setZero64(pQueueEntry->timestamp_proccessing_start);
+																#endif
+																m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));
+																delete pEntry->pCipher;
+																pEntry=m_pChannelList->getNextChannel(pEntry);
+															}
+														m_pIPList->removeIP(pfmHashEntry->peerIP);
+														m_psocketgroupUsersRead->remove(*(CAMuxSocket*)pfmHashEntry->pMuxSocket);
+														m_psocketgroupUsersWrite->remove(*(CAMuxSocket*)pfmHashEntry->pMuxSocket);
+														delete pfmHashEntry->pQueueSend;
+														delete pfmHashEntry->pSymCipher;
+														m_pChannelList->remove(pfmHashEntry->pMuxSocket);
+														delete pfmHashEntry->pMuxSocket;
+														decUsers();
+														goto NEXT_USER_WRITING;
+													}														
 												#endif
 												#ifdef DELAY_USERS
 													pfmHashEntry->delayBucket--;
@@ -566,9 +561,11 @@ NEXT_USER:
 #endif
 									//todo error handling
 #ifdef HAVE_EPOLL
+NEXT_USER_WRITING:
 						pfmHashEntry=(fmHashTableEntry*)m_psocketgroupUsersWrite->getNextSignaledSocketData();
 #else
 							}//if is socket signaled
+NEXT_USER_WRITING:														
 						pfmHashEntry=m_pChannelList->getNext();
 #endif
 					}
