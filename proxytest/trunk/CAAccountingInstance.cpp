@@ -656,11 +656,11 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		{
 			pAccInfo->transferredBytes += pCC->getTransferredBytes();
 			pAccInfo->confirmedBytes = pCC->getTransferredBytes();
-			#ifdef DEBUG
+			//#ifdef DEBUG
 				UINT8 tmp[32];
 				print64(tmp,pAccInfo->transferredBytes);
 				CAMsg::printMsg(LOG_DEBUG, "TransferredBytes is now %s\n", tmp);
-			#endif			
+			//#endif			
 			delete pCC;
 		}
 
