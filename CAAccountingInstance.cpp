@@ -162,7 +162,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			else
 			{
 				ms_pInstance->m_Mutex.unlock();
-				return 1;
+				return 2;
 			}
 		}	
 		
@@ -170,14 +170,6 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		{
 			ms_pInstance->m_Mutex.unlock();
 			return 1;
-		}
-		
-		// do the following tests after a lot of Mix packets only (gain speed...)
-		if (pAccInfo->sessionPackets % PACKETS_BEFORE_NEXT_CHECK != 1)
-		{
-			//CAMsg::printMsg( LOG_DEBUG, "Now we gain some speed...\n");
-			ms_pInstance->m_Mutex.unlock();
-			return 1;	
 		}
 
 		ms_pInstance->m_settleHashtable->getMutex().lock();
@@ -228,6 +220,15 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			}
 		}		
 		ms_pInstance->m_settleHashtable->getMutex().unlock();	
+		
+		
+		// do the following tests after a lot of Mix packets only (gain speed...)
+		if (pAccInfo->sessionPackets % PACKETS_BEFORE_NEXT_CHECK != 1)
+		{
+			//CAMsg::printMsg( LOG_DEBUG, "Now we gain some speed...\n");
+			ms_pInstance->m_Mutex.unlock();
+			return 1;	
+		}
 		
 		//kick user out if a timeout was set and has since run out
 		if (pAccInfo->authFlags & (AUTH_TIMEOUT_STARTED) &&
