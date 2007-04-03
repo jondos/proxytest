@@ -408,7 +408,7 @@ SINT32 CAAccountingDBInterface::storePrepaidAmount(UINT64 accountNumber, SINT32 
 		result = PQexec(m_dbConn, (char *)finalQuery);
 		if (PQresultStatus(result) != PGRES_COMMAND_OK)
 		{
-			CAMsg::printMsg(LOG_ERR, "CAAccountungDBInterface: Saving to prepaidamounts failed");
+			CAMsg::printMsg(LOG_ERR, "CAAccountungDBInterface: Saving to prepaidamounts failed!\");
 			PQclear(result);
 			return E_UNKNOWN;	
 		}
