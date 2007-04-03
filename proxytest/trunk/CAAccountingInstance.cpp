@@ -337,11 +337,13 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				CAMsg::printMsg(LOG_DEBUG, "CC request sent for %u bytes \n",bytesToConfirm);
 				CAMsg::printMsg(LOG_DEBUG, "transferrred bytes: %u bytes \n",pAccInfo->transferredBytes);				
 				CAMsg::printMsg(LOG_DEBUG, "prepaid Interval: %u \n",prepaidInterval);	
+				/*
 				UINT32 debuglen = 3000;
 				UINT8 debugout[3000];
 				DOM_Output::dumpToMem(doc,debugout,&debuglen);
 				debugout[debuglen] = 0;			
 				CAMsg::printMsg(LOG_DEBUG, "the CC sent looks like this: %s \n",debugout);
+				*/
 //#endif						
 				return returnOK(pAccInfo);
 			}// end of soft limit exceeded
@@ -824,8 +826,6 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 			m_Mutex.unlock();
 			return ;
 		}*/
-		
-	pAccInfo->authFlags |= AUTH_ACCOUNT_OK;
 	
 	// fetch cost confirmation from last session if available, and send it
 	CAXMLCostConfirmation * pCC = NULL;
@@ -844,6 +844,9 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 		pAccInfo->pControlChannel->sendXMLMessage(pCC->getXMLDocument());
 		delete pCC;
 	}
+	
+	
+	pAccInfo->authFlags |= AUTH_ACCOUNT_OK;
 	
 	if ( pHashEntry->pAccountingInfo->pChallenge != NULL ) // free mem
 		{
