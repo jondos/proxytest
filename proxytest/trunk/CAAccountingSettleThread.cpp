@@ -169,7 +169,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 						else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_ACCOUNT_EMPTY)
 						{
 							entry->authFlags |= AUTH_ACCOUNT_EMPTY;
-							if (dbConn.markAsSettled(attachedCC->getAccountNumber()) == E_SUCCESS)
+							if (dbConn.markAsSettled(pCC->getAccountNumber()) == E_SUCCESS)
 							{ 
 								CAMsg::printMsg(LOG_ERR, "SettleThread: Costconfirmation for the account was marked as settled!\n");
 							}
