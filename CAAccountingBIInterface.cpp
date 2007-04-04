@@ -133,7 +133,7 @@ CAXMLErrorMessage * CAAccountingBIInterface::settle(CAXMLCostConfirmation &cc)
 		delete[] pStrCC;
 		contentLen=0;
 		status=0;
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingBIInterface::settle: request sent!\n");
+
 		if(m_httpClient.parseHTTPHeader(&contentLen, &status)!=E_SUCCESS ||
 			(status!=200) || (contentLen==0))
 			{

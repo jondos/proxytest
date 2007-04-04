@@ -292,7 +292,7 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 			}
 		delete[] query;	
 		PQclear(pResult);
-		CAMsg::printMsg(LOG_DEBUG, "finished storing CC in DB\n");
+		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstanceDBInterface: Finished storing CC in DB.\n");
 		return E_SUCCESS;
 	}
 
