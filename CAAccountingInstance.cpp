@@ -773,6 +773,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 	elemPanic.setAttribute( "version", "1.0" );
 	doc.appendChild( elemRoot );
 	elemRoot.appendChild( elemPanic );
+	elemRoot.appendChild( elemPrepaid );
 	setDOMElementValue( elemPanic, b64Challenge );
 	setDOMElementValue( elemPrepaid, (pAccInfo->confirmedBytes - pAccInfo->transferredBytes));
 
