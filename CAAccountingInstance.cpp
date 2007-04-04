@@ -738,7 +738,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 			return ;
 		}
 		
-	CAMsg::printMsg(LOG_DEBUG, "Checking database for previously prepaid bytes...\n");
+	//CAMsg::printMsg(LOG_DEBUG, "Checking database for previously prepaid bytes...\n");
 	SINT32 prepaidAmount = m_dbInterface->getPrepaidAmount(pAccInfo->accountNumber);
 	if (prepaidAmount > 0)
 	{
