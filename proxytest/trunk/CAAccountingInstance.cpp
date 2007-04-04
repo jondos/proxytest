@@ -612,7 +612,7 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
  */
 void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry, DOM_Element &root)
 	{
-		CAMsg::printMsg(LOG_DEBUG, "started method handleAccountCertificate\n");
+		//CAMsg::printMsg(LOG_DEBUG, "started method handleAccountCertificate\n");
 		DOM_Element elGeneral;
 		timespec now;
 		getcurrentTime(now);
@@ -629,7 +629,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		if(pAccInfo->authFlags&AUTH_GOT_ACCOUNTCERT)
 			{
 				//#ifdef DEBUG
-					CAMsg::printMsg(LOG_DEBUG, "Already got an account cert. Ignoring!");
+					CAMsg::printMsg(LOG_DEBUG, "Already got an account cert. Ignoring...");
 				//#endif
 				CAXMLErrorMessage err(
 						CAXMLErrorMessage::ERR_BAD_REQUEST, 
@@ -646,7 +646,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		if ( getDOMChildByName( root, (UINT8 *)"AccountNumber", elGeneral, false ) != E_SUCCESS ||
 					getDOMElementValue( elGeneral, pAccInfo->accountNumber ) != E_SUCCESS)
 		{
-			CAMsg::printMsg( LOG_ERR, "AccountCertificate has wrong or no accountnumber. Ignoring\n");
+			CAMsg::printMsg( LOG_ERR, "AccountCertificate has wrong or no accountnumber. Ignoring...\n");
 			CAXMLErrorMessage err(CAXMLErrorMessage::ERR_WRONG_FORMAT);
 			DOM_Document errDoc;
 			err.toXmlDocument(errDoc);
@@ -662,18 +662,18 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		{
 			pAccInfo->transferredBytes += pCC->getTransferredBytes();
 			pAccInfo->confirmedBytes = pCC->getTransferredBytes();
-			//#ifdef DEBUG
+			#ifdef DEBUG
 				UINT8 tmp[32];
 				print64(tmp,pAccInfo->transferredBytes);
 				CAMsg::printMsg(LOG_DEBUG, "TransferredBytes is now %s\n", tmp);
-			//#endif			
+			#endif			
 			delete pCC;
 		}
 		else
 		{
 			UINT8 tmp[32];
 			print64(tmp,pAccInfo->accountNumber);
-			CAMsg::printMsg(LOG_DEBUG, "Did not find cost confirmation for account %s in database.\n", tmp);
+			CAMsg::printMsg(LOG_DEBUG, "Did not find cost confirmation for account %s in database. This seems to be a new user.\n", tmp);
 		}
 
 		// parse & set payment instance id
@@ -684,7 +684,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 			{
 				delete[] pAccInfo->pstrBIID;
 				pAccInfo->pstrBIID=NULL;
-				CAMsg::printMsg( LOG_ERR, "AccountCertificate has no Payment Instance ID. Ignoring\n");
+				CAMsg::printMsg( LOG_ERR, "AccountCertificate has no Payment Instance ID. Ignoring...\n");
 				CAXMLErrorMessage err(CAXMLErrorMessage::ERR_WRONG_FORMAT);
 				DOM_Document errDoc;
 				err.toXmlDocument(errDoc);
@@ -700,7 +700,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 	// parse & set public key
 	if ( getDOMChildByName( root, (UINT8 *)"JapPublicKey", elGeneral, false ) != E_SUCCESS )
 		{
-			CAMsg::printMsg( LOG_ERR, "AccountCertificate contains no public key. Ignoring\n");
+			CAMsg::printMsg( LOG_ERR, "AccountCertificate contains no public key. Ignoring...\n");
 			CAXMLErrorMessage err(CAXMLErrorMessage::ERR_KEY_NOT_FOUND);
 			DOM_Document errDoc;
 			err.toXmlDocument(errDoc);
@@ -969,7 +969,7 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,D
 	m_Mutex.unlock();
 	
 	m_dbInterface->storeCostConfirmation(*pCC);
-	CAMsg::printMsg(LOG_DEBUG, "after store \n");
+
 	delete pCC;
 	return;
 }
