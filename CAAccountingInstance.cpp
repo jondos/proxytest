@@ -749,13 +749,13 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 	{
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: No database record for prepaid bytes found for this account \n");	
 	}	
-	CAMsg::printMsg(LOG_DEBUG, "number of prepaid (confirmed-transferred) bytes: %d \n",pAccInfo->confirmedBytes-pAccInfo->transferredBytes);
+	//CAMsg::printMsg(LOG_DEBUG, "Number of prepaid (confirmed-transferred) bytes : %d \n",pAccInfo->confirmedBytes-pAccInfo->transferredBytes);
 		
 	UINT8 * arbChallenge;
 	UINT8 b64Challenge[ 512 ];
 	UINT32 b64Len = 512;
 
-	CAMsg::printMsg(LOG_DEBUG, "almost finished handleAccountCertificate, preparing challenge\n");
+	//CAMsg::printMsg(LOG_DEBUG, "Almost finished handleAccountCertificate, preparing challenge\n");
 
 	// generate random challenge data and Base64 encode it
 	arbChallenge = ( UINT8* ) malloc( 222 );
