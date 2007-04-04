@@ -742,7 +742,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 	SINT32 prepaidAmount = m_dbInterface->getPrepaidAmount(pAccInfo->accountNumber);
 	if (prepaidAmount > 0)
 	{
-		pAccInfo->confirmedBytes += prepaidAmount;	
+		pAccInfo->transferredBytes -= prepaidAmount;	
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Got %d prepaid bytes\n",prepaidAmount);
 	}	
 	else
@@ -769,10 +769,12 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 	DOM_Document doc = DOM_Document::createDocument();
 	DOM_Element elemRoot = doc.createElement( "Challenge" );
 	DOM_Element elemPanic = doc.createElement( "DontPanic" );
+	DOM_Element elemPrepaid = doc.createElement( "PrepaidBytes" );
 	elemPanic.setAttribute( "version", "1.0" );
 	doc.appendChild( elemRoot );
 	elemRoot.appendChild( elemPanic );
 	setDOMElementValue( elemPanic, b64Challenge );
+	setDOMElementValue( elemPrepaid, (pAccInfo->confirmedBytes - pAccInfo->transferredBytes));
 
 	// send XML struct to Jap & set auth flags
 	pAccInfo->pControlChannel->sendXMLMessage(doc);
