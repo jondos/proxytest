@@ -160,8 +160,9 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				return returnKickout(pAccInfo);
 			}
 			else
-			{
+			{				
 				ms_pInstance->m_Mutex.unlock();
+				// don't let through messages from JAP
 				return 2;
 			}
 		}	
@@ -200,11 +201,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			
 			if (err)
 			{			
-				CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: sending error message...!\n");
-				DOM_Document doc;												
-				err->toXmlDocument(doc);			
-				delete err;
-				pAccInfo->pControlChannel->sendXMLMessage(doc);				
+				CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: sending error message...!\n");										
 			}
 			
 			if (entry->authFlags & AUTH_FATAL_ERROR || entry->authFlags == 0)
@@ -214,7 +211,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				{
 					delete entry; //do not delete before the above usage....
 					ms_pInstance->m_settleHashtable->getMutex().unlock();
-					return returnHold(pAccInfo);		
+					return returnHold(pAccInfo, err);		
 				}
 				delete entry;
 			}
@@ -228,31 +225,31 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			//CAMsg::printMsg( LOG_DEBUG, "Now we gain some speed...\n");
 			ms_pInstance->m_Mutex.unlock();
 			return 1;	
-		}
-		
-		//kick user out if a timeout was set and has since run out
-		if (pAccInfo->authFlags & (AUTH_TIMEOUT_STARTED) &&
-		    time(NULL) > pAccInfo->goodwillTimeoutStarttime + GOODWILL_TIMEOUT)
-		{
-#ifdef DEBUG							
-				CAMsg::printMsg(LOG_DEBUG, "Goodwill timeout has runout, will kick out user now...\n");
-#endif							
-				return returnHold(pAccInfo);				
 		}	
 	
 		if(!(pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT) )
 		{ 
+			//kick user out if a timeout was set and has since run out
+			if (pAccInfo->authFlags & (AUTH_TIMEOUT_STARTED) &&
+			    time(NULL) > pAccInfo->goodwillTimeoutStarttime + GOODWILL_TIMEOUT)
+			{
+	#ifdef DEBUG							
+					CAMsg::printMsg(LOG_DEBUG, "Goodwill timeout has runout, will kick out user now...\n");
+	#endif											
+					return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_NO_ACCOUNTCERT));				
+			}			
+			
 			return returnWait(pAccInfo); //dont let the packet through for now, but still wait for an account cert
 		}
 		else 
-		{
-			// authentication process not properly finished
+		{			
 			if( pAccInfo->authFlags & AUTH_FAKE )
 			{
+				// authentication process not properly finished
 #ifdef DEBUG				
 				CAMsg::printMsg( LOG_DEBUG, "AccountingInstance: AUTH_FAKE flag is set ... byebye\n");
 #endif				
-				return returnHold(pAccInfo);
+				return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_BAD_SIGNATURE, (UINT8*)"Your account certificate is invalid"));
 			}
 			if( !(pAccInfo->authFlags & AUTH_ACCOUNT_OK) )
 			{
@@ -260,11 +257,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				if(time(NULL) >= pAccInfo->lastRequestSeconds + REQUEST_TIMEOUT)
 				{
 					CAMsg::printMsg( LOG_DEBUG, "AccountingInstance: Jap refused to send response to challenge (Request Timeout)...\n");
-					CAXMLErrorMessage msg(CAXMLErrorMessage::ERR_NO_ACCOUNTCERT);
-					DOM_Document doc;
-					msg.toXmlDocument(doc);
-					pAccInfo->pControlChannel->sendXMLMessage(doc);
-					return returnHold(pAccInfo); //timeout over -> kick out
+					return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_NO_ACCOUNTCERT)); //timeout over -> kick out
 				}
 				else //timeout still running
 				{
@@ -310,12 +303,8 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 									"to send cost confirmation (HARDLIMIT EXCEEDED).\n");
 #endif																						
 					ms_pInstance->m_pIPBlockList->insertIP( pHashEntry->peerIP );
-					CAXMLErrorMessage msg(CAXMLErrorMessage::ERR_NO_CONFIRMATION);
-					DOM_Document doc;
-					msg.toXmlDocument(doc);
-					pAccInfo->pControlChannel->sendXMLMessage(doc);
 					pAccInfo->lastHardLimitSeconds = 0;
-					return returnHold(pAccInfo);
+					return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_NO_CONFIRMATION));
 				}
 			}
 			else
@@ -413,11 +402,24 @@ SINT32 CAAccountingInstance::returnKickout(tAiAccountingInfo* pAccInfo)
  * (Usage: send an error message before kicking out the user:
  * sets AUTH_FATAL_ERROR )
  */
-SINT32 CAAccountingInstance::returnHold(tAiAccountingInfo* pAccInfo)
+SINT32 CAAccountingInstance::returnHold(tAiAccountingInfo* pAccInfo, CAXMLErrorMessage* a_error)
 {
+	if (a_error)
+	{
+		CAMsg::printMsg(LOG_CRIT, "AccountingInstance: Sending error message...\n");
+		DOM_Document doc;												
+		a_error->toXmlDocument(doc);			
+		delete a_error;
+		pAccInfo->pControlChannel->sendXMLMessage(doc);		
+	}
+	else
+	{
+		CAMsg::printMsg(LOG_CRIT, "AccountingInstance: Should send error message, but none is available!\n");
+	}
+	
 	pAccInfo->authFlags |= AUTH_FATAL_ERROR;
 	ms_pInstance->m_Mutex.unlock();
-	return 1;
+	return 2;
 }
 
 
@@ -730,10 +732,6 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		{
 			// signature invalid. mark this user as bad guy
 			CAMsg::printMsg( LOG_INFO, "CAAccountingInstance::handleAccountCertificate(): Bad Jpi signature\n" );
-			CAXMLErrorMessage err(CAXMLErrorMessage::ERR_BAD_SIGNATURE, (UINT8*)"Your account certificate is invalid");
-			DOM_Document errDoc;
-			err.toXmlDocument(errDoc);
-			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
 			pAccInfo->authFlags |= AUTH_FAKE | AUTH_GOT_ACCOUNTCERT;
 			pAccInfo->authFlags &= ~AUTH_ACCOUNT_OK;
 			m_Mutex.unlock();

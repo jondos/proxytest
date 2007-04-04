@@ -166,7 +166,7 @@ private:
 	static SINT32 returnOK(tAiAccountingInfo* pAccInfo);
 	static SINT32 returnWait(tAiAccountingInfo* pAccInfo);
 	static SINT32 returnKickout(tAiAccountingInfo* pAccInfo);
-	static SINT32 returnHold(tAiAccountingInfo* pAccInfo);
+	static SINT32 returnHold(tAiAccountingInfo* pAccInfo, CAXMLErrorMessage* a_error);
 	
 	/**
 	 * The main loop of the AI thread - reads messages from the queue 
