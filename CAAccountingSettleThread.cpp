@@ -169,7 +169,14 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 						else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_ACCOUNT_EMPTY)
 						{
 							entry->authFlags |= AUTH_ACCOUNT_EMPTY;
-							bDeleteCC = true;
+							if (dbConn.markAsSettled(attachedCC->getAccountNumber()) == E_SUCCESS)
+							{ 
+								CAMsg::printMsg(LOG_ERR, "SettleThread: Costconfirmation for the account was marked as settled!\n");
+							}
+							else
+							{	
+								CAMsg::printMsg(LOG_ERR, "SettleThread: Could not mark an account as settled!\n");
+							}
 						}
 						else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_INVALID_CC)
 						{							
