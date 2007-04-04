@@ -157,9 +157,8 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 							}
 						}						
 						
-						CAMsg::printMsg(LOG_ERR, "SettleThread: BI reported error no. %d (%s)\n",
+						CAMsg::printMsg(LOG_ERR, "Accounting SettleThread: BI reported error no. %d (%s)\n",
 							pErrMsg->getErrorCode(), pErrMsg->getDescription() );
-						CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: BI reported error!\n");
 						bDeleteCC = false;
 						if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_KEY_NOT_FOUND)
 						{
@@ -169,14 +168,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 						else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_ACCOUNT_EMPTY)
 						{
 							entry->authFlags |= AUTH_ACCOUNT_EMPTY;
-							if (dbConn.markAsSettled(pCC->getAccountNumber()) == E_SUCCESS)
-							{ 
-								CAMsg::printMsg(LOG_ERR, "SettleThread: Costconfirmation for the account was marked as settled!\n");
-							}
-							else
-							{	
-								CAMsg::printMsg(LOG_ERR, "SettleThread: Could not mark an account as settled!\n");
-							}
+							dbConn.markAsSettled(pCC->getAccountNumber());
 						}
 						else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_INVALID_CC)
 						{							
@@ -187,15 +179,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 							//store it in DB
 							if (dbConn.storeCostConfirmation(*attachedCC) == E_SUCCESS)
 							{
-								CAMsg::printMsg(LOG_DEBUG, "SettleThread: stored last valid CC in DB\n");
-								if (dbConn.markAsSettled(attachedCC->getAccountNumber()) == E_SUCCESS)
-								{ 
-									CAMsg::printMsg(LOG_ERR, "SettleThread: Costconfirmation for the account was marked as settled!\n");
-								}
-								else
-								{	
-									CAMsg::printMsg(LOG_ERR, "SettleThread: Could not mark an account as settled!\n");
-								}
+								dbConn.markAsSettled(attachedCC->getAccountNumber());
 							}
 							else
 							{
@@ -229,16 +213,8 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 						{
 							delete entry;
 						}
-						m_pAccountingSettleThread->m_accountingHashtable->getMutex().unlock();
-						
-						if(dbConn.markAsSettled(pCC->getAccountNumber())==E_SUCCESS)
-						{ 
-							CAMsg::printMsg(LOG_ERR, "SettleThread: Costconfirmation for the account was marked as settled!\n");
-						}
-						else
-						{	
-							CAMsg::printMsg(LOG_ERR, "SettleThread: Could not mark an account as settled!\n");
-						}
+						m_pAccountingSettleThread->m_accountingHashtable->getMutex().unlock();						
+						dbConn.markAsSettled(pCC->getAccountNumber());
 					} 
 
 					if (pCC != NULL)

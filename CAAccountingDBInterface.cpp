@@ -370,25 +370,42 @@ SINT32 CAAccountingDBInterface::deleteCC(UINT64 accountNumber)
 	const char* deleteQuery = "DELETE FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER = %s AND SETTLED = 0";
 	UINT8* finalQuery;
 	PGresult* result;
+	SINT32 ret;
+	UINT8 temp[32];
+	print64(temp,accountNumber);
 	
 	if (!m_bConnected)
 	{
-		return E_NOT_CONNECTED;	
-	}			
-	UINT8 temp[32];
-	print64(temp,accountNumber);
-	finalQuery = new UINT8[strlen(deleteQuery)+32];
-	sprintf((char *)finalQuery,deleteQuery,temp);
-	result = PQexec(m_dbConn, (char*)finalQuery);
-	CAMsg::printMsg(LOG_DEBUG, "%s\n",finalQuery);
-	delete[] finalQuery;
-	if (PQresultStatus(result) != PGRES_COMMAND_OK)
+		ret = E_NOT_CONNECTED;	
+	}
+	else
+	{						
+		finalQuery = new UINT8[strlen(deleteQuery)+32];
+		sprintf((char *)finalQuery,deleteQuery,temp);
+		result = PQexec(m_dbConn, (char*)finalQuery);
+		CAMsg::printMsg(LOG_DEBUG, "%s\n",finalQuery);
+		delete[] finalQuery;
+		if (PQresultStatus(result) != PGRES_COMMAND_OK)
+		{
+			PQclear(result);
+			ret = E_UNKNOWN;
+		}		
+		else
+		{
+			PQclear(result);
+			ret = E_SUCCESS;
+		}
+	}
+	
+	if (ret == E_SUCCESS)
 	{
-		PQclear(result);
-		return E_UNKNOWN;
-	}		
-	PQclear(result);
-	return E_SUCCESS;
+		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Costconfirmation for account %s was marked as settled!\n", temp);
+	}
+	else
+	{	
+		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Could not mark account %s as settled!\n", temp);
+	}	
+	return ret;
 }	
 
 
