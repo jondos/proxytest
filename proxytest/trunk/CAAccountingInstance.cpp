@@ -951,19 +951,19 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,D
 	//AccInfo's confirmed bytes + the Config's PrepaidInterval - the number of bytes transferred between
 	//requesting and receiving the CC
 	if(pCC->getTransferredBytes() < pAccInfo->confirmedBytes )
-		{
-			UINT8 tmp[32];
-			print64(tmp,pCC->getTransferredBytes());
-			CAMsg::printMsg( LOG_INFO, "CostConfirmation has Wrong Number of Bytes (%s). Ignoring...\n", tmp );
-			CAXMLErrorMessage err(CAXMLErrorMessage::ERR_WRONG_DATA, 
-				(UINT8*)"Your CostConfirmation has a wrong number of transferred bytes");
-			DOM_Document errDoc;
-			err.toXmlDocument(errDoc);
-			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
-			delete pCC;
-			m_Mutex.unlock();
-			return ;
-		}
+	{
+		UINT8 tmp[32];
+		print64(tmp,pCC->getTransferredBytes());
+		CAMsg::printMsg( LOG_INFO, "CostConfirmation has Wrong Number of Bytes (%s). Ignoring...\n", tmp );
+		CAXMLErrorMessage err(CAXMLErrorMessage::ERR_WRONG_DATA, 
+			(UINT8*)"Your CostConfirmation has a wrong number of transferred bytes");
+		DOM_Document errDoc;
+		err.toXmlDocument(errDoc);
+		pAccInfo->pControlChannel->sendXMLMessage(errDoc);
+		delete pCC;
+		m_Mutex.unlock();
+		return;
+	}
 	pAccInfo->confirmedBytes = pCC->getTransferredBytes();
 	if(pAccInfo->confirmedBytes >= pAccInfo->reqConfirmBytes)
 	{
