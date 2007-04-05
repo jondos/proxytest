@@ -171,12 +171,12 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 							dbConn.markAsSettled(pCC->getAccountNumber());
 						}
 						else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_INVALID_CC)
-						{							
-							entry->authFlags |= AUTH_INVALID_CC;
+						{														
 							//get attached CC from error message
 							CAXMLCostConfirmation* attachedCC = (CAXMLCostConfirmation*) pErrMsg->getMessageObject();
 							if (attachedCC)
 							{
+								entry->authFlags |= AUTH_INVALID_CC;
 								CAMsg::printMsg(LOG_DEBUG, "Settle Thread: tried invalid CC, received last valid CC back\n");
 								//store it in DB
 								if (dbConn.storeCostConfirmation(*attachedCC) == E_SUCCESS)
