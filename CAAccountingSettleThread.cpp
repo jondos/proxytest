@@ -175,19 +175,25 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 							entry->authFlags |= AUTH_INVALID_CC;
 							//get attached CC from error message
 							CAXMLCostConfirmation* attachedCC = (CAXMLCostConfirmation*) pErrMsg->getMessageObject();
-							CAMsg::printMsg(LOG_DEBUG, "Settle Thread: tried invalid CC, received last valid CC back\n");
-							//store it in DB
-							if (dbConn.storeCostConfirmation(*attachedCC) == E_SUCCESS)
+							if (attachedCC)
 							{
-								dbConn.markAsSettled(attachedCC->getAccountNumber());
+								CAMsg::printMsg(LOG_DEBUG, "Settle Thread: tried invalid CC, received last valid CC back\n");
+								//store it in DB
+								if (dbConn.storeCostConfirmation(*attachedCC) == E_SUCCESS)
+								{
+									dbConn.markAsSettled(attachedCC->getAccountNumber());
+								}
+								else
+								{
+									CAMsg::printMsg(LOG_ERR, "SettleThread: storing last valid CC in db failed!\n");	
+								}								
+								// set the confirmed bytes to the value of the CC got from the PI
+								entry->confirmedBytes = attachedCC->getTransferredBytes();	
 							}
 							else
 							{
-								CAMsg::printMsg(LOG_ERR, "SettleThread: storing last valid CC in db failed!\n");	
-							}
-							
-							// set the confirmed bytes to the value of the CC got from the PI
-							entry->confirmedBytes = attachedCC->getTransferredBytes();									
+								CAMsg::printMsg(LOG_DEBUG, "Settle Thread: Did not receive last valid CC - maybe old Payment instance?\n");
+							}																		
 						}	
 						
 						m_pAccountingSettleThread->m_accountingHashtable->getMutex().unlock();				
