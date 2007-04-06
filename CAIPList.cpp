@@ -132,9 +132,9 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 								#endif
 								if(entry->count>=m_allowedConnections) //an Attack...
 									{
-										#if !defined(PSEUDO_LOG)&&defined(FIREWALL_SUPPORT)
-											CAMsg::printMsg(LOG_CRIT,"possible Flooding Attack from: %u.%u.%u.%u !\n",ip[0],ip[1],ip[2],ip[3]);
-										#endif
+										//#if !defined(PSEUDO_LOG)&&defined(FIREWALL_SUPPORT)
+											CAMsg::printMsg(LOG_CRIT,"Possible Flooding Attack from: %u.%u.%u.%u !\n",ip[0],ip[1],ip[2],ip[3]);
+										//#endif
 										m_pMutex->unlock();
 										return E_UNKNOWN;
 									}

@@ -798,26 +798,33 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 										//Pruefen ob schon vorhanden..
 										ret=((CASocket*)pNewMuxSocket)->getPeerIP(peerIP);
 										#ifdef PAYMENT
-											if(ret!=E_SUCCESS||pIPList->insertIP(peerIP)<0 ||
-												CAAccountingInstance::isIPAddressBlocked(peerIP))
+											if(ret!=E_SUCCESS||pIPList->insertIP(peerIP)<0) // ||
+												//CAAccountingInstance::isIPAddressBlocked(peerIP))
 										#else
 											if(ret!=E_SUCCESS||pIPList->insertIP(peerIP)<0)
 										#endif
 											{
-												CAMsg::printMsg(LOG_DEBUG,"Could not insert IP address!\n");
+												if (ret != E_SUCCESS)
+												{
+													CAMsg::printMsg(LOG_DEBUG,"Could not insert IP address as IP could not be retrieved!\n");
+												}
+												else
+												{
+													CAMsg::printMsg(LOG_DEBUG,"Could not insert IP address!\n");	
+												}
 												delete pNewMuxSocket;
 											}
 										else
-											{
-												t_UserLoginData* d=new t_UserLoginData;
-												d->pNewUser=pNewMuxSocket;
-												d->pMix=pFirstMix;
-												memcpy(d->peerIP,peerIP,4);
-												if(pthreadsLogin->addRequest(fm_loopDoUserLogin,d)!=E_SUCCESS)
-													{
-														CAMsg::printMsg(LOG_DEBUG,"Could not add an login request to the login thread pool!\n");
-													}
-											}
+										{																						
+											t_UserLoginData* d=new t_UserLoginData;
+											d->pNewUser=pNewMuxSocket;
+											d->pMix=pFirstMix;
+											memcpy(d->peerIP,peerIP,4);
+											if(pthreadsLogin->addRequest(fm_loopDoUserLogin,d)!=E_SUCCESS)
+												{
+													CAMsg::printMsg(LOG_DEBUG,"Could not add an login request to the login thread pool!\n");
+												}
+										}
 									}
 							}
 						i++;
