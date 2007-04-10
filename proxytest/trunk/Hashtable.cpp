@@ -316,10 +316,6 @@ void Hashtable::makeEmpty(SINT8 keyMode,SINT8 valueMode)
 		}
 		for(e = m_table[index];e;e = next)
 		{
-			if (!e)
-			{
-				break;
-			}
 			switch(keyMode)
 			{
 				case HASH_EMPTY_DELETE:
