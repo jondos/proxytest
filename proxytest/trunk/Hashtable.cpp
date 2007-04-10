@@ -323,7 +323,10 @@ void Hashtable::makeEmpty(SINT8 keyMode,SINT8 valueMode)
 			switch(keyMode)
 			{
 				case HASH_EMPTY_DELETE:
-					delete e->e_Key;
+					if (e->e_Key)
+					{
+						delete e->e_Key;
+					}
 					break;
 				case HASH_EMPTY_FREE:
 					free(e->e_Key);
@@ -332,7 +335,10 @@ void Hashtable::makeEmpty(SINT8 keyMode,SINT8 valueMode)
 			switch(valueMode)
 			{
 				case HASH_EMPTY_DELETE:
-					delete e->e_Value;
+					if (e->e_Value)
+					{
+						delete e->e_Value;
+					}
 					break;
 				case HASH_EMPTY_FREE:
 					free(e->e_Value);
