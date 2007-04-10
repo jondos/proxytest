@@ -61,9 +61,10 @@ CAXMLErrorMessage::CAXMLErrorMessage(UINT32 errorCode)
 			(UINT8*)"No Flatrate offered",
 			(UINT8*)"Invalid code",
 			(UINT8*)"Costconfirmation is not valid, possible attempt at doublespending!"
+			(UINT8*)"One or more price certificates are invalid!"
 		};
 		m_iErrorCode = errorCode;
-		if (m_iErrorCode < 0 || m_iErrorCode >= 16)
+		if (m_iErrorCode < 0 || m_iErrorCode >= 17)
 		{
 			UINT8 defaultMsg[] = "Unknown Error";
 			m_strErrMsg = new UINT8[strlen((char *)defaultMsg)+1];
