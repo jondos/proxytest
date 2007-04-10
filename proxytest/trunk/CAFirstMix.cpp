@@ -882,6 +882,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		//((CASocket*)pNewUser)->send(m_xmlKeyInfoBuff,m_xmlKeyInfoSize);
 		// es kann nicht blockieren unter der Annahme das der TCP-Sendbuffer > m_xmlKeyInfoSize ist....
 		//wait for keys from user
+		
 		UINT16 xml_len;
 		if(((CASocket*)pNewUser)->receiveFullyT((UINT8*)&xml_len,2,FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT)!=E_SUCCESS)
 		{
@@ -889,6 +890,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 			m_pIPList->removeIP(peerIP);
 			return E_UNKNOWN;
 		}
+		CAMsg::printMsg(LOG_DEBUG,"User login: reveived first symmetric key from client\n");
 		
 		xml_len=ntohs(xml_len);
 		UINT8* xml_buff=new UINT8[xml_len+2]; //+2 for size...
@@ -899,6 +901,8 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 			m_pIPList->removeIP(peerIP);
 			return E_UNKNOWN;
 		}
+		
+		CAMsg::printMsg(LOG_DEBUG,"User login: reveived second symmetric key from client\n");
 		
 		DOMParser oParser;
 		MemBufInputSource oInput(xml_buff+2,xml_len,"tmp");
@@ -956,8 +960,19 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		DOM_Output::dumpToMem(docSig,xml_buff+2,&u32);
 		xml_buff[0]=(UINT8)(u32>>8);
 		xml_buff[1]=(UINT8)(u32&0xFF);
-		((CASocket*)pNewUser)->send(xml_buff,u32+2);
+		
+		
+		if (((CASocket*)pNewUser)->sendFullyTimeOut(xml_buff,u32+2, 30000, 10000) != E_SUCCESS)
+		{
+			CAMsg::printMsg(LOG_DEBUG,"User login: Sending key exchange signature has been interrupted!\n");
+			delete xml_buff;
+			delete pNewUser;
+			m_pIPList->removeIP(peerIP);
+			return E_UNKNOWN;
+		}
+		CAMsg::printMsg(LOG_DEBUG,"User login: key exchange signature sent\n");
 		delete xml_buff;
+		
 		((CASocket*)pNewUser)->setNonBlocking(true);
 		CAQueue* tmpQueue=new CAQueue(sizeof(tQueueEntry));
 		fmHashTableEntry* pHashEntry=m_pChannelList->add(pNewUser,peerIP,tmpQueue);
