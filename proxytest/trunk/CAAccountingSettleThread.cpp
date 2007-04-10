@@ -106,9 +106,9 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					CAMsg::printMsg(LOG_ERR, "SettleThread could not connect to Database. Retrying later...\n");
 					continue;
 				}
-				#ifdef DEBUG	
+				//#ifdef DEBUG	
 				CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: DB connections established!\n");
-				#endif
+				//#endif
 				dbConn.getUnsettledCostConfirmations(q);
 				//CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: dbConn.getUnsettledCostConfirmations(q) finished!\n");
 				while(!q.isEmpty())
@@ -127,10 +127,23 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 						q.clean();
 						break;
 					}
+					
+					if (!pCC)
+					{
+						CAMsg::printMsg(LOG_CRIT, "CAAccountingSettleThread: Cost confirmation is NULL!\n");
+						continue;
+					}
+					
 					CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: try to settle...\n");
 					pErrMsg = biConn.settle( *pCC );
 					biConn.terminateBIConnection();
-					CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: settle done!\n");
+					CAMsg::printMsg(LOG_DEBUG, "CAAccountingSettleThread: settle done!\n");
+				
+					if (!pCC)
+					{
+						CAMsg::printMsg(LOG_CRIT, "CAAccountingSettleThread: Cost confirmation is NULL!\n");
+						continue;
+					}
 				
 					// check returncode
 					if(pErrMsg==NULL)  //no returncode -> connection error
@@ -169,6 +182,11 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 							entry->authFlags |= AUTH_ACCOUNT_EMPTY;
 							dbConn.markAsSettled(pCC->getAccountNumber());
 						}
+						else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_INVALID_PRICE_CERT)
+						{
+							// this should never happen; the price certs in this CC do not fit to the ones of the cascade
+							bDeleteCC = true;
+						}
 						else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_INVALID_CC)
 						{														
 							//get attached CC from error message
@@ -193,9 +211,9 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 							{
 								CAMsg::printMsg(LOG_DEBUG, "Settle Thread: Did not receive last valid CC - maybe old Payment instance?\n");
 							}																		
-						}	
-						
+						}							
 						m_pAccountingSettleThread->m_accountingHashtable->getMutex().unlock();				
+						
 						if (bDeleteCC)
 						{
 							//delete costconfirmation to avoid trying to settle an unusable CC again and again					
