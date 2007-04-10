@@ -222,7 +222,7 @@ void* Hashtable::put(void *key, void *value)
 		value = oldEntry->e_Value;
 	}
 	
-	m_modCount++;
+	//m_modCount++;
 	if (m_modCount >= m_threshold)
 	{
 		
@@ -283,7 +283,7 @@ void *Hashtable::remove(void *key)
 		{
 			void *value;
 
-			m_modCount++;
+			//m_modCount++;
 			if (prev)
 			{
 				prev->e_Next = e->e_Next;
@@ -308,9 +308,11 @@ void *Hashtable::remove(void *key)
 
 void Hashtable::makeEmpty(SINT8 keyMode,SINT8 valueMode)
 {
-	m_modCount++;
+	CAMsg::printMsg(LOG_INFO, "Hashtable: Clearing...\n");
+	
+	//m_modCount++;
 
-	for(SINT32 index = m_capacity;--index >= 0;)
+	for(SINT32 index = 0; index < m_capacity; index++)
 	{
 		struct Entry *e,*next;
 
@@ -331,6 +333,8 @@ void Hashtable::makeEmpty(SINT8 keyMode,SINT8 valueMode)
 				case HASH_EMPTY_FREE:
 					free(e->e_Key);
 					break;
+				default:
+					e->e_Key = NULL;
 			}
 			switch(valueMode)
 			{
@@ -343,6 +347,8 @@ void Hashtable::makeEmpty(SINT8 keyMode,SINT8 valueMode)
 				case HASH_EMPTY_FREE:
 					free(e->e_Value);
 					break;
+				default:
+					e->e_Value = NULL;
 			}
 			next = e->e_Next;
 			delete e;
@@ -350,6 +356,8 @@ void Hashtable::makeEmpty(SINT8 keyMode,SINT8 valueMode)
 		m_table[index] = NULL;
 	}
 	m_count = 0;
+	
+	CAMsg::printMsg(LOG_INFO, "Hashtable: Has been cleared!\n");
 }
 
 UINT32 Hashtable::getSize()
@@ -379,10 +387,6 @@ bool Hashtable::rehash()
 	UINT32 newCapacity,i;
 
 	newCapacity = oldCapacity * 2 + 1;
-	//if (!(newtable = (struct Entry **)malloc(newCapacity * sizeof(struct Entry *))))
-	{
-		//return false;
-	}
 	newtable = new Entry*[newCapacity];
 	for (UINT32 i = 0; i < newCapacity; i++)
 	{
@@ -392,29 +396,35 @@ bool Hashtable::rehash()
 	m_modCount++;
 	if (m_modCount > 10)
 	{
-		CAMsg::printMsg(LOG_INFO, "Hashtable: Too many rehash operations!\n");
+		CAMsg::printMsg(LOG_INFO, "Hashtable: Too many rehash operations! Please adapt hashtable capacity to at least %d.\n", newCapacity);
 	}
 	
 	m_threshold = (UINT32)(newCapacity * m_loadFactor);
 	m_table = newtable;
 	m_capacity = newCapacity;
 
-	for(i = oldCapacity;i-- > 0;)
+	for(int i = 0; i < oldCapacity; i++)
 	{
-		struct Entry *old,*e = NULL;
+		struct Entry *nextEntry, *e = NULL;
 		UINT32 index;
 		
-		for (old = oldtable[i];old;)
+		for (nextEntry = oldtable[i]; nextEntry;)
 		{
-			e = old;  
-			old = old->e_Next;
-			
+			e = nextEntry;  
+			// save the previous next entry, as it will be deleted later
+			nextEntry = nextEntry->e_Next;
+						
 			index = hashCode(e->e_Key) % newCapacity;
-			e->e_Next = newtable[index];
+			/* If there has been another entry before, replace it.
+			 * Delete the previous next entry in the same step.
+			 */
+			e->e_Next = newtable[index]; 
 			newtable[index] = e;
 		}
 	}
 	delete oldtable;
+	
+	CAMsg::printMsg(LOG_INFO, "Hashtable: Rehashing complete.\n");
 	
 	return true;
 }
