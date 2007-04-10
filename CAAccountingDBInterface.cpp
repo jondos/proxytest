@@ -399,11 +399,11 @@ SINT32 CAAccountingDBInterface::deleteCC(UINT64 accountNumber)
 	
 	if (ret == E_SUCCESS)
 	{
-		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Costconfirmation for account %s was marked as settled!\n", temp);
+		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Costconfirmation for account %s was deleted!\n", temp);
 	}
 	else
 	{	
-		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Could not mark account %s as settled!\n", temp);
+		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Could not delete account %s!\n", temp);
 	}	
 	return ret;
 }	
