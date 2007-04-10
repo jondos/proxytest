@@ -281,15 +281,15 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 		pResult = PQexec(m_dbConn, (char*)query);
 		delete[] pStrCC;
 		if(PQresultStatus(pResult) != PGRES_COMMAND_OK)
-			{
-				CAMsg::printMsg(LOG_ERR, 
-												"Database Error '%s' while processing query '%s'\n", 
-												PQresultErrorMessage(pResult), query
-												);
-				delete[] query;	
-				PQclear(pResult);
-				return E_UNKNOWN;
-			}
+		{
+			CAMsg::printMsg(LOG_ERR, 
+											"Database Error '%s' while processing query '%s'\n", 
+											PQresultErrorMessage(pResult), query
+											);
+			delete[] query;	
+			PQclear(pResult);
+			return E_UNKNOWN;
+		}
 		delete[] query;	
 		PQclear(pResult);
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstanceDBInterface: Finished storing CC in DB.\n");
