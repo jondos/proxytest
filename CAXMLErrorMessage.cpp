@@ -60,7 +60,7 @@ CAXMLErrorMessage::CAXMLErrorMessage(UINT32 errorCode)
 			(UINT8*)"Insufficient balance",
 			(UINT8*)"No Flatrate offered",
 			(UINT8*)"Invalid code",
-			(UINT8*)"Costconfirmation is not valid, possible attempt at doublespending!"
+			(UINT8*)"Costconfirmation is not valid, possible attempt at doublespending!",
 			(UINT8*)"One or more price certificates are invalid!"
 		};
 		m_iErrorCode = errorCode;

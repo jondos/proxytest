@@ -112,13 +112,6 @@ CAAccountingInstance::~CAAccountingInstance()
 		delete m_pSettleThread;
 		m_pSettleThread = NULL;
 		
-		CAMsg::printMsg( LOG_DEBUG, "CAAccountingInstance: Clearing settle hashtable...\n");
-		m_settleHashtable->makeEmpty(HASH_EMPTY_NONE, HASH_EMPTY_DELETE);
-		CAMsg::printMsg( LOG_DEBUG, "CAAccountingInstance: Deleting settle hashtable...\n" );
-		delete m_settleHashtable;
-		m_settleHashtable = NULL;		
-		CAMsg::printMsg( LOG_DEBUG, "CAAccountingInstance: Settle hashtable deleted.\n" );
-		
 		//delete m_biInterface;
 		delete m_dbInterface;
 		m_dbInterface = NULL;
@@ -128,6 +121,16 @@ CAAccountingInstance::~CAAccountingInstance()
 		m_pQueue = NULL;
 		delete[] m_AiName;
 		m_AiName = NULL;
+		
+		m_settleHashtable->getMutex().lock();
+		CAMsg::printMsg( LOG_DEBUG, "CAAccountingInstance: Clearing settle hashtable...\n");
+		m_settleHashtable->makeEmpty(HASH_EMPTY_NONE, HASH_EMPTY_DELETE);
+		m_settleHashtable->getMutex().unlock();
+		CAMsg::printMsg( LOG_DEBUG, "CAAccountingInstance: Deleting settle hashtable...\n" );
+		delete m_settleHashtable;
+		m_settleHashtable = NULL;		
+		CAMsg::printMsg( LOG_DEBUG, "CAAccountingInstance: Settle hashtable deleted.\n" );		
+		
 		m_Mutex.unlock();
 		
 		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance dying finished.\n" );		
