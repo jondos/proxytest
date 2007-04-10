@@ -399,7 +399,7 @@ SINT32 CAAccountingDBInterface::deleteCC(UINT64 accountNumber)
 	
 	if (ret == E_SUCCESS)
 	{
-		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Costconfirmation for account %s was deleted!\n", temp);
+		CAMsg::printMsg(LOG_INFO, "CAAccountingDBInterface: Costconfirmation for account %s was deleted!\n", temp);
 	}
 	else
 	{	
