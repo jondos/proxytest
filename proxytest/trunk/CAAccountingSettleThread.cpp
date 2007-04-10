@@ -148,16 +148,15 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 							entry = new AccountHashEntry;
 							entry->accountNumber = pCC->getAccountNumber();
 							entry->authFlags = 0;
-							entry->confirmedBytes = 0;
+							entry->confirmedBytes = 0;							
 							m_pAccountingSettleThread->m_accountingHashtable->put(&(entry->accountNumber), entry);							
-							entry = (AccountHashEntry*) (m_pAccountingSettleThread->m_accountingHashtable->getValue(&(entry->accountNumber)));
-							if (!entry)
+							if (!(m_pAccountingSettleThread->m_accountingHashtable->getValue(&(entry->accountNumber))))
 							{
-								CAMsg::printMsg(LOG_CRIT, "CAAccountingSettleThread: DID NOT FOUND ENTRY THAT  HAS BEEN STORED!\n");
+								CAMsg::printMsg(LOG_CRIT, "CAAccountingSettleThread: DID NOT FIND ENTRY THAT HAD BEEN STORED BEFORE!\n");
 							}
 						}						
 						
-						CAMsg::printMsg(LOG_ERR, "Accounting SettleThread: BI reported error no. %d (%s)\n",
+						CAMsg::printMsg(LOG_ERR, "CAAccountingSettleThread: BI reported error no. %d (%s)\n",
 							pErrMsg->getErrorCode(), pErrMsg->getDescription() );
 						bDeleteCC = false;
 						if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_KEY_NOT_FOUND)
