@@ -103,6 +103,8 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
  */
 CAAccountingInstance::~CAAccountingInstance()
 	{
+		m_Mutex.lock();
+		
 		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance dying\n" );
 		m_bThreadRunning = false;
 		//m_pThread->join();
@@ -110,14 +112,12 @@ CAAccountingInstance::~CAAccountingInstance()
 		delete m_pSettleThread;
 		m_pSettleThread = NULL;
 		
-		ms_pInstance->m_settleHashtable->getMutex().lock();
 		CAMsg::printMsg( LOG_DEBUG, "CAAccountingInstance: Clearing settle hashtable...\n");
 		m_settleHashtable->makeEmpty(HASH_EMPTY_NONE, HASH_EMPTY_DELETE);
 		CAMsg::printMsg( LOG_DEBUG, "CAAccountingInstance: Deleting settle hashtable...\n" );
 		delete m_settleHashtable;
-		m_settleHashtable = NULL;
-		CAMsg::printMsg( LOG_DEBUG, "CAAccountingInstance: Settle hashtable deleted!\n" );
-		ms_pInstance->m_settleHashtable->getMutex().unlock();
+		m_settleHashtable = NULL;		
+		CAMsg::printMsg( LOG_DEBUG, "CAAccountingInstance: Settle hashtable deleted.\n" );
 		
 		//delete m_biInterface;
 		delete m_dbInterface;
@@ -128,7 +128,9 @@ CAAccountingInstance::~CAAccountingInstance()
 		m_pQueue = NULL;
 		delete[] m_AiName;
 		m_AiName = NULL;
-		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance dying finished\n" );
+		m_Mutex.unlock();
+		
+		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance dying finished.\n" );		
 	}
 
 
@@ -182,6 +184,12 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		{
 			ms_pInstance->m_Mutex.unlock();
 			return 1;
+		}
+		
+		if (!ms_pInstance->m_settleHashtable)
+		{
+			// accounting instance is dying...
+			return returnKickout(pAccInfo);
 		}
 
 		ms_pInstance->m_settleHashtable->getMutex().lock();
@@ -1041,13 +1049,16 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			dbInterface->storePrepaidAmount(pAccInfo->accountNumber,prepaidBytes);
 			delete dbInterface;
 			
-			ms_pInstance->m_settleHashtable->getMutex().lock();				
-			entry = (AccountHashEntry*)ms_pInstance->m_settleHashtable->remove(&(pAccInfo->accountNumber));
-			if (entry)
+			if (ms_pInstance->m_settleHashtable)
 			{
-				delete entry;				
-			}						
-			ms_pInstance->m_settleHashtable->getMutex().unlock();	
+				ms_pInstance->m_settleHashtable->getMutex().lock();				
+				entry = (AccountHashEntry*)ms_pInstance->m_settleHashtable->remove(&(pAccInfo->accountNumber));
+				if (entry)
+				{
+					delete entry;				
+				}						
+				ms_pInstance->m_settleHashtable->getMutex().unlock();	
+			}
 			
 			//free memory of pAccInfo
 			if ( pAccInfo->pPublicKey!=NULL )
