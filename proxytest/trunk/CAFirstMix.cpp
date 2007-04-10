@@ -886,6 +886,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		UINT16 xml_len;
 		if(((CASocket*)pNewUser)->receiveFullyT((UINT8*)&xml_len,2,FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT)!=E_SUCCESS)
 		{
+			CAMsg::printMsg(LOG_DEBUG,"User login: timed out while waiting for first symmetric key from client!\n");
 			delete pNewUser;
 			m_pIPList->removeIP(peerIP);
 			return E_UNKNOWN;
@@ -896,6 +897,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		UINT8* xml_buff=new UINT8[xml_len+2]; //+2 for size...
 		if(((CASocket*)pNewUser)->receiveFullyT(xml_buff+2,xml_len,FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT)!=E_SUCCESS)
 		{
+			CAMsg::printMsg(LOG_DEBUG,"User login: timed out while waiting for second symmetric key from client!\n");
 			delete pNewUser;
 			delete xml_buff;
 			m_pIPList->removeIP(peerIP);
