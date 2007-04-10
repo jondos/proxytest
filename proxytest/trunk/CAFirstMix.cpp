@@ -961,7 +961,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		u32=xml_len;
 		DOM_Output::dumpToMem(docSig,xml_buff+2,&u32);
 		xml_buff[0]=(UINT8)(u32>>8);
-		xml_buff[1]=(UINT8)(u32&0xFF);s
+		xml_buff[1]=(UINT8)(u32&0xFF);
 		
 		if (((CASocket*)pNewUser)->sendFullyTimeOut(xml_buff,u32+2, 30000, 10000) != E_SUCCESS)
 		{

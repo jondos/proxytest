@@ -188,7 +188,7 @@ bool Hashtable::containsKey(void *key)
  */
 
 void *Hashtable::getValue(void *key)
-{
+{		
 	struct Entry *e = getHashEntry(key);
 
 	return e ? e->e_Value : NULL;
@@ -210,6 +210,8 @@ void *Hashtable::getValue(void *key)
 
 void* Hashtable::put(void *key, void *value)
 {
+	CAMsg::printMsg(LOG_INFO, "Hashtable: Putting key.\n");
+	
 	struct Entry *oldEntry = getHashEntry(key);
 	struct Entry *e = NULL;
 	UINT32 hash = m_hashFunc(key);
@@ -260,6 +262,8 @@ void* Hashtable::put(void *key, void *value)
 
 void *Hashtable::remove(void *key)
 {
+	CAMsg::printMsg(LOG_INFO, "Hashtable: Removing key.\n");
+	
 	struct Entry **table,*e,*prev;
 	UINT32 hash,(*func)(void *);
 	SINT32 index;
@@ -361,6 +365,8 @@ UINT32 Hashtable::getCapacity()
  
 bool Hashtable::rehash()
 {
+	CAMsg::printMsg(LOG_INFO, "Hashtable: Rehashing.\n");
+	
 	UINT32 (*hashCode)(void *) = m_hashFunc;
 	struct Entry **oldtable = m_table,**newtable;
 	UINT32 oldCapacity = m_capacity;
