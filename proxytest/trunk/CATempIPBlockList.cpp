@@ -185,7 +185,7 @@ THREAD_RETURN CATempIPBlockList::cleanupThreadMainLoop(void *param)
 										// entry can be removed
 										if(previous==NULL)
 											{
-												CAMsg::printMsg(LOG_DEBUG, "CATmpIPBlockList: removing entry...");
+												CAMsg::printMsg(LOG_DEBUG, "CATmpIPBlockList: removing entry...\n");
 												instance->m_hashTable[i] = entry->next;
 												previous=entry->next;
 												delete entry; 
