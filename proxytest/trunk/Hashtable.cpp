@@ -316,25 +316,21 @@ void Hashtable::makeEmpty(SINT8 keyMode,SINT8 valueMode)
 	{
 		struct Entry *e,*next;
 
-		if (!m_table[index])
+		for(e = m_table[index]; e; e = next)
 		{
-			continue;
-		}
-		for(e = m_table[index];e;e = next)
-		{
+			/*
 			switch(keyMode)
 			{
 				case HASH_EMPTY_DELETE:
 					if (e->e_Key)
 					{
 						delete e->e_Key;
+						e->e_Key = NULL;
 					}
 					break;
 				case HASH_EMPTY_FREE:
 					free(e->e_Key);
-					break;
-				default:
-					e->e_Key = NULL;
+					break;					
 			}
 			switch(valueMode)
 			{
@@ -342,14 +338,13 @@ void Hashtable::makeEmpty(SINT8 keyMode,SINT8 valueMode)
 					if (e->e_Value)
 					{
 						delete e->e_Value;
+						e->e_Value = NULL;
 					}
 					break;
 				case HASH_EMPTY_FREE:
 					free(e->e_Value);
-					break;
-				default:
-					e->e_Value = NULL;
-			}
+					break;					
+			}*/
 			next = e->e_Next;
 			delete e;
 		}
