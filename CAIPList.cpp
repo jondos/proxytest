@@ -112,10 +112,12 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 				entry->next=NULL;
 				m_HashTable[hashvalue]=entry;
 				ret = entry->count;
+#ifdef DEBUG
 #ifndef PSEUDO_LOG
 				CAMsg::printMsg(LOG_DEBUG,"New IP-Address inserted: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X !\n",hash[0],hash[1],hash[2],hash[3],hash[4],hash[5],hash[6],hash[7],hash[8],hash[9],hash[10],hash[11],hash[12],hash[13],hash[14],hash[15]);
 #else
 				CAMsg::printMsg(LOG_DEBUG,"New IP-Address inserted: {%u.%u.%u.%u} !\n",ip[0],ip[1],ip[2],ip[3]);
+#endif
 #endif
 				m_pMutex->unlock();
 				return ret;
