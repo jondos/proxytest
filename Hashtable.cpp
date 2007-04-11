@@ -121,11 +121,11 @@ Hashtable::~Hashtable()
 {
 	struct Entry **table = m_table;
 	
-	for(SINT32 index = m_capacity;--index >= 0;)
+	for(SINT32 index = 0; index < m_capacity; index++)
 	{
 		struct Entry *e,*next;
 
-		for(e = table[index];e;e = next)
+		for(e = table[index]; e; e = next)
 		{
 			next = e->e_Next;
 			delete e;
@@ -376,7 +376,6 @@ UINT32 Hashtable::getCapacity()
  *
  *  @return success true, wenn die Kapazitt verdoppelt werden konnte, false, wenn nicht
  */
- 
 bool Hashtable::rehash()
 {
 	CAMsg::printMsg(LOG_INFO, "Hashtable: Rehashing.\n");
@@ -446,13 +445,12 @@ struct Entry *Hashtable::getHashEntry(void *key)
 	hash = (func = m_hashFunc)(key);
 	UINT32 index = hash % m_capacity;
 	
-	for(e = table[index];e;e = e->e_Next)
+	for(e = table[index]; e; e = e->e_Next)
 	{
 		if (e == NULL)
 		{
 			return NULL;
-		}
-		
+		}		
 		
 		if ((func(e->e_Key) == hash) && !m_compareFunc(e->e_Key,key))
 		{
