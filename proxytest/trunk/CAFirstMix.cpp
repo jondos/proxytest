@@ -54,6 +54,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 extern CACmdLnOptions options;
 #include "CAReplayControlChannel.hpp"
 
+const UINT32 CAFirstMix::MAX_CONCURRENT_NEW_CONNECTIONS = 15;
+
+
 SINT32 CAFirstMix::initOnce()
 	{
 		CAMsg::printMsg(LOG_DEBUG,"Starting FirstMix InitOnce\n");
@@ -807,12 +810,12 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 								pFirstMix->m_newConnections--;
 								msSleep(400);
 							}
-							else if (pFirstMix->m_newConnections > 15)
+							else if (pFirstMix->m_newConnections > CAFirstMix::MAX_CONCURRENT_NEW_CONNECTIONS)
 							{
 								/* This should protect the mix from fooding attacks
-								 * No more than MAX_NEW_CONNECTIONS are allowed.
+								 * No more than MAX_CONCURRENT_NEW_CONNECTIONS are allowed.
 								 */
-								CAMsg::printMsg(LOG_DEBUG,"Too many concurrent new connections: %d (Maximum:%d)\n", pFirstMix->m_newConnections, 15);
+								CAMsg::printMsg(LOG_DEBUG,"Too many concurrent new connections: %d (Maximum:%d)\n", pFirstMix->m_newConnections, CAFirstMix::MAX_CONCURRENT_NEW_CONNECTIONS);
 								delete pNewMuxSocket;
 								pFirstMix->m_newConnections--;
 								msSleep(400);
@@ -886,7 +889,10 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 			((CASocket*)pNewUser)->setKeepAlive(true);
 		#endif
 		
-		CAMsg::printMsg(LOG_DEBUG,"User login: start\n");
+		#ifdef DEBUG
+			CAMsg::printMsg(LOG_DEBUG,"User login: start\n");
+		#endif	
+		
 		// send the mix-keys to JAP
 		if (((CASocket*)pNewUser)->sendFullyTimeOut(m_xmlKeyInfoBuff,m_xmlKeyInfoSize, 30000, 10000) != E_SUCCESS)
 		{
@@ -895,7 +901,9 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 			m_pIPList->removeIP(peerIP);
 			return E_UNKNOWN;
 		}
-		CAMsg::printMsg(LOG_DEBUG,"User login: login data sent\n");
+		#ifdef DEBUG
+			CAMsg::printMsg(LOG_DEBUG,"User login: login data sent\n");
+		#endif
 		
 		//((CASocket*)pNewUser)->send(m_xmlKeyInfoBuff,m_xmlKeyInfoSize);
 		// es kann nicht blockieren unter der Annahme das der TCP-Sendbuffer > m_xmlKeyInfoSize ist....
@@ -905,12 +913,16 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		if(((CASocket*)pNewUser)->isClosed() || 
 		   ((CASocket*)pNewUser)->receiveFullyT((UINT8*)&xml_len,2,FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT)!=E_SUCCESS)
 		{
-			CAMsg::printMsg(LOG_DEBUG,"User login: timed out while waiting for first symmetric key from client!\n");
+			#ifdef DEBUG
+				CAMsg::printMsg(LOG_DEBUG,"User login: timed out while waiting for first symmetric key from client!\n");
+			#endif
 			delete pNewUser;
 			m_pIPList->removeIP(peerIP);
 			return E_UNKNOWN;
 		}
-		CAMsg::printMsg(LOG_DEBUG,"User login: received first symmetric key from client\n");
+		#ifdef DEBUG
+			CAMsg::printMsg(LOG_DEBUG,"User login: received first symmetric key from client\n");
+		#endif
 		
 		xml_len=ntohs(xml_len);
 		UINT8* xml_buff=new UINT8[xml_len+2]; //+2 for size...
@@ -924,7 +936,9 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 			return E_UNKNOWN;
 		}
 		
-		CAMsg::printMsg(LOG_DEBUG,"User login: received second symmetric key from client\n");
+		#ifdef DEBUG
+			CAMsg::printMsg(LOG_DEBUG,"User login: received second symmetric key from client\n");
+		#endif
 		
 		DOMParser oParser;
 		MemBufInputSource oInput(xml_buff+2,xml_len,"tmp");
@@ -992,7 +1006,9 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 			m_pIPList->removeIP(peerIP);
 			return E_UNKNOWN;
 		}
-		CAMsg::printMsg(LOG_DEBUG,"User login: key exchange signature sent\n");
+		#ifdef DEBUG
+			CAMsg::printMsg(LOG_DEBUG,"User login: key exchange signature sent\n");
+		#endif
 		delete xml_buff;
 		
 		((CASocket*)pNewUser)->setNonBlocking(true);
@@ -1008,7 +1024,9 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 #ifdef PAYMENT
 		// register AI control channel
 		//CAAccountingControlChannel * pTmp = new CAAccountingControlChannel(pHashEntry);
-		CAMsg::printMsg(LOG_DEBUG,"User login: registering payment control channel\n");
+		#ifdef DEBUG
+			CAMsg::printMsg(LOG_DEBUG,"User login: registering payment control channel\n");
+		#endif
 		pHashEntry->pControlChannelDispatcher->registerControlChannel(new CAAccountingControlChannel(pHashEntry));
 #endif
 		pHashEntry->pSymCipher=new CASymCipher();
