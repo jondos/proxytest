@@ -695,7 +695,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		{
 			UINT8 tmp[32];
 			print64(tmp,pAccInfo->accountNumber);
-			CAMsg::printMsg(LOG_DEBUG, "Did not find cost confirmation for account %s in database. This seems to be a new user.\n", tmp);
+			CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Cost confirmation for account %s not found in database. This seems to be a new user.\n", tmp);
 		}
 
 		// parse & set payment instance id
