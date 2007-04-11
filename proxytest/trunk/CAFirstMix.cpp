@@ -742,22 +742,25 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 		UINT32 i=0;
 		SINT32 countRead;
 		SINT32 ret;
+		
+		pFirstMix->m_newConnections = 0;
+		
 		for(i=0;i<nSocketsIn;i++)
-			{
-				psocketgroupAccept->add(socketsIn[i]);
-			}
+		{
+			psocketgroupAccept->add(socketsIn[i]);
+		}
 #ifdef REPLAY_DETECTION //before we can start to accept users we have to ensure that we received the replay timestamps form the over mixes
 		CAMsg::printMsg(LOG_DEBUG,"Waiting for Replay Timestamp from next mixes\n");
 		i=0;
 		while(!pFirstMix->getRestart()&&i<pFirstMix->m_u32MixCount-1)
-			{
-				if(pFirstMix->m_arMixParameters[i].m_u32ReplayRefTime==0)//not set yet
-					{
-						msSleep(100);//wait a little bit and try again
-						continue;
-					}
-				i++;
-			}
+		{
+			if(pFirstMix->m_arMixParameters[i].m_u32ReplayRefTime==0)//not set yet
+				{
+					msSleep(100);//wait a little bit and try again
+					continue;
+				}
+			i++;
+		}
 		CAMsg::printMsg(LOG_DEBUG,"All Replay Timestamp received\n");
 #endif
 		while(!pFirstMix->getRestart())
@@ -773,62 +776,84 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 				CAMsg::printMsg(LOG_DEBUG,"UserAcceptLoop: countRead=%i\n",countRead);
 #endif
 				while(countRead>0&&i<nSocketsIn)
-					{
-						if(psocketgroupAccept->isSignaled(socketsIn[i]))
+				{
+					if(psocketgroupAccept->isSignaled(socketsIn[i]))
+						{
+							countRead--;
+							#ifdef _DEBUG
+								CAMsg::printMsg(LOG_DEBUG,"New direct Connection from Client!\n");
+							#endif
+							pNewMuxSocket=new CAMuxSocket;
+							ret=socketsIn[i].accept(*(CASocket*)pNewMuxSocket);
+							pFirstMix->m_newConnections++;							 
+							if(ret!=E_SUCCESS)
 							{
-								countRead--;
-								#ifdef _DEBUG
-									CAMsg::printMsg(LOG_DEBUG,"New direct Connection from Client!\n");
+								CAMsg::printMsg(LOG_ERR,"Accept Error %u - direct Connection from Client!\n",GET_NET_ERROR);
+								delete pNewMuxSocket;
+								pFirstMix->m_newConnections--;
+								if(ret==E_SOCKETCLOSED&&pFirstMix->getRestart()) //Hm, should we restart ??
+								{
+									goto END_THREAD;
+								}
+								else if(ret==E_SOCKET_LIMIT) // Hm no free sockets - wait some time to hope to get a free one...
+								{
+									msSleep(400);
+								}
+							}
+							else if (options.getMaxNrOfUsers() > 0 && pFirstMix->m_nUser >= options.getMaxNrOfUsers())
+							{
+								CAMsg::printMsg(LOG_DEBUG,"Too many users: %d (Maximum:%d)\n", pFirstMix->m_nUser, options.getMaxNrOfUsers());
+								delete pNewMuxSocket;
+								pFirstMix->m_newConnections--;
+								msSleep(400);
+							}
+							else if (pFirstMix->m_newConnections > 15)
+							{
+								/* This should protect the mix from fooding attacks
+								 * No more than MAX_NEW_CONNECTIONS are allowed.
+								 */
+								CAMsg::printMsg(LOG_DEBUG,"Too many concurrent new connections: %d (Maximum:%d)\n", pFirstMix->m_newConnections, 15);
+								delete pNewMuxSocket;
+								pFirstMix->m_newConnections--;
+								msSleep(400);
+							}
+							else
+							{																		
+								//Pruefen ob schon vorhanden..
+								ret=((CASocket*)pNewMuxSocket)->getPeerIP(peerIP);
+								#ifdef PAYMENT
+									if(ret!=E_SUCCESS||pIPList->insertIP(peerIP)<0) // ||
+										//CAAccountingInstance::isIPAddressBlocked(peerIP))
+								#else
+									if(ret!=E_SUCCESS||pIPList->insertIP(peerIP)<0)
 								#endif
-								pNewMuxSocket=new CAMuxSocket;
-								ret=socketsIn[i].accept(*(CASocket*)pNewMuxSocket);
-								if(ret!=E_SUCCESS)
 									{
-										CAMsg::printMsg(LOG_ERR,"Accept Error %u - direct Connection from Client!\n",GET_NET_ERROR);
+										if (ret != E_SUCCESS)
+										{
+											CAMsg::printMsg(LOG_DEBUG,"Could not insert IP address as IP could not be retrieved!\n");
+										}
+										else
+										{
+											CAMsg::printMsg(LOG_DEBUG,"Could not insert IP address!\n");	
+										}
 										delete pNewMuxSocket;
-										if(ret==E_SOCKETCLOSED&&pFirstMix->getRestart()) //Hm, should we restart ??
-											goto END_THREAD;
-										else if(ret==E_SOCKET_LIMIT) // Hm no free sockets - wait some time to hope to get a free one...
-											{
-												msSleep(400);
-											}
+										pFirstMix->m_newConnections--;
 									}
 								else
+								{																						
+									t_UserLoginData* d=new t_UserLoginData;
+									d->pNewUser=pNewMuxSocket;
+									d->pMix=pFirstMix;
+									memcpy(d->peerIP,peerIP,4);
+									if(pthreadsLogin->addRequest(fm_loopDoUserLogin,d)!=E_SUCCESS)
 									{
-										//Pruefen ob schon vorhanden..
-										ret=((CASocket*)pNewMuxSocket)->getPeerIP(peerIP);
-										#ifdef PAYMENT
-											if(ret!=E_SUCCESS||pIPList->insertIP(peerIP)<0) // ||
-												//CAAccountingInstance::isIPAddressBlocked(peerIP))
-										#else
-											if(ret!=E_SUCCESS||pIPList->insertIP(peerIP)<0)
-										#endif
-											{
-												if (ret != E_SUCCESS)
-												{
-													CAMsg::printMsg(LOG_DEBUG,"Could not insert IP address as IP could not be retrieved!\n");
-												}
-												else
-												{
-													CAMsg::printMsg(LOG_DEBUG,"Could not insert IP address!\n");	
-												}
-												delete pNewMuxSocket;
-											}
-										else
-										{																						
-											t_UserLoginData* d=new t_UserLoginData;
-											d->pNewUser=pNewMuxSocket;
-											d->pMix=pFirstMix;
-											memcpy(d->peerIP,peerIP,4);
-											if(pthreadsLogin->addRequest(fm_loopDoUserLogin,d)!=E_SUCCESS)
-												{
-													CAMsg::printMsg(LOG_DEBUG,"Could not add an login request to the login thread pool!\n");
-												}
-										}
+										CAMsg::printMsg(LOG_DEBUG,"Could not add an login request to the login thread pool!\n");
 									}
+								}
 							}
-						i++;
-					}
+						}
+					i++;
+				}
 			}
 END_THREAD:
 		delete []peerIP;
@@ -842,6 +867,7 @@ THREAD_RETURN fm_loopDoUserLogin(void* param)
 		t_UserLoginData* d=(t_UserLoginData*)param;
 		d->pMix->doUserLogin(d->pNewUser,d->peerIP);
 		delete d;
+		d->pMix->m_newConnections--;
 		THREAD_RETURN_SUCCESS;
 	}
 
@@ -859,14 +885,6 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		#else
 			((CASocket*)pNewUser)->setKeepAlive(true);
 		#endif
-		
-		if (options.getMaxNrOfUsers() > 0 && m_nUser >= options.getMaxNrOfUsers())
-		{
-			CAMsg::printMsg(LOG_DEBUG,"Too many users: %d (Maximum:%d)\n", m_nUser, options.getMaxNrOfUsers());
-			delete pNewUser;
-			m_pIPList->removeIP(peerIP);
-			return E_UNKNOWN;
-		}
 		
 		CAMsg::printMsg(LOG_DEBUG,"User login: start\n");
 		// send the mix-keys to JAP

@@ -288,6 +288,9 @@ protected:
 		private:
 			SINT32 sendReplayTimestampRequestsToAllMixes();
 #endif
+
+private:
+	UINT32 m_newConnections;
 };
 
 #endif
