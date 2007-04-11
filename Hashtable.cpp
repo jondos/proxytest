@@ -99,7 +99,7 @@ Hashtable::Hashtable(UINT32 (*hashFunc)(void *), SINT32 (*compareFunc)(void *,vo
 	}	
 	
 	m_table = new Entry*[capacity];
-	for (UINT32 i = 0; i < capacity; i++)
+	for (SINT32 i = 0; i < capacity; i++)
 	{
 		m_table[i] = NULL;
 	}
@@ -382,8 +382,8 @@ bool Hashtable::rehash()
 	
 	UINT32 (*hashCode)(void *) = m_hashFunc;
 	struct Entry **oldtable = m_table,**newtable;
-	UINT32 oldCapacity = m_capacity;
-	UINT32 newCapacity,i;
+	SINT32 oldCapacity = m_capacity;
+	UINT32 newCapacity;
 
 	newCapacity = oldCapacity * 2 + 1;
 	newtable = new Entry*[newCapacity];
@@ -402,7 +402,7 @@ bool Hashtable::rehash()
 	m_table = newtable;
 	m_capacity = newCapacity;
 
-	for(int i = 0; i < oldCapacity; i++)
+	for(SINT32 i = 0; i < oldCapacity; i++)
 	{
 		struct Entry *nextEntry, *e = NULL;
 		UINT32 index;
