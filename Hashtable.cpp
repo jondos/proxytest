@@ -119,19 +119,30 @@ Hashtable::Hashtable(UINT32 (*hashFunc)(void *), SINT32 (*compareFunc)(void *,vo
 
 Hashtable::~Hashtable()
 {
-	struct Entry **table = m_table;
+	m_mutex.lock();
 	
 	for(SINT32 index = 0; index < m_capacity; index++)
 	{
 		struct Entry *e,*next;
 
-		for(e = table[index]; e; e = next)
+		for(e = m_table[index]; e; e = next)
 		{
 			next = e->e_Next;
 			delete e;
 		}
+		m_table[index] = NULL;
 	}
-	delete table;
+	delete m_table;
+	m_table = NULL;
+	m_capacity = 0;
+	m_count = 0;
+	m_threshold = 0;
+	m_loadFactor = 0;
+	m_modCount = 0;
+	m_hashFunc = NULL;
+	m_compareFunc = NULL;
+	
+	m_mutex.unlock();
 }
 
 
@@ -212,6 +223,11 @@ void* Hashtable::put(void *key, void *value)
 {
 	CAMsg::printMsg(LOG_INFO, "Hashtable: Putting key.\n");
 	
+	if (!key || !value)
+	{
+		return NULL;
+	}
+	
 	struct Entry *oldEntry = getHashEntry(key);
 	struct Entry *e = NULL;
 	UINT32 hash = m_hashFunc(key);
@@ -223,9 +239,8 @@ void* Hashtable::put(void *key, void *value)
 	}
 	
 	//m_modCount++;
-	if (m_modCount >= m_threshold)
-	{
-		
+	if (m_count >= m_threshold)
+	{		
 		rehash();
 	}
 	
@@ -264,6 +279,11 @@ void *Hashtable::remove(void *key)
 {
 	CAMsg::printMsg(LOG_INFO, "Hashtable: Removing key.\n");
 	
+	if (!key)
+	{
+		return NULL;
+	}
+	
 	struct Entry **table,*e,*prev;
 	UINT32 hash,(*func)(void *);
 	SINT32 index;
@@ -272,7 +292,7 @@ void *Hashtable::remove(void *key)
 	hash = (func = m_hashFunc)(key);
 	index = hash % m_capacity;
 	
-	for(e = table[index],prev = NULL;e;e = e->e_Next)
+	for(e = table[index],prev = NULL; e; e = e->e_Next)
 	{
 		if (e == NULL)
 		{
@@ -307,10 +327,13 @@ void *Hashtable::remove(void *key)
 
 
 void Hashtable::makeEmpty(SINT8 keyMode,SINT8 valueMode)
-{
+{	
 	CAMsg::printMsg(LOG_INFO, "Hashtable: Clearing...\n");
-	
-	//m_modCount++;
+
+	if (!m_table)
+	{
+		return;
+	}
 
 	for(SINT32 index = 0; index < m_capacity; index++)
 	{
@@ -318,7 +341,6 @@ void Hashtable::makeEmpty(SINT8 keyMode,SINT8 valueMode)
 
 		for(e = m_table[index]; e; e = next)
 		{
-			/*
 			switch(keyMode)
 			{
 				case HASH_EMPTY_DELETE:
@@ -328,9 +350,10 @@ void Hashtable::makeEmpty(SINT8 keyMode,SINT8 valueMode)
 						e->e_Key = NULL;
 					}
 					break;
-				case HASH_EMPTY_FREE:
-					free(e->e_Key);
-					break;					
+//				case HASH_EMPTY_FREE:
+//					free(e->e_Key);
+				default:
+					e->e_Key = NULL;		
 			}
 			switch(valueMode)
 			{
@@ -341,10 +364,11 @@ void Hashtable::makeEmpty(SINT8 keyMode,SINT8 valueMode)
 						e->e_Value = NULL;
 					}
 					break;
-				case HASH_EMPTY_FREE:
-					free(e->e_Value);
-					break;					
-			}*/
+//				case HASH_EMPTY_FREE:
+//					free(e->e_Value);
+				default:
+					e->e_Value = NULL;
+			}
 			next = e->e_Next;
 			delete e;
 		}
@@ -433,6 +457,11 @@ bool Hashtable::rehash()
 
 struct Entry *Hashtable::getHashEntry(void *key)
 {	
+	if (!key)
+	{
+		return NULL;
+	}
+	
 	struct Entry **table,*e;
 	UINT32 hash,(*func)(void *);
 	
