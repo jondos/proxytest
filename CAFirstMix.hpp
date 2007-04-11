@@ -290,6 +290,9 @@ protected:
 #endif
 
 private:
+
+	static const UINT32 MAX_CONCURRENT_NEW_CONNECTIONS;
+
 	UINT32 m_newConnections;
 };
 

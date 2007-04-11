@@ -56,7 +56,7 @@ CATempIPBlockList::~CATempIPBlockList()
 		m_bRunCleanupThread=false;
 		m_pCleanupThread->join(); //wait for cleanupthread to wakeup and exit
 		m_pMutex->lock();
-		//its safe to delet it because we have the lock...
+		//its safe to delete it because we have the lock...
 		for(UINT32 i=0;i<=0xFFFF;i++) 
 			{
 				PTEMPIPBLOCKLIST entry=m_hashTable[i];
