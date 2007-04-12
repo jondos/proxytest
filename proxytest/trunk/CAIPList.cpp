@@ -92,6 +92,11 @@ CAIPList::~CAIPList()
 	*/
 SINT32 CAIPList::insertIP(const UINT8 ip[4])
 	{
+		if (1 == 1)
+		{
+			return 1;
+		}
+		
 		UINT16 hashvalue=(ip[2]<<8)|ip[3];
 		SINT32 ret;
 		m_pMutex->lock();
@@ -174,6 +179,11 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 	SINT32 CAIPList::removeIP(const UINT8 ip[4],UINT32 time,UINT32 trafficIn,UINT32 trafficOut)
 #endif
 	{
+		if (1 == 1)
+		{
+			return 0;
+		}
+		
 		UINT16 hashvalue=(ip[2]<<8)|ip[3];
 		SINT32 ret;
 		m_pMutex->lock();
