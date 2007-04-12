@@ -445,7 +445,9 @@ SINT32 CASocket::sendFullyTimeOut(const UINT8* buff,UINT32 len, UINT32 msTimeOut
 			getcurrentTimeMillis(currentMillis);
 			if (currentMillis >= (startupTime + msTimeOut))
 			{
+				#ifdef DEBUG
 				CAMsg::printMsg(LOG_DEBUG,"CASocket::sendFullyTimeOut() - timed out!\n");
+				#endif
 				setSendTimeOut(aktTimeOut);
 				return E_TIMEDOUT;
 			}
@@ -462,7 +464,7 @@ SINT32 CASocket::sendFullyTimeOut(const UINT8* buff,UINT32 len, UINT32 msTimeOut
 				if(ret>=0||ret==E_TIMEDOUT)
 					continue;
 				#ifdef _DEBUG
-					CAMsg::printMsg(LOG_DEBUG,"CASocket::sendFully() - error near select_once() ret=%i\n",ret);
+					CAMsg::printMsg(LOG_DEBUG,"CASocket::sendTimeOutFully() - error near select_once() ret=%i\n",ret);
 				#endif
 				setSendTimeOut(aktTimeOut);
 				return E_UNKNOWN;
@@ -470,7 +472,7 @@ SINT32 CASocket::sendFullyTimeOut(const UINT8* buff,UINT32 len, UINT32 msTimeOut
 			else if(ret<0)
 			{
 				#ifdef _DEBUG
-					CAMsg::printMsg(LOG_DEBUG,"CASocket::sendFully() - send returned %i\n",ret);
+					CAMsg::printMsg(LOG_DEBUG,"CASocket::sendTimeOutFully() - send returned %i\n",ret);
 				#endif
 				setSendTimeOut(aktTimeOut);
 				return E_UNKNOWN;
