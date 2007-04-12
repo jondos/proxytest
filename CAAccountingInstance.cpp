@@ -323,8 +323,9 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 #ifdef DEBUG					
 					CAMsg::printMsg( LOG_DEBUG, "Accounting instance: User refused "		
 									"to send cost confirmation (HARDLIMIT EXCEEDED).\n");
-#endif																						
-					ms_pInstance->m_pIPBlockList->insertIP( pHashEntry->peerIP );
+#endif					
+					/** @todo test if this is needeed... */																	
+					//ms_pInstance->m_pIPBlockList->insertIP( pHashEntry->peerIP );
 					pAccInfo->lastHardLimitSeconds = 0;
 					return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_NO_CONFIRMATION));
 				}
