@@ -74,24 +74,26 @@ SINT32 CAAccountingBIInterface::initBIConnection()
 				m_connected = false;
 				return E_UNKNOWN;
 			}
+		#ifdef DEBUG
 		CAMsg::printMsg(LOG_DEBUG,"CAAccountingBIInterface: try to connect to BI at %s:%i.\n",pBI->getHostName(),pBI->getPortNumber());
+		#endif
 		address.setAddr(pBI->getHostName(), (UINT16)pBI->getPortNumber());		
 		// connect
 		rc=m_pSocket->connect(address);
 		if(rc!=E_SUCCESS)
-			{
-				UINT8 buf[64];
-				memset(buf,0,64);
-				address.getHostName(buf, 64);
-				CAMsg::printMsg(
-						LOG_ERR, 
-						"CAAccountingBIInterface: could not connect to BI at %s:%i. Reason: %i\n", 
-						buf, address.getPort(), rc
-					);
-				m_connected = false;
-				return E_UNKNOWN;
-			}
-		CAMsg::printMsg(LOG_DEBUG,"CAAccountingBIInterface: BI connection established!\n");
+		{
+			UINT8 buf[64];
+			memset(buf,0,64);
+			address.getHostName(buf, 64);
+			CAMsg::printMsg(
+					LOG_ERR, 
+					"CAAccountingBIInterface: Could not connect to BI at %s:%i. Reason: %i\n", 
+					buf, address.getPort(), rc
+				);
+			m_connected = false;
+			return E_UNKNOWN;
+		}
+		CAMsg::printMsg(LOG_DEBUG,"CAAccountingBIInterface: BI connection to %s:%i established!\n", pBI->getHostName(),pBI->getPortNumber());
 		m_httpClient.setSocket(m_pSocket);
 		m_connected = true;
 		return E_SUCCESS;
