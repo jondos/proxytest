@@ -869,12 +869,12 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 		!= E_SUCCESS )
 		{
 			CAMsg::printMsg(LOG_ERR, "Challenge-response authentication failed!\n" );
-			/*
-			CAXMLErrorMessage err(CAXMLErrorMessage::ERR_BAD_SIGNATURE, 
-					(UINT8*)"Challenge-response authentication failed!!\n");
-			DOM_Document errDoc;
-			err.toXmlDocument(errDoc);
-			pAccInfo->pControlChannel->sendMessage(errDoc); */
+			
+			//CAXMLErrorMessage err(CAXMLErrorMessage::ERR_BAD_SIGNATURE, 
+			//		(UINT8*)"Challenge-response authentication failed!!\n");
+			//DOM_Document errDoc;
+			//err.toXmlDocument(errDoc);
+			//pAccInfo->pControlChannel->sendMessage(errDoc); 
 			pAccInfo->authFlags |= AUTH_FAKE;
 			pAccInfo->authFlags &= ~AUTH_ACCOUNT_OK;
 			m_Mutex.unlock();
