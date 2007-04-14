@@ -179,7 +179,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			{				
 				ms_pInstance->m_Mutex.unlock();
 				// don't let through messages from JAP
-				return 1;
+				return 2;
 			}
 		}	
 		
@@ -413,8 +413,7 @@ SINT32 CAAccountingInstance::returnWait(tAiAccountingInfo* pAccInfo)
  */
 SINT32 CAAccountingInstance::returnKickout(tAiAccountingInfo* pAccInfo)
 {
-	CAMsg::printMsg(LOG_DEBUG, "AccountingInstance: should kick out user now...\n");
-	pAccInfo->sessionPackets = 0;
+	CAMsg::printMsg(LOG_DEBUG, "AccountingInstance: should kick out user now...\n");	
 	pAccInfo->transferredBytes = pAccInfo->confirmedBytes;
 	ms_pInstance->m_Mutex.unlock();
 	return 3;
@@ -433,6 +432,7 @@ SINT32 CAAccountingInstance::returnHold(tAiAccountingInfo* pAccInfo, CAXMLErrorM
 		DOM_Document doc;												
 		a_error->toXmlDocument(doc);			
 		delete a_error;
+		pAccInfo->sessionPackets = 0; // allow some pakets to pass by to send the control message
 		pAccInfo->pControlChannel->sendXMLMessage(doc);		
 	}
 	else
