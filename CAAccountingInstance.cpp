@@ -859,11 +859,12 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 	
 	
 	// check signature
-	pDsaSig = DSA_SIG_new();
+	//pDsaSig = DSA_SIG_new();
 	CASignature * sigTester = pHashEntry->pAccountingInfo->pPublicKey;
 		//#pragma message (__FILE__ "(665) Signature verifying must be implemented here !!!!!!!!!! ")
 	sigTester->decodeRS( decodeBuffer, decodeBufferLen, pDsaSig );
 	/// TODO: Really do signature checking here...
+	/*
 	if ( sigTester->verifyDER( pHashEntry->pAccountingInfo->pChallenge, 222, decodeBuffer, decodeBufferLen ) 
 		!= E_SUCCESS )
 		{
@@ -878,7 +879,7 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 			pAccInfo->authFlags &= ~AUTH_ACCOUNT_OK;
 			m_Mutex.unlock();
 			return ;
-		}
+		}*/
 		
 	pAccInfo->authFlags |= AUTH_ACCOUNT_OK;
 	
