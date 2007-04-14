@@ -82,13 +82,15 @@ SINT32 CAAccountingBIInterface::initBIConnection()
 		rc=m_pSocket->connect(address);
 		if(rc!=E_SUCCESS)
 		{
+			/*
 			UINT8 buf[64];
 			memset(buf,0,64);
-			address.getHostName(buf, 64);
+			address.getHostName(buf, 64);*/
 			CAMsg::printMsg(
 					LOG_ERR, 
 					"CAAccountingBIInterface: Could not connect to BI at %s:%i. Reason: %i\n", 
-					buf, address.getPort(), rc
+					//buf, address.getPort(), rc
+					pBI->getHostName(), pBI->getPortNumber(), rc
 				);
 			m_connected = false;
 			return E_UNKNOWN;

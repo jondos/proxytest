@@ -171,7 +171,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		if(pAccInfo->authFlags & (AUTH_FATAL_ERROR))
 		{
 			// there was an error earlier.
-			if (a_bControlMessage || pAccInfo->sessionPackets >= 4)
+			if (a_bControlMessage || pAccInfo->sessionPackets >= 10)
 			{				
 				return returnKickout(pAccInfo);
 			}
@@ -202,7 +202,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			if (entry->authFlags & AUTH_INVALID_CC)
 			{
 				entry->authFlags &= ~AUTH_INVALID_CC;		
-				// insert confirmed bytes from current CC here						
+				// we had stored an outdated CC; insert confirmed bytes from current CC here						
 				pAccInfo->transferredBytes +=  entry->confirmedBytes - pAccInfo->confirmedBytes;
 				pAccInfo->confirmedBytes = entry->confirmedBytes;				
 			}
@@ -210,7 +210,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			{
 				entry->authFlags &= ~AUTH_ACCOUNT_EMPTY;
 				entry->authFlags |= AUTH_FATAL_ERROR;
-				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Account empty, kicking out user...\n");				
+				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Account empty! Kicking out user...\n");				
 				err = new CAXMLErrorMessage(CAXMLErrorMessage::ERR_ACCOUNT_EMPTY);
 			}
 			else if (entry->authFlags & AUTH_INVALID_ACCOUNT)
@@ -222,7 +222,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			}
 			
 			if (err)
-			{			
+			{
 				CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: sending error message...!\n");										
 			}
 			
