@@ -179,7 +179,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			{				
 				ms_pInstance->m_Mutex.unlock();
 				// don't let through messages from JAP
-				return 2;
+				return 1;
 			}
 		}	
 		
