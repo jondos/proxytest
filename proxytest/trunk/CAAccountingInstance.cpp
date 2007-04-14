@@ -862,7 +862,7 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 	//pDsaSig = DSA_SIG_new();
 	CASignature * sigTester = pHashEntry->pAccountingInfo->pPublicKey;
 		//#pragma message (__FILE__ "(665) Signature verifying must be implemented here !!!!!!!!!! ")
-	sigTester->decodeRS( decodeBuffer, decodeBufferLen, pDsaSig );
+	//sigTester->decodeRS( decodeBuffer, decodeBufferLen, pDsaSig );
 	/// TODO: Really do signature checking here...
 	/*
 	if ( sigTester->verifyDER( pHashEntry->pAccountingInfo->pChallenge, 222, decodeBuffer, decodeBufferLen ) 
