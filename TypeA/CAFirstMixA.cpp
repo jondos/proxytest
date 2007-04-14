@@ -185,7 +185,7 @@ SINT32 CAFirstMixA::loop()
 												{
 													ret = CAAccountingInstance::handleJapPacket(pHashEntry, false);  
 												}
-												if (ret == 2)
+												if (ret == 2 || ret == 3)
 												{
 													goto NEXT_USER;
 												}		
