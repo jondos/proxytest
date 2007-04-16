@@ -1859,25 +1859,29 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 			// old configuration version <= 0.61
 			DOM_Element elemInfoService;
 			DOM_Element elemAllowReconfig;
-			getDOMChildByName(elemNetwork,(UINT8*)"InfoService",elemInfoService,false);
+			if (getDOMChildByName(elemNetwork,(UINT8*)"InfoService",elemInfoService,false) != E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Node \"InfoServices\" not found!\n");				
+				return E_UNKNOWN;
+			}
 			/* LERNGRUPPE: There might not be any InfoService configuration in the file, but in infoservices.xml, so check this */
 			if(elemInfoService != NULL)
 			{ 
-			getDOMChildByName(elemInfoService,(UINT8*)"AllowAutoConfiguration",elemAllowReconfig,false);
-				CAListenerInterface* isListenerInterface = CAListenerInterface::getInstance(elemInfoService);
-			 m_addrInfoServicesSize = 1;
-			m_addrInfoServices = new CAListenerInterface*[m_addrInfoServicesSize];
-			m_addrInfoServices[0] = isListenerInterface;
+				getDOMChildByName(elemInfoService,(UINT8*)"AllowAutoConfiguration",elemAllowReconfig,false);
+					CAListenerInterface* isListenerInterface = CAListenerInterface::getInstance(elemInfoService);
+				 m_addrInfoServicesSize = 1;
+				m_addrInfoServices = new CAListenerInterface*[m_addrInfoServicesSize];
+				m_addrInfoServices[0] = isListenerInterface;
 				if(getDOMElementValue(elemAllowReconfig,tmpBuff,&tmpLen)==E_SUCCESS)
-					{
+				{
 					m_bAcceptReconfiguration = (strcmp("True",(char*)tmpBuff) == 0);
 				}
 			}
 		}
 		else
 	    {
-				// Refactored
-				parseInfoServices(elemInfoServiceContainer);
+			// Refactored
+			parseInfoServices(elemInfoServiceContainer);
 	    }
 		 
 		//get ListenerInterfaces
@@ -2162,27 +2166,27 @@ SKIP_NEXT_MIX:
 
 		//Set Proxy Visible Addresses if Last Mix and given
 		if(isLastMix())
+		{
+			DOM_Element elemProxies=m_docMixInfo.createElement("Proxies");
+			DOM_Element elemProxy=m_docMixInfo.createElement("Proxy");
+			DOM_Element elemVisAddresses=m_docMixInfo.createElement("VisibleAddresses");
+			elemMix.appendChild(elemProxies);
+			elemProxies.appendChild(elemProxy);
+			elemProxy.appendChild(elemVisAddresses);
+			for(UINT32 i=1;i<=getVisibleAddressesCount();i++)
 			{
-				DOM_Element elemProxies=m_docMixInfo.createElement("Proxies");
-				DOM_Element elemProxy=m_docMixInfo.createElement("Proxy");
-				DOM_Element elemVisAddresses=m_docMixInfo.createElement("VisibleAddresses");
-				elemMix.appendChild(elemProxies);
-				elemProxies.appendChild(elemProxy);
-				elemProxy.appendChild(elemVisAddresses);
-				for(UINT32 i=1;i<=getVisibleAddressesCount();i++)
-					{
-						UINT8 tmp[255];
-						UINT32 tmplen=255;
-						if(getVisibleAddress(tmp,tmplen,i)==E_SUCCESS)
-							{
-								DOM_Element elemVisAddress=m_docMixInfo.createElement("VisibleAddress");
-								DOM_Element elemHost=m_docMixInfo.createElement("Host");
-								elemVisAddress.appendChild(elemHost);
-								setDOMElementValue(elemHost,tmp);
-								elemVisAddresses.appendChild(elemVisAddress);
-							}
-					}
+				UINT8 tmp[255];
+				UINT32 tmplen=255;
+				if(getVisibleAddress(tmp,tmplen,i)==E_SUCCESS)
+				{
+					DOM_Element elemVisAddress=m_docMixInfo.createElement("VisibleAddress");
+					DOM_Element elemHost=m_docMixInfo.createElement("Host");
+					elemVisAddress.appendChild(elemHost);
+					setDOMElementValue(elemHost,tmp);
+					elemVisAddresses.appendChild(elemVisAddress);
+				}
 			}
+		}
 		
 		//Set Software-Version...
 		DOM_Element elemSoftware=m_docMixInfo.createElement("Software");
@@ -2196,12 +2200,12 @@ SKIP_NEXT_MIX:
 		//insert price certificate
 		if (getPriceCertificate() == NULL)
 		{
-			CAMsg::printMsg(LOG_DEBUG, "can't insert price certificate because it's Null\n");
+			CAMsg::printMsg(LOG_CRIT, "can't insert price certificate because it's Null\n");
+			return E_UNKNOWN;
 		} else {
 			DOM_Element pcElem;		
 			getPriceCertificate()->toXmlElement(m_docMixInfo,pcElem);	
 			elemMix.appendChild(pcElem);
-			CAMsg::printMsg(LOG_DEBUG,"after inserting price certificate\n");
 		}
 		//insert prepaid interval
 		UINT32 prepaidIntervalKbytes;
