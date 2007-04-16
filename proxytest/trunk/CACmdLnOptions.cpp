@@ -1397,7 +1397,11 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 			return E_UNKNOWN;
 		DOM_Element elemRoot=docConfig.getDocumentElement();
 		DOM_Element elemGeneral;
-		getDOMChildByName(elemRoot,(UINT8*)"General",elemGeneral,false);
+		if (getDOMChildByName(elemRoot,(UINT8*)"General",elemGeneral,false) != E_SUCCESS)
+		{
+			CAMsg::printMsg(LOG_CRIT,"No \"General\" node found in configuration file!\n");
+			return E_UNKNOWN;
+		}
 
 		UINT8 tmpBuff[255];
 		UINT32 tmpLen=255;
@@ -1405,17 +1409,26 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		
 		//getMixType
 		DOM_Element elem;
-		getDOMChildByName(elemGeneral,(UINT8*)"MixType",elem,false);
+		if (getDOMChildByName(elemGeneral,(UINT8*)"MixType",elem,false) != E_SUCCESS)
+		{
+			CAMsg::printMsg(LOG_CRIT,"No \"MixType\" node found in configuration file!\n");
+			return E_UNKNOWN;
+		}
 		tmpLen=255;
 		if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS)
-			{
-				if(memcmp(tmpBuff,"FirstMix",8)==0)
-					m_bFirstMix=true;
-				else if (memcmp(tmpBuff,"MiddleMix",9)==0)
-					m_bMiddleMix=true;
-				else if (memcmp(tmpBuff,"LastMix",7)==0)
-					m_bLastMix=true;
-			}
+		{
+			if(memcmp(tmpBuff,"FirstMix",8)==0)
+				m_bFirstMix=true;
+			else if (memcmp(tmpBuff,"MiddleMix",9)==0)
+				m_bMiddleMix=true;
+			else if (memcmp(tmpBuff,"LastMix",7)==0)
+				m_bLastMix=true;
+		}
+		else
+		{
+			CAMsg::printMsg(LOG_CRIT,"Node \"MixType\" is empty!\n");
+			return E_UNKNOWN;
+		}
 
 		// LERNGRUPPE
 		// get Dynamic flag
@@ -1457,11 +1470,11 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		getDOMChildByName(elemGeneral,(UINT8*)"UserID",elem,false);
 		tmpLen=255;
 		if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS)
-			{
-				m_strUser=new char[tmpLen+1];
-				memcpy(m_strUser,tmpBuff,tmpLen);
-				m_strUser[tmpLen]=0;
-			}
+		{
+			m_strUser=new char[tmpLen+1];
+			memcpy(m_strUser,tmpBuff,tmpLen);
+			m_strUser[tmpLen]=0;
+		}
 		//get Number of File Descriptors to use
 		getDOMChildByName(elemGeneral,(UINT8*)"NrOfFileDescriptors",elem,false);
 		UINT32 tmp;
@@ -1543,22 +1556,22 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		UINT8 passwd[500];
 		passwd[0]=0;
 		if(m_pSignKey->setSignKey(elemOwnCert.getFirstChild(),SIGKEY_PKCS12)!=E_SUCCESS)
-			{//Maybe not an empty passwd
-				printf("I need a passwd for the SignKey: ");
-				scanf("%400[^\n]%*1[\n]",(char*)passwd);
-				if(m_pSignKey->setSignKey(elemOwnCert.getFirstChild(),SIGKEY_PKCS12,(char*)passwd)!=E_SUCCESS)
-					{
-						CAMsg::printMsg(LOG_CRIT,"Could not read own signature key!\n");
-						delete m_pSignKey;
-						m_pSignKey=NULL;
-					}
+		{//Maybe not an empty passwd
+			printf("I need a passwd for the SignKey: ");
+			scanf("%400[^\n]%*1[\n]",(char*)passwd);
+			if(m_pSignKey->setSignKey(elemOwnCert.getFirstChild(),SIGKEY_PKCS12,(char*)passwd)!=E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Could not read own signature key!\n");
+				delete m_pSignKey;
+				m_pSignKey=NULL;
 			}
+		}		
 		m_pOwnCertificate=CACertificate::decode(elemOwnCert.getFirstChild(),CERT_PKCS12,(char*)passwd);
 		if (m_pOwnCertificate == NULL)
-			{
-				return E_UNKNOWN;
-			}
-
+		{
+			CAMsg::printMsg(LOG_CRIT,"Could not decode mix certificate!\n");
+			return E_UNKNOWN;
+		}
 		
 		//get MixID
 		tmpLen=255;
@@ -1568,10 +1581,12 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 			getDOMChildByName(elemGeneral,(UINT8*)"MixID",elemMixID,false);
 			if(elemMixID==NULL)
 			{
+				CAMsg::printMsg(LOG_CRIT,"Node \"MixID\" not found!\n");
 				return E_UNKNOWN;
 			}
 			if(getDOMElementValue(elemMixID,tmpBuff,&tmpLen)!=E_SUCCESS)
 			{
+				CAMsg::printMsg(LOG_CRIT,"Node \"MixID\" is empty!\n");
 				return E_UNKNOWN;
 			}
 		}
@@ -1590,16 +1605,17 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 
 		//then Operator Certificate
 		DOM_Element elemOpCert;
-		//CAMsg::printMsg(LOG_DEBUG,"Could not sign KeyInfo sent to users...\n");
-		getDOMChildByName(elemCertificates,(UINT8*)"OperatorOwnCertificate",elemOpCert,false);
+		if (getDOMChildByName(elemCertificates,(UINT8*)"OperatorOwnCertificate",elemOpCert,false) != E_SUCCESS)
+		{
+			CAMsg::printMsg(LOG_CRIT,"Node \"OperatorOwnCertificate\" not found!\n");
+			return E_UNKNOWN;
+		}
 		//CAMsg::printMsg(LOG_DEBUG,"Node: %s\n",elemOpCert.getNodeName().transcode());
 		
 		m_OpCertsLength = 0;
 		if (elemOpCert != NULL)
 		{
-			DOM_NodeList opCertList = elemOpCert.getElementsByTagName("X509Certificate");
-		
-			m_OpCertsLength = 0;
+			DOM_NodeList opCertList = elemOpCert.getElementsByTagName("X509Certificate");		
 			m_OpCerts = new CACertificate*[opCertList.getLength()];	
 			for (UINT32 i = 0; i < opCertList.getLength(); i++)
 			{
@@ -1608,6 +1624,11 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 				{
 					m_OpCertsLength++;
 				}
+			}
+			if (m_OpCertsLength == 0)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Node \"X509Certificate\" of operator certificate not found!\n");
+				return E_UNKNOWN;
 			}
 		}		
 		
@@ -1628,97 +1649,163 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 // Read PaymentInstance data (JPI Hostname, Port, Publickey) from configfile
 
 		DOM_Element elemAccounting;
-		getDOMChildByName(elemRoot,(UINT8*)"Accounting",elemAccounting,false);
+		if (getDOMChildByName(elemRoot,(UINT8*)"Accounting",elemAccounting,false) != E_SUCCESS)
+		{
+			CAMsg::printMsg(LOG_CRIT,"Node \"Accounting\" not found!\n");
+			return E_UNKNOWN;
+		}
 		if(elemAccounting != NULL) 
+		{
+
+			//get price certificate
+			DOM_Element pcElem;
+			//function in CAUtil, last param is "deep", needs to be set to include child elems				
+			getDOMChildByName(elemAccounting, (UINT8*)"PriceCertificate",pcElem, false);
+			if (pcElem == NULL)
 			{
+				CAMsg::printMsg(LOG_CRIT,"Node \"PriceCertificate\" not found!\n");
+				return E_UNKNOWN;
+			} else 
+			{
+				m_pPriceCertificate = CAXMLPriceCert::getInstance(pcElem); 
+				if (m_pPriceCertificate == NULL) {
+					CAMsg::printMsg(LOG_DEBUG, "PRICECERT PROCESSED, BUT STILL NULL");
+					return E_UNKNOWN;
+				}
+			}				
 
-				//get price certificate
-				DOM_Element pcElem;
-				//function in CAUtil, last param is "deep", needs to be set to include child elems				
-				getDOMChildByName(elemAccounting, (UINT8*)"PriceCertificate",pcElem, false);
-				if (pcElem == NULL)
+			DOM_Element elemJPI;
+			getDOMChildByName(elemAccounting, CAXMLBI::getXMLElementName(), elemJPI, false);
+			m_pBI = CAXMLBI::getInstance(elemJPI);
+			if (getDOMChildByName(elemAccounting, (UINT8*)"SoftLimit", elem, false) != E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Node \"SoftLimit\" not found!\n");
+				return E_UNKNOWN;
+			}
+			if(getDOMElementValue(elem, &tmp)==E_SUCCESS)
+			{
+				m_iPaymentSoftLimit = tmp;
+			}
+			if (getDOMChildByName(elemAccounting, (UINT8*)"HardLimit", elem, false) != E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Node \"HardLimit\" not found!\n");
+				return E_UNKNOWN;
+			}
+			if(getDOMElementValue(elem, &tmp)==E_SUCCESS)
+			{
+				m_iPaymentHardLimit = tmp;
+			}
+			if (getDOMChildByName(elemAccounting, (UINT8*)"PrepaidIntervalKbytes", elem, false) != E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Node \"PrepaidIntervalKbytes\" not found!\n");
+			}
+			if(getDOMElementValue(elem, &tmp)==E_SUCCESS)
+			{
+				m_iPrepaidIntervalKbytes = tmp;
+			}
+			else 
+			{
+				CAMsg::printMsg(LOG_CRIT,"Node \"PrepaidIntervalKbytes\" is empty! Setting default...\n");
+				m_iPrepaidIntervalKbytes = 10240; //10 MB as safe default if not explicitly set in config file	
+			}
+			if (getDOMChildByName(elemAccounting, (UINT8*)"SettleInterval", elem, false) != E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Node \"SettleInterval\" not found!\n");
+				return E_UNKNOWN;
+			}
+			if(getDOMElementValue(elem, &tmp)==E_SUCCESS)
+			{
+				m_iPaymentSettleInterval = tmp;
+			}
+			else
+			{
+				CAMsg::printMsg(LOG_CRIT,"Node \"SettleInterval\" is empty!\n");
+				return E_UNKNOWN;
+			}
+				
+			// get AiID (NOT a separate element /Accounting/AiID any more, rather the subjectkeyidentifier given in the price certificate
+			m_strAiID = m_pPriceCertificate->getSubjectKeyIdentifier();
+				
+				
+			DOM_Element elemDatabase;
+			if (getDOMChildByName(elemAccounting, (UINT8*)"Database", elemDatabase, false) != E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Node \"Database\" not found!\n");
+				return E_UNKNOWN;
+			}								
+			if(elemDatabase != NULL) 
+			{
+				// get DB Hostname
+				if (getDOMChildByName(elemDatabase, (UINT8*)"Host", elem, false) != E_SUCCESS)
 				{
-					CAMsg::printMsg(LOG_DEBUG, "no price certificate element found");
-				} else 
+					CAMsg::printMsg(LOG_CRIT,"Node \"Host\" not found!\n");
+					return E_UNKNOWN;
+				}
+				tmpLen = 255;
+				if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) 
 				{
-					m_pPriceCertificate = CAXMLPriceCert::getInstance(pcElem); 
-					if (m_pPriceCertificate == NULL) {
-						CAMsg::printMsg(LOG_DEBUG, "PRICECERT PROCESSED, BUT STILL NULL");
-					}
-				}	
-
-
-				DOM_Element elemJPI;
-				getDOMChildByName(elemAccounting, CAXMLBI::getXMLElementName(), elemJPI, false);
-				m_pBI = CAXMLBI::getInstance(elemJPI);
-				getDOMChildByName(elemAccounting, (UINT8*)"SoftLimit", elem, false);
-				if(getDOMElementValue(elem, &tmp)==E_SUCCESS)
-					{
-						m_iPaymentSoftLimit = tmp;
-					}
-				getDOMChildByName(elemAccounting, (UINT8*)"HardLimit", elem, false);
-				if(getDOMElementValue(elem, &tmp)==E_SUCCESS)
-					{
-						m_iPaymentHardLimit = tmp;
-					}
-				getDOMChildByName(elemAccounting, (UINT8*)"PrepaidIntervalKbytes", elem, false);
-				if(getDOMElementValue(elem, &tmp)==E_SUCCESS)
-					{
-						m_iPrepaidIntervalKbytes = tmp;
-					}
-				else 
-					{
-					m_iPrepaidIntervalKbytes = 10240; //10 MB as safe default if not explicitly set in config file	
-					}
-				getDOMChildByName(elemAccounting, (UINT8*)"SettleInterval", elem, false);
-				if(getDOMElementValue(elem, &tmp)==E_SUCCESS)
-					{
-						m_iPaymentSettleInterval = tmp;
-					}
-					
-				// get AiID (NOT a separate element /Accounting/AiID any more, rather the subjectkeyidentifier given in the price certificate
-				m_strAiID = m_pPriceCertificate->getSubjectKeyIdentifier();
-					
-					
-				DOM_Element elemDatabase;
-				getDOMChildByName(elemAccounting, (UINT8*)"Database", elemDatabase, false);
-				if(elemDatabase != NULL) 
-					{
-						// get DB Hostname
-						getDOMChildByName(elemDatabase, (UINT8*)"Host", elem, false);
-						tmpLen = 255;
-						if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) 
-							{
-								strtrim(tmpBuff);
-								m_strDatabaseHost = new UINT8[strlen((char*)tmpBuff)+1];
-								strcpy((char *)m_strDatabaseHost, (char *) tmpBuff);
-							}
-						// get Database Port
-						getDOMChildByName(elemDatabase, (UINT8*)"Port", elem, false);
-						if(getDOMElementValue(elem, &tmp)==E_SUCCESS) 
-							{
-								m_iDatabasePort = tmp;
-							}
-						// get DB Name
-						getDOMChildByName(elemDatabase, (UINT8*)"DBName", elem, false);
-						tmpLen = 255;
-						if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) 
-							{
-								strtrim(tmpBuff);
-								m_strDatabaseName = new UINT8[strlen((char*)tmpBuff)+1];
-								strcpy((char *)m_strDatabaseName, (char *) tmpBuff);
-							}
-						// get DB Username
-						getDOMChildByName(elemDatabase, (UINT8*)"Username", elem, false);
-						tmpLen = 255;
-						if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) 
-							{
-								strtrim(tmpBuff);
-								m_strDatabaseUser = new UINT8[strlen((char*)tmpBuff)+1];
-								strcpy((char *)m_strDatabaseUser, (char *) tmpBuff);
-							}
-							
-						//get DB password from xml 	
+					strtrim(tmpBuff);
+					m_strDatabaseHost = new UINT8[strlen((char*)tmpBuff)+1];
+					strcpy((char *)m_strDatabaseHost, (char *) tmpBuff);
+				}
+				else
+				{
+					CAMsg::printMsg(LOG_CRIT,"Node \"Host\" is empty!\n");
+					return E_UNKNOWN;
+				}
+				// get Database Port
+				if (getDOMChildByName(elemDatabase, (UINT8*)"Port", elem, false) != E_SUCCESS)
+				{
+					CAMsg::printMsg(LOG_CRIT,"Node \"Port\" not found!\n");
+					return E_UNKNOWN;
+				}
+				if(getDOMElementValue(elem, &tmp)==E_SUCCESS) 
+				{
+					m_iDatabasePort = tmp;
+				}
+				else
+				{
+					CAMsg::printMsg(LOG_CRIT,"Node \"Port\" is empty!\n");
+					return E_UNKNOWN;
+				}
+				// get DB Name
+				if (getDOMChildByName(elemDatabase, (UINT8*)"DBName", elem, false) != E_SUCCESS)
+				{
+					CAMsg::printMsg(LOG_CRIT,"Node \"DBName\" not found!\n");
+					return E_UNKNOWN;
+				}
+				tmpLen = 255;
+				if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) 
+				{
+					strtrim(tmpBuff);
+					m_strDatabaseName = new UINT8[strlen((char*)tmpBuff)+1];
+					strcpy((char *)m_strDatabaseName, (char *) tmpBuff);
+				}
+				else
+				{
+					CAMsg::printMsg(LOG_CRIT,"Node \"DBName\" is empty!\n");
+					return E_UNKNOWN;
+				}
+				// get DB Username
+				if (getDOMChildByName(elemDatabase, (UINT8*)"Username", elem, false) != E_SUCCESS)
+				{
+					CAMsg::printMsg(LOG_CRIT,"Node \"Username\" not found!\n");
+					return E_UNKNOWN;
+				}
+				tmpLen = 255;
+				if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) 
+				{
+					strtrim(tmpBuff);
+					m_strDatabaseUser = new UINT8[strlen((char*)tmpBuff)+1];
+					strcpy((char *)m_strDatabaseUser, (char *) tmpBuff);
+				}
+				else
+				{
+					CAMsg::printMsg(LOG_CRIT,"Node \"Username\" is empty!\n");
+					return E_UNKNOWN;
+				}
+						
+				//get DB password from xml 	
 				getDOMChildByName(elemDatabase, (UINT8*)"Password", elem, false);
 				tmpLen = 255;
 				//read password from xml if given
@@ -1729,37 +1816,42 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 				}
 				else
 				{      
-				        //read password from stdin:
-						UINT8 dbpass[500];
-						dbpass[0]=0;
-						printf("Please enter password for postgresql user %s at %s: ",m_strDatabaseUser, m_strDatabaseHost);
-						scanf("%400[^\n]%*1[\n]",(char*)dbpass); 
-						int len = strlen((char *)dbpass);
-						if(len>0) 
-							{
-								m_strDatabasePassword = new UINT8[len+1];
-								strcpy((char *)m_strDatabasePassword, (char *)dbpass);
-							}
-						else
-							{
-								m_strDatabasePassword = new UINT8[1];
-								m_strDatabasePassword[0] = '\0';
-							}	
+			        //read password from stdin:
+					UINT8 dbpass[500];
+					dbpass[0]=0;
+					printf("Please enter password for postgresql user %s at %s: ",m_strDatabaseUser, m_strDatabaseHost);
+					scanf("%400[^\n]%*1[\n]",(char*)dbpass); 
+					int len = strlen((char *)dbpass);
+					if(len>0) 
+					{
+						m_strDatabasePassword = new UINT8[len+1];
+						strcpy((char *)m_strDatabasePassword, (char *)dbpass);
+					}
+					else
+					{
+						m_strDatabasePassword = new UINT8[1];
+						m_strDatabasePassword[0] = '\0';
+					}	
 				}
-							
-				} //of elem database
+						
+			} //of elem database
 		} //of elem accounting
 		else 
-			{
-				CAMsg::printMsg( 17, "No accounting instance info found in configfile. Payment will not work!\n");
-			}
+		{
+			CAMsg::printMsg(LOG_CRIT, "No accounting instance info found in configfile. Payment will not work!\n");
+			return E_UNKNOWN;
+		}
 
 #endif /* ifdef PAYMENT */
 
 
 		//get InfoService data
 		DOM_Element elemNetwork;
-		getDOMChildByName(elemRoot,(UINT8*)"Network",elemNetwork,false);
+		if (getDOMChildByName(elemRoot,(UINT8*)"Network",elemNetwork,false) != E_SUCCESS)
+		{
+			CAMsg::printMsg(LOG_CRIT,"Node \"Network\" not found!\n");				
+			return E_UNKNOWN;
+		}
 		DOM_Element elemInfoServiceContainer;
 		getDOMChildByName(elemNetwork,(UINT8*)"InfoServices",elemInfoServiceContainer,false);
 		if (elemInfoServiceContainer ==	NULL)
@@ -1783,10 +1875,10 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 			}
 		}
 		else
-    {
-			// Refactored
-			parseInfoServices(elemInfoServiceContainer);
-    }
+	    {
+				// Refactored
+				parseInfoServices(elemInfoServiceContainer);
+	    }
 		 
 		//get ListenerInterfaces
 		DOM_Element elemListenerInterfaces;
