@@ -182,7 +182,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_ACCOUNT_EMPTY)
 					{
 						authFlags |= AUTH_ACCOUNT_EMPTY;
-						dbConn.markAsSettled(pCC->getAccountNumber());
+						dbConn.markAsSettled(pCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade);
 					}
 					else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_INVALID_PRICE_CERT)
 					{
@@ -200,7 +200,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 							//store it in DB
 							if (dbConn.storeCostConfirmation(*attachedCC, m_pAccountingSettleThread->m_settleCascade) == E_SUCCESS)
 							{
-								dbConn.markAsSettled(attachedCC->getAccountNumber());
+								dbConn.markAsSettled(attachedCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade);
 							}
 							else
 							{
@@ -269,7 +269,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					{
 						delete entry;
 					}											
-					dbConn.markAsSettled(pCC->getAccountNumber());
+					dbConn.markAsSettled(pCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade);
 				} 
 
 				if (pCC != NULL)
