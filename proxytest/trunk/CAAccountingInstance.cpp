@@ -519,6 +519,10 @@ SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName
 				return E_UNKNOWN;
 			tmpBuff[len]=0;
 						
+			
+			//line breaks might have been added, and would lead to database problems
+			strtrim(tmpBuff); //return value ohny significant for NULL or all-whitespace string, ignore   
+						
 			allHashes[i] = tmpBuff;
 			//do not delete tmpBuff here, since we're using allHashes below
 
