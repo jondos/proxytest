@@ -202,8 +202,8 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 			#warning Native UINT64 type not available - CostConfirmation Database might be non-functional
 		#endif
 		const char* previousCCQuery = "SELECT COUNT(*) FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER=%s AND CASCADE='%s'";
-		const char* query2F = "INSERT INTO COSTCONFIRMATIONS(ACCOUNTNUMBER, BYTES, XMLCC, SETTLED, CASCADE) VALUES (%s, %s, '%s', %d,'%s')";
-	 	const char* query3F = "UPDATE COSTCONFIRMATIONS SET BYTES=%s, XMLCC='%s', SETTLED=%d WHERE ACCOUNTNUMBER=%s AND CASCADE='%s'";
+		const char* query2F =         "INSERT INTO COSTCONFIRMATIONS(ACCOUNTNUMBER, BYTES, XMLCC, SETTLED, CASCADE) VALUES (%s, %s, '%s', %d,'%s')";
+	 	const char* query3F =         "UPDATE COSTCONFIRMATIONS SET BYTES=%s, XMLCC='%s', SETTLED=%d WHERE ACCOUNTNUMBER=%s AND CASCADE='%s'";
 	
 		UINT8 * query;
 		UINT8 * pStrCC;
@@ -226,7 +226,8 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 #endif  
 
 		// Test: is there already an entry with this accountno. for the same cascade?
-		query = new UINT8[ strlen(previousCCQuery) + 32 + 32 + size + strlen((char*)ccCascade)];
+		// *todo very Buggy!!!!! Use the maximum strlen of the queries here!!!
+		query = new UINT8[ strlen(query2F) + 32 + 32 + size + strlen((char*)ccCascade)];
 		UINT8 strAccountNumber[32];
 		print64(strAccountNumber,cc.getAccountNumber());
 		sprintf( (char*)query, previousCCQuery, strAccountNumber, ccCascade);
