@@ -292,8 +292,10 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 			return E_UNKNOWN;
 		}
 		delete[] query;	
-		PQclear(pResult);
+		PQclear(pResult);		
+		#ifdef DEBUG
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstanceDBInterface: Finished storing CC in DB.\n");
+		#endif
 		return E_SUCCESS;
 	}
 
