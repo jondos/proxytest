@@ -705,7 +705,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		
 		// fetch cost confirmation from last session if available, and retrieve information
 		CAXMLCostConfirmation * pCC = NULL;
-		m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, &pCC);
+		m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, m_currentCascade, &pCC);
 		if(pCC!=NULL)
 		{
 			pAccInfo->transferredBytes += pCC->getTransferredBytes();
@@ -911,7 +911,7 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 	
 	// fetch cost confirmation from last session if available, and send it
 	CAXMLCostConfirmation * pCC = NULL;
-	m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, &pCC);
+	m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, m_currentCascade, &pCC);
 	if(pCC!=NULL)
 	{
 		pAccInfo->pControlChannel->sendXMLMessage(pCC->getXMLDocument());
