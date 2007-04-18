@@ -159,10 +159,11 @@ private:
 	 */
 	void handleChallengeResponse(fmHashTableEntry *pHashEntry, const DOM_Element &root);
 
-	static SINT32 prepareCCRequest(CAMix* callingMix, UINT8* a_AiName);			
+	SINT32 prepareCCRequest(CAMix* callingMix, UINT8* a_AiName);			
 	static SINT32 makeCCRequest( const UINT64 accountNumber, const UINT64 transferredBytes, DOM_Document& doc);
 	static SINT32 makeAccountRequest(DOM_Document &doc);
 	
+	//possible replies to a JAP
 	static SINT32 returnOK(tAiAccountingInfo* pAccInfo);
 	static SINT32 returnWait(tAiAccountingInfo* pAccInfo);
 	static SINT32 returnKickout(tAiAccountingInfo* pAccInfo);
@@ -178,7 +179,7 @@ private:
 	
 	static DOM_Document m_preparedCCRequest;
 	
-	/** this thread reads messages from the queue and processes them */
+	/** reads messages from the queue and processes them */
 	CAThread * m_pThread;
 	
 	/** this is for synchronizing the write access to the HashEntries */
@@ -188,7 +189,12 @@ private:
 	Hashtable* m_settleHashtable;
 	
 	/** the name of this accounting instance */
-	UINT8 * m_AiName;
+	UINT8* m_AiName;
+	
+	/** current cascade (identified by the concatenated hash values of the price certificates) */
+	// (same hash values as in CCs and in the JPI, as taken from the MixInfo)
+	// we concatenate price certificates rather than mix-skis because a cascade with changed prices counts as a new/different cascade
+	UINT8* m_currentCascade;
 
 	/** the interface to the database */
 	CAAccountingDBInterface * m_dbInterface;

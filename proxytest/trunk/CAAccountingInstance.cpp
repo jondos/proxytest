@@ -94,7 +94,7 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
 		// launch BI settleThread		
 		m_settleHashtable = 
 			new Hashtable((UINT32 (*)(void *))Hashtable::hashUINT64, (SINT32 (*)(void *,void *))Hashtable::compareUINT64);		
-		m_pSettleThread = new CAAccountingSettleThread(m_settleHashtable);
+		m_pSettleThread = new CAAccountingSettleThread(m_settleHashtable, m_currentCascade);
 	}
 		
 
@@ -129,9 +129,11 @@ CAAccountingInstance::~CAAccountingInstance()
 		CAMsg::printMsg( LOG_DEBUG, "CAAccountingInstance: Deleting settle hashtable...\n" );
 		delete m_settleHashtable;
 		m_settleHashtable = NULL;		
-		CAMsg::printMsg( LOG_DEBUG, "CAAccountingInstance: Settle hashtable deleted.\n" );		
-		
+		CAMsg::printMsg( LOG_DEBUG, "CAAccountingInstance: Settle hashtable deleted.\n" );				
 		m_Mutex.unlock();
+		
+		delete[] m_currentCascade;
+		m_currentCascade = NULL;
 		
 		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance dying finished.\n" );		
 	}
@@ -528,6 +530,19 @@ SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName
 		allSkis[i] =  (UINT8*) skiNode.getFirstChild().getNodeValue().transcode();
 
 	}
+	//concatenate the hashes, and store for future reference to indentify the cascade
+	m_currentCascade = new UINT8[256];
+	for (UINT32 j = 0; j < nrOfMixes; j++)
+	{
+		//check for hash value size (should always be OK)
+		if (strlen((const char*)m_currentCascade) > ( 256 - strlen((const char*)allHashes[j]) )   )
+		{
+			return E_UNKNOWN;
+			CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance::prepareCCRequest: Too many/too long hash values, ran out of allocated memory\n");
+		}
+		m_currentCascade = (UINT8*) strcat((char*)m_currentCascade,(char*)allHashes[j]);
+	}	
+	
 	//and append to CC
 	DOM_Element elemPriceCerts = m_preparedCCRequest.createElement("PriceCertificates");
 	DOM_Element elemCert;
@@ -760,9 +775,10 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 			m_Mutex.unlock();
 			return ;
 		}
-		
-	//CAMsg::printMsg(LOG_DEBUG, "Checking database for previously prepaid bytes...\n");
-	SINT32 prepaidAmount = m_dbInterface->getPrepaidAmount(pAccInfo->accountNumber);
+#ifdef DEBUG		
+	CAMsg::printMsg(LOG_DEBUG, "Checking database for previously prepaid bytes...\n");
+#endif
+	SINT32 prepaidAmount = m_dbInterface->getPrepaidAmount(pAccInfo->accountNumber, m_currentCascade);
 	if (prepaidAmount > 0)
 	{
 		pAccInfo->transferredBytes -= prepaidAmount;	
@@ -997,7 +1013,7 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,D
 	}
 	m_Mutex.unlock();
 	
-	m_dbInterface->storeCostConfirmation(*pCC);
+	m_dbInterface->storeCostConfirmation(*pCC, m_currentCascade);
 
 	delete pCC;
 	return;
@@ -1053,7 +1069,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 				return E_UNKNOWN;
 			}
 			
-			dbInterface->storePrepaidAmount(pAccInfo->accountNumber,prepaidBytes);
+			dbInterface->storePrepaidAmount(pAccInfo->accountNumber,prepaidBytes, ms_pInstance->m_currentCascade);
 			delete dbInterface;
 			
 			if (ms_pInstance->m_settleHashtable)

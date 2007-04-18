@@ -70,7 +70,7 @@ class CAAccountingDBInterface
 			//SINT32 createTables();						
 			//SINT32 dropTables();
 			
-			SINT32 storeCostConfirmation(CAXMLCostConfirmation &cc);
+			SINT32 storeCostConfirmation(CAXMLCostConfirmation &cc, UINT8* ccCascade);
 
 			SINT32 getCostConfirmation(UINT64 accountNumber, CAXMLCostConfirmation **pCC);
 			
@@ -79,7 +79,7 @@ class CAAccountingDBInterface
 			* Fills the CAQueue with all non-settled cost confirmations
 			*
 			*/
-			SINT32 getUnsettledCostConfirmations(CAQueue &q);
+			SINT32 getUnsettledCostConfirmations(CAQueue &q, UINT8* cascadeId);
 			
 			/**
 			* Marks this account as settled.
@@ -91,10 +91,10 @@ class CAAccountingDBInterface
 			 * if the BI reports an error while trying to settle a CC, this will be called to delete it from the database
 			 * (otherwise the AI would try forever in vain to settle the unusable CC)
 			 */
-			SINT32 deleteCC(UINT64 accountNumber);
+			SINT32 deleteCC(UINT64 accountNumber, UINT8* cascadeId);
 			
-			SINT32 storePrepaidAmount(UINT64 accountNumber, SINT32 prepaidBytes);
-			SINT32 getPrepaidAmount(UINT64 accountNumber);
+			SINT32 storePrepaidAmount(UINT64 accountNumber, SINT32 prepaidBytes, UINT8* cascadeId);
+			SINT32 getPrepaidAmount(UINT64 accountNumber, UINT8* cascadeId);
 
 		private:
 			/** connection to postgreSQL database */
