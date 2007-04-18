@@ -1070,15 +1070,9 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			//store prepaid bytes in database, so the user wont lose the prepaid amount by disconnecting
 			SINT32 prepaidBytes = pAccInfo->confirmedBytes - pAccInfo->transferredBytes;			
 			AccountHashEntry* entry;
-			if(ms_pInstance->m_dbInterface->initDBConnection() != E_SUCCESS)
-			{
-				CAMsg::printMsg( LOG_ERR, "Could not connect to DB, preapid bytes were lost\n");
-				ms_pInstance->m_Mutex.unlock();
-				return E_UNKNOWN;
-			}
 			
 			ms_pInstance->m_dbInterface->storePrepaidAmount(pAccInfo->accountNumber,prepaidBytes, ms_pInstance->m_currentCascade);
-			
+
 			if (ms_pInstance->m_settleHashtable)
 			{
 				ms_pInstance->m_settleHashtable->getMutex().lock();				
