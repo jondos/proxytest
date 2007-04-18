@@ -192,16 +192,16 @@ SINT32 CAAccountingDBInterface::getCostConfirmation(UINT64 accountNumber, CAXMLC
  * stores a cost confirmation in the DB
  * @todo optimize - maybe do check and insert/update in one step??
  */
-SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc )
+SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc, UINT8* ccCascade )
 	{
 	
 		
 		#ifndef HAVE_NATIVE_UINT64
 			#warning Native UINT64 type not available - CostConfirmation Database might be non-functional
 		#endif
-		const char* query1F = "SELECT COUNT(*) FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER=%s";
-		const char* query2F = "INSERT INTO COSTCONFIRMATIONS(ACCOUNTNUMBER, BYTES, XMLCC, SETTLED) VALUES (%s, %s, '%s', %d)";
-		const char* query3F = "UPDATE COSTCONFIRMATIONS SET BYTES=%s, XMLCC='%s', SETTLED=%d WHERE ACCOUNTNUMBER=%s";
+		const char* previousCCQuery = "SELECT COUNT(*) FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER=%s AND CASCADE='%s'";
+		const char* query2F = "INSERT INTO COSTCONFIRMATIONS(ACCOUNTNUMBER, BYTES, XMLCC, SETTLED, CASCADE) VALUES (%s, %s, '%s', %d,'%s')";
+	 	const char* query3F = "UPDATE COSTCONFIRMATIONS SET BYTES=%s, XMLCC='%s', SETTLED=%d WHERE ACCOUNTNUMBER=%s AND CASCADE='%s'";
 	
 		UINT8 * query;
 		UINT8 * pStrCC;
@@ -222,11 +222,13 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 #ifdef DEBUG
 		CAMsg::printMsg(LOG_DEBUG, "cc to store in  db:%s\n",pStrCC);	  		
 #endif  
-		// Test: is there already an entry with this accountno.?
-		query = new UINT8[ strlen(query1F) + size + 128 ];
+
+
+		// Test: is there already an entry with this accountno. for the same cascade?
+		query = new UINT8[ strlen(previousCCQuery) + size + 128 ];
 		UINT8 strAccountNumber[32];
 		print64(strAccountNumber,cc.getAccountNumber());
-		sprintf( (char*)query, query1F, strAccountNumber);
+		sprintf( (char*)query, previousCCQuery, strAccountNumber, ccCascade);
 	
 		// to receive result in binary format...
 		pResult = PQexec(m_dbConn, (char*)query);
@@ -260,20 +262,19 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 		if(atoi( (char*)pVal ) == 0)
 			{
 				UINT8 tmp2[32];
-				print64(tmp2,cc.getTransferredBytes());
+				print64(tmp2,cc.getTransferredBytes() );
 				sprintf( // do insert
 					(char*)query, query2F, 
 					strAccountNumber, tmp2, 
-					pStrCC, 0);
+					pStrCC, 0, ccCascade);
 			}
 		else
 			{
 				UINT8 tmp2[32];
-				print64(tmp2,cc.getTransferredBytes());
+				print64(tmp2,cc.getTransferredBytes() );
 				sprintf( // do update
 					(char*)query, (char*) query3F,
-					tmp2, pStrCC, 0, strAccountNumber
-				);
+					tmp2, pStrCC, 0, strAccountNumber, ccCascade);
 			}
 		PQclear(pResult);
 	
@@ -301,22 +302,32 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 	* Fills the CAQueue with pointer to all non-settled cost confirmations. The caller is responsible for deleating this cost confirmations.
 	* @retval E_NOT_CONNECTED if a connection to the DB could not be established
 	* @retval E_UNKNOWN in case of a general error
-	* @retval E_SUCCESS if the information from the databse could be retrieved successful. Not that this does not 
-	* mean that the number of returned unsettled cost confirmations is greater than zero.
-	*
+	* @retval E_SUCCESS : database operation completed successfully (but queue might still be empty if there were no unsettled cost confirmation to find).
+	* Param: cascadeId : String identifier of a cascade for which to return the cost confirmations (concatenated hashes of all the cascade's mixes' price certs) 
+	* 
 	*/
-SINT32 CAAccountingDBInterface::getUnsettledCostConfirmations(CAQueue& q)
+SINT32 CAAccountingDBInterface::getUnsettledCostConfirmations(CAQueue& q, UINT8* cascadeId)
 	{
-		const char* query= "SELECT XMLCC FROM COSTCONFIRMATIONS WHERE SETTLED=0";
+		const char* query= "SELECT XMLCC FROM COSTCONFIRMATIONS WHERE SETTLED=0 and cascade = '%s' ";
+		UINT8* finalQuery;
 		PGresult* result;
 		SINT32 numTuples, i;
 		UINT8* pTmpStr;
 		CAXMLCostConfirmation* pCC;
-		
+
 		if(!m_bConnected) 
 			return E_NOT_CONNECTED;
+		finalQuery = new UINT8[strlen(query)+strlen((const char*)cascadeId)];
+		sprintf( (char*)finalQuery, query, cascadeId);
+
+#ifdef DEBUG
+		CAMsg::printMsg(LOG_DEBUG, "Getting Cost confirmations for cascade: ");
+		CAMsg::printMsg(LOG_DEBUG, (const char*) finalQuery);
+#endif
 		
-		result = PQexec(m_dbConn, (char *)query);
+		result = PQexec(m_dbConn, (char *)finalQuery);
+		delete[] finalQuery;
+		finalQuery = NULL;
 		if(PQresultStatus(result) != PGRES_TUPLES_OK)
 			{
 				PQclear(result);
@@ -365,9 +376,9 @@ SINT32 CAAccountingDBInterface::markAsSettled(UINT64 accountNumber)
 		return E_SUCCESS;
 	}
 	
-SINT32 CAAccountingDBInterface::deleteCC(UINT64 accountNumber)
+SINT32 CAAccountingDBInterface::deleteCC(UINT64 accountNumber, UINT8* cascadeId)
 {
-	const char* deleteQuery = "DELETE FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER = %s AND SETTLED = 0";
+	const char* deleteQuery = "DELETE FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER = %s AND CASCADE='%s'AND SETTLED = 0";
 	UINT8* finalQuery;
 	PGresult* result;
 	SINT32 ret;
@@ -381,7 +392,7 @@ SINT32 CAAccountingDBInterface::deleteCC(UINT64 accountNumber)
 	else
 	{						
 		finalQuery = new UINT8[strlen(deleteQuery)+32];
-		sprintf((char *)finalQuery,deleteQuery,temp);
+		sprintf((char *)finalQuery,deleteQuery,temp, cascadeId);
 		result = PQexec(m_dbConn, (char*)finalQuery);
 		CAMsg::printMsg(LOG_DEBUG, "%s\n",finalQuery);
 		delete[] finalQuery;
@@ -412,15 +423,15 @@ SINT32 CAAccountingDBInterface::deleteCC(UINT64 accountNumber)
 /*
  *  When terminating a connection, store the amount of bytes that the JAP account has already paid for, but not used 
  */	
-SINT32 CAAccountingDBInterface::storePrepaidAmount(UINT64 accountNumber, SINT32 prepaidBytes)
+SINT32 CAAccountingDBInterface::storePrepaidAmount(UINT64 accountNumber, SINT32 prepaidBytes, UINT8* cascadeId)
 	{
-		const char* insertQuery = "INSERT INTO PREPAIDAMOUNTS(ACCOUNTNUMBER, PREPAIDBYTES) VALUES (%s, %d)";
+		const char* insertQuery = "INSERT INTO PREPAIDAMOUNTS(ACCOUNTNUMBER, PREPAIDBYTES, CASCADE) VALUES (%s, %d, '%s')";
 		PGresult* result;
 		UINT8 finalQuery[128];
 		UINT8 tmp[32];
 		print64(tmp,accountNumber);
 		
-		sprintf( (char *)finalQuery, insertQuery, tmp,prepaidBytes);
+		sprintf( (char *)finalQuery, insertQuery, tmp,prepaidBytes, cascadeId);
 		result = PQexec(m_dbConn, (char *)finalQuery);
 		if (PQresultStatus(result) != PGRES_COMMAND_OK)
 		{
@@ -441,15 +452,15 @@ SINT32 CAAccountingDBInterface::storePrepaidAmount(UINT64 accountNumber, SINT32 
  * Will then delete this enty from the database table prepaidamounts
  * If the account has not been connected to this cascade before, will return zero 
  */	
-SINT32 CAAccountingDBInterface::getPrepaidAmount(UINT64 accountNumber)	
+SINT32 CAAccountingDBInterface::getPrepaidAmount(UINT64 accountNumber, UINT8* cascadeId)	
 	{
 		//check for an entry for this accountnumber
-		const char* selectQuery = "SELECT PREPAIDBYTES FROM PREPAIDAMOUNTS WHERE ACCOUNTNUMBER=%s";
+		const char* selectQuery = "SELECT PREPAIDBYTES FROM PREPAIDAMOUNTS WHERE ACCOUNTNUMBER=%s AND CASCADE='%s' ";
 		PGresult* result;
 		UINT8 finalQuery[128];
-		UINT8 tmp[32];
-		print64(tmp,accountNumber);
-		sprintf( (char *)finalQuery, selectQuery, tmp);
+		UINT8 accountNumberAsString[32];
+		print64(accountNumberAsString,accountNumber);
+		sprintf( (char *)finalQuery, selectQuery, accountNumberAsString, cascadeId);
 		
 		result = PQexec(m_dbConn, (char *)finalQuery);
 		if(PQresultStatus(result)!=PGRES_TUPLES_OK) 
@@ -469,10 +480,10 @@ SINT32 CAAccountingDBInterface::getPrepaidAmount(UINT64 accountNumber)
 		PQclear(result);						
 
 		//delete entry from db
-		const char* deleteQuery = "DELETE FROM PREPAIDAMOUNTS WHERE ACCOUNTNUMBER=%s";
+		const char* deleteQuery = "DELETE FROM PREPAIDAMOUNTS WHERE ACCOUNTNUMBER=%s AND CASCADE='%s'";
 		PGresult* result2;
-		print64(tmp,accountNumber);
-		sprintf( (char *)finalQuery, deleteQuery, tmp);
+		print64(accountNumberAsString,accountNumber);
+		sprintf( (char *)finalQuery, deleteQuery, accountNumberAsString, cascadeId);
 		
 		result2 = PQexec(m_dbConn, (char *)finalQuery);
 		if (PQresultStatus(result2) != PGRES_COMMAND_OK)

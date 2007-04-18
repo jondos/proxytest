@@ -37,10 +37,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAXMLErrorMessage.hpp"
 #include "Hashtable.hpp"
 
-CAAccountingSettleThread::CAAccountingSettleThread(Hashtable* a_accountingHashtable)
+CAAccountingSettleThread::CAAccountingSettleThread(Hashtable* a_accountingHashtable, UINT8* currentCascade)
 {
 	// launch AI thread
 	m_pThread = new CAThread();
+	m_settleCascade = currentCascade;
 	m_pThread->setMainLoop( mainLoop );
 	CAMsg::printMsg(LOG_DEBUG, "Now launching Accounting SettleThread...\n");
 	m_pPIList = NULL;
@@ -109,8 +110,18 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 			//#ifdef DEBUG	
 			CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: DB connections established!\n");
 			//#endif
-			dbConn.getUnsettledCostConfirmations(q);
-			//CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: dbConn.getUnsettledCostConfirmations(q) finished!\n");
+
+			dbConn.getUnsettledCostConfirmations(q, m_pAccountingSettleThread->m_settleCascade);
+			if (q.isEmpty() )
+			{
+				CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: finished gettings CCs, found no CCs to settle\n");
+			}
+			else 
+			{
+				UINT32 qSize = q.getSize();
+				UINT32 nrOfCCs = qSize / sizeof(pCC); 
+				CAMsg::printMsg(LOG_DEBUG, "SettleThread: finished gettings CCs, found %u cost confirmations to settle\n",nrOfCCs);	
+			}
 			while(!q.isEmpty())
 			{
 				// get the next CC from the queue
@@ -121,13 +132,18 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					q.clean();
 					break;
 				}
+#ifdef DEBUG				
+				CAMsg::printMsg(LOG_DEBUG, " Settle Thread: trying to connect to payment instance");
+#endif				
 				if(biConn.initBIConnection()!=E_SUCCESS)
 				{
 					CAMsg::printMsg(LOG_DEBUG, "SettleThread: could not connect to BI. Retrying later...\n");
 					q.clean();
 					break;
 				}
-				
+#ifdef DEBUG				
+				CAMsg::printMsg(LOG_DEBUG, " SettleThread: successfully connected to payment instance");
+#endif				
 				if (!pCC)
 				{
 					CAMsg::printMsg(LOG_CRIT, "CAAccountingSettleThread: Cost confirmation is NULL!\n");
@@ -182,7 +198,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 							authFlags |= AUTH_INVALID_CC;
 							CAMsg::printMsg(LOG_DEBUG, "SettleThread: tried invalid CC, received last valid CC back\n");
 							//store it in DB
-							if (dbConn.storeCostConfirmation(*attachedCC) == E_SUCCESS)
+							if (dbConn.storeCostConfirmation(*attachedCC, m_pAccountingSettleThread->m_settleCascade) == E_SUCCESS)
 							{
 								dbConn.markAsSettled(attachedCC->getAccountNumber());
 							}
@@ -233,7 +249,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					if (bDeleteCC)
 					{
 						//delete costconfirmation to avoid trying to settle an unusable CC again and again					
-						if(dbConn.deleteCC(pCC->getAccountNumber()) == E_SUCCESS)
+						if(dbConn.deleteCC(pCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade) == E_SUCCESS)
 						{
 							CAMsg::printMsg(LOG_ERR, "SettleThread: unusable cost confirmation was deleted\n");	
 						}	

@@ -61,10 +61,11 @@ typedef struct t_paymentInstanceListNode tPaymentInstanceListEntry;
 class CAAccountingSettleThread
 {
 	public:
-		CAAccountingSettleThread(Hashtable* a_accountingHashtable);
+		CAAccountingSettleThread(Hashtable* a_accountingHashtable, UINT8* currentCascade);
 		~CAAccountingSettleThread();
 
 	private:	
+		UINT8* m_settleCascade;
 		static THREAD_RETURN mainLoop(void * param);
 		SINT32 addKnownPI(const UINT8* a_pstrID, const UINT8* a_pstrHost, UINT32 port, const CACertificate* a_pCert); 
 		tPaymentInstanceListEntry* getPI(UINT8* pstrID);
@@ -72,5 +73,6 @@ class CAAccountingSettleThread
 		volatile bool m_bRun;
 		tPaymentInstanceListEntry* m_pPIList;
 		Hashtable* m_accountingHashtable;
+	
 };
 #endif
