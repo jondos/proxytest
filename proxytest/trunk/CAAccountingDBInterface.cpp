@@ -429,7 +429,7 @@ SINT32 CAAccountingDBInterface::storePrepaidAmount(UINT64 accountNumber, SINT32 
 	{
 		const char* insertQuery = "INSERT INTO PREPAIDAMOUNTS(ACCOUNTNUMBER, PREPAIDBYTES, CASCADE) VALUES (%s, %d, '%s')";
 		PGresult* result;
-		UINT8 finalQuery[128];
+		UINT8 finalQuery[1024];
 		UINT8 tmp[32];
 		print64(tmp,accountNumber);
 		
@@ -459,7 +459,7 @@ SINT32 CAAccountingDBInterface::getPrepaidAmount(UINT64 accountNumber, UINT8* ca
 		//check for an entry for this accountnumber
 		const char* selectQuery = "SELECT PREPAIDBYTES FROM PREPAIDAMOUNTS WHERE ACCOUNTNUMBER=%s AND CASCADE='%s' ";
 		PGresult* result;
-		UINT8 finalQuery[128];
+		UINT8 finalQuery[1024];
 		UINT8 accountNumberAsString[32];
 		print64(accountNumberAsString,accountNumber);
 		sprintf( (char *)finalQuery, selectQuery, accountNumberAsString, cascadeId);
