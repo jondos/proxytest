@@ -227,7 +227,7 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 
 		// Test: is there already an entry with this accountno. for the same cascade?
 		// *todo very Buggy!!!!! Use the maximum strlen of the queries here!!!
-		query = new UINT8[ strlen(query2F) + 32 + 32 + size + strlen((char*)ccCascade)];
+		query = new UINT8[ strlen(previousCCQuery) + 32 + 32 + size + strlen((char*)ccCascade)];
 		UINT8 strAccountNumber[32];
 		print64(strAccountNumber,cc.getAccountNumber());
 		sprintf( (char*)query, previousCCQuery, strAccountNumber, ccCascade);
