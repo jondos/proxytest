@@ -29,7 +29,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 // stdafx.h : Include-Datei fuer Standard-System-Include-Dateien,
 //  oder projektspezifische Include-Dateien, die haeufig benutzt, aber
 //      in unregelmaessigen Abstaenden geaendert werden.
-//
 
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
