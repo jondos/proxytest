@@ -1861,15 +1861,20 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 			DOM_Element elemAllowReconfig;
 			if (getDOMChildByName(elemNetwork,(UINT8*)"InfoService",elemInfoService,false) != E_SUCCESS)
 			{
-				CAMsg::printMsg(LOG_CRIT,"Node \"InfoServices\" not found!\n");				
+				CAMsg::printMsg(LOG_CRIT,"Node \"InfoService\" not found!\n");				
 				return E_UNKNOWN;
 			}
 			/* LERNGRUPPE: There might not be any InfoService configuration in the file, but in infoservices.xml, so check this */
 			if(elemInfoService != NULL)
 			{ 
 				getDOMChildByName(elemInfoService,(UINT8*)"AllowAutoConfiguration",elemAllowReconfig,false);
-					CAListenerInterface* isListenerInterface = CAListenerInterface::getInstance(elemInfoService);
-				 m_addrInfoServicesSize = 1;
+				CAListenerInterface* isListenerInterface = CAListenerInterface::getInstance(elemInfoService);
+				if (!isListenerInterface)
+				{
+					CAMsg::printMsg(LOG_CRIT,"Node \"InfoService\" does not contain valid data!\n");				
+					return E_UNKNOWN;
+				}
+				m_addrInfoServicesSize = 1;
 				m_addrInfoServices = new CAListenerInterface*[m_addrInfoServicesSize];
 				m_addrInfoServices[0] = isListenerInterface;
 				if(getDOMElementValue(elemAllowReconfig,tmpBuff,&tmpLen)==E_SUCCESS)
