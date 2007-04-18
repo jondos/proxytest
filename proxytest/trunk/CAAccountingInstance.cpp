@@ -530,18 +530,24 @@ SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName
 		allSkis[i] =  (UINT8*) skiNode.getFirstChild().getNodeValue().transcode();
 
 	}
-	//concatenate the hashes, and store for future reference to indentify the cascade
-	m_currentCascade = new UINT8[256];
-	for (UINT32 j = 0; j < nrOfMixes; j++)
-	{
-		//check for hash value size (should always be OK)
-		if (strlen((const char*)m_currentCascade) > ( 256 - strlen((const char*)allHashes[j]) )   )
-		{
-			return E_UNKNOWN;
-			CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance::prepareCCRequest: Too many/too long hash values, ran out of allocated memory\n");
-		}
-		m_currentCascade = (UINT8*) strcat((char*)m_currentCascade,(char*)allHashes[j]);
-	}	
+	    //concatenate the hashes, and store for future reference to indentify the cascade
+    m_currentCascade = new UINT8[256];
+    for (UINT32 j = 0; j < nrOfMixes; j++)
+    {
+        //check for hash value size (should always be OK)
+        if (strlen((const char*)m_currentCascade) > ( 256 - strlen((const char*)allHashes[j]) )   )
+        {
+            return E_UNKNOWN;
+            CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance::prepareCCRequest: Too many/too long hash values, ran out of allocated memory\n");
+        }
+        if (j == 0)
+        {
+            m_currentCascade = (UINT8*) strcpy( (char*) m_currentCascade,(const char*)allHashes[j]);
+        } else
+        {
+            m_currentCascade = (UINT8*) strcat((char*)m_currentCascade,(char*)allHashes[j]);
+        }
+    } 
 	
 	//and append to CC
 	DOM_Element elemPriceCerts = m_preparedCCRequest.createElement("PriceCertificates");
