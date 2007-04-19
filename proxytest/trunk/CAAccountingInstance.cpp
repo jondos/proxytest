@@ -1071,7 +1071,10 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			SINT32 prepaidBytes = pAccInfo->confirmedBytes - pAccInfo->transferredBytes;			
 			AccountHashEntry* entry;
 			
-			ms_pInstance->m_dbInterface->storePrepaidAmount(pAccInfo->accountNumber,prepaidBytes, ms_pInstance->m_currentCascade);
+			if (ms_pInstance->m_dbInterface)
+			{
+				ms_pInstance->m_dbInterface->storePrepaidAmount(pAccInfo->accountNumber,prepaidBytes, ms_pInstance->m_currentCascade);
+			}
 
 			if (ms_pInstance->m_settleHashtable)
 			{
