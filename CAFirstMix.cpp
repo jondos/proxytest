@@ -313,7 +313,7 @@ SINT32 CAFirstMix::processKeyExchange()
     recvBuff[len]=0;
     //get the Keys from the other mixes (and the Mix-Id's...!)
     CAMsg::printMsg(LOG_INFO,"Received Key Info...\n");
-    CAMsg::printMsg(LOG_DEBUG,"%s\n",recvBuff);
+    //CAMsg::printMsg(LOG_DEBUG,"%s\n",recvBuff);
 
     MemBufInputSource oInput(recvBuff,len,"tmp");
     DOMParser oParser;
