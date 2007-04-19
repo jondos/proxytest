@@ -209,6 +209,16 @@ THREAD_RETURN CAInfoService::TCascadeHelo(void *p)
 	}
 	THREAD_RETURN_SUCCESS;
 }	
+
+THREAD_RETURN CAInfoService::TCascadeStatus(void *p)
+{
+	InfoServiceHeloMsg* message = (InfoServiceHeloMsg*)p;
+	if (message->is->sendStatus(message->strXML, message->len, message->addr) == E_SUCCESS)
+	{
+		THREAD_RETURN_SUCCESS;
+	}
+	THREAD_RETURN_SUCCESS;
+}	
 	
 	
 	
@@ -397,27 +407,22 @@ SINT32 CAInfoService::stop()
 SINT32 CAInfoService::sendStatus(bool bIncludeCerts)
 {
 	if(!options.isFirstMix())
-		return E_SUCCESS;
-	SINT32 returnValue = E_UNKNOWN;
-	SINT32 currentValue;
-	UINT32 nrAddresses;
-	UINT32 len;
-	UINT8* strStatusXML=getStatusXMLAsString(bIncludeCerts,len);
-	if(strStatusXML==NULL)
-		return E_UNKNOWN;
-	CAListenerInterface** ppSocketAddresses = options.getInfoServices(nrAddresses);
-	for (UINT32 i = 0; i < nrAddresses; i++)
 	{
-		CASocketAddrINet* pAddr=(CASocketAddrINet*)ppSocketAddresses[i]->getAddr();
-		currentValue = sendStatus(strStatusXML,len,pAddr);
-		if (currentValue == E_SUCCESS)
-		{
-			returnValue = currentValue;
-		}
-		delete pAddr;
+		return E_SUCCESS;
 	}
+	
+	UINT32 len;
+	SINT32 ret;
+	UINT8* strStatusXML=getStatusXMLAsString(bIncludeCerts,len);
+	
+	if(strStatusXML==NULL)
+	{
+		return E_UNKNOWN;
+	}
+	
+	ret = sendHelo(strStatusXML, len, TCascadeHelo);
 	delete[] strStatusXML;
-	return returnValue;	
+	return ret;
 }
 
 
@@ -772,17 +777,9 @@ ERR:
 	return E_UNKNOWN;
 }
 
-SINT32 CAInfoService::sendCascadeHelo()
-{	
-	if(options.isMiddleMix())
-  	{
-		return E_SUCCESS;
-  	}
-  	
-	UINT32 len;
-	UINT8* strCascadeHeloXML=getCascadeHeloXMLAsString(len);
-	if(strCascadeHeloXML==NULL)
-		return E_UNKNOWN;
+
+SINT32 CAInfoService::sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN (*a_thread)(void *))
+{
 	SINT32 returnValue = E_UNKNOWN;
 	UINT32 nrAddresses;
 	CAListenerInterface** socketAddresses = options.getInfoServices(nrAddresses);
@@ -793,11 +790,11 @@ SINT32 CAInfoService::sendCascadeHelo()
 	{
 		messages[i] = new InfoServiceHeloMsg();
 		messages[i]->addr = (CASocketAddrINet*)socketAddresses[i]->getAddr();
-		messages[i]->len = len;
-		messages[i]->strXML = strCascadeHeloXML;
+		messages[i]->len = a_len;
+		messages[i]->strXML = a_strXML;
 		messages[i]->is = this;
-		threads[i] = new CAThread((UINT8*)"CascadeHeloThread");
-		threads[i]->setMainLoop(TCascadeHelo);
+		threads[i] = new CAThread((UINT8*)"HeloThread");
+		threads[i]->setMainLoop((THREAD_RETURN (*)(void *))a_thread);
 		threads[i]->start((void*)(messages[i]));
 	}
 	
@@ -813,8 +810,30 @@ SINT32 CAInfoService::sendCascadeHelo()
 	
 	delete[] messages;
 	delete[] threads;
-	delete[] strCascadeHeloXML;
+	
 	return returnValue;
+}
+
+
+
+SINT32 CAInfoService::sendCascadeHelo()
+{	
+	if(options.isMiddleMix())
+  	{
+		return E_SUCCESS;
+  	}
+  	
+	UINT32 len;
+	SINT32 ret;
+	UINT8* strCascadeHeloXML=getCascadeHeloXMLAsString(len);
+	if(strCascadeHeloXML==NULL)
+	{
+		return E_UNKNOWN;
+	}
+	
+	ret = sendHelo(strCascadeHeloXML, len, TCascadeHelo);
+	delete[] strCascadeHeloXML;
+	return ret;
 }
 
 UINT8* CAInfoService::getCascadeHeloXMLAsString(UINT32& a_len)
