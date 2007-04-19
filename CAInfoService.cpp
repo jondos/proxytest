@@ -198,6 +198,8 @@ struct InfoServiceHeloMsg
 	UINT32 len;
 	CASocketAddrINet* addr;
 	CAInfoService* is;
+	SINT32 requestCommand;
+	const UINT8* param;
 };
 
 THREAD_RETURN CAInfoService::TCascadeHelo(void *p)
@@ -214,6 +216,16 @@ THREAD_RETURN CAInfoService::TCascadeStatus(void *p)
 {
 	InfoServiceHeloMsg* message = (InfoServiceHeloMsg*)p;
 	if (message->is->sendStatus(message->strXML, message->len, message->addr) == E_SUCCESS)
+	{
+		THREAD_RETURN_SUCCESS;
+	}
+	THREAD_RETURN_SUCCESS;
+}	
+
+THREAD_RETURN CAInfoService::TMixHelo(void *p)
+{
+	InfoServiceHeloMsg* message = (InfoServiceHeloMsg*)p;
+	if (message->is->sendMixHelo(message->strXML, message->len, message->requestCommand, message->param, message->addr) == E_SUCCESS)
 	{
 		THREAD_RETURN_SUCCESS;
 	}
@@ -420,7 +432,7 @@ SINT32 CAInfoService::sendStatus(bool bIncludeCerts)
 		return E_UNKNOWN;
 	}
 	
-	ret = sendHelo(strStatusXML, len, TCascadeStatus, (UINT8*)"Status Thread");
+	ret = sendHelo(strStatusXML, len, TCascadeStatus, (UINT8*)"Status Thread", REQUEST_COMMAND_STATUS);
 	delete[] strStatusXML;
 	return ret;
 }
@@ -556,28 +568,17 @@ SINT32 CAInfoService::sendStatus(const UINT8* a_strStatusXML,UINT32 a_len, const
 SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param)
 {
 	UINT32 len;
+	SINT32 ret;
 	UINT8* strMixHeloXML=getMixHeloXMLAsString(len);
+	
 	if(strMixHeloXML==NULL)
-		{
-			CAMsg::printMsg(LOG_DEBUG,"InfoService:sendMixHelo() -- Error: getMixHeloXMLAsString() returned NULL!\n");
-			return E_UNKNOWN;
-		}
-	SINT32 returnValue = E_UNKNOWN;
-	SINT32 currentValue;
-	UINT32 nrAddresses;
-	CAListenerInterface** socketAddresses = options.getInfoServices(nrAddresses);
-	for (UINT32 i = 0; i < nrAddresses; i++)
-	{
-		CASocketAddrINet* pAddr=(CASocketAddrINet*)socketAddresses[i]->getAddr();
-		currentValue = sendMixHelo(strMixHeloXML,len,requestCommand, param, pAddr);
-		if (currentValue == E_SUCCESS)
-		{
-			returnValue = currentValue;
-		}
-		delete pAddr;
+	{			
+		return E_UNKNOWN;
 	}
+	
+	ret = sendHelo(strMixHeloXML, len, TMixHelo, (UINT8*)"Mix Helo Thread", requestCommand, param);
 	delete[] strMixHeloXML;
-	return returnValue;		
+	return ret;
 }
 
 
@@ -778,7 +779,7 @@ ERR:
 }
 
 
-SINT32 CAInfoService::sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN (*a_thread)(void *), UINT8* a_strThreadName)
+SINT32 CAInfoService::sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN (*a_thread)(void *), UINT8* a_strThreadName, SINT32 requestCommand, const UINT8* param)
 {
 	SINT32 returnValue = E_UNKNOWN;
 	UINT32 nrAddresses;
@@ -793,6 +794,8 @@ SINT32 CAInfoService::sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN (*a_
 		messages[i]->len = a_len;
 		messages[i]->strXML = a_strXML;
 		messages[i]->is = this;
+		messages[i]->requestCommand = requestCommand;
+		messages[i]->param = param;
 		threads[i] = new CAThread(a_strThreadName);
 		threads[i]->setMainLoop((THREAD_RETURN (*)(void *))a_thread);
 		threads[i]->start((void*)(messages[i]));
@@ -831,7 +834,7 @@ SINT32 CAInfoService::sendCascadeHelo()
 		return E_UNKNOWN;
 	}
 	
-	ret = sendHelo(strCascadeHeloXML, len, TCascadeHelo, (UINT8*)"Cascade Helo Thread");
+	ret = sendHelo(strCascadeHeloXML, len, TCascadeHelo, (UINT8*)"Cascade Helo Thread", REQUEST_COMMAND_CASCADE);
 	delete[] strCascadeHeloXML;
 	return ret;
 }
