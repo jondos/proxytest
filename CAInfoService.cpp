@@ -420,7 +420,7 @@ SINT32 CAInfoService::sendStatus(bool bIncludeCerts)
 		return E_UNKNOWN;
 	}
 	
-	ret = sendHelo(strStatusXML, len, TCascadeHelo);
+	ret = sendHelo(strStatusXML, len, TCascadeStatus, (UINT8*)"Status Thread");
 	delete[] strStatusXML;
 	return ret;
 }
@@ -778,7 +778,7 @@ ERR:
 }
 
 
-SINT32 CAInfoService::sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN (*a_thread)(void *))
+SINT32 CAInfoService::sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN (*a_thread)(void *), UINT8* a_strThreadName)
 {
 	SINT32 returnValue = E_UNKNOWN;
 	UINT32 nrAddresses;
@@ -793,7 +793,7 @@ SINT32 CAInfoService::sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN (*a_
 		messages[i]->len = a_len;
 		messages[i]->strXML = a_strXML;
 		messages[i]->is = this;
-		threads[i] = new CAThread((UINT8*)"HeloThread");
+		threads[i] = new CAThread(a_strThreadName);
 		threads[i]->setMainLoop((THREAD_RETURN (*)(void *))a_thread);
 		threads[i]->start((void*)(messages[i]));
 	}
@@ -831,7 +831,7 @@ SINT32 CAInfoService::sendCascadeHelo()
 		return E_UNKNOWN;
 	}
 	
-	ret = sendHelo(strCascadeHeloXML, len, TCascadeHelo);
+	ret = sendHelo(strCascadeHeloXML, len, TCascadeHelo, (UINT8*)"Cascade Helo Thread");
 	delete[] strCascadeHeloXML;
 	return ret;
 }
