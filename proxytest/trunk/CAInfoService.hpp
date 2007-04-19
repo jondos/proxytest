@@ -108,8 +108,9 @@ class CAInfoService
 		private:			
 			static THREAD_RETURN TCascadeHelo(void *p);
 			static THREAD_RETURN TCascadeStatus(void *p);
+			static THREAD_RETURN TMixHelo(void *p);
 			static THREAD_RETURN InfoLoop(void *p);
-			SINT32 sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN (*a_thread)(void *), UINT8* a_strThreadName);
+			SINT32 sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN (*a_thread)(void *), UINT8* a_strThreadName, SINT32 requestCommand, const UINT8* param = NULL);
 			UINT8* getCascadeHeloXMLAsString(UINT32& len);
 			SINT32 sendCascadeHelo(const UINT8* xml,UINT32 len,const CASocketAddrINet* a_socketAddress) const;
 			
