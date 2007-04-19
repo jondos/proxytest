@@ -876,36 +876,27 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 	decodeBufferLen = 512;
 	CABase64::decode( decodeBuffer, usedLen, decodeBuffer, &decodeBufferLen );
 	
-	
+	/*
 	UINT8 b64Challenge[ 512 ];
 	UINT32 b64Len = 512;
-
-	
 	CABase64::encode(pHashEntry->pAccountingInfo->pChallenge, 222, b64Challenge, &b64Len);
 	CAMsg::printMsg(LOG_DEBUG, "Challenge:\n%s\n", b64Challenge);
+	*/
 	
 	// check signature
 	pDsaSig = DSA_SIG_new();
 	CASignature * sigTester = pHashEntry->pAccountingInfo->pPublicKey;
-		//#pragma message (__FILE__ "(665) Signature verifying must be implemented here !!!!!!!!!! ")
 	sigTester->decodeRS( decodeBuffer, decodeBufferLen, pDsaSig );
-	/// TODO: Really do signature checking here...
-	
+	/// TODO: Really do signature checking here...	
 	if ( sigTester->verifyDER( pHashEntry->pAccountingInfo->pChallenge, 222, decodeBuffer, decodeBufferLen ) 
 		!= E_SUCCESS )
-		{
-			CAMsg::printMsg(LOG_ERR, "Challenge-response authentication failed!\n" );
-			
-			//CAXMLErrorMessage err(CAXMLErrorMessage::ERR_BAD_SIGNATURE, 
-			//		(UINT8*)"Challenge-response authentication failed!!\n");
-			//DOM_Document errDoc;
-			//err.toXmlDocument(errDoc);
-			//pAccInfo->pControlChannel->sendMessage(errDoc); 
-			pAccInfo->authFlags |= AUTH_FAKE;
-			pAccInfo->authFlags &= ~AUTH_ACCOUNT_OK;
-			m_Mutex.unlock();
-			return ;
-		}
+	{
+		CAMsg::printMsg(LOG_ERR, "Challenge-response authentication failed!\n" );
+		pAccInfo->authFlags |= AUTH_FAKE;
+		pAccInfo->authFlags &= ~AUTH_ACCOUNT_OK;
+		m_Mutex.unlock();
+		return ;
+	}
 		
 	pAccInfo->authFlags |= AUTH_ACCOUNT_OK;
 	
