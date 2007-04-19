@@ -760,25 +760,25 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 	#endif
 	pAccInfo->pPublicKey = new CASignature();
 	if ( pAccInfo->pPublicKey->setVerifyKey( elGeneral ) != E_SUCCESS )
-		{
-			CAXMLErrorMessage err(CAXMLErrorMessage::ERR_INTERNAL_SERVER_ERROR);
-			DOM_Document errDoc;
-			err.toXmlDocument(errDoc);
-			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
-			m_Mutex.unlock();
-			return ;
-		}
+	{
+		CAXMLErrorMessage err(CAXMLErrorMessage::ERR_INTERNAL_SERVER_ERROR);
+		DOM_Document errDoc;
+		err.toXmlDocument(errDoc);
+		pAccInfo->pControlChannel->sendXMLMessage(errDoc);
+		m_Mutex.unlock();
+		return ;
+	}
 
 	if ( (!m_pJpiVerifyingInstance)||
 			(m_pJpiVerifyingInstance->verifyXML( (DOM_Node &)root, (CACertStore *)NULL ) != E_SUCCESS ))
-		{
-			// signature invalid. mark this user as bad guy
-			CAMsg::printMsg( LOG_INFO, "CAAccountingInstance::handleAccountCertificate(): Bad Jpi signature\n" );
-			pAccInfo->authFlags |= AUTH_FAKE | AUTH_GOT_ACCOUNTCERT;
-			pAccInfo->authFlags &= ~AUTH_ACCOUNT_OK;
-			m_Mutex.unlock();
-			return ;
-		}
+	{
+		// signature invalid. mark this user as bad guy
+		CAMsg::printMsg( LOG_INFO, "CAAccountingInstance::handleAccountCertificate(): Bad Jpi signature\n" );
+		pAccInfo->authFlags |= AUTH_FAKE | AUTH_GOT_ACCOUNTCERT;
+		pAccInfo->authFlags &= ~AUTH_ACCOUNT_OK;
+		m_Mutex.unlock();
+		return ;
+	}
 #ifdef DEBUG		
 	CAMsg::printMsg(LOG_DEBUG, "Checking database for previously prepaid bytes...\n");
 #endif
@@ -884,10 +884,11 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 	*/
 	
 	// check signature
+	/// TODO: This DOES work now, but wait for the next JAP release so that every JAP is patched...
+	/*
 	pDsaSig = DSA_SIG_new();
 	CASignature * sigTester = pHashEntry->pAccountingInfo->pPublicKey;
 	sigTester->decodeRS( decodeBuffer, decodeBufferLen, pDsaSig );
-	/// TODO: Really do signature checking here...	
 	if ( sigTester->verifyDER( pHashEntry->pAccountingInfo->pChallenge, 222, decodeBuffer, decodeBufferLen ) 
 		!= E_SUCCESS )
 	{
@@ -896,7 +897,7 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 		pAccInfo->authFlags &= ~AUTH_ACCOUNT_OK;
 		m_Mutex.unlock();
 		return ;
-	}
+	}*/
 		
 	pAccInfo->authFlags |= AUTH_ACCOUNT_OK;
 	
