@@ -53,7 +53,7 @@ const UINT64 CAInfoService::SEND_MIX_INFO_WAIT = MINUTE * 10;
 const UINT64 CAInfoService::SEND_STATUS_INFO_WAIT = MINUTE;
 const UINT32 CAInfoService::SEND_INFO_TIMEOUT_MS = 3000; // timeout for single send operations
 
-static THREAD_RETURN InfoLoop(void *p)
+THREAD_RETURN CAInfoService::InfoLoop(void *p)
 	{
 		CAMsg::printMsg(LOG_DEBUG, "CAInfoService - InfoLoop() started\n");
 		CAInfoService* pInfoService=(CAInfoService*)p;
@@ -70,8 +70,7 @@ static THREAD_RETURN InfoLoop(void *p)
 #ifdef DYNAMIC_MIX		
 		UINT32 loops = 4;
 		UINT32 interval = 0;
-#endif
-		
+#endif	
 		lastCascadeUpdate=lastMixInfoUpdate=lastStatusUpdate=time(NULL); 
 		// tell the algorithm it is time to update
 		lastCascadeUpdate -= CAInfoService::SEND_CASCADE_INFO_WAIT; 
@@ -193,10 +192,23 @@ static THREAD_RETURN InfoLoop(void *p)
 	}
 	
 
-//static THREAD_RETURN InfoLoop(void *p)
-//{
-	
-//}	
+struct InfoServiceHeloMsg
+{
+	UINT8* strXML;
+	UINT32 len;
+	CASocketAddrINet* addr;
+	CAInfoService* is;
+};
+
+THREAD_RETURN CAInfoService::TCascadeHelo(void *p)
+{
+	InfoServiceHeloMsg* message = (InfoServiceHeloMsg*)p;
+	if (message->is->sendCascadeHelo(message->strXML, message->len, message->addr) == E_SUCCESS)
+	{
+		THREAD_RETURN_SUCCESS;
+	}
+	THREAD_RETURN_SUCCESS;
+}	
 	
 	
 	
@@ -761,27 +773,46 @@ ERR:
 }
 
 SINT32 CAInfoService::sendCascadeHelo()
-{
-  if(options.isMiddleMix())
+{	
+	if(options.isMiddleMix())
+  	{
 		return E_SUCCESS;
+  	}
+  	
 	UINT32 len;
 	UINT8* strCascadeHeloXML=getCascadeHeloXMLAsString(len);
 	if(strCascadeHeloXML==NULL)
 		return E_UNKNOWN;
 	SINT32 returnValue = E_UNKNOWN;
-	SINT32 currentValue;
 	UINT32 nrAddresses;
 	CAListenerInterface** socketAddresses = options.getInfoServices(nrAddresses);
+	CAThread** threads = new CAThread*[nrAddresses];
+	InfoServiceHeloMsg** messages = new InfoServiceHeloMsg*[nrAddresses];
+	
 	for (UINT32 i = 0; i < nrAddresses; i++)
 	{
-		CASocketAddrINet* pAddr=(CASocketAddrINet*)socketAddresses[i]->getAddr();
-		currentValue = sendCascadeHelo(strCascadeHeloXML,len,pAddr);
-		if (currentValue == E_SUCCESS)
-		{
-			returnValue = currentValue;
-		}
-		delete pAddr;
+		messages[i] = new InfoServiceHeloMsg();
+		messages[i]->addr = (CASocketAddrINet*)socketAddresses[i]->getAddr();
+		messages[i]->len = len;
+		messages[i]->strXML = strCascadeHeloXML;
+		messages[i]->is = this;
+		threads[i] = new CAThread((UINT8*)"CascadeHeloThread");
+		threads[i]->setMainLoop(TCascadeHelo);
+		threads[i]->start((void*)(messages[i]));
 	}
+	
+	for (UINT32 i = 0; i < nrAddresses; i++)
+	{
+		if (threads[i]->join() == E_SUCCESS)
+		{
+			returnValue = E_SUCCESS;
+		}
+		delete messages[i]->addr;
+		delete threads[i];
+	}
+	
+	//delete messages[][];
+	//delete threads[][];
 	delete[] strCascadeHeloXML;
 	return returnValue;
 }

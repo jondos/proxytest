@@ -105,7 +105,9 @@ class CAInfoService
 			static const UINT64 SEND_STATUS_INFO_WAIT;
 			static const UINT32 SEND_INFO_TIMEOUT_MS;
 			
-		private:
+		private:			
+			static THREAD_RETURN TCascadeHelo(void *p);
+			static THREAD_RETURN InfoLoop(void *p);
 			UINT8* getCascadeHeloXMLAsString(UINT32& len);
 			SINT32 sendCascadeHelo(const UINT8* xml,UINT32 len,const CASocketAddrINet* a_socketAddress) const;
 			
