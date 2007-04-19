@@ -811,8 +811,8 @@ SINT32 CAInfoService::sendCascadeHelo()
 		delete threads[i];
 	}
 	
-	//delete messages[][];
-	//delete threads[][];
+	delete[] messages;
+	delete[] threads;
 	delete[] strCascadeHeloXML;
 	return returnValue;
 }
