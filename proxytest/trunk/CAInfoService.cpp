@@ -192,7 +192,7 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 	}
 	
 
-struct InfoServiceHeloMsg
+struct CAInfoService::InfoServiceHeloMsg
 {
 	UINT8* strXML;
 	UINT32 len;
