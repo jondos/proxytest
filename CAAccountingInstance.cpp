@@ -864,7 +864,6 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 			return ;
 		}
 	pAccInfo->authFlags &= ~AUTH_CHALLENGE_SENT;
-	//m_Mutex.unlock();
 
 	// get raw bytes of response
 	if ( getDOMElementValue( root, decodeBuffer, &decodeBufferLen ) != E_SUCCESS )
@@ -878,13 +877,20 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 	CABase64::decode( decodeBuffer, usedLen, decodeBuffer, &decodeBufferLen );
 	
 	
+	UINT8 b64Challenge[ 512 ];
+	UINT32 b64Len = 512;
+
+	
+	CABase64::encode(pHashEntry->pAccountingInfo->pChallenge, 222, b64Challenge, &b64Len);
+	CAMsg::printMsg(LOG_DEBUG, "Challenge:\n%s\n", b64Challenge);
+	
 	// check signature
-	//pDsaSig = DSA_SIG_new();
+	pDsaSig = DSA_SIG_new();
 	CASignature * sigTester = pHashEntry->pAccountingInfo->pPublicKey;
 		//#pragma message (__FILE__ "(665) Signature verifying must be implemented here !!!!!!!!!! ")
-	//sigTester->decodeRS( decodeBuffer, decodeBufferLen, pDsaSig );
+	sigTester->decodeRS( decodeBuffer, decodeBufferLen, pDsaSig );
 	/// TODO: Really do signature checking here...
-	/*
+	
 	if ( sigTester->verifyDER( pHashEntry->pAccountingInfo->pChallenge, 222, decodeBuffer, decodeBufferLen ) 
 		!= E_SUCCESS )
 		{
@@ -899,7 +905,7 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 			pAccInfo->authFlags &= ~AUTH_ACCOUNT_OK;
 			m_Mutex.unlock();
 			return ;
-		}*/
+		}
 		
 	pAccInfo->authFlags |= AUTH_ACCOUNT_OK;
 	
