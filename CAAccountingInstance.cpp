@@ -72,7 +72,7 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
 			exit(1);
 		}
 	
-		// initialize JPI signataure tester
+		// initialize JPI signature tester
 		m_AiName = new UINT8[256];
 		options.getAiID(m_AiName, 256);
 		if (options.getBI() != NULL)
@@ -83,13 +83,6 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
 		options.getPaymentSoftLimit(&m_iSoftLimitBytes);
 	
 		prepareCCRequest(callingMix, m_AiName);
-	
-		// launch AI thread
-		/*m_pThread = new CAThread();
-		m_pThread->setMainLoop( aiThreadMainLoop );
-		m_bThreadRunning = true;
-		m_pThread->start( this );
-		*/
 		
 		// launch BI settleThread		
 		m_settleHashtable = 
@@ -113,6 +106,7 @@ CAAccountingInstance::~CAAccountingInstance()
 		m_pSettleThread = NULL;
 		
 		//delete m_biInterface;
+		m_dbInterface->terminateDBConnection();
 		delete m_dbInterface;
 		m_dbInterface = NULL;
 		delete m_pIPBlockList;
