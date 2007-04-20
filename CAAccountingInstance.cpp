@@ -685,8 +685,8 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 			}
 
 		// parse & set accountnumber
-		if ( getDOMChildByName( root, (UINT8 *)"AccountNumber", elGeneral, false ) != E_SUCCESS ||
-					getDOMElementValue( elGeneral, pAccInfo->accountNumber ) != E_SUCCESS)
+		if (getDOMChildByName( root, (UINT8 *)"AccountNumber", elGeneral, false ) != E_SUCCESS ||
+			getDOMElementValue( elGeneral, pAccInfo->accountNumber ) != E_SUCCESS)
 		{
 			CAMsg::printMsg( LOG_ERR, "AccountCertificate has wrong or no accountnumber. Ignoring...\n");
 			CAXMLErrorMessage err(CAXMLErrorMessage::ERR_WRONG_FORMAT);
@@ -696,6 +696,8 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 			m_Mutex.unlock();
 			return ;
 		}
+		
+		//m_dbInterface->
 		
 		// fetch cost confirmation from last session if available, and retrieve information
 		CAXMLCostConfirmation * pCC = NULL;
