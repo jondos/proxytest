@@ -499,6 +499,7 @@ SINT32 CAAccountingDBInterface::storePrepaidAmount(UINT64 accountNumber, SINT32 
 							PQresultErrorMessage(result), finalQuery
 							);
 		delete[] finalQuery;
+		//CAMsg::printMsg(LOG_ERR, "CAAccountungDBInterface: Saving to prepaidamounts failed!\n");
 		if (result)
 		{
 			PQclear(result);
@@ -563,6 +564,104 @@ SINT32 CAAccountingDBInterface::getPrepaidAmount(UINT64 accountNumber, UINT8* ca
 		
 		return nrOfBytes;
 	}	
+	/* upon receiving an ErrorMesage from the jpi, save the account status to the database table accountstatus
+	 * uses the same error codes defined in CAXMLErrorMessage
+	 */
+	SINT32 CAAccountingDBInterface::storeAccountStatus(UINT64 accountNumber, UINT32 statuscode)
+	{
+		const char* previousStatusQuery = "SELECT COUNT(*) FROM ACCOUNTSTATUS WHERE ACCOUNTNUMBER=%s ";
+		//reverse order of columns, so insertQuery and updateQuery can be used with the same sprintf parameters
+		const char* insertQuery         = "INSERT INTO ACCOUNTSTATUS(STATUSCODE,ACCOUNTNUMBER) VALUES (%u, %s)";
+	 	const char* updateQuery         = "UPDATE ACCOUNTSTATUS SET STATUSCODE=%u WHERE ACCOUNTNUMBER=%s";
+	 	const char* query;
+	 	
+		PGresult* result;
+		UINT8* finalQuery;
+		UINT8 tmp[32];
+		UINT32 len;
+		UINT32 count;
+		print64(tmp,accountNumber);
+	
+		if(!m_bConnected) 
+		{
+			return E_NOT_CONNECTED;
+		}
+		
+		len = max(strlen(previousStatusQuery), strlen(insertQuery));
+		len = max(len, strlen(updateQuery));
+		finalQuery = new UINT8[len + 32 + 32];
+		sprintf( (char *)finalQuery, previousStatusQuery, tmp);
+		
+		if (checkCountAllQuery(finalQuery, count) != E_SUCCESS)
+		{
+			delete[] finalQuery;
+			return E_UNKNOWN;
+		}
+		
+		// put query together (either insert or update)
+		if(count == 0)
+		{			
+			query = insertQuery;
+		}
+		else
+		{
+			query = updateQuery;
+		}
+		sprintf((char*)finalQuery, query, statuscode, tmp);
+		result = PQexec(m_dbConn, (char *)finalQuery);	
+		if (PQresultStatus(result) != PGRES_COMMAND_OK)
+		{
+			CAMsg::printMsg(LOG_ERR, 
+								"CAAccountungDBInterface: Saving the account status failed! Database Error '%s' while processing query '%s'\n", 
+								PQresultErrorMessage(result), finalQuery
+								);
+			delete[] finalQuery;
+			if (result)
+			{
+				PQclear(result);
+			}
+			return E_UNKNOWN;	
+		}
+		delete[] finalQuery;
+		PQclear(result);
+		CAMsg::printMsg(LOG_DEBUG, "Stored status code %u  for account nr. %s \n",statuscode, tmp); 
+		return E_SUCCESS;	 	
+	}
+	
+	/* retrieve account status, e.g. to see if the user's account is empty
+	 * will return 0 if everything is OK (0 is defined as status ERR_OK, but is also returned if no entry is found for this account)
+	 */
+	SINT32 CAAccountingDBInterface::getAccountStatus(UINT64 accountNumber)
+	{
+		SINT32 accountStatus;
+		const char* selectQuery = "SELECT STATUSCODE FROM ACCOUNTSTATUS WHERE ACCOUNTNUMBER = %s";
+		PGresult* result;
+		UINT8* finalQuery;
+		UINT8 accountNumberAsString[32];
+		print64(accountNumberAsString,accountNumber);
+		
+		finalQuery = new UINT8[strlen(selectQuery) + 32];
+		sprintf( (char *)finalQuery, selectQuery, accountNumberAsString);		
+		result = PQexec(m_dbConn, (char *)finalQuery);
+		if(PQresultStatus(result)!=PGRES_TUPLES_OK) 
+		{
+			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Database error while trying to read account status, Reason: %s\n", PQresultErrorMessage(result));
+			PQclear(result);
+			delete[] finalQuery;
+			return E_UNKNOWN;
+		}
+		
+		if(PQntuples(result)!=1) 
+		{
+			//perfectly normal, we have no account status since no error occured
+			accountStatus =  0;
+		}
+		accountStatus =  atoi(PQgetvalue(result, 0, 0)); //first row, first column
+		delete[] finalQuery;
+		PQclear(result);		
+		
+		return accountStatus;				
+	}
 	
 	
 #endif

@@ -95,7 +95,10 @@ class CAAccountingDBInterface
 			
 			SINT32 storePrepaidAmount(UINT64 accountNumber, SINT32 prepaidBytes, UINT8* cascadeId);
 			SINT32 getPrepaidAmount(UINT64 accountNumber, UINT8* cascadeId);
-
+			
+			SINT32 storeAccountStatus(UINT64 accountNumber, UINT32 statuscode);
+			SINT32 getAccountStatus(UINT64 accountNumber);
+			
 		private:
 			/**
 			 * Takes and executes a query that counts databae records and tests if the result
