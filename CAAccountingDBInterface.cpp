@@ -478,19 +478,16 @@ SINT32 CAAccountingDBInterface::storePrepaidAmount(UINT64 accountNumber, SINT32 
 	if (checkCountAllQuery(finalQuery, count) != E_SUCCESS)
 	{
 		delete[] finalQuery;
-		CAMsg::printMsg(LOG_DEBUG, "Error1\n"); 
 		return E_UNKNOWN;
 	}
 	
 	// put query together (either insert or update)
 	if(count == 0)
 	{			
-		CAMsg::printMsg(LOG_DEBUG, "insert\n"); 
 		query = insertQuery;
 	}
 	else
 	{
-		CAMsg::printMsg(LOG_DEBUG, "update\n"); 
 		query = updateQuery;
 	}
 	sprintf((char*)finalQuery, query, prepaidBytes, tmp, cascadeId);
