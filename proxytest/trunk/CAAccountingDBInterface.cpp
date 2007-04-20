@@ -369,7 +369,7 @@ SINT32 CAAccountingDBInterface::getUnsettledCostConfirmations(CAQueue& q, UINT8*
 		}		
 		PQclear(result);
 
-		CAMsg::printMsg(LOG_DEBUG, "Stop get unsettled CC\n");
+		//CAMsg::printMsg(LOG_DEBUG, "Stop get unsettled CC\n");
 		return E_SUCCESS;
 	}
 

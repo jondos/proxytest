@@ -939,9 +939,9 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
  */
 void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,DOM_Element &root)
 {
-#ifdef DEBUG
+//#ifdef DEBUG
 	CAMsg::printMsg(LOG_DEBUG, "started method handleCostConfirmation\n");
-#endif
+//#endif
 	tAiAccountingInfo*pAccInfo=pHashEntry->pAccountingInfo;
 	m_Mutex.lock();
 	
@@ -964,25 +964,25 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,D
 		
 	// for debugging only: test signature the oldschool way
 	// warning this removes the signature from doc!!!
-	if ( pAccInfo->pPublicKey==NULL||
-			(pAccInfo->pPublicKey->verifyXML( (DOM_Node &)root ) != E_SUCCESS ))
-		{
-			// wrong signature
-			CAMsg::printMsg( LOG_INFO, "CostConfirmation has INVALID SIGNATURE!\n" );
-			CAXMLErrorMessage err(CAXMLErrorMessage::ERR_BAD_SIGNATURE, (UINT8*)"CostConfirmation has bad signature");
-			DOM_Document errDoc;
-			err.toXmlDocument(errDoc);
-			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
-			delete pCC;
-			m_Mutex.unlock();
-			return ;
-		}
-	#ifdef DEBUG
+	if (pAccInfo->pPublicKey==NULL||
+		pAccInfo->pPublicKey->verifyXML( (DOM_Node &)root ) != E_SUCCESS)
+	{
+		// wrong signature
+		CAMsg::printMsg( LOG_INFO, "CostConfirmation has INVALID SIGNATURE!\n" );
+		CAXMLErrorMessage err(CAXMLErrorMessage::ERR_BAD_SIGNATURE, (UINT8*)"CostConfirmation has bad signature");
+		DOM_Document errDoc;
+		err.toXmlDocument(errDoc);
+		pAccInfo->pControlChannel->sendXMLMessage(errDoc);
+		delete pCC;
+		m_Mutex.unlock();
+		return ;
+	}
+	//#ifdef DEBUG
 	else
 		{
 			CAMsg::printMsg( LOG_DEBUG, "CostConfirmation Signature is OK.\n");
 		}
-	#endif
+	//#endif
 	m_Mutex.unlock();
 	
 /************ TODO: check pricecerthash with isAI-attribute instead *******
