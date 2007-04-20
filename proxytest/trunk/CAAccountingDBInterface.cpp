@@ -301,10 +301,10 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 		// issue query..
 		pResult = PQexec(m_dbConn, (char*)query);
 		delete[] pStrCC;
-		if(PQresultStatus(pResult) != PGRES_COMMAND_OK || PQntuples(pResult) != 1)
+		if(PQresultStatus(pResult) != PGRES_COMMAND_OK) // || PQntuples(pResult) != 1)
 		{
-			CAMsg::printMsg(LOG_ERR, "Could not store CC!");
-			if (PQresultStatus(pResult) != PGRES_COMMAND_OK)
+			CAMsg::printMsg(LOG_ERR, "Could not store CC!\n");
+			//if (PQresultStatus(pResult) != PGRES_COMMAND_OK)
 			{
 				CAMsg::printMsg(LOG_ERR, 
 								"Database message '%s' while processing query '%s'\n", 
@@ -497,10 +497,10 @@ SINT32 CAAccountingDBInterface::storePrepaidAmount(UINT64 accountNumber, SINT32 
 	}
 	sprintf((char*)finalQuery, query, prepaidBytes, tmp, cascadeId);
 	result = PQexec(m_dbConn, (char *)finalQuery);	
-	if (PQresultStatus(result) != PGRES_COMMAND_OK || PQntuples(result) != 1)
+	if (PQresultStatus(result) != PGRES_COMMAND_OK) // || PQntuples(result) != 1)
 	{
-		CAMsg::printMsg(LOG_ERR, "CAAccountungDBInterface: Saving to prepaidamounts failed!");
-		if (PQresultStatus(result) != PGRES_COMMAND_OK)
+		CAMsg::printMsg(LOG_ERR, "CAAccountungDBInterface: Saving to prepaidamounts failed!\n");
+		//if (PQresultStatus(result) != PGRES_COMMAND_OK)
 		{			
 			CAMsg::printMsg(LOG_ERR, 
 							"Database message '%s' while processing query '%s'\n", 
@@ -617,10 +617,10 @@ SINT32 CAAccountingDBInterface::getPrepaidAmount(UINT64 accountNumber, UINT8* ca
 		}
 		sprintf((char*)finalQuery, query, statuscode, tmp);
 		result = PQexec(m_dbConn, (char *)finalQuery);	
-		if (PQresultStatus(result) != PGRES_COMMAND_OK || PQntuples(result) != 1)
+		if (PQresultStatus(result) != PGRES_COMMAND_OK) // || PQntuples(result) != 1)
 		{
-			CAMsg::printMsg(LOG_ERR, "CAAccountungDBInterface: Saving the account status failed!");
-			if (PQresultStatus(result) != PGRES_COMMAND_OK)
+			CAMsg::printMsg(LOG_ERR, "CAAccountungDBInterface: Saving the account status failed!\n");
+			//if (PQresultStatus(result) != PGRES_COMMAND_OK)
 			{
 				CAMsg::printMsg(LOG_ERR, 
 								"Database Error '%s' while processing query '%s'\n", 
