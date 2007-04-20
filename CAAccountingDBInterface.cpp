@@ -494,15 +494,14 @@ SINT32 CAAccountingDBInterface::storePrepaidAmount(UINT64 accountNumber, SINT32 
 		query = updateQuery;
 	}
 	sprintf((char*)finalQuery, query, tmp, prepaidBytes, cascadeId);
-	result = PQexec(m_dbConn, (char *)finalQuery);
-	delete[] finalQuery;
+	result = PQexec(m_dbConn, (char *)finalQuery);	
 	if (PQresultStatus(result) != PGRES_COMMAND_OK)
 	{
 		CAMsg::printMsg(LOG_ERR, 
 							"CAAccountungDBInterface: Saving to prepaidamounts failed! Database Error '%s' while processing query '%s'\n", 
-							PQresultErrorMessage(pResult), query
+							PQresultErrorMessage(result), query
 							);
-		
+		delete[] finalQuery;
 		//CAMsg::printMsg(LOG_ERR, "CAAccountungDBInterface: Saving to prepaidamounts failed!\n");
 		if (result)
 		{
@@ -510,6 +509,7 @@ SINT32 CAAccountingDBInterface::storePrepaidAmount(UINT64 accountNumber, SINT32 
 		}
 		return E_UNKNOWN;	
 	}
+	delete[] finalQuery;
 	PQclear(result);
 	CAMsg::printMsg(LOG_DEBUG, "Stored %d prepaid bytes for account nr. %s \n",prepaidBytes, tmp); 
 	return E_SUCCESS;
