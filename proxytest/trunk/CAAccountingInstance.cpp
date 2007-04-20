@@ -1029,7 +1029,12 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,D
 	}
 	m_Mutex.unlock();
 	
-	m_dbInterface->storeCostConfirmation(*pCC, m_currentCascade);
+	if (m_dbInterface->storeCostConfirmation(*pCC, m_currentCascade) != E_SUCCESS)
+	{
+		UINT8 tmp[32];
+		print64(tmp,pCC->getTransferredBytes());
+		CAMsg::printMsg( LOG_INFO, "CostConfirmation for account %s could not be stored in database!\n", tmp );
+	}
 
 	delete pCC;
 	return;
