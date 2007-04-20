@@ -240,8 +240,9 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 			#warning Native UINT64 type not available - CostConfirmation Database might be non-functional
 		#endif
 		const char* previousCCQuery = "SELECT COUNT(*) FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER=%s AND CASCADE='%s'";
-		const char* query2F =         "INSERT INTO COSTCONFIRMATIONS(ACCOUNTNUMBER, BYTES, XMLCC, SETTLED, CASCADE) VALUES (%s, %s, '%s', %d,'%s')";
+		const char* query2F =         "INSERT INTO COSTCONFIRMATIONS(BYTES, XMLCC, SETTLED, ACCOUNTNUMBER, CASCADE) VALUES (%s, '%s', %d, %s, '%s')";
 	 	const char* query3F =         "UPDATE COSTCONFIRMATIONS SET BYTES=%s, XMLCC='%s', SETTLED=%d WHERE ACCOUNTNUMBER=%s AND CASCADE='%s'";
+	 	const char* tempQuery;
 	
 		UINT8 * query;
 		UINT8 * pStrCC;
@@ -288,14 +289,13 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 		print64(tmp,cc.getTransferredBytes());		
 		if(count == 0)
 		{			
-			sprintf( // do insert
-				(char*)query, query2F, strAccountNumber, tmp, pStrCC, 0, ccCascade);
+			tempQuery = query2F; // do insert
 		}
 		else
 		{
-			sprintf( // do update
-				(char*)query, query3F, tmp, pStrCC, 0, strAccountNumber, ccCascade);
+			tempQuery = query3F; // do update
 		}
+		sprintf((char*)query, query3F, tmp, pStrCC, 0, strAccountNumber, ccCascade);
 	
 		// issue query..
 		pResult = PQexec(m_dbConn, (char*)query);
@@ -478,6 +478,7 @@ SINT32 CAAccountingDBInterface::storePrepaidAmount(UINT64 accountNumber, SINT32 
 	if (checkCountAllQuery(finalQuery, count) != E_SUCCESS)
 	{
 		delete[] finalQuery;
+		CAMsg::printMsg(LOG_DEBUG, "Error1"); 
 		return E_UNKNOWN;
 	}
 	
@@ -495,6 +496,8 @@ SINT32 CAAccountingDBInterface::storePrepaidAmount(UINT64 accountNumber, SINT32 
 	delete[] finalQuery;
 	if (PQresultStatus(result) != PGRES_COMMAND_OK)
 	{
+		CAMsg::printMsg(LOG_DEBUG, "Error2"); 
+		
 		CAMsg::printMsg(LOG_ERR, "CAAccountungDBInterface: Saving to prepaidamounts failed!\n");
 		if (result)
 		{
