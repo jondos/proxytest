@@ -944,9 +944,9 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
  */
 void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,DOM_Element &root)
 {
-//#ifdef DEBUG
+#ifdef DEBUG
 	CAMsg::printMsg(LOG_DEBUG, "started method handleCostConfirmation\n");
-//#endif
+#endif
 	tAiAccountingInfo*pAccInfo=pHashEntry->pAccountingInfo;
 	m_Mutex.lock();
 	
@@ -982,12 +982,12 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,D
 		m_Mutex.unlock();
 		return ;
 	}
-	//#ifdef DEBUG
+	#ifdef DEBUG
 	else
 		{
 			CAMsg::printMsg( LOG_DEBUG, "CostConfirmation Signature is OK.\n");
 		}
-	//#endif
+	#endif
 	m_Mutex.unlock();
 	
 /************ TODO: check pricecerthash with isAI-attribute instead *******
@@ -1034,7 +1034,6 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,D
 	}
 	m_Mutex.unlock();
 	
-	CAMsg::printMsg( LOG_INFO, "Store CC.\n");
 	if (m_dbInterface->storeCostConfirmation(*pCC, m_currentCascade) != E_SUCCESS)
 	{
 		UINT8 tmp[32];
