@@ -1029,6 +1029,7 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,D
 	}
 	m_Mutex.unlock();
 	
+	CAMsg::printMsg( LOG_INFO, "Store CC for account %s.\n", tmp );
 	if (m_dbInterface->storeCostConfirmation(*pCC, m_currentCascade) != E_SUCCESS)
 	{
 		UINT8 tmp[32];
