@@ -261,15 +261,15 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 
 		pStrCC = new UINT8[8192];
 		size=8192;
-		if(cc.toXMLString(pStrCC,&size)!=E_SUCCESS)
+		if(cc.toXMLString(pStrCC, &size)!=E_SUCCESS)
 		{
 			delete[] pStrCC;
 			return E_UNKNOWN;
 		}
 		
-//#ifdef DEBUG
+#ifdef DEBUG
 		CAMsg::printMsg(LOG_DEBUG, "cc to store in  db:%s\n",pStrCC);	  		
-//#endif  
+#endif  
 
 		// Test: is there already an entry with this accountno. for the same cascade?		
 		len = max(strlen(previousCCQuery), strlen(query2F));
@@ -296,7 +296,7 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 		{
 			tempQuery = query3F; // do update
 		}
-		sprintf((char*)query, query3F, tmp, pStrCC, 0, strAccountNumber, ccCascade);
+		sprintf((char*)query, tempQuery, tmp, pStrCC, 0, strAccountNumber, ccCascade);
 	
 		// issue query..
 		pResult = PQexec(m_dbConn, (char*)query);
@@ -314,9 +314,9 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 		delete[] query;	
 		PQclear(pResult);		
 
-		//#ifdef DEBUG
+		#ifdef DEBUG
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstanceDBInterface: Finished storing CC in DB.\n");
-		//#endif
+		#endif
 		return E_SUCCESS;
 	}
 
