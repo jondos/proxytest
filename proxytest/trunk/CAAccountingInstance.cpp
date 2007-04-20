@@ -702,11 +702,9 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		{
 			UINT8 tmp[32];
 			print64(tmp,pAccInfo->accountNumber);
-			CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Could not check status for account %s!\n", tmp);
-			
+			CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Could not check status for account %s!\n", tmp);			
 		}
-		
-		if (status > CAXMLErrorMessage::ERR_OK)
+		else if (status > CAXMLErrorMessage::ERR_OK)
 		{
 			UINT8 tmp[32];
 			print64(tmp,pAccInfo->accountNumber);
