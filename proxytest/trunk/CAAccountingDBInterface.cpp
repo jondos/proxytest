@@ -296,15 +296,15 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 		{
 			tempQuery = query3F; // do update
 		}
-		sprintf((char*)query, tempQuery, tmp, pStrCC, 0, strAccountNumber, ccCascade);
+		sprintf((char*)query, query3F, tmp, pStrCC, 0, strAccountNumber, ccCascade);
 	
 		// issue query..
 		pResult = PQexec(m_dbConn, (char*)query);
 		delete[] pStrCC;
-		if(PQresultStatus(pResult) != PGRES_COMMAND_OK)
+		if(PQresultStatus(pResult) != PGRES_COMMAND_OK || PQntuples(pResult) != 1)
 		{
 			CAMsg::printMsg(LOG_ERR, 
-							"Database Error '%s' while processing query '%s'\n", 
+							"Could not store CC! Database message '%s' while processing query '%s'\n", 
 							PQresultErrorMessage(pResult), query
 							);
 			delete[] query;	
@@ -493,14 +493,13 @@ SINT32 CAAccountingDBInterface::storePrepaidAmount(UINT64 accountNumber, SINT32 
 	}
 	sprintf((char*)finalQuery, query, prepaidBytes, tmp, cascadeId);
 	result = PQexec(m_dbConn, (char *)finalQuery);	
-	if (PQresultStatus(result) != PGRES_COMMAND_OK)
+	if (PQresultStatus(result) != PGRES_COMMAND_OK || PQntuples(result) != 1)
 	{
 		CAMsg::printMsg(LOG_ERR, 
-							"CAAccountungDBInterface: Saving to prepaidamounts failed! Database Error '%s' while processing query '%s'\n", 
+							"CAAccountungDBInterface: Saving to prepaidamounts failed! Database message '%s' while processing query '%s'\n", 
 							PQresultErrorMessage(result), finalQuery
 							);
-		delete[] finalQuery;
-		//CAMsg::printMsg(LOG_ERR, "CAAccountungDBInterface: Saving to prepaidamounts failed!\n");
+		delete[] finalQuery;		
 		if (result)
 		{
 			PQclear(result);
@@ -610,7 +609,7 @@ SINT32 CAAccountingDBInterface::getPrepaidAmount(UINT64 accountNumber, UINT8* ca
 		}
 		sprintf((char*)finalQuery, query, statuscode, tmp);
 		result = PQexec(m_dbConn, (char *)finalQuery);	
-		if (PQresultStatus(result) != PGRES_COMMAND_OK)
+		if (PQresultStatus(result) != PGRES_COMMAND_OK || PQntuples(result) != 1)
 		{
 			CAMsg::printMsg(LOG_ERR, 
 								"CAAccountungDBInterface: Saving the account status failed! Database Error '%s' while processing query '%s'\n", 
