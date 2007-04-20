@@ -97,6 +97,14 @@ class CAAccountingDBInterface
 			SINT32 getPrepaidAmount(UINT64 accountNumber, UINT8* cascadeId);
 
 		private:
+			/**
+			 * Takes and executes a query that counts databae records and tests if the result
+			 * is valid.
+			 * @param a_query a query that should return the count of database rows
+			 * @param r_count number of database rows; only valid if E_SUCCESS is returned
+			 */
+			SINT32 checkCountAllQuery(UINT8* a_query, UINT32& r_count);
+		
 			/** connection to postgreSQL database */
 			PGconn * m_dbConn;
 			bool m_bConnected;

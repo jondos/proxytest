@@ -147,7 +147,9 @@ SINT32 CAAccountingDBInterface::terminateDBConnection()
 SINT32 CAAccountingDBInterface::getCostConfirmation(UINT64 accountNumber, UINT8* cascadeId, CAXMLCostConfirmation **pCC)
 	{
 		if(!m_bConnected) 
+		{
 			return E_NOT_CONNECTED;
+		}
 		
 		const char* queryF = "SELECT XMLCC FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER=%s AND CASCADE='%s'";
 		UINT8* query;
@@ -186,11 +188,45 @@ SINT32 CAAccountingDBInterface::getCostConfirmation(UINT64 accountNumber, UINT8*
 		PQclear(result);
 
 		if(*pCC==NULL)
+		{
 			return E_UNKNOWN;
+		}
 		return E_SUCCESS;
 	}
 
 
+
+SINT32 CAAccountingDBInterface::checkCountAllQuery(UINT8* a_query, UINT32& r_count)
+{
+	r_count = 0;
+	
+	if (!a_query)
+	{		
+		return E_UNKNOWN;
+	}
+	
+	PGresult * pResult = PQexec(m_dbConn, (char*)a_query);
+	if(PQresultStatus(pResult) != PGRES_TUPLES_OK)
+	{
+		CAMsg::printMsg(LOG_ERR, 
+						"CAAccountingDBInterface: Database Error '%s' while processing query '%s'\n", 
+						PQresultErrorMessage(pResult), a_query
+						);
+		PQclear(pResult);
+		return E_UNKNOWN;
+	}
+	
+	if ( (PQntuples(pResult) != 1) || (PQgetisnull(pResult, 0, 0)))
+	{
+		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Wrong number of tuples or null value\n");
+		PQclear(pResult);
+		return E_UNKNOWN;
+	}
+	
+	r_count = atoi(PQgetvalue(pResult, 0, 0));
+	PQclear(pResult);
+	return E_SUCCESS;
+}
 
 
 
@@ -211,7 +247,10 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 		UINT8 * pStrCC;
 		UINT32 size;
 		UINT32 len;
+		UINT32 count;
 		PGresult * pResult;
+		UINT8 strAccountNumber[32];
+		UINT8 tmp[32];
 		
 		if(!m_bConnected) 
 		{
@@ -234,56 +273,29 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 		len = max(strlen(previousCCQuery), strlen(query2F));
 		len = max(len, strlen(query3F));
 		query = new UINT8[len + 32 + 32 + 1 + size + strlen((char*)ccCascade)];
-		UINT8 strAccountNumber[32];
 		print64(strAccountNumber,cc.getAccountNumber());
 		sprintf( (char*)query, previousCCQuery, strAccountNumber, ccCascade);
 	
 		// to receive result in binary format...
-		pResult = PQexec(m_dbConn, (char*)query);
-		if(PQresultStatus(pResult) != PGRES_TUPLES_OK)
+		if (checkCountAllQuery(query, count) != E_SUCCESS)
 		{
-			CAMsg::printMsg(LOG_ERR, 
-							"Database Error '%s' while processing query '%s'\n", 
-							PQresultErrorMessage(pResult), query
-							);
 			delete[] pStrCC;
 			delete[] query;
-			PQclear(pResult);
-			return E_UNKNOWN;
-		}
-		
-		if ( (PQntuples(pResult) != 1) || (PQgetisnull(pResult, 0, 0)) )
-		{
-			CAMsg::printMsg(LOG_ERR, "DBInterface: Wrong number of tuples or null value\n");
-			delete[] pStrCC;
-			delete[] query;
-			PQclear(pResult);
 			return E_UNKNOWN;
 		}
 	
 		// put query together (either insert or update)
-		UINT8* pVal = (UINT8*)PQgetvalue(pResult, 0, 0);
-		#ifdef DEBUG
-			CAMsg::printMsg(LOG_DEBUG, "DB store -> pVal ist %s, atoi gibt %i\n", pVal, atoi((char*)pVal));
-		#endif
-		if(atoi( (char*)pVal ) == 0)
-		{
-			UINT8 tmp2[32];
-			print64(tmp2,cc.getTransferredBytes() );
+		print64(tmp,cc.getTransferredBytes());		
+		if(count == 0)
+		{			
 			sprintf( // do insert
-				(char*)query, query2F, 
-				strAccountNumber, tmp2, 
-				pStrCC, 0, ccCascade);
+				(char*)query, query2F, strAccountNumber, tmp, pStrCC, 0, ccCascade);
 		}
 		else
 		{
-			UINT8 tmp2[32];
-			print64(tmp2,cc.getTransferredBytes() );
 			sprintf( // do update
-				(char*)query, (char*) query3F,
-				tmp2, pStrCC, 0, strAccountNumber, ccCascade);
+				(char*)query, query3F, tmp, pStrCC, 0, strAccountNumber, ccCascade);
 		}
-		PQclear(pResult);
 	
 		// issue query..
 		pResult = PQexec(m_dbConn, (char*)query);
@@ -440,30 +452,60 @@ SINT32 CAAccountingDBInterface::deleteCC(UINT64 accountNumber, UINT8* cascadeId)
  *  When terminating a connection, store the amount of bytes that the JAP account has already paid for, but not used 
  */	
 SINT32 CAAccountingDBInterface::storePrepaidAmount(UINT64 accountNumber, SINT32 prepaidBytes, UINT8* cascadeId)
-	{
-		const char* insertQuery = "INSERT INTO PREPAIDAMOUNTS(ACCOUNTNUMBER, PREPAIDBYTES, CASCADE) VALUES (%s, %d, '%s')";
-		PGresult* result;
-		UINT8* finalQuery;
-		UINT8 tmp[32];
-		print64(tmp,accountNumber);
+{
+	const char* selectQuery = "SELECT COUNT(*) FROM PREPAIDAMOUNTS WHERE ACCOUNTNUMBER=%s AND CASCADE='%s'";
+	const char* insertQuery = "INSERT INTO PREPAIDAMOUNTS(ACCOUNTNUMBER, PREPAIDBYTES, CASCADE) VALUES (%s, %d, '%s')";
+	const char* updateQuery = "UPDATE PREPAIDAMOUNTS SET ACCOUNTNUMBER=%s, PREPAIDBYTES=%d, CASCADE='%s'";
+	const char* query;
+	
+	PGresult* result;
+	UINT8* finalQuery;
+	UINT8 tmp[32];
+	UINT32 len;
+	UINT32 count;
+	print64(tmp,accountNumber);
 
-		finalQuery = new UINT8[strlen(insertQuery) + 32 + 32 + strlen((char*)cascadeId)];
-		sprintf( (char *)finalQuery, insertQuery, tmp, prepaidBytes, cascadeId);
-		result = PQexec(m_dbConn, (char *)finalQuery);
-		delete[] finalQuery;
-		if (PQresultStatus(result) != PGRES_COMMAND_OK)
-		{
-			CAMsg::printMsg(LOG_ERR, "CAAccountungDBInterface: Saving to prepaidamounts failed!\n");
-			if (result)
-			{
-				PQclear(result);
-			}
-			return E_UNKNOWN;	
-		}
-		PQclear(result);
-		CAMsg::printMsg(LOG_DEBUG, "Stored %d prepaid bytes for account nr. %s \n",prepaidBytes, tmp); 
-		return E_SUCCESS;
+	if(!m_bConnected) 
+	{
+		return E_NOT_CONNECTED;
 	}
+	
+	len = max(strlen(selectQuery), strlen(insertQuery));
+	len = max(len, strlen(updateQuery));
+	finalQuery = new UINT8[len + 32 + 32 + strlen((char*)cascadeId)];
+	sprintf( (char *)finalQuery, selectQuery, tmp, cascadeId);
+	
+	if (checkCountAllQuery(finalQuery, count) != E_SUCCESS)
+	{
+		delete[] finalQuery;
+		return E_UNKNOWN;
+	}
+	
+	// put query together (either insert or update)
+	if(count == 0)
+	{			
+		query = insertQuery;
+	}
+	else
+	{
+		query = updateQuery;
+	}
+	sprintf((char*)finalQuery, query, tmp, prepaidBytes, cascadeId);
+	result = PQexec(m_dbConn, (char *)finalQuery);
+	delete[] finalQuery;
+	if (PQresultStatus(result) != PGRES_COMMAND_OK)
+	{
+		CAMsg::printMsg(LOG_ERR, "CAAccountungDBInterface: Saving to prepaidamounts failed!\n");
+		if (result)
+		{
+			PQclear(result);
+		}
+		return E_UNKNOWN;	
+	}
+	PQclear(result);
+	CAMsg::printMsg(LOG_DEBUG, "Stored %d prepaid bytes for account nr. %s \n",prepaidBytes, tmp); 
+	return E_SUCCESS;
+}
 /*
  * When initializing a connection, retrieve the amount of prepaid, but unused, bytes the JAP account has left over from
  * a previous connection.
@@ -483,24 +525,25 @@ SINT32 CAAccountingDBInterface::getPrepaidAmount(UINT64 accountNumber, UINT8* ca
 		sprintf( (char *)finalQuery, selectQuery, accountNumberAsString, cascadeId);		
 		result = PQexec(m_dbConn, (char *)finalQuery);
 		if(PQresultStatus(result)!=PGRES_TUPLES_OK) 
-			{
-				CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Database error while trying to read prepaid bytes, Reason: %s\n", PQresultErrorMessage(result));
-				PQclear(result);
-				delete[] finalQuery;
-				return E_UNKNOWN;
-			}
+		{
+			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Database error while trying to read prepaid bytes, Reason: %s\n", PQresultErrorMessage(result));
+			PQclear(result);
+			delete[] finalQuery;
+			return E_UNKNOWN;
+		}
 		
 		if(PQntuples(result)!=1) 
-			{
-				//perfectly normal, the user account simply hasnt been used with this cascade yet
-				PQclear(result);
-				delete[] finalQuery;
-				return 0;
-			}
+		{
+			//perfectly normal, the user account simply hasnt been used with this cascade yet
+			PQclear(result);
+			delete[] finalQuery;
+			return 0;
+		}
 		SINT32 nrOfBytes =  atoi(PQgetvalue(result, 0, 0)); //first row, first column
 		PQclear(result);						
 
 		//delete entry from db
+		/*
 		const char* deleteQuery = "DELETE FROM PREPAIDAMOUNTS WHERE ACCOUNTNUMBER=%s AND CASCADE='%s' ";
 		PGresult* result2;
 		print64(accountNumberAsString,accountNumber);
@@ -511,7 +554,7 @@ SINT32 CAAccountingDBInterface::getPrepaidAmount(UINT64 accountNumber, UINT8* ca
 		{
 			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Deleting read prepaidamount failed.");	
 		}
-		PQclear(result2);
+		PQclear(result2);*/
 		delete[] finalQuery;
 		
 		return nrOfBytes;
