@@ -499,7 +499,7 @@ SINT32 CAAccountingDBInterface::storePrepaidAmount(UINT64 accountNumber, SINT32 
 	{
 		CAMsg::printMsg(LOG_ERR, 
 							"CAAccountungDBInterface: Saving to prepaidamounts failed! Database Error '%s' while processing query '%s'\n", 
-							PQresultErrorMessage(result), query
+							PQresultErrorMessage(result), finalQuery
 							);
 		delete[] finalQuery;
 		//CAMsg::printMsg(LOG_ERR, "CAAccountungDBInterface: Saving to prepaidamounts failed!\n");
