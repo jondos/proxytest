@@ -454,8 +454,8 @@ SINT32 CAAccountingDBInterface::deleteCC(UINT64 accountNumber, UINT8* cascadeId)
 SINT32 CAAccountingDBInterface::storePrepaidAmount(UINT64 accountNumber, SINT32 prepaidBytes, UINT8* cascadeId)
 {
 	const char* selectQuery = "SELECT COUNT(*) FROM PREPAIDAMOUNTS WHERE ACCOUNTNUMBER=%s AND CASCADE='%s'";
-	const char* insertQuery = "INSERT INTO PREPAIDAMOUNTS(ACCOUNTNUMBER, PREPAIDBYTES, CASCADE) VALUES (%s, %d, '%s')";
-	const char* updateQuery = "UPDATE PREPAIDAMOUNTS SET ACCOUNTNUMBER=%s, PREPAIDBYTES=%d, CASCADE='%s'";
+	const char* insertQuery = "INSERT INTO PREPAIDAMOUNTS(PREPAIDBYTES, ACCOUNTNUMBER, CASCADE) VALUES (%d, %s, '%s')";
+	const char* updateQuery = "UPDATE PREPAIDAMOUNTS SET PREPAIDBYTES=%d WHERE ACCOUNTNUMBER=%s AND CASCADE='%s'";
 	const char* query;
 	
 	PGresult* result;
@@ -493,7 +493,7 @@ SINT32 CAAccountingDBInterface::storePrepaidAmount(UINT64 accountNumber, SINT32 
 		CAMsg::printMsg(LOG_DEBUG, "update\n"); 
 		query = updateQuery;
 	}
-	sprintf((char*)finalQuery, query, tmp, prepaidBytes, cascadeId);
+	sprintf((char*)finalQuery, query, prepaidBytes, tmp, cascadeId);
 	result = PQexec(m_dbConn, (char *)finalQuery);	
 	if (PQresultStatus(result) != PGRES_COMMAND_OK)
 	{
