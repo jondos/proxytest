@@ -29,6 +29,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef PAYMENT
 #include "CAAccountingDBInterface.hpp"
 #include "CACmdLnOptions.hpp"
+#include "CAXMLErrorMessage.hpp"
 #include "CAMsg.hpp"
 
 extern CACmdLnOptions options;
@@ -654,9 +655,12 @@ SINT32 CAAccountingDBInterface::getPrepaidAmount(UINT64 accountNumber, UINT8* ca
 		if(PQntuples(result)!=1) 
 		{
 			//perfectly normal, we have no account status since no error occured
-			accountStatus =  0;
+			accountStatus =  CAXMLErrorMessage::ERR_OK;
 		}
-		accountStatus =  atoi(PQgetvalue(result, 0, 0)); //first row, first column
+		else
+		{
+			accountStatus = atoi(PQgetvalue(result, 0, 1)); //first row, first column
+		}
 		delete[] finalQuery;
 		PQclear(result);		
 		
