@@ -658,6 +658,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		DOM_Element elGeneral;
 		timespec now;
 		getcurrentTime(now);
+		SINT32 status;
 
 		// check authstate of this user
 		m_Mutex.lock();
@@ -697,7 +698,20 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 			return ;
 		}
 		
-		//m_dbInterface->
+		status = m_dbInterface->getAccountStatus(pAccInfo->accountNumber);
+		if (status < CAXMLErrorMessage::ERR_OK)
+		{
+			UINT8 tmp[32];
+			print64(tmp,pAccInfo->accountNumber);
+			CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Could not check status for account %s!\n", tmp);
+			
+		}
+		else if (status > CAXMLErrorMessage::ERR_OK)
+		{
+			UINT8 tmp[32];
+			print64(tmp,pAccInfo->accountNumber);
+			CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: The user with account %s should be kicked out due to error %d!\n", tmp, status);
+		}
 		
 		// fetch cost confirmation from last session if available, and retrieve information
 		CAXMLCostConfirmation * pCC = NULL;
