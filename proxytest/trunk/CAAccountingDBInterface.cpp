@@ -632,14 +632,15 @@ SINT32 CAAccountingDBInterface::getPrepaidAmount(UINT64 accountNumber, UINT8* ca
 	/* retrieve account status, e.g. to see if the user's account is empty
 	 * will return 0 if everything is OK (0 is defined as status ERR_OK, but is also returned if no entry is found for this account)
 	 */
-	SINT32 CAAccountingDBInterface::getAccountStatus(UINT64 accountNumber)
+	SINT32 CAAccountingDBInterface::getAccountStatus(UINT64 accountNumber, UINT32& a_statusCode)
 	{
-		SINT32 accountStatus;
 		const char* selectQuery = "SELECT STATUSCODE FROM ACCOUNTSTATUS WHERE ACCOUNTNUMBER = %s";
 		PGresult* result;
 		UINT8* finalQuery;
 		UINT8 accountNumberAsString[32];
 		print64(accountNumberAsString,accountNumber);
+		
+		a_statusCode =  CAXMLErrorMessage::ERR_OK;
 		
 		finalQuery = new UINT8[strlen(selectQuery) + 32];
 		sprintf( (char *)finalQuery, selectQuery, accountNumberAsString);		
@@ -652,19 +653,14 @@ SINT32 CAAccountingDBInterface::getPrepaidAmount(UINT64 accountNumber, UINT8* ca
 			return E_UNKNOWN;
 		}
 		
-		if(PQntuples(result)!=1) 
+		if(PQntuples(result) == 1) 
 		{
-			//perfectly normal, we have no account status since no error occured
-			accountStatus =  CAXMLErrorMessage::ERR_OK;
-		}
-		else
-		{
-			accountStatus = atoi(PQgetvalue(result, 0, 1)); //first row, first column
+			a_statusCode = atoi(PQgetvalue(result, 0, 1)); //first row, first column
 		}
 		delete[] finalQuery;
 		PQclear(result);		
 		
-		return accountStatus;				
+		return E_SUCCESS;				
 	}
 	
 	
