@@ -296,17 +296,21 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 		{
 			tempQuery = query3F; // do update
 		}
-		sprintf((char*)query, query3F, tmp, pStrCC, 0, strAccountNumber, ccCascade);
+		sprintf((char*)query, tempQuery, tmp, pStrCC, 0, strAccountNumber, ccCascade);
 	
 		// issue query..
 		pResult = PQexec(m_dbConn, (char*)query);
 		delete[] pStrCC;
 		if(PQresultStatus(pResult) != PGRES_COMMAND_OK || PQntuples(pResult) != 1)
 		{
-			CAMsg::printMsg(LOG_ERR, 
-							"Could not store CC! Database message '%s' while processing query '%s'\n", 
-							PQresultErrorMessage(pResult), query
-							);
+			CAMsg::printMsg(LOG_ERR, "Could not store CC!");
+			if (PQresultStatus(pResult) != PGRES_COMMAND_OK)
+			{
+				CAMsg::printMsg(LOG_ERR, 
+								"Database message '%s' while processing query '%s'\n", 
+								PQresultErrorMessage(pResult), query
+								);
+			}
 			delete[] query;	
 			PQclear(pResult);
 			return E_UNKNOWN;
@@ -495,10 +499,14 @@ SINT32 CAAccountingDBInterface::storePrepaidAmount(UINT64 accountNumber, SINT32 
 	result = PQexec(m_dbConn, (char *)finalQuery);	
 	if (PQresultStatus(result) != PGRES_COMMAND_OK || PQntuples(result) != 1)
 	{
-		CAMsg::printMsg(LOG_ERR, 
-							"CAAccountungDBInterface: Saving to prepaidamounts failed! Database message '%s' while processing query '%s'\n", 
+		CAMsg::printMsg(LOG_ERR, "CAAccountungDBInterface: Saving to prepaidamounts failed!");
+		if (PQresultStatus(result) != PGRES_COMMAND_OK)
+		{			
+			CAMsg::printMsg(LOG_ERR, 
+							"Database message '%s' while processing query '%s'\n", 
 							PQresultErrorMessage(result), finalQuery
 							);
+		}
 		delete[] finalQuery;		
 		if (result)
 		{
@@ -611,10 +619,14 @@ SINT32 CAAccountingDBInterface::getPrepaidAmount(UINT64 accountNumber, UINT8* ca
 		result = PQexec(m_dbConn, (char *)finalQuery);	
 		if (PQresultStatus(result) != PGRES_COMMAND_OK || PQntuples(result) != 1)
 		{
-			CAMsg::printMsg(LOG_ERR, 
-								"CAAccountungDBInterface: Saving the account status failed! Database Error '%s' while processing query '%s'\n", 
+			CAMsg::printMsg(LOG_ERR, "CAAccountungDBInterface: Saving the account status failed!");
+			if (PQresultStatus(result) != PGRES_COMMAND_OK)
+			{
+				CAMsg::printMsg(LOG_ERR, 
+								"Database Error '%s' while processing query '%s'\n", 
 								PQresultErrorMessage(result), finalQuery
 								);
+			}
 			delete[] finalQuery;
 			if (result)
 			{

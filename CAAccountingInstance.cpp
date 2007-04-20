@@ -235,15 +235,6 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			}
 		}		
 		ms_pInstance->m_settleHashtable->getMutex().unlock();	
-		
-		
-		// do the following tests after a lot of Mix packets only (gain speed...)
-		if (pAccInfo->sessionPackets % PACKETS_BEFORE_NEXT_CHECK != 1)
-		{
-			//CAMsg::printMsg( LOG_DEBUG, "Now we gain some speed...\n");
-			ms_pInstance->m_Mutex.unlock();
-			return 1;	
-		}	
 	
 		if(!(pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT) )
 		{ 
@@ -260,7 +251,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			return returnWait(pAccInfo); //dont let the packet through for now, but still wait for an account cert
 		}
 		else 
-		{			
+		{										
 			if( pAccInfo->authFlags & AUTH_FAKE )
 			{
 				// authentication process not properly finished
@@ -283,6 +274,20 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 					return 1;
 				}					
 			}
+			
+			
+			
+			
+			// do the following tests after a lot of Mix packets only (gain speed...)
+			if (pAccInfo->sessionPackets % PACKETS_BEFORE_NEXT_CHECK != 1)
+			{
+				//CAMsg::printMsg( LOG_DEBUG, "Now we gain some speed...\n");
+				ms_pInstance->m_Mutex.unlock();
+				return 1;	
+			}
+			
+			
+			
 
 			//----------------------------------------------------------
 			// ******     Hardlimit cost confirmation check **********
@@ -402,7 +407,7 @@ SINT32 CAAccountingInstance::returnWait(tAiAccountingInfo* pAccInfo)
 	CAMsg::printMsg(LOG_DEBUG, "Wait: %u\n", pAccInfo->goodwillTimeoutStarttime);
 	pAccInfo->goodwillTimeoutStarttime = time(NULL);		
 	ms_pInstance->m_Mutex.unlock();
-	return 1;
+	return 2; //or better 1??
 }	
 /**
  *  When receiving this message, the Mix should kick the user out immediately
