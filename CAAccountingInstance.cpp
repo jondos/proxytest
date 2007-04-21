@@ -110,7 +110,7 @@ CAAccountingInstance::~CAAccountingInstance()
 		delete m_dbInterface;
 		m_dbInterface = NULL;
 		//delete m_pIPBlockList;
-		m_pIPBlockList = NULL;
+		//m_pIPBlockList = NULL;
 		delete m_pQueue;
 		m_pQueue = NULL;
 		delete[] m_AiName;
@@ -1097,11 +1097,11 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			{
 				ms_pInstance->m_settleHashtable->getMutex().lock();				
 				entry = (AccountHashEntry*)ms_pInstance->m_settleHashtable->remove(&(pAccInfo->accountNumber));										
-				ms_pInstance->m_settleHashtable->getMutex().unlock();	
 				if (entry)
 				{
 					delete entry;				
 				}
+				ms_pInstance->m_settleHashtable->getMutex().unlock();					
 			}
 			
 			//free memory of pAccInfo
