@@ -1096,12 +1096,12 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			if (ms_pInstance->m_settleHashtable)
 			{
 				ms_pInstance->m_settleHashtable->getMutex().lock();				
-				entry = (AccountHashEntry*)ms_pInstance->m_settleHashtable->remove(&(pAccInfo->accountNumber));
+				entry = (AccountHashEntry*)ms_pInstance->m_settleHashtable->remove(&(pAccInfo->accountNumber));										
+				ms_pInstance->m_settleHashtable->getMutex().unlock();	
 				if (entry)
 				{
 					delete entry;				
-				}						
-				ms_pInstance->m_settleHashtable->getMutex().unlock();	
+				}
 			}
 			
 			//free memory of pAccInfo
