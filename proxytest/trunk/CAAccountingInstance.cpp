@@ -1072,7 +1072,7 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
  */
 SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 	{
-		ms_pInstance->m_Mutex.lock();
+		//ms_pInstance->m_Mutex.lock();
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
 		
 		if ( pAccInfo != NULL)
@@ -1103,7 +1103,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			}
 			else
 			{
-				CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Cleanup method found zero account number!\n");
+				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Cleanup method found zero account number!\n");
 			}
 			
 			//free memory of pAccInfo
@@ -1123,7 +1123,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			delete pAccInfo;
 			pHashEntry->pAccountingInfo=NULL;
 		}
-		ms_pInstance->m_Mutex.unlock();
+		//ms_pInstance->m_Mutex.unlock();
 		
 		return E_SUCCESS;
 	}
