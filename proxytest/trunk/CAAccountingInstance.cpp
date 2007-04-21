@@ -952,18 +952,18 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,D
 	
 	// check authstate	
 	if( (pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT)==0 ||
-			(pAccInfo->authFlags & AUTH_ACCOUNT_OK)==0)
-		{
-			m_Mutex.unlock();
-			return ;
-		}
+		 (pAccInfo->authFlags & AUTH_ACCOUNT_OK)==0)
+	{
+		m_Mutex.unlock();
+		return ;
+	}
 		
 	CAXMLCostConfirmation* pCC = CAXMLCostConfirmation::getInstance(root);
 	if(pCC==NULL)
-		{
-			m_Mutex.unlock();
-			return ;
-		}
+	{
+		m_Mutex.unlock();
+		return ;
+	}
 	
 	
 		
