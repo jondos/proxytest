@@ -218,10 +218,11 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				err = new CAXMLErrorMessage(CAXMLErrorMessage::ERR_KEY_NOT_FOUND);
 			}
 			
+			/*
 			if (err)
 			{
 				CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: sending error message...!\n");										
-			}
+			}*/
 			
 			if (entry->authFlags & AUTH_FATAL_ERROR)
 			{							
@@ -424,7 +425,7 @@ SINT32 CAAccountingInstance::returnHold(tAiAccountingInfo* pAccInfo, CAXMLErrorM
 {
 	if (a_error)
 	{
-		CAMsg::printMsg(LOG_CRIT, "AccountingInstance: Sending error message...\n");
+		//CAMsg::printMsg(LOG_CRIT, "AccountingInstance: Sending error message...\n");
 		DOM_Document doc;												
 		a_error->toXmlDocument(doc);			
 		delete a_error;
@@ -1071,31 +1072,38 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
  */
 SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 	{
-		//ms_pInstance->m_Mutex.lock();
+		ms_pInstance->m_Mutex.lock();
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
 		
 		if ( pAccInfo != NULL)
 		{
 			pHashEntry->pAccountingInfo=NULL;
 			
-			//store prepaid bytes in database, so the user wont lose the prepaid amount by disconnecting
-			SINT32 prepaidBytes = pAccInfo->confirmedBytes - pAccInfo->transferredBytes;			
-			AccountHashEntry* entry;
-			
-			if (ms_pInstance->m_dbInterface)
+			if (pAccInfo->accountNumber)
 			{
-				ms_pInstance->m_dbInterface->storePrepaidAmount(pAccInfo->accountNumber,prepaidBytes, ms_pInstance->m_currentCascade);
-			}
-
-			if (ms_pInstance->m_settleHashtable)
-			{
-				ms_pInstance->m_settleHashtable->getMutex().lock();				
-				entry = (AccountHashEntry*)ms_pInstance->m_settleHashtable->remove(&(pAccInfo->accountNumber));										
-				if (entry)
+				//store prepaid bytes in database, so the user wont lose the prepaid amount by disconnecting
+				SINT32 prepaidBytes = pAccInfo->confirmedBytes - pAccInfo->transferredBytes;			
+				AccountHashEntry* entry;
+				
+				if (ms_pInstance->m_dbInterface)
 				{
-					delete entry;				
+					ms_pInstance->m_dbInterface->storePrepaidAmount(pAccInfo->accountNumber,prepaidBytes, ms_pInstance->m_currentCascade);
 				}
-				ms_pInstance->m_settleHashtable->getMutex().unlock();					
+	
+				if (ms_pInstance->m_settleHashtable)
+				{
+					ms_pInstance->m_settleHashtable->getMutex().lock();				
+					entry = (AccountHashEntry*)ms_pInstance->m_settleHashtable->remove(&(pAccInfo->accountNumber));										
+					if (entry)
+					{
+						delete entry;				
+					}
+					ms_pInstance->m_settleHashtable->getMutex().unlock();					
+				}
+			}
+			else
+			{
+				CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Cleanup method found zero account number!\n");
 			}
 			
 			//free memory of pAccInfo
@@ -1115,7 +1123,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			delete pAccInfo;
 			pHashEntry->pAccountingInfo=NULL;
 		}
-		//ms_pInstance->m_Mutex.unlock();
+		ms_pInstance->m_Mutex.unlock();
 		
 		return E_SUCCESS;
 	}
