@@ -667,8 +667,8 @@ SINT32 CAAccountingDBInterface::getPrepaidAmount(UINT64 accountNumber, UINT8* ca
 		if(PQntuples(result) == 1) 
 		{
 			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Found a status code! ");
-			CAMsg::printMsg(LOG_ERR, "Value: '%s' or '%s'!\n", PQgetvalue(result, 0, 0), PQgetvalue(result, 0, 1));
-			//a_statusCode = atoi(PQgetvalue(result, 0, 1)); //first row, first column
+			CAMsg::printMsg(LOG_ERR, "Value: '%s'!\n", PQgetvalue(result, 0, 0));
+			a_statusCode = atoi(PQgetvalue(result, 0, 0)); //first row, first column
 		}
 		PQclear(result);		
 		
