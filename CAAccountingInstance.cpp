@@ -157,12 +157,6 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		AccountHashEntry* entry = NULL;
 		CAXMLErrorMessage* err = NULL;
 		
-		if (!a_bControlMessage)
-		{
-			pAccInfo->transferredBytes += MIXPACKET_SIZE; // count the packet	
-			
-		}
-		
 		//kick user out after previous error
 		if(pAccInfo->authFlags & AUTH_FATAL_ERROR)
 		{
@@ -188,6 +182,10 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		{
 			ms_pInstance->m_Mutex.unlock();
 			return 1;
+		}
+		else
+		{
+			pAccInfo->transferredBytes += MIXPACKET_SIZE; // count the packet
 		}
 		
 		if (!ms_pInstance->m_settleHashtable)
