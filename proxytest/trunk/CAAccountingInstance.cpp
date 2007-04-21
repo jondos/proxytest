@@ -410,7 +410,9 @@ SINT32 CAAccountingInstance::returnWait(tAiAccountingInfo* pAccInfo)
  */
 SINT32 CAAccountingInstance::returnKickout(tAiAccountingInfo* pAccInfo)
 {
-	CAMsg::printMsg(LOG_DEBUG, "AccountingInstance: should kick out user now...\n");	
+	UINT8 tmp[32];
+	print64(tmp,pAccInfo->accountNumber);
+	CAMsg::printMsg(LOG_DEBUG, "AccountingInstance: should kick out user with account %s now...\n", tmp);	
 	pAccInfo->transferredBytes = pAccInfo->confirmedBytes;
 	ms_pInstance->m_Mutex.unlock();
 	return 3;
@@ -423,6 +425,8 @@ SINT32 CAAccountingInstance::returnKickout(tAiAccountingInfo* pAccInfo)
  */
 SINT32 CAAccountingInstance::returnHold(tAiAccountingInfo* pAccInfo, CAXMLErrorMessage* a_error)
 {
+	pAccInfo->authFlags |= AUTH_FATAL_ERROR;
+	
 	if (a_error)
 	{
 		//CAMsg::printMsg(LOG_CRIT, "AccountingInstance: Sending error message...\n");
@@ -437,7 +441,6 @@ SINT32 CAAccountingInstance::returnHold(tAiAccountingInfo* pAccInfo, CAXMLErrorM
 		CAMsg::printMsg(LOG_CRIT, "AccountingInstance: Should send error message, but none is available!\n");
 	}
 	
-	pAccInfo->authFlags |= AUTH_FATAL_ERROR;
 	ms_pInstance->m_Mutex.unlock();
 	return 2;
 }
