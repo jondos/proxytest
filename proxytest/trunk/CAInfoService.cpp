@@ -798,7 +798,7 @@ SINT32 CAInfoService::sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN (*a_
 		messages[i]->param = param;
 		threads[i] = new CAThread(a_strThreadName);
 		threads[i]->setMainLoop((THREAD_RETURN (*)(void *))a_thread);
-		threads[i]->start((void*)(messages[i]));
+		threads[i]->start((void*)(messages[i]), false, true);
 	}
 	
 	for (UINT32 i = 0; i < nrAddresses; i++)

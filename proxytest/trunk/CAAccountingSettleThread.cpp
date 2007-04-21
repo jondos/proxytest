@@ -150,7 +150,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					continue;
 				}
 				
-				CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: try to settle...\n");
+				//CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: try to settle...\n");
 				pErrMsg = biConn.settle( *pCC );
 				biConn.terminateBIConnection();
 				CAMsg::printMsg(LOG_DEBUG, "CAAccountingSettleThread: settle done!\n");
