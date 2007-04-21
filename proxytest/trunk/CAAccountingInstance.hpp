@@ -125,9 +125,10 @@ public:
 	 * @retval 0 if it is not blocked
 	 */
 	static SINT32 isIPAddressBlocked(const UINT8 ip[4])
-		{
-			return ms_pInstance->m_pIPBlockList->checkIP(ip); 
-		}
+	{
+		//return ms_pInstance->m_pIPBlockList->checkIP(ip); 
+		return 0;
+	}
 	
 	/**
 	* Handle a user (xml) message sent to us by the Jap through the ControlChannel
