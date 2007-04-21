@@ -223,7 +223,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			
 			if (entry->authFlags & AUTH_FATAL_ERROR)
 			{						
-				entry->authFlags &= ~AUTH_FATAL_ERROR	
+				entry->authFlags &= ~AUTH_FATAL_ERROR;	
 				ms_pInstance->m_settleHashtable->getMutex().unlock();
 				return returnHold(pAccInfo, err);		
 			}
