@@ -122,6 +122,13 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				UINT32 nrOfCCs = qSize / sizeof(pCC); 
 				CAMsg::printMsg(LOG_DEBUG, "SettleThread: finished gettings CCs, found %u cost confirmations to settle\n",nrOfCCs);	
 			}
+			
+			if(biConn.initBIConnection()!=E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_DEBUG, "SettleThread: could not connect to BI. Retrying later...\n");
+				q.clean();
+			}
+			
 			while(!q.isEmpty())
 			{
 				// get the next CC from the queue
@@ -135,12 +142,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 #ifdef DEBUG				
 				CAMsg::printMsg(LOG_DEBUG, " Settle Thread: trying to connect to payment instance");
 #endif				
-				if(biConn.initBIConnection()!=E_SUCCESS)
-				{
-					CAMsg::printMsg(LOG_DEBUG, "SettleThread: could not connect to BI. Retrying later...\n");
-					q.clean();
-					break;
-				}
+				
 #ifdef DEBUG				
 				CAMsg::printMsg(LOG_DEBUG, " SettleThread: successfully connected to payment instance");
 #endif				
@@ -151,8 +153,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				}
 				
 				//CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: try to settle...\n");
-				pErrMsg = biConn.settle( *pCC );
-				biConn.terminateBIConnection();
+				pErrMsg = biConn.settle( *pCC );				
 				CAMsg::printMsg(LOG_DEBUG, "CAAccountingSettleThread: settle done!\n");
 			
 				if (!pCC)
