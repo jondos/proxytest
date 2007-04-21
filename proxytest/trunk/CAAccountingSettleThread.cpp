@@ -197,7 +197,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 						if (attachedCC)
 						{
 							authFlags |= AUTH_OUTDATED_CC;
-							CAMsg::printMsg(LOG_DEBUG, "SettleThread: tried invalid CC, received last valid CC back\n");
+							CAMsg::printMsg(LOG_DEBUG, "SettleThread: tried outdated CC, received last valid CC back\n");
 							//store it in DB
 							if (dbConn.storeCostConfirmation(*attachedCC, m_pAccountingSettleThread->m_settleCascade) == E_SUCCESS)
 							{
