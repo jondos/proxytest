@@ -62,7 +62,7 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
 	{	
 		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance initialising\n" );
 		m_pQueue = new CAQueue();
-		m_pIPBlockList = new CATempIPBlockList(60000);
+		//m_pIPBlockList = new CATempIPBlockList(60000);
 		
 		// initialize Database connection
 		m_dbInterface = new CAAccountingDBInterface();
@@ -109,7 +109,7 @@ CAAccountingInstance::~CAAccountingInstance()
 		m_dbInterface->terminateDBConnection();
 		delete m_dbInterface;
 		m_dbInterface = NULL;
-		delete m_pIPBlockList;
+		//delete m_pIPBlockList;
 		m_pIPBlockList = NULL;
 		delete m_pQueue;
 		m_pQueue = NULL;
