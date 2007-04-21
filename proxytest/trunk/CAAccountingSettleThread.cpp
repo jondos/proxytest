@@ -177,7 +177,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_KEY_NOT_FOUND)
 					{
 						authFlags |= AUTH_INVALID_ACCOUNT;	
-						//dbConn.storeAccountStatus(pCC->getAccountNumber(), CAXMLErrorMessage::ERR_KEY_NOT_FOUND);				
+						dbConn.storeAccountStatus(pCC->getAccountNumber(), CAXMLErrorMessage::ERR_KEY_NOT_FOUND);				
 						bDeleteCC = true;													
 					}
 					else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_ACCOUNT_EMPTY)
@@ -262,16 +262,6 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				}
 				else //settling was OK, so mark account as settled
 				{
-					UINT64 accountNumber = pCC->getAccountNumber();
-					/*
-					m_pAccountingSettleThread->m_accountingHashtable->getMutex().lock();											
-					AccountHashEntry* entry = (AccountHashEntry*)m_pAccountingSettleThread->m_accountingHashtable->remove(&(accountNumber));		
-					if (entry)
-					{
-						delete entry;
-					}			
-					m_pAccountingSettleThread->m_accountingHashtable->getMutex().unlock();								
-					*/
 					dbConn.markAsSettled(pCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade);
 				} 
 

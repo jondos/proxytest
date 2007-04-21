@@ -223,16 +223,10 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: sending error message...!\n");										
 			}
 			
-			if (entry->authFlags & AUTH_FATAL_ERROR) // || entry->authFlags == 0)
+			if (entry->authFlags & AUTH_FATAL_ERROR)
 			{							
-				//ms_pInstance->m_settleHashtable->remove(&(pAccInfo->accountNumber));			
-				//if (entry->authFlags & AUTH_FATAL_ERROR)
-				{
-					//delete entry; //do not delete before the above usage....
-					ms_pInstance->m_settleHashtable->getMutex().unlock();
-					return returnHold(pAccInfo, err);		
-				}
-				//delete entry;
+				ms_pInstance->m_settleHashtable->getMutex().unlock();
+				return returnHold(pAccInfo, err);		
 			}
 		}		
 		ms_pInstance->m_settleHashtable->getMutex().unlock();	
