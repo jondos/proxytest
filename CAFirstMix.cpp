@@ -294,14 +294,14 @@ SINT32 CAFirstMix::processKeyExchange()
 {
     UINT8* recvBuff=NULL;
     UINT16 len;
-	CAMsg::printMsg(LOG_CRIT,"Try to read the Key Info lenght from next Mix...\n");
+	CAMsg::printMsg(LOG_CRIT,"Try to read the Key Info length from next Mix...\n");
     if(m_pMuxOut->receiveFully((UINT8*)&len,2)!=E_SUCCESS)
     {
-        CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info lenght!\n");
+        CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info length!\n");
         return E_UNKNOWN;
     }
     len=ntohs(len);
-    CAMsg::printMsg(LOG_CRIT,"Received Key Info lenght %u\n",len);
+    CAMsg::printMsg(LOG_CRIT,"Received Key Info length %u\n",len);
     recvBuff=new UINT8[len+1];
 
     if(m_pMuxOut->receiveFully(recvBuff,len)!=E_SUCCESS)
