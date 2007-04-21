@@ -144,7 +144,7 @@ CAAccountingInstance::~CAAccountingInstance()
  * @return 3: fatal error, or timeout exceeded -> kick the user out
  * 
  */
-SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool a_bControlMessage)
+SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool a_bControlMessage, bool a_bMessageToJAP)
 	{
 		ms_pInstance->m_Mutex.lock();
 		
@@ -157,7 +157,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		AccountHashEntry* entry = NULL;
 		CAXMLErrorMessage* err = NULL;
 		
-		if (!a_bControlMessage)
+		if (!a_bControlMessage && a_bMessageToJAP)
 		{
 			pAccInfo->transferredBytes += MIXPACKET_SIZE; // count the packet	
 			pAccInfo->sessionPackets++;
@@ -167,7 +167,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		if(pAccInfo->authFlags & AUTH_FATAL_ERROR)
 		{
 			// there was an error earlier.
-			if (a_bControlMessage || pAccInfo->sessionPackets >= 10)
+			if (a_bMessageToJAP && (a_bControlMessage || pAccInfo->sessionPackets >= 10))
 			{				
 				return returnKickout(pAccInfo);
 			}
