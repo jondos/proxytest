@@ -815,7 +815,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 								/* This should protect the mix from fooding attacks
 								 * No more than MAX_CONCURRENT_NEW_CONNECTIONS are allowed.
 								 */
-								CAMsg::printMsg(LOG_DEBUG,"CAFirstMix Flooding protection: Too many concurrent new connections (Maximum:%d)! Rejecting user...\n", CAFirstMix::MAX_CONCURRENT_NEW_CONNECTIONS);
+								CAMsg::printMsg(LOG_DEBUG,"CAFirstMix Flooding protection: Too many concurrent new connections (Current:%d)! Rejecting user...\n", pFirstMix->m_newConnections, CAFirstMix::MAX_CONCURRENT_NEW_CONNECTIONS);
 								delete pNewMuxSocket;
 								pFirstMix->m_newConnections--;
 								msSleep(400);
