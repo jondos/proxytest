@@ -183,7 +183,7 @@ SINT32 CAFirstMixA::loop()
 												// payment code added by Bastian Voigt
 												if (ret == 0)
 												{
-													ret = CAAccountingInstance::handleJapPacket(pHashEntry, false);  
+													ret = CAAccountingInstance::handleJapPacket(pHashEntry, false, false);  
 												}
 												if (ret == 2 || ret == 3)
 												{
@@ -516,7 +516,7 @@ NEXT_USER:
 													//if(pfmHashEntry->bCountPacket)
 														{
 															// count packet for payment
-															if (CAAccountingInstance::handleJapPacket(pfmHashEntry, !(pfmHashEntry->bCountPacket)) == 3)
+															if (CAAccountingInstance::handleJapPacket(pfmHashEntry, !(pfmHashEntry->bCountPacket), true) == 3)
 															{
 																// this jap is evil! terminate connection and add IP to blacklist
 																CAMsg::printMsg(LOG_DEBUG, "CAFirstMixA: Detected evil Jap.. closing connection! Removing IP..\n", ret);
