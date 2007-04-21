@@ -1103,7 +1103,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			}
 			else
 			{
-				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Cleanup method found zero account number!\n");
+				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Cleanup method found account zero.\n");
 			}
 			
 			//free memory of pAccInfo
