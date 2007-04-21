@@ -263,6 +263,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				else //settling was OK, so mark account as settled
 				{
 					UINT64 accountNumber = pCC->getAccountNumber();
+					/*
 					m_pAccountingSettleThread->m_accountingHashtable->getMutex().lock();											
 					AccountHashEntry* entry = (AccountHashEntry*)m_pAccountingSettleThread->m_accountingHashtable->remove(&(accountNumber));		
 					if (entry)
@@ -270,6 +271,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 						delete entry;
 					}			
 					m_pAccountingSettleThread->m_accountingHashtable->getMutex().unlock();								
+					*/
 					dbConn.markAsSettled(pCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade);
 				} 
 
