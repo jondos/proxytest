@@ -157,15 +157,20 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		AccountHashEntry* entry = NULL;
 		CAXMLErrorMessage* err = NULL;
 		
-		if (!a_bControlMessage && a_bMessageToJAP)
+		if (!a_bControlMessage)
 		{
 			pAccInfo->transferredBytes += MIXPACKET_SIZE; // count the packet	
-			pAccInfo->sessionPackets++;
+			
 		}
 		
 		//kick user out after previous error
 		if(pAccInfo->authFlags & AUTH_FATAL_ERROR)
 		{
+			if (a_bMessageToJAP)
+			{
+				pAccInfo->sessionPackets++;
+			}
+			
 			// there was an error earlier.
 			if (a_bMessageToJAP && (a_bControlMessage || pAccInfo->sessionPackets >= 10))
 			{				
@@ -218,12 +223,6 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				err = new CAXMLErrorMessage(CAXMLErrorMessage::ERR_KEY_NOT_FOUND);
 			}
 			
-			/*
-			if (err)
-			{
-				CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: sending error message...!\n");										
-			}*/
-			
 			if (entry->authFlags & AUTH_FATAL_ERROR)
 			{							
 				ms_pInstance->m_settleHashtable->getMutex().unlock();
@@ -275,12 +274,13 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			
 			
 			// do the following tests after a lot of Mix packets only (gain speed...)
+			/*
 			if (pAccInfo->sessionPackets % PACKETS_BEFORE_NEXT_CHECK != 1)
 			{
 				//CAMsg::printMsg( LOG_DEBUG, "Now we gain some speed...\n");
 				ms_pInstance->m_Mutex.unlock();
 				return 1;	
-			}
+			}*/
 			
 			
 			
