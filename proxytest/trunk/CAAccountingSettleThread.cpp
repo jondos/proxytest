@@ -190,13 +190,13 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 						// this should never happen; the price certs in this CC do not fit to the ones of the cascade
 						// bDeleteCC = true;
 					}
-					else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_INVALID_CC)
+					else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_OUTDATED_CC)
 					{														
 						//get attached CC from error message
 						CAXMLCostConfirmation* attachedCC = (CAXMLCostConfirmation*) pErrMsg->getMessageObject();
 						if (attachedCC)
 						{
-							authFlags |= AUTH_INVALID_CC;
+							authFlags |= AUTH_OUTDATED_CC;
 							CAMsg::printMsg(LOG_DEBUG, "SettleThread: tried invalid CC, received last valid CC back\n");
 							//store it in DB
 							if (dbConn.storeCostConfirmation(*attachedCC, m_pAccountingSettleThread->m_settleCascade) == E_SUCCESS)

@@ -182,7 +182,7 @@ typedef struct t_mix_parameters tMixParameters;
 /** a fatal error occured earlier */
 #define AUTH_FATAL_ERROR 0x2000
 
-#define AUTH_INVALID_CC 0x4000
+#define AUTH_OUTDATED_CC 0x4000
 
 /** Account does not exist */
 #define AUTH_INVALID_ACCOUNT 0x8000

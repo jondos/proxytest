@@ -195,9 +195,9 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		entry = (AccountHashEntry*)ms_pInstance->m_settleHashtable->getValue(&(pAccInfo->accountNumber));				
 		if (entry)
 		{						
-			if (entry->authFlags & AUTH_INVALID_CC)
+			if (entry->authFlags & AUTH_OUTDATED_CC)
 			{
-				entry->authFlags &= ~AUTH_INVALID_CC;	
+				entry->authFlags &= ~AUTH_OUTDATED_CC;	
 				// we had stored an outdated CC; insert confirmed bytes from current CC here						
 				pAccInfo->transferredBytes +=  entry->confirmedBytes - pAccInfo->confirmedBytes;
 				pAccInfo->confirmedBytes = entry->confirmedBytes;				

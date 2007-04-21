@@ -59,7 +59,7 @@ class CAXMLErrorMessage : public CAAbstractXMLEncodable
 			static const UINT32 ERR_INSUFFICIENT_BALANCE = 13;
 			static const UINT32 ERR_NO_FLATRATE_OFFERED = 14;
 			static const UINT32 ERR_INVALID_CODE = 15;
-			static const UINT32 ERR_INVALID_CC = 16;
+			static const UINT32 ERR_OUTDATED_CC = 16;
 			static const UINT32 ERR_INVALID_PRICE_CERT = 17;
 			
 		
