@@ -704,7 +704,6 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 			return ;
 		}
 		
-		/*
 		if (m_dbInterface->getAccountStatus(pAccInfo->accountNumber, status) != E_SUCCESS)
 		{
 			UINT8 tmp[32];
@@ -715,8 +714,8 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		{
 			UINT8 tmp[32];
 			print64(tmp,pAccInfo->accountNumber);
-			CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: The user with account %s should be kicked out due to error %d!\n", tmp, status);
-		}*/
+			CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: The user with account %s should be kicked out due to error %u!\n", tmp, status);
+		}
 		
 		// fetch cost confirmation from last session if available, and retrieve information
 		CAXMLCostConfirmation * pCC = NULL;
