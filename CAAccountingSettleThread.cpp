@@ -176,7 +176,8 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 						pErrMsg->getErrorCode(), pErrMsg->getDescription() );
 					if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_KEY_NOT_FOUND)
 					{
-						authFlags |= AUTH_INVALID_ACCOUNT;						
+						authFlags |= AUTH_INVALID_ACCOUNT;	
+						dbConn.storeAccountStatus(pCC->getAccountNumber(), CAXMLErrorMessage::ERR_KEY_NOT_FOUND);				
 						bDeleteCC = true;													
 					}
 					else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_ACCOUNT_EMPTY)
@@ -263,12 +264,12 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				{
 					UINT64 accountNumber = pCC->getAccountNumber();
 					m_pAccountingSettleThread->m_accountingHashtable->getMutex().lock();											
-					AccountHashEntry* entry = (AccountHashEntry*)m_pAccountingSettleThread->m_accountingHashtable->remove(&(accountNumber));
-					m_pAccountingSettleThread->m_accountingHashtable->getMutex().unlock();
+					AccountHashEntry* entry = (AccountHashEntry*)m_pAccountingSettleThread->m_accountingHashtable->remove(&(accountNumber));		
 					if (entry)
 					{
 						delete entry;
-					}											
+					}			
+					m_pAccountingSettleThread->m_accountingHashtable->getMutex().unlock();								
 					dbConn.markAsSettled(pCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade);
 				} 
 
