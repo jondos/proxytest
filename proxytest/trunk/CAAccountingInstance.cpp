@@ -237,7 +237,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 	
 		if(!(pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT) )
 		{ 
-						//dont let the packet through for now, but still wait for an account cert
+			//dont let the packet through for now, but still wait for an account cert
 			if (!(pAccInfo->authFlags & AUTH_TIMEOUT_STARTED))						
 			{
 				pAccInfo->authFlags |= AUTH_TIMEOUT_STARTED;
@@ -315,16 +315,15 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 #endif					
 			if (prepaidBytes <= (SINT32) ms_pInstance->m_iHardLimitBytes)
 			{
-#ifdef DEBUG					
+//#ifdef DEBUG					
 				CAMsg::printMsg(LOG_ERR, "hard limit of %d bytes triggered \n", ms_pInstance->m_iHardLimitBytes);
-#endif										
-				time_t theTime=time(NULL);	
+//#endif											
 				if ((pAccInfo->authFlags & AUTH_HARD_LIMIT_REACHED) == 0)
 				{
 					pAccInfo->authFlags |= AUTH_HARD_LIMIT_REACHED;
-					pAccInfo->lastHardLimitSeconds = theTime;
+					pAccInfo->lastHardLimitSeconds = time(NULL);
 				}
-				if(theTime >= pAccInfo->lastHardLimitSeconds + HARD_LIMIT_TIMEOUT)
+				if(time(NULL) >= pAccInfo->lastHardLimitSeconds + HARD_LIMIT_TIMEOUT)
 				{
 //#ifdef DEBUG					
 					CAMsg::printMsg( LOG_DEBUG, "Accounting instance: User refused "		
@@ -686,7 +685,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		}
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;				
 		
-		if(pAccInfo->authFlags&AUTH_GOT_ACCOUNTCERT)
+		if(pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT)
 			{
 				//#ifdef DEBUG
 					CAMsg::printMsg(LOG_DEBUG, "Already got an account cert. Ignoring...");
@@ -824,6 +823,14 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: No database record for prepaid bytes found for this account \n");	
 	}	
 	//CAMsg::printMsg(LOG_DEBUG, "Number of prepaid (confirmed-transferred) bytes : %d \n",pAccInfo->confirmedBytes-pAccInfo->transferredBytes);
+		
+	
+	if (pAccInfo->confirmedBytes - pAccInfo->transferredBytes <= (SINT32) ms_pInstance->m_iHardLimitBytes &&
+		(pAccInfo->authFlags & AUTH_HARD_LIMIT_REACHED) == 0)
+	{								
+		pAccInfo->authFlags |= AUTH_HARD_LIMIT_REACHED;
+		pAccInfo->lastHardLimitSeconds = time(NULL);
+	}	
 		
 	UINT8 * arbChallenge;
 	UINT8 b64Challenge[ 512 ];
