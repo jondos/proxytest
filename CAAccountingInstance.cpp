@@ -163,11 +163,15 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		{
 			if (a_bMessageToJAP)
 			{
-				pAccInfo->sessionPackets++;
+				/**
+				 * This is a mesage going to JAP; we forward some of these packages so that 
+				 * the control error message may go through.
+				 */
+				pAccInfo->packetsSinceFatal++;
 			}
 			
 			// there was an error earlier.
-			if (a_bMessageToJAP && (a_bControlMessage || pAccInfo->sessionPackets >= 10))
+			if (a_bMessageToJAP && (a_bControlMessage || pAccInfo->packetsSinceFatal >= FATAL_GRACE_PACKETS))
 			{				
 				return returnKickout(pAccInfo);
 			}
@@ -185,7 +189,8 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		}
 		else
 		{
-			pAccInfo->transferredBytes += MIXPACKET_SIZE; // count the packet
+			 // count the packet and continue checkings
+			pAccInfo->transferredBytes += MIXPACKET_SIZE;
 		}
 		
 		if (!ms_pInstance->m_settleHashtable)
@@ -232,29 +237,28 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 	
 		if(!(pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT) )
 		{ 
-			//kick user out if a timeout was set and has since run out
-			if (pAccInfo->authFlags & (AUTH_TIMEOUT_STARTED) &&
-			    time(NULL) > pAccInfo->goodwillTimeoutStarttime + GOODWILL_TIMEOUT)
+						//dont let the packet through for now, but still wait for an account cert
+			if (!(pAccInfo->authFlags & AUTH_TIMEOUT_STARTED))						
 			{
-	#ifdef DEBUG							
-					CAMsg::printMsg(LOG_DEBUG, "Goodwill timeout has runout, will kick out user now...\n");
-	#endif											
-					return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_NO_ACCOUNTCERT));				
-			}			
-			
-			//dont let the packet through for now, but still wait for an account cert
-			pAccInfo->authFlags |= AUTH_TIMEOUT_STARTED;
-			if (pAccInfo->goodwillTimeoutStarttime < 0)
-			{
-				pAccInfo->goodwillTimeoutStarttime = time(NULL);
+				pAccInfo->authFlags |= AUTH_TIMEOUT_STARTED;
+				pAccInfo->authTimeoutStartSeconds = time(NULL);
+				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Wait for account certificate: %u\n", pAccInfo->authTimeoutStartSeconds);
 			}
-			CAMsg::printMsg(LOG_DEBUG, "Wait for account certificate: %u\n", pAccInfo->goodwillTimeoutStarttime);
+			
+			//kick user out if a timeout was set and has since run out
+			if (time(NULL) > pAccInfo->authTimeoutStartSeconds + AUTH_TIMEOUT)
+			{
+	//#ifdef DEBUG							
+				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Auth timeout has runout, will kick out user now...\n");
+	//#endif											
+				return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_NO_ACCOUNTCERT));				
+			}						
 					
 			ms_pInstance->m_Mutex.unlock();
-			return 2; //or better 1??
+			return 2;
 		}
 		else 
-		{										
+		{									
 			if( pAccInfo->authFlags & AUTH_FAKE )
 			{
 				// authentication process not properly finished
@@ -266,7 +270,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			if( !(pAccInfo->authFlags & AUTH_ACCOUNT_OK) )
 			{
 				// we did not yet receive the response to the challenge...
-				if(time(NULL) >= pAccInfo->lastRequestSeconds + REQUEST_TIMEOUT)
+				if(time(NULL) >= pAccInfo->challengeSentSeconds + CHALLENGE_TIMEOUT)
 				{
 					CAMsg::printMsg( LOG_DEBUG, "AccountingInstance: Jap refused to send response to challenge (Request Timeout)...\n");
 					return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_NO_ACCOUNTCERT)); //timeout over -> kick out
@@ -279,8 +283,6 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			}
 			
 			
-			
-			
 			// do the following tests after a lot of Mix packets only (gain speed...)
 			/*
 			if (pAccInfo->sessionPackets % PACKETS_BEFORE_NEXT_CHECK != 1)
@@ -289,7 +291,6 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				ms_pInstance->m_Mutex.unlock();
 				return 1;	
 			}*/
-			
 			
 			
 
@@ -313,8 +314,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			{
 #ifdef DEBUG					
 				CAMsg::printMsg(LOG_ERR, "hard limit of %d bytes triggered \n", ms_pInstance->m_iHardLimitBytes);
-#endif					
-					
+#endif										
 				time_t theTime=time(NULL);	
 				if ((pAccInfo->authFlags & AUTH_HARD_LIMIT_REACHED) == 0)
 				{
@@ -357,31 +357,10 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 					return returnOK(pAccInfo);
 				}//we have sent a CC request
 				// no CC request sent yet --> send a first CC request
-				DOM_Document doc;
 				
-                //send CC to jap
-                UINT32 prepaidInterval;
-                options.getPrepaidIntervalKbytes(&prepaidInterval);
-                UINT64 confirmedBytes = pAccInfo->confirmedBytes;
-                UINT64 bytesToConfirm = confirmedBytes + (prepaidInterval * 1024); 				
-				makeCCRequest(pAccInfo->accountNumber, bytesToConfirm, doc);
-#ifdef DEBUG				
-				CAMsg::printMsg(LOG_DEBUG, "AccountingInstance sending first CC request for account nr %u.\n", pAccInfo->accountNumber);
-#endif					
-				pAccInfo->authFlags |= AUTH_SENT_CC_REQUEST;
-				pAccInfo->pControlChannel->sendXMLMessage(doc);
-#ifdef DEBUG	
-				CAMsg::printMsg(LOG_DEBUG, "CC request sent for %u bytes \n",bytesToConfirm);
-				CAMsg::printMsg(LOG_DEBUG, "transferrred bytes: %u bytes \n",pAccInfo->transferredBytes);
-				CAMsg::printMsg(LOG_DEBUG, "prepaid Interval: %u \n",prepaidInterval);	
-				/*
-				UINT32 debuglen = 3000;
-				UINT8 debugout[3000];
-				DOM_Output::dumpToMem(doc,debugout,&debuglen);
-				debugout[debuglen] = 0;			
-				CAMsg::printMsg(LOG_DEBUG, "the CC sent looks like this: %s \n",debugout);
-				*/
-#endif						
+				//send CC to jap
+				sendCCRequest(pAccInfo);
+						
 				return returnOK(pAccInfo);
 			}// end of soft limit exceeded
 
@@ -399,8 +378,6 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
  */
 SINT32 CAAccountingInstance::returnOK(tAiAccountingInfo* pAccInfo)
 {
-	pAccInfo->authFlags &= ~AUTH_TIMEOUT_STARTED;
-	pAccInfo->goodwillTimeoutStarttime = 0;
 	ms_pInstance->m_Mutex.unlock();
 	return 1;	
 }
@@ -413,7 +390,7 @@ SINT32 CAAccountingInstance::returnKickout(tAiAccountingInfo* pAccInfo)
 {
 	UINT8 tmp[32];
 	print64(tmp,pAccInfo->accountNumber);
-	CAMsg::printMsg(LOG_DEBUG, "AccountingInstance: should kick out user with account %s now...\n", tmp);	
+	CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: should kick out user with account %s now...\n", tmp);	
 	pAccInfo->transferredBytes = pAccInfo->confirmedBytes;
 	ms_pInstance->m_Mutex.unlock();
 	return 3;
@@ -434,7 +411,7 @@ SINT32 CAAccountingInstance::returnHold(tAiAccountingInfo* pAccInfo, CAXMLErrorM
 		DOM_Document doc;												
 		a_error->toXmlDocument(doc);			
 		delete a_error;
-		pAccInfo->sessionPackets = 0; // allow some pakets to pass by to send the control message
+		//pAccInfo->sessionPackets = 0; // allow some pakets to pass by to send the control message
 		pAccInfo->pControlChannel->sendXMLMessage(doc);		
 	}
 	else
@@ -446,6 +423,30 @@ SINT32 CAAccountingInstance::returnHold(tAiAccountingInfo* pAccInfo, CAXMLErrorM
 	return 2;
 }
 
+
+SINT32 CAAccountingInstance::sendCCRequest(tAiAccountingInfo* pAccInfo)
+{
+	DOM_Document doc;                
+    UINT32 prepaidInterval;
+    options.getPrepaidIntervalKbytes(&prepaidInterval);
+    UINT64 bytesToConfirm = pAccInfo->confirmedBytes + (prepaidInterval * 1024); 				
+	makeCCRequest(pAccInfo->accountNumber, bytesToConfirm, doc);				
+	pAccInfo->authFlags |= AUTH_SENT_CC_REQUEST;
+#ifdef DEBUG	
+	CAMsg::printMsg(LOG_DEBUG, "CC request sent for %u bytes \n",bytesToConfirm);
+	CAMsg::printMsg(LOG_DEBUG, "transferrred bytes: %u bytes \n",pAccInfo->transferredBytes);
+	CAMsg::printMsg(LOG_DEBUG, "prepaid Interval: %u \n",prepaidInterval);	
+	/*
+	UINT32 debuglen = 3000;
+	UINT8 debugout[3000];
+	DOM_Output::dumpToMem(doc,debugout,&debuglen);
+	debugout[debuglen] = 0;			
+	CAMsg::printMsg(LOG_DEBUG, "the CC sent looks like this: %s \n",debugout);
+	*/
+#endif				
+	
+	return pAccInfo->pControlChannel->sendXMLMessage(doc);
+}
 
 
 /**
@@ -793,7 +794,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 	{
 		// signature invalid. mark this user as bad guy
 		CAMsg::printMsg( LOG_INFO, "CAAccountingInstance::handleAccountCertificate(): Bad Jpi signature\n" );
-		pAccInfo->authFlags |= AUTH_FAKE | AUTH_GOT_ACCOUNTCERT;
+		pAccInfo->authFlags |= AUTH_FAKE | AUTH_GOT_ACCOUNTCERT | AUTH_TIMEOUT_STARTED;
 		pAccInfo->authFlags &= ~AUTH_ACCOUNT_OK;
 		m_Mutex.unlock();
 		return ;
@@ -841,8 +842,9 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 
 	// send XML struct to Jap & set auth flags
 	pAccInfo->pControlChannel->sendXMLMessage(doc);
-	pAccInfo->authFlags = AUTH_CHALLENGE_SENT | AUTH_GOT_ACCOUNTCERT;
-	pAccInfo->lastRequestSeconds = now.tv_sec;
+	pAccInfo->authFlags = AUTH_CHALLENGE_SENT | AUTH_GOT_ACCOUNTCERT | AUTH_TIMEOUT_STARTED;
+	//pAccInfo->lastRequestSeconds = now.tv_sec;
+	pAccInfo->challengeSentSeconds = time(NULL);
 	//CAMsg::printMsg("Last Account Certificate request seconds: for IP %u%u%u%u", (UINT8)pHashEntry->peerIP[0], (UINT8)pHashEntry->peerIP[1],(UINT8) pHashEntry->peerIP[2], (UINT8)pHashEntry->peerIP[3]);
 	m_Mutex.unlock();
 }
@@ -927,6 +929,10 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 	{
 		pAccInfo->pControlChannel->sendXMLMessage(pCC->getXMLDocument());
 		delete pCC;
+	}
+	else
+	{
+		sendCCRequest(pAccInfo);
 	}
 	
 	if ( pHashEntry->pAccountingInfo->pChallenge != NULL ) // free mem
@@ -1054,18 +1060,16 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,D
  * data structures
  */
 SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
-	{
-		ms_pInstance->m_Mutex.lock();
-		pHashEntry->pAccountingInfo = new tAiAccountingInfo;
-		memset( pHashEntry->pAccountingInfo, 0, sizeof( tAiAccountingInfo ) );
-		pHashEntry->pAccountingInfo->authFlags |= AUTH_SENT_ACCOUNT_REQUEST;
-		pHashEntry->pAccountingInfo->lastRequestSeconds = time(NULL);
-		pHashEntry->pAccountingInfo->goodwillTimeoutStarttime = -1;
-		pHashEntry->pAccountingInfo->sessionPackets = 0;
-		//getting the JAP's previously prepaid bytes happens in handleAccountCert, could be moved here?
-		ms_pInstance->m_Mutex.unlock();
-		return E_SUCCESS;
-	}
+{
+	ms_pInstance->m_Mutex.lock();
+	pHashEntry->pAccountingInfo = new tAiAccountingInfo;
+	memset( pHashEntry->pAccountingInfo, 0, sizeof( tAiAccountingInfo ) );
+	pHashEntry->pAccountingInfo->authFlags |= AUTH_SENT_ACCOUNT_REQUEST | AUTH_TIMEOUT_STARTED;
+	pHashEntry->pAccountingInfo->authTimeoutStartSeconds = time(NULL);
+	pHashEntry->pAccountingInfo->packetsSinceFatal = 0;
+	ms_pInstance->m_Mutex.unlock();
+	return E_SUCCESS;
+}
 
 
 

@@ -52,9 +52,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 // the number of seconds that may pass between a pay request
 // and the jap sending its answer
-#define REQUEST_TIMEOUT 10
+#define CHALLENGE_TIMEOUT 10
+// the number of packets that JAP is allowed to receive after a fatal error
+#define FATAL_GRACE_PACKETS 10 
 #define HARD_LIMIT_TIMEOUT 15
-#define GOODWILL_TIMEOUT 20
+#define AUTH_TIMEOUT 20
 #define MIN_BYTES 1024*512
 
 
@@ -162,6 +164,7 @@ private:
 
 	SINT32 prepareCCRequest(CAMix* callingMix, UINT8* a_AiName);			
 	static SINT32 makeCCRequest( const UINT64 accountNumber, const UINT64 transferredBytes, DOM_Document& doc);
+	static SINT32 CAAccountingInstance::sendCCRequest(tAiAccountingInfo* pAccInfo);
 	static SINT32 makeAccountRequest(DOM_Document &doc);
 	
 	//possible replies to a JAP
