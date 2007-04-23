@@ -206,8 +206,8 @@ struct t_accountinginfo
 	/** the signature verifying instance for this user */
 	CASignature * pPublicKey;
 	
-	/** The number of packets transfered in this session (JAP connection) */
-	UINT64 sessionPackets;
+	/** The number of packets transfered to JAP since a fatal error. */
+	UINT64 packetsSinceFatal;
 	
 	/** the minimum timestamp for the requested XMLBalance */
 	SINT32 reqbalMinSeconds;
@@ -238,7 +238,7 @@ struct t_accountinginfo
 	SINT32 lastHardLimitSeconds;
 
 	/** timestamp when last PayRequest was sent */
-	SINT32 lastRequestSeconds;
+	SINT32 challengeSentSeconds;
 	
     /** timestamp when last balance request was sent */
 	UINT32 lastBalanceRequestSeconds;
@@ -252,8 +252,8 @@ struct t_accountinginfo
 	/** stores connection time for enabling free surfing period */
 	SINT32 connectionTime;
 	
-	//time at which a goodwill timeout was started, i.e. a necessary message from jap was not received by the AI
-	SINT32 goodwillTimeoutStarttime;
+	//time at which the timeout for waiting for the account certificate has been started
+	SINT32 authTimeoutStartSeconds;
 };
 typedef struct t_accountinginfo tAiAccountingInfo;
 
