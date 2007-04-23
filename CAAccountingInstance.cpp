@@ -173,9 +173,8 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			}
 			else
 			{				
-				ms_pInstance->m_Mutex.unlock();
-				// don't let through messages from JAP
-				return 2;
+				ms_pInstance->m_Mutex.unlock();				
+				return 2; // don't let through messages from JAP
 			}
 		}	
 		
@@ -243,7 +242,16 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 					return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_NO_ACCOUNTCERT));				
 			}			
 			
-			return returnWait(pAccInfo); //dont let the packet through for now, but still wait for an account cert
+			//dont let the packet through for now, but still wait for an account cert
+			pAccInfo->authFlags |= AUTH_TIMEOUT_STARTED;
+			if (pAccInfo->goodwillTimeoutStarttime < 0)
+			{
+				pAccInfo->goodwillTimeoutStarttime = time(NULL);
+			}
+			CAMsg::printMsg(LOG_DEBUG, "Wait for account certificate: %u\n", pAccInfo->goodwillTimeoutStarttime);
+					
+			ms_pInstance->m_Mutex.unlock();
+			return 2; //or better 1??
 		}
 		else 
 		{										
@@ -266,7 +274,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				else //timeout still running
 				{
 					ms_pInstance->m_Mutex.unlock();
-					return 2;
+					return 2; // do not forward any traffic from JAP
 				}					
 			}
 			
@@ -307,8 +315,6 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				CAMsg::printMsg(LOG_ERR, "hard limit of %d bytes triggered \n", ms_pInstance->m_iHardLimitBytes);
 #endif					
 					
-				//currently nothing happens if prepaidBytes go below zero during timeout?
-				//should not be a problem, TODO: think about this more  
 				time_t theTime=time(NULL);	
 				if ((pAccInfo->authFlags & AUTH_HARD_LIMIT_REACHED) == 0)
 				{
@@ -328,8 +334,8 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				}
 				else
 				{
-					// do not forward any traffic from JAP
-					returnWait(pAccInfo);
+					ms_pInstance->m_Mutex.unlock();
+					return 2; // do not forward any traffic from JAP
 				}
 			}
 			else
@@ -399,21 +405,7 @@ SINT32 CAAccountingInstance::returnOK(tAiAccountingInfo* pAccInfo)
 	return 1;	
 }
 
-/*
- * we need a message from the Jap, hold packet and start a timeout
- */
-SINT32 CAAccountingInstance::returnWait(tAiAccountingInfo* pAccInfo)
-{
-	pAccInfo->authFlags |= AUTH_TIMEOUT_STARTED;
-	if (pAccInfo->goodwillTimeoutStarttime < 0)
-	{
-		pAccInfo->goodwillTimeoutStarttime = time(NULL);
-	}
-	CAMsg::printMsg(LOG_DEBUG, "Wait: %u\n", pAccInfo->goodwillTimeoutStarttime);
-			
-	ms_pInstance->m_Mutex.unlock();
-	return 2; //or better 1??
-}	
+
 /**
  *  When receiving this message, the Mix should kick the user out immediately
  */
