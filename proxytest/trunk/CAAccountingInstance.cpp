@@ -255,7 +255,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			}						
 					
 			ms_pInstance->m_Mutex.unlock();
-			//return 2;
+			//return 2; //dangerous, destroys encrypted stream somehow
 			return 1;
 		}
 		else 
@@ -279,7 +279,8 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				else //timeout still running
 				{
 					ms_pInstance->m_Mutex.unlock();
-					//return 2; // do not forward any traffic from JAP
+					// do not forward any traffic from JAP
+					//return 2; //dangerous, destroys encrypted stream somehow
 					return 1;
 				}					
 			}
@@ -341,7 +342,8 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 						sendCCRequest(pAccInfo);
 					}
 					ms_pInstance->m_Mutex.unlock();
-					//return 2; // do not forward any traffic from JAP
+					// do not forward any traffic from JAP
+					//return 2; //dangerous, destroys encrypted stream somehow
 					return 1;
 				}
 			}
