@@ -334,6 +334,10 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				}
 				else
 				{
+					if( !(pAccInfo->authFlags & AUTH_SENT_CC_REQUEST) )
+					{
+						sendCCRequest(pAccInfo);
+					}
 					ms_pInstance->m_Mutex.unlock();
 					return 2; // do not forward any traffic from JAP
 				}
@@ -429,7 +433,9 @@ SINT32 CAAccountingInstance::sendCCRequest(tAiAccountingInfo* pAccInfo)
 	DOM_Document doc;                
     UINT32 prepaidInterval;
     options.getPrepaidIntervalKbytes(&prepaidInterval);
-    UINT64 bytesToConfirm = pAccInfo->confirmedBytes + (prepaidInterval * 1024); 				
+    // prepaid bytes are "confirmed bytes - transfered bytes"
+    //UINT64 bytesToConfirm = pAccInfo->confirmedBytes + (prepaidInterval * 1000) - (pAccInfo->confirmedBytes - pAccInfo->transferredBytes);			
+    UINT64 bytesToConfirm = (prepaidInterval * 1000) + pAccInfo->transferredBytes;
 	makeCCRequest(pAccInfo->accountNumber, bytesToConfirm, doc);				
 	pAccInfo->authFlags |= AUTH_SENT_CC_REQUEST;
 #ifdef DEBUG	
@@ -1067,6 +1073,8 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 	pHashEntry->pAccountingInfo->authFlags |= AUTH_SENT_ACCOUNT_REQUEST | AUTH_TIMEOUT_STARTED;
 	pHashEntry->pAccountingInfo->authTimeoutStartSeconds = time(NULL);
 	pHashEntry->pAccountingInfo->packetsSinceFatal = 0;
+	pHashEntry->pAccountingInfo->transferredBytes = 0;
+	pHashEntry->pAccountingInfo->confirmedBytes = 0;
 	ms_pInstance->m_Mutex.unlock();
 	return E_SUCCESS;
 }
