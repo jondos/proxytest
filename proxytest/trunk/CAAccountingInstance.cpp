@@ -124,10 +124,11 @@ CAAccountingInstance::~CAAccountingInstance()
 		delete m_settleHashtable;
 		m_settleHashtable = NULL;		
 		CAMsg::printMsg( LOG_DEBUG, "CAAccountingInstance: Settle hashtable deleted.\n" );				
-		m_Mutex.unlock();
 		
 		delete[] m_currentCascade;
 		m_currentCascade = NULL;
+		
+		m_Mutex.unlock();
 		
 		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance dying finished.\n" );		
 	}
@@ -265,7 +266,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				else //timeout still running
 				{
 					ms_pInstance->m_Mutex.unlock();
-					return 1;
+					return 2;
 				}					
 			}
 			
@@ -316,14 +317,19 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				}
 				if(theTime >= pAccInfo->lastHardLimitSeconds + HARD_LIMIT_TIMEOUT)
 				{
-#ifdef DEBUG					
+//#ifdef DEBUG					
 					CAMsg::printMsg( LOG_DEBUG, "Accounting instance: User refused "		
 									"to send cost confirmation (HARDLIMIT EXCEEDED).\n");
-#endif					
+//#endif					
 					/** @todo test if this is needeed... */																	
 					//ms_pInstance->m_pIPBlockList->insertIP( pHashEntry->peerIP );
 					pAccInfo->lastHardLimitSeconds = 0;
 					return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_NO_CONFIRMATION));
+				}
+				else
+				{
+					// do not forward any traffic from JAP
+					returnWait(pAccInfo);
 				}
 			}
 			else
@@ -399,8 +405,12 @@ SINT32 CAAccountingInstance::returnOK(tAiAccountingInfo* pAccInfo)
 SINT32 CAAccountingInstance::returnWait(tAiAccountingInfo* pAccInfo)
 {
 	pAccInfo->authFlags |= AUTH_TIMEOUT_STARTED;
+	if (pAccInfo->goodwillTimeoutStarttime < 0)
+	{
+		pAccInfo->goodwillTimeoutStarttime = time(NULL);
+	}
 	CAMsg::printMsg(LOG_DEBUG, "Wait: %u\n", pAccInfo->goodwillTimeoutStarttime);
-	pAccInfo->goodwillTimeoutStarttime = time(NULL);		
+			
 	ms_pInstance->m_Mutex.unlock();
 	return 2; //or better 1??
 }	
