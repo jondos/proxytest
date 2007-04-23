@@ -292,7 +292,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				return 1;	
 			}*/
 			
-			
+			CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Checking CCs...\n");
 
 			//----------------------------------------------------------
 			// ******     Hardlimit cost confirmation check **********
@@ -657,7 +657,7 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
  */
 void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry, DOM_Element &root)
 	{
-		//CAMsg::printMsg(LOG_DEBUG, "started method handleAccountCertificate\n");
+		CAMsg::printMsg(LOG_DEBUG, "started method handleAccountCertificate\n");
 		DOM_Element elGeneral;
 		timespec now;
 		getcurrentTime(now);
