@@ -321,11 +321,11 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 					pAccInfo->lastHardLimitSeconds = time(NULL);
 				}
 				
-//#ifdef DEBUG					
+#ifdef DEBUG					
 				CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Hard limit of %d bytes triggered in %d seconds \n", 
 								ms_pInstance->m_iHardLimitBytes,
 								(pAccInfo->lastHardLimitSeconds + HARD_LIMIT_TIMEOUT - time(NULL)));
-//#endif					
+#endif					
 				
 				if(time(NULL) >= pAccInfo->lastHardLimitSeconds + HARD_LIMIT_TIMEOUT)
 				{
