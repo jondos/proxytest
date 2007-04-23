@@ -315,9 +315,9 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 #endif					
 			if (prepaidBytes <= (SINT32) ms_pInstance->m_iHardLimitBytes)
 			{
-//#ifdef DEBUG					
+#ifdef DEBUG					
 				CAMsg::printMsg(LOG_ERR, "hard limit of %d bytes triggered \n", ms_pInstance->m_iHardLimitBytes);
-//#endif											
+#endif											
 				if ((pAccInfo->authFlags & AUTH_HARD_LIMIT_REACHED) == 0)
 				{
 					pAccInfo->authFlags |= AUTH_HARD_LIMIT_REACHED;
