@@ -335,7 +335,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				else
 				{
 					ms_pInstance->m_Mutex.unlock();
-					return 2; // do not forward any traffic from JAP
+					return 1; // do not forward any traffic from JAP
 				}
 			}
 			else
