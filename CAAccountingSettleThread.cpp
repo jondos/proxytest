@@ -295,7 +295,9 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 							oldEntry->confirmedBytes = entry->confirmedBytes;
 						}
 						nextEntry = entry->nextEntry;
+						CAMsg::printMsg(LOG_CRIT, "Delete old entry\n");
 						delete entry;
+						CAMsg::printMsg(LOG_CRIT, "Old entry deleted\n");
 						entry = nextEntry;
 					}										
 				}
