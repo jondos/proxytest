@@ -119,7 +119,7 @@ CAAccountingInstance::~CAAccountingInstance()
 		delete[] m_AiName;
 		m_AiName = NULL;
 		
-		m_currentAccountsHashtable->makeEmpty();
+		m_currentAccountsHashtable->makeEmpty(HASH_EMPTY_NONE, HASH_EMPTY_DELETE);
 		delete m_currentAccountsHashtable;
 		m_currentAccountsHashtable = NULL;
 		
@@ -891,6 +891,7 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 	UINT32 usedLen;
 	DOM_Element elemPanic;
 	DSA_SIG * pDsaSig;
+	UINT64* count;
 	// check current authstate
 	
 	
@@ -914,11 +915,11 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 
 	// get raw bytes of response
 	if ( getDOMElementValue( root, decodeBuffer, &decodeBufferLen ) != E_SUCCESS )
-		{
-			CAMsg::printMsg( LOG_DEBUG, "ChallengeResponse has wrong XML format. Ignoring\n" );
-			m_Mutex.unlock();
-			return ;
-		}
+	{
+		CAMsg::printMsg( LOG_DEBUG, "ChallengeResponse has wrong XML format. Ignoring\n" );
+		m_Mutex.unlock();
+		return;
+	}
 	usedLen = decodeBufferLen;
 	decodeBufferLen = 512;
 	CABase64::decode( decodeBuffer, usedLen, decodeBuffer, &decodeBufferLen );
@@ -946,20 +947,26 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 		return ;
 	}*/
 		
-		
-	if (m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber)))
+	m_currentAccountsHashtable->getMutex().lock();
+	count = (UINT64*)m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
+	if (count)
 	{
 		// there is already a user logged in with this account; kick out this user!
+		(*count)++;
 		CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Multiple login detected! Kicking out user...\n" );
 		pAccInfo->authFlags |= AUTH_FAKE; // maybe choose another flag
 		pAccInfo->authFlags &= ~AUTH_ACCOUNT_OK;
+		m_currentAccountsHashtable->getMutex().unlock();
 		m_Mutex.unlock();
 		return;
 	}
 	else
 	{
 		// remember that this user is logged in
-		m_currentAccountsHashtable->put(&(pAccInfo->accountNumber), &(pAccInfo->accountNumber));
+		count = new UINT64;
+		*count = 0;
+		m_currentAccountsHashtable->put(&(pAccInfo->accountNumber), count);
+		m_currentAccountsHashtable->getMutex().unlock();
 	}
 		
 	pAccInfo->authFlags |= AUTH_ACCOUNT_OK;
@@ -1126,6 +1133,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 	{
 		//ms_pInstance->m_Mutex.lock();
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
+		UINT64* count;
 		
 		if ( pAccInfo != NULL)
 		{
@@ -1134,7 +1142,20 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			if (pAccInfo->accountNumber)
 			{
 				// remove login
-				ms_pInstance->m_currentAccountsHashtable->remove(&(pAccInfo->accountNumber));
+				ms_pInstance->m_currentAccountsHashtable->getMutex().lock();
+				count = (UINT64*)ms_pInstance->m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
+				if (*count)
+				{
+					// this user is kicked out due to multiple logins
+					(*count)--;
+				}
+				else
+				{
+					// a normal user with only one login
+					ms_pInstance->m_currentAccountsHashtable->remove(&(pAccInfo->accountNumber));
+					delete count;
+				}				
+				ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();
 				
 				//store prepaid bytes in database, so the user wont lose the prepaid amount by disconnecting
 				SINT32 prepaidBytes = pAccInfo->confirmedBytes - pAccInfo->transferredBytes;			
