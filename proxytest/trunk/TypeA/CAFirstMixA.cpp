@@ -516,7 +516,8 @@ NEXT_USER:
 													//if(pfmHashEntry->bCountPacket)
 														{
 															// count packet for payment
-															if (CAAccountingInstance::handleJapPacket(pfmHashEntry, !(pfmHashEntry->bCountPacket), true) == 3)
+															ret = CAAccountingInstance::handleJapPacket(pfmHashEntry, !(pfmHashEntry->bCountPacket), true);
+															if (ret == 3)
 															{
 																// this jap is evil! terminate connection and add IP to blacklist
 																CAMsg::printMsg(LOG_DEBUG, "CAFirstMixA: Detected evil Jap.. closing connection! Removing IP..\n", ret);
@@ -544,6 +545,10 @@ NEXT_USER:
 																decUsers();
 																goto NEXT_USER_WRITING;
 															}
+															else if (ret = 2)
+															{
+																goto NEXT_USER_WRITING;
+															}															
 														}
 												#endif
 												#ifdef DELAY_USERS
