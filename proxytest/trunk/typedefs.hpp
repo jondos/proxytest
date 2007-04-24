@@ -207,7 +207,7 @@ struct t_accountinginfo
 	CASignature * pPublicKey;
 	
 	/** The number of packets transfered to JAP since a fatal error. */
-	UINT64 packetsSinceFatal;
+	//UINT64 packetsSinceFatal;
 	
 	/** the minimum timestamp for the requested XMLBalance */
 	SINT32 reqbalMinSeconds;

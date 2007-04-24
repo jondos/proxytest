@@ -84,6 +84,9 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
 	
 		prepareCCRequest(callingMix, m_AiName);
 		
+		m_currentAccountsHashtable = 
+			new Hashtable((UINT32 (*)(void *))Hashtable::hashUINT64, (SINT32 (*)(void *,void *))Hashtable::compareUINT64);		
+		
 		// launch BI settleThread		
 		m_settleHashtable = 
 			new Hashtable((UINT32 (*)(void *))Hashtable::hashUINT64, (SINT32 (*)(void *,void *))Hashtable::compareUINT64);		
@@ -115,6 +118,10 @@ CAAccountingInstance::~CAAccountingInstance()
 		m_pQueue = NULL;
 		delete[] m_AiName;
 		m_AiName = NULL;
+		
+		m_currentAccountsHashtable->makeEmpty();
+		delete m_currentAccountsHashtable;
+		m_currentAccountsHashtable = NULL;
 		
 		m_settleHashtable->getMutex().lock();
 		CAMsg::printMsg( LOG_DEBUG, "CAAccountingInstance: Clearing settle hashtable...\n");
@@ -161,14 +168,11 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		//kick user out after previous error
 		if(pAccInfo->authFlags & AUTH_FATAL_ERROR)
 		{
+			/*
 			if (a_bMessageToJAP)
 			{
-				/**
-				 * This is a mesage going to JAP; we forward some of these packages so that 
-				 * the control error message may go through.
-				 */
 				pAccInfo->packetsSinceFatal++;
-			}
+			}*/
 			
 			// there was an error earlier.
 			if (a_bMessageToJAP && a_bControlMessage)// (a_bControlMessage || pAccInfo->packetsSinceFatal >= FATAL_GRACE_PACKETS))
@@ -690,20 +694,20 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;				
 		
 		if(pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT)
-			{
-				//#ifdef DEBUG
-					CAMsg::printMsg(LOG_DEBUG, "Already got an account cert. Ignoring...");
-				//#endif
-				CAXMLErrorMessage err(
-						CAXMLErrorMessage::ERR_BAD_REQUEST, 
-						(UINT8*)"You have already sent an Account Certificate"
-					);
-				DOM_Document errDoc;
-				err.toXmlDocument(errDoc);
-				pAccInfo->pControlChannel->sendXMLMessage(errDoc);
-				m_Mutex.unlock();
-				return ;
-			}
+		{
+			//#ifdef DEBUG
+				CAMsg::printMsg(LOG_DEBUG, "Already got an account cert. Ignoring...");
+			//#endif
+			CAXMLErrorMessage err(
+					CAXMLErrorMessage::ERR_BAD_REQUEST, 
+					(UINT8*)"You have already sent an Account Certificate"
+				);
+			DOM_Document errDoc;
+			err.toXmlDocument(errDoc);
+			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
+			m_Mutex.unlock();
+			return ;
+		}
 
 		// parse & set accountnumber
 		if (getDOMChildByName( root, (UINT8 *)"AccountNumber", elGeneral, false ) != E_SUCCESS ||
@@ -942,6 +946,22 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 		return ;
 	}*/
 		
+		
+	if (m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber)))
+	{
+		// there is already a user logged in with this account; kick out this user!
+		CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Multiple login detected! Kicking out user...\n" );
+		pAccInfo->authFlags |= AUTH_FAKE; // maybe choose another flag
+		pAccInfo->authFlags &= ~AUTH_ACCOUNT_OK;
+		m_Mutex.unlock();
+		return;
+	}
+	else
+	{
+		// remember that this user is logged in
+		m_currentAccountsHashtable->put(&(pAccInfo->accountNumber), &(pAccInfo->accountNumber));
+	}
+		
 	pAccInfo->authFlags |= AUTH_ACCOUNT_OK;
 	
 	// fetch cost confirmation from last session if available, and send it
@@ -958,10 +978,10 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 	}
 	
 	if ( pHashEntry->pAccountingInfo->pChallenge != NULL ) // free mem
-		{
-			delete[] pHashEntry->pAccountingInfo->pChallenge;
-			pHashEntry->pAccountingInfo->pChallenge = NULL;
-		}
+	{
+		delete[] pHashEntry->pAccountingInfo->pChallenge;
+		pHashEntry->pAccountingInfo->pChallenge = NULL;
+	}
 	m_Mutex.unlock();
 }
 
@@ -1088,7 +1108,7 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 	memset( pHashEntry->pAccountingInfo, 0, sizeof( tAiAccountingInfo ) );
 	pHashEntry->pAccountingInfo->authFlags |= AUTH_SENT_ACCOUNT_REQUEST | AUTH_TIMEOUT_STARTED;
 	pHashEntry->pAccountingInfo->authTimeoutStartSeconds = time(NULL);
-	pHashEntry->pAccountingInfo->packetsSinceFatal = 0;
+	//pHashEntry->pAccountingInfo->packetsSinceFatal = 0;
 	pHashEntry->pAccountingInfo->transferredBytes = 0;
 	pHashEntry->pAccountingInfo->confirmedBytes = 0;
 	ms_pInstance->m_Mutex.unlock();
@@ -1113,6 +1133,9 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			
 			if (pAccInfo->accountNumber)
 			{
+				// remove login
+				ms_pInstance->m_currentAccountsHashtable->remove(&(pAccInfo->accountNumber));
+				
 				//store prepaid bytes in database, so the user wont lose the prepaid amount by disconnecting
 				SINT32 prepaidBytes = pAccInfo->confirmedBytes - pAccInfo->transferredBytes;			
 				AccountHashEntry* entry;
