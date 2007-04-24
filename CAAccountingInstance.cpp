@@ -264,13 +264,17 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		}
 		else 
 		{									
-			if( pAccInfo->authFlags & AUTH_FAKE )
+			if(pAccInfo->authFlags & AUTH_FAKE )
 			{
 				// authentication process not properly finished
 #ifdef DEBUG				
 				CAMsg::printMsg( LOG_DEBUG, "AccountingInstance: AUTH_FAKE flag is set ... byebye\n");
 #endif				
 				return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_BAD_SIGNATURE, (UINT8*)"Your account certificate is invalid"));
+			}
+			else if (pAccInfo->authFlags & AUTH_MULTIPLE_LOGIN)
+			{
+				return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_MULTIPLE_LOGIN, (UINT8*)"One one login per account is allowed!"));
 			}
 			if( !(pAccInfo->authFlags & AUTH_ACCOUNT_OK) )
 			{
@@ -954,7 +958,7 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 		// there is already a user logged in with this account; kick out this user!
 		(*count)++;
 		CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Multiple login detected! Kicking out user...\n" );
-		pAccInfo->authFlags |= AUTH_FAKE; // maybe choose another flag
+		pAccInfo->authFlags |= AUTH_MULTIPLE_LOGIN;
 		pAccInfo->authFlags &= ~AUTH_ACCOUNT_OK;
 		m_currentAccountsHashtable->getMutex().unlock();
 		m_Mutex.unlock();
