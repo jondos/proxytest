@@ -180,7 +180,6 @@ SINT32 CAFirstMixA::loop()
 													}
 												}
 #ifdef PAYMENT
-												// payment code added by Bastian Voigt
 												if (ret == 0)
 												{
 													ret = CAAccountingInstance::handleJapPacket(pHashEntry, false, false);  
@@ -190,135 +189,106 @@ SINT32 CAFirstMixA::loop()
 													goto NEXT_USER;
 												}		
 #endif													
-												/*
-												if(ret == 3) 
-												{
-													// this jap is evil! terminate connection and add IP to blacklist
-													CAMsg::printMsg(LOG_DEBUG, "CAFirstMixA: Detected evil Jap.. closing connection! Removing IP..\n", ret);
-													fmChannelListEntry* pEntry;
-													pEntry=m_pChannelList->getFirstChannelForSocket(pMuxSocket);
-													while(pEntry!=NULL)
-														{
-															getRandom(pMixPacket->data,DATA_SIZE);
-															pMixPacket->flags=CHANNEL_CLOSE;
-															pMixPacket->channel=pEntry->channelOut;
-															#ifdef LOG_PACKET_TIMES
-																setZero64(pQueueEntry->timestamp_proccessing_start);
-															#endif
-															m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));
-															delete pEntry->pCipher;
-															pEntry=m_pChannelList->getNextChannel(pEntry);
-														}
-													m_pIPList->removeIP(pHashEntry->peerIP);
-													m_psocketgroupUsersRead->remove(*(CASocket*)pMuxSocket);
-													m_psocketgroupUsersWrite->remove(*(CASocket*)pMuxSocket);
-													delete pHashEntry->pQueueSend;
-													delete pHashEntry->pSymCipher;
-													m_pChannelList->remove(pMuxSocket);
-													delete pMuxSocket;
-													decUsers();
-													goto NEXT_USER;
-												}*/
 
 												if(pMixPacket->flags==CHANNEL_DUMMY)					// just a dummy to keep the connection alife in e.g. NAT gateways 
-													{ 
+												{ 
+													getRandom(pMixPacket->data,DATA_SIZE);
+													#ifdef LOG_PACKET_TIMES
+														setZero64(pQueueEntry->timestamp_proccessing_start);
+													#endif
+													pHashEntry->pQueueSend->add(pMixPacket,sizeof(tQueueEntry));
+													#ifdef HAVE_EPOLL
+														m_psocketgroupUsersWrite->add(*pMuxSocket,pHashEntry); 
+													#else
+														m_psocketgroupUsersWrite->add(*pMuxSocket); 
+													#endif
+												}
+												else if(pMixPacket->flags==CHANNEL_CLOSE)			// closing one mix-channel (not the JAP<->mix connection!)
+												{
+													fmChannelListEntry* pEntry;
+													pEntry=m_pChannelList->get(pMuxSocket,pMixPacket->channel);
+													if(pEntry!=NULL)
+													{
+														pMixPacket->channel=pEntry->channelOut;
 														getRandom(pMixPacket->data,DATA_SIZE);
 														#ifdef LOG_PACKET_TIMES
-															setZero64(pQueueEntry->timestamp_proccessing_start);
+															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
 														#endif
-														pHashEntry->pQueueSend->add(pMixPacket,sizeof(tQueueEntry));
-														#ifdef HAVE_EPOLL
-															m_psocketgroupUsersWrite->add(*pMuxSocket,pHashEntry); 
-														#else
-															m_psocketgroupUsersWrite->add(*pMuxSocket); 
+														m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));
+														#ifdef LOG_CHANNEL
+															//pEntry->packetsInFromUser++;
+															getcurrentTimeMicros(current_time);
+															diff_time=diff64(current_time,pEntry->timeCreated);
+															CAMsg::printMsg(LOG_DEBUG,"1:%u,%Lu,%u,%u,%u\n",
+																												pEntry->channelIn,pEntry->pHead->id,pEntry->packetsInFromUser,pEntry->packetsOutToUser,
+																												diff_time);
 														#endif
+														delete pEntry->pCipher;              // forget the symetric key of this connection
+														m_pChannelList->removeChannel(pMuxSocket,pEntry->channelIn);
 													}
-												else if(pMixPacket->flags==CHANNEL_CLOSE)			// closing one mix-channel (not the JAP<->mix connection!)
+													#ifdef _DEBUG
+													else
 													{
-														fmChannelListEntry* pEntry;
-														pEntry=m_pChannelList->get(pMuxSocket,pMixPacket->channel);
-														if(pEntry!=NULL)
-															{
-																pMixPacket->channel=pEntry->channelOut;
-																getRandom(pMixPacket->data,DATA_SIZE);
-																#ifdef LOG_PACKET_TIMES
-																	getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
-																#endif
-																m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));
-																#ifdef LOG_CHANNEL
-																	//pEntry->packetsInFromUser++;
-																	getcurrentTimeMicros(current_time);
-																	diff_time=diff64(current_time,pEntry->timeCreated);
-																	CAMsg::printMsg(LOG_DEBUG,"1:%u,%Lu,%u,%u,%u\n",
-																														pEntry->channelIn,pEntry->pHead->id,pEntry->packetsInFromUser,pEntry->packetsOutToUser,
-																														diff_time);
-																#endif
-																delete pEntry->pCipher;              // forget the symetric key of this connection
-																m_pChannelList->removeChannel(pMuxSocket,pEntry->channelIn);
-															}
-														#ifdef _DEBUG
-														else
-															{
-//																	CAMsg::printMsg(LOG_DEBUG,"Invalid ID to close from Browser!\n");
-															}
-														#endif
+//														CAMsg::printMsg(LOG_DEBUG,"Invalid ID to close from Browser!\n");
 													}
+													#endif
+												}
 												else		                                     // finally! a normal mix packet
+												{
+													CASymCipher* pCipher=NULL;
+													fmChannelListEntry* pEntry;
+													pEntry=m_pChannelList->get(pMuxSocket,pMixPacket->channel);
+													if(pEntry!=NULL&&pMixPacket->flags==CHANNEL_DATA)
 													{
-														CASymCipher* pCipher=NULL;
-														fmChannelListEntry* pEntry;
-														pEntry=m_pChannelList->get(pMuxSocket,pMixPacket->channel);
-														if(pEntry!=NULL&&pMixPacket->flags==CHANNEL_DATA)
-															{
-																pMixPacket->channel=pEntry->channelOut;
-																pCipher=pEntry->pCipher;
-																pCipher->crypt1(pMixPacket->data,pMixPacket->data,DATA_SIZE);
-																                     // queue the packet for sending to the next mix.
-																#ifdef LOG_PACKET_TIMES
-																	getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
-																#endif
-																m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));
-																incMixedPackets();
-																#ifdef LOG_CHANNEL
-																	pEntry->packetsInFromUser++;
-																#endif
-															}
-														else if(pEntry==NULL&&pMixPacket->flags==CHANNEL_OPEN)  // open a new mix channel
-															{ // stefan: muesste das nicht vor die behandlung von CHANNEL_DATA? oder gilt OPEN => !DATA ? 
-																//es gilt: open -> data
-																pHashEntry->pSymCipher->crypt1(pMixPacket->data,rsaBuff,KEY_SIZE);
-																pCipher= new CASymCipher();
-																pCipher->setKey(rsaBuff);
-																for(int i=0;i<16;i++)
-																	rsaBuff[i]=0xFF;
-																pCipher->setIV2(rsaBuff);
-																pCipher->crypt1(pMixPacket->data+KEY_SIZE,pMixPacket->data,DATA_SIZE-KEY_SIZE);
-																getRandom(pMixPacket->data+DATA_SIZE-KEY_SIZE,KEY_SIZE);
-																#ifdef LOG_CHANNEL
-																	HCHANNEL tmpC=pMixPacket->channel;
-																#endif
-																if(m_pChannelList->addChannel(pMuxSocket,pMixPacket->channel,pCipher,&pMixPacket->channel)!=E_SUCCESS)
-																	{ //todo move up ?
-																		delete pCipher;
-																	}
-																else
-																	{
-																		#ifdef LOG_PACKET_TIMES
-																			getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
-																		#endif
-																		#ifdef LOG_CHANNEL
-																			fmChannelListEntry* pTmpEntry=m_pChannelList->get(pMuxSocket,tmpC);
-																			pTmpEntry->packetsInFromUser++;
-																			set64(pTmpEntry->timeCreated,pQueueEntry->timestamp_proccessing_start);
-																		#endif
-																		m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));
-																		incMixedPackets();
-																		#ifdef _DEBUG
-//																			CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",pMixPacket->channel);
-																		#endif
-																	}
-															}
+														pMixPacket->channel=pEntry->channelOut;
+														pCipher=pEntry->pCipher;
+														pCipher->crypt1(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+														                     // queue the packet for sending to the next mix.
+														#ifdef LOG_PACKET_TIMES
+															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
+														#endif
+														m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));
+														incMixedPackets();
+														#ifdef LOG_CHANNEL
+															pEntry->packetsInFromUser++;
+														#endif
 													}
+													else if(pEntry==NULL&&pMixPacket->flags==CHANNEL_OPEN)  // open a new mix channel
+													{ // stefan: muesste das nicht vor die behandlung von CHANNEL_DATA? oder gilt OPEN => !DATA ? 
+														//es gilt: open -> data
+														pHashEntry->pSymCipher->crypt1(pMixPacket->data,rsaBuff,KEY_SIZE);
+														pCipher= new CASymCipher();
+														pCipher->setKey(rsaBuff);
+														for(int i=0;i<16;i++)
+															rsaBuff[i]=0xFF;
+														pCipher->setIV2(rsaBuff);
+														pCipher->crypt1(pMixPacket->data+KEY_SIZE,pMixPacket->data,DATA_SIZE-KEY_SIZE);
+														getRandom(pMixPacket->data+DATA_SIZE-KEY_SIZE,KEY_SIZE);
+														#ifdef LOG_CHANNEL
+															HCHANNEL tmpC=pMixPacket->channel;
+														#endif
+														if(m_pChannelList->addChannel(pMuxSocket,pMixPacket->channel,pCipher,&pMixPacket->channel)!=E_SUCCESS)
+														{ //todo move up ?
+															delete pCipher;
+														}
+														else
+														{
+															#ifdef LOG_PACKET_TIMES
+																getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
+															#endif
+															#ifdef LOG_CHANNEL
+																fmChannelListEntry* pTmpEntry=m_pChannelList->get(pMuxSocket,tmpC);
+																pTmpEntry->packetsInFromUser++;
+																set64(pTmpEntry->timeCreated,pQueueEntry->timestamp_proccessing_start);
+															#endif
+															m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));
+															incMixedPackets();
+															#ifdef _DEBUG
+//																			CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",pMixPacket->channel);
+															#endif
+														}
+													}
+												}
 											}
 								#ifdef HAVE_EPOLL
 NEXT_USER:
