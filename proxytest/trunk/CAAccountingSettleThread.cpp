@@ -272,10 +272,12 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				m_pAccountingSettleThread->m_accountingHashtable->getMutex().lock();
 				while (entry)
 				{
+					CAMsg::printMsg(LOG_CRIT, "New entry\n");
 					accountNumber = pCC->getAccountNumber();					
 					AccountHashEntry* oldEntry = (AccountHashEntry*) (m_pAccountingSettleThread->m_accountingHashtable->getValue(&(accountNumber)));
 					if (!oldEntry)
-					{							
+					{				
+						CAMsg::printMsg(LOG_CRIT, "No old entry\n");			
 						m_pAccountingSettleThread->m_accountingHashtable->put(&(entry->accountNumber), entry);							
 						#ifdef DEBUG						
 						if (!(m_pAccountingSettleThread->m_accountingHashtable->getValue(&(entry->accountNumber))))
@@ -291,13 +293,16 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					}	
 					else
 					{
+						CAMsg::printMsg(LOG_CRIT, "Old entry found\n");
 						oldEntry->authFlags |= entry->authFlags;						
 						if (entry->confirmedBytes)
 						{
 							oldEntry->confirmedBytes = entry->confirmedBytes;
 						}
 						nextEntry = entry->nextEntry;
+						CAMsg::printMsg(LOG_CRIT, "Delete old entry\n");
 						delete entry;
+						CAMsg::printMsg(LOG_CRIT, "Old entry deleted\n");
 						entry = nextEntry;
 					}										
 				}
