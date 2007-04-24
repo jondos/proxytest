@@ -171,7 +171,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			}
 			
 			// there was an error earlier.
-			if (a_bMessageToJAP && a_bControlMessage) // (a_bControlMessage || pAccInfo->packetsSinceFatal >= FATAL_GRACE_PACKETS))
+			if (a_bMessageToJAP && (a_bControlMessage || pAccInfo->packetsSinceFatal >= FATAL_GRACE_PACKETS))
 			{				
 				return returnKickout(pAccInfo);
 			}
