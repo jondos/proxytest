@@ -84,8 +84,10 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
 	
 		prepareCCRequest(callingMix, m_AiName);
 		
+		/*
 		m_currentAccountsHashtable = 
 			new Hashtable((UINT32 (*)(void *))Hashtable::hashUINT64, (SINT32 (*)(void *,void *))Hashtable::compareUINT64);		
+		*/
 		
 		// launch BI settleThread		
 		m_settleHashtable = 
@@ -951,6 +953,7 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 		return ;
 	}*/
 		
+	/*
 	m_currentAccountsHashtable->getMutex().lock();
 	count = (UINT64*)m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
 	if (count)
@@ -971,7 +974,7 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 		*count = 0;
 		m_currentAccountsHashtable->put(&(pAccInfo->accountNumber), count);
 		m_currentAccountsHashtable->getMutex().unlock();
-	}
+	}*/
 		
 	pAccInfo->authFlags |= AUTH_ACCOUNT_OK;
 	
@@ -1145,6 +1148,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			
 			if (pAccInfo->accountNumber)
 			{
+				/*
 				// remove login
 				ms_pInstance->m_currentAccountsHashtable->getMutex().lock();
 				count = (UINT64*)ms_pInstance->m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
@@ -1159,7 +1163,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 					ms_pInstance->m_currentAccountsHashtable->remove(&(pAccInfo->accountNumber));
 					delete count;
 				}				
-				ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();
+				ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();*/
 				
 				//store prepaid bytes in database, so the user wont lose the prepaid amount by disconnecting
 				SINT32 prepaidBytes = pAccInfo->confirmedBytes - pAccInfo->transferredBytes;			
