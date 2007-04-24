@@ -73,7 +73,9 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 		UINT32 sleepInterval;
 		CAQueue q;
 		UINT32 size;
-		CASocketAddrINet biAddr;		
+		CASocketAddrINet biAddr;	
+		AccountHashEntry* entry;	
+		AccountHashEntry* nextEntry;	
 	
 		CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread is running...\n");
 	
@@ -122,6 +124,8 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				UINT32 nrOfCCs = qSize / sizeof(pCC); 
 				CAMsg::printMsg(LOG_DEBUG, "SettleThread: finished gettings CCs, found %u cost confirmations to settle\n",nrOfCCs);	
 			}
+			
+			entry = NULL;
 			while(!q.isEmpty())
 			{
 				// get the next CC from the queue
@@ -218,34 +222,13 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					
 					if (authFlags)
 					{
-						UINT64 accountNumber = pCC->getAccountNumber();
-						m_pAccountingSettleThread->m_accountingHashtable->getMutex().lock();
-						AccountHashEntry* entry = (AccountHashEntry*) (m_pAccountingSettleThread->m_accountingHashtable->getValue(&(accountNumber)));
-						if (!entry)
-						{
-							entry = new AccountHashEntry;
-							entry->accountNumber = pCC->getAccountNumber();
-							entry->authFlags = authFlags;
-							entry->confirmedBytes = confirmedBytes;							
-							m_pAccountingSettleThread->m_accountingHashtable->put(&(entry->accountNumber), entry);	
-							#ifdef DEBUG						
-							if (!(m_pAccountingSettleThread->m_accountingHashtable->getValue(&(entry->accountNumber))))
-							{
-								CAMsg::printMsg(LOG_CRIT, "CAAccountingSettleThread: DID NOT FIND ENTRY THAT HAD BEEN STORED BEFORE!\n");
-							}
-							#endif
-						}	
-						else
-						{
-							entry->authFlags |= authFlags;
-							if (confirmedBytes)
-							{
-								entry->confirmedBytes = confirmedBytes;
-							}	
-						}						
-							
-						m_pAccountingSettleThread->m_accountingHashtable->getMutex().unlock();					
-					}								
+						nextEntry = new AccountHashEntry; 
+						nextEntry->accountNumber = pCC->getAccountNumber();
+						nextEntry->authFlags = authFlags;
+						nextEntry->confirmedBytes = confirmedBytes;	
+						nextEntry->nextEntry = entry;
+						entry = nextEntry;
+					}																	
 					
 					if (bDeleteCC)
 					{
@@ -276,7 +259,50 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					pErrMsg = NULL;
 				}
 			}
+			
 			dbConn.terminateDBConnection();
+			
+			/*
+			 * Now alter the hashtable entries if needed. This blocks communication with JAP clients
+			 * and should therefore be done as quickly as possible.
+			 */
+			if (entry)
+			{
+				UINT64 accountNumber;
+				m_pAccountingSettleThread->m_accountingHashtable->getMutex().lock();
+				while (entry)
+				{
+					accountNumber = pCC->getAccountNumber();					
+					AccountHashEntry* oldEntry = (AccountHashEntry*) (m_pAccountingSettleThread->m_accountingHashtable->getValue(&(accountNumber)));
+					if (!oldEntry)
+					{							
+						m_pAccountingSettleThread->m_accountingHashtable->put(&(entry->accountNumber), entry);							
+						#ifdef DEBUG						
+						if (!(m_pAccountingSettleThread->m_accountingHashtable->getValue(&(entry->accountNumber))))
+						{
+							CAMsg::printMsg(LOG_CRIT, "CAAccountingSettleThread: DID NOT FIND ENTRY THAT HAD BEEN STORED BEFORE!\n");
+						}
+						#endif
+						/*
+						 * Pointer to next entry may be invalid after that, they should not be used
+						 * anywhere else... For performance reasons we do not delete the pointer here.
+						 */
+						entry = entry->nextEntry;	
+					}	
+					else
+					{
+						oldEntry->authFlags |= entry->authFlags;						
+						if (entry->confirmedBytes)
+						{
+							oldEntry->confirmedBytes = entry->confirmedBytes;
+						}
+						nextEntry = entry->nextEntry;
+						delete entry;
+						entry = nextEntry;
+					}										
+				}
+				m_pAccountingSettleThread->m_accountingHashtable->getMutex().unlock();					
+			}
 		}//main while run loop
 		CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Exiting run loop!\n");
 		THREAD_RETURN_SUCCESS;

@@ -71,6 +71,7 @@ struct AccountHashEntry
 	UINT64 accountNumber;
 	UINT32 authFlags;
 	UINT32 confirmedBytes;
+	AccountHashEntry* nextEntry;
 };
 
 extern CACmdLnOptions options;
