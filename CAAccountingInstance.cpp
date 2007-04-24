@@ -274,7 +274,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			}
 			else if (pAccInfo->authFlags & AUTH_MULTIPLE_LOGIN)
 			{
-				return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_MULTIPLE_LOGIN, (UINT8*)"One one login per account is allowed!"));
+				return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_MULTIPLE_LOGIN, (UINT8*)"Only one login per account is allowed!"));
 			}
 			if( !(pAccInfo->authFlags & AUTH_ACCOUNT_OK) )
 			{

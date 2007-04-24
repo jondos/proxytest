@@ -190,6 +190,8 @@ typedef struct t_mix_parameters tMixParameters;
 // AI is waiting for a necessary message from JAP (e.g. response to challenge)
 #define AUTH_TIMEOUT_STARTED 0x10000 
 
+#define AUTH_MULTIPLE_LOGIN 0x20000 
+
 
 
 class CASignature;
