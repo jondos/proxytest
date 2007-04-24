@@ -1132,7 +1132,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 						CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Cleanup found\n");
 						delete entry;				
 					}
-					else if ((AccountHashEntry*)ms_pInstance->m_settleHashtable->get(&(pAccInfo->accountNumber)))
+					else if ((AccountHashEntry*)ms_pInstance->m_settleHashtable->getValue(&(pAccInfo->accountNumber)))
 					{							
 						CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Cleanup not found\n");
 					}
