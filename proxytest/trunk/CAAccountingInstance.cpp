@@ -1124,6 +1124,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 	
 				if (ms_pInstance->m_settleHashtable)
 				{
+					CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Cleanup\n");
 					ms_pInstance->m_settleHashtable->getMutex().lock();				
 					entry = (AccountHashEntry*)ms_pInstance->m_settleHashtable->remove(&(pAccInfo->accountNumber));										
 					if (entry)
