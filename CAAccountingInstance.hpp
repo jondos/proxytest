@@ -164,7 +164,7 @@ private:
 
 	SINT32 prepareCCRequest(CAMix* callingMix, UINT8* a_AiName);			
 	static SINT32 makeCCRequest( const UINT64 accountNumber, const UINT64 transferredBytes, DOM_Document& doc);
-	static SINT32 CAAccountingInstance::sendCCRequest(tAiAccountingInfo* pAccInfo);
+	static SINT32 sendCCRequest(tAiAccountingInfo* pAccInfo);
 	static SINT32 makeAccountRequest(DOM_Document &doc);
 	
 	//possible replies to a JAP
@@ -191,6 +191,9 @@ private:
 	
 	/** For information exchange between the settle thread and the accounting instance */
 	Hashtable* m_settleHashtable;
+	
+	/** Stores the account number of all users currently logged in. */
+	Hashtable* m_currentAccountsHashtable;
 	
 	/** the name of this accounting instance */
 	UINT8* m_AiName;
