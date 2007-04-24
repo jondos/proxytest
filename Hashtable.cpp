@@ -286,7 +286,7 @@ void *Hashtable::remove(void *key)
 	
 	struct Entry **table,*e,*prev;
 	UINT32 hash;
-	SINT32 index;
+	UINT32 index;
 	
 	table = m_table;
 	hash = m_hashFunc(key);
@@ -299,7 +299,7 @@ void *Hashtable::remove(void *key)
 			return NULL;
 		}
 		
-		if ((m_hashFunc(e->e_Key) == hash) && m_compareFunc(e->e_Key,key))
+		if ((m_hashFunc(e->e_Key) == hash) && !m_compareFunc(e->e_Key,key))
 		{
 			void *value;
 
