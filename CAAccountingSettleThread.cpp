@@ -268,13 +268,11 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 			 */
 			if (entry)
 			{
-				UINT64 accountNumber;
 				m_pAccountingSettleThread->m_accountingHashtable->getMutex().lock();
 				while (entry)
 				{
-					CAMsg::printMsg(LOG_CRIT, "New entry\n");
-					accountNumber = pCC->getAccountNumber();					
-					AccountHashEntry* oldEntry = (AccountHashEntry*) (m_pAccountingSettleThread->m_accountingHashtable->getValue(&(accountNumber)));
+					CAMsg::printMsg(LOG_CRIT, "New entry\n");				
+					AccountHashEntry* oldEntry = (AccountHashEntry*) (m_pAccountingSettleThread->m_accountingHashtable->getValue(&(entry->accountNumber)));
 					if (!oldEntry)
 					{				
 						CAMsg::printMsg(LOG_CRIT, "No old entry\n");			
