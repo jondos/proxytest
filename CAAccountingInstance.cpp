@@ -199,6 +199,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		}
 		
 		
+		
 		// do the following tests after a lot of Mix packets only (gain speed...)
 		if (!(pAccInfo->authFlags & AUTH_HARD_LIMIT_REACHED) &&
 			pAccInfo->sessionPackets % PACKETS_BEFORE_NEXT_CHECK != 0)
@@ -208,6 +209,8 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			return 1;
 		}
 		//CAMsg::printMsg( LOG_DEBUG, "Checking after %d session packets...\n", pAccInfo->sessionPackets);
+		
+		
 		
 		
 		if (!ms_pInstance->m_settleHashtable)
