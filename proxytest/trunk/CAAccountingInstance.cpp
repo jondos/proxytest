@@ -740,7 +740,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		{
 			// remember that this user is logged in at least once
 			loginEntry = new AccountLoginHashEntry;
-			loginEntry->accountNumber;
+			loginEntry->accountNumber = pAccInfo->accountNumber;
 			loginEntry->count = 0;
 			m_currentAccountsHashtable->put(&(loginEntry->accountNumber), loginEntry);
 		}		
