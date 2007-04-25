@@ -686,7 +686,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		timespec now;
 		getcurrentTime(now);
 		UINT32 status;
-		SINT32* count;
+		AccountLoginHashEntry* loginEntry;
 
 		// check authstate of this user
 		m_Mutex.lock();
@@ -727,21 +727,22 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		}
 		
 		m_currentAccountsHashtable->getMutex().lock();
-		count = (SINT32*)m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
-		if (count)
+		loginEntry = (AccountLoginHashEntry*)m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
+		if (loginEntry)
 		{
 			/*
 			 * There might already be a user logged in with this account, or at least
 			 * he is trying to. Kick out all users save one after authentication.
 			 */
-			(*count)++;	
+			 loginEntry->count++;
 		}
 		else
 		{
 			// remember that this user is logged in at least once
-			count = new SINT32;
-			*count = 0;
-			m_currentAccountsHashtable->put(&(pAccInfo->accountNumber), count);
+			loginEntry = new AccountLoginHashEntry;
+			loginEntry->accountNumber;
+			loginEntry->count = 0;
+			m_currentAccountsHashtable->put(&(loginEntry->accountNumber), loginEntry);
 		}		
 		m_currentAccountsHashtable->getMutex().unlock();
 		
@@ -915,9 +916,9 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 	UINT32 usedLen;
 	DOM_Element elemPanic;
 	DSA_SIG * pDsaSig;
-	SINT32* count;
-	// check current authstate
+	AccountLoginHashEntry* loginEntry;
 	
+	// check current authstate
 	
 	m_Mutex.lock();
 	if (pHashEntry == NULL || pHashEntry->pAccountingInfo == NULL)
@@ -972,11 +973,11 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 	}*/
 		
 	m_currentAccountsHashtable->getMutex().lock();
-	count = (SINT32*)m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
-	if (count && (*count))
+	loginEntry = (AccountLoginHashEntry*)m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
+	if (loginEntry && loginEntry->count)
 	{
 		// there is now more than one user logged in with this account; kick out this user!
-		CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Multiple logins (%s) detected! Kicking out user...\n" );
+		CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Multiple logins (%s) detected! Kicking out user...\n", loginEntry->count);
 		pAccInfo->authFlags |= AUTH_MULTIPLE_LOGIN;
 		pAccInfo->authFlags &= ~AUTH_ACCOUNT_OK;
 		m_currentAccountsHashtable->getMutex().unlock();
@@ -1148,9 +1149,9 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
  */
 SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 	{
-		ms_pInstance->m_Mutex.lock();
+		//ms_pInstance->m_Mutex.lock();
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
-		SINT32* count;
+		AccountLoginHashEntry* loginEntry;
 		
 		if ( pAccInfo != NULL)
 		{
@@ -1160,14 +1161,14 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			{
 				// remove login
 				ms_pInstance->m_currentAccountsHashtable->getMutex().lock();
-				count = (SINT32*)ms_pInstance->m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
-				if (!count || !(*count))
+				loginEntry = (AccountLoginHashEntry*)ms_pInstance->m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
+				if (!loginEntry || loginEntry->count <= 0)
 				{
 					// a normal user with only one login
-					if (count)
+					if (loginEntry)
 					{
 						ms_pInstance->m_currentAccountsHashtable->remove(&(pAccInfo->accountNumber));
-						delete count;
+						delete loginEntry;
 					}
 					else
 					{
@@ -1203,7 +1204,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 				else
 				{
 					// this user is kicked out due to multiple logins
-					(*count)--;
+					loginEntry->count--;
 				}
 				ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();				
 			}
@@ -1229,7 +1230,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			delete pAccInfo;
 			pHashEntry->pAccountingInfo=NULL;
 		}
-		ms_pInstance->m_Mutex.unlock();
+		//ms_pInstance->m_Mutex.unlock();
 		
 		return E_SUCCESS;
 	}
