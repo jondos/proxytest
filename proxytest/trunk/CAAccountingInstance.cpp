@@ -154,8 +154,6 @@ CAAccountingInstance::~CAAccountingInstance()
  */
 SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool a_bControlMessage, bool a_bMessageToJAP)
 	{
-		CAMsg::printMsg( LOG_DEBUG, "Hard limit handle: %d\n",(pHashEntry->pAccountingInfo->authFlags & AUTH_HARD_LIMIT_REACHED));	
-		
 		ms_pInstance->m_Mutex.lock();
 		
 		if (pHashEntry == NULL || pHashEntry->pAccountingInfo == NULL)
@@ -206,7 +204,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		if (!(pAccInfo->authFlags & AUTH_HARD_LIMIT_REACHED) &&
 			pAccInfo->sessionPackets % PACKETS_BEFORE_NEXT_CHECK != 0)
 		{
-			CAMsg::printMsg( LOG_DEBUG, "Now we gain some speed after %d session packets... Hard limit: %d\n", pAccInfo->sessionPackets, (pAccInfo->authFlags & AUTH_HARD_LIMIT_REACHED));
+			CAMsg::printMsg( LOG_DEBUG, "Now we gain some speed after %d session packets...\n", pAccInfo->sessionPackets);
 			ms_pInstance->m_Mutex.unlock();
 			return 1;
 		}
@@ -366,7 +364,6 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			}
 			else
 			{
-				CAMsg::printMsg( LOG_DEBUG, "AccountingInstance: Hard limt reset!\n");
 				pAccInfo->authFlags &= ~AUTH_HARD_LIMIT_REACHED;
 			}
 
@@ -704,7 +701,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 			return;
 		}
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;				
-		CAMsg::printMsg( LOG_DEBUG, "Hard limit cert: %d\n",(pHashEntry->pAccountingInfo->authFlags & AUTH_HARD_LIMIT_REACHED));	
+		
 		if(pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT)
 		{
 			//#ifdef DEBUG
@@ -865,13 +862,6 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 	}	
 	//CAMsg::printMsg(LOG_DEBUG, "Number of prepaid (confirmed-transferred) bytes : %d \n",pAccInfo->confirmedBytes-pAccInfo->transferredBytes);
 		
-	/*
-	if (pAccInfo->confirmedBytes - pAccInfo->transferredBytes <= (SINT32) ms_pInstance->m_iHardLimitBytes &&
-		(pAccInfo->authFlags & AUTH_HARD_LIMIT_REACHED) == 0)
-	{								
-		pAccInfo->authFlags |= AUTH_HARD_LIMIT_REACHED;
-		pAccInfo->lastHardLimitSeconds = time(NULL);
-	}*/	
 		
 	UINT8 * arbChallenge;
 	UINT8 b64Challenge[ 512 ];
@@ -901,8 +891,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 
 	// send XML struct to Jap & set auth flags
 	pAccInfo->pControlChannel->sendXMLMessage(doc);
-	pAccInfo->authFlags = AUTH_CHALLENGE_SENT | AUTH_GOT_ACCOUNTCERT | AUTH_TIMEOUT_STARTED;
-	//pAccInfo->lastRequestSeconds = now.tv_sec;
+	pAccInfo->authFlags |= AUTH_CHALLENGE_SENT | AUTH_GOT_ACCOUNTCERT | AUTH_TIMEOUT_STARTED;	
 	pAccInfo->challengeSentSeconds = time(NULL);
 	//CAMsg::printMsg("Last Account Certificate request seconds: for IP %u%u%u%u", (UINT8)pHashEntry->peerIP[0], (UINT8)pHashEntry->peerIP[1],(UINT8) pHashEntry->peerIP[2], (UINT8)pHashEntry->peerIP[3]);
 	m_Mutex.unlock();
@@ -919,8 +908,6 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
  */
 void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry, const DOM_Element &root)
 {
-	CAMsg::printMsg( LOG_DEBUG, "Hard limit challenge: %d\n",(pHashEntry->pAccountingInfo->authFlags & AUTH_HARD_LIMIT_REACHED));	
-	
 	UINT8 decodeBuffer[ 512 ];
 	UINT32 decodeBufferLen = 512;
 	UINT32 usedLen;
@@ -1143,7 +1130,6 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 	memset( pHashEntry->pAccountingInfo, 0, sizeof( tAiAccountingInfo ) );
 	pHashEntry->pAccountingInfo->authFlags |= 
 		AUTH_SENT_ACCOUNT_REQUEST | AUTH_TIMEOUT_STARTED | AUTH_HARD_LIMIT_REACHED;
-	CAMsg::printMsg( LOG_DEBUG, "Hard limit: %d\n",(pHashEntry->pAccountingInfo->authFlags & AUTH_HARD_LIMIT_REACHED));	
 	pHashEntry->pAccountingInfo->authTimeoutStartSeconds = time(NULL);
 	pHashEntry->pAccountingInfo->lastHardLimitSeconds = time(NULL);
 	pHashEntry->pAccountingInfo->sessionPackets = 0;
