@@ -208,8 +208,8 @@ struct t_accountinginfo
 	/** the signature verifying instance for this user */
 	CASignature * pPublicKey;
 	
-	/** The number of packets transfered to JAP since a fatal error. */
-	//UINT64 packetsSinceFatal;
+	/** The number of packets transfered. */
+	UINT64 sessionPackets;
 	
 	/** the minimum timestamp for the requested XMLBalance */
 	SINT32 reqbalMinSeconds;
