@@ -704,7 +704,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 			return;
 		}
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;				
-		
+		CAMsg::printMsg( LOG_DEBUG, "Hard limit cert: %d\n",(pHashEntry->pAccountingInfo->authFlags & AUTH_HARD_LIMIT_REACHED));	
 		if(pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT)
 		{
 			//#ifdef DEBUG
