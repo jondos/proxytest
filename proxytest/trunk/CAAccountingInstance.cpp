@@ -364,6 +364,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			}
 			else
 			{
+				CAMsg::printMsg( LOG_DEBUG, "AccountingInstance: Hard limt reset!\n");
 				pAccInfo->authFlags &= ~AUTH_HARD_LIMIT_REACHED;
 			}
 
