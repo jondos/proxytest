@@ -203,10 +203,11 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		if (!(pAccInfo->authFlags & AUTH_HARD_LIMIT_REACHED) &&
 			pAccInfo->sessionPackets % PACKETS_BEFORE_NEXT_CHECK != 0)
 		{
-			CAMsg::printMsg( LOG_DEBUG, "Now we gain some speed after %d session packets...\n", pAccInfo->sessionPackets);
+			//CAMsg::printMsg( LOG_DEBUG, "Now we gain some speed after %d session packets...\n", pAccInfo->sessionPackets);
 			ms_pInstance->m_Mutex.unlock();
 			return 1;
 		}
+		CAMsg::printMsg( LOG_DEBUG, "Checking after %d session packets...\n", pAccInfo->sessionPackets);
 		
 		
 		if (!ms_pInstance->m_settleHashtable)
