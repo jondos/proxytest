@@ -739,7 +739,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 			 * There might already be a user logged in with this account, or at least
 			 * he is trying to. Kick out all users save one after authentication.
 			 */
-			 loginEntry->count++;
+			 //loginEntry->count++;
 		}
 		else
 		{
