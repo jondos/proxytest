@@ -197,6 +197,17 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			pAccInfo->transferredBytes += MIXPACKET_SIZE;
 		}
 		
+		
+		// do the following tests after a lot of Mix packets only (gain speed...)
+		/*
+		if (pAccInfo->sessionPackets % PACKETS_BEFORE_NEXT_CHECK != 1)
+		{
+			//CAMsg::printMsg( LOG_DEBUG, "Now we gain some speed...\n");
+			ms_pInstance->m_Mutex.unlock();
+			return 1;
+		}*/		
+		
+		
 		if (!ms_pInstance->m_settleHashtable)
 		{
 			// accounting instance is dying...
@@ -291,19 +302,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 					//return 2; //dangerous, destroys encrypted stream somehow
 					return 1;
 				}					
-			}
-			
-			
-			// do the following tests after a lot of Mix packets only (gain speed...)
-			/*
-			if (pAccInfo->sessionPackets % PACKETS_BEFORE_NEXT_CHECK != 1)
-			{
-				//CAMsg::printMsg( LOG_DEBUG, "Now we gain some speed...\n");
-				ms_pInstance->m_Mutex.unlock();
-				return 1;	
-			}*/
-			
-			
+			}			
 
 			//----------------------------------------------------------
 			// ******     Hardlimit cost confirmation check **********
@@ -687,7 +686,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		timespec now;
 		getcurrentTime(now);
 		UINT32 status;
-		UINT32* count;
+		SINT32* count;
 
 		// check authstate of this user
 		m_Mutex.lock();
@@ -728,19 +727,19 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		}
 		
 		m_currentAccountsHashtable->getMutex().lock();
-		count = (UINT32*)m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
+		count = (SINT32*)m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
 		if (count)
 		{
 			/*
-			 *  There might already be a user logged in with this account.
-			 *  Kick out all users save one after authentication.
+			 * There might already be a user logged in with this account, or at least
+			 * he is trying to. Kick out all users save one after authentication.
 			 */
-			(*count)++;			
+			(*count)++;	
 		}
 		else
 		{
-			// remember that this user is logged in
-			count = new UINT32;
+			// remember that this user is logged in at least once
+			count = new SINT32;
 			*count = 0;
 			m_currentAccountsHashtable->put(&(pAccInfo->accountNumber), count);
 		}		
@@ -916,7 +915,7 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 	UINT32 usedLen;
 	DOM_Element elemPanic;
 	DSA_SIG * pDsaSig;
-	UINT32* count;
+	SINT32* count;
 	// check current authstate
 	
 	
@@ -973,11 +972,11 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 	}*/
 		
 	m_currentAccountsHashtable->getMutex().lock();
-	count = (UINT32*)m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
+	count = (SINT32*)m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
 	if (count && (*count))
 	{
 		// there is now more than one user logged in with this account; kick out this user!
-		CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Multiple login detected! Kicking out user...\n" );
+		CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Multiple logins (%s) detected! Kicking out user...\n" );
 		pAccInfo->authFlags |= AUTH_MULTIPLE_LOGIN;
 		pAccInfo->authFlags &= ~AUTH_ACCOUNT_OK;
 		m_currentAccountsHashtable->getMutex().unlock();
@@ -1149,9 +1148,9 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
  */
 SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 	{
-		//ms_pInstance->m_Mutex.lock();
+		ms_pInstance->m_Mutex.lock();
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
-		UINT32* count;
+		SINT32* count;
 		
 		if ( pAccInfo != NULL)
 		{
@@ -1161,7 +1160,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			{
 				// remove login
 				ms_pInstance->m_currentAccountsHashtable->getMutex().lock();
-				count = (UINT32*)ms_pInstance->m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
+				count = (SINT32*)ms_pInstance->m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
 				if (!count || !(*count))
 				{
 					// a normal user with only one login
@@ -1230,7 +1229,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			delete pAccInfo;
 			pHashEntry->pAccountingInfo=NULL;
 		}
-		//ms_pInstance->m_Mutex.unlock();
+		ms_pInstance->m_Mutex.unlock();
 		
 		return E_SUCCESS;
 	}
