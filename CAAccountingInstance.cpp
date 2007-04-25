@@ -1138,7 +1138,7 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 	memset( pHashEntry->pAccountingInfo, 0, sizeof( tAiAccountingInfo ) );
 	pHashEntry->pAccountingInfo->authFlags |= 
 		AUTH_SENT_ACCOUNT_REQUEST | AUTH_TIMEOUT_STARTED | AUTH_HARD_LIMIT_REACHED;
-	CAMsg::printMsg( LOG_DEBUG, "Hard limit: %d\n",(pAccInfo->authFlags & AUTH_HARD_LIMIT_REACHED));	
+	CAMsg::printMsg( LOG_DEBUG, "Hard limit: %d\n",(pHashEntry->pAccountingInfo->authFlags & AUTH_HARD_LIMIT_REACHED));	
 	pHashEntry->pAccountingInfo->authTimeoutStartSeconds = time(NULL);
 	pHashEntry->pAccountingInfo->lastHardLimitSeconds = time(NULL);
 	pHashEntry->pAccountingInfo->sessionPackets = 0;
