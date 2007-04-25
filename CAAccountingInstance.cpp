@@ -195,17 +195,18 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		{
 			 // count the packet and continue checkings
 			pAccInfo->transferredBytes += MIXPACKET_SIZE;
+			pAccInfo->sessionPackets++;
 		}
 		
 		
 		// do the following tests after a lot of Mix packets only (gain speed...)
-		/*
-		if (pAccInfo->sessionPackets % PACKETS_BEFORE_NEXT_CHECK != 1)
+		if (!(pAccInfo->authFlags & AUTH_HARD_LIMIT_REACHED) &&
+			pAccInfo->sessionPackets % PACKETS_BEFORE_NEXT_CHECK == 0)
 		{
-			//CAMsg::printMsg( LOG_DEBUG, "Now we gain some speed...\n");
+			CAMsg::printMsg( LOG_DEBUG, "Now we gain some speed after %d session packets...\n", pAccInfo->sessionPackets);
 			ms_pInstance->m_Mutex.unlock();
 			return 1;
-		}*/		
+		}
 		
 		
 		if (!ms_pInstance->m_settleHashtable)
@@ -857,13 +858,13 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 	}	
 	//CAMsg::printMsg(LOG_DEBUG, "Number of prepaid (confirmed-transferred) bytes : %d \n",pAccInfo->confirmedBytes-pAccInfo->transferredBytes);
 		
-	
+	/*
 	if (pAccInfo->confirmedBytes - pAccInfo->transferredBytes <= (SINT32) ms_pInstance->m_iHardLimitBytes &&
 		(pAccInfo->authFlags & AUTH_HARD_LIMIT_REACHED) == 0)
 	{								
 		pAccInfo->authFlags |= AUTH_HARD_LIMIT_REACHED;
 		pAccInfo->lastHardLimitSeconds = time(NULL);
-	}	
+	}*/	
 		
 	UINT8 * arbChallenge;
 	UINT8 b64Challenge[ 512 ];
@@ -1131,9 +1132,11 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 	ms_pInstance->m_Mutex.lock();
 	pHashEntry->pAccountingInfo = new tAiAccountingInfo;
 	memset( pHashEntry->pAccountingInfo, 0, sizeof( tAiAccountingInfo ) );
-	pHashEntry->pAccountingInfo->authFlags |= AUTH_SENT_ACCOUNT_REQUEST | AUTH_TIMEOUT_STARTED;
+	pHashEntry->pAccountingInfo->authFlags |= 
+		AUTH_SENT_ACCOUNT_REQUEST | AUTH_TIMEOUT_STARTED | AUTH_HARD_LIMIT_REACHED;
 	pHashEntry->pAccountingInfo->authTimeoutStartSeconds = time(NULL);
-	//pHashEntry->pAccountingInfo->packetsSinceFatal = 0;
+	pHashEntry->pAccountingInfo->lastHardLimitSeconds = time(NULL);
+	pHashEntry->pAccountingInfo->sessionPackets = 0;
 	pHashEntry->pAccountingInfo->transferredBytes = 0;
 	pHashEntry->pAccountingInfo->confirmedBytes = 0;
 	ms_pInstance->m_Mutex.unlock();
