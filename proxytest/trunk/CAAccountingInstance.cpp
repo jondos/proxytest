@@ -974,7 +974,7 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 		
 	m_currentAccountsHashtable->getMutex().lock();
 	loginEntry = (AccountLoginHashEntry*)m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
-	if (loginEntry && loginEntry->count)
+	if (loginEntry && loginEntry->count > 0)
 	{
 		// there is now more than one user logged in with this account; kick out this user!
 		CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Multiple logins (%s) detected! Kicking out user...\n", loginEntry->count);

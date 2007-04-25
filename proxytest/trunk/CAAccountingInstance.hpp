@@ -61,7 +61,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 struct t_aiqueueitem
 	{
-		DOM_Document*				pDomDoc;
+		DOM_Document*			pDomDoc;
 		fmHashTableEntry*		pHashEntry;
 	};
 typedef struct t_aiqueueitem aiQueueItem;
@@ -72,6 +72,12 @@ struct AccountHashEntry
 	UINT32 authFlags;
 	UINT32 confirmedBytes;
 	AccountHashEntry* nextEntry;
+};
+
+struct AccountLoginHashEntry
+{
+	UINT64 accountNumber;
+	UINT32 count;
 };
 
 extern CACmdLnOptions options;
