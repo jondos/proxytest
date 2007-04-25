@@ -739,7 +739,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 			 * There might already be a user logged in with this account, or at least
 			 * he is trying to. Kick out all users save one after authentication.
 			 */
-			 //loginEntry->count++;
+			 loginEntry->count++;
 		}
 		else
 		{
@@ -1128,7 +1128,7 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 	ms_pInstance->m_Mutex.lock();
 	pHashEntry->pAccountingInfo = new tAiAccountingInfo;
 	memset( pHashEntry->pAccountingInfo, 0, sizeof( tAiAccountingInfo ) );
-	pHashEntry->pAccountingInfo->authFlags |= 
+	pHashEntry->pAccountingInfo->authFlags = 
 		AUTH_SENT_ACCOUNT_REQUEST | AUTH_TIMEOUT_STARTED | AUTH_HARD_LIMIT_REACHED;
 	pHashEntry->pAccountingInfo->authTimeoutStartSeconds = time(NULL);
 	pHashEntry->pAccountingInfo->lastHardLimitSeconds = time(NULL);
