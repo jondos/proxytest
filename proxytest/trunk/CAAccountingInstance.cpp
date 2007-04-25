@@ -154,6 +154,8 @@ CAAccountingInstance::~CAAccountingInstance()
  */
 SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool a_bControlMessage, bool a_bMessageToJAP)
 	{
+		CAMsg::printMsg( LOG_DEBUG, "Hard limit handle: %d\n",(pHashEntry->pAccountingInfo->authFlags & AUTH_HARD_LIMIT_REACHED));	
+		
 		ms_pInstance->m_Mutex.lock();
 		
 		if (pHashEntry == NULL || pHashEntry->pAccountingInfo == NULL)
@@ -917,6 +919,8 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
  */
 void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry, const DOM_Element &root)
 {
+	CAMsg::printMsg( LOG_DEBUG, "Hard limit challenge: %d\n",(pHashEntry->pAccountingInfo->authFlags & AUTH_HARD_LIMIT_REACHED));	
+	
 	UINT8 decodeBuffer[ 512 ];
 	UINT32 decodeBufferLen = 512;
 	UINT32 usedLen;
