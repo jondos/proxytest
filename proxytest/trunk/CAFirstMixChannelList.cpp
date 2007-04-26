@@ -387,7 +387,6 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 		// cleanup accounting information
 		CAAccountingInstance::cleanupTableEntry(pHashTableEntry);
 #endif
-		delete[] pHashTableEntry->id;
 		memset(pHashTableEntry,0,sizeof(fmHashTableEntry)); //'delete' the connection from the connection hash table 
 		m_Mutex.unlock();
 		return E_SUCCESS;
