@@ -316,16 +316,8 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			
 			//confirmed and transferred bytes are cumulative, so they use UINT64 to store potentially huge values
 			//prepaid Bytes as the difference will be much smaller, but might be negative, so we cast to signed int
-			UINT64 prepaidBytesUnsigned = (UINT64) (pAccInfo->confirmedBytes - pAccInfo->transferredBytes);
-			SINT32 prepaidBytes = (SINT32) prepaidBytesUnsigned;
-#ifdef DEBUG		
-			UINT64 confirmedBytes = pAccInfo->confirmedBytes;
-			UINT64 transferred = pAccInfo->transferredBytes;
-			CAMsg::printMsg(LOG_ERR, "Confirmed: %u \n",confirmedBytes);
-			CAMsg::printMsg(LOG_ERR, "transferrred: %u \n",transferred);	
-			CAMsg::printMsg(LOG_ERR, "prepaidBytes: %d \n",prepaidBytes);
-#endif					
-			if (prepaidBytes <= (SINT32) ms_pInstance->m_iHardLimitBytes)
+			UINT64 prepaidBytes = (UINT64) (pAccInfo->confirmedBytes - pAccInfo->transferredBytes);		
+			if (prepaidBytes <= ms_pInstance->m_iHardLimitBytes)
 			{				
 				if ((pAccInfo->authFlags & AUTH_HARD_LIMIT_REACHED) == 0)
 				{
@@ -700,10 +692,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 			m_Mutex.unlock();
 			return;
 		}
-		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;				
-		
-		CAMsg::printMsg(LOG_DEBUG, "User: %u", pHashEntry->id);
-		
+		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;							
 		
 		if(pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT)
 		{
@@ -738,6 +727,21 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		loginEntry = (AccountLoginHashEntry*)m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
 		if (loginEntry)
 		{
+			if (loginEntry->userID == pHashEntry->id)
+			{
+				UINT8 userIDAsString[32];
+				print64(userIDAsString, pHashEntry->id);
+				CAMsg::printMsg(LOG_ERR, 
+					"CAAccountingInstance: User with random ID %s entered handleAccountCertificate more than once!", userIDAsString);
+			}	
+			else
+			{
+				UINT8 accountNrAsString[32];
+				print64(accountNrAsString, pAccInfo->accountNumber);
+				CAMsg::printMsg(LOG_ERR, 
+					"CAAccountingInstance: User with account nr %s might be logged in more than once!", accountNrAsString);
+			}
+			
 			/*
 			 * There might already be a user logged in with this account, or at least
 			 * he is trying to. Kick out all users save one after authentication.
@@ -750,6 +754,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 			loginEntry = new AccountLoginHashEntry;
 			loginEntry->accountNumber = pAccInfo->accountNumber;
 			loginEntry->count = 0;
+			loginEntry->userID = pHashEntry->id;
 			m_currentAccountsHashtable->put(&(loginEntry->accountNumber), loginEntry);
 		}		
 		m_currentAccountsHashtable->getMutex().unlock();
