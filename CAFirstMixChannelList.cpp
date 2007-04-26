@@ -114,8 +114,9 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 		pHashTableEntry->trafficIn=0;
 		pHashTableEntry->trafficOut=0;
 		getcurrentTimeMillis(pHashTableEntry->timeCreated);
+#endif		
 		getRandom((UINT8*)&pHashTableEntry->id,8);
-#endif
+
 #ifdef PAYMENT
 		pHashTableEntry->pAccountingInfo=NULL;
 #endif
@@ -386,6 +387,7 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 		// cleanup accounting information
 		CAAccountingInstance::cleanupTableEntry(pHashTableEntry);
 #endif
+		delete[] pHashTableEntry->id;
 		memset(pHashTableEntry,0,sizeof(fmHashTableEntry)); //'delete' the connection from the connection hash table 
 		m_Mutex.unlock();
 		return E_SUCCESS;
