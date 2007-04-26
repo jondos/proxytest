@@ -732,14 +732,14 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 				UINT8 userIDAsString[32];
 				print64(userIDAsString, pHashEntry->id);
 				CAMsg::printMsg(LOG_ERR, 
-					"CAAccountingInstance: User with random ID %s entered handleAccountCertificate more than once!", userIDAsString);
+					"CAAccountingInstance: User with random ID %s entered handleAccountCertificate more than once!\n", userIDAsString);
 			}	
 			else
 			{
 				UINT8 accountNrAsString[32];
 				print64(accountNrAsString, pAccInfo->accountNumber);
 				CAMsg::printMsg(LOG_ERR, 
-					"CAAccountingInstance: User with account nr %s might be logged in more than once!", accountNrAsString);
+					"CAAccountingInstance: User with account nr %s might be logged in more than once!\n", accountNrAsString);
 			}
 			
 			/*
