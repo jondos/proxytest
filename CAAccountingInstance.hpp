@@ -77,6 +77,7 @@ struct AccountHashEntry
 struct AccountLoginHashEntry
 {
 	UINT64 accountNumber;
+	UINT64 userID;
 	UINT32 count;
 };
 

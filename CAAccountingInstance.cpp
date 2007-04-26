@@ -361,7 +361,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 
 			//-------------------------------------------------------
 			// *** SOFT LIMIT CHECK *** is it time to request a new cost confirmation?
-			if ( prepaidBytes <= (SINT32) ms_pInstance->m_iSoftLimitBytes )
+			if ( prepaidBytes <= ms_pInstance->m_iSoftLimitBytes )
 			{
 #ifdef DEBUG
 				CAMsg::printMsg(LOG_ERR, "soft limit of %d bytes triggered \n",ms_pInstance->m_iSoftLimitBytes);
