@@ -740,13 +740,13 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 				print64(accountNrAsString, pAccInfo->accountNumber);
 				CAMsg::printMsg(LOG_ERR, 
 					"CAAccountingInstance: User with account nr %s might be logged in more than once!\n", accountNrAsString);
-			}
-			
-			/*
-			 * There might already be a user logged in with this account, or at least
-			 * he is trying to. Kick out all users save one after authentication.
-			 */
-			 //loginEntry->count++;
+					
+				/*
+				 * There might already be a user logged in with this account, or at least
+				 * he is trying to. Kick out all users save one after authentication.
+				 */
+				 //loginEntry->count++;	
+			}			
 		}
 		else
 		{
