@@ -115,7 +115,7 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 		pHashTableEntry->trafficOut=0;
 		getcurrentTimeMillis(pHashTableEntry->timeCreated);
 #endif		
-		id = new UINT8[8];
+		pHashTableEntry->id = new UINT8[8];
 		getRandom(pHashTableEntry->id,8);
 
 #ifdef PAYMENT
