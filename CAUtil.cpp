@@ -278,6 +278,15 @@ SINT32 getRandom(UINT32* val)
 				return E_UNKNOWN;
 		return E_SUCCESS;
 	}
+	
+SINT32 getRandom(UINT64* val)
+	{
+		ASSERT(val!=NULL,"VAL should be not NULL");
+		if(RAND_bytes((UINT8*)val,8)!=1&&
+			 RAND_pseudo_bytes((UINT8*)val,8)<0)
+				return E_UNKNOWN;
+		return E_SUCCESS;
+	}	
 
 /** Gets some random bytes.
 	@param buff - buff which is filled with randomness
