@@ -57,8 +57,9 @@ struct t_fmhashtableentry
 			UINT32				trafficIn;
 			UINT32				trafficOut;
 			UINT64				timeCreated;
-			UINT64				id;
-#endif
+#endif			
+			UINT8*				id;
+
 			CASymCipher*  pSymCipher;
 			UINT8					peerIP[4]; //needed for flooding control
 #ifdef COUNTRY_STATS

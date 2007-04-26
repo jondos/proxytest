@@ -702,6 +702,9 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		}
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;				
 		
+		CAMsg::printMsg(LOG_DEBUG, "User: %s", pHashEntry->id);
+		
+		
 		if(pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT)
 		{
 			//#ifdef DEBUG
