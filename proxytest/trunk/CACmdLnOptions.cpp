@@ -1726,115 +1726,117 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 			// get AiID (NOT a separate element /Accounting/AiID any more, rather the subjectkeyidentifier given in the price certificate
 			m_strAiID = m_pPriceCertificate->getSubjectKeyIdentifier();
 				
-				
-			DOM_Element elemDatabase;
-			if (getDOMChildByName(elemAccounting, (UINT8*)"Database", elemDatabase, false) != E_SUCCESS)
+			if (m_bFirstMix)
 			{
-				CAMsg::printMsg(LOG_CRIT,"Node \"Database\" not found!\n");
-				return E_UNKNOWN;
-			}								
-			if(elemDatabase != NULL) 
-			{
-				// get DB Hostname
-				if (getDOMChildByName(elemDatabase, (UINT8*)"Host", elem, false) != E_SUCCESS)
+				DOM_Element elemDatabase;
+				if (getDOMChildByName(elemAccounting, (UINT8*)"Database", elemDatabase, false) != E_SUCCESS)
 				{
-					CAMsg::printMsg(LOG_CRIT,"Node \"Host\" not found!\n");
+					CAMsg::printMsg(LOG_CRIT,"Node \"Database\" not found!\n");
 					return E_UNKNOWN;
-				}
-				tmpLen = 255;
-				if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) 
+				}								
+				else //if(elemDatabase != NULL) 
 				{
-					strtrim(tmpBuff);
-					m_strDatabaseHost = new UINT8[strlen((char*)tmpBuff)+1];
-					strcpy((char *)m_strDatabaseHost, (char *) tmpBuff);
-				}
-				else
-				{
-					CAMsg::printMsg(LOG_CRIT,"Node \"Host\" is empty!\n");
-					return E_UNKNOWN;
-				}
-				// get Database Port
-				if (getDOMChildByName(elemDatabase, (UINT8*)"Port", elem, false) != E_SUCCESS)
-				{
-					CAMsg::printMsg(LOG_CRIT,"Node \"Port\" not found!\n");
-					return E_UNKNOWN;
-				}
-				if(getDOMElementValue(elem, &tmp)==E_SUCCESS) 
-				{
-					m_iDatabasePort = tmp;
-				}
-				else
-				{
-					CAMsg::printMsg(LOG_CRIT,"Node \"Port\" is empty!\n");
-					return E_UNKNOWN;
-				}
-				// get DB Name
-				if (getDOMChildByName(elemDatabase, (UINT8*)"DBName", elem, false) != E_SUCCESS)
-				{
-					CAMsg::printMsg(LOG_CRIT,"Node \"DBName\" not found!\n");
-					return E_UNKNOWN;
-				}
-				tmpLen = 255;
-				if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) 
-				{
-					strtrim(tmpBuff);
-					m_strDatabaseName = new UINT8[strlen((char*)tmpBuff)+1];
-					strcpy((char *)m_strDatabaseName, (char *) tmpBuff);
-				}
-				else
-				{
-					CAMsg::printMsg(LOG_CRIT,"Node \"DBName\" is empty!\n");
-					return E_UNKNOWN;
-				}
-				// get DB Username
-				if (getDOMChildByName(elemDatabase, (UINT8*)"Username", elem, false) != E_SUCCESS)
-				{
-					CAMsg::printMsg(LOG_CRIT,"Node \"Username\" not found!\n");
-					return E_UNKNOWN;
-				}
-				tmpLen = 255;
-				if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) 
-				{
-					strtrim(tmpBuff);
-					m_strDatabaseUser = new UINT8[strlen((char*)tmpBuff)+1];
-					strcpy((char *)m_strDatabaseUser, (char *) tmpBuff);
-				}
-				else
-				{
-					CAMsg::printMsg(LOG_CRIT,"Node \"Username\" is empty!\n");
-					return E_UNKNOWN;
-				}
-						
-				//get DB password from xml 	
-				getDOMChildByName(elemDatabase, (UINT8*)"Password", elem, false);
-				tmpLen = 255;
-				//read password from xml if given
-				if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) {
-					strtrim(tmpBuff);
-					m_strDatabasePassword = new UINT8[strlen((char*)tmpBuff)+1];
-					strcpy((char *)m_strDatabasePassword, (char *) tmpBuff);
-				}
-				else
-				{      
-			        //read password from stdin:
-					UINT8 dbpass[500];
-					dbpass[0]=0;
-					printf("Please enter password for postgresql user %s at %s: ",m_strDatabaseUser, m_strDatabaseHost);
-					scanf("%400[^\n]%*1[\n]",(char*)dbpass); 
-					int len = strlen((char *)dbpass);
-					if(len>0) 
+					// get DB Hostname
+					if (getDOMChildByName(elemDatabase, (UINT8*)"Host", elem, false) != E_SUCCESS)
 					{
-						m_strDatabasePassword = new UINT8[len+1];
-						strcpy((char *)m_strDatabasePassword, (char *)dbpass);
+						CAMsg::printMsg(LOG_CRIT,"Node \"Host\" not found!\n");
+						return E_UNKNOWN;
+					}
+					tmpLen = 255;
+					if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) 
+					{
+						strtrim(tmpBuff);
+						m_strDatabaseHost = new UINT8[strlen((char*)tmpBuff)+1];
+						strcpy((char *)m_strDatabaseHost, (char *) tmpBuff);
 					}
 					else
 					{
-						m_strDatabasePassword = new UINT8[1];
-						m_strDatabasePassword[0] = '\0';
-					}	
-				}
-						
-			} //of elem database
+						CAMsg::printMsg(LOG_CRIT,"Node \"Host\" is empty!\n");
+						return E_UNKNOWN;
+					}
+					// get Database Port
+					if (getDOMChildByName(elemDatabase, (UINT8*)"Port", elem, false) != E_SUCCESS)
+					{
+						CAMsg::printMsg(LOG_CRIT,"Node \"Port\" not found!\n");
+						return E_UNKNOWN;
+					}
+					if(getDOMElementValue(elem, &tmp)==E_SUCCESS) 
+					{
+						m_iDatabasePort = tmp;
+					}
+					else
+					{
+						CAMsg::printMsg(LOG_CRIT,"Node \"Port\" is empty!\n");
+						return E_UNKNOWN;
+					}
+					// get DB Name
+					if (getDOMChildByName(elemDatabase, (UINT8*)"DBName", elem, false) != E_SUCCESS)
+					{
+						CAMsg::printMsg(LOG_CRIT,"Node \"DBName\" not found!\n");
+						return E_UNKNOWN;
+					}
+					tmpLen = 255;
+					if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) 
+					{
+						strtrim(tmpBuff);
+						m_strDatabaseName = new UINT8[strlen((char*)tmpBuff)+1];
+						strcpy((char *)m_strDatabaseName, (char *) tmpBuff);
+					}
+					else
+					{
+						CAMsg::printMsg(LOG_CRIT,"Node \"DBName\" is empty!\n");
+						return E_UNKNOWN;
+					}
+					// get DB Username
+					if (getDOMChildByName(elemDatabase, (UINT8*)"Username", elem, false) != E_SUCCESS)
+					{
+						CAMsg::printMsg(LOG_CRIT,"Node \"Username\" not found!\n");
+						return E_UNKNOWN;
+					}
+					tmpLen = 255;
+					if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) 
+					{
+						strtrim(tmpBuff);
+						m_strDatabaseUser = new UINT8[strlen((char*)tmpBuff)+1];
+						strcpy((char *)m_strDatabaseUser, (char *) tmpBuff);
+					}
+					else
+					{
+						CAMsg::printMsg(LOG_CRIT,"Node \"Username\" is empty!\n");
+						return E_UNKNOWN;
+					}
+							
+					//get DB password from xml 	
+					getDOMChildByName(elemDatabase, (UINT8*)"Password", elem, false);
+					tmpLen = 255;
+					//read password from xml if given
+					if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) {
+						strtrim(tmpBuff);
+						m_strDatabasePassword = new UINT8[strlen((char*)tmpBuff)+1];
+						strcpy((char *)m_strDatabasePassword, (char *) tmpBuff);
+					}
+					else
+					{      
+				        //read password from stdin:
+						UINT8 dbpass[500];
+						dbpass[0]=0;
+						printf("Please enter password for postgresql user %s at %s: ",m_strDatabaseUser, m_strDatabaseHost);
+						scanf("%400[^\n]%*1[\n]",(char*)dbpass); 
+						int len = strlen((char *)dbpass);
+						if(len>0) 
+						{
+							m_strDatabasePassword = new UINT8[len+1];
+							strcpy((char *)m_strDatabasePassword, (char *)dbpass);
+						}
+						else
+						{
+							m_strDatabasePassword = new UINT8[1];
+							m_strDatabasePassword[0] = '\0';
+						}	
+					}
+							
+				} //of elem database
+			}
 		} //of elem accounting
 		else 
 		{
