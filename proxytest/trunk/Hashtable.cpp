@@ -466,12 +466,10 @@ struct Entry *Hashtable::getHashEntry(void *key)
 	}
 	
 	struct Entry **table,*e;
-	UINT32 hash;
-	//UINT32 (*func)(void *);
+	UINT32 hash,(*func)(void *);
 	
 	table = m_table;
-	//hash = (func = m_hashFunc)(key);
-	hash = m_hashFunc(key);
+	hash = (func = m_hashFunc)(key);
 	UINT32 index = hash % m_capacity;
 	
 	for(e = table[index]; e; e = e->e_Next)
@@ -481,8 +479,7 @@ struct Entry *Hashtable::getHashEntry(void *key)
 			return NULL;
 		}		
 		
-		if (//(func(e->e_Key) == hash) &&  // not useful, as otherwise this entry would not be in the hashtable
-		    !m_compareFunc(e->e_Key,key))
+		if ((func(e->e_Key) == hash) && !m_compareFunc(e->e_Key,key))
 		{
 			return e;
 		}
