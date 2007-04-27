@@ -1150,7 +1150,7 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
  */
 SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 	{
-		ms_pInstance->m_Mutex.lock();
+		//ms_pInstance->m_Mutex.lock();
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
 		AccountLoginHashEntry* loginEntry;
 		
@@ -1231,7 +1231,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			delete pAccInfo;
 			pHashEntry->pAccountingInfo=NULL;
 		}
-		ms_pInstance->m_Mutex.unlock();
+		//ms_pInstance->m_Mutex.unlock();
 		
 		return E_SUCCESS;
 	}
