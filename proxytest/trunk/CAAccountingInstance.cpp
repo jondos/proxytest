@@ -53,7 +53,7 @@ DOM_Document CAAccountingInstance::m_preparedCCRequest;
  */
 CAAccountingInstance * CAAccountingInstance::ms_pInstance = NULL;
 
-const UINT64 CAAccountingInstance::PACKETS_BEFORE_NEXT_CHECK = 100;
+const UINT64 CAAccountingInstance::PACKETS_BEFORE_NEXT_CHECK = 200;
 
 /**
  * private Constructor
@@ -167,15 +167,9 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		
 		//kick user out after previous error
 		if(pAccInfo->authFlags & AUTH_FATAL_ERROR)
-		{
-			/*
-			if (a_bMessageToJAP)
-			{
-				pAccInfo->packetsSinceFatal++;
-			}*/
-			
+		{			
 			// there was an error earlier.
-			if (a_bMessageToJAP && a_bControlMessage)// (a_bControlMessage || pAccInfo->packetsSinceFatal >= FATAL_GRACE_PACKETS))
+			if (a_bMessageToJAP && a_bControlMessage)
 			{				
 				return returnKickout(pAccInfo);
 			}
