@@ -221,7 +221,7 @@ void *Hashtable::getValue(void *key)
 
 void* Hashtable::put(void *key, void *value)
 {
-	CAMsg::printMsg(LOG_INFO, "Hashtable: Putting key.\n");
+	//CAMsg::printMsg(LOG_INFO, "Hashtable: Putting key.\n");
 	
 	if (!key || !value)
 	{
@@ -277,7 +277,7 @@ void* Hashtable::put(void *key, void *value)
 
 void *Hashtable::remove(void *key)
 {
-	CAMsg::printMsg(LOG_INFO, "Hashtable: Removing key.\n");
+	//CAMsg::printMsg(LOG_INFO, "Hashtable: Removing key.\n");
 	
 	if (!key)
 	{
@@ -466,10 +466,12 @@ struct Entry *Hashtable::getHashEntry(void *key)
 	}
 	
 	struct Entry **table,*e;
-	UINT32 hash,(*func)(void *);
+	UINT32 hash;
+	//UINT32 (*func)(void *);
 	
 	table = m_table;
-	hash = (func = m_hashFunc)(key);
+	//hash = (func = m_hashFunc)(key);
+	hash = m_hashFunc(key);
 	UINT32 index = hash % m_capacity;
 	
 	for(e = table[index]; e; e = e->e_Next)
@@ -479,7 +481,8 @@ struct Entry *Hashtable::getHashEntry(void *key)
 			return NULL;
 		}		
 		
-		if ((func(e->e_Key) == hash) && !m_compareFunc(e->e_Key,key))
+		if (//(func(e->e_Key) == hash) &&  // not useful, as otherwise this entry would not be in the hashtable
+		    !m_compareFunc(e->e_Key,key))
 		{
 			return e;
 		}
