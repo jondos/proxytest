@@ -556,7 +556,6 @@ SINT32 CAAccountingDBInterface::getPrepaidAmount(UINT64 accountNumber, UINT8* ca
 		PQclear(result);						
 
 		//delete entry from db
-		/*
 		const char* deleteQuery = "DELETE FROM PREPAIDAMOUNTS WHERE ACCOUNTNUMBER=%s AND CASCADE='%s' ";
 		PGresult* result2;
 		print64(accountNumberAsString,accountNumber);
@@ -567,7 +566,7 @@ SINT32 CAAccountingDBInterface::getPrepaidAmount(UINT64 accountNumber, UINT8* ca
 		{
 			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Deleting read prepaidamount failed.");	
 		}
-		PQclear(result2);*/
+		PQclear(result2);
 		delete[] finalQuery;
 		
 		return nrOfBytes;
