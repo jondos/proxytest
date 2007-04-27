@@ -894,7 +894,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		#endif	
 		
 		// send the mix-keys to JAP
-		if (((CASocket*)pNewUser)->sendFullyTimeOut(m_xmlKeyInfoBuff,m_xmlKeyInfoSize, 30000, 10000) != E_SUCCESS)
+		if (((CASocket*)pNewUser)->sendFullyTimeOut(m_xmlKeyInfoBuff,m_xmlKeyInfoSize, 40000, 10000) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_DEBUG,"User login: Sending login data has been interrupted!\n");
 			delete pNewUser;
