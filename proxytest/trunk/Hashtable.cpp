@@ -293,7 +293,7 @@ void *Hashtable::remove(void *key)
 {
 	//CAMsg::printMsg(LOG_INFO, "Hashtable: Removing key.\n");
 	
-	if (!key || !m_Table)
+	if (!key || !m_table)
 	{
 		return NULL;
 	}
