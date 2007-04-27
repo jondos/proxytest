@@ -738,6 +738,9 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 				/*
 				 * There might already be a user logged in with this account, or at least
 				 * he is trying to. Kick out all users save one after authentication.
+				 * @todo this is a problem right now, as, if the users network connection is cut of, the mix does not
+				 * know he is not logged in any more; there must be a mechism (like keep alive) that kicks out the user
+				 * after a short time if he did not answer.
 				 */
 				 //loginEntry->count++;	
 			}			
