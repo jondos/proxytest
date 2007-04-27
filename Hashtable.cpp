@@ -293,7 +293,7 @@ void *Hashtable::remove(void *key)
 {
 	//CAMsg::printMsg(LOG_INFO, "Hashtable: Removing key.\n");
 	
-	if (!key)
+	if (!key || !m_Table)
 	{
 		return NULL;
 	}
@@ -345,12 +345,12 @@ void *Hashtable::remove(void *key)
 
 void Hashtable::makeEmpty(SINT8 keyMode,SINT8 valueMode)
 {	
-	CAMsg::printMsg(LOG_INFO, "Hashtable: Clearing...\n");
-
 	if (!m_table)
 	{
 		return;
 	}
+	
+	CAMsg::printMsg(LOG_INFO, "Hashtable: Clearing...\n");
 
 	for(SINT32 index = 0; index < m_capacity; index++)
 	{
@@ -414,6 +414,11 @@ UINT32 Hashtable::getCapacity()
  */
 bool Hashtable::rehash()
 {
+	if (!m_table)
+	{
+		return false;
+	}
+	
 	CAMsg::printMsg(LOG_INFO, "Hashtable: Rehashing.\n");
 	
 	UINT32 (*hashCode)(void *) = m_hashFunc;
@@ -474,7 +479,7 @@ bool Hashtable::rehash()
 
 struct Entry *Hashtable::getHashEntry(void *key)
 {	
-	if (!key)
+	if (!key || !m_table)
 	{
 		return NULL;
 	}
