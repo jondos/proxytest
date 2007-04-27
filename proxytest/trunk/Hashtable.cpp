@@ -224,7 +224,7 @@ void* Hashtable::put(void *key, void *value)
 {
 	//CAMsg::printMsg(LOG_INFO, "Hashtable: Putting key.\n");
 	
-	if (!key || !value)
+	if (!key || !value || !m_Table)
 	{
 		return NULL;
 	}
