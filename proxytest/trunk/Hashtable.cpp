@@ -148,12 +148,13 @@ Hashtable::~Hashtable()
 
 UINT32 Hashtable::hashUINT64(UINT64 *a_number)
 {
-	UINT32 hash = ((*a_number) % 4294967295u);
- 	return hash;
+ 	return ((*a_number) % 4294967295u);
 }
 
 SINT32 Hashtable::compareUINT64(UINT64 *a_numberA, UINT64 *a_numberB)
 {
+	return (*a_numberA == *a_numberB)? 0 : ((*a_numberA > *a_numberB)? 1 : -1);
+	/*
 	if (*a_numberA == *a_numberB)
 	{
 		return 0;
@@ -165,7 +166,7 @@ SINT32 Hashtable::compareUINT64(UINT64 *a_numberA, UINT64 *a_numberB)
 	else
 	{
 		return -1;
-	}
+	}*/
 }	
 
 
@@ -228,40 +229,53 @@ void* Hashtable::put(void *key, void *value)
 		return NULL;
 	}
 	
-	struct Entry *oldEntry = getHashEntry(key);
-	struct Entry *e = NULL;
+	struct Entry *oldEntry = NULL;
+	struct Entry *newEntry = NULL;
 	UINT32 hash = m_hashFunc(key);
-	UINT32 index;
+	UINT32 index = hash % m_capacity;
 	
-	if (oldEntry)
-	{
-		value = oldEntry->e_Value;
-	}
-	
-	//m_modCount++;
+	m_count++;
 	if (m_count >= m_threshold)
 	{		
 		rehash();
 	}
 	
 	index = hash % m_capacity;
-
-	e = new Entry;
-	e->e_Key = key;
-	e->e_Value = value;
 	
-	if (m_table[index])
-	{		
-		e->e_Next = m_table[index];
+	newEntry = new Entry;
+	newEntry->e_Key = key;
+	newEntry->e_Value = value;
+	newEntry->e_Next = NULL;
+	
+	oldEntry = m_table[index];
+	if (!oldEntry)
+	{
+		m_table[index] = newEntry;
 	}
 	else
 	{
-		e->e_Next = NULL;
+		struct Entry *prevEntry = NULL;
+		for(; oldEntry; oldEntry = oldEntry->e_Next)
+		{			
+			if (m_hashFunc(oldEntry->e_Key) == hash && !m_compareFunc(oldEntry->e_Key,key))
+			{
+				// found the same entry
+				newEntry->e_Next = oldEntry->e_Next;
+				break;
+			}
+			prevEntry = oldEntry;
+		}
+		if (prevEntry)
+		{
+			prevEntry->e_Next = newEntry;
+		}
+		else
+		{
+			m_table[index] = newEntry;
+		}
 	}
-	m_table[index] = e; 
-	m_count++;
 	
-	return value;
+	return oldEntry;
 }
 
 
@@ -465,21 +479,12 @@ struct Entry *Hashtable::getHashEntry(void *key)
 		return NULL;
 	}
 	
-	struct Entry **table,*e;
-	UINT32 hash,(*func)(void *);
+	struct Entry *e;
+	UINT32 hash = m_hashFunc(key);
 	
-	table = m_table;
-	hash = (func = m_hashFunc)(key);
-	UINT32 index = hash % m_capacity;
-	
-	for(e = table[index]; e; e = e->e_Next)
-	{
-		if (e == NULL)
-		{
-			return NULL;
-		}		
-		
-		if ((func(e->e_Key) == hash) && !m_compareFunc(e->e_Key,key))
+	for(e = m_table[hash % m_capacity]; e; e = e->e_Next)
+	{		
+		if (m_hashFunc(e->e_Key) == hash && !m_compareFunc(e->e_Key,key))
 		{
 			return e;
 		}
