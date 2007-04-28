@@ -196,12 +196,15 @@ typedef struct t_mix_parameters tMixParameters;
 
 class CASignature;
 class CAAccountingControlChannel;
+class CAMutex;
 /**
  * Structure that holds all per-user payment information
  * Included in CAFirstMixChannelList (struct fmHashTableEntry)
  */
 struct t_accountinginfo
 {
+	CAMutex* mutex;	
+	
 	/** we store the challenge here to verify the response later */
 	UINT8 * pChallenge;
 	
