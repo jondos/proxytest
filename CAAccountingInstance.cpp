@@ -718,7 +718,6 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		timespec now;
 		getcurrentTime(now);
 		UINT32 status;
-		AccountLoginHashEntry* loginEntry;
 
 		// check authstate of this user
 		if (pHashEntry == NULL || pHashEntry->pAccountingInfo == NULL)
