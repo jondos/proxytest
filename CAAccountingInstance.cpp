@@ -1038,7 +1038,7 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 				 	 * He won't get any new access again before the old connections have been closed!
 				 	 */
 				 	CAMsg::printMsg(LOG_ERR, 
-				 					"CAAccountingInstance: Maximum of multiple logins (%d) for user with account %s detected! \
+				 					"CAAccountingInstance: Maximum of multiple logins exceeded (%d) for user with account %s! \
 				 					Kicking out this user!\n", 
 				 					loginEntry->count, accountNrAsString);
 				 	bSendCCRequest = false; // not needed...
