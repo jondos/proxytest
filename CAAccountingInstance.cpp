@@ -1026,7 +1026,7 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 				if (loginEntry->count < MAX_TOLERATED_MULTIPLE_LOGINS)
 				{
 					// There is now more than one user logged in with this account; kick out the other users!		
-					CAMsg::printMsg(LOG_ERR, 
+					CAMsg::printMsg(LOG_INFO, 
 									"CAAccountingInstance: Multiple logins (%d) of user with account %s detected! \
 									Kicking out other users with this account...\n", 
 									loginEntry->count, accountNrAsString);
@@ -1037,7 +1037,7 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 				 	/* The maximum of tolerated concurrent logins for this user is exceeded.
 				 	 * He won't get any new access again before the old connections have been closed!
 				 	 */
-				 	CAMsg::printMsg(LOG_ERR, 
+				 	CAMsg::printMsg(LOG_INFO, 
 				 					"CAAccountingInstance: Maximum of multiple logins exceeded (%d) for user with account %s! \
 				 					Kicking out this user!\n", 
 				 					loginEntry->count, accountNrAsString);
@@ -1246,9 +1246,9 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 				{
 					if (loginEntry->count <= 1)
 					{
-						if (loginEntry->count < 1)
+						if (loginEntry->count < 0)
 						{
-							CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: Cleanup found non-positive number of user login hash entries (%d)!\n", loginEntry->count);
+							CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Cleanup found negative number of user login hash entries (%d)!\n", loginEntry->count);
 						}
 						// this is the last active user connection; delete the entry
 						ms_pInstance->m_currentAccountsHashtable->remove(&(pAccInfo->accountNumber));
