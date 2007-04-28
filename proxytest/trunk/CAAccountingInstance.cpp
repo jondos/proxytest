@@ -210,7 +210,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		
 		if (pAccInfo->authFlags & AUTH_ACCOUNT_OK)
 		{
-			// this user is authenticated; test if he has logged in more times
+			// this user is authenticated; test if he has logged in more than one time
 			
 			if (!ms_pInstance->m_currentAccountsHashtable)
 			{
@@ -1025,7 +1025,7 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 	loginEntry = (AccountLoginHashEntry*)m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
 	if (loginEntry && loginEntry->count > 0)
 	{
-		// there is now more than one user logged in with this account; kick out this user!		
+		// there is now more than one user logged in with this account; kick out the other users!		
 		CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Multiple logins (%d) detected! Kicking out other users...\n", loginEntry->count);
 		loginEntry->userID = pHashEntry->id; // this is the current user
 	}
@@ -1229,7 +1229,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 						{
 							CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: Cleanup found negative number of user login hash entries (%d)!\n", loginEntry->count);
 						}
-						
+						// this is the last active user connection; delete the entry
 						ms_pInstance->m_currentAccountsHashtable->remove(&(pAccInfo->accountNumber));
 						delete loginEntry;
 						
