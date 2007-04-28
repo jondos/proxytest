@@ -59,27 +59,14 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define AUTH_TIMEOUT 5
 
 
-struct t_aiqueueitem
-	{
-		DOM_Document*			pDomDoc;
-		fmHashTableEntry*		pHashEntry;
-	};
-typedef struct t_aiqueueitem aiQueueItem;
-
 struct AccountHashEntry
 {
 	UINT64 accountNumber;
 	UINT32 authFlags;
 	UINT32 confirmedBytes;
 	AccountHashEntry* nextEntry;
-};
+};	
 
-struct AccountLoginHashEntry
-{
-	UINT64 accountNumber;
-	UINT64 userID;
-	UINT32 count;
-};
 
 extern CACmdLnOptions options;
 
@@ -118,10 +105,7 @@ public:
 	 */
 	static SINT32 cleanupTableEntry(fmHashTableEntry * pHashEntry);	
 	static SINT32 initTableEntry(fmHashTableEntry * pHashEntry);
-	static SINT32 queueItem(aiQueueItem* pItem)
-		{
-			return ms_pInstance->m_pQueue->add(pItem,sizeof(aiQueueItem));
-		}
+	
 	/**
 	 * This should be called by the FirstMix for every incoming Jap packet
 	 */
@@ -147,11 +131,24 @@ public:
 	* function
 	*/
 	SINT32 static processJapMessage(fmHashTableEntry * pHashEntry,const DOM_Document& a_DomDoc);
+	
 
 private:
 
 	CAAccountingInstance(CAMix* callingMix); //Singleton!
 	~CAAccountingInstance();
+
+	struct t_aiqueueitem
+	{
+		DOM_Document*			pDomDoc;
+		fmHashTableEntry*		pHashEntry;
+	};
+	typedef struct t_aiqueueitem aiQueueItem;
+
+	static SINT32 queueItem(aiQueueItem* pItem)
+	{
+		return ms_pInstance->m_pQueue->add(pItem,sizeof(aiQueueItem));
+	}
 
 	/**
 	* Handles a cost confirmation sent by a jap
@@ -244,6 +241,13 @@ private:
 	CAAccountingSettleThread * m_pSettleThread;
 	
 	bool m_bThreadRunning;
+
+	struct AccountLoginHashEntry
+	{
+		UINT64 accountNumber;
+		UINT64 userID;
+		UINT32 count;
+	};
 };
 
 
