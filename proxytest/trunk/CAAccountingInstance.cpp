@@ -210,7 +210,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		}
 		//CAMsg::printMsg( LOG_DEBUG, "Checking after %d session packets...\n", pAccInfo->sessionPackets);
 		
-		if (pAccInfo->authFlags & AUTH_ACCOUNT_OK && !(pAccInfo->authFlags & AUTH_MULTIPLE_LOGIN))
+		if (pAccInfo->authFlags & AUTH_ACCOUNT_OK)
 		{
 			// this user is authenticated; test if he has logged in more than one time
 			
