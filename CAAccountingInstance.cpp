@@ -55,6 +55,8 @@ CAAccountingInstance * CAAccountingInstance::ms_pInstance = NULL;
 
 const UINT64 CAAccountingInstance::PACKETS_BEFORE_NEXT_CHECK = 100;
 
+const UINT32 CAAccountingInstance::MAX_TOLERATED_MULTIPLE_LOGINS = 10;
+
 /**
  * private Constructor
  */
@@ -208,7 +210,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		}
 		//CAMsg::printMsg( LOG_DEBUG, "Checking after %d session packets...\n", pAccInfo->sessionPackets);
 		
-		if (pAccInfo->authFlags & AUTH_ACCOUNT_OK)
+		if (pAccInfo->authFlags & AUTH_ACCOUNT_OK && !(pAccInfo->authFlags & AUTH_MULTIPLE_LOGIN))
 		{
 			// this user is authenticated; test if he has logged in more than one time
 			
@@ -226,7 +228,6 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				{
 					// this is not the latest connection of this user; kick him out...
 					pAccInfo->authFlags |= AUTH_MULTIPLE_LOGIN;
-					pAccInfo->authFlags &= ~AUTH_ACCOUNT_OK;
 					ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();
 					return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_MULTIPLE_LOGIN, (UINT8*)"Only one login per account is allowed!"));
 				}
@@ -316,11 +317,10 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 #endif				
 				return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_BAD_SIGNATURE, (UINT8*)"Your account certificate is invalid"));
 			}
-			/*
 			else if (pAccInfo->authFlags & AUTH_MULTIPLE_LOGIN)
 			{
 				return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_MULTIPLE_LOGIN, (UINT8*)"Only one login per account is allowed!"));
-			}*/
+			}
 			if( !(pAccInfo->authFlags & AUTH_ACCOUNT_OK) )
 			{
 				// we did not yet receive the response to the challenge...
@@ -773,16 +773,14 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 			}	
 			else
 			{
+				/*
+				 * There might already be a user logged in with this account, or at least
+		 		 * he is trying to. 
+		 		 */
 				UINT8 accountNrAsString[32];
 				print64(accountNrAsString, pAccInfo->accountNumber);
 				CAMsg::printMsg(LOG_ERR, 
-					"CAAccountingInstance: User with account nr %s might be logged in more than once!\n", accountNrAsString);
-					
-				/*
-				 * There might already be a user logged in with this account, or at least
-				 * he is trying to. Kick out all users save this one after authentication.
-				 */
-				 loginEntry->count++;				 
+					"CAAccountingInstance: User with account nr %s might be logged in more than once!\n", accountNrAsString);												 
 			}			
 		}
 		else
@@ -791,7 +789,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 			loginEntry = new AccountLoginHashEntry;
 			loginEntry->accountNumber = pAccInfo->accountNumber;
 			loginEntry->count = 0;
-			loginEntry->userID = pHashEntry->id;
+			loginEntry->userID = pAccInfo->userID;
 			m_currentAccountsHashtable->put(&(loginEntry->accountNumber), loginEntry);
 		}		
 		m_currentAccountsHashtable->getMutex().unlock();
@@ -891,7 +889,6 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		// signature invalid. mark this user as bad guy
 		CAMsg::printMsg( LOG_INFO, "CAAccountingInstance::handleAccountCertificate(): Bad Jpi signature\n" );
 		pAccInfo->authFlags |= AUTH_FAKE | AUTH_GOT_ACCOUNTCERT | AUTH_TIMEOUT_STARTED;
-		pAccInfo->authFlags &= ~AUTH_ACCOUNT_OK;
 		//m_Mutex.unlock();
 		pAccInfo->mutex->unlock();
 		return ;
@@ -964,6 +961,7 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 	DOM_Element elemPanic;
 	DSA_SIG * pDsaSig;
 	AccountLoginHashEntry* loginEntry;
+	bool bSendCCRequest = true;
 	
 	// check current authstate
 	
@@ -1004,7 +1002,7 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 	*/
 	
 	// check signature
-	/// TODO: This DOES work now, but wait for the next JAP release so that every JAP is patched...
+	/// TODO: This DOES work now, but wait for the next JAP release so that most JAPs are patched...
 	/*
 	pDsaSig = DSA_SIG_new();
 	CASignature * sigTester = pHashEntry->pAccountingInfo->pPublicKey;
@@ -1020,31 +1018,46 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 		return ;
 	}*/
 		
+		
+	pAccInfo->authFlags |= AUTH_ACCOUNT_OK;
 	
 	m_currentAccountsHashtable->getMutex().lock();
 	loginEntry = (AccountLoginHashEntry*)m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
 	if (loginEntry && loginEntry->count > 0)
 	{
-		// there is now more than one user logged in with this account; kick out the other users!		
-		CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Multiple logins (%d) detected! Kicking out other users...\n", loginEntry->count);
-		loginEntry->userID = pHashEntry->id; // this is the current user
+		 loginEntry->count++;
+		 if (loginEntry->count < MAX_TOLERATED_MULTIPLE_LOGINS)
+		 {
+			// There is now more than one user logged in with this account; kick out the other users!		
+			CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Multiple logins (%d) detected! Kicking out other users...\n", loginEntry->count);
+			loginEntry->userID = pAccInfo->userID; // this is the current user
+		 }
+		 else
+		 {
+		 	/* The maximum of tolerated concurrent logins for this user is exceeded.
+		 	 * He won't get any new access again before the old connections have been closed!
+		 	 */
+		 	CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Maximum of multiple logins (%d) detected! Kicking out this user!\n", loginEntry->count);
+		 	bSendCCRequest = false;
+		 	pAccInfo->authFlags |= AUTH_MULTIPLE_LOGIN;
+		 }
 	}
 	m_currentAccountsHashtable->getMutex().unlock();
 	
-		
-	pAccInfo->authFlags |= AUTH_ACCOUNT_OK;
-	
-	// fetch cost confirmation from last session if available, and send it
-	CAXMLCostConfirmation * pCC = NULL;
-	m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, m_currentCascade, &pCC);
-	if(pCC!=NULL)
+	if (bSendCCRequest)
 	{
-		pAccInfo->pControlChannel->sendXMLMessage(pCC->getXMLDocument());
-		delete pCC;
-	}
-	else
-	{
-		sendCCRequest(pAccInfo);
+		// fetch cost confirmation from last session if available, and send it
+		CAXMLCostConfirmation * pCC = NULL;
+		m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, m_currentCascade, &pCC);
+		if(pCC!=NULL)
+		{
+			pAccInfo->pControlChannel->sendXMLMessage(pCC->getXMLDocument());
+			delete pCC;
+		}
+		else
+		{
+			sendCCRequest(pAccInfo);
+		}
 	}
 	
 	if ( pHashEntry->pAccountingInfo->pChallenge != NULL ) // free mem
@@ -1187,6 +1200,7 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 	pHashEntry->pAccountingInfo->sessionPackets = 0;
 	pHashEntry->pAccountingInfo->transferredBytes = 0;
 	pHashEntry->pAccountingInfo->confirmedBytes = 0;
+	pHashEntry->pAccountingInfo->userID = pHashEntry->id;
 	pHashEntry->pAccountingInfo->mutex = new CAMutex;
 	//ms_pInstance->m_Mutex.unlock();
 	return E_SUCCESS;
@@ -1248,7 +1262,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 							ms_pInstance->m_settleHashtable->getMutex().unlock();					
 						}	
 					}
-					else
+					else if (pAccInfo->authFlags & AUTH_ACCOUNT_OK)
 					{
 						// there are other connections from this user
 						loginEntry->count--;

@@ -140,9 +140,9 @@ private:
 
 	struct t_aiqueueitem
 	{
-		DOM_Element*			pDomDoc;
-		fmHashTableEntry*		pHashEntry;
-		SINT32 (*handleFunc)(fmHashTableEntry*,DOM_Element&);
+		DOM_Element*			pDomElem;
+		tAiAccountingInfo*		pAccInfo;
+		SINT32 (*handleFunc)(tAiAccountingInfo*,DOM_Element&);
 	};
 	typedef struct t_aiqueueitem aiQueueItem;
 
@@ -185,6 +185,8 @@ private:
 	static THREAD_RETURN aiThreadMainLoop(void *param);
 	
 	static const UINT64 PACKETS_BEFORE_NEXT_CHECK;
+	
+	static const UINT32 MAX_TOLERATED_MULTIPLE_LOGINS;
 	
 	static DOM_Document m_preparedCCRequest;
 	

@@ -222,6 +222,9 @@ struct t_accountinginfo
 	
 	/** the user's account number */
 	UINT64 accountNumber;
+	
+	/** The same value as in fmHashTableEntry. */
+	UINT64 userID;
 
 	/** a pointer to the user-specific control channel object */
 	CAAccountingControlChannel* pControlChannel;
