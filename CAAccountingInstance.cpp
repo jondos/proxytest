@@ -782,7 +782,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 				 * There might already be a user logged in with this account, or at least
 				 * he is trying to. Kick out all users save this one after authentication.
 				 */
-				 loginEntry->count++;					 
+				 loginEntry->count++;				 
 			}			
 		}
 		else
@@ -1151,19 +1151,17 @@ void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,D
 		return;
 	}
 	pAccInfo->confirmedBytes = pCC->getTransferredBytes();
-	if(pAccInfo->confirmedBytes >= pAccInfo->reqConfirmBytes)
-	{
-		pAccInfo->authFlags &= ~AUTH_SENT_CC_REQUEST;
-	}
-	//m_Mutex.unlock();
-	pAccInfo->mutex->unlock();
-	
+	pAccInfo->authFlags &= ~AUTH_SENT_CC_REQUEST;
+
 	if (m_dbInterface->storeCostConfirmation(*pCC, m_currentCascade) != E_SUCCESS)
 	{
 		UINT8 tmp[32];
 		print64(tmp,pCC->getTransferredBytes());
 		CAMsg::printMsg( LOG_INFO, "CostConfirmation for account %s could not be stored in database!\n", tmp );
 	}
+
+	//m_Mutex.unlock();
+	pAccInfo->mutex->unlock();
 
 	delete pCC;
 	return;

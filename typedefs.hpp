@@ -214,21 +214,11 @@ struct t_accountinginfo
 	/** The number of packets transfered. */
 	UINT64 sessionPackets;
 	
-	/** the minimum timestamp for the requested XMLBalance */
-	SINT32 reqbalMinSeconds;
-	
 	/** the number of bytes that was transferred (as counted by the AI)  Elmar: since last CC, or in total? */
 	UINT64 transferredBytes;
 	
 	/** the number of bytes that was confirmed by the account user */
 	UINT64 confirmedBytes;
-	
-	/** the number of transferredBytes that we last asked the account user to confirm */
-	UINT64 reqConfirmBytes;
-	
-	/** number of bytes that have been prepaid by the JAP, but not yet spent */
-	//UINT64 prepaidBytes;
-	//not necessary, simply use confirmedBytes - transferredBytes
 	
 	/** the user's account number */
 	UINT64 accountNumber;
@@ -245,17 +235,8 @@ struct t_accountinginfo
 	/** timestamp when last PayRequest was sent */
 	SINT32 challengeSentSeconds;
 	
-    /** timestamp when last balance request was sent */
-	UINT32 lastBalanceRequestSeconds;
-	
-	/** ID of payment instance belogig to this account */
+	/** ID of payment instance belongig to this account */
 	UINT8* pstrBIID;
-	
-	/** indicates if user is surfing for free (0 = User has not surfed for free, 1 = User is currently surfing for free, 2 = User has exceeded free surfing period*/
-	UINT32 surfingFree;
-	
-	/** stores connection time for enabling free surfing period */
-	SINT32 connectionTime;
 	
 	//time at which the timeout for waiting for the account certificate has been started
 	SINT32 authTimeoutStartSeconds;
