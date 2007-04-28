@@ -1256,7 +1256,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 						loginEntry->count--;
 					}
 				}
-				else
+				else if (pAccInfo->authFlags & AUTH_ACCOUNT_OK)
 				{
 					CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: Cleanup did not find user login hash entry!\n");
 				}
