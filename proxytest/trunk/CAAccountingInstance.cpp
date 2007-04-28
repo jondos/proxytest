@@ -758,22 +758,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 			//m_Mutex.unlock();
 			pAccInfo->mutex->unlock();
 			return ;
-		}
-		
-		
-		m_currentAccountsHashtable->getMutex().lock();
-		loginEntry = (AccountLoginHashEntry*)m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
-		if (!loginEntry)
-		{
-			// remember that this user is logged in at least once
-			loginEntry = new AccountLoginHashEntry;
-			loginEntry->accountNumber = pAccInfo->accountNumber;
-			loginEntry->count = 0;
-			loginEntry->userID = pAccInfo->userID;
-			m_currentAccountsHashtable->put(&(loginEntry->accountNumber), loginEntry);
 		}		
-		m_currentAccountsHashtable->getMutex().unlock();
-		
 		
 		if (m_dbInterface->getAccountStatus(pAccInfo->accountNumber, status) != E_SUCCESS)
 		{
@@ -1001,55 +986,49 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 		
 	pAccInfo->authFlags |= AUTH_ACCOUNT_OK;
 	
-	m_currentAccountsHashtable->getMutex().lock();
-	loginEntry = (AccountLoginHashEntry*)m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
-	if (loginEntry)
+	m_currentAccountsHashtable->getMutex().lock();	
+	loginEntry = (AccountLoginHashEntry*)m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));	
+	if (!loginEntry)
 	{
-		loginEntry->count++;
-		if (loginEntry->count > 1)
-		{
-			if (loginEntry->userID == pAccInfo->userID)
-			{
-				UINT8 userIDAsString[32];
-				print64(userIDAsString, pAccInfo->userID);
-				CAMsg::printMsg(LOG_ERR, 
-					"CAAccountingInstance: User with random ID %s entered handleChallengeResponse more than once!\n", userIDAsString);
-				loginEntry->count--;
-			}	
-			else
-			{
-				/*
-				 * There already is a user logged in with this account.
-		 		 */
-				UINT8 accountNrAsString[32];
-				print64(accountNrAsString, pAccInfo->accountNumber);
-				if (loginEntry->count < MAX_TOLERATED_MULTIPLE_LOGINS)
-				{
-					// There is now more than one user logged in with this account; kick out the other users!		
-					CAMsg::printMsg(LOG_INFO, 
-									"CAAccountingInstance: Multiple logins (%d) of user with account %s detected! \
-									Kicking out other users with this account...\n", 
-									loginEntry->count, accountNrAsString);
-					loginEntry->userID = pAccInfo->userID; // this is the current user; kick out the others
-				}
-				else
-				{
-				 	/* The maximum of tolerated concurrent logins for this user is exceeded.
-				 	 * He won't get any new access again before the old connections have been closed!
-				 	 */
-				 	CAMsg::printMsg(LOG_INFO, 
-				 					"CAAccountingInstance: Maximum of multiple logins exceeded (%d) for user with account %s! \
-				 					Kicking out this user!\n", 
-				 					loginEntry->count, accountNrAsString);
-				 	bSendCCRequest = false; // not needed...
-				 	//pAccInfo->authFlags |= AUTH_MULTIPLE_LOGIN;
-				}
-			}
-		}
-	}
+		// remember that this user is logged in at least once
+		loginEntry = new AccountLoginHashEntry;
+		loginEntry->accountNumber = pAccInfo->accountNumber;
+		loginEntry->count = 1;
+		loginEntry->userID = pAccInfo->userID;
+		m_currentAccountsHashtable->put(&(loginEntry->accountNumber), loginEntry);
+	}	
 	else
 	{
-		CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: Did not find user login entry when checking challenge!\n");
+		loginEntry->count++;
+	}
+	if (loginEntry->count > 1)
+	{
+		/*
+		 * There already is a user logged in with this account.
+ 		 */
+		UINT8 accountNrAsString[32];
+		print64(accountNrAsString, pAccInfo->accountNumber);
+		if (loginEntry->count < MAX_TOLERATED_MULTIPLE_LOGINS)
+		{
+			// There is now more than one user logged in with this account; kick out the other users!		
+			CAMsg::printMsg(LOG_INFO, 
+							"CAAccountingInstance: Multiple logins (%d) of user with account %s detected! \
+							Kicking out other users with this account...\n", 
+							loginEntry->count, accountNrAsString);
+			loginEntry->userID = pAccInfo->userID; // this is the current user; kick out the others
+		}
+		else
+		{
+		 	/* The maximum of tolerated concurrent logins for this user is exceeded.
+		 	 * He won't get any new access again before the old connections have been closed!
+		 	 */
+		 	CAMsg::printMsg(LOG_INFO, 
+		 					"CAAccountingInstance: Maximum of multiple logins exceeded (%d) for user with account %s! \
+		 					Kicking out this user!\n", 
+		 					loginEntry->count, accountNrAsString);
+		 	bSendCCRequest = false; // not needed...
+		 	//pAccInfo->authFlags |= AUTH_MULTIPLE_LOGIN;
+		}
 	}
 	m_currentAccountsHashtable->getMutex().unlock();
 	
@@ -1246,9 +1225,9 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 				{
 					if (loginEntry->count <= 1)
 					{
-						if (loginEntry->count < 0)
+						if (loginEntry->count < 1)
 						{
-							CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Cleanup found negative number of user login hash entries (%d)!\n", loginEntry->count);
+							CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Cleanup found non-positive number of user login hash entries (%d)!\n", loginEntry->count);
 						}
 						// this is the last active user connection; delete the entry
 						ms_pInstance->m_currentAccountsHashtable->remove(&(pAccInfo->accountNumber));
