@@ -54,7 +54,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 extern CACmdLnOptions options;
 #include "CAReplayControlChannel.hpp"
 
-const UINT32 CAFirstMix::MAX_CONCURRENT_NEW_CONNECTIONS = NUM_LOGIN_WORKER_TRHEADS * 2;
+const UINT32 CAFirstMix::MAX_CONCURRENT_NEW_CONNECTIONS = NUM_LOGIN_WORKER_TRHEADS * 4;
 
 
 SINT32 CAFirstMix::initOnce()
@@ -818,7 +818,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 								CAMsg::printMsg(LOG_DEBUG,"CAFirstMix Flooding protection: Too many concurrent new connections (Maximum:%d)! Rejecting user...\n", CAFirstMix::MAX_CONCURRENT_NEW_CONNECTIONS);
 								delete pNewMuxSocket;
 								pFirstMix->m_newConnections--;
-								msSleep(400);
+								msSleep(1000);
 							}
 							else
 							{																		
