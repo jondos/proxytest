@@ -161,6 +161,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
 		AccountHashEntry* entry = NULL;
+		AccountLoginHashEntry* loginEntry = NULL;
 		CAXMLErrorMessage* err = NULL;
 		
 		pAccInfo->mutex->lock();
@@ -207,6 +208,35 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		}
 		//CAMsg::printMsg( LOG_DEBUG, "Checking after %d session packets...\n", pAccInfo->sessionPackets);
 		
+		if (pAccInfo->authFlags & AUTH_ACCOUNT_OK)
+		{
+			// this user is authenticated; test if he has logged in more times
+			
+			if (!ms_pInstance->m_currentAccountsHashtable)
+			{
+				// accounting instance is dying...
+				return returnKickout(pAccInfo);
+			}
+			
+			ms_pInstance->m_currentAccountsHashtable->getMutex().lock();
+			loginEntry = (AccountLoginHashEntry*)ms_pInstance->m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
+			if (loginEntry)
+			{
+				if (loginEntry->userID != pHashEntry->id)
+				{
+					// this is not the latest connection of this user; kick him out...
+					pAccInfo->authFlags |= AUTH_MULTIPLE_LOGIN;
+					pAccInfo->authFlags &= ~AUTH_ACCOUNT_OK;
+					ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();
+					return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_MULTIPLE_LOGIN, (UINT8*)"Only one login per account is allowed!"));
+				}
+			}
+			else
+			{
+				CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: handleJapPacket did not find user login hash entry!\n");
+			}
+			ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();
+		}
 		
 		
 		
@@ -286,10 +316,11 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 #endif				
 				return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_BAD_SIGNATURE, (UINT8*)"Your account certificate is invalid"));
 			}
+			/*
 			else if (pAccInfo->authFlags & AUTH_MULTIPLE_LOGIN)
 			{
 				return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_MULTIPLE_LOGIN, (UINT8*)"Only one login per account is allowed!"));
-			}
+			}*/
 			if( !(pAccInfo->authFlags & AUTH_ACCOUNT_OK) )
 			{
 				// we did not yet receive the response to the challenge...
@@ -749,12 +780,9 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 					
 				/*
 				 * There might already be a user logged in with this account, or at least
-				 * he is trying to. Kick out all users save one after authentication.
-				 * @todo this is a problem right now, as, if the users network connection is cut of, the mix does not
-				 * know he is not logged in any more; there must be a mechism (like keep alive) that kicks out the user
-				 * after a short time if he did not answer.
+				 * he is trying to. Kick out all users save this one after authentication.
 				 */
-				 //loginEntry->count++;	
+				 loginEntry->count++;					 
 			}			
 		}
 		else
@@ -998,13 +1026,8 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 	if (loginEntry && loginEntry->count > 0)
 	{
 		// there is now more than one user logged in with this account; kick out this user!		
-		CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Multiple logins (%d) detected! Kicking out user...\n", loginEntry->count);
-		pAccInfo->authFlags |= AUTH_MULTIPLE_LOGIN;
-		pAccInfo->authFlags &= ~AUTH_ACCOUNT_OK;
-		m_currentAccountsHashtable->getMutex().unlock();
-		//m_Mutex.unlock();
-		pAccInfo->mutex->unlock();
-		return;
+		CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Multiple logins (%d) detected! Kicking out other users...\n", loginEntry->count);
+		loginEntry->userID = pHashEntry->id; // this is the current user
 	}
 	m_currentAccountsHashtable->getMutex().unlock();
 	
@@ -1186,7 +1209,6 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 		AccountHashEntry* entry;
 		SINT32 prepaidBytes = 0;
 		CAMutex* mutex;
-		bool bLastLogin = true;
 		
 		if (pAccInfo != NULL)
 		{
@@ -1198,54 +1220,53 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			{
 				// remove login
 				ms_pInstance->m_currentAccountsHashtable->getMutex().lock();
-				loginEntry = (AccountLoginHashEntry*)ms_pInstance->m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
-				if (!loginEntry || loginEntry->count <= 0)
-				{	
-					// a normal user with only one login																			
-					if (loginEntry)
+				loginEntry = (AccountLoginHashEntry*)ms_pInstance->m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));																	
+				if (loginEntry)
+				{
+					if (loginEntry->count <= 0)
 					{
+						if (loginEntry->count < 0)
+						{
+							CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: Cleanup found negative number of user login hash entries (%d)!\n", loginEntry->count);
+						}
+						
 						ms_pInstance->m_currentAccountsHashtable->remove(&(pAccInfo->accountNumber));
 						delete loginEntry;
+						
+						if (ms_pInstance->m_settleHashtable)
+						{
+							ms_pInstance->m_settleHashtable->getMutex().lock();				
+							entry = (AccountHashEntry*)ms_pInstance->m_settleHashtable->remove(&(pAccInfo->accountNumber));										
+							if (entry)
+							{
+								delete entry;				
+							}
+					#ifdef DEBUG
+							else if ((AccountHashEntry*)ms_pInstance->m_settleHashtable->getValue(&(pAccInfo->accountNumber)))
+							{							
+								CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: Cleanup hash entry exists but was not found!\n");
+							}
+					#endif
+							ms_pInstance->m_settleHashtable->getMutex().unlock();					
+						}	
 					}
 					else
 					{
-						CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: Cleanup did not find user login hash entry!\n");
+						// there are other connections from this user
+						loginEntry->count--;
 					}
 				}
 				else
 				{
-					// this user is kicked out due to multiple logins
-					bLastLogin = false;
-					loginEntry->count--;
+					CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: Cleanup did not find user login hash entry!\n");
 				}
-				ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();		
-					
+				ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();																		
+				
 				//store prepaid bytes in database, so the user wont lose the prepaid amount by disconnecting
-				prepaidBytes = pAccInfo->confirmedBytes - pAccInfo->transferredBytes;	
-											
+				prepaidBytes = pAccInfo->confirmedBytes - pAccInfo->transferredBytes;												
 				if (ms_pInstance->m_dbInterface)
 				{
 					ms_pInstance->m_dbInterface->storePrepaidAmount(pAccInfo->accountNumber,prepaidBytes, ms_pInstance->m_currentCascade);
-				}
-		
-				if (bLastLogin)
-				{
-					if (ms_pInstance->m_settleHashtable)
-					{
-						ms_pInstance->m_settleHashtable->getMutex().lock();				
-						entry = (AccountHashEntry*)ms_pInstance->m_settleHashtable->remove(&(pAccInfo->accountNumber));										
-						if (entry)
-						{
-							delete entry;				
-						}
-				#ifdef DEBUG
-						else if ((AccountHashEntry*)ms_pInstance->m_settleHashtable->getValue(&(pAccInfo->accountNumber)))
-						{							
-							CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: Cleanup hash entry exists but was not found!\n");
-						}
-				#endif
-						ms_pInstance->m_settleHashtable->getMutex().unlock();					
-					}					
 				}
 			}
 			else
