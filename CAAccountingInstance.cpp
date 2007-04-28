@@ -53,7 +53,7 @@ DOM_Document CAAccountingInstance::m_preparedCCRequest;
  */
 CAAccountingInstance * CAAccountingInstance::ms_pInstance = NULL;
 
-const UINT64 CAAccountingInstance::PACKETS_BEFORE_NEXT_CHECK = 200;
+const UINT64 CAAccountingInstance::PACKETS_BEFORE_NEXT_CHECK = 100;
 
 /**
  * private Constructor
