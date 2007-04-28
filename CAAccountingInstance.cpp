@@ -317,10 +317,11 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 #endif				
 				return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_BAD_SIGNATURE, (UINT8*)"Your account certificate is invalid"));
 			}
+			/*
 			else if (pAccInfo->authFlags & AUTH_MULTIPLE_LOGIN)
 			{
 				return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_MULTIPLE_LOGIN, (UINT8*)"Only one login per account is allowed!"));
-			}
+			}*/
 			if( !(pAccInfo->authFlags & AUTH_ACCOUNT_OK) )
 			{
 				// we did not yet receive the response to the challenge...
@@ -1029,7 +1030,7 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 									"CAAccountingInstance: Multiple logins (%d) of user with account %s detected! \
 									Kicking out other users with this account...\n", 
 									loginEntry->count, accountNrAsString);
-					loginEntry->userID = pAccInfo->userID; // this is the current user
+					loginEntry->userID = pAccInfo->userID; // this is the current user; kick out the others
 				}
 				else
 				{
@@ -1040,8 +1041,8 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 				 					"CAAccountingInstance: Maximum of multiple logins (%d) for user with account %s detected! \
 				 					Kicking out this user!\n", 
 				 					loginEntry->count, accountNrAsString);
-				 	bSendCCRequest = false;
-				 	pAccInfo->authFlags |= AUTH_MULTIPLE_LOGIN;
+				 	bSendCCRequest = false; // not needed...
+				 	//pAccInfo->authFlags |= AUTH_MULTIPLE_LOGIN;
 				}
 			}
 		}
