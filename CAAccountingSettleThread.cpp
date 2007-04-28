@@ -268,7 +268,6 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 			 */
 			if (entry)
 			{
-				CAMsg::printMsg(LOG_DEBUG, "CAAccountingSettleThread: Writing settle entries to hashtable.\n");
 				m_pAccountingSettleThread->m_accountingHashtable->getMutex().lock();
 				while (entry)
 				{			
@@ -301,7 +300,6 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					}										
 				}
 				m_pAccountingSettleThread->m_accountingHashtable->getMutex().unlock();		
-				CAMsg::printMsg(LOG_DEBUG, "CAAccountingSettleThread: Settle entries written to hashtable.\n");			
 			}
 		}//main while run loop
 		CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Exiting run loop!\n");
