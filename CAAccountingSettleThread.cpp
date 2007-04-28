@@ -123,143 +123,148 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				UINT32 qSize = q.getSize();
 				UINT32 nrOfCCs = qSize / sizeof(pCC); 
 				CAMsg::printMsg(LOG_DEBUG, "SettleThread: finished gettings CCs, found %u cost confirmations to settle\n",nrOfCCs);	
-			}
-			
-			entry = NULL;
-			while(!q.isEmpty())
-			{
-				// get the next CC from the queue
-				size = sizeof(pCC);
-				if(q.get((UINT8*)(&pCC), &size)!=E_SUCCESS)
-				{
-					CAMsg::printMsg(LOG_ERR, "SettleThread: could not get next item from queue\n");
-					q.clean();
-					break;
-				}
-#ifdef DEBUG				
-				CAMsg::printMsg(LOG_DEBUG, " Settle Thread: trying to connect to payment instance");
-#endif				
+
+				#ifdef DEBUG				
+				CAMsg::printMsg(LOG_DEBUG, "Settle Thread: trying to connect to payment instance");
+				#endif				
 				if(biConn.initBIConnection()!=E_SUCCESS)
 				{
 					CAMsg::printMsg(LOG_DEBUG, "SettleThread: could not connect to BI. Retrying later...\n");
 					q.clean();
-					break;
+
 				}
-#ifdef DEBUG				
-				CAMsg::printMsg(LOG_DEBUG, " SettleThread: successfully connected to payment instance");
-#endif				
-				if (!pCC)
+				else
 				{
-					CAMsg::printMsg(LOG_CRIT, "CAAccountingSettleThread: Cost confirmation is NULL!\n");
-					continue;
+					#ifdef DEBUG				
+					CAMsg::printMsg(LOG_DEBUG, "SettleThread: successfully connected to payment instance");
+					#endif		
+						
+					entry = NULL;
+					while(!q.isEmpty())
+					{
+						// get the next CC from the queue
+						size = sizeof(pCC);
+						if(q.get((UINT8*)(&pCC), &size)!=E_SUCCESS)
+						{
+							CAMsg::printMsg(LOG_ERR, "SettleThread: could not get next item from queue\n");
+							q.clean();
+							break;
+						}
+			
+						if (!pCC)
+						{
+							CAMsg::printMsg(LOG_CRIT, "CAAccountingSettleThread: Cost confirmation is NULL!\n");
+							continue;
+						}
+						
+						//CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: try to settle...\n");
+						pErrMsg = biConn.settle( *pCC );
+						CAMsg::printMsg(LOG_DEBUG, "CAAccountingSettleThread: settle done!\n");
+					
+						if (!pCC)
+						{
+							CAMsg::printMsg(LOG_CRIT, "CAAccountingSettleThread: Cost confirmation is NULL!\n");
+							continue;
+						}
+					
+						// check returncode
+						if(pErrMsg==NULL)  //no returncode -> connection error
+						{
+							CAMsg::printMsg(LOG_ERR, "SettleThread: Communication with BI failed!\n");
+						}
+						else if(pErrMsg->getErrorCode()!=pErrMsg->ERR_OK)  //BI reported error
+						{																												
+							bool bDeleteCC = false;
+							UINT32 authFlags = 0;
+							UINT32 confirmedBytes = 0;														
+							
+							CAMsg::printMsg(LOG_ERR, "CAAccountingSettleThread: BI reported error no. %d (%s)\n",
+								pErrMsg->getErrorCode(), pErrMsg->getDescription() );
+							if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_KEY_NOT_FOUND)
+							{
+								authFlags |= AUTH_INVALID_ACCOUNT;	
+								dbConn.storeAccountStatus(pCC->getAccountNumber(), CAXMLErrorMessage::ERR_KEY_NOT_FOUND);				
+								bDeleteCC = true;													
+							}
+							else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_ACCOUNT_EMPTY)
+							{
+								authFlags |= AUTH_ACCOUNT_EMPTY;
+								dbConn.markAsSettled(pCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade);
+							}
+							else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_INVALID_PRICE_CERT)
+							{
+								// this should never happen; the price certs in this CC do not fit to the ones of the cascade
+								// bDeleteCC = true;
+							}
+							else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_OUTDATED_CC)
+							{														
+								//get attached CC from error message
+								CAXMLCostConfirmation* attachedCC = (CAXMLCostConfirmation*) pErrMsg->getMessageObject();
+								if (attachedCC)
+								{
+									authFlags |= AUTH_OUTDATED_CC;
+									CAMsg::printMsg(LOG_DEBUG, "SettleThread: tried outdated CC, received last valid CC back\n");
+									//store it in DB
+									if (dbConn.storeCostConfirmation(*attachedCC, m_pAccountingSettleThread->m_settleCascade) == E_SUCCESS)
+									{
+										dbConn.markAsSettled(attachedCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade);
+									}
+									else
+									{
+										CAMsg::printMsg(LOG_ERR, "SettleThread: storing last valid CC in db failed!\n");	
+									}								
+									// set the confirmed bytes to the value of the CC got from the PI
+									confirmedBytes = attachedCC->getTransferredBytes();	
+								}
+								else
+								{
+									CAMsg::printMsg(LOG_DEBUG, "SettleThread: Did not receive last valid CC - maybe old Payment instance?\n");
+								}																		
+							}		
+							
+							if (authFlags)
+							{
+								nextEntry = new AccountHashEntry; 
+								nextEntry->accountNumber = pCC->getAccountNumber();
+								nextEntry->authFlags = authFlags;
+								nextEntry->confirmedBytes = confirmedBytes;	
+								nextEntry->nextEntry = entry;
+								entry = nextEntry;
+							}																	
+							
+							if (bDeleteCC)
+							{
+								//delete costconfirmation to avoid trying to settle an unusable CC again and again					
+								if(dbConn.deleteCC(pCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade) == E_SUCCESS)
+								{
+									CAMsg::printMsg(LOG_ERR, "SettleThread: unusable cost confirmation was deleted\n");	
+								}	
+								else
+								{						
+									CAMsg::printMsg(LOG_ERR, "SettleThread: cost confirmation is unusable, but could not delete it from database\n");
+								}
+							}
+						}
+						else //settling was OK, so mark account as settled
+						{
+							dbConn.markAsSettled(pCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade);
+						} 
+		
+						if (pCC != NULL)
+						{
+							delete pCC;
+							pCC = NULL;
+						}
+						if (pErrMsg != NULL)
+						{
+							delete pErrMsg;
+							pErrMsg = NULL;
+						}
+					}		
+					biConn.terminateBIConnection();			
 				}
 				
-				//CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: try to settle...\n");
-				pErrMsg = biConn.settle( *pCC );
-				biConn.terminateBIConnection();
-				CAMsg::printMsg(LOG_DEBUG, "CAAccountingSettleThread: settle done!\n");
-			
-				if (!pCC)
-				{
-					CAMsg::printMsg(LOG_CRIT, "CAAccountingSettleThread: Cost confirmation is NULL!\n");
-					continue;
-				}
-			
-				// check returncode
-				if(pErrMsg==NULL)  //no returncode -> connection error
-				{
-					CAMsg::printMsg(LOG_ERR, "SettleThread: Communication with BI failed!\n");
-				}
-				else if(pErrMsg->getErrorCode()!=pErrMsg->ERR_OK)  //BI reported error
-				{																												
-					bool bDeleteCC = false;
-					UINT32 authFlags = 0;
-					UINT32 confirmedBytes = 0;														
-					
-					CAMsg::printMsg(LOG_ERR, "CAAccountingSettleThread: BI reported error no. %d (%s)\n",
-						pErrMsg->getErrorCode(), pErrMsg->getDescription() );
-					if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_KEY_NOT_FOUND)
-					{
-						authFlags |= AUTH_INVALID_ACCOUNT;	
-						dbConn.storeAccountStatus(pCC->getAccountNumber(), CAXMLErrorMessage::ERR_KEY_NOT_FOUND);				
-						bDeleteCC = true;													
-					}
-					else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_ACCOUNT_EMPTY)
-					{
-						authFlags |= AUTH_ACCOUNT_EMPTY;
-						dbConn.markAsSettled(pCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade);
-					}
-					else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_INVALID_PRICE_CERT)
-					{
-						// this should never happen; the price certs in this CC do not fit to the ones of the cascade
-						// bDeleteCC = true;
-					}
-					else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_OUTDATED_CC)
-					{														
-						//get attached CC from error message
-						CAXMLCostConfirmation* attachedCC = (CAXMLCostConfirmation*) pErrMsg->getMessageObject();
-						if (attachedCC)
-						{
-							authFlags |= AUTH_OUTDATED_CC;
-							CAMsg::printMsg(LOG_DEBUG, "SettleThread: tried outdated CC, received last valid CC back\n");
-							//store it in DB
-							if (dbConn.storeCostConfirmation(*attachedCC, m_pAccountingSettleThread->m_settleCascade) == E_SUCCESS)
-							{
-								dbConn.markAsSettled(attachedCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade);
-							}
-							else
-							{
-								CAMsg::printMsg(LOG_ERR, "SettleThread: storing last valid CC in db failed!\n");	
-							}								
-							// set the confirmed bytes to the value of the CC got from the PI
-							confirmedBytes = attachedCC->getTransferredBytes();	
-						}
-						else
-						{
-							CAMsg::printMsg(LOG_DEBUG, "SettleThread: Did not receive last valid CC - maybe old Payment instance?\n");
-						}																		
-					}		
-					
-					if (authFlags)
-					{
-						nextEntry = new AccountHashEntry; 
-						nextEntry->accountNumber = pCC->getAccountNumber();
-						nextEntry->authFlags = authFlags;
-						nextEntry->confirmedBytes = confirmedBytes;	
-						nextEntry->nextEntry = entry;
-						entry = nextEntry;
-					}																	
-					
-					if (bDeleteCC)
-					{
-						//delete costconfirmation to avoid trying to settle an unusable CC again and again					
-						if(dbConn.deleteCC(pCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade) == E_SUCCESS)
-						{
-							CAMsg::printMsg(LOG_ERR, "SettleThread: unusable cost confirmation was deleted\n");	
-						}	
-						else
-						{						
-							CAMsg::printMsg(LOG_ERR, "SettleThread: cost confirmation is unusable, but could not delete it from database\n");
-						}
-					}
-				}
-				else //settling was OK, so mark account as settled
-				{
-					dbConn.markAsSettled(pCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade);
-				} 
-
-				if (pCC != NULL)
-				{
-					delete pCC;
-					pCC = NULL;
-				}
-				if (pErrMsg != NULL)
-				{
-					delete pErrMsg;
-					pErrMsg = NULL;
-				}
-			}
-			
+			}			
 			dbConn.terminateDBConnection();
 			
 			/*

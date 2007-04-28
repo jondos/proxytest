@@ -140,8 +140,9 @@ private:
 
 	struct t_aiqueueitem
 	{
-		DOM_Document*			pDomDoc;
+		DOM_Element*			pDomDoc;
 		fmHashTableEntry*		pHashEntry;
+		SINT32 (*handleFunc)(fmHashTableEntry*,DOM_Element&);
 	};
 	typedef struct t_aiqueueitem aiQueueItem;
 
