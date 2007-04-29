@@ -189,11 +189,12 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 						authFlags |= AUTH_ACCOUNT_EMPTY;
 						dbConn.markAsSettled(pCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade);
 					}
+					/*
 					else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_INVALID_PRICE_CERT)
 					{
 						// this should never happen; the price certs in this CC do not fit to the ones of the cascade
 						// bDeleteCC = true;
-					}
+					}*/
 					else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_OUTDATED_CC)
 					{														
 						//get attached CC from error message
@@ -218,6 +219,10 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 						{
 							CAMsg::printMsg(LOG_DEBUG, "SettleThread: Did not receive last valid CC - maybe old Payment instance?\n");
 						}																		
+					}
+					else
+					{
+						authFlags |= AUTH_UNKNOWN;												
 					}		
 					
 					if (authFlags)

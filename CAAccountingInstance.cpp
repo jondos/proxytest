@@ -351,6 +351,13 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Found invalid account! Kicking out user...\n");																
 				err = new CAXMLErrorMessage(CAXMLErrorMessage::ERR_KEY_NOT_FOUND);
 			}
+			else if (entry->authFlags & AUTH_UNKNOWN)
+			{
+				entry->authFlags &= ~AUTH_UNKNOWN;
+				entry->authFlags |= AUTH_FATAL_ERROR;												
+				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Unknown error! Kicking out user...\n");																
+				err = new CAXMLErrorMessage(CAXMLErrorMessage::ERR_INTERNAL_SERVER_ERROR);
+			}
 			
 			if (entry->authFlags & AUTH_FATAL_ERROR)
 			{						
@@ -1357,7 +1364,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 					{
 						if (loginEntry->count < 1)
 						{
-							CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Cleanup found non-positive number of user login hash entries (%d)!\n", loginEntry->count);
+							CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: Cleanup found non-positive number of user login hash entries (%d)!\n", loginEntry->count);
 						}
 						// this is the last active user connection; delete the entry
 						ms_pInstance->m_currentAccountsHashtable->remove(&(pAccInfo->accountNumber));
@@ -1380,7 +1387,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 							ms_pInstance->m_settleHashtable->getMutex().unlock();					
 						}	
 					}
-					else if (pAccInfo->authFlags)
+					else if (pAccInfo->authFlags & AUTH_ACCOUNT_OK)
 					{
 						// there are other connections from this user
 						ms_pInstance->m_userNumbers++; // this is needed to correct the Mix user numbers
