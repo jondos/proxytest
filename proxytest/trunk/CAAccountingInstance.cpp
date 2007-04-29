@@ -170,17 +170,14 @@ THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
 
 	while ( instance->m_bThreadRunning || !instance->m_pQueue->isEmpty())
 	{
-		//CAMsg::printMsg( LOG_DEBUG, "AI Thread loops\n" );
+		CAMsg::printMsg( LOG_DEBUG, "AI Thread loops\n" );
 		
 		itemSize = sizeof( item );
 		if (instance->m_pQueue->getOrWait(((UINT8*)&item), &itemSize) == E_SUCCESS &&
 			item)
 		{
-			CAMsg::printMsg( LOG_DEBUG, "Starting queue item\n" );
 			DOM_Element elem = item->pDomDoc->getDocumentElement();
-			CAMsg::printMsg( LOG_DEBUG, "Got queue item elem\n" );
 			(instance->*(item->handleFunc))(item->pAccInfo, elem);
-			CAMsg::printMsg( LOG_DEBUG, "Stopping queue item\n" );
 			delete item->pDomDoc;
 			delete item;
 			item = NULL;
