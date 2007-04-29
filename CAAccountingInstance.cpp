@@ -188,6 +188,7 @@ THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
 				 * and the connection is closed. We have to delete the entry.
 				 */
 				bDelete = true;
+				CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Deleting account entry from AI thread.\n");
 			}
 			
 			if (item->pAccInfo->nrInQueue < 0)
@@ -1434,6 +1435,10 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 				delete pAccInfo->mutex;
 				pAccInfo->mutex = NULL;
 				delete pAccInfo;
+			}
+			else
+			{
+				CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Cleanup method sent account deletion request.!\n");
 			}
 		}
 		//ms_pInstance->m_Mutex.unlock();
