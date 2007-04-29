@@ -178,6 +178,7 @@ THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
 		{
 			CAMsg::printMsg( LOG_DEBUG, "Starting queue item\n" );
 			DOM_Element elem = item->pDomDoc->getDocumentElement();
+			CAMsg::printMsg( LOG_DEBUG, "Got queue item elem\n" );
 			(instance->*(item->handleFunc))(item->pAccInfo, elem);
 			CAMsg::printMsg( LOG_DEBUG, "Stopping queue item\n" );
 			delete item->pDomDoc;
