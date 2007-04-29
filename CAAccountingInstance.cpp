@@ -1073,7 +1073,9 @@ void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, 
 	if ( sigTester->verifyDER( pAccInfo->pChallenge, 222, decodeBuffer, decodeBufferLen ) 
 		!= E_SUCCESS )
 	{
-		CAMsg::printMsg(LOG_ERR, "Challenge-response authentication failed!\n" );
+		UINT8 accountNrAsString[32];
+		print64(accountNrAsString, pAccInfo->accountNumber);
+		CAMsg::printMsg(LOG_ERR, "Challenge-response authentication failed for account %s!\n", accountNrAsString);
 		pAccInfo->authFlags |= AUTH_FAKE;
 		pAccInfo->authFlags &= ~AUTH_ACCOUNT_OK;
 		//m_Mutex.unlock();
