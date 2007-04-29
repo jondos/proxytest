@@ -148,7 +148,7 @@ private:
 
 	static SINT32 queueItem(aiQueueItem* pItem)
 	{
-		return ms_pInstance->m_pQueue->add(pItem,sizeof(aiQueueItem));
+		return ms_pInstance->m_pQueue->add(&pItem,sizeof(aiQueueItem*));
 	}
 
 	/**
