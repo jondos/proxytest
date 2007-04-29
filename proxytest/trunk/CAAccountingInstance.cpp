@@ -755,9 +755,7 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 		}
 
 		DOM_Element root = a_DomDoc.getDocumentElement();
-		DOM_Document* pDoc;
 		char* docElementName = root.getTagName().transcode();		
-		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
 		aiQueueItem* pItem;
 		void (CAAccountingInstance::*handleFunc)(tAiAccountingInfo*,DOM_Element&) = NULL;
 
@@ -797,14 +795,13 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 		}
 
 		/*
-		pDoc = new DOM_Document(a_DomDoc);
 		pItem = new aiQueueItem;
-		pItem->pDomDoc = pDoc;
-		pItem->pAccInfo = pAccInfo;
+		pItem->pDomDoc = new DOM_Document(a_DomDoc);
+		pItem->pAccInfo = pHashEntry->pAccountingInfo;
 		pItem->handleFunc = handleFunc;
 		queueItem(pItem);*/
 		
-		(ms_pInstance->*handleFunc)(pAccInfo, root );
+		(ms_pInstance->*handleFunc)(pHashEntry->pAccountingInfo, root );
 		delete [] docElementName;
 		return E_SUCCESS;
 	}
