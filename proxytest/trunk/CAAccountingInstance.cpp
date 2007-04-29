@@ -174,11 +174,9 @@ THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
 		instance->m_pQueue->getOrWait((UINT8*)item, &itemSize, 2000);
 		if (item)
 		{
-			(instance->*(item->handleFunc))(item->pAccInfo, (*item->pDomElem));
-			if (item->pDomElem)
-			{
-				delete item->pDomElem;
-			}
+			DOM_Element elem = item->pDomDoc->getDocumentElement();
+			(instance->*(item->handleFunc))(item->pAccInfo, elem);
+			delete item->pDomDoc;
 			delete item;
 		}
 		//instance->processJapMessage( item.pHashEntry, item.pDomDoc );
@@ -720,16 +718,6 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
 		aiQueueItem* pItem;
 		void (CAAccountingInstance::*handleFunc)(tAiAccountingInfo*,DOM_Element&) = NULL;
-		
-		
-		/*
-		pDoc = DOM_Document::createDocument();
-		pDoc->appendChild(pDoc->importNode(root, true));
-		pItem = new aiQueueItem;
-		pItem->pDomDoc = pDoc;
-		pItem->pHashEntry = m_pHashEntry;
-		CAAccountingInstance::queueItem(pItem);
-	*/
 
 
 		// what type of message is it?
@@ -739,7 +727,7 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 					CAMsg::printMsg( LOG_DEBUG, "Received an AccountCertificate. Calling handleAccountCertificate()\n" );
 				#endif
 				handleFunc = &CAAccountingInstance::handleAccountCertificate;
-				(ms_pInstance->*handleFunc)(pAccInfo, root );
+				//(ms_pInstance->*handleFunc)(pAccInfo, root );
 				//ms_pInstance->handleAccountCertificate( pAccInfo, root );
 			}
 		else if ( strcmp( docElementName, "Response" ) == 0)
@@ -747,14 +735,16 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 				#ifdef DEBUG
 					CAMsg::printMsg( LOG_DEBUG, "Received a Response (challenge-response)\n");
 				#endif
-				ms_pInstance->handleChallengeResponse( pAccInfo, root );
+				handleFunc = &CAAccountingInstance::handleChallengeResponse;
+				//ms_pInstance->handleChallengeResponse( pAccInfo, root );
 			}
 		else if ( strcmp( docElementName, "CC" ) == 0 )
 			{
 				#ifdef DEBUG
 					CAMsg::printMsg( LOG_DEBUG, "Received a CC. Calling handleCostConfirmation()\n" );
 				#endif
-				ms_pInstance->handleCostConfirmation( pAccInfo, root );
+				handleFunc = &CAAccountingInstance::handleCostConfirmation;
+				//ms_pInstance->handleCostConfirmation( pAccInfo, root );
 			}
 		else
 		{
@@ -764,6 +754,16 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 										);
 			return E_UNKNOWN;
 		}
+		
+		
+		pDoc = new DOM_Document;
+		pDoc->appendChild(pDoc->importNode(root, true));
+		pItem = new aiQueueItem;
+		pItem->pDomDoc = pDoc;
+		pItem->pAccInfo = pAccInfo;
+		pItem->handleFunc = handleFunc;
+		queueItem(pItem);
+		
 		//delete pDomDoc;
 		delete [] docElementName;
 		return E_SUCCESS;
