@@ -164,7 +164,7 @@ THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
 {
 	CAAccountingInstance * instance;
 	aiQueueItem* item = NULL;
-	UINT32 itemSize;
+	UINT32 itemSize = sizeof(item);
 	instance = ( CAAccountingInstance * ) param;
 	CAMsg::printMsg( LOG_DEBUG, "AI Thread starting\n" );
 
