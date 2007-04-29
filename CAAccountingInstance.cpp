@@ -99,7 +99,8 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix, volatile UINT32& a
 		// launch AI thread
 		m_pThread = new CAThread();
 		m_pThread->setMainLoop( aiThreadMainLoop );
-		m_bThreadRunning = true;
+		//m_bThreadRunning = true;
+		m_bThreadRunning = false;
 		m_pThread->start( this );
 	}
 		
