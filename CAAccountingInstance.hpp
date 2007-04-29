@@ -142,7 +142,7 @@ private:
 	{
 		DOM_Element*			pDomElem;
 		tAiAccountingInfo*		pAccInfo;
-		SINT32 (*handleFunc)(tAiAccountingInfo*,DOM_Element&);
+		void (CAAccountingInstance::*handleFunc)(tAiAccountingInfo*,DOM_Element&);
 	};
 	typedef struct t_aiqueueitem aiQueueItem;
 
@@ -154,18 +154,18 @@ private:
 	/**
 	* Handles a cost confirmation sent by a jap
 	*/
-	void handleCostConfirmation( fmHashTableEntry *pHashEntry, DOM_Element &root );
+	void handleCostConfirmation(tAiAccountingInfo* pAccInfo, DOM_Element &root );
 
 	/**
 	* Handles an account certificate of a newly connected Jap.
 	*/
-	void handleAccountCertificate( fmHashTableEntry *pHashEntry, DOM_Element &root );
+	void handleAccountCertificate(tAiAccountingInfo* pAccInfo, DOM_Element &root );
 	
 	
 	/**
 	 * Checks the response of the challenge-response auth.
 	 */
-	void handleChallengeResponse(fmHashTableEntry *pHashEntry, const DOM_Element &root);
+	void handleChallengeResponse(tAiAccountingInfo* pAccInfo, DOM_Element &root);
 
 	SINT32 prepareCCRequest(CAMix* callingMix, UINT8* a_AiName);			
 	static SINT32 makeCCRequest( const UINT64 accountNumber, const UINT64 transferredBytes, DOM_Document& doc);
@@ -218,8 +218,6 @@ private:
 	
 	UINT32 m_iSoftLimitBytes;
 	UINT32 m_iHardLimitBytes;
-	// /** the interface to the payment instance */
-	// CAAccountingBIInterface * m_biInterface;
 	
 	/** 
 	 * Users that get kicked out because they sent no authentication certificate
@@ -241,7 +239,7 @@ private:
 	CASignature * m_pJpiVerifyingInstance;
 	
 	/** internal receiving queue for messages coming from Japs */
-	CAQueue * m_pQueue;
+	CAQueue* m_pQueue;
 	
 	/** this thread sends cost confirmations to the BI in regular intervals */
 	CAAccountingSettleThread * m_pSettleThread;

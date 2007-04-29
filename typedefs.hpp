@@ -192,6 +192,12 @@ typedef struct t_mix_parameters tMixParameters;
 
 #define AUTH_MULTIPLE_LOGIN 0x20000 
 
+/* 
+ * The user corresponding to this entry has closed the connection. 
+ * Delete the entry as soon as possible.
+ */
+#define AUTH_DELETE_ENTRY 0x40000 
+
 
 
 class CASignature;
@@ -243,6 +249,9 @@ struct t_accountinginfo
 	
 	//time at which the timeout for waiting for the account certificate has been started
 	SINT32 authTimeoutStartSeconds;
+	
+	// the number of references to this entry in the ai queue
+	UINT32 nrInQueue;
 };
 typedef struct t_accountinginfo tAiAccountingInfo;
 
