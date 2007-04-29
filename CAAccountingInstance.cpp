@@ -172,7 +172,7 @@ THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
 	while ( instance->m_bThreadRunning || !instance->m_pQueue->isEmpty())
 	{	
 		itemSize = sizeof( item );
-		if (instance->m_pQueue->getOrWait(((UINT8*)&item, 400), &itemSize) == E_SUCCESS &&
+		if (instance->m_pQueue->getOrWait(((UINT8*)&item), &itemSize, 400) == E_SUCCESS &&
 			item)
 		{			
 			DOM_Element elem = item->pDomDoc->getDocumentElement();
