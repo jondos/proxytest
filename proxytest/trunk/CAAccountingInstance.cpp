@@ -170,6 +170,8 @@ THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
 
 	while ( instance->m_bThreadRunning || !instance->m_pQueue->isEmpty())
 	{
+		CAMsg::printMsg( LOG_DEBUG, "AI Thread loops\n" );
+		
 		itemSize = sizeof( aiQueueItem );
 		instance->m_pQueue->getOrWait((UINT8*)item, &itemSize, 2000);
 		if (item)
@@ -761,7 +763,7 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 
 		pDoc = new DOM_Document(a_DomDoc);
 		CAMsg::printMsg( LOG_DEBUG, "Importing node for queue item\n");
-		pDoc->appendChild(pDoc->importNode(root, true));
+		//pDoc->appendChild(pDoc->importNode(root, true));
 		CAMsg::printMsg( LOG_DEBUG, "Node for queue item imported\n");
 		pItem = new aiQueueItem;
 		pItem->pDomDoc = pDoc;
