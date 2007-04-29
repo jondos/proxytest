@@ -172,7 +172,7 @@ THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
 	while ( instance->m_bThreadRunning || !instance->m_pQueue->isEmpty())
 	{	
 		itemSize = sizeof( item );
-		if (instance->m_pQueue->getOrWait(((UINT8*)&item), &itemSize) == E_SUCCESS &&
+		if (instance->m_pQueue->getOrWait(((UINT8*)&item, 400), &itemSize) == E_SUCCESS &&
 			item)
 		{			
 			DOM_Element elem = item->pDomDoc->getDocumentElement();
@@ -788,15 +788,15 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 			return E_UNKNOWN;
 		}
 
-		/*
+		
 		pDoc = new DOM_Document(a_DomDoc);
 		pItem = new aiQueueItem;
 		pItem->pDomDoc = pDoc;
 		pItem->pAccInfo = pAccInfo;
 		pItem->handleFunc = handleFunc;
-		queueItem(pItem);*/
+		queueItem(pItem);
 		
-		(ms_pInstance->*handleFunc)(pAccInfo, root );
+		//(ms_pInstance->*handleFunc)(pAccInfo, root );
 		delete [] docElementName;
 		return E_SUCCESS;
 	}
