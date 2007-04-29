@@ -170,10 +170,10 @@ THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
 
 	while ( instance->m_bThreadRunning || !instance->m_pQueue->isEmpty())
 	{
-		CAMsg::printMsg( LOG_DEBUG, "AI Thread loops\n" );
+		//CAMsg::printMsg( LOG_DEBUG, "AI Thread loops\n" );
 		
 		itemSize = sizeof( aiQueueItem );
-		instance->m_pQueue->getOrWait((UINT8*)item, &itemSize);
+		instance->m_pQueue->getOrWait(((UINT8*)&item), &itemSize);
 		if (item)
 		{
 			CAMsg::printMsg( LOG_DEBUG, "Starting queue item\n" );
