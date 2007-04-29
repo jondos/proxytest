@@ -969,8 +969,6 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 	*/
 	
 	// check signature
-	/// TODO: This DOES work now, but wait for the next JAP release so that most JAPs are patched...
-	/*
 	pDsaSig = DSA_SIG_new();
 	CASignature * sigTester = pHashEntry->pAccountingInfo->pPublicKey;
 	sigTester->decodeRS( decodeBuffer, decodeBufferLen, pDsaSig );
@@ -983,7 +981,7 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 		//m_Mutex.unlock();
 		pAccInfo->mutex->unlock();
 		return ;
-	}*/
+	}
 		
 		
 	pAccInfo->authFlags |= AUTH_ACCOUNT_OK;
