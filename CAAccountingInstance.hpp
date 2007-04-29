@@ -86,9 +86,9 @@ public:
 	/**
 	 * Returns a reference to the Singleton instance
 	 */
-	static SINT32 init(CAMix* callingMix)
+	static SINT32 init(CAMix* callingMix, volatile UINT32& a_userNumbers)
 		{
-				ms_pInstance = new CAAccountingInstance(callingMix);
+				ms_pInstance = new CAAccountingInstance(callingMix, a_userNumbers);
 				return E_SUCCESS;
 		}
 		
@@ -135,7 +135,7 @@ public:
 
 private:
 
-	CAAccountingInstance(CAMix* callingMix); //Singleton!
+	CAAccountingInstance(CAMix* callingMix, volatile UINT32& a_userNumbers); //Singleton!
 	~CAAccountingInstance();
 
 	struct t_aiqueueitem
@@ -195,6 +195,9 @@ private:
 	
 	/** this is for synchronizing the write access to the HashEntries */
 	CAMutex m_Mutex;
+	
+	/** A reference to the user numbers of the parent mix. Used to correct numbers. */
+	volatile UINT32& m_userNumbers;
 	
 	/** For information exchange between the settle thread and the accounting instance */
 	Hashtable* m_settleHashtable;
