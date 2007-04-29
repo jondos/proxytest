@@ -1392,11 +1392,14 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 				}
 				ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();																		
 				
-				//store prepaid bytes in database, so the user wont lose the prepaid amount by disconnecting
-				prepaidBytes = pAccInfo->confirmedBytes - pAccInfo->transferredBytes;												
-				if (ms_pInstance->m_dbInterface)
+				if (pAccInfo->authFlags & AUTH_ACCOUNT_OK)
 				{
-					ms_pInstance->m_dbInterface->storePrepaidAmount(pAccInfo->accountNumber,prepaidBytes, ms_pInstance->m_currentCascade);
+					//store prepaid bytes in database, so the user wont lose the prepaid amount by disconnecting
+					prepaidBytes = pAccInfo->confirmedBytes - pAccInfo->transferredBytes;												
+					if (ms_pInstance->m_dbInterface)
+					{
+						ms_pInstance->m_dbInterface->storePrepaidAmount(pAccInfo->accountNumber,prepaidBytes, ms_pInstance->m_currentCascade);
+					}
 				}
 			}
 			else
@@ -1423,7 +1426,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			
 			if (pAccInfo->nrInQueue > 0)
 			{
-				// there are still entries in the queue; empty it before deletion
+				// there are still entries in the ai queue; empty it before deletion; we cannot delete it now
 				pAccInfo->authFlags |= AUTH_DELETE_ENTRY;
 			}
 			else if (pAccInfo->nrInQueue < 0)
@@ -1434,7 +1437,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			
 			if (!(pAccInfo->authFlags & AUTH_DELETE_ENTRY))
 			{
-				// there are not entries in the queue, we can savely delete this
+				// there are no handles for this entry in the queue, we can savely delete it now
 				delete pAccInfo->mutex;
 				pAccInfo->mutex = NULL;
 				delete pAccInfo;
