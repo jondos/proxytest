@@ -192,6 +192,8 @@ typedef struct t_mix_parameters tMixParameters;
 
 #define AUTH_MULTIPLE_LOGIN 0x20000 
 
+#define AUTH_UNKNOWN 0x40000 
+
 /* 
  * The user corresponding to this entry has closed the connection. 
  * Delete the entry as soon as possible.
