@@ -183,8 +183,18 @@ THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
 			if (item->pAccInfo->authFlags & AUTH_DELETE_ENTRY &&
 				item->pAccInfo->nrInQueue == 0)
 			{
+				/*
+				 * There is no more entry of this connection in the queue,
+				 * and the connection is closed. We have to delete the entry.
+				 */
 				bDelete = true;
 			}
+			
+			if (item->pAccInfo->nrInQueue < 0)
+			{
+				CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: AI thread found negative handle queue!\n");
+			}
+			
 			item->pAccInfo->mutex->unlock();
 			if (bDelete)
 			{
@@ -1413,6 +1423,10 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			{
 				// there are still entries in the queue; empty it before deletion
 				pAccInfo->authFlags |= AUTH_DELETE_ENTRY;
+			}
+			else if (pAccInfo->nrInQueue < 0)
+			{
+				CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: Cleanup method found negative handle queue!\n");
 			}
 			pAccInfo->mutex->unlock();
 			
