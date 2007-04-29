@@ -761,7 +761,7 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 
 		pDoc = new DOM_Document(a_DomDoc);
 		CAMsg::printMsg( LOG_DEBUG, "Importing node for queue item\n");
-		//pDoc->appendChild(pDoc->importNode(root, true));
+		pDoc->appendChild(pDoc->importNode(root, true));
 		CAMsg::printMsg( LOG_DEBUG, "Node for queue item imported\n");
 		pItem = new aiQueueItem;
 		pItem->pDomDoc = pDoc;
