@@ -786,8 +786,6 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 										);
 			return E_UNKNOWN;
 		}
-		
-		CAMsg::printMsg( LOG_DEBUG, "Creating queue item\n");
 
 		pDoc = new DOM_Document(a_DomDoc);
 		pItem = new aiQueueItem;
