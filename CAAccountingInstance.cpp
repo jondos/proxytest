@@ -164,7 +164,7 @@ THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
 {
 	CAAccountingInstance * instance;
 	aiQueueItem* item = NULL;
-	UINT32 itemSize = sizeof(item);
+	UINT32 itemSize;
 	instance = ( CAAccountingInstance * ) param;
 	CAMsg::printMsg( LOG_DEBUG, "AI Thread starting\n" );
 
@@ -172,9 +172,9 @@ THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
 	{
 		//CAMsg::printMsg( LOG_DEBUG, "AI Thread loops\n" );
 		
-		itemSize = sizeof( aiQueueItem );
-		instance->m_pQueue->getOrWait(((UINT8*)&item), &itemSize);
-		if (item)
+		itemSize = sizeof( item );
+		if (instance->m_pQueue->getOrWait(((UINT8*)&item), &itemSize) == E_SUCCESS &&
+			item)
 		{
 			CAMsg::printMsg( LOG_DEBUG, "Starting queue item\n" );
 			DOM_Element elem = item->pDomDoc->getDocumentElement();
@@ -183,6 +183,7 @@ THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
 			CAMsg::printMsg( LOG_DEBUG, "Stopping queue item\n" );
 			delete item->pDomDoc;
 			delete item;
+			item = NULL;
 		}
 		//instance->processJapMessage( item.pHashEntry, item.pDomDoc );
 	}
