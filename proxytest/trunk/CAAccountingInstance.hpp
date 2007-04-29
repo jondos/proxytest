@@ -140,7 +140,7 @@ private:
 
 	struct t_aiqueueitem
 	{
-		DOM_Element*			pDomElem;
+		DOM_Document*			pDomDoc;
 		tAiAccountingInfo*		pAccInfo;
 		void (CAAccountingInstance::*handleFunc)(tAiAccountingInfo*,DOM_Element&);
 	};

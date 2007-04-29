@@ -174,8 +174,10 @@ THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
 		instance->m_pQueue->getOrWait((UINT8*)item, &itemSize, 2000);
 		if (item)
 		{
+			CAMsg::printMsg( LOG_DEBUG, "Starting queue item\n" );
 			DOM_Element elem = item->pDomDoc->getDocumentElement();
 			(instance->*(item->handleFunc))(item->pAccInfo, elem);
+			CAMsg::printMsg( LOG_DEBUG, "Stopping queue item\n" );
 			delete item->pDomDoc;
 			delete item;
 		}
@@ -755,6 +757,7 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 			return E_UNKNOWN;
 		}
 		
+		CAMsg::printMsg( LOG_DEBUG, "Creating queue item\n");
 		
 		pDoc = new DOM_Document;
 		pDoc->appendChild(pDoc->importNode(root, true));
@@ -762,6 +765,7 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 		pItem->pDomDoc = pDoc;
 		pItem->pAccInfo = pAccInfo;
 		pItem->handleFunc = handleFunc;
+		CAMsg::printMsg( LOG_DEBUG, "Inserting queue item\n");
 		queueItem(pItem);
 		
 		//delete pDomDoc;
