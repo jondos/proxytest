@@ -165,19 +165,33 @@ THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
 	CAAccountingInstance * instance;
 	aiQueueItem* item = NULL;
 	UINT32 itemSize;
+	bool bDelete;
 	instance = ( CAAccountingInstance * ) param;
 	CAMsg::printMsg( LOG_DEBUG, "AI Thread starting\n" );
 
 	while ( instance->m_bThreadRunning || !instance->m_pQueue->isEmpty())
-	{
-		CAMsg::printMsg( LOG_DEBUG, "AI Thread loops\n" );
-		
+	{	
 		itemSize = sizeof( item );
 		if (instance->m_pQueue->getOrWait(((UINT8*)&item), &itemSize) == E_SUCCESS &&
 			item)
-		{
+		{			
 			DOM_Element elem = item->pDomDoc->getDocumentElement();
 			(instance->*(item->handleFunc))(item->pAccInfo, elem);
+			item->pAccInfo->mutex->lock();
+			item->pAccInfo->nrInQueue--;
+			bDelete = false;
+			if (item->pAccInfo->authFlags & AUTH_DELETE_ENTRY &&
+				item->pAccInfo->nrInQueue == 0)
+			{
+				bDelete = true;
+			}
+			item->pAccInfo->mutex->unlock();
+			if (bDelete)
+			{
+				delete item->pAccInfo->mutex;
+				delete item->pAccInfo;
+			}
+
 			delete item->pDomDoc;
 			delete item;
 			item = NULL;
@@ -212,6 +226,12 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		CAXMLErrorMessage* err = NULL;
 		
 		pAccInfo->mutex->lock();
+		
+		if (pAccInfo == NULL || pAccInfo->authFlags & AUTH_DELETE_ENTRY)
+		{
+			pAccInfo->mutex->unlock();
+			return 3;
+		}
 		
 		//kick user out after previous error
 		if(pAccInfo->authFlags & AUTH_FATAL_ERROR)
@@ -730,7 +750,6 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 					CAMsg::printMsg( LOG_DEBUG, "Received an AccountCertificate. Calling handleAccountCertificate()\n" );
 				#endif
 				handleFunc = &CAAccountingInstance::handleAccountCertificate;
-				//(ms_pInstance->*handleFunc)(pAccInfo, root );
 				//ms_pInstance->handleAccountCertificate( pAccInfo, root );
 			}
 		else if ( strcmp( docElementName, "Response" ) == 0)
@@ -761,20 +780,22 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 		CAMsg::printMsg( LOG_DEBUG, "Creating queue item\n");
 
 		pDoc = new DOM_Document(a_DomDoc);
-		CAMsg::printMsg( LOG_DEBUG, "Importing node for queue item\n");
-		//pDoc->appendChild(pDoc->importNode(root, true));
-		CAMsg::printMsg( LOG_DEBUG, "Node for queue item imported\n");
 		pItem = new aiQueueItem;
 		pItem->pDomDoc = pDoc;
 		pItem->pAccInfo = pAccInfo;
 		pItem->handleFunc = handleFunc;
-		CAMsg::printMsg( LOG_DEBUG, "Inserting queue item\n");
 		queueItem(pItem);
 		
-		//delete pDomDoc;
+		//(ms_pInstance->*handleFunc)(pAccInfo, root );
 		delete [] docElementName;
 		return E_SUCCESS;
 	}
+	
+SINT32 CAAccountingInstance::queueItem(aiQueueItem* pItem)
+{
+	pItem->pAccInfo->nrInQueue++;
+	return ms_pInstance->m_pQueue->add(&pItem,sizeof(aiQueueItem*));
+}	
 
 
 /**
@@ -801,7 +822,13 @@ void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo,
 							
 		pAccInfo->mutex->lock();
 		
-		if(pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT)
+		if (pAccInfo->authFlags & AUTH_DELETE_ENTRY)
+		{
+			pAccInfo->mutex->unlock();
+			return;
+		}
+		
+		if (pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT)
 		{
 			//#ifdef DEBUG
 				CAMsg::printMsg(LOG_DEBUG, "Already got an account cert. Ignoring...");
@@ -993,6 +1020,12 @@ void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, 
 	}
 
 	pAccInfo->mutex->lock();
+	
+	if (pAccInfo->authFlags & AUTH_DELETE_ENTRY)
+	{
+		pAccInfo->mutex->unlock();
+		return;
+	}
 
 	if( (!(pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT)) ||
 			(!(pAccInfo->authFlags & AUTH_CHALLENGE_SENT))
@@ -1149,6 +1182,12 @@ void CAAccountingInstance::handleCostConfirmation(tAiAccountingInfo* pAccInfo, D
 	//m_Mutex.lock();
 	pAccInfo->mutex->lock();
 	
+	if (pAccInfo->authFlags & AUTH_DELETE_ENTRY)
+	{
+		pAccInfo->mutex->unlock();
+		return;
+	}
+	
 	// check authstate	
 	if( (pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT)==0 ||
 		 (pAccInfo->authFlags & AUTH_ACCOUNT_OK)==0)
@@ -1287,7 +1326,6 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 		AccountLoginHashEntry* loginEntry;
 		AccountHashEntry* entry;
 		SINT32 prepaidBytes = 0;
-		CAMutex* mutex;
 		
 		if (pAccInfo != NULL)
 		{
@@ -1368,19 +1406,23 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 				delete [] pAccInfo->pstrBIID;
 			}
 						
-			mutex = pAccInfo->mutex;
 			
-			//ms_pInstance->m_Mutex.lock();
-			pAccInfo->mutex = NULL;
-			delete pAccInfo;
-			pHashEntry->pAccountingInfo=NULL;				
-			//ms_pInstance->m_Mutex.unlock();
+			pHashEntry->pAccountingInfo=NULL;	
 			
-			mutex->unlock();
+			if (pAccInfo->nrInQueue > 0)
+			{
+				// there are still entries in the queue; empty it before deletion
+				pAccInfo->authFlags |= AUTH_DELETE_ENTRY;
+			}
+			pAccInfo->mutex->unlock();
 			
-			delete mutex;
-			
-
+			if (!(pAccInfo->authFlags & AUTH_DELETE_ENTRY))
+			{
+				// there are not entries in the queue, we can savely delete this
+				delete pAccInfo->mutex;
+				pAccInfo->mutex = NULL;
+				delete pAccInfo;
+			}
 		}
 		//ms_pInstance->m_Mutex.unlock();
 		
