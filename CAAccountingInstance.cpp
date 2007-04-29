@@ -788,14 +788,15 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 			return E_UNKNOWN;
 		}
 
+		/*
 		pDoc = new DOM_Document(a_DomDoc);
 		pItem = new aiQueueItem;
 		pItem->pDomDoc = pDoc;
 		pItem->pAccInfo = pAccInfo;
 		pItem->handleFunc = handleFunc;
-		queueItem(pItem);
+		queueItem(pItem);*/
 		
-		//(ms_pInstance->*handleFunc)(pAccInfo, root );
+		(ms_pInstance->*handleFunc)(pAccInfo, root );
 		delete [] docElementName;
 		return E_SUCCESS;
 	}
