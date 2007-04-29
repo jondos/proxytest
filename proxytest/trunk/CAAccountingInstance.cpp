@@ -95,6 +95,12 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix, volatile UINT32& a
 		m_settleHashtable = 
 			new Hashtable((UINT32 (*)(void *))Hashtable::hashUINT64, (SINT32 (*)(void *,void *))Hashtable::compareUINT64);		
 		m_pSettleThread = new CAAccountingSettleThread(m_settleHashtable, m_currentCascade);
+		
+		// launch AI thread
+		m_pThread = new CAThread();
+		m_pThread->setMainLoop( aiThreadMainLoop );
+		m_bThreadRunning = true;
+		m_pThread->start( this );
 	}
 		
 
@@ -107,8 +113,9 @@ CAAccountingInstance::~CAAccountingInstance()
 		
 		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance dying\n" );
 		m_bThreadRunning = false;
-		//m_pThread->join();
-		//delete m_pThread;
+		m_pThread->join();
+		delete m_pThread;
+		m_pThread = NULL;
 		delete m_pSettleThread;
 		m_pSettleThread = NULL;
 		
@@ -118,6 +125,10 @@ CAAccountingInstance::~CAAccountingInstance()
 		m_dbInterface = NULL;
 		//delete m_pIPBlockList;
 		//m_pIPBlockList = NULL;
+		if (!m_pQueue->isEmpty())
+		{
+			CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: Handle queue is not empty while dying!\n" );
+		}
 		delete m_pQueue;
 		m_pQueue = NULL;
 		delete[] m_AiName;
@@ -144,6 +155,37 @@ CAAccountingInstance::~CAAccountingInstance()
 		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance dying finished.\n" );		
 	}
 
+
+/**
+ * The Main Loop of the accounting instance thread.
+ * Reads messages out of the queue and processes them
+ */
+THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
+{
+	CAAccountingInstance * instance;
+	aiQueueItem* item = NULL;
+	UINT32 itemSize;
+	instance = ( CAAccountingInstance * ) param;
+	CAMsg::printMsg( LOG_DEBUG, "AI Thread starting\n" );
+
+	while ( instance->m_bThreadRunning || !instance->m_pQueue->isEmpty())
+	{
+		itemSize = sizeof( aiQueueItem );
+		instance->m_pQueue->getOrWait((UINT8*)item, &itemSize, 2000);
+		if (item)
+		{
+			(instance->*(item->handleFunc))(item->pAccInfo, (*item->pDomElem));
+			if (item->pDomElem)
+			{
+				delete item->pDomElem;
+			}
+			delete item;
+		}
+		//instance->processJapMessage( item.pHashEntry, item.pDomDoc );
+	}
+	
+	THREAD_RETURN_SUCCESS;
+}
 
 
 /**
@@ -667,8 +709,28 @@ SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UIN
  */
 SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,const DOM_Document& a_DomDoc)
 	{
+		if (pHashEntry == NULL)
+		{
+			return E_UNKNOWN;
+		}
+
 		DOM_Element root = a_DomDoc.getDocumentElement();
-		char * docElementName = root.getTagName().transcode();
+		DOM_Document* pDoc;
+		char* docElementName = root.getTagName().transcode();		
+		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
+		aiQueueItem* pItem;
+		void (CAAccountingInstance::*handleFunc)(tAiAccountingInfo*,DOM_Element&) = NULL;
+		
+		
+		/*
+		pDoc = DOM_Document::createDocument();
+		pDoc->appendChild(pDoc->importNode(root, true));
+		pItem = new aiQueueItem;
+		pItem->pDomDoc = pDoc;
+		pItem->pHashEntry = m_pHashEntry;
+		CAAccountingInstance::queueItem(pItem);
+	*/
+
 
 		// what type of message is it?
 		if ( strcmp( docElementName, "AccountCertificate" ) == 0 )
@@ -676,21 +738,23 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 				#ifdef DEBUG
 					CAMsg::printMsg( LOG_DEBUG, "Received an AccountCertificate. Calling handleAccountCertificate()\n" );
 				#endif
-				ms_pInstance->handleAccountCertificate( pHashEntry, root );
+				handleFunc = &CAAccountingInstance::handleAccountCertificate;
+				(ms_pInstance->*handleFunc)(pAccInfo, root );
+				//ms_pInstance->handleAccountCertificate( pAccInfo, root );
 			}
 		else if ( strcmp( docElementName, "Response" ) == 0)
 			{
 				#ifdef DEBUG
 					CAMsg::printMsg( LOG_DEBUG, "Received a Response (challenge-response)\n");
 				#endif
-				ms_pInstance->handleChallengeResponse( pHashEntry, root );
+				ms_pInstance->handleChallengeResponse( pAccInfo, root );
 			}
 		else if ( strcmp( docElementName, "CC" ) == 0 )
 			{
 				#ifdef DEBUG
 					CAMsg::printMsg( LOG_DEBUG, "Received a CC. Calling handleCostConfirmation()\n" );
 				#endif
-				ms_pInstance->handleCostConfirmation( pHashEntry, root );
+				ms_pInstance->handleCostConfirmation( pAccInfo, root );
 			}
 		else
 		{
@@ -714,7 +778,7 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
  * TODO: think about switching account without changing mixcascade
  *   (receive a new acc.cert. though we already have one)
  */
-void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry, DOM_Element &root)
+void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo, DOM_Element &root)
 	{
 		//CAMsg::printMsg(LOG_DEBUG, "started method handleAccountCertificate\n");
 		DOM_Element elGeneral;
@@ -723,12 +787,11 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		UINT32 status;
 
 		// check authstate of this user
-		if (pHashEntry == NULL || pHashEntry->pAccountingInfo == NULL)
+		if (pAccInfo == NULL)
 		{
 			return;
 		}
-		
-		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;							
+							
 		pAccInfo->mutex->lock();
 		
 		if(pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT)
@@ -859,22 +922,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
 		//m_Mutex.unlock();
 		pAccInfo->mutex->unlock();
 		return ;
-	}
-#ifdef DEBUG		
-	CAMsg::printMsg(LOG_DEBUG, "Checking database for previously prepaid bytes...\n");
-#endif
-	SINT32 prepaidAmount = m_dbInterface->getPrepaidAmount(pAccInfo->accountNumber, m_currentCascade);
-	if (prepaidAmount > 0)
-	{
-		pAccInfo->transferredBytes -= prepaidAmount;	
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Got %d prepaid bytes\n",prepaidAmount);
 	}	
-	else
-	{
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: No database record for prepaid bytes found for this account \n");	
-	}	
-	//CAMsg::printMsg(LOG_DEBUG, "Number of prepaid (confirmed-transferred) bytes : %d \n",pAccInfo->confirmedBytes-pAccInfo->transferredBytes);
-		
 		
 	UINT8 * arbChallenge;
 	UINT8 b64Challenge[ 512 ];
@@ -920,7 +968,7 @@ void CAAccountingInstance::handleAccountCertificate(fmHashTableEntry *pHashEntry
  * Also gets the last CC of the user, and sends it to the JAP
  * accordingly.
  */
-void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry, const DOM_Element &root)
+void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, DOM_Element &root)
 {
 	UINT8 decodeBuffer[ 512 ];
 	UINT32 decodeBufferLen = 512;
@@ -932,11 +980,11 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 	
 	// check current authstate
 	
-	if (pHashEntry == NULL || pHashEntry->pAccountingInfo == NULL)
+	if (pAccInfo == NULL)
 	{
 		return;
 	}
-	tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
+
 	pAccInfo->mutex->lock();
 
 	if( (!(pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT)) ||
@@ -970,9 +1018,9 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 	
 	// check signature
 	pDsaSig = DSA_SIG_new();
-	CASignature * sigTester = pHashEntry->pAccountingInfo->pPublicKey;
+	CASignature * sigTester = pAccInfo->pPublicKey;
 	sigTester->decodeRS( decodeBuffer, decodeBufferLen, pDsaSig );
-	if ( sigTester->verifyDER( pHashEntry->pAccountingInfo->pChallenge, 222, decodeBuffer, decodeBufferLen ) 
+	if ( sigTester->verifyDER( pAccInfo->pChallenge, 222, decodeBuffer, decodeBufferLen ) 
 		!= E_SUCCESS )
 	{
 		CAMsg::printMsg(LOG_ERR, "Challenge-response authentication failed!\n" );
@@ -1036,6 +1084,22 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 	
 	if (bSendCCRequest)
 	{
+		#ifdef DEBUG		
+		CAMsg::printMsg(LOG_DEBUG, "Checking database for previously prepaid bytes...\n");
+		#endif
+		SINT32 prepaidAmount = m_dbInterface->getPrepaidAmount(pAccInfo->accountNumber, m_currentCascade);
+		if (prepaidAmount > 0)
+		{
+			pAccInfo->transferredBytes -= prepaidAmount;	
+			CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Got %d prepaid bytes\n",prepaidAmount);
+		}	
+		else
+		{
+			CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: No database record for prepaid bytes found for this account \n");	
+		}	
+		//CAMsg::printMsg(LOG_DEBUG, "Number of prepaid (confirmed-transferred) bytes : %d \n",pAccInfo->confirmedBytes-pAccInfo->transferredBytes);
+		
+		
 		// fetch cost confirmation from last session if available, and send it
 		CAXMLCostConfirmation * pCC = NULL;
 		m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, m_currentCascade, &pCC);
@@ -1050,10 +1114,10 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 		}
 	}
 	
-	if ( pHashEntry->pAccountingInfo->pChallenge != NULL ) // free mem
+	if ( pAccInfo->pChallenge != NULL ) // free mem
 	{
-		delete[] pHashEntry->pAccountingInfo->pChallenge;
-		pHashEntry->pAccountingInfo->pChallenge = NULL;
+		delete[] pAccInfo->pChallenge;
+		pAccInfo->pChallenge = NULL;
 	}
 	//m_Mutex.unlock();
 	pAccInfo->mutex->unlock();
@@ -1064,12 +1128,17 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 /**
  * Handles a cost confirmation sent by a jap
  */
-void CAAccountingInstance::handleCostConfirmation(fmHashTableEntry *pHashEntry,DOM_Element &root)
+void CAAccountingInstance::handleCostConfirmation(tAiAccountingInfo* pAccInfo, DOM_Element &root)
 {
 #ifdef DEBUG
 	CAMsg::printMsg(LOG_DEBUG, "started method handleCostConfirmation\n");
 #endif
-	tAiAccountingInfo*pAccInfo=pHashEntry->pAccountingInfo;
+
+	if (pAccInfo == NULL)
+	{
+		return;
+	}
+
 	//m_Mutex.lock();
 	pAccInfo->mutex->lock();
 	
@@ -1190,6 +1259,7 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 	pHashEntry->pAccountingInfo->sessionPackets = 0;
 	pHashEntry->pAccountingInfo->transferredBytes = 0;
 	pHashEntry->pAccountingInfo->confirmedBytes = 0;
+	pHashEntry->pAccountingInfo->nrInQueue = 0;
 	pHashEntry->pAccountingInfo->userID = pHashEntry->id;
 	pHashEntry->pAccountingInfo->mutex = new CAMutex;
 	//ms_pInstance->m_Mutex.unlock();
@@ -1252,7 +1322,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 							ms_pInstance->m_settleHashtable->getMutex().unlock();					
 						}	
 					}
-					else if (pAccInfo->authFlags & AUTH_ACCOUNT_OK)
+					else if (pAccInfo->authFlags)
 					{
 						// there are other connections from this user
 						ms_pInstance->m_userNumbers++; // this is needed to correct the Mix user numbers

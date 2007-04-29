@@ -64,27 +64,7 @@ CAAccountingControlChannel::~CAAccountingControlChannel()
 */
 SINT32 CAAccountingControlChannel::processXMLMessage(const DOM_Document &a_doc)
 	{
-		//aiQueueItem * pItem;
-		//DOM_Document * pDoc;
-		//DOM_Node root;
-		
-		// it is necessary to clone the document here 
-		// because a_doc will be deleted after this function returns..
-		/*pDoc = new DOM_Document;
-		*pDoc = DOM_Document::createDocument();
-		root = a_doc.getFirstChild();
-		if(root == NULL)
-			{
-				return E_UNKNOWN;
-			}
-		pDoc->appendChild(pDoc->importNode(root, true));
-	
-		pItem = new aiQueueItem;
-		pItem->pDomDoc = pDoc;
-		pItem->pHashEntry = m_pHashEntry;
-		CAAccountingInstance::queueItem(pItem);*/
 		return CAAccountingInstance::processJapMessage( m_pHashEntry,a_doc );
-		//return E_SUCCESS;
 	}
 #endif
 
