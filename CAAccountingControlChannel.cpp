@@ -60,7 +60,7 @@ CAAccountingControlChannel::~CAAccountingControlChannel()
 /**
 * processMessage - receives an XML msg and appends it to the AI message queue where it
 * will be processed asynchronously
-* Note: Temporalliy changed to synchronously processing!
+* Note: Temporarily changed to synchronous processing!
 */
 SINT32 CAAccountingControlChannel::processXMLMessage(const DOM_Document &a_doc)
 	{
