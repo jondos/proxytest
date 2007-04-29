@@ -60,9 +60,11 @@ const UINT32 CAAccountingInstance::MAX_TOLERATED_MULTIPLE_LOGINS = 10;
 /**
  * private Constructor
  */
-CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
+CAAccountingInstance::CAAccountingInstance(CAMix* callingMix, volatile UINT32& a_userNumbers) :
+	m_userNumbers(a_userNumbers)
 	{	
 		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance initialising\n" );
+		
 		m_pQueue = new CAQueue();
 		//m_pIPBlockList = new CATempIPBlockList(60000);
 		
@@ -1006,6 +1008,8 @@ void CAAccountingInstance::handleChallengeResponse(fmHashTableEntry *pHashEntry,
 		/*
 		 * There already is a user logged in with this account.
  		 */
+ 		m_userNumbers--; // this is needed to correct the Mix user numbers 
+ 		 
 		UINT8 accountNrAsString[32];
 		print64(accountNrAsString, pAccInfo->accountNumber);
 		if (loginEntry->count < MAX_TOLERATED_MULTIPLE_LOGINS)
@@ -1253,6 +1257,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 					else if (pAccInfo->authFlags & AUTH_ACCOUNT_OK)
 					{
 						// there are other connections from this user
+						ms_pInstance->m_userNumbers++; // this is needed to correct the Mix user numbers
 						loginEntry->count--;
 					}
 				}
