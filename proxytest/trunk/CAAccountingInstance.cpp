@@ -194,41 +194,6 @@ THREAD_RETURN CAAccountingInstance::processThread(void* a_param)
 
 
 /**
- * The Main Loop of the accounting instance thread.
- * Reads messages out of the queue and processes them
- */
- /*
-THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
-{
-	CAAccountingInstance * instance = ( CAAccountingInstance * ) param;
-	aiQueueItem* item = NULL;
-	UINT32 itemSize;
-	CAThreadPool* threadProcess = 
-		new CAThreadPool(NUM_LOGIN_WORKER_TRHEADS, MAX_LOGIN_QUEUE, false);
-
-	while ( instance->m_bThreadRunning || !instance->m_pQueue->isEmpty())
-	{	
-		itemSize = sizeof( item );
-		if (instance->m_pQueue->getOrWait(((UINT8*)&item), &itemSize, 400) == E_SUCCESS &&
-			item)
-		{			
-			if(threadProcess->addRequest(processThread, item)!=E_SUCCESS)
-			{
-				CAMsg::printMsg(LOG_ERR, 
-					"Could not add item to ai process handle thread!\n");
-				instance->m_pQueue->add(&item,sizeof(aiQueueItem*));
-			}
-			item = NULL;
-		}
-	}
-	
-	delete threadProcess;
-	
-	THREAD_RETURN_SUCCESS;
-}*/
-
-
-/**
  * Called by FirstMix for each incoming JAP packet.
  * Determines whether the packet should be let through or not
  * 
@@ -240,8 +205,7 @@ THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
  */
 SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool a_bControlMessage, bool a_bMessageToJAP)
 	{	
-		UINT8 accountNrAsString[32];
-	print64(accountNrAsString, item->pAccInfo->accountNumber);
+		
 	
 	CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket start for account %s.\n", accountNrAsString);
 		
@@ -255,6 +219,9 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		AccountHashEntry* entry = NULL;
 		AccountLoginHashEntry* loginEntry = NULL;
 		CAXMLErrorMessage* err = NULL;
+
+	UINT8 accountNrAsString[32];
+	print64(accountNrAsString, pAccInfo->accountNumber);
 		
 		pAccInfo->mutex->lock();
 		
