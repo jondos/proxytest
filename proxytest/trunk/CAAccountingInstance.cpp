@@ -306,7 +306,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				// accounting instance is dying...
 				return returnKickout(pAccInfo);
 			}
-			
+			/*
 			ms_pInstance->m_currentAccountsHashtable->getMutex().lock();
 			loginEntry = (AccountLoginHashEntry*)ms_pInstance->m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
 			if (loginEntry)
@@ -325,6 +325,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				pAccInfo->sessionPackets = 0;
 			}
 			ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();
+			*/
 		}
 		
 		
