@@ -779,7 +779,7 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 			return ret;
 		}*/
 	
-	
+		// remove these lines if AI thread pool is used (see @todo above)
 		(ms_pInstance->*handleFunc)(pHashEntry->pAccountingInfo, root );
 		return E_SUCCESS;
 	}
