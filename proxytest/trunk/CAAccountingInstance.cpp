@@ -796,7 +796,7 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
  */
 void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo, DOM_Element &root)
 	{
-		CAMsg::printMsg(LOG_DEBUG, "started method handleAccountCertificate\n");
+		//CAMsg::printMsg(LOG_DEBUG, "started method handleAccountCertificate\n");
 		DOM_Element elGeneral;
 		timespec now;
 		getcurrentTime(now);
@@ -1002,7 +1002,7 @@ void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo,
  */
 void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, DOM_Element &root)
 {
-	CAMsg::printMsg(LOG_DEBUG, "started method handleChallengeResponse\n");
+	//CAMsg::printMsg(LOG_DEBUG, "started method handleChallengeResponse\n");
 	
 	UINT8 decodeBuffer[ 512 ];
 	UINT32 decodeBufferLen = 512;
