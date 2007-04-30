@@ -806,7 +806,7 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 		}
 
 		delete [] docElementName;
-
+/*
 		pItem = new aiQueueItem;
 		pItem->pDomDoc = new DOM_Document(a_DomDoc);
 		pItem->pAccInfo = pHashEntry->pAccountingInfo;
@@ -819,9 +819,9 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 			delete pItem;
 		}
 		return ret;
-		
-		//(ms_pInstance->*handleFunc)(pHashEntry->pAccountingInfo, root );
-		//return E_SUCCESS;
+	*/	
+		(ms_pInstance->*handleFunc)(pHashEntry->pAccountingInfo, root );
+		return E_SUCCESS;
 	}
 
 
@@ -835,7 +835,7 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
  */
 void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo, DOM_Element &root)
 	{
-		CAMsg::printMsg(LOG_DEBUG, "started method handleAccountCertificate\n");
+		//CAMsg::printMsg(LOG_DEBUG, "started method handleAccountCertificate\n");
 		DOM_Element elGeneral;
 		timespec now;
 		getcurrentTime(now);
@@ -1048,7 +1048,7 @@ void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo,
  */
 void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, DOM_Element &root)
 {
-	CAMsg::printMsg(LOG_DEBUG, "started method handleChallengeResponse\n");
+	//CAMsg::printMsg(LOG_DEBUG, "started method handleChallengeResponse\n");
 	
 	UINT8 decodeBuffer[ 512 ];
 	UINT32 decodeBufferLen = 512;
@@ -1202,7 +1202,7 @@ void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, 
  */
 void CAAccountingInstance::handleCostConfirmation(tAiAccountingInfo* pAccInfo, DOM_Element &root)
 {
-	CAMsg::printMsg(LOG_DEBUG, "started method handleCostConfirmation\n");
+	//CAMsg::printMsg(LOG_DEBUG, "started method handleCostConfirmation\n");
 
 
 	if (pAccInfo == NULL)
