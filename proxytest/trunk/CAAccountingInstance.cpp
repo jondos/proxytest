@@ -159,16 +159,18 @@ THREAD_RETURN CAAccountingInstance::processThread(void* a_param)
 	CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: After processing for account %s.\n", accountNrAsString);
 	
 	
-	item->pAccInfo->mutex->lock();
 	item->pAccInfo->nrInQueue--;
+	
+	/*
+	item->pAccInfo->mutex->lock();
 	if (item->pAccInfo->authFlags & AUTH_DELETE_ENTRY &&
 		item->pAccInfo->nrInQueue == 0)
-	{
+	{*/
 		/*
 		 * There is no more entry of this connection in the queue,
 		 * and the connection is closed. We have to delete the entry.
 		 */
-		bDelete = true;
+/*		bDelete = true;
 		CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Deleting account entry from AI thread.\n");
 	}
 	
@@ -182,7 +184,7 @@ THREAD_RETURN CAAccountingInstance::processThread(void* a_param)
 	{
 		delete item->pAccInfo->mutex;
 		delete item->pAccInfo;
-	}
+	}*/
 
 	delete item->pDomDoc;
 	delete item;
@@ -801,7 +803,7 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 
 		delete [] docElementName;
 
-/*
+
 		if (handleFunc)
 		{
 			pItem = new aiQueueItem;
@@ -817,9 +819,9 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 			}
 			return ret;
 		}
-	*/	
 	
-		(ms_pInstance->*handleFunc)(pHashEntry->pAccountingInfo, root );
+	
+		//(ms_pInstance->*handleFunc)(pHashEntry->pAccountingInfo, root );
 		return E_SUCCESS;
 	}
 
