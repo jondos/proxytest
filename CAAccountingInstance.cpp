@@ -207,7 +207,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 	{	
 		
 	
-	CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket start for account %s.\n", accountNrAsString);
+	
 		
 		
 		if (pHashEntry == NULL || pHashEntry->pAccountingInfo == NULL)
@@ -222,6 +222,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 
 	UINT8 accountNrAsString[32];
 	print64(accountNrAsString, pAccInfo->accountNumber);
+	CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket start for account %s.\n", accountNrAsString);
 		
 		pAccInfo->mutex->lock();
 		
