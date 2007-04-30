@@ -1449,6 +1449,8 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			
 			if (pAccInfo->nrInQueue > 0)
 			{
+				CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: Queue entries left: %u!\n", pAccInfo->nrInQueue);
+				
 				// there are still entries in the ai queue; empty it before deletion; we cannot delete it now
 				pAccInfo->authFlags |= AUTH_DELETE_ENTRY;
 			}
