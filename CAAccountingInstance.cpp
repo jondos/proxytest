@@ -281,7 +281,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		
 		if (pAccInfo->authFlags & AUTH_ACCOUNT_OK)
 		{
-			CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket OK for account %s.\n", accountNrAsString);
+			//CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket OK for account %s.\n", accountNrAsString);
 			
 			// this user is authenticated; test if he has logged in more than one time
 			
@@ -311,7 +311,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();
 		}
 		
-		CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket settle for account %s.\n", accountNrAsString);
+		//CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket settle for account %s.\n", accountNrAsString);
 		
 		if (!ms_pInstance->m_settleHashtable)
 		{
@@ -362,7 +362,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		}		
 		ms_pInstance->m_settleHashtable->getMutex().unlock();	
 	
-		CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket auth for account %s.\n", accountNrAsString);
+		//CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket auth for account %s.\n", accountNrAsString);
 	
 		if(!(pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT) )
 		{ 
