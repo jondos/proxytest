@@ -254,7 +254,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		//CAMsg::printMsg( LOG_DEBUG, "Checking after %d session packets...\n", pAccInfo->sessionPackets);
 		
 		/** @todo We need this trick so that the program does not freeze with active AI ThreadPool!!!! */
-		pAccInfo->mutex->unlock();
+		//pAccInfo->mutex->unlock();
 			
 		if (pAccInfo->authFlags & AUTH_ACCOUNT_OK)
 		{
@@ -326,7 +326,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		ms_pInstance->m_settleHashtable->getMutex().unlock();	
 	
 		/** @todo We need this trick so that the program does not freeze with active AI ThreadPool!!!! */
-		pAccInfo->mutex->lock();
+		//pAccInfo->mutex->lock();
 		
 		
 		if (err)
@@ -419,7 +419,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 					CAMsg::printMsg( LOG_DEBUG, "Accounting instance: User refused "		
 									"to send cost confirmation (HARDLIMIT EXCEEDED).\n");
 //#endif					
-					/** @todo test if this is needeed... */																	
+															
 					//ms_pInstance->m_pIPBlockList->insertIP( pHashEntry->peerIP );
 					pAccInfo->lastHardLimitSeconds = 0;
 					return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_NO_CONFIRMATION));
@@ -550,7 +550,6 @@ SINT32 CAAccountingInstance::sendCCRequest(tAiAccountingInfo* pAccInfo)
 
 
 /**
- * @todo make this faster by not using DOM!
  * creating the xml of a new CC is really the responsability of the CAXMLCostConfirmation class
  * knowledge about the structure of a CC's XML should be encapsulated in it
  * TODO: add constructor to that class that takes accountnumber, transferredbytes etc as params
@@ -759,7 +758,7 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 
 		delete [] docElementName;
 
-
+		/** @todo this does not work yet due to errors in CAMutex!!!
 		if (handleFunc)
 		{
 			pItem = new aiQueueItem;
@@ -778,10 +777,10 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 			}
 			pHashEntry->pAccountingInfo->mutex->unlock();
 			return ret;
-		}
+		}*/
 	
 	
-		//(ms_pInstance->*handleFunc)(pHashEntry->pAccountingInfo, root );
+		(ms_pInstance->*handleFunc)(pHashEntry->pAccountingInfo, root );
 		return E_SUCCESS;
 	}
 
@@ -1074,7 +1073,7 @@ void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, 
 	pAccInfo->authFlags |= AUTH_ACCOUNT_OK;
 	
 	/** @todo We need this trick so that the program does not freeze with active AI ThreadPool!!!! */
-	pAccInfo->mutex->unlock();
+	//pAccInfo->mutex->unlock();
 	
 	m_currentAccountsHashtable->getMutex().lock();	
 	loginEntry = (AccountLoginHashEntry*)m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));	
@@ -1125,7 +1124,7 @@ void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, 
 	m_currentAccountsHashtable->getMutex().unlock();
 	
 	/** @todo We need this trick so that the program does not freeze with active AI ThreadPool!!!! */
-	pAccInfo->mutex->lock();
+	//pAccInfo->mutex->lock();
 	
 	if (bSendCCRequest)
 	{		
