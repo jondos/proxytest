@@ -149,14 +149,14 @@ THREAD_RETURN CAAccountingInstance::processThread(void* a_param)
 	bool bDelete = false;
 	DOM_Element elem = item->pDomDoc->getDocumentElement();
 
-	UINT8 accountNrAsString[32];
-	print64(accountNrAsString, item->pAccInfo->accountNumber);
+	//UINT8 accountNrAsString[32];
+	//print64(accountNrAsString, item->pAccInfo->accountNumber);
 	
-	CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Processing start for account %s.\n", accountNrAsString);
+	//CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Processing start for account %s.\n", accountNrAsString);
 	
 	// call the handle function
 	(ms_pInstance->*(item->handleFunc))(item->pAccInfo, elem);
-	CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: After processing for account %s.\n", accountNrAsString);
+	//CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: After processing for account %s.\n", accountNrAsString);
 	
 	
 	item->pAccInfo->nrInQueue--;
@@ -188,7 +188,7 @@ THREAD_RETURN CAAccountingInstance::processThread(void* a_param)
 	delete item->pDomDoc;
 	delete item;
 	
-	CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Processing finished.\n");
+	//CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Processing finished.\n");
 	
 	THREAD_RETURN_SUCCESS;
 }
