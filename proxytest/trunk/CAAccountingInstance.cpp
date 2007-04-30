@@ -66,7 +66,6 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix, volatile UINT32& a
 	{	
 		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance initialising\n" );
 		
-		//m_pQueue = new CAQueue();
 		//m_pIPBlockList = new CATempIPBlockList(60000);
 		
 		// initialize Database connection
@@ -97,15 +96,7 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix, volatile UINT32& a
 			new Hashtable((UINT32 (*)(void *))Hashtable::hashUINT64, (SINT32 (*)(void *,void *))Hashtable::compareUINT64);		
 		m_pSettleThread = new CAAccountingSettleThread(m_settleHashtable, m_currentCascade);
 		
-		m_aiThreadPool = new CAThreadPool(1, MAX_LOGIN_QUEUE, false);
-		
-		/*
-		// launch AI thread				
-		m_pThread = new CAThread((const UINT8*)"AI thread");
-		m_pThread->setMainLoop( aiThreadMainLoop );
-		//m_bThreadRunning = true;
-		m_bThreadRunning = false;
-		m_pThread->start( this );*/
+		m_aiThreadPool = new CAThreadPool(NUM_LOGIN_WORKER_TRHEADS, MAX_LOGIN_QUEUE, false);
 	}
 		
 
@@ -117,29 +108,17 @@ CAAccountingInstance::~CAAccountingInstance()
 		m_Mutex.lock();
 		
 		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance dying\n" );
-/*		m_bThreadRunning = false;
-		m_pThread->join();
-		delete m_pThread;
-		m_pThread = NULL;*/
 		delete m_pSettleThread;
 		m_pSettleThread = NULL;
 		
 		delete m_aiThreadPool;
 		m_aiThreadPool = NULL;
 		
-		//delete m_biInterface;
 		m_dbInterface->terminateDBConnection();
 		delete m_dbInterface;
 		m_dbInterface = NULL;
 		//delete m_pIPBlockList;
 		//m_pIPBlockList = NULL;
-		/*
-		if (!m_pQueue->isEmpty())
-		{
-			CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: Handle queue is not empty while dying!\n" );
-		}
-		delete m_pQueue;
-		m_pQueue = NULL;*/
 		delete[] m_AiName;
 		m_AiName = NULL;
 		
@@ -787,6 +766,7 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 		char* docElementName = root.getTagName().transcode();		
 		aiQueueItem* pItem;
 		void (CAAccountingInstance::*handleFunc)(tAiAccountingInfo*,DOM_Element&) = NULL;
+		SINT32 ret;
 
 
 		// what type of message is it?
@@ -825,30 +805,22 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 
 		delete [] docElementName;
 
-		
 		pItem = new aiQueueItem;
 		pItem->pDomDoc = new DOM_Document(a_DomDoc);
 		pItem->pAccInfo = pHashEntry->pAccountingInfo;
+		pItem->pAccInfo->nrInQueue++;
 		pItem->handleFunc = handleFunc;
-		return queueItem(pItem);
+		ret = ms_pInstance->m_aiThreadPool->addRequest(processThread, pItem);
+		if (ret !=E_SUCCESS)
+		{
+			CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: Process could not add to AI thread pool!\n" );
+			delete pItem;
+		}
+		return ret;
 		
 		//(ms_pInstance->*handleFunc)(pHashEntry->pAccountingInfo, root );
 		//return E_SUCCESS;
 	}
-	
-SINT32 CAAccountingInstance::queueItem(aiQueueItem* pItem)
-{
-	SINT32 ret;
-	pItem->pAccInfo->nrInQueue++;
-	
-	ret = ms_pInstance->m_aiThreadPool->addRequest(processThread, pItem);
-	if (ret !=E_SUCCESS)
-	{
-		delete pItem;
-	}
-	return ret;
-	//return ms_pInstance->m_pQueue->add(&pItem,sizeof(aiQueueItem*));
-}	
 
 
 /**
@@ -1470,6 +1442,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			
 			if (pAccInfo->nrInQueue > 0)
 			{
+				/*
 				if (pAccInfo->accountNumber == 0)
 				{
 					CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: AI queue entries found for account zero: %u!\n", pAccInfo->nrInQueue);
@@ -1480,7 +1453,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 					print64(accountNrAsString, pAccInfo->accountNumber);
 					CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: AI queue entries found for unauthorized account %s: %u!\n", accountNrAsString, pAccInfo->nrInQueue);
 				}
-				else
+				else*/
 				{	
 					// there are still entries in the ai queue; empty it before deletion; we cannot delete it now
 					pAccInfo->authFlags |= AUTH_DELETE_ENTRY;
