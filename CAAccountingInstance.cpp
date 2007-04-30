@@ -205,11 +205,6 @@ THREAD_RETURN CAAccountingInstance::processThread(void* a_param)
  */
 SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool a_bControlMessage, bool a_bMessageToJAP)
 	{	
-		
-	
-	
-		
-		
 		if (pHashEntry == NULL || pHashEntry->pAccountingInfo == NULL)
 		{
 			return 3;
@@ -272,7 +267,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		//CAMsg::printMsg( LOG_DEBUG, "Checking after %d session packets...\n", pAccInfo->sessionPackets);
 		
 		
-		
+		/*
 		if (pAccInfo->authFlags & AUTH_ACCOUNT_OK)
 		{
 			CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket OK for account %s.\n", accountNrAsString);
@@ -303,13 +298,9 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				pAccInfo->sessionPackets = 0;
 			}
 			ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();
-		}
+		}*/
 		
-					if (1 == 1)
-	{
-		pAccInfo->mutex->unlock();
-		return 1;
-	}
+	
 		
 		//CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket settle for account %s.\n", accountNrAsString);
 		
@@ -361,6 +352,13 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			}
 		}		
 		ms_pInstance->m_settleHashtable->getMutex().unlock();	
+	
+	if (1 == 1)
+	{
+		pAccInfo->mutex->unlock();
+		return 1;
+	}
+	
 	
 		//CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket auth for account %s.\n", accountNrAsString);
 	
