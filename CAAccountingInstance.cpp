@@ -1107,6 +1107,8 @@ void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, 
 		
 	pAccInfo->authFlags |= AUTH_ACCOUNT_OK;
 	
+	pAccInfo->mutex->unlock();
+	
 	m_currentAccountsHashtable->getMutex().lock();	
 	loginEntry = (AccountLoginHashEntry*)m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));	
 	if (!loginEntry)
@@ -1154,6 +1156,8 @@ void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, 
 		}
 	}
 	m_currentAccountsHashtable->getMutex().unlock();
+	
+	pAccInfo->mutex->lock();
 	
 	if (bSendCCRequest)
 	{		
