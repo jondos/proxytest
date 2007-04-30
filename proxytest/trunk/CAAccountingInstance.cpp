@@ -779,16 +779,16 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 				#ifdef DEBUG
 					CAMsg::printMsg( LOG_DEBUG, "Received a Response (challenge-response)\n");
 				#endif
-				//handleFunc = &CAAccountingInstance::handleChallengeResponse;
-				ms_pInstance->handleChallengeResponse( pHashEntry->pAccountingInfo, root );
+				handleFunc = &CAAccountingInstance::handleChallengeResponse;
+				//ms_pInstance->handleChallengeResponse( pHashEntry->pAccountingInfo, root );
 			}
 		else if ( strcmp( docElementName, "CC" ) == 0 )
 			{
 				#ifdef DEBUG
 					CAMsg::printMsg( LOG_DEBUG, "Received a CC. Calling handleCostConfirmation()\n" );
 				#endif
-				//handleFunc = &CAAccountingInstance::handleCostConfirmation;
-				ms_pInstance->handleCostConfirmation( pHashEntry->pAccountingInfo, root );
+				handleFunc = &CAAccountingInstance::handleCostConfirmation;
+				//ms_pInstance->handleCostConfirmation( pHashEntry->pAccountingInfo, root );
 			}
 		else
 		{
@@ -801,6 +801,7 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 
 		delete [] docElementName;
 
+/*
 		if (handleFunc)
 		{
 			pItem = new aiQueueItem;
@@ -816,9 +817,9 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 			}
 			return ret;
 		}
-		
+	*/	
 	
-		//(ms_pInstance->*handleFunc)(pHashEntry->pAccountingInfo, root );
+		(ms_pInstance->*handleFunc)(pHashEntry->pAccountingInfo, root );
 		return E_SUCCESS;
 	}
 
