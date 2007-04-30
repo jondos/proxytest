@@ -97,7 +97,7 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix, volatile UINT32& a
 			new Hashtable((UINT32 (*)(void *))Hashtable::hashUINT64, (SINT32 (*)(void *,void *))Hashtable::compareUINT64);		
 		m_pSettleThread = new CAAccountingSettleThread(m_settleHashtable, m_currentCascade);
 		
-		m_aiThreadPool = new CAThreadPool(NUM_LOGIN_WORKER_TRHEADS, MAX_LOGIN_QUEUE, false);
+		m_aiThreadPool = new CAThreadPool(1, MAX_LOGIN_QUEUE, false);
 		
 		/*
 		// launch AI thread				
@@ -166,6 +166,8 @@ CAAccountingInstance::~CAAccountingInstance()
 
 THREAD_RETURN CAAccountingInstance::processThread(void* a_param)
 {
+	CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Processing start.\n");
+	
 	aiQueueItem* item = (aiQueueItem*)a_param;
 	bool bDelete = false;
 	DOM_Element elem = item->pDomDoc->getDocumentElement();
@@ -200,6 +202,8 @@ THREAD_RETURN CAAccountingInstance::processThread(void* a_param)
 
 	delete item->pDomDoc;
 	delete item;
+	
+	CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Processing finished.\n");
 	
 	THREAD_RETURN_SUCCESS;
 }
