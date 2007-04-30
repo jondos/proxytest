@@ -40,6 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 #include "CAMsg.hpp"
 #include "CAUtil.hpp"
 #include "CASignature.hpp"
+#include "CAThreadPool.hpp"
 #include "CAXMLErrorMessage.hpp"
 #include "Hashtable.hpp"
 
@@ -96,11 +97,11 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix, volatile UINT32& a
 			new Hashtable((UINT32 (*)(void *))Hashtable::hashUINT64, (SINT32 (*)(void *,void *))Hashtable::compareUINT64);		
 		m_pSettleThread = new CAAccountingSettleThread(m_settleHashtable, m_currentCascade);
 		
-		// launch AI thread
+		// launch AI thread				
 		m_pThread = new CAThread();
 		m_pThread->setMainLoop( aiThreadMainLoop );
-		//m_bThreadRunning = true;
-		m_bThreadRunning = false;
+		m_bThreadRunning = true;
+		//m_bThreadRunning = false;
 		m_pThread->start( this );
 	}
 		
@@ -156,6 +157,46 @@ CAAccountingInstance::~CAAccountingInstance()
 		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance dying finished.\n" );		
 	}
 
+THREAD_RETURN CAAccountingInstance::processThread(void* a_param)
+{
+	aiQueueItem* item = (aiQueueItem*)a_param;
+	bool bDelete = false;
+	DOM_Element elem = item->pDomDoc->getDocumentElement();
+	
+	// call the handle function
+	(ms_pInstance->*(item->handleFunc))(item->pAccInfo, elem);
+	
+	item->pAccInfo->mutex->lock();
+	item->pAccInfo->nrInQueue--;
+	if (item->pAccInfo->authFlags & AUTH_DELETE_ENTRY &&
+		item->pAccInfo->nrInQueue == 0)
+	{
+		/*
+		 * There is no more entry of this connection in the queue,
+		 * and the connection is closed. We have to delete the entry.
+		 */
+		bDelete = true;
+		CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Deleting account entry from AI thread.\n");
+	}
+	
+	if (item->pAccInfo->nrInQueue < 0)
+	{
+		CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: AI thread found negative handle queue!\n");
+	}
+	
+	item->pAccInfo->mutex->unlock();
+	if (bDelete)
+	{
+		delete item->pAccInfo->mutex;
+		delete item->pAccInfo;
+	}
+
+	delete item->pDomDoc;
+	delete item;
+	
+	THREAD_RETURN_SUCCESS;
+}
+
 
 /**
  * The Main Loop of the accounting instance thread.
@@ -163,11 +204,12 @@ CAAccountingInstance::~CAAccountingInstance()
  */
 THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
 {
-	CAAccountingInstance * instance;
+	CAAccountingInstance * instance = ( CAAccountingInstance * ) param;
 	aiQueueItem* item = NULL;
 	UINT32 itemSize;
-	bool bDelete;
-	instance = ( CAAccountingInstance * ) param;
+	CAThreadPool* threadProcess = 
+		new CAThreadPool(NUM_LOGIN_WORKER_TRHEADS, MAX_LOGIN_QUEUE, false);
+	
 	CAMsg::printMsg( LOG_DEBUG, "AI Thread starting\n" );
 
 	while ( instance->m_bThreadRunning || !instance->m_pQueue->isEmpty())
@@ -176,40 +218,17 @@ THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
 		if (instance->m_pQueue->getOrWait(((UINT8*)&item), &itemSize, 400) == E_SUCCESS &&
 			item)
 		{			
-			DOM_Element elem = item->pDomDoc->getDocumentElement();
-			(instance->*(item->handleFunc))(item->pAccInfo, elem);
-			item->pAccInfo->mutex->lock();
-			item->pAccInfo->nrInQueue--;
-			bDelete = false;
-			if (item->pAccInfo->authFlags & AUTH_DELETE_ENTRY &&
-				item->pAccInfo->nrInQueue == 0)
+			if(threadProcess->addRequest(processThread, item)!=E_SUCCESS)
 			{
-				/*
-				 * There is no more entry of this connection in the queue,
-				 * and the connection is closed. We have to delete the entry.
-				 */
-				bDelete = true;
-				CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Deleting account entry from AI thread.\n");
+				CAMsg::printMsg(LOG_ERR, 
+					"Could not add item to ai process handle thread!\n");
+				instance->m_pQueue->add(&item,sizeof(aiQueueItem*));
 			}
-			
-			if (item->pAccInfo->nrInQueue < 0)
-			{
-				CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: AI thread found negative handle queue!\n");
-			}
-			
-			item->pAccInfo->mutex->unlock();
-			if (bDelete)
-			{
-				delete item->pAccInfo->mutex;
-				delete item->pAccInfo;
-			}
-
-			delete item->pDomDoc;
-			delete item;
 			item = NULL;
 		}
-		//instance->processJapMessage( item.pHashEntry, item.pDomDoc );
 	}
+	
+	delete threadProcess;
 	
 	THREAD_RETURN_SUCCESS;
 }
@@ -794,14 +813,14 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 			return E_UNKNOWN;
 		}
 
-		/*
+		
 		pItem = new aiQueueItem;
 		pItem->pDomDoc = new DOM_Document(a_DomDoc);
 		pItem->pAccInfo = pHashEntry->pAccountingInfo;
 		pItem->handleFunc = handleFunc;
-		queueItem(pItem);*/
+		queueItem(pItem);
 		
-		(ms_pInstance->*handleFunc)(pHashEntry->pAccountingInfo, root );
+		//(ms_pInstance->*handleFunc)(pHashEntry->pAccountingInfo, root );
 		delete [] docElementName;
 		return E_SUCCESS;
 	}

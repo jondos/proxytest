@@ -850,7 +850,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 									memcpy(d->peerIP,peerIP,4);
 									if(pthreadsLogin->addRequest(fm_loopDoUserLogin,d)!=E_SUCCESS)
 									{
-										CAMsg::printMsg(LOG_DEBUG,"Could not add an login request to the login thread pool!\n");
+										CAMsg::printMsg(LOG_ERR,"Could not add an login request to the login thread pool!\n");
 									}
 								}
 							}
