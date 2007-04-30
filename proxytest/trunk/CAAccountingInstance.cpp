@@ -267,7 +267,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		//CAMsg::printMsg( LOG_DEBUG, "Checking after %d session packets...\n", pAccInfo->sessionPackets);
 		
 	
-		pAccInfo->mutex->unlock();
+		//pAccInfo->mutex->unlock();
 	
 			
 		if (pAccInfo->authFlags & AUTH_ACCOUNT_OK)
@@ -304,7 +304,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();
 		}
 		
-		pAccInfo->mutex->lock();
+		//pAccInfo->mutex->lock();
 		
 			if (1 == 1)
 	{
