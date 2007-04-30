@@ -814,11 +814,12 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 				CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: Process could not add to AI thread pool!\n" );
 				delete pItem;
 			}
+			return ret;
 		}
-		return ret;
+		
 	
 		//(ms_pInstance->*handleFunc)(pHashEntry->pAccountingInfo, root );
-		//return E_SUCCESS;
+		return E_SUCCESS;
 	}
 
 
