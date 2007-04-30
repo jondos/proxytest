@@ -751,8 +751,8 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 				#ifdef DEBUG
 					CAMsg::printMsg( LOG_DEBUG, "Received an AccountCertificate. Calling handleAccountCertificate()\n" );
 				#endif
-				//handleFunc = &CAAccountingInstance::handleAccountCertificate;
-				ms_pInstance->handleAccountCertificate( pHashEntry->pAccountingInfo, root );
+				handleFunc = &CAAccountingInstance::handleAccountCertificate;
+				//ms_pInstance->handleAccountCertificate( pHashEntry->pAccountingInfo, root );
 			}
 		else if ( strcmp( docElementName, "Response" ) == 0)
 			{
@@ -781,7 +781,7 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 
 		delete [] docElementName;
 
-
+/*
 		if (handleFunc)
 		{
 			pItem = new aiQueueItem;
@@ -801,9 +801,9 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 			pHashEntry->pAccountingInfo->mutex->unlock();
 			return ret;
 		}
+	*/
 	
-	
-		//(ms_pInstance->*handleFunc)(pHashEntry->pAccountingInfo, root );
+		(ms_pInstance->*handleFunc)(pHashEntry->pAccountingInfo, root );
 		return E_SUCCESS;
 	}
 
