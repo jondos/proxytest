@@ -773,8 +773,8 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 				#ifdef DEBUG
 					CAMsg::printMsg( LOG_DEBUG, "Received an AccountCertificate. Calling handleAccountCertificate()\n" );
 				#endif
-				handleFunc = &CAAccountingInstance::handleAccountCertificate;
-				//ms_pInstance->handleAccountCertificate( pHashEntry->pAccountingInfo, root );
+				//handleFunc = &CAAccountingInstance::handleAccountCertificate;
+				ms_pInstance->handleAccountCertificate( pHashEntry->pAccountingInfo, root );
 			}
 		else if ( strcmp( docElementName, "Response" ) == 0)
 			{
