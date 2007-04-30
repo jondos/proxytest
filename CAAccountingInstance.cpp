@@ -991,6 +991,23 @@ void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo,
 		pAccInfo->mutex->unlock();
 		return ;
 	}	
+	
+	// someone else may "steal" another ones old prepaid bytes like this, but this does not seem to be that harmful...
+	#ifdef DEBUG		
+	CAMsg::printMsg(LOG_DEBUG, "Checking database for previously prepaid bytes...\n");
+	#endif
+	SINT32 prepaidAmount = m_dbInterface->getPrepaidAmount(pAccInfo->accountNumber, m_currentCascade);
+	if (prepaidAmount > 0)
+	{
+		pAccInfo->transferredBytes -= prepaidAmount;	
+		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Got %d prepaid bytes\n",prepaidAmount);
+	}	
+	else
+	{
+		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: No database record for prepaid bytes found for this account \n");	
+	}	
+	//CAMsg::printMsg(LOG_DEBUG, "Number of prepaid (confirmed-transferred) bytes : %d \n",pAccInfo->confirmedBytes-pAccInfo->transferredBytes);	
+	
 		
 	UINT8 * arbChallenge;
 	UINT8 b64Challenge[ 512 ];
@@ -1159,23 +1176,7 @@ void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, 
 	m_currentAccountsHashtable->getMutex().unlock();
 	
 	if (bSendCCRequest)
-	{
-		#ifdef DEBUG		
-		CAMsg::printMsg(LOG_DEBUG, "Checking database for previously prepaid bytes...\n");
-		#endif
-		SINT32 prepaidAmount = m_dbInterface->getPrepaidAmount(pAccInfo->accountNumber, m_currentCascade);
-		if (prepaidAmount > 0)
-		{
-			pAccInfo->transferredBytes -= prepaidAmount;	
-			CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Got %d prepaid bytes\n",prepaidAmount);
-		}	
-		else
-		{
-			CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: No database record for prepaid bytes found for this account \n");	
-		}	
-		//CAMsg::printMsg(LOG_DEBUG, "Number of prepaid (confirmed-transferred) bytes : %d \n",pAccInfo->confirmedBytes-pAccInfo->transferredBytes);
-		
-		
+	{		
 		// fetch cost confirmation from last session if available, and send it
 		CAXMLCostConfirmation * pCC = NULL;
 		m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, m_currentCascade, &pCC);
@@ -1376,6 +1377,16 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 				loginEntry = (AccountLoginHashEntry*)ms_pInstance->m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));																	
 				if (loginEntry)
 				{
+					if (pAccInfo->userID == loginEntry->userID)
+					{
+						//store prepaid bytes in database, so the user wont lose the prepaid amount by disconnecting
+						prepaidBytes = pAccInfo->confirmedBytes - pAccInfo->transferredBytes;												
+						if (ms_pInstance->m_dbInterface)
+						{
+							ms_pInstance->m_dbInterface->storePrepaidAmount(pAccInfo->accountNumber,prepaidBytes, ms_pInstance->m_currentCascade);
+						}
+					}					
+					
 					if (loginEntry->count <= 1)
 					{
 						if (loginEntry->count < 1)
@@ -1414,17 +1425,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 				{
 					CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: Cleanup did not find user login hash entry!\n");
 				}
-				ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();																		
-				
-				if (pAccInfo->authFlags & AUTH_ACCOUNT_OK)
-				{
-					//store prepaid bytes in database, so the user wont lose the prepaid amount by disconnecting
-					prepaidBytes = pAccInfo->confirmedBytes - pAccInfo->transferredBytes;												
-					if (ms_pInstance->m_dbInterface)
-					{
-						ms_pInstance->m_dbInterface->storePrepaidAmount(pAccInfo->accountNumber,prepaidBytes, ms_pInstance->m_currentCascade);
-					}
-				}
+				ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();																						
 			}
 			else
 			{
