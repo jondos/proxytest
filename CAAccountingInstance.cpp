@@ -98,7 +98,7 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix, volatile UINT32& a
 		m_pSettleThread = new CAAccountingSettleThread(m_settleHashtable, m_currentCascade);
 		
 		// launch AI thread				
-		m_pThread = new CAThread();
+		m_pThread = new CAThread("AI thread");
 		m_pThread->setMainLoop( aiThreadMainLoop );
 		m_bThreadRunning = true;
 		//m_bThreadRunning = false;
@@ -209,8 +209,6 @@ THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
 	UINT32 itemSize;
 	CAThreadPool* threadProcess = 
 		new CAThreadPool(NUM_LOGIN_WORKER_TRHEADS, MAX_LOGIN_QUEUE, false);
-	
-	CAMsg::printMsg( LOG_DEBUG, "AI Thread starting\n" );
 
 	while ( instance->m_bThreadRunning || !instance->m_pQueue->isEmpty())
 	{	
@@ -1469,7 +1467,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			}
 			else
 			{
-				CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Cleanup method sent account deletion request!\n");
+				CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Cleanup method sent account deletion request to AI thread!\n");
 			}
 		}
 		//ms_pInstance->m_Mutex.unlock();
