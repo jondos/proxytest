@@ -149,19 +149,18 @@ THREAD_RETURN CAAccountingInstance::processThread(void* a_param)
 	bool bDelete = false;
 	DOM_Element elem = item->pDomDoc->getDocumentElement();
 
-	//UINT8 accountNrAsString[32];
-	//print64(accountNrAsString, item->pAccInfo->accountNumber);
+	UINT8 accountNrAsString[32];
+	print64(accountNrAsString, item->pAccInfo->accountNumber);
 	
-	//CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Processing start for account %s.\n", accountNrAsString);
+	CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Processing start for account %s.\n", accountNrAsString);
 	
 	// call the handle function
 	(ms_pInstance->*(item->handleFunc))(item->pAccInfo, elem);
-	//CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: After processing for account %s.\n", accountNrAsString);
+	CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: After processing for account %s.\n", accountNrAsString);
 	
-	
-	item->pAccInfo->nrInQueue--;
 	
 	item->pAccInfo->mutex->lock();
+	item->pAccInfo->nrInQueue--;
 	if (item->pAccInfo->authFlags & AUTH_DELETE_ENTRY &&
 		item->pAccInfo->nrInQueue == 0)
 	{
@@ -188,7 +187,7 @@ THREAD_RETURN CAAccountingInstance::processThread(void* a_param)
 	delete item->pDomDoc;
 	delete item;
 	
-	//CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Processing finished.\n");
+	CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Processing finished.\n");
 	
 	THREAD_RETURN_SUCCESS;
 }
@@ -808,14 +807,18 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 			pItem = new aiQueueItem;
 			pItem->pDomDoc = new DOM_Document(a_DomDoc);
 			pItem->pAccInfo = pHashEntry->pAccountingInfo;
-			pItem->pAccInfo->nrInQueue++;
 			pItem->handleFunc = handleFunc;
+			
+			pHashEntry->pAccountingInfo->mutex->lock();
+			pItem->pAccInfo->nrInQueue++;
 			ret = ms_pInstance->m_aiThreadPool->addRequest(processThread, pItem);
 			if (ret !=E_SUCCESS)
 			{
+				pItem->pAccInfo->nrInQueue--;
 				CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: Process could not add to AI thread pool!\n" );
 				delete pItem;
 			}
+			pHashEntry->pAccountingInfo->mutex->unlock();
 			return ret;
 		}
 	
@@ -1041,7 +1044,7 @@ void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo,
  */
 void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, DOM_Element &root)
 {
-	//CAMsg::printMsg(LOG_DEBUG, "started method handleChallengeResponse\n");
+	CAMsg::printMsg(LOG_DEBUG, "started method handleChallengeResponse\n");
 	
 	UINT8 decodeBuffer[ 512 ];
 	UINT32 decodeBufferLen = 512;
@@ -1191,7 +1194,7 @@ void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, 
  */
 void CAAccountingInstance::handleCostConfirmation(tAiAccountingInfo* pAccInfo, DOM_Element &root)
 {
-	//CAMsg::printMsg(LOG_DEBUG, "started method handleCostConfirmation\n");
+	CAMsg::printMsg(LOG_DEBUG, "started method handleCostConfirmation\n");
 
 
 	if (pAccInfo == NULL)
@@ -1199,7 +1202,6 @@ void CAAccountingInstance::handleCostConfirmation(tAiAccountingInfo* pAccInfo, D
 		return;
 	}
 
-	//m_Mutex.lock();
 	pAccInfo->mutex->lock();
 	
 	if (pAccInfo->authFlags & AUTH_DELETE_ENTRY)
