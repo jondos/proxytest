@@ -811,14 +811,14 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 			return E_UNKNOWN;
 		}
 
-		
+		/*
 		pItem = new aiQueueItem;
 		pItem->pDomDoc = new DOM_Document(a_DomDoc);
 		pItem->pAccInfo = pHashEntry->pAccountingInfo;
 		pItem->handleFunc = handleFunc;
-		queueItem(pItem);
+		queueItem(pItem);*/
 		
-		//(ms_pInstance->*handleFunc)(pHashEntry->pAccountingInfo, root );
+		(ms_pInstance->*handleFunc)(pHashEntry->pAccountingInfo, root );
 		delete [] docElementName;
 		return E_SUCCESS;
 	}
