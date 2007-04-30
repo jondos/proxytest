@@ -206,7 +206,10 @@ THREAD_RETURN CAAccountingInstance::processThread(void* a_param)
 SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool a_bControlMessage, bool a_bMessageToJAP)
 	{	
 		
-	
+	if (1 == 1)
+	{
+		return 1;
+	}
 	
 		
 		
@@ -781,7 +784,7 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 
 		delete [] docElementName;
 
-/*
+
 		if (handleFunc)
 		{
 			pItem = new aiQueueItem;
@@ -801,9 +804,9 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 			pHashEntry->pAccountingInfo->mutex->unlock();
 			return ret;
 		}
-	*/
 	
-		(ms_pInstance->*handleFunc)(pHashEntry->pAccountingInfo, root );
+	
+		//(ms_pInstance->*handleFunc)(pHashEntry->pAccountingInfo, root );
 		return E_SUCCESS;
 	}
 
