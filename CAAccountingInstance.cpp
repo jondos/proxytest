@@ -771,24 +771,24 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 				#ifdef DEBUG
 					CAMsg::printMsg( LOG_DEBUG, "Received an AccountCertificate. Calling handleAccountCertificate()\n" );
 				#endif
-				//handleFunc = &CAAccountingInstance::handleAccountCertificate;
-				ms_pInstance->handleAccountCertificate( pAccInfo, root );
+				handleFunc = &CAAccountingInstance::handleAccountCertificate;
+				//ms_pInstance->handleAccountCertificate( pAccInfo, root );
 			}
 		else if ( strcmp( docElementName, "Response" ) == 0)
 			{
 				#ifdef DEBUG
 					CAMsg::printMsg( LOG_DEBUG, "Received a Response (challenge-response)\n");
 				#endif
-				handleFunc = &CAAccountingInstance::handleChallengeResponse;
-				//ms_pInstance->handleChallengeResponse( pAccInfo, root );
+				//handleFunc = &CAAccountingInstance::handleChallengeResponse;
+				ms_pInstance->handleChallengeResponse( pAccInfo, root );
 			}
 		else if ( strcmp( docElementName, "CC" ) == 0 )
 			{
 				#ifdef DEBUG
 					CAMsg::printMsg( LOG_DEBUG, "Received a CC. Calling handleCostConfirmation()\n" );
 				#endif
-				handleFunc = &CAAccountingInstance::handleCostConfirmation;
-				//ms_pInstance->handleCostConfirmation( pAccInfo, root );
+				//handleFunc = &CAAccountingInstance::handleCostConfirmation;
+				ms_pInstance->handleCostConfirmation( pAccInfo, root );
 			}
 		else
 		{
