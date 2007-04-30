@@ -145,7 +145,10 @@ CAAccountingInstance::~CAAccountingInstance()
 
 THREAD_RETURN CAAccountingInstance::processThread(void* a_param)
 {
-	CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Processing start.\n");
+	UINT8 accountNrAsString[32];
+	print64(accountNrAsString, pAccInfo->accountNumber);
+	
+	CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Processing start for account %s.\n", accountNrAsString);
 	
 	aiQueueItem* item = (aiQueueItem*)a_param;
 	bool bDelete = false;
@@ -153,7 +156,7 @@ THREAD_RETURN CAAccountingInstance::processThread(void* a_param)
 	
 	// call the handle function
 	(ms_pInstance->*(item->handleFunc))(item->pAccInfo, elem);
-	CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: After processing.\n");
+	CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: After processing for account %s.\n", accountNrAsString);
 	
 	
 	item->pAccInfo->mutex->lock();
@@ -264,8 +267,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				return returnKickout(pAccInfo);
 			}
 			else
-			{				
-				//ms_pInstance->m_Mutex.unlock();				
+			{							
 				pAccInfo->mutex->unlock();
 				return 2; // don't let through messages from JAP
 			}
@@ -273,7 +275,6 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		
 		if (a_bControlMessage)		
 		{
-			//ms_pInstance->m_Mutex.unlock();
 			pAccInfo->mutex->unlock();
 			return 1;
 		}
@@ -291,7 +292,6 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			pAccInfo->sessionPackets % PACKETS_BEFORE_NEXT_CHECK != 0)
 		{
 			//CAMsg::printMsg( LOG_DEBUG, "Now we gain some speed after %d session packets...\n", pAccInfo->sessionPackets);
-			//ms_pInstance->m_Mutex.unlock();
 			pAccInfo->mutex->unlock();
 			return 1;
 		}
@@ -397,7 +397,6 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_NO_ACCOUNTCERT));				
 			}						
 					
-			//ms_pInstance->m_Mutex.unlock();
 			pAccInfo->mutex->unlock();
 			//return 2; //dangerous, destroys encrypted stream somehow
 			return 1;
@@ -427,7 +426,6 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				}
 				else //timeout still running
 				{
-					//ms_pInstance->m_Mutex.unlock();
 					pAccInfo->mutex->unlock();
 					// do not forward any traffic from JAP
 					//return 2; //dangerous, destroys encrypted stream somehow
@@ -474,7 +472,6 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 					{
 						sendCCRequest(pAccInfo);
 					}
-					//ms_pInstance->m_Mutex.unlock();
 					pAccInfo->mutex->unlock();
 					// do not forward any traffic from JAP
 					//return 2; //dangerous, destroys encrypted stream somehow
@@ -521,7 +518,6 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
  */
 SINT32 CAAccountingInstance::returnOK(tAiAccountingInfo* pAccInfo)
 {
-	//ms_pInstance->m_Mutex.unlock();
 	pAccInfo->mutex->unlock();
 	return 1;	
 }
@@ -536,7 +532,6 @@ SINT32 CAAccountingInstance::returnKickout(tAiAccountingInfo* pAccInfo)
 	print64(tmp,pAccInfo->accountNumber);
 	CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: should kick out user with account %s now...\n", tmp);	
 	pAccInfo->transferredBytes = pAccInfo->confirmedBytes;
-	//ms_pInstance->m_Mutex.unlock();
 	pAccInfo->mutex->unlock();
 	return 3;
 }
@@ -564,7 +559,6 @@ SINT32 CAAccountingInstance::returnHold(tAiAccountingInfo* pAccInfo, CAXMLErrorM
 		CAMsg::printMsg(LOG_CRIT, "AccountingInstance: Should send error message, but none is available!\n");
 	}
 	
-	//ms_pInstance->m_Mutex.unlock();
 	pAccInfo->mutex->unlock();
 	return 2;
 }
@@ -777,8 +771,8 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 				#ifdef DEBUG
 					CAMsg::printMsg( LOG_DEBUG, "Received an AccountCertificate. Calling handleAccountCertificate()\n" );
 				#endif
-				handleFunc = &CAAccountingInstance::handleAccountCertificate;
-				//ms_pInstance->handleAccountCertificate( pAccInfo, root );
+				//handleFunc = &CAAccountingInstance::handleAccountCertificate;
+				ms_pInstance->handleAccountCertificate( pAccInfo, root );
 			}
 		else if ( strcmp( docElementName, "Response" ) == 0)
 			{
@@ -806,22 +800,25 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 		}
 
 		delete [] docElementName;
-/*
-		pItem = new aiQueueItem;
-		pItem->pDomDoc = new DOM_Document(a_DomDoc);
-		pItem->pAccInfo = pHashEntry->pAccountingInfo;
-		pItem->pAccInfo->nrInQueue++;
-		pItem->handleFunc = handleFunc;
-		ret = ms_pInstance->m_aiThreadPool->addRequest(processThread, pItem);
-		if (ret !=E_SUCCESS)
+
+		if (handleFunc)
 		{
-			CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: Process could not add to AI thread pool!\n" );
-			delete pItem;
+			pItem = new aiQueueItem;
+			pItem->pDomDoc = new DOM_Document(a_DomDoc);
+			pItem->pAccInfo = pHashEntry->pAccountingInfo;
+			pItem->pAccInfo->nrInQueue++;
+			pItem->handleFunc = handleFunc;
+			ret = ms_pInstance->m_aiThreadPool->addRequest(processThread, pItem);
+			if (ret !=E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: Process could not add to AI thread pool!\n" );
+				delete pItem;
+			}
 		}
 		return ret;
-	*/	
-		(ms_pInstance->*handleFunc)(pHashEntry->pAccountingInfo, root );
-		return E_SUCCESS;
+	
+		//(ms_pInstance->*handleFunc)(pHashEntry->pAccountingInfo, root );
+		//return E_SUCCESS;
 	}
 
 
@@ -867,7 +864,6 @@ void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo,
 			DOM_Document errDoc;
 			err.toXmlDocument(errDoc);
 			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
-			//m_Mutex.unlock();
 			pAccInfo->mutex->unlock();
 			return ;
 		}
@@ -881,7 +877,6 @@ void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo,
 			DOM_Document errDoc;
 			err.toXmlDocument(errDoc);
 			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
-			//m_Mutex.unlock();
 			pAccInfo->mutex->unlock();
 			return ;
 		}		
@@ -933,7 +928,6 @@ void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo,
 				DOM_Document errDoc;
 				err.toXmlDocument(errDoc);
 				pAccInfo->pControlChannel->sendXMLMessage(errDoc);
-				//m_Mutex.unlock();
 				pAccInfo->mutex->unlock();
 				return ;
 			}
@@ -950,7 +944,6 @@ void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo,
 			DOM_Document errDoc;
 			err.toXmlDocument(errDoc);
 			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
-			//m_Mutex.unlock();
 			pAccInfo->mutex->unlock();
 			return ;
 		}
@@ -969,7 +962,6 @@ void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo,
 		DOM_Document errDoc;
 		err.toXmlDocument(errDoc);
 		pAccInfo->pControlChannel->sendXMLMessage(errDoc);
-		//m_Mutex.unlock();
 		pAccInfo->mutex->unlock();
 		return ;
 	}
@@ -980,7 +972,6 @@ void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo,
 		// signature invalid. mark this user as bad guy
 		CAMsg::printMsg( LOG_INFO, "CAAccountingInstance::handleAccountCertificate(): Bad Jpi signature\n" );
 		pAccInfo->authFlags |= AUTH_FAKE | AUTH_GOT_ACCOUNTCERT | AUTH_TIMEOUT_STARTED;
-		//m_Mutex.unlock();
 		pAccInfo->mutex->unlock();
 		return ;
 	}	
@@ -1033,7 +1024,6 @@ void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo,
 	pAccInfo->authFlags |= AUTH_CHALLENGE_SENT | AUTH_GOT_ACCOUNTCERT | AUTH_TIMEOUT_STARTED;	
 	pAccInfo->challengeSentSeconds = time(NULL);
 	//CAMsg::printMsg("Last Account Certificate request seconds: for IP %u%u%u%u", (UINT8)pHashEntry->peerIP[0], (UINT8)pHashEntry->peerIP[1],(UINT8) pHashEntry->peerIP[2], (UINT8)pHashEntry->peerIP[3]);
-	//m_Mutex.unlock();
 	pAccInfo->mutex->unlock();
 }
 
@@ -1077,7 +1067,6 @@ void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, 
 			(!(pAccInfo->authFlags & AUTH_CHALLENGE_SENT))
 		)
 	{
-		//m_Mutex.unlock();
 		pAccInfo->mutex->unlock();
 		return ;
 	}
@@ -1087,7 +1076,6 @@ void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, 
 	if ( getDOMElementValue( root, decodeBuffer, &decodeBufferLen ) != E_SUCCESS )
 	{
 		CAMsg::printMsg( LOG_DEBUG, "ChallengeResponse has wrong XML format. Ignoring\n" );
-		//m_Mutex.unlock();
 		pAccInfo->mutex->unlock();
 		return;
 	}
@@ -1114,7 +1102,6 @@ void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, 
 		CAMsg::printMsg(LOG_ERR, "Challenge-response authentication failed for account %s!\n", accountNrAsString);
 		pAccInfo->authFlags |= AUTH_FAKE;
 		pAccInfo->authFlags &= ~AUTH_ACCOUNT_OK;
-		//m_Mutex.unlock();
 		pAccInfo->mutex->unlock();
 		return ;
 	}
@@ -1191,7 +1178,6 @@ void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, 
 		delete[] pAccInfo->pChallenge;
 		pAccInfo->pChallenge = NULL;
 	}
-	//m_Mutex.unlock();
 	pAccInfo->mutex->unlock();
 }
 
@@ -1223,7 +1209,6 @@ void CAAccountingInstance::handleCostConfirmation(tAiAccountingInfo* pAccInfo, D
 	if( (pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT)==0 ||
 		 (pAccInfo->authFlags & AUTH_ACCOUNT_OK)==0)
 	{		
-		//m_Mutex.unlock();
 		pAccInfo->mutex->unlock();
 		return ;
 	}
@@ -1231,7 +1216,6 @@ void CAAccountingInstance::handleCostConfirmation(tAiAccountingInfo* pAccInfo, D
 	CAXMLCostConfirmation* pCC = CAXMLCostConfirmation::getInstance(root);
 	if(pCC==NULL)
 	{
-		//m_Mutex.unlock();
 		pAccInfo->mutex->unlock();
 		return ;
 	}
@@ -1250,7 +1234,6 @@ void CAAccountingInstance::handleCostConfirmation(tAiAccountingInfo* pAccInfo, D
 		err.toXmlDocument(errDoc);
 		pAccInfo->pControlChannel->sendXMLMessage(errDoc);
 		delete pCC;
-		//m_Mutex.unlock();
 		pAccInfo->mutex->unlock();
 		return ;
 	}
@@ -1295,7 +1278,6 @@ void CAAccountingInstance::handleCostConfirmation(tAiAccountingInfo* pAccInfo, D
 		err.toXmlDocument(errDoc);
 		pAccInfo->pControlChannel->sendXMLMessage(errDoc);
 		delete pCC;
-		//m_Mutex.unlock();
 		pAccInfo->mutex->unlock();
 		return;
 	}
@@ -1309,7 +1291,6 @@ void CAAccountingInstance::handleCostConfirmation(tAiAccountingInfo* pAccInfo, D
 		CAMsg::printMsg( LOG_INFO, "CostConfirmation for account %s could not be stored in database!\n", tmp );
 	}
 
-	//m_Mutex.unlock();
 	pAccInfo->mutex->unlock();
 
 	delete pCC;
