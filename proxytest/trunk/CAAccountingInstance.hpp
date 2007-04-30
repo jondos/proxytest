@@ -190,8 +190,6 @@ private:
 	static DOM_Document m_preparedCCRequest;
 	
 	/** reads messages from the queue and processes them */
-	//CAThread * m_pThread;
-	
 	CAThreadPool* m_aiThreadPool;
 	
 	/** this is for synchronizing the write access to the HashEntries */
@@ -238,9 +236,6 @@ private:
 	 * @todo initialize this member
 	 */
 	CASignature * m_pJpiVerifyingInstance;
-	
-	/** internal receiving queue for messages coming from Japs */
-	//CAQueue* m_pQueue;	
 	
 	/** this thread sends cost confirmations to the BI in regular intervals */
 	CAAccountingSettleThread * m_pSettleThread;
