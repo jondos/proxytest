@@ -266,14 +266,11 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		}
 		//CAMsg::printMsg( LOG_DEBUG, "Checking after %d session packets...\n", pAccInfo->sessionPackets);
 		
-	
-		//pAccInfo->mutex->unlock();
-	
+		/** @todo We need this trick so that the program does not freeze with ThreadQueue!!!! */
+		pAccInfo->mutex->unlock();
 			
 		if (pAccInfo->authFlags & AUTH_ACCOUNT_OK)
 		{
-			CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket OK for account %s.\n", accountNrAsString);
-			
 			// this user is authenticated; test if he has logged in more than one time
 			
 			if (!ms_pInstance->m_currentAccountsHashtable)
@@ -283,8 +280,6 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			}
 			
 			ms_pInstance->m_currentAccountsHashtable->getMutex().lock();
-			CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket OK locked for account %s.\n", accountNrAsString);
-			
 			loginEntry = (AccountLoginHashEntry*)ms_pInstance->m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
 			if (loginEntry)
 			{
@@ -303,24 +298,12 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			}
 			ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();
 		}
-		
-		//pAccInfo->mutex->lock();
-		
-			if (1 == 1)
-	{
-		pAccInfo->mutex->unlock();
-		return 1;
-	}
-	
-		
-		//CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket settle for account %s.\n", accountNrAsString);
-		
+
 		if (!ms_pInstance->m_settleHashtable)
 		{
 			// accounting instance is dying...
 			return returnKickout(pAccInfo);
 		}
-
 
 		ms_pInstance->m_settleHashtable->getMutex().lock();
 		entry = (AccountHashEntry*)ms_pInstance->m_settleHashtable->getValue(&(pAccInfo->accountNumber));				
@@ -337,36 +320,31 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			else if (entry->authFlags & AUTH_ACCOUNT_EMPTY)
 			{
 				entry->authFlags &= ~AUTH_ACCOUNT_EMPTY;
-				entry->authFlags |= AUTH_FATAL_ERROR;
 				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Account empty! Kicking out user...\n");				
 				err = new CAXMLErrorMessage(CAXMLErrorMessage::ERR_ACCOUNT_EMPTY);
 			}
 			else if (entry->authFlags & AUTH_INVALID_ACCOUNT)
 			{
-				entry->authFlags &= ~AUTH_INVALID_ACCOUNT;
-				entry->authFlags |= AUTH_FATAL_ERROR;												
+				entry->authFlags &= ~AUTH_INVALID_ACCOUNT;											
 				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Found invalid account! Kicking out user...\n");																
 				err = new CAXMLErrorMessage(CAXMLErrorMessage::ERR_KEY_NOT_FOUND);
 			}
 			else if (entry->authFlags & AUTH_UNKNOWN)
 			{
-				entry->authFlags &= ~AUTH_UNKNOWN;
-				entry->authFlags |= AUTH_FATAL_ERROR;												
+				entry->authFlags &= ~AUTH_UNKNOWN;										
 				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Unknown error! Kicking out user...\n");																
 				err = new CAXMLErrorMessage(CAXMLErrorMessage::ERR_INTERNAL_SERVER_ERROR);
-			}
-			
-			if (entry->authFlags & AUTH_FATAL_ERROR)
-			{						
-				entry->authFlags &= ~AUTH_FATAL_ERROR;	
-				ms_pInstance->m_settleHashtable->getMutex().unlock();
-				return returnHold(pAccInfo, err);		
 			}
 		}		
 		ms_pInstance->m_settleHashtable->getMutex().unlock();	
 	
-	
-	
+		pAccInfo->mutex->lock();
+		
+		/** @todo We need this trick so that the program does not freeze with ThreadQueue!!!! */
+		if (err)
+		{						
+			return returnHold(pAccInfo, err);		
+		}
 	
 		//CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket auth for account %s.\n", accountNrAsString);
 	
