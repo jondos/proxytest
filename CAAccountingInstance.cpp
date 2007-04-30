@@ -796,7 +796,7 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
  */
 void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo, DOM_Element &root)
 	{
-		//CAMsg::printMsg(LOG_DEBUG, "started method handleAccountCertificate\n");
+		CAMsg::printMsg(LOG_DEBUG, "started method handleAccountCertificate\n");
 		DOM_Element elGeneral;
 		timespec now;
 		getcurrentTime(now);
@@ -1002,7 +1002,7 @@ void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo,
  */
 void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, DOM_Element &root)
 {
-	//CAMsg::printMsg(LOG_DEBUG, "started method handleChallengeResponse\n");
+	CAMsg::printMsg(LOG_DEBUG, "started method handleChallengeResponse\n");
 	
 	UINT8 decodeBuffer[ 512 ];
 	UINT32 decodeBufferLen = 512;
@@ -1096,7 +1096,7 @@ void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, 
 		/*
 		 * There already is a user logged in with this account.
  		 */
- 		//m_userNumbers--; // this is needed to correct the Mix user numbers 
+ 		m_userNumbers--; // this is needed to correct the Mix user numbers 
  		 
 		UINT8 accountNrAsString[32];
 		print64(accountNrAsString, pAccInfo->accountNumber);
@@ -1317,10 +1317,6 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			if (pAccInfo->accountNumber)
 			{
 				// remove login
-				
-				/** @todo We need this trick so that the program does not freeze with active AI ThreadPool!!!! */
-				pAccInfo->mutex->unlock();
-				
 				ms_pInstance->m_currentAccountsHashtable->getMutex().lock();
 				loginEntry = (AccountLoginHashEntry*)ms_pInstance->m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));																	
 				if (loginEntry)
@@ -1365,7 +1361,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 					else if (pAccInfo->authFlags & AUTH_ACCOUNT_OK)
 					{
 						// there are other connections from this user
-						//ms_pInstance->m_userNumbers++; // this is needed to correct the Mix user numbers
+						ms_pInstance->m_userNumbers++; // this is needed to correct the Mix user numbers
 						loginEntry->count--;
 					}
 				}
@@ -1373,10 +1369,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 				{
 					CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: Cleanup did not find user login hash entry!\n");
 				}
-				ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();			
-				
-				/** @todo We need this trick so that the program does not freeze with active AI ThreadPool!!!! */
-				pAccInfo->mutex->lock();																			
+				ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();																						
 			}
 			else
 			{
