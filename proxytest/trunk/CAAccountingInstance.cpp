@@ -266,8 +266,15 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		}
 		//CAMsg::printMsg( LOG_DEBUG, "Checking after %d session packets...\n", pAccInfo->sessionPackets);
 		
-		
-		/*
+	
+	if (1 == 1)
+	{
+		pAccInfo->mutex->unlock();
+		return 1;
+	}
+	
+	
+			
 		if (pAccInfo->authFlags & AUTH_ACCOUNT_OK)
 		{
 			CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket OK for account %s.\n", accountNrAsString);
@@ -281,6 +288,8 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			}
 			
 			ms_pInstance->m_currentAccountsHashtable->getMutex().lock();
+			CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket OK locked for account %s.\n", accountNrAsString);
+			/*
 			loginEntry = (AccountLoginHashEntry*)ms_pInstance->m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
 			if (loginEntry)
 			{
@@ -296,9 +305,9 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			{
 				CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: handleJapPacket did not find user login hash entry!\n");
 				pAccInfo->sessionPackets = 0;
-			}
+			}*/
 			ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();
-		}*/
+		}
 		
 	
 		
@@ -309,12 +318,6 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			// accounting instance is dying...
 			return returnKickout(pAccInfo);
 		}
-
-if (1 == 1)
-	{
-		pAccInfo->mutex->unlock();
-		return 1;
-	}
 
 
 		ms_pInstance->m_settleHashtable->getMutex().lock();
