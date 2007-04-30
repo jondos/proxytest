@@ -145,14 +145,14 @@ CAAccountingInstance::~CAAccountingInstance()
 
 THREAD_RETURN CAAccountingInstance::processThread(void* a_param)
 {
-	UINT8 accountNrAsString[32];
-	print64(accountNrAsString, pAccInfo->accountNumber);
-	
-	CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Processing start for account %s.\n", accountNrAsString);
-	
 	aiQueueItem* item = (aiQueueItem*)a_param;
 	bool bDelete = false;
 	DOM_Element elem = item->pDomDoc->getDocumentElement();
+
+	UINT8 accountNrAsString[32];
+	print64(accountNrAsString, item->pAccInfo->accountNumber);
+	
+	CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Processing start for account %s.\n", accountNrAsString);
 	
 	// call the handle function
 	(ms_pInstance->*(item->handleFunc))(item->pAccInfo, elem);
