@@ -161,16 +161,15 @@ THREAD_RETURN CAAccountingInstance::processThread(void* a_param)
 	
 	item->pAccInfo->nrInQueue--;
 	
-	/*
 	item->pAccInfo->mutex->lock();
 	if (item->pAccInfo->authFlags & AUTH_DELETE_ENTRY &&
 		item->pAccInfo->nrInQueue == 0)
-	{*/
+	{
 		/*
 		 * There is no more entry of this connection in the queue,
 		 * and the connection is closed. We have to delete the entry.
 		 */
-/*		bDelete = true;
+		bDelete = true;
 		CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Deleting account entry from AI thread.\n");
 	}
 	
@@ -178,13 +177,13 @@ THREAD_RETURN CAAccountingInstance::processThread(void* a_param)
 	{
 		CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: AI thread found negative handle queue!\n");
 	}
-	
 	item->pAccInfo->mutex->unlock();
+	
 	if (bDelete)
 	{
 		delete item->pAccInfo->mutex;
 		delete item->pAccInfo;
-	}*/
+	}
 
 	delete item->pDomDoc;
 	delete item;
