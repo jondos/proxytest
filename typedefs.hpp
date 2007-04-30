@@ -198,7 +198,7 @@ typedef struct t_mix_parameters tMixParameters;
  * The user corresponding to this entry has closed the connection. 
  * Delete the entry as soon as possible.
  */
-#define AUTH_DELETE_ENTRY 0x40000 
+#define AUTH_DELETE_ENTRY 0x80000 
 
 
 
