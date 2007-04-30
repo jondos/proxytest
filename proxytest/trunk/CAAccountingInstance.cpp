@@ -206,10 +206,7 @@ THREAD_RETURN CAAccountingInstance::processThread(void* a_param)
 SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool a_bControlMessage, bool a_bMessageToJAP)
 	{	
 		
-	if (1 == 1)
-	{
-		return 1;
-	}
+	
 	
 		
 		
@@ -222,12 +219,18 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		AccountHashEntry* entry = NULL;
 		AccountLoginHashEntry* loginEntry = NULL;
 		CAXMLErrorMessage* err = NULL;
-
+/*
 	UINT8 accountNrAsString[32];
 	print64(accountNrAsString, pAccInfo->accountNumber);
 	CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket start for account %s.\n", accountNrAsString);
-		
+	*/	
 		pAccInfo->mutex->lock();
+		
+		if (1 == 1)
+	{
+		pAccInfo->mutex->unlock();
+		return 1;
+	}
 		
 		if (pAccInfo == NULL || pAccInfo->authFlags & AUTH_DELETE_ENTRY)
 		{
