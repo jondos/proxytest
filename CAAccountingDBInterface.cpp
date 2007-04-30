@@ -263,6 +263,7 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 		size=8192;
 		if(cc.toXMLString(pStrCC, &size)!=E_SUCCESS)
 		{
+			CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstanceDBInterface: Could not transform CC to XML string!\n");
 			delete[] pStrCC;
 			return E_UNKNOWN;
 		}
