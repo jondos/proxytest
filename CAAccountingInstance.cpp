@@ -226,13 +226,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 	*/	
 		pAccInfo->mutex->lock();
 		
-		if (1 == 1)
-	{
-		pAccInfo->mutex->unlock();
-		return 1;
-	}
-		
-		if (pAccInfo == NULL || pAccInfo->authFlags & AUTH_DELETE_ENTRY)
+		if (pAccInfo->authFlags & AUTH_DELETE_ENTRY)
 		{
 			pAccInfo->mutex->unlock();
 			return 3;
@@ -277,6 +271,12 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		}
 		//CAMsg::printMsg( LOG_DEBUG, "Checking after %d session packets...\n", pAccInfo->sessionPackets);
 		
+		
+			if (1 == 1)
+	{
+		pAccInfo->mutex->unlock();
+		return 1;
+	}
 		
 		
 		if (pAccInfo->authFlags & AUTH_ACCOUNT_OK)
