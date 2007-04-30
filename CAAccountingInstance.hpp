@@ -126,9 +126,9 @@ public:
 	/**
 	* Handle a user (xml) message sent to us by the Jap through the ControlChannel
 	*  
-	* This function is running inside the AiThread. It determines 
-	* what type of message we have and calls the appropriate handle...() 
-	* function
+	* This function determines 
+	* what type of message we have and sends the appropriate handle...() 
+	* function to the ai thread.
 	*/
 	SINT32 static processJapMessage(fmHashTableEntry * pHashEntry,const DOM_Document& a_DomDoc);
 	
@@ -177,9 +177,12 @@ private:
 	
 	/**
 	 * The main loop of the AI thread - reads messages from the queue 
-	 * and calls the appropriate handlers
+	 * and starts process threads for these messages.
 	 */
 	static THREAD_RETURN aiThreadMainLoop(void *param);
+	
+	/** Processes JAP messages asynchronously by calls to the appropriate handlers. */
+	static THREAD_RETURN processThread(void* a_param);
 	
 	static const UINT64 PACKETS_BEFORE_NEXT_CHECK;
 	
