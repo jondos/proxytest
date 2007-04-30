@@ -1115,6 +1115,7 @@ void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, 
 		
 	pAccInfo->authFlags |= AUTH_ACCOUNT_OK;
 	
+	/*
 	m_currentAccountsHashtable->getMutex().lock();	
 	loginEntry = (AccountLoginHashEntry*)m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));	
 	if (!loginEntry)
@@ -1131,11 +1132,11 @@ void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, 
 		loginEntry->count++;
 	}
 	if (loginEntry->count > 1)
-	{
+	{*/
 		/*
 		 * There already is a user logged in with this account.
  		 */
- 		m_userNumbers--; // this is needed to correct the Mix user numbers 
+ /*		m_userNumbers--; // this is needed to correct the Mix user numbers 
  		 
 		UINT8 accountNrAsString[32];
 		print64(accountNrAsString, pAccInfo->accountNumber);
@@ -1149,11 +1150,11 @@ void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, 
 			loginEntry->userID = pAccInfo->userID; // this is the current user; kick out the others
 		}
 		else
-		{
+		{*/
 		 	/* The maximum of tolerated concurrent logins for this user is exceeded.
 		 	 * He won't get any new access again before the old connections have been closed!
 		 	 */
-		 	CAMsg::printMsg(LOG_INFO, 
+/*		 	CAMsg::printMsg(LOG_INFO, 
 		 					"CAAccountingInstance: Maximum of multiple logins exceeded (%d) for user with account %s! \
 		 					Kicking out this user!\n", 
 		 					loginEntry->count, accountNrAsString);
@@ -1162,7 +1163,7 @@ void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, 
 		}
 	}
 	m_currentAccountsHashtable->getMutex().unlock();
-	
+	*/
 	if (bSendCCRequest)
 	{		
 		// fetch cost confirmation from last session if available, and send it
