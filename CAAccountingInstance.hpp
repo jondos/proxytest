@@ -147,8 +147,6 @@ private:
 	};
 	typedef struct t_aiqueueitem aiQueueItem;
 
-	static SINT32 queueItem(aiQueueItem* pItem);
-
 	/**
 	* Handles a cost confirmation sent by a jap
 	*/
