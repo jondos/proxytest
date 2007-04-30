@@ -240,6 +240,12 @@ THREAD_RETURN CAAccountingInstance::aiThreadMainLoop( void *param )
  */
 SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool a_bControlMessage, bool a_bMessageToJAP)
 	{	
+		UINT8 accountNrAsString[32];
+	print64(accountNrAsString, item->pAccInfo->accountNumber);
+	
+	CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket start for account %s.\n", accountNrAsString);
+		
+		
 		if (pHashEntry == NULL || pHashEntry->pAccountingInfo == NULL)
 		{
 			return 3;
@@ -297,8 +303,12 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		}
 		//CAMsg::printMsg( LOG_DEBUG, "Checking after %d session packets...\n", pAccInfo->sessionPackets);
 		
+		
+		
 		if (pAccInfo->authFlags & AUTH_ACCOUNT_OK)
 		{
+			CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket OK for account %s.\n", accountNrAsString);
+			
 			// this user is authenticated; test if he has logged in more than one time
 			
 			if (!ms_pInstance->m_currentAccountsHashtable)
@@ -306,7 +316,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				// accounting instance is dying...
 				return returnKickout(pAccInfo);
 			}
-			/*
+			
 			ms_pInstance->m_currentAccountsHashtable->getMutex().lock();
 			loginEntry = (AccountLoginHashEntry*)ms_pInstance->m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
 			if (loginEntry)
@@ -325,10 +335,9 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 				pAccInfo->sessionPackets = 0;
 			}
 			ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();
-			*/
 		}
 		
-		
+		CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket settle for account %s.\n", accountNrAsString);
 		
 		if (!ms_pInstance->m_settleHashtable)
 		{
@@ -378,6 +387,8 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			}
 		}		
 		ms_pInstance->m_settleHashtable->getMutex().unlock();	
+	
+		CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket auth for account %s.\n", accountNrAsString);
 	
 		if(!(pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT) )
 		{ 
@@ -839,7 +850,7 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
  */
 void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo, DOM_Element &root)
 	{
-		//CAMsg::printMsg(LOG_DEBUG, "started method handleAccountCertificate\n");
+		CAMsg::printMsg(LOG_DEBUG, "started method handleAccountCertificate\n");
 		DOM_Element elGeneral;
 		timespec now;
 		getcurrentTime(now);
@@ -1116,7 +1127,6 @@ void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, 
 		
 	pAccInfo->authFlags |= AUTH_ACCOUNT_OK;
 	
-	/*
 	m_currentAccountsHashtable->getMutex().lock();	
 	loginEntry = (AccountLoginHashEntry*)m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));	
 	if (!loginEntry)
@@ -1133,11 +1143,11 @@ void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, 
 		loginEntry->count++;
 	}
 	if (loginEntry->count > 1)
-	{*/
+	{
 		/*
 		 * There already is a user logged in with this account.
  		 */
- /*		m_userNumbers--; // this is needed to correct the Mix user numbers 
+ 		m_userNumbers--; // this is needed to correct the Mix user numbers 
  		 
 		UINT8 accountNrAsString[32];
 		print64(accountNrAsString, pAccInfo->accountNumber);
@@ -1151,11 +1161,11 @@ void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, 
 			loginEntry->userID = pAccInfo->userID; // this is the current user; kick out the others
 		}
 		else
-		{*/
+		{
 		 	/* The maximum of tolerated concurrent logins for this user is exceeded.
 		 	 * He won't get any new access again before the old connections have been closed!
 		 	 */
-/*		 	CAMsg::printMsg(LOG_INFO, 
+		 	CAMsg::printMsg(LOG_INFO, 
 		 					"CAAccountingInstance: Maximum of multiple logins exceeded (%d) for user with account %s! \
 		 					Kicking out this user!\n", 
 		 					loginEntry->count, accountNrAsString);
@@ -1164,7 +1174,7 @@ void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, 
 		}
 	}
 	m_currentAccountsHashtable->getMutex().unlock();
-	*/
+	
 	if (bSendCCRequest)
 	{		
 		// fetch cost confirmation from last session if available, and send it
@@ -1196,7 +1206,7 @@ void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, 
  */
 void CAAccountingInstance::handleCostConfirmation(tAiAccountingInfo* pAccInfo, DOM_Element &root)
 {
-	CAMsg::printMsg(LOG_DEBUG, "started method handleCostConfirmation\n");
+	//CAMsg::printMsg(LOG_DEBUG, "started method handleCostConfirmation\n");
 
 
 	if (pAccInfo == NULL)
