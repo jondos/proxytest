@@ -6,6 +6,9 @@
  *
  ********************************************************/
 
+#ifndef __CATHREADPOOL__
+#define __CATHREADPOOL__
+
 #include "CAMutex.hpp"
 #ifndef ONLY_LOCAL_PROXY
 #include "CAThread.hpp"
@@ -60,3 +63,5 @@ class CAThreadPool
       CAConditionVariable*	m_pcondEmpty;
 	};
 #endif //ONLY_LOCAL_PROXY
+
+#endif 

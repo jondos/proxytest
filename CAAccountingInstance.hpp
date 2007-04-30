@@ -35,6 +35,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAQueue.hpp"
 #include "CAThread.hpp"
 #include "CATempIPBlockList.hpp"
+#include "CAThreadPool.hpp"
 #include "CAAccountingDBInterface.hpp"
 #include "CAAccountingBIInterface.hpp"
 #include "CAAccountingControlChannel.hpp"
@@ -179,7 +180,7 @@ private:
 	 * The main loop of the AI thread - reads messages from the queue 
 	 * and starts process threads for these messages.
 	 */
-	static THREAD_RETURN aiThreadMainLoop(void *param);
+	//static THREAD_RETURN aiThreadMainLoop(void *param);
 	
 	/** Processes JAP messages asynchronously by calls to the appropriate handlers. */
 	static THREAD_RETURN processThread(void* a_param);
@@ -191,7 +192,9 @@ private:
 	static DOM_Document m_preparedCCRequest;
 	
 	/** reads messages from the queue and processes them */
-	CAThread * m_pThread;
+	//CAThread * m_pThread;
+	
+	CAThreadPool* m_aiThreadPool;
 	
 	/** this is for synchronizing the write access to the HashEntries */
 	CAMutex m_Mutex;
@@ -239,7 +242,7 @@ private:
 	CASignature * m_pJpiVerifyingInstance;
 	
 	/** internal receiving queue for messages coming from Japs */
-	CAQueue* m_pQueue;
+	//CAQueue* m_pQueue;	
 	
 	/** this thread sends cost confirmations to the BI in regular intervals */
 	CAAccountingSettleThread * m_pSettleThread;
