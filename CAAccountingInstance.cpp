@@ -1469,7 +1469,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			}
 			else
 			{
-				CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Cleanup method sent account deletion request.!\n");
+				CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Cleanup method sent account deletion request!\n");
 			}
 		}
 		//ms_pInstance->m_Mutex.unlock();
