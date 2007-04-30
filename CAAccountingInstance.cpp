@@ -152,11 +152,11 @@ THREAD_RETURN CAAccountingInstance::processThread(void* a_param)
 	UINT8 accountNrAsString[32];
 	print64(accountNrAsString, item->pAccInfo->accountNumber);
 	
-	CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Processing start for account %s.\n", accountNrAsString);
+	//CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Processing start for account %s.\n", accountNrAsString);
 	
 	// call the handle function
 	(ms_pInstance->*(item->handleFunc))(item->pAccInfo, elem);
-	CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: After processing for account %s.\n", accountNrAsString);
+	//CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: After processing for account %s.\n", accountNrAsString);
 	
 	
 	item->pAccInfo->mutex->lock();
@@ -187,7 +187,7 @@ THREAD_RETURN CAAccountingInstance::processThread(void* a_param)
 	delete item->pDomDoc;
 	delete item;
 	
-	CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Processing finished.\n");
+	//CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Processing finished.\n");
 	
 	THREAD_RETURN_SUCCESS;
 }
@@ -219,11 +219,11 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		AccountHashEntry* entry = NULL;
 		AccountLoginHashEntry* loginEntry = NULL;
 		CAXMLErrorMessage* err = NULL;
-/*
+
 	UINT8 accountNrAsString[32];
 	print64(accountNrAsString, pAccInfo->accountNumber);
-	CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket start for account %s.\n", accountNrAsString);
-	*/	
+	//CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket start for account %s.\n", accountNrAsString);
+	
 		pAccInfo->mutex->lock();
 		
 		if (pAccInfo->authFlags & AUTH_DELETE_ENTRY)
@@ -272,16 +272,10 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		//CAMsg::printMsg( LOG_DEBUG, "Checking after %d session packets...\n", pAccInfo->sessionPackets);
 		
 		
-			if (1 == 1)
-	{
-		pAccInfo->mutex->unlock();
-		return 1;
-	}
-		
 		
 		if (pAccInfo->authFlags & AUTH_ACCOUNT_OK)
 		{
-			//CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket OK for account %s.\n", accountNrAsString);
+			CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket OK for account %s.\n", accountNrAsString);
 			
 			// this user is authenticated; test if he has logged in more than one time
 			
@@ -310,6 +304,12 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			}
 			ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();
 		}
+		
+					if (1 == 1)
+	{
+		pAccInfo->mutex->unlock();
+		return 1;
+	}
 		
 		//CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket settle for account %s.\n", accountNrAsString);
 		
