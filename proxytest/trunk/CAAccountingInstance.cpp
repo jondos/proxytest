@@ -61,8 +61,7 @@ const UINT32 CAAccountingInstance::MAX_TOLERATED_MULTIPLE_LOGINS = 10;
 /**
  * private Constructor
  */
-CAAccountingInstance::CAAccountingInstance(CAMix* callingMix, volatile UINT32& a_userNumbers) :
-	m_userNumbers(a_userNumbers)
+CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
 	{	
 		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance initialising\n" );
 		
@@ -1068,14 +1067,13 @@ void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, 
 		pAccInfo->mutex->unlock();
 		return ;
 	}
-		
-		
-	pAccInfo->authFlags |= AUTH_ACCOUNT_OK;
+	
 	
 	/** @todo We need this trick so that the program does not freeze with active AI ThreadPool!!!! */
 	//pAccInfo->mutex->unlock();
-	
 	m_currentAccountsHashtable->getMutex().lock();	
+	pAccInfo->authFlags |= AUTH_ACCOUNT_OK;
+	
 	loginEntry = (AccountLoginHashEntry*)m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));	
 	if (!loginEntry)
 	{
@@ -1085,6 +1083,12 @@ void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, 
 		loginEntry->count = 1;
 		loginEntry->userID = pAccInfo->userID;
 		m_currentAccountsHashtable->put(&(loginEntry->accountNumber), loginEntry);
+		if (!(AccountLoginHashEntry*)m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber)))
+		{
+			UINT8 accountNrAsString[32];
+			print64(accountNrAsString, pAccInfo->accountNumber);
+			CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: Could not insert login entry for account %s!", accountNrAsString);
+		}
 	}	
 	else
 	{
@@ -1095,7 +1099,6 @@ void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, 
 		/*
 		 * There already is a user logged in with this account.
  		 */
- 		m_userNumbers--; // this is needed to correct the Mix user numbers 
  		 
 		UINT8 accountNrAsString[32];
 		print64(accountNrAsString, pAccInfo->accountNumber);
@@ -1307,13 +1310,18 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 		AccountHashEntry* entry;
 		SINT32 prepaidBytes = 0;
 		
-		if (pAccInfo != NULL)
+		if (pAccInfo == NULL)
 		{
-			pAccInfo->mutex->lock();
-			
-			pHashEntry->pAccountingInfo=NULL;
-			
-			if (pAccInfo->accountNumber)
+			return E_UNKNOWN;
+		}
+		
+		pAccInfo->mutex->lock();
+		
+		pHashEntry->pAccountingInfo=NULL;
+		
+		if (pAccInfo->accountNumber)
+		{
+			if (pAccInfo->authFlags & AUTH_ACCOUNT_OK)
 			{
 				// remove login
 				ms_pInstance->m_currentAccountsHashtable->getMutex().lock();
@@ -1329,7 +1337,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 							ms_pInstance->m_dbInterface->storePrepaidAmount(pAccInfo->accountNumber,prepaidBytes, ms_pInstance->m_currentCascade);
 						}
 					}					
-					
+
 					if (loginEntry->count <= 1)
 					{
 						if (loginEntry->count < 1)
@@ -1357,77 +1365,76 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 							ms_pInstance->m_settleHashtable->getMutex().unlock();					
 						}	
 					}
-					else if (pAccInfo->authFlags & AUTH_ACCOUNT_OK)
+					else
 					{
 						// there are other connections from this user
-						ms_pInstance->m_userNumbers++; // this is needed to correct the Mix user numbers
 						loginEntry->count--;
 					}
 				}
-				else if (pAccInfo->authFlags & AUTH_ACCOUNT_OK)
+				else
 				{
 					CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: Cleanup did not find user login hash entry!\n");
 				}
-				ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();																						
-			}
-			else
+				ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();	
+			}																					
+		}
+		else
+		{
+			CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Cleanup method found account zero.\n");
+		}
+		
+		//free memory of pAccInfo
+		if ( pAccInfo->pPublicKey!=NULL )
+		{
+			delete pAccInfo->pPublicKey;
+		}
+		if ( pAccInfo->pChallenge!=NULL )
+		{
+			delete [] pAccInfo->pChallenge;
+		}
+		if ( pAccInfo->pstrBIID!=NULL )
+		{
+			delete [] pAccInfo->pstrBIID;
+		}
+					
+		
+		pHashEntry->pAccountingInfo=NULL;	
+		
+		if (pAccInfo->nrInQueue > 0)
+		{
+			/*
+			if (pAccInfo->accountNumber == 0)
 			{
-				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Cleanup method found account zero.\n");
-			}
-			
-			//free memory of pAccInfo
-			if ( pAccInfo->pPublicKey!=NULL )
+				CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: AI queue entries found for account zero: %u!\n", pAccInfo->nrInQueue);
+			}	
+			else if (!(pAccInfo->authFlags & AUTH_ACCOUNT_OK))
 			{
-				delete pAccInfo->pPublicKey;
+				UINT8 accountNrAsString[32];
+				print64(accountNrAsString, pAccInfo->accountNumber);
+				CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: AI queue entries found for unauthorized account %s: %u!\n", accountNrAsString, pAccInfo->nrInQueue);
 			}
-			if ( pAccInfo->pChallenge!=NULL )
-			{
-				delete [] pAccInfo->pChallenge;
+			else*/
+			{	
+				// there are still entries in the ai queue; empty it before deletion; we cannot delete it now
+				pAccInfo->authFlags |= AUTH_DELETE_ENTRY;
 			}
-			if ( pAccInfo->pstrBIID!=NULL )
-			{
-				delete [] pAccInfo->pstrBIID;
-			}
-						
-			
-			pHashEntry->pAccountingInfo=NULL;	
-			
-			if (pAccInfo->nrInQueue > 0)
-			{
-				/*
-				if (pAccInfo->accountNumber == 0)
-				{
-					CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: AI queue entries found for account zero: %u!\n", pAccInfo->nrInQueue);
-				}	
-				else if (!(pAccInfo->authFlags & AUTH_ACCOUNT_OK))
-				{
-					UINT8 accountNrAsString[32];
-					print64(accountNrAsString, pAccInfo->accountNumber);
-					CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: AI queue entries found for unauthorized account %s: %u!\n", accountNrAsString, pAccInfo->nrInQueue);
-				}
-				else*/
-				{	
-					// there are still entries in the ai queue; empty it before deletion; we cannot delete it now
-					pAccInfo->authFlags |= AUTH_DELETE_ENTRY;
-				}
-			}
-			else if (pAccInfo->nrInQueue < 0)
-			{
-				CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: Cleanup method found negative handle queue!\n");
-			}
-			pAccInfo->mutex->unlock();
-			
-			if (!(pAccInfo->authFlags & AUTH_DELETE_ENTRY))
-			{
-				// there are no handles for this entry in the queue, we can savely delete it now
-				delete pAccInfo->mutex;
-				pAccInfo->mutex = NULL;
-				delete pAccInfo;
-			}
-			else
-			{
-				CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Cleanup method sent account deletion request to AI thread!\n");
-			}
+		}
+		else if (pAccInfo->nrInQueue < 0)
+		{
+			CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: Cleanup method found negative handle queue!\n");
+		}
+		pAccInfo->mutex->unlock();
+		
+		if (!(pAccInfo->authFlags & AUTH_DELETE_ENTRY))
+		{
+			// there are no handles for this entry in the queue, we can savely delete it now
+			delete pAccInfo->mutex;
+			pAccInfo->mutex = NULL;
+			delete pAccInfo;
+		}
+		else
+		{
+			CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Cleanup method sent account deletion request to AI thread!\n");
 		}
 		//ms_pInstance->m_Mutex.unlock();
 		
