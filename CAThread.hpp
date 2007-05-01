@@ -79,6 +79,12 @@ typedef THREAD_RETURN(*THREAD_MAIN_TYP)(void *);
 class CAThread
 	{
 		public:
+			struct METHOD_STACK
+			{
+				UINT8* strMethodName;
+				SINT32 position;
+			};
+		
 			/** Creates a CAThread object but no actual thread.
 				*/
 			CAThread();
@@ -96,8 +102,9 @@ class CAThread
 						delete m_strName;
 				}
 				
-			static void setValue(void* a_strMethod);	
-			static void* getValue();
+			
+			static void setCurrentStack(METHOD_STACK* a_stack);	
+			static METHOD_STACK* getCurrentStack();
 			
 			
 			/** Sets the main function which will be executed within this thread.
@@ -166,8 +173,11 @@ class CAThread
 					return E_SUCCESS;
 				}
 */
+
+			static const SINT32 METHOD_BEGIN;
+			static const SINT32 METHOD_END;
 		private:
-			static void destroyValue(void *a_value);
+			static void destroyValue(void* a_stack);
 			static void initKey();
 		
 		

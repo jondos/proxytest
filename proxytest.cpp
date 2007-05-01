@@ -98,6 +98,27 @@ void removePidFile()
 void signal_segv( int ) 
 {
 	CAMsg::printMsg(LOG_CRIT,"Oops ... caught SIG_SEGV! Exiting ...\n");
+	CAThread::METHOD_STACK* stack = CAThread::getCurrentStack();
+	if (stack != NULL)
+	{
+		if (CAThread::METHOD_BEGIN == stack->position)
+		{
+			CAMsg::printMsg( LOG_INFO, "Stack trace: %s, BEGIN\n", stack->strMethodName);
+		}
+		else if (CAThread::METHOD_END == stack->position)
+		{
+			CAMsg::printMsg( LOG_INFO, "Stack trace: %s, END\n", stack->strMethodName);
+		}
+		else
+		{
+			CAMsg::printMsg( LOG_INFO, "Stack trace: %s, %d\n", stack->strMethodName, stack->position);
+		}
+	}
+	else
+	{
+		CAMsg::printMsg( LOG_INFO, "Stack trace: none available\n");
+	}
+	
 	removePidFile();
 	exit(1);
 }

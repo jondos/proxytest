@@ -34,6 +34,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 pthread_once_t CAThread::ms_threadKeyInit = PTHREAD_ONCE_INIT;
 pthread_key_t CAThread::ms_threadKey; 
 
+const SINT32 CAThread::METHOD_BEGIN = 0;
+const SINT32 CAThread::METHOD_END = -1;
+
+
 CAThread::CAThread()
 	{
 		m_fncMainLoop=NULL;
@@ -55,7 +59,7 @@ CAThread::CAThread(const UINT8* strName)
 			}
 	}
 
-void CAThread::destroyValue(void *a_value) 
+void CAThread::destroyValue(void* a_value) 
 { 
 	if (a_value)
 	{
@@ -69,7 +73,7 @@ void CAThread::initKey()
 }
 
 
-void CAThread::setValue(void* a_value)
+void CAThread::setCurrentStack(METHOD_STACK* a_value)
 {
 	pthread_once(&ms_threadKeyInit, initKey); 
 	void *value = pthread_getspecific(ms_threadKey); 
@@ -81,11 +85,13 @@ void CAThread::setValue(void* a_value)
 	pthread_setspecific(ms_threadKey, value); 
 }
 
-void* CAThread::getValue()
+CAThread::METHOD_STACK* CAThread::getCurrentStack()
 {
 	pthread_once(&ms_threadKeyInit, initKey); 
-	return pthread_getspecific(ms_threadKey); 
+	return (METHOD_STACK*)pthread_getspecific(ms_threadKey); 
 }
+
+
 
 
 SINT32 CAThread::start(void* param,bool bDaemon,bool bSilent)
