@@ -803,9 +803,9 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 									msSleep(400);
 								}
 							}
-							else if (options.getMaxNrOfUsers() > 0 && pFirstMix->m_nUser >= options.getMaxNrOfUsers())
+							else if (options.getMaxNrOfUsers() > 0 && pFirstMix->getNrOfUsers() >= options.getMaxNrOfUsers())
 							{
-								CAMsg::printMsg(LOG_DEBUG,"CAFirstMix User control: Too many users (Maximum:%d)! Rejecting user...\n", pFirstMix->m_nUser, options.getMaxNrOfUsers());
+								CAMsg::printMsg(LOG_DEBUG,"CAFirstMix User control: Too many users (Maximum:%d)! Rejecting user...\n", pFirstMix->getNrOfUsers(), options.getMaxNrOfUsers());
 								delete pNewMuxSocket;
 								pFirstMix->m_newConnections--;
 								msSleep(400);

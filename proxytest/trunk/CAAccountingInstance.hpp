@@ -133,7 +133,7 @@ public:
 	*/
 	SINT32 static processJapMessage(fmHashTableEntry * pHashEntry,const DOM_Document& a_DomDoc);
 	
-	
+	UINT32 static getNrOfUsers();
 
 private:
 
