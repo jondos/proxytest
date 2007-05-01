@@ -72,7 +72,7 @@ typedef struct
 	#ifdef _DEBUG
 		void signal_broken_pipe( int sig)
 			{
-				CAMsg::printMsg(LOG_WARNING,"Hm.. Broken Pipe.... How cares!\n");
+				CAMsg::printMsg(LOG_WARNING,"Hm.. Broken Pipe.... Who cares!\n");
 				signal(SIGPIPE,signal_broken_pipe);
 			}
 	#endif
@@ -95,8 +95,15 @@ void removePidFile()
 			}
 	}
 
+void signal_segv( int ) 
+{
+	CAMsg::printMsg(LOG_CRIT,"Oops ... caught SIG_SEGV! Exiting ...\n");
+	removePidFile();
+	exit(1);
+}
+
 void signal_term( int )
-	{
+	{ 
 		CAMsg::printMsg(LOG_INFO,"Hm.. Signal SIG_TERM received... exiting!\n");
 		removePidFile();
 		exit(0);
@@ -578,6 +585,7 @@ int main(int argc, const char* argv[])
 #endif
 		signal(SIGINT,signal_interrupt);
 		signal(SIGTERM,signal_term);
+		signal(SIGSEGV,signal_segv);
 
 		//Try to write pidfile....
 		UINT8 strPidFile[512];

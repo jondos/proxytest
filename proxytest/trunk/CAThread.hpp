@@ -84,7 +84,7 @@ class CAThread
 			CAThread();
 
 			/** Creates a CAThread object but no actual thread.
-				* @param strName a name for this thread, usefull mostly for debugging
+				* @param strName a name for this thread, useful mostly for debugging
 				*/
 			CAThread(const UINT8* strName);
 			
@@ -95,6 +95,10 @@ class CAThread
 					if(m_strName!=NULL)
 						delete m_strName;
 				}
+				
+			static void setValue(void* a_strMethod);	
+			static void* getValue();
+			
 			
 			/** Sets the main function which will be executed within this thread.
 				*
@@ -163,6 +167,13 @@ class CAThread
 				}
 */
 		private:
+			static void destroyValue(void *a_value);
+			static void initKey();
+		
+		
+			static pthread_key_t ms_threadKey; 
+			static pthread_once_t ms_threadKeyInit;
+		
 			THREAD_MAIN_TYP m_fncMainLoop;
 	 		pthread_t* m_pThread;
 			UINT8* m_strName; //< a name mostly for debuging purpose...
