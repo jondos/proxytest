@@ -31,6 +31,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAUtil.hpp"
 #include "CAMsg.hpp"
 
+pthread_once_t CAThread::ms_threadKeyInit = PTHREAD_ONCE_INIT;
+pthread_key_t CAThread::ms_threadKey; 
+
 CAThread::CAThread()
 	{
 		m_fncMainLoop=NULL;
@@ -51,6 +54,39 @@ CAThread::CAThread(const UINT8* strName)
 				m_strName[len]=0;
 			}
 	}
+
+void CAThread::destroyValue(void *a_value) 
+{ 
+	if (a_value)
+	{
+		delete a_value; 
+	}
+}
+
+void CAThread::initKey() 
+{ 
+	pthread_key_create(&ms_threadKey, destroyValue); 
+}
+
+
+void CAThread::setValue(void* a_value)
+{
+	pthread_once(&ms_threadKeyInit, initKey); 
+	void *value = pthread_getspecific(ms_threadKey); 
+	if (value != NULL) 
+	{
+		 delete value;
+	}
+	value = a_value; 
+	pthread_setspecific(ms_threadKey, value); 
+}
+
+void* CAThread::getValue()
+{
+	pthread_once(&ms_threadKeyInit, initKey); 
+	return pthread_getspecific(ms_threadKey); 
+}
+
 
 SINT32 CAThread::start(void* param,bool bDaemon,bool bSilent)
 	{
