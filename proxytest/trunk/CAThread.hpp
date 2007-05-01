@@ -29,6 +29,14 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define __CATHREAD__
 #include "CAMsg.hpp"
 
+#define INIT_STACK CAThread::METHOD_STACK* stack
+#define SAVE_STACK(methodName, methodPosition) \
+stack = new CAThread::METHOD_STACK; \
+stack->strMethodName = (methodName); \
+stack->position = (methodPosition); \
+CAThread::setCurrentStack(stack)
+
+
 /** Defines the type of the main function of the thread. The main function has one argument of type void*.
 	*	The exit points of the main function should be THREAD_RETURN_SUCCESS or THREAD_RETRUN_ERROR. 
 	*
@@ -81,7 +89,7 @@ class CAThread
 		public:
 			struct METHOD_STACK
 			{
-				UINT8* strMethodName;
+				const char* strMethodName;
 				SINT32 position;
 			};
 		

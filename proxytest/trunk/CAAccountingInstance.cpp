@@ -104,6 +104,9 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
  */
 CAAccountingInstance::~CAAccountingInstance()
 	{
+		INIT_STACK;
+		SAVE_STACK("~CAAccountingInstance",CAThread::METHOD_BEGIN);
+		
 		m_Mutex.lock();
 		
 		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance dying\n" );
@@ -139,6 +142,8 @@ CAAccountingInstance::~CAAccountingInstance()
 		
 		m_Mutex.unlock();
 		
+		SAVE_STACK("~CAAccountingInstance",CAThread::METHOD_END);
+		
 		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance dying finished.\n" );		
 	}
 
@@ -160,6 +165,9 @@ UINT32 CAAccountingInstance::getNrOfUsers()
 
 THREAD_RETURN CAAccountingInstance::processThread(void* a_param)
 {
+	INIT_STACK;
+	SAVE_STACK("CAAccountingInstance::processThread",CAThread::METHOD_BEGIN);
+	
 	aiQueueItem* item = (aiQueueItem*)a_param;
 	bool bDelete = false;
 	DOM_Element elem = item->pDomDoc->getDocumentElement();
@@ -211,6 +219,9 @@ THREAD_RETURN CAAccountingInstance::processThread(void* a_param)
  */
 SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool a_bControlMessage, bool a_bMessageToJAP)
 	{	
+		INIT_STACK;
+		SAVE_STACK("handleJapPacket",CAThread::METHOD_BEGIN);
+		
 		if (pHashEntry == NULL || pHashEntry->pAccountingInfo == NULL)
 		{
 			return 3;
@@ -539,6 +550,9 @@ SINT32 CAAccountingInstance::returnHold(tAiAccountingInfo* pAccInfo, CAXMLErrorM
 
 SINT32 CAAccountingInstance::sendCCRequest(tAiAccountingInfo* pAccInfo)
 {
+	INIT_STACK;
+	SAVE_STACK("CAAccountingInstance::sendCCRequest",CAThread::METHOD_BEGIN);
+	
 	DOM_Document doc;                
     UINT32 prepaidInterval;
     options.getPrepaidIntervalKbytes(&prepaidInterval);
@@ -696,6 +710,9 @@ SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName
 
 SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UINT64 transferredBytes, DOM_Document& doc)
 	{
+		INIT_STACK;
+		SAVE_STACK("makeCCRequest",CAThread::METHOD_BEGIN);
+		
 		DOM_Node elemCC;
 		
 		doc = DOM_Document::createDocument();
@@ -725,6 +742,9 @@ SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UIN
  */
 SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,const DOM_Document& a_DomDoc)
 	{
+		INIT_STACK;
+		SAVE_STACK("CAAccountingInstance::processJapMessage",CAThread::METHOD_BEGIN);
+		
 		if (pHashEntry == NULL)
 		{
 			return E_UNKNOWN;
@@ -811,6 +831,9 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
  */
 void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo, DOM_Element &root)
 	{
+		INIT_STACK;
+		SAVE_STACK("CAAccountingInstance::handleAccountCertificate",CAThread::METHOD_BEGIN);
+		
 		//CAMsg::printMsg(LOG_DEBUG, "started method handleAccountCertificate\n");
 		DOM_Element elGeneral;
 		timespec now;
@@ -1017,6 +1040,9 @@ void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo,
  */
 void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, DOM_Element &root)
 {
+	INIT_STACK;
+	SAVE_STACK("CAAccountingInstance::handleChallengeResponse",CAThread::METHOD_BEGIN);
+	
 	//CAMsg::printMsg(LOG_DEBUG, "started method handleChallengeResponse\n");
 	
 	UINT8 decodeBuffer[ 512 ];
@@ -1177,6 +1203,8 @@ void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, 
  */
 void CAAccountingInstance::handleCostConfirmation(tAiAccountingInfo* pAccInfo, DOM_Element &root)
 {
+	INIT_STACK;
+	SAVE_STACK("CAAccountingInstance::handleCostConfirmation",CAThread::METHOD_BEGIN);
 	//CAMsg::printMsg(LOG_DEBUG, "started method handleCostConfirmation\n");
 
 
@@ -1295,6 +1323,9 @@ void CAAccountingInstance::handleCostConfirmation(tAiAccountingInfo* pAccInfo, D
  */
 SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 {
+	INIT_STACK;
+	SAVE_STACK("CAAccountingInstance::initTableEntry",CAThread::METHOD_BEGIN);
+	
 	//ms_pInstance->m_Mutex.lock();
 	pHashEntry->pAccountingInfo = new tAiAccountingInfo;
 	memset( pHashEntry->pAccountingInfo, 0, sizeof( tAiAccountingInfo ) );
@@ -1321,6 +1352,9 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
  */
 SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 	{
+		INIT_STACK;
+		SAVE_STACK("CAAccountingInstance::cleanupTableEntry",CAThread::METHOD_BEGIN);
+		
 		//ms_pInstance->m_Mutex.lock();
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
 		AccountLoginHashEntry* loginEntry;
@@ -1329,6 +1363,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 		
 		if (pAccInfo == NULL)
 		{
+			SAVE_STACK("CAAccountingInstance::cleanupTableEntry",1);
 			return E_UNKNOWN;
 		}
 		
@@ -1454,6 +1489,8 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Cleanup method sent account deletion request to AI thread!\n");
 		}
 		//ms_pInstance->m_Mutex.unlock();
+		
+		SAVE_STACK("CAAccountingInstance::cleanupTableEntry",CAThread::METHOD_END);
 		
 		return E_SUCCESS;
 	}
