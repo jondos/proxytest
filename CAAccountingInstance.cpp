@@ -142,6 +142,22 @@ CAAccountingInstance::~CAAccountingInstance()
 		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance dying finished.\n" );		
 	}
 
+UINT32 CAAccountingInstance::getNrOfUsers()
+{
+	UINT32 users = 0;
+	
+	if (ms_pInstance)
+	{
+		ms_pInstance->m_Mutex.lock();
+		// getting the size is an atomic operation and does not need synchronization
+		users = ms_pInstance->m_currentAccountsHashtable->getSize();
+		ms_pInstance->m_Mutex.unlock();
+	}
+	
+	return users;
+}
+
+
 THREAD_RETURN CAAccountingInstance::processThread(void* a_param)
 {
 	aiQueueItem* item = (aiQueueItem*)a_param;
@@ -772,6 +788,7 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 			{
 				pItem->pAccInfo->nrInQueue--;
 				CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: Process could not add to AI thread pool!\n" );
+				delete pItem->pDomDoc;
 				delete pItem;
 			}
 			pHashEntry->pAccountingInfo->mutex->unlock();

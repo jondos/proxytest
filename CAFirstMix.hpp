@@ -140,9 +140,18 @@ public:
 					return E_SUCCESS;
 				}
 
+			UINT32 getNrOfUsers() const
+			{
+				#ifdef PAYMENT
+				return CAAccountingInstance::getNrOfUsers();
+				#else
+				return m_nUser;
+				#endif	
+			}
+
 			SINT32 getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic) const
 				{
-					*puser=(SINT32)m_nUser;
+					*puser=(SINT32)getNrOfUsers();
 					*prisk=-1;
 					*ptraffic=-1;
 					return E_SUCCESS;
