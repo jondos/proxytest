@@ -30,7 +30,7 @@ class Hashtable
 		void* put(void *key,void *value);
 		void *remove(void *key);
 
-		void makeEmpty(SINT8 keyMode = HASH_EMPTY_NONE,SINT8 valueMode = HASH_EMPTY_NONE);
+		void clear(SINT8 keyMode = HASH_EMPTY_NONE,SINT8 valueMode = HASH_EMPTY_NONE);
 		
 	protected:
 		bool rehash();

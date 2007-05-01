@@ -343,7 +343,7 @@ void *Hashtable::remove(void *key)
 }
 
 
-void Hashtable::makeEmpty(SINT8 keyMode,SINT8 valueMode)
+void Hashtable::clear(SINT8 keyMode,SINT8 valueMode)
 {	
 	if (!m_table)
 	{

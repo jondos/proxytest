@@ -121,13 +121,13 @@ CAAccountingInstance::~CAAccountingInstance()
 		delete[] m_AiName;
 		m_AiName = NULL;
 		
-		m_currentAccountsHashtable->makeEmpty(HASH_EMPTY_NONE, HASH_EMPTY_DELETE);
+		m_currentAccountsHashtable->clear(HASH_EMPTY_NONE, HASH_EMPTY_DELETE);
 		delete m_currentAccountsHashtable;
 		m_currentAccountsHashtable = NULL;
 		
 		m_settleHashtable->getMutex().lock();
 		CAMsg::printMsg( LOG_DEBUG, "CAAccountingInstance: Clearing settle hashtable...\n");
-		m_settleHashtable->makeEmpty(HASH_EMPTY_NONE, HASH_EMPTY_DELETE);
+		m_settleHashtable->clear(HASH_EMPTY_NONE, HASH_EMPTY_DELETE);
 		m_settleHashtable->getMutex().unlock();
 		CAMsg::printMsg( LOG_DEBUG, "CAAccountingInstance: Deleting settle hashtable...\n" );
 		delete m_settleHashtable;
