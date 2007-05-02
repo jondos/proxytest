@@ -29,12 +29,13 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define __CATHREAD__
 #include "CAMsg.hpp"
 
-#define INIT_STACK CAThread::METHOD_STACK* stack
-#define SAVE_STACK(methodName, methodPosition) \
-stack = new CAThread::METHOD_STACK; \
-stack->strMethodName = (methodName); \
-stack->position = (methodPosition); \
-CAThread::setCurrentStack(stack)
+#define INIT_STACK CAThread::METHOD_STACK* _stack; UINT32 _stackCounter = CAThread::METHOD_BEGIN;
+#define SAVE_STACK(methodName) \
+_stack = new CAThread::METHOD_STACK; \
+_stack->strMethodName = (methodName); \
+_stack->position = (_stackCounter); \
+_stackCounter++; \
+CAThread::setCurrentStack(_stack)
 
 
 /** Defines the type of the main function of the thread. The main function has one argument of type void*.

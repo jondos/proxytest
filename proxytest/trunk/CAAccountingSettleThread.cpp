@@ -66,7 +66,7 @@ CAAccountingSettleThread::~CAAccountingSettleThread()
 THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 	{
 		INIT_STACK;
-		SAVE_STACK("CAAccountingSettleThread::mainLoop",CAThread::METHOD_BEGIN);
+		SAVE_STACK("CAAccountingSettleThread::mainLoop");
 		
 		CAAccountingSettleThread* m_pAccountingSettleThread=(CAAccountingSettleThread*)pParam;
 		CAAccountingBIInterface biConn;
@@ -95,7 +95,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 
 		while(m_pAccountingSettleThread->m_bRun)
 		{
-			SAVE_STACK("CAAccountingSettleThread::mainLoop",1);
+			SAVE_STACK("CAAccountingSettleThread::mainLoop");
 			
 			//#ifdef DEBUG
 				CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread going to sleep...\n");
@@ -129,11 +129,11 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				UINT32 nrOfCCs = qSize / sizeof(pCC); 
 				CAMsg::printMsg(LOG_DEBUG, "SettleThread: finished gettings CCs, found %u cost confirmations to settle\n",nrOfCCs);	
 			}
-			SAVE_STACK("CAAccountingSettleThread::mainLoop",2);
+			SAVE_STACK("CAAccountingSettleThread::mainLoop");
 			entry = NULL;
 			while(!q.isEmpty())
 			{
-				SAVE_STACK("CAAccountingSettleThread::mainLoop",3);
+				SAVE_STACK("CAAccountingSettleThread::mainLoop");
 				// get the next CC from the queue
 				size = sizeof(pCC);
 				if(q.get((UINT8*)(&pCC), &size)!=E_SUCCESS)
