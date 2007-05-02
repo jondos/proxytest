@@ -131,7 +131,7 @@ void signal_segv( int )
 		CAMsg::printMsg( LOG_CRIT, "Stack trace: none available\n");
 	}
 	
-	terminate();
+	//terminate();
 	removePidFile();
 	exit(1);
 }
@@ -142,7 +142,7 @@ void signal_segv( int )
 void signal_term( int )
 	{ 
 		CAMsg::printMsg(LOG_INFO,"Hm.. Signal SIG_TERM received... exiting!\n");
-		terminate();
+		//terminate();
 		removePidFile();
 		exit(0);
 	}
@@ -150,7 +150,7 @@ void signal_term( int )
 void signal_interrupt( int)
 	{
 		CAMsg::printMsg(LOG_INFO,"Hm.. Strg+C pressed... exiting!\n");
-		terminate();
+		//terminate();
 		removePidFile();
 		exit(0);
 	}
