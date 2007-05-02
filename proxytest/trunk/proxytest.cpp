@@ -103,20 +103,20 @@ void signal_segv( int )
 	{
 		if (CAThread::METHOD_BEGIN == stack->position)
 		{
-			CAMsg::printMsg( LOG_INFO, "Stack trace: %s, BEGIN\n", stack->strMethodName);
+			CAMsg::printMsg( LOG_CRIT, "Stack trace: %s, BEGIN\n", stack->strMethodName);
 		}
 		else if (CAThread::METHOD_END == stack->position)
 		{
-			CAMsg::printMsg( LOG_INFO, "Stack trace: %s, END\n", stack->strMethodName);
+			CAMsg::printMsg( LOG_CRIT, "Stack trace: %s, END\n", stack->strMethodName);
 		}
 		else
 		{
-			CAMsg::printMsg( LOG_INFO, "Stack trace: %s, %d\n", stack->strMethodName, stack->position);
+			CAMsg::printMsg( LOG_CRIT, "Stack trace: %s, %d\n", stack->strMethodName, stack->position);
 		}
 	}
 	else
 	{
-		CAMsg::printMsg( LOG_INFO, "Stack trace: none available\n");
+		CAMsg::printMsg( LOG_CRIT, "Stack trace: none available\n");
 	}
 	
 	removePidFile();
