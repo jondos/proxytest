@@ -105,7 +105,7 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
 CAAccountingInstance::~CAAccountingInstance()
 	{
 		INIT_STACK;
-		SAVE_STACK("~CAAccountingInstance",CAThread::METHOD_BEGIN);
+		SAVE_STACK("~CAAccountingInstance");
 		
 		m_Mutex.lock();
 		
@@ -163,7 +163,7 @@ CAAccountingInstance::~CAAccountingInstance()
 		
 		m_Mutex.unlock();
 		
-		SAVE_STACK("~CAAccountingInstance",CAThread::METHOD_END);
+		SAVE_STACK("~CAAccountingInstance");
 		
 		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance dying finished.\n" );		
 	}
@@ -187,7 +187,7 @@ UINT32 CAAccountingInstance::getNrOfUsers()
 THREAD_RETURN CAAccountingInstance::processThread(void* a_param)
 {
 	INIT_STACK;
-	SAVE_STACK("CAAccountingInstance::processThread",CAThread::METHOD_BEGIN);
+	SAVE_STACK("CAAccountingInstance::processThread");
 	
 	aiQueueItem* item = (aiQueueItem*)a_param;
 	bool bDelete = false;
@@ -241,7 +241,7 @@ THREAD_RETURN CAAccountingInstance::processThread(void* a_param)
 SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool a_bControlMessage, bool a_bMessageToJAP)
 	{	
 		INIT_STACK;
-		SAVE_STACK("handleJapPacket",CAThread::METHOD_BEGIN);
+		SAVE_STACK("CAAccountingInstance::handleJapPacket");
 		
 		if (pHashEntry == NULL || pHashEntry->pAccountingInfo == NULL)
 		{
@@ -303,6 +303,8 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		/** @todo We need this trick so that the program does not freeze with active AI ThreadPool!!!! */
 		//pAccInfo->mutex->unlock();
 			
+			
+		SAVE_STACK("CAAccountingInstance::handleJapPacket");
 		if (pAccInfo->authFlags & AUTH_ACCOUNT_OK)
 		{
 			// this user is authenticated; test if he has logged in more than one time
@@ -338,7 +340,9 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			// accounting instance is dying...
 			return returnKickout(pAccInfo);
 		}
-
+	
+		SAVE_STACK("CAAccountingInstance::handleJapPacket");
+	
 		ms_pInstance->m_settleHashtable->getMutex().lock();
 		entry = (AccountHashEntry*)ms_pInstance->m_settleHashtable->getValue(&(pAccInfo->accountNumber));				
 		if (entry)
@@ -375,6 +379,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		/** @todo We need this trick so that the program does not freeze with active AI ThreadPool!!!! */
 		//pAccInfo->mutex->lock();
 		
+		SAVE_STACK("CAAccountingInstance::handleJapPacket");
 		
 		if (err)
 		{						
@@ -572,7 +577,7 @@ SINT32 CAAccountingInstance::returnHold(tAiAccountingInfo* pAccInfo, CAXMLErrorM
 SINT32 CAAccountingInstance::sendCCRequest(tAiAccountingInfo* pAccInfo)
 {
 	INIT_STACK;
-	SAVE_STACK("CAAccountingInstance::sendCCRequest",CAThread::METHOD_BEGIN);
+	SAVE_STACK("CAAccountingInstance::sendCCRequest");
 	
 	DOM_Document doc;                
     UINT32 prepaidInterval;
@@ -732,7 +737,7 @@ SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName
 SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UINT64 transferredBytes, DOM_Document& doc)
 	{
 		INIT_STACK;
-		SAVE_STACK("makeCCRequest",CAThread::METHOD_BEGIN);
+		SAVE_STACK("makeCCRequest");
 		
 		DOM_Node elemCC;
 		
@@ -764,7 +769,7 @@ SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UIN
 SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,const DOM_Document& a_DomDoc)
 	{
 		INIT_STACK;
-		SAVE_STACK("CAAccountingInstance::processJapMessage",CAThread::METHOD_BEGIN);
+		SAVE_STACK("CAAccountingInstance::processJapMessage");
 		
 		if (pHashEntry == NULL)
 		{
@@ -853,7 +858,7 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo, DOM_Element &root)
 	{
 		INIT_STACK;
-		SAVE_STACK("CAAccountingInstance::handleAccountCertificate",CAThread::METHOD_BEGIN);
+		SAVE_STACK("CAAccountingInstance::handleAccountCertificate");
 		
 		//CAMsg::printMsg(LOG_DEBUG, "started method handleAccountCertificate\n");
 		DOM_Element elGeneral;
@@ -1062,7 +1067,7 @@ void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo,
 void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, DOM_Element &root)
 {
 	INIT_STACK;
-	SAVE_STACK("CAAccountingInstance::handleChallengeResponse",CAThread::METHOD_BEGIN);
+	SAVE_STACK("CAAccountingInstance::handleChallengeResponse");
 	
 	//CAMsg::printMsg(LOG_DEBUG, "started method handleChallengeResponse\n");
 	
@@ -1225,7 +1230,7 @@ void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, 
 void CAAccountingInstance::handleCostConfirmation(tAiAccountingInfo* pAccInfo, DOM_Element &root)
 {
 	INIT_STACK;
-	SAVE_STACK("CAAccountingInstance::handleCostConfirmation",CAThread::METHOD_BEGIN);
+	SAVE_STACK("CAAccountingInstance::handleCostConfirmation");
 	//CAMsg::printMsg(LOG_DEBUG, "started method handleCostConfirmation\n");
 
 
@@ -1345,7 +1350,7 @@ void CAAccountingInstance::handleCostConfirmation(tAiAccountingInfo* pAccInfo, D
 SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 {
 	INIT_STACK;
-	SAVE_STACK("CAAccountingInstance::initTableEntry",CAThread::METHOD_BEGIN);
+	SAVE_STACK("CAAccountingInstance::initTableEntry");
 	
 	//ms_pInstance->m_Mutex.lock();
 	pHashEntry->pAccountingInfo = new tAiAccountingInfo;
@@ -1374,7 +1379,7 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 	{
 		INIT_STACK;
-		SAVE_STACK("CAAccountingInstance::cleanupTableEntry",CAThread::METHOD_BEGIN);
+		SAVE_STACK("CAAccountingInstance::cleanupTableEntry");
 		
 		//ms_pInstance->m_Mutex.lock();
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
@@ -1384,7 +1389,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 		
 		if (pAccInfo == NULL)
 		{
-			SAVE_STACK("CAAccountingInstance::cleanupTableEntry",1);
+			SAVE_STACK("CAAccountingInstance::cleanupTableEntry");
 			return E_UNKNOWN;
 		}
 		
@@ -1511,7 +1516,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 		}
 		//ms_pInstance->m_Mutex.unlock();
 		
-		SAVE_STACK("CAAccountingInstance::cleanupTableEntry",CAThread::METHOD_END);
+		SAVE_STACK("CAAccountingInstance::cleanupTableEntry");
 		
 		return E_SUCCESS;
 	}
