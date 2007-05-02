@@ -110,34 +110,55 @@ CAAccountingInstance::~CAAccountingInstance()
 		m_Mutex.lock();
 		
 		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance dying\n" );
-		delete m_pSettleThread;
+		if (m_pSettleThread)
+		{
+			delete m_pSettleThread;
+		}
 		m_pSettleThread = NULL;
 		
-		delete m_aiThreadPool;
+		if (m_aiThreadPool)
+		{
+			delete m_aiThreadPool;
+		}
 		m_aiThreadPool = NULL;
 		
-		m_dbInterface->terminateDBConnection();
-		delete m_dbInterface;
+		if (m_dbInterface)
+		{
+			m_dbInterface->terminateDBConnection();
+			delete m_dbInterface;
+		}
 		m_dbInterface = NULL;
 		//delete m_pIPBlockList;
 		//m_pIPBlockList = NULL;
-		delete[] m_AiName;
+		if (m_AiName)
+		{
+			delete[] m_AiName;
+		}
 		m_AiName = NULL;
 		
-		m_currentAccountsHashtable->clear(HASH_EMPTY_NONE, HASH_EMPTY_DELETE);
-		delete m_currentAccountsHashtable;
+		if (m_currentAccountsHashtable)
+		{
+			m_currentAccountsHashtable->clear(HASH_EMPTY_NONE, HASH_EMPTY_DELETE);
+			delete m_currentAccountsHashtable;
+		}
 		m_currentAccountsHashtable = NULL;
 		
-		m_settleHashtable->getMutex().lock();
-		CAMsg::printMsg( LOG_DEBUG, "CAAccountingInstance: Clearing settle hashtable...\n");
-		m_settleHashtable->clear(HASH_EMPTY_NONE, HASH_EMPTY_DELETE);
-		m_settleHashtable->getMutex().unlock();
-		CAMsg::printMsg( LOG_DEBUG, "CAAccountingInstance: Deleting settle hashtable...\n" );
-		delete m_settleHashtable;
+		if (m_settleHashtable)
+		{
+			m_settleHashtable->getMutex().lock();
+			CAMsg::printMsg( LOG_DEBUG, "CAAccountingInstance: Clearing settle hashtable...\n");
+			m_settleHashtable->clear(HASH_EMPTY_NONE, HASH_EMPTY_DELETE);
+			m_settleHashtable->getMutex().unlock();
+			CAMsg::printMsg( LOG_DEBUG, "CAAccountingInstance: Deleting settle hashtable...\n" );
+			delete m_settleHashtable;
+		}
 		m_settleHashtable = NULL;		
 		CAMsg::printMsg( LOG_DEBUG, "CAAccountingInstance: Settle hashtable deleted.\n" );				
 		
-		delete[] m_currentCascade;
+		if (m_currentCascade)
+		{
+			delete[] m_currentCascade;
+		}
 		m_currentCascade = NULL;
 		
 		m_Mutex.unlock();
