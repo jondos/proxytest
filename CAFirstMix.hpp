@@ -100,6 +100,7 @@ public:
 
     virtual ~CAFirstMix()
 			{
+				clean();
 				delete m_pmutexUser;
 				delete m_pmutexMixedPackets;
 				delete m_pmutexLoginThreads;
