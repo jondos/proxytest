@@ -28,6 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "StdAfx.h"
 #ifndef ONLY_LOCAL_PROXY
 #include "CAXMLBI.hpp"
+#include "CAMsg.hpp"
 
 const UINT8* const CAXMLBI::ms_pXmlElemName=(UINT8*)"PaymentInstance";
 
@@ -118,9 +119,14 @@ SINT32 CAXMLBI::setValues(DOM_Element &elemRoot)
 		getDOMChildByName(elem, (UINT8*)"X509Certificate", elemCert, false);
 		CACertificate *pPICert = CACertificate::decode(elemCert, CERT_X509CERTIFICATE, NULL);
 		if (pPICert != NULL)
-			{
-				m_pCert = pPICert;
-			}
+		{
+			m_pCert = pPICert;
+		}
+		else
+		{
+			CAMsg::printMsg(LOG_CRIT,"No certificate for payment instance available!\n");
+			return E_UNKNOWN;
+		}
 			
 		//Parse PI Host
 		DOM_Element elemNet;

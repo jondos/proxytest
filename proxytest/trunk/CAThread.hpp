@@ -29,13 +29,15 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define __CATHREAD__
 #include "CAMsg.hpp"
 
-#define INIT_STACK CAThread::METHOD_STACK* _stack; UINT32 _stackCounter = CAThread::METHOD_BEGIN;
-#define SAVE_STACK(methodName) \
+#define INIT_STACK CAThread::METHOD_STACK* _stack
+#define SAVE_STACK(methodName, methodPosition) \
 _stack = new CAThread::METHOD_STACK; \
 _stack->strMethodName = (methodName); \
-_stack->position = (_stackCounter); \
-_stackCounter++; \
+_stack->strPosition = (methodPosition); \
 CAThread::setCurrentStack(_stack)
+
+#define FINISH_STACK(methodName) SAVE_STACK(methodName, CAThread::METHOD_END)
+#define BEGIN_STACK(methodName) SAVE_STACK(methodName, CAThread::METHOD_BEGIN)
 
 
 /** Defines the type of the main function of the thread. The main function has one argument of type void*.
@@ -91,7 +93,7 @@ class CAThread
 			struct METHOD_STACK
 			{
 				const char* strMethodName;
-				SINT32 position;
+				const char* strPosition;
 			};
 		
 			/** Creates a CAThread object but no actual thread.
@@ -183,8 +185,8 @@ class CAThread
 				}
 */
 
-			static const SINT32 METHOD_BEGIN;
-			static const SINT32 METHOD_END;
+			static const char* METHOD_BEGIN;
+			static const char* METHOD_END;
 		private:
 			static void destroyValue(void* a_stack);
 			static void initKey();

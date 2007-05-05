@@ -148,21 +148,26 @@ private:
 	};
 	typedef struct t_aiqueueitem aiQueueItem;
 
+	static SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEntry, bool a_bControlMessage, bool a_bMessageToJAP);
+
 	/**
 	* Handles a cost confirmation sent by a jap
 	*/
 	void handleCostConfirmation(tAiAccountingInfo* pAccInfo, DOM_Element &root );
+	void handleCostConfirmation_internal(tAiAccountingInfo* pAccInfo, DOM_Element &root );
 
 	/**
 	* Handles an account certificate of a newly connected Jap.
 	*/
 	void handleAccountCertificate(tAiAccountingInfo* pAccInfo, DOM_Element &root );
+	void handleAccountCertificate_internal(tAiAccountingInfo* pAccInfo, DOM_Element &root );
 	
 	
 	/**
 	 * Checks the response of the challenge-response auth.
 	 */
 	void handleChallengeResponse(tAiAccountingInfo* pAccInfo, DOM_Element &root);
+	void handleChallengeResponse_internal(tAiAccountingInfo* pAccInfo, DOM_Element &root);
 
 	SINT32 prepareCCRequest(CAMix* callingMix, UINT8* a_AiName);			
 	static SINT32 makeCCRequest( const UINT64 accountNumber, const UINT64 transferredBytes, DOM_Document& doc);

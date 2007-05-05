@@ -34,8 +34,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 pthread_once_t CAThread::ms_threadKeyInit = PTHREAD_ONCE_INIT;
 pthread_key_t CAThread::ms_threadKey; 
 
-const SINT32 CAThread::METHOD_BEGIN = 0;
-const SINT32 CAThread::METHOD_END = -1;
+const char* CAThread::METHOD_BEGIN = "Begin of method";
+const char* CAThread::METHOD_END = "End of method";
 
 
 CAThread::CAThread()
