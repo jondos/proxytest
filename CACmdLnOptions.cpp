@@ -1677,6 +1677,11 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 			DOM_Element elemJPI;
 			getDOMChildByName(elemAccounting, CAXMLBI::getXMLElementName(), elemJPI, false);
 			m_pBI = CAXMLBI::getInstance(elemJPI);
+			if (m_pBI == NULL)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Could not instantiate payment instance interface!\n");
+				return E_UNKNOWN;
+			}
 			if (getDOMChildByName(elemAccounting, (UINT8*)"SoftLimit", elem, false) != E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Node \"SoftLimit\" not found!\n");

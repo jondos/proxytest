@@ -113,18 +113,8 @@ void signal_segv( int )
 	CAThread::METHOD_STACK* stack = CAThread::getCurrentStack();
 	if (stack != NULL)
 	{
-		if (CAThread::METHOD_BEGIN == stack->position)
-		{
-			CAMsg::printMsg( LOG_CRIT, "Stack trace: %s, BEGIN\n", stack->strMethodName);
-		}
-		else if (CAThread::METHOD_END == stack->position)
-		{
-			CAMsg::printMsg( LOG_CRIT, "Stack trace: %s, END\n", stack->strMethodName);
-		}
-		else
-		{
-			CAMsg::printMsg( LOG_CRIT, "Stack trace: %s, %d\n", stack->strMethodName, stack->position);
-		}
+		CAMsg::printMsg( LOG_CRIT, "Stack trace: %s, \"%s\"\n", stack->strMethodName, stack->strPosition);
+		
 	}
 	else
 	{

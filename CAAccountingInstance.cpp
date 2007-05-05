@@ -105,7 +105,7 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
 CAAccountingInstance::~CAAccountingInstance()
 	{
 		INIT_STACK;
-		SAVE_STACK("~CAAccountingInstance");
+		BEGIN_STACK("~CAAccountingInstance");
 		
 		m_Mutex.lock();
 		
@@ -163,7 +163,7 @@ CAAccountingInstance::~CAAccountingInstance()
 		
 		m_Mutex.unlock();
 		
-		SAVE_STACK("~CAAccountingInstance");
+		FINISH_STACK("~CAAccountingInstance");
 		
 		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance dying finished.\n" );		
 	}
@@ -187,7 +187,7 @@ UINT32 CAAccountingInstance::getNrOfUsers()
 THREAD_RETURN CAAccountingInstance::processThread(void* a_param)
 {
 	INIT_STACK;
-	SAVE_STACK("CAAccountingInstance::processThread");
+	BEGIN_STACK("CAAccountingInstance::processThread");
 	
 	aiQueueItem* item = (aiQueueItem*)a_param;
 	bool bDelete = false;
@@ -224,9 +224,20 @@ THREAD_RETURN CAAccountingInstance::processThread(void* a_param)
 	delete item->pDomDoc;
 	delete item;
 	
+	FINISH_STACK("CAAccountingInstance::processThread");
+		
 	THREAD_RETURN_SUCCESS;
 }
 
+SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool a_bControlMessage, bool a_bMessageToJAP)
+{
+	SINT32 ret = handleJapPacket_internal(pHashEntry, a_bControlMessage, a_bMessageToJAP);
+	
+	INIT_STACK;
+	FINISH_STACK("CAAccountingInstance::handleJapPacket");
+	
+	return ret;
+}
 
 /**
  * Called by FirstMix for each incoming JAP packet.
@@ -238,10 +249,10 @@ THREAD_RETURN CAAccountingInstance::processThread(void* a_param)
  * @return 3: fatal error, or timeout exceeded -> kick the user out
  * 
  */
-SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool a_bControlMessage, bool a_bMessageToJAP)
+SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEntry, bool a_bControlMessage, bool a_bMessageToJAP)
 	{	
 		INIT_STACK;
-		SAVE_STACK("CAAccountingInstance::handleJapPacket");
+		BEGIN_STACK("CAAccountingInstance::handleJapPacket");
 		
 		if (pHashEntry == NULL || pHashEntry->pAccountingInfo == NULL)
 		{
@@ -304,7 +315,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		//pAccInfo->mutex->unlock();
 			
 			
-		SAVE_STACK("CAAccountingInstance::handleJapPacket");
+		SAVE_STACK("CAAccountingInstance::handleJapPacket", "before accounts hash");
 		if (pAccInfo->authFlags & AUTH_ACCOUNT_OK)
 		{
 			// this user is authenticated; test if he has logged in more than one time
@@ -341,7 +352,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 			return returnKickout(pAccInfo);
 		}
 	
-		SAVE_STACK("CAAccountingInstance::handleJapPacket");
+		SAVE_STACK("CAAccountingInstance::handleJapPacket", "before settle hash");
 	
 		ms_pInstance->m_settleHashtable->getMutex().lock();
 		entry = (AccountHashEntry*)ms_pInstance->m_settleHashtable->getValue(&(pAccInfo->accountNumber));				
@@ -379,7 +390,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
 		/** @todo We need this trick so that the program does not freeze with active AI ThreadPool!!!! */
 		//pAccInfo->mutex->lock();
 		
-		SAVE_STACK("CAAccountingInstance::handleJapPacket");
+		SAVE_STACK("CAAccountingInstance::handleJapPacket", "before err");
 		
 		if (err)
 		{						
@@ -577,7 +588,7 @@ SINT32 CAAccountingInstance::returnHold(tAiAccountingInfo* pAccInfo, CAXMLErrorM
 SINT32 CAAccountingInstance::sendCCRequest(tAiAccountingInfo* pAccInfo)
 {
 	INIT_STACK;
-	SAVE_STACK("CAAccountingInstance::sendCCRequest");
+	BEGIN_STACK("CAAccountingInstance::sendCCRequest");
 	
 	DOM_Document doc;                
     UINT32 prepaidInterval;
@@ -599,6 +610,8 @@ SINT32 CAAccountingInstance::sendCCRequest(tAiAccountingInfo* pAccInfo)
 	CAMsg::printMsg(LOG_DEBUG, "the CC sent looks like this: %s \n",debugout);
 	*/
 #endif				
+	
+	FINISH_STACK("CAAccountingInstance::sendCCRequest");
 	
 	return pAccInfo->pControlChannel->sendXMLMessage(doc);
 }
@@ -737,7 +750,7 @@ SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName
 SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UINT64 transferredBytes, DOM_Document& doc)
 	{
 		INIT_STACK;
-		SAVE_STACK("makeCCRequest");
+		BEGIN_STACK("CAAccountingInstance::makeCCRequest");
 		
 		DOM_Node elemCC;
 		
@@ -752,6 +765,8 @@ SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UIN
 		DOM_Element elemBytes = doc.createElement("TransferredBytes");
 		setDOMElementValue(elemBytes, transferredBytes);
 		elemCC.appendChild(elemBytes);
+		
+		FINISH_STACK("CAAccountingInstance::makeCCRequest");
 
 		return E_SUCCESS;
 	}
@@ -769,7 +784,7 @@ SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UIN
 SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,const DOM_Document& a_DomDoc)
 	{
 		INIT_STACK;
-		SAVE_STACK("CAAccountingInstance::processJapMessage");
+		BEGIN_STACK("CAAccountingInstance::processJapMessage");
 		
 		if (pHashEntry == NULL)
 		{
@@ -814,6 +829,8 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 					"AI Received XML message with unknown root element \"%s\". This is not accepted!\n",
 											docElementName 
 										);
+										
+			SAVE_STACK("CAAccountingInstance::processJapMessage", "error");
 			return E_UNKNOWN;
 		}
 
@@ -843,8 +860,19 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 	
 		// remove these lines if AI thread pool is used (see @todo above)
 		(ms_pInstance->*handleFunc)(pHashEntry->pAccountingInfo, root );
+		
+		FINISH_STACK("CAAccountingInstance::processJapMessage");
 		return E_SUCCESS;
 	}
+
+void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo, DOM_Element &root)
+{
+	handleAccountCertificate_internal(pAccInfo, root);
+	
+	INIT_STACK;
+	FINISH_STACK("CAAccountingInstance::handleAccountCertificate");
+}
+
 
 
 /**
@@ -855,10 +883,10 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
  * TODO: think about switching account without changing mixcascade
  *   (receive a new acc.cert. though we already have one)
  */
-void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo, DOM_Element &root)
+void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* pAccInfo, DOM_Element &root)
 	{
 		INIT_STACK;
-		SAVE_STACK("CAAccountingInstance::handleAccountCertificate");
+		BEGIN_STACK("CAAccountingInstance::handleAccountCertificate");
 		
 		//CAMsg::printMsg(LOG_DEBUG, "started method handleAccountCertificate\n");
 		DOM_Element elGeneral;
@@ -994,8 +1022,8 @@ void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo,
 		return ;
 	}
 
-	if ( (!m_pJpiVerifyingInstance)||
-			(m_pJpiVerifyingInstance->verifyXML( (DOM_Node &)root, (CACertStore *)NULL ) != E_SUCCESS ))
+	if ((!m_pJpiVerifyingInstance) ||
+		(m_pJpiVerifyingInstance->verifyXML( (DOM_Node &)root, (CACertStore *)NULL ) != E_SUCCESS ))
 	{
 		// signature invalid. mark this user as bad guy
 		CAMsg::printMsg( LOG_INFO, "CAAccountingInstance::handleAccountCertificate(): Bad Jpi signature\n" );
@@ -1056,6 +1084,12 @@ void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo,
 }
 
 
+void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, DOM_Element &root)
+{
+	handleChallengeResponse_internal(pAccInfo, root);
+	INIT_STACK;
+	FINISH_STACK("CAAccountingInstance::handleChallengeResponse");
+}
 
 
 /**
@@ -1064,10 +1098,10 @@ void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo,
  * Also gets the last CC of the user, and sends it to the JAP
  * accordingly.
  */
-void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, DOM_Element &root)
+void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* pAccInfo, DOM_Element &root)
 {
 	INIT_STACK;
-	SAVE_STACK("CAAccountingInstance::handleChallengeResponse");
+	BEGIN_STACK("CAAccountingInstance::handleChallengeResponse");
 	
 	//CAMsg::printMsg(LOG_DEBUG, "started method handleChallengeResponse\n");
 	
@@ -1222,15 +1256,20 @@ void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, 
 	pAccInfo->mutex->unlock();
 }
 
-
+void CAAccountingInstance::handleCostConfirmation(tAiAccountingInfo* pAccInfo, DOM_Element &root)
+{
+	handleCostConfirmation_internal(pAccInfo, root);
+	INIT_STACK;
+	FINISH_STACK("CAAccountingInstance::handleCostConfirmation");
+}
 
 /**
  * Handles a cost confirmation sent by a jap
  */
-void CAAccountingInstance::handleCostConfirmation(tAiAccountingInfo* pAccInfo, DOM_Element &root)
+void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pAccInfo, DOM_Element &root)
 {
 	INIT_STACK;
-	SAVE_STACK("CAAccountingInstance::handleCostConfirmation");
+	BEGIN_STACK("CAAccountingInstance::handleCostConfirmation");
 	//CAMsg::printMsg(LOG_DEBUG, "started method handleCostConfirmation\n");
 
 
@@ -1350,7 +1389,7 @@ void CAAccountingInstance::handleCostConfirmation(tAiAccountingInfo* pAccInfo, D
 SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 {
 	INIT_STACK;
-	SAVE_STACK("CAAccountingInstance::initTableEntry");
+	BEGIN_STACK("CAAccountingInstance::initTableEntry");
 	
 	//ms_pInstance->m_Mutex.lock();
 	pHashEntry->pAccountingInfo = new tAiAccountingInfo;
@@ -1366,6 +1405,10 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 	pHashEntry->pAccountingInfo->userID = pHashEntry->id;
 	pHashEntry->pAccountingInfo->mutex = new CAMutex;
 	//ms_pInstance->m_Mutex.unlock();
+	
+
+	FINISH_STACK("CAAccountingInstance::initTableEntry");
+	
 	return E_SUCCESS;
 }
 
@@ -1379,7 +1422,7 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 	{
 		INIT_STACK;
-		SAVE_STACK("CAAccountingInstance::cleanupTableEntry");
+		BEGIN_STACK("CAAccountingInstance::cleanupTableEntry");
 		
 		//ms_pInstance->m_Mutex.lock();
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
@@ -1389,7 +1432,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 		
 		if (pAccInfo == NULL)
 		{
-			SAVE_STACK("CAAccountingInstance::cleanupTableEntry");
+			SAVE_STACK("CAAccountingInstance::cleanupTableEntry", "acc info null");
 			return E_UNKNOWN;
 		}
 		
@@ -1516,7 +1559,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 		}
 		//ms_pInstance->m_Mutex.unlock();
 		
-		SAVE_STACK("CAAccountingInstance::cleanupTableEntry");
+		FINISH_STACK("CAAccountingInstance::cleanupTableEntry");
 		
 		return E_SUCCESS;
 	}
