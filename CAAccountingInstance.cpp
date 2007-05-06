@@ -1391,11 +1391,19 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 	INIT_STACK;
 	BEGIN_STACK("CAAccountingInstance::initTableEntry");
 	
+	if (pHashEntry == NULL)
+	{
+		return E_UNKNOWN;
+	}
+	
 	//ms_pInstance->m_Mutex.lock();
 	pHashEntry->pAccountingInfo = new tAiAccountingInfo;
 	memset( pHashEntry->pAccountingInfo, 0, sizeof( tAiAccountingInfo ) );
+	
+	SAVE_STACK("CAAccountingInstance::initTableEntry", "After memset");
+	
 	pHashEntry->pAccountingInfo->authFlags = 
-		AUTH_SENT_ACCOUNT_REQUEST | AUTH_TIMEOUT_STARTED | AUTH_HARD_LIMIT_REACHED;
+		AUTH_SENT_ACCOUNT_REQUEST | AUTH_TIMEOUT_STARTED | AUTH_HARD_LIMIT_REACHED;		
 	pHashEntry->pAccountingInfo->authTimeoutStartSeconds = time(NULL);
 	pHashEntry->pAccountingInfo->lastHardLimitSeconds = time(NULL);
 	pHashEntry->pAccountingInfo->sessionPackets = 0;
