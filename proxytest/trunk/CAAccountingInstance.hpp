@@ -148,7 +148,7 @@ private:
 	};
 	typedef struct t_aiqueueitem aiQueueItem;
 
-	static SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEntry, bool a_bControlMessage, bool a_bMessageToJAP);
+	static SINT32 handleJapPacket_internal(fmHashTableEntry *pHashEntry, bool a_bControlMessage, bool a_bMessageToJAP);
 
 	/**
 	* Handles a cost confirmation sent by a jap
