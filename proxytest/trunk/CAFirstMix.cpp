@@ -799,6 +799,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 							CAMsg::printMsg(LOG_DEBUG,"CAFirstMix User control: Too many users (Maximum:%d)! Rejecting user...\n", pFirstMix->getNrOfUsers(), options.getMaxNrOfUsers());
 							ret = E_UNKNOWN;
 						}
+						#ifdef PAYMENT
 						else if (pFirstMix->m_newConnections > CAFirstMix::MAX_CONCURRENT_NEW_CONNECTIONS)
 						{
 							/* This should protect the mix from fooding attacks
@@ -807,6 +808,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 							CAMsg::printMsg(LOG_DEBUG,"CAFirstMix Flooding protection: Too many concurrent new connections (Maximum:%d)! Rejecting user...\n", CAFirstMix::MAX_CONCURRENT_NEW_CONNECTIONS);
 							ret = E_UNKNOWN;
 						}
+						#endif
 						else if ((ret = ((CASocket*)pNewMuxSocket)->getPeerIP(peerIP)) != E_SUCCESS ||
 								pIPList->insertIP(peerIP)<0) // ||CAAccountingInstance::isIPAddressBlocked(peerIP))) 
 						{									
@@ -858,10 +860,25 @@ END_THREAD:
 
 THREAD_RETURN fm_loopDoUserLogin(void* param)
 	{
+		INIT_STACK;
+		BEGIN_STACK("CAFirstMix::fm_loopDoUserLogin");
+		
+		if (param == NULL)
+		{
+			FINISH_STACK("CAFirstMix::fm_loopDoUserLogin: NULL");
+			THREAD_RETURN_ERROR;
+		}
+		
 		t_UserLoginData* d=(t_UserLoginData*)param;
 		d->pMix->doUserLogin(d->pNewUser,d->peerIP);
+		
+		SAVE_STACK("CAFirstMix::fm_loopDoUserLogin", after user login);
+		
 		delete d;
 		d->pMix->m_newConnections--;
+		
+		FINISH_STACK("CAFirstMix::fm_loopDoUserLogin");
+		
 		THREAD_RETURN_SUCCESS;
 	}
 
@@ -871,7 +888,7 @@ THREAD_RETURN fm_loopDoUserLogin(void* param)
 	* @todo Cleanup of runing thread if mix restarts...
 ***/
 SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
-	{
+	{	
 		#ifdef _DEBUG
 			int ret=((CASocket*)pNewUser)->setKeepAlive(true);
 			if(ret!=E_SUCCESS)
@@ -1042,7 +1059,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		m_psocketgroupUsersRead->add(*pNewUser); // add user socket to the established ones that we read data from.
 		m_psocketgroupUsersWrite->add(*pNewUser);
 #endif
-		CAMsg::printMsg(LOG_DEBUG,"User login: finished\n");
+		//CAMsg::printMsg(LOG_DEBUG,"User login: finished\n");
 
 		return E_SUCCESS;
 	}
