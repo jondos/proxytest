@@ -388,7 +388,7 @@ SINT32 CAFirstMix::processKeyExchange()
 		elemRootKey.appendChild(elemPayment);
 		#ifdef PAYMENT
 			setDOMElementAttribute(elemPayment,"required",(UINT8*)"true");
-			setDOMElementAttribute(elemPayment,"version",(UINT8*)"2.0");
+			setDOMElementAttribute(elemPayment,"version",(UINT8*)PAYMENT_VERSION);
 		#else
 			setDOMElementAttribute(elemPayment,"required",(UINT8*)"false");
 		#endif
