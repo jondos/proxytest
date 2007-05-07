@@ -142,9 +142,11 @@ SINT32 CAMsg::printMsg(UINT32 type,const char* format,...)
 			}
 		else
 			{
+				syslog(type,"Hello");
 				switch(pMsg->m_uLogType)
 					{
 						case MSG_LOG:
+						syslog(type,"Hello2");
 		#ifndef _WIN32
 							syslog(type,pMsg->m_strMsgBuff);
 		#endif
