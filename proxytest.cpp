@@ -51,9 +51,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include "CAMiddleMix.hpp"
 	#include "CALogPacketStats.hpp"
 	#include "CATLSClientSocket.hpp"
-#ifndef _WIN32
-	#include "stdlib.h"
-#endif
 
 // The Mix....
 CAMix* pMix=NULL;
@@ -576,8 +573,6 @@ int main(int argc, const char* argv[])
 
 #ifndef WIN32
 		maxFiles=options.getMaxOpenFiles();
-		CAMsg::printMsg(LOG_CRIT,"Dump file size: %s", system("ulimit -c"));
-		
 		if(maxFiles>0)
 			{
 				struct rlimit lim;
