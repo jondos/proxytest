@@ -1510,7 +1510,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 						m_strLogDir=new char[strlen((char*)tmpBuff)+1];
 						strcpy(m_strLogDir,(char*)tmpBuff);
 					}
-				getDOMChildByName(elemGeneral,(UINT8*)"Syslog",elem,false);
+				getDOMChildByName(elemLogging,(UINT8*)"Syslog",elem,false);
 				tmpLen=255;
 				if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS&&memcmp(tmpBuff,"True",4)==0)
 				{

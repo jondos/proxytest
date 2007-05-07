@@ -523,6 +523,10 @@ int main(int argc, const char* argv[])
         close(STDERR_FILENO);			
 			}
 #endif
+		if(options.isSyslogEnabled())
+		{
+			CAMsg::setLogOptions(MSG_LOG);
+		}
 		if(options.getLogDir((UINT8*)buff,255)==E_SUCCESS)
 			{
 				if(options.getCompressLogs())
