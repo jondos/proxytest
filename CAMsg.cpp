@@ -122,24 +122,24 @@ SINT32 CAMsg::printMsg(UINT32 type,const char* format,...)
 #endif
 		va_end(ap);
 		if(type==LOG_ENCRYPTED)
+		{
+			ret=strlen(pMsg->m_strMsgBuff);
+			if(	pMsg->m_pCipher==NULL)
 			{
-				ret=strlen(pMsg->m_strMsgBuff);
-				if(	pMsg->m_pCipher==NULL)
-					{
-						ret=E_UNKNOWN;
-					}
-				else
-					{
-						UINT8 bp[MAX_MSG_SIZE];
-						AES_ofb128_encrypt((UINT8*)pMsg->m_strMsgBuff,
-																bp,ret,
-																&(pMsg->m_pCipher->oKey),
-																pMsg->m_pCipher->iv,
-																&(pMsg->m_pCipher->iv_off));
-						if(write(pMsg->m_hFileEncrypted,bp,ret)!=ret)
-							ret=E_UNKNOWN;
-				 }
+				ret=E_UNKNOWN;
 			}
+			else
+			{
+				UINT8 bp[MAX_MSG_SIZE];
+				AES_ofb128_encrypt((UINT8*)pMsg->m_strMsgBuff,
+														bp,ret,
+														&(pMsg->m_pCipher->oKey),
+														pMsg->m_pCipher->iv,
+														&(pMsg->m_pCipher->iv_off));
+				if(write(pMsg->m_hFileEncrypted,bp,ret)!=ret)
+					ret=E_UNKNOWN;
+		 	}	
+		}
 		else
 			{
 				switch(pMsg->m_uLogType)
