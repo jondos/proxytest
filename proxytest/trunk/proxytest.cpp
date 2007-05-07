@@ -573,16 +573,24 @@ int main(int argc, const char* argv[])
 
 #ifndef WIN32
 		maxFiles=options.getMaxOpenFiles();
+		
+		struct rlimit coreLimit;
+		coreLimit.rlim_cur = coreLimit.rlim_max = RLIM_INFINITY;
+		if (setrlimit(RLIMIT_CORE, &coreLimit) != 0)
+		{
+			CAMsg::printMsg(LOG_CRIT,"Could not set RLIMIT_CORE (max core file size) to unlimited size. -- Core dumps might not be generated!\n",maxFiles);
+		}
+		
 		if(maxFiles>0)
 			{
 				struct rlimit lim;
 				// Set the new MAX open files limit
 				lim.rlim_cur = lim.rlim_max = maxFiles;
 				if (setrlimit(RLIMIT_NOFILE, &lim) != 0)
-					{
-						CAMsg::printMsg(LOG_CRIT,"Could not set MAX open files to: %u -- Exiting!\n",maxFiles);
-						exit(EXIT_FAILURE);
-					}
+				{
+					CAMsg::printMsg(LOG_CRIT,"Could not set MAX open files to: %u -- Exiting!\n",maxFiles);
+					exit(EXIT_FAILURE);
+				}
 			}
 		if(options.getUser(buff,255)==E_SUCCESS) //switching user
 			{
