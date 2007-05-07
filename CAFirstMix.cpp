@@ -873,9 +873,8 @@ THREAD_RETURN fm_loopDoUserLogin(void* param)
 		d->pMix->doUserLogin(d->pNewUser,d->peerIP);
 		
 		SAVE_STACK("CAFirstMix::fm_loopDoUserLogin", "after user login");
-		
-		delete d;
 		d->pMix->m_newConnections--;
+		delete d;
 		
 		FINISH_STACK("CAFirstMix::fm_loopDoUserLogin");
 		
