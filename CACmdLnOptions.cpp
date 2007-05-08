@@ -1727,6 +1727,10 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 				CAMsg::printMsg(LOG_CRIT,"Node \"PrepaidInterval\" is empty! Setting default...\n");
 				m_iPrepaidInterval = 5000000; //5 MB as safe default if not explicitly set in config file	
 			}
+			if (m_iPrepaidInterval > 5000000)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Prepaid interval is higher than 5000000! No JAP will pay more in advance!\n");
+			}
 			if (getDOMChildByName(elemAccounting, (UINT8*)"SettleInterval", elem, false) != E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Node \"SettleInterval\" not found!\n");
