@@ -592,10 +592,10 @@ SINT32 CAAccountingInstance::sendCCRequest(tAiAccountingInfo* pAccInfo)
 	
 	DOM_Document doc;                
     UINT32 prepaidInterval;
-    options.getPrepaidIntervalKbytes(&prepaidInterval);
+    options.getPrepaidInterval(&prepaidInterval);
     // prepaid bytes are "confirmed bytes - transfered bytes"
-    //UINT64 bytesToConfirm = pAccInfo->confirmedBytes + (prepaidInterval * 1000) - (pAccInfo->confirmedBytes - pAccInfo->transferredBytes);			
-    UINT64 bytesToConfirm = (prepaidInterval * 1000) + pAccInfo->transferredBytes;
+    //UINT64 bytesToConfirm = pAccInfo->confirmedBytes + (prepaidInterval) - (pAccInfo->confirmedBytes - pAccInfo->transferredBytes);			
+    UINT64 bytesToConfirm = (prepaidInterval) + pAccInfo->transferredBytes;
 	makeCCRequest(pAccInfo->accountNumber, bytesToConfirm, doc);				
 	pAccInfo->authFlags |= AUTH_SENT_CC_REQUEST;
 #ifdef DEBUG	
