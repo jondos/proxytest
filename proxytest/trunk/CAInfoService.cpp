@@ -849,11 +849,11 @@ UINT8* CAInfoService::getCascadeHeloXMLAsString(UINT32& a_len)
 		DOM_Element elemSerial; 
 		DOM_Element elemRoot;
 		
-    if(m_pMix->getMixCascadeInfo(docMixInfo)!=E_SUCCESS)
-			{
-        CAMsg::printMsg(LOG_INFO,"InfoService: Cascade not yet configured.\r\n");
-				goto ERR;
-			}
+	    if(m_pMix->getMixCascadeInfo(docMixInfo)!=E_SUCCESS)
+		{
+	        CAMsg::printMsg(LOG_INFO,"InfoService: Cascade not yet configured.\r\n");
+			goto ERR;
+		}
 		//insert (or update) the Timestamp
 		elemRoot=docMixInfo.getDocumentElement();
 		
