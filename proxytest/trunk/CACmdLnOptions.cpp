@@ -1846,6 +1846,8 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 							
 				} //of elem database
 			}
+			
+			CAMsg::printMsg(LOG_CRIT, "Accounting values parsed.\n");
 		} //of elem accounting
 		else 
 		{
