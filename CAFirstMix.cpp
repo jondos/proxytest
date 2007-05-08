@@ -388,11 +388,17 @@ SINT32 CAFirstMix::processKeyExchange()
 		elemRootKey.appendChild(elemPayment);
 		#ifdef PAYMENT
 			setDOMElementAttribute((DOM_Element&)elemPayment,"required",(UINT8*)"true");
-			setDOMElementAttribute((DOM_Element&)elemPayment,"version",(UINT8*)PAYMENT_VERSION);
+			if (setDOMElementAttribute((DOM_Element&)elemPayment,"version",(UINT8*)PAYMENT_VERSION) != E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Could not set payment version in cascade info!\n");
+			}
 			
 			UINT32 prepaidInterval;
 			options.getPrepaidInterval(&prepaidInterval);
-			setDOMElementAttribute((DOM_Element&)elemPayment,"prepaidInterval", prepaidInterval);
+			if (setDOMElementAttribute((DOM_Element&)elemPayment,"prepaidInterval", prepaidInterval))
+			{
+				CAMsg::printMsg(LOG_CRIT,"Could not set payment prepaid interval in cascade info!\n");
+			}
 		#else
 			setDOMElementAttribute(elemPayment,"required",(UINT8*)"false");
 		#endif
