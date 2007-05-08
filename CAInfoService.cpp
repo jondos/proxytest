@@ -114,7 +114,7 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 				{
 					if(pInfoService->sendCascadeHelo()!=E_SUCCESS)
 					{
-						CAMsg::printMsg(LOG_ERR,"InfoService: Error: Could not send Cascade information.\n");
+						CAMsg::printMsg(LOG_ERR,"InfoService: Could not send Cascade information.\n");
 					}
 					else
 					{
@@ -128,7 +128,7 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 				{
 					if (pInfoService->sendMixHelo() != E_SUCCESS)
 					{
-						CAMsg::printMsg(LOG_ERR,"InfoService: Error: Could not send MixInfo information.\n");
+						CAMsg::printMsg(LOG_ERR,"InfoService: Could not send MixInfo information.\n");
 					}
 					else
 					{
@@ -851,7 +851,7 @@ UINT8* CAInfoService::getCascadeHeloXMLAsString(UINT32& a_len)
 		
     if(m_pMix->getMixCascadeInfo(docMixInfo)!=E_SUCCESS)
 			{
-        CAMsg::printMsg(LOG_INFO,"InfoService: Error: Cascade not yet configured.\r\n");
+        CAMsg::printMsg(LOG_INFO,"InfoService: Cascade not yet configured.\r\n");
 				goto ERR;
 			}
 		//insert (or update) the Timestamp

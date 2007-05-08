@@ -124,7 +124,7 @@ SINT32 CAFirstMix::init()
 				if(pAddr->getType()==AF_INET&&((CASocketAddrINet*)pAddr)->getPort()<1024)
 					{
 						if(seteuid(0)==-1) //changing to root
-							CAMsg::printMsg(LOG_CRIT,"Setuid failed! You must start the mix as root in order to user listener ports lower than 1024!\n");
+							CAMsg::printMsg(LOG_CRIT,"Setuid failed! You must start the mix as root in order to use listener ports lower than 1024!\n");
 					}
 #endif
 				SINT32 ret=m_arrSocketsIn[aktSocket].listen(*pAddr);
