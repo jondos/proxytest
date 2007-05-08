@@ -1674,7 +1674,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 				}
 			}				
 
-			CAMsg::printMsg(LOG_CRIT, "Parsing JPI values.\n");
+			CAMsg::printMsg(LOG_DEBUG, "Parsing JPI values.\n");
 
 			DOM_Element elemJPI;
 			getDOMChildByName(elemAccounting, CAXMLBI::getXMLElementName(), elemJPI, false);
@@ -1730,7 +1730,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 				return E_UNKNOWN;
 			}
 			
-			CAMsg::printMsg(LOG_CRIT, "Parsing AI values.\n");
+			CAMsg::printMsg(LOG_DEBUG, "Parsing AI values.\n");
 				
 			// get AiID (NOT a separate element /Accounting/AiID any more, rather the subjectkeyidentifier given in the price certificate
 			m_strAiID = m_pPriceCertificate->getSubjectKeyIdentifier();
@@ -1847,7 +1847,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 				} //of elem database
 			}
 			
-			CAMsg::printMsg(LOG_CRIT, "Accounting values parsed OK.\n");
+			CAMsg::printMsg(LOG_DEBUG, "Accounting values parsed OK.\n");
 		} //of elem accounting
 		else 
 		{

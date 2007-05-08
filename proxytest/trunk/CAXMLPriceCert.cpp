@@ -84,7 +84,6 @@ CAXMLPriceCert* CAXMLPriceCert::getInstance(DOM_Element &elemRoot)
 			CAMsg::printMsg(LOG_DEBUG,"CAXMLPriceCert::getInstance.setValues() FAILED \n");
 			return NULL;
 		}
-	CAMsg::printMsg(LOG_DEBUG,"getInstance: setValues OK\n\n");
 	return pPC;	
 }
 
@@ -109,14 +108,15 @@ SINT32 CAXMLPriceCert::toXmlElement(DOM_Document &a_doc, DOM_Element &elemRoot)
 		DOM_Element elemBiID = a_doc.createElement("BiID");
 		setDOMElementValue(elemBiID,m_StrBiID);
 		elemRoot.appendChild(elemBiID);
-
-		CAMsg::printMsg(LOG_DEBUG,"before signature\n");
 		
 		//append signature node
 		if (m_signature != NULL)
 		{			
 			elemRoot.appendChild(a_doc.importNode(m_signature,true));
-			CAMsg::printMsg(LOG_DEBUG,"inserted signature");
+		}
+		else
+		{
+			CAMsg::printMsg(LOG_DEBUG,"Could not import PI signature node!");
 		}
 		
 		return E_SUCCESS;
