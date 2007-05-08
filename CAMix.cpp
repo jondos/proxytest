@@ -327,6 +327,10 @@ SINT32 CAMix::initMixCascadeInfo(DOM_Element& mixes)
 	elemRoot.appendChild(elemPayment);
 #ifdef PAYMENT
 	setDOMElementAttribute(elemPayment,"required",(UINT8*)"true");
+	setDOMElementAttribute(elemPayment,"version",(UINT8*)PAYMENT_VERSION);
+	UINT32 prepaidInterval;
+	options.getPrepaidInterval(&prepaidInterval);
+	setDOMElementAttribute(elemPayment,"prepaidInterval", prepaidInterval);
 #else
 	setDOMElementAttribute(elemPayment,"required",(UINT8*)"false");
 #endif
