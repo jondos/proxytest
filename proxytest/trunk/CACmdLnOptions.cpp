@@ -1674,6 +1674,8 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 				}
 			}				
 
+			CAMsg::printMsg(LOG_CRIT, "Parsing JPI.\n");
+
 			DOM_Element elemJPI;
 			getDOMChildByName(elemAccounting, CAXMLBI::getXMLElementName(), elemJPI, false);
 			m_pBI = CAXMLBI::getInstance(elemJPI);
@@ -1727,6 +1729,8 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 				CAMsg::printMsg(LOG_CRIT,"Node \"SettleInterval\" is empty!\n");
 				return E_UNKNOWN;
 			}
+			
+			CAMsg::printMsg(LOG_CRIT, "Parsing AI values.\n");
 				
 			// get AiID (NOT a separate element /Accounting/AiID any more, rather the subjectkeyidentifier given in the price certificate
 			m_strAiID = m_pPriceCertificate->getSubjectKeyIdentifier();
