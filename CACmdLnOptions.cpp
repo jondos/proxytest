@@ -1916,6 +1916,9 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 			return E_UNKNOWN;
 		}
 #endif
+
+		CAMsg::printMsg(LOG_CRIT, "Parsing next Mix interface.\n");
+
 		//get TargetInterfaces
 		m_cnTargets=0;
 		TargetInterface* targetInterfaceNextMix=NULL;
@@ -2123,6 +2126,9 @@ SKIP_NEXT_MIX:
 				m_arTargetInterfaces[m_cnTargets++].addr=targetInterfaceNextMix->addr;
 				delete targetInterfaceNextMix;
 			}
+			
+		CAMsg::printMsg(LOG_CRIT, "Next Mix interface parsed.\n");	
+		
 		//-----------------------------------------------------------------------------	
 		//construct a XML-String, which describes the Mix (send via Infoservice.Helo())
 		m_docMixInfo=DOM_Document::createDocument();
