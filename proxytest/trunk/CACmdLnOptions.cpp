@@ -1915,6 +1915,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
     /* LERNGRUPPE: ListenerInterfaces may be configured dynamically */
 		if (m_cnListenerInterfaces == 0)
 		{
+			CAMsg::printMsg(LOG_CRIT, "No listener interfaces found!\n");
 			return E_UNKNOWN;
 		}
 #endif
