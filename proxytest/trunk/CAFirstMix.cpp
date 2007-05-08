@@ -395,7 +395,9 @@ SINT32 CAFirstMix::processKeyExchange()
 			
 			UINT32 prepaidInterval;
 			options.getPrepaidInterval(&prepaidInterval);
-			if (setDOMElementAttribute((DOM_Element&)elemPayment,"prepaidInterval", prepaidInterval))
+			
+			DOM_Node elemPrepaidInterval=docXmlKeyInfo.createElement("PrepaidInterval");
+			if (setDOMElementValue((DOM_Element&)elemPrepaidInterval, prepaidInterval) != E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Could not set payment prepaid interval in cascade info!\n");
 			}
