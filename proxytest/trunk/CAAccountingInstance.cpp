@@ -1391,7 +1391,7 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 	INIT_STACK;
 	BEGIN_STACK("CAAccountingInstance::initTableEntry");
 	
-	ms_pInstance->m_Mutex.lock();
+	//ms_pInstance->m_Mutex.lock();
 	
 	if (pHashEntry == NULL)
 	{
@@ -1414,7 +1414,7 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 	pHashEntry->pAccountingInfo->nrInQueue = 0;
 	pHashEntry->pAccountingInfo->userID = pHashEntry->id;
 	pHashEntry->pAccountingInfo->mutex = new CAMutex;
-	ms_pInstance->m_Mutex.unlock();
+	//ms_pInstance->m_Mutex.unlock();
 	
 
 	FINISH_STACK("CAAccountingInstance::initTableEntry");
@@ -1434,7 +1434,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 		INIT_STACK;
 		BEGIN_STACK("CAAccountingInstance::cleanupTableEntry");
 		
-		ms_pInstance->m_Mutex.lock();
+		//ms_pInstance->m_Mutex.lock();
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
 		AccountLoginHashEntry* loginEntry;
 		AccountHashEntry* entry;
@@ -1443,7 +1443,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 		if (pAccInfo == NULL)
 		{
 			SAVE_STACK("CAAccountingInstance::cleanupTableEntry", "acc info null");
-			ms_pInstance->m_Mutex.unlock();
+			//ms_pInstance->m_Mutex.unlock();
 			return E_UNKNOWN;
 		}
 		
@@ -1568,7 +1568,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 		{
 			CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Cleanup method sent account deletion request to AI thread!\n");
 		}
-		ms_pInstance->m_Mutex.unlock();
+		//ms_pInstance->m_Mutex.unlock();
 		
 		FINISH_STACK("CAAccountingInstance::cleanupTableEntry");
 		
