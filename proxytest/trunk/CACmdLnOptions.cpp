@@ -2245,7 +2245,7 @@ SKIP_NEXT_MIX:
 		UINT32 prepaidInterval;
 		getPrepaidInterval(&prepaidInterval);
 		DOM_Element elemInterval = m_docMixInfo.createElement("PrepaidIntervalKbytes");
-		setDOMElementValue(elemInterval,prepaidInterval * 1000); 
+		setDOMElementValue(elemInterval,prepaidInterval / 1000); 
 		elemMix.appendChild(elemInterval);	
 			
 			
