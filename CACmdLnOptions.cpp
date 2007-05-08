@@ -1674,7 +1674,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 				}
 			}				
 
-			CAMsg::printMsg(LOG_CRIT, "Parsing JPI.\n");
+			CAMsg::printMsg(LOG_CRIT, "Parsing JPI values.\n");
 
 			DOM_Element elemJPI;
 			getDOMChildByName(elemAccounting, CAXMLBI::getXMLElementName(), elemJPI, false);
@@ -1847,7 +1847,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 				} //of elem database
 			}
 			
-			CAMsg::printMsg(LOG_CRIT, "Accounting values parsed.\n");
+			CAMsg::printMsg(LOG_CRIT, "Accounting values parsed OK.\n");
 		} //of elem accounting
 		else 
 		{
@@ -1901,8 +1901,6 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 			// Refactored
 			parseInfoServices(elemInfoServiceContainer);
 	    }
-	    
-	    CAMsg::printMsg(LOG_CRIT, "Parsing listener interfaces.\n");
 		 
 		//get ListenerInterfaces
 		DOM_Element elemListenerInterfaces;
@@ -1920,7 +1918,6 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		}
 #endif
 
-		CAMsg::printMsg(LOG_CRIT, "Parsing next Mix interface.\n");
 
 		//get TargetInterfaces
 		m_cnTargets=0;
@@ -2129,8 +2126,6 @@ SKIP_NEXT_MIX:
 				m_arTargetInterfaces[m_cnTargets++].addr=targetInterfaceNextMix->addr;
 				delete targetInterfaceNextMix;
 			}
-			
-		CAMsg::printMsg(LOG_CRIT, "Next Mix interface parsed.\n");	
 		
 		//-----------------------------------------------------------------------------	
 		//construct a XML-String, which describes the Mix (send via Infoservice.Helo())
