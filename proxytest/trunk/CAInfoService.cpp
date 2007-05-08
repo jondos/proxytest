@@ -851,7 +851,7 @@ UINT8* CAInfoService::getCascadeHeloXMLAsString(UINT32& a_len)
 		
 	    if(m_pMix->getMixCascadeInfo(docMixInfo)!=E_SUCCESS)
 		{
-	        CAMsg::printMsg(LOG_INFO,"InfoService: Cascade not yet configured.\r\n");
+	        CAMsg::printMsg(LOG_INFO,"InfoService: Cascade not yet configured.\n");
 			goto ERR;
 		}
 		//insert (or update) the Timestamp
