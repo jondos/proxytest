@@ -1192,9 +1192,9 @@ SINT32 CACmdLnOptions::getPaymentHardLimit(UINT32 *pHardLimit)
 		return E_SUCCESS;
 	}
 
-SINT32 CACmdLnOptions::getPrepaidIntervalKbytes(UINT32 *pPrepaidIntervalKbytes)
+SINT32 CACmdLnOptions::getPrepaidInterval(UINT32 *pPrepaidInterval)
 	{
-		*pPrepaidIntervalKbytes = m_iPrepaidIntervalKbytes;
+		*pPrepaidInterval = m_iPrepaidInterval;
 		return E_SUCCESS;
 	}
 
@@ -1702,18 +1702,30 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 			{
 				m_iPaymentHardLimit = tmp;
 			}
-			if (getDOMChildByName(elemAccounting, (UINT8*)"PrepaidIntervalKbytes", elem, false) != E_SUCCESS)
+			if (getDOMChildByName(elemAccounting, (UINT8*)"PrepaidInterval", elem, false) != E_SUCCESS)
 			{
-				CAMsg::printMsg(LOG_CRIT,"Node \"PrepaidIntervalKbytes\" not found!\n");
+				CAMsg::printMsg(LOG_CRIT,"Node \"PrepaidInterval\" not found!\n");
+				
+				if (getDOMChildByName(elemAccounting, (UINT8*)"PrepaidIntervalKbytes", elem, false) != E_SUCCESS)
+				{
+					CAMsg::printMsg(LOG_CRIT,"Node \"PrepaidIntervalKbytes\" not found!\n");
+				}
+				else
+				{
+					if(getDOMElementValue(elem, &tmp)==E_SUCCESS)
+					{
+						m_iPrepaidInterval = tmp * 1000;
+					}
+				}
 			}
-			if(getDOMElementValue(elem, &tmp)==E_SUCCESS)
+			else if(getDOMElementValue(elem, &tmp) == E_SUCCESS)	
 			{
-				m_iPrepaidIntervalKbytes = tmp;
+				m_iPrepaidInterval = tmp;
 			}
 			else 
 			{
-				CAMsg::printMsg(LOG_CRIT,"Node \"PrepaidIntervalKbytes\" is empty! Setting default...\n");
-				m_iPrepaidIntervalKbytes = 10240; //10 MB as safe default if not explicitly set in config file	
+				CAMsg::printMsg(LOG_CRIT,"Node \"PrepaidInterval\" is empty! Setting default...\n");
+				m_iPrepaidInterval = 5000000; //5 MB as safe default if not explicitly set in config file	
 			}
 			if (getDOMChildByName(elemAccounting, (UINT8*)"SettleInterval", elem, false) != E_SUCCESS)
 			{
@@ -2230,10 +2242,10 @@ SKIP_NEXT_MIX:
 			elemMix.appendChild(pcElem);
 		}
 		//insert prepaid interval
-		UINT32 prepaidIntervalKbytes;
-		getPrepaidIntervalKbytes(&prepaidIntervalKbytes);
+		UINT32 prepaidInterval;
+		getPrepaidInterval(&prepaidInterval);
 		DOM_Element elemInterval = m_docMixInfo.createElement("PrepaidIntervalKbytes");
-		setDOMElementValue(elemInterval,prepaidIntervalKbytes); 
+		setDOMElementValue(elemInterval,prepaidInterval * 1000); 
 		elemMix.appendChild(elemInterval);	
 			
 			

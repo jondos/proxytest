@@ -351,12 +351,7 @@ class CACmdLnOptions
 #endif
 
 
-#ifdef PAYMENT
-// added by Bastian Voigt:
-// getter functions for the payment config options
-/*			SINT32 getJPIHost(UINT8* host,UINT32 len);
-			UINT16 getJPIPort();*/
-			
+#ifdef PAYMENT	
 			// accounting database
 			SINT32 getDatabaseHost(UINT8 * host, UINT32 len);
 			UINT16 getDatabasePort();
@@ -367,9 +362,8 @@ class CACmdLnOptions
 			CAXMLBI* getBI();
 			SINT32 getPaymentHardLimit(UINT32 *pHardLimit);
 			SINT32 getPaymentSoftLimit(UINT32 *pSoftLimit);
-			SINT32 getPrepaidIntervalKbytes(UINT32 *pPrepaidIntervalKbytes); 
+			SINT32 getPrepaidInterval(UINT32 *pPrepaidInterval); 
 			SINT32 getPaymentSettleInterval(UINT32 *pInterval);
-			
 #endif	
 
 
@@ -529,7 +523,7 @@ class CACmdLnOptions
 			UINT16 m_iDatabasePort;
 			UINT32 m_iPaymentHardLimit;
 			UINT32 m_iPaymentSoftLimit;
-			UINT32 m_iPrepaidIntervalKbytes; 
+			UINT32 m_iPrepaidInterval; 
 			UINT32 m_iPaymentSettleInterval;
 #endif
 
