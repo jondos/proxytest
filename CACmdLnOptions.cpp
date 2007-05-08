@@ -1901,6 +1901,8 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 			// Refactored
 			parseInfoServices(elemInfoServiceContainer);
 	    }
+	    
+	    CAMsg::printMsg(LOG_CRIT, "Parsing listener interfaces.\n");
 		 
 		//get ListenerInterfaces
 		DOM_Element elemListenerInterfaces;
