@@ -393,6 +393,8 @@ SINT32 CAFirstMix::processKeyExchange()
 			UINT32 prepaidInterval;
 			options.getPrepaidInterval(&prepaidInterval);
 			setDOMElementAttribute(elemPayment,"prepaidInterval", prepaidInterval);
+			setDOMElementAttribute(elemPayment,"piid", options.getBI()->getID());
+			
 		#else
 			setDOMElementAttribute(elemPayment,"required",(UINT8*)"false");
 		#endif
