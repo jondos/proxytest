@@ -1731,6 +1731,10 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Prepaid interval is higher than 5000000! No JAP will pay more in advance!\n");
 			}
+			else if (m_iPrepaidInterval < 5000)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Prepaid interval of %u is far too low! Performance will be critical and clients will lose connection!\n", m_iPrepaidInterval);
+			}
 			if (getDOMChildByName(elemAccounting, (UINT8*)"SettleInterval", elem, false) != E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Node \"SettleInterval\" not found!\n");
