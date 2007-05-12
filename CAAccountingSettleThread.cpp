@@ -228,7 +228,8 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					}
 					else
 					{
-						authFlags |= AUTH_UNKNOWN;												
+						authFlags |= AUTH_UNKNOWN;	
+						bDeleteCC = true; // an unknown error leads to user kickout
 					}		
 					
 					if (authFlags)

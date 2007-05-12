@@ -1270,7 +1270,6 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 {
 	INIT_STACK;
 	BEGIN_STACK("CAAccountingInstance::handleCostConfirmation");
-	//CAMsg::printMsg(LOG_DEBUG, "started method handleCostConfirmation\n");
 
 
 	if (pAccInfo == NULL)
