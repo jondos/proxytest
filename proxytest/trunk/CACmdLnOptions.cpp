@@ -1674,81 +1674,84 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 				}
 			}				
 
-			CAMsg::printMsg(LOG_DEBUG, "Parsing JPI values.\n");
-
-			DOM_Element elemJPI;
-			getDOMChildByName(elemAccounting, CAXMLBI::getXMLElementName(), elemJPI, false);
-			m_pBI = CAXMLBI::getInstance(elemJPI);
-			if (m_pBI == NULL)
-			{
-				CAMsg::printMsg(LOG_CRIT,"Could not instantiate payment instance interface!\n");
-				return E_UNKNOWN;
-			}
-			if (getDOMChildByName(elemAccounting, (UINT8*)"SoftLimit", elem, false) != E_SUCCESS)
-			{
-				CAMsg::printMsg(LOG_CRIT,"Node \"SoftLimit\" not found!\n");
-				return E_UNKNOWN;
-			}
-			if(getDOMElementValue(elem, &tmp)==E_SUCCESS)
-			{
-				m_iPaymentSoftLimit = tmp;
-			}
-			if (getDOMChildByName(elemAccounting, (UINT8*)"HardLimit", elem, false) != E_SUCCESS)
-			{
-				CAMsg::printMsg(LOG_CRIT,"Node \"HardLimit\" not found!\n");
-				return E_UNKNOWN;
-			}
-			if(getDOMElementValue(elem, &tmp)==E_SUCCESS)
-			{
-				m_iPaymentHardLimit = tmp;
-			}
-			if (getDOMChildByName(elemAccounting, (UINT8*)"PrepaidInterval", elem, false) != E_SUCCESS)
-			{
-				CAMsg::printMsg(LOG_CRIT,"Node \"PrepaidInterval\" not found!\n");
-				
-				if (getDOMChildByName(elemAccounting, (UINT8*)"PrepaidIntervalKbytes", elem, false) != E_SUCCESS)
+			//if (m_bFirstMix)
+			//{
+				CAMsg::printMsg(LOG_DEBUG, "Parsing JPI values.\n");
+	
+				DOM_Element elemJPI;
+				getDOMChildByName(elemAccounting, CAXMLBI::getXMLElementName(), elemJPI, false);
+				m_pBI = CAXMLBI::getInstance(elemJPI);
+				if (m_pBI == NULL)
 				{
-					CAMsg::printMsg(LOG_CRIT,"Node \"PrepaidIntervalKbytes\" not found!\n");
+					CAMsg::printMsg(LOG_CRIT,"Could not instantiate payment instance interface!\n");
+					return E_UNKNOWN;
+				}
+				if (getDOMChildByName(elemAccounting, (UINT8*)"SoftLimit", elem, false) != E_SUCCESS)
+				{
+					CAMsg::printMsg(LOG_CRIT,"Node \"SoftLimit\" not found!\n");
+					return E_UNKNOWN;
+				}
+				if(getDOMElementValue(elem, &tmp)==E_SUCCESS)
+				{
+					m_iPaymentSoftLimit = tmp;
+				}
+				if (getDOMChildByName(elemAccounting, (UINT8*)"HardLimit", elem, false) != E_SUCCESS)
+				{
+					CAMsg::printMsg(LOG_CRIT,"Node \"HardLimit\" not found!\n");
+					return E_UNKNOWN;
+				}
+				if(getDOMElementValue(elem, &tmp)==E_SUCCESS)
+				{
+					m_iPaymentHardLimit = tmp;
+				}
+				if (getDOMChildByName(elemAccounting, (UINT8*)"PrepaidInterval", elem, false) != E_SUCCESS)
+				{
+					CAMsg::printMsg(LOG_CRIT,"Node \"PrepaidInterval\" not found!\n");
+					
+					if (getDOMChildByName(elemAccounting, (UINT8*)"PrepaidIntervalKbytes", elem, false) != E_SUCCESS)
+					{
+						CAMsg::printMsg(LOG_CRIT,"Node \"PrepaidIntervalKbytes\" not found!\n");
+					}
+					else
+					{
+						if(getDOMElementValue(elem, &tmp)==E_SUCCESS)
+						{
+							m_iPrepaidInterval = tmp * 1000;
+						}
+					}
+				}
+				else if(getDOMElementValue(elem, &tmp) == E_SUCCESS)	
+				{
+					m_iPrepaidInterval = tmp;
+				}
+				else 
+				{
+					CAMsg::printMsg(LOG_CRIT,"Node \"PrepaidInterval\" is empty! Setting default...\n");
+					m_iPrepaidInterval = 5000000; //5 MB as safe default if not explicitly set in config file	
+				}
+				if (m_iPrepaidInterval > 5000000)
+				{
+					CAMsg::printMsg(LOG_CRIT,"Prepaid interval is higher than 5000000! No JAP will pay more in advance!\n");
+				}
+				else if (m_iPrepaidInterval < 5000)
+				{
+					CAMsg::printMsg(LOG_CRIT,"Prepaid interval of %u is far too low! Performance will be critical and clients will lose connection!\n", m_iPrepaidInterval);
+				}
+				if (getDOMChildByName(elemAccounting, (UINT8*)"SettleInterval", elem, false) != E_SUCCESS)
+				{
+					CAMsg::printMsg(LOG_CRIT,"Node \"SettleInterval\" not found!\n");
+					return E_UNKNOWN;
+				}
+				if(getDOMElementValue(elem, &tmp)==E_SUCCESS)
+				{
+					m_iPaymentSettleInterval = tmp;
 				}
 				else
 				{
-					if(getDOMElementValue(elem, &tmp)==E_SUCCESS)
-					{
-						m_iPrepaidInterval = tmp * 1000;
-					}
+					CAMsg::printMsg(LOG_CRIT,"Node \"SettleInterval\" is empty!\n");
+					return E_UNKNOWN;
 				}
-			}
-			else if(getDOMElementValue(elem, &tmp) == E_SUCCESS)	
-			{
-				m_iPrepaidInterval = tmp;
-			}
-			else 
-			{
-				CAMsg::printMsg(LOG_CRIT,"Node \"PrepaidInterval\" is empty! Setting default...\n");
-				m_iPrepaidInterval = 5000000; //5 MB as safe default if not explicitly set in config file	
-			}
-			if (m_iPrepaidInterval > 5000000)
-			{
-				CAMsg::printMsg(LOG_CRIT,"Prepaid interval is higher than 5000000! No JAP will pay more in advance!\n");
-			}
-			else if (m_iPrepaidInterval < 5000)
-			{
-				CAMsg::printMsg(LOG_CRIT,"Prepaid interval of %u is far too low! Performance will be critical and clients will lose connection!\n", m_iPrepaidInterval);
-			}
-			if (getDOMChildByName(elemAccounting, (UINT8*)"SettleInterval", elem, false) != E_SUCCESS)
-			{
-				CAMsg::printMsg(LOG_CRIT,"Node \"SettleInterval\" not found!\n");
-				return E_UNKNOWN;
-			}
-			if(getDOMElementValue(elem, &tmp)==E_SUCCESS)
-			{
-				m_iPaymentSettleInterval = tmp;
-			}
-			else
-			{
-				CAMsg::printMsg(LOG_CRIT,"Node \"SettleInterval\" is empty!\n");
-				return E_UNKNOWN;
-			}
+			//}
 			
 			CAMsg::printMsg(LOG_DEBUG, "Parsing AI values.\n");
 				
