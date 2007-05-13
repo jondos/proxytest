@@ -176,7 +176,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				{
 					CAMsg::printMsg(LOG_ERR, "SettleThread: Communication with BI failed!\n");
 				}
-				else if(pErrMsg->getErrorCode()!=pErrMsg->ERR_OK)  //BI reported error
+				else if(pErrMsg->getErrorCode() != pErrMsg->ERR_OK)  //BI reported error
 				{																												
 					bool bDeleteCC = false;
 					UINT32 authFlags = 0;

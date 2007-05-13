@@ -62,6 +62,8 @@ class CAXMLErrorMessage : public CAAbstractXMLEncodable
 			static const UINT32 ERR_OUTDATED_CC = 16;
 			static const UINT32 ERR_INVALID_PRICE_CERT = 17;
 			static const UINT32 ERR_MULTIPLE_LOGIN = 18;
+			static const UINT32 ERR_NO_RECORD_FOUND = 19;
+			static const UINT32 ERR_NO_ERROR_GIVEN = 100;
 			
 		
 			/**

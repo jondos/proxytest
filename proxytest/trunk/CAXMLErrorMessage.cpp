@@ -61,10 +61,12 @@ CAXMLErrorMessage::CAXMLErrorMessage(UINT32 errorCode)
 			(UINT8*)"No Flatrate offered",
 			(UINT8*)"Invalid code",
 			(UINT8*)"Costconfirmation is not valid, possible attempt at doublespending!",
-			(UINT8*)"One or more price certificates are invalid!"
+			(UINT8*)"One or more price certificates are invalid!",
+			(UINT8*)"User is logged in more than once!",
+			(UINT8*)"No database record for this cost confirmation was found!"
 		};
 		m_iErrorCode = errorCode;
-		if (m_iErrorCode < 0 || m_iErrorCode >= 17)
+		if (m_iErrorCode < 0 || m_iErrorCode >= 19)
 		{
 			UINT8 defaultMsg[] = "Unknown Error";
 			m_strErrMsg = new UINT8[strlen((char *)defaultMsg)+1];
@@ -101,7 +103,10 @@ CAXMLErrorMessage::CAXMLErrorMessage(UINT8 * strXmlData)
 	DOM_Element elemRoot = doc.getDocumentElement();
 	m_strErrMsg=NULL;
 	m_messageObject = NULL;
-	setValues(elemRoot);
+	if (setValues(elemRoot) != E_SUCCESS)
+	{
+		m_iErrorCode = ERR_NO_ERROR_GIVEN;
+	}
 }
 
 
@@ -138,7 +143,7 @@ SINT32 CAXMLErrorMessage::setValues(DOM_Element &elemRoot)
 	}
 	//add code to parse other types of objects here when adding new error codes with corresponding objects
 	
-	return ERR_OK;
+	return E_SUCCESS;
 }
 
 
