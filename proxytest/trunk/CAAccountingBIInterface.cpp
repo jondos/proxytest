@@ -71,7 +71,6 @@ SINT32 CAAccountingBIInterface::initBIConnection()
 		if(pBI == NULL)
 			{
 				CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface: could not get JPI hostname\n");
-				m_connected = false;
 				return E_UNKNOWN;
 			}
 		#ifdef DEBUG
@@ -92,12 +91,10 @@ SINT32 CAAccountingBIInterface::initBIConnection()
 					//buf, address.getPort(), rc
 					pBI->getHostName(), pBI->getPortNumber(), rc
 				);
-			m_connected = false;
 			return E_UNKNOWN;
 		}
 		CAMsg::printMsg(LOG_DEBUG,"CAAccountingBIInterface: BI connection to %s:%i established!\n", pBI->getHostName(),pBI->getPortNumber());
 		m_httpClient.setSocket(m_pSocket);
-		m_connected = true;
 		return E_SUCCESS;
 	}
 
@@ -108,10 +105,7 @@ SINT32 CAAccountingBIInterface::initBIConnection()
  */
 SINT32 CAAccountingBIInterface::terminateBIConnection()
 	{
-		if(m_connected)
-			{
-				m_pSocket->close();
-			}
+		m_pSocket->close();
 		return E_SUCCESS;
 	}
 

@@ -146,19 +146,20 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				CAMsg::printMsg(LOG_DEBUG, "Settle Thread: trying to connect to payment instance");
 #endif				
 				if(biConn.initBIConnection()!=E_SUCCESS)
-				{
-					CAMsg::printMsg(LOG_DEBUG, "SettleThread: could not connect to BI. Retrying later...\n");
-					q.clean();
-					break;
-				}
+					{
+						CAMsg::printMsg(LOG_DEBUG, "SettleThread: could not connect to BI. Retrying later...\n");
+						q.clean();
+						break;
+					}
 #ifdef DEBUG				
 				CAMsg::printMsg(LOG_DEBUG, "SettleThread: successfully connected to payment instance");
 #endif				
 				if (!pCC)
-				{
-					CAMsg::printMsg(LOG_CRIT, "CAAccountingSettleThread: Cost confirmation is NULL!\n");
-					continue;
-				}
+					{
+						CAMsg::printMsg(LOG_CRIT, "CAAccountingSettleThread: Cost confirmation is NULL!\n");
+						biConn.terminateBIConnection();
+						continue;
+					}
 				
 				//CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: try to settle...\n");
 				pErrMsg = biConn.settle( *pCC );

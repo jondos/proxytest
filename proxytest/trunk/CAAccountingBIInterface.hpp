@@ -65,10 +65,8 @@ public:
 	SINT32 update(UINT8 *balanceCert, UINT8 * response, UINT32 *responseLen);*/
 
 private:
-	
-	bool m_connected;
 	CATLSClientSocket* m_pSocket;
-	CAHttpClient				m_httpClient;
+	CAHttpClient			 m_httpClient;
 };
 
 #endif

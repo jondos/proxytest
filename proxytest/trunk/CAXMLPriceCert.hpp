@@ -44,7 +44,7 @@ class CAXMLPriceCert : public CAAbstractXMLSignable
 		* @retval NULL if the XML data was wrong
 		* @retrun a newly allocated CAXMLCostconfirmationObject
 		*/
-		static CAXMLPriceCert* getInstance(UINT8 * strXmlData,UINT32 strXMLDataLength);
+		static CAXMLPriceCert* getInstance(const UINT8 * strXmlData,UINT32 strXMLDataLength);
 		
 		static CAXMLPriceCert* getInstance(DOM_Element &elemRoot);
 		~CAXMLPriceCert();
