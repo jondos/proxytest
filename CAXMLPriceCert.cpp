@@ -35,22 +35,25 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 const UINT8* const CAXMLPriceCert::ms_pStrElemName=(UINT8*)"PriceCertificate";
 
 CAXMLPriceCert::CAXMLPriceCert()
-{
-	m_StrSubjectKeyIdentifier = NULL;
-	m_StrSignatureTime = NULL;
-	m_StrBiID = NULL;
-	m_domDocument = NULL;	
-}
+	{
+		m_StrSubjectKeyIdentifier = NULL;
+		m_StrSignatureTime = NULL;
+		m_StrBiID = NULL;
+		m_domDocument = NULL;	
+	}
 
 CAXMLPriceCert::~CAXMLPriceCert()
-{
-	if (m_StrSubjectKeyIdentifier != NULL) delete[] m_StrSubjectKeyIdentifier;
-	if (m_StrSignatureTime != NULL) delete[] m_StrSignatureTime;
-	if (m_StrBiID != NULL) delete[] m_StrBiID;
-	m_domDocument=NULL;	
-}
+	{
+		if (m_StrSubjectKeyIdentifier != NULL) 
+			delete[] m_StrSubjectKeyIdentifier;
+		if (m_StrSignatureTime != NULL) 
+			delete[] m_StrSignatureTime;
+		if (m_StrBiID != NULL) 
+			delete[] m_StrBiID;
+		m_domDocument=NULL;	
+	}
 
-CAXMLPriceCert* CAXMLPriceCert::getInstance(UINT8 * strXmlData,UINT32 strXmlDataLen)
+CAXMLPriceCert* CAXMLPriceCert::getInstance(const UINT8 * strXmlData,UINT32 strXmlDataLen)
 {
 	// parse XML
 	if(strXmlData==NULL)
@@ -69,66 +72,65 @@ CAXMLPriceCert* CAXMLPriceCert::getInstance(UINT8 * strXmlData,UINT32 strXmlData
 }
 
 CAXMLPriceCert* CAXMLPriceCert::getInstance(DOM_Element &elemRoot)
-{
-	if(elemRoot==NULL)
 	{
-		CAMsg::printMsg(LOG_DEBUG,"CAXMLPriceCert::getInstance: root element is null\n");
-		return NULL;
-	}	
-	CAXMLPriceCert* pPC=new CAXMLPriceCert();
-	pPC->m_domDocument=DOM_Document::createDocument();
-	pPC->m_domDocument.appendChild(pPC->m_domDocument.importNode(elemRoot,true));
-	if(pPC->setValues()!=E_SUCCESS)
-		{
-			delete pPC;
-			CAMsg::printMsg(LOG_DEBUG,"CAXMLPriceCert::getInstance.setValues() FAILED \n");
-			return NULL;
-		}
-	return pPC;	
-}
+		if(elemRoot==NULL)
+			{
+				CAMsg::printMsg(LOG_DEBUG,"CAXMLPriceCert::getInstance: root element is null\n");
+				return NULL;
+			}	
+		CAXMLPriceCert* pPC=new CAXMLPriceCert();
+		pPC->m_domDocument=DOM_Document::createDocument();
+		pPC->m_domDocument.appendChild(pPC->m_domDocument.importNode(elemRoot,true));
+		if(pPC->setValues()!=E_SUCCESS)
+			{
+				delete pPC;
+				CAMsg::printMsg(LOG_DEBUG,"CAXMLPriceCert::getInstance.setValues() FAILED \n");
+				return NULL;
+			}
+		return pPC;	
+	}
 
 SINT32 CAXMLPriceCert::toXmlElement(DOM_Document &a_doc, DOM_Element &elemRoot)
 	{
 		elemRoot = a_doc.createElement("PriceCertificate");
-		
-		setDOMElementAttribute(elemRoot,"version",(UINT8*)"1.1"); 
 	
+		setDOMElementAttribute(elemRoot,"version",(UINT8*)"1.1"); 
+
 		DOM_Element elemHashOfMixCert = a_doc.createElement("SubjectKeyIdentifier");
 		setDOMElementValue(elemHashOfMixCert,m_StrSubjectKeyIdentifier);
 		elemRoot.appendChild(elemHashOfMixCert);
-		
+	
 		DOM_Element elemRate = a_doc.createElement("Rate");
 		setDOMElementValue(elemRate,m_lRate);
 		elemRoot.appendChild(elemRate);
-		
+	
 		DOM_Element elemCreationTime = a_doc.createElement("SignatureTime");
 		setDOMElementValue(elemCreationTime,m_StrSignatureTime);
 		elemRoot.appendChild(elemCreationTime);
-		
+	
 		DOM_Element elemBiID = a_doc.createElement("BiID");
 		setDOMElementValue(elemBiID,m_StrBiID);
 		elemRoot.appendChild(elemBiID);
-		
+	
 		//append signature node
 		if (m_signature != NULL)
-		{			
-			elemRoot.appendChild(a_doc.importNode(m_signature,true));
-		}
+			{				
+				elemRoot.appendChild(a_doc.importNode(m_signature,true));
+			}
 		else
-		{
-			CAMsg::printMsg(LOG_DEBUG,"Could not import PI signature node!");
-		}
-		
+			{
+				CAMsg::printMsg(LOG_DEBUG,"Could not import PI signature node!\n");
+			}
 		return E_SUCCESS;
 	}
 
 SINT32 CAXMLPriceCert::setValues() 
 {
 	if(m_domDocument==NULL)
-	{
-		CAMsg::printMsg(LOG_DEBUG,"setValues(): no document\n");
-		return E_UNKNOWN;
-	}
+		{
+			CAMsg::printMsg(LOG_DEBUG,"setValues(): no document\n");
+			return E_UNKNOWN;
+		}
 	DOM_Element elemRoot=m_domDocument.getDocumentElement();
 	DOM_Element elem;
 	
@@ -143,9 +145,6 @@ SINT32 CAXMLPriceCert::setValues()
 	//TODO: parsing Strings could be generalized instead of copy-and-paste code for each element
 	UINT8 strGeneral[512];
 	UINT32 strGeneralLen = 512;
-
-
-
 	// parse subjectkeyidentifier(UINT8*)
 	if(m_StrSubjectKeyIdentifier!=NULL)
 		delete[] m_StrSubjectKeyIdentifier;
