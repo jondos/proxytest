@@ -413,7 +413,7 @@ int main(int argc, const char* argv[])
 #ifndef ONLY_LOCAL_PROXY
 		pMix=NULL;
 #endif
-		int i;
+		UINT32 lLogOpts = 0;
 		SINT32 maxFiles,ret;
 #if defined(HAVE_CRTDBG)
 //			_CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_FILE );
@@ -558,18 +558,23 @@ int main(int argc, const char* argv[])
 			CAMsg::printMsg(LOG_INFO,"Warning - Running as root!\n");
 #endif
 
-
+		if(options.isConsoleLogEnabled())
+			lLogOpts |= MSG_STDOUT;
+			
 		if(options.isSyslogEnabled())
 		{
-			CAMsg::setLogOptions(MSG_LOG);
+			lLogOpts |= MSG_LOG;
 		}
 		if(options.getLogDir((UINT8*)buff,255)==E_SUCCESS)
 			{
 				if(options.getCompressLogs())
-					CAMsg::setLogOptions(MSG_COMPRESSED_FILE);
+					lLogOpts |= MSG_COMPRESSED_FILE;
 				else
-					CAMsg::setLogOptions(MSG_FILE);
+					lLogOpts |= MSG_FILE;
 			}
+
+		CAMsg::setLogOptions(lLogOpts);
+
 #ifndef ONLY_LOCAL_PROXY
 		ret=CAMsg::openEncryptedLog();
 #endif

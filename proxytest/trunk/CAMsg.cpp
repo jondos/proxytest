@@ -142,44 +142,37 @@ SINT32 CAMsg::printMsg(UINT32 type,const char* format,...)
 		}
 		else
 			{
-				switch(pMsg->m_uLogType)
-					{
-						case MSG_LOG:
-		#ifndef _WIN32
-							syslog(type,pMsg->m_strMsgBuff);
-		#endif
-						break;
-						case MSG_FILE:
-							if(pMsg->m_hFileInfo==-1)
-								{
-									pMsg->m_hFileInfo=open(pMsg->m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE|O_SYNC,S_IREAD|S_IWRITE);																	
-								}
-							if(pMsg->m_hFileInfo!=-1)
-								{
-		#ifdef PSEUDO_LOG
-									char buff[255];
-									sprintf(buff,"%.15s mix AnonMix: ",ctime(&currtime)+4);
-									write(pMsg->m_hFileInfo,buff,strlen(buff));
-		#endif
-									if(write(pMsg->m_hFileInfo,pMsg->m_strMsgBuff,strlen(pMsg->m_strMsgBuff))==-1)
-									ret=E_UNKNOWN;
-								}
-						break;
-		#ifdef COMPRESSED_LOGS
-						case MSG_COMPRESSED_FILE:
-							if(pMsg->m_gzFileInfo!=NULL)
-								{
-									if(gzwrite(pMsg->m_gzFileInfo,pMsg->m_strMsgBuff,strlen(pMsg->m_strMsgBuff))==-1)
-										ret=E_UNKNOWN;
-								}
-						break;
-		#endif
-						case MSG_STDOUT:
-							printf("%s",pMsg->m_strMsgBuff);
-						break;
-						default:
-						ret=E_UNKNOWN;
+#ifndef _WIN32				
+				if(pMsg->m_uLogType & MSG_LOG) 
+					syslog(type,pMsg->m_strMsgBuff);
+#endif
+				if(pMsg->m_uLogType & MSG_FILE) {
+					
+					if(pMsg->m_hFileInfo==-1)
+						pMsg->m_hFileInfo=open(pMsg->m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE|O_SYNC,S_IREAD|S_IWRITE);
+						
+					if(pMsg->m_hFileInfo!=-1) {
+#ifdef PSEUDO_LOG
+						char buff[255];
+						sprintf(buff,"%.15s mix AnonMix: ",ctime(&currtime)+4);
+						write(pMsg->m_hFileInfo,buff,strlen(buff));
+#endif
+						if(write(pMsg->m_hFileInfo,pMsg->m_strMsgBuff,strlen(pMsg->m_strMsgBuff))==-1)
+							ret=E_UNKNOWN;
 					}
+				}
+				
+#ifdef COMPRESSED_LOGS
+				else if(pMsg->m_uLogType & MSG_COMPRESSED_FILE) {
+					if(pMsg->m_gzFileInfo!=NULL)
+					{
+						if(gzwrite(pMsg->m_gzFileInfo,pMsg->m_strMsgBuff,strlen(pMsg->m_strMsgBuff))==-1)
+							ret=E_UNKNOWN;
+					}
+				}
+#endif
+				if(pMsg->m_uLogType & MSG_STDOUT)
+					printf("%s",pMsg->m_strMsgBuff);					
 			}
 		pMsg->m_pcsPrint->unlock();
 		return ret;
@@ -187,61 +180,53 @@ SINT32 CAMsg::printMsg(UINT32 type,const char* format,...)
 
 SINT32 CAMsg::closeLog()
 	{
-		switch(m_uLogType)
-			{
-				case MSG_LOG:
-					#ifndef _WIN32
-						::closelog();
-					#endif
-				break;
-				case MSG_FILE:
-					if(m_hFileInfo!=-1)
-						close(m_hFileInfo);
-					m_hFileInfo=-1;
-#ifdef COMPRESSED_LOGS
-				case MSG_COMPRESSED_FILE:
-					if(m_gzFileInfo!=NULL)
-						gzclose(m_gzFileInfo);
-					m_gzFileInfo=NULL;
-				break;
+#ifndef _WIN32		
+		if(m_uLogType & MSG_LOG)
+			::closelog();
 #endif
-			}
+		if(m_uLogType & MSG_FILE) {
+			if(m_hFileInfo!=-1)
+				close(m_hFileInfo);
+			m_hFileInfo=-1;
+		}
+#ifdef COMPRESSED_LOGS
+		else if(m_uLogType & MSG_COMPRESSED_FILE) {
+			if(m_gzFileInfo!=NULL)
+				gzclose(m_gzFileInfo);
+			m_gzFileInfo=NULL;
+		}
+#endif
 		return E_SUCCESS;
 	}
 
 SINT32 CAMsg::openLog(UINT32 type)
 	{
 //		int tmpHandle=-1;
-		switch(type)
-			{
-				case MSG_LOG:
-					#ifndef _WIN32
-						openlog("AnonMix",0,LOG_USER);
-					#endif
-				break;
-				case MSG_FILE:
-					if(options.getLogDir((UINT8*)m_strLogFile,1024)!=E_SUCCESS)
-						return E_UNKNOWN;
-					strcat(m_strLogFile,FILENAME_INFOLOG);
-					m_hFileInfo=open(m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE|O_SYNC,S_IREAD|S_IWRITE);										
-					break;
-#ifdef COMPRESSED_LOGS
-				case MSG_COMPRESSED_FILE:
-					char logdir[255];
-					char buff[1024];
-					if(options.getLogDir((UINT8*)logdir,255)!=E_SUCCESS)
-						return E_UNKNOWN;
-					strcpy(buff,logdir);
-					strcat(buff,FILENAME_INFOLOG_GZ);
-					tmpHandle=open(buff,O_APPEND|O_CREAT|O_WRONLY,S_IREAD|S_IWRITE);
-					m_gzFileInfo=gzdopen(tmpHandle,"wb9");
-					if(m_gzFileInfo==NULL)
-						return E_UNKNOWN;
-				break;
+printf("%d == %d ? \n",type, MSG_LOG);
+#ifndef _WIN32
+		if(type & MSG_LOG) 
+			openlog("AnonMix",0,LOG_USER);
 #endif
-				default:
-					return E_UNKNOWN;
-			}
+		if(type & MSG_FILE) {
+			if(options.getLogDir((UINT8*)m_strLogFile,1024)!=E_SUCCESS)
+				return E_UNKNOWN;
+			strcat(m_strLogFile,FILENAME_INFOLOG);
+			m_hFileInfo=open(m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE|O_SYNC,S_IREAD|S_IWRITE);
+		}										
+#ifdef COMPRESSED_LOGS
+		else if(type & MSG_COMPRESSED_FILE) {
+			char logdir[255];
+			char buff[1024];
+			if(options.getLogDir((UINT8*)logdir,255)!=E_SUCCESS)
+				return E_UNKNOWN;
+			strcpy(buff,logdir);
+			strcat(buff,FILENAME_INFOLOG_GZ);
+			tmpHandle=open(buff,O_APPEND|O_CREAT|O_WRONLY,S_IREAD|S_IWRITE);
+			m_gzFileInfo=gzdopen(tmpHandle,"wb9");
+			if(m_gzFileInfo==NULL)
+				return E_UNKNOWN;
+		}
+#endif
 		return E_SUCCESS;
 	}
 
