@@ -462,7 +462,7 @@ SINT32 CAAccountingDBInterface::storePrepaidAmount(UINT64 accountNumber, SINT32 
 	const char* selectQuery = "SELECT COUNT(*) FROM PREPAIDAMOUNTS WHERE ACCOUNTNUMBER=%s AND CASCADE='%s'";
 	const char* insertQuery = "INSERT INTO PREPAIDAMOUNTS(PREPAIDBYTES, ACCOUNTNUMBER, CASCADE) VALUES (%d, %s, '%s')";
 	const char* updateQuery = "UPDATE PREPAIDAMOUNTS SET PREPAIDBYTES=%d WHERE ACCOUNTNUMBER=%s AND CASCADE='%s'";
-	const char* deleteQuery = "DELETE FROM PREPAIDAMOUNTS WHERE ACCOUNTNUMBER = %s AND CASCADE='%s'";
+	//const char* deleteQuery = "DELETE FROM PREPAIDAMOUNTS WHERE ACCOUNTNUMBER = %s AND CASCADE='%s'";
 	const char* query;
 	
 	PGresult* result;

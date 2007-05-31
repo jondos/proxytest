@@ -233,6 +233,8 @@ class CACmdLnOptions
 			{
 				return m_bSyslog;
 			}
+			
+			bool isConsoleLogEnabled();
 
 			/** Set to true if the encrpyted log could/should be used**/
 			SINT32 enableEncryptedLog(bool b)
@@ -477,6 +479,7 @@ class CACmdLnOptions
 			char*		m_strEncryptedLogDir;
 			bool		m_bCompressedLogs;
 			bool		m_bSyslog;
+			bool		m_bConsoleLog;
 			char*		m_strUser;
 			char*		m_strPidFile;
 			SINT32	m_nrOfOpenFiles; //How many open files (sockets) should we use
