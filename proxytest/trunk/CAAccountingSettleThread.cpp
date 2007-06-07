@@ -146,20 +146,20 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				CAMsg::printMsg(LOG_DEBUG, "Settle Thread: trying to connect to payment instance");
 #endif				
 				if(biConn.initBIConnection()!=E_SUCCESS)
-					{
-						CAMsg::printMsg(LOG_DEBUG, "SettleThread: could not connect to BI. Retrying later...\n");
-						q.clean();
-						break;
-					}
+				{
+					CAMsg::printMsg(LOG_DEBUG, "SettleThread: could not connect to BI. Retrying later...\n");
+					q.clean();
+					break;
+				}
 #ifdef DEBUG				
 				CAMsg::printMsg(LOG_DEBUG, "SettleThread: successfully connected to payment instance");
 #endif				
 				if (!pCC)
-					{
-						CAMsg::printMsg(LOG_CRIT, "CAAccountingSettleThread: Cost confirmation is NULL!\n");
-						biConn.terminateBIConnection();
-						continue;
-					}
+				{
+					CAMsg::printMsg(LOG_CRIT, "CAAccountingSettleThread: Cost confirmation is NULL!\n");
+					biConn.terminateBIConnection();
+					continue;
+				}
 				
 				//CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: try to settle...\n");
 				pErrMsg = biConn.settle( *pCC );
@@ -194,6 +194,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_ACCOUNT_EMPTY)
 					{
 						authFlags |= AUTH_ACCOUNT_EMPTY;
+						dbConn.storeAccountStatus(pCC->getAccountNumber(), CAXMLErrorMessage::ERR_ACCOUNT_EMPTY);				
 						dbConn.markAsSettled(pCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade);
 					}
 					/*
@@ -229,6 +230,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					}
 					else
 					{
+						CAMsg::printMsg(LOG_DEBUG, "SettleThread: Setting unknown kickout error no. %d.\n", pErrMsg->getErrorCode());
 						authFlags |= AUTH_UNKNOWN;	
 						bDeleteCC = true; // an unknown error leads to user kickout
 					}		
@@ -303,7 +305,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					}	
 					else
 					{
-						oldEntry->authFlags |= entry->authFlags;						
+						oldEntry->authFlags |= entry->authFlags;
 						if (entry->confirmedBytes)
 						{
 							oldEntry->confirmedBytes = entry->confirmedBytes;

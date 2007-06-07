@@ -945,9 +945,37 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 		}
 		else if (status > CAXMLErrorMessage::ERR_OK)
 		{
+			UINT32 authFlags = 0;
 			UINT8 tmp[32];
 			print64(tmp,pAccInfo->accountNumber);
 			CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: The user with account %s should be kicked out due to error %u!\n", tmp, status);
+			if (status == CAXMLErrorMessage::ERR_KEY_NOT_FOUND)
+			{
+				authFlags |= AUTH_INVALID_ACCOUNT;
+			}
+			else if (status == CAXMLErrorMessage::ERR_ACCOUNT_EMPTY)
+			{
+				authFlags |= AUTH_ACCOUNT_EMPTY;
+			}
+			
+			if (authFlags)
+			{
+				ms_pInstance->m_settleHashtable->getMutex().lock();		
+				AccountHashEntry* oldEntry = 
+					(AccountHashEntry*) (ms_pInstance->m_settleHashtable->getValue(&(pAccInfo->accountNumber)));
+				if (!oldEntry)
+				{
+					AccountHashEntry* entry = new AccountHashEntry; 
+					entry->accountNumber = pAccInfo->accountNumber;
+					entry->authFlags = authFlags;					
+					ms_pInstance->m_settleHashtable->put(&(entry->accountNumber), entry);
+				}	
+				else
+				{
+					oldEntry->authFlags |= authFlags;
+				}										
+				ms_pInstance->m_settleHashtable->getMutex().unlock();
+			}
 		}
 		
 		// fetch cost confirmation from last session if available, and retrieve information
