@@ -35,6 +35,7 @@ class CAFirstMixA:public CAFirstMix
 	{		
 		protected:
 			SINT32 loop();	
+			SINT32 closeConnection(fmHashTableEntry* pHashEntry);	
 	};
 
 #endif

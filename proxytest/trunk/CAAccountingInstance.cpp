@@ -49,6 +49,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 
 DOM_Document CAAccountingInstance::m_preparedCCRequest;
 
+const SINT32 CAAccountingInstance::HANDLE_PACKET_CONNECTION_OK = 1;
+const SINT32 CAAccountingInstance::HANDLE_PACKET_CONNECTION_UNCHECKED = 4;
+const SINT32 CAAccountingInstance::HANDLE_PACKET_HOLD_CONNECTION = 0;
+const SINT32 CAAccountingInstance::HANDLE_PACKET_PREPARE_FOR_CLOSING_CONNECTION = 2;
+const SINT32 CAAccountingInstance::HANDLE_PACKET_CLOSE_CONNECTION = 3;
+
+
 /**
  * Singleton: This is the reference to the only instance of this class
  */
@@ -256,7 +263,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 		
 		if (pHashEntry == NULL || pHashEntry->pAccountingInfo == NULL)
 		{
-			return 3;
+			return HANDLE_PACKET_CLOSE_CONNECTION;
 		}
 		
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
@@ -269,7 +276,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 		if (pAccInfo->authFlags & AUTH_DELETE_ENTRY)
 		{
 			pAccInfo->mutex->unlock();
-			return 3;
+			return HANDLE_PACKET_CLOSE_CONNECTION;
 		}
 		
 		//kick user out after previous error
@@ -283,14 +290,14 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			else
 			{							
 				pAccInfo->mutex->unlock();
-				return 2; // don't let through messages from JAP
+				return HANDLE_PACKET_PREPARE_FOR_CLOSING_CONNECTION; // don't let through messages from JAP
 			}
 		}	
 		
 		if (a_bControlMessage)		
 		{
 			pAccInfo->mutex->unlock();
-			return 1;
+			return HANDLE_PACKET_CONNECTION_UNCHECKED;
 		}
 		else
 		{
@@ -307,7 +314,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 		{
 			//CAMsg::printMsg( LOG_DEBUG, "Now we gain some speed after %d session packets...\n", pAccInfo->sessionPackets);
 			pAccInfo->mutex->unlock();
-			return 1;
+			return HANDLE_PACKET_CONNECTION_UNCHECKED;
 		}
 		//CAMsg::printMsg( LOG_DEBUG, "Checking after %d session packets...\n", pAccInfo->sessionPackets);
 		
@@ -335,7 +342,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 					// this is not the latest connection of this user; kick him out...
 					pAccInfo->authFlags |= AUTH_MULTIPLE_LOGIN;
 					ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();
-					return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_MULTIPLE_LOGIN, (UINT8*)"Only one login per account is allowed!"));
+					return returnPrepareKickout(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_MULTIPLE_LOGIN, (UINT8*)"Only one login per account is allowed!"));
 				}
 			}
 			else
@@ -394,7 +401,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 		
 		if (err)
 		{						
-			return returnHold(pAccInfo, err);		
+			return returnPrepareKickout(pAccInfo, err);		
 		}
 	
 		//CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket auth for account %s.\n", accountNrAsString);
@@ -415,12 +422,11 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 	//#ifdef DEBUG							
 				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Auth timeout has runout, will kick out user now...\n");
 	//#endif											
-				return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_NO_ACCOUNTCERT));				
+				return returnPrepareKickout(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_NO_ACCOUNTCERT));				
 			}						
 					
 			pAccInfo->mutex->unlock();
-			//return 2; //dangerous, destroys encrypted stream somehow
-			return 1;
+			return HANDLE_PACKET_HOLD_CONNECTION;
 		}
 		else 
 		{									
@@ -430,12 +436,12 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 #ifdef DEBUG				
 				CAMsg::printMsg( LOG_DEBUG, "AccountingInstance: AUTH_FAKE flag is set ... byebye\n");
 #endif				
-				return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_BAD_SIGNATURE, (UINT8*)"Your account certificate is invalid"));
+				return returnPrepareKickout(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_BAD_SIGNATURE, (UINT8*)"Your account certificate is invalid"));
 			}
 			/*
 			else if (pAccInfo->authFlags & AUTH_MULTIPLE_LOGIN)
 			{
-				return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_MULTIPLE_LOGIN, (UINT8*)"Only one login per account is allowed!"));
+				return returnPrepareKickout(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_MULTIPLE_LOGIN, (UINT8*)"Only one login per account is allowed!"));
 			}*/
 			if( !(pAccInfo->authFlags & AUTH_ACCOUNT_OK) )
 			{
@@ -443,14 +449,13 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 				if(time(NULL) >= pAccInfo->challengeSentSeconds + CHALLENGE_TIMEOUT)
 				{
 					CAMsg::printMsg( LOG_DEBUG, "AccountingInstance: Jap refused to send response to challenge (Request Timeout)...\n");
-					return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_NO_ACCOUNTCERT)); //timeout over -> kick out
+					return returnPrepareKickout(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_NO_ACCOUNTCERT)); //timeout over -> kick out
 				}
 				else //timeout still running
 				{
 					pAccInfo->mutex->unlock();
 					// do not forward any traffic from JAP
-					//return 2; //dangerous, destroys encrypted stream somehow
-					return 1;
+					return HANDLE_PACKET_HOLD_CONNECTION;
 				}					
 			}			
 
@@ -485,7 +490,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 															
 					//ms_pInstance->m_pIPBlockList->insertIP( pHashEntry->peerIP );
 					pAccInfo->lastHardLimitSeconds = 0;
-					return returnHold(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_NO_CONFIRMATION));
+					return returnPrepareKickout(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_NO_CONFIRMATION));
 				}
 				else
 				{
@@ -495,8 +500,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 					}
 					pAccInfo->mutex->unlock();
 					// do not forward any traffic from JAP
-					//return 2; //dangerous, destroys encrypted stream somehow
-					return 1;
+					return HANDLE_PACKET_HOLD_CONNECTION;
 				}
 			}
 			else
@@ -540,7 +544,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 SINT32 CAAccountingInstance::returnOK(tAiAccountingInfo* pAccInfo)
 {
 	pAccInfo->mutex->unlock();
-	return 1;	
+	return HANDLE_PACKET_CONNECTION_OK;	
 }
 
 
@@ -554,7 +558,7 @@ SINT32 CAAccountingInstance::returnKickout(tAiAccountingInfo* pAccInfo)
 	CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: should kick out user with account %s now...\n", tmp);	
 	pAccInfo->transferredBytes = pAccInfo->confirmedBytes;
 	pAccInfo->mutex->unlock();
-	return 3;
+	return HANDLE_PACKET_CLOSE_CONNECTION;
 }
 
 /*
@@ -562,7 +566,7 @@ SINT32 CAAccountingInstance::returnKickout(tAiAccountingInfo* pAccInfo)
  * (Usage: send an error message before kicking out the user:
  * sets AUTH_FATAL_ERROR )
  */
-SINT32 CAAccountingInstance::returnHold(tAiAccountingInfo* pAccInfo, CAXMLErrorMessage* a_error)
+SINT32 CAAccountingInstance::returnPrepareKickout(tAiAccountingInfo* pAccInfo, CAXMLErrorMessage* a_error)
 {
 	pAccInfo->authFlags |= AUTH_FATAL_ERROR;
 	
@@ -581,7 +585,7 @@ SINT32 CAAccountingInstance::returnHold(tAiAccountingInfo* pAccInfo, CAXMLErrorM
 	}
 	
 	pAccInfo->mutex->unlock();
-	return 2;
+	return HANDLE_PACKET_PREPARE_FOR_CLOSING_CONNECTION;
 }
 
 

@@ -68,8 +68,10 @@ struct t_fmhashtableentry
 #ifdef DELAY_USERS
 			UINT32				delayBucket;
 			UINT32				delayBucketID;
-#endif
-			
+#endif						
+			// if false, the entry should be deleted the next time it is read from the queue
+			bool bRecoverTimeout;
+	
 		private:
 			UINT32				cNumberOfChannels;
 			struct t_firstmixchannellist* pChannelList;
@@ -79,6 +81,14 @@ struct t_fmhashtableentry
 					struct t_fmhashtableentry* prev;
 					struct t_fmhashtableentry* next;
 				} list_HashEntries;
+				
+			// the timeout list
+			struct
+			{
+				struct t_fmhashtableentry* prev;
+				struct t_fmhashtableentry* next;
+				SINT32 timoutSecs;
+			} list_TimeoutHashEntries;
 
 		friend class CAFirstMixChannelList;
 #ifdef PAYMENT
@@ -189,8 +199,24 @@ class CAFirstMixChannelList
 			fmHashTableEntry* add(CAMuxSocket* pMuxSocket,const UINT8 peerIP[4],CAQueue* pQueueSend);
 			SINT32 addChannel(CAMuxSocket* pMuxSocket,HCHANNEL channelIn,CASymCipher* pCipher,HCHANNEL* channelOut);
 			
-			fmChannelListEntry* get(CAMuxSocket* pMuxSocket,HCHANNEL channelIn);
+			fmChannelListEntry* get(CAMuxSocket* pMuxSocket,HCHANNEL channelIn);			
 
+			/** 
+			 * @return pops the next expired entry from the queue or returns NULL
+			 * if there are no exired entries
+			 */
+			fmHashTableEntry* popTimeoutEntry();
+			
+			/**
+			 * adds the entry to the timeout queue with mutex
+			 */
+			SINT32 pushTimeoutEntry(fmHashTableEntry* pHashTableEntry);
+			
+			/**
+			 * Adds the entry to the timeout queue with mutex; this entry will be the next one to get deleted!
+			 */
+			//SINT32 pushTimeoutEntry(fmHashTableEntry* pHashTableEntry, bool a_bForceTimeOut);
+			
 
 			SINT32 remove(CAMuxSocket* pMuxSocket);
 			SINT32 removeChannel(CAMuxSocket* pMuxSocket,HCHANNEL channelIn);
@@ -212,7 +238,14 @@ class CAFirstMixChannelList
         void cleanVacantOutChannels();
       #endif
 
-		private:
+		private:			
+			SINT32 removeFromTimeoutList(fmHashTableEntry* pHashTableEntry);
+			/**
+			 * adds the entry to the timeout queue
+			 */
+			SINT32 pushTimeoutEntry_internal(fmHashTableEntry* pHashTableEntry);
+			//SINT32 pushTimeoutEntry_internal(fmHashTableEntry* pHashTableEntry, bool a_bForceTimeOut);
+		
 			/** Gets the in-channel and all associated information for the given out-channel.
 				* This method is NOT thread safe (and so only for internal use)
 				* @see get() 
@@ -248,6 +281,8 @@ class CAFirstMixChannelList
 					return pEntry;
 				}	
 		private:
+			static const SINT32 EXPIRATION_TIME_SECS;
+		
 			///The Hash-Table of all connections.
 			LP_fmHashTableEntry* m_HashTable;
 			///The Hash-Table of all out-channels.
@@ -257,6 +292,11 @@ class CAFirstMixChannelList
 			fmHashTableEntry* m_listHashTableHead;
 			///Next Element in the enumeration of all connections.
 			fmHashTableEntry* m_listHashTableNext;
+			
+			///Pointer to the head of the timout list of all connections.
+			fmHashTableEntry* m_listTimoutHead;
+			fmHashTableEntry* m_listTimoutFoot;
+			
 			///This mutex is used in all functions and makes them thread safe.
 			CAMutex m_Mutex;
 //#ifdef PAYMENT

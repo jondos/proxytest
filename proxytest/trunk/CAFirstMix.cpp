@@ -1029,6 +1029,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		fmHashTableEntry* pHashEntry=m_pChannelList->add(pNewUser,peerIP,tmpQueue);
 		if(pHashEntry==NULL)// adding user connection to mix->JAP channel list (stefan: sollte das nicht connection list sein? --> es handelt sich um eine Datenstruktu fr Connections/Channels ).
 		{
+			CAMsg::printMsg(LOG_ERR,"User login: Could add new socket to connection list!\n");
 			m_pIPList->removeIP(peerIP);
 			delete tmpQueue;
 			delete pNewUser;

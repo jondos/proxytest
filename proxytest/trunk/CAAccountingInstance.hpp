@@ -134,6 +134,12 @@ public:
 	SINT32 static processJapMessage(fmHashTableEntry * pHashEntry,const DOM_Document& a_DomDoc);
 	
 	UINT32 static getNrOfUsers();
+	
+	static const SINT32 HANDLE_PACKET_CONNECTION_OK; // this packet has been checked and is OK
+	static const SINT32 HANDLE_PACKET_CONNECTION_UNCHECKED; // the packet might be OK (is it not checked)
+	static const SINT32 HANDLE_PACKET_HOLD_CONNECTION; // queue packets until JAP has authenticated
+	static const SINT32 HANDLE_PACKET_PREPARE_FOR_CLOSING_CONNECTION; // small grace period until kickout
+	static const SINT32 HANDLE_PACKET_CLOSE_CONNECTION; // this connection should be closed immediatly
 
 private:
 
@@ -178,7 +184,7 @@ private:
 	static SINT32 returnOK(tAiAccountingInfo* pAccInfo);
 	static SINT32 returnWait(tAiAccountingInfo* pAccInfo);
 	static SINT32 returnKickout(tAiAccountingInfo* pAccInfo);
-	static SINT32 returnHold(tAiAccountingInfo* pAccInfo, CAXMLErrorMessage* a_error);
+	static SINT32 returnPrepareKickout(tAiAccountingInfo* pAccInfo, CAXMLErrorMessage* a_error);
 	
 	/**
 	 * The main loop of the AI thread - reads messages from the queue 

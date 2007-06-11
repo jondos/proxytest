@@ -92,6 +92,7 @@ CAIPList::~CAIPList()
 	*/
 SINT32 CAIPList::insertIP(const UINT8 ip[4])
 	{
+		
 		if (1 == 1)
 		{
 			return 1;
@@ -118,11 +119,13 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 				m_HashTable[hashvalue]=entry;
 				ret = entry->count;
 #ifdef DEBUG
+/*
 #ifndef PSEUDO_LOG
 				CAMsg::printMsg(LOG_DEBUG,"New IP-Address inserted: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X !\n",hash[0],hash[1],hash[2],hash[3],hash[4],hash[5],hash[6],hash[7],hash[8],hash[9],hash[10],hash[11],hash[12],hash[13],hash[14],hash[15]);
 #else
 				CAMsg::printMsg(LOG_DEBUG,"New IP-Address inserted: {%u.%u.%u.%u} !\n",ip[0],ip[1],ip[2],ip[3]);
 #endif
+*/
 #endif
 				m_pMutex->unlock();
 				return ret;
@@ -179,6 +182,7 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 	SINT32 CAIPList::removeIP(const UINT8 ip[4],UINT32 time,UINT32 trafficIn,UINT32 trafficOut)
 #endif
 	{
+		
 		if (1 == 1)
 		{
 			return 0;
