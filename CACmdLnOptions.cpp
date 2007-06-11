@@ -45,7 +45,6 @@ CACmdLnOptions::CACmdLnOptions()
   {
 		m_bDaemon=false;
 		m_bSyslog=false;
-		m_bConsoleLog=true;		
 		m_bLocalProxy=m_bFirstMix=m_bLastMix=m_bMiddleMix=false;
 #ifndef ONLY_LOCAL_PROXY
 		m_bIsRunReConfigure=false;
@@ -1517,12 +1516,6 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 				{
 					m_bSyslog=true;
 				}
-				getDOMChildByName(elemLogging,(UINT8*)"Console",elem,false);
-				tmpLen=255;
-				if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS&&memcmp(tmpBuff,"True",4)==0)
-				{
-					m_bConsoleLog=true;
-				}
 					
 				DOM_Element elemEncLog;
 				//get Encrypted Log Info
@@ -2985,12 +2978,3 @@ SINT32 CACmdLnOptions::changeMixType(CAMix::tMixType a_newMixType)
 
 #endif //DYNAMIC_MIX
 #endif //ONLY_LOCAL_PROXY
-
-/**
- * Returns whether logging to console (stdout) is enabled.
- * @retval true if console logging is enabled, false otherwise
- * @author Oliver Meyer <ronin2@web.de>
- */
-bool CACmdLnOptions::isConsoleLogEnabled() {
-	return m_bConsoleLog;
-}
