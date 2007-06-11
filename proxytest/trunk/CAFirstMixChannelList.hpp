@@ -211,12 +211,6 @@ class CAFirstMixChannelList
 			 * adds the entry to the timeout queue with mutex
 			 */
 			SINT32 pushTimeoutEntry(fmHashTableEntry* pHashTableEntry);
-			
-			/**
-			 * Adds the entry to the timeout queue with mutex; this entry will be the next one to get deleted!
-			 */
-			//SINT32 pushTimeoutEntry(fmHashTableEntry* pHashTableEntry, bool a_bForceTimeOut);
-			
 
 			SINT32 remove(CAMuxSocket* pMuxSocket);
 			SINT32 removeChannel(CAMuxSocket* pMuxSocket,HCHANNEL channelIn);
@@ -244,7 +238,6 @@ class CAFirstMixChannelList
 			 * adds the entry to the timeout queue
 			 */
 			SINT32 pushTimeoutEntry_internal(fmHashTableEntry* pHashTableEntry);
-			//SINT32 pushTimeoutEntry_internal(fmHashTableEntry* pHashTableEntry, bool a_bForceTimeOut);
 		
 			/** Gets the in-channel and all associated information for the given out-channel.
 				* This method is NOT thread safe (and so only for internal use)
