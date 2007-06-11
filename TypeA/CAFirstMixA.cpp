@@ -249,9 +249,8 @@ SINT32 CAFirstMixA::loop()
 													pHashEntry->bRecoverTimeout = false;	
 													goto NEXT_USER;
 												}
-												else
+												else if (CAAccountingInstance::HANDLE_PACKET_CLOSE_CONNECTION == ret)
 												{
-													// CAAccountingInstance::HANDLE_PACKET_CLOSE_CONNECTION
 													// kickout this user - he deserves it...
 													closeConnection(pHashEntry);
 													goto NEXT_USER;
@@ -568,7 +567,7 @@ NEXT_USER:
 														// the next timeout might be deadly for this connection...
 														pfmHashEntry->bRecoverTimeout = false;	
 													}
-													else
+													else if (CAAccountingInstance::HANDLE_PACKET_CLOSE_CONNECTION == ret)
 													{
 														CAMsg::printMsg(LOG_DEBUG, "CAFirstMixA: Closing JAP connection due to illegal payment status!\n", ret);														
 														closeConnection(pfmHashEntry);
