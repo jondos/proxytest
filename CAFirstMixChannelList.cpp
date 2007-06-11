@@ -333,49 +333,6 @@ SINT32 CAFirstMixChannelList::pushTimeoutEntry(fmHashTableEntry* pHashTableEntry
 	return ret;
 }
 
-/*
-SINT32 CAFirstMixChannelList::pushTimeoutEntry(fmHashTableEntry* pHashTableEntry, bool a_bForceTimeOut)
-{
-	SINT32 ret;
-	
-	m_Mutex.lock();
-	ret = pushTimeoutEntry_internal(pHashTableEntry, a_bForceTimeOut);
-	m_Mutex.unlock();
-	
-	return ret;
-}
-
-SINT32 CAFirstMixChannelList::pushTimeoutEntry_internal(fmHashTableEntry* pHashTableEntry, bool a_bForceTimeOut)
-{
-	if (pHashTableEntry == NULL)
-	{
-		return E_UNKNOWN;
-	}
-	
-	pHashTableEntry->list_TimeoutHashEntries.timoutSecs = 0;
-	
-	// remove from timeout list if needed before adding it to the end
-	removeFromTimeoutList(pHashTableEntry);
-	
-	if (m_listTimoutHead == NULL)
-	{
-		// this is the first entry in the list
-		pHashTableEntry->list_TimeoutHashEntries.next = NULL;
-		m_listTimoutFoot = pHashTableEntry;
-		
-	}
-	else
-	{
-		// this is the new first entry in the list
-		m_listTimoutHead->list_TimeoutHashEntries.prev = pHashTableEntry;
-		pHashTableEntry->list_TimeoutHashEntries.next = m_listTimoutHead;
-	}
-	pHashTableEntry->list_TimeoutHashEntries.prev = NULL;
-	m_listTimoutHead = pHashTableEntry;
-	
-	return E_SUCCESS;	
-}*/
-
 		
 SINT32 CAFirstMixChannelList::pushTimeoutEntry_internal(fmHashTableEntry* pHashTableEntry)
 {	

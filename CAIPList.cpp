@@ -92,12 +92,6 @@ CAIPList::~CAIPList()
 	*/
 SINT32 CAIPList::insertIP(const UINT8 ip[4])
 	{
-		
-		if (1 == 1)
-		{
-			return 1;
-		}
-		
 		UINT16 hashvalue=(ip[2]<<8)|ip[3];
 		SINT32 ret;
 		m_pMutex->lock();
@@ -109,8 +103,8 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 				memcpy(m_Random,ip,4);
 				MD5(m_Random,56,hash);
 				CAMsg::printMsg(LOG_DEBUG,"Inserting new IP-Address: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X !\n",hash[0],hash[1],hash[2],hash[3],hash[4],hash[5],hash[6],hash[7],hash[8],hash[9],hash[10],hash[11],hash[12],hash[13],hash[14],hash[15]);
-#else
-				CAMsg::printMsg(LOG_DEBUG,"Inserting new IP-Address: {%u.%u.%u.%u} !\n",ip[0],ip[1],ip[2],ip[3]);
+//#else
+//				CAMsg::printMsg(LOG_DEBUG,"Inserting new IP-Address: {%u.%u.%u.%u} !\n",ip[0],ip[1],ip[2],ip[3]);
 #endif
 				entry=new IPLISTENTRY;
 				memcpy(entry->ip,ip,2);
@@ -181,13 +175,7 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 #else
 	SINT32 CAIPList::removeIP(const UINT8 ip[4],UINT32 time,UINT32 trafficIn,UINT32 trafficOut)
 #endif
-	{
-		
-		if (1 == 1)
-		{
-			return 0;
-		}
-		
+	{	
 		UINT16 hashvalue=(ip[2]<<8)|ip[3];
 		SINT32 ret;
 		m_pMutex->lock();
@@ -223,8 +211,8 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 								#else
 									CAMsg::printMsg(LOG_DEBUG,"Removing IP-Address: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X !\n",hash[0],hash[1],hash[2],hash[3],hash[4],hash[5],hash[6],hash[7],hash[8],hash[9],hash[10],hash[11],hash[12],hash[13],hash[14],hash[15]);
 								#endif
-							#else
-								CAMsg::printMsg(LOG_DEBUG,"Removing IP-Address: {%u.%u.%u.%u} !\n",ip[0],ip[1],ip[2],ip[3]);
+							//#else
+							//	CAMsg::printMsg(LOG_DEBUG,"Removing IP-Address: {%u.%u.%u.%u} !\n",ip[0],ip[1],ip[2],ip[3]);
 							#endif
 							if(before==NULL)
 								m_HashTable[hashvalue]=entry->next;
