@@ -1086,14 +1086,16 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 	CAMsg::printMsg(LOG_DEBUG, "Checking database for previously prepaid bytes...\n");
 	#endif
 	SINT32 prepaidAmount = m_dbInterface->getPrepaidAmount(pAccInfo->accountNumber, m_currentCascade);
+	UINT8 tmp[32];
+	print64(tmp,pAccInfo->accountNumber);
 	if (prepaidAmount > 0)
 	{
 		pAccInfo->transferredBytes -= prepaidAmount;	
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Got %d prepaid bytes\n",prepaidAmount);
+		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Got %d prepaid bytes for account nr. %s.\n",prepaidAmount, tmp);
 	}	
 	else
 	{
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: No database record for prepaid bytes found for this account \n");	
+		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: No database record for prepaid bytes found for account nr. %s.\n", tmp);	
 	}	
 	//CAMsg::printMsg(LOG_DEBUG, "Number of prepaid (confirmed-transferred) bytes : %d \n",pAccInfo->confirmedBytes-pAccInfo->transferredBytes);	
 	
