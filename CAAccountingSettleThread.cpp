@@ -97,13 +97,13 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 		{
 			SAVE_STACK("CAAccountingSettleThread::mainLoop", "Loop");
 			
-			//#ifdef DEBUG
+			#ifdef DEBUG
 				CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread going to sleep...\n");
-			//#endif
+			#endif
 			sSleep((UINT16)sleepInterval);
-			//#ifdef DEBUG
+			#ifdef DEBUG
 				CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread Waking up...\n");
-			//#endif
+			#endif
 			if(!m_pAccountingSettleThread->m_bRun)
 			{
 				CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Leaving run loop\n");
@@ -114,9 +114,9 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				CAMsg::printMsg(LOG_ERR, "SettleThread could not connect to Database. Retrying later...\n");
 				continue;
 			}
-			//#ifdef DEBUG	
+			#ifdef DEBUG	
 			CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: DB connections established!\n");
-			//#endif
+			#endif
 
 			dbConn.getUnsettledCostConfirmations(q, m_pAccountingSettleThread->m_settleCascade);
 			if (q.isEmpty() )
