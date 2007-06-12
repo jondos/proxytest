@@ -60,6 +60,8 @@ class CAAccountingDBInterface
 			*/
 			SINT32 terminateDBConnection();
 			
+			bool isDBConnected();
+			
 			/**
 			* Creates the tables we need in the DB
 			*
@@ -100,6 +102,12 @@ class CAAccountingDBInterface
 			SINT32 getAccountStatus(UINT64 a_accountNumber, UINT32& a_statusCode);
 			
 		private:
+			/**
+			 * Checks if the connection still exists and tries to reconnect if not.
+			 * @return if the database connection is active after the call or not
+			 */
+			bool checkConnectionStatus();
+		
 			/**
 			 * Takes and executes a query that counts databae records and tests if the result
 			 * is valid.
