@@ -117,6 +117,38 @@ SINT32 CAAccountingDBInterface::initDBConnection()
 		return E_SUCCESS;
 	}
 
+bool CAAccountingDBInterface::checkConnectionStatus()
+{
+	if (!m_bConnected)
+	{
+		return false;
+	}
+	
+	if (PQstatus(m_dbConn) != CONNECTION_OK) 
+	{
+		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInteface: Connection to database lost! Reason: %s\n", 
+			PQerrorMessage(m_dbConn));	
+    	PQreset(m_dbConn);
+    	
+      	if (PQstatus(m_dbConn) != CONNECTION_OK) 
+      	{
+      		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInteface: Could not reset database connection! Reason: %s\n", 
+      			PQerrorMessage(m_dbConn));	
+			terminateDBConnection();
+      	}
+      	else
+      	{
+      		CAMsg::printMsg(LOG_INFO, "CAAccountingDBInteface: Database connection has been reset successfully!");
+      	}
+	}
+	
+	return m_bConnected;
+}
+
+bool CAAccountingDBInterface::isDBConnected()
+{
+	return m_bConnected;
+}
 
 /**
  * Terminates the database connection
@@ -147,7 +179,7 @@ SINT32 CAAccountingDBInterface::terminateDBConnection()
  */
 SINT32 CAAccountingDBInterface::getCostConfirmation(UINT64 accountNumber, UINT8* cascadeId, CAXMLCostConfirmation **pCC)
 	{
-		if(!m_bConnected) 
+		if(!checkConnectionStatus()) 
 		{
 			return E_NOT_CONNECTED;
 		}
@@ -194,7 +226,6 @@ SINT32 CAAccountingDBInterface::getCostConfirmation(UINT64 accountNumber, UINT8*
 		}
 		return E_SUCCESS;
 	}
-
 
 
 SINT32 CAAccountingDBInterface::checkCountAllQuery(UINT8* a_query, UINT32& r_count)
@@ -254,7 +285,7 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 		UINT8 strAccountNumber[32];
 		UINT8 tmp[32];
 		
-		if(!m_bConnected) 
+		if(!checkConnectionStatus()) 
 		{
 			return E_NOT_CONNECTED;
 		}
@@ -343,8 +374,10 @@ SINT32 CAAccountingDBInterface::getUnsettledCostConfirmations(CAQueue& q, UINT8*
 		UINT8* pTmpStr;
 		CAXMLCostConfirmation* pCC;
 
-		if(!m_bConnected) 
+		if(!checkConnectionStatus()) 
+		{
 			return E_NOT_CONNECTED;
+		}
 
 		finalQuery = new UINT8[strlen(query)+strlen((char*)cascadeId)];
 		sprintf( (char*)finalQuery, query, cascadeId);
@@ -390,8 +423,10 @@ SINT32 CAAccountingDBInterface::markAsSettled(UINT64 accountNumber, UINT8* casca
 		UINT8 * query;
 		PGresult * result;
 		
-		if(!m_bConnected) 
+		if(!checkConnectionStatus()) 
+		{
 			return E_NOT_CONNECTED;
+		}
 
 		UINT8 tmp[32];
 		print64(tmp,accountNumber);
@@ -418,7 +453,7 @@ SINT32 CAAccountingDBInterface::deleteCC(UINT64 accountNumber, UINT8* cascadeId)
 	UINT8 temp[32];
 	print64(temp,accountNumber);
 	
-	if (!m_bConnected)
+	if (!checkConnectionStatus())
 	{
 		ret = E_NOT_CONNECTED;	
 	}
@@ -472,7 +507,7 @@ SINT32 CAAccountingDBInterface::storePrepaidAmount(UINT64 accountNumber, SINT32 
 	UINT32 count;
 	print64(tmp,accountNumber);
 
-	if(!m_bConnected) 
+	if(!checkConnectionStatus()) 
 	{
 		return E_NOT_CONNECTED;
 	}
@@ -536,6 +571,11 @@ SINT32 CAAccountingDBInterface::getPrepaidAmount(UINT64 accountNumber, UINT8* ca
 		UINT8 accountNumberAsString[32];
 		print64(accountNumberAsString,accountNumber);
 		
+		if(!checkConnectionStatus()) 
+		{
+			return E_NOT_CONNECTED;
+		}
+		
 		finalQuery = new UINT8[strlen(selectQuery) + 32 + strlen((char*)cascadeId)];
 		sprintf( (char *)finalQuery, selectQuery, accountNumberAsString, cascadeId);		
 		result = PQexec(m_dbConn, (char *)finalQuery);
@@ -591,7 +631,7 @@ SINT32 CAAccountingDBInterface::getPrepaidAmount(UINT64 accountNumber, UINT8* ca
 		UINT32 count;
 		print64(tmp,accountNumber);
 	
-		if(!m_bConnected) 
+		if(!checkConnectionStatus()) 
 		{
 			return E_NOT_CONNECTED;
 		}
@@ -651,6 +691,12 @@ SINT32 CAAccountingDBInterface::getPrepaidAmount(UINT64 accountNumber, UINT8* ca
 		UINT8* finalQuery;
 		UINT8 accountNumberAsString[32];
 		print64(accountNumberAsString,accountNumber);
+		
+		if(!checkConnectionStatus()) 
+		{
+			return E_NOT_CONNECTED;
+		}
+		
 		
 		a_statusCode =  CAXMLErrorMessage::ERR_OK;
 		

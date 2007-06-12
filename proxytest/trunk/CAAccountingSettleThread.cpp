@@ -109,7 +109,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Leaving run loop\n");
 				break;
 			}
-			if(dbConn.initDBConnection()!=E_SUCCESS)
+			if(!dbConn.isDBConnected() && dbConn.initDBConnection()!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_ERR, "SettleThread could not connect to Database. Retrying later...\n");
 				continue;
@@ -149,6 +149,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				{
 					CAMsg::printMsg(LOG_DEBUG, "SettleThread: could not connect to BI. Retrying later...\n");
 					q.clean();
+					biConn.terminateBIConnection(); // make sure the socket is closed
 					break;
 				}
 #ifdef DEBUG				
@@ -275,9 +276,6 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				}
 			}
 			
-			SAVE_STACK("CAAccountingSettleThread::mainLoop", "Terminate db conn");
-			dbConn.terminateDBConnection();
-			
 			/*
 			 * Now alter the hashtable entries if needed. This blocks communication with JAP clients
 			 * and should therefore be done as quickly as possible.
@@ -317,9 +315,13 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				}
 				m_pAccountingSettleThread->m_accountingHashtable->getMutex().unlock();		
 			}
+			
 			FINISH_STACK("CAAccountingSettleThread::mainLoop");
 		}//main while run loop
 		CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Exiting run loop!\n");
+		
+		dbConn.terminateDBConnection();
+		
 		THREAD_RETURN_SUCCESS;
 	}
 
