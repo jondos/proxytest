@@ -101,6 +101,11 @@ public:
 		}
 
 	/**
+	 * @return the payment auth flags of the given connecttion or 0 if no auth flags are set
+	 */
+	static UINT32 getAuthFlags(fmHashTableEntry * pHashEntry);
+
+	/**
 	 * This should always be called when closing a JAP connection
 	 * to cleanup the data structures
 	 */
