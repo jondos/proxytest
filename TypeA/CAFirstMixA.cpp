@@ -143,8 +143,28 @@ SINT32 CAFirstMixA::loop()
 				// check the timeout for all connections
 				fmHashTableEntry* timeoutHashEntry;
 				while ((timeoutHashEntry = m_pChannelList->popTimeoutEntry()) != NULL)
-				{
-					CAMsg::printMsg(LOG_DEBUG,"Client connection closed due to timeout.\n");
+				{				
+					if (timeoutHashEntry->bRecoverTimeout)
+					{
+						CAMsg::printMsg(LOG_DEBUG,"Client connection closed due to timeout.\n");
+					}
+					else
+					{
+						// This should not happen if all client connections are closed as defined in the protocols.
+#ifdef PAYMENT
+						UINT32 authFlags = CAAccountingInstance::getAuthFlags(timeoutHashEntry);
+						if (authFlags > 0)
+						{
+							CAMsg::printMsg(LOG_ERR,"Client connection closed due to forced timeout! Payment auth flags: %u\n", authFlags);
+						}
+						else
+#endif						
+						{
+							CAMsg::printMsg(LOG_ERR,"Client connection closed due to forced timeout!\n");
+						}
+					}
+					
+					
 					closeConnection(timeoutHashEntry);
 				}
 

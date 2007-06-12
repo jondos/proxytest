@@ -175,6 +175,23 @@ CAAccountingInstance::~CAAccountingInstance()
 		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance dying finished.\n" );		
 	}
 
+UINT32 CAAccountingInstance::getAuthFlags(fmHashTableEntry * pHashEntry)
+{
+	if (pHashEntry == NULL)
+	{
+		return 0;
+	}
+	
+	tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
+	
+	if (pAccInfo == NULL)
+	{
+		return 0;
+	}
+	
+	return pAccInfo->authFlags;
+}
+
 UINT32 CAAccountingInstance::getNrOfUsers()
 {
 	UINT32 users = 0;
