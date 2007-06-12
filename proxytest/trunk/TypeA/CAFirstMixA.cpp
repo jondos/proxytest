@@ -162,8 +162,7 @@ SINT32 CAFirstMixA::loop()
 						{
 							CAMsg::printMsg(LOG_ERR,"Client connection closed due to forced timeout!\n");
 						}
-					}
-					
+					}					
 					
 					closeConnection(timeoutHashEntry);
 				}
