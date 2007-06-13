@@ -50,7 +50,7 @@ SINT32 CAFirstMixA::closeConnection(fmHashTableEntry* pHashEntry)
 	INIT_STACK;
 	BEGIN_STACK("CAFirstMixA::closeConnection");
 	
-	CAMsg::printMsg(LOG_ERR,"Closing client connection.\n");
+	CAMsg::printMsg(LOG_DEBUG,"Closing client connection.\n");
 	
 	fmChannelListEntry* pEntry;
 	tQueueEntry* pQueueEntry = new tQueueEntry;
@@ -69,6 +69,9 @@ SINT32 CAFirstMixA::closeConnection(fmHashTableEntry* pHashEntry)
 	m_psocketgroupUsersRead->remove(*(CASocket*)pHashEntry->pMuxSocket);
 	m_psocketgroupUsersWrite->remove(*(CASocket*)pHashEntry->pMuxSocket);
 	pEntry = m_pChannelList->getFirstChannelForSocket(pHashEntry->pMuxSocket);
+	
+	CAMsg::printMsg(LOG_DEBUG,"Closing client connection: entering while loop.\n");
+	
 	while(pEntry!=NULL)
 	{
 		getRandom(pMixPacket->data,DATA_SIZE);
@@ -84,11 +87,17 @@ SINT32 CAFirstMixA::closeConnection(fmHashTableEntry* pHashEntry)
 	ASSERT(pHashEntry->pQueueSend!=NULL,"Send queue is NULL");
 	delete pHashEntry->pQueueSend;
 	delete pHashEntry->pSymCipher;
+	
+	CAMsg::printMsg(LOG_DEBUG,"Closing client connection: decreasing users.\n");
+	
 	#ifdef COUNTRY_STATS
 		decUsers(pHashEntry);
 	#else
 		decUsers();
 	#endif	
+	
+	CAMsg::printMsg(LOG_DEBUG,"Closing client connection: deleting socket.\n")
+	
 	m_pChannelList->remove(pHashEntry->pMuxSocket);
 	delete pHashEntry->pMuxSocket;	
 	
@@ -217,9 +226,7 @@ SINT32 CAFirstMixA::loop()
 											closeConnection(pHashEntry);
 										}
 										else if(ret==MIXPACKET_SIZE) 											// we've read enough data for a whole mix packet. nice!
-											{
-												CAMsg::printMsg(LOG_ERR,"Packet flags: %d\n", pMixPacket->flags); 
-												
+											{												
 												if (pHashEntry->bRecoverTimeout)
 												{
 													// renew the timeout only if recovery is allowed
