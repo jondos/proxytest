@@ -203,7 +203,7 @@ SINT32 CAFirstMixA::loop()
 								if(m_psocketgroupUsersRead->isSignaled(*pMuxSocket))	// if this one seems to have data
 									{
 										countRead--;
-#endif
+#endif																				
 										ret=pMuxSocket->receive(pMixPacket,0);
 										#if defined LOG_PACKET_TIMES||defined(LOG_CHANNEL)
 											getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_start);
@@ -216,6 +216,8 @@ SINT32 CAFirstMixA::loop()
 										}
 										else if(ret==MIXPACKET_SIZE) 											// we've read enough data for a whole mix packet. nice!
 											{
+												CAMsg::printMsg(LOG_ERR,"Packet flags: %d\n", pMixPacket->flags); 
+												
 												if (pHashEntry->bRecoverTimeout)
 												{
 													// renew the timeout only if recovery is allowed

@@ -103,6 +103,7 @@ SINT32 CAMuxSocket::connect(CASocketAddr & psa,UINT retry,UINT32 time)
 /** Closes the underlying socket.*/			
 SINT32 CAMuxSocket::close()
 	{
+		CAMsg::printMsg(LOG_CRIT,"Closed MuxSocket.");
 		m_aktBuffPos=0;
 		return m_Socket.close();
 	}
