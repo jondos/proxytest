@@ -30,6 +30,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketAddr.hpp"
 #include "CAClientSocket.hpp"
 #include "CAMutex.hpp"
+#include "Hashtable.hpp"
 
 class CASocket:public CAClientSocket
 	{
@@ -37,20 +38,20 @@ class CASocket:public CAClientSocket
 		CASocket(bool bIsReserved=false);
 			~CASocket(){close();}
 
-			SINT32 create();						
-		    SINT32 create(bool a_bShowTypicalError);
-			SINT32 create(int type);
+			SINT32 create(UINT32 a_category);						
+		    SINT32 create(UINT32 a_category, bool a_bShowTypicalError);
+			SINT32 create(UINT32 a_category, int type);
 
 			SINT32 listen(const CASocketAddr& psa);
 			SINT32 listen(UINT16 port);
 			SINT32 accept(CASocket &s);
-			SINT32 connect(const CASocketAddr& psa)
+			SINT32 connect(UINT32 a_category, const CASocketAddr& psa)
 				{
-					return connect(psa,1,0);
+					return connect(a_category, psa,1,0);
 				}
 				
-			SINT32 connect(const CASocketAddr& psa,UINT32 retry,UINT32 msWaitTime);
-			SINT32 connect(const CASocketAddr& psa,UINT32 msTimeOut);
+			SINT32 connect(UINT32 a_category, const CASocketAddr& psa,UINT32 retry,UINT32 msWaitTime);
+			SINT32 connect(UINT32 a_category, const CASocketAddr& psa,UINT32 msTimeOut);
 			
 			SINT32 close();
 /* it seems that this function is not used:
@@ -105,6 +106,19 @@ class CASocket:public CAClientSocket
 				return m_bSocketIsClosed;
 			}
 			SINT32 getLocalIP(UINT32* r_Ip);
+			
+			
+			static const UINT32 CATEGORY_UNKNOWN;
+			static const UINT32 CATEGORY_FIRST_MIX;
+			static const UINT32 CATEGORY_LAST_MIX;
+			static const UINT32 CATEGORY_LAST_MIX_CONNECT;
+			static const UINT32 CATEGORY_FIRST_MIX_CHANNEL_LIST;
+			static const UINT32 CATEGORY_INFO_SERVICE;
+			static const UINT32 CATEGORY_INFO_SERVICE_CONNECT;
+			static const UINT32 CATEGORY_LOCAL_PROXY;
+			static const UINT32 CATEGORY_MUX_SOCKET;
+			static const UINT32 CATEGORY_MUX_SOCKET_CONNECT;
+			static const UINT32 CATEGORY_TLS_CLIENT_SOCKET_CONNECT;
 		protected:
 			bool m_bSocketIsClosed; //this is a flag, which shows, if the m_Socket is valid
 													//we should not set m_Socket to -1 or so after close,
@@ -113,9 +127,10 @@ class CASocket:public CAClientSocket
 
 			SOCKET m_Socket;
 		private:			
-			SINT32 create(int type, bool a_bShowTypicalError);
+			SINT32 create(UINT32 a_category, int type, bool a_bShowTypicalError);
 		
-		
+			static UINT32* ms_categoryCounts;
+			UINT32 m_category;
 			CAMutex m_csClose;
 			UINT32 m_closeMode;
 			///The following two variables are use to realise "reserved" sockets. The rational behind is to ensure
