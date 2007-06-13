@@ -59,7 +59,7 @@ SINT32 CAMuxSocket::accept(UINT16 port)
 		oSocket.setReuseAddr(true);
 		if(oSocket.listen((char*)NULL, CASocket::CATEGORY_MUX_SOCKET, port)!=E_SUCCESS)
 			return E_UNKNOWN;
-		if(oSocket.accept(m_Socket)!=E_SUCCESS)
+		if(oSocket.accept((char*)NULL, CASocket::CATEGORY_MUX_SOCKET, m_Socket)!=E_SUCCESS)
 			return E_UNKNOWN;
 		oSocket.close();
 		//m_Socket.setRecvLowWat(MIXPACKET_SIZE);
@@ -80,7 +80,7 @@ SINT32 CAMuxSocket::accept(const CASocketAddr& oAddr)
 		SINT32 ret=oSocket.listen((char*)NULL, CASocket::CATEGORY_MUX_SOCKET, oAddr);
 		if(ret!=E_SUCCESS)
 			return ret;
-		ret=oSocket.accept(m_Socket);
+		ret=oSocket.accept((char*)NULL, CASocket::CATEGORY_MUX_SOCKET, m_Socket);
 		if(ret!=E_SUCCESS)
 			return E_UNKNOWN;
 		oSocket.close();

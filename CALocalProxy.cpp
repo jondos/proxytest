@@ -265,7 +265,7 @@ SINT32 CALocalProxy::loop()
 							CAMsg::printMsg(LOG_DEBUG,"New Connection from Browser!\n");
 						#endif
 						newSocket=new CASocket;
-						if(m_socketIn.accept(*newSocket)!=E_SUCCESS)
+						if(m_socketIn.accept((char*)NULL, CASocket::CATEGORY_LOCAL_PROXY, *newSocket)!=E_SUCCESS)
 							{
 								#ifdef _DEBUG
 									CAMsg::printMsg(LOG_DEBUG,"Accept Error - Connection from Browser!\n");
@@ -286,7 +286,7 @@ SINT32 CALocalProxy::loop()
 							CAMsg::printMsg(LOG_DEBUG,"New Connection from SOCKS!\n");
 						#endif
 						newSocket=new CASocket;
-						if(m_socketSOCKSIn.accept(*newSocket)!=E_SUCCESS)
+						if(m_socketSOCKSIn.accept((char*)NULL, CASocket::CATEGORY_LOCAL_PROXY, *newSocket)!=E_SUCCESS)
 							{
 								#ifdef _DEBUG
 									CAMsg::printMsg(LOG_DEBUG,"Accept Error - Connection from SOCKS!\n");

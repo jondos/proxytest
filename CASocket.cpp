@@ -54,15 +54,16 @@ const UINT32 CASocket::CATEGORY_LAST_MIX_CONNECT = 3;
 const UINT32 CASocket::CATEGORY_FIRST_MIX = 4;
 const UINT32 CASocket::CATEGORY_FIRST_MIX_NEXT_MIX_SOCKET = 5;
 const UINT32 CASocket::CATEGORY_FIRST_MIX_LISTEN = 6;
-const UINT32 CASocket::CATEGORY_FIRST_MIX_CHANNEL_LIST = 7;
-const UINT32 CASocket::CATEGORY_MIDDLE_MIX = 8;
-const UINT32 CASocket::CATEGORY_INFO_SERVICE = 9;
-const UINT32 CASocket::CATEGORY_INFO_SERVICE_CONNECT = 10;
-const UINT32 CASocket::CATEGORY_LOCAL_PROXY = 11;
-const UINT32 CASocket::CATEGORY_MUX_SOCKET = 12;
-const UINT32 CASocket::CATEGORY_MUX_SOCKET_CONNECT = 13;
-const UINT32 CASocket::CATEGORY_TLS_CLIENT_SOCKET_CONNECT = 14;
-const UINT32 CASocket::CATEGORY_EXCEPTION = 15;
+const UINT32 CASocket::CATEGORY_FIRST_MIX_ACCEPT = 7;
+const UINT32 CASocket::CATEGORY_FIRST_MIX_CHANNEL_LIST = 8;
+const UINT32 CASocket::CATEGORY_MIDDLE_MIX = 9;
+const UINT32 CASocket::CATEGORY_INFO_SERVICE = 10;
+const UINT32 CASocket::CATEGORY_INFO_SERVICE_CONNECT = 11;
+const UINT32 CASocket::CATEGORY_LOCAL_PROXY = 12;
+const UINT32 CASocket::CATEGORY_MUX_SOCKET = 13;
+const UINT32 CASocket::CATEGORY_MUX_SOCKET_CONNECT = 14;
+const UINT32 CASocket::CATEGORY_TLS_CLIENT_SOCKET_CONNECT = 15;
+const UINT32 CASocket::CATEGORY_EXCEPTION = 16;
 
 
 
@@ -150,7 +151,7 @@ SINT32 CASocket::create(UINT32 a_category, int type, bool a_bShowTypicalError)
 			ms_categoryCounts[m_category]++;			
 			if (ms_categoryCounts[m_category] % 10 == 0)
 			{
-				CAMsg::printMsg(LOG_CRIT,"Nr. of sockets of category '%d': %d  -- Total open sockets: %d\n", m_category , ms_categoryCounts[m_category], m_u32NormalSocketsOpen);
+				CAMsg::printMsg(LOG_CRIT,"Create: Nr. of sockets of category '%d': %d  -- Total open sockets: %d\n", m_category , ms_categoryCounts[m_category], m_u32NormalSocketsOpen);
 			}
 			ms_mutexCount->unlock();
 		}
@@ -208,7 +209,7 @@ SINT32 CASocket::listen(char* dummy, UINT32 a_category, UINT16 port)
 	* @retval E_SOCKET_LIMIT if the could not create a new socket for the new connection
 	* @retval E_UNKNOWN otherwise
 	*/
-SINT32 CASocket::accept(CASocket &s)
+SINT32 CASocket::accept(char* dummy, UINT32 a_category, CASocket &s)
 	{
 		if(m_bSocketIsClosed) //the accept socket should not be closed!!
 			return E_SOCKETCLOSED;
@@ -219,6 +220,7 @@ SINT32 CASocket::accept(CASocket &s)
 				CAMsg::printMsg(LOG_CRIT,"CASocket::accept() -- Could not create a new normal Socket -- allowed number of normal sockets exeded!\n");
 				return E_SOCKET_LIMIT;
 			}
+		s.m_category = a_category;
 		s.m_Socket=::accept(m_Socket,NULL,NULL);
 		if(s.m_Socket==SOCKET_ERROR)
 			{
@@ -227,13 +229,20 @@ SINT32 CASocket::accept(CASocket &s)
 					return E_SOCKETCLOSED;
 				return E_UNKNOWN;
 			}
-		m_csClose.lock();
+		s.m_csClose.lock();
 		ms_mutexCount->lock();
 		m_u32NormalSocketsOpen++;
-		ms_categoryCounts[m_category]++;
+		ms_categoryCounts[a_category]++;
 		ms_mutexCount->unlock();
-		m_csClose.unlock();
 		s.m_bSocketIsClosed=false;
+		
+		if (ms_categoryCounts[a_category] % 1 == 0)
+		{
+			CAMsg::printMsg(LOG_CRIT,"Accept: Nr. of sockets of category '%d': %d  -- Total open sockets: %d\n", a_category , ms_categoryCounts[a_category], m_u32NormalSocketsOpen);
+		}		
+		
+		s.m_csClose.unlock();
+		
 		return E_SUCCESS;
 	}
 

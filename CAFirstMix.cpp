@@ -793,7 +793,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 							CAMsg::printMsg(LOG_DEBUG,"New direct Connection from Client!\n");
 						#endif
 						pNewMuxSocket=new CAMuxSocket;
-						ret=socketsIn[i].accept(*(CASocket*)pNewMuxSocket);
+						ret=socketsIn[i].accept((char*)NULL, CASocket::CATEGORY_FIRST_MIX_ACCEPT, *(CASocket*)pNewMuxSocket);
 						pFirstMix->m_newConnections++;							 
 						if(ret!=E_SUCCESS)
 						{
