@@ -144,10 +144,10 @@ SINT32 CALastMixA::loop()
 													ptmpLB=m_pSocksLB;
 												for(UINT32 count=0;count<ptmpLB->getElementCount();count++)
 													{
-														tmpSocket->create((char*)NULL, CASocket::CATEGORY_LAST_MIX);
+														tmpSocket->create();
 														tmpSocket->setRecvBuff(50000);
 														tmpSocket->setSendBuff(5000);
-														ret=tmpSocket->connect(CASocket::CATEGORY_LAST_MIX_CONNECT, *ptmpLB->get(),LAST_MIX_TO_PROXY_CONNECT_TIMEOUT);
+														ret=tmpSocket->connect(*ptmpLB->get(),LAST_MIX_TO_PROXY_CONNECT_TIMEOUT);
 														if(ret==E_SUCCESS)
 															break;
 														tmpSocket->close();
