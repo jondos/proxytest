@@ -311,6 +311,7 @@ SINT32 CASocket::close()
 				::closesocket(m_Socket);
 			if(!m_bIsReservedSocket)
 				m_u32NormalSocketsOpen--;
+				CAMsg::printMsg(LOG_DEBUG,"Open Sockets: %d\n", m_u32NormalSocketsOpen);
 				m_bSocketIsClosed=true;
 				m_closeMode=0;
 				ret=E_SUCCESS;
