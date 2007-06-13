@@ -165,7 +165,7 @@ SINT32 CATLSClientSocket::connect(CASocketAddr & psa, UINT32 retry, UINT32 msWai
 	{
 		SINT32 rc;
 		// call base class connect function
-		if( (rc=m_pSocket->connect(psa, retry, msWaitTime)) != E_SUCCESS)
+		if( (rc=m_pSocket->connect(CASocket::CATEGORY_TLS_CLIENT_SOCKET_CONNECT, psa, retry, msWaitTime)) != E_SUCCESS)
 			return rc;
 		// do our own connection initialisation (TLS handshake)
 		return doTLSConnect(psa);
