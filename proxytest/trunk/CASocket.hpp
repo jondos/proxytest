@@ -38,12 +38,12 @@ class CASocket:public CAClientSocket
 		CASocket(bool bIsReserved=false);
 			~CASocket(){close();}
 
-			SINT32 create(UINT32 a_category);						
-		    SINT32 create(UINT32 a_category, bool a_bShowTypicalError);
-			SINT32 create(UINT32 a_category, int type);
+			SINT32 create(char* dummy, UINT32 a_category);						
+		    SINT32 create(char* dummy, UINT32 a_category, bool a_bShowTypicalError);
+			SINT32 create(char* dummy, UINT32 a_category, int type);
 
-			SINT32 listen(const CASocketAddr& psa);
-			SINT32 listen(UINT16 port);
+			SINT32 listen(char* dummy, UINT32 a_category, const CASocketAddr& psa);
+			SINT32 listen(char* dummy, UINT32 a_category, UINT16 port);
 			SINT32 accept(CASocket &s);
 			SINT32 connect(UINT32 a_category, const CASocketAddr& psa)
 				{
@@ -109,10 +109,13 @@ class CASocket:public CAClientSocket
 			
 			
 			static const UINT32 CATEGORY_UNKNOWN;
+			static const UINT32 CATEGORY_UNDEFINED;
 			static const UINT32 CATEGORY_FIRST_MIX;
 			static const UINT32 CATEGORY_LAST_MIX;
+			static const UINT32 CATEGORY_MIDDLE_MIX;
 			static const UINT32 CATEGORY_LAST_MIX_CONNECT;
 			static const UINT32 CATEGORY_FIRST_MIX_CHANNEL_LIST;
+			static const UINT32 CATEGORY_FIRST_MIX_LISTEN;
 			static const UINT32 CATEGORY_INFO_SERVICE;
 			static const UINT32 CATEGORY_INFO_SERVICE_CONNECT;
 			static const UINT32 CATEGORY_LOCAL_PROXY;
@@ -130,7 +133,7 @@ class CASocket:public CAClientSocket
 		private:			
 			SINT32 create(UINT32 a_category, int type, bool a_bShowTypicalError);
 		
-			static UINT32* ms_categoryCounts;
+			static SINT32* ms_categoryCounts;
 			static CAMutex* ms_mutexCount;
 			UINT32 m_category;
 			CAMutex m_csClose;

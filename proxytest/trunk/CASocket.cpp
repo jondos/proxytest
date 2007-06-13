@@ -358,6 +358,16 @@ SINT32 CASocket::close()
 			{
 				ms_mutexCount->lock();
 				m_u32NormalSocketsOpen--;
+				
+				if (ms_categoryCounts == NULL)
+				{	
+					ms_categoryCounts = new SINT32[15];
+					for (UINT32 i = 0; i < 15; i++)
+					{
+						ms_categoryCounts[i] = 0;
+					}
+				}		
+				
 				ms_categoryCounts[m_category]--;
 				ms_mutexCount->unlock();
 			}
