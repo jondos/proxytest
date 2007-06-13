@@ -377,7 +377,8 @@ SINT32 CASocket::close()
 					{
 						ms_categoryCounts[i] = 0;
 					}
-				}		
+				}	
+				CAMsg::printMsg(LOG_CRIT,"Socket closed. Category: %d\n", m_category);	
 				
 				ms_categoryCounts[m_category]--;
 				ms_mutexCount->unlock();
