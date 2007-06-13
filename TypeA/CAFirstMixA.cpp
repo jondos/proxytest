@@ -50,6 +50,8 @@ SINT32 CAFirstMixA::closeConnection(fmHashTableEntry* pHashEntry)
 	INIT_STACK;
 	BEGIN_STACK("CAFirstMixA::closeConnection");
 	
+	CAMsg::printMsg(LOG_ERR,"Closing client connection.\n");
+	
 	fmChannelListEntry* pEntry;
 	tQueueEntry* pQueueEntry = new tQueueEntry;
 	MIXPACKET* pMixPacket=&pQueueEntry->packet;
