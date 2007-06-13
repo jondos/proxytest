@@ -115,7 +115,7 @@ SINT32 CALocalProxy::init()
 	{
 		CAListenerInterface* pListener;
 		
-		m_socketIn.create((char*)NULL, CASocket::CATEGORY_LOCAL_PROXY);
+		m_socketIn.create();
 		m_socketIn.setReuseAddr(true);
 		pListener=options.getListenerInterface(1);
 		if(pListener==NULL)
@@ -127,7 +127,7 @@ SINT32 CALocalProxy::init()
 		delete pListener;
 		if(pSocketAddrIn->isAnyIP())
 			pSocketAddrIn->setAddr((UINT8*)"127.0.0.1",pSocketAddrIn->getPort());
-		if(m_socketIn.listen((char*)NULL, CASocket::CATEGORY_LOCAL_PROXY, *pSocketAddrIn)!=E_SUCCESS)
+		if(m_socketIn.listen(*pSocketAddrIn)!=E_SUCCESS)
 		  {
 				CAMsg::printMsg(LOG_CRIT,"Cannot listen (1)\n");
 				delete pSocketAddrIn;
@@ -151,7 +151,7 @@ SINT32 CALocalProxy::init()
 		addrNext.setAddr(strTarget,options.getMixPort());
 		CAMsg::printMsg(LOG_INFO,"Try connecting to next Mix...\n");
 
-		((CASocket*)m_muxOut)->create((char*)NULL, CASocket::CATEGORY_LOCAL_PROXY);
+		((CASocket*)m_muxOut)->create();
 		((CASocket*)m_muxOut)->setSendBuff(MIXPACKET_SIZE*50);
 		((CASocket*)m_muxOut)->setRecvBuff(MIXPACKET_SIZE*50);
 		if(m_muxOut.connect(addrNext)==E_SUCCESS)
@@ -265,7 +265,7 @@ SINT32 CALocalProxy::loop()
 							CAMsg::printMsg(LOG_DEBUG,"New Connection from Browser!\n");
 						#endif
 						newSocket=new CASocket;
-						if(m_socketIn.accept((char*)NULL, CASocket::CATEGORY_LOCAL_PROXY, *newSocket)!=E_SUCCESS)
+						if(m_socketIn.accept(*newSocket)!=E_SUCCESS)
 							{
 								#ifdef _DEBUG
 									CAMsg::printMsg(LOG_DEBUG,"Accept Error - Connection from Browser!\n");
@@ -286,7 +286,7 @@ SINT32 CALocalProxy::loop()
 							CAMsg::printMsg(LOG_DEBUG,"New Connection from SOCKS!\n");
 						#endif
 						newSocket=new CASocket;
-						if(m_socketSOCKSIn.accept((char*)NULL, CASocket::CATEGORY_LOCAL_PROXY, *newSocket)!=E_SUCCESS)
+						if(m_socketSOCKSIn.accept(*newSocket)!=E_SUCCESS)
 							{
 								#ifdef _DEBUG
 									CAMsg::printMsg(LOG_DEBUG,"Accept Error - Connection from SOCKS!\n");
