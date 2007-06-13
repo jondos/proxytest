@@ -143,7 +143,7 @@ SINT32 CALastMixA::loop()
 												if(pMixPacket->payload.type==MIX_PAYLOAD_SOCKS)
 													ptmpLB=m_pSocksLB;
 												for(UINT32 count=0;count<ptmpLB->getElementCount();count++)
-													{CAMsg::printMsg(LOG_DEBUG,"Oioioi!\n");
+													{
 														tmpSocket->create((char*)NULL, CASocket::CATEGORY_LAST_MIX);
 														tmpSocket->setRecvBuff(50000);
 														tmpSocket->setSendBuff(5000);
