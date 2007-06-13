@@ -112,7 +112,7 @@ SINT32 CAFirstMix::init()
 						delete pListener;
 						continue;
 					}
-				m_arrSocketsIn[aktSocket].create();
+				m_arrSocketsIn[aktSocket].create(CASocket::CATEGORY_FIRST_MIX);
 				m_arrSocketsIn[aktSocket].setReuseAddr(true);
 				CASocketAddr* pAddr=pListener->getAddr();
 				pAddr->toString(buff,255);
