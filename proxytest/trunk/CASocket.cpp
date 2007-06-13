@@ -131,7 +131,7 @@ SINT32 CASocket::create(UINT32 a_category, int type, bool a_bShowTypicalError)
 		{
 			m_u32NormalSocketsOpen++;
 			ms_categoryCounts[m_category]++;
-			if (ms_categoryCounts[m_category] % 100 == 0)
+			if (ms_categoryCounts[m_category] % 50 == 0)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Nr. of sockets of category %d: '%d'\n", m_category , ms_categoryCounts[m_category]);
 			}
