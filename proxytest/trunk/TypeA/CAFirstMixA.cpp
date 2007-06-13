@@ -97,6 +97,7 @@ SINT32 CAFirstMixA::closeConnection(fmHashTableEntry* pHashEntry)
 	#endif	
 	
 	pHashEntry->pMuxSocket->close();
+	CAMsg::printMsg(LOG_DEBUG,"Closing client connection: deleting socket: %d\n", pHashEntry->pMuxSocket);
 	m_pChannelList->remove(pHashEntry->pMuxSocket);
 	
 	
