@@ -44,7 +44,7 @@ class CASocket:public CAClientSocket
 
 			SINT32 listen(char* dummy, UINT32 a_category, const CASocketAddr& psa);
 			SINT32 listen(char* dummy, UINT32 a_category, UINT16 port);
-			SINT32 accept(CASocket &s);
+			SINT32 accept(char* dummy, UINT32 a_category, CASocket &s);
 			SINT32 connect(UINT32 a_category, const CASocketAddr& psa)
 				{
 					return connect(a_category, psa,1,0);
@@ -116,6 +116,7 @@ class CASocket:public CAClientSocket
 			static const UINT32 CATEGORY_LAST_MIX_CONNECT;
 			static const UINT32 CATEGORY_FIRST_MIX_CHANNEL_LIST;
 			static const UINT32 CATEGORY_FIRST_MIX_LISTEN;
+			static const UINT32 CATEGORY_FIRST_MIX_ACCEPT;
 			static const UINT32 CATEGORY_FIRST_MIX_NEXT_MIX_SOCKET; 
 			static const UINT32 CATEGORY_INFO_SERVICE;
 			static const UINT32 CATEGORY_INFO_SERVICE_CONNECT;
