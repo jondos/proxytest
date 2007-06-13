@@ -45,6 +45,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 UINT32 CASocket::m_u32NormalSocketsOpen=0; //how many "normal" sockets are open
 UINT32 CASocket::m_u32MaxNormalSockets=0xFFFFFFFF; //how many "normal" sockets are allowed at max
 UINT32* CASocket::ms_categoryCounts = NULL;
+CAMutex CASocket::ms_mutexCount = new CAMutex;
 
 const UINT32 CASocket::CATEGORY_UNKNOWN = 0;
 const UINT32 CASocket::CATEGORY_LAST_MIX = 1;
@@ -84,7 +85,7 @@ SINT32 CASocket::create(UINT32 a_category, bool a_bShowTypicalError)
 ///@todo Not thread safe!
 SINT32 CASocket::create(UINT32 a_category, int type, bool a_bShowTypicalError)
 	{
-		ms_mutexCount.lock();
+		ms_mutexCount->lock();
 		if (ms_categoryCounts == NULL)
 		{	
 			ms_categoryCounts = new UINT32[12];
@@ -93,7 +94,7 @@ SINT32 CASocket::create(UINT32 a_category, int type, bool a_bShowTypicalError)
 				ms_categoryCounts[i] = 0;
 			}
 		}		
-		ms_mutexCount.unlock();
+		ms_mutexCount->unlock();
 		
 		if(m_bSocketIsClosed)
 		{
@@ -131,14 +132,14 @@ SINT32 CASocket::create(UINT32 a_category, int type, bool a_bShowTypicalError)
 		m_csClose.lock();
 		if(!m_bIsReservedSocket)
 		{
-			ms_mutexCount.lock();
+			ms_mutexCount->lock();
 			m_u32NormalSocketsOpen++;			
 			ms_categoryCounts[m_category]++;			
 			if (ms_categoryCounts[m_category] % 50 == 0)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Nr. of sockets of category %d: '%d'\n", m_category , ms_categoryCounts[m_category]);
 			}
-			ms_mutexCount.unlock();
+			ms_mutexCount->unlock();
 		}
 		m_csClose.unlock();
 		return E_SUCCESS;
@@ -214,10 +215,10 @@ SINT32 CASocket::accept(CASocket &s)
 				return E_UNKNOWN;
 			}
 		m_csClose.lock();
-		ms_mutexCount.lock();
+		ms_mutexCount->lock();
 		m_u32NormalSocketsOpen++;
 		ms_categoryCounts[m_category]++;
-		ms_mutexCount.unlock();
+		ms_mutexCount->unlock();
 		m_csClose.unlock();
 		s.m_bSocketIsClosed=false;
 		return E_SUCCESS;
@@ -344,10 +345,10 @@ SINT32 CASocket::close()
 				::closesocket(m_Socket);
 			if(!m_bIsReservedSocket)
 			{
-				ms_mutexCount.lock();
+				ms_mutexCount->lock();
 				m_u32NormalSocketsOpen--;
 				ms_categoryCounts[m_category]--;
-				ms_mutexCount.unlock();
+				ms_mutexCount->unlock();
 			}
 				m_bSocketIsClosed=true;
 				m_closeMode=0;
