@@ -130,7 +130,7 @@ class CASocket:public CAClientSocket
 			SINT32 create(UINT32 a_category, int type, bool a_bShowTypicalError);
 		
 			static UINT32* ms_categoryCounts;
-			static CAMutex ms_mutexCount;
+			static CAMutex* ms_mutexCount;
 			UINT32 m_category;
 			CAMutex m_csClose;
 			UINT32 m_closeMode;

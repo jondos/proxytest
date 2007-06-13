@@ -45,7 +45,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 UINT32 CASocket::m_u32NormalSocketsOpen=0; //how many "normal" sockets are open
 UINT32 CASocket::m_u32MaxNormalSockets=0xFFFFFFFF; //how many "normal" sockets are allowed at max
 UINT32* CASocket::ms_categoryCounts = NULL;
-CAMutex CASocket::ms_mutexCount = new CAMutex;
+CAMutex* CASocket::ms_mutexCount = new CAMutex;
 
 const UINT32 CASocket::CATEGORY_UNKNOWN = 0;
 const UINT32 CASocket::CATEGORY_LAST_MIX = 1;
