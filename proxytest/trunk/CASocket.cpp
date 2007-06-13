@@ -58,6 +58,7 @@ const UINT32 CASocket::CATEGORY_LAST_MIX_CONNECT = 7;
 const UINT32 CASocket::CATEGORY_INFO_SERVICE_CONNECT = 8;
 const UINT32 CASocket::CATEGORY_MUX_SOCKET_CONNECT = 9;
 const UINT32 CASocket::CATEGORY_TLS_CLIENT_SOCKET_CONNECT = 10;
+const UINT32 CASocket::CATEGORY_EXCEPTION = 11;
 
 CASocket::CASocket(bool bIsReservedSocket)
 	{				
@@ -98,9 +99,9 @@ SINT32 CASocket::create(UINT32 a_category, int type, bool a_bShowTypicalError)
 		
 		if(m_bSocketIsClosed)
 		{
-			if (a_category < 0 || a_category > 11)
+			if (a_category < 0 || a_category > 10)
 			{
-				a_category = 0;
+				a_category = CATEGORY_EXCEPTION;
 			}
 			m_category = a_category;
 			

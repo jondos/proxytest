@@ -887,13 +887,23 @@ THREAD_RETURN fm_loopDoUserLogin(void* param)
 		THREAD_RETURN_SUCCESS;
 	}
 
+SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
+{
+	INIT_STACK;
+	doUserLogin_internal(pNewUser, peerIP);
+	FINISH_STACK("CAFirstMix::doUserLogin");
+}
+
 /** Sends and receives all data neccessary for a User to "login".
 	* This means sending the public key of the Mixes and receiving the
 	* sym keys of JAP. This is done in a thread on a per user basis
 	* @todo Cleanup of runing thread if mix restarts...
 ***/
-SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
+SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 	{	
+		INIT_STACK;
+		BEGIN_STACK("CAFirstMix::doUserLogin");
+		
 		#ifdef _DEBUG
 			int ret=((CASocket*)pNewUser)->setKeepAlive(true);
 			if(ret!=E_SUCCESS)
@@ -906,6 +916,8 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 			CAMsg::printMsg(LOG_DEBUG,"User login: start\n");
 		#endif	
 		
+		SAVE_STACK("CAFirstMix::doUserLogin", "after setting keep alive");
+		
 		// send the mix-keys to JAP
 		if (((CASocket*)pNewUser)->sendFullyTimeOut(m_xmlKeyInfoBuff,m_xmlKeyInfoSize, 40000, 10000) != E_SUCCESS)
 		{
@@ -917,6 +929,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		#ifdef DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"User login: login data sent\n");
 		#endif
+		SAVE_STACK("CAFirstMix::doUserLogin", "after sinding login data");
 		
 		//((CASocket*)pNewUser)->send(m_xmlKeyInfoBuff,m_xmlKeyInfoSize);
 		// es kann nicht blockieren unter der Annahme das der TCP-Sendbuffer > m_xmlKeyInfoSize ist....
@@ -936,6 +949,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		#ifdef DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"User login: received first symmetric key from client\n");
 		#endif
+		SAVE_STACK("CAFirstMix::doUserLogin", "received first symmetric key");
 		
 		xml_len=ntohs(xml_len);
 		UINT8* xml_buff=new UINT8[xml_len+2]; //+2 for size...
@@ -952,6 +966,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		#ifdef DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"User login: received second symmetric key from client\n");
 		#endif
+		SAVE_STACK("CAFirstMix::doUserLogin", "received second symmetric key");
 		
 		DOMParser oParser;
 		MemBufInputSource oInput(xml_buff+2,xml_len,"tmp");
@@ -1024,6 +1039,8 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		#endif
 		delete xml_buff;
 		
+		SAVE_STACK("CAFirstMix::doUserLogin", "sent key echange signature");
+		
 		((CASocket*)pNewUser)->setNonBlocking(true);
 		CAQueue* tmpQueue=new CAQueue(sizeof(tQueueEntry));
 		fmHashTableEntry* pHashEntry=m_pChannelList->add(pNewUser,peerIP,tmpQueue);
@@ -1035,11 +1052,14 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 			delete pNewUser;
 			return E_UNKNOWN;
 		}
+		
+		SAVE_STACK("CAFirstMix::doUserLogin", "socket added to connection list");
 #ifdef PAYMENT
 		#ifdef DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"User login: registering payment control channel\n");
 		#endif
 		pHashEntry->pControlChannelDispatcher->registerControlChannel(new CAAccountingControlChannel(pHashEntry));
+		SAVE_STACK("CAFirstMix::doUserLogin", "payment registered");
 #endif
 		pHashEntry->pSymCipher=new CASymCipher();
 		pHashEntry->pSymCipher->setKey(mixKey);
