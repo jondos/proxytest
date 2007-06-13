@@ -43,7 +43,6 @@ CAMuxSocket::CAMuxSocket()
 	
 CAMuxSocket::~CAMuxSocket()
 	{
-		CAMsg::printMsg(LOG_CRIT,"Closing MuxSocket...");
 		close();
 		delete []m_Buff;
 	}	
@@ -62,11 +61,11 @@ SINT32 CAMuxSocket::setCrypt(bool b)
 SINT32 CAMuxSocket::accept(UINT16 port)
 	{
 		CASocket oSocket;
-		oSocket.create((char*)NULL, CASocket::CATEGORY_MUX_SOCKET);
+		oSocket.create();
 		oSocket.setReuseAddr(true);
-		if(oSocket.listen((char*)NULL, CASocket::CATEGORY_MUX_SOCKET, port)!=E_SUCCESS)
+		if(oSocket.listen(port)!=E_SUCCESS)
 			return E_UNKNOWN;
-		if(oSocket.accept((char*)NULL, CASocket::CATEGORY_MUX_SOCKET, m_Socket)!=E_SUCCESS)
+		if(oSocket.accept(m_Socket)!=E_SUCCESS)
 			return E_UNKNOWN;
 		oSocket.close();
 		//m_Socket.setRecvLowWat(MIXPACKET_SIZE);
@@ -82,12 +81,12 @@ SINT32 CAMuxSocket::accept(UINT16 port)
 SINT32 CAMuxSocket::accept(const CASocketAddr& oAddr)
 	{
 		CASocket oSocket;
-		oSocket.create((char*)NULL, CASocket::CATEGORY_MUX_SOCKET, oAddr.getType());
+		oSocket.create(oAddr.getType());
 		oSocket.setReuseAddr(true);
-		SINT32 ret=oSocket.listen((char*)NULL, CASocket::CATEGORY_MUX_SOCKET, oAddr);
+		SINT32 ret=oSocket.listen(oAddr);
 		if(ret!=E_SUCCESS)
 			return ret;
-		ret=oSocket.accept((char*)NULL, CASocket::CATEGORY_MUX_SOCKET, m_Socket);
+		ret=oSocket.accept(m_Socket);
 		if(ret!=E_SUCCESS)
 			return E_UNKNOWN;
 		oSocket.close();
@@ -105,12 +104,11 @@ SINT32 CAMuxSocket::connect(CASocketAddr & psa,UINT retry,UINT32 time)
 	{
 		//m_Socket.setRecvLowWat(MIXPACKET_SIZE);
 		m_aktBuffPos=0;
-		return m_Socket.connect(CASocket::CATEGORY_MUX_SOCKET_CONNECT, psa,retry,time);
+		return m_Socket.connect(psa,retry,time);
 	}
 /** Closes the underlying socket.*/			
 SINT32 CAMuxSocket::close()
 	{
-		CAMsg::printMsg(LOG_CRIT,"Closed MuxSocket.");
 		m_aktBuffPos=0;
 		return m_Socket.close();
 	}

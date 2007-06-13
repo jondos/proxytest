@@ -353,7 +353,7 @@ SINT32 CAMiddleMix::init()
 	
 		m_pMuxOut=new CAMuxSocket();
 
-		if(((CASocket*)*m_pMuxOut)->create((char*)NULL, CASocket::CATEGORY_MIDDLE_MIX, pAddrNext->getType())!=E_SUCCESS)
+		if(((CASocket*)*m_pMuxOut)->create(pAddrNext->getType())!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Init: Cannot create SOCKET for outgoing conncetion...\n");
 				return E_UNKNOWN;

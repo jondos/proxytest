@@ -112,7 +112,7 @@ SINT32 CAFirstMix::init()
 						delete pListener;
 						continue;
 					}
-				m_arrSocketsIn[aktSocket].create((char*)NULL, CASocket::CATEGORY_FIRST_MIX);
+				m_arrSocketsIn[aktSocket].create();
 				m_arrSocketsIn[aktSocket].setReuseAddr(true);
 				CASocketAddr* pAddr=pListener->getAddr();
 				pAddr->toString(buff,255);
@@ -127,7 +127,7 @@ SINT32 CAFirstMix::init()
 							CAMsg::printMsg(LOG_CRIT,"Setuid failed! You must start the mix as root in order to use listener ports lower than 1024!\n");
 					}
 #endif
-				SINT32 ret=m_arrSocketsIn[aktSocket].listen((char*)NULL, CASocket::CATEGORY_FIRST_MIX_LISTEN, *pAddr);
+				SINT32 ret=m_arrSocketsIn[aktSocket].listen(*pAddr);
 				delete pAddr;
 #ifndef _WIN32
 				seteuid(old_uid);
@@ -160,7 +160,7 @@ SINT32 CAFirstMix::init()
 				return E_UNKNOWN;
 			}
 		m_pMuxOut=new CAMuxSocket();
-		if(((CASocket*)(*m_pMuxOut))->create((char*)NULL, CASocket::CATEGORY_FIRST_MIX_NEXT_MIX_SOCKET,  pAddrNext->getType())!=E_SUCCESS)
+		if(((CASocket*)(*m_pMuxOut))->create(pAddrNext->getType())!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Cannot create SOCKET for connection to next Mix!\n");
 				return E_UNKNOWN;
@@ -793,7 +793,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 							CAMsg::printMsg(LOG_DEBUG,"New direct Connection from Client!\n");
 						#endif
 						pNewMuxSocket=new CAMuxSocket;
-						ret=socketsIn[i].accept((char*)NULL, CASocket::CATEGORY_FIRST_MIX_ACCEPT, *(CASocket*)pNewMuxSocket);
+						ret=socketsIn[i].accept(*(CASocket*)pNewMuxSocket);
 						pFirstMix->m_newConnections++;							 
 						if(ret!=E_SUCCESS)
 						{

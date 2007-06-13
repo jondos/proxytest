@@ -531,7 +531,7 @@ SINT32 CAInfoService::sendStatus(const UINT8* a_strStatusXML,UINT32 a_len, const
 			return E_UNKNOWN;
 		}
 		
-		if(oSocket.connect(CASocket::CATEGORY_INFO_SERVICE_CONNECT, *a_pSocketAddress, MIX_TO_INFOSERVICE_TIMEOUT)!=E_SUCCESS)
+		if(oSocket.connect(*a_pSocketAddress, MIX_TO_INFOSERVICE_TIMEOUT)!=E_SUCCESS)
 		{
 			return E_UNKNOWN;
 		}
@@ -669,7 +669,7 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
 	}
 		
     oSocket.setRecvBuff(255);
-	if(oSocket.connect(CASocket::CATEGORY_INFO_SERVICE_CONNECT, *a_pSocketAddress, MIX_TO_INFOSERVICE_TIMEOUT)==E_SUCCESS)
+	if(oSocket.connect(*a_pSocketAddress, MIX_TO_INFOSERVICE_TIMEOUT)==E_SUCCESS)
 	{
 		httpClient.setSocket(&oSocket);
 		const char* strRequestCommand=STRINGS_REQUEST_COMMANDS[requestCommand];
@@ -920,7 +920,7 @@ SINT32 CAInfoService::sendCascadeHelo(const UINT8* a_strCascadeHeloXML,UINT32 a_
 	{
 		goto ERR;
 	}
-	if(oSocket.connect(CASocket::CATEGORY_INFO_SERVICE_CONNECT, *a_pSocketAddress, MIX_TO_INFOSERVICE_TIMEOUT)==E_SUCCESS)
+	if(oSocket.connect(*a_pSocketAddress, MIX_TO_INFOSERVICE_TIMEOUT)==E_SUCCESS)
 	{
 	    if(options.isFirstMix())
 		{
@@ -1083,7 +1083,7 @@ SINT32 CAInfoService::getPaymentInstance(const UINT8* a_pstrPIID,CAXMLBI** a_pXM
 SINT32 CAInfoService::getPaymentInstance(const UINT8* a_pstrPIID,CAXMLBI** a_pXMLBI,
 										 CASocketAddrINet* a_socketAddress)
 	{
-		CASocket socket(CASocket::CATEGORY_INFO_SERVICE);
+		CASocket socket;
 		CASocketAddrINet address;
 		UINT8 hostname[255];
 		UINT8 request[255];
@@ -1098,7 +1098,7 @@ SINT32 CAInfoService::getPaymentInstance(const UINT8* a_pstrPIID,CAXMLBI** a_pXM
 	
 		address.setAddr(hostname,a_socketAddress->getPort());
 	
-		if(socket.connect(CASocket::CATEGORY_INFO_SERVICE_CONNECT, address)!=E_SUCCESS)
+		if(socket.connect(address)!=E_SUCCESS)
 			return E_UNKNOWN;
 	
 		#ifdef DEBUG
