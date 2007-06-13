@@ -105,11 +105,14 @@ SINT32 CASocket::create(UINT32 a_category, int type, bool a_bShowTypicalError)
 		
 		if(m_bSocketIsClosed)
 		{
-			if (a_category < 0 || a_category > 14)
-			{
-				a_category = CATEGORY_EXCEPTION;
+			if (m_category == CATEGORY_UNDEFINED)
+			{			
+				if (a_category < 0 || a_category > 14)
+				{
+					a_category = CATEGORY_EXCEPTION;
+				}
+				m_category = a_category;
 			}
-			m_category = a_category;
 			
 			if(m_bIsReservedSocket||m_u32NormalSocketsOpen<m_u32MaxNormalSockets)
 			{
@@ -148,7 +151,7 @@ SINT32 CASocket::create(UINT32 a_category, int type, bool a_bShowTypicalError)
 			ms_categoryCounts[m_category]++;			
 			if (ms_categoryCounts[m_category] % 1 == 0)
 			{
-				CAMsg::printMsg(LOG_CRIT,"Nr. of sockets of category %d: '%d'\n", m_category , ms_categoryCounts[m_category]);
+				CAMsg::printMsg(LOG_CRIT,"Nr. of sockets of category '%d': %d  Total open sockets: %d\n", m_category , ms_categoryCounts[m_category], m_u32NormalSocketsOpen);
 			}
 			ms_mutexCount->unlock();
 		}
