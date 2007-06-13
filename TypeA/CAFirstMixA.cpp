@@ -50,7 +50,6 @@ SINT32 CAFirstMixA::closeConnection(fmHashTableEntry* pHashEntry)
 	INIT_STACK;
 	BEGIN_STACK("CAFirstMixA::closeConnection");
 	
-	CAMsg::printMsg(LOG_DEBUG,"Closing client connection.\n");
 	
 	fmChannelListEntry* pEntry;
 	tQueueEntry* pQueueEntry = new tQueueEntry;
@@ -70,8 +69,6 @@ SINT32 CAFirstMixA::closeConnection(fmHashTableEntry* pHashEntry)
 	m_psocketgroupUsersWrite->remove(*(CASocket*)pHashEntry->pMuxSocket);
 	pEntry = m_pChannelList->getFirstChannelForSocket(pHashEntry->pMuxSocket);
 	
-	CAMsg::printMsg(LOG_DEBUG,"Closing client connection: entering while loop.\n");
-	
 	while(pEntry!=NULL)
 	{
 		getRandom(pMixPacket->data,DATA_SIZE);
@@ -88,22 +85,16 @@ SINT32 CAFirstMixA::closeConnection(fmHashTableEntry* pHashEntry)
 	delete pHashEntry->pQueueSend;
 	delete pHashEntry->pSymCipher;
 	
-	CAMsg::printMsg(LOG_DEBUG,"Closing client connection: decreasing users.\n");
-	
 	#ifdef COUNTRY_STATS
 		decUsers(pHashEntry);
 	#else
 		decUsers();
 	#endif	
 	
-	pHashEntry->pMuxSocket->close();
-	CAMsg::printMsg(LOG_DEBUG,"Closing client connection: deleting socket: %d\n", pHashEntry->pMuxSocket);
+	CAMuxSocket* pMuxSocket = pHashEntry->pMuxSocket;
+	// Save the socket - its pointer will be deleted in this method!!! Crazy programming...
 	m_pChannelList->remove(pHashEntry->pMuxSocket);
-	
-	
-	
-	CAMsg::printMsg(LOG_DEBUG,"Closing client connection: deleting socket: %d\n", pHashEntry->pMuxSocket);
-	delete pHashEntry->pMuxSocket;	
+	delete pMuxSocket;	
 	
 	delete pQueueEntry;
 	
