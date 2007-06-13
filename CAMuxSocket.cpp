@@ -55,9 +55,9 @@ SINT32 CAMuxSocket::setCrypt(bool b)
 SINT32 CAMuxSocket::accept(UINT16 port)
 	{
 		CASocket oSocket;
-		oSocket.create(CASocket::CATEGORY_MUX_SOCKET);
+		oSocket.create((char*)NULL, CASocket::CATEGORY_MUX_SOCKET);
 		oSocket.setReuseAddr(true);
-		if(oSocket.listen(port)!=E_SUCCESS)
+		if(oSocket.listen((char*)NULL, CASocket::CATEGORY_MUX_SOCKET, port)!=E_SUCCESS)
 			return E_UNKNOWN;
 		if(oSocket.accept(m_Socket)!=E_SUCCESS)
 			return E_UNKNOWN;
@@ -75,9 +75,9 @@ SINT32 CAMuxSocket::accept(UINT16 port)
 SINT32 CAMuxSocket::accept(const CASocketAddr& oAddr)
 	{
 		CASocket oSocket;
-		oSocket.create(CASocket::CATEGORY_MUX_SOCKET, oAddr.getType());
+		oSocket.create((char*)NULL, CASocket::CATEGORY_MUX_SOCKET, oAddr.getType());
 		oSocket.setReuseAddr(true);
-		SINT32 ret=oSocket.listen(oAddr);
+		SINT32 ret=oSocket.listen((char*)NULL, CASocket::CATEGORY_MUX_SOCKET, oAddr);
 		if(ret!=E_SUCCESS)
 			return ret;
 		ret=oSocket.accept(m_Socket);

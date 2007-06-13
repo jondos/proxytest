@@ -44,41 +44,47 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 UINT32 CASocket::m_u32NormalSocketsOpen=0; //how many "normal" sockets are open
 UINT32 CASocket::m_u32MaxNormalSockets=0xFFFFFFFF; //how many "normal" sockets are allowed at max
-UINT32* CASocket::ms_categoryCounts = NULL;
+SINT32* CASocket::ms_categoryCounts = NULL;
 CAMutex* CASocket::ms_mutexCount = new CAMutex;
 
-const UINT32 CASocket::CATEGORY_UNKNOWN = 0;
-const UINT32 CASocket::CATEGORY_LAST_MIX = 1;
-const UINT32 CASocket::CATEGORY_FIRST_MIX = 2;
-const UINT32 CASocket::CATEGORY_FIRST_MIX_CHANNEL_LIST = 3;
-const UINT32 CASocket::CATEGORY_INFO_SERVICE = 4;
-const UINT32 CASocket::CATEGORY_LOCAL_PROXY = 5;
-const UINT32 CASocket::CATEGORY_MUX_SOCKET = 6;
-const UINT32 CASocket::CATEGORY_LAST_MIX_CONNECT = 7;
-const UINT32 CASocket::CATEGORY_INFO_SERVICE_CONNECT = 8;
-const UINT32 CASocket::CATEGORY_MUX_SOCKET_CONNECT = 9;
-const UINT32 CASocket::CATEGORY_TLS_CLIENT_SOCKET_CONNECT = 10;
-const UINT32 CASocket::CATEGORY_EXCEPTION = 11;
+const UINT32 CASocket::CATEGORY_UNDEFINED = 0;
+const UINT32 CASocket::CATEGORY_UNKNOWN = 1;
+const UINT32 CASocket::CATEGORY_LAST_MIX = 2;
+const UINT32 CASocket::CATEGORY_LAST_MIX_CONNECT = 3;
+const UINT32 CASocket::CATEGORY_FIRST_MIX = 4;
+const UINT32 CASocket::CATEGORY_FIRST_MIX_LISTEN = 5;
+const UINT32 CASocket::CATEGORY_FIRST_MIX_CHANNEL_LIST = 6;
+const UINT32 CASocket::CATEGORY_MIDDLE_MIX = 7;
+const UINT32 CASocket::CATEGORY_INFO_SERVICE = 8;
+const UINT32 CASocket::CATEGORY_INFO_SERVICE_CONNECT = 9;
+const UINT32 CASocket::CATEGORY_LOCAL_PROXY = 10;
+const UINT32 CASocket::CATEGORY_MUX_SOCKET = 11;
+const UINT32 CASocket::CATEGORY_MUX_SOCKET_CONNECT = 12;
+const UINT32 CASocket::CATEGORY_TLS_CLIENT_SOCKET_CONNECT = 13;
+const UINT32 CASocket::CATEGORY_EXCEPTION = 14;
+
+
 
 CASocket::CASocket(bool bIsReservedSocket)
-	{				
+	{			
+		m_category = CATEGORY_UNDEFINED;
 		m_Socket=0;
 		m_closeMode=0;
 		m_bSocketIsClosed=true;
 		m_bIsReservedSocket=bIsReservedSocket;
 	}
 
-SINT32 CASocket::create(UINT32 a_category)
+SINT32 CASocket::create(char* dummy, UINT32 a_category)
 	{
 		return create(a_category, AF_INET, true);
 	}
 
-SINT32 CASocket::create(UINT32 a_category, int type)
+SINT32 CASocket::create(char* dummy, UINT32 a_category, int type)
 {
 	return create(a_category, type, true);
 }
 
-SINT32 CASocket::create(UINT32 a_category, bool a_bShowTypicalError)
+SINT32 CASocket::create(char* dummy, UINT32 a_category, bool a_bShowTypicalError)
 {
 	return create(a_category, AF_INET, a_bShowTypicalError);
 }
@@ -89,8 +95,8 @@ SINT32 CASocket::create(UINT32 a_category, int type, bool a_bShowTypicalError)
 		ms_mutexCount->lock();
 		if (ms_categoryCounts == NULL)
 		{	
-			ms_categoryCounts = new UINT32[12];
-			for (UINT32 i = 0; i < 12; i++)
+			ms_categoryCounts = new SINT32[15];
+			for (UINT32 i = 0; i < 15; i++)
 			{
 				ms_categoryCounts[i] = 0;
 			}
@@ -99,7 +105,7 @@ SINT32 CASocket::create(UINT32 a_category, int type, bool a_bShowTypicalError)
 		
 		if(m_bSocketIsClosed)
 		{
-			if (a_category < 0 || a_category > 10)
+			if (a_category < 0 || a_category > 14)
 			{
 				a_category = CATEGORY_EXCEPTION;
 			}
@@ -156,10 +162,10 @@ SINT32 CASocket::create(UINT32 a_category, int type, bool a_bShowTypicalError)
 	* @retval E_SOCKET_BIND,	 if call to bind() returns an error
 	* @retval E_UNKNOWN, otherwise
 	*/
-SINT32 CASocket::listen(const CASocketAddr& psa)
+SINT32 CASocket::listen(char* dummy, UINT32 a_category, const CASocketAddr& psa)
 	{
 		SINT32 type=psa.getType();
-		if(m_bSocketIsClosed&&create(type)!=E_SUCCESS)
+		if(m_bSocketIsClosed&&create(dummy, a_category, type)!=E_SUCCESS)
 			return E_UNKNOWN;
 #ifdef HAVE_UNIX_DOMAIN_PROTOCOL
 		//we have to delete the file before...
@@ -188,10 +194,10 @@ SINT32 CASocket::listen(const CASocketAddr& psa)
 		return E_SUCCESS;
 	}
 			
-SINT32 CASocket::listen(UINT16 port)
+SINT32 CASocket::listen(char* dummy, UINT32 a_category, UINT16 port)
 	{
 		CASocketAddrINet oSocketAddrINet(port);
-		return listen(oSocketAddrINet);
+		return listen(dummy, a_category, oSocketAddrINet);
 	}
 
 /** Accepts a new connection. The new socket is returned in s.
@@ -238,7 +244,7 @@ SINT32 CASocket::accept(CASocket &s)
 SINT32 CASocket::connect(UINT32 a_category, const CASocketAddr & psa,UINT32 retry,UINT32 time)
 	{
 //		CAMsg::printMsg(LOG_DEBUG,"Socket:connect\n");
-		if(m_bSocketIsClosed&&create(a_category)!=E_SUCCESS)
+		if(m_bSocketIsClosed&&create((char*)NULL, a_category)!=E_SUCCESS)
 			{
 				return E_UNKNOWN;
 			}
@@ -280,7 +286,7 @@ SINT32 CASocket::connect(UINT32 a_category, const CASocketAddr & psa,UINT32 retr
 	*/
 SINT32 CASocket::connect(UINT32 a_category, const CASocketAddr & psa,UINT32 msTimeOut)
 	{
-		if(m_bSocketIsClosed&&create(a_category, psa.getType())!=E_SUCCESS)
+		if(m_bSocketIsClosed&&create((char*)NULL, a_category, psa.getType())!=E_SUCCESS)
 			{
 				return E_UNKNOWN;
 			}
@@ -813,7 +819,7 @@ SINT32 CASocket::getMaxOpenSockets()
 	UINT32 maxSocket=0;
 	for(UINT32 t=0;t<10001;t++)
 		{
-		if(parSocket[t].create(false)!=E_SUCCESS)
+		if(parSocket[t].create((char*)NULL, CATEGORY_UNKNOWN, false)!=E_SUCCESS)
 			{
 			maxSocket=t;
 			break;
