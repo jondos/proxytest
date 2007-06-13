@@ -119,6 +119,7 @@ class CASocket:public CAClientSocket
 			static const UINT32 CATEGORY_MUX_SOCKET;
 			static const UINT32 CATEGORY_MUX_SOCKET_CONNECT;
 			static const UINT32 CATEGORY_TLS_CLIENT_SOCKET_CONNECT;
+			static const UINT32 CATEGORY_EXCEPTION;
 		protected:
 			bool m_bSocketIsClosed; //this is a flag, which shows, if the m_Socket is valid
 													//we should not set m_Socket to -1 or so after close,
