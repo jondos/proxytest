@@ -44,43 +44,69 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 UINT32 CASocket::m_u32NormalSocketsOpen=0; //how many "normal" sockets are open
 UINT32 CASocket::m_u32MaxNormalSockets=0xFFFFFFFF; //how many "normal" sockets are allowed at max
+UINT32* CASocket::ms_categoryCounts = NULL;
+
+const UINT32 CASocket::CATEGORY_UNKNOWN = 0;
+const UINT32 CASocket::CATEGORY_LAST_MIX = 1;
+const UINT32 CASocket::CATEGORY_LAST_MIX_CONNECT = 7;
+const UINT32 CASocket::CATEGORY_FIRST_MIX = 2;
+const UINT32 CASocket::CATEGORY_FIRST_MIX_CHANNEL_LIST = 3;
+const UINT32 CASocket::CATEGORY_INFO_SERVICE = 4;
+const UINT32 CASocket::CATEGORY_INFO_SERVICE_CONNECT = 8;
+const UINT32 CASocket::CATEGORY_LOCAL_PROXY = 5;
+const UINT32 CASocket::CATEGORY_MUX_SOCKET = 6;
+const UINT32 CASocket::CATEGORY_MUX_SOCKET_CONNECT = 9;
+const UINT32 CASocket::CATEGORY_TLS_CLIENT_SOCKET_CONNECT = 10;
 
 CASocket::CASocket(bool bIsReservedSocket)
-	{
+	{				
 		m_Socket=0;
 		m_closeMode=0;
 		m_bSocketIsClosed=true;
 		m_bIsReservedSocket=bIsReservedSocket;
 	}
 
-SINT32 CASocket::create()
+SINT32 CASocket::create(UINT32 a_category)
 	{
-		return create(true);
+		return create(a_category, AF_INET, true);
 	}
 
-SINT32 CASocket::create(int type)
+SINT32 CASocket::create(UINT32 a_category, int type)
 {
-	return create(type, true);
+	return create(a_category, type, true);
 }
 
-SINT32 CASocket::create(bool a_bShowTypicalError)
+SINT32 CASocket::create(UINT32 a_category, bool a_bShowTypicalError)
 {
-	return create(AF_INET, a_bShowTypicalError);
+	return create(a_category, AF_INET, a_bShowTypicalError);
 }
 
 ///@todo Not thread safe!
-SINT32 CASocket::create(int type, bool a_bShowTypicalError)
+SINT32 CASocket::create(UINT32 a_category, int type, bool a_bShowTypicalError)
 	{
-		if(m_bSocketIsClosed)
+		if (ms_categoryCounts == NULL)
+		{	
+			ms_categoryCounts = new UINT32[6];
+			for (UINT32 i = 0; i < 6; i++)
 			{
+				ms_categoryCounts[i] = 0;
+			}
+		}		
+		
+		if(m_bSocketIsClosed)
+		{
+			m_category = a_category;
+			
 			if(m_bIsReservedSocket||m_u32NormalSocketsOpen<m_u32MaxNormalSockets)
-			m_Socket=socket(type,SOCK_STREAM,0);
+			{
+				m_Socket=socket(type,SOCK_STREAM,0);
+			}
 			else
-				{
+			{
 				CAMsg::printMsg(LOG_CRIT,"Could not create a new normal Socket -- allowed number of normal sockets exeded!\n");
 				return SOCKET_ERROR;
-				}
 			}
+		}
 		else
 			return E_UNKNOWN;
 		if(m_Socket==INVALID_SOCKET)
@@ -102,7 +128,14 @@ SINT32 CASocket::create(int type, bool a_bShowTypicalError)
 		m_bSocketIsClosed=false;
 		m_csClose.lock();
 		if(!m_bIsReservedSocket)
-		m_u32NormalSocketsOpen++;
+		{
+			m_u32NormalSocketsOpen++;
+			ms_categoryCounts[m_category]++;
+			if (ms_categoryCounts[m_category] % 2 == 0)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Nr. of sockets of category %d: '%d'", m_category , ms_categoryCounts[m_category]);
+			}
+		}
 		m_csClose.unlock();
 		return E_SUCCESS;
 	}
@@ -178,6 +211,7 @@ SINT32 CASocket::accept(CASocket &s)
 			}
 		m_csClose.lock();
 		m_u32NormalSocketsOpen++;
+		ms_categoryCounts[m_category]++;
 		m_csClose.unlock();
 		s.m_bSocketIsClosed=false;
 		return E_SUCCESS;
@@ -189,10 +223,10 @@ SINT32 CASocket::accept(CASocket &s)
 	* @param retry - number of retries
 	* @param time - time between retries in seconds
 	*/			
-SINT32 CASocket::connect(const CASocketAddr & psa,UINT32 retry,UINT32 time)
+SINT32 CASocket::connect(UINT32 a_category, const CASocketAddr & psa,UINT32 retry,UINT32 time)
 	{
 //		CAMsg::printMsg(LOG_DEBUG,"Socket:connect\n");
-		if(m_bSocketIsClosed&&create()!=E_SUCCESS)
+		if(m_bSocketIsClosed&&create(a_category)!=E_SUCCESS)
 			{
 				return E_UNKNOWN;
 			}
@@ -232,9 +266,9 @@ SINT32 CASocket::connect(const CASocketAddr & psa,UINT32 retry,UINT32 time)
 	*	@param psa - peer
 	* @param msTimeOut - abort after msTimeOut milli seconds
 	*/
-SINT32 CASocket::connect(const CASocketAddr & psa,UINT32 msTimeOut)
+SINT32 CASocket::connect(UINT32 a_category, const CASocketAddr & psa,UINT32 msTimeOut)
 	{
-		if(m_bSocketIsClosed&&create(psa.getType())!=E_SUCCESS)
+		if(m_bSocketIsClosed&&create(a_category, psa.getType())!=E_SUCCESS)
 			{
 				return E_UNKNOWN;
 			}
@@ -303,7 +337,10 @@ SINT32 CASocket::close()
 			{
 				::closesocket(m_Socket);
 			if(!m_bIsReservedSocket)
-			m_u32NormalSocketsOpen--;
+			{
+				m_u32NormalSocketsOpen--;
+				ms_categoryCounts[m_category]--;
+			}
 				m_bSocketIsClosed=true;
 				m_closeMode=0;
 				ret=E_SUCCESS;

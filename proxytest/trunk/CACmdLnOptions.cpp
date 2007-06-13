@@ -350,7 +350,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 			printf(MIX_VERSION_INFO);
 			for(UINT32 t=0;t<10000;t++)
 				{
-					CASocket* pSocket=new CASocket;
+					CASocket* pSocket=new CASocket(CASocket::CATEGORY_UNKNOWN);
 					if(pSocket->create(false)!=E_SUCCESS)
 						{
 							printf("Max open sockets: %u\n",t);

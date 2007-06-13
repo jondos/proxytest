@@ -903,7 +903,7 @@ SINT32 CAFirstMixChannelList::test()
 	{
 		CAFirstMixChannelList* pList=new CAFirstMixChannelList();
 		CAMuxSocket *pMuxSocket=new CAMuxSocket();
-		((CASocket*)pMuxSocket)->create();
+		((CASocket*)pMuxSocket)->create(CASocket::CATEGORY_FIRST_MIX_CHANNEL_LIST);
 		UINT8 peerIP[4];
 		pList->add(pMuxSocket,peerIP,NULL);
 #if defined(HAVE_CRTDBG)

@@ -115,7 +115,7 @@ SINT32 CALocalProxy::init()
 	{
 		CAListenerInterface* pListener;
 		
-		m_socketIn.create();
+		m_socketIn.create(CASocket::CATEGORY_LOCAL_PROXY);
 		m_socketIn.setReuseAddr(true);
 		pListener=options.getListenerInterface(1);
 		if(pListener==NULL)
@@ -151,7 +151,7 @@ SINT32 CALocalProxy::init()
 		addrNext.setAddr(strTarget,options.getMixPort());
 		CAMsg::printMsg(LOG_INFO,"Try connecting to next Mix...\n");
 
-		((CASocket*)m_muxOut)->create();
+		((CASocket*)m_muxOut)->create(CASocket::CATEGORY_LOCAL_PROXY);
 		((CASocket*)m_muxOut)->setSendBuff(MIXPACKET_SIZE*50);
 		((CASocket*)m_muxOut)->setRecvBuff(MIXPACKET_SIZE*50);
 		if(m_muxOut.connect(addrNext)==E_SUCCESS)
