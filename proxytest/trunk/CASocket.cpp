@@ -52,16 +52,17 @@ const UINT32 CASocket::CATEGORY_UNKNOWN = 1;
 const UINT32 CASocket::CATEGORY_LAST_MIX = 2;
 const UINT32 CASocket::CATEGORY_LAST_MIX_CONNECT = 3;
 const UINT32 CASocket::CATEGORY_FIRST_MIX = 4;
-const UINT32 CASocket::CATEGORY_FIRST_MIX_LISTEN = 5;
-const UINT32 CASocket::CATEGORY_FIRST_MIX_CHANNEL_LIST = 6;
-const UINT32 CASocket::CATEGORY_MIDDLE_MIX = 7;
-const UINT32 CASocket::CATEGORY_INFO_SERVICE = 8;
-const UINT32 CASocket::CATEGORY_INFO_SERVICE_CONNECT = 9;
-const UINT32 CASocket::CATEGORY_LOCAL_PROXY = 10;
-const UINT32 CASocket::CATEGORY_MUX_SOCKET = 11;
-const UINT32 CASocket::CATEGORY_MUX_SOCKET_CONNECT = 12;
-const UINT32 CASocket::CATEGORY_TLS_CLIENT_SOCKET_CONNECT = 13;
-const UINT32 CASocket::CATEGORY_EXCEPTION = 14;
+const UINT32 CASocket::CATEGORY_FIRST_MIX_NEXT_MIX_SOCKET = 5;
+const UINT32 CASocket::CATEGORY_FIRST_MIX_LISTEN = 6;
+const UINT32 CASocket::CATEGORY_FIRST_MIX_CHANNEL_LIST = 7;
+const UINT32 CASocket::CATEGORY_MIDDLE_MIX = 8;
+const UINT32 CASocket::CATEGORY_INFO_SERVICE = 9;
+const UINT32 CASocket::CATEGORY_INFO_SERVICE_CONNECT = 10;
+const UINT32 CASocket::CATEGORY_LOCAL_PROXY = 11;
+const UINT32 CASocket::CATEGORY_MUX_SOCKET = 12;
+const UINT32 CASocket::CATEGORY_MUX_SOCKET_CONNECT = 13;
+const UINT32 CASocket::CATEGORY_TLS_CLIENT_SOCKET_CONNECT = 14;
+const UINT32 CASocket::CATEGORY_EXCEPTION = 15;
 
 
 
@@ -95,8 +96,8 @@ SINT32 CASocket::create(UINT32 a_category, int type, bool a_bShowTypicalError)
 		ms_mutexCount->lock();
 		if (ms_categoryCounts == NULL)
 		{	
-			ms_categoryCounts = new SINT32[15];
-			for (UINT32 i = 0; i < 15; i++)
+			ms_categoryCounts = new SINT32[16];
+			for (UINT32 i = 0; i < 16; i++)
 			{
 				ms_categoryCounts[i] = 0;
 			}
@@ -105,14 +106,12 @@ SINT32 CASocket::create(UINT32 a_category, int type, bool a_bShowTypicalError)
 		
 		if(m_bSocketIsClosed)
 		{
-			if (m_category == CATEGORY_UNDEFINED)
-			{			
-				if (a_category < 0 || a_category > 14)
-				{
-					a_category = CATEGORY_EXCEPTION;
-				}
-				m_category = a_category;
+			if (a_category < 0 || a_category > 15)
+			{
+				a_category = CATEGORY_EXCEPTION;
 			}
+			m_category = a_category;
+	
 			
 			if(m_bIsReservedSocket||m_u32NormalSocketsOpen<m_u32MaxNormalSockets)
 			{
@@ -364,8 +363,8 @@ SINT32 CASocket::close()
 				
 				if (ms_categoryCounts == NULL)
 				{	
-					ms_categoryCounts = new SINT32[15];
-					for (UINT32 i = 0; i < 15; i++)
+					ms_categoryCounts = new SINT32[16];
+					for (UINT32 i = 0; i < 16; i++)
 					{
 						ms_categoryCounts[i] = 0;
 					}
