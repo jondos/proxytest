@@ -160,7 +160,7 @@ SINT32 CAFirstMix::init()
 				return E_UNKNOWN;
 			}
 		m_pMuxOut=new CAMuxSocket();
-		if(((CASocket*)(*m_pMuxOut))->create((char*)NULL, pAddrNext->getType())!=E_SUCCESS)
+		if(((CASocket*)(*m_pMuxOut))->create((char*)NULL, CASocket::CATEGORY_FIRST_MIX_NEXT_MIX_SOCKET,  pAddrNext->getType())!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Cannot create SOCKET for connection to next Mix!\n");
 				return E_UNKNOWN;
