@@ -40,6 +40,13 @@ CAMuxSocket::CAMuxSocket()
 		m_aktBuffPos=0;
 		m_bIsCrypted=false;
 	}
+	
+CAMuxSocket::~CAMuxSocket()
+	{
+		CAMsg::printMsg(LOG_CRIT,"Closing MuxSocket...");
+		close();
+		delete []m_Buff;
+	}	
 
 SINT32 CAMuxSocket::setCrypt(bool b)
 	{

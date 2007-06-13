@@ -37,11 +37,7 @@ class CAMuxSocket
 	{
 		public:
 			CAMuxSocket();
-			~CAMuxSocket()
-				{
-					close();
-					delete []m_Buff;
-				}
+			~CAMuxSocket();
 			SINT32 accept(UINT16 port);
 			SINT32 accept(const CASocketAddr& oAddr);
 			SINT32 connect(CASocketAddr& psa);
