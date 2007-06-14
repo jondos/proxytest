@@ -55,7 +55,9 @@ CACertStore::~CACertStore()
 SINT32 CACertStore::add(CACertificate* cert)
 	{
 		if(cert==NULL)
+		{
 			return E_UNKNOWN;
+		}
 		LP_CERTSTORE_ENTRY newEntry=new CERTSTORE_ENTRY;
 		newEntry->pCert=cert->clone();
 		newEntry->next=m_pCertList;
