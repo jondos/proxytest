@@ -39,6 +39,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #endif
 extern CACmdLnOptions options;
 
+void CAFirstMixA::shutDown()
+{
+	m_bIsShuttingDown = true;
+}
 
 SINT32 CAFirstMixA::closeConnection(fmHashTableEntry* pHashEntry)
 {
@@ -674,7 +678,7 @@ NEXT_USER:
 		// we have to be sure that the Accept thread was already stopped!
 		m_pthreadsLogin->destroy(true);
 		CAMsg::printMsg(LOG_CRIT,"Before deleting CAFirstMixChannelList()!\n");
-		CAMsg::printMsg	(LOG_CRIT,"Memeory usage before: %u\n",getMemoryUsage());	
+		CAMsg::printMsg	(LOG_CRIT,"Memory usage before: %u\n",getMemoryUsage());	
 		fmHashTableEntry* pHashEntry=m_pChannelList->getFirst();
 		while(pHashEntry!=NULL)
 			{

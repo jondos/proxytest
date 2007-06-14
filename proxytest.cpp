@@ -60,6 +60,7 @@ CACmdLnOptions options;
 //Global Locks required by OpenSSL-Library
 CAMutex* pOpenSSLMutexes;
 
+bool bTriedTermination = false;
 
 
 typedef struct
@@ -100,9 +101,12 @@ void terminate(void)
 {
 	if(pMix!=NULL)
 	{
+		pMix->shutDown();
+		/*
 		CAMix* mix = pMix;
 		pMix = NULL;
 		delete mix;
+		*/
 	}	
 }
 
@@ -120,8 +124,11 @@ void signal_segv( int )
 	{
 		CAMsg::printMsg( LOG_CRIT, "Stack trace: none available\n");
 	}
-	
-	//terminate();
+	if (!bTriedTermination)
+	{
+		bTriedTermination = true;
+		terminate();
+	}
 	removePidFile();
 	exit(1);
 }
@@ -132,7 +139,7 @@ void signal_segv( int )
 void signal_term( int )
 	{ 
 		CAMsg::printMsg(LOG_INFO,"Hm.. Signal SIG_TERM received... exiting!\n");
-		//terminate();
+		terminate();
 		removePidFile();
 		exit(0);
 	}
@@ -140,7 +147,7 @@ void signal_term( int )
 void signal_interrupt( int)
 	{
 		CAMsg::printMsg(LOG_INFO,"Hm.. Strg+C pressed... exiting!\n");
-		//terminate();
+		terminate();
 		removePidFile();
 		exit(0);
 	}
