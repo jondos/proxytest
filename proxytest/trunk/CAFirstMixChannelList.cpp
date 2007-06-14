@@ -367,13 +367,13 @@ SINT32 CAFirstMixChannelList::pushTimeoutEntry_internal(fmHashTableEntry* pHashT
 	
 	pHashTableEntry->list_TimeoutHashEntries.timoutSecs = time(NULL) + EXPIRATION_TIME_SECS;
 	
-	SAVE_STACK("CAFirstMixChannelList::add", "removing from timeout list");
+	SAVE_STACK("CAFirstMixChannelList::pushTimeoutEntry_internal", "removing from timeout list");
 	// remove from timeout list if needed before adding it to the end
 	removeFromTimeoutList(pHashTableEntry);
 	
 	if (m_listTimoutFoot == NULL)
 	{
-		SAVE_STACK("CAFirstMixChannelList::add", "new first entry");
+		SAVE_STACK("CAFirstMixChannelList::pushTimeoutEntry_internal", "new first entry");
 		
 		// this is the first entry in the list
 		pHashTableEntry->list_TimeoutHashEntries.prev = NULL;
@@ -381,7 +381,7 @@ SINT32 CAFirstMixChannelList::pushTimeoutEntry_internal(fmHashTableEntry* pHashT
 	}
 	else
 	{
-		SAVE_STACK("CAFirstMixChannelList::add", "new last entry");
+		SAVE_STACK("CAFirstMixChannelList::pushTimeoutEntry_internal", "new last entry");
 		// this is the new last entry in the list
 		m_listTimoutFoot->list_TimeoutHashEntries.next = pHashTableEntry;
 		pHashTableEntry->list_TimeoutHashEntries.prev = m_listTimoutFoot;
