@@ -98,18 +98,31 @@ CAFirstMixChannelList::~CAFirstMixChannelList()
 	*/
 fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8 peerIP[4],CAQueue* pQueueSend)
 	{
+		INIT_STACK;
+		BEGIN_STACK("CAFirstMixChannelList::add");
+		
 		if(pMuxSocket==NULL)
+		{
+			FINISH_STACK("CAFirstMixChannelList::add (null socket)");
 			return NULL;
+		}
 		SINT32 hashkey=pMuxSocket->getSocket();
 		if(hashkey>MAX_HASH_KEY-1||hashkey<0)
+		{
+			FINISH_STACK("CAFirstMixChannelList::add (invalid hash key)");
 			return NULL;
+		}
 		m_Mutex.lock();
 		fmHashTableEntry* pHashTableEntry=m_HashTable[hashkey];
 		if(pHashTableEntry->pMuxSocket!=NULL) //the entry in the hashtable for this socket (hashkey) must be empty
 		{
+			FINISH_STACK("CAFirstMixChannelList::add (socket exists)");
 			m_Mutex.unlock();
 			return NULL;
 		}
+		
+		SAVE_STACK("CAFirstMixChannelList::add", "initialising table entry");
+		
 		pHashTableEntry->pMuxSocket=pMuxSocket;
 		pHashTableEntry->pQueueSend=pQueueSend;
 		pHashTableEntry->pControlChannelDispatcher=new CAControlChannelDispatcher(pQueueSend);
@@ -125,6 +138,8 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 #ifdef PAYMENT
 		pHashTableEntry->pAccountingInfo=NULL;
 #endif
+		
+		SAVE_STACK("CAFirstMixChannelList::add", "copying peer IP");
 		memcpy(pHashTableEntry->peerIP,peerIP,4);
 #ifdef DELAY_USERS
 		pHashTableEntry->delayBucket=m_u32DelayChannelUnlimitTraffic; //can always send some first packets
@@ -139,6 +154,7 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 		m_pDelayBuckets[pHashTableEntry->delayBucketID]=&pHashTableEntry->delayBucket;
 #endif
 
+		SAVE_STACK("CAFirstMixChannelList::add", "inserting in connection list");
 		//now insert the new connection in the list of all open connections
 		if(m_listHashTableHead==NULL) //if first one
 		{
@@ -152,11 +168,15 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 		pHashTableEntry->list_HashEntries.prev=NULL;
 		m_listHashTableHead=pHashTableEntry;	
 		
+		SAVE_STACK("CAFirstMixChannelList::add", "inserting in timout list");
 		// insert in timeout list; entries are added to the foot of the list
 		pHashTableEntry->bRecoverTimeout = true;
 		pushTimeoutEntry_internal(pHashTableEntry);
 		
 		m_Mutex.unlock();
+		
+		FINISH_STACK("CAFirstMixChannelList::add");
+		
 		return pHashTableEntry;
 	}
 
@@ -341,25 +361,35 @@ SINT32 CAFirstMixChannelList::pushTimeoutEntry_internal(fmHashTableEntry* pHashT
 		return E_UNKNOWN;
 	}
 	
+	INIT_STACK;
+	BEGIN_STACK("CAFirstMixChannelList::pushTimeoutEntry_internal");
+	
+	
 	pHashTableEntry->list_TimeoutHashEntries.timoutSecs = time(NULL) + EXPIRATION_TIME_SECS;
 	
+	SAVE_STACK("CAFirstMixChannelList::add", "removing from timeout list");
 	// remove from timeout list if needed before adding it to the end
 	removeFromTimeoutList(pHashTableEntry);
 	
 	if (m_listTimoutFoot == NULL)
 	{
+		SAVE_STACK("CAFirstMixChannelList::add", "new first entry");
+		
 		// this is the first entry in the list
 		pHashTableEntry->list_TimeoutHashEntries.prev = NULL;
 		m_listTimoutHead = pHashTableEntry;
 	}
 	else
 	{
+		SAVE_STACK("CAFirstMixChannelList::add", "new last entry");
 		// this is the new last entry in the list
 		m_listTimoutFoot->list_TimeoutHashEntries.next = pHashTableEntry;
 		pHashTableEntry->list_TimeoutHashEntries.prev = m_listTimoutFoot;
 	}
 	pHashTableEntry->list_TimeoutHashEntries.next = NULL;
 	m_listTimoutFoot = pHashTableEntry;
+	
+	FINISH_STACK("CAFirstMixChannelList::pushTimeoutEntry_internal");
 	
 	return E_SUCCESS;
 	

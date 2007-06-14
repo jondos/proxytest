@@ -1039,10 +1039,14 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		#endif
 		delete xml_buff;
 		
-		SAVE_STACK("CAFirstMix::doUserLogin", "sent key echange signature");
+		SAVE_STACK("CAFirstMix::doUserLogin", "sent key exchange signature");
 		
 		((CASocket*)pNewUser)->setNonBlocking(true);
+		
+		SAVE_STACK("CAFirstMix::doUserLogin", "Creating CAQueue...");
 		CAQueue* tmpQueue=new CAQueue(sizeof(tQueueEntry));
+		
+		SAVE_STACK("CAFirstMix::doUserLogin", "Adding user to connection list...");
 		fmHashTableEntry* pHashEntry=m_pChannelList->add(pNewUser,peerIP,tmpQueue);
 		if(pHashEntry==NULL)// adding user connection to mix->JAP channel list (stefan: sollte das nicht connection list sein? --> es handelt sich um eine Datenstruktu fr Connections/Channels ).
 		{
