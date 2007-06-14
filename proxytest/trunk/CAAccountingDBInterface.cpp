@@ -462,7 +462,7 @@ SINT32 CAAccountingDBInterface::deleteCC(UINT64 accountNumber, UINT8* cascadeId)
 		finalQuery = new UINT8[strlen(deleteQuery)+ 32 + strlen((char*)cascadeId)];
 		sprintf((char *)finalQuery,deleteQuery,temp, cascadeId);
 		result = PQexec(m_dbConn, (char*)finalQuery);
-		CAMsg::printMsg(LOG_DEBUG, "%s\n",finalQuery);
+		//CAMsg::printMsg(LOG_DEBUG, "%s\n",finalQuery);
 		delete[] finalQuery;
 		if (PQresultStatus(result) != PGRES_COMMAND_OK)
 		{

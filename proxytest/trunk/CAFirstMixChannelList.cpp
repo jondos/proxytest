@@ -440,11 +440,24 @@ SINT32 CAFirstMixChannelList::removeFromTimeoutList(fmHashTableEntry* pHashTable
 		}
 		else
 		{
-			//its a simple middle element
-			pHashTableEntry->list_TimeoutHashEntries.prev->list_TimeoutHashEntries.next = pHashTableEntry->list_TimeoutHashEntries.next;
-			pHashTableEntry->list_TimeoutHashEntries.next->list_TimeoutHashEntries.prev = pHashTableEntry->list_TimeoutHashEntries.prev;			
+			//it is a simple middle element
+			if (pHashTableEntry->list_TimeoutHashEntries.prev == NULL)
+			{
+				CAMsg::printMsg(LOG_CRIT, "CAFirstMixCahnelList:removeFromTimeoutList: No previous element!!\n");
+			}
+			else
+			{
+				pHashTableEntry->list_TimeoutHashEntries.prev->list_TimeoutHashEntries.next = pHashTableEntry->list_TimeoutHashEntries.next;
+			}
+			if (pHashTableEntry->list_TimeoutHashEntries.next == NULL)
+			{
+				CAMsg::printMsg(LOG_CRIT, "CAFirstMixCahnelList:removeFromTimeoutList: No next element!!\n");
+			}
+			else
+			{
+				pHashTableEntry->list_TimeoutHashEntries.next->list_TimeoutHashEntries.prev = pHashTableEntry->list_TimeoutHashEntries.prev;			
+			}
 		}
-		
 	}	
 	pHashTableEntry->list_TimeoutHashEntries.prev = NULL;
 	pHashTableEntry->list_TimeoutHashEntries.next = NULL;
