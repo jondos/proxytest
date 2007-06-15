@@ -625,14 +625,14 @@ SINT32 CAAccountingInstance::sendCCRequest(tAiAccountingInfo* pAccInfo)
 	CAMsg::printMsg(LOG_DEBUG, "transferrred bytes: %u bytes \n",pAccInfo->transferredBytes);
 	CAMsg::printMsg(LOG_DEBUG, "prepaid Interval: %u \n",prepaidInterval);	
 	
-#endif			
+		
 
 	UINT32 debuglen = 3000;
 	UINT8 debugout[3000];
 	DOM_Output::dumpToMem(doc,debugout,&debuglen);
 	debugout[debuglen] = 0;			
 	CAMsg::printMsg(LOG_DEBUG, "the CC sent looks like this: %s \n",debugout);
-		
+#endif			
 	
 	FINISH_STACK("CAAccountingInstance::sendCCRequest");
 	
@@ -1008,11 +1008,11 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 		{
 			pAccInfo->transferredBytes += pCC->getTransferredBytes();
 			pAccInfo->confirmedBytes = pCC->getTransferredBytes();
-			//#ifdef DEBUG
+			#ifdef DEBUG
 				UINT8 tmp[32];
 				print64(tmp,pAccInfo->transferredBytes);
 				CAMsg::printMsg(LOG_DEBUG, "TransferredBytes is now %s\n", tmp);
-			//#endif			
+			#endif			
 			delete pCC;
 		}
 		else
@@ -1404,12 +1404,14 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 	{
 		UINT8 tmp[32];
 		print64(tmp,pCC->getTransferredBytes());
-		CAMsg::printMsg( LOG_INFO, "CostConfirmation has Wrong Number of Bytes (%s). Ignoring...\n", tmp );
+		CAMsg::printMsg( LOG_ERR, "CostConfirmation has Wrong Number of Bytes (%s). Ignoring...\n", tmp );
+		pAccInfo->authFlags &= ~AUTH_SENT_CC_REQUEST;
+		/*
 		CAXMLErrorMessage err(CAXMLErrorMessage::ERR_WRONG_DATA, 
 			(UINT8*)"Your CostConfirmation has a wrong number of transferred bytes");
 		DOM_Document errDoc;
 		err.toXmlDocument(errDoc);
-		pAccInfo->pControlChannel->sendXMLMessage(errDoc);
+		pAccInfo->pControlChannel->sendXMLMessage(errDoc);*/
 		delete pCC;
 		pAccInfo->mutex->unlock();
 		return;
