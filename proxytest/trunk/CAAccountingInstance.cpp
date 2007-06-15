@@ -623,14 +623,15 @@ SINT32 CAAccountingInstance::sendCCRequest(tAiAccountingInfo* pAccInfo)
 	CAMsg::printMsg(LOG_DEBUG, "CC request sent for %u bytes \n",bytesToConfirm);
 	CAMsg::printMsg(LOG_DEBUG, "transferrred bytes: %u bytes \n",pAccInfo->transferredBytes);
 	CAMsg::printMsg(LOG_DEBUG, "prepaid Interval: %u \n",prepaidInterval);	
-	/*
+	
+#endif			
+
 	UINT32 debuglen = 3000;
 	UINT8 debugout[3000];
 	DOM_Output::dumpToMem(doc,debugout,&debuglen);
 	debugout[debuglen] = 0;			
 	CAMsg::printMsg(LOG_DEBUG, "the CC sent looks like this: %s \n",debugout);
-	*/
-#endif				
+		
 	
 	FINISH_STACK("CAAccountingInstance::sendCCRequest");
 	
@@ -657,7 +658,7 @@ SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName
 	elemRoot.setAttribute("version", "1.0");
 	m_preparedCCRequest.appendChild(elemRoot);
 	DOM_Element elemCC = m_preparedCCRequest.createElement("CC");
-	elemCC.setAttribute("version", "1.1");
+	elemCC.setAttribute("version", "1.2");
 	elemRoot.appendChild(elemCC);
 	DOM_Element elemAiName = m_preparedCCRequest.createElement("AiID");
 	setDOMElementValue(elemAiName, a_AiName);
