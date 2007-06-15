@@ -385,6 +385,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			if (entry->authFlags & AUTH_OUTDATED_CC)
 			{
 				entry->authFlags &= ~AUTH_OUTDATED_CC;	
+				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Fixing bytes from outdated CC...\n");	
 				// we had stored an outdated CC; insert confirmed bytes from current CC here						
 				pAccInfo->transferredBytes +=  entry->confirmedBytes - pAccInfo->confirmedBytes;
 				pAccInfo->confirmedBytes = entry->confirmedBytes;				
@@ -1007,11 +1008,11 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 		{
 			pAccInfo->transferredBytes += pCC->getTransferredBytes();
 			pAccInfo->confirmedBytes = pCC->getTransferredBytes();
-			#ifdef DEBUG
+			//#ifdef DEBUG
 				UINT8 tmp[32];
 				print64(tmp,pAccInfo->transferredBytes);
 				CAMsg::printMsg(LOG_DEBUG, "TransferredBytes is now %s\n", tmp);
-			#endif			
+			//#endif			
 			delete pCC;
 		}
 		else
