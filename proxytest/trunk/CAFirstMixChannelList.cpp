@@ -30,6 +30,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAFirstMixChannelList.hpp"
 #include "CAUtil.hpp"
 #include "CAMsg.hpp"
+#include "CAThread.hpp"
 #define MAX_HASH_KEY 8200 //8113
 
 #ifdef PAYMENT
