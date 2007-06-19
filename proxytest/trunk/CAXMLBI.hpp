@@ -81,6 +81,11 @@ class CAXMLBI : public CAAbstractXMLEncodable
 			
 		SINT32 toXmlElement(DOM_Document &a_doc, DOM_Element &elemRoot);
 		
+		CACertificate* getCertificate()
+		{
+			return m_pCert;
+		}
+		
 		static const UINT8* const getXMLElementName()
 			{
 				return CAXMLBI::ms_pXmlElemName;

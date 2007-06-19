@@ -111,7 +111,7 @@ SINT32 CATLSClientSocket::doTLSConnect(CASocketAddr &psa)
 				return E_UNKNOWN;
 			}
 		#ifdef DEBUG
-			CAMsg::printMsg(LOG_DEBUG,"connect paased\n");
+			CAMsg::printMsg(LOG_DEBUG,"connect passed\n");
 		#endif
 
 		// ssl handshake ok, now let's check the server's identity
@@ -123,7 +123,7 @@ SINT32 CATLSClientSocket::doTLSConnect(CASocketAddr &psa)
 		SINT32 ret=SSL_get_verify_result( m_pSSL );
 		if(ret != X509_V_OK&&ret!=X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT ) 
 			{
-				CAMsg::printMsg(LOG_ERR, "SSLClientSocket: the Server certificate INVALID!! Error: %i\n",ret);
+				CAMsg::printMsg(LOG_ERR, "SSLClientSocket: the Server certificate is INVALID!! Error: %i\n",ret);
 				close();
 				m_bConnectedTLS = false;
 				return E_UNKNOWN; 

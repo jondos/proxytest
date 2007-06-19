@@ -78,6 +78,7 @@ SINT32 CAAccountingBIInterface::initBIConnection()
 		#endif
 		address.setAddr(pBI->getHostName(), (UINT16)pBI->getPortNumber());		
 		// connect
+		m_pSocket->setServerCertificate(pBI->getCertificate());
 		rc=m_pSocket->connect(address);
 		if(rc!=E_SUCCESS)
 		{
