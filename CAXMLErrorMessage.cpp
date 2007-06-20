@@ -111,7 +111,7 @@ CAXMLErrorMessage::CAXMLErrorMessage(UINT8 * strXmlData)
 
 
 SINT32 CAXMLErrorMessage::setValues(DOM_Element &elemRoot)
-{
+{	
 	UINT8 strGeneral[256];
 	UINT32 strGeneralLen = 256;
 	SINT32 tmp;
@@ -120,6 +120,11 @@ SINT32 CAXMLErrorMessage::setValues(DOM_Element &elemRoot)
 			((rc=getDOMElementValue(elemRoot, strGeneral, &strGeneralLen)) !=E_SUCCESS)
 		)
 	{
+		UINT8 buff[8192];
+		UINT32 len=8192;
+		DOM_Output::dumpToMem(elemRoot,buff,&len);
+		CAMsg::printMsg(LOG_DEBUG,(char*)buff);
+		
 		return rc;
 	}
 	m_iErrorCode = (UINT32)tmp;
