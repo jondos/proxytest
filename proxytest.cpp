@@ -55,7 +55,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 // The Mix....
 CAMix* pMix=NULL;
 #endif
-CACmdLnOptions options;
+CACmdLnOptions* pglobalOptions;
 
 //Global Locks required by OpenSSL-Library
 CAMutex* pOpenSSLMutexes;
@@ -82,7 +82,6 @@ typedef struct
 void removePidFile()
 	{
 		UINT8 strPidFile[512];
-		if(options.getPidFile(strPidFile,512)==E_SUCCESS)
 			{
 				if(::remove((char*)strPidFile)!=0)
 					{
@@ -155,7 +154,7 @@ void signal_interrupt( int)
 #ifndef ONLY_LOCAL_PROXY
 void signal_hup(int)
 	{
-		options.reread(pMix);
+		pglobalOptions->reread(pMix);
 	}
 #endif
 
@@ -238,6 +237,7 @@ void init()
 			err=WSAStartup(0x0202,&wsadata);
 		#endif
 		initRandom();
+		pglobalOptions=new CACmdLnOptions();
 	}
 
 /** \mainpage
@@ -487,16 +487,16 @@ int main(int argc, const char* argv[])
 		
 		exit(0);
 */
-		if(options.parse(argc,argv) != E_SUCCESS)
+		if(pglobalOptions->parse(argc,argv) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_CRIT,"Error: Cannot parse configuration file!\n");
 			goto EXIT;
 		}
-		if(!(options.isFirstMix()||options.isMiddleMix()||options.isLastMix()||options.isLocalProxy()))
+		if(!(pglobalOptions->isFirstMix()||pglobalOptions->isMiddleMix()||pglobalOptions->isLastMix()||pglobalOptions->isLocalProxy()))
 			{
 				CAMsg::printMsg(LOG_CRIT,"You must specifiy, which kind of Mix you want to run!\n");
 				CAMsg::printMsg(LOG_CRIT,"Use -j or -c\n");
-				CAMsg::printMsg(LOG_CRIT,"Or try --help for more options.\n");
+				CAMsg::printMsg(LOG_CRIT,"Or try --help for more pglobalOptions->\n");
 				CAMsg::printMsg(LOG_CRIT,"Exiting...\n");
 				goto EXIT;
 			}
@@ -507,7 +507,7 @@ int main(int argc, const char* argv[])
 #endif
 		UINT8 buff[255];
 #ifndef _WIN32
-		if(options.getDaemon())
+		if(pglobalOptions->getDaemon())
 			{
 				CAMsg::printMsg(LOG_DEBUG,"starting as daemon\n");
 				pid_t pid;
@@ -532,7 +532,7 @@ int main(int argc, const char* argv[])
 #endif
 
 #ifndef WIN32
-		maxFiles=options.getMaxOpenFiles();
+		maxFiles=pglobalOptions->getMaxOpenFiles();
 		
 		struct rlimit coreLimit;
 		coreLimit.rlim_cur = coreLimit.rlim_max = RLIM_INFINITY;
@@ -552,7 +552,7 @@ int main(int argc, const char* argv[])
 					exit(EXIT_FAILURE);
 				}
 			}
-		if(options.getUser(buff,255)==E_SUCCESS) //switching user
+		if(pglobalOptions->getUser(buff,255)==E_SUCCESS) //switching user
 			{
 				struct passwd* pwd=getpwnam((char*)buff);
 				if(pwd==NULL||seteuid(pwd->pw_uid)==-1)
@@ -566,13 +566,13 @@ int main(int argc, const char* argv[])
 #endif
 
 			
-		if(options.isSyslogEnabled())
+		if(pglobalOptions->isSyslogEnabled())
 		{
 			CAMsg::setLogOptions(MSG_LOG);
 		}
-		if(options.getLogDir((UINT8*)buff,255)==E_SUCCESS)
+		if(pglobalOptions->getLogDir((UINT8*)buff,255)==E_SUCCESS)
 			{
-				if(options.getCompressLogs())
+				if(pglobalOptions->getCompressLogs())
 					CAMsg::setLogOptions(MSG_COMPRESSED_FILE);
 				else
 					CAMsg::setLogOptions(MSG_FILE);
@@ -583,13 +583,13 @@ int main(int argc, const char* argv[])
 #ifdef LOG_CRIME
 		if(ret!=E_SUCCESS)
 			{
-				if(options.isEncryptedLogEnabled())
+				if(pglobalOptions->isEncryptedLogEnabled())
 					{
 						CAMsg::printMsg(LOG_ERR,"Could not open encrypted log - exiting!\n");
 						exit(EXIT_FAILURE);
 					}
 				else
-					options.enableEncryptedLog(false);
+					pglobalOptions->enableEncryptedLog(false);
 			}
 #endif
 
@@ -606,7 +606,7 @@ int main(int argc, const char* argv[])
 		//Testing msSleep
 		CAMsg::printMsg(LOG_DEBUG,"Should sleep now for aprox 2 seconds....\n");
 		start=time(NULL);
-		for(i=0;i<10;i++)
+		for(SINT32 i=0;i<10;i++)
 			msSleep(200);
 		start=time(NULL)-start;
 		CAMsg::printMsg(LOG_DEBUG,"done! Takes %u seconds\n",start);
@@ -641,7 +641,7 @@ int main(int argc, const char* argv[])
 
 		//Try to write pidfile....
 		UINT8 strPidFile[512];
-		if(options.getPidFile(strPidFile,512)==E_SUCCESS)
+		if(pglobalOptions->getPidFile(strPidFile,512)==E_SUCCESS)
 			{
 				#ifndef _WIN32
 					int old_uid=geteuid(); //old uid... stored if we have to switch to root
@@ -672,7 +672,7 @@ int main(int argc, const char* argv[])
 			}
 
 //		CARoundTripTime* pRTT=NULL;
-		if(options.isLocalProxy())
+		if(pglobalOptions->isLocalProxy())
 			{
 				#ifndef NEW_MIX_TYPE
 					CALocalProxy* pProxy=new CALocalProxy();
@@ -702,7 +702,7 @@ int main(int argc, const char* argv[])
 				{
 				CASocket::setMaxNormalSockets(s32MaxSockets-10);
 				}
-				if(options.isFirstMix())
+				if(pglobalOptions->isFirstMix())
 					{
 						CAMsg::printMsg(LOG_INFO,"I am the First MIX..\n");
 						#if !defined(NEW_MIX_TYPE)
@@ -711,7 +711,7 @@ int main(int argc, const char* argv[])
 							pMix=new CAFirstMixB();
 						#endif
 					}
-				else if(options.isMiddleMix())
+				else if(pglobalOptions->isMiddleMix())
 					{
 						CAMsg::printMsg(LOG_INFO,"I am a Middle MIX..\n");
 						pMix=new CAMiddleMix();
@@ -748,7 +748,7 @@ while(true)
 	if(pMix!=NULL)
 		delete pMix;
 
-	if(options.isFirstMix())
+	if(pglobalOptions->isFirstMix())
 	{
 		CAMsg::printMsg(LOG_INFO,"I am now the First MIX..\n");
 #if !defined(NEW_MIX_TYPE)
@@ -757,7 +757,7 @@ while(true)
             pMix=new CAFirstMixB();
 #endif
 	}
-	else if(options.isMiddleMix())
+	else if(pglobalOptions->isMiddleMix())
 	{
 		CAMsg::printMsg(LOG_INFO,"I am now a Middle MIX..\n");
 		pMix=new CAMiddleMix();
@@ -777,12 +777,14 @@ EXIT:
 		if(pMix!=NULL)
 			delete pMix;
 #endif
+		CAMsg::printMsg(LOG_CRIT,"Terminating Programm!\n");
 		//		CASocketAddrINet::destroy();
 		#ifdef _WIN32
 			WSACleanup();
 		#endif
 		removePidFile();
-		options.clean();
+		delete pglobalOptions;
+		pglobalOptions=NULL;
 //OpenSSL Cleanup
 		CRYPTO_set_locking_callback(NULL);
 		delete []pOpenSSLMutexes;
@@ -793,7 +795,6 @@ EXIT:
 #ifndef ONLY_LOCAL_PROXY
 		XMLPlatformUtils::Terminate();
 #endif //ONLY_LOCAL_PROXY
-		CAMsg::printMsg(LOG_CRIT,"Terminating Programm!\n");
 		CAMsg::cleanup();
 #if defined(HAVE_CRTDBG)
 		_CrtMemCheckpoint( &s2 );

@@ -29,7 +29,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define __CAMIX__
 
 #ifndef ONLY_LOCAL_PROXY
-extern class CACmdLnOptions options;
+//extern class CACmdLnOptions pglobalOptions->;
 
 class CASignature;
 class CAInfoService;

@@ -94,11 +94,14 @@ CACmdLnOptions::~CACmdLnOptions()
 		cleanup();
 	}
 
+/** This is the final cleanup, which deletes every resource (including any locks necessary to synchronise read/write to properties).
+*/
 SINT32 CACmdLnOptions::cleanup()
 	{
 		clean();
 #ifndef ONLY_LOCAL_PROXY
 		delete m_pcsReConfigure;
+		m_pcsReConfigure=NULL;
 #endif
 		return E_SUCCESS;
 	}
@@ -219,6 +222,7 @@ SINT32 CACmdLnOptions::getVisibleAddress(UINT8* strAddressBuff, UINT32 len,UINT3
 	}
 #endif //ONLY_LOCAL_PROXY
 
+/** Deletes and resssource allocated by objects of this class EXPECT the locks necessary to controll access to the properties of this class*/
 void CACmdLnOptions::clean()
   {
 		if(m_strConfigFile!=NULL)
@@ -235,6 +239,7 @@ void CACmdLnOptions::clean()
 			{
 				delete[] m_strSOCKSHost;
 	    }
+		m_strSOCKSHost=NULL;
 #ifndef ONLY_LOCAL_PROXY
 		if (m_addrInfoServices != NULL)
 			{
@@ -248,7 +253,6 @@ void CACmdLnOptions::clean()
 	    }
 #endif //ONLY_LOCAL_PROXY
 
-		m_strSOCKSHost=NULL;
 		if(m_strCascadeName!=NULL)
 			delete[] m_strCascadeName;
 		m_strCascadeName=NULL;
@@ -281,16 +285,16 @@ void CACmdLnOptions::clean()
 		m_pOwnCertificate=NULL;
 		// deleting whole array and array elements
 		if (m_OpCerts != NULL)
-		{
-			if (m_OpCertsLength > 0)
 			{
-			for (UINT32 i = 0; i < m_OpCertsLength; i++)
-			{
-				delete m_OpCerts[i];
+				if (m_OpCertsLength > 0)
+					{
+						for (UINT32 i = 0; i < m_OpCertsLength; i++)
+							{
+								delete m_OpCerts[i];
+							}
+					}
+				delete[] m_OpCerts;
 			}
-			}
-			delete m_OpCerts;
-		}
 		m_OpCerts=NULL;
 		if(m_pNextMixCertificate!=NULL)
 			delete m_pNextMixCertificate;
@@ -590,7 +594,7 @@ struct t_CMNDLN_REREAD_PARAMS
 	};
 #endif //ONLY_LOCAL_PROXY
 
-/** Copies options from \c newOptions. Only those options which are specified
+/** Copies pglobalOptions-> from \c newOptions. Only those pglobalOptions-> which are specified
 	* in \c newOptions are copied. The others are left untouched!
 	*
 	* @param newOptions \c CACmdLnOptions object from which the new values are copied
@@ -623,9 +627,9 @@ SINT32 CACmdLnOptions::setNewValues(CACmdLnOptions& newOptions)
 
 #ifndef ONLY_LOCAL_PROXY
 /** Modifies the next mix settings (target interface and certificate) according to
-* the specified options object. Target interfaces are only copied if they denote a
+* the specified pglobalOptions-> object. Target interfaces are only copied if they denote a
 * next mix. HTTP and SOCKS proxy settings are ignored.
-* @param doc a DOM document containing XML data with the new options
+* @param doc a DOM document containing XML data with the new pglobalOptions->
 */
 #ifndef DYNAMIC_MIX
 SINT32 CACmdLnOptions::setNextMix(DOM_Document& doc)
@@ -853,9 +857,9 @@ SINT32 CACmdLnOptions::setNextMix(DOM_Document& doc)
 
 #ifndef ONLY_LOCAL_PROXY
 /** Modifies the next mix settings (target interface and certificate) according to
-* the specified options object. Target interfaces are only copied if they denote a
+* the specified pglobalOptions-> object. Target interfaces are only copied if they denote a
 * next mix. HTTP and SOCKS proxy settings are ignored.
-* @param doc  a DOM document containing XML data with the new options
+* @param doc  a DOM document containing XML data with the new pglobalOptions->
 */
 #ifndef DYNAMIC_MIX
 SINT32 CACmdLnOptions::setPrevMix(DOM_Document& doc)
@@ -874,7 +878,7 @@ SINT32 CACmdLnOptions::setPrevMix(DOM_Document& doc)
 			{
 				CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - elem cert found in data from infoservice\n");
         DOM_Element elemOptionsRoot = m_docMixXml.getDocumentElement();
-				CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - got  current options root element\n");
+				CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - got  current pglobalOptions-> root element\n");
         DOM_Element elemOptionsCerts;
         getDOMChildByName(elemOptionsRoot, (UINT8*) "Certificates", elemOptionsCerts, false);
         DOM_Element elemOptionsPrevMixCert;
@@ -1385,7 +1389,7 @@ SINT32 CACmdLnOptions::readXmlConfiguration(DOM_Document& docConfig,const UINT8*
 }
 
 /** Processes a XML configuration document. This sets the values of the
-	* options to the values found in the XML document.
+	* pglobalOptions-> to the values found in the XML document.
 	* Note that only the values are changed, which are given in the XML document!
 	* @param docConfig the configuration as XML document
 	* @retval E_UNKNOWN if an error occurs
@@ -2872,10 +2876,10 @@ SINT32 CACmdLnOptions::checkMixId()
 SINT32 CACmdLnOptions::getRandomInfoService(CASocketAddrINet *&r_address)
 {
     UINT32 nrAddresses;
-    CAListenerInterface** socketAddresses = options.getInfoServices(nrAddresses);
+    CAListenerInterface** socketAddresses = pglobalOptions->.getInfoServices(nrAddresses);
     if( socketAddresses == NULL )
     {
-        CAMsg::printMsg( LOG_ERR, "Unable to get a list of InfoServices from the options, check your configuration!\n");
+        CAMsg::printMsg( LOG_ERR, "Unable to get a list of InfoServices from the pglobalOptions->, check your configuration!\n");
         return E_UNKNOWN;
     }
     UINT32 index = getRandom(nrAddresses);

@@ -527,7 +527,7 @@ enum {
  *
  * I  n-bit Integer
  *    Numbers:
- *      The following options exists
+ *      The following pglobalOptions-> exists
  *        I8  = 8-bit integer
  *        I16 = 16-bit integer
  *        I32 = 32-bit integer

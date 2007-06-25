@@ -10,7 +10,7 @@
     #pragma argsused
 #endif
 
-CACmdLnOptions options;
+CACmdLnOptions pglobalOptions->;
 
 void log(int line, SINT32 result, char* des, int msg)
 {

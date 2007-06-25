@@ -37,7 +37,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define FILENAME_INFOLOG_GZ "/messages.gz"
 
 #define MAX_MSG_SIZE 8192
-extern CACmdLnOptions options;
+extern CACmdLnOptions* pglobalOptions;
 
 CAMsg* CAMsg::pMsg=new CAMsg();
 
@@ -220,7 +220,7 @@ SINT32 CAMsg::openLog(UINT32 type)
 #endif
 				break;
 				case MSG_FILE:
-			if(options.getLogDir((UINT8*)m_strLogFile,1024)!=E_SUCCESS)
+			if(pglobalOptions->getLogDir((UINT8*)m_strLogFile,1024)!=E_SUCCESS)
 				return E_UNKNOWN;
 			strcat(m_strLogFile,FILENAME_INFOLOG);
 			m_hFileInfo=open(m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE|O_SYNC,S_IREAD|S_IWRITE);
@@ -229,7 +229,7 @@ SINT32 CAMsg::openLog(UINT32 type)
 				case MSG_COMPRESSED_FILE:
 			char logdir[255];
 			char buff[1024];
-			if(options.getLogDir((UINT8*)logdir,255)!=E_SUCCESS)
+			if(pglobalOptions->getLogDir((UINT8*)logdir,255)!=E_SUCCESS)
 				return E_UNKNOWN;
 			strcpy(buff,logdir);
 			strcat(buff,FILENAME_INFOLOG_GZ);
@@ -261,7 +261,7 @@ SINT32 CAMsg::openLog(UINT32 type)
 	*/
 	SINT32 CAMsg::openEncryptedLog()
 	{
-		CACertificate* pCert=options.getLogEncryptionKey();
+		CACertificate* pCert=pglobalOptions->getLogEncryptionKey();
 		if(pCert==NULL)
 			return E_UNKNOWN;
 		CAASymCipher oRSA;
@@ -270,8 +270,8 @@ SINT32 CAMsg::openLog(UINT32 type)
 		if(ret!=E_SUCCESS)
 			return E_UNKNOWN;
 		UINT8 buff[1024];
-		if(options.getEncryptedLogDir(buff,1024)!=E_SUCCESS)
-			if(options.getLogDir(buff,1024)!=E_SUCCESS)
+		if(pglobalOptions->getEncryptedLogDir(buff,1024)!=E_SUCCESS)
+			if(pglobalOptions->getLogDir(buff,1024)!=E_SUCCESS)
 				return E_UNKNOWN;
 		strcat((char*)buff,FILENAME_ENCRYPTEDLOG);
 		pMsg->m_hFileEncrypted=open((char*)buff,O_APPEND|O_CREAT|O_WRONLY|O_LARGEFILE|O_BINARY,S_IREAD|S_IWRITE);										

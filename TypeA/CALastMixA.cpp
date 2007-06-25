@@ -36,7 +36,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "../CASocketGroupEpoll.hpp"
 #endif
 
-extern CACmdLnOptions options;
+extern CACmdLnOptions* pglobalOptions;
 #ifdef LOG_CHANNEL
 		//CAMsg::printMsg(LOG_DEBUG,"Channel time log format is as follows: Channel-ID,Channel duration [micros], Upload (bytes), Download (bytes), DataAndOpenPacketsFromUser, DataPacketsToUser\n"); 
 	#define MACRO_DO_LOG_CHANNEL\
@@ -52,12 +52,12 @@ SINT32 CALastMixA::loop()
 #ifndef NEW_MIX_TYPE
 		//CASocketList  oSocketList;
 #ifdef DELAY_CHANNELS
-		m_pChannelList->setDelayParameters(	options.getDelayChannelUnlimitTraffic(),
-																			options.getDelayChannelBucketGrow(),
-																			options.getDelayChannelBucketGrowIntervall());	
+		m_pChannelList->setDelayParameters(	pglobalOptions->.getDelayChannelUnlimitTraffic(),
+																			pglobalOptions->.getDelayChannelBucketGrow(),
+																			pglobalOptions->.getDelayChannelBucketGrowIntervall());	
 #endif		
 #ifdef DELAY_CHANNELS_LATENCY
-		m_pChannelList->setDelayLatencyParameters(	options.getDelayChannelLatency());
+		m_pChannelList->setDelayLatencyParameters(	pglobalOptions->.getDelayChannelLatency());
 #endif		
 #ifdef HAVE_EPOLL	
 		CASocketGroupEpoll* psocketgroupCacheRead=new CASocketGroupEpoll(false);
@@ -199,7 +199,7 @@ SINT32 CALastMixA::loop()
 																		UINT32 id=m_pMuxIn->sigCrime(pMixPacket->channel,&oSigCrimeQueueEntry.packet);
 																		m_pQueueSendToMix->add(&oSigCrimeQueueEntry,sizeof(tQueueEntry));
 																		int log=LOG_ENCRYPTED;
-																		if(!options.isEncryptedLogEnabled())
+																		if(!pglobalOptions->isEncryptedLogEnabled())
 																			log=LOG_CRIT;
 																		CAMsg::printMsg(log,"Crime detected -- ID: %u -- Content: \n%s\n",id,crimeBuff);
 																	}

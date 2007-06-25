@@ -84,13 +84,13 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
 	
 		// initialize JPI signature tester
 		m_AiName = new UINT8[256];
-		options.getAiID(m_AiName, 256);
-		if (options.getBI() != NULL)
+		pglobalOptions->.getAiID(m_AiName, 256);
+		if (pglobalOptions->.getBI() != NULL)
 		{
-			m_pJpiVerifyingInstance = options.getBI()->getVerifier();
+			m_pJpiVerifyingInstance = pglobalOptions->.getBI()->getVerifier();
 		}
-		options.getPaymentHardLimit(&m_iHardLimitBytes);
-		options.getPaymentSoftLimit(&m_iSoftLimitBytes);
+		pglobalOptions->.getPaymentHardLimit(&m_iHardLimitBytes);
+		pglobalOptions->.getPaymentSoftLimit(&m_iSoftLimitBytes);
 	
 		prepareCCRequest(callingMix, m_AiName);
 		
@@ -614,7 +614,7 @@ SINT32 CAAccountingInstance::sendCCRequest(tAiAccountingInfo* pAccInfo)
 	
 	DOM_Document doc;                
     UINT32 prepaidInterval;
-    options.getPrepaidInterval(&prepaidInterval);
+    pglobalOptions->.getPrepaidInterval(&prepaidInterval);
     // prepaid bytes are "confirmed bytes - transfered bytes"
     //UINT64 bytesToConfirm = pAccInfo->confirmedBytes + (prepaidInterval) - (pAccInfo->confirmedBytes - pAccInfo->transferredBytes);			
     UINT64 bytesToConfirm = (prepaidInterval) + pAccInfo->transferredBytes;

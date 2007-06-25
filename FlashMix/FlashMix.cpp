@@ -6,7 +6,7 @@
     #pragma argsused
 #endif
 
-CACmdLnOptions options;
+CACmdLnOptions pglobalOptions->;
 
 UINT8* localIP = NULL;
 UINT8* bbIP = NULL;

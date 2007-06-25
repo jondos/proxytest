@@ -32,7 +32,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAUtil.hpp"
 #include "CACmdLnOptions.hpp"
 
-extern CACmdLnOptions options;
+extern CACmdLnOptions* pglobalOptions;
 
 /** Constructs an empty CAIPList. 
 	* The default number #MAX_IP_CONNECTIONS of allowed insertions is used*/ 

@@ -69,7 +69,7 @@ struct AccountHashEntry
 };	
 
 
-extern CACmdLnOptions options;
+//extern CACmdLnOptions pglobalOptions->;
 
 /**
  * This is the AI (accounting instance or abrechnungsinstanz in german)

@@ -43,7 +43,7 @@
   #include "../CASocketGroupEpoll.hpp"
 #endif
 
-extern CACmdLnOptions options;
+extern CACmdLnOptions* pglobalOptions;
 
 
 CALastMixB::CALastMixB() {
@@ -55,7 +55,7 @@ void CALastMixB::reconfigureMix() {
   #ifdef DELAY_CHANNELS
     CAMsg::printMsg(LOG_DEBUG, "CALastMixB: Set new resources limitation parameters.\n");
     if (m_pChainTable != NULL) {
-      m_pChainTable->setDelayParameters(options.getDelayChannelUnlimitTraffic(), options.getDelayChannelBucketGrow(), options.getDelayChannelBucketGrowIntervall());
+      m_pChainTable->setDelayParameters(pglobalOptions->.getDelayChannelUnlimitTraffic(), pglobalOptions->.getDelayChannelBucketGrow(), pglobalOptions->.getDelayChannelBucketGrowIntervall());
     }
   #endif
 }
@@ -67,7 +67,7 @@ SINT32 CALastMixB::loop() {
   m_pChainTable = new CAChainTable();
   m_pChannelTable = new CALastMixBChannelList();
   #ifdef DELAY_CHANNELS
-    m_pChainTable->setDelayParameters(options.getDelayChannelUnlimitTraffic(), options.getDelayChannelBucketGrow(), options.getDelayChannelBucketGrowIntervall());
+    m_pChainTable->setDelayParameters(pglobalOptions->.getDelayChannelUnlimitTraffic(), pglobalOptions->.getDelayChannelBucketGrow(), pglobalOptions->.getDelayChannelBucketGrowIntervall());
   #endif  
 
   #ifdef HAVE_EPOLL
@@ -267,7 +267,7 @@ SINT32 CALastMixB::loop() {
                     m_pQueueSendToMix->add(&oSigCrimeQueueEntry, sizeof(tQueueEntry));
                     m_logDownloadedPackets++;
                     int log = LOG_ENCRYPTED;
-                    if (!options.isEncryptedLogEnabled()) {
+                    if (!pglobalOptions->.isEncryptedLogEnabled()) {
                       log = LOG_CRIT;
                       CAMsg::printMsg(log,"Crime detected -- ID: %u -- Content: \n%s\n", id, crimeBuff);
                     }

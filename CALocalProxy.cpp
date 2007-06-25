@@ -36,7 +36,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CABase64.hpp"
 #include "xml/DOM_Output.hpp"
 #ifndef NEW_MIX_TYPE
-extern CACmdLnOptions options;
+extern CACmdLnOptions* pglobalOptions;
 // signals the main loop whether to capture or replay packets
 bool CALocalProxy::bCapturePackets;
 bool CALocalProxy::bReplayPackets;
@@ -89,7 +89,7 @@ SINT32 CALocalProxy::start()
 
 SINT32 CALocalProxy::initOnce()
 	{
-		if(options.getListenerInterfaceCount()<1)
+		if(pglobalOptions->getListenerInterfaceCount()<1)
 		  {
 				CAMsg::printMsg(LOG_CRIT,"No Listener Interface spezified!\n");
 				return E_UNKNOWN;
@@ -103,7 +103,7 @@ SINT32 CALocalProxy::initOnce()
 		#endif
 
 		UINT8 strTarget[255];
-		if(options.getMixHost(strTarget,255)!=E_SUCCESS)
+		if(pglobalOptions->getMixHost(strTarget,255)!=E_SUCCESS)
 		  {
 				CAMsg::printMsg(LOG_CRIT,"No AnonServer specified!\n");
 				return E_UNKNOWN;
@@ -117,7 +117,7 @@ SINT32 CALocalProxy::init()
 		
 		m_socketIn.create();
 		m_socketIn.setReuseAddr(true);
-		pListener=options.getListenerInterface(1);
+		pListener=pglobalOptions->getListenerInterface(1);
 		if(pListener==NULL)
 			{
 				CAMsg::printMsg(LOG_CRIT,"No listener specified\n");
@@ -134,9 +134,9 @@ SINT32 CALocalProxy::init()
 				return E_UNKNOWN;
 			}
 		delete pSocketAddrIn;
-/*		if(options.getSOCKSServerPort()!=(UINT16)-1)
+/*		if(pglobalOptions->getSOCKSServerPort()!=(UINT16)-1)
 			{
-				socketAddrIn.setAddr((UINT8*)"127.0.0.1",options.getSOCKSServerPort());
+				socketAddrIn.setAddr((UINT8*)"127.0.0.1",pglobalOptions->getSOCKSServerPort());
 				m_socketSOCKSIn.create();
 				m_socketSOCKSIn.setReuseAddr(true);
 				if(m_socketSOCKSIn.listen(socketAddrIn)!=E_SUCCESS)
@@ -147,8 +147,8 @@ SINT32 CALocalProxy::init()
 			}*/
 		CASocketAddrINet addrNext;
 		UINT8 strTarget[255];
-		options.getMixHost(strTarget,255);
-		addrNext.setAddr(strTarget,options.getMixPort());
+		pglobalOptions->getMixHost(strTarget,255);
+		addrNext.setAddr(strTarget,pglobalOptions->getMixPort());
 		CAMsg::printMsg(LOG_INFO,"Try connecting to next Mix...\n");
 
 		((CASocket*)m_muxOut)->create();
@@ -202,7 +202,7 @@ SINT32 CALocalProxy::loop()
 		CASocketList  oSocketList;
 		CASocketGroup oSocketGroup(false);
 		oSocketGroup.add(m_socketIn);
-		UINT16 socksPort=options.getSOCKSServerPort();
+		UINT16 socksPort=pglobalOptions->getSOCKSServerPort();
 		bool bHaveSocks=(socksPort!=0xFFFF);
 		if(bHaveSocks)
 			oSocketGroup.add(m_socketSOCKSIn);
@@ -486,7 +486,7 @@ MIX_CONNECTION_ERROR:
 		delete pMixPacket;
 		if(ret==E_SUCCESS)
 			return E_SUCCESS;
-		if(options.getAutoReconnect())
+		if(pglobalOptions->getAutoReconnect())
 			return E_UNKNOWN;
 		else
 			exit(-1);

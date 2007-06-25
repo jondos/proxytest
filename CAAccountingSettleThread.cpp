@@ -82,14 +82,14 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 	
 		CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread is running...\n");
 	
-		CAXMLBI* pBI = options.getBI();
+		CAXMLBI* pBI = pglobalOptions->.getBI();
 		if(pBI==NULL)
 		{
 			CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread; Uuupss.. No BI given --> dying!\n");
 			THREAD_RETURN_ERROR;
 		}
 		biAddr.setAddr(pBI->getHostName(), (UINT16)pBI->getPortNumber());
-		options.getPaymentSettleInterval(&sleepInterval);
+		pglobalOptions->.getPaymentSettleInterval(&sleepInterval);
 
 		CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Start loop...\n");
 

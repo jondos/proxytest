@@ -11,7 +11,7 @@
 
 #include <iostream>
 
-CACmdLnOptions options;
+CACmdLnOptions pglobalOptions->;
 
 unsigned int port = 16000;
 unsigned int keylength = 1024;
