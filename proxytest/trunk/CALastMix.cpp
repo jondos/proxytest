@@ -46,7 +46,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAPool.hpp"
 #include "xml/DOM_Output.hpp"
 
-extern CACmdLnOptions options;
+extern CACmdLnOptions* pglobalOptions;
 
 /*#ifdef LOG_CHANNEL
 	#define MACRO_DO_LOG_CHANNEL\
@@ -71,16 +71,16 @@ SINT32 CALastMix::initOnce()
 				return E_UNKNOWN;
 			}
 
-		m_pSignature=options.getSignKey();
+		m_pSignature=pglobalOptions->getSignKey();
 		if(m_pSignature==NULL)
 			return E_UNKNOWN;
-		if(options.getListenerInterfaceCount()<1)
+		if(pglobalOptions->getListenerInterfaceCount()<1)
 			{
 				CAMsg::printMsg(LOG_CRIT,"No ListenerInterfaces specified!\n");
 				return E_UNKNOWN;
 			}
-    if(options.getCascadeXML() != NULL)
-    	initMixCascadeInfo(options.getCascadeXML());
+    if(pglobalOptions->getCascadeXML() != NULL)
+    	initMixCascadeInfo(pglobalOptions->getCascadeXML());
 		return E_SUCCESS;
 	}
 
@@ -95,10 +95,10 @@ SINT32 CALastMix::init()
 		
 		CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...\n");
 		CAListenerInterface*  pListener=NULL;
-		UINT32 interfaces=options.getListenerInterfaceCount();
+		UINT32 interfaces=pglobalOptions->getListenerInterfaceCount();
 		for(UINT32 i=1;i<=interfaces;i++)
 			{
-				pListener=options.getListenerInterface(i);
+				pListener=pglobalOptions->getListenerInterface(i);
 				if(!pListener->isVirtual())
 					break;
 				delete pListener;
@@ -135,9 +135,9 @@ SINT32 CALastMix::init()
 
 #ifdef LOG_CRIME
 		m_nCrimeRegExpsURL=0;
-		m_pCrimeRegExpsURL=options.getCrimeRegExpsURL(&m_nCrimeRegExpsURL);
+		m_pCrimeRegExpsURL=pglobalOptions->getCrimeRegExpsURL(&m_nCrimeRegExpsURL);
 		m_nCrimeRegExpsPayload = 0;
-		m_pCrimeRegExpsPayload = options.getCrimeRegExpsPayload(&m_nCrimeRegExpsPayload);
+		m_pCrimeRegExpsPayload = pglobalOptions->getCrimeRegExpsPayload(&m_nCrimeRegExpsPayload);
 #endif	
 		ret=processKeyExchange();
 		if(ret!=E_SUCCESS)
@@ -195,7 +195,7 @@ SINT32 CALastMix::processKeyExchange()
 		DOM_Element elemMixes=doc.createElement("Mixes");
 		setDOMElementAttribute(elemMixes,"count",1);
     //UINT8 cName[128];
-    //options.getCascadeName(cName,128);
+    //pglobalOptions->getCascadeName(cName,128);
     //setDOMElementAttribute(elemMixes,"cascadeName",cName);
 		doc.appendChild(elemMixes);
 		
@@ -250,8 +250,8 @@ SINT32 CALastMix::processKeyExchange()
 		
 // Add Info about KeepAlive traffic
 		DOM_Element elemKeepAlive;
-		UINT32 u32KeepAliveSendInterval=options.getKeepAliveSendInterval();
-		UINT32 u32KeepAliveRecvInterval=options.getKeepAliveRecvInterval();
+		UINT32 u32KeepAliveSendInterval=pglobalOptions->getKeepAliveSendInterval();
+		UINT32 u32KeepAliveRecvInterval=pglobalOptions->getKeepAliveRecvInterval();
 		elemKeepAlive=doc.createElement("KeepAlive");
 		DOM_Element elemKeepAliveSendInterval;
 		DOM_Element elemKeepAliveRecvInterval;
@@ -306,7 +306,7 @@ SINT32 CALastMix::processKeyExchange()
 		CAMsg::printMsg(LOG_INFO,"%s\n",(char*)messageBuff);		
 		//verify signature
 		CASignature oSig;
-		CACertificate* pCert=options.getPrevMixTestCertificate();
+		CACertificate* pCert=pglobalOptions->getPrevMixTestCertificate();
 		oSig.setVerifyKey(pCert);
 		delete pCert;
 		if(oSig.verifyXML(messageBuff,len)!=E_SUCCESS)
@@ -387,12 +387,12 @@ SINT32 CALastMix::reconfigure()
 		CAMsg::printMsg(LOG_DEBUG,"Set new ressources limitation parameters\n");
         if(m_pChannelList!=NULL) {
 		#if defined (DELAY_CHANNELS)
-			m_pChannelList->setDelayParameters(	options.getDelayChannelUnlimitTraffic(),
-																					options.getDelayChannelBucketGrow(),
-																					options.getDelayChannelBucketGrowIntervall());
+			m_pChannelList->setDelayParameters(	pglobalOptions->getDelayChannelUnlimitTraffic(),
+																					pglobalOptions->getDelayChannelBucketGrow(),
+																					pglobalOptions->getDelayChannelBucketGrowIntervall());
 		#endif
 		#if defined (DELAY_CHANNELS_LATENCY)
-			UINT32 utemp=options.getDelayChannelLatency();
+			UINT32 utemp=pglobalOptions->getDelayChannelLatency();
 			m_pChannelList->setDelayLatencyParameters(	utemp);
 		#endif
 		}
@@ -670,13 +670,13 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 	}
 #endif
 
-/** Reads the configured proxies from \c options.
+/** Reads the configured proxies from \c pglobalOptions->
 	* @retval E_UNKNOWN if no proxies are specified
 	* @retval E_SUCCESS if successfully configured the proxies
 	*/
 SINT32 CALastMix::setTargets()
 	{
-		UINT32 cntTargets=options.getTargetInterfaceCount();
+		UINT32 cntTargets=pglobalOptions->getTargetInterfaceCount();
 		if(cntTargets==0)
 			{
 				CAMsg::printMsg(LOG_CRIT,"No Targets (proxies) specified!\n");
@@ -688,7 +688,7 @@ SINT32 CALastMix::setTargets()
 		for(i=1;i<=cntTargets;i++)
 			{
 				TargetInterface oTargetInterface;
-				options.getTargetInterface(oTargetInterface,i);
+				pglobalOptions->getTargetInterface(oTargetInterface,i);
 				if(oTargetInterface.target_type==TARGET_HTTP_PROXY)
 					m_pCacheLB->add(oTargetInterface.addr);
 				else if(oTargetInterface.target_type==TARGET_SOCKS_PROXY)

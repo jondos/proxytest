@@ -51,7 +51,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef PAYMENT
 	#include "CAAccountingControlChannel.hpp"
 #endif
-extern CACmdLnOptions options;
+extern CACmdLnOptions* pglobalOptions;
 #include "CAReplayControlChannel.hpp"
 
 const UINT32 CAFirstMix::MAX_CONCURRENT_NEW_CONNECTIONS = NUM_LOGIN_WORKER_TRHEADS * 2;
@@ -60,16 +60,16 @@ const UINT32 CAFirstMix::MAX_CONCURRENT_NEW_CONNECTIONS = NUM_LOGIN_WORKER_TRHEA
 SINT32 CAFirstMix::initOnce()
 	{
 		CAMsg::printMsg(LOG_DEBUG,"Starting FirstMix InitOnce\n");
-		m_pSignature=options.getSignKey();
+		m_pSignature=pglobalOptions->getSignKey();
 		if(m_pSignature==NULL)
 			return E_UNKNOWN;
 		//Try to find out how many (real) ListenerInterfaces are specified
-		UINT32 tmpSocketsIn=options.getListenerInterfaceCount();
+		UINT32 tmpSocketsIn=pglobalOptions->getListenerInterfaceCount();
 		m_nSocketsIn=0;
 		for(UINT32 i=1;i<=tmpSocketsIn;i++)
 			{
 				CAListenerInterface* pListener=NULL;
-				pListener=options.getListenerInterface(i);
+				pListener=pglobalOptions->getListenerInterface(i);
 				if(pListener==NULL)
 					continue;
 				if(!pListener->isVirtual())
@@ -98,10 +98,10 @@ SINT32 CAFirstMix::init()
 		//Establishing all Listeners
 		m_arrSocketsIn=new CASocket[m_nSocketsIn];
 		UINT32 i,aktSocket=0;
-		for(i=1;i<=options.getListenerInterfaceCount();i++)
+		for(i=1;i<=pglobalOptions->getListenerInterfaceCount();i++)
 			{
 				CAListenerInterface* pListener=NULL;
-				pListener=options.getListenerInterface(i);
+				pListener=pglobalOptions->getListenerInterface(i);
 				if(pListener==NULL)
 					{
             CAMsg::printMsg(LOG_CRIT,"Error: Listener interface invalid.\n");
@@ -143,10 +143,10 @@ SINT32 CAFirstMix::init()
 
 
 		CASocketAddr* pAddrNext=NULL;
-		for(i=0;i<options.getTargetInterfaceCount();i++)
+		for(i=0;i<pglobalOptions->getTargetInterfaceCount();i++)
 			{
 				TargetInterface oNextMix;
-				options.getTargetInterface(oNextMix,i+1);
+				pglobalOptions->getTargetInterface(oNextMix,i+1);
 				if(oNextMix.target_type==TARGET_MIX)
 					{
 						pAddrNext=oNextMix.addr;
@@ -336,7 +336,7 @@ SINT32 CAFirstMix::processKeyExchange()
     cascadeName = elemMixes.getAttribute("cascadeName").transcode();
     if(cascadeName == NULL)
         return E_UNKNOWN;
-    options.setCascadeName(cascadeName);
+    pglobalOptions->setCascadeName(cascadeName);
 */
     m_pRSA=new CAASymCipher;
     m_pRSA->generateKeyPair(1024);
@@ -391,9 +391,9 @@ SINT32 CAFirstMix::processKeyExchange()
 			setDOMElementAttribute(elemPayment,"version",(UINT8*)PAYMENT_VERSION);
 			
 			UINT32 prepaidInterval;
-			options.getPrepaidInterval(&prepaidInterval);
+			pglobalOptions->getPrepaidInterval(&prepaidInterval);
 			setDOMElementAttribute(elemPayment,"prepaidInterval", prepaidInterval);
-			setDOMElementAttribute(elemPayment,"piid", options.getBI()->getID());
+			setDOMElementAttribute(elemPayment,"piid", pglobalOptions->getBI()->getID());
 			
 		#else
 			setDOMElementAttribute(elemPayment,"required",(UINT8*)"false");
@@ -424,7 +424,7 @@ SINT32 CAFirstMix::processKeyExchange()
             //check Signature....
             CAMsg::printMsg(LOG_DEBUG,"Try to verify next mix signature...\n");
             CASignature oSig;
-            CACertificate* nextCert=options.getNextMixTestCertificate();
+            CACertificate* nextCert=pglobalOptions->getNextMixTestCertificate();
             oSig.setVerifyKey(nextCert);
             SINT32 ret=oSig.verifyXML(child,NULL);
             delete nextCert;
@@ -481,8 +481,8 @@ SINT32 CAFirstMix::processKeyExchange()
 						getDOMElementValue(elemKeepAliveRecvInterval,tmpRecvInterval,0xFFFFFFFF); //if no recv interval was given --> set it to "infinite"
 						CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Getting offer -- SendInterval %u -- ReceiveInterval %u\n",tmpSendInterval,tmpRecvInterval);
 						// Add Info about KeepAlive traffic
-						UINT32 u32KeepAliveSendInterval=options.getKeepAliveSendInterval();
-						UINT32 u32KeepAliveRecvInterval=options.getKeepAliveRecvInterval();
+						UINT32 u32KeepAliveSendInterval=pglobalOptions->getKeepAliveSendInterval();
+						UINT32 u32KeepAliveRecvInterval=pglobalOptions->getKeepAliveRecvInterval();
 						elemKeepAlive=docSymKey.createElement("KeepAlive");
 						elemKeepAliveSendInterval=docSymKey.createElement("SendInterval");
 						elemKeepAliveRecvInterval=docSymKey.createElement("ReceiveInterval");
@@ -800,9 +800,9 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 							// may return E_SOCKETCLOSED or E_SOCKET_LIMIT
 							CAMsg::printMsg(LOG_ERR,"Accept Error %u - direct Connection from Client!\n",GET_NET_ERROR);														
 						}
-						else if (options.getMaxNrOfUsers() > 0 && pFirstMix->getNrOfUsers() >= options.getMaxNrOfUsers())
+						else if (pglobalOptions->getMaxNrOfUsers() > 0 && pFirstMix->getNrOfUsers() >= pglobalOptions->getMaxNrOfUsers())
 						{
-							CAMsg::printMsg(LOG_DEBUG,"CAFirstMix User control: Too many users (Maximum:%d)! Rejecting user...\n", pFirstMix->getNrOfUsers(), options.getMaxNrOfUsers());
+							CAMsg::printMsg(LOG_DEBUG,"CAFirstMix User control: Too many users (Maximum:%d)! Rejecting user...\n", pFirstMix->getNrOfUsers(), pglobalOptions->getMaxNrOfUsers());
 							ret = E_UNKNOWN;
 						}
 						#ifdef PAYMENT
@@ -1201,9 +1201,9 @@ SINT32 CAFirstMix::reconfigure()
 #ifdef DELAY_USERS
 		CAMsg::printMsg(LOG_DEBUG,"Set new ressources limitation parameters\n");
 		if(m_pChannelList!=NULL)
-			m_pChannelList->setDelayParameters(	options.getDelayChannelUnlimitTraffic(),
-																					options.getDelayChannelBucketGrow(),
-																					options.getDelayChannelBucketGrowIntervall());	
+			m_pChannelList->setDelayParameters(	pglobalOptions->getDelayChannelUnlimitTraffic(),
+																					pglobalOptions->getDelayChannelBucketGrow(),
+																					pglobalOptions->getDelayChannelBucketGrowIntervall());	
 #endif		
 		return E_SUCCESS;
 	}
@@ -1217,7 +1217,7 @@ SINT32 CAFirstMix::initMixParameters(DOM_Element& elemMixes)
 		m_arMixParameters=new tMixParameters[m_u32MixCount];
 		memset(m_arMixParameters,0,sizeof(tMixParameters)*m_u32MixCount);
 		UINT8 buff[255];
-		options.getMixId(buff,255);
+		pglobalOptions->getMixId(buff,255);
 		UINT32 len=strlen((char*)buff)+1;
 		UINT32 aktMix=0;
 		for(UINT32 i=0;i<nl.getLength();i++)
@@ -1267,7 +1267,7 @@ SINT32 CAFirstMix::initCountryStats()
 		CAMsg::printMsg(LOG_DEBUG,"Connected to CountryStats DB!\n");
 		char query[1024];
 		UINT8 buff[255];
-		options.getCascadeName(buff,255);
+		pglobalOptions->getCascadeName(buff,255);
 		sprintf(query,"CREATE TABLE IF NOT EXISTS `stats_%s` (date timestamp,id int,count int,packets_in int,packets_out int)",buff);
 		SINT32 ret=mysql_query(m_mysqlCon,query);
 		if(ret!=0)
@@ -1381,7 +1381,7 @@ THREAD_RETURN iplist_loopDoLogCountries(void* param)
 		CAFirstMix* pIPList=(CAFirstMix*)param;
 		UINT32 s=0;
 		UINT8 buff[255];
-		options.getCascadeName(buff,255);
+		pglobalOptions->getCascadeName(buff,255);
 		mysql_thread_init();
 		while(pIPList->m_bRunLogCountries)
 			{

@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAHttpClient.hpp"
 #include "CACmdLnOptions.hpp"
 
-extern CACmdLnOptions options;
+extern CACmdLnOptions pglobalOptions->;
 
 /**
   * LERNGRUPPE
@@ -120,7 +120,7 @@ SINT32 CAInfoServiceAware::sendInfoserviceGetRequest(CASocketAddrINet* a_addr, U
 
 /**
   * LERNGRUPPE
-  * Sends a request to a random InfoService from the list of known InfoServices in the options. The result should be a XML structure which is returned by r_elemRoot
+  * Sends a request to a random InfoService from the list of known InfoServices in the pglobalOptions->. The result should be a XML structure which is returned by r_elemRoot
 	* The request issued is a GET request.
   * @param a_strRequest The request to send
   * @return r_elemRoot The root element of the resulting XML structure
@@ -134,7 +134,7 @@ SINT32 CAInfoServiceAware::sendRandomInfoserviceGetRequest(UINT8 *a_strRequest, 
 
 /**
   * LERNGRUPPE
-  * Sends a request to a random InfoService from the list of known InfoServices in the options. The result should be a XML structure which is returned by r_elemRoot
+  * Sends a request to a random InfoService from the list of known InfoServices in the pglobalOptions->. The result should be a XML structure which is returned by r_elemRoot
   * @param a_addr The CASocketAddrINet of the InfoService
   * @param a_strRequest The request to send
   * @param a_postData POST data to include in the request (if this is NULL, a GET request will be issued, otherwise a POST request)
@@ -146,7 +146,7 @@ SINT32 CAInfoServiceAware::sendRandomInfoserviceGetRequest(UINT8 *a_strRequest, 
 SINT32 CAInfoServiceAware::sendRandomInfoserviceRequest(UINT8 *a_strRequest, DOM_Element *r_elemRoot, UINT8* a_postData, UINT32 a_postLen)
 {
 	CASocketAddrINet *address;
-	if( options.getRandomInfoService(address) != E_SUCCESS)
+	if( pglobalOptions->.getRandomInfoService(address) != E_SUCCESS)
 	{
 // 		CAMsg::printMsg( LOG_ERR, "CAInfoServiceAware::sendInfoserviceRequest - Unable to get a random InfoService - This will cause problems! Check your configuration!\n");
 		return E_UNKNOWN;

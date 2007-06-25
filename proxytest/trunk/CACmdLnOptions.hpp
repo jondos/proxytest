@@ -512,7 +512,7 @@ class CACmdLnOptions
 
 #ifdef PAYMENT
 // added by Bastian Voigt:
-// getter functions for the payment config options
+// getter functions for the payment config pglobalOptions->
 		private:
 			CAXMLBI * m_pBI;
 			UINT8 * m_strDatabaseHost;

@@ -41,7 +41,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAXMLBI.hpp"
 #include "CADynamicCascadeConfigurator.hpp"
 
-extern CACmdLnOptions options;
+extern CACmdLnOptions* pglobalOptions;
 
 const char * STRINGS_REQUEST_TYPES[2]={"POST","GET"};
 const char * STRINGS_REQUEST_COMMANDS[6]={"configure","helo","mixinfo/", "dynacascade", "cascade", "feedback"};
@@ -110,7 +110,7 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 			currentTime=time(NULL);
 		    if (currentTime >= (lastCascadeUpdate + CAInfoService::SEND_CASCADE_INFO_WAIT) || pInfoService->isConfiguring())
 			{				
-				if (options.isFirstMix() || (options.isLastMix() && pInfoService->isConfiguring()))
+				if (pglobalOptions->isFirstMix() || (pglobalOptions->isLastMix() && pInfoService->isConfiguring()))
 				{
 					if(pInfoService->sendCascadeHelo()!=E_SUCCESS)
 					{
@@ -146,7 +146,7 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 				* Note that increasing the delay might cause problems in CAMix::start (MiddleMixes entering 
 				*::init and so on
 				*/
-			if( options.isDynamic() )
+			if( pglobalOptions->isDynamic() )
 			{
 				pInfoService->dynamicCascadeConfiguration();
 			}
@@ -247,9 +247,9 @@ bool CAInfoService::newCascadeAvailable()
 	UINT8 buff[255];
 	UINT8 bufMixId[60];
 	UINT32 mixIdLen = 60;
-	options.getMixId( bufMixId, mixIdLen );
+	pglobalOptions->getMixId( bufMixId, mixIdLen );
 	sprintf((char*)buff, "/newcascadeinformationavailable/%s",bufMixId ); 
-	if( options.getRandomInfoService(address) != E_SUCCESS)
+	if( pglobalOptions->getRandomInfoService(address) != E_SUCCESS)
 	{
 		CAMsg::printMsg( LOG_ERR, "Unable to get a random InfoService - This will cause problems! Check your configuration!\n");
 		return false;
@@ -299,9 +299,9 @@ SINT32 CAInfoService::dynamicCascadeConfiguration()
 	/** @todo Is this really safe? State of configuration is unknown here, reset should work though */
 	if(ret != E_SUCCESS)
 	{
-		options.resetNextMix();
-		options.resetPrevMix();
-		options.setCascadeProposal(NULL, 0);
+		pglobalOptions->resetNextMix();
+		pglobalOptions->resetPrevMix();
+		pglobalOptions->setCascadeProposal(NULL, 0);
 		m_pMix->dynaReconfigure(false);
 	}	
 	m_bReconfig = false;
@@ -379,14 +379,14 @@ SINT32 CAInfoService::setSignature(CASignature* pSig, CACertificate* pOwnCert,
 
 SINT32 CAInfoService::getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic)
 {
-    if(m_pMix!=NULL && options.isFirstMix())
+    if(m_pMix!=NULL && pglobalOptions->isFirstMix())
         return ((CAFirstMix*)m_pMix)->getLevel(puser,prisk,ptraffic);
     return E_UNKNOWN;
 }
 
 SINT32 CAInfoService::getMixedPackets(UINT64& ppackets)
 	{
-		if(m_pMix!=NULL && options.isFirstMix())
+		if(m_pMix!=NULL && pglobalOptions->isFirstMix())
 			return ((CAFirstMix*)m_pMix)->getMixedPackets(ppackets);
 		return E_UNKNOWN;
 	}
@@ -418,7 +418,7 @@ SINT32 CAInfoService::stop()
 
 SINT32 CAInfoService::sendStatus(bool bIncludeCerts)
 {
-	if(!options.isFirstMix())
+	if(!pglobalOptions->isFirstMix())
 	{
 		return E_SUCCESS;
 	}
@@ -446,7 +446,7 @@ UINT8* CAInfoService::getStatusXMLAsString(bool bIncludeCerts,UINT32& len)
 			
 		//httpClient.setSocket(&oSocket);
 		UINT8 strMixId[255];
-		options.getMixId(strMixId,255);
+		pglobalOptions->getMixId(strMixId,255);
 		
 		tmpUser=tmpTraffic=tmpRisk=-1;
 		set64(tmpPackets,(UINT32)-1);
@@ -521,7 +521,7 @@ SINT32 CAInfoService::sendStatus(const UINT8* a_strStatusXML,UINT32 a_len, const
 		#ifdef DEBUG
 			CAMsg::printMsg(LOG_DEBUG, "CAInfoService::sendStatus()\n");
 		#endif
-		if(!options.isFirstMix())
+		if(!pglobalOptions->isFirstMix())
 		{
 			return E_SUCCESS;
 		}
@@ -594,7 +594,7 @@ DOM_Element elemRoot;
 
 
 				DOM_Document docMixInfo;
-				if(options.getMixXml(docMixInfo)!=E_SUCCESS)
+				if(pglobalOptions->getMixXml(docMixInfo)!=E_SUCCESS)
 					{
 						goto ERR;
 					}
@@ -753,12 +753,12 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
                     if(m_expectedMixRelPos < 0)
                     {
                         CAMsg::printMsg(LOG_DEBUG,"InfoService: Setting new previous mix: %s\n",root.getAttribute("id").transcode());
-                        options.setPrevMix(doc);
+                        pglobalOptions->setPrevMix(doc);
                     }
                     else if(m_expectedMixRelPos > 0)
                     {
                         CAMsg::printMsg(LOG_DEBUG,"InfoService: Setting new next mix: %s\n",root.getAttribute("id").transcode());
-                        options.setNextMix(doc);
+                        pglobalOptions->setNextMix(doc);
                     }
                 }
             }
@@ -783,7 +783,7 @@ SINT32 CAInfoService::sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN (*a_
 {
 	SINT32 returnValue = E_UNKNOWN;
 	UINT32 nrAddresses;
-	CAListenerInterface** socketAddresses = options.getInfoServices(nrAddresses);
+	CAListenerInterface** socketAddresses = pglobalOptions->getInfoServices(nrAddresses);
 	CAThread** threads = new CAThread*[nrAddresses];
 	InfoServiceHeloMsg** messages = new InfoServiceHeloMsg*[nrAddresses];
 	
@@ -821,7 +821,7 @@ SINT32 CAInfoService::sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN (*a_
 
 SINT32 CAInfoService::sendCascadeHelo()
 {	
-	if(options.isMiddleMix())
+	if(pglobalOptions->isMiddleMix())
   	{
 		return E_SUCCESS;
   	}
@@ -901,7 +901,7 @@ ERR:
 	*/
 SINT32 CAInfoService::sendCascadeHelo(const UINT8* a_strCascadeHeloXML,UINT32 a_len,const CASocketAddrINet* a_pSocketAddress) const
 {	
-	if(options.isMiddleMix() || (options.isLastMix() && !m_bConfiguring))
+	if(pglobalOptions->isMiddleMix() || (pglobalOptions->isLastMix() && !m_bConfiguring))
 	{
 		return E_SUCCESS;
 	}
@@ -922,7 +922,7 @@ SINT32 CAInfoService::sendCascadeHelo(const UINT8* a_strCascadeHeloXML,UINT32 a_
 	}
 	if(oSocket.connect(*a_pSocketAddress, MIX_TO_INFOSERVICE_TIMEOUT)==E_SUCCESS)
 	{
-	    if(options.isFirstMix())
+	    if(pglobalOptions->isFirstMix())
 		{
 			CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending cascade helo to InfoService %s:%d.\r\n", hostname, a_pSocketAddress->getPort());
 		}
@@ -933,7 +933,7 @@ SINT32 CAInfoService::sendCascadeHelo(const UINT8* a_strCascadeHeloXML,UINT32 a_
 	    // LERNGRUPPE
 	    // Semi-dynamic cascades are temporary cascades, not yet established! InfoService can cope with them now
 	    // using the /dynacascade command
-	    if( options.isLastMix() && m_bConfiguring )
+	    if( pglobalOptions->isLastMix() && m_bConfiguring )
 		{
 			sprintf((char*)buffHeader,"POST /dynacascade HTTP/1.0\r\nContent-Length: %u\r\n\r\n",a_len);
 		}
@@ -989,7 +989,7 @@ SINT32 CAInfoService::handleConfigEvent(DOM_Document& doc) const
     char* myPrevMixId = NULL;
     bool bFoundMix = false;
     UINT8 myMixId[64];
-    options.getMixId(myMixId,64);
+    pglobalOptions->getMixId(myMixId,64);
     DOM_Node child = mixesElement.getFirstChild();
     while(child!=NULL)
     {
@@ -1058,7 +1058,7 @@ SINT32 CAInfoService::getPaymentInstance(const UINT8* a_pstrPIID,CAXMLBI** a_pXM
 	SINT32 returnValue = E_UNKNOWN;
 	SINT32 currentValue;
 	UINT32 nrAddresses;
-	CAListenerInterface** socketAddresses = options.getInfoServices(nrAddresses);
+	CAListenerInterface** socketAddresses = pglobalOptions->getInfoServices(nrAddresses);
 	for (UINT32 i = 0; i < nrAddresses; i++)
 	{
 		currentValue = getPaymentInstance(a_pstrPIID, a_pXMLBI,

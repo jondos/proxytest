@@ -42,17 +42,17 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAPool.hpp"
 #include "xml/DOM_Output.hpp"
 
-extern CACmdLnOptions options;
+extern CACmdLnOptions* pglobalOptions;
 
 SINT32 CAMiddleMix::initOnce()
 	{
 		CAMsg::printMsg(LOG_DEBUG,"Starting MiddleMix InitOnce\n");
-		m_pSignature=options.getSignKey();
+		m_pSignature=pglobalOptions->getSignKey();
 		if(m_pSignature==NULL)
 			{
 				return E_UNKNOWN;
 			}
-		if(options.getListenerInterfaceCount()<1)
+		if(pglobalOptions->getListenerInterfaceCount()<1)
 			{
 				CAMsg::printMsg(LOG_CRIT,"No ListenerInterfaces specified!\n");
 				return E_UNKNOWN;
@@ -125,7 +125,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 					{
 						//check Signature....
 						CASignature oSig;
-						CACertificate* nextCert=options.getNextMixTestCertificate();
+						CACertificate* nextCert=pglobalOptions->getNextMixTestCertificate();
 						oSig.setVerifyKey(nextCert);
 						ret=oSig.verifyXML(child,NULL);
 						delete nextCert;
@@ -208,7 +208,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 		
 		
 		UINT8 tmpBuff[50];
-		options.getMixId(tmpBuff,50); //the mix id...
+		pglobalOptions->getMixId(tmpBuff,50); //the mix id...
 		mixNode.setAttribute("id",DOMString((char*)tmpBuff));
 		//Supported Mix Protocol -->currently "0.3"
 		DOM_Element elemMixProtocolVersion=doc.createElement("MixProtocolVersion");
@@ -280,7 +280,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 		DOM_Element elemRoot=doc.getDocumentElement();
 		//verify signature
 		CASignature oSig;
-		CACertificate* pCert=options.getPrevMixTestCertificate();
+		CACertificate* pCert=pglobalOptions->getPrevMixTestCertificate();
 		oSig.setVerifyKey(pCert);
 		delete pCert;
 		if(oSig.verifyXML(elemRoot)!=E_SUCCESS)
@@ -334,10 +334,10 @@ SINT32 CAMiddleMix::init()
 		
     // connect to next mix    
 		CASocketAddr* pAddrNext=NULL;
-		for(UINT32 i=0;i<options.getTargetInterfaceCount();i++)
+		for(UINT32 i=0;i<pglobalOptions->getTargetInterfaceCount();i++)
 			{
 				TargetInterface oNextMix;
-				options.getTargetInterface(oNextMix,i+1);
+				pglobalOptions->getTargetInterface(oNextMix,i+1);
 				if(oNextMix.target_type==TARGET_MIX)
 					{
 						pAddrNext=oNextMix.addr;
@@ -364,10 +364,10 @@ SINT32 CAMiddleMix::init()
 		
     CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...\n");    
 		CAListenerInterface* pListener=NULL;
-		UINT32 interfaces=options.getListenerInterfaceCount();
+		UINT32 interfaces=pglobalOptions->getListenerInterfaceCount();
 		for(UINT32 i=1;i<=interfaces;i++)
 			{
-				pListener=options.getListenerInterface(i);
+				pListener=pglobalOptions->getListenerInterface(i);
 				if(!pListener->isVirtual())
 					break;
 				delete pListener;

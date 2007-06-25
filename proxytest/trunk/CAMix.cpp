@@ -32,10 +32,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAInfoService.hpp"
 #include "CACmdLnOptions.hpp"
 
-
+extern CACmdLnOptions* pglobalOptions;
+ 
 CAMix::CAMix()
 {
-    m_acceptReconfiguration = options.acceptReconfiguration();
+    m_acceptReconfiguration = pglobalOptions->acceptReconfiguration();
 		m_pSignature=NULL;
 		m_pInfoService=NULL;
 		#ifdef REPLAY_DETECTION
@@ -58,14 +59,14 @@ SINT32 CAMix::start()
 	{
 		if(initOnce()!=E_SUCCESS)
 			return E_UNKNOWN;
-    if(m_pSignature != NULL && options.isInfoServiceEnabled())
+    if(m_pSignature != NULL && pglobalOptions->isInfoServiceEnabled())
 			{
 				CAMsg::printMsg(LOG_DEBUG, "CAMix start: creating InfoService object\n");
         m_pInfoService=new CAInfoService(this);
         
 		UINT32 opCertLength;
-		CACertificate** opCerts = options.getOpCertificates(opCertLength);
-		m_pInfoService->setSignature(m_pSignature, options.getOwnCertificate(), opCerts, opCertLength);
+		CACertificate** opCerts = pglobalOptions->getOpCertificates(opCertLength);
+		m_pInfoService->setSignature(m_pSignature, pglobalOptions->getOwnCertificate(), opCerts, opCertLength);
 		
 		UINT64 currentMillis;
 		if (getcurrentTimeMillis(currentMillis) != E_SUCCESS)
@@ -81,7 +82,7 @@ SINT32 CAMix::start()
 				delete[] opCerts;
 			}
 
-        bool allowReconf = options.acceptReconfiguration();
+        bool allowReconf = pglobalOptions->acceptReconfiguration();
         bool needReconf = needAutoConfig();
 
         m_pInfoService->setConfiguring(allowReconf && needReconf);
@@ -96,7 +97,7 @@ SINT32 CAMix::start()
 //             needReconf = needAutoConfig();
 //         }
         }
-		bool allowReconf = options.acceptReconfiguration();
+		bool allowReconf = pglobalOptions->acceptReconfiguration();
 //     bool needReconf = needAutoConfig();
 #ifdef DYNAMIC_MIX
 		/* LERNGRUPPE: We might want to break out of this loop if the mix-type changes */
@@ -131,7 +132,7 @@ SINT32 CAMix::start()
 						m_bReconfiguring = false;
 						m_bCascadeEstablished = true;
 						m_bReconfigured = false;
-						if(options.isFirstMix() && options.isDynamic())
+						if(pglobalOptions->isFirstMix() && pglobalOptions->isDynamic())
 							m_pInfoService->sendCascadeHelo();
 #endif
 						loop();
@@ -153,10 +154,10 @@ SKIP:
         if(m_pInfoService != NULL)
         {
 #ifndef DYNAMIC_MIX
-            if(options.acceptReconfiguration())
+            if(pglobalOptions->acceptReconfiguration())
 #else
 						// Only keep the InfoService alive if the Mix-Type doesn't change
-						if(options.acceptReconfiguration() && m_bLoop)
+						if(pglobalOptions->acceptReconfiguration() && m_bLoop)
 #endif
                 m_pInfoService->setConfiguring(true);
             else
@@ -196,26 +197,26 @@ bool CAMix::needAutoConfig()
 {
     bool ret = false;
 
-    if(!options.isLastMix())
+    if(!pglobalOptions->isLastMix())
     {
         ret = true;
 
         // look for usable target interfaces
-        for(UINT32 i=0;i<options.getTargetInterfaceCount();i++)
+        for(UINT32 i=0;i<pglobalOptions->getTargetInterfaceCount();i++)
         {
             TargetInterface oNextMix;
-            options.getTargetInterface(oNextMix,i+1);
+            pglobalOptions->getTargetInterface(oNextMix,i+1);
             if(oNextMix.target_type==TARGET_MIX)
             {
                 ret = false;
             }
 			}
 
-        if(!options.hasNextMixTestCertificate())
+        if(!pglobalOptions->hasNextMixTestCertificate())
             ret = true;
     }
 
-    if(!options.isFirstMix() && !options.hasPrevMixTestCertificate())
+    if(!pglobalOptions->isFirstMix() && !pglobalOptions->hasPrevMixTestCertificate())
         ret = true;
 
     return ret;
@@ -235,10 +236,10 @@ SINT32 CAMix::initMixCascadeInfo(DOM_Element& mixes)
 
     UINT8 id[50];
 		UINT8* cascadeID=NULL;
-    options.getMixId(id,50);
+    pglobalOptions->getMixId(id,50);
 
     UINT8 name[255];
-    if(options.getCascadeName(name,255)!=E_SUCCESS)
+    if(pglobalOptions->getCascadeName(name,255)!=E_SUCCESS)
     {
     	CAMsg::printMsg(LOG_ERR,"No cascade name given!\n");
 			return E_UNKNOWN;
@@ -253,9 +254,9 @@ SINT32 CAMix::initMixCascadeInfo(DOM_Element& mixes)
     DOM_Element elemListenerInterfaces=m_docMixCascadeInfo.createElement("ListenerInterfaces");
     elem.appendChild(elemListenerInterfaces);
 
-    for(UINT32 i=1;i<=options.getListenerInterfaceCount();i++)
+    for(UINT32 i=1;i<=pglobalOptions->getListenerInterfaceCount();i++)
     {
-        CAListenerInterface* pListener=options.getListenerInterface(i);
+        CAListenerInterface* pListener=pglobalOptions->getListenerInterface(i);
         if(pListener->isHidden())
         {//do nothing
         }
@@ -271,7 +272,7 @@ SINT32 CAMix::initMixCascadeInfo(DOM_Element& mixes)
     DOM_Node elemMixesDocCascade=m_docMixCascadeInfo.createElement("Mixes");
     DOM_Element elemMix;
     count=1;
-    if(options.isFirstMix())
+    if(pglobalOptions->isFirstMix())
     {
     	addMixInfo(elemMixesDocCascade, false);
 		getDOMChildByName(elemMixesDocCascade, (UINT8*)"Mix", elemMix, false);
@@ -281,7 +282,7 @@ SINT32 CAMix::initMixCascadeInfo(DOM_Element& mixes)
 			CAMsg::printMsg(LOG_DEBUG,"Could not sign KeyInfo sent to users...\n");
 		}
     	//if(m_pSignature->signXML(docMixInfo,m_pcertstoreOwnCerts)!=E_SUCCESS)
-		//m_pSignature, options.getOwnCertificate()    	
+		//m_pSignature, pglobalOptions->getOwnCertificate()    	
 		/*
         elemMixesDocCascade.appendChild(elemThisMix);*/
     }
@@ -302,7 +303,7 @@ SINT32 CAMix::initMixCascadeInfo(DOM_Element& mixes)
         node=node.getNextSibling();
     }
 
-    if(options.isLastMix())
+    if(pglobalOptions->isLastMix())
     {
         addMixInfo(elemMixesDocCascade, false);
 		getLastDOMChildByName(elemMixesDocCascade, (UINT8*)"Mix", elemMix);
@@ -313,7 +314,7 @@ SINT32 CAMix::initMixCascadeInfo(DOM_Element& mixes)
 		}
         cascadeID = id;
     }
-		else if(options.isFirstMix())
+		else if(pglobalOptions->isFirstMix())
     {
         cascadeID = id;
     }
@@ -329,9 +330,9 @@ SINT32 CAMix::initMixCascadeInfo(DOM_Element& mixes)
 	setDOMElementAttribute(elemPayment,"required",(UINT8*)"true");
 	setDOMElementAttribute(elemPayment,"version",(UINT8*)PAYMENT_VERSION);
 	UINT32 prepaidInterval;
-	options.getPrepaidInterval(&prepaidInterval);
+	pglobalOptions->getPrepaidInterval(&prepaidInterval);
 	setDOMElementAttribute(elemPayment,"prepaidInterval", prepaidInterval);
-	setDOMElementAttribute(elemPayment,"piid", options.getBI()->getID());
+	setDOMElementAttribute(elemPayment,"piid", pglobalOptions->getBI()->getID());
 #else
 	setDOMElementAttribute(elemPayment,"required",(UINT8*)"false");
 #endif
@@ -342,7 +343,7 @@ SINT32 CAMix::addMixInfo(DOM_Node& a_element, bool a_bForceFirstNode)
 {
 	// this is a complete mixinfo node to be sent to the InfoService
 	DOM_Document docMixInfo;
-	if(options.getMixXml(docMixInfo)!=E_SUCCESS)
+	if(pglobalOptions->getMixXml(docMixInfo)!=E_SUCCESS)
 	{
 		return E_UNKNOWN;
 	}
@@ -363,7 +364,7 @@ SINT32 CAMix::signXML(DOM_Node& a_element)
 	{
     CACertStore* tmpCertStore=new CACertStore();
     
-    CACertificate* ownCert=options.getOwnCertificate();
+    CACertificate* ownCert=pglobalOptions->getOwnCertificate();
     if(ownCert==NULL)
 			{
         CAMsg::printMsg(LOG_DEBUG,"Own Test Cert is NULL!\n");
@@ -371,7 +372,7 @@ SINT32 CAMix::signXML(DOM_Node& a_element)
     
     // Operator Certificates
     UINT32 opCertsLength;
-    CACertificate** opCert=options.getOpCertificates(opCertsLength);
+    CACertificate** opCert=pglobalOptions->getOpCertificates(opCertsLength);
     if(opCert==NULL)
 			{
         CAMsg::printMsg(LOG_DEBUG,"Op Test Cert is NULL!\n");
@@ -407,7 +408,7 @@ SINT32 CAMix::signXML(DOM_Node& a_element)
  * 1) Set m_bLoop = false to break the main loop, if a_bChangeMixType is true
  * 2) Disconnect the cascade
  * 3) Break the mix out of init if it is stuck there
- * The new configuration options should already be set in the CACmdLnOptions of this mix
+ * The new configuration pglobalOptions-> should already be set in the CACmdLnOptions of this mix
  *
  * @param a_bChangeMixType Indicates if this mix becomes another mix type (eg. MiddleMix -> FirstMix)
  * @retval E_SUCCESS
@@ -428,10 +429,10 @@ SINT32 CAMix::dynaReconfigure(bool a_bChangeMixType)
 	/** @todo Break a middle mix out of its init. That doesn't look really nice, maybe there is a better way to do this?
    	*/
 	CAListenerInterface* pListener=NULL;
-	UINT32 interfaces=options.getListenerInterfaceCount();
+	UINT32 interfaces=pglobalOptions->getListenerInterfaceCount();
 	for(UINT32 i=1;i<=interfaces;i++)
 	{
-		pListener=options.getListenerInterface(i);
+		pListener=pglobalOptions->getListenerInterface(i);
 		if(!pListener->isVirtual())
 			break;
 		delete pListener;

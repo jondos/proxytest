@@ -126,7 +126,7 @@ SINT32 CAReplayCtrlChannelMsgProc::proccessGetTimestamp(const CAReplayControlCha
 	{
 		UINT8 buff[255];
 		UINT8 msgBuff[1024];
-		options.getMixId(buff,255);
+		pglobalOptions->.getMixId(buff,255);
 		if(strMixID==NULL||strncmp((char*)strMixID,(char*)buff,255)==0)//our own replay db timestamp is requested
 			{
 				//First Mixes do not have a replay DB!
@@ -168,7 +168,7 @@ SINT32 CAReplayCtrlChannelMsgProc::propagateCurrentReplayTimestamp()
 			}
 		UINT8 buff[255];
 		UINT8* msgBuff=new UINT8[1024];
-		options.getMixId(buff,255);
+		pglobalOptions->.getMixId(buff,255);
 		sprintf((char*)msgBuff,strMsgTemplate,buff,replayTimestamp.interval,replayTimestamp.offset);
 		CAMsg::printMsg(LOG_DEBUG,"Msg to sent is %s\n",msgBuff);
 		CAMsg::printMsg(LOG_DEBUG,"m_pDownstreamReplayControlChannel= %p\n",m_pDownstreamReplayControlChannel);
