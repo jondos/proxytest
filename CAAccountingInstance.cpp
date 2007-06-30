@@ -47,6 +47,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 //for testing purposes only
 #define JAP_DIGEST_LENGTH 28
 
+extern CACmdLnOptions pglobalOptions;
+
 DOM_Document CAAccountingInstance::m_preparedCCRequest;
 
 const SINT32 CAAccountingInstance::HANDLE_PACKET_CONNECTION_OK = 1;
@@ -85,12 +87,12 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
 		// initialize JPI signature tester
 		m_AiName = new UINT8[256];
 		pglobalOptions->.getAiID(m_AiName, 256);
-		if (pglobalOptions->.getBI() != NULL)
+		if (pglobalOptions.getBI() != NULL)
 		{
-			m_pJpiVerifyingInstance = pglobalOptions->.getBI()->getVerifier();
+			m_pJpiVerifyingInstance = pglobalOptions.getBI()->getVerifier();
 		}
-		pglobalOptions->.getPaymentHardLimit(&m_iHardLimitBytes);
-		pglobalOptions->.getPaymentSoftLimit(&m_iSoftLimitBytes);
+		pglobalOptions.getPaymentHardLimit(&m_iHardLimitBytes);
+		pglobalOptions.getPaymentSoftLimit(&m_iSoftLimitBytes);
 	
 		prepareCCRequest(callingMix, m_AiName);
 		
@@ -614,7 +616,7 @@ SINT32 CAAccountingInstance::sendCCRequest(tAiAccountingInfo* pAccInfo)
 	
 	DOM_Document doc;                
     UINT32 prepaidInterval;
-    pglobalOptions->.getPrepaidInterval(&prepaidInterval);
+    pglobalOptions.getPrepaidInterval(&prepaidInterval);
     // prepaid bytes are "confirmed bytes - transfered bytes"
     //UINT64 bytesToConfirm = pAccInfo->confirmedBytes + (prepaidInterval) - (pAccInfo->confirmedBytes - pAccInfo->transferredBytes);			
     UINT64 bytesToConfirm = (prepaidInterval) + pAccInfo->transferredBytes;

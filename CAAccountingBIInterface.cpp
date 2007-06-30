@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocket.hpp"
 #include "CAHttpClient.hpp"
 
-extern CACmdLnOptions pglobalOptions->;
+extern CACmdLnOptions pglobalOptions;
 
 /**
  * Constructor
@@ -65,7 +65,7 @@ SINT32 CAAccountingBIInterface::initBIConnection()
 	{
 		CASocketAddrINet address;
 		SINT32 rc;
-		CAXMLBI* pBI= pglobalOptions->.getBI();
+		CAXMLBI* pBI= pglobalOptions.getBI();
 		
 		// fetch BI address
 		if(pBI == NULL)
