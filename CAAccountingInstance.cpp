@@ -86,7 +86,7 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
 	
 		// initialize JPI signature tester
 		m_AiName = new UINT8[256];
-		pglobalOptions->.getAiID(m_AiName, 256);
+		pglobalOptions.getAiID(m_AiName, 256);
 		if (pglobalOptions.getBI() != NULL)
 		{
 			m_pJpiVerifyingInstance = pglobalOptions.getBI()->getVerifier();
