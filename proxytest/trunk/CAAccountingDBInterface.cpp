@@ -32,7 +32,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAXMLErrorMessage.hpp"
 #include "CAMsg.hpp"
 
-extern CACmdLnOptions pglobalOptions;
+extern CACmdLnOptions* pglobalOptions;
 
 /**
  * Constructor
@@ -70,26 +70,26 @@ SINT32 CAAccountingDBInterface::initDBConnection()
 		
 		// Get database connection info from configfile and/or commandline
 		UINT8 host[255];
-		if(pglobalOptions.getDatabaseHost(host, 255) != E_SUCCESS) 
+		if(pglobalOptions->getDatabaseHost(host, 255) != E_SUCCESS) 
 		{
 			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Error, no Database Host!\n");
 			return E_UNKNOWN;
 		}
-		UINT32 tcp_port = pglobalOptions.getDatabasePort();
+		UINT32 tcp_port = pglobalOptions->getDatabasePort();
 		UINT8 dbName[255];
-		if(pglobalOptions.getDatabaseName(dbName, 255) != E_SUCCESS)
+		if(pglobalOptions->getDatabaseName(dbName, 255) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Error, no Database Name!\n");
 			return E_UNKNOWN;
 		}
 		UINT8 userName[255];
-		if(pglobalOptions.getDatabaseUsername(userName, 255) != E_SUCCESS)
+		if(pglobalOptions->getDatabaseUsername(userName, 255) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Error, no Database Username!\n");
 			return E_UNKNOWN;
 		}
 		UINT8 password[255];
-		if(pglobalOptions.getDatabasePassword(password, 255) != E_SUCCESS)
+		if(pglobalOptions->getDatabasePassword(password, 255) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Error, no Database Password!\n");
 			return E_UNKNOWN;

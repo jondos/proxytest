@@ -37,7 +37,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAXMLErrorMessage.hpp"
 #include "Hashtable.hpp"
 
-extern CACmdLnOptions pglobalOptions;
+extern CACmdLnOptions* pglobalOptions;
 
 CAAccountingSettleThread::CAAccountingSettleThread(Hashtable* a_accountingHashtable, UINT8* currentCascade)
 {
@@ -84,14 +84,14 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 	
 		CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread is running...\n");
 	
-		CAXMLBI* pBI = pglobalOptions.getBI();
+		CAXMLBI* pBI = pglobalOptions->getBI();
 		if(pBI==NULL)
 		{
 			CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread; Uuupss.. No BI given --> dying!\n");
 			THREAD_RETURN_ERROR;
 		}
 		biAddr.setAddr(pBI->getHostName(), (UINT16)pBI->getPortNumber());
-		pglobalOptions.getPaymentSettleInterval(&sleepInterval);
+		pglobalOptions->getPaymentSettleInterval(&sleepInterval);
 
 		CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Start loop...\n");
 
