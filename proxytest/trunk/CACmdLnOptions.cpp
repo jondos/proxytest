@@ -2226,7 +2226,7 @@ SKIP_NEXT_MIX:
 			DOM_Element elemProxies=m_docMixInfo.createElement("Proxies");
 			if (m_bSocksSupport)
 			{
-				setElementAttribute(elemProxies, "sock5Support", "true");
+				setDOMElementAttribute(elemProxies, "sock5Support", "true");
 			}
 			DOM_Element elemProxy=m_docMixInfo.createElement("Proxy");
 			DOM_Element elemVisAddresses=m_docMixInfo.createElement("VisibleAddresses");
