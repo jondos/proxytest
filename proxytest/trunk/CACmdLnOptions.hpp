@@ -304,6 +304,10 @@ class CACmdLnOptions
 			bool isFirstMix();
 			bool isMiddleMix();
 			bool isLastMix();
+			bool isSock5sSupported()
+			{
+				return m_bSocksSupport;
+			}				
 			bool isInfoServiceEnabled()
 				{
 					return m_addrInfoServicesSize;
@@ -476,6 +480,7 @@ class CACmdLnOptions
 			char*		m_strLogDir;
 			char*		m_strEncryptedLogDir;
 			bool		m_bCompressedLogs;
+			bool 		m_bSocksSupport;
 			bool		m_bSyslog;
 			char*		m_strUser;
 			char*		m_strPidFile;
