@@ -497,7 +497,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 				prepaidBytes *= -1;
 			}
 			 
-			CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Prepaid bytes: %d!\n", prepaidBytes);
+			//CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Prepaid bytes: %d!\n", prepaidBytes);
 				
 			if (prepaidBytes < 0 ||  prepaidBytes <= ms_pInstance->m_iHardLimitBytes)
 			{				
@@ -1414,7 +1414,7 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 	//The CC's transferredBytes should be equivalent to 
 	//AccInfo's confirmed bytes + the Config's PrepaidInterval - the number of bytes transferred between
 	//requesting and receiving the CC
-	if(pCC->getTransferredBytes() < pAccInfo->confirmedBytes )
+	if(pCC->getTransferredBytes() <= pAccInfo->confirmedBytes )
 	{
 		UINT8 tmp[32];
 		print64(tmp,pCC->getTransferredBytes());
