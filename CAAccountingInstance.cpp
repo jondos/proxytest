@@ -486,7 +486,19 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			
 			//confirmed and transferred bytes are cumulative, so they use UINT64 to store potentially huge values
 			//prepaid Bytes as the difference will be much smaller, but might be negative, so we cast to signed int
-			UINT64 prepaidBytes = (UINT64) (pAccInfo->confirmedBytes - pAccInfo->transferredBytes);		
+			SINT32 prepaidBytes;
+			if (pAccInfo->confirmedBytes > pAccInfo->transferredBytes)
+			{
+				prepaidBytes = pAccInfo->confirmedBytes - pAccInfo->transferredBytes;
+			}
+			else
+			{
+				prepaidBytes = pAccInfo->transferredBytes - pAccInfo->confirmedBytes;
+				prepaidBytes *= -1;
+			}
+			 
+			CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Prepaid bytes: %d!\n", prepaidBytes);
+				
 			if (prepaidBytes <= ms_pInstance->m_iHardLimitBytes)
 			{				
 				if ((pAccInfo->authFlags & AUTH_HARD_LIMIT_REACHED) == 0)
@@ -1519,7 +1531,16 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 					if (pAccInfo->userID == loginEntry->userID)
 					{
 						//store prepaid bytes in database, so the user wont lose the prepaid amount by disconnecting
-						prepaidBytes = pAccInfo->confirmedBytes - pAccInfo->transferredBytes;												
+						SINT32 prepaidBytes;
+						if (pAccInfo->confirmedBytes > pAccInfo->transferredBytes)
+						{
+							prepaidBytes = pAccInfo->confirmedBytes - pAccInfo->transferredBytes;
+						}
+						else
+						{
+							prepaidBytes = pAccInfo->transferredBytes) - pAccInfo->confirmedBytes;
+							prepaidBytes *= -1;
+						}												
 						if (ms_pInstance->m_dbInterface)
 						{
 							ms_pInstance->m_dbInterface->storePrepaidAmount(pAccInfo->accountNumber,prepaidBytes, ms_pInstance->m_currentCascade);
