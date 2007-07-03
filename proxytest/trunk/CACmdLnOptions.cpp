@@ -45,6 +45,7 @@ CACmdLnOptions::CACmdLnOptions()
   {
 		m_bDaemon=false;
 		m_bSyslog=false;
+		m_bSocksSupport = false;
 		m_bLocalProxy=m_bFirstMix=m_bLastMix=m_bMiddleMix=false;
 #ifndef ONLY_LOCAL_PROXY
 		m_bIsRunReConfigure=false;
@@ -2083,12 +2084,18 @@ SKIP_NEXT_MIX:
 									continue;
 								strtrim(tmpBuff);
 								if(strcmp((char*)tmpBuff,"SOCKS")==0)
+								{
+									m_bSocksSupport = true;
 									proxy_type=TARGET_SOCKS_PROXY;
+								}
 								else if(strcmp((char*)tmpBuff,"HTTP")==0)
+								{
 									proxy_type=TARGET_HTTP_PROXY;
+								}
 								else
+								{
 									continue;
-
+								}
 
 								if(type==SSL_TCP||type==RAW_TCP)
 									{
@@ -2217,6 +2224,10 @@ SKIP_NEXT_MIX:
 		if(isLastMix())
 		{
 			DOM_Element elemProxies=m_docMixInfo.createElement("Proxies");
+			if (m_bSocksSupport)
+			{
+				setElementAttribute(elemProxies, "sock5Support", "true");
+			}
 			DOM_Element elemProxy=m_docMixInfo.createElement("Proxy");
 			DOM_Element elemVisAddresses=m_docMixInfo.createElement("VisibleAddresses");
 			elemMix.appendChild(elemProxies);
