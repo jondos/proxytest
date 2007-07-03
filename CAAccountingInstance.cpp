@@ -1537,7 +1537,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 						}
 						else
 						{
-							prepaidBytes = pAccInfo->transferredBytes) - pAccInfo->confirmedBytes;
+							prepaidBytes = pAccInfo->transferredBytes - pAccInfo->confirmedBytes;
 							prepaidBytes *= -1;
 						}												
 						if (ms_pInstance->m_dbInterface)
