@@ -1732,11 +1732,11 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 				else 
 				{
 					CAMsg::printMsg(LOG_CRIT,"Node \"PrepaidInterval\" is empty! Setting default...\n");
-					m_iPrepaidInterval = 5000000; //5 MB as safe default if not explicitly set in config file	
+					m_iPrepaidInterval = 3000000; //3 MB as safe default if not explicitly set in config file	
 				}
-				if (m_iPrepaidInterval > 5000000)
+				if (m_iPrepaidInterval > 3000000)
 				{
-					CAMsg::printMsg(LOG_CRIT,"Prepaid interval is higher than 5000000! No JAP will pay more in advance!\n");
+					CAMsg::printMsg(LOG_CRIT,"Prepaid interval is higher than 3000000! No JAP will pay more in advance!\n");
 				}
 				else if (m_iPrepaidInterval < 5000)
 				{
