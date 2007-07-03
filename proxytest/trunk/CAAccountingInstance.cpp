@@ -1531,7 +1531,6 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 					if (pAccInfo->userID == loginEntry->userID)
 					{
 						//store prepaid bytes in database, so the user wont lose the prepaid amount by disconnecting
-						SINT32 prepaidBytes;
 						if (pAccInfo->confirmedBytes > pAccInfo->transferredBytes)
 						{
 							prepaidBytes = pAccInfo->confirmedBytes - pAccInfo->transferredBytes;

@@ -58,27 +58,29 @@ class CAClientSocket
 				* @return E_SUCCESS otherwise
 			***/
 			SINT32 receiveFully(UINT8* buff,UINT32 len)
-				{
-					SINT32 ret;
-					UINT32 pos=0;
-					do
+			{
+				SINT32 ret;
+				UINT32 pos=0;
+				do
+					{
+						ret=receive(buff+pos,len);
+						if(ret<=0)
 						{
-							ret=receive(buff+pos,len);
-							if(ret<=0)
-								{
-									if(ret==E_AGAIN)
-										{
-											msSleep(100);
-											continue;
-										}
-									else
-										return E_UNKNOWN;
-								}
-							pos+=ret;
-							len-=ret;
+							if(ret==E_AGAIN)
+							{
+								msSleep(100);
+								continue;
+							}
+							else
+							{
+								return E_UNKNOWN;
+							}
 						}
-					while(len>0);
-					return E_SUCCESS;	    	    
-				}
+						pos+=ret;
+						len-=ret;
+					}
+				while(len>0);
+				return E_SUCCESS;	    	    
+			}
 	};
 #endif
