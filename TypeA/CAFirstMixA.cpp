@@ -155,11 +155,11 @@ SINT32 CAFirstMixA::loop()
 				bAktiv=false;
 				// check the timeout for all connections
 				fmHashTableEntry* timeoutHashEntry;
-				isShuttingDown = isShuttingDown();
+				isShuttingDown = m_bIsShuttingDown;
 				CAMsg::printMsg(LOG_DEBUG,"Shutting down:%d\n", isShuttingDown);
 				while ((timeoutHashEntry = m_pChannelList->popTimeoutEntry(isShuttingDown)) != NULL)
 				{			
-					if (isShuttingDown())
+					if (isShuttingDown)
 					{
 						CAMsg::printMsg(LOG_DEBUG,"Shutting down, closing client connection.\n");
 					}	
