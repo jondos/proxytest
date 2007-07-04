@@ -42,21 +42,16 @@ SINT32 CAClientSocket::receiveFullyT(UINT8* buff,UINT32 len,UINT32 msTimeOut)
 	SINT32 ret;
 	UINT32 pos=0;
 	UINT64 currentTime,endTime;
+	bool bWasNonBlocking; 
+	
 	getcurrentTimeMillis(currentTime);
 	set64(endTime,currentTime);
 	add64(endTime,msTimeOut);
 	
-	getSocket()->setNonBlocking(true);
-	
-	bool test;
-	getSocket()->getNonBlocking(&test);
-	if (test)
+	getSocket()->getNonBlocking(&bWasNonBlocking);
+	if (!bWasNonBlocking)
 	{
-		CAMsg::printMsg(LOG_DEBUG, "CAClientSocket:: Receive timeout non-blocking\n");
-	}
-	else
-	{
-		CAMsg::printMsg(LOG_DEBUG, "CAClientSocket:: Blocking while receive timeout!\n");
+		getSocket()->setNonBlocking(true);
 	}
 	
 	CASingleSocketGroup oSG(false);
@@ -78,6 +73,10 @@ SINT32 CAClientSocket::receiveFullyT(UINT8* buff,UINT32 len,UINT32 msTimeOut)
 				}
 				else
 				{
+					if (!bWasNonBlocking)
+					{
+						getSocket()->setNonBlocking(false);
+					}
 					return E_UNKNOWN;
 				}
 			}
@@ -86,19 +85,28 @@ SINT32 CAClientSocket::receiveFullyT(UINT8* buff,UINT32 len,UINT32 msTimeOut)
 		}
 		else if(ret==E_TIMEDOUT)
 		{
+			if (!bWasNonBlocking)
+			{
+				getSocket()->setNonBlocking(false);
+			}
 			return E_TIMEDOUT;
 		}
-		else
-		{
-			CAMsg::printMsg(LOG_DEBUG, "CAClientSocket:: Unknown select return status!\n");
-		}
+
 		if(len==0)
 		{
+			if (!bWasNonBlocking)
+			{
+				getSocket()->setNonBlocking(false);
+			}
 			return E_SUCCESS;
 		}
 		getcurrentTimeMillis(currentTime);
 		if(!isLesser64(currentTime,endTime))
 		{
+			if (!bWasNonBlocking)
+			{
+				getSocket()->setNonBlocking(false);
+			}
 			return E_TIMEDOUT;
 		}
 		msTimeOut=diff64(endTime,currentTime);
