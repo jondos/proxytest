@@ -36,11 +36,20 @@ class CAFirstMixA:public CAFirstMix
 		public:
 		CAFirstMixA()
 		{
+			m_bHasShutDown = false;
 		}		
+		
+		bool isShutDown()
+		{
+			return m_bHasShutDown;
+		}
 		
 		protected:
 			SINT32 loop();	
-			SINT32 closeConnection(fmHashTableEntry* pHashEntry);					
+			SINT32 closeConnection(fmHashTableEntry* pHashEntry);	
+			
+		private:
+			bool m_bHasShutDown;				
 	};
 
 #endif

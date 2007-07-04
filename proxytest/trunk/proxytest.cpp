@@ -101,7 +101,7 @@ void terminate(void)
 	if(pMix!=NULL)
 	{
 		pMix->shutDown();
-		while (!(pMix->isShutDown()))
+		for (UINT32 i = 0; i < 20 && !(pMix->isShutDown(); i++)
 		{
 			sleep(100);
 		}
