@@ -179,6 +179,9 @@ CAListenerInterface *CADynaNetworking::getWorkingListenerInterface()
   */
 static THREAD_RETURN ConnectivityLoop(void *p)
 {
+	INIT_STACK;
+	BEGIN_STACK("CADynaNetworking::ConnectivityLoop");
+	
     CADynaNetworking* parent = (CADynaNetworking*)p;
     char buff[1024];
     UINT32 len = 1024;
@@ -228,6 +231,8 @@ static THREAD_RETURN ConnectivityLoop(void *p)
     socket.send( (const UINT8*)pechoRequest, rLen);
     delete pechoRequest;
 EXIT:
+	FINISH_STACK("CADynaNetworking::ConnectivityLoop");
+
     if(address != NULL)
         delete address;
     socket.close();

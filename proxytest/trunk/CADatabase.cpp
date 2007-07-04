@@ -174,6 +174,9 @@ SINT32 CADatabase::stop()
 
 THREAD_RETURN db_loopMaintenance(void *param)
 	{
+		INIT_STACK;
+		BEGIN_STACK("CADatabase::db_loopMaintenance");
+		
 		CADatabase* pDatabase=(CADatabase*)param;
 		tReplayTimestamp rt;
 		pDatabase->getCurrentReplayTimestamp(rt);
@@ -185,6 +188,9 @@ THREAD_RETURN db_loopMaintenance(void *param)
 				if(secondsTilNextClock<=0&&pDatabase->m_bRun)
 					pDatabase->nextClock();
 			}
+			
+		FINISH_STACK("CADatabase::db_loopMaintenance");
+			
 		THREAD_RETURN_SUCCESS;
 	}
 
