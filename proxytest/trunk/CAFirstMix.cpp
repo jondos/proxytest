@@ -60,7 +60,7 @@ void CAFirstMix::shutDown()
 {
 	CAMsg::printMsg(LOG_DEBUG,"Shut down\n");
 	m_bIsShuttingDown = true;
-	m_bRestart = true;
+	//m_bRestart = true;
 }
 
 bool CAFirstMix::isShuttingDown()
