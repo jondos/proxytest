@@ -314,8 +314,19 @@ fmHashTableEntry* CAFirstMixChannelList::popTimeoutEntry()
 {
 	return popTimeoutEntry(false);
 }	
-	
+
 fmHashTableEntry* CAFirstMixChannelList::popTimeoutEntry(bool a_bForce)
+{
+	fmHashTableEntry* ret;
+	
+	m_Mutex.lock();
+	ret = popTimeoutEntry(a_bForce);
+	m_Mutex.unlock();
+	
+	return ret;
+}
+	
+fmHashTableEntry* CAFirstMixChannelList::popTimeoutEntry_internal(bool a_bForce)
 {
 	fmHashTableEntry* pHashTableEntry;
 	
