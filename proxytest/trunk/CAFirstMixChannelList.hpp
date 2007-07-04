@@ -208,6 +208,14 @@ class CAFirstMixChannelList
 			fmHashTableEntry* popTimeoutEntry();
 			
 			/**
+			 * @param if set to true, forces to return the next timeout enty or NULL if none
+			 * are left in the queue
+			 * @return if set to true, forces to return the next timeout enty or NULL if none
+			 * are left in the queue
+			 */
+			fmHashTableEntry* popTimeoutEntry(bool a_bForce);
+			
+			/**
 			 * adds the entry to the timeout queue with mutex
 			 */
 			SINT32 pushTimeoutEntry(fmHashTableEntry* pHashTableEntry);
