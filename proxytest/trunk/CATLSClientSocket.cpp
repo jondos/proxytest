@@ -42,8 +42,6 @@ CATLSClientSocket::CATLSClientSocket()
 		m_pSSL = NULL;
 		m_pRootCert=NULL;
 		m_pSocket=new CASocket(true);
-		//m_pSocket->setRecvBuff(20);
-		m_pSocket->setNonBlocking(true);
 	}
 
 CATLSClientSocket::~CATLSClientSocket()
@@ -204,12 +202,18 @@ SINT32 CATLSClientSocket::sendFully(const UINT8* buff, UINT32 len)
 	* @return the number of bytes received (always >0)
 **/
 SINT32 CATLSClientSocket::receive(UINT8* buff,UINT32 len)
-	{
-		SINT32 ret=::SSL_read(m_pSSL,(char*)buff,len);
-	  if(ret<0)
-			return SOCKET_ERROR;
-		return ret;
-	}
+{
+	SINT32 ret=::SSL_read(m_pSSL,(char*)buff,len);
+	if(ret<0)
+  	{	
+  		if (SSL_ERROR_WANT_READ == SSL_get_error(m_pSSL, ret))
+  		{
+  			return E_AGAIN;
+  		}
+		return SOCKET_ERROR;
+  	}
+	return ret;
+}
 
 #endif
 #endif //ONLY_LOCAL_PROXY
