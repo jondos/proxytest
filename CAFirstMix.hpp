@@ -151,7 +151,7 @@ public:
 				#endif	
 			}
 
-			void shutDown();
+			virtual void shutDown();
 
 			SINT32 getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic) const
 				{

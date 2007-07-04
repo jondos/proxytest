@@ -60,9 +60,6 @@ void CAFirstMix::shutDown()
 {
 	m_bIsShuttingDown = true;
 	m_bRestart = true;
-	m_pMuxOut->close();
-	delete m_pMuxOut;
-	clean();
 }
 
 bool CAFirstMix::isShuttingDown()

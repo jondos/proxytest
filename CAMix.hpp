@@ -63,7 +63,7 @@ class CAMix
 				m_bShutDown = true;
 			}
 			
-			bool isShutDown()
+			virtual bool isShutDown()
 			{
 				return m_bShutDown;
 			}

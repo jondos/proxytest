@@ -310,9 +310,12 @@ fmChannelListEntry* CAFirstMixChannelList::get(CAMuxSocket* pMuxSocket,HCHANNEL 
 		return NULL;		
 	}
 	
-	
-	
 fmHashTableEntry* CAFirstMixChannelList::popTimeoutEntry()
+{
+	return popTimeoutEntry(false);
+}	
+	
+fmHashTableEntry* CAFirstMixChannelList::popTimeoutEntry(bool a_bForce)
 {
 	fmHashTableEntry* pHashTableEntry;
 	
@@ -323,7 +326,7 @@ fmHashTableEntry* CAFirstMixChannelList::popTimeoutEntry()
 	}
 	
 	pHashTableEntry = m_listTimoutHead;
-	if (pHashTableEntry->list_TimeoutHashEntries.timoutSecs <= time(NULL))
+	if (a_bForce || pHashTableEntry->list_TimeoutHashEntries.timoutSecs <= time(NULL))
 	{
 		m_listTimoutHead = pHashTableEntry->list_TimeoutHashEntries.next;
 		if (m_listTimoutHead == NULL)
