@@ -51,6 +51,7 @@ void CAFirstMixA::shutDown()
 		closeConnection(timeoutHashEntry);
 	}	
 	clean();
+	m_bHasShutDown = true;
 }
 
 
@@ -155,21 +156,14 @@ SINT32 CAFirstMixA::loop()
 //		CAThread threadReadFromUsers;
 //		threadReadFromUsers.setMainLoop(loopReadFromUsers);
 //		threadReadFromUsers.start(this);
-		bool isShuttingDown;
 		while(!m_bRestart) /* the main mix loop as long as there are things that are not handled by threads. */
 			{
 				bAktiv=false;
 				// check the timeout for all connections
 				fmHashTableEntry* timeoutHashEntry;
-				isShuttingDown = m_bIsShuttingDown;
-				CAMsg::printMsg(LOG_DEBUG,"Shutting down:%d\n", isShuttingDown);
-				while ((timeoutHashEntry = m_pChannelList->popTimeoutEntry(isShuttingDown)) != NULL)
+				while ((timeoutHashEntry = m_pChannelList->popTimeoutEntry()) != NULL)
 				{			
-					if (isShuttingDown)
-					{
-						CAMsg::printMsg(LOG_DEBUG,"Shutting down, closing client connection.\n");
-					}	
-					else if (timeoutHashEntry->bRecoverTimeout)
+					 if (timeoutHashEntry->bRecoverTimeout)
 					{
 						CAMsg::printMsg(LOG_DEBUG,"Client connection closed due to timeout.\n");
 					}
@@ -191,7 +185,6 @@ SINT32 CAFirstMixA::loop()
 					
 					closeConnection(timeoutHashEntry);
 				}
-				m_bHasShutDown = isShuttingDown;
 
 				
 //LOOP_START:
