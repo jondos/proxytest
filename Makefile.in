@@ -70,7 +70,8 @@ am_mix_OBJECTS = CAAbstractControlChannel.$(OBJEXT) \
 	CAAccountingSettleThread.$(OBJEXT) CAASymCipher.$(OBJEXT) \
 	CABase64.$(OBJEXT) CACacheLoadBalancing.$(OBJEXT) \
 	CACertificate.$(OBJEXT) CACertStore.$(OBJEXT) \
-	CACmdLnOptions.$(OBJEXT) CAConditionVariable.$(OBJEXT) \
+	CAClientSocket.$(OBJEXT) CACmdLnOptions.$(OBJEXT) \
+	CAConditionVariable.$(OBJEXT) \
 	CAControlChannelDispatcher.$(OBJEXT) \
 	CAControlChannelTest.$(OBJEXT) CADatabase.$(OBJEXT) \
 	CADatagramSocket.$(OBJEXT) CADynaNetworking.$(OBJEXT) \
@@ -245,6 +246,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CACacheLoadBalancing.cpp\
 		    CACertificate.cpp\
 		    CACertStore.cpp\
+		    CAClientSocket.cpp\
 		    CACmdLnOptions.cpp \
 		    CAConditionVariable.cpp\
 		    CAControlChannelDispatcher.cpp\
@@ -477,6 +479,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CACacheLoadBalancing.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CACertStore.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CACertificate.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAClientSocket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CACmdLnOptions.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAConditionVariable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAControlChannelDispatcher.Po@am__quote@

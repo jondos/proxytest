@@ -106,6 +106,11 @@ class CASocket:public CAClientSocket
 			SINT32 getLocalIP(UINT32* r_Ip);
 			
 		protected:
+			CASocket* getSocket()
+			{
+				return this;
+			}
+		
 			bool m_bSocketIsClosed; //this is a flag, which shows, if the m_Socket is valid
 													//we should not set m_Socket to -1 or so after close,
 													//because the Socket value ist needed sometimes even after close!!!

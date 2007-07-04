@@ -18,6 +18,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CACacheLoadBalancing.cpp\
 		    CACertificate.cpp\
 		    CACertStore.cpp\
+		    CAClientSocket.cpp\
 		    CACmdLnOptions.cpp \
 		    CAConditionVariable.cpp\
 		    CAControlChannelDispatcher.cpp\
