@@ -61,7 +61,9 @@ SINT32 CAClientSocket::receiveFullyT(UINT8* buff,UINT32 len,UINT32 msTimeOut)
 	oSG.add(*getSocket());
 	for(;;)
 	{
+		CAMsg::printMsg(LOG_DEBUG, "CAClientSocket:: Select\n");
 		ret=oSG.select(msTimeOut);
+		CAMsg::printMsg(LOG_DEBUG, "CAClientSocket:: After select\n");
 		if(ret==1)
 			{
 				ret=receive(buff+pos,len);
