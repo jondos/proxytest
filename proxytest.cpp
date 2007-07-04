@@ -104,7 +104,7 @@ void terminate(void)
 		pMix->shutDown();
 		CAMsg::printMsg(LOG_CRIT,"2\n");
 		for (UINT32 i = 0; i < 20 && !(pMix->isShutDown()); i++)
-		{
+		{CAMsg::printMsg(LOG_CRIT,"sleep\n");
 			sleep(100);
 		}
 		CAMsg::printMsg(LOG_CRIT,"3\n");
