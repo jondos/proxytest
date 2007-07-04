@@ -61,11 +61,9 @@ SINT32 CAClientSocket::receiveFullyT(UINT8* buff,UINT32 len,UINT32 msTimeOut)
 	
 	CASingleSocketGroup oSG(false);
 	oSG.add(*getSocket());
+	ret = 1;
 	for(;;)
 	{
-		CAMsg::printMsg(LOG_DEBUG, "CAClientSocket:: Select\n");
-		ret=oSG.select(msTimeOut);
-		CAMsg::printMsg(LOG_DEBUG, "CAClientSocket:: After select\n");
 		if(ret==1)
 		{
 			ret=receive(buff+pos,len);								
@@ -73,7 +71,9 @@ SINT32 CAClientSocket::receiveFullyT(UINT8* buff,UINT32 len,UINT32 msTimeOut)
 			{
 				if(ret==E_AGAIN)
 				{
-					msSleep(100);
+					CAMsg::printMsg(LOG_DEBUG, "CAClientSocket:: Select\n");
+					ret=oSG.select(msTimeOut);
+					CAMsg::printMsg(LOG_DEBUG, "CAClientSocket:: After select\n");
 					continue;
 				}
 				else
@@ -93,10 +93,14 @@ SINT32 CAClientSocket::receiveFullyT(UINT8* buff,UINT32 len,UINT32 msTimeOut)
 			CAMsg::printMsg(LOG_DEBUG, "CAClientSocket:: Unknown select return status!\n");
 		}
 		if(len==0)
+		{
 			return E_SUCCESS;
+		}
 		getcurrentTimeMillis(currentTime);
 		if(!isLesser64(currentTime,endTime))
+		{
 			return E_TIMEDOUT;
+		}
 		msTimeOut=diff64(endTime,currentTime);
 	}
 }
