@@ -118,6 +118,7 @@ private:
 			SINT32 connectToNextMix(CASocketAddr* a_pAddrNext);
 protected:
 			virtual SINT32 loop()=0;
+			bool isShuttingDown();
 			SINT32 init();
 			SINT32 clean();
 			SINT32 initOnce();
