@@ -39,7 +39,7 @@ class CAFirstMixA:public CAFirstMix
 			m_bHasShutDown = false;
 		}		
 		
-		bool isShutDown()
+		virtual bool isShutDown()
 		{
 			return m_bHasShutDown;
 		}
