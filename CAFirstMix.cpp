@@ -60,6 +60,7 @@ void CAFirstMix::shutDown()
 {
 	m_bIsShuttingDown = true;
 	m_bRestart = true;
+	clean();
 }
 
 SINT32 CAFirstMix::initOnce()
