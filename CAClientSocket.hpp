@@ -86,17 +86,17 @@ class CAClientSocket
 				return E_SUCCESS;	    	    
 			}
 
-		/** Trys to receive all bytes. If after the timeout value has elapsed, 
-			* not all bytes are received
-			* the error E_TIMEDOUT is returned.
-			*	@param buff byte array, where the received bytes would be stored 
-			*	@param len	on input holds the number of bytes which should be read,
-			*	@param msTimeOut the timout in milli seconds
-			* @retval E_TIMEDOUT if not all byts could be read
-			* @retval E_UNKNOWN if an error occured
-			* @retval E_SUCCESS if all bytes could be read
-			*
-			*/
+		/** Tries to receive all bytes. If after the timeout value has elapsed, 
+		* not all bytes are received
+		* the error E_TIMEDOUT is returned.
+		*	@param buff byte array, where the received bytes would be stored 
+		*	@param len	on input holds the number of bytes which should be read,
+		*	@param msTimeOut the timout in milli seconds
+		* @retval E_TIMEDOUT if not all byts could be read
+		* @retval E_UNKNOWN if an error occured
+		* @retval E_SUCCESS if all bytes could be read
+		*
+		*/
 		SINT32 receiveFullyT(UINT8* buff,UINT32 len,UINT32 msTimeOut);
 
 			
