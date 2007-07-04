@@ -49,11 +49,11 @@ SINT32 CAClientSocket::receiveFullyT(UINT8* buff,UINT32 len,UINT32 msTimeOut)
 	getSocket()->getNonBlocking(&test);
 	if (test)
 	{
-		CAMsg::printMsg(LOG_DEBUG, "CAClientSocket:: Receive timeout non-blocking");
+		CAMsg::printMsg(LOG_DEBUG, "CAClientSocket:: Receive timeout non-blocking\n");
 	}
 	else
 	{
-		CAMsg::printMsg(LOG_DEBUG, "CAClientSocket:: Blocking while receive timeout!");
+		CAMsg::printMsg(LOG_DEBUG, "CAClientSocket:: Blocking while receive timeout!\n");
 	}
 	
 	CASingleSocketGroup oSG(false);
@@ -64,8 +64,9 @@ SINT32 CAClientSocket::receiveFullyT(UINT8* buff,UINT32 len,UINT32 msTimeOut)
 		if(ret==1)
 			{
 				ret=receive(buff+pos,len);
-				if(ret<=0)
+				if(ret != E_AGAIN && ret<=0)
 				{
+					CAMsg::printMsg(LOG_DEBUG, "CAClientSocket:: error occured!\n");
 					return E_UNKNOWN;
 				}
 				pos+=ret;
