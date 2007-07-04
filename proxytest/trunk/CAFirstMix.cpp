@@ -808,6 +808,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 #endif
 				while(countRead>0&&i<nSocketsIn)
 				{
+					CAMsg::printMsg(LOG_DEBUG,"Loop");
 					if(psocketgroupAccept->isSignaled(socketsIn[i]))
 					{
 						countRead--;
