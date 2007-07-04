@@ -39,6 +39,15 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #endif
 extern CACmdLnOptions* pglobalOptions;
 
+void CAFirstMixA::shutDown()
+{
+	CAMsg::printMsg(LOG_DEBUG,"Shut down\n");
+	m_bIsShuttingDown = true;
+	//m_bRestart = true;
+	//clean();
+}
+
+
 SINT32 CAFirstMixA::closeConnection(fmHashTableEntry* pHashEntry)
 {
 	if (pHashEntry == NULL)
@@ -140,15 +149,15 @@ SINT32 CAFirstMixA::loop()
 //		CAThread threadReadFromUsers;
 //		threadReadFromUsers.setMainLoop(loopReadFromUsers);
 //		threadReadFromUsers.start(this);
-
-		while(!m_bRestart || (isShuttingDown() && !m_bHasShutDown)) /* the main mix loop as long as there are things that are not handled by threads. */
+		bool isShuttingDown;
+		while(!m_bRestart) /* the main mix loop as long as there are things that are not handled by threads. */
 			{
 				bAktiv=false;
 				// check the timeout for all connections
 				fmHashTableEntry* timeoutHashEntry;
-				m_bHasShutDown = isShuttingDown();
-				CAMsg::printMsg(LOG_DEBUG,"Shutting down:%d\n", m_bHasShutDown);
-				while ((timeoutHashEntry = m_pChannelList->popTimeoutEntry(isShuttingDown())) != NULL)
+				isShuttingDown = isShuttingDown();
+				CAMsg::printMsg(LOG_DEBUG,"Shutting down:%d\n", isShuttingDown);
+				while ((timeoutHashEntry = m_pChannelList->popTimeoutEntry(isShuttingDown)) != NULL)
 				{			
 					if (isShuttingDown())
 					{
@@ -176,6 +185,7 @@ SINT32 CAFirstMixA::loop()
 					
 					closeConnection(timeoutHashEntry);
 				}
+				m_bHasShutDown = isShuttingDown;
 
 				
 //LOOP_START:

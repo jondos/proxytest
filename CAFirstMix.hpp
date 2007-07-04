@@ -302,12 +302,14 @@ protected:
 			SINT32 sendReplayTimestampRequestsToAllMixes();
 #endif
 
+protected:
+	bool m_bIsShuttingDown;
+
 private:
 	SINT32 doUserLogin_internal(CAMuxSocket* pNewUSer,UINT8 perrIP[4]);
 	
 	static const UINT32 MAX_CONCURRENT_NEW_CONNECTIONS;
 
-	bool m_bIsShuttingDown;
 	UINT32 m_newConnections;
 };
 
