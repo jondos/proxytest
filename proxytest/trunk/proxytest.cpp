@@ -100,14 +100,12 @@ void terminate(void)
 {
 	if(pMix!=NULL)
 	{
-		CAMsg::printMsg(LOG_CRIT,"1\n");
 		pMix->shutDown();
-		CAMsg::printMsg(LOG_CRIT,"2\n");
-		for (UINT32 i = 0; i < 2 && !(pMix->isShutDown()); i++)
-		{CAMsg::printMsg(LOG_CRIT,"sleep\n");
-			sleep(1);
+		for (UINT32 i = 0; i < 20 && !(pMix->isShutDown()); i++)
+		{
+			CAMsg::printMsg(LOG_CRIT,"Sleep ...\n");
+			msSleep(100);
 		}
-		CAMsg::printMsg(LOG_CRIT,"3\n");
 		/*
 		CAMix* mix = pMix;
 		pMix = NULL;
