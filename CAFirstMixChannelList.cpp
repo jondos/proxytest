@@ -974,6 +974,9 @@ SINT32 CAFirstMixChannelList::test()
 #ifdef DELAY_USERS
 	THREAD_RETURN fml_loopDelayBuckets(void* param)
 		{
+			INIT_STACK;
+			BEGIN_STACK("CAFirstMixChannelList::fml_loopDelayBuckets");
+			
 			CAFirstMixChannelList* pChannelList=(CAFirstMixChannelList*)param;
 			UINT32** pDelayBuckets=pChannelList->m_pDelayBuckets;
 			while(pChannelList->m_bDelayBucketsLoopRun)
@@ -989,6 +992,9 @@ SINT32 CAFirstMixChannelList::test()
 					pChannelList->m_pMutexDelayChannel->unlock();		
 					msSleep(pChannelList->m_u32DelayChannelBucketGrowIntervall);
 				}
+			
+			FINISH_STACK("CAFirstMixChannelList::fml_loopDelayBuckets");	
+				
 			THREAD_RETURN_SUCCESS;
 		}
 		

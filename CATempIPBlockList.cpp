@@ -166,6 +166,9 @@ SINT32 CATempIPBlockList::checkIP(const UINT8 ip[4])
  */
 THREAD_RETURN CATempIPBlockList::cleanupThreadMainLoop(void *param)
 	{
+		INIT_STACK;
+		BEGIN_STACK("CATempIPBlockList::cleanupThreadMainLoop");
+		
 		CATempIPBlockList * instance;
 		instance = (CATempIPBlockList *)param;
 		while(instance->m_bRunCleanupThread) 
@@ -211,6 +214,9 @@ THREAD_RETURN CATempIPBlockList::cleanupThreadMainLoop(void *param)
 		// let the thread sleep for 1 minute
 		sSleep(CLEANUP_THREAD_SLEEP_INTERVAL);
 	}
+	
+	FINISH_STACK("CATempIPBlockList::cleanupThreadMainLoop");
+	
 	THREAD_RETURN_SUCCESS;
 }
 

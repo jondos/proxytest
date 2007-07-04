@@ -55,6 +55,9 @@ const UINT32 CAInfoService::SEND_INFO_TIMEOUT_MS = 3000; // timeout for single s
 
 THREAD_RETURN CAInfoService::InfoLoop(void *p)
 	{
+		INIT_STACK;
+		BEGIN_STACK("CAInfoService::InfoLoop");
+		
 		CAMsg::printMsg(LOG_DEBUG, "CAInfoService - InfoLoop() started\n");
 		CAInfoService* pInfoService=(CAInfoService*)p;
 		bool bIsFirst=true; //send our own certifcate only the first time
@@ -188,6 +191,7 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 			sSleep(nextUpdate);
 #endif
 		}
+		FINISH_STACK("CAInfoService::InfoLoop");
 		THREAD_RETURN_SUCCESS;
 	}
 	
@@ -204,31 +208,46 @@ struct CAInfoService::InfoServiceHeloMsg
 
 THREAD_RETURN CAInfoService::TCascadeHelo(void *p)
 {
+	INIT_STACK;
+	BEGIN_STACK("CAInfoService::TCascadeHelo");
+	
 	InfoServiceHeloMsg* message = (InfoServiceHeloMsg*)p;
 	if (message->is->sendCascadeHelo(message->strXML, message->len, message->addr) == E_SUCCESS)
 	{
+		FINISH_STACK("CAInfoService::TCascadeHelo");
 		THREAD_RETURN_SUCCESS;
 	}
+	FINISH_STACK("CAInfoService::TCascadeHelo");
 	THREAD_RETURN_SUCCESS;
 }	
 
 THREAD_RETURN CAInfoService::TCascadeStatus(void *p)
 {
+	INIT_STACK;
+	BEGIN_STACK("CAInfoService::TCascadeStatus");
+	
 	InfoServiceHeloMsg* message = (InfoServiceHeloMsg*)p;
 	if (message->is->sendStatus(message->strXML, message->len, message->addr) == E_SUCCESS)
 	{
+		FINISH_STACK("CAInfoService::TCascadeStatus");
 		THREAD_RETURN_SUCCESS;
 	}
+	FINISH_STACK("CAInfoService::TCascadeStatus");
 	THREAD_RETURN_SUCCESS;
 }	
 
 THREAD_RETURN CAInfoService::TMixHelo(void *p)
 {
+	INIT_STACK;
+	BEGIN_STACK("CAInfoService::TMixHelo");
+	
 	InfoServiceHeloMsg* message = (InfoServiceHeloMsg*)p;
 	if (message->is->sendMixHelo(message->strXML, message->len, message->requestCommand, message->param, message->addr) == E_SUCCESS)
 	{
+		FINISH_STACK("CAInfoService::TMixHelo");
 		THREAD_RETURN_SUCCESS;
 	}
+	FINISH_STACK("CAInfoService::TMixHelo");
 	THREAD_RETURN_SUCCESS;
 }	
 	

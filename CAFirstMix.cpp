@@ -551,6 +551,9 @@ SINT32 CAFirstMix::setMixParameters(const tMixParameters& params)
 */
 THREAD_RETURN fm_loopSendToMix(void* param)
 	{
+		INIT_STACK;
+		BEGIN_STACK("CAFirstMix::fm_loopSendToMix");
+		
 		CAFirstMix* pFirstMix=(CAFirstMix*)param;
 		CAQueue* pQueue=((CAFirstMix*)param)->m_pQueueSendToMix;
 		CAMuxSocket* pMuxSocket=pFirstMix->m_pMuxOut;
@@ -630,6 +633,8 @@ THREAD_RETURN fm_loopSendToMix(void* param)
 		delete pPoolEntry;
 		delete pPool;
 #endif
+		FINISH_STACK("CAFirstMix::fm_loopSendToMix");
+
 		CAMsg::printMsg(LOG_DEBUG,"Exiting Thread SendToMix\n");
 		THREAD_RETURN_SUCCESS;
 	}
@@ -640,6 +645,9 @@ THREAD_RETURN fm_loopSendToMix(void* param)
 #define MAX_READ_FROM_NEXT_MIX_QUEUE_SIZE 10000000 //How many bytes could be in the incoming queue ??
 THREAD_RETURN fm_loopReadFromMix(void* pParam)
 	{
+		INIT_STACK;
+		BEGIN_STACK("CAFirstMix::fm_loopReadFromMix");
+		
 		CAFirstMix* pFirstMix=(CAFirstMix*)pParam;
 		CAMuxSocket* pMuxSocket=pFirstMix->m_pMuxOut;
 		CAQueue* pQueue=pFirstMix->m_pQueueReadFromMix;
@@ -722,6 +730,8 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 		#ifdef USE_POOL
 			delete pPool;
 		#endif
+		
+		FINISH_STACK("CAFirstMix::fm_loopReadFromMix");
 		THREAD_RETURN_SUCCESS;
 	}
 
@@ -740,6 +750,9 @@ typedef struct T_UserLoginData t_UserLoginData;
 */
 THREAD_RETURN fm_loopAcceptUsers(void* param)
 	{
+		INIT_STACK;
+		BEGIN_STACK("CAFirstMix::fm_loopAcceptUsers");
+		
 		CAFirstMix* pFirstMix=(CAFirstMix*)param;
 		CASocket* socketsIn=pFirstMix->m_arrSocketsIn;
 		CAIPList* pIPList=pFirstMix->m_pIPList;
@@ -858,8 +871,11 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 				}
 			}
 END_THREAD:
+		FINISH_STACK("CAFirstMix::fm_loopAcceptUsers");
+
 		delete []peerIP;
 		delete psocketgroupAccept;
+		
 		CAMsg::printMsg(LOG_DEBUG,"Exiting Thread AcceptUser\n");
 		THREAD_RETURN_SUCCESS;
 	}

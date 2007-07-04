@@ -317,12 +317,13 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				}
 				m_pAccountingSettleThread->m_accountingHashtable->getMutex().unlock();		
 			}
-			
-			FINISH_STACK("CAAccountingSettleThread::mainLoop");
+						
 		}//main while run loop
-		CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Exiting run loop!\n");
 		
-		dbConn.terminateDBConnection();
+		FINISH_STACK("CAAccountingSettleThread::mainLoop");
+		
+		CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Exiting run loop!\n");
+		dbConn.terminateDBConnection();	
 		
 		THREAD_RETURN_SUCCESS;
 	}
