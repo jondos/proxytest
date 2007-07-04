@@ -339,6 +339,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #define E_SUCCESS 0
 #define E_UNKNOWN -1
+#define E_SHUTDOWN -2 // this mix has been shut down and will not restart
 #define E_UNSPECIFIED -100 // A Parameter was not specified/not set
 #define E_SPACE -101//there was not enough memory (or space in a buffer)
 #define E_QUEUEFULL -200 // If a Send Queue contains more data then a defined number

@@ -58,7 +58,15 @@ class CAMix
 			virtual SINT32 reconfigure(){return E_SUCCESS;}
 			virtual tMixType getType() const =0;
 			
-			virtual void shutDown(){}
+			virtual void shutDown()
+			{
+				m_bShutDown = true;
+			}
+			
+			bool isShutDown()
+			{
+				return m_bShutDown;
+			}
 			
 #ifdef DYNAMIC_MIX
 			void setReconfiguring(bool a_val)
@@ -110,6 +118,7 @@ class CAMix
 			bool m_bReconfigured;
 #endif
 			bool m_bReconfiguring;
+			bool m_bShutDown;
 			virtual SINT32 clean()=0;
 			virtual SINT32 initOnce(){return E_SUCCESS;}
 			virtual SINT32 init()=0;

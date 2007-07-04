@@ -56,6 +56,11 @@ extern CACmdLnOptions* pglobalOptions;
 
 const UINT32 CAFirstMix::MAX_CONCURRENT_NEW_CONNECTIONS = NUM_LOGIN_WORKER_TRHEADS * 2;
 
+void CAFirstMix::shutDown()
+{
+	m_bIsShuttingDown = true;
+	m_bRestart = true;
+}
 
 SINT32 CAFirstMix::initOnce()
 	{
@@ -87,6 +92,11 @@ SINT32 CAFirstMix::initOnce()
 
 SINT32 CAFirstMix::init()
 	{
+		if (m_bIsShuttingDown)
+		{
+			return E_SHUTDOWN;
+		}
+		
 #ifdef DYNAMIC_MIX
 		m_bBreakNeeded = m_bReconfigured;
 #endif

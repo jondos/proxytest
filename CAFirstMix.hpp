@@ -150,6 +150,8 @@ public:
 				#endif	
 			}
 
+			void shutDown();
+
 			SINT32 getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic) const
 				{
 					*puser=(SINT32)getNrOfUsers();
@@ -304,6 +306,7 @@ private:
 	
 	static const UINT32 MAX_CONCURRENT_NEW_CONNECTIONS;
 
+	bool m_bIsShuttingDown;
 	UINT32 m_newConnections;
 };
 
