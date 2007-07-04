@@ -36,7 +36,8 @@ _stack->strMethodName = (methodName); \
 _stack->strPosition = (methodPosition); \
 CAThread::setCurrentStack(_stack)
 
-#define FINISH_STACK(methodName) SAVE_STACK(methodName, CAThread::METHOD_END)
+#define FINISH_STACK(methodName) SAVE_STACK(methodName, CAThread::METHOD_END); \
+delete _stack
 #define BEGIN_STACK(methodName) SAVE_STACK(methodName, CAThread::METHOD_BEGIN)
 
 
