@@ -59,6 +59,17 @@ SINT32 CAClientSocket::receiveFullyT(UINT8* buff,UINT32 len,UINT32 msTimeOut)
 	ret = 1;
 	for(;;)
 	{
+		getcurrentTimeMillis(currentTime);
+		if(!isLesser64(currentTime,endTime))
+		{
+			if (!bWasNonBlocking)
+			{
+				getSocket()->setNonBlocking(false);
+			}
+			return E_TIMEDOUT;
+		}
+		msTimeOut=diff64(endTime,currentTime);
+		
 		if(ret==1)
 		{
 			ret=receive(buff+pos,len);								
@@ -99,16 +110,6 @@ SINT32 CAClientSocket::receiveFullyT(UINT8* buff,UINT32 len,UINT32 msTimeOut)
 				getSocket()->setNonBlocking(false);
 			}
 			return E_SUCCESS;
-		}
-		getcurrentTimeMillis(currentTime);
-		if(!isLesser64(currentTime,endTime))
-		{
-			if (!bWasNonBlocking)
-			{
-				getSocket()->setNonBlocking(false);
-			}
-			return E_TIMEDOUT;
-		}
-		msTimeOut=diff64(endTime,currentTime);
+		}		
 	}
 }
