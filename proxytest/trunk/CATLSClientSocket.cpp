@@ -41,7 +41,8 @@ CATLSClientSocket::CATLSClientSocket()
 		//SSL_CTX_set_timeout(m_pCtx, 20); // 20 seconds timeout
 		m_pSSL = NULL;
 		m_pRootCert=NULL;
-		m_pSocket=new CASocket();
+		m_pSocket=new CASocket(true);
+		oSocket.setRecvBuff(255);
 		//m_pSocket->setNonBlocking(true);
 	}
 
