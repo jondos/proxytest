@@ -58,6 +58,7 @@ const UINT32 CAFirstMix::MAX_CONCURRENT_NEW_CONNECTIONS = NUM_LOGIN_WORKER_TRHEA
 
 void CAFirstMix::shutDown()
 {
+	CAMsg::printMsg(LOG_DEBUG,"Shut down\n");
 	m_bIsShuttingDown = true;
 	m_bRestart = true;
 }
