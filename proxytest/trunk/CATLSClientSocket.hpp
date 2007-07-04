@@ -65,7 +65,14 @@ public:
 	*@Note At the moment only a depth of verification path of zero or one is supported!
 	*/
 	SINT32 setServerCertificate(CACertificate* pCert);
-		
+
+protected:
+
+	CASocket* getSocket()
+	{
+		return m_pSocket;
+	}		
+
 private:
 	SINT32 doTLSConnect(CASocketAddr &psa);
 	

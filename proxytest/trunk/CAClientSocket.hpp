@@ -28,6 +28,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CA_CLIENT_SOCKET__
 #define __CA_CLIENT_SOCKET__
 #include "CAUtil.hpp"
+
+class CASocket;
+
 class CAClientSocket
 	{
 		public:
@@ -82,5 +85,22 @@ class CAClientSocket
 				while(len>0);
 				return E_SUCCESS;	    	    
 			}
+
+		/** Trys to receive all bytes. If after the timeout value has elapsed, 
+			* not all bytes are received
+			* the error E_TIMEDOUT is returned.
+			*	@param buff byte array, where the received bytes would be stored 
+			*	@param len	on input holds the number of bytes which should be read,
+			*	@param msTimeOut the timout in milli seconds
+			* @retval E_TIMEDOUT if not all byts could be read
+			* @retval E_UNKNOWN if an error occured
+			* @retval E_SUCCESS if all bytes could be read
+			*
+			*/
+		SINT32 receiveFullyT(UINT8* buff,UINT32 len,UINT32 msTimeOut);
+
+			
+		protected:
+			virtual CASocket* getSocket() = 0;
 	};
 #endif
