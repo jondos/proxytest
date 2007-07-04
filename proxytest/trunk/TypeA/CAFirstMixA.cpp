@@ -39,11 +39,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #endif
 extern CACmdLnOptions* pglobalOptions;
 
-void CAFirstMixA::shutDown()
-{
-	m_bIsShuttingDown = true;
-}
-
 SINT32 CAFirstMixA::closeConnection(fmHashTableEntry* pHashEntry)
 {
 	if (pHashEntry == NULL)

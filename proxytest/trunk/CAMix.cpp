@@ -33,6 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CACmdLnOptions.hpp"
 
 extern CACmdLnOptions* pglobalOptions;
+
  
 CAMix::CAMix()
 {
@@ -46,6 +47,7 @@ CAMix::CAMix()
 		m_pMuxInControlChannelDispatcher=NULL;
 		m_u32KeepAliveSendInterval=0;//zero means --> do not use
 		m_u32KeepAliveRecvInterval=0;//zero means --> do not use
+		m_bShutDown = false; 
 #ifdef DYNAMIC_MIX
 		/* LERNGRUPPE: Run by default */
 		m_bLoop = true;
@@ -57,6 +59,8 @@ CAMix::CAMix()
 
 SINT32 CAMix::start()
 	{
+		SINT32 initStatus;
+		
 		if(initOnce()!=E_SUCCESS)
 			return E_UNKNOWN;
     if(m_pSignature != NULL && pglobalOptions->isInfoServiceEnabled())
@@ -117,7 +121,7 @@ SINT32 CAMix::start()
 				if(!m_bLoop) goto SKIP;
 #endif
 				CAMsg::printMsg(LOG_DEBUG, "CAMix main: before init()\n");
-        if(init() == E_SUCCESS)
+        if((initStatus = init()) == E_SUCCESS)
         {
 					CAMsg::printMsg(LOG_DEBUG, "CAMix main: init() returned success\n");
             if(m_pInfoService != NULL)
@@ -143,6 +147,10 @@ SINT32 CAMix::start()
 							m_pInfoService->dynamicCascadeConfiguration();
 #endif
 						CAMsg::printMsg(LOG_DEBUG, "CAMix main: loop() returned, maybe connection lost.\n");
+        }
+        else if (initStatus = E_SHUTDOWN)
+        {
+        	CAMsg::printMsg(LOG_DEBUG, "Mix has been stopped. Waiting for shutdown...\n");
         }
         else
         {

@@ -101,6 +101,10 @@ void terminate(void)
 	if(pMix!=NULL)
 	{
 		pMix->shutDown();
+		while (!(pMix->isShutDown()))
+		{
+			sleep(100);
+		}
 		/*
 		CAMix* mix = pMix;
 		pMix = NULL;
