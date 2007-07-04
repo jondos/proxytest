@@ -103,7 +103,6 @@ void terminate(void)
 		pMix->shutDown();
 		for (UINT32 i = 0; i < 20 && !(pMix->isShutDown()); i++)
 		{
-			CAMsg::printMsg(LOG_CRIT,"Sleep ...\n");
 			msSleep(100);
 		}
 		/*

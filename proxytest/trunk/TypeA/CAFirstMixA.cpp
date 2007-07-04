@@ -51,12 +51,6 @@ void CAFirstMixA::shutDown()
 		closeConnection(timeoutHashEntry);
 	}	
 	
-	//clean();
-	
-	#ifdef PAYMENT
-		CAAccountingInstance::clean();
-	#endif
-	
 	m_bHasShutDown = true;
 }
 
