@@ -103,9 +103,9 @@ void terminate(void)
 		CAMsg::printMsg(LOG_CRIT,"1\n");
 		pMix->shutDown();
 		CAMsg::printMsg(LOG_CRIT,"2\n");
-		for (UINT32 i = 0; i < 20 && !(pMix->isShutDown()); i++)
+		for (UINT32 i = 0; i < 2 && !(pMix->isShutDown()); i++)
 		{CAMsg::printMsg(LOG_CRIT,"sleep\n");
-			sleep(100);
+			sleep(1);
 		}
 		CAMsg::printMsg(LOG_CRIT,"3\n");
 		/*
