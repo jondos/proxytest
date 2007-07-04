@@ -50,9 +50,13 @@ void CAFirstMixA::shutDown()
 		CAMsg::printMsg(LOG_DEBUG,"Shutting down, closing client connection.\n");					
 		closeConnection(timeoutHashEntry);
 	}	
-	CAMsg::printMsg(LOG_DEBUG,"Restart:%d", getRestart());
 	
 	//clean();
+	
+	#ifdef PAYMENT
+		CAAccountingInstance::clean();
+	#endif
+	
 	m_bHasShutDown = true;
 }
 
@@ -165,7 +169,7 @@ SINT32 CAFirstMixA::loop()
 				fmHashTableEntry* timeoutHashEntry;
 				while ((timeoutHashEntry = m_pChannelList->popTimeoutEntry()) != NULL)
 				{			
-					 if (timeoutHashEntry->bRecoverTimeout)
+					if (timeoutHashEntry->bRecoverTimeout)
 					{
 						CAMsg::printMsg(LOG_DEBUG,"Client connection closed due to timeout.\n");
 					}
