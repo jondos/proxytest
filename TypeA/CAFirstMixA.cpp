@@ -144,7 +144,7 @@ SINT32 CAFirstMixA::loop()
 		while(!m_bRestart) /* the main mix loop as long as there are things that are not handled by threads. */
 			{
 				bAktiv=false;
-				
+				CAMsg::printMsg(LOG_DEBUG,"Users.\n");
 				// check the timeout for all connections
 				fmHashTableEntry* timeoutHashEntry;
 				while ((timeoutHashEntry = m_pChannelList->popTimeoutEntry()) != NULL)
