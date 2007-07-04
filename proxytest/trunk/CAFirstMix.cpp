@@ -63,6 +63,11 @@ void CAFirstMix::shutDown()
 	clean();
 }
 
+bool CAFirstMix::isShuttingDown()
+{
+	return m_bIsShuttingDown;
+}
+
 SINT32 CAFirstMix::initOnce()
 	{
 		CAMsg::printMsg(LOG_DEBUG,"Starting FirstMix InitOnce\n");
