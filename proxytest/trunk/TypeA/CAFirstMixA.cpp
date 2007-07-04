@@ -50,6 +50,8 @@ void CAFirstMixA::shutDown()
 		CAMsg::printMsg(LOG_DEBUG,"Shutting down, closing client connection.\n");					
 		closeConnection(timeoutHashEntry);
 	}	
+	CAMsg::printMsg(LOG_DEBUG,"Restart:%d", getRestart());
+	
 	//clean();
 	m_bHasShutDown = true;
 }
