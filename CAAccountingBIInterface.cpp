@@ -139,11 +139,11 @@ CAXMLErrorMessage * CAAccountingBIInterface::settle(CAXMLCostConfirmation &cc)
 			CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface::settle: response fehlerhaft!\n");
 			return NULL;
 		}
-#ifdef DEBUG			
+//#ifdef DEBUG			
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingBIInterface::settle: got response header [Status,content-Lenght]=[%i,%i]!\n",status,contentLen);
-#endif		
+//#endif		
 		response = new UINT8[contentLen+1];
-		if(m_pSocket->receiveFullyT(response, contentLen, 20000)!=E_SUCCESS)
+		if(m_pSocket->receiveFully(response, contentLen, 20000)!=E_SUCCESS)
 			{
 				delete[] response;
 				return NULL;
