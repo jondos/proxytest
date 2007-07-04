@@ -46,6 +46,8 @@ SINT32 CAClientSocket::receiveFullyT(UINT8* buff,UINT32 len,UINT32 msTimeOut)
 	set64(endTime,currentTime);
 	add64(endTime,msTimeOut);
 	
+	getSocket()->setNonBlocking(true);
+	
 	bool test;
 	getSocket()->getNonBlocking(&test);
 	if (test)
