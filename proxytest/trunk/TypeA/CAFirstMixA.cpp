@@ -41,20 +41,16 @@ extern CACmdLnOptions* pglobalOptions;
 
 void CAFirstMixA::shutDown()
 {
-	CAMsg::printMsg(LOG_DEBUG,"Shut down\n");
 	m_bIsShuttingDown = true;
+	m_bRestart = true;
 
-fmHashTableEntry* timeoutHashEntry;
-while ((timeoutHashEntry = m_pChannelList->popTimeoutEntry(true)) != NULL)
+	fmHashTableEntry* timeoutHashEntry;
+	while ((timeoutHashEntry = m_pChannelList->popTimeoutEntry(true)) != NULL)
 	{			
-		CAMsg::printMsg(LOG_DEBUG,"Shutting down, closing client connection.\n");				
-					
-			closeConnection(timeoutHashEntry);
-}	
-	
-	
-	//m_bRestart = true;
-	//clean();
+		CAMsg::printMsg(LOG_DEBUG,"Shutting down, closing client connection.\n");					
+		closeConnection(timeoutHashEntry);
+	}	
+	clean();
 }
 
 
