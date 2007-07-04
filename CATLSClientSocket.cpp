@@ -42,6 +42,7 @@ CATLSClientSocket::CATLSClientSocket()
 		m_pSSL = NULL;
 		m_pRootCert=NULL;
 		m_pSocket=new CASocket(true);
+		m_pSocket->setRecvBuff(255);
 		//m_pSocket->setNonBlocking(true);
 	}
 
