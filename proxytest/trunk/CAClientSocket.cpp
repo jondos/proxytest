@@ -66,9 +66,9 @@ SINT32 CAClientSocket::receiveFullyT(UINT8* buff,UINT32 len,UINT32 msTimeOut)
 			{
 				if(ret==E_AGAIN)
 				{
-					CAMsg::printMsg(LOG_DEBUG, "CAClientSocket:: Select\n");
+					//CAMsg::printMsg(LOG_DEBUG, "CAClientSocket:: Select\n");
 					ret=oSG.select(msTimeOut);
-					CAMsg::printMsg(LOG_DEBUG, "CAClientSocket:: After select\n");
+					//CAMsg::printMsg(LOG_DEBUG, "CAClientSocket:: After select\n");
 					continue;
 				}
 				else
