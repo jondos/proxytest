@@ -357,6 +357,21 @@ SINT32 CAFirstMixChannelList::pushTimeoutEntry(fmHashTableEntry* pHashTableEntry
 	return ret;
 }
 
+UINT32 CAFirstMixChannelList::countTimeoutEntries()
+{
+	fmHashTableEntry* pHashTableEntry;
+	UINT32 count = 1;
+	
+	if (m_listTimoutHead == NULL)
+	{
+		return 0;
+	}
+
+	for (pHashTableEntry = m_listTimoutHead->list_TimeoutHashEntries.next;  pHashTableEntry != m_listTimoutHead; count++);
+
+	return count;
+}
+
 		
 SINT32 CAFirstMixChannelList::pushTimeoutEntry_internal(fmHashTableEntry* pHashTableEntry)
 {	
@@ -368,11 +383,12 @@ SINT32 CAFirstMixChannelList::pushTimeoutEntry_internal(fmHashTableEntry* pHashT
 	INIT_STACK;
 	BEGIN_STACK("CAFirstMixChannelList::pushTimeoutEntry_internal");
 	
+	CAMsg::printMsg(LOG_DEBUG,"Entries in tiemout list before push: %d\n", countTimeoutEntries());
 	
 	pHashTableEntry->list_TimeoutHashEntries.timoutSecs = time(NULL) + EXPIRATION_TIME_SECS;
 	
 	SAVE_STACK("CAFirstMixChannelList::pushTimeoutEntry_internal", "removing from timeout list");
-	// remove from timeout list if needed before adding it to the end
+	// remove from timeout list if needed before adding it to the end	
 	removeFromTimeoutList(pHashTableEntry);
 	
 	if (m_listTimoutFoot == NULL)
@@ -392,6 +408,8 @@ SINT32 CAFirstMixChannelList::pushTimeoutEntry_internal(fmHashTableEntry* pHashT
 	}
 	pHashTableEntry->list_TimeoutHashEntries.next = NULL;
 	m_listTimoutFoot = pHashTableEntry;
+	
+		CAMsg::printMsg(LOG_DEBUG,"Entries in tiemout list after push: %d\n", countTimeoutEntries());
 	
 	FINISH_STACK("CAFirstMixChannelList::pushTimeoutEntry_internal");
 	
