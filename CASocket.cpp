@@ -49,7 +49,6 @@ UINT32 CASocket::m_u32MaxNormalSockets=0xFFFFFFFF; //how many "normal" sockets a
 CASocket::CASocket(bool bIsReservedSocket)
 	{			
 		m_Socket=0;
-		m_closeMode=0;
 		m_bSocketIsClosed=true;
 		m_bIsReservedSocket=bIsReservedSocket;
 	}
@@ -232,7 +231,7 @@ SINT32 CASocket::connect(const CASocketAddr & psa,UINT32 retry,UINT32 time)
 			}
 		return err;
 	}
-			
+	
 
 /** Tries to connect to peer psa.
 	*
@@ -305,19 +304,23 @@ SINT32 CASocket::connect(const CASocketAddr & psa,UINT32 msTimeOut)
 SINT32 CASocket::close()
 	{
 		m_csClose.lock();
-		int ret;
+		int ret = ::closesocket(m_Socket);
+		
 		if(!m_bSocketIsClosed)
-			{
-				::closesocket(m_Socket);
+		{				
 			if(!m_bIsReservedSocket)
+			{
 				m_u32NormalSocketsOpen--;
-				//CAMsg::printMsg(LOG_DEBUG,"Open Sockets: %d\n", m_u32NormalSocketsOpen);
-				m_bSocketIsClosed=true;
-				m_closeMode=0;
-				ret=E_SUCCESS;
 			}
+			//CAMsg::printMsg(LOG_DEBUG,"Open Sockets: %d\n", m_u32NormalSocketsOpen);
+			m_bSocketIsClosed=true;
+			ret = GET_NET_ERROR;
+		}
 		else
-			ret=E_UNKNOWN;
+		{
+			ret=E_SUCCESS;
+		}
+
 		m_csClose.unlock();
 		return ret;
 	}
