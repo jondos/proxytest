@@ -53,12 +53,13 @@ public:
 	SINT32 close();
 
 	/** Establishes the actual TCP/IP connection and performs the TLS handshake */
-	SINT32 connect(CASocketAddr & psa, UINT32 retry, UINT32 msWaitTime);
+	SINT32 connect(CASocketAddr & psa, UINT32 msTimeout);
 	
+	/*
 	SINT32 connect(CASocketAddr & psa)
 		{
 			return connect(psa, 1, 0);
-		}
+		}*/
 
 	/** Sets the Certifcate we accept as server identifikation. Set to NULL if you do not want
 	* any certificate checking. 
