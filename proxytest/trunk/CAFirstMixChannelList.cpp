@@ -328,7 +328,7 @@ fmHashTableEntry* CAFirstMixChannelList::popTimeoutEntry(bool a_bForce)
 	
 fmHashTableEntry* CAFirstMixChannelList::popTimeoutEntry_internal(bool a_bForce)
 {
-	//fmHashTableEntry* pHashTableEntry;
+	fmHashTableEntry* pHashTableEntry;
 	
 	if (m_listTimoutHead == NULL)
 	{

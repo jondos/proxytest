@@ -247,6 +247,8 @@ class CAFirstMixChannelList
 			 */
 			SINT32 pushTimeoutEntry_internal(fmHashTableEntry* pHashTableEntry);
 			
+			fmHashTableEntry* popTimeoutEntry_internal(bool a_bForce);
+			
 			UINT32 countTimeoutEntries();
 		
 			/** Gets the in-channel and all associated information for the given out-channel.
