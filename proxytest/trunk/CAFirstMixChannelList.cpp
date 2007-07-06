@@ -340,10 +340,13 @@ fmHashTableEntry* CAFirstMixChannelList::popTimeoutEntry_internal(bool a_bForce)
 	if (a_bForce || pHashTableEntry->list_TimeoutHashEntries.timoutSecs <= time(NULL))
 	{
 		if (removeFromTimeoutList(pHashTableEntry) == E_SUCCESS)
+		{			
+			return pHashTableEntry;
+		}
+		else
 		{
 			CAMsg::printMsg(LOG_CRIT,
-				"CAFirstMixChannelList:popTimeoutEntry_internal Could not remove expired entry from timeout list!\n");
-			return pHashTableEntry;
+				"CAFirstMixChannelList:popTimeoutEntry_internal Could not remove expired entry from timeout list!\n");	
 		}
 		
 		/*

@@ -97,9 +97,10 @@ void removePidFile()
 
 
 void terminate(void)
-{
-	if(pMix!=NULL)
+{	
+	if(!bTriedTermination && pMix!=NULL)
 	{
+		bTriedTermination = true;
 		pMix->shutDown();
 		for (UINT32 i = 0; i < 20 && !(pMix->isShutDown()); i++)
 		{
@@ -127,11 +128,8 @@ void signal_segv( int )
 	{
 		CAMsg::printMsg( LOG_CRIT, "Stack trace: none available\n");
 	}
-	if (!bTriedTermination)
-	{
-		bTriedTermination = true;
-		terminate();
-	}
+	
+	terminate();
 	removePidFile();
 	exit(1);
 }
