@@ -304,10 +304,11 @@ SINT32 CASocket::connect(const CASocketAddr & psa,UINT32 msTimeOut)
 SINT32 CASocket::close()
 	{
 		m_csClose.lock();
-		int ret = ::closesocket(m_Socket);
+		int ret = E_SUCCESS;
 		
 		if(!m_bSocketIsClosed)
 		{				
+			::closesocket(m_Socket);
 			if(!m_bIsReservedSocket)
 			{
 				m_u32NormalSocketsOpen--;
@@ -315,10 +316,6 @@ SINT32 CASocket::close()
 			//CAMsg::printMsg(LOG_DEBUG,"Open Sockets: %d\n", m_u32NormalSocketsOpen);
 			m_bSocketIsClosed=true;
 			ret = GET_NET_ERROR;
-		}
-		else
-		{
-			ret=E_SUCCESS;
 		}
 
 		m_csClose.unlock();

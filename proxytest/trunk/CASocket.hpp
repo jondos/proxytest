@@ -44,11 +44,12 @@ class CASocket:public CAClientSocket
 			SINT32 listen(const CASocketAddr& psa);
 			SINT32 listen(UINT16 port);
 			SINT32 accept(CASocket &s);
+			
 			SINT32 connect(const CASocketAddr& psa)
 			{
 				return connect(psa,1,0);
 			}
-			SINT32 connect(const CASocketAddr& psa,UINT32 retry,UINT32 msWaitTime);
+			SINT32 connect(const CASocketAddr& psa,UINT32 retry,UINT32 sWaitTime);
 			SINT32 connect(const CASocketAddr& psa,UINT32 msTimeOut);
 			
 			SINT32 close();
@@ -120,7 +121,6 @@ class CASocket:public CAClientSocket
 			SINT32 create(int type, bool a_bShowTypicalError);
 		
 			CAMutex m_csClose;
-			UINT32 m_closeMode;
 			///The following two variables are use to realise "reserved" sockets. The rational behind is to ensure
 			///that we could allway crate "reserved" socket why we may fail to create normal sockets because of to many open files related restrictions
 			static UINT32 m_u32NormalSocketsOpen; //how many "normal" sockets are open
