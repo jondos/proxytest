@@ -317,7 +317,7 @@ fmHashTableEntry* CAFirstMixChannelList::popTimeoutEntry()
 	
 fmHashTableEntry* CAFirstMixChannelList::popTimeoutEntry(bool a_bForce)	
 {
-	SINT32 ret;
+	fmHashTableEntry* ret;
 	
 	m_Mutex.lock();
 	ret = popTimeoutEntry_internal(a_bForce);
