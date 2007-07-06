@@ -382,16 +382,9 @@ SINT32 CAFirstMixChannelList::pushTimeoutEntry(fmHashTableEntry* pHashTableEntry
 UINT32 CAFirstMixChannelList::countTimeoutEntries()
 {
 	fmHashTableEntry* pHashTableEntry;
-	UINT32 count;
-	
-	if (m_listTimoutHead == NULL)
-	{
-		return 0;
-	}
-	pHashTableEntry = m_listTimoutHead->list_TimeoutHashEntries.next;
+	UINT32 count = 0;
 
-
-	for (pHashTableEntry = m_listTimoutHead, count = 1; pHashTableEntry != m_listTimoutFoot; 
+	for (pHashTableEntry = m_listTimoutHead; pHashTableEntry != NULL; 
 		count++, pHashTableEntry = pHashTableEntry->list_TimeoutHashEntries.next);
 
 	return count;
