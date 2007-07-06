@@ -91,6 +91,7 @@ SINT32 CATLSClientSocket::setServerCertificate(CACertificate* pCert)
  */
 SINT32 CATLSClientSocket::doTLSConnect(CASocketAddr &psa)
 	{
+		SINT32 status;
 		#ifdef DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"starting tls connect\n");
 		#endif
@@ -104,9 +105,10 @@ SINT32 CATLSClientSocket::doTLSConnect(CASocketAddr &psa)
 			CAMsg::printMsg(LOG_DEBUG,"my set fd socket is %i\n",s);
 		#endif
 		SSL_set_fd( m_pSSL, s );
-		if( SSL_connect( m_pSSL ) != 1) 
+		if((status = SSL_connect( m_pSSL )) != 1) 
 			{
-				CAMsg::printMsg(LOG_INFO,"doTLSConnect() SSL_connect() failed!\n");
+				CAMsg::printMsg(LOG_INFO,"CATLSClientSocket::doTLSConnect() failed! Reason: %i\n", status);
+				SSL_shutdown(m_pSSL);
 				close();
 				m_bConnectedTLS = false;
 				return E_UNKNOWN;
