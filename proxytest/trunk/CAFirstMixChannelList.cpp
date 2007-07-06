@@ -315,9 +315,20 @@ fmHashTableEntry* CAFirstMixChannelList::popTimeoutEntry()
 	return popTimeoutEntry(false);
 }	
 	
-fmHashTableEntry* CAFirstMixChannelList::popTimeoutEntry(bool a_bForce)
+fmHashTableEntry* CAFirstMixChannelList::popTimeoutEntry(bool a_bForce)	
 {
-	fmHashTableEntry* pHashTableEntry;
+	SINT32 ret;
+	
+	m_Mutex.lock();
+	ret = popTimeoutEntry_internal(a_bForce);
+	m_Mutex.unlock();
+	
+	return ret;
+}
+	
+fmHashTableEntry* CAFirstMixChannelList::popTimeoutEntry_internal(bool a_bForce)
+{
+	//fmHashTableEntry* pHashTableEntry;
 	
 	if (m_listTimoutHead == NULL)
 	{
@@ -325,9 +336,11 @@ fmHashTableEntry* CAFirstMixChannelList::popTimeoutEntry(bool a_bForce)
 		return NULL;
 	}
 	
-	pHashTableEntry = m_listTimoutHead;
-	if (a_bForce || pHashTableEntry->list_TimeoutHashEntries.timoutSecs <= time(NULL))
+	//pHashTableEntry = m_listTimoutHead;
+	if (a_bForce || m_listTimoutHead->list_TimeoutHashEntries.timoutSecs <= time(NULL))
 	{
+		return removeFromTimeoutList(m_listTimoutHead);
+		/*
 		m_listTimoutHead = pHashTableEntry->list_TimeoutHashEntries.next;
 		if (m_listTimoutHead == NULL)
 		{
@@ -339,7 +352,7 @@ fmHashTableEntry* CAFirstMixChannelList::popTimeoutEntry(bool a_bForce)
 			m_listTimoutHead->list_TimeoutHashEntries.prev = NULL;			
 		}
 		pHashTableEntry->list_TimeoutHashEntries.next = NULL;
-		return pHashTableEntry;
+		return pHashTableEntry;*/
 	}
 	
 	return NULL;
@@ -412,7 +425,7 @@ SINT32 CAFirstMixChannelList::pushTimeoutEntry_internal(fmHashTableEntry* pHashT
 	pHashTableEntry->list_TimeoutHashEntries.next = NULL;
 	m_listTimoutFoot = pHashTableEntry;
 	
-		CAMsg::printMsg(LOG_DEBUG,"Entries in timeout list after push: %d\n", countTimeoutEntries());
+	CAMsg::printMsg(LOG_DEBUG,"Entries in timeout list after push: %d\n", countTimeoutEntries());
 	
 	FINISH_STACK("CAFirstMixChannelList::pushTimeoutEntry_internal");
 	
