@@ -92,6 +92,7 @@ SINT32 CAAccountingBIInterface::initBIConnection()
 					//buf, address.getPort(), rc
 					pBI->getHostName(), pBI->getPortNumber(), rc
 				);
+			m_pSocket->close();
 			return E_UNKNOWN;
 		}
 		CAMsg::printMsg(LOG_DEBUG,"CAAccountingBIInterface: BI connection to %s:%i established!\n", pBI->getHostName(),pBI->getPortNumber());
