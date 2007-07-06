@@ -305,16 +305,20 @@ SINT32 CASocket::close()
 	{
 		m_csClose.lock();
 		int ret = E_SUCCESS;
-		
+		ret = ::closesocket(m_Socket);
 		if(!m_bSocketIsClosed)
 		{				
-			::closesocket(m_Socket);
+			
 			if(!m_bIsReservedSocket)
 			{
 				m_u32NormalSocketsOpen--;
 			}
 			//CAMsg::printMsg(LOG_DEBUG,"Open Sockets: %d\n", m_u32NormalSocketsOpen);
-			m_bSocketIsClosed=true;
+			m_bSocketIsClosed=true;			
+		}
+		
+		if (ret != E_SUCCESS)
+		{
 			ret = GET_NET_ERROR;
 		}
 
