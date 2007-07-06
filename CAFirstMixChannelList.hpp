@@ -246,6 +246,8 @@ class CAFirstMixChannelList
 			 * adds the entry to the timeout queue
 			 */
 			SINT32 pushTimeoutEntry_internal(fmHashTableEntry* pHashTableEntry);
+			
+			UINT32 countTimeoutEntries();
 		
 			/** Gets the in-channel and all associated information for the given out-channel.
 				* This method is NOT thread safe (and so only for internal use)
