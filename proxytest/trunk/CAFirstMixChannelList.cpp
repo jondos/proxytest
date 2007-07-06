@@ -336,10 +336,14 @@ fmHashTableEntry* CAFirstMixChannelList::popTimeoutEntry_internal(bool a_bForce)
 		return NULL;
 	}
 	
-	//pHashTableEntry = m_listTimoutHead;
-	if (a_bForce || m_listTimoutHead->list_TimeoutHashEntries.timoutSecs <= time(NULL))
+	pHashTableEntry = m_listTimoutHead;
+	if (a_bForce || pHashTableEntry->list_TimeoutHashEntries.timoutSecs <= time(NULL))
 	{
-		return removeFromTimeoutList(m_listTimoutHead);
+		if (removeFromTimeoutList(pHashTableEntry) == E_SUCCESS)
+		{
+			return pHashTableEntry;
+		}
+		
 		/*
 		m_listTimoutHead = pHashTableEntry->list_TimeoutHashEntries.next;
 		if (m_listTimoutHead == NULL)
