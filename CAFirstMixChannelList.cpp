@@ -401,7 +401,7 @@ SINT32 CAFirstMixChannelList::pushTimeoutEntry_internal(fmHashTableEntry* pHashT
 	INIT_STACK;
 	BEGIN_STACK("CAFirstMixChannelList::pushTimeoutEntry_internal");
 	
-	CAMsg::printMsg(LOG_DEBUG,"Entries in timeout list before push: %d\n", countTimeoutEntries());
+	//CAMsg::printMsg(LOG_DEBUG,"Entries in timeout list before push: %d\n", countTimeoutEntries());
 	
 	pHashTableEntry->list_TimeoutHashEntries.timoutSecs = time(NULL) + EXPIRATION_TIME_SECS;
 	
@@ -427,7 +427,7 @@ SINT32 CAFirstMixChannelList::pushTimeoutEntry_internal(fmHashTableEntry* pHashT
 	pHashTableEntry->list_TimeoutHashEntries.next = NULL;
 	m_listTimoutFoot = pHashTableEntry;
 	
-	CAMsg::printMsg(LOG_DEBUG,"Entries in timeout list after push: %d\n", countTimeoutEntries());
+	//CAMsg::printMsg(LOG_DEBUG,"Entries in timeout list after push: %d\n", countTimeoutEntries());
 	
 	FINISH_STACK("CAFirstMixChannelList::pushTimeoutEntry_internal");
 	
