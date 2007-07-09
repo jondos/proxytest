@@ -122,7 +122,7 @@ SINT32 CAMix::start()
 #endif
 				CAMsg::printMsg(LOG_DEBUG, "CAMix main: before init()\n");
 		initStatus = init();
-        if((initStatus == E_SUCCESS)
+        if(initStatus == E_SUCCESS)
         {
 					CAMsg::printMsg(LOG_DEBUG, "CAMix main: init() returned success\n");
             if(m_pInfoService != NULL)
