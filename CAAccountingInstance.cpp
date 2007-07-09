@@ -562,9 +562,9 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 /******************************************************************/
 
 
-SINT32 CAAccountingInstance::getPrepaidBytes(tAiAccountingInfo* pAccInfos)
+SINT32 CAAccountingInstance::getPrepaidBytes(tAiAccountingInfo* pAccInfo)
 {
-	if (pAccInfos == NULL)
+	if (pAccInfo == NULL)
 	{
 		return 0;
 	}

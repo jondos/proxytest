@@ -180,7 +180,7 @@ private:
 	void handleChallengeResponse(tAiAccountingInfo* pAccInfo, DOM_Element &root);
 	void handleChallengeResponse_internal(tAiAccountingInfo* pAccInfo, DOM_Element &root);
 
-	SINT32 getPrepaidBytes(tAiAccountingInfo* pAccInfos);
+	static SINT32 getPrepaidBytes(tAiAccountingInfo* pAccInfos);
 	SINT32 prepareCCRequest(CAMix* callingMix, UINT8* a_AiName);			
 	static SINT32 makeCCRequest( const UINT64 accountNumber, const UINT64 transferredBytes, DOM_Document& doc);
 	static SINT32 sendCCRequest(tAiAccountingInfo* pAccInfo);
