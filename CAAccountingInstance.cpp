@@ -486,16 +486,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			
 			//confirmed and transferred bytes are cumulative, so they use UINT64 to store potentially huge values
 			//prepaid Bytes as the difference will be much smaller, but might be negative, so we cast to signed int
-			SINT32 prepaidBytes;
-			if (pAccInfo->confirmedBytes > pAccInfo->transferredBytes)
-			{
-				prepaidBytes = pAccInfo->confirmedBytes - pAccInfo->transferredBytes;
-			}
-			else
-			{
-				prepaidBytes = pAccInfo->transferredBytes - pAccInfo->confirmedBytes;
-				prepaidBytes *= -1;
-			}
+			SINT32 prepaidBytes = getPrepaidBytes(pAccInfo);
 			 
 			//CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Prepaid bytes: %d!\n", prepaidBytes);
 				
@@ -569,6 +560,28 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 /******************************************************************/	
 //methods to provide a unified point of exit for handleJapPacket
 /******************************************************************/
+
+
+SINT32 CAAccountingInstance::getPrepaidBytes(tAiAccountingInfo* pAccInfos)
+{
+	if (pAccInfos == NULL)
+	{
+		return 0;
+	}
+	
+	SINT32 prepaidBytes;
+	if (pAccInfo->confirmedBytes > pAccInfo->transferredBytes)
+	{
+		prepaidBytes = pAccInfo->confirmedBytes - pAccInfo->transferredBytes;
+	}
+	else
+	{
+		prepaidBytes = pAccInfo->transferredBytes - pAccInfo->confirmedBytes;
+		prepaidBytes *= -1;
+	}	
+	return prepaidBytes;
+}
+
 
 /**
  * everything is fine, let the packet pass
@@ -1298,6 +1311,9 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 	}
 	m_currentAccountsHashtable->getMutex().unlock();
 	
+	if (pAccInfo->transferredBytes != pCC->getTransferredBytes();
+			pAccInfo->confirmedBytes = pCC->getTransferredBytes();
+	
 	/** @todo We need this trick so that the program does not freeze with active AI ThreadPool!!!! */
 	//pAccInfo->mutex->lock();
 	
@@ -1546,15 +1562,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 					if (pAccInfo->userID == loginEntry->userID)
 					{
 						//store prepaid bytes in database, so the user wont lose the prepaid amount by disconnecting
-						if (pAccInfo->confirmedBytes > pAccInfo->transferredBytes)
-						{
-							prepaidBytes = pAccInfo->confirmedBytes - pAccInfo->transferredBytes;
-						}
-						else
-						{
-							prepaidBytes = pAccInfo->transferredBytes - pAccInfo->confirmedBytes;
-							prepaidBytes *= -1;
-						}												
+						prepaidBytes = getPrepaidBytes(pAccInfo);															
 						if (ms_pInstance->m_dbInterface)
 						{
 							ms_pInstance->m_dbInterface->storePrepaidAmount(pAccInfo->accountNumber,prepaidBytes, ms_pInstance->m_currentCascade);
