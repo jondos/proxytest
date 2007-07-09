@@ -121,7 +121,8 @@ SINT32 CAMix::start()
 				if(!m_bLoop) goto SKIP;
 #endif
 				CAMsg::printMsg(LOG_DEBUG, "CAMix main: before init()\n");
-        if((initStatus == init()) == E_SUCCESS)
+		initStatus = init();
+        if((initStatus == E_SUCCESS)
         {
 					CAMsg::printMsg(LOG_DEBUG, "CAMix main: init() returned success\n");
             if(m_pInfoService != NULL)
