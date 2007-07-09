@@ -1311,9 +1311,6 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 	}
 	m_currentAccountsHashtable->getMutex().unlock();
 	
-	if (pAccInfo->transferredBytes != pCC->getTransferredBytes();
-			pAccInfo->confirmedBytes = pCC->getTransferredBytes();
-	
 	/** @todo We need this trick so that the program does not freeze with active AI ThreadPool!!!! */
 	//pAccInfo->mutex->lock();
 	
