@@ -53,11 +53,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 // the number of seconds that may pass between a pay request
 // and the jap sending its answer
-#define CHALLENGE_TIMEOUT 5
-// the number of packets that JAP is allowed to receive after a fatal error
-//#define FATAL_GRACE_PACKETS 10 
-#define HARD_LIMIT_TIMEOUT 10
-#define AUTH_TIMEOUT 5
+#define CHALLENGE_TIMEOUT 10
+#define HARD_LIMIT_TIMEOUT 15
+#define AUTH_TIMEOUT 10
 
 
 struct AccountHashEntry

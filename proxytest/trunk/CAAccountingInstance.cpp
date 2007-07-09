@@ -1435,7 +1435,7 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 		{
 			UINT8 tmp[32], tmpOther[32];
 			print64(tmp,pCC->getTransferredBytes());
-			print64(tmpOther,confirmedBytes);		
+			print64(tmpOther,pAccInfo->confirmedBytes);		
 			CAMsg::printMsg( LOG_ERR, "CostConfirmation has insufficient number of bytes (%s < %s). Ignoring...\n", 
 				tmp, tmpOther );
 		}
