@@ -1431,9 +1431,15 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 	//requesting and receiving the CC
 	if(pCC->getTransferredBytes() <= pAccInfo->confirmedBytes )
 	{
-		UINT8 tmp[32];
-		print64(tmp,pCC->getTransferredBytes());
-		CAMsg::printMsg( LOG_ERR, "CostConfirmation has Wrong Number of Bytes (%s). Ignoring...\n", tmp );
+		if (pCC->getTransferredBytes() < pAccInfo->confirmedBytes)
+		{
+			UINT8 tmp[32], tmpOther[32];
+			print64(tmp,pCC->getTransferredBytes());
+			print64(tmpOther,confirmedBytes);		
+			CAMsg::printMsg( LOG_ERR, "CostConfirmation has insufficient number of bytes (%s < %s). Ignoring...\n", 
+				tmp, tmpOther );
+		}
+	
 		pAccInfo->authFlags &= ~AUTH_SENT_CC_REQUEST;
 		
 		// fetch cost confirmation from last session if available, and send it
