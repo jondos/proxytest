@@ -974,6 +974,7 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 			return ;
 		}		
 		
+	/** @todo Dangerous, as this may collide with previous accounts that have been used and deleted before...
 		if (m_dbInterface->getAccountStatus(pAccInfo->accountNumber, status) != E_SUCCESS)
 		{
 			UINT8 tmp[32];
@@ -986,6 +987,7 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 			UINT8 tmp[32];
 			print64(tmp,pAccInfo->accountNumber);
 			CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: The user with account %s should be kicked out due to error %u!\n", tmp, status);
+
 			if (status == CAXMLErrorMessage::ERR_KEY_NOT_FOUND)
 			{
 				authFlags |= AUTH_INVALID_ACCOUNT;
@@ -1013,7 +1015,7 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 				}										
 				ms_pInstance->m_settleHashtable->getMutex().unlock();
 			}
-		}
+		}*/
 		
 		// fetch cost confirmation from last session if available, and retrieve information
 		CAXMLCostConfirmation * pCC = NULL;
@@ -1420,6 +1422,18 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 		print64(tmp,pCC->getTransferredBytes());
 		CAMsg::printMsg( LOG_ERR, "CostConfirmation has Wrong Number of Bytes (%s). Ignoring...\n", tmp );
 		pAccInfo->authFlags &= ~AUTH_SENT_CC_REQUEST;
+		
+		// fetch cost confirmation from last session if available, and send it
+		/*
+		CAXMLCostConfirmation * pCC = NULL;
+		m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, m_currentCascade, &pCC);
+		if(pCC!=NULL)
+		{
+			pAccInfo->pControlChannel->sendXMLMessage(pCC->getXMLDocument());
+			delete pCC;
+		}*/
+		
+		
 		/*
 		CAXMLErrorMessage err(CAXMLErrorMessage::ERR_WRONG_DATA, 
 			(UINT8*)"Your CostConfirmation has a wrong number of transferred bytes");
@@ -1474,6 +1488,7 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 	
 	pHashEntry->pAccountingInfo->authFlags = 
 		AUTH_SENT_ACCOUNT_REQUEST | AUTH_TIMEOUT_STARTED | AUTH_HARD_LIMIT_REACHED;		
+	pHashEntry->pAccountingInfo->authFlags |= AUTH_SENT_CC_REQUEST; // prevents multiple CC requests on login
 	pHashEntry->pAccountingInfo->authTimeoutStartSeconds = time(NULL);
 	pHashEntry->pAccountingInfo->lastHardLimitSeconds = time(NULL);
 	pHashEntry->pAccountingInfo->sessionPackets = 0;

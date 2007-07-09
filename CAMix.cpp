@@ -121,7 +121,7 @@ SINT32 CAMix::start()
 				if(!m_bLoop) goto SKIP;
 #endif
 				CAMsg::printMsg(LOG_DEBUG, "CAMix main: before init()\n");
-        if((initStatus = init()) == E_SUCCESS)
+        if((initStatus == init()) == E_SUCCESS)
         {
 					CAMsg::printMsg(LOG_DEBUG, "CAMix main: init() returned success\n");
             if(m_pInfoService != NULL)
@@ -148,7 +148,7 @@ SINT32 CAMix::start()
 #endif
 						CAMsg::printMsg(LOG_DEBUG, "CAMix main: loop() returned, maybe connection lost.\n");
         }
-        else if (initStatus = E_SHUTDOWN)
+        else if (initStatus == E_SHUTDOWN)
         {
         	CAMsg::printMsg(LOG_DEBUG, "Mix has been stopped. Waiting for shutdown...\n");
         }
