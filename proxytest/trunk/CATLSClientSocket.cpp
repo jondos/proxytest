@@ -189,7 +189,7 @@ SINT32 CATLSClientSocket::sendFully(const UINT8* buff, UINT32 len)
 	  if(len==0) 
 			return E_SUCCESS; //nothing to send
 		SINT32 ret=::SSL_write(m_pSSL,(char*)buff,len);
-	  if(ret < 0 || (UINT32)ret < len)
+	  if(ret < 0 || ret < len)
 			return E_UNKNOWN;
 		return E_SUCCESS;
 	}
