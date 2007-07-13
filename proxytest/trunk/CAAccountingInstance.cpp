@@ -987,7 +987,7 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 			return ;
 		}		
 		
-	/** @todo Dangerous, as this may collide with previous accounts that have been used and deleted before...
+	/** @todo Dangerous, as this may collide with previous accounts that have been used and deleted before... */
 		if (m_dbInterface->getAccountStatus(pAccInfo->accountNumber, status) != E_SUCCESS)
 		{
 			UINT8 tmp[32];
@@ -1001,11 +1001,11 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 			print64(tmp,pAccInfo->accountNumber);
 			CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: The user with account %s should be kicked out due to error %u!\n", tmp, status);
 
-			if (status == CAXMLErrorMessage::ERR_KEY_NOT_FOUND)
+			/*if (status == CAXMLErrorMessage::ERR_KEY_NOT_FOUND)
 			{
 				authFlags |= AUTH_INVALID_ACCOUNT;
 			}
-			else if (status == CAXMLErrorMessage::ERR_ACCOUNT_EMPTY)
+			else*/ if (status == CAXMLErrorMessage::ERR_ACCOUNT_EMPTY)
 			{
 				authFlags |= AUTH_ACCOUNT_EMPTY;
 			}
