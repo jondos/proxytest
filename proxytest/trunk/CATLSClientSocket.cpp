@@ -38,10 +38,9 @@ CATLSClientSocket::CATLSClientSocket()
 		SSL_METHOD* meth;
 		meth = TLSv1_client_method();
 		m_pCtx = SSL_CTX_new( meth );
-		//SSL_CTX_set_timeout(m_pCtx, 20); // 20 seconds timeout
 		m_pSSL = NULL;
 		m_pRootCert=NULL;
-		m_pSocket=new CASocket(true);
+		m_pSocket=new CASocket();
 	}
 
 CATLSClientSocket::~CATLSClientSocket()

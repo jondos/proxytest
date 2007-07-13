@@ -572,6 +572,49 @@ SINT32 CASocket::receive(UINT8* buff,UINT32 len)
 	  return ret;	    	    
 	}
 
+/** Trys to receive all bytes. If after the timeout value has elapsed, 
+	* not all bytes are received
+	* the error E_TIMEDOUT is returned.
+	*	@param buff byte array, where the received bytes would be stored 
+	*	@param len	on input holds the number of bytes which should be read,
+	*	@param msTimeOut the timout in milli seconds
+	* @retval E_TIMEDOUT if not all byts could be read
+	* @retval E_UNKNOWN if an error occured
+	* @retval E_SUCCESS if all bytes could be read
+	*
+	*/
+SINT32 CASocket::receiveFullyT(UINT8* buff,UINT32 len,UINT32 msTimeOut)
+	{
+		SINT32 ret;
+		UINT32 pos=0;
+		UINT64 currentTime,endTime;
+		getcurrentTimeMillis(currentTime);
+		set64(endTime,currentTime);
+		add64(endTime,msTimeOut);
+		CASingleSocketGroup oSG(false);
+		oSG.add(*this);
+		for(;;)
+			{
+				ret=oSG.select(msTimeOut);
+				if(ret==1)
+					{
+						ret=receive(buff+pos,len);
+						if(ret<=0)
+							return E_UNKNOWN;
+						pos+=ret;
+						len-=ret;
+					}
+				else if(ret==E_TIMEDOUT)
+					return E_TIMEDOUT;
+				if(len==0)
+					return E_SUCCESS;
+				getcurrentTimeMillis(currentTime);
+				if(!isLesser64(currentTime,endTime))
+					return E_TIMEDOUT;
+				msTimeOut=diff64(endTime,currentTime);
+			}
+	}
+
 SINT32 CASocket::getLocalPort()
 	{
 		struct sockaddr_in addr;
