@@ -1028,7 +1028,7 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 				}										
 				ms_pInstance->m_settleHashtable->getMutex().unlock();
 			}
-		}*/
+		}
 		
 		// fetch cost confirmation from last session if available, and retrieve information
 		CAXMLCostConfirmation * pCC = NULL;
