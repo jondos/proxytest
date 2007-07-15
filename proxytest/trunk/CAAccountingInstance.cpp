@@ -1443,7 +1443,7 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 		if (pCC->getTransferredBytes() >= pAccInfo->bytesToConfirm)
 		{
 			// the user confirmed everything we wanted; if a timeout has been set, it should be reset
-			pAccInfo->authTimeoutStartSeconds = time(NULL);
+			pAccInfo->lastHardLimitSeconds = time(NULL);
 		}
 		pAccInfo->bytesToConfirm = 0;
 		pAccInfo->authFlags &= ~AUTH_SENT_CC_REQUEST;
