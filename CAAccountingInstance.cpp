@@ -1519,7 +1519,7 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 	pHashEntry->pAccountingInfo->sessionPackets = 0;
 	pHashEntry->pAccountingInfo->transferredBytes = 0;
 	pHashEntry->pAccountingInfo->confirmedBytes = 0;
-	pHashEntry->pAccountingInfo->transferredBytesLastCC = 0;
+	pHashEntry->pAccountingInfo->bytesToConfirm = 0;
 	pHashEntry->pAccountingInfo->nrInQueue = 0;
 	pHashEntry->pAccountingInfo->userID = pHashEntry->id;
 	pHashEntry->pAccountingInfo->mutex = new CAMutex;
