@@ -228,6 +228,9 @@ struct t_accountinginfo
 	/** the number of bytes that was confirmed by the account user */
 	UINT64 confirmedBytes;
 	
+	/** The bytes the user could confirm in the last CC sent to him.  */
+	UINT64 bytesToConfirm;
+	
 	/** the user's account number */
 	UINT64 accountNumber;
 	
