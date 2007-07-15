@@ -644,8 +644,8 @@ SINT32 CAAccountingInstance::sendCCRequest(tAiAccountingInfo* pAccInfo)
     pglobalOptions->getPrepaidInterval(&prepaidInterval);
     // prepaid bytes are "confirmed bytes - transfered bytes"
     //UINT64 bytesToConfirm = pAccInfo->confirmedBytes + (prepaidInterval) - (pAccInfo->confirmedBytes - pAccInfo->transferredBytes);			
-    UINT64 bytesToConfirm = (prepaidInterval) + pAccInfo->transferredBytes;
-	makeCCRequest(pAccInfo->accountNumber, bytesToConfirm, doc);				
+    pAccInfo->bytesToConfirm = (prepaidInterval) + pAccInfo->transferredBytes;
+	makeCCRequest(pAccInfo->accountNumber, pAccInfo->bytesToConfirm, doc);				
 	pAccInfo->authFlags |= AUTH_SENT_CC_REQUEST;
 #ifdef DEBUG	
 	CAMsg::printMsg(LOG_DEBUG, "CC request sent for %u bytes \n",bytesToConfirm);
@@ -1440,6 +1440,12 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 				tmp, tmpOther );
 		}
 	
+		if (pCC->getTransferredBytes() >= pAccInfo->bytesToConfirm)
+		{
+			// the user confirmed everything we wanted; if a timeout has been set, it should be reset
+			pAccInfo->authTimeoutStartSeconds = time(NULL);
+		}
+		pAccInfo->bytesToConfirm = 0;
 		pAccInfo->authFlags &= ~AUTH_SENT_CC_REQUEST;
 		
 		// fetch cost confirmation from last session if available, and send it
@@ -1513,6 +1519,7 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 	pHashEntry->pAccountingInfo->sessionPackets = 0;
 	pHashEntry->pAccountingInfo->transferredBytes = 0;
 	pHashEntry->pAccountingInfo->confirmedBytes = 0;
+	pHashEntry->pAccountingInfo->transferredBytesLastCC = 0;
 	pHashEntry->pAccountingInfo->nrInQueue = 0;
 	pHashEntry->pAccountingInfo->userID = pHashEntry->id;
 	pHashEntry->pAccountingInfo->mutex = new CAMutex;
