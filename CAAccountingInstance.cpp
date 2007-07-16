@@ -418,6 +418,9 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 		
 		if (pAccInfo->authFlags & AUTH_ACCOUNT_EMPTY)
 		{
+			// There should be no time limit. The connections is simply closed after all prepaid bytes are gone.
+			pAccInfo->lastHardLimitSeconds = time(NULL);
+			
 			if (getPrepaidBytes(pAccInfo) <= 0)
 			{
 				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Account empty! Kicking out user...\n");				
