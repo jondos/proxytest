@@ -147,7 +147,7 @@ SINT32 CAXMLErrorMessage::setValues(DOM_Element &elemRoot)
 	else if (ERR_ACCOUNT_EMPTY == m_iErrorCode)
 	{
 		DOM_Element confirmedElem;
-		if (getDOMChildByName(objectRootElem,(UINT8*)"ConfirmedBytes",confirmedElem,true) == E_SUCCESS)
+		if (getDOMChildByName(objectRootElem,(UINT8*)"GenericText",confirmedElem,true) == E_SUCCESS)
 		{
 			m_messageObject = new UINT64;
 			if(getDOMElementValue(confirmedElem, (*(UINT64*)m_messageObject)) != E_SUCCESS)
