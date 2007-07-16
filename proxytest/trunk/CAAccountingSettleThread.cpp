@@ -197,7 +197,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_ACCOUNT_EMPTY)
 					{
 						authFlags |= AUTH_ACCOUNT_EMPTY;
-						UINT64* msgConfirmedBytes = (UNIT64*)pErrMsg->getMessageObject();
+						UINT64* msgConfirmedBytes = (UINT64*)pErrMsg->getMessageObject();
 						if (msgConfirmedBytes)
 						{
 							confirmedBytes = *msgConfirmedBytes;
