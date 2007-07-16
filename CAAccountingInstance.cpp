@@ -399,7 +399,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 				/* confirmedBytes = 0 leads to immediate disconnection.
 				 * If confirmedBytes > 0,  any remaining prepaid bytes may be used.
 				 */
-				pAccInfo->confirmedBytes = entry->confirmedBytes;								
+				pAccInfo->confirmedBytes = entry->confirmedBytes;
 			}
 			else if (entry->authFlags & AUTH_INVALID_ACCOUNT)
 			{
