@@ -323,9 +323,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			 // count the packet and continue checkings
 			pAccInfo->transferredBytes += MIXPACKET_SIZE;
 			pAccInfo->sessionPackets++;
-		}
-		
-		
+		}		
 		
 		// do the following tests after a lot of Mix packets only (gain speed...)
 		if (!(pAccInfo->authFlags & AUTH_HARD_LIMIT_REACHED) &&
@@ -395,9 +393,13 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			}
 			else if (entry->authFlags & AUTH_ACCOUNT_EMPTY)
 			{
-				entry->authFlags &= ~AUTH_ACCOUNT_EMPTY;
-				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Account empty! Kicking out user...\n");				
-				err = new CAXMLErrorMessage(CAXMLErrorMessage::ERR_ACCOUNT_EMPTY);
+				// Do not reset the flag, so that the confirmedBytes are always reset.
+				//entry->authFlags &= ~AUTH_ACCOUNT_EMPTY; 
+				pAccInfo->authFlags |= AUTH_ACCOUNT_EMPTY;
+				/* confirmedBytes = 0 leads to immediate disconnection.
+				 * If confirmedBytes > 0,  any remaining prepaid bytes may be used.
+				 */
+				pAccInfo->confirmedBytes = entry->confirmedBytes;								
 			}
 			else if (entry->authFlags & AUTH_INVALID_ACCOUNT)
 			{
@@ -413,6 +415,26 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			}
 		}		
 		ms_pInstance->m_settleHashtable->getMutex().unlock();	
+		
+		if (pAccInfo->authFlags & AUTH_ACCOUNT_EMPTY)
+		{
+			if (getPrepaidBytes(pAccInfo) <= 0)
+			{
+				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Account empty! Kicking out user...\n");				
+				err = new CAXMLErrorMessage(CAXMLErrorMessage::ERR_ACCOUNT_EMPTY);
+			}
+			else
+			{
+				/** 
+				 * Do not make further checkings. Let the client use the 
+				 * remaining prepaid bytes, and then disconnect him afterwards.
+				 * As the confirmedBytes are set to zero when the client connects and
+				 * the account has been empty before, no other (unauthenticated) 
+				 * client may use these bytes.
+				 */
+				returnOK(pAccInfo);
+			}
+		}
 	
 		/** @todo We need this trick so that the program does not freeze with active AI ThreadPool!!!! */
 		//pAccInfo->mutex->lock();
@@ -426,8 +448,8 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 	
 		//CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket auth for account %s.\n", accountNrAsString);
 	
-		if(!(pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT) )
-		{ 
+		if (!(pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT))
+		{
 			//dont let the packet through for now, but still wait for an account cert
 			if (!(pAccInfo->authFlags & AUTH_TIMEOUT_STARTED))						
 			{
@@ -636,17 +658,26 @@ SINT32 CAAccountingInstance::returnPrepareKickout(tAiAccountingInfo* pAccInfo, C
 
 SINT32 CAAccountingInstance::sendCCRequest(tAiAccountingInfo* pAccInfo)
 {
-	INIT_STACK;
-	BEGIN_STACK("CAAccountingInstance::sendCCRequest");
+	//INIT_STACK;
+	//BEGIN_STACK("CAAccountingInstance::sendCCRequest");
 	
 	DOM_Document doc;                
     UINT32 prepaidInterval;
+    
+    pAccInfo->authFlags |= AUTH_SENT_CC_REQUEST;
+    
+    if (pAccInfo->authFlags & AUTH_ACCOUNT_EMPTY)
+    {
+    	// do not send further CC requests for this account    	
+    	return E_SUCCESS;
+    }
+    
     pglobalOptions->getPrepaidInterval(&prepaidInterval);
     // prepaid bytes are "confirmed bytes - transfered bytes"
     //UINT64 bytesToConfirm = pAccInfo->confirmedBytes + (prepaidInterval) - (pAccInfo->confirmedBytes - pAccInfo->transferredBytes);			
     pAccInfo->bytesToConfirm = (prepaidInterval) + pAccInfo->transferredBytes;
 	makeCCRequest(pAccInfo->accountNumber, pAccInfo->bytesToConfirm, doc);				
-	pAccInfo->authFlags |= AUTH_SENT_CC_REQUEST;
+	//pAccInfo->authFlags |= AUTH_SENT_CC_REQUEST;
 #ifdef DEBUG	
 	CAMsg::printMsg(LOG_DEBUG, "CC request sent for %u bytes \n",bytesToConfirm);
 	CAMsg::printMsg(LOG_DEBUG, "transferrred bytes: %u bytes \n",pAccInfo->transferredBytes);
@@ -661,7 +692,7 @@ SINT32 CAAccountingInstance::sendCCRequest(tAiAccountingInfo* pAccInfo)
 	CAMsg::printMsg(LOG_DEBUG, "the CC sent looks like this: %s \n",debugout);
 #endif			
 	
-	FINISH_STACK("CAAccountingInstance::sendCCRequest");
+	//FINISH_STACK("CAAccountingInstance::sendCCRequest");
 	
 	return pAccInfo->pControlChannel->sendXMLMessage(doc);
 }
@@ -987,7 +1018,11 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 			return ;
 		}		
 		
-	/** @todo Dangerous, as this may collide with previous accounts that have been used and deleted before... */
+		/** 
+		 * @todo Dangerous, as this may collide with previous accounts that have been 
+		 * used and deleted before... 
+		 * There should be something like an expiration date for the account status, e.g. 1 month
+		 */
 		if (m_dbInterface->getAccountStatus(pAccInfo->accountNumber, status) != E_SUCCESS)
 		{
 			UINT8 tmp[32];
@@ -1368,8 +1403,9 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 	}
 	
 	// check authstate	
-	if( (pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT)==0 ||
-		 (pAccInfo->authFlags & AUTH_ACCOUNT_OK)==0)
+	if (!(pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT) ||
+		!(pAccInfo->authFlags & AUTH_ACCOUNT_OK) ||  
+		(pAccInfo->authFlags & AUTH_ACCOUNT_EMPTY)) // Account is empty, ignore CCs for this account!
 	{		
 		pAccInfo->mutex->unlock();
 		return ;

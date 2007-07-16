@@ -62,7 +62,7 @@ struct AccountHashEntry
 {
 	UINT64 accountNumber;
 	UINT32 authFlags;
-	UINT32 confirmedBytes;
+	UINT64 confirmedBytes;
 	AccountHashEntry* nextEntry;
 };	
 
