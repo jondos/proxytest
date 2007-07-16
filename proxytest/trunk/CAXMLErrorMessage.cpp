@@ -136,11 +136,25 @@ SINT32 CAXMLErrorMessage::setValues(DOM_Element &elemRoot)
 	getDOMChildByName(elemRoot, (UINT8*)"MessageObject", objectRootElem, false);
 	
 	//due to lack of RTTI, we need to hardcode how to deal with each specific object type
-	if (m_iErrorCode == 16)
+	if (ERR_OUTDATED_CC == m_iErrorCode)
 	{
 		DOM_Element ccElem;
-		getDOMChildByName(objectRootElem,(UINT8*)"CC",ccElem,true);
-		m_messageObject = CAXMLCostConfirmation::getInstance(ccElem);	
+		if (getDOMChildByName(objectRootElem,(UINT8*)"CC",ccElem,true) == E_SUCCESS)
+		{
+			m_messageObject = CAXMLCostConfirmation::getInstance(ccElem);	
+		}
+	}
+	else if (ERR_ACCOUNT_EMPTY == m_iErrorCode)
+	{
+		DOM_Element confirmedElem;
+		if (getDOMChildByName(objectRootElem,(UINT8*)"ConfirmedBytes",confirmedElem,true) == E_SUCCESS)
+		{
+			m_messageObject = new UINT64;
+			if(getDOMElementValue(confirmedElem, (*(UINT64*)m_messageObject)) != E_SUCCESS)
+			{
+				delete (UINT64*)m_messageObject;
+			}
+		}		
 	}
 	else
 	{

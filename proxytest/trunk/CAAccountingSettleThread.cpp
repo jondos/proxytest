@@ -184,7 +184,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				{																												
 					bool bDeleteCC = false;
 					UINT32 authFlags = 0;
-					UINT32 confirmedBytes = 0;														
+					UINT64 confirmedBytes = 0;														
 					
 					CAMsg::printMsg(LOG_ERR, "CAAccountingSettleThread: BI reported error no. %d (%s)\n",
 						pErrMsg->getErrorCode(), pErrMsg->getDescription() );
@@ -197,6 +197,11 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_ACCOUNT_EMPTY)
 					{
 						authFlags |= AUTH_ACCOUNT_EMPTY;
+						UINT64* msgConfirmedBytes = (UNIT64*)pErrMsg->getMessageObject();
+						if (msgConfirmedBytes)
+						{
+							confirmedBytes = *msgConfirmedBytes;
+						}
 						dbConn.storeAccountStatus(pCC->getAccountNumber(), CAXMLErrorMessage::ERR_ACCOUNT_EMPTY);				
 						dbConn.markAsSettled(pCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade);
 					}
