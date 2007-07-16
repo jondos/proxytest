@@ -201,6 +201,9 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 						if (msgConfirmedBytes)
 						{
 							confirmedBytes = *msgConfirmedBytes;
+							UINT8 tmp[32];
+							print64(tmp, confirmedBytes);
+							CAMsg::printMsg(LOG_ERR, "CAAccountingSettleThread: Received %s confirmed bytes!\n", tmp);
 						}
 						dbConn.storeAccountStatus(pCC->getAccountNumber(), CAXMLErrorMessage::ERR_ACCOUNT_EMPTY);				
 						dbConn.markAsSettled(pCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade);
