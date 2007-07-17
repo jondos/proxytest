@@ -421,7 +421,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			// There should be no time limit. The connections is simply closed after all prepaid bytes are gone.
 			pAccInfo->lastHardLimitSeconds = time(NULL);
 			
-			CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Accoiunt empty with %d prepaid bytes!\n", getPrepaidBytes(pAccInfo));
+			CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Account empty with %d prepaid bytes!\n", getPrepaidBytes(pAccInfo));
 			
 			if (getPrepaidBytes(pAccInfo) <= 0)
 			{
@@ -1023,6 +1023,28 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 			return ;
 		}		
 		
+		// fetch cost confirmation from last session if available, and retrieve information
+		CAXMLCostConfirmation * pCC = NULL;
+		m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, m_currentCascade, &pCC);
+		if(pCC!=NULL)
+		{
+			pAccInfo->transferredBytes += pCC->getTransferredBytes();
+			pAccInfo->confirmedBytes = pCC->getTransferredBytes();
+			#ifdef DEBUG
+				UINT8 tmp[32];
+				print64(tmp,pAccInfo->transferredBytes);
+				CAMsg::printMsg(LOG_DEBUG, "TransferredBytes is now %s\n", tmp);
+			#endif			
+			delete pCC;
+		}
+		else
+		{
+			UINT8 tmp[32];
+			print64(tmp,pAccInfo->accountNumber);
+			CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Cost confirmation for account %s not found in database. This seems to be a new user.\n", tmp);
+		}		
+		
+		
 		/** 
 		 * @todo Dangerous, as this may collide with previous accounts that have been 
 		 * used and deleted before... 
@@ -1059,7 +1081,8 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 				{
 					AccountHashEntry* entry = new AccountHashEntry; 
 					entry->accountNumber = pAccInfo->accountNumber;
-					entry->authFlags = authFlags;					
+					entry->authFlags = authFlags;
+					entry->confirmedBytes = pAccInfo->confirmedBytes;	
 					ms_pInstance->m_settleHashtable->put(&(entry->accountNumber), entry);
 				}	
 				else
@@ -1068,27 +1091,6 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 				}										
 				ms_pInstance->m_settleHashtable->getMutex().unlock();
 			}
-		}
-		
-		// fetch cost confirmation from last session if available, and retrieve information
-		CAXMLCostConfirmation * pCC = NULL;
-		m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, m_currentCascade, &pCC);
-		if(pCC!=NULL)
-		{
-			pAccInfo->transferredBytes += pCC->getTransferredBytes();
-			pAccInfo->confirmedBytes = pCC->getTransferredBytes();
-			#ifdef DEBUG
-				UINT8 tmp[32];
-				print64(tmp,pAccInfo->transferredBytes);
-				CAMsg::printMsg(LOG_DEBUG, "TransferredBytes is now %s\n", tmp);
-			#endif			
-			delete pCC;
-		}
-		else
-		{
-			UINT8 tmp[32];
-			print64(tmp,pAccInfo->accountNumber);
-			CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Cost confirmation for account %s not found in database. This seems to be a new user.\n", tmp);
 		}
 
 		// parse & set payment instance id
