@@ -333,7 +333,8 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 		
 		// do the following tests after a lot of Mix packets only (gain speed...)
 		if (!(pAccInfo->authFlags & AUTH_HARD_LIMIT_REACHED) &&
-			pAccInfo->sessionPackets % PACKETS_BEFORE_NEXT_CHECK != 0)
+			pAccInfo->sessionPackets % PACKETS_BEFORE_NEXT_CHECK != 0 &&
+			!(pAccInfo->authFlags & AUTH_ACCOUNT_EMPTY))
 		{
 			//CAMsg::printMsg( LOG_DEBUG, "Now we gain some speed after %d session packets...\n", pAccInfo->sessionPackets);
 			pAccInfo->mutex->unlock();
