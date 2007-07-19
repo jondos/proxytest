@@ -325,10 +325,11 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			pAccInfo->sessionPackets++;
 		}		
 		
+		/*
 		UINT8 tmp[32];
 		print64(tmp,pAccInfo->transferredBytes);
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Transferred bytes:%s\n", tmp);	
-		
+		*/
 		
 		// do the following tests after a lot of Mix packets only (gain speed...)
 		if (!(pAccInfo->authFlags & AUTH_HARD_LIMIT_REACHED) &&
