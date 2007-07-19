@@ -1051,54 +1051,6 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 			CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Cost confirmation for account %s not found in database. This seems to be a new user.\n", tmp);
 		}		
 		
-		
-		/** 
-		 * @todo Dangerous, as this may collide with previous accounts that have been 
-		 * used and deleted before... 
-		 * There should be something like an expiration date for the account status, e.g. 1 month
-		 */
-		if (m_dbInterface->getAccountStatus(pAccInfo->accountNumber, status) != E_SUCCESS)
-		{
-			UINT8 tmp[32];
-			print64(tmp,pAccInfo->accountNumber);
-			CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Could not check status for account %s!\n", tmp);			
-		}
-		else if (status > CAXMLErrorMessage::ERR_OK)
-		{
-			UINT32 authFlags = 0;
-			UINT8 tmp[32];
-			print64(tmp,pAccInfo->accountNumber);
-			CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: The user with account %s should be kicked out due to error %u!\n", tmp, status);
-
-			/*if (status == CAXMLErrorMessage::ERR_KEY_NOT_FOUND)
-			{
-				authFlags |= AUTH_INVALID_ACCOUNT;
-			}
-			else*/ if (status == CAXMLErrorMessage::ERR_ACCOUNT_EMPTY)
-			{
-				authFlags |= AUTH_ACCOUNT_EMPTY;
-			}
-			
-			if (authFlags)
-			{
-				ms_pInstance->m_settleHashtable->getMutex().lock();		
-				AccountHashEntry* oldEntry = 
-					(AccountHashEntry*) (ms_pInstance->m_settleHashtable->getValue(&(pAccInfo->accountNumber)));
-				if (!oldEntry)
-				{
-					AccountHashEntry* entry = new AccountHashEntry; 
-					entry->accountNumber = pAccInfo->accountNumber;
-					entry->authFlags = authFlags;
-					entry->confirmedBytes = pAccInfo->confirmedBytes;	
-					ms_pInstance->m_settleHashtable->put(&(entry->accountNumber), entry);
-				}	
-				else
-				{
-					oldEntry->authFlags |= authFlags;
-				}										
-				ms_pInstance->m_settleHashtable->getMutex().unlock();
-			}
-		}
 
 		// parse & set payment instance id
 		UINT32 len=256;
@@ -1178,6 +1130,56 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: No database record for prepaid bytes found for account nr. %s.\n", tmp);	
 	}	
 	//CAMsg::printMsg(LOG_DEBUG, "Number of prepaid (confirmed-transferred) bytes : %d \n",pAccInfo->confirmedBytes-pAccInfo->transferredBytes);	
+
+
+	/** 
+	 * @todo Dangerous, as this may collide with previous accounts that have been 
+	 * used and deleted before... 
+	 * There should be something like an expiration date for the account status, e.g. 1 month
+	 */
+	if (m_dbInterface->getAccountStatus(pAccInfo->accountNumber, status) != E_SUCCESS)
+	{
+		UINT8 tmp[32];
+		print64(tmp,pAccInfo->accountNumber);
+		CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Could not check status for account %s!\n", tmp);			
+	}
+	else if (status > CAXMLErrorMessage::ERR_OK)
+	{
+		UINT32 authFlags = 0;
+		UINT8 tmp[32];
+		print64(tmp,pAccInfo->accountNumber);
+		CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: The user with account %s should be kicked out due to error %u!\n", tmp, status);
+
+		/*if (status == CAXMLErrorMessage::ERR_KEY_NOT_FOUND)
+		{
+			authFlags |= AUTH_INVALID_ACCOUNT;
+		}
+		else*/ if (status == CAXMLErrorMessage::ERR_ACCOUNT_EMPTY)
+		{
+			authFlags |= AUTH_ACCOUNT_EMPTY;
+			pAccInfo->authFlags |= AUTH_ACCOUNT_EMPTY;
+		}
+		
+		if (authFlags)
+		{
+			ms_pInstance->m_settleHashtable->getMutex().lock();		
+			AccountHashEntry* oldEntry = 
+				(AccountHashEntry*) (ms_pInstance->m_settleHashtable->getValue(&(pAccInfo->accountNumber)));
+			if (!oldEntry)
+			{
+				AccountHashEntry* entry = new AccountHashEntry; 
+				entry->accountNumber = pAccInfo->accountNumber;
+				entry->authFlags = authFlags;
+				entry->confirmedBytes = pAccInfo->confirmedBytes;	
+				ms_pInstance->m_settleHashtable->put(&(entry->accountNumber), entry);
+			}	
+			else
+			{
+				oldEntry->authFlags |= authFlags;
+			}										
+			ms_pInstance->m_settleHashtable->getMutex().unlock();
+		}
+	}
 	
 		
 	UINT8 * arbChallenge;
