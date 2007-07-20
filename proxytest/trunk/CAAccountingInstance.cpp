@@ -1515,6 +1515,7 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 	}
 	else
 	{
+		pAccInfo->confirmedBytes = pCC->getTransferredBytes();
 		if (m_dbInterface->storeCostConfirmation(*pCC, m_currentCascade) != E_SUCCESS)
 		{
 			UINT8 tmp[32];
@@ -1530,7 +1531,6 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 	}
 	
 	pAccInfo->bytesToConfirm = 0;
-	pAccInfo->confirmedBytes = pCC->getTransferredBytes();
 	pAccInfo->authFlags &= ~AUTH_SENT_CC_REQUEST;
 
 	
