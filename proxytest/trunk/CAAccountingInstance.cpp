@@ -1493,14 +1493,7 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 			CAMsg::printMsg( LOG_ERR, "CostConfirmation has insufficient number of bytes (%s < %s). Ignoring...\n", 
 				tmp, tmpOther );
 		}
-	
-		if (pCC->getTransferredBytes() >= pAccInfo->bytesToConfirm)
-		{
-			// the user confirmed everything we wanted; if a timeout has been set, it should be reset
-			pAccInfo->lastHardLimitSeconds = time(NULL);
-		}
-		pAccInfo->bytesToConfirm = 0;
-		pAccInfo->authFlags &= ~AUTH_SENT_CC_REQUEST;
+			
 		
 		// fetch cost confirmation from last session if available, and send it
 		/*
@@ -1519,23 +1512,31 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 		DOM_Document errDoc;
 		err.toXmlDocument(errDoc);
 		pAccInfo->pControlChannel->sendXMLMessage(errDoc);*/
-		delete pCC;
-		pAccInfo->mutex->unlock();
-		return;
 	}
+	else
+	{
+		if (m_dbInterface->storeCostConfirmation(*pCC, m_currentCascade) != E_SUCCESS)
+		{
+			UINT8 tmp[32];
+			print64(tmp,pCC->getTransferredBytes());
+			CAMsg::printMsg( LOG_INFO, "CostConfirmation for account %s could not be stored in database!\n", tmp );
+		}
+	}
+	
+	if (pCC->getTransferredBytes() >= pAccInfo->bytesToConfirm)
+	{
+		// the user confirmed everything we wanted; if a timeout has been set, it should be reset
+		pAccInfo->lastHardLimitSeconds = time(NULL);
+	}
+	
+	pAccInfo->bytesToConfirm = 0;
 	pAccInfo->confirmedBytes = pCC->getTransferredBytes();
 	pAccInfo->authFlags &= ~AUTH_SENT_CC_REQUEST;
 
-	if (m_dbInterface->storeCostConfirmation(*pCC, m_currentCascade) != E_SUCCESS)
-	{
-		UINT8 tmp[32];
-		print64(tmp,pCC->getTransferredBytes());
-		CAMsg::printMsg( LOG_INFO, "CostConfirmation for account %s could not be stored in database!\n", tmp );
-	}
-
-	pAccInfo->mutex->unlock();
-
+	
 	delete pCC;
+	pAccInfo->mutex->unlock();
+	
 	return;
 }
 
