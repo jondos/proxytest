@@ -677,7 +677,7 @@ SINT32 CAAccountingDBInterface::getPrepaidAmount(UINT64 accountNumber, UINT8* ca
 		}
 		delete[] finalQuery;
 		PQclear(result);
-		CAMsg::printMsg(LOG_DEBUG, "Stored status code %u  for account nr. %s \n",statuscode, tmp); 
+		CAMsg::printMsg(LOG_DEBUG, "Stored status code %u for account nr. %s \n",statuscode, tmp); 
 		return E_SUCCESS;	 	
 	}
 	
