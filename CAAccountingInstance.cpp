@@ -931,6 +931,7 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 
 		delete [] docElementName;
 
+		/** @todo this does not work yet due to errors in CAMutex!!!
 		if (handleFunc)
 		{
 			pItem = new aiQueueItem;
@@ -950,14 +951,13 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 			}
 			pHashEntry->pAccountingInfo->mutex->unlock();
 			return ret;
-		}
+		}*/
 	
 		// remove these lines if AI thread pool is used (see @todo above)
-		/*
 		(ms_pInstance->*handleFunc)(pHashEntry->pAccountingInfo, root );
 		
 		FINISH_STACK("CAAccountingInstance::processJapMessage");
-		return E_SUCCESS;*/
+		return E_SUCCESS;
 	}
 
 void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo, DOM_Element &root)
