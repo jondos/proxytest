@@ -915,8 +915,9 @@ THREAD_RETURN fm_loopDoUserLogin(void* param)
 SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 {
 	INIT_STACK;
-	doUserLogin_internal(pNewUser, peerIP);
+	SINT32 ret = doUserLogin_internal(pNewUser, peerIP);
 	FINISH_STACK("CAFirstMix::doUserLogin");
+	return ret;
 }
 
 /** Sends and receives all data neccessary for a User to "login".
