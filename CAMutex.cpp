@@ -58,7 +58,7 @@ SINT32 CAMutex::lock()
 		else
 		{
 			pthread_mutex_unlock(m_pMutex);
-			CAMsg::printMsg("CAMutex: lock error=%d\n", ret);
+			CAMsg::printMsg(LOG_CRIT, "CAMutex: lock error=%d\n", ret);
 		}
 	
 		if(pthread_mutex_lock(m_pMutex)==0)
@@ -78,7 +78,7 @@ SINT32 CAMutex::unlock()
 		{
 			return E_SUCCESS;
 		}
-		CAMsg::printMsg("CAMutex: unlock error=%d\n", ret);
+		CAMsg::printMsg(LOG_CRIT, "CAMutex: unlock error=%d\n", ret);
 		return E_UNKNOWN;
 	#else
 		return m_pMutex->up();
