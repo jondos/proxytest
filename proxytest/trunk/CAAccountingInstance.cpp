@@ -57,6 +57,8 @@ const SINT32 CAAccountingInstance::HANDLE_PACKET_HOLD_CONNECTION = 0;
 const SINT32 CAAccountingInstance::HANDLE_PACKET_PREPARE_FOR_CLOSING_CONNECTION = 2;
 const SINT32 CAAccountingInstance::HANDLE_PACKET_CLOSE_CONNECTION = 3;
 
+SINT32 CAAccountingInstance::m_prepaidBytesMinimum = 0;
+
 
 /**
  * Singleton: This is the reference to the only instance of this class
@@ -83,8 +85,6 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
 			CAMsg::printMsg( LOG_ERR, "**************** AccountingInstance: Could not connect to DB!\n");
 			exit(1);
 		}
-	
-		m_prepaidBytesMinimum = 0;
 	
 		// initialize JPI signature tester
 		m_AiName = new UINT8[256];
