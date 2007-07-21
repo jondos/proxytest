@@ -45,7 +45,10 @@ CAMutex::~CAMutex()
 #endif
 
 
-void CAMutex::logError(char* a_msg, SINT32 a_error);
+void CAMutex::logError(char* a_msg, SINT32 a_error)
+{
+	CAMsg(LOG_CRIT, a_msg, a_error);
+}
 
 
 
