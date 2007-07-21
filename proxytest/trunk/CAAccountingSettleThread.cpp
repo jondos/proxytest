@@ -46,9 +46,9 @@ CAAccountingSettleThread::CAAccountingSettleThread(Hashtable* a_accountingHashta
 	m_settleCascade = currentCascade;
 	m_pThread->setMainLoop( mainLoop );
 	CAMsg::printMsg(LOG_DEBUG, "Now launching Accounting SettleThread...\n");
-	m_pPIList = NULL;
 	m_bRun=true;
 	m_accountingHashtable = a_accountingHashtable;
+	m_pCondition = new CAConditionVariable;
 	m_pThread->start(this);
 }
 
@@ -58,7 +58,7 @@ CAAccountingSettleThread::~CAAccountingSettleThread()
 		m_bRun=false;
 		m_pThread->join();
 		delete m_pThread;
-///@todo delete m_pPIList !
+		delete m_pCondition;
 	}
 
 /**
@@ -79,8 +79,8 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 		CAQueue q;
 		UINT32 size;
 		CASocketAddrINet biAddr;	
-		AccountHashEntry* entry;	
-		AccountHashEntry* nextEntry;	
+		AccountLoginHashEntry* entry;	
+		AccountLoginHashEntry* nextEntry;	
 	
 		CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread is running...\n");
 	
@@ -102,7 +102,8 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 			#ifdef DEBUG
 				CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread going to sleep...\n");
 			#endif
-			sSleep((UINT16)sleepInterval);
+			m_pCondition->wait(sleepInterval * 1000);
+			//sSleep((UINT16)sleepInterval);
 			#ifdef DEBUG
 				CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread Waking up...\n");
 			#endif
@@ -242,13 +243,13 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					else
 					{
 						CAMsg::printMsg(LOG_DEBUG, "SettleThread: Setting unknown kickout error no. %d.\n", pErrMsg->getErrorCode());
-						authFlags |= AUTH_UNKNOWN;	
+						authFlags |= AUTH_UNKNOWN;
 						bDeleteCC = true; // an unknown error leads to user kickout
 					}		
 					
 					if (authFlags)
 					{
-						nextEntry = new AccountHashEntry; 
+						nextEntry = new AccountLoginHashEntry; 
 						nextEntry->accountNumber = pCC->getAccountNumber();
 						nextEntry->authFlags = authFlags;
 						nextEntry->confirmedBytes = confirmedBytes;	
@@ -295,33 +296,20 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				m_pAccountingSettleThread->m_accountingHashtable->getMutex().lock();
 				while (entry)
 				{			
-					AccountHashEntry* oldEntry = (AccountHashEntry*) (m_pAccountingSettleThread->m_accountingHashtable->getValue(&(entry->accountNumber)));
-					if (!oldEntry)
-					{						
-						m_pAccountingSettleThread->m_accountingHashtable->put(&(entry->accountNumber), entry);							
-						#ifdef DEBUG						
-						if (!(m_pAccountingSettleThread->m_accountingHashtable->getValue(&(entry->accountNumber))))
-						{
-							CAMsg::printMsg(LOG_CRIT, "CAAccountingSettleThread: DID NOT FIND ENTRY THAT HAD BEEN STORED BEFORE!\n");
-						}
-						#endif
-						/*
-						 * Pointer to next entry may be invalid after that, they should not be used
-						 * anywhere else... For performance reasons we do not delete the pointer here.
-						 */
-						entry = entry->nextEntry;	
-					}	
-					else
-					{
+					AccountLoginHashEntry* oldEntry = 
+						(AccountLoginHashEntry*) (m_pAccountingSettleThread->m_accountingHashtable->getValue(&(entry->accountNumber)));
+					if (oldEntry)
+					{				
+						// the user is currently logged in											
 						oldEntry->authFlags |= entry->authFlags;
 						if (entry->confirmedBytes)
 						{
 							oldEntry->confirmedBytes = entry->confirmedBytes;
-						}
-						nextEntry = entry->nextEntry;
-						delete entry;
-						entry = nextEntry;
-					}										
+						}						
+					}	
+					nextEntry = entry->nextEntry;
+					delete entry;
+					entry = nextEntry;									
 				}
 				m_pAccountingSettleThread->m_accountingHashtable->getMutex().unlock();		
 			}
@@ -334,48 +322,5 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 		dbConn.terminateDBConnection();	
 		
 		THREAD_RETURN_SUCCESS;
-	}
-
-/** Adds information about a PI to the list of known PIs.
-	* @retval E_SPACE if not enough space for storing the information is available
-	* @retval E_UNKNOWN in case of an error
-	* @retval E_SUCCESS if PI is added to the list successfully
-	*/
-SINT32 CAAccountingSettleThread::addKnownPI(const UINT8* a_pstrID, const UINT8* a_pstrHost, UINT32 a_port, const CACertificate* a_pCert) 
-	{
-		if(a_pstrID==NULL||a_pstrHost==NULL||a_pCert==NULL)
-			return E_UNKNOWN;
-		tPaymentInstanceListEntry* pEntry = new tPaymentInstanceListEntry;
-		memset(pEntry,0,sizeof(tPaymentInstanceListEntry));
-		UINT32 len=strlen((const char*)a_pstrID);
-		if(len>255)
-			return E_SPACE;
-		memcpy(pEntry->arstrPIID, a_pstrID,len+1);
-		len=strlen((const char*)a_pstrHost);
-		if(len>255)
-			return E_SPACE;
-		memcpy(pEntry->arstrHost, a_pstrHost,len+1);
-		pEntry->u32Port = a_port;
-		pEntry->pCertificate = a_pCert->clone();
-		pEntry->next = m_pPIList;
-		m_pPIList = pEntry;
-		return E_SUCCESS;
-	}
-
-/** Returns a tPaymentListEntry for the requested PI. If the PI is not in the list, NULL is returned
-  *@note The original list item is returned NOT a copy!
-	*/
-tPaymentInstanceListEntry* CAAccountingSettleThread::getPI(UINT8* a_pstrID)
-	{
-		tPaymentInstanceListEntry* pEntry = m_pPIList;
-		while(pEntry!=NULL)
-			{
-				if(strcmp((const char*)pEntry->arstrPIID, (const char*)a_pstrID) == 0 )
-					{
-						return pEntry;
-					}
-				pEntry = pEntry->next;
-		}
-		return NULL;
 	}
 #endif //PAYMENT

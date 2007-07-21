@@ -31,6 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #include "CAThread.hpp"
 #include "Hashtable.hpp"
+#include "CAConditionVariable.hpp"
 
 struct t_aiSettleItem
 	{
@@ -63,15 +64,18 @@ class CAAccountingSettleThread
 	public:
 		CAAccountingSettleThread(Hashtable* a_accountingHashtable, UINT8* currentCascade);
 		~CAAccountingSettleThread();
+		
+		CAConditionVariable* getCondition()
+		{
+			return m_pCondition;
+		}
 
 	private:	
+		CAConditionVariable* m_pCondition;
 		UINT8* m_settleCascade;
 		static THREAD_RETURN mainLoop(void * param);
-		SINT32 addKnownPI(const UINT8* a_pstrID, const UINT8* a_pstrHost, UINT32 port, const CACertificate* a_pCert); 
-		tPaymentInstanceListEntry* getPI(UINT8* pstrID);
 		CAThread* m_pThread;
 		volatile bool m_bRun;
-		tPaymentInstanceListEntry* m_pPIList;
 		Hashtable* m_accountingHashtable;
 	
 };

@@ -65,7 +65,7 @@ struct AccountLoginHashEntry
 	UINT64 confirmedBytes;
 	UINT64 userID;
 	UINT32 count;
-	AccountHashEntry* nextEntry;
+	AccountLoginHashEntry* nextEntry;
 };	
 
 
