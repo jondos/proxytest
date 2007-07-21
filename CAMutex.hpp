@@ -63,27 +63,7 @@ class CAMutex
 			CAMutex();
 			virtual ~CAMutex();
 #endif
-			SINT32 lock()
-				{
-					#ifdef	HAVE_PTHREAD_MUTEXES
-						SINT32 ret;
-						ret = pthread_mutex_trylock(m_pMutex);
-						if(ret == 0)
-						{
-							return E_SUCCESS;
-						}
-						else
-						{
-							logError("CAMutex: lock error=%d\n", ret);
-						}
-					
-						if(pthread_mutex_lock(m_pMutex)==0)
-							return E_SUCCESS;
-						return E_UNKNOWN;
-					#else
-						return m_pMutex->down();
-					#endif
-				}
+			SINT32 lock();
 
 				SINT32 unlock()
 				{
