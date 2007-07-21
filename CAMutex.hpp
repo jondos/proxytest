@@ -36,20 +36,7 @@ class CAMutex
 	{
 		public:
 #if !defined (DEBUG) || !defined(HAVE_PTHREAD_MUTEXES)
-			CAMutex()
-			{
-				#ifdef HAVE_PTHREAD_MUTEXES
-					m_pMutex=new pthread_mutex_t;
-					m_pMutexAttributes = new pthread_mutexattr_t;						
-					pthread_mutexattr_init(m_pMutexAttributes);  
-					//pthread_mutexattr_settype(m_pMutexAttributes, PTHREAD_MUTEX_RECURSIVE);
-					pthread_mutexattr_settype(m_pMutexAttributes, PTHREAD_MUTEX_ERRORCHECK);
-					pthread_mutex_init(m_pMutex, m_pMutexAttributes);
-					//pthread_mutex_init(m_pMutex, NULL);
-				#else
-					m_pMutex=new CASemaphore(1);
-				#endif
-			}
+			CAMutex();
 
 			virtual ~CAMutex()
 				{
