@@ -965,7 +965,6 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 		DOM_Element elGeneral;
 		timespec now;
 		getcurrentTime(now);
-		UINT32 status;
 
 		// check authstate of this user
 		if (pAccInfo == NULL)
@@ -1157,6 +1156,7 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 	DSA_SIG * pDsaSig;
 	AccountLoginHashEntry* loginEntry;
 	bool bSendCCRequest = true;
+	UINT32 status;
 	
 	// check current authstate
 	
