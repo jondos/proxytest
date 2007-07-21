@@ -50,14 +50,28 @@ CAMutex::CAMutex()
 		m_pMutex=new pthread_mutex_t;
 		m_pMutexAttributes = new pthread_mutexattr_t;						
 		pthread_mutexattr_init(m_pMutexAttributes);  
-		//pthread_mutexattr_settype(m_pMutexAttributes, PTHREAD_MUTEX_RECURSIVE);
-		pthread_mutexattr_settype(m_pMutexAttributes, PTHREAD_MUTEX_ERRORCHECK);
+		pthread_mutexattr_settype(m_pMutexAttributes, PTHREAD_MUTEX_RECURSIVE);
+		//pthread_mutexattr_settype(m_pMutexAttributes, PTHREAD_MUTEX_ERRORCHECK);
 		pthread_mutex_init(m_pMutex, m_pMutexAttributes);
-		//pthread_mutex_init(m_pMutex, NULL);
+		pthread_mutex_init(m_pMutex, NULL);
 	#else
 		m_pMutex=new CASemaphore(1);
 	#endif
 }
+
+CAMutex::~CAMutex()
+{
+	#ifdef HAVE_PTHREAD_MUTEXES
+		pthread_mutex_destroy(m_pMutex);
+		pthread_mutexattr_destroy(m_pMutexAttributes);					
+	#endif
+	delete m_pMutex;
+	
+	#ifdef HAVE_PTHREAD_MUTEXES
+		delete m_pMutexAttributes;	
+	#endif
+}
+
 #endif
 
 SINT32 CAMutex::lock()
@@ -65,25 +79,28 @@ SINT32 CAMutex::lock()
 	#ifdef	HAVE_PTHREAD_MUTEXES
 	
 		SINT32 ret;
-		/*
+		//CAMsg::printMsg(LOG_CRIT, "CAMutex: locked!\n");
 		ret = pthread_mutex_trylock(m_pMutex);
 		if(ret == 0)
 		{
-			CAMsg::printMsg(LOG_CRIT, "CAMutex: locked!\n");
+			printf("%s", "CAMutex: locked!\n");
+			//CAMsg::printMsg(LOG_CRIT, "CAMutex: locked!\n");
 			return E_SUCCESS;
 		}
 		else
 		{			
-			CAMsg::printMsg(LOG_CRIT, "CAMutex: lock error=%d\n", ret);
-			//pthread_mutex_unlock(m_pMutex);
-		}*/
+			printf("%s", "CAMutex: lock error=%d\n", ret);
+			//CAMsg::printMsg(LOG_CRIT, "CAMutex: lock error=%d\n", ret);
+			pthread_mutex_unlock(m_pMutex);
+		}
 	
 		ret = pthread_mutex_lock(m_pMutex);
 		if(ret == 0)
 		{
 			return E_SUCCESS;
 		}
-		CAMsg::printMsg(LOG_CRIT, "CAMutex: lock error=%d\n", ret);
+		printf("%s", "CAMutex: lock error=%d\n", ret);
+		//CAMsg::printMsg(LOG_CRIT, "CAMutex: lock error=%d\n", ret);
 		return E_UNKNOWN;
 	#else
 		return m_pMutex->down();
@@ -93,13 +110,13 @@ SINT32 CAMutex::lock()
 SINT32 CAMutex::unlock()
 {
 	#ifdef HAVE_PTHREAD_MUTEXES
-		SINT32 ret;
-		ret = pthread_mutex_unlock(m_pMutex);
+		SINT32 ret = pthread_mutex_unlock(m_pMutex);
 		if(ret == 0)
 		{
 			return E_SUCCESS;
 		}
-		CAMsg::printMsg(LOG_CRIT, "CAMutex: unlock error=%d\n", ret);
+		printf("%s", "CAMutex: unlock error=%d\n", ret);
+		//CAMsg::printMsg(LOG_CRIT, "CAMutex: unlock error=%d\n", ret);
 		return E_UNKNOWN;
 	#else
 		return m_pMutex->up();
