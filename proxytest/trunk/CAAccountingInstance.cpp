@@ -277,7 +277,6 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 		}
 		
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
-		AccountHashEntry* entry = NULL;
 		AccountLoginHashEntry* loginEntry = NULL;
 		CAXMLErrorMessage* err = NULL;
 	
