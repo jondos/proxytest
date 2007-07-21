@@ -252,6 +252,8 @@ private:
 	/** this thread sends cost confirmations to the BI in regular intervals */
 	CAAccountingSettleThread * m_pSettleThread;
 	
+	SINT32 m_prepaidBytesMinimum;
+	
 	bool m_bThreadRunning;
 };
 

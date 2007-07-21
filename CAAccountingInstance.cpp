@@ -84,6 +84,8 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
 			exit(1);
 		}
 	
+		m_prepaidBytesMinimum = 0;
+	
 		// initialize JPI signature tester
 		m_AiName = new UINT8[256];
 		pglobalOptions->getAiID(m_AiName, 256);
@@ -592,6 +594,13 @@ SINT32 CAAccountingInstance::getPrepaidBytes(tAiAccountingInfo* pAccInfo)
 		prepaidBytes = pAccInfo->transferredBytes - pAccInfo->confirmedBytes;
 		prepaidBytes *= -1;
 	}	
+	
+	if (prepaidBytes < m_prepaidBytesMinimum)
+	{
+		m_prepaidBytesMinimum = prepaidBytes;
+		CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: New PrepaidBytes minimum: %d\n", m_prepaidBytesMinimum);
+	}
+	
 	return prepaidBytes;
 }
 
