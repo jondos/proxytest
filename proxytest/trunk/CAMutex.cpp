@@ -53,12 +53,13 @@ SINT32 CAMutex::lock()
 		ret = pthread_mutex_trylock(m_pMutex);
 		if(ret == 0)
 		{
+			CAMsg::printMsg(LOG_CRIT, "CAMutex: locked!\n");
 			return E_SUCCESS;
 		}
 		else
-		{
-			pthread_mutex_unlock(m_pMutex);
+		{			
 			CAMsg::printMsg(LOG_CRIT, "CAMutex: lock error=%d\n", ret);
+			//pthread_mutex_unlock(m_pMutex);
 		}
 	
 		if(pthread_mutex_lock(m_pMutex)==0)
