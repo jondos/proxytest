@@ -83,7 +83,7 @@ SINT32 CAMutex::lock()
 		ret = pthread_mutex_trylock(m_pMutex);
 		if(ret == 0)
 		{
-			printf("%s", "CAMutex: locked!\n");
+			//printf("%s", "CAMutex: locked!\n");
 			//CAMsg::printMsg(LOG_CRIT, "CAMutex: locked!\n");
 			return E_SUCCESS;
 		}
