@@ -44,7 +44,7 @@ CAAccountingSettleThread::CAAccountingSettleThread(Hashtable* a_accountingHashta
 	// launch AI thread
 	m_pThread = new CAThread();
 	m_settleCascade = currentCascade;
-	m_pThread->setMainLoop((THREAD_RETURN (*)(void *))&((this->*mainLoop));
+	m_pThread->setMainLoop( mainLoop );
 	CAMsg::printMsg(LOG_DEBUG, "Now launching Accounting SettleThread...\n");
 	m_bRun=true;
 	m_accountingHashtable = a_accountingHashtable;
@@ -102,7 +102,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 			#ifdef DEBUG
 				CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread going to sleep...\n");
 			#endif
-			m_pCondition->wait(sleepInterval * 1000);
+			m_pAccountingSettleThread->m_pCondition->wait(sleepInterval * 1000);
 			//sSleep((UINT16)sleepInterval);
 			#ifdef DEBUG
 				CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread Waking up...\n");
