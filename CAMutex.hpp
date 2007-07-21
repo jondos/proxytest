@@ -65,7 +65,7 @@ class CAMutex
 			SINT32 lock()
 				{
 					#ifdef	HAVE_PTHREAD_MUTEXES
-						if(pthread_mutex_trylock(m_pMutex)==0)
+						if(pthread_mutex_lock(m_pMutex)==0)
 							return E_SUCCESS;
 						return E_UNKNOWN;
 					#else
