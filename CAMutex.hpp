@@ -31,7 +31,6 @@ class CAConditionVariable;
 #ifndef HAVE_PTHREAD_MUTEXES
 	#include "CASemaphore.hpp"
 #endif
-//#include "CAMsg.hpp"
 
 class CAMutex
 	{
@@ -64,9 +63,43 @@ class CAMutex
 			CAMutex();
 			virtual ~CAMutex();
 #endif
-			SINT32 lock();
+			SINT32 lock()
+				{
+					#ifdef	HAVE_PTHREAD_MUTEXES
+						SINT32 ret;
+						ret = pthread_mutex_trylock(m_pMutex);
+						if(ret == 0)
+						{
+							return E_SUCCESS;
+						}
+						else
+						{
+							logError("CAMutex: lock error=%d\n", ret);
+						}
+					
+						if(pthread_mutex_lock(m_pMutex)==0)
+							return E_SUCCESS;
+						return E_UNKNOWN;
+					#else
+						return m_pMutex->down();
+					#endif
+				}
 
-			SINT32 unlock();
+				SINT32 unlock()
+				{
+					#ifdef HAVE_PTHREAD_MUTEXES
+						SINT32 ret;
+						ret = pthread_mutex_unlock(m_pMutex);
+						if(ret == 0)
+						{
+							return E_SUCCESS;
+						}
+						logError("CAMutex: unlock error=%d\n", ret);
+						return E_UNKNOWN;
+					#else
+						return m_pMutex->up();
+					#endif
+				}
 		
 		friend class CAConditionVariable;
 		protected:
@@ -76,5 +109,7 @@ class CAMutex
 			#else
 				CASemaphore* m_pMutex;
 			#endif
+		private:
+			void logError(char* a_msg, SINT32 a_error);
 	};
 #endif
