@@ -42,9 +42,23 @@ CAMutex::~CAMutex()
 		ASSERT(pthread_mutex_destroy(m_pMutex)==0,"Mutex detroy failed!");
 		delete m_pMutex;
 	}
+#else
+
+CAMutex()
+{
+	#ifdef HAVE_PTHREAD_MUTEXES
+		m_pMutex=new pthread_mutex_t;
+		m_pMutexAttributes = new pthread_mutexattr_t;						
+		pthread_mutexattr_init(m_pMutexAttributes);  
+		//pthread_mutexattr_settype(m_pMutexAttributes, PTHREAD_MUTEX_RECURSIVE);
+		pthread_mutexattr_settype(m_pMutexAttributes, PTHREAD_MUTEX_ERRORCHECK);
+		pthread_mutex_init(m_pMutex, m_pMutexAttributes);
+		//pthread_mutex_init(m_pMutex, NULL);
+	#else
+		m_pMutex=new CASemaphore(1);
+	#endif
+}
 #endif
-
-
 
 SINT32 CAMutex::lock()
 {
