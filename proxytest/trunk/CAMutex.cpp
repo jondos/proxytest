@@ -44,7 +44,7 @@ CAMutex::~CAMutex()
 	}
 #else
 
-CAMutex()
+CAMutex::CAMutex()
 {
 	#ifdef HAVE_PTHREAD_MUTEXES
 		m_pMutex=new pthread_mutex_t;
