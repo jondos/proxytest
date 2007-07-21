@@ -99,10 +99,8 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
 		m_currentAccountsHashtable = 
 			new Hashtable((UINT32 (*)(void *))Hashtable::hashUINT64, (SINT32 (*)(void *,void *))Hashtable::compareUINT64, 2000);		
 		
-		// launch BI settleThread		
-		m_settleHashtable = 
-			new Hashtable((UINT32 (*)(void *))Hashtable::hashUINT64, (SINT32 (*)(void *,void *))Hashtable::compareUINT64);		
-		m_pSettleThread = new CAAccountingSettleThread(m_settleHashtable, m_currentCascade);
+		// launch BI settleThread				
+		m_pSettleThread = new CAAccountingSettleThread(m_currentAccountsHashtable, m_currentCascade);
 		
 		m_aiThreadPool = new CAThreadPool(NUM_LOGIN_WORKER_TRHEADS, MAX_LOGIN_QUEUE, false);
 	}
@@ -147,22 +145,15 @@ CAAccountingInstance::~CAAccountingInstance()
 		
 		if (m_currentAccountsHashtable)
 		{
+			m_currentAccountsHashtable->getMutex().lock();
+			CAMsg::printMsg( LOG_DEBUG, "CAAccountingInstance: Clearing accounts hashtable...\n");
 			m_currentAccountsHashtable->clear(HASH_EMPTY_NONE, HASH_EMPTY_DELETE);
+			CAMsg::printMsg( LOG_DEBUG, "CAAccountingInstance: Deleting accounts hashtable...\n" );
+			m_currentAccountsHashtable->getMutex().unlock();
 			delete m_currentAccountsHashtable;
 		}
 		m_currentAccountsHashtable = NULL;
-		
-		if (m_settleHashtable)
-		{
-			m_settleHashtable->getMutex().lock();
-			CAMsg::printMsg( LOG_DEBUG, "CAAccountingInstance: Clearing settle hashtable...\n");
-			m_settleHashtable->clear(HASH_EMPTY_NONE, HASH_EMPTY_DELETE);
-			m_settleHashtable->getMutex().unlock();
-			CAMsg::printMsg( LOG_DEBUG, "CAAccountingInstance: Deleting settle hashtable...\n" );
-			delete m_settleHashtable;
-		}
-		m_settleHashtable = NULL;		
-		CAMsg::printMsg( LOG_DEBUG, "CAAccountingInstance: Settle hashtable deleted.\n" );				
+		CAMsg::printMsg( LOG_DEBUG, "CAAccountingInstance: Accounts hashtable deleted.\n" );
 		
 		if (m_currentCascade)
 		{
@@ -368,60 +359,47 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 					ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();
 					return returnPrepareKickout(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_MULTIPLE_LOGIN, (UINT8*)"Only one login per account is allowed!"));
 				}
+				else if (loginEntry->authFlags & AUTH_OUTDATED_CC)
+				{
+					loginEntry->authFlags &= ~AUTH_OUTDATED_CC;	
+					CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Fixing bytes from outdated CC...\n");	
+					// we had stored an outdated CC; insert confirmed bytes from current CC here						
+					pAccInfo->transferredBytes +=  loginEntry->confirmedBytes - pAccInfo->confirmedBytes;
+					pAccInfo->confirmedBytes = loginEntry->confirmedBytes;				
+					loginEntry->confirmedBytes = 0;
+				}
+				else if (loginEntry->authFlags & AUTH_ACCOUNT_EMPTY)
+				{
+					// Do not reset the flag, so that the confirmedBytes are always reset.
+					//loginEntry->authFlags &= ~AUTH_ACCOUNT_EMPTY; 
+					pAccInfo->authFlags |= AUTH_ACCOUNT_EMPTY;
+					/* confirmedBytes = 0 leads to immediate disconnection.
+					 * If confirmedBytes > 0,  any remaining prepaid bytes may be used.
+					 */
+					pAccInfo->confirmedBytes = loginEntry->confirmedBytes;
+				}
+				else if (loginEntry->authFlags & AUTH_INVALID_ACCOUNT)
+				{
+					loginEntry->authFlags &= ~AUTH_INVALID_ACCOUNT;											
+					CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Found invalid account! Kicking out user...\n");																
+					err = new CAXMLErrorMessage(CAXMLErrorMessage::ERR_KEY_NOT_FOUND);
+				}
+				else if (loginEntry->authFlags & AUTH_UNKNOWN)
+				{
+					loginEntry->authFlags &= ~AUTH_UNKNOWN;										
+					CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Unknown error! Kicking out user...\n");																
+					err = new CAXMLErrorMessage(CAXMLErrorMessage::ERR_INTERNAL_SERVER_ERROR);
+				}
 			}
 			else
 			{
 				CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: handleJapPacket did not find user login hash entry!\n");
 				pAccInfo->sessionPackets = 0;
-			}
+			}											
+			
 			ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();
-		}
-
-		if (!ms_pInstance->m_settleHashtable)
-		{
-			// accounting instance is dying...
-			return returnKickout(pAccInfo);
-		}
-	
-		SAVE_STACK("CAAccountingInstance::handleJapPacket", "before settle hash");
-	
-		ms_pInstance->m_settleHashtable->getMutex().lock();
-		entry = (AccountHashEntry*)ms_pInstance->m_settleHashtable->getValue(&(pAccInfo->accountNumber));				
-		if (entry)
-		{						
-			if (entry->authFlags & AUTH_OUTDATED_CC)
-			{
-				entry->authFlags &= ~AUTH_OUTDATED_CC;	
-				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Fixing bytes from outdated CC...\n");	
-				// we had stored an outdated CC; insert confirmed bytes from current CC here						
-				pAccInfo->transferredBytes +=  entry->confirmedBytes - pAccInfo->confirmedBytes;
-				pAccInfo->confirmedBytes = entry->confirmedBytes;				
-				entry->confirmedBytes = 0;
-			}
-			else if (entry->authFlags & AUTH_ACCOUNT_EMPTY)
-			{
-				// Do not reset the flag, so that the confirmedBytes are always reset.
-				//entry->authFlags &= ~AUTH_ACCOUNT_EMPTY; 
-				pAccInfo->authFlags |= AUTH_ACCOUNT_EMPTY;
-				/* confirmedBytes = 0 leads to immediate disconnection.
-				 * If confirmedBytes > 0,  any remaining prepaid bytes may be used.
-				 */
-				pAccInfo->confirmedBytes = entry->confirmedBytes;
-			}
-			else if (entry->authFlags & AUTH_INVALID_ACCOUNT)
-			{
-				entry->authFlags &= ~AUTH_INVALID_ACCOUNT;											
-				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Found invalid account! Kicking out user...\n");																
-				err = new CAXMLErrorMessage(CAXMLErrorMessage::ERR_KEY_NOT_FOUND);
-			}
-			else if (entry->authFlags & AUTH_UNKNOWN)
-			{
-				entry->authFlags &= ~AUTH_UNKNOWN;										
-				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Unknown error! Kicking out user...\n");																
-				err = new CAXMLErrorMessage(CAXMLErrorMessage::ERR_INTERNAL_SERVER_ERROR);
-			}
 		}		
-		ms_pInstance->m_settleHashtable->getMutex().unlock();	
+
 		
 		if (pAccInfo->authFlags & AUTH_ACCOUNT_EMPTY)
 		{
@@ -1113,75 +1091,7 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 		pAccInfo->authFlags |= AUTH_FAKE | AUTH_GOT_ACCOUNTCERT | AUTH_TIMEOUT_STARTED;
 		pAccInfo->mutex->unlock();
 		return ;
-	}	
-	
-	// someone else may "steal" another ones old prepaid bytes like this, but this does not seem to be that harmful...
-	#ifdef DEBUG		
-	CAMsg::printMsg(LOG_DEBUG, "Checking database for previously prepaid bytes...\n");
-	#endif
-	SINT32 prepaidAmount = m_dbInterface->getPrepaidAmount(pAccInfo->accountNumber, m_currentCascade);
-	UINT8 tmp[32];
-	print64(tmp,pAccInfo->accountNumber);
-	if (prepaidAmount > 0)
-	{
-		pAccInfo->transferredBytes -= prepaidAmount;	
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Got %d prepaid bytes for account nr. %s.\n",prepaidAmount, tmp);
-	}	
-	else
-	{
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: No database record for prepaid bytes found for account nr. %s.\n", tmp);	
-	}	
-	//CAMsg::printMsg(LOG_DEBUG, "Number of prepaid (confirmed-transferred) bytes : %d \n",pAccInfo->confirmedBytes-pAccInfo->transferredBytes);	
-
-
-	/** 
-	 * @todo Dangerous, as this may collide with previous accounts that have been 
-	 * used and deleted before... 
-	 * There should be something like an expiration date for the account status, e.g. 1 month
-	 */
-	if (m_dbInterface->getAccountStatus(pAccInfo->accountNumber, status) != E_SUCCESS)
-	{
-		UINT8 tmp[32];
-		print64(tmp,pAccInfo->accountNumber);
-		CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Could not check status for account %s!\n", tmp);			
-	}
-	else if (status > CAXMLErrorMessage::ERR_OK)
-	{
-		UINT32 authFlags = 0;
-		UINT8 tmp[32];
-		print64(tmp,pAccInfo->accountNumber);
-		CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: The user with account %s should be kicked out due to error %u!\n", tmp, status);
-
-		/*if (status == CAXMLErrorMessage::ERR_KEY_NOT_FOUND)
-		{
-			authFlags |= AUTH_INVALID_ACCOUNT;
-		}
-		else*/ if (status == CAXMLErrorMessage::ERR_ACCOUNT_EMPTY)
-		{
-			authFlags |= AUTH_ACCOUNT_EMPTY;
-			pAccInfo->authFlags |= AUTH_ACCOUNT_EMPTY;
-		}
-		
-		if (authFlags)
-		{
-			ms_pInstance->m_settleHashtable->getMutex().lock();		
-			AccountHashEntry* oldEntry = 
-				(AccountHashEntry*) (ms_pInstance->m_settleHashtable->getValue(&(pAccInfo->accountNumber)));
-			if (!oldEntry)
-			{
-				AccountHashEntry* entry = new AccountHashEntry; 
-				entry->accountNumber = pAccInfo->accountNumber;
-				entry->authFlags = authFlags;
-				entry->confirmedBytes = pAccInfo->confirmedBytes;	
-				ms_pInstance->m_settleHashtable->put(&(entry->accountNumber), entry);
-			}	
-			else
-			{
-				oldEntry->authFlags |= authFlags;
-			}										
-			ms_pInstance->m_settleHashtable->getMutex().unlock();
-		}
-	}
+	}		
 	
 		
 	UINT8 * arbChallenge;
@@ -1310,7 +1220,7 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 	/** @todo We need this trick so that the program does not freeze with active AI ThreadPool!!!! */
 	//pAccInfo->mutex->unlock();
 	m_currentAccountsHashtable->getMutex().lock();	
-	pAccInfo->authFlags |= AUTH_ACCOUNT_OK;
+	pAccInfo->authFlags |= AUTH_ACCOUNT_OK;	// authentication successful
 	
 	loginEntry = (AccountLoginHashEntry*)m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));	
 	if (!loginEntry)
@@ -1319,6 +1229,8 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 		loginEntry = new AccountLoginHashEntry;
 		loginEntry->accountNumber = pAccInfo->accountNumber;
 		loginEntry->count = 1;
+		loginEntry->confirmedBytes = 0;
+		loginEntry->authFlags = 0;
 		loginEntry->userID = pAccInfo->userID;
 		m_currentAccountsHashtable->put(&(loginEntry->accountNumber), loginEntry);
 		if (!(AccountLoginHashEntry*)m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber)))
@@ -1336,8 +1248,7 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 	{
 		/*
 		 * There already is a user logged in with this account.
- 		 */
- 		 
+ 		 */ 		 
 		UINT8 accountNrAsString[32];
 		print64(accountNrAsString, pAccInfo->accountNumber);
 		if (loginEntry->count < MAX_TOLERATED_MULTIPLE_LOGINS)
@@ -1362,7 +1273,63 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 		 	//pAccInfo->authFlags |= AUTH_MULTIPLE_LOGIN;
 		}
 	}
+	
+	#ifdef DEBUG		
+	CAMsg::printMsg(LOG_DEBUG, "Checking database for previously prepaid bytes...\n");
+	#endif
+	SINT32 prepaidAmount = m_dbInterface->getPrepaidAmount(pAccInfo->accountNumber, m_currentCascade);
+	UINT8 tmp[32];
+	print64(tmp,pAccInfo->accountNumber);
+	if (prepaidAmount > 0)
+	{
+		pAccInfo->transferredBytes -= prepaidAmount;	
+		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Got %d prepaid bytes for account nr. %s.\n",prepaidAmount, tmp);
+	}	
+	else
+	{
+		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: No database record for prepaid bytes found for account nr. %s.\n", tmp);	
+	}	
+	//CAMsg::printMsg(LOG_DEBUG, "Number of prepaid (confirmed-transferred) bytes : %d \n",pAccInfo->confirmedBytes-pAccInfo->transferredBytes);	
+	
+	/** 
+	 * @todo Dangerous, as this may collide with previous accounts that have been 
+	 * used and deleted before... 
+	 * There should be something like an expiration date for the account status, e.g. 1 month
+	 */
+	if (m_dbInterface->getAccountStatus(pAccInfo->accountNumber, status) != E_SUCCESS)
+	{
+		UINT8 tmp[32];
+		print64(tmp,pAccInfo->accountNumber);
+		CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Could not check status for account %s!\n", tmp);			
+	}
+	else if (status > CAXMLErrorMessage::ERR_OK)
+	{
+		UINT32 authFlags = 0;
+		UINT8 tmp[32];
+		print64(tmp,pAccInfo->accountNumber);
+		CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: The user with account %s should be kicked out due to error %u!\n", tmp, status);
+
+		/*if (status == CAXMLErrorMessage::ERR_KEY_NOT_FOUND)
+		{
+			authFlags |= AUTH_INVALID_ACCOUNT;
+		}
+		else*/ if (status == CAXMLErrorMessage::ERR_ACCOUNT_EMPTY)
+		{
+			authFlags |= AUTH_ACCOUNT_EMPTY;
+			pAccInfo->authFlags |= AUTH_ACCOUNT_EMPTY;
+		}
+		
+		if (authFlags)
+		{	
+			loginEntry->authFlags |= authFlags;
+			if (loginEntry->confirmedBytes == 0)
+			{
+				loginEntry->confirmedBytes = pAccInfo->confirmedBytes;
+			}
+		}
+	}	
 	m_currentAccountsHashtable->getMutex().unlock();
+	
 	
 	/** @todo We need this trick so that the program does not freeze with active AI ThreadPool!!!! */
 	//pAccInfo->mutex->lock();
@@ -1642,24 +1609,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 						}
 						// this is the last active user connection; delete the entry
 						ms_pInstance->m_currentAccountsHashtable->remove(&(pAccInfo->accountNumber));
-						delete loginEntry;
-						
-						if (ms_pInstance->m_settleHashtable)
-						{
-							ms_pInstance->m_settleHashtable->getMutex().lock();				
-							entry = (AccountHashEntry*)ms_pInstance->m_settleHashtable->remove(&(pAccInfo->accountNumber));										
-							if (entry)
-							{
-								delete entry;				
-							}
-					#ifdef DEBUG
-							else if ((AccountHashEntry*)ms_pInstance->m_settleHashtable->getValue(&(pAccInfo->accountNumber)))
-							{							
-								CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: Cleanup hash entry exists but was not found!\n");
-							}
-					#endif
-							ms_pInstance->m_settleHashtable->getMutex().unlock();					
-						}	
+						delete loginEntry;												
 					}
 					else
 					{

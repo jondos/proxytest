@@ -58,11 +58,13 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define AUTH_TIMEOUT 10
 
 
-struct AccountHashEntry
+struct AccountLoginHashEntry
 {
 	UINT64 accountNumber;
 	UINT32 authFlags;
 	UINT64 confirmedBytes;
+	UINT64 userID;
+	UINT32 count;
 	AccountHashEntry* nextEntry;
 };	
 
@@ -211,9 +213,6 @@ private:
 	/** this is for synchronizing the write access to the HashEntries */
 	CAMutex m_Mutex;
 	
-	/** For information exchange between the settle thread and the accounting instance */
-	Hashtable* m_settleHashtable;
-	
 	/** Stores the account number of all users currently logged in. */
 	Hashtable* m_currentAccountsHashtable;
 	
@@ -254,13 +253,6 @@ private:
 	CAAccountingSettleThread * m_pSettleThread;
 	
 	bool m_bThreadRunning;
-
-	struct AccountLoginHashEntry
-	{
-		UINT64 accountNumber;
-		UINT64 userID;
-		UINT32 count;
-	};
 };
 
 
