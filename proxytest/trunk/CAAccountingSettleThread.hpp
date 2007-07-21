@@ -73,7 +73,7 @@ class CAAccountingSettleThread
 	private:	
 		CAConditionVariable* m_pCondition;
 		UINT8* m_settleCascade;
-		static THREAD_RETURN mainLoop(void * param);
+		THREAD_RETURN mainLoop(void * param);
 		CAThread* m_pThread;
 		volatile bool m_bRun;
 		Hashtable* m_accountingHashtable;
