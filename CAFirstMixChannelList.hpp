@@ -48,7 +48,7 @@ struct t_fmhashtableentry
 	{
 		public:
 			CAMuxSocket*	pMuxSocket;
-			CAQueue*			pQueueSend;
+			CAQueue*		pQueueSend;
 			CAControlChannelDispatcher* pControlChannelDispatcher;
 			SINT32        uAlreadySendPacketSize;
 			tQueueEntry		oQueueEntry;
