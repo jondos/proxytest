@@ -1567,7 +1567,6 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 		//ms_pInstance->m_Mutex.lock();
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
 		AccountLoginHashEntry* loginEntry;
-		AccountHashEntry* entry;
 		SINT32 prepaidBytes = 0;
 		
 		if (pAccInfo == NULL)
