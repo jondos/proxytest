@@ -44,41 +44,8 @@ CAMutex::~CAMutex()
 	}
 #endif
 
-SINT32 CAMutex::lock()
-{
-	#ifdef	HAVE_PTHREAD_MUTEXES
-		SINT32 ret;
-		ret = pthread_mutex_trylock(m_pMutex);
-		if(ret == 0)
-		{
-			return E_SUCCESS;
-		}
-		else
-		{
-			CAMsg::printMsg(LOG_CRIT, "CAMutex: lock error=%d\n", ret);
-		}
-	
-		if(pthread_mutex_lock(m_pMutex)==0)
-			return E_SUCCESS;
-		return E_UNKNOWN;
-	#else
-		return m_pMutex->down();
-	#endif
-}
 
-SINT32 CAMutex::unlock()
-{
-	#ifdef HAVE_PTHREAD_MUTEXES
-		SINT32 ret;
-		ret = pthread_mutex_unlock(m_pMutex);
-		if(ret == 0)
-		{
-			return E_SUCCESS;
-		}
-		CAMsg::printMsg(LOG_CRIT, "CAMutex: unlock error=%d\n", ret);
-		return E_UNKNOWN;
-	#else
-		return m_pMutex->up();
-	#endif
-}
+void CAMutex::logError(char* a_msg, SINT32 a_error);
+
+
 
