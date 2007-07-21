@@ -38,15 +38,7 @@ class CAMutex
 #if !defined (DEBUG) || !defined(HAVE_PTHREAD_MUTEXES)
 			CAMutex();
 
-			virtual ~CAMutex()
-				{
-					#ifdef HAVE_PTHREAD_MUTEXES
-						pthread_mutex_destroy(m_pMutex);
-						pthread_mutexattr_destroy(m_pMutexAttributes);
-						delete m_pMutexAttributes;						
-					#endif
-					delete m_pMutex;
-				}
+			virtual ~CAMutex();
 #else
 			CAMutex();
 			virtual ~CAMutex();
