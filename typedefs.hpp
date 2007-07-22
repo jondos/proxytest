@@ -159,6 +159,9 @@ typedef struct t_mix_parameters tMixParameters;
 /** format and signature of all received certificates was OK */
 #define AUTH_ACCOUNT_OK 0x2
 
+/** First CC from cient has not been settled yet. */
+#define AUTH_WAITING_FOR_FIRST_SETTLED_CC 0x4
+
 /** we have sent one or two CC requests */
 #define AUTH_SENT_CC_REQUEST 0x20
 

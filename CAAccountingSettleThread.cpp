@@ -79,8 +79,10 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 		CAQueue q;
 		UINT32 size;
 		CASocketAddrINet biAddr;	
-		AccountLoginHashEntry* entry;	
-		AccountLoginHashEntry* nextEntry;	
+		SettleEntry* entry;	
+		SettleEntry* nextEntry;	
+		bool bSleep = false;
+		bool bPICommunicationError;
 	
 		CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread is running...\n");
 	
@@ -99,22 +101,27 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 		{
 			SAVE_STACK("CAAccountingSettleThread::mainLoop", "Loop");
 			
-			#ifdef DEBUG
-				CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread going to sleep...\n");
-			#endif
-			m_pAccountingSettleThread->m_pCondition->wait(sleepInterval * 1000);
-			//sSleep((UINT16)sleepInterval);
-			#ifdef DEBUG
-				CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread Waking up...\n");
-			#endif
-			if(!m_pAccountingSettleThread->m_bRun)
+			if (bSleep)
 			{
-				CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Leaving run loop\n");
-				break;
+				bSleep = false;
+				#ifdef DEBUG
+					CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread going to sleep...\n");
+				#endif
+				m_pAccountingSettleThread->m_pCondition->wait(sleepInterval * 1000);
+				//sSleep((UINT16)sleepInterval);
+				#ifdef DEBUG
+					CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread Waking up...\n");
+				#endif
+				if(!m_pAccountingSettleThread->m_bRun)
+				{
+					CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Leaving run loop\n");
+					break;
+				}
 			}
 			if(!dbConn.isDBConnected() && dbConn.initDBConnection()!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_ERR, "SettleThread could not connect to Database. Retrying later...\n");
+				bSleep = true;
 				continue;
 			}
 			#ifdef DEBUG	
@@ -122,9 +129,11 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 			#endif
 
 			dbConn.getUnsettledCostConfirmations(q, m_pAccountingSettleThread->m_settleCascade);
-			if (q.isEmpty() )
+			if (q.isEmpty())
 			{
 				CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: finished gettings CCs, found no CCs to settle\n");
+				bSleep = true;
+				continue;
 			}
 			else 
 			{
@@ -134,7 +143,8 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 			}
 			
 			entry = NULL;
-			while(!q.isEmpty())
+			bPICommunicationError = false;
+			while(!q.isEmpty() && m_pAccountingSettleThread->m_bRun)
 			{
 				SAVE_STACK("CAAccountingSettleThread::mainLoop", "Settling");
 				// get the next CC from the queue
@@ -145,63 +155,71 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					q.clean();
 					break;
 				}
+				
+				if (!pCC)
+				{
+					CAMsg::printMsg(LOG_CRIT, "CAAccountingSettleThread: Cost confirmation is NULL!\n");
+					continue;		
+				}				
+				
 #ifdef DEBUG				
 				CAMsg::printMsg(LOG_DEBUG, "Settle Thread: trying to connect to payment instance");
 #endif				
-				if(biConn.initBIConnection()!=E_SUCCESS)
+				if(bPICommunicationError || biConn.initBIConnection() != E_SUCCESS)
 				{
-					CAMsg::printMsg(LOG_DEBUG, "SettleThread: could not connect to BI. Retrying later...\n");
-					q.clean();
-					biConn.terminateBIConnection(); // make sure the socket is closed
-					break;
+					if (!bPICommunicationError)
+					{
+						CAMsg::printMsg(LOG_DEBUG, "SettleThread: could not connect to BI. Retrying later...\n");
+					}
+					//q.clean();
+					pErrMsg = NULL; // continue in order to tell AUTH_WAITING_FOR_FIRST_SETTLED_CC for all accounts
+					bPICommunicationError = true;
+					biConn.terminateBIConnection(); // make sure the socket is closed					
 				}
+				else
+				{					
 #ifdef DEBUG				
-				CAMsg::printMsg(LOG_DEBUG, "SettleThread: successfully connected to payment instance");
+					CAMsg::printMsg(LOG_DEBUG, "SettleThread: successfully connected to payment instance");
 #endif				
-				if (!pCC)
-				{
-					CAMsg::printMsg(LOG_CRIT, "CAAccountingSettleThread: Cost confirmation is NULL!\n");
+					pErrMsg = biConn.settle( *pCC );
 					biConn.terminateBIConnection();
-					continue;
+					CAMsg::printMsg(LOG_DEBUG, "CAAccountingSettleThread: settle done!\n");
 				}
-				
-				//CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: try to settle...\n");
-				pErrMsg = biConn.settle( *pCC );
-				biConn.terminateBIConnection();
-				CAMsg::printMsg(LOG_DEBUG, "CAAccountingSettleThread: settle done!\n");
-			
-				if (!pCC)
-				{
-					CAMsg::printMsg(LOG_CRIT, "CAAccountingSettleThread: Cost confirmation is NULL!\n");
-					continue;
-				}
+
+				bool bDeleteCC = false;
+				UINT32 authFlags = 0;
+				UINT32 authRemoveFlags = 0;
+				UINT64 confirmedBytes = 0;														
+				UINT64 diffBytes = 0;
 			
 				// check returncode
-				if(pErrMsg==NULL)  //no returncode -> connection error
+				if(pErrMsg == NULL)  //no returncode -> connection error
 				{
+					authRemoveFlags |= AUTH_WAITING_FOR_FIRST_SETTLED_CC; // no fault of the client
 					CAMsg::printMsg(LOG_ERR, "SettleThread: Communication with BI failed!\n");
 				}
 				else if(pErrMsg->getErrorCode() != pErrMsg->ERR_OK)  //BI reported error
-				{																												
-					bool bDeleteCC = false;
-					UINT32 authFlags = 0;
-					UINT64 confirmedBytes = 0;														
-					
+				{																																	
 					CAMsg::printMsg(LOG_ERR, "CAAccountingSettleThread: BI reported error no. %d (%s)\n",
 						pErrMsg->getErrorCode(), pErrMsg->getDescription() );
 					if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_KEY_NOT_FOUND)
 					{
 						authFlags |= AUTH_INVALID_ACCOUNT;	
 						//dbConn.storeAccountStatus(pCC->getAccountNumber(), CAXMLErrorMessage::ERR_KEY_NOT_FOUND);				
-						bDeleteCC = true;													
+						//bDeleteCC = true;													
 					}
 					else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_ACCOUNT_EMPTY)
 					{
+						authRemoveFlags |= AUTH_WAITING_FOR_FIRST_SETTLED_CC;
 						authFlags |= AUTH_ACCOUNT_EMPTY;
 						UINT64* msgConfirmedBytes = (UINT64*)pErrMsg->getMessageObject();
 						if (msgConfirmedBytes)
 						{
 							confirmedBytes = *msgConfirmedBytes;
+							if (confirmedBytes < pCC->getTransferredBytes())
+							{
+								diffBytes = pCC->getTransferredBytes() - confirmedBytes;
+							}
 							UINT8 tmp[32];
 							print64(tmp, confirmedBytes);
 							CAMsg::printMsg(LOG_ERR, "CAAccountingSettleThread: Received %s confirmed bytes!\n", tmp);
@@ -216,7 +234,9 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 						// bDeleteCC = true;
 					}*/
 					else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_OUTDATED_CC)
-					{														
+					{					
+						authRemoveFlags |= AUTH_WAITING_FOR_FIRST_SETTLED_CC; // this is a Mix not a client error
+															
 						//get attached CC from error message
 						CAXMLCostConfirmation* attachedCC = (CAXMLCostConfirmation*) pErrMsg->getMessageObject();
 						if (attachedCC)
@@ -244,17 +264,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					{
 						CAMsg::printMsg(LOG_DEBUG, "SettleThread: Setting unknown kickout error no. %d.\n", pErrMsg->getErrorCode());
 						authFlags |= AUTH_UNKNOWN;
-						bDeleteCC = true; // an unknown error leads to user kickout
-					}		
-					
-					if (authFlags)
-					{
-						nextEntry = new AccountLoginHashEntry; 
-						nextEntry->accountNumber = pCC->getAccountNumber();
-						nextEntry->authFlags = authFlags;
-						nextEntry->confirmedBytes = confirmedBytes;	
-						nextEntry->nextEntry = entry;
-						entry = nextEntry;
+						//bDeleteCC = true; // an unknown error leads to user kickout
 					}																	
 					
 					if (bDeleteCC)
@@ -272,8 +282,21 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				}
 				else //settling was OK, so mark account as settled
 				{
+					authRemoveFlags |= AUTH_WAITING_FOR_FIRST_SETTLED_CC;
 					dbConn.markAsSettled(pCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade);
 				} 
+				
+				if (authFlags || authRemoveFlags)
+				{
+					nextEntry = new AccountLoginHashEntry; 
+					nextEntry->accountNumber = pCC->getAccountNumber();
+					nextEntry->authFlags = authFlags;
+					nextEntry->authRemoveFlags = authRemoveFlags;
+					nextEntry->confirmedBytes = confirmedBytes;	
+					nextEntry->diffBytes = diffBytes;
+					nextEntry->nextEntry = entry;
+					entry = nextEntry;
+				}						
 
 				if (pCC != NULL)
 				{
@@ -296,17 +319,37 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				m_pAccountingSettleThread->m_accountingHashtable->getMutex().lock();
 				while (entry)
 				{			
-					AccountLoginHashEntry* oldEntry = 
+					AccountLoginHashEntry* loginEntry = 
 						(AccountLoginHashEntry*) (m_pAccountingSettleThread->m_accountingHashtable->getValue(&(entry->accountNumber)));
-					if (oldEntry)
+					if (loginEntry)
 					{				
 						// the user is currently logged in											
-						oldEntry->authFlags |= entry->authFlags;
+						loginEntry->authFlags |= entry->authFlags;
+						loginEntry->authRemoveFlags |= entry->authRemoveFlags;
 						if (entry->confirmedBytes)
 						{
-							oldEntry->confirmedBytes = entry->confirmedBytes;
-						}						
+							loginEntry->confirmedBytes = entry->confirmedBytes;
+						}											
 					}	
+					else if (entry->diffBytes)
+					{
+						// user is currently not logged in; set correct prepaid bytes in DB
+						SINT32 prepaidBytes = 
+							dbConn.getPrepaidAmount(entry->accountNumber, m_settleCascade);
+						if (prepaidBytes > 0)
+						{ 
+							if (entry->diffBytes >= prepaidBytes)
+							{
+								prepaidBytes = 0;
+							}
+							else
+							{
+								prepaidBytes -= diffBytes;
+							}
+							storePrepaidAmount(
+								entry->accountNumber, storePrepaidAmount, m_settleCascade);
+						}
+					}
 					nextEntry = entry->nextEntry;
 					delete entry;
 					entry = nextEntry;									

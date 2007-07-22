@@ -62,10 +62,10 @@ struct AccountLoginHashEntry
 {
 	UINT64 accountNumber;
 	UINT32 authFlags;
+	UINT32 authRemoveFlags;
 	UINT64 confirmedBytes;
 	UINT64 userID;
 	UINT32 count;
-	AccountLoginHashEntry* nextEntry;
 };	
 
 

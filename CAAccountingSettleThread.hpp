@@ -77,6 +77,16 @@ class CAAccountingSettleThread
 		CAThread* m_pThread;
 		volatile bool m_bRun;
 		Hashtable* m_accountingHashtable;
+		
+		struct SettleEntry
+		{
+			UINT64 accountNumber;
+			UINT32 authFlags;
+			UINT32 authRemoveFlags;
+			UINT64 confirmedBytes;
+			UINT64 diffBytes;
+			SettleEntry* nextEntry;
+		};			
 	
 };
 #endif
