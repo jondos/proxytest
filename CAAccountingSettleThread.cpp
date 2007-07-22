@@ -140,7 +140,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					break;
 				}
 			}
-			m_pAccountingSettleThread->m_pCondition->getMutex().unock();
+			m_pAccountingSettleThread->m_pCondition->getMutex().unlock();
 			
 			if(!dbConn.isDBConnected() && dbConn.initDBConnection()!=E_SUCCESS)
 			{
