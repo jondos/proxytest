@@ -354,7 +354,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			if (loginEntry)
 			{
 				//pAccInfo->authFlags &= ~loginEntry->authRemoveFlags;
-				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Remove flag: %d", ~loginEntry->authRemoveFlags);
+				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Remove flag: %d\n", ~loginEntry->authRemoveFlags);
 				
 				if (loginEntry->userID != pHashEntry->id)
 				{
@@ -1262,6 +1262,7 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 		loginEntry->accountNumber = pAccInfo->accountNumber;
 		loginEntry->count = 1;
 		loginEntry->confirmedBytes = 0;
+		loginEntry->authRemoveFlags = 0;
 		loginEntry->authFlags = 0;
 		loginEntry->userID = pAccInfo->userID;
 		m_currentAccountsHashtable->put(&(loginEntry->accountNumber), loginEntry);
