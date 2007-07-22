@@ -353,7 +353,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			loginEntry = (AccountLoginHashEntry*)ms_pInstance->m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
 			if (loginEntry)
 			{
-				//pAccInfo->authFlags &= ~loginEntry->authRemoveFlags;
+				pAccInfo->authFlags &= ~loginEntry->authRemoveFlags;
 				//CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Remove flag: %d\n", loginEntry->authRemoveFlags);
 				
 				if (loginEntry->userID != pHashEntry->id)
@@ -1315,7 +1315,7 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 	print64(tmp,pAccInfo->accountNumber);
 	if (prepaidAmount > 0)
 	{
-		//pAccInfo->authFlags &= ~AUTH_WAITING_FOR_FIRST_SETTLED_CC;
+		pAccInfo->authFlags &= ~AUTH_WAITING_FOR_FIRST_SETTLED_CC;
 		pAccInfo->transferredBytes -= prepaidAmount;	
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Got %d prepaid bytes for account nr. %s.\n",prepaidAmount, tmp);
 	}	
