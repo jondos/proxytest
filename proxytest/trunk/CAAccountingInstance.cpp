@@ -1516,29 +1516,7 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 		pAccInfo->pControlChannel->sendXMLMessage(errDoc);*/
 	}
 	else
-	{		
-		UINT32 prepaidInterval;
-		UINT64 prepaidBytes;
-		UINT64 transferred = pAccInfo->transferredBytes;
-		
-		if (pCC->getTransferredBytes() > transferred)
-		{
-			pglobalOptions->getPrepaidInterval(&prepaidInterval);
-			prepaidBytes = pCC->getTransferredBytes() - transferred;
-			if (prepaidBytes > prepaidInterval)
-			{
-				UINT8 tmp[32];
-				UINT8 tmp2[32];
-				print64(tmp,pCC->getAccountNumber());
-				print64(tmp2,prepaidBytes - prepaidInterval);
-				// client paid more than the prepaid interval - this is beyond specification!
-				CAMsg::printMsg(LOG_WARNING, 
-					"CostConfirmation for account %s is higher than prepaid interval! "
-					"Loosing %s bytes...", tmp, tmp2);
-				pAccInfo->transferredBytes += (prepaidBytes - prepaidInterval);
-			}
-		}
-	
+	{			
 		pAccInfo->confirmedBytes = pCC->getTransferredBytes();	
 		if (m_dbInterface->storeCostConfirmation(*pCC, m_currentCascade) != E_SUCCESS)
 		{
@@ -1555,7 +1533,7 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 			getcurrentTimeMillis(currentMillis);
 			print64(tmpStrCurrentMillis,currentMillis);
 			CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Settle ini: %s\n", tmpStrCurrentMillis);			
-			m_pSettleThread->settle();
+			//m_pSettleThread->settle();
 		}
 	}
 	
@@ -1638,6 +1616,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
 		AccountLoginHashEntry* loginEntry;
 		SINT32 prepaidBytes = 0;
+		UINT32 prepaidInterval;
 		
 		if (pAccInfo == NULL)
 		{
@@ -1670,6 +1649,23 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 						
 						//store prepaid bytes in database, so the user wont lose the prepaid amount by disconnecting
 						prepaidBytes = getPrepaidBytes(pAccInfo);
+						if (prepaidBytes > 0)
+						{
+							pglobalOptions->getPrepaidInterval(&prepaidInterval);
+							if (prepaidBytes > prepaidInterval)
+							{
+								UINT8 tmp[32];
+								print64(tmp, pAccInfo->accountNumber);
+								/* Client paid more than the prepaid interval - 
+								 * this is beyond specification and not allowed!
+								 */
+								CAMsg::printMsg(LOG_WARNING, 
+									"CostConfirmation for account %s is higher than prepaid interval! "
+									"Loosing %d bytes...", tmp, prepaidBytes - prepaidInterval);
+								
+								prepaidBytes = prepaidInterval;
+							}
+						}												
 						
 						if (ms_pInstance->m_dbInterface)
 						{
