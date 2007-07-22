@@ -324,14 +324,14 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 		*/
 		
 		// do the following tests after a lot of Mix packets only (gain speed...)
-		if (!(pAccInfo->authFlags & AUTH_HARD_LIMIT_REACHED) &&
-			pAccInfo->sessionPackets % PACKETS_BEFORE_NEXT_CHECK != 0 &&
-			!(pAccInfo->authFlags & AUTH_ACCOUNT_EMPTY))
+		if (!(pAccInfo->authFlags & (AUTH_HARD_LIMIT_REACHED | AUTH_ACCOUNT_EMPTY | AUTH_WAITING_FOR_FIRST_SETTLED_CC)) &&
+			pAccInfo->sessionPackets % PACKETS_BEFORE_NEXT_CHECK != 0)
 		{
-			//CAMsg::printMsg( LOG_DEBUG, "Now we gain some speed after %d session packets...\n", pAccInfo->sessionPackets);
+			CAMsg::printMsg( LOG_DEBUG, "Now we gain some speed after %d session packets...\n", pAccInfo->sessionPackets);
 			pAccInfo->mutex->unlock();
 			return HANDLE_PACKET_CONNECTION_UNCHECKED;
 		}
+		
 		//CAMsg::printMsg( LOG_DEBUG, "Checking after %d session packets...\n", pAccInfo->sessionPackets);
 		
 		/** @todo We need this trick so that the program does not freeze with active AI ThreadPool!!!! */
@@ -353,7 +353,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			loginEntry = (AccountLoginHashEntry*)ms_pInstance->m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
 			if (loginEntry)
 			{
-				pAccInfo->authFlags &= ~loginEntry->authRemoveFlags;
+				//pAccInfo->authFlags &= ~loginEntry->authRemoveFlags;
 				//CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Remove flag: %d\n", loginEntry->authRemoveFlags);
 				
 				if (loginEntry->userID != pHashEntry->id)
@@ -619,7 +619,6 @@ SINT32 CAAccountingInstance::returnOK(tAiAccountingInfo* pAccInfo)
 	SINT32 ret;
 	if (pAccInfo->authFlags & AUTH_WAITING_FOR_FIRST_SETTLED_CC)
 	{
-		CAMsg::printMsg(LOG_ERR, "Still no CC settled...\n");
 		// it is not yet sure whether this user has a charged account
 		ret = HANDLE_PACKET_HOLD_CONNECTION;
 	}
@@ -1525,7 +1524,7 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 			print64(tmp,pCC->getTransferredBytes());
 			CAMsg::printMsg( LOG_INFO, "CostConfirmation for account %s could not be stored in database!\n", tmp );
 		}
-		else
+		else if (pAccInfo->authFlags & AUTH_WAITING_FOR_FIRST_SETTLED_CC)
 		{
 			// initiate immediate settling
 			UINT64 currentMillis;
@@ -1534,7 +1533,7 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 			getcurrentTimeMillis(currentMillis);
 			print64(tmpStrCurrentMillis,currentMillis);
 			CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Settle ini: %s\n", tmpStrCurrentMillis);			
-			//m_pSettleThread->settle();
+			m_pSettleThread->settle();
 		}
 	}
 	
