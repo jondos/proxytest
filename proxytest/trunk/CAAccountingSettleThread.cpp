@@ -120,16 +120,19 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				#endif
 				
 				
+#ifdef DEBUG
 				UINT64 currentMillis;
-				UINT8 tmpStrCurrentMillis[50];
-				
+				UINT8 tmpStrCurrentMillis[50];				
 				getcurrentTimeMillis(currentMillis);
 				print64(tmpStrCurrentMillis,currentMillis);
 				CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Wait start: %s\n", tmpStrCurrentMillis);				
+#endif				
 				m_pAccountingSettleThread->m_pCondition->wait(sleepInterval * 1000);
+#ifdef DEBUG				
 				getcurrentTimeMillis(currentMillis);
 				print64(tmpStrCurrentMillis,currentMillis);
-				CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Wait stop:  %s\n", tmpStrCurrentMillis);				
+				CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Wait stop:  %s\n", tmpStrCurrentMillis);
+#endif				
 				//sSleep((UINT16)sleepInterval);
 				#ifdef DEBUG
 					CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread Waking up...\n");
