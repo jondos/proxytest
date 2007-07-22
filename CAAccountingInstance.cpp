@@ -1529,10 +1529,11 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 			// initiate immediate settling
 			UINT64 currentMillis;
 			UINT8 tmpStrCurrentMillis[50];
-			
+#ifdef DEBUG
 			getcurrentTimeMillis(currentMillis);
 			print64(tmpStrCurrentMillis,currentMillis);
 			CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Settle ini: %s\n", tmpStrCurrentMillis);			
+#endif
 			m_pSettleThread->settle();
 		}
 	}
