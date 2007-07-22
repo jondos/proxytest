@@ -61,6 +61,15 @@ CAAccountingSettleThread::~CAAccountingSettleThread()
 		delete m_pCondition;
 	}
 
+
+void CAAccountingSettleThread::settle()
+{
+	m_pCondition->getMutex().lock();
+	m_bSleep = false;
+	m_pCondition->signal();
+	m_pCondition->getMutex().unlock();
+}
+
 /**
  * The main loop. Sleeps for a few minutes, then contacts the BI to settle CCs, 
  * then sleeps again
@@ -80,11 +89,12 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 		UINT32 size;
 		CASocketAddrINet biAddr;	
 		SettleEntry* entry;	
-		SettleEntry* nextEntry;	
-		bool bSleep = false;
+		SettleEntry* nextEntry;			
 		bool bPICommunicationError;
 	
 		CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread is running...\n");
+		m_bSleep = false;
+	
 	
 		CAXMLBI* pBI = pglobalOptions->getBI();
 		if(pBI==NULL)
@@ -101,13 +111,15 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 		{
 			SAVE_STACK("CAAccountingSettleThread::mainLoop", "Loop");
 			
-			if (bSleep)
+			m_pCondition->getMutex().lock();
+			if (m_bSleep)
 			{
-				bSleep = false;
+				m_bSleep = false;
 				#ifdef DEBUG
 					CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread going to sleep...\n");
 				#endif
-				m_pAccountingSettleThread->m_pCondition->wait(sleepInterval * 1000);
+				
+				m_pAccountingSettleThread->m_pCondition->wait(sleepInterval * 1000);				
 				//sSleep((UINT16)sleepInterval);
 				#ifdef DEBUG
 					CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread Waking up...\n");
@@ -118,10 +130,12 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					break;
 				}
 			}
+			m_pCondition->getMutex().unock();
+			
 			if(!dbConn.isDBConnected() && dbConn.initDBConnection()!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_ERR, "SettleThread could not connect to Database. Retrying later...\n");
-				bSleep = true;
+				m_bSleep = true;
 				continue;
 			}
 			#ifdef DEBUG	
@@ -132,7 +146,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 			if (q.isEmpty())
 			{
 				CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: finished gettings CCs, found no CCs to settle\n");
-				bSleep = true;
+				m_bSleep = true;
 				continue;
 			}
 			else 
