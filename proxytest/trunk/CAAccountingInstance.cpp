@@ -353,6 +353,8 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			loginEntry = (AccountLoginHashEntry*)ms_pInstance->m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
 			if (loginEntry)
 			{
+				pAccInfo->authFlags &= ~loginEntry->authRemoveFlags;
+				
 				if (loginEntry->userID != pHashEntry->id)
 				{
 					// this is not the latest connection of this user; kick him out...
@@ -366,7 +368,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 					CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Fixing bytes from outdated CC...\n");	
 					// we had stored an outdated CC; insert confirmed bytes from current CC here						
 					pAccInfo->transferredBytes +=  loginEntry->confirmedBytes - pAccInfo->confirmedBytes;
-					pAccInfo->confirmedBytes = loginEntry->confirmedBytes;				
+					pAccInfo->confirmedBytes = loginEntry->confirmedBytes;			
 					loginEntry->confirmedBytes = 0;
 				}
 				else if (loginEntry->authFlags & AUTH_ACCOUNT_EMPTY)
@@ -395,7 +397,8 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			else
 			{
 				CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: handleJapPacket did not find user login hash entry!\n");
-				pAccInfo->sessionPackets = 0;
+				//pAccInfo->sessionPackets = 0;
+				return returnKickout(pAccInfo);				
 			}											
 			
 			ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();
@@ -502,6 +505,14 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			//confirmed and transferred bytes are cumulative, so they use UINT64 to store potentially huge values
 			//prepaid Bytes as the difference will be much smaller, but might be negative, so we cast to signed int
 			SINT32 prepaidBytes = getPrepaidBytes(pAccInfo);
+			
+			if (prepaidBytes < m_prepaidBytesMinimum)
+			{
+				// this is only for logging the typical client behaviour in confirming prepaid bytes
+				m_prepaidBytesMinimum = prepaidBytes;
+				CAMsg::printMsg(LOG_INFO, 
+					"CAAccountingInstance: New PrepaidBytes minimum: %d\n", m_prepaidBytesMinimum);
+			}
 			 
 			//CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Prepaid bytes: %d!\n", prepaidBytes);
 				
@@ -595,12 +606,6 @@ SINT32 CAAccountingInstance::getPrepaidBytes(tAiAccountingInfo* pAccInfo)
 		prepaidBytes *= -1;
 	}	
 	
-	if (prepaidBytes < m_prepaidBytesMinimum)
-	{
-		m_prepaidBytesMinimum = prepaidBytes;
-		CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: New PrepaidBytes minimum: %d\n", m_prepaidBytesMinimum);
-	}
-	
 	return prepaidBytes;
 }
 
@@ -610,8 +615,19 @@ SINT32 CAAccountingInstance::getPrepaidBytes(tAiAccountingInfo* pAccInfo)
  */
 SINT32 CAAccountingInstance::returnOK(tAiAccountingInfo* pAccInfo)
 {
+	SINT32 ret;
+	if (pAccInfo->authFlags & AUTH_WAITING_FOR_FIRST_SETTLED_CC)
+	{
+		// it is not yet sure whether this user has a charged account
+		ret = HANDLE_PACKET_HOLD_CONNECTION;
+	}
+	else
+	{
+		ret = HANDLE_PACKET_CONNECTION_OK;
+	}
 	pAccInfo->mutex->unlock();
-	return HANDLE_PACKET_CONNECTION_OK;	
+	
+	return ret;	
 }
 
 
@@ -1290,6 +1306,7 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 	print64(tmp,pAccInfo->accountNumber);
 	if (prepaidAmount > 0)
 	{
+		pAccInfo->authFlags &= ~AUTH_WAITING_FOR_FIRST_SETTLED_CC;
 		pAccInfo->transferredBytes -= prepaidAmount;	
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Got %d prepaid bytes for account nr. %s.\n",prepaidAmount, tmp);
 	}	
@@ -1497,6 +1514,12 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 			print64(tmp,pCC->getTransferredBytes());
 			CAMsg::printMsg( LOG_INFO, "CostConfirmation for account %s could not be stored in database!\n", tmp );
 		}
+		else
+		{
+			// initiate immediate settling
+			/** @todo This should be fully synchronized! */
+			m_pSettleThread->getCondition()->signal();
+		}
 	}
 	
 	if (pCC->getTransferredBytes() >= pAccInfo->bytesToConfirm)
@@ -1542,8 +1565,9 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 	SAVE_STACK("CAAccountingInstance::initTableEntry", "After memset");
 	
 	pHashEntry->pAccountingInfo->authFlags = 
-		AUTH_SENT_ACCOUNT_REQUEST | AUTH_TIMEOUT_STARTED | AUTH_HARD_LIMIT_REACHED;		
-	pHashEntry->pAccountingInfo->authFlags |= AUTH_SENT_CC_REQUEST; // prevents multiple CC requests on login
+		AUTH_SENT_ACCOUNT_REQUEST | AUTH_TIMEOUT_STARTED | 
+		AUTH_HARD_LIMIT_REACHED | AUTH_WAITING_FOR_FIRST_CC	| 
+		AUTH_SENT_CC_REQUEST; // prevents multiple CC requests on login
 	pHashEntry->pAccountingInfo->authTimeoutStartSeconds = time(NULL);
 	pHashEntry->pAccountingInfo->lastHardLimitSeconds = time(NULL);
 	pHashEntry->pAccountingInfo->sessionPackets = 0;
