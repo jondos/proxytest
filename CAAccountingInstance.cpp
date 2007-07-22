@@ -1524,7 +1524,7 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 		if (pCC->getTransferredBytes() > transferred)
 		{
 			pglobalOptions->getPrepaidInterval(&prepaidInterval);
-			prepaidBytes = pCC->getTransferredBytes() - transferred);
+			prepaidBytes = pCC->getTransferredBytes() - transferred;
 			if (prepaidBytes > prepaidInterval)
 			{
 				UINT8 tmp[32];
