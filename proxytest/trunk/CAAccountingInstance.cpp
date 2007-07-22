@@ -619,7 +619,7 @@ SINT32 CAAccountingInstance::returnOK(tAiAccountingInfo* pAccInfo)
 	SINT32 ret;
 	if (pAccInfo->authFlags & AUTH_WAITING_FOR_FIRST_SETTLED_CC)
 	{
-		CAMsg::printMsg(LOG_ERR, "Still no CC settled...");
+		CAMsg::printMsg(LOG_ERR, "Still no CC settled...\n");
 		// it is not yet sure whether this user has a charged account
 		ret = HANDLE_PACKET_HOLD_CONNECTION;
 	}
@@ -1363,9 +1363,7 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 			}
 		}
 	}	
-	m_currentAccountsHashtable->getMutex().unlock();
-	
-	CAMsg::printMsg( LOG_ERR, "CAAccountingInstance::handleChallengeResponse before request\n");
+	m_currentAccountsHashtable->getMutex().unlock();	
 	
 	/** @todo We need this trick so that the program does not freeze with active AI ThreadPool!!!! */
 	//pAccInfo->mutex->lock();
