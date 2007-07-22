@@ -1534,7 +1534,7 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 			getcurrentTimeMillis(currentMillis);
 			print64(tmpStrCurrentMillis,currentMillis);
 			CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Settle ini: %s\n", tmpStrCurrentMillis);			
-			m_pSettleThread->settle();
+			//m_pSettleThread->settle();
 		}
 	}
 	
