@@ -1660,9 +1660,9 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 								 * this is beyond specification and not allowed!
 								 */
 								CAMsg::printMsg(LOG_WARNING, 
-									"PrepaidBytes for account %s are higher than prepaid interval! "
+									"PrepaidBytes of %d for account %s are higher than prepaid interval! "
 									"The client did not behave according to specification."
-									"Deleting %d bytes...\n", tmp, prepaidBytes - prepaidInterval);
+									"Deleting %d bytes...\n", prepaidBytes, tmp, prepaidBytes - prepaidInterval);
 								
 								prepaidBytes = prepaidInterval;
 							}
