@@ -359,7 +359,8 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					{
 						// user is currently not logged in; set correct prepaid bytes in DB
 						SINT32 prepaidBytes = 
-							dbConn.getPrepaidAmount(entry->accountNumber, m_settleCascade);
+							dbConn.getPrepaidAmount(entry->accountNumber, 
+								m_pAccountingSettleThread->m_settleCascade);
 						if (prepaidBytes > 0)
 						{ 
 							if (entry->diffBytes >= prepaidBytes)
