@@ -372,7 +372,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 								prepaidBytes -= entry->diffBytes;
 							}
 							dbConn.storePrepaidAmount(
-								entry->accountNumber, prepaidBytes, m_settleCascade);
+								entry->accountNumber, prepaidBytes, m_pAccountingSettleThread->m_settleCascade);
 						}
 					}
 					nextEntry = entry->nextEntry;
