@@ -93,7 +93,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 		bool bPICommunicationError;
 	
 		CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread is running...\n");
-		m_bSleep = false;
+		m_pAccountingSettleThread->m_bSleep = false;
 	
 	
 		CAXMLBI* pBI = pglobalOptions->getBI();
@@ -112,9 +112,9 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 			SAVE_STACK("CAAccountingSettleThread::mainLoop", "Loop");
 			
 			m_pCondition->getMutex().lock();
-			if (m_bSleep)
+			if (m_pAccountingSettleThread->m_bSleep)
 			{
-				m_bSleep = false;
+				m_pAccountingSettleThread->m_bSleep = false;
 				#ifdef DEBUG
 					CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread going to sleep...\n");
 				#endif
@@ -145,7 +145,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 			if(!dbConn.isDBConnected() && dbConn.initDBConnection()!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_ERR, "SettleThread could not connect to Database. Retrying later...\n");
-				m_bSleep = true;
+				m_pAccountingSettleThread->m_bSleep = true;
 				continue;
 			}
 			#ifdef DEBUG	
@@ -156,7 +156,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 			if (q.isEmpty())
 			{
 				CAMsg::printMsg(LOG_DEBUG, "Accounting SettleThread: finished gettings CCs, found no CCs to settle\n");
-				m_bSleep = true;
+				m_pAccountingSettleThread->m_bSleep = true;
 				continue;
 			}
 			else 

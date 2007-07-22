@@ -1565,7 +1565,7 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 	
 	pHashEntry->pAccountingInfo->authFlags = 
 		AUTH_SENT_ACCOUNT_REQUEST | AUTH_TIMEOUT_STARTED | 
-		AUTH_HARD_LIMIT_REACHED | AUTH_WAITING_FOR_FIRST_CC	| 
+		AUTH_HARD_LIMIT_REACHED | AUTH_WAITING_FOR_FIRST_SETTLED_CC	| 
 		AUTH_SENT_CC_REQUEST; // prevents multiple CC requests on login
 	pHashEntry->pAccountingInfo->authTimeoutStartSeconds = time(NULL);
 	pHashEntry->pAccountingInfo->lastHardLimitSeconds = time(NULL);
