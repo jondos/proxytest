@@ -1485,7 +1485,7 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 	//The CC's transferredBytes should be equivalent to 
 	//AccInfo's confirmed bytes + the Config's PrepaidInterval - the number of bytes transferred between
 	//requesting and receiving the CC
-	if(pCC->getTransferredBytes() <= pAccInfo->confirmedBytes )
+	if (pCC->getTransferredBytes() <= pAccInfo->confirmedBytes)
 	{
 		if (pCC->getTransferredBytes() < pAccInfo->confirmedBytes)
 		{
@@ -1516,12 +1516,34 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 		pAccInfo->pControlChannel->sendXMLMessage(errDoc);*/
 	}
 	else
-	{
-		pAccInfo->confirmedBytes = pCC->getTransferredBytes();
+	{		
+		UINT32 prepaidInterval;
+		UINT64 prepaidBytes;
+		UINT64 transferred = pAccInfo->transferredBytes;
+		
+		if (pCC->getTransferredBytes() > transferred)
+		{
+			pglobalOptions->getPrepaidInterval(&prepaidInterval);
+			prepaidBytes = pCC->getTransferredBytes() - transferred);
+			if (prepaidBytes > prepaidInterval)
+			{
+				UINT8 tmp[32];
+				UINT8 tmp2[32];
+				print64(tmp,pCC->getAccountNumber());
+				print64(tmp2,prepaidBytes - prepaidInterval);
+				// client paid more than the prepaid interval - this is beyond specification!
+				CAMsg::printMsg(LOG_WARNING, 
+					"CostConfirmation for account %s is higher than prepaid interval! "
+					"Loosing %s bytes...", tmp, tmp2);
+				pAccInfo->transferredBytes += (prepaidBytes - prepaidInterval);
+			}
+		}
+	
+		pAccInfo->confirmedBytes = pCC->getTransferredBytes();	
 		if (m_dbInterface->storeCostConfirmation(*pCC, m_currentCascade) != E_SUCCESS)
 		{
 			UINT8 tmp[32];
-			print64(tmp,pCC->getTransferredBytes());
+			print64(tmp,pCC->getAccountNumber());
 			CAMsg::printMsg( LOG_INFO, "CostConfirmation for account %s could not be stored in database!\n", tmp );
 		}
 		else if (pAccInfo->authFlags & AUTH_WAITING_FOR_FIRST_SETTLED_CC)
@@ -1637,10 +1659,18 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 				loginEntry = (AccountLoginHashEntry*)ms_pInstance->m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));																	
 				if (loginEntry)
 				{
-					if (pAccInfo->userID == loginEntry->userID)
-					{
+					if (pAccInfo->userID == loginEntry->userID &&
+						!(pAccInfo->authFlags & AUTH_WAITING_FOR_FIRST_SETTLED_CC))
+					{						
+						if (loginEntry->authFlags & AUTH_ACCOUNT_EMPTY)
+						{
+							// make sure to store the correct number of prepaid bytes
+							pAccInfo->confirmedBytes = loginEntry->confirmedBytes;
+						}
+						
 						//store prepaid bytes in database, so the user wont lose the prepaid amount by disconnecting
-						prepaidBytes = getPrepaidBytes(pAccInfo);															
+						prepaidBytes = getPrepaidBytes(pAccInfo);
+						
 						if (ms_pInstance->m_dbInterface)
 						{
 							ms_pInstance->m_dbInterface->storePrepaidAmount(pAccInfo->accountNumber,prepaidBytes, ms_pInstance->m_currentCascade);
