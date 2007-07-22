@@ -1638,8 +1638,8 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 				loginEntry = (AccountLoginHashEntry*)ms_pInstance->m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));																	
 				if (loginEntry)
 				{
-					if (pAccInfo->userID == loginEntry->userID &&
-						!(pAccInfo->authFlags & AUTH_WAITING_FOR_FIRST_SETTLED_CC))
+					if (pAccInfo->userID == loginEntry->userID)// &&
+						//!(pAccInfo->authFlags & AUTH_WAITING_FOR_FIRST_SETTLED_CC))
 					{						
 						if (loginEntry->authFlags & AUTH_ACCOUNT_EMPTY)
 						{
