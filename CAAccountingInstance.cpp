@@ -1517,7 +1517,6 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 		else
 		{
 			// initiate immediate settling
-			/** @todo This should be fully synchronized! */
 			m_pSettleThread->settle();
 		}
 	}
