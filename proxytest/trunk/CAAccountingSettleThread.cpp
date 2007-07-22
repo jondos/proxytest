@@ -111,7 +111,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 		{
 			SAVE_STACK("CAAccountingSettleThread::mainLoop", "Loop");
 			
-			m_pCondition->getMutex().lock();
+			m_pAccountingSettleThread->m_pCondition->getMutex().lock();
 			if (m_pAccountingSettleThread->m_bSleep)
 			{
 				m_pAccountingSettleThread->m_bSleep = false;
@@ -140,7 +140,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					break;
 				}
 			}
-			m_pCondition->getMutex().unock();
+			m_pAccountingSettleThread->m_pCondition->getMutex().unock();
 			
 			if(!dbConn.isDBConnected() && dbConn.initDBConnection()!=E_SUCCESS)
 			{
