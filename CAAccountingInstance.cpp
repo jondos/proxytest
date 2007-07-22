@@ -354,6 +354,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			if (loginEntry)
 			{
 				//pAccInfo->authFlags &= ~loginEntry->authRemoveFlags;
+				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Remove flag: %d", ~loginEntry->authRemoveFlags);
 				
 				if (loginEntry->userID != pHashEntry->id)
 				{
@@ -985,7 +986,7 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 		INIT_STACK;
 		BEGIN_STACK("CAAccountingInstance::handleAccountCertificate");
 		
-		CAMsg::printMsg( LOG_ERR, "CAAccountingInstance::handleAccountCertificate start\n");
+		//CAMsg::printMsg( LOG_ERR, "CAAccountingInstance::handleAccountCertificate start\n");
 		
 		//CAMsg::printMsg(LOG_DEBUG, "started method handleAccountCertificate\n");
 		DOM_Element elGeneral;
@@ -1151,7 +1152,7 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 	pAccInfo->challengeSentSeconds = time(NULL);
 	//CAMsg::printMsg("Last Account Certificate request seconds: for IP %u%u%u%u", (UINT8)pHashEntry->peerIP[0], (UINT8)pHashEntry->peerIP[1],(UINT8) pHashEntry->peerIP[2], (UINT8)pHashEntry->peerIP[3]);
 	
-	CAMsg::printMsg( LOG_ERR, "CAAccountingInstance::handleAccountCertificate stop\n");
+	//CAMsg::printMsg( LOG_ERR, "CAAccountingInstance::handleAccountCertificate stop\n");
 	
 	
 	pAccInfo->mutex->unlock();
@@ -1178,7 +1179,7 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 	BEGIN_STACK("CAAccountingInstance::handleChallengeResponse");
 	
 	
-	CAMsg::printMsg( LOG_ERR, "CAAccountingInstance::handleChallengeResponse start\n");
+	//CAMsg::printMsg( LOG_ERR, "CAAccountingInstance::handleChallengeResponse start\n");
 
 	
 	UINT8 decodeBuffer[ 512 ];
@@ -1246,16 +1247,12 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 		pAccInfo->authFlags &= ~AUTH_ACCOUNT_OK;
 		pAccInfo->mutex->unlock();
 		return ;
-	}
-	
-	CAMsg::printMsg( LOG_ERR, "CAAccountingInstance::handleChallengeResponse middle\n");
+	}	
 	
 	/** @todo We need this trick so that the program does not freeze with active AI ThreadPool!!!! */
 	//pAccInfo->mutex->unlock();
 	m_currentAccountsHashtable->getMutex().lock();	
 	pAccInfo->authFlags |= AUTH_ACCOUNT_OK;	// authentication successful
-	
-	CAMsg::printMsg( LOG_ERR, "CAAccountingInstance::handleChallengeResponse inside\n");
 	
 	loginEntry = (AccountLoginHashEntry*)m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));	
 	if (!loginEntry)
@@ -1392,7 +1389,7 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 		delete[] pAccInfo->pChallenge;
 		pAccInfo->pChallenge = NULL;
 	}
-	CAMsg::printMsg( LOG_ERR, "CAAccountingInstance::handleChallengeResponse stop\n");
+	//CAMsg::printMsg( LOG_ERR, "CAAccountingInstance::handleChallengeResponse stop\n");
 	
 	pAccInfo->mutex->unlock();
 }
