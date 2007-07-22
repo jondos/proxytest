@@ -1654,12 +1654,13 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 							pglobalOptions->getPrepaidInterval(&prepaidInterval);
 							if (prepaidBytes > prepaidInterval)
 							{
+								CAMsg::printMsg(LOG_INFO, "Test");
 								UINT8 tmp[32];
 								print64(tmp, pAccInfo->accountNumber);
 								/* Client paid more than the prepaid interval - 
 								 * this is beyond specification and not allowed!
 								 */
-								CAMsg::printMsg(LOG_WARNING, 
+								CAMsg::printMsg(LOG_INFO, 
 									"CostConfirmation for account %s is higher than prepaid interval! "
 									"Loosing %d bytes...", tmp, prepaidBytes - prepaidInterval);
 								
