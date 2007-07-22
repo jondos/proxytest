@@ -353,8 +353,8 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			loginEntry = (AccountLoginHashEntry*)ms_pInstance->m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
 			if (loginEntry)
 			{
-				//pAccInfo->authFlags &= ~loginEntry->authRemoveFlags;
-				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Remove flag: %d\n", loginEntry->authRemoveFlags);
+				pAccInfo->authFlags &= ~loginEntry->authRemoveFlags;
+				//CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Remove flag: %d\n", loginEntry->authRemoveFlags);
 				
 				if (loginEntry->userID != pHashEntry->id)
 				{
@@ -619,6 +619,7 @@ SINT32 CAAccountingInstance::returnOK(tAiAccountingInfo* pAccInfo)
 	SINT32 ret;
 	if (pAccInfo->authFlags & AUTH_WAITING_FOR_FIRST_SETTLED_CC)
 	{
+		CAMsg::printMsg(LOG_ERR, "Still no CC settled...");
 		// it is not yet sure whether this user has a charged account
 		ret = HANDLE_PACKET_HOLD_CONNECTION;
 	}
