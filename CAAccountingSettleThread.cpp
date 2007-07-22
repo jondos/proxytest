@@ -312,7 +312,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				
 				if (authFlags || authRemoveFlags)
 				{
-					nextEntry = new AccountLoginHashEntry; 
+					nextEntry = new SettleEntry; 
 					nextEntry->accountNumber = pCC->getAccountNumber();
 					nextEntry->authFlags = authFlags;
 					nextEntry->authRemoveFlags = authRemoveFlags;
