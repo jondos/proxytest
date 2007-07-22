@@ -981,9 +981,11 @@ void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo,
  *   (receive a new acc.cert. though we already have one)
  */
 void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* pAccInfo, DOM_Element &root)
-	{
+	{			
 		INIT_STACK;
 		BEGIN_STACK("CAAccountingInstance::handleAccountCertificate");
+		
+		CAMsg::printMsg( LOG_ERR, "CAAccountingInstance::handleAccountCertificate start\n");
 		
 		//CAMsg::printMsg(LOG_DEBUG, "started method handleAccountCertificate\n");
 		DOM_Element elGeneral;
@@ -1148,6 +1150,10 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 	pAccInfo->authFlags |= AUTH_CHALLENGE_SENT | AUTH_GOT_ACCOUNTCERT | AUTH_TIMEOUT_STARTED;	
 	pAccInfo->challengeSentSeconds = time(NULL);
 	//CAMsg::printMsg("Last Account Certificate request seconds: for IP %u%u%u%u", (UINT8)pHashEntry->peerIP[0], (UINT8)pHashEntry->peerIP[1],(UINT8) pHashEntry->peerIP[2], (UINT8)pHashEntry->peerIP[3]);
+	
+	CAMsg::printMsg( LOG_ERR, "CAAccountingInstance::handleAccountCertificate stop\n");
+	
+	
 	pAccInfo->mutex->unlock();
 }
 
