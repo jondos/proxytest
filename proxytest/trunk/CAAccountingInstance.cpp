@@ -1533,7 +1533,7 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 			getcurrentTimeMillis(currentMillis);
 			print64(tmpStrCurrentMillis,currentMillis);
 			CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Settle ini: %s\n", tmpStrCurrentMillis);			
-			//m_pSettleThread->settle();
+			m_pSettleThread->settle();
 		}
 	}
 	
@@ -1654,15 +1654,15 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 							pglobalOptions->getPrepaidInterval(&prepaidInterval);
 							if (prepaidBytes > prepaidInterval)
 							{
-								CAMsg::printMsg(LOG_INFO, "Test");
 								UINT8 tmp[32];
 								print64(tmp, pAccInfo->accountNumber);
 								/* Client paid more than the prepaid interval - 
 								 * this is beyond specification and not allowed!
 								 */
-								CAMsg::printMsg(LOG_INFO, 
-									"CostConfirmation for account %s is higher than prepaid interval! "
-									"Loosing %d bytes...", tmp, prepaidBytes - prepaidInterval);
+								CAMsg::printMsg(LOG_WARNING, 
+									"PrepaidBytes for account %s are higher than prepaid interval! "
+									"The client did not behave according to specification."
+									"Deleting %d bytes...\n", tmp, prepaidBytes - prepaidInterval);
 								
 								prepaidBytes = prepaidInterval;
 							}
