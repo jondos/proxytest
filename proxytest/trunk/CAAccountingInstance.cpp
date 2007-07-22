@@ -353,7 +353,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			loginEntry = (AccountLoginHashEntry*)ms_pInstance->m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
 			if (loginEntry)
 			{
-				pAccInfo->authFlags &= ~loginEntry->authRemoveFlags;
+				//pAccInfo->authFlags &= ~loginEntry->authRemoveFlags;
 				
 				if (loginEntry->userID != pHashEntry->id)
 				{
