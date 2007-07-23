@@ -293,24 +293,27 @@ void *Hashtable::remove(void *key)
 		return NULL;
 	}
 	
-	struct Entry **table,*e,*prev;
-	UINT32 hash;
+	struct Entry *e,*prev;
+	UINT32 hash = m_hashFunc(key);
 	
-	table = m_table;
-	hash = m_hashFunc(key);
 	
-	for(e = table[hash % m_capacity], prev = NULL; e; e = e->e_Next)
-	{
-		if (e == NULL)
+	for(e = m_table[hash % m_capacity]; e; e = e->e_Next)
+	{		
+		if (m_hashFunc(e->e_Key) == hash && !m_compareFunc(e->e_Key,key))
 		{
-			return NULL;
+			CAMsg::printMsg(LOG_INFO, "Hashtable: Found alternative!\n");
 		}
+	}
+	
+	
+	for(e = m_table[hash % m_capacity], prev = NULL; e; e = e->e_Next)
+	{
 		CAMsg::printMsg(LOG_INFO, "Hashtable: Removing key.\n");
 		if (m_hashFunc(e->e_Key) == hash)
 		{
 			CAMsg::printMsg(LOG_INFO, "Hashtable: Found hash to remove.\n");
 		}
-		  
+		  		
 		if (m_hashFunc(e->e_Key) == hash && !m_compareFunc(e->e_Key,key))
 		{
 			CAMsg::printMsg(LOG_INFO, "Hashtable: Found key to remove.\n");
@@ -324,7 +327,7 @@ void *Hashtable::remove(void *key)
 			}
 			else
 			{
-				table[hash % m_capacity] = e->e_Next;
+				m_table[hash % m_capacity] = e->e_Next;
 			}
 			
 			m_count--;
