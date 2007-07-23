@@ -345,7 +345,7 @@ void Hashtable::clear(SINT8 keyMode,SINT8 valueMode)
 		return;
 	}
 	
-	CAMsg::printMsg(LOG_INFO, "Hashtable: Clearing...\n");
+	//CAMsg::printMsg(LOG_INFO, "Hashtable: Clearing...\n");
 
 	for(SINT32 index = 0; index < m_capacity; index++)
 	{
@@ -388,7 +388,7 @@ void Hashtable::clear(SINT8 keyMode,SINT8 valueMode)
 	}
 	m_count = 0;
 	
-	CAMsg::printMsg(LOG_INFO, "Hashtable: Has been cleared!\n");
+	//CAMsg::printMsg(LOG_INFO, "Hashtable: Has been cleared!\n");
 }
 
 UINT32 Hashtable::getSize()
