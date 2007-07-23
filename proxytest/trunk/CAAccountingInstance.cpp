@@ -162,6 +162,15 @@ CAAccountingInstance::~CAAccountingInstance()
 			delete[] m_currentCascade;
 		}
 		m_currentCascade = NULL;
+		if (m_allHashes)
+		{
+			for (int i = 0; i < m_allHashesLen; i++)
+			{
+				delete m_allHashes[i];
+			}
+			delete m_allHashes;
+		}
+		m_allHashes = NULL;
 		
 		m_Mutex.unlock();
 		
@@ -317,11 +326,15 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			pAccInfo->sessionPackets++;
 		}		
 		
-		/*
+		
 		UINT8 tmp[32];
 		print64(tmp,pAccInfo->transferredBytes);
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Transferred bytes:%s\n", tmp);	
-		*/
+		
+		UINT8 tmp[32];
+		print64(tmp,pAccInfo->confirmedBytes);
+		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Confirmed bytes:%s\n", tmp);	
+		
 		
 		// do the following tests after a lot of Mix packets only (gain speed...)
 		if (!(pAccInfo->authFlags & (AUTH_HARD_LIMIT_REACHED | AUTH_ACCOUNT_EMPTY | AUTH_WAITING_FOR_FIRST_SETTLED_CC)) &&
@@ -763,7 +776,8 @@ SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName
 	
 	//hash'em, and get subjectkeyidentifiers
 		UINT8 digest[SHA_DIGEST_LENGTH];
-		UINT8** allHashes=new UINT8*[nrOfMixes];
+		m_allHashes=new UINT8*[nrOfMixes];
+		m_allHashesLen = nrOfMixes;
 		UINT8** allSkis=new UINT8*[nrOfMixes];
 		DOM_Node skiNode;
 		for (UINT32 i = 0; i < nrOfMixes; i++){
@@ -788,7 +802,7 @@ SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName
 			//line breaks might have been added, and would lead to database problems
 			strtrim(tmpBuff); //return value ohny significant for NULL or all-whitespace string, ignore   
 						
-			allHashes[i] = tmpBuff;
+			m_allHashes[i] = tmpBuff;
 			//do not delete tmpBuff here, since we're using allHashes below
 
 		if (getDOMChildByName(mixNodes[i],(UINT8*)"SubjectKeyIdentifier",skiNode,true) != E_SUCCESS)
@@ -821,26 +835,29 @@ SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName
 	//and append to CC
 	DOM_Element elemPriceCerts = m_preparedCCRequest.createElement("PriceCertificates");
 	DOM_Element elemCert;
-	for (UINT32 i = 0; i < nrOfMixes; i++) {
+	for (UINT32 i = 0; i < nrOfMixes; i++) 
+	{
 		elemCert = m_preparedCCRequest.createElement("PriceCertHash");
 		CAMsg::printMsg(LOG_DEBUG,"hash to be inserted in cc: index %d, value %s\n",i,allHashes[i]);
 		setDOMElementValue(elemCert,allHashes[i]);
-		delete[] allHashes[i];
+		//delete[] allHashes[i];
 		elemCert.setAttribute("id", DOMString( (const char*)allSkis[i]));
-		if (i == 0) {
-			elemCert.setAttribute("isAI","true");	
-			}
-			elemPriceCerts.appendChild(elemCert);
+		setDOMElementAttribute(elemCert, "position", i);
+		if (i == 0) 
+		{
+			elemCert.setAttribute("isAI","true");
 		}
-		elemCC.appendChild(elemPriceCerts);
+		elemPriceCerts.appendChild(elemCert);
+	}
+	elemCC.appendChild(elemPriceCerts);
 #ifdef DEBUG 		
-		CAMsg::printMsg(LOG_DEBUG, "finished method makeCCRequest\n");
+	CAMsg::printMsg(LOG_DEBUG, "finished method makeCCRequest\n");
 #endif		
 
-		delete[] mixNodes;
-		delete[] allHashes;
-		delete[] allSkis;	
-		return E_SUCCESS;
+	delete[] mixNodes;
+	//delete[] allHashes;
+	delete[] allSkis;	
+	return E_SUCCESS;
 
 }
 
@@ -1479,6 +1496,10 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 		}
 	delete[] pAiID;
 ********************/
+
+//m_allHashes
+
+
 
 	// parse & set transferredBytes
 	//when using Prepayment, this check is outdated, but left in to notice the most crude errors/cheats
