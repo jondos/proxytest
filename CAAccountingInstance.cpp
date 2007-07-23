@@ -1513,7 +1513,7 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 		certHash = pCC->getPriceCertHash(i);
 		certHashCC->put(certHash, certHash);
 	}
-	for (UINT32 i = 0; i < m_allHashesLen); i++)
+	for (UINT32 i = 0; i < m_allHashesLen; i++)
 	{
 		certHash = (UINT8*)certHashCC->remove(m_allHashes[i]);
 		if (certHash == NULL)
