@@ -1343,7 +1343,7 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 CAMsg::printMsg(LOG_INFO, "CAAccountingInstance:");
 			UINT8 tmp2[32];
 			print64(tmp2, pAccInfo->transferredBytes);
-			CAMsg::printMsg(LOG_WARNING, "CAAccountingInstance: Transfered bytes of %s for account %s are lower than prepaid amount!\n",tmp2, tmp);
+			CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Transfered bytes of %s for account %s are lower than prepaid amount!\n",tmp2, tmp);
 			pAccInfo->transferredBytes = 0;			
 		}
 		
@@ -1686,7 +1686,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 								/* Client paid more than the prepaid interval - 
 								 * this is beyond specification and not allowed!
 								 */
-								CAMsg::printMsg(LOG_WARNING, 
+								CAMsg::printMsg(LOG_ERR, 
 									"PrepaidBytes of %d for account %s are higher than prepaid interval! "
 									"The client did not behave according to specification."
 									"Deleting %d bytes...\n", prepaidBytes, tmp, prepaidBytes - prepaidInterval);
