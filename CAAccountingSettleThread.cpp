@@ -216,12 +216,13 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				bool bDeleteCC = false;
 				UINT32 authFlags = 0;
 				UINT32 authRemoveFlags = 0;
-				UINT64 confirmedBytes = 0;														
+				UINT64 confirmedBytes = 0;							
 				UINT64 diffBytes = 0;
 			
 				// check returncode
 				if(pErrMsg == NULL)  //no returncode -> connection error
 				{
+					m_pAccountingSettleThread->m_bSleep = true;
 					authRemoveFlags |= AUTH_WAITING_FOR_FIRST_SETTLED_CC; // no fault of the client
 					CAMsg::printMsg(LOG_ERR, "SettleThread: Communication with BI failed!\n");
 				}
@@ -233,7 +234,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					{
 						authFlags |= AUTH_INVALID_ACCOUNT;	
 						//dbConn.storeAccountStatus(pCC->getAccountNumber(), CAXMLErrorMessage::ERR_KEY_NOT_FOUND);				
-						//bDeleteCC = true;													
+						bDeleteCC = true;													
 					}
 					else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_ACCOUNT_EMPTY)
 					{
@@ -291,7 +292,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					{
 						CAMsg::printMsg(LOG_DEBUG, "SettleThread: Setting unknown kickout error no. %d.\n", pErrMsg->getErrorCode());
 						authFlags |= AUTH_UNKNOWN;
-						//bDeleteCC = true; // an unknown error leads to user kickout
+						bDeleteCC = true; // an unknown error leads to user kickout
 					}																	
 					
 					if (bDeleteCC)
