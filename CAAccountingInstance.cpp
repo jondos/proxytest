@@ -1512,11 +1512,23 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 	{
 		certHash = pCC->getPriceCertHash(i);
 		certHashCC->put(certHash, certHash);
-		CAMsg::printMsg( LOG_INFO, "CC: %s", certHash);
+		if (certHashCC->get(certHash) == NULL)
+		{
+			CAMsg::printMsg( LOG_INFO, "CC1: %s\n", certHash);
+		}
+		certHash = certHashCC->remove(certHash);
+		if (certHash == NULL)
+		{
+			CAMsg::printMsg( LOG_INFO, "CC1: %s\n", certHash);
+		}
+		else
+		{
+			delete certHash;
+		}
 	}
 	for (UINT32 i = 0; i < m_allHashesLen; i++)
 	{
-		CAMsg::printMsg( LOG_INFO, "CA: %s", m_allHashes[i]);
+		CAMsg::printMsg( LOG_INFO, "CA:  %s\n", m_allHashes[i]);
 		certHash = (UINT8*)certHashCC->remove(m_allHashes[i]);
 		if (certHash == NULL)
 		{
