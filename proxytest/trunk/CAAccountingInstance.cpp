@@ -1340,6 +1340,7 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 		}
 		else
 		{
+CAMsg::printMsg(LOG_INFO, "CAAccountingInstance:");
 			UINT8 tmp2[32];
 			print64(tmp2, pAccInfo->transferredBytes);
 			CAMsg::printMsg(LOG_WARNING, "CAAccountingInstance: Transfered bytes of %s for account %s are lower than prepaid amount!\n",tmp2, tmp);
