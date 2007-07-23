@@ -30,7 +30,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 
 
-CAPriceInfo::CAPriceInfo(UINT8* strMixId, UINT8* strPriceCertHash, UINT32 a_postition)
+CAPriceInfo::CAPriceInfo(UINT8* strMixId, UINT8* strPriceCertHash, SINT32 a_postition)
 {
 	m_pStrMixId = strMixId;
 	m_pStrPriceCertHash = strPriceCertHash;	
