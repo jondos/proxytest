@@ -229,7 +229,7 @@ SINT32 CAXMLCostConfirmation::setValues()
 			}
 			
 			CAMsg::printMsg(LOG_DEBUG, "Parsing position\n");
-			if (getDOMElementAttribute(curNode, "position", curPosition) != E_SUCCESS)
+			if (getDOMElementAttribute(curNode, "position", &curPosition) != E_SUCCESS)
 			{
 				curPosition = -1;
 			}
