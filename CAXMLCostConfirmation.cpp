@@ -85,7 +85,7 @@ CAXMLCostConfirmation::~CAXMLCostConfirmation()
 			delete[] m_pStrPIID;
 		}
 		
-		if (m_priceCerts != null)
+		if (m_priceCerts != NULL)
 		{
 			for (int i = 0; i < m_priceCertsLen; i++)
 			{
