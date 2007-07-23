@@ -385,7 +385,8 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 					loginEntry->authFlags &= ~AUTH_OUTDATED_CC;	
 					CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Fixing bytes from outdated CC...\n");	
 					// we had stored an outdated CC; insert confirmed bytes from current CC here						
-					pAccInfo->transferredBytes +=  loginEntry->confirmedBytes - pAccInfo->confirmedBytes;
+					//pAccInfo->transferredBytes +=  loginEntry->confirmedBytes - pAccInfo->confirmedBytes;
+					// alas, we loose the difference in bytes... this would not be the case if JAP could receive the CC back, either
 					pAccInfo->confirmedBytes = loginEntry->confirmedBytes;			
 					loginEntry->confirmedBytes = 0;
 				}
