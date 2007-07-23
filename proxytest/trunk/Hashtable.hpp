@@ -1,30 +1,12 @@
 #ifndef HASHTABLE_H
 #define HASHTABLE_H
-/* Hashtable - a general purpose hash table
-**
-** Copyright 2001, pinc Software. All Rights Reserved.
-*/
+
 #include "CAMutex.hpp"
 
 #define HASH_EMPTY_NONE (SINT8)0
 #define HASH_EMPTY_FREE (SINT8)1
 #define HASH_EMPTY_DELETE (SINT8)2
 
-
-/************************** standard string hash functions **************************/
-
-
-UINT32 stringHash(UINT8* c)
-{
-  UINT32 len = strlen((char*)c);
-  
-  return(*(UINT32 *)(c+len-4));  
-}
-
-SINT32 stringCompare(UINT8* a,UINT8* *b)
-{
-  return(!strcmp((char*)a,(char*)b));
-}
 
 
 
@@ -33,6 +15,19 @@ class Hashtable
 	public:
 		Hashtable(UINT32 (*func)(void *), SINT32 (*func)(void *,void *), SINT32 capacity = 1000,float loadFactor = 0.75);
 		~Hashtable();
+
+		/************************** standard string hash functions **************************/
+		static UINT32 stringHash(UINT8* c)
+		{
+		  UINT32 len = strlen((char*)c);
+		  
+		  return(*(UINT32 *)(c+len-4));  
+		}
+		
+		static SINT32 stringCompare(UINT8* a,UINT8* *b)
+		{
+		  return(!strcmp((char*)a,(char*)b));
+		}
 
 		static UINT32 hashUINT64(UINT64 *a_number);
 		static SINT32 compareUINT64(UINT64 *a_numberA, UINT64 *a_numberB);
