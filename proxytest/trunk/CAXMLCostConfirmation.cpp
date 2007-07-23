@@ -172,7 +172,7 @@ SINT32 CAXMLCostConfirmation::setValues()
 		CAMsg::printMsg(LOG_DEBUG, "Looking for PriceCertHash\n");
 		
 		// one last test if the tag is really in the right XML layer; throw away elemRoot here...		
-		if getDOMChildByName(elem, (UINT8*)"PriceCertHash", elemRoot, false) != E_SUCCESS)
+		if (getDOMChildByName(elem, (UINT8*)"PriceCertHash", elemRoot, false) != E_SUCCESS)
 		{
 			return E_UNKNOWN;
 		}
