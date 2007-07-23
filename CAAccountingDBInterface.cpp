@@ -562,7 +562,7 @@ SINT32 CAAccountingDBInterface::storePrepaidAmount(UINT64 accountNumber, SINT32 
  * Will then delete this enty from the database table prepaidamounts
  * If the account has not been connected to this cascade before, will return zero 
  */	
-SINT32 CAAccountingDBInterface::getPrepaidAmount(UINT64 accountNumber, UINT8* cascadeId)	
+SINT32 CAAccountingDBInterface::getPrepaidAmount(UINT64 accountNumber, UINT8* cascadeId, bool a_bDelete)	
 	{
 		//check for an entry for this accountnumber
 		const char* selectQuery = "SELECT PREPAIDBYTES FROM PREPAIDAMOUNTS WHERE ACCOUNTNUMBER=%s AND CASCADE='%s'";
@@ -597,18 +597,22 @@ SINT32 CAAccountingDBInterface::getPrepaidAmount(UINT64 accountNumber, UINT8* ca
 		SINT32 nrOfBytes =  atoi(PQgetvalue(result, 0, 0)); //first row, first column
 		PQclear(result);						
 
-		//delete entry from db
-		const char* deleteQuery = "DELETE FROM PREPAIDAMOUNTS WHERE ACCOUNTNUMBER=%s AND CASCADE='%s' ";
-		PGresult* result2;
-		print64(accountNumberAsString,accountNumber);
-		sprintf( (char *)finalQuery, deleteQuery, accountNumberAsString, cascadeId);
-		
-		result2 = PQexec(m_dbConn, (char *)finalQuery);
-		if (PQresultStatus(result2) != PGRES_COMMAND_OK)
+		if (a_bDelete)
 		{
-			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Deleting read prepaidamount failed.");	
+			//delete entry from db
+			const char* deleteQuery = "DELETE FROM PREPAIDAMOUNTS WHERE ACCOUNTNUMBER=%s AND CASCADE='%s' ";
+			PGresult* result2;
+			print64(accountNumberAsString,accountNumber);
+			sprintf( (char *)finalQuery, deleteQuery, accountNumberAsString, cascadeId);
+			
+			result2 = PQexec(m_dbConn, (char *)finalQuery);
+			if (PQresultStatus(result2) != PGRES_COMMAND_OK)
+			{
+				CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Deleting read prepaidamount failed.");	
+			}
+			PQclear(result2);			
 		}
-		PQclear(result2);
+		
 		delete[] finalQuery;
 		
 		return nrOfBytes;
