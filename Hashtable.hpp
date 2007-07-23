@@ -17,11 +17,17 @@ class Hashtable
 		~Hashtable();
 
 		/************************** standard string hash functions **************************/
-		static UINT32 stringHash(UINT8* c)
+		static UINT32 stringHash(UINT8* str)
 		{
-		  UINT32 len = strlen((char*)c);
-		  
-		  return(*(UINT32 *)(c+len-4));  
+			// djb2 algorithm
+			
+			UINT32 hash = 5381; 
+			SINT32 c; 
+			while (c = *str++) 
+			{
+				hash = ((hash << 5) + hash) + c; /* hash * 33 + c */ 
+			}
+			return hash;			
 		}
 		
 		static SINT32 stringCompare(UINT8* a,UINT8* *b)
@@ -29,10 +35,35 @@ class Hashtable
 		  return strcmp((char*)a,(char*)b);
 		}
 
-		static UINT32 hashUINT64(UINT64 *a_number);
-		static SINT32 compareUINT64(UINT64 *a_numberA, UINT64 *a_numberB);
-		static UINT32 hashUINT32(UINT32 *a_number);
-		static SINT32 compareUINT32(UINT32 *a_numberA, UINT32 *a_numberB);
+		static UINT32 hashUINT64(UINT64 *a_number)
+		{
+			return ((*a_number) % 4294967295u);
+		}
+		static SINT32 compareUINT64(UINT64 *a_numberA, UINT64 *a_numberB)
+		{
+			return (*a_numberA == *a_numberB)? 0 : ((*a_numberA > *a_numberB)? 1 : -1);
+			/*
+			if (*a_numberA == *a_numberB)
+			{
+				return 0;
+			}
+			else if (*a_numberA > *a_numberB)
+			{
+				return 1;
+			}
+			else
+			{
+				return -1;
+			}*/
+		}	
+		static UINT32 hashUINT32(UINT32 *a_number)
+		{			
+		 	return *a_number;
+		}
+		static SINT32 compareUINT32(UINT32 *a_numberA, UINT32 *a_numberB)
+		{
+			return (*a_numberA == *a_numberB)? 0 : ((*a_numberA > *a_numberB)? 1 : -1);
+		}
 
 		CAMutex& getMutex();
 

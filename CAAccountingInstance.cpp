@@ -1512,7 +1512,7 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 	{
 		certHash = pCC->getPriceCertHash(i);
 		certHashCC->put(certHash, certHash);
-		if ((certHash = certHashCC->getValue(certHash)) != NULL)
+		if ((certHash = (UINT8*)certHashCC->getValue(certHash)) != NULL)
 		{
 			CAMsg::printMsg( LOG_INFO, "CC1: %s\n", certHash);
 		}

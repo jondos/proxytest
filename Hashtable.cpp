@@ -130,39 +130,7 @@ Hashtable::~Hashtable()
 	m_mutex.unlock();
 }
 
-SINT32 Hashtable::compareUINT32(UINT32 *a_numberA, UINT32 *a_numberB)
-{
-	return (*a_numberA == *a_numberB)? 0 : ((*a_numberA > *a_numberB)? 1 : -1);
-}
 
-UINT32 Hashtable::hashUINT32(UINT32 *a_number)
-{
- 	return *a_number;
-}
-
-
-UINT32 Hashtable::hashUINT64(UINT64 *a_number)
-{
- 	return ((*a_number) % 4294967295u);
-}
-
-SINT32 Hashtable::compareUINT64(UINT64 *a_numberA, UINT64 *a_numberB)
-{
-	return (*a_numberA == *a_numberB)? 0 : ((*a_numberA > *a_numberB)? 1 : -1);
-	/*
-	if (*a_numberA == *a_numberB)
-	{
-		return 0;
-	}
-	else if (*a_numberA > *a_numberB)
-	{
-		return 1;
-	}
-	else
-	{
-		return -1;
-	}*/
-}	
 
 
 /** 
