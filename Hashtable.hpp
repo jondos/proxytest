@@ -16,14 +16,14 @@
 
 UINT32 stringHash(UINT8* c)
 {
-  UINT32 len = strlen(c);
+  UINT32 len = strlen((char*)c);
   
   return(*(UINT32 *)(c+len-4));  
 }
 
 SINT32 stringCompare(UINT8* a,UINT8* *b)
 {
-  return(!strcmp(a,b));
+  return(!strcmp((char*)a,(char*)b));
 }
 
 

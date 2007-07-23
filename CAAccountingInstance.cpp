@@ -1504,7 +1504,7 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 		return;
 	}
 	
-	Hashtable certHashCC = 
+	Hashtable* certHashCC = 
 		new Hashtable((UINT32 (*)(void *))stringHash, (SINT32 (*)(void *,void *))stringCompare);
 	UINT8* certHash;
 	bool bFailed = false;
