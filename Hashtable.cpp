@@ -307,9 +307,12 @@ void *Hashtable::remove(void *key)
 		{
 			return NULL;
 		}
+		CAMsg::printMsg(LOG_INFO, "Hashtable: Removing key.\n");
 		
 		if ((m_hashFunc(e->e_Key) == hash) && !m_compareFunc(e->e_Key,key))
 		{
+			CAMsg::printMsg(LOG_INFO, "Hashtable: Found key to remove.\n");
+			
 			void *value;
 
 			//m_modCount++;
