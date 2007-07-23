@@ -24,6 +24,15 @@ class CAXMLCostConfirmation
 			DOM_Document	m_domDocument;
 			static const UINT8* const ms_pStrElemName;
 			
+			SINT32 checkLen(UINT32 a_hashNumber)
+			{
+				if (a_hashNumber < 0 || a_hashNumber > m_priceCertsLen - 1)
+				{
+					return E_UNKNOWN;
+				}
+				return E_SUCCESS;
+			}
+			
 		public:
 			/** Tries to create an CAXMLCostConfirmation object from the given XML string.
 				* @retval NULL if the XML data was wrong
@@ -36,6 +45,39 @@ class CAXMLCostConfirmation
 				*/
 			static CAXMLCostConfirmation* getInstance(DOM_Element &elemRoot);
 			~CAXMLCostConfirmation();
+			
+			UINT32 getNumberOfHashes()
+			{
+				return m_priceCertsLen;
+			}
+			
+			SINT32 getPosition(UINT32 a_hashNumber)
+			{
+				if (checkLen(a_hashNumber) != E_SUCCESS)
+				{
+					return E_UNKNOWN;
+				}
+				
+				return m_priceCerts[a_hashNumber]->getPosition();
+			}
+			
+			UINT8* getPriceCertHash(UINT32 a_hashNumber) 
+			{
+				if (checkLen(a_hashNumber) != E_SUCCESS)
+				{
+					return NULL;
+				}
+				return m_priceCerts[a_hashNumber]->getPriceCertHash();
+			}
+			
+			UINT8* getMixId(UINT32 a_hashNumber) 
+			{
+				if (checkLen(a_hashNumber) != E_SUCCESS)
+				{
+					return NULL;
+				}
+				return m_priceCerts[a_hashNumber]->getMixId();
+			}
 			
 			/** dumps the XML CC to memory without trailing '0'.*/
 			UINT8* dumpToMem(UINT32* pLen)

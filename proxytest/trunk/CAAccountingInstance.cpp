@@ -1481,7 +1481,7 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 		pAccInfo->pControlChannel->sendXMLMessage(errDoc);
 		delete pCC;
 		pAccInfo->mutex->unlock();
-		return ;
+		return;
 	}
 	#ifdef DEBUG
 	else
@@ -1508,8 +1508,19 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 	delete[] pAiID;
 ********************/
 
-//m_allHashes
-
+	if (pCC->getNumberOfHashes() != m_allHashesLen)
+	{
+		// wrong signature
+		CAMsg::printMsg( LOG_INFO, "CostConfirmation has illegal number of price cert hashes!\n" );
+		CAXMLErrorMessage err(CAXMLErrorMessage::ERR_BAD_REQUEST, 
+			(UINT8*)"CostConfirmation has illegal number of price cert hashes");
+		DOM_Document errDoc;
+		err.toXmlDocument(errDoc);
+		pAccInfo->pControlChannel->sendXMLMessage(errDoc);
+		delete pCC;
+		pAccInfo->mutex->unlock();
+		return;
+	}
 
 
 	// parse & set transferredBytes
