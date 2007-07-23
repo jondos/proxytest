@@ -212,11 +212,12 @@ SINT32 CAXMLCostConfirmation::setValues()
 			//extract strings for mixid and pricecerthash, and check isAI attribute
 			curId = new UINT8[100];
 			len = 100;
-			if (getDOMElementAttribute(curNode, "id", (UINT8*)curId, &len) != E_SUCCESS)
+			if (getDOMElementAttribute(curNode, "id", (UINT8*)curId, &len) != E_SUCCESS || 1 == 1)
 			{
 				delete curId;
 				return E_UNKNOWN;
 			}
+			
 			
 			CAMsg::printMsg(LOG_DEBUG, "Parsing hash\n");
 			curHash = new UINT8[100];
