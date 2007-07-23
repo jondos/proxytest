@@ -331,7 +331,6 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 		print64(tmp,pAccInfo->transferredBytes);
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Transferred bytes:%s\n", tmp);	
 		
-		UINT8 tmp[32];
 		print64(tmp,pAccInfo->confirmedBytes);
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Confirmed bytes:%s\n", tmp);	
 		

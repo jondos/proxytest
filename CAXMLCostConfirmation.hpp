@@ -18,7 +18,8 @@ class CAXMLCostConfirmation
 			UINT64				m_lTransferredBytes;
 			UINT64				m_lAccountNumber;
 			UINT32				m_id; //id of the CC, only set after storing it in the BI's database
-//			CAPriceInfo** 		m_priceCerts;		
+			CAPriceInfo** 		m_priceCerts;	
+			UINT32	 			m_priceCertsLen;
 			UINT8*				m_pStrPIID;
 			DOM_Document	m_domDocument;
 			static const UINT8* const ms_pStrElemName;

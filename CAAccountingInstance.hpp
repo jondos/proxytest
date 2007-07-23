@@ -223,6 +223,10 @@ private:
 	// (same hash values as in CCs and in the JPI, as taken from the MixInfo)
 	// we concatenate price certificates rather than mix-skis because a cascade with changed prices counts as a new/different cascade
 	UINT8* m_currentCascade;
+	
+	/** The hash values of the Mixes ordered beginning with the AI Mix. */
+	UINT8** m_allHashes;
+	UINT32 m_allHashesLen;
 
 	/** the interface to the database */
 	CAAccountingDBInterface * m_dbInterface;
