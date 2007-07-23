@@ -41,9 +41,7 @@ or null (for non-pay Mixes) )
 class CAPriceInfo
 {
 public:
-	CAPriceInfo(); //warning: makes no sense to construct a data container object without data
-	CAPriceInfo(UINT8* strMixId, UINT8* strPriceCertHash, bool isAI);
-	CAPriceInfo(UINT8* strMixId); //shortcut for non-pay Mixes whose PriceCerthash is null anyway
+	CAPriceInfo(UINT8* strMixId, UINT8* strPriceCertHash, UINT32 a_postition);
 	
 	virtual ~CAPriceInfo();
 	
