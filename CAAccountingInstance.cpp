@@ -1535,9 +1535,9 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 		else if (pAccInfo->authFlags & AUTH_WAITING_FOR_FIRST_SETTLED_CC)
 		{
 			// initiate immediate settling
+#ifdef DEBUG			
 			UINT64 currentMillis;
 			UINT8 tmpStrCurrentMillis[50];
-#ifdef DEBUG
 			getcurrentTimeMillis(currentMillis);
 			print64(tmpStrCurrentMillis,currentMillis);
 			CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Settle ini: %s\n", tmpStrCurrentMillis);			
@@ -1548,6 +1548,7 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 	
 	if (pCC->getTransferredBytes() >= pAccInfo->bytesToConfirm)
 	{
+		CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: confirmed");
 		// the user confirmed everything we wanted; if a timeout has been set, it should be reset
 		pAccInfo->lastHardLimitSeconds = time(NULL);
 	}
