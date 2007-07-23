@@ -1340,6 +1340,7 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 		
 		if (pAccInfo->transferredBytes > prepaidAmount)
 		{
+			m_countTransferred -= prepaidAmount;
 			pAccInfo->transferredBytes -= prepaidAmount;				
 		}
 		else
