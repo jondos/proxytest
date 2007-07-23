@@ -73,7 +73,7 @@ typedef struct
 	#ifdef _DEBUG
 		void signal_broken_pipe( int sig)
 			{
-				CAMsg::printMsg(LOG_WARNING,"Hm.. Broken Pipe.... Who cares!\n");
+				CAMsg::printMsg(LOG_INFO,"Hm.. Broken Pipe.... Who cares!\n");
 				signal(SIGPIPE,signal_broken_pipe);
 			}
 	#endif
