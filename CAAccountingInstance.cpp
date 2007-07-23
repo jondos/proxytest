@@ -1490,27 +1490,9 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 		}
 	#endif
 	
-/************ TODO: check pricecerthash with isAI-attribute instead *******
-	// parse and check AI name
-	UINT8* pAiID = pCC->getAiID();
-	if( strcmp( (char *)pAiID, (char *)m_AiName ) != 0)
-		{
-			CAMsg::printMsg( LOG_INFO, "CostConfirmation has wrong AIName %s. Ignoring...\n", pAiID );
-			CAXMLErrorMessage err(CAXMLErrorMessage::ERR_WRONG_DATA, (UINT8*)"Your CostConfirmation has a wrong AI name");
-			DOM_Document errDoc;
-			err.toXmlDocument(errDoc);
-			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
-			delete[] pAiID;
-			delete pCC;
-			pAccInfo->mutex->unlock();
-			return ;
-		}
-	delete[] pAiID;
-********************/
 
 	if (pCC->getNumberOfHashes() != m_allHashesLen)
 	{
-		// wrong signature
 		CAMsg::printMsg( LOG_INFO, "CostConfirmation has illegal number of price cert hashes!\n" );
 		CAXMLErrorMessage err(CAXMLErrorMessage::ERR_BAD_REQUEST, 
 			(UINT8*)"CostConfirmation has illegal number of price cert hashes");
@@ -1521,6 +1503,45 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 		pAccInfo->mutex->unlock();
 		return;
 	}
+	
+	Hashtable certHashCC = 
+		new Hashtable((UINT32 (*)(void *))stringHash, (SINT32 (*)(void *,void *))stringCompare);
+	UINT8* certHash;
+	bool bFailed = false;
+	for (UINT32 i = 0; i < pCC->getNumberOfHashes(); i++)
+	{
+		certHash = pCC->getPriceCertHash(i);
+		certHashCC->put(certHash, certHash);
+	}
+	for (UINT32 i = 0; i < m_allHashesLen); i++)
+	{
+		certHash = (UINT8*)certHashCC->remove(m_allHashes[i]);
+		if (certHash == NULL)
+		{
+			bFailed = true;
+			break;
+		}
+		else
+		{
+			delete certHash;
+		}
+	}
+	certHashCC->clear(HASH_EMPTY_NONE, HASH_EMPTY_DELETE);
+	delete certHashCC;
+	
+	if (bFailed)
+	{
+		CAMsg::printMsg( LOG_INFO, "CostConfirmation has invalid price cert hashes!\n" );
+		CAXMLErrorMessage err(CAXMLErrorMessage::ERR_BAD_REQUEST, 
+			(UINT8*)"CostConfirmation has invalid price cert hashes");
+		DOM_Document errDoc;
+		err.toXmlDocument(errDoc);
+		pAccInfo->pControlChannel->sendXMLMessage(errDoc);
+		delete pCC;
+		pAccInfo->mutex->unlock();
+		return;
+	}
+	
 
 
 	// parse & set transferredBytes
@@ -1577,7 +1598,7 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 	}
 	else
 	{
-		CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: NOT confirmed!!!\n");
+		CAMsg::printMsg(LOG_ERR, "AccountingSettleThread: NOT confirmed!!!\n");
 	}
 	
 	pAccInfo->bytesToConfirm = 0;

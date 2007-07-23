@@ -47,21 +47,6 @@ struct Entry
 };
 
 
-/************************** standard string hash functions **************************/
-
-
-UINT32 stringHash(char *c)
-{
-  UINT32 len = strlen(c);
-  
-  return(*(UINT32 *)(c+len-4));  
-}
-
-SINT32 stringCompare(char *a,char *b)
-{
-  return(!strcmp(a,b));
-}
-
 
 /************************** Hashtable **************************/
 // #pragma mark -

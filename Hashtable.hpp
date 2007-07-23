@@ -10,6 +10,24 @@
 #define HASH_EMPTY_FREE (SINT8)1
 #define HASH_EMPTY_DELETE (SINT8)2
 
+
+/************************** standard string hash functions **************************/
+
+
+UINT32 stringHash(UINT8* c)
+{
+  UINT32 len = strlen(c);
+  
+  return(*(UINT32 *)(c+len-4));  
+}
+
+SINT32 stringCompare(UINT8* a,UINT8* *b)
+{
+  return(!strcmp(a,b));
+}
+
+
+
 class Hashtable
 {
 	public:
