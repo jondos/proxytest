@@ -26,7 +26,7 @@ class Hashtable
 		
 		static SINT32 stringCompare(UINT8* a,UINT8* *b)
 		{
-		  return(!strcmp((char*)a,(char*)b));
+		  return strcmp((char*)a,(char*)b);
 		}
 
 		static UINT32 hashUINT64(UINT64 *a_number);
