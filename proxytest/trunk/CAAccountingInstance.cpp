@@ -1516,7 +1516,7 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 		{
 			CAMsg::printMsg( LOG_INFO, "CC1: %s\n", certHash);
 		}
-		certHash = certHashCC->remove(certHash);
+		certHash = (UINT8*)certHashCC->remove(certHash);
 		if (certHash == NULL)
 		{
 			CAMsg::printMsg( LOG_INFO, "CC1: %s\n", certHash);
