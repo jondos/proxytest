@@ -259,6 +259,8 @@ private:
 	static SINT32 m_prepaidBytesMinimum;
 	
 	bool m_bThreadRunning;
+	
+	static UINT64 m_countTransferred;
 };
 
 
