@@ -837,8 +837,8 @@ SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName
 	for (UINT32 i = 0; i < nrOfMixes; i++) 
 	{
 		elemCert = m_preparedCCRequest.createElement("PriceCertHash");
-		CAMsg::printMsg(LOG_DEBUG,"hash to be inserted in cc: index %d, value %s\n",i,allHashes[i]);
-		setDOMElementValue(elemCert,allHashes[i]);
+		CAMsg::printMsg(LOG_DEBUG,"hash to be inserted in cc: index %d, value %s\n",i,m_allHashes[i]);
+		setDOMElementValue(elemCert,m_allHashes[i]);
 		//delete[] allHashes[i];
 		elemCert.setAttribute("id", DOMString( (const char*)allSkis[i]));
 		setDOMElementAttribute(elemCert, "position", i);
