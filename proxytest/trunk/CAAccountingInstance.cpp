@@ -823,7 +823,7 @@ SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName
 	DOM_Element elemCert;
 	for (UINT32 i = 0; i < nrOfMixes; i++) {
 		elemCert = m_preparedCCRequest.createElement("PriceCertHash");
-		//CAMsg::printMsg(LOG_DEBUG,"hash to be inserted in cc: index %d, value %s\n",i,allHashes[i]);
+		CAMsg::printMsg(LOG_DEBUG,"hash to be inserted in cc: index %d, value %s\n",i,allHashes[i]);
 		setDOMElementValue(elemCert,allHashes[i]);
 		delete[] allHashes[i];
 		elemCert.setAttribute("id", DOMString( (const char*)allSkis[i]));
@@ -1495,18 +1495,6 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 			CAMsg::printMsg( LOG_ERR, "CostConfirmation has insufficient number of bytes (%s < %s). Ignoring...\n", 
 				tmp, tmpOther );
 		}
-			
-		
-		// fetch cost confirmation from last session if available, and send it
-		/*
-		CAXMLCostConfirmation * pCC = NULL;
-		m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, m_currentCascade, &pCC);
-		if(pCC!=NULL)
-		{
-			pAccInfo->pControlChannel->sendXMLMessage(pCC->getXMLDocument());
-			delete pCC;
-		}*/
-		
 		
 		/*
 		CAXMLErrorMessage err(CAXMLErrorMessage::ERR_WRONG_DATA, 
