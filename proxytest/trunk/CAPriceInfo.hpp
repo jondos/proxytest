@@ -69,16 +69,16 @@ public:
 		return pTmpStr;
 	}
 	
-	bool isAI()
+	UINT32 getPosition()
 	{
-		return m_isAi;
+		return m_postition;
 	}
 
 private:
 	
-	UINT8*	m_pStrMixId; //SubjectKeyIdentifier of the Mix
-	UINT8*  m_pStrPriceCertHash; //null for non-pay Mixes
-	bool   m_isAi; //true if this Mix is the first mix and therefor the AI of the cascade
+	UINT8* m_pStrMixId; //SubjectKeyIdentifier of the Mix
+	UINT8* m_pStrPriceCertHash; 
+	UINT32 m_postition;
 };
 
 #endif /*CAPRICEINFO_H_*/

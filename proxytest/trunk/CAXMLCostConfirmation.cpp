@@ -91,6 +91,11 @@ SINT32 CAXMLCostConfirmation::setValues()
 		if(m_domDocument==NULL)
 			return E_UNKNOWN;
 		DOM_Element elemRoot=m_domDocument.getDocumentElement();
+		if (elemRoot == NULL)
+		{
+			return E_UNKNOWN;
+		}
+		
 		DOM_Element elem;
 
 		char * strTagname = elemRoot.getTagName().transcode();
@@ -110,6 +115,25 @@ SINT32 CAXMLCostConfirmation::setValues()
 		getDOMChildByName(elemRoot, (UINT8*)"TransferredBytes", elem, false);
 		if(getDOMElementValue(elem, m_lTransferredBytes)!=E_SUCCESS)
 			return E_UNKNOWN;
+			
+		// parse PIID
+		if(m_pStrPIID!=NULL)
+			delete[] m_pStrPIID;
+		m_pStrPIID=NULL;
+		UINT8 strGeneral[256];
+		UINT32 strGeneralLen = 256;
+		strGeneralLen=255;
+		getDOMChildByName(elemRoot, (UINT8*)"PIID", elem, false);
+		if(getDOMElementValue(elem, strGeneral, &strGeneralLen)==E_SUCCESS)
+		{
+			m_pStrPIID = new UINT8[strGeneralLen+1];
+			memcpy(m_pStrPIID, strGeneral,strGeneralLen+1);
+		}
+		else
+		{
+			return E_UNKNOWN;
+		}			
+			
 
 /** we do not use the price cert hashes for anything in the AI
  * except storing them as part of the xml string in the db
@@ -118,30 +142,60 @@ SINT32 CAXMLCostConfirmation::setValues()
  * (and initialize certArray with new(), otherwise it, and m_priceCerts with it, 
  *  will be gone by the end of this method!!!)
  * 
- * 
+ */
+ /*
+ 	CAMsg::printMsg(LOG_DEBUG, "Parsing PriceCertificates\n");
+ 
 		//parse PriceCertHash elements 
 		//currently does not check syntax, e.g. whether <PriceCertHash> is within <PriceCertificates>
-		DOM_NodeList theNodes = elemRoot.getElementsByTagName("PriceCertHash");//should work with root, if not try getting the PriceCertificates from elemRoot first, and then PriceCertHash elements from it
+		if getDOMChildByName(elemRoot, (UINT8*)"PriceCertificates", elem, false) != E_SUCCESS)
+		{
+			return E_UNKNOWN;
+		}		
+		
+		CAMsg::printMsg(LOG_DEBUG, "Looking for PriceCertHash\n");
+		
+		// one last test if the tag is really in the right XML layer; throw away elemRoot here...		
+		if getDOMChildByName(elem, (UINT8*)"PriceCertHash", elemRoot, false) != E_SUCCESS)
+		{
+			return E_UNKNOWN;
+		}
+		
+		CAMsg::printMsg(LOG_DEBUG, "Parsing PriceCertHash\n");
+		
+		DOM_NodeList elem = elem.getElementsByTagName("PriceCertHash");
+		if (theNodes.getLength() <= 0)
+		{
+			return E_UNKNOWN;
+		}
+		
 		//determine size and build array
-		int nrOfCerts = theNodes.getLength(); //return XMLSim_pStrPriceCertHashze_t, conversion to int okay?
-		CAPriceInfo* certArray[nrOfCerts];
+		m_priceCertsLen = theNodes.getLength();
+		m_priceCerts = new CAPriceInfo*[m_priceCertsLen];
+		
 		//loop through nodes
 		CAPriceInfo* curInfo;
 		DOM_Node curNode;
 		UINT8* curId;
 		UINT8* curPriceCert;
 		DOM_Node aiNode;
-		DOM_Node idNode;
 		bool isAiFound; 
+		UINT32 curPosition;
 		UINT8* aiAttr;
 		for (int i = 0; i< nrOfCerts; i++ )
 		{
 			isAiFound = false;
 			//get single node
 			curNode = theNodes.item(i);
+			
+			CAMsg::printMsg(LOG_DEBUG, "Parsing id\n");
+			
 			//extract strings for mixid and pricecerthash, and check isAI attribute
-			idNode = curNode.getAttributes().getNamedItem("id");
-			curId = (UINT8*) idNode.getNodeValue().transcode(); //need transcode() to transform DOMString to char*
+			if (getDOMElementAttribute(curNode, "id", curId) != E_SUCCESS)
+			{
+				return E_UNKNOWN;
+			}
+		
 			curPriceCert = (UINT8*) curNode.getNodeValue().transcode();
 			aiNode = curNode.getAttributes().getNamedItem("isAI"); 
 			if ( aiNode != NULL)
@@ -162,26 +216,8 @@ SINT32 CAXMLCostConfirmation::setValues()
 			}
 		//set member variable to new array
 		m_priceCerts = certArray;
-		
-	******/	
-
-		// parse PIID
-		if(m_pStrPIID!=NULL)
-			delete[] m_pStrPIID;
-		m_pStrPIID=NULL;
-		UINT8 strGeneral[256];
-		UINT32 strGeneralLen = 256;
-		strGeneralLen=255;
-		getDOMChildByName(elemRoot, (UINT8*)"PIID", elem, false);
-		if(getDOMElementValue(elem, strGeneral, &strGeneralLen)==E_SUCCESS)
-			{
-				m_pStrPIID = new UINT8[strGeneralLen+1];
-				memcpy(m_pStrPIID, strGeneral,strGeneralLen+1);
-			}
-		else
-			{
-				return E_UNKNOWN;
-			}
+		*/
+			
 		return E_SUCCESS;
 	}
 #endif //ONLY_LOCAL_PROXY

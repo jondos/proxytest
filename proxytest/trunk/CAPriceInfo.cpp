@@ -35,19 +35,13 @@ CAPriceInfo::CAPriceInfo()
 	m_pStrMixId = NULL;
 }
 
-CAPriceInfo::CAPriceInfo(UINT8* strMixId, UINT8* strPriceCertHash, bool isAi)
+CAPriceInfo::CAPriceInfo(UINT8* strMixId, UINT8* strPriceCertHash, UINT32 a_postition)
 {
 	m_pStrMixId = strMixId;
 	m_pStrPriceCertHash = strPriceCertHash;	
-	m_isAi = isAi;
+	m_postition = a_postition;
 }
 
-CAPriceInfo::CAPriceInfo(UINT8* strMixId)
-{
-	m_pStrMixId = strMixId;
-	m_pStrPriceCertHash = NULL;
-	m_isAi = false;	
-}	
 
 CAPriceInfo::~CAPriceInfo()
 {
