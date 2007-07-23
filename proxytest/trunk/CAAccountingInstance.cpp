@@ -327,13 +327,6 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 		}		
 		
 		
-		UINT8 tmp[32];
-		print64(tmp,pAccInfo->transferredBytes);
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Transferred bytes:%s\n", tmp);	
-		
-		print64(tmp,pAccInfo->confirmedBytes);
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Confirmed bytes:%s\n", tmp);	
-		
 		
 		// do the following tests after a lot of Mix packets only (gain speed...)
 		if (!(pAccInfo->authFlags & (AUTH_HARD_LIMIT_REACHED | AUTH_ACCOUNT_EMPTY | AUTH_WAITING_FOR_FIRST_SETTLED_CC)) &&
@@ -343,6 +336,13 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			pAccInfo->mutex->unlock();
 			return HANDLE_PACKET_CONNECTION_UNCHECKED;
 		}
+		
+		UINT8 tmp[32];
+		print64(tmp,pAccInfo->transferredBytes);
+		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance1: Transferred bytes:%s\n", tmp);	
+		
+		print64(tmp,pAccInfo->confirmedBytes);
+		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance2: Confirmed bytes:  %s\n", tmp);	
 		
 		//CAMsg::printMsg( LOG_DEBUG, "Checking after %d session packets...\n", pAccInfo->sessionPackets);
 		
@@ -1551,6 +1551,10 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 		CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: confirmed");
 		// the user confirmed everything we wanted; if a timeout has been set, it should be reset
 		pAccInfo->lastHardLimitSeconds = time(NULL);
+	}
+	else
+	{
+		CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: NOT confirmed!!!");
 	}
 	
 	pAccInfo->bytesToConfirm = 0;
