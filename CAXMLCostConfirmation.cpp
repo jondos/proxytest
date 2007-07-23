@@ -179,7 +179,7 @@ SINT32 CAXMLCostConfirmation::setValues()
 		
 		CAMsg::printMsg(LOG_DEBUG, "Parsing PriceCertHash\n");
 		
-		DOM_NodeList elem = elem.getElementsByTagName("PriceCertHash");
+		DOM_NodeList theNodes = elem.getElementsByTagName("PriceCertHash");
 		if (theNodes.getLength() <= 0)
 		{
 			return E_UNKNOWN;
