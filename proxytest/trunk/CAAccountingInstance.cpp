@@ -60,6 +60,8 @@ const SINT32 CAAccountingInstance::HANDLE_PACKET_CLOSE_CONNECTION = 3;
 SINT32 CAAccountingInstance::m_prepaidBytesMinimum = 0;
 
 
+UINT64 CAAccountingInstance::m_countTransferred = 0;
+
 /**
  * Singleton: This is the reference to the only instance of this class
  */
@@ -326,7 +328,12 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			pAccInfo->sessionPackets++;
 		}		
 		
+		UINT8 tmp[32];
+		print64(tmp,pAccInfo->transferredBytes - m_countTransferred);
+		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance1: Transferred bytes:%s\n", tmp);	
 		
+		print64(tmp,pAccInfo->confirmedBytes);
+		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance2: Confirmed bytes:  %s\n", tmp);	
 		
 		// do the following tests after a lot of Mix packets only (gain speed...)
 		if (!(pAccInfo->authFlags & (AUTH_HARD_LIMIT_REACHED | AUTH_ACCOUNT_EMPTY | AUTH_WAITING_FOR_FIRST_SETTLED_CC)) &&
@@ -337,12 +344,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			return HANDLE_PACKET_CONNECTION_UNCHECKED;
 		}
 		
-		UINT8 tmp[32];
-		print64(tmp,pAccInfo->transferredBytes);
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance1: Transferred bytes:%s\n", tmp);	
 		
-		print64(tmp,pAccInfo->confirmedBytes);
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance2: Confirmed bytes:  %s\n", tmp);	
 		
 		//CAMsg::printMsg( LOG_DEBUG, "Checking after %d session packets...\n", pAccInfo->sessionPackets);
 		
@@ -1057,6 +1059,8 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 		m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, m_currentCascade, &pCC);
 		if(pCC!=NULL)
 		{
+			m_countTransferred = pCC->getTransferredBytes();
+			
 			pAccInfo->transferredBytes += pCC->getTransferredBytes();
 			pAccInfo->confirmedBytes = pCC->getTransferredBytes();
 			#ifdef DEBUG
@@ -1637,6 +1641,8 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 		FINISH_STACK("CAAccountingInstance::initTableEntry:NULL");
 		return E_UNKNOWN;
 	}
+	
+	m_countTransferred = 0;
 	
 	pHashEntry->pAccountingInfo = new tAiAccountingInfo;
 	memset( pHashEntry->pAccountingInfo, 0, sizeof( tAiAccountingInfo ) );
