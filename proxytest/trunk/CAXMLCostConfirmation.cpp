@@ -38,6 +38,7 @@ CAXMLCostConfirmation::CAXMLCostConfirmation()
 	{
 		m_domDocument = NULL;
 		m_pStrPIID = NULL;
+		m_priceCerts = NULL;
 
 	}
 
@@ -80,7 +81,22 @@ CAXMLCostConfirmation::~CAXMLCostConfirmation()
 	{
 
 		if(m_pStrPIID!=NULL)
+		{
 			delete[] m_pStrPIID;
+		}
+		
+		if (m_priceCerts != null)
+		{
+			for (int i = 0; i < m_priceCertsLen; i++)
+			{
+				if (m_priceCerts[i])
+				{
+					delete m_priceCerts[i];				
+				}
+			}
+			delete[] m_priceCerts;
+			m_priceCerts = NULL;
+		}
 		
 		m_domDocument=NULL;
 	}
@@ -143,7 +159,7 @@ SINT32 CAXMLCostConfirmation::setValues()
  *  will be gone by the end of this method!!!)
  * 
  */
- /*
+ 
  	CAMsg::printMsg(LOG_DEBUG, "Parsing PriceCertificates\n");
  
 		//parse PriceCertHash elements 
@@ -174,15 +190,17 @@ SINT32 CAXMLCostConfirmation::setValues()
 		m_priceCerts = new CAPriceInfo*[m_priceCertsLen];
 		
 		//loop through nodes
-		CAPriceInfo* curInfo;
 		DOM_Node curNode;
 		UINT8* curId;
-		UINT8* curPriceCert;
-		DOM_Node aiNode;
-		bool isAiFound; 
+		UINT8* curHash;
 		UINT32 curPosition;
-		UINT8* aiAttr;
-		for (int i = 0; i< nrOfCerts; i++ )
+		
+		for (int i = 0; i < m_priceCertsLen; i++ )
+		{
+			m_priceCerts[i] = NULL;
+		}
+		
+		for (int i = 0; i < m_priceCertsLen; i++ )
 		{
 			isAiFound = false;
 			//get single node
@@ -191,32 +209,33 @@ SINT32 CAXMLCostConfirmation::setValues()
 			CAMsg::printMsg(LOG_DEBUG, "Parsing id\n");
 			
 			//extract strings for mixid and pricecerthash, and check isAI attribute
-			if (getDOMElementAttribute(curNode, "id", curId) != E_SUCCESS)
+			curId = new UINT8[32];
+			if (getDOMElementAttribute(curNode, "id", curId, 32) != E_SUCCESS)
 			{
+				delete curId;
 				return E_UNKNOWN;
 			}
+			
+			CAMsg::printMsg(LOG_DEBUG, "Parsing hash\n");
+			curHash = new UINT8[32];
+			if (getDOMElementValue(curNode, curHash, 32) != E_SUCCESS)
+			{	
+				delete curId;
+				delete curHash;
+				return E_UNKNOWN;
+			}
+			
+			CAMsg::printMsg(LOG_DEBUG, "Parsing position\n");
+			if (getDOMElementAttribute(curNode, "position", curPosition) != E_SUCCESS)
+			{
+				curPosition = -1;
+			}
+			
+			CAMsg::printMsg(LOG_DEBUG, "Adding cert info\n");
+			m_priceCerts[i] = new CAPriceInfo(curId, curHash, curPosition);	
+		}
+
 		
-			curPriceCert = (UINT8*) curNode.getNodeValue().transcode();
-			aiNode = curNode.getAttributes().getNamedItem("isAI"); 
-			if ( aiNode != NULL)
-			{
-				aiAttr = (UINT8*) aiNode.getNodeValue().transcode();
-				if (strcmp((const char*)aiAttr,"true"))
-					isAiFound = true;
-			}
-			//build PriceInfo instance and add to array
-			if (isAiFound == false && curPriceCert == NULL)
-			{
-				curInfo = new CAPriceInfo(curId);
-			} else
-			{
-				curInfo = new CAPriceInfo(curId, curPriceCert, isAiFound);	
-			}
-			certArray[i] = curInfo;
-			}
-		//set member variable to new array
-		m_priceCerts = certArray;
-		*/
 			
 		return E_SUCCESS;
 	}

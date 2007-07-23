@@ -1548,13 +1548,13 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 	
 	if (pCC->getTransferredBytes() >= pAccInfo->bytesToConfirm)
 	{
-		CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: confirmed");
+		CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: confirmed\n");
 		// the user confirmed everything we wanted; if a timeout has been set, it should be reset
 		pAccInfo->lastHardLimitSeconds = time(NULL);
 	}
 	else
 	{
-		CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: NOT confirmed!!!");
+		CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: NOT confirmed!!!\n");
 	}
 	
 	pAccInfo->bytesToConfirm = 0;
