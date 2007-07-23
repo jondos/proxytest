@@ -1173,7 +1173,7 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 	{
 		prepaidAmount = 0;
 	}
-	setDOMElementValue( elemPrepaid, prepaidAmount);
+	setDOMElementValue( elemPrepaid, (UINT32)prepaidAmount);
 
 	// send XML struct to Jap & set auth flags
 	pAccInfo->pControlChannel->sendXMLMessage(doc);
