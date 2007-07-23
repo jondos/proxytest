@@ -295,21 +295,23 @@ void *Hashtable::remove(void *key)
 	
 	struct Entry **table,*e,*prev;
 	UINT32 hash;
-	UINT32 index;
 	
 	table = m_table;
 	hash = m_hashFunc(key);
-	index = hash % m_capacity;
 	
-	for(e = table[index], prev = NULL; e; e = e->e_Next)
+	for(e = table[hash % m_capacity], prev = NULL; e; e = e->e_Next)
 	{
 		if (e == NULL)
 		{
 			return NULL;
 		}
 		CAMsg::printMsg(LOG_INFO, "Hashtable: Removing key.\n");
-		
-		if ((m_hashFunc(e->e_Key) == hash) && !m_compareFunc(e->e_Key,key))
+		if (m_hashFunc(e->e_Key) == hash)
+		{
+			CAMsg::printMsg(LOG_INFO, "Hashtable: Found hash to remove.\n");
+		}
+		  
+		if (m_hashFunc(e->e_Key) == hash && !m_compareFunc(e->e_Key,key))
 		{
 			CAMsg::printMsg(LOG_INFO, "Hashtable: Found key to remove.\n");
 			
@@ -322,7 +324,7 @@ void *Hashtable::remove(void *key)
 			}
 			else
 			{
-				table[index] = e->e_Next;
+				table[hash % m_capacity] = e->e_Next;
 			}
 			
 			m_count--;
