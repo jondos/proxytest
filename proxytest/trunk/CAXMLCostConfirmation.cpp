@@ -207,12 +207,6 @@ SINT32 CAXMLCostConfirmation::setValues()
 			curNode = theNodes.item(i);
 			
 			
-			UINT32 debuglen = 3000;
-	UINT8 debugout[3000];
-	DOM_Output::dumpToMem(curNode,debugout,&debuglen);
-	debugout[debuglen] = 0;			
-	CAMsg::printMsg(LOG_DEBUG, "the CC node parsed looks like this: %s \n",debugout);
-			
 			CAMsg::printMsg(LOG_DEBUG, "Parsing id\n");
 			
 			//extract strings for mixid and pricecerthash, and check isAI attribute
