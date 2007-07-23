@@ -45,6 +45,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CAMsg.cpp \
 		    CAMutex.cpp\
 		    CAMuxSocket.cpp \
+                    CAPriceInfo.cpp \ 
 		    CAPool.cpp\
 		    CAQueue.cpp \
 		    CAReplayControlChannel.cpp\
@@ -112,6 +113,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CAMsg.hpp \
 		    CAMutex.hpp\
 		    CAMuxSocket.hpp \
+                    CAPriceInfo.hpp \
 		    CAPool.hpp\
 		    CAQueue.hpp \
 		    CAReplayControlChannel.hpp\
