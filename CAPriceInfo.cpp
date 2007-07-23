@@ -29,11 +29,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAPriceInfo.hpp"
 
 
-CAPriceInfo::CAPriceInfo()
-{
-	m_pStrPriceCertHash = NULL;
-	m_pStrMixId = NULL;
-}
 
 CAPriceInfo::CAPriceInfo(UINT8* strMixId, UINT8* strPriceCertHash, UINT32 a_postition)
 {

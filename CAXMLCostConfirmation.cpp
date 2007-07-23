@@ -195,14 +195,13 @@ SINT32 CAXMLCostConfirmation::setValues()
 		UINT8* curHash;
 		UINT32 curPosition;
 		
-		for (int i = 0; i < m_priceCertsLen; i++ )
+		for (UINT32 i = 0; i < m_priceCertsLen; i++ )
 		{
 			m_priceCerts[i] = NULL;
 		}
 		
-		for (int i = 0; i < m_priceCertsLen; i++ )
+		for (UINT32 i = 0; i < m_priceCertsLen; i++ )
 		{
-			isAiFound = false;
 			//get single node
 			curNode = theNodes.item(i);
 			
@@ -210,7 +209,7 @@ SINT32 CAXMLCostConfirmation::setValues()
 			
 			//extract strings for mixid and pricecerthash, and check isAI attribute
 			curId = new UINT8[32];
-			if (getDOMElementAttribute(curNode, "id", curId, 32) != E_SUCCESS)
+			if (getDOMElementAttribute(curNode, "id", (UINT8*)curId, 32) != E_SUCCESS)
 			{
 				delete curId;
 				return E_UNKNOWN;
@@ -218,7 +217,7 @@ SINT32 CAXMLCostConfirmation::setValues()
 			
 			CAMsg::printMsg(LOG_DEBUG, "Parsing hash\n");
 			curHash = new UINT8[32];
-			if (getDOMElementValue(curNode, curHash, 32) != E_SUCCESS)
+			if (getDOMElementValue(curNode, (UINT8*)curHash, 32) != E_SUCCESS)
 			{	
 				delete curId;
 				delete curHash;
