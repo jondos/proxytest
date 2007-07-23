@@ -41,7 +41,7 @@ or null (for non-pay Mixes) )
 class CAPriceInfo
 {
 public:
-	CAPriceInfo(UINT8* strMixId, UINT8* strPriceCertHash, UINT32 a_postition);
+	CAPriceInfo(UINT8* strMixId, UINT8* strPriceCertHash, SINT32 a_postition);
 	
 	virtual ~CAPriceInfo();
 	
@@ -67,7 +67,7 @@ public:
 		return pTmpStr;
 	}
 	
-	UINT32 getPosition()
+	SINT32 getPosition()
 	{
 		return m_postition;
 	}
@@ -76,7 +76,7 @@ private:
 	
 	UINT8* m_pStrMixId; //SubjectKeyIdentifier of the Mix
 	UINT8* m_pStrPriceCertHash; 
-	UINT32 m_postition;
+	SINT32 m_postition;
 };
 
 #endif /*CAPRICEINFO_H_*/

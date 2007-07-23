@@ -194,7 +194,7 @@ SINT32 CAXMLCostConfirmation::setValues()
 		UINT8* curId;
 		UINT8* curHash;
 		UINT32 len;
-		UINT32 curPosition;
+		SINT32 curPosition;
 		
 		for (UINT32 i = 0; i < m_priceCertsLen; i++ )
 		{
