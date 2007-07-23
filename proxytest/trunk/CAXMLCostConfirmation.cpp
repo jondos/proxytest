@@ -160,7 +160,7 @@ SINT32 CAXMLCostConfirmation::setValues()
  * 
  */
  
- 	CAMsg::printMsg(LOG_DEBUG, "Parsing PriceCertificates\n");
+ 	//CAMsg::printMsg(LOG_DEBUG, "Parsing PriceCertificates\n");
  
 		//parse PriceCertHash elements 
 		//currently does not check syntax, e.g. whether <PriceCertHash> is within <PriceCertificates>
@@ -169,7 +169,7 @@ SINT32 CAXMLCostConfirmation::setValues()
 			return E_UNKNOWN;
 		}		
 		
-		CAMsg::printMsg(LOG_DEBUG, "Looking for PriceCertHash\n");
+		//CAMsg::printMsg(LOG_DEBUG, "Looking for PriceCertHash\n");
 		
 		// one last test if the tag is really in the right XML layer; throw away elemRoot here...		
 		if (getDOMChildByName(elem, (UINT8*)"PriceCertHash", elemRoot, false) != E_SUCCESS)
@@ -177,7 +177,7 @@ SINT32 CAXMLCostConfirmation::setValues()
 			return E_UNKNOWN;
 		}
 		
-		CAMsg::printMsg(LOG_DEBUG, "Parsing PriceCertHash\n");
+		//CAMsg::printMsg(LOG_DEBUG, "Parsing PriceCertHash\n");
 		
 		DOM_NodeList theNodes = elem.getElementsByTagName("PriceCertHash");
 		if (theNodes.getLength() <= 0)
@@ -207,19 +207,19 @@ SINT32 CAXMLCostConfirmation::setValues()
 			curNode = theNodes.item(i);
 			
 			
-			CAMsg::printMsg(LOG_DEBUG, "Parsing id\n");
+			//CAMsg::printMsg(LOG_DEBUG, "Parsing id\n");
 			
 			//extract strings for mixid and pricecerthash, and check isAI attribute
 			curId = new UINT8[100];
 			len = 100;
-			if (getDOMElementAttribute(curNode, "id", (UINT8*)curId, &len) != E_SUCCESS)
+			if (getDOMElementAttribute(curNode, "id", (UINT8*)curId, &len) != E_SUCCESS || 1==1)
 			{
 				delete curId;
 				return E_UNKNOWN;
 			}
 			
 			
-			CAMsg::printMsg(LOG_DEBUG, "Parsing hash\n");
+			//CAMsg::printMsg(LOG_DEBUG, "Parsing hash\n");
 			curHash = new UINT8[100];
 			len = 100;
 			if (getDOMElementValue(curNode, (UINT8*)curHash, &len) != E_SUCCESS)
@@ -229,13 +229,13 @@ SINT32 CAXMLCostConfirmation::setValues()
 				return E_UNKNOWN;
 			}
 			
-			CAMsg::printMsg(LOG_DEBUG, "Parsing position\n");
+			//CAMsg::printMsg(LOG_DEBUG, "Parsing position\n");
 			if (getDOMElementAttribute(curNode, "position", &curPosition) != E_SUCCESS)
 			{
 				curPosition = -1;
 			}
 			
-			CAMsg::printMsg(LOG_DEBUG, "Adding cert info\n");
+			//CAMsg::printMsg(LOG_DEBUG, "Adding cert info\n");
 			m_priceCerts[i] = new CAPriceInfo(curId, curHash, curPosition);	
 		}
 
