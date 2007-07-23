@@ -216,8 +216,8 @@ SINT32 CAXMLCostConfirmation::setValues()
 			CAMsg::printMsg(LOG_DEBUG, "Parsing id\n");
 			
 			//extract strings for mixid and pricecerthash, and check isAI attribute
-			curId = new UINT8[32];
-			len = 32;
+			curId = new UINT8[100];
+			len = 100;
 			if (getDOMElementAttribute(curNode, "id", (UINT8*)curId, &len) != E_SUCCESS)
 			{
 				delete curId;
@@ -225,8 +225,8 @@ SINT32 CAXMLCostConfirmation::setValues()
 			}
 			
 			CAMsg::printMsg(LOG_DEBUG, "Parsing hash\n");
-			curHash = new UINT8[32];
-			len = 32;
+			curHash = new UINT8[100];
+			len = 100;
 			if (getDOMElementValue(curNode, (UINT8*)curHash, &len) != E_SUCCESS)
 			{	
 				delete curId;
