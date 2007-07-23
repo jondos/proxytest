@@ -87,7 +87,7 @@ CAXMLCostConfirmation::~CAXMLCostConfirmation()
 		
 		if (m_priceCerts != NULL)
 		{
-			for (int i = 0; i < m_priceCertsLen; i++)
+			for (UINT32 i = 0; i < m_priceCertsLen; i++)
 			{
 				if (m_priceCerts[i])
 				{
@@ -164,7 +164,7 @@ SINT32 CAXMLCostConfirmation::setValues()
  
 		//parse PriceCertHash elements 
 		//currently does not check syntax, e.g. whether <PriceCertHash> is within <PriceCertificates>
-		if getDOMChildByName(elemRoot, (UINT8*)"PriceCertificates", elem, false) != E_SUCCESS)
+		if (getDOMChildByName(elemRoot, (UINT8*)"PriceCertificates", elem, false) != E_SUCCESS)
 		{
 			return E_UNKNOWN;
 		}		
