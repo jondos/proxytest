@@ -59,6 +59,8 @@ const SINT32 CAAccountingInstance::HANDLE_PACKET_CLOSE_CONNECTION = 3;
 
 SINT32 CAAccountingInstance::m_prepaidBytesMinimum = 0;
 
+UINT64 CAAccountingInstance::m_countTransferred = 0;
+
 
 /**
  * Singleton: This is the reference to the only instance of this class
@@ -328,7 +330,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 		
 			UINT8 tmp[32];
 		print64(tmp,pAccInfo->transferredBytes);
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance1: Transferred bytes:%s\n", (tmp - m_countTransferred));	
+		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance1: Transferred bytes:%s\n", (tmp - CAAccountingInstance::m_countTransferred));	
 		
 		print64(tmp,pAccInfo->confirmedBytes);
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance2: Confirmed bytes:  %s\n", tmp);	
