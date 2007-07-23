@@ -1168,7 +1168,12 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 	elemRoot.appendChild( elemPanic );
 	elemRoot.appendChild( elemPrepaid );
 	setDOMElementValue( elemPanic, b64Challenge );
-	setDOMElementValue( elemPrepaid, (pAccInfo->confirmedBytes - pAccInfo->transferredBytes));
+	SINT32 prepaidAmount = m_dbInterface->getPrepaidAmount(pAccInfo->accountNumber, m_currentCascade, false);
+	if (prepaidAmount < 0)
+	{
+		prepaidAmount = 0;
+	}
+	setDOMElementValue( elemPrepaid, prepaidAmount);
 
 	// send XML struct to Jap & set auth flags
 	pAccInfo->pControlChannel->sendXMLMessage(doc);
@@ -1334,7 +1339,7 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 	#ifdef DEBUG		
 	CAMsg::printMsg(LOG_DEBUG, "Checking database for previously prepaid bytes...\n");
 	#endif
-	SINT32 prepaidAmount = m_dbInterface->getPrepaidAmount(pAccInfo->accountNumber, m_currentCascade);
+	SINT32 prepaidAmount = m_dbInterface->getPrepaidAmount(pAccInfo->accountNumber, m_currentCascade, true);
 	UINT8 tmp[32];
 	print64(tmp,pAccInfo->accountNumber);
 	if (prepaidAmount > 0)

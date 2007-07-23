@@ -96,7 +96,7 @@ class CAAccountingDBInterface
 			SINT32 deleteCC(UINT64 accountNumber, UINT8* cascadeId);
 			
 			SINT32 storePrepaidAmount(UINT64 accountNumber, SINT32 prepaidBytes, UINT8* cascadeId);
-			SINT32 getPrepaidAmount(UINT64 accountNumber, UINT8* cascadeId);
+			SINT32 getPrepaidAmount(UINT64 accountNumber, UINT8* cascadeId, bool a_bDelete);
 			
 			SINT32 storeAccountStatus(UINT64 a_accountNumber, UINT32 a_statusCode);
 			SINT32 getAccountStatus(UINT64 a_accountNumber, UINT32& a_statusCode);
