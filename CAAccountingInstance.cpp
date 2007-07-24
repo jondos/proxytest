@@ -386,7 +386,8 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 					CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Fixing bytes from outdated CC...\n");	
 					// we had stored an outdated CC; insert confirmed bytes from current CC here and also update client					
 					CAXMLCostConfirmation * pCC = NULL;
-					ms_pInstance->m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, m_currentCascade, &pCC);
+					ms_pInstance->m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, 
+						ms_pInstance->m_currentCascade, &pCC);
 					if (pCC!=NULL)
 					{				
 						pAccInfo->transferredBytes +=  loginEntry->confirmedBytes - pAccInfo->confirmedBytes;			
