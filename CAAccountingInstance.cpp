@@ -642,8 +642,8 @@ SINT32 CAAccountingInstance::getPrepaidBytes(tAiAccountingInfo* pAccInfo)
 			print64(tmp,pAccInfo->transferredBytes);
 			print64(tmp2,pAccInfo->confirmedBytes);
 			
-			CAMsg::printMsg(LOG_ERR, "PrepaidBytes are way to high! Maybe a hacker attack? Or CC did get lost? "
-				"TransferredBytes: %s  ConfirmedBytes: %s\n", tmp, tmp2);
+			CAMsg::printMsg(LOG_ERR, "PrepaidBytes are way to high! Maybe a hacker attack? Or CC did get lost?\n");
+			CAMsg::printMsg(LOG_ERR, "TransferredBytes: %s  ConfirmedBytes: %s\n", tmp, tmp2);
 			UINT32 prepaidInterval;
 			pglobalOptions->getPrepaidInterval(&prepaidInterval);
 			prepaidBytes = (SINT32)prepaidInterval;
@@ -1616,11 +1616,12 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 		pAccInfo->pControlChannel->sendXMLMessage(errDoc);*/
 	}
 	else
-	{			
+	{	
+		/*		
 		UINT8 tmp[32];
 		print64(tmp,pCC->getTransferredBytes());
 		CAMsg::printMsg( LOG_ERR, "Transferredbytes in CC: %s\n", tmp);
-		
+		*/
 		
 		if (m_dbInterface->storeCostConfirmation(*pCC, m_currentCascade) != E_SUCCESS)
 		{
