@@ -1657,8 +1657,10 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 	}
 	else
 	{
-		CAMsg::printMsg(LOG_ERR, "AccountingSettleThread: Requested CC value has NOT been confirmed! "
-								"Maybe client and Mix count differently?\n");
+		UINT8 tmp[32];
+		print64(tmp,pCC->getAccountNumber());
+		CAMsg::printMsg(LOG_ERR, "AccountingSettleThread: Requested CC value has NOT been confirmed! Received Bytes: %s "
+								"Maybe client and Mix count differently?\n", tmp);
 		m_pSettleThread->settle();
 	}
 	
