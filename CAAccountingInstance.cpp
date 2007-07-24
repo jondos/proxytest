@@ -1633,6 +1633,7 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 	else
 	{
 		CAMsg::printMsg(LOG_ERR, "AccountingSettleThread: NOT confirmed!!!\n");
+		m_pSettleThread->settle();
 	}
 	
 	pAccInfo->bytesToConfirm = 0;
