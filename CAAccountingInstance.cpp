@@ -640,7 +640,12 @@ SINT32 CAAccountingInstance::getPrepaidBytes(tAiAccountingInfo* pAccInfo)
 		prepaidBytes = pAccInfo->confirmedBytes - pAccInfo->transferredBytes;
 		if (prepaidBytes < 0)
 		{
-			CAMsg::printMsg(LOG_ERR, "PrepaidBytes are way to high! Maybe a hacker attack? Or CC did get lost?\n");
+			UINT8 tmp[32], tmp2[32];		
+			print64(tmp,pAccInfo->transferredBytes);
+			print64(tmp,pAccInfo->confirmedBytes);
+			
+			CAMsg::printMsg(LOG_ERR, "PrepaidBytes are way to high! Maybe a hacker attack? Or CC did get lost? "
+				"TransferredBytes: %s  ConfirmedBytes: %s\n", tmp, tmp2);
 			UINT32 prepaidInterval;
 			pglobalOptions->getPrepaidInterval(&prepaidInterval);
 			prepaidBytes = (SINT32)prepaidInterval;
