@@ -1755,8 +1755,6 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 				loginEntry = (AccountLoginHashEntry*)ms_pInstance->m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));																	
 				if (loginEntry)
 				{
-					
-					CAMsg::printMsg(LOG_ERR, "Logout1\n");
 					// delete CC!!!
 					ms_pInstance->m_dbInterface->deleteCC(pAccInfo->accountNumber, ms_pInstance->m_currentCascade);
 					
@@ -1796,7 +1794,6 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 						}
 					}					
 
-					CAMsg::printMsg(LOG_ERR, "Logout2\n");
 					if (loginEntry->count <= 1)
 					{
 						if (loginEntry->count < 1)
@@ -1809,7 +1806,6 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 					}
 					else
 					{
-						CAMsg::printMsg(LOG_ERR, "Logout3\n");
 						// there are other connections from this user
 						loginEntry->count--;
 					}

@@ -37,7 +37,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include "CAAccountingInstance.hpp"
 #endif
 
-const SINT32 CAFirstMixChannelList::EXPIRATION_TIME_SECS = 600; // 10 minutes
+const SINT32 CAFirstMixChannelList::EXPIRATION_TIME_SECS = 300; // 5 minutes
 
 
 CAFirstMixChannelList::CAFirstMixChannelList()
