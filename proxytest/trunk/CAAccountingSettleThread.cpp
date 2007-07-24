@@ -214,6 +214,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				}
 
 				bool bDeleteCC = false;
+				bDeleteCC = true;
 				UINT32 authFlags = 0;
 				UINT32 authRemoveFlags = 0;
 				UINT64 confirmedBytes = 0;							
