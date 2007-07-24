@@ -1379,7 +1379,7 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 		pAccInfo->authFlags &= ~AUTH_WAITING_FOR_FIRST_SETTLED_CC;
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Got %d prepaid bytes for account nr. %s.\n",prepaidAmount, tmp);
 		
-		if (pAccInfo->transferredBytes > (UINT32)prepaidAmount)
+		if (pAccInfo->transferredBytes >= (UINT32)prepaidAmount)
 		{
 			pAccInfo->transferredBytes -= prepaidAmount;				
 		}
