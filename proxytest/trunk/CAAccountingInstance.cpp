@@ -1618,28 +1618,33 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 		print64(tmp,pCC->getTransferredBytes());
 		CAMsg::printMsg( LOG_ERR, "Transferredbytes in CC: %s\n", tmp);
 		
-		pAccInfo->confirmedBytes = pCC->getTransferredBytes();	
+		
 		if (m_dbInterface->storeCostConfirmation(*pCC, m_currentCascade) != E_SUCCESS)
 		{
 			UINT8 tmp[32];
 			print64(tmp,pCC->getAccountNumber());
 			CAMsg::printMsg( LOG_INFO, "CostConfirmation for account %s could not be stored in database!\n", tmp );
 		}
-		else if (pAccInfo->authFlags & AUTH_WAITING_FOR_FIRST_SETTLED_CC)
+		else 
 		{
-			// initiate immediate settling
+			pAccInfo->confirmedBytes = pCC->getTransferredBytes();	
+			
+			if (pAccInfo->authFlags & AUTH_WAITING_FOR_FIRST_SETTLED_CC)
+			{
+				// initiate immediate settling
 #ifdef DEBUG			
-			UINT64 currentMillis;
-			UINT8 tmpStrCurrentMillis[50];
-			getcurrentTimeMillis(currentMillis);
-			print64(tmpStrCurrentMillis,currentMillis);
-			CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Settle ini: %s\n", tmpStrCurrentMillis);			
+				UINT64 currentMillis;
+				UINT8 tmpStrCurrentMillis[50];
+				getcurrentTimeMillis(currentMillis);
+				print64(tmpStrCurrentMillis,currentMillis);
+				CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Settle ini: %s\n", tmpStrCurrentMillis);			
 #endif
-			m_pSettleThread->settle();
+				m_pSettleThread->settle();
+			}
 		}
 	}
 	
-	if (pCC->getTransferredBytes() >= pAccInfo->bytesToConfirm)
+	if (pAccInfo->confirmedBytes >= pAccInfo->bytesToConfirm)
 	{
 		CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: confirmed\n");
 		// the user confirmed everything we wanted; if a timeout has been set, it should be reset
@@ -1746,6 +1751,8 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 				loginEntry = (AccountLoginHashEntry*)ms_pInstance->m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));																	
 				if (loginEntry)
 				{
+					
+					CAMsg::printMsg(LOG_ERR, "Logout1\n");
 					// delete CC!!!
 					ms_pInstance->m_dbInterface->deleteCC(pAccInfo->accountNumber, ms_pInstance->m_currentCascade);
 					
@@ -1785,6 +1792,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 						}
 					}					
 
+					CAMsg::printMsg(LOG_ERR, "Logout2\n");
 					if (loginEntry->count <= 1)
 					{
 						if (loginEntry->count < 1)
@@ -1797,6 +1805,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 					}
 					else
 					{
+						CAMsg::printMsg(LOG_ERR, "Logout3\n");
 						// there are other connections from this user
 						loginEntry->count--;
 					}
