@@ -293,7 +293,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					  		 pErrMsg->getErrorCode() ==	ERR_SUCCESS_BUT_WITH_ERRORS ||
 					  		 pErrMsg->getErrorCode() == ERR_DATABASE_ERROR)
 					{
-						// kick out hte user and store the CC
+						// kick out the user and store the CC
 						authFlags |= AUTH_UNKNOWN;
 						m_pAccountingSettleThread->m_bSleep = true;
 					}
