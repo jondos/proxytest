@@ -213,8 +213,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					CAMsg::printMsg(LOG_DEBUG, "CAAccountingSettleThread: settle done!\n");
 				}
 
-				bool bDeleteCC = false;
-				bDeleteCC = true;
+				bool bDeleteCC = false;			
 				UINT32 authFlags = 0;
 				UINT32 authRemoveFlags = 0;
 				UINT64 confirmedBytes = 0;							
@@ -313,6 +312,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				{
 					authRemoveFlags |= AUTH_WAITING_FOR_FIRST_SETTLED_CC;
 					dbConn.markAsSettled(pCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade);
+						bDeleteCC = true;
 				} 
 				
 				if (authFlags || authRemoveFlags)
