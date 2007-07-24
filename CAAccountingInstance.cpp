@@ -326,17 +326,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			pAccInfo->sessionPackets++;
 		}		
 		
-		/*
-		UINT8 tmp[32];
-		//print64(tmp,pAccInfo->transferredBytes - m_countTransferred);
-		//CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance1: Transferred bytes:%s\n", tmp);	
 		
-		print64(tmp,pAccInfo->transferredBytes);
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance2: Transferred bytes:%s\n", tmp);
-		
-		print64(tmp,pAccInfo->confirmedBytes);
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance3: Confirmed bytes:  %s\n", tmp);	
-		*/
 		
 		// do the following tests after a lot of Mix packets only (gain speed...)
 		if (!(pAccInfo->authFlags & (AUTH_HARD_LIMIT_REACHED | AUTH_ACCOUNT_EMPTY | AUTH_WAITING_FOR_FIRST_SETTLED_CC)) &&
@@ -347,6 +337,16 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			return HANDLE_PACKET_CONNECTION_UNCHECKED;
 		}
 		
+		
+		UINT8 tmp[32];
+		//print64(tmp,pAccInfo->transferredBytes - m_countTransferred);
+		//CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance1: Transferred bytes:%s\n", tmp);	
+		
+		print64(tmp,pAccInfo->transferredBytes);
+		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance2: Transferred bytes:%s\n", tmp);
+		
+		print64(tmp,pAccInfo->confirmedBytes);
+		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance3: Confirmed bytes:  %s\n", tmp);	
 		
 		
 		//CAMsg::printMsg( LOG_DEBUG, "Checking after %d session packets...\n", pAccInfo->sessionPackets);
@@ -1362,7 +1362,7 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 		pAccInfo->authFlags &= ~AUTH_WAITING_FOR_FIRST_SETTLED_CC;
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Got %d prepaid bytes for account nr. %s.\n",prepaidAmount, tmp);
 		
-		if (pAccInfo->transferredBytes > prepaidAmount)
+		if (pAccInfo->transferredBytes > (UINT32)prepaidAmount)
 		{
 			pAccInfo->transferredBytes -= prepaidAmount;				
 		}
