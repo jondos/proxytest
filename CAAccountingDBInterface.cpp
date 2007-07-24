@@ -446,7 +446,7 @@ SINT32 CAAccountingDBInterface::markAsSettled(UINT64 accountNumber, UINT8* casca
 	
 SINT32 CAAccountingDBInterface::deleteCC(UINT64 accountNumber, UINT8* cascadeId)
 {
-	const char* deleteQuery = "DELETE FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER = %s AND CASCADE='%s' AND SETTLED = 0";
+	const char* deleteQuery = "DELETE FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER = %s AND CASCADE='%s'";
 	UINT8* finalQuery;
 	PGresult* result;
 	SINT32 ret;
