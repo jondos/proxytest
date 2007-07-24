@@ -112,7 +112,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 			SAVE_STACK("CAAccountingSettleThread::mainLoop", "Loop");
 			
 			m_pAccountingSettleThread->m_pCondition->getMutex().lock();
-			if (m_pAccountingSettleThread->m_bSleep)
+			while (1 == 1 || m_pAccountingSettleThread->m_bSleep)
 			{
 				m_pAccountingSettleThread->m_bSleep = false;
 				#ifdef DEBUG
@@ -292,7 +292,8 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					{
 						CAMsg::printMsg(LOG_DEBUG, "SettleThread: Setting unknown kickout error no. %d.\n", pErrMsg->getErrorCode());
 						authFlags |= AUTH_UNKNOWN;
-						bDeleteCC = true; // an unknown error leads to user kickout
+						m_pAccountingSettleThread->m_bSleep = true;
+						//bDeleteCC = true; // an unknown error leads to user kickout
 					}																	
 					
 					if (bDeleteCC)
