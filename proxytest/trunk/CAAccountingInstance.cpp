@@ -1370,7 +1370,8 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 		{
 			UINT8 tmp2[32];
 			print64(tmp2, pAccInfo->transferredBytes);
-			CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Transfered bytes of %s for account %s are lower than prepaid amount!\n",tmp2, tmp);
+			CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Transfered bytes of %s for account %s are lower than prepaid amount! "
+									"Maybe we lost a CC?\n",tmp2, tmp);
 			pAccInfo->transferredBytes = 0;			
 		}
 		
@@ -1731,8 +1732,8 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 				loginEntry = (AccountLoginHashEntry*)ms_pInstance->m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));																	
 				if (loginEntry)
 				{
-					// delete CC!!!
-					ms_pInstance->m_dbInterface->deleteCC(pAccInfo->accountNumber, ms_pInstance->m_currentCascade);
+					// test: delete CC!!!
+					//ms_pInstance->m_dbInterface->deleteCC(pAccInfo->accountNumber, ms_pInstance->m_currentCascade);
 					
 					if (pAccInfo->userID == loginEntry->userID)// &&
 						//!(pAccInfo->authFlags & AUTH_WAITING_FOR_FIRST_SETTLED_CC))
