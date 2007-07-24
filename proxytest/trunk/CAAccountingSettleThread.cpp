@@ -368,7 +368,13 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 						{
 							loginEntry->confirmedBytes = entry->confirmedBytes;
 						}											
-					}	
+					}
+					else if (entry->authFlags & (AUTH_INVALID_ACCOUNT | AUTH_UNKNOWN))
+					{
+						// user is currently not logged in; delete prepaid bytes in DB
+						dbConn.storePrepaidAmount(
+								entry->accountNumber, 0, m_pAccountingSettleThread->m_settleCascade);
+					}
 					else if (entry->diffBytes)
 					{
 						// user is currently not logged in; set correct prepaid bytes in DB
