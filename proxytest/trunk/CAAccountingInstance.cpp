@@ -166,7 +166,7 @@ CAAccountingInstance::~CAAccountingInstance()
 		m_currentCascade = NULL;
 		if (m_allHashes)
 		{
-			for (int i = 0; i < m_allHashesLen; i++)
+			for (UINT32 i = 0; i < m_allHashesLen; i++)
 			{
 				delete m_allHashes[i];
 			}
@@ -386,8 +386,8 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 					CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Fixing bytes from outdated CC...\n");	
 					// we had stored an outdated CC; insert confirmed bytes from current CC here and also update client					
 					CAXMLCostConfirmation * pCC = NULL;
-					m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, m_currentCascade, &pCC);
-					if(pCC!=NULL)
+					ms_pInstance->m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, m_currentCascade, &pCC);
+					if (pCC!=NULL)
 					{				
 						pAccInfo->transferredBytes +=  loginEntry->confirmedBytes - pAccInfo->confirmedBytes;			
 						pAccInfo->confirmedBytes = loginEntry->confirmedBytes;
