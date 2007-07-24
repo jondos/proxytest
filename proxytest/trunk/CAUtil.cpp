@@ -953,7 +953,12 @@ SINT32 parseU64(const UINT8 * str, UINT64& value)
 {
 	#ifdef HAVE_NATIVE_UINT64
 		#ifdef HAVE_ATOLL
-			value = (UINT64) atoll((char *)str);
+			long long signedValue = atoll((char *)str);
+			if (signedValue < 0)
+			{
+				signedValue = 0;
+			}
+			value = (UINT64) signedValue;
 			return E_SUCCESS;
 		#else
 			#warning parseU64() is not implemented for platforms without atoll() support!!!
