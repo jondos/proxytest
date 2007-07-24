@@ -1604,6 +1604,10 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 	}
 	else
 	{			
+		UINT8 tmp[32];
+		print64(tmp,pCC->getTransferredBytes());
+		CAMsg::printMsg( LOG_ERR, "Transferredbytes in CC: %s\n", tmp);
+		
 		pAccInfo->confirmedBytes = pCC->getTransferredBytes();	
 		if (m_dbInterface->storeCostConfirmation(*pCC, m_currentCascade) != E_SUCCESS)
 		{
