@@ -1760,7 +1760,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 				if (loginEntry)
 				{
 					// test: delete CC!!!
-					ms_pInstance->m_dbInterface->deleteCC(pAccInfo->accountNumber, ms_pInstance->m_currentCascade);
+					//ms_pInstance->m_dbInterface->deleteCC(pAccInfo->accountNumber, ms_pInstance->m_currentCascade);
 					
 					if (pAccInfo->userID == loginEntry->userID)// &&
 						//!(pAccInfo->authFlags & AUTH_WAITING_FOR_FIRST_SETTLED_CC))
