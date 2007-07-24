@@ -337,19 +337,17 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			return HANDLE_PACKET_CONNECTION_UNCHECKED;
 		}
 		
-		
+		/*
 		UINT8 tmp[32];
 		//print64(tmp,pAccInfo->transferredBytes - m_countTransferred);
 		//CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance1: Transferred bytes:%s\n", tmp);	
 		
 		print64(tmp,pAccInfo->transferredBytes);
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance2: Transferred bytes:%s\n", tmp);
-		
 		print64(tmp,pAccInfo->confirmedBytes);
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance3: Confirmed bytes:  %s\n", tmp);	
-		
-
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance3: Prepaid bytes:    %d\n", getPrepaidBytes(pAccInfo));	
+		*/
 		
 		
 		//CAMsg::printMsg( LOG_DEBUG, "Checking after %d session packets...\n", pAccInfo->sessionPackets);
@@ -1651,13 +1649,13 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 	
 	if (pAccInfo->confirmedBytes >= pAccInfo->bytesToConfirm)
 	{
-		CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: confirmed\n");
 		// the user confirmed everything we wanted; if a timeout has been set, it should be reset
 		pAccInfo->lastHardLimitSeconds = time(NULL);
 	}
 	else
 	{
-		CAMsg::printMsg(LOG_ERR, "AccountingSettleThread: NOT confirmed!!!\n");
+		CAMsg::printMsg(LOG_ERR, "AccountingSettleThread: Requested CC value has NOT been confirmed! "
+								"Maybe client and Mix count differently?\n");
 		m_pSettleThread->settle();
 	}
 	
