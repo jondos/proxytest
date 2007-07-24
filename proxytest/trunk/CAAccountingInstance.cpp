@@ -567,9 +567,10 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 				if (time(NULL) >= pAccInfo->lastHardLimitSeconds + HARD_LIMIT_TIMEOUT ||
 					(prepaidBytes < 0 && (UINT32)(prepaidBytes * (-1)) >= prepaidInterval))
 				{
-//#ifdef DEBUG					
+//#ifdef DEBUG		
 					CAMsg::printMsg( LOG_DEBUG, "Accounting instance: User refused "		
-									"to send cost confirmation (HARDLIMIT EXCEEDED).\n");
+									"to send cost confirmation (HARDLIMIT EXCEEDED). "
+									"PrepaidBytes were: %d\n", prepaidBytes);
 //#endif					
 															
 					//ms_pInstance->m_pIPBlockList->insertIP( pHashEntry->peerIP );
