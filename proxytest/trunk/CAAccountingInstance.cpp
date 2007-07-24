@@ -1659,7 +1659,7 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 	}
 	else
 	{
-		UINT8 tmp[32], tm2[32];
+		UINT8 tmp[32], tmp2[32];
 		print64(tmp, pCC->getTransferredBytes());
 		print64(tmp2, pCC->getAccountNumber());
 		CAMsg::printMsg(LOG_ERR, "AccountingSettleThread: Requested CC value has NOT been confirmed by account nr %s! Received Bytes: %s "
