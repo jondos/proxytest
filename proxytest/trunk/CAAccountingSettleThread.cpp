@@ -290,8 +290,8 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 						}																		
 					}
 					else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_INTERNAL_SERVER_ERROR ||
-					  		 pErrMsg->getErrorCode() ==	ERR_SUCCESS_BUT_WITH_ERRORS ||
-					  		 pErrMsg->getErrorCode() == ERR_DATABASE_ERROR)
+					  		 pErrMsg->getErrorCode() ==	CAXMLErrorMessage::ERR_SUCCESS_BUT_WITH_ERRORS ||
+					  		 pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_DATABASE_ERROR)
 					{
 						// kick out the user and store the CC
 						authFlags |= AUTH_UNKNOWN;
