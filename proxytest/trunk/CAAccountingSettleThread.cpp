@@ -112,7 +112,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 			SAVE_STACK("CAAccountingSettleThread::mainLoop", "Loop");
 			
 			m_pAccountingSettleThread->m_pCondition->getMutex().lock();
-			while (1 == 1 || m_pAccountingSettleThread->m_bSleep)
+			if (m_pAccountingSettleThread->m_bSleep)
 			{
 				m_pAccountingSettleThread->m_bSleep = false;
 				#ifdef DEBUG
