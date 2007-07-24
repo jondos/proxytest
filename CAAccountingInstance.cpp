@@ -539,13 +539,14 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			//prepaid Bytes as the difference will be much smaller, but might be negative, so we cast to signed int
 			SINT32 prepaidBytes = getPrepaidBytes(pAccInfo);
 			
+			/*
 			if (prepaidBytes < m_prepaidBytesMinimum)
 			{
 				// this is only for logging the typical client behaviour in confirming prepaid bytes
 				m_prepaidBytesMinimum = prepaidBytes;
 				CAMsg::printMsg(LOG_INFO, 
 					"CAAccountingInstance: New PrepaidBytes minimum: %d\n", m_prepaidBytesMinimum);
-			}
+			}*/
 			 
 			//CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Prepaid bytes: %d!\n", prepaidBytes);
 				
