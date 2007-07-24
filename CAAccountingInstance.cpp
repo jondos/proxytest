@@ -565,7 +565,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 #endif					
 				
 				if (time(NULL) >= pAccInfo->lastHardLimitSeconds + HARD_LIMIT_TIMEOUT ||
-					(prepaidBytes < 0 && (UINT32)(prepaidBytes * (-1)) >= prepaidInterval)
+					(prepaidBytes < 0 && (UINT32)(prepaidBytes * (-1)) >= prepaidInterval))
 				{
 //#ifdef DEBUG					
 					CAMsg::printMsg( LOG_DEBUG, "Accounting instance: User refused "		
