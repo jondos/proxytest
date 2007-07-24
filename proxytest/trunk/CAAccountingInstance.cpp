@@ -384,11 +384,22 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 				{
 					loginEntry->authFlags &= ~AUTH_OUTDATED_CC;	
 					CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Fixing bytes from outdated CC...\n");	
-					// we had stored an outdated CC; insert confirmed bytes from current CC here						
-					//pAccInfo->transferredBytes +=  loginEntry->confirmedBytes - pAccInfo->confirmedBytes;
-					// alas, we loose the difference in bytes... this would not be the case if JAP could receive the CC back, either
-					pAccInfo->confirmedBytes = loginEntry->confirmedBytes;			
-					loginEntry->confirmedBytes = 0;
+					// we had stored an outdated CC; insert confirmed bytes from current CC here and also update client					
+					CAXMLCostConfirmation * pCC = NULL;
+					m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, m_currentCascade, &pCC);
+					if(pCC!=NULL)
+					{				
+						pAccInfo->transferredBytes +=  loginEntry->confirmedBytes - pAccInfo->confirmedBytes;			
+						pAccInfo->confirmedBytes = loginEntry->confirmedBytes;
+						loginEntry->confirmedBytes = 0;
+						
+						pAccInfo->pControlChannel->sendXMLMessage(pCC->getXMLDocument());
+						delete pCC;
+					}
+					else
+					{
+						CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Bytes from outdated CC could not be fixed!\n");	
+					}																																
 				}
 				else if (loginEntry->authFlags & AUTH_ACCOUNT_EMPTY)
 				{
@@ -536,11 +547,14 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			//CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Prepaid bytes: %d!\n", prepaidBytes);
 				
 			if (prepaidBytes < 0 ||  prepaidBytes <= ms_pInstance->m_iHardLimitBytes)
-			{				
+			{	
+				UINT32 prepaidInterval;
+				pglobalOptions->getPrepaidInterval(&prepaidInterval);
+							
 				if ((pAccInfo->authFlags & AUTH_HARD_LIMIT_REACHED) == 0)
 				{
-					pAccInfo->authFlags |= AUTH_HARD_LIMIT_REACHED;
 					pAccInfo->lastHardLimitSeconds = time(NULL);
+					pAccInfo->authFlags |= AUTH_HARD_LIMIT_REACHED;					
 				}
 				
 #ifdef DEBUG					
@@ -549,7 +563,8 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 								(pAccInfo->lastHardLimitSeconds + HARD_LIMIT_TIMEOUT - time(NULL)));
 #endif					
 				
-				if(time(NULL) >= pAccInfo->lastHardLimitSeconds + HARD_LIMIT_TIMEOUT)
+				if (time(NULL) >= pAccInfo->lastHardLimitSeconds + HARD_LIMIT_TIMEOUT ||
+					(prepaidBytes < 0 && (UINT32)(prepaidBytes * (-1)) >= prepaidInterval)
 				{
 //#ifdef DEBUG					
 					CAMsg::printMsg( LOG_DEBUG, "Accounting instance: User refused "		
@@ -843,7 +858,7 @@ SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName
 	for (UINT32 i = 0; i < nrOfMixes; i++) 
 	{
 		elemCert = m_preparedCCRequest.createElement("PriceCertHash");
-		CAMsg::printMsg(LOG_DEBUG,"hash to be inserted in cc: index %d, value %s\n",i,m_allHashes[i]);
+		//CAMsg::printMsg(LOG_DEBUG,"hash to be inserted in cc: index %d, value %s\n",i,m_allHashes[i]);
 		setDOMElementValue(elemCert,m_allHashes[i]);
 		//delete[] allHashes[i];
 		elemCert.setAttribute("id", DOMString( (const char*)allSkis[i]));
