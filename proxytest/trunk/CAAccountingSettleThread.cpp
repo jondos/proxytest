@@ -289,12 +289,20 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 							CAMsg::printMsg(LOG_DEBUG, "SettleThread: Did not receive last valid CC - maybe old Payment instance?\n");
 						}																		
 					}
-					else
+					else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_INTERNAL_SERVER_ERROR ||
+					  		 pErrMsg->getErrorCode() ==	ERR_SUCCESS_BUT_WITH_ERRORS ||
+					  		 pErrMsg->getErrorCode() == ERR_DATABASE_ERROR)
 					{
-						CAMsg::printMsg(LOG_DEBUG, "SettleThread: Setting unknown kickout error no. %d.\n", pErrMsg->getErrorCode());
+						// kick out hte user and store the CC
 						authFlags |= AUTH_UNKNOWN;
 						m_pAccountingSettleThread->m_bSleep = true;
-						//bDeleteCC = true; // an unknown error leads to user kickout
+					}
+					else
+					{
+						// an unknown error leads to user kickout
+						CAMsg::printMsg(LOG_DEBUG, "SettleThread: Setting unknown kickout error no. %d.\n", pErrMsg->getErrorCode());
+						authFlags |= AUTH_UNKNOWN;						
+						bDeleteCC = true; 
 					}																	
 					
 					if (bDeleteCC)
