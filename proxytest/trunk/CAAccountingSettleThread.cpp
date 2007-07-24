@@ -311,8 +311,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				else //settling was OK, so mark account as settled
 				{
 					authRemoveFlags |= AUTH_WAITING_FOR_FIRST_SETTLED_CC;
-					dbConn.markAsSettled(pCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade);
-						bDeleteCC = true;
+					dbConn.markAsSettled(pCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade);						
 				} 
 				
 				if (authFlags || authRemoveFlags)
