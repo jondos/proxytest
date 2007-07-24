@@ -192,7 +192,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 #ifdef DEBUG				
 				CAMsg::printMsg(LOG_DEBUG, "Settle Thread: trying to connect to payment instance");
 #endif				
-				if(bPICommunicationError || biConn.initBIConnection() != E_SUCCESS)
+				if(biConn.initBIConnection() != E_SUCCESS)
 				{
 					if (!bPICommunicationError)
 					{
@@ -208,7 +208,8 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 #ifdef DEBUG				
 					CAMsg::printMsg(LOG_DEBUG, "SettleThread: successfully connected to payment instance");
 #endif				
-					pErrMsg = biConn.settle( *pCC );
+					bPICommunicationError = false;
+					pErrMsg = biConn.settle( *pCC );					
 					biConn.terminateBIConnection();
 					CAMsg::printMsg(LOG_DEBUG, "CAAccountingSettleThread: settle done!\n");
 				}
