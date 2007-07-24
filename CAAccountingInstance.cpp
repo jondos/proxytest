@@ -640,7 +640,7 @@ SINT32 CAAccountingInstance::getPrepaidBytes(tAiAccountingInfo* pAccInfo)
 		{
 			UINT8 tmp[32], tmp2[32];		
 			print64(tmp,pAccInfo->transferredBytes);
-			print64(tmp,pAccInfo->confirmedBytes);
+			print64(tmp2,pAccInfo->confirmedBytes);
 			
 			CAMsg::printMsg(LOG_ERR, "PrepaidBytes are way to high! Maybe a hacker attack? Or CC did get lost? "
 				"TransferredBytes: %s  ConfirmedBytes: %s\n", tmp, tmp2);
