@@ -23,7 +23,7 @@ class Hashtable
 			
 			UINT32 hash = 5381; 
 			SINT32 c; 
-			while (c = *str++) 
+			while ((c = *str++)) 
 			{
 				hash = ((hash << 5) + hash) + c; /* hash * 33 + c */ 
 			}
