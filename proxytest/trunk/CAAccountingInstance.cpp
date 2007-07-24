@@ -326,6 +326,15 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			pAccInfo->sessionPackets++;
 		}		
 		
+		UINT8 tmp[32];
+		//print64(tmp,pAccInfo->transferredBytes - m_countTransferred);
+		//CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance1: Transferred bytes:%s\n", tmp);	
+		
+		print64(tmp,pAccInfo->transferredBytes);
+		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance2: Transferred bytes:%s\n", tmp);
+		print64(tmp,pAccInfo->confirmedBytes);
+		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance3: Confirmed bytes:  %s\n", tmp);	
+		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance3: Prepaid bytes:    %d\n", getPrepaidBytes(pAccInfo));	
 		
 		
 		// do the following tests after a lot of Mix packets only (gain speed...)
@@ -337,17 +346,8 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			return HANDLE_PACKET_CONNECTION_UNCHECKED;
 		}
 		
-		/*
-		UINT8 tmp[32];
-		//print64(tmp,pAccInfo->transferredBytes - m_countTransferred);
-		//CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance1: Transferred bytes:%s\n", tmp);	
 		
-		print64(tmp,pAccInfo->transferredBytes);
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance2: Transferred bytes:%s\n", tmp);
-		print64(tmp,pAccInfo->confirmedBytes);
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance3: Confirmed bytes:  %s\n", tmp);	
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance3: Prepaid bytes:    %d\n", getPrepaidBytes(pAccInfo));	
-		*/
+	
 		
 		
 		//CAMsg::printMsg( LOG_DEBUG, "Checking after %d session packets...\n", pAccInfo->sessionPackets);
