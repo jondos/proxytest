@@ -674,7 +674,7 @@ SINT32 CAAccountingInstance::returnOK(tAiAccountingInfo* pAccInfo)
 	SINT32 ret;
 	if (pAccInfo->authFlags & AUTH_WAITING_FOR_FIRST_SETTLED_CC)
 	{
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Still no settled CC...");
+		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Still no settled CC...\n");
 		// it is not yet sure whether this user has a charged account
 		ret = HANDLE_PACKET_HOLD_CONNECTION;
 	}
