@@ -401,6 +401,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 							pAccInfo->transferredBytes +=  loginEntry->confirmedBytes - pAccInfo->confirmedBytes;			
 							pAccInfo->confirmedBytes = loginEntry->confirmedBytes;
 							loginEntry->confirmedBytes = 0;						
+							pAccInfo->authFlags |= AUTH_SENT_CC_REQUEST;
 							pAccInfo->pControlChannel->sendXMLMessage(pCC->getXMLDocument());
 						}
 						else
