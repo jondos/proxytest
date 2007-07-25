@@ -394,7 +394,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 					bool bSettled;
 					ms_pInstance->m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, 
 						ms_pInstance->m_currentCascade, &pCC, bSettled);
-					if (pCC!=NULL)
+					if (pCC != NULL)
 					{				
 						if (bSettled)
 						{
