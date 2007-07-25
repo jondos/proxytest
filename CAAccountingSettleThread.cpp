@@ -310,7 +310,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 						//delete costconfirmation to avoid trying to settle an unusable CC again and again					
 						if(dbConn.deleteCC(pCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade) == E_SUCCESS)
 						{
-							CAMsg::printMsg(LOG_ERR, "SettleThread: unusable cost confirmation was deleted\n");	
+							CAMsg::printMsg(LOG_ERR, "SettleThread: unusable cost confirmation was deleted\n");
 						}	
 						else
 						{						
@@ -321,7 +321,11 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				else //settling was OK, so mark account as settled
 				{
 					authRemoveFlags |= AUTH_WAITING_FOR_FIRST_SETTLED_CC;
-					dbConn.markAsSettled(pCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade);						
+					if (dbConn.markAsSettled(pCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade, 
+						pCC->getTransferredBytes()) != E_SUCCESS)
+					 {
+					 	CAMsg::printMsg(LOG_ERR, "SettleThread: Could not mark CC as settled. Maybe a new CC has been added meanwhile?\n");
+					 }
 				} 
 				
 				if (authFlags || authRemoveFlags)
