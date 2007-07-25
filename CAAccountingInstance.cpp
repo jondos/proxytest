@@ -1241,7 +1241,7 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 	DSA_SIG * pDsaSig;
 	SINT32 prepaidAmount = 0;
 	AccountLoginHashEntry* loginEntry;
-	CAXMLCostConfirmation * pCC = NULL;
+	CAXMLCostConfirmation* pCC = NULL;
 	bool bSendCCRequest = true;
 	UINT32 status;
 	
