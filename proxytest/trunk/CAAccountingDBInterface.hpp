@@ -74,7 +74,7 @@ class CAAccountingDBInterface
 			
 			SINT32 storeCostConfirmation(CAXMLCostConfirmation &cc, UINT8* ccCascade);
 
-			SINT32 getCostConfirmation(UINT64 accountNumber, UINT8* cascadeId, CAXMLCostConfirmation **pCC);
+			SINT32 getCostConfirmation(UINT64 accountNumber, UINT8* cascadeId, CAXMLCostConfirmation **pCC, bool& a_bSettled);
 			
 			
 			/**
@@ -87,7 +87,7 @@ class CAAccountingDBInterface
 			* Marks this account as settled.
 			* @todo what to do if there was a new CC stored while we were busy settling the old one?
 			*/
-			SINT32 markAsSettled(UINT64 accountNumber, UINT8* cascadeId);
+			SINT32 markAsSettled(UINT64 accountNumber, UINT8* cascadeId, UINT64 a_transferredBytes);
 			
 			/**
 			 * if the BI reports an error while trying to settle a CC, this will be called to delete it from the database

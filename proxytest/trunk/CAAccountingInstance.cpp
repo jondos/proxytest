@@ -674,7 +674,7 @@ SINT32 CAAccountingInstance::returnOK(tAiAccountingInfo* pAccInfo)
 	SINT32 ret;
 	if (pAccInfo->authFlags & AUTH_WAITING_FOR_FIRST_SETTLED_CC)
 	{
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Still no settled CC...\n");
+		//CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Still no settled CC...\n");
 		// it is not yet sure whether this user has a charged account
 		ret = HANDLE_PACKET_HOLD_CONNECTION;
 	}
@@ -1095,28 +1095,6 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 			pAccInfo->mutex->unlock();
 			return ;
 		}		
-		
-		// fetch cost confirmation from last session if available, and retrieve information
-		CAXMLCostConfirmation * pCC = NULL;
-		m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, m_currentCascade, &pCC);
-		if(pCC!=NULL)
-		{
-			pAccInfo->transferredBytes += pCC->getTransferredBytes();
-			pAccInfo->confirmedBytes = pCC->getTransferredBytes();
-			#ifdef DEBUG
-				UINT8 tmp[32];
-				print64(tmp,pAccInfo->transferredBytes);
-				CAMsg::printMsg(LOG_DEBUG, "TransferredBytes is now %s\n", tmp);
-			#endif			
-			delete pCC;
-		}
-		else
-		{
-			UINT8 tmp[32];
-			print64(tmp,pAccInfo->accountNumber);
-			CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Cost confirmation for account %s not found in database. This seems to be a new user.\n", tmp);
-		}		
-		
 
 		// parse & set payment instance id
 		UINT32 len=256;
@@ -1254,6 +1232,7 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 	DSA_SIG * pDsaSig;
 	SINT32 prepaidAmount = 0;
 	AccountLoginHashEntry* loginEntry;
+	CAXMLCostConfirmation * pCC = NULL;
 	bool bSendCCRequest = true;
 	UINT32 status;
 	
@@ -1314,6 +1293,40 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 		pAccInfo->mutex->unlock();
 		return ;
 	}	
+	
+	
+	
+	// fetch cost confirmation from last session if available, and retrieve information; synchronized with settle thread
+	bool bSettled;
+	m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, m_currentCascade, &pCC, bSettled);
+	if (pCC != NULL)
+	{
+		if (bSettled)
+		{
+			CAMsg::printMsg(LOG_DEBUG, "Found SETTLED CC!\n");
+		}
+		else
+		{
+			CAMsg::printMsg(LOG_DEBUG, "No settled CC...!\n");
+		}
+		
+		pAccInfo->transferredBytes += pCC->getTransferredBytes();
+		pAccInfo->confirmedBytes = pCC->getTransferredBytes();
+		#ifdef DEBUG
+			UINT8 tmp[32];
+			print64(tmp,pAccInfo->transferredBytes);
+			CAMsg::printMsg(LOG_DEBUG, "TransferredBytes is now %s\n", tmp);
+		#endif			
+		//delete pCC;
+	}
+	else
+	{
+		UINT8 tmp[32];
+		print64(tmp,pAccInfo->accountNumber);
+		CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Cost confirmation for account %s not found in database. This seems to be a new user.\n", tmp);
+	}	
+		
+	
 	
 	/** @todo We need this trick so that the program does not freeze with active AI ThreadPool!!!! */
 	//pAccInfo->mutex->unlock();
@@ -1449,13 +1462,13 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 	if (bSendCCRequest)
 	{		
 		// fetch cost confirmation from last session if available, and send it
-		CAXMLCostConfirmation * pCC = NULL;
-		m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, m_currentCascade, &pCC);
+		//CAXMLCostConfirmation * pCC = NULL;
+		//m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, m_currentCascade, &pCC);
 		if(pCC != NULL)
 		{			
 			// the typical case; the user had logged in before
 			pAccInfo->pControlChannel->sendXMLMessage(pCC->getXMLDocument());
-			delete pCC;
+			//delete pCC;
 		}
 		else
 		{
@@ -1467,6 +1480,11 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 			}
 			sendCCRequest(pAccInfo);
 		}
+	}
+	
+	if(pCC != NULL)
+	{
+		delete pCC;
 	}
 	
 	if ( pAccInfo->pChallenge != NULL ) // free mem
@@ -1502,17 +1520,22 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 
 	pAccInfo->mutex->lock();
 	
-	if (pAccInfo->authFlags & AUTH_DELETE_ENTRY)
+	
+	if (pAccInfo->authFlags & (AUTH_DELETE_ENTRY | AUTH_ACCOUNT_EMPTY))
 	{
+		// ignore CCs for this account!
 		pAccInfo->mutex->unlock();
-		return;
+		return ;
 	}
 	
 	// check authstate	
 	if (!(pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT) ||
 		!(pAccInfo->authFlags & AUTH_ACCOUNT_OK) ||  
-		(pAccInfo->authFlags & AUTH_ACCOUNT_EMPTY)) // Account is empty, ignore CCs for this account!
+		!(pAccInfo->authFlags & AUTH_SENT_CC_REQUEST)) 
 	{		
+		CAMsg::printMsg(LOG_ERR, 
+			"CAAccountingInstance::handleCostConfirmation CC was received but has not been requested! Ignoring...\n");
+		
 		pAccInfo->mutex->unlock();
 		return ;
 	}
@@ -1772,7 +1795,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			if (pAccInfo->authFlags & AUTH_ACCOUNT_OK)
 			{
 				// remove login
-				ms_pInstance->m_currentAccountsHashtable->getMutex().lock();
+				//ms_pInstance->m_currentAccountsHashtable->getMutex().lock();
 				loginEntry = (AccountLoginHashEntry*)ms_pInstance->m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));																	
 				if (loginEntry)
 				{

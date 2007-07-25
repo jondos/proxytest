@@ -177,14 +177,14 @@ SINT32 CAAccountingDBInterface::terminateDBConnection()
  * @retval E_NOT_FOUND, if there was no XMLCC found
  * @retval E_UNKOWN in case of a general error
  */
-SINT32 CAAccountingDBInterface::getCostConfirmation(UINT64 accountNumber, UINT8* cascadeId, CAXMLCostConfirmation **pCC)
+SINT32 CAAccountingDBInterface::getCostConfirmation(UINT64 accountNumber, UINT8* cascadeId, CAXMLCostConfirmation **pCC, bool& a_bSettled)
 	{
 		if(!checkConnectionStatus()) 
 		{
 			return E_NOT_CONNECTED;
 		}
 		
-		const char* queryF = "SELECT XMLCC FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER=%s AND CASCADE='%s'";
+		const char* queryF = "SELECT XMLCC, SETTLED FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER=%s AND CASCADE='%s'";
 		UINT8* query;
 		UINT8* xmlCC;
 		PGresult* result;
@@ -217,6 +217,15 @@ SINT32 CAAccountingDBInterface::getCostConfirmation(UINT64 accountNumber, UINT8*
 		}
 	
 		xmlCC = (UINT8*) PQgetvalue(result, 0, 0);
+		if (atoi(PQgetvalue(result, 0, 1)) == 0)
+		{
+			a_bSettled = false;
+		}
+		else
+		{
+			a_bSettled = true;
+		}
+		
 		*pCC = CAXMLCostConfirmation::getInstance(xmlCC,strlen((char*)xmlCC));
 		PQclear(result);
 
@@ -417,9 +426,9 @@ SINT32 CAAccountingDBInterface::getUnsettledCostConfirmations(CAQueue& q, UINT8*
 	* @retval E_NOT_CONNECTED if a connection to the DB could not be established
 	* @retval E_UNKNOWN in case of a general error
 	*/
-SINT32 CAAccountingDBInterface::markAsSettled(UINT64 accountNumber, UINT8* cascadeId)
+SINT32 CAAccountingDBInterface::markAsSettled(UINT64 accountNumber, UINT8* cascadeId, UINT64 a_transferredBytes)
 	{
-		const char* queryF = "UPDATE COSTCONFIRMATIONS SET SETTLED=1 WHERE ACCOUNTNUMBER=%s AND CASCADE='%s'";
+		const char* queryF = "UPDATE COSTCONFIRMATIONS SET SETTLED=1 WHERE ACCOUNTNUMBER=%s AND BYTES=%s AND CASCADE='%s'";
 		UINT8 * query;
 		PGresult * result;
 		
@@ -428,10 +437,11 @@ SINT32 CAAccountingDBInterface::markAsSettled(UINT64 accountNumber, UINT8* casca
 			return E_NOT_CONNECTED;
 		}
 
-		UINT8 tmp[32];
+		UINT8 tmp[32], tmp2[32];
 		print64(tmp,accountNumber);
-		query = new UINT8[strlen(queryF) + 32 + strlen((char*)cascadeId)];
-		sprintf((char *)query, queryF, tmp, cascadeId);
+		print64(tmp2,a_transferredBytes);
+		query = new UINT8[strlen(queryF) + 32 + 32 + strlen((char*)cascadeId)];
+		sprintf((char *)query, queryF, tmp, tmp2, cascadeId);
 		result = PQexec(m_dbConn, (char *)query);
 		delete[] query;
 		if(PQresultStatus(result) != PGRES_COMMAND_OK)
