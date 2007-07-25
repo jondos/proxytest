@@ -1248,6 +1248,7 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 	UINT32 usedLen;
 	DOM_Element elemPanic;
 	DSA_SIG * pDsaSig;
+	SINT32 prepaidAmount = 0;
 	AccountLoginHashEntry* loginEntry;
 	bool bSendCCRequest = true;
 	UINT32 status;
@@ -1371,7 +1372,7 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 	#ifdef DEBUG		
 	CAMsg::printMsg(LOG_DEBUG, "Checking database for previously prepaid bytes...\n");
 	#endif
-	SINT32 prepaidAmount = m_dbInterface->getPrepaidAmount(pAccInfo->accountNumber, m_currentCascade, true);
+	prepaidAmount = m_dbInterface->getPrepaidAmount(pAccInfo->accountNumber, m_currentCascade, true);
 	UINT8 tmp[32];
 	print64(tmp,pAccInfo->accountNumber);
 	if (prepaidAmount > 0)
@@ -1446,13 +1447,20 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 		// fetch cost confirmation from last session if available, and send it
 		CAXMLCostConfirmation * pCC = NULL;
 		m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, m_currentCascade, &pCC);
-		if(pCC!=NULL)
-		{
+		if(pCC != NULL)
+		{			
+			// the typical case; the user had logged in before
 			pAccInfo->pControlChannel->sendXMLMessage(pCC->getXMLDocument());
 			delete pCC;
 		}
 		else
 		{
+			// there is no CC in the database; typically this is the first connection of this user			
+			if (prepaidAmount > 0)
+			{
+				// Delete any previously stored prepaid amount; there should not be any!
+				pAccInfo->transferredBytes += prepaidAmount;
+			}
 			sendCCRequest(pAccInfo);
 		}
 	}
