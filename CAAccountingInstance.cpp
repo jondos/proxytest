@@ -385,7 +385,10 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 				else if (loginEntry->authFlags & AUTH_OUTDATED_CC)
 				{
 					loginEntry->authFlags &= ~AUTH_OUTDATED_CC;	
-					CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Fixing bytes from outdated CC...\n");	
+					
+					UINT8 tmp[32];
+					print64(tmp,pAccInfo->accountNumber);
+					CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Fixing bytes from outdated CC for account %s...\n", tmp);	
 					// we had stored an outdated CC; insert confirmed bytes from current CC here and also update client					
 					CAXMLCostConfirmation * pCC = NULL;
 					ms_pInstance->m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, 
@@ -671,6 +674,7 @@ SINT32 CAAccountingInstance::returnOK(tAiAccountingInfo* pAccInfo)
 	SINT32 ret;
 	if (pAccInfo->authFlags & AUTH_WAITING_FOR_FIRST_SETTLED_CC)
 	{
+		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Still no settled CC...");
 		// it is not yet sure whether this user has a charged account
 		ret = HANDLE_PACKET_HOLD_CONNECTION;
 	}
@@ -1379,13 +1383,19 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 	{		
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Got %d prepaid bytes for account nr. %s.\n",prepaidAmount, tmp);
 						
-		pAccInfo->transferredBytes -= prepaidAmount;		
-		if (pAccInfo->transferredBytes < (UINT32)prepaidAmount)
+		//pAccInfo->authFlags &= ~AUTH_WAITING_FOR_FIRST_SETTLED_CC;
+			
+		if (pAccInfo->transferredBytes >= (UINT32)prepaidAmount)
+		{
+			pAccInfo->transferredBytes -= prepaidAmount;	
+		}
+		else
 		{
 			UINT8 tmp2[32];
 			print64(tmp2, pAccInfo->transferredBytes);
-			CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Transfered bytes of %s for account %s are lower than prepaid amount! "
+			CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Transferred bytes of %s for account %s are lower than prepaid amount! "
 									"Maybe we lost a CC?\n",tmp2, tmp);
+			prepaidAmount = 0;
 		}		
 	}	
 	else
@@ -1444,11 +1454,6 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 		if(pCC != NULL)
 		{			
 			// the typical case; the user had logged in before
-			if (prepaidAmount > 0)
-			{
-				pAccInfo->authFlags &= ~AUTH_WAITING_FOR_FIRST_SETTLED_CC;
-			}
-			
 			pAccInfo->pControlChannel->sendXMLMessage(pCC->getXMLDocument());
 			delete pCC;
 		}
@@ -1457,7 +1462,7 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 			// there is no CC in the database; typically this is the first connection of this user			
 			if (prepaidAmount > 0)
 			{
-				// Delete any previously stored prepaid amount; there should not be any!
+				// Delete any previously stored prepaid amount; there should not be any! CC lost?
 				pAccInfo->transferredBytes += prepaidAmount;
 			}
 			sendCCRequest(pAccInfo);
