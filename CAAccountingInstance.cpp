@@ -1803,7 +1803,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			if (pAccInfo->authFlags & AUTH_ACCOUNT_OK)
 			{
 				// remove login
-				//ms_pInstance->m_currentAccountsHashtable->getMutex().lock();
+				ms_pInstance->m_currentAccountsHashtable->getMutex().lock();
 				loginEntry = (AccountLoginHashEntry*)ms_pInstance->m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));																	
 				if (loginEntry)
 				{
