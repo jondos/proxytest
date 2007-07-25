@@ -1312,11 +1312,7 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 	{
 		if (bSettled)
 		{
-			CAMsg::printMsg(LOG_DEBUG, "Found SETTLED CC!\n");
-		}
-		else
-		{
-			CAMsg::printMsg(LOG_DEBUG, "No settled CC...!\n");
+			pAccInfo->authFlags &= ~AUTH_WAITING_FOR_FIRST_SETTLED_CC;
 		}
 		
 		pAccInfo->transferredBytes += pCC->getTransferredBytes();
@@ -1809,7 +1805,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 				if (loginEntry)
 				{
 					// test: delete CC!!!
-					ms_pInstance->m_dbInterface->deleteCC(pAccInfo->accountNumber, ms_pInstance->m_currentCascade);
+					//ms_pInstance->m_dbInterface->deleteCC(pAccInfo->accountNumber, ms_pInstance->m_currentCascade);
 					
 					if (pAccInfo->userID == loginEntry->userID)// &&
 						//!(pAccInfo->authFlags & AUTH_WAITING_FOR_FIRST_SETTLED_CC))
