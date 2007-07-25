@@ -1376,23 +1376,17 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 	UINT8 tmp[32];
 	print64(tmp,pAccInfo->accountNumber);
 	if (prepaidAmount > 0)
-	{
-		pAccInfo->authFlags &= ~AUTH_WAITING_FOR_FIRST_SETTLED_CC;
+	{		
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Got %d prepaid bytes for account nr. %s.\n",prepaidAmount, tmp);
-		
-		if (pAccInfo->transferredBytes >= (UINT32)prepaidAmount)
-		{
-			pAccInfo->transferredBytes -= prepaidAmount;				
-		}
-		else
+						
+		pAccInfo->transferredBytes -= prepaidAmount;		
+		if (pAccInfo->transferredBytes < (UINT32)prepaidAmount)
 		{
 			UINT8 tmp2[32];
 			print64(tmp2, pAccInfo->transferredBytes);
 			CAMsg::printMsg(LOG_ERR, "CAAccountingInstance: Transfered bytes of %s for account %s are lower than prepaid amount! "
 									"Maybe we lost a CC?\n",tmp2, tmp);
-			//pAccInfo->transferredBytes = 0;			
-		}
-		
+		}		
 	}	
 	else
 	{
@@ -1450,6 +1444,11 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 		if(pCC != NULL)
 		{			
 			// the typical case; the user had logged in before
+			if (prepaidAmount > 0)
+			{
+				pAccInfo->authFlags &= ~AUTH_WAITING_FOR_FIRST_SETTLED_CC;
+			}
+			
 			pAccInfo->pControlChannel->sendXMLMessage(pCC->getXMLDocument());
 			delete pCC;
 		}
