@@ -254,7 +254,8 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 							CAMsg::printMsg(LOG_ERR, "CAAccountingSettleThread: Received %s confirmed bytes!\n", tmp);
 						}
 						dbConn.storeAccountStatus(pCC->getAccountNumber(), CAXMLErrorMessage::ERR_ACCOUNT_EMPTY);				
-						dbConn.markAsSettled(pCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade);
+						dbConn.markAsSettled(pCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade, 
+							pCC->getTransferredBytes());
 					}
 					/*
 					else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_INVALID_PRICE_CERT)
@@ -275,7 +276,12 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 							//store it in DB
 							if (dbConn.storeCostConfirmation(*attachedCC, m_pAccountingSettleThread->m_settleCascade) == E_SUCCESS)
 							{
-								dbConn.markAsSettled(attachedCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade);
+								if (dbConn.markAsSettled(attachedCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade,
+														attachedCC->getTransferredBytes() != E_SUCESS)
+								{
+									CAMsg::printMsg(LOG_ERR, "SettleThread: Could not mark last valid CC as settled." 
+										"Maybe a new CC has been added meanwhile?\n");
+								}
 							}
 							else
 							{
