@@ -277,7 +277,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 							if (dbConn.storeCostConfirmation(*attachedCC, m_pAccountingSettleThread->m_settleCascade) == E_SUCCESS)
 							{
 								if (dbConn.markAsSettled(attachedCC->getAccountNumber(), m_pAccountingSettleThread->m_settleCascade,
-														attachedCC->getTransferredBytes() != E_SUCCESS))
+														attachedCC->getTransferredBytes()) != E_SUCCESS)
 								{
 									CAMsg::printMsg(LOG_ERR, "SettleThread: Could not mark last valid CC as settled." 
 										"Maybe a new CC has been added meanwhile?\n");
