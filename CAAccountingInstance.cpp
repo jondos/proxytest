@@ -432,6 +432,18 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 					CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Found invalid account! Kicking out user...\n");																
 					err = new CAXMLErrorMessage(CAXMLErrorMessage::ERR_KEY_NOT_FOUND);
 				}
+				else if (loginEntry->authFlags & AUTH_BLOCKED)
+				{
+					loginEntry->authFlags &= ~AUTH_BLOCKED;										
+					CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Kicking out blocked user!\n");																
+					err = new CAXMLErrorMessage(CAXMLErrorMessage::ERR_BLOCKED);
+				}
+				else if (loginEntry->authFlags & AUTH_DATABASE)
+				{
+					loginEntry->authFlags &= ~AUTH_DATABASE;										
+					CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Upps - kicking out user due to database error...\n");																
+					err = new CAXMLErrorMessage(CAXMLErrorMessage::ERR_DATABASE_ERROR);
+				}
 				else if (loginEntry->authFlags & AUTH_UNKNOWN)
 				{
 					loginEntry->authFlags &= ~AUTH_UNKNOWN;										
@@ -1672,6 +1684,7 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 			UINT8 tmp[32];
 			print64(tmp,pCC->getAccountNumber());
 			CAMsg::printMsg( LOG_INFO, "CostConfirmation for account %s could not be stored in database!\n", tmp );
+			pAccInfo->authFlags |= AUTH_DATABASE;
 		}
 		else 
 		{

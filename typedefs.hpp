@@ -165,8 +165,11 @@ typedef struct t_mix_parameters tMixParameters;
 /** we have sent one or two CC requests */
 #define AUTH_SENT_CC_REQUEST 0x20
 
-/** we have a costConfirmation which was not yet forwarded to the Bi */
-#define AUTH_HAVE_UNSETTLED_CC 0x80
+/** A database error occured (internal or in the BI) */
+#define AUTH_DATABASE 0x40
+
+/** Accoutn has been blocked temporarilyi */
+#define AUTH_BLOCKED 0x80
 
 /** we have sent one request for an accountcertificate */
 #define AUTH_SENT_ACCOUNT_REQUEST 0x100
