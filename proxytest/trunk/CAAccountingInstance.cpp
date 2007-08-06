@@ -1456,11 +1456,11 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 		{
 			authFlags |= AUTH_INVALID_ACCOUNT;
 		}
-		else*/ if (status == CAXMLErrorMessage::ERR_ACCOUNT_EMPTY)
+		else if (status == CAXMLErrorMessage::ERR_ACCOUNT_EMPTY)
 		{
 			authFlags |= AUTH_ACCOUNT_EMPTY;
 			pAccInfo->authFlags |= AUTH_ACCOUNT_EMPTY;
-		}
+		}*/
 		
 		if (authFlags)
 		{	
