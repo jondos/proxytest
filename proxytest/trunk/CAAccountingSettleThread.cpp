@@ -302,7 +302,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					}
 					else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_DATABASE_ERROR)
 					{												
-						authFlags |= AUTH_DATABASE;
+						//authFlags |= AUTH_DATABASE;
 						// the user is not responsible for this! 
 						authRemoveFlags |= AUTH_WAITING_FOR_FIRST_SETTLED_CC;
 						m_pAccountingSettleThread->m_bSleep = true;
