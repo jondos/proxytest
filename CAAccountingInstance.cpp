@@ -441,8 +441,8 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 				else if (loginEntry->authFlags & AUTH_DATABASE)
 				{
 					loginEntry->authFlags &= ~AUTH_DATABASE;										
-					//CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Upps - kicking out user due to database error...\n");																
-					//err = new CAXMLErrorMessage(CAXMLErrorMessage::ERR_DATABASE_ERROR);
+					CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Upps - kicking out user due to database error...\n");																
+					err = new CAXMLErrorMessage(CAXMLErrorMessage::ERR_DATABASE_ERROR);
 				}
 				else if (loginEntry->authFlags & AUTH_UNKNOWN)
 				{
