@@ -35,9 +35,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 pthread_once_t CAThread::ms_threadKeyInit = PTHREAD_ONCE_INIT;
 pthread_key_t CAThread::ms_threadKey; 
 
-const char* CAThread::METHOD_BEGIN = "Begin of method";
-const char* CAThread::METHOD_END = "End of method";
-//end check
+#ifdef PRINT_THREAD_STACK_TRACE	
+	const char* CAThread::METHOD_BEGIN = "Begin of method";
+	const char* CAThread::METHOD_END = "End of method";
+#endif
 
 CAThread::CAThread()
 	{
@@ -73,7 +74,7 @@ void CAThread::initKey()
 	pthread_key_create(&ms_threadKey, destroyValue); 
 }
 
-
+#ifdef PRINT_THREAD_STACK_TRACE	
 void CAThread::setCurrentStack(METHOD_STACK* a_value)
 {
 	pthread_once(&ms_threadKeyInit, initKey); 
@@ -91,9 +92,7 @@ CAThread::METHOD_STACK* CAThread::getCurrentStack()
 	pthread_once(&ms_threadKeyInit, initKey); 
 	return (METHOD_STACK*)pthread_getspecific(ms_threadKey); 
 }
-
-
-///end check
+#endif
 
 SINT32 CAThread::start(void* param,bool bDaemon,bool bSilent)
 	{

@@ -51,8 +51,10 @@ CAFirstMixChannelList::CAFirstMixChannelList()
 			}
 		m_listHashTableHead=NULL;
 		m_listHashTableNext=NULL;
+#ifdef PAYMENT
 		m_listTimoutHead = NULL;
 		m_listTimoutFoot = NULL;
+#endif
 		m_HashTableOutChannels=new LP_fmChannelListEntry[0x10000];
 		memset(m_HashTableOutChannels,0,sizeof(LP_fmChannelListEntry)*0x10000);
 #ifdef DO_TRACE
@@ -171,9 +173,10 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 		
 		//SAVE_STACK("CAFirstMixChannelList::add", "inserting in timout list");
 		// insert in timeout list; entries are added to the foot of the list
+#ifdef PAYMENT
 		pHashTableEntry->bRecoverTimeout = true;
 		pushTimeoutEntry_internal(pHashTableEntry);
-		
+#endif		
 		m_Mutex.unlock();
 		
 		FINISH_STACK("CAFirstMixChannelList::add");
@@ -309,12 +312,12 @@ fmChannelListEntry* CAFirstMixChannelList::get(CAMuxSocket* pMuxSocket,HCHANNEL 
 		m_Mutex.unlock();
 		return NULL;		
 	}
+#ifdef PAYMENT	
 
 fmHashTableEntry* CAFirstMixChannelList::popTimeoutEntry()
 {
 	return popTimeoutEntry(false);
 }	
-	
 fmHashTableEntry* CAFirstMixChannelList::popTimeoutEntry(bool a_bForce)	
 {
 	fmHashTableEntry* ret;
@@ -352,8 +355,9 @@ fmHashTableEntry* CAFirstMixChannelList::popTimeoutEntry_internal(bool a_bForce)
 	
 	return NULL;
 }
-			
+#endif			
 
+#ifdef PAYMENT
 SINT32 CAFirstMixChannelList::pushTimeoutEntry(fmHashTableEntry* pHashTableEntry)
 {
 	SINT32 ret;
@@ -365,6 +369,7 @@ SINT32 CAFirstMixChannelList::pushTimeoutEntry(fmHashTableEntry* pHashTableEntry
 	return ret;
 }
 
+
 UINT32 CAFirstMixChannelList::countTimeoutEntries()
 {
 	fmHashTableEntry* pHashTableEntry;
@@ -375,8 +380,9 @@ UINT32 CAFirstMixChannelList::countTimeoutEntries()
 
 	return count;
 }
+#endif
 
-		
+#ifdef PAYMENT		
 SINT32 CAFirstMixChannelList::pushTimeoutEntry_internal(fmHashTableEntry* pHashTableEntry)
 {	
 	if (pHashTableEntry == NULL)
@@ -420,7 +426,9 @@ SINT32 CAFirstMixChannelList::pushTimeoutEntry_internal(fmHashTableEntry* pHashT
 	return E_SUCCESS;
 	
 }
+#endif
 
+#ifdef PAYMENT
 SINT32 CAFirstMixChannelList::removeFromTimeoutList(fmHashTableEntry* pHashTableEntry)
 {
 	if (pHashTableEntry == NULL)
@@ -490,7 +498,7 @@ SINT32 CAFirstMixChannelList::removeFromTimeoutList(fmHashTableEntry* pHashTable
 			
 	return E_SUCCESS;
 }	
-	
+#endif	
 
 /** Removes all channels, which belongs to the given connection and 
 	* the connection itself from the list.
@@ -547,9 +555,9 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 					}
 			}
 		
-		
+#ifdef PAYMENT		
 		removeFromTimeoutList(pHashTableEntry);
-		
+#endif		
 		
 		fmChannelListEntry* pEntry=pHashTableEntry->pChannelList;
 		fmChannelListEntry* pTmpEntry;

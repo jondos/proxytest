@@ -59,6 +59,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 /* LERNGRUPPE: define this to get dynamic mixes */
 //#define DYNAMIC_MIX
 
+//#define PRINT_THREAD_STACK_TRACE //Usefull for debugging output of stack trace if mix dies...
+
 //the following definition are just for threading support beside pthread
 #undef USE_SEMAPHORE //normally we do not need semaphores
 #define HAVE_PTHREAD_CV //normally we use the pthread conditional variables

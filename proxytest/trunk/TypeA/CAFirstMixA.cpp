@@ -46,6 +46,7 @@ void CAFirstMixA::shutDown()
 	m_bIsShuttingDown = true;
 	m_bRestart = true;
 
+#ifdef PAYMENT
 	fmHashTableEntry* timeoutHashEntry;
 	while ((timeoutHashEntry = m_pChannelList->popTimeoutEntry(true)) != NULL)
 	{			
@@ -54,7 +55,8 @@ void CAFirstMixA::shutDown()
 		closeConnection(timeoutHashEntry);
 	}	
 	CAMsg::printMsg(LOG_DEBUG,"Closed %i client connections.\n", connectionsClosed);
-	
+#endif
+
 	m_bHasShutDown = true;
 }
 
@@ -163,6 +165,7 @@ SINT32 CAFirstMixA::loop()
 		while(!m_bRestart) /* the main mix loop as long as there are things that are not handled by threads. */
 			{
 				bAktiv=false;
+#ifdef PAYMENT
 				// check the timeout for all connections
 				fmHashTableEntry* timeoutHashEntry;
 				while ((timeoutHashEntry = m_pChannelList->popTimeoutEntry()) != NULL)
@@ -174,14 +177,14 @@ SINT32 CAFirstMixA::loop()
 					else
 					{
 						// This should not happen if all client connections are closed as defined in the protocols.
-#ifdef PAYMENT
+//#ifdef PAYMENT
 						UINT32 authFlags = CAAccountingInstance::getAuthFlags(timeoutHashEntry);
 						if (authFlags > 0)
 						{
 							CAMsg::printMsg(LOG_ERR,"Client connection closed due to forced timeout! Payment auth flags: %u\n", authFlags);
 						}
 						else
-#endif						
+//#endif						
 						{
 							CAMsg::printMsg(LOG_ERR,"Client connection closed due to forced timeout!\n");
 						}
@@ -190,7 +193,7 @@ SINT32 CAFirstMixA::loop()
 					closeConnection(timeoutHashEntry);
 				}
 
-				
+#endif				
 //LOOP_START:
 
 //First Step
@@ -239,12 +242,13 @@ SINT32 CAFirstMixA::loop()
 										}
 										else if(ret==MIXPACKET_SIZE) 											// we've read enough data for a whole mix packet. nice!
 											{												
+#ifdef PAYMENT
 												if (pHashEntry->bRecoverTimeout)
 												{
 													// renew the timeout only if recovery is allowed
 													m_pChannelList->pushTimeoutEntry(pHashEntry);
 												}
-												
+#endif												
 												#ifdef LOG_TRAFFIC_PER_USER
 													pHashEntry->trafficIn++;
 												#endif

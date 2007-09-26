@@ -29,17 +29,22 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define __CATHREAD__
 #include "CAMsg.hpp"
 
-///check
-#define INIT_STACK CAThread::METHOD_STACK* _stack
-#define SAVE_STACK(methodName, methodPosition) \
-_stack = new CAThread::METHOD_STACK; \
-_stack->strMethodName = (methodName); \
-_stack->strPosition = (methodPosition); \
-CAThread::setCurrentStack(_stack)
+#ifdef PRINT_THREAD_STACK_TRACE
+	#define INIT_STACK CAThread::METHOD_STACK* _stack
+	#define SAVE_STACK(methodName, methodPosition) \
+	_stack = new CAThread::METHOD_STACK; \
+	_stack->strMethodName = (methodName); \
+	_stack->strPosition = (methodPosition); \
+	CAThread::setCurrentStack(_stack)
 
-#define FINISH_STACK(methodName) SAVE_STACK(methodName, CAThread::METHOD_END)
-#define BEGIN_STACK(methodName) SAVE_STACK(methodName, CAThread::METHOD_BEGIN)
-///end check
+	#define FINISH_STACK(methodName) SAVE_STACK(methodName, CAThread::METHOD_END)
+	#define BEGIN_STACK(methodName) SAVE_STACK(methodName, CAThread::METHOD_BEGIN)
+#else
+	#define INIT_STACK
+	#define BEGIN_STACK(methodName)
+	#define FINISH_STACK(methodName)
+	#define SAVE_STACK(methodName, methodPosition)
+#endif
 
 /** Defines the type of the main function of the thread. The main function has one argument of type void*.
 	*	The exit points of the main function should be THREAD_RETURN_SUCCESS or THREAD_RETRUN_ERROR. 
@@ -91,13 +96,13 @@ typedef THREAD_RETURN(*THREAD_MAIN_TYP)(void *);
 class CAThread
 	{
 		public:
-///check
+#ifdef PRINT_THREAD_STACK_TRACE
 			struct METHOD_STACK
 			{
 				const char* strMethodName;
 				const char* strPosition;
 			};
-///end check		
+#endif
 			/** Creates a CAThread object but no actual thread.
 				*/
 			CAThread();
@@ -112,14 +117,14 @@ class CAThread
 					if(m_pThread!=NULL)
 						delete m_pThread;
 					if(m_strName!=NULL)
-						delete m_strName;
+						delete[] m_strName;
 				}
 			
-///check			
+#ifdef PRINT_THREAD_STACK_TRACE			
 			static void setCurrentStack(METHOD_STACK* a_stack);	
 			static METHOD_STACK* getCurrentStack();
+#endif			
 			
-///end check			
 			/** Sets the main function which will be executed within this thread.
 				*
 				* @param fnc the fuction to be executed
@@ -186,10 +191,12 @@ class CAThread
 					return E_SUCCESS;
 				}
 */
-///check
+#ifdef PRINT_THREAD_STACK_TRACE
 			static const char* METHOD_BEGIN;
 			static const char* METHOD_END;
+#endif
 		private:
+///check
 			static void destroyValue(void* a_stack);
 			static void initKey();
 		

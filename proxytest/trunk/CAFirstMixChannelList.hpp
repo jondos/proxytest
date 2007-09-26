@@ -48,9 +48,9 @@ struct t_fmhashtableentry
 	{
 		public:
 			CAMuxSocket*	pMuxSocket;
-			CAQueue*			pQueueSend;
+			CAQueue*		pQueueSend;
 			CAControlChannelDispatcher* pControlChannelDispatcher;
-			SINT32        uAlreadySendPacketSize;
+			SINT32			uAlreadySendPacketSize;
 			tQueueEntry		oQueueEntry;
 			UINT32				cSuspend;
 #ifdef LOG_TRAFFIC_PER_USER
@@ -83,13 +83,15 @@ struct t_fmhashtableentry
 				} list_HashEntries;
 
 			// the timeout list
+			// At the moement only enabled for payment Mixes (to be changed iff new mix protcol supports this for all clients)
+#ifdef PAYMENT
 			struct
 			{
 				struct t_fmhashtableentry* prev;
 				struct t_fmhashtableentry* next;
 				SINT32 timoutSecs;
 			} list_TimeoutHashEntries;
-
+#endif
 		friend class CAFirstMixChannelList;
 #ifdef PAYMENT
 		public:
@@ -201,6 +203,7 @@ class CAFirstMixChannelList
 			
 			fmChannelListEntry* get(CAMuxSocket* pMuxSocket,HCHANNEL channelIn);
 
+#ifdef PAYMENT
 			/** 
 			 * @return pops the next expired entry from the queue or returns NULL
 			 * if there are no exired entries
@@ -214,11 +217,12 @@ class CAFirstMixChannelList
 			 * are left in the queue
 			 */
 			fmHashTableEntry* popTimeoutEntry(bool a_bForce);
-			
+
 			/**
 			 * adds the entry to the timeout queue with mutex
 			 */
 			SINT32 pushTimeoutEntry(fmHashTableEntry* pHashTableEntry);
+#endif
 
 			SINT32 remove(CAMuxSocket* pMuxSocket);
 			SINT32 removeChannel(CAMuxSocket* pMuxSocket,HCHANNEL channelIn);
@@ -241,6 +245,7 @@ class CAFirstMixChannelList
       #endif
 
 		private:
+#ifdef PAYMENT
 			SINT32 removeFromTimeoutList(fmHashTableEntry* pHashTableEntry);
 			/**
 			 * adds the entry to the timeout queue
@@ -250,7 +255,7 @@ class CAFirstMixChannelList
 			fmHashTableEntry* popTimeoutEntry_internal(bool a_bForce);
 			
 			UINT32 countTimeoutEntries();
-		
+#endif		
 			/** Gets the in-channel and all associated information for the given out-channel.
 				* This method is NOT thread safe (and so only for internal use)
 				* @see get() 
@@ -297,11 +302,11 @@ class CAFirstMixChannelList
 			fmHashTableEntry* m_listHashTableHead;
 			///Next Element in the enumeration of all connections.
 			fmHashTableEntry* m_listHashTableNext;
-			
+#ifdef PAYMENT			
 			///Pointer to the head of the timout list of all connections.
 			fmHashTableEntry* m_listTimoutHead;
 			fmHashTableEntry* m_listTimoutFoot;
-			
+#endif			
 			///This mutex is used in all functions and makes them thread safe.
 			CAMutex m_Mutex;
 //#ifdef PAYMENT
