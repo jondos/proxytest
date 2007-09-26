@@ -64,17 +64,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define PRINT_THREAD_STACK_TRACE
 #endif
 
-//the following definition are just for threading support beside pthread
-#undef USE_SEMAPHORE //normally we do not need semaphores
-#define HAVE_PTHREAD_CV //normally we use the pthread conditional variables
-#define HAVE_PTHREAD_MUTEXES //normally we use the pthread mutexs
-
-#if !defined(HAVE_PTHREAD_CV) || !defined (HAVE_PTHREAD_MUTEXES) //if we do not have pthread mutexes or cvs we emulate them with semphores
- #define USE_SEMAPHORE
-#endif
-
-#define HAVE_PTHREAD_SEMAPHORE //normally we use pthread semaphores
-
 #ifdef COUNTRY_STATS
 	#define LOG_COUNTRIES_INTERVALL 6 //how often to log the country stats (multiplied by 10 seconds)
 #endif
@@ -230,6 +219,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define atoll _atoi64
 	#define getpid _getpid
 	#define HAVE_ATOLL
+	#define HAVE_PTHREAD_MUTEX_INIT
+	#define HAVE_PTHREAD_COND_INIT
+	#define HAVE_SEM_INIT
 #else
 	//__linux is not defined on power pc so we define our own __linux if __linux__ is defined
 	#if defined(__linux__) && !defined(__linux)
@@ -252,6 +244,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define HAVE_ATOLL
 		#define HAVE_POLL
 		#define HAVE_O_SYNC
+		#define HAVE_PTHREAD_MUTEX_INIT
+		#define HAVE_PTHREAD_COND_INIT
+		#define HAVE_SEM_INIT
 		#ifndef __linux
 			#define HAVE_TCP_KEEPALIVE
 		#endif
@@ -369,6 +364,23 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include <assert.h>
 
 #include <pthread.h>
+//the following definition are just for threading support beside pthread
+#undef USE_SEMAPHORE //normally we do not need semaphores
+#ifdef HAVE_PTHREAD_COND_INIT
+	#define HAVE_PTHREAD_CV //normally we use the pthread conditional variables
+#endif
+#ifdef HAVE_PTHREAD_MUTEX_INIT
+	#define HAVE_PTHREAD_MUTEXES //normally we use the pthread mutexs
+#endif
+
+#if !defined(HAVE_PTHREAD_CV) || !defined (HAVE_PTHREAD_MUTEXES) //if we do not have pthread mutexes or cvs we emulate them with semphores
+ #define USE_SEMAPHORE
+#endif
+
+#ifdef HAVE_SEM_INIT
+	#define HAVE_PTHREAD_SEMAPHORE //normally we use pthread semaphores
+#endif
+
 #ifdef USE_SEMAPHORE
 	#ifdef HAVE_PTHREAD_SEMAPHORE
 		#include <semaphore.h>
