@@ -3,7 +3,7 @@ dnl Autoconfiguration files for proxytest (a MiX proxy)
 dnl Konrad Rieck <kr@r0q.cx>
 dnl
 
-AC_INIT([AN.ON Mix],[00.05.039],[sk13@inf.tu-dresden.de],[mix])
+AC_INIT([AN.ON Mix],[00.07.001],[sk13@inf.tu-dresden.de],[mix])
 AM_INIT_AUTOMAKE
 AM_MAINTAINER_MODE
 AC_PREREQ(2.59)
@@ -229,6 +229,9 @@ AC_CHECK_FUNCS([vsnprintf])
 AC_CHECK_FUNCS([snprintf])
 AC_CHECK_FUNCS([atoll])
 AC_CHECK_FUNCS([poll])
+AC_CHECK_FUNCS([pthread_mutex_init])
+AC_CHECK_FUNCS([pthread_cond_init])
+AC_CHECK_FUNCS([sem_init])
 
 dnl even if epoll exist it may be unfunctional...
 if test "x$USE_EPOLL" != "x0" ; then

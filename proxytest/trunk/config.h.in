@@ -55,6 +55,15 @@
 /* Define to 1 if you have the <postgresql/libpq-fe.h> header file. */
 #undef HAVE_POSTGRESQL_LIBPQ_FE_H
 
+/* Define to 1 if you have the `pthread_cond_init' function. */
+#undef HAVE_PTHREAD_COND_INIT
+
+/* Define to 1 if you have the `pthread_mutex_init' function. */
+#undef HAVE_PTHREAD_MUTEX_INIT
+
+/* Define to 1 if you have the `sem_init' function. */
+#undef HAVE_SEM_INIT
+
 /* Define to 1 if you have the `snprintf' function. */
 #undef HAVE_SNPRINTF
 
