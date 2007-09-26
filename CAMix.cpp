@@ -110,6 +110,7 @@ SINT32 CAMix::start()
     while(true)
 #endif
         {
+				if (m_pInfoService != NULL)
 				m_pInfoService->setConfiguring(allowReconf && needAutoConfig());
 				while(allowReconf && (needAutoConfig() || m_bReconfiguring))
 				{
