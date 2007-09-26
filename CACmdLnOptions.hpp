@@ -307,10 +307,11 @@ class CACmdLnOptions
 			bool isSock5sSupported()
 			{
 				return m_bSocksSupport;
-			}				
+			}
+
 			bool isInfoServiceEnabled()
 				{
-					return m_addrInfoServicesSize;
+					return (m_addrInfoServicesSize>0);
 				}
 
 			bool getAutoReconnect()

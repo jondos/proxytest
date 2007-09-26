@@ -96,8 +96,8 @@ void removePidFile()
 			}
 	}
 
-
-void terminate(void)
+///Remark: terminate() might be already defined by the c lib -- do not use this name...
+void my_terminate(void)
 {	
 	if(!bTriedTermination && pMix!=NULL)
 	{
@@ -119,6 +119,7 @@ void terminate(void)
 void signal_segv( int ) 
 {
 	CAMsg::printMsg(LOG_CRIT,"Oops ... caught SIG_SEGV! Exiting ...\n");
+#ifdef PRINT_THREAD_STACK_TRACE
 	CAThread::METHOD_STACK* stack = CAThread::getCurrentStack();
 	if (stack != NULL)
 	{
@@ -129,8 +130,8 @@ void signal_segv( int )
 	{
 		CAMsg::printMsg( LOG_CRIT, "Stack trace: none available\n");
 	}
-	
-	terminate();
+#endif	
+	my_terminate();
 	removePidFile();
 	exit(1);
 }
@@ -141,7 +142,7 @@ void signal_segv( int )
 void signal_term( int )
 	{
 		CAMsg::printMsg(LOG_INFO,"Hm.. Signal SIG_TERM received... exiting!\n");
-		terminate();
+		my_terminate();
 		removePidFile();
 		exit(0);
 	}
@@ -149,7 +150,7 @@ void signal_term( int )
 void signal_interrupt( int)
 	{
 		CAMsg::printMsg(LOG_INFO,"Hm.. Strg+C pressed... exiting!\n");
-		terminate();
+		my_terminate();
 		removePidFile();
 		exit(0);
 	}
