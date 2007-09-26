@@ -99,12 +99,10 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 		if(entry==NULL)
 			{//Hashkey nicht in der Hashtabelle gefunden --> neuer Eintrag in Hashtabelle
 #ifndef PSEUDO_LOG
-/*
 				UINT8 hash[16];
 				memcpy(m_Random,ip,4);
 				MD5(m_Random,56,hash);
 				CAMsg::printMsg(LOG_DEBUG,"Inserting new IP-Address: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X !\n",hash[0],hash[1],hash[2],hash[3],hash[4],hash[5],hash[6],hash[7],hash[8],hash[9],hash[10],hash[11],hash[12],hash[13],hash[14],hash[15]);
-		*/
 #else
 				CAMsg::printMsg(LOG_DEBUG,"Inserting new IP-Address: {%u.%u.%u.%u} !\n",ip[0],ip[1],ip[2],ip[3]);
 #endif
@@ -115,13 +113,11 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 				m_HashTable[hashvalue]=entry;
 				ret = entry->count;
 #ifdef DEBUG
-/*
 #ifndef PSEUDO_LOG
 				CAMsg::printMsg(LOG_DEBUG,"New IP-Address inserted: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X !\n",hash[0],hash[1],hash[2],hash[3],hash[4],hash[5],hash[6],hash[7],hash[8],hash[9],hash[10],hash[11],hash[12],hash[13],hash[14],hash[15]);
 #else
 				CAMsg::printMsg(LOG_DEBUG,"New IP-Address inserted: {%u.%u.%u.%u} !\n",ip[0],ip[1],ip[2],ip[3]);
 #endif
-*/
 #endif
 				m_pMutex->unlock();
 				return ret;
@@ -139,7 +135,7 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 								if(entry->count>=m_allowedConnections) //an Attack...
 									{
 										//#if !defined(PSEUDO_LOG)&&defined(FIREWALL_SUPPORT)
-											CAMsg::printMsg(LOG_INFO,"Possible Flooding Attack from: %u.%u.%u.%u !\n",ip[0],ip[1],ip[2],ip[3]);
+											CAMsg::printMsg(LOG_CRIT,"Possible Flooding Attack from: %u.%u.%u.%u !\n",ip[0],ip[1],ip[2],ip[3]);
 										//#endif
 										m_pMutex->unlock();
 										return E_UNKNOWN;
@@ -177,7 +173,7 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 #else
 	SINT32 CAIPList::removeIP(const UINT8 ip[4],UINT32 time,UINT32 trafficIn,UINT32 trafficOut)
 #endif
-	{	
+	{
 		UINT16 hashvalue=(ip[2]<<8)|ip[3];
 		SINT32 ret;
 		m_pMutex->lock();
@@ -205,7 +201,6 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 							}
 							
 							#ifndef PSEUDO_LOG
-							/*
 								UINT8 hash[16];
 								memcpy(m_Random,ip,4);
 								MD5(m_Random,56,hash);
@@ -214,7 +209,6 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 								#else
 									CAMsg::printMsg(LOG_DEBUG,"Removing IP-Address: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X !\n",hash[0],hash[1],hash[2],hash[3],hash[4],hash[5],hash[6],hash[7],hash[8],hash[9],hash[10],hash[11],hash[12],hash[13],hash[14],hash[15]);
 								#endif
-								*/
 							#else
 								CAMsg::printMsg(LOG_DEBUG,"Removing IP-Address: {%u.%u.%u.%u} !\n",ip[0],ip[1],ip[2],ip[3]);
 							#endif

@@ -38,11 +38,11 @@ class CAConditionVariable:public CAMutex
 		public:
 			CAConditionVariable()
 				{
-					m_pMutex=new CAMutex();
 					#ifdef HAVE_PTHREAD_CV
 						m_pCondVar=new pthread_cond_t;
 						pthread_cond_init(m_pCondVar,NULL);
-					#else						
+					#else
+						m_pMutex=new CAMutex();
 						m_pSemaphore=new CASemaphore(0);
 						m_iSleepers=0;
 					#endif
@@ -53,10 +53,10 @@ class CAConditionVariable:public CAMutex
 					#ifdef HAVE_PTHREAD_CV
 						pthread_cond_destroy(m_pCondVar);
 						delete m_pCondVar;
-					#else						
+					#else
+						delete m_pMutex;
 						delete m_pSemaphore;
 					#endif
-					delete m_pMutex;
 				}
 			
 				/** Waits for a signal or for a timeout.
@@ -68,7 +68,7 @@ class CAConditionVariable:public CAMutex
 			SINT32 wait()
 				{
 					#ifdef HAVE_PTHREAD_CV
-						if(pthread_cond_wait(m_pCondVar, m_pMutex->m_pMutex)==0)
+						if(pthread_cond_wait(m_pCondVar,m_pMutex)==0)
 							return E_SUCCESS;
 						return E_UNKNOWN;
 					#else
@@ -137,7 +137,7 @@ class CAConditionVariable:public CAMutex
 								to.tv_sec++;
 								to.tv_nsec-=1000000000;
 							}
-						int ret=pthread_cond_timedwait(m_pCondVar,m_pMutex->m_pMutex,&to);
+						int ret=pthread_cond_timedwait(m_pCondVar,m_pMutex,&to);
 						if(ret==0)
 							return E_SUCCESS;
 						else if(ret==ETIMEDOUT)
@@ -154,26 +154,21 @@ class CAConditionVariable:public CAMutex
 				* must be called if proccessing ends.
 				*/
 			SINT32 signal()
-			{
-				#ifdef HAVE_PTHREAD_CV
-					if(pthread_cond_signal(m_pCondVar)==0)
-						return E_SUCCESS;
-					return E_UNKNOWN;
-				#else
-					m_pMutex->lock();
-					if( m_iSleepers > 0 )
-						{
-							m_pSemaphore->up();
-							m_iSleepers--;
-						}
-					return m_pMutex->unlock();
-				#endif
-			}
-			
-			CAMutex& getMutex()
-			{
-				return *m_pMutex;
-			}
+				{
+					#ifdef HAVE_PTHREAD_CV
+						if(pthread_cond_signal(m_pCondVar)==0)
+							return E_SUCCESS;
+						return E_UNKNOWN;
+					#else
+						m_pMutex->lock();
+						if( m_iSleepers > 0 )
+							{
+								m_pSemaphore->up();
+								m_iSleepers--;
+							}
+						return m_pMutex->unlock();
+					#endif
+				}
 
 			/** Signals this object. All threads waiting on this object will awake.
 				* Note: lock() must be called before signal() and unlock() 
@@ -197,10 +192,10 @@ class CAConditionVariable:public CAMutex
 				}
 
 		private:
-				CAMutex* m_pMutex;
 				#ifdef HAVE_PTHREAD_CV
 					pthread_cond_t* m_pCondVar;
-				#else					
+				#else
+					CAMutex* m_pMutex;
 					CASemaphore* m_pSemaphore;
 					UINT32 m_iSleepers;
 				#endif

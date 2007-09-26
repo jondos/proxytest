@@ -116,11 +116,11 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 		m_Mutex.lock();
 		fmHashTableEntry* pHashTableEntry=m_HashTable[hashkey];
 		if(pHashTableEntry->pMuxSocket!=NULL) //the entry in the hashtable for this socket (hashkey) must be empty
-		{
+			{
 			FINISH_STACK("CAFirstMixChannelList::add (socket exists)");
-			m_Mutex.unlock();
-			return NULL;
-		}
+				m_Mutex.unlock();
+				return NULL;
+			}
 		
 		//SAVE_STACK("CAFirstMixChannelList::add", "initialising table entry");
 		
@@ -133,7 +133,7 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 		pHashTableEntry->trafficIn=0;
 		pHashTableEntry->trafficOut=0;
 		getcurrentTimeMillis(pHashTableEntry->timeCreated);
-#endif		
+#endif
 		getRandom(&(pHashTableEntry->id));
 
 #ifdef PAYMENT
@@ -158,14 +158,14 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 		//SAVE_STACK("CAFirstMixChannelList::add", "inserting in connection list");
 		//now insert the new connection in the list of all open connections
 		if(m_listHashTableHead==NULL) //if first one
-		{
-			pHashTableEntry->list_HashEntries.next=NULL;			
-		}
+			{
+				pHashTableEntry->list_HashEntries.next=NULL;
+			}
 		else
-		{//add to the head of the double linked list
-			pHashTableEntry->list_HashEntries.next=m_listHashTableHead;			
-			m_listHashTableHead->list_HashEntries.prev=pHashTableEntry;			
-		}
+			{//add to the head of the double linked list
+				pHashTableEntry->list_HashEntries.next=m_listHashTableHead;
+				m_listHashTableHead->list_HashEntries.prev=pHashTableEntry;
+			}
 		pHashTableEntry->list_HashEntries.prev=NULL;
 		m_listHashTableHead=pHashTableEntry;	
 		
@@ -235,16 +235,16 @@ SINT32 CAFirstMixChannelList::addChannel(CAMuxSocket* pMuxSocket,HCHANNEL channe
 		
 		//add to the channel list for the given connection
 		if(pEntry==NULL) //First Entry to the channel list
-		{
-			pNewEntry->list_InChannelPerSocket.next=NULL;
-			pNewEntry->list_InChannelPerSocket.prev=NULL;				
-		}
+			{
+				pNewEntry->list_InChannelPerSocket.next=NULL;
+				pNewEntry->list_InChannelPerSocket.prev=NULL;				
+			}
 		else
-		{
-			pNewEntry->list_InChannelPerSocket.next=pEntry;
-			pNewEntry->list_InChannelPerSocket.prev=NULL;
-			pEntry->list_InChannelPerSocket.prev=pNewEntry;
-		}
+			{
+				pNewEntry->list_InChannelPerSocket.next=pEntry;
+				pNewEntry->list_InChannelPerSocket.prev=NULL;
+				pEntry->list_InChannelPerSocket.prev=pNewEntry;
+			}
 		pHashTableEntry->pChannelList=pNewEntry;
 		
 		//add to the out-channel list
@@ -309,7 +309,7 @@ fmChannelListEntry* CAFirstMixChannelList::get(CAMuxSocket* pMuxSocket,HCHANNEL 
 		m_Mutex.unlock();
 		return NULL;		
 	}
-	
+
 fmHashTableEntry* CAFirstMixChannelList::popTimeoutEntry()
 {
 	return popTimeoutEntry(false);
@@ -523,29 +523,29 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 			m_listHashTableNext=pHashTableEntry->list_HashEntries.next;
 		
 		if(pHashTableEntry->list_HashEntries.prev==NULL) //if entry is the head of the connection list
-		{
-			if(pHashTableEntry->list_HashEntries.next==NULL) //if entry is also the last (so the only one in the list..)
 			{
-				m_listHashTableHead=NULL; //list is now empty
+				if(pHashTableEntry->list_HashEntries.next==NULL) //if entry is also the last (so the only one in the list..)
+					{
+						m_listHashTableHead=NULL; //list is now empty
+					}
+				else
+					{//remove the head of the list
+						m_listHashTableHead=pHashTableEntry->list_HashEntries.next; 
+						m_listHashTableHead->list_HashEntries.prev=NULL;
+					}
 			}
-			else
-			{//remove the head of the list
-				m_listHashTableHead=pHashTableEntry->list_HashEntries.next; 
-				m_listHashTableHead->list_HashEntries.prev=NULL;
-			}
-		}
 		else
 		{	//the connection is not the head of the list
-			if(pHashTableEntry->list_HashEntries.next==NULL)
-			{//the connection is the last element in the list
-				pHashTableEntry->list_HashEntries.prev->list_HashEntries.next=NULL;
+				if(pHashTableEntry->list_HashEntries.next==NULL)
+					{//the connection is the last element in the list
+						pHashTableEntry->list_HashEntries.prev->list_HashEntries.next=NULL;
+					}
+				else
+					{//its a simple middle element
+						pHashTableEntry->list_HashEntries.prev->list_HashEntries.next=pHashTableEntry->list_HashEntries.next;
+						pHashTableEntry->list_HashEntries.next->list_HashEntries.prev=pHashTableEntry->list_HashEntries.prev;
+					}
 			}
-			else
-			{//its a simple middle element
-				pHashTableEntry->list_HashEntries.prev->list_HashEntries.next=pHashTableEntry->list_HashEntries.next;
-				pHashTableEntry->list_HashEntries.next->list_HashEntries.prev=pHashTableEntry->list_HashEntries.prev;
-			}
-		}
 		
 		
 		removeFromTimeoutList(pHashTableEntry);

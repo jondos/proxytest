@@ -1,22 +1,5 @@
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual Studio 2005
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "proxytest-lib", "proxytest-lib.vcproj", "{150377B0-CA8F-4031-A0B8-45A3001F4F81}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "proxytest", "proxytest.vcproj", "{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}"
-	ProjectSection(ProjectDependencies) = postProject
-		{150377B0-CA8F-4031-A0B8-45A3001F4F81} = {150377B0-CA8F-4031-A0B8-45A3001F4F81}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AllTest", "AllTests.vcproj", "{1DE75B05-314A-4E97-B281-5D1075F7CF2D}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FlashMix-lib", "FlashMix\FlashMix-lib.vcproj", "{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FlashMix", "FlashMix\FlashMix.vcproj", "{17916053-4B43-46CF-ABB3-709AE4E3DA78}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FlashMixUser", "FlashMix\FlashMixUser.vcproj", "{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BulletinBoard", "FlashMix\BulletinBoard.vcproj", "{9DB252A3-2EE3-440F-AC14-E961994FCE7A}"
-EndProject
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{54C687C4-A40F-4654-8DA3-66D2D382DDC8}"
 	ProjectSection(SolutionItems) = preProject
 		documentation\docMixConfig.template = documentation\docMixConfig.template
@@ -38,10 +21,24 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		documentation\XML\XMLSignature.xml = documentation\XML\XMLSignature.xml
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "proxytest-lib", "proxytest-lib.vcproj", "{150377B0-CA8F-4031-A0B8-45A3001F4F81}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "proxytest", "proxytest.vcproj", "{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81} = {150377B0-CA8F-4031-A0B8-45A3001F4F81}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AllTest", "AllTests.vcproj", "{1DE75B05-314A-4E97-B281-5D1075F7CF2D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FlashMix-lib", "FlashMix\FlashMix-lib.vcproj", "{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FlashMix", "FlashMix\FlashMix.vcproj", "{17916053-4B43-46CF-ABB3-709AE4E3DA78}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FlashMixUser", "FlashMix\FlashMixUser.vcproj", "{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BulletinBoard", "FlashMix\BulletinBoard.vcproj", "{9DB252A3-2EE3-440F-AC14-E961994FCE7A}"
+EndProject
 Global
-	GlobalSection(TestCaseManagementSettings) = postSolution
-		CategoryFile = proxytest.vsmdi
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -255,5 +252,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = proxytest.vsmdi
 	EndGlobalSection
 EndGlobal

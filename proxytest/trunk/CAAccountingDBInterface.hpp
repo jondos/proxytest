@@ -100,7 +100,7 @@ class CAAccountingDBInterface
 			
 			SINT32 storeAccountStatus(UINT64 a_accountNumber, UINT32 a_statusCode);
 			SINT32 getAccountStatus(UINT64 a_accountNumber, UINT32& a_statusCode);
-			
+
 		private:
 			/**
 			 * Checks if the connection still exists and tries to reconnect if not.

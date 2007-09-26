@@ -27,6 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #include "StdAfx.h"
 #include "CAMutex.hpp"
+#if defined (DEBUG) && defined(HAVE_PTHREAD_MUTEXES)
 #include "CAMsg.hpp"
 
 #if defined (DEBUG) && defined(HAVE_PTHREAD_MUTEXES)
@@ -73,56 +74,3 @@ CAMutex::~CAMutex()
 }
 
 #endif
-
-SINT32 CAMutex::lock()
-{
-	#ifdef	HAVE_PTHREAD_MUTEXES
-	
-		SINT32 ret;
-		//CAMsg::printMsg(LOG_CRIT, "CAMutex: locked!\n");
-		/*
-		ret = pthread_mutex_trylock(m_pMutex);
-		if(ret == 0)
-		{
-			//printf("%s", "CAMutex: locked!\n");
-			//CAMsg::printMsg(LOG_CRIT, "CAMutex: locked!\n");
-			return E_SUCCESS;
-		}
-		else
-		{			
-			printf("%s", "CAMutex: lock error=%d\n", ret);
-			//CAMsg::printMsg(LOG_CRIT, "CAMutex: lock error=%d\n", ret);
-			pthread_mutex_unlock(m_pMutex);
-		}*/
-	
-		ret = pthread_mutex_lock(m_pMutex);
-		if(ret == 0)
-		{
-			return E_SUCCESS;
-		}
-		//printf("%s", "CAMutex: lock error=%d\n", ret);
-		//CAMsg::printMsg(LOG_CRIT, "CAMutex: lock error=%d\n", ret);
-		return E_UNKNOWN;
-	#else
-		return m_pMutex->down();
-	#endif
-}
-
-SINT32 CAMutex::unlock()
-{
-	#ifdef HAVE_PTHREAD_MUTEXES
-		SINT32 ret = pthread_mutex_unlock(m_pMutex);
-		if(ret == 0)
-		{
-			return E_SUCCESS;
-		}
-		printf("%s", "CAMutex: unlock error=%d\n", ret);
-		//CAMsg::printMsg(LOG_CRIT, "CAMutex: unlock error=%d\n", ret);
-		return E_UNKNOWN;
-	#else
-		return m_pMutex->up();
-	#endif
-}
-
-
-

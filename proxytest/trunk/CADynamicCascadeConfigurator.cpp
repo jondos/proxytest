@@ -37,7 +37,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CACertificate.hpp"
 #include "CAMsg.hpp"
 
-extern CACmdLnOptions pglobalOptions->;
+extern CACmdLnOptions* pglobalOptions;
 
 /**
   * LERNGRUPPE
@@ -100,7 +100,7 @@ CADynamicCascadeConfigurator::~CADynamicCascadeConfigurator()
 SINT32 CADynamicCascadeConfigurator::configure()
 {
 	UINT32 nrAddresses;
-	CAListenerInterface** ppSocketAddresses = pglobalOptions->.getInfoServices(nrAddresses);
+	CAListenerInterface** ppSocketAddresses = pglobalOptions->getInfoServices(nrAddresses);
 
 #ifdef DEBUG
 	CAMsg::printMsg( LOG_DEBUG, "CADynamicCascadeConfigurator::configure - Querying %i infoservices...\n", nrAddresses);
@@ -108,7 +108,7 @@ SINT32 CADynamicCascadeConfigurator::configure()
 	UINT8 bufMixId[255];
 	UINT32 mixIdLen = 255;
 	UINT8 request[255];
-	pglobalOptions->.getMixId( bufMixId, mixIdLen );
+	pglobalOptions->getMixId( bufMixId, mixIdLen );
 	sprintf((char*)request, "/reconfigure/%s",bufMixId );
 
 	for (UINT32 i = 0; i < nrAddresses; i++)
@@ -146,7 +146,7 @@ SINT32 CADynamicCascadeConfigurator::configure()
 		/** @todo move this to some place else */
 		UINT8 buff[1024];
 		UINT32 len = 1024;
-		if(pglobalOptions->.getLastCascadeProposal(buff, len) == E_SUCCESS)
+		if(pglobalOptions->getLastCascadeProposal(buff, len) == E_SUCCESS)
 		{
 			if(strcmp((char*)proposal, (char*)buff) == 0)
 			{
@@ -222,7 +222,7 @@ SINT32 CADynamicCascadeConfigurator::reconfigureMix(DOM_Node a_elemNewCascade, U
 	char* mixId;
 	UINT8 myMixId[255];
 	UINT32 len=255;
-	pglobalOptions->.getMixId(myMixId, len);
+	pglobalOptions->getMixId(myMixId, len);
 	char* prevMixId = NULL;
 	char* myNextMixId = NULL;
 	char* myPrevMixId = NULL;
@@ -258,9 +258,9 @@ SINT32 CADynamicCascadeConfigurator::reconfigureMix(DOM_Node a_elemNewCascade, U
 	if(myPrevMixId == NULL && myNextMixId == NULL) 
 	{
 		// Only stops the cascade, now reconfiguration is done yet
-		pglobalOptions->.resetPrevMix();
-		pglobalOptions->.resetNextMix();
-		pglobalOptions->.setCascadeProposal(a_strProposal, strlen((char*)a_strProposal));
+		pglobalOptions->resetPrevMix();
+		pglobalOptions->resetNextMix();
+		pglobalOptions->setCascadeProposal(a_strProposal, strlen((char*)a_strProposal));
 		m_pMix->dynaReconfigure( false );
 		return E_SUCCESS;
 	}
@@ -273,20 +273,20 @@ SINT32 CADynamicCascadeConfigurator::reconfigureMix(DOM_Node a_elemNewCascade, U
 	if(myPrevMixId == NULL)
 	{
 
-		if(pglobalOptions->.isLastMix())
+		if(pglobalOptions->isLastMix())
 		{
 			CAMsg::printMsg( LOG_ERR, "CADynamicCascadeConfigurator::reconfigureMix - I am a LastMix and should be reconfigured as a FirstMix! Won't do that!!\n");
 			return E_UNKNOWN;
 		}
-		else if(pglobalOptions->.isMiddleMix())
+		else if(pglobalOptions->isMiddleMix())
 		{
 #ifdef DEBUG
 			CAMsg::printMsg( LOG_DEBUG, "CADynamicCascadeConfigurator::reconfigureMix - I am a MiddleMix and should be reconfigured as a FirstMix!\n");
 #endif
-			pglobalOptions->.changeMixType(CAMix::FIRST_MIX);
+			pglobalOptions->changeMixType(CAMix::FIRST_MIX);
 			typeChanged = true;
 		}
-		else if(pglobalOptions->.isFirstMix())
+		else if(pglobalOptions->isFirstMix())
 		{
 #ifdef DEBUG
 			CAMsg::printMsg( LOG_DEBUG, "CADynamicCascadeConfigurator::reconfigureMix - CADynamicCascadeConfigurator::reconfigureMix - I am (and will remain) a first mix!\n");
@@ -297,7 +297,7 @@ SINT32 CADynamicCascadeConfigurator::reconfigureMix(DOM_Node a_elemNewCascade, U
 #ifdef DEBUG
 			CAMsg::printMsg( LOG_DEBUG, "CADynamicCascadeConfigurator::reconfigureMix - Ugh! I do not have a current mix type! Trying to become a FirstMix nevertheless, but that might fail\n");
 #endif
-			pglobalOptions->.changeMixType(CAMix::FIRST_MIX);
+			pglobalOptions->changeMixType(CAMix::FIRST_MIX);
 			typeChanged = true;
 		}
 	}
@@ -305,7 +305,7 @@ SINT32 CADynamicCascadeConfigurator::reconfigureMix(DOM_Node a_elemNewCascade, U
 	/** Last Mix */
 	if( myNextMixId == NULL )
 	{
-		if(!pglobalOptions->.isLastMix())
+		if(!pglobalOptions->isLastMix())
 		{
 			CAMsg::printMsg( LOG_ERR, "CADynamicCascadeConfigurator::reconfigureMix - I am NOT a LastMix and should be reconfigured as a LastMix! Won't do that!!\n");
 			return E_UNKNOWN;
@@ -321,20 +321,20 @@ SINT32 CADynamicCascadeConfigurator::reconfigureMix(DOM_Node a_elemNewCascade, U
 	/** Middle Mix */
 	if(myPrevMixId != NULL && myNextMixId != NULL)
 	{
-		if(pglobalOptions->.isLastMix())
+		if(pglobalOptions->isLastMix())
 		{
 			CAMsg::printMsg( LOG_ERR, "CADynamicCascadeConfigurator::reconfigureMix - I am a LastMix and should be reconfigured as a MiddleMix! Won't do that!!\n");
 			return E_UNKNOWN;
 		}
-		else if(pglobalOptions->.isFirstMix())
+		else if(pglobalOptions->isFirstMix())
 		{
 #ifdef DEBUG
 			CAMsg::printMsg( LOG_DEBUG, "CADynamicCascadeConfigurator::reconfigureMix - I am a FirstMix and should be reconfigured as a MiddleMix!\n");
 #endif
-			pglobalOptions->.changeMixType(CAMix::MIDDLE_MIX);
+			pglobalOptions->changeMixType(CAMix::MIDDLE_MIX);
 			typeChanged = true;
 		}
-		else if(pglobalOptions->.isMiddleMix())
+		else if(pglobalOptions->isMiddleMix())
 		{
 			CAMsg::printMsg( LOG_DEBUG, "CADynamicCascadeConfigurator::reconfigureMix - I am (and will remain) a middle mix!\n");
 		}
@@ -343,7 +343,7 @@ SINT32 CADynamicCascadeConfigurator::reconfigureMix(DOM_Node a_elemNewCascade, U
 #ifdef DEBUG
 			CAMsg::printMsg( LOG_DEBUG, "CADynamicCascadeConfigurator::reconfigureMix - Ugh! I do not have a current mix type! Trying to become a MiddleMix nevertheless, but that might fail\n");
 #endif
-			pglobalOptions->.changeMixType(CAMix::MIDDLE_MIX);
+			pglobalOptions->changeMixType(CAMix::MIDDLE_MIX);
 			typeChanged = true;
 		}
 	}
@@ -363,17 +363,17 @@ SINT32 CADynamicCascadeConfigurator::reconfigureMix(DOM_Node a_elemNewCascade, U
 			return ret;
 		}
 		DOM_Document doc = result.getOwnerDocument();
-		ret = pglobalOptions->.setPrevMix( doc );
+		ret = pglobalOptions->setPrevMix( doc );
 		if(ret != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_ERR,"CADynamicCascadeConfigurator::reconfigureMix - Error setting next mix info!\n");
-			pglobalOptions->.resetPrevMix();
+			pglobalOptions->resetPrevMix();
 			return E_UNKNOWN;
 		}
 	}
 	else
 	{
-		if(pglobalOptions->.resetPrevMix() != E_SUCCESS)
+		if(pglobalOptions->resetPrevMix() != E_SUCCESS)
 		{
 			CAMsg::printMsg( LOG_ERR, "CADynamicCascadeConfigurator::reconfigureMix - Unable to reset prev mix information\n");
 			return E_UNKNOWN;
@@ -393,7 +393,7 @@ SINT32 CADynamicCascadeConfigurator::reconfigureMix(DOM_Node a_elemNewCascade, U
 			return E_UNKNOWN;
 		}
 		DOM_Document doc = result.getOwnerDocument();
-		if(pglobalOptions->.setNextMix( doc ) != E_SUCCESS)
+		if(pglobalOptions->setNextMix( doc ) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_ERR,"CADynamicCascadeConfigurator::reconfigureMix - Error setting next mix info!\n");
 			return E_UNKNOWN;
@@ -401,17 +401,17 @@ SINT32 CADynamicCascadeConfigurator::reconfigureMix(DOM_Node a_elemNewCascade, U
 	}
 	else
 	{
-		if(pglobalOptions->.resetNextMix() != E_SUCCESS)
+		if(pglobalOptions->resetNextMix() != E_SUCCESS)
 		{
 			CAMsg::printMsg( LOG_ERR, "CADynamicCascadeConfigurator::reconfigureMix - Unable to reset next mix information\n");
 			return E_UNKNOWN;
 		}
 	}
 
-	pglobalOptions->.setCascadeProposal(a_strProposal, strlen((char*)a_strProposal));
-/*	if(pglobalOptions->.isFirstMix()) 
+	pglobalOptions->setCascadeProposal(a_strProposal, strlen((char*)a_strProposal));
+/*	if(pglobalOptions->isFirstMix()) 
 	{
-		pglobalOptions->.setCascadeXML((DOM_Element&)a_elemNewCascade);
+		pglobalOptions->setCascadeXML((DOM_Element&)a_elemNewCascade);
 	}*/
 #ifdef DEBUG
 	CAMsg::printMsg( LOG_DEBUG, "CADynamicCascadeConfigurator::reconfigureMix - Calling dynaReconfigure on the mix, grab a hold of something!\n");

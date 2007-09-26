@@ -29,6 +29,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define __CATHREAD__
 #include "CAMsg.hpp"
 
+///check
 #define INIT_STACK CAThread::METHOD_STACK* _stack
 #define SAVE_STACK(methodName, methodPosition) \
 _stack = new CAThread::METHOD_STACK; \
@@ -38,7 +39,7 @@ CAThread::setCurrentStack(_stack)
 
 #define FINISH_STACK(methodName) SAVE_STACK(methodName, CAThread::METHOD_END)
 #define BEGIN_STACK(methodName) SAVE_STACK(methodName, CAThread::METHOD_BEGIN)
-
+///end check
 
 /** Defines the type of the main function of the thread. The main function has one argument of type void*.
 	*	The exit points of the main function should be THREAD_RETURN_SUCCESS or THREAD_RETRUN_ERROR. 
@@ -90,12 +91,13 @@ typedef THREAD_RETURN(*THREAD_MAIN_TYP)(void *);
 class CAThread
 	{
 		public:
+///check
 			struct METHOD_STACK
 			{
 				const char* strMethodName;
 				const char* strPosition;
 			};
-		
+///end check		
 			/** Creates a CAThread object but no actual thread.
 				*/
 			CAThread();
@@ -112,12 +114,12 @@ class CAThread
 					if(m_strName!=NULL)
 						delete m_strName;
 				}
-				
 			
+///check			
 			static void setCurrentStack(METHOD_STACK* a_stack);	
 			static METHOD_STACK* getCurrentStack();
 			
-			
+///end check			
 			/** Sets the main function which will be executed within this thread.
 				*
 				* @param fnc the fuction to be executed
@@ -184,7 +186,7 @@ class CAThread
 					return E_SUCCESS;
 				}
 */
-
+///check
 			static const char* METHOD_BEGIN;
 			static const char* METHOD_END;
 		private:
@@ -194,7 +196,7 @@ class CAThread
 		
 			static pthread_key_t ms_threadKey; 
 			static pthread_once_t ms_threadKeyInit;
-		
+///end check		
 			THREAD_MAIN_TYP m_fncMainLoop;
 	 		pthread_t* m_pThread;
 			UINT8* m_strName; //< a name mostly for debuging purpose...

@@ -670,7 +670,7 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 	}
 #endif
 
-/** Reads the configured proxies from \c pglobalOptions->
+/** Reads the configured proxies from \c options.
 	* @retval E_UNKNOWN if no proxies are specified
 	* @retval E_SUCCESS if successfully configured the proxies
 	*/

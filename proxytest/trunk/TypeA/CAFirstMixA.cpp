@@ -128,9 +128,9 @@ SINT32 CAFirstMixA::loop()
 	{
 #ifndef NEW_MIX_TYPE
 #ifdef DELAY_USERS
-		m_pChannelList->setDelayParameters(	pglobalOptions->.getDelayChannelUnlimitTraffic(),
-																			pglobalOptions->.getDelayChannelBucketGrow(),
-																			pglobalOptions->.getDelayChannelBucketGrowIntervall());	
+		m_pChannelList->setDelayParameters(	pglobalOptions->getDelayChannelUnlimitTraffic(),
+																			pglobalOptions->getDelayChannelBucketGrow(),
+																			pglobalOptions->getDelayChannelBucketGrowIntervall());	
 #endif		
 
 	//	CASingleSocketGroup osocketgroupMixOut;
@@ -474,7 +474,7 @@ NEXT_USER:
 												{
 													UINT32 id=(pMixPacket->flags>>8)&0x000000FF;
 													int log=LOG_ENCRYPTED;
-													if(!pglobalOptions->.isEncryptedLogEnabled())
+													if(!pglobalOptions->isEncryptedLogEnabled())
 														log=LOG_CRIT;
 													CAMsg::printMsg(log,"Detecting crime activity - ID: %u -- In-IP is: %u.%u.%u.%u \n",id,pEntry->pHead->peerIP[0],pEntry->pHead->peerIP[1],pEntry->pHead->peerIP[2],pEntry->pHead->peerIP[3]);
 													continue;
@@ -590,22 +590,23 @@ NEXT_USER:
 												{
 													// count packet for payment
 													SINT32 ret = CAAccountingInstance::handleJapPacket(pfmHashEntry, !(pfmHashEntry->bCountPacket), true);
-													if (CAAccountingInstance::HANDLE_PACKET_CONNECTION_OK == ret)
+													if (ret==CAAccountingInstance::HANDLE_PACKET_CONNECTION_OK)
 													{
 														// renew the timeout
 														pfmHashEntry->bRecoverTimeout = true;														
 														m_pChannelList->pushTimeoutEntry(pfmHashEntry);	
 													}
-													else if (CAAccountingInstance::HANDLE_PACKET_HOLD_CONNECTION == ret ||
-															CAAccountingInstance::HANDLE_PACKET_PREPARE_FOR_CLOSING_CONNECTION == ret)
+													else if (ret==CAAccountingInstance::HANDLE_PACKET_HOLD_CONNECTION ||
+															ret==CAAccountingInstance::HANDLE_PACKET_PREPARE_FOR_CLOSING_CONNECTION )
 													{
 														// the next timeout might be deadly for this connection...
 														pfmHashEntry->bRecoverTimeout = false;	
 													}
-													else if (CAAccountingInstance::HANDLE_PACKET_CLOSE_CONNECTION == ret)
+													else if (ret==CAAccountingInstance::HANDLE_PACKET_CLOSE_CONNECTION )
 													{
 														CAMsg::printMsg(LOG_DEBUG, "CAFirstMixA: Closing JAP connection due to illegal payment status!\n", ret);														
 														closeConnection(pfmHashEntry);
+goto NEXT_USER_WRITING;
 													}
 												}
 												#endif
@@ -656,9 +657,11 @@ NEXT_USER:
 #endif
 									//todo error handling
 #ifdef HAVE_EPOLL
+NEXT_USER_WRITING:
 						pfmHashEntry=(fmHashTableEntry*)m_psocketgroupUsersWrite->getNextSignaledSocketData();
 #else
 							}//if is socket signaled					
+NEXT_USER_WRITING:							
 						pfmHashEntry=m_pChannelList->getNext();
 #endif
 					}

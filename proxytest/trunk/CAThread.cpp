@@ -31,12 +31,13 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAUtil.hpp"
 #include "CAMsg.hpp"
 
+///check
 pthread_once_t CAThread::ms_threadKeyInit = PTHREAD_ONCE_INIT;
 pthread_key_t CAThread::ms_threadKey; 
 
 const char* CAThread::METHOD_BEGIN = "Begin of method";
 const char* CAThread::METHOD_END = "End of method";
-
+//end check
 
 CAThread::CAThread()
 	{
@@ -58,7 +59,7 @@ CAThread::CAThread(const UINT8* strName)
 				m_strName[len]=0;
 			}
 	}
-
+///check
 void CAThread::destroyValue(void* a_value) 
 { 
 	if (a_value)
@@ -92,7 +93,7 @@ CAThread::METHOD_STACK* CAThread::getCurrentStack()
 }
 
 
-
+///end check
 
 SINT32 CAThread::start(void* param,bool bDaemon,bool bSilent)
 	{

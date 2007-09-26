@@ -97,11 +97,11 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
 		pglobalOptions->getPaymentSoftLimit(&m_iSoftLimitBytes);
 	
 		prepareCCRequest(callingMix, m_AiName);
-		
+	
 		m_currentAccountsHashtable = 
 			new Hashtable((UINT32 (*)(void *))Hashtable::hashUINT64, (SINT32 (*)(void *,void *))Hashtable::compareUINT64, 2000);		
 		
-		// launch BI settleThread				
+		// launch BI settleThread		
 		m_pSettleThread = new CAAccountingSettleThread(m_currentAccountsHashtable, m_currentCascade);
 		
 		m_aiThreadPool = new CAThreadPool(NUM_LOGIN_WORKER_TRHEADS, MAX_LOGIN_QUEUE, false);
@@ -121,7 +121,7 @@ CAAccountingInstance::~CAAccountingInstance()
 		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance dying\n" );
 		if (m_pSettleThread)
 		{
-			delete m_pSettleThread;
+		delete m_pSettleThread;
 		}
 		m_pSettleThread = NULL;
 		
@@ -134,14 +134,14 @@ CAAccountingInstance::~CAAccountingInstance()
 		if (m_dbInterface)
 		{
 			m_dbInterface->terminateDBConnection();
-			delete m_dbInterface;
+		delete m_dbInterface;
 		}
 		m_dbInterface = NULL;
 		//delete m_pIPBlockList;
 		//m_pIPBlockList = NULL;
 		if (m_AiName)
 		{
-			delete[] m_AiName;
+		delete[] m_AiName;
 		}
 		m_AiName = NULL;
 		
@@ -159,7 +159,7 @@ CAAccountingInstance::~CAAccountingInstance()
 		
 		if (m_currentCascade)
 		{
-			delete[] m_currentCascade;
+		delete[] m_currentCascade;
 		}
 		m_currentCascade = NULL;
 		if (m_allHashes)
@@ -251,7 +251,7 @@ THREAD_RETURN CAAccountingInstance::processThread(void* a_param)
 
 	delete item->pDomDoc;
 	delete item;
-	
+
 	FINISH_STACK("CAAccountingInstance::processThread");
 		
 	THREAD_RETURN_SUCCESS;
@@ -278,7 +278,7 @@ SINT32 CAAccountingInstance::handleJapPacket(fmHashTableEntry *pHashEntry, bool 
  * 
  */
 SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEntry, bool a_bControlMessage, bool a_bMessageToJAP)
-	{	
+	{
 		INIT_STACK;
 		BEGIN_STACK("CAAccountingInstance::handleJapPacket");
 		
@@ -290,7 +290,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
 		AccountLoginHashEntry* loginEntry = NULL;
 		CAXMLErrorMessage* err = NULL;
-	
+		
 		pAccInfo->mutex->lock();
 		
 		if (pAccInfo->authFlags & AUTH_DELETE_ENTRY)
@@ -301,14 +301,14 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 		
 		//kick user out after previous error
 		if(pAccInfo->authFlags & AUTH_FATAL_ERROR)
-		{			
+		{
 			// there was an error earlier.
 			if (a_bMessageToJAP && a_bControlMessage)
 			{				
 				return returnKickout(pAccInfo);
 			}
 			else
-			{							
+			{				
 				pAccInfo->mutex->unlock();
 				return HANDLE_PACKET_PREPARE_FOR_CLOSING_CONNECTION; // don't let through messages from JAP
 			}
@@ -348,7 +348,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			pAccInfo->mutex->unlock();
 			return HANDLE_PACKET_CONNECTION_UNCHECKED;
 		}
-	
+		
 		
 		
 		//CAMsg::printMsg( LOG_DEBUG, "Checking after %d session packets...\n", pAccInfo->sessionPackets);
@@ -363,27 +363,27 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			// this user is authenticated; test if he has logged in more than one time
 			
 			if (!ms_pInstance->m_currentAccountsHashtable)
-			{
-				// accounting instance is dying...
-				return returnKickout(pAccInfo);
-			}
-			
+		{
+			// accounting instance is dying...
+			return returnKickout(pAccInfo);
+		}
+
 			ms_pInstance->m_currentAccountsHashtable->getMutex().lock();
 			loginEntry = (AccountLoginHashEntry*)ms_pInstance->m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
 			if (loginEntry)
-			{
+		{						
 				pAccInfo->authFlags &= ~loginEntry->authRemoveFlags;
 				//CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Remove flag: %d\n", loginEntry->authRemoveFlags);
 				
 				if (loginEntry->userID != pHashEntry->id)
-				{
+			{
 					// this is not the latest connection of this user; kick him out...
 					pAccInfo->authFlags |= AUTH_MULTIPLE_LOGIN;
 					ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();
 					return returnPrepareKickout(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_MULTIPLE_LOGIN, (UINT8*)"Only one login per account is allowed!"));
-				}
+			}
 				else if (loginEntry->authFlags & AUTH_OUTDATED_CC)
-				{
+			{
 					loginEntry->authFlags &= ~AUTH_OUTDATED_CC;	
 					
 					UINT8 tmp[32];
@@ -425,13 +425,13 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 					 * If confirmedBytes > 0,  any remaining prepaid bytes may be used.
 					 */
 					pAccInfo->confirmedBytes = loginEntry->confirmedBytes;
-				}
+			}
 				else if (loginEntry->authFlags & AUTH_INVALID_ACCOUNT)
-				{
+			{
 					loginEntry->authFlags &= ~AUTH_INVALID_ACCOUNT;											
-					CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Found invalid account! Kicking out user...\n");																
-					err = new CAXMLErrorMessage(CAXMLErrorMessage::ERR_KEY_NOT_FOUND);
-				}
+				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Found invalid account! Kicking out user...\n");																
+				err = new CAXMLErrorMessage(CAXMLErrorMessage::ERR_KEY_NOT_FOUND);
+			}
 				else if (loginEntry->authFlags & AUTH_BLOCKED)
 				{
 					loginEntry->authFlags &= ~AUTH_BLOCKED;										
@@ -445,11 +445,11 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 					err = new CAXMLErrorMessage(CAXMLErrorMessage::ERR_DATABASE_ERROR);
 				}
 				else if (loginEntry->authFlags & AUTH_UNKNOWN)
-				{
+			{
 					loginEntry->authFlags &= ~AUTH_UNKNOWN;										
 					CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Unknown error! Kicking out user...\n");																
 					err = new CAXMLErrorMessage(CAXMLErrorMessage::ERR_INTERNAL_SERVER_ERROR);
-				}
+			}
 			}
 			else
 			{
@@ -461,9 +461,9 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();
 		}		
 
-		
+			
 		if (pAccInfo->authFlags & AUTH_ACCOUNT_EMPTY)
-		{
+			{							
 			// There should be no time limit. The connections is simply closed after all prepaid bytes are gone.
 			pAccInfo->lastHardLimitSeconds = time(NULL);
 			
@@ -472,10 +472,10 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			#endif
 			
 			if (getPrepaidBytes(pAccInfo) <= 0)
-			{
+				{
 				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Account empty! Kicking out user...\n");				
 				err = new CAXMLErrorMessage(CAXMLErrorMessage::ERR_ACCOUNT_EMPTY);
-			}
+				}
 			else
 			{
 				/** 
@@ -487,22 +487,22 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 				 */
 				returnOK(pAccInfo);
 			}
-		}
-	
+		}		
+		
 		/** @todo We need this trick so that the program does not freeze with active AI ThreadPool!!!! */
 		//pAccInfo->mutex->lock();
 		
 		SAVE_STACK("CAAccountingInstance::handleJapPacket", "before err");
 		
 		if (err)
-		{						
+		{
 			return returnPrepareKickout(pAccInfo, err);		
-		}
+		}	
 	
 		//CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: handleJapPacket auth for account %s.\n", accountNrAsString);
 	
 		if (!(pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT))
-		{
+		{ 
 			//dont let the packet through for now, but still wait for an account cert
 			if (!(pAccInfo->authFlags & AUTH_TIMEOUT_STARTED))						
 			{
@@ -518,13 +518,13 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 				CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Auth timeout has runout, will kick out user now...\n");
 	//#endif											
 				return returnPrepareKickout(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_NO_ACCOUNTCERT));				
-			}						
-					
+			}			
+			
 			pAccInfo->mutex->unlock();
 			return HANDLE_PACKET_HOLD_CONNECTION;
 		}
 		else 
-		{									
+		{			
 			if(pAccInfo->authFlags & AUTH_FAKE )
 			{
 				// authentication process not properly finished
@@ -552,7 +552,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 					// do not forward any traffic from JAP
 					return HANDLE_PACKET_HOLD_CONNECTION;
 				}					
-			}			
+			}
 
 			//----------------------------------------------------------
 			// ******     Hardlimit cost confirmation check **********
@@ -578,11 +578,11 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			{	
 				UINT32 prepaidInterval;
 				pglobalOptions->getPrepaidInterval(&prepaidInterval);
-							
+					
 				if ((pAccInfo->authFlags & AUTH_HARD_LIMIT_REACHED) == 0)
 				{
 					pAccInfo->lastHardLimitSeconds = time(NULL);
-					pAccInfo->authFlags |= AUTH_HARD_LIMIT_REACHED;					
+					pAccInfo->authFlags |= AUTH_HARD_LIMIT_REACHED;
 				}
 				
 #ifdef DEBUG					
@@ -635,7 +635,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 				}//we have sent a CC request
 				// no CC request sent yet --> send a first CC request
 				
-				//send CC to jap
+                //send CC to jap
 				sendCCRequest(pAccInfo);
 						
 				return returnOK(pAccInfo);
@@ -704,9 +704,9 @@ SINT32 CAAccountingInstance::returnOK(tAiAccountingInfo* pAccInfo)
 		ret = HANDLE_PACKET_CONNECTION_OK;
 	}
 	pAccInfo->mutex->unlock();
-	
+
 	return ret;	
-}
+}	
 
 
 /**
@@ -751,7 +751,7 @@ SINT32 CAAccountingInstance::returnPrepareKickout(tAiAccountingInfo* pAccInfo, C
 
 
 SINT32 CAAccountingInstance::sendCCRequest(tAiAccountingInfo* pAccInfo)
-{
+{	
 	//INIT_STACK;
 	//BEGIN_STACK("CAAccountingInstance::sendCCRequest");
 	
@@ -877,16 +877,16 @@ SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName
 		allSkis[i] =  (UINT8*) skiNode.getFirstChild().getNodeValue().transcode();
 
 	}
-	    //concatenate the hashes, and store for future reference to indentify the cascade
-    m_currentCascade = new UINT8[256];
-    for (UINT32 j = 0; j < nrOfMixes; j++)
-    {
-        //check for hash value size (should always be OK)
+	//concatenate the hashes, and store for future reference to indentify the cascade
+	m_currentCascade = new UINT8[256];
+	for (UINT32 j = 0; j < nrOfMixes; j++)
+	{
+		//check for hash value size (should always be OK)
         if (strlen((const char*)m_currentCascade) > ( 256 - strlen((const char*)m_allHashes[j]) )   )
-        {
-            return E_UNKNOWN;
-            CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance::prepareCCRequest: Too many/too long hash values, ran out of allocated memory\n");
-        }
+		{
+			return E_UNKNOWN;
+			CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance::prepareCCRequest: Too many/too long hash values, ran out of allocated memory\n");
+		}
         if (j == 0)
         {
             m_currentCascade = (UINT8*) strcpy( (char*) m_currentCascade,(const char*)m_allHashes[j]);
@@ -894,7 +894,7 @@ SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName
         {
             m_currentCascade = (UINT8*) strcat((char*)m_currentCascade,(char*)m_allHashes[j]);
         }
-    } 
+	}	
 	
 	//and append to CC
 	DOM_Element elemPriceCerts = m_preparedCCRequest.createElement("PriceCertificates");
@@ -909,19 +909,19 @@ SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName
 		setDOMElementAttribute(elemCert, "position", i);
 		if (i == 0) 
 		{
-			elemCert.setAttribute("isAI","true");
+			elemCert.setAttribute("isAI","true");	
+			}
+			elemPriceCerts.appendChild(elemCert);
 		}
-		elemPriceCerts.appendChild(elemCert);
-	}
-	elemCC.appendChild(elemPriceCerts);
+		elemCC.appendChild(elemPriceCerts);
 #ifdef DEBUG 		
-	CAMsg::printMsg(LOG_DEBUG, "finished method makeCCRequest\n");
+		CAMsg::printMsg(LOG_DEBUG, "finished method makeCCRequest\n");
 #endif		
 
-	delete[] mixNodes;
+		delete[] mixNodes;
 	//delete[] allHashes;
-	delete[] allSkis;	
-	return E_SUCCESS;
+		delete[] allSkis;	
+		return E_SUCCESS;
 
 }
 
@@ -944,7 +944,7 @@ SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UIN
 		DOM_Element elemBytes = doc.createElement("TransferredBytes");
 		setDOMElementValue(elemBytes, transferredBytes);
 		elemCC.appendChild(elemBytes);
-		
+
 		FINISH_STACK("CAAccountingInstance::makeCCRequest");
 
 		return E_SUCCESS;
@@ -1063,7 +1063,7 @@ void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo,
  *   (receive a new acc.cert. though we already have one)
  */
 void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* pAccInfo, DOM_Element &root)
-	{			
+	{
 		INIT_STACK;
 		BEGIN_STACK("CAAccountingInstance::handleAccountCertificate");
 		
@@ -1079,7 +1079,7 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 		{
 			return;
 		}
-							
+		
 		pAccInfo->mutex->lock();
 		
 		if (pAccInfo->authFlags & AUTH_DELETE_ENTRY)
@@ -1089,24 +1089,24 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 		}
 		
 		if (pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT)
-		{
-			//#ifdef DEBUG
-				CAMsg::printMsg(LOG_DEBUG, "Already got an account cert. Ignoring...");
-			//#endif
-			CAXMLErrorMessage err(
-					CAXMLErrorMessage::ERR_BAD_REQUEST, 
-					(UINT8*)"You have already sent an Account Certificate"
-				);
-			DOM_Document errDoc;
-			err.toXmlDocument(errDoc);
-			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
+			{
+				//#ifdef DEBUG
+					CAMsg::printMsg(LOG_DEBUG, "Already got an account cert. Ignoring...");
+				//#endif
+				CAXMLErrorMessage err(
+						CAXMLErrorMessage::ERR_BAD_REQUEST, 
+						(UINT8*)"You have already sent an Account Certificate"
+					);
+				DOM_Document errDoc;
+				err.toXmlDocument(errDoc);
+				pAccInfo->pControlChannel->sendXMLMessage(errDoc);
 			pAccInfo->mutex->unlock();
-			return ;
-		}
+				return ;
+			}
 
 		// parse & set accountnumber
 		if (getDOMChildByName( root, (UINT8 *)"AccountNumber", elGeneral, false ) != E_SUCCESS ||
-			getDOMElementValue( elGeneral, pAccInfo->accountNumber ) != E_SUCCESS)
+					getDOMElementValue( elGeneral, pAccInfo->accountNumber ) != E_SUCCESS)
 		{
 			CAMsg::printMsg( LOG_ERR, "AccountCertificate has wrong or no accountnumber. Ignoring...\n");
 			CAXMLErrorMessage err(CAXMLErrorMessage::ERR_WRONG_FORMAT);
@@ -1115,8 +1115,8 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
 			pAccInfo->mutex->unlock();
 			return ;
-		}		
-
+		}
+		
 		// parse & set payment instance id
 		UINT32 len=256;
 		pAccInfo->pstrBIID=new UINT8[256];
@@ -1159,24 +1159,24 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 	#endif
 	pAccInfo->pPublicKey = new CASignature();
 	if ( pAccInfo->pPublicKey->setVerifyKey( elGeneral ) != E_SUCCESS )
-	{
-		CAXMLErrorMessage err(CAXMLErrorMessage::ERR_INTERNAL_SERVER_ERROR);
-		DOM_Document errDoc;
-		err.toXmlDocument(errDoc);
-		pAccInfo->pControlChannel->sendXMLMessage(errDoc);
+		{
+			CAXMLErrorMessage err(CAXMLErrorMessage::ERR_INTERNAL_SERVER_ERROR);
+			DOM_Document errDoc;
+			err.toXmlDocument(errDoc);
+			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
 		pAccInfo->mutex->unlock();
-		return ;
-	}
+			return ;
+		}
 
 	if ((!m_pJpiVerifyingInstance) ||
-		(m_pJpiVerifyingInstance->verifyXML( (DOM_Node &)root, (CACertStore *)NULL ) != E_SUCCESS ))
-	{
-		// signature invalid. mark this user as bad guy
-		CAMsg::printMsg( LOG_INFO, "CAAccountingInstance::handleAccountCertificate(): Bad Jpi signature\n" );
+			(m_pJpiVerifyingInstance->verifyXML( (DOM_Node &)root, (CACertStore *)NULL ) != E_SUCCESS ))
+		{
+			// signature invalid. mark this user as bad guy
+			CAMsg::printMsg( LOG_INFO, "CAAccountingInstance::handleAccountCertificate(): Bad Jpi signature\n" );
 		pAccInfo->authFlags |= AUTH_FAKE | AUTH_GOT_ACCOUNTCERT | AUTH_TIMEOUT_STARTED;
 		pAccInfo->mutex->unlock();
-		return ;
-	}		
+			return ;
+		}
 	
 		
 	UINT8 * arbChallenge;
@@ -1275,19 +1275,19 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 	if( (!(pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT)) ||
 			(!(pAccInfo->authFlags & AUTH_CHALLENGE_SENT))
 		)
-	{
+		{
 		pAccInfo->mutex->unlock();
-		return ;
-	}
+			return ;
+		}
 	pAccInfo->authFlags &= ~AUTH_CHALLENGE_SENT;
 
 	// get raw bytes of response
 	if ( getDOMElementValue( root, decodeBuffer, &decodeBufferLen ) != E_SUCCESS )
-	{
-		CAMsg::printMsg( LOG_DEBUG, "ChallengeResponse has wrong XML format. Ignoring\n" );
+		{
+			CAMsg::printMsg( LOG_DEBUG, "ChallengeResponse has wrong XML format. Ignoring\n" );
 		pAccInfo->mutex->unlock();
 		return;
-	}
+		}
 	usedLen = decodeBufferLen;
 	decodeBufferLen = 512;
 	CABase64::decode( decodeBuffer, usedLen, decodeBuffer, &decodeBufferLen );
@@ -1305,14 +1305,14 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 	sigTester->decodeRS( decodeBuffer, decodeBufferLen, pDsaSig );
 	if ( sigTester->verifyDER( pAccInfo->pChallenge, 222, decodeBuffer, decodeBufferLen ) 
 		!= E_SUCCESS )
-	{
+		{
 		UINT8 accountNrAsString[32];
 		print64(accountNrAsString, pAccInfo->accountNumber);
 		CAMsg::printMsg(LOG_ERR, "Challenge-response authentication failed for account %s!\n", accountNrAsString);
-		pAccInfo->authFlags |= AUTH_FAKE;
-		pAccInfo->authFlags &= ~AUTH_ACCOUNT_OK;
+			pAccInfo->authFlags |= AUTH_FAKE;
+			pAccInfo->authFlags &= ~AUTH_ACCOUNT_OK;
 		pAccInfo->mutex->unlock();
-		return ;
+			return ;
 	}	
 	
 	
@@ -1478,13 +1478,13 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 	
 	if (bSendCCRequest)
 	{		
-		// fetch cost confirmation from last session if available, and send it
+	// fetch cost confirmation from last session if available, and send it
 		//CAXMLCostConfirmation * pCC = NULL;
 		//m_dbInterface->getCostConfirmation(pAccInfo->accountNumber, m_currentCascade, &pCC);
 		if(pCC != NULL)
-		{			
+	{
 			// the typical case; the user had logged in before
-			pAccInfo->pControlChannel->sendXMLMessage(pCC->getXMLDocument());
+		pAccInfo->pControlChannel->sendXMLMessage(pCC->getXMLDocument());
 			//delete pCC;
 		}
 		else
@@ -1505,12 +1505,12 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 	}
 	
 	if ( pAccInfo->pChallenge != NULL ) // free mem
-	{
+		{
 		delete[] pAccInfo->pChallenge;
 		pAccInfo->pChallenge = NULL;
-	}
+		}
 	//CAMsg::printMsg( LOG_ERR, "CAAccountingInstance::handleChallengeResponse stop\n");
-	
+
 	pAccInfo->mutex->unlock();
 }
 
@@ -1549,20 +1549,20 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 	if (!(pAccInfo->authFlags & AUTH_GOT_ACCOUNTCERT) ||
 		!(pAccInfo->authFlags & AUTH_ACCOUNT_OK) ||  
 		!(pAccInfo->authFlags & AUTH_SENT_CC_REQUEST)) 
-	{		
+		{
 		CAMsg::printMsg(LOG_ERR, 
 			"CAAccountingInstance::handleCostConfirmation CC was received but has not been requested! Ignoring...\n");
 		
 		pAccInfo->mutex->unlock();
-		return ;
-	}
+			return ;
+		}
 		
 	CAXMLCostConfirmation* pCC = CAXMLCostConfirmation::getInstance(root);
 	if(pCC==NULL)
-	{
+		{
 		pAccInfo->mutex->unlock();
-		return ;
-	}
+			return ;
+		}
 	
 	
 		
@@ -1570,17 +1570,17 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 	// warning this removes the signature from doc!!!
 	if (pAccInfo->pPublicKey==NULL||
 		pAccInfo->pPublicKey->verifyXML( (DOM_Node &)root ) != E_SUCCESS)
-	{
-		// wrong signature
-		CAMsg::printMsg( LOG_INFO, "CostConfirmation has INVALID SIGNATURE!\n" );
-		CAXMLErrorMessage err(CAXMLErrorMessage::ERR_BAD_SIGNATURE, (UINT8*)"CostConfirmation has bad signature");
-		DOM_Document errDoc;
-		err.toXmlDocument(errDoc);
-		pAccInfo->pControlChannel->sendXMLMessage(errDoc);
-		delete pCC;
+		{
+			// wrong signature
+			CAMsg::printMsg( LOG_INFO, "CostConfirmation has INVALID SIGNATURE!\n" );
+			CAXMLErrorMessage err(CAXMLErrorMessage::ERR_BAD_SIGNATURE, (UINT8*)"CostConfirmation has bad signature");
+			DOM_Document errDoc;
+			err.toXmlDocument(errDoc);
+			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
+			delete pCC;
 		pAccInfo->mutex->unlock();
 		return;
-	}
+		}
 	#ifdef DEBUG
 	else
 		{
@@ -1590,17 +1590,17 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 	
 
 	if (pCC->getNumberOfHashes() != m_allHashesLen)
-	{
+		{
 		CAMsg::printMsg( LOG_INFO, "CostConfirmation has illegal number of price cert hashes!\n" );
 		CAXMLErrorMessage err(CAXMLErrorMessage::ERR_BAD_REQUEST, 
 			(UINT8*)"CostConfirmation has illegal number of price cert hashes");
-		DOM_Document errDoc;
-		err.toXmlDocument(errDoc);
-		pAccInfo->pControlChannel->sendXMLMessage(errDoc);
-		delete pCC;
+			DOM_Document errDoc;
+			err.toXmlDocument(errDoc);
+			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
+			delete pCC;
 		pAccInfo->mutex->unlock();
 		return;
-	}
+		}
 	
 	Hashtable* certHashCC = 
 		new Hashtable((UINT32 (*)(void *))Hashtable::stringHash, (SINT32 (*)(void *,void *))Hashtable::stringCompare);
@@ -1658,7 +1658,7 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 		if (pCC->getTransferredBytes() < pAccInfo->confirmedBytes)
 		{
 			UINT8 tmp[32], tmpOther[32];
-			print64(tmp,pCC->getTransferredBytes());
+		print64(tmp,pCC->getTransferredBytes());
 			print64(tmpOther,pAccInfo->confirmedBytes);		
 			CAMsg::printMsg( LOG_ERR, "CostConfirmation has insufficient number of bytes (%s < %s). Ignoring...\n", 
 				tmp, tmpOther );
@@ -1688,10 +1688,10 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 		}
 		else 
 		{
-			pAccInfo->confirmedBytes = pCC->getTransferredBytes();	
+	pAccInfo->confirmedBytes = pCC->getTransferredBytes();
 			
 			if (pAccInfo->authFlags & AUTH_WAITING_FOR_FIRST_SETTLED_CC)
-			{
+	{
 				// initiate immediate settling
 #ifdef DEBUG			
 				UINT64 currentMillis;
@@ -1701,7 +1701,7 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 				CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Settle ini: %s\n", tmpStrCurrentMillis);			
 #endif
 				m_pSettleThread->settle();
-			}
+	}
 		}
 	}
 	
@@ -1724,8 +1724,8 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 	
 	pAccInfo->bytesToConfirm = 0;
 	pAccInfo->authFlags &= ~AUTH_SENT_CC_REQUEST;
-
 	
+
 	delete pCC;
 	pAccInfo->mutex->unlock();
 	
@@ -1753,8 +1753,8 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 		return E_UNKNOWN;
 	}
 	
-	pHashEntry->pAccountingInfo = new tAiAccountingInfo;
-	memset( pHashEntry->pAccountingInfo, 0, sizeof( tAiAccountingInfo ) );
+		pHashEntry->pAccountingInfo = new tAiAccountingInfo;
+		memset( pHashEntry->pAccountingInfo, 0, sizeof( tAiAccountingInfo ) );
 	
 	SAVE_STACK("CAAccountingInstance::initTableEntry", "After memset");
 	
@@ -1764,7 +1764,7 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 		AUTH_SENT_CC_REQUEST; // prevents multiple CC requests on login
 	pHashEntry->pAccountingInfo->authTimeoutStartSeconds = time(NULL);
 	pHashEntry->pAccountingInfo->lastHardLimitSeconds = time(NULL);
-	pHashEntry->pAccountingInfo->sessionPackets = 0;
+		pHashEntry->pAccountingInfo->sessionPackets = 0;
 	pHashEntry->pAccountingInfo->transferredBytes = 0;
 	pHashEntry->pAccountingInfo->confirmedBytes = 0;
 	pHashEntry->pAccountingInfo->bytesToConfirm = 0;
@@ -1776,7 +1776,7 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 
 	FINISH_STACK("CAAccountingInstance::initTableEntry");
 	
-	return E_SUCCESS;
+		return E_SUCCESS;
 }
 
 
@@ -1806,8 +1806,8 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 		
 		pAccInfo->mutex->lock();
 		
-		pHashEntry->pAccountingInfo=NULL;
-		
+			pHashEntry->pAccountingInfo=NULL;
+			
 		if (pAccInfo->accountNumber)
 		{
 			if (pAccInfo->authFlags & AUTH_ACCOUNT_OK)
@@ -1829,10 +1829,10 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 							pAccInfo->confirmedBytes = loginEntry->confirmedBytes;
 						}
 						
-						//store prepaid bytes in database, so the user wont lose the prepaid amount by disconnecting
+			//store prepaid bytes in database, so the user wont lose the prepaid amount by disconnecting
 						prepaidBytes = getPrepaidBytes(pAccInfo);
 						if (prepaidBytes > 0)
-						{
+			{
 							pglobalOptions->getPrepaidInterval(&prepaidInterval);
 							if (prepaidBytes > prepaidInterval)
 							{
@@ -1848,14 +1848,14 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 								
 								prepaidBytes = prepaidInterval;
 							}
-						}												
-						
+			}
+			
 						if (ms_pInstance->m_dbInterface)
 						{
 							ms_pInstance->m_dbInterface->storePrepaidAmount(pAccInfo->accountNumber,prepaidBytes, ms_pInstance->m_currentCascade);
 						}
 					}					
-
+			
 					if (loginEntry->count <= 1)
 					{
 						if (loginEntry->count < 1)
@@ -1867,7 +1867,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 						delete loginEntry;
 					}
 					else
-					{
+			{
 						// there are other connections from this user
 						loginEntry->count--;
 					}
@@ -1877,29 +1877,29 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 					CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: Cleanup did not find user login hash entry!\n");
 				}
 				ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();	
-			}																					
+				}						
 		}
 		else
 		{
 			CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Cleanup method found account zero.\n");
-		}
+			}
+			
+			//free memory of pAccInfo
+			if ( pAccInfo->pPublicKey!=NULL )
+			{
+				delete pAccInfo->pPublicKey;
+			}
+			if ( pAccInfo->pChallenge!=NULL )
+			{
+				delete [] pAccInfo->pChallenge;
+			}
+			if ( pAccInfo->pstrBIID!=NULL )
+			{
+				delete [] pAccInfo->pstrBIID;
+			}
+			
 		
-		//free memory of pAccInfo
-		if ( pAccInfo->pPublicKey!=NULL )
-		{
-			delete pAccInfo->pPublicKey;
-		}
-		if ( pAccInfo->pChallenge!=NULL )
-		{
-			delete [] pAccInfo->pChallenge;
-		}
-		if ( pAccInfo->pstrBIID!=NULL )
-		{
-			delete [] pAccInfo->pstrBIID;
-		}
-					
-		
-		pHashEntry->pAccountingInfo=NULL;	
+			pHashEntry->pAccountingInfo=NULL;
 		
 		if (pAccInfo->nrInQueue > 0)
 		{
@@ -1907,7 +1907,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			if (pAccInfo->accountNumber == 0)
 			{
 				CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: AI queue entries found for account zero: %u!\n", pAccInfo->nrInQueue);
-			}	
+		}
 			else if (!(pAccInfo->authFlags & AUTH_ACCOUNT_OK))
 			{
 				UINT8 accountNrAsString[32];
