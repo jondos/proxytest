@@ -60,6 +60,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define DYNAMIC_MIX
 
 //#define PRINT_THREAD_STACK_TRACE //Usefull for debugging output of stack trace if mix dies...
+#if !defined(PRINT_THREAD_STACK_TRACE) && defined (DEBUG)
+	#define PRINT_THREAD_STACK_TRACE
+#endif
 
 //the following definition are just for threading support beside pthread
 #undef USE_SEMAPHORE //normally we do not need semaphores
