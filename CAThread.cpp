@@ -31,11 +31,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAUtil.hpp"
 #include "CAMsg.hpp"
 
-///check
-pthread_once_t CAThread::ms_threadKeyInit = PTHREAD_ONCE_INIT;
-pthread_key_t CAThread::ms_threadKey; 
-
 #ifdef PRINT_THREAD_STACK_TRACE	
+	pthread_once_t CAThread::ms_threadKeyInit = PTHREAD_ONCE_INIT;
+	pthread_key_t CAThread::ms_threadKey; 
 	const char* CAThread::METHOD_BEGIN = "Begin of method";
 	const char* CAThread::METHOD_END = "End of method";
 #endif
@@ -60,7 +58,7 @@ CAThread::CAThread(const UINT8* strName)
 				m_strName[len]=0;
 			}
 	}
-///check
+#ifdef PRINT_THREAD_STACK_TRACE	
 void CAThread::destroyValue(void* a_value) 
 { 
 	if (a_value)
@@ -74,7 +72,6 @@ void CAThread::initKey()
 	pthread_key_create(&ms_threadKey, destroyValue); 
 }
 
-#ifdef PRINT_THREAD_STACK_TRACE	
 void CAThread::setCurrentStack(METHOD_STACK* a_value)
 {
 	pthread_once(&ms_threadKeyInit, initKey); 

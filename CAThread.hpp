@@ -196,14 +196,14 @@ class CAThread
 			static const char* METHOD_END;
 #endif
 		private:
-///check
+#ifdef PRINT_THREAD_STACK_TRACE
 			static void destroyValue(void* a_stack);
 			static void initKey();
 		
 		
 			static pthread_key_t ms_threadKey; 
 			static pthread_once_t ms_threadKeyInit;
-///end check		
+#endif
 			THREAD_MAIN_TYP m_fncMainLoop;
 	 		pthread_t* m_pThread;
 			UINT8* m_strName; //< a name mostly for debuging purpose...
