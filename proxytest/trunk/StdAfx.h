@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.06.14"
+#define MIX_VERSION "00.07.01"
 
 #include "doxygen.h"
 
@@ -184,45 +184,47 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define PAYMENT_VERSION "2.0"
 
 #if defined (_WIN32) &&!defined(__CYGWIN__)
-		//For Visual C++    #if defined(_MSC_VER)
-		//For Borland C++    #if defined(__BCPLUSPLUS__)
-    #if _MSC_VER > 1000
-    #pragma once
-    #endif // _MSC_VER > 1000
-		#define _WIN32_WINDOWS 0x0410
-		#include <winsock2.h>
-		#if defined(_MSC_VER) &&defined (_DEBUG)
-			#include <crtdbg.h>
-			#define HAVE_CRTDBG
-		#endif
-		#define socklen_t int
-		#define MSG_NOSIGNAL 0
+	//For Visual C++    #if defined(_MSC_VER)
+	//For Borland C++    #if defined(__BCPLUSPLUS__)
+	#define _CRT_SECURE_NO_DEPRECATE
+	#define _CRT_SECURE_NO_WARNINGS    
+	#if _MSC_VER > 1000
+		#pragma once
+	#endif // _MSC_VER > 1000
+	#define _WIN32_WINDOWS 0x0410
+	#include <winsock2.h>
+	#if defined(_MSC_VER) &&defined (_DEBUG)
+		#include <crtdbg.h>
+		#define HAVE_CRTDBG
+	#endif
+	#define socklen_t int
+	#define MSG_NOSIGNAL 0
     #include <io.h>
-    #include <conio.h>
-		#include <sys/timeb.h>
-		#include <process.h>
-		#ifdef MSC_VER
-			#define ftime _ftime
-			#define timeb _timeb
-		#endif
-		#include <malloc.h>
-		#define GET_NET_ERROR (WSAGetLastError())
-		#define GET_NET_ERROR_STR(x) ("Unknown error")
-		#define ERR_INTERN_TIMEDOUT WSAETIMEDOUT
-		#define ERR_INTERN_CONNREFUSED WSAECONNREFUSED
-		#define ERR_INTERN_WOULDBLOCK	WSAEWOULDBLOCK
-		#define ERR_INTERN_SOCKET_CLOSED WSAENOTSOCK
-		#define MSG_DONTWAIT 0
-		#define O_NONBLOCK 0
-		#define HAVE_VSNPRINTF
-		#define HAVE_SNPRINTF
+	#include <conio.h>
+	#include <sys/timeb.h>
+	#include <process.h>
+	#ifdef _MSC_VER
+		#define ftime _ftime
+		#define timeb _timeb
+	#endif
+	#include <malloc.h>
+	#define GET_NET_ERROR (WSAGetLastError())
+	#define GET_NET_ERROR_STR(x) ("Unknown error")
+	#define ERR_INTERN_TIMEDOUT WSAETIMEDOUT
+	#define ERR_INTERN_CONNREFUSED WSAECONNREFUSED
+	#define ERR_INTERN_WOULDBLOCK	WSAEWOULDBLOCK
+	#define ERR_INTERN_SOCKET_CLOSED WSAENOTSOCK
+	#define MSG_DONTWAIT 0
+	#define O_NONBLOCK 0
+	#define HAVE_VSNPRINTF
+	#define HAVE_SNPRINTF
+	#if _MSC_VER <1500
 		#define vsnprintf _vsnprintf
-		#define snprintf _snprintf
-		#define atoll _atoi64
-		#define getpid _getpid
-		#define HAVE_ATOLL
-		#define _CRT_SECURE_NO_DEPRECATE
-		#define _CRT_SECURE_NO_WARNINGS
+	#endif
+	#define snprintf _snprintf
+	#define atoll _atoi64
+	#define getpid _getpid
+	#define HAVE_ATOLL
 #else
 	//__linux is not defined on power pc so we define our own __linux if __linux__ is defined
 	#if defined(__linux__) && !defined(__linux)

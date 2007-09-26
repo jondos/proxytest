@@ -45,7 +45,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(DevEnvDir)\..\..\VC\lib\PlatformSDK\Include&quot;;&quot;$(INCLUDE_XERCES_C)&quot;;&quot;$(INCLUDE_XERCES_C)\xercesc&quot;;&quot;$(INCLUDE_OPENSSL)&quot;;&quot;$(INCLUDE_PTHREADS)&quot;;&quot;$(INCLUDE_ZLIB)&quot;;&quot;$(INCLUDE_MYSQL)&quot;;&quot;$(INCLUDE_POSTGRES_CLIENT_LIB)\postgresql&quot;;&quot;$(INCLUDE_POSTGRES_CLIENT_LIB)&quot;"
+				AdditionalIncludeDirectories="&quot;L:\Programme\Microsoft SDKs\Windows\v6.0A\Include&quot;;&quot;$(INCLUDE_XERCES_C)&quot;;&quot;$(INCLUDE_XERCES_C)\xercesc&quot;;&quot;$(INCLUDE_OPENSSL)&quot;;&quot;$(INCLUDE_PTHREADS)&quot;;&quot;$(INCLUDE_ZLIB)&quot;;&quot;$(INCLUDE_MYSQL)&quot;;&quot;$(INCLUDE_POSTGRES_CLIENT_LIB)\postgresql&quot;;&quot;$(INCLUDE_POSTGRES_CLIENT_LIB)&quot;"
 				PreprocessorDefinitions="WIN32;_CONSOLE;_DEBUG;_REENTRANT;__MIX_TEST;__CLEANUP_C;"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -82,7 +82,7 @@
 				OutputFile="$(OutDir)\proxytest.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="&quot;$(DevEnvDir)\..\..\VC\lib\PlatformSDK\lib&quot;;&quot;.\proxytest-lib\Debug&quot;;&quot;$(LIB_XERCES_C_DEBUG)&quot;;&quot;$(LIB_OPENSSL)&quot;;&quot;$(LIB_PTHREADS)&quot;;&quot;$(LIB_ZLIB)&quot;;&quot;$(LIB_POSTGRES)&quot;"
+				AdditionalLibraryDirectories="&quot;L:\Programme\Microsoft SDKs\Windows\v6.0A\Lib&quot;;&quot;.\proxytest-lib\Debug&quot;;&quot;$(LIB_XERCES_C_DEBUG)&quot;;&quot;$(LIB_OPENSSL)&quot;;&quot;$(LIB_PTHREADS)&quot;;&quot;$(LIB_ZLIB)&quot;;&quot;$(LIB_POSTGRES)&quot;"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)\proxytest.pdb"
 				GenerateMapFile="true"
@@ -148,7 +148,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
-				AdditionalIncludeDirectories="$(INCLUDE_XERCES_C);$(INCLUDE_XERCES_C)\xercesc;$(INCLUDE_OPENSSL);$(INCLUDE_PTHREADS);$(INCLUDE_ZLIB);$(INCLUDE_MYSQL);"
+				AdditionalIncludeDirectories="&quot;L:\Programme\Microsoft SDKs\Windows\v6.0A\Include&quot;;&quot;$(INCLUDE_XERCES_C)&quot;;&quot;$(INCLUDE_XERCES_C)\xercesc&quot;;&quot;$(INCLUDE_OPENSSL)&quot;;&quot;$(INCLUDE_PTHREADS)&quot;;&quot;$(INCLUDE_ZLIB)&quot;;&quot;$(INCLUDE_MYSQL)&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_REENTRANT;__CLEANUP_C"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -177,11 +177,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib ssleay32.lib libeay32.lib pthreadvce.lib xerces-c_2.lib"
+				AdditionalDependencies="ws2_32.lib ssleay32.lib libeay32.lib pthreadvce.lib xerces-c_2.lib xerces-depdom_2.lib $(NOINHERIT)"
 				OutputFile="$(OutDir)\proxytest.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories=".\proxytest-lib\Release;$(LIB_XERCES_C_RELEASE);$(LIB_OPENSSL);$(LIB_PTHREADS)"
+				AdditionalLibraryDirectories="&quot;L:\Programme\Microsoft SDKs\Windows\v6.0A\Lib&quot;;&quot;.\proxytest-lib\Release&quot;;&quot;$(LIB_XERCES_C_RELEASE)&quot;;&quot;$(LIB_OPENSSL)&quot;;&quot;$(LIB_PTHREADS)&quot;"
 				ProgramDatabaseFile="$(OutDir)\proxytest.pdb"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
@@ -596,6 +596,7 @@
 	<References>
 		<ProjectReference
 			ReferencedProjectIdentifier="{150377B0-CA8F-4031-A0B8-45A3001F4F81}"
+			RelativePathToProject=".\proxytest-lib.vcproj"
 		/>
 	</References>
 	<Files>

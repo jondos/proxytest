@@ -82,7 +82,7 @@ typedef struct
 void removePidFile()
 	{
 		UINT8 strPidFile[512];
-		if(options.getPidFile(strPidFile,512)==E_SUCCESS)
+		if(pglobalOptions->getPidFile(strPidFile,512)==E_SUCCESS)
 			{
 				if(::remove((char*)strPidFile)!=0)
 					{

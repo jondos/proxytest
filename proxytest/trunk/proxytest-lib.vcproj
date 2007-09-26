@@ -20,7 +20,6 @@
 			OutputDirectory=".\proxytest-lib\Debug"
 			IntermediateDirectory=".\proxytest-lib\Debug"
 			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -45,7 +44,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(DevEnvDir)\..\..\VC\lib\PlatformSDK\Include&quot;;&quot;$(INCLUDE_XERCES_C)&quot;;&quot;$(INCLUDE_XERCES_C)\xercesc&quot;;&quot;$(INCLUDE_OPENSSL)&quot;;&quot;$(INCLUDE_PTHREADS)&quot;;&quot;$(INCLUDE_ZLIB)&quot;;&quot;$(INCLUDE_MYSQL)&quot;;&quot;$(INCLUDE_POSTGRES_CLIENT_LIB)\postgresql&quot;;&quot;$(INCLUDE_POSTGRES_CLIENT_LIB)&quot;"
+				AdditionalIncludeDirectories="&quot;L:\Programme\Microsoft SDKs\Windows\v6.0A\include&quot;;&quot;$(INCLUDE_XERCES_C)&quot;;&quot;$(INCLUDE_XERCES_C)\xercesc&quot;;&quot;$(INCLUDE_OPENSSL)&quot;;&quot;$(INCLUDE_PTHREADS)&quot;;&quot;$(INCLUDE_ZLIB)&quot;;&quot;$(INCLUDE_MYSQL)&quot;;&quot;$(INCLUDE_POSTGRES_CLIENT_LIB)\postgresql&quot;;&quot;$(INCLUDE_POSTGRES_CLIENT_LIB)&quot;"
 				PreprocessorDefinitions="WIN32;_CONSOLE;_DEBUG;_REENTRANT;__MIX_TEST;__CLEANUP_C;"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -130,7 +129,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
-				AdditionalIncludeDirectories="$(INCLUDE_XERCES_C);$(INCLUDE_XERCES_C)\xercesc;$(INCLUDE_OPENSSL);$(INCLUDE_PTHREADS);$(INCLUDE_ZLIB);$(INCLUDE_MYSQL);"
+				AdditionalIncludeDirectories="&quot;L:\Programme\Microsoft SDKs\Windows\v6.0A\Include&quot;;&quot;$(INCLUDE_XERCES_C)&quot;;&quot;$(INCLUDE_XERCES_C)\xercesc&quot;;&quot;$(INCLUDE_OPENSSL)&quot;;&quot;$(INCLUDE_PTHREADS)&quot;;&quot;$(INCLUDE_ZLIB)&quot;;&quot;$(INCLUDE_MYSQL)&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_REENTRANT;__CLEANUP_C"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -2180,77 +2179,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="CAPayment.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						BrowseInformation="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="VTune|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="3"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Mit Xerces 2.0.0|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						BrowseInformation="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Mit Xerces 2.3 dev|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						BrowseInformation="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="proxytest-only-local-debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						BrowseInformation="1"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath=".\CAPool.cpp"
 				>
 			</File>
@@ -3586,12 +3514,28 @@
 							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\tre\tre-compile.cpp"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -3770,12 +3714,28 @@
 							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\tre\tre-stack.cpp"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -3863,6 +3823,14 @@
 						/>
 					</FileConfiguration>
 					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
 						Name="proxytest-only-local-debug|Win32"
 						>
 						<Tool
@@ -3876,6 +3844,14 @@
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -3952,6 +3928,14 @@
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -4471,10 +4455,6 @@
 			</File>
 			<File
 				RelativePath="CAMuxSocket.hpp"
-				>
-			</File>
-			<File
-				RelativePath="CAPayment.hpp"
 				>
 			</File>
 			<File
