@@ -828,7 +828,7 @@ SINT32 CAInfoService::sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN (*a_
 			returnValue = E_SUCCESS;
 		}
 		delete messages[i]->addr;
-		delete messagea[i];
+		delete messages[i];
 		delete threads[i];
 	}
 

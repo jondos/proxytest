@@ -30,8 +30,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if defined (DEBUG) && defined(HAVE_PTHREAD_MUTEXES)
 #include "CAMsg.hpp"
 
-#if defined (DEBUG) && defined(HAVE_PTHREAD_MUTEXES)
-
 CAMutex::CAMutex()
 	{
 		m_pMutex=new pthread_mutex_t;
