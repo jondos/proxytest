@@ -114,8 +114,12 @@ class CAThread
 			
 			~CAThread()
 				{
+					#ifdef OS_TUDOS
+					m_Thread = L4THREAD_INVALID_ID;
+					#else
 					if(m_pThread!=NULL)
 						delete m_pThread;
+					#endif
 					if(m_strName!=NULL)
 						delete[] m_strName;
 				}
@@ -157,6 +161,13 @@ class CAThread
 				*/
 			SINT32 join()
 				{
+#ifdef OS_TUDOS
+					CAMsg::printMsg(LOG_ERR,"CAThread - join() L4 implement me !\n");
+					if(m_Thread==L4THREAD_INVALID_ID)
+						return E_SUCCESS;
+
+					return E_UNKNOWN;
+#else
 					if(m_pThread==NULL)
 						return E_SUCCESS;
 					if(pthread_join(*m_pThread,NULL)==0)
@@ -173,6 +184,7 @@ class CAThread
 							CAMsg::printMsg(LOG_ERR,"CAThread - join() not successful\n");
 							return E_UNKNOWN;
 						}
+#endif
 				}
 
 /*			SINT32 sleep(UINT32 msSeconds)
@@ -205,7 +217,11 @@ class CAThread
 			static pthread_once_t ms_threadKeyInit;
 #endif
 			THREAD_MAIN_TYP m_fncMainLoop;
+#ifdef OS_TUDOS
+			l4thread_t m_Thread;
+#else	
 	 		pthread_t* m_pThread;
+#endif
 			UINT8* m_strName; //< a name mostly for debuging purpose...
 	};
 #endif

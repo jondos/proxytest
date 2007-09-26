@@ -41,14 +41,23 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 CAThread::CAThread()
 	{
 		m_fncMainLoop=NULL;
+#ifdef OS_TUDOS
+		m_Thread=L4THREAD_INVALID_ID;
+		assert(ms_threadKey != L4_ENOKEY);
+#else
 		m_pThread=NULL;
+#endif
 		m_strName=NULL;
 	}
 
 CAThread::CAThread(const UINT8* strName)
 	{
 		m_fncMainLoop=NULL;
+#ifdef OS_TUDOS
+		m_Thread=L4THREAD_INVALID_ID;
+#else
 		m_pThread=NULL;
+#endif
 		m_strName=NULL;
 		if(strName!=NULL)
 			{
@@ -95,12 +104,25 @@ SINT32 CAThread::start(void* param,bool bDaemon,bool bSilent)
 	{
 		if(m_fncMainLoop==NULL)
 			return E_UNKNOWN;
+
+#ifndef OS_TUDOS
 		m_pThread=new pthread_t;
+#endif
+
 		#ifdef DEBUG
 			if(!bSilent)
 				CAMsg::printMsg(LOG_DEBUG, "CAThread::start() - creating thread\n");
 		#endif
 
+#ifdef OS_TUDOS
+		if ((m_Thread = l4thread_create(m_fncMainLoop, param, L4THREAD_CREATE_ASYNC)) < 1)
+			{
+				m_Thread = L4THREAD_INVALID_ID;
+				if(!bSilent)
+					CAMsg::printMsg(LOG_ERR, "CAThread::start() - creating new thread failed!\n");
+				return E_UNKNOWN;
+			}
+#else
 		if(pthread_create(m_pThread,NULL,m_fncMainLoop,param)!=0)
 			{
 				if(!bSilent)
@@ -109,10 +131,23 @@ SINT32 CAThread::start(void* param,bool bDaemon,bool bSilent)
 				m_pThread=NULL;
 				return E_UNKNOWN;
 			}
+		#endif
+
 		#ifdef DEBUG
 			if(!bSilent)
 				CAMsg::printMsg(LOG_DEBUG, "CAThread::start() - thread created sucessful\n");
 		#endif
+
+		#ifdef OS_TUDOS
+
+		if(m_strName!=NULL&&!bSilent)
+			CAMsg::printMsg(LOG_DEBUG,
+				"Thread with name: %s created - pthread_t: "l4util_idfmt"\n",
+				 m_strName, l4util_idstr(l4thread_l4_id(m_Thread)));
+
+		if(bDaemon)
+			CAMsg::printMsg(LOG_ERR, "TODO: Emulate pthread_detach on L4 ?!\n");
+		#else
 		if(m_strName!=NULL&&!bSilent)
 			{
 				UINT8* temp=bytes2hex(m_pThread,sizeof(pthread_t));
@@ -121,6 +156,7 @@ SINT32 CAThread::start(void* param,bool bDaemon,bool bSilent)
 			}
 		if(bDaemon)
 			pthread_detach(*m_pThread);
+#endif
 		return E_SUCCESS;
 	}
 #endif //ONLY_LOCAL_PROXY

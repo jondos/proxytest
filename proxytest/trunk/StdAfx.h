@@ -374,10 +374,19 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#include <semaphore.h>
 	#endif
 #endif
-#define THREAD_RETURN void*
-#define THREAD_RETURN_ERROR return(NULL)
-#define THREAD_RETURN_SUCCESS return (NULL)
 
+#ifdef OS_TUDOS
+	#define THREAD_RETURN void
+	#define THREAD_RETURN_ERROR return
+	#define THREAD_RETURN_SUCCESS return
+	#include <l4/thread/thread.h>
+	#include <l4/util/macros.h>
+	#include <l4/env/errno.h>
+#else
+	#define THREAD_RETURN void*
+	#define THREAD_RETURN_ERROR return(NULL)
+	#define THREAD_RETURN_SUCCESS return (NULL)
+#endif
 
 #ifndef DEBUG
 #define ASSERT(cond,msg)
