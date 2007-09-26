@@ -35,17 +35,30 @@ class CAConditionVariable;
 class CAMutex
 	{
 		public:
-#if !defined (DEBUG) || !defined(HAVE_PTHREAD_MUTEXES)
-			CAMutex();
-
-			virtual ~CAMutex();
-#else
 			CAMutex();
 			virtual ~CAMutex();
-#endif
-			SINT32 lock();
 
-			SINT32 unlock();
+			SINT32 lock()
+				{
+					#ifdef	HAVE_PTHREAD_MUTEXES
+						if(pthread_mutex_lock(m_pMutex)==0)
+							return E_SUCCESS;
+						return E_UNKNOWN;
+					#else
+						return m_pMutex->down();
+					#endif
+				}
+
+			SINT32 unlock()
+				{
+					#ifdef HAVE_PTHREAD_MUTEXES
+						if(pthread_mutex_unlock(m_pMutex)==0)
+							return E_SUCCESS;
+						return E_UNKNOWN;
+					#else
+						return m_pMutex->up();
+					#endif
+				}
 		
 		friend class CAConditionVariable;
 		protected:

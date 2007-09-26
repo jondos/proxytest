@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 extern CACmdLnOptions* pglobalOptions;
 
- 
+
 CAMix::CAMix()
 {
     m_acceptReconfiguration = pglobalOptions->acceptReconfiguration();
@@ -417,7 +417,7 @@ SINT32 CAMix::signXML(DOM_Node& a_element)
  * 1) Set m_bLoop = false to break the main loop, if a_bChangeMixType is true
  * 2) Disconnect the cascade
  * 3) Break the mix out of init if it is stuck there
- * The new configuration pglobalOptions-> should already be set in the CACmdLnOptions of this mix
+ * The new configuration options should already be set in the CACmdLnOptions of this mix
  *
  * @param a_bChangeMixType Indicates if this mix becomes another mix type (eg. MiddleMix -> FirstMix)
  * @retval E_SUCCESS

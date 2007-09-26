@@ -48,7 +48,7 @@ struct t_fmhashtableentry
 	{
 		public:
 			CAMuxSocket*	pMuxSocket;
-			CAQueue*		pQueueSend;
+			CAQueue*			pQueueSend;
 			CAControlChannelDispatcher* pControlChannelDispatcher;
 			SINT32        uAlreadySendPacketSize;
 			tQueueEntry		oQueueEntry;
@@ -57,7 +57,7 @@ struct t_fmhashtableentry
 			UINT32				trafficIn;
 			UINT32				trafficOut;
 			UINT64				timeCreated;
-#endif			
+#endif
 			UINT64				id;
 
 			CASymCipher*  pSymCipher;
@@ -68,10 +68,10 @@ struct t_fmhashtableentry
 #ifdef DELAY_USERS
 			UINT32				delayBucket;
 			UINT32				delayBucketID;
-#endif						
+#endif
 			// if false, the entry should be deleted the next time it is read from the queue
 			bool bRecoverTimeout;
-	
+			
 		private:
 			UINT32				cNumberOfChannels;
 			struct t_firstmixchannellist* pChannelList;
@@ -81,7 +81,7 @@ struct t_fmhashtableentry
 					struct t_fmhashtableentry* prev;
 					struct t_fmhashtableentry* next;
 				} list_HashEntries;
-				
+
 			// the timeout list
 			struct
 			{
@@ -199,7 +199,7 @@ class CAFirstMixChannelList
 			fmHashTableEntry* add(CAMuxSocket* pMuxSocket,const UINT8 peerIP[4],CAQueue* pQueueSend);
 			SINT32 addChannel(CAMuxSocket* pMuxSocket,HCHANNEL channelIn,CASymCipher* pCipher,HCHANNEL* channelOut);
 			
-			fmChannelListEntry* get(CAMuxSocket* pMuxSocket,HCHANNEL channelIn);			
+			fmChannelListEntry* get(CAMuxSocket* pMuxSocket,HCHANNEL channelIn);
 
 			/** 
 			 * @return pops the next expired entry from the queue or returns NULL
@@ -240,7 +240,7 @@ class CAFirstMixChannelList
         void cleanVacantOutChannels();
       #endif
 
-		private:			
+		private:
 			SINT32 removeFromTimeoutList(fmHashTableEntry* pHashTableEntry);
 			/**
 			 * adds the entry to the timeout queue

@@ -74,7 +74,7 @@ public:
 
 private:
 	
-	UINT8* m_pStrMixId; //SubjectKeyIdentifier of the Mix
+	UINT8*	m_pStrMixId; //SubjectKeyIdentifier of the Mix
 	UINT8* m_pStrPriceCertHash; 
 	SINT32 m_postition;
 };

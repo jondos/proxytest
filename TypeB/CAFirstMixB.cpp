@@ -44,9 +44,9 @@ SINT32 CAFirstMixB::loop()
 #ifdef NEW_MIX_TYPE
     /* should only be compiled if new NEW_MIX_TYPE is defined */
 #ifdef DELAY_USERS
-    m_pChannelList->setDelayParameters(  pglobalOptions->.getDelayChannelUnlimitTraffic(),
-                                      pglobalOptions->.getDelayChannelBucketGrow(),
-                                      pglobalOptions->.getDelayChannelBucketGrowIntervall());  
+    m_pChannelList->setDelayParameters(  pglobalOptions->getDelayChannelUnlimitTraffic(),
+                                      pglobalOptions->getDelayChannelBucketGrow(),
+                                      pglobalOptions->getDelayChannelBucketGrowIntervall());  
 #endif    
 
   //  CASingleSocketGroup osocketgroupMixOut;
@@ -374,7 +374,7 @@ NEXT_USER:
                         {
                           UINT32 id=(pMixPacket->flags>>8)&0x000000FF;
                           int log=LOG_ENCRYPTED;
-                          if(!pglobalOptions->.isEncryptedLogEnabled())
+                          if(!pglobalOptions->isEncryptedLogEnabled())
                             log=LOG_CRIT;
                           CAMsg::printMsg(log,"Detecting crime activity - ID: %u -- In-IP is: %u.%u.%u.%u \n",id,pEntry->pHead->peerIP[0],pEntry->pHead->peerIP[1],pEntry->pHead->peerIP[2],pEntry->pHead->peerIP[3]);
                           continue;
@@ -417,7 +417,7 @@ NEXT_USER:
                       if((pMixPacket->flags&CHANNEL_SIG_CRIME)==CHANNEL_SIG_CRIME) {
                         UINT32 id = (pMixPacket->flags>>8)&0x000000FF;
                         int log = LOG_ENCRYPTED;
-                        if (!pglobalOptions->.isEncryptedLogEnabled()) {
+                        if (!pglobalOptions->isEncryptedLogEnabled()) {
                           log=LOG_CRIT;
                         }
                         CAMsg::printMsg(log,"Detecting crime activity - ID: %u -- In-IP is: not available (user has already closed connection)\n",id);

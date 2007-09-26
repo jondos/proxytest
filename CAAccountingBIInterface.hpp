@@ -66,7 +66,7 @@ public:
 
 private:
 	CATLSClientSocket* m_pSocket;
-	CAHttpClient			 m_httpClient;
+	CAHttpClient				m_httpClient;
 };
 
 #endif

@@ -73,7 +73,7 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 #ifdef DYNAMIC_MIX		
 		UINT32 loops = 4;
 		UINT32 interval = 0;
-#endif	
+#endif
 		lastCascadeUpdate=lastMixInfoUpdate=lastStatusUpdate=time(NULL); 
 		// tell the algorithm it is time to update
 		lastCascadeUpdate -= CAInfoService::SEND_CASCADE_INFO_WAIT; 
@@ -111,36 +111,36 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 			
 			// check every minute if configuring, every 10 minutes otherwise
 			currentTime=time(NULL);
-		    if (currentTime >= (lastCascadeUpdate + CAInfoService::SEND_CASCADE_INFO_WAIT) || pInfoService->isConfiguring())
-			{				
+      if (currentTime >= (lastCascadeUpdate + CAInfoService::SEND_CASCADE_INFO_WAIT) || pInfoService->isConfiguring())
+		{				
 				if (pglobalOptions->isFirstMix() || (pglobalOptions->isLastMix() && pInfoService->isConfiguring()))
-				{
-					if(pInfoService->sendCascadeHelo()!=E_SUCCESS)
-					{
+						{
+							if(pInfoService->sendCascadeHelo()!=E_SUCCESS)
+								{
 						CAMsg::printMsg(LOG_ERR,"InfoService: Could not send Cascade information.\n");
-					}
-					else
-					{
-						lastCascadeUpdate=time(NULL);
-						bOneUpdateDone = true;
-						CAMsg::printMsg(LOG_DEBUG,"InfoService: Successfully sent Cascade information.\n");
-					}
-				}
-				currentTime=time(NULL);
-				if (currentTime >= (lastMixInfoUpdate + CAInfoService::SEND_MIX_INFO_WAIT) || pInfoService->isConfiguring())
-				{
-					if (pInfoService->sendMixHelo() != E_SUCCESS)
-					{
+								}
+							else
+								{
+									lastCascadeUpdate=time(NULL);
+									bOneUpdateDone = true;
+                  CAMsg::printMsg(LOG_DEBUG,"InfoService: Successfully sent Cascade information.\n");
+								}
+						}
+					currentTime=time(NULL);
+					if (currentTime >= (lastMixInfoUpdate + CAInfoService::SEND_MIX_INFO_WAIT) || pInfoService->isConfiguring())
+						{
+							if (pInfoService->sendMixHelo() != E_SUCCESS)
+								{
 						CAMsg::printMsg(LOG_ERR,"InfoService: Could not send MixInfo information.\n");
-					}
-					else
-					{
-						lastMixInfoUpdate=time(NULL);
-						bOneUpdateDone = true;
-						CAMsg::printMsg(LOG_DEBUG,"InfoService: Successfully sent MixInfo information.\n");
-					}
+								}
+							else
+								{
+									lastMixInfoUpdate=time(NULL);
+									bOneUpdateDone = true;
+                  CAMsg::printMsg(LOG_DEBUG,"InfoService: Successfully sent MixInfo information.\n");
+								}
+						}
 				}
-			}
 #ifdef DYNAMIC_MIX
 			// LERNGRUPPE
 			// Check regulary for new cascade information
@@ -447,7 +447,7 @@ SINT32 CAInfoService::sendStatus(bool bIncludeCerts)
 	UINT8* strStatusXML=getStatusXMLAsString(bIncludeCerts,len);
 	
 	if(strStatusXML==NULL)
-	{
+		{
 		return E_UNKNOWN;
 	}
 	
@@ -557,8 +557,8 @@ SINT32 CAInfoService::sendStatus(const UINT8* a_strStatusXML,UINT32 a_len, const
 		
 		if(a_pSocketAddress->getIPAsStr(hostname, 255) == E_SUCCESS)
 		{
-			CAMsg::printMsg(LOG_DEBUG, "InfoService: Sending current status to InfoService %s:%d.\n", hostname, a_pSocketAddress->getPort());
-			sprintf((char*)buffHeader,"POST /feedback HTTP/1.0\r\nContent-Length: %u\r\n\r\n",a_len);
+		CAMsg::printMsg(LOG_DEBUG, "InfoService: Sending current status to InfoService %s:%d.\n", hostname, a_pSocketAddress->getPort());
+		sprintf((char*)buffHeader,"POST /feedback HTTP/1.0\r\nContent-Length: %u\r\n\r\n",a_len);
 			
 			getcurrentTimeMillis(startupTime);			
 			oSocket.sendFullyTimeOut(buffHeader,strlen((char*)buffHeader), currentTimeout, SEND_INFO_TIMEOUT_MS);
@@ -591,9 +591,10 @@ SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param)
 	UINT8* strMixHeloXML=getMixHeloXMLAsString(len);
 	
 	if(strMixHeloXML==NULL)
-	{			
-		return E_UNKNOWN;
-	}
+		{
+			CAMsg::printMsg(LOG_DEBUG,"InfoService:sendMixHelo() -- Error: getMixHeloXMLAsString() returned NULL!\n");
+			return E_UNKNOWN;
+		}
 	
 	ret = sendHelo(strMixHeloXML, len, TMixHelo, (UINT8*)"Mix Helo Thread", requestCommand, param);
 	delete[] strMixHeloXML;
@@ -644,10 +645,10 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
     SINT32 ret = E_SUCCESS;
     UINT32 len = 0;
 
-	CASocket oSocket(true);
-	UINT8 hostname[255];
-	UINT8 buffHeader[255];
-	CAHttpClient httpClient;
+		CASocket oSocket(true);
+		UINT8 hostname[255];
+		UINT8 buffHeader[255];
+		CAHttpClient httpClient;
 
 	UINT64 currentTimeout = MIX_TO_INFOSERVICE_TIMEOUT;
 	UINT64 startupTime, currentMillis;
@@ -655,54 +656,54 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
     UINT32 requestType = REQUEST_TYPE_POST;
     bool receiveAnswer = false;
 
-	if (a_pSocketAddress == NULL)
-	{
-		return E_UNKNOWN;
-	}
+		if (a_pSocketAddress == NULL)
+			{
+				return E_UNKNOWN;
+			}
 
     if(requestCommand<0)
-	{
+			{
         if(m_bConfiguring)
-		{
-			requestCommand = REQUEST_COMMAND_CONFIGURE;
-			receiveAnswer = true;
-		}
+					{
+            requestCommand = REQUEST_COMMAND_CONFIGURE;
+            receiveAnswer = true;
+					}
         else
-		{
-			requestCommand = REQUEST_COMMAND_HELO;
-			receiveAnswer = true;
-		}
-	}
-	else
-	{
+					{
+            requestCommand = REQUEST_COMMAND_HELO;
+            receiveAnswer = true;
+					}
+			}
+		else
+			{
         if(requestCommand==REQUEST_COMMAND_MIXINFO)
-		{
-			requestType=REQUEST_TYPE_GET;
-			receiveAnswer = true;
-		}
-	}
+					{
+            requestType=REQUEST_TYPE_GET;
+            receiveAnswer = true;
+					}
+			}
 
-	if(a_pSocketAddress->getIPAsStr(hostname, 255)!=E_SUCCESS)
-	{
-		goto ERR;
-	}
+		if(a_pSocketAddress->getIPAsStr(hostname, 255)!=E_SUCCESS)
+		{
+			goto ERR;
+		}
 		
     oSocket.setRecvBuff(255);
 	if(oSocket.connect(*a_pSocketAddress, MIX_TO_INFOSERVICE_TIMEOUT)==E_SUCCESS)
-	{
-		httpClient.setSocket(&oSocket);
-		const char* strRequestCommand=STRINGS_REQUEST_COMMANDS[requestCommand];
-		const char* strRequestType=STRINGS_REQUEST_TYPES[requestType];
+			{
+				httpClient.setSocket(&oSocket);
+				const char* strRequestCommand=STRINGS_REQUEST_COMMANDS[requestCommand];
+				const char* strRequestType=STRINGS_REQUEST_TYPES[requestType];
         CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending [%s] %s to InfoService %s:%d.\r\n", strRequestType,strRequestCommand, hostname, a_pSocketAddress->getPort());
 
         if(requestCommand==REQUEST_COMMAND_MIXINFO)
-   		{
-			sprintf((char*)buffHeader,"%s /%s%s HTTP/1.0\r\nContent-Length: %u\r\n\r\n", strRequestType, strRequestCommand, param,a_len);
-   		}
-		else
-		{
-			sprintf((char*)buffHeader,"%s /%s HTTP/1.0\r\nContent-Length: %u\r\n\r\n", strRequestType, strRequestCommand, a_len);
-		}
+       		{
+						sprintf((char*)buffHeader,"%s /%s%s HTTP/1.0\r\nContent-Length: %u\r\n\r\n", strRequestType, strRequestCommand, param,a_len);
+       		}
+				else
+					{
+						sprintf((char*)buffHeader,"%s /%s HTTP/1.0\r\nContent-Length: %u\r\n\r\n", strRequestType, strRequestCommand, a_len);
+					}
 		
 		getcurrentTimeMillis(startupTime);
 		if (oSocket.sendFullyTimeOut(buffHeader,strlen((char*)buffHeader), currentTimeout, SEND_INFO_TIMEOUT_MS)!=E_SUCCESS)
@@ -714,36 +715,36 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
 		currentTimeout -= (currentMillis - startupTime);
 		if (currentTimeout <= 0 ||
 			oSocket.sendFullyTimeOut(a_strMixHeloXML, a_len, currentTimeout, SEND_INFO_TIMEOUT_MS)!=E_SUCCESS)
-		{
-			goto ERR;
-		}
+				{
+					goto ERR;
+				}
 
         if(receiveAnswer)
         {
         	getcurrentTimeMillis(currentMillis);	
 			currentTimeout -= (currentMillis - startupTime);
 			if(currentTimeout <= 0 || httpClient.parseHTTPHeader(&len) != E_SUCCESS)
-			{
-				goto ERR;
-			}
+				{
+							goto ERR;
+				}
 				
             if(len > 0)
             {
             	getcurrentTimeMillis(currentMillis);	
 				currentTimeout -= (currentMillis - startupTime);
 				
-                recvBuff = new UINT8[len+1];                
+                recvBuff = new UINT8[len+1];
                 if (currentTimeout <= 0 || 
 					oSocket.receiveFullyT(recvBuff, len, currentTimeout) != E_SUCCESS)
                 {
-					delete []recvBuff;
+										delete []recvBuff;
                     recvBuff=NULL;
                     goto ERR;
                 }
-				recvBuff[len]=0;
-				CAMsg::printMsg(LOG_DEBUG,"Received from Infoservice:\n");
-				CAMsg::printMsg(LOG_DEBUG,(char*)recvBuff);
-				CAMsg::printMsg(LOG_DEBUG,"\n");
+								recvBuff[len]=0;
+								CAMsg::printMsg(LOG_DEBUG,"Received from Infoservice:\n");
+								CAMsg::printMsg(LOG_DEBUG,(char*)recvBuff);
+								CAMsg::printMsg(LOG_DEBUG,"\n");
             }
         }
         oSocket.close();
@@ -786,15 +787,15 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
                 CAMsg::printMsg(LOG_CRIT,"InfoService: Error parsing answer from InfoService!\n");
             }
         }
-		return E_SUCCESS;	
-	}
-	else
-	{
-    	CAMsg::printMsg(LOG_DEBUG,"InfoService: sendMixHelo() connecting to InfoService %s:%d failed!\n", hostname, a_pSocketAddress->getPort());
-	}
+				return E_SUCCESS;	
+			}
+		else
+			{
+        CAMsg::printMsg(LOG_DEBUG,"InfoService: sendMixHelo() connecting to InfoService %s:%d failed!\n", hostname, a_pSocketAddress->getPort());
+			}
 ERR:
 	oSocket.close();
-	return E_UNKNOWN;
+		return E_UNKNOWN;
 }
 
 
@@ -827,9 +828,10 @@ SINT32 CAInfoService::sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN (*a_
 			returnValue = E_SUCCESS;
 		}
 		delete messages[i]->addr;
+		delete messagea[i];
 		delete threads[i];
 	}
-	
+
 	delete[] messages;
 	delete[] threads;
 	
@@ -839,7 +841,7 @@ SINT32 CAInfoService::sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN (*a_
 
 
 SINT32 CAInfoService::sendCascadeHelo()
-{	
+{
 	if(pglobalOptions->isMiddleMix())
   	{
 		return E_SUCCESS;
@@ -849,7 +851,7 @@ SINT32 CAInfoService::sendCascadeHelo()
 	SINT32 ret;
 	UINT8* strCascadeHeloXML=getCascadeHeloXMLAsString(len);
 	if(strCascadeHeloXML==NULL)
-	{
+		{
 		return E_UNKNOWN;
 	}
 	
@@ -868,11 +870,11 @@ UINT8* CAInfoService::getCascadeHeloXMLAsString(UINT32& a_len)
 		DOM_Element elemSerial; 
 		DOM_Element elemRoot;
 		
-	    if(m_pMix->getMixCascadeInfo(docMixInfo)!=E_SUCCESS)
-		{
+    if(m_pMix->getMixCascadeInfo(docMixInfo)!=E_SUCCESS)
+			{
 	        CAMsg::printMsg(LOG_INFO,"InfoService: Cascade not yet configured.\n");
-			goto ERR;
-		}
+				goto ERR;
+			}
 		//insert (or update) the Timestamp
 		elemRoot=docMixInfo.getDocumentElement();
 		
@@ -922,44 +924,44 @@ SINT32 CAInfoService::sendCascadeHelo(const UINT8* a_strCascadeHeloXML,UINT32 a_
 {	
 	if(pglobalOptions->isMiddleMix() || (pglobalOptions->isLastMix() && !m_bConfiguring))
 	{
-		return E_SUCCESS;
+			return E_SUCCESS;
 	}
-	CASocket oSocket(true);
-	UINT8 hostname[255];
-	UINT8 buffHeader[255];
+		CASocket oSocket(true);
+		UINT8 hostname[255];
+		UINT8 buffHeader[255];
 	UINT64 currentTimeout = MIX_TO_INFOSERVICE_TIMEOUT;
 	UINT64 startupTime, currentMillis;
 	
-	if (a_pSocketAddress == NULL)
-	{
-		return E_UNKNOWN;
-	}
-	
-	if(a_pSocketAddress->getIPAsStr(hostname, 255)!=E_SUCCESS)
-	{
-		goto ERR;
-	}
+		if (a_pSocketAddress == NULL)
+		{
+			return E_UNKNOWN;
+		}
+		
+		if(a_pSocketAddress->getIPAsStr(hostname, 255)!=E_SUCCESS)
+		{
+			goto ERR;
+		}
 	if(oSocket.connect(*a_pSocketAddress, MIX_TO_INFOSERVICE_TIMEOUT)==E_SUCCESS)
-	{
+			{
 	    if(pglobalOptions->isFirstMix())
-		{
-			CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending cascade helo to InfoService %s:%d.\r\n", hostname, a_pSocketAddress->getPort());
-		}
-	    else
-		{
-			CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending cascade configuration request to InfoService %s:%d.\r\n", hostname, a_pSocketAddress->getPort());
-		}
-	    // LERNGRUPPE
-	    // Semi-dynamic cascades are temporary cascades, not yet established! InfoService can cope with them now
-	    // using the /dynacascade command
+					{
+            CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending cascade helo to InfoService %s:%d.\r\n", hostname, a_pSocketAddress->getPort());
+					}
+        else
+					{
+            CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending cascade configuration request to InfoService %s:%d.\r\n", hostname, a_pSocketAddress->getPort());
+					}
+        // LERNGRUPPE
+        // Semi-dynamic cascades are temporary cascades, not yet established! InfoService can cope with them now
+        // using the /dynacascade command
 	    if( pglobalOptions->isLastMix() && m_bConfiguring )
-		{
-			sprintf((char*)buffHeader,"POST /dynacascade HTTP/1.0\r\nContent-Length: %u\r\n\r\n",a_len);
-		}
-	    else
-		{
-			sprintf((char*)buffHeader,"POST /cascade HTTP/1.0\r\nContent-Length: %u\r\n\r\n",a_len);
-		}
+					{
+            sprintf((char*)buffHeader,"POST /dynacascade HTTP/1.0\r\nContent-Length: %u\r\n\r\n",a_len);
+					}
+        else
+					{
+						sprintf((char*)buffHeader,"POST /cascade HTTP/1.0\r\nContent-Length: %u\r\n\r\n",a_len);
+					}
 		
 		getcurrentTimeMillis(startupTime);
 		if(	oSocket.sendFullyTimeOut(buffHeader, strlen((char*)buffHeader), currentTimeout, SEND_INFO_TIMEOUT_MS)!=E_SUCCESS)
@@ -971,27 +973,27 @@ SINT32 CAInfoService::sendCascadeHelo(const UINT8* a_strCascadeHeloXML,UINT32 a_
 		if (currentTimeout <= 0 ||
 		    oSocket.sendFullyTimeOut(a_strCascadeHeloXML, a_len, currentTimeout, SEND_INFO_TIMEOUT_MS)!=E_SUCCESS)
 		{
-			goto ERR;
+						goto ERR;
 		}
-		//Receive answer --> 200 Ok or failure
-		//HTTP/1.1 200 Ok
+				//Receive answer --> 200 Ok or failure
+				//HTTP/1.1 200 Ok
 		getcurrentTimeMillis(currentMillis);	
 		currentTimeout -= (currentMillis - startupTime);
 		if(currentTimeout <= 0 ||
 		   oSocket.receiveFullyT(buffHeader, 12, currentTimeout)!=E_SUCCESS)
 		{
-			goto ERR;
+					goto ERR;
 		}
-		if(memcmp(buffHeader+9,"200",3)!=0)
+				if(memcmp(buffHeader+9,"200",3)!=0)
 		{
-			goto ERR;
+					goto ERR;
 		}
-		oSocket.close();
-		return E_SUCCESS;	
-	}
+				oSocket.close();
+				return E_SUCCESS;	
+			}
 ERR:
 	oSocket.close();
-	return E_UNKNOWN;
+		return E_UNKNOWN;
 }
 
 SINT32 CAInfoService::handleConfigEvent(DOM_Document& doc) const

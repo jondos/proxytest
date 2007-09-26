@@ -278,12 +278,12 @@ SINT32 getRandom(UINT32* val)
 				return E_UNKNOWN;
 		return E_SUCCESS;
 	}
-	
+
 SINT32 getRandom(UINT64* val)
 	{
 		ASSERT(val!=NULL,"VAL should be not NULL");
-		if(RAND_bytes((UINT8*)val,8)!=1&&
-			 RAND_pseudo_bytes((UINT8*)val,8)<0)
+		if(RAND_bytes((UINT8*)val,sizeof(UINT64))!=1&&
+			 RAND_pseudo_bytes((UINT8*)val,sizeof(UINT64))<0)
 				return E_UNKNOWN;
 		return E_SUCCESS;
 	}	
@@ -947,18 +947,15 @@ UINT8* readFile(UINT8* name,UINT32* size)
 	}
 
 /**
- * Parses a 64bit integer
+ * Parses a 64bit unsigned integer.
+ * Note: If the value is out of range the result is unspecified.
  */
 SINT32 parseU64(const UINT8 * str, UINT64& value)
 {
 	#ifdef HAVE_NATIVE_UINT64
 		#ifdef HAVE_ATOLL
-			long long signedValue = atoll((char *)str);
-			if (signedValue < 0)
-			{
-				signedValue = 0;
-			}
-			value = (UINT64) signedValue;
+		  ///TODO: Implement error check!
+			value = (UINT64) atoll((char *)str);
 			return E_SUCCESS;
 		#else
 			#warning parseU64() is not implemented for platforms without atoll() support!!!

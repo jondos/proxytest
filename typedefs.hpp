@@ -159,7 +159,7 @@ typedef struct t_mix_parameters tMixParameters;
 /** format and signature of all received certificates was OK */
 #define AUTH_ACCOUNT_OK 0x2
 
-/** First CC from cient has not been settled yet. */
+/** First CC from client has not been settled yet. */
 #define AUTH_WAITING_FOR_FIRST_SETTLED_CC 0x4
 
 /** we have sent one or two CC requests */
@@ -168,7 +168,7 @@ typedef struct t_mix_parameters tMixParameters;
 /** A database error occured (internal or in the BI) */
 #define AUTH_DATABASE 0x40
 
-/** Accoutn has been blocked temporarilyi */
+/** Account has been blocked temporarly */
 #define AUTH_BLOCKED 0x80
 
 /** we have sent one request for an accountcertificate */

@@ -82,6 +82,7 @@ typedef struct
 void removePidFile()
 	{
 		UINT8 strPidFile[512];
+		if(options.getPidFile(strPidFile,512)==E_SUCCESS)
 			{
 				if(::remove((char*)strPidFile)!=0)
 					{
@@ -138,7 +139,7 @@ void signal_segv( int )
 
 
 void signal_term( int )
-	{ 
+	{
 		CAMsg::printMsg(LOG_INFO,"Hm.. Signal SIG_TERM received... exiting!\n");
 		terminate();
 		removePidFile();
@@ -498,7 +499,7 @@ int main(int argc, const char* argv[])
 			{
 				CAMsg::printMsg(LOG_CRIT,"You must specifiy, which kind of Mix you want to run!\n");
 				CAMsg::printMsg(LOG_CRIT,"Use -j or -c\n");
-				CAMsg::printMsg(LOG_CRIT,"Or try --help for more pglobalOptions->\n");
+				CAMsg::printMsg(LOG_CRIT,"Or try --help for more options.\n");
 				CAMsg::printMsg(LOG_CRIT,"Exiting...\n");
 				goto EXIT;
 			}

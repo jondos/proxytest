@@ -46,9 +46,9 @@ class CASocket:public CAClientSocket
 			SINT32 accept(CASocket &s);
 			
 			SINT32 connect(const CASocketAddr& psa)
-			{
-				return connect(psa,1,0);
-			}
+				{
+					return connect(psa,1,0);
+				}
 			SINT32 connect(const CASocketAddr& psa,UINT32 retry,UINT32 sWaitTime);
 			SINT32 connect(const CASocketAddr& psa,UINT32 msTimeOut);
 			
@@ -107,11 +107,13 @@ class CASocket:public CAClientSocket
 			SINT32 getLocalIP(UINT32* r_Ip);
 			
 		protected:
-			CASocket* getSocket()
+	///check	
+/*			CASocket* getSocket()
 			{
 				return this;
 			}
-		
+*/		
+///end check	
 			bool m_bSocketIsClosed; //this is a flag, which shows, if the m_Socket is valid
 													//we should not set m_Socket to -1 or so after close,
 													//because the Socket value ist needed sometimes even after close!!!

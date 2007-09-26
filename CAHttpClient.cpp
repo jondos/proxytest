@@ -130,9 +130,9 @@ SINT32 CAHttpClient::parseHTTPHeader(UINT32* contentLength, UINT32 * statusCode)
 		SINT32 ret = 0;
 		SINT32 ret2 = E_UNKNOWN;
 		if(!m_pSocket)
-		{
-			return E_NOT_CONNECTED;
-		}
+			{
+				return E_NOT_CONNECTED;
+			}
 		do
 			{
 				int i=0;

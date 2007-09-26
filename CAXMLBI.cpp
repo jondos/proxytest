@@ -119,9 +119,9 @@ SINT32 CAXMLBI::setValues(DOM_Element &elemRoot)
 		getDOMChildByName(elem, (UINT8*)"X509Certificate", elemCert, false);
 		CACertificate *pPICert = CACertificate::decode(elemCert, CERT_X509CERTIFICATE, NULL);
 		if (pPICert != NULL)
-		{
-			m_pCert = pPICert;
-		}
+			{
+				m_pCert = pPICert;
+			}
 		else
 		{
 			CAMsg::printMsg(LOG_CRIT,"No certificate for payment instance available!\n");

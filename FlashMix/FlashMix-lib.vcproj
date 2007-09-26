@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="9,00"
 	Name="FlashMix-lib"
 	ProjectGUID="{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}"
 	Keyword="Win32Proj"
+	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -209,7 +210,6 @@
 	<References>
 		<ProjectReference
 			ReferencedProjectIdentifier="{150377B0-CA8F-4031-A0B8-45A3001F4F81}"
-			RelativePathToProject=".\proxytest-lib.vcproj"
 		/>
 	</References>
 	<Files>

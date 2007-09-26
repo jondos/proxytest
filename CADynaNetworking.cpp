@@ -76,10 +76,10 @@ SINT32 CADynaNetworking::updateNetworkConfiguration(UINT16 a_port)
     }
 
     // Beware! This resets all information abount ListenerInterfaces!
-    pglobalOptions->.resetNetworkConfiguration();
+    pglobalOptions->resetNetworkConfiguration();
 
     DOM_Document doc;
-    pglobalOptions->.getMixXml(doc);
+    pglobalOptions->getMixXml(doc);
     DOM_Element elemRoot = doc.getDocumentElement();
     DOM_Element elemListeners;
     getDOMChildByName(elemRoot,(UINT8*)"ListenerInterfaces",elemListeners,false);
@@ -110,7 +110,7 @@ SINT32 CADynaNetworking::updateNetworkConfiguration(UINT16 a_port)
   * LERNGRUPPE
   * Creates a ListenerInterface-XML-Node for the given information. With this node the CACmdLnOptions.addListenerInterface-method can
   * be called to add the ListenerInterface to the configuration
-  * @param a_ownerDoc The Document (pglobalOptions->.getMixXml(doc))
+  * @param a_ownerDoc The Document (pglobalOptions->getMixXml(doc))
   * @param a_ip The IP address for the ListenerInterface
   * @param a_port The port for the ListenerInterface
   * @param a_bHidden Indicator if the ListenerInterface should be hidden
@@ -148,7 +148,7 @@ SINT32 CADynaNetworking::createListenerInterface(DOM_Element r_elemListeners, DO
     CAMsg::printMsg(LOG_CRIT, "%s\n",(char*)buff);
 #endif
 
-    pglobalOptions->.addListenerInterface(elemListener);
+    pglobalOptions->addListenerInterface(elemListener);
     return E_SUCCESS;
 }
 
@@ -159,11 +159,11 @@ SINT32 CADynaNetworking::createListenerInterface(DOM_Element r_elemListeners, DO
   */
 CAListenerInterface *CADynaNetworking::getWorkingListenerInterface()
 {
-    UINT32 interfaces = pglobalOptions->.getListenerInterfaceCount();
+    UINT32 interfaces = pglobalOptions->getListenerInterfaceCount();
     CAListenerInterface *pListener = NULL;
     for( UINT32 i = 1; i <= interfaces; i++ )
     {
-        pListener = pglobalOptions->.getListenerInterface(i);
+        pListener = pglobalOptions->getListenerInterface(i);
         if(!pListener->isVirtual())
             break;
         delete pListener;

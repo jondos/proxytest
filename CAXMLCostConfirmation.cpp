@@ -131,7 +131,7 @@ SINT32 CAXMLCostConfirmation::setValues()
 		getDOMChildByName(elemRoot, (UINT8*)"TransferredBytes", elem, false);
 		if(getDOMElementValue(elem, m_lTransferredBytes)!=E_SUCCESS)
 			return E_UNKNOWN;
-			
+
 		// parse PIID
 		if(m_pStrPIID!=NULL)
 			delete[] m_pStrPIID;
@@ -217,13 +217,13 @@ SINT32 CAXMLCostConfirmation::setValues()
 				delete curId;
 				return E_UNKNOWN;
 			}
-			
-			
+		
+
 			//CAMsg::printMsg(LOG_DEBUG, "Parsing hash\n");
 			curHash = new UINT8[100];
 			len = 100;
 			if (getDOMElementValue(curNode, (UINT8*)curHash, &len) != E_SUCCESS)
-			{	
+			{
 				delete curId;
 				delete curHash;
 				return E_UNKNOWN;

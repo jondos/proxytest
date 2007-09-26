@@ -204,7 +204,7 @@ void* Hashtable::put(void *key, void *value)
 	}
 	
 	index = hash % m_capacity;
-	
+
 	newEntry = new Entry;
 	newEntry->e_Key = key;
 	newEntry->e_Value = value;
@@ -212,7 +212,7 @@ void* Hashtable::put(void *key, void *value)
 	
 	oldEntry = m_table[index];
 	if (!oldEntry)
-	{
+	{		
 		m_table[index] = newEntry;
 	}
 	else
@@ -265,7 +265,7 @@ void *Hashtable::remove(void *key)
 	UINT32 hash = m_hashFunc(key);
 	
 	for(e = m_table[hash % m_capacity], prev = NULL; e; e = e->e_Next)
-	{  		
+		{
 		if (m_hashFunc(e->e_Key) == hash && !m_compareFunc(e->e_Key,key))
 		{
 			void *value;
@@ -302,7 +302,7 @@ void Hashtable::clear(SINT8 keyMode,SINT8 valueMode)
 	{
 		return;
 	}
-	
+
 	//CAMsg::printMsg(LOG_INFO, "Hashtable: Clearing...\n");
 
 	for(SINT32 index = 0; index < m_capacity; index++)
@@ -441,7 +441,7 @@ struct Entry *Hashtable::getHashEntry(void *key)
 	UINT32 hash = m_hashFunc(key);
 	
 	for(e = m_table[hash % m_capacity]; e; e = e->e_Next)
-	{		
+		{
 		if (m_hashFunc(e->e_Key) == hash && !m_compareFunc(e->e_Key,key))
 		{
 			return e;
