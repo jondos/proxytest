@@ -100,7 +100,6 @@
 			OutputDirectory=".\proxytest-lib\Release"
 			IntermediateDirectory=".\proxytest-lib\Release"
 			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -129,7 +128,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
-				AdditionalIncludeDirectories="&quot;L:\Programme\Microsoft SDKs\Windows\v6.0A\Include&quot;;&quot;$(INCLUDE_XERCES_C)&quot;;&quot;$(INCLUDE_XERCES_C)\xercesc&quot;;&quot;$(INCLUDE_OPENSSL)&quot;;&quot;$(INCLUDE_PTHREADS)&quot;;&quot;$(INCLUDE_ZLIB)&quot;;&quot;$(INCLUDE_MYSQL)&quot;"
+				AdditionalIncludeDirectories="&quot;L:\Programme\Microsoft SDKs\Windows\v6.0A\Include&quot;;&quot;$(INCLUDE_XERCES_C)&quot;;&quot;$(INCLUDE_XERCES_C)\xercesc&quot;;&quot;$(INCLUDE_OPENSSL)&quot;;&quot;$(INCLUDE_PTHREADS)&quot;;&quot;$(INCLUDE_ZLIB)&quot;;&quot;$(INCLUDE_MYSQL)&quot;;&quot;$(INCLUDE_POSTGRES_CLIENT_LIB)&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_REENTRANT;__CLEANUP_C"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -2183,6 +2182,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CAPriceInfo.cpp"
+				>
+			</File>
+			<File
 				RelativePath="CAQueue.cpp"
 				>
 				<FileConfiguration
@@ -3077,6 +3080,10 @@
 			</File>
 			<File
 				RelativePath=".\CAXMLPriceCert.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Hashtable.cpp"
 				>
 			</File>
 			<File
@@ -4462,6 +4469,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CAPriceInfo.hpp"
+				>
+			</File>
+			<File
 				RelativePath="CAQueue.hpp"
 				>
 			</File>
@@ -4559,6 +4570,10 @@
 			</File>
 			<File
 				RelativePath=".\doxygen.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Hashtable.hpp"
 				>
 			</File>
 			<File

@@ -64,10 +64,10 @@ CAAccountingSettleThread::~CAAccountingSettleThread()
 
 void CAAccountingSettleThread::settle()
 {
-	m_pCondition->getMutex().lock();
+	m_pCondition->lock();
 	m_bSleep = false;
 	m_pCondition->signal();
-	m_pCondition->getMutex().unlock();
+	m_pCondition->unlock();
 }
 
 /**
@@ -111,7 +111,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 		{
 			SAVE_STACK("CAAccountingSettleThread::mainLoop", "Loop");
 			
-			m_pAccountingSettleThread->m_pCondition->getMutex().lock();
+			m_pAccountingSettleThread->m_pCondition->lock();
 			if (m_pAccountingSettleThread->m_bSleep)
 			{
 				m_pAccountingSettleThread->m_bSleep = false;
@@ -143,7 +143,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				break;
 			}
 			}
-			m_pAccountingSettleThread->m_pCondition->getMutex().unlock();
+			m_pAccountingSettleThread->m_pCondition->unlock();
 			
 			if(!dbConn.isDBConnected() && dbConn.initDBConnection()!=E_SUCCESS)
 			{

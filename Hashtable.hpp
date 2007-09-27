@@ -1,6 +1,7 @@
+
 #ifndef HASHTABLE_H
 #define HASHTABLE_H
-
+#ifdef PAYMENT
 #include "CAMutex.hpp"
 
 #define HASH_EMPTY_NONE (SINT8)0
@@ -13,7 +14,7 @@
 class Hashtable
 {
 	public:
-		Hashtable(UINT32 (*func)(void *), SINT32 (*func)(void *,void *), SINT32 capacity = 1000,float loadFactor = 0.75);
+		Hashtable(UINT32 (*func1)(void *), SINT32 (*func2)(void *,void *), SINT32 capacity = 1000,float loadFactor = 0.75);
 		~Hashtable();
 
 		/************************** standard string hash functions **************************/
@@ -91,5 +92,5 @@ class Hashtable
 	private:
 		CAMutex m_mutex;
 };
-
+#endif //PAYMENT
 #endif  // HASHTABLE_H

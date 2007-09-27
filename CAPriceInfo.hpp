@@ -36,8 +36,8 @@ or null (for non-pay Mixes) )
 
 @author Elmar Schraml
 */
+#ifdef PAYMENT
 #include "StdAfx.h"
-
 class CAPriceInfo
 {
 public:
@@ -78,5 +78,5 @@ private:
 	UINT8* m_pStrPriceCertHash; 
 	SINT32 m_postition;
 };
-
+#endif //PAYMENT
 #endif /*CAPRICEINFO_H_*/
