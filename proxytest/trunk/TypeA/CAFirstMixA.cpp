@@ -349,7 +349,7 @@ SINT32 CAFirstMixA::loop()
 													{
 														pMixPacket->channel=pEntry->channelOut;
 														pCipher=pEntry->pCipher;
-														pCipher->crypt1(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+														pCipher->crypt(pMixPacket->data,pMixPacket->data,DATA_SIZE,1);
 														                     // queue the packet for sending to the next mix.
 														#ifdef LOG_PACKET_TIMES
 															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
@@ -363,13 +363,13 @@ SINT32 CAFirstMixA::loop()
 													else if(pEntry==NULL&&pMixPacket->flags==CHANNEL_OPEN)  // open a new mix channel
 													{ // stefan: muesste das nicht vor die behandlung von CHANNEL_DATA? oder gilt OPEN => !DATA ? 
 														//es gilt: open -> data
-														pHashEntry->pSymCipher->crypt1(pMixPacket->data,rsaBuff,KEY_SIZE);
+														pHashEntry->pSymCipher->crypt(pMixPacket->data,rsaBuff,KEY_SIZE,1);
 														pCipher= new CASymCipher();
 														pCipher->setKey(rsaBuff);
 														for(int i=0;i<16;i++)
 															rsaBuff[i]=0xFF;
 														pCipher->setIV2(rsaBuff);
-														pCipher->crypt1(pMixPacket->data+KEY_SIZE,pMixPacket->data,DATA_SIZE-KEY_SIZE);
+														pCipher->crypt(pMixPacket->data+KEY_SIZE,pMixPacket->data,DATA_SIZE-KEY_SIZE,1);
 														getRandom(pMixPacket->data+DATA_SIZE-KEY_SIZE,KEY_SIZE);
 														#ifdef LOG_CHANNEL
 															HCHANNEL tmpC=pMixPacket->channel;
@@ -485,7 +485,7 @@ NEXT_USER:
 												}
 										#endif
 										pMixPacket->channel=pEntry->channelIn;
-										pEntry->pCipher->crypt2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+										pEntry->pCipher->crypt(pMixPacket->data,pMixPacket->data,DATA_SIZE,2);
 										
 										#ifdef LOG_PACKET_TIMES
 											getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);

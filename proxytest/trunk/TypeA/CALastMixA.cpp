@@ -129,9 +129,9 @@ SINT32 CALastMixA::loop()
 												#endif
 												CASymCipher* newCipher=new CASymCipher();
 												newCipher->setKey(rsaBuff);
-												newCipher->crypt1(pMixPacket->data+RSA_SIZE,
+												newCipher->crypt(pMixPacket->data+RSA_SIZE,
 																							pMixPacket->data+RSA_SIZE-KEY_SIZE,
-																							DATA_SIZE-RSA_SIZE);
+																							DATA_SIZE-RSA_SIZE,1);
 												memcpy(	pMixPacket->data,rsaBuff+KEY_SIZE,
 																RSA_SIZE-KEY_SIZE);
 												#ifdef LOG_PACKET_TIMES
@@ -163,7 +163,7 @@ SINT32 CALastMixA::loop()
                               pMixPacket->payload.type = 0;
                               pMixPacket->payload.len = htons(0 | CONNECTION_ERROR_FLAG);
                               pMixPacket->flags = CHANNEL_DATA;
-														  newCipher->crypt2(pMixPacket->data, pMixPacket->data, DATA_SIZE);
+														  newCipher->crypt(pMixPacket->data, pMixPacket->data, DATA_SIZE,2);
 															#ifdef LOG_PACKET_TIMES
 																setZero64(pQueueEntry->timestamp_proccessing_start);
 															#endif
@@ -216,7 +216,7 @@ SINT32 CALastMixA::loop()
                                   pMixPacket->payload.type = 0;
                                   pMixPacket->payload.len = htons(0 | CONNECTION_ERROR_FLAG);
                                   pMixPacket->flags = CHANNEL_DATA;
-														      newCipher->crypt2(pMixPacket->data, pMixPacket->data, DATA_SIZE);
+														      newCipher->crypt(pMixPacket->data, pMixPacket->data, DATA_SIZE,2);
 															    #ifdef LOG_PACKET_TIMES
 																    setZero64(pQueueEntry->timestamp_proccessing_start);
 															    #endif
@@ -301,7 +301,7 @@ SINT32 CALastMixA::loop()
 												#ifdef LOG_CHANNEL
 													pChannelListEntry->packetsDataInFromUser++;
 												#endif
-												pChannelListEntry->pCipher->crypt1(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+												pChannelListEntry->pCipher->crypt(pMixPacket->data,pMixPacket->data,DATA_SIZE,1);
 												ret=ntohs(pMixPacket->payload.len);
 												#ifdef NEW_FLOW_CONTROL
 												if(ret&NEW_FLOW_CONTROL_FLAG)
@@ -337,7 +337,7 @@ SINT32 CALastMixA::loop()
                             pMixPacket->payload.type = 0;
                             pMixPacket->payload.len = htons(0 | CONNECTION_ERROR_FLAG);
                             pMixPacket->flags = CHANNEL_DATA;
-														pChannelListEntry->pCipher->crypt2(pMixPacket->data, pMixPacket->data, DATA_SIZE);
+														pChannelListEntry->pCipher->crypt(pMixPacket->data, pMixPacket->data, DATA_SIZE,2);
 														#ifdef LOG_PACKET_TIMES
 															setZero64(pQueueEntry->timestamp_proccessing_start);
 														#endif
@@ -420,7 +420,7 @@ SINT32 CALastMixA::loop()
                             pMixPacket->payload.len = htons(0 | CONNECTION_ERROR_FLAG);
                             pMixPacket->flags = CHANNEL_DATA;
 														pMixPacket->channel = pChannelListEntry->channelIn;
-														pChannelListEntry->pCipher->crypt2(pMixPacket->data, pMixPacket->data, DATA_SIZE);
+														pChannelListEntry->pCipher->crypt(pMixPacket->data, pMixPacket->data, DATA_SIZE,2);
 														#ifdef LOG_PACKET_TIMES
 															setZero64(pQueueEntry->timestamp_proccessing_start);
 														#endif
@@ -518,7 +518,7 @@ SINT32 CALastMixA::loop()
                               pMixPacket->payload.len = htons(0 | CONNECTION_ERROR_FLAG);
                               pMixPacket->flags = CHANNEL_DATA;
 														  pMixPacket->channel = pChannelListEntry->channelIn;
-														  pChannelListEntry->pCipher->crypt2(pMixPacket->data, pMixPacket->data, DATA_SIZE);
+														  pChannelListEntry->pCipher->crypt(pMixPacket->data, pMixPacket->data, DATA_SIZE,2);
 														  #ifdef LOG_PACKET_TIMES
 															  setZero64(pQueueEntry->timestamp_proccessing_end_OP);
 														  #endif
@@ -561,7 +561,7 @@ SINT32 CALastMixA::loop()
 														#else
 															pMixPacket->payload.len=htons((UINT16)ret);
 														#endif
-														pChannelListEntry->pCipher->crypt2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+														pChannelListEntry->pCipher->crypt(pMixPacket->data,pMixPacket->data,DATA_SIZE,2);
 														#ifdef LOG_PACKET_TIMES
 															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
 														#endif
