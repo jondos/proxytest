@@ -340,7 +340,7 @@ SINT32 CALocalProxy::loop()
 									else
 										{
 											for(UINT32 c=0;c<m_chainlen;c++)
-												oConnection.pCiphers[c].crypt2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+												oConnection.pCiphers[c].crypt(pMixPacket->data,pMixPacket->data,DATA_SIZE,2);
 											#ifdef _DEBUG
 												CAMsg::printMsg(LOG_DEBUG,"Sending Data to Browser!\n");
 											#endif
@@ -416,17 +416,17 @@ SINT32 CALocalProxy::loop()
 																memcpy(buff+KEY_SIZE,pMixPacket->data,DATA_SIZE-KEY_SIZE);
 																if(m_MixCascadeProtocolVersion==MIX_CASCADE_PROTOCOL_VERSION_0_4&&c==m_chainlen-1)
 																	{
-																		m_pSymCipher->crypt1(buff,buff,KEY_SIZE);
+																		m_pSymCipher->crypt(buff,buff,KEY_SIZE,1);
 																		UINT8 iv[16];
 																		memset(iv,0xFF,16);
 																		tmpCon->pCiphers[c].setIV2(iv);
-																		tmpCon->pCiphers[c].crypt1(buff+KEY_SIZE,buff+KEY_SIZE,DATA_SIZE-KEY_SIZE);
+																		tmpCon->pCiphers[c].crypt(buff+KEY_SIZE,buff+KEY_SIZE,DATA_SIZE-KEY_SIZE,1);
 																	}
 																else
 																	{
 																		m_arRSA[c].encrypt(buff,buff);
 																		// Does RSA_SIZE need to be increased by RSA_SIZE/KEY_SIZE*TIMESTAMP_SIZE?
-																		tmpCon->pCiphers[c].crypt1(buff+RSA_SIZE,buff+RSA_SIZE,DATA_SIZE-RSA_SIZE);
+																		tmpCon->pCiphers[c].crypt(buff+RSA_SIZE,buff+RSA_SIZE,DATA_SIZE-RSA_SIZE,1);
 																	}	
 																memcpy(pMixPacket->data,buff,DATA_SIZE);
 																//size-=KEY_SIZE;
@@ -437,7 +437,7 @@ SINT32 CALocalProxy::loop()
 												else //sonst
 													{
 														for(UINT32 c=0;c<m_chainlen;c++)
-															tmpCon->pCiphers[c].crypt1(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+															tmpCon->pCiphers[c].crypt(pMixPacket->data,pMixPacket->data,DATA_SIZE,1);
 														pMixPacket->flags=CHANNEL_DATA;
 													}
 

@@ -92,6 +92,9 @@ CAIPList::~CAIPList()
 	*/
 SINT32 CAIPList::insertIP(const UINT8 ip[4])
 	{
+#ifdef PAYMENT
+		return E_SUCCESS;
+#else			
 		UINT16 hashvalue=(ip[2]<<8)|ip[3];
 		SINT32 ret;
 		m_pMutex->lock();
@@ -161,6 +164,7 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 				m_pMutex->unlock();
 				return ret;
 			}	
+#endif			
 	}
 
 /** Removes the IP-Address from the list.
@@ -174,6 +178,9 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 	SINT32 CAIPList::removeIP(const UINT8 ip[4],UINT32 time,UINT32 trafficIn,UINT32 trafficOut)
 #endif
 	{	
+#ifdef PAYMENT	
+	return E_SUCCESS;
+#else
 		UINT16 hashvalue=(ip[2]<<8)|ip[3];
 		SINT32 ret;
 		m_pMutex->lock();
@@ -230,6 +237,7 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 				m_pMutex->unlock();
 				CAMsg::printMsg(LOG_INFO,"Try to remove IP which is not in list - possible inconsistences in IPList!\n");
 				return 0;
-			}	
+			}
+#endif			
 	}
 #endif //ONLY_LOCAL_PROXY
