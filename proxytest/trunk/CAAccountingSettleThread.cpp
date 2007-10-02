@@ -190,7 +190,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 				}				
 				
 //#ifdef DEBUG				
-				CAMsg::printMsg(LOG_DEBUG, "Settle Thread: Connecting to payment instance...");
+				CAMsg::printMsg(LOG_DEBUG, "Settle Thread: Connecting to payment instance...\n");
 //#endif				
 				if(biConn.initBIConnection() != E_SUCCESS)
 				{
