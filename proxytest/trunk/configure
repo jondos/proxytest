@@ -4417,9 +4417,9 @@ case "$host" in
         CFLAGS="$CFLAGS "
         ;;
 *-*-freebsd*)
-	DEFAULTLIBS="$LIBS -L/usr/local/lib -liconv -lc_r";
-	CFLAGS="$CFLAGS -pthread";
-	CXXFLAGS="$CXXFLAGS -pthread";
+	DEFAULTLIBS="$LIBS -L/usr/local/lib -liconv -lpthread";
+	CFLAGS="$CFLAGS";
+	CXXFLAGS="$CXXFLAGS";
 	OFLAGS="-O0"
 	;;
 *-*-netbsd*)
@@ -12586,6 +12586,7 @@ if test "${enable_debug+set}" = set; then
   enableval=$enable_debug;
 	    if test "x$enableval" != "xno" ; then
 		CFLAGS="$CFLAGS -g -D_DEBUG"
+		CXXFLAGS="$CXXFLAGS -g -D_DEBUG"
 		OFLAGS=""
 	    fi
 
