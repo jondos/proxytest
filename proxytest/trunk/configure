@@ -3472,6 +3472,9 @@ else
 fi
 
 
+
+SAVEDCXXFLAGS=$CXXFLAGS
+CXXFLAGS=" "
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -3943,6 +3946,8 @@ else
   am__fastdepCXX_FALSE=
 fi
 
+
+CXXFLAGS=$SAVEDCXXFLAGS
 
 # Find a good install program.  We prefer a C program (faster),
 # so one script is as good as another.  But avoid the broken or
