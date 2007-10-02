@@ -15,7 +15,13 @@ AC_CANONICAL_HOST
 
 dnl Checks for programs.
 AC_PROG_CC
+
+dnl avoid the default flags "-g -o2"
+SAVEDCXXFLAGS=$CXXFLAGS
+CXXFLAGS=" "
 AC_PROG_CXX 
+CXXFLAGS=$SAVEDCXXFLAGS
+
 AC_PROG_INSTALL
 AC_PROG_RANLIB
 
