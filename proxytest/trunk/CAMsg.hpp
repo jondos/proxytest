@@ -40,6 +40,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define LOG_CRIT	1
 	#define LOG_INFO	2 
 	#define LOG_DEBUG 3
+#else
+	#include <syslog.h>
 #endif
 #define LOG_ENCRYPTED 255
 

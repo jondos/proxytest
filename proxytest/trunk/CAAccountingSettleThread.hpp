@@ -64,7 +64,7 @@ class CAAccountingSettleThread
 	public:
 		CAAccountingSettleThread(Hashtable* a_accountingHashtable, UINT8* currentCascade);
 		~CAAccountingSettleThread();
-
+		
 		void settle();
 	
 
@@ -74,7 +74,7 @@ class CAAccountingSettleThread
 		static THREAD_RETURN mainLoop(void * param);
 		CAThread* m_pThread;
 		volatile bool m_bRun;
-		Hashtable* m_accountingHashtable;
+		Hashtable* m_accountingHashtable;	
 		bool m_bSleep;
 		
 		struct SettleEntry

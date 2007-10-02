@@ -107,7 +107,7 @@ SINT32 CAAccountingBIInterface::initBIConnection()
  */
 SINT32 CAAccountingBIInterface::terminateBIConnection()
 	{
-				m_pSocket->close();
+		m_pSocket->close();
 		return E_SUCCESS;
 	}
 
@@ -126,20 +126,20 @@ CAXMLErrorMessage * CAAccountingBIInterface::settle(CAXMLCostConfirmation &cc)
 	
 		pStrCC = cc.dumpToMem(&contentLen);
 		if(	pStrCC==NULL || m_httpClient.sendPostRequest((UINT8*)"/settle", pStrCC,contentLen)!= E_SUCCESS)
-			{
-				delete[] pStrCC;
-				return NULL;
-			}
+		{
+			delete[] pStrCC;
+			return NULL;
+		}
 		delete[] pStrCC;
 		contentLen=0;
 		status=0;
 
 		if(m_httpClient.parseHTTPHeader(&contentLen, &status)!=E_SUCCESS ||
 			(status!=200) || (contentLen==0))
-			{
-				CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface::settle: response fehlerhaft!\n");
-				return NULL;
-			}
+		{
+			CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface::settle: response fehlerhaft!\n");
+			return NULL;
+		}
 #ifdef DEBUG			
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingBIInterface::settle: got response header [Status,content-Lenght]=[%i,%i]!\n",status,contentLen);
 #endif		

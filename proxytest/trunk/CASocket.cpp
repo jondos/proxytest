@@ -47,7 +47,7 @@ UINT32 CASocket::m_u32MaxNormalSockets=0xFFFFFFFF; //how many "normal" sockets a
 
 
 CASocket::CASocket(bool bIsReservedSocket)
-	{
+	{			
 		m_Socket=0;
 		m_bSocketIsClosed=true;
 		m_bIsReservedSocket=bIsReservedSocket;
@@ -72,17 +72,17 @@ SINT32 CASocket::create(bool a_bShowTypicalError)
 SINT32 CASocket::create(int type, bool a_bShowTypicalError)
 	{
 		if(m_bSocketIsClosed)
-			{
+		{
 			if(m_bIsReservedSocket||m_u32NormalSocketsOpen<m_u32MaxNormalSockets)
 			{
-			m_Socket=socket(type,SOCK_STREAM,0);
+				m_Socket=socket(type,SOCK_STREAM,0);
 			}
 			else
-				{
+			{
 				CAMsg::printMsg(LOG_CRIT,"Could not create a new normal Socket -- allowed number of normal sockets exeded!\n");
 				return SOCKET_ERROR;
-				}
 			}
+		}
 		else
 			return E_UNKNOWN;
 		if(m_Socket==INVALID_SOCKET)
@@ -105,7 +105,7 @@ SINT32 CASocket::create(int type, bool a_bShowTypicalError)
 		m_csClose.lock();
 		if(!m_bIsReservedSocket)
 		{
-		m_u32NormalSocketsOpen++;
+			m_u32NormalSocketsOpen++;			
 		}
 		m_csClose.unlock();
 		return E_SUCCESS;
@@ -231,7 +231,7 @@ SINT32 CASocket::connect(const CASocketAddr & psa,UINT32 retry,UINT32 time)
 			}
 		return err;
 	}
-			
+	
 
 /** Tries to connect to peer psa.
 	*
@@ -310,11 +310,11 @@ SINT32 CASocket::close()
 			ret=::closesocket(m_Socket);
 			if(!m_bIsReservedSocket)
 			{
-			m_u32NormalSocketsOpen--;
+				m_u32NormalSocketsOpen--;
 			}
 			//CAMsg::printMsg(LOG_DEBUG,"Open Sockets: %d\n", m_u32NormalSocketsOpen);
-				m_bSocketIsClosed=true;
-			}
+			m_bSocketIsClosed=true;			
+		}
 		
 		if (ret != E_SUCCESS)
 		{

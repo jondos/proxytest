@@ -809,56 +809,56 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 				while(countRead>0&&i<nSocketsIn)
 				{
 					if(psocketgroupAccept->isSignaled(socketsIn[i]))
+					{
+						countRead--;
+						#ifdef _DEBUG
+							CAMsg::printMsg(LOG_DEBUG,"New direct Connection from Client!\n");
+						#endif
+						pNewMuxSocket=new CAMuxSocket;
+						ret=socketsIn[i].accept(*(CASocket*)pNewMuxSocket);
+						pFirstMix->m_newConnections++;							 
+						if(ret!=E_SUCCESS)
 						{
-							countRead--;
-							#ifdef _DEBUG
-								CAMsg::printMsg(LOG_DEBUG,"New direct Connection from Client!\n");
-							#endif
-							pNewMuxSocket=new CAMuxSocket;
-							ret=socketsIn[i].accept(*(CASocket*)pNewMuxSocket);
-							pFirstMix->m_newConnections++;							 
-							if(ret!=E_SUCCESS)
-							{
 							// may return E_SOCKETCLOSED or E_SOCKET_LIMIT
-								CAMsg::printMsg(LOG_ERR,"Accept Error %u - direct Connection from Client!\n",GET_NET_ERROR);
-								}
+							CAMsg::printMsg(LOG_ERR,"Accept Error %u - direct Connection from Client!\n",GET_NET_ERROR);														
+						}
 						else if (pglobalOptions->getMaxNrOfUsers() > 0 && pFirstMix->getNrOfUsers() >= pglobalOptions->getMaxNrOfUsers())
-							{
+						{
 							CAMsg::printMsg(LOG_DEBUG,"CAFirstMix User control: Too many users (Maximum:%d)! Rejecting user...\n", pFirstMix->getNrOfUsers(), pglobalOptions->getMaxNrOfUsers());
 							ret = E_UNKNOWN;
-							}
-							else if (pFirstMix->m_newConnections > CAFirstMix::MAX_CONCURRENT_NEW_CONNECTIONS)
-							{
-								/* This should protect the mix from fooding attacks
-								 * No more than MAX_CONCURRENT_NEW_CONNECTIONS are allowed.
-								 */
+						}
+						else if (pFirstMix->m_newConnections > CAFirstMix::MAX_CONCURRENT_NEW_CONNECTIONS)
+						{
+							/* This should protect the mix from flooding attacks
+							 * No more than MAX_CONCURRENT_NEW_CONNECTIONS are allowed.
+							 */
 							CAMsg::printMsg(LOG_DEBUG,"CAFirstMix Flooding protection: Too many concurrent new connections (Maximum:%d)! Rejecting user...\n", CAFirstMix::MAX_CONCURRENT_NEW_CONNECTIONS);
 							ret = E_UNKNOWN;
-							}
+						}
 						else if ((ret = ((CASocket*)pNewMuxSocket)->getPeerIP(peerIP)) != E_SUCCESS ||
 								pIPList->insertIP(peerIP)<0) 
-									{
-										if (ret != E_SUCCESS)
-										{
-											CAMsg::printMsg(LOG_DEBUG,"Could not insert IP address as IP could not be retrieved!\n");
-										}
-										else
-										{
+						{
+							if (ret != E_SUCCESS)
+							{
+								CAMsg::printMsg(LOG_DEBUG,"Could not insert IP address as IP could not be retrieved!\n");
+							}
+							else
+							{
 								ret = E_UNKNOWN;
 								CAMsg::printMsg(LOG_DEBUG,"CAFirstMix Flooding protection: Could not insert IP address!\n");	
-										}
-									}
-								else
-								{																						
-									t_UserLoginData* d=new t_UserLoginData;
-									d->pNewUser=pNewMuxSocket;
-									d->pMix=pFirstMix;
-									memcpy(d->peerIP,peerIP,4);
-									if(pthreadsLogin->addRequest(fm_loopDoUserLogin,d)!=E_SUCCESS)
-									{
+							}							
+						}
+						else
+						{
+							t_UserLoginData* d=new t_UserLoginData;
+							d->pNewUser=pNewMuxSocket;
+							d->pMix=pFirstMix;
+							memcpy(d->peerIP,peerIP,4);
+							if(pthreadsLogin->addRequest(fm_loopDoUserLogin,d)!=E_SUCCESS)
+							{
 								CAMsg::printMsg(LOG_ERR,"Could not add an login request to the login thread pool!\n");
-									}
-								}
+							}
+						}
 											
 						if (ret != E_SUCCESS)
 						{
@@ -872,8 +872,8 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 							{
 								msSleep(400);
 							}
-							}
 						}
+					}
 					i++;
 				}
 			}
@@ -919,7 +919,7 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 	* @todo Cleanup of runing thread if mix restarts...
 ***/
 SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
-	{
+	{	
 		INIT_STACK;
 		BEGIN_STACK("CAFirstMix::doUserLogin");
 		

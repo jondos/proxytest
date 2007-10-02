@@ -140,7 +140,7 @@ void signal_segv( int )
 
 
 void signal_term( int )
-	{
+	{ 
 		CAMsg::printMsg(LOG_INFO,"Hm.. Signal SIG_TERM received... exiting!\n");
 		my_terminate();
 		removePidFile();

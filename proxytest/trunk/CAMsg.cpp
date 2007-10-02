@@ -122,32 +122,32 @@ SINT32 CAMsg::printMsg(UINT32 type,const char* format,...)
 #endif
 		va_end(ap);
 		if(type==LOG_ENCRYPTED)
+		{
+			ret=strlen(pMsg->m_strMsgBuff);
+			if(	pMsg->m_pCipher==NULL)
 			{
-				ret=strlen(pMsg->m_strMsgBuff);
-				if(	pMsg->m_pCipher==NULL)
-					{
-						ret=E_UNKNOWN;
-					}
-				else
-					{
-						UINT8 bp[MAX_MSG_SIZE];
-						AES_ofb128_encrypt((UINT8*)pMsg->m_strMsgBuff,
-																bp,ret,
-																&(pMsg->m_pCipher->oKey),
-																pMsg->m_pCipher->iv,
-																&(pMsg->m_pCipher->iv_off));
-						if(write(pMsg->m_hFileEncrypted,bp,ret)!=ret)
-							ret=E_UNKNOWN;
-				 }
+				ret=E_UNKNOWN;
 			}
+			else
+			{
+				UINT8 bp[MAX_MSG_SIZE];
+				AES_ofb128_encrypt((UINT8*)pMsg->m_strMsgBuff,
+														bp,ret,
+														&(pMsg->m_pCipher->oKey),
+														pMsg->m_pCipher->iv,
+														&(pMsg->m_pCipher->iv_off));
+				if(write(pMsg->m_hFileEncrypted,bp,ret)!=ret)
+					ret=E_UNKNOWN;
+		 	}	
+		}
 		else
 			{
 				switch(pMsg->m_uLogType)
 					{
 						case MSG_LOG:
-		#ifndef _WIN32
-							syslog(type,pMsg->m_strMsgBuff);
-		#endif
+#ifndef _WIN32				
+					syslog(type,pMsg->m_strMsgBuff);
+#endif
 						break;
 						case MSG_FILE:
 							if(pMsg->m_hFileInfo==-1)
@@ -165,15 +165,15 @@ SINT32 CAMsg::printMsg(UINT32 type,const char* format,...)
 									ret=E_UNKNOWN;
 								}
 						break;
-		#ifdef COMPRESSED_LOGS
+#ifdef COMPRESSED_LOGS
 						case MSG_COMPRESSED_FILE:
 							if(pMsg->m_gzFileInfo!=NULL)
-								{
-									if(gzwrite(pMsg->m_gzFileInfo,pMsg->m_strMsgBuff,strlen(pMsg->m_strMsgBuff))==-1)
-										ret=E_UNKNOWN;
-								}
+							{
+								if(gzwrite(pMsg->m_gzFileInfo,pMsg->m_strMsgBuff,strlen(pMsg->m_strMsgBuff))==-1)
+									ret=E_UNKNOWN;
+							}
 						break;
-		#endif
+#endif
 						case MSG_STDOUT:
 							printf("%s",pMsg->m_strMsgBuff);
 						break;
@@ -190,9 +190,9 @@ SINT32 CAMsg::closeLog()
 		switch(m_uLogType)
 			{
 				case MSG_LOG:
-					#ifndef _WIN32
-						::closelog();
-					#endif
+#ifndef _WIN32		
+					::closelog();
+#endif
 				break;
 				case MSG_FILE:
 					if(m_hFileInfo!=-1)
@@ -205,7 +205,7 @@ SINT32 CAMsg::closeLog()
 					m_gzFileInfo=NULL;
 				break;
 #endif
-			}
+		}
 		return E_SUCCESS;
 	}
 
@@ -215,33 +215,33 @@ SINT32 CAMsg::openLog(UINT32 type)
 		switch(type)
 			{
 				case MSG_LOG:
-					#ifndef _WIN32
-						openlog("AnonMix",0,LOG_USER);
-					#endif
+#ifndef _WIN32
+			openlog("AnonMix",0,LOG_USER);
+#endif
 				break;
 				case MSG_FILE:
 			if(pglobalOptions->getLogDir((UINT8*)m_strLogFile,1024)!=E_SUCCESS)
-						return E_UNKNOWN;
-					strcat(m_strLogFile,FILENAME_INFOLOG);
-					m_hFileInfo=open(m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE|O_SYNC,S_IREAD|S_IWRITE);										
+				return E_UNKNOWN;
+			strcat(m_strLogFile,FILENAME_INFOLOG);
+			m_hFileInfo=open(m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE|O_SYNC,S_IREAD|S_IWRITE);
 					break;
 #ifdef COMPRESSED_LOGS
 				case MSG_COMPRESSED_FILE:
-					char logdir[255];
-					char buff[1024];
+			char logdir[255];
+			char buff[1024];
 			if(pglobalOptions->getLogDir((UINT8*)logdir,255)!=E_SUCCESS)
-						return E_UNKNOWN;
-					strcpy(buff,logdir);
-					strcat(buff,FILENAME_INFOLOG_GZ);
-					tmpHandle=open(buff,O_APPEND|O_CREAT|O_WRONLY,S_IREAD|S_IWRITE);
-					m_gzFileInfo=gzdopen(tmpHandle,"wb9");
-					if(m_gzFileInfo==NULL)
-						return E_UNKNOWN;
+				return E_UNKNOWN;
+			strcpy(buff,logdir);
+			strcat(buff,FILENAME_INFOLOG_GZ);
+			tmpHandle=open(buff,O_APPEND|O_CREAT|O_WRONLY,S_IREAD|S_IWRITE);
+			m_gzFileInfo=gzdopen(tmpHandle,"wb9");
+			if(m_gzFileInfo==NULL)
+				return E_UNKNOWN;
 				break;
 #endif
 				default:
 					return E_UNKNOWN;
-			}
+		}
 		return E_SUCCESS;
 	}
 
