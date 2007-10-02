@@ -46,9 +46,9 @@ class CASocket:public CAClientSocket
 			SINT32 accept(CASocket &s);
 			
 			SINT32 connect(const CASocketAddr& psa)
-				{
-					return connect(psa,1,0);
-				}
+			{
+				return connect(psa,1,0);
+			}
 			SINT32 connect(const CASocketAddr& psa,UINT32 retry,UINT32 sWaitTime);
 			SINT32 connect(const CASocketAddr& psa,UINT32 msTimeOut);
 			

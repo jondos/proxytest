@@ -233,7 +233,7 @@ class CACmdLnOptions
 			{
 				return m_bSyslog;
 			}
-
+			
 			/** Set to true if the encrpyted log could/should be used**/
 			SINT32 enableEncryptedLog(bool b)
 			{
@@ -307,11 +307,10 @@ class CACmdLnOptions
 			bool isSock5sSupported()
 			{
 				return m_bSocksSupport;
-			}
-
+			}				
 			bool isInfoServiceEnabled()
 				{
-					return (m_addrInfoServicesSize>0);
+					return m_addrInfoServicesSize;
 				}
 
 			bool getAutoReconnect()
@@ -356,7 +355,7 @@ class CACmdLnOptions
 #endif
 
 
-#ifdef PAYMENT
+#ifdef PAYMENT	
 			// accounting database
 			SINT32 getDatabaseHost(UINT8 * host, UINT32 len);
 			UINT16 getDatabasePort();

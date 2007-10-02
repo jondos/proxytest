@@ -114,7 +114,7 @@ CAXMLErrorMessage::CAXMLErrorMessage(UINT8 * strXmlData)
 
 
 SINT32 CAXMLErrorMessage::setValues(DOM_Element &elemRoot)
-{
+{	
 	UINT8 strGeneral[256];
 	UINT32 strGeneralLen = 256;
 	SINT32 tmp;
@@ -144,8 +144,8 @@ SINT32 CAXMLErrorMessage::setValues(DOM_Element &elemRoot)
 		DOM_Element ccElem;
 		if (getDOMChildByName(objectRootElem,(UINT8*)"CC",ccElem,true) == E_SUCCESS)
 		{
-		m_messageObject = CAXMLCostConfirmation::getInstance(ccElem);	
-	}
+			m_messageObject = CAXMLCostConfirmation::getInstance(ccElem);	
+		}
 	}
 	else if (ERR_ACCOUNT_EMPTY == m_iErrorCode)
 	{

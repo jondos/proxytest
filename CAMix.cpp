@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 extern CACmdLnOptions* pglobalOptions;
 
-
+ 
 CAMix::CAMix()
 {
     m_acceptReconfiguration = pglobalOptions->acceptReconfiguration();

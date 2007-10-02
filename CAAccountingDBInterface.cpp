@@ -71,29 +71,29 @@ SINT32 CAAccountingDBInterface::initDBConnection()
 		// Get database connection info from configfile and/or commandline
 		UINT8 host[255];
 		if(pglobalOptions->getDatabaseHost(host, 255) != E_SUCCESS) 
-			{
-				CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Error, no Database Host!\n");
-				return E_UNKNOWN;
-			}
+		{
+			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Error, no Database Host!\n");
+			return E_UNKNOWN;
+		}
 		UINT32 tcp_port = pglobalOptions->getDatabasePort();
 		UINT8 dbName[255];
 		if(pglobalOptions->getDatabaseName(dbName, 255) != E_SUCCESS)
-			{
-				CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Error, no Database Name!\n");
-				return E_UNKNOWN;
-			}
+		{
+			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Error, no Database Name!\n");
+			return E_UNKNOWN;
+		}
 		UINT8 userName[255];
 		if(pglobalOptions->getDatabaseUsername(userName, 255) != E_SUCCESS)
-			{
-				CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Error, no Database Username!\n");
-				return E_UNKNOWN;
-			}
+		{
+			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Error, no Database Username!\n");
+			return E_UNKNOWN;
+		}
 		UINT8 password[255];
 		if(pglobalOptions->getDatabasePassword(password, 255) != E_SUCCESS)
-			{
-				CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Error, no Database Password!\n");
-				return E_UNKNOWN;
-			}
+		{
+			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Error, no Database Password!\n");
+			return E_UNKNOWN;
+		}
 
 		
 		char port[20];
@@ -103,16 +103,16 @@ SINT32 CAAccountingDBInterface::initDBConnection()
 				(char*)dbName, (char*)userName, (char*)password
 			);
 		if(m_dbConn==NULL||PQstatus(m_dbConn) == CONNECTION_BAD) 
-			{
-				CAMsg::printMsg(
-					LOG_ERR, "CAAccountingDBInteface: Could not connect to Database. Reason: %s\n",
-					PQerrorMessage(m_dbConn)
-				);
-				PQfinish(m_dbConn);
-				m_dbConn = NULL;
-				m_bConnected = false;
-				return E_NOT_CONNECTED;
-			}
+		{
+			CAMsg::printMsg(
+				LOG_ERR, "CAAccountingDBInteface: Could not connect to Database. Reason: %s\n",
+				PQerrorMessage(m_dbConn)
+			);
+			PQfinish(m_dbConn);
+			m_dbConn = NULL;
+			m_bConnected = false;
+			return E_NOT_CONNECTED;
+		}
 		m_bConnected = true;
 		return E_SUCCESS;
 	}
@@ -155,15 +155,15 @@ bool CAAccountingDBInterface::isDBConnected()
  * @return E_SUCCESS
  */
 SINT32 CAAccountingDBInterface::terminateDBConnection() 
+{
+	if(m_bConnected) 
 	{
-		if(m_bConnected) 
-			{
-				PQfinish(m_dbConn);
-			}
-		m_dbConn=NULL;
-		m_bConnected = false;
-		return E_SUCCESS;
+		PQfinish(m_dbConn);
 	}
+	m_dbConn=NULL;
+	m_bConnected = false;
+	return E_SUCCESS;
+}
 
 /**
  * Gets the latest cost confirmation stored for the given user account.
@@ -180,7 +180,7 @@ SINT32 CAAccountingDBInterface::terminateDBConnection()
 SINT32 CAAccountingDBInterface::getCostConfirmation(UINT64 accountNumber, UINT8* cascadeId, CAXMLCostConfirmation **pCC, bool& a_bSettled)
 	{
 		if(!checkConnectionStatus()) 
-	{
+		{
 			return E_NOT_CONNECTED;
 		}
 		
@@ -200,21 +200,21 @@ SINT32 CAAccountingDBInterface::getCostConfirmation(UINT64 accountNumber, UINT8*
 		result = PQexec(m_dbConn, (char *)query);
 		delete[] query;
 		if(PQresultStatus(result)!=PGRES_TUPLES_OK) 
-			{
-				CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Could not read XMLCC. Reason: %s\n", 
-				PQresultErrorMessage(result));
-				PQclear(result);
-				return E_UNKNOWN;
-			}
+		{
+			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Could not read XMLCC. Reason: %s\n", 
+			PQresultErrorMessage(result));
+			PQclear(result);
+			return E_UNKNOWN;
+		}
 		
 		if(PQntuples(result)!=1) 
-			{
-				#ifdef DEBUG
-					CAMsg::printMsg(LOG_DEBUG, "CAAccountingDBInterface: XMLCC not found.\n");
-				#endif
-				PQclear(result);
-				return E_NOT_FOUND;
-			}
+		{
+			#ifdef DEBUG
+				CAMsg::printMsg(LOG_DEBUG, "CAAccountingDBInterface: XMLCC not found.\n");
+			#endif
+			PQclear(result);
+			return E_NOT_FOUND;
+		}
 	
 		xmlCC = (UINT8*) PQgetvalue(result, 0, 0);
 		if (atoi(PQgetvalue(result, 0, 1)) == 0)
@@ -276,13 +276,13 @@ SINT32 CAAccountingDBInterface::checkCountAllQuery(UINT8* a_query, UINT32& r_cou
  * @todo optimize - maybe do check and insert/update in one step??
  */
 SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc, UINT8* ccCascade )
-	{
+	{			
 		#ifndef HAVE_NATIVE_UINT64
 			#warning Native UINT64 type not available - CostConfirmation Database might be non-functional
 		#endif
 		const char* previousCCQuery = "SELECT COUNT(*) FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER=%s AND CASCADE='%s'";
 		const char* query2F =         "INSERT INTO COSTCONFIRMATIONS(BYTES, XMLCC, SETTLED, ACCOUNTNUMBER, CASCADE) VALUES (%s, '%s', %d, %s, '%s')";
-	 	const char* query3F = "UPDATE COSTCONFIRMATIONS SET BYTES=%s, XMLCC='%s', SETTLED=%d WHERE ACCOUNTNUMBER=%s AND CASCADE='%s'";
+	 	const char* query3F =         "UPDATE COSTCONFIRMATIONS SET BYTES=%s, XMLCC='%s', SETTLED=%d WHERE ACCOUNTNUMBER=%s AND CASCADE='%s'";
 	 	const char* tempQuery;
 	
 		UINT8 * query;
@@ -302,17 +302,17 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 		pStrCC = new UINT8[8192];
 		size=8192;
 		if(cc.toXMLString(pStrCC, &size)!=E_SUCCESS)
-			{
+		{
 			CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstanceDBInterface: Could not transform CC to XML string!\n");
-				delete[] pStrCC;
-				return E_UNKNOWN;
-			}
+			delete[] pStrCC;
+			return E_UNKNOWN;
+		}
 		
 #ifdef DEBUG
 		CAMsg::printMsg(LOG_DEBUG, "cc to store in  db:%s\n",pStrCC);	  		
 #endif  
 
-		// Test: is there already an entry with this accountno. for the same cascade?
+		// Test: is there already an entry with this accountno. for the same cascade?		
 		len = max(strlen(previousCCQuery), strlen(query2F));
 		len = max(len, strlen(query3F));
 		query = new UINT8[len + 32 + 32 + 1 + size + strlen((char*)ccCascade)];
@@ -321,22 +321,22 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 	
 		// to receive result in binary format...
 		if (checkCountAllQuery(query, count) != E_SUCCESS)
-			{
-				delete[] pStrCC;
-				delete[] query;
-				return E_UNKNOWN;
-			}
+		{
+			delete[] pStrCC;
+			delete[] query;
+			return E_UNKNOWN;
+		}
 	
 		// put query together (either insert or update)
 		print64(tmp,cc.getTransferredBytes());		
 		if(count == 0)
-			{
+		{			
 			tempQuery = query2F; // do insert
-			}
+		}
 		else
-			{
+		{
 			tempQuery = query3F; // do update
-			}
+		}
 		sprintf((char*)query, tempQuery, tmp, pStrCC, 0, strAccountNumber, ccCascade);
 	
 		// issue query..
@@ -346,18 +346,18 @@ SINT32 CAAccountingDBInterface::storeCostConfirmation( CAXMLCostConfirmation &cc
 		{
 			CAMsg::printMsg(LOG_ERR, "Could not store CC!\n");
 			//if (PQresultStatus(pResult) != PGRES_COMMAND_OK)
-		{
-			CAMsg::printMsg(LOG_ERR, 
+			{
+				CAMsg::printMsg(LOG_ERR, 
 								"Database message '%s' while processing query '%s'\n", 
-											PQresultErrorMessage(pResult), query
-											);
+								PQresultErrorMessage(pResult), query
+								);
 			}
 			delete[] query;	
 			PQclear(pResult);
 			return E_UNKNOWN;
 		}
 		delete[] query;	
-		PQclear(pResult);
+		PQclear(pResult);		
 
 		#ifdef DEBUG
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstanceDBInterface: Finished storing CC in DB.\n");
@@ -400,20 +400,20 @@ SINT32 CAAccountingDBInterface::getUnsettledCostConfirmations(CAQueue& q, UINT8*
 		delete[] finalQuery;
 		finalQuery = NULL;
 		if(PQresultStatus(result) != PGRES_TUPLES_OK)
-			{
-				PQclear(result);
-				return E_UNKNOWN;
-			}
+		{
+			PQclear(result);
+			return E_UNKNOWN;
+		}
 		numTuples = PQntuples(result);
 		for(i=0; i<numTuples; i++)
+		{
+			pTmpStr = (UINT8*)PQgetvalue(result, i, 0);
+			if( (pTmpStr!=NULL)&&
+					( (pCC = CAXMLCostConfirmation::getInstance(pTmpStr,strlen((char*)pTmpStr)) )!=NULL))
 			{
-				pTmpStr = (UINT8*)PQgetvalue(result, i, 0);
-				if( (pTmpStr!=NULL)&&
-						( (pCC = CAXMLCostConfirmation::getInstance(pTmpStr,strlen((char*)pTmpStr)) )!=NULL))
-					{
-						q.add(&pCC, sizeof(CAXMLCostConfirmation *));
-					}
-			}		
+				q.add(&pCC, sizeof(CAXMLCostConfirmation *));
+			}
+		}		
 		PQclear(result);
 
 		//CAMsg::printMsg(LOG_DEBUG, "Stop get unsettled CC\n");
@@ -449,7 +449,7 @@ SINT32 CAAccountingDBInterface::markAsSettled(UINT64 accountNumber, UINT8* casca
 				PQclear(result);
 				return E_UNKNOWN;
 			}
-		PQclear(result);		
+		PQclear(result);	
 
 		return E_SUCCESS;
 	}
@@ -510,13 +510,13 @@ SINT32 CAAccountingDBInterface::storePrepaidAmount(UINT64 accountNumber, SINT32 
 	//const char* deleteQuery = "DELETE FROM PREPAIDAMOUNTS WHERE ACCOUNTNUMBER = %s AND CASCADE='%s'";
 	const char* query;
 	
-		PGresult* result;
+	PGresult* result;
 	UINT8* finalQuery;
-		UINT8 tmp[32];
+	UINT8 tmp[32];
 	UINT32 len;
 	UINT32 count;
-		print64(tmp,accountNumber);
-		
+	print64(tmp,accountNumber);
+
 	if(!checkConnectionStatus()) 
 	{
 		return E_NOT_CONNECTED;
@@ -543,10 +543,10 @@ SINT32 CAAccountingDBInterface::storePrepaidAmount(UINT64 accountNumber, SINT32 
 		query = updateQuery;
 	}
 	sprintf((char*)finalQuery, query, prepaidBytes, tmp, cascadeId);
-		result = PQexec(m_dbConn, (char *)finalQuery);
+	result = PQexec(m_dbConn, (char *)finalQuery);	
 	if (PQresultStatus(result) != PGRES_COMMAND_OK) // || PQntuples(result) != 1)
-		{
-			CAMsg::printMsg(LOG_ERR, "CAAccountungDBInterface: Saving to prepaidamounts failed!\n");
+	{
+		CAMsg::printMsg(LOG_ERR, "CAAccountungDBInterface: Saving to prepaidamounts failed!\n");
 		//if (PQresultStatus(result) != PGRES_COMMAND_OK)
 		{			
 			CAMsg::printMsg(LOG_ERR, 
@@ -555,16 +555,16 @@ SINT32 CAAccountingDBInterface::storePrepaidAmount(UINT64 accountNumber, SINT32 
 							);
 		}
 		delete[] finalQuery;		
-			if (result)
-			{
-				PQclear(result);
-			}
-			return E_UNKNOWN;	
+		if (result)
+		{
+			PQclear(result);
 		}
+		return E_UNKNOWN;	
+	}
 	delete[] finalQuery;
-		PQclear(result);
+	PQclear(result);
 	CAMsg::printMsg(LOG_DEBUG, "CAAccountingDBInterface: Stored %d prepaid bytes for account nr. %s \n",prepaidBytes, tmp); 
-		return E_SUCCESS;
+	return E_SUCCESS;
 }
 /*
  * When initializing a connection, retrieve the amount of prepaid, but unused, bytes the JAP account has left over from
@@ -590,37 +590,37 @@ SINT32 CAAccountingDBInterface::getPrepaidAmount(UINT64 accountNumber, UINT8* ca
 		sprintf( (char *)finalQuery, selectQuery, accountNumberAsString, cascadeId);		
 		result = PQexec(m_dbConn, (char *)finalQuery);
 		if(PQresultStatus(result)!=PGRES_TUPLES_OK) 
-			{
-				CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Database error while trying to read prepaid bytes, Reason: %s\n", PQresultErrorMessage(result));
-				PQclear(result);
+		{
+			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Database error while trying to read prepaid bytes, Reason: %s\n", PQresultErrorMessage(result));
+			PQclear(result);
 			delete[] finalQuery;
-				return E_UNKNOWN;
-			}
+			return E_UNKNOWN;
+		}
 		
 		if(PQntuples(result)!=1) 
-			{
-				//perfectly normal, the user account simply hasnt been used with this cascade yet
-				PQclear(result);
+		{
+			//perfectly normal, the user account simply hasnt been used with this cascade yet
+			PQclear(result);
 			delete[] finalQuery;
-				return 0;
-			}
+			return 0;
+		}
 		SINT32 nrOfBytes =  atoi(PQgetvalue(result, 0, 0)); //first row, first column
 		PQclear(result);						
 
 		if (a_bDelete)
 		{
-		//delete entry from db
+			//delete entry from db
 			const char* deleteQuery = "DELETE FROM PREPAIDAMOUNTS WHERE ACCOUNTNUMBER=%s AND CASCADE='%s' ";
-		PGresult* result2;
-		print64(accountNumberAsString,accountNumber);
-		sprintf( (char *)finalQuery, deleteQuery, accountNumberAsString, cascadeId);
-		
-		result2 = PQexec(m_dbConn, (char *)finalQuery);
-		if (PQresultStatus(result2) != PGRES_COMMAND_OK)
-		{
-			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Deleting read prepaidamount failed.");	
-		}
-		PQclear(result2);
+			PGresult* result2;
+			print64(accountNumberAsString,accountNumber);
+			sprintf( (char *)finalQuery, deleteQuery, accountNumberAsString, cascadeId);
+			
+			result2 = PQexec(m_dbConn, (char *)finalQuery);
+			if (PQresultStatus(result2) != PGRES_COMMAND_OK)
+			{
+				CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Deleting read prepaidamount failed.");	
+			}
+			PQclear(result2);			
 		}
 		
 		delete[] finalQuery;

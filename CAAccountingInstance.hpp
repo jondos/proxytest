@@ -121,10 +121,10 @@ public:
 	 * @retval 0 if it is not blocked
 	 */
 	static SINT32 isIPAddressBlocked(const UINT8 ip[4])
-		{
+	{
 		//return ms_pInstance->m_pIPBlockList->checkIP(ip); 
 		return 0;
-		}
+	}
 	
 	/**
 	* Handle a user (xml) message sent to us by the Jap through the ControlChannel
@@ -134,7 +134,7 @@ public:
 	* function to the ai thread.
 	*/
 	SINT32 static processJapMessage(fmHashTableEntry * pHashEntry,const DOM_Document& a_DomDoc);
-
+	
 	UINT32 static getNrOfUsers();
 	
 	static const SINT32 HANDLE_PACKET_CONNECTION_OK; // this packet has been checked and is OK
@@ -220,7 +220,7 @@ private:
 	// (same hash values as in CCs and in the JPI, as taken from the MixInfo)
 	// we concatenate price certificates rather than mix-skis because a cascade with changed prices counts as a new/different cascade
 	UINT8* m_currentCascade;
-
+	
 	/** The hash values of the Mixes ordered beginning with the AI Mix. */
 	UINT8** m_allHashes;
 	UINT32 m_allHashesLen;

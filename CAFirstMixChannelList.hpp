@@ -57,7 +57,7 @@ struct t_fmhashtableentry
 			UINT32				trafficIn;
 			UINT32				trafficOut;
 			UINT64				timeCreated;
-#endif
+#endif			
 			UINT64				id;
 
 			CASymCipher*  pSymCipher;
@@ -68,10 +68,10 @@ struct t_fmhashtableentry
 #ifdef DELAY_USERS
 			UINT32				delayBucket;
 			UINT32				delayBucketID;
-#endif
+#endif						
 			// if false, the entry should be deleted the next time it is read from the queue
 			bool bRecoverTimeout;
-			
+	
 		private:
 			UINT32				cNumberOfChannels;
 			struct t_firstmixchannellist* pChannelList;
@@ -81,7 +81,7 @@ struct t_fmhashtableentry
 					struct t_fmhashtableentry* prev;
 					struct t_fmhashtableentry* next;
 				} list_HashEntries;
-
+				
 			// the timeout list
 			// At the moement only enabled for payment Mixes (to be changed iff new mix protcol supports this for all clients)
 #ifdef PAYMENT
@@ -201,7 +201,7 @@ class CAFirstMixChannelList
 			fmHashTableEntry* add(CAMuxSocket* pMuxSocket,const UINT8 peerIP[4],CAQueue* pQueueSend);
 			SINT32 addChannel(CAMuxSocket* pMuxSocket,HCHANNEL channelIn,CASymCipher* pCipher,HCHANNEL* channelOut);
 			
-			fmChannelListEntry* get(CAMuxSocket* pMuxSocket,HCHANNEL channelIn);
+			fmChannelListEntry* get(CAMuxSocket* pMuxSocket,HCHANNEL channelIn);			
 
 #ifdef PAYMENT
 			/** 
@@ -217,7 +217,7 @@ class CAFirstMixChannelList
 			 * are left in the queue
 			 */
 			fmHashTableEntry* popTimeoutEntry(bool a_bForce);
-
+			
 			/**
 			 * adds the entry to the timeout queue with mutex
 			 */

@@ -207,15 +207,15 @@ SINT32 CATLSClientSocket::sendFully(const UINT8* buff, UINT32 len)
 **/
 SINT32 CATLSClientSocket::receive(UINT8* buff,UINT32 len)
 {
-		SINT32 ret=::SSL_read(m_pSSL,(char*)buff,len);
-	  if(ret<0)
+	SINT32 ret=::SSL_read(m_pSSL,(char*)buff,len);
+	if(ret<0)
   	{	
   		if (SSL_ERROR_WANT_READ == SSL_get_error(m_pSSL, ret))
   		{
   			return E_AGAIN;
   		}
-			return SOCKET_ERROR;
-	}
+		return SOCKET_ERROR;
+  	}
 	return ret;
 }
 

@@ -36,10 +36,10 @@ const UINT8* const CAXMLPriceCert::ms_pStrElemName=(UINT8*)"PriceCertificate";
 
 CAXMLPriceCert::CAXMLPriceCert()
 	{
-	m_StrSubjectKeyIdentifier = NULL;
-	m_StrSignatureTime = NULL;
-	m_StrBiID = NULL;
-	m_domDocument = NULL;	
+		m_StrSubjectKeyIdentifier = NULL;
+		m_StrSignatureTime = NULL;
+		m_StrBiID = NULL;
+		m_domDocument = NULL;	
 	}
 
 CAXMLPriceCert::~CAXMLPriceCert()
@@ -50,7 +50,7 @@ CAXMLPriceCert::~CAXMLPriceCert()
 			delete[] m_StrSignatureTime;
 		if (m_StrBiID != NULL) 
 			delete[] m_StrBiID;
-	m_domDocument=NULL;	
+		m_domDocument=NULL;	
 	}
 
 CAXMLPriceCert* CAXMLPriceCert::getInstance(const UINT8 * strXmlData,UINT32 strXmlDataLen)
@@ -73,45 +73,45 @@ CAXMLPriceCert* CAXMLPriceCert::getInstance(const UINT8 * strXmlData,UINT32 strX
 
 CAXMLPriceCert* CAXMLPriceCert::getInstance(DOM_Element &elemRoot)
 	{
-	if(elemRoot==NULL)
-	{
-		CAMsg::printMsg(LOG_DEBUG,"CAXMLPriceCert::getInstance: root element is null\n");
-		return NULL;
-	}	
-	CAXMLPriceCert* pPC=new CAXMLPriceCert();
-	pPC->m_domDocument=DOM_Document::createDocument();
-	pPC->m_domDocument.appendChild(pPC->m_domDocument.importNode(elemRoot,true));
-	if(pPC->setValues()!=E_SUCCESS)
-		{
-			delete pPC;
-			CAMsg::printMsg(LOG_DEBUG,"CAXMLPriceCert::getInstance.setValues() FAILED \n");
-			return NULL;
-		}
-	return pPC;	
+		if(elemRoot==NULL)
+			{
+				CAMsg::printMsg(LOG_DEBUG,"CAXMLPriceCert::getInstance: root element is null\n");
+				return NULL;
+			}	
+		CAXMLPriceCert* pPC=new CAXMLPriceCert();
+		pPC->m_domDocument=DOM_Document::createDocument();
+		pPC->m_domDocument.appendChild(pPC->m_domDocument.importNode(elemRoot,true));
+		if(pPC->setValues()!=E_SUCCESS)
+			{
+				delete pPC;
+				CAMsg::printMsg(LOG_DEBUG,"CAXMLPriceCert::getInstance.setValues() FAILED \n");
+				return NULL;
+			}
+		return pPC;	
 	}
 
 SINT32 CAXMLPriceCert::toXmlElement(DOM_Document &a_doc, DOM_Element &elemRoot)
 	{
 		elemRoot = a_doc.createElement("PriceCertificate");
-		
-		setDOMElementAttribute(elemRoot,"version",(UINT8*)"1.1"); 
 	
+		setDOMElementAttribute(elemRoot,"version",(UINT8*)"1.1"); 
+
 		DOM_Element elemHashOfMixCert = a_doc.createElement("SubjectKeyIdentifier");
 		setDOMElementValue(elemHashOfMixCert,m_StrSubjectKeyIdentifier);
 		elemRoot.appendChild(elemHashOfMixCert);
-		
+	
 		DOM_Element elemRate = a_doc.createElement("Rate");
 		setDOMElementValue(elemRate,m_lRate);
 		elemRoot.appendChild(elemRate);
-		
+	
 		DOM_Element elemCreationTime = a_doc.createElement("SignatureTime");
 		setDOMElementValue(elemCreationTime,m_StrSignatureTime);
 		elemRoot.appendChild(elemCreationTime);
-		
+	
 		DOM_Element elemBiID = a_doc.createElement("BiID");
 		setDOMElementValue(elemBiID,m_StrBiID);
 		elemRoot.appendChild(elemBiID);
-
+	
 		//append signature node
 		if (m_signature != NULL)
 		{			
