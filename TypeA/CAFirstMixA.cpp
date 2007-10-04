@@ -589,6 +589,10 @@ NEXT_USER:
 										}
 								len=MIXPACKET_SIZE-pfmHashEntry->uAlreadySendPacketSize;
 								ret=((CASocket*)pfmHashEntry->pMuxSocket)->send(((UINT8*)&(pfmHashEntry->oQueueEntry))+pfmHashEntry->uAlreadySendPacketSize,len);
+								if (ret <= 0 && !pfmHashEntry->bCountPacket)
+								{
+									CAMsg::printMsg(LOG_DEBUG, "Could not write control channel packet!!\n");	
+								}
 								if(ret>0)
 									{
 										pfmHashEntry->uAlreadySendPacketSize+=ret;
