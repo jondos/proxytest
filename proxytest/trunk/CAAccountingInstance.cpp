@@ -781,7 +781,7 @@ SINT32 CAAccountingInstance::sendCCRequest(tAiAccountingInfo* pAccInfo)
     pAccInfo->bytesToConfirm = (prepaidInterval) + pAccInfo->transferredBytes;
 	makeCCRequest(pAccInfo->accountNumber, pAccInfo->bytesToConfirm, doc);				
 	//pAccInfo->authFlags |= AUTH_SENT_CC_REQUEST;
-//#ifdef DEBUG	
+#ifdef DEBUG	
 	CAMsg::printMsg(LOG_DEBUG, "CC request sent for %u bytes \n",pAccInfo->bytesToConfirm);
 	CAMsg::printMsg(LOG_DEBUG, "transferrred bytes: %u bytes \n",pAccInfo->transferredBytes);
 	CAMsg::printMsg(LOG_DEBUG, "prepaid Interval: %u \n",prepaidInterval);	
@@ -793,7 +793,7 @@ SINT32 CAAccountingInstance::sendCCRequest(tAiAccountingInfo* pAccInfo)
 	DOM_Output::dumpToMem(doc,debugout,&debuglen);
 	debugout[debuglen] = 0;			
 	CAMsg::printMsg(LOG_DEBUG, "the CC sent looks like this: %s \n",debugout);
-//#endif			
+#endif			
 	
 	//FINISH_STACK("CAAccountingInstance::sendCCRequest");
 	
