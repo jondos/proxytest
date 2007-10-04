@@ -549,7 +549,6 @@ NEXT_USER:
 //Step 5 
 //Writing to users...
 				countRead=m_psocketgroupUsersWrite->select(/*true,*/0);
-				CAMsg::printMsg(LOG_DEBUG, "Writing...");	
 #ifdef HAVE_EPOLL		
 				fmHashTableEntry* pfmHashEntry=(fmHashTableEntry*)m_psocketgroupUsersWrite->getFirstSignaledSocketData();
 				while(pfmHashEntry!=NULL)
@@ -577,7 +576,7 @@ NEXT_USER:
 											//do not count control channel packets!
 											if(pfmHashEntry->oQueueEntry.packet.channel>0&&pfmHashEntry->oQueueEntry.packet.channel<256)
 											{
-												CAMsg::printMsg(LOG_DEBUG, "Writing control channel packet...");												
+												CAMsg::printMsg(LOG_DEBUG, "Writing control channel packet...\n");												
 												pfmHashEntry->bCountPacket=false;
 											}
 											else
