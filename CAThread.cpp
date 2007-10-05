@@ -31,6 +31,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAUtil.hpp"
 #include "CAMsg.hpp"
 
+#ifdef OS_TUDOS
+	const int l4thread_max_threads = 64;
+#endif
+
 #ifdef PRINT_THREAD_STACK_TRACE	
 	pthread_once_t CAThread::ms_threadKeyInit = PTHREAD_ONCE_INIT;
 	pthread_key_t CAThread::ms_threadKey; 
@@ -43,7 +47,9 @@ CAThread::CAThread()
 		m_fncMainLoop=NULL;
 #ifdef OS_TUDOS
 		m_Thread=L4THREAD_INVALID_ID;
+#ifdef PRINT_THREAD_STACK_TRACE	
 		assert(ms_threadKey != L4_ENOKEY);
+#endif //PRINT_THREAD_STACK_TRACE	
 #else
 		m_pThread=NULL;
 #endif
