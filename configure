@@ -4431,8 +4431,8 @@ case "$host" in
 	DEFAULTLIBS="$LIBS -L/usr/pkg/lib -liconv -lpthread"
 	;;
 *-*-drops*)
-	CFLAGS="$CFLAGS -DDROPS"
-	CXXFLAGS="$CXXFLAGS -DDROPS";
+	CFLAGS="$CFLAGS -DOS_TUDOS"
+	CXXFLAGS="$CXXFLAGS -DOS_TUDOS";
 	;;
 *)
 	;;
