@@ -284,7 +284,10 @@ class CACmdLnOptions
 				{
 				return m_u32KeepAliveRecvInterval;
 				}
-			
+			bool isInfoServiceEnabled()
+				{
+					return m_addrInfoServicesSize;
+				}			
 #endif //ONLY_LOCAL_PROXY			
 			bool getCompressLogs()
 				{
@@ -308,10 +311,7 @@ class CACmdLnOptions
 			{
 				return m_bSocksSupport;
 			}				
-			bool isInfoServiceEnabled()
-				{
-					return m_addrInfoServicesSize;
-				}
+
 
 			bool getAutoReconnect()
 				{
@@ -449,6 +449,7 @@ class CACmdLnOptions
 	    CAMutex* m_pcsReConfigure; //Ensures that reconfigure is running only once at the same time;
 			CAThread m_threadReConfigure; //Thread, that does the actual reconfigure work
 	    CAListenerInterface**	m_addrInfoServices;
+			UINT32 m_addrInfoServicesSize;
 
 			CASignature*		m_pSignKey;
 			CACertificate*	m_pOwnCertificate;
@@ -473,7 +474,6 @@ class CACmdLnOptions
 			UINT32 m_u32KeepAliveRecvInterval;
 #endif //ONLY_LOCAL_PROXY
 
-			UINT32 m_addrInfoServicesSize;
 			bool		m_bLocalProxy,m_bFirstMix,m_bMiddleMix,m_bLastMix;
 			bool		m_bAutoReconnect; //auto reconnect if connection to first mix lost ??
 			char*		m_strCascadeName;

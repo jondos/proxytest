@@ -40,6 +40,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef LOG_CRIME
 	#include "tre/regex.h"
 #endif
+/* TUDO: CVHEC!!!
 #ifndef _WIN32
 	#include <termios.h> 
 	int getch() {
@@ -78,7 +79,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_bIsEncryptedLogEnabled=false;
 		m_docMixInfo=NULL;
 #endif //ONLY_LOCAL_PROXY
-		m_iTargetPort=m_iSOCKSPort=m_iSOCKSServerPort=m_addrInfoServicesSize=0xFFFF;
+		m_iTargetPort=m_iSOCKSPort=m_iSOCKSServerPort=0xFFFF;
 		m_strTargetHost=m_strSOCKSHost=NULL;
 		m_strUser=m_strCascadeName=m_strLogDir=m_strEncryptedLogDir=NULL;
 		m_maxNrOfUsers = 0;
@@ -1581,7 +1582,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 			printf("I need a passwd for the SignKey: ");
 #ifdef _WIN32			
 			scanf("%400[^\n]%*1[\n]",(char*)passwd);
-#else			
+#else	//CHECK!!		
 			UINT16 i=0;
 			UINT8 tmp=0;
 			while(i<500 && ((char)tmp!='\n')){
@@ -2856,7 +2857,7 @@ SINT32 CACmdLnOptions::checkInfoServices(UINT32 *r_runningInfoServices)
 {
     UINT32 i;
 		*r_runningInfoServices = 0;
-    if(m_addrInfoServicesSize == 0 || m_addrInfoServicesSize == 0xFFFF) // WTH?
+    if(m_addrInfoServicesSize == 0 ) // WTH?
         return E_UNKNOWN;
 
     /** @todo Better test if these InfoServices are reachable */

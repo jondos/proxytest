@@ -1114,6 +1114,140 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 
 		return E_SUCCESS;
 	}
+//NEVER EVER DELETE THIS!
+/*
+THREAD_RETURN loopReadFromUsers(void* param)
+	{
+		CAFirstMix* pFirstMix=(CAFirstMix*)param;
+		CAFirstMixChannelList* pChannelList=pFirstMix->m_pChannelList;
+		CASocketGroup* psocketgroupUsersRead=pFirstMix->m_psocketgroupUsersRead;
+		CASocketGroup* psocketgroupUsersWrite=pFirstMix->m_psocketgroupUsersWrite;
+		CAQueue* pQueueSendToMix=pFirstMix->m_pQueueSendToMix;
+//		CAInfoService* pInfoService=pFirstMix->m_pInfoService;
+		CAASymCipher* pRSA=pFirstMix->m_pRSA;
+		CAIPList* pIPList=pFirstMix->m_pIPList;
+		CAMuxSocket* pNextMix=pFirstMix->m_pMuxOut;
+
+		CAMuxSocket* pMuxSocket;
+
+		SINT32 countRead;
+		SINT32 ret;
+		UINT8* ip=new UINT8[4];
+		UINT8* tmpBuff=new UINT8[MIXPACKET_SIZE];
+		MIXPACKET* pMixPacket=new MIXPACKET;
+		UINT8* rsaBuff=new UINT8[RSA_SIZE];
+
+		fmHashTableEntry* pHashEntry;
+		fmChannelListEntry* pEntry;
+		CASymCipher* pCipher=NULL;
+
+		for(;;)
+			{
+				countRead=psocketgroupUsersRead->select(false,1000); //if we sleep here forever, we will not notice new sockets...
+				if(countRead<0)
+					{ //check for error
+						if(pFirstMix->getRestart()||countRead!=E_TIMEDOUT)
+							goto END_THREAD;
+					}
+				pHashEntry=pChannelList->getFirst();
+				while(pHashEntry!=NULL&&countRead>0)
+					{
+						pMuxSocket=pHashEntry->pMuxSocket;
+						if(psocketgroupUsersRead->isSignaled(*pMuxSocket))
+							{
+								countRead--;
+								ret=pMuxSocket->receive(pMixPacket,0);
+								if(ret==SOCKET_ERROR)
+									{
+										((CASocket*)pMuxSocket)->getPeerIP(ip);
+										pIPList->removeIP(ip);
+										psocketgroupUsersRead->remove(*(CASocket*)pMuxSocket);
+										psocketgroupUsersWrite->remove(*(CASocket*)pMuxSocket);
+										pEntry=pChannelList->getFirstChannelForSocket(pMuxSocket);
+										while(pEntry!=NULL)
+											{
+												pNextMix->close(pEntry->channelOut,tmpBuff);
+												pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
+												delete pEntry->pCipher;
+												pEntry=pChannelList->getNextChannel(pEntry);
+											}
+										ASSERT(pHashEntry->pQueueSend!=NULL,"Send queue is NULL");
+										delete pHashEntry->pQueueSend;
+										pChannelList->remove(pMuxSocket);
+										pMuxSocket->close();
+										delete pMuxSocket;
+										pFirstMix->decUsers();
+									}
+								else if(ret==MIXPACKET_SIZE)
+									{
+										if(pMixPacket->flags==CHANNEL_CLOSE)
+											{
+												pEntry=pChannelList->get(pMuxSocket,pMixPacket->channel);
+												if(pEntry!=NULL)
+													{
+														pNextMix->close(pEntry->channelOut,tmpBuff);
+														pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
+														delete pEntry->pCipher;
+														pChannelList->removeChannel(pMuxSocket,pMixPacket->channel);
+													}
+												else
+													{
+														#if defined(_DEBUG) && ! defined(__MIX_TEST)
+															CAMsg::printMsg(LOG_DEBUG,"Invalid ID to close from Browser!\n");
+														#endif
+													}
+											}
+										else
+											{
+												pEntry=pChannelList->get(pMuxSocket,pMixPacket->channel);
+												if(pEntry!=NULL&&pMixPacket->flags==CHANNEL_DATA)
+													{
+														pMixPacket->channel=pEntry->channelOut;
+														pCipher=pEntry->pCipher;
+														pCipher->decryptAES(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+														pNextMix->send(pMixPacket,tmpBuff);
+														pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
+														pFirstMix->incMixedPackets();
+													}
+												else if(pEntry==NULL&&(pMixPacket->flags==CHANNEL_OPEN_OLD||pMixPacket->flags==CHANNEL_OPEN_NEW))
+													{
+														pCipher= new CASymCipher();
+														pRSA->decrypt(pMixPacket->data,rsaBuff);
+														pCipher->setKeyAES(rsaBuff);
+														pCipher->decryptAES(pMixPacket->data+RSA_SIZE,
+																						 pMixPacket->data+RSA_SIZE-KEY_SIZE,
+																						 DATA_SIZE-RSA_SIZE);
+														memcpy(pMixPacket->data,rsaBuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
+
+														if(pChannelList->addChannel(pMuxSocket,pMixPacket->channel,pCipher,&pMixPacket->channel)!=E_SUCCESS)
+															{//todo --> maybe move up to not make decryption!!
+																delete pCipher;
+															}
+														else
+															{
+																#if defined(_DEBUG) && !defined(__MIX_TEST)
+																	CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",pMixPacket->channel);
+																#endif
+																pNextMix->send(pMixPacket,tmpBuff);
+																pQueueSendToMix->add(tmpBuff,MIXPACKET_SIZE);
+																pFirstMix->incMixedPackets();
+															}
+													}
+											}
+									}
+							}
+						pHashEntry=pChannelList->getNext();
+					}
+			}
+END_THREAD:
+		delete ip;
+		delete tmpBuff;
+		delete pMixPacket;
+		delete rsaBuff;
+		CAMsg::printMsg(LOG_DEBUG,"Exiting Thread ReadFromUser\n");
+		THREAD_RETURN_SUCCESS;
+	}
+*/
 
 SINT32 CAFirstMix::clean()
 	{

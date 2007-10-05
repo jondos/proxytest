@@ -1,7 +1,7 @@
 
 #ifndef HASHTABLE_H
 #define HASHTABLE_H
-
+#ifdef PAYMENT
 #include "CAMutex.hpp"
 
 #define HASH_EMPTY_NONE (SINT8)0
@@ -92,5 +92,5 @@ class Hashtable
 	private:
 		CAMutex m_mutex;
 };
-
+#endif //PAYMENT
 #endif  // HASHTABLE_H
