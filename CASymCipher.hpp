@@ -91,7 +91,8 @@ class CASymCipher
 					return E_SUCCESS;
 				}
 
-			SINT32 crypt(const UINT8* in,UINT8* out,UINT32 len,UINT8 ivselect);
+			SINT32 crypt1(const UINT8* in,UINT8* out,UINT32 len);
+			SINT32 crypt2(const UINT8* in,UINT8* out,UINT32 len);
 			SINT32 decrypt1CBCwithPKCS7(const UINT8* in,UINT8* out,UINT32* len);
 			SINT32 encrypt1CBCwithPKCS7(const UINT8* in,UINT32 inlen,UINT8* out,UINT32* len);
 		protected:
