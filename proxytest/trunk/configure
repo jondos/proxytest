@@ -4430,6 +4430,10 @@ case "$host" in
 *-*-netbsd*)
 	DEFAULTLIBS="$LIBS -L/usr/pkg/lib -liconv -lpthread"
 	;;
+*-*-drops*)
+	CFLAGS="$CFLAGS -DDROPS"
+	CXXFLAGS="$CXXFLAGS -DDROPS";
+	;;
 *)
 	;;
 esac
