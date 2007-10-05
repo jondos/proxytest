@@ -40,7 +40,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef LOG_CRIME
 	#include "tre/regex.h"
 #endif
-/* TUDO: CVHEC!!!
+// TUDO: CVHEC!!!
 #ifndef _WIN32
 	#include <termios.h> 
 	int getch() {
