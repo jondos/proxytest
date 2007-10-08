@@ -218,6 +218,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define snprintf _snprintf
 	#define atoll _atoi64
 	#define getpid _getpid
+	#define getchar _getch
 	#define HAVE_ATOLL
 	#define HAVE_PTHREAD_MUTEX_INIT
 	#define HAVE_PTHREAD_COND_INIT
