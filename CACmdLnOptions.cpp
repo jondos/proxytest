@@ -40,23 +40,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef LOG_CRIME
 	#include "tre/regex.h"
 #endif
-// TUDO: CVHEC!!!
-#ifndef _WIN32
-	#include <termios.h> 
-	int getch() {
-    		static int ch = -1, fd = 0;
-    		struct termios neu, alt;
-    		fd = fileno(stdin);
-    		tcgetattr(fd, &alt);
-    		neu = alt;
-    		neu.c_lflag &= ~(ICANON|ECHO);
-    		tcsetattr(fd, TCSANOW, &neu);
-    		ch = getchar();
-    		tcsetattr(fd, TCSANOW, &alt);
-    		return ch;
-		}	
-#endif
-
 
 CACmdLnOptions::CACmdLnOptions()
   {
@@ -1580,21 +1563,8 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 		if(m_pSignKey->setSignKey(elemOwnCert.getFirstChild(),SIGKEY_PKCS12)!=E_SUCCESS)
 		{//Maybe not an empty passwd
 			printf("I need a passwd for the SignKey: ");
-#ifdef _WIN32			
-			scanf("%400[^\n]%*1[\n]",(char*)passwd);
-#else	//CHECK!!		
-			UINT16 i=0;
-			UINT8 tmp=0;
-			while(i<500 && ((char)tmp!='\n')){
-				tmp=getch();
-				passwd[i]=((char)tmp!='\n')?tmp:0;
-				i++;
-				};
-			printf("\n");
-			if (i==500){
-				passwd[499]=0;
-				};
-#endif
+			fflush(stdout);
+			readPasswd(passwd,500);
 			if(m_pSignKey->setSignKey(elemOwnCert.getFirstChild(),SIGKEY_PKCS12,(char*)passwd)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Could not read own signature key!\n");

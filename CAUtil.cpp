@@ -973,6 +973,43 @@ SINT32 parseU64(const UINT8 * str, UINT64& value)
 	#endif
 }
 
+SINT32 readPasswd(UINT8* buff,UINT32 len)
+	{
+		if(len==0)
+			return E_SUCCESS;
+#ifdef _WIN32
+		UINT32 i=0;
+		for(i=0;i<len-1;i++)
+			{
+				int c=_getch();
+				if(c=='\r')
+					break;
+				buff[i]=c;
+			}
+		buff[i]=0;
+#else
+		termios tmpTermios;
+		UINT32 flags;
+		bool bResotre=true;
+		if(tcgetattr(STDIN_FILENO,&tmpTermios)!=0)
+			{
+				bResore=false;
+			}
+		flags=tmpTermios.c_lflag;
+		tmpTermios.c_lflag&=~(ECHO);
+		if(bRestore)
+			tcsetattr(STDIN_FILENO,TCSAFLUSH,&tmpTermios);
+		SINT32 size=read(STDIN_FILENO,buff,len);
+		tmpTermios.c_lflag=flags;
+		if(bRestore)
+			tcsetattr(STDIN_FILENO,TCSAFLUSH,&tmpTermios);
+		if(size<1||size>=len)
+			return E_UNKNOWN;
+		buff[size]=0;
+#endif
+		return E_SUCCESS;
+	}	
+
 /**
  * Parses a timestamp in JDBC timestamp escape format (as it comes from the BI)
  * and outputs the value in seconds since the epoch.

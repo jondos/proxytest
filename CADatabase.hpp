@@ -85,7 +85,7 @@ class CADatabase
 			static SINT32 getTimeForReplayTimestamp(UINT32& refTime,tReplayTimestamp replayTimestamp)
 				{
 					time_t now=time(NULL);
-					refTime=now-replayTimestamp.interval*SECONDS_PER_INTERVALL-replayTimestamp.offset;
+					refTime=(UINT32)(now-replayTimestamp.interval*SECONDS_PER_INTERVALL-replayTimestamp.offset);
 					return E_SUCCESS;
 				}
 

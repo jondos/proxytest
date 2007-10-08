@@ -286,7 +286,7 @@ class CACmdLnOptions
 				}
 			bool isInfoServiceEnabled()
 				{
-					return m_addrInfoServicesSize;
+					return (m_addrInfoServicesSize>0);
 				}			
 #endif //ONLY_LOCAL_PROXY			
 			bool getCompressLogs()
