@@ -218,11 +218,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define vsnprintf _vsnprintf
 	#endif
 	#define snprintf _snprintf
-	#define atoll _atoi64
-	#define strtoll _strtoui64
 	#define getpid _getpid
-	#define HAVE_ATOLL
-	#define HAVE_STRTOLL
 	#define HAVE_PTHREAD_MUTEX_INIT
 	#define HAVE_PTHREAD_COND_INIT
 	#define HAVE_SEM_INIT
@@ -245,7 +241,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define HAVE_UNIX_DOMAIN_PROTOCOL
 		#define HAVE_VSNPRINTF
 		#define HAVE_SNPRINTF
-		#define HAVE_ATOLL
 		#define HAVE_POLL
 		#define HAVE_O_SYNC
 		#define HAVE_PTHREAD_MUTEX_INIT

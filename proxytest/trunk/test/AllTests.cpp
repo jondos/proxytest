@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 int sockets;
 #endif
 
-CACmdLnOptions options;
+CACmdLnOptions* pglobaloptions;
 
 /**
 * This function runs all tests of the project an is needed if no gui testrunner is

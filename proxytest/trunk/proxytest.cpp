@@ -448,10 +448,10 @@ int main(int argc, const char* argv[])
 #endif
 		init();
 			//some test....
-		UINT8 buff1[500];
-		readPasswd(buff1,500);
-		printf("%s\n",buff1);
-		printf("Len: %i\n",strlen((char*)buff1));
+		//UINT8 buff1[500];
+		//readPasswd(buff1,500);
+		//printf("%s\n",buff1);
+		//printf("Len: %i\n",strlen((char*)buff1));
 		checkSizesOfBaseTypes();
 #ifndef NEW_MIX_TYPE
 		if(MIXPACKET_SIZE!=sizeof(MIXPACKET))
