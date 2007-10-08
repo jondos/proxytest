@@ -74,7 +74,7 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 		UINT32 loops = 4;
 		UINT32 interval = 0;
 #endif	
-		lastCascadeUpdate=lastMixInfoUpdate=lastStatusUpdate=time(NULL); 
+		lastCascadeUpdate=lastMixInfoUpdate=lastStatusUpdate=(UINT32)time(NULL); 
 		// tell the algorithm it is time to update
 		lastCascadeUpdate -= CAInfoService::SEND_CASCADE_INFO_WAIT; 
 		lastMixInfoUpdate -= CAInfoService::SEND_MIX_INFO_WAIT;
