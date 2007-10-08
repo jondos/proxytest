@@ -959,7 +959,7 @@ SINT32 parseU64(const UINT8 * str, UINT64& value)
 			if(len<1)
 				return E_UNKNOWN;
 			UINT64 u64=0;
-			for(int i=0;i<len;i++)
+			for(UINT32 i=0;i<len;i++)
 				{
 					UINT8 c=str[i];
 					if(c>='0'&&c<='9')

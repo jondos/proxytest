@@ -1,4 +1,5 @@
 #include "../StdAfx.h"
+#ifdef POOLSPEEDTEST
 #include "../CASocket.hpp"
 #include "../CASocketGroup.hpp"
 #include "../CAUtil.hpp"
@@ -50,3 +51,4 @@ int main()
 	}
 	return 0;
 }
+#endif
