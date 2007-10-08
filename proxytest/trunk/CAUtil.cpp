@@ -977,17 +977,8 @@ SINT32 readPasswd(UINT8* buff,UINT32 len)
 	{
 		if(len==0)
 			return E_SUCCESS;
-#ifdef _WIN32
-		UINT32 i=0;
-		for(i=0;i<len-1;i++)
-			{
-				int c=_getch();
-				if(c=='\r')
-					break;
-				buff[i]=c;
-			}
-		buff[i]=0;
-#else
+
+#ifndef _WIN32
 		termios tmpTermios;
 		UINT32 flags;
 		bool bRestore=true;
@@ -999,13 +990,22 @@ SINT32 readPasswd(UINT8* buff,UINT32 len)
 		tmpTermios.c_lflag&=~(ECHO);
 		if(bRestore)
 			tcsetattr(STDIN_FILENO,TCSAFLUSH,&tmpTermios);
-		SINT32 size=read(STDIN_FILENO,buff,len);
+#endif
+
+		UINT32 i=0;
+		for(i=0;i<len-1;i++)
+			{
+				int c=getchar();
+				if(c<=0||c=='\r')
+					break;
+				buff[i]=c;
+			}
+		buff[i]=0;
+
+#ifndef _WIN32
 		tmpTermios.c_lflag=flags;
 		if(bRestore)
 			tcsetattr(STDIN_FILENO,TCSAFLUSH,&tmpTermios);
-		if(size<1||size>=len)
-			return E_UNKNOWN;
-		buff[size]=0;
 #endif
 		return E_SUCCESS;
 	}	
