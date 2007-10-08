@@ -948,24 +948,30 @@ UINT8* readFile(UINT8* name,UINT32* size)
 
 /**
  * Parses a 64bit unsigned integer.
- * Note: If the value is out of range the result is 0.
+ * Note: If the value is out of range or not parseable an erro is returned.
  */
 SINT32 parseU64(const UINT8 * str, UINT64& value)
 {
 	#ifdef HAVE_NATIVE_UINT64
-		#ifdef HAVE_ATOLL
-		 ///TODO: Implement error check!
-			long long signedValue = atoll((char *)str);
-			if (signedValue < 0)
-			{
-				signedValue = 0;
-			}
-			value = (UINT64) signedValue;
+			if(str==NULL)
+				return E_UNKNOWN;
+			UINT32 len=strlen((char*)str);
+			if(len<1)
+				return E_UNKNOWN;
+			UINT64 u64=0;
+			for(int i=0;i<len;i++)
+				{
+					UINT8 c=str[i];
+					if(c>='0'&&c<='9')
+						{
+							u64*=10;
+							u64+=c-'0';
+						}
+					else if(str[i]!='+')
+						return E_UNKNOWN;
+				}
+			value = u64;
 			return E_SUCCESS;
-		#else
-			#warning parseU64() is not implemented for platforms without atoll() support!!!
-			return E_UNKNOWN;
-		#endif
 	#else
 		#warning parseU64() is not implemented for platforms without native UINT64 support!!!
 		///@todo code if we do not have native UINT64
@@ -995,7 +1001,11 @@ SINT32 readPasswd(UINT8* buff,UINT32 len)
 		UINT32 i=0;
 		for(i=0;i<len-1;i++)
 			{
-				int c=getchar();
+#ifdef _WIN32
+				int c=::getch();
+#else
+				int c=::getchar();
+#endif
 				if(c<=0||c=='\r'||c=='\n')
 					break;
 				buff[i]=c;
