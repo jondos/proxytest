@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.07.05"
+#define MIX_VERSION "00.07.06"
 
 #include "doxygen.h"
 
@@ -293,20 +293,22 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#endif
 	#include <sys/ioctl.h>
 	#include <sys/types.h>
-  #include <sys/socket.h>
-  #include <pwd.h>
-  #include <sys/un.h>
-  #include <sys/time.h>
-  #include <netinet/in.h>
-  #include <arpa/inet.h>
-  #include <netdb.h>
-  #include <unistd.h>
-  #include <stdlib.h>
-  #include <strings.h>
-  #include <syslog.h>
-  #include <stdarg.h>
-  #include <memory.h>
-  #include <sys/resource.h>
+	#include <sys/socket.h>
+	#include <pwd.h>
+	#include <sys/un.h>
+	#include <sys/time.h>
+	#include <netinet/in.h>
+	#include <arpa/inet.h>
+	#include <netdb.h>
+	#include <unistd.h>
+	#include <stdlib.h>
+	#include <strings.h>
+	#include <syslog.h>
+	#include <stdarg.h>
+	#include <memory.h>
+	#include <sys/resource.h>
+	#include <termios.h> 
+
 	#include <ctype.h>
     typedef struct sockaddr SOCKADDR;
   typedef SOCKADDR* LPSOCKADDR;
