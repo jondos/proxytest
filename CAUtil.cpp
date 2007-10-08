@@ -993,7 +993,7 @@ SINT32 readPasswd(UINT8* buff,UINT32 len)
 		bool bRestore=true;
 		if(tcgetattr(STDIN_FILENO,&tmpTermios)!=0)
 			{
-				bResore=false;
+				bRestore=false;
 			}
 		flags=tmpTermios.c_lflag;
 		tmpTermios.c_lflag&=~(ECHO);
