@@ -305,6 +305,10 @@ UINT8* readFile(UINT8* name,UINT32* size);
  */
 SINT32 parseU64(const UINT8 * str, UINT64& value);
 
+/** Read a passwd (i.e. without echoing the chars typed in)
+	*/
+SINT32 readPasswd(UINT8* buff,UINT32 len);
+
 #ifndef ONLY_LOCAL_PROXY
 /** Clones an OpenSSL DSA structure
 	*/
