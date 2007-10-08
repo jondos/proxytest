@@ -996,7 +996,7 @@ SINT32 readPasswd(UINT8* buff,UINT32 len)
 		for(i=0;i<len-1;i++)
 			{
 				int c=getchar();
-				if(c<=0||c=='\r')
+				if(c<=0||c=='\r'||c=='\n')
 					break;
 				buff[i]=c;
 			}
