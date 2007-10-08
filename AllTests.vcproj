@@ -21,7 +21,6 @@
 			OutputDirectory="AllTest/Debug"
 			IntermediateDirectory="AllTest/Debug"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
@@ -42,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="$(INCLUDE_CPPUNIT);$(INCLUDE_CPPUNIT)\cppunit;$(INCLUDE_XERCES_C);$(INCLUDE_XERCES_C)\xercesc;$(INCLUDE_OPENSSL);$(INCLUDE_PTHREADS);$(INCLUDE_ZLIB);$(INCLUDE_MYSQL);"
+				AdditionalIncludeDirectories="&quot;L:\Programme\Microsoft SDKs\Windows\v6.0A\include&quot;;&quot;$(INCLUDE_CPPUNIT)&quot;;&quot;$(INCLUDE_CPPUNIT)\cppunit&quot;;&quot;$(INCLUDE_XERCES_C)&quot;;&quot;$(INCLUDE_XERCES_C)\xercesc&quot;;&quot;$(INCLUDE_OPENSSL)&quot;;&quot;$(INCLUDE_PTHREADS)&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;__UNIT_TEST__"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -64,10 +63,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="cppunitd_dll.lib proxytest-lib.lib ws2_32.lib ssleay32.lib libeay32.lib pthreadVC.lib xerces-c_2D.lib zlib.lib"
+				AdditionalDependencies="cppunitd_dll.lib proxytest-lib.lib ws2_32.lib ssleay32.lib libeay32.lib pthreadVC.lib xerces-c_2D.lib xerces-depdom_2D.lib zlib.lib"
 				OutputFile="$(OutDir)/AllTest.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories=".\proxytest-lib\Debug;$(LIB_CPPUNIT);$(LIB_XERCES_C_DEBUG);$(LIB_OPENSSL);$(LIB_PTHREADS);$(LIB_ZLIB);$(LIB_MYSQL_DEBUG)"
+				AdditionalLibraryDirectories="&quot;L:\Programme\Microsoft SDKs\Windows\v6.0A\Lib&quot;;&quot;.\proxytest-lib\Debug&quot;;&quot;$(LIB_CPPUNIT)&quot;;&quot;$(LIB_XERCES_C_DEBUG)&quot;;&quot;$(LIB_OPENSSL)&quot;;&quot;$(LIB_PTHREADS)&quot;;&quot;$(LIB_ZLIB)&quot;"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/AllTest.pdb"
 				SubSystem="1"
@@ -257,6 +256,7 @@
 	<References>
 		<ProjectReference
 			ReferencedProjectIdentifier="{150377B0-CA8F-4031-A0B8-45A3001F4F81}"
+			RelativePathToProject=".\proxytest-lib.vcproj"
 		/>
 	</References>
 	<Files>
@@ -266,14 +266,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\test\AllTests.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\test\AllTestsCA.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\test\CAFirstMixChannelListTest.cpp"
 				>
 			</File>
@@ -282,7 +274,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\test\SampleTest.cpp"
+				RelativePath=".\TCAUtil.cpp"
 				>
 			</File>
 		</Filter>
@@ -297,10 +289,6 @@
 			</File>
 			<File
 				RelativePath=".\test\CAFirstMixChannelListTest.hpp"
-				>
-			</File>
-			<File
-				RelativePath=".\test\SampleTest.hpp"
 				>
 			</File>
 		</Filter>

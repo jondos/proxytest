@@ -204,6 +204,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include <malloc.h>
 	#define GET_NET_ERROR (WSAGetLastError())
 	#define GET_NET_ERROR_STR(x) ("Unknown error")
+	#define RESETERROR errno=0;
+	#define GETERROR (errno)
 	#define ERR_INTERN_TIMEDOUT WSAETIMEDOUT
 	#define ERR_INTERN_CONNREFUSED WSAECONNREFUSED
 	#define ERR_INTERN_WOULDBLOCK	WSAEWOULDBLOCK
@@ -217,9 +219,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#endif
 	#define snprintf _snprintf
 	#define atoll _atoi64
+	#define strtoll _strtoui64
 	#define getpid _getpid
-	#define getchar _getch
 	#define HAVE_ATOLL
+	#define HAVE_STRTOLL
 	#define HAVE_PTHREAD_MUTEX_INIT
 	#define HAVE_PTHREAD_COND_INIT
 	#define HAVE_SEM_INIT
@@ -324,6 +327,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
   #define SD_BOTH 2
   #define GET_NET_ERROR (errno)
 	#define GET_NET_ERROR_STR(x) (strerror(x))
+	#define RESETERROR errno=0;
 	#define GETERROR (errno)
 	#define ERR_INTERN_TIMEDOUT ETIMEDOUT
 	#define ERR_INTERN_CONNREFUSED ECONNREFUSED
@@ -339,30 +343,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define MSG_DONTWAIT 0
 	#endif
 #endif //WIn32 ?
-
-//Error constants...
-
-#define E_SUCCESS 0
-#define E_UNKNOWN -1
-#define E_SHUTDOWN -2 // this mix has been shut down and will not restart
-#define E_UNSPECIFIED -100 // A Parameter was not specified/not set
-#define E_SPACE -101//there was not enough memory (or space in a buffer)
-#define E_QUEUEFULL -200 // If a Send Queue contains more data then a defined number
-#define E_AGAIN -300 //If something was'nt completed und should request again later..
-#define E_TIMEDOUT -301 //An opertion has timed out
-#define E_SOCKETCLOSED -302 //An operation which required an open socket uses a closed socket
-#define E_SOCKET_LISTEN -303 //An error occured during listen
-#define E_SOCKET_ACCEPT -304 //An error occured during accept
-#define E_SOCKET_BIND -305 //An error occured during bind
-#define E_SOCKET_LIMIT -306 //An error occurde because we run out of available sockets
-#define E_UNKNOWN_HOST -400 // A hostname could not be resolved
-#define E_FILE_OPEN -500 //Error in opening a file
-#define E_FILE_READ -501 //Error in opening a file
-#define E_XML_PARSE -600 //Error in parsing XML
-#define E_NOT_CONNECTED -700 //Something is not connected that should be
-														// (like a TCP/IP connection or a database connection)
-#define E_NOT_FOUND -701 //Something was not found
-#define E_INVALID -800 // sth is invalid (e.g. signature verifying)
 
 #include <assert.h>
 
@@ -533,6 +513,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define MIX_VERSION_INFO "Mix-Version: " MIX_VERSION PAYMENT_VERSION_INFO "\nUsing: " OPENSSL_VERSION_TEXT "\nUsing Xerces-C: " MY_XERCES_VERSION "\n"
 
 #include "basetypedefs.h"
+#include "errorcodes.hpp"
 #include "typedefs.hpp"
 #include "controlchannelids.h"
 #endif // !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
