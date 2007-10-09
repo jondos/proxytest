@@ -713,6 +713,7 @@ CPP
 GREP
 EGREP
 ALLOCA
+LIBCPPUNIT
 DOTESTS_TRUE
 DOTESTS_FALSE
 LIBOBJS
@@ -12534,12 +12535,14 @@ if test "${enable_tests+set}" = set; then
 
 fi
 
+if test "x$DOTHETEST" != "xyes" ; then
+    LIBCPPUNIT=cppunit
+
+fi
 
 CFLAGS="$CFLAGS $POOL $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS"
 CXXFLAGS="$CXXFLAGS $POOL $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS"
 LIBS="$LIBS $PAYMENT_LIB"
-
-echo "dotest: $DOTHETESTS"
 
  if test x$DOTHETESTS = xyes; then
   DOTESTS_TRUE=
@@ -13360,13 +13363,14 @@ ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
 ALLOCA!$ALLOCA$ac_delim
+LIBCPPUNIT!$LIBCPPUNIT$ac_delim
 DOTESTS_TRUE!$DOTESTS_TRUE$ac_delim
 DOTESTS_FALSE!$DOTESTS_FALSE$ac_delim
 LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 5; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 6; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5
