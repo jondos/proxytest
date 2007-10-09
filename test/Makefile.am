@@ -5,7 +5,7 @@
 
 AUTOMAKE_OPTIONS = foreign
 
-noinst_PROGRAMMS = test.proxytest
+noinst_PROGRAMS = test.proxytest
 test.proxytest_SOURCES = TCAUtil.cpp
 
 includes = @INCLUDES@
