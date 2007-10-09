@@ -4,8 +4,10 @@
 #
 
 AUTOMAKE_OPTIONS = foreign
+noinst_LIBRARIES = libproxytest.a
 sbin_PROGRAMS = mix
-mix_SOURCES = CAAbstractControlChannel.cpp\
+
+libproxytest_a_SOURCES = CAAbstractControlChannel.cpp\
 		    CAAbstractXMLEncodable.cpp\
 		    CAAbstractXMLSignable.cpp\
 		    CAAccountingBIInterface.cpp\
@@ -72,7 +74,6 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CAXMLPriceCert.cpp\
 		    Hashtable.cpp\
 		    StdAfx.cpp \
-		    proxytest.cpp \
 		    CAAbstractControlChannel.hpp\
 		    CAAbstractXMLEncodable.hpp\
 		    CAAbstractXMLSignable.hpp\
@@ -144,12 +145,15 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    StdAfx.h \
 		    basetypedefs.h
 
+mix_sources = proxytest.cpp
+
 
 mix_LDADD = $(top_srcdir)/xml/libxml.a \
 	    $(top_srcdir)/popt/libpopt.a \
 	    $(top_srcdir)/trio/libtrio.a \
 	    $(top_srcdir)/tre/libtre.a \
-	    $(top_srcdir)/TypeA/libmixa.a
+	    $(top_srcdir)/TypeA/libmixa.a\
+	    $(top_srcdir)libproxytest.a
 
 EXTRA_DIST = README proxytest.doxy proxytest.dsp proxytest.dsw
 
