@@ -5,9 +5,9 @@
 
 AUTOMAKE_OPTIONS = foreign
 
-noinst_PROGRAMS = test.proxytest
+check_PROGRAMS = test.proxytest
 test_proxytest_SOURCES = TCAUtil.cpp
-test_proxytest_LDADD =@LIBCPPUNIT@
+test_proxytest_LDADD =-l @LIBCPPUNIT@
 
 includes = @INCLUDES@
 
