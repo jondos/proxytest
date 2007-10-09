@@ -49,7 +49,8 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 am_test_proxytest_OBJECTS = TCAUtil.$(OBJEXT)
 test_proxytest_OBJECTS = $(am_test_proxytest_OBJECTS)
-test_proxytest_DEPENDENCIES = $(top_srcdir)/libproxytest.a
+test_proxytest_DEPENDENCIES = $(top_srcdir)/libproxytest.a \
+	$(top_srcdir)/xml/libxml.a
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -166,7 +167,12 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 test_proxytest_SOURCES = TCAUtil.cpp
-test_proxytest_LDADD = -l @LIBCPPUNIT@ $(top_srcdir)/libproxytest.a
+test_proxytest_LDADD = -l @LIBCPPUNIT@ $(top_srcdir)/libproxytest.a $(top_srcdir)/xml/libxml.a
+#mix_LDADD = $(top_srcdir)/libproxytest.a \
+#             \
+#	                $(top_srcdir)/popt/libpopt.a \
+#			            $(top_srcdir)/trio/libtrio.a \
+#						            $(top_srcdir)/TypeA/libmixa.a
 includes = @INCLUDES@
 all: all-am
 
