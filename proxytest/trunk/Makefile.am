@@ -31,7 +31,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CAFirstMixChannelList.cpp \
 		    CAHttpClient.cpp \
 		    CAInfoService.cpp \
-				CAInfoServiceAware.cpp \
+		    CAInfoServiceAware.cpp \
 		    CAIPList.cpp \
 		    CALastMix.cpp \
 		    CALastMixChannelList.cpp\
@@ -45,7 +45,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CAMsg.cpp \
 		    CAMutex.cpp\
 		    CAMuxSocket.cpp \
-                    CAPriceInfo.cpp \ 
+		    CAPriceInfo.cpp \
 		    CAPool.cpp\
 		    CAQueue.cpp \
 		    CAReplayControlChannel.cpp\
@@ -98,7 +98,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CAFirstMixChannelList.hpp \
 		    CAHttpClient.hpp \
 		    CAInfoService.hpp \
-				CAInfoServiceAware.hpp \
+		    CAInfoServiceAware.hpp \
 		    CAIPList.hpp \
 		    CALastMix.hpp \
 		    CALastMixChannelList.hpp\
@@ -113,7 +113,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CAMsg.hpp \
 		    CAMutex.hpp\
 		    CAMuxSocket.hpp \
-                    CAPriceInfo.hpp \
+		    CAPriceInfo.hpp \
 		    CAPool.hpp\
 		    CAQueue.hpp \
 		    CAReplayControlChannel.hpp\
@@ -146,16 +146,15 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 
 
 mix_LDADD = $(top_srcdir)/xml/libxml.a \
-		  $(top_srcdir)/popt/libpopt.a \
-		  $(top_srcdir)/trio/libtrio.a \
-		  $(top_srcdir)/tre/libtre.a \
-		  $(top_srcdir)/TypeA/libmixa.a
+	    $(top_srcdir)/popt/libpopt.a \
+	    $(top_srcdir)/trio/libtrio.a \
+	    $(top_srcdir)/tre/libtre.a \
+	    $(top_srcdir)/TypeA/libmixa.a
 
 EXTRA_DIST = README proxytest.doxy proxytest.dsp proxytest.dsw
 
 if DOTESTS
-    MAYBE_tests="test"
+    MAYBE_tests=test
 endif    
 
 SUBDIRS = popt xml trio tre TypeA $(MAYBE_tests)
-
