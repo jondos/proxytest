@@ -586,6 +586,6 @@ LIBS="$LIBS $PAYMENT_LIB"
 
 echo "dotest: $DOTESTS"
 
-AM_CONDITIONAL([DOTESTS], [test "$DOTESTS" = yes])
+AM_CONDITIONAL([DOTESTS], [test x$DOTESTS = xyes])
 AC_CONFIG_FILES([Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile test/Makefile])
 AC_OUTPUT

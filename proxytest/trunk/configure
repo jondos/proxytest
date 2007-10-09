@@ -12541,7 +12541,7 @@ LIBS="$LIBS $PAYMENT_LIB"
 
 echo "dotest: $DOTESTS"
 
- if test "$DOTESTS" = yes; then
+ if test x$DOTESTS = xyes; then
   DOTESTS_TRUE=
   DOTESTS_FALSE='#'
 else
