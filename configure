@@ -12523,12 +12523,12 @@ if test "${enable_crime_detection+set}" = set; then
 fi
 
 
-DOTESTS=""
+DOTHETESTS=""
 # Check whether --enable-tests was given.
 if test "${enable_tests+set}" = set; then
   enableval=$enable_tests;
 	    if test "x$enableval" != "xno" ; then
-		DOTESTS="yes"
+		DOTHETESTS="yes"
 	    fi
 
 
@@ -12539,9 +12539,9 @@ CFLAGS="$CFLAGS $POOL $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $REP
 CXXFLAGS="$CXXFLAGS $POOL $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS"
 LIBS="$LIBS $PAYMENT_LIB"
 
-echo "dotest: $DOTESTS"
+echo "dotest: $DOTHETESTS"
 
- if test x$DOTESTS = xyes; then
+ if test x$DOTHETESTS = xyes; then
   DOTESTS_TRUE=
   DOTESTS_FALSE='#'
 else
