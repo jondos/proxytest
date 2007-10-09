@@ -122,7 +122,7 @@ RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = $(SUBDIRS)
+DIST_SUBDIRS = popt xml trio tre TypeA test
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -261,7 +261,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CAFirstMixChannelList.cpp \
 		    CAHttpClient.cpp \
 		    CAInfoService.cpp \
-				CAInfoServiceAware.cpp \
+		    CAInfoServiceAware.cpp \
 		    CAIPList.cpp \
 		    CALastMix.cpp \
 		    CALastMixChannelList.cpp\
@@ -275,7 +275,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CAMsg.cpp \
 		    CAMutex.cpp\
 		    CAMuxSocket.cpp \
-                    CAPriceInfo.cpp \
+		    CAPriceInfo.cpp \
 		    CAPool.cpp\
 		    CAQueue.cpp \
 		    CAReplayControlChannel.cpp\
@@ -328,7 +328,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CAFirstMixChannelList.hpp \
 		    CAHttpClient.hpp \
 		    CAInfoService.hpp \
-				CAInfoServiceAware.hpp \
+		    CAInfoServiceAware.hpp \
 		    CAIPList.hpp \
 		    CALastMix.hpp \
 		    CALastMixChannelList.hpp\
@@ -343,7 +343,7 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    CAMsg.hpp \
 		    CAMutex.hpp\
 		    CAMuxSocket.hpp \
-                    CAPriceInfo.hpp \
+		    CAPriceInfo.hpp \
 		    CAPool.hpp\
 		    CAQueue.hpp \
 		    CAReplayControlChannel.hpp\
@@ -375,13 +375,14 @@ mix_SOURCES = CAAbstractControlChannel.cpp\
 		    basetypedefs.h
 
 mix_LDADD = $(top_srcdir)/xml/libxml.a \
-		  $(top_srcdir)/popt/libpopt.a \
-		  $(top_srcdir)/trio/libtrio.a \
-		  $(top_srcdir)/tre/libtre.a \
-		  $(top_srcdir)/TypeA/libmixa.a
+	    $(top_srcdir)/popt/libpopt.a \
+	    $(top_srcdir)/trio/libtrio.a \
+	    $(top_srcdir)/tre/libtre.a \
+	    $(top_srcdir)/TypeA/libmixa.a
 
 EXTRA_DIST = README proxytest.doxy proxytest.dsp proxytest.dsw
-SUBDIRS = popt xml trio tre TypeA
+@DOTESTS_TRUE@MAYBE_tests = test
+SUBDIRS = popt xml trio tre TypeA $(MAYBE_tests)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
