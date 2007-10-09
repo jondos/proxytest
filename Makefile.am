@@ -153,4 +153,9 @@ mix_LDADD = $(top_srcdir)/xml/libxml.a \
 
 EXTRA_DIST = README proxytest.doxy proxytest.dsp proxytest.dsw
 
-SUBDIRS = popt xml trio tre TypeA
+if DOTESTS
+    MAYBE_tests="test"
+endif    
+
+SUBDIRS = popt xml trio tre TypeA $(MAYBE_tests)
+
