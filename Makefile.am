@@ -145,7 +145,7 @@ libproxytest_a_SOURCES = CAAbstractControlChannel.cpp\
 		    StdAfx.h \
 		    basetypedefs.h
 
-mix_sources = proxytest.cpp
+mix_SOURCES = proxytest.cpp
 
 
 mix_LDADD = $(top_srcdir)/xml/libxml.a \
