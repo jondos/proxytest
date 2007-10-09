@@ -58,9 +58,7 @@ LIBRARIES = $(noinst_LIBRARIES)
 AR = ar
 ARFLAGS = cru
 libproxytest_a_AR = $(AR) $(ARFLAGS)
-libproxytest_a_DEPENDENCIES = $(top_srcdir)/xml/libxml.a \
-	$(top_srcdir)/popt/libpopt.a $(top_srcdir)/trio/libtrio.a \
-	$(top_srcdir)/tre/libtre.a $(top_srcdir)/TypeA/libmixa.a
+libproxytest_a_LIBADD =
 am_libproxytest_a_OBJECTS = CAAbstractControlChannel.$(OBJEXT) \
 	CAAbstractXMLEncodable.$(OBJEXT) \
 	CAAbstractXMLSignable.$(OBJEXT) \
@@ -104,7 +102,10 @@ sbinPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(sbin_PROGRAMS)
 am_mix_OBJECTS = proxytest.$(OBJEXT)
 mix_OBJECTS = $(am_mix_OBJECTS)
-mix_DEPENDENCIES = $(top_srcdir)/libproxytest.a
+mix_DEPENDENCIES = $(top_srcdir)/libproxytest.a \
+	$(top_srcdir)/xml/libxml.a $(top_srcdir)/popt/libpopt.a \
+	$(top_srcdir)/trio/libtrio.a $(top_srcdir)/tre/libtre.a \
+	$(top_srcdir)/TypeA/libmixa.a
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -384,13 +385,13 @@ libproxytest_a_SOURCES = CAAbstractControlChannel.cpp\
 		    basetypedefs.h
 
 mix_SOURCES = proxytest.cpp
-libproxytest_a_LIBADD = $(top_srcdir)/xml/libxml.a \
+mix_LDADD = $(top_srcdir)/libproxytest.a \
+	    $(top_srcdir)/xml/libxml.a \
 	    $(top_srcdir)/popt/libpopt.a \
 	    $(top_srcdir)/trio/libtrio.a \
 	    $(top_srcdir)/tre/libtre.a \
 	    $(top_srcdir)/TypeA/libmixa.a
 
-mix_LDADD = $(top_srcdir)/libproxytest.a
 EXTRA_DIST = README proxytest.doxy proxytest.dsp proxytest.dsw
 @DOTESTS_TRUE@MAYBE_tests = test
 SUBDIRS = popt xml trio tre TypeA $(MAYBE_tests)
