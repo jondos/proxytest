@@ -153,7 +153,7 @@ mix_LDADD = $(top_srcdir)/xml/libxml.a \
 	    $(top_srcdir)/trio/libtrio.a \
 	    $(top_srcdir)/tre/libtre.a \
 	    $(top_srcdir)/TypeA/libmixa.a\
-	    $(top_srcdir)libproxytest.a
+	    $(top_srcdir)/libproxytest.a
 
 EXTRA_DIST = README proxytest.doxy proxytest.dsp proxytest.dsw
 
