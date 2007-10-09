@@ -570,10 +570,20 @@ AC_ARG_ENABLE(crime-detection,
 	]
 )
 
+DOTESTS=""
+AC_ARG_ENABLE(tests,
+	AS_HELP_STRING([--enable-tests],[Build also some functional tests]),
+	[
+	    if test "x$enableval" != "xno" ; then
+		DOTESTS="yes"
+	    fi	
+	]
+)
 
 CFLAGS="$CFLAGS $POOL $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS"
 CXXFLAGS="$CXXFLAGS $POOL $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS"
 LIBS="$LIBS $PAYMENT_LIB"
 
-AC_CONFIG_FILES([Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile])
+AM_CONDITIONAL([DOTESTS], [test "$DOTESTS" = yes])
+AC_CONFIG_FILES([Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile test/Makefile])
 AC_OUTPUT
