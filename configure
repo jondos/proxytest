@@ -713,6 +713,8 @@ CPP
 GREP
 EGREP
 ALLOCA
+DOTESTS_TRUE
+DOTESTS_FALSE
 LIBOBJS
 LTLIBOBJS'
 ac_subst_files=''
@@ -1332,6 +1334,7 @@ Optional Features:
   --enable-debug          Enable debug mode
   --enable-crime-detection
                           Enable crime detection mode
+  --enable-tests          Build also some functional tests
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -12520,12 +12523,31 @@ if test "${enable_crime_detection+set}" = set; then
 fi
 
 
+DOTESTS=""
+# Check whether --enable-tests was given.
+if test "${enable_tests+set}" = set; then
+  enableval=$enable_tests;
+	    if test "x$enableval" != "xno" ; then
+		DOTESTS="yes"
+	    fi
+
+
+fi
+
 
 CFLAGS="$CFLAGS $POOL $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS"
 CXXFLAGS="$CXXFLAGS $POOL $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS"
 LIBS="$LIBS $PAYMENT_LIB"
 
-ac_config_files="$ac_config_files Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile"
+ if test "$DOTESTS" = yes; then
+  DOTESTS_TRUE=
+  DOTESTS_FALSE='#'
+else
+  DOTESTS_TRUE='#'
+  DOTESTS_FALSE=
+fi
+
+ac_config_files="$ac_config_files Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile test/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -12648,6 +12670,13 @@ if test -z "${am__fastdepCXX_TRUE}" && test -z "${am__fastdepCXX_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"am__fastdepCXX\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
 echo "$as_me: error: conditional \"am__fastdepCXX\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${DOTESTS_TRUE}" && test -z "${DOTESTS_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"DOTESTS\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"DOTESTS\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
@@ -13127,6 +13156,7 @@ do
     "tre/Makefile") CONFIG_FILES="$CONFIG_FILES tre/Makefile" ;;
     "TypeA/Makefile") CONFIG_FILES="$CONFIG_FILES TypeA/Makefile" ;;
     "TypeB/Makefile") CONFIG_FILES="$CONFIG_FILES TypeB/Makefile" ;;
+    "test/Makefile") CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;
 
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
@@ -13328,11 +13358,13 @@ ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
 ALLOCA!$ALLOCA$ac_delim
+DOTESTS_TRUE!$DOTESTS_TRUE$ac_delim
+DOTESTS_FALSE!$DOTESTS_FALSE$ac_delim
 LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 3; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 5; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5
