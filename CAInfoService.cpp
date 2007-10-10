@@ -896,9 +896,9 @@ UINT8* CAInfoService::getCascadeHeloXMLAsString(UINT32& a_len)
 		}
 		
 		if(m_pSignature->signXML(docMixInfo,m_pcertstoreOwnCerts)!=E_SUCCESS)
-			{
-				goto ERR;
-			}
+		{
+			goto ERR;
+		}
 				
 		sendBuff=DOM_Output::dumpToMem(docMixInfo,&sendBuffLen);
 		if(sendBuff==NULL)

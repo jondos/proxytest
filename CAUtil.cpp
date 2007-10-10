@@ -953,23 +953,29 @@ UINT8* readFile(UINT8* name,UINT32* size)
 SINT32 parseU64(const UINT8 * str, UINT64& value)
 {
 	#ifdef HAVE_NATIVE_UINT64
-			if(str==NULL)
+			if (str == NULL)
+			{
 				return E_UNKNOWN;
+			}
 			UINT32 len=strlen((char*)str);
-			if(len<1)
+			if (len < 1)
+			{
 				return E_UNKNOWN;
-			UINT64 u64=0;
-			for(UINT32 i=0;i<len;i++)
+			}
+			UINT64 u64 = 0;
+			for (UINT32 i = 0; i < len; i++)
+			{
+				UINT8 c=str[i];
+				if (c >= '0' && c <= '9')
 				{
-					UINT8 c=str[i];
-					if(c>='0'&&c<='9')
-						{
-							u64*=10;
-							u64+=c-'0';
-						}
-					else if(str[i]!='+')
-						return E_UNKNOWN;
+					u64 *= 10;
+					u64 += c - '0';
 				}
+				else if (i != 0 || str[i] != '+')
+				{
+					return E_UNKNOWN;
+				}
+			}
 			value = u64;
 			return E_SUCCESS;
 	#else
