@@ -1904,7 +1904,6 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 			if (getDOMChildByName(elemNetwork,(UINT8*)"InfoService",elemInfoService,false) != E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Node \"InfoService\" not found!\n");				
-				return E_UNKNOWN;
 			}
 			/* LERNGRUPPE: There might not be any InfoService configuration in the file, but in infoservices.xml, so check this */
 			if(elemInfoService != NULL)
@@ -1914,21 +1913,23 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 				if (!isListenerInterface)
 				{
 					CAMsg::printMsg(LOG_CRIT,"Node \"InfoService\" does not contain valid data!\n");				
-					return E_UNKNOWN;
 				}
-				m_addrInfoServicesSize = 1;
-				m_addrInfoServices = new CAListenerInterface*[m_addrInfoServicesSize];
-				m_addrInfoServices[0] = isListenerInterface;
-				if(getDOMElementValue(elemAllowReconfig,tmpBuff,&tmpLen)==E_SUCCESS)
+				else
 				{
-					m_bAcceptReconfiguration = (strcmp("True",(char*)tmpBuff) == 0);
+					m_addrInfoServicesSize = 1;
+					m_addrInfoServices = new CAListenerInterface*[m_addrInfoServicesSize];
+					m_addrInfoServices[0] = isListenerInterface;
+					if(getDOMElementValue(elemAllowReconfig,tmpBuff,&tmpLen)==E_SUCCESS)
+					{
+						m_bAcceptReconfiguration = (strcmp("True",(char*)tmpBuff) == 0);
+					}
 				}
 			}
 		}
 		else
 	    {
-			// Refactored
-			parseInfoServices(elemInfoServiceContainer);
+				// Refactored
+				parseInfoServices(elemInfoServiceContainer);
 	    }
 		 
 		//get ListenerInterfaces
