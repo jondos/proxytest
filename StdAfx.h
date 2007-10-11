@@ -365,12 +365,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#endif
 #endif
 
-#ifndef DEBUG
-	#define ASSERT(cond,msg)
-#else
-	#define ASSERT(cond,msg) {if(!(cond)){CAMsg::printMsg(LOG_DEBUG,"ASSERT: %s (File: %s, Line: %u)\n",msg,__FILE__,__LINE__);}}
-#endif
-
 #ifdef OS_TUDOS
 	#define Assert
 	#define THREAD_RETURN void
@@ -380,11 +374,19 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include <l4/util/macros.h>
 	#include <l4/env/errno.h>
 	#undef Assert
+	#undef ASSERT
 #else
 	#define THREAD_RETURN void*
 	#define THREAD_RETURN_ERROR return(NULL)
 	#define THREAD_RETURN_SUCCESS return (NULL)
 #endif
+
+#ifndef DEBUG
+	#define ASSERT(cond,msg)
+#else
+	#define ASSERT(cond,msg) {if(!(cond)){CAMsg::printMsg(LOG_DEBUG,"ASSERT: %s (File: %s, Line: %u)\n",msg,__FILE__,__LINE__);}}
+#endif
+
 
 #include <stdio.h>
 #include <time.h>
