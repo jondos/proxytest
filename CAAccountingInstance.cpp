@@ -43,6 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 #include "CAThreadPool.hpp"
 #include "CAXMLErrorMessage.hpp"
 #include "Hashtable.hpp"
+#include "packetintro.h"
 
 //for testing purposes only
 #define JAP_DIGEST_LENGTH 28
@@ -324,6 +325,9 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 			 // count the packet and continue checkings
 			pAccInfo->transferredBytes += MIXPACKET_SIZE;
 			pAccInfo->sessionPackets++;
+#ifdef SDTFA			
+			IncrementShmPacketCount();
+#endif			
 		}		
 		
 		/*
