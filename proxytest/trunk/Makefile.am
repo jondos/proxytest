@@ -73,6 +73,7 @@ libproxytest_a_SOURCES = CAAbstractControlChannel.cpp\
 		    CAXMLErrorMessage.cpp\
 		    CAXMLPriceCert.cpp\
 		    Hashtable.cpp\
+		    packetintro.cpp
 		    StdAfx.cpp \
 		    CAAbstractControlChannel.hpp\
 		    CAAbstractXMLEncodable.hpp\
@@ -142,7 +143,8 @@ libproxytest_a_SOURCES = CAAbstractControlChannel.cpp\
 		    CAXMLErrorMessage.hpp\
 		    CAXMLPriceCert.hpp\
 		    Hashtable.hpp\
-		    StdAfx.h \
+		    packetintro.h
+		    StdAfx.h \		    		   
 		    basetypedefs.h
 
 mix_SOURCES = proxytest.cpp
