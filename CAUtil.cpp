@@ -1010,7 +1010,7 @@ SINT32 readPasswd(UINT8* buff,UINT32 len)
 #ifdef _WIN32
 				int c=::getch();
 #else
-				int c=::getchar();
+				int c=getchar();
 #endif
 				if(c<=0||c=='\r'||c=='\n')
 					break;
