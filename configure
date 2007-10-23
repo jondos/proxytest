@@ -12504,8 +12504,8 @@ fi
 if test "${enable_debug+set}" = set; then
   enableval=$enable_debug;
 	    if test "x$enableval" != "xno" ; then
-		CFLAGS="$CFLAGS -g -D_DEBUG"
-		CXXFLAGS="$CXXFLAGS -g -D_DEBUG"
+		CFLAGS="$CFLAGS -g gdb3-D_DEBUG -fno-inline -fno-default-inline"
+		CXXFLAGS="$CXXFLAGS -ggdb3 -D_DEBUG -fno-inline -fno-default-inline"
 		OFLAGS=""
 	    fi
 
