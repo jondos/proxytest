@@ -638,6 +638,7 @@ int main(int argc, const char* argv[])
 	#endif
 	#ifndef ONLY_LOCAL_PROXY
 		struct sigaction newAction;
+		memset(&newAction,0,sizeof(newAction));
 		newAction.sa_handler=signal_hup;
 		newAction.sa_flags=0;
 		sigaction(SIGHUP,&newAction,NULL);

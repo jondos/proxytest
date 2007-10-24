@@ -1337,7 +1337,7 @@ SINT32 CAFirstMix::clean()
 			{
 				for(UINT32 i=0;i<m_u32MixCount-1;i++)
 					{
-						delete m_arMixParameters[i].m_strMixID;
+						delete[] m_arMixParameters[i].m_strMixID;
 					}
 				delete[] m_arMixParameters;
 			}
