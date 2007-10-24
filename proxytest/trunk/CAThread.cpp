@@ -158,7 +158,7 @@ SINT32 CAThread::start(void* param,bool bDaemon,bool bSilent)
 			{
 				UINT8* temp=bytes2hex(m_pThread,sizeof(pthread_t));
 				CAMsg::printMsg(LOG_DEBUG,"Thread with name: %s created - pthread_t: %s\n",m_strName,temp);
-				delete temp;
+				delete[] temp;
 			}
 		if(bDaemon)
 			pthread_detach(*m_pThread);
