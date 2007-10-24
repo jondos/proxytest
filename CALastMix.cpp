@@ -282,7 +282,7 @@ SINT32 CALastMix::processKeyExchange()
 				delete []messageBuff;
 				return E_UNKNOWN;
 			}
-		delete messageBuff;
+		delete[] messageBuff;
 		
 		//Now receiving the symmetric key
 		CAMsg::printMsg(LOG_INFO,"Waiting for len of Symmetric Key from previous Mix...\n");

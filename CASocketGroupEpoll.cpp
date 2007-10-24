@@ -32,6 +32,7 @@ CASocketGroupEpoll::CASocketGroupEpoll(bool bWrite)
 	{
 		m_hEPFD=epoll_create(MAX_POLLFD);
 		m_pEpollEvent=new struct epoll_event;
+		memset(m_pEpollEvent,0,sizeof(struct epoll_event));
 		m_pEvents=new struct epoll_event[MAX_POLLFD];
 		setPoolForWrite(bWrite);
 	}
