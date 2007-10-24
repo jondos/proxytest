@@ -54,13 +54,13 @@ CACertificate* CACertificate::decode(const DOM_Node &n,UINT32 type,const char* p
 									UINT8* tmpStr=new UINT8[strLen];
 									if(getDOMElementValue(node,tmpStr,&strLen)!=E_SUCCESS)
 										{
-											delete tmpStr;
+											delete[] tmpStr;
 											return NULL;
 										}
 									UINT32 decLen=4096;
 									UINT8* decBuff=new UINT8[decLen];
 									CABase64::decode((UINT8*)tmpStr,strLen,decBuff,&decLen);
-									delete tmpStr;
+									delete[] tmpStr;
 									CACertificate* cert=decode(decBuff,decLen,CERT_PKCS12,passwd);
 									delete[] decBuff;
 									return cert;
@@ -77,7 +77,7 @@ CACertificate* CACertificate::decode(const DOM_Node &n,UINT32 type,const char* p
 									UINT8* tmpStr=new UINT8[strLen];
 									if(getDOMElementValue(node,tmpStr,&strLen)!=E_SUCCESS)
 										{
-											delete tmpStr;
+											delete[] tmpStr;
 											return NULL;
 										}
 									UINT32 decLen=4096;
