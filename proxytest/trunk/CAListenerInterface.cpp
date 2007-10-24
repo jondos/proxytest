@@ -51,7 +51,7 @@ CAListenerInterface::CAListenerInterface(void)
 CAListenerInterface::~CAListenerInterface(void)
 	{
 		delete m_pAddr;
-		delete m_strHostname;
+		delete[] m_strHostname;
 	}
 
 CAListenerInterface* CAListenerInterface::getInstance(NetworkType type,const UINT8* file)

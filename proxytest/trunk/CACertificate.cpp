@@ -83,7 +83,7 @@ CACertificate* CACertificate::decode(const DOM_Node &n,UINT32 type,const char* p
 									UINT32 decLen=4096;
 									UINT8* decBuff=new UINT8[decLen];
 									CABase64::decode((UINT8*)tmpStr,strLen,decBuff,&decLen);
-									delete tmpStr;
+									delete[] tmpStr;
 									CACertificate* cert=decode(decBuff,decLen,CERT_DER);
 									delete[] decBuff;
 									return cert;
