@@ -880,14 +880,14 @@ SINT32 decryptXMLElement(DOM_Node node, CAASymCipher* pRSA)
 		UINT32 len=1000;
 		if(getDOMElementValue(elemCipherValue,cipherValue,&len)!=E_SUCCESS)
 			{
-				delete cipherValue;
+				delete[] cipherValue;
 				return E_UNKNOWN;
 			}
 		CABase64::decode(cipherValue,len,cipherValue,&len);
 		if(	pRSA->decryptOAEP(cipherValue,cipherValue,&len)!=E_SUCCESS||
 				len!=32)
 			{
-				delete cipherValue;
+				delete[] cipherValue;
 				return E_UNKNOWN;
 			}
 		CASymCipher *pSymCipher=new CASymCipher();
@@ -901,7 +901,7 @@ SINT32 decryptXMLElement(DOM_Node node, CAASymCipher* pRSA)
 		if(getDOMElementValue(elemCipherValue,cipherValue,&len)!=E_SUCCESS)
 			{
 				delete pSymCipher;
-				delete cipherValue;
+				delete[] cipherValue;
 				return E_UNKNOWN;
 			}
 		CABase64::decode(cipherValue,len,cipherValue,&len);
@@ -909,14 +909,14 @@ SINT32 decryptXMLElement(DOM_Node node, CAASymCipher* pRSA)
 		delete pSymCipher;
 		if(ret!=E_SUCCESS)
 			{
-				delete cipherValue;
+				delete[] cipherValue;
 				return E_UNKNOWN;
 			}
 		//now the need to parse the plaintext...
 		MemBufInputSource oInput(cipherValue,len,"decryptelement");
 		DOMParser oParser;
 		oParser.parse(oInput);
-		delete cipherValue;		
+		delete[] cipherValue;		
 		DOM_Document docPlain=oParser.getDocument();
 		DOM_Node elemPlainRoot;
 		if(docPlain==NULL||(elemPlainRoot=docPlain.getDocumentElement())==NULL)

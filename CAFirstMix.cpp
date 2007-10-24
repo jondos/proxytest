@@ -979,7 +979,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		{
 			CAMsg::printMsg(LOG_DEBUG,"User login: timed out while waiting for second symmetric key from client!\n");
 			delete pNewUser;
-			delete xml_buff;
+			delete[] xml_buff;
 			m_pIPList->removeIP(peerIP);
 			return E_UNKNOWN;
 		}
@@ -997,7 +997,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		if(doc==NULL||(elemRoot=doc.getDocumentElement())==NULL||
 			decryptXMLElement(elemRoot,m_pRSA)!=E_SUCCESS)
 			{
-				delete xml_buff;
+				delete[] xml_buff;
 				delete pNewUser;
 				m_pIPList->removeIP(peerIP);
 				return E_UNKNOWN;
@@ -1005,7 +1005,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		elemRoot=doc.getDocumentElement();
 		if(!elemRoot.getNodeName().equals("JAPKeyExchange"))
 			{
-				delete xml_buff;
+				delete[] xml_buff;
 				delete pNewUser;
 				m_pIPList->removeIP(peerIP);
 				return E_UNKNOWN;
@@ -1021,7 +1021,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 				CABase64::decode(mixKey,mixKeyLen,mixKey,&mixKeyLen)!=E_SUCCESS||
 				linkKeyLen!=64||mixKeyLen!=32)
 			{
-				delete xml_buff;
+				delete[] xml_buff;
 				delete pNewUser;
 				m_pIPList->removeIP(peerIP);
 				return E_UNKNOWN;
@@ -1050,7 +1050,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		    ((CASocket*)pNewUser)->sendFullyTimeOut(xml_buff,u32+2, 30000, 10000) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_DEBUG,"User login: Sending key exchange signature has been interrupted!\n");
-			delete xml_buff;
+			delete[] xml_buff;
 			delete pNewUser;
 			m_pIPList->removeIP(peerIP);
 			return E_UNKNOWN;
@@ -1058,7 +1058,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		#ifdef DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"User login: key exchange signature sent\n");
 		#endif
-		delete xml_buff;
+		delete[] xml_buff;
 		
 		SAVE_STACK("CAFirstMix::doUserLogin", "sent key exchange signature");
 		
