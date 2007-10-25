@@ -411,6 +411,24 @@ THREAD_RETURN lm_loopLog(void* param)
 		UINT8 buff[256];
 		while(pLastMix->m_bRunLog)
 			{
+				if((countLog%10)==0)
+					{
+#ifdef HAVE_SBRK
+						CAMsg::printMsg(LOG_DEBUG,"Memory consumption reported by sbrk(): %p\n",sbrk(0));
+#endif
+#ifdef HAVE_MALLINFO
+						struct mallinfo malli=mallinfo();
+						//memset(&malli,0,sizeo(malli));
+						CAMsg::printMsg(LOG_DEBUG,"Memory consumption reported by mallinfo():\n");
+						CAMsg::printMsg(LOG_DEBUG,"\t Total size of memory allocated with sbrk() by malloc() [bytes]: %i\n",mallinfo.arena);
+						CAMsg::printMsg(LOG_DEBUG,"\t Number of chunks not in use: %i\n",mallinfo.ordblks);
+						CAMsg::printMsg(LOG_DEBUG,"\t Total number of chunks allocated with mmap(): %i\n",mallinfo.hblks);
+						CAMsg::printMsg(LOG_DEBUG,"\t Total size of memory allocated with mmap() [byte]: %i\n",mallinfo.hblkhd);
+						CAMsg::printMsg(LOG_DEBUG,"\t Total size of memory occupied by chunks handed out by malloc(): %i\n",mallinfo.uordblks);
+						CAMsg::printMsg(LOG_DEBUG,"\t Total size of memory occupied by free (not in use) chunks: %i\n",mallinfo.fordblks);
+						CAMsg::printMsg(LOG_DEBUG,"\t Size of the top-most releasable chunk that normally borders the end of the heap: %i\n",mallinfo.keepcost);
+#endif
+					}
 				if(countLog==0)
 					{
 						CAMsg::printMsg(LOG_DEBUG,"Uploaded  Packets: %u\n",pLastMix->m_logUploadedPackets);
