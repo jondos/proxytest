@@ -31,6 +31,9 @@
 /* Define to 1 if you have the <libpq-fe.h> header file. */
 #undef HAVE_LIBPQ_FE_H
 
+/* Define to 1 if you have the `mallinfo' function. */
+#undef HAVE_MALLINFO
+
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
@@ -57,6 +60,9 @@
 
 /* Define to 1 if you have the `pthread_mutex_init' function. */
 #undef HAVE_PTHREAD_MUTEX_INIT
+
+/* Define to 1 if you have the `sbrk' function. */
+#undef HAVE_SBRK
 
 /* Define to 1 if you have the `sem_init' function. */
 #undef HAVE_SEM_INIT

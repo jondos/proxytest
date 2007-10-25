@@ -241,6 +241,8 @@ AC_CHECK_FUNCS([poll])
 AC_CHECK_FUNCS([pthread_mutex_init])
 AC_CHECK_FUNCS([pthread_cond_init])
 AC_CHECK_FUNCS([sem_init])
+AC_CHECK_FUNCS([sbrk])
+AC_CHECK_FUNCS([mallinfo])
 
 dnl even if epoll exist it may be unfunctional...
 if test "x$USE_EPOLL" != "x0" ; then
