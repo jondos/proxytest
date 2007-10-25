@@ -291,6 +291,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#ifdef HAVE_EPOLL
 		#include <sys/epoll.h>
 	#endif
+	#ifdef HAVE_MALLOC_H
+	    #include <malloc.h>
+	#endif
 	#include <sys/ioctl.h>
 	#include <sys/types.h>
 	#include <sys/socket.h>

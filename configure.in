@@ -228,6 +228,7 @@ dnl Checks for Headers
 AC_HEADER_STDC
 AC_CHECK_HEADERS(sys/filio.h)
 AC_CHECK_HEADERS(sys/epoll.h)
+AC_CHECK_HEADERS(malloc.h)
 
 dnl Check for some "standard" libraries
 AC_CHECK_LIB(epoll,epoll_ctl)
