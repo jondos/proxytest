@@ -35,7 +35,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CALocalProxy.hpp"
 #include "CAQueue.hpp"
 #ifdef _DEBUG //For FreeBSD memory checking functionality
-	char* _malloc_options="AX";
+	const char* _malloc_options="AX";
 #endif
 
 #ifndef ONLY_LOCAL_PROXY
