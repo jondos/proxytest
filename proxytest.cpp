@@ -34,6 +34,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMsg.hpp"
 #include "CALocalProxy.hpp"
 #include "CAQueue.hpp"
+#ifdef _DEBUG //For FreeBSD memory checking functionality
+	char* _malloc_options="AX";
+#endif
+
 #ifndef ONLY_LOCAL_PROXY
 	#include "xml/DOM_Output.hpp"
 	#include "CAMix.hpp"

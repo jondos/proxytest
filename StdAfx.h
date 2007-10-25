@@ -518,8 +518,4 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "typedefs.hpp"
 #include "controlchannelids.h"
 
-#ifdef _DEBUG //FOr FreeBSD memory checking functionality
- char* _malloc_options="AX";
-#endif
-
 #endif // !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
