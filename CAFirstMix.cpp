@@ -889,6 +889,26 @@ END_THREAD:
 		THREAD_RETURN_SUCCESS;
 	}
 
+
+THREAD_RETURN fm_loopLog(void* param)
+	{
+		CAFirstMix* pFirstMix=(CAFirstMix*)param;
+		pFirstMix->m_bRunLog=true;
+		UINT32 countLog=0;
+		while(pFirstMix->m_bRunLog)
+			{
+				if(countLog==0)
+					{
+						logMemoryUsage();
+						countLog=10;
+					}
+				sSleep(30);
+				countLog--;
+			}
+		THREAD_RETURN_SUCCESS;
+	}
+
+
 THREAD_RETURN fm_loopDoUserLogin(void* param)
 	{
 		INIT_STACK;

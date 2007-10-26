@@ -309,6 +309,9 @@ SINT32 parseU64(const UINT8 * str, UINT64& value);
 	*/
 SINT32 readPasswd(UINT8* buff,UINT32 len);
 
+void logMemoryUsage();
+
+
 #ifndef ONLY_LOCAL_PROXY
 /** Clones an OpenSSL DSA structure
 	*/

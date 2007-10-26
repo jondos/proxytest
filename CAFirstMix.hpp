@@ -302,6 +302,8 @@ protected:
 
 protected:
 	bool m_bIsShuttingDown;
+	friend THREAD_RETURN	fm_loopLog(void*);
+	volatile bool					m_bRunLog;
 
 private:
 	SINT32 doUserLogin_internal(CAMuxSocket* pNewUSer,UINT8 perrIP[4]);
