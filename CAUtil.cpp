@@ -33,7 +33,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #endif
 #include "xml/DOM_Output.hpp"
 #include "CASymCipher.hpp"
-/**
+
+#ifdef HAVE_SBRK
+	char* internal_sbrk_start=(char*)sbrk(0);
+#endif
+
+	/**
 *	Removes leading and ending whitespaces (chars<=32) from a zero terminated string.
 *		@param s input string (null terminated)
 *		@return new size of string
@@ -151,7 +156,7 @@ char* strins(const char* src,const char * pos,const char* ins)
 void logMemoryUsage()
 	{
 #ifdef HAVE_SBRK
-		CAMsg::printMsg(LOG_DEBUG,"Memory consumption reported by sbrk(): %p\n",sbrk(0));
+		CAMsg::printMsg(LOG_DEBUG,"Memory consumption reported by sbrk(): %u\n",(long)((char*)sbrk(0)-internal_sbrk_start));
 #endif
 #ifdef HAVE_MALLINFO
 		struct mallinfo malli=mallinfo();
