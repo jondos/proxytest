@@ -159,6 +159,10 @@ SINT32 CAFirstMixA::loop()
 		CAMsg::printMsg(LOG_DEBUG,"1. Close received from user (times in micros) - 1:Channel-ID,Connection-ID,PacketsIn (only data and open),PacketsOut (only data),ChannelDuration (open packet received --> close packet put into send queue to next mix)\n");
 		CAMsg::printMsg(LOG_DEBUG,"2. Channel close from Mix(times in micros)- 2.:Channel-ID,Connection-ID,PacketsIn (only data and open), PacketsOut (only data),ChannelDuration (open packet received)--> close packet put into send queue to next user\n");
 #endif
+		CAThread* pLogThread=new CAThread((UINT8*)"CAFirstMixA - LogLoop");
+		pLogThread->setMainLoop(fm_loopLog);
+		pLogThread->start(this);
+
 //		CAThread threadReadFromUsers;
 //		threadReadFromUsers.setMainLoop(loopReadFromUsers);
 //		threadReadFromUsers.start(this);
@@ -676,6 +680,7 @@ NEXT_USER_WRITING:
 //@todo move cleanup to clean() !
 		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
 		m_bRestart=true;
+		m_bRunLog=true;
 		m_pMuxOut->close();
 		for(UINT32 i=0;i<m_nSocketsIn;i++)
 			m_arrSocketsIn[i].close();
@@ -721,6 +726,8 @@ NEXT_USER_WRITING:
 		CAMsg::printMsg	(LOG_CRIT,"Memory usage after: %u\n",getMemoryUsage());	
 		delete pQueueEntry;
 		delete []tmpBuff;
+		pLogThread->join();
+		delete pLogThread;
 		CAMsg::printMsg(LOG_CRIT,"Main Loop exited!!\n");
 #endif //!MIX_NEW_TYP
 		return E_UNKNOWN;
