@@ -354,11 +354,11 @@ AC_CACHE_CHECK([for OpenSSL directory], ac_cv_openssldir, [
 				]])],
 				[
 				found_crypto=1
-				break;
 			],[
-				],[
-			found_crypto=1
-			echo "skip openssl run test because of cross compiling"])
+			],[	
+			if test -f "$ssldir/libssl.a" && test -f "$ssldir/libcrypto.a"; then
+			  found_crypto=1
+			  fi])
 		if test ! -z "$found_crypto" ; then
 			break;
 		fi
@@ -431,8 +431,10 @@ for xmldir in "" $tryxmlincludedir ; do
 				break;
 			],[
 				],[
-			found_xmldir=1
-			AC_MSG_RESULT([skip xml include run test because of cross compiling])
+		        if test -f "$xmldir/xercesc/util/XMLString.hpp"; then
+			  found_xmldir=1
+			  break;
+                        fi
 			])
 done
 if test -z "$found_xmldir"; then
@@ -458,7 +460,8 @@ AC_ARG_WITH(xml-lib,
 if test "x$prefix" != "xNONE" ; then
 	tryxmllibdir="$tryxmllibdir $prefix"
 fi
-LIBS="$saved_LIBS -lxerces-c"
+dnl Note: the order is import for compiling on TUDOS
+LIBS="-lxerces-c $saved_LIBS"
 for xmllibdir in "" $tryxmllibdir ; do
 	LDFLAGS="$saved_LDFLAGS -L$xmllibdir"
 	AC_LINK_IFELSE([AC_LANG_PROGRAM([
