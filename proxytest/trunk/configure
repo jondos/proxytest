@@ -11898,8 +11898,9 @@ else
                 # linking, *does not* test for RSA - that comes later.
 		if test "$cross_compiling" = yes; then
 
-			found_crypto=1
-			echo "skip openssl run test because of cross compiling"
+			if test -f "$ssldir/libssl.a" && test -f "$ssldir/libcrypto.a"; then
+			  found_crypto=1
+			  fi
 else
   cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
@@ -11942,7 +11943,6 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
   (exit $ac_status); }; }; then
 
 				found_crypto=1
-				break;
 
 else
   echo "$as_me: program exited with status $ac_status" >&5
@@ -12033,9 +12033,10 @@ for xmldir in "" $tryxmlincludedir ; do
 	CXXFLAGS="$saved_CXXFLAGS -I$xmldir -I$xmldir/xercesc"
 	if test "$cross_compiling" = yes; then
 
-			found_xmldir=1
-			{ echo "$as_me:$LINENO: result: skip xml include run test because of cross compiling" >&5
-echo "${ECHO_T}skip xml include run test because of cross compiling" >&6; }
+		        if test -f "$xmldir/xercesc/util/XMLString.hpp"; then
+			  found_xmldir=1
+			  break;
+                        fi
 
 else
   cat >conftest.$ac_ext <<_ACEOF
@@ -12120,7 +12121,7 @@ fi
 if test "x$prefix" != "xNONE" ; then
 	tryxmllibdir="$tryxmllibdir $prefix"
 fi
-LIBS="$saved_LIBS -lxerces-c"
+LIBS="-lxerces-c $saved_LIBS"
 for xmllibdir in "" $tryxmllibdir ; do
 	LDFLAGS="$saved_LDFLAGS -L$xmllibdir"
 	cat >conftest.$ac_ext <<_ACEOF
