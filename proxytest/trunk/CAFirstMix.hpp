@@ -85,6 +85,7 @@ public:
 					m_pthreadReadFromMix=NULL;
 					m_pthreadAcceptUsers=NULL;
 					m_pthreadsLogin=NULL;
+					m_bIsShuttingDown=false;
 #ifdef LOG_PACKET_TIMES
 					m_pLogPacketStats=NULL;
 #endif
