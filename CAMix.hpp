@@ -117,7 +117,7 @@ class CAMix
 			bool m_bReconfigured;
 #endif
 			bool m_bReconfiguring;
-			bool m_bShutDown;
+			volatile bool m_bShutDown;
 			virtual SINT32 clean()=0;
 			virtual SINT32 initOnce(){return E_SUCCESS;}
 			virtual SINT32 init()=0;

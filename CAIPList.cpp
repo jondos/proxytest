@@ -199,14 +199,8 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 					if(memcmp(entry->ip,ip,2)==0)
 					{
 						entry->count--;
-						if(entry->count<=0)
-						{
-							if (entry->count < 0)
-							{
-								CAMsg::printMsg(LOG_CRIT,"Negative count for IP address!");
-								entry->count = 0;
-							}
-							
+						if(entry->count==0)
+						{						
 							#ifndef PSEUDO_LOG
 								UINT8 hash[16];
 								memcpy(m_Random,ip,4);

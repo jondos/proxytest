@@ -41,12 +41,11 @@ extern CACmdLnOptions* pglobalOptions;
 
 void CAFirstMixA::shutDown()
 {
-	UINT32 connectionsClosed = 0;
-	
 	m_bIsShuttingDown = true;
 	m_bRestart = true;
 
 #ifdef PAYMENT
+	UINT32 connectionsClosed = 0;
 	fmHashTableEntry* timeoutHashEntry;
 	while ((timeoutHashEntry = m_pChannelList->popTimeoutEntry(true)) != NULL)
 	{			
@@ -57,7 +56,7 @@ void CAFirstMixA::shutDown()
 	CAMsg::printMsg(LOG_DEBUG,"Closed %i client connections.\n", connectionsClosed);
 #endif
 
-	m_bHasShutDown = true;
+	m_bIsShuttingDown = false;
 }
 
 

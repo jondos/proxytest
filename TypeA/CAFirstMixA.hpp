@@ -34,24 +34,13 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 class CAFirstMixA:public CAFirstMix
 	{		
 		public:
-		CAFirstMixA()
-		{
-			m_bHasShutDown = false;
-		}		
-		
+	
 		virtual void shutDown();
-		
-		virtual bool isShutDown()
-		{
-			return m_bHasShutDown;
-		}
-		
+
 		protected:
 			SINT32 loop();	
 			SINT32 closeConnection(fmHashTableEntry* pHashEntry);	
 			
-		private:
-			bool m_bHasShutDown;				
 	};
 
 #endif
