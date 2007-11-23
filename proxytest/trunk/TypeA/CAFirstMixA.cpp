@@ -681,7 +681,7 @@ NEXT_USER_WRITING:
 //@todo move cleanup to clean() !
 		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
 		m_bRestart=true;
-		m_bRunLog=true;
+		m_bRunLog=false;
 		m_pMuxOut->close();
 		for(UINT32 i=0;i<m_nSocketsIn;i++)
 			m_arrSocketsIn[i].close();
