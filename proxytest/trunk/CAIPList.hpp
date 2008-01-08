@@ -73,7 +73,10 @@ class CAIPList
 		private:
 			UINT32		m_allowedConnections;
 			volatile	VOLATILE_PIPLIST* m_HashTable;
+#ifdef _DEBUG
+			//used for 'encryption' of IP-address for privacy aware logging
 			UINT8*		m_Random; //seems to be the best value for MD5, which operates on x*512-64 bit (52*8+4*8=512-64)
+#endif
 			CAMutex*	m_pMutex;
 
 

@@ -832,7 +832,9 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 							/* This should protect the mix from flooding attacks
 							 * No more than MAX_CONCURRENT_NEW_CONNECTIONS are allowed.
 							 */
+#ifdef _DEBUG
 							CAMsg::printMsg(LOG_DEBUG,"CAFirstMix Flooding protection: Too many concurrent new connections (Maximum:%d)! Rejecting user...\n", CAFirstMix::MAX_CONCURRENT_NEW_CONNECTIONS);
+#endif
 							ret = E_UNKNOWN;
 						}
 #ifndef PAYMENT					
