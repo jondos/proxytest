@@ -694,9 +694,8 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
 		httpClient.setSocket(&oSocket);
 		const char* strRequestCommand=STRINGS_REQUEST_COMMANDS[requestCommand];
 		const char* strRequestType=STRINGS_REQUEST_TYPES[requestType];
-        CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending [%s] %s to InfoService %s:%d.\r\n", strRequestType,strRequestCommand, hostname, a_pSocketAddress->getPort());
-
-        if(requestCommand==REQUEST_COMMAND_MIXINFO)
+    CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending [%s] %s to InfoService %s:%d.\r\n", strRequestType,strRequestCommand, hostname, a_pSocketAddress->getPort());
+    if(requestCommand==REQUEST_COMMAND_MIXINFO)
    		{
 			sprintf((char*)buffHeader,"%s /%s%s HTTP/1.0\r\nContent-Length: %u\r\n\r\n", strRequestType, strRequestCommand, param,a_len);
    		}
