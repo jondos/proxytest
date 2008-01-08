@@ -964,7 +964,9 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		// send the mix-keys to JAP
 		if (((CASocket*)pNewUser)->sendFullyTimeOut(m_xmlKeyInfoBuff,m_xmlKeyInfoSize, 40000, 10000) != E_SUCCESS)
 		{
+#ifdef _DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"User login: Sending login data has been interrupted!\n");
+#endif
 			delete pNewUser;
 			m_pIPList->removeIP(peerIP);
 			return E_UNKNOWN;
@@ -999,7 +1001,9 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		if(((CASocket*)pNewUser)->isClosed() ||
 		   ((CASocket*)pNewUser)->receiveFullyT(xml_buff+2,xml_len,FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT)!=E_SUCCESS)
 		{
+#ifdef _DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"User login: timed out while waiting for second symmetric key from client!\n");
+#endif
 			delete pNewUser;
 			delete[] xml_buff;
 			m_pIPList->removeIP(peerIP);
@@ -1093,7 +1097,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		fmHashTableEntry* pHashEntry=m_pChannelList->add(pNewUser,peerIP,tmpQueue);
 		if(pHashEntry==NULL)// adding user connection to mix->JAP channel list (stefan: sollte das nicht connection list sein? --> es handelt sich um eine Datenstruktu fr Connections/Channels ).
 		{
-			CAMsg::printMsg(LOG_ERR,"User login: Could add new socket to connection list!\n");
+			CAMsg::printMsg(LOG_ERR,"User login: Could not add new socket to connection list!\n");
 			m_pIPList->removeIP(peerIP);
 			delete tmpQueue;
 			delete pNewUser;
