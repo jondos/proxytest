@@ -28,7 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "StdAfx.h"
 #include "CASocketAddrINet.hpp"
 
-CAMutex* CASocketAddrINet::m_pcsGet=new CAMutex();
+CAMutex* CASocketAddrINet::m_pcsGet=NULL;
 
 /** Must be called once before using one of the CAsocketAddrINet functions */
 /*SINT32 CASocketAddrINet::init()
