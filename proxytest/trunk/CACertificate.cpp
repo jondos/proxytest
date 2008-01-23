@@ -245,7 +245,7 @@ SINT32 CACertificate::getSubjectKeyIdentifier(UINT8* r_ski, UINT32 *r_skiLen)
     CAMsg::printMsg( LOG_ERR, "getSubjectKeyIdentifier: SKI is %s\n", cSki);
 #endif
     removeColons(cSki, strlen((const char*)cSki), r_ski, r_skiLen);
-		delete cSki;
+		free(cSki);
     return E_SUCCESS;
 }
 
