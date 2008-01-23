@@ -83,6 +83,19 @@ typedef struct
 	#endif
 #endif
 
+///Callbackfunction for locking required by OpenSSL
+void openssl_locking_callback(int mode, int type, char * /*file*/, int /*line*/)
+	{
+		if (mode & CRYPTO_LOCK)
+			{
+				pOpenSSLMutexes[type].lock();
+			}
+		else
+			{
+				pOpenSSLMutexes[type].unlock();
+			}
+	}
+
 void removePidFile()
 	{
 		UINT8 strPidFile[512];
@@ -100,6 +113,60 @@ void removePidFile()
 			}
 	}
 
+
+/**do necessary initialisations of libraries etc.*/
+void init()
+	{
+#ifndef ONLY_LOCAL_PROXY
+		XMLPlatformUtils::Initialize();
+#endif
+		OpenSSL_add_all_algorithms();
+		pOpenSSLMutexes=new CAMutex[CRYPTO_num_locks()];
+		CRYPTO_set_locking_callback((void (*)(int,int,const char *,int))openssl_locking_callback);
+#ifndef ONLY_LOCAL_PROXY
+		SSL_library_init();
+#endif
+		CAMsg::init();
+		CASocketAddrINet::init();
+		//startup
+		#ifdef _WIN32
+			int err=0;
+			WSADATA wsadata;
+			err=WSAStartup(0x0202,&wsadata);
+		#endif
+		initRandom();
+		pglobalOptions=new CACmdLnOptions();
+	}
+
+/**do necessary cleanups of libraries etc.*/
+void cleanup()
+	{
+//		delete pRTT;
+#ifndef ONLY_LOCAL_PROXY
+		if(pMix!=NULL)
+			delete pMix;
+#endif
+		CAMsg::printMsg(LOG_CRIT,"Terminating Programm!\n");
+		//		CASocketAddrINet::destroy();
+		#ifdef _WIN32
+			WSACleanup();
+		#endif
+		removePidFile();
+		delete pglobalOptions;
+		pglobalOptions=NULL;
+//OpenSSL Cleanup
+		CRYPTO_set_locking_callback(NULL);
+		delete []pOpenSSLMutexes;
+		CASocketAddrINet::cleanup();
+//XML Cleanup
+		//Note: We have to destroy all XML Objects and all objects that uses XML Objects BEFORE
+		//we terminate the XML lib!
+#ifndef ONLY_LOCAL_PROXY
+		XMLPlatformUtils::Terminate();
+#endif //ONLY_LOCAL_PROXY
+		CAMsg::cleanup();
+	}
+
 ///Remark: terminate() might be already defined by the c lib -- do not use this name...
 void my_terminate(void)
 {	
@@ -111,12 +178,10 @@ void my_terminate(void)
 		{
 			msSleep(100);
 		}
-		/*
-		CAMix* mix = pMix;
-		pMix = NULL;
-		delete mix;
-		*/
-	}	
+		delete pMix;
+		pMix=NULL;
+	}
+	cleanup();
 }
 
 
@@ -136,7 +201,6 @@ void signal_segv( int )
 	}
 #endif	
 	my_terminate();
-	removePidFile();
 	exit(1);
 }
 
@@ -147,7 +211,6 @@ void signal_term( int )
 	{ 
 		CAMsg::printMsg(LOG_INFO,"Hm.. Signal SIG_TERM received... exiting!\n");
 		my_terminate();
-		removePidFile();
 		exit(0);
 	}
 
@@ -155,7 +218,6 @@ void signal_interrupt( int)
 	{
 		CAMsg::printMsg(LOG_INFO,"Hm.. Strg+C pressed... exiting!\n");
 		my_terminate();
-		removePidFile();
 		exit(0);
 	}
 
@@ -166,18 +228,6 @@ void signal_hup(int)
 	}
 #endif
 
-///Callbackfunction for looking required by OpenSSL
-void openssl_locking_callback(int mode, int type, char * /*file*/, int /*line*/)
-	{
-		if (mode & CRYPTO_LOCK)
-			{
-				pOpenSSLMutexes[type].lock();
-			}
-		else
-			{
-				pOpenSSLMutexes[type].unlock();
-			}
-	}
 
 ///Check what the sizes of base types are as expected -- if not kill the programm
 void checkSizesOfBaseTypes()
@@ -224,29 +274,6 @@ void checkSizesOfBaseTypes()
 		#pragma warning( pop )
 	}
 
-/**do necessary initialisations of libraries etc.*/
-void init()
-	{
-#ifndef ONLY_LOCAL_PROXY
-		XMLPlatformUtils::Initialize();
-#endif
-		OpenSSL_add_all_algorithms();
-		pOpenSSLMutexes=new CAMutex[CRYPTO_num_locks()];
-		CRYPTO_set_locking_callback((void (*)(int,int,const char *,int))openssl_locking_callback);
-#ifndef ONLY_LOCAL_PROXY
-		SSL_library_init();
-#endif
-		CAMsg::init();
-		CASocketAddrINet::init();
-		//startup
-		#ifdef _WIN32
-			int err=0;
-			WSADATA wsadata;
-			err=WSAStartup(0x0202,&wsadata);
-		#endif
-		initRandom();
-		pglobalOptions=new CACmdLnOptions();
-	}
 
 /** \mainpage
 
@@ -785,30 +812,7 @@ while(true)
 #endif //DYNAMIC_MIX
 #endif //ONLY_LOCAL_PROXY
 EXIT:
-//		delete pRTT;
-#ifndef ONLY_LOCAL_PROXY
-		if(pMix!=NULL)
-			delete pMix;
-#endif
-		CAMsg::printMsg(LOG_CRIT,"Terminating Programm!\n");
-		//		CASocketAddrINet::destroy();
-		#ifdef _WIN32
-			WSACleanup();
-		#endif
-		removePidFile();
-		delete pglobalOptions;
-		pglobalOptions=NULL;
-//OpenSSL Cleanup
-		CRYPTO_set_locking_callback(NULL);
-		delete []pOpenSSLMutexes;
-		CASocketAddrINet::cleanup();
-//XML Cleanup
-		//Note: We have to destroy all XML Objects and all objects that uses XML Objects BEFORE
-		//we terminate the XML lib!
-#ifndef ONLY_LOCAL_PROXY
-		XMLPlatformUtils::Terminate();
-#endif //ONLY_LOCAL_PROXY
-		CAMsg::cleanup();
+		cleanup();
 #if defined(HAVE_CRTDBG)
 		_CrtMemCheckpoint( &s2 );
 		if ( _CrtMemDifference( &s3, &s1, &s2 ) )
