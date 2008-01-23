@@ -61,8 +61,10 @@ class CALastMix:public
 		public:
 			CALastMix()
 				{
-					m_pMuxIn=NULL;m_pSignature=NULL;
-					m_pRSA=NULL;m_pInfoService=NULL;
+					m_pMuxIn=NULL;
+					m_pSignature=NULL;
+					m_pRSA=NULL;
+					m_pInfoService=NULL;
           #ifndef NEW_MIX_TYPE // not TypeB mixes
             /* TypeB mixes are using an own implementation */
 					m_pChannelList=NULL;
