@@ -33,12 +33,14 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 CAMutex::CAMutex()
 	{
 		m_pMutex=new pthread_mutex_t;
-		ASSERT(pthread_mutex_init(m_pMutex,NULL)==0,"Muxtex init failed!");
+		SINT32 ret=pthread_mutex_init(m_pMutex,NULL);
+		ASSERT(ret==0,"Muxtex init failed!");
 	}
 
 CAMutex::~CAMutex()
 	{
-		ASSERT(pthread_mutex_destroy(m_pMutex)==0,"Mutex detroy failed!");
+		SINT32 ret=pthread_mutex_destroy(m_pMutex);
+		ASSERT(ret==0,"Mutex detroy failed!");
 		delete m_pMutex;
 	}
 #else
