@@ -612,6 +612,7 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 				getcurrentTimeMillis(keepaliveLast);
 			}
 		delete pQueueEntry;
+		delete pSocketGroup;
 		#ifdef USE_POOL
 			delete pPool;
 		#endif			

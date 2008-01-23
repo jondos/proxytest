@@ -79,6 +79,12 @@ SINT32 CAQueue::add(const void* buff,UINT32 size)
 		m_pcsQueue->lock();
 		//if(m_pHeap==NULL)
 		//	incHeap();
+#ifdef _DEBUG
+		if(m_nExpectedElementSize>0&&size>(m_nExpectedElementSize<<1))
+			{
+				CAMsg::printMsg(LOG_DEBUG,"CAQueue::add() WARNING: request for add %u bytes in a queue with expected element size of %u bytes !\n",size,m_nExpectedElementSize);
+			}
+#endif
 		if(m_Queue==NULL)
 			{
 				/*m_Queue=m_pHeap;
