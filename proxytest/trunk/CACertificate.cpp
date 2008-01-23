@@ -214,14 +214,14 @@ SINT32 CACertificate::getSubjectKeyIdentifier(UINT8* r_ski, UINT32 *r_skiLen)
     // FIXME Do we have a memory leak here? Maybe we need to ASN1_OCTET_STRING_free pSkid?
     ASN1_OCTET_STRING *pSki = NULL;
     pSki = (ASN1_OCTET_STRING*)X509_get_ext_d2i(m_pCert, NID_subject_key_identifier, NULL, NULL );
-    if ( !pSki )
+    if ( pSki==NULL )
     {
 #ifdef DEBUG
         CAMsg::printMsg( LOG_ERR, "Unable to get SKI from Certificate, trying to recover\n");
 #endif
         setSubjectKeyIdentifier();
         pSki = (ASN1_OCTET_STRING*)X509_get_ext_d2i(m_pCert, NID_subject_key_identifier, NULL, NULL );
-        if( ! pSki ) 
+        if( pSki==NULL ) 
         {
             CAMsg::printMsg( LOG_ERR, "Unable to retrieve SKI from Certificate\n");
             return E_UNKNOWN;
@@ -235,7 +235,8 @@ SINT32 CACertificate::getSubjectKeyIdentifier(UINT8* r_ski, UINT32 *r_skiLen)
     }
     // Get the ASCII string format of the subject key identifier
     UINT8* cSki = (UINT8*)i2s_ASN1_OCTET_STRING( NULL, pSki );
-    if ( !cSki )
+		ASN1_OCTET_STRING_free(pSki);
+    if ( cSki==NULL )
     {
         CAMsg::printMsg( LOG_ERR, "Unable to convert SKI\n");
         return E_UNKNOWN;
@@ -244,6 +245,7 @@ SINT32 CACertificate::getSubjectKeyIdentifier(UINT8* r_ski, UINT32 *r_skiLen)
     CAMsg::printMsg( LOG_ERR, "getSubjectKeyIdentifier: SKI is %s\n", cSki);
 #endif
     removeColons(cSki, strlen((const char*)cSki), r_ski, r_skiLen);
+		delete[] cSki;
     return E_SUCCESS;
 }
 
