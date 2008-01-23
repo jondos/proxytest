@@ -61,6 +61,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_pLogEncryptionCertificate=NULL;
 		m_bIsEncryptedLogEnabled=false;
 		m_docMixInfo=NULL;
+		m_bAcceptReconfiguration=false;
 #endif //ONLY_LOCAL_PROXY
 		m_iTargetPort=m_iSOCKSPort=m_iSOCKSServerPort=0xFFFF;
 		m_strTargetHost=m_strSOCKSHost=NULL;
