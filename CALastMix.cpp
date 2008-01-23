@@ -721,6 +721,7 @@ SINT32 CALastMix::setTargets()
 
 SINT32 CALastMix::clean()
 {
+		m_bRestart=true;
 #ifdef REPLAY_DETECTION
 		if(m_pReplayMsgProc!=NULL)
 			{
@@ -738,29 +739,39 @@ SINT32 CALastMix::clean()
 		if(m_pMuxIn!=NULL)
 			{
 				m_pMuxIn->close();
+			}
+		if(m_pthreadSendToMix!=NULL)
+			{
+				m_pthreadSendToMix->join();
+				delete m_pthreadSendToMix;
+			}
+		m_pthreadSendToMix=NULL;	
+		if(m_pthreadReadFromMix!=NULL)
+			{
+				m_pthreadReadFromMix->join();
+				delete m_pthreadReadFromMix;
+			}
+		m_pthreadReadFromMix=NULL;	
+		if(m_pQueueReadFromMix!=NULL)
+			delete m_pQueueReadFromMix;
+		m_pQueueReadFromMix=NULL;	
+		if(m_pQueueSendToMix!=NULL)
+			delete m_pQueueSendToMix;
+		m_pQueueSendToMix=NULL;	
+    #ifndef NEW_MIX_TYPE // not TypeB mixes
+      /* TypeB mixes are using an own implementation */
+		if(m_pChannelList!=NULL)
+			delete m_pChannelList;
+		m_pChannelList=NULL;
+		if(m_pMuxIn!=NULL)
+			{
+				m_pMuxIn->close();
 				delete m_pMuxIn;
 			}
 		m_pMuxIn=NULL;
 		if(m_pRSA!=NULL)
 			delete m_pRSA;
 		m_pRSA=NULL;
-		if(m_pthreadSendToMix!=NULL)
-			delete m_pthreadSendToMix;
-		m_pthreadSendToMix=NULL;	
-		if(m_pQueueSendToMix!=NULL)
-			delete m_pQueueSendToMix;
-		m_pQueueSendToMix=NULL;	
-		if(m_pthreadReadFromMix!=NULL)
-			delete m_pthreadReadFromMix;
-		m_pthreadReadFromMix=NULL;	
-		if(m_pQueueReadFromMix!=NULL)
-			delete m_pQueueReadFromMix;
-		m_pQueueReadFromMix=NULL;	
-    #ifndef NEW_MIX_TYPE // not TypeB mixes
-      /* TypeB mixes are using an own implementation */
-		if(m_pChannelList!=NULL)
-			delete m_pChannelList;
-		m_pChannelList=NULL;
     #endif
 		return E_SUCCESS;
 	}
