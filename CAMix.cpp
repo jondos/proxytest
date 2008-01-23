@@ -70,8 +70,9 @@ SINT32 CAMix::start()
         
 			UINT32 opCertLength;
 			CACertificate** opCerts = pglobalOptions->getOpCertificates(opCertLength);
-			m_pInfoService->setSignature(m_pSignature, pglobalOptions->getOwnCertificate(), opCerts, opCertLength);
-			
+			CACertificate* pOwnCert=pglobalOptions->getOwnCertificate();
+			m_pInfoService->setSignature(m_pSignature, pOwnCert, opCerts, opCertLength);
+			delete pOwnCert;
 			UINT64 currentMillis;
 			if (getcurrentTimeMillis(currentMillis) != E_SUCCESS)
 			{
@@ -231,7 +232,8 @@ bool CAMix::needAutoConfig()
             {
                 ret = false;
             }
-			}
+						delete oNextMix.addr;
+				}
 
         if(!pglobalOptions->hasNextMixTestCertificate())
             ret = true;

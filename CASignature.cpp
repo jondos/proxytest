@@ -144,7 +144,11 @@ SINT32 CASignature::setSignKey(const UINT8* buff,UINT32 len,UINT32 type,const ch
 					EVP_PKEY* key=NULL;
 //					X509* cert=NULL;
 					if(PKCS12_parse(tmpPKCS12,passwd,&key,NULL,NULL)!=1)
-						return E_UNKNOWN;
+							{
+								PKCS12_free(tmpPKCS12);
+								return E_UNKNOWN;
+							}	
+					PKCS12_free(tmpPKCS12);
 	//				X509_free(cert);
 					if(EVP_PKEY_type(key->type)!=EVP_PKEY_DSA)
 						{
