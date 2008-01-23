@@ -81,9 +81,9 @@ CAIPList::~CAIPList()
 					}
 			}
 #ifdef _DEUBG
-		delete [] m_Random;
+		delete[] m_Random;
 #endif
-		delete [] m_HashTable;
+		delete[] m_HashTable;
 		delete m_pMutex;
 	}
 
