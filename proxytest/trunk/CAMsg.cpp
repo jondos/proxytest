@@ -39,7 +39,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define MAX_MSG_SIZE 8192
 extern CACmdLnOptions* pglobalOptions;
 
-CAMsg* CAMsg::pMsg=new CAMsg();
+CAMsg* CAMsg::pMsg=NULL;
 
 const char* const CAMsg::m_strMsgTypes[5]={", error   ] ",", critical] ",", info    ] ",", debug   ] ",", special ] "}; //all same size!
 #define STRMSGTYPES_SIZE 12
