@@ -2433,7 +2433,7 @@ SKIP_NEXT_MIX:
 
 #ifndef DYNAMIC_MIX
     /* LERNGRUPPE: This is no error in the fully dynamic model */
-    if(isLastMix() && haveCascade != E_SUCCESS && getPrevMixTestCertificate() == NULL)
+    if(isLastMix() && haveCascade != E_SUCCESS && !hasPrevMixTestCertificate())
     {
         CAMsg::printMsg(LOG_CRIT,"Error in configuration: You must either specify cascade info or the previous mix's certificate.\n");
         return E_UNKNOWN;

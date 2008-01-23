@@ -101,7 +101,6 @@ CACertificate* CACertificate::decode(const UINT8* buff,UINT32 bufflen,UINT32 typ
 			return NULL;
 		X509* tmpCert=NULL;
 		const UINT8* tmp;
-		PKCS12* tmpPKCS12;
 		switch(type)
 			{
 				case CERT_DER:
@@ -113,13 +112,18 @@ CACertificate* CACertificate::decode(const UINT8* buff,UINT32 bufflen,UINT32 typ
 					#endif
 				break;
 				case CERT_PKCS12:
+					PKCS12* tmpPKCS12;
 					#if OPENSSL_VERSION_NUMBER	> 0x009070CfL
 						tmpPKCS12=d2i_PKCS12(NULL,&buff,bufflen);	
 					#else
 						tmpPKCS12=d2i_PKCS12(NULL,(UINT8**)&buff,bufflen);	
 					#endif
 					if(PKCS12_parse(tmpPKCS12,passwd,NULL,&tmpCert,NULL)!=1)
-						return NULL;
+						{
+							PKCS12_free(tmpPKCS12);
+							return NULL;
+						}
+					PKCS12_free(tmpPKCS12);
 				break;
 				case CERT_XML_X509CERTIFICATE:
 					MemBufInputSource oInput(buff,bufflen,"certxml");
