@@ -65,7 +65,10 @@ CACmdLnOptions::CACmdLnOptions()
 #endif //ONLY_LOCAL_PROXY
 		m_iTargetPort=m_iSOCKSPort=m_iSOCKSServerPort=0xFFFF;
 		m_strTargetHost=m_strSOCKSHost=NULL;
-		m_strUser=m_strCascadeName=m_strLogDir=m_strEncryptedLogDir=NULL;
+		m_strUser=NULL;
+		m_strCascadeName=NULL;
+		m_strLogDir=NULL;
+		m_strEncryptedLogDir=NULL;
 		m_maxNrOfUsers = 0;
 		m_arTargetInterfaces=NULL;
 		m_cnTargets=0;
@@ -1225,15 +1228,16 @@ CAListenerInterface** CACmdLnOptions::getInfoServices(UINT32& r_size)
  		r_size = m_addrInfoServicesSize;
  		return m_addrInfoServices;
   }
-SINT32 CACmdLnOptions::getCascadeName(UINT8* name,UINT32 len)
+
+SINT32 CACmdLnOptions::getCascadeName(UINT8* name,UINT32 len) const
   {
 		if(m_strCascadeName==NULL)
 				return E_UNKNOWN;
-		if(len<=(UINT32)strlen(m_strCascadeName))
+		if(len<=(UINT32)strlen((char*)m_strCascadeName))
 				{
 					return E_UNKNOWN;
 				}
-		strcpy((char*)name,m_strCascadeName);
+		strcpy((char*)name,(char*)m_strCascadeName);
 		return E_SUCCESS;
   }
 
@@ -1459,17 +1463,14 @@ SINT32 CACmdLnOptions::processXmlConfiguration(DOM_Document& docConfig)
 #endif
 		if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS)
 			{
-				m_strCascadeName=new char[tmpLen+1];
-				memcpy(m_strCascadeName,tmpBuff,tmpLen);
-				m_strCascadeName[tmpLen]=0;
+				setCascadeName(tmpBuff);
 			}
 #ifdef DYNAMIC_MIX
 			/* LERNGRUPPE: Dynamic Mixes must have a cascade name, as MiddleMixes may be reconfigured to be FirstMixes */
 		else
 			{
 				bNeedCascadeNameFromMixID=true;
-				m_strCascadeName = new char[strlen(m_strMixID) + 1];
-				strncpy(m_strCascadeName, m_strMixID, strlen(m_strMixID)+1);
+				setCascadeName(m_strMixID);
 			}
 #endif
 		//get Username to run as...
@@ -2404,30 +2405,6 @@ SKIP_NEXT_MIX:
 		getDOMElementValue(elemKeepAliveSendInterval,m_u32KeepAliveSendInterval,KEEP_ALIVE_TRAFFIC_SEND_WAIT_TIME);
 		getDOMElementValue(elemKeepAliveRecvInterval,m_u32KeepAliveRecvInterval,KEEP_ALIVE_TRAFFIC_RECV_WAIT_TIME);
 		
-    //getMixType
-    DOM_Element elemMixType;
-    getDOMChildByName(elemGeneral,(UINT8*)"MixType",elemMixType,false);
-    tmpLen=255;
-    if(getDOMElementValue(elemMixType,tmpBuff,&tmpLen)==E_SUCCESS)
-    {
-        if(memcmp(tmpBuff,"FirstMix",8)==0)
-            m_bFirstMix=true;
-        else if (memcmp(tmpBuff,"MiddleMix",9)==0)
-            m_bMiddleMix=true;
-        else if (memcmp(tmpBuff,"LastMix",7)==0)
-            m_bLastMix=true;
-    }
-
-    //getCascadeName
-    getDOMChildByName(elemGeneral,(UINT8*)"CascadeName",elem,false);
-    tmpLen=255;
-    if(getDOMElementValue(elem,tmpBuff,&tmpLen)==E_SUCCESS)
-    {
-        m_strCascadeName=new char[tmpLen+1];
-        memcpy(m_strCascadeName,tmpBuff,tmpLen);
-        m_strCascadeName[tmpLen]=0;
-	}
-
     DOM_Element elemCascade;
     SINT32 haveCascade = getDOMChildByName(elemRoot,(UINT8*)"MixCascade",elemCascade,false);
 
