@@ -682,7 +682,7 @@ NEXT_USER_WRITING:
 		delete pQueueEntry;
 		delete []tmpBuff;
 #ifdef _DEBUG
-		pLogThread->join;
+		pLogThread->join();
 		delete pLogThread; 
 #endif		
 		CAMsg::printMsg(LOG_CRIT,"Main Loop exited!!\n");
