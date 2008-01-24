@@ -209,13 +209,17 @@ SINT32 CASymCipher::decrypt1CBCwithPKCS7(const UINT8* in,UINT8* out,UINT32* len)
 	* @param in input (plain or ciphertext) bytes
 	* @param inlen size of the input buffer
 	* @param out output (plain or ciphertext) bytes
-	* @param len len of input. on return the output len, 
-	*													which is always <= len of input
+	* @param len on call len of output buffer; on return size of output buffer used, 
+	*													which is always > len of input
 	* @retval E_SUCCESS
 	*/
 SINT32 CASymCipher::encrypt1CBCwithPKCS7(const UINT8* in,UINT32 inlen,UINT8* out,UINT32* len)
 	{
-		UINT32 padlen=16-inlen%16;
+		UINT32 padlen=16-(inlen%16);
+		if(inlen+padlen>(*len))
+			{
+				return E_SPACE;
+			}
 		UINT8* tmp=new UINT8[inlen+padlen];
 		memcpy(tmp,in,inlen);
 		for(UINT32 i=inlen;i<inlen+padlen;i++)
@@ -223,7 +227,7 @@ SINT32 CASymCipher::encrypt1CBCwithPKCS7(const UINT8* in,UINT32 inlen,UINT8* out
 				tmp[i]=(UINT8)padlen;
 			}
 		AES_cbc_encrypt(tmp,out,inlen+padlen,m_keyAES,m_iv1,AES_ENCRYPT);
-		delete []tmp;
+		delete[] tmp;
 		*len=inlen+padlen;			
 		return E_SUCCESS;
 	}	
