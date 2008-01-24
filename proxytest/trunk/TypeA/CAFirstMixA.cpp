@@ -677,61 +677,16 @@ NEXT_USER_WRITING:
 				  msSleep(100);
 			}
 //ERR:
-//@todo move cleanup to clean() !
 		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
-		m_bRestart=true;
-		m_bRunLog=false;
-		m_pMuxOut->close();
-		for(UINT32 i=0;i<m_nSocketsIn;i++)
-			m_arrSocketsIn[i].close();
-		//writng some bytes to the queue...
-		UINT8 b[sizeof(tQueueEntry)+1];
-		m_pQueueSendToMix->add(b,sizeof(tQueueEntry)+1);
-//#if !defined(_DEBUG) && !defined(NO_LOOPACCEPTUSER)
-		CAMsg::printMsg(LOG_CRIT,"Wait for LoopAcceptUsers!\n");
-		m_pthreadAcceptUsers->join();
-//#endif
-		CAMsg::printMsg(LOG_CRIT,"Wait for LoopSendToMix!\n");
-		m_pthreadSendToMix->join(); //will not join if queue is empty (and so waitng)!!!
-		CAMsg::printMsg(LOG_CRIT,"Wait for LoopReadFromMix!\n");
-		m_pthreadReadFromMix->join();
-		#ifdef LOG_PACKET_TIMES
-			CAMsg::printMsg(LOG_CRIT,"Wait for LoopLogPacketStats to terminate!\n");
-			m_pLogPacketStats->stop();
-		#endif	
-		//waits until all login threads terminates....
-		// we have to be sure that the Accept thread was already stopped!
-		m_pthreadsLogin->destroy(true);
-		CAMsg::printMsg(LOG_CRIT,"Before deleting CAFirstMixChannelList()!\n");
-		CAMsg::printMsg	(LOG_CRIT,"Memory usage before: %u\n",getMemoryUsage());	
-		fmHashTableEntry* pHashEntry=m_pChannelList->getFirst();
-		while(pHashEntry!=NULL)
-			{
-				CAMuxSocket * pMuxSocket=pHashEntry->pMuxSocket;
-				delete pHashEntry->pQueueSend;
-				delete pHashEntry->pSymCipher; 
-
-				fmChannelListEntry* pEntry=m_pChannelList->getFirstChannelForSocket(pHashEntry->pMuxSocket);
-				while(pEntry!=NULL)
-					{
-						delete pEntry->pCipher;
-	
-						pEntry=m_pChannelList->getNextChannel(pEntry);
-					}
-				m_pChannelList->remove(pHashEntry->pMuxSocket);
-				pMuxSocket->close();
-				delete pMuxSocket;
-				pHashEntry=m_pChannelList->getNext();
-			}
-		CAMsg::printMsg	(LOG_CRIT,"Memory usage after: %u\n",getMemoryUsage());	
+		clean();
 		delete pQueueEntry;
 		delete []tmpBuff;
 #ifdef _DEBUG
-		pLogThread->join();
-		delete pLogThread;
-#endif
+		pLogThread->join;
+		delete pLogThread; 
+#endif		
 		CAMsg::printMsg(LOG_CRIT,"Main Loop exited!!\n");
-#endif //!MIX_NEW_TYP
+#endif//NEW_MIX_TYPE
 		return E_UNKNOWN;
 	}
 #endif //ONLY_LOCAL_PROXY

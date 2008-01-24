@@ -884,7 +884,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 END_THREAD:
 		FINISH_STACK("CAFirstMix::fm_loopAcceptUsers");
 
-		delete []peerIP;
+		delete[] peerIP;
 		delete psocketgroupAccept;
 		
 		CAMsg::printMsg(LOG_DEBUG,"Exiting Thread AcceptUser\n");
@@ -1280,6 +1280,25 @@ SINT32 CAFirstMix::clean()
 		#ifdef _DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"CAFirstMix::clean() start\n");
 		#endif
+		m_bRunLog=false;
+		m_bRestart=true;
+		if(m_pMuxOut!=NULL)
+			{
+				m_pMuxOut->close();
+			}
+		for(UINT32 i=0;i<m_nSocketsIn;i++)
+			m_arrSocketsIn[i].close();
+		//writng some bytes to the queue...
+		UINT8 b[sizeof(tQueueEntry)+1];
+		m_pQueueSendToMix->add(b,sizeof(tQueueEntry)+1);
+
+		if(m_pthreadAcceptUsers!=NULL)
+				{
+					CAMsg::printMsg(LOG_CRIT,"Wait for LoopAcceptUsers!\n");
+					m_pthreadAcceptUsers->join();
+					delete m_pthreadAcceptUsers;
+				}
+		m_pthreadAcceptUsers=NULL;
 		if(m_pthreadsLogin!=NULL)
 			delete m_pthreadsLogin;
 		m_pthreadsLogin=NULL;
@@ -1294,18 +1313,31 @@ SINT32 CAFirstMix::clean()
     //     }
     //     m_pInfoService=NULL;
 
-		if(m_pthreadAcceptUsers!=NULL)
-			delete m_pthreadAcceptUsers;
-		m_pthreadAcceptUsers=NULL;
-		if(m_pthreadSendToMix!=NULL)
+	if(m_pthreadSendToMix!=NULL)
+		{
+			CAMsg::printMsg(LOG_CRIT,"Wait for LoopSendToMix!\n");
+			m_pthreadSendToMix->join();
 			delete m_pthreadSendToMix;
-		m_pthreadSendToMix=NULL;
+		}
+	m_pthreadSendToMix=NULL;
+	if(m_pthreadReadFromMix!=NULL)
+		{
+			CAMsg::printMsg(LOG_CRIT,"Wait for LoopReadFromMix!\n");
+			m_pthreadReadFromMix->join();
+			delete m_pthreadReadFromMix;
+		}
+	m_pthreadReadFromMix=NULL;
+
 #ifdef PAYMENT
 		CAAccountingInstance::clean();
 #endif
 		#ifdef LOG_PACKET_TIMES
 		if(m_pLogPacketStats!=NULL)
-			delete m_pLogPacketStats;
+			{
+				CAMsg::printMsg(LOG_CRIT,"Wait for LoopLogPacketStats to terminate!\n");
+				m_pLogPacketStats->stop();
+				delete m_pLogPacketStats;
+			}
 		m_pLogPacketStats=NULL;
 		#endif
 		if(m_arrSocketsIn!=NULL)
@@ -1343,9 +1375,33 @@ SINT32 CAFirstMix::clean()
 		if(m_pQueueReadFromMix!=NULL)
 			delete m_pQueueReadFromMix;
 		m_pQueueReadFromMix=NULL;
+
+		CAMsg::printMsg(LOG_CRIT,"Before deleting CAFirstMixChannelList()!\n");
+		CAMsg::printMsg	(LOG_CRIT,"Memory usage before: %u\n",getMemoryUsage());	
+		fmHashTableEntry* pHashEntry=m_pChannelList->getFirst();
+		while(pHashEntry!=NULL)
+			{
+				CAMuxSocket * pMuxSocket=pHashEntry->pMuxSocket;
+				delete pHashEntry->pQueueSend;
+				delete pHashEntry->pSymCipher; 
+
+				fmChannelListEntry* pEntry=m_pChannelList->getFirstChannelForSocket(pHashEntry->pMuxSocket);
+				while(pEntry!=NULL)
+					{
+						delete pEntry->pCipher;
+	
+						pEntry=m_pChannelList->getNextChannel(pEntry);
+					}
+				m_pChannelList->remove(pHashEntry->pMuxSocket);
+				pMuxSocket->close();
+				delete pMuxSocket;
+				pHashEntry=m_pChannelList->getNext();
+			}
 		if(m_pChannelList!=NULL)
 			delete m_pChannelList;
 		m_pChannelList=NULL;
+		CAMsg::printMsg	(LOG_CRIT,"Memory usage after: %u\n",getMemoryUsage());	
+
 		if(m_psocketgroupUsersRead!=NULL)
 			delete m_psocketgroupUsersRead;
 		m_psocketgroupUsersRead=NULL;
@@ -1356,7 +1412,7 @@ SINT32 CAFirstMix::clean()
 			delete m_pRSA;
 		m_pRSA=NULL;
 		if(m_xmlKeyInfoBuff!=NULL)
-			delete []m_xmlKeyInfoBuff;
+			delete[] m_xmlKeyInfoBuff;
 		m_xmlKeyInfoBuff=NULL;
 		m_docMixCascadeInfo=NULL;
 		if(m_arMixParameters!=NULL)

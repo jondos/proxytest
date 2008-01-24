@@ -125,6 +125,7 @@ SINT32 CAThreadPool::destroy(bool bWaitForFinish)
 		for(UINT32 i=0; i < m_NumThreads; i++) 
 			{
 				m_parThreads[i]->join();
+				delete m_parThreads[i];
 			}
 		// Now free pool structures 
 		delete[] m_parThreads;
