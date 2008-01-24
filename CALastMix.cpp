@@ -723,6 +723,7 @@ SINT32 CALastMix::setTargets()
 SINT32 CALastMix::clean()
 {
 		m_bRestart=true;
+		m_bRunLog=false;
 #ifdef REPLAY_DETECTION
 		if(m_pReplayMsgProc!=NULL)
 			{
@@ -741,18 +742,49 @@ SINT32 CALastMix::clean()
 			{
 				m_pMuxIn->close();
 			}
+		//writng some bytes to the queue...
+		if(m_pQueueSendToMix!=NULL)
+			{
+				UINT8 b[sizeof(tQueueEntry)+1];
+				m_pQueueSendToMix->add(b,sizeof(tQueueEntry)+1);
+			}
+
 		if(m_pthreadSendToMix!=NULL)
 			{
+				CAMsg::printMsg(LOG_CRIT,"Wait for LoopSendToMix!\n");
 				m_pthreadSendToMix->join();
 				delete m_pthreadSendToMix;
 			}
 		m_pthreadSendToMix=NULL;	
 		if(m_pthreadReadFromMix!=NULL)
 			{
+				CAMsg::printMsg(LOG_CRIT,"Wait for LoopReadFromMix!\n");
 				m_pthreadReadFromMix->join();
 				delete m_pthreadReadFromMix;
 			}
 		m_pthreadReadFromMix=NULL;	
+	
+#ifdef LOG_PACKET_TIMES
+			CAMsg::printMsg(LOG_CRIT,"Wait for LoopLogPacketStats to terminate!\n");
+			if(m_pLogPacketStats!=NULL)
+				{
+					m_pLogPacketStats->stop();
+					delete m_pLogPacketStats;
+				}
+			m_pLogPacketStats=NULL;
+#endif	
+		if(m_pChannelList!=NULL)
+			{
+				lmChannelListEntry* pChannelListEntry=m_pChannelList->getFirstSocket();
+				while(pChannelListEntry!=NULL)
+					{
+						delete pChannelListEntry->pCipher;
+						delete pChannelListEntry->pQueueSend;
+						pChannelListEntry->pSocket->close();
+						delete pChannelListEntry->pSocket;
+						pChannelListEntry=m_pChannelList->getNextSocket();
+					}
+			}	
 		if(m_pQueueReadFromMix!=NULL)
 			delete m_pQueueReadFromMix;
 		m_pQueueReadFromMix=NULL;	

@@ -1287,11 +1287,17 @@ SINT32 CAFirstMix::clean()
 			{
 				m_pMuxOut->close();
 			}
-		for(UINT32 i=0;i<m_nSocketsIn;i++)
-			m_arrSocketsIn[i].close();
+		if(m_arrSocketsIn!=NULL)
+			{
+				for(UINT32 i=0;i<m_nSocketsIn;i++)
+					m_arrSocketsIn[i].close();
+			}
 		//writng some bytes to the queue...
-		UINT8 b[sizeof(tQueueEntry)+1];
-		m_pQueueSendToMix->add(b,sizeof(tQueueEntry)+1);
+		if(m_pQueueSendToMix!=NULL)
+			{
+				UINT8 b[sizeof(tQueueEntry)+1];
+				m_pQueueSendToMix->add(b,sizeof(tQueueEntry)+1);
+			}
 
 		if(m_pthreadAcceptUsers!=NULL)
 				{
@@ -1330,9 +1336,9 @@ SINT32 CAFirstMix::clean()
 	m_pthreadReadFromMix=NULL;
 
 #ifdef PAYMENT
-		CAAccountingInstance::clean();
+	CAAccountingInstance::clean();
 #endif
-		#ifdef LOG_PACKET_TIMES
+#ifdef LOG_PACKET_TIMES
 		if(m_pLogPacketStats!=NULL)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Wait for LoopLogPacketStats to terminate!\n");
@@ -1340,7 +1346,7 @@ SINT32 CAFirstMix::clean()
 				delete m_pLogPacketStats;
 			}
 		m_pLogPacketStats=NULL;
-		#endif
+#endif
 		if(m_arrSocketsIn!=NULL)
 			delete[] m_arrSocketsIn;
 		m_arrSocketsIn=NULL;
@@ -1377,26 +1383,29 @@ SINT32 CAFirstMix::clean()
 			delete m_pQueueReadFromMix;
 		m_pQueueReadFromMix=NULL;
 
-		CAMsg::printMsg(LOG_CRIT,"Before deleting CAFirstMixChannelList()!\n");
-		CAMsg::printMsg	(LOG_CRIT,"Memory usage before: %u\n",getMemoryUsage());	
-		fmHashTableEntry* pHashEntry=m_pChannelList->getFirst();
-		while(pHashEntry!=NULL)
+		if(m_pChannelList!=NULL)
 			{
-				CAMuxSocket * pMuxSocket=pHashEntry->pMuxSocket;
-				delete pHashEntry->pQueueSend;
-				delete pHashEntry->pSymCipher; 
-
-				fmChannelListEntry* pEntry=m_pChannelList->getFirstChannelForSocket(pHashEntry->pMuxSocket);
-				while(pEntry!=NULL)
+				CAMsg::printMsg(LOG_CRIT,"Before deleting CAFirstMixChannelList()!\n");
+				CAMsg::printMsg	(LOG_CRIT,"Memory usage before: %u\n",getMemoryUsage());	
+				fmHashTableEntry* pHashEntry=m_pChannelList->getFirst();
+				while(pHashEntry!=NULL)
 					{
-						delete pEntry->pCipher;
-	
-						pEntry=m_pChannelList->getNextChannel(pEntry);
+						CAMuxSocket * pMuxSocket=pHashEntry->pMuxSocket;
+						delete pHashEntry->pQueueSend;
+						delete pHashEntry->pSymCipher; 
+
+						fmChannelListEntry* pEntry=m_pChannelList->getFirstChannelForSocket(pHashEntry->pMuxSocket);
+						while(pEntry!=NULL)
+							{
+								delete pEntry->pCipher;
+			
+								pEntry=m_pChannelList->getNextChannel(pEntry);
+							}
+						m_pChannelList->remove(pHashEntry->pMuxSocket);
+						pMuxSocket->close();
+						delete pMuxSocket;
+						pHashEntry=m_pChannelList->getNext();
 					}
-				m_pChannelList->remove(pHashEntry->pMuxSocket);
-				pMuxSocket->close();
-				delete pMuxSocket;
-				pHashEntry=m_pChannelList->getNext();
 			}
 		if(m_pChannelList!=NULL)
 			delete m_pChannelList;
