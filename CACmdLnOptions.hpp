@@ -254,15 +254,15 @@ class CACmdLnOptions
 					return m_oCascadeXML;
 			}
 
-			SINT32 getCascadeName(UINT8* name,UINT32 len);
+			SINT32 getCascadeName(UINT8* name,UINT32 len) const;
     
 			// added by ronin <ronin2@web.de>
-			SINT32 setCascadeName(char* name)
+			SINT32 setCascadeName(const UINT8* name)
 			{
     		if(m_strCascadeName!=NULL)
-					delete m_strCascadeName;
-				m_strCascadeName = new char[strlen(name)+1];
-				strcpy(m_strCascadeName,name);
+					delete[] m_strCascadeName;
+				m_strCascadeName = new UINT8[strlen((const char*)name)+1];
+				strcpy((char*)m_strCascadeName,(const char*)name);
 				return E_SUCCESS;
 			}
 
@@ -476,7 +476,7 @@ class CACmdLnOptions
 
 			bool		m_bLocalProxy,m_bFirstMix,m_bMiddleMix,m_bLastMix;
 			bool		m_bAutoReconnect; //auto reconnect if connection to first mix lost ??
-			char*		m_strCascadeName;
+			UINT8*	m_strCascadeName;
 			char*		m_strLogDir;
 			char*		m_strEncryptedLogDir;
 			bool		m_bCompressedLogs;
