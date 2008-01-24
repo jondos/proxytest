@@ -678,6 +678,7 @@ NEXT_USER_WRITING:
 			}
 //ERR:
 		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
+		m_bRunLog=false;
 		clean();
 		delete pQueueEntry;
 		delete []tmpBuff;

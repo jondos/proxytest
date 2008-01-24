@@ -598,30 +598,9 @@ SINT32 CALastMixA::loop()
 
 //ERR:
 		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
-		m_bRestart=true;
-		m_pMuxIn->close();
-		//writng some bytes to the queue...
-		UINT8 b[sizeof(tQueueEntry)+1];
-		m_pQueueSendToMix->add(b,sizeof(tQueueEntry)+1);
-		CAMsg::printMsg(LOG_CRIT,"Wait for LoopSendToMix!\n");
-		m_pthreadSendToMix->join(); //will not join if queue is empty (and so wating)!!!
-		m_bRunLog=false;
-		CAMsg::printMsg(LOG_CRIT,"Wait for LoopReadFromMix!\n");
-		m_pthreadReadFromMix->join();
-		CAMsg::printMsg(LOG_CRIT,"done.\n");
-		#ifdef LOG_PACKET_TIMES
-			CAMsg::printMsg(LOG_CRIT,"Wait for LoopLogPacketStats to terminate!\n");
-			m_pLogPacketStats->stop();
-		#endif	
-		pChannelListEntry=m_pChannelList->getFirstSocket();
-		while(pChannelListEntry!=NULL)
-			{
-				delete pChannelListEntry->pCipher;
-				delete pChannelListEntry->pQueueSend;
-				pChannelListEntry->pSocket->close();
-				delete pChannelListEntry->pSocket;
-				pChannelListEntry=m_pChannelList->getNextSocket();
-			}
+		m_bRunLog=false;		
+		clean();
+
 		delete []tmpBuff;
 		delete pQueueEntry;
 		pLogThread->join();
