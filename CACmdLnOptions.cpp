@@ -224,7 +224,7 @@ SINT32 CACmdLnOptions::getVisibleAddress(UINT8* strAddressBuff, UINT32 len,UINT3
 	}
 #endif //ONLY_LOCAL_PROXY
 
-/** Deletes and resssource allocated by objects of this class EXPECT the locks necessary to controll access to the properties of this class*/
+/** Deletes all resssource allocated by objects of this class EXPECT the locks necessary to controll access to the properties of this class*/
 void CACmdLnOptions::clean()
   {
 		if(m_strConfigFile!=NULL)

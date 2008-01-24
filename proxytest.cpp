@@ -95,9 +95,13 @@ void openssl_locking_callback(int mode, int type, char * /*file*/, int /*line*/)
 				pOpenSSLMutexes[type].unlock();
 			}
 	}
-
+/// Removes the stored PID (file)
 void removePidFile()
 	{
+		if(pglobalOptions==NULL)
+			{
+				return;
+			}
 		UINT8 strPidFile[512];
 		if(pglobalOptions->getPidFile(strPidFile,512)==E_SUCCESS)
 			{
@@ -145,6 +149,7 @@ void cleanup()
 #ifndef ONLY_LOCAL_PROXY
 		if(pMix!=NULL)
 			delete pMix;
+		pMix=NULL;
 #endif
 		CAMsg::printMsg(LOG_CRIT,"Terminating Programm!\n");
 		//		CASocketAddrINet::destroy();
@@ -157,6 +162,7 @@ void cleanup()
 //OpenSSL Cleanup
 		CRYPTO_set_locking_callback(NULL);
 		delete []pOpenSSLMutexes;
+		pOpenSSLMutexes=NULL;
 		CASocketAddrINet::cleanup();
 //XML Cleanup
 		//Note: We have to destroy all XML Objects and all objects that uses XML Objects BEFORE

@@ -248,10 +248,15 @@ SINT32 CASignature::parseSignKeyXML(const UINT8* buff,UINT32 len)
 
 SINT32 CASignature::sign(UINT8* in,UINT32 inlen,UINT8* sig,UINT32* siglen)
 	{
-		DSA_SIG* signature;
-		if(	sign(in,inlen,&signature)!=E_SUCCESS||
-				encodeRS(sig,siglen,signature)!=E_SUCCESS)
+		DSA_SIG* signature=NULL;
+		if(	sign(in,inlen,&signature)!=E_SUCCESS)
 			return E_UNKNOWN;
+		if(encodeRS(sig,siglen,signature)!=E_SUCCESS)
+			{
+				DSA_SIG_free(signature);
+				return E_UNKNOWN;
+			}
+		DSA_SIG_free(signature);
 		return E_SUCCESS;
 	}
 
