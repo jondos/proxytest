@@ -10,6 +10,7 @@ XERCESC_LIB=/usr/lib/
 INCLUDE = -I. -I${OPENSSL_INC} -I${XERCESC_INC} -I${XERCESC_INC}/xercesc 
 LIBDIR= -L${OPENSSL_LIB} -L/usr/local/lib -L${XERCESC_LIB} 
 LIBS	= ./popt/libpopt.a ./xml/libxml.a ./trio/libtrio.a ./tre/libtre.a ./TypeA/libmixa.a -lcrypto -lssl -lm -lxerces-c -lxerces-depdom -lmysqlclient_r
+LIBS_PURIFY	= ./popt/libpopt.a ./xml/libxml.a ./trio/libtrio.a ./tre/libtre.a ./TypeA/libmixa.a -lcrypto -lssl -lm -lxerces-c -lxerces-depdom
 IRIX_INCLUDE=-I${HOME}/openssl64-0.9.7d/include -I${HOME}/xercesc/include/xercesc
 IRIX_LIBDIR=-L${HOME}/openssl64-0.9.7d/lib -L${HOME}/xercesc/lib
 
@@ -154,11 +155,17 @@ freebsd-x86-gcc-pthread:
 linux-x86-gcc-webdeploy:
 	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -O0' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++ -lxerces-depdom' 'LIBDIR=$(LIBDIR)' _all_aes 
 
+linux-x86-purify:
+	$(MAKE) 'CC=g++' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -O0 -g' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes_purify 
+
 _all_aes: $(OBJS) libpopt.a libxml.a libtrio.a libtre.a libmixa.a
 	$(CC) -o proxytest $(DEBUG) $(CPPFLAGS) $(OBJS) $(LIBDIR) $(LIBS)
 
 _all_aes_newglibc: $(OBJS) libpopt.a libxml.a libtrio.a libtre.a libmixa.a
 	$(CC) -o proxytest $(DEBUG) $(CPPFLAGS) $(OBJS) $(LDFLAGS)
+
+_all_aes_purify: $(OBJS) libpopt.a libxml.a libtrio.a libtre.a libmixa.a
+	$(PURIFY) g++ $(OBJS) $(LIBS_PURIFY)
 
 libpopt.a:
 	cd popt;$(MAKE) 'CC=$(CC)' 'DEBUG=$(DEBUG)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)'
