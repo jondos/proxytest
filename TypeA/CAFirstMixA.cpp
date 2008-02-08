@@ -42,7 +42,6 @@ extern CACmdLnOptions* pglobalOptions;
 void CAFirstMixA::shutDown()
 {
 	m_bIsShuttingDown = true;
-	m_bRestart = true;
 
 #ifdef PAYMENT
 	UINT32 connectionsClosed = 0;
@@ -55,7 +54,7 @@ void CAFirstMixA::shutDown()
 	}	
 	CAMsg::printMsg(LOG_DEBUG,"Closed %i client connections.\n", connectionsClosed);
 #endif
-
+	m_bRestart = true;
 	m_bIsShuttingDown = false;
 }
 
