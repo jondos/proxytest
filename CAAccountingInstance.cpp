@@ -201,11 +201,14 @@ UINT32 CAAccountingInstance::getNrOfUsers()
 {
 	UINT32 users = 0;
 	
-	if (ms_pInstance)
+	if (ms_pInstance!=NULL)
 	{
 		ms_pInstance->m_Mutex.lock();
-		// getting the size is an atomic operation and does not need synchronization
-		users = ms_pInstance->m_currentAccountsHashtable->getSize();
+		if(ms_pInstance->m_currentAccountsHashtable!=NULL)
+			{
+				// getting the size is an atomic operation and does not need synchronization
+				users = ms_pInstance->m_currentAccountsHashtable->getSize();
+			}
 		ms_pInstance->m_Mutex.unlock();
 	}
 	
