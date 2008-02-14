@@ -147,9 +147,9 @@ public:
 			UINT32 getNrOfUsers() const
 			{
 				#ifdef PAYMENT
-				return CAAccountingInstance::getNrOfUsers();
+					return CAAccountingInstance::getNrOfUsers();
 				#else
-				return m_nUser;
+					return m_nUser;
 				#endif	
 			}
 

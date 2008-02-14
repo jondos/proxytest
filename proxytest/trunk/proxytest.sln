@@ -43,6 +43,9 @@ Global
 		Debug|Any CPU = Debug|Any CPU
 		Debug|Mixed Platforms = Debug|Mixed Platforms
 		Debug|Win32 = Debug|Win32
+		Debug-with-payment|Any CPU = Debug-with-payment|Any CPU
+		Debug-with-payment|Mixed Platforms = Debug-with-payment|Mixed Platforms
+		Debug-with-payment|Win32 = Debug-with-payment|Win32
 		Mit Xerces 2.0.0|Any CPU = Mit Xerces 2.0.0|Any CPU
 		Mit Xerces 2.0.0|Mixed Platforms = Mit Xerces 2.0.0|Mixed Platforms
 		Mit Xerces 2.0.0|Win32 = Mit Xerces 2.0.0|Win32
@@ -65,6 +68,11 @@ Global
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Debug|Mixed Platforms.Build.0 = Debug|Win32
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Debug|Win32.ActiveCfg = Debug|Win32
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Debug|Win32.Build.0 = Debug|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Debug-with-payment|Any CPU.ActiveCfg = Debug-with-payment|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Debug-with-payment|Mixed Platforms.ActiveCfg = Debug-with-payment|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Debug-with-payment|Mixed Platforms.Build.0 = Debug-with-payment|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Debug-with-payment|Win32.ActiveCfg = Debug-with-payment|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Debug-with-payment|Win32.Build.0 = Debug-with-payment|Win32
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Mit Xerces 2.0.0|Any CPU.ActiveCfg = Mit Xerces 2.0.0|Win32
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Mit Xerces 2.0.0|Mixed Platforms.ActiveCfg = Mit Xerces 2.0.0|Win32
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Mit Xerces 2.0.0|Mixed Platforms.Build.0 = Mit Xerces 2.0.0|Win32
@@ -94,6 +102,10 @@ Global
 		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
 		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.Debug|Mixed Platforms.Build.0 = Debug|Win32
 		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.Debug-with-payment|Any CPU.ActiveCfg = Debug-with-payment|Win32
+		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.Debug-with-payment|Mixed Platforms.ActiveCfg = Debug-with-payment|Win32
+		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.Debug-with-payment|Mixed Platforms.Build.0 = Debug-with-payment|Win32
+		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.Debug-with-payment|Win32.ActiveCfg = Debug-with-payment|Win32
 		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.Mit Xerces 2.0.0|Any CPU.ActiveCfg = Mit Xerces 2.0.0|Win32
 		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.Mit Xerces 2.0.0|Mixed Platforms.ActiveCfg = Mit Xerces 2.0.0|Win32
 		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.Mit Xerces 2.0.0|Mixed Platforms.Build.0 = Mit Xerces 2.0.0|Win32
@@ -119,6 +131,10 @@ Global
 		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Debug|Mixed Platforms.Build.0 = Debug|Win32
 		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Debug|Win32.ActiveCfg = Debug|Win32
 		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Debug|Win32.Build.0 = Debug|Win32
+		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Debug-with-payment|Any CPU.ActiveCfg = Debug-with-payment|Win32
+		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Debug-with-payment|Mixed Platforms.ActiveCfg = Debug-with-payment|Win32
+		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Debug-with-payment|Mixed Platforms.Build.0 = Debug-with-payment|Win32
+		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Debug-with-payment|Win32.ActiveCfg = Debug-with-payment|Win32
 		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Mit Xerces 2.0.0|Any CPU.ActiveCfg = proxytest-only-local-debug|Win32
 		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Mit Xerces 2.0.0|Mixed Platforms.ActiveCfg = proxytest-only-local-debug|Win32
 		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Mit Xerces 2.0.0|Mixed Platforms.Build.0 = proxytest-only-local-debug|Win32
@@ -148,6 +164,10 @@ Global
 		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Debug|Mixed Platforms.Build.0 = Debug|Win32
 		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Debug|Win32.ActiveCfg = Debug|Win32
 		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Debug|Win32.Build.0 = Debug|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Debug-with-payment|Any CPU.ActiveCfg = Debug-with-payment|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Debug-with-payment|Mixed Platforms.ActiveCfg = Debug-with-payment|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Debug-with-payment|Mixed Platforms.Build.0 = Debug-with-payment|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Debug-with-payment|Win32.ActiveCfg = Debug-with-payment|Win32
 		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Mit Xerces 2.0.0|Any CPU.ActiveCfg = proxytest-only-local-debug|Win32
 		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Mit Xerces 2.0.0|Mixed Platforms.ActiveCfg = proxytest-only-local-debug|Win32
 		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Mit Xerces 2.0.0|Mixed Platforms.Build.0 = proxytest-only-local-debug|Win32
@@ -177,6 +197,10 @@ Global
 		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Debug|Mixed Platforms.Build.0 = Debug|Win32
 		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Debug|Win32.ActiveCfg = Debug|Win32
 		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Debug|Win32.Build.0 = Debug|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Debug-with-payment|Any CPU.ActiveCfg = Debug-with-payment|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Debug-with-payment|Mixed Platforms.ActiveCfg = Debug-with-payment|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Debug-with-payment|Mixed Platforms.Build.0 = Debug-with-payment|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Debug-with-payment|Win32.ActiveCfg = Debug-with-payment|Win32
 		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Mit Xerces 2.0.0|Any CPU.ActiveCfg = proxytest-only-local-debug|Win32
 		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Mit Xerces 2.0.0|Mixed Platforms.ActiveCfg = proxytest-only-local-debug|Win32
 		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Mit Xerces 2.0.0|Mixed Platforms.Build.0 = proxytest-only-local-debug|Win32
@@ -205,6 +229,10 @@ Global
 		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
 		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.Debug|Mixed Platforms.Build.0 = Debug|Win32
 		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.Debug-with-payment|Any CPU.ActiveCfg = Debug-with-payment|Win32
+		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.Debug-with-payment|Mixed Platforms.ActiveCfg = Debug-with-payment|Win32
+		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.Debug-with-payment|Mixed Platforms.Build.0 = Debug-with-payment|Win32
+		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.Debug-with-payment|Win32.ActiveCfg = Debug-with-payment|Win32
 		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.Mit Xerces 2.0.0|Any CPU.ActiveCfg = proxytest-only-local-debug|Win32
 		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.Mit Xerces 2.0.0|Mixed Platforms.ActiveCfg = proxytest-only-local-debug|Win32
 		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.Mit Xerces 2.0.0|Mixed Platforms.Build.0 = proxytest-only-local-debug|Win32
@@ -229,6 +257,10 @@ Global
 		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
 		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.Debug|Mixed Platforms.Build.0 = Debug|Win32
 		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.Debug-with-payment|Any CPU.ActiveCfg = Debug-with-payment|Win32
+		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.Debug-with-payment|Mixed Platforms.ActiveCfg = Debug-with-payment|Win32
+		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.Debug-with-payment|Mixed Platforms.Build.0 = Debug-with-payment|Win32
+		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.Debug-with-payment|Win32.ActiveCfg = Debug-with-payment|Win32
 		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.Mit Xerces 2.0.0|Any CPU.ActiveCfg = proxytest-only-local-debug|Win32
 		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.Mit Xerces 2.0.0|Mixed Platforms.ActiveCfg = proxytest-only-local-debug|Win32
 		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.Mit Xerces 2.0.0|Mixed Platforms.Build.0 = proxytest-only-local-debug|Win32

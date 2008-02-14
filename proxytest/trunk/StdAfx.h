@@ -478,7 +478,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#else
 	    #include <libpq-fe.h>
 		#endif
-  #elif defined(__FreeBSD__)
+  #elif defined(__FreeBSD__) ||defined (_WIN32)
 		#include <libpq-fe.h>
 			#else
 		#include <postgresql/libpq-fe.h>

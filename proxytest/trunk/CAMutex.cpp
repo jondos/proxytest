@@ -39,6 +39,10 @@ CAMutex::CAMutex()
 
 CAMutex::~CAMutex()
 	{
+	  //This is to ensure, that the mutex is not locked then we wnat to destroy it.
+		//Of course this does not really work. In fact we need another mutex to prevent the destruction of a locked mutex...
+		lock();
+		unlock();
 		SINT32 ret=pthread_mutex_destroy(m_pMutex);
 		ASSERT(ret==0,"Mutex detroy failed!");
 		delete m_pMutex;
