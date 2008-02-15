@@ -195,7 +195,6 @@ SKIP:
 			}
 		m_pInfoService=NULL;
 		return E_SUCCESS;
-#endif
 	}
 
 
