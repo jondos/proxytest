@@ -1433,11 +1433,14 @@ SINT32 CAFirstMix::clean()
 					}
 				delete[] m_arMixParameters;
 			}
-			m_arMixParameters=NULL;
-			m_u32MixCount=0;
-		#ifdef _DEBUG
-			CAMsg::printMsg(LOG_DEBUG,"CAFirstMix::clean() finished\n");
-		#endif
+		m_arMixParameters=NULL;
+		m_u32MixCount=0;
+		m_nMixedPackets=0; //reset to zero after each restart (at the moment neccessary for infoservice)
+		m_nUser=0;
+
+#ifdef _DEBUG
+		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix::clean() finished\n");
+#endif
 		return E_SUCCESS;
 	}
 

@@ -58,14 +58,14 @@ class CAMix
 			virtual tMixType getType() const =0;
 			
 			virtual void shutDown()
-			{
-				m_bShutDown = true;
-			}
+				{
+					m_bShutDown = true;
+				}
 			
 			virtual bool isShutDown()
-			{
-				return m_bShutDown;
-			}
+				{
+					return m_bShutDown;
+				}
 			
 #ifdef DYNAMIC_MIX
 			void setReconfiguring(bool a_val)

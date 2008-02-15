@@ -181,9 +181,9 @@ void my_terminate(void)
 		bTriedTermination = true;
 		pMix->shutDown();
 		for (UINT32 i = 0; i < 20 && !(pMix->isShutDown()); i++)
-		{
-			msSleep(100);
-		}
+			{
+				msSleep(100);
+			}
 		delete pMix;
 		pMix=NULL;
 	}

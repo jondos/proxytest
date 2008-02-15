@@ -64,79 +64,70 @@ SINT32 CAMix::start()
 		if(initOnce()!=E_SUCCESS)
 			return E_UNKNOWN;
 		if(m_pSignature != NULL && pglobalOptions->isInfoServiceEnabled())
-		{
-			CAMsg::printMsg(LOG_DEBUG, "CAMix start: creating InfoService object\n");
-			m_pInfoService=new CAInfoService(this);
-        
-			UINT32 opCertLength;
-			CACertificate** opCerts = pglobalOptions->getOpCertificates(opCertLength);
-			CACertificate* pOwnCert=pglobalOptions->getOwnCertificate();
-			m_pInfoService->setSignature(m_pSignature, pOwnCert, opCerts, opCertLength);
-			delete pOwnCert;
-			UINT64 currentMillis;
-			if (getcurrentTimeMillis(currentMillis) != E_SUCCESS)
 			{
-				currentMillis = 0;
-			}
-			m_pInfoService->setSerial(currentMillis);
-			
-			if(opCerts!=NULL)
+				CAMsg::printMsg(LOG_DEBUG, "CAMix start: creating InfoService object\n");
+				m_pInfoService=new CAInfoService(this);
+	        
+				UINT32 opCertLength;
+				CACertificate** opCerts = pglobalOptions->getOpCertificates(opCertLength);
+				CACertificate* pOwnCert=pglobalOptions->getOwnCertificate();
+				m_pInfoService->setSignature(m_pSignature, pOwnCert, opCerts, opCertLength);
+				delete pOwnCert;
+				UINT64 currentMillis;
+				if (getcurrentTimeMillis(currentMillis) != E_SUCCESS)
 				{
-					for(UINT32 i=0;i<opCertLength;i++)
-						delete opCerts[i];
-					delete[] opCerts;
+					currentMillis = 0;
 				}
-	
-	        bool allowReconf = pglobalOptions->acceptReconfiguration();
-	        bool needReconf = needAutoConfig();
-	
-	        m_pInfoService->setConfiguring(allowReconf && needReconf);
-					CAMsg::printMsg(LOG_DEBUG, "CAMix start: starting InfoService\n");
-	        m_pInfoService->start();
-// 	LERNGRUPPE: Moved this loop to the beginning of the main loop to allow reconfiguration
-//         while(allowReconf && needReconf)
-//         {
-//             CAMsg::printMsg(LOG_INFO, "No next mix or no prev. mix certificate specified. Waiting for auto-config from InfoService.\n");
-// 
-//             sSleep(20);
-//             needReconf = needAutoConfig();
-//         }
-        }
+				m_pInfoService->setSerial(currentMillis);
+				
+				if(opCerts!=NULL)
+					{
+						for(UINT32 i=0;i<opCertLength;i++)
+							delete opCerts[i];
+						delete[] opCerts;
+					}
+		
+				bool allowReconf = pglobalOptions->acceptReconfiguration();
+				bool needReconf = needAutoConfig();
+		
+				m_pInfoService->setConfiguring(allowReconf && needReconf);
+				CAMsg::printMsg(LOG_DEBUG, "CAMix start: starting InfoService\n");
+				m_pInfoService->start();
+			}
 		else
-		{
-			m_pInfoService = NULL;
-		}
+			{
+				m_pInfoService = NULL;
+			}
 		bool allowReconf = pglobalOptions->acceptReconfiguration();
-//     bool needReconf = needAutoConfig();
 #ifdef DYNAMIC_MIX
 		/* LERNGRUPPE: We might want to break out of this loop if the mix-type changes */
 		while(m_bLoop)
 #else
     while(true)
 #endif
-    {
-    	if (m_pInfoService != NULL)
-    		m_pInfoService->setConfiguring(allowReconf && needAutoConfig());
-		while(allowReconf && (needAutoConfig() || m_bReconfiguring))
-		{
-			CAMsg::printMsg(LOG_DEBUG, "Not configured -> sleeping\n");
+			{
+    		if (m_pInfoService != NULL)
+    			m_pInfoService->setConfiguring(allowReconf && needAutoConfig());
+				while(allowReconf && (needAutoConfig() || m_bReconfiguring))
+					{
+						CAMsg::printMsg(LOG_DEBUG, "Not configured -> sleeping\n");
             sSleep(20);
-        }
+					}
 #ifdef DYNAMIC_MIX
-		// if we change the mix type, we must not enter init!
-		if(!m_bLoop) goto SKIP;
+				// if we change the mix type, we must not enter init!
+				if(!m_bLoop) goto SKIP;
 #endif
-		CAMsg::printMsg(LOG_DEBUG, "CAMix main: before init()\n");
-		initStatus = init();
+				CAMsg::printMsg(LOG_DEBUG, "CAMix main: before init()\n");
+				initStatus = init();
         if(initStatus == E_SUCCESS)
-        {
-					CAMsg::printMsg(LOG_DEBUG, "CAMix main: init() returned success\n");
+					{
+						CAMsg::printMsg(LOG_DEBUG, "CAMix main: init() returned success\n");
             if(m_pInfoService != NULL)
-            {
-                m_pInfoService->setConfiguring(false);
+							{
+								m_pInfoService->setConfiguring(false);
                 if( ! m_pInfoService->isRunning())
-                    m_pInfoService->start();
-            }
+									m_pInfoService->start();
+							}
 
             CAMsg::printMsg(LOG_INFO, "The mix is now on-line.\n");
 #ifdef DYNAMIC_MIX
@@ -154,57 +145,58 @@ SINT32 CAMix::start()
 							m_pInfoService->dynamicCascadeConfiguration();
 #endif
 						CAMsg::printMsg(LOG_DEBUG, "CAMix main: loop() returned, maybe connection lost.\n");
-        }
+					}
         else if (initStatus == E_SHUTDOWN)
-        {
-        	CAMsg::printMsg(LOG_DEBUG, "Mix has been stopped. Waiting for shutdown...\n");
-        }
+					{
+        		CAMsg::printMsg(LOG_DEBUG, "Mix has been stopped. Waiting for shutdown...\n");
+						break;
+					}
         else
-        {
-            CAMsg::printMsg(LOG_DEBUG, "init() failed, maybe no connection.\n");
-        }
+					{
+						CAMsg::printMsg(LOG_DEBUG, "init() failed, maybe no connection.\n");
+					}
 #ifdef DYNAMIC_MIX
 SKIP:
 #endif
         if(m_pInfoService != NULL)
-        {
+					{
 #ifndef DYNAMIC_MIX
-            if(pglobalOptions->acceptReconfiguration())
+						if(pglobalOptions->acceptReconfiguration())
 #else
-			// Only keep the InfoService alive if the Mix-Type doesn't change
-			if(pglobalOptions->acceptReconfiguration() && m_bLoop)
+						// Only keep the InfoService alive if the Mix-Type doesn't change
+						if(pglobalOptions->acceptReconfiguration() && m_bLoop)
 #endif
-                m_pInfoService->setConfiguring(true);
+							m_pInfoService->setConfiguring(true);
             else
-			{
-				CAMsg::printMsg(LOG_DEBUG, "CAMix main: stopping InfoService\n");
+							{
+								CAMsg::printMsg(LOG_DEBUG, "CAMix main: stopping InfoService\n");
                 m_pInfoService->stop();
-			}
+							}
             // maybe Cascade information (e.g. certificate validity) will change on next connection
             UINT64 currentMillis;
             if (getcurrentTimeMillis(currentMillis) != E_SUCCESS)
-            {
-            	currentMillis = 0;
-            }
+							{
+            		currentMillis = 0;
+							}
             m_pInfoService->setSerial(currentMillis);            
-        }
-		CAMsg::printMsg(LOG_DEBUG, "CAMix main: before clean()\n");
-		clean();
-		CAMsg::printMsg(LOG_DEBUG, "CAMix main: after clean()\n");
+					}
+				CAMsg::printMsg(LOG_DEBUG, "CAMix main: before clean()\n");
+				clean();
+				CAMsg::printMsg(LOG_DEBUG, "CAMix main: after clean()\n");
 #ifdef DYNAMIC_MIX
-		if(m_bLoop)
+				if(m_bLoop)
 #endif
-		sSleep(10);
-    }
-#ifdef DYNAMIC_MIX
-	if(m_pInfoService != NULL && m_pInfoService->isRunning())
-	{
-		m_pInfoService->stop();
-		delete m_pInfoService;
-    }
-	return E_SUCCESS;
+					sSleep(10);
+			}// Big loop....
+		if(m_pInfoService != NULL)
+			{
+				m_pInfoService->stop();
+				delete m_pInfoService;
+			}
+		m_pInfoService=NULL;
+		return E_SUCCESS;
 #endif
-}
+	}
 
 
 /**
