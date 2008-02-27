@@ -32,7 +32,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "../CAFirstMix.hpp"
 
 class CAFirstMixA:public CAFirstMix
-	{		
+{		
 		public:
 	
 		virtual void shutDown();
@@ -41,7 +41,7 @@ class CAFirstMixA:public CAFirstMix
 			SINT32 loop();	
 			SINT32 closeConnection(fmHashTableEntry* pHashEntry);	
 			
-	};
+};
 
 #endif
 #endif //ONLY_LOCAL_PROXY

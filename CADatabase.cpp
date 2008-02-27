@@ -153,7 +153,7 @@ SINT32 CADatabase::insert(UINT8 key[16])
 
 SINT32 CADatabase::start()
 	{
-		m_pThread=new CAThread();
+		m_pThread=new CAThread((UINT8*)"DB Maintenance Thread");
 		m_bRun=true;
 		m_pThread->setMainLoop(db_loopMaintenance);
 		return m_pThread->start(this);

@@ -208,7 +208,7 @@ private:
 	CAThreadPool* m_aiThreadPool;
 	
 	/** this is for synchronizing the write access to the HashEntries */
-	CAMutex m_Mutex;
+	CAMutex *m_pMutex;
 	
 	/** Stores the account number of all users currently logged in. */
 	Hashtable* m_currentAccountsHashtable;

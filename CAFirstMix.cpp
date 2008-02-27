@@ -1398,10 +1398,10 @@ SINT32 CAFirstMix::clean()
 						while(pEntry!=NULL)
 							{
 								delete pEntry->pCipher;
-			
 								pEntry=m_pChannelList->getNextChannel(pEntry);
 							}
 						m_pChannelList->remove(pHashEntry->pMuxSocket);
+						//CAMsg::printMsg	(LOG_CRIT,"pMuxSocket ref %0x%x\n", (UINT32) pMuxSocket);	
 						pMuxSocket->close();
 						delete pMuxSocket;
 						pHashEntry=m_pChannelList->getNext();
@@ -1530,7 +1530,7 @@ SINT32 CAFirstMix::initCountryStats()
 		memset((void*)m_PacketsPerCountryIN,0,sizeof(UINT32)*(NR_OF_COUNTRIES+1));
 		m_PacketsPerCountryOUT=new UINT32[NR_OF_COUNTRIES+1];
 		memset((void*)m_PacketsPerCountryOUT,0,sizeof(UINT32)*(NR_OF_COUNTRIES+1));
-		m_threadLogLoop=new CAThread();
+		m_threadLogLoop=new CAThread((UINT8*)"Country Logger Thread");
 		m_threadLogLoop->setMainLoop(iplist_loopDoLogCountries);
 		m_bRunLogCountries=true;
 		m_threadLogLoop->start(this,true);

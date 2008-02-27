@@ -203,6 +203,10 @@ class CAThread
 					return E_SUCCESS;
 				}
 */
+			UINT8* getName()
+			{
+				return m_strName;
+			}
 #ifdef PRINT_THREAD_STACK_TRACE
 			static const char* METHOD_BEGIN;
 			static const char* METHOD_END;

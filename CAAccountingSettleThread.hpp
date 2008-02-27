@@ -66,8 +66,7 @@ class CAAccountingSettleThread
 		~CAAccountingSettleThread();
 		
 		void settle();
-	
-
+		
 	private:	
 		CAConditionVariable* m_pCondition;
 		UINT8* m_settleCascade;

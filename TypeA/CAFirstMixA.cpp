@@ -46,13 +46,23 @@ void CAFirstMixA::shutDown()
 #ifdef PAYMENT
 	UINT32 connectionsClosed = 0;
 	fmHashTableEntry* timeoutHashEntry;
-	while ((timeoutHashEntry = m_pChannelList->popTimeoutEntry(true)) != NULL)
-	{			
-		CAMsg::printMsg(LOG_DEBUG,"Shutting down, closing client connection.\n");					
-		connectionsClosed++;
-		closeConnection(timeoutHashEntry);
-	}	
-	CAMsg::printMsg(LOG_DEBUG,"Closed %i client connections.\n", connectionsClosed);
+	
+	if(m_pInfoService != NULL)
+	{
+		CAMsg::printMsg(LOG_DEBUG,"Shutting down infoservice.\n");		
+		m_pInfoService->stop();
+	}
+	
+	if(m_pChannelList!=NULL) // may happen if mixes did not yet connect to each other
+	{
+		while ((timeoutHashEntry = m_pChannelList->popTimeoutEntry(true)) != NULL)
+		{			
+			CAMsg::printMsg(LOG_DEBUG,"Shutting down, closing client connection.\n");					
+			connectionsClosed++;
+			closeConnection(timeoutHashEntry);
+		}	
+		CAMsg::printMsg(LOG_DEBUG,"Closed %i client connections.\n", connectionsClosed);
+	}
 #endif
 	m_bRestart = true;
 	m_bIsShuttingDown = false;
@@ -157,6 +167,7 @@ SINT32 CAFirstMixA::loop()
 		CAMsg::printMsg(LOG_DEBUG,"1. Close received from user (times in micros) - 1:Channel-ID,Connection-ID,PacketsIn (only data and open),PacketsOut (only data),ChannelDuration (open packet received --> close packet put into send queue to next mix)\n");
 		CAMsg::printMsg(LOG_DEBUG,"2. Channel close from Mix(times in micros)- 2.:Channel-ID,Connection-ID,PacketsIn (only data and open), PacketsOut (only data),ChannelDuration (open packet received)--> close packet put into send queue to next user\n");
 #endif
+/** @todo check if thread is closed */
 #ifdef _DEBUG
 		CAThread* pLogThread=new CAThread((UINT8*)"CAFirstMixA - LogLoop");
 		pLogThread->setMainLoop(fm_loopLog);
@@ -629,7 +640,7 @@ goto NEXT_USER_WRITING;
 														}
 												#endif
 											}
-#define USER_SEND_BUFFER_RESUME 10000
+
 										if( pfmHashEntry->cSuspend > 0 &&
 												pfmHashEntry->pQueueSend->getSize() < USER_SEND_BUFFER_RESUME)
 											{
@@ -676,7 +687,7 @@ NEXT_USER_WRITING:
 				  msSleep(100);
 			}
 //ERR:
-		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
+		CAMsg::printMsg(LOG_CRIT,"Seems that we are restarting now!!\n");
 		m_bRunLog=false;
 		clean();
 		delete pQueueEntry;

@@ -66,8 +66,11 @@ CAMsg::~CAMsg()
 			closeEncryptedLog();
 #endif
 			delete[] m_strMsgBuff;
+			m_strMsgBuff = NULL; 
 			delete[] m_strLogFile;
+			m_strLogFile = NULL;
 			delete m_pcsPrint;
+			m_pcsPrint = NULL;
 		}
     
 SINT32 CAMsg::setLogOptions(UINT32 opt)
@@ -85,104 +88,111 @@ SINT32 CAMsg::setLogOptions(UINT32 opt)
 
 SINT32 CAMsg::printMsg(UINT32 type,const char* format,...)
 	{
-		pMsg->m_pcsPrint->lock();
-		va_list ap;
-		va_start(ap,format);
-		SINT32 ret=E_SUCCESS;
-
-		//Date is: yyyy/mm/dd-hh:mm:ss   -- the size is: 19 
-		time_t currtime=time(NULL);
-		strftime(pMsg->m_strMsgBuff+1,255,"%Y/%m/%d-%H:%M:%S",localtime(&currtime));
-		switch(type)
-			{
-				case LOG_DEBUG:
-					strcat(pMsg->m_strMsgBuff,pMsg->m_strMsgTypes[3]);
-				break;
-				case LOG_INFO:
-					strcat(pMsg->m_strMsgBuff,pMsg->m_strMsgTypes[2]);
-				break;
-				case LOG_CRIT:
-					strcat(pMsg->m_strMsgBuff,pMsg->m_strMsgTypes[1]);
-				break;
-				case LOG_ERR:
-					strcat(pMsg->m_strMsgBuff,pMsg->m_strMsgTypes[0]);
-				break;
-				case LOG_ENCRYPTED:
-					strcat(pMsg->m_strMsgBuff,pMsg->m_strMsgTypes[4]);
-				break;
-				default:
-					va_end(ap);
-					pMsg->m_pcsPrint->unlock();
-					return E_UNKNOWN;
-			}
-#ifdef HAVE_VSNPRINTF
-		vsnprintf(pMsg->m_strMsgBuff+20+STRMSGTYPES_SIZE,MAX_MSG_SIZE,format,ap);
-#else
-	  trio_vsnprintf(pMsg->m_strMsgBuff+20+STRMSGTYPES_SIZE,MAX_MSG_SIZE,format,ap);
-#endif
-		va_end(ap);
-		if(type==LOG_ENCRYPTED)
+		if(pMsg != NULL) 
 		{
-			ret=strlen(pMsg->m_strMsgBuff);
-			if(	pMsg->m_pCipher==NULL)
+			pMsg->m_pcsPrint->lock();
+			va_list ap;
+			va_start(ap,format);
+			SINT32 ret=E_SUCCESS;
+	
+			//Date is: yyyy/mm/dd-hh:mm:ss   -- the size is: 19 
+			time_t currtime=time(NULL);
+			strftime(pMsg->m_strMsgBuff+1,255,"%Y/%m/%d-%H:%M:%S",localtime(&currtime));
+			switch(type)
+				{
+					case LOG_DEBUG:
+						strcat(pMsg->m_strMsgBuff,pMsg->m_strMsgTypes[3]);
+					break;
+					case LOG_INFO:
+						strcat(pMsg->m_strMsgBuff,pMsg->m_strMsgTypes[2]);
+					break;
+					case LOG_CRIT:
+						strcat(pMsg->m_strMsgBuff,pMsg->m_strMsgTypes[1]);
+					break;
+					case LOG_ERR:
+						strcat(pMsg->m_strMsgBuff,pMsg->m_strMsgTypes[0]);
+					break;
+					case LOG_ENCRYPTED:
+						strcat(pMsg->m_strMsgBuff,pMsg->m_strMsgTypes[4]);
+					break;
+					default:
+						va_end(ap);
+						pMsg->m_pcsPrint->unlock();
+						return E_UNKNOWN;
+				}
+	#ifdef HAVE_VSNPRINTF
+			vsnprintf(pMsg->m_strMsgBuff+20+STRMSGTYPES_SIZE,MAX_MSG_SIZE,format,ap);
+	#else
+		  trio_vsnprintf(pMsg->m_strMsgBuff+20+STRMSGTYPES_SIZE,MAX_MSG_SIZE,format,ap);
+	#endif
+			va_end(ap);
+			if(type==LOG_ENCRYPTED)
 			{
-				ret=E_UNKNOWN;
+				ret=strlen(pMsg->m_strMsgBuff);
+				if(	pMsg->m_pCipher==NULL)
+				{
+					ret=E_UNKNOWN;
+				}
+				else
+				{
+					UINT8 bp[MAX_MSG_SIZE];
+					AES_ofb128_encrypt((UINT8*)pMsg->m_strMsgBuff,
+															bp,ret,
+															&(pMsg->m_pCipher->oKey),
+															pMsg->m_pCipher->iv,
+															&(pMsg->m_pCipher->iv_off));
+					if(write(pMsg->m_hFileEncrypted,bp,ret)!=ret)
+						ret=E_UNKNOWN;
+			 	}	
 			}
 			else
-			{
-				UINT8 bp[MAX_MSG_SIZE];
-				AES_ofb128_encrypt((UINT8*)pMsg->m_strMsgBuff,
-														bp,ret,
-														&(pMsg->m_pCipher->oKey),
-														pMsg->m_pCipher->iv,
-														&(pMsg->m_pCipher->iv_off));
-				if(write(pMsg->m_hFileEncrypted,bp,ret)!=ret)
-					ret=E_UNKNOWN;
-		 	}	
+				{
+					switch(pMsg->m_uLogType)
+						{
+							case MSG_LOG:
+	#ifndef _WIN32				
+						syslog(type,pMsg->m_strMsgBuff);
+	#endif
+							break;
+							case MSG_FILE:
+								if(pMsg->m_hFileInfo==-1)
+									{
+										pMsg->m_hFileInfo=open(pMsg->m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE|O_SYNC,S_IREAD|S_IWRITE);																	
+									}
+								if(pMsg->m_hFileInfo!=-1)
+									{
+			#ifdef PSEUDO_LOG
+										char buff[255];
+										sprintf(buff,"%.15s mix AnonMix: ",ctime(&currtime)+4);
+										write(pMsg->m_hFileInfo,buff,strlen(buff));
+			#endif
+										if(write(pMsg->m_hFileInfo,pMsg->m_strMsgBuff,strlen(pMsg->m_strMsgBuff))==-1)
+										ret=E_UNKNOWN;
+									}
+							break;
+	#ifdef COMPRESSED_LOGS
+							case MSG_COMPRESSED_FILE:
+								if(pMsg->m_gzFileInfo!=NULL)
+								{
+									if(gzwrite(pMsg->m_gzFileInfo,pMsg->m_strMsgBuff,strlen(pMsg->m_strMsgBuff))==-1)
+										ret=E_UNKNOWN;
+								}
+							break;
+	#endif
+							case MSG_STDOUT:
+								printf("%s",pMsg->m_strMsgBuff);
+							break;
+							default:
+							ret=E_UNKNOWN;
+						}
+				}
+			pMsg->m_pcsPrint->unlock();
+			return ret;
 		}
 		else
-			{
-				switch(pMsg->m_uLogType)
-					{
-						case MSG_LOG:
-#ifndef _WIN32				
-					syslog(type,pMsg->m_strMsgBuff);
-#endif
-						break;
-						case MSG_FILE:
-							if(pMsg->m_hFileInfo==-1)
-								{
-									pMsg->m_hFileInfo=open(pMsg->m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE|O_SYNC,S_IREAD|S_IWRITE);																	
-								}
-							if(pMsg->m_hFileInfo!=-1)
-								{
-		#ifdef PSEUDO_LOG
-									char buff[255];
-									sprintf(buff,"%.15s mix AnonMix: ",ctime(&currtime)+4);
-									write(pMsg->m_hFileInfo,buff,strlen(buff));
-		#endif
-									if(write(pMsg->m_hFileInfo,pMsg->m_strMsgBuff,strlen(pMsg->m_strMsgBuff))==-1)
-									ret=E_UNKNOWN;
-								}
-						break;
-#ifdef COMPRESSED_LOGS
-						case MSG_COMPRESSED_FILE:
-							if(pMsg->m_gzFileInfo!=NULL)
-							{
-								if(gzwrite(pMsg->m_gzFileInfo,pMsg->m_strMsgBuff,strlen(pMsg->m_strMsgBuff))==-1)
-									ret=E_UNKNOWN;
-							}
-						break;
-#endif
-						case MSG_STDOUT:
-							printf("%s",pMsg->m_strMsgBuff);
-						break;
-						default:
-						ret=E_UNKNOWN;
-					}
-			}
-		pMsg->m_pcsPrint->unlock();
-		return ret;
+		{
+			puts("Warning logger is not active!");
+		}
   }
 
 SINT32 CAMsg::closeLog()

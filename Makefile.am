@@ -67,6 +67,7 @@ libproxytest_a_SOURCES = CAAbstractControlChannel.cpp\
 		    CATempIPBlockList.cpp\
 		    CAThread.cpp \
 		    CAThreadPool.cpp\
+		    CAThreadList.cpp \
 		    CAUtil.cpp \
 		    CAXMLBI.cpp \
 		    CAXMLCostConfirmation.cpp\
@@ -137,6 +138,7 @@ libproxytest_a_SOURCES = CAAbstractControlChannel.cpp\
 		    CATempIPBlockList.hpp\
 		    CAThread.hpp \
 		    CAThreadPool.hpp\
+		    CAThreadList.hpp \
 		    CAUtil.hpp \
 		    CAXMLBI.hpp \
 		    CAXMLCostConfirmation.hpp\
