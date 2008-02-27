@@ -77,6 +77,7 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
 	{	
 		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance initialising\n" );
 		
+		m_pMutex = new CAMutex();
 		//m_pIPBlockList = new CATempIPBlockList(60000);
 		
 		// initialize Database connection
@@ -117,23 +118,27 @@ CAAccountingInstance::~CAAccountingInstance()
 		INIT_STACK;
 		BEGIN_STACK("~CAAccountingInstance");
 		
-		m_Mutex.lock();
+		m_pMutex->lock();
 		
 		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance dying\n" );
 		if (m_pSettleThread)
 		{
+			CAMsg::printMsg( LOG_DEBUG, "deleting m_pSettleThread\n" );
+			m_pSettleThread->settle();
 			delete m_pSettleThread;
 		}
 		m_pSettleThread = NULL;
 		
 		if (m_aiThreadPool)
 		{
+			CAMsg::printMsg( LOG_DEBUG, "deleting m_aiThreadPool\n" );
 			delete m_aiThreadPool;
 		}
 		m_aiThreadPool = NULL;
 		
 		if (m_dbInterface)
 		{
+			CAMsg::printMsg( LOG_DEBUG, "termintaing dbConnection\n" );
 			m_dbInterface->terminateDBConnection();
 			delete m_dbInterface;
 		}
@@ -148,11 +153,11 @@ CAAccountingInstance::~CAAccountingInstance()
 		
 		if (m_currentAccountsHashtable)
 		{
-			m_currentAccountsHashtable->getMutex().lock();
+			m_currentAccountsHashtable->getMutex()->lock();
 			CAMsg::printMsg( LOG_DEBUG, "CAAccountingInstance: Clearing accounts hashtable...\n");
 			m_currentAccountsHashtable->clear(HASH_EMPTY_NONE, HASH_EMPTY_DELETE);
 			CAMsg::printMsg( LOG_DEBUG, "CAAccountingInstance: Deleting accounts hashtable...\n" );
-			m_currentAccountsHashtable->getMutex().unlock();
+			m_currentAccountsHashtable->getMutex()->unlock();
 			delete m_currentAccountsHashtable;
 		}
 		m_currentAccountsHashtable = NULL;
@@ -168,13 +173,16 @@ CAAccountingInstance::~CAAccountingInstance()
 			for (UINT32 i = 0; i < m_allHashesLen; i++)
 			{
 				delete m_allHashes[i];
+				m_allHashes[i] = NULL;
 			}
-			delete m_allHashes;
+			delete[] m_allHashes;
 		}
 		m_allHashes = NULL;
 		
-		m_Mutex.unlock();
+		m_pMutex->unlock();
 		
+		delete m_pMutex;
+		m_pMutex = NULL;
 		FINISH_STACK("~CAAccountingInstance");
 		
 		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance dying finished.\n" );		
@@ -201,15 +209,19 @@ UINT32 CAAccountingInstance::getNrOfUsers()
 {
 	UINT32 users = 0;
 	
-	if (ms_pInstance!=NULL)
+	if (ms_pInstance != NULL)
 	{
-		ms_pInstance->m_Mutex.lock();
-		if(ms_pInstance->m_currentAccountsHashtable!=NULL)
-			{
-				// getting the size is an atomic operation and does not need synchronization
-				users = ms_pInstance->m_currentAccountsHashtable->getSize();
-			}
-		ms_pInstance->m_Mutex.unlock();
+		ms_pInstance->m_pMutex->lock();	
+		if(ms_pInstance->m_currentAccountsHashtable != NULL)
+		{
+			// getting the size is an atomic operation and does not need synchronization
+			users = ms_pInstance->m_currentAccountsHashtable->getSize();
+		}
+		else
+		{
+			CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: Trying to access Hashtable after it has been disposed!!.\n");
+		}
+		ms_pInstance->m_pMutex->unlock();
 	}
 	
 	return users;
@@ -375,7 +387,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 				return returnKickout(pAccInfo);
 			}
 			
-			ms_pInstance->m_currentAccountsHashtable->getMutex().lock();
+			ms_pInstance->m_currentAccountsHashtable->getMutex()->lock();
 			loginEntry = (AccountLoginHashEntry*)ms_pInstance->m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));
 			if (loginEntry)
 			{
@@ -386,7 +398,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 				{
 					// this is not the latest connection of this user; kick him out...
 					pAccInfo->authFlags |= AUTH_MULTIPLE_LOGIN;
-					ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();
+					ms_pInstance->m_currentAccountsHashtable->getMutex()->unlock();
 					return returnPrepareKickout(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_MULTIPLE_LOGIN, (UINT8*)"Only one login per account is allowed!"));
 				}
 				else if (loginEntry->authFlags & AUTH_OUTDATED_CC)
@@ -465,7 +477,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 				return returnKickout(pAccInfo);				
 			}											
 			
-			ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();
+			ms_pInstance->m_currentAccountsHashtable->getMutex()->unlock();
 		}		
 
 		
@@ -1363,7 +1375,7 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 	
 	/** @todo We need this trick so that the program does not freeze with active AI ThreadPool!!!! */
 	//pAccInfo->mutex->unlock();
-	m_currentAccountsHashtable->getMutex().lock();	
+	m_currentAccountsHashtable->getMutex()->lock();	
 	pAccInfo->authFlags |= AUTH_ACCOUNT_OK;	// authentication successful
 	
 	loginEntry = (AccountLoginHashEntry*)m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));	
@@ -1487,7 +1499,7 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 			}
 		}
 	}	
-	m_currentAccountsHashtable->getMutex().unlock();	
+	m_currentAccountsHashtable->getMutex()->unlock();	
 	
 	/** @todo We need this trick so that the program does not freeze with active AI ThreadPool!!!! */
 	//pAccInfo->mutex->lock();
@@ -1761,7 +1773,7 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 	INIT_STACK;
 	BEGIN_STACK("CAAccountingInstance::initTableEntry");
 	
-	//ms_pInstance->m_Mutex.lock();
+	//ms_pInstance->m_pMutex->lock();
 	
 	if (pHashEntry == NULL)
 	{
@@ -1787,7 +1799,7 @@ SINT32 CAAccountingInstance::initTableEntry( fmHashTableEntry * pHashEntry )
 	pHashEntry->pAccountingInfo->nrInQueue = 0;
 	pHashEntry->pAccountingInfo->userID = pHashEntry->id;
 	pHashEntry->pAccountingInfo->mutex = new CAMutex;
-	//ms_pInstance->m_Mutex.unlock();
+	//ms_pInstance->m_pMutex->unlock();
 	
 
 	FINISH_STACK("CAAccountingInstance::initTableEntry");
@@ -1807,7 +1819,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 		INIT_STACK;
 		BEGIN_STACK("CAAccountingInstance::cleanupTableEntry");
 		
-		//ms_pInstance->m_Mutex.lock();
+		//ms_pInstance->m_pMutex->lock();
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
 		AccountLoginHashEntry* loginEntry;
 		SINT32 prepaidBytes = 0;
@@ -1816,7 +1828,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 		if (pAccInfo == NULL)
 		{
 			SAVE_STACK("CAAccountingInstance::cleanupTableEntry", "acc info null");
-			//ms_pInstance->m_Mutex.unlock();
+			//ms_pInstance->m_pMutex->unlock();
 			return E_UNKNOWN;
 		}
 		
@@ -1829,7 +1841,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			if (pAccInfo->authFlags & AUTH_ACCOUNT_OK)
 			{
 				// remove login
-				ms_pInstance->m_currentAccountsHashtable->getMutex().lock();
+				ms_pInstance->m_currentAccountsHashtable->getMutex()->lock();
 				loginEntry = (AccountLoginHashEntry*)ms_pInstance->m_currentAccountsHashtable->getValue(&(pAccInfo->accountNumber));																	
 				if (loginEntry)
 				{
@@ -1892,7 +1904,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 				{
 					CAMsg::printMsg(LOG_CRIT, "CAAccountingInstance: Cleanup did not find user login hash entry!\n");
 				}
-				ms_pInstance->m_currentAccountsHashtable->getMutex().unlock();	
+				ms_pInstance->m_currentAccountsHashtable->getMutex()->unlock();	
 			}																					
 		}
 		else
@@ -1953,7 +1965,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 		{
 			CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Cleanup method sent account deletion request to AI thread!\n");
 		}
-		//ms_pInstance->m_Mutex.unlock();
+		//ms_pInstance->m_pMutex->unlock();
 		
 		FINISH_STACK("CAAccountingInstance::cleanupTableEntry");
 		

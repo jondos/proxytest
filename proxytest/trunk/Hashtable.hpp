@@ -66,7 +66,7 @@ class Hashtable
 			return (*a_numberA == *a_numberB)? 0 : ((*a_numberA > *a_numberB)? 1 : -1);
 		}
 
-		CAMutex& getMutex();
+		CAMutex *getMutex();
 
 		bool isEmpty();
 		bool containsKey(void *key);
@@ -90,7 +90,7 @@ class Hashtable
 		SINT32	(*m_compareFunc)(void *,void *);
 		
 	private:
-		CAMutex m_mutex;
+		CAMutex *m_pMutex;
 };
 
 #endif  // HASHTABLE_H

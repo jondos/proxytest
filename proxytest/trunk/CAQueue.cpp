@@ -81,10 +81,10 @@ SINT32 CAQueue::add(const void* buff,UINT32 size)
 		//	incHeap();
 #ifdef _DEBUG
 //		if(m_nExpectedElementSize>0&&size>(m_nExpectedElementSize<<1))
-		if(size>1500)
+		/*if(size>1500)
 			{
 				CAMsg::printMsg(LOG_DEBUG,"CAQueue::add() WARNING: request for add %u bytes in a queue with expected element size of %u bytes !\n",size,m_nExpectedElementSize);
-			}
+			}*/
 #endif
 		if(m_Queue==NULL)
 			{
@@ -403,8 +403,8 @@ SINT32 CAQueue::test()
 			return E_UNKNOWN;
 		
 		//Multiple Threads....
-		CAThread* pthreadProducer=new CAThread();
-		CAThread* pthreadConsumer=new CAThread();
+		CAThread* pthreadProducer=new CAThread((UINT8*)"Queue Producer Thread");
+		CAThread* pthreadConsumer=new CAThread((UINT8*)"Queue Consumer Thread");
 		pthreadProducer->setMainLoop(producer);
 		pthreadConsumer->setMainLoop(consumer);
 		struct __queue_test t1,t2;

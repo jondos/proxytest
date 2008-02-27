@@ -42,7 +42,7 @@ extern CACmdLnOptions* pglobalOptions;
 CAAccountingSettleThread::CAAccountingSettleThread(Hashtable* a_accountingHashtable, UINT8* currentCascade)
 {
 	// launch AI thread
-	m_pThread = new CAThread();
+	m_pThread = new CAThread((UINT8*)"Accounting Settle Thread");
 	m_settleCascade = currentCascade;
 	m_pThread->setMainLoop( mainLoop );
 	CAMsg::printMsg(LOG_DEBUG, "Now launching Accounting SettleThread...\n");
@@ -375,7 +375,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 			 */
 			if (entry)
 			{
-				m_pAccountingSettleThread->m_accountingHashtable->getMutex().lock();
+				m_pAccountingSettleThread->m_accountingHashtable->getMutex()->lock();
 				while (entry)
 				{			
 					AccountLoginHashEntry* loginEntry = 
@@ -420,7 +420,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 					delete entry;
 					entry = nextEntry;									
 				}
-				m_pAccountingSettleThread->m_accountingHashtable->getMutex().unlock();		
+				m_pAccountingSettleThread->m_accountingHashtable->getMutex()->unlock();		
 			}
 						
 		}//main while run loop

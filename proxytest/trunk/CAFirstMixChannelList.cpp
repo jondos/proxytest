@@ -66,7 +66,7 @@ CAFirstMixChannelList::CAFirstMixChannelList()
 		m_u32DelayChannelBucketGrowIntervall=DELAY_USERS_BUCKET_GROW_INTERVALL;
 		m_pDelayBuckets=new UINT32*[MAX_POLLFD];
 		memset(m_pDelayBuckets,0,sizeof(UINT32*)*MAX_POLLFD);
-		m_pMutexDelayChannel=new CAMutex();
+		m_pMutexDelayChannel=new CAMutex((UINT8*)"Delay Channel Thread");
 		m_pThreadDelayBucketsLoop=new CAThread();
 		m_bDelayBucketsLoopRun=true;
 		m_pThreadDelayBucketsLoop->setMainLoop(fml_loopDelayBuckets);

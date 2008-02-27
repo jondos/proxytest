@@ -188,7 +188,13 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 			loops = 0;
 #else
 			CAMsg::printMsg(LOG_DEBUG,"InfoService: Next update in %i seconds...\n", nextUpdate);
-			sSleep(nextUpdate);
+			
+			/* We can interrupt this thread if the mix is shutting down */
+			pInfoService->m_pLoopCV->lock();
+			pInfoService->m_pLoopCV->wait(nextUpdate * 1000);
+			pInfoService->m_pLoopCV->unlock();
+			
+			//sSleep(nextUpdate);
 #endif
 		}
 		FINISH_STACK("CAInfoService::InfoLoop");
@@ -340,6 +346,7 @@ CAInfoService::CAInfoService()
 		m_minuts=0;
 		m_lastMixedPackets=0;
     m_expectedMixRelPos = 0;
+    	m_pLoopCV = new CAConditionVariable();
 		m_pthreadRunLoop=new CAThread((UINT8*)"InfoServiceThread");
 #ifdef DYNAMIC_MIX
 		m_bReconfig = false;
@@ -355,7 +362,8 @@ CAInfoService::CAInfoService(CAMix* pMix)
 		m_minuts=0;
 		m_lastMixedPackets=0;
     m_expectedMixRelPos = 0;
-		m_pthreadRunLoop=new CAThread((UINT8*)"InfoServiceThread");
+    	m_pLoopCV = new CAConditionVariable();
+    	m_pthreadRunLoop=new CAThread((UINT8*)"InfoServiceThread");
 		m_pMix=pMix;
 #ifdef DYNAMIC_MIX
 		m_bReconfig = false;
@@ -365,8 +373,12 @@ CAInfoService::CAInfoService(CAMix* pMix)
 CAInfoService::~CAInfoService()
 	{
 		stop();
+		delete m_pLoopCV;
+		m_pLoopCV = NULL;
 		delete m_pcertstoreOwnCerts;
+		m_pcertstoreOwnCerts = NULL;
 		delete m_pthreadRunLoop;
+		m_pthreadRunLoop = NULL;
 	}
 /** Sets the signature used to sign the messages send to Infoservice.
 	* If pOwnCert!=NULL this Certifcate is included in the Signature
@@ -430,6 +442,11 @@ SINT32 CAInfoService::stop()
 		if(m_bRun)
 			{
 				m_bRun=false;
+				/* Interrupt this thread */
+				m_pLoopCV->lock();
+				m_pLoopCV->signal();
+				m_pLoopCV->unlock();
+				
 				m_pthreadRunLoop->join();
 			}
 		return E_SUCCESS;

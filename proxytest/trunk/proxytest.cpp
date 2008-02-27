@@ -34,6 +34,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMsg.hpp"
 #include "CALocalProxy.hpp"
 #include "CAQueue.hpp"
+#include "CAThreadList.hpp"
+
 #ifdef _DEBUG //For FreeBSD memory checking functionality
 	const char* _malloc_options="AX";
 #endif
@@ -60,7 +62,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 CAMix* pMix=NULL;
 #endif
 CACmdLnOptions* pglobalOptions;
-
+#ifdef _DEBUG
+CAThreadList *pThreadList = new CAThreadList();
+#endif
 //Global Locks required by OpenSSL-Library
 CAMutex* pOpenSSLMutexes;
 
@@ -164,13 +168,28 @@ void cleanup()
 		delete []pOpenSSLMutexes;
 		pOpenSSLMutexes=NULL;
 		CASocketAddrINet::cleanup();
-//XML Cleanup
+		//XML Cleanup
 		//Note: We have to destroy all XML Objects and all objects that uses XML Objects BEFORE
 		//we terminate the XML lib!
 #ifndef ONLY_LOCAL_PROXY
 		XMLPlatformUtils::Terminate();
 #endif //ONLY_LOCAL_PROXY
+
+#ifdef _DEBUG
+			if(pThreadList != NULL)
+			{
+				int nrOfThreads = pThreadList->getSize();
+				CAMsg::printMsg(LOG_INFO,"After cleanup %d threads listed.\n", nrOfThreads);
+				if(nrOfThreads > 0)
+				{
+					pThreadList->showAll();
+				}
+				delete pThreadList;
+				pThreadList = NULL;
+			}
+#endif
 		CAMsg::cleanup();
+		
 	}
 
 ///Remark: terminate() might be already defined by the c lib -- do not use this name...
@@ -181,9 +200,9 @@ void my_terminate(void)
 		bTriedTermination = true;
 		pMix->shutDown();
 		for (UINT32 i = 0; i < 20 && !(pMix->isShutDown()); i++)
-			{
-				msSleep(100);
-			}
+		{
+			msSleep(100);
+		}
 		delete pMix;
 		pMix=NULL;
 	}
@@ -223,6 +242,10 @@ void signal_term( int )
 void signal_interrupt( int)
 	{
 		CAMsg::printMsg(LOG_INFO,"Hm.. Strg+C pressed... exiting!\n");
+#ifdef _DEBUG
+		CAMsg::printMsg(LOG_INFO,"%d threads listed.\n",pThreadList->getSize());
+		pThreadList->showAll();
+#endif
 		my_terminate();
 		exit(0);
 	}
@@ -763,11 +786,13 @@ int main(int argc, const char* argv[])
 						pMix=new CAMiddleMix();
 					}
 				else
+				{
 						#if !defined(NEW_MIX_TYPE)
 							pMix=new CALastMixA();
 						#else
 							pMix=new CALastMixB();
 						#endif
+				}
 #else
 				CAMsg::printMsg(LOG_ERR,"this Mix is compile to work only as local proxy!\n");
 				goto EXIT;

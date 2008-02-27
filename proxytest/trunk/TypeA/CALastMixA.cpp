@@ -115,7 +115,7 @@ SINT32 CALastMixA::loop()
 									{
 										if(pMixPacket->flags==CHANNEL_OPEN)
 											{
-												#if defined(_DEBUG1) 
+												#if defined(_DEBUG) 
 													CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
 												#endif
 												
@@ -182,7 +182,7 @@ SINT32 CALastMixA::loop()
 												else
 														{ //connection to proxy successfull
 															UINT16 payLen=ntohs(pMixPacket->payload.len);
-															#ifdef _DEBUG1
+															#ifdef _DEBUG
 																UINT8 c=pMixPacket->payload.data[30];
 																pMixPacket->payload.data[30]=0;
 																CAMsg::printMsg(LOG_DEBUG,"Try sending data to Squid: %s\n",pMixPacket->payload.data);

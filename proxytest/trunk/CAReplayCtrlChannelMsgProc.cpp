@@ -182,7 +182,7 @@ SINT32 CAReplayCtrlChannelMsgProc::propagateCurrentReplayTimestamp()
 SINT32 CAReplayCtrlChannelMsgProc::startTimeStampPorpagation(UINT32 minutesPropagationInterval)
 	{
 		m_u32PropagationInterval=minutesPropagationInterval;
-		m_pThreadTimestampPropagation=new CAThread();
+		m_pThreadTimestampPropagation=new CAThread((UINT8*)"Timestamp Propagation Thread");
 		m_pThreadTimestampPropagation->setMainLoop(rp_loopPropagateTimestamp);
 		m_bRun=true;
 		return m_pThreadTimestampPropagation->start(this);

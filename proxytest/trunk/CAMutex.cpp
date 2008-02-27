@@ -27,33 +27,14 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #include "StdAfx.h"
 #include "CAMutex.hpp"
-#if defined (DEBUG) && defined(HAVE_PTHREAD_MUTEXES)
 #include "CAMsg.hpp"
 
-CAMutex::CAMutex()
-	{
-		m_pMutex=new pthread_mutex_t;
-		SINT32 ret=pthread_mutex_init(m_pMutex,NULL);
-		ASSERT(ret==0,"Muxtex init failed!");
-	}
-
-CAMutex::~CAMutex()
-	{
-	  //This is to ensure, that the mutex is not locked then we wnat to destroy it.
-		//Of course this does not really work. In fact we need another mutex to prevent the destruction of a locked mutex...
-		lock();
-		unlock();
-		SINT32 ret=pthread_mutex_destroy(m_pMutex);
-		ASSERT(ret==0,"Mutex detroy failed!");
-		delete m_pMutex;
-	}
-#else
 
 CAMutex::CAMutex()
 {
 	#ifdef HAVE_PTHREAD_MUTEXES
 		m_pMutex=new pthread_mutex_t;
-		m_pMutexAttributes = new pthread_mutexattr_t;						
+		m_pMutexAttributes = new pthread_mutexattr_t;
 		pthread_mutexattr_init(m_pMutexAttributes);  
 		pthread_mutexattr_settype(m_pMutexAttributes, PTHREAD_MUTEX_RECURSIVE);
 		//pthread_mutexattr_settype(m_pMutexAttributes, PTHREAD_MUTEX_ERRORCHECK);
@@ -67,14 +48,12 @@ CAMutex::CAMutex()
 CAMutex::~CAMutex()
 {
 	#ifdef HAVE_PTHREAD_MUTEXES
-		pthread_mutex_destroy(m_pMutex);
-		pthread_mutexattr_destroy(m_pMutexAttributes);					
+	pthread_mutex_destroy(m_pMutex);
+	pthread_mutexattr_destroy(m_pMutexAttributes);					
 	#endif
 	delete m_pMutex;
 	
 	#ifdef HAVE_PTHREAD_MUTEXES
-		delete m_pMutexAttributes;	
+	delete m_pMutexAttributes;
 	#endif
 }
-
-#endif

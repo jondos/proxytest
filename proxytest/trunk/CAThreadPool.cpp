@@ -31,10 +31,13 @@ CAThreadPool::CAThreadPool(	UINT32 num_worker_threads,
 		m_pcondNotEmpty=new CAConditionVariable();
 		m_pcondNotFull=new CAConditionVariable();
 
+		char thread_str[24];
+		
 		/* create threads */
 		for (i = 0; i != num_worker_threads; i++) 
 			{
-				m_parThreads[i]=new CAThread();
+				snprintf(thread_str, 16, "Pool Thread %3d", i);
+				m_parThreads[i]=new CAThread((UINT8*)thread_str);
 				m_parThreads[i]->setMainLoop(worker_thread_main_loop);
 				m_parThreads[i]->start(this);
 			}

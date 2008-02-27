@@ -64,11 +64,11 @@ class CAMsg
 			~CAMsg();
 			static SINT32 init(){pMsg=new CAMsg();return E_SUCCESS;}
 			static SINT32 cleanup()
-				{
-					delete pMsg;
-					pMsg=NULL;
-					return E_SUCCESS;
-				}
+			{
+				delete pMsg;
+				pMsg = NULL;
+				return E_SUCCESS;
+			}
 			static SINT32 setLogOptions(UINT32 options);
 			static SINT32 printMsg(UINT32 typ,const char* format,...);
 #ifndef ONLY_LOCAL_PROXY

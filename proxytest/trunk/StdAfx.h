@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.07.13"
+#define MIX_VERSION "00.07.14"
 
 #include "doxygen.h"
 
@@ -133,6 +133,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define MAX_LOGIN_QUEUE 500 //how many waiting entries in the login queue *do not change this until you really know that you are doing!*??
 
 #define MAX_USER_SEND_QUEUE 100000 //How many bytes could be in each User's send queue, before we suspend the belonging channels
+#define USER_SEND_BUFFER_RESUME 10000
 
 #define PAYMENT_ACCOUNT_CERT_TIMEOUT 180 //Timeout for receiving the Payment certificate in seconds
 #define CLEANUP_THREAD_SLEEP_INTERVAL 60 //sleep interval for payment blocked ip list

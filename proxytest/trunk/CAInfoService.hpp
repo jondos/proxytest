@@ -127,6 +127,7 @@ class CAInfoService
 			CACertStore*	m_pcertstoreOwnCerts;
 			CAMix*				m_pMix;
 			CAThread*			m_pthreadRunLoop;
+			CAConditionVariable *	m_pLoopCV;
 			UINT64				m_lastMixedPackets;
 			UINT64				m_serial;
 			UINT32				m_minuts;

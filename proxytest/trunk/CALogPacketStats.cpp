@@ -58,7 +58,7 @@ THREAD_RETURN loopLogPacketStats(void* param)
 SINT32 CALogPacketStats::start()
 	{
 		resetTimeingStats();
-		m_pthreadLog=new CAThread();
+		m_pthreadLog=new CAThread((UINT8*)"Packet Stats Logging Thread");
 		m_pthreadLog->setMainLoop(loopLogPacketStats);
 		m_bRunLog=true;
 		return m_pthreadLog->start(this);

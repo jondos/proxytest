@@ -52,9 +52,9 @@ struct Entry
 // #pragma mark -
 
 
-CAMutex& Hashtable::getMutex()
+CAMutex *Hashtable::getMutex()
 {
-	return m_mutex;
+	return m_pMutex;
 }
 
 
@@ -73,6 +73,8 @@ CAMutex& Hashtable::getMutex()
 **/
 Hashtable::Hashtable(UINT32 (*hashFunc)(void *), SINT32 (*compareFunc)(void *,void *), SINT32 capacity, float loadFactor)
 {
+	m_pMutex = new CAMutex();
+	
 	if (capacity < 0 || loadFactor <= 0)
 	{
 		return;
@@ -104,7 +106,7 @@ Hashtable::Hashtable(UINT32 (*hashFunc)(void *), SINT32 (*compareFunc)(void *,vo
 
 Hashtable::~Hashtable()
 {
-	m_mutex.lock();
+	m_pMutex->lock();
 	
 	for(SINT32 index = 0; index < m_capacity; index++)
 	{
@@ -127,7 +129,10 @@ Hashtable::~Hashtable()
 	m_hashFunc = NULL;
 	m_compareFunc = NULL;
 	
-	m_mutex.unlock();
+	m_pMutex->unlock();
+	
+	delete m_pMutex;
+	m_pMutex = NULL;
 }
 
 

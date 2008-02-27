@@ -44,7 +44,7 @@ CALastMixChannelList::CALastMixChannelList()
 		m_pDelayBuckets=new UINT32*[MAX_POLLFD];
 		memset(m_pDelayBuckets,0,sizeof(UINT32*)*MAX_POLLFD);
 		m_pMutexDelayChannel=new CAMutex();
-		m_pThreadDelayBucketsLoop=new CAThread();
+		m_pThreadDelayBucketsLoop=new CAThread((UINT8*)"Delay Buckets Thread");
 		m_bDelayBucketsLoopRun=true;
 		m_pThreadDelayBucketsLoop->setMainLoop(lml_loopDelayBuckets);
 		m_pThreadDelayBucketsLoop->start(this);

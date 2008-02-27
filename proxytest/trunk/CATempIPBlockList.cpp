@@ -41,7 +41,7 @@ CATempIPBlockList::CATempIPBlockList(UINT64 validTimeMillis)
 		m_pMutex = new CAMutex();
 	
 		// launch cleanup thread
-		m_pCleanupThread = new CAThread();
+		m_pCleanupThread = new CAThread((UINT8*)"Cleanup Thread");
 		m_bRunCleanupThread=true;
 		m_pCleanupThread->setMainLoop(cleanupThreadMainLoop);
 		m_pCleanupThread->start(this);

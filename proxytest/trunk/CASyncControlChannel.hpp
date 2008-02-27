@@ -59,7 +59,7 @@ class CASyncControlChannel : public CAAbstractControlChannel
 		SINT32 proccessMessage(const UINT8* msg, UINT32 msglen)
 			{
 				#ifdef DEBUG
-					CAMsg::printMsg(LOG_DEBUG,"CASnycControlChannel::proccessMessage - msglen=%u\n",msglen);
+					CAMsg::printMsg(LOG_DEBUG,"CASyncControlChannel::proccessMessage - msglen=%u\n",msglen);
 				#endif
 				if(m_MsgBytesLeft==0)//start of new XML Msg
 					{
@@ -67,7 +67,7 @@ class CASyncControlChannel : public CAAbstractControlChannel
 							return E_UNKNOWN;
 						m_MsgBytesLeft=(msg[0]<<8)|msg[1];
 						#ifdef DEBUG
-							CAMsg::printMsg(LOG_DEBUG,"CASnycControlChannel::proccessMessage - start of a new msg of len=%u\n",m_MsgBytesLeft);
+							CAMsg::printMsg(LOG_DEBUG,"CASyncControlChannel::proccessMessage - start of a new msg of len=%u\n",m_MsgBytesLeft);
 						#endif
 						msglen-=2;
 						m_aktIndex=msglen;
@@ -95,10 +95,10 @@ class CASyncControlChannel : public CAAbstractControlChannel
 					if(m_aktIndex<0xFFFF)
 						{
 							m_MsgBuff[m_aktIndex]=0;
-							CAMsg::printMsg(LOG_DEBUG,"CASnycControlChannel::proccessMessageComplete() - msg=%s\n",m_MsgBuff);
+							CAMsg::printMsg(LOG_DEBUG,"CASyncControlChannel::proccessMessageComplete() - msg=%s\n",m_MsgBuff);
 						}
 					else
-						CAMsg::printMsg(LOG_DEBUG,"CASnycControlChannel::proccessMessageComplete() \n");
+						CAMsg::printMsg(LOG_DEBUG,"CASyncControlChannel::proccessMessageComplete() \n");
 				#endif
 				MemBufInputSource oInput(m_MsgBuff,m_aktIndex,"synchannel");
 				DOMParser oParser;
@@ -109,7 +109,7 @@ class CASyncControlChannel : public CAAbstractControlChannel
 				if(doc==NULL)
 					return E_UNKNOWN;
 				#ifdef DEBUG
-					CAMsg::printMsg(LOG_DEBUG,"CASnycControlChannel::proccessMessageComplete() call processXMLMessage()\n");
+					CAMsg::printMsg(LOG_DEBUG,"CASyncControlChannel::proccessMessageComplete() call processXMLMessage()\n");
 				#endif
 				return processXMLMessage(doc);
 			}
