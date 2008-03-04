@@ -710,8 +710,9 @@ int main(int argc, const char* argv[])
 #endif
 		signal(SIGINT,signal_interrupt);
 		signal(SIGTERM,signal_term);
+#ifndef _DEBUG
 		signal(SIGSEGV,signal_segv);
-
+#endif
 		//Try to write pidfile....
 		UINT8 strPidFile[512];
 		if(pglobalOptions->getPidFile(strPidFile,512)==E_SUCCESS)

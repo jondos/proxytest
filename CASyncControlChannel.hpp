@@ -100,12 +100,9 @@ class CASyncControlChannel : public CAAbstractControlChannel
 					else
 						CAMsg::printMsg(LOG_DEBUG,"CASyncControlChannel::proccessMessageComplete() \n");
 				#endif
-				MemBufInputSource oInput(m_MsgBuff,m_aktIndex,"synchannel");
-				XercesDOMParser oParser;
-				oParser.parse(oInput);
 				m_aktIndex=0;
 				m_MsgBytesLeft=0;
-				XERCES_CPP_NAMESPACE::DOMDocument* doc=oParser.getDocument();
+				XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(m_MsgBuff,m_aktIndex);
 				if(doc==NULL)
 					return E_UNKNOWN;
 				#ifdef DEBUG

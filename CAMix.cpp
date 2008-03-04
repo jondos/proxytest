@@ -47,7 +47,8 @@ CAMix::CAMix()
 		m_pMuxInControlChannelDispatcher=NULL;
 		m_u32KeepAliveSendInterval=0;//zero means --> do not use
 		m_u32KeepAliveRecvInterval=0;//zero means --> do not use
-		m_bShutDown = false; 
+		m_bShutDown = false;
+		m_docMixCascadeInfo=NULL;
 #ifdef DYNAMIC_MIX
 		/* LERNGRUPPE: Run by default */
 		m_bLoop = true;

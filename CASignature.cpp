@@ -174,10 +174,7 @@ SINT32 CASignature::setSignKey(const UINT8* buff,UINT32 len,UINT32 type,const ch
 SINT32 CASignature::parseSignKeyXML(const UINT8* buff,UINT32 len)
 	{
 
-		MemBufInputSource oInput(buff,len,"sigkey");
-		XercesDOMParser oParser;
-		oParser.parse(oInput);
-		XERCES_CPP_NAMESPACE::DOMDocument* doc=oParser.getDocument();
+		XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(buff,len);
 		DOMElement* rootKeyInfo=doc->getDocumentElement();
 		if(!equals(rootKeyInfo->getNodeName(),"KeyInfo"))
 			return E_UNKNOWN;
@@ -293,10 +290,7 @@ SINT32 CASignature::signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen,CAC
 		if(in==NULL||inlen<1||out==NULL||outlen==NULL)
 			return E_UNKNOWN;
 		
-		MemBufInputSource oInput(in,inlen,"signxml");
-		XercesDOMParser oParser;
-		oParser.parse(oInput);
-		XERCES_CPP_NAMESPACE::DOMDocument* doc=oParser.getDocument();
+		XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(in,inlen);
 		if(doc==NULL)
 			return E_UNKNOWN;
 		DOMElement* root=doc->getDocumentElement();
@@ -673,10 +667,7 @@ SINT32 CASignature::verifyDER(UINT8* in, UINT32 inlen, const UINT8 * dsaSig, con
 
 SINT32 CASignature::verifyXML(const UINT8* const in,UINT32 inlen)
 	{
-		MemBufInputSource oInput(in,inlen,"sigverify");
-		XercesDOMParser oParser;
-		oParser.parse(oInput);
-		XERCES_CPP_NAMESPACE::DOMDocument* doc=oParser.getDocument();
+		XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(in,inlen);
 		DOMElement* root=doc->getDocumentElement();
 		return verifyXML(root,NULL);
 	}

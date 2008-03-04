@@ -91,14 +91,16 @@ SINT32 DOM_Output::dumpNode(const DOMNode* toWrite,bool bCanonical)
 						const XMLCh*   pNodeValue = toWrite->getNodeValue();
             if(!bCanonical)
 							{
-								m_pFormatter->formatBuf(pNodeValue,XMLFormatter::CharEscapes);
+							m_pFormatter->formatBuf(pNodeValue,XMLString::stringLen(pNodeValue),XMLFormatter::CharEscapes);
 							}
 						else //strip whitespaces...
 							{
 								XMLCh* pText=XMLString::replicate(pNodeValue);
 								XMLString::trim(pText);
-								m_pFormatter->formatBuf(pText, XMLFormatter::CharEscapes);
+								char* tmpStr=XMLString::transcode(pText);
+								m_pFormatter->formatBuf(pText,XMLString::stringLen(pText),XMLFormatter::CharEscapes);
 								XMLString::release(&pText);
+								delete []tmpStr;
 							}
             break;
         }
@@ -178,7 +180,7 @@ SINT32 DOM_Output::dumpNode(const DOMNode* toWrite,bool bCanonical)
 									}
 							}
 
-						for (int i = 0; i < attrCount; i++)
+						for (UINT32 i = 0; i < attrCount; i++)
             {
 								//delete[] attr_names[i];
                 DOMNode*  pAttribute = pAttributes->item(sort_indices[i]);

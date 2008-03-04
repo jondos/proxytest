@@ -103,10 +103,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 		CAMsg::printMsg(LOG_INFO,"%s\n",recvBuff);
 		
 		//Parsing KeyInfo received from Mix n+1
-		MemBufInputSource oInput(recvBuff,len,"tmpID");
-		XercesDOMParser oParser;
-		oParser.parse(oInput);		
-		XERCES_CPP_NAMESPACE::DOMDocument* doc=oParser.getDocument();
+		XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(recvBuff,len);
 		delete []recvBuff;
 		if(doc==NULL)
 			{
@@ -264,9 +261,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 		CAMsg::printMsg(LOG_INFO,"Symmetric Key Info received is:\n");
 		CAMsg::printMsg(LOG_INFO,"%s\n",(char*)recvBuff);		
 		//Parsing doc received
-		MemBufInputSource oInput1(recvBuff,len,"tmp");
-		oParser.parse(oInput1);
-		doc=oParser.getDocument();
+		doc=parseDOMDocument(recvBuff,len);
 		delete[] recvBuff;
 		if(doc==NULL)
 			{

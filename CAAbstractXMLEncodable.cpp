@@ -50,7 +50,7 @@ UINT8* CAAbstractXMLEncodable::toXmlString(UINT32* pSize)
 		tmp2[*pSize]=0;
 		delete[] tmp;
 		pDoc->release();
-		delete pDoc;
+		//delete pDoc;
 		return tmp2;
 	}
 #endif //ONLY_LOCAL_PROXY

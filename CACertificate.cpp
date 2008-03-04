@@ -126,10 +126,7 @@ CACertificate* CACertificate::decode(const UINT8* buff,UINT32 bufflen,UINT32 typ
 					PKCS12_free(tmpPKCS12);
 				break;
 				case CERT_XML_X509CERTIFICATE:
-					MemBufInputSource oInput(buff,bufflen,"certxml");
-					XercesDOMParser oParser;
-					oParser.parse(oInput);
-					XERCES_CPP_NAMESPACE::DOMDocument* doc=oParser.getDocument();
+					XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(buff,bufflen);
 					DOMElement* root=doc->getDocumentElement();
 					if(root==NULL||!equals(root->getNodeName(),"X509Certificate"))
 						return NULL;
