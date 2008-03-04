@@ -83,6 +83,8 @@ CAThread::CAThread(const UINT8* strName)
 				memcpy(m_strName,strName,len);
 				m_strName[len]=0;
 			}
+		m_Id=ms_LastId;
+		ms_LastId++;
 	}
 #ifdef PRINT_THREAD_STACK_TRACE	
 void CAThread::destroyValue(void* a_value) 
