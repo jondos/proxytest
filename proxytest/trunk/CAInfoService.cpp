@@ -625,12 +625,12 @@ UINT8* CAInfoService::getMixHeloXMLAsString(UINT32& a_len)
 
 		UINT32 sendBuffLen;
 		UINT8* sendBuff=NULL;
-			DOM_Element elemTimeStamp;
+		DOMElement* elemTimeStamp;
 	
-DOM_Element elemRoot;
+		DOMElement* elemRoot;
 
 
-				DOM_Document docMixInfo;
+				XERCES_CPP_NAMESPACE::DOMDocument* docMixInfo;
 				if(pglobalOptions->getMixXml(docMixInfo)!=E_SUCCESS)
 					{
 						goto ERR;
@@ -768,15 +768,15 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
         if(recvBuff != NULL)
         {
             MemBufInputSource oInput(recvBuff,len,"tmpID");
-            DOMParser oParser;
+            XercesDOMParser oParser;
             oParser.parse(oInput);
-            DOM_Document doc=oParser.getDocument();
+            XERCES_CPP_NAMESPACE::DOMDocument* doc=oParser.getDocument();
             delete[] recvBuff;
             recvBuff=NULL;
-            DOM_Element root;
-            if(!doc.isNull() && (root = doc.getDocumentElement()) != NULL)
+            DOMElement* root;
+            if(doc!=NULL && (root = doc->getDocumentElement()) != NULL)
             {
-                if(root.getNodeName().equals("MixCascade"))
+                if(equals(root->getNodeName(),"MixCascade"))
                 {
                     ret = handleConfigEvent(doc);
                     if(ret == E_SUCCESS)
@@ -784,18 +784,22 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
                     else
                         return ret;
                 }
-                else if(root.getNodeName().equals("Mix"))
+                else if(equals(root->getNodeName(),"Mix"))
                 {
                     if(m_expectedMixRelPos < 0)
-                    {
-                        CAMsg::printMsg(LOG_DEBUG,"InfoService: Setting new previous mix: %s\n",root.getAttribute("id").transcode());
+											{
+												char* tmpStr=XMLString::transcode(root->getAttribute(XMLString::transcode("id")));
+                        CAMsg::printMsg(LOG_DEBUG,"InfoService: Setting new previous mix: %s\n",tmpStr);
+												delete[] tmpStr;
                         pglobalOptions->setPrevMix(doc);
-                    }
+											}
                     else if(m_expectedMixRelPos > 0)
-                    {
-                        CAMsg::printMsg(LOG_DEBUG,"InfoService: Setting new next mix: %s\n",root.getAttribute("id").transcode());
+											{
+											char* tmpStr=XMLString::transcode(root->getAttribute(XMLString::transcode("id")));
+                        CAMsg::printMsg(LOG_DEBUG,"InfoService: Setting new next mix: %s\n",tmpStr);
+												delete[] tmpStr;
                         pglobalOptions->setNextMix(doc);
-                    }
+											}
                 }
             }
             else
@@ -881,23 +885,23 @@ UINT8* CAInfoService::getCascadeHeloXMLAsString(UINT32& a_len)
 		a_len=0;
  		UINT32 sendBuffLen;
 		UINT8* sendBuff=NULL;
-		DOM_Document docMixInfo;
-		DOM_Element elemTimeStamp;
-		DOM_Element elemSerial; 
-		DOM_Element elemRoot;
+		XERCES_CPP_NAMESPACE::DOMDocument* docMixInfo;
+		DOMElement* elemTimeStamp;
+		DOMElement* elemSerial; 
+		DOMElement* elemRoot;
 		
-	    if(m_pMix->getMixCascadeInfo(docMixInfo)!=E_SUCCESS)
+	  if(m_pMix->getMixCascadeInfo(docMixInfo)!=E_SUCCESS)
 		{
-	        CAMsg::printMsg(LOG_INFO,"InfoService: Cascade not yet configured.\n");
+	    CAMsg::printMsg(LOG_INFO,"InfoService: Cascade not yet configured.\n");
 			goto ERR;
 		}
 		//insert (or update) the Timestamp
-		elemRoot=docMixInfo.getDocumentElement();
+		elemRoot=docMixInfo->getDocumentElement();
 		
-		if(getDOMChildByName(elemRoot,(UINT8*)"LastUpdate",elemTimeStamp,false)!=E_SUCCESS)
+		if(getDOMChildByName(elemRoot,"LastUpdate",elemTimeStamp,false)!=E_SUCCESS)
 			{
-				elemTimeStamp=docMixInfo.createElement("LastUpdate");
-				elemRoot.appendChild(elemTimeStamp);
+				elemTimeStamp=createDOMElement(docMixInfo,"LastUpdate");
+				elemRoot->appendChild(elemTimeStamp);
 			}
 		UINT64 currentMillis;
 		getcurrentTimeMillis(currentMillis);
@@ -1012,7 +1016,7 @@ ERR:
 	return E_UNKNOWN;
 }
 
-SINT32 CAInfoService::handleConfigEvent(DOM_Document& doc) const
+SINT32 CAInfoService::handleConfigEvent(XERCES_CPP_NAMESPACE::DOMDocument* doc) const
 {
 	///*** Nedd redesigning!*/
 /*    CAMsg::printMsg(LOG_INFO,"InfoService: Cascade info received from InfoService\n");

@@ -3464,6 +3464,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\CAThreadList.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\CAThreadPool.cpp"
 				>
 			</File>
@@ -5038,6 +5042,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CAAbstractXMLSignable.hpp"
+				>
+			</File>
+			<File
 				RelativePath=".\CAAccountingBIInterface.hpp"
 				>
 			</File>
@@ -5263,6 +5271,10 @@
 			</File>
 			<File
 				RelativePath="CAThread.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\CAThreadList.hpp"
 				>
 			</File>
 			<File

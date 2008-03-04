@@ -104,24 +104,24 @@ SINT32 CAMiddleMix::processKeyExchange()
 		
 		//Parsing KeyInfo received from Mix n+1
 		MemBufInputSource oInput(recvBuff,len,"tmpID");
-		DOMParser oParser;
+		XercesDOMParser oParser;
 		oParser.parse(oInput);		
-		DOM_Document doc=oParser.getDocument();
+		XERCES_CPP_NAMESPACE::DOMDocument* doc=oParser.getDocument();
 		delete []recvBuff;
-		if(doc.isNull())
+		if(doc==NULL)
 			{
 				CAMsg::printMsg(LOG_INFO,"Error parsing Key Info from Mix n+1!\n");
 				return E_UNKNOWN;
 			}
 
-		DOM_Element root=doc.getDocumentElement();
+		DOMElement* root=doc->getDocumentElement();
 		
 		//Finding first <Mix> entry and sending symetric key...
 		bool bFoundNextMix=false;
-		DOM_Node child=root.getFirstChild();
+		DOMNode* child=root->getFirstChild();
 		while(child!=NULL)
 			{
-				if(child.getNodeName().equals("Mix"))
+				if(equals(child->getNodeName(),"Mix"))
 					{
 						//check Signature....
 						CASignature oSig;
@@ -135,8 +135,8 @@ SINT32 CAMiddleMix::processKeyExchange()
 								return E_UNKNOWN;
 							}
 						//extracting Nonce and computing Hash of them
-						DOM_Element elemNonce;
-						getDOMChildByName(child,(UINT8*)"Nonce",elemNonce,false);
+						DOMElement* elemNonce;
+						getDOMChildByName(child,"Nonce",elemNonce,false);
 						UINT32 lenNonce=1024;
 						UINT8 arNonce[1024];
 						UINT32 tmpLen=1024;
@@ -155,19 +155,19 @@ SINT32 CAMiddleMix::processKeyExchange()
 						
 						//Extracting PubKey of Mix n+1, generating SymKey for link encryption
 						//with Mix n+1, encrypt and send them
-						DOM_Node rsaKey=child.getFirstChild();
+						DOMNode* rsaKey=child->getFirstChild();
 						CAASymCipher oRSA;
 						oRSA.setPublicKeyAsDOMNode(rsaKey);
 						UINT8 key[64];
 						getRandom(key,64);
-						DOM_DocumentFragment docfragSymKey;
+						DOMDocumentFragment* docfragSymKey=NULL;
 						encodeXMLEncryptedKey(key,64,docfragSymKey,&oRSA);
-						DOM_Document docSymKey=DOM_Document::createDocument();
-						docSymKey.appendChild(docSymKey.importNode(docfragSymKey,true));
-						DOM_Element elemRoot=docSymKey.getDocumentElement();
-						DOM_Element elemNonceHash=docSymKey.createElement("Nonce");
+						XERCES_CPP_NAMESPACE::DOMDocument* docSymKey=createDOMDocument();
+						docSymKey->appendChild(docSymKey->importNode(docfragSymKey,true));
+						DOMElement* elemRoot=docSymKey->getDocumentElement();
+						DOMElement* elemNonceHash=createDOMElement(docSymKey,"Nonce");
 						setDOMElementValue(elemNonceHash,arNonce);						
-						elemRoot.appendChild(elemNonceHash);
+						elemRoot->appendChild(elemNonceHash);
 						m_pSignature->signXML(elemRoot);
 						m_pMuxOut->setSendKey(key,32);
 						m_pMuxOut->setReceiveKey(key+32,32);
@@ -180,7 +180,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 						bFoundNextMix=true;
 						break;
 					}
-				child=child.getNextSibling();
+				child=child->getNextSibling();
 			}
 		if(!bFoundNextMix)
 			{
@@ -191,43 +191,39 @@ SINT32 CAMiddleMix::processKeyExchange()
 		// ---- Start exchange with Mix n-1 --------
 		// -----------------------------------------		
 		//Inserting own (key) info
-		DOMString tmpDOMStr=root.getAttribute("count");
-		char* tmpStr=tmpDOMStr.transcode();
-		if(tmpStr==NULL)
+		UINT32 count=0;
+		if(getDOMElementAttribute(root,"count",count)!=E_SUCCESS)
 			{
 				return E_UNKNOWN;
 			}
-		UINT32 count=atol(tmpStr);
-		delete tmpStr;
 		count++;
 		setDOMElementAttribute(root,"count",count);
 		
 		addMixInfo(root, true);
-		DOM_Element mixNode;
-		getDOMChildByName(root, (UINT8*)"Mix", mixNode, false);
+		DOMElement* mixNode;
+		getDOMChildByName(root, "Mix", mixNode, false);
 		
 		
 		UINT8 tmpBuff[50];
 		pglobalOptions->getMixId(tmpBuff,50); //the mix id...
-		mixNode.setAttribute("id",DOMString((char*)tmpBuff));
+		setDOMElementAttribute(mixNode,"id",tmpBuff);
 		//Supported Mix Protocol -->currently "0.3"
-		DOM_Element elemMixProtocolVersion=doc.createElement("MixProtocolVersion");
-		mixNode.appendChild(elemMixProtocolVersion);
+		DOMElement* elemMixProtocolVersion=createDOMElement(doc,"MixProtocolVersion");
+		mixNode->appendChild(elemMixProtocolVersion);
 		setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.3");
 
-		DOM_DocumentFragment pDocFragment;
+		DOMDocumentFragment* pDocFragment=NULL;
 		m_pRSA->getPublicKeyAsDocumentFragment(pDocFragment); //the key
-		mixNode.appendChild(doc.importNode(pDocFragment,true));
-		pDocFragment=0;
+		mixNode->appendChild(doc->importNode(pDocFragment,true));
 		//inserting Nonce
-		DOM_Element elemNonce=doc.createElement("Nonce");
+		DOMElement* elemNonce=createDOMElement(doc,"Nonce");
 		UINT8 arNonce[16];
 		getRandom(arNonce,16);
 		UINT32 tmpLen=50;
 		CABase64::encode(arNonce,16,tmpBuff,&tmpLen);
 		tmpBuff[tmpLen]=0;
 		setDOMElementValue(elemNonce,tmpBuff);
-		mixNode.appendChild(elemNonce);
+		mixNode->appendChild(elemNonce);
 		
 		// create signature
 		if(signXML(mixNode)!=E_SUCCESS)
@@ -272,12 +268,12 @@ SINT32 CAMiddleMix::processKeyExchange()
 		oParser.parse(oInput1);
 		doc=oParser.getDocument();
 		delete[] recvBuff;
-		if(doc.isNull())
+		if(doc==NULL)
 			{
 				CAMsg::printMsg(LOG_INFO,"Error parsing Key Info from Mix n-1!\n");
 				return E_UNKNOWN;
 			}
-		DOM_Element elemRoot=doc.getDocumentElement();
+		DOMElement* elemRoot=doc->getDocumentElement();
 		//verify signature
 		CASignature oSig;
 		CACertificate* pCert=pglobalOptions->getPrevMixTestCertificate();
@@ -290,7 +286,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 			}
 		//Verifying nonce
 		elemNonce=NULL;
-		getDOMChildByName(elemRoot,(UINT8*)"Nonce",elemNonce,false);
+		getDOMChildByName(elemRoot,"Nonce",elemNonce,false);
 		tmpLen=50;
 		memset(tmpBuff,0,tmpLen);
 		if(elemNonce==NULL||getDOMElementValue(elemNonce,tmpBuff,&tmpLen)!=E_SUCCESS||

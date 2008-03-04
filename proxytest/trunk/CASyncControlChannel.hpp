@@ -53,7 +53,7 @@ class CASyncControlChannel : public CAAbstractControlChannel
 			* If you need to store it for later processing, make a copy of
 			* the DOM_Document using docMsg.cloneNode(true)
 			*/
-		virtual SINT32 processXMLMessage(const DOM_Document& docMsg)=0;
+		virtual SINT32 processXMLMessage(const XERCES_CPP_NAMESPACE::DOMDocument* docMsg)=0;
 
 	protected:
 		SINT32 proccessMessage(const UINT8* msg, UINT32 msglen)
@@ -101,11 +101,11 @@ class CASyncControlChannel : public CAAbstractControlChannel
 						CAMsg::printMsg(LOG_DEBUG,"CASyncControlChannel::proccessMessageComplete() \n");
 				#endif
 				MemBufInputSource oInput(m_MsgBuff,m_aktIndex,"synchannel");
-				DOMParser oParser;
+				XercesDOMParser oParser;
 				oParser.parse(oInput);
 				m_aktIndex=0;
 				m_MsgBytesLeft=0;
-				DOM_Document doc=oParser.getDocument();
+				XERCES_CPP_NAMESPACE::DOMDocument* doc=oParser.getDocument();
 				if(doc==NULL)
 					return E_UNKNOWN;
 				#ifdef DEBUG

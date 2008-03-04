@@ -27,6 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef CAXMLPRICECERT_H_
 #define CAXMLPRICECERT_H_
+#ifdef PAYMENT
 #include "xml/DOM_Output.hpp"
 #include "CAAbstractXMLSignable.hpp"
 #include "CAMsg.hpp"
@@ -143,5 +144,5 @@ class CAXMLPriceCert : public CAAbstractXMLSignable
 				
 };
 
+#endif //PAYMENT
 #endif /*CAXMLPRICECERT_H_*/
-

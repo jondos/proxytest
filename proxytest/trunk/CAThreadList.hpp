@@ -1,14 +1,10 @@
 #ifndef CATHREADLIST_H_
 #define CATHREADLIST_H_
 
-//#include "StdAfx.hpp"
-//#include "CAMsg.hpp"
-//#include "CAThread.hpp"
-
+#ifdef DEBUG
 struct thread_list_entry
 {
-	CAThread *tle_thread;
-	pthread_t tle_thread_id;
+	CAThread* tle_thread;
 	struct thread_list_entry *tle_next;
 };
 
@@ -22,23 +18,23 @@ public:
 	CAThreadList();
 	virtual ~CAThreadList();
 	
-	UINT32 put(CAThread *thread, pthread_t thread_id);
-	CAThread *remove(pthread_t thread_id);
-	CAThread *get(CAThread *thread, pthread_t thread_id);
-	void showAll();
-	UINT32 getSize();
+	SINT32	put(const CAThread* const thread);
+	SINT32	remove(const CAThread* const thread);
+	//CAThread* get(CAThread *thread);
+	void showAll() const;
+	UINT32 getSize() const
+		{
+			return m_Size;
+		}
 	
 private:
 	
-	UINT32 __put(CAThread *thread, pthread_t thread_id);
-	CAThread *__remove(pthread_t thread_id);
-	CAThread *__get(pthread_t thread_id);
-	void __showAll();
-	void __removeAll();
-	UINT32 __getSize();
+	void			removeAll();
 	
-	thread_list_entry_t *m_pHead;
-	CAMutex *m_pListLock;
+	UINT32 m_Size;
+	thread_list_entry_t* m_pHead;
+	CAMutex* m_pListLock;
 };
 
 #endif /*CATHREADLIST_H_*/
+#endif //DEBUG

@@ -40,15 +40,15 @@ CACertificate::CACertificate()
 		m_pCert=NULL;
 	}
 
-CACertificate* CACertificate::decode(const DOM_Node &n,UINT32 type,const char* passwd)
+CACertificate* CACertificate::decode(const DOMNode* n,UINT32 type,const char* passwd)
 	{
-		DOM_Node node=n;
+		const DOMNode* node=n;
 		switch(type)
 			{
 				case CERT_PKCS12:					
 					while(node!=NULL)
 						{
-							if(node.getNodeName().equals("X509PKCS12"))
+							if(equals(node->getNodeName(),"X509PKCS12"))
 								{
 									UINT32 strLen=4096;
 									UINT8* tmpStr=new UINT8[strLen];
@@ -65,13 +65,13 @@ CACertificate* CACertificate::decode(const DOM_Node &n,UINT32 type,const char* p
 									delete[] decBuff;
 									return cert;
 								}
-							node=node.getNextSibling();
+							node=node->getNextSibling();
 						}
 				break;
 				case	CERT_X509CERTIFICATE:
 					while(node!=NULL)
 						{
-							if(node.getNodeName().equals("X509Certificate"))
+							if(equals(node->getNodeName(),"X509Certificate"))
 								{
 									UINT32 strLen=4096;
 									UINT8* tmpStr=new UINT8[strLen];
@@ -88,7 +88,7 @@ CACertificate* CACertificate::decode(const DOM_Node &n,UINT32 type,const char* p
 									delete[] decBuff;
 									return cert;
 								}
-							node=node.getNextSibling();
+							node=node->getNextSibling();
 						}
 
 			}
@@ -127,11 +127,11 @@ CACertificate* CACertificate::decode(const UINT8* buff,UINT32 bufflen,UINT32 typ
 				break;
 				case CERT_XML_X509CERTIFICATE:
 					MemBufInputSource oInput(buff,bufflen,"certxml");
-					DOMParser oParser;
+					XercesDOMParser oParser;
 					oParser.parse(oInput);
-					DOM_Document doc=oParser.getDocument();
-					DOM_Element root=doc.getDocumentElement();
-					if(root.isNull()||!root.getNodeName().equals("X509Certificate"))
+					XERCES_CPP_NAMESPACE::DOMDocument* doc=oParser.getDocument();
+					DOMElement* root=doc->getDocumentElement();
+					if(root==NULL||!equals(root->getNodeName(),"X509Certificate"))
 						return NULL;
 					UINT8* tmpBuff=new UINT8[bufflen];
 					UINT32 tmpBuffSize=bufflen;
@@ -186,11 +186,11 @@ SINT32 CACertificate::encode(UINT8* buff,UINT32* bufflen,UINT32 type)
 		return E_SUCCESS;
 	}
 
-SINT32 CACertificate::encode(DOM_DocumentFragment& docFrag,DOM_Document& doc)
+SINT32 CACertificate::encode(DOMDocumentFragment* & docFrag,XERCES_CPP_NAMESPACE::DOMDocument* doc)
 	{
-		docFrag=doc.createDocumentFragment();
-		DOM_Element elemCert=doc.createElement("X509Certificate");
-		docFrag.appendChild(elemCert);
+		docFrag=doc->createDocumentFragment();
+		DOMElement* elemCert=createDOMElement(doc,"X509Certificate");
+		docFrag->appendChild(elemCert);
 		UINT8 buff[2048]; //TODO: Very bad --> looks like easy buffer overflow... [donn't care at the moment...]
 		UINT8* tmp=buff;
 		int i=i2d_X509(m_pCert,&tmp); //now we need DER

@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.07.14"
+#define MIX_VERSION "00.07.15"
 
 #include "doxygen.h"
 
@@ -427,13 +427,16 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include <util/TranscodingException.hpp>
 #include <framework/MemBufInputSource.hpp>
 
-#if (XERCES_VERSION_MAJOR >1)
+/*#if (XERCES_VERSION_MAJOR >1)
 	#include <dom/deprecated/DOM.hpp>
 	#include <dom/deprecated/DOMParser.hpp>
 #else
 	#include <dom/DOM.hpp>
 	#include <parsers/DOMParser.hpp>
 #endif
+*/
+#include <dom/DOM.hpp>
+#include <parsers/XercesDOMParser.hpp>
 
 #if (_XERCES_VERSION >= 20200)
     XERCES_CPP_NAMESPACE_USE

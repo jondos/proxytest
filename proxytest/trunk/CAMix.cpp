@@ -243,11 +243,11 @@ bool CAMix::needAutoConfig()
 * @retval E_UNKNOWN if processing produces an error
 * @retval E_SUCCESS otherwise
 */
-SINT32 CAMix::initMixCascadeInfo(DOM_Element& mixes)
+SINT32 CAMix::initMixCascadeInfo(DOMElement* mixes)
 {
     int count;
-    m_docMixCascadeInfo=DOM_Document::createDocument();
-    DOM_Element elemRoot=m_docMixCascadeInfo.createElement("MixCascade");
+    m_docMixCascadeInfo=createDOMDocument();
+    DOMElement* elemRoot=createDOMElement(m_docMixCascadeInfo,"MixCascade");
 
     UINT8 id[50];
 		UINT8* cascadeID=NULL;
@@ -259,15 +259,15 @@ SINT32 CAMix::initMixCascadeInfo(DOM_Element& mixes)
     	CAMsg::printMsg(LOG_ERR,"No cascade name given!\n");
 			return E_UNKNOWN;
 		}
-    m_docMixCascadeInfo.appendChild(elemRoot);
-    DOM_Element elem=m_docMixCascadeInfo.createElement("Name");
+    m_docMixCascadeInfo->appendChild(elemRoot);
+    DOMElement* elem=createDOMElement(m_docMixCascadeInfo,"Name");
 		setDOMElementValue(elem,name);
-    elemRoot.appendChild(elem);
+    elemRoot->appendChild(elem);
 
-    elem=m_docMixCascadeInfo.createElement("Network");
-    elemRoot.appendChild(elem);
-    DOM_Element elemListenerInterfaces=m_docMixCascadeInfo.createElement("ListenerInterfaces");
-    elem.appendChild(elemListenerInterfaces);
+    elem=createDOMElement(m_docMixCascadeInfo,"Network");
+    elemRoot->appendChild(elem);
+    DOMElement* elemListenerInterfaces=createDOMElement(m_docMixCascadeInfo,"ListenerInterfaces");
+    elem->appendChild(elemListenerInterfaces);
 
     for(UINT32 i=1;i<=pglobalOptions->getListenerInterfaceCount();i++)
     {
@@ -277,20 +277,20 @@ SINT32 CAMix::initMixCascadeInfo(DOM_Element& mixes)
         }
         else if(pListener->getType()==RAW_TCP)
         {
-            DOM_DocumentFragment docFrag;
+            DOMDocumentFragment* docFrag=NULL;
             pListener->toDOMFragment(docFrag,m_docMixCascadeInfo);
-            elemListenerInterfaces.appendChild(docFrag);
+            elemListenerInterfaces->appendChild(docFrag);
         }
         delete pListener;
     }	
     
-    DOM_Node elemMixesDocCascade=m_docMixCascadeInfo.createElement("Mixes");
-    DOM_Element elemMix;
+    DOMNode* elemMixesDocCascade=createDOMElement(m_docMixCascadeInfo,"Mixes");
+    DOMElement* elemMix;
     count=1;
     if(pglobalOptions->isFirstMix())
     {
     	addMixInfo(elemMixesDocCascade, false);
-		getDOMChildByName(elemMixesDocCascade, (UINT8*)"Mix", elemMix, false);
+		getDOMChildByName(elemMixesDocCascade, "Mix", elemMix, false);
     	// create signature
 		if (signXML(elemMix) != E_SUCCESS)
 		{
@@ -301,27 +301,27 @@ SINT32 CAMix::initMixCascadeInfo(DOM_Element& mixes)
 		/*
         elemMixesDocCascade.appendChild(elemThisMix);*/
     }
-    elemRoot.appendChild(elemMixesDocCascade);
+    elemRoot->appendChild(elemMixesDocCascade);
 
 //    UINT8 cascadeId[255];
 //		UINT32 cascadeIdLen=255;
 
-    DOM_Node node=mixes.getFirstChild();
+    DOMNode* node=mixes->getFirstChild();
     while(node!=NULL)
     {
-        if(node.getNodeType()==DOM_Node::ELEMENT_NODE&&node.getNodeName().equals("Mix"))
+        if(node->getNodeType()==DOMNode::ELEMENT_NODE&&equals(node->getNodeName(),"Mix"))
         {
-            elemMixesDocCascade.appendChild(m_docMixCascadeInfo.importNode(node,true));
+            elemMixesDocCascade->appendChild(m_docMixCascadeInfo->importNode(node,true));
             count++;
  //           cascadeId = static_cast<const DOM_Element&>(node).getAttribute("id").transcode();
         }
-        node=node.getNextSibling();
+        node=node->getNextSibling();
     }
 
     if(pglobalOptions->isLastMix())
     {
-        addMixInfo(elemMixesDocCascade, false);
-		getLastDOMChildByName(elemMixesDocCascade, (UINT8*)"Mix", elemMix);
+      addMixInfo(elemMixesDocCascade, false);
+			getLastDOMChildByName(elemMixesDocCascade, "Mix", elemMix);
     	// create signature
 		if (signXML(elemMix) != E_SUCCESS)
 		{
@@ -339,8 +339,8 @@ SINT32 CAMix::initMixCascadeInfo(DOM_Element& mixes)
     setDOMElementAttribute(elemMixesDocCascade,"count",count);
     
 		
-  DOM_Node elemPayment=m_docMixCascadeInfo.createElement("Payment");
-	elemRoot.appendChild(elemPayment);
+  DOMNode* elemPayment=createDOMElement(m_docMixCascadeInfo,"Payment");
+	elemRoot->appendChild(elemPayment);
 #ifdef PAYMENT
 	setDOMElementAttribute(elemPayment,"required",(UINT8*)"true");
 	setDOMElementAttribute(elemPayment,"version",(UINT8*)PAYMENT_VERSION);
@@ -354,28 +354,28 @@ SINT32 CAMix::initMixCascadeInfo(DOM_Element& mixes)
 		return E_SUCCESS;
 }
 
-SINT32 CAMix::addMixInfo(DOM_Node& a_element, bool a_bForceFirstNode)
+SINT32 CAMix::addMixInfo(DOMNode* a_element, bool a_bForceFirstNode)
 {
 	// this is a complete mixinfo node to be sent to the InfoService
-	DOM_Document docMixInfo;
+	XERCES_CPP_NAMESPACE::DOMDocument* docMixInfo=NULL;
 	if(pglobalOptions->getMixXml(docMixInfo)!=E_SUCCESS)
 	{
 		return E_UNKNOWN;
 	}
-	DOM_Node nodeMixInfo = a_element.getOwnerDocument().importNode(
-		docMixInfo.getDocumentElement(), true);
-	if (a_bForceFirstNode && a_element.hasChildNodes())
+	DOMNode* nodeMixInfo = a_element->getOwnerDocument()->importNode(
+		docMixInfo->getDocumentElement(), true);
+	if (a_bForceFirstNode && a_element->hasChildNodes())
 	{
-		a_element.insertBefore(nodeMixInfo, a_element.getFirstChild());
+		a_element->insertBefore(nodeMixInfo, a_element->getFirstChild());
 	}
 	else
 	{
-		a_element.appendChild(nodeMixInfo);
+		a_element->appendChild(nodeMixInfo);
 	}
 	return E_SUCCESS;
 }
 
-SINT32 CAMix::signXML(DOM_Node& a_element)
+SINT32 CAMix::signXML(DOMNode* a_element)
 	{
     CACertStore* tmpCertStore=new CACertStore();
     

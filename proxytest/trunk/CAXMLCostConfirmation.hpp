@@ -1,5 +1,6 @@
 #ifndef __CAXMLCOSTCONFIRMATION__
 #define __CAXMLCOSTCONFIRMATION__
+#ifdef PAYMET
 #include "xml/DOM_Output.hpp"
 #include "CAPriceInfo.hpp"
 
@@ -146,4 +147,5 @@ class CAXMLCostConfirmation
 			
 	};
 
+#endif //PAYMENT
 #endif

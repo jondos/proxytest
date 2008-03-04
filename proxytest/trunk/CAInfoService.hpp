@@ -119,7 +119,7 @@ class CAInfoService
 			SINT32 sendMixHelo(const UINT8* strMixHeloXML,UINT32 len,SINT32 requestCommand,const UINT8* param,
 								const CASocketAddrINet* a_socketAddress);
 			// added by ronin <ronin2@web.de>
-			SINT32 handleConfigEvent(DOM_Document& doc) const;
+			SINT32 handleConfigEvent(XERCES_CPP_NAMESPACE::DOMDocument* doc) const;
 
 			struct InfoServiceHeloMsg;
 			volatile bool m_bRun;

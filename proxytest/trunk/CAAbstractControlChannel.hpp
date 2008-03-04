@@ -57,11 +57,11 @@ class CAAbstractControlChannel
 			* @retval E_SUCCESS, if the message that successful send
 			* @retval E_UNKNOWN, in case of an error
 			*/
-		SINT32 sendXMLMessage(const DOM_Document& docMsg) const
+		SINT32 sendXMLMessage(const XERCES_CPP_NAMESPACE::DOMDocument* pDocMsg) const
 			{
 				UINT32 tlen=0xFFFF+2;
 				UINT8 tmpB[0xFFFF+2];
-				if(DOM_Output::dumpToMem(docMsg,tmpB+2,&tlen)!=E_SUCCESS||
+				if(DOM_Output::dumpToMem(pDocMsg,tmpB+2,&tlen)!=E_SUCCESS||
 					tlen>0xFFFF)
 					{
 						return E_SPACE;

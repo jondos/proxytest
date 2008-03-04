@@ -44,7 +44,7 @@ class CAReplayControlChannel :
 			* associated CAReplayCtrlChannelMsgProc
 			* @see CAReplayCtrlChannelMsgProc
 			*/
-		virtual SINT32 processXMLMessage(const DOM_Document& doc);
+		virtual SINT32 processXMLMessage(const XERCES_CPP_NAMESPACE::DOMDocument* doc);
 
 	private:
 		const CAReplayCtrlChannelMsgProc* m_pProcessor;

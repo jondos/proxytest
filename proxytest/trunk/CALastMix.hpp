@@ -107,7 +107,7 @@ class CALastMix:public
       #endif
 
     // added by ronin <ronin2@web.de>
-    SINT32 initMixCascadeInfo(DOM_Element&);
+    SINT32 initMixCascadeInfo(DOMElement* );
 
     // moved to CAMix.hpp
     virtual SINT32 processKeyExchange();
