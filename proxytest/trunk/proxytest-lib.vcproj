@@ -635,6 +635,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CAAbstractXMLSignable.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\CAAccountingBIInterface.cpp"
 				>
 			</File>

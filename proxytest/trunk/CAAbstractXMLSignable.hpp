@@ -42,7 +42,7 @@ public:
 		{
 			//ASSERT(verifier!=NULL, "sigVerifier is NULL");
 			XERCES_CPP_NAMESPACE::DOMDocument* pDoc;
-			toXmlDocument(doc);
+			toXmlDocument(pDoc);
 			DOMElement* pElemRoot = pDoc->getDocumentElement();
 			SINT32 rc = verifier.verifyXML( pElemRoot, (CACertStore *)NULL );
 			return rc;
@@ -54,9 +54,9 @@ public:
 	 */
 	SINT32 setSignature(DOMElement* elemSig)
 		{
-			ASSERT(!elemSig.isNull(), "Signature element is NULL")
+			ASSERT(!elemSig==NULL, "Signature element is NULL")
 			m_pSignature = createDOMDocument();
-			m_pSignature->appendChild(m_signature->importNode(elemSig, true));
+			m_pSignature->appendChild(m_pSignature->importNode(elemSig, true));
 			return E_SUCCESS;
 		}
 
