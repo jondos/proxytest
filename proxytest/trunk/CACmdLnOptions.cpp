@@ -1385,12 +1385,9 @@ SINT32 CACmdLnOptions::readXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument* &
 	*/
 SINT32 CACmdLnOptions::readXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument* & docConfig,const UINT8* const buf, UINT32 len)
 {
-		XercesDOMParser parser;
-    MemBufInputSource in(buf,len,"tmpConfigBuff");
-		parser.parse(in);
-		if(parser.getErrorCount()>0)
-			return E_XML_PARSE;
-		docConfig=parser.getDocument();
+		docConfig=parseDOMDocument(buf,len);
+		if(docConfig==NULL)
+			return E_UNKNOWN;
 		return E_SUCCESS;
 }
 

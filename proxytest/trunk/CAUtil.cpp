@@ -397,6 +397,20 @@ bool equals(const XMLCh* const e1,const char* const e2)
 		return XMLString::equals(e1,XMLString::transcode(e2));
 	}
 
+XercesDOMParser* theDOMParser=NULL;
+
+XERCES_CPP_NAMESPACE::DOMDocument* parseDOMDocument(const UINT8* const buff, UINT32 len)
+	{
+		if(theDOMParser==NULL)
+			theDOMParser=new XercesDOMParser();
+	  MemBufInputSource in(buff,len,"tmpBuff");
+		theDOMParser->parse(in);
+		if(theDOMParser->getErrorCount()>0)
+			return NULL;
+		return theDOMParser->getDocument();
+		
+	}
+
 DOMElement* createDOMElement(XERCES_CPP_NAMESPACE::DOMDocument* pOwnerDoc,const char * const name)
 	{
 		return pOwnerDoc->createElement(XMLString::transcode(name));
