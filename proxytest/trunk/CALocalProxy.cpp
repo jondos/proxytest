@@ -511,10 +511,7 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 		CAMsg::printMsg(LOG_INFO,"Login process and key exchange started...\n");
 #ifndef ONLY_LOCAL_PROXY
 		//Parsing KeyInfo received from Mix n+1
-		MemBufInputSource oInput(buff,len,"localoproxy");
-		XercesDOMParser oParser;
-		oParser.parse(oInput);		
-		XERCES_CPP_NAMESPACE::DOMDocument* doc=oParser.getDocument();
+		XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(buff,len);
 		if(doc==NULL)
 			{
 				CAMsg::printMsg(LOG_INFO,"Error parsing Key Info from Mix!\n");

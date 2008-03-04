@@ -52,6 +52,7 @@
 				BufferSecurityCheck="true"
 				EnableFunctionLevelLinking="true"
 				DisableLanguageExtensions="false"
+				RuntimeTypeInfo="false"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="stdafx.h"
 				PrecompiledHeaderFile="$(OutDir)\proxytest-lib.pch"
@@ -60,7 +61,7 @@
 				ObjectFile="$(OutDir)\"
 				ProgramDataBaseFileName="$(OutDir)\"
 				BrowseInformation="1"
-				WarningLevel="2"
+				WarningLevel="4"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
 				CompileAs="0"
@@ -1608,6 +1609,7 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"
+						RuntimeTypeInfo="false"
 						BrowseInformation="1"
 					/>
 				</FileConfiguration>

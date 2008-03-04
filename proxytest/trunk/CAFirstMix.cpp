@@ -324,12 +324,8 @@ SINT32 CAFirstMix::processKeyExchange()
     CAMsg::printMsg(LOG_INFO,"Received Key Info...\n");
     CAMsg::printMsg(LOG_DEBUG,"%s\n",recvBuff);
 
-    MemBufInputSource oInput(recvBuff,len,"tmp");
-    XercesDOMParser oParser;
-    oParser.parse(oInput);
+		XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(recvBuff,len);
     delete []recvBuff;
-
-		XERCES_CPP_NAMESPACE::DOMDocument* doc=oParser.getDocument();
     DOMElement* elemMixes=doc->getDocumentElement();
     if(elemMixes==NULL)
 			return E_UNKNOWN;
@@ -468,7 +464,7 @@ SINT32 CAFirstMix::processKeyExchange()
             DOMDocumentFragment* docfragSymKey=NULL;
             encodeXMLEncryptedKey(key,64,docfragSymKey,&oRSA);
             XERCES_CPP_NAMESPACE::DOMDocument* docSymKey=createDOMDocument();
-            docSymKey->appendChild(docSymKey->importNode(docfragSymKey,true));
+						docSymKey->appendChild(docSymKey->importNode(docfragSymKey->getFirstChild(),true));
             DOMElement* elemRoot=docSymKey->getDocumentElement();
             if(elemNonce!=NULL)
             {
@@ -479,9 +475,9 @@ SINT32 CAFirstMix::processKeyExchange()
             UINT32 outlen=5000;
             UINT8* out=new UINT8[outlen];
 						///Getting the KeepAlive Traffice...
-						DOMElement* elemKeepAlive;
-						DOMElement* elemKeepAliveSendInterval;
-						DOMElement* elemKeepAliveRecvInterval;
+						DOMElement* elemKeepAlive=NULL;
+						DOMElement* elemKeepAliveSendInterval=NULL;
+						DOMElement* elemKeepAliveRecvInterval=NULL;
 						getDOMChildByName(child,"KeepAlive",elemKeepAlive,false);
 						getDOMChildByName(elemKeepAlive,"SendInterval",elemKeepAliveSendInterval,false);
 						getDOMChildByName(elemKeepAlive,"ReceiveInterval",elemKeepAliveRecvInterval,false);
@@ -1016,11 +1012,8 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		#endif
 		SAVE_STACK("CAFirstMix::doUserLogin", "received second symmetric key");
 		
-		XercesDOMParser oParser;
-		MemBufInputSource oInput(xml_buff+2,xml_len,"tmp");
-		oParser.parse(oInput);
-		XERCES_CPP_NAMESPACE::DOMDocument* doc=oParser.getDocument();
-		DOMElement* elemRoot;
+		XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(xml_buff+2,xml_len);
+		DOMElement* elemRoot=NULL;
 		if(doc==NULL||(elemRoot=doc->getDocumentElement())==NULL||
 			decryptXMLElement(elemRoot,m_pRSA)!=E_SUCCESS)
 			{

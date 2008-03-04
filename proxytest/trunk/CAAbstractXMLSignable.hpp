@@ -25,7 +25,7 @@ public:
 			if(m_pSignature!=NULL)
 				{
 					m_pSignature->release();
-					delete m_pSignature;
+					//delete m_pSignature;
 				}
 		}
 	

@@ -488,7 +488,7 @@ SINT32 setDOMElementValue(DOMElement* pElem,const UINT8* value)
 					{
 						DOMNode* n=pElem->removeChild(pChild);
 						n->release();
-						delete n;
+						//delete n;
 					}
 				pChild=pChild->getNextSibling();
 			}
@@ -804,10 +804,7 @@ SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, DOMDocumentFragment* & do
 
 SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, const UINT8* const xml, UINT32 xmllen,CAASymCipher* pRSA)
 	{
-		MemBufInputSource oInput(xml,xmllen,"decodekey");
-		XercesDOMParser oParser;
-		oParser.parse(oInput);
-		XERCES_CPP_NAMESPACE::DOMDocument* pDoc=oParser.getDocument();
+		XERCES_CPP_NAMESPACE::DOMDocument* pDoc=parseDOMDocument(xml,xmllen);
 		DOMElement* root=pDoc->getDocumentElement();
 		return decodeXMLEncryptedKey(key,keylen,root,pRSA);
 	}
@@ -1023,12 +1020,9 @@ SINT32 decryptXMLElement(DOMNode* node, CAASymCipher* pRSA)
 				return E_UNKNOWN;
 			}
 		//now the need to parse the plaintext...
-		MemBufInputSource oInput(cipherValue,len,"decryptelement");
-		XercesDOMParser oParser;
-		oParser.parse(oInput);
+		XERCES_CPP_NAMESPACE::DOMDocument* docPlain=parseDOMDocument(cipherValue,len);
 		delete[] cipherValue;		
-		XERCES_CPP_NAMESPACE::DOMDocument* docPlain=oParser.getDocument();
-		DOMNode* elemPlainRoot;
+		DOMNode* elemPlainRoot=NULL;
 		if(docPlain==NULL||(elemPlainRoot=docPlain->getDocumentElement())==NULL)
 			return E_UNKNOWN;
 		elemPlainRoot=doc->importNode(elemPlainRoot,true);	

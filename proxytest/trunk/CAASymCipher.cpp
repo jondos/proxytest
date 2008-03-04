@@ -320,10 +320,7 @@ SINT32 CAASymCipher::setPublicKeyAsXML(const UINT8* key,UINT32 len)
 		if(key==NULL)
 			return E_UNKNOWN;
 
-		MemBufInputSource oInput(key,len,"rsaKey");
-		XercesDOMParser oParser;
-		oParser.parse(oInput);
-		XERCES_CPP_NAMESPACE::DOMDocument* doc=oParser.getDocument();
+		XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(key,len);
 		DOMElement* root=doc->getDocumentElement();
 		return setPublicKeyAsDOMNode(root);
 	}		

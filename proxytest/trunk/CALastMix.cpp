@@ -200,7 +200,7 @@ SINT32 CALastMix::processKeyExchange()
 		doc->appendChild(elemMixes);
 		
 		addMixInfo(elemMixes, false);
-		DOMElement* elemMix;
+		DOMElement* elemMix=NULL;
 		getDOMChildByName(elemMixes, "Mix", elemMix, false);
 
 		//Inserting MixProtocol Version 
@@ -316,10 +316,7 @@ SINT32 CALastMix::processKeyExchange()
 				return E_UNKNOWN;
 			}
 		//Verifying nonce!
-		MemBufInputSource oInput(messageBuff,len,"tmp");
-		XercesDOMParser oParser;
-		oParser.parse(oInput);
-		doc=oParser.getDocument();
+		doc=parseDOMDocument(messageBuff,len);
 		DOMElement* elemRoot=doc->getDocumentElement();
 		elemNonce=NULL;
 		getDOMChildByName(elemRoot,"Nonce",elemNonce,false);

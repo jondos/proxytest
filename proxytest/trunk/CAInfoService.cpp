@@ -625,9 +625,7 @@ UINT8* CAInfoService::getMixHeloXMLAsString(UINT32& a_len)
 
 		UINT32 sendBuffLen;
 		UINT8* sendBuff=NULL;
-		DOMElement* elemTimeStamp;
 	
-		DOMElement* elemRoot;
 
 
 				XERCES_CPP_NAMESPACE::DOMDocument* docMixInfo;
@@ -767,13 +765,10 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
 
         if(recvBuff != NULL)
         {
-            MemBufInputSource oInput(recvBuff,len,"tmpID");
-            XercesDOMParser oParser;
-            oParser.parse(oInput);
-            XERCES_CPP_NAMESPACE::DOMDocument* doc=oParser.getDocument();
+            XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(recvBuff,len);
             delete[] recvBuff;
             recvBuff=NULL;
-            DOMElement* root;
+            DOMElement* root=NULL;
             if(doc!=NULL && (root = doc->getDocumentElement()) != NULL)
             {
                 if(equals(root->getNodeName(),"MixCascade"))
@@ -885,10 +880,9 @@ UINT8* CAInfoService::getCascadeHeloXMLAsString(UINT32& a_len)
 		a_len=0;
  		UINT32 sendBuffLen;
 		UINT8* sendBuff=NULL;
-		XERCES_CPP_NAMESPACE::DOMDocument* docMixInfo;
-		DOMElement* elemTimeStamp;
-		DOMElement* elemSerial; 
-		DOMElement* elemRoot;
+		XERCES_CPP_NAMESPACE::DOMDocument* docMixInfo=NULL;
+		DOMElement* elemTimeStamp=NULL;
+		DOMElement* elemRoot=NULL;
 		
 	  if(m_pMix->getMixCascadeInfo(docMixInfo)!=E_SUCCESS)
 		{
