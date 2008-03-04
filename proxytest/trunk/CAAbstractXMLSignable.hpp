@@ -74,7 +74,7 @@ public:
 		}
 
 protected:
-	XERCES_CPP_NAMESPACE::DOM_Document* m_pSignature;
+	XERCES_CPP_NAMESPACE::DOMDocument* m_pSignature;
 };
 
 #endif

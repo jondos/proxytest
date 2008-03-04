@@ -61,12 +61,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 // The Mix....
 CAMix* pMix=NULL;
 #endif
-CACmdLnOptions* pglobalOptions;
+CACmdLnOptions* pglobalOptions=NULL;
 #ifdef _DEBUG
-CAThreadList *pThreadList = new CAThreadList();
+CAThreadList *pThreadList = NULL;
 #endif
 //Global Locks required by OpenSSL-Library
-CAMutex* pOpenSSLMutexes;
+CAMutex* pOpenSSLMutexes=NULL;
 
 bool bTriedTermination = false;
 
@@ -133,6 +133,10 @@ void init()
 		CRYPTO_set_locking_callback((void (*)(int,int,const char *,int))openssl_locking_callback);
 #ifndef ONLY_LOCAL_PROXY
 		SSL_library_init();
+#endif
+#ifdef _DEBUG
+		pThreadList=new CAThreadList();
+		CAThread::setThreadList(pThreadList);
 #endif
 		CAMsg::init();
 		CASocketAddrINet::init();

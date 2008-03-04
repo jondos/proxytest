@@ -132,7 +132,7 @@ class DOM_Output
 				* @return E_SPACE if buff is to small
 				* @return E_UNKNOWN if an error occurs
 				*/
-			static SINT32 dumpToMem(const DOM_Node& node,UINT8* buff, UINT32* size)
+			static SINT32 dumpToMem(const DOMNode* node,UINT8* buff, UINT32* size)
 				{
 					DOM_Output out;
 					if(	out.dumpNode(node,false)!=E_SUCCESS)
@@ -148,7 +148,7 @@ class DOM_Output
 				* @return a pointer to a newls allocated buff, which must be delete[] by the caller
 				* @return NULL if an error occurs
 				*/
-			static UINT8* dumpToMem(DOM_Node& node,UINT32* size)
+			static UINT8* dumpToMem(const DOMNode* node,UINT32* size)
 				{
 					DOM_Output out;
 					if(	out.dumpNode(node,false)!=E_SUCCESS)
@@ -165,7 +165,7 @@ class DOM_Output
 				* @return E_SPACE if buff is to small
 				* @return E_UNKNOWN if an error occurs
 				*/
-			static SINT32 makeCanonical(DOM_Node& node,UINT8* buff,UINT32* size)
+			static SINT32 makeCanonical(const DOMNode* node,UINT8* buff,UINT32* size)
 				{
 					DOM_Output out;
 					if(	out.dumpNode(node,true)!=E_SUCCESS)
@@ -180,7 +180,7 @@ class DOM_Output
 				* @return a pointer to a newly allocated buff, which must be delete[] by the caller
 				* @return NULL if an error occurs
 				*/
-			static UINT8* makeCanonical(DOM_Node& node,UINT32* size)
+			static UINT8* makeCanonical(const DOMNode* node,UINT32* size)
 				{
 					DOM_Output out;
 					if(	out.dumpNode(node,true)!=E_SUCCESS)
@@ -206,7 +206,7 @@ class DOM_Output
 					delete m_pFormatter;
 				}
 
-			SINT32 dumpNode(const DOM_Node& toWrite,bool bCanonical);
+			SINT32 dumpNode(const DOMNode* toWrite,bool bCanonical);
 			XMLFormatter* m_pFormatter;
 			MemFormatTarget* m_pFormatTarget;
 			static const XMLCh  m_XML[41]; 
