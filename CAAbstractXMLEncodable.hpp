@@ -55,7 +55,7 @@ public:
 	 * @param elemRoot on return contains the root element of the created XML structure.
 	 * Note that the element is not appended to any node in the document
 	 */
-	virtual SINT32 toXmlElement(const XERCES_CPP_NAMESPACE::DOMDocument* a_pDoc, DOMElement* & pElemRoot)=0;
+	virtual SINT32 toXmlElement(XERCES_CPP_NAMESPACE::DOMDocument* a_pDoc, DOMElement* & pElemRoot)=0;
 	
 	/** 
 	 * returns a pointer to the tagname of this XML structure's top level element.

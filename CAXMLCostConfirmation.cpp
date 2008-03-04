@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMsg.hpp"
 #include "CAPriceInfo.hpp" 
 
-const UINT8* const CAXMLCostConfirmation::ms_pStrElemName=(UINT8*)"CC";
+const char* const CAXMLCostConfirmation::ms_pStrElemName="CC";
 
 CAXMLCostConfirmation::CAXMLCostConfirmation()
 	{
@@ -48,11 +48,8 @@ CAXMLCostConfirmation* CAXMLCostConfirmation::getInstance(UINT8 * strXmlData,UIN
 		// parse XML
 		if(strXmlData==NULL)
 			return NULL;
-		MemBufInputSource oInput( strXmlData, strXmlDataLen, "XMLCostConfirmation" );
-		DOMParser oParser;
-		oParser.parse( oInput );
 		CAXMLCostConfirmation* pCC=new CAXMLCostConfirmation();
-		pCC->m_domDocument = oParser.getDocument();
+		pCC->m_domDocument = parseDOMDocument(strXmlData, strXmlDataLen);
 		if(pCC->setValues()!=E_SUCCESS)
 			{
 				delete pCC;
@@ -61,13 +58,13 @@ CAXMLCostConfirmation* CAXMLCostConfirmation::getInstance(UINT8 * strXmlData,UIN
 		return pCC;
 	}
 
-CAXMLCostConfirmation* CAXMLCostConfirmation::getInstance(DOM_Element &elemRoot)
+CAXMLCostConfirmation* CAXMLCostConfirmation::getInstance(DOMElement* elemRoot)
 	{
 		if(elemRoot==NULL)
 			return NULL;
 		CAXMLCostConfirmation* pCC=new CAXMLCostConfirmation();
-		pCC->m_domDocument=DOM_Document::createDocument();
-		pCC->m_domDocument.appendChild(pCC->m_domDocument.importNode(elemRoot,true));
+		pCC->m_domDocument=createDOMDocument();
+		pCC->m_domDocument->appendChild(pCC->m_domDocument->importNode(elemRoot,true));
 		if(pCC->setValues()!=E_SUCCESS)
 			{
 				delete pCC;
@@ -107,29 +104,27 @@ SINT32 CAXMLCostConfirmation::setValues()
 	{
 		if(m_domDocument==NULL)
 			return E_UNKNOWN;
-		DOM_Element elemRoot=m_domDocument.getDocumentElement();
+		DOMElement* elemRoot=m_domDocument->getDocumentElement();
 		if (elemRoot == NULL)
 		{
 			return E_UNKNOWN;
 		}
 		
-		DOM_Element elem;
+		DOMElement* elem=NULL;
 
-		char * strTagname = elemRoot.getTagName().transcode();
-		if( (strcmp((char *)strTagname, (char *)ms_pStrElemName)!=0) )
+
+		if( !equals(elemRoot->getTagName(),ms_pStrElemName) )
 			{
-				delete[] strTagname;
 				return E_UNKNOWN;
 			}
-		delete[] strTagname;
 
 		// parse accountnumber
-		getDOMChildByName(elemRoot, (UINT8*)"AccountNumber", elem, false);
+		getDOMChildByName(elemRoot, "AccountNumber", elem, false);
 		if(getDOMElementValue(elem, m_lAccountNumber)!=E_SUCCESS)
 			return E_UNKNOWN;
 
 		// parse transferredBytes
-		getDOMChildByName(elemRoot, (UINT8*)"TransferredBytes", elem, false);
+		getDOMChildByName(elemRoot, "TransferredBytes", elem, false);
 		if(getDOMElementValue(elem, m_lTransferredBytes)!=E_SUCCESS)
 			return E_UNKNOWN;
 
@@ -140,7 +135,7 @@ SINT32 CAXMLCostConfirmation::setValues()
 		UINT8 strGeneral[256];
 		UINT32 strGeneralLen = 256;
 		strGeneralLen=255;
-		getDOMChildByName(elemRoot, (UINT8*)"PIID", elem, false);
+		getDOMChildByName(elemRoot, "PIID", elem, false);
 		if(getDOMElementValue(elem, strGeneral, &strGeneralLen)==E_SUCCESS)
 		{
 			m_pStrPIID = new UINT8[strGeneralLen+1];
@@ -165,7 +160,7 @@ SINT32 CAXMLCostConfirmation::setValues()
  
 		//parse PriceCertHash elements 
 		//currently does not check syntax, e.g. whether <PriceCertHash> is within <PriceCertificates>
-		if (getDOMChildByName(elemRoot, (UINT8*)"PriceCertificates", elem, false) != E_SUCCESS)
+		if (getDOMChildByName(elemRoot, "PriceCertificates", elem, false) != E_SUCCESS)
 		{
 			return E_UNKNOWN;
 		}		
@@ -173,25 +168,25 @@ SINT32 CAXMLCostConfirmation::setValues()
 		//CAMsg::printMsg(LOG_DEBUG, "Looking for PriceCertHash\n");
 		
 		// one last test if the tag is really in the right XML layer; throw away elemRoot here...		
-		if (getDOMChildByName(elem, (UINT8*)"PriceCertHash", elemRoot, false) != E_SUCCESS)
+		if (getDOMChildByName(elem, "PriceCertHash", elemRoot, false) != E_SUCCESS)
 		{
 			return E_UNKNOWN;
 		}
 		
 		//CAMsg::printMsg(LOG_DEBUG, "Parsing PriceCertHash\n");
 		
-		DOM_NodeList theNodes = elem.getElementsByTagName("PriceCertHash");
-		if (theNodes.getLength() <= 0)
+		DOMNodeList* theNodes = getElementsByTagName(elem,"PriceCertHash");
+		if (theNodes->getLength() <= 0)
 		{
 			return E_UNKNOWN;
 		}
 		
 		//determine size and build array
-		m_priceCertsLen = theNodes.getLength();
+		m_priceCertsLen = theNodes->getLength();
 		m_priceCerts = new CAPriceInfo*[m_priceCertsLen];
 		
 		//loop through nodes
-		DOM_Node curNode;
+		const DOMNode* curNode=NULL;
 		UINT8* curId;
 		UINT8* curHash;
 		UINT32 len;
@@ -205,7 +200,7 @@ SINT32 CAXMLCostConfirmation::setValues()
 		for (UINT32 i = 0; i < m_priceCertsLen; i++ )
 		{
 			//get single node
-			curNode = theNodes.item(i);
+			curNode = theNodes->item(i);
 			
 			
 			//CAMsg::printMsg(LOG_DEBUG, "Parsing id\n");
@@ -213,7 +208,7 @@ SINT32 CAXMLCostConfirmation::setValues()
 			//extract strings for mixid and pricecerthash, and check isAI attribute
 			curId = new UINT8[100];
 			len = 100;
-			if (getDOMElementAttribute(curNode, "id", (UINT8*)curId, &len) != E_SUCCESS)
+			if (getDOMElementAttribute(curNode, "id", curId, &len) != E_SUCCESS)
 			{
 				delete curId;
 				return E_UNKNOWN;
@@ -223,7 +218,7 @@ SINT32 CAXMLCostConfirmation::setValues()
 			//CAMsg::printMsg(LOG_DEBUG, "Parsing hash\n");
 			curHash = new UINT8[100];
 			len = 100;
-			if (getDOMElementValue(curNode, (UINT8*)curHash, &len) != E_SUCCESS)
+			if (getDOMElementValue(curNode, curHash, &len) != E_SUCCESS)
 			{
 				delete curId;
 				delete curHash;

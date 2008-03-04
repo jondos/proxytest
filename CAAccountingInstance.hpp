@@ -161,27 +161,27 @@ private:
 	/**
 	* Handles a cost confirmation sent by a jap
 	*/
-	void handleCostConfirmation(tAiAccountingInfo* pAccInfo, DOM_Element &root );
-	void handleCostConfirmation_internal(tAiAccountingInfo* pAccInfo, DOM_Element &root );
+	void handleCostConfirmation(tAiAccountingInfo* pAccInfo, DOMElement* root );
+	void handleCostConfirmation_internal(tAiAccountingInfo* pAccInfo, DOMElement* root );
 
 	/**
 	* Handles an account certificate of a newly connected Jap.
 	*/
-	void handleAccountCertificate(tAiAccountingInfo* pAccInfo, DOM_Element &root );
-	void handleAccountCertificate_internal(tAiAccountingInfo* pAccInfo, DOM_Element &root );
+	void handleAccountCertificate(tAiAccountingInfo* pAccInfo, DOMElement* root );
+	void handleAccountCertificate_internal(tAiAccountingInfo* pAccInfo, DOMElement* root );
 	
 	
 	/**
 	 * Checks the response of the challenge-response auth.
 	 */
-	void handleChallengeResponse(tAiAccountingInfo* pAccInfo, DOM_Element &root);
-	void handleChallengeResponse_internal(tAiAccountingInfo* pAccInfo, DOM_Element &root);
+	void handleChallengeResponse(tAiAccountingInfo* pAccInfo, DOMElement* root);
+	void handleChallengeResponse_internal(tAiAccountingInfo* pAccInfo, DOMElement* root);
 
 	static SINT32 getPrepaidBytes(tAiAccountingInfo* pAccInfos);
 	SINT32 prepareCCRequest(CAMix* callingMix, UINT8* a_AiName);			
-	static SINT32 makeCCRequest( const UINT64 accountNumber, const UINT64 transferredBytes, DOM_Document& doc);
+	static SINT32 makeCCRequest( const UINT64 accountNumber, const UINT64 transferredBytes,  XERCES_CPP_NAMESPACE::DOMDocument* & doc);
 	static SINT32 sendCCRequest(tAiAccountingInfo* pAccInfo);
-	static SINT32 makeAccountRequest(DOM_Document &doc);
+	static SINT32 makeAccountRequest( XERCES_CPP_NAMESPACE::DOMDocument* & doc);
 	
 	//possible replies to a JAP
 	static SINT32 returnOK(tAiAccountingInfo* pAccInfo);
