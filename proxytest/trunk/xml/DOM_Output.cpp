@@ -180,7 +180,7 @@ SINT32 DOM_Output::dumpNode(const DOMNode* toWrite,bool bCanonical)
 
 						for (int i = 0; i < attrCount; i++)
             {
-								delete[] attr_names[i];
+								//delete[] attr_names[i];
                 DOMNode*  pAttribute = pAttributes->item(sort_indices[i]);
 	
                 //
