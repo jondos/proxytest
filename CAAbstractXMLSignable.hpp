@@ -22,7 +22,7 @@ public:
 	
 	virtual ~CAAbstractXMLSignable() 
 		{
-			if(m_psignature!=NULL)
+			if(m_pSignature!=NULL)
 				{
 					m_pSiganture->release();
 					delete m_pSignature();
