@@ -32,7 +32,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAUtil.hpp"
 #include "CAMsg.hpp"
 
-const UINT8* const CAXMLPriceCert::ms_pStrElemName=(UINT8*)"PriceCertificate";
+const char* const CAXMLPriceCert::ms_pStrElemName="PriceCertificate";
 
 CAXMLPriceCert::CAXMLPriceCert()
 	{
@@ -58,11 +58,8 @@ CAXMLPriceCert* CAXMLPriceCert::getInstance(const UINT8 * strXmlData,UINT32 strX
 	// parse XML
 	if(strXmlData==NULL)
 		return NULL;
-	MemBufInputSource oInput( strXmlData, strXmlDataLen, "XMLPriceCert" );//third parameter seems to be an arbitrary bufferId internal to Xerces
-	DOMParser oParser;
-	oParser.parse( oInput );
 	CAXMLPriceCert* pPC=new CAXMLPriceCert();
-	pPC->m_domDocument = oParser.getDocument();
+	pPC->m_domDocument = parseDOMDocument(strXmlData, strXmlDataLen);
 	if(pPC->setValues()!=E_SUCCESS)
 		{
 			delete pPC;
@@ -71,7 +68,7 @@ CAXMLPriceCert* CAXMLPriceCert::getInstance(const UINT8 * strXmlData,UINT32 strX
 	return pPC;	
 }
 
-CAXMLPriceCert* CAXMLPriceCert::getInstance(DOM_Element &elemRoot)
+CAXMLPriceCert* CAXMLPriceCert::getInstance(DOMElement* elemRoot)
 	{
 		if(elemRoot==NULL)
 			{
@@ -79,8 +76,8 @@ CAXMLPriceCert* CAXMLPriceCert::getInstance(DOM_Element &elemRoot)
 				return NULL;
 			}	
 		CAXMLPriceCert* pPC=new CAXMLPriceCert();
-		pPC->m_domDocument=DOM_Document::createDocument();
-		pPC->m_domDocument.appendChild(pPC->m_domDocument.importNode(elemRoot,true));
+		pPC->m_domDocument=createDOMDocument();
+		pPC->m_domDocument->appendChild(pPC->m_domDocument->importNode(elemRoot,true));
 		if(pPC->setValues()!=E_SUCCESS)
 			{
 				delete pPC;
@@ -90,32 +87,32 @@ CAXMLPriceCert* CAXMLPriceCert::getInstance(DOM_Element &elemRoot)
 		return pPC;	
 	}
 
-SINT32 CAXMLPriceCert::toXmlElement(DOM_Document &a_doc, DOM_Element &elemRoot)
+SINT32 CAXMLPriceCert::toXmlElement(XERCES_CPP_NAMESPACE::DOMDocument* a_doc, DOMElement* &elemRoot)
 	{
-		elemRoot = a_doc.createElement("PriceCertificate");
+		elemRoot = createDOMElement(a_doc,"PriceCertificate");
 	
 		setDOMElementAttribute(elemRoot,"version",(UINT8*)"1.1"); 
 
-		DOM_Element elemHashOfMixCert = a_doc.createElement("SubjectKeyIdentifier");
+		DOMElement* elemHashOfMixCert = createDOMElement(a_doc,"SubjectKeyIdentifier");
 		setDOMElementValue(elemHashOfMixCert,m_StrSubjectKeyIdentifier);
-		elemRoot.appendChild(elemHashOfMixCert);
+		elemRoot->appendChild(elemHashOfMixCert);
 	
-		DOM_Element elemRate = a_doc.createElement("Rate");
+		DOMElement* elemRate = createDOMElement(a_doc,"Rate");
 		setDOMElementValue(elemRate,m_lRate);
-		elemRoot.appendChild(elemRate);
+		elemRoot->appendChild(elemRate);
 	
-		DOM_Element elemCreationTime = a_doc.createElement("SignatureTime");
+		DOMElement* elemCreationTime = createDOMElement(a_doc,"SignatureTime");
 		setDOMElementValue(elemCreationTime,m_StrSignatureTime);
-		elemRoot.appendChild(elemCreationTime);
+		elemRoot->appendChild(elemCreationTime);
 	
-		DOM_Element elemBiID = a_doc.createElement("BiID");
+		DOMElement* elemBiID = createDOMElement(a_doc,"BiID");
 		setDOMElementValue(elemBiID,m_StrBiID);
-		elemRoot.appendChild(elemBiID);
+		elemRoot->appendChild(elemBiID);
 	
 		//append signature node
 		if (m_signature != NULL)
 		{			
-			elemRoot.appendChild(a_doc.importNode(m_signature,true));
+			elemRoot->appendChild(a_doc->importNode(m_signature,true));
 		}
 		else
 			{
@@ -131,17 +128,14 @@ SINT32 CAXMLPriceCert::setValues()
 		CAMsg::printMsg(LOG_DEBUG,"setValues(): no document\n");
 		return E_UNKNOWN;
 	}
-	DOM_Element elemRoot=m_domDocument.getDocumentElement();
-	DOM_Element elem;
+	DOMElement* elemRoot=m_domDocument->getDocumentElement();
+	DOMElement* elem=NULL;
 	
-	char * strTagname = elemRoot.getTagName().transcode();
-	if( (strcmp((char *)strTagname, (char *)ms_pStrElemName)!=0) )
+	if(!equals(elemRoot->getTagName(),ms_pStrElemName))
 		{
-			delete[] strTagname;
 			CAMsg::printMsg(LOG_DEBUG,"setValues(): failed to get root elem tagname\n");
 			return E_UNKNOWN;
 		}
-	delete[] strTagname;
 	//TODO: parsing Strings could be generalized instead of copy-and-paste code for each element
 	UINT8 strGeneral[512];
 	UINT32 strGeneralLen = 512;
@@ -150,7 +144,7 @@ SINT32 CAXMLPriceCert::setValues()
 		delete[] m_StrSubjectKeyIdentifier;
 	m_StrSubjectKeyIdentifier=NULL;
 
-	getDOMChildByName(elemRoot, (UINT8*)"SubjectKeyIdentifier", elem, false);
+	getDOMChildByName(elemRoot, "SubjectKeyIdentifier", elem, false);
 	if(getDOMElementValue(elem, strGeneral, &strGeneralLen)==E_SUCCESS)
 		{
 			m_StrSubjectKeyIdentifier = new UINT8[strGeneralLen+1];
@@ -166,7 +160,7 @@ SINT32 CAXMLPriceCert::setValues()
 		}
 	
 	// parse rate (double)
-	getDOMChildByName(elemRoot, (UINT8*)"Rate", elem, false);
+	getDOMChildByName(elemRoot, "Rate", elem, false);
 	if(getDOMElementValue(elem, &m_lRate)!=E_SUCCESS)
 	{
 		return E_UNKNOWN;
@@ -179,7 +173,7 @@ SINT32 CAXMLPriceCert::setValues()
 	if(m_StrSignatureTime!=NULL)
 		delete[] m_StrSignatureTime;
 	m_StrSignatureTime=NULL;
-	getDOMChildByName(elemRoot, (UINT8*)"SignatureTime", elem, false);
+	getDOMChildByName(elemRoot, "SignatureTime", elem, false);
 	
 	if(getDOMElementValue(elem, strGeneral, &strGeneralLen)==E_SUCCESS)
 		{
@@ -202,7 +196,7 @@ SINT32 CAXMLPriceCert::setValues()
 	if(m_StrBiID!=NULL)
 		delete[] m_StrBiID;
 	m_StrBiID=NULL;
-	getDOMChildByName(elemRoot, (UINT8*)"BiID", elem, false);
+	getDOMChildByName(elemRoot, "BiID", elem, false);
 	if(getDOMElementValue(elem, strGeneral2, &strGeneralLen2)==E_SUCCESS)
 		{
 			m_StrBiID = new UINT8[strGeneralLen2+1];
@@ -218,7 +212,7 @@ SINT32 CAXMLPriceCert::setValues()
 		
 		
 	//if present, store signature node as element	
-	getDOMChildByName(elemRoot, (UINT8*)"Signature", m_signature, true);
+	getDOMChildByName(elemRoot, "Signature", m_signature, true);
 	//returns E_UNKNOWN if no signature node present, right now we dont care 
 	
 	

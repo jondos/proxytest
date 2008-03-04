@@ -35,7 +35,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 struct t_aiSettleItem
 	{
-		DOM_Document doc;
+		 XERCES_CPP_NAMESPACE::DOMDocument* doc;
 	};
 
 typedef struct t_aiSettleItem aiSettleItem;

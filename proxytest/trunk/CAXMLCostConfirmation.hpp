@@ -1,6 +1,6 @@
 #ifndef __CAXMLCOSTCONFIRMATION__
 #define __CAXMLCOSTCONFIRMATION__
-#ifdef PAYMET
+#ifdef PAYMENT
 #include "xml/DOM_Output.hpp"
 #include "CAPriceInfo.hpp"
 
@@ -22,8 +22,8 @@ class CAXMLCostConfirmation
 			CAPriceInfo** 		m_priceCerts;	
 			UINT32	 			m_priceCertsLen;
 			UINT8*				m_pStrPIID;
-			DOM_Document	m_domDocument;
-			static const UINT8* const ms_pStrElemName;
+			XERCES_CPP_NAMESPACE::DOMDocument*	m_domDocument;
+			static const char* const ms_pStrElemName;
 			
 			SINT32 checkLen(UINT32 a_hashNumber)
 			{
@@ -44,7 +44,7 @@ class CAXMLCostConfirmation
 				* @retval NULL if the XML data was wrong
 				* @return a newly allocated CAXMLCostconfirmationObject
 				*/
-			static CAXMLCostConfirmation* getInstance(DOM_Element &elemRoot);
+			static CAXMLCostConfirmation* getInstance(DOMElement* elemRoot);
 			~CAXMLCostConfirmation();
 			
 			UINT32 getNumberOfHashes()
@@ -133,12 +133,12 @@ class CAXMLCostConfirmation
 					return pTmpStr;
 				}
 				
-			static const UINT8* const getXMLElementName()
+			static const char* const getXMLElementName()
 				{
 					return ms_pStrElemName;
 				}
 			
-			DOM_Document getXMLDocument()
+			 XERCES_CPP_NAMESPACE::DOMDocument* getXMLDocument()
 			{
 				return m_domDocument;
 			}

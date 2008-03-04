@@ -47,10 +47,10 @@ class CAXMLPriceCert : public CAAbstractXMLSignable
 		*/
 		static CAXMLPriceCert* getInstance(const UINT8 * strXmlData,UINT32 strXMLDataLength);
 		
-		static CAXMLPriceCert* getInstance(DOM_Element &elemRoot);
+		static CAXMLPriceCert* getInstance(DOMElement* elemRoot);
 		~CAXMLPriceCert();
 		
-		SINT32 toXmlElement(DOM_Document &a_doc, DOM_Element &elemRoot);
+		SINT32 toXmlElement(XERCES_CPP_NAMESPACE::DOMDocument* a_doc, DOMElement* & elemRoot);
 		
 		/** dumps the XML CC to memory without trailing '0'.*/
 		UINT8* dumpToMem(UINT32* pLen)
@@ -117,12 +117,12 @@ class CAXMLPriceCert : public CAAbstractXMLSignable
 			return pTmpStr;	
 		}
 		
-		static const UINT8* const getXMLElementName()
+		static const char* const getXMLElementName()
 		{
 			return ms_pStrElemName;
 		}
 	
-		DOM_Document getXMLDocument()
+		 XERCES_CPP_NAMESPACE::DOMDocument* getXMLDocument()
 		{
 			return m_domDocument;
 		}
@@ -138,9 +138,9 @@ class CAXMLPriceCert : public CAAbstractXMLSignable
 		double 		m_lRate;
 		UINT8* 		m_StrSignatureTime;
 		UINT8*		m_StrBiID;
-		DOM_Element  m_signature;
-		DOM_Document	m_domDocument;
-		static const UINT8* const ms_pStrElemName;
+		DOMElement*  m_signature;
+		 XERCES_CPP_NAMESPACE::DOMDocument*	m_domDocument;
+		static const char* const ms_pStrElemName;
 				
 };
 

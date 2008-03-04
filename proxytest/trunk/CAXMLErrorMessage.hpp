@@ -96,7 +96,7 @@ class CAXMLErrorMessage : public CAAbstractXMLEncodable
 		
 			~CAXMLErrorMessage();
 			
-			SINT32 toXmlElement(DOM_Document &a_doc, DOM_Element &elemRoot);
+			SINT32 toXmlElement( XERCES_CPP_NAMESPACE::DOMDocument* a_doc, DOMElement* &elemRoot);
 			UINT32 getErrorCode() 
 				{
 					return m_iErrorCode;
@@ -113,7 +113,7 @@ class CAXMLErrorMessage : public CAAbstractXMLEncodable
 			}
 
 		private: 
-			SINT32 setValues(DOM_Element &elemRoot);
+			SINT32 setValues(DOMElement* elemRoot);
 			UINT32 m_iErrorCode;
 			UINT8 * m_strErrMsg;
 			void* m_messageObject;
