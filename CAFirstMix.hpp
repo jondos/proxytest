@@ -134,7 +134,7 @@ protected:
     virtual SINT32 processKeyExchange();
     
 		/** Initialises the MixParameters info for each mix form the \<Mixes\> element received from the second mix.*/
-    SINT32 initMixParameters(DOM_Element& elemMixes);
+    SINT32 initMixParameters(DOMElement* elemMixes);
     
     
 public:
@@ -267,7 +267,7 @@ protected:
 			UINT8* m_xmlKeyInfoBuff;
 			UINT16 m_xmlKeyInfoSize;
 
-			DOM_Document m_docMixCascadeInfo;
+			XERCES_CPP_NAMESPACE::DOMDocument* m_docMixCascadeInfo;
 			UINT64 m_nMixedPackets;
 			CAASymCipher* m_pRSA;
     // moved to CAMix

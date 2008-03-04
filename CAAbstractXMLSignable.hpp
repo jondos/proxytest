@@ -17,10 +17,17 @@ class CAAbstractXMLSignable : public CAAbstractXMLEncodable
 public:
 	CAAbstractXMLSignable() : CAAbstractXMLEncodable()
 		{
-			m_signature = NULL;
+			m_pSignature = NULL;
 		}
 	
-	virtual ~CAAbstractXMLSignable() {}
+	virtual ~CAAbstractXMLSignable() 
+		{
+			if(m_psignature!=NULL)
+				{
+					m_pSiganture->release();
+					delete m_pSignature();
+				}
+		}
 	
 	/** TODO: implement */
 	SINT32 sign(CASignature &signer)
@@ -34,10 +41,10 @@ public:
 	SINT32 verifySignature(CASignature &verifier)
 		{
 			//ASSERT(verifier!=NULL, "sigVerifier is NULL");
-			DOM_Document doc;
+			XERCES_CPP_NAMESPACE::DOMDocument* pDoc;
 			toXmlDocument(doc);
-			DOM_Element elemRoot = doc.getDocumentElement();
-			SINT32 rc = verifier.verifyXML( (DOM_Node &)elemRoot, (CACertStore *)NULL );
+			DOMElement* pElemRoot = pDoc->getDocumentElement();
+			SINT32 rc = verifier.verifyXML( pElemRoot, (CACertStore *)NULL );
 			return rc;
 		}
 
@@ -45,18 +52,18 @@ public:
 	 * sets the internal signature representation. 
 	 * Should be called from derived class constructors.
 	 */
-	SINT32 setSignature(DOM_Element &elemSig)
+	SINT32 setSignature(DOMElement* elemSig)
 		{
 			ASSERT(!elemSig.isNull(), "Signature element is NULL")
-			m_signature = DOM_Document::createDocument();
-			m_signature.appendChild(m_signature.importNode((DOM_Node&)elemSig, true));
+			m_pSignature = createDOMDocument();
+			m_pSignature->appendChild(m_signature->importNode(elemSig, true));
 			return E_SUCCESS;
 		}
 
 	/** returns nonzero, if this structure is already signed */
 	SINT32 isSigned()
 		{
-			if(!m_signature.isNull())
+			if(m_pSignature!=NULL)
 			{
 				return true;
 			}
@@ -67,7 +74,7 @@ public:
 		}
 
 protected:
-	DOM_Document m_signature;
+	XERCES_CPP_NAMESPACE::DOM_Document* m_pSignature;
 };
 
 #endif

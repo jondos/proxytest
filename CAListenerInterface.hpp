@@ -31,8 +31,8 @@ class CAListenerInterface
 			CAListenerInterface& operator=(const CAListenerInterface&); //Zuweisungsoperator
 			~CAListenerInterface(void);
 #ifndef ONLY_LOCAL_PROXY
-			static CAListenerInterface* getInstance(const DOM_Node& node);
-			static CAListenerInterface** getInstance(DOM_Element& a_elemListenerInterfaces, UINT32& r_length);
+			static CAListenerInterface* getInstance(const DOMNode* node);
+			static CAListenerInterface** getInstance(DOMElement* a_elemListenerInterfaces, UINT32& r_length);
 #endif
 			static CAListenerInterface* getInstance(NetworkType type,const UINT8* path); //constructs a Unix Domain ListenerInterface
 			static CAListenerInterface* getInstance(NetworkType type,const UINT8* hostnameOrIP,UINT16 port); //constructs a TCP/IP ListenerInterface
@@ -59,7 +59,7 @@ class CAListenerInterface
 				}
 			char* getHostname() { return (char*)m_strHostname; }
 #ifndef ONLY_LOCAL_PROXY
-			SINT32 toDOMFragment(DOM_DocumentFragment& fragment,DOM_Document& ownerDoc) const;
+			SINT32 toDOMFragment(DOMDocumentFragment* & fragment,XERCES_CPP_NAMESPACE::DOMDocument* ownerDoc) const;
 			static const char* XML_ELEMENT_CONTAINER_NAME;
 			static const char* XML_ELEMENT_NAME;
 #endif

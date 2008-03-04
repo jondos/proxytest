@@ -41,24 +41,24 @@ class CASignature
 			CASignature* clone();
 			SINT32 generateSignKey(UINT32 size);
 			SINT32 setSignKey(const UINT8* buff,UINT32 len,UINT32 type,const char* passwd=NULL);
-			SINT32 setSignKey(const DOM_Node& node,UINT32 type,const char* passwd=NULL);
+			SINT32 setSignKey(const DOMNode* node,UINT32 type,const char* passwd=NULL);
 			/** Gets the secret sign key as XML encode PKCS#12 struct*/
-			SINT32 getSignKey(DOM_DocumentFragment& node,DOM_Document& doc);
+			SINT32 getSignKey(DOMDocumentFragment* node,XERCES_CPP_NAMESPACE::DOMDocument* doc);
 			SINT32 sign(UINT8* in,UINT32 inlen,UINT8* sig,UINT32* siglen);
-			SINT32 signXML(DOM_Node& node,CACertStore* pIncludeCerts=NULL);
+			SINT32 signXML(DOMNode* node,CACertStore* pIncludeCerts=NULL);
 			SINT32 signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen,CACertStore* pIncludeCerts=NULL);
 			SINT32 setVerifyKey(CACertificate* pCert);
 			/**
 			 * Parses the XML representation of a DSA public key
 			 */
-			SINT32 setVerifyKey(const DOM_Element& xmlKey);
+			SINT32 setVerifyKey(const DOMElement* xmlKey);
 			/** Get the public key as XML encoded X509 certificate*/ 
 			SINT32 getVerifyKey(CACertificate**);
 			SINT32 getVerifyKeyHash(UINT8* buff,UINT32* len);
 
 //			SINT32 verify(UINT8* in,UINT32 inlen,UINT8* sig,UINT32 siglen);
 			SINT32 verifyXML(const UINT8* const in,UINT32 inlen);
-			SINT32 verifyXML(DOM_Node& node,CACertStore* pTrustedCerts=NULL);
+			SINT32 verifyXML(DOMNode* node,CACertStore* pTrustedCerts=NULL);
 			SINT32 getSignatureSize();
 			SINT32 encodeRS(UINT8* out,UINT32* outLen,DSA_SIG* pdsaSig);
 			

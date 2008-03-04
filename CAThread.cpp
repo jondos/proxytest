@@ -45,9 +45,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	const char* CAThread::METHOD_END = "End of method";
 #endif
 
-#ifdef _DEBUG
-extern CAThreadList *pThreadList;
+#ifdef DEBUG
+	CAThreadList* CAThread::m_pThreadList=NULL;
 #endif
+
+UINT32 CAThread::ms_LastId=0;
 
 CAThread::CAThread()
 	{
@@ -61,6 +63,8 @@ CAThread::CAThread()
 		m_pThread=NULL;
 #endif
 		m_strName=NULL;
+		m_Id=ms_LastId;
+		ms_LastId++;
 	}
 
 CAThread::CAThread(const UINT8* strName)
@@ -146,9 +150,9 @@ SINT32 CAThread::start(void* param,bool bDaemon,bool bSilent)
 			}
 		#endif
 #ifdef _DEBUG
-		if(pThreadList != NULL)
+		if(m_pThreadList != NULL)
 		{
-			pThreadList->put(this, *m_pThread);
+			m_pThreadList->put(this);
 		}
 
 		else
@@ -198,7 +202,7 @@ SINT32 CAThread::join()
 	{
 #ifdef DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"CAThread %s - join() successful\n", m_strName);
-			pThreadList->remove(*m_pThread);
+			m_pThreadList->remove(this);
 #endif	
 				
 		delete m_pThread;

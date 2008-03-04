@@ -512,19 +512,19 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 #ifndef ONLY_LOCAL_PROXY
 		//Parsing KeyInfo received from Mix n+1
 		MemBufInputSource oInput(buff,len,"localoproxy");
-		DOMParser oParser;
+		XercesDOMParser oParser;
 		oParser.parse(oInput);		
-		DOM_Document doc=oParser.getDocument();
-		if(doc.isNull())
+		XERCES_CPP_NAMESPACE::DOMDocument* doc=oParser.getDocument();
+		if(doc==NULL)
 			{
 				CAMsg::printMsg(LOG_INFO,"Error parsing Key Info from Mix!\n");
 				return E_UNKNOWN;
 			}
 
 
-		DOM_Element root=doc.getDocumentElement();
-		DOM_Element elemVersion;
-		getDOMChildByName(root,(UINT8*)"MixProtocolVersion",elemVersion,false);
+		DOMElement* root=doc->getDocumentElement();
+		DOMElement* elemVersion=NULL;
+		getDOMChildByName(root,"MixProtocolVersion",elemVersion,false);
 		UINT8 strVersion[255];
 		UINT32 tmpLen=255;
 		if(getDOMElementValue(elemVersion,strVersion,&tmpLen)==E_SUCCESS&&tmpLen==3)
@@ -560,8 +560,8 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 			return E_UNKNOWN;
 #endif
 		}
-		DOM_Element elemMixes;
-		getDOMChildByName(root,(UINT8*)"Mixes",elemMixes,false);
+		DOMElement* elemMixes;
+		getDOMChildByName(root,"Mixes",elemMixes,false);
 		SINT32 chainlen=-1;
 		if(elemMixes==NULL||getDOMElementAttribute(elemMixes,"count",&chainlen)!=E_SUCCESS)
 			{
@@ -583,12 +583,12 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 			}
 		UINT32 i=0;
 		m_arRSA=new CAASymCipher[m_chainlen];
-		DOM_Node child=elemMixes.getLastChild();
+		DOMNode* child=elemMixes->getLastChild();
 		while(child!= NULL&&chainlen>0)
 			{
-				if(child.getNodeName().equals("Mix"))
+				if(equals(child->getNodeName(),"Mix"))
 					{
-						DOM_Node nodeKey=child.getFirstChild();
+						DOMNode* nodeKey=child->getFirstChild();
 						if(m_arRSA[i++].setPublicKeyAsDOMNode(nodeKey)!=E_SUCCESS)
 							{
 #ifdef _DEBUG
@@ -598,7 +598,7 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 							}
 						chainlen--;
 					}
-				child=child.getPreviousSibling();
+				child=child->getPreviousSibling();
 			}
 		if(chainlen!=0)
 			{

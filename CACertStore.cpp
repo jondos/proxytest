@@ -28,6 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "StdAfx.h"
 #ifndef ONLY_LOCAL_PROXY
 #include "CACertStore.hpp"
+#include "CAUtil.hpp"
 
 CACertStore::CACertStore()
 	{
@@ -100,19 +101,18 @@ SINT32 CACertStore::encode(UINT8* buff,UINT32* bufflen,UINT32 type)
 	* @retval E_SUCCESS if successful
 	* @retval E_UNKNOWN otherwise
 	*/
-SINT32 CACertStore::encode(DOM_DocumentFragment& docFrag,DOM_Document& doc)
+SINT32 CACertStore::encode(DOMDocumentFragment* & docFrag,XERCES_CPP_NAMESPACE::DOMDocument* doc)
 	{
-		docFrag=doc.createDocumentFragment();
-		DOM_Element elemX509Data=doc.createElement("X509Data");
-		docFrag.appendChild(elemX509Data);
+		docFrag=doc->createDocumentFragment();
+		DOMElement* elemX509Data=createDOMElement(doc,"X509Data");
+		docFrag->appendChild(elemX509Data);
 		LP_CERTSTORE_ENTRY tmp;
 		tmp=m_pCertList;
 		while(tmp!=NULL)
 			{
-				DOM_DocumentFragment tmpFrag;
+				DOMDocumentFragment* tmpFrag;
 				tmp->pCert->encode(tmpFrag,doc);
-				elemX509Data.appendChild(tmpFrag);
-				tmpFrag=0;
+				elemX509Data->appendChild(tmpFrag);
 				tmp=tmp->next;
 			}
 		return E_SUCCESS;

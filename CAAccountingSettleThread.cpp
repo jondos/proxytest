@@ -63,12 +63,12 @@ CAAccountingSettleThread::~CAAccountingSettleThread()
 
 
 void CAAccountingSettleThread::settle()
-{
-	m_pCondition->lock();
-	m_bSleep = false;
-	m_pCondition->signal();
-	m_pCondition->unlock();
-}
+	{
+		m_pCondition->lock();
+		m_bSleep = false;
+		m_pCondition->signal();
+		m_pCondition->unlock();
+	}
 
 /**
  * The main loop. Sleeps for a few minutes, then contacts the BI to settle CCs, 
