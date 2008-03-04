@@ -2125,8 +2125,8 @@ SKIP_NEXT_MIX:
 								else
 		#ifdef HAVE_UNIX_DOMAIN_PROTOCOL
 									{
-										DOM_Element elemFile;
-										getDOMChildByName(elemTargetInterface,(UINT8*)"File",elemFile,false);
+										DOMElement* elemFile;
+										getDOMChildByName(elemTargetInterface,"File",elemFile,false);
 										tmpLen=255;
 										if(getDOMElementValue(elemFile,tmpBuff,&tmpLen)!=E_SUCCESS)
 											continue;

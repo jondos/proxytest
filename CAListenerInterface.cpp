@@ -231,8 +231,8 @@ CAListenerInterface* CAListenerInterface::getInstance(const DOMNode* elemListene
 		else
 			#ifdef HAVE_UNIX_DOMAIN_PROTOCOL
 				{
-					DOM_Element elemFile;
-					getDOMChildByName(elemListenerInterface,(UINT8*)"File",elemFile,false);
+					DOMElement* elemFile;
+					getDOMChildByName(elemListenerInterface,"File",elemFile,false);
 					tmpLen=255;
 					if(getDOMElementValue(elemFile,tmpBuff,&tmpLen)!=E_SUCCESS)
 						goto ERR;
