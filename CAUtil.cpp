@@ -574,6 +574,7 @@ SINT32 getDOMElementAttribute(const DOMNode * const elem,const char* attrName,bo
 
 SINT32 getDOMChildByName(const DOMNode* pNode,const XMLCh* const name,DOMNode* & a_child,bool deep)
 	{
+		a_child=NULL;
 		if(pNode==NULL)
 			return E_UNKNOWN;
 		DOMNode *pChild=pNode->getFirstChild();
@@ -597,6 +598,7 @@ SINT32 getDOMChildByName(const DOMNode* pNode,const XMLCh* const name,DOMNode* &
 
 SINT32 getDOMChildByName(const DOMNode* pNode,const char* const name,DOMNode* & a_child,bool deep)
 	{
+		a_child=NULL;
 		if(pNode==NULL)
 			return E_UNKNOWN;
 		XMLCh* tmpName=XMLString::transcode((const char * const)name);
@@ -607,6 +609,7 @@ SINT32 getDOMChildByName(const DOMNode* pNode,const char* const name,DOMNode* & 
 
 SINT32 getLastDOMChildByName(const DOMNode* pNode,const char* const name,DOMNode* & a_child)
 	{
+		a_child=NULL;
 		if(pNode==NULL)
 			return E_UNKNOWN;
 		XMLCh* tmpName=XMLString::transcode((const char * const)name);
@@ -617,6 +620,7 @@ SINT32 getLastDOMChildByName(const DOMNode* pNode,const char* const name,DOMNode
 
 SINT32 getLastDOMChildByName(const DOMNode* pNode,const XMLCh* const name,DOMNode* & a_child)
 	{
+		a_child=NULL;
 		if(pNode==NULL)
 			{
 				return E_UNKNOWN;

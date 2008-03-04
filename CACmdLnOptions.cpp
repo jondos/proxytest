@@ -179,9 +179,9 @@ SINT32 CACmdLnOptions::addVisibleAddresses(DOMNode* nodeProxy)
 			return E_UNKNOWN;
 		if(!equals(nodeProxy->getNodeName(),"Proxy"))
 			return E_UNKNOWN;
-		DOMNode* elemVisAdresses;
+		DOMNode* elemVisAdresses=NULL;
 		getDOMChildByName(nodeProxy,"VisibleAddresses",elemVisAdresses);
-		DOMNode* elemVisAddress;
+		DOMNode* elemVisAddress=NULL;
 		getDOMChildByName(elemVisAdresses,"VisibleAddress",elemVisAddress);
 		while(elemVisAddress!=NULL)
 			{
@@ -1639,12 +1639,12 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 		
 		
 		//nextMixCertificate if given
-		DOMElement* elemNextCert;
+		DOMElement* elemNextCert=NULL;
 		getDOMChildByName(elemCertificates,"NextMixCertificate",elemNextCert,false);
 		if(elemNextCert!=NULL)
 			m_pNextMixCertificate=CACertificate::decode(elemNextCert->getFirstChild(),CERT_X509CERTIFICATE);
 		//prevMixCertificate if given
-		DOMElement* elemPrevCert;
+		DOMElement* elemPrevCert=NULL;
 		getDOMChildByName(elemCertificates,"PrevMixCertificate",elemPrevCert,false);
 		if(elemPrevCert!=NULL)
 			m_pPrevMixCertificate=CACertificate::decode(elemPrevCert->getFirstChild(),CERT_X509CERTIFICATE);
@@ -1932,7 +1932,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 	    }
 		 
 		//get ListenerInterfaces
-		DOMElement* elemListenerInterfaces;
+		DOMElement* elemListenerInterfaces=NULL;
 		getDOMChildByName(elemNetwork,CAListenerInterface::XML_ELEMENT_CONTAINER_NAME,elemListenerInterfaces,false);
 		m_arListenerInterfaces = CAListenerInterface::getInstance(
 			elemListenerInterfaces, m_cnListenerInterfaces);
@@ -1951,13 +1951,13 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 		m_cnTargets=0;
 		TargetInterface* targetInterfaceNextMix=NULL;
 		//NextMix --> only one!!
-		DOMElement* elemNextMix;
+		DOMElement* elemNextMix=NULL;
 		getDOMChildByName(elemNetwork,"NextMix",elemNextMix,false);
 		if(elemNextMix!=NULL)
 			{
 				NetworkType type;
 				CASocketAddr* addr=NULL;
-				DOMElement* elemType;
+				DOMElement* elemType=NULL;
 				getDOMChildByName(elemNextMix,"NetworkProtocol",elemType,false);
 				tmpLen=255;
 				if(getDOMElementValue(elemType,tmpBuff,&tmpLen)!=E_SUCCESS)
@@ -1975,9 +1975,9 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 					goto SKIP_NEXT_MIX;
 				if(type==SSL_TCP||type==RAW_TCP)
 					{
-						DOMElement* elemPort;
-						DOMElement* elemHost;
-            DOMElement* elemIP;
+						DOMElement* elemPort=NULL;
+						DOMElement* elemHost=NULL;
+            DOMElement* elemIP=NULL;
             UINT8 buffHost[255];
             UINT32 buffHostLen=255;
 						UINT16 port;
@@ -2013,7 +2013,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 				else
 #ifdef HAVE_UNIX_DOMAIN_PROTOCOL
 					{
-						DOMElement* elemFile;
+						DOMElement* elemFile=NULL;
 						getDOMChildByName(elemNextMix,"File",elemFile,false);
 						tmpLen=255;
 						if(getDOMElementValue(elemFile,tmpBuff,&tmpLen)!=E_SUCCESS)
@@ -2038,11 +2038,11 @@ SKIP_NEXT_MIX:
 
 		//Next Proxies and visible adresses
 		clearVisibleAddresses();
-		DOMElement* elemProxies;
+		DOMElement* elemProxies=NULL;
 		getDOMChildByName(elemNetwork,"Proxies",elemProxies,false);
 		if(elemProxies!=NULL)
 			{
-				DOMNodeList* nlTargetInterfaces;
+				DOMNodeList* nlTargetInterfaces=NULL;
 				nlTargetInterfaces=getElementsByTagName(elemProxies,"Proxy");
 				m_cnTargets+=nlTargetInterfaces->getLength();
 				if(nlTargetInterfaces->getLength()>0)
@@ -2058,7 +2058,7 @@ SKIP_NEXT_MIX:
 								if(addr!=NULL)
 									delete addr;
 								addr=NULL;
-								DOMNode* elemTargetInterface;
+								DOMNode* elemTargetInterface=NULL;
 								elemTargetInterface=nlTargetInterfaces->item(i);
 								DOMElement* elemType;
 								getDOMChildByName(elemTargetInterface,"NetworkProtocol",elemType,false);

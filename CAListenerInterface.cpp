@@ -160,7 +160,7 @@ CAListenerInterface* CAListenerInterface::getInstance(const DOMNode* elemListene
 		CAListenerInterface* pListener=new CAListenerInterface();
 		getDOMElementAttribute(elemListenerInterface,"hidden",pListener->m_bHidden);
 		getDOMElementAttribute(elemListenerInterface,"virtual",pListener->m_bVirtual);
-		DOMNode* elemType;
+		DOMNode* elemType=NULL;
 		getDOMChildByName(elemListenerInterface,"NetworkProtocol",elemType,false);
 		if (elemType == NULL)
 		{
@@ -196,9 +196,9 @@ CAListenerInterface* CAListenerInterface::getInstance(const DOMNode* elemListene
 		if(pListener->m_Type==SSL_TCP||pListener->m_Type==RAW_TCP
 		   ||pListener->m_Type==HTTP_TCP)
 			{ 
-				DOMNode* elemIP;
-				DOMElement* elemPort;
-				DOMNode* elemHost;
+				DOMNode* elemIP=NULL;
+				DOMElement* elemPort=NULL;
+				DOMNode* elemHost=NULL;
 				getDOMChildByName(elemListenerInterface,"Port",elemPort,false);
 				UINT32 port;
 				if(getDOMElementValue(elemPort,&port)!=E_SUCCESS)
@@ -231,7 +231,7 @@ CAListenerInterface* CAListenerInterface::getInstance(const DOMNode* elemListene
 		else
 			#ifdef HAVE_UNIX_DOMAIN_PROTOCOL
 				{
-					DOMElement* elemFile;
+					DOMElement* elemFile=NULL;
 					getDOMChildByName(elemListenerInterface,"File",elemFile,false);
 					tmpLen=255;
 					if(getDOMElementValue(elemFile,tmpBuff,&tmpLen)!=E_SUCCESS)
