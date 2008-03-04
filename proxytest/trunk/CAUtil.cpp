@@ -644,7 +644,7 @@ SINT32 getDOMElementValue(const DOMNode * const pElem,UINT8* value,UINT32* value
 		DOMNode*  pText=pElem->getFirstChild();
 		UINT32 spaceLeft=*valuelen;
 		*valuelen=0;
-		while(!pText!=NULL)
+		while(pText!=NULL)
 			{
 				if(pText->getNodeType()==DOMNode::TEXT_NODE)
 					{
