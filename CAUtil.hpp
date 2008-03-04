@@ -61,6 +61,10 @@ SINT32 filelength(int handle);
 #endif
 
 #ifndef ONLY_LOCAL_PROXY
+/** Parses  a buffer containing an XML document and returns this document.
+	*/
+XERCES_CPP_NAMESPACE::DOMDocument* parseDOMDocument(const UINT8* const buff, UINT32 len);
+
 /** Creates an empty DOM DOcument.
 	*/
 XERCES_CPP_NAMESPACE::DOMDocument* createDOMDocument();
