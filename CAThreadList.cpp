@@ -97,15 +97,15 @@ CAThread *CAThreadList::get(CAThread *thread)
 void CAThreadList::showAll() const
 {
 	m_pListLock->lock();
-	thread_list_entry_t *iterator;
 	
 	if(m_pHead == NULL)
 	{
 		CAMsg::printMsg(LOG_INFO, "CAThreadList::showAll: list is empty, no threads found\n");
+		m_pListLock->unlock();
 		return;
 	}
 	
-	iterator = m_pHead;
+	thread_list_entry_t *iterator = m_pHead;
 	do 
 	{
 		CAMsg::printMsg(LOG_INFO, "CAThreadList::showAll: Thread %s, id %u\n", 
@@ -119,15 +119,15 @@ void CAThreadList::showAll() const
 // This only deletes the list entries not the corresponding threads!
 void CAThreadList::removeAll()
 {
-	thread_list_entry_t *iterator;
+	thread_list_entry_t* iterator=NULL;
 	
 	while(m_pHead != NULL)
-	{
-		iterator=m_pHead->tle_next;
+		{
+			iterator=m_pHead->tle_next;
 
-		CAMsg::printMsg(LOG_INFO, "CAThreadList::removeAll: Thread %s, id %x\n", 
-										m_pHead->tle_thread->getName(),
-										m_pHead->tle_thread->getID());
+			CAMsg::printMsg(LOG_INFO, "CAThreadList::removeAll: Thread %s, id %u\n", 
+											m_pHead->tle_thread->getName(),
+											m_pHead->tle_thread->getID());
 			delete m_pHead;
 			m_pHead=iterator;
 		}
