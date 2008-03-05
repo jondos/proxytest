@@ -416,7 +416,7 @@ XERCES_CPP_NAMESPACE::DOMDocument* parseDOMDocument(const UINT8* const buff, UIN
 
 DOMElement* createDOMElement(XERCES_CPP_NAMESPACE::DOMDocument* pOwnerDoc,const char * const name)
 	{
-		XMLCh* n=XMLString::transcode(name)
+		XMLCh* n=XMLString::transcode(name);
 		DOMElement* ret=pOwnerDoc->createElement(n);
 		XMLString::release(&n);
 		return ret;
