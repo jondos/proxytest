@@ -61,6 +61,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_pLogEncryptionCertificate=NULL;
 		m_bIsEncryptedLogEnabled=false;
 		m_docMixInfo=NULL;
+		m_docMixXml=NULL;
 		m_bAcceptReconfiguration=false;
 #endif //ONLY_LOCAL_PROXY
 		m_iTargetPort=m_iSOCKSPort=m_iSOCKSServerPort=0xFFFF;
@@ -310,6 +311,12 @@ void CACmdLnOptions::clean()
 		if(m_pLogEncryptionCertificate!=NULL)
 			delete m_pLogEncryptionCertificate;
 		m_pLogEncryptionCertificate=NULL;
+		if(m_docMixInfo!=NULL)
+			m_docMixInfo->release();
+		m_docMixInfo=NULL;
+		if(m_docMixXml!=NULL)
+			m_docMixXml->release();
+		m_docMixXml=NULL;
 #endif //ONLY_LOCAL_PROXY
 }
 
@@ -1039,7 +1046,7 @@ THREAD_RETURN threadReConfigure(void *param)
 		//pOptions->m_pcsReConfigure->lock();
 		CAMsg::printMsg(LOG_DEBUG,"ReConfiguration of the Mix is under way....\n");
 		CACmdLnOptions otmpOptions;
-		XERCES_CPP_NAMESPACE::DOMDocument* docConfig;
+		XERCES_CPP_NAMESPACE::DOMDocument* docConfig=NULL;
 		if(otmpOptions.readXmlConfiguration(docConfig,pOptions->m_strConfigFile)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_DEBUG,"Could not re-read the config file!\n");
@@ -1323,6 +1330,7 @@ bool CACmdLnOptions::isLocalProxy()
     }
 
 #ifndef ONLY_LOCAL_PROXY
+
 /** Returns the XML tree describing the Mix . This is NOT a copy!
 	* @param docMixInfo destination for the XML tree
 	*	@retval E_SUCCESS if it was successful
@@ -1331,22 +1339,21 @@ bool CACmdLnOptions::isLocalProxy()
 SINT32 CACmdLnOptions::getMixXml(XERCES_CPP_NAMESPACE::DOMDocument* & docMixInfo)
 	{
 		docMixInfo=m_docMixInfo;
-	//insert (or update) the Timestamp
-	DOMElement* elemTimeStamp=NULL;
-	DOMElement* elemRoot=docMixInfo->getDocumentElement();
-	if(getDOMChildByName(elemRoot,"LastUpdate",elemTimeStamp,false)!=E_SUCCESS)
-	{
-		elemTimeStamp=createDOMElement(docMixInfo,"LastUpdate");
-		elemRoot->appendChild(elemTimeStamp);
-	}
-	UINT64 currentMillis;
-	getcurrentTimeMillis(currentMillis);
-	UINT8 tmpStrCurrentMillis[50];
-	print64(tmpStrCurrentMillis,currentMillis);
-	setDOMElementValue(elemTimeStamp,tmpStrCurrentMillis);		
-	
+		//insert (or update) the Timestamp
+		DOMElement* elemTimeStamp=NULL;
+		DOMElement* elemRoot=docMixInfo->getDocumentElement();
+		if(getDOMChildByName(elemRoot,"LastUpdate",elemTimeStamp,false)!=E_SUCCESS)
+			{
+				elemTimeStamp=createDOMElement(docMixInfo,"LastUpdate");
+				elemRoot->appendChild(elemTimeStamp);
+			}
+		UINT64 currentMillis;
+		getcurrentTimeMillis(currentMillis);
+		UINT8 tmpStrCurrentMillis[50];
+		print64(tmpStrCurrentMillis,currentMillis);
+		setDOMElementValue(elemTimeStamp,tmpStrCurrentMillis);
 		return E_SUCCESS;
-}
+	}
 
 /** Tries to read the XML configuration file \c configFile and parses (but not process) it.
 	* Returns the parsed document as \c DOM_Document.
@@ -1403,7 +1410,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 		if(docConfig==NULL)
 			return E_UNKNOWN;
 		DOMElement* elemRoot=docConfig->getDocumentElement();
-		DOMElement* elemGeneral;
+		DOMElement* elemGeneral=NULL;
 		if (getDOMChildByName(elemRoot,"General",elemGeneral,false) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_CRIT,"No \"General\" node found in configuration file!\n");

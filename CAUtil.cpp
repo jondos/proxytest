@@ -500,7 +500,11 @@ SINT32 setDOMElementAttribute(DOMNode* pElem,const char* attrName,const UINT8* v
 	{
 		if(pElem==NULL||pElem->getNodeType()!=DOMNode::ELEMENT_NODE||attrName==NULL||value==NULL)
 			return E_UNKNOWN;
-		((DOMElement*)pElem)->setAttribute(XMLString::transcode(attrName),XMLString::transcode((const char*)value));
+		XMLCh* name=XMLString::transcode(attrName);
+		XMLCh* val=XMLString::transcode((const char*)value);
+		((DOMElement*)pElem)->setAttribute(name,val);
+		XMLString::release(&name);
+		XMLString::release(&val);
 		return E_SUCCESS;
 	}
 
@@ -515,17 +519,19 @@ SINT32 getDOMElementAttribute(const DOMNode * const elem,const char* attrName,UI
 	{
 		if(elem==NULL||attrName==NULL||value==NULL||len==NULL||elem->getNodeType()!=DOMNode::ELEMENT_NODE)
 			return E_UNKNOWN;
-		const XMLCh* tmpCh=((DOMElement*)elem)->getAttribute(XMLString::transcode(attrName));
+		XMLCh* name=XMLString::transcode(attrName);
+		const XMLCh* tmpCh=((DOMElement*)elem)->getAttribute(name);
+		XMLString::release(&name);
 		char* tmpStr=XMLString::transcode(tmpCh);
 		UINT32 l=strlen(tmpStr);
 		if(l>=*len)
 			{
-				delete[] tmpStr;
+				XMLString::release(&tmpStr);
 				return E_SPACE;
 			}
 		*len=l;
 		memcpy(value,tmpStr,l+1);
-		delete[] tmpStr;
+		XMLString::release(&tmpStr);
 		return E_SUCCESS;
 	}
 
@@ -672,13 +678,13 @@ SINT32 getDOMElementValue(const DOMNode * const pElem,UINT8* value,UINT32* value
 						if(tmpStrLen>=spaceLeft)
 							{							
 								*valuelen=tmpStrLen+1;
-								delete[] tmpStr;
+								XMLString::release(&tmpStr);
 								return E_SPACE;
 							}
 						memcpy(value+(*valuelen),tmpStr,tmpStrLen);
 						*valuelen+=tmpStrLen;
 						spaceLeft-=tmpStrLen;
-						delete[] tmpStr;
+						XMLString::release(&tmpStr);
 					}
 				pText=pText->getNextSibling();
 			}
@@ -806,12 +812,14 @@ SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, const UINT8* const xml, 
 	{
 		XERCES_CPP_NAMESPACE::DOMDocument* pDoc=parseDOMDocument(xml,xmllen);
 		DOMElement* root=pDoc->getDocumentElement();
-		return decodeXMLEncryptedKey(key,keylen,root,pRSA);
+		SINT32 ret=decodeXMLEncryptedKey(key,keylen,root,pRSA);
+		pDoc->release();
+		return ret;
 	}
 
 SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen,const DOMNode* root,CAASymCipher* pRSA)
 	{
-		DOMNode* elemCipherValue;
+		DOMNode* elemCipherValue=NULL;
 		if(getDOMChildByName(root,"CipherValue",elemCipherValue,true)!=E_SUCCESS)
 			return E_UNKNOWN;
 		UINT8 buff[2048];
@@ -854,17 +862,15 @@ SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen,const DOMNode* root,CAASy
 	*/
 SINT32 encryptXMLElement(DOMNode* node, CAASymCipher* pRSA)
 	{
-		XERCES_CPP_NAMESPACE::DOMDocument* doc;
-		DOMNode* parent;
+		XERCES_CPP_NAMESPACE::DOMDocument* doc=node->getOwnerDocument();
+		DOMNode* parent=NULL;
 		if(node->getNodeType()==DOMNode::DOCUMENT_NODE)
 			{
-				doc=(XERCES_CPP_NAMESPACE::DOMDocument*)node;
 				parent=doc;
 				node=doc->getDocumentElement();
 			}
 		else
 			{
-				doc=node->getOwnerDocument();
 				parent=node->getParentNode();
 			}
 		DOMElement* elemRoot=createDOMElement(doc,"EncryptedData");
@@ -909,12 +915,14 @@ SINT32 encryptXMLElement(DOMNode* node, CAASymCipher* pRSA)
 		delete[] pBuff;
 		if(parent->getNodeType()==DOMNode::DOCUMENT_NODE)
 			{
-				parent->removeChild(node);
+				DOMNode* n=parent->removeChild(node);
+				n->release();
 				parent->appendChild(elemRoot);
 			}
 		else
 			{
-				parent->replaceChild(elemRoot,node);
+				DOMNode* n=parent->replaceChild(elemRoot,node);
+				n->release();
 			}
 		return E_SUCCESS;
 	}
@@ -977,11 +985,11 @@ SINT32 decryptXMLElement(DOMNode* node, CAASymCipher* pRSA)
 		XERCES_CPP_NAMESPACE::DOMDocument* doc=node->getOwnerDocument();
 		if(! XMLString::equals(node->getNodeName(),XMLString::transcode("EncryptedData")))
 			return E_UNKNOWN;
-		DOMNode* elemKeyInfo;
+		DOMNode* elemKeyInfo=NULL;
 		getDOMChildByName(node,"ds:KeyInfo",elemKeyInfo,false);
-		DOMNode* elemEncKey;
+		DOMNode* elemEncKey=NULL;
 		getDOMChildByName(elemKeyInfo,"EncryptedKey",elemEncKey,false);
-		DOMNode* elemCipherValue;
+		DOMNode* elemCipherValue=NULL;
 		getDOMChildByName(elemEncKey,"CipherValue",elemCipherValue,true);
 		UINT8* cipherValue=new UINT8[1000];
 		UINT32 len=1000;
@@ -1001,7 +1009,7 @@ SINT32 decryptXMLElement(DOMNode* node, CAASymCipher* pRSA)
 		pSymCipher->setKey(cipherValue,false);
 		pSymCipher->setIVs(cipherValue+16);
 
-		DOMNode* elemCipherData;
+		DOMNode* elemCipherData=NULL;
 		getDOMChildByName(node,"CipherData",elemCipherData,false);
 		getDOMChildByName(elemCipherData,"CipherValue",elemCipherValue,false);
 		len=1000;
@@ -1023,17 +1031,27 @@ SINT32 decryptXMLElement(DOMNode* node, CAASymCipher* pRSA)
 		XERCES_CPP_NAMESPACE::DOMDocument* docPlain=parseDOMDocument(cipherValue,len);
 		delete[] cipherValue;		
 		DOMNode* elemPlainRoot=NULL;
-		if(docPlain==NULL||(elemPlainRoot=docPlain->getDocumentElement())==NULL)
+		if(docPlain==NULL)
 			return E_UNKNOWN;
+		if((elemPlainRoot=docPlain->getDocumentElement())==NULL)
+			{
+				docPlain->release();
+				return E_UNKNOWN;
+			}
 		elemPlainRoot=doc->importNode(elemPlainRoot,true);	
 		DOMNode* parent=node->getParentNode();
 		if(parent->getNodeType()==DOMNode::DOCUMENT_NODE)
 			{
-				parent->removeChild(node);
+				DOMNode* n=parent->removeChild(node);
+				n->release();
 				parent->appendChild(elemPlainRoot);
 			}
 		else	
-			parent->replaceChild(elemPlainRoot,node);	
+			{
+				DOMNode* n=parent->replaceChild(elemPlainRoot,node);	
+				n->release();
+			}
+		docPlain->release();
 		return E_SUCCESS;
 	}
 #endif //ONLY_LOCAL_PROXY

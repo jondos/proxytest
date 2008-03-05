@@ -133,7 +133,7 @@ public:
 	* what type of message we have and sends the appropriate handle...() 
 	* function to the ai thread.
 	*/
-	SINT32 static processJapMessage(fmHashTableEntry * pHashEntry,const DOM_Document& a_DomDoc);
+	SINT32 static processJapMessage(fmHashTableEntry * pHashEntry,const  XERCES_CPP_NAMESPACE::DOMDocument* a_DomDoc);
 	
 	UINT32 static getNrOfUsers();
 	
@@ -152,7 +152,7 @@ private:
 	{
 		DOM_Document*			pDomDoc;
 		tAiAccountingInfo*		pAccInfo;
-		void (CAAccountingInstance::*handleFunc)(tAiAccountingInfo*,DOM_Element&);
+		void (CAAccountingInstance::*handleFunc)(tAiAccountingInfo*,DOMElement*);
 	};
 	typedef struct t_aiqueueitem aiQueueItem;
 
