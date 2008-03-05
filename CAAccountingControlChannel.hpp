@@ -48,6 +48,6 @@ class CAAccountingControlChannel : public CASyncControlChannel
 			SINT32 processXMLMessage(const  XERCES_CPP_NAMESPACE::DOMDocument* a_doc);
 
 		private:
-			fmHashTableEntry * m_pHashEntry;
+			fmHashTableEntry* m_pHashEntry;
 	};
 #endif

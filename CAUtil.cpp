@@ -401,17 +401,25 @@ bool equals(const XMLCh* const e1,const char* const e2)
 	}
 
 XercesDOMParser* theDOMParser=NULL;
+CAMutex* theParseDOMDocumentLock=NULL;
 
 XERCES_CPP_NAMESPACE::DOMDocument* parseDOMDocument(const UINT8* const buff, UINT32 len)
 	{
 		if(theDOMParser==NULL)
-			theDOMParser=new XercesDOMParser();
+			{
+				theParseDOMDocumentLock=new CAMutex();
+				theParseDOMDocumentLock->lock();
+				theDOMParser=new XercesDOMParser();
+			}
+		else
+			theParseDOMDocumentLock->lock();
 	  MemBufInputSource in(buff,len,"tmpBuff");
 		theDOMParser->parse(in);
-		if(theDOMParser->getErrorCount()>0)
-			return NULL;
-		return theDOMParser->getDocument();
-		
+		XERCES_CPP_NAMESPACE::DOMDocument* ret=NULL;
+		if(theDOMParser->getErrorCount()==0)
+			ret=theDOMParser->getDocument();
+		theParseDOMDocumentLock->unlock();
+		return ret;
 	}
 
 DOMElement* createDOMElement(XERCES_CPP_NAMESPACE::DOMDocument* pOwnerDoc,const char * const name)
