@@ -49,9 +49,9 @@ class CASyncControlChannel : public CAAbstractControlChannel
 				}
 
 		/**Override this method to receive a XML Message.
-			* Note: The DOM_Document reference is valid onyl within this call!
+			* Note: The DOMDocument reference is valid only within this call, i.e. will be delete afterwards form the caller!
 			* If you need to store it for later processing, make a copy of
-			* the DOM_Document using docMsg.cloneNode(true)
+			* the DOMDocument using docMsg->cloneNode(true)
 			*/
 		virtual SINT32 processXMLMessage(const XERCES_CPP_NAMESPACE::DOMDocument* docMsg)=0;
 
@@ -108,7 +108,9 @@ class CASyncControlChannel : public CAAbstractControlChannel
 				#ifdef DEBUG
 					CAMsg::printMsg(LOG_DEBUG,"CASyncControlChannel::proccessMessageComplete() call processXMLMessage()\n");
 				#endif
-				return processXMLMessage(doc);
+				SINT32 ret=processXMLMessage(doc);
+				doc->release();
+				return ret;
 			}
 
 		///buffer for assembling the parts of the message

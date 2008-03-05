@@ -1000,7 +1000,7 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 
 		DOMElement* root = a_DomDoc->getDocumentElement();
 		char* docElementName = XMLString::transcode(root->getTagName());		
-		aiQueueItem* pItem;
+		aiQueueItem* pItem=NULL;
 		void (CAAccountingInstance::*handleFunc)(tAiAccountingInfo*,DOMElement*) = NULL;
 		SINT32 ret;
 
@@ -1129,6 +1129,7 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 			XERCES_CPP_NAMESPACE::DOMDocument* errDoc=NULL;
 			err.toXmlDocument(errDoc);
 			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
+			errDoc->release();
 			pAccInfo->mutex->unlock();
 			return ;
 		}
@@ -1142,6 +1143,7 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 			XERCES_CPP_NAMESPACE::DOMDocument* errDoc=NULL;
 			err.toXmlDocument(errDoc);
 			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
+			errDoc->release();
 			pAccInfo->mutex->unlock();
 			return ;
 		}		
@@ -1159,6 +1161,7 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 				XERCES_CPP_NAMESPACE::DOMDocument* errDoc=NULL;
 				err.toXmlDocument(errDoc);
 				pAccInfo->pControlChannel->sendXMLMessage(errDoc);
+				errDoc->release();
 				pAccInfo->mutex->unlock();
 				return ;
 			}
@@ -1175,6 +1178,7 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 			XERCES_CPP_NAMESPACE::DOMDocument* errDoc=NULL;
 			err.toXmlDocument(errDoc);
 			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
+			errDoc->release();
 			pAccInfo->mutex->unlock();
 			return ;
 		}
@@ -1193,6 +1197,7 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 		XERCES_CPP_NAMESPACE::DOMDocument* errDoc=NULL;
 		err.toXmlDocument(errDoc);
 		pAccInfo->pControlChannel->sendXMLMessage(errDoc);
+		errDoc->release();
 		pAccInfo->mutex->unlock();
 		return ;
 	}
@@ -1606,6 +1611,7 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 		XERCES_CPP_NAMESPACE::DOMDocument* errDoc=NULL;
 		err.toXmlDocument(errDoc);
 		pAccInfo->pControlChannel->sendXMLMessage(errDoc);
+		errDoc->release();
 		delete pCC;
 		pAccInfo->mutex->unlock();
 		return;
@@ -1626,6 +1632,7 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 		XERCES_CPP_NAMESPACE::DOMDocument* errDoc=NULL;
 		err.toXmlDocument(errDoc);
 		pAccInfo->pControlChannel->sendXMLMessage(errDoc);
+		errDoc->release();
 		delete pCC;
 		pAccInfo->mutex->unlock();
 		return;
@@ -1670,6 +1677,7 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 		XERCES_CPP_NAMESPACE::DOMDocument* errDoc=NULL;
 		err.toXmlDocument(errDoc);
 		pAccInfo->pControlChannel->sendXMLMessage(errDoc);
+		errDoc->release();
 		delete pCC;
 		pAccInfo->mutex->unlock();
 		return;
