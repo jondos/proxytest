@@ -394,7 +394,10 @@ SINT32 filelength(int handle)
 #ifndef ONLY_LOCAL_PROXY
 bool equals(const XMLCh* const e1,const char* const e2)
 	{
-		return XMLString::equals(e1,XMLString::transcode(e2));
+		XMLCh* e3=XMLString::transcode(e2);
+		bool ret=XMLString::equals(e1,e3);
+		XMLString::release(&e3);
+		return ret;
 	}
 
 XercesDOMParser* theDOMParser=NULL;
@@ -413,7 +416,10 @@ XERCES_CPP_NAMESPACE::DOMDocument* parseDOMDocument(const UINT8* const buff, UIN
 
 DOMElement* createDOMElement(XERCES_CPP_NAMESPACE::DOMDocument* pOwnerDoc,const char * const name)
 	{
-		return pOwnerDoc->createElement(XMLString::transcode(name));
+		XMLCh* n=XMLString::transcode(name)
+		DOMElement* ret=pOwnerDoc->createElement(n);
+		XMLString::release(&n);
+		return ret;
 	}
 
 SINT32 getDOMChildByName(const DOMNode* pNode,const char * const name,DOMElement* & child,bool deep)
@@ -425,7 +431,7 @@ DOMNodeList* getElementsByTagName(DOMElement* pElem,const char* const name)
 	{
 		XMLCh* tmpCh=XMLString::transcode(name);
 		DOMNodeList* ret=pElem->getElementsByTagName(tmpCh);
-		delete[] tmpCh;
+		XMLString::release(&tmpCh);
 		return ret;
 	}
 
@@ -436,7 +442,10 @@ SINT32 getLastDOMChildByName(const DOMNode* pNode,const char * const name,DOMEle
 
 DOMText* createDOMText(XERCES_CPP_NAMESPACE::DOMDocument* pOwnerDoc,const char * const text)
 	{
-		return pOwnerDoc->createTextNode(XMLString::transcode(text));
+		XMLCh* t=XMLString::transcode(text);
+		DOMText* ret= pOwnerDoc->createTextNode(t);
+		XMLString::release(&t);
+		return ret;
 	}
 
 XERCES_CPP_NAMESPACE::DOMDocument* createDOMDocument()
@@ -480,6 +489,7 @@ SINT32 setDOMElementValue(DOMElement* pElem,const UINT8* value)
 	{
 		XMLCh* val=XMLString::transcode((const char *)value);
 		DOMText* pText=pElem->getOwnerDocument()->createTextNode(val);
+		XMLString::release(&val);
 		//Remove all "old" text Elements...
 		DOMNode* pChild=pElem->getFirstChild();
 		while(pChild!=NULL)
@@ -983,7 +993,7 @@ UINT8* encryptXMLElement(UINT8* inbuff,UINT32 inlen,UINT32& outlen,CAASymCipher*
 SINT32 decryptXMLElement(DOMNode* node, CAASymCipher* pRSA)
 	{
 		XERCES_CPP_NAMESPACE::DOMDocument* doc=node->getOwnerDocument();
-		if(! XMLString::equals(node->getNodeName(),XMLString::transcode("EncryptedData")))
+		if(! equals(node->getNodeName(),"EncryptedData"))
 			return E_UNKNOWN;
 		DOMNode* elemKeyInfo=NULL;
 		getDOMChildByName(node,"ds:KeyInfo",elemKeyInfo,false);

@@ -346,7 +346,7 @@ SINT32 CAASymCipher::setPublicKeyAsDOMNode(DOMNode* node)
 										char* tmpStr=XMLString::transcode(child->getFirstChild()->getNodeValue());
 										decLen=4096;
 										CABase64::decode((UINT8*)tmpStr,strlen(tmpStr),decBuff,&decLen);
-										delete[] tmpStr;
+										XMLString::release(&tmpStr);
 										tmpRSA->n=BN_bin2bn(decBuff,decLen,NULL);
 									}
 								else if(equals(child->getNodeName(),"Exponent"))
@@ -356,7 +356,7 @@ SINT32 CAASymCipher::setPublicKeyAsDOMNode(DOMNode* node)
 										char* tmpStr=XMLString::transcode(child->getFirstChild()->getNodeValue());
 										decLen=4096;
 										CABase64::decode((UINT8*)tmpStr,strlen(tmpStr),decBuff,&decLen);
-										delete[] tmpStr;
+										XMLString::release(&tmpStr);
 										tmpRSA->e=BN_bin2bn(decBuff,decLen,NULL);
 									}
 								child=child->getNextSibling();
