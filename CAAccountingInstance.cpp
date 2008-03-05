@@ -50,7 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 
 extern CACmdLnOptions* pglobalOptions;
 
-DOM_Document CAAccountingInstance::m_preparedCCRequest;
+XERCES_CPP_NAMESPACE::DOMDocument* CAAccountingInstance::m_preparedCCRequest;
 
 const SINT32 CAAccountingInstance::HANDLE_PACKET_CONNECTION_OK = 1;
 const SINT32 CAAccountingInstance::HANDLE_PACKET_CONNECTION_UNCHECKED = 4;
@@ -235,7 +235,7 @@ THREAD_RETURN CAAccountingInstance::processThread(void* a_param)
 	
 	aiQueueItem* item = (aiQueueItem*)a_param;
 	bool bDelete = false;
-	DOM_Element elem = item->pDomDoc->getDocumentElement();
+	DOMElement* elem = item->pDomDoc->getDocumentElement();
 	
 	// call the handle function
 	(ms_pInstance->*(item->handleFunc))(item->pAccInfo, elem);
@@ -762,7 +762,7 @@ SINT32 CAAccountingInstance::returnPrepareKickout(tAiAccountingInfo* pAccInfo, C
 	if (a_error)
 	{
 		//CAMsg::printMsg(LOG_CRIT, "AccountingInstance: Sending error message...\n");
-		DOM_Document doc;												
+		XERCES_CPP_NAMESPACE::DOMDocument* doc=NULL;												
 		a_error->toXmlDocument(doc);			
 		delete a_error;
 		//pAccInfo->sessionPackets = 0; // allow some pakets to pass by to send the control message
@@ -783,7 +783,7 @@ SINT32 CAAccountingInstance::sendCCRequest(tAiAccountingInfo* pAccInfo)
 	//INIT_STACK;
 	//BEGIN_STACK("CAAccountingInstance::sendCCRequest");
 	
-	DOM_Document doc;                
+		XERCES_CPP_NAMESPACE::DOMDocument* doc=NULL;                
     UINT32 prepaidInterval;
     
     pAccInfo->authFlags |= AUTH_SENT_CC_REQUEST;
@@ -833,33 +833,33 @@ SINT32 CAAccountingInstance::sendCCRequest(tAiAccountingInfo* pAccInfo)
  */
 SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName)
 {	
-	m_preparedCCRequest = DOM_Document::createDocument();
+	m_preparedCCRequest = createDOMDocument();
 	
-	DOM_Element elemRoot = m_preparedCCRequest.createElement("PayRequest");
-	elemRoot.setAttribute("version", "1.0");
-	m_preparedCCRequest.appendChild(elemRoot);
-	DOM_Element elemCC = m_preparedCCRequest.createElement("CC");
-	elemCC.setAttribute("version", "1.2");
-	elemRoot.appendChild(elemCC);
-	DOM_Element elemAiName = m_preparedCCRequest.createElement("AiID");
+	DOMElement* elemRoot = createDOMElement(m_preparedCCRequest,"PayRequest");
+	setDOMElementAttribute(elemRoot,"version",(UINT8*) "1.0");
+	m_preparedCCRequest->appendChild(elemRoot);
+	DOMElement* elemCC = createDOMElement(m_preparedCCRequest,"CC");
+	setDOMElementAttribute(elemCC,"version",(UINT8*) "1.2");
+	elemRoot->appendChild(elemCC);
+	DOMElement* elemAiName = createDOMElement(m_preparedCCRequest,"AiID");
 	setDOMElementValue(elemAiName, a_AiName);
-	elemCC.appendChild(elemAiName);	
+	elemCC->appendChild(elemAiName);	
 
 	//extract price certificate elements from cascadeInfo
 	//get cascadeInfo from CAMix(which makeCCRequest needs to extract the price certs
-	DOM_Document cascadeInfoDoc; 
+	XERCES_CPP_NAMESPACE::DOMDocument* cascadeInfoDoc=NULL; 
 	callingMix->getMixCascadeInfo(cascadeInfoDoc);
 	
-	DOM_Element cascadeInfoElem = cascadeInfoDoc.getDocumentElement();
-	DOM_NodeList allMixes = cascadeInfoElem.getElementsByTagName("Mix");
-	UINT32 nrOfMixes = allMixes.getLength();
-	DOM_Node* mixNodes = new DOM_Node[nrOfMixes]; //so we can use separate loops for extracting, hashing and appending
+	DOMElement* cascadeInfoElem = cascadeInfoDoc->getDocumentElement();
+	DOMNodeList* allMixes = getElementsByTagName(cascadeInfoElem,"Mix");
+	UINT32 nrOfMixes = allMixes->getLength();
+	DOMNode** mixNodes = new DOMNode*[nrOfMixes]; //so we can use separate loops for extracting, hashing and appending
 	
-	DOM_Node curMixNode;
+	DOMNode* curMixNode=NULL;
 	for (UINT32 i = 0, j = 0, count = nrOfMixes; i < count; i++, j++){
 		//cant use getDOMChildByName from CAUtil here yet, since it will always return the first child
-		curMixNode = allMixes.item(i); 
-		if (getDOMChildByName(curMixNode,(UINT8*)"PriceCertificate",mixNodes[j],true) != E_SUCCESS)
+		curMixNode = allMixes->item(i); 
+		if (getDOMChildByName(curMixNode,"PriceCertificate",mixNodes[j],true) != E_SUCCESS)
 		{
 			j--;
 			nrOfMixes--;
@@ -871,7 +871,7 @@ SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName
 		m_allHashes=new UINT8*[nrOfMixes];
 		m_allHashesLen = nrOfMixes;
 		UINT8** allSkis=new UINT8*[nrOfMixes];
-		DOM_Node skiNode;
+		DOMNode* skiNode=NULL;
 		for (UINT32 i = 0; i < nrOfMixes; i++){
 			UINT8* out=new UINT8[5000];
 			UINT32 outlen=5000;
@@ -897,12 +897,12 @@ SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName
 			m_allHashes[i] = tmpBuff;
 			//do not delete tmpBuff here, since we're using allHashes below
 
-		if (getDOMChildByName(mixNodes[i],(UINT8*)"SubjectKeyIdentifier",skiNode,true) != E_SUCCESS)
+		if (getDOMChildByName(mixNodes[i],"SubjectKeyIdentifier",skiNode,true) != E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Could not get mix id from price cert");	
 			}	
 		
-		allSkis[i] =  (UINT8*) skiNode.getFirstChild().getNodeValue().transcode();
+		allSkis[i] =  (UINT8*) XMLString::transcode(skiNode->getFirstChild()->getNodeValue());
 
 	}
 	    //concatenate the hashes, and store for future reference to indentify the cascade
@@ -925,23 +925,23 @@ SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName
     } 
 	
 	//and append to CC
-	DOM_Element elemPriceCerts = m_preparedCCRequest.createElement("PriceCertificates");
-	DOM_Element elemCert;
+	DOMElement* elemPriceCerts = createDOMElement(m_preparedCCRequest,"PriceCertificates");
+	DOMElement* elemCert=NULL;
 	for (UINT32 i = 0; i < nrOfMixes; i++) 
 	{
-		elemCert = m_preparedCCRequest.createElement("PriceCertHash");
+		elemCert = createDOMElement(m_preparedCCRequest,"PriceCertHash");
 		//CAMsg::printMsg(LOG_DEBUG,"hash to be inserted in cc: index %d, value %s\n",i,m_allHashes[i]);
 		setDOMElementValue(elemCert,m_allHashes[i]);
 		//delete[] allHashes[i];
-		elemCert.setAttribute("id", DOMString( (const char*)allSkis[i]));
+		setDOMElementAttribute(elemCert,"id",allSkis[i]);
 		setDOMElementAttribute(elemCert, "position", i);
 		if (i == 0) 
 		{
-			elemCert.setAttribute("isAI","true");
+			setDOMElementAttribute(elemCert,"isAI",(UINT8*)"true");
 		}
-		elemPriceCerts.appendChild(elemCert);
+		elemPriceCerts->appendChild(elemCert);
 	}
-	elemCC.appendChild(elemPriceCerts);
+	elemCC->appendChild(elemPriceCerts);
 #ifdef DEBUG 		
 	CAMsg::printMsg(LOG_DEBUG, "finished method makeCCRequest\n");
 #endif		
@@ -954,24 +954,24 @@ SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName
 }
 
 
-SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UINT64 transferredBytes, DOM_Document& doc)
+SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UINT64 transferredBytes, XERCES_CPP_NAMESPACE::DOMDocument* & doc)
 	{
 		INIT_STACK;
 		BEGIN_STACK("CAAccountingInstance::makeCCRequest");
 		
-		DOM_Node elemCC;
+		DOMNode* elemCC=NULL;
 		
-		doc = DOM_Document::createDocument();
-		doc.appendChild(doc.importNode(m_preparedCCRequest.getDocumentElement(),true));
+		doc = createDOMDocument();
+		doc->appendChild(doc->importNode(m_preparedCCRequest->getDocumentElement(),true));
 		
-	    getDOMChildByName(doc.getDocumentElement(),(UINT8*)"CC",elemCC);
+	  getDOMChildByName(doc->getDocumentElement(),"CC",elemCC);
 		
-		DOM_Element elemAccount = doc.createElement("AccountNumber");
+		DOMElement* elemAccount = createDOMElement(doc,"AccountNumber");
 		setDOMElementValue(elemAccount, accountNumber);
-		elemCC.appendChild(elemAccount);
-		DOM_Element elemBytes = doc.createElement("TransferredBytes");
+		elemCC->appendChild(elemAccount);
+		DOMElement* elemBytes = createDOMElement(doc,"TransferredBytes");
 		setDOMElementValue(elemBytes, transferredBytes);
-		elemCC.appendChild(elemBytes);
+		elemCC->appendChild(elemBytes);
 		
 		FINISH_STACK("CAAccountingInstance::makeCCRequest");
 
@@ -988,7 +988,7 @@ SINT32 CAAccountingInstance::makeCCRequest(const UINT64 accountNumber, const UIN
  * what type of message we have and calls the appropriate handle...() 
  * function
  */
-SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,const DOM_Document& a_DomDoc)
+SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,const XERCES_CPP_NAMESPACE::DOMDocument* a_DomDoc)
 	{
 		INIT_STACK;
 		BEGIN_STACK("CAAccountingInstance::processJapMessage");
@@ -998,10 +998,10 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 			return E_UNKNOWN;
 		}
 
-		DOM_Element root = a_DomDoc.getDocumentElement();
-		char* docElementName = root.getTagName().transcode();		
+		DOMElement* root = a_DomDoc->getDocumentElement();
+		char* docElementName = XMLString::transcode(root->getTagName());		
 		aiQueueItem* pItem;
-		void (CAAccountingInstance::*handleFunc)(tAiAccountingInfo*,DOM_Element&) = NULL;
+		void (CAAccountingInstance::*handleFunc)(tAiAccountingInfo*,DOMElement*) = NULL;
 		SINT32 ret;
 
 
@@ -1038,10 +1038,11 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 										);
 										
 			SAVE_STACK("CAAccountingInstance::processJapMessage", "error");
+			XMLString::release(&docElementName);
 			return E_UNKNOWN;
 		}
 
-		delete [] docElementName;
+	XMLString::release(&docElementName);
 
 		/** @todo this does not work yet due to errors in CAMutex!!!
 		if (handleFunc)
@@ -1072,7 +1073,7 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 		return E_SUCCESS;
 	}
 
-void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo, DOM_Element &root)
+void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo, DOMElement* root)
 {
 	handleAccountCertificate_internal(pAccInfo, root);
 	
@@ -1090,7 +1091,7 @@ void CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInfo,
  * TODO: think about switching account without changing mixcascade
  *   (receive a new acc.cert. though we already have one)
  */
-void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* pAccInfo, DOM_Element &root)
+void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* pAccInfo, DOMElement* root)
 	{			
 		INIT_STACK;
 		BEGIN_STACK("CAAccountingInstance::handleAccountCertificate");
@@ -1098,7 +1099,7 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 		//CAMsg::printMsg( LOG_ERR, "CAAccountingInstance::handleAccountCertificate start\n");
 		
 		//CAMsg::printMsg(LOG_DEBUG, "started method handleAccountCertificate\n");
-		DOM_Element elGeneral;
+		DOMElement* elGeneral=NULL;
 		timespec now;
 		getcurrentTime(now);
 
@@ -1125,7 +1126,7 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 					CAXMLErrorMessage::ERR_BAD_REQUEST, 
 					(UINT8*)"You have already sent an Account Certificate"
 				);
-			DOM_Document errDoc;
+			XERCES_CPP_NAMESPACE::DOMDocument* errDoc=NULL;
 			err.toXmlDocument(errDoc);
 			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
 			pAccInfo->mutex->unlock();
@@ -1133,12 +1134,12 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 		}
 
 		// parse & set accountnumber
-		if (getDOMChildByName( root, (UINT8 *)"AccountNumber", elGeneral, false ) != E_SUCCESS ||
+		if (getDOMChildByName( root, "AccountNumber", elGeneral, false ) != E_SUCCESS ||
 			getDOMElementValue( elGeneral, pAccInfo->accountNumber ) != E_SUCCESS)
 		{
 			CAMsg::printMsg( LOG_ERR, "AccountCertificate has wrong or no accountnumber. Ignoring...\n");
 			CAXMLErrorMessage err(CAXMLErrorMessage::ERR_WRONG_FORMAT);
-			DOM_Document errDoc;
+			XERCES_CPP_NAMESPACE::DOMDocument* errDoc=NULL;
 			err.toXmlDocument(errDoc);
 			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
 			pAccInfo->mutex->unlock();
@@ -1148,14 +1149,14 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 		// parse & set payment instance id
 		UINT32 len=256;
 		pAccInfo->pstrBIID=new UINT8[256];
-		if ( getDOMChildByName( root, (UINT8 *)"BiID", elGeneral, false ) != E_SUCCESS ||
+		if ( getDOMChildByName( root,"BiID", elGeneral, false ) != E_SUCCESS ||
 			 getDOMElementValue( elGeneral,pAccInfo->pstrBIID, &len ) != E_SUCCESS)
 			{
 				delete[] pAccInfo->pstrBIID;
 				pAccInfo->pstrBIID=NULL;
 				CAMsg::printMsg( LOG_ERR, "AccountCertificate has no Payment Instance ID. Ignoring...\n");
 				CAXMLErrorMessage err(CAXMLErrorMessage::ERR_WRONG_FORMAT);
-				DOM_Document errDoc;
+				XERCES_CPP_NAMESPACE::DOMDocument* errDoc=NULL;
 				err.toXmlDocument(errDoc);
 				pAccInfo->pControlChannel->sendXMLMessage(errDoc);
 				pAccInfo->mutex->unlock();
@@ -1167,11 +1168,11 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 
 
 	// parse & set public key
-	if ( getDOMChildByName( root, (UINT8 *)"JapPublicKey", elGeneral, false ) != E_SUCCESS )
+	if ( getDOMChildByName( root, "JapPublicKey", elGeneral, false ) != E_SUCCESS )
 		{
 			CAMsg::printMsg( LOG_ERR, "AccountCertificate contains no public key. Ignoring...\n");
 			CAXMLErrorMessage err(CAXMLErrorMessage::ERR_KEY_NOT_FOUND);
-			DOM_Document errDoc;
+			XERCES_CPP_NAMESPACE::DOMDocument* errDoc=NULL;
 			err.toXmlDocument(errDoc);
 			pAccInfo->pControlChannel->sendXMLMessage(errDoc);
 			pAccInfo->mutex->unlock();
@@ -1189,7 +1190,7 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 	if ( pAccInfo->pPublicKey->setVerifyKey( elGeneral ) != E_SUCCESS )
 	{
 		CAXMLErrorMessage err(CAXMLErrorMessage::ERR_INTERNAL_SERVER_ERROR);
-		DOM_Document errDoc;
+		XERCES_CPP_NAMESPACE::DOMDocument* errDoc=NULL;
 		err.toXmlDocument(errDoc);
 		pAccInfo->pControlChannel->sendXMLMessage(errDoc);
 		pAccInfo->mutex->unlock();
@@ -1197,7 +1198,7 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 	}
 
 	if ((!m_pJpiVerifyingInstance) ||
-		(m_pJpiVerifyingInstance->verifyXML( (DOM_Node &)root, (CACertStore *)NULL ) != E_SUCCESS ))
+		(m_pJpiVerifyingInstance->verifyXML( root, (CACertStore *)NULL ) != E_SUCCESS ))
 	{
 		// signature invalid. mark this user as bad guy
 		CAMsg::printMsg( LOG_INFO, "CAAccountingInstance::handleAccountCertificate(): Bad Jpi signature\n" );
@@ -1222,14 +1223,14 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 	pAccInfo->pChallenge = arbChallenge; // store challenge for later..
 
 	// generate XML challenge structure
-	DOM_Document doc = DOM_Document::createDocument();
-	DOM_Element elemRoot = doc.createElement( "Challenge" );
-	DOM_Element elemPanic = doc.createElement( "DontPanic" );
-	DOM_Element elemPrepaid = doc.createElement( "PrepaidBytes" );
-	elemPanic.setAttribute( "version", "1.0" );
-	doc.appendChild( elemRoot );
-	elemRoot.appendChild( elemPanic );
-	elemRoot.appendChild( elemPrepaid );
+	XERCES_CPP_NAMESPACE::DOMDocument* doc = createDOMDocument();
+	DOMElement* elemRoot = createDOMElement(doc, "Challenge" );
+	DOMElement* elemPanic = createDOMElement(doc, "DontPanic" );
+	DOMElement* elemPrepaid = createDOMElement(doc, "PrepaidBytes" );
+	setDOMElementAttribute(elemPanic, "version",(UINT8*) "1.0" );
+	doc->appendChild( elemRoot );
+	elemRoot->appendChild( elemPanic );
+	elemRoot->appendChild( elemPrepaid );
 	setDOMElementValue( elemPanic, b64Challenge );
 	SINT32 prepaidAmount = m_dbInterface->getPrepaidAmount(pAccInfo->accountNumber, m_currentCascade, false);
 	if (prepaidAmount < 0)
@@ -1251,7 +1252,7 @@ void CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo* 
 }
 
 
-void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, DOM_Element &root)
+void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, DOMElement* root)
 {
 	handleChallengeResponse_internal(pAccInfo, root);
 	INIT_STACK;
@@ -1265,7 +1266,7 @@ void CAAccountingInstance::handleChallengeResponse(tAiAccountingInfo* pAccInfo, 
  * Also gets the last CC of the user, and sends it to the JAP
  * accordingly.
  */
-void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* pAccInfo, DOM_Element &root)
+void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* pAccInfo, DOMElement* root)
 {
 	INIT_STACK;
 	BEGIN_STACK("CAAccountingInstance::handleChallengeResponse");
@@ -1277,8 +1278,8 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 	UINT8 decodeBuffer[ 512 ];
 	UINT32 decodeBufferLen = 512;
 	UINT32 usedLen;
-	DOM_Element elemPanic;
-	DSA_SIG * pDsaSig;
+	DOMElement* elemPanic=NULL;
+	DSA_SIG * pDsaSig=NULL;
 	SINT32 prepaidAmount = 0;
 	AccountLoginHashEntry* loginEntry;
 	CAXMLCostConfirmation* pCC = NULL;
@@ -1542,7 +1543,7 @@ void CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo* p
 	pAccInfo->mutex->unlock();
 }
 
-void CAAccountingInstance::handleCostConfirmation(tAiAccountingInfo* pAccInfo, DOM_Element &root)
+void CAAccountingInstance::handleCostConfirmation(tAiAccountingInfo* pAccInfo, DOMElement* root)
 {
 	handleCostConfirmation_internal(pAccInfo, root);
 	INIT_STACK;
@@ -1552,7 +1553,7 @@ void CAAccountingInstance::handleCostConfirmation(tAiAccountingInfo* pAccInfo, D
 /**
  * Handles a cost confirmation sent by a jap
  */
-void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pAccInfo, DOM_Element &root)
+void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pAccInfo, DOMElement* root)
 {
 	INIT_STACK;
 	BEGIN_STACK("CAAccountingInstance::handleCostConfirmation");
@@ -1597,12 +1598,12 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 	// for debugging only: test signature the oldschool way
 	// warning this removes the signature from doc!!!
 	if (pAccInfo->pPublicKey==NULL||
-		pAccInfo->pPublicKey->verifyXML( (DOM_Node &)root ) != E_SUCCESS)
+		pAccInfo->pPublicKey->verifyXML( root ) != E_SUCCESS)
 	{
 		// wrong signature
 		CAMsg::printMsg( LOG_INFO, "CostConfirmation has INVALID SIGNATURE!\n" );
 		CAXMLErrorMessage err(CAXMLErrorMessage::ERR_BAD_SIGNATURE, (UINT8*)"CostConfirmation has bad signature");
-		DOM_Document errDoc;
+		XERCES_CPP_NAMESPACE::DOMDocument* errDoc=NULL;
 		err.toXmlDocument(errDoc);
 		pAccInfo->pControlChannel->sendXMLMessage(errDoc);
 		delete pCC;
@@ -1622,7 +1623,7 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 		CAMsg::printMsg( LOG_INFO, "CostConfirmation has illegal number of price cert hashes!\n" );
 		CAXMLErrorMessage err(CAXMLErrorMessage::ERR_BAD_REQUEST, 
 			(UINT8*)"CostConfirmation has illegal number of price cert hashes");
-		DOM_Document errDoc;
+		XERCES_CPP_NAMESPACE::DOMDocument* errDoc=NULL;
 		err.toXmlDocument(errDoc);
 		pAccInfo->pControlChannel->sendXMLMessage(errDoc);
 		delete pCC;
@@ -1666,7 +1667,7 @@ void CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* pA
 		CAMsg::printMsg( LOG_INFO, "CostConfirmation has invalid price cert hashes!\n" );
 		CAXMLErrorMessage err(CAXMLErrorMessage::ERR_BAD_REQUEST, 
 			(UINT8*)"CostConfirmation has invalid price cert hashes");
-		DOM_Document errDoc;
+		XERCES_CPP_NAMESPACE::DOMDocument* errDoc=NULL;
 		err.toXmlDocument(errDoc);
 		pAccInfo->pControlChannel->sendXMLMessage(errDoc);
 		delete pCC;

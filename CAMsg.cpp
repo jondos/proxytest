@@ -191,7 +191,8 @@ SINT32 CAMsg::printMsg(UINT32 type,const char* format,...)
 		}
 		else
 		{
-			puts("Warning logger is not active!");
+			printf("Warning logger is not active!\n");
+			return E_UNKNOWN;
 		}
   }
 

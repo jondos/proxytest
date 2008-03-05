@@ -1159,14 +1159,11 @@ SINT32 CAInfoService::getPaymentInstance(const UINT8* a_pstrPIID,CAXMLBI** a_pXM
 			}
 		socket.close();
 		//Parse XML
-		MemBufInputSource oInput( content, contentLength, "PaymentInstance" );
-		DOMParser oParser;
-		oParser.parse( oInput );
+		XERCES_CPP_NAMESPACE::DOMDocument* doc = parseDOMDocument(content,contentLength);
 		delete []content;
-		DOM_Document doc = oParser.getDocument();
 		if(doc==NULL)
 			return E_UNKNOWN;
-		DOM_Element elemRoot=doc.getDocumentElement();
+		DOMElement* elemRoot=doc->getDocumentElement();
 
 		*a_pXMLBI = CAXMLBI::getInstance(elemRoot);
 		if (*a_pXMLBI != NULL)
