@@ -99,11 +99,8 @@ CAXMLErrorMessage::CAXMLErrorMessage(const UINT32 errorCode, UINT8* message, CAA
 CAXMLErrorMessage::CAXMLErrorMessage(UINT8 * strXmlData)
 	: CAAbstractXMLEncodable()
 {
-	MemBufInputSource oInput( strXmlData, strlen((char*)strXmlData), "XMLErrorMessage" );
-	DOMParser oParser;
-	oParser.parse( oInput );
-	DOM_Document doc = oParser.getDocument();
-	DOM_Element elemRoot = doc.getDocumentElement();
+	XERCES_CPP_NAMESPACE::DOMDocument* doc = parseDOMDocument(strXmlData,strlen((char*)strXmlData));
+	DOMElement* elemRoot = doc->getDocumentElement();
 	m_strErrMsg=NULL;
 	m_messageObject = NULL;
 	if (setValues(elemRoot) != E_SUCCESS)
@@ -113,7 +110,7 @@ CAXMLErrorMessage::CAXMLErrorMessage(UINT8 * strXmlData)
 }
 
 
-SINT32 CAXMLErrorMessage::setValues(DOM_Element &elemRoot)
+SINT32 CAXMLErrorMessage::setValues(DOMElement* elemRoot)
 {	
 	UINT8 strGeneral[256];
 	UINT32 strGeneralLen = 256;
@@ -135,22 +132,22 @@ SINT32 CAXMLErrorMessage::setValues(DOM_Element &elemRoot)
 	m_strErrMsg = new UINT8[strGeneralLen+1];
 	strcpy((char*)m_strErrMsg, (char*)strGeneral);
 	
-	DOM_Element objectRootElem;
-	getDOMChildByName(elemRoot, (UINT8*)"MessageObject", objectRootElem, false);
+	DOMElement* objectRootElem=NULL;
+	getDOMChildByName(elemRoot, "MessageObject", objectRootElem, false);
 	
 	//due to lack of RTTI, we need to hardcode how to deal with each specific object type
 	if (ERR_OUTDATED_CC == m_iErrorCode)
 	{
-		DOM_Element ccElem;
-		if (getDOMChildByName(objectRootElem,(UINT8*)"CC",ccElem,true) == E_SUCCESS)
+		DOMElement* ccElem=NULL;
+		if (getDOMChildByName(objectRootElem,"CC",ccElem,true) == E_SUCCESS)
 		{
 			m_messageObject = CAXMLCostConfirmation::getInstance(ccElem);	
 		}
 	}
 	else if (ERR_ACCOUNT_EMPTY == m_iErrorCode)
 	{
-		DOM_Element confirmedElem;
-		if (getDOMChildByName(objectRootElem,(UINT8*)"GenericText",confirmedElem,true) == E_SUCCESS)
+		DOMElement* confirmedElem=NULL;
+		if (getDOMChildByName(objectRootElem,"GenericText",confirmedElem,true) == E_SUCCESS)
 		{
 			m_messageObject = new UINT64;
 			if(getDOMElementValue(confirmedElem, (*(UINT64*)m_messageObject)) != E_SUCCESS)
@@ -178,21 +175,21 @@ CAXMLErrorMessage::~CAXMLErrorMessage()
 	}
 
 
-SINT32 CAXMLErrorMessage::toXmlElement(DOM_Document &a_doc, DOM_Element &elemRoot)
+SINT32 CAXMLErrorMessage::toXmlElement(XERCES_CPP_NAMESPACE::DOMDocument* a_doc, DOMElement* & elemRoot)
 	{	
-		elemRoot = a_doc.createElement("ErrorMessage");
+		elemRoot = createDOMElement(a_doc,"ErrorMessage");
 		setDOMElementAttribute(elemRoot, "code", m_iErrorCode);
 		setDOMElementValue(elemRoot, m_strErrMsg);
 
 		if (m_messageObject)
 		{
-			DOM_Element objectRoot = a_doc.createElement("MessageObject");
-			DOM_Element objectElem;
+			DOMElement* objectRoot = createDOMElement(a_doc,"MessageObject");
+			DOMElement* objectElem=NULL;
 			//WARNING: this will fail for CAXMLCostConfirmation!!! (since it is not a subclass of CAAbstractXMLEncodable)
 			CAAbstractXMLEncodable* encodableObject = (CAAbstractXMLEncodable*) m_messageObject;
 			encodableObject->toXmlElement(a_doc,objectElem);
-			objectRoot.appendChild(objectElem);
-			elemRoot.appendChild(objectRoot);
+			objectRoot->appendChild(objectElem);
+			elemRoot->appendChild(objectRoot);
 		}
 		
 		return E_SUCCESS;

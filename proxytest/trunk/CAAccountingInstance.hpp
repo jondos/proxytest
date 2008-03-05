@@ -150,7 +150,7 @@ private:
 
 	struct t_aiqueueitem
 	{
-		DOM_Document*			pDomDoc;
+		XERCES_CPP_NAMESPACE::DOMDocument*			pDomDoc;
 		tAiAccountingInfo*		pAccInfo;
 		void (CAAccountingInstance::*handleFunc)(tAiAccountingInfo*,DOMElement*);
 	};
@@ -202,7 +202,7 @@ private:
 	
 	static const UINT32 MAX_TOLERATED_MULTIPLE_LOGINS;
 	
-	static DOM_Document m_preparedCCRequest;
+	static XERCES_CPP_NAMESPACE::DOMDocument* m_preparedCCRequest;
 	
 	/** reads messages from the queue and processes them */
 	CAThreadPool* m_aiThreadPool;

@@ -30,7 +30,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAXMLBI.hpp"
 #include "CAMsg.hpp"
 
-const UINT8* const CAXMLBI::ms_pXmlElemName=(UINT8*)"PaymentInstance";
+const char* const CAXMLBI::ms_pXmlElemName="PaymentInstance";
 
 CAXMLBI::CAXMLBI() : CAAbstractXMLEncodable()
 	{
@@ -60,7 +60,7 @@ CAXMLBI* CAXMLBI::getInstance(const UINT8 * biID, const UINT8 * hostName, const 
 		return pBI;
 	}
 
-CAXMLBI* CAXMLBI::getInstance(DOM_Element & elemRoot)
+CAXMLBI* CAXMLBI::getInstance(DOMElement* elemRoot)
 	{
 		if (elemRoot == NULL)
 			{
@@ -87,20 +87,16 @@ CAXMLBI::~CAXMLBI()
 			delete m_pHostName;
 	}
 
-SINT32 CAXMLBI::setValues(DOM_Element &elemRoot)
+SINT32 CAXMLBI::setValues(DOMElement* elemRoot)
 	{
-		UINT8 * rootName;
-		DOM_Element elem;
+		DOMElement* elem=NULL;
 		UINT8 strGeneral[256];
 		UINT32 strGeneralLen = 255;
 		
-		rootName = (UINT8*) (elemRoot.getTagName().transcode());
-		if(strcmp((char*)rootName, (char*)CAXMLBI::getXMLElementName())!=0)
+		if(!equals(elemRoot->getTagName(),CAXMLBI::getXMLElementName()))
 		{
-			delete[] rootName;
 			return E_UNKNOWN;
 		}
-		delete[] rootName;
 		
 		//Parse ID
 		if(getDOMElementAttribute(elemRoot, "id", strGeneral, &strGeneralLen)==E_SUCCESS)
@@ -114,9 +110,9 @@ SINT32 CAXMLBI::setValues(DOM_Element &elemRoot)
 			}
 		
 		//Parse PI Certificate
-		DOM_Element elemCert;
-		getDOMChildByName(elemRoot, (UINT8*)"Certificate", elem, false);
-		getDOMChildByName(elem, (UINT8*)"X509Certificate", elemCert, false);
+		DOMElement* elemCert=NULL;
+		getDOMChildByName(elemRoot, "Certificate", elem, false);
+		getDOMChildByName(elem, "X509Certificate", elemCert, false);
 		CACertificate *pPICert = CACertificate::decode(elemCert, CERT_X509CERTIFICATE, NULL);
 		if (pPICert != NULL)
 		{
@@ -129,16 +125,16 @@ SINT32 CAXMLBI::setValues(DOM_Element &elemRoot)
 		}
 			
 		//Parse PI Host
-		DOM_Element elemNet;
-		DOM_Element elemListeners;
-		DOM_Element elemListener;
-		DOM_Element elemHost;
-		DOM_Element elemPort;
-		getDOMChildByName(elemRoot, (UINT8*)"Network", elemNet, false);
-		getDOMChildByName(elemNet, (UINT8*)"ListenerInterfaces", elemListeners, false);
-		getDOMChildByName(elemListeners, (UINT8*)"ListenerInterface", elemListener, false);
-		getDOMChildByName(elemListener, (UINT8*)"Host", elemHost, false);
-		getDOMChildByName(elemListener, (UINT8*)"Port", elemPort, false);
+		DOMElement* elemNet=NULL;
+		DOMElement* elemListeners=NULL;
+		DOMElement* elemListener=NULL;
+		DOMElement* elemHost=NULL;
+		DOMElement* elemPort=NULL;
+		getDOMChildByName(elemRoot, "Network", elemNet, false);
+		getDOMChildByName(elemNet, "ListenerInterfaces", elemListeners, false);
+		getDOMChildByName(elemListeners, "ListenerInterface", elemListener, false);
+		getDOMChildByName(elemListener, "Host", elemHost, false);
+		getDOMChildByName(elemListener, "Port", elemPort, false);
 		strGeneralLen=255;
 		//Parse PI Host and Port
 		if(	getDOMElementValue(elemHost, strGeneral, &strGeneralLen)!=E_SUCCESS||
@@ -155,35 +151,35 @@ SINT32 CAXMLBI::setValues(DOM_Element &elemRoot)
 		return E_SUCCESS;
 	}
 	
-SINT32 CAXMLBI::toXmlElement(DOM_Document &a_doc, DOM_Element &elemRoot)
+SINT32 CAXMLBI::toXmlElement(XERCES_CPP_NAMESPACE::DOMDocument *a_doc, DOMElement* & elemRoot)
 	{
-		elemRoot = a_doc.createElement((char *)getXMLElementName());
+		elemRoot = createDOMElement(a_doc,getXMLElementName());
 		setDOMElementAttribute(elemRoot, "id", m_pBiID);
 		
 		//Set network settings
-		DOM_Element elemNet = a_doc.createElement("Network");
-		elemRoot.appendChild(elemNet);
-		DOM_Element elemListeners = a_doc.createElement("ListenerInterfaces");
-		elemNet.appendChild(elemListeners);	
-		DOM_Element elemListener = a_doc.createElement("ListenerInterface");
-		elemListeners.appendChild(elemListener);
+		DOMElement* elemNet = createDOMElement(a_doc,"Network");
+		elemRoot->appendChild(elemNet);
+		DOMElement* elemListeners = createDOMElement(a_doc,"ListenerInterfaces");
+		elemNet->appendChild(elemListeners);	
+		DOMElement* elemListener = createDOMElement(a_doc,"ListenerInterface");
+		elemListeners->appendChild(elemListener);
 		//Set Hostname
-		DOM_Element elemHost = a_doc.createElement("Host");
-		elemListener.appendChild(elemHost);
+		DOMElement* elemHost = createDOMElement(a_doc,"Host");
+		elemListener->appendChild(elemHost);
 		setDOMElementValue(elemHost, m_pHostName);
 		//Set Port
-		DOM_Element elemPort = a_doc.createElement("Port");
-		elemListener.appendChild(elemPort);
+		DOMElement* elemPort = createDOMElement(a_doc,"Port");
+		elemListener->appendChild(elemPort);
 		setDOMElementValue(elemPort, m_iPortNumber);
 		//Set Cert
 		if(m_pCert!=NULL)
 		{
-			DOM_Element elemCert = a_doc.createElement("Certificate");
-			elemRoot.appendChild(elemCert);
+			DOMElement* elemCert = createDOMElement(a_doc,"Certificate");
+			elemRoot->appendChild(elemCert);
 			
-			DOM_DocumentFragment tmpFrag;
+			DOMDocumentFragment* tmpFrag=NULL;
 			m_pCert->encode(tmpFrag, a_doc);
-			elemCert.appendChild(tmpFrag);
+			elemCert->appendChild(tmpFrag);
 		}
 		
 		return E_SUCCESS;

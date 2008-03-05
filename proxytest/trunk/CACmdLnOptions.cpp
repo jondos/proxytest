@@ -1660,8 +1660,8 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 // Added by Bastian Voigt: 
 // Read PaymentInstance data (JPI Hostname, Port, Publickey) from configfile
 
-		DOM_Element elemAccounting;
-		if (getDOMChildByName(elemRoot,(UINT8*)"Accounting",elemAccounting,false) != E_SUCCESS)
+		DOMElement* elemAccounting=NULL;
+		if (getDOMChildByName(elemRoot,"Accounting",elemAccounting,false) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_CRIT,"Node \"Accounting\" not found!\n");
 			return E_UNKNOWN;
@@ -1670,9 +1670,9 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 		{
 
 			//get price certificate
-			DOM_Element pcElem;
+			DOMElement* pcElem=NULL;
 			//function in CAUtil, last param is "deep", needs to be set to include child elems				
-			getDOMChildByName(elemAccounting, (UINT8*)"PriceCertificate",pcElem, false);
+			getDOMChildByName(elemAccounting, "PriceCertificate",pcElem, false);
 			if (pcElem == NULL)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Node \"PriceCertificate\" not found!\n");
@@ -1690,7 +1690,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 			//{
 				CAMsg::printMsg(LOG_DEBUG, "Parsing JPI values.\n");
 	
-				DOM_Element elemJPI;
+				DOMElement* elemJPI=NULL;
 				getDOMChildByName(elemAccounting, CAXMLBI::getXMLElementName(), elemJPI, false);
 				m_pBI = CAXMLBI::getInstance(elemJPI);
 				if (m_pBI == NULL)
@@ -1698,7 +1698,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 					CAMsg::printMsg(LOG_CRIT,"Could not instantiate payment instance interface!\n");
 					return E_UNKNOWN;
 				}
-				if (getDOMChildByName(elemAccounting, (UINT8*)"SoftLimit", elem, false) != E_SUCCESS)
+				if (getDOMChildByName(elemAccounting,"SoftLimit", elem, false) != E_SUCCESS)
 				{
 					CAMsg::printMsg(LOG_CRIT,"Node \"SoftLimit\" not found!\n");
 					return E_UNKNOWN;
@@ -1707,7 +1707,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 				{
 					m_iPaymentSoftLimit = tmp;
 				}
-				if (getDOMChildByName(elemAccounting, (UINT8*)"HardLimit", elem, false) != E_SUCCESS)
+				if (getDOMChildByName(elemAccounting,"HardLimit", elem, false) != E_SUCCESS)
 				{
 					CAMsg::printMsg(LOG_CRIT,"Node \"HardLimit\" not found!\n");
 					return E_UNKNOWN;
@@ -1716,11 +1716,11 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 				{
 					m_iPaymentHardLimit = tmp;
 				}
-				if (getDOMChildByName(elemAccounting, (UINT8*)"PrepaidInterval", elem, false) != E_SUCCESS)
+				if (getDOMChildByName(elemAccounting,"PrepaidInterval", elem, false) != E_SUCCESS)
 				{
 					CAMsg::printMsg(LOG_CRIT,"Node \"PrepaidInterval\" not found!\n");
 					
-					if (getDOMChildByName(elemAccounting, (UINT8*)"PrepaidIntervalKbytes", elem, false) != E_SUCCESS)
+					if (getDOMChildByName(elemAccounting,"PrepaidIntervalKbytes", elem, false) != E_SUCCESS)
 					{
 						CAMsg::printMsg(LOG_CRIT,"Node \"PrepaidIntervalKbytes\" not found!\n");
 					}
@@ -1749,7 +1749,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 				{
 					CAMsg::printMsg(LOG_CRIT,"Prepaid interval of %u is far too low! Performance will be critical and clients will lose connection!\n", m_iPrepaidInterval);
 				}
-				if (getDOMChildByName(elemAccounting, (UINT8*)"SettleInterval", elem, false) != E_SUCCESS)
+				if (getDOMChildByName(elemAccounting, "SettleInterval", elem, false) != E_SUCCESS)
 				{
 					CAMsg::printMsg(LOG_CRIT,"Node \"SettleInterval\" not found!\n");
 					return E_UNKNOWN;
@@ -1772,8 +1772,8 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 				
 			if (m_bFirstMix)
 			{
-				DOM_Element elemDatabase;
-				if (getDOMChildByName(elemAccounting, (UINT8*)"Database", elemDatabase, false) != E_SUCCESS)
+				DOMElement* elemDatabase=NULL;
+				if (getDOMChildByName(elemAccounting, "Database", elemDatabase, false) != E_SUCCESS)
 				{
 					CAMsg::printMsg(LOG_CRIT,"Node \"Database\" not found!\n");
 					return E_UNKNOWN;
@@ -1781,7 +1781,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 				else //if(elemDatabase != NULL) 
 				{
 					// get DB Hostname
-					if (getDOMChildByName(elemDatabase, (UINT8*)"Host", elem, false) != E_SUCCESS)
+					if (getDOMChildByName(elemDatabase,"Host", elem, false) != E_SUCCESS)
 					{
 						CAMsg::printMsg(LOG_CRIT,"Node \"Host\" not found!\n");
 						return E_UNKNOWN;
@@ -1799,7 +1799,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 						return E_UNKNOWN;
 					}
 					// get Database Port
-					if (getDOMChildByName(elemDatabase, (UINT8*)"Port", elem, false) != E_SUCCESS)
+					if (getDOMChildByName(elemDatabase,"Port", elem, false) != E_SUCCESS)
 					{
 						CAMsg::printMsg(LOG_CRIT,"Node \"Port\" not found!\n");
 						return E_UNKNOWN;
@@ -1814,7 +1814,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 						return E_UNKNOWN;
 					}
 					// get DB Name
-					if (getDOMChildByName(elemDatabase, (UINT8*)"DBName", elem, false) != E_SUCCESS)
+					if (getDOMChildByName(elemDatabase,"DBName", elem, false) != E_SUCCESS)
 					{
 						CAMsg::printMsg(LOG_CRIT,"Node \"DBName\" not found!\n");
 						return E_UNKNOWN;
@@ -1832,7 +1832,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 						return E_UNKNOWN;
 					}
 					// get DB Username
-					if (getDOMChildByName(elemDatabase, (UINT8*)"Username", elem, false) != E_SUCCESS)
+					if (getDOMChildByName(elemDatabase,"Username", elem, false) != E_SUCCESS)
 					{
 						CAMsg::printMsg(LOG_CRIT,"Node \"Username\" not found!\n");
 						return E_UNKNOWN;
@@ -1851,7 +1851,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 					}
 							
 					//get DB password from xml 	
-					getDOMChildByName(elemDatabase, (UINT8*)"Password", elem, false);
+					getDOMChildByName(elemDatabase, "Password", elem, false);
 					tmpLen = 255;
 					//read password from xml if given
 					if(getDOMElementValue(elem, tmpBuff, &tmpLen)==E_SUCCESS) {
@@ -2270,16 +2270,16 @@ SKIP_NEXT_MIX:
 			CAMsg::printMsg(LOG_CRIT, "can't insert price certificate because it's Null\n");
 			return E_UNKNOWN;
 		} else {
-			DOM_Element pcElem;		
+			DOMElement* pcElem=NULL;		
 			getPriceCertificate()->toXmlElement(m_docMixInfo,pcElem);	
-			elemMix.appendChild(pcElem);
+			elemMix->appendChild(pcElem);
 		}
 		//insert prepaid interval
 		UINT32 prepaidInterval;
 		getPrepaidInterval(&prepaidInterval);
-		DOM_Element elemInterval = m_docMixInfo.createElement("PrepaidIntervalKbytes");
+		DOMElement* elemInterval = createDOMElement(m_docMixInfo,"PrepaidIntervalKbytes");
 		setDOMElementValue(elemInterval,prepaidInterval / 1000); 
-		elemMix.appendChild(elemInterval);	
+		elemMix->appendChild(elemInterval);	
 			
 			
 		
