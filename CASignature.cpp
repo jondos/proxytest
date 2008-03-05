@@ -196,7 +196,7 @@ SINT32 CASignature::parseSignKeyXML(const UINT8* buff,UINT32 len)
 						char* tmpStr=XMLString::transcode(text->getNodeValue());
 						tlen=4096;
 						CABase64::decode((UINT8*)tmpStr,strlen(tmpStr),tbuff,&tlen);
-						delete[] tmpStr;
+						XMLString::release(&tmpStr);
 						if(strcmp(name,"P")==0)
 							{
 								if(tmpDSA->p!=NULL)
@@ -229,7 +229,7 @@ SINT32 CASignature::parseSignKeyXML(const UINT8* buff,UINT32 len)
 								tmpDSA->pub_key=BN_bin2bn(tbuff,tlen,NULL);
 							}
 					}
-				delete[] name;
+				XMLString::release(&name);
 				child=child->getNextSibling();
 			}
 		if(DSA_sign_setup(tmpDSA,NULL,&tmpDSA->kinv,&tmpDSA->r)!=1)
@@ -499,7 +499,7 @@ SINT32 CASignature::setVerifyKey(const DOMElement* xmlKey)
 	{
 		char* tmpStr=XMLString::transcode(xmlKey->getTagName());
 		CAMsg::printMsg(LOG_DEBUG, "CASignature::setVerifyKey(): no JapPublicKey! -- Tagname is %s\n", tmpStr);
-		delete[] tmpStr;
+		XMLString::release(&tmpStr);
 		return E_UNKNOWN;
 	}
 

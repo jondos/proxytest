@@ -777,16 +777,20 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
                 {
                     if(m_expectedMixRelPos < 0)
 											{
-												char* tmpStr=XMLString::transcode(root->getAttribute(XMLString::transcode("id")));
+												char* id=XMLString::transcode("id");
+												char* tmpStr=XMLString::transcode(root->getAttribute(id));
                         CAMsg::printMsg(LOG_DEBUG,"InfoService: Setting new previous mix: %s\n",tmpStr);
-												delete[] tmpStr;
+												XMLString::release(&tmpStr);
+												XMLString::release(&id);
                         pglobalOptions->setPrevMix(doc);
 											}
                     else if(m_expectedMixRelPos > 0)
 											{
-											char* tmpStr=XMLString::transcode(root->getAttribute(XMLString::transcode("id")));
+												char* id=XMLString::transcode("id");
+												char* tmpStr=XMLString::transcode(root->getAttribute(id));
                         CAMsg::printMsg(LOG_DEBUG,"InfoService: Setting new next mix: %s\n",tmpStr);
-												delete[] tmpStr;
+												XMLString::release(&id);
+												XMLString::release(&tmpStr);
                         pglobalOptions->setNextMix(doc);
 											}
                 }
