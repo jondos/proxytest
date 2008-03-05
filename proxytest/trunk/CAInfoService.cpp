@@ -362,8 +362,8 @@ CAInfoService::CAInfoService(CAMix* pMix)
 		m_minuts=0;
 		m_lastMixedPackets=0;
     m_expectedMixRelPos = 0;
-    	m_pLoopCV = new CAConditionVariable();
-    	m_pthreadRunLoop=new CAThread((UINT8*)"InfoServiceThread");
+    m_pLoopCV = new CAConditionVariable();
+    m_pthreadRunLoop=new CAThread((UINT8*)"InfoServiceThread");
 		m_pMix=pMix;
 #ifdef DYNAMIC_MIX
 		m_bReconfig = false;
@@ -625,24 +625,21 @@ UINT8* CAInfoService::getMixHeloXMLAsString(UINT32& a_len)
 
 		UINT32 sendBuffLen;
 		UINT8* sendBuff=NULL;
-	
-
-
-				XERCES_CPP_NAMESPACE::DOMDocument* docMixInfo;
-				if(pglobalOptions->getMixXml(docMixInfo)!=E_SUCCESS)
-					{
-						goto ERR;
-					}
-				if(m_pSignature->signXML(docMixInfo,m_pcertstoreOwnCerts)!=E_SUCCESS)
-					{
-						goto ERR;
-					}
-				
-				sendBuff=DOM_Output::dumpToMem(docMixInfo,&sendBuffLen);
-				if(sendBuff==NULL)
-					goto ERR;
-				a_len=sendBuffLen;
-				return sendBuff;	
+		XERCES_CPP_NAMESPACE::DOMDocument* docMixInfo=NULL;
+		if(pglobalOptions->getMixXml(docMixInfo)!=E_SUCCESS)
+			{
+				goto ERR;
+			}
+		if(m_pSignature->signXML(docMixInfo,m_pcertstoreOwnCerts)!=E_SUCCESS)
+			{
+				goto ERR;
+			}
+		
+		sendBuff=DOM_Output::dumpToMem(docMixInfo,&sendBuffLen);
+		if(sendBuff==NULL)
+			goto ERR;
+		a_len=sendBuffLen;
+		return sendBuff;	
 			
 ERR:
 		if(sendBuff!=NULL)
@@ -655,70 +652,67 @@ ERR:
 	*/
 SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT32 requestCommand,const UINT8* param,
 									const CASocketAddrINet* a_pSocketAddress)
-{
+	{
     UINT8* recvBuff = NULL;
     SINT32 ret = E_SUCCESS;
     UINT32 len = 0;
 
-	CASocket oSocket(true);
-	UINT8 hostname[255];
-	UINT8 buffHeader[255];
-	CAHttpClient httpClient;
+		CASocket oSocket(true);
+		UINT8 hostname[255];
+		UINT8 buffHeader[255];
+		CAHttpClient httpClient;
 
-	UINT64 currentTimeout = MIX_TO_INFOSERVICE_TIMEOUT;
-	UINT64 startupTime, currentMillis;
+		UINT64 currentTimeout = MIX_TO_INFOSERVICE_TIMEOUT;
+		UINT64 startupTime, currentMillis;
 
     UINT32 requestType = REQUEST_TYPE_POST;
     bool receiveAnswer = false;
 
-	if (a_pSocketAddress == NULL)
-	{
-		return E_UNKNOWN;
-	}
+		if (a_pSocketAddress == NULL)
+		{
+			return E_UNKNOWN;
+		}
 
     if(requestCommand<0)
-	{
+			{
         if(m_bConfiguring)
-		{
-			requestCommand = REQUEST_COMMAND_CONFIGURE;
-			receiveAnswer = true;
-		}
+					{
+						requestCommand = REQUEST_COMMAND_CONFIGURE;
+						receiveAnswer = true;
+					}
         else
-		{
-			requestCommand = REQUEST_COMMAND_HELO;
-			receiveAnswer = true;
-		}
-	}
-	else
-	{
-        if(requestCommand==REQUEST_COMMAND_MIXINFO)
-		{
-			requestType=REQUEST_TYPE_GET;
-			receiveAnswer = true;
-		}
-	}
-
-	if(a_pSocketAddress->getIPAsStr(hostname, 255)!=E_SUCCESS)
-	{
-		goto ERR;
-	}
+					{
+						requestCommand = REQUEST_COMMAND_HELO;
+						receiveAnswer = true;
+					}
+			}
+		else if(requestCommand==REQUEST_COMMAND_MIXINFO)
+			{
+				requestType=REQUEST_TYPE_GET;
+				receiveAnswer = true;
+			}
+	
+		if(a_pSocketAddress->getIPAsStr(hostname, 255)!=E_SUCCESS)
+			{
+				goto ERR;
+			}
 		
     oSocket.setRecvBuff(255);
-	if(oSocket.connect(*a_pSocketAddress, MIX_TO_INFOSERVICE_TIMEOUT)==E_SUCCESS)
-	{
-		httpClient.setSocket(&oSocket);
-		const char* strRequestCommand=STRINGS_REQUEST_COMMANDS[requestCommand];
-		const char* strRequestType=STRINGS_REQUEST_TYPES[requestType];
-    CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending [%s] %s to InfoService %s:%d.\r\n", strRequestType,strRequestCommand, hostname, a_pSocketAddress->getPort());
-    if(requestCommand==REQUEST_COMMAND_MIXINFO)
-   		{
-			sprintf((char*)buffHeader,"%s /%s%s HTTP/1.0\r\nContent-Length: %u\r\n\r\n", strRequestType, strRequestCommand, param,a_len);
-   		}
-		else
+		if(oSocket.connect(*a_pSocketAddress, MIX_TO_INFOSERVICE_TIMEOUT)==E_SUCCESS)
 		{
-			sprintf((char*)buffHeader,"%s /%s HTTP/1.0\r\nContent-Length: %u\r\n\r\n", strRequestType, strRequestCommand, a_len);
-		}
-		
+			httpClient.setSocket(&oSocket);
+			const char* strRequestCommand=STRINGS_REQUEST_COMMANDS[requestCommand];
+			const char* strRequestType=STRINGS_REQUEST_TYPES[requestType];
+			CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending [%s] %s to InfoService %s:%d.\r\n", strRequestType,strRequestCommand, hostname, a_pSocketAddress->getPort());
+			if(requestCommand==REQUEST_COMMAND_MIXINFO)
+   			{
+				sprintf((char*)buffHeader,"%s /%s%s HTTP/1.0\r\nContent-Length: %u\r\n\r\n", strRequestType, strRequestCommand, param,a_len);
+   			}
+			else
+			{
+				sprintf((char*)buffHeader,"%s /%s HTTP/1.0\r\nContent-Length: %u\r\n\r\n", strRequestType, strRequestCommand, a_len);
+			}
+			
 		getcurrentTimeMillis(startupTime);
 		if (oSocket.sendFullyTimeOut(buffHeader,strlen((char*)buffHeader), currentTimeout, SEND_INFO_TIMEOUT_MS)!=E_SUCCESS)
 		{
@@ -733,16 +727,16 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
 			goto ERR;
 		}
 
-        if(receiveAnswer)
-        {
-        	getcurrentTimeMillis(currentMillis);	
-			currentTimeout -= (currentMillis - startupTime);
-			if(currentTimeout <= 0 || httpClient.parseHTTPHeader(&len) != E_SUCCESS)
-			{
-				goto ERR;
-			}
+    if(receiveAnswer)
+      {
+				getcurrentTimeMillis(currentMillis);	
+				currentTimeout -= (currentMillis - startupTime);
+				if(currentTimeout <= 0 || httpClient.parseHTTPHeader(&len) != E_SUCCESS)
+				{
+					goto ERR;
+				}
 				
-            if(len > 0)
+	      if(len > 0)
             {
             	getcurrentTimeMillis(currentMillis);	
 				currentTimeout -= (currentMillis - startupTime);

@@ -45,7 +45,7 @@ class CAAccountingControlChannel : public CASyncControlChannel
 		public:
 			CAAccountingControlChannel(fmHashTableEntry * pHashEntry);
 			virtual ~CAAccountingControlChannel();
-			SINT32 processXMLMessage(const DOM_Document &a_doc);
+			SINT32 processXMLMessage(const  XERCES_CPP_NAMESPACE::DOMDocument* a_doc);
 
 		private:
 			fmHashTableEntry * m_pHashEntry;

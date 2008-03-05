@@ -230,11 +230,11 @@ SINT32 CALastMix::processKeyExchange()
       #endif
     #endif
 		//Inserting RSA-Key
-		DOMDocumentFragment* tmpDocFrag;
+		DOMDocumentFragment* tmpDocFrag=NULL;
 		m_pRSA->getPublicKeyAsDocumentFragment(tmpDocFrag);
 		DOMNode* nodeRsaKey=doc->importNode(tmpDocFrag,true);
 		elemMix->appendChild(nodeRsaKey);
-		tmpDocFrag=0;
+		tmpDocFrag->getOwnerDocument()->release();
 		//inserting Nonce
 		DOMElement* elemNonce=createDOMElement(doc,"Nonce");
 		UINT8 arNonce[16];
@@ -249,12 +249,12 @@ SINT32 CALastMix::processKeyExchange()
     
 		
 // Add Info about KeepAlive traffic
-		DOMElement* elemKeepAlive;
+		DOMElement* elemKeepAlive=NULL;
 		UINT32 u32KeepAliveSendInterval=pglobalOptions->getKeepAliveSendInterval();
 		UINT32 u32KeepAliveRecvInterval=pglobalOptions->getKeepAliveRecvInterval();
 		elemKeepAlive=createDOMElement(doc,"KeepAlive");
-		DOMElement* elemKeepAliveSendInterval;
-		DOMElement* elemKeepAliveRecvInterval;
+		DOMElement* elemKeepAliveSendInterval=NULL;
+		DOMElement* elemKeepAliveRecvInterval=NULL;
 		elemKeepAliveSendInterval=createDOMElement(doc,"SendInterval");
 		elemKeepAliveRecvInterval=createDOMElement(doc,"ReceiveInterval");
 		elemKeepAlive->appendChild(elemKeepAliveSendInterval);
@@ -272,6 +272,7 @@ SINT32 CALastMix::processKeyExchange()
 
 		UINT32 len=0;
 		UINT8* messageBuff=DOM_Output::dumpToMem(doc,&len);
+		doc->release();
 		UINT16 tmp=htons((UINT16)len);
 		CAMsg::printMsg(LOG_INFO,"Sending Infos (chain length and RSA-Key, Message-Size %u)\n",len);
 		
@@ -329,6 +330,7 @@ SINT32 CALastMix::processKeyExchange()
 			)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Couldt not verify the Nonce!\n");		
+				doc->release();
 				delete []messageBuff;
 				return E_UNKNOWN;
 			}
@@ -340,11 +342,13 @@ SINT32 CALastMix::processKeyExchange()
 		delete []messageBuff;
 		if(ret!=E_SUCCESS||keySize!=64)
 			{
+				doc->release();
 				CAMsg::printMsg(LOG_CRIT,"Couldt not decrypt the symetric key!\n");		
 				return E_UNKNOWN;
 			}
 		if(m_pMuxIn->setReceiveKey(key,32)!=E_SUCCESS||m_pMuxIn->setSendKey(key+32,32)!=E_SUCCESS)
 			{
+				doc->release();
 				CAMsg::printMsg(LOG_CRIT,"Couldt not set the symetric key to be used by the MuxSocket!\n");		
 				return E_UNKNOWN;
 			}
@@ -364,6 +368,7 @@ SINT32 CALastMix::processKeyExchange()
 		if(m_u32KeepAliveSendInterval>10000)
 			m_u32KeepAliveSendInterval-=10000; //make the send interval a little bit smaller than the related receive intervall
 		m_u32KeepAliveRecvInterval=max(u32KeepAliveRecvInterval,tmpSendInterval);
+		doc->release();
 		CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Calculated -- SendInterval %u -- Receive Interval %u\n",m_u32KeepAliveSendInterval,m_u32KeepAliveRecvInterval);		
 		return E_SUCCESS;
 	}

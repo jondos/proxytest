@@ -300,25 +300,25 @@ SINT32 CAFirstMix::connectToNextMix(CASocketAddr* a_pAddrNext)
 *@DOCME
 */
 SINT32 CAFirstMix::processKeyExchange()
-{
+	{
     UINT8* recvBuff=NULL;
     UINT16 len;
-	CAMsg::printMsg(LOG_CRIT,"Try to read the Key Info length from next Mix...\n");
+		CAMsg::printMsg(LOG_CRIT,"Try to read the Key Info length from next Mix...\n");
     if(m_pMuxOut->receiveFully((UINT8*)&len,2)!=E_SUCCESS)
-    {
+			{
         CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info length!\n");
         return E_UNKNOWN;
-    }
+			}
     len=ntohs(len);
     CAMsg::printMsg(LOG_CRIT,"Received Key Info length %u\n",len);
     recvBuff=new UINT8[len+1];
 
     if(m_pMuxOut->receiveFully(recvBuff,len)!=E_SUCCESS)
-    {
+			{
         CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info!\n");
         delete []recvBuff;
         return E_UNKNOWN;
-    }
+			}
     recvBuff[len]=0;
     //get the Keys from the other mixes (and the Mix-Id's...!)
     CAMsg::printMsg(LOG_INFO,"Received Key Info...\n");
@@ -328,10 +328,16 @@ SINT32 CAFirstMix::processKeyExchange()
     delete []recvBuff;
     DOMElement* elemMixes=doc->getDocumentElement();
     if(elemMixes==NULL)
-			return E_UNKNOWN;
+			{
+				doc->release();
+				return E_UNKNOWN;
+			}
 		SINT32 count=0;
     if(getDOMElementAttribute(elemMixes,"count",&count)!=E_SUCCESS)
+			{
+				doc->release();
         return E_UNKNOWN;
+			}
  /*
 		@todo Do not know why we do this here - probably it has something todo with the
 		dynamic mix config, but makes not sense at all for me...
@@ -375,16 +381,16 @@ SINT32 CAFirstMix::processKeyExchange()
     //tlen=256;
 
     //Inserting own Key in XML-Key struct
-    DOMDocumentFragment* docfragKey;
+    DOMDocumentFragment* docfragKey=NULL;
     m_pRSA->getPublicKeyAsDocumentFragment(docfragKey);
     addMixInfo(elemMixesKey, true);
-    DOMElement* elemOwnMix;
+    DOMElement* elemOwnMix=NULL;
     getDOMChildByName(elemMixesKey, "Mix", elemOwnMix, false);
 		elemOwnMix->appendChild(docXmlKeyInfo->importNode(docfragKey,true));
-	if (signXML(elemOwnMix) != E_SUCCESS)
-	{
-		CAMsg::printMsg(LOG_DEBUG,"Could not sign MixInfo sent to users...\n");
-	}
+		if (signXML(elemOwnMix) != E_SUCCESS)
+		{
+			CAMsg::printMsg(LOG_DEBUG,"Could not sign MixInfo sent to users...\n");
+		}
 	
     setDOMElementAttribute(elemMixesKey,"count",count+1);
     
@@ -404,16 +410,17 @@ SINT32 CAFirstMix::processKeyExchange()
 			setDOMElementAttribute(elemPayment,"required",(UINT8*)"false");
 		#endif
 
-	// create signature
-	if (signXML(elemRootKey) != E_SUCCESS)
-    {
-		CAMsg::printMsg(LOG_DEBUG,"Could not sign KeyInfo sent to users...\n");
-		}
+		// create signature
+		if (signXML(elemRootKey) != E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_DEBUG,"Could not sign KeyInfo sent to users...\n");
+			}
 
     
     UINT32 tlen=0;
     UINT8* tmpB=DOM_Output::dumpToMem(docXmlKeyInfo,&tlen);
-    m_xmlKeyInfoBuff=new UINT8[tlen+2];
+    docXmlKeyInfo->release();
+		m_xmlKeyInfoBuff=new UINT8[tlen+2];
     memcpy(m_xmlKeyInfoBuff+2,tmpB,tlen);
     UINT16 s=htons((UINT16)tlen);
     memcpy(	m_xmlKeyInfoBuff,&s,2);
@@ -436,17 +443,18 @@ SINT32 CAFirstMix::processKeyExchange()
             if(ret!=E_SUCCESS)
             {
                 CAMsg::printMsg(LOG_DEBUG,"failed!\n");
-                return E_UNKNOWN;
+                doc->release();
+								return E_UNKNOWN;
             }
             CAMsg::printMsg(LOG_DEBUG,"success!\n");
             DOMNode* rsaKey=child->getFirstChild();
             CAASymCipher oRSA;
             oRSA.setPublicKeyAsDOMNode(rsaKey);
-            DOMElement* elemNonce;
+            DOMElement* elemNonce=NULL;
             getDOMChildByName(child,"Nonce",elemNonce,false);
             UINT8 arNonce[1024];
             if(elemNonce!=NULL)
-            {
+							{
                 UINT32 lenNonce=1024;
                 UINT32 tmpLen=1024;
                 getDOMElementValue(elemNonce,arNonce,&lenNonce);
@@ -456,7 +464,7 @@ SINT32 CAFirstMix::processKeyExchange()
                 CABase64::encode(SHA1(arNonce,lenNonce,NULL),SHA_DIGEST_LENGTH,
                                  arNonce,&tmpLen);
                 arNonce[tmpLen]=0;
-            }
+							}
             UINT8 key[64];
             getRandom(key,64);
             //UINT8 buff[400];
@@ -465,7 +473,8 @@ SINT32 CAFirstMix::processKeyExchange()
             encodeXMLEncryptedKey(key,64,docfragSymKey,&oRSA);
             XERCES_CPP_NAMESPACE::DOMDocument* docSymKey=createDOMDocument();
 						docSymKey->appendChild(docSymKey->importNode(docfragSymKey->getFirstChild(),true));
-            DOMElement* elemRoot=docSymKey->getDocumentElement();
+            docfragSymKey->getOwnerDocument()->release();
+						DOMElement* elemRoot=docSymKey->getDocumentElement();
             if(elemNonce!=NULL)
             {
                 DOMElement* elemNonceHash=createDOMElement(docSymKey,"Nonce");
@@ -505,6 +514,7 @@ SINT32 CAFirstMix::processKeyExchange()
 
             m_pSignature->signXML(elemRoot);
             DOM_Output::dumpToMem(docSymKey,out,&outlen);
+						docSymKey->release();
 						m_pMuxOut->setSendKey(key,32);
             m_pMuxOut->setReceiveKey(key+32,32);
             UINT16 size=htons((UINT16)outlen);
@@ -519,20 +529,25 @@ SINT32 CAFirstMix::processKeyExchange()
     }
 		///initialises MixParameters struct
 		if(initMixParameters(elemMixes)!=E_SUCCESS)
-			return E_UNKNOWN;
+			{
+				doc->release();
+				return E_UNKNOWN;
+			}
     if(initMixCascadeInfo(elemMixes)!=E_SUCCESS)
-    {
+			{
+				doc->release();	
         CAMsg::printMsg(LOG_CRIT,"Error initializing cascade info.\n");
         return E_UNKNOWN;
-    }
+			}
 /*    else
     {
         if(m_pInfoService != NULL)
             m_pInfoService->sendCascadeHelo();
     }*/
 		CAMsg::printMsg(LOG_DEBUG,"Keyexchange finished!\n");
+		doc->release();
     return E_SUCCESS;
-}
+	}
 
 
 SINT32 CAFirstMix::setMixParameters(const tMixParameters& params)
@@ -1020,18 +1035,21 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 				delete[] xml_buff;
 				delete pNewUser;
 				m_pIPList->removeIP(peerIP);
+				if(doc!=NULL)
+					doc->release();
 				return E_UNKNOWN;
 			}
 		elemRoot=doc->getDocumentElement();
 		if(!equals(elemRoot->getNodeName(),"JAPKeyExchange"))
 			{
+				doc->release();
 				delete[] xml_buff;
 				delete pNewUser;
 				m_pIPList->removeIP(peerIP);
 				return E_UNKNOWN;
 			}
-		DOMElement* elemLinkEnc;
-		DOMElement* elemMixEnc;
+		DOMElement* elemLinkEnc=NULL;
+		DOMElement* elemMixEnc=NULL;
 		getDOMChildByName(elemRoot,"LinkEncryption",elemLinkEnc,false);
 		getDOMChildByName(elemRoot,"MixEncryption",elemMixEnc,false);
 		UINT8 linkKey[255],mixKey[255];
@@ -1042,6 +1060,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 				CABase64::decode(mixKey,mixKeyLen,mixKey,&mixKeyLen)!=E_SUCCESS||
 				linkKeyLen!=64||mixKeyLen!=32)
 			{
+				doc->release();
 				delete[] xml_buff;
 				delete pNewUser;
 				m_pIPList->removeIP(peerIP);
@@ -1064,12 +1083,14 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		setDOMElementValue(elemSigValue,sig);
 		u32=xml_len;
 		DOM_Output::dumpToMem(docSig,xml_buff+2,&u32);
+		docSig->release();
 		xml_buff[0]=(UINT8)(u32>>8);
 		xml_buff[1]=(UINT8)(u32&0xFF);
 		
 		if (((CASocket*)pNewUser)->isClosed() ||
 		    ((CASocket*)pNewUser)->sendFullyTimeOut(xml_buff,u32+2, 30000, 10000) != E_SUCCESS)
 		{
+			doc->release();
 			CAMsg::printMsg(LOG_DEBUG,"User login: Sending key exchange signature has been interrupted!\n");
 			delete[] xml_buff;
 			delete pNewUser;
@@ -1092,6 +1113,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		fmHashTableEntry* pHashEntry=m_pChannelList->add(pNewUser,peerIP,tmpQueue);
 		if(pHashEntry==NULL)// adding user connection to mix->JAP channel list (stefan: sollte das nicht connection list sein? --> es handelt sich um eine Datenstruktu fr Connections/Channels ).
 		{
+			doc->release();
 			CAMsg::printMsg(LOG_ERR,"User login: Could not add new socket to connection list!\n");
 			m_pIPList->removeIP(peerIP);
 			delete tmpQueue;
@@ -1131,6 +1153,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		m_psocketgroupUsersRead->add(*pNewUser); // add user socket to the established ones that we read data from.
 		m_psocketgroupUsersWrite->add(*pNewUser);
 #endif
+		doc->release();
 		CAMsg::printMsg(LOG_DEBUG,"User login: finished\n");
 
 		return E_SUCCESS;
