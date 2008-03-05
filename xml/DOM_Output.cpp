@@ -100,7 +100,7 @@ SINT32 DOM_Output::dumpNode(const DOMNode* toWrite,bool bCanonical)
 								char* tmpStr=XMLString::transcode(pText);
 								m_pFormatter->formatBuf(pText,XMLString::stringLen(pText),XMLFormatter::CharEscapes);
 								XMLString::release(&pText);
-								delete []tmpStr;
+								XMLString::release(&tmpStr);
 							}
             break;
         }
