@@ -872,15 +872,17 @@ SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen,const DOMNode* root,CAASy
 	*/
 SINT32 encryptXMLElement(DOMNode* node, CAASymCipher* pRSA)
 	{
-		XERCES_CPP_NAMESPACE::DOMDocument* doc=node->getOwnerDocument();
+		XERCES_CPP_NAMESPACE::DOMDocument* doc=NULL;
 		DOMNode* parent=NULL;
 		if(node->getNodeType()==DOMNode::DOCUMENT_NODE)
 			{
+				doc=(XERCES_CPP_NAMESPACE::DOMDocument*)node;
 				parent=doc;
 				node=doc->getDocumentElement();
 			}
 		else
 			{
+				doc=node->getOwnerDocument();
 				parent=node->getParentNode();
 			}
 		DOMElement* elemRoot=createDOMElement(doc,"EncryptedData");

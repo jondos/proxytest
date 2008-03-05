@@ -203,26 +203,26 @@ SINT32 CASignature::parseSignKeyXML(const UINT8* buff,UINT32 len)
 									BN_free(tmpDSA->p);
 								tmpDSA->p=BN_bin2bn(tbuff,tlen,NULL);
 							}
-						else if(strcmp(name,"Q")==NULL)
+						else if(strcmp(name,"Q")==0)
 							{
 								if(tmpDSA->q!=NULL)
 									BN_free(tmpDSA->q);
 								tmpDSA->q=BN_bin2bn(tbuff,tlen,NULL);
 							}
-						else if(strcmp(name,"G")==NULL)
+						else if(strcmp(name,"G")==0)
 							{
 								if(tmpDSA->g!=NULL)
 										BN_free(tmpDSA->g);
 									tmpDSA->g=BN_bin2bn(tbuff,tlen,NULL);
 							}
-						else if(strcmp(name,"X")==NULL)
+						else if(strcmp(name,"X")==0)
 							{
 								if(tmpDSA->priv_key!=NULL)
 									BN_free(tmpDSA->priv_key);
 								tmpDSA->priv_key=BN_bin2bn(tbuff,tlen,NULL);
 
 							}
-						else if(strcmp(name,"Y")==NULL)
+						else if(strcmp(name,"Y")==0)
 							{
 								if(tmpDSA->pub_key!=NULL)
 									BN_free(tmpDSA->pub_key);
