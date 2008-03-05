@@ -311,15 +311,17 @@ SINT32 CASignature::signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen,CAC
 SINT32 CASignature::signXML(DOMNode* node,CACertStore* pIncludeCerts)
 	{	
 		//getting the Document an the Node to sign
-		XERCES_CPP_NAMESPACE::DOMDocument* doc=node->getOwnerDocument();
+		XERCES_CPP_NAMESPACE::DOMDocument* doc=NULL;
 		DOMNode* elemRoot=NULL;
 		if(node->getNodeType()==DOMNode::DOCUMENT_NODE)
 			{
+				doc=(XERCES_CPP_NAMESPACE::DOMDocument*)node;
 				elemRoot=doc->getDocumentElement();
 			}
 		else
 			{
 				elemRoot=node;
+				doc=node->getOwnerDocument();
 			}
 
 		//check if there is already a Signature and if so remove it first...
