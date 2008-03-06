@@ -54,6 +54,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define DELAY_USERS //to enable max per user bandwidth
 //#define DELAY_CHANNELS_LATENCY //to enable min latency per channel
 //#define HAVE_EPOLL //define if you have epoll support on your (Linux) system
+//#define MXML_DOM //define this if you wnat to use the Mix-XML library (www.minixml.org) instead of the default Xerces-C library
 //#define COUNTRY_STATS //collect stats about countries users come from
 //#define ONLY_LOCAL_PROXY //define to build only the local proxy (aka JAP)
 /* LERNGRUPPE: define this to get dynamic mixes */
@@ -419,6 +420,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #endif
 #ifndef ONLY_LOCAL_PROXY
 //For DOM
+#ifdef MXML_DOM
+	#include "xml/dom/mxml/mxmlDOM.hpp"
+#else
 #include <util/XercesDefs.hpp>
 #include <util/PlatformUtils.hpp>
 #include <util/XMLString.hpp>
@@ -441,6 +445,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if (_XERCES_VERSION >= 20200)
     XERCES_CPP_NAMESPACE_USE
 #endif
+#endif //wich DOM-Implementation to use?
 #endif //ONLY_LOCAL_PROXY
 
 //For large file support

@@ -41,7 +41,7 @@ public:
 	SINT32 verifySignature(CASignature &verifier)
 		{
 			//ASSERT(verifier!=NULL, "sigVerifier is NULL");
-			XERCES_CPP_NAMESPACE::DOMDocument* pDoc;
+			XERCES_CPP_NAMESPACE::DOMDocument* pDoc=NULL;
 			toXmlDocument(pDoc);
 			DOMElement* pElemRoot = pDoc->getDocumentElement();
 			SINT32 rc = verifier.verifyXML( pElemRoot, (CACertStore *)NULL );
