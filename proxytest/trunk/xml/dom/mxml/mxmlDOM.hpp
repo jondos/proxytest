@@ -1,0 +1,13 @@
+#include "mxmlDOMTypeDef.hpp"
+
+#include "mxmlDOMElement.hpp"
+#include "mxmlDOMDocument.hpp"
+#include "mxmlDOMDocumentFragment.hpp"
+#include "mxmlDOMText.hpp"
+#include "mxmlDOMNodeList.hpp"
+#include "mxmlXMLFormatTarget.hpp"
+#include "mxmlXMLFormatter.hpp"
+#include "mxmlXMLString.hpp"
+#include "mxmlXercesDOMParser.hpp"
+#include "mxmlDOMImplementation.hpp"
+#include "mxmlMemBufInputSource.hpp"

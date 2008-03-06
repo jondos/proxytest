@@ -207,8 +207,8 @@ class DOM_Output
 				}
 
 			SINT32 dumpNode(const DOMNode* toWrite,bool bCanonical);
-			XMLFormatter* m_pFormatter;
-			MemFormatTarget* m_pFormatTarget;
+			XMLFormatter*				m_pFormatter;
+			MemFormatTarget*		m_pFormatTarget;
 			static const XMLCh  m_XML[41]; 
 			static const XMLCh  m_UTF8[6]; 
 			static const XMLCh  m_1_0[4]; 
