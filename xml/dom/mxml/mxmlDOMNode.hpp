@@ -2,6 +2,7 @@
 #define __MXML__DOMNODE_
 
 #include "mxmlDOMTypeDef.hpp"
+#include "mxmlDOMNamedNodeMap.hpp"
 
 class DOMNode
 	{
@@ -14,21 +15,71 @@ class DOMNode
 				  DOCUMENT_FRAGMENT_NODE = 4 
 				}; 
 
-			DOMNode* appendChild(DOMNode* newChild);
+			DOMNode* appendChild(DOMNode* newChild)
+				{
+					if(newChild->getOwnerDocument()!=m_docOwner)
+						return NULL;
+					
+					return newChild;
+				}
+
 			void release();
-			DOMNode* getFirstChild() const;
+			DOMNode* getFirstChild() const
+				{
+					return m_nodeFirstChild;
+				}
+
 			DOMNode* getLastChild() const;  
-			DOMNode* getNextSibling() const;  
-			DOMNode* getPreviousSibling() const;
-			DOMNode* getParentNode() const;
-			const XMLCh* getNodeName() const;
-			const XMLCh* getNodeValue() const;  
+			DOMNode* getNextSibling() const
+				{
+					return m_nodeNext;
+				}
+			DOMNode* getPreviousSibling() const
+				{
+					return m_nodePrev;
+				}
+			DOMNode* getParentNode() const
+				{
+					return m_nodeParent;
+				}
+			const XMLCh* getNodeName() const
+				{
+					return m_xmlchNodeName;
+				}
+
+			const XMLCh* getNodeValue() const
+				{
+					return m_xmlchNodeValue;
+				}
+
 			DOMNode* insertBefore(DOMNode* newChild, DOMNode* refChild);
 			DOMNode* replaceChild(DOMNode* newChild, DOMNode* oldChild);
 			DOMNode* removeChild(DOMNode* oldChild);
-			bool hasChildNodes() const;  
-			XERCES_CPP_NAMESPACE::DOMDocument* getOwnerDocument() const;
-			UINT getNodeType() const;
+			bool hasChildNodes() const
+				{
+					return m_nodeFirstChild!=NULL;
+				}
+
+			DOMNamedNodeMap* getAttributes() const;
+			XERCES_CPP_NAMESPACE::DOMDocument* getOwnerDocument() const
+				{
+					return m_docOwner;
+				}
+
+			UINT getNodeType() const
+				{
+					return m_nodeType;
+				}
+		
+		private:
+			DOMNode* m_nodeParent;
+			DOMNode* m_nodePrev;
+			DOMNode* m_nodeNext;
+			DOMNode* m_nodeFirstChild;
+			XERCES_CPP_NAMESPACE::DOMDocument* m_docOwner;
+			XMLCh* m_xmlchNodeName;
+			XMLCh* m_xmlchNodeValue;
+			UINT m_nodeType;
 	};
 
 #endif //__MXML__DOMNODE_

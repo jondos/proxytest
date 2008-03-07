@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 
-#ifdef _DEBUG
+#if defined (_DEBUG) && ! defined (ONLY_LOCAL_PROXY)
 
 #include "CAThread.hpp"
 #include "CAThreadList.hpp"

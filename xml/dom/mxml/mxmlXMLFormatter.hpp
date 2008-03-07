@@ -5,7 +5,9 @@ class XMLFormatter
 		public:
 			enum EscapeFlags
 				{ 
-					NoEscapes 
+					NoEscapes,
+					AttrEscapes,
+					CharEscapes
 				};
 			enum UnRepFlags
 				{
@@ -13,4 +15,8 @@ class XMLFormatter
 				};
 			
 			XMLFormatter (const XMLCh *const outEncoding, XMLFormatTarget *const target, const EscapeFlags escapeFlags=NoEscapes, const UnRepFlags unrepFlags=UnRep_Fail);
+			void formatBuf(const XMLCh *const toFormat, const unsigned int count, const EscapeFlags);
+			
+			XMLFormatter& operator<< (const XMLCh toFormat);
+			XMLFormatter& operator<< (const XMLCh* toFormat);
 	};

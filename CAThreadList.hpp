@@ -1,7 +1,7 @@
 #ifndef CATHREADLIST_H_
 #define CATHREADLIST_H_
 
-#ifdef DEBUG
+#if defined (DEBUG) && !defined(ONLY_LOCAL_PROXY)
 struct thread_list_entry
 {
 	CAThread* tle_thread;

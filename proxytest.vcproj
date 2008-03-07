@@ -721,8 +721,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(INCLUDE_XERCES_C)&quot;;&quot;$(INCLUDE_XERCES_C)\xercesc&quot;;&quot;$(INCLUDE_OPENSSL)&quot;;&quot;$(INCLUDE_PTHREADS)&quot;;&quot;$(INCLUDE_ZLIB)&quot;;&quot;$(INCLUDE_MYSQL)&quot;;&quot;$(INCLUDE_POSTGRES_CLIENT_LIB)\postgresql&quot;;&quot;$(INCLUDE_POSTGRES_CLIENT_LIB)&quot;"
-				PreprocessorDefinitions="WIN32;_CONSOLE;_DEBUG;_REENTRANT;__MIX_TEST;__CLEANUP_C;"
+				AdditionalIncludeDirectories="&quot;$(INCLUDE_MXML)&quot;;&quot;$(INCLUDE_OPENSSL)&quot;;&quot;$(INCLUDE_PTHREADS)&quot;;&quot;$(INCLUDE_ZLIB)&quot;;"
+				PreprocessorDefinitions="WIN32;_CONSOLE;MXML_DOM;ONLY_LOCAL_PROXY;_DEBUG;_REENTRANT;__MIX_TEST;__CLEANUP_C;"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				BufferSecurityCheck="true"
@@ -754,11 +754,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="proxytest-lib.lib ws2_32.lib ssleay32.lib libeay32.lib pthreadVC2.lib xerces-c_2D.lib xerces-depdom_2D.lib $(NOINHERIT)"
+				AdditionalDependencies="proxytest-lib.lib ws2_32.lib ssleay32.lib libeay32.lib pthreadVC2.lib $(NOINHERIT)"
 				OutputFile="$(OutDir)\proxytest.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="&quot;.\proxytest-lib\Debug&quot;;&quot;$(LIB_XERCES_C_DEBUG)&quot;;&quot;$(LIB_OPENSSL)&quot;;&quot;$(LIB_PTHREADS)&quot;;&quot;$(LIB_ZLIB)&quot;;&quot;$(LIB_POSTGRES)&quot;"
+				AdditionalLibraryDirectories="&quot;.\Debug-with-Mini-XML&quot;;&quot;$(LIB_OPENSSL)&quot;;&quot;$(LIB_PTHREADS)&quot;;&quot;$(LIB_ZLIB)&quot;;&quot;$(LIB_POSTGRES)&quot;"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)\proxytest.pdb"
 				GenerateMapFile="true"

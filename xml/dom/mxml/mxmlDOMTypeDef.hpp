@@ -7,9 +7,10 @@ typedef UINT8 XMLCh;
 typedef UINT8 XMLByte;
 
 const XMLCh chOpenAngle='<';
-const XMLCh chClose='>';
+const XMLCh chCloseAngle='>';
 const XMLCh chDoubleQuote='"';
 const XMLCh chForwardSlash='/';
+const XMLCh chDash='-';
 const XMLCh chLatin_U='U';
 const XMLCh chLatin_T='T';
 const XMLCh chLatin_F='F';
@@ -26,6 +27,17 @@ const XMLCh chLatin_s='s';
 const XMLCh chLatin_i='i';
 const XMLCh chLatin_o='o';
 const XMLCh chLatin_n='n';
+const XMLCh chLatin_c='c';
+const XMLCh chLatin_d='d';
+const XMLCh chLatin_g='g';
+const XMLCh chNull=0;
+const XMLCh chEqual='=';
+const XMLCh chSpace=' ';
+const XMLCh chPeriod='.';
+const XMLCh chQuestion='?';
+const XMLCh chCR='\n';
+const XMLCh chLF='\r';
+
 
 namespace XERCES_CPP_NAMESPACE
 	{

@@ -391,7 +391,44 @@ SINT32 filelength(int handle)
 	}
 #endif
 
-#ifndef ONLY_LOCAL_PROXY
+SINT32 getDOMChildByName(const DOMNode* pNode,const char * const name,DOMElement* & child,bool deep)
+	{
+		return getDOMChildByName(pNode,name,(DOMNode*&)child,deep);
+	}
+SINT32 getDOMChildByName(const DOMNode* pNode,const XMLCh* const name,DOMNode* & a_child,bool deep)
+	{
+		a_child=NULL;
+		if(pNode==NULL)
+			return E_UNKNOWN;
+		DOMNode *pChild=pNode->getFirstChild();
+		while(pChild!=NULL)
+			{
+				if(XMLString::equals(pChild->getNodeName(),name))
+					{
+						a_child=pChild;
+						return E_SUCCESS;
+					}
+				if(deep)
+					{
+						if(getDOMChildByName(pChild,name,a_child,deep)==E_SUCCESS)
+							return E_SUCCESS;
+					}
+				pChild=pChild->getNextSibling();
+			}
+		return E_UNKNOWN;
+	}
+
+
+SINT32 getDOMChildByName(const DOMNode* pNode,const char* const name,DOMNode* & a_child,bool deep)
+	{
+		a_child=NULL;
+		if(pNode==NULL)
+			return E_UNKNOWN;
+		XMLCh* tmpName=XMLString::transcode((const char * const)name);
+		SINT32 ret=getDOMChildByName(pNode,tmpName,a_child,deep);
+		XMLString::release(&tmpName);
+		return ret;
+	}
 bool equals(const XMLCh* const e1,const char* const e2)
 	{
 		XMLCh* e3=XMLString::transcode(e2);
@@ -422,6 +459,84 @@ XERCES_CPP_NAMESPACE::DOMDocument* parseDOMDocument(const UINT8* const buff, UIN
 		return ret;
 	}
 
+/** 
+ * Returns the content of the text node(s) under elem
+ * as null-terminated C String. If there is no text node
+ * len is set to 0.
+ * 
+ * TODO: Why is elem a DOM_Node and not a DOM_Element here?
+ * @param elem the element which has a text node under it
+ * @param value a buffer that gets the text value
+ * @param valuelen on call contains the buffer size, on return contains the number of bytes copied
+ * @retval E_SPACE if the buffer is too small
+ * @retval E_UNKNOWN if the element is NULL
+ * @retval E_SUCCESS otherwise
+ */
+SINT32 getDOMElementValue(const DOMNode * const pElem,UINT8* value,UINT32* valuelen)
+	{
+		ASSERT(value!=NULL,"Value is null");
+		ASSERT(valuelen!=NULL,"ValueLen is null");
+		ASSERT(pElem!=NULL,"Element is NULL");
+		if(pElem==NULL)
+			return E_UNKNOWN;
+		DOMNode*  pText=pElem->getFirstChild();
+		UINT32 spaceLeft=*valuelen;
+		*valuelen=0;
+		while(pText!=NULL)
+			{
+				if(pText->getNodeType()==DOMNode::TEXT_NODE)
+					{
+						const XMLCh* str=pText->getNodeValue();
+						char* tmpStr=XMLString::transcode(str);
+						UINT32 tmpStrLen=strlen(tmpStr);
+						if(tmpStrLen>=spaceLeft)
+							{							
+								*valuelen=tmpStrLen+1;
+								XMLString::release(&tmpStr);
+								return E_SPACE;
+							}
+						memcpy(value+(*valuelen),tmpStr,tmpStrLen);
+						*valuelen+=tmpStrLen;
+						spaceLeft-=tmpStrLen;
+						XMLString::release(&tmpStr);
+					}
+				pText=pText->getNextSibling();
+			}
+		value[*valuelen]=0;
+		return E_SUCCESS;
+	}
+
+SINT32 getDOMElementAttribute(const DOMNode * const elem,const char* attrName,UINT8* value,UINT32* len)
+	{
+		if(elem==NULL||attrName==NULL||value==NULL||len==NULL||elem->getNodeType()!=DOMNode::ELEMENT_NODE)
+			return E_UNKNOWN;
+		XMLCh* name=XMLString::transcode(attrName);
+		const XMLCh* tmpCh=((DOMElement*)elem)->getAttribute(name);
+		XMLString::release(&name);
+		char* tmpStr=XMLString::transcode(tmpCh);
+		UINT32 l=strlen(tmpStr);
+		if(l>=*len)
+			{
+				XMLString::release(&tmpStr);
+				return E_SPACE;
+			}
+		*len=l;
+		memcpy(value,tmpStr,l+1);
+		XMLString::release(&tmpStr);
+		return E_SUCCESS;
+	}
+
+SINT32 getDOMElementAttribute(const DOMNode * const elem,const char* attrName,SINT32* value)
+	{
+		UINT8 val[50];
+		UINT32 len=50;
+		if(getDOMElementAttribute(elem,attrName,val,&len)!=E_SUCCESS)
+			return E_UNKNOWN;
+		*value=atol((char*)val);
+		return E_SUCCESS;
+	}
+
+#ifndef ONLY_LOCAL_PROXY
 DOMElement* createDOMElement(XERCES_CPP_NAMESPACE::DOMDocument* pOwnerDoc,const char * const name)
 	{
 		XMLCh* n=XMLString::transcode(name);
@@ -430,10 +545,6 @@ DOMElement* createDOMElement(XERCES_CPP_NAMESPACE::DOMDocument* pOwnerDoc,const 
 		return ret;
 	}
 
-SINT32 getDOMChildByName(const DOMNode* pNode,const char * const name,DOMElement* & child,bool deep)
-	{
-		return getDOMChildByName(pNode,name,(DOMNode*&)child,deep);
-	}
 
 DOMNodeList* getElementsByTagName(DOMElement* pElem,const char* const name)
 	{
@@ -533,35 +644,7 @@ SINT32 setDOMElementAttribute(DOMNode* pElem,const char* attrName,SINT32 value)
 		return setDOMElementAttribute(pElem,attrName,tmp);
 	}
 
-SINT32 getDOMElementAttribute(const DOMNode * const elem,const char* attrName,UINT8* value,UINT32* len)
-	{
-		if(elem==NULL||attrName==NULL||value==NULL||len==NULL||elem->getNodeType()!=DOMNode::ELEMENT_NODE)
-			return E_UNKNOWN;
-		XMLCh* name=XMLString::transcode(attrName);
-		const XMLCh* tmpCh=((DOMElement*)elem)->getAttribute(name);
-		XMLString::release(&name);
-		char* tmpStr=XMLString::transcode(tmpCh);
-		UINT32 l=strlen(tmpStr);
-		if(l>=*len)
-			{
-				XMLString::release(&tmpStr);
-				return E_SPACE;
-			}
-		*len=l;
-		memcpy(value,tmpStr,l+1);
-		XMLString::release(&tmpStr);
-		return E_SUCCESS;
-	}
 
-SINT32 getDOMElementAttribute(const DOMNode * const elem,const char* attrName,SINT32* value)
-	{
-		UINT8 val[50];
-		UINT32 len=50;
-		if(getDOMElementAttribute(elem,attrName,val,&len)!=E_SUCCESS)
-			return E_UNKNOWN;
-		*value=atol((char*)val);
-		return E_SUCCESS;
-	}
 
 SINT32 getDOMElementAttribute(const DOMNode * const elem,const char* attrName,UINT32& value)
 	{
@@ -596,40 +679,7 @@ SINT32 getDOMElementAttribute(const DOMNode * const elem,const char* attrName,bo
 		return ret;
 	}
 
-SINT32 getDOMChildByName(const DOMNode* pNode,const XMLCh* const name,DOMNode* & a_child,bool deep)
-	{
-		a_child=NULL;
-		if(pNode==NULL)
-			return E_UNKNOWN;
-		DOMNode *pChild=pNode->getFirstChild();
-		while(pChild!=NULL)
-			{
-				if(XMLString::equals(pChild->getNodeName(),name))
-					{
-						a_child=pChild;
-						return E_SUCCESS;
-					}
-				if(deep)
-					{
-						if(getDOMChildByName(pChild,name,a_child,deep)==E_SUCCESS)
-							return E_SUCCESS;
-					}
-				pChild=pChild->getNextSibling();
-			}
-		return E_UNKNOWN;
-	}
 
-
-SINT32 getDOMChildByName(const DOMNode* pNode,const char* const name,DOMNode* & a_child,bool deep)
-	{
-		a_child=NULL;
-		if(pNode==NULL)
-			return E_UNKNOWN;
-		XMLCh* tmpName=XMLString::transcode((const char * const)name);
-		SINT32 ret=getDOMChildByName(pNode,tmpName,a_child,deep);
-		XMLString::release(&tmpName);
-		return ret;
-	}
 
 SINT32 getLastDOMChildByName(const DOMNode* pNode,const char* const name,DOMNode* & a_child)
 	{
@@ -663,52 +713,7 @@ SINT32 getLastDOMChildByName(const DOMNode* pNode,const XMLCh* const name,DOMNod
 		return E_UNKNOWN;
 	}
 
-/** 
- * Returns the content of the text node(s) under elem
- * as null-terminated C String. If there is no text node
- * len is set to 0.
- * 
- * TODO: Why is elem a DOM_Node and not a DOM_Element here?
- * @param elem the element which has a text node under it
- * @param value a buffer that gets the text value
- * @param valuelen on call contains the buffer size, on return contains the number of bytes copied
- * @retval E_SPACE if the buffer is too small
- * @retval E_UNKNOWN if the element is NULL
- * @retval E_SUCCESS otherwise
- */
-SINT32 getDOMElementValue(const DOMNode * const pElem,UINT8* value,UINT32* valuelen)
-	{
-		ASSERT(value!=NULL,"Value is null");
-		ASSERT(valuelen!=NULL,"ValueLen is null");
-		ASSERT(pElem!=NULL,"Element is NULL");
-		if(pElem==NULL)
-			return E_UNKNOWN;
-		DOMNode*  pText=pElem->getFirstChild();
-		UINT32 spaceLeft=*valuelen;
-		*valuelen=0;
-		while(pText!=NULL)
-			{
-				if(pText->getNodeType()==DOMNode::TEXT_NODE)
-					{
-						const XMLCh* str=pText->getNodeValue();
-						char* tmpStr=XMLString::transcode(str);
-						UINT32 tmpStrLen=strlen(tmpStr);
-						if(tmpStrLen>=spaceLeft)
-							{							
-								*valuelen=tmpStrLen+1;
-								XMLString::release(&tmpStr);
-								return E_SPACE;
-							}
-						memcpy(value+(*valuelen),tmpStr,tmpStrLen);
-						*valuelen+=tmpStrLen;
-						spaceLeft-=tmpStrLen;
-						XMLString::release(&tmpStr);
-					}
-				pText=pText->getNextSibling();
-			}
-		value[*valuelen]=0;
-		return E_SUCCESS;
-	}
+
 
 
 SINT32 getDOMElementValue(const DOMElement* const pElem,UINT32* value)

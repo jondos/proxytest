@@ -299,11 +299,6 @@ class CACmdLnOptions
 			SINT32 getUser(UINT8* user,UINT32 len);
 			SINT32 getPidFile(UINT8* pidfile,UINT32 len);
 
-			UINT32 getMaxNrOfUsers()
-			{
-				return m_maxNrOfUsers;
-			}
-
 			bool isLocalProxy();
 			bool isFirstMix();
 			bool isMiddleMix();
@@ -384,6 +379,11 @@ class CACmdLnOptions
 			/** Writes a default configuration file into the file named by filename*/
 			static SINT32 createMixOnCDConfiguration(const UINT8* strFileName);
 		static SINT32 saveToFile(XERCES_CPP_NAMESPACE::DOMDocument* a_doc, const UINT8* a_strFileName);
+		UINT32 getMaxNrOfUsers()
+			{
+				return m_maxNrOfUsers;
+			}
+
 #ifdef DYNAMIC_MIX
 			/* LERNGRUPPE (refactoring + new) */
 			//SINT32 createMixOnCDConfiguration(const UINT8* strFileName);
