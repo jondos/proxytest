@@ -62,7 +62,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define SDTFA // specific logic needed by SDTFA, http://www.sdtfa.com
 
 //#define PRINT_THREAD_STACK_TRACE //Usefull for debugging output of stack trace if mix dies...
-#if !defined(PRINT_THREAD_STACK_TRACE) && defined (DEBUG)
+#if !defined(PRINT_THREAD_STACK_TRACE) && defined (DEBUG)&& ! defined(ONLY_LOCAL_PROXY)
 	#define PRINT_THREAD_STACK_TRACE
 #endif
 
@@ -345,6 +345,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#endif
 #endif //WIn32 ?
 
+#include "basetypedefs.h"
+
 #include <assert.h>
 
 #include <pthread.h>
@@ -418,7 +420,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include <openssl/sha.h>
 	#include <openssl/md5.h>
 #endif
-#ifndef ONLY_LOCAL_PROXY
+
 //For DOM
 #ifdef MXML_DOM
 	#include "xml/dom/mxml/mxmlDOM.hpp"
@@ -446,7 +448,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
     XERCES_CPP_NAMESPACE_USE
 #endif
 #endif //wich DOM-Implementation to use?
-#endif //ONLY_LOCAL_PROXY
 
 //For large file support
 #ifndef O_LARGEFILE
@@ -522,7 +523,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #define MIX_VERSION_INFO "Mix-Version: " MIX_VERSION PAYMENT_VERSION_INFO "\nUsing: " OPENSSL_VERSION_TEXT "\nUsing Xerces-C: " MY_XERCES_VERSION "\n"
 
-#include "basetypedefs.h"
 #include "errorcodes.hpp"
 #include "typedefs.hpp"
 #include "controlchannelids.h"

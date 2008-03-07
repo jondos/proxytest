@@ -62,7 +62,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 CAMix* pMix=NULL;
 #endif
 CACmdLnOptions* pglobalOptions=NULL;
-#ifdef _DEBUG
+#if defined (_DEBUG) && ! defined (ONLY_LOCAL_PROXY)
 CAThreadList *pThreadList = NULL;
 #endif
 //Global Locks required by OpenSSL-Library
@@ -134,7 +134,7 @@ void init()
 #ifndef ONLY_LOCAL_PROXY
 		SSL_library_init();
 #endif
-#ifdef _DEBUG
+#if defined _DEBUG && ! defined (ONLY_LOCAL_PROXY)
 		pThreadList=new CAThreadList();
 		CAThread::setThreadList(pThreadList);
 #endif
@@ -179,7 +179,7 @@ void cleanup()
 		XMLPlatformUtils::Terminate();
 #endif //ONLY_LOCAL_PROXY
 
-#ifdef _DEBUG
+#if defined _DEBUG && ! defined (ONLY_LOCAL_PROXY)
 			if(pThreadList != NULL)
 			{
 				int nrOfThreads = pThreadList->getSize();
@@ -199,6 +199,7 @@ void cleanup()
 ///Remark: terminate() might be already defined by the c lib -- do not use this name...
 void my_terminate(void)
 {	
+#ifndef ONLY_LOCAL_PROXY
 	if(!bTriedTermination && pMix!=NULL)
 	{
 		bTriedTermination = true;
@@ -210,6 +211,7 @@ void my_terminate(void)
 		delete pMix;
 		pMix=NULL;
 	}
+#endif
 	cleanup();
 }
 
@@ -246,7 +248,7 @@ void signal_term( int )
 void signal_interrupt( int)
 	{
 		CAMsg::printMsg(LOG_INFO,"Hm.. Strg+C pressed... exiting!\n");
-#ifdef _DEBUG
+#if defined _DEBUG && ! defined (ONLY_LOCAL_PROXY)
 		CAMsg::printMsg(LOG_INFO,"%d threads listed.\n",pThreadList->getSize());
 		pThreadList->showAll();
 #endif
@@ -637,11 +639,12 @@ int main(int argc, const char* argv[])
 			CAMsg::printMsg(LOG_INFO,"Warning - Running as root!\n");
 #endif
 
-			
+#ifndef ONLY_LOCAL_PROXY
 		if(pglobalOptions->isSyslogEnabled())
 		{
 			CAMsg::setLogOptions(MSG_LOG);
 		}
+#endif
 		if(pglobalOptions->getLogDir((UINT8*)buff,255)==E_SUCCESS)
 			{
 				if(pglobalOptions->getCompressLogs())

@@ -28,6 +28,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(__CA_LOG_PACKET_TIMES__)
 #define __CA_LOG_PACKET_TIMES__
 
+#ifndef ONLY_LOCAL_PROXY
+
 #include "CAMutex.hpp"
 #include "CAThread.hpp"
 
@@ -96,4 +98,5 @@ class CALogPacketStats
 			volatile bool					m_bRunLog;
 			CAThread*							m_pthreadLog;
 	};
+#endif //ONLY_LOCAL_PROXY
 #endif

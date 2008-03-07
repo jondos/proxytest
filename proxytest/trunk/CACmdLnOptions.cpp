@@ -63,6 +63,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_docMixInfo=NULL;
 		m_docMixXml=NULL;
 		m_bAcceptReconfiguration=false;
+		m_maxNrOfUsers = 0;
 #endif //ONLY_LOCAL_PROXY
 		m_iTargetPort=m_iSOCKSPort=m_iSOCKSServerPort=0xFFFF;
 		m_strTargetHost=m_strSOCKSHost=NULL;
@@ -70,7 +71,6 @@ CACmdLnOptions::CACmdLnOptions()
 		m_strCascadeName=NULL;
 		m_strLogDir=NULL;
 		m_strEncryptedLogDir=NULL;
-		m_maxNrOfUsers = 0;
 		m_arTargetInterfaces=NULL;
 		m_cnTargets=0;
 		m_arListenerInterfaces=NULL;

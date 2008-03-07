@@ -60,14 +60,35 @@ UINT32 getMemoryUsage();
 SINT32 filelength(int handle);
 #endif
 
-#ifndef ONLY_LOCAL_PROXY
 /** Parses  a buffer containing an XML document and returns this document.
 	*/
 XERCES_CPP_NAMESPACE::DOMDocument* parseDOMDocument(const UINT8* const buff, UINT32 len);
 
+SINT32 getDOMChildByName(const DOMNode* pNode,const XMLCh* const name,DOMNode* & child,bool deep=false);
+SINT32 getDOMChildByName(const DOMNode* pNode,const char * const name,DOMNode* & child,bool deep=false);
+SINT32 getDOMChildByName(const DOMNode* pNode,const char * const name,DOMElement* & child,bool deep=false);
+
+/** 
+ * Returns the content of the text node(s) under elem
+ * as null-terminated C String. If there is no text node
+ * len is set to 0.
+ * 
+ * @param DOM_Node the element which has a text node under it
+ * @param value a buffer that gets the text value
+ * @param len on call contains the buffer size, on return contains the number of bytes copied
+ * @return E_SPACE if the buffer is too small, E_SUCCESS otherwise, E_UNKNOWN if the element is NULL
+ */
+SINT32 getDOMElementValue(const DOMNode * const pElem,UINT8* value,UINT32* len);
+
+bool equals(const XMLCh* const e1,const char* const e2);
+
+SINT32 getDOMElementAttribute(const DOMNode * const pElem,const char* attrName,SINT32* value);
+
+#ifndef ONLY_LOCAL_PROXY
 /** Creates an empty DOM DOcument.
 	*/
 XERCES_CPP_NAMESPACE::DOMDocument* createDOMDocument();
+
 
 /** Creates a new DOMElement with the given name which belongs to the DOMDocument owernDoc. 
 **/
@@ -77,7 +98,6 @@ DOMElement* createDOMElement(XERCES_CPP_NAMESPACE::DOMDocument* pOwnerDoc,const 
 **/
 DOMText* createDOMText(XERCES_CPP_NAMESPACE::DOMDocument* pOwnerDoc,const char * const text);
 
-bool equals(const XMLCh* const e1,const char* const e2);
 
 SINT32 setDOMElementValue(DOMElement* pElem,UINT32 value);
 
@@ -103,31 +123,15 @@ SINT32 getDOMElementValue(const DOMElement * const pElem,UINT16* value);
 SINT32 setDOMElementValue(DOMElement* pElem,const UINT8* value);
 
 
-/** 
- * Returns the content of the text node(s) under elem
- * as null-terminated C String. If there is no text node
- * len is set to 0.
- * 
- * @param DOM_Node the element which has a text node under it
- * @param value a buffer that gets the text value
- * @param len on call contains the buffer size, on return contains the number of bytes copied
- * @return E_SPACE if the buffer is too small, E_SUCCESS otherwise, E_UNKNOWN if the element is NULL
- */
-SINT32 getDOMElementValue(const DOMNode * const pElem,UINT8* value,UINT32* len);
 SINT32 getDOMElementValue(const DOMElement * const pElem,double* value);
 
 SINT32 setDOMElementAttribute(DOMNode* pElem,const char* attrName,SINT32 value);
 SINT32 setDOMElementValue(DOMElement* pElem,double floatValue);
 SINT32 setDOMElementAttribute(DOMNode* pElem,const char* attrName,const UINT8* value);
 
-SINT32 getDOMElementAttribute(const DOMNode * const pElem,const char* attrName,SINT32* value);
 SINT32 getDOMElementAttribute(const DOMNode * const pElem,const char* attrName,UINT32& value);
 SINT32 getDOMElementAttribute(const DOMNode * const pElem,const char* attrName,bool& value);
 SINT32 getDOMElementAttribute(const DOMNode * const pElem,const char* attrName,UINT8* value,UINT32* len);
-
-SINT32 getDOMChildByName(const DOMNode* pNode,const XMLCh* const name,DOMNode* & child,bool deep=false);
-SINT32 getDOMChildByName(const DOMNode* pNode,const char * const name,DOMNode* & child,bool deep=false);
-SINT32 getDOMChildByName(const DOMNode* pNode,const char * const name,DOMElement* & child,bool deep=false);
 
 DOMNodeList* getElementsByTagName(DOMElement* pElem,const char* const name);
 

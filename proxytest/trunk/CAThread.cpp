@@ -45,7 +45,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	const char* CAThread::METHOD_END = "End of method";
 #endif
 
-#ifdef DEBUG
+#if defined (DEBUG) && ! defined(ONLY_LOCAL_PROXY)
 	CAThreadList* CAThread::m_pThreadList=NULL;
 #endif
 

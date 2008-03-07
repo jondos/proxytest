@@ -1,6 +1,8 @@
 #ifndef __CAABSTRACTXMLSIGNABLE__
 #define __CAABSTRACTXMLSIGNABLE__
 
+#ifndef ONLY_LOCAL_PROXY
+
 #include "CAAbstractXMLEncodable.hpp"
 #include "CACertStore.hpp"
 #include "CASignature.hpp"
@@ -77,4 +79,5 @@ protected:
 	XERCES_CPP_NAMESPACE::DOMDocument* m_pSignature;
 };
 
+#endif //ONLY_LOCAL_PROXY
 #endif

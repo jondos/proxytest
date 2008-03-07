@@ -27,6 +27,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CATHREAD__
 #define __CATHREAD__
+
+#ifndef ONLY_LOCAL_PROXY
+
 #include "CAMsg.hpp"
 
 class CAThreadList;
@@ -211,7 +214,7 @@ class CAThread
 			UINT8* m_strName; //< a name mostly for debuging purpose...
 			UINT32 m_Id; // some unique identifier
 			static UINT32 ms_LastId;
-#ifdef _DEBUG
+#if defined _DEBUG && ! defined(ONLY_LOCAL_PROXY)
 			static CAThreadList* m_pThreadList;
 		public:
 			static void setThreadList(CAThreadList* pThreadList)
@@ -222,3 +225,4 @@ class CAThread
 	};
 #endif
 
+#endif //ONLY_LOCAL_PROXY

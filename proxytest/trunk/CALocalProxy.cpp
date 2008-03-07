@@ -509,7 +509,6 @@ SINT32 CALocalProxy::clean()
 SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 	{
 		CAMsg::printMsg(LOG_INFO,"Login process and key exchange started...\n");
-#ifndef ONLY_LOCAL_PROXY
 		//Parsing KeyInfo received from Mix n+1
 		XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(buff,len);
 		if(doc==NULL)
@@ -604,25 +603,6 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 				return E_UNKNOWN;
 #endif
 			}
-#else
-	m_MixCascadeProtocolVersion=MIX_CASCADE_PROTOCOL_VERSION_0_4;
-	m_chainlen=2;
-	m_arRSA=new CAASymCipher[m_chainlen];
-	UINT8* modulus;
-	UINT32 moduluslen;
-	UINT8* exponent;
-	UINT32 exponentlen;
-	modulus=(UINT8*)strstr((char*)buff,"<Modulus>")+9;
-	moduluslen=((UINT8*)strstr((char*)modulus,"</Modulus>"))-modulus;
-	exponent=(UINT8*)strstr((char*)modulus,"<Exponent>")+10;
-	exponentlen=((UINT8*)strstr((char*)exponent,"</Exponent>"))-exponent;
-	m_arRSA[1].setPublicKey(modulus,moduluslen,exponent,exponentlen);
-	modulus=(UINT8*)strstr((char*)exponent,"<Modulus>")+9;
-	moduluslen=((UINT8*)strstr((char*)modulus,"</Modulus>"))-modulus;
-	exponent=(UINT8*)strstr((char*)modulus,"<Exponent>")+10;
-	exponentlen=((UINT8*)strstr((char*)exponent,"</Exponent>"))-exponent;
-	m_arRSA[0].setPublicKey(modulus,moduluslen,exponent,exponentlen);
-#endif
 		//Now sending SymKeys....
 		if(m_MixCascadeProtocolVersion==MIX_CASCADE_PROTOCOL_VERSION_0_2)
 			{

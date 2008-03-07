@@ -649,7 +649,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;$(INCLUDE_MXML)&quot;;&quot;$(INCLUDE_OPENSSL)&quot;;&quot;$(INCLUDE_PTHREADS)&quot;;&quot;$(INCLUDE_ZLIB)&quot;;"
-				PreprocessorDefinitions="WIN32;_CONSOLE;_DEBUG;MXML_DOM;_REENTRANT;__MIX_TEST;__CLEANUP_C;"
+				PreprocessorDefinitions="WIN32;_CONSOLE;_DEBUG;MXML_DOM;ONLY_LOCAL_PROXY;_REENTRANT;__MIX_TEST;__CLEANUP_C;"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -1708,6 +1708,50 @@
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\TypeA\CAFirstMixA.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PrecompiledHeaderThrough="../stdafx.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="proxytest-only-local-debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PrecompiledHeaderThrough="../stdafx.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug-with-payment|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PrecompiledHeaderThrough="../stdafx.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug-with-Mini-XML|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PrecompiledHeaderThrough="../stdafx.h"
 					/>
 				</FileConfiguration>
 			</File>
@@ -5005,50 +5049,6 @@
 				Name="TypeA"
 				>
 				<File
-					RelativePath=".\TypeA\CAFirstMixA.cpp"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PrecompiledHeaderThrough="../stdafx.h"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="proxytest-only-local-debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PrecompiledHeaderThrough="../stdafx.h"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug-with-payment|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PrecompiledHeaderThrough="../stdafx.h"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug-with-Mini-XML|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PrecompiledHeaderThrough="../stdafx.h"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
 					RelativePath=".\TypeA\CALastMixA.cpp"
 					>
 					<FileConfiguration
@@ -6121,6 +6121,10 @@
 						</File>
 						<File
 							RelativePath=".\xml\dom\mxml\mxmlDOMImplementation.hpp"
+							>
+						</File>
+						<File
+							RelativePath=".\xml\dom\mxml\mxmlDOMNamedNodeMap.hpp"
 							>
 						</File>
 						<File
