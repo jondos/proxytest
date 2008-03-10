@@ -5752,6 +5752,38 @@
 						/>
 					</FileConfiguration>
 				</File>
+				<Filter
+					Name="dom"
+					>
+					<Filter
+						Name="mxml"
+						>
+						<File
+							RelativePath=".\xml\dom\mxml\mxmlDOMDocument.cpp"
+							>
+							<FileConfiguration
+								Name="Debug-with-Mini-XML|Win32"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+									UsePrecompiledHeader="0"
+								/>
+							</FileConfiguration>
+						</File>
+						<File
+							RelativePath=".\xml\dom\mxml\mxmlXercesDOMParser.cpp"
+							>
+							<FileConfiguration
+								Name="Debug-with-Mini-XML|Win32"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+									UsePrecompiledHeader="0"
+								/>
+							</FileConfiguration>
+						</File>
+					</Filter>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter
@@ -6105,6 +6137,10 @@
 						>
 						<File
 							RelativePath=".\xml\dom\mxml\mxmlDOM.hpp"
+							>
+						</File>
+						<File
+							RelativePath=".\xml\dom\mxml\mxmlDOMAttr.hpp"
 							>
 						</File>
 						<File

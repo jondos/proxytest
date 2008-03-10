@@ -459,6 +459,19 @@ XERCES_CPP_NAMESPACE::DOMDocument* parseDOMDocument(const UINT8* const buff, UIN
 		return ret;
 	}
 
+void releaseDOMParser()
+	{
+		if(	theParseDOMDocumentLock!=NULL)
+			{
+				theParseDOMDocumentLock->lock();
+				delete theDOMParser;
+				theDOMParser=NULL;
+				theParseDOMDocumentLock->unlock();
+				delete theParseDOMDocumentLock;
+				theParseDOMDocumentLock=NULL;
+			}
+	}
+
 /** 
  * Returns the content of the text node(s) under elem
  * as null-terminated C String. If there is no text node
@@ -536,7 +549,6 @@ SINT32 getDOMElementAttribute(const DOMNode * const elem,const char* attrName,SI
 		return E_SUCCESS;
 	}
 
-#ifndef ONLY_LOCAL_PROXY
 DOMElement* createDOMElement(XERCES_CPP_NAMESPACE::DOMDocument* pOwnerDoc,const char * const name)
 	{
 		XMLCh* n=XMLString::transcode(name);
@@ -545,7 +557,27 @@ DOMElement* createDOMElement(XERCES_CPP_NAMESPACE::DOMDocument* pOwnerDoc,const 
 		return ret;
 	}
 
+DOMText* createDOMText(XERCES_CPP_NAMESPACE::DOMDocument* pOwnerDoc,const char * const text)
+	{
+		XMLCh* t=XMLString::transcode(text);
+		DOMText* ret= pOwnerDoc->createTextNode(t);
+		XMLString::release(&t);
+		return ret;
+	}
 
+SINT32 setDOMElementAttribute(DOMNode* pElem,const char* attrName,const UINT8* value)
+	{
+		if(pElem==NULL||pElem->getNodeType()!=DOMNode::ELEMENT_NODE||attrName==NULL||value==NULL)
+			return E_UNKNOWN;
+		XMLCh* name=XMLString::transcode(attrName);
+		XMLCh* val=XMLString::transcode((const char*)value);
+		((DOMElement*)pElem)->setAttribute(name,val);
+		XMLString::release(&name);
+		XMLString::release(&val);
+		return E_SUCCESS;
+	}
+
+#ifndef ONLY_LOCAL_PROXY
 DOMNodeList* getElementsByTagName(DOMElement* pElem,const char* const name)
 	{
 		XMLCh* tmpCh=XMLString::transcode(name);
@@ -557,14 +589,6 @@ DOMNodeList* getElementsByTagName(DOMElement* pElem,const char* const name)
 SINT32 getLastDOMChildByName(const DOMNode* pNode,const char * const name,DOMElement* & a_child)
 	{
 		return getLastDOMChildByName(pNode,name,(DOMNode*&)a_child);
-	}
-
-DOMText* createDOMText(XERCES_CPP_NAMESPACE::DOMDocument* pOwnerDoc,const char * const text)
-	{
-		XMLCh* t=XMLString::transcode(text);
-		DOMText* ret= pOwnerDoc->createTextNode(t);
-		XMLString::release(&t);
-		return ret;
 	}
 
 XERCES_CPP_NAMESPACE::DOMDocument* createDOMDocument()
@@ -622,18 +646,6 @@ SINT32 setDOMElementValue(DOMElement* pElem,const UINT8* value)
 				pChild=pChild->getNextSibling();
 			}
 		pElem->appendChild(pText);
-		return E_SUCCESS;
-	}
-
-SINT32 setDOMElementAttribute(DOMNode* pElem,const char* attrName,const UINT8* value)
-	{
-		if(pElem==NULL||pElem->getNodeType()!=DOMNode::ELEMENT_NODE||attrName==NULL||value==NULL)
-			return E_UNKNOWN;
-		XMLCh* name=XMLString::transcode(attrName);
-		XMLCh* val=XMLString::transcode((const char*)value);
-		((DOMElement*)pElem)->setAttribute(name,val);
-		XMLString::release(&name);
-		XMLString::release(&val);
 		return E_SUCCESS;
 	}
 
