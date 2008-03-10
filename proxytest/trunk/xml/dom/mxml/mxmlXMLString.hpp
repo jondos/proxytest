@@ -1,3 +1,5 @@
+#ifndef __MXML_XML_STRING__
+#define __MXML_XML_STRING__
 #include "mxmlDOMTypeDef.hpp"
 
 class XMLString
@@ -37,7 +39,20 @@ class XMLString
 				}
 
 			static void trim(XMLCh* const toTrim);
-			static XMLCh* replicate(const XMLCh* const toRep);
-			static UINT32 stringLen(const XMLCh* const src);
+			
+			static XMLCh* replicate(const XMLCh* const toRep)
+				{
+					UINT32 len=XMLString::stringLen(toRep)+1;
+					XMLCh* c=new XMLCh[len];
+					memcpy(c,toRep,len);
+					return c;
+				}
+			
+			static UINT32 stringLen(const XMLCh* const src)
+				{
+					return strlen((char*)src);
+				}
+
 			static SINT32 compareString(const XMLCh *const str1, const XMLCh *const str2);
 	};
+#endif //__MXML_XML_STRING__

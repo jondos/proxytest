@@ -1,6 +1,8 @@
 #ifndef __MXML_DOM_TYPE_DEF__
 #define __MXML_DOM_TYPE_DEF__
 
+#include "../../../basetypedefs.h"
+
 #define XERCES_CPP_NAMESPACE MXML_APACHE_DOM_BINDINGS
 
 typedef UINT8 XMLCh;

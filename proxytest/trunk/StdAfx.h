@@ -423,6 +423,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 //For DOM
 #ifdef MXML_DOM
+	#include <mxml.h>
 	#include "xml/dom/mxml/mxmlDOM.hpp"
 #else
 #include <util/XercesDefs.hpp>

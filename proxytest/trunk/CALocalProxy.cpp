@@ -64,7 +64,7 @@ SINT32 CALocalProxy::start()
 	{
 		if(initOnce()!=E_SUCCESS)
 			return E_UNKNOWN;
-    while(true)
+    for(;;)
     {
 				CAMsg::printMsg(LOG_DEBUG, "CALocalProxy main: before init()\n");
         if(init() == E_SUCCESS)
@@ -180,7 +180,7 @@ SINT32 CALocalProxy::init()
 						CAMsg::printMsg(LOG_INFO,"%s\n",buff);
 #endif
 						SINT32 ret=processKeyExchange(buff,size);
-						delete []  buff;
+						delete[]  buff;
 						if(ret!=E_SUCCESS)
 							return E_UNKNOWN;
 					}
@@ -380,7 +380,7 @@ SINT32 CALocalProxy::loop()
 										else 
 											{
 												pMixPacket->channel=tmpCon->outChannel;
-												pMixPacket->payload.len=htons(len);
+												pMixPacket->payload.len=htons((UINT16)len);
 												if(bHaveSocks&&tmpCon->pSocket->getLocalPort()==socksPort)
 													{
 														pMixPacket->payload.type=MIX_PAYLOAD_SOCKS;
@@ -556,7 +556,7 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 			return E_UNKNOWN;
 #endif
 		}
-		DOMElement* elemMixes;
+		DOMElement* elemMixes=NULL;
 		getDOMChildByName(root,"Mixes",elemMixes,false);
 		SINT32 chainlen=-1;
 		if(elemMixes==NULL||getDOMElementAttribute(elemMixes,"count",&chainlen)!=E_SUCCESS)
@@ -654,7 +654,7 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 				sprintf((char*)buff,XML_JAP_KEY_TEMPLATE,outBuffLinkKey,outBuffMixKey);
 				UINT32 encbufflen;
 				UINT8* encbuff=encryptXMLElement(buff,strlen((char*)buff),encbufflen,&m_arRSA[m_chainlen-1]);
-				UINT16 size2=htons(encbufflen+XML_HEADER_SIZE);
+				UINT16 size2=htons((UINT16)(encbufflen+XML_HEADER_SIZE));
 				SINT32 ret=((CASocket*)&m_muxOut)->send((UINT8*)&size2,2);
 				ret=((CASocket*)&m_muxOut)->send((UINT8*)XML_HEADER,XML_HEADER_SIZE);
 				ret=((CASocket*)&m_muxOut)->send(encbuff,encbufflen);
@@ -670,6 +670,7 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 				m_muxOut.setReceiveKey(linkKeys+32,32);
 				m_muxOut.setCrypt(true);
 			}
+		doc->release();
 		CAMsg::printMsg(LOG_INFO,"Login process and key exchange finished!\n");		
 		return E_SUCCESS;
 	}

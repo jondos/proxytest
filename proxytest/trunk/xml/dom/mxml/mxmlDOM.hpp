@@ -4,6 +4,7 @@
 #include "mxmlDOMDocument.hpp"
 #include "mxmlDOMDocumentFragment.hpp"
 #include "mxmlDOMText.hpp"
+#include "mxmlDOMAttr.hpp"
 #include "mxmlDOMNodeList.hpp"
 #include "mxmlDOMNamedNodeMap.hpp"
 #include "mxmlXMLFormatTarget.hpp"

@@ -3,6 +3,9 @@
 
 class InputSource
 	{
+		protected:
+			virtual char* getBuff() const=0;
+			friend class XercesDOMParser;
 	};
 
 #endif //__MXML_INPUT_SOURCE__

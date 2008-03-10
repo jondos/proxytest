@@ -325,6 +325,8 @@ SINT32 CAASymCipher::setPublicKeyAsXML(const UINT8* key,UINT32 len)
 		return setPublicKeyAsDOMNode(root);
 	}		
 
+#endif //ONLY_LOCAL_PROXY
+
 //Bugy!! Changes node!!!		
 SINT32 CAASymCipher::setPublicKeyAsDOMNode(DOMNode* node)
 	{	
@@ -343,20 +345,24 @@ SINT32 CAASymCipher::setPublicKeyAsDOMNode(DOMNode* node)
 									{
 										if(tmpRSA->n!=NULL)
 											BN_free(tmpRSA->n);
-										char* tmpStr=XMLString::transcode(child->getFirstChild()->getNodeValue());
+										UINT8* tmpStr=new UINT8[4096];
+										UINT32 tmpStrLen=4096;
+										getDOMElementValue(child,tmpStr,&tmpStrLen);
 										decLen=4096;
-										CABase64::decode((UINT8*)tmpStr,strlen(tmpStr),decBuff,&decLen);
-										XMLString::release(&tmpStr);
+										CABase64::decode(tmpStr,tmpStrLen,decBuff,&decLen);
+										delete []tmpStr;
 										tmpRSA->n=BN_bin2bn(decBuff,decLen,NULL);
 									}
 								else if(equals(child->getNodeName(),"Exponent"))
 									{
 										if(tmpRSA->e!=NULL)
 											BN_free(tmpRSA->e);
-										char* tmpStr=XMLString::transcode(child->getFirstChild()->getNodeValue());
+										UINT8* tmpStr=new UINT8[4096];
+										UINT32 tmpStrLen=4096;
+										getDOMElementValue(child,tmpStr,&tmpStrLen);
 										decLen=4096;
-										CABase64::decode((UINT8*)tmpStr,strlen(tmpStr),decBuff,&decLen);
-										XMLString::release(&tmpStr);
+										CABase64::decode(tmpStr,tmpStrLen,decBuff,&decLen);
+										delete []tmpStr;
 										tmpRSA->e=BN_bin2bn(decBuff,decLen,NULL);
 									}
 								child=child->getNextSibling();
@@ -376,7 +382,6 @@ SINT32 CAASymCipher::setPublicKeyAsDOMNode(DOMNode* node)
 			}
 		return E_UNKNOWN;
 	}
-#endif //ONLY_LOCAL_PROXY
 
 #ifndef ONLY_LOCAL_PROXY
 /** Sets the public key which is used for encryption to the contained in the

@@ -64,7 +64,7 @@ class CAMutex
 		protected:
 			#ifdef HAVE_PTHREAD_MUTEXES
 				pthread_mutex_t* m_pMutex;
-				pthread_mutexattr_t* m_pMutexAttributes;
+				//pthread_mutexattr_t* m_pMutexAttributes;
 			#else
 				CASemaphore* m_pMutex;
 			#endif

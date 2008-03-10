@@ -131,6 +131,7 @@ void init()
 		OpenSSL_add_all_algorithms();
 		pOpenSSLMutexes=new CAMutex[CRYPTO_num_locks()];
 		CRYPTO_set_locking_callback((void (*)(int,int,const char *,int))openssl_locking_callback);
+
 #ifndef ONLY_LOCAL_PROXY
 		SSL_library_init();
 #endif
@@ -148,6 +149,7 @@ void init()
 		#endif
 		initRandom();
 		pglobalOptions=new CACmdLnOptions();
+
 	}
 
 /**do necessary cleanups of libraries etc.*/
@@ -160,24 +162,25 @@ void cleanup()
 		pMix=NULL;
 #endif
 		CAMsg::printMsg(LOG_CRIT,"Terminating Programm!\n");
-		//		CASocketAddrINet::destroy();
+		CASocketAddrINet::cleanup();
 		#ifdef _WIN32
 			WSACleanup();
 		#endif
 		removePidFile();
 		delete pglobalOptions;
 		pglobalOptions=NULL;
-//OpenSSL Cleanup
+
+	//OpenSSL Cleanup
 		CRYPTO_set_locking_callback(NULL);
 		delete []pOpenSSLMutexes;
 		pOpenSSLMutexes=NULL;
-		CASocketAddrINet::cleanup();
 		//XML Cleanup
 		//Note: We have to destroy all XML Objects and all objects that uses XML Objects BEFORE
 		//we terminate the XML lib!
+		releaseDOMParser();
 #ifndef ONLY_LOCAL_PROXY
 		XMLPlatformUtils::Terminate();
-#endif //ONLY_LOCAL_PROXY
+#endif
 
 #if defined _DEBUG && ! defined (ONLY_LOCAL_PROXY)
 			if(pThreadList != NULL)
@@ -518,6 +521,15 @@ int main(int argc, const char* argv[])
 		//readPasswd(buff1,500);
 		//printf("%s\n",buff1);
 		//printf("Len: %i\n",strlen((char*)buff1));
+
+		/*UINT32 size=0;
+		UINT8* fg=readFile((UINT8*)"test.xml",&size);
+		XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(fg,size);
+		delete[] fg;
+		doc->release();
+		cleanup();
+		exit(0);
+		*/
 		checkSizesOfBaseTypes();
 #ifndef NEW_MIX_TYPE
 		if(MIXPACKET_SIZE!=sizeof(MIXPACKET))
