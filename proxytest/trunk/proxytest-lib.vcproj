@@ -5762,6 +5762,14 @@
 							RelativePath=".\xml\dom\mxml\mxmlDOMDocument.cpp"
 							>
 							<FileConfiguration
+								Name="Debug|Win32"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+									UsePrecompiledHeader="0"
+								/>
+							</FileConfiguration>
+							<FileConfiguration
 								Name="Debug-with-Mini-XML|Win32"
 								>
 								<Tool
@@ -5773,6 +5781,14 @@
 						<File
 							RelativePath=".\xml\dom\mxml\mxmlXercesDOMParser.cpp"
 							>
+							<FileConfiguration
+								Name="Debug|Win32"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+									UsePrecompiledHeader="0"
+								/>
+							</FileConfiguration>
 							<FileConfiguration
 								Name="Debug-with-Mini-XML|Win32"
 								>

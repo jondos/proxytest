@@ -2375,24 +2375,24 @@ SKIP_NEXT_MIX:
 #if defined(DELAY_CHANNELS_LATENCY)
 		m_u32DelayChannelLatency=DELAY_CHANNEL_LATENCY;	
 #endif
-		DOM_Element elemRessources;
-		getDOMChildByName(elemRoot,(UINT8*)"Ressources",elemRessources,false);
+		DOMElement* elemRessources=NULL;
+		getDOMChildByName(elemRoot,"Ressources",elemRessources,false);
 		if(elemRessources!=NULL)
 			{
 				UINT32 u32;
 #if defined (DELAY_CHANNELS) ||defined(DELAY_USERS)
-				if(	getDOMChildByName(elemRessources,(UINT8*)"UnlimitTraffic",elem,false)==E_SUCCESS&&
+				if(	getDOMChildByName(elemRessources,"UnlimitTraffic",elem,false)==E_SUCCESS&&
 						getDOMElementValue(elem,&u32)==E_SUCCESS)
 					m_u32DelayChannelUnlimitTraffic=u32;
-				if(	getDOMChildByName(elemRessources,(UINT8*)"BytesPerIntervall",elem,false)==E_SUCCESS&&
+				if(	getDOMChildByName(elemRessources,"BytesPerIntervall",elem,false)==E_SUCCESS&&
 						getDOMElementValue(elem,&u32)==E_SUCCESS)
 					m_u32DelayChannelBucketGrow=u32;
-				if(	getDOMChildByName(elemRessources,(UINT8*)"Intervall",elem,false)==E_SUCCESS&&
+				if(	getDOMChildByName(elemRessources,"Intervall",elem,false)==E_SUCCESS&&
 						getDOMElementValue(elem,&u32)==E_SUCCESS)
 					m_u32DelayChannelBucketGrowIntervall=u32;
 #endif
 #if defined (DELAY_CHANNELS_LATENCY)
-				if(	getDOMChildByName(elemRessources,(UINT8*)"Latency",elem,false)==E_SUCCESS&&
+				if(	getDOMChildByName(elemRessources,"Latency",elem,false)==E_SUCCESS&&
 						getDOMElementValue(elem,&u32)==E_SUCCESS)
 					m_u32DelayChannelLatency=u32;
 #endif
