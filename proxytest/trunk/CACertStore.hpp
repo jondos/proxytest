@@ -49,7 +49,7 @@ class CACertStore
 			UINT32 getNumber(){return m_cCerts;}
 			static CACertStore* decode(UINT8* buff,UINT32 bufflen,UINT32 type);
 			SINT32 encode(UINT8* buff,UINT32* bufflen,UINT32 type);
-			SINT32 encode(DOMDocumentFragment* & docFrag,XERCES_CPP_NAMESPACE::DOMDocument* doc);
+			SINT32 encode(DOMElement* & elemnRoot,XERCES_CPP_NAMESPACE::DOMDocument* doc);
 		private:
 			LP_CERTSTORE_ENTRY m_pCertList;
 			UINT32 m_cCerts;

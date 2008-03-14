@@ -59,7 +59,7 @@ class CAListenerInterface
 				}
 			char* getHostname() { return (char*)m_strHostname; }
 #ifndef ONLY_LOCAL_PROXY
-			SINT32 toDOMFragment(DOMDocumentFragment* & fragment,XERCES_CPP_NAMESPACE::DOMDocument* ownerDoc) const;
+			SINT32 toDOMElement(DOMElement* & elem,XERCES_CPP_NAMESPACE::DOMDocument* ownerDoc) const;
 			static const char* XML_ELEMENT_CONTAINER_NAME;
 			static const char* XML_ELEMENT_NAME;
 #endif

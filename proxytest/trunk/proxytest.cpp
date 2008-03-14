@@ -530,6 +530,7 @@ int main(int argc, const char* argv[])
 		cleanup();
 		exit(0);
 		*/
+	
 		checkSizesOfBaseTypes();
 #ifndef NEW_MIX_TYPE
 		if(MIXPACKET_SIZE!=sizeof(MIXPACKET))

@@ -1,3 +1,4 @@
+#ifdef MXML_DOM
 #include "../../../StdAfx.h"
 #include "../../../CAUtil.hpp"
 
@@ -59,3 +60,4 @@ void xercesdomparser_sax_callback (mxml_node_t * node, mxml_sax_event_t sax_even
 				break;
 			}
 	}
+#endif //MXML_DOM

@@ -183,18 +183,16 @@ SINT32 CACertificate::encode(UINT8* buff,UINT32* bufflen,UINT32 type)
 		return E_SUCCESS;
 	}
 
-SINT32 CACertificate::encode(DOMDocumentFragment* & docFrag,XERCES_CPP_NAMESPACE::DOMDocument* doc)
+SINT32 CACertificate::encode(DOMElement* & elemRoot,XERCES_CPP_NAMESPACE::DOMDocument* doc)
 	{
-		docFrag=doc->createDocumentFragment();
-		DOMElement* elemCert=createDOMElement(doc,"X509Certificate");
-		docFrag->appendChild(elemCert);
+		elemRoot=createDOMElement(doc,"X509Certificate");
 		UINT8 buff[2048]; //TODO: Very bad --> looks like easy buffer overflow... [donn't care at the moment...]
 		UINT8* tmp=buff;
 		int i=i2d_X509(m_pCert,&tmp); //now we need DER
 		UINT32 bufflen=2048;
 		CABase64::encode(buff,i,buff,&bufflen); //now we have it converted to Base64
 		buff[bufflen]=0;
-		setDOMElementValue(elemCert,buff);
+		setDOMElementValue(elemRoot,buff);
 		return E_SUCCESS;
 	}
 

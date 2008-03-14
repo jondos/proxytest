@@ -146,7 +146,7 @@ SINT32 getLastDOMChildByName(const DOMNode* pNode,const char * const name,DOMEle
 
 
 SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, UINT8* xml, UINT32* xmllen,CAASymCipher* pRSA);
-SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, DOMDocumentFragment* & pDocFrag,CAASymCipher* pRSA);
+SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, DOMElement* & elemRootEncodedKey,XERCES_CPP_NAMESPACE::DOMDocument* docOwner,CAASymCipher* pRSA);
 SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, const UINT8* const xml, UINT32 xmllen,CAASymCipher* pRSA);
 SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, const DOMNode* pRoot,CAASymCipher* pRSA);
 

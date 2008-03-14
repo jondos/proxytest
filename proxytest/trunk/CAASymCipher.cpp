@@ -269,41 +269,40 @@ SINT32 CAASymCipher::getPublicKeyAsXML(UINT8* buff,UINT32 *len)
 	{
 		if(m_pRSA==NULL||buff==NULL)
 			return E_UNKNOWN;
-		DOMDocumentFragment* pDFrag=NULL;
-		getPublicKeyAsDocumentFragment(pDFrag);
-		DOM_Output::dumpToMem(pDFrag,buff,len);
+		XERCES_CPP_NAMESPACE::DOMDocument* pDoc=createDOMDocument();
+		DOMElement* elemRoot=NULL;
+		getPublicKeyAsDOMElement(elemRoot,pDoc);
+		DOM_Output::dumpToMem(elemRoot,buff,len);
+		pDoc->release();
 		return E_SUCCESS;
 	}
 
-SINT32 CAASymCipher::getPublicKeyAsDocumentFragment(DOMDocumentFragment* & dFrag)
+SINT32 CAASymCipher::getPublicKeyAsDOMElement(DOMElement* & elemRoot,XERCES_CPP_NAMESPACE::DOMDocument* docOwner)
 	{
 		if(m_pRSA==NULL)
 			return E_UNKNOWN;
-		XERCES_CPP_NAMESPACE::DOMDocument* doc=createDOMDocument();
-		DOMElement* root=createDOMElement(doc,"RSAKeyValue");
-		dFrag=doc->createDocumentFragment();
+		elemRoot=createDOMElement(docOwner,"RSAKeyValue");
 		
-		DOMElement* nodeModulus=createDOMElement(doc,"Modulus");
-		root->appendChild(nodeModulus);
+		DOMElement* nodeModulus=createDOMElement(docOwner,"Modulus");
+		elemRoot->appendChild(nodeModulus);
 		UINT8 tmpBuff[256];
 		UINT32 size=256;
 		BN_bn2bin(m_pRSA->n,tmpBuff);
 		CABase64::encode(tmpBuff,BN_num_bytes(m_pRSA->n),tmpBuff,&size);
 		tmpBuff[size]=0;
-		DOMText* tmpTextNode=createDOMText(doc,(const char* const)tmpBuff);
+		DOMText* tmpTextNode=createDOMText(docOwner,(const char* const)tmpBuff);
 		nodeModulus->appendChild(tmpTextNode);
 
-		DOMElement* nodeExponent=createDOMElement(doc,"Exponent");
+		DOMElement* nodeExponent=createDOMElement(docOwner,"Exponent");
 		BN_bn2bin(m_pRSA->e,tmpBuff);
 		size=256;
 		CABase64::encode(tmpBuff,BN_num_bytes(m_pRSA->e),tmpBuff,&size);
 		tmpBuff[size]=0;
 		
-		tmpTextNode=createDOMText(doc,(const char* const)tmpBuff);
+		tmpTextNode=createDOMText(docOwner,(const char* const)tmpBuff);
 		nodeExponent->appendChild(tmpTextNode);
 
-		root->appendChild(nodeExponent);
-		dFrag->appendChild(root);
+		elemRoot->appendChild(nodeExponent);
 		return E_SUCCESS;
 	}
 
