@@ -454,7 +454,7 @@ XERCES_CPP_NAMESPACE::DOMDocument* parseDOMDocument(const UINT8* const buff, UIN
 		theDOMParser->parse(in);
 		XERCES_CPP_NAMESPACE::DOMDocument* ret=NULL;
 		if(theDOMParser->getErrorCount()==0)
-			ret=theDOMParser->getDocument();
+			ret=theDOMParser->adoptDocument();
 		theParseDOMDocumentLock->unlock();
 		return ret;
 	}
@@ -818,19 +818,15 @@ SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, UINT8* xml, UINT32* xmlle
 		return E_SUCCESS;
 	}
 
-SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, DOMDocumentFragment* & docFrag,CAASymCipher* pRSA)
+SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, DOMElement* & elemRootEncodedKey,XERCES_CPP_NAMESPACE::DOMDocument* docOwner,CAASymCipher* pRSA)
 	{
-		XERCES_CPP_NAMESPACE::DOMDocument* pDoc=createDOMDocument();
-		DOMElement* root=createDOMElement(pDoc,"EncryptedKey");
-		pDoc->appendChild(root);
-		docFrag=pDoc->createDocumentFragment();
-		docFrag->appendChild(root);
-		DOMElement* elem1=createDOMElement(pDoc,"EncryptionMethod");
+		elemRootEncodedKey=createDOMElement(docOwner,"EncryptedKey");
+		DOMElement* elem1=createDOMElement(docOwner,"EncryptionMethod");
 		setDOMElementAttribute(elem1,"Algorithm",(UINT8*)"RSA");
-		root->appendChild(elem1);
-		DOMElement* elem2=createDOMElement(pDoc,"CipherData");
+		elemRootEncodedKey->appendChild(elem1);
+		DOMElement* elem2=createDOMElement(docOwner,"CipherData");
 		elem1->appendChild(elem2);
-		elem1=createDOMElement(pDoc,"CipherValue");
+		elem1=createDOMElement(docOwner,"CipherValue");
 		elem2->appendChild(elem1);
 		UINT8 tmpBuff[1024];
 		UINT32 tmpLen=1024;

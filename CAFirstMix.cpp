@@ -381,12 +381,12 @@ SINT32 CAFirstMix::processKeyExchange()
     //tlen=256;
 
     //Inserting own Key in XML-Key struct
-    DOMDocumentFragment* docfragKey=NULL;
-    m_pRSA->getPublicKeyAsDocumentFragment(docfragKey);
+    DOMElement* elemKey=NULL;
+		m_pRSA->getPublicKeyAsDOMElement(elemKey,docXmlKeyInfo);
     addMixInfo(elemMixesKey, true);
     DOMElement* elemOwnMix=NULL;
     getDOMChildByName(elemMixesKey, "Mix", elemOwnMix, false);
-		elemOwnMix->appendChild(docXmlKeyInfo->importNode(docfragKey,true));
+		elemOwnMix->appendChild(elemKey);
 		if (signXML(elemOwnMix) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_DEBUG,"Could not sign MixInfo sent to users...\n");
@@ -469,12 +469,10 @@ SINT32 CAFirstMix::processKeyExchange()
             getRandom(key,64);
             //UINT8 buff[400];
             //UINT32 bufflen=400;
-            DOMDocumentFragment* docfragSymKey=NULL;
-            encodeXMLEncryptedKey(key,64,docfragSymKey,&oRSA);
             XERCES_CPP_NAMESPACE::DOMDocument* docSymKey=createDOMDocument();
-						docSymKey->appendChild(docSymKey->importNode(docfragSymKey->getFirstChild(),true));
-            docfragSymKey->getOwnerDocument()->release();
-						DOMElement* elemRoot=docSymKey->getDocumentElement();
+            DOMElement* elemRoot=NULL;
+						encodeXMLEncryptedKey(key,64,elemRoot,docSymKey,&oRSA);
+						docSymKey->appendChild(elemRoot);
             if(elemNonce!=NULL)
             {
                 DOMElement* elemNonceHash=createDOMElement(docSymKey,"Nonce");

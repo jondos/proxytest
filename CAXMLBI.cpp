@@ -177,9 +177,9 @@ SINT32 CAXMLBI::toXmlElement(XERCES_CPP_NAMESPACE::DOMDocument *a_doc, DOMElemen
 			DOMElement* elemCert = createDOMElement(a_doc,"Certificate");
 			elemRoot->appendChild(elemCert);
 			
-			DOMDocumentFragment* tmpFrag=NULL;
-			m_pCert->encode(tmpFrag, a_doc);
-			elemCert->appendChild(tmpFrag);
+			DOMElement* tmpElem=NULL;
+			m_pCert->encode(tmpElem, a_doc);
+			elemCert->appendChild(tmpElem);
 		}
 		
 		return E_SUCCESS;

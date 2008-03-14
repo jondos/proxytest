@@ -2633,12 +2633,13 @@ SINT32 CACmdLnOptions::buildDefaultConfig(XERCES_CPP_NAMESPACE::DOMDocument* doc
     elemRoot->appendChild(elemCerts);
     DOMElement* elemOwnCert=createDOMElement(doc,"OwnCertificate");
     elemCerts->appendChild(elemOwnCert);
-    DOMDocumentFragment* docFrag=NULL;
-    pSignature->getSignKey(docFrag,doc);
-    elemOwnCert->appendChild(docFrag);
+    DOMElement* tmpElemSigKey=NULL;
+    pSignature->getSignKey(tmpElemSigKey,doc);
+    elemOwnCert->appendChild(tmpElemSigKey);
 
-    pCert->encode(docFrag,doc);
-    elemOwnCert->appendChild(docFrag);
+    DOMElement* elemTmpCert=NULL;
+		pCert->encode(elemTmpCert,doc);
+    elemOwnCert->appendChild(elemTmpCert);
 
     /** @todo Add Description section because InfoService doesn't accept MixInfos without Location or Operator */
     delete pCert;

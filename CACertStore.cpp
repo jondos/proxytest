@@ -96,23 +96,21 @@ SINT32 CACertStore::encode(UINT8* buff,UINT32* bufflen,UINT32 type)
 /**Creates a XML DocumentFragment which represenst all the Certifcates in this 
 	* CertStore
 	*
-	*	@param docFrag on ouput holds the created DOM_DocumentFragment
+	*	@param docFrag on ouput holds the created DOMElement
 	* @param doc owner document of the new DOM_DocumentFragment
 	* @retval E_SUCCESS if successful
 	* @retval E_UNKNOWN otherwise
 	*/
-SINT32 CACertStore::encode(DOMDocumentFragment* & docFrag,XERCES_CPP_NAMESPACE::DOMDocument* doc)
+SINT32 CACertStore::encode(DOMElement* & elemRoot,XERCES_CPP_NAMESPACE::DOMDocument* doc)
 	{
-		docFrag=doc->createDocumentFragment();
-		DOMElement* elemX509Data=createDOMElement(doc,"X509Data");
-		docFrag->appendChild(elemX509Data);
+		elemRoot=createDOMElement(doc,"X509Data");
 		LP_CERTSTORE_ENTRY tmp;
 		tmp=m_pCertList;
 		while(tmp!=NULL)
 			{
-				DOMDocumentFragment* tmpFrag;
-				tmp->pCert->encode(tmpFrag,doc);
-				elemX509Data->appendChild(tmpFrag);
+				DOMElement* tmpElem=NULL;
+				tmp->pCert->encode(tmpElem,doc);
+				elemRoot->appendChild(tmpElem);
 				tmp=tmp->next;
 			}
 		return E_SUCCESS;

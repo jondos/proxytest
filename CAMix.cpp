@@ -278,9 +278,9 @@ SINT32 CAMix::initMixCascadeInfo(DOMElement* mixes)
         }
         else if(pListener->getType()==RAW_TCP)
         {
-            DOMDocumentFragment* docFrag=NULL;
-            pListener->toDOMFragment(docFrag,m_docMixCascadeInfo);
-            elemListenerInterfaces->appendChild(docFrag);
+            DOMElement* elemTmpLI=NULL;
+            pListener->toDOMElement(elemTmpLI,m_docMixCascadeInfo);
+            elemListenerInterfaces->appendChild(elemTmpLI);
         }
         delete pListener;
     }	

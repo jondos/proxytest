@@ -230,11 +230,9 @@ SINT32 CALastMix::processKeyExchange()
       #endif
     #endif
 		//Inserting RSA-Key
-		DOMDocumentFragment* tmpDocFrag=NULL;
-		m_pRSA->getPublicKeyAsDocumentFragment(tmpDocFrag);
-		DOMNode* nodeRsaKey=doc->importNode(tmpDocFrag,true);
+		DOMElement* nodeRsaKey=NULL;
+		m_pRSA->getPublicKeyAsDOMElement(nodeRsaKey,doc);
 		elemMix->appendChild(nodeRsaKey);
-		tmpDocFrag->getOwnerDocument()->release();
 		//inserting Nonce
 		DOMElement* elemNonce=createDOMElement(doc,"Nonce");
 		UINT8 arNonce[16];

@@ -157,11 +157,10 @@ SINT32 CAMiddleMix::processKeyExchange()
 						oRSA.setPublicKeyAsDOMNode(rsaKey);
 						UINT8 key[64];
 						getRandom(key,64);
-						DOMDocumentFragment* docfragSymKey=NULL;
-						encodeXMLEncryptedKey(key,64,docfragSymKey,&oRSA);
 						XERCES_CPP_NAMESPACE::DOMDocument* docSymKey=createDOMDocument();
-						docSymKey->appendChild(docSymKey->importNode(docfragSymKey,true));
-						DOMElement* elemRoot=docSymKey->getDocumentElement();
+						DOMElement* elemRoot=NULL;
+						encodeXMLEncryptedKey(key,64,elemRoot,docSymKey,&oRSA);
+						docSymKey->appendChild(elemRoot);
 						DOMElement* elemNonceHash=createDOMElement(docSymKey,"Nonce");
 						setDOMElementValue(elemNonceHash,arNonce);						
 						elemRoot->appendChild(elemNonceHash);
@@ -173,6 +172,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 						UINT16 size=htons((UINT16)outlen);
 						((CASocket*)m_pMuxOut)->send((UINT8*)&size,2);
 						((CASocket*)m_pMuxOut)->send(out,outlen);
+						docSymKey->release();
 						delete[] out;
 						bFoundNextMix=true;
 						break;
@@ -209,9 +209,9 @@ SINT32 CAMiddleMix::processKeyExchange()
 		mixNode->appendChild(elemMixProtocolVersion);
 		setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.3");
 
-		DOMDocumentFragment* pDocFragment=NULL;
-		m_pRSA->getPublicKeyAsDocumentFragment(pDocFragment); //the key
-		mixNode->appendChild(doc->importNode(pDocFragment,true));
+		DOMElement* elemKey=NULL;
+		m_pRSA->getPublicKeyAsDOMElement(elemKey,doc); //the key
+		mixNode->appendChild(elemKey);
 		//inserting Nonce
 		DOMElement* elemNonce=createDOMElement(doc,"Nonce");
 		UINT8 arNonce[16];

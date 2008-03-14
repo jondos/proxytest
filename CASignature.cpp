@@ -72,9 +72,9 @@ SINT32 CASignature::generateSignKey(UINT32 size)
 		return E_SUCCESS;
 	}
 
-SINT32 CASignature::getSignKey(DOMDocumentFragment* node,XERCES_CPP_NAMESPACE::DOMDocument* doc)
+SINT32 CASignature::getSignKey(DOMElement* & elem,XERCES_CPP_NAMESPACE::DOMDocument* doc)
 	{
-		CACertificate* pCert;
+		CACertificate* pCert=NULL;
 		getVerifyKey(&pCert);
 		EVP_PKEY* pPKey=EVP_PKEY_new();
 		EVP_PKEY_set1_DSA(pPKey,m_pDSA);		
@@ -88,9 +88,7 @@ SINT32 CASignature::getSignKey(DOMDocumentFragment* node,XERCES_CPP_NAMESPACE::D
 		CABase64::encode(buff,len,outbuff,&outlen);
 		outbuff[outlen]=0;
 		OPENSSL_free(buff);
-		node=doc->createDocumentFragment();
-		DOMElement* elem=createDOMElement(doc,"X509PKCS12");
-		node->appendChild(elem);
+		elem=createDOMElement(doc,"X509PKCS12");
 		setDOMElementValue(elem,outbuff);
 		return E_SUCCESS;
 	}
@@ -399,12 +397,11 @@ SINT32 CASignature::signXML(DOMNode* node,CACertStore* pIncludeCerts)
 		if(pIncludeCerts!=NULL)
 			{
 				//Making KeyInfo-Block
-				DOMDocumentFragment* tmpDocFrag=NULL;
-				if(pIncludeCerts->encode(tmpDocFrag,doc)==E_SUCCESS && tmpDocFrag!=NULL)
+				DOMElement* tmpElemCerts=NULL;
+				if(pIncludeCerts->encode(tmpElemCerts,doc)==E_SUCCESS && tmpElemCerts!=NULL)
 					{
 						DOMElement* elemKeyInfo=createDOMElement(doc,"KeyInfo");
-						elemKeyInfo->appendChild(doc->importNode(tmpDocFrag,true));
-						tmpDocFrag=0;
+						elemKeyInfo->appendChild(tmpElemCerts);
 						elemSignature->appendChild(elemKeyInfo);
 					}
 			}

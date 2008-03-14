@@ -52,7 +52,12 @@ class DOMElement:public DOMNode
 						}
 				}
 
-			DOMNodeList* getElementsByTagName(const XMLCh* name) const;
+			DOMNodeList* getElementsByTagName(const XMLCh* name) const
+				{
+					DOMNodeList* list=new DOMNodeList();
+					addElementsByTagName(list,name);
+				}
+
 	private:
 			DOMElement(XERCES_CPP_NAMESPACE::DOMDocument* doc,const XMLCh* name):DOMNode(doc)	
 				{
@@ -68,8 +73,27 @@ class DOMElement:public DOMNode
 						}
 					delete m_pAttrs;
 				}
+			
+			void addElementsByTagName(DOMNodeList* list,const XMLCh* name) const
+				{
+					if(XMLString::equals(m_xmlchNodeName,name))
+						{
+							list->add((DOMNode*)this);
+						}
+					DOMNode* child=getFirstChild();
+					while(child!=NULL)
+						{
+							if(child->getNodeType()==DOMNode::ELEMENT_NODE)
+								{
+									((DOMElement*)child)->addElementsByTagName(list,name);
+								}
+							child=child->getNextSibling();
+						}
+				}
+			
 			friend class XERCES_CPP_NAMESPACE::DOMDocument;
 			DOMNodeList* m_pAttrs;
+
 
 	};
 

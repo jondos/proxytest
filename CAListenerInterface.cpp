@@ -122,11 +122,9 @@ CAListenerInterface** CAListenerInterface::getInstance(DOMElement* a_elemListene
 }
 
 
-SINT32	CAListenerInterface::toDOMFragment(DOMDocumentFragment* & fragment,XERCES_CPP_NAMESPACE::DOMDocument* ownerDoc) const
+SINT32	CAListenerInterface::toDOMElement(DOMElement* & elemListenerInterface,XERCES_CPP_NAMESPACE::DOMDocument* ownerDoc) const
 	{
-		fragment=ownerDoc->createDocumentFragment();
-		DOMElement* elemListenerInterface=createDOMElement(ownerDoc,"ListenerInterface");
-		fragment->appendChild(elemListenerInterface);
+		elemListenerInterface=createDOMElement(ownerDoc,"ListenerInterface");
 		DOMElement* elem=createDOMElement(ownerDoc,"Type");
 		elemListenerInterface->appendChild(elem);
 		setDOMElementValue(elem,(UINT8*)"RAW/TCP");

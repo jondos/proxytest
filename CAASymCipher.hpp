@@ -45,7 +45,7 @@ class CAASymCipher
 			//SINT32 getPublicKey(UINT8* buff,UINT32 *len);
 #ifndef ONLY_LOCAL_PROXY
 			SINT32 getPublicKeyAsXML(UINT8* buff,UINT32* len);
-			SINT32 getPublicKeyAsDocumentFragment(DOMDocumentFragment* & pDFrag);
+			SINT32 getPublicKeyAsDOMElement(DOMElement* & elemRoot,XERCES_CPP_NAMESPACE::DOMDocument* docOwner);
 			//SINT32 getPublicKeySize();
 			//SINT32 setPublicKey(UINT8* buff,UINT32* len);
 			SINT32 setPublicKey(const CACertificate* pCert);
