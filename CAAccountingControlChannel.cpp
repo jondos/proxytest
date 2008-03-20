@@ -65,6 +65,9 @@ CAAccountingControlChannel::~CAAccountingControlChannel()
 */
 SINT32 CAAccountingControlChannel::processXMLMessage(const  XERCES_CPP_NAMESPACE::DOMDocument* a_doc)
 	{
+		#ifdef DEBUG
+			CAMsg::printMsg(LOG_DEBUG, "Invoking processJapMessage\n");
+		#endif
 		return CAAccountingInstance::processJapMessage( m_pHashEntry,a_doc );
 	}
 #endif

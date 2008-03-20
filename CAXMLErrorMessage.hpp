@@ -106,7 +106,12 @@ class CAXMLErrorMessage : public CAAbstractXMLEncodable
 				{
 					return m_strErrMsg;
 				}
-
+			
+			char* getExpTimeString()
+				{
+					return m_strExpires;
+				}
+			
 			void* getMessageObject()
 			{
 				return m_messageObject;
@@ -115,7 +120,8 @@ class CAXMLErrorMessage : public CAAbstractXMLEncodable
 		private: 
 			SINT32 setValues(DOMElement* elemRoot);
 			UINT32 m_iErrorCode;
-			UINT8 * m_strErrMsg;
+			char *m_strExpires;
+			UINT8 *m_strErrMsg;
 			void* m_messageObject;
 	};
 

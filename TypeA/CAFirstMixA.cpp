@@ -524,7 +524,7 @@ NEXT_USER:
 //										UINT32 uQueueSize=pEntry->pHead->pQueueSend->getSize();
 //										if(uQueueSize>200000)
 //											CAMsg::printMsg(LOG_INFO,"User Send Queue size is now %u\n",uQueueSize);
-										if(pEntry->pHead->pQueueSend->getSize()>MAX_USER_SEND_QUEUE&&
+										if(pEntry->pHead->pQueueSend->getSize() > MAX_USER_SEND_QUEUE &&
 												!pEntry->bIsSuspended)
 											{
 												pMixPacket->channel=pEntry->channelOut;

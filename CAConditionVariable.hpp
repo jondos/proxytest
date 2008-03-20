@@ -171,7 +171,7 @@ class CAConditionVariable:public CAMutex
 				}
 
 			/** Signals this object. All threads waiting on this object will awake.
-				* Note: lock() must be called before signal() and unlock() 
+				* Note: lock() must be called before broadcast() and unlock() 
 				* must be called if proccessing ends.
 				*/
 			SINT32 broadcast()

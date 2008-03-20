@@ -33,7 +33,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketAddrINet.hpp"
 #include "CAXMLCostConfirmation.hpp"
 #include "CAXMLErrorMessage.hpp"
+#include "CAXMLBI.hpp"
 
+#define PI_CONNECT_TIMEOUT 5000
 
 /**
  * This class encapsulates the connection to the JPI
@@ -44,11 +46,18 @@ class CAAccountingBIInterface
 {
 
 public: 
+	
+	//SINT32 setPIServerAddress(UINT8* pPiServerName, UINT16 piServerPort);
+	//SINT32 setPIServerCertificate(CACertificate * pPiServerCertificate);
 	CAAccountingBIInterface();
 	~CAAccountingBIInterface();
-
+	SINT32 setPIServerConfiguration(CAXMLBI* pPiServerConfig);
+	
 	SINT32 initBIConnection();
 	SINT32 terminateBIConnection();
+	
+	//static CAAccountingBIInterface *getInstance(CAXMLBI *pPiServerConfig);
+	//static SINT32 cleanup();
 	
 	/**
 	 * Send a cost confirmation to the JPI
@@ -65,8 +74,19 @@ public:
 	SINT32 update(UINT8 *balanceCert, UINT8 * response, UINT32 *responseLen);*/
 
 private:
-	CATLSClientSocket* m_pSocket;
-	CAHttpClient				m_httpClient;
+	
+	//CAAccountingBIInterface();
+	//~CAAccountingBIInterface();
+	
+	
+	CATLSClientSocket *m_pSocket;
+	CAHttpClient	 *m_phttpClient;
+	CASocketAddrINet *m_pPiServerAddress;
+	CACertificate *m_pPiServerCertificate;
+	
+	//static CAAccountingBIInterface *m_pPiInterfaceSingleton;
+	//CAMutex *m_pPiInterfaceMutex;
+	//friend class CAAccountingInstance;
 };
 
 #endif

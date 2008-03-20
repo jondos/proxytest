@@ -206,7 +206,8 @@ typedef struct t_mix_parameters tMixParameters;
  */
 #define AUTH_DELETE_ENTRY 0x80000 
 
-
+#define AUTH_LOGIN_NOT_FINISHED 0x100000 
+#define AUTH_LOGIN_FAILED 0x200000 
 
 class CASignature;
 class CAAccountingControlChannel;

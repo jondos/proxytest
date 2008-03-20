@@ -138,7 +138,9 @@ SINT32 CAMuxSocket::send(MIXPACKET *pPacket)
 				ret=E_UNKNOWN;
 			}
 		else
+		{
 			ret=MIXPACKET_SIZE;
+		}
 		memcpy(pPacket,tmpBuff,16);
 		m_csSend.unlock();
 		return ret;

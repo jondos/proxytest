@@ -222,10 +222,10 @@ protected:
 					return E_SUCCESS;
 				}
 
-			bool getRestart() const
+			/*bool getRestart() const
 				{
 					return m_bRestart;
-				}
+				}*/
 			SINT32 doUserLogin(CAMuxSocket* pNewUSer,UINT8 perrIP[4]);
 			
 #ifdef DELAY_USERS
