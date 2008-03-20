@@ -34,71 +34,156 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocket.hpp"
 #include "CAHttpClient.hpp"
 
-extern CACmdLnOptions* pglobalOptions;
+//extern CACmdLnOptions* pglobalOptions;
+//CAMutex* CAAccountingBIInterface::m_pPiInterfaceMutex = new CAMutex();
+//CAAccountingBIInterface *CAAccountingBIInterface::m_pPiInterfaceSingleton = NULL;
 
 /**
- * Constructor
- * Initiates the DB connection
+ * private constructor
+ * just initializes fields, server configuration is done separately
  */
 CAAccountingBIInterface::CAAccountingBIInterface()
 	{
-		m_pSocket =NULL;
+		//m_pSocket =NULL;
+		//m_pPiInterfaceMutex = new CAMutex();
 		m_pSocket = new CATLSClientSocket();
+		m_pPiServerAddress = new CASocketAddrINet();
+		m_phttpClient = new CAHttpClient();
 	}
 
 /**
- * Destructor
+ * private destructor
  */
 CAAccountingBIInterface::~CAAccountingBIInterface()
 	{
 		terminateBIConnection();
 		if(m_pSocket!=NULL)
+		{
 			delete m_pSocket;
+			m_pSocket = NULL;
+		}
+		if(m_pPiServerAddress!=NULL)
+		{
+			delete m_pPiServerAddress;
+			m_pPiServerAddress = NULL;
+		}
+		if(m_phttpClient!=NULL)
+		{
+			delete m_phttpClient;
+			m_phttpClient = NULL;
+		}
+		/*if(m_pPiInterfaceMutex!=NULL)
+		{
+			delete m_pPiInterfaceMutex;
+			m_pPiInterfaceMutex = NULL;
+		}*/
 	}
 
 
+SINT32 CAAccountingBIInterface::setPIServerConfiguration(CAXMLBI* pPiServerConfig)
+{
+	UINT8 *pPiName = NULL;
+	UINT16 piPort = 0;
+	CACertificate *pPiCert = NULL;
+	
+	//m_pPiInterfaceMutex->lock();
+		
+	if(pPiServerConfig==NULL)
+	{
+		CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface: could not configure PI interface: no proper configuration given.\n");
+		//m_pPiInterfaceMutex->unlock();
+		return E_UNKNOWN;
+	}
+	
+	pPiName = pPiServerConfig->getHostName();
+	pPiCert = pPiServerConfig->getCertificate();
+	piPort = (UINT16)pPiServerConfig->getPortNumber();
+	
+	if(pPiName==NULL)
+	{
+		CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface: could not configure PI interface: no PI name specified.\n");
+		//m_pPiInterfaceMutex->unlock();
+		return E_UNKNOWN;
+	}
+	if(pPiCert==NULL)
+	{
+		CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface: could not configure PI interface: no PI certificate specified.\n");
+		//m_pPiInterfaceMutex->unlock();
+		return E_UNKNOWN;
+	}
+	
+	if(m_pPiServerAddress == NULL)
+	{
+		//Should never happen
+		#ifdef DEBUG
+		CAMsg::printMsg(LOG_ERR,"CAAccountingBIInterface: no server address initialized while trying to configure PI interface.\n");
+		#endif
+		m_pPiServerAddress = new CASocketAddrINet();
+	}
+	m_pPiServerAddress->setAddr(pPiName, piPort);
+	m_pPiServerCertificate = pPiCert; 
+	//m_pPiInterfaceMutex->unlock();
+	return E_SUCCESS;
+}
 
 /**
- * Initiate HTTP(s) connection to the BI (JPI)
+ * Establishes HTTP(s) connection to the BI (JPI)
  */
 SINT32 CAAccountingBIInterface::initBIConnection()
+{
+	SINT32 rc;
+	UINT8 buf[64];
+	
+	memset(buf,0,64);
+	
+	//m_pPiInterfaceMutex->lock();
+	if(m_pPiServerAddress == NULL)
 	{
-		CASocketAddrINet address;
-		SINT32 rc;
-		CAXMLBI* pBI= pglobalOptions->getBI();
-		
-		// fetch BI address
-		if(pBI == NULL)
-			{
-				CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface: could not get JPI hostname\n");
-				return E_UNKNOWN;
-			}
+		//Should never happen
 		#ifdef DEBUG
-		CAMsg::printMsg(LOG_DEBUG,"CAAccountingBIInterface: try to connect to BI at %s:%i.\n",pBI->getHostName(),pBI->getPortNumber());
+		CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface: no address initialized while trying to connect. Connect aborted.\n");
 		#endif
-		address.setAddr(pBI->getHostName(), (UINT16)pBI->getPortNumber());		
-		// connect
-		m_pSocket->setServerCertificate(pBI->getCertificate());
-		rc=m_pSocket->connect(address, 5000);
-		if(rc!=E_SUCCESS)
-		{
-			/*
-			UINT8 buf[64];
-			memset(buf,0,64);
-			address.getHostName(buf, 64);*/
-			CAMsg::printMsg(
-					LOG_ERR, 
-					"CAAccountingBIInterface: Could not connect to BI at %s:%i. Reason: %i\n", 
-					//buf, address.getPort(), rc
-					pBI->getHostName(), pBI->getPortNumber(), rc
-				);
-			m_pSocket->close();
-			return E_UNKNOWN;
-		}
-		CAMsg::printMsg(LOG_DEBUG,"CAAccountingBIInterface: BI connection to %s:%i established!\n", pBI->getHostName(),pBI->getPortNumber());
-		m_httpClient.setSocket(m_pSocket);
-		return E_SUCCESS;
+		//m_pPiInterfaceMutex->unlock();
+		return E_UNKNOWN;
 	}
+			
+	if(m_pSocket == NULL)
+	{
+		//Should never happen
+		#ifdef DEBUG
+		CAMsg::printMsg(LOG_ERR,"CAAccountingBIInterface: no socket initialized while trying to connect. Creating new one.\n");
+		#endif
+		m_pSocket = new CATLSClientSocket();
+	}
+	
+	if(m_pPiServerCertificate == NULL)
+	{
+		CAMsg::printMsg(LOG_ERR,"CAAccountingBIInterface: no PI server certificate specified. Connect aborted.\n");
+		//m_pPiInterfaceMutex->unlock();
+		return E_UNKNOWN;
+	}			
+	// connect
+	m_pSocket->setServerCertificate(m_pPiServerCertificate);
+	rc=m_pSocket->connect(*m_pPiServerAddress, PI_CONNECT_TIMEOUT);
+	if(rc!=E_SUCCESS)
+	{
+		m_pPiServerAddress->getHostName(buf, 64);
+		CAMsg::printMsg(
+				LOG_ERR, 
+				"CAAccountingBIInterface: Could not connect to BI at %s:%i. Reason: %i\n", 
+				buf, m_pPiServerAddress->getPort(), rc
+				//pBI->getHostName(), pBI->getPortNumber(), rc
+			);
+		m_pSocket->close();
+		//m_pPiInterfaceMutex->unlock();
+		return E_UNKNOWN;
+	}
+	m_pPiServerAddress->getHostName(buf, 64);
+	CAMsg::printMsg(LOG_DEBUG,"CAAccountingBIInterface: BI connection to %s:%i established!\n", buf,m_pPiServerAddress->getPort());
+	m_phttpClient->setSocket(m_pSocket);
+	//m_pPiInterfaceMutex->unlock();
+	return E_SUCCESS;
+}
 
 
 
@@ -106,10 +191,21 @@ SINT32 CAAccountingBIInterface::initBIConnection()
  * Terminate HTTP(s) connection to the BI (JPI)
  */
 SINT32 CAAccountingBIInterface::terminateBIConnection()
+{
+	//m_pPiInterfaceMutex->lock();
+	if(m_pSocket == NULL)
 	{
-		m_pSocket->close();
-		return E_SUCCESS;
+		//Should never happen
+		#ifdef DEBUG
+		CAMsg::printMsg(LOG_ERR,"CAAccountingBIInterface: no socket initialized while trying to close connection.\n");
+		#endif
+		//m_pPiInterfaceMutex->unlock();
+		return E_UNKNOWN;
 	}
+	m_pSocket->close();
+	//m_pPiInterfaceMutex->unlock();
+	return E_SUCCESS;
+}
 
 
 
@@ -118,46 +214,80 @@ SINT32 CAAccountingBIInterface::terminateBIConnection()
  * TODO: Error handling
  */
 CAXMLErrorMessage * CAAccountingBIInterface::settle(CAXMLCostConfirmation &cc)
-	{
-		UINT8 * pStrCC=NULL;
-		UINT8* response=NULL;
-		UINT32 contentLen=0, status=0;
-		CAXMLErrorMessage *pErrMsg;
+{
+	UINT8 * pStrCC=NULL;
+	UINT8* response=NULL;
+	UINT32 contentLen=0, status=0;
+	CAXMLErrorMessage *pErrMsg;
 	
-		pStrCC = cc.dumpToMem(&contentLen);
-		if(	pStrCC==NULL || m_httpClient.sendPostRequest((UINT8*)"/settle", pStrCC,contentLen)!= E_SUCCESS)
-		{
-			delete[] pStrCC;
-			return NULL;
-		}
+	//m_pPiInterfaceMutex->lock();
+	pStrCC = cc.dumpToMem(&contentLen);
+	if(	pStrCC==NULL || m_phttpClient->sendPostRequest((UINT8*)"/settle", pStrCC,contentLen)!= E_SUCCESS)
+	{
 		delete[] pStrCC;
-		contentLen=0;
-		status=0;
+		//m_pPiInterfaceMutex->unlock();
+		return NULL;
+	}
+	delete[] pStrCC;
+	contentLen=0;
+	status=0;
 
-		if(m_httpClient.parseHTTPHeader(&contentLen, &status)!=E_SUCCESS ||
-			(status!=200) || (contentLen==0))
+	if(m_phttpClient->parseHTTPHeader(&contentLen, &status)!=E_SUCCESS ||
+		(status!=200) || (contentLen==0))
+	{
+		CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface::settle: response fehlerhaft!\n");
+		//m_pPiInterfaceMutex->unlock();
+		return NULL;
+	}
+#ifdef DEBUG			
+	CAMsg::printMsg(LOG_DEBUG, "CAAccountingBIInterface::settle: got response header [Status,content-Lenght]=[%i,%i]!\n",status,contentLen);
+#endif		
+	response = new UINT8[contentLen+1];
+	if(m_pSocket->receiveFully(response, contentLen)!=E_SUCCESS)
 		{
-			CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface::settle: response fehlerhaft!\n");
+			delete[] response;
+			//m_pPiInterfaceMutex->unlock();
 			return NULL;
 		}
 #ifdef DEBUG			
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingBIInterface::settle: got response header [Status,content-Lenght]=[%i,%i]!\n",status,contentLen);
+	CAMsg::printMsg(LOG_DEBUG, "CAAccountingBIInterface::settle: response body received!\n");
 #endif		
-		response = new UINT8[contentLen+1];
-		if(m_pSocket->receiveFully(response, contentLen)!=E_SUCCESS)
-			{
-				delete[] response;
-				return NULL;
-			}
-#ifdef DEBUG			
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingBIInterface::settle: response body received!\n");
-#endif		
-		response[contentLen]='\0';
-		pErrMsg = new CAXMLErrorMessage(response);
-		delete[] response;
-		return pErrMsg;
-	}
+	response[contentLen]='\0';
+	pErrMsg = new CAXMLErrorMessage(response);
+	delete[] response;
+	//m_pPiInterfaceMutex->unlock();
+	return pErrMsg;
+}
 
+/*CAAccountingBIInterface *CAAccountingBIInterface::getInstance(CAXMLBI* pPiServerConfig)
+{
+	SINT32 ret;
+	m_pPiInterfaceMutex->lock();
+	if(m_pPiInterfaceSingleton == NULL)
+	{
+		if(pPiServerConfig == NULL)
+		{
+			CAMsg::printMsg(LOG_DEBUG, "CAAccountingBIInterface::could not create PI interface: no proper configuration specified!\n");
+			m_pPiInterfaceMutex->unlock();
+			return NULL;
+		}
+		m_pPiInterfaceSingleton = new CAAccountingBIInterface();
+		ret = m_pPiInterfaceSingleton->setPIServerConfiguration(pPiServerConfig);
+		if(ret != E_SUCCESS)
+		{
+			CAMsg::printMsg(LOG_DEBUG, "CAAccountingBIInterface::could not create PI interface: no proper configuration specified!\n");
+			m_pPiInterfaceMutex->unlock();
+			return NULL;
+		}
+	}
+	else 
+	{
+		CAMsg::printMsg(LOG_DEBUG, "CAAccountingBIInterface:: PI Interface already running!\n");
+	}
+	m_pPiInterfaceMutex->unlock();
+	return m_pPiInterfaceSingleton;
+	
+}*/
 
 /*
 

@@ -68,6 +68,16 @@ struct AccountLoginHashEntry
 	UINT32 count;
 };
 
+struct SettleEntry
+{
+	UINT64 accountNumber;
+	UINT32 authFlags;
+	UINT32 authRemoveFlags;
+	UINT64 confirmedBytes;
+	UINT64 diffBytes;
+	SettleEntry* nextEntry;
+};
+
 /**
  * This is the AI (accounting instance or abrechnungsinstanz in german)
  * class. Its purpose is to count packets for every user and to decide
@@ -113,7 +123,7 @@ public:
 	 * This should be called by the FirstMix for every incoming Jap packet
 	 */
 	static SINT32 handleJapPacket(fmHashTableEntry *pHashEntry, bool a_bControlMessage, bool a_bMessageToJAP);
-
+		
 	/**
 	 * Check if an IP address is temporarily blocked by the accounting instance.
 	 * This should be called by the FirstMix when a JAP is connecting.
@@ -134,15 +144,22 @@ public:
 	* function to the ai thread.
 	*/
 	SINT32 static processJapMessage(fmHashTableEntry * pHashEntry,const  XERCES_CPP_NAMESPACE::DOMDocument* a_DomDoc);
-	
+		
 	UINT32 static getNrOfUsers();
 	
+	static SINT32 loginProcessStatus(fmHashTableEntry *pHashEntry);
+	static SINT32 finishLoginProcess(fmHashTableEntry *pHashEntry);
+	//static void forcedSettle();
+	
+	static SINT32 settlementTransaction();
+		
 	static const SINT32 HANDLE_PACKET_CONNECTION_OK; // this packet has been checked and is OK
 	static const SINT32 HANDLE_PACKET_CONNECTION_UNCHECKED; // the packet might be OK (is it not checked)
 	static const SINT32 HANDLE_PACKET_HOLD_CONNECTION; // queue packets until JAP has authenticated
 	static const SINT32 HANDLE_PACKET_PREPARE_FOR_CLOSING_CONNECTION; // small grace period until kickout
 	static const SINT32 HANDLE_PACKET_CLOSE_CONNECTION; // this connection should be closed immediatly
-
+	
+	
 private:
 
 	CAAccountingInstance(CAMix* callingMix); //Singleton!
@@ -157,38 +174,42 @@ private:
 	typedef struct t_aiqueueitem aiQueueItem;
 
 	static SINT32 handleJapPacket_internal(fmHashTableEntry *pHashEntry, bool a_bControlMessage, bool a_bMessageToJAP);
-
+	
+	static void processJapMessageLoginHelper(fmHashTableEntry *pHashEntry, 
+											 UINT32 handlerReturnvalue, 
+											 bool finishLogin);
 	/**
-	* Handles a cost confirmation sent by a jap
-	*/
-	void handleCostConfirmation(tAiAccountingInfo* pAccInfo, DOMElement* root );
-	void handleCostConfirmation_internal(tAiAccountingInfo* pAccInfo, DOMElement* root );
+	 * Handles a cost confirmation sent by a jap
+	 */
+	UINT32 handleCostConfirmation(tAiAccountingInfo* pAccInfo, DOMElement* root );
+	UINT32 handleCostConfirmation_internal(tAiAccountingInfo* pAccInfo, DOMElement* root );
 
 	/**
 	* Handles an account certificate of a newly connected Jap.
 	*/
-	void handleAccountCertificate(tAiAccountingInfo* pAccInfo, DOMElement* root );
-	void handleAccountCertificate_internal(tAiAccountingInfo* pAccInfo, DOMElement* root );
+	UINT32 handleAccountCertificate(tAiAccountingInfo* pAccInfo, DOMElement* root );
+	UINT32 handleAccountCertificate_internal(tAiAccountingInfo* pAccInfo, DOMElement* root );
 	
 	
 	/**
 	 * Checks the response of the challenge-response auth.
 	 */
-	void handleChallengeResponse(tAiAccountingInfo* pAccInfo, DOMElement* root);
-	void handleChallengeResponse_internal(tAiAccountingInfo* pAccInfo, DOMElement* root);
+	UINT32 handleChallengeResponse(tAiAccountingInfo* pAccInfo, DOMElement* root);
+	UINT32 handleChallengeResponse_internal(tAiAccountingInfo* pAccInfo, DOMElement* root);
 
 	static SINT32 getPrepaidBytes(tAiAccountingInfo* pAccInfos);
 	SINT32 prepareCCRequest(CAMix* callingMix, UINT8* a_AiName);			
 	static SINT32 makeCCRequest( const UINT64 accountNumber, const UINT64 transferredBytes,  XERCES_CPP_NAMESPACE::DOMDocument* & doc);
 	static SINT32 sendCCRequest(tAiAccountingInfo* pAccInfo);
 	static SINT32 makeAccountRequest( XERCES_CPP_NAMESPACE::DOMDocument* & doc);
+	static SINT32 sendAILoginConfirmation(tAiAccountingInfo* pAccInfo, const UINT32 code, UINT8 * message);
 	
 	//possible replies to a JAP
 	static SINT32 returnOK(tAiAccountingInfo* pAccInfo);
 	static SINT32 returnWait(tAiAccountingInfo* pAccInfo);
 	static SINT32 returnKickout(tAiAccountingInfo* pAccInfo);
 	static SINT32 returnPrepareKickout(tAiAccountingInfo* pAccInfo, CAXMLErrorMessage* a_error);
-	
+		
 	/**
 	 * The main loop of the AI thread - reads messages from the queue 
 	 * and starts process threads for these messages.
@@ -226,7 +247,8 @@ private:
 	UINT32 m_allHashesLen;
 
 	/** the interface to the database */
-	CAAccountingDBInterface * m_dbInterface;
+	//CAAccountingDBInterface * m_dbInterface;
+	CAAccountingBIInterface *m_pPiInterface;
 	
 	UINT32 m_iSoftLimitBytes;
 	UINT32 m_iHardLimitBytes;
@@ -256,6 +278,13 @@ private:
 	static SINT32 m_prepaidBytesMinimum;
 	
 	bool m_bThreadRunning;
+	
+	//bool m_loginHashTableChangeInProgress;
+	
+	/* For Thread synchronisation can only be set and read when m_pSettlementMutex lock is acquired */
+	volatile UINT64 m_nextSettleNr;
+	volatile UINT64 m_settleWaitNr;
+	CAConditionVariable *m_pSettlementMutex;
 };
 
 

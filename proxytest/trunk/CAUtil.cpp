@@ -290,6 +290,32 @@ SINT32 initRandom()
 		#endif
 		return E_SUCCESS;
 	}
+
+/* 
+ * compares date1 with date2. Note: only the date is compared, not the time
+ * returns: 
+ * 	-1 if date1 < date2
+ *   0 if date1 == date2
+ * 	 1 if date1 > date2
+ */
+SINT32 compDate(struct tm *date1, struct tm *date2)
+{
+	//year
+	if(date1->tm_year != date2->tm_year)
+	{
+		return (date1->tm_year < date2->tm_year) ? -1 : 1; 
+	}
+	if(date1->tm_mon != date2->tm_mon)
+	{
+		return (date1->tm_mon < date2->tm_mon) ? -1 : 1; 
+	}
+	if(date1->tm_mday != date2->tm_mday)
+	{
+		return (date1->tm_mday < date2->tm_mday) ? -1 : 1; 
+	}
+	return 0;
+}
+
 /** Gets 32 random bits.
 	@param val - on return the bits are random
 	@retval E_UNKNOWN, if an error occured

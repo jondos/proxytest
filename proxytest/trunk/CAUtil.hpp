@@ -43,6 +43,8 @@ SINT32 getcurrentTime(timespec& t);
 SINT32 getcurrentTimeMillis(UINT64& u64Time);
 SINT32 getcurrentTimeMicros(UINT64& u64Time);
 
+SINT32 compDate(struct tm *date1, struct tm *date2);
+
 SINT32 initRandom();
 SINT32 getRandom(UINT8* buff,UINT32 len);
 

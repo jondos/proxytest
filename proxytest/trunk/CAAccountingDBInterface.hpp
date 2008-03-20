@@ -32,6 +32,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAQueue.hpp"
 #include "CAXMLCostConfirmation.hpp"
 
+#define MAX_DB_CONNECTIONS 1
+
 /**
   * @author Bastian Voigt
   *
@@ -40,18 +42,108 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
   */
 class CAAccountingDBInterface
 	{
-		public: 
+	public:
+		
+		/**
+		 * Creates the tables we need in the DB
+		 *
+		 * @return E_SUCCESS if all is OK
+		 * @return E_UNKNOWN if the query could not be executed
+		 * @return E_NOT_CONNECTED if we are not connected to the DB
+		 */
+		//SINT32 createTables();						
+		//SINT32 dropTables();
+		
+		SINT32 storeCostConfirmation(CAXMLCostConfirmation &cc, UINT8* ccCascade);
+
+		SINT32 getCostConfirmation(UINT64 accountNumber, UINT8* cascadeId, CAXMLCostConfirmation **pCC, bool& a_bSettled);
+		
+		
+		/**
+		* Fills the CAQueue with all non-settled cost confirmations
+		*
+		*/
+		SINT32 getUnsettledCostConfirmations(CAQueue &q, UINT8* cascadeId);
+		
+		/**
+		* Marks this account as settled.
+		* @todo what to do if there was a new CC stored while we were busy settling the old one?
+		*/
+		SINT32 markAsSettled(UINT64 accountNumber, UINT8* cascadeId, UINT64 a_transferredBytes);
+		
+		/**
+		 * if the BI reports an error while trying to settle a CC, this will be called to delete it from the database
+		 * (otherwise the AI would try forever in vain to settle the unusable CC)
+		 */
+		SINT32 deleteCC(UINT64 accountNumber, UINT8* cascadeId);
+		
+		SINT32 storePrepaidAmount(UINT64 accountNumber, SINT32 prepaidBytes, UINT8* cascadeId);
+		SINT32 getPrepaidAmount(UINT64 accountNumber, UINT8* cascadeId, bool a_bDelete);
+		
+		SINT32 storeAccountStatus(UINT64 a_accountNumber, UINT32 a_statusCode, char *expires);
+		SINT32 getAccountStatus(UINT64 a_accountNumber, UINT32& a_statusCode, char *expires);
+		
+		/**
+		 * Takes and executes a query that counts databae records and tests if the result
+		 * is valid.
+		 * @param a_query a query that should return the count of database rows
+		 * @param r_count number of database rows; only valid if E_SUCCESS is returned
+		 */
+		SINT32 checkCountAllQuery(UINT8* a_query, UINT32& r_count);
+		
+		/* Requests a DB connection. Blocks until it is available and returns a 
+		 * DB Interface which is then owned by the requesting thread. In general the returned
+		 * interface is already connected but it is also returned if a connection could not be
+		 * established
+		 */
+		static CAAccountingDBInterface *getConnection();
+		
+		/* Requests a DB connection. Returns a connected DB Interface 
+		 * if it is available, which is then owned by the requesting thread.
+		 * Returns NULL otherwise.
+		 */
+		//static CAAccountingDBInterface *getConnectionNB();
+		
+		/* Release the DBConnection which must be owned by the calling thread
+		 * Connection will not be disconnected
+		 */
+		static SINT32 releaseConnection(CAAccountingDBInterface *dbIf);
+		
+		/* static initialization of the DBConnections */
+		static SINT32 init();
+		/* removes all DBconnections */
+		static SINT32 cleanup();
+		
+		private: 
+			
 			CAAccountingDBInterface();
 			~CAAccountingDBInterface();
 
+			/* thread unsafe DB query functions */
+			SINT32 __storeCostConfirmation(CAXMLCostConfirmation &cc, UINT8* ccCascade);
+			SINT32 __getCostConfirmation(UINT64 accountNumber, UINT8* cascadeId, CAXMLCostConfirmation **pCC, bool& a_bSettled);
+			
+			SINT32 __getUnsettledCostConfirmations(CAQueue &q, UINT8* cascadeId);
+					
+			SINT32 __markAsSettled(UINT64 accountNumber, UINT8* cascadeId, UINT64 a_transferredBytes);
+			SINT32 __deleteCC(UINT64 accountNumber, UINT8* cascadeId);
+					
+			SINT32 __storePrepaidAmount(UINT64 accountNumber, SINT32 prepaidBytes, UINT8* cascadeId);
+			SINT32 __getPrepaidAmount(UINT64 accountNumber, UINT8* cascadeId, bool a_bDelete);
+					
+			SINT32 __storeAccountStatus(UINT64 a_accountNumber, UINT32 a_statusCode, char *expires);
+			SINT32 __getAccountStatus(UINT64 a_accountNumber, UINT32& a_statusCode, char *expires);
+			
+			SINT32 __checkCountAllQuery(UINT8* a_query, UINT32& r_count);
+			
 			/**
-			* Initiates the database connection. 
-			* This function is called inside the aiThread
-			*
-			* @return E_NOT_CONNECTED if the connection could not be established
-			* @return E_UNKNOWN if we are already connected
-			* @return E_SUCCESS if all is OK
-			*/
+			 * Initiates the database connection. 
+			 * This function is called inside the aiThread
+			 *
+			 * @return E_NOT_CONNECTED if the connection could not be established
+			 * @return E_UNKNOWN if we are already connected
+			 * @return E_SUCCESS if all is OK
+			 */
 			SINT32 initDBConnection();
 			
 			/**
@@ -59,66 +151,44 @@ class CAAccountingDBInterface
 			* @return E_SUCCESS
 			*/
 			SINT32 terminateDBConnection();
+			friend class CAAccountingInstance;
 			
 			bool isDBConnected();
-			
-			/**
-			* Creates the tables we need in the DB
-			*
-			* @return E_SUCCESS if all is OK
-			* @return E_UNKNOWN if the query could not be executed
-			* @return E_NOT_CONNECTED if we are not connected to the DB
-			*/
-			//SINT32 createTables();						
-			//SINT32 dropTables();
-			
-			SINT32 storeCostConfirmation(CAXMLCostConfirmation &cc, UINT8* ccCascade);
-
-			SINT32 getCostConfirmation(UINT64 accountNumber, UINT8* cascadeId, CAXMLCostConfirmation **pCC, bool& a_bSettled);
-			
-			
-			/**
-			* Fills the CAQueue with all non-settled cost confirmations
-			*
-			*/
-			SINT32 getUnsettledCostConfirmations(CAQueue &q, UINT8* cascadeId);
-			
-			/**
-			* Marks this account as settled.
-			* @todo what to do if there was a new CC stored while we were busy settling the old one?
-			*/
-			SINT32 markAsSettled(UINT64 accountNumber, UINT8* cascadeId, UINT64 a_transferredBytes);
-			
-			/**
-			 * if the BI reports an error while trying to settle a CC, this will be called to delete it from the database
-			 * (otherwise the AI would try forever in vain to settle the unusable CC)
-			 */
-			SINT32 deleteCC(UINT64 accountNumber, UINT8* cascadeId);
-			
-			SINT32 storePrepaidAmount(UINT64 accountNumber, SINT32 prepaidBytes, UINT8* cascadeId);
-			SINT32 getPrepaidAmount(UINT64 accountNumber, UINT8* cascadeId, bool a_bDelete);
-			
-			SINT32 storeAccountStatus(UINT64 a_accountNumber, UINT32 a_statusCode);
-			SINT32 getAccountStatus(UINT64 a_accountNumber, UINT32& a_statusCode);
-			
-		private:
+						
 			/**
 			 * Checks if the connection still exists and tries to reconnect if not.
 			 * @return if the database connection is active after the call or not
 			 */
 			bool checkConnectionStatus();
 		
-			/**
-			 * Takes and executes a query that counts databae records and tests if the result
-			 * is valid.
-			 * @param a_query a query that should return the count of database rows
-			 * @param r_count number of database rows; only valid if E_SUCCESS is returned
-			 */
-			SINT32 checkCountAllQuery(UINT8* a_query, UINT32& r_count);
-		
+			bool checkOwner();
+			
+			bool testAndSetOwner();
+			bool testAndResetOwner();
+			
 			/** connection to postgreSQL database */
 			PGconn * m_dbConn;
 			bool m_bConnected;
+			
+			/* The owner of the connection */
+			volatile pthread_t m_owner;
+			/* indicates wether this connection is not owned by a thread.
+			 * (There is no reliable value of m_owner to indicate this).
+			 */
+			volatile bool m_free;
+			/* to ensure atomic access to m_owner and m_free */
+			CAMutex *m_pConnectionMutex;
+			
+			
+			static CAConditionVariable *ms_pConnectionAvailable;
+			/* WaitNr for a thread requesting a connection: if the ms_nextThreadNr equals the thread's 
+			 * waitNumber it's his turn to obtain the next free connection
+			 */
+			static volatile UINT64 ms_threadWaitNr;
+			/* Indicates which thread obtains the next available connection */
+			static volatile UINT64 ms_nextThreadNr;	
+			
+			static CAAccountingDBInterface *ms_pDBConnectionPool[];
 	};
 #endif //PAYMENT
 #endif

@@ -35,7 +35,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 struct t_aiSettleItem
 	{
-		 XERCES_CPP_NAMESPACE::DOMDocument* doc;
+		XERCES_CPP_NAMESPACE::DOMDocument* doc;
 	};
 
 typedef struct t_aiSettleItem aiSettleItem;
@@ -67,24 +67,19 @@ class CAAccountingSettleThread
 		
 		void settle();
 		
+				
 	private:	
 		CAConditionVariable* m_pCondition;
+		CAConditionVariable* m_pForcedSettlementCondition;
 		UINT8* m_settleCascade;
 		static THREAD_RETURN mainLoop(void * param);
 		CAThread* m_pThread;
 		volatile bool m_bRun;
 		Hashtable* m_accountingHashtable;	
 		bool m_bSleep;
+		/*CAAccountingBIInterface *m_pPiInterface;
+		CAAccountingDBInterface *m_pDbInterface;*/
 		
-		struct SettleEntry
-		{
-			UINT64 accountNumber;
-			UINT32 authFlags;
-			UINT32 authRemoveFlags;
-			UINT64 confirmedBytes;
-			UINT64 diffBytes;
-			SettleEntry* nextEntry;
-		};			
-	
+		
 };
 #endif
