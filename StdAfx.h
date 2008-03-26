@@ -313,6 +313,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include <stdarg.h>
 	#include <memory.h>
 	#include <sys/resource.h>
+	#include <sys/wait.h>
 	#include <termios.h> 
 
 	#include <ctype.h>
