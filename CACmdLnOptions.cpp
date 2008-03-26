@@ -82,6 +82,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_bAutoReconnect=false;
 		m_strConfigFile=NULL;
 		m_strPidFile=NULL;
+		m_bAutoRestart=false;
 #ifdef PAYMENT
 		m_pBI=NULL;
 		m_strDatabaseHost=NULL;
@@ -333,6 +334,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 	int iVersion=0;
 	char* configfile=NULL;
 	int iAutoReconnect=0;
+	int iAutoRestart=0;
 	char* strPidFile=NULL;
 	char* strCreateConf=0;
 	//DOM_Document docMixXml;
@@ -352,6 +354,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 		{"version",'v',POPT_ARG_NONE,&iVersion,0,"show version",NULL},
 		{"pidfile",'r',POPT_ARG_STRING,&strPidFile,0,"file where the PID will be stored","<file>"},
 		{"createConf",0,POPT_ARG_STRING,&strCreateConf,0,"creates a generic configuration for MixOnCD","[<file>]"},
+		{"autorestart",0,POPT_ARG_NONE,&iAutoRestart,0,"restarts the Mix process if it dies unexpectly",NULL},
 		POPT_AUTOHELP
 		{NULL,0,0,
 		NULL,0,NULL,NULL}
@@ -503,6 +506,10 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 		m_bCompressedLogs=false;
 	else
 		m_bCompressedLogs=true;
+	if(iAutoRestart==0)
+		m_bAutoRestart=false;
+	else
+		m_bAutoRestart=true;
 	if(serverPort!=NULL&&m_bLocalProxy)
 		{
 			m_arListenerInterfaces=new CAListenerInterface*[1];
