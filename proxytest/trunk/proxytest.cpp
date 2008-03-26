@@ -630,10 +630,10 @@ RESTART_MIX:
 								CAMsg::printMsg(LOG_DEBUG,"Exiting parent!\n");
 								exit(EXIT_SUCCESS);
 							}
-						int status
+						int status=0;
 						pid_t ret=waitpid(pid,&status,0); //wait for process termination
 						if(ret==pid&&status!=0) //if unexpectly died --> restart
-							goto RESTART_MIX
+							goto RESTART_MIX;
 						exit(EXIT_SUCCESS);
 					}		
 				CAMsg::printMsg(LOG_DEBUG,"child after fork...\n");
