@@ -12777,8 +12777,8 @@ if test "${enable_debug+set}" = set; then
 		CXXFLAGS="$CXXFLAGS -ggdb3 -D_DEBUG -fno-inline -fno-default-inline"
 		OFLAGS="-O0"
 	    else
-		CFLAGS="$CFLAGS -gnone"
-		CXXFLAGS="$CXXFLAGS -gnone"
+		CFLAGS="$CFLAGS -g0"
+		CXXFLAGS="$CXXFLAGS -g0"
 	    fi
 
 
