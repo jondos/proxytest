@@ -540,9 +540,12 @@ AC_ARG_ENABLE(debug,
 	AS_HELP_STRING([--enable-debug],[Enable debug mode]),
 	[
 	    if test "x$enableval" != "xno" ; then
-		CFLAGS="$CFLAGS -g gdb3-D_DEBUG -fno-inline -fno-default-inline"
+		CFLAGS="$CFLAGS -ggdb3 -D_DEBUG -fno-inline -fno-default-inline"
 		CXXFLAGS="$CXXFLAGS -ggdb3 -D_DEBUG -fno-inline -fno-default-inline"
 		OFLAGS="-O0"
+	    else
+		CFLAGS="$CFLAGS -gnone"	
+		CXXFLAGS="$CXXFLAGS -gnone"	
 	    fi
 	]
 )
