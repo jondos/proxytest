@@ -51,7 +51,7 @@
   /* channel logging doesn't make much sense for type-B mixes -> we will log
    * chains instead of channels
    */
-  #define LOG_CHAIN_STATISTICS
+  //#define LOG_CHAIN_STATISTICS
 #endif
 
 
