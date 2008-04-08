@@ -61,6 +61,7 @@ libproxytest_a_SOURCES = CAAbstractControlChannel.cpp\
 		    CASocketGroup.cpp \
 		    CASocketGroupEpoll.cpp\
 		    CASocketList.cpp \
+		    CAStatusManager.cpp \
 		    CATLSClientSocket.cpp\
 		    CASymCipher.cpp \
 		    CASyncControlChannel.cpp\
@@ -131,6 +132,7 @@ libproxytest_a_SOURCES = CAAbstractControlChannel.cpp\
 		    CASocketGroup.hpp \
 		    CASocketGroupEpoll.hpp\
 		    CASocketList.hpp \
+		    CAStatusManager.hpp \
 		    CATLSClientSocket.hpp\
 		    CAClientSocket.hpp\
 		    CASymCipher.hpp \

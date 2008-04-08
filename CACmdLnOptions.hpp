@@ -299,6 +299,11 @@ class CACmdLnOptions
 			SINT32 getUser(UINT8* user,UINT32 len);
 			SINT32 getPidFile(UINT8* pidfile,UINT32 len);
 
+#ifdef SERVER_MONITORING
+			char *getMonitoringListenerHost();
+			UINT16 getMonitoringListenerPort();
+#endif /* SERVER_MONITORING */
+			
 			bool isLocalProxy();
 			bool isFirstMix();
 			bool isMiddleMix();
@@ -540,7 +545,12 @@ class CACmdLnOptions
 			UINT32 m_iPrepaidInterval; 
 			UINT32 m_iPaymentSettleInterval;
 #endif
-
+#ifdef SERVER_MONITORING
+		private:
+			char *m_strMonitoringListenerHost;
+			UINT16 m_iMonitoringListenerPort;
+#endif
+			
 		private:
 			SINT32 setNewValues(CACmdLnOptions& newOptions);
 #ifndef ONLY_LOCAL_PROXY

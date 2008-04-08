@@ -33,9 +33,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 class CASignature;
 class CAInfoService;
 //class DOM_Element;
-#ifdef REPLAY_DETECTION
-	#include "CAReplayCtrlChannelMsgProc.hpp"
-#endif	
 class CAControlChannelDispatcher;
 
 
@@ -147,9 +144,7 @@ class CAMix
 
 			// added by ronin <ronin2@web.de>
 			XERCES_CPP_NAMESPACE::DOMDocument* m_docMixCascadeInfo;
-#ifdef REPLAY_DETECTION
-			CAReplayCtrlChannelMsgProc* m_pReplayMsgProc;
-#endif
+
 			CAControlChannelDispatcher* m_pMuxOutControlChannelDispatcher;
 			CAControlChannelDispatcher* m_pMuxInControlChannelDispatcher;
 		private:

@@ -91,6 +91,10 @@ CACmdLnOptions::CACmdLnOptions()
 		m_strDatabasePassword=NULL;
 		m_strAiID=NULL;
 #endif
+#ifdef SERVER_MONITORING
+		m_strMonitoringListenerHost = NULL;
+		m_iMonitoringListenerPort = 0xFFFF;
+#endif
 #ifdef DYNAMIC_MIX
 		m_strLastCascadeProposal = NULL;
 #endif
@@ -319,6 +323,12 @@ void CACmdLnOptions::clean()
 			m_docMixXml->release();
 		m_docMixXml=NULL;
 #endif //ONLY_LOCAL_PROXY
+#ifdef SERVER_MONITORING
+		if(m_strMonitoringListenerHost != NULL)
+		{
+			delete[] m_strMonitoringListenerHost;
+		}
+#endif
 }
 
 SINT32 CACmdLnOptions::parse(int argc,const char** argv)
@@ -1336,6 +1346,18 @@ bool CACmdLnOptions::isLocalProxy()
 			return m_bLocalProxy;
     }
 
+#ifdef SERVER_MONITORING
+char *CACmdLnOptions::getMonitoringListenerHost()
+{
+	return m_strMonitoringListenerHost;
+}
+
+UINT16 CACmdLnOptions::getMonitoringListenerPort()
+{	
+	return m_iMonitoringListenerPort;
+}
+#endif /* SERVER_MONITORING */
+
 #ifndef ONLY_LOCAL_PROXY
 
 /** Returns the XML tree describing the Mix . This is NOT a copy!
@@ -1994,34 +2016,34 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
             DOMElement* elemIP=NULL;
             UINT8 buffHost[255];
             UINT32 buffHostLen=255;
-						UINT16 port;
-						getDOMChildByName(elemNextMix,"Port",elemPort,false);
-						if(getDOMElementValue(elemPort,&port)!=E_SUCCESS)
-							goto SKIP_NEXT_MIX;
+			UINT16 port;
+			getDOMChildByName(elemNextMix,"Port",elemPort,false);
+			if(getDOMElementValue(elemPort,&port)!=E_SUCCESS)
+				goto SKIP_NEXT_MIX;
 
-						addr=new CASocketAddrINet;
-						bool bAddrIsSet=false;
-						getDOMChildByName(elemNextMix,"Host",elemHost,false);
-						/* The rules for <Host> and <IP> are as follows:
-							* 1. if <Host> is given and not empty take the <Host> value for the address of the next mix; if not go to 2
-							* 2. if <IP> if given and not empty take <IP> value for the address of the next mix; if not goto 3.
-							* 3. this entry for the next mix is invalid!*/
-						if(elemHost!=NULL)
-							{
-								if(getDOMElementValue(elemHost,buffHost,&buffHostLen)==E_SUCCESS&&
-                  ((CASocketAddrINet*)addr)->setAddr(buffHost,port)==E_SUCCESS)
-								{
-									bAddrIsSet=true;
-								}
-							}
-						if(!bAddrIsSet)//now try <IP>
-							{
-                getDOMChildByName(elemNextMix,"IP",elemIP,false);
-                if(elemIP == NULL || getDOMElementValue(elemIP,buffHost,&buffHostLen)!=E_SUCCESS)
-                    goto SKIP_NEXT_MIX;
-                if(((CASocketAddrINet*)addr)->setAddr(buffHost,port)!=E_SUCCESS)
+			addr=new CASocketAddrINet;
+			bool bAddrIsSet=false;
+			getDOMChildByName(elemNextMix,"Host",elemHost,false);
+			/* The rules for <Host> and <IP> are as follows:
+				* 1. if <Host> is given and not empty take the <Host> value for the address of the next mix; if not go to 2
+				* 2. if <IP> if given and not empty take <IP> value for the address of the next mix; if not goto 3.
+				* 3. this entry for the next mix is invalid!*/
+			if(elemHost!=NULL)
+				{
+					if(getDOMElementValue(elemHost,buffHost,&buffHostLen)==E_SUCCESS&&
+							((CASocketAddrINet*)addr)->setAddr(buffHost,port)==E_SUCCESS)
+					{
+						bAddrIsSet=true;
+					}
+				}
+				if(!bAddrIsSet)//now try <IP>
+					{
+					getDOMChildByName(elemNextMix,"IP",elemIP,false);
+					if(elemIP == NULL || getDOMElementValue(elemIP,buffHost,&buffHostLen)!=E_SUCCESS)
+						goto SKIP_NEXT_MIX;
+					if(((CASocketAddrINet*)addr)->setAddr(buffHost,port)!=E_SUCCESS)
 									goto SKIP_NEXT_MIX;
-							}
+				}
             CAMsg::printMsg(LOG_INFO, "Setting target interface: %s:%d\n", buffHost, port);
 					}
 				else
@@ -2050,6 +2072,53 @@ SKIP_NEXT_MIX:
 				delete addr;
 			}
 
+#ifdef SERVER_MONITORING
+		DOMElement* elemServerMonitoringRoot = NULL;
+		DOMElement* elemServerMonitoringHost = NULL;
+		DOMElement* elemServerMonitoringPort = NULL;
+		
+		m_strMonitoringListenerHost = NULL;
+		m_iMonitoringListenerPort = 0xFFFF;
+		
+		if (getDOMChildByName(elemNetwork,"ServerMonitoring",elemServerMonitoringRoot,false) == E_SUCCESS)
+		{
+			if(getDOMChildByName(elemServerMonitoringRoot,
+								"Host",
+								elemServerMonitoringHost,
+								false) == E_SUCCESS)
+			{
+				
+				char buffHost[255];
+				UINT32 buffHostLen=255;
+				memset(buffHost, 0, sizeof(char)*buffHostLen);
+				if(getDOMElementValue(elemServerMonitoringHost,
+									  (UINT8 *)buffHost,&buffHostLen)==E_SUCCESS)
+				{
+					
+					m_strMonitoringListenerHost = new char[buffHostLen];
+					strncpy(m_strMonitoringListenerHost, (const char*) buffHost, buffHostLen);
+					m_strMonitoringListenerHost[254] = 0;
+					
+				}
+				
+			}
+			if(getDOMChildByName(elemServerMonitoringRoot,
+								"Port",
+								elemServerMonitoringPort,
+								false) == E_SUCCESS)
+			{
+				UINT16 port = 0xFFFF;
+				if(getDOMElementValue(elemServerMonitoringPort,&port)==E_SUCCESS)
+				{
+					m_iMonitoringListenerPort = port;		
+				}
+			}
+		}
+		else
+		{
+			CAMsg::printMsg(LOG_DEBUG, "Server Monitoring Config not found\n");
+		}
+#endif /* SERVER_MONITORING */
 		//Next Proxies and visible adresses
 		clearVisibleAddresses();
 		DOMElement* elemProxies=NULL;
