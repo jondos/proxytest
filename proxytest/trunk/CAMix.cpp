@@ -40,9 +40,6 @@ CAMix::CAMix()
     m_acceptReconfiguration = pglobalOptions->acceptReconfiguration();
 		m_pSignature=NULL;
 		m_pInfoService=NULL;
-		#ifdef REPLAY_DETECTION
-			m_pReplayMsgProc=NULL;
-		#endif
 		m_pMuxOutControlChannelDispatcher=NULL;
 		m_pMuxInControlChannelDispatcher=NULL;
 		m_u32KeepAliveSendInterval=0;//zero means --> do not use
@@ -138,7 +135,9 @@ SINT32 CAMix::start()
 							if(pglobalOptions->isFirstMix() && pglobalOptions->isDynamic())
 								m_pInfoService->sendCascadeHelo();
 #endif
+							MONITORING_FIRE_SYS_EVENT(ev_sys_enterMainLoop);
 							loop();
+							MONITORING_FIRE_SYS_EVENT(ev_sys_leavingMainLoop);
 #ifdef DYNAMIC_MIX
 							m_bCascadeEstablished = false;
 							/** If the cascade breaks down, some mix might have been reconfigured. Let's have a look if there is new information */

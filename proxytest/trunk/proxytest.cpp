@@ -35,6 +35,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CALocalProxy.hpp"
 #include "CAQueue.hpp"
 #include "CAThreadList.hpp"
+#include "CAStatusManager.hpp"
+
 
 #ifdef _DEBUG //For FreeBSD memory checking functionality
 	const char* _malloc_options="AX";
@@ -195,6 +197,9 @@ void cleanup()
 				pThreadList = NULL;
 			}
 #endif
+#ifdef SERVER_MONITORING
+		CAStatusManager::cleanup();
+#endif
 		CAMsg::cleanup();
 		
 	}
@@ -221,6 +226,7 @@ void my_terminate(void)
 
 void signal_segv( int ) 
 {
+	MONITORING_FIRE_SYS_EVENT(ev_sys_sigSegV);
 	CAMsg::printMsg(LOG_CRIT,"Oops ... caught SIG_SEGV! Exiting ...\n");
 #ifdef PRINT_THREAD_STACK_TRACE
 	CAThread::METHOD_STACK* stack = CAThread::getCurrentStack();
@@ -243,6 +249,7 @@ void signal_segv( int )
 
 void signal_term( int )
 	{ 
+		MONITORING_FIRE_SYS_EVENT(ev_sys_sigTerm);
 		CAMsg::printMsg(LOG_INFO,"Hm.. Signal SIG_TERM received... exiting!\n");
 		my_terminate();
 		exit(0);
@@ -250,6 +257,7 @@ void signal_term( int )
 
 void signal_interrupt( int)
 	{
+		MONITORING_FIRE_SYS_EVENT(ev_sys_sigInt);
 		CAMsg::printMsg(LOG_INFO,"Hm.. Strg+C pressed... exiting!\n");
 #if defined _DEBUG && ! defined (ONLY_LOCAL_PROXY)
 		CAMsg::printMsg(LOG_INFO,"%d threads listed.\n",pThreadList->getSize());
@@ -648,7 +656,9 @@ RESTART_MIX:
         close(STDERR_FILENO);			
 			}
 #endif
-
+#ifdef SERVER_MONITORING
+		CAStatusManager::init();
+#endif
 #ifndef WIN32
 		maxFiles=pglobalOptions->getMaxOpenFiles();
 		
@@ -823,27 +833,31 @@ RESTART_MIX:
 				{
 				CASocket::setMaxNormalSockets(s32MaxSockets-10);
 				}
+				MONITORING_FIRE_SYS_EVENT(ev_sys_start);
 				if(pglobalOptions->isFirstMix())
-					{
-						CAMsg::printMsg(LOG_INFO,"I am the First MIX..\n");
-						#if !defined(NEW_MIX_TYPE)
-							pMix=new CAFirstMixA();
-						#else
-							pMix=new CAFirstMixB();
-						#endif
-					}
+				{
+					CAMsg::printMsg(LOG_INFO,"I am the First MIX..\n");
+					#if !defined(NEW_MIX_TYPE)
+						pMix=new CAFirstMixA();
+					#else
+						pMix=new CAFirstMixB();
+					#endif					
+					MONITORING_FIRE_NET_EVENT(ev_net_firstMixInited);
+				}
 				else if(pglobalOptions->isMiddleMix())
-					{
-						CAMsg::printMsg(LOG_INFO,"I am a Middle MIX..\n");
-						pMix=new CAMiddleMix();
-					}
+				{
+					CAMsg::printMsg(LOG_INFO,"I am a Middle MIX..\n");
+					pMix=new CAMiddleMix();				
+					MONITORING_FIRE_NET_EVENT(ev_net_middleMixInited);
+				}
 				else
 				{
 						#if !defined(NEW_MIX_TYPE)
 							pMix=new CALastMixA();
 						#else
 							pMix=new CALastMixB();
-						#endif
+						#endif				
+						MONITORING_FIRE_NET_EVENT(ev_net_lastMixInited);
 				}
 #else
 				CAMsg::printMsg(LOG_ERR,"this Mix is compile to work only as local proxy!\n");

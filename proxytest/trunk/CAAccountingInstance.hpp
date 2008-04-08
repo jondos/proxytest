@@ -44,6 +44,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "Hashtable.hpp"
 #include "CAMix.hpp"
 #include "xml/DOM_Output.hpp"
+#include "CAStatusManager.hpp"
 
 // we want a costconfirmation from the user for every megabyte
 // after 2megs of unconfirmed traffic we kick the user out
@@ -56,7 +57,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define CHALLENGE_TIMEOUT 10
 #define HARD_LIMIT_TIMEOUT 15
 #define AUTH_TIMEOUT 10
-
+#define CRITICAL_SUBSEQUENT_BI_CONN_ERRORS 5
 
 struct AccountLoginHashEntry
 {
@@ -97,6 +98,7 @@ public:
 	static SINT32 init(CAMix* callingMix)
 		{
 				ms_pInstance = new CAAccountingInstance(callingMix);
+				MONITORING_FIRE_PAY_EVENT(ev_pay_aiInited);
 				return E_SUCCESS;
 		}
 		
@@ -104,6 +106,7 @@ public:
 		{
 			delete ms_pInstance;
 			ms_pInstance=NULL;
+			MONITORING_FIRE_PAY_EVENT(ev_pay_aiShutdown);
 			return E_SUCCESS;
 		}
 
@@ -285,6 +288,8 @@ private:
 	volatile UINT64 m_nextSettleNr;
 	volatile UINT64 m_settleWaitNr;
 	CAConditionVariable *m_pSettlementMutex;
+	
+	volatile UINT32 m_seqBIConnErrors;
 };
 
 

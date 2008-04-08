@@ -166,6 +166,8 @@ class CAAccountingDBInterface
 			bool testAndSetOwner();
 			bool testAndResetOwner();
 			
+			PGresult *monitored_PQexec(PGconn *conn, const char *query);
+			
 			/** connection to postgreSQL database */
 			PGconn * m_dbConn;
 			bool m_bConnected;

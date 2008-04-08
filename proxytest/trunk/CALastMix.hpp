@@ -45,7 +45,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
   /* TypeB mixes are using an own implementation */
   #include "CALastMixChannelList.hpp"
 #endif
-#include "CAMixWithReplayDB.hpp"
+
+#ifdef REPLAY_DETECTION
+	#include "CAMixWithReplayDB.hpp"
+#endif
 
 THREAD_RETURN	lm_loopLog(void*);
 THREAD_RETURN	lm_loopSendToMix(void* param);

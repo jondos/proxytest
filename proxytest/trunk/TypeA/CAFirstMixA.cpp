@@ -378,6 +378,15 @@ SINT32 CAFirstMixA::loop()
 													{ // stefan: muesste das nicht vor die behandlung von CHANNEL_DATA? oder gilt OPEN => !DATA ? 
 														//es gilt: open -> data
 														pHashEntry->pSymCipher->crypt1(pMixPacket->data,rsaBuff,KEY_SIZE);
+														#ifdef REPLAY_DETECTION
+														// replace time(NULL) with the real timestamp ()
+														// packet-timestamp + m_u64ReferenceTime
+															if(m_pReplayDB->insert(rsaBuff,time(NULL))!=E_SUCCESS)
+															{
+																CAMsg::printMsg(LOG_INFO,"Replay: Duplicate packet ignored.\n");
+																continue;
+															}
+														#endif
 														pCipher= new CASymCipher();
 														pCipher->setKey(rsaBuff);
 														for(int i=0;i<16;i++)

@@ -89,13 +89,13 @@ am_libproxytest_a_OBJECTS = CAAbstractControlChannel.$(OBJEXT) \
 	CASocket.$(OBJEXT) CASocketAddrINet.$(OBJEXT) \
 	CASocketAddrUnix.$(OBJEXT) CASocketGroup.$(OBJEXT) \
 	CASocketGroupEpoll.$(OBJEXT) CASocketList.$(OBJEXT) \
-	CATLSClientSocket.$(OBJEXT) CASymCipher.$(OBJEXT) \
-	CASyncControlChannel.$(OBJEXT) CATempIPBlockList.$(OBJEXT) \
-	CAThread.$(OBJEXT) CAThreadPool.$(OBJEXT) \
-	CAThreadList.$(OBJEXT) CAUtil.$(OBJEXT) CAXMLBI.$(OBJEXT) \
-	CAXMLCostConfirmation.$(OBJEXT) CAXMLErrorMessage.$(OBJEXT) \
-	CAXMLPriceCert.$(OBJEXT) Hashtable.$(OBJEXT) \
-	packetintro.$(OBJEXT)
+	CAStatusManager.$(OBJEXT) CATLSClientSocket.$(OBJEXT) \
+	CASymCipher.$(OBJEXT) CASyncControlChannel.$(OBJEXT) \
+	CATempIPBlockList.$(OBJEXT) CAThread.$(OBJEXT) \
+	CAThreadPool.$(OBJEXT) CAThreadList.$(OBJEXT) CAUtil.$(OBJEXT) \
+	CAXMLBI.$(OBJEXT) CAXMLCostConfirmation.$(OBJEXT) \
+	CAXMLErrorMessage.$(OBJEXT) CAXMLPriceCert.$(OBJEXT) \
+	Hashtable.$(OBJEXT) packetintro.$(OBJEXT)
 libproxytest_a_OBJECTS = $(am_libproxytest_a_OBJECTS)
 am__installdirs = "$(DESTDIR)$(sbindir)"
 sbinPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
@@ -296,6 +296,7 @@ libproxytest_a_SOURCES = CAAbstractControlChannel.cpp\
 		    CASocketGroup.cpp \
 		    CASocketGroupEpoll.cpp\
 		    CASocketList.cpp \
+		    CAStatusManager.cpp \
 		    CATLSClientSocket.cpp\
 		    CASymCipher.cpp \
 		    CASyncControlChannel.cpp\
@@ -471,6 +472,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASocketGroup.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASocketGroupEpoll.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASocketList.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAStatusManager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASymCipher.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASyncControlChannel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CATLSClientSocket.Po@am__quote@
@@ -948,6 +950,7 @@ uninstall-am: uninstall-sbinPROGRAMS
 		    CASocketGroup.hpp \
 		    CASocketGroupEpoll.hpp\
 		    CASocketList.hpp \
+		    CAStatusManager.hpp \
 		    CATLSClientSocket.hpp\
 		    CAClientSocket.hpp\
 		    CASymCipher.hpp \

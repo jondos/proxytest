@@ -49,6 +49,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include "CASocketGroupEpoll.hpp"
 #endif
 
+#ifdef REPLAY_DETECTION
+	#include "CAMixWithReplayDB.hpp"
+#endif
+
 class CAInfoService;
 
 THREAD_RETURN fm_loopSendToMix(void*);
@@ -58,10 +62,15 @@ THREAD_RETURN fm_loopReadFromUsers(void*);
 THREAD_RETURN fm_loopDoUserLogin(void* param);
 THREAD_RETURN	fm_loopLog(void*);
 
-class CAFirstMix:public CAMix
+class CAFirstMix:public 
+#ifdef REPLAY_DETECTION
+	CAMixWithReplayDB
+#else
+	CAMix
+#endif
 {
 public:
-    CAFirstMix() : CAMix()
+    CAFirstMix()
 				{
 					m_pmutexUser=new CAMutex();
 					m_pmutexMixedPackets=new CAMutex();
@@ -182,6 +191,10 @@ public:
 			* to the stored parameters of the mixes of this cascade.
 			*/
 		SINT32 setMixParameters(const tMixParameters& params);
+
+#ifdef REPLAY_DETECTION
+		UINT64 m_u64LastTimestampReceived;
+#endif
 
 protected:
 #ifndef COUNTRY_STATS

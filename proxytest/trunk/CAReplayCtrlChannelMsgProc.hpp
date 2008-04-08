@@ -29,13 +29,16 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define CA_REPLAY_CONTROL_CHANNEL_MSG_PROC
 #include "CAThread.hpp"
 class CAMix;
+class CAMixWithReplayDB;
 class CAReplayControlChannel;
+
+THREAD_RETURN rp_loopPropagateTimestamp(void* param);
 
 class CAReplayCtrlChannelMsgProc
 {
 	public:
 		/** Initialises the replay control channel messages processor with the necessary information.*/
-		CAReplayCtrlChannelMsgProc(const CAMix* pMix);
+		CAReplayCtrlChannelMsgProc(const CAMixWithReplayDB* pMix);
 		~CAReplayCtrlChannelMsgProc();
 
 		/** Propagates downstream the current replay timestamp*/ 
@@ -57,7 +60,7 @@ class CAReplayCtrlChannelMsgProc
 			* @retval E_SUCCESS if the request could be processed successfully
 			* @retval E_UNKNOWN otherwise
 			*/
-		SINT32 proccessGetTimestamps(const CAReplayControlChannel* pReceiver) const;
+//		SINT32 proccessGetTimestamps(const CAReplayControlChannel* pReceiver) const;
 
 		/** Proccesses a getTimeStamp request on a reply control channel.
 			*
@@ -76,14 +79,14 @@ class CAReplayCtrlChannelMsgProc
 			* @retval E_SUCCESS if the timestamp was preocessed successfully
 			* @retval E_UNKNOWN otherwise
 			*/
-		SINT32 proccessGotTimestamp(const CAReplayControlChannel* pReceiver,const UINT8* strMixID,const tReplayTimestamp& rt) const;
+		SINT32 proccessGotTimestamp(const CAReplayControlChannel* pReceiver,const UINT8* strMixID,const UINT32 offset) const;
 
 		/** Sends upstram a request for the replay timestamp for the given mix*/
 		SINT32 sendGetTimestamp(const UINT8* strMixID);
 
 private:
-		friend THREAD_RETURN rp_loopPropagateTimestamp(void*);
-		const CAMix* m_pMix;
+		friend THREAD_RETURN rp_loopPropagateTimestamp(void* param);
+		const CAMixWithReplayDB* m_pMix;
 		CAReplayControlChannel* m_pDownstreamReplayControlChannel;
 		CAReplayControlChannel* m_pUpstreamReplayControlChannel;
 		UINT32 m_u32PropagationInterval;
@@ -91,5 +94,7 @@ private:
 		//UINT8* m_strGetTimestampsRepsonseMessageTemplate;
 		//UINT32 m_u32GetTimestampsRepsonseMessageTemplateLen;
 		volatile bool m_bRun;
+		XERCES_CPP_NAMESPACE::DOMDocument* m_docTemplate;
+		SINT32 initTimestampsMessageTemplate();
 };
 #endif

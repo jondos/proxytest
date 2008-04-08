@@ -31,6 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CACmdLnOptions.hpp"
 #include "CAXMLErrorMessage.hpp"
 #include "CAMsg.hpp"
+#include "CAStatusManager.hpp"
 
 extern CACmdLnOptions* pglobalOptions;
 
@@ -47,7 +48,7 @@ CAAccountingDBInterface::CAAccountingDBInterface()
 		m_bConnected = false;
 		m_dbConn=NULL;/* The owner of the connection */
 		m_owner = 0;
-		/* indicates wether this connection is not owned by a thread.
+		/* indicates whether this connection is not owned by a thread.
 		 * (There is no reliable value of m_owner to indicate this).
 		 */
 		m_free = true;
@@ -155,7 +156,6 @@ bool CAAccountingDBInterface::checkConnectionStatus()
       		CAMsg::printMsg(LOG_INFO, "CAAccountingDBInterface: Database connection has been reset successfully!");
       	}
 	}
-	
 	return m_bConnected;
 }
 
@@ -220,6 +220,10 @@ SINT32 CAAccountingDBInterface::__getCostConfirmation(UINT64 accountNumber, UINT
 	{
 		if(!checkConnectionStatus()) 
 		{
+			/* We assume, that the DB Connection was obtained by CAAccountingDBInterface::getConnnection
+			 *  which shall return an established DBConnection. Therefore this is an error event 
+			 */
+			MONITORING_FIRE_PAY_EVENT(ev_pay_dbConnectionFailure);
 			return E_NOT_CONNECTED;
 		}
 		
@@ -236,7 +240,8 @@ SINT32 CAAccountingDBInterface::__getCostConfirmation(UINT64 accountNumber, UINT
 			CAMsg::printMsg(LOG_DEBUG, "CAAccountingDBInterface: executing query %s\n", query);
 		#endif
 		
-		result = PQexec(m_dbConn, (char *)query);
+		result = monitored_PQexec(m_dbConn, (char *)query);
+		
 		delete[] query;
 		if(PQresultStatus(result)!=PGRES_TUPLES_OK) 
 		{
@@ -295,8 +300,16 @@ SINT32 CAAccountingDBInterface::__checkCountAllQuery(UINT8* a_query, UINT32& r_c
 	{		
 		return E_UNKNOWN;
 	}
+	/*
+	if(!checkConnectionStatus()) 
+	{
+		MONITORING_FIRE_PAY_EVENT(ev_pay_dbConnectionFailure);
+		return E_NOT_CONNECTED;
+	}
+	MONITORING_FIRE_PAY_EVENT(ev_pay_dbConnectionSuccess);
+	*/
+	PGresult * pResult = monitored_PQexec(m_dbConn, (char*)a_query);
 	
-	PGresult * pResult = PQexec(m_dbConn, (char*)a_query);
 	if(PQresultStatus(pResult) != PGRES_TUPLES_OK)
 	{
 		CAMsg::printMsg(LOG_ERR, 
@@ -357,8 +370,10 @@ SINT32 CAAccountingDBInterface::__storeCostConfirmation( CAXMLCostConfirmation &
 		
 		if(!checkConnectionStatus()) 
 		{
+			MONITORING_FIRE_PAY_EVENT(ev_pay_dbConnectionFailure);
 			return E_NOT_CONNECTED;
 		}
+		MONITORING_FIRE_PAY_EVENT(ev_pay_dbConnectionSuccess);
 		
 		pStrCC = new UINT8[8192];
 		size=8192;
@@ -381,7 +396,7 @@ SINT32 CAAccountingDBInterface::__storeCostConfirmation( CAXMLCostConfirmation &
 		sprintf( (char*)query, previousCCQuery, strAccountNumber, ccCascade);
 	
 		// to receive result in binary format...
-		if (checkCountAllQuery(query, count) != E_SUCCESS)
+		if (__checkCountAllQuery(query, count) != E_SUCCESS)
 		{
 			delete[] pStrCC;
 			delete[] query;
@@ -401,7 +416,8 @@ SINT32 CAAccountingDBInterface::__storeCostConfirmation( CAXMLCostConfirmation &
 		sprintf((char*)query, tempQuery, tmp, pStrCC, 0, strAccountNumber, ccCascade);
 	
 		// issue query..
-		pResult = PQexec(m_dbConn, (char*)query);
+		pResult = monitored_PQexec(m_dbConn, (char*)query);
+		
 		delete[] pStrCC;
 		if(PQresultStatus(pResult) != PGRES_COMMAND_OK) // || PQntuples(pResult) != 1)
 		{
@@ -456,8 +472,10 @@ SINT32 CAAccountingDBInterface::__getUnsettledCostConfirmations(CAQueue& q, UINT
 
 		if(!checkConnectionStatus()) 
 		{
+			MONITORING_FIRE_PAY_EVENT(ev_pay_dbConnectionFailure);
 			return E_NOT_CONNECTED;
 		}
+		MONITORING_FIRE_PAY_EVENT(ev_pay_dbConnectionSuccess);
 
 		finalQuery = new UINT8[strlen(query)+strlen((char*)cascadeId)];
 		sprintf( (char*)finalQuery, query, cascadeId);
@@ -467,7 +485,8 @@ SINT32 CAAccountingDBInterface::__getUnsettledCostConfirmations(CAQueue& q, UINT
 		CAMsg::printMsg(LOG_DEBUG, (const char*) finalQuery);
 #endif
 		
-		result = PQexec(m_dbConn, (char *)finalQuery);
+		result = monitored_PQexec(m_dbConn, (char *)finalQuery);
+		
 		delete[] finalQuery;
 		finalQuery = NULL;
 		if(PQresultStatus(result) != PGRES_TUPLES_OK)
@@ -516,15 +535,18 @@ SINT32 CAAccountingDBInterface::__markAsSettled(UINT64 accountNumber, UINT8* cas
 		
 		if(!checkConnectionStatus()) 
 		{
+			MONITORING_FIRE_PAY_EVENT(ev_pay_dbConnectionFailure);
 			return E_NOT_CONNECTED;
 		}
+		MONITORING_FIRE_PAY_EVENT(ev_pay_dbConnectionSuccess);
 
 		UINT8 tmp[32], tmp2[32];
 		print64(tmp,accountNumber);
 		print64(tmp2,a_transferredBytes);
 		query = new UINT8[strlen(queryF) + 32 + 32 + strlen((char*)cascadeId)];
 		sprintf((char *)query, queryF, tmp, tmp2, cascadeId);
-		result = PQexec(m_dbConn, (char *)query);
+		result = monitored_PQexec(m_dbConn, (char *)query);
+		
 		delete[] query;
 		if(PQresultStatus(result) != PGRES_COMMAND_OK)
 			{
@@ -559,13 +581,17 @@ SINT32 CAAccountingDBInterface::__deleteCC(UINT64 accountNumber, UINT8* cascadeI
 	
 	if (!checkConnectionStatus())
 	{
+		MONITORING_FIRE_PAY_EVENT(ev_pay_dbConnectionFailure);
 		ret = E_NOT_CONNECTED;	
 	}
 	else
 	{						
+		MONITORING_FIRE_PAY_EVENT(ev_pay_dbConnectionSuccess);
+		
 		finalQuery = new UINT8[strlen(deleteQuery)+ 32 + strlen((char*)cascadeId)];
 		sprintf((char *)finalQuery,deleteQuery,temp, cascadeId);
-		result = PQexec(m_dbConn, (char*)finalQuery);
+		result = monitored_PQexec(m_dbConn, (char*)finalQuery);
+		
 		//CAMsg::printMsg(LOG_DEBUG, "%s\n",finalQuery);
 		delete[] finalQuery;
 		if (PQresultStatus(result) != PGRES_COMMAND_OK)
@@ -623,17 +649,25 @@ SINT32 CAAccountingDBInterface::__storePrepaidAmount(UINT64 accountNumber, SINT3
 
 	if(!checkConnectionStatus()) 
 	{
+		MONITORING_FIRE_PAY_EVENT(ev_pay_dbConnectionFailure);
 		return E_NOT_CONNECTED;
 	}
+	
+	MONITORING_FIRE_PAY_EVENT(ev_pay_dbConnectionSuccess);
 	
 	len = max(strlen(selectQuery), strlen(insertQuery));
 	len = max(len, strlen(updateQuery));
 	finalQuery = new UINT8[len + 32 + 32 + strlen((char*)cascadeId)];
 	sprintf( (char *)finalQuery, selectQuery, tmp, cascadeId);
 	
-	if (checkCountAllQuery(finalQuery, count) != E_SUCCESS)
+	if (__checkCountAllQuery(finalQuery, count) != E_SUCCESS)
 	{
 		delete[] finalQuery;
+		/*if(!checkConnectionStatus()) 
+		{
+			MONITORING_FIRE_PAY_EVENT(ev_pay_dbConnectionFailure);
+			return E_NOT_CONNECTED;
+		}*/
 		return E_UNKNOWN;
 	}
 	
@@ -647,7 +681,8 @@ SINT32 CAAccountingDBInterface::__storePrepaidAmount(UINT64 accountNumber, SINT3
 		query = updateQuery;
 	}
 	sprintf((char*)finalQuery, query, prepaidBytes, tmp, cascadeId);
-	result = PQexec(m_dbConn, (char *)finalQuery);	
+	result = monitored_PQexec(m_dbConn, (char *)finalQuery);
+	
 	if (PQresultStatus(result) != PGRES_COMMAND_OK) // || PQntuples(result) != 1)
 	{
 		CAMsg::printMsg(LOG_ERR, "CAAccountungDBInterface: Saving to prepaidamounts failed!\n");
@@ -699,12 +734,15 @@ SINT32 CAAccountingDBInterface::__getPrepaidAmount(UINT64 accountNumber, UINT8* 
 		
 		if(!checkConnectionStatus()) 
 		{
+			MONITORING_FIRE_PAY_EVENT(ev_pay_dbConnectionFailure);
 			return E_NOT_CONNECTED;
 		}
+		MONITORING_FIRE_PAY_EVENT(ev_pay_dbConnectionSuccess);
 		
 		finalQuery = new UINT8[strlen(selectQuery) + 32 + strlen((char*)cascadeId)];
 		sprintf( (char *)finalQuery, selectQuery, accountNumberAsString, cascadeId);		
-		result = PQexec(m_dbConn, (char *)finalQuery);
+		result = monitored_PQexec(m_dbConn, (char *)finalQuery);
+		
 		if(PQresultStatus(result)!=PGRES_TUPLES_OK) 
 		{
 			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Database error while trying to read prepaid bytes, Reason: %s\n", PQresultErrorMessage(result));
@@ -731,7 +769,8 @@ SINT32 CAAccountingDBInterface::__getPrepaidAmount(UINT64 accountNumber, UINT8* 
 			print64(accountNumberAsString,accountNumber);
 			sprintf( (char *)finalQuery, deleteQuery, accountNumberAsString, cascadeId);
 			
-			result2 = PQexec(m_dbConn, (char *)finalQuery);
+			result2 = monitored_PQexec(m_dbConn, (char *)finalQuery);
+			
 			if (PQresultStatus(result2) != PGRES_COMMAND_OK)
 			{
 				CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Deleting read prepaidamount failed.");	
@@ -775,15 +814,17 @@ SINT32 CAAccountingDBInterface::__storeAccountStatus(UINT64 accountNumber, UINT3
 
 	if(!checkConnectionStatus()) 
 	{
+		MONITORING_FIRE_PAY_EVENT(ev_pay_dbConnectionFailure);
 		return E_NOT_CONNECTED;
 	}
+	MONITORING_FIRE_PAY_EVENT(ev_pay_dbConnectionSuccess);
 	
 	len = max(strlen(previousStatusQuery), strlen(insertQuery));
 	len = max(len, strlen(updateQuery));
 	finalQuery = new UINT8[len + 32 + 32 + 32];
 	sprintf( (char *)finalQuery, previousStatusQuery, tmp);
 	
-	if (checkCountAllQuery(finalQuery, count) != E_SUCCESS)
+	if (__checkCountAllQuery(finalQuery, count) != E_SUCCESS)
 	{
 		delete[] finalQuery;
 		return E_UNKNOWN;
@@ -799,7 +840,8 @@ SINT32 CAAccountingDBInterface::__storeAccountStatus(UINT64 accountNumber, UINT3
 		query = updateQuery;
 	}
 	sprintf((char*)finalQuery, query, statuscode, expires, tmp);
-	result = PQexec(m_dbConn, (char *)finalQuery);	
+	result = monitored_PQexec(m_dbConn, (char *)finalQuery);	
+
 	if (PQresultStatus(result) != PGRES_COMMAND_OK) // || PQntuples(result) != 1)
 	{
 		CAMsg::printMsg(LOG_ERR, "CAAccountungDBInterface: Saving the account status failed!\n");
@@ -849,15 +891,17 @@ SINT32 CAAccountingDBInterface::__storeAccountStatus(UINT64 accountNumber, UINT3
 		
 		if(!checkConnectionStatus()) 
 		{
+			MONITORING_FIRE_PAY_EVENT(ev_pay_dbConnectionFailure);
 			return E_NOT_CONNECTED;
 		}
-		
-		
+		MONITORING_FIRE_PAY_EVENT(ev_pay_dbConnectionSuccess);
+	
 		a_statusCode =  CAXMLErrorMessage::ERR_OK;
 		
 		finalQuery = new UINT8[strlen(selectQuery) + 32];
 		sprintf( (char *)finalQuery, selectQuery, accountNumberAsString);		
-		result = PQexec(m_dbConn, (char *)finalQuery);
+		result = monitored_PQexec(m_dbConn, (char *)finalQuery);
+		
 		delete[] finalQuery;
 		if(PQresultStatus(result)!=PGRES_TUPLES_OK) 
 		{
@@ -910,7 +954,6 @@ CAAccountingDBInterface *CAAccountingDBInterface::getConnection()
 		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: DBConnections not initialized. This should NEVER happen!\n");
 		return NULL;
 	}
-	//CAMsg::printMsg(LOG_DEBUG, "CAAccountingDBInterface: Thread %x: requesting DBConnection\n", pthread_self());
 	ms_pConnectionAvailable->lock();
 	for(i=0; 1; i++)
 	{
@@ -927,14 +970,18 @@ CAAccountingDBInterface *CAAccountingDBInterface::getConnection()
 			//wait until connection is free
 			ms_threadWaitNr++;
 			myWaitNr = ms_threadWaitNr;
-			CAMsg::printMsg(LOG_INFO, "CAAccountingDBInterface: Thread %x waits for connection with waitNr %Lu and %Lu Threads waiting before\n",
+#ifdef DEBUG			
+			CAMsg::printMsg(LOG_DEBUG, "CAAccountingDBInterface: Thread %x waits for connection with waitNr %Lu and %Lu Threads waiting before\n",
 					pthread_self(), myWaitNr, (myWaitNr - ms_nextThreadNr));
+#endif
 			while(ms_nextThreadNr != myWaitNr)
 			{
 				ms_pConnectionAvailable->wait();
 			}
-			CAMsg::printMsg(LOG_INFO, "CAAccountingDBInterface: Thread %x with waitNr %Lu continues\n",
+#ifdef DEBUG			
+			CAMsg::printMsg(LOG_DEBUG, "CAAccountingDBInterface: Thread %x with waitNr %Lu continues\n",
 								pthread_self(), myWaitNr);
+#endif
 			if(ms_threadWaitNr == ms_nextThreadNr)
 			{
 				//was the last waiting thread: reset the variables
@@ -951,15 +998,21 @@ CAAccountingDBInterface *CAAccountingDBInterface::getConnection()
 		{
 			if(returnedConnection->initDBConnection() != E_SUCCESS)
 			{
-				CAMsg::printMsg(LOG_WARNING, "CAAccountingDBInterface: Warning requested DB connection can not be established\n"); 
-					
+				MONITORING_FIRE_PAY_EVENT(ev_pay_dbConnectionFailure);
+				CAMsg::printMsg(LOG_WARNING, "CAAccountingDBInterface: Warning requested DB connection can not be established\n"); 	
 				/*returnedConnection->testAndResetOwner();
 				return NULL;*/
 			}
+			else
+			{
+				MONITORING_FIRE_PAY_EVENT(ev_pay_dbConnectionSuccess);
+			}
+		}
+		else
+		{
+			MONITORING_FIRE_PAY_EVENT(ev_pay_dbConnectionSuccess);
 		}
 	}
-	//CAMsg::printMsg(LOG_DEBUG, "CAAccountingDBInterface: Thread %x: successfully acquired DBConnection %x\n", 
-	//		pthread_self(), (UINT32) returnedConnection);
 	return returnedConnection;
 }
 			
@@ -987,17 +1040,18 @@ SINT32 CAAccountingDBInterface::releaseConnection(CAAccountingDBInterface *dbIf)
 		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: DBConnections not initialized. This should NEVER happen!\n");
 		return E_UNKNOWN;
 	}
-	//CAMsg::printMsg(LOG_DEBUG, "CAAccountingDBInterface: Thread %x: try to release DBConnection %x\n", 
-	//			pthread_self(), (UINT32) dbIf);
+	
 	ms_pConnectionAvailable->lock();
 	if(dbIf->testAndResetOwner())
 	{
 		if(ms_threadWaitNr != ms_nextThreadNr)
 		{
 			ms_nextThreadNr++;
-			//There are threads waiting
-			CAMsg::printMsg(LOG_INFO, "CAAccountingDBInterface: There are %Lu Threads waiting. Waking up thread with waitNr. %Lu\n",
+#ifdef DEBUG			
+			CAMsg::printMsg(LOG_DEBUG, "CAAccountingDBInterface: There are %Lu Threads waiting. Waking up thread with waitNr. %Lu\n",
 											 (ms_threadWaitNr - ms_nextThreadNr), ms_nextThreadNr);
+#endif
+			//There are threads waiting
 			ms_pConnectionAvailable->broadcast();
 		}
 		ret = E_SUCCESS;
@@ -1007,16 +1061,6 @@ SINT32 CAAccountingDBInterface::releaseConnection(CAAccountingDBInterface *dbIf)
 		ret = E_UNKNOWN;
 	}
 	ms_pConnectionAvailable->unlock();
-	/*if(ret == E_SUCCESS)
-	{
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingDBInterface: Thread %x: successfully released DBConnection %x\n", 
-					pthread_self(), (UINT32) dbIf);
-	}
-	else
-	{
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingDBInterface: Thread %x: not succeeded in releasing DBConnection %x\n", 
-							pthread_self(), (UINT32) dbIf);
-	}*/
 	return ret;
 }
 
@@ -1064,14 +1108,16 @@ SINT32 CAAccountingDBInterface::init()
 		{
 			if(ms_pDBConnectionPool[i] != NULL)
 			{
-				CAMsg::printMsg(LOG_WARNING, "CAAccountingDBInterface: DBConnection initialization: Already initialized connections !?! Or someone forgot to do cleaunp?\n");
+				CAMsg::printMsg(LOG_WARNING, "CAAccountingDBInterface: DBConnection initialization: "
+						"Already initialized connections !?! Or someone forgot to do cleaunp?\n");
 			}
 			ms_pDBConnectionPool[i] = new CAAccountingDBInterface();
 			dbConnStatus = ms_pDBConnectionPool[i]->initDBConnection();
 			
 			if(dbConnStatus != E_SUCCESS)
 			{
-				CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: DBConnection initialization: could not connect to Database.\n");
+				CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: DBConnection initialization: "
+						"could not connect to Database.\n");
 				return E_UNKNOWN;
 			}
 		}
@@ -1084,10 +1130,6 @@ SINT32 CAAccountingDBInterface::init()
 	return E_SUCCESS;
 }
 
-/* IMPORTANT: make that EVERY thread is terminated that could access the Database!
- * It is very ugly to have threads requesting DB connections when they are cleaned up.
- * Even when using locks this will not work.
- */
 SINT32 CAAccountingDBInterface::cleanup()
 {
 	UINT32 i;
@@ -1098,33 +1140,44 @@ SINT32 CAAccountingDBInterface::cleanup()
 		{
 			if(ms_pDBConnectionPool[i] == NULL)
 			{
-				CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: DBConnection cleanup: Already cleaned up !?! Or someone forgot to initialize :-) ?\n");
+				CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: DBConnection cleanup: Already cleaned up !?! "
+						"Or someone forgot to initialize?\n");
 			}
 			else
 			{
-				//ms_pDBConnectionPool[i]->m_pConnectionMutex->lock();
-				//ms_pDBConnectionPool[i]->m_pConnectionMutex->unlock();
 				dbConnStatus = ms_pDBConnectionPool[i]->terminateDBConnection();
 				delete ms_pDBConnectionPool[i];
 				ms_pDBConnectionPool[i] = NULL;
 			}
 			if(dbConnStatus != E_SUCCESS)
 			{
-				CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: DBConnection cleanup: an error occured while closing DBConnection.\n");
+				CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: DBConnection cleanup: "
+						"an error occured while closing DBConnection.\n");
 				ret = dbConnStatus;
 			}
 		}
 	}
 	if(ms_pConnectionAvailable != NULL)
 	{
-		//ms_pConnectionAvailable->lock();
-		//ms_pConnectionAvailable->broadcast();
-		//ms_pConnectionAvailable->unlock();
-		
 		delete ms_pConnectionAvailable;
 		ms_pConnectionAvailable = NULL;
 	}
 	return ret;
+}
+
+PGresult *CAAccountingDBInterface::monitored_PQexec(PGconn *conn, const char *query)
+{
+	PGresult* result = NULL;
+	result = PQexec(conn, query);
+	if(!checkConnectionStatus()) 
+	{		
+		MONITORING_FIRE_PAY_EVENT(ev_pay_dbConnectionFailure);	
+	}
+	else
+	{
+		MONITORING_FIRE_PAY_EVENT(ev_pay_dbConnectionSuccess);
+	}
+	return result;
 }
 
 #endif

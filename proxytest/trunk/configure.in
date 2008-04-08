@@ -187,6 +187,18 @@ AC_ARG_ENABLE(payment,
 	]
 )
 
+dnl server monitoring ??
+SERVER_MONITORING=""
+AC_ARG_ENABLE(server_monitoring,
+	AS_HELP_STRING([--enable-server_monitoring],
+			[Specify if to build with state tracking for server monitoring]),
+	[
+		if test "x$enableval" != "xno" ; then
+		    SERVER_MONITORING="-DSERVER_MONITORING"
+		fi
+	]
+)
+
 dnl replay detection ??
 REPLAY_DETECTION=""
 AC_ARG_ENABLE(replay_detection,
@@ -200,7 +212,7 @@ AC_ARG_ENABLE(replay_detection,
 )
 
 dnl type-b mixes ??
-REPLAY_DETECTION=""
+NEW_MIX_TYPE=""
 AC_ARG_ENABLE(new_mix_type,
 	AS_HELP_STRING([--enable-new_mix_type],
 			[Specify if to build with type B mixes]),
@@ -572,8 +584,8 @@ if test "x$DOTHETEST" != "xyes" ; then
     AC_SUBST(LIBCPPUNIT,cppunit)
 fi
 
-CFLAGS="$CFLAGS $POOL $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS"
-CXXFLAGS="$CXXFLAGS $POOL $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS"
+CFLAGS="$CFLAGS $POOL $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS"
+CXXFLAGS="$CXXFLAGS $POOL $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS"
 LIBS="$LIBS $PAYMENT_LIB"
 
 AM_CONDITIONAL([DOTESTS], [test x$DOTHETESTS = xyes])

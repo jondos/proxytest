@@ -43,21 +43,16 @@ CAReplayControlChannel::~CAReplayControlChannel(void)
 	{
 	}
 
-SINT32 CAReplayControlChannel::processXMLMessage(const DOM_Document& doc)
+SINT32 CAReplayControlChannel::processXMLMessage(const XERCES_CPP_NAMESPACE::DOMDocument* doc)
 	{
 		#ifdef DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"CAReplayControlChannel::processXMLMessage()\n");
 		#endif
-		DOM_Element elemRoot=doc.getDocumentElement();
+		DOMElement* elemRoot=doc->getDocumentElement();
 		if(elemRoot==NULL)
 			return E_UNKNOWN;
-		DOMString rootNodeName;
-		rootNodeName=elemRoot.getNodeName();	
-		if(rootNodeName.equals("GetTimestamps"))
-			{
-				m_pProcessor->proccessGetTimestamps(this);
-			}
-		else if(rootNodeName.equals("GetTimestamp"))
+
+		if(equals(elemRoot->getNodeName(),"GetTimestamp"))
 			{
 				UINT8 buff[255];
 				UINT32 bufflen=255;
@@ -66,7 +61,7 @@ SINT32 CAReplayControlChannel::processXMLMessage(const DOM_Document& doc)
 				buff[bufflen]=0;
 				m_pProcessor->proccessGetTimestamp(this,buff);
 			}
-		else if(rootNodeName.equals("Mix"))
+		else if(equals(elemRoot->getNodeName(),"Mix"))
 			{
 				#ifdef DEBUG
 					CAMsg::printMsg(LOG_DEBUG,"CAReplayControlChannel::processXMLMessage() - got a timestamp\n");
@@ -76,18 +71,17 @@ SINT32 CAReplayControlChannel::processXMLMessage(const DOM_Document& doc)
 				if(getDOMElementAttribute(elemRoot,"id",buff,&bufflen)!=E_SUCCESS)
 					return E_UNKNOWN;
 				buff[bufflen]=0;
-				tReplayTimestamp rt;
-				DOM_Node child;
-				getDOMChildByName(elemRoot,(UINT8*)"Replay",child);
-				DOM_Node elemReplayTimestamp;
-				getDOMChildByName(child,(UINT8*)"ReplayTimestamp",elemReplayTimestamp);
-				if(	getDOMElementAttribute(elemReplayTimestamp,"offset",rt.offset)!=E_SUCCESS||
-						getDOMElementAttribute(elemReplayTimestamp,"interval",rt.interval)!=E_SUCCESS)
+				DOMElement *child;
+				getDOMChildByName(elemRoot,"Replay",child,false);
+				DOMElement *elemReplayTimestamp;
+				getDOMChildByName(child,"ReplayOffset",elemReplayTimestamp,false);
+				UINT32 offset=0;
+				if( getDOMElementValue(elemReplayTimestamp,offset,0)!=E_SUCCESS)
 					return E_UNKNOWN;
 				#ifdef DEBUG
 					CAMsg::printMsg(LOG_DEBUG,"CAReplayControlChannel::processXMLMessage() - call m_pProcessor->proccessGotTimestamp() - m_pProcessor=%p\n",m_pProcessor);
 				#endif
-				m_pProcessor->proccessGotTimestamp(this,buff,rt);
+				m_pProcessor->proccessGotTimestamp(this,buff,offset);
 			}
 		return E_SUCCESS;
 	}
