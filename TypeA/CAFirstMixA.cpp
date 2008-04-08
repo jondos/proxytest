@@ -464,7 +464,7 @@ NEXT_USER:
 											//pEntry->packetsOutToUser++;
 											getcurrentTimeMicros(current_time);
 											diff_time=diff64(current_time,pEntry->timeCreated);
-											CAMsg::printMsg(LOG_DEBUG,"2:%u,%Lu,%LU,%u,%u,%u\n",
+											CAMsg::printMsg(LOG_DEBUG,"2:%u,%Lu,%Lu,%u,%u,%u\n",
 																								pEntry->channelIn,pEntry->pHead->id,pEntry->timeCreated,pEntry->packetsInFromUser,pEntry->packetsOutToUser,
 																								diff_time);
 										#endif
