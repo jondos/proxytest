@@ -164,8 +164,8 @@ SINT32 CAFirstMixA::loop()
 		UINT64 current_time;
 		UINT32 diff_time;
 		CAMsg::printMsg(LOG_DEBUG,"Channel log formats:\n");
-		CAMsg::printMsg(LOG_DEBUG,"1. Close received from user (times in micros) - 1:Channel-ID,Connection-ID,PacketsIn (only data and open),PacketsOut (only data),ChannelDuration (open packet received --> close packet put into send queue to next mix)\n");
-		CAMsg::printMsg(LOG_DEBUG,"2. Channel close from Mix(times in micros)- 2.:Channel-ID,Connection-ID,PacketsIn (only data and open), PacketsOut (only data),ChannelDuration (open packet received)--> close packet put into send queue to next user\n");
+		CAMsg::printMsg(LOG_DEBUG,"1. Close received from user (times in micros) - 1:Channel-ID,Connection-ID,Channel open timestamp (microseconds),PacketsIn (only data and open),PacketsOut (only data),ChannelDuration (open packet received --> close packet put into send queue to next mix)\n");
+		CAMsg::printMsg(LOG_DEBUG,"2. Channel close from Mix(times in micros)- 2.:Channel-ID,Connection-ID,Channel open timestamp (microseconds),PacketsIn (only data and open), PacketsOut (only data),ChannelDuration (open packet received)--> close packet put into send queue to next user\n");
 #endif
 /** @todo check if thread is closed */
 #ifdef _DEBUG
@@ -340,8 +340,8 @@ SINT32 CAFirstMixA::loop()
 															//pEntry->packetsInFromUser++;
 															getcurrentTimeMicros(current_time);
 															diff_time=diff64(current_time,pEntry->timeCreated);
-															CAMsg::printMsg(LOG_DEBUG,"1:%u,%Lu,%u,%u,%u\n",
-																												pEntry->channelIn,pEntry->pHead->id,pEntry->packetsInFromUser,pEntry->packetsOutToUser,
+															CAMsg::printMsg(LOG_DEBUG,"1:%u,%Lu,%Lu,%u,%u,%u\n",
+																												pEntry->channelIn,pEntry->pHead->id,pEntry->timeCreated,pEntry->packetsInFromUser,pEntry->packetsOutToUser,
 																												diff_time);
 														#endif
 														delete pEntry->pCipher;              // forget the symetric key of this connection
@@ -464,8 +464,8 @@ NEXT_USER:
 											//pEntry->packetsOutToUser++;
 											getcurrentTimeMicros(current_time);
 											diff_time=diff64(current_time,pEntry->timeCreated);
-											CAMsg::printMsg(LOG_DEBUG,"2:%u,%Lu,%u,%u,%u\n",
-																								pEntry->channelIn,pEntry->pHead->id,pEntry->packetsInFromUser,pEntry->packetsOutToUser,
+											CAMsg::printMsg(LOG_DEBUG,"2:%u,%Lu,%LU,%u,%u,%u\n",
+																								pEntry->channelIn,pEntry->pHead->id,pEntry->timeCreated,pEntry->packetsInFromUser,pEntry->packetsOutToUser,
 																								diff_time);
 										#endif
 										
