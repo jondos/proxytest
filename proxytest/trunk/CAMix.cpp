@@ -31,7 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAUtil.hpp"
 #include "CAInfoService.hpp"
 #include "CACmdLnOptions.hpp"
-
+#include "CAStatusManager.hpp"
 extern CACmdLnOptions* pglobalOptions;
 
  
