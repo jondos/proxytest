@@ -44,7 +44,7 @@ CAIPList::CAIPList()
 		m_HashTable=new PIPLIST[0x10000];
 		memset((void*)m_HashTable,0,0x10000*sizeof(PIPLIST));
 		m_allowedConnections=MAX_IP_CONNECTIONS;
-#if defined (_DEBUG) || defined (LOG_TRAFFIC_PER_USER)
+#if defined (_DEBUG)
 		m_Random=new UINT8[56];
 		getRandom(m_Random,56);
 #endif
@@ -60,7 +60,7 @@ CAIPList::CAIPList(UINT32 allowedConnections)
 		m_HashTable=new PIPLIST[0x10000];
 		memset((void*)m_HashTable,0,0x10000*sizeof(PIPLIST));
 		m_allowedConnections=allowedConnections;
-#if defined (_DEBUG) || defined (LOG_TRAFFIC_PER_USER)
+#if defined (_DEBUG)
 		m_Random=new UINT8[56];
 		getRandom(m_Random,56);
 #endif
@@ -184,11 +184,7 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 	* @return the remaining count of inserts for this IP-Address. 
 	* @retval 0 if IP-Address is delete form the list
 	*/
-#ifndef LOG_TRAFFIC_PER_USER
 	SINT32 CAIPList::removeIP(const UINT8 ip[4])
-#else
-	SINT32 CAIPList::removeIP(const UINT8 ip[4],UINT32 time,UINT32 trafficIn,UINT32 trafficOut)
-#endif
 	{	
 #ifdef PAYMENT	
 	return E_SUCCESS;
@@ -214,15 +210,11 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 						if(entry->count==0)
 						{						
 							#ifndef PSEUDO_LOG
-								#if defined (_DEBUG)||defined (LOG_TRAFFIC_PER_USER)
+								#if defined (_DEBUG)
 									UINT8 hash[16];
 									memcpy(m_Random,ip,4);
 									MD5(m_Random,56,hash);
-									#ifdef LOG_TRAFFIC_PER_USER
-										CAMsg::printMsg(LOG_DEBUG,"Removing IP-Address: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X -- Time [ms]: %u  Traffic was: IN: %u  --  OUT: %u\n",hash[0],hash[1],hash[2],hash[3],hash[4],hash[5],hash[6],hash[7],hash[8],hash[9],hash[10],hash[11],hash[12],hash[13],hash[14],hash[15],time,trafficIn,trafficOut);
-									#elif defined(_DEBUG)
-										CAMsg::printMsg(LOG_DEBUG,"Removing IP-Address: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X !\n",hash[0],hash[1],hash[2],hash[3],hash[4],hash[5],hash[6],hash[7],hash[8],hash[9],hash[10],hash[11],hash[12],hash[13],hash[14],hash[15]);
-									#endif
+									CAMsg::printMsg(LOG_DEBUG,"Removing IP-Address: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X !\n",hash[0],hash[1],hash[2],hash[3],hash[4],hash[5],hash[6],hash[7],hash[8],hash[9],hash[10],hash[11],hash[12],hash[13],hash[14],hash[15]);
 								#endif
 							#else
 								CAMsg::printMsg(LOG_DEBUG,"Removing IP-Address: {%u.%u.%u.%u} !\n",ip[0],ip[1],ip[2],ip[3]);
