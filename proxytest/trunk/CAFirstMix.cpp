@@ -1372,8 +1372,11 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		m_psocketgroupUsersWrite->add(*pNewUser);
 #endif
 		doc->release();
+#ifndef LOG_DIALOG
 		CAMsg::printMsg(LOG_DEBUG,"User login: finished\n");
-
+#else
+		CAMsg::printMsg(LOG_DEBUG,"User login: finished -- connection-ID: %Lu -- country-id: %u -- dialog: %s\n",pHashEntry->id,pHashEntry->countryID,pHashEntry->strDialog);
+#endif
 		return E_SUCCESS;
 	}
 //NEVER EVER DELETE THIS!

@@ -65,15 +65,11 @@ class CAIPList
 			CAIPList(UINT32 allowedConnections);
 			~CAIPList();
 			SINT32 insertIP(const UINT8 ip[4]);
-#ifndef LOG_TRAFFIC_PER_USER
 			SINT32 removeIP(const UINT8 ip[4]);
-#else
-			SINT32 removeIP(const UINT8 ip[4],UINT32 time=0,UINT32 trafficIn=0,UINT32 trafficOut=0);
-#endif
 		private:
 			UINT32		m_allowedConnections;
 			volatile	VOLATILE_PIPLIST* m_HashTable;
-#if defined (_DEBUG) || defined (LOG_TRAFFIC_PER_USER)
+#if defined (_DEBUG)
 			//used for 'encryption' of IP-address for privacy aware logging
 			UINT8*		m_Random; //seems to be the best value for MD5, which operates on x*512-64 bit (52*8+4*8=512-64)
 #endif

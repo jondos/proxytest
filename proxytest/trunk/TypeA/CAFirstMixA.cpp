@@ -86,13 +86,10 @@ SINT32 CAFirstMixA::closeConnection(fmHashTableEntry* pHashEntry)
 	
 	#ifdef LOG_TRAFFIC_PER_USER
 		UINT64 current_time;
-		UINT32 diff_time;
 		getcurrentTimeMillis(current_time);
-		diff_time=diff64(current_time,pHashEntry->timeCreated);
-		m_pIPList->removeIP(pHashEntry->peerIP,diff_time,pHashEntry->trafficIn,pHashEntry->trafficOut);
-	#else
-		m_pIPList->removeIP(pHashEntry->peerIP);
+		CAMsg::printMsg(LOG_DEBUG,"Removing Connection wiht ID: %Lu -- login time [ms] %Lu -- logout time [ms] %Lu -- Traffic was: IN: %u  --  OUT: %u\n",pHashEntry->id,pHashEntry->timeCreated,current_time,pHashEntry->trafficIn,pHashEntry->trafficOut);
 	#endif
+	m_pIPList->removeIP(pHashEntry->peerIP);
 	
 	m_psocketgroupUsersRead->remove(*(CASocket*)pHashEntry->pMuxSocket);
 	m_psocketgroupUsersWrite->remove(*(CASocket*)pHashEntry->pMuxSocket);

@@ -67,6 +67,18 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define PRINT_THREAD_STACK_TRACE
 #endif
 
+#if defined(LOG_DIALOG)
+	#ifndef LOG_CHANNEL
+		#define LOG_CHANNEL
+	#endif
+	#ifndef COUNTRY_STATS
+		#define COUNTRY_STATS
+	#endif
+#endif
+#if (defined(LOG_CHANNEL)) && !defined(LOG_TRAFFIC_PER_USER)
+	#define LOG_TRAFFIC_PER_USER
+#endif
+
 #ifdef COUNTRY_STATS
 	#define LOG_COUNTRIES_INTERVALL 6 //how often to log the country stats (multiplied by 10 seconds)
 #endif
@@ -169,9 +181,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define MIX_CASCADE_PROTOCOL_VERSION_0_3 3 //with reply detection [deprecated - not in use anymore!]
 #define MIX_CASCADE_PROTOCOL_VERSION_0_2 2 //old normal protocol
 
-#if (defined(LOG_CHANNEL)) && !defined(LOG_TRAFFIC_PER_USER)
-	#define LOG_TRAFFIC_PER_USER
-#endif
 #ifdef REPLAY_DETECTION
 	#define MIX_CASCADE_PROTOCOL_VERSION "0.8"
 //#elif defined(PAYMENT)
