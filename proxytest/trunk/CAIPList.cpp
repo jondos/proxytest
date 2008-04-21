@@ -44,7 +44,7 @@ CAIPList::CAIPList()
 		m_HashTable=new PIPLIST[0x10000];
 		memset((void*)m_HashTable,0,0x10000*sizeof(PIPLIST));
 		m_allowedConnections=MAX_IP_CONNECTIONS;
-#ifdef _DEBUG
+#if defined (_DEBUG) || defined (LOG_TRAFFIC_PER_USER)
 		m_Random=new UINT8[56];
 		getRandom(m_Random,56);
 #endif
@@ -60,7 +60,7 @@ CAIPList::CAIPList(UINT32 allowedConnections)
 		m_HashTable=new PIPLIST[0x10000];
 		memset((void*)m_HashTable,0,0x10000*sizeof(PIPLIST));
 		m_allowedConnections=allowedConnections;
-#ifdef _DEBUG
+#if defined (_DEBUG) || defined (LOG_TRAFFIC_PER_USER)
 		m_Random=new UINT8[56];
 		getRandom(m_Random,56);
 #endif
