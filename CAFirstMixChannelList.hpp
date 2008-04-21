@@ -65,6 +65,11 @@ struct t_fmhashtableentry
 #ifdef COUNTRY_STATS
 			UINT32 countryID; /** CountryID of this IP Address*/
 #endif				
+
+#ifdef LOG_DIALOG
+			UINT8*				strDialog;
+#endif
+
 #ifdef DELAY_USERS
 			UINT32				delayBucket;
 			UINT32				delayBucketID;
@@ -124,7 +129,6 @@ struct t_firstmixchannellist
 			UINT32				packetsOutToUser;
 			UINT64				timeCreated;	
 #endif
-
 		private:
 			struct
 				{
@@ -197,8 +201,12 @@ class CAFirstMixChannelList
 		public:
 			CAFirstMixChannelList();
 			~CAFirstMixChannelList();
-		
+
+#ifndef LOG_DIALOG
 			fmHashTableEntry* add(CAMuxSocket* pMuxSocket,const UINT8 peerIP[4],CAQueue* pQueueSend);
+#else
+			fmHashTableEntry* add(CAMuxSocket* pMuxSocket,const UINT8 peerIP[4],CAQueue* pQueueSend,UINT8* strDialog);
+#endif
 			SINT32 addChannel(CAMuxSocket* pMuxSocket,HCHANNEL channelIn,CASymCipher* pCipher,HCHANNEL* channelOut);
 			
 			fmChannelListEntry* get(CAMuxSocket* pMuxSocket,HCHANNEL channelIn);			

@@ -1106,6 +1106,14 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 
 		DOMElement *elemSig=NULL;
 
+#ifdef LOG_DIALOG
+		DOMElement* elemDialog=NULL;
+		getDOMChildByName(elemRoot,"Dialog",elemDialog,false);
+		UINT8 strDialog[255];
+		memset(strDialog,0,255);
+		UINT32 dialogLen=255;
+		getDOMElementValue(elemDialog,strDialog,&dialogLen);
+#endif
 #ifdef REPLAY_DETECTION
 		//checking if Replay-Detection is enabled
 		DOMElement *elemReplay=NULL;
@@ -1188,7 +1196,11 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		CAQueue* tmpQueue=new CAQueue(sizeof(tQueueEntry));
 		
 		SAVE_STACK("CAFirstMix::doUserLogin", "Adding user to connection list...");
+#ifndef LOG_DIALOG
 		fmHashTableEntry* pHashEntry=m_pChannelList->add(pNewUser,peerIP,tmpQueue);
+#else
+		fmHashTableEntry* pHashEntry=m_pChannelList->add(pNewUser,peerIP,tmpQueue,strDialog);
+#endif
 		if(pHashEntry==NULL)// adding user connection to mix->JAP channel list (stefan: sollte das nicht connection list sein? --> es handelt sich um eine Datenstruktu fr Connections/Channels ).
 		{
 			doc->release();
@@ -1745,7 +1757,7 @@ SINT32 CAFirstMix::initCountryStats()
 		if(tmp==NULL)
 			{
 				CAMsg::printMsg(LOG_DEBUG,"Could not connet to CountryStats DB!\n");
-				my_thread_end();
+				mysql_thread_end();
 				mysql_close(m_mysqlCon);
 				m_mysqlCon=NULL;
 				return E_UNKNOWN;
@@ -1784,7 +1796,7 @@ SINT32 CAFirstMix::deleteCountryStats()
 			}
 		if(m_mysqlCon!=NULL)
 			{
-				my_thread_end();
+				mysql_thread_end();
 				mysql_close(m_mysqlCon);
 				m_mysqlCon=NULL;
 			}
