@@ -47,6 +47,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define LOG_TRAFFIC_PER_USER //Log detail for traffic per user
 //#define LOG_CHANNEL //Log detail for traffic per cahnnel
 //#define LOG_PACKET_TIMES //computes statistics about the processing time each packet needs
+//#define LOG_DIALOG
 //#define COMPRESSED_LOGS
 //#define DO_TRACE
 //#define PSEUDO_LOG
