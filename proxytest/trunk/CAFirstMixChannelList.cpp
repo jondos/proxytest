@@ -99,7 +99,11 @@ CAFirstMixChannelList::~CAFirstMixChannelList()
 	* @retval the fmHashTableEntry of the newly added connection
 	* @retval NULL if an error occured
 	*/
+#ifndef LOG_DIALOG
 fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8 peerIP[4],CAQueue* pQueueSend)
+#else
+fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8 peerIP[4],CAQueue* pQueueSend,UINT8* strDialog)
+#endif
 	{
 		INIT_STACK;
 		BEGIN_STACK("CAFirstMixChannelList::add");
@@ -135,7 +139,11 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 		pHashTableEntry->trafficIn=0;
 		pHashTableEntry->trafficOut=0;
 		getcurrentTimeMillis(pHashTableEntry->timeCreated);
-#endif		
+#endif
+#ifdef LOG_DIALOG
+		pHashTableEntry->strDialog=new UINT8[strlen((char*)strDialog)];
+		strcpy((char*)pHashTableEntry->strDialog,(char*)strDialog);
+#endif
 		getRandom(&(pHashTableEntry->id));
 
 #ifdef PAYMENT
@@ -613,6 +621,9 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 		// cleanup accounting information
 		CAAccountingInstance::cleanupTableEntry(pHashTableEntry);
 #endif
+#ifdef LOG_DIALOG
+		delete[] pHashTableEntry->strDialog;
+#endif
 		memset(pHashTableEntry,0,sizeof(fmHashTableEntry)); //'delete' the connection from the connection hash table 
 		m_Mutex.unlock();
 		return E_SUCCESS;
@@ -984,7 +995,11 @@ SINT32 CAFirstMixChannelList::test()
 		CAMuxSocket *pMuxSocket=new CAMuxSocket();
 		((CASocket*)pMuxSocket)->create();
 		UINT8 peerIP[4];
+#ifndef LOG_DIALOG
 		pList->add(pMuxSocket,peerIP,NULL);
+#else
+		pList->add(pMuxSocket,peerIP,NULL,(UINT8*)"1");
+#endif
 #if defined(HAVE_CRTDBG)
 		_CrtMemState s1, s2, s3;
 		_CrtMemCheckpoint( &s1 );
