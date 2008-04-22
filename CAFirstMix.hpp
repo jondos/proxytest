@@ -62,6 +62,10 @@ THREAD_RETURN fm_loopReadFromUsers(void*);
 THREAD_RETURN fm_loopDoUserLogin(void* param);
 THREAD_RETURN	fm_loopLog(void*);
 
+#ifdef COUNTRY_STATS
+THREAD_RETURN iplist_loopDoLogCountries(void* param);
+#endif
+
 class CAFirstMix:public 
 #ifdef REPLAY_DETECTION
 	CAMixWithReplayDB
