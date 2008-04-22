@@ -141,7 +141,7 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 		getcurrentTimeMillis(pHashTableEntry->timeCreated);
 #endif
 #ifdef LOG_DIALOG
-		pHashTableEntry->strDialog=new UINT8[strlen((char*)strDialog)];
+		pHashTableEntry->strDialog=new UINT8[strlen((char*)strDialog)+1];
 		strcpy((char*)pHashTableEntry->strDialog,(char*)strDialog);
 #endif
 		getRandom(&(pHashTableEntry->id));

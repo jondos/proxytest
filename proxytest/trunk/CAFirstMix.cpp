@@ -210,7 +210,14 @@ SINT32 CAFirstMix::init()
     }
 		m_pIPList=new CAIPList();
 #ifdef COUNTRY_STATS
-		initCountryStats();
+		char* db_host;
+		char* db_user;
+		char* db_passwd;
+		pglobalOptions->getCountryStatsDBConnectionLoginData(&db_host,&db_user,&db_passwd);
+		initCountryStats(db_host,db_user,db_passwd);
+		delete[] db_host;
+		delete[] db_user;
+		delete[] db_passwd;
 #endif		
 		m_pQueueSendToMix=new CAQueue(sizeof(tQueueEntry));
 		m_pQueueReadFromMix=new CAQueue(sizeof(tQueueEntry));
@@ -1749,14 +1756,14 @@ SINT32 CAFirstMix::sendReplayTimestampRequestsToAllMixes()
 
 #ifdef COUNTRY_STATS
 #define COUNTRY_STATS_DB "CountryStats"
-#define NR_OF_COUNTRIES 250
+#define NR_OF_COUNTRIES 254
 
-SINT32 CAFirstMix::initCountryStats()
+SINT32 CAFirstMix::initCountryStats(char* db_host,char* db_user,char* db_passwd)
 	{
 		m_CountryStats=NULL;
 		m_mysqlCon=mysql_init(NULL);
 		MYSQL* tmp=NULL;
-		tmp=mysql_real_connect(m_mysqlCon,NULL,"root",NULL,COUNTRY_STATS_DB,0,NULL,0);
+		tmp=mysql_real_connect(m_mysqlCon,db_host,db_user,db_passwd,COUNTRY_STATS_DB,0,NULL,0);
 		if(tmp==NULL)
 			{
 				CAMsg::printMsg(LOG_DEBUG,"Could not connet to CountryStats DB!\n");

@@ -64,6 +64,9 @@ CACmdLnOptions::CACmdLnOptions()
 		m_docMixXml=NULL;
 		m_bAcceptReconfiguration=false;
 		m_maxNrOfUsers = 0;
+#ifdef COUNTRY_STATS
+		m_dbCountryStatsHost=m_dbCountryStatsPasswd=m_dbCountryStatsUser=NULL;
+#endif
 #endif //ONLY_LOCAL_PROXY
 		m_iTargetPort=m_iSOCKSPort=m_iSOCKSServerPort=0xFFFF;
 		m_strTargetHost=m_strSOCKSHost=NULL;
@@ -322,6 +325,13 @@ void CACmdLnOptions::clean()
 		if(m_docMixXml!=NULL)
 			m_docMixXml->release();
 		m_docMixXml=NULL;
+
+#ifdef COUNTRY_STATS
+		delete[] m_dbCountryStatsHost;
+		delete[] m_dbCountryStatsUser;
+		delete[] m_dbCountryStatsPasswd;
+#endif
+
 #endif //ONLY_LOCAL_PROXY
 #ifdef SERVER_MONITORING
 		if(m_strMonitoringListenerHost != NULL)
@@ -2283,7 +2293,7 @@ SKIP_NEXT_MIX:
     }    
     
 		//Import the Description if given
-		DOMElement* elemMixDescription;
+		DOMElement* elemMixDescription=NULL;
 		getDOMChildByName(elemRoot,"Description",elemMixDescription,false);
 		if(elemMixDescription!=NULL)
 			{
@@ -2414,8 +2424,35 @@ SKIP_NEXT_MIX:
 			}				
 		}
 		CAMsg::printMsg(LOG_DEBUG,"Loading Crime Detection Data finished\n");
-
 #endif
+
+#ifdef COUNTRY_STATS
+		DOMElement* elemCountryStats=NULL;
+		getDOMChildByName(elemRoot,"CountryStatsDB",elemCountryStats,false);
+		UINT8 db_tmp_buff[4096];
+		UINT32 db_tmp_buff_len=4096;
+		if(getDOMElementAttribute(elemCountryStats,"host",db_tmp_buff,&db_tmp_buff_len)==E_SUCCESS)
+			{
+				m_dbCountryStatsHost=new char[db_tmp_buff_len+1];
+				memcpy(m_dbCountryStatsHost,db_tmp_buff,db_tmp_buff_len);
+				m_dbCountryStatsHost[db_tmp_buff_len]=0;
+			}
+		db_tmp_buff_len=4096;
+		if(getDOMElementAttribute(elemCountryStats,"user",db_tmp_buff,&db_tmp_buff_len)==E_SUCCESS)
+			{
+				m_dbCountryStatsUser=new char[db_tmp_buff_len+1];
+				memcpy(m_dbCountryStatsUser,db_tmp_buff,db_tmp_buff_len);
+				m_dbCountryStatsUser[db_tmp_buff_len]=0;
+			}
+		db_tmp_buff_len=4096;
+		if(getDOMElementAttribute(elemCountryStats,"passwd",db_tmp_buff,&db_tmp_buff_len)==E_SUCCESS)
+			{
+				m_dbCountryStatsPasswd=new char[db_tmp_buff_len+1];
+				memcpy(m_dbCountryStatsPasswd,db_tmp_buff,db_tmp_buff_len);
+				m_dbCountryStatsPasswd[db_tmp_buff_len]=0;
+			}
+#endif
+
 #if defined (DELAY_CHANNELS) ||defined(DELAY_USERS)||defined(DELAY_CHANNELS_LATENCY)
 		///reads the parameters for the ressource limitation for last mix/first mix
 		//this is at the moment:
@@ -3052,4 +3089,27 @@ SINT32 CACmdLnOptions::changeMixType(CAMix::tMixType a_newMixType)
 }
 
 #endif //DYNAMIC_MIX
+
+#ifdef COUNTRY_STATS
+SINT32 CACmdLnOptions::getCountryStatsDBConnectionLoginData(char** db_host,char**db_user,char**db_passwd)
+	{
+		*db_host=*db_user=*db_passwd=NULL;
+		if(m_dbCountryStatsHost!=NULL)
+			{
+				*db_host=new char[strlen(m_dbCountryStatsHost)+1];
+				strcpy(*db_host,m_dbCountryStatsHost);
+			}
+		if(m_dbCountryStatsUser!=NULL)
+			{
+				*db_user=new char[strlen(m_dbCountryStatsUser)+1];
+				strcpy(*db_user,m_dbCountryStatsUser);
+			}
+		if(m_dbCountryStatsPasswd!=NULL)
+			{
+				*db_passwd=new char[strlen(m_dbCountryStatsPasswd)+1];
+				strcpy(*db_passwd,m_dbCountryStatsPasswd);
+			}
+		return E_SUCCESS;
+	}
+#endif
 #endif //ONLY_LOCAL_PROXY
