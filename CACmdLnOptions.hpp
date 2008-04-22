@@ -182,6 +182,9 @@ class CACmdLnOptions
 			}
 #endif				
 				
+#ifdef COUNTRY_STATS
+			SINT32 getCountryStatsDBConnectionLoginData(char** db_host,char**db_user,char**db_passwd);
+#endif
 			/** Returns a COPY of the Operator Certificate that mix.
 				* @return opCerts
 				*/
@@ -559,7 +562,12 @@ class CACmdLnOptions
 			SINT32 processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument* docConfig);
 			SINT32 clearVisibleAddresses();
 			SINT32 addVisibleAddresses(DOMNode* nodeProxy);
-#endif
+#ifdef COUNTRY_STATS
+			char* m_dbCountryStatsHost;
+			char* m_dbCountryStatsUser;
+			char* m_dbCountryStatsPasswd;
+#endif //COUNTRY_STATS
+#endif //ONLY_LOCAL_PROXY
 			SINT32 clearTargetInterfaces();
 			SINT32 clearListenerInterfaces();
 	};
