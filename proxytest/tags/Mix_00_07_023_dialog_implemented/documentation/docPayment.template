@@ -1,0 +1,915 @@
+/** \page docPayment Momentane Implementierung des Bezahlsystems für AN.ON
+@manonly
+\documentclass{article}
+\usepackage[ngerman]{babel}
+\usepackage[latin1]{inputenc}
+\usepackage{graphics}
+\usepackage[dvips]{graphicx}
+%\usepackage{pstcol}
+\usepackage{amsmath}
+\usepackage{ifthen}
+\newcommand{\todo}[1]{{\marginpar{\textbf{#1}}}}
+\newcommand{\zb}{z.\thinspace B.\ }
+\newcommand{\Dh}{d.\thinspace h.\ }
+\newcommand{\KBN}{\textit{KBN}\ }
+\newboolean{pdf}
+\setboolean{pdf}{false}
+@endmanonly
+@latexonly
+\author{Stefan Köpsell, Andreas Müller, Bastian Voigt\\sk13@inf.tu-dresden.de, am12@inf.tu-dresden.de, bastian.voigt@inf.fu-berlin.de}
+\title{Momentane Implementierung des Bezahlsystems für AN.ON}
+\maketitle
+
+\begin{abstract} Vorgestellt wird ein Bezahlsystem für einen
+Mix\-kas\-kaden-basierten Anonymisierungsdienst. Es ermöglicht
+eine Datenvolumen-abhängige Bezahlung. Das Bezahlsystem wurde unter dem
+Gesichtspunkt der praktikablen Anwendbarkeit entworfen, \Dh es werden existierende Zahlungsmethoden genutzt
+und die Qualität des Anonymisierungsdienstes wird nicht beeinträchtigt.
+Ein eventueller Betrug einer Partei wird erkannt und kann mit Hilfe von
+Nachweisen geahndet werden.
+
+\end{abstract}
+@endlatexonly
+
+\section secEinfuehrung Einführung
+
+"JAP" ist ein Mixkaskaden-basierter Dienst zur Anonymisierung von
+HTTP-Verbindungen für den anonymen Zugriff auf das World Wide Web
+[BeFK01]. Jeder Nutzer muss sich dazu ein gleichnamiges Programm als lokalen Proxy für
+seinen Browser installieren. JAP dient als Schnittstelle zu sogenannten
+Mixkaskaden, über die die Kommunikation zu den Zielservern im Internet (um-)geleitet wird.  
+
+Ein Mix ist im wesentlichen ein Server, der mehrfach
+verschlüsselte Datenpakete empfängt, zwischenpuffert, umkodiert (durch
+Entschlüsselung eine "Verschlüsselungsschale" entfernt) und
+umsortiert wieder ausgibt [Chau81]. Werden mehrere Mixe in Form einer 
+statischen Kette hintereinandergeschaltet, so spricht man von
+einer Kaskade. 
+
+Die Anonymität ist gewährleistet, solange wenigstens ein
+Mix der Kaskade vertrauenswürdig ist. Dies gilt selbst unter der Annahme, dass
+ein Angreifer alle anderen Mixe kontrolliert und sämtliche
+Netzwerkverbindungen überwachen bzw. aktiv manipulieren kann (d. h.
+Pakete löscht, verändert, hinzufügt etc.)
+
+Betrachtet man eine Kaskade als "Black Box", so ist das Ziel, die Zuordnung von
+eingehenden zu ausgehenden Nachrichten zu verbergen. Es bleibt jedoch beobachtbar, 
+wer den Dienst verwendet und an welche Empfänger Nachrichten gesendet werden.
+Beispielsweise "sieht" ein Angreifer, wer welches "Bitmuster" 
+an den ersten Mix gesendet hat. 
+
+Jedem Mixbetreiber entstehen Kosten, die hauptsächlich durch das
+Datenvolumen der zu bearbeitenden Mixpakete verursacht werden [BFRW02].
+Eine faire Möglichkeit zur Deckung der anfallenden Kosten besteht darin, diese
+auf die Nutzer umzulegen.
+
+Bisherige Ansätze [FrJe98], [FrJW98],[BaNe99] nutzen zur Bezahlung der Mixpakete anonyme digitale
+Münzen. Diese werden vom Nutzer bei einer Bank erworben und den Mixpaketen
+mitgegeben. Da momentan keine Bank digitale Münzen anbietet, sind diese
+Verfahren nicht praktikabel. Zudem hat eine Bezahlung mit digitalen Münzen
+generell den Nachteil, dass die Verhinderung von Betrug durch mehrfaches
+Ausgeben (engl. Doublespending) der selben Münze zum Teil erheblichen
+zusätzlichen Kommunikationsaufwand verursacht.
+
+Daher wird ein kontobasiertes Bezahlsystem vorgeschlagen, welches auf 
+vorhandene Zahlungsmethoden aufbaut und die Kommunikationsqualität der zu
+anonymisierenden Verbindung nicht verschlechtert. Es berücksichtigt die
+mehrseitigen Sicherheitsanforderungen aller involvierten Parteien (Nutzer,
+Mixbetreiber, Banken). Dies wird durch digital signierte Nachweise erzielt.
+
+\section secPayArchitecture Architektur des Bezahlsystems
+
+Beim Anonymisierungsdienst JAP kann der Nutzer zwischen verschiedenen
+Mixkaskaden frei wählen. Generell werden die Mixe einer Kaskade nicht
+einzeln bezahlt, sondern eine Kaskaden-zentrale <var>Abrechnungsinstanz</var> (AI). 
+Auf Grund der statischen Struktur einer Kaskade (insbesondere gleiches Datenvolumen für alle Mixe) 
+kann diese Instanz das Geld auf die beteiligten Mixe verteilen. 
+Als Vorteil ergeben sich geringerer Aufwand und Komplexität des gesamten Bezahlsystems. 
+
+Die AI befindet sich vor dem ersten Mix und kennt daher gemäß Angreifermodell die Zuordnung 
+von abzurechnenden Datenpaketen zu Nutzern.
+Der hohe Aufwand für ein anonymes (kontobasiertes) Bezahlsystem ist daher nicht notwendig, 
+zumal diese Verfahren (z. B. [LoMP94], [BüPf89]) selbst wieder 
+auf einen Anonymisierungsdienst zurückgreifen.
+
+Der Nutzer besitzt unter einem Pseudonym ein
+<var>Guthabenkonto</var>, von dem die Kosten abgebucht werden. Dieses muss er
+zuvor mit Hilfe verfügbarer Zahlungsmethoden aufladen. Abhängig von der
+gewählten Zahlungsmethode braucht der Nutzer seine Identität jedoch gegenüber dem
+Geldinstitut und der Konto-verwaltenden Stelle nicht offenzulegen.
+
+Damit er nicht bei jeder Mixkaskade ein separates
+aufzuladendes Konto benötigt, verwaltet eine Anonymisierungsdienst-zentrale <var>Bezahlinstanz</var> (BI)
+die Nutzerkonten. Der Nutzer bezahlt bei
+ihr für den Dienst und erhält die Möglichkeit, ihn unter freier
+Auswahl der Kaskaden zu nutzen. Von der BI erhalten die
+Abrechnungsinstanzen der Mixkaskaden die Kontoinformationen und rechnen die
+Kosten der Nutzer ab. Die Abrechnungsinstanzen haben eine (temporäre) Verbindung zur Bezahlinstanz.  
+
+@manonly
+\begin{figure}[ht]
+\begin{center}
+   \scalebox{0.5}{
+   \includegraphics{figs/bezahlarchitektur_paper.eps}
+} 
+  \caption{\it Architektur des Bezahlsystems }
+  \label{architektur}
+  \end{center}
+  \end{figure}
+@endmanonly
+\image html bezahlarchitektur_paper.png "Abbildung 1: Architektur des Bezahlsystems"
+\image latex bezahlarchitektur_paper.png "Abbildung 1: Architektur des Bezahlsystems"
+
+Das Bezahlsystem besteht somit aus den Komponenten: 
+Bezahlinstanz, Abrechnungsinstanzen und lokale Proxies der Nutzer (Abbildung @latexonly~\ref{architektur}@endlatexonly @htmlonly 1@endhtmlonly).
+
+Um den Dienst einer Mixkaskade zu nutzen, muss sich der Nutzer mit seinem
+Pseudonym gegenüber der AI authentisieren.  Diese rechnet die Kosten seiner
+gesendeten und empfangenen Mixpakete über sein Pseudonymkonto ab.  Dazu
+müssen die von der BI verwalteten Pseudonym- und Kontodaten des Nutzers bei
+der AI vorliegen.  Um Robustheit gegen Ausfälle der BI oder deren
+Nichterreichbarkeit zu gewährleisten, sind die Authentisierung des Nutzers
+und die Abrechnung seiner Mixpakete nicht von einer ständigen Erreichbarkeit
+der BI abhängig.  Bei einem Ausfall der Bezahlinstanz wäre andernfalls
+der ganze Dienst bzw. die Abrechnung des Dienstes blockiert. 
+
+Die Abrechnung bzw. Zusammenführung der von den AIs übermittelten Kontostände
+bei der BI stellt sicher, dass die AIs das Geld
+für die geleisteten Dienste der Mixkaskaden erhalten.  Gleichzeitig wird
+verhindert, dass die AIs die Möglichkeit des Betruges haben, indem sie
+Kosten eines Nutzers bei der BI abrechnen, die er nicht verursacht hat. Digitale Nachweise verhindern außerdem,
+dass die BI betrügt und dienen zur Kostenkontrolle durch den Nutzer.
+
+\section secPayProtocols Protokolle zwischen den Parteien
+
+Generell erfolgt die Kommunikation zwischen den Beteiligten über konzelierte und integritätssichernde Verbindungen. 
+Alle Protokollschritte sind durch ein Authentifizierungsprotokoll abgesichert, so dass z. b. 
+man-in-the-middle- oder replay-Angriffe nicht möglich sind. Nachfolgend wird darauf nicht mehr explizit hingewiesen.
+
+\subsection paraPayImpl1 Implemetierungsanmerkungen
+Die Authentifizierung der BI erfolgt über die SSL gesicherte Verbindung. Der JAP überprüft dabei ob die Kommunikation
+tatsächlich mit der BI erfolgt, dessen öffentliches Zertifikat der JAP besitzt.
+Die Authentifizierung des JAP gegenüber der BI erfolgt mittels Challenge-Response Verfahren. Die BI sendet dazu die 
+nachfolgende Challenge:
+
+@verbatim
+<?xml version="1.0" ?>
+<Challenge>
+  <DontPanic>
+    Base64 koderierte Zufallszahlenfolge
+  </DontPanic>
+</Challenge>	
+@endverbatim
+
+Beim Beginn einer Sitzung kann der JAP mittels HTTP POST Request an die URL <tt>/authenticate</tt> eine Challenge 
+anfordern. Dazu sendet er
+im HTTP Body sein Kontozertifikat mit.
+
+Als Response erwartet die BI eine Signatur über das Element <tt>\<DontPanic\></tt> (inklusive der Tags) vom JAP. 
+Die Signatur leistet der JAP
+mittels des zu seinem Konto gehörenden privaten Schlüssels. Er sendet folgende XML Struktur an die BI:
+
+@verbatim
+<?xml version="1.0" ?>
+<Response>
+  Base64 koderierte Signature bzgl. der Challenge
+</Response>	
+@endverbatim
+
+
+\subsection secPayJAPBIProto JAP-Bezahlinstanz-Protokoll
+
+\subsubsection secPayJAPBIProtoAccountOpen Kontoanmeldung 
+Zur Kontoanmeldung generiert der JAP zuerst ein Schlüsselpaar
+eines Signatursystems. Der private Schlüssel
+bleibt dabei im Vertrauensbereich des Nutzers. Mit ihm authentisiert sich der
+Nutzer gegenüber den Abrechnungsinstanzen und der Bezahlinstanz und
+signiert unten näher erläuterte Kostenbestätigungen.  Der öffentliche
+Schlüssel wird als Nutzerpseudonym <var>P</var> an ein Konto bei der BI gebunden (Abbildung@latexonly~\ref{kontoanmeldung}@endlatexonly@htmlonly 2 @endhtmlonly).
+
+@latexonly
+\begin{figure}[ht]
+\begin{center}
+%\fboxsep7mm
+ \scalebox{0.485}{
+	\includegraphics{figs/kontoanmeldung.eps}}
+
+  \caption{\it Kommunikation bei der Kontoanmeldung}
+  \label{kontoanmeldung}
+  \end{center}
+  \end{figure}
+@endlatexonly
+\image html kontoanmeldung.png "Abbildung 2: Kommunikation bei der Kontoanmeldung"
+
+Der JAP übermittelt zunächst den generierten öffentlichen Schlüssel. 
+Die BI erzeugt eine für sie eindeutige
+Kontonummer <var>KN</var> und legt unter dieser ein Konto für den Nutzer an.
+Der öffentliche Schlüssel und die Kontonummer werden zusammen von der BI
+signiert und das resultierende Kontozertifikat
+
+\f[
+Z=\left(\textit{BI},P,\textit{KN},t_{creation},S_{BI}\right)
+\f]
+
+ an den JAP
+zurückgesendet.  <var>BI</var> ist dabei ein eindeutiger Identifikator der Bezahlinstanz, <var>S</var><sub>BI</sub> ist die 
+digitale Signatur
+ der BI über
+<var>BI, P, KN</var> und <var>t</var><sub>creation</sub>. Der Zeitpunkt <var>t</var><sub>creation</sub>
+gibt an, wann das Konto eröffnet wurde. Um ein "Fluten" der Datenbank mit unbenutzten Konten zu verhindern, werden 
+nicht aufgeladene Konten nach einer gewissen Zeit aus der Datenbank gelöscht.
+
+\paragraph paraPayRegisterAccountImpl Implementierungsanmerkungen
+Zu Kontoanmeldung ruft der JAP bei der BI die URL <tt>/register</tt> mittels POST Request auf. Im Body wird mittels 
+einer XML-Struktur der
+öffentliche Schlüssel mitgeschickt, den der JAP mit dem Konto verküpfen möchte.
+
+@verbatim
+<?xml version="1.0" ?>
+<JapPublicKey version="1.0">
+  <RSAKeyValue>
+    <Modulus> Base64 encoded Modulus </Modulus>
+    <Exponent> Base 64 enocded Exponent </Exponent>
+  </RSAKEyValue>
+</JapPublicKey>
+@endverbatim
+ 
+ Es folgt das oben beschriebene Challenge-Response Verfahren. Dazu sendet die BI im HTTP Reply-Body die XML \<Challenge\> Struktur.
+ Der JAP antwortet mittels POST Request an die URL <tt>/response</tt>. Im HTTP Request-Body befindet sich dabei die XML \<Response\> Struktur.
+War die Authentifizierung erfolgreich, so wird ein neues Konto angelegt. Dazu wird eine zufällige 12stellige Kontonummer generiert.
+Anschliessend wird ein Kontozertifikat generiert:
+
+@verbatim
+<?xml version="1.0" ?>
+<AccountCertificate version="1.0">
+  <AccountNumber> 123456789012 </AccountNumber>
+    <JapPublicKey>
+      ... public key xml data (siehe oben)
+    </JapPublicKey>
+  <CreationTime> YYYY-MM-DD HH:MM:SS </CreationTime>
+  <BiID> eindeutige ID der BI </BiID>
+  <Signature>
+    ... signature der BI unter die Daten
+  </Signature>
+</AccountCertificate>
+@endverbatim
+
+In der Datenbanktabelle <tt>ACCOUNTS</tt> wird ein neuer Eintrag mit der erzeugten Kontonummer, 
+dem Zeitstempel der Erzeugung, sowie dem zugehörigen öffentlichen Schlüssel angelegt. Die Werte <tt>DEPOSIT</tt> und <tt>SPENT</tt>
+ werden auf Null gesetzt.
+Der Wert <tt>DEPOSITVALIDTIME</tt> wird auf den Wert von <tt>CREATIONTIME</tt> gesetzt.
+
+Das Kontozertifikat wird an den JAP gesendet. Dieser speichert es zusammen mit dem zugehörigen geheimen Schlüssel als 
+Zugangsvorraussetzung zu dem Konto.
+
+\subsubsection secPayOptions Bezahlmöglichkeiten
+
+Will der JAP von der Bezahlinstanz erfahren, welche Zahlungsverfahren diese zur Aufladung eines Kontos akzeptiert, so sendet er einen GET-Request 
+mit dem URL <tt>/paymentoptions</tt> an die Bezahlinstanz. Diese antwortet mit einer XML-Struktur der folgenden Form:
+
+@verbatim
+<PaymentOptions version="1.0">
+    <Currency>...akzeptierte Bezahlwährung</Currency>
+    <PaymentOption name="...Name der Bezahloption" type="...Typ (aktiv/passiv)">
+        <Heading lang="...Sprachkürzel für den Tagwert">...Überschrift</Heading>
+        <DetailedInfo lang="...Sprachkürzel">...Genaue Information über das Zahlungsverfahren</DetailedInfo>
+        <ExtraInfo type="...Typ der Zusatzinformation (text/link/phone...)" lang="...Sprachkürzel">...Zusatzinformationen wie z.B. Bankverbindung oder PayPal-Link</ExtraInfo>
+    <PaymentOption name="..." type="...">
+        <Heading lang="...">...</Heading>
+        <DetailedInfo lang="...">...</DetailedInfo>
+        <input ref="..."><label lang="...">...XForms-kompatibles Eingabefeld</label></input>
+    </PaymentOption>
+</PaymentOptions>
+@endverbatim
+
+Dabei können die Tags <tt>Currency, Heading, DetailedInfo, ExtraInfo</tt> und <tt>input</tt> mehrfach vorkommen. Außer für den Tag <tt>Currency</tt> müssen dabei unterschiedliche Sprachkürzel im Attribut <tt>lang</tt> angegeben werden.
+
+Der JAP kann anhand der übermittelten Informationen beim Aufladevorgang einen Dialog mit den entsprechenden Informationen anzeigen. Enthält die von der Bezahlinstanz übermittelte XML-Strukur <tt>input</tt>-Tags (nur bei passiven Verfahren), so muss der JAP die geforderten Informationen vom Benutzer abfragen und an die Bezahlinstanz übermitteln (Anmerkung: Die Art der Übermittlung muss noch spezifiziert werden).
+
+
+\subsubsection secPayChargeAccount Kontoaufladung
+
+Zur Dienstnutzung muss das angemeldete Pseudonymkonto aufgeladen werden.  Der
+JAP erfragt dafür bei der BI eine Überweisungsnummer <var>ÜN</var> als einmal gültiges
+Transaktionspseudonym. Die Überweisungsnummer wird durch die BI generiert,
+dort vermerkt und dem JAP zusammen mit der Pseudonymkontonummer und dem aktuellen <var>G</var><sub>max</sub> von ihr
+signiert übermittelt. Pro Konto können dabei nicht mehrere Aufladetransaktionen parallel durchgeführt werden.
+
+Der Nutzer muss nun die Zahlung unter Angabe der Überweisungsnummer mit
+existierenden Zahlungsmethoden durchführen.  Nach Eingang der Zahlung bei der
+Bezahlinstanz lädt diese das zugehörige Pseudonymkonto auf (Abbildung@latexonly~\ref{auflad_aktiv}@endlatexonly @htmlonly 3 @endhtmlonly).
+
+@latexonly
+\begin{figure}[ht]
+\begin{center}
+ \scalebox{0.47}{
+   \includegraphics{figs/kontoauflad_extern.eps} 
+  }
+  \caption{\it Kommunikation bei der Kontoaufladung}
+  \label{auflad_aktiv}
+\end{center}
+\end{figure}
+@endlatexonly
+
+\image html kontoaufladextern.png "Abbildung 3: Kommunikation bei der Kontoaufladung"
+
+Als Nachweis der Kontoaufladung, kann der Nutzer nach Eingang des Geldes eine Kontostandsinformation erfragen.
+
+\paragraph paraChargeAccountImpl Implementierungsanmerkungen
+Der JAP fordert eine Transaktionsnummer mittes HTTP GET-Request an die URL <tt>/charge</tt> an. 
+Dazu erfolgt zunächst das oben beschriebenen Challenge Response Verfahren. War die Authentifizierung erfolgreich, so generiert die BI
+eine neue zufällige 12stellige Transaktionsnummer. 
+Diese wird gemäß dem in im c't-Magazin 4/97 ("Blütenrein") beschriebenen Diedergruppen-Prüfsummen-Verfahren erzeugt. 
+Die BI generiert nachfolgendes Transaktionszertifikat:
+
+@verbatim
+<?xml version="1.0" ?>
+<TransferCertificate version"1.2">
+  <AccountNumber> ... </AccountNumber>
+  <TransferNumber> ... </TransferNumber>
+  <Deposit> ... </Deposit>
+  <ValidTime> Gültigkeitsende der Transaktionsnummer </ValidTime>
+  <ReceivedDate> Datum, an dem das Zertifikat vom JAP empfangen wurde </ReceivedDate>
+  <Signature>
+    ... Signature der BI
+  </Signature>	
+</TransferCertificate>
+@endverbatim
+
+Die BI erzeugt ausserdem einen Eintrag in der Datenbanktabelle <tt>TRANSFERS</tt>. Der Wert <tt>USED</tt> wird 
+dabei auf <tt>false</tt> gesetzt. 
+Die BI überträgt nun das oben erstellte Transaktionszertifikat an den Nutzer.
+\subsubsection secBalance Kontostandsabfrage
+
+Wünscht der Nutzer eine aktuelle Kontostandsinformation, so sendet er eine entsprechende Anfrage an die BI.
+Er erhält von ihr eine signierte Bestätigung <var>KBN</var> seines
+aktuellen Kontostandes:
+\f[
+\textit{KBN}=\left(\textit{KN},G_{max},K_{Gesamt},t,S_{BI}\right) 
+\f]
+<var>KN</var> ist die Kontonummer des Kontos, <var>G</var><sub>max</sub> entspricht der <var>Gesamtsumme</var> des
+auf das Konto eingezahlten Geldes, <var>K</var><sub>Gesamt</sub> ist die <var>Gesamtsumme</var> der verursachten Kosten, 
+<var>t</var> ist ein Zeitstempel und <var>S</var><sub>BI</sub> ist die
+digitale Signatur der BI über <var>KN</var>, <var>G</var><sub>max</sub>, <var>K</var><sub>Gesamt</sub> und <var>t</var>.
+Damit ergibt sich das Guthaben <var>G</var>=<var>G</var><sub>max</sub>-<var>K</var><sub>Gesamt</sub>, welches dem
+Nutzer noch zur Verfügung steht.
+
+Die BI muss gleichzeitig die angefallenen Kosten <var>K</var><sub>Gesamt</sub> mit Kostenbestätigungen
+nachweisen. Dazu werden neben der Kontobestätigung <var>KBN</var> auch die
+entsprechenden Kostenbestätigungen <var>B</var> übermittelt.  Die Kostenbestätigungen
+sind vom Nutzerpseudonym unterschriebene Erklärungen, mit denen es den
+Abrechnungsinstanzen bestätigt, den Dienst der jeweiligen Mixkaskade im
+angegebenen Umfang genutzt zu haben. Diese Erklärungen werden in Abschnitt
+\ref secAIBI ausführlich erläutert.
+
+Die signierte Kontobestätigung <var>KBN</var> gibt dem Nutzer unter der
+angegebenen Kontonummer das Recht, den Anonymisierungsdienst bis zur mit
+<var>G</var><sub>max</sub> angegebenen Kostenhöhe zu nutzen.  Diese von der BI signierte
+Bestätigung muss lokal beim Nutzer bzw. dessen JAP gespeichert werden. Sie
+dient als Nachweis der Kontoaufladung.  Bis zum Erhalt der Kontobestätigung
+nach einer Kontoaufladung muss sich der Nutzer den Nachweis der
+Zahlung (Kontoauszug o. ä.) und das Zertifikat, welches die
+Überweisungsnummer mit der Kontonummer verbindet, aufbewahren.  Enthält die BI
+die Kontobestätigung <var>KBN</var> dem Nutzer vor, kann der Nutzer damit die
+Kontoaufladung und somit sein Dienstnutzungsrecht gegenüber Dritten
+nachweisen.
+ 
+Um ein mehrmaliges Aufladen eines Pseudonymkontos zu ermöglichen, gilt für die
+Kontobestätigungen neben der oben genannten Nachweispflicht der Kosten <var>K</var><sub>Gesamt</sub> folgende Regel:
+
+\remark <var>Die Kontobestätigung mit einem größeren Wert G<sub>max</sub> ist die aktuell
+gültige Bestätigung und entwertet eine mit einem
+kleineren Wert G<sub>max</sub>.</var> 
+
+Speichert der Nutzer diesen Nachweis nicht, kann die Bezahlinstanz beim
+Nachweis der Dienstnutzung eine Kontobestätigung mit kleinerem <var>G</var><sub>max</sub> 
+generieren und als aktuell präsentieren. 
+
+\paragraph paraBalanceImpl Implementierungsanmerkungen
+Der JAP führt zunächst die Challenge-Response Authentikation durch. Anschliessend sendet er einen HTTP GET-Request
+an die URL <tt>/balance</tt>. Daraufhin antwortet die BI mit einem aktuellen Kontoauszug, 
+der das auf dem Konto befindlich Gesamtguthaben und die Gesamtkosten umfasst und die 
+letzen vom JAP unterschriebenen Kostenbestätigungen, die von den AIs bereits abgerechnet wurden.
+Dazu wird folgende XML Struktur versendet:
+
+@verbatim
+<AccountInfo>
+  <Balance>
+    <AccountNumber> ..</AccountNumber>
+    <Deposit>...</Deposit>
+    <Spent>....</Spent>
+    <Validtime>...</Validtime>
+    <Timestamp>...</Timestamp>
+    <Signature> //Unterschrift der BI
+      ...
+    </Signature>
+  <Balance>	
+  <CostConfirmations> //Kostenbestätigungen, die 
+	                      von den einzelnen AI's 
+	                      abgerechnet wurden
+    <CC>...</CC>
+    <CC>...</CC>
+  </CostConfirmations>
+</AccountInfo>  
+@endverbatim
+
+\paragraph paraJAPBISec Sicherheitsbetrachtungen
+Behauptet der Nutzer ein höheres Guthaben <var>G</var><sub>max</sub> zu besitzen, als die BI zugibt, 
+so muss er dies beweisen, indem er entweder folgendes vorlegt:
+
+1. ein gültiges Kontozertifikat, für das er den privaten Schlüssel besitzt 
+und eine zu dem Konto passende, gültige Kontobestätigung mit dem behaupteten <var>G</var><sub>max</sub> 
+
+oder
+
+2. ein gültiges Kontozertifikat, für das er den privaten Schlüssel besitzt, eine zu dem Konto passende,
+ gültige Kontobestätigung mit einem <var>G</var>'<sub>max</sub>, ein passendes, gültiges Zertifikat,
+  das die Zuordnung von einer Überweisungsnummer zu seinem Konto bestätigt und Beweise des Zahlungssystems,
+   dass er eine Überweisung in Höhe von <var>G</var>'=<var>G</var><sub>max</sub>-<var>G</var>'<sub>max</sub>
+    unter Angabe der Überweisungsnummer auf das Konto der BI getätigt hat.
+
+Der erste Fall ist trivial. Im zweiten Fall kann die BI nicht betrügen, da auf Grund der vorgelegten 
+Beweise klar ist, dass
+der Nutzer mindestens ein Guthaben von <var>G</var><sub>max</sub> besitzt.
+ Gleichzeitig kann auch der Benutzer nicht betrügen, da der Versuch eines mehrmaligen Vorlegens desselben 
+ Überweisungsnummernzertifikats (inkl. Beweis des Zahlungseingangs) durch die Verkettung von altem Kontostand 
+ und Überweisungsnummer erkannt wird.
+
+\subsection secJAPAI JAP-Abrechnungsinstanz-Protokoll
+
+Will der Nutzer eine Mixkaskade nutzen,
+authentisiert sich sein JAP gegenüber der AI mit dem Kontozertifikat <var>Z</var> seines
+Nutzerpseudonyms und übermittelt eine Kontobestätigung <var>KBN</var>.
+
+Mit Hilfe der
+Kontobestätigung kann die AI die Liquidität des Nutzers
+einschätzen. Enthält die Kontobestätigung einen älteren Zeitstempel,
+kann die AI von der BI  einen aktuellen Kontostand anfordern
+(vgl. Abschnitt \ref secAIBI). 
+
+Ist auf dem Pseudonymkonto Guthaben vorhanden, antwortet die AI mit dem
+"Kostenanschlag" der Mixkaskade.  Dieser enthält
+Informationen über den Mixkaskadennutzungspreis (z. B. Preis pro Mixpaket)
+und die Länge des Bestätigungsintervalls. Dies gibt an,
+nach wieviel nicht bestätigten verursachten Kosten die AI eine Bestätigung des aktuellen Kostenstandes spätestens
+erwartet.
+
+Wurde die Mixkaskade schon einmal genutzt, übermittelt die
+AI zusätzlich die vom Nutzerpseudonym zuletzt gesendete Kostenbestätigung
+\f[
+B=(\textit{ID},\textit{KN},K,S_{P})
+\f]
+die aus der eindeutigen Kennung <var>ID</var> der
+Abrechnungsinstanz, der Kontonummer <var>KN</var> des Pseudonymkontos und dem 
+bestätigten Kostenkontostand <var>K</var> des Pseudonyms bei der AI besteht.  <var>S</var><sub>P</sub> ist die
+digitale Signatur des Nutzerpseudonyms <var>P</var> über <var>ID</var>, <var>KN</var> und <var>K</var>.  Mit der
+Signatur bestätigt das Nutzerpseudonym <var>P</var>, die
+Kosten <var>K</var> bei der AI bzw. deren Mixkaskade verursacht zu haben. Die AI kann
+mit der Kostenbestätigung <var>B</var> die Kosten <var>K</var> bei der BI vom Guthaben des
+Pseudonymkontos <var>KN</var> abrechnen. (siehe Abschnitt \ref secAIBI ). 
+
+\remarks Der Kostenstand <var>K</var> ist kumulativ und gibt stets die Gesamtsumme der bei der
+Mixkaskade durch das Pseudonym verursachten Kosten an.
+
+Auf Grund der
+Bestätigung von Gesamtkosten, ist ein Betrug durch Doublespending von
+Kostenbestätigungen durch die AI nicht möglich.  
+
+Während der Dienstnutzung sendet und empfängt der Nutzer Mixpakete.  Durch den
+übermittelten Kostenanschlag und die letzte Kostenbestätigung weiß der Nutzer,
+wann er welche Kostenbestätigung der AI übermitteln muss (Abbildung@latexonly~\ref{japaiprotpic}@endlatexonly @htmlonly 4 @endhtmlonly).
+
+@latexonly
+\begin{figure}[ht]
+\begin{center}
+ \scalebox{0.484}{
+   \includegraphics{figs/jap-ai-prot.eps} 
+  }
+  \caption{\it Kommunikation zwischen JAP und Abrechnungsinstanz}
+  \label{japaiprotpic}
+\end{center}
+\end{figure}
+@endlatexonly
+
+\image html japaiproto.png "Abbidlung 4: Kommunikation zwischen JAP und Abrechnungsinstanz"
+
+Zur Minimierung von Übertragungs-
+und Rechenaufwand wird nicht jedes
+Bestätigungsintervall durch eine <var>signierte</var> Erklärung bestätigt, sondern 
+das in [Ped97] beschriebene Tickpayment-Verfahren genutzt.  
+In jeder signierten Bestätigung <var>B</var><sub>S</sub> ist zusätzlich der Endwert einer
+Tickfolge enthalten. Eine Tickfolge ist eine Folge von Werten, die der Nutzer
+ausgehend von einem zufälligen Wert mit einer Einwegfunktion generiert und
+gespeichert hat. Der Nutzer übermittelt die
+Werte der Folge in umgekehrter Reihenfolge als Bestätigungen <var>B</var><sub>H</sub>=(h) an die AI.
+Die AI kann die Werte prüfen, indem sie die Einwegfunktion auf den neu
+erhaltenen Wert anwendet und das Ergebnis mit dem davor erhaltenen vergleicht.
+
+Die signierte Bestätigung <var>B</var><sub>S</sub> wird um den Endwert <var>h</var><sub>end</sub> der
+Tickfolge, die Länge <var>l</var> der Folge und den Tickkostenwert <var>w</var> erweitert, der den Wert angibt, der durch
+einen Tickwert der Tickfolge bestätigt wird:
+
+\f[
+B_{S}=(\textit{ID},\textit{KN},K,h_{end},l,w,S_{P})
+\f]
+
+Durch diese signierte
+Bestätigung <var>B</var><sub>S</sub> und einen Tickwert <var>h</var> wird ein Kostenstand
+<var>K</var><sub>result</sub> bestätigt. Dieser ergibt sich aus dem in der signierten
+Bestätigung <var>B</var><sub>S</sub> enthaltenen Kostenstand <var>K</var>, dem Kostenwert <var>w</var> 
+und dem Wert
+<var>k</var>\<=<var>l</var>, der für die Anzahl der Einwegfunktionsaufrufe steht, um von <var>h</var> zu dem
+Ergebnis <var>h</var><sub>end</sub> zu kommen:
+
+\f[
+K_{result}=K+k\cdot w
+\f]
+
+\note Ist f(<var>x</var>) die Einwegfunktion, so
+gilt f<sup><var>k</var></sup>(<var>h</var>)=<var>h</var><sub>end</sub>.
+
+ Sind die
+generierten Werte einer Tickfolge im JAP aufgebraucht, sendet er eine neue
+signierte Bestätigung, die den aktuellen Kostenkontostand und den
+Tickfolgenendwert einer neu generierten Tickfolge enthält. Die alte
+Bestätigung und den zugehörigen letzten Tickwert kann die AI löschen.  
+
+\subsubsection paraJAPAIImpl Implementierungsanmerkungen
+Momentan werden zur Bestätigung der Inanspruchnahme des Dienstes lediglich vereinfachte Kostenbestätigungen 
+ohne Tickfolge verwendet. 
+Dies bedeutet das jede dieser vereinfachten Kostenbestätigungen durch den Kontoinhaber unterschrieben ist.
+Die zugehörige XML Struktur ist wie folgend:
+
+@verbatim
+<CC version "1.1">
+  <AiID> ... </AiID>
+  <AccountNumber> ... </AccountNumber>
+  <TransferredBytes>... </TransferredBytes>
+  <PIID> eindeutige ID der BI </PIID>
+  <Signature>
+   ... Signature des Kontoinhabers
+  </Signature>
+</CC>
+@endverbatim
+
+Bei der Anmeldung an die Kaskade erfährt der JAP, ob die Dienstleistung der Kaskade bezahlt werden muss. 
+Ist dies der Fall, so 
+ läuft anschliessend foglendes Protokoll zwischen JAP und AI ab (der Aufbau einer gesicherten Verbindung zwischen
+JAP und AI wird dabei nicht betrachtet):
+
+-# Der JAP sendet sein Kontozertifikat (siehe oben)
+-# Die AI sendet ein Challenge (siehe oben)
+-# Der JAP sendet ein Response (siehe oben)
+-# Die AI sendet die letzte vom JAP erhaltene Kostenbestätigung. Sollte der JAP sich zumn ersten mal 
+bei der Kaskade anmelden, so wird eine leere Kostenbestätigung <tt>\<CC&nbsp;version="1.1"/\></tt> gesendet.
+
+Während der Benutzung des Dienstes durch den JAP sendet der Mix an diesen Aufforderungen zur Quittierung 
+der erbrachten Dienstleistung:
+@verbatim
+<PayRequest version="1.0">
+  <BalanceRequest> optional;  //Anforderung eines 
+                                aktuellen Kontoauszuges
+    <NewerThan> Zeitstempel <NewerThan> // der Kontoauszug 
+                                           muss neuer als 
+                                           das angegeben 
+                                           Datum sein
+  </BalanceRequest> 
+  <CC version="1.1"> optional //Kostenbestätigung die 
+                                unterschrieben werden soll
+                                (siehe oben)
+    <AiID>... </AiID>  // eindeutiger ID der AI
+    <AccountNumber> ... </AccountNumber>
+    <TransferredBytes>... </TransferredBytes>
+  </CC>
+</PayRequest>
+@endverbatim
+
+Das Element <tt>\<BalanceRequest\></tt> signalisiert dem JAP, daß die AI einen aktuellen Kontoauszug erwartet. 
+
+Auf eine solche Quittierungsaufforderung hin sendet der JAP die Kostenbestätigung unterschrieben an die AI zurück.
+ Die AI speichert
+die jeweils aktuellste Kostenbestätigung pro Konto in der Tabelle <tt>COSTCONFIRMATIONS</tt>.
+
+\paragraph paraJAPAISec Sicherheitsbetrachtungen
+Versucht der Nutzer zu betrügen, indem er keine oder ungültige Bestätigungen schickt, blockiert die AI
+die Paketweiterleitung solange, bis der Nutzer die gewünschten Bestätigungen
+übermittelt. Dies bedeutet, dass eine Mixkaskade in Vorleistung tritt. Der Nutzer
+erreicht im Betrugsfall damit einen Vorteil gegenüber der AI, der jedoch den
+Umfang des durch die AI gewählten Bestätigungsintervalls nicht übersteigt. 
+
+Die AI kann versuchen zu betrügen, indem sie zu Beginn eine Kostenbestätigung <var>B</var> sendet, 
+die höhere Kosten enthält, als durch den Nutzer bisher verursacht. Die Manipulation erkennt
+der Nutzer jedoch, da diese Bestätigung durch ihn selbst signiert sein muss. 
+Da neben der AI auch der JAP des Nutzers das gesendete bzw. empfangene Datenvolumen messen kann,
+ist es auch nicht möglich, dass die AI Bestätigungen anfordert, obwohl das Bestätigungsintervall 
+noch gar nicht vorüber ist. 
+
+\subsection secAIBI Abrechnungsinstanz-Bezahlinstanz-Protokoll
+
+Die Abrechnungsinstanzen kontaktieren in kurzfristigen Abständen die
+Bezahlinstanz zur Kostenbestätigungsabrechnung. In längerfristigen
+Intervallen, z. b. einmal im Monat, wird die BI von den AIs zur Geldabrechnung
+kontaktiert.
+
+\subsubsection secSettle Abrechnung der Kostenbestätigungen
+
+Die AI kontaktiert in regelmäßigen Abständen die BI und rechnet die von den
+Nutzern erhaltenen Kostenbestätigungen <var>B</var> ab. Dazu übermittelt die AI die
+vom Nutzerpseudonym signierte Bestätigung 
+
+\f[
+B_S=(\textit{ID},\textit{KN},K,h_{end},l,w,S_{P})
+\f]
+
+zuzüglich des zugehörigen zuletzt erhaltenen Tickwertes <var>h</var> an die BI. 
+
+Entsprechend dieser Bestätigung wird die neue Gesamtsumme der angefallenen Kosten <var>K</var><sub>Gesamt</sub>
+ des zugehörigen
+Pseudonymkontos berechnet. Dazu wird das neue  <var>K</var><sub>Gesamt</sub> aus den
+von den anderen AIs abgerechneten Kostenkontoständen <var>K</var> und dem neuen durch
+die Bestätigung <var>B</var> und dem Tickwert <var>h</var> bestätigten Kostenkontostand <var>K</var> der
+abrechnenden AI berechnet:
+
+\f[
+K_{Gesamt}=\sum_{i}K_{i}
+\f]
+ 
+Anschließend sendet die BI einen neuen
+Kontoschnappschuss 
+
+\f[
+\textit{KSA}=(\textit{ID},\textit{KN},G_{max},K_{Gesamt},K,t,S_{{BI}})
+\f]
+
+ des Pseudonymkontos
+<var>KN</var> signiert an die abrechnende AI zurück (siehe Abbildung@latexonly~\ref{abrech}@endlatexonly @htmlonly 5 @endhtmlonly).  
+
+@latexonly
+\begin{figure}[ht]
+\begin{center}
+ \scalebox{0.465}{
+   \includegraphics{figs/kostenabrechnen-prot.eps} 
+  }
+  \caption{\it Kommunikation beim Abrechnen der Kostenbestätigungen}
+  \label{abrech}
+\end{center}
+\end{figure}
+@endlatexonly
+
+\image html kostenabrechnen-prot.png "Abbildung 5: Kommunikation beim Abrechnen der Kostenbestätigungen"
+
+Mit diesem unterschriebenen Kontoschnappschuss erkennt die BI den
+Kostenkontostand <var>K</var> des Pseudonymkontos <var>KN</var> bei der AI <var>ID</var>
+zum Zeitpunkt <var>t</var> an.  Der von der BI unterzeichnete Schnappschuss dient der
+AI als Nachweis der Dienstabrechnung.
+
+Die BI speichert sich für jedes Pseudonymkonto und für jede AI den
+zuletzt bestätigten Kostenkontostand <var>K</var> und die dafür von der AI
+präsentierten Bestätigungen <var>B</var>.  Mit diesen Bestätigungen muss die BI den
+Dienstnutzungsnachweis gemäß Abschnitt \ref secPayJAPBIProto führen.
+
+
+Bei der Abrechnung besteht die Gefahr, dass das Guthaben des
+Pseudonymkontos nicht mehr die erforderliche Höhe hat, um der AI die
+Abrechnung zu bestätigen. Der AI gehen die Ausgaben verloren, die nicht durch
+das verbliebene Guthaben gedeckt sind. In diesem Fall hat der Nutzer
+zwar nachweisbar betrogen, eine Schadensregulierung kann jedoch nicht
+garantiert werden, da der Nutzer bei Verwendung einer anonymen Zahlungsmethode (z. b. Prepaid-Karte)
+gegenüber der Bezahlinstanz anonym bleiben kann. 
+
+Um die Gefahr eines Schadens zu verringern, sind die Kostenbestätigungen der
+Nutzerpseudonyme rechtzeitig bei der BI abzurechnen.  Dabei gilt folgende
+Strategie:  
+<var>Je geringer das Guthaben des Nutzers ist,
+bzw. je älter die Abrechnungsbestätigung der Bank ist, desto kürzer ist das
+Abrechnungsintervall für die Kostenbestätigungen durch die AI zu wählen.</var>
+
+\paragraph paraSettleImpl Implementierungsanmerkungen
+Momentan wird nur die Abrechnung der durch den Nutzer verursachten Kosten implementiert. 
+Das Auszahlen von Geld hingegen nicht.
+Zur Abrechnung der Kosten sendet die AI an die BI einen HTTP POST-Request mit der URL <tt>/settle</tt>.
+Dabei wird im Request-Body folgende XML Struktur mitgesendet:
+
+@verbatim
+<CostConfirmations>
+  <CC>..</CC>
+  <CC>..</CC>
+</CostConfirmations>
+@endverbatim
+
+Die BI aktuallisert die Einträge in der Tabelle <tt>COSTCONFIRMATIONS</tt> entsprechend 
+der aktuell erhaltenen Kostenbestätigungen.
+
+\paragraph paraNewBalance Kontostandsaktualisierung
+
+Wünscht die AI einen aktuellen Kontoschnappschuss <var>KSA</var> eines
+Nutzerpseudonymkontos, kann sie diesen von der BI anfordern --- auch ohne eine
+Kostenbestätigung <var>B</var> des Nutzerpseudonyms abrechnen zu müssen.
+
+Die Kommunikation verläuft analog zur Kostenabrechnung mit dem Unterschied,
+dass anstelle der Kostenbestätigung <var>B</var> die Kontobestätigung <var>KBN</var>
+an die BI übermittelt wird. Die BI antwortet wie bei der Kostenabrechnung 
+mit einem aktuellen Kontoschnappschuss <var>KSA</var> des Pseudonymkontos.
+
+\paragraph paraGetMoney Geldauszahlung an die Abrechnungsinstanzen
+
+Die Auszahlung von Geld durch die BI an die AI <var>ID</var> beginnt letztere durch 
+Übermittelung einer Liste (<var>KN</var><sub>1</sub>,...,<var>KN</var><sub>n</sub>)
+mit Kontonummern,
+für deren Kostenkontostände (<var>K</var><sub>KN<sub>1</sub></sub>,...,<var>K</var><sub>KN<sub><var>n</var></sub></sub>)
+sie Geld ausgezahlt bekommen möchte. Die BI
+übermittelt eine Überweisungsnummer, unter der sie die Geldüberweisung
+durchführen wird sowie die Höhe des auszuzahlenden Geldbetrages.
+
+Das Geld kann die BI den AIs mit klassischen Zahlungsmethoden überweisen.  Als
+Bestätigung des Geldempfangs übermitteln die AIs eine signierte
+Kostenauszahlungsbestätigung 
+<var>KAB</var> an die BI (Abbildung@latexonly~\ref{geldabrech}@endlatexonly @htmlonly 6 @endhtmlonly).
+
+@latexonly
+\begin{figure}[ht]
+\begin{center}
+ \scalebox{0.473}{
+   \includegraphics{figs/geldabrechnen-prot.eps} 
+  }
+  \caption{\it Kommunikation bei der Geldabrechnung}
+  \label{geldabrech}
+\end{center}
+\end{figure}
+@endlatexonly
+
+\image html geldabrechnen-prot.png "Abbildung 6: "Kommunikation bei der Geldabrechnung"
+
+Die Kostenauszahlungsbestätigung <var>KAB</var> ist die von der AI signierte Liste der ausgezahlten
+Kostenkontostände der Pseudonymkonten. Leere Kostenkontostände sind
+in dieser Bestätigung nicht enthalten. 
+
+\f[
+KAB=(\textit{ID},\{\textit{KN}_{1},K_{\textit{KN}_{1}}\},...,\{\textit{KN}_{n},K_{\textit{KN}_{n}}\},S_{\textit{ID}})
+\f]
+
+<var>ID</var> ist die
+Kennung der AI, <var>KN</var><sub>i</sub> ist die Kontonummer und 
+<var>K</var><sub><var>KN</var><sub><var>i</var></sub></sub> der
+Kostenkontostand <var>K</var> des Pseudonymkontos  <var>KN</var><sub><var>i</var></sub> bei der AI <var>ID</var>.
+<var>S</var><sub>ID</sub> ist die digitale
+Signature der Abrechnungsinstanz <var>ID</var> über <var>ID</var> und alle übertragenen 
+<var>KN</var><sub><var>i</var></sub>
+und <var>K</var><sub><var>KN</var><sub><var>i</var></sub></sub>. Damit bestätigt die AI von der BI für 
+die angegebenen
+Kostenstände der Pseudonymkonten Geld empfangen zu haben.
+Diese signierte Bestätigung speichert sich die BI, bis sie eine 
+Kostenauszahlungsbestätigung mit höheren oder gleichen Kostenständen der
+Pseudonymkonten von der AI erhält. 
+
+Die AI übermittelt bei der nächsten Geldauszahlung der BI eine neue
+Bestätigung der verrechneten Kontostände. In der neuen Bestätigung müssen alle
+Konten der Vorgängerbestätigung enthalten sein, damit die BI die vorherige
+Bestätigung löschen kann.
+
+\paragraph paraSecAI Sicherheitsbetrachtungen
+Betrügt eine AI, indem sie Geld von der BI für nicht erbrachte Leistungen erhalten will, 
+so hat die AI zwei Möglichkeiten, dies zu versuchen:
+
+1. Sie versucht, Kostenbestätigungen für nicht erbrachte Leistungen abzurechnen. 
+Dabei kann sie jedoch nicht die Bestätigungen <var>B</var><sub>S</sub> fälschen, 
+da diese durch den Nutzer signiert sind. Eine AI kann auch keinen Tickwert <var>h</var> berechnen, 
+so dass f<sup><var>l</var></sup>(<var>h</var>)=<var>h</var><sub>end</sub> gilt.
+ Dies beruht auf den Eigenschaften der zugrundeliegenden Hashfunktion <var>f</var>.
+
+Versucht die AI mehrmals die selbe Kostenbestätigung <var>B</var> abzurechnen (Doublespending), 
+so wird dies durch die BI erkannt, da die Kosten <var>K</var> kumulativ geführt werden und nach der ersten 
+Abrechnung 
+von <var>B</var> somit bei der BI ein größeres <var>K</var> gespeichert ist, als in der Bestätigung <var>B</var> 
+angegeben.
+
+2. Die AI versucht, bei der Geldauszahlung zu betrügen. Dabei kann sie nicht einfach beliebige 
+Kosten <var>K</var> angeben, da die BI nur Kontoschnappschüsse <var>KSA</var> akzeptiert, 
+die von ihr zuvor digital signiert wurden. Auch das mehrmalige Abrechnen wird erkannt, 
+da die AI der BI bestätigen muss, für welche Kosten sie bereits Geld erhalten hat. 
+Diese Bestätigung speichert sich die BI. Verweigert die AI das Senden der Bestätigung, 
+so kann die BI mit Hilfe von durch das Zahlungssystem generierten Beweisen gegenüber Dritten belegen, 
+dass sie für die abgerechneten Kosten bezahlt hat. Damit hat die AI betrogen.
+
+Versucht die BI zu betrügen, indem sie der AI die Bezahlung angefallener Kosten bzw.
+ das Senden von Kostenbestätigungen verweigert, so kann die AI mit den von der BI bzw. 
+ den Nutzer in der Vergangenheit zugesandten Bestätigungen gegenüber Dritten die ihr 
+ zustehende Bezahlung nachweisen.
+
+\section secConclusion Zusammenfassung und Ausblick
+Es wurde ein Abrechnungssystem für einen Anonymisierungsdienst vorgestellt, das sich im Gegensatz zu den
+bekannten Verfahren mit heute verfügbaren Bezahlmöglichkeiten umsetzen lässt.
+Durch die Verwendung von digital signierten Belegen wird Schutz vor Betrug für
+jede beteiligte Partei erreicht.  Da die Guthaben und angefallenen Kosten
+jeweils nur kumulativ geführt werden, werden Probleme mit Doublespending bzw.
+einer umfangreichen Speicherung von bereits abgerechneten Quittungen
+vermieden.
+
+Das vorgeschlagene System wird momentan implementiert und in den vorhandenen
+Anonymisierungsdienst JAP integriert. Anschließend soll eine Evaluierung
+(ein "Proof of Concept" durchgeführt werden. Dies wird unter
+Beteiligung der "echten" Nutzer des Dienstes geschehen (allerdings
+zunächst unter Verwendung von "Spielgeld").
+
+@manonly
+\begin{thebibliography}{9999999}
+
+\bibitem[BaNe99]{bezahl3} Matthias Baumgart, Heike Neumann. \textit{Bezahlen von Mix-Netz-Diensten}. Verläßliche IT-Systeme -- VIS 1999, Vieweg-Verlag, 1999
+
+\bibitem[BeFK01]{webmix}
+Oliver Berthold, Hannes Federrath, Stefan Köpsell. \textit{Web MIXes: A system for anonymous and unobservable Internet access}.
+in: Hannes Federrath (Ed.): Designing Privacy Enhancing Technologies. Proc. Workshop on Design Issues in Anonymity and Unobservability, 
+LNCS 2009, Springer-Verlag, Heidelberg 2001, 115--129.
+
+\bibitem[BFRW02]{leipzig} Thomas Butzlaff, Florian Jäger, Björn Rober, David Weber, Andreas Wilm. \textit{Praxisprojekt: JAP -- Anonymität im Internet}. Handelshochschule Leipzig, Dezember 2002.
+
+\bibitem[B"uPf89]{anonNummernkonto} Holger B"urk, Andreas Pfitzmann. \textit{Digital Payment Systems Enabling Security and Unobservability}. Computers \& Security 8/5, 1989, 399--416.
+
+\bibitem[Chau81]{Chaum81}
+David Chaum. \textit{Untraceable Electronic Mail, Return Addresses, and Digital
+Pseudonyms}. Communications of the ACM 24/2, 1981, 84--88. 
+
+\bibitem[FrJe98]{bezahl1}	Elke Franz, Anja Jerichow. \textit{A Mix-Mediated Anonymity Service and Its Payment}. ESORICS '98 (5th European Symposium on Research in Computer Security), Louvain-la-Neuve, LNCS 1485, Springer, Berlin, 1998, 313--327.
+
+\bibitem[FrJW98]{bezahl2} Elke Franz, Anja Jerichow, Guntram Wicke. \textit{Payment Scheme for Mixes Providing Anonymity}. IFIP Working Conference on Electronic Commerce 98, LNCS 1402, Springer, Berlin 1998, 94--108.
+
+\bibitem[LoMP94]{anonKredit} S. Low, N. Maxemchuk, and Sanjoy Paul. \textit{Anonymous credit cards}. 2nd ACM Conference on Computer and Communications Security, Fairfax, Virginia, ACM Press, 1994, 108--117.
+
+\bibitem[Ped97]{pedersen}	Torben P. Pedersen. \textit{Electronic Payments of Small Amounts}. Security Protocols 96, LNCS 1189, Springer, Berlin, 1997, 59--68.
+
+\end{thebibliography}
+\appendix
+@endmanonly
+
+\subsection secLiteratur Literatur
+
+[BaNe99] Matthias Baumgart, Heike Neumann. <var>Bezahlen von Mix-Netz-Diensten</var>. Verläßliche IT-Systeme -- VIS 1999, Vieweg-Verlag, 1999
+
+[BeFK01] Oliver Berthold, Hannes Federrath, Stefan Köpsell. <var>Web MIXes: A system for anonymous and unobservable Internet access</var>.
+in: Hannes Federrath (Ed.): Designing Privacy Enhancing Technologies. Proc. Workshop on Design Issues in Anonymity and Unobservability, 
+LNCS 2009, Springer-Verlag, Heidelberg 2001, 115--129.
+
+[BFRW02] Thomas Butzlaff, Florian Jäger, Björn Rober, David Weber, Andreas Wilm. <var>Praxisprojekt: JAP -- Anonymität im Internet</var>. Handelshochschule Leipzig, Dezember 2002.
+
+[BüPf89] Holger Bürk, Andreas Pfitzmann. <var>Digital Payment Systems Enabling Security and Unobservability</var>. Computers \& Security 8/5, 1989, 399--416.
+
+[Chau81] David Chaum. <var>Untraceable Electronic Mail, Return Addresses, and Digital
+Pseudonyms</var>. Communications of the ACM 24/2, 1981, 84--88. 
+
+[FrJe98] Elke Franz, Anja Jerichow. <var>A Mix-Mediated Anonymity Service and Its Payment</var>. ESORICS '98 (5th European Symposium on Research in Computer Security), Louvain-la-Neuve, LNCS 1485, Springer, Berlin, 1998, 313--327.
+
+[FrJW98] Elke Franz, Anja Jerichow, Guntram Wicke. <var>Payment Scheme for Mixes Providing Anonymity</var>. IFIP Working Conference on Electronic Commerce 98, LNCS 1402, Springer, Berlin 1998, 94--108.
+
+[LoMP94] S. Low, N. Maxemchuk, and Sanjoy Paul. <var>Anonymous credit cards</var>. 2nd ACM Conference on Computer and Communications Security, Fairfax, Virginia, ACM Press, 1994, 108--117.
+
+[Ped97]	Torben P. Pedersen. <var>Electronic Payments of Small Amounts</var>. Security Protocols 96, LNCS 1189, Springer, Berlin, 1997, 59--68.
+
+
+\section secAnhnag Anhang
+\subsection secTables A. Datenbanktabellen
+
+\subsubsection secKontoTable Kontotabelle
+@verbatim
+Name: ACCOUNTS
+Felder: 
+  ACCOUNTNUMBER    (64 Bit Integer; BIGINTEGER) - Kontonummer
+  CREATIONTIME     (Zeitstempel;     TIMESTAMP) - Zeitpunkt der Kontoeröffnung
+  XMLPUBLICKEY     (Zeichenfolge;      VARCHAR) - XML-codierter öffentlicher Kontoschlüssel
+  DEPOSIT          (64 Bit Integer; BIGINTEGER) - Gesamtguthaben aller Einzahlungen
+  SPENT            (64 Bit Integer; BIGINTEGER) - Kummulierte Kosten bei allen Kaskaden
+  DEPOSITVALIDTIME (Zeitpunkt;       TIMESTAMP) - Gültigkeitsende des Guthabens 
+@endverbatim
+\subsection secTransTable Transaktionsnummern
+@verbatim
+Name: TRANSFERS
+Felder: 
+  ACCOUNTNUMBER    (64 Bit Integer; BIGINTEGER) - Kontonummer
+  TRANSFERNUMBER   (64 Bit Integer; BIGINTEGER) - Transaktionsnummer
+  DEPOSIT          (64 Bit Integer; BIGINTEGER) - Gesamtguthaben aller Einzahlungen
+  VALIDTIME        (Zeitpunkt;       TIMESTAMP) - Gültigkeitsende der Transaktionsnummer 
+  USED             (Boolean;           BOOLEAN) - gibt an ob die Transkationsnummer bereits 
+                                                  für Zahlungen verwendet wurde
+  USEDTIME         (64 Bit Integer; BIGINTEGER) - Gibt das Datum an, an dem die Transaktionsnummer
+                                                  zur Zahlung benutzt wurde
+@endverbatim
+\subsection secBITable BI Kostenbestätigungen pro Konto und Kaskade
+@verbatim
+Name: COSTCONFIRMATIONS
+Felder:
+  AiID             (Zeichenfolge;     VARCHAR)  - Eindeutige Bezeichnung der AI
+  ACCOUNTNUMBER    (64 Bit Integer; BIGINTEGER) - Kontonummer
+  TRANSFERREDBYTE  (64 Bit Integer; BIGINTEGER) - bestätigte transferrierte Bytes durch die
+                                                  Inanspruchnahme des Dienstes
+  XMLCC            (Zeichenkette;VARCHAR(2000)) - letzte unterschriebene Kostenbestätigung
+@endverbatim    
+\subsection secAITAble AI Kostenbestätigungen
+@verbatim
+Name: COSTCONFIRMATIONS
+Felder: 
+  ACCOUNTNUMBER    (64 Bit Integer; BIGINTEGER) - Kontonummer
+  TRANSFERREDBYTE  (64 Bit Integer; BIGINTEGER) - bestätigte transferrierte Bytes durch die
+                                                  Inanspruchnahme des Dienstes
+  XMLCC            (Zeichenkette;VARCHAR(2000)) - letzte unterschriebene Kostenbestätigung
+@endverbatim
+
+*/

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<EncryptedKey>
+  <EncryptionMethod Algorithm="RSA" />
+  <CipherData>
+    <CipherValue>...</CipherValue>
+  </CipherData>
+  <Nonce>...</Nonce>
+  <KeepAlive>
+    <!-- Gives information about the "Keep-Alive"-protocol 
+		    between Mixes -->
+    <SendInterval>
+      <!-- minimum packet send interval (in seconds)
+			     from Mix n-1 to Mix n -->
+      ...
+    </SendInterval>
+    <ReceiveInterval>
+      <!-- minimum packet receive interval (in seconds)
+			     from Mix n to Mix n-1 -->
+      ...
+    </ReceiveInterval>
+  </KeepAlive>
+  <Signature>...</Signature>
+</EncryptedKey>

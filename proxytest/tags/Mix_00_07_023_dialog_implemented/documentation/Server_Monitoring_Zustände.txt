@@ -1,0 +1,61 @@
+Für das Server-Monitoring können derzeit der aktuelle Netzwerk- , Bezahl- und Systemzustand ausgelesen werden. 
+Für die Zustände sind die Level OK und KRITISCH definiert ( kann leicht erweitert werden, wenn nötig).
+Durch einen Code sind die Zustände jeweils für ihren Bereich eindeutig identifizierbar.
+Folgende Zustände sind definiert:
+
+Netzwerk:
+
+1. (Netzwerk-Startzustand - Code 0)
+2. Erster Mix initialisiert - Code 1 
+	(Konfiguration eingelesen, bereit für den Verbindungsaufbau)
+3. Erster Mix ist mit Nachfolger verbunden - Code 2
+	(Netzwerkverbindung hergestellt, warte auf Schlüsselaustausch mit Nachfolger)
+4. Erster Mix Online - Code 3
+	(Schlüsselaustausch mit Nachfolger erfolgreich, Nutzer können Daten versenden)
+5. Mittlerer Mix initialisiert - Code 4
+	(wie beim ersten Mix)
+6. Mittlerer Mix verbunden mit vorherigem Mix - Code 5
+	(Mix ist mit dem Vorgänger verbunden, warte auf Verbindung zum Nachfolger)	
+7. Mittlerer Mix verbunden mit Nachfolger - Code 6
+	(Mix ist Vorgänger und Nachfolger verbunden - Warte auf Schlüsselaustausch)
+8. Mittlerer Mix online - Code 7
+	(Schlüsselaustausch mit Vorgänger und Nachfolger erfolgreich, Nutzer können Daten senden)
+9. Letzter Mix initialisiert - Code 8
+	(siehe oben)
+10. Letzter Mix verbunden mit Vorgänger - Code 9
+	(siehe oben)
+11. Letzter Mix online - Code 10
+	(siehe oben)
+
+Bezahlung (nur für erste Mixe):
+
+1. (Bezahlung-Startzustand - Code 0)
+2. Abrechnungsinstanz initialisiert - Code 1
+3. AI wird heruntergefahren - Code 2
+4. BI erreichbar - Code 3
+	(AI konnte settling bei BI erfolgreich durchführen)	
+5. BI zeitweise nicht erreichbar - Code 4
+	(AI konnte sich nicht BI verbinden)
+6. BI permanent nicht erreichbar - Code 5 KRITISCH
+	(Mehrere aufeinanderfolgende Verbindungsversuche zur BI sind fehlgeschlagen)
+7. Zugriff auf AI-Datenbank fehlgeschlagen - Code 6 KRITISCH
+	(Nur wenn keine Verbindung hergestellt werden kann)
+8. Zugriff auf AI-Datenbank fehlgeschlagen und BI temporär nicht erreichbar - Code 7 KRITISCH
+	(Zustand 7 und 5 gleichzeitig)
+9. Zugriff auf AI-Datenbank fehlgeschlagen und BI permanent nicht erreichbar - Code 8 KRITISCH
+	(Zustand 7 und 6 gleichzeitig)
+
+System:
+
+1. (System-Startzustand - Code 0)
+2. Mix wird initialisiert - Code 1
+	(Wenn Mix gerade gestartet wurde und noch nicht online ist)
+3. Mix arbeitet - Code 2
+	(Wenn Mix online ist)  
+4. Mix ist beim restart - Code 3
+	(Mix war bereits online, hat aber die Verbindung zu Vorgänger und/oder Nachfolger verloren,
+	versucht aber einen reconnect - enstpricht im Prinzip "mix initialisiert")
+5. Mix wird heruntergefahren - Code 4
+	(Nur interessant, um zu überprüfen, ob er in diesem Zustand festhängt)
+6. Mix wird wegen segmentation fault heruntergefahren - Code 5 KRITISCH
+	(Definitiv unerwünscht!)

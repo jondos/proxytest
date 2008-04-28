@@ -1,0 +1,998 @@
+\documentclass{article}
+\setlength{\parindent}{0pt}
+
+\usepackage{url}
+\usepackage{hyperref}
+\begin{document}
+
+\begin{center}
+\huge {Project AN.ON}\\
+\vspace{0.5cm}
+\vspace{0.5cm}\textsc{Freie Universit\"at Berlin}\\
+\huge {Institut f\"ur Informatik} \\
+
+
+
+\vspace{1.0cm}\huge{Mix Install Manual}\\
+
+\title{Installing Proxytest on a Linux System\\
+\vspace{1.6cm}}
+\date{\today}
+\author{\\
+Heinrich Langos\\
+}
+
+\end{center}
+
+\maketitle
+  
+  
+%\newenvironment{myoutput} { \begin{center}\framebox[1.05\width]\{\begin{minipage}[c]{0.8\textwidth} \small\{ \begin{verbatim} } { \end{verbatim}\} \end{minipage} \} \end{center} }
+
+% ---------------------------------------------------------------------
+% ---------------------------------------------------------------------
+
+
+\section{Before You Start}
+
+Running a Mix takes some commitment. You will need to set aside some
+CPU cycles (idealy on a separate machine) and probably a lot of
+bandwidth. Don't try to run a Mix in your network if you don't have
+the authority or permission to do so. 
+
+% ---------------------------------------------------------------------
+
+\subsection{Some Mix Basics}
+
+In this document we will assume that you know the basics of what a Mix
+is and what a Mix-Cascade is. We also assume that you know a little
+about cryptography and the terms ``public key'' and ``private key''
+are not all Greek to you.
+
+Please check out \url{http://www.anon-online.com/} for details on how
+a Mix works and what a Cascade is.
+
+TO-DO: add some basics here.
+
+% ---------------------------------------------------------------------
+
+\subsection{Planning a Cascade}
+
+Currently getting a Mix known to the JAP users involves some
+coordination with us and other Mix operators.
+
+You will need the public keys of the other Mixes and they will need to
+get your Mix's public key (don't worry we will get to the creation of
+your key later).
+
+We will send you the public keys of the other Mixes as attachments
+to an email. (TO-DO: Downloading public keys from InfoService)
+
+We will also help you get in touch with the other operators.
+(TO-DO: InfoService Operator-fields with contact information.)
+
+Our email address is \url{jap@inf.tu-dresden.de} for the time being.
+\footnote{This is also our support address for our users so we may install a
+separate contact address for operators soon.}
+
+\subsection{Keys and Trust}
+
+Due to the inherent insecurity of the Internet messages sent to us and
+received from us should be cryptographically signed. There is no need to
+encrypt messages since we will not exchange any secret information. In
+fact it is better not to encrypt emails in this context since signed
+emails will provide some transparency and reassurance in case of doubt.
+
+Our PGP key can be found at \url{http://anon.inf.tu-dresden.de/jappgp.asc}
+and the key's fingerprint is ``B965 99E4 05EB 4202 895C 27DC D022 60C9 73EE 1DD1''
+
+If you don't trust this document itself you should confirm the key's
+fingerprint by some other means e.g. calling us on the phone.
+
+If you simply send us your PGP or GPG key in an unsecured way (e.g.
+email) we will also not trust it until it has been confirmed by some
+other means (like a phone call).
+
+% ---------------------------------------------------------------------
+
+\subsection{Voluntary Commitment}
+
+Mix operators are given a lot of trust by their users. Therefore a Mix
+operator should sign a commitment that states the way he is going to
+operate the Mix.
+
+This commitment is meant not only for the end users, but also for the
+other Mix operators.
+
+Currently there is only a German version of it at
+\url{http://www.anon-online.com/Selbstverpflichtung.html} but we are
+working on an English version of that document too.
+
+Please sign this document and send us the signed copy. Sending us a paper
+version would be ideal (for the legal people), as well as an
+electronic version (for the users). Check out the above mentioned URL
+for an example of the electronically signed version.
+
+% ---------------------------------------------------------------------
+% ---------------------------------------------------------------------
+
+\section{System Installation}
+\label{sys_install}
+
+We will try to guide you through the installation of a basic Linux
+system. No bells or whistles. Just the plain basic system. This will,
+however, be a rather sketchy description and by no means a replacement
+for reading the installation manual of your Linux distribution.
+
+A word of caution: Using the newest hottest version of any software
+will most definitely not result in the most secure system. New
+features tend to introduce new bugs and new security problems.
+Therefore, if facing the choice between a stable and a developers
+version, it is better to stick to the stable one (provided that
+security fixes are available when needed).
+
+% ---------------------------------------------------------------------
+
+\subsection{Linux - choosing your flavor}
+
+What ``basic Linux system'' means depends on what you want to do with
+the system. But first of all you may need to decide which distribution
+of Linux to run.
+
+If you are an experienced Unix operator we would strongly recommend a
+Debian system. It is secure out-of-the-box and has the fastest
+security update service. However if has a much steeper learning curve
+when compared to other, more desktop oriented, Linux distributions.
+
+If you are not familiar with Debian and you prefer graphical
+configuration tools you might want to try Red Hat or Suse instead.
+
+For operating a Mix you just need a text console. You don't even need
+X-Windows or any other graphical display. 
+
+For configuring the Mix however there is a graphical Java
+Applet/Application. That program can be run on your Mix computer or on
+another computer (even a Windows system can do it). Running it on a
+different computer may introduce some security problem since you will
+need to handle the Mix's secret key. Installing X-Windows and a Java
+runtime environment on the Mix will require much more space and a lot
+more software on the Mix itself. The choice is up to you.
+
+For the rest of this document we will assume that you want to run the
+Configuration Tool on your Mix computer and therefore you will need an
+X-Windows system and a Java runtime engine. 
+
+% ---------------------------------------------------------------------
+
+\subsubsection{Debian 3.0 (Woody)}
+
+Install Debian Woody. There is a very detailed installation manual
+online at \url{http://www.debian.org/releases/stable/installmanual}
+but simply following the instructions during installation will also
+get you there.
+
+Make sure you include the ``non-US'' and ``non-free'' packages when
+asked during the installation. Otherwise you will probably have some
+trouble with the OpenSSL packages.
+
+When asked for additional apt-sources add
+\url{ftp://ftp.informatik.hu-berlin.de/pub/Java/Linux/debian} to get
+Java pre-packaged for Debian.
+
+When asked by the ``Task Installer'' during the installation which
+tasks to install, select ``X window system'' from the end-user section
+and ``C and C++'' from the Development section.
+
+After completing the installation, log in as root and install these
+additional packages: 
+
+\begin{itemize}
+\item libxerces1-dev
+\item libxerces1
+\item openssl
+\item ssh 
+\item j2re1.3
+\item j2sdk1.3
+\end{itemize}
+
+You can do it by running \verb|dselect| or by using 
+\verb|apt-get install <package-name>|. If the dselect program complains about a
+missing j2se-common package you will have to press ``Q'' to ignore
+this.
+
+\subsubsection{Suse Linux 8.2}
+
+During installation you will be asked which software to install.
+
+First go to the selections and deactivate ``Office Applications''.
+This will save a lot of space and time.  Then switch the filter from
+``Selections'' to ``Package groups''.
+
+\parbox{\textwidth}{
+  In the tree view on the left, now select the packages ``openssl-devel'', ``Xerces-c-devel''
+and ``mozilla''
+  \begin{itemize}
+  \item[$\vdash$] Development
+    \begin{itemize}
+    \item[$\vdash$] Libraries
+      \begin{itemize}
+      \item[$\vdash$] C and C++
+        
+        
+        \begin{itemize}
+        \item[$\Rightarrow$] openssl-devel
+          
+        \item[$\Rightarrow$] Xerces-c-devel
+        \end{itemize}
+        
+      \end{itemize}
+    \end{itemize}
+  \end{itemize}
+}\par
+
+TO-DO: Commercial Suse contains the Java package .. but where.. or is
+it installed by default?
+
+\begin{center}
+\framebox[1.05\width]{
+  \begin{minipage}[c]{0.8\textwidth}
+    If you don't have the full commercial version of Suse you will need to
+    download the Java runtime environment after completing the system
+    installation. It can be found at\\
+    \url{http://java.sun.com/j2se/1.3.1/download.html}.\\
+    Select the ``Linux RPM in self-extracting file'' of the JRE.
+    Currently it is named \\
+    \texttt{j2re-1\_3\_1\_08-linux-i586.rpm.bin}.\\
+    After downloading the file run\\
+    \texttt{bash j2re-1\_3\_1\_08-linux-i586.rpm.bin}\\
+    to extract it. This will produce a file named\\
+    \texttt{jre-1.3.1\_08.i586.rpm}.\\
+    To finally install this package, you will have to become root again. 
+    Open a console and run \\
+    \texttt{su -} \\
+    \texttt{rpm -iv jre-1.3.1\_08.i586.rpm}\\
+    The disadvantage of this is that you will have to type\\
+    \texttt{/usr/java/jre1.3.1\_08/bin/java}\\
+    instead of simply \texttt{java} later when we need the Java 
+    environment. 
+  \end{minipage}
+}
+\end{center}
+
+TO-DO: \\
+Deactivate these services:\\
+portmap TCP 111\\
+X TCP 6000\\
+
+\subsubsection{Red Hat 9}
+
+Install Red Hat with the default Workstation settings. To save some
+time and space you might want to deselect ``mrproject'' and
+``openoffice'' from the ``Office/Productivity'' group.
+
+As with the free Suse version you have to download the Java runtime
+environment if you want to use the MixConfig tool. Take a look at the
+previous section for details.
+
+The precompiled binary of the Mix works ok on RedHat9
+\footnote{Earlier versions had some kernel-thread issues.} but if you
+want to compile your own mix, you will have to download the xerces-c libraries and 
+compile and install them first.
+
+Taking the precompiled xerces-c binaries for RedHat 7.2 will fail with\\
+\texttt{configure: error: Xerces-C Lib NOT found - please use --with-xml-lib}\\
+because of incompatible binary interfaces.
+
+You can download the sources of xerces-c from
+\url{http://xml.apache.org/xerces-c/} and follow the ``Install'' and
+``Build'' instructions.
+
+Last time we checked version 2.3.0 was the current version and didn't
+work with proxytest.\footnote{They changed the API again without
+  warning. proxytest 0.2.1 works with xerces-c 2.3.0 now but the next
+  xerces-c version might break things again.}
+
+Rather try the last 1.x release ... 1.7 works without a problem.
+
+Download the sources and install according to the included Documentation 
+( accessible by the Readme.html file )
+
+
+After runing ``gmake'' as a final build step for xerces-c you don't
+need to install the libraries anywhere. 
+Make sure that there is a link named libxerces-c.so in the librarie directory by this commands:
+
+\begin{verbatim}
+$ cd $XERCESCROOT/lib
+$ ln -is libxerces-c1_7_0.so libxerces-c.so
+\end{verbatim}
+
+
+The rest is the same as described in \ref{compilemix}.
+
+TO-DO: \\
+Deactivate these services:\\
+Install these packages:\\
+
+% ---------------------------------------------------------------------
+
+\subsection{Other Linux Flavors}
+
+If you want to install a Mix on a different Linux install the
+following packages using your package management system or from sources.
+
+\begin{itemize}
+\item Xerces-c libraries and development files. (version 1.5 or above should be OK)
+
+\item OpenSSL libraries and development files. (0.9.6a or above)
+
+\item Java Runtime Environment (Version 1.3 or above)
+\end{itemize}
+
+% ---------------------------------------------------------------------
+
+\subsection{tools you will also need}
+
+\begin{itemize}
+\item{A Web Browser}. ``Lynx'' will do but when X-Windows is installed most
+people will want to install Netscape, Mozilla, Opera or Konqueror. Any
+one of those will do.
+
+\item{An email client}. Again ``mutt'' will perfectly suffice but you can
+also use a graphical one like KMail or Evolution. Preferably one that
+has builtin support for PGP or GPG. (If you ask about Outlook Express
+you will be sent back home.\footnote{Do not pass Go, do not collect
+  \$200!})
+
+\item{Crypto-software}. PGP (Pretty Good Privacy) or GPG (Gnu Privacy
+  Guard) for signing emails and checking signed emails.
+
+\item{Ssh} (secure shell) for remote administration of your Mix.
+\end{itemize}
+
+\subsection{network connectivity test}
+
+TO-DO
+
+% ---------------------------------------------------------------------
+% ---------------------------------------------------------------------
+
+
+\section{Mix Installation}
+
+In this section we will go through the steps to get the Mix program ready
+to run on your system. 
+
+% ---------------------------------------------------------------------
+
+\subsection{Create a User}
+
+Creating a separate user for running the Mix software is a good idea.
+It will keep the Mix software out of your way (and you out of its
+way). For the sake of simplicity call that new user ``mix''.
+
+Most systems will have a graphical tool for managing users but simply
+running \verb|adduser mix| as root will do just the same.
+
+% ---------------------------------------------------------------------
+
+\subsection{Download Mix Software}
+
+Login as the user ``mix''.
+
+Next you need the Mix software. The binary (the
+executable file) is called \verb|proxytest| and you can download a
+precompiled version of it or compile it on your own.
+
+If you are in a hurry you may want to try the precompiled version. 
+
+If you want to do it the \emph{right} way (or the precompiled versions
+doesn't work on your system) you have to download the sources and compile it
+yourself.
+
+% ---------------------------------------------------------------------
+
+\subsubsection{Precompiled Mix Software}
+\label{precompiled}
+Start your browser and go to
+
+\url{http://anon.inf.tu-dresden.de/develop/aktversions_en.html}
+
+Download the \verb|proxytest.tgz| archive and save it to your home directory (\texttt{/home/mix}).
+
+Open a shell and extract the archive with \verb|tar xzvf proxytest.tgz|
+
+This will extract the precompiled binary named \verb|proxytest|
+
+To check if the precompiled version runs on your system you can try to run
+it in the JAP\-Mode\footnote{This is basically a JAP replacement mode. It
+makes the Mix software act like a proxy for your web browser.}\\
+
+\verb|./proxytest -j -a -p 4001 -n mix.inf.tu-dresden.de:6544|
+
+The output should look something like this:
+\begin{verbatim}
+[2003/06/16-18:01:30, info    ] Anon proxy started!
+[2003/06/16-18:01:30, info    ] Version: 00.01.67
+[2003/06/16-18:01:30, info    ] Using: OpenSSL 0.9.6c 21 dec 2001!
+[2003/06/16-18:01:30, info    ] Starting MIX...
+[2003/06/16-18:01:30, info    ] Try connecting to next Mix...
+[2003/06/16-18:01:32, info    ]  connected!
+[2003/06/16-18:01:32, info    ] Chain-Length: 2
+\end{verbatim}
+
+The version numbers may vary. By pressing \verb|CTRL-C| you can stop it again.
+
+If you don't get connected within 30 seconds you may need to try a different
+address behind the ''-n'' option. With your browser, go to
+\url{http://anon.inf.tu-dresden.de/status.php?lang=en} and click on one of
+the available cascade's name. The resulting page will list under ''General
+Information'' an IP and a Port to try instead of the ones listed above.
+
+If proxytest dies with an error message like
+this one
+
+\verb|TODO|
+
+then you will need to compile your own version.
+
+% ---------------------------------------------------------------------
+
+\subsubsection{Compiling the Mix Software from Sources}
+\label{compilemix}
+
+Make sure that you have the development packages installed as mentioned
+under Section \ref{sys_install}.
+
+Start your browser and go to
+\url{http://anon.inf.tu-dresden.de/develop/sources_en.html}
+
+Download the \verb|mix.src.tgz| archive and save it to your home directory.
+Open a shell and extract the archive with \verb|tar xzvf mix.src.tgz| \\
+This will create a directory named \verb|proxytest|. Please rename it by
+typing \verb|mv proxytest proxytestdir| 
+
+Change into that directory and run \verb|./configure| 
+
+The output will be something like 
+\begin{verbatim}
+checking for a BSD-compatible install... /usr/bin/install -c
+checking whether build environment is sane... yes
+checking for gawk... no
+checking for mawk... mawk
+\end{verbatim}
+\vdots
+\begin{verbatim}
+checking for OpenSSL directory... (system)
+checking for dom/DOM.hpp... yes
+Xerces-C includes found
+XercesC-Lib found
+configure: creating ./config.status
+config.status: creating Makefile
+config.status: creating popt/Makefile
+config.status: creating xml/Makefile
+config.status: creating aes/Makefile
+config.status: creating trio/Makefile
+config.status: creating config.h
+config.status: executing depfiles commands
+\end{verbatim}
+
+There is a new \verb|configure| switch in recent versions (>00.02.x)
+of proxytest that allows for a deanonymization of certain connections.
+The switch is \verb|--with-crime-detection|. 
+
+Normally it would require all mix operators to work together to
+deanonymize a connection. Due to a design flaw in the current
+proxytest versions however, it is possible to circumvent older
+versions of the middle mix. Newer versions (>=00.01.69) contain a fix
+for the middle mix but the fundamental weakness will only be fixed by
+a new protocol. Probably in Version 00.03.x.
+
+For details look for \verb|LOG_CRIME| and \verb|ALLOWED_FLAGS|
+switches in the source code.
+
+
+If configure didn't completely run through you can check the config.log file for 
+errors (e.g. using \verb|less config.log|). 
+Toward the end of that file you may find a clue as to what went wrong. 
+Look for a line that contains the error message that you got from configure. 
+Like this one:
+\begin{verbatim}
+configure:5328: error: Xerces-C Lib NOT found - please use --with-xml-lib
+\end{verbatim}
+Above this error message you will find the test that caused the error and
+possibly a more detailed error message.
+
+A word of warning about the C/C++ compiler version: On some systems
+there has been some trouble with gcc versions 3.x and above. Compiling
+works but linking to the libraries fails. This is almost exclusively
+due to the fact that the libraries had been compiled with a different
+compiler version and the binary interfaces between applications and
+libraries have changed since than. When in doubt go with the
+default version that your Linux distribution installs.
+
+After successfully running configure you can compile the Mix with a simple 
+\verb|make| command.
+
+This will create a file named \verb|proxytest|. Please move it to the
+parent directory by typing \verb|mv proxytest ../|
+
+Test your proxytest binary as mentioned in Section \ref{precompiled} and continue 
+with the configuration below.
+
+% ---------------------------------------------------------------------
+% ---------------------------------------------------------------------
+
+\section{Configuration} 
+
+
+The Mix software needs some data to make it work as a Mix in a
+cascade. This configuration data is stored in an XML file and you can
+create it with the Java application ``MixConfig''.
+
+\subsection{Getting MixConfig}
+
+Stay logged in as ``mix''. Download the program from
+\url{http://anon.inf.tu-dresden.de/develop/MixConfig.html} with your
+web browser. It also works as a Java Applet but as with all applets,
+input and output operations are limited to the system's clip board.
+You can't read or write files from an Applet and therefore we recommend
+downloading the \verb|MixConfig.jar| file and saving it to you home
+directory.
+
+\subsection{MixConfig Step-by-Step}
+
+Open a shell and run \verb|java -jar MixConfig.jar|
+
+The configuration tool has four main areas to complete.
+You can complete them in any order you want.
+
+Through the ``File'' menu you can start a new configuration, save it
+to a file and later reload your configuration file to make changes.
+
+\subsubsection{General}
+
+\begin{description}
+
+\item{Mix Type}: Choose the type of Mix you want to run. (This should be agreed upon
+  with the other operators in your cascade.)
+
+\item{Cascade Name}: If you are the first Mix you will need to set the name for the whole
+  cascade.  A format like ``Mixlocation1 - Mixlocation2 - Mixlocation3''
+  or ``Operator1 - Operator2'' would be nice. 
+  
+  Example: \verb|New York - Berlin - Dresden| 
+
+\item{Mix Name}: Just choose one. It will be visible to the JAP users
+  if they check the detailed description for a cascade.
+  
+  Examples: \verb|Mix at the Data Commisionars Office| or \verb|Berlin1|
+
+\item{Mix ID}: Just push the ``Generate'' button.
+  
+\item{Set User ID on Execution} will make the Mix change to a
+  different User ID when started as root. We will assume that you run
+  the Mix as a non-root user anyway so you can leave this option
+  switched off.
+%, or enter \texttt{mix} 
+
+  Example: \texttt{nobody}
+  
+\item{Set Number of File Descriptors} artificially limits how many
+  concurrent connections your Mix can handle. For the first Mix it is
+  the number of users it supports and for the last Mix it is the
+  number of concurrent requests it may send to the proxy. (Middle
+  mixes only need one connection to the previous Mix and one to the
+  next.)
+  
+\end{description}
+
+The next two options control how much you see of the Mix's work.
+
+During the installation it would be best to switch ``Run as Daemon''
+off and ``Enable Logging'' to ``console''.
+
+After successfully testing the Mix in a cascade you should switch on
+``Run as Daemon'' and switch off the logging or set it to ``syslog''.
+
+\begin{description}
+
+\item{Run as Daemon}: Set this option to make the mix detach itself from the 
+  starting tty like all other Unix daemons.
+  
+\item{Enable Logging} will make the Mix log some errors warnings and
+  debug information. 
+  
+  For debugging reasons the first Mix will currently also output
+  starting and ending connections.  But don't worry.  Before printing
+  the IP number of the incoming connection it will be encrypted
+  with a random number (generated during the Mix's start). So you can
+  at most log that you get connections form \emph{different} IP
+  addresses, not from \emph{which} addresses. As soon as you stop the
+  mix program that random number is forgotten.
+
+  The last Mix will currently output some byte and packet counters.
+  
+  For the Unix gurus: All debug output here is subject to change in
+  further versions of the Mix software, so don't write wrapper scripts
+  that count on it.
+
+\end{description}
+
+
+\subsubsection{Network}
+
+Here you will need some data that you get from the other Mix operators.
+Like theirs Mix's IP addresses and port numbers.
+
+\begin{description}
+  
+\item{Incoming}: Click on ``Add'' to define how your Mix will receive
+  incoming connections. For a First Mix this will be the IP address
+  and port where the JAP users connect to. For the other Mix types
+  this is the address that their predecessor Mix in the cascade
+  connects to. (TO-DO: Currently a Mix also needs the hostname of
+  its predecessor, but this will be changed soon.)
+  
+  Select ``TCP'', ``Raw'' (don't worry the data is encrypted anyway)
+  and enter at least your IP address and the port you agreed upon with
+  your predecessor Mix or us.
+  
+\item{Outgoing}: Click on ``Add'' to define how your Mix will connect
+  to the next Mix or the final proxy. For a First Mix or Middle Mix
+  this will be the IP address and port where they connect to the next
+  Mix. For the Last Mix this is the address of a proxy. 
+  
+  First or Middle Mixes normally select ``TCP'', ``Raw'' and enter at
+  least the IP address and the port you agreed upon with your
+  successor Mix. 
+  
+  Last Mixes will enter the proxy's type address and port. \\
+  Example: A local squid proxy will be connected as ``HTTP'', ``TCP''
+  and ``RAW'' at IP address ``127.0.0.1'' and port ``3128''.
+
+\item{InfoService} describes the InfoService that your Mix will register with.
+Currently this is:
+
+\begin{description}
+\item{Host}: \verb|infoservice.inf.tu-dresden.de| 
+\item{IP}: \verb|141.76.46.91| 
+\item{Port}: \verb|6543| 
+\end{description}  
+
+The InfoService propagates available Mix cascades to the JAP users. To
+get listed with it you will have to get in touch with us and send us
+your Mix's public key.
+
+If you want to run a cascade for testing purposes without registering
+it to the InfoService you will need to enter the IP address and port
+number of the first Mix manually in JAP (or you can use proxytest in
+JAP-Mode).
+
+\end{description}
+
+\subsubsection{Certificates}
+
+\begin{description}
+\item{Own}: Click on ``Create a New One''. This will take a while
+  since it includes the creation of your public and private key.
+  Select the time frame (one year starting from now will be OK). Don't
+  enter a password, unless your Mix computer is connected to a
+  UPS (Uninterruptible Power Supply). If you enter a password here you
+  will need to enter it whenever the Mix is restarted. In case of
+  power failure it Mix will be unable to start up unattended.
+  
+  Then click on Export and choose the ``Base64 encoded Public X.509
+  Certificate'' Enter a filename like ``mymix'' and the program will
+  append \verb|.b64.cer| to the filename.
+  
+  This file now contains your public key that you need to send to
+  us and the other Mix operators that you connect to.
+  
+\item{Previous and/or Next Mix Certificate}: Click on Import and
+  select the public key file(s) that you received from the other
+  Operators.
+
+\end{description}
+
+\subsubsection{Network}
+
+\begin{description}
+\item{Location}: Where is your Mix. This may be interesting when it
+  comes to questions of jurisdiction.
+\item{Operator}: Who is running the Mix and how can I get in touch with him.
+  \begin{description}
+  \item{Organization}: This should contain either a Person's name or the
+    Organization that runs the Mix. It can also be a X.500 DN
+    (Distinguished Name) if you are familiar with that.
+  \item{URL}: A URL pointing to further information about the Operator
+    and a means of contact to the person actually running the Mix.
+  \end{description}
+\end{description}
+
+After completing those forms you should select ``Check'' from the
+``File'' menu to see if everything is syntactically OK. Save your
+configuration in a file named \verb|config.xml| and close the
+MixConfig program.
+
+\subsection{Make Your Public Key Known}
+
+Send your Mix's public key (remember that mymix.b64.cer file) to us
+and the other Mix operators of your cascade. Preferably by a secure
+means. Either sign your e-mail with PGP/GPG or be prepared to verify
+it by some other means.
+
+\subsection{First Start}
+
+Try to start your mix by running \verb|./proxytest -c config.xml|
+
+The output should look something like this for a First Mix:
+
+\begin{verbatim}
+[2003/06/17-22:43:27, info    ] Anon proxy started!
+[2003/06/17-22:43:27, info    ] Version: 00.01.60
+[2003/06/17-22:43:27, info    ] Using: OpenSSL 0.9.6c 21 dec 2001!
+[2003/06/17-22:43:27, info    ] I am the First MIX..
+[2003/06/17-22:43:27, info    ] Starting MIX...
+[2003/06/17-22:43:27, debug   ] Starting FirstMix InitOnce
+[2003/06/17-22:43:27, info    ] SOCKET Option SENDLOWWAT not set!
+[2003/06/17-22:43:27, info    ] MUXOUT-SOCKET RecvBuffSize: 131070
+[2003/06/17-22:43:27, info    ] MUXOUT-SOCKET SendBuffSize: 131070
+[2003/06/17-22:43:27, info    ] MUXOUT-SOCKET SendLowWatSize: 1
+\end{verbatim}
+
+And like this for a Last Mix:
+
+\begin{verbatim}
+[2003/06/18-03:41:05, info    ] Anon proxy started!
+[2003/06/18-03:41:05, info    ] Version: 00.01.60
+[2003/06/18-03:41:05, info    ] Using: OpenSSL 0.9.6c 21 dec 2001!
+[2003/06/18-03:41:05, info    ] Starting MIX...
+[2003/06/18-03:41:05, debug   ] This mix will use the following proxies:
+[2003/06/18-03:41:05, debug   ] 1. Proxy's Address: 160.45.111.18:3128
+[2003/06/18-03:41:06, info    ] Waiting for Connection from previous Mix...
+\end{verbatim}
+
+
+Eventually your Mix should get the connection to its neighbor Mixes and it should go on like this:
+
+\begin{verbatim}
+[2003/06/17-22:43:47, info    ]  connected!
+[2003/06/17-22:43:47, info    ] Socket option TCP-KEEP-ALIVE returned an error - so not set!
+[2003/06/17-22:43:47, critical] Received Key Info lenght 572
+[2003/06/17-22:43:48, critical] Received Key Info...
+[2003/06/17-22:43:48, debug   ] Get KeyInfo (foolowing line)
+[2003/06/17-22:43:48, debug   ] <?xml version=''1.0'' encoding=''UTF-8''?>
+<Mixes count=''1''><Mix id=''160.45.111.180X1.6EBD600000400P-8959000''>
+<RSAKeyValue><Modulus>tF0prcug5eWsA1lk4RDhI7Dv2E0fI/IzyLOjEjDyHnDLDKDTpNvin/4d2CFX5h33
+wNYZle9gtRLJCzFMLeK0sAholzxbJtmDVmvgRIBO15BhuhzGWclClHGrj5VfNnWe
+Jc6Y966+ywBgUFuBhb7j3mMQFmc05HfgVbIfZ+aB8vE=
+</Modulus><Exponent>AQAB
+</Exponent></RSAKeyValue><Signature><SignedInfo><Reference URI="><DigestValue>ET8S0RPHcuSwoS3LoBhLWnDLneE=
+</DigestValue></Reference></SignedInfo><SignatureValue>dY9wmKfhW6rqVNdSqoO77JUFQAdDTnsV5016PGU440oDMxwk4B5whA==
+</SignatureValue></Signature></Mix></Mixes>
+[2003/06/17-22:43:48, debug   ] Try to verify next mix signature...[2003/06/17-22:43:48, debug   ] success!
+[2003/06/17-22:43:48, debug   ] CAFirstMix init() succeded
+[2003/06/17-22:43:48, debug   ] CAFirstMix InfoService - Signature set
+[2003/06/17-22:43:48, debug   ] CAFirstMix Helo sended
+[2003/06/17-22:43:48, debug   ] InfoService Loop started
+[2003/06/17-22:43:48, debug   ] Starting Message Loop...
+\end{verbatim}
+
+When you get that far your Mix is fully operational and you are
+ready for the final steps to make your Mix run unattended and start
+automatically if your machine should ever need to be rebooted.
+
+
+% ---------------------------------------------------------------------
+% ---------------------------------------------------------------------
+
+\section {Running the Mix unattended}
+
+Rerun ``MixConfig'' to turn proxytest into Daemon and to switch off
+logging, or switch to logging via syslog if you want to see it work.
+(First and last Mixes will produce a lot of output there.)
+
+% ---------------------------------------------------------------------
+
+\subsection {System Start Scripts}
+
+To make the Mix start automatically in case your system is rebooted
+you will need to write a start script. Fortunately most systems
+provide skeleton scripts. You only need to adjust them instead of
+writing one from scratch.
+
+% ---------------------------------------------------------------------
+
+\subsubsection {Debian}
+
+Become root. Go to /etc/init.d/ and make a copy of the existing
+skeleton file. Call it mix.
+
+Start your favorite editor and open that file.
+
+Change
+\begin{verbatim}
+DAEMON=/usr/sbin/daemon
+NAME=daemon
+DESC="some daemon"
+\end{verbatim}
+to
+\begin{verbatim}
+DAEMON=/home/mix/proxytest
+NAME=proxytest
+DESC="Mix daemon"
+\end{verbatim}
+
+and change
+
+\begin{verbatim}
+  start)
+        echo -n "Starting $DESC: $NAME"
+        start-stop-daemon --start --quiet --pidfile /var/run/$NAME.pid \
+                --exec $DAEMON
+        echo "."
+        ;;
+  stop)
+        echo -n "Stopping $DESC: $NAME "
+        start-stop-daemon --stop --quiet --pidfile /var/run/$NAME.pid \
+                --exec $DAEMON
+        echo "."
+        ;;
+\end{verbatim}
+
+to
+
+\begin{verbatim}
+  start)
+        echo -n "Starting $DESC: $NAME"
+        start-stop-daemon --start --quiet -u mix -c mix \
+                --exec $DAEMON -- -c /home/mix/config.xml
+        echo "."
+        ;;
+  stop)
+        echo -n "Stopping $DESC: $NAME "
+        start-stop-daemon --stop --quiet -u mix -c mix \
+                --exec $DAEMON
+        echo ``.''
+        ;;
+\end{verbatim}
+
+
+You can now test your script by running \texttt{/etc/init.d/mix start} and
+confirm with \texttt{ps axu} that your mix is running.
+
+Shut it down with \texttt{/etc/init.d/mix stop} and once again
+confirm with \texttt{ps axu} that your mix is not running anymore.
+
+If that went OK you can use \texttt{update-rc.d mix defaults 50} to
+actually make your script part of the startup and shutdown procedures.
+
+Reboot your machine to finally test it all.
+
+% ---------------------------------------------------------------------
+
+\subsubsection {Suse}
+
+Become root. Go to /etc/init.d/ and make a copy of the existing
+skeleton file. Call it mix.
+
+Start your favorite editor, open that file and change the INFO section to something like this:
+
+\begin{verbatim}
+### BEGIN INIT INFO
+# Provides:          Mix
+# Required-Start:    $syslog $network $named
+# X-UnitedLinux-Should-Start: $time
+# Required-Stop:     $syslog $network
+# X-UnitedLinux-Should-Stop: $time
+# Default-Start:     3 5
+# Default-Stop:      0 1 2 6
+# Short-Description: Mix cascade proxytest daemon
+# Description:       Start mix to run the proxytest daemon
+#       and let it connect to the other mixes in its cascade.
+### END INIT INFO
+\end{verbatim}
+
+Now change 
+
+\begin{verbatim}
+# Check for missing binaries (stale symlinks should not happen)
+FOO_BIN=/usr/sbin/FOO
+test -x $FOO_BIN || exit 5
+\end{verbatim}
+to
+\begin{verbatim}
+# Check for missing binaries (stale symlinks should not happen)
+FOO_BIN=/home/mix/proxytest
+test -x $FOO_BIN || exit 5
+\end{verbatim}
+
+and 
+
+\begin{verbatim}
+# Check for existence of needed config file and read it
+FOO_CONFIG=/etc/sysconfig/FOO
+test -r $FOO_CONFIG || exit 6
+. $FOO_CONFIG
+\end{verbatim}
+to
+\begin{verbatim}
+# Check for existence of needed config file
+FOO_CONFIG=/home/mix/config.xml
+test -r $FOO_CONFIG || exit 6
+#. $FOO_CONFIG
+\end{verbatim}
+
+Further down look for 
+
+\begin{verbatim}
+    start)
+        echo -n "Starting FOO "
+        ## Start daemon with startproc(8). If this fails
+        ## the return value is set appropriately by startproc.
+        startproc $FOO_BIN
+
+\end{verbatim}
+
+and change that to
+
+\begin{verbatim}
+    start)
+        echo -n "Starting Mix "
+        ## Start daemon with startproc(8). If this fails
+        ## the return value is set appropriately by startproc.
+        startproc -u mix $FOO_BIN -c $FOO_CONFIG
+
+\end{verbatim}
+
+and for cosmetic reasons also change
+
+\begin{verbatim}
+    stop)
+        echo -n "Shutting down FOO "
+        ## Stop daemon with killproc(8) and if this fails
+\end{verbatim}
+
+to
+
+\begin{verbatim}
+    stop)
+        echo -n "Shutting down Mix "
+        ## Stop daemon with killproc(8) and if this fails
+\end{verbatim}
+
+You can now test your script by running \texttt{/etc/init.d/mix start} and
+confirm with \texttt{ps axu} that your mix is running.
+
+Shut it down with \texttt{/etc/init.d/mix stop} and once again
+confirm with \texttt{ps axu} that your mix is not running anymore.
+
+If that went OK you can use \texttt{insserv /etc/init.d/mix} to 
+actually make your script part of the startup and shutdown procedures.
+
+Reboot your machine to finally test it all.
+
+% ---------------------------------------------------------------------
+
+\subsubsection{Red Hat}
+
+
+\verb|export LD_LIBRARY_PATH=/home/mix/xerces-c-src_2_3_0/lib/|
+
+
+% ---------------------------------------------------------------------
+
+\subsection{Links to further Information}
+
+
+TO-DO\\
+
+The End.
+
+\end{document}
+
+
+% LocalWords:  JAP InfoService PGP Debian GPG URL Suse Applet dselect yast Ssh
+% LocalWords:  Xerces OpenSSL Netscape Mozilla Konqueror KMail proxytest XML IP
+% LocalWords:  item MixConfig Dresden devel JRE
