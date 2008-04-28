@@ -467,7 +467,7 @@ NEXT_USER:
 											m_PacketsPerCountryOUT[pEntry->pHead->countryID]++;
 										#endif	
 										#ifdef LOG_CHANNEL	
-											//pEntry->packetsOutToUser++;
+											pEntry->packetsOutToUser++;
 											getcurrentTimeMicros(current_time);
 											diff_time=diff64(current_time,pEntry->timeCreated);
 											CAMsg::printMsg(LOG_DEBUG,"2:%u,%Lu,%Lu,%u,%u,%u\n",
@@ -517,7 +517,7 @@ NEXT_USER:
 										#ifdef COUNTRY_STATS
 											m_PacketsPerCountryOUT[pEntry->pHead->countryID]++;
 										#endif	
-										#ifdef LOG_CGANNEL	
+										#ifdef LOG_CHANNEL	
 											pEntry->packetsOutToUser++;
 										#endif
 										#ifdef HAVE_EPOLL

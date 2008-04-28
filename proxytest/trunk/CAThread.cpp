@@ -142,10 +142,11 @@ SINT32 CAThread::start(void* param,bool bDaemon,bool bSilent)
 				return E_UNKNOWN;
 			}
 #else
-		if(pthread_create(m_pThread,NULL,m_fncMainLoop,param)!=0)
+		SINT32 ret=pthread_create(m_pThread,NULL,m_fncMainLoop,param);
+		if(ret!=0)
 			{
 				if(!bSilent)
-					CAMsg::printMsg(LOG_ERR, "CAThread::start() - creating new thread failed!\n");
+					CAMsg::printMsg(LOG_ERR, "CAThread::start() - creating new thread failed! - Err: %i\n",ret);
 				delete m_pThread;
 				m_pThread=NULL;
 				return E_UNKNOWN;
