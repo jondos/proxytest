@@ -214,10 +214,12 @@ SINT32 CAFirstMix::init()
 		char* db_user;
 		char* db_passwd;
 		pglobalOptions->getCountryStatsDBConnectionLoginData(&db_host,&db_user,&db_passwd);
-		initCountryStats(db_host,db_user,db_passwd);
+		SINT32 retcountrydb=initCountryStats(db_host,db_user,db_passwd);
 		delete[] db_host;
 		delete[] db_user;
 		delete[] db_passwd;
+		if(retcountrydb!=E_SUCCESS)
+			return E_UNKNOWN;
 #endif		
 		m_pQueueSendToMix=new CAQueue(sizeof(tQueueEntry));
 		m_pQueueReadFromMix=new CAQueue(sizeof(tQueueEntry));
@@ -1768,7 +1770,7 @@ SINT32 CAFirstMix::initCountryStats(char* db_host,char* db_user,char* db_passwd)
 		tmp=mysql_real_connect(m_mysqlCon,db_host,db_user,db_passwd,COUNTRY_STATS_DB,0,NULL,0);
 		if(tmp==NULL)
 			{
-				CAMsg::printMsg(LOG_DEBUG,"Could not connet to CountryStats DB!\n");
+				CAMsg::printMsg(LOG_DEBUG,"Could not connect to CountryStats DB!\n");
 				mysql_thread_end();
 				mysql_close(m_mysqlCon);
 				m_mysqlCon=NULL;
