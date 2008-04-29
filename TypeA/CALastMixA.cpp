@@ -100,8 +100,11 @@ SINT32 CALastMixA::loop()
 							{
 								ret=sizeof(tQueueEntry);
 								m_pQueueReadFromMix->get((UINT8*)pQueueEntry,(UINT32*)&ret);
+								#if defined(LOG_PACKET_TIMES) ||defined(LOG_CHANNEL)
+									getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_start);
+								#endif
 								#ifdef LOG_PACKET_TIMES
-									getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_start_OP);
+									set64(pQueueEntry->timestamp_proccessing_start,pQueueEntry->timestamp_proccessing_start_OP);
 								#endif
 								if(pMixPacket->channel>0&&pMixPacket->channel<256)
 									{
