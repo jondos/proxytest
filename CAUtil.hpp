@@ -172,7 +172,7 @@ inline void set64(UINT64& op1,UINT32 op2)
 #endif
 	}
 
-inline void set64(UINT64& op1,UINT64 op2)
+inline void set64(UINT64& dst,UINT64 src)
 	{
 #if !defined(HAVE_NATIVE_UINT64)
 		op1.low=op2.low;
