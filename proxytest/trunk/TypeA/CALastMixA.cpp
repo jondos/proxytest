@@ -40,7 +40,7 @@ extern CACmdLnOptions* pglobalOptions;
 #ifdef LOG_CHANNEL
 //CAMsg::printMsg(LOG_DEBUG,"Channel time log format is as follows: Channel-ID,Channel Start [micros], Channel End [micros], Upload (bytes), Download (bytes), DataAndOpenAndClosePacketsFromUser, DataAndClosePacketsToUser\n"); 
 #define MACRO_DO_LOG_CHANNEL(a)\
-	CAMsg::printMsg(LOG_DEBUG,#a ":%u,%ul,%ul,%u,%u,%u,%u\n",\
+	CAMsg::printMsg(LOG_DEBUG,#a ":%u,%Lu,%Lu,%u,%u,%u,%u\n",\
 			pChannelListEntry->channelIn,pChannelListEntry->timeCreated,pQueueEntry->timestamp_proccessing_end,\
 			pChannelListEntry->trafficInFromUser,pChannelListEntry->trafficOutToUser,\
 			pChannelListEntry->packetsDataInFromUser,pChannelListEntry->packetsDataOutToUser); 
