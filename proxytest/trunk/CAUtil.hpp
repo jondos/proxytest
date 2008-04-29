@@ -172,13 +172,15 @@ inline void set64(UINT64& op1,UINT32 op2)
 #endif
 	}
 
+/** Sets the value of dst to the value of src
+*/
 inline void set64(UINT64& dst,UINT64 src)
 	{
 #if !defined(HAVE_NATIVE_UINT64)
-		op1.low=op2.low;
-		op1.high=op2.high;
+		dst.low=src.low;
+		dst.high=src.high;
 #else
-		op1=op2;
+		dst=src;
 #endif
 	}
 
