@@ -77,13 +77,14 @@ CALastMixChannelList::~CALastMixChannelList()
 		delete[] m_HashTable;
 	}
 
-#if defined (LOG_CHANNEL) 
-	SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue,UINT64 time, UINT32 trafficInFromUser)
-#elif defined (DELAY_CHANNELS_LATENCY)
-	SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue,UINT64 time)
-#else
-	SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue)
+SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue
+#ifdef LOG_CHANNEL
+																	,UINT64 timecreated,UINT32 trafficInFromUser
 #endif
+#if defined(DELAY_CHANNELS_LATENCY)
+																	,UINT64 delaytime
+#endif
+																)
 	{
 		UINT32 hash=id&0x0000FFFF;
 		lmChannelListEntry* pEntry=m_HashTable[hash];
@@ -93,17 +94,15 @@ CALastMixChannelList::~CALastMixChannelList()
 		pNewEntry->pSocket=pSocket;
 		pNewEntry->pQueueSend=pQueue;
 #if defined (LOG_CHANNEL)
-		pNewEntry->timeCreated=time;
+		pNewEntry->timeCreated=timecreated;
 #endif
 #if defined (DELAY_CHANNELS_LATENCY)
-		pNewEntry->timeLatency=time+m_u32DelayChannelLatency;
+		pNewEntry->timeLatency=delaytime+m_u32DelayChannelLatency;
 #endif
 #ifdef LOG_CHANNEL
 		pNewEntry->trafficInFromUser=trafficInFromUser;
 		pNewEntry->packetsDataInFromUser=1;
 		pNewEntry->packetsDataOutToUser=0;
-#endif
-#if defined (LOG_CHANNEL)
 		pNewEntry->trafficOutToUser=0;
 #endif
 #ifdef NEW_FLOW_CONTROL

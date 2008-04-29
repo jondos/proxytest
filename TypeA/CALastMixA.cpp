@@ -1,4 +1,4 @@
-/*
+
 Copyright (c) 2000, The JAP-Team 
 All rights reserved.
 Redistribution and use in source and binary forms, with or without modification, 
@@ -38,13 +38,14 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 extern CACmdLnOptions* pglobalOptions;
 #ifdef LOG_CHANNEL
-		//CAMsg::printMsg(LOG_DEBUG,"Channel time log format is as follows: Channel-ID,Channel duration [micros], Upload (bytes), Download (bytes), DataAndOpenPacketsFromUser, DataPacketsToUser\n"); 
-	#define MACRO_DO_LOG_CHANNEL\
-		diff_time=diff64(pQueueEntry->timestamp_proccessing_end,pChannelListEntry->timeCreated);\
-		CAMsg::printMsg(LOG_DEBUG,"%u,%u,%u,%u,%u,%u\n",\
-			pChannelListEntry->channelIn,\
-			diff_time,pChannelListEntry->trafficInFromUser,pChannelListEntry->trafficOutToUser,\
+//CAMsg::printMsg(LOG_DEBUG,"Channel time log format is as follows: Channel-ID,Channel Start [micros], Channel End [micros], Upload (bytes), Download (bytes), DataAndOpenAndClosePacketsFromUser, DataAndClosePacketsToUser\n"); 
+#define MACRO_DO_LOG_CHANNEL(a)\
+	CAMsg::printMsg(LOG_DEBUG,#a ":%u,%ul,%ul,%u,%u,%u,%u\n",\
+			pChannelListEntry->channelIn,pChannelListEntry->timeCreated,pQueueEntry->timestamp_proccessing_end,\
+			pChannelListEntry->trafficInFromUser,pChannelListEntry->trafficOutToUser,\
 			pChannelListEntry->packetsDataInFromUser,pChannelListEntry->packetsDataOutToUser); 
+#define MACRO_DO_LOG_CHANNEL_CLOSE_FROM_USER MACRO_DO_LOG_CHANNEL(1)
+#define MACRO_DO_LOG_CHANNEL_CLOSE_FROM_MIX MACRO_DO_LOG_CHANNEL(2)
 #endif
 
 SINT32 CALastMixA::loop()
@@ -82,8 +83,7 @@ SINT32 CALastMixA::loop()
 		pLogThread->start(this);
 
 		#ifdef LOG_CHANNEL
-			UINT32 diff_time; 
-			CAMsg::printMsg(LOG_DEBUG,"Channel time log format is as follows: Channel-ID,Channel duration [micros], Upload (bytes), Download (bytes), DataAndOpenPacketsFromUser, DataPacketsToUser\n"); 
+			CAMsg::printMsg(LOG_DEBUG,"Channel time log format is as follows: Channel-ID,Channel Start [micros], Channel End [micros], Upload (bytes), Download (bytes), DataAndOpenPacketsFromUser, DataPacketsToUser\n"); 
 		#endif
 
 		while(!m_bRestart)
@@ -237,15 +237,18 @@ SINT32 CALastMixA::loop()
 															else
 																{
 																	tmpSocket->setNonBlocking(true);
-																	#if defined (LOG_CHANNEL)
-																		m_pChannelList->add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue(),pQueueEntry->timestamp_proccessing_start,payLen);
-																	#elif defined (DELAY_CHANNELS_LATENCY)
+																	#if defined (DELAY_CHANNELS_LATENCY)
 																		UINT64 u64temp;
 																		getcurrentTimeMillis(u64temp);
-																		m_pChannelList->add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue(PAYLOAD_SIZE),u64temp);
-																	#else
-																		m_pChannelList->add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue(PAYLOAD_SIZE));
 																	#endif
+																	m_pChannelList->add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue(PAYLOAD_SIZE)
+																	#if defined (LOG_CHANNEL)
+																											,pQueueEntry->timestamp_proccessing_start,payLen
+																	#endif
+																	#if defined (DELAY_CHANNELS_LATENCY)
+																											,u64temp
+																	#endif
+																											);
 #ifdef HAVE_EPOLL
 																	psocketgroupCacheRead->add(*tmpSocket,m_pChannelList->get(pMixPacket->channel));
 #else
@@ -269,15 +272,18 @@ SINT32 CALastMixA::loop()
 												delete pChannelListEntry->pSocket;
 												delete pChannelListEntry->pCipher;
 												delete pChannelListEntry->pQueueSend;										
-												m_pChannelList->removeChannel(pMixPacket->channel);
-												#ifdef LOG_PACKET_TIMES
+												#if defined (LOG_PACKET_TIMES) ||defined (LOG_CHANNEL)
 													getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
+												#endif
+												#if defined (LOG_PACKET_TIMES)
 													set64(pQueueEntry->timestamp_proccessing_end_OP,pQueueEntry->timestamp_proccessing_end);
 													m_pLogPacketStats->addToTimeingStats(*pQueueEntry,CHANNEL_CLOSE,true);
-													#ifdef LOG_CHANNEL
-														MACRO_DO_LOG_CHANNEL
-													#endif
 												#endif
+												#ifdef LOG_CHANNEL
+													pChannelListEntry->packetsDataInFromUser++;
+													MACRO_DO_LOG_CHANNEL_CLOSE_FROM_USER
+												#endif
+												m_pChannelList->removeChannel(pMixPacket->channel);
 											}
 										else if(pMixPacket->flags==CHANNEL_SUSPEND)
 											{
@@ -329,10 +335,6 @@ SINT32 CALastMixA::loop()
 														psocketgroupCacheRead->remove(*(pChannelListEntry->pSocket));
 														psocketgroupCacheWrite->remove(*(pChannelListEntry->pSocket));
 														pChannelListEntry->pSocket->close();
-														#ifdef LOG_CHANNEL
-															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
-															MACRO_DO_LOG_CHANNEL
-														#endif
 														delete pChannelListEntry->pSocket;
                             /* send a data packet signaling the connection error */
                             getRandom(pMixPacket->payload.data, PAYLOAD_SIZE);
@@ -345,9 +347,17 @@ SINT32 CALastMixA::loop()
 														#endif
 														m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));			
 														m_logDownloadedPackets++;	
+														#ifdef LOG_CHANNEL
+															pChannelListEntry->packetsDataOutToUser++;
+														#endif
                             delete pChannelListEntry->pCipher;
                             /* now send channel-close */
 														delete pChannelListEntry->pQueueSend;
+														#ifdef LOG_CHANNEL
+															pChannelListEntry->packetsDataOutToUser++;
+															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
+															MACRO_DO_LOG_CHANNEL_CLOSE_FROM_MIX
+														#endif
 														m_pChannelList->removeChannel(pMixPacket->channel);
 														getRandom(pMixPacket->data,DATA_SIZE);
 														pMixPacket->flags=CHANNEL_CLOSE;
@@ -411,10 +421,6 @@ SINT32 CALastMixA::loop()
 														psocketgroupCacheRead->remove(*(pChannelListEntry->pSocket));
 														psocketgroupCacheWrite->remove(*(pChannelListEntry->pSocket));
 														pChannelListEntry->pSocket->close();
-														#ifdef LOG_CHANNEL
-															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
-															MACRO_DO_LOG_CHANNEL
-														#endif
 														delete pChannelListEntry->pSocket;
                             /* send a data packet signaling the connection error */
                             getRandom(pMixPacket->payload.data, PAYLOAD_SIZE);
@@ -427,6 +433,9 @@ SINT32 CALastMixA::loop()
 															setZero64(pQueueEntry->timestamp_proccessing_start);
 														#endif
 														m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));			
+														#ifdef LOG_CHANNEL
+															pChannelListEntry->packetsDataOutToUser++;
+														#endif
 														m_logDownloadedPackets++;	
                             delete pChannelListEntry->pCipher;
                             /* now send channel-close */
@@ -439,6 +448,13 @@ SINT32 CALastMixA::loop()
 														#endif
 														m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));			
 														m_logDownloadedPackets++;	
+														#ifdef LOG_CHANNEL
+															pChannelListEntry->packetsDataOutToUser++;
+														#endif
+														#ifdef LOG_CHANNEL
+															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
+															MACRO_DO_LOG_CHANNEL_CLOSE_FROM_MIX
+														#endif
 														m_pChannelList->removeChannel(pChannelListEntry->channelIn);											 
 													}
 											}
@@ -508,10 +524,6 @@ SINT32 CALastMixA::loop()
 														psocketgroupCacheRead->remove(*(pChannelListEntry->pSocket));
 														psocketgroupCacheWrite->remove(*(pChannelListEntry->pSocket));
 														pChannelListEntry->pSocket->close();
-														#ifdef LOG_CHANNEL
-															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
-															MACRO_DO_LOG_CHANNEL
-														#endif
 														delete pChannelListEntry->pSocket;
                             if (ret == SOCKET_ERROR) {
                               /* send a data packet signaling the connection error */
@@ -526,6 +538,9 @@ SINT32 CALastMixA::loop()
 														  #endif
 														  m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));			
 														  m_logDownloadedPackets++;
+															#ifdef LOG_CHANNEL
+																pChannelListEntry->packetsDataOutToUser++;
+															#endif
                             }
                             /* send channel-close */
 														delete pChannelListEntry->pCipher;
@@ -533,12 +548,19 @@ SINT32 CALastMixA::loop()
 														pMixPacket->flags=CHANNEL_CLOSE;
 														pMixPacket->channel=pChannelListEntry->channelIn;
 														getRandom(pMixPacket->data,DATA_SIZE);
-														m_pChannelList->removeChannel(pChannelListEntry->channelIn);
 														#ifdef LOG_PACKET_TIMES
 															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
 														#endif
 														m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));			
 														m_logDownloadedPackets++;	
+														#ifdef LOG_CHANNEL
+															pChannelListEntry->packetsDataOutToUser++;
+														#endif
+														#ifdef LOG_CHANNEL
+															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
+															MACRO_DO_LOG_CHANNEL_CLOSE_FROM_MIX
+														#endif
+														m_pChannelList->removeChannel(pChannelListEntry->channelIn);
 													}
 												else 
 													{

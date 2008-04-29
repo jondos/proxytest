@@ -49,16 +49,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 extern CACmdLnOptions* pglobalOptions;
 
-/*#ifdef LOG_CHANNEL
-	#define MACRO_DO_LOG_CHANNEL\
-		getcurrentTimeMillis(current_millis);\
-		diff_time=diff64(current_millis,pChannelListEntry->timeCreated);\
-		CAMsg::printMsg(LOG_DEBUG,"Channel %u closed - Start %Lu - End %Lu - Time [ms] - %u, Upload - %u, Download - %u, DataPacketsFromUser %u, DataPacketsToUser %u\n",\
-			pChannelListEntry->channelIn,pChannelListEntry->timeCreated,\
-			current_millis,diff_time,pChannelListEntry->trafficInFromUser,pChannelListEntry->trafficOutToUser,\
-			pChannelListEntry->packetsDataInFromUser,pChannelListEntry->packetsDataOutToUser); 
-#endif
-*/
 /*******************************************************************************/
 // ----------START NEW VERSION -----------------------
 //---------------------------------------------------------

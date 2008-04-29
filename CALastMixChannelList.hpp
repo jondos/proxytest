@@ -59,8 +59,6 @@ struct t_lastmixchannellist
 			UINT32				trafficInFromUser;
 			UINT32				packetsDataOutToUser;
 			UINT32				packetsDataInFromUser;
-#endif
-#if defined (LOG_CHANNEL)
 			UINT32				trafficOutToUser;
 #endif
 #ifdef NEW_FLOW_CONTROL
@@ -95,13 +93,16 @@ class CALastMixChannelList
 			CALastMixChannelList();
 			~CALastMixChannelList();
 
-#ifdef LOG_CHANNEL			
-			SINT32 add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue,UINT64 time,UINT32 trafficIn);
-#elif defined(DELAY_CHANNELS_LATENCY)
-			SINT32 add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue,UINT64 time);
-#else
-			SINT32 add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue);
+
+			SINT32 add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue
+#ifdef LOG_CHANNEL
+									,UINT64 timecreated,UINT32 trafficIn
 #endif
+#if defined(DELAY_CHANNELS_LATENCY)
+									,UINT64 delaytime
+#endif
+								);
+
 			lmChannelListEntry* get(HCHANNEL channelIn)
 				{
 					lmChannelListEntry* akt=m_HashTable[channelIn&0x0000FFFF];
