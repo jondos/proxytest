@@ -455,7 +455,8 @@ NEXT_USER:
 								if(pEntry!=NULL)
 									{
 										pMixPacket->channel=pEntry->channelIn;
-										getRandom(pMixPacket->data,DATA_SIZE);
+										pEntry->pCipher->crypt2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+										//getRandom(pMixPacket->data,DATA_SIZE);
 										#ifdef LOG_PACKET_TIMES
 											getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
 										#endif
