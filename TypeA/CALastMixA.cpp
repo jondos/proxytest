@@ -163,11 +163,11 @@ SINT32 CALastMixA::loop()
 																CAMsg::printMsg(LOG_DEBUG,"Cannot connect to Squid!\n");
 															#endif
 															delete tmpSocket;
-                              /* send a data packet signaling the connect error */
+                              /* send a close packet signaling the connect error */
                               getRandom(pMixPacket->payload.data, PAYLOAD_SIZE);
                               pMixPacket->payload.type = 0;
-                              pMixPacket->payload.len = htons(0 | CONNECTION_ERROR_FLAG);
-                              pMixPacket->flags = CHANNEL_DATA;
+                              pMixPacket->payload.len = htons(CONNECTION_ERROR_FLAG);
+                              pMixPacket->flags = CHANNEL_CLOSE;
 														  newCipher->crypt2(pMixPacket->data, pMixPacket->data, DATA_SIZE);
 															#ifdef LOG_PACKET_TIMES
 																setZero64(pQueueEntry->timestamp_proccessing_start);
@@ -175,14 +175,6 @@ SINT32 CALastMixA::loop()
 															m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));			
 															m_logDownloadedPackets++;	
 															delete newCipher;
-                              /* now send channel-close */
-															getRandom(pMixPacket->data,DATA_SIZE);
-															pMixPacket->flags=CHANNEL_CLOSE;
-															#ifdef LOG_PACKET_TIMES
-																setZero64(pQueueEntry->timestamp_proccessing_start);
-															#endif
-															m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));			
-															m_logDownloadedPackets++;	
 													}
 												else
 														{ //connection to proxy successfull
@@ -216,11 +208,11 @@ SINT32 CALastMixA::loop()
 																	#endif
 																	tmpSocket->close();
 																	delete tmpSocket;
-                                  /* send a data packet signaling the connect error */
+                                  /* send a close packet signaling the connect error */
                                   getRandom(pMixPacket->payload.data, PAYLOAD_SIZE);
                                   pMixPacket->payload.type = 0;
-                                  pMixPacket->payload.len = htons(0 | CONNECTION_ERROR_FLAG);
-                                  pMixPacket->flags = CHANNEL_DATA;
+                                  pMixPacket->payload.len = htons(CONNECTION_ERROR_FLAG);
+                                  pMixPacket->flags = CHANNEL_CLOSE;
 														      newCipher->crypt2(pMixPacket->data, pMixPacket->data, DATA_SIZE);
 															    #ifdef LOG_PACKET_TIMES
 																    setZero64(pQueueEntry->timestamp_proccessing_start);
@@ -228,15 +220,7 @@ SINT32 CALastMixA::loop()
 															    m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));			
 															    m_logDownloadedPackets++;	
 																	delete newCipher;
-                                  /* now send channel-close */
-																	getRandom(pMixPacket->data,DATA_SIZE);
-																	pMixPacket->flags=CHANNEL_CLOSE;
-																	#ifdef LOG_PACKET_TIMES
-																		setZero64(pQueueEntry->timestamp_proccessing_start);
-																	#endif
-																	m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));			
-																	m_logDownloadedPackets++;	
-																}
+ 																}
 															else
 																{
 																	tmpSocket->setNonBlocking(true);
@@ -339,20 +323,6 @@ SINT32 CALastMixA::loop()
 														psocketgroupCacheWrite->remove(*(pChannelListEntry->pSocket));
 														pChannelListEntry->pSocket->close();
 														delete pChannelListEntry->pSocket;
-                            /* send a data packet signaling the connection error */
-                            getRandom(pMixPacket->payload.data, PAYLOAD_SIZE);
-                            pMixPacket->payload.type = 0;
-                            pMixPacket->payload.len = htons(0 | CONNECTION_ERROR_FLAG);
-                            pMixPacket->flags = CHANNEL_DATA;
-														pChannelListEntry->pCipher->crypt2(pMixPacket->data, pMixPacket->data, DATA_SIZE);
-														#ifdef LOG_PACKET_TIMES
-															setZero64(pQueueEntry->timestamp_proccessing_start);
-														#endif
-														m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));			
-														m_logDownloadedPackets++;	
-														#ifdef LOG_CHANNEL
-															pChannelListEntry->packetsDataOutToUser++;
-														#endif
                             delete pChannelListEntry->pCipher;
                             /* now send channel-close */
 														delete pChannelListEntry->pQueueSend;
@@ -425,21 +395,6 @@ SINT32 CALastMixA::loop()
 														psocketgroupCacheWrite->remove(*(pChannelListEntry->pSocket));
 														pChannelListEntry->pSocket->close();
 														delete pChannelListEntry->pSocket;
-                            /* send a data packet signaling the connection error */
-                            getRandom(pMixPacket->payload.data, PAYLOAD_SIZE);
-                            pMixPacket->payload.type = 0;
-                            pMixPacket->payload.len = htons(0 | CONNECTION_ERROR_FLAG);
-                            pMixPacket->flags = CHANNEL_DATA;
-														pMixPacket->channel = pChannelListEntry->channelIn;
-														pChannelListEntry->pCipher->crypt2(pMixPacket->data, pMixPacket->data, DATA_SIZE);
-														#ifdef LOG_PACKET_TIMES
-															setZero64(pQueueEntry->timestamp_proccessing_start);
-														#endif
-														m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));			
-														#ifdef LOG_CHANNEL
-															pChannelListEntry->packetsDataOutToUser++;
-														#endif
-														m_logDownloadedPackets++;	
                             delete pChannelListEntry->pCipher;
                             /* now send channel-close */
 														delete pChannelListEntry->pQueueSend;
@@ -528,23 +483,6 @@ SINT32 CALastMixA::loop()
 														psocketgroupCacheWrite->remove(*(pChannelListEntry->pSocket));
 														pChannelListEntry->pSocket->close();
 														delete pChannelListEntry->pSocket;
-                            if (ret == SOCKET_ERROR) {
-                              /* send a data packet signaling the connection error */
-                              getRandom(pMixPacket->payload.data, PAYLOAD_SIZE);
-                              pMixPacket->payload.type = 0;
-                              pMixPacket->payload.len = htons(0 | CONNECTION_ERROR_FLAG);
-                              pMixPacket->flags = CHANNEL_DATA;
-														  pMixPacket->channel = pChannelListEntry->channelIn;
-														  pChannelListEntry->pCipher->crypt2(pMixPacket->data, pMixPacket->data, DATA_SIZE);
-														  #ifdef LOG_PACKET_TIMES
-															  setZero64(pQueueEntry->timestamp_proccessing_end_OP);
-														  #endif
-														  m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));			
-														  m_logDownloadedPackets++;
-															#ifdef LOG_CHANNEL
-																pChannelListEntry->packetsDataOutToUser++;
-															#endif
-                            }
                             /* send channel-close */
 														delete pChannelListEntry->pCipher;
 														delete pChannelListEntry->pQueueSend;
