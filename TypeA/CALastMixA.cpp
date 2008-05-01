@@ -165,8 +165,8 @@ SINT32 CALastMixA::loop()
 															delete tmpSocket;
                               /* send a close packet signaling the connect error */
                               getRandom(pMixPacket->payload.data, PAYLOAD_SIZE);
-                              pMixPacket->payload.type = 0;
-                              pMixPacket->payload.len = htons(CONNECTION_ERROR_FLAG);
+                              pMixPacket->payload.type = CONNECTION_ERROR_FLAG;
+                              pMixPacket->payload.len = 0;
                               pMixPacket->flags = CHANNEL_CLOSE;
 														  newCipher->crypt2(pMixPacket->data, pMixPacket->data, DATA_SIZE);
 															#ifdef LOG_PACKET_TIMES
