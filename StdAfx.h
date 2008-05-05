@@ -488,7 +488,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if defined(COUNTRY_STATS)
     #ifdef HAVE_CONFIG_H
 	#ifdef HAVE_MYSQL_MYSQL_H
-	    #include <mysql/myql.h>
+	    #include <mysql/mysql.h>
 	#else
 	    #include <mysql.h>
 	#endif
