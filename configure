@@ -1336,6 +1336,10 @@ Optional Features:
   --enable-new_mix_type   Specify if to build with type B mixes
   --enable-dynamic        Specify if to build a mix for a dynamic cascade
   --enable-dialog
+  --enable-debug          Enable debug mode
+  --enable-crime-detection
+                          Enable crime detection mode
+  --enable-tests          Build also some functional tests
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -13258,7 +13262,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 				#ifdef HAVE_MYSQL_MYSQL_H
-				#include <mysql/mysql..h>
+				#include <mysql/mysql.h>
 				#elif defined(HAVE_MYSQL_H)
 				#include <mysql.h>
 				#endif
@@ -13296,67 +13300,64 @@ else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-	{ echo "$as_me:$LINENO: result: libmysql NOT found
+	{ echo "$as_me:$LINENO: result: libmysql NOT found" >&5
+echo "${ECHO_T}libmysql NOT found" >&6; }
 fi
 
 rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
       conftest$ac_exeext conftest.$ac_ext
 
-LIBS=\"$saved_LIBS\"
+LIBS="$saved_LIBS"
 fi
 
 
 
-  --enable-debug          Enable debug mode
 # Check whether --enable-debug was given.
-if test \"${enable_debug+set}\" = set; then
+if test "${enable_debug+set}" = set; then
   enableval=$enable_debug;
-	    if test \"x$enableval\" != \"xno\" ; then
-		CFLAGS=\"$CFLAGS -ggdb3 -D_DEBUG -fno-inline -fno-default-inline\"
-		CXXFLAGS=\"$CXXFLAGS -ggdb3 -D_DEBUG -fno-inline -fno-default-inline\"
-		OFLAGS=\"-O0\"
+	    if test "x$enableval" != "xno" ; then
+		CFLAGS="$CFLAGS -ggdb3 -D_DEBUG -fno-inline -fno-default-inline"
+		CXXFLAGS="$CXXFLAGS -ggdb3 -D_DEBUG -fno-inline -fno-default-inline"
+		OFLAGS="-O0"
 	    else
-		CFLAGS=\"$CFLAGS -g0\"
-		CXXFLAGS=\"$CXXFLAGS -g0\"
+		CFLAGS="$CFLAGS -g0"
+		CXXFLAGS="$CXXFLAGS -g0"
 	    fi
 
 
 fi
 
-CRIME=\"\"
-  --enable-crime-detection
-                          Enable crime detection mode
+CRIME=""
 # Check whether --enable-crime-detection was given.
-if test \"${enable_crime_detection+set}\" = set; then
+if test "${enable_crime_detection+set}" = set; then
   enableval=$enable_crime_detection;
-	    if test \"x$enableval\" != \"xno\" ; then
-		CRIME=\"-DLOG_CRIME\"
+	    if test "x$enableval" != "xno" ; then
+		CRIME="-DLOG_CRIME"
 	    fi
 
 
 fi
 
 
-DOTHETESTS=\"\"
-  --enable-tests          Build also some functional tests
+DOTHETESTS=""
 # Check whether --enable-tests was given.
-if test \"${enable_tests+set}\" = set; then
+if test "${enable_tests+set}" = set; then
   enableval=$enable_tests;
-	    if test \"x$enableval\" != \"xno\" ; then
-		DOTHETESTS=\"yes\"
+	    if test "x$enableval" != "xno" ; then
+		DOTHETESTS="yes"
 	    fi
 
 
 fi
 
-if test \"x$DOTHETEST\" != \"xyes\" ; then
+if test "x$DOTHETEST" != "xyes" ; then
     LIBCPPUNIT=cppunit
 
 fi
 
-CFLAGS=\"$CFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS\"
-CXXFLAGS=\"$CXXFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS\"
-LIBS=\"$LIBS $PAYMENT_LIB $MYSQL_LIB\"
+CFLAGS="$CFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS"
+CXXFLAGS="$CXXFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS"
+LIBS="$LIBS $PAYMENT_LIB $MYSQL_LIB"
 
  if test x$DOTHETESTS = xyes; then
   DOTESTS_TRUE=
@@ -13366,7 +13367,7 @@ else
   DOTESTS_FALSE=
 fi
 
-ac_config_files=\"$ac_config_files Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile test/Makefile\"
+ac_config_files="$ac_config_files Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile test/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -13378,8 +13379,8 @@ cat >confcache <<\_ACEOF
 # config.status only pays attention to the cache file if you give it
 # the --recheck option to rerun configure.
 #
-# \`ac_cv_env_foo' variables (set or unset) will be overridden when
-# loading this file, other *unset* \`ac_cv_foo' will be assigned the
+# `ac_cv_env_foo' variables (set or unset) will be overridden when
+# loading this file, other *unset* `ac_cv_foo' will be assigned the
 # following values.
 
 _ACEOF
@@ -13390,112 +13391,12 @@ _ACEOF
 # Ultrix sh set writes to stderr and can't be redirected directly,
 # and sets the high bit in the cache file unless we assign to the vars.
 (
-  for ac_var in \`(set) 2>&1 | sed -n 's/^\(a-zA-Z_a-zA-Z0-9_*\)=.*/\1/p'\`; do
+  for ac_var in `(set) 2>&1 | sed -n 's/^\([a-zA-Z_][a-zA-Z0-9_]*\)=.*/\1/p'`; do
     eval ac_val=\$$ac_var
     case $ac_val in #(
     *${as_nl}*)
       case $ac_var in #(
-      *_cv_*" >&5
-echo "${ECHO_T}libmysql NOT found
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-
-LIBS=\"$saved_LIBS\"
-fi
-
-
-
-  --enable-debug          Enable debug mode
-# Check whether --enable-debug was given.
-if test \"${enable_debug+set}\" = set; then
-  enableval=$enable_debug;
-	    if test \"x$enableval\" != \"xno\" ; then
-		CFLAGS=\"$CFLAGS -ggdb3 -D_DEBUG -fno-inline -fno-default-inline\"
-		CXXFLAGS=\"$CXXFLAGS -ggdb3 -D_DEBUG -fno-inline -fno-default-inline\"
-		OFLAGS=\"-O0\"
-	    else
-		CFLAGS=\"$CFLAGS -g0\"
-		CXXFLAGS=\"$CXXFLAGS -g0\"
-	    fi
-
-
-fi
-
-CRIME=\"\"
-  --enable-crime-detection
-                          Enable crime detection mode
-# Check whether --enable-crime-detection was given.
-if test \"${enable_crime_detection+set}\" = set; then
-  enableval=$enable_crime_detection;
-	    if test \"x$enableval\" != \"xno\" ; then
-		CRIME=\"-DLOG_CRIME\"
-	    fi
-
-
-fi
-
-
-DOTHETESTS=\"\"
-  --enable-tests          Build also some functional tests
-# Check whether --enable-tests was given.
-if test \"${enable_tests+set}\" = set; then
-  enableval=$enable_tests;
-	    if test \"x$enableval\" != \"xno\" ; then
-		DOTHETESTS=\"yes\"
-	    fi
-
-
-fi
-
-if test \"x$DOTHETEST\" != \"xyes\" ; then
-    LIBCPPUNIT=cppunit
-
-fi
-
-CFLAGS=\"$CFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS\"
-CXXFLAGS=\"$CXXFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS\"
-LIBS=\"$LIBS $PAYMENT_LIB $MYSQL_LIB\"
-
- if test x$DOTHETESTS = xyes; then
-  DOTESTS_TRUE=
-  DOTESTS_FALSE='#'
-else
-  DOTESTS_TRUE='#'
-  DOTESTS_FALSE=
-fi
-
-ac_config_files=\"$ac_config_files Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile test/Makefile\"
-
-cat >confcache <<\_ACEOF
-# This file is a shell script that caches the results of configure
-# tests run on this system so they can be shared between configure
-# scripts and configure runs, see configure's option --config-cache.
-# It is not useful on other systems.  If it contains results you don't
-# want to keep, you may remove or edit it.
-#
-# config.status only pays attention to the cache file if you give it
-# the --recheck option to rerun configure.
-#
-# \`ac_cv_env_foo' variables (set or unset) will be overridden when
-# loading this file, other *unset* \`ac_cv_foo' will be assigned the
-# following values.
-
-_ACEOF
-
-# The following way of writing the cache mishandles newlines in values,
-# but we know of no workaround that is simple, portable, and efficient.
-# So, we kill variables containing newlines.
-# Ultrix sh set writes to stderr and can't be redirected directly,
-# and sets the high bit in the cache file unless we assign to the vars.
-(
-  for ac_var in \`(set) 2>&1 | sed -n 's/^\(a-zA-Z_a-zA-Z0-9_*\)=.*/\1/p'\`; do
-    eval ac_val=\$$ac_var
-    case $ac_val in #(
-    *${as_nl}*)
-      case $ac_var in #(
-      *_cv_*" >&6; } { echo "$as_me:$LINENO: WARNING: Cache variable $ac_var contains a newline." >&5
+      *_cv_*) { echo "$as_me:$LINENO: WARNING: Cache variable $ac_var contains a newline." >&5
 echo "$as_me: WARNING: Cache variable $ac_var contains a newline." >&2;} ;;
       esac
       case $ac_var in #(
