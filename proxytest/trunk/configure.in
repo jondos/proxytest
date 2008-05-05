@@ -576,13 +576,13 @@ if test "x$DIALOG" != "x" ; then
     LIBS="$LIBS $MYSQL_LIB"
     AC_LINK_IFELSE([AC_LANG_PROGRAM([
 				#ifdef HAVE_MYSQL_MYSQL_H
-				#include <mysql/mysql..h>
+				#include <mysql/mysql.h>
 				#elif defined(HAVE_MYSQL_H)
 				#include <mysql.h>
 				#endif
 				], [mysql_init(0);
 				])],[AC_MSG_RESULT(libmysql found)],
-				[AC_MSG_RESULT(libmysql NOT found])
+				[AC_MSG_RESULT(libmysql NOT found)])
 
 LIBS="$saved_LIBS"
 fi
