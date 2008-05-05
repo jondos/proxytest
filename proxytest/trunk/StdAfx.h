@@ -486,7 +486,15 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 //For MySQL
 #if defined(COUNTRY_STATS)
-    #include <mysql/mysql.h>
+    #ifdef HAVE_CONFIG_H
+	#ifdef HAVE_MYSQL_MYSQL_H
+	    #include <mysql/myql.h>
+	#else
+	    #include <mysql.h>
+	#endif
+    #else //HAVE_CONFIG_H
+	#include <mysql/mysql.h>
+    #endif
 #endif
 
 //For Payment
