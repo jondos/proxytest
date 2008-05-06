@@ -264,7 +264,7 @@ SINT32 CAFirstMixA::loop()
 													pHashEntry->trafficIn++;
 												#endif
 												#ifdef COUNTRY_STATS
-													m_PacketsPerCountryIN[pHashEntry->countryID]++;
+													m_PacketsPerCountryIN[pHashEntry->countryID].inc();
 												#endif	
 												//New control channel code...!
 												if(pMixPacket->channel>0&&pMixPacket->channel<256)
@@ -314,6 +314,12 @@ SINT32 CAFirstMixA::loop()
 													#ifdef LOG_PACKET_TIMES
 														setZero64(pQueueEntry->timestamp_proccessing_start);
 													#endif
+													#ifdef LOG_TRAFFIC_PER_USER
+														pHashEntry->trafficOut++;
+													#endif
+													#ifdef COUNTRY_STATS
+														m_PacketsPerCountryOUT[pHashEntry->countryID].inc();
+													#endif	
 													pHashEntry->pQueueSend->add(pMixPacket,sizeof(tQueueEntry));
 													#ifdef HAVE_EPOLL
 														m_psocketgroupUsersWrite->add(*pMuxSocket,pHashEntry); 
@@ -465,7 +471,7 @@ NEXT_USER:
 											pEntry->pHead->trafficOut++;
 										#endif
 										#ifdef COUNTRY_STATS
-											m_PacketsPerCountryOUT[pEntry->pHead->countryID]++;
+											m_PacketsPerCountryOUT[pEntry->pHead->countryID].inc();
 										#endif	
 										#ifdef LOG_CHANNEL	
 											pEntry->packetsOutToUser++;
@@ -516,7 +522,7 @@ NEXT_USER:
 											pEntry->pHead->trafficOut++;
 										#endif
 										#ifdef COUNTRY_STATS
-											m_PacketsPerCountryOUT[pEntry->pHead->countryID]++;
+											m_PacketsPerCountryOUT[pEntry->pHead->countryID].inc();
 										#endif	
 										#ifdef LOG_CHANNEL	
 											pEntry->packetsOutToUser++;

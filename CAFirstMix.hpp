@@ -52,6 +52,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef REPLAY_DETECTION
 	#include "CAMixWithReplayDB.hpp"
 #endif
+#ifdef COUNTRY_STATS
+	#include "CAMutex.hpp"
+#endif
 
 class CAInfoService;
 
@@ -64,6 +67,33 @@ THREAD_RETURN	fm_loopLog(void*);
 
 #ifdef COUNTRY_STATS
 THREAD_RETURN iplist_loopDoLogCountries(void* param);
+class tUINT32withLock
+	{
+	private:
+		volatile UINT32 value;
+		CAMutex lock;
+	public:
+		tUINT32withLock()
+			{
+				value=0;
+			}
+		void inc()
+			{
+				lock.lock();
+				value++;
+				lock.unlock();
+			}
+
+		int getAndzero()
+			{
+				UINT32 tmp;
+				lock.lock();
+				tmp=value;
+				value=0;
+				lock.unlock();
+				return tmp;
+			}
+	};
 #endif
 
 class CAFirstMix:public 
@@ -103,7 +133,8 @@ public:
 					m_pLogPacketStats=NULL;
 #endif
 #ifdef COUNTRY_STATS
-					m_PacketsPerCountryIN=m_PacketsPerCountryOUT=m_CountryStats=NULL;
+					m_PacketsPerCountryIN=m_PacketsPerCountryOUT=NULL;
+					m_CountryStats=NULL;
 					m_mysqlCon=NULL;
 					m_threadLogLoop=NULL;
 #endif
@@ -306,8 +337,8 @@ protected:
 			volatile bool m_bRunLogCountries;
 			volatile UINT32* m_CountryStats;
 		protected:	
-			volatile UINT32* m_PacketsPerCountryIN;
-			volatile UINT32* m_PacketsPerCountryOUT;
+			tUINT32withLock* m_PacketsPerCountryIN;
+			tUINT32withLock* m_PacketsPerCountryOUT;
 		private:	
 			CAThread* m_threadLogLoop;
 			MYSQL* m_mysqlCon;

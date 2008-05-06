@@ -1788,10 +1788,10 @@ SINT32 CAFirstMix::initCountryStats(char* db_host,char* db_user,char* db_passwd)
 		}
 		m_CountryStats=new UINT32[NR_OF_COUNTRIES+1];
 		memset((void*)m_CountryStats,0,sizeof(UINT32)*(NR_OF_COUNTRIES+1));
-		m_PacketsPerCountryIN=new UINT32[NR_OF_COUNTRIES+1];
-		memset((void*)m_PacketsPerCountryIN,0,sizeof(UINT32)*(NR_OF_COUNTRIES+1));
-		m_PacketsPerCountryOUT=new UINT32[NR_OF_COUNTRIES+1];
-		memset((void*)m_PacketsPerCountryOUT,0,sizeof(UINT32)*(NR_OF_COUNTRIES+1));
+		m_PacketsPerCountryIN=new tUINT32withLock[NR_OF_COUNTRIES+1];
+		//memset((void*)m_PacketsPerCountryIN,0,sizeof(UINT32)*(NR_OF_COUNTRIES+1));
+		m_PacketsPerCountryOUT=new tUINT32withLock[NR_OF_COUNTRIES+1];
+		//memset((void*)m_PacketsPerCountryOUT,0,sizeof(UINT32)*(NR_OF_COUNTRIES+1));
 		m_threadLogLoop=new CAThread((UINT8*)"Country Logger Thread");
 		m_threadLogLoop->setMainLoop(iplist_loopDoLogCountries);
 		m_bRunLogCountries=true;
@@ -1890,12 +1890,12 @@ RET:
 THREAD_RETURN iplist_loopDoLogCountries(void* param)
 	{
 		CAMsg::printMsg(LOG_DEBUG,"Starting iplist_loopDoLogCountries\n");														
-		CAFirstMix* pIPList=(CAFirstMix*)param;
+		CAFirstMix* pFirstMix=(CAFirstMix*)param;
 		UINT32 s=0;
 		UINT8 buff[255];
 		pglobalOptions->getCascadeName(buff,255);
 		mysql_thread_init();
-		while(pIPList->m_bRunLogCountries)
+		while(pFirstMix->m_bRunLogCountries)
 			{
 				if(s==LOG_COUNTRIES_INTERVALL)
 					{
@@ -1904,22 +1904,21 @@ THREAD_RETURN iplist_loopDoLogCountries(void* param)
 						strftime((char*)aktDate,255,"%Y%m%d%H%M%S",gmtime(&aktTime));
 						char query[1024];
 						sprintf(query,"INSERT into `stats_%s` (date,id,count,packets_in,packets_out) VALUES (\"%s\",\"%%u\",\"%%u\",\"%%u\",\"%%u\")",buff,aktDate);
-						pIPList->m_pmutexUser->lock();
+						pFirstMix->m_pmutexUser->lock();
 						for(UINT32 i=0;i<NR_OF_COUNTRIES+1;i++)
 							{
-								if(pIPList->m_CountryStats[i]>0)
+								if(pFirstMix->m_CountryStats[i]>0)
 									{
 										char aktQuery[1024];
-										sprintf(aktQuery,query,i,pIPList->m_CountryStats[i],pIPList->m_PacketsPerCountryIN[i],pIPList->m_PacketsPerCountryOUT[i]);
-										pIPList->m_PacketsPerCountryIN[i]=pIPList->m_PacketsPerCountryOUT[i]=0;
-										SINT32 ret=mysql_query(pIPList->m_mysqlCon,aktQuery);
+										sprintf(aktQuery,query,i,pFirstMix->m_CountryStats[i],pFirstMix->m_PacketsPerCountryIN[i].getAndzero(),pFirstMix->m_PacketsPerCountryOUT[i].getAndzero());
+										SINT32 ret=mysql_query(pFirstMix->m_mysqlCon,aktQuery);
 										if(ret!=0)
 										{
 											CAMsg::printMsg(LOG_INFO,"CountryStats DB - failed to update CountryStats DB with new values - error %i\n",ret);
 										}
 									}
 							}
-						pIPList->m_pmutexUser->unlock();
+						pFirstMix->m_pmutexUser->unlock();
 						s=0;
 					}
 				sSleep(10);
