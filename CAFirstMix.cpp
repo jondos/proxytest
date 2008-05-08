@@ -1764,8 +1764,8 @@ SINT32 CAFirstMix::initCountryStats(char* db_host,char* db_user,char* db_passwd)
 	{
 		m_CountryStats=NULL;
 		m_mysqlCon=mysql_init(NULL);
-		my_bool thetrue=1;
 #ifdef HAVE_MYSQL_OPT_RECONNECT
+		my_bool thetrue=1;
 		mysql_options(m_mysqlCon,MYSQL_OPT_RECONNECT,&thetrue);
 #endif
 		MYSQL* tmp=NULL;
