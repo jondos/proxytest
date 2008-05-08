@@ -63,7 +63,10 @@ inline SINT64 filesize64(int handle)
 		#ifdef _WIN32
 			return _filelengthi64(handle);
 		#else
-			return lseek64(handle,SEEK_CUR,0);
+			struct stat64 info;
+			if(fstat64(file_descriptor, &info) != 0)
+				return E_UNKNOWN;
+			return info.st_size;
 		#endif
 	}
 
@@ -72,7 +75,10 @@ inline SINT32 filesize32(int handle)
 		#ifdef _WIN32
 			return _filelength(handle);
 		#else
-			return lseek(handle,SEEK_CUR,0);
+			struct stat info;
+			if(fstat(file_descriptor, &info) != 0)
+				return E_UNKNOWN;
+			return info.st_size;
 		#endif
 	}
 
