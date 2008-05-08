@@ -116,8 +116,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\proxytest\Release"
-			IntermediateDirectory=".\proxytest\Release"
+			OutputDirectory=".\Release"
+			IntermediateDirectory=".\Release"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
@@ -177,11 +177,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib ssleay32.lib libeay32.lib pthreadvce.lib xerces-c_2.lib xerces-depdom_2.lib $(NOINHERIT)"
+				AdditionalDependencies="ws2_32.lib ssleay32.lib libeay32.lib pthreadvc2.lib xerces-c_2.lib xerces-depdom_2.lib $(NOINHERIT)"
 				OutputFile="$(OutDir)\proxytest.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="&quot;L:\Programme\Microsoft SDKs\Windows\v6.0A\Lib&quot;;&quot;.\proxytest-lib\Release&quot;;&quot;$(LIB_XERCES_C_RELEASE)&quot;;&quot;$(LIB_OPENSSL)&quot;;&quot;$(LIB_PTHREADS)&quot;"
+				AdditionalLibraryDirectories="&quot;.\proxytest-lib\Release&quot;;&quot;$(LIB_XERCES_C_RELEASE)&quot;;&quot;$(LIB_OPENSSL)&quot;;&quot;$(LIB_PTHREADS)&quot;"
 				ProgramDatabaseFile="$(OutDir)\proxytest.pdb"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
