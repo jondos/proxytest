@@ -64,7 +64,7 @@ inline SINT64 filesize64(int handle)
 			return _filelengthi64(handle);
 		#else
 			struct stat64 info;
-			if(fstat64(file_descriptor, &info) != 0)
+			if(fstat64(handle, &info) != 0)
 				return E_UNKNOWN;
 			return info.st_size;
 		#endif
@@ -76,7 +76,7 @@ inline SINT32 filesize32(int handle)
 			return _filelength(handle);
 		#else
 			struct stat info;
-			if(fstat(file_descriptor, &info) != 0)
+			if(fstat(handle, &info) != 0)
 				return E_UNKNOWN;
 			return info.st_size;
 		#endif
