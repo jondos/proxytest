@@ -299,6 +299,11 @@ class CACmdLnOptions
 				}
 			SINT32 getLogDir(UINT8* name,UINT32 len);
 			SINT32 setLogDir(const UINT8* name,UINT32 len);
+			SINT64 getMaxLogFileSize()
+				{
+					return m_maxLogFileSize;
+				}
+
 			SINT32 getUser(UINT8* user,UINT32 len);
 			SINT32 getPidFile(UINT8* pidfile,UINT32 len);
 
@@ -495,6 +500,7 @@ class CACmdLnOptions
 			bool		m_bAutoRestart; //auto restart if Mix dies unexpectly?
 			UINT8*	m_strCascadeName;
 			char*		m_strLogDir;
+			SINT64	m_maxLogFileSize;
 			char*		m_strEncryptedLogDir;
 			bool		m_bCompressedLogs;
 			bool 		m_bSocksSupport;

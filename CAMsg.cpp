@@ -47,6 +47,7 @@ const char* const CAMsg::m_strMsgTypes[5]={", error   ] ",", critical] ",", info
 CAMsg::CAMsg()
     {
 			m_pcsPrint=new CAMutex();
+			setZero64(m_maxLogFileSize);
 			m_strMsgBuff=new char[MAX_MSG_SIZE+1+20+STRMSGTYPES_SIZE];
 			m_uLogType=MSG_STDOUT;
 			m_hFileInfo=-1;
@@ -155,20 +156,25 @@ SINT32 CAMsg::printMsg(UINT32 type,const char* format,...)
 	#endif
 							break;
 							case MSG_FILE:
-								if(pMsg->m_hFileInfo==-1)
+/*								if(pMsg->m_hFileInfo==-1)
 									{
 										pMsg->m_hFileInfo=open(pMsg->m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE|O_SYNC,S_IREAD|S_IWRITE);																	
 									}
-								if(pMsg->m_hFileInfo!=-1)
-									{
+*///								if(pMsg->m_hFileInfo!=-1)
+//									{
 			#ifdef PSEUDO_LOG
 										char buff[255];
 										sprintf(buff,"%.15s mix AnonMix: ",ctime(&currtime)+4);
 										write(pMsg->m_hFileInfo,buff,strlen(buff));
 			#endif
 										if(write(pMsg->m_hFileInfo,pMsg->m_strMsgBuff,strlen(pMsg->m_strMsgBuff))==-1)
-										ret=E_UNKNOWN;
-									}
+											ret=E_UNKNOWN;
+										if(!isZero64(pMsg->m_maxLogFileSize)&&isGreater64(filesize64(pMsg->m_hFileInfo),pMsg->m_maxLogFileSize))
+											{
+												pMsg->closeLog();
+												pMsg->openLog(pMsg->m_uLogType);
+											}
+//									}
 							break;
 	#ifdef COMPRESSED_LOGS
 							case MSG_COMPRESSED_FILE:
@@ -223,6 +229,7 @@ SINT32 CAMsg::closeLog()
 SINT32 CAMsg::openLog(UINT32 type)
 	{
 //		int tmpHandle=-1;
+		time_t currtime=0;
 		switch(type)
 			{
 				case MSG_LOG:
@@ -231,11 +238,14 @@ SINT32 CAMsg::openLog(UINT32 type)
 #endif
 				break;
 				case MSG_FILE:
-			if(pglobalOptions->getLogDir((UINT8*)m_strLogFile,1024)!=E_SUCCESS)
-				return E_UNKNOWN;
-			strcat(m_strLogFile,FILENAME_INFOLOG);
-			m_hFileInfo=open(m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE|O_SYNC,S_IREAD|S_IWRITE);
-					break;
+					if(pglobalOptions->getLogDir((UINT8*)m_strLogFile,1024)!=E_SUCCESS)
+						return E_UNKNOWN;
+					strcat(m_strLogFile,FILENAME_INFOLOG);
+					currtime=time(NULL);
+					strftime(m_strLogFile+strlen(m_strLogFile),1024-strlen(m_strLogFile),"%Y/%m/%d-%H:%M:%S",localtime(&currtime));
+					m_hFileInfo=open(m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE|O_SYNC,S_IREAD|S_IWRITE);
+					setMaxLogFileSize(pglobalOptions->getMaxLogFileSize());
+				break;
 #ifdef COMPRESSED_LOGS
 				case MSG_COMPRESSED_FILE:
 			char logdir[255];

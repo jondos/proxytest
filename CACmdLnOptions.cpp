@@ -73,6 +73,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_strUser=NULL;
 		m_strCascadeName=NULL;
 		m_strLogDir=NULL;
+		setZero64(m_maxLogFileSize);
 		m_strEncryptedLogDir=NULL;
 		m_arTargetInterfaces=NULL;
 		m_cnTargets=0;
@@ -1409,7 +1410,7 @@ SINT32 CACmdLnOptions::readXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument* &
 		handle=open((char*)configFile,O_BINARY|O_RDONLY);
 		if(handle==-1)
 			return E_FILE_OPEN;
-		SINT32 len=filelength(handle);
+		SINT32 len=filesize32(handle);
 		UINT8* tmpChar=new UINT8[len];
 		int ret=read(handle,tmpChar,len);
 		close(handle);
@@ -1559,6 +1560,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 						strtrim(tmpBuff);
 						m_strLogDir=new char[strlen((char*)tmpBuff)+1];
 						strcpy(m_strLogDir,(char*)tmpBuff);
+						getDOMElementAttribute(elem,"MaxFileSize",m_maxLogFileSize);
 					}
 				getDOMChildByName(elemLogging,"Syslog",elem,false);
 				tmpLen=255;
