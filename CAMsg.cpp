@@ -169,7 +169,8 @@ SINT32 CAMsg::printMsg(UINT32 type,const char* format,...)
 			#endif
 										if(write(pMsg->m_hFileInfo,pMsg->m_strMsgBuff,strlen(pMsg->m_strMsgBuff))==-1)
 											ret=E_UNKNOWN;
-										if(!isZero64(pMsg->m_maxLogFileSize)&&isGreater64(filesize64(pMsg->m_hFileInfo),pMsg->m_maxLogFileSize))
+										pMsg->m_NrOfWrites++;
+										if(pMsg->m_NrOfWrites>10000&&!isZero64(pMsg->m_maxLogFileSize)&&isGreater64(filesize64(pMsg->m_hFileInfo),pMsg->m_maxLogFileSize))
 											{
 												pMsg->closeLog();
 												pMsg->openLog(pMsg->m_uLogType);
@@ -242,9 +243,10 @@ SINT32 CAMsg::openLog(UINT32 type)
 						return E_UNKNOWN;
 					strcat(m_strLogFile,FILENAME_INFOLOG);
 					currtime=time(NULL);
-					strftime(m_strLogFile+strlen(m_strLogFile),1024-strlen(m_strLogFile),"%Y/%m/%d-%H:%M:%S",localtime(&currtime));
+					strftime(m_strLogFile+strlen(m_strLogFile),1024-strlen(m_strLogFile),"%Y%m%d-%H%M%S",localtime(&currtime));
 					m_hFileInfo=open(m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE|O_SYNC,S_IREAD|S_IWRITE);
 					setMaxLogFileSize(pglobalOptions->getMaxLogFileSize());
+					m_NrOfWrites=0;
 				break;
 #ifdef COMPRESSED_LOGS
 				case MSG_COMPRESSED_FILE:

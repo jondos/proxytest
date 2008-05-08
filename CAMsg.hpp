@@ -87,6 +87,7 @@ class CAMsg
 #endif //ONLY_LOCAL_PROXY
 		private:
 			SINT64 m_maxLogFileSize;
+			UINT32 m_NrOfWrites;
 			SINT32 openLog(UINT32 type);
 			SINT32 closeLog();
 			UINT32 m_uLogType;
