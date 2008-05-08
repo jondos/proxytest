@@ -46,6 +46,9 @@
 /* Define to 1 if you have the <mysql/mysql.h> header file. */
 #undef HAVE_MYSQL_MYSQL_H
 
+/* Define if you mysql client library supports the MYSQL_RECONNECT option */
+#undef HAVE_MYSQL_OPT_RECONNECT
+
 /* Define if you have OpenSSL (which is needed!) */
 #undef HAVE_OPENSSL
 

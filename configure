@@ -13365,6 +13365,13 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
 { echo "$as_me:$LINENO: result: $ac_cv_have_decl_MYSQL_OPT_RECONNECT" >&5
 echo "${ECHO_T}$ac_cv_have_decl_MYSQL_OPT_RECONNECT" >&6; }
+if test $ac_cv_have_decl_MYSQL_OPT_RECONNECT = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_MYSQL_OPT_RECONNECT
+_ACEOF
+
+fi
 
 LIBS="$saved_LIBS"
 fi
