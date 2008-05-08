@@ -407,16 +407,6 @@ UINT32 getMemoryUsage()
 #endif
 	}
 
-#ifndef _WIN32
-SINT32 filelength(int handle)
-	{
-		struct stat st;
-		if(fstat(handle,&st)==-1)
-			return -1;
-		return st.st_size;
-	}
-#endif
-
 SINT32 getDOMChildByName(const DOMNode* pNode,const char * const name,DOMElement* & child,bool deep)
 	{
 		return getDOMChildByName(pNode,name,(DOMNode*&)child,deep);
@@ -682,7 +672,16 @@ SINT32 setDOMElementAttribute(DOMNode* pElem,const char* attrName,SINT32 value)
 		return setDOMElementAttribute(pElem,attrName,tmp);
 	}
 
-
+SINT32 getDOMElementAttribute(const DOMNode * const elem,const char* attrName,SINT64& value)
+	{
+		UINT8 val[50];
+		UINT32 len=50;
+		if(getDOMElementAttribute(elem,attrName,val,&len)!=E_SUCCESS)
+			return E_UNKNOWN;
+		if(parseS64(val,value)!=E_SUCCESS)
+			return E_UNKNOWN;
+		return E_SUCCESS;
+	}
 
 SINT32 getDOMElementAttribute(const DOMNode * const elem,const char* attrName,UINT32& value)
 	{
@@ -1120,7 +1119,7 @@ UINT8* readFile(UINT8* name,UINT32* size)
 		int handle=open((char*)name,O_BINARY|O_RDONLY);
 		if(handle<0)
 			return NULL;
-		*size=filelength(handle);
+		*size=filesize32(handle);
 		UINT8* buff=new UINT8[*size];
 		read(handle,buff,*size);
 		close(handle);
@@ -1161,6 +1160,48 @@ SINT32 parseU64(const UINT8 * str, UINT64& value)
 			return E_SUCCESS;
 	#else
 		#warning parseU64() is not implemented for platforms without native UINT64 support!!!
+		///@todo code if we do not have native UINT64
+		return E_UNKNOWN;
+	#endif
+}
+
+/**
+ * Parses a 64bit signed integer.
+ * Note: If the value is out of range or not parseable an erro is returned.
+ */
+SINT32 parseS64(const UINT8 * str, SINT64& value)
+{
+	#ifdef HAVE_NATIVE_UINT64
+			if (str == NULL)
+			{
+				return E_UNKNOWN;
+			}
+			UINT32 len=strlen((char*)str);
+			if (len < 1)
+			{
+				return E_UNKNOWN;
+			}
+			SINT64 s64 = 0;
+			for (UINT32 i = 0; i < len; i++)
+			{
+				UINT8 c=str[i];
+				if (c >= '0' && c <= '9')
+				{
+					s64 *= 10;
+					s64 += c - '0';
+				}
+				else if (i != 0 || str[i] != '+'||str[i]!='-')
+				{
+					return E_UNKNOWN;
+				}
+			}
+			if(str[0]=='-')
+				value=-s64;
+			else
+				value = s64;
+			return E_SUCCESS;
+	#else
+		#warning parseS64() is not implemented for platforms without native INT64 support!!!
 		///@todo code if we do not have native UINT64
 		return E_UNKNOWN;
 	#endif

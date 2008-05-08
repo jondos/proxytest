@@ -58,9 +58,23 @@ SINT32 sSleep(UINT16 sec);
 
 UINT32 getMemoryUsage();
 
-#ifndef _WIN32
-SINT32 filelength(int handle);
-#endif
+inline SINT64 filesize64(int handle)
+	{
+		#ifdef _WIN32
+			return _filelengthi64(handle);
+		#else
+			return lseek64(handle,SEEK_CUR,0);
+		#endif
+	}
+
+inline SINT32 filesize32(int handle)
+	{
+		#ifdef _WIN32
+			return _filelength(handle);
+		#else
+			return lseek(handle,SEEK_CUR,0);
+		#endif
+	}
 
 /** Parses  a buffer containing an XML document and returns this document.
 	*/
@@ -136,6 +150,7 @@ SINT32 getDOMElementValue(const DOMElement * const pElem,double* value);
 SINT32 setDOMElementAttribute(DOMNode* pElem,const char* attrName,SINT32 value);
 SINT32 setDOMElementValue(DOMElement* pElem,double floatValue);
 
+SINT32 getDOMElementAttribute(const DOMNode * const pElem,const char* attrName,SINT64& value);
 SINT32 getDOMElementAttribute(const DOMNode * const pElem,const char* attrName,UINT32& value);
 SINT32 getDOMElementAttribute(const DOMNode * const pElem,const char* attrName,bool& value);
 SINT32 getDOMElementAttribute(const DOMNode * const pElem,const char* attrName,UINT8* value,UINT32* len);
@@ -184,6 +199,18 @@ inline void set64(UINT64& dst,UINT64 src)
 #endif
 	}
 
+/** Sets the value of dst to the value of src
+*/
+inline void set64(SINT64& dst,SINT64 src)
+	{
+#if !defined(HAVE_NATIVE_UINT64)
+		dst.low=src.low;
+		dst.high=src.high;
+#else
+		dst=src;
+#endif
+	}
+
 inline void setZero64(UINT64& op1)
 	{
 #if !defined(HAVE_NATIVE_UINT64)
@@ -194,6 +221,16 @@ inline void setZero64(UINT64& op1)
 #endif
 	}
 	
+inline void setZero64(SINT64& op1)
+	{
+#if !defined(HAVE_NATIVE_UINT64)
+		op1.low=0;
+		op1.high=0;
+#else
+		op1=0;
+#endif
+	}
+
 inline void add64(UINT64& op1,UINT32 op2)
 	{
 #if !defined(HAVE_NATIVE_UINT64)
@@ -248,6 +285,19 @@ inline bool isGreater64(UINT64& op1,UINT64& op2)
 #endif
 	}
 
+inline bool isGreater64(SINT64 op1,SINT64 op2)
+	{
+#if !defined(HAVE_NATIVE_UINT64)
+		if(op1.high>op2.high)
+			return true;
+		if(op1.high==op2.high)
+			return op1.low>op2.low;
+		return false;
+#else
+		return op1>op2;
+#endif
+	}
+
 inline bool isLesser64(UINT64& smallOp1,UINT64& bigOp2)
 	{
 #if !defined(HAVE_NATIVE_UINT64)
@@ -279,6 +329,15 @@ inline bool isZero64(UINT64& op1)
 #endif
 	}
 	
+inline bool isZero64(SINT64& op1)
+	{
+#if !defined(HAVE_NATIVE_UINT64)
+		return (op1.high==0)&&op1.low==0;
+#else
+		return op1==0;
+#endif
+	}
+
 inline void print64(UINT8* buff,UINT64 num)
 	{
 		#ifdef HAVE_NATIVE_UINT64
@@ -340,9 +399,14 @@ UINT8* readFile(UINT8* name,UINT32* size);
 
 
 /**
- * Parses a 64bit integer
+ * Parses a 64bit unsigned integer
  */
 SINT32 parseU64(const UINT8 * str, UINT64& value);
+
+/**
+ * Parses a 64bit signed integer
+ */
+SINT32 parseS64(const UINT8 * str, SINT64& value);
 
 /** Read a passwd (i.e. without echoing the chars typed in)
 	*/

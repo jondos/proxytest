@@ -70,19 +70,30 @@ class CAMsg
 				return E_SUCCESS;
 			}
 			static SINT32 setLogOptions(UINT32 options);
+			static SINT32 setMaxLogFileSize(UINT64 size)
+				{
+					if(pMsg!=NULL)
+						{
+							set64(pMsg->m_maxLogFileSize,size);
+							return E_SUCCESS;		
+						}
+					return E_UNKNOWN;
+				}
+
 			static SINT32 printMsg(UINT32 typ,const char* format,...);
 #ifndef ONLY_LOCAL_PROXY
 			static SINT32 openEncryptedLog();
 			static SINT32 closeEncryptedLog();
 #endif //ONLY_LOCAL_PROXY
 		private:
+			SINT64 m_maxLogFileSize;
 			SINT32 openLog(UINT32 type);
 			SINT32 closeLog();
 			UINT32 m_uLogType;
 			int m_hFileEncrypted;
 			int m_hFileInfo;
 			char *m_strMsgBuff;
-			char *m_strLogFile; 
+			char *m_strLogFile;
 			static const char* const m_strMsgTypes[5];
 			CAMutex* m_pcsPrint;
 #ifdef COMPRESSED_LOGS
