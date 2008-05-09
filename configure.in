@@ -583,7 +583,7 @@ if test "x$DIALOG" != "x" ; then
 				], [mysql_init(0);
 				])],[AC_MSG_RESULT(libmysql found)],
 				[AC_MSG_RESULT(libmysql NOT found)])
-    AC_CHECK_DECL([MYSQL_OPT_RECONNECT], [AC_DEFINE(HAVE_MYSQL_OPT_RECONNECT,,[Define if you mysql client library supports the MYSQL_RECONNECT option])]   ,[],[[
+    AC_CHECK_DECL([MYSQL_OPT_RECONNECT],[],[],[[
     				#ifdef HAVE_MYSQL_MYSQL_H
 				#include <mysql/mysql.h>
 				#elif defined(HAVE_MYSQL_H)
