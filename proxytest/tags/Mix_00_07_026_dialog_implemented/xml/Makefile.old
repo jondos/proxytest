@@ -1,0 +1,8 @@
+libxml.a: DOM_Output.cpp DOM_Output.hpp  
+	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) DOM_Output.cpp -o DOM_Output.o
+	ar -rcs libxml.a *.o 
+
+clean:
+	rm -f *.o
+	rm -f libxml.a
+
