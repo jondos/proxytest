@@ -55,6 +55,13 @@ CAAccountingControlChannel::~CAAccountingControlChannel()
 		#ifdef DEBUG
 			CAMsg::printMsg(LOG_DEBUG, "~CAAccountingControlChannel destructor\n");
 		#endif
+			if(m_MsgBuff != NULL)
+			{
+				CAMsg::printMsg(LOG_DEBUG, "~CAAccountingControlChannel destructor, "
+						"deleting fields from superclass\n");
+				delete[] m_MsgBuff;
+				m_MsgBuff = NULL;
+			}
 		CAAccountingInstance::cleanupTableEntry(m_pHashEntry);
 	}
 

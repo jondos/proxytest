@@ -99,6 +99,10 @@ CACmdLnOptions::CACmdLnOptions()
 		m_strMonitoringListenerHost = NULL;
 		m_iMonitoringListenerPort = 0xFFFF;
 #endif
+#ifdef PERFORMANCE_SERVER
+		m_strPerformanceServerListenerHost = NULL;
+		m_iPerformanceServerListenerPort = 0xFFFF;
+#endif
 #ifdef DYNAMIC_MIX
 		m_strLastCascadeProposal = NULL;
 #endif
@@ -338,6 +342,12 @@ void CACmdLnOptions::clean()
 		if(m_strMonitoringListenerHost != NULL)
 		{
 			delete[] m_strMonitoringListenerHost;
+		}
+#endif
+#ifdef PERFORMANCE_SERVER
+		if(m_strPerformanceServerListenerHost != NULL)
+		{
+			delete[] m_strPerformanceServerListenerHost;
 		}
 #endif
 }
@@ -1369,6 +1379,19 @@ UINT16 CACmdLnOptions::getMonitoringListenerPort()
 }
 #endif /* SERVER_MONITORING */
 
+#ifdef PERFORMANCE_SERVER
+UINT8* CACmdLnOptions::getPerformanceServerListenerHost()
+{
+	return m_strPerformanceServerListenerHost;
+}
+
+UINT16 CACmdLnOptions::getPerformanceServerListenerPort()
+{
+	return m_iPerformanceServerListenerPort;
+}
+
+#endif /* PERFORMANCE_SERVER */
+
 #ifndef ONLY_LOCAL_PROXY
 
 /** Returns the XML tree describing the Mix . This is NOT a copy!
@@ -2131,6 +2154,60 @@ SKIP_NEXT_MIX:
 			CAMsg::printMsg(LOG_DEBUG, "Server Monitoring Config not found\n");
 		}
 #endif /* SERVER_MONITORING */
+#ifdef PERFORMANCE_SERVER
+		m_strPerformanceServerListenerHost = NULL;
+		m_iPerformanceServerListenerPort = 7777;
+		
+		if(isLastMix())
+		{
+			DOMElement* elemPerformanceServerRoot = NULL;
+			DOMElement* elemPerformanceServerHost = NULL;
+			DOMElement* elemPerformanceServerPort = NULL;
+		
+			if (getDOMChildByName(elemNetwork,"PerformanceServer",elemPerformanceServerRoot,false) == E_SUCCESS)
+			{
+				if(getDOMChildByName(elemPerformanceServerRoot,
+						"Host",
+						elemPerformanceServerHost,
+						false) == E_SUCCESS)
+				{
+					UINT8 buffHost[255];
+					UINT32 buffHostLen=255;
+					memset(buffHost, 0, sizeof(UINT8)*buffHostLen);
+					if(getDOMElementValue(elemPerformanceServerHost,
+							buffHost,&buffHostLen) == E_SUCCESS)
+					{
+						m_strPerformanceServerListenerHost = new UINT8[buffHostLen+1];
+						strncpy((char*) m_strPerformanceServerListenerHost, (const char*) buffHost, buffHostLen);
+						m_strPerformanceServerListenerHost[buffHostLen] = 0;
+					}
+				}
+				
+				if(getDOMChildByName(elemPerformanceServerRoot,
+							"Port",
+							elemPerformanceServerPort,
+							false) == E_SUCCESS)
+				{
+					UINT16 port = 0xFFFF;
+					if(getDOMElementValue(elemPerformanceServerPort,&port)==E_SUCCESS)
+					{
+						m_iPerformanceServerListenerPort = port;
+					}
+				}
+			}
+			else
+			{
+				CAMsg::printMsg(LOG_DEBUG, "Performance Server Config not found\n");
+			}
+		
+			if(!m_strPerformanceServerListenerHost)
+			{
+				m_strPerformanceServerListenerHost = new UINT8[10];
+				strncpy((char*)m_strPerformanceServerListenerHost, "localhost", 9);
+				m_strPerformanceServerListenerHost[9] = 0;
+			}
+		}
+#endif /* PERFORMANCE_SERVER */
 		//Next Proxies and visible adresses
 		clearVisibleAddresses();
 		DOMElement* elemProxies=NULL;
@@ -2349,7 +2426,21 @@ SKIP_NEXT_MIX:
 		setDOMElementValue(elemVersion,(UINT8*)MIX_VERSION);
 		elemSoftware->appendChild(elemVersion);
 		elemMix->appendChild(elemSoftware);
-
+		
+#ifdef PERFORMANCE_SERVER
+		if(isLastMix() && m_strPerformanceServerListenerHost != NULL)
+		{
+			DOMElement* elemPerf=createDOMElement(m_docMixInfo, "PerformanceServer");
+			DOMElement* elemPerfHost=createDOMElement(m_docMixInfo, "Host");
+			DOMElement* elemPerfPort=createDOMElement(m_docMixInfo, "Port");
+			setDOMElementValue(elemPerfHost, m_strPerformanceServerListenerHost);
+			setDOMElementValue(elemPerfPort, (UINT32) m_iPerformanceServerListenerPort);
+			elemPerf->appendChild(elemPerfHost);
+			elemPerf->appendChild(elemPerfPort);
+			elemMix->appendChild(elemPerf);
+		}
+#endif		
+		
 #ifdef PAYMENT
 		
 		//insert price certificate

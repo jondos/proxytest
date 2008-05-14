@@ -95,7 +95,10 @@ CAXMLCostConfirmation::~CAXMLCostConfirmation()
 			delete[] m_priceCerts;
 			m_priceCerts = NULL;
 		}
-		
+		if(m_domDocument != NULL)
+		{
+			m_domDocument->release();
+		}
 		m_domDocument=NULL;
 	}
 
@@ -210,7 +213,7 @@ SINT32 CAXMLCostConfirmation::setValues()
 			len = 100;
 			if (getDOMElementAttribute(curNode, "id", curId, &len) != E_SUCCESS)
 			{
-				delete curId;
+				delete[] curId;
 				return E_UNKNOWN;
 			}
 		
@@ -220,8 +223,8 @@ SINT32 CAXMLCostConfirmation::setValues()
 			len = 100;
 			if (getDOMElementValue(curNode, curHash, &len) != E_SUCCESS)
 			{
-				delete curId;
-				delete curHash;
+				delete[] curId;
+				delete[] curHash;
 				return E_UNKNOWN;
 			}
 			

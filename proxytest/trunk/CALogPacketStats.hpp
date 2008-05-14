@@ -33,6 +33,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMutex.hpp"
 #include "CAThread.hpp"
 
+#ifdef LOG_PACKET_TIMES
+
 class CALogPacketStats
 	{
 		public:
@@ -99,4 +101,5 @@ class CALogPacketStats
 			CAThread*							m_pthreadLog;
 	};
 #endif //ONLY_LOCAL_PROXY
+#endif
 #endif

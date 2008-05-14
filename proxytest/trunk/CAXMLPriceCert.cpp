@@ -50,6 +50,12 @@ CAXMLPriceCert::~CAXMLPriceCert()
 			delete[] m_StrSignatureTime;
 		if (m_StrBiID != NULL) 
 			delete[] m_StrBiID;
+		if(m_domDocument != NULL)
+		{
+			//CAMsg::printMsg(LOG_DEBUG, "cleaning up internal PriceCert document 0x%x.\n",
+			//					m_domDocument);
+			m_domDocument->release();
+		}
 		m_domDocument=NULL;	
 	}
 

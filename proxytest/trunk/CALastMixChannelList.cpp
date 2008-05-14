@@ -32,8 +32,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 CALastMixChannelList::CALastMixChannelList()
 	{
-		m_HashTable=new LP_lmChannelListEntry[0x10000];
-		memset(m_HashTable,0,0x10000*sizeof(LP_lmChannelListEntry));
+		m_HashTable=new LP_lmChannelListEntry[HASHTABLE_SIZE];
+		memset(m_HashTable,0, HASHTABLE_SIZE*sizeof(LP_lmChannelListEntry));
 		m_listSockets=NULL;
 		m_listSocketsNext=NULL;
 		m_nChannels=0;
@@ -63,7 +63,7 @@ CALastMixChannelList::~CALastMixChannelList()
 		delete m_pMutexDelayChannel;
 		delete []m_pDelayBuckets;
 #endif
-		for(UINT32 i=0;i<0x10000;i++)
+		for(UINT32 i=0;i < HASHTABLE_SIZE; i++)
 			{
 				lmChannelListEntry* akt=m_HashTable[i];
 				lmChannelListEntry* tmp;
@@ -86,7 +86,7 @@ SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCip
 #endif
 																)
 	{
-		UINT32 hash=id&0x0000FFFF;
+		UINT32 hash=id & HASH_MASK;
 		lmChannelListEntry* pEntry=m_HashTable[hash];
 		lmChannelListEntry* pNewEntry=new lmChannelListEntry;
 		pNewEntry->channelIn=id;
@@ -154,7 +154,7 @@ SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCip
 
 SINT32 CALastMixChannelList::removeChannel(HCHANNEL channel)
 	{
-		UINT32 hash=channel&0x0000FFFF;
+		UINT32 hash=channel & HASH_MASK;
 		lmChannelListEntry* pEntry=m_HashTable[hash];
 		while(pEntry!=NULL)
 			{
@@ -207,7 +207,7 @@ SINT32 CALastMixChannelList::test()
 							oList.add(c,NULL,NULL,NULL);
 
 					}
-					for(i=0;i<10000;i++)
+					for(i=0;i < 10000;i++)
 						{
 							lmChannelListEntry* akt=oList.getFirstSocket();
 							while(akt!=NULL)

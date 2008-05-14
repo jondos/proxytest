@@ -126,7 +126,9 @@ SINT32 CALastMixA::loop()
 												#ifdef REPLAY_DETECTION
 													// replace time(NULL) with the real timestamp ()
 													// packet-timestamp + m_u64ReferenceTime
-													if(m_pReplayDB->insert(rsaBuff,time(NULL))!=E_SUCCESS)
+													UINT32 stamp=(UINT32)(rsaBuff[13]<<16)+(UINT32)(rsaBuff[14]<<8)+(UINT32)(rsaBuff[15]);
+													if(m_pReplayDB->insert(rsaBuff,stamp+m_u64ReferenceTime)!=E_SUCCESS)
+//													if(m_pReplayDB->insert(rsaBuff,time(NULL))!=E_SUCCESS)
 														{
 															CAMsg::printMsg(LOG_INFO,"Replay: Duplicate packet ignored.\n");
 															continue;
@@ -177,7 +179,7 @@ SINT32 CALastMixA::loop()
 															delete newCipher;
 													}
 												else
-														{ //connection to proxy successfull
+														{ //connection to proxy successful
 															UINT16 payLen=ntohs(pMixPacket->payload.len);
 															#ifdef _DEBUG
 																UINT8 c=pMixPacket->payload.data[30];
@@ -282,7 +284,7 @@ SINT32 CALastMixA::loop()
 										else if(pMixPacket->flags==CHANNEL_RESUME)
 											{
 												#ifdef _DEBUG
-													CAMsg::printMsg(LOG_DEBUG,"Resumeing channel %u Socket: %u\n",pMixPacket->channel,(SOCKET)(*pChannelListEntry->pSocket));
+													CAMsg::printMsg(LOG_DEBUG,"Resuming channel %u Socket: %u\n",pMixPacket->channel,(SOCKET)(*pChannelListEntry->pSocket));
 												#endif
 	
 #ifdef HAVE_EPOLL
@@ -427,7 +429,7 @@ SINT32 CALastMixA::loop()
 //End Step 2
 
 //Step 3 Reading from Cache....
-#define MAX_MIXIN_SEND_QUEUE_SIZE 1000000
+
 				countRead=psocketgroupCacheRead->select(0);
 #ifdef DELAY_CHANNELS_LATENCY
 				UINT64 current_time_millis;

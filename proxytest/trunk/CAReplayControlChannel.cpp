@@ -41,6 +41,7 @@ CAReplayControlChannel::CAReplayControlChannel(const CAReplayCtrlChannelMsgProc*
 
 CAReplayControlChannel::~CAReplayControlChannel(void)
 	{
+		//@todo: delete m_MsgBuff of superclass CASyncControlChannel
 	}
 
 SINT32 CAReplayControlChannel::processXMLMessage(const XERCES_CPP_NAMESPACE::DOMDocument* doc)

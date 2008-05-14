@@ -61,6 +61,7 @@ class CASocket:public CAClientSocket
 			SINT32 sendTimeOut(const UINT8* buff,UINT32 len,UINT32 msTimeOut);
 			SINT32 receive(UINT8* buff,UINT32 len);
 			SINT32 receiveFullyT(UINT8* buff,UINT32 len,UINT32 msTimeOut);
+			SINT32 receiveLine(UINT8* line, UINT32 maxLen, UINT32 msTimeOut);
 			/** Returns the number of the Socket used. Which will be always the same number,
 				* even after close(), until the Socket
 				* is recreated using create()

@@ -33,6 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMsg.hpp"
 #include "CACmdLnOptions.hpp"
 #include "CAFirstMixChannelList.hpp"
+#include "CAListenerInterface.hpp"
 #include "CAASymCipher.hpp"
 #include "CAInfoService.hpp"
 #include "CASocketAddrINet.hpp"
@@ -696,7 +697,6 @@ THREAD_RETURN fm_loopSendToMix(void* param)
 /* How to end this thread:
 	0. set bRestart=true
 */
-#define MAX_READ_FROM_NEXT_MIX_QUEUE_SIZE 10000000 //How many bytes could be in the incoming queue ??
 THREAD_RETURN fm_loopReadFromMix(void* pParam)
 	{
 		INIT_STACK;
@@ -720,6 +720,9 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 			{
 				if(pQueue->getSize()>MAX_READ_FROM_NEXT_MIX_QUEUE_SIZE)
 					{
+#ifdef DEBUG
+						CAMsg::printMsg(LOG_DEBUG,"CAFirstMix::Queue is full!\n");
+#endif
 						msSleep(200);
 						getcurrentTimeMillis(keepaliveLast);
 						continue;
@@ -866,17 +869,52 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 						pNewMuxSocket=new CAMuxSocket;
 						ret=socketsIn[i].accept(*(CASocket*)pNewMuxSocket);
 						pFirstMix->m_newConnections++;							 
+						int master = ((CASocket*)pNewMuxSocket)->getPeerIP(peerIP);
+						
+						if(master == E_SUCCESS)
+						{
+							UINT32 size;
+							CAListenerInterface** intf = pglobalOptions->getInfoServices(size);
+							
+							master = -1;
+													
+							for(UINT32 i = 0; i < size; i++)
+							{
+								if(intf[i]->getType() == HTTP_TCP || intf[i]->getType() == RAW_TCP)
+								{
+									CASocketAddrINet* addr = (CASocketAddrINet*) intf[i]->getAddr();
+									if(addr == NULL) continue;
+									
+									UINT8* remoteIP = new UINT8[4];
+									addr->getIP(remoteIP);
+								
+									if(memcmp(peerIP, remoteIP, 4) == 0)
+									{
+										CAMsg::printMsg(LOG_ERR,"FirstMix: You are allowed\n");
+										master = E_SUCCESS;
+										break;
+									}
+									
+									delete addr;
+									delete remoteIP;
+								}
+								
+							}
+						}
+												
 						if(ret!=E_SUCCESS)
 						{
 							// may return E_SOCKETCLOSED or E_SOCKET_LIMIT
 							CAMsg::printMsg(LOG_ERR,"Accept Error %u - direct Connection from Client!\n",GET_NET_ERROR);														
 						}
-						else if (pglobalOptions->getMaxNrOfUsers() > 0 && pFirstMix->getNrOfUsers() >= pglobalOptions->getMaxNrOfUsers())
+						else if( (pglobalOptions->getMaxNrOfUsers() > 0 && pFirstMix->getNrOfUsers() >= pglobalOptions->getMaxNrOfUsers())
+							 && (master != E_SUCCESS) )
 						{
 							CAMsg::printMsg(LOG_DEBUG,"CAFirstMix User control: Too many users (Maximum:%d)! Rejecting user...\n", pFirstMix->getNrOfUsers(), pglobalOptions->getMaxNrOfUsers());
 							ret = E_UNKNOWN;
 						}
-						else if (pFirstMix->m_newConnections > CAFirstMix::MAX_CONCURRENT_NEW_CONNECTIONS)
+						else if ((pFirstMix->m_newConnections > CAFirstMix::MAX_CONCURRENT_NEW_CONNECTIONS)
+							&& (master != E_SUCCESS) )
 						{
 							/* This should protect the mix from flooding attacks
 							 * No more than MAX_CONCURRENT_NEW_CONNECTIONS are allowed.
@@ -907,6 +945,9 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 							d->pNewUser=pNewMuxSocket;
 							d->pMix=pFirstMix;
 							memcpy(d->peerIP,peerIP,4);
+#ifdef DEBUG
+							CAMsg::printMsg(LOG_DEBUG,"%d concurrent client connections.\n", pFirstMix->m_newConnections);
+#endif
 							if(pthreadsLogin->addRequest(fm_loopDoUserLogin,d)!=E_SUCCESS)
 							{
 								CAMsg::printMsg(LOG_ERR,"Could not add an login request to the login thread pool!\n");

@@ -146,7 +146,10 @@ SINT32 CAReplayCtrlChannelMsgProc::proccessGetTimestamp(const CAReplayControlCha
 				setDOMElementAttribute(elemGet,"id",strMixID);
 				doc->appendChild(elemGet);
 
-				return m_pUpstreamReplayControlChannel->sendXMLMessage(doc);
+				SINT32 return_value=m_pUpstreamReplayControlChannel->sendXMLMessage(doc);
+				doc->release();
+
+				return return_value;
 			}
 		return E_SUCCESS;	
 	}
@@ -269,7 +272,10 @@ SINT32 CAReplayCtrlChannelMsgProc::proccessGotTimestamp(const CAReplayControlCha
 				elemReplay->appendChild(elemReplayOffset);
 				doc->appendChild(elemMix);
 
-				return m_pDownstreamReplayControlChannel->sendXMLMessage(doc);
+				SINT32 return_value=m_pDownstreamReplayControlChannel->sendXMLMessage(doc);
+				doc->release();
+
+				return return_value;
 			}
 
 		//First mix --> update mix parameters
@@ -301,7 +307,10 @@ SINT32 CAReplayCtrlChannelMsgProc::sendGetTimestamp(const UINT8* strMixID)
 		setDOMElementAttribute(elemGet,"id",strMixID);
 		doc->appendChild(elemGet);
 
-		return m_pUpstreamReplayControlChannel->sendXMLMessage(doc);
+		SINT32 return_value=m_pUpstreamReplayControlChannel->sendXMLMessage(doc);
+		doc->release();
+
+		return return_value;
 	}
 
 #endif //REPLAY_DETECTION

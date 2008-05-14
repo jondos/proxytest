@@ -669,6 +669,8 @@ SINT32 CASignature::verifyXML(const UINT8* const in,UINT32 inlen)
 	{
 		XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(in,inlen);
 		DOMElement* root=doc->getDocumentElement();
+		//CAMsg::printMsg(LOG_DEBUG,"verified document 0x%x doesn't clean up itself!\n",
+							//doc);
 		return verifyXML(root,NULL);
 	}
 

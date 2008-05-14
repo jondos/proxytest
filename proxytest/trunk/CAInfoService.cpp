@@ -794,6 +794,8 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
                         pglobalOptions->setNextMix(doc);
 											}
                 }
+                CAMsg::printMsg(LOG_DEBUG,"InfoService::sendMixHelo(): XML infoservice doc 0x%x not needed anymore.\n", 
+                		doc);
             }
             else
             {
@@ -1106,7 +1108,7 @@ SINT32 CAInfoService::getPaymentInstance(const UINT8* a_pstrPIID,CAXMLBI** a_pXM
 
 
 /** Gets a payment instance from the InfoService.
-	@param a_pstrPIID id of the payment instacne for which the information is requested
+	@param a_pstrPIID id of the payment instance for which the information is requested
 	@param a_pXMLBI a pointer to a pointer which on a successful return will point to a newly created CAXMLBI object
 	@param a_socketAddress adress of the InfoService from which the information is to be requested
 	@retval E_SUCCESS if succesful
@@ -1166,6 +1168,7 @@ SINT32 CAInfoService::getPaymentInstance(const UINT8* a_pstrPIID,CAXMLBI** a_pXM
 		DOMElement* elemRoot=doc->getDocumentElement();
 
 		*a_pXMLBI = CAXMLBI::getInstance(elemRoot);
+		CAMsg::printMsg(LOG_DEBUG, "CAInfoService::getPaymentInstance(): XML doc not needed anymore\n");
 		if (*a_pXMLBI != NULL)
 			{
 				return E_SUCCESS;

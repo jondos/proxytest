@@ -104,8 +104,16 @@ public:
 		
 	static SINT32 clean()
 		{
-			delete ms_pInstance;
-			ms_pInstance=NULL;
+			if(ms_pInstance != NULL)
+			{
+				delete ms_pInstance;
+				ms_pInstance=NULL;
+			}
+			if(m_preparedCCRequest != NULL)
+			{
+				m_preparedCCRequest->release();
+				m_preparedCCRequest = NULL;
+			}
 			MONITORING_FIRE_PAY_EVENT(ev_pay_aiShutdown);
 			return E_SUCCESS;
 		}

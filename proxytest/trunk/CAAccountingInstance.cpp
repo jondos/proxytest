@@ -126,8 +126,8 @@ CAAccountingInstance::~CAAccountingInstance()
 		INIT_STACK;
 		BEGIN_STACK("~CAAccountingInstance");
 		
-		/* Why locks?
-		 * @todo: avoid calling this desctructor concurrently!
+		/*
+		 * avoid calling this desctructor concurrently!
 		 */
 		m_pMutex->lock(); 
 		
@@ -656,8 +656,13 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 								(pAccInfo->lastHardLimitSeconds + HARD_LIMIT_TIMEOUT - time(NULL)));
 #endif					
 				
-				if (time(NULL) >= pAccInfo->lastHardLimitSeconds + HARD_LIMIT_TIMEOUT ||
-					(prepaidBytes < 0 && (UINT32)(prepaidBytes * (-1)) >= prepaidInterval))
+				/* @todo: we don't use prepaid interval hard limit because it may abort 
+				 * large downloads/uploads, where large amounts of data are handled by mixes
+				 * in a short time.
+				 */ 
+				if (time(NULL) >= pAccInfo->lastHardLimitSeconds + HARD_LIMIT_TIMEOUT &&
+				    prepaidBytes <= 0
+						/*|| (prepaidBytes < 0 && (UINT32)(prepaidBytes * (-1)) >= prepaidInterval )*/ )
 				{
 //#ifdef DEBUG		
 					char* strReason;
@@ -665,10 +670,10 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 					{
 						strReason = "timeout";
 					}
-					else
+					/*else
 					{
 						strReason = "negative prepaid interval exceeded";
-					}
+					}*/
 					CAMsg::printMsg( LOG_INFO, "Accounting instance: User refused "		
 									"to send cost confirmation (HARDLIMIT EXCEEDED, %s). "
 									"PrepaidBytes were: %d\n", strReason, prepaidBytes);
@@ -812,7 +817,8 @@ SINT32 CAAccountingInstance::returnPrepareKickout(tAiAccountingInfo* pAccInfo, C
 		a_error->toXmlDocument(doc);			
 		delete a_error;
 		//pAccInfo->sessionPackets = 0; // allow some pakets to pass by to send the control message
-		pAccInfo->pControlChannel->sendXMLMessage(doc);		
+		pAccInfo->pControlChannel->sendXMLMessage(doc);
+		doc->release();
 	}
 	else
 	{
@@ -847,8 +853,8 @@ SINT32 CAAccountingInstance::sendCCRequest(tAiAccountingInfo* pAccInfo)
 	makeCCRequest(pAccInfo->accountNumber, pAccInfo->bytesToConfirm, doc);				
 	//pAccInfo->authFlags |= AUTH_SENT_CC_REQUEST;
 #ifdef DEBUG	
-	CAMsg::printMsg(LOG_DEBUG, "CC request sent for %u bytes \n",pAccInfo->bytesToConfirm);
-	CAMsg::printMsg(LOG_DEBUG, "transferrred bytes: %u bytes \n",pAccInfo->transferredBytes);
+	CAMsg::printMsg(LOG_DEBUG, "CC request sent for %Lu bytes \n",pAccInfo->bytesToConfirm);
+	CAMsg::printMsg(LOG_DEBUG, "transferrred bytes: %Lu bytes \n",pAccInfo->transferredBytes);
 	CAMsg::printMsg(LOG_DEBUG, "prepaid Interval: %u \n",prepaidInterval);	
 
 	UINT32 debuglen = 3000;
@@ -860,7 +866,10 @@ SINT32 CAAccountingInstance::sendCCRequest(tAiAccountingInfo* pAccInfo)
 	
 	//FINISH_STACK("CAAccountingInstance::sendCCRequest");
 	
-	return pAccInfo->pControlChannel->sendXMLMessage(doc);
+	SINT32 ret = pAccInfo->pControlChannel->sendXMLMessage(doc);
+	doc->release();
+	doc = NULL;
+	return ret;
 }
 
 
@@ -1505,7 +1514,7 @@ UINT32 CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo
 	//CAMsg::printMsg(LOG_DEBUG, "Almost finished handleAccountCertificate, preparing challenge\n");
 
 	// generate random challenge data and Base64 encode it
-	arbChallenge = ( UINT8* ) malloc( 222 );
+	arbChallenge = new UINT8[222];
 	getRandom( arbChallenge, 222 );
 	CABase64::encode( arbChallenge, 222, b64Challenge, &b64Len );
 	if ( pAccInfo->pChallenge != NULL )
@@ -1541,6 +1550,7 @@ UINT32 CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo
 
 	// send XML struct to Jap & set auth flags
 	pAccInfo->pControlChannel->sendXMLMessage(doc);
+	doc->release();
 	pAccInfo->authFlags |= AUTH_CHALLENGE_SENT | AUTH_GOT_ACCOUNTCERT | AUTH_TIMEOUT_STARTED;	
 	pAccInfo->challengeSentSeconds = time(NULL);
 	//CAMsg::printMsg("Last Account Certificate request seconds: for IP %u%u%u%u", (UINT8)pHashEntry->peerIP[0], (UINT8)pHashEntry->peerIP[1],(UINT8) pHashEntry->peerIP[2], (UINT8)pHashEntry->peerIP[3]);
@@ -1630,9 +1640,9 @@ UINT32 CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo*
 	*/
 	
 	// check signature
-	pDsaSig = DSA_SIG_new();
+	//pDsaSig = DSA_SIG_new();
 	CASignature * sigTester = pAccInfo->pPublicKey;
-	sigTester->decodeRS( decodeBuffer, decodeBufferLen, pDsaSig );
+	//sigTester->decodeRS( decodeBuffer, decodeBufferLen, pDsaSig );
 	if ( sigTester->verifyDER( pAccInfo->pChallenge, 222, decodeBuffer, decodeBufferLen ) 
 		!= E_SUCCESS )
 	{
@@ -1844,10 +1854,10 @@ UINT32 CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo*
 				pAccInfo->authFlags |= AUTH_ACCOUNT_EMPTY;
 			}
 		} 
-		else
+		/*else
 		{
 			//@todo:  perhaps forcing settlement
-		}
+		}*/
 		
 		delete expireDate;
 		expireDate = NULL;
@@ -1864,13 +1874,14 @@ UINT32 CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo*
 		}
 		m_currentAccountsHashtable->getMutex()->unlock();
 		pAccInfo->mutex->unlock();
+		delete pCC;
+		pCC = NULL;
 		return status;
 	}	
 	m_currentAccountsHashtable->getMutex()->unlock();	
 	
 	/** @todo We need this trick so that the program does not freeze with active AI ThreadPool!!!! */
 	//pAccInfo->mutex->lock();
-	
 	if (bSendCCRequest)
 	{		
 		// fetch cost confirmation from last session if available, and send it
@@ -1882,6 +1893,13 @@ UINT32 CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo*
 			CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Sending pcc to sign with %Lu transferred bytes\n", pCC->getTransferredBytes());
 #endif
 			// the typical case; the user had logged in before
+			/* there shouldn't be any counting synchronisation problems with the JAP
+			 * because the new login protocol doesn't permit JAPs 
+			 * to exchange data before login is finished.
+			 */
+			UINT32 prepaidIval = 0;
+			pglobalOptions->getPrepaidInterval(&prepaidIval);
+			pAccInfo->bytesToConfirm = (prepaidIval - prepaidAmount) + pCC->getTransferredBytes();
 			pAccInfo->pControlChannel->sendXMLMessage(pCC->getXMLDocument());
 			//delete pCC;
 		}
@@ -2027,7 +2045,7 @@ UINT32 CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* 
 		}
 		else
 		{
-			delete certHash;
+			delete[] certHash;
 		}
 	}
 	certHashCC->clear(HASH_EMPTY_NONE, HASH_EMPTY_DELETE);
@@ -2055,8 +2073,10 @@ UINT32 CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* 
 	//AccInfo's confirmed bytes + the Config's PrepaidInterval - the number of bytes transferred between
 	//requesting and receiving the CC
 #ifdef DEBUG
-	CAMsg::printMsg( LOG_DEBUG, "received cost confirmation for  %Lu transferred bytes where confirmed bytes are %Lu, we need %Lu bytes to confirm\n", 
-			pCC->getTransferredBytes(), pAccInfo->confirmedBytes, pAccInfo->bytesToConfirm );
+	CAMsg::printMsg( LOG_DEBUG, "received cost confirmation for  %Lu transferred bytes where confirmed bytes are %Lu, we need %Lu bytes to confirm"
+			", mix already counted %Lu transferred bytes\n", 
+			pCC->getTransferredBytes(), pAccInfo->confirmedBytes, pAccInfo->bytesToConfirm,
+			pAccInfo->transferredBytes);
 #endif
 	
 	if (pCC->getTransferredBytes() < pAccInfo->confirmedBytes)
@@ -2127,15 +2147,21 @@ UINT32 CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* 
 	}
 	else
 	{
-		UINT8 tmp[32], tmp2[32], tmp3[32];
+		/*UINT8 tmp[32], tmp2[32], tmp3[32];
 		print64(tmp, pCC->getTransferredBytes());
 		print64(tmp2, pCC->getAccountNumber());
-		print64(tmp3, pAccInfo->bytesToConfirm);
-		CAMsg::printMsg(LOG_ERR, "AccountingSettleThread: Requested CC value has NOT been confirmed by account nr %s! "
-								 "Received Bytes: %s/%s "
-								"Maybe client and Mix count differently?\n", tmp2, tmp, tmp3);
-		
-		m_pSettleThread->settle();
+		print64(tmp3, pAccInfo->bytesToConfirm);*/
+		CAMsg::printMsg(LOG_ERR, "AccountingSettleThread: Requested CC value has NOT been confirmed by account nr %Lu! "
+								 "Received Bytes: %Lu/%Lu "
+								"Client should not be allowed to login.\n", 
+								pCC->getAccountNumber(),
+								pCC->getTransferredBytes(),  
+								pAccInfo->bytesToConfirm);
+		delete pCC;
+		pAccInfo->mutex->unlock();
+		pAccInfo->authFlags |= AUTH_FAKE;
+		return CAXMLErrorMessage::ERR_WRONG_DATA;
+		//m_pSettleThread->settle();
 		
 	}
 	
@@ -2690,7 +2716,7 @@ SINT32 CAAccountingInstance::settlementTransaction()
 			dbInterface = CAAccountingDBInterface::getConnection();
 		}
 		
-		while (entry && (dbInterface!=NULL))
+		while (entry != NULL && dbInterface != NULL)
 		{			
 			if (entry->authFlags & (AUTH_INVALID_ACCOUNT | AUTH_UNKNOWN))
 			{
@@ -2721,20 +2747,18 @@ SINT32 CAAccountingInstance::settlementTransaction()
 			entry = nextEntry;									
 		}
 	}
-	//dbInterface->terminateDBConnection();
-	/* Before unlocking give the DB Connection free */
 	CAAccountingDBInterface::releaseConnection(dbInterface);
 	dbInterface = NULL;
 	ms_pInstance->m_pSettlementMutex->unlock();
 	
-	if(first)
+	if(first != NULL)
 	{
 #ifdef DEBUG
 		CAMsg::printMsg(LOG_DEBUG, "Settlement thread with wait nr %Lu alters hashtable.\n", myWaitNr);
 #endif
 		entry = first;
 		ms_pInstance->m_currentAccountsHashtable->getMutex()->lock();
-		while (entry)
+		while (entry != NULL)
 		{	
 			AccountLoginHashEntry* loginEntry = 
 							(AccountLoginHashEntry*) (ms_pInstance->m_currentAccountsHashtable->getValue(&(entry->accountNumber)));
@@ -2754,7 +2778,7 @@ SINT32 CAAccountingInstance::settlementTransaction()
 		}
 		ms_pInstance->m_currentAccountsHashtable->getMutex()->unlock();
 		
-		/* In this case we get the next waiting thread to alter the table running */
+		// In this case we get the next waiting thread to alter the table running
 		ms_pInstance->m_pSettlementMutex->lock();
 		if(ms_pInstance->m_settleWaitNr != ms_pInstance->m_nextSettleNr)
 		{

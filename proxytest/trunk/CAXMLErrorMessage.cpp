@@ -111,7 +111,11 @@ CAXMLErrorMessage::CAXMLErrorMessage(UINT8 * strXmlData)
 	{
 		m_iErrorCode = ERR_NO_ERROR_GIVEN;
 	}
-	
+	if(doc != NULL)
+	{
+		doc->release();
+		doc = NULL;
+	}
 }
 
 
@@ -199,7 +203,7 @@ CAXMLErrorMessage::~CAXMLErrorMessage()
 		
 		if (m_strExpires !=NULL)
 		{
-			delete m_strExpires;
+			delete[] m_strExpires;
 			m_strExpires = NULL;
 		}
 	}
