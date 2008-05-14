@@ -226,6 +226,8 @@ void my_terminate(void)
 
 void signal_segv( int ) 
 {
+	signal(SIGSEGV,SIG_DFL); //otherwise we might end up in endless loops...
+	
 	MONITORING_FIRE_SYS_EVENT(ev_sys_sigSegV);
 	CAMsg::printMsg(LOG_CRIT,"Oops ... caught SIG_SEGV! Exiting ...\n");
 #ifdef PRINT_THREAD_STACK_TRACE

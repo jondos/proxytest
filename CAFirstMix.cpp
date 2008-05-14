@@ -1557,6 +1557,7 @@ SINT32 CAFirstMix::clean()
 		{
 			CAMsg::printMsg(LOG_CRIT,"Wait for LoopSendToMix!\n");
 			m_pthreadSendToMix->join();
+			CAMsg::printMsg(LOG_CRIT,"LoopSendToMix - joined()!\n");
 			delete m_pthreadSendToMix;
 		}
 		m_pthreadSendToMix=NULL;
@@ -1565,6 +1566,7 @@ SINT32 CAFirstMix::clean()
 		{
 			CAMsg::printMsg(LOG_CRIT,"Wait for LoopReadFromMix!\n");
 			m_pthreadReadFromMix->join();
+			CAMsg::printMsg(LOG_CRIT,"LoopReadFromMix - joined()!\n");
 			delete m_pthreadReadFromMix;
 		}
 		m_pthreadReadFromMix=NULL;

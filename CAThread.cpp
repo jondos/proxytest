@@ -201,7 +201,8 @@ SINT32 CAThread::join()
 #else
 	if(m_pThread==NULL)
 		return E_SUCCESS;
-	if(pthread_join(*m_pThread,NULL)==0)
+	SINT32 ret=pthread_join(*m_pThread,NULL);
+	if(ret==0)
 	{
 #ifdef DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"CAThread %s - join() successful\n", m_strName);
@@ -214,7 +215,7 @@ SINT32 CAThread::join()
 	}
 	else
 	{
-		CAMsg::printMsg(LOG_ERR,"CAThread - join() not successful\n");
+		CAMsg::printMsg(LOG_ERR,"CAThread - join() not successful - Error was: %i\n",ret);
 		return E_UNKNOWN;
 	}
 #endif
