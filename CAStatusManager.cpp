@@ -35,7 +35,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CAUtil.hpp"
 #include "xml/DOM_Output.hpp"
 #include "CACmdLnOptions.hpp"
-#include "CASocketAddrINet.hpp"
+#include "monitoringDefs.h"
 
 /**
  * @author Simon Pecher, JonDos GmbH
@@ -113,17 +113,19 @@ SINT32 CAStatusManager::fireEvent(event_type_t e_type, enum status_type s_type)
 
 CAStatusManager::CAStatusManager()
 {
-	int i = 0;
+	int i = 0, ret = 0;
 	m_pCurrentStates = NULL;
 	m_pCurrentStatesInfo = NULL;
 	m_pStatusLock = NULL;
 	m_pStatusSocket = NULL;
+	m_pListenAddr = NULL;
 	m_pMonitoringThread = NULL;
-	m_pPreparedStatusMessage = NULL; 
+	m_pPreparedStatusMessage = NULL;
+	m_bTryListen = false;
 	
 	m_pCurrentStates = new state_t*[NR_STATUS_TYPES];
 	
-	for(i = 0; i < NR_STATUS_TYPES; i++)
+	for(i = FIRST_STATUS; i < NR_STATUS_TYPES; i++)
 	{
 		m_pCurrentStates[i] = 
 				ms_pAllStates[i][ENTRY_STATE];
@@ -135,9 +137,10 @@ CAStatusManager::CAStatusManager()
 	
 	m_pStatusLock = new CAMutex();
 	m_pStatusSocket = new CASocket();
-
-	if(initSocket() == E_SUCCESS)
+	ret = initSocket();
+	if( (ret == E_SUCCESS) || (ret == EADDRINUSE) )
 	{
+		m_bTryListen = (ret == EADDRINUSE);
 		m_pMonitoringThread = new CAThread((UINT8*)"Monitoring Thread");
 		m_pMonitoringThread->setMainLoop(serveMonitoringRequests);
 		m_pMonitoringThread->start(this);
@@ -150,7 +153,7 @@ CAStatusManager::CAStatusManager()
 	}
 	initStatusMessage();
 	/* pass entry state staus information to the DOM structure */
-	for(i = 0; i < NR_STATUS_TYPES; i++)
+	for(i = FIRST_STATUS; i < NR_STATUS_TYPES; i++)
 	{
 		setDOMElementValue(
 				(m_pCurrentStatesInfo[i]).dsi_stateType,
@@ -195,7 +198,7 @@ CAStatusManager::~CAStatusManager()
 	}
 	if(m_pCurrentStates != NULL)
 	{
-		for(i = 0; i < NR_STATUS_TYPES; i++)
+		for(i = FIRST_STATUS; i < NR_STATUS_TYPES; i++)
 		{
 			m_pCurrentStates[i] = NULL;
 		}
@@ -206,6 +209,11 @@ CAStatusManager::~CAStatusManager()
 	{
 		delete m_pStatusSocket;
 		m_pStatusSocket = NULL;
+	}
+	if(m_pListenAddr != NULL)
+	{
+		delete m_pListenAddr;
+		m_pListenAddr = NULL;
 	}
 	/*if(m_pPreparedStatusMessage != NULL)
 	{
@@ -220,7 +228,8 @@ CAStatusManager::~CAStatusManager()
 SINT32 CAStatusManager::initSocket()
 {
 	SINT32 ret = E_UNKNOWN;
-	CASocketAddrINet listenAddr;
+	int errnum = 0;
+	
 	if(m_pStatusSocket == NULL)
 	{
 		m_pStatusSocket = new CASocket();
@@ -259,7 +268,8 @@ SINT32 CAStatusManager::initSocket()
 			userdefined = true;
 		}
 	}
-	ret = listenAddr.setAddr((UINT8 *) hostname, port);
+	m_pListenAddr = new CASocketAddrINet();
+	ret = m_pListenAddr->setAddr((UINT8 *) hostname, port);
 	if(ret != E_SUCCESS)
 	{
 		if(ret == E_UNKNOWN_HOST)
@@ -273,7 +283,7 @@ SINT32 CAStatusManager::initSocket()
 				CAMsg::printMsg(LOG_ERR, 
 						"StatusManager: trying %s.\n", hostname);
 				
-				ret = listenAddr.setAddr((UINT8 *) hostname, port);
+				ret = m_pListenAddr->setAddr((UINT8 *) hostname, port);
 				if(ret != E_SUCCESS)
 				{
 					CAMsg::printMsg(LOG_ERR, 
@@ -293,14 +303,26 @@ SINT32 CAStatusManager::initSocket()
 			return ret;
 		}
 	}
-	ret = m_pStatusSocket->listen(listenAddr);
+	ret = m_pStatusSocket->listen(*m_pListenAddr);
 		
 	if(ret != E_SUCCESS)
 	{
-		CAMsg::printMsg(LOG_ERR, 
-				"StatusManager: not to init server socket %s:%d "
-				"for server monitoring.\n",
-				hostname, port);
+		if(ret != E_UNKNOWN)
+		{
+			errnum = GET_NET_ERROR;
+			CAMsg::printMsg(LOG_ERR, 
+					"StatusManager: not able to init server socket %s:%d "
+					"for server monitoring. %s failed because: %s\n",
+					hostname, port,
+					((ret == E_SOCKET_BIND) ? "Bind" : "Listen"),
+					 GET_NET_ERROR_STR(errnum));
+			if( errnum == EADDRINUSE )
+			{
+				CAMsg::printMsg(LOG_INFO, "retry socket listening later\n");
+				return errnum;
+				//it's safer to avoid reuseaddr in this case
+			}
+		}
 		return ret;
 	}
 #ifdef DEBUG
@@ -323,13 +345,13 @@ SINT32 CAStatusManager::transition(event_type_t e_type, status_type_t s_type)
 				"StatusManager: fatal error\n");
 		return E_UNKNOWN;
 	}
-	if((s_type >= NR_STATUS_TYPES) || (s_type < 0))
+	if((s_type >= NR_STATUS_TYPES) || (s_type < FIRST_STATUS))
 	{
 		CAMsg::printMsg(LOG_ERR, 
 				"StatusManager: received event for an invalid status type: %d\n", s_type);
 		return E_INVALID;
 	}
-	if((e_type >= EVENT_COUNT[s_type]) || (e_type < 0))
+	if((e_type >= EVENT_COUNT[s_type]) || (e_type < FIRST_EVENT))
 	{
 		CAMsg::printMsg(LOG_ERR, 
 				"StatusManager: received an invalid event: %d\n", e_type);
@@ -394,25 +416,25 @@ SINT32 CAStatusManager::initStatusMessage()
 	int i = 0;
 	m_pPreparedStatusMessage = createDOMDocument();
 	m_pCurrentStatesInfo = new dom_state_info[NR_STATUS_TYPES];
-	DOMElement *elemRoot = createDOMElement(m_pPreparedStatusMessage, "StatusMessage");
+	DOMElement *elemRoot = createDOMElement(m_pPreparedStatusMessage, DOM_ELEMENT_STATUS_MESSAGE_NAME);
 	DOMElement *status_dom_element = NULL;
 	
-	for(i = 0; i < NR_STATUS_TYPES; i++)
+	for(i = FIRST_STATUS; i < NR_STATUS_TYPES; i++)
 	{
 		status_dom_element = 
 			createDOMElement(m_pPreparedStatusMessage, STATUS_NAMES[i]); 
 		(m_pCurrentStatesInfo[i]).dsi_stateType = 
-			createDOMElement(m_pPreparedStatusMessage, "State");
+			createDOMElement(m_pPreparedStatusMessage, DOM_ELEMENT_STATE_NAME);
 #ifdef DEBUG		
 		setDOMElementValue((m_pCurrentStatesInfo[i]).dsi_stateType, (UINT8*)"Statenumber");
 #endif		
 		(m_pCurrentStatesInfo[i]).dsi_stateLevel =
-			createDOMElement(m_pPreparedStatusMessage, "StateLevel");
+			createDOMElement(m_pPreparedStatusMessage, DOM_ELEMENT_STATE_LEVEL_NAME);
 #ifdef DEBUG
 		setDOMElementValue((m_pCurrentStatesInfo[i]).dsi_stateLevel, (UINT8*)"OK or Critcal or something");
 #endif
 		(m_pCurrentStatesInfo[i]).dsi_stateDesc =
-			createDOMElement(m_pPreparedStatusMessage, "StateDescription");
+			createDOMElement(m_pPreparedStatusMessage, DOM_ELEMENT_STATE_DESCRIPTION_NAME);
 #ifdef DEBUG
 		setDOMElementValue((m_pCurrentStatesInfo[i]).dsi_stateDesc, (UINT8*)"Description of the state");
 #endif
@@ -435,11 +457,56 @@ SINT32 CAStatusManager::initStatusMessage()
 THREAD_RETURN serveMonitoringRequests(void* param)
 {
 	CASocket monitoringRequestSocket;
+	int ret = 0;
 	CAStatusManager *statusManager = (CAStatusManager*) param;
+
+	if(statusManager == NULL)
+	{
+		CAMsg::printMsg(LOG_CRIT, 
+				"Monitoring Thread: fatal error, exiting.\n");
+		THREAD_RETURN_ERROR;
+	}
+	
 	for(;EVER;)
 	{
+		
 		if(statusManager->m_pStatusSocket != NULL)
 		{
+			if(statusManager->m_bTryListen)
+			{
+				sleep(10);
+				
+				if(statusManager->m_pListenAddr == NULL)
+				{
+					CAMsg::printMsg(LOG_ERR, 
+								"Monitoring Thread: bind error, leaving loop.\n");
+					THREAD_RETURN_ERROR;
+				}
+				ret = statusManager-> m_pStatusSocket->listen(*(statusManager->m_pListenAddr));
+				
+				if(ret == E_UNKNOWN)
+				{
+					CAMsg::printMsg(LOG_ERR, 
+							"Monitoring Thread: bind error, leaving loop.\n");
+							THREAD_RETURN_ERROR;
+				}
+				statusManager->m_bTryListen = (ret != E_SUCCESS);
+#ifdef DEBUG
+				if(statusManager->m_bTryListen)
+				{
+					
+						CAMsg::printMsg(LOG_DEBUG, 
+							"Monitoring Thread: wait again for listen: %s\n",
+							GET_NET_ERROR_STR(GET_NET_ERROR));
+				}				
+				else
+				{
+					CAMsg::printMsg(LOG_DEBUG, 
+								"Monitoring Thread: socket listening again\n");
+				}
+#endif				
+				continue;
+			}
 			if(statusManager->m_pStatusSocket->isClosed())
 			{
 				CAMsg::printMsg(LOG_INFO, 
@@ -502,12 +569,12 @@ void CAStatusManager::initStates()
 	int i = 0, j = 0; 
 	ms_pAllStates = new state_t**[NR_STATUS_TYPES];
 	
-	for(i = 0; i < NR_STATUS_TYPES; i++)
+	for(i = FIRST_STATUS; i < NR_STATUS_TYPES; i++)
 	{
 		ms_pAllStates[i] = 
 			new state_t*[STATE_COUNT[i]];
 		
-		for(j=0; j < STATE_COUNT[i]; j++)
+		for(j = ENTRY_STATE; j < STATE_COUNT[i]; j++)
 		{
 			ms_pAllStates[i][j] = new state_t; 
 			/* only state identifier are set, transitions and state description
@@ -525,10 +592,10 @@ void CAStatusManager::deleteStates()
 {
 	int i = 0, j = 0;
 	
-	for(i = 0; i < NR_STATUS_TYPES; i++)
+	for(i = FIRST_STATUS; i < NR_STATUS_TYPES; i++)
 	{
 		//m_pCurrentStates[i] = NULL;
-		for(j=0; j < STATE_COUNT[i]; j++)
+		for(j = ENTRY_STATE; j < STATE_COUNT[i]; j++)
 		{
 			if(ms_pAllStates[i][j] != NULL)
 			{
@@ -552,10 +619,10 @@ void CAStatusManager::initEvents()
 	int i = 0, j = 0;
 	ms_pAllEvents = new event_t**[NR_STATUS_TYPES];
 	
-	for(i = 0; i < NR_STATUS_TYPES; i++)
+	for(i = FIRST_STATUS; i < NR_STATUS_TYPES; i++)
 	{
 		ms_pAllEvents[i] = new event_t*[EVENT_COUNT[i]];
-		for(j = 0; j < EVENT_COUNT[i]; j++)
+		for(j = FIRST_EVENT; j < EVENT_COUNT[i]; j++)
 		{
 			ms_pAllEvents[i][j] = new event_t;
 			ms_pAllEvents[i][j]->ev_type = (event_type_t) j;
@@ -569,9 +636,9 @@ void CAStatusManager::deleteEvents()
 {
 	int i = 0, j = 0;
 	
-	for(i = 0; i < NR_STATUS_TYPES; i++)
+	for(i = FIRST_STATUS; i < NR_STATUS_TYPES; i++)
 	{
-		for(j = 0; j < EVENT_COUNT[i]; j++)
+		for(j = FIRST_EVENT; j < EVENT_COUNT[i]; j++)
 		{
 			//todo: delete event descriptions ?
 			delete ms_pAllEvents[i][j];
@@ -599,7 +666,7 @@ transition_t *defineTransitions(status_type_t s_type, SINT32 transitionCount, ..
 	}
 	va_end(ap);
 	
-	if((s_type >= NR_STATUS_TYPES) || (s_type < 0))
+	if((s_type >= NR_STATUS_TYPES) || (s_type < FIRST_STATUS))
 	{
 		/* invalid status type specified */
 		return NULL;

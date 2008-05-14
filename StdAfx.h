@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.07.28"
+#define MIX_VERSION "00.08.01"
 
 #include "doxygen.h"
 
@@ -148,6 +148,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define MAX_LOGIN_QUEUE 500 //how many waiting entries in the login queue *do not change this until you really know that you are doing!*??
 
 #define MAX_USER_SEND_QUEUE 100000 //How many bytes could be in each User's send queue, before we suspend the belonging channels
+#define MAX_DATA_PER_CHANNEL 100000
 #define USER_SEND_BUFFER_RESUME 10000
 
 #define PAYMENT_ACCOUNT_CERT_TIMEOUT 180 //Timeout for receiving the Payment certificate in seconds
@@ -157,6 +158,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define FLOW_CONTROL_SENDME_HARD_LIMIT 95 //last mix stops sending after this unack packets
 #define FLOW_CONTROL_SENDME_SOFT_LIMIT 80 //last mix sends request for 'SENDME' after this unack packets
 
+#define MAX_READ_FROM_PREV_MIX_QUEUE_SIZE 10000000
+#define MAX_READ_FROM_NEXT_MIX_QUEUE_SIZE 10000000 //How many bytes could be in the incoming queue ??
+#define MAX_MIXIN_SEND_QUEUE_SIZE 10000000
+#define MAX_NEXT_MIX_QUEUE_SIZE 10000000
 
 #define DEFAULT_INFOSERVICE "141.76.45.37"
 
@@ -180,7 +185,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define MIX_CASCADE_PROTOCOL_VERSION_0_2 2 //old normal protocol
 
 #ifdef REPLAY_DETECTION
-	#define MIX_CASCADE_PROTOCOL_VERSION "0.8"
+	#define MIX_CASCADE_PROTOCOL_VERSION "0.81"
 //#elif defined(PAYMENT)
 	//#define MIX_CASCADE_PROTOCOL_VERSION "0.9"
 #else

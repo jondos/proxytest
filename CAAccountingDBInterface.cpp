@@ -354,9 +354,9 @@ SINT32 CAAccountingDBInterface::__storeCostConfirmation( CAXMLCostConfirmation &
 		#ifndef HAVE_NATIVE_UINT64
 			#warning Native UINT64 type not available - CostConfirmation Database might be non-functional
 		#endif
-		const char* previousCCQuery = "SELECT COUNT(*) FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER=%s AND CASCADE='%s'";
-		const char* query2F =         "INSERT INTO COSTCONFIRMATIONS(BYTES, XMLCC, SETTLED, ACCOUNTNUMBER, CASCADE) VALUES (%s, '%s', %d, %s, '%s')";
-	 	const char* query3F =         "UPDATE COSTCONFIRMATIONS SET BYTES=%s, XMLCC='%s', SETTLED=%d WHERE ACCOUNTNUMBER=%s AND CASCADE='%s'";
+		const char* previousCCQuery = "SELECT COUNT(*) FROM COSTCONFIRMATIONS WHERE ACCOUNTNUMBER='%s' AND CASCADE='%s'";
+		const char* query2F =         "INSERT INTO COSTCONFIRMATIONS(BYTES, XMLCC, SETTLED, ACCOUNTNUMBER, CASCADE) VALUES ('%s', '%s', '%d', '%s', '%s')";
+	 	const char* query3F =         "UPDATE COSTCONFIRMATIONS SET BYTES='%s', XMLCC='%s', SETTLED='%d' WHERE ACCOUNTNUMBER='%s' AND CASCADE='%s'";
 	 	const char* tempQuery;
 	
 		UINT8 * query;
@@ -367,7 +367,7 @@ SINT32 CAAccountingDBInterface::__storeCostConfirmation( CAXMLCostConfirmation &
 		PGresult * pResult;
 		UINT8 strAccountNumber[32];
 		UINT8 tmp[32];
-		
+				
 		if(!checkConnectionStatus()) 
 		{
 			MONITORING_FIRE_PAY_EVENT(ev_pay_dbConnectionFailure);

@@ -36,6 +36,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMsg.hpp"
 #include "CAThread.hpp"
 
+#define HASHTABLE_SIZE 0x00010000
+#define HASH_MASK 0x0000FFFF
+
 struct t_lastmixchannellist
 	{
 		public:
@@ -105,7 +108,7 @@ class CALastMixChannelList
 
 			lmChannelListEntry* get(HCHANNEL channelIn)
 				{
-					lmChannelListEntry* akt=m_HashTable[channelIn&0x0000FFFF];
+					lmChannelListEntry* akt=m_HashTable[channelIn & HASH_MASK];
 					while(akt!=NULL)
 						{
 							if(akt->channelIn==channelIn)

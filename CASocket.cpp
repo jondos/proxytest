@@ -611,6 +611,48 @@ SINT32 CASocket::receiveFullyT(UINT8* buff,UINT32 len,UINT32 msTimeOut)
 			}
 	}
 
+SINT32 CASocket::receiveLine(UINT8* line, UINT32 maxLen, UINT32 msTimeOut)
+{
+	UINT32 i = 0;
+	UINT8 byte = 0;
+	SINT32 ret = 0;
+	UINT64 currentTime, endTime;
+	getcurrentTimeMillis(currentTime);
+	set64(endTime,currentTime);
+	add64(endTime,msTimeOut);
+	CASingleSocketGroup oSG(false);
+	oSG.add(*this);
+	do
+	{
+		ret = oSG.select(msTimeOut);
+		if(ret == 1)
+		{
+			ret = receive(&byte, 1);
+			if(byte == '\r' || byte == '\n')
+			{
+				line[i++] = 0;
+			}
+			else
+			{
+				line[i++] = byte;
+			}
+		}
+		else if(ret == E_TIMEDOUT)
+		{
+			return E_TIMEDOUT;
+		}
+		getcurrentTimeMillis(currentTime);
+		if(!isLesser64(currentTime,endTime))
+		{
+			return E_TIMEDOUT;
+		}
+		msTimeOut=diff64(endTime,currentTime);
+	}
+	while(byte != '\n' && i<maxLen && ret > 0);
+	
+	return ret;
+}
+
 SINT32 CASocket::getLocalPort()
 	{
 		struct sockaddr_in addr;

@@ -50,8 +50,10 @@ public:
 		UINT8* pTmpStr = NULL;
 		if(m_pStrMixId!=NULL)
 			{
-				pTmpStr = new UINT8[strlen((char*)m_pStrMixId)+1];
-				strcpy( (char*)pTmpStr, (char*)m_pStrMixId);
+				int hlen = strlen((char*)m_pStrMixId)+1;
+				pTmpStr = new UINT8[hlen];
+				memset(pTmpStr, 0, (hlen*sizeof(UINT8)) );
+				strncpy( (char*)pTmpStr, (char*)m_pStrMixId, (hlen-1));
 			}
 		return pTmpStr;
 	}
@@ -61,8 +63,10 @@ public:
 		UINT8* pTmpStr = NULL;
 		if(m_pStrPriceCertHash!=NULL)
 			{
-				pTmpStr = new UINT8[strlen((char*)m_pStrPriceCertHash)+1];
-				strcpy((char*)pTmpStr, (char*)m_pStrPriceCertHash);
+				int hlen = strlen((char*)m_pStrPriceCertHash)+1;
+				pTmpStr = new UINT8[hlen];
+				memset(pTmpStr, 0, (hlen*sizeof(UINT8)) );
+				strncpy((char*)pTmpStr, (char*)m_pStrPriceCertHash, (hlen-1));
 			}
 		return pTmpStr;
 	}

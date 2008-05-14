@@ -286,6 +286,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 		
 
 		UINT8* out=new UINT8[0xFFFF];
+		memset(out, 0, (sizeof(UINT8)*0xFFFF));
 		UINT32 outlen=0xFFFD;
 		DOM_Output::dumpToMem(doc,out+2,&outlen);
 #ifdef _DEBUG
@@ -665,6 +666,14 @@ THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 
 		while(pMix->m_bRun)
 			{
+				if(pQueue->getSize()>MAX_READ_FROM_PREV_MIX_QUEUE_SIZE)
+				{
+#ifdef DEBUG
+					CAMsg::printMsg(LOG_DEBUG,"CAFirstMix::Queue prev is full!\n");
+#endif				
+					msSleep(200);
+					continue;
+				}
 				#ifndef USE_POOL			
 					ret=oSocketGroup.select(1000);
 				#else
@@ -730,7 +739,9 @@ THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 										#ifdef REPLAY_DETECTION
 											// replace time(NULL) with the real timestamp ()
 											// packet-timestamp + m_u64ReferenceTime
-											if(pMix->m_pReplayDB->insert(tmpRSABuff,time(NULL))!=E_SUCCESS)
+											UINT32 stamp=(UINT32)(tmpRSABuff[13]<<16)+(UINT32)(tmpRSABuff[14]<<8)+(UINT32)(tmpRSABuff[15]);
+											if(pMix->m_pReplayDB->insert(tmpRSABuff,stamp+pMix->m_u64ReferenceTime)!=E_SUCCESS)
+//											if(pMix->m_pReplayDB->insert(tmpRSABuff,time(NULL))!=E_SUCCESS)
 												{
 													CAMsg::printMsg(LOG_INFO,"Replay: Duplicate packet ignored.\n");
 													continue;
@@ -806,12 +817,20 @@ THREAD_RETURN mm_loopReadFromMixAfter(void* param)
 		oSocketGroup.add(*(pMix->m_pMuxOut));
 
 		CAQueue* pQueue=pMix->m_pQueueSendToMixBefore;
-
+		
 #ifdef USE_POOL		
 		CAPool* pPool=new CAPool(MIX_POOL_SIZE);
 #endif
 		while(pMix->m_bRun)
 			{
+				if(pQueue->getSize()>MAX_READ_FROM_NEXT_MIX_QUEUE_SIZE)
+				{
+#ifdef DEBUG				
+					CAMsg::printMsg(LOG_DEBUG,"CAFirstMix::Queue next is full!\n");
+#endif
+					msSleep(200);
+					continue;
+				}
 				#ifndef USE_POOL
 					ret=oSocketGroup.select(1000);
 				#else

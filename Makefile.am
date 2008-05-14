@@ -48,6 +48,7 @@ libproxytest_a_SOURCES = CAAbstractControlChannel.cpp\
 		    CAMutex.cpp\
 		    CAMuxSocket.cpp \
 		    CAPriceInfo.cpp \
+		    CAPerformanceServer.cpp \
 		    CAPool.cpp\
 		    CAQueue.cpp \
 		    CAReplayControlChannel.cpp\
@@ -117,6 +118,7 @@ libproxytest_a_SOURCES = CAAbstractControlChannel.cpp\
 		    CAMsg.hpp \
 		    CAMutex.hpp\
 		    CAMuxSocket.hpp \
+		    CAPerformanceServer.hpp \
 		    CAPriceInfo.hpp \
 		    CAPool.hpp\
 		    CAQueue.hpp \

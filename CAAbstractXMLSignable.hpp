@@ -47,6 +47,10 @@ public:
 			toXmlDocument(pDoc);
 			DOMElement* pElemRoot = pDoc->getDocumentElement();
 			SINT32 rc = verifier.verifyXML( pElemRoot, (CACertStore *)NULL );
+			if(pDoc != NULL)
+			{
+				pDoc->release();
+			}
 			return rc;
 		}
 

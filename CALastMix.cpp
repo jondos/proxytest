@@ -523,7 +523,6 @@ THREAD_RETURN lm_loopSendToMix(void* param)
 		THREAD_RETURN_SUCCESS;
 	}
 
-#define MAX_READ_FROM_PREV_MIX_QUEUE_SIZE	10000000
 
 /* How to end this thread:
  * 1. set m_brestart=true
@@ -547,6 +546,9 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 			{
 				if(pQueue->getSize()>MAX_READ_FROM_PREV_MIX_QUEUE_SIZE)
 					{
+#ifdef DEBUG						
+						CAMsg::printMsg(LOG_DEBUG,"CAFirstMix::Queue is full!\n");
+#endif
 						msSleep(200);
 						getcurrentTimeMillis(keepaliveLast);
 						continue;

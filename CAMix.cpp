@@ -32,6 +32,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAInfoService.hpp"
 #include "CACmdLnOptions.hpp"
 #include "CAStatusManager.hpp"
+
 extern CACmdLnOptions* pglobalOptions;
 
  
@@ -338,7 +339,19 @@ SINT32 CAMix::initMixCascadeInfo(DOMElement* mixes)
 				setDOMElementAttribute(elemRoot,"id",cascadeID);
     setDOMElementAttribute(elemMixesDocCascade,"count",count);
     
-		
+    DOMElement* elemPerf = NULL;
+    if(getDOMChildByName(elemMixesDocCascade, "PerformanceServer", elemPerf, true) == E_SUCCESS && elemPerf != NULL)
+    {
+    	elemPerf = createDOMElement(m_docMixCascadeInfo, "PerformanceServer");    	
+    	setDOMElementValue(elemPerf, (UINT8*) "true");
+    }
+    else
+    {
+    	elemPerf = createDOMElement(m_docMixCascadeInfo, "PerformanceServer");   	
+    	setDOMElementValue(elemPerf, (UINT8*) "false");
+    }
+	elemRoot->appendChild(elemPerf);
+    
   DOMNode* elemPayment=createDOMElement(m_docMixCascadeInfo,"Payment");
 	elemRoot->appendChild(elemPayment);
 #ifdef PAYMENT
