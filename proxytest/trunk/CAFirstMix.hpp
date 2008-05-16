@@ -327,12 +327,12 @@ protected:
 
 #ifdef COUNTRY_STATS
 		private:
-			SINT32 initCountryStats(char* db_host,char* db_user,char*db_passwd);
-			SINT32 deleteCountryStats();
+			SINT32 initCountryStats(char* db_host,char* db_user,char*db_passwd);			
 			SINT32 updateCountryStats(const UINT8 ip[4],UINT32 a_countryID,bool bRemove);
 			volatile bool m_bRunLogCountries;
 			volatile UINT32* m_CountryStats;
 		protected:	
+		    SINT32 deleteCountryStats();
 			tUINT32withLock* m_PacketsPerCountryIN;
 			tUINT32withLock* m_PacketsPerCountryOUT;
 		private:	
