@@ -62,9 +62,14 @@ inline SINT64 filesize64(int handle)
 	{
 		#ifdef _WIN32
 			return _filelengthi64(handle);
-		#else
+		#elif defined (HAVE_FSTAT64)
 			struct stat64 info;
 			if(fstat64(handle, &info) != 0)
+				return E_UNKNOWN;
+			return info.st_size;
+		#else
+			struct stat info;
+			if(fstat(handle, &info) != 0)
 				return E_UNKNOWN;
 			return info.st_size;
 		#endif
