@@ -274,6 +274,7 @@ AC_FUNC_ALLOCA
 AC_CHECK_FUNCS([strerror])
 AC_CHECK_FUNCS([vsnprintf])
 AC_CHECK_FUNCS([snprintf])
+AC_CHECK_FUNCS([fstat64])
 AC_CHECK_FUNCS([poll])
 AC_CHECK_FUNCS([pthread_mutex_init])
 AC_CHECK_FUNCS([pthread_cond_init])
