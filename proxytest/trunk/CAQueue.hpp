@@ -62,6 +62,9 @@ class CAQueue
 					m_nQueueSize=0;
 					m_pcsQueue=new CAMutex();
 					m_pconvarSize=new CAConditionVariable();
+#ifdef QUEUE_SIZE_LOG
+					m_nLogSize=0;
+#endif
 					//m_pHeap=NULL;
 					//incHeap();
 				}
@@ -80,8 +83,9 @@ class CAQueue
 			UINT32 getSize()
 				{
 					m_pcsQueue->lock();
+					UINT32 s=m_nQueueSize;
 					m_pcsQueue->unlock();
-					return m_nQueueSize;
+					return s;
 				}
 			
 			/** Returns true, if the Queue is empty
@@ -97,16 +101,26 @@ class CAQueue
 				* @retval E_SUCCESS, if Queue implementation seams to be ok
 				*/
 			static SINT32 test();
+
+#ifdef QUEUE_SIZE_LOG
+			void logIfSizeGreaterThen(UINT32 size)
+				{
+					m_nLogSize=size;
+				}
+#endif
 		
 		private:
 			QUEUE* m_Queue; 
 			QUEUE* m_lastElem;
-			UINT32 m_nQueueSize;
+			volatile UINT32 m_nQueueSize;
 			UINT32 m_nExpectedElementSize;
 			//QUEUE* m_pHeap;
 			CAMutex* m_pcsQueue;
 			CAConditionVariable* m_pconvarSize;
 
+#ifdef QUEUE_SIZE_LOG
+			UINT32 m_nLogSize;
+#endif
 	/*		SINT32 incHeap()
 				{
 					QUEUE* pEntry;

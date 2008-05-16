@@ -123,6 +123,12 @@ SINT32 CAQueue::add(const void* buff,UINT32 size)
 				memcpy(m_lastElem->pBuff,buff,size);
 			}
 		m_nQueueSize+=size;
+#ifdef QUEUE_SIZE_LOG
+		if(m_nLogSize!=0 && m_nQueueSize>m_nLogSize)
+			{
+				CAMsg::printMsg(LOG_DEBUG,"CAQueue::add() WARNING: queue size is now %u bytes which is above the expected maximum size of %u\n !\n",m_nQueueSize,m_nLogSize);
+			}
+#endif
 		m_pcsQueue->unlock();
 		m_pconvarSize->signal();
 		return E_SUCCESS;
