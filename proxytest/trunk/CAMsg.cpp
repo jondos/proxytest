@@ -242,11 +242,18 @@ SINT32 CAMsg::openLog(UINT32 type)
 					if(pglobalOptions->getLogDir((UINT8*)m_strLogFile,1024)!=E_SUCCESS)
 						return E_UNKNOWN;
 					strcat(m_strLogFile,FILENAME_INFOLOG);
-					currtime=time(NULL);
-					strftime(m_strLogFile+strlen(m_strLogFile),1024-strlen(m_strLogFile),"%Y%m%d-%H%M%S",localtime(&currtime));
-					m_hFileInfo=open(m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE|O_SYNC,S_IREAD|S_IWRITE);
-					setMaxLogFileSize(pglobalOptions->getMaxLogFileSize());
-					m_NrOfWrites=0;
+					if(pglobalOptions->getMaxLogFileSize()>0)
+					{
+						currtime=time(NULL);
+						strftime(m_strLogFile+strlen(m_strLogFile),1024-strlen(m_strLogFile),"%Y%m%d-%H%M%S",localtime(&currtime));
+						m_hFileInfo=open(m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE|O_SYNC,S_IREAD|S_IWRITE);
+						setMaxLogFileSize(pglobalOptions->getMaxLogFileSize());
+						m_NrOfWrites=0;
+					}
+					else
+					{
+						m_hFileInfo=open(m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE|O_SYNC,S_IREAD|S_IWRITE);
+					}
 				break;
 #ifdef COMPRESSED_LOGS
 				case MSG_COMPRESSED_FILE:
