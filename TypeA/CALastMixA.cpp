@@ -230,7 +230,11 @@ SINT32 CALastMixA::loop()
 																		UINT64 u64temp;
 																		getcurrentTimeMillis(u64temp);
 																	#endif
-																	m_pChannelList->add(pMixPacket->channel,tmpSocket,newCipher,new CAQueue(PAYLOAD_SIZE)
+																	CAQueue* pQueue=new CAQueue(PAYLOAD_SIZE);
+																	#ifdef LASTMIX_CHECK_MEMORY
+																		pQueue->logIfSizeGreaterThen(100000);
+																	#endif
+																	m_pChannelList->add(pMixPacket->channel,tmpSocket,newCipher,pQueue
 																	#if defined (LOG_CHANNEL)
 																											,pQueueEntry->timestamp_proccessing_start,payLen
 																	#endif
