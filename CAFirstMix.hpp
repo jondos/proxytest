@@ -144,12 +144,9 @@ public:
 #endif
 				}
 
-    virtual ~CAFirstMix()
+    	virtual ~CAFirstMix()
 			{
-				clean();
-				delete m_pmutexUser;
-				delete m_pmutexMixedPackets;
-				delete m_pmutexLoginThreads;
+				
 			}
 
 		tMixType getType() const
@@ -166,7 +163,6 @@ protected:
 			virtual SINT32 loop()=0;
 			bool isShuttingDown();
 			SINT32 init();
-			SINT32 clean();
 			SINT32 initOnce();
 #ifdef DYNAMIC_MIX
 			void stopCascade()
