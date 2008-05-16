@@ -36,6 +36,14 @@ class CAFirstMixA:public CAFirstMix
 		public:
 	
 		virtual void shutDown();
+		virtual ~CAFirstMixA()
+		{
+			//clean();
+			delete m_pmutexUser;
+			delete m_pmutexMixedPackets;
+			delete m_pmutexLoginThreads;
+		}
+		virtual SINT32 clean();
 
 		protected:
 			SINT32 loop();	
