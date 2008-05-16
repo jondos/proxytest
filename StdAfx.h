@@ -33,7 +33,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
+<<<<<<< StdAfx.h
+#define MIX_VERSION "00.07.29"
+=======
 #define MIX_VERSION "00.08.01"
+>>>>>>> 1.599
 
 #include "doxygen.h"
 
@@ -61,6 +65,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 /* LERNGRUPPE: define this to get dynamic mixes */
 //#define DYNAMIC_MIX
 //#define SDTFA // specific logic needed by SDTFA, http://www.sdtfa.com
+
+//#define LASTMIX_CHECK_MEMORY // only for internal debugging purpose 
 
 //#define PRINT_THREAD_STACK_TRACE //Usefull for debugging output of stack trace if mix dies...
 #if !defined(PRINT_THREAD_STACK_TRACE) && defined (DEBUG)&& ! defined(ONLY_LOCAL_PROXY)
@@ -114,6 +120,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #endif
 #ifdef DELAY_CHANNELS_LATENCY
 	#define DELAY_CHANNEL_LATENCY 10000 //min latency defaults to 10 second
+#endif
+
+#if defined LASTMIX_CHECK_MEMORY && ! defined(QUEUE_SIZE_LOG)
+	#define QUEUE_SIZE_LOG
 #endif
 //#define LOG_CRIME
 //#define PAYMENT //to enable payment support, now use configure --enable-payment..
