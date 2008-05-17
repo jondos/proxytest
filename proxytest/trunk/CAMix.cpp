@@ -249,6 +249,9 @@ SINT32 CAMix::initMixCascadeInfo(DOMElement* mixes)
     int count;
     m_docMixCascadeInfo=createDOMDocument();
     DOMElement* elemRoot=createDOMElement(m_docMixCascadeInfo,"MixCascade");
+#ifdef LOG_DIALOG
+    setDOMElementAttribute(elemRoot,"study",(UINT8*)"true");
+#endif
 
     UINT8 id[50];
 		UINT8* cascadeID=NULL;
