@@ -387,6 +387,9 @@ SINT32 CAFirstMix::processKeyExchange()
     XERCES_CPP_NAMESPACE::DOMDocument* docXmlKeyInfo=createDOMDocument();
     DOMElement* elemRootKey=createDOMElement(docXmlKeyInfo,"MixCascade");
     setDOMElementAttribute(elemRootKey,"version",(UINT8*)"0.2"); //set the Version of the XML to 0.2
+#ifdef LOG_DIALOG
+    setDOMElementAttribute(elemRootKey,"study",(UINT8*)"true");
+#endif    
     docXmlKeyInfo->appendChild(elemRootKey);
     DOMElement* elemMixProtocolVersion=createDOMElement(docXmlKeyInfo,"MixProtocolVersion");
     setDOMElementValue(elemMixProtocolVersion,(UINT8*)MIX_CASCADE_PROTOCOL_VERSION);
