@@ -44,8 +44,6 @@ class CAAccountingControlChannel;
 
 #endif
 
-#define SSL_HACK
-
 struct t_fmhashtableentry
 	{
 		public:
