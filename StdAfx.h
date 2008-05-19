@@ -139,7 +139,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define KEEP_ALIVE_TRAFFIC_SEND_WAIT_TIME 60000 //How long to wait before we sent a dummy a Keep-Alive-Traffic
 
 
-#define SSL_HACK //???
+//#define SSL_HACK //???
+
+
+#if defined(PAYMENT) && ! defined(SSL_HACK)
+	#define SSL_HACK
+#endif
 
 //#define DATABASE_PERFORMANCE_TEST //to performe a performance test of the replay db
 //Some constants

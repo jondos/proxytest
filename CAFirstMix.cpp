@@ -1009,7 +1009,9 @@ THREAD_RETURN fm_loopDoUserLogin(void* param)
 	{
 		INIT_STACK;
 		BEGIN_STACK("CAFirstMix::fm_loopDoUserLogin");
-		
+#ifdef COUNTRY_STATS
+		my_thread_init();
+#endif
 
 		t_UserLoginData* d=(t_UserLoginData*)param;
 		d->pMix->doUserLogin(d->pNewUser,d->peerIP);
@@ -1018,6 +1020,9 @@ THREAD_RETURN fm_loopDoUserLogin(void* param)
 		d->pMix->m_newConnections--;
 		delete d;
 		
+#ifdef COUNTRY_STATS
+		my_thread_end();
+#endif
 		FINISH_STACK("CAFirstMix::fm_loopDoUserLogin");
 		
 		THREAD_RETURN_SUCCESS;
@@ -1769,13 +1774,14 @@ RET:
 
 THREAD_RETURN iplist_loopDoLogCountries(void* param)
 	{
+		mysql_thread_init();
 		CAMsg::printMsg(LOG_DEBUG,"Starting iplist_loopDoLogCountries\n");														
 		CAFirstMix* pFirstMix=(CAFirstMix*)param;
 		UINT32 s=0;
 		UINT8 buff[255];
+		memset(buff,0,255);
 		pglobalOptions->getCascadeName(buff,255);
 		mysqlEscapeTableName(buff);
-		mysql_thread_init();
 		while(pFirstMix->m_bRunLogCountries)
 			{
 				if(s==LOG_COUNTRIES_INTERVALL)
@@ -1805,8 +1811,8 @@ THREAD_RETURN iplist_loopDoLogCountries(void* param)
 				sSleep(10);
 				s++;
 			}
-		mysql_thread_end();
 		CAMsg::printMsg(LOG_DEBUG,"Exiting iplist_loopDoLogCountries\n");														
+		mysql_thread_end();
 		THREAD_RETURN_SUCCESS;	
 	}
 #endif
