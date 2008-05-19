@@ -872,11 +872,13 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 						pNewMuxSocket=new CAMuxSocket;
 						ret=socketsIn[i].accept(*(CASocket*)pNewMuxSocket);
 						pFirstMix->m_newConnections++;							 
-						int master = ((CASocket*)pNewMuxSocket)->getPeerIP(peerIP);
+						SINT32 master = ((CASocket*)pNewMuxSocket)->getPeerIP(peerIP);
 						
 						if(master == E_SUCCESS)
 						{
-							UINT32 size;
+							UINT32 size=0;
+							UINT8 remoteIP[4];
+
 							CAListenerInterface** intf = pglobalOptions->getInfoServices(size);
 							
 							master = -1;
@@ -886,10 +888,11 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 								if(intf[i]->getType() == HTTP_TCP || intf[i]->getType() == RAW_TCP)
 								{
 									CASocketAddrINet* addr = (CASocketAddrINet*) intf[i]->getAddr();
-									if(addr == NULL) continue;
+									if(addr == NULL)
+										continue;
 									
-									UINT8* remoteIP = new UINT8[4];
 									addr->getIP(remoteIP);
+									delete addr;
 								
 									if(memcmp(peerIP, remoteIP, 4) == 0)
 									{
@@ -898,8 +901,6 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 										break;
 									}
 									
-									delete addr;
-									delete remoteIP;
 								}
 								
 							}
