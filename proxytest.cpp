@@ -782,7 +782,7 @@ RESTART_MIX:
 #endif
 		signal(SIGINT,signal_interrupt);
 		signal(SIGTERM,signal_term);
-#ifndef _DEBUG
+#if !defined (_DEBUG) && !defined(NO_CATCH_SIGSEV)
 		signal(SIGSEGV,signal_segv);
 #endif
 		//Try to write pidfile....
