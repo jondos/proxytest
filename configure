@@ -1339,7 +1339,8 @@ Optional Features:
   --enable-new_mix_type   Specify if to build with type B mixes
   --enable-dynamic        Specify if to build a mix for a dynamic cascade
   --enable-dialog
-  --enable-debug          Enable debug mode
+  --enable-debug          Enable debug compilation mode
+  --enable-debug-output   Enable output of debug messages
   --enable-crime-detection
                           Enable crime detection mode
   --enable-tests          Build also some functional tests
@@ -13505,12 +13506,24 @@ fi
 if test "${enable_debug+set}" = set; then
   enableval=$enable_debug;
 	    if test "x$enableval" != "xno" ; then
-		CFLAGS="$CFLAGS -ggdb3 -D_DEBUG -fno-inline -fno-default-inline"
-		CXXFLAGS="$CXXFLAGS -ggdb3 -D_DEBUG -fno-inline -fno-default-inline"
+		CFLAGS="$CFLAGS -ggdb3 -DNO_SIGSEV_CATCH -fno-inline -fno-default-inline"
+		CXXFLAGS="$CXXFLAGS -ggdb3 -DNO_SIGSEV_CATCH -fno-inline -fno-default-inline"
 		OFLAGS="-O0"
 	    else
 		CFLAGS="$CFLAGS -g0"
 		CXXFLAGS="$CXXFLAGS -g0"
+	    fi
+
+
+fi
+
+
+# Check whether --enable-debug-output was given.
+if test "${enable_debug_output+set}" = set; then
+  enableval=$enable_debug_output;
+	    if test "x$enableval" != "xno" ; then
+		CFLAGS="$CFLAGS -D_DEBUG"
+		CXXFLAGS="$CXXFLAGS -D_DEBUG"
 	    fi
 
 
