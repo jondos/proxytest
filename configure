@@ -13361,10 +13361,14 @@ done
 
     { echo "$as_me:$LINENO: checking for Mysql libs" >&5
 echo $ECHO_N "checking for Mysql libs... $ECHO_C" >&6; }
+    trymysqllibdir="/usr/lib /usr/local/lib /usr/lib/mysql /usr/local/lib/mysql"
     saved_LIBS="$LIBS"
+    saved_LDFLAGS="$LDFLAGS"
     MYSQL_LIB="-lmysqlclient_r"
     LIBS="$LIBS $MYSQL_LIB"
-    cat >conftest.$ac_ext <<_ACEOF
+    for mysqllibdir in "" $trymysqllibdir ; do
+	LDFLAGS="$saved_LDFLAGS -L$mysqllibdir"
+	cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
@@ -13404,18 +13408,27 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
 	 test ! -s conftest.err
        } && test -s conftest$ac_exeext &&
        $as_test_x conftest$ac_exeext; then
-  { echo "$as_me:$LINENO: result: libmysql found" >&5
-echo "${ECHO_T}libmysql found" >&6; }
+
+				{ echo "$as_me:$LINENO: result: found in $mysqllibdir" >&5
+echo "${ECHO_T}found in $mysqllibdir" >&6; }
+				found_mysqllib=1 break;
+
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-	{ echo "$as_me:$LINENO: result: libmysql NOT found" >&5
-echo "${ECHO_T}libmysql NOT found" >&6; }
+
 fi
 
 rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
       conftest$ac_exeext conftest.$ac_ext
+	done
+	if test -z "$found_mysqllib"; then
+	    { { echo "$as_me:$LINENO: error: mysql libs NOT found - please use --with-mysql-lib" >&5
+echo "$as_me: error: mysql libs NOT found - please use --with-mysql-lib" >&2;}
+   { (exit 1); exit 1; }; }
+	fi
+
     { echo "$as_me:$LINENO: checking whether MYSQL_OPT_RECONNECT is declared" >&5
 echo $ECHO_N "checking whether MYSQL_OPT_RECONNECT is declared... $ECHO_C" >&6; }
 if test "${ac_cv_have_decl_MYSQL_OPT_RECONNECT+set}" = set; then
@@ -13483,7 +13496,7 @@ _ACEOF
 
 fi
 
-LIBS="$saved_LIBS"
+    LIBS="$saved_LIBS"
 fi
 
 

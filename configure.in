@@ -341,7 +341,7 @@ dnl Checks for libraries.
 
 
 dnl Check for OpenSSL libs and includes. Adopted from OpenSSH configure.in
-dnl defualt palce to look for OpenSSL --> may be overwriten by the option below!
+dnl default place to look for OpenSSL --> may be overwriten by the option below!
 tryssldir="/usr/local/openssl /usr/lib/openssl \
                          /usr/local/ssl /usr/lib/ssl /usr/local /usr/pkg \
                          /opt /opt/openssl $HOME/ssl $HOME/openssl"
@@ -585,18 +585,31 @@ if test "x$DIALOG" != "x" ; then
 						]
 		    )		    
     AC_MSG_CHECKING([for Mysql libs])
+    trymysqllibdir="/usr/lib /usr/local/lib /usr/lib/mysql /usr/local/lib/mysql"
     saved_LIBS="$LIBS"
+    saved_LDFLAGS="$LDFLAGS"
     MYSQL_LIB="-lmysqlclient_r"
     LIBS="$LIBS $MYSQL_LIB"
-    AC_LINK_IFELSE([AC_LANG_PROGRAM([
+    for mysqllibdir in "" $trymysqllibdir ; do
+	LDFLAGS="$saved_LDFLAGS -L$mysqllibdir"
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([
 				#ifdef HAVE_MYSQL_MYSQL_H
 				#include <mysql/mysql.h>
 				#elif defined(HAVE_MYSQL_H)
 				#include <mysql.h>
 				#endif
 				], [mysql_init(0);
-				])],[AC_MSG_RESULT(libmysql found)],
-				[AC_MSG_RESULT(libmysql NOT found)])
+				])],[
+				AC_MSG_RESULT([found in $mysqllibdir])
+				found_mysqllib=1 break;
+				],[],[found_mysqllib=1
+			AC_MSG_RESULT([skip mysql lib run test because of cross compiling])
+			])
+	done
+	if test -z "$found_mysqllib"; then
+	    AC_MSG_ERROR([mysql libs NOT found - please use --with-mysql-lib])
+	fi
+
     AC_CHECK_DECL([MYSQL_OPT_RECONNECT], [AC_DEFINE(HAVE_MYSQL_OPT_RECONNECT,,[Define if you mysql client library supports the MYSQL_RECONNECT option])]   ,[],[[
     				#ifdef HAVE_MYSQL_MYSQL_H
 				#include <mysql/mysql.h>
@@ -604,7 +617,7 @@ if test "x$DIALOG" != "x" ; then
 				#include <mysql.h>
 				#endif
 				]])
-LIBS="$saved_LIBS"
+    LIBS="$saved_LIBS"
 fi
 
 
