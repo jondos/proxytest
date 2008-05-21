@@ -1077,7 +1077,12 @@ SINT32 decryptXMLElement(DOMNode* node, CAASymCipher* pRSA)
 				delete[] cipherValue;
 				return E_UNKNOWN;
 			}
-		CABase64::decode(cipherValue,len,cipherValue,&len);
+		if(CABase64::decode(cipherValue,len,cipherValue,&len)!=E_SUCCESS)
+			{
+				delete pSymCipher;
+				delete[] cipherValue;
+				return E_UNKNOWN;
+			}
 		SINT32 ret=pSymCipher->decrypt1CBCwithPKCS7(cipherValue,cipherValue,&len);
 		delete pSymCipher;
 		if(ret!=E_SUCCESS)
