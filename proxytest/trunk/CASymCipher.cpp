@@ -193,7 +193,7 @@ SINT32 CASymCipher::crypt2(const UINT8* in,UINT8* out,UINT32 len)
 	*/
 SINT32 CASymCipher::decrypt1CBCwithPKCS7(const UINT8* in,UINT8* out,UINT32* len)
 	{
-		if(in==NULL||out==NULL||len==0||*len=0)
+		if(in==NULL||out==NULL||len==NULL||*len==0)
 			return E_UNKNOWN;
 		AES_cbc_encrypt(in,out,*len,m_keyAES,m_iv1,AES_DECRYPT);
 		//Now remove padding
