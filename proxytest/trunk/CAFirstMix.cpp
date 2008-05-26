@@ -881,7 +881,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 
 							CAListenerInterface** intf = pglobalOptions->getInfoServices(size);
 							
-							master = -1;
+							master = E_UNKNOWN;
 													
 							for(UINT32 i = 0; i < size; i++)
 							{
@@ -899,10 +899,8 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 										CAMsg::printMsg(LOG_ERR,"FirstMix: You are allowed\n");
 										master = E_SUCCESS;
 										break;
-									}
-									
-								}
-								
+									}									
+								}								
 							}
 						}
 												
