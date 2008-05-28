@@ -668,12 +668,7 @@ RESTART_MIX:
 #ifdef SERVER_MONITORING
 		CAStatusManager::init();
 #endif
-#ifdef PERFORMANCE_SERVER
-		if(pglobalOptions->isLastMix()) 
-		{
-			CAPerformanceServer::init();
-		}
-#endif			
+			
 #ifndef WIN32
 		maxFiles=pglobalOptions->getMaxOpenFiles();
 		
@@ -867,6 +862,9 @@ RESTART_MIX:
 				}
 				else
 				{
+#ifdef PERFORMANCE_SERVER
+                        CAPerformanceServer::init();
+#endif
 						#if !defined(NEW_MIX_TYPE)
 							pMix=new CALastMixA();
 						#else
