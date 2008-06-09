@@ -600,7 +600,7 @@ SINT32 CAFirstMixA::loop()
 														pHashEntry->pSymCipher->crypt1(pMixPacket->data,rsaBuff,KEY_SIZE);
 														#ifdef REPLAY_DETECTION
 														// replace time(NULL) with the real timestamp ()
-														// packet-timestamp + m_u64ReferenceTime
+														// packet-timestamp*REPLAY_BASE + m_u64ReferenceTime
 															if(m_pReplayDB->insert(rsaBuff,time(NULL))!=E_SUCCESS)
 															{
 																CAMsg::printMsg(LOG_INFO,"Replay: Duplicate packet ignored.\n");

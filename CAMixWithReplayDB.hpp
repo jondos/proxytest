@@ -33,6 +33,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAReplayCtrlChannelMsgProc.hpp"
 #include "CAMix.hpp"
 
+// REPLAY_BASE defines the timebase of the replay-DBs e.g. if it is set to 1 the the base is 1 second
+#define REPLAY_BASE 1
+
 /** This class (interface) adds the functionality used by last and middle mixes to detecte replays*/
 class CAMixWithReplayDB:public CAMix
 	{

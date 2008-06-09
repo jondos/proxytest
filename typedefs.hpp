@@ -145,6 +145,7 @@ struct t_mix_parameters
 		UINT8* m_strMixID;
 		/// stores the local time in seconds since epoch for interval '0' for this mix
 		UINT32 m_u32ReplayOffset;
+		UINT16 m_u32ReplayBase;
 	};
 typedef struct t_mix_parameters tMixParameters;
 
