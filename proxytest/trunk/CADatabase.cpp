@@ -99,18 +99,50 @@ SINT32 CADatabase::insert(UINT8 key[16],UINT64 timestamp)
 			}
 
 		t_databaseInfo* aktDB=NULL;
+		t_databaseInfo* prevDB=NULL;
+		t_databaseInfo* nextDB=NULL;
 
 		if(timestamp<m_lastSwitch){
 			aktDB=m_prevDatabase;
+			prevDB=NULL;
+			nextDB=m_currDatabase;
 			}
 		else if(timestamp<(m_lastSwitch+SECONDS_PER_INTERVALL)){
 			aktDB=m_currDatabase;
+			prevDB=m_prevDatabase;
+			nextDB=m_nextDatabase;
 			}
 		else {
 			aktDB=m_nextDatabase;
+			prevDB=m_currDatabase;
+			nextDB=NULL;
 			}
 
 		UINT64 hashkey=key[2]<<56+key[3]<<48+key[4]<<40+key[5]<<32+key[6]<<24+key[7]<<16+key[8]<<8+key[9];
+
+// insert
+		if (prevDB!=NULL){
+			t_databaseEntry* tmp=prevDB->m_pHashTable[key[0]][key[1]];
+
+			while(tmp!=NULL){
+				if (tmp->key!=hashkey) {
+					tmp=tmp->next;
+					}
+				else {
+					// duplicate found!!
+					m_pMutex->unlock();
+					return E_UNKNOWN;
+					}
+				}
+
+			// inserting in DB
+			tmp=new t_databaseEntry;
+			tmp->next=prevDB->m_pHashTable[key[0]][key[1]];
+			tmp->key=hashkey;
+			prevDB->m_pHashTable[key[0]][key[1]]=tmp;
+			prevDB->m_u32Size++;
+			}
+
 		t_databaseEntry* tmp=aktDB->m_pHashTable[key[0]][key[1]];
 
 		while(tmp!=NULL){
@@ -130,6 +162,29 @@ SINT32 CADatabase::insert(UINT8 key[16],UINT64 timestamp)
 		tmp->key=hashkey;
 		aktDB->m_pHashTable[key[0]][key[1]]=tmp;
 		aktDB->m_u32Size++;
+
+		if (nextDB!=NULL){
+			t_databaseEntry* tmp=nextDB->m_pHashTable[key[0]][key[1]];
+
+			while(tmp!=NULL){
+				if (tmp->key!=hashkey) {
+					tmp=tmp->next;
+					}
+				else {
+					// duplicate found!!
+					m_pMutex->unlock();
+					return E_UNKNOWN;
+					}
+				}
+
+			// inserting in DB
+			tmp=new t_databaseEntry;
+			tmp->next=nextDB->m_pHashTable[key[0]][key[1]];
+			tmp->key=hashkey;
+			nextDB->m_pHashTable[key[0]][key[1]]=tmp;
+			nextDB->m_u32Size++;
+			}
+
 		m_pMutex->unlock();
 		return E_SUCCESS;
 

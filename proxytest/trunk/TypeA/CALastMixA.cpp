@@ -126,7 +126,7 @@ SINT32 CALastMixA::loop()
 												#ifdef REPLAY_DETECTION
 													// replace time(NULL) with the real timestamp ()
 													// packet-timestamp + m_u64ReferenceTime
-													UINT32 stamp=(UINT32)(rsaBuff[13]<<16)+(UINT32)(rsaBuff[14]<<8)+(UINT32)(rsaBuff[15]);
+													UINT32 stamp=((UINT32)(rsaBuff[13]<<16)+(UINT32)(rsaBuff[14]<<8)+(UINT32)(rsaBuff[15]))*REPLAY_BASE;
 													if(m_pReplayDB->insert(rsaBuff,stamp+m_u64ReferenceTime)!=E_SUCCESS)
 //													if(m_pReplayDB->insert(rsaBuff,time(NULL))!=E_SUCCESS)
 														{

@@ -248,6 +248,9 @@ SINT32 CAReplayCtrlChannelMsgProc::initTimestampsMessageTemplate()
 		DOMElement *elemReplayOffset=createDOMElement(m_docTemplate,"ReplayOffset");
 //		setDOMElementValue(elemReplayOffset,(UINT32) (time(NULL)-m_pMix->m_u64ReferenceTime));
 		elemReplay->appendChild(elemReplayOffset);
+		DOMElement *elemReplayBase=createDOMElement(m_docTemplate,"ReplayBase");
+		setDOMElementValue(elemReplayBase,(UINT32) (REPLAY_BASE));
+		elemReplay->appendChild(elemReplayBase);
 		m_docTemplate->appendChild(elemMix);
 
 		return E_SUCCESS;

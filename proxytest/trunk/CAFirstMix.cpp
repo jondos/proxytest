@@ -592,6 +592,7 @@ SINT32 CAFirstMix::setMixParameters(const tMixParameters& params)
 				if(strcmp((char*)m_arMixParameters[i].m_strMixID,(char*)params.m_strMixID)==0)
 					{
 						m_arMixParameters[i].m_u32ReplayOffset=params.m_u32ReplayOffset;
+						m_arMixParameters[i].m_u32ReplayBase=params.m_u32ReplayBase;
 					}
 				else{
 						if (m_arMixParameters[i].m_u32ReplayOffset!=0) m_arMixParameters[i].m_u32ReplayOffset+=diff;
@@ -1192,6 +1193,9 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 					DOMElement* elemReplayOffset=createDOMElement(docSig,"ReplayOffset");
 					setDOMElementValue(elemReplayOffset,(UINT32) (m_arMixParameters[i].m_u32ReplayOffset+diff));
 					elemMix->appendChild(elemReplayOffset);
+					DOMElement* elemReplayBase=createDOMElement(docSig,"ReplayBase");
+					setDOMElementValue(elemReplayBase,(UINT32) (m_arMixParameters[i].m_u32ReplayBase));
+					elemMix->appendChild(elemReplayBase);
 					elemReplay->appendChild(elemMix);
 				}
 
@@ -1201,6 +1205,9 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 				setDOMElementAttribute(elemMix,"id",buff);
 				DOMElement* elemReplayOffset=createDOMElement(docSig,"ReplayOffset");
 				setDOMElementValue(elemReplayOffset,(UINT32) (time(NULL)-m_u64ReferenceTime));
+				elemMix->appendChild(elemReplayOffset);
+				DOMElement* elemReplayBase=createDOMElement(docSig,"ReplayBase");
+				setDOMElementValue(elemReplayBase,(UINT32) (REPLAY_BASE));
 				elemMix->appendChild(elemReplayOffset);
 				elemReplay->appendChild(elemMix);
 
