@@ -801,8 +801,8 @@ SINT32 CAAccountingDBInterface::__storeAccountStatus(UINT64 accountNumber, UINT3
 {
 	const char* previousStatusQuery = "SELECT COUNT(*) FROM ACCOUNTSTATUS WHERE ACCOUNTNUMBER='%s' ";
 	//reverse order of columns, so insertQuery and updateQuery can be used with the same sprintf parameters
-	const char* insertQuery         = "INSERT INTO ACCOUNTSTATUS(STATUSCODE,EXPIRES,ACCOUNTNUMBER) VALUES ('%u', '%s', '%s')";
- 	const char* updateQuery         = "UPDATE ACCOUNTSTATUS SET (STATUSCODE,EXPIRES)=('%u','%s') WHERE ACCOUNTNUMBER='%s'";
+	const char* insertQuery         = "INSERT INTO ACCOUNTSTATUS(STATUSCODE,ACCOUNTNUMBER) VALUES ('%u', '%s')";
+ 	const char* updateQuery         = "UPDATE ACCOUNTSTATUS SET STATUSCODE=%u WHERE ACCOUNTNUMBER=%s";
  	const char* query;
  	
 	PGresult* result;
@@ -839,7 +839,7 @@ SINT32 CAAccountingDBInterface::__storeAccountStatus(UINT64 accountNumber, UINT3
 	{
 		query = updateQuery;
 	}
-	sprintf((char*)finalQuery, query, statuscode, expires, tmp);
+	sprintf((char*)finalQuery, query, statuscode, tmp);
 	result = monitored_PQexec(m_dbConn, (char *)finalQuery);	
 
 	if (PQresultStatus(result) != PGRES_COMMAND_OK) // || PQntuples(result) != 1)
@@ -883,7 +883,7 @@ SINT32 CAAccountingDBInterface::__storeAccountStatus(UINT64 accountNumber, UINT3
 	 */
 	SINT32 CAAccountingDBInterface::__getAccountStatus(UINT64 accountNumber, UINT32& a_statusCode, char *expires)
 	{
-		const char* selectQuery = "SELECT STATUSCODE, EXPIRES FROM ACCOUNTSTATUS WHERE ACCOUNTNUMBER = %s";
+		const char* selectQuery = "SELECT STATUSCODE FROM ACCOUNTSTATUS WHERE ACCOUNTNUMBER = %s";
 		PGresult* result;
 		UINT8* finalQuery;
 		UINT8 accountNumberAsString[32];
@@ -913,7 +913,7 @@ SINT32 CAAccountingDBInterface::__storeAccountStatus(UINT64 accountNumber, UINT3
 		if(PQntuples(result) == 1) 
 		{
 			int statusCodeIndex = PQfnumber(result,"STATUSCODE");
-			int expiresIndex = PQfnumber(result,"EXPIRES");
+			//int expiresIndex = PQfnumber(result,"EXPIRES");
 			if(statusCodeIndex != -1 )
 			{
 				a_statusCode = atoi(PQgetvalue(result, 0, statusCodeIndex)); //first row, first column
@@ -923,14 +923,14 @@ SINT32 CAAccountingDBInterface::__storeAccountStatus(UINT64 accountNumber, UINT3
 				CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: no status code found while reading account status\n");
 			}
 			
-			if(expiresIndex != -1)
+			/*if(expiresIndex != -1)
 			{
 				expires = strncpy(expires, (const char*)PQgetvalue(result, 0, expiresIndex), 10);
 			}
 			else
 			{
 				CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: no expire date found while reading account status\n");
-			}
+			}*/
 		}
 		
 		PQclear(result);		
