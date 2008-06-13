@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.08.10"
+#define MIX_VERSION "00.08.11"
 
 #include "doxygen.h"
 
@@ -153,9 +153,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define CLIENTS_PER_IP 10 //how many jap connections per IP are allowed?
 #define CHANNELS_PER_CLIENT 50 //how many channels per jap client are allowed?
 
-#define FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT 30000 //Timout in waiting for login information to receive from JAP (10 seconds)
+#define FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT 40000 //Timout in waiting for login information to receive from JAP (10 seconds)
 #define LAST_MIX_TO_PROXY_CONNECT_TIMEOUT 2000 //Connection timeout for last mix to proxy connections 2 Seconds...
-#define AI_LOGIN_SO_TIMEOUT (UINT32) 5000 //5 Seconds...
+#define AI_LOGIN_SO_TIMEOUT (UINT32) 10000 //5 Seconds...
 #define LAST_MIX_TO_PROXY_SEND_TIMEOUT (UINT32)5000 //5 Seconds...
 #define MIX_TO_INFOSERVICE_TIMEOUT 30000 //How long to wait when communicating with the InfoService? (ms)
 #define NUM_LOGIN_WORKER_TRHEADS 10//How many working threads for login *do not change this until you really know that you are doing!* ??
