@@ -1794,6 +1794,7 @@ UINT32 CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo*
 	 * There should be something like an expiration date for the account status, e.g. 1 month
 	 */
 	char expireBuf[10];
+	memset(expireBuf, 0, 10);
 	SINT32 dbRet;
 	if(dbInterface != NULL);
 	{
@@ -2550,13 +2551,14 @@ SINT32 CAAccountingInstance::settlementTransaction()
 				}
 				
 				//check if expDate is set don't store status otherwise
-				if(pErrMsg->getExpTimeString()!=NULL)
+				/*if(pErrMsg->getExpTimeString()!=NULL)
 				{
 					if(*(pErrMsg->getExpTimeString())!=0)
 					{
 						dbInterface->storeAccountStatus(pCC->getAccountNumber(), CAXMLErrorMessage::ERR_ACCOUNT_EMPTY, pErrMsg->getExpTimeString());				
 					}
-				}
+				}*/
+				dbInterface->storeAccountStatus(pCC->getAccountNumber(), CAXMLErrorMessage::ERR_ACCOUNT_EMPTY, pErrMsg->getExpTimeString());				
 				dbInterface->markAsSettled(pCC->getAccountNumber(), ms_pInstance->m_currentCascade, 
 											pCC->getTransferredBytes());
 #ifdef DEBUG
@@ -2608,16 +2610,16 @@ SINT32 CAAccountingInstance::settlementTransaction()
 				authFlags |= AUTH_BLOCKED;
 				bDeleteCC = true;
 				
-				
+				dbInterface->storeAccountStatus(pCC->getAccountNumber(), CAXMLErrorMessage::ERR_BLOCKED, pErrMsg->getExpTimeString());
 				/* Don't forget to store the status when account is blocked
 				  but first check if expDate is set, otherwise don't store status */
-				if(pErrMsg->getExpTimeString()!=NULL)
+				/*if(pErrMsg->getExpTimeString()!=NULL)
 				{
 					if(*(pErrMsg->getExpTimeString())!=0)
 					{
 						dbInterface->storeAccountStatus(pCC->getAccountNumber(), CAXMLErrorMessage::ERR_BLOCKED, pErrMsg->getExpTimeString());
 					}
-				}
+				}*/
 			}
 			
 			else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_DATABASE_ERROR)
