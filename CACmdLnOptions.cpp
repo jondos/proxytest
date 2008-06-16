@@ -2130,9 +2130,9 @@ SKIP_NEXT_MIX:
 									  (UINT8 *)buffHost,&buffHostLen)==E_SUCCESS)
 				{
 					
-					m_strMonitoringListenerHost = new char[buffHostLen];
+					m_strMonitoringListenerHost = new char[buffHostLen+1];
 					strncpy(m_strMonitoringListenerHost, (const char*) buffHost, buffHostLen);
-					m_strMonitoringListenerHost[254] = 0;
+					m_strMonitoringListenerHost[buffHostLen] = 0;
 					
 				}
 				
