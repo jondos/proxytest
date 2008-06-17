@@ -832,8 +832,8 @@ SINT32 CAAccountingInstance::returnPrepareKickout(tAiAccountingInfo* pAccInfo, C
 
 SINT32 CAAccountingInstance::sendCCRequest(tAiAccountingInfo* pAccInfo)
 {
-	//INIT_STACK;
-	//BEGIN_STACK("CAAccountingInstance::sendCCRequest");
+	INIT_STACK;
+	BEGIN_STACK("CAAccountingInstance::sendCCRequest");
 	
 	XERCES_CPP_NAMESPACE::DOMDocument* doc=NULL;          
     UINT32 prepaidInterval;
@@ -1100,6 +1100,14 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 				//handleFunc = &CAAccountingInstance::handleChallengeResponse;
 				hf_ret = ms_pInstance->handleChallengeResponse( pHashEntry->pAccountingInfo, root );
 				processJapMessageLoginHelper(pHashEntry, hf_ret, false);	
+				if(hf_ret == CAXMLErrorMessage::ERR_OK)
+				{
+					CAMsg::printMsg( LOG_DEBUG, "Prepaid bytes are: %d\n",  
+							getPrepaidBytes(pHashEntry->pAccountingInfo)); 
+					pHashEntry->pAccountingInfo->authFlags |= 
+						 (getPrepaidBytes(pHashEntry->pAccountingInfo) > 0) ? 
+								 AUTH_LOGIN_SKIP_SETTLEMENT : AUTH_NEW;
+				}
 			}
 		else if ( strcmp( docElementName, "CC" ) == 0 )
 			{
@@ -1108,7 +1116,7 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 				#endif
 				//handleFunc = &CAAccountingInstance::handleCostConfirmation;
 				hf_ret = ms_pInstance->handleCostConfirmation( pHashEntry->pAccountingInfo, root );
-				processJapMessageLoginHelper(pHashEntry, hf_ret, true);				
+				processJapMessageLoginHelper(pHashEntry, hf_ret, true);
 			}
 		else
 		{
@@ -1246,7 +1254,7 @@ SINT32 CAAccountingInstance::loginProcessStatus(fmHashTableEntry *pHashEntry)
 	}
 	pHashEntry->pAccountingInfo->mutex->lock();
 	ret = pHashEntry->pAccountingInfo->authFlags & 
-		(AUTH_LOGIN_NOT_FINISHED | AUTH_LOGIN_FAILED);
+		(AUTH_LOGIN_NOT_FINISHED | AUTH_LOGIN_FAILED | AUTH_LOGIN_SKIP_SETTLEMENT);
 	pHashEntry->pAccountingInfo->mutex->unlock();
 	return ret;
 }
@@ -2483,9 +2491,9 @@ SINT32 CAAccountingInstance::settlementTransaction()
 			continue;		
 		}				
 		
-//#ifdef DEBUG				
+#ifdef DEBUG				
 		CAMsg::printMsg(LOG_DEBUG, "Settlement transaction: Connecting to payment instance...\n");
-//#endif				
+#endif				
 		ret = ms_pInstance->m_pPiInterface->initBIConnection();
 		if(ret != E_SUCCESS)
 		{
@@ -2546,7 +2554,7 @@ SINT32 CAAccountingInstance::settlementTransaction()
 					}
 					UINT8 tmp[32];
 					print64(tmp, confirmedBytes);
-					CAMsg::printMsg(LOG_ERR, "Settlement transaction: Received %s confirmed bytes!\n", tmp);
+					CAMsg::printMsg(LOG_INFO, "Settlement transaction: Received %s confirmed bytes!\n", tmp);
 					
 				}
 				
@@ -2562,7 +2570,7 @@ SINT32 CAAccountingInstance::settlementTransaction()
 				dbInterface->markAsSettled(pCC->getAccountNumber(), ms_pInstance->m_currentCascade, 
 											pCC->getTransferredBytes());
 #ifdef DEBUG
-				CAMsg::printMsg(LOG_ERR, "Settlement transaction: settling %Lu bytes for account %Lu\n", 
+				CAMsg::printMsg(LOG_DEBUG, "Settlement transaction: settling %Lu bytes for account %Lu\n", 
 											pCC->getTransferredBytes(), pCC->getAccountNumber());
 #endif
 			}
@@ -2602,7 +2610,7 @@ SINT32 CAAccountingInstance::settlementTransaction()
 				}
 				else
 				{
-					CAMsg::printMsg(LOG_DEBUG, "Settlement transaction: Did not receive last valid CC - maybe old Payment instance?\n");
+					CAMsg::printMsg(LOG_INFO, "Settlement transaction: Did not receive last valid CC - maybe old Payment instance?\n");
 				}																		
 			}
 			else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_BLOCKED)
@@ -2664,7 +2672,7 @@ SINT32 CAAccountingInstance::settlementTransaction()
 			 {
 			 	CAMsg::printMsg(LOG_ERR, "Settlement transaction: Could not mark CC as settled. Maybe a new CC has been added meanwhile?\n");
 			 }
-			CAMsg::printMsg(LOG_ERR, "Settlement transaction: CC OK!\n");
+			CAMsg::printMsg(LOG_INFO, "Settlement transaction: CC OK!\n");
 		} 
 					
 		
