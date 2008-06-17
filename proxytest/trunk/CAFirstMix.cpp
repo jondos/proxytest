@@ -1363,10 +1363,19 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		 */
 		if(!(aiLoginStatus & AUTH_LOGIN_FAILED))
 		{
-#ifdef DEBUG
-			CAMsg::printMsg(LOG_DEBUG,"AI login messages successfully exchanged: now starting settlement for user account balancing check\n");
-#endif
-			aiLoginStatus = CAAccountingInstance::settlementTransaction();
+			if(!(aiLoginStatus & AUTH_LOGIN_SKIP_SETTLEMENT))
+			{
+				//#ifdef DEBUG
+				CAMsg::printMsg(LOG_DEBUG,"AI login messages successfully exchanged: now starting settlement for user account balancing check\n");
+				//#endif
+				aiLoginStatus = CAAccountingInstance::settlementTransaction();
+			}
+//#ifdef DEBUG
+			else
+			{
+				CAMsg::printMsg(LOG_DEBUG,"AI login messages successfully exchanged: skipping settlement, user has valid prepaid amount\n");
+			}
+//#endif
 		}
 		
 		/* A client timeout may occur while settling */
@@ -1386,7 +1395,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 					tmpQueue->get((UINT8*)aiAnswerQueueEntry,&qlen); 
 					if(pNewUser->send(&(aiAnswerQueueEntry->packet)) != MIXPACKET_SIZE)
 					{
-						CAMsg::printMsg(LOG_DEBUG,"A client timeout has likely occured while settling\n");
+						CAMsg::printMsg(LOG_INFO,"A client timeout has likely occured while settling\n");
 						aiLoginStatus |= AUTH_LOGIN_FAILED;
 						break;
 					}
