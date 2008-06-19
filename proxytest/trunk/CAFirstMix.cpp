@@ -873,6 +873,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 						pNewMuxSocket=new CAMuxSocket;
 						ret=socketsIn[i].accept(*(CASocket*)pNewMuxSocket);
 						pFirstMix->m_newConnections++;							 
+#ifdef PERFORMANCE_SERVER
 						SINT32 master = ((CASocket*)pNewMuxSocket)->getPeerIP(peerIP);
 						
 						if(master == E_SUCCESS)
@@ -904,20 +905,27 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 								}								
 							}
 						}
-												
+#endif										
 						if(ret!=E_SUCCESS)
 						{
 							// may return E_SOCKETCLOSED or E_SOCKET_LIMIT
 							CAMsg::printMsg(LOG_ERR,"Accept Error %u - direct Connection from Client!\n",GET_NET_ERROR);														
 						}
 						else if( (pglobalOptions->getMaxNrOfUsers() > 0 && pFirstMix->getNrOfUsers() >= pglobalOptions->getMaxNrOfUsers())
-							 && (master != E_SUCCESS) )
+#ifdef PERFORMANCE_SERVER							
+								&& (master != E_SUCCESS) 
+#endif							 
+								)
 						{
 							CAMsg::printMsg(LOG_DEBUG,"CAFirstMix User control: Too many users (Maximum:%d)! Rejecting user...\n", pFirstMix->getNrOfUsers(), pglobalOptions->getMaxNrOfUsers());
 							ret = E_UNKNOWN;
 						}
 						else if ((pFirstMix->m_newConnections > CAFirstMix::MAX_CONCURRENT_NEW_CONNECTIONS)
-							&& (master != E_SUCCESS) )
+#ifdef PERFORMANCE_SERVER							
+								&& (master != E_SUCCESS) 
+#endif
+								)
+
 						{
 							/* This should protect the mix from flooding attacks
 							 * No more than MAX_CONCURRENT_NEW_CONNECTIONS are allowed.
