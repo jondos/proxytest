@@ -102,19 +102,27 @@ CAXMLErrorMessage::CAXMLErrorMessage(const UINT32 errorCode, UINT8* message, CAA
 CAXMLErrorMessage::CAXMLErrorMessage(UINT8 * strXmlData)
 	: CAAbstractXMLEncodable()
 {
-	XERCES_CPP_NAMESPACE::DOMDocument* doc = parseDOMDocument(strXmlData,strlen((char*)strXmlData));
-	DOMElement* elemRoot = doc->getDocumentElement();
 	m_strErrMsg=NULL;
 	m_messageObject = NULL;
 	m_strExpires = new char[10];
-	if (setValues(elemRoot) != E_SUCCESS)
-	{
-		m_iErrorCode = ERR_NO_ERROR_GIVEN;
-	}
+	XERCES_CPP_NAMESPACE::DOMDocument* doc = parseDOMDocument(strXmlData,strlen((char*)strXmlData));
+	
 	if(doc != NULL)
 	{
-		doc->release();
-		doc = NULL;
+		DOMElement* elemRoot = doc->getDocumentElement();
+		if (setValues(elemRoot) != E_SUCCESS)
+		{
+			m_iErrorCode = ERR_NO_ERROR_GIVEN;
+		}
+		if(doc != NULL)
+		{
+			doc->release();
+			doc = NULL;
+		}
+	}
+	else
+	{
+		m_iErrorCode = ERR_NO_ERROR_GIVEN;
 	}
 }
 

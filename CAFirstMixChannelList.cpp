@@ -165,7 +165,7 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 		m_pDelayBuckets[pHashTableEntry->delayBucketID]=&pHashTableEntry->delayBucket;
 #endif
 
-		//SAVE_STACK("CAFirstMixChannelList::add", "inserting in connection list");
+		SAVE_STACK("CAFirstMixChannelList::add", "inserting in connection list");
 		//now insert the new connection in the list of all open connections
 		if(m_listHashTableHead==NULL) //if first one
 		{
@@ -179,7 +179,7 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 		pHashTableEntry->list_HashEntries.prev=NULL;
 		m_listHashTableHead=pHashTableEntry;	
 		
-		//SAVE_STACK("CAFirstMixChannelList::add", "inserting in timout list");
+		SAVE_STACK("CAFirstMixChannelList::add", "inserting in timout list");
 		// insert in timeout list; entries are added to the foot of the list
 #ifdef PAYMENT
 		pHashTableEntry->bRecoverTimeout = true;

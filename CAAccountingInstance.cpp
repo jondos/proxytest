@@ -1076,6 +1076,11 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 		}
 
 		DOMElement* root = a_DomDoc->getDocumentElement();
+		if(root == NULL)
+		{
+			CAMsg::printMsg(LOG_DEBUG, "ProcessJapMessage: getDocument Element is null!!!\n" );
+			return E_UNKNOWN;
+		}
 		char* docElementName = XMLString::transcode(root->getTagName());		
 		aiQueueItem* pItem=NULL;
 		void (CAAccountingInstance::*handleFunc)(tAiAccountingInfo*,DOMElement*) = NULL;
@@ -2410,6 +2415,9 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
  * */
 SINT32 CAAccountingInstance::settlementTransaction()
 {
+	INIT_STACK;
+	BEGIN_STACK("CAAccountingInstance::settlementTransaction");
+	
 	SINT32 ret = 0;
 	CAXMLErrorMessage * pErrMsg = NULL;
 	CAXMLCostConfirmation * pCC = NULL;
@@ -2427,11 +2435,13 @@ SINT32 CAAccountingInstance::settlementTransaction()
 	/* This should never happen */
 	if(ms_pInstance == NULL)
 	{
-			return E_UNKNOWN;
+		FINISH_STACK("CAAccountingInstance::settlementTransaction");	
+		return E_UNKNOWN;
 	}
 	/* This should never happen */
 	if(ms_pInstance->m_pSettlementMutex == NULL)
 	{
+		FINISH_STACK("CAAccountingInstance::settlementTransaction");
 		return E_UNKNOWN;
 	}
 	//sleep(5);
@@ -2440,6 +2450,7 @@ SINT32 CAAccountingInstance::settlementTransaction()
 	{
 		CAMsg::printMsg(LOG_ERR, "Settlement transaction: could not connect to Database. Retry later...\n");
 		//MONITORING_FIRE_PAY_EVENT(ev_pay_dbConnectionFailure);
+		FINISH_STACK("CAAccountingInstance::settlementTransaction");
 		return E_NOT_CONNECTED;
 	}
 	//MONITORING_FIRE_PAY_EVENT(ev_pay_dbConnectionSuccess);
@@ -2448,7 +2459,7 @@ SINT32 CAAccountingInstance::settlementTransaction()
 	#ifdef DEBUG	
 	CAMsg::printMsg(LOG_DEBUG, "Settlement transaction: DB connections established!\n");
 	#endif
-
+	
 	dbInterface->getUnsettledCostConfirmations(q, ms_pInstance->m_currentCascade);
 	if (q.isEmpty())
 	{
@@ -2459,12 +2470,14 @@ SINT32 CAAccountingInstance::settlementTransaction()
 			dbInterface = NULL;
 		}
 		ms_pInstance->m_pSettlementMutex->unlock();
+		FINISH_STACK("CAAccountingInstance::settlementTransaction");
 		return E_SUCCESS;
 	}
 	qSize = q.getSize();
 	nrOfCCs = qSize / sizeof(pCC); 
 	CAMsg::printMsg(LOG_DEBUG, "Settlement transaction: finished gettings CCs, found %u cost confirmations to settle\n",nrOfCCs);	
 	
+	SAVE_STACK("CAAccountingInstance::settlementTransaction", "After getting unsettled CCs");
 	/* Second part: We found unsettled CCs. Now contact the Payment Instance to settle them */
 
 	while(!q.isEmpty())
@@ -2482,6 +2495,7 @@ SINT32 CAAccountingInstance::settlementTransaction()
 				dbInterface = NULL;
 			}
 			ms_pInstance->m_pSettlementMutex->unlock();
+			FINISH_STACK("CAAccountingInstance::settlementTransaction");
 			return ret;
 			//break;
 		}
@@ -2699,6 +2713,7 @@ SINT32 CAAccountingInstance::settlementTransaction()
 			pErrMsg = NULL;
 		}
 	}
+	SAVE_STACK("CAAccountingInstance::settlementTransaction", "After settling unsettled CCs with BI");
 	
 	SettleEntry *first = entry;
 	UINT64 myWaitNr = 0;
@@ -2712,6 +2727,7 @@ SINT32 CAAccountingInstance::settlementTransaction()
 		}
 		else
 		{
+			SAVE_STACK("CAAccountingInstance::settlementTransaction", "wait for altering hashtable");
 			//get global wait number and wait but release the DBConnection first.
 			CAAccountingDBInterface::releaseConnection(dbInterface);
 			dbInterface = NULL;
@@ -2725,7 +2741,7 @@ SINT32 CAAccountingInstance::settlementTransaction()
 			}
 			dbInterface = CAAccountingDBInterface::getConnection();
 		}
-		
+		SAVE_STACK("CAAccountingInstance::settlementTransaction", "altering DB entries");
 		while (entry != NULL && dbInterface != NULL)
 		{			
 			if (entry->authFlags & (AUTH_INVALID_ACCOUNT | AUTH_UNKNOWN))
@@ -2763,6 +2779,7 @@ SINT32 CAAccountingInstance::settlementTransaction()
 	
 	if(first != NULL)
 	{
+		SAVE_STACK("CAAccountingInstance::settlementTransaction", "altering hashtable");
 #ifdef DEBUG
 		CAMsg::printMsg(LOG_DEBUG, "Settlement thread with wait nr %Lu alters hashtable.\n", myWaitNr);
 #endif
@@ -2792,6 +2809,7 @@ SINT32 CAAccountingInstance::settlementTransaction()
 		ms_pInstance->m_pSettlementMutex->lock();
 		if(ms_pInstance->m_settleWaitNr != ms_pInstance->m_nextSettleNr)
 		{
+			SAVE_STACK("CAAccountingInstance::settlementTransaction", "waking up waiting threads for altering hashtable");
 			//There are Threads waiting
 			CAMsg::printMsg(LOG_INFO, "Waking up next Thread %Lu are waiting.\n", 
 							(ms_pInstance->m_settleWaitNr - ms_pInstance->m_nextSettleNr));
@@ -2806,6 +2824,7 @@ SINT32 CAAccountingInstance::settlementTransaction()
 		CAAccountingDBInterface::releaseConnection(dbInterface);
 		dbInterface = NULL;
 	}*/
+	FINISH_STACK("CAAccountingInstance::settlementTransaction");
 	return E_SUCCESS;
 }
 

@@ -127,9 +127,15 @@ CACertificate* CACertificate::decode(const UINT8* buff,UINT32 bufflen,UINT32 typ
 				break;
 				case CERT_XML_X509CERTIFICATE:
 					XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(buff,bufflen);
+					if(doc == NULL)
+					{
+						return NULL;
+					}
 					DOMElement* root=doc->getDocumentElement();
 					if(root==NULL||!equals(root->getNodeName(),"X509Certificate"))
+					{
 						return NULL;
+					}
 					UINT8* tmpBuff=new UINT8[bufflen];
 					UINT32 tmpBuffSize=bufflen;
 					getDOMElementValue(root,tmpBuff,&tmpBuffSize);
@@ -141,7 +147,7 @@ CACertificate* CACertificate::decode(const UINT8* buff,UINT32 bufflen,UINT32 typ
 						tmpCert=d2i_X509(NULL,(UINT8**)&tmp,tmpBuffSize);
 					#endif
 					delete[] tmpBuff;
-				break;
+					break;
 			}
 		if(tmpCert==NULL)
 			return NULL;

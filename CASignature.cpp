@@ -173,9 +173,19 @@ SINT32 CASignature::parseSignKeyXML(const UINT8* buff,UINT32 len)
 	{
 
 		XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(buff,len);
-		DOMElement* rootKeyInfo=doc->getDocumentElement();
-		if(!equals(rootKeyInfo->getNodeName(),"KeyInfo"))
+		if(doc == NULL)
+		{
 			return E_UNKNOWN;
+		}
+		DOMElement* rootKeyInfo=doc->getDocumentElement();
+		if(rootKeyInfo == NULL)
+		{
+			return E_UNKNOWN;
+		}
+		if(!equals(rootKeyInfo->getNodeName(),"KeyInfo"))
+		{
+			return E_UNKNOWN;
+		}
 		DOMNode* elemKeyValue;
 		if(getDOMChildByName(rootKeyInfo,"KeyValue",elemKeyValue)!=E_SUCCESS)
 			return E_UNKNOWN;
@@ -668,7 +678,15 @@ SINT32 CASignature::verifyDER(UINT8* in, UINT32 inlen, const UINT8 * dsaSig, con
 SINT32 CASignature::verifyXML(const UINT8* const in,UINT32 inlen)
 	{
 		XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(in,inlen);
+		if(doc == NULL)
+		{
+			return E_UNKNOWN;
+		}
 		DOMElement* root=doc->getDocumentElement();
+		if(root == NULL)
+		{
+			return E_UNKNOWN;
+		}
 		//CAMsg::printMsg(LOG_DEBUG,"verified document 0x%x doesn't clean up itself!\n",
 							//doc);
 		return verifyXML(root,NULL);

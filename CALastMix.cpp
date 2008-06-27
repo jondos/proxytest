@@ -294,7 +294,7 @@ SINT32 CALastMix::processKeyExchange()
 		CAMsg::printMsg(LOG_INFO,"Waiting for Symmetric Key from previous Mix...\n");
 		if(((CASocket*)*m_pMuxIn)->receiveFully(messageBuff,len)!=E_SUCCESS)
 			{
-				CAMsg::printMsg(LOG_ERR,"Error receiving symetric key!\n");
+				CAMsg::printMsg(LOG_ERR,"Error receiving symmetric key!\n");
 				delete []messageBuff;
 				return E_UNKNOWN;
 			}
@@ -308,13 +308,26 @@ SINT32 CALastMix::processKeyExchange()
 		delete pCert;
 		if(oSig.verifyXML(messageBuff,len)!=E_SUCCESS)
 			{
-				CAMsg::printMsg(LOG_CRIT,"Could not verify the symetric key!\n");		
+				CAMsg::printMsg(LOG_CRIT,"Could not verify the symmetric key!\n");		
 				delete []messageBuff;
 				return E_UNKNOWN;
 			}
 		//Verifying nonce!
 		doc=parseDOMDocument(messageBuff,len);
+		if(doc == NULL)
+		{
+			CAMsg::printMsg(LOG_CRIT,"Could not parse symmetric key !\n");
+			delete []messageBuff;
+			return E_UNKNOWN;
+		}
 		DOMElement* elemRoot=doc->getDocumentElement();
+		if(elemRoot == NULL)
+		{
+			CAMsg::printMsg(LOG_CRIT,"Symmetric key XML is invalid!\n");
+			doc->release();
+			delete []messageBuff;
+			return E_UNKNOWN;
+		}
 		elemNonce=NULL;
 		getDOMChildByName(elemRoot,"Nonce",elemNonce,false);
 		tmpLen=50;
@@ -325,7 +338,7 @@ SINT32 CALastMix::processKeyExchange()
 			memcmp(SHA1(arNonce,16,NULL),tmpBuff,SHA_DIGEST_LENGTH)!=0
 			)
 			{
-				CAMsg::printMsg(LOG_CRIT,"Couldt not verify the Nonce!\n");		
+				CAMsg::printMsg(LOG_CRIT,"Could not verify the Nonce!\n");		
 				doc->release();
 				delete []messageBuff;
 				return E_UNKNOWN;
