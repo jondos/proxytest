@@ -867,7 +867,15 @@ SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, DOMElement* & elemRootEnc
 SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, const UINT8* const xml, UINT32 xmllen,CAASymCipher* pRSA)
 	{
 		XERCES_CPP_NAMESPACE::DOMDocument* pDoc=parseDOMDocument(xml,xmllen);
+		if(pDoc == NULL)
+		{
+			return E_UNKNOWN;
+		}
 		DOMElement* root=pDoc->getDocumentElement();
+		if(root == NULL)
+		{
+			return E_UNKNOWN;
+		}
 		SINT32 ret=decodeXMLEncryptedKey(key,keylen,root,pRSA);
 		pDoc->release();
 		return ret;

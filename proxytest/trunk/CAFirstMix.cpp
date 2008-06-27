@@ -1080,7 +1080,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		#ifdef DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"User login: login data sent\n");
 		#endif
-		SAVE_STACK("CAFirstMix::doUserLogin", "after sinding login data");
+		SAVE_STACK("CAFirstMix::doUserLogin", "after sending login data");
 		
 		//((CASocket*)pNewUser)->send(m_xmlKeyInfoBuff,m_xmlKeyInfoSize);
 		// es kann nicht blockieren unter der Annahme das der TCP-Sendbuffer > m_xmlKeyInfoSize ist....
@@ -1097,9 +1097,9 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 			m_pIPList->removeIP(peerIP);
 			return E_UNKNOWN;
 		}
-		#ifdef DEBUG
+		//#ifdef DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"User login: received first symmetric key from client\n");
-		#endif
+		//#endif
 		SAVE_STACK("CAFirstMix::doUserLogin", "received first symmetric key");
 		
 		xml_len=ntohs(xml_len);
@@ -1116,9 +1116,9 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 			return E_UNKNOWN;
 		}
 		
-		#ifdef DEBUG
+		//#ifdef DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"User login: received second symmetric key from client\n");
-		#endif
+		//#endif
 		SAVE_STACK("CAFirstMix::doUserLogin", "received second symmetric key");
 		
 		XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(xml_buff+2,xml_len);
@@ -1302,7 +1302,9 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		pNewUser->setSendKey(linkKey+32,32);
 		pNewUser->setCrypt(true);
 		
-#ifdef PAYMENT	
+#ifdef PAYMENT
+		
+		SAVE_STACK("CAFirstMix::doUserLogin", "Starting AI login procedure");
 		CAMsg::printMsg(LOG_DEBUG,"Starting AI login procedure.\n");
 		/* 
 		 * Here we can go on with our Accounting Instance login procedure 
@@ -1362,7 +1364,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 			aiLoginStatus = CAAccountingInstance::loginProcessStatus(pHashEntry);
 		}
 		
-		
+		SAVE_STACK("CAFirstMix::doUserLogin", "AI login packages exchanged.");
 		/* We have exchanged all AI login packets:
 		 * 1. AccountCert
 		 * 2. ChallengeResponse 
@@ -1420,6 +1422,8 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		paymentLoginPacket = NULL;
 		delete aiAnswerQueueEntry;
 		aiAnswerQueueEntry = NULL;
+		
+		SAVE_STACK("CAFirstMix::doUserLogin", "AI login procedure finished.");
 		
 		if((aiLoginStatus & AUTH_LOGIN_FAILED))
 		{

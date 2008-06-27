@@ -320,7 +320,15 @@ SINT32 CAASymCipher::setPublicKeyAsXML(const UINT8* key,UINT32 len)
 			return E_UNKNOWN;
 
 		XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(key,len);
+		if(doc == NULL)
+		{
+			return E_UNKNOWN;
+		}
 		DOMElement* root=doc->getDocumentElement();
+		if(root == NULL)
+		{
+			return E_UNKNOWN;
+		}
 		return setPublicKeyAsDOMNode(root);
 	}		
 
