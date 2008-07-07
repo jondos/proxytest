@@ -35,9 +35,14 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 /** Deletes this Queue and all stored data*/
 CAQueue::~CAQueue()
 	{
-		clean();
-		delete m_pcsQueue;
-		delete m_pconvarSize;
+		if (m_pconvarSize)
+		{
+			clean();
+			delete m_pcsQueue;
+			m_pcsQueue = NULL;
+			delete m_pconvarSize;
+			m_pconvarSize = NULL;
+		}
 	}
 
 /** Removes any stored data from the Queue.
@@ -116,7 +121,6 @@ SINT32 CAQueue::add(const void* buff,UINT32 size)
 				m_lastElem->next=new QUEUE;
 				m_lastElem=m_lastElem->next;
 				m_lastElem->pBuff=new UINT8[size];
-					
 				m_lastElem->next=NULL;
 				m_lastElem->size=size;
 				m_lastElem->index=0;

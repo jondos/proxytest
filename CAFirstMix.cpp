@@ -1289,10 +1289,6 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 			CAMsg::printMsg(LOG_DEBUG,"User login: registering payment control channel\n");
 		#endif
 		pHashEntry->pControlChannelDispatcher->registerControlChannel(new CAAccountingControlChannel(pHashEntry));
-		/* @todo: Before we continue, we have to accomplish a full login to the accounting instance, comprising:
-		 * procedure not complete yet, still need a forced settlement and what todo with data packets sent
-		 * before login is completed.
-		 */
 		SAVE_STACK("CAFirstMix::doUserLogin", "payment registered");
 #endif
 		pHashEntry->pSymCipher=new CASymCipher();
@@ -1301,19 +1297,13 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		pNewUser->setReceiveKey(linkKey,32);
 		pNewUser->setSendKey(linkKey+32,32);
 		pNewUser->setCrypt(true);
-		
+
+		doc->release();		
 #ifdef PAYMENT
 		
 		SAVE_STACK("CAFirstMix::doUserLogin", "Starting AI login procedure");
 		CAMsg::printMsg(LOG_DEBUG,"Starting AI login procedure.\n");
-		/* 
-		 * Here we can go on with our Accounting Instance login procedure 
-		 * This procedure is tradeoff between integrating the AI login procedure 
-		 * in the global login process and handling AI login packets separately
-		 * over the AI control channel.
-		 * We have to get the AI login messages over the control channel for 
-		 * backward compatibility reasons of the JAP Proxy.
-		 */
+		
 		MIXPACKET *paymentLoginPacket = new MIXPACKET;
 		tQueueEntry *aiAnswerQueueEntry=new tQueueEntry;
 		UINT32 qlen=sizeof(tQueueEntry);
@@ -1333,11 +1323,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 					aiLoginStatus = AUTH_LOGIN_FAILED;
 					break;
 				}
-				/*
-				 * This queue is registered for the user's control channel dispatcher
-				 * So fetch the answers from there (even though asynchronous packet 
-				 * processing is not required here).
-				 */
+				
 				while(tmpQueue->getSize()>0)
 				{
 					tmpQueue->get((UINT8*)aiAnswerQueueEntry,&qlen); 
@@ -1428,7 +1414,6 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		if((aiLoginStatus & AUTH_LOGIN_FAILED))
 		{
 			CAMsg::printMsg(LOG_INFO,"User AI login failed\n");
-			doc->release();
 			m_pChannelList->remove(pNewUser);
 			delete pNewUser;
 			pNewUser = NULL;
@@ -1456,7 +1441,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		m_psocketgroupUsersRead->add(*pNewUser); // add user socket to the established ones that we read data from.
 		m_psocketgroupUsersWrite->add(*pNewUser);
 #endif
-		doc->release();
+		
 #ifndef LOG_DIALOG
 		CAMsg::printMsg(LOG_DEBUG,"User login: finished\n");
 #else

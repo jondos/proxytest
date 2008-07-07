@@ -186,6 +186,9 @@ void cleanup()
 		//XML Cleanup
 		//Note: We have to destroy all XML Objects and all objects that uses XML Objects BEFORE
 		//we terminate the XML lib!
+#ifdef SERVER_MONITORING
+		CAStatusManager::cleanup();
+#endif
 		releaseDOMParser();
 #ifndef ONLY_LOCAL_PROXY
 		XMLPlatformUtils::Terminate();
@@ -204,9 +207,7 @@ void cleanup()
 				pThreadList = NULL;
 			}
 #endif
-#ifdef SERVER_MONITORING
-		CAStatusManager::cleanup();
-#endif
+
 		CAMsg::cleanup();
 		
 	}

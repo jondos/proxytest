@@ -150,7 +150,7 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 		pHashTableEntry->pAccountingInfo=NULL;
 #endif
 		
-		//SAVE_STACK("CAFirstMixChannelList::add", "copying peer IP");
+		     SAVE_STACK("CAFirstMixChannelList::add", "copying peer IP");
 		memcpy(pHashTableEntry->peerIP,peerIP,4);
 #ifdef DELAY_USERS
 		pHashTableEntry->delayBucket=m_u32DelayChannelUnlimitTraffic; //can always send some first packets

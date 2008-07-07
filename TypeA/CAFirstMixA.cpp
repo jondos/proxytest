@@ -176,13 +176,22 @@ SINT32 CAFirstMixA::clean()
 		deleteCountryStats();
 #endif		
 		if(m_pIPList!=NULL)
+		{
 			delete m_pIPList;
+			m_pIPList = NULL;
+		}
 		m_pIPList=NULL;
 		if(m_pQueueSendToMix!=NULL)
+		{
 			delete m_pQueueSendToMix;
+			m_pQueueSendToMix = NULL;
+		}
 		m_pQueueSendToMix=NULL;
 		if(m_pQueueReadFromMix!=NULL)
+		{
 			delete m_pQueueReadFromMix;
+			m_pQueueReadFromMix = NULL;
+		}
 		m_pQueueReadFromMix=NULL;
 
 		if(m_pChannelList!=NULL)
@@ -210,26 +219,31 @@ SINT32 CAFirstMixA::clean()
 					}
 			}
 		if(m_pChannelList!=NULL)
+		{
 			delete m_pChannelList;
-		m_pChannelList=NULL;
+			m_pChannelList=NULL;
+		}
+		
 		CAMsg::printMsg	(LOG_CRIT,"Memory usage after: %u\n",getMemoryUsage());	
 
 #ifdef PAYMENT
 	CAAccountingInstance::clean();
 	CAAccountingDBInterface::cleanup();
 #endif
-		if(m_psocketgroupUsersRead!=NULL)
-			delete m_psocketgroupUsersRead;
-		m_psocketgroupUsersRead=NULL;
-		if(m_psocketgroupUsersWrite!=NULL)
-			delete m_psocketgroupUsersWrite;
+		
+		delete m_psocketgroupUsersRead;
+		m_psocketgroupUsersRead = NULL;
+		
+		delete m_psocketgroupUsersWrite;
 		m_psocketgroupUsersWrite=NULL;
-		if(m_pRSA!=NULL)
-			delete m_pRSA;
+		
+		delete m_pRSA;
 		m_pRSA=NULL;
-		if(m_xmlKeyInfoBuff!=NULL)
-			delete[] m_xmlKeyInfoBuff;
+		
+
+		delete[] m_xmlKeyInfoBuff;
 		m_xmlKeyInfoBuff=NULL;
+		
 		m_docMixCascadeInfo=NULL;
 		if(m_arMixParameters!=NULL)
 			{
@@ -997,7 +1011,7 @@ NEXT_USER_WRITING:
 //ERR:
 		CAMsg::printMsg(LOG_CRIT,"Seems that we are restarting now!!\n");
 		m_bRunLog=false;
-		clean();
+		//clean();
 		delete pQueueEntry;
 		delete []tmpBuff;
 #ifdef _DEBUG
