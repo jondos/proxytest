@@ -208,6 +208,8 @@ private:
 	UINT32 handleChallengeResponse(tAiAccountingInfo* pAccInfo, DOMElement* root);
 	UINT32 handleChallengeResponse_internal(tAiAccountingInfo* pAccInfo, DOMElement* root);
 
+	bool cascadeMatchesCC(CAXMLCostConfirmation *pCC);
+	
 	static SINT32 getPrepaidBytes(tAiAccountingInfo* pAccInfos);
 	SINT32 prepareCCRequest(CAMix* callingMix, UINT8* a_AiName);			
 	static SINT32 makeCCRequest( const UINT64 accountNumber, const UINT64 transferredBytes,  XERCES_CPP_NAMESPACE::DOMDocument* & doc);
@@ -241,6 +243,8 @@ private:
 	
 	/** this is for synchronizing the write access to the HashEntries */
 	CAMutex *m_pMutex;
+	
+	Hashtable* m_certHashCC;
 	
 	/** Stores the account number of all users currently logged in. */
 	Hashtable* m_currentAccountsHashtable;

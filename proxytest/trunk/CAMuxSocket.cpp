@@ -45,6 +45,7 @@ CAMuxSocket::~CAMuxSocket()
 	{
 		close();
 		delete []m_Buff;
+		m_Buff = NULL;
 	}	
 
 SINT32 CAMuxSocket::setCrypt(bool b)

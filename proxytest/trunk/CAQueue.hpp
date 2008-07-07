@@ -82,10 +82,14 @@ class CAQueue
 				*/
 			UINT32 getSize()
 				{
-					m_pcsQueue->lock();
-					UINT32 s=m_nQueueSize;
-					m_pcsQueue->unlock();
-					return s;
+					if (m_pcsQueue)
+					{
+						m_pcsQueue->lock();
+						UINT32 s=m_nQueueSize;
+						m_pcsQueue->unlock();
+						return s;
+					}
+					return 0;
 				}
 			
 			/** Returns true, if the Queue is empty

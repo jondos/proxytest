@@ -256,7 +256,7 @@ SINT32 CALastMixA::loop()
 											}
 									}
 								else
-									{//channellsit entry !=NULL
+									{//channellist entry !=NULL
 										if(pMixPacket->flags==CHANNEL_CLOSE)
 											{
 												psocketgroupCacheRead->remove(*(pChannelListEntry->pSocket));
@@ -570,7 +570,7 @@ SINT32 CALastMixA::loop()
 //ERR:
 		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
 		m_bRunLog=false;		
-		clean();
+		//clean();
 
 		delete []tmpBuff;
 		delete pQueueEntry;

@@ -110,6 +110,13 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
 		m_currentAccountsHashtable = 
 			new Hashtable((UINT32 (*)(void *))Hashtable::hashUINT64, (SINT32 (*)(void *,void *))Hashtable::compareUINT64, 2000);		
 		
+		m_certHashCC = 
+			new Hashtable((UINT32 (*)(void *))Hashtable::stringHash, (SINT32 (*)(void *,void *))Hashtable::stringCompare);
+		for (UINT32 i = 0; i < m_allHashesLen; i++)
+		{
+			m_certHashCC->put(m_allHashes[i], m_allHashes[i]);
+		}
+		
 		// launch BI settleThread				
 		m_pSettleThread = new CAAccountingSettleThread(m_currentAccountsHashtable, 
 														m_currentCascade);
@@ -191,6 +198,18 @@ CAAccountingInstance::~CAAccountingInstance()
 			delete[] m_currentCascade;
 		}
 		m_currentCascade = NULL;
+		
+		if(m_certHashCC != NULL)
+		{
+			for (UINT32 i = 0; i < m_allHashesLen; i++)
+			{
+				UINT8* certHash = (UINT8*)m_certHashCC->remove(m_allHashes[i]);
+			}
+			m_certHashCC->clear(HASH_EMPTY_NONE, HASH_EMPTY_DELETE);
+			delete m_certHashCC;
+			m_certHashCC = NULL;
+		}
+		
 		if (m_allHashes)
 		{
 			for (UINT32 i = 0; i < m_allHashesLen; i++)
@@ -873,6 +892,38 @@ SINT32 CAAccountingInstance::sendCCRequest(tAiAccountingInfo* pAccInfo)
 }
 
 
+bool CAAccountingInstance::cascadeMatchesCC(CAXMLCostConfirmation *pCC)
+{
+	
+		UINT8* certHash;
+		if(m_allHashesLen !=  pCC->getNumberOfHashes() )
+		{
+			return false;
+		}
+		
+		for (UINT32 i = 0; i < pCC->getNumberOfHashes(); i++)
+		{
+			certHash = pCC->getPriceCertHash(i);
+			if ((certHash = (UINT8*)m_certHashCC->getValue(certHash)) != NULL)
+			{
+#ifdef DEBUG
+				CAMsg::printMsg( LOG_INFO, "CC1: %s\n", certHash);
+#endif
+			}
+			else
+			{
+#ifdef DEBUG
+				CAMsg::printMsg(LOG_DEBUG, "CC do not match current cascade.\n");
+#endif	
+				return false;
+			}
+		}
+#ifdef DEBUG
+		CAMsg::printMsg(LOG_DEBUG, "CC matches current Cascade.\n");
+#endif
+		return true;
+}
+
 /**
  * creating the xml of a new CC is really the responsability of the CAXMLCostConfirmation class
  * knowledge about the structure of a CC's XML should be encapsulated in it
@@ -1345,8 +1396,6 @@ SINT32 CAAccountingInstance::finishLoginProcess(fmHashTableEntry *pHashEntry)
 										(UINT8 *) "AI login: error occured while connecting, access denied");
 		}
 		
-		
-		
 		if(err != NULL)
 		{
 			err->toXmlDocument(errDoc);
@@ -1387,7 +1436,6 @@ UINT32 CAAccountingInstance::handleAccountCertificate(tAiAccountingInfo* pAccInf
 	INIT_STACK;
 	FINISH_STACK("CAAccountingInstance::handleAccountCertificate");
 }
-
 
 
 /**
@@ -1678,6 +1726,20 @@ UINT32 CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo*
 		dbInterface->getCostConfirmation(pAccInfo->accountNumber, m_currentCascade, &pCC, bSettled);
 	}
 	
+	
+	if (pCC != NULL)
+	{
+		for (UINT32 i = 0; i < pCC-> getNumberOfHashes(); i++ )
+		{
+			CAMsg::printMsg(LOG_ERR, "Mix-Ids from CC: %s\n", pCC->getMixId(i));
+		}
+		if(!cascadeMatchesCC(pCC))
+		{
+			delete pCC;
+			pCC = NULL;
+			CAMsg::printMsg(LOG_INFO, "CC do not match current Cascade. Discarding CC.\n");
+		}
+	}
 	
 	if (pCC != NULL)
 	{
@@ -2034,38 +2096,38 @@ UINT32 CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* 
 		return CAXMLErrorMessage::ERR_WRONG_FORMAT;
 	}
 	
-	Hashtable* certHashCC = 
+	/*Hashtable* certHashCC = 
 		new Hashtable((UINT32 (*)(void *))Hashtable::stringHash, (SINT32 (*)(void *,void *))Hashtable::stringCompare);
-	UINT8* certHash;
-	bool bFailed = false;
-	for (UINT32 i = 0; i < pCC->getNumberOfHashes(); i++)
-	{
-		certHash = pCC->getPriceCertHash(i);
-		certHashCC->put(certHash, certHash);
+	UINT8* certHash;*/
+	//bool bFailed = false;
+	//for (UINT32 i = 0; i < pCC->getNumberOfHashes(); i++)
+	//{
+	//	certHash = pCC->getPriceCertHash(i);
+	//	certHashCC->put(certHash, certHash);
 		/*
 		if ((certHash = (UINT8*)certHashCC->getValue(certHash)) != NULL)
 		{
 			CAMsg::printMsg( LOG_INFO, "CC1: %s\n", certHash);
 		}*/
-	}
-	for (UINT32 i = 0; i < m_allHashesLen; i++)
-	{
+	//}
+	//for (UINT32 i = 0; i < m_allHashesLen; i++)
+	//{
 		//CAMsg::printMsg( LOG_INFO, "CA:  %s\n", m_allHashes[i]);
-		certHash = (UINT8*)certHashCC->remove(m_allHashes[i]);
-		if (certHash == NULL)
-		{
-			bFailed = true;
-			break;
-		}
-		else
-		{
-			delete[] certHash;
-		}
-	}
-	certHashCC->clear(HASH_EMPTY_NONE, HASH_EMPTY_DELETE);
-	delete certHashCC;
+	//	certHash = (UINT8*)certHashCC->remove(m_allHashes[i]);
+	//	if (certHash == NULL)
+	//	{
+	//		bFailed = true;
+	//		break;
+	//	}
+	//	else
+	//	{
+	//		delete[] certHash;
+	//	}
+	//}
+	//certHashCC->clear(HASH_EMPTY_NONE, HASH_EMPTY_DELETE);
+	//delete certHashCC;
 	
-	if (bFailed)
+	if (!cascadeMatchesCC(pCC))
 	{
 		CAMsg::printMsg( LOG_INFO, "CostConfirmation has invalid price cert hashes!\n" );
 		CAXMLErrorMessage err(CAXMLErrorMessage::ERR_BAD_REQUEST, 
