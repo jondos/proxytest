@@ -59,8 +59,11 @@ class CASymCipher
 					waitForDestroy();
 #endif
 					delete m_keyAES;
+					m_keyAES = NULL;
 					delete[] m_iv1;
+					m_iv1 = NULL;
 					delete[] m_iv2;
+					m_iv2 = NULL;
 				}
 			bool isKeyValid()
 				{
