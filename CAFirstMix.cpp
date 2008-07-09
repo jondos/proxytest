@@ -872,7 +872,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 						#endif
 						pNewMuxSocket=new CAMuxSocket;
 						ret=socketsIn[i].accept(*(CASocket*)pNewMuxSocket);
-						pFirstMix->m_newConnections++;							 
+						pFirstMix->incNewConnections();							 
 #ifdef PERFORMANCE_SERVER
 						SINT32 master = ((CASocket*)pNewMuxSocket)->getPeerIP(peerIP);
 						
@@ -968,7 +968,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 						if (ret != E_SUCCESS)
 						{
 							delete pNewMuxSocket;
-							pFirstMix->m_newConnections--;
+							pFirstMix->decNewConnections();
 							if(ret==E_SOCKETCLOSED&&pFirstMix->m_bRestart) //Hm, should we restart ??
 							{
 								goto END_THREAD;
@@ -1024,7 +1024,7 @@ THREAD_RETURN fm_loopDoUserLogin(void* param)
 		d->pMix->doUserLogin(d->pNewUser,d->peerIP);
 		
 		SAVE_STACK("CAFirstMix::fm_loopDoUserLogin", "after user login");
-		d->pMix->m_newConnections--;
+		d->pMix->decNewConnections();
 		delete d;
 		
 #ifdef COUNTRY_STATS

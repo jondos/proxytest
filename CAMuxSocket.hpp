@@ -131,8 +131,8 @@ class CAMuxSocket
 				CASocket		m_Socket;
 				UINT32			m_aktBuffPos;
 				UINT8*			m_Buff;
-				CASymCipher m_oCipherIn;
-				CASymCipher m_oCipherOut;
+				CASymCipher	m_oCipherIn;
+				CASymCipher	m_oCipherOut;
 				bool				m_bIsCrypted;
 				CAMutex			m_csSend;
 				CAMutex			m_csReceive;

@@ -109,6 +109,7 @@ public:
 					m_pmutexUser=new CAMutex();
 					m_pmutexMixedPackets=new CAMutex();
 					m_pmutexLoginThreads=new CAMutex();
+					m_pmutexNewConnections=new CAMutex();
 					m_nMixedPackets=0;
 					m_nUser=0;
 					m_nSocketsIn=0;
@@ -146,7 +147,7 @@ public:
 
     	virtual ~CAFirstMix()
 			{
-				
+				delete m_pmutexNewConnections;				
 			}
 
 		tMixType getType() const
@@ -356,7 +357,23 @@ private:
 	
 	static const UINT32 MAX_CONCURRENT_NEW_CONNECTIONS;
 
-	UINT32 m_newConnections;
+	volatile UINT32 m_newConnections;
+	CAMutex* m_pmutexNewConnections;
+
+	void incNewConnections()
+		{
+			m_pmutexNewConnections->lock();
+			m_newConnections++;
+			m_pmutexNewConnections->unlock();
+		}
+
+	void decNewConnections()
+		{
+			m_pmutexNewConnections->lock();
+			m_newConnections--;
+			m_pmutexNewConnections->unlock();
+		}
+
 };
 
 #endif
