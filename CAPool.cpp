@@ -72,9 +72,12 @@ CAPool::~CAPool()
 				tmpEntry=m_pPoolList;
 				m_pPoolList=m_pPoolList->next;
 				delete tmpEntry;
+				tmpEntry = NULL;
 			}
 		delete m_pEntry;
+		m_pEntry = NULL;
 		delete[] m_arChannelIDs;
+		m_arChannelIDs = NULL;
 	}
 	
 SINT32 CAPool::pool(tPoolEntry* pPoolEntry)

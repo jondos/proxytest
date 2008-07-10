@@ -48,8 +48,9 @@ CATLSClientSocket::~CATLSClientSocket()
 		close();
 		SSL_CTX_free(m_pCtx);
 		delete m_pSocket;
-		if(m_pRootCert!=NULL)
-			delete m_pRootCert;
+		m_pSocket = NULL;
+		delete m_pRootCert;
+		m_pRootCert = NULL;
 	}
 	
 /**

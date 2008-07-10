@@ -41,10 +41,10 @@ CAPriceInfo::CAPriceInfo(UINT8* strMixId, UINT8* strPriceCertHash, SINT32 a_post
 
 CAPriceInfo::~CAPriceInfo()
 {
-	if (m_pStrMixId != NULL)
-		delete[] m_pStrMixId;
-	if (m_pStrPriceCertHash != NULL)
-		delete[] m_pStrPriceCertHash;
+	delete[] m_pStrMixId;
+	m_pStrMixId = NULL;
+	delete[] m_pStrPriceCertHash;
+	m_pStrPriceCertHash = NULL;
 }
 #endif
 

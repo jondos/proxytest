@@ -18,18 +18,18 @@ class CAAbstractXMLSignable : public CAAbstractXMLEncodable
 {
 public:
 	CAAbstractXMLSignable() : CAAbstractXMLEncodable()
-		{
-			m_pSignature = NULL;
-		}
+	{
+		m_pSignature = NULL;
+	}
 	
 	virtual ~CAAbstractXMLSignable() 
+	{
+		if(m_pSignature!=NULL)
 		{
-			if(m_pSignature!=NULL)
-				{
-					m_pSignature->release();
-					//delete m_pSignature;
-				}
+			m_pSignature->release();
+			m_pSignature = NULL;
 		}
+	}
 	
 	/** TODO: implement */
 	SINT32 sign(CASignature &signer)

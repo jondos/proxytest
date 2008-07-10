@@ -113,7 +113,11 @@ class CASyncControlChannel : public CAAbstractControlChannel
 					CAMsg::printMsg(LOG_DEBUG,"CASyncControlChannel::proccessMessageComplete() call processXMLMessage()\n");
 				#endif
 				SINT32 ret=processXMLMessage(doc);
-				doc->release();
+				if (doc != NULL)
+				{
+					doc->release();
+					doc = NULL;
+				}
 				return ret;
 			}
 

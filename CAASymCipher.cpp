@@ -273,7 +273,11 @@ SINT32 CAASymCipher::getPublicKeyAsXML(UINT8* buff,UINT32 *len)
 		DOMElement* elemRoot=NULL;
 		getPublicKeyAsDOMElement(elemRoot,pDoc);
 		DOM_Output::dumpToMem(elemRoot,buff,len);
-		pDoc->release();
+		if (pDoc != NULL)
+		{
+			pDoc->release();
+			pDoc = NULL;
+		}
 		return E_SUCCESS;
 	}
 
@@ -358,6 +362,7 @@ SINT32 CAASymCipher::setPublicKeyAsDOMNode(DOMNode* node)
 										decLen=4096;
 										CABase64::decode(tmpStr,tmpStrLen,decBuff,&decLen);
 										delete []tmpStr;
+										tmpStr = NULL;
 										tmpRSA->n=BN_bin2bn(decBuff,decLen,NULL);
 									}
 								else if(equals(child->getNodeName(),"Exponent"))
@@ -370,6 +375,7 @@ SINT32 CAASymCipher::setPublicKeyAsDOMNode(DOMNode* node)
 										decLen=4096;
 										CABase64::decode(tmpStr,tmpStrLen,decBuff,&decLen);
 										delete []tmpStr;
+										tmpStr = NULL;
 										tmpRSA->e=BN_bin2bn(decBuff,decLen,NULL);
 									}
 								child=child->getNextSibling();

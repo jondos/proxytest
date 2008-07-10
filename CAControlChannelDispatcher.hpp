@@ -55,9 +55,13 @@ class CAControlChannelDispatcher
 		~CAControlChannelDispatcher()
 			{
 				delete m_pcsSendMsg;
+				m_pcsSendMsg = NULL;
 				delete m_pcsRegisterChannel;
+				m_pcsRegisterChannel = NULL;
 				delete[] m_arControlChannels;
+				m_arControlChannels = NULL;
 				delete m_pQueueEntry;
+				m_pQueueEntry = NULL;
 			}
 			
 		void deleteAllControlChannels(void);

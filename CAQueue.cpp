@@ -53,9 +53,11 @@ SINT32 CAQueue::clean()
 		while(m_Queue!=NULL)
 			{
 				delete[] m_Queue->pBuff;
+				m_Queue->pBuff = NULL;
 				m_lastElem=m_Queue;
 				m_Queue=m_Queue->next;
 				delete m_lastElem;
+				m_lastElem = NULL;
 			}
 /*		while(m_pHeap!=NULL)
 			{
@@ -174,7 +176,9 @@ SINT32 CAQueue::get(UINT8* pbuff,UINT32* psize)
 				//tmp->next=m_pHeap;
 				//m_pHeap=tmp;
 				delete[] tmp->pBuff;
+				tmp->pBuff = NULL;
 				delete tmp;
+				tmp = NULL;
 				if(m_Queue==NULL)
 					{
 						m_pcsQueue->unlock();
@@ -304,7 +308,9 @@ SINT32 CAQueue::remove(UINT32* psize)
 //				tmp->next=m_pHeap;
 //				m_pHeap=tmp;
 				delete[] tmp->pBuff;
+				tmp->pBuff = NULL;
 				delete tmp;
+				tmp = NULL;
 				if(m_Queue==NULL)
 					{
 						m_pcsQueue->unlock();
@@ -429,13 +435,18 @@ SINT32 CAQueue::test()
 		pthreadProducer->join();
 		pthreadConsumer->join();
 		delete pthreadProducer;
+		pthreadProducer = NULL;
 		delete pthreadConsumer;
+		pthreadConsumer = NULL;
 		delete pQueue;
+		pQueue = NULL;
 		if(memcmp(source,target,TEST_SIZE)!=0)
 			return E_UNKNOWN;
 		
 		delete []source;
+		source = NULL;
 		delete []target;
+		target = NULL;
 		return E_SUCCESS;
 	}
 #endif //ONLY_LOCAL_PROXY

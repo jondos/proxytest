@@ -129,19 +129,25 @@ SINT32 CAThreadPool::destroy(bool bWaitForFinish)
 			{
 				m_parThreads[i]->join();
 				delete m_parThreads[i];
+				m_parThreads[i] = NULL;
 			}
 		// Now free pool structures 
 		delete[] m_parThreads;
+		m_parThreads = NULL;
 		while(m_pQueueHead != NULL)
-			{
-				cur_nodep = m_pQueueHead->next; 
-				m_pQueueHead = m_pQueueHead->next;
-				delete cur_nodep;
-			}
+		{
+			cur_nodep = m_pQueueHead->next;
+			delete m_pQueueHead; 
+			m_pQueueHead = cur_nodep;			
+		}
 		delete m_pmutexQueue;
+		m_pmutexQueue = NULL;
 		delete m_pcondEmpty;
+		m_pcondEmpty = NULL;
 		delete m_pcondNotEmpty;
+		m_pcondNotEmpty = NULL;
 		delete m_pcondNotFull;
+		m_pcondNotFull = NULL;
 
 		return E_SUCCESS;
 	}
@@ -187,6 +193,7 @@ THREAD_RETURN worker_thread_main_loop(void *arg)
 			// Do this work item 
 			(*(my_workp->routine))(my_workp->arg);
 			delete my_workp;
+			my_workp = NULL;
   } 
 }
 #endif //ONLY_LOCAL_PROXY

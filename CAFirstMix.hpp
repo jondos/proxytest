@@ -148,6 +148,7 @@ public:
     	virtual ~CAFirstMix()
 			{
 				delete m_pmutexNewConnections;				
+				m_pmutexNewConnections = NULL;
 			}
 
 		tMixType getType() const

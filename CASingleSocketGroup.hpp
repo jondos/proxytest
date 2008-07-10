@@ -76,7 +76,11 @@ class CASingleSocketGroup
 					m_pollfd=new struct pollfd;
 					setPoolForWrite(bWrite);
 				}
-			~CASingleSocketGroup(){delete m_pollfd;}
+			~CASingleSocketGroup()
+			{
+				delete m_pollfd;
+				m_pollfd = NULL;
+			}
 			
 			SINT32 add(CASocket&s)
 				{

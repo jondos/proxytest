@@ -86,12 +86,10 @@ void CAStatusManager::cleanup()
 	if(ms_pAllStates != NULL)
 	{
 		deleteStates();
-		ms_pAllStates = NULL;
 	}
 	if(ms_pAllEvents != NULL)
 	{
 		deleteEvents();
-		ms_pAllEvents = NULL;
 	}
 }
 
@@ -602,8 +600,10 @@ void CAStatusManager::deleteStates()
 			}
 		}
 		delete[] ms_pAllStates[i];
+		ms_pAllStates[i] = NULL;
 	}
 	delete[] ms_pAllStates;
+	ms_pAllStates = NULL;
 }
 
 void CAStatusManager::initEvents()
@@ -637,8 +637,10 @@ void CAStatusManager::deleteEvents()
 			ms_pAllEvents[i][j] = NULL;
 		}
 		delete[] ms_pAllEvents[i];
+		ms_pAllEvents[i] = NULL;
 	}
 	delete[] ms_pAllEvents;
+	ms_pAllEvents = NULL;
 }
 
 transition_t *defineTransitions(status_type_t s_type, SINT32 transitionCount, ...)

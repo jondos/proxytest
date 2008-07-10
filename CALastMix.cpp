@@ -104,9 +104,11 @@ SINT32 CALastMix::init()
 		const CASocketAddr* pAddr=NULL;
 		pAddr=pListener->getAddr();
 		delete pListener;
+		pListener = NULL;
 		m_pMuxIn=new CAMuxSocket();
 		SINT32 ret=m_pMuxIn->accept(*pAddr);
 		delete pAddr;
+		pAddr = NULL;
 		if(ret!=E_SUCCESS)
 		    {
 					CAMsg::printMsg(LOG_CRIT," failed!\n");
@@ -268,7 +270,11 @@ SINT32 CALastMix::processKeyExchange()
 
 		UINT32 len=0;
 		UINT8* messageBuff=DOM_Output::dumpToMem(doc,&len);
-		doc->release();
+		if (doc != NULL)
+		{
+			doc->release();
+			doc = NULL;
+		}
 		UINT16 tmp=htons((UINT16)len);
 		CAMsg::printMsg(LOG_INFO,"Sending Infos (chain length and RSA-Key, Message-Size %u)\n",len);
 		
@@ -277,9 +283,11 @@ SINT32 CALastMix::processKeyExchange()
 			{
 				CAMsg::printMsg(LOG_ERR,"Error sending Key-Info!\n");
 				delete []messageBuff;
+				messageBuff = NULL;
 				return E_UNKNOWN;
 			}
 		delete[] messageBuff;
+		messageBuff = NULL;
 		
 		//Now receiving the symmetric key
 		CAMsg::printMsg(LOG_INFO,"Waiting for len of Symmetric Key from previous Mix...\n");
@@ -296,6 +304,7 @@ SINT32 CALastMix::processKeyExchange()
 			{
 				CAMsg::printMsg(LOG_ERR,"Error receiving symmetric key!\n");
 				delete []messageBuff;
+				messageBuff = NULL;
 				return E_UNKNOWN;
 			}
 		messageBuff[len]=0;
@@ -306,10 +315,12 @@ SINT32 CALastMix::processKeyExchange()
 		CACertificate* pCert=pglobalOptions->getPrevMixTestCertificate();
 		oSig.setVerifyKey(pCert);
 		delete pCert;
+		pCert = NULL;
 		if(oSig.verifyXML(messageBuff,len)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Could not verify the symmetric key!\n");		
 				delete []messageBuff;
+				messageBuff = NULL;
 				return E_UNKNOWN;
 			}
 		//Verifying nonce!
@@ -318,14 +329,20 @@ SINT32 CALastMix::processKeyExchange()
 		{
 			CAMsg::printMsg(LOG_CRIT,"Could not parse symmetric key !\n");
 			delete []messageBuff;
+			messageBuff = NULL;
 			return E_UNKNOWN;
 		}
 		DOMElement* elemRoot=doc->getDocumentElement();
 		if(elemRoot == NULL)
 		{
 			CAMsg::printMsg(LOG_CRIT,"Symmetric key XML is invalid!\n");
-			doc->release();
+			if (doc != NULL)
+			{
+				doc->release();
+				doc = NULL;
+			}
 			delete []messageBuff;
+			messageBuff = NULL;
 			return E_UNKNOWN;
 		}
 		elemNonce=NULL;
@@ -338,9 +355,14 @@ SINT32 CALastMix::processKeyExchange()
 			memcmp(SHA1(arNonce,16,NULL),tmpBuff,SHA_DIGEST_LENGTH)!=0
 			)
 			{
-				CAMsg::printMsg(LOG_CRIT,"Could not verify the Nonce!\n");		
-				doc->release();
+				CAMsg::printMsg(LOG_CRIT,"Could not verify the Nonce!\n");	
+				if (doc != NULL)
+				{	
+					doc->release();
+					doc = NULL;
+				}
 				delete []messageBuff;
+				messageBuff = NULL;
 				return E_UNKNOWN;
 			}
 		CAMsg::printMsg(LOG_INFO,"Verified the symetric key!\n");		
@@ -349,15 +371,24 @@ SINT32 CALastMix::processKeyExchange()
 		UINT32 keySize=150;
 		SINT32 ret=decodeXMLEncryptedKey(key,&keySize,messageBuff,len,m_pRSA);
 		delete []messageBuff;
+		messageBuff = NULL;
 		if(ret!=E_SUCCESS||keySize!=64)
 			{
-				doc->release();
+				if (doc != NULL)
+				{
+					doc->release();
+					doc = NULL;
+				}
 				CAMsg::printMsg(LOG_CRIT,"Couldt not decrypt the symetric key!\n");		
 				return E_UNKNOWN;
 			}
 		if(m_pMuxIn->setReceiveKey(key,32)!=E_SUCCESS||m_pMuxIn->setSendKey(key+32,32)!=E_SUCCESS)
 			{
-				doc->release();
+				if (doc != NULL)
+				{
+					doc->release();
+					doc = NULL;
+				}
 				CAMsg::printMsg(LOG_CRIT,"Couldt not set the symetric key to be used by the MuxSocket!\n");		
 				return E_UNKNOWN;
 			}
@@ -377,7 +408,11 @@ SINT32 CALastMix::processKeyExchange()
 		if(m_u32KeepAliveSendInterval>10000)
 			m_u32KeepAliveSendInterval-=10000; //make the send interval a little bit smaller than the related receive intervall
 		m_u32KeepAliveRecvInterval=max(u32KeepAliveRecvInterval,tmpSendInterval);
-		doc->release();
+		if (doc != NULL)
+		{
+			doc->release();
+			doc = NULL;
+		}
 		CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Calculated -- SendInterval %u -- Receive Interval %u\n",m_u32KeepAliveSendInterval,m_u32KeepAliveRecvInterval);		
 		return E_SUCCESS;
 	}
@@ -491,6 +526,7 @@ THREAD_RETURN lm_loopSendToMix(void* param)
 #endif					
 			}
 		delete pQueueEntry;
+		pQueueEntry = NULL;
 #else
 		CAPool* pPool=new CAPool(MIX_POOL_SIZE);
 		tPoolEntry* pPoolEntry=new tPoolEntry;
@@ -530,7 +566,9 @@ THREAD_RETURN lm_loopSendToMix(void* param)
 #endif					
 			}
 		delete pPoolEntry;
+		pPoolEntry = NULL;
 		delete pPool;
+		pPool = NULL;
 #endif
 		CAMsg::printMsg(LOG_DEBUG,"Exiting Thread SendToMix\n");
 		THREAD_RETURN_SUCCESS;
@@ -630,9 +668,12 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 				getcurrentTimeMillis(keepaliveLast);
 			}
 		delete pQueueEntry;
+		pQueueEntry = NULL;
 		delete pSocketGroup;
+		pSocketGroup = NULL;
 		#ifdef USE_POOL
 			delete pPool;
+			pPool = NULL;
 		#endif			
 		THREAD_RETURN_SUCCESS;
 	}
@@ -717,6 +758,7 @@ SINT32 CALastMix::setTargets()
 				else if(oTargetInterface.target_type==TARGET_SOCKS_PROXY)
 					m_pSocksLB->add(oTargetInterface.addr);
 				delete oTargetInterface.addr;
+				oTargetInterface.addr = NULL;
 			}
 		CAMsg::printMsg(LOG_DEBUG,"This mix will use the following proxies:\n");
 		for(i=0;i<m_pCacheLB->getElementCount();i++)
@@ -747,6 +789,7 @@ SINT32 CALastMix::clean()
 		if(m_pReplayMsgProc!=NULL)
 			{
 				delete m_pReplayMsgProc;
+				m_pReplayMsgProc = NULL;
 			}
 		m_pReplayMsgProc=NULL;
 #endif
@@ -754,6 +797,7 @@ SINT32 CALastMix::clean()
 		if(m_pMuxInControlChannelDispatcher!=NULL)
 			{
 				delete m_pMuxInControlChannelDispatcher;
+				m_pMuxInControlChannelDispatcher = NULL;
 			}
 		m_pMuxInControlChannelDispatcher=NULL;
 
@@ -773,6 +817,7 @@ SINT32 CALastMix::clean()
 				CAMsg::printMsg(LOG_CRIT,"Wait for LoopSendToMix!\n");
 				m_pthreadSendToMix->join();
 				delete m_pthreadSendToMix;
+				m_pthreadSendToMix = NULL;
 			}
 		m_pthreadSendToMix=NULL;	
 		if(m_pthreadReadFromMix!=NULL)
@@ -780,6 +825,7 @@ SINT32 CALastMix::clean()
 				CAMsg::printMsg(LOG_CRIT,"Wait for LoopReadFromMix!\n");
 				m_pthreadReadFromMix->join();
 				delete m_pthreadReadFromMix;
+				m_pthreadReadFromMix = NULL;
 			}
 		m_pthreadReadFromMix=NULL;	
 	
@@ -789,6 +835,7 @@ SINT32 CALastMix::clean()
 				{
 					m_pLogPacketStats->stop();
 					delete m_pLogPacketStats;
+					m_pLogPacketStats = NULL;
 				}
 			m_pLogPacketStats=NULL;
 #endif	
@@ -798,32 +845,35 @@ SINT32 CALastMix::clean()
 				while(pChannelListEntry!=NULL)
 					{
 						delete pChannelListEntry->pCipher;
+						pChannelListEntry->pCipher = NULL;
 						delete pChannelListEntry->pQueueSend;
-						pChannelListEntry->pSocket->close();
-						delete pChannelListEntry->pSocket;
+						pChannelListEntry->pQueueSend = NULL;
+						if (pChannelListEntry->pSocket != NULL)
+						{
+							pChannelListEntry->pSocket->close();
+							delete pChannelListEntry->pSocket;
+							pChannelListEntry->pSocket = NULL;
+						}
 						pChannelListEntry=m_pChannelList->getNextSocket();
 					}
 			}	
-		if(m_pQueueReadFromMix!=NULL)
-			delete m_pQueueReadFromMix;
-		m_pQueueReadFromMix=NULL;	
-		if(m_pQueueSendToMix!=NULL)
-			delete m_pQueueSendToMix;
-		m_pQueueSendToMix=NULL;	
+		delete m_pQueueReadFromMix;
+		m_pQueueReadFromMix = NULL;
+		delete m_pQueueSendToMix;
+		m_pQueueSendToMix = NULL;	
     #ifndef NEW_MIX_TYPE // not TypeB mixes
       /* TypeB mixes are using an own implementation */
-		if(m_pChannelList!=NULL)
-			delete m_pChannelList;
-		m_pChannelList=NULL;
-		if(m_pMuxIn!=NULL)
-			{
-				m_pMuxIn->close();
-				delete m_pMuxIn;
-			}
-		m_pMuxIn=NULL;
-		if(m_pRSA!=NULL)
-			delete m_pRSA;
-		m_pRSA=NULL;
+		delete m_pChannelList;
+		m_pChannelList = NULL;
+		if(m_pMuxIn != NULL)
+		{
+			m_pMuxIn->close();
+			delete m_pMuxIn;
+			m_pMuxIn=NULL;
+		}
+		
+		delete m_pRSA;
+		m_pRSA = NULL;
     #endif
 		return E_SUCCESS;
 	}

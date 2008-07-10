@@ -77,14 +77,17 @@ CAXMLBI* CAXMLBI::getInstance(DOMElement* elemRoot)
 
 CAXMLBI::~CAXMLBI()
 	{
-		if(m_pCert!=NULL)
-			delete m_pCert;
-		if(m_pVeryfire!=NULL)
-			delete m_pVeryfire;
-		if(m_pBiID!=NULL)
-			delete m_pBiID;
-		if(m_pHostName!=NULL)
-			delete m_pHostName;
+		delete m_pCert;
+		m_pCert = NULL;
+		
+		delete m_pVeryfire;
+		m_pVeryfire = NULL;
+
+		delete m_pBiID;
+		m_pBiID = NULL;
+		
+		delete m_pHostName;
+		m_pHostName = NULL;
 	}
 
 SINT32 CAXMLBI::setValues(DOMElement* elemRoot)

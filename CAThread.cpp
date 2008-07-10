@@ -89,10 +89,8 @@ CAThread::CAThread(const UINT8* strName)
 #ifdef PRINT_THREAD_STACK_TRACE	
 void CAThread::destroyValue(void* a_value) 
 { 
-	if (a_value)
-	{
-		delete a_value; 
-	}
+	delete a_value;
+	a_value = NULL; 
 }
 
 void CAThread::initKey() 
@@ -104,10 +102,8 @@ void CAThread::setCurrentStack(METHOD_STACK* a_value)
 {
 	pthread_once(&ms_threadKeyInit, initKey); 
 	void *value = pthread_getspecific(ms_threadKey); 
-	if (value != NULL) 
-	{
-		 delete value;
-	}
+
+	delete value;
 	value = a_value; 
 	pthread_setspecific(ms_threadKey, value); 
 }
@@ -183,6 +179,7 @@ SINT32 CAThread::start(void* param,bool bDaemon,bool bSilent)
 				UINT8* temp=bytes2hex(m_pThread,sizeof(pthread_t));
 				CAMsg::printMsg(LOG_DEBUG,"Thread with name: %s created - pthread_t: %s\n",m_strName,temp);
 				delete[] temp;
+				temp = NULL;
 			}
 		if(bDaemon)
 			pthread_detach(*m_pThread);

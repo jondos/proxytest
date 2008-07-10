@@ -100,6 +100,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 				CAMsg::printMsg(LOG_INFO,"Error receiving Key Info from Mix n+1!\n");
 				MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextFailed);
 				delete []recvBuff;
+				recvBuff = NULL;
 				return E_UNKNOWN;
 			}
 		recvBuff[len]=0; //make a string
@@ -109,6 +110,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 		//Parsing KeyInfo received from Mix n+1
 		XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(recvBuff,len);
 		delete []recvBuff;
+		recvBuff = NULL;
 		if(doc==NULL)
 			{
 				CAMsg::printMsg(LOG_INFO,"Error parsing Key Info from Mix n+1!\n");
@@ -131,6 +133,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 						oSig.setVerifyKey(nextCert);
 						ret=oSig.verifyXML(child,NULL);
 						delete nextCert;
+						nextCert = NULL;
 						if(ret!=E_SUCCESS)
 							{
 								MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextFailed);
@@ -209,8 +212,13 @@ SINT32 CAMiddleMix::processKeyExchange()
 						UINT16 size=htons((UINT16)outlen);
 						((CASocket*)m_pMuxOut)->send((UINT8*)&size,2);
 						((CASocket*)m_pMuxOut)->send(out,outlen);
-						docSymKey->release();
+						if (docSymKey != NULL)
+						{
+							docSymKey->release();
+							docSymKey = NULL;
+						}
 						delete[] out;
+						out = NULL;
 						bFoundNextMix=true;
 						break;
 					}
@@ -296,6 +304,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 		memcpy(out,&len,2);
 		ret=((CASocket*)*m_pMuxIn)->send(out,outlen+2);
 		delete[] out;
+		out = NULL;
 		if(ret<0||(UINT32)ret!=outlen+2)
 		{
 			CAMsg::printMsg(LOG_DEBUG,"Error sending new New Key Info\n");
@@ -315,6 +324,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangePrevFailed);
 			CAMsg::printMsg(LOG_ERR,"Error receiving symetric key from Mix n-1!\n");
 			delete []recvBuff;
+			recvBuff = NULL;
 			return E_UNKNOWN;
 		}
 		recvBuff[len]=0;
@@ -323,6 +333,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 		//Parsing doc received
 		doc=parseDOMDocument(recvBuff,len);
 		delete[] recvBuff;
+		recvBuff = NULL;
 		if(doc==NULL)
 		{	
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangePrevFailed);
@@ -335,6 +346,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 		CACertificate* pCert=pglobalOptions->getPrevMixTestCertificate();
 		oSig.setVerifyKey(pCert);
 		delete pCert;
+		pCert = NULL;
 		if(oSig.verifyXML(elemRoot)!=E_SUCCESS)
 		{
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangePrevFailed);
@@ -418,6 +430,7 @@ SINT32 CAMiddleMix::init()
 						break;
 					}
 				delete oNextMix.addr;
+				oNextMix.addr = NULL;
 			}
 		if(pAddrNext==NULL)
 			{
@@ -456,6 +469,7 @@ SINT32 CAMiddleMix::init()
 		const CASocketAddr* pAddr=NULL;
 		pAddr=pListener->getAddr();
 		delete pListener;
+		pListener = NULL;
 		m_pMuxIn=new CAMuxSocket();
 #ifdef DYNAMIC_MIX
 		// LERNGRUPPE Do not block if we are currently reconfiguring
@@ -466,6 +480,7 @@ SINT32 CAMiddleMix::init()
 #endif
 		SINT32 ret=m_pMuxIn->accept(*pAddr);
 		delete pAddr;
+		pAddr = NULL;
 		if(ret!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Error waiting for previous Mix... -- Exiting!\n");				
@@ -487,11 +502,13 @@ SINT32 CAMiddleMix::init()
 		if(connectToNextMix(pAddrNext) != E_SUCCESS)
 		{
 			delete pAddrNext;
+			pAddrNext = NULL;
 			MONITORING_FIRE_NET_EVENT(ev_net_prevConnectionClosed);
 			CAMsg::printMsg(LOG_DEBUG, "CAMiddleMix::init - Unable to connect to next mix\n");
 			return E_UNKNOWN;
 		}
 		delete pAddrNext;
+		pAddrNext = NULL;
 
 //		mSocketGroup.add(muxOut);	
 		MONITORING_FIRE_NET_EVENT(ev_net_nextConnected);
@@ -549,10 +566,11 @@ THREAD_RETURN mm_loopSendToMixAfter(void* param)
 				if(!(pMiddleMix->m_bRun))
 				{
 					CAMsg::printMsg(LOG_INFO,"SendToMixAfter thread: was interrupted.\n");
+					MONITORING_FIRE_NET_EVENT(ev_net_nextConnectionClosed);
 					break;
 				}
 				if(ret==E_TIMEDOUT)
-					{//send a dummy as keep-alvie-traffic
+					{//send a dummy as keep-alive-traffic
 						pMixPacket->flags=CHANNEL_DUMMY;
 						pMixPacket->channel=DUMMY_CHANNEL;
 						getRandom(pMixPacket->data,DATA_SIZE);
@@ -580,6 +598,7 @@ THREAD_RETURN mm_loopSendToMixAfter(void* param)
 			}
 		pMiddleMix->m_bRun = false;
 		delete pQueueEntry;
+		pQueueEntry = NULL;
 		FINISH_STACK("CAFirstMix::fm_loopSendToMixAfter");
 
 		CAMsg::printMsg(LOG_DEBUG,"Exiting Thread SendToMixAfter\n");
@@ -611,7 +630,7 @@ THREAD_RETURN mm_loopSendToMixBefore(void* param)
 					break;
 				}
 				if(ret==E_TIMEDOUT)
-					{//send a dummy as keep-alvie-traffic
+					{//send a dummy as keep-alive-traffic
 						pMixPacket->flags=CHANNEL_DUMMY;
 						pMixPacket->channel=DUMMY_CHANNEL;
 						getRandom(pMixPacket->data,DATA_SIZE);
@@ -639,6 +658,7 @@ THREAD_RETURN mm_loopSendToMixBefore(void* param)
 			}
 		pMiddleMix->m_bRun = false;
 		delete pQueueEntry;
+		pQueueEntry = NULL;
 		FINISH_STACK("CAFirstMix::fm_loopSendToMixBefore");
 
 		CAMsg::printMsg(LOG_DEBUG,"Exiting Thread SendToMixBefore\n");
@@ -795,9 +815,12 @@ THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 			pMix->m_pQueueSendToMixAfter->add(b,sizeof(tQueueEntry)+1);
 		}
 		delete tmpRSABuff;
+		tmpRSABuff = NULL;
 		delete pPoolEntry;
+		pPoolEntry = NULL;
 		#ifdef USE_POOL
 			delete pPool;
+			pPool = NULL;
 		#endif
 		CAMsg::printMsg(LOG_CRIT,"loopReadFromMixBefore -- Now Exiting!\n");
 		THREAD_RETURN_SUCCESS;
@@ -924,8 +947,10 @@ THREAD_RETURN mm_loopReadFromMixAfter(void* param)
 			pMix->m_pQueueSendToMixAfter->add(b,sizeof(tQueueEntry)+1);
 		}
 		delete pPoolEntry;
+		pPoolEntry = NULL;
 		#ifdef USE_POOL
 			delete pPool;
+			pPool = NULL;
 		#endif
 		CAMsg::printMsg(LOG_CRIT,"loopReadFromMixAfter -- Now Exiting!\n");
 		THREAD_RETURN_SUCCESS;		
@@ -1014,42 +1039,34 @@ SINT32 CAMiddleMix::loop()
 	}
 SINT32 CAMiddleMix::clean()
 {
-		if(m_pQueueSendToMixBefore!=NULL)
-			{
-				delete m_pQueueSendToMixBefore;
-			}
+		delete m_pQueueSendToMixBefore;	
 		m_pQueueSendToMixBefore=NULL;
 
-		if(m_pQueueSendToMixAfter!=NULL)
-			{
-				delete m_pQueueSendToMixAfter;
-			}
+		delete m_pQueueSendToMixAfter;	
 		m_pQueueSendToMixAfter=NULL;
 
 #ifdef REPLAY_DETECTION
-		if(m_pReplayMsgProc!=NULL)
-			{
-				delete m_pReplayMsgProc;
-			}
+		delete m_pReplayMsgProc;
 		m_pReplayMsgProc=NULL;
 #endif
 		if(m_pMuxIn!=NULL)
-			{
-				m_pMuxIn->close();
-				delete m_pMuxIn;
-			}
-		m_pMuxIn=NULL;
+		{
+			m_pMuxIn->close();
+			delete m_pMuxIn;
+			m_pMuxIn=NULL;
+		}
+		
 		if(m_pMuxOut!=NULL)
-			{
-				m_pMuxOut->close();
-				delete m_pMuxOut;
-			}
-		m_pMuxOut=NULL;
-		if(m_pRSA!=NULL)
-			delete m_pRSA;
+		{
+			m_pMuxOut->close();
+			delete m_pMuxOut;
+			m_pMuxOut=NULL;
+		}
+		
+		delete m_pRSA;
 		m_pRSA=NULL;
-		if(m_pMiddleMixChannelList!=NULL)
-			delete m_pMiddleMixChannelList;
+		
+		delete m_pMiddleMixChannelList;
 		m_pMiddleMixChannelList=NULL;
 		return E_SUCCESS;
 	}

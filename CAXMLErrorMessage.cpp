@@ -151,7 +151,8 @@ SINT32 CAXMLErrorMessage::setValues(DOMElement* elemRoot)
 	}
 	
 	m_iErrorCode = (UINT32)tmp;
-	if(m_strErrMsg) delete [] m_strErrMsg;
+	delete [] m_strErrMsg;
+	m_strErrMsg = NULL;
 	m_strErrMsg = new UINT8[strGeneralLen+1];
 	strcpy((char*)m_strErrMsg, (char*)strGeneral);
 	
@@ -183,6 +184,7 @@ SINT32 CAXMLErrorMessage::setValues(DOMElement* elemRoot)
 			if(getDOMElementValue(confirmedElem, (*(UINT64*)m_messageObject)) != E_SUCCESS)
 			{
 				delete (UINT64*)m_messageObject;
+				m_messageObject = NULL;
 			}
 		}		
 	}

@@ -83,6 +83,7 @@ SINT32 CAFirstMix::initOnce()
 				if(!pListener->isVirtual())
 					m_nSocketsIn++;
 				delete pListener;
+				pListener = NULL;
 			}
 		if(m_nSocketsIn<1)
 			{
@@ -123,6 +124,7 @@ SINT32 CAFirstMix::init()
 				if(pListener->isVirtual())
 					{
 						delete pListener;
+						pListener = NULL;
 						continue;
 					}
 				m_arrSocketsIn[aktSocket].create();
@@ -131,6 +133,7 @@ SINT32 CAFirstMix::init()
 				pAddr->toString(buff,255);
 				CAMsg::printMsg(LOG_DEBUG,"Listening on Interface: %s\n",buff);
 				delete pListener;
+				pListener = NULL;
 #ifndef _WIN32
 				//we have to be a temporaly superuser if port <1024...
 				int old_uid=geteuid();
@@ -142,6 +145,7 @@ SINT32 CAFirstMix::init()
 #endif
 				SINT32 ret=m_arrSocketsIn[aktSocket].listen(*pAddr);
 				delete pAddr;
+				pAddr = NULL;
 #ifndef _WIN32
 				seteuid(old_uid);
 #endif
@@ -166,6 +170,7 @@ SINT32 CAFirstMix::init()
 						break;
 					}
 				delete oNextMix.addr;
+				oNextMix.addr = NULL;
 			}
 		if(pAddrNext==NULL)
 			{
@@ -190,10 +195,12 @@ SINT32 CAFirstMix::init()
 		if(connectToNextMix(pAddrNext) != E_SUCCESS)
 			{
 				delete pAddrNext;
+				pAddrNext = NULL;
 			CAMsg::printMsg(LOG_DEBUG, "CAFirstMix::init - Unable to connect to next mix\n");
 				return E_UNKNOWN;
 			}
 		delete pAddrNext;
+		pAddrNext = NULL;
 		MONITORING_FIRE_NET_EVENT(ev_net_nextConnected);
 		CAMsg::printMsg(LOG_INFO," connected!\n");
 		if(((CASocket*)(*m_pMuxOut))->setKeepAlive((UINT32)1800)!=E_SUCCESS)
@@ -217,8 +224,11 @@ SINT32 CAFirstMix::init()
 		pglobalOptions->getCountryStatsDBConnectionLoginData(&db_host,&db_user,&db_passwd);
 		SINT32 retcountrydb=initCountryStats(db_host,db_user,db_passwd);
 		delete[] db_host;
+		db_host = NULL;
 		delete[] db_user;
+		db_user = NULL;
 		delete[] db_passwd;
+		db_passwd = NULL;
 		if(retcountrydb!=E_SUCCESS)
 			return E_UNKNOWN;
 #endif		
@@ -340,6 +350,7 @@ SINT32 CAFirstMix::processKeyExchange()
     {
         CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info!\n");
         delete []recvBuff;
+        recvBuff = NULL;
         return E_UNKNOWN;
     }
     recvBuff[len]=0;
@@ -349,12 +360,14 @@ SINT32 CAFirstMix::processKeyExchange()
 
     XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(recvBuff,len);
     delete []recvBuff;
+    recvBuff = NULL;
     DOMElement* elemMixes=doc->getDocumentElement();
     if(elemMixes==NULL)
     {
 		if(doc != NULL)
 		{
 			doc->release();
+			doc = NULL;
 		}
 		return E_UNKNOWN;
     }
@@ -364,6 +377,7 @@ SINT32 CAFirstMix::processKeyExchange()
     	if(doc != NULL)
 		{
 			doc->release();
+			doc = NULL;
 		}
         return E_UNKNOWN;
     }
@@ -451,13 +465,18 @@ SINT32 CAFirstMix::processKeyExchange()
     
     UINT32 tlen=0;
     UINT8* tmpB=DOM_Output::dumpToMem(docXmlKeyInfo,&tlen);
-    docXmlKeyInfo->release();
+    if (docXmlKeyInfo != NULL)
+    {
+    	docXmlKeyInfo->release();
+    	docXmlKeyInfo = NULL;
+    }
     m_xmlKeyInfoBuff=new UINT8[tlen+2];
     memcpy(m_xmlKeyInfoBuff+2,tmpB,tlen);
     UINT16 s=htons((UINT16)tlen);
     memcpy(	m_xmlKeyInfoBuff,&s,2);
     m_xmlKeyInfoSize=(UINT16)tlen+2;
     delete []tmpB;
+    tmpB = NULL;
 
     //Sending symetric key...
     child=elemMixes->getFirstChild();
@@ -472,10 +491,15 @@ SINT32 CAFirstMix::processKeyExchange()
             oSig.setVerifyKey(nextCert);
             SINT32 ret=oSig.verifyXML(child,NULL);
             delete nextCert;
+            nextCert = NULL;
             if(ret!=E_SUCCESS)
             {
                 CAMsg::printMsg(LOG_DEBUG,"failed!\n");
-                doc->release();
+                if (doc != NULL)
+                {
+                	doc->release();
+                	doc = NULL;
+                }
                 return E_UNKNOWN;
             }
             CAMsg::printMsg(LOG_DEBUG,"success!\n");
@@ -546,7 +570,11 @@ SINT32 CAFirstMix::processKeyExchange()
 
             m_pSignature->signXML(elemRoot);
             DOM_Output::dumpToMem(docSymKey,out,&outlen);
-			docSymKey->release();
+            if (docSymKey != NULL)
+            {
+				docSymKey->release();
+				docSymKey = NULL;
+            }
 			m_pMuxOut->setSendKey(key,32);
             m_pMuxOut->setReceiveKey(key+32,32);
             UINT16 size=htons((UINT16)outlen);
@@ -555,6 +583,7 @@ SINT32 CAFirstMix::processKeyExchange()
             ((CASocket*)m_pMuxOut)->send(out,outlen);
             m_pMuxOut->setCrypt(true);
             delete[] out;
+            out = NULL;
             break;
         }
         child=child->getNextSibling();
@@ -562,12 +591,20 @@ SINT32 CAFirstMix::processKeyExchange()
 		///initialises MixParameters struct
 	if(initMixParameters(elemMixes)!=E_SUCCESS)
 	{
-		doc->release();
+		if (doc != NULL)
+		{
+			doc->release();
+			doc = NULL;
+		}
 		return E_UNKNOWN;
 	}
     if(initMixCascadeInfo(elemMixes)!=E_SUCCESS)
     {
-    	doc->release();	
+    	if (doc != NULL)
+    	{
+    		doc->release();
+    		doc = NULL;
+    	}	
     	CAMsg::printMsg(LOG_CRIT,"Error initializing cascade info.\n");
         return E_UNKNOWN;
     }
@@ -577,7 +614,11 @@ SINT32 CAFirstMix::processKeyExchange()
             m_pInfoService->sendCascadeHelo();
     }*/
     CAMsg::printMsg(LOG_DEBUG,"Keyexchange finished!\n");
-    doc->release();
+    if (doc != NULL)
+    {
+    	doc->release();
+    	doc = NULL;
+    }
     return E_SUCCESS;
 }
 
@@ -653,6 +694,7 @@ THREAD_RETURN fm_loopSendToMix(void* param)
 #endif
 			}
 		delete pQueueEntry;
+		pQueueEntry = NULL;
 #else
 		CAPool* pPool=new CAPool(MIX_POOL_SIZE);
 		tPoolEntry* pPoolEntry=new tPoolEntry;
@@ -690,7 +732,9 @@ THREAD_RETURN fm_loopSendToMix(void* param)
 				#endif
 			}
 		delete pPoolEntry;
+		pPoolEntry = NULL;
 		delete pPool;
+		pPool = NULL;
 #endif
 		FINISH_STACK("CAFirstMix::fm_loopSendToMix");
 
@@ -791,9 +835,12 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 				getcurrentTimeMillis(keepaliveLast);
 			}
 		delete pQueueEntry;
+		pQueueEntry = NULL;
 		delete pSocketGroup;
+		pSocketGroup = NULL;
 		#ifdef USE_POOL
 			delete pPool;
+			pPool = NULL;
 		#endif
 		
 		FINISH_STACK("CAFirstMix::fm_loopReadFromMix");
@@ -895,6 +942,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 									
 									addr->getIP(remoteIP);
 									delete addr;
+									addr = NULL;
 								
 									if(memcmp(peerIP, remoteIP, 4) == 0)
 									{
@@ -968,6 +1016,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 						if (ret != E_SUCCESS)
 						{
 							delete pNewMuxSocket;
+							pNewMuxSocket = NULL;
 							pFirstMix->decNewConnections();
 							if(ret==E_SOCKETCLOSED&&pFirstMix->m_bRestart) //Hm, should we restart ??
 							{
@@ -986,7 +1035,9 @@ END_THREAD:
 		FINISH_STACK("CAFirstMix::fm_loopAcceptUsers");
 
 		delete[] peerIP;
+		peerIP = NULL;
 		delete psocketgroupAccept;
+		psocketgroupAccept = NULL;
 		
 		CAMsg::printMsg(LOG_DEBUG,"Exiting Thread AcceptUser\n");
 		THREAD_RETURN_SUCCESS;
@@ -1026,6 +1077,7 @@ THREAD_RETURN fm_loopDoUserLogin(void* param)
 		SAVE_STACK("CAFirstMix::fm_loopDoUserLogin", "after user login");
 		d->pMix->decNewConnections();
 		delete d;
+		d = NULL;
 		
 #ifdef COUNTRY_STATS
 		my_thread_end();
@@ -1074,6 +1126,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 			CAMsg::printMsg(LOG_DEBUG,"User login: Sending login data has been interrupted!\n");
 #endif
 			delete pNewUser;
+			pNewUser = NULL;
 			m_pIPList->removeIP(peerIP);
 			return E_UNKNOWN;
 		}
@@ -1094,6 +1147,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 				CAMsg::printMsg(LOG_DEBUG,"User login: timed out while waiting for first symmetric key from client!\n");
 			#endif
 			delete pNewUser;
+			pNewUser = NULL;
 			m_pIPList->removeIP(peerIP);
 			return E_UNKNOWN;
 		}
@@ -1111,7 +1165,9 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 			CAMsg::printMsg(LOG_DEBUG,"User login: timed out while waiting for second symmetric key from client!\n");
 #endif
 			delete pNewUser;
+			pNewUser = NULL;
 			delete[] xml_buff;
+			xml_buff = NULL;
 			m_pIPList->removeIP(peerIP);
 			return E_UNKNOWN;
 		}
@@ -1127,20 +1183,29 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 			decryptXMLElement(elemRoot,m_pRSA)!=E_SUCCESS)
 			{
 				delete[] xml_buff;
+				xml_buff = NULL;
 				delete pNewUser;
+				pNewUser = NULL;
 				m_pIPList->removeIP(peerIP);
 				if(doc!=NULL)
 				{
 					doc->release();
+					doc = NULL;
 				}
 				return E_UNKNOWN;
 			}
 		elemRoot=doc->getDocumentElement();
 		if(!equals(elemRoot->getNodeName(),"JAPKeyExchange"))
 			{
-				doc->release();
+				if (doc != NULL)
+				{
+					doc->release();
+					doc = NULL;
+				}
 				delete[] xml_buff;
+				xml_buff = NULL;
 				delete pNewUser;
+				pNewUser = NULL;
 				m_pIPList->removeIP(peerIP);
 				return E_UNKNOWN;
 			}
@@ -1156,9 +1221,15 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 				CABase64::decode(mixKey,mixKeyLen,mixKey,&mixKeyLen)!=E_SUCCESS||
 				linkKeyLen!=64||mixKeyLen!=32)
 			{
-				doc->release();
+				if (doc != NULL)
+				{
+					doc->release();
+					doc = NULL;
+				}
 				delete[] xml_buff;
+				xml_buff = NULL;
 				delete pNewUser;
+				pNewUser = NULL;
 				m_pIPList->removeIP(peerIP);
 				return E_UNKNOWN;
 			}
@@ -1241,17 +1312,27 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		setDOMElementValue(elemSigValue,sig);
 		u32=xml_len;
 		DOM_Output::dumpToMem(docSig,xml_buff+2,&u32);
-		docSig->release();
+		if (docSig != NULL)
+		{
+			docSig->release();
+			docSig = NULL;
+		}
 		xml_buff[0]=(UINT8)(u32>>8);
 		xml_buff[1]=(UINT8)(u32&0xFF);
 		
 		if (((CASocket*)pNewUser)->isClosed() ||
 		    ((CASocket*)pNewUser)->sendFullyTimeOut(xml_buff,u32+2, 30000, 10000) != E_SUCCESS)
 		{
-			doc->release();
+			if (doc != NULL)
+			{
+				doc->release();
+				doc = NULL;
+			}
 			CAMsg::printMsg(LOG_DEBUG,"User login: Sending key exchange signature has been interrupted!\n");
 			delete[] xml_buff;
+			xml_buff = NULL;
 			delete pNewUser;
+			pNewUser = NULL;
 			m_pIPList->removeIP(peerIP);
 			return E_UNKNOWN;
 		}
@@ -1259,6 +1340,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 			CAMsg::printMsg(LOG_DEBUG,"User login: key exchange signature sent\n");
 		#endif
 		delete[] xml_buff;
+		xml_buff = NULL;
 		
 		SAVE_STACK("CAFirstMix::doUserLogin", "sent key exchange signature");
 		
@@ -1275,11 +1357,17 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 #endif
 		if(pHashEntry==NULL)// adding user connection to mix->JAP channel list (stefan: sollte das nicht connection list sein? --> es handelt sich um eine Datenstruktu fr Connections/Channels ).
 		{
-			doc->release();
+			if (doc != NULL)
+			{
+				doc->release();
+				doc = NULL;
+			}
 			CAMsg::printMsg(LOG_ERR,"User login: Could not add new socket to connection list!\n");
 			m_pIPList->removeIP(peerIP);
 			delete tmpQueue;
+			tmpQueue = NULL;
 			delete pNewUser;
+			pNewUser = NULL;
 			return E_UNKNOWN;
 		}
 		
@@ -1298,7 +1386,11 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		pNewUser->setSendKey(linkKey+32,32);
 		pNewUser->setCrypt(true);
 
-		doc->release();		
+		if (doc != NULL)
+		{
+			doc->release();
+			doc = NULL;
+		}		
 #ifdef PAYMENT
 		
 		SAVE_STACK("CAFirstMix::doUserLogin", "Starting AI login procedure");
@@ -1710,14 +1802,14 @@ SINT32 CAFirstMix::deleteCountryStats()
 				mysql_close(m_mysqlCon);
 				m_mysqlCon=NULL;
 			}
-		if(m_CountryStats!=NULL)
-			delete[] m_CountryStats;
+	
+		delete[] m_CountryStats;
 		m_CountryStats=NULL;
-		if(m_PacketsPerCountryIN!=NULL)
-			delete[] m_PacketsPerCountryIN;
+	
+		delete[] m_PacketsPerCountryIN;
 		m_PacketsPerCountryIN=NULL;
-		if(m_PacketsPerCountryOUT!=NULL)
-			delete[] m_PacketsPerCountryOUT;
+		
+		delete[] m_PacketsPerCountryOUT;
 		m_PacketsPerCountryOUT=NULL;
 		return E_SUCCESS;
 	}

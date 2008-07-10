@@ -230,11 +230,12 @@ static THREAD_RETURN ConnectivityLoop(void *p)
 #endif
     socket.send( (const UINT8*)pechoRequest, rLen);
     delete pechoRequest;
+    pechoRequest = NULL;
 EXIT:
 	FINISH_STACK("CADynaNetworking::ConnectivityLoop");
 
-    if(address != NULL)
-        delete address;
+    delete address;
+    address = NULL;
     socket.close();
     serverSocket.close();
 		THREAD_RETURN_SUCCESS;
@@ -280,6 +281,7 @@ SINT32 CADynaNetworking::verifyConnectivity()
     CASocketAddrINet *addr = (CASocketAddrINet*)pListener->getAddr();    
     UINT16 port = addr->getPort();
     delete pListener;
+    pListener = NULL;
     // End Fixme
 
     CASocket tmpSock;
@@ -321,7 +323,9 @@ SINT32 CADynaNetworking::verifyConnectivity()
         ret = E_SUCCESS;
 error:
     delete m_pthreadConnectivtyLoop;
+    m_pthreadConnectivtyLoop = NULL;
     delete addr;
+    addr = NULL;
     return ret;
 }
 
@@ -426,6 +430,7 @@ SINT32 CADynaNetworking::getInterfaceIp(UINT32 *r_addr)
     sock->close();
 
     delete sock;
+    sock = NULL;
     return E_SUCCESS;
 }
 

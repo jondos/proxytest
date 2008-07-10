@@ -68,11 +68,12 @@ SINT32 CALogPacketStats::stop()
 	{
 		m_bRunLog=false;
 		if(m_pthreadLog!=NULL)
-			{
-				m_pthreadLog->join();
-				delete m_pthreadLog;
-			}
-		m_pthreadLog=NULL;
+		{
+			m_pthreadLog->join();
+			delete m_pthreadLog;
+			m_pthreadLog=NULL;
+		}
+		
 		return E_SUCCESS;
 	}
 

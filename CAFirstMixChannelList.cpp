@@ -80,16 +80,21 @@ CAFirstMixChannelList::~CAFirstMixChannelList()
 		m_bDelayBucketsLoopRun=false;
 		m_pThreadDelayBucketsLoop->join();
 		delete m_pThreadDelayBucketsLoop;
+		m_pThreadDelayBucketsLoop = NULL;
 		delete m_pMutexDelayChannel;
+		m_pMutexDelayChannel = NULL;
 		delete []m_pDelayBuckets;
+		m_pDelayBuckets = NULL;
 #endif
 		for(int i=0;i<MAX_HASH_KEY;i++)
 				{
 					delete m_HashTable[i];
+					m_HashTable[i] = NULL;
 				}
 		delete []m_HashTable;
+		m_HashTable = NULL;
 		delete []m_HashTableOutChannels;
-		
+		m_HashTableOutChannels = NULL;		
 	}
 		
 /** Adds a new TCP/IP connection (a new user) to the channel list.
@@ -540,6 +545,7 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 	#endif
 		pHashTableEntry->pControlChannelDispatcher->deleteAllControlChannels();
 		delete pHashTableEntry->pControlChannelDispatcher; //deletes the dispatcher and all associated control channels
+		pHashTableEntry->pControlChannelDispatcher = NULL;
 		if(m_listHashTableNext==pHashTableEntry) //adjust the enumeration over all connections (@see getNext())
 			m_listHashTableNext=pHashTableEntry->list_HashEntries.next;
 		
@@ -616,6 +622,7 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 				pTmpEntry=pEntry->list_InChannelPerSocket.next;
 #ifndef DO_TRACE				
 				delete pEntry;
+				pEntry = NULL;
 #else
 				deleteChannelListEntry(pEntry);
 #endif
@@ -627,6 +634,7 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 #endif
 #ifdef LOG_DIALOG
 		delete[] pHashTableEntry->strDialog;
+		pHashTableEntry->strDialog = NULL;
 #endif
 		memset(pHashTableEntry,0,sizeof(fmHashTableEntry)); //'delete' the connection from the connection hash table 
 		m_Mutex.unlock();
@@ -665,6 +673,7 @@ SINT32 CAFirstMixChannelList::removeClientPart(CAMuxSocket* pMuxSocket)
     #endif
     pHashTableEntry->pControlChannelDispatcher->deleteAllControlChannels();
     delete pHashTableEntry->pControlChannelDispatcher; //deletes the dispatcher and all associated control channels
+    pHashTableEntry->pControlChannelDispatcher = NULL;
     if(m_listHashTableNext==pHashTableEntry) //adjust the enumeration over all connections (@see getNext())
       m_listHashTableNext=pHashTableEntry->list_HashEntries.next;
     
@@ -762,6 +771,7 @@ void CAFirstMixChannelList::removeVacantOutChannel(fmChannelListEntry* pEntry) {
       /* entry is not in the table any more */
       #ifndef DO_TRACE        
         delete pEntry;
+        pEntry = NULL;
       #else
         deleteChannelListEntry(pEntry);
       #endif
@@ -806,11 +816,13 @@ void CAFirstMixChannelList::cleanVacantOutChannels() {
         }
         /* entry is removed from the table, now delete the channel-cipher */
         delete pTmpEntry->pCipher;
+        pTmpEntry->pCipher = NULL;
         fmChannelListEntry* pRemoveEntry = pTmpEntry;
         pTmpEntry = pTmpEntry->list_OutChannelHashTable.next;
         /* delete the entry */
         #ifndef DO_TRACE        
           delete pRemoveEntry;
+          pRemoveEntry = NULL;
         #else
           deleteChannelListEntry(pEntry);
         #endif
@@ -919,6 +931,7 @@ SINT32 CAFirstMixChannelList::removeChannel(CAMuxSocket* pMuxSocket,HCHANNEL cha
 							}
 						#ifndef DO_TRACE				
 							delete pEntry;
+							pEntry = NULL;
 						#else
 							deleteChannelListEntry(pEntry);
 						#endif
@@ -1021,7 +1034,9 @@ SINT32 CAFirstMixChannelList::test()
 		
 		pList->remove(pMuxSocket);
 		delete pMuxSocket;
+		pMuxSocket = NULL;
 		delete pList;
+		pList = NULL;
 		return E_SUCCESS;
 	}
 	

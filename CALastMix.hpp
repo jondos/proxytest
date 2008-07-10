@@ -85,7 +85,9 @@ class CALastMix:public
 				{
 					clean();
 					delete m_pCacheLB;
+					m_pCacheLB = NULL;
 					delete m_pSocksLB;
+					m_pSocksLB = NULL;
 				}
 
 			SINT32 reconfigure();

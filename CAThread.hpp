@@ -122,11 +122,11 @@ class CAThread
 					#ifdef OS_TUDOS
 					m_Thread = L4THREAD_INVALID_ID;
 					#else
-					if(m_pThread!=NULL)
-						delete m_pThread;
+					delete m_pThread;
+					m_pThread = NULL;
 					#endif
-					if(m_strName!=NULL)
-						delete[] m_strName;
+					delete[] m_strName;
+					m_strName = NULL;
 				}
 			
 #ifdef PRINT_THREAD_STACK_TRACE			

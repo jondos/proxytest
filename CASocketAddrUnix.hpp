@@ -96,6 +96,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 							return E_UNKNOWN;
 						SINT32 ret=snprintf((char*)buff,bufflen,"Unix address: %s",tmppath);
 						delete[]tmppath;
+						tmppath = NULL;
 						if(ret<0)
 							{
 								return E_SPACE;

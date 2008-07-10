@@ -116,6 +116,7 @@ Hashtable::~Hashtable()
 		{
 			next = e->e_Next;
 			delete e;
+			e = NULL;
 		}
 		m_table[index] = NULL;
 	}
@@ -291,6 +292,7 @@ void *Hashtable::remove(void *key)
 			e->e_Key = NULL;
 			e->e_Next = NULL;
 			delete e;
+			e = NULL;
 
 			return value;
 		}
@@ -346,6 +348,7 @@ void Hashtable::clear(SINT8 keyMode,SINT8 valueMode)
 			}
 			next = e->e_Next;
 			delete e;
+			e = NULL;
 		}
 		m_table[index] = NULL;
 	}
@@ -421,6 +424,7 @@ bool Hashtable::rehash()
 		}
 	}
 	delete oldtable;
+	oldtable = NULL;
 	
 	CAMsg::printMsg(LOG_INFO, "Hashtable: Rehashing complete.\n");
 	

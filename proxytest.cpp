@@ -822,6 +822,7 @@ RESTART_MIX:
 					if(pProxy->start()!=E_SUCCESS)
 						CAMsg::printMsg(LOG_CRIT,"Error during MIX-Startup!\n");
 					delete pProxy;
+					pProxy = NULL;
 				#else
 					CAMsg::printMsg(LOG_CRIT,"Compiled without LocalProxy support!\n");
 					goto EXIT;
@@ -896,8 +897,8 @@ while(true)
 	}
 
 	/* If we got here, the mix should already be reconfigured, so we only need a new instance */
-	if(pMix!=NULL)
-		delete pMix;
+	delete pMix;
+	pMix = NULL;
 
 	if(pglobalOptions->isFirstMix())
 	{

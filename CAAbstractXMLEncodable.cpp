@@ -49,7 +49,12 @@ UINT8* CAAbstractXMLEncodable::toXmlString(UINT32* pSize)
 		memcpy(tmp2, tmp, *pSize);
 		tmp2[*pSize]=0;
 		delete[] tmp;
-		pDoc->release();
+		tmp = NULL;
+		if (pDoc != NULL)
+		{
+			pDoc->release();
+			pDoc = NULL;
+		}
 		//delete pDoc;
 		return tmp2;
 	}

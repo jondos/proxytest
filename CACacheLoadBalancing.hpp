@@ -65,7 +65,9 @@ class CACacheLoadBalancing
 							else 
 								pEntry=pSelectedEntry->next;
 							delete pSelectedEntry->pAddr;
+							pSelectedEntry->pAddr = NULL;
 							delete pSelectedEntry;
+							pSelectedEntry = NULL;
 							pSelectedEntry=pEntry;
 						}
 					m_ElementCount=0;
