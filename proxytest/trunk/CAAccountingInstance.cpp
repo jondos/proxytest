@@ -1767,10 +1767,6 @@ UINT32 CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo*
 	
 	if (pCC != NULL)
 	{
-		for (UINT32 i = 0; i < pCC-> getNumberOfHashes(); i++ )
-		{
-			CAMsg::printMsg(LOG_ERR, "Mix-Ids from CC: %s\n", pCC->getMixId(i));
-		}
 		if(!cascadeMatchesCC(pCC))
 		{
 			delete pCC;
