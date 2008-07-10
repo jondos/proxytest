@@ -297,6 +297,7 @@ SINT32 CAMsg::openLog(UINT32 type)
 		CAASymCipher oRSA;
 		SINT32 ret=oRSA.setPublicKey(pCert);
 		delete pCert;
+		pCert = NULL;
 		if(ret!=E_SUCCESS)
 			return E_UNKNOWN;
 		UINT8 buff[1024];

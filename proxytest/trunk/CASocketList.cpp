@@ -45,6 +45,7 @@ SINT32 CASocketList::increasePool()
 		if(tmpMem==NULL)
 			{
 				delete[] tmp;
+				tmp = NULL;
 				return E_UNKNOWN;
 			}
 		memset(tmp,0,sizeof(CONNECTIONLIST)*POOL_SIZE);
@@ -95,9 +96,11 @@ SINT32 CASocketList::clear()
 		while(tmp!=NULL)
 			{
 				delete []tmp->mem;
+				tmp->mem = NULL;
 				m_Memlist=tmp;
 				tmp=tmp->next;
 				delete m_Memlist;
+				m_Memlist = NULL;
 			}
 		m_Connections=NULL;
 		m_Pool=NULL;

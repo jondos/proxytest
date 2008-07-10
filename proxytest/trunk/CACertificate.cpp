@@ -55,14 +55,17 @@ CACertificate* CACertificate::decode(const DOMNode* n,UINT32 type,const char* pa
 									if(getDOMElementValue(node,tmpStr,&strLen)!=E_SUCCESS)
 										{
 											delete[] tmpStr;
+											tmpStr = NULL;
 											return NULL;
 										}
 									UINT32 decLen=4096;
 									UINT8* decBuff=new UINT8[decLen];
 									CABase64::decode((UINT8*)tmpStr,strLen,decBuff,&decLen);
 									delete[] tmpStr;
+									tmpStr = NULL;
 									CACertificate* cert=decode(decBuff,decLen,CERT_PKCS12,passwd);
 									delete[] decBuff;
+									decBuff = NULL;
 									return cert;
 								}
 							node=node->getNextSibling();
@@ -78,14 +81,17 @@ CACertificate* CACertificate::decode(const DOMNode* n,UINT32 type,const char* pa
 									if(getDOMElementValue(node,tmpStr,&strLen)!=E_SUCCESS)
 										{
 											delete[] tmpStr;
+											tmpStr = NULL;
 											return NULL;
 										}
 									UINT32 decLen=4096;
 									UINT8* decBuff=new UINT8[decLen];
 									CABase64::decode((UINT8*)tmpStr,strLen,decBuff,&decLen);
 									delete[] tmpStr;
+									tmpStr = NULL;
 									CACertificate* cert=decode(decBuff,decLen,CERT_DER);
 									delete[] decBuff;
+									decBuff = NULL;
 									return cert;
 								}
 							node=node->getNextSibling();
@@ -147,6 +153,7 @@ CACertificate* CACertificate::decode(const UINT8* buff,UINT32 bufflen,UINT32 typ
 						tmpCert=d2i_X509(NULL,(UINT8**)&tmp,tmpBuffSize);
 					#endif
 					delete[] tmpBuff;
+					tmpBuff = NULL;
 					break;
 			}
 		if(tmpCert==NULL)

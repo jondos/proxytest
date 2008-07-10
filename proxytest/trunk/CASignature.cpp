@@ -80,6 +80,7 @@ SINT32 CASignature::getSignKey(DOMElement* & elem,XERCES_CPP_NAMESPACE::DOMDocum
 		EVP_PKEY_set1_DSA(pPKey,m_pDSA);		
 		PKCS12* pPKCS12=PKCS12_create(NULL,NULL, pPKey,pCert->m_pCert,NULL,0,0,0,0,0);
 		delete pCert;
+		pCert = NULL;
 		EVP_PKEY_free(pPKey);
 		UINT8* buff=NULL;
 		SINT32 len=i2d_PKCS12(pPKCS12,&buff);
@@ -97,30 +98,33 @@ SINT32 CASignature::setSignKey(const DOMNode* n,UINT32 type,const char* passwd)
 	{
 		const DOMNode* node=n; 
 		switch(type)
-			{
-				case SIGKEY_PKCS12:
-					while(node!=NULL)
+		{
+			case SIGKEY_PKCS12:
+				while(node!=NULL)
+				{
+					if(equals(node->getNodeName(),"X509PKCS12"))
+					{
+						UINT32 strLen=4096;
+						UINT8* tmpStr=new UINT8[strLen];
+						if(getDOMElementValue(node,tmpStr,&strLen)!=E_SUCCESS)
 						{
-							if(equals(node->getNodeName(),"X509PKCS12"))
-								{
-									UINT32 strLen=4096;
-									UINT8* tmpStr=new UINT8[strLen];
-									if(getDOMElementValue(node,tmpStr,&strLen)!=E_SUCCESS)
-										{
-											delete[] tmpStr;
-											return E_UNKNOWN;
-										}
-									UINT32 decLen=4096;
-									UINT8* decBuff=new UINT8[decLen];
-									CABase64::decode((UINT8*)tmpStr,strLen,decBuff,&decLen);
-									delete [] tmpStr;
-									SINT32 ret=setSignKey(decBuff,decLen,SIGKEY_PKCS12,passwd);
-									delete[] decBuff;
-									return ret;
-								}
-							node=node->getNextSibling();
+							delete[] tmpStr;
+							tmpStr = NULL;
+							return E_UNKNOWN;
 						}
-			}
+						UINT32 decLen=4096;
+						UINT8* decBuff=new UINT8[decLen];
+						CABase64::decode((UINT8*)tmpStr,strLen,decBuff,&decLen);
+						delete [] tmpStr;
+						tmpStr = NULL;
+						SINT32 ret=setSignKey(decBuff,decLen,SIGKEY_PKCS12,passwd);
+						delete[] decBuff;
+						decBuff = NULL;
+						return ret;
+					}
+					node=node->getNextSibling();
+				}
+		}
 		return E_UNKNOWN;
 	}
 
@@ -337,7 +341,11 @@ SINT32 CASignature::signXML(DOMNode* node,CACertStore* pIncludeCerts)
 		if(getDOMChildByName(elemRoot,"Signature",tmpSignature,false)==E_SUCCESS)
 			{
 				DOMNode* n=elemRoot->removeChild(tmpSignature);
-				n->release();
+				if (n != NULL)
+				{
+					n->release();
+					n = NULL;
+				}
 			}
 
 		//Calculating the Digest...
@@ -349,6 +357,7 @@ SINT32 CASignature::signXML(DOMNode* node,CACertStore* pIncludeCerts)
 		UINT8 dgst[SHA_DIGEST_LENGTH];
 		SHA1(canonicalBuff,len,dgst);
 		delete[]canonicalBuff;
+		canonicalBuff = NULL;
 
 		UINT8 tmpBuff[1024];
 		len=1024;
@@ -376,6 +385,7 @@ SINT32 CASignature::signXML(DOMNode* node,CACertStore* pIncludeCerts)
 		
 		SINT32 ret=sign(canonicalBuff,len,&pdsaSig);
 		delete[] canonicalBuff;
+		canonicalBuff = NULL;
 
 		if(ret!=E_SUCCESS)
 			{
@@ -774,6 +784,7 @@ SINT32 CASignature::verifyXML(DOMNode* root,CACertStore* trustedCerts)
 			{
 				DSA_SIG_free(dsaSig);
 				delete[] out;
+				out = NULL;
 				return E_UNKNOWN;
 			}
 		DSA_SIG_free(dsaSig);
@@ -784,6 +795,7 @@ SINT32 CASignature::verifyXML(DOMNode* root,CACertStore* trustedCerts)
 		UINT8 dgst1[SHA_DIGEST_LENGTH];
 		SHA1(out,outlen,dgst1);
 		delete[] out;
+		out = NULL;
 		for(int i=0;i<SHA_DIGEST_LENGTH;i++)
 			{
 				if(dgst1[i]!=dgst[i])

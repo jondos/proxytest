@@ -83,6 +83,7 @@ SINT32 CAInfoServiceAware::sendInfoserviceRequest(CASocketAddrINet* a_addr, UINT
 	if(httpClient.getContent(content, &contentLength)!=E_SUCCESS)
 	{
 		delete []content;
+		content = NULL;
 		return E_UNKNOWN;
 	}
 #ifdef DEBUG
@@ -92,10 +93,10 @@ SINT32 CAInfoServiceAware::sendInfoserviceRequest(CASocketAddrINet* a_addr, UINT
 	//Parse XML
 	oInput = new MemBufInputSource( content, contentLength, "tmp" );
 	oParser.parse( *oInput );
-	if( content != NULL )
-		delete[] content;
-	if(oInput != NULL)
-		delete oInput;
+	delete[] content;
+	content = NULL;
+	delete oInput;
+	oInput = NULL;
 	doc = oParser.getDocument();
 	if(doc==NULL)
 		return E_UNKNOWN;

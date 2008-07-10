@@ -133,6 +133,7 @@ SINT32 CASocket::listen(const CASocketAddr& psa)
 						if(ret!=0)
 							CAMsg::printMsg(LOG_ERR,"CASocket::listen() -- could not unlink unix domain socket file name %s -- a call to bind or listen may fail...\n",path);
 						delete[] path;
+						path = NULL;
 					}
 			}
 #endif			
@@ -826,6 +827,7 @@ SINT32 CASocket::getMaxOpenSockets()
 		parSocket[t].close();
 		}
 	delete []parSocket;
+	parSocket = NULL;
 	return maxSocket;
 }
 

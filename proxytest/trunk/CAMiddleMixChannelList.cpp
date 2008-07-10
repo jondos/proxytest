@@ -16,11 +16,15 @@ CAMiddleMixChannelList::~CAMiddleMixChannelList()
 						pTmpEntry=pEntry;
 						pEntry=pEntry->list_HashTableIn.next;
 						delete pTmpEntry->pCipher;
+						pTmpEntry->pCipher = NULL;
 						delete pTmpEntry;
+						pTmpEntry = NULL;
 					}
 			}
 		delete m_pHashTableIn;
+		m_pHashTableIn = NULL;
 		delete m_pHashTableOut;
+		m_pHashTableOut = NULL;
 		m_Mutex.unlock();
 	}
 
@@ -99,6 +103,7 @@ SINT32 CAMiddleMixChannelList::remove(HCHANNEL channelIn)
 				if(pEntry->channelIn==channelIn)
 					{
 						delete pEntry->pCipher;
+						pEntry->pCipher = NULL;
 						if(pEntry->list_HashTableIn.prev==NULL)
 							{
 								if(pEntry->list_HashTableIn.next==NULL)
@@ -148,6 +153,7 @@ SINT32 CAMiddleMixChannelList::remove(HCHANNEL channelIn)
 									}								
 							}
 						delete pEntry;
+						pEntry = NULL;
 						m_Mutex.unlock();
 						return E_SUCCESS;
 					}

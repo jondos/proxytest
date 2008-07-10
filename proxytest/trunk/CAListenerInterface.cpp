@@ -51,7 +51,9 @@ CAListenerInterface::CAListenerInterface(void)
 CAListenerInterface::~CAListenerInterface(void)
 	{
 		delete m_pAddr;
+		m_pAddr = NULL;
 		delete[] m_strHostname;
+		m_strHostname = NULL;
 	}
 
 CAListenerInterface* CAListenerInterface::getInstance(NetworkType type,const UINT8* file)
@@ -247,6 +249,7 @@ CAListenerInterface* CAListenerInterface::getInstance(const DOMNode* elemListene
 		return pListener;
 ERR:
 		delete pListener;
+		pListener = NULL;
 		return NULL;
 }
 #endif //ONLY_LOCAL_PROXY

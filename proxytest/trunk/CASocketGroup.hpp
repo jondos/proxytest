@@ -41,6 +41,7 @@ class CASocketGroup
 				{
 					#ifdef HAVE_POLL
 						delete[] m_pollfd;
+						m_pollfd = NULL;
 					#endif
 				}
 			

@@ -58,6 +58,7 @@ CADatabase::~CADatabase()
 		deleteDB(m_prevDatabase);
 		m_pMutex->unlock();
 		delete m_pMutex;
+		m_pMutex = NULL;
 	}
 
 SINT32 CADatabase::clearDB(t_databaseInfo* pDBInfo)
@@ -69,6 +70,7 @@ SINT32 CADatabase::clearDB(t_databaseInfo* pDBInfo)
 					t_databaseEntry* anker=pDBInfo->m_pHashTable[tmp][tmp2];
 					pDBInfo->m_pHashTable[tmp][tmp2]=anker->next;
 					delete anker;
+					anker = NULL;
 					}
 				}
 			}
@@ -310,12 +312,14 @@ SINT32 CADatabase::measurePerformance(	UINT8* strLogFile,
 						printf("Start delete \n");
 						getcurrentTimeMicros(startTime);
 						delete pDatabase;
+						pDatabase = NULL;
 						getcurrentTimeMicros(endTime);
 						printf("delete takes %u microsecs\n",diff64(endTime,startTime));
 					}
 				aktNrOfEntries+=stepBy;
 			}
 		delete[] key;
+		key = NULL;
 		return E_SUCCESS;
 	}
 

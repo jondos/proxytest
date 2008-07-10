@@ -80,12 +80,14 @@ CAReplayCtrlChannelMsgProc::~CAReplayCtrlChannelMsgProc()
 			{
 				pDispatcher->removeControlChannel(m_pDownstreamReplayControlChannel->getID());
 				delete m_pDownstreamReplayControlChannel;
+				m_pDownstreamReplayControlChannel = NULL;
 			}
 		pDispatcher=m_pMix->getUpstreamControlChannelDispatcher();
 		if(pDispatcher!=NULL)
 			{
 				pDispatcher->removeControlChannel(m_pUpstreamReplayControlChannel->getID());
 				delete m_pUpstreamReplayControlChannel;
+				m_pUpstreamReplayControlChannel = NULL;
 			}
 	}
 
@@ -147,7 +149,11 @@ SINT32 CAReplayCtrlChannelMsgProc::proccessGetTimestamp(const CAReplayControlCha
 				doc->appendChild(elemGet);
 
 				SINT32 return_value=m_pUpstreamReplayControlChannel->sendXMLMessage(doc);
-				doc->release();
+				if (doc != NULL)
+				{
+					doc->release();
+					doc = NULL;
+				}
 
 				return return_value;
 			}
@@ -214,6 +220,7 @@ SINT32 CAReplayCtrlChannelMsgProc::stopTimeStampPorpagation()
 			{
 				m_pThreadTimestampPropagation->join();
 				delete m_pThreadTimestampPropagation;
+				m_pThreadTimestampPropagation = NULL;
 			}
 		m_pThreadTimestampPropagation=NULL;
 		return E_SUCCESS;
@@ -276,7 +283,11 @@ SINT32 CAReplayCtrlChannelMsgProc::proccessGotTimestamp(const CAReplayControlCha
 				doc->appendChild(elemMix);
 
 				SINT32 return_value=m_pDownstreamReplayControlChannel->sendXMLMessage(doc);
-				doc->release();
+				if (doc != NULL)
+				{
+					doc->release();
+					doc = NULL;
+				}
 
 				return return_value;
 			}
@@ -297,6 +308,7 @@ SINT32 CAReplayCtrlChannelMsgProc::proccessGotTimestamp(const CAReplayControlCha
 
 		pMix->m_u64LastTimestampReceived=time(NULL);
 		delete[] params.m_strMixID;
+		params.m_strMixID = NULL;
 		return E_SUCCESS;
 	}
 
@@ -311,7 +323,11 @@ SINT32 CAReplayCtrlChannelMsgProc::sendGetTimestamp(const UINT8* strMixID)
 		doc->appendChild(elemGet);
 
 		SINT32 return_value=m_pUpstreamReplayControlChannel->sendXMLMessage(doc);
-		doc->release();
+		if (doc != NULL)
+		{
+			doc->release();
+			doc = NULL;
+		}
 
 		return return_value;
 	}

@@ -311,9 +311,8 @@ SINT32 CAPerformanceServer::sendDummyData(perfrequest_t* request)
 	}
 		
 	delete[] header;
-	delete[] buff;
-	
 	header = NULL;
+	delete[] buff;
 	buff = NULL;
 	sendbuff = NULL;
 	
@@ -372,6 +371,7 @@ SINT32 CAPerformanceServer::handleRequest(perfrequest_t* request)
 		}
 	} while(strlen(line) > 0);
 	delete[] line;
+	line = NULL;
 	
 	if(len == 0)
 	{

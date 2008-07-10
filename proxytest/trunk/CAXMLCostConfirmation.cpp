@@ -53,7 +53,7 @@ CAXMLCostConfirmation* CAXMLCostConfirmation::getInstance(UINT8 * strXmlData,UIN
 		if(pCC->setValues()!=E_SUCCESS)
 			{
 				delete pCC;
-				return NULL;
+				pCC = NULL;
 			}
 		return pCC;
 	}
@@ -68,7 +68,7 @@ CAXMLCostConfirmation* CAXMLCostConfirmation::getInstance(DOMElement* elemRoot)
 		if(pCC->setValues()!=E_SUCCESS)
 			{
 				delete pCC;
-				return NULL;
+				pCC = NULL;
 			}
 		return pCC;
 	}
@@ -78,10 +78,9 @@ CAXMLCostConfirmation* CAXMLCostConfirmation::getInstance(DOMElement* elemRoot)
 CAXMLCostConfirmation::~CAXMLCostConfirmation()
 	{
 
-		if(m_pStrPIID!=NULL)
-		{
-			delete[] m_pStrPIID;
-		}
+		delete[] m_pStrPIID;
+		m_pStrPIID = NULL;
+		
 		
 		if (m_priceCerts != NULL)
 		{
@@ -89,7 +88,8 @@ CAXMLCostConfirmation::~CAXMLCostConfirmation()
 			{
 				if (m_priceCerts[i])
 				{
-					delete m_priceCerts[i];				
+					delete m_priceCerts[i];	
+					m_priceCerts[i] = NULL;			
 				}
 			}
 			delete[] m_priceCerts;
@@ -98,8 +98,8 @@ CAXMLCostConfirmation::~CAXMLCostConfirmation()
 		if(m_domDocument != NULL)
 		{
 			m_domDocument->release();
-		}
-		m_domDocument=NULL;
+			m_domDocument=NULL;
+		}		
 	}
 
 
@@ -132,8 +132,7 @@ SINT32 CAXMLCostConfirmation::setValues()
 			return E_UNKNOWN;
 
 		// parse PIID
-		if(m_pStrPIID!=NULL)
-			delete[] m_pStrPIID;
+		delete[] m_pStrPIID;
 		m_pStrPIID=NULL;
 		UINT8 strGeneral[256];
 		UINT32 strGeneralLen = 256;
@@ -214,6 +213,7 @@ SINT32 CAXMLCostConfirmation::setValues()
 			if (getDOMElementAttribute(curNode, "id", curId, &len) != E_SUCCESS)
 			{
 				delete[] curId;
+				curId = NULL;
 				return E_UNKNOWN;
 			}
 		
@@ -224,7 +224,9 @@ SINT32 CAXMLCostConfirmation::setValues()
 			if (getDOMElementValue(curNode, curHash, &len) != E_SUCCESS)
 			{
 				delete[] curId;
+				curId = NULL;
 				delete[] curHash;
+				curHash = NULL;
 				return E_UNKNOWN;
 			}
 			

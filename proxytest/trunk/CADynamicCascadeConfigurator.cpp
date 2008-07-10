@@ -69,10 +69,12 @@ CADynamicCascadeConfigurator::~CADynamicCascadeConfigurator()
 			{
 				tmpProposal->proposers = tmpProposer->next;
 				delete tmpProposer->ski;
+				tmpProposer->ski = NULL;
 				delete tmpProposer;
 				tmpProposer = NULL;
 			}
 			delete tmpProposal->proposal;
+			tmpProposal->proposal = NULL;
 // 			delete tmpProposal->elem;
 			m_proposals = tmpProposal->next;
 			delete tmpProposal;
@@ -121,12 +123,14 @@ SINT32 CADynamicCascadeConfigurator::configure()
 		CAMsg::printMsg( LOG_DEBUG, "CADynamicCascadeConfigurator::configure - Query %i WAS NOT SUCCESSFULL!\n", i);
 #endif
 			delete pAddr;
+			pAddr = NULL;
 			continue;
 		}
 #ifdef DEBUG
 		CAMsg::printMsg( LOG_DEBUG, "CADynamicCascadeConfigurator::configure - Query %i successful, adding proposal now...\n", i);
 #endif
 		delete pAddr;
+		pAddr = NULL;
 /*		UINT8* sendBuff=NULL; 
 		UINT32 sendBuffLen = 0;
 		sendBuff=DOM_Output::dumpToMem(elem,&sendBuffLen);
@@ -461,10 +465,10 @@ SINT32 CADynamicCascadeConfigurator::addProposal(DOM_Element a_elem)
 				char *tmp = new char[strlen(tmpProposal)+1];
 				strncpy(tmp, tmpProposal, strlen(tmpProposal)+1);
 				delete tmpProposal;
-				tmpProposal = NULL;
 				tmpProposal = new char[ strlen(mixId) + strlen(tmp) + 1];
 				strncpy(tmpProposal, tmp, strlen(tmp) + 1);
 				delete tmp;
+				tmp = NULL;
 				strcat(tmpProposal, mixId);
 			}
 		}
@@ -476,6 +480,7 @@ SINT32 CADynamicCascadeConfigurator::addProposal(DOM_Element a_elem)
 	memcpy(proposal, tmpProposal, strlen(tmpProposal) + 1);
 	lenProposal = strlen(tmpProposal);
 	delete tmpProposal;
+	tmpProposal = NULL;
 
 #ifdef DEBUG
 // 	CAMsg::printMsg(LOG_DEBUG, "CADynamicCascadeConfigurator::addProposal - next proposal is %s\n", proposal);

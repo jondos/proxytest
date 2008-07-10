@@ -53,9 +53,12 @@ class CAConditionVariable:public CAMutex
 					#ifdef HAVE_PTHREAD_CV
 						pthread_cond_destroy(m_pCondVar);
 						delete m_pCondVar;
+						m_pCondVar = NULL;
 					#else
 						delete m_pMutex;
+						m_pMutex = NULL;
 						delete m_pSemaphore;
+						m_pSemaphore = NULL;
 					#endif
 				}
 			

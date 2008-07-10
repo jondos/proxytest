@@ -263,8 +263,7 @@ class CACmdLnOptions
 			// added by ronin <ronin2@web.de>
 			SINT32 setCascadeName(const UINT8* name)
 			{
-    		if(m_strCascadeName!=NULL)
-					delete[] m_strCascadeName;
+				delete[] m_strCascadeName;
 				m_strCascadeName = new UINT8[strlen((const char*)name)+1];
 				strcpy((char*)m_strCascadeName,(const char*)name);
 				return E_SUCCESS;

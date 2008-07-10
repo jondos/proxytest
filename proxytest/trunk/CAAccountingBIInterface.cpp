@@ -225,10 +225,12 @@ CAXMLErrorMessage * CAAccountingBIInterface::settle(CAXMLCostConfirmation &cc)
 	if(	pStrCC==NULL || m_phttpClient->sendPostRequest((UINT8*)"/settle", pStrCC,contentLen)!= E_SUCCESS)
 	{
 		delete[] pStrCC;
+		pStrCC = NULL;
 		//m_pPiInterfaceMutex->unlock();
 		return NULL;
 	}
 	delete[] pStrCC;
+	pStrCC = NULL;
 	contentLen=0;
 	status=0;
 
@@ -246,6 +248,7 @@ CAXMLErrorMessage * CAAccountingBIInterface::settle(CAXMLCostConfirmation &cc)
 	if(m_pSocket->receiveFully(response, contentLen)!=E_SUCCESS)
 		{
 			delete[] response;
+			response = NULL;
 			//m_pPiInterfaceMutex->unlock();
 			return NULL;
 		}
@@ -255,6 +258,7 @@ CAXMLErrorMessage * CAAccountingBIInterface::settle(CAXMLCostConfirmation &cc)
 	response[contentLen]='\0';
 	pErrMsg = new CAXMLErrorMessage(response);
 	delete[] response;
+	response = NULL;
 	//m_pPiInterfaceMutex->unlock();
 	return pErrMsg;
 }

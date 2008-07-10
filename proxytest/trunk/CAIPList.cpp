@@ -78,13 +78,17 @@ CAIPList::~CAIPList()
 						tmpEntry=entry;
 						entry=entry->next;
 						delete tmpEntry;
+						tmpEntry = NULL;
 					}
 			}
 #ifdef _DEUBG
 		delete[] m_Random;
+		m_Random = NULL;
 #endif
 		delete[] m_HashTable;
+		m_HashTable = NULL;
 		delete m_pMutex;
+		m_pMutex = NULL;
 	}
 
 /** Inserts the IP-Address into the list. 
@@ -224,6 +228,7 @@ SINT32 CAIPList::insertIP(const UINT8 ip[4])
 							else
 								before->next=entry->next;
 							delete entry;
+							entry = NULL;
 							m_pMutex->unlock();
 							return 0;
 						}

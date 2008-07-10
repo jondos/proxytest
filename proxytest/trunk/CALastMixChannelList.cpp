@@ -60,8 +60,11 @@ CALastMixChannelList::~CALastMixChannelList()
 		m_bDelayBucketsLoopRun=false;
 		m_pThreadDelayBucketsLoop->join();
 		delete m_pThreadDelayBucketsLoop;
+		m_pThreadDelayBucketsLoop = NULL;
 		delete m_pMutexDelayChannel;
+		m_pMutexDelayChannel = NULL;
 		delete []m_pDelayBuckets;
+		m_pDelayBuckets = NULL;
 #endif
 		for(UINT32 i=0;i < HASHTABLE_SIZE; i++)
 			{
@@ -72,9 +75,11 @@ CALastMixChannelList::~CALastMixChannelList()
 						tmp=akt;
 						akt=akt->list_Channels.next;
 						delete tmp;
+						tmp = NULL;
 					}
 			}
 		delete[] m_HashTable;
+		m_HashTable = NULL;
 	}
 
 SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue
@@ -186,6 +191,7 @@ SINT32 CALastMixChannelList::removeChannel(HCHANNEL channel)
 							m_pMutexDelayChannel->unlock();
 						#endif
 						delete pEntry;
+						pEntry = NULL;
 						m_nChannels--;					
 						return E_SUCCESS;
 					}

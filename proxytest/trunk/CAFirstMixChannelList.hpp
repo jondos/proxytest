@@ -354,6 +354,7 @@ class CAFirstMixChannelList
 				{
 					m_aktAlloc-=sizeof(fmChannelListEntry);
 					delete entry;
+					entry = NULL;
 				}
 #endif
 	};

@@ -69,11 +69,14 @@ CATempIPBlockList::~CATempIPBlockList()
 						tmpEntry=entry;
 						entry=entry->next;
 						delete tmpEntry;
+						tmpEntry = NULL;
 					}
 			}
 		delete [] m_hashTable;
+		m_hashTable = NULL;
 		m_pMutex->unlock();
 		delete m_pMutex;
+		m_pMutex = NULL;
 	}
 
 
@@ -147,6 +150,7 @@ SINT32 CATempIPBlockList::checkIP(const UINT8 ip[4])
 					previous->next = entry->next;
 				}
 				delete entry;
+				entry = NULL;
 				m_pMutex->unlock();
 				return E_SUCCESS;
 			}
@@ -194,7 +198,7 @@ THREAD_RETURN CATempIPBlockList::cleanupThreadMainLoop(void *param)
 												CAMsg::printMsg(LOG_DEBUG, "CATmpIPBlockList: removing entry...\n");
 												instance->m_hashTable[i] = entry->next;
 												previous=entry->next;
-												delete entry; 
+												delete entry;
 												entry=previous;
 												previous=NULL;
 										}

@@ -58,6 +58,7 @@ SINT32 CAHttpClient::sendGetRequest(const UINT8 * url)
 		// send it
 		SINT32 ret = m_pSocket->sendFully(requestS,len);
 		delete[] requestS;
+		requestS = NULL;
 		if(ret != E_SUCCESS)
 			{ // socket error
 				return E_UNKNOWN;
@@ -98,6 +99,7 @@ SINT32 CAHttpClient::sendPostRequest(const UINT8 * url, const UINT8 * data, cons
 		#endif
 		SINT32 ret=m_pSocket->sendFully(requestS,len);
 		delete[] requestS;
+		requestS = NULL;
 		if(ret!=E_SUCCESS)
 			{
 				return E_UNKNOWN;
@@ -180,6 +182,7 @@ SINT32 CAHttpClient::parseHTTPHeader(UINT32* contentLength, UINT32 * statusCode)
 			} 
 		while(strlen(line) > 0);//Stop reading of response lines, if an empty line was reveived...
 		delete[] line;
+		line = NULL;
 		return ret2;
 	}
 

@@ -52,6 +52,7 @@ CAMutex::~CAMutex()
 	//pthread_mutexattr_destroy(m_pMutexAttributes);					
 	#endif
 	delete m_pMutex;
+	m_pMutex = NULL;
 	
 	#ifdef HAVE_PTHREAD_MUTEXES
 	//delete m_pMutexAttributes;

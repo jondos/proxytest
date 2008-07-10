@@ -94,6 +94,7 @@ SINT32 CAThreadList::remove(const CAThread* const thread)
 					}
 				//dispose the entry			
 				delete iterator;
+				iterator = NULL;
 				m_Size--;
 				break;
 			}

@@ -125,15 +125,18 @@ SINT32 CALocalProxy::init()
 			}
 		CASocketAddrINet* pSocketAddrIn=(CASocketAddrINet*)pListener->getAddr();
 		delete pListener;
+		pListener = NULL;
 		if(pSocketAddrIn->isAnyIP())
 			pSocketAddrIn->setAddr((UINT8*)"127.0.0.1",pSocketAddrIn->getPort());
 		if(m_socketIn.listen(*pSocketAddrIn)!=E_SUCCESS)
 		  {
 				CAMsg::printMsg(LOG_CRIT,"Cannot listen (1)\n");
 				delete pSocketAddrIn;
+				pSocketAddrIn = NULL;
 				return E_UNKNOWN;
 			}
 		delete pSocketAddrIn;
+		pSocketAddrIn = NULL;
 /*		if(pglobalOptions->getSOCKSServerPort()!=(UINT16)-1)
 			{
 				socketAddrIn.setAddr((UINT8*)"127.0.0.1",pglobalOptions->getSOCKSServerPort());
@@ -181,6 +184,7 @@ SINT32 CALocalProxy::init()
 #endif
 						SINT32 ret=processKeyExchange(buff,size);
 						delete[]  buff;
+						buff = NULL;
 						if(ret!=E_SUCCESS)
 							return E_UNKNOWN;
 					}
@@ -271,6 +275,7 @@ SINT32 CALocalProxy::loop()
 									CAMsg::printMsg(LOG_DEBUG,"Accept Error - Connection from Browser!\n");
 								#endif
 								delete newSocket;
+								newSocket = NULL;
 							}
 						else
 							{
@@ -292,6 +297,7 @@ SINT32 CALocalProxy::loop()
 									CAMsg::printMsg(LOG_DEBUG,"Accept Error - Connection from SOCKS!\n");
 								#endif
 								delete newSocket;
+								newSocket = NULL;
 							}
 						else
 							{
@@ -327,7 +333,9 @@ SINT32 CALocalProxy::loop()
 														CAMsg::printMsg(LOG_DEBUG,"closed!\n");
 													#endif
 													delete oConnection.pSocket;
+													oConnection.pSocket = NULL;
 													delete [] oConnection.pCiphers;
+													oConnection.pCiphers = NULL;
 
 													// stop capturing packets when the channel is closed
 													if(pMixPacket->channel == uCapturedChannel)
@@ -374,7 +382,9 @@ SINT32 CALocalProxy::loop()
 														m_muxOut.send(pMixPacket);
 														tmpSocket->close();
 														delete tmpSocket;
+														tmpSocket = NULL;
 														delete [] tmpCon->pCiphers;
+														tmpCon->pCiphers = NULL;
 													}
 											}
 										else 
@@ -480,10 +490,13 @@ MIX_CONNECTION_ERROR:
 		while(tmpCon!=NULL)
 			{
 				delete [] tmpCon->pCiphers;
+				tmpCon->pCiphers = NULL;
 				delete tmpCon->pSocket;
+				tmpCon->pSocket = NULL;
 				tmpCon=tmpCon->next;
 			}
 		delete pMixPacket;
+		pMixPacket = NULL;
 		if(ret==E_SUCCESS)
 			return E_SUCCESS;
 		if(pglobalOptions->getAutoReconnect())
@@ -497,12 +510,13 @@ SINT32 CALocalProxy::clean()
 		m_socketIn.close();
 		m_socketSOCKSIn.close();
 		m_muxOut.close();
-		if(m_arRSA!=NULL)
-			delete[] m_arRSA;
+	
+		delete[] m_arRSA;
 		m_arRSA=NULL;
-		if(m_pSymCipher!=NULL)
-			delete m_pSymCipher;
+		
+		delete m_pSymCipher;
 		m_pSymCipher=NULL;
+		
 		return E_SUCCESS;
 	}
 
@@ -659,18 +673,25 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 				ret=((CASocket*)&m_muxOut)->send((UINT8*)XML_HEADER,XML_HEADER_SIZE);
 				ret=((CASocket*)&m_muxOut)->send(encbuff,encbufflen);
 				delete[] encbuff;
+				encbuff = NULL;
 				delete[] buff;
+				buff = NULL;
 				// Checking Signature send from Mix
 				ret=((CASocket*)&m_muxOut)->receiveFully((UINT8*)&size2,2);
 				size2=ntohs(size2);
 				UINT8* xmlbuff=new UINT8[size2];
 				ret=((CASocket*)&m_muxOut)->receiveFully(xmlbuff,size2);
 				delete[] xmlbuff;
+				xmlbuff = NULL;
 				m_muxOut.setSendKey(linkKeys,32);
 				m_muxOut.setReceiveKey(linkKeys+32,32);
 				m_muxOut.setCrypt(true);
 			}
-		doc->release();
+		if (doc != NULL)
+		{
+			doc->release();
+			doc = NULL;
+		}
 		CAMsg::printMsg(LOG_INFO,"Login process and key exchange finished!\n");		
 		return E_SUCCESS;
 	}

@@ -231,6 +231,7 @@ SINT32 CASymCipher::encrypt1CBCwithPKCS7(const UINT8* in,UINT32 inlen,UINT8* out
 			}
 		AES_cbc_encrypt(tmp,out,inlen+padlen,m_keyAES,m_iv1,AES_ENCRYPT);
 		delete[] tmp;
+		tmp = NULL;
 		*len=inlen+padlen;			
 		return E_SUCCESS;
 	}	

@@ -58,6 +58,7 @@ SINT32 CABase64::decode(const UINT8*in, UINT32 inlen, UINT8*out, UINT32*outlen)
 		memcpy(tmpIn, in, inlen);
 		EVP_DecodeUpdate(&oCTX, out, (int*) outlen, tmpIn, (int)inlen);
 		delete[] tmpIn;
+		tmpIn = NULL;
 	}
 	else
 	{
@@ -103,6 +104,7 @@ SINT32 CABase64::encode(const UINT8*in, UINT32 inlen, UINT8*out, UINT32*outlen)
 		memcpy(tmpIn, in, inlen);
 		EVP_EncodeUpdate(&oCTX, out, (int*) outlen, tmpIn, (int)inlen);
 		delete[] tmpIn;
+		tmpIn = NULL;
 	}
 	else
 	{

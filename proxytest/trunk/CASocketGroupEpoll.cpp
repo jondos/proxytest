@@ -41,7 +41,9 @@ CASocketGroupEpoll::~CASocketGroupEpoll()
 	{
 		close(m_hEPFD);
 		delete[] m_pEvents;
+		m_pEvents = NULL;
 		delete m_pEpollEvent; 
+		m_pEpollEvent = NULL;
 	}
 
 SINT32 CASocketGroupEpoll::setPoolForWrite(bool bWrite)

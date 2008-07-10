@@ -72,6 +72,7 @@ SINT32 CAMix::start()
 			CACertificate* pOwnCert=pglobalOptions->getOwnCertificate();
 			m_pInfoService->setSignature(m_pSignature, pOwnCert, opCerts, opCertLength);
 			delete pOwnCert;
+			pOwnCert = NULL;
 			UINT64 currentMillis;
 			if (getcurrentTimeMillis(currentMillis) != E_SUCCESS)
 			{
@@ -82,8 +83,12 @@ SINT32 CAMix::start()
 			if(opCerts!=NULL)
 				{
 					for(UINT32 i=0;i<opCertLength;i++)
+					{
 						delete opCerts[i];
+						opCerts[i] = NULL;
+					}
 					delete[] opCerts;
+					opCerts = NULL;
 				}
 	
 	        bool allowReconf = pglobalOptions->acceptReconfiguration();
@@ -226,6 +231,7 @@ bool CAMix::needAutoConfig()
                 ret = false;
             }
 						delete oNextMix.addr;
+						oNextMix.addr = NULL;
 				}
 
         if(!pglobalOptions->hasNextMixTestCertificate())
@@ -286,6 +292,7 @@ SINT32 CAMix::initMixCascadeInfo(DOMElement* mixes)
             elemListenerInterfaces->appendChild(elemTmpLI);
         }
         delete pListener;
+        pListener = NULL;
     }	
     
     DOMNode* elemMixesDocCascade=createDOMElement(m_docMixCascadeInfo,"Mixes");
@@ -423,12 +430,17 @@ SINT32 CAMix::signXML(DOMNode* a_element)
 				return E_UNKNOWN;
 			}
     delete ownCert;
-		for(UINT32 i=0;i<opCertsLength;i++)
-			{
-				delete opCert[i];
-			}
-		delete[] opCert;
+    ownCert = NULL;
+    
+	for(UINT32 i=0;i<opCertsLength;i++)
+	{
+		delete opCert[i];
+		opCert[i] = NULL;
+	}
+	delete[] opCert;
+	opCert = NULL;
     delete tmpCertStore;	
+    tmpCertStore = NULL;
     
     return E_SUCCESS;
 }
@@ -478,9 +490,11 @@ SINT32 CAMix::dynaReconfigure(bool a_bChangeMixType)
 	
 	pAddr=pListener->getAddr();
 	delete pListener;
+	pListener = NULL;
 	
 	tmpSock.connect(*pAddr);
 	delete pAddr;
+	pAddr = NULL;
 	tmpSock.close();
 	
 	ret = E_SUCCESS;

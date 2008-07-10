@@ -243,6 +243,7 @@ SINT32 CAAccountingDBInterface::__getCostConfirmation(UINT64 accountNumber, UINT
 		result = monitored_PQexec(m_dbConn, (char *)query);
 		
 		delete[] query;
+		query = NULL;
 		if(PQresultStatus(result)!=PGRES_TUPLES_OK) 
 		{
 			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Could not read XMLCC. Reason: %s\n", 
@@ -381,6 +382,7 @@ SINT32 CAAccountingDBInterface::__storeCostConfirmation( CAXMLCostConfirmation &
 		{
 			CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstanceDBInterface: Could not transform CC to XML string!\n");
 			delete[] pStrCC;
+			pStrCC = NULL;
 			return E_UNKNOWN;
 		}
 		
@@ -399,7 +401,9 @@ SINT32 CAAccountingDBInterface::__storeCostConfirmation( CAXMLCostConfirmation &
 		if (__checkCountAllQuery(query, count) != E_SUCCESS)
 		{
 			delete[] pStrCC;
+			pStrCC = NULL;
 			delete[] query;
+			query = NULL;
 			return E_UNKNOWN;
 		}
 	
@@ -419,6 +423,7 @@ SINT32 CAAccountingDBInterface::__storeCostConfirmation( CAXMLCostConfirmation &
 		pResult = monitored_PQexec(m_dbConn, (char*)query);
 		
 		delete[] pStrCC;
+		pStrCC = NULL;
 		if(PQresultStatus(pResult) != PGRES_COMMAND_OK) // || PQntuples(pResult) != 1)
 		{
 			CAMsg::printMsg(LOG_ERR, "Could not store CC!\n");
@@ -429,11 +434,13 @@ SINT32 CAAccountingDBInterface::__storeCostConfirmation( CAXMLCostConfirmation &
 								PQresultErrorMessage(pResult), query
 								);
 			}
-			delete[] query;	
+			delete[] query;
+			query = NULL;	
 			PQclear(pResult);
 			return E_UNKNOWN;
 		}
-		delete[] query;	
+		delete[] query;
+		query = NULL;	
 		PQclear(pResult);		
 
 		#ifdef DEBUG
@@ -548,6 +555,7 @@ SINT32 CAAccountingDBInterface::__markAsSettled(UINT64 accountNumber, UINT8* cas
 		result = monitored_PQexec(m_dbConn, (char *)query);
 		
 		delete[] query;
+		query = NULL;
 		if(PQresultStatus(result) != PGRES_COMMAND_OK)
 			{
 				PQclear(result);
@@ -594,6 +602,7 @@ SINT32 CAAccountingDBInterface::__deleteCC(UINT64 accountNumber, UINT8* cascadeI
 		
 		//CAMsg::printMsg(LOG_DEBUG, "%s\n",finalQuery);
 		delete[] finalQuery;
+		finalQuery = NULL;
 		if (PQresultStatus(result) != PGRES_COMMAND_OK)
 		{
 			PQclear(result);
@@ -663,6 +672,7 @@ SINT32 CAAccountingDBInterface::__storePrepaidAmount(UINT64 accountNumber, SINT3
 	if (__checkCountAllQuery(finalQuery, count) != E_SUCCESS)
 	{
 		delete[] finalQuery;
+		finalQuery = NULL;
 		/*if(!checkConnectionStatus()) 
 		{
 			MONITORING_FIRE_PAY_EVENT(ev_pay_dbConnectionFailure);
@@ -693,7 +703,8 @@ SINT32 CAAccountingDBInterface::__storePrepaidAmount(UINT64 accountNumber, SINT3
 							PQresultErrorMessage(result), finalQuery
 							);
 		}
-		delete[] finalQuery;		
+		delete[] finalQuery;
+		finalQuery = NULL;		
 		if (result)
 		{
 			PQclear(result);
@@ -701,6 +712,7 @@ SINT32 CAAccountingDBInterface::__storePrepaidAmount(UINT64 accountNumber, SINT3
 		return E_UNKNOWN;	
 	}
 	delete[] finalQuery;
+	finalQuery = NULL;
 	PQclear(result);
 	CAMsg::printMsg(LOG_DEBUG, "CAAccountingDBInterface: Stored %d prepaid bytes for account nr. %s \n",prepaidBytes, tmp); 
 	return E_SUCCESS;
@@ -748,6 +760,7 @@ SINT32 CAAccountingDBInterface::__getPrepaidAmount(UINT64 accountNumber, UINT8* 
 			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Database error while trying to read prepaid bytes, Reason: %s\n", PQresultErrorMessage(result));
 			PQclear(result);
 			delete[] finalQuery;
+			finalQuery = NULL;
 			return E_UNKNOWN;
 		}
 		
@@ -756,6 +769,7 @@ SINT32 CAAccountingDBInterface::__getPrepaidAmount(UINT64 accountNumber, UINT8* 
 			//perfectly normal, the user account simply hasnt been used with this cascade yet
 			PQclear(result);
 			delete[] finalQuery;
+			finalQuery = NULL;
 			return 0;
 		}
 		SINT32 nrOfBytes =  atoi(PQgetvalue(result, 0, 0)); //first row, first column
@@ -779,6 +793,7 @@ SINT32 CAAccountingDBInterface::__getPrepaidAmount(UINT64 accountNumber, UINT8* 
 		}
 		
 		delete[] finalQuery;
+		finalQuery = NULL;
 		
 		return nrOfBytes;
 	}	
@@ -827,6 +842,7 @@ SINT32 CAAccountingDBInterface::__storeAccountStatus(UINT64 accountNumber, UINT3
 	if (__checkCountAllQuery(finalQuery, count) != E_SUCCESS)
 	{
 		delete[] finalQuery;
+		finalQuery = NULL;
 		return E_UNKNOWN;
 	}
 	
@@ -853,6 +869,7 @@ SINT32 CAAccountingDBInterface::__storeAccountStatus(UINT64 accountNumber, UINT3
 							);
 		}
 		delete[] finalQuery;
+		finalQuery = NULL;
 		if (result)
 		{
 			PQclear(result);
@@ -860,6 +877,7 @@ SINT32 CAAccountingDBInterface::__storeAccountStatus(UINT64 accountNumber, UINT3
 		return E_UNKNOWN;	
 	}
 	delete[] finalQuery;
+	finalQuery = NULL;
 	PQclear(result);
 	CAMsg::printMsg(LOG_DEBUG, "Stored status code %u and expire date %s, for account nr. %s \n",statuscode, expires, tmp); 
 	return E_SUCCESS;	 	
@@ -903,6 +921,7 @@ SINT32 CAAccountingDBInterface::__storeAccountStatus(UINT64 accountNumber, UINT3
 		result = monitored_PQexec(m_dbConn, (char *)finalQuery);
 		
 		delete[] finalQuery;
+		finalQuery = NULL;
 		if(PQresultStatus(result)!=PGRES_TUPLES_OK) 
 		{
 			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Database error while trying to read account status, Reason: %s\n", PQresultErrorMessage(result));

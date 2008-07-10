@@ -42,9 +42,11 @@ CACertStore::~CACertStore()
 		while(m_pCertList!=NULL)
 			{
 				delete m_pCertList->pCert;
+				m_pCertList->pCert = NULL;
 				tmp=m_pCertList;
 				m_pCertList=m_pCertList->next;
 				delete tmp;
+				tmp = NULL;
 			}
 	}
 
