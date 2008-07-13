@@ -355,6 +355,7 @@ protected:
 
 private:
 	SINT32 doUserLogin_internal(CAMuxSocket* pNewUSer,UINT8 perrIP[4]);
+	SINT32 isAllowedToPassRestrictions(CASocket* pNewMuxSocket);
 	
 	static const UINT32 MAX_CONCURRENT_NEW_CONNECTIONS;
 

@@ -979,7 +979,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 							ret = E_UNKNOWN;
 						}
 						else if ((pFirstMix->m_newConnections > CAFirstMix::MAX_CONCURRENT_NEW_CONNECTIONS)					
-								&& ((isAllowedToPassRestrictions((CASocket*)pNewMuxSocket) != E_SUCCESS) 
+								&& (isAllowedToPassRestrictions((CASocket*)pNewMuxSocket) != E_SUCCESS) 
 								)
 
 						{
