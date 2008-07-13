@@ -856,6 +856,46 @@ struct T_UserLoginData
 
 typedef struct T_UserLoginData t_UserLoginData;
 
+SINT32 isAllowedToPassRestrictions(CASocket* pNewMuxSocket)
+{
+	SINT32 master = ((CASocket*)pNewMuxSocket)->getPeerIP(peerIP);
+						
+	if(master == E_SUCCESS)
+	{
+		UINT32 size=0;
+		UINT8 remoteIP[4];
+
+		CAListenerInterface** intf = pglobalOptions->getInfoServices(size);
+		
+		master = E_UNKNOWN;
+								
+		for(UINT32 i = 0; i < size; i++)
+		{
+			if(intf[i]->getType() == HTTP_TCP || intf[i]->getType() == RAW_TCP)
+			{
+				CASocketAddrINet* addr = (CASocketAddrINet*) intf[i]->getAddr();
+				if(addr == NULL)
+				{
+					continue;
+				}
+				
+				addr->getIP(remoteIP);
+				delete addr;
+				addr = NULL;
+			
+				if(memcmp(peerIP, remoteIP, 4) == 0)
+				{
+					CAMsg::printMsg(LOG_DEBUG,"FirstMix: You are allowed...\n");
+					master = E_SUCCESS;
+					break;
+				}									
+			}								
+		}
+	}
+	return master;
+}
+
+
 /*How to end this thread
 1. Set m_bRestart in firstMix to true
 2. close all accept sockets
@@ -920,58 +960,22 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 						pNewMuxSocket=new CAMuxSocket;
 						ret=socketsIn[i].accept(*(CASocket*)pNewMuxSocket);
 						pFirstMix->incNewConnections();							 
-#ifdef PERFORMANCE_SERVER
-						SINT32 master = ((CASocket*)pNewMuxSocket)->getPeerIP(peerIP);
-						
-						if(master == E_SUCCESS)
-						{
-							UINT32 size=0;
-							UINT8 remoteIP[4];
-
-							CAListenerInterface** intf = pglobalOptions->getInfoServices(size);
-							
-							master = E_UNKNOWN;
-													
-							for(UINT32 i = 0; i < size; i++)
-							{
-								if(intf[i]->getType() == HTTP_TCP || intf[i]->getType() == RAW_TCP)
-								{
-									CASocketAddrINet* addr = (CASocketAddrINet*) intf[i]->getAddr();
-									if(addr == NULL)
-										continue;
 									
-									addr->getIP(remoteIP);
-									delete addr;
-									addr = NULL;
-								
-									if(memcmp(peerIP, remoteIP, 4) == 0)
-									{
-										CAMsg::printMsg(LOG_ERR,"FirstMix: You are allowed\n");
-										master = E_SUCCESS;
-										break;
-									}									
-								}								
-							}
-						}
-#endif										
 						if(ret!=E_SUCCESS)
 						{
 							// may return E_SOCKETCLOSED or E_SOCKET_LIMIT
 							CAMsg::printMsg(LOG_ERR,"Accept Error %u - direct Connection from Client!\n",GET_NET_ERROR);														
 						}
-						else if( (pglobalOptions->getMaxNrOfUsers() > 0 && pFirstMix->getNrOfUsers() >= pglobalOptions->getMaxNrOfUsers())
-#ifdef PERFORMANCE_SERVER							
-								&& (master != E_SUCCESS) 
-#endif							 
+						else if( (pglobalOptions->getMaxNrOfUsers() > 0 && pFirstMix->getNrOfUsers() >= pglobalOptions->getMaxNrOfUsers())					
+								&& (isAllowedToPassRestrictions((CASocket*)pNewMuxSocket) != E_SUCCESS) 
+						 
 								)
 						{
 							CAMsg::printMsg(LOG_DEBUG,"CAFirstMix User control: Too many users (Maximum:%d)! Rejecting user...\n", pFirstMix->getNrOfUsers(), pglobalOptions->getMaxNrOfUsers());
 							ret = E_UNKNOWN;
 						}
-						else if ((pFirstMix->m_newConnections > CAFirstMix::MAX_CONCURRENT_NEW_CONNECTIONS)
-#ifdef PERFORMANCE_SERVER							
-								&& (master != E_SUCCESS) 
-#endif
+						else if ((pFirstMix->m_newConnections > CAFirstMix::MAX_CONCURRENT_NEW_CONNECTIONS)					
+								&& ((isAllowedToPassRestrictions((CASocket*)pNewMuxSocket) != E_SUCCESS) 
 								)
 
 						{
