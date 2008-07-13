@@ -304,10 +304,23 @@ SINT32 CASocket::connect(const CASocketAddr & psa,UINT32 msTimeOut)
 			
 SINT32 CASocket::close()
 	{
-		m_csClose.lock();
-		int ret=E_SUCCESS;
-		if(!m_bSocketIsClosed)
-			{
+		UINT32 ret;
+		
+		if(m_bSocketIsClosed)
+		{
+			return E_SUCCESS;
+		}
+		
+		ret = m_csClose.lock();
+		if (ret != E_SUCCESS)
+		{
+			CAMsg::printMsg(LOG_CRIT,
+				"Could not get lock for closing socket! Error code: %d\n", ret);
+			return ret;
+		}
+		
+		if (!m_bSocketIsClosed)
+		{
 			ret=::closesocket(m_Socket);
 			if(!m_bIsReservedSocket)
 			{
