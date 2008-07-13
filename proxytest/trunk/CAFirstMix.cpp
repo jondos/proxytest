@@ -858,6 +858,7 @@ typedef struct T_UserLoginData t_UserLoginData;
 
 SINT32 isAllowedToPassRestrictions(CASocket* pNewMuxSocket)
 {
+	UINT8* peerIP=new UINT8[4];
 	SINT32 master = ((CASocket*)pNewMuxSocket)->getPeerIP(peerIP);
 						
 	if(master == E_SUCCESS)
@@ -892,6 +893,9 @@ SINT32 isAllowedToPassRestrictions(CASocket* pNewMuxSocket)
 			}								
 		}
 	}
+	delete[] peerIP;
+	peerIP = NULL;
+	
 	return master;
 }
 
