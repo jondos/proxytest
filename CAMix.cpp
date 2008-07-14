@@ -258,7 +258,15 @@ SINT32 CAMix::initMixCascadeInfo(DOMElement* mixes)
 #ifdef LOG_DIALOG
     setDOMElementAttribute(elemRoot,"study",(UINT8*)"true");
 #endif
-
+    if(pglobalOptions->isFirstMix())
+    {
+    	int maxUsers = pglobalOptions->getMaxNrOfUsers();
+    	if(maxUsers > 0)
+    	{
+    		setDOMElementAttribute(elemRoot,"maxUsers", maxUsers);
+    	}
+    }
+    
     UINT8 id[50];
 		UINT8* cascadeID=NULL;
     pglobalOptions->getMixId(id,50);
