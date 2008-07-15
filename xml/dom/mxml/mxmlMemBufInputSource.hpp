@@ -14,6 +14,7 @@ class  MemBufInputSource : public InputSource
 			~MemBufInputSource()
 				{
 					delete[] m_strXML;
+					m_strXML = NULL;
 				}
 
 		protected:

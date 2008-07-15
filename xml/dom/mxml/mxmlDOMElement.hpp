@@ -70,8 +70,10 @@ class DOMElement:public DOMNode
 					for(UINT32 i=0;i<m_pAttrs->getLength();i++)
 						{
 							delete m_pAttrs->item(i);
+							m_pAttrs->item(i) = NULL;
 						}
 					delete m_pAttrs;
+					m_pAttrs = NULL;
 				}
 			
 			void addElementsByTagName(DOMNodeList* list,const XMLCh* name) const

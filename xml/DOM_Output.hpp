@@ -43,7 +43,9 @@ class MemFormatTarget: public XMLFormatTarget
 			~MemFormatTarget()
 				{
 					delete m_pQueue;
+					m_pQueue = NULL;
 					delete[] m_Buff;
+					m_Buff = NULL;
 				}
 
 			virtual void writeChars(const XMLByte* const toWrite, const unsigned int count,
@@ -109,7 +111,7 @@ class MemFormatTarget: public XMLFormatTarget
 					if(m_pQueue->peek(tmp,size)!=E_SUCCESS)
 						{
 							delete[] tmp;
-							return NULL;
+							tmp = NULL;
 						}
 					return tmp;
 				}
@@ -203,7 +205,9 @@ class DOM_Output
 			~DOM_Output()
 				{
 					delete m_pFormatTarget;
+					m_pFormatTarget = NULL;
 					delete m_pFormatter;
+					m_pFormatter = NULL;
 				}
 
 			SINT32 dumpNode(const DOMNode* toWrite,bool bCanonical);

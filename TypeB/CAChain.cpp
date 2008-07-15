@@ -70,9 +70,11 @@ CAChain::~CAChain(void) {
     removeFromAllSocketGroupsInternal();
     m_socket->close();
     delete m_socket;
+    m_socket = NULL;
   }
   m_upstreamSendQueue->clean();
   delete m_upstreamSendQueue;
+  m_upstreamSendQueue = NULL;
   /* remove all associated channels (normally there shouldn't be any, but in
    * case of a shutdown, some channels may be still open)
    */
@@ -85,11 +87,14 @@ CAChain::~CAChain(void) {
       t_deadlineEntry* currentDeadline = channelEntry->channel->firstResponseDeadline;
       channelEntry->channel->firstResponseDeadline = currentDeadline->nextDeadline;
       delete currentDeadline;
+      currentDeadline = NULL;
     }
     /* remove the channel-cipher */
     delete channelEntry->channel->channelCipher;
+    channelEntry->channel->channelCipher = NULL;
     m_firstChannel = channelEntry->nextChannel;
     delete channelEntry;
+    channelEntry = NULL;
   }
   #ifdef LOG_CHAIN_STATISTICS
     /* log chain-statistics with format:
@@ -101,8 +106,10 @@ CAChain::~CAChain(void) {
      UINT8* chainId = getPrintableChainId();
      CAMsg::printMsg(LOG_DEBUG, "%s,%u,%u,%u,%u,%u\n", chainId, duration, m_bytesFromUser, m_bytesToUser, m_packetsFromUser, m_packetsToUser);
      delete []chainId;
+     chainId = NULL;
   #endif
   delete []m_chainId;
+  m_chainId = NULL;
   #ifdef DELAY_CHANNELS
     /* free the delay-bucket (set it to -1), don't delete the mutex because it
      * is used for all delay-buckets
@@ -173,6 +180,7 @@ SINT32 CAChain::processDownstream(CASocketGroup* a_signalingGroup, MIXPACKET* a_
       UINT8* chainId = getPrintableChainId();
       CAMsg::printMsg(LOG_INFO, "Dropped downstream-packets from chain '%s'!\n", chainId);
       delete []chainId;
+      chainId = NULL;
       while (m_firstChannel->channel->remainingDownstreamPackets > 1) {
         m_firstChannel->channel->remainingDownstreamPackets--;
         m_firstChannel->channel->firstResponseDeadline = testedDeadlineEntry->nextDeadline;
@@ -234,6 +242,7 @@ SINT32 CAChain::processDownstream(CASocketGroup* a_signalingGroup, MIXPACKET* a_
               t_deadlineEntry* currentDeadline = m_firstChannel->channel->firstResponseDeadline;
               m_firstChannel->channel->firstResponseDeadline = currentDeadline->nextDeadline;
               delete currentDeadline;
+              currentDeadline = NULL;
               *a_processedBytes = (UINT32)bytesReceived;
               #ifdef LOG_CHAIN_STATISTICS
                 m_packetsToUser++;
@@ -260,12 +269,16 @@ SINT32 CAChain::processDownstream(CASocketGroup* a_signalingGroup, MIXPACKET* a_
     t_lastMixBChannelListEntry* currentChannel = m_firstChannel->channel;
     currentChannel->associatedChannelList->removeFromTable(currentChannel);
     delete currentChannel->firstResponseDeadline;
+    currentChannel->firstResponseDeadline = NULL;
     delete currentChannel->channelCipher;
+    currentChannel->channelCipher = NULL;
     delete currentChannel;
+    currentChannel = NULL;
     t_channelEntry* currentChannelEntry = m_firstChannel;
     /* change to the next channel */
     m_firstChannel = m_firstChannel->nextChannel;
     delete currentChannelEntry;
+    currentChannelEntry = NULL;
     #ifdef LOG_CHAIN_STATISTICS
       /* a packet (CHANNEL_CLOSE) without payload is sent */
       m_packetsToUser++;
@@ -328,6 +341,7 @@ SINT32 CAChain::processDownstream(CASocketGroup* a_signalingGroup, MIXPACKET* a_
     t_deadlineEntry* currentDeadline = m_firstChannel->channel->firstResponseDeadline;
     m_firstChannel->channel->firstResponseDeadline = currentDeadline->nextDeadline;
     delete currentDeadline;
+    currentDeadline = NULL;
     #ifdef LOG_CHAIN_STATISTICS
       /* a packet without payload is sent */
       m_packetsToUser++;

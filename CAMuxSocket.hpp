@@ -112,20 +112,22 @@ class CAMuxSocket
 				}
 
 			SINT32 setReceiveKey(UINT8* key,UINT32 keyLen)
+			{
+				if(keyLen==16)
 				{
-					if(keyLen==16)
-						{
-							m_oCipherIn.setKey(key);
-						}
-					else if(keyLen==32)
-						{
-							m_oCipherIn.setKey(key);
-							m_oCipherIn.setIVs(key+16);
-						}
-					else
-						return E_UNKNOWN;
-					return E_SUCCESS;
+					m_oCipherIn.setKey(key);
 				}
+				else if(keyLen==32)
+				{
+					m_oCipherIn.setKey(key);
+					m_oCipherIn.setIVs(key+16);
+				}
+				else
+				{
+					return E_UNKNOWN;
+				}
+				return E_SUCCESS;
+			}
 
 		private:
 				CASocket		m_Socket;
