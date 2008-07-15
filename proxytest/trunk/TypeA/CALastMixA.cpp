@@ -165,6 +165,7 @@ SINT32 CALastMixA::loop()
 																CAMsg::printMsg(LOG_DEBUG,"Cannot connect to Squid!\n");
 															#endif
 															delete tmpSocket;
+															tmpSocket = NULL;
                               /* send a close packet signaling the connect error */
                               getRandom(pMixPacket->payload.data, PAYLOAD_SIZE);
                               pMixPacket->payload.type = CONNECTION_ERROR_FLAG;
@@ -177,6 +178,7 @@ SINT32 CALastMixA::loop()
 															m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));			
 															m_logDownloadedPackets++;	
 															delete newCipher;
+															newCipher = NULL;
 													}
 												else
 														{ //connection to proxy successful
@@ -210,6 +212,7 @@ SINT32 CALastMixA::loop()
 																	#endif
 																	tmpSocket->close();
 																	delete tmpSocket;
+																	tmpSocket = NULL;
                                   /* send a close packet signaling the connect error */
                                   getRandom(pMixPacket->payload.data, PAYLOAD_SIZE);
                                   pMixPacket->payload.type = 0;
@@ -222,6 +225,7 @@ SINT32 CALastMixA::loop()
 															    m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));			
 															    m_logDownloadedPackets++;	
 																	delete newCipher;
+																	newCipher = NULL;
  																}
 															else
 																{
@@ -263,8 +267,11 @@ SINT32 CALastMixA::loop()
 												psocketgroupCacheWrite->remove(*(pChannelListEntry->pSocket));
 												pChannelListEntry->pSocket->close();
 												delete pChannelListEntry->pSocket;
+												pChannelListEntry->pSocket = NULL;
 												delete pChannelListEntry->pCipher;
-												delete pChannelListEntry->pQueueSend;										
+												pChannelListEntry->pCipher = NULL;
+												delete pChannelListEntry->pQueueSend;	
+												pChannelListEntry->pQueueSend = NULL;									
 												#if defined (LOG_PACKET_TIMES) ||defined (LOG_CHANNEL)
 													getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
 												#endif
@@ -329,9 +336,12 @@ SINT32 CALastMixA::loop()
 														psocketgroupCacheWrite->remove(*(pChannelListEntry->pSocket));
 														pChannelListEntry->pSocket->close();
 														delete pChannelListEntry->pSocket;
-                            delete pChannelListEntry->pCipher;
-                            /* now send channel-close */
+														pChannelListEntry->pSocket = NULL;
+                            							delete pChannelListEntry->pCipher;
+                            							pChannelListEntry->pCipher = NULL;
+                            							/* now send channel-close */
 														delete pChannelListEntry->pQueueSend;
+														pChannelListEntry->pQueueSend = NULL;
 														#ifdef LOG_CHANNEL
 															pChannelListEntry->packetsDataOutToUser++;
 															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
@@ -401,9 +411,12 @@ SINT32 CALastMixA::loop()
 														psocketgroupCacheWrite->remove(*(pChannelListEntry->pSocket));
 														pChannelListEntry->pSocket->close();
 														delete pChannelListEntry->pSocket;
-                            delete pChannelListEntry->pCipher;
-                            /* now send channel-close */
+														pChannelListEntry->pSocket = NULL;
+							                            delete pChannelListEntry->pCipher;
+							                            pChannelListEntry->pCipher = NULL;
+							                            /* now send channel-close */
 														delete pChannelListEntry->pQueueSend;
+														pChannelListEntry->pQueueSend = NULL;
 														pMixPacket->flags=CHANNEL_CLOSE;
 														getRandom(pMixPacket->data,DATA_SIZE);
 														pMixPacket->channel=pChannelListEntry->channelIn;
@@ -489,9 +502,12 @@ SINT32 CALastMixA::loop()
 														psocketgroupCacheWrite->remove(*(pChannelListEntry->pSocket));
 														pChannelListEntry->pSocket->close();
 														delete pChannelListEntry->pSocket;
+														pChannelListEntry->pSocket = NULL;
                             /* send channel-close */
 														delete pChannelListEntry->pCipher;
+														pChannelListEntry->pCipher = NULL;
 														delete pChannelListEntry->pQueueSend;
+														pChannelListEntry->pQueueSend = NULL;
 														pMixPacket->flags=CHANNEL_CLOSE;
 														pMixPacket->channel=pChannelListEntry->channelIn;
 														getRandom(pMixPacket->data,DATA_SIZE);
@@ -573,11 +589,16 @@ SINT32 CALastMixA::loop()
 		//clean();
 
 		delete []tmpBuff;
+		tmpBuff = NULL;
 		delete pQueueEntry;
+		pQueueEntry = NULL;
 		pLogThread->join();
 		delete pLogThread;
+		pLogThread = NULL;
 		delete psocketgroupCacheWrite;
+		psocketgroupCacheWrite = NULL;
 		delete psocketgroupCacheRead;
+		psocketgroupCacheRead = NULL;
 #endif //! NEW_MIX_TYPE
 		return E_UNKNOWN;
 	}

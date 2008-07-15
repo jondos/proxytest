@@ -145,12 +145,22 @@ public:
 #endif
 				}
 
-    	virtual ~CAFirstMix()
+    	/*virtual ~CAFirstMix()
 			{
 				delete m_pmutexNewConnections;				
 				m_pmutexNewConnections = NULL;
-			}
-
+			}*/
+    	virtual ~CAFirstMix()
+		{
+			clean();
+			delete m_pmutexUser;
+			m_pmutexUser = NULL;
+			delete m_pmutexMixedPackets;
+			m_pmutexMixedPackets = NULL;
+			delete m_pmutexLoginThreads;
+			m_pmutexLoginThreads = NULL;
+		}
+    
 		tMixType getType() const
 			{
 				return CAMix::FIRST_MIX;
@@ -165,6 +175,7 @@ protected:
 			virtual SINT32 loop()=0;
 			bool isShuttingDown();
 			SINT32 init();
+			SINT32 clean();
 			SINT32 initOnce();
 #ifdef DYNAMIC_MIX
 			void stopCascade()

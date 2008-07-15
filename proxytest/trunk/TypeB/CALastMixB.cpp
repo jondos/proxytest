@@ -184,6 +184,7 @@ SINT32 CALastMixB::loop() {
                */
               CAMsg::printMsg(LOG_INFO, "Unable to create more than %u chains - dropped new chain.\n", MAX_POLLFD);
               delete channelCipher;
+              channelCipher = NULL;
               /* currently we have to send at least a CHANNEL-CLOSE -> reuse
                * our buffers for the response
                */
@@ -349,6 +350,7 @@ SINT32 CALastMixB::loop() {
                  */
                 CAMsg::printMsg(LOG_INFO, "Unable to create more than %u chains - cannot send 'unknown chain' response.\n", MAX_POLLFD);
                 delete channelCipher;
+                channelCipher = NULL;
                 /* currently we have to send at least a CHANNEL-CLOSE -> reuse
                  * our buffers for the response
                  */
@@ -478,12 +480,18 @@ SINT32 CALastMixB::loop() {
   #endif
   /* delete the tables (will also remove all entries) */
   delete m_pChainTable;
+  m_pChainTable = NULL;
   delete m_pChannelTable;
+  m_pChannelTable = NULL;
   delete currentQueueEntry;
+  currentQueueEntry = NULL;
   pLogThread->join();
   delete pLogThread;
+  pLogThread = NULL;
   delete psocketgroupCacheWrite;
+  psocketgroupCacheWrite = NULL;
   delete psocketgroupCacheRead;
+  psocketgroupCacheRead = NULL;
 #endif //NEW_MIX_TYPE
   return E_UNKNOWN;
 }

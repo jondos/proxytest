@@ -1684,6 +1684,178 @@ END_THREAD:
 	}
 */
 
+SINT32 CAFirstMix::clean()
+	{
+		//#ifdef _DEBUG
+			CAMsg::printMsg(LOG_DEBUG,"CAFirstMix::clean() start\n");
+		//#endif
+		m_bRunLog=false;
+		m_bRestart=true;
+		if(m_pMuxOut!=NULL)
+			{
+				m_pMuxOut->close();
+			}
+		if(m_arrSocketsIn!=NULL)
+			{
+				for(UINT32 i=0;i<m_nSocketsIn;i++)
+					m_arrSocketsIn[i].close();
+			}
+		//writing some bytes to the queue...
+		if(m_pQueueSendToMix!=NULL)
+			{
+				UINT8 b[sizeof(tQueueEntry)+1];
+				m_pQueueSendToMix->add(b,sizeof(tQueueEntry)+1);
+			}
+
+		if(m_pthreadAcceptUsers!=NULL)
+				{
+					CAMsg::printMsg(LOG_CRIT,"Wait for LoopAcceptUsers!\n");
+					m_pthreadAcceptUsers->join();
+					delete m_pthreadAcceptUsers;
+				}
+		m_pthreadAcceptUsers=NULL;
+		if(m_pthreadsLogin!=NULL)
+			delete m_pthreadsLogin;
+		m_pthreadsLogin=NULL;
+    //     if(m_pInfoService!=NULL)
+    //     {
+    //         CAMsg::printMsg(LOG_CRIT,"Stopping InfoService....\n");
+    //         CAMsg::printMsg	(LOG_CRIT,"Memory usage before: %u\n",getMemoryUsage());
+    //         m_pInfoService->stop();
+    //         CAMsg::printMsg	(LOG_CRIT,"Memory usage after: %u\n",getMemoryUsage());
+    //         CAMsg::printMsg(LOG_CRIT,"Stopped InfoService!\n");
+    //         delete m_pInfoService;
+    //     }
+    //     m_pInfoService=NULL;
+
+	if(m_pthreadSendToMix!=NULL)
+		{
+			CAMsg::printMsg(LOG_CRIT,"Wait for LoopSendToMix!\n");
+			m_pthreadSendToMix->join();
+			delete m_pthreadSendToMix;
+		}
+	m_pthreadSendToMix=NULL;
+	if(m_pthreadReadFromMix!=NULL)
+		{
+			CAMsg::printMsg(LOG_CRIT,"Wait for LoopReadFromMix!\n");
+			m_pthreadReadFromMix->join();
+			delete m_pthreadReadFromMix;
+		}
+	m_pthreadReadFromMix=NULL;
+
+
+#ifdef LOG_PACKET_TIMES
+		if(m_pLogPacketStats!=NULL)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Wait for LoopLogPacketStats to terminate!\n");
+				m_pLogPacketStats->stop();
+				delete m_pLogPacketStats;
+			}
+		m_pLogPacketStats=NULL;
+#endif
+		if(m_arrSocketsIn!=NULL)
+			delete[] m_arrSocketsIn;
+		m_arrSocketsIn=NULL;
+#ifdef REPLAY_DETECTION
+		if(m_pReplayMsgProc!=NULL)
+			{
+				delete m_pReplayMsgProc;
+			}
+		m_pReplayMsgProc=NULL;
+#endif
+
+		if(m_pMuxOutControlChannelDispatcher!=NULL)
+		{
+			delete m_pMuxOutControlChannelDispatcher;
+		}
+		m_pMuxOutControlChannelDispatcher=NULL;
+
+		if(m_pMuxOut!=NULL)
+			{
+				m_pMuxOut->close();
+				delete m_pMuxOut;
+			}
+		m_pMuxOut=NULL;
+#ifdef COUNTRY_STATS
+		deleteCountryStats();
+#endif		
+		if(m_pIPList!=NULL)
+			delete m_pIPList;
+		m_pIPList=NULL;
+		if(m_pQueueSendToMix!=NULL)
+			delete m_pQueueSendToMix;
+		m_pQueueSendToMix=NULL;
+		if(m_pQueueReadFromMix!=NULL)
+			delete m_pQueueReadFromMix;
+		m_pQueueReadFromMix=NULL;
+
+		if(m_pChannelList!=NULL)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Before deleting CAFirstMixChannelList()!\n");
+				CAMsg::printMsg	(LOG_CRIT,"Memory usage before: %u\n",getMemoryUsage());	
+				fmHashTableEntry* pHashEntry=m_pChannelList->getFirst();
+				while(pHashEntry!=NULL)
+					{
+						CAMuxSocket * pMuxSocket=pHashEntry->pMuxSocket;
+						delete pHashEntry->pQueueSend;
+						pHashEntry->pQueueSend = NULL;
+						delete pHashEntry->pSymCipher;
+						pHashEntry->pSymCipher = NULL;
+
+						fmChannelListEntry* pEntry=m_pChannelList->getFirstChannelForSocket(pHashEntry->pMuxSocket);
+						while(pEntry!=NULL)
+							{
+								delete pEntry->pCipher;
+								pEntry->pCipher = NULL;
+								pEntry=m_pChannelList->getNextChannel(pEntry);
+							}
+						m_pChannelList->remove(pHashEntry->pMuxSocket);
+						pMuxSocket->close();
+						delete pMuxSocket;
+						pMuxSocket = NULL;
+						pHashEntry=m_pChannelList->getNext();
+					}
+			}
+
+		if(m_pChannelList!=NULL)
+			delete m_pChannelList;
+		m_pChannelList=NULL;
+		CAMsg::printMsg	(LOG_CRIT,"Memory usage after: %u\n",getMemoryUsage());	
+#ifdef PAYMENT
+	CAAccountingInstance::clean();
+	CAAccountingDBInterface::cleanup();
+#endif
+		if(m_psocketgroupUsersRead!=NULL)
+			delete m_psocketgroupUsersRead;
+		m_psocketgroupUsersRead=NULL;
+		if(m_psocketgroupUsersWrite!=NULL)
+			delete m_psocketgroupUsersWrite;
+		m_psocketgroupUsersWrite=NULL;
+		if(m_pRSA!=NULL)
+			delete m_pRSA;
+		m_pRSA=NULL;
+		if(m_xmlKeyInfoBuff!=NULL)
+			delete[] m_xmlKeyInfoBuff;
+		m_xmlKeyInfoBuff=NULL;
+		m_docMixCascadeInfo=NULL;
+		if(m_arMixParameters!=NULL)
+		{
+			for(UINT32 i=0;i<m_u32MixCount-1;i++)
+				{
+					delete[] m_arMixParameters[i].m_strMixID;
+				}
+			delete[] m_arMixParameters;
+		}
+		m_arMixParameters=NULL;
+		m_u32MixCount=0;
+		m_nMixedPackets=0; //reset to zero after each restart (at the moment neccessary for infoservice)
+		m_nUser=0;
+		//#ifdef _DEBUG
+			CAMsg::printMsg(LOG_DEBUG,"CAFirstMix::clean() finished\n");
+		//#endif
+		return E_SUCCESS;
+	}
+
 #ifdef DELAY_USERS
 SINT32 CAFirstMix::reconfigure()
 	{

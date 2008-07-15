@@ -24,13 +24,13 @@ class XMLString
 			static void release  ( XMLCh **  buf)
 				{
 					delete[] *buf;
-					buf=NULL;
+					*buf = NULL;
 				}
 
 			static void release  ( char **  buf)
 				{
 					delete[] *buf;
-					buf=NULL;
+					*buf = NULL;
 				}
 
 			static bool equals ( const XMLCh *const   str1, const XMLCh *const   str2)

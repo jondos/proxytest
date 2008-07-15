@@ -77,11 +77,16 @@ CAChainTable::~CAChainTable(void) {
     /* wait for the delay-buckets-refill loop */
     m_pDelayBucketsLoop->join();
     delete m_pDelayBucketsLoop;
+    m_pDelayBucketsLoop = NULL;
     delete m_pDelayBucketMutex;
+    m_pDelayBucketMutex = NULL;
     delete []m_pDelayBuckets;
+    m_pDelayBuckets = NULL;
   #endif
   delete m_pMutex;
+  m_pMutex = NULL;
   delete []m_pChainTable;
+  m_pChainTable = NULL;
 }
 
 CAChain* CAChainTable::getEntry(UINT8* a_chainId) {
@@ -179,6 +184,7 @@ CAChain* CAChainTable::createEntry() {
     if (getRandom(chainId, CHAIN_ID_LENGTH) != E_SUCCESS) {
       m_pMutex->unlock();
       delete []chainId;
+      chainId = NULL;
       return NULL;
     }
   }
@@ -205,7 +211,9 @@ CAChain* CAChainTable::createEntry() {
        */
       m_pDelayBucketMutex->unlock();
       delete newEntry;
+      newEntry = NULL;
       delete []chainId;
+      chainId = NULL;
       m_pMutex->unlock();
       return NULL;
     }
@@ -279,8 +287,10 @@ void CAChainTable::removeEntryInternal(t_chaintableEntry* a_entry) {
   }
   /* delete the chain */
   delete a_entry->chain;
+  a_entry->chain = NULL;
   /* delete the table-entry */
   delete a_entry;
+  a_entry = NULL;
   m_chaintableSize--;
 }
 

@@ -201,7 +201,9 @@ SINT32 DOM_Output::dumpNode(const DOMNode* toWrite,bool bCanonical)
             *m_pFormatter << XMLFormatter::NoEscapes << chCloseAngle;
 
 						delete[] attr_names;
+						attr_names = NULL;
 						delete[] sort_indices;
+						sort_indices = NULL;
 
             //
             //  Test for the presence of children, which includes both

@@ -135,7 +135,9 @@ SINT32 CAFirstMixB::loop()
                         m_psocketgroupUsersWrite->remove(*(CASocket*)pMuxSocket);
                         ASSERT(pHashEntry->pQueueSend!=NULL,"Send queue is NULL");
                         delete pHashEntry->pQueueSend;
+                        pHashEntry->pQueueSend = NULL;
                         delete pHashEntry->pSymCipher;
+                        pHashEntry->pSymCipher = NULL;
                         #ifdef COUNTRY_STATS
                           decUsers(pHashEntry);
                         #else
@@ -147,6 +149,7 @@ SINT32 CAFirstMixB::loop()
                          */
                         m_pChannelList->removeClientPart(pMuxSocket);
                         delete pMuxSocket;
+                        pMuxSocket = NULL;
                       }
                     else if(ret==MIXPACKET_SIZE)                       // we've read enough data for a whole mix packet. nice!
                       {
@@ -197,15 +200,19 @@ SINT32 CAFirstMixB::loop()
                                 #endif
                                 m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));
                                 delete pEntry->pCipher;
+                                pEntry->pCipher = NULL;
                                 pEntry=m_pChannelList->getNextChannel(pEntry);
                               }
                             m_pIPList->removeIP(pHashEntry->peerIP);
                             m_psocketgroupUsersRead->remove(*(CASocket*)pMuxSocket);
                             m_psocketgroupUsersWrite->remove(*(CASocket*)pMuxSocket);
                             delete pHashEntry->pQueueSend;
+                            pHashEntry->pQueueSend = NULL;
                             delete pHashEntry->pSymCipher;
+                            pHashEntry->pSymCipher = NULL;
                             m_pChannelList->remove(pMuxSocket);
                             delete pMuxSocket;
+                            pMuxSocket = NULL;
                             decUsers();
                             goto NEXT_USER;
                           }
@@ -260,6 +267,7 @@ SINT32 CAFirstMixB::loop()
                                 if(m_pChannelList->addChannel(pMuxSocket,pMixPacket->channel,pCipher,&pMixPacket->channel)!=E_SUCCESS)
                                   { //todo move up ?
                                     delete pCipher;
+                                    pCipher = NULL;
                                   }
                                 else
                                   {
@@ -345,6 +353,7 @@ NEXT_USER:
                         m_psocketgroupUsersWrite->add(*pEntry->pHead->pMuxSocket); 
                       #endif                    
                       delete pEntry->pCipher;
+                      pEntry->pCipher = NULL;
                       m_pChannelList->removeChannel(pEntry->pHead->pMuxSocket,pEntry->channelIn);
                     }
                     else {
@@ -356,6 +365,7 @@ NEXT_USER:
                         getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
                       #endif
                       delete pEntry->pCipher;
+                      pEntry->pCipher = NULL;
                       m_pChannelList->removeVacantOutChannel(pEntry);
                       pEntry = NULL;
                     }
@@ -561,18 +571,22 @@ NEXT_USER_WRITING:
       {
         CAMuxSocket * pMuxSocket=pHashEntry->pMuxSocket;
         delete pHashEntry->pQueueSend;
-        delete pHashEntry->pSymCipher; 
+        pHashEntry->pQueueSend = NULL;
+        delete pHashEntry->pSymCipher;
+        pHashEntry->pSymCipher = NULL; 
 
         fmChannelListEntry* pEntry=m_pChannelList->getFirstChannelForSocket(pHashEntry->pMuxSocket);
         while(pEntry!=NULL)
           {
             delete pEntry->pCipher;
+            pEntry->pCipher = NULL;
   
             pEntry=m_pChannelList->getNextChannel(pEntry);
           }
         m_pChannelList->remove(pHashEntry->pMuxSocket);
         pMuxSocket->close();
         delete pMuxSocket;
+        pMuxSocket = NULL;
         pHashEntry=m_pChannelList->getNext();
       }
     /* clean all vacant out-channels (the connection from the client was
@@ -581,7 +595,9 @@ NEXT_USER_WRITING:
     m_pChannelList->cleanVacantOutChannels();
     CAMsg::printMsg  (LOG_CRIT,"Memory usage after: %u\n",getMemoryUsage());  
     delete pQueueEntry;
+    pQueueEntry = NULL;
     delete []tmpBuff;
+    tmpBuff = NULL;
     CAMsg::printMsg(LOG_CRIT,"Main Loop exited!!\n");
 #endif // NEW_MIX_TYPE
     return E_UNKNOWN;

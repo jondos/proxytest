@@ -44,7 +44,9 @@ CALastMixBChannelList::CALastMixBChannelList() {
 
 CALastMixBChannelList::~CALastMixBChannelList() {
   delete m_pMutex;
+  m_pMutex = NULL;
   delete []m_pChannelTable;
+  m_pChannelTable = NULL;
 }
 
 t_lastMixBChannelListEntry* CALastMixBChannelList::add(HCHANNEL a_channelId, CASymCipher* a_channelCipher, CAChain* a_associatedChain) {
