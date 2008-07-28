@@ -82,8 +82,8 @@ am_libproxytest_a_OBJECTS = CAAbstractControlChannel.$(OBJEXT) \
 	CAMiddleMix.$(OBJEXT) CAMiddleMixChannelList.$(OBJEXT) \
 	CAMix.$(OBJEXT) CAMixWithReplayDB.$(OBJEXT) CAMsg.$(OBJEXT) \
 	CAMutex.$(OBJEXT) CAMuxSocket.$(OBJEXT) CAPriceInfo.$(OBJEXT) \
-	CAPerformanceServer.$(OBJEXT) CAPool.$(OBJEXT) \
-	CAQueue.$(OBJEXT) CAReplayControlChannel.$(OBJEXT) \
+	CAPool.$(OBJEXT) CAQueue.$(OBJEXT) \
+	CAReplayControlChannel.$(OBJEXT) \
 	CAReplayCtrlChannelMsgProc.$(OBJEXT) CASemaphore.$(OBJEXT) \
 	CASignature.$(OBJEXT) CASingleSocketGroup.$(OBJEXT) \
 	CASocket.$(OBJEXT) CASocketAddrINet.$(OBJEXT) \
@@ -283,7 +283,6 @@ libproxytest_a_SOURCES = CAAbstractControlChannel.cpp\
 		    CAMutex.cpp\
 		    CAMuxSocket.cpp \
 		    CAPriceInfo.cpp \
-		    CAPerformanceServer.cpp \
 		    CAPool.cpp\
 		    CAQueue.cpp \
 		    CAReplayControlChannel.cpp\
@@ -459,7 +458,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMsg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMutex.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMuxSocket.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAPerformanceServer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAPool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAPriceInfo.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAQueue.Po@am__quote@
@@ -937,7 +935,6 @@ uninstall-am: uninstall-sbinPROGRAMS
 		    CAMsg.hpp \
 		    CAMutex.hpp\
 		    CAMuxSocket.hpp \
-		    CAPerformanceServer.hpp \
 		    CAPriceInfo.hpp \
 		    CAPool.hpp\
 		    CAQueue.hpp \

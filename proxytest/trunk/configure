@@ -1331,9 +1331,6 @@ Optional Features:
   --enable-server_monitoring
                           Specify if to build with state tracking for server
                           monitoring
-  --enable-performance-server
-                          Specify if to build with the server-side of the
-                          perfomance manager
   --enable-replay_detection
                           Specify if to build with replay detection support
   --enable-new_mix_type   Specify if to build with type B mixes
@@ -4581,19 +4578,6 @@ if test "${enable_server_monitoring+set}" = set; then
   enableval=$enable_server_monitoring;
 		if test "x$enableval" != "xno" ; then
 		    SERVER_MONITORING="-DSERVER_MONITORING"
-		fi
-
-
-fi
-
-
-
-PERFORMANCE_SERVER=""
-# Check whether --enable-performance_server was given.
-if test "${enable_performance_server+set}" = set; then
-  enableval=$enable_performance_server;
-		if test "x$enableval" != "xno" ; then
-		    PERFORMANCE_SERVER="-DPERFORMANCE_SERVER"
 		fi
 
 
@@ -13557,8 +13541,8 @@ if test "x$DOTHETEST" != "xyes" ; then
 
 fi
 
-CFLAGS="$CFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $SERVER_MONITORING $PERFORMANCE_SERVER $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS"
-CXXFLAGS="$CXXFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $SERVER_MONITORING $PERFORMANCE_SERVER $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS"
+CFLAGS="$CFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS"
+CXXFLAGS="$CXXFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS"
 LIBS="$LIBS $PAYMENT_LIB $MYSQL_LIB"
 
  if test x$DOTHETESTS = xyes; then
