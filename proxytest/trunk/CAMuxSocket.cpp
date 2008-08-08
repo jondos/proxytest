@@ -213,6 +213,11 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket)
 //TODO: Bug if socket is not in non_blocking mode!!
 SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 msTimeout)
 	{
+		if (m_Socket.isClosed())
+		{
+			return E_NOT_CONNECTED;
+		}
+		
 		UINT32 retLock = m_csReceive.lock();
 		if (retLock != E_SUCCESS)
 		{
@@ -223,28 +228,28 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 msTimeout)
 		SINT32 len=MIXPACKET_SIZE-m_aktBuffPos;
 		SINT32 ret=m_Socket.receive(m_Buff+m_aktBuffPos,len);
 		if(ret<=0&&ret!=E_AGAIN) //if socket was set in non-blocking mode
-			{
-				m_csReceive.unlock();
-				return E_UNKNOWN;
-			}
+		{
+			m_csReceive.unlock();
+			return E_UNKNOWN;
+		}
 		if(ret==len) //whole packet recieved
-			{
-				if(m_bIsCrypted)
-					m_oCipherIn.crypt1(m_Buff,m_Buff,16);
-				memcpy(pPacket,m_Buff,MIXPACKET_SIZE);
-				pPacket->channel=ntohl(pPacket->channel);
-				pPacket->flags=ntohs(pPacket->flags);
-				m_aktBuffPos=0;
-				m_csReceive.unlock();
-				return MIXPACKET_SIZE;
-			}
+		{
+			if(m_bIsCrypted)
+				m_oCipherIn.crypt1(m_Buff,m_Buff,16);
+			memcpy(pPacket,m_Buff,MIXPACKET_SIZE);
+			pPacket->channel=ntohl(pPacket->channel);
+			pPacket->flags=ntohs(pPacket->flags);
+			m_aktBuffPos=0;
+			m_csReceive.unlock();
+			return MIXPACKET_SIZE;
+		}
 		if(ret>0) //some new bytes arrived
 			m_aktBuffPos+=ret;
 		if(msTimeout==0) //we should not wait any more
-			{
-				m_csReceive.unlock();
-				return E_AGAIN;
-			}
+		{
+			m_csReceive.unlock();
+			return E_AGAIN;
+		}
 		UINT64 timeE;
 		UINT64 timeC;
 		getcurrentTimeMillis(timeE);
@@ -252,32 +257,43 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 msTimeout)
 		UINT32 dt=msTimeout;
 		CASingleSocketGroup oSocketGroup(false);
 		oSocketGroup.add(*this);
-		for(;;)
+		while (TRUE)
 			{
+				if (m_Socket.isClosed())
+				{
+					m_csReceive.unlock();
+					return E_NOT_CONNECTED;
+				}				
 				ret=oSocketGroup.select(dt);
 				if(ret!=1)
-					{
-						m_csReceive.unlock();
-						return E_UNKNOWN;
-					}
+				{
+					m_csReceive.unlock();
+					return E_UNKNOWN;
+				}
 				len=MIXPACKET_SIZE-m_aktBuffPos;
+				if (m_Socket.isClosed())
+				{
+					m_csReceive.unlock();
+					return E_NOT_CONNECTED;
+				}				
 				ret=m_Socket.receive(m_Buff+m_aktBuffPos,len);
 				if(ret<=0&&ret!=E_AGAIN)
-					{
-						m_csReceive.unlock();
-						return E_UNKNOWN;
-					}
+				{
+					CAMsg::printMsg(LOG_CRIT, "Error while receiving. Socket status: %d\n  Error code: %d", m_Socket.isClosed(), ret);
+					m_csReceive.unlock();
+					return E_UNKNOWN;
+				}
 				if(ret==len)
-					{
-						if(m_bIsCrypted)
-							m_oCipherIn.crypt1(m_Buff,m_Buff,16);
-						memcpy(pPacket,m_Buff,MIXPACKET_SIZE);
-						pPacket->channel=ntohl(pPacket->channel);
-						pPacket->flags=ntohs(pPacket->flags);
-						m_aktBuffPos=0;
-						m_csReceive.unlock();
-						return MIXPACKET_SIZE;
-					}
+				{
+					if(m_bIsCrypted)
+						m_oCipherIn.crypt1(m_Buff,m_Buff,16);
+					memcpy(pPacket,m_Buff,MIXPACKET_SIZE);
+					pPacket->channel=ntohl(pPacket->channel);
+					pPacket->flags=ntohs(pPacket->flags);
+					m_aktBuffPos=0;
+					m_csReceive.unlock();
+					return MIXPACKET_SIZE;
+				}
 				if(ret>0)
 					m_aktBuffPos+=ret;
 				getcurrentTimeMillis(timeC);

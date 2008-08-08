@@ -831,7 +831,7 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 						getcurrentTimeMicros(pQueueEntry->pool_timestamp_out);
 					#endif
 				#endif
-				pQueue->add(pMixPacket,sizeof(tQueueEntry));
+				pQueue->add(pQueueEntry, sizeof(tQueueEntry));
 				getcurrentTimeMillis(keepaliveLast);
 			}
 		delete pQueueEntry;

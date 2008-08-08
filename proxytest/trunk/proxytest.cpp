@@ -207,20 +207,23 @@ void cleanup()
 ///Remark: terminate() might be already defined by the c lib -- do not use this name...
 void my_terminate(void)
 {	
-#ifndef ONLY_LOCAL_PROXY
-	if(!bTriedTermination && pMix!=NULL)
+	if(!bTriedTermination)
 	{
 		bTriedTermination = true;
-		pMix->shutDown();
-		for (UINT32 i = 0; i < 20 && !(pMix->isShutDown()); i++)
-		{
-			msSleep(100);
+#ifndef ONLY_LOCAL_PROXY
+		if(pMix!=NULL)
+		{			
+			pMix->shutDown();
+			for (UINT32 i = 0; i < 20 && !(pMix->isShutDown()); i++)
+			{
+				msSleep(100);
+			}
+			delete pMix;
+			pMix=NULL;
 		}
-		delete pMix;
-		pMix=NULL;
-	}
 #endif
-	cleanup();
+		cleanup();
+	}
 }
 
 
@@ -242,7 +245,7 @@ void signal_segv( int )
 		CAMsg::printMsg( LOG_CRIT, "Stack trace: none available\n");
 	}
 #endif	
-	my_terminate();
+	// my_terminate();  temporarily disabled
 	exit(1);
 }
 

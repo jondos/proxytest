@@ -335,7 +335,7 @@ SINT32 CAFirstMixA::closeConnection(fmHashTableEntry* pHashEntry)
 		#ifdef LOG_PACKET_TIMES
 			setZero64(pQueueEntry->timestamp_proccessing_start);
 		#endif
-		m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));
+		m_pQueueSendToMix->add(pQueueEntry, sizeof(tQueueEntry));
 		delete pEntry->pCipher;
 		pEntry->pCipher = NULL;
 		pEntry=m_pChannelList->getNextChannel(pEntry);
@@ -479,7 +479,12 @@ SINT32 CAFirstMixA::loop()
 									{
 										countRead--;
 #endif																				
+/*#ifdef DELAY_USERS
+								if( m_pChannelList->hasDelayBuckets(pHashEntry->delayBucketID) )
+								{
+#endif*/			
 										ret=pMuxSocket->receive(pMixPacket,0);
+								
 										#if defined LOG_PACKET_TIMES||defined(LOG_CHANNEL)
 											getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_start);
 											set64(pQueueEntry->timestamp_proccessing_start_OP,pQueueEntry->timestamp_proccessing_start);
@@ -543,7 +548,6 @@ SINT32 CAFirstMixA::loop()
 													closeConnection(pHashEntry);
 													goto NEXT_USER;
 												}
-
 #endif													
 
 												if(pMixPacket->flags==CHANNEL_DUMMY) // just a dummy to keep the connection alife in e.g. NAT gateways 
@@ -559,9 +563,9 @@ SINT32 CAFirstMixA::loop()
 													#ifdef COUNTRY_STATS
 														m_PacketsPerCountryOUT[pHashEntry->countryID].inc();
 													#endif	
-													pHashEntry->pQueueSend->add(pMixPacket,sizeof(tQueueEntry));
+													pHashEntry->pQueueSend->add(pQueueEntry,sizeof(tQueueEntry));
 													#ifdef HAVE_EPOLL
-														m_psocketgroupUsersWrite->add(*pMuxSocket,pHashEntry); 
+														//m_psocketgroupUsersWrite->add(*pMuxSocket,pHashEntry); 
 													#else
 														m_psocketgroupUsersWrite->add(*pMuxSocket); 
 													#endif
@@ -577,7 +581,10 @@ SINT32 CAFirstMixA::loop()
 														#ifdef LOG_PACKET_TIMES
 															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
 														#endif
-														m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));
+														m_pQueueSendToMix->add(pQueueEntry, sizeof(tQueueEntry));
+														#ifdef DELAY_USERS
+														m_pChannelList->decDelayBuckets(pHashEntry->delayBucketID);
+														#endif
 														#ifdef LOG_CHANNEL
 															//pEntry->packetsInFromUser++;
 															getcurrentTimeMicros(current_time);
@@ -612,7 +619,10 @@ SINT32 CAFirstMixA::loop()
 															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
 														#endif
 							
-														m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));
+														m_pQueueSendToMix->add(pQueueEntry, sizeof(tQueueEntry));
+														#ifdef DELAY_USERS
+														m_pChannelList->decDelayBuckets(pHashEntry->delayBucketID);
+														#endif
 														incMixedPackets();
 														#ifdef LOG_CHANNEL
 															pEntry->packetsInFromUser++;
@@ -656,7 +666,10 @@ SINT32 CAFirstMixA::loop()
 																pTmpEntry->packetsInFromUser++;
 																set64(pTmpEntry->timeCreated,pQueueEntry->timestamp_proccessing_start);
 															#endif
-															m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));
+															m_pQueueSendToMix->add(pQueueEntry, sizeof(tQueueEntry));
+															#ifdef DELAY_USERS
+															m_pChannelList->decDelayBuckets(pHashEntry->delayBucketID);
+															#endif
 															incMixedPackets();
 															#ifdef _DEBUG
 //																			CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",pMixPacket->channel);
@@ -665,6 +678,9 @@ SINT32 CAFirstMixA::loop()
 													}
 												}
 											}
+/*#ifdef DELAY_USERS
+									}
+#endif*/
 								#ifdef HAVE_EPOLL
 NEXT_USER:
 									pHashEntry=(fmHashTableEntry*)m_psocketgroupUsersRead->getNextSignaledSocketData();
@@ -716,7 +732,7 @@ NEXT_USER:
 										#ifdef LOG_PACKET_TIMES
 											getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
 										#endif
-										pEntry->pHead->pQueueSend->add(pMixPacket,sizeof(tQueueEntry));
+										pEntry->pHead->pQueueSend->add(pQueueEntry, sizeof(tQueueEntry));
 										#ifdef LOG_TRAFFIC_PER_USER
 											pEntry->pHead->trafficOut++;
 										#endif
@@ -739,7 +755,7 @@ NEXT_USER:
 										#endif
 										
 										#ifdef HAVE_EPOLL
-											m_psocketgroupUsersWrite->add(*pEntry->pHead->pMuxSocket,pEntry->pHead); 
+											//m_psocketgroupUsersWrite->add(*pEntry->pHead->pMuxSocket,pEntry->pHead); 
 										#else
 											m_psocketgroupUsersWrite->add(*pEntry->pHead->pMuxSocket); 
 										#endif
@@ -794,7 +810,7 @@ NEXT_USER:
 										#ifdef LOG_PACKET_TIMES
 											getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
 										#endif
-										pEntry->pHead->pQueueSend->add(pMixPacket,sizeof(tQueueEntry));
+										pEntry->pHead->pQueueSend->add(pQueueEntry, sizeof(tQueueEntry));
 										#ifdef LOG_TRAFFIC_PER_USER
 											pEntry->pHead->trafficOut++;
 										#endif
@@ -812,8 +828,13 @@ NEXT_USER:
 										#endif
 										
 										#ifdef HAVE_EPOLL
-											m_psocketgroupUsersWrite->add(*pEntry->pHead->pMuxSocket,pEntry->pHead); 
-										#else
+											/*int epret = m_psocketgroupUsersWrite->add(*pEntry->pHead->pMuxSocket,pEntry->pHead); 
+											if(epret == E_UNKNOWN)
+											{
+												epret=errno;
+												CAMsg::printMsg(LOG_INFO,"epoll_add returns: %s (return value: %d) \n", strerror(epret), epret);
+											}*/
+											#else
 											m_psocketgroupUsersWrite->add(*pEntry->pHead->pMuxSocket); 
 										#endif
 		
@@ -841,7 +862,7 @@ NEXT_USER:
 												#ifdef LOG_PACKET_TIMES
 													setZero64(pQueueEntry->timestamp_proccessing_start);
 												#endif
-												m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));
+												m_pQueueSendToMix->add(pQueueEntry, sizeof(tQueueEntry));
 												pEntry->bIsSuspended=true;
 												pEntry->pHead->cSuspend++;
 											}
@@ -880,16 +901,23 @@ NEXT_USER:
 							{
 								countRead--;
 #endif
-#ifdef DELAY_USERS
-								if(pfmHashEntry->delayBucket>0)
-								{
-#endif
+
 									
 								if(pfmHashEntry->pQueueSend->getSize()>0)
-								{
-									//CAMsg::printMsg(LOG_CRIT,"turning!!\n");
-									bAktiv=true;
+								{	
 									UINT32 len=sizeof(tQueueEntry);
+#ifdef DELAY_USERS								
+									pfmHashEntry->pQueueSend->peek((UINT8*)&pfmHashEntry->oQueueEntry,&len);
+									HCHANNEL packetChannel = pfmHashEntry->oQueueEntry.packet.channel;
+									//delete pfmHashEntry->oQueueEntry;
+									len=sizeof(tQueueEntry);
+									
+									if( m_pChannelList->hasDelayBuckets(pfmHashEntry->delayBucketID) || 
+											(packetChannel>0 && packetChannel<256) )
+									{
+#endif
+									bAktiv=true;
+								
 									if(pfmHashEntry->uAlreadySendPacketSize==-1)
 									{
 										pfmHashEntry->pQueueSend->get((UINT8*)&pfmHashEntry->oQueueEntry,&len); 
@@ -959,7 +987,7 @@ goto NEXT_USER_WRITING;
 												}
 												#endif
 												#ifdef DELAY_USERS
-													pfmHashEntry->delayBucket--;
+												m_pChannelList->decDelayBuckets(pfmHashEntry->delayBucketID);
 												#endif
 												pfmHashEntry->uAlreadySendPacketSize=-1;
 												#ifdef LOG_PACKET_TIMES
@@ -990,7 +1018,7 @@ goto NEXT_USER_WRITING;
 														#ifdef _DEBUG
 															CAMsg::printMsg(LOG_INFO,"Sending resume for channel: %u\n",pMixPacket->channel);
 														#endif												
-														m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));
+														m_pQueueSendToMix->add(pQueueEntry, sizeof(tQueueEntry));
 														pEntry->bIsSuspended=false;	
 													}
 													
@@ -999,14 +1027,10 @@ goto NEXT_USER_WRITING;
 												pfmHashEntry->cSuspend=0;
 											}
 									}
-								
-								}
-								
-									
-								
 #ifdef DELAY_USERS
 								}
-#endif
+#endif								
+								}								
 									//todo error handling
 #ifdef HAVE_EPOLL
 NEXT_USER_WRITING:
@@ -1018,6 +1042,7 @@ NEXT_USER_WRITING:
 						pfmHashEntry=m_pChannelList->getNext();
 #endif
 					}
+				
 				if(!bAktiv)
 				  msSleep(100);
 			}
@@ -1039,3 +1064,4 @@ NEXT_USER_WRITING:
 		return E_UNKNOWN;
 	}
 #endif //ONLY_LOCAL_PROXY
+

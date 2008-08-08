@@ -53,6 +53,7 @@ CAXMLBI* CAXMLBI::getInstance(const UINT8 * biID, const UINT8 * hostName, const 
 			}
 		pBI->m_pBiID = new UINT8[strlen((char*)biID)+1];
 		strcpy((char*)pBI->m_pBiID, (char*)biID);
+		memset(pBI->m_pBiID, 0, (strlen((char*)biID)+1));
 		pBI->m_pHostName = new UINT8[strlen((char*)hostName)+1];
 		strcpy((char*)pBI->m_pHostName, (char*)hostName);
 		pBI->m_iPortNumber = portNumber;
@@ -83,7 +84,7 @@ CAXMLBI::~CAXMLBI()
 		delete m_pVeryfire;
 		m_pVeryfire = NULL;
 
-		delete m_pBiID;
+		delete[] m_pBiID;
 		m_pBiID = NULL;
 		
 		delete m_pHostName;
@@ -105,6 +106,7 @@ SINT32 CAXMLBI::setValues(DOMElement* elemRoot)
 		if(getDOMElementAttribute(elemRoot, "id", strGeneral, &strGeneralLen)==E_SUCCESS)
 			{
 				m_pBiID = new UINT8[strGeneralLen+1];
+				memset(m_pBiID, 0, (strGeneralLen+1));
 				memcpy(m_pBiID,strGeneral,strGeneralLen);
 			}
 		else 
