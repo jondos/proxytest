@@ -183,7 +183,7 @@ SINT32 CAMuxSocket::prepareForSend(MIXPACKET *pinoutPacket)
 	*/
 SINT32 CAMuxSocket::receive(MIXPACKET* pPacket)
 	{
-		UINT32 retLock = m_csReceive.lock();
+		SINT32 retLock = m_csReceive.lock();
 		if (retLock != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_CRIT,
@@ -218,7 +218,7 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 msTimeout)
 			return E_NOT_CONNECTED;
 		}
 		
-		UINT32 retLock = m_csReceive.lock();
+		SINT32 retLock = m_csReceive.lock();
 		if (retLock != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_CRIT,
@@ -257,7 +257,7 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 msTimeout)
 		UINT32 dt=msTimeout;
 		CASingleSocketGroup oSocketGroup(false);
 		oSocketGroup.add(*this);
-		while (TRUE)
+		while (true)
 			{
 				if (m_Socket.isClosed())
 				{
