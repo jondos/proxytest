@@ -50,8 +50,10 @@ class CASocketGroupEpoll
 					m_csFD_SET.lock();
 					SOCKET socket=(SOCKET)s;
 					m_pEpollEvent->data.ptr=datapointer;
-					if(epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,socket,m_pEpollEvent)!=0)
-						ret=E_UNKNOWN;
+					
+					//if(epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,socket,m_pEpollEvent)!=0)
+					//	ret=E_UNKNOWN;
+					ret=epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,socket,m_pEpollEvent);
 					m_csFD_SET.unlock();
 					return ret;
 				}
@@ -64,8 +66,9 @@ class CASocketGroupEpoll
 					m_csFD_SET.lock();
 					SOCKET socket=s.getSocket();
 					m_pEpollEvent->data.ptr=datapointer;
-					if(epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,socket,m_pEpollEvent)!=0)
-						ret=E_UNKNOWN;
+					//if(epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,socket,m_pEpollEvent)!=0)
+					//	ret=E_UNKNOWN;
+					ret=epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,socket,m_pEpollEvent);
 					m_csFD_SET.unlock();
 					return ret;
 				}

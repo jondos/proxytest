@@ -163,7 +163,10 @@ class CALastMixChannelList
 				volatile UINT32 m_u32DelayChannelBucketGrowIntervall; //duration of one time intervall in ms
 																															//therefore the allowed bandwith=BucketGrow/Intervall*1000 [bytes/s]
 				public:
-					void setDelayParameters(UINT32 unlimitTraffic,UINT32 bucketGrow,UINT32 intervall);																												
+					void setDelayParameters(UINT32 unlimitTraffic,UINT32 bucketGrow,UINT32 intervall);
+					void reduceDelayBuckets(UINT32 delayBucketID, UINT32 amount);
+					bool hasDelayBuckets(UINT32 delayBucketID);
+					UINT32 getDelayBuckets(UINT32 delayBucketID);
 			#endif
 			#ifdef DELAY_CHANNELS_LATENCY
 				//Parameters

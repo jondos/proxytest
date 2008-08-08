@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.08.24"
+#define MIX_VERSION "00.08.28"
 
 #include "doxygen.h"
 
@@ -99,9 +99,15 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define DELAY_BUCKET_GROW PAYLOAD_SIZE //Grow in bytes
 	#endif
 #endif
+
+#ifndef PAYMENT
+	#define DELAY_USERS
+	#define DELAY_CHANNELS_LATENCY
+#endif
+
 #ifdef DELAY_USERS
 	#ifndef DELAY_USERS_TRAFFIC
-		#define DELAY_USERS_TRAFFIC 100 //Traffic in packets after which (download direction) the user is delayed
+		#define DELAY_USERS_TRAFFIC 0 //Traffic in packets after which (download direction) the user is delayed
 	#endif
 	//Delay is at the moment constant and calculate as
 	// 1000/DELAY_BUCKET_GROW_INTERVALL*DELAY_BUCKET_GROW bytes/s
@@ -115,7 +121,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#endif
 #endif
 #ifdef DELAY_CHANNELS_LATENCY
-	#define DELAY_CHANNEL_LATENCY 10000 //min latency defaults to 10 second
+	#define DELAY_CHANNEL_LATENCY 0 //min latency defaults to 0 milliseconds
 #endif
 
 #if defined LASTMIX_CHECK_MEMORY && ! defined(QUEUE_SIZE_LOG)
@@ -176,6 +182,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define MAX_READ_FROM_NEXT_MIX_QUEUE_SIZE 10000000 //How many bytes could be in the incoming queue ??
 #define MAX_MIXIN_SEND_QUEUE_SIZE 10000000
 #define MAX_NEXT_MIX_QUEUE_SIZE 10000000
+
+//#define FORCED_DELAY
+//#define MIN_LATENCY 250
 
 #define DEFAULT_INFOSERVICE "141.76.45.37"
 

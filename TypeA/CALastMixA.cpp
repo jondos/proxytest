@@ -175,7 +175,7 @@ SINT32 CALastMixA::loop()
 															#ifdef LOG_PACKET_TIMES
 																setZero64(pQueueEntry->timestamp_proccessing_start);
 															#endif
-															m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));			
+															m_pQueueSendToMix->add(pQueueEntry,sizeof(tQueueEntry));			
 															m_logDownloadedPackets++;	
 															delete newCipher;
 															newCipher = NULL;
@@ -222,7 +222,7 @@ SINT32 CALastMixA::loop()
 															    #ifdef LOG_PACKET_TIMES
 																    setZero64(pQueueEntry->timestamp_proccessing_start);
 															    #endif
-															    m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));			
+															    m_pQueueSendToMix->add(pQueueEntry,sizeof(tQueueEntry));			
 															    m_logDownloadedPackets++;	
 																	delete newCipher;
 																	newCipher = NULL;
@@ -353,7 +353,7 @@ SINT32 CALastMixA::loop()
 														#ifdef LOG_PACKET_TIMES
 															setZero64(pQueueEntry->timestamp_proccessing_start);
 														#endif
-														m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));			
+														m_pQueueSendToMix->add(pQueueEntry,sizeof(tQueueEntry));			
 														m_logDownloadedPackets++;	
 													}
 												else
@@ -423,7 +423,7 @@ SINT32 CALastMixA::loop()
 														#ifdef LOG_PACKET_TIMES
 															setZero64(pQueueEntry->timestamp_proccessing_start);
 														#endif
-														m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));			
+														m_pQueueSendToMix->add(pQueueEntry,sizeof(tQueueEntry));			
 														m_logDownloadedPackets++;	
 														#ifdef LOG_CHANNEL
 															pChannelListEntry->packetsDataOutToUser++;
@@ -474,7 +474,7 @@ SINT32 CALastMixA::loop()
 										if(true
 										#endif
 												#ifdef DELAY_CHANNELS
-													&&(pChannelListEntry->delayBucket>0)
+													&&(m_pChannelList->hasDelayBuckets(pChannelListEntry->delayBucketID) )
 												#endif
 												#ifdef DELAY_CHANNELS_LATENCY
 													&&(isGreater64(current_time_millis,pChannelListEntry->timeLatency))
@@ -489,7 +489,10 @@ SINT32 CALastMixA::loop()
 												#ifndef DELAY_CHANNELS
 													ret=pChannelListEntry->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE);
 												#else
-													UINT32 readLen=min(pChannelListEntry->delayBucket,PAYLOAD_SIZE);
+													UINT32 readLen=
+																min(
+																	m_pChannelList->getDelayBuckets(pChannelListEntry->delayBucketID),
+																	PAYLOAD_SIZE);
 													ret=pChannelListEntry->pSocket->receive(pMixPacket->payload.data,readLen);
 												#endif
 												#ifdef LOG_PACKET_TIMES
@@ -514,7 +517,7 @@ SINT32 CALastMixA::loop()
 														#ifdef LOG_PACKET_TIMES
 															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
 														#endif
-														m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));			
+														m_pQueueSendToMix->add(pQueueEntry,sizeof(tQueueEntry));			
 														m_logDownloadedPackets++;	
 														#ifdef LOG_CHANNEL
 															pChannelListEntry->packetsDataOutToUser++;
@@ -532,7 +535,7 @@ SINT32 CALastMixA::loop()
 															pChannelListEntry->trafficOutToUser+=ret;
 														#endif
 														#ifdef DELAY_CHANNELS
-															pChannelListEntry->delayBucket-=ret;
+															m_pChannelList->reduceDelayBuckets(pChannelListEntry->delayBucketID, ret);
 														#endif
 														pMixPacket->channel=pChannelListEntry->channelIn;
 														pMixPacket->flags=CHANNEL_DATA;
@@ -552,7 +555,7 @@ SINT32 CALastMixA::loop()
 														#ifdef LOG_PACKET_TIMES
 															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
 														#endif
-														m_pQueueSendToMix->add(pMixPacket,sizeof(tQueueEntry));			
+														m_pQueueSendToMix->add(pQueueEntry, sizeof(tQueueEntry));			
 														m_logDownloadedPackets++;
 														#if defined(LOG_CHANNEL)
 															pChannelListEntry->packetsDataOutToUser++;

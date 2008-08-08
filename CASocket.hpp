@@ -53,6 +53,7 @@ class CASocket:public CAClientSocket
 			SINT32 connect(const CASocketAddr& psa,UINT32 msTimeOut);
 			
 			SINT32 close();
+			bool isClosed();
 /* it seems that this function is not used:
 			SINT32 close(UINT32 mode);*/
 			SINT32 send(const UINT8* buff,UINT32 len);

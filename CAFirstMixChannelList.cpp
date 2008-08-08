@@ -64,10 +64,10 @@ CAFirstMixChannelList::CAFirstMixChannelList()
 		m_u32DelayChannelUnlimitTraffic=DELAY_USERS_TRAFFIC;
 		m_u32DelayChannelBucketGrow=DELAY_USERS_BUCKET_GROW;
 		m_u32DelayChannelBucketGrowIntervall=DELAY_USERS_BUCKET_GROW_INTERVALL;
-		m_pDelayBuckets=new UINT32*[MAX_POLLFD];
+		m_pDelayBuckets=new volatile UINT32*[MAX_POLLFD];
 		memset(m_pDelayBuckets,0,sizeof(UINT32*)*MAX_POLLFD);
-		m_pMutexDelayChannel=new CAMutex((UINT8*)"Delay Channel Thread");
-		m_pThreadDelayBucketsLoop=new CAThread();
+		m_pMutexDelayChannel=new CAMutex();
+		m_pThreadDelayBucketsLoop=new CAThread((UINT8*)"Delay Channel Thread");
 		m_bDelayBucketsLoopRun=true;
 		m_pThreadDelayBucketsLoop->setMainLoop(fml_loopDelayBuckets);
 		m_pThreadDelayBucketsLoop->start(this);
@@ -158,6 +158,7 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 		     SAVE_STACK("CAFirstMixChannelList::add", "copying peer IP");
 		memcpy(pHashTableEntry->peerIP,peerIP,4);
 #ifdef DELAY_USERS
+		m_pMutexDelayChannel->lock();
 		pHashTableEntry->delayBucket=m_u32DelayChannelUnlimitTraffic; //can always send some first packets
 		for(UINT32 i=0;i<MAX_POLLFD;i++)
 			{
@@ -168,6 +169,7 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 					}
 			}
 		m_pDelayBuckets[pHashTableEntry->delayBucketID]=&pHashTableEntry->delayBucket;
+		m_pMutexDelayChannel->unlock();
 #endif
 
 		SAVE_STACK("CAFirstMixChannelList::add", "inserting in connection list");
@@ -1047,7 +1049,7 @@ SINT32 CAFirstMixChannelList::test()
 			BEGIN_STACK("CAFirstMixChannelList::fml_loopDelayBuckets");
 			
 			CAFirstMixChannelList* pChannelList=(CAFirstMixChannelList*)param;
-			UINT32** pDelayBuckets=pChannelList->m_pDelayBuckets;
+			volatile UINT32** pDelayBuckets=pChannelList->m_pDelayBuckets;
 			while(pChannelList->m_bDelayBucketsLoopRun)
 				{
 					pChannelList->m_pMutexDelayChannel->lock();
@@ -1056,7 +1058,9 @@ SINT32 CAFirstMixChannelList::test()
 					for(UINT32 i=0;i<MAX_POLLFD;i++)
 						{
 							if(pDelayBuckets[i]!=NULL&&*(pDelayBuckets[i])<u32MaxBucket)
+							{
 								*(pDelayBuckets[i])+=u32BucketGrow;
+							}
 						}
 					pChannelList->m_pMutexDelayChannel->unlock();		
 					msSleep(pChannelList->m_u32DelayChannelBucketGrowIntervall);
@@ -1066,7 +1070,37 @@ SINT32 CAFirstMixChannelList::test()
 				
 			THREAD_RETURN_SUCCESS;
 		}
-		
+	
+	void CAFirstMixChannelList::decDelayBuckets(UINT32 delayBucketID)
+	{
+		m_pMutexDelayChannel->lock();
+		if(delayBucketID < MAX_POLLFD)
+		{
+			if(m_pDelayBuckets[delayBucketID] != NULL)
+			{
+				*(m_pDelayBuckets[delayBucketID]) -= ( (*(m_pDelayBuckets[delayBucketID])) > 0 ) ? 1 : 0;
+			}
+			/*CAMsg::printMsg(LOG_DEBUG,"DelayBuckets decrementing ID %u downto %u\n", 
+								delayBucketID, (*(m_pDelayBuckets[delayBucketID])) );*/
+		}
+		m_pMutexDelayChannel->unlock();
+	}
+	
+	bool CAFirstMixChannelList::hasDelayBuckets(UINT32 delayBucketID)
+	{
+		bool ret = false;
+		m_pMutexDelayChannel->lock();
+		if(delayBucketID < MAX_POLLFD)
+		{
+			if(m_pDelayBuckets[delayBucketID] != NULL)
+			{
+				ret = ( (*(m_pDelayBuckets[delayBucketID])) > 0 );
+			}
+		}
+		m_pMutexDelayChannel->unlock();
+		return ret;
+	}
+	
 	void CAFirstMixChannelList::setDelayParameters(UINT32 unlimitTraffic,UINT32 bucketGrow,UINT32 intervall)
 		{
 			m_pMutexDelayChannel->lock();

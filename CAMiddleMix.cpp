@@ -556,13 +556,13 @@ THREAD_RETURN mm_loopSendToMixAfter(void* param)
 
 		UINT32 len;
 		SINT32 ret;
-		tQueueEntry* pQueueEntry=new tQueueEntry;
-		MIXPACKET* pMixPacket=&pQueueEntry->packet;
+		tPoolEntry* pPoolEntry=new tPoolEntry;
+		MIXPACKET* pMixPacket=&pPoolEntry->packet;
 		UINT32 u32KeepAliveSendInterval=pMiddleMix->m_u32KeepAliveSendInterval2;
 		while(pMiddleMix->m_bRun)
 			{
-				len=sizeof(tQueueEntry);
-				ret=pQueue->getOrWait((UINT8*)pQueueEntry,&len,u32KeepAliveSendInterval);
+				len=sizeof(tPoolEntry);
+				ret=pQueue->getOrWait((UINT8*)pPoolEntry,&len,u32KeepAliveSendInterval);
 				if(!(pMiddleMix->m_bRun))
 				{
 					CAMsg::printMsg(LOG_INFO,"SendToMixAfter thread: was interrupted.\n");
@@ -589,16 +589,16 @@ THREAD_RETURN mm_loopSendToMixAfter(void* param)
 						break;
 					}
 #ifdef LOG_PACKET_TIMES
- 				if(!isZero64(pQueueEntry->timestamp_proccessing_start))
+ 				if(!isZero64(pPoolEntry->timestamp_proccessing_start))
 					{
-						getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
-						pFirstMix->m_pLogPacketStats->addToTimeingStats(*pQueueEntry,pMixPacket->flags,true);
+						getcurrentTimeMicros(pPoolEntry->timestamp_proccessing_end);
+						pFirstMix->m_pLogPacketStats->addToTimeingStats(*pPoolEntry,pMixPacket->flags,true);
 					}
 #endif
 			}
 		pMiddleMix->m_bRun = false;
-		delete pQueueEntry;
-		pQueueEntry = NULL;
+		delete pPoolEntry;
+		pPoolEntry = NULL;
 		FINISH_STACK("CAFirstMix::fm_loopSendToMixAfter");
 
 		CAMsg::printMsg(LOG_DEBUG,"Exiting Thread SendToMixAfter\n");
@@ -617,13 +617,13 @@ THREAD_RETURN mm_loopSendToMixBefore(void* param)
 
 		UINT32 len;
 		SINT32 ret;
-		tQueueEntry* pQueueEntry=new tQueueEntry;
-		MIXPACKET* pMixPacket=&pQueueEntry->packet;
+		tPoolEntry* pPoolEntry=new tPoolEntry;
+		MIXPACKET* pMixPacket=&pPoolEntry->packet;
 		UINT32 u32KeepAliveSendInterval=pMiddleMix->m_u32KeepAliveSendInterval;
 		while(pMiddleMix->m_bRun)
 			{
-				len=sizeof(tQueueEntry);
-				ret=pQueue->getOrWait((UINT8*)pQueueEntry,&len,u32KeepAliveSendInterval);
+				len=sizeof(tPoolEntry);
+				ret=pQueue->getOrWait((UINT8*)pPoolEntry,&len,u32KeepAliveSendInterval);
 				if(!(pMiddleMix->m_bRun))
 				{
 					CAMsg::printMsg(LOG_INFO,"SendToMixBefore thread: was interrupted.\n");
@@ -649,16 +649,16 @@ THREAD_RETURN mm_loopSendToMixBefore(void* param)
 						break;
 					}
 #ifdef LOG_PACKET_TIMES
- 				if(!isZero64(pQueueEntry->timestamp_proccessing_start))
+ 				if(!isZero64(pPoolEntry->timestamp_proccessing_start))
 					{
-						getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
-						pFirstMix->m_pLogPacketStats->addToTimeingStats(*pQueueEntry,pMixPacket->flags,true);
+						getcurrentTimeMicros(pPoolEntry->timestamp_proccessing_end);
+						pFirstMix->m_pLogPacketStats->addToTimeingStats(*pPoolEntry,pMixPacket->flags,true);
 					}
 #endif
 			}
 		pMiddleMix->m_bRun = false;
-		delete pQueueEntry;
-		pQueueEntry = NULL;
+		delete pPoolEntry;
+		pPoolEntry = NULL;
 		FINISH_STACK("CAFirstMix::fm_loopSendToMixBefore");
 
 		CAMsg::printMsg(LOG_DEBUG,"Exiting Thread SendToMixBefore\n");
@@ -781,7 +781,7 @@ THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 											pPool->pool(pPoolEntry);
 										#endif
 
-										pQueue->add(pMixPacket,sizeof(tQueueEntry));
+										pQueue->add(pPoolEntry,sizeof(tPoolEntry));
 									}
 							}
 						else
@@ -797,7 +797,7 @@ THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 									}
 								pMixPacket->channel=channelOut;
 
-								pQueue->add(pMixPacket,sizeof(tQueueEntry));
+								pQueue->add(pPoolEntry,sizeof(tPoolEntry));
 							}
 					}
 			}
@@ -909,7 +909,7 @@ THREAD_RETURN mm_loopReadFromMixAfter(void* param)
 						#ifdef REPLAY_DETECTION
 						else if(pMixPacket->channel==REPLAY_CONTROL_CHANNEL_ID)
 							{
-								pQueue->add(pMixPacket,sizeof(tQueueEntry));
+								pQueue->add(pPoolEntry,sizeof(tPoolEntry));
 							}
 						#endif
 						else if(pMix->m_pMiddleMixChannelList->getOutToIn(&channelIn,pMixPacket->channel,&pCipher)==E_SUCCESS)
@@ -929,7 +929,7 @@ THREAD_RETURN mm_loopReadFromMixAfter(void* param)
 									{//Channel close received -->remove channel form channellist
 										pMix->m_pMiddleMixChannelList->remove(channelIn);
 									}
-								pQueue->add(pMixPacket,sizeof(tQueueEntry));
+								pQueue->add(pPoolEntry,sizeof(tPoolEntry));
 							}
 					}
 			}

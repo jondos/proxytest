@@ -71,8 +71,8 @@ struct t_fmhashtableentry
 #endif
 
 #ifdef DELAY_USERS
-			UINT32				delayBucket;
-			UINT32				delayBucketID;
+			volatile UINT32				delayBucket;
+			volatile UINT32				delayBucketID;
 #endif						
 			// if false, the entry should be deleted the next time it is read from the queue
 			bool bRecoverTimeout;
@@ -151,6 +151,8 @@ struct t_firstmixchannellist
 typedef struct t_firstmixchannellist fmChannelList; 
 typedef struct t_firstmixchannellist fmChannelListEntry; 
 typedef fmChannelListEntry* LP_fmChannelListEntry;
+
+THREAD_RETURN fml_loopDelayBuckets(void* param);
 
 /**  \page pageFirstMixChannelList Data structures for storing the Mix channel table of the first Mix
 	*  \section docFirstMixChannelList Data structures for storing the Mix channel table of the first Mix
@@ -324,7 +326,7 @@ class CAFirstMixChannelList
 //			CAAccountingInstance *m_pAccountingInstance;
 //#endif
 			#ifdef DELAY_USERS
-				UINT32** m_pDelayBuckets;
+				volatile UINT32** m_pDelayBuckets;
 				CAThread* m_pThreadDelayBucketsLoop;
 				CAMutex* m_pMutexDelayChannel;
 				bool m_bDelayBucketsLoopRun;
@@ -335,7 +337,9 @@ class CAFirstMixChannelList
 				volatile UINT32 m_u32DelayChannelBucketGrowIntervall; //duration of one time intervall in ms
 																															//therefore the allowed max bandwith=BucketGrow/Intervall*1000 *PAYLOAD_SIZE[bytes/s]
 				public:
-					void setDelayParameters(UINT32 unlimitTraffic,UINT32 bucketGrow,UINT32 intervall);																												
+					void setDelayParameters(UINT32 unlimitTraffic,UINT32 bucketGrow,UINT32 intervall);
+					void decDelayBuckets(UINT32 delayBucketID);
+					bool hasDelayBuckets(UINT32 delayBucketID);
 			#endif
 #ifdef DO_TRACE
 			UINT32 m_aktAlloc;

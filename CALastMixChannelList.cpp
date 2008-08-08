@@ -250,38 +250,78 @@ SINT32 CALastMixChannelList::test()
 
 #ifdef DELAY_CHANNELS
 	THREAD_RETURN lml_loopDelayBuckets(void* param)
+	{
+		CALastMixChannelList* pChannelList=(CALastMixChannelList*)param;
+		UINT32** pDelayBuckets=pChannelList->m_pDelayBuckets;
+		while(pChannelList->m_bDelayBucketsLoopRun)
+			{
+				pChannelList->m_pMutexDelayChannel->lock();
+				UINT32 u32BucketGrow=pChannelList->m_u32DelayChannelBucketGrow;
+				UINT32 u32MaxBucket=u32BucketGrow*10;
+				for(UINT32 i=0;i<MAX_POLLFD;i++)
+					{
+						if(pDelayBuckets[i]!=NULL&&*(pDelayBuckets[i])<u32MaxBucket)
+							*(pDelayBuckets[i])+=u32BucketGrow;
+					}
+				pChannelList->m_pMutexDelayChannel->unlock();		
+				msSleep(pChannelList->m_u32DelayChannelBucketGrowIntervall);
+			}
+		THREAD_RETURN_SUCCESS;
+	}
+	
+	void CALastMixChannelList::reduceDelayBuckets(UINT32 delayBucketID, UINT32 amount)
+	{
+		m_pMutexDelayChannel->lock();
+		if(delayBucketID < MAX_POLLFD)
 		{
-			CALastMixChannelList* pChannelList=(CALastMixChannelList*)param;
-			UINT32** pDelayBuckets=pChannelList->m_pDelayBuckets;
-			while(pChannelList->m_bDelayBucketsLoopRun)
-				{
-					pChannelList->m_pMutexDelayChannel->lock();
-					UINT32 u32BucketGrow=pChannelList->m_u32DelayChannelBucketGrow;
-					UINT32 u32MaxBucket=u32BucketGrow*10;
-					for(UINT32 i=0;i<MAX_POLLFD;i++)
-						{
-							if(pDelayBuckets[i]!=NULL&&*(pDelayBuckets[i])<u32MaxBucket)
-								*(pDelayBuckets[i])+=u32BucketGrow;
-						}
-					pChannelList->m_pMutexDelayChannel->unlock();		
-					msSleep(pChannelList->m_u32DelayChannelBucketGrowIntervall);
-				}
-			THREAD_RETURN_SUCCESS;
+			if(m_pDelayBuckets[delayBucketID] != NULL)
+			{
+				*(m_pDelayBuckets[delayBucketID]) -= ( (*(m_pDelayBuckets[delayBucketID])) > amount ) 
+															? amount : (*(m_pDelayBuckets[delayBucketID]));
+			}
+			/*CAMsg::printMsg(LOG_DEBUG,"DelayBuckets decrementing ID %u downto %u\n", 
+								delayBucketID, (*(m_pDelayBuckets[delayBucketID])) );*/
 		}
-		
-	void CALastMixChannelList::setDelayParameters(UINT32 unlimitTraffic,UINT32 bucketGrow,UINT32 intervall)
+		m_pMutexDelayChannel->unlock();
+	}
+	
+	UINT32 CALastMixChannelList::getDelayBuckets(UINT32 delayBucketID)
+	{
+		UINT32 ret = 0;
+		m_pMutexDelayChannel->lock();
+		ret = ( (*(m_pDelayBuckets[delayBucketID])) > 0 ) ? (*(m_pDelayBuckets[delayBucketID])) : 0;
+		m_pMutexDelayChannel->unlock();
+		return ret;
+	}
+	
+	bool CALastMixChannelList::hasDelayBuckets(UINT32 delayBucketID)
+	{
+		bool ret = false;
+		m_pMutexDelayChannel->lock();
+		if(delayBucketID < MAX_POLLFD)
 		{
-			m_pMutexDelayChannel->lock();
-			CAMsg::printMsg(LOG_DEBUG,"CALastMixChannelList - Set new traffic limit per channel- unlimit: %u bucketgrow: %u intervall %u\n",
-				unlimitTraffic,bucketGrow,intervall);
-			m_u32DelayChannelUnlimitTraffic=unlimitTraffic;
-			m_u32DelayChannelBucketGrow=bucketGrow;
-			m_u32DelayChannelBucketGrowIntervall=intervall;
-			for(UINT32 i=0;i<MAX_POLLFD;i++)
-				if(m_pDelayBuckets[i]!=NULL)
-					*(m_pDelayBuckets[i])=m_u32DelayChannelUnlimitTraffic;
-			m_pMutexDelayChannel->unlock();		
-		}																												
+			if(m_pDelayBuckets[delayBucketID] != NULL)
+			{
+				ret = ( (*(m_pDelayBuckets[delayBucketID])) > 0 );
+			}
+		}
+		m_pMutexDelayChannel->unlock();
+		return ret;
+	}
+	
+	void CALastMixChannelList::setDelayParameters(UINT32 unlimitTraffic,UINT32 bucketGrow,UINT32 intervall)
+	{
+		m_pMutexDelayChannel->lock();
+		CAMsg::printMsg(LOG_DEBUG,"CALastMixChannelList - Set new traffic limit per channel- unlimit: %u bucketgrow: %u intervall %u\n",
+			unlimitTraffic,bucketGrow,intervall);
+		m_u32DelayChannelUnlimitTraffic=unlimitTraffic;
+		m_u32DelayChannelBucketGrow=bucketGrow;
+		m_u32DelayChannelBucketGrowIntervall=intervall;
+		for(UINT32 i=0;i<MAX_POLLFD;i++)
+			if(m_pDelayBuckets[i]!=NULL)
+				*(m_pDelayBuckets[i])=m_u32DelayChannelUnlimitTraffic;
+		m_pMutexDelayChannel->unlock();		
+	}																												
 #endif
 
 #ifdef DELAY_CHANNELS_LATENCY
