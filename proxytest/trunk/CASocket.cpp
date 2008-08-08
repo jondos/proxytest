@@ -301,11 +301,6 @@ SINT32 CASocket::connect(const CASocketAddr & psa,UINT32 msTimeOut)
 		setNonBlocking(bWasNonBlocking);
 		return E_SUCCESS;	
 	}
-	
-bool CASocket::isClosed()
-{
-	return m_bSocketIsClosed;
-}
 			
 SINT32 CASocket::close()
 	{
