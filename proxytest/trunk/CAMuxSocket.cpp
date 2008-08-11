@@ -279,7 +279,7 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 msTimeout)
 				ret=m_Socket.receive(m_Buff+m_aktBuffPos,len);
 				if(ret<=0&&ret!=E_AGAIN)
 				{
-					CAMsg::printMsg(LOG_CRIT, "Error while receiving. Socket status: %d\n  Error code: %d", m_Socket.isClosed(), ret);
+					CAMsg::printMsg(LOG_CRIT, "Error while receiving. Socket status: %d  Error code: %d\n", m_Socket.isClosed(), ret);
 					m_csReceive.unlock();
 					return E_UNKNOWN;
 				}
