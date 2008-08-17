@@ -104,7 +104,7 @@ class CAInfoService
 			static const UINT64 SEND_MIX_INFO_WAIT;
 			static const UINT64 SEND_STATUS_INFO_WAIT;
 			static const UINT32 SEND_INFO_TIMEOUT_MS;
-			
+			static const UINT32 REPEAT_ON_STATUS_SENT_ERROR;
 		private:								
 			static THREAD_RETURN TCascadeHelo(void *p);
 			static THREAD_RETURN TCascadeStatus(void *p);
