@@ -52,6 +52,7 @@ const UINT64 CAInfoService::SEND_CASCADE_INFO_WAIT = MINUTE * 10;
 const UINT64 CAInfoService::SEND_MIX_INFO_WAIT = MINUTE * 10;
 const UINT64 CAInfoService::SEND_STATUS_INFO_WAIT = MINUTE;
 const UINT32 CAInfoService::SEND_INFO_TIMEOUT_MS = 3000; // timeout for single send operations
+const UINT32 CAInfoService::REPEAT_ON_STATUS_SENT_ERROR = 3;
 
 THREAD_RETURN CAInfoService::InfoLoop(void *p)
 	{
@@ -79,6 +80,7 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 		lastCascadeUpdate -= CAInfoService::SEND_CASCADE_INFO_WAIT; 
 		lastMixInfoUpdate -= CAInfoService::SEND_MIX_INFO_WAIT;
 		lastStatusUpdate -= CAInfoService::SEND_STATUS_INFO_WAIT;  
+		UINT32 statusSentErrorBurst = 0;
 		
     while(pInfoService->isRunning())
 		{
@@ -100,10 +102,12 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 					lastStatusUpdate=time(NULL);
 					bIsFirst=false;
 					bOneUpdateDone = true;
+					statusSentErrorBurst = 0;
 					CAMsg::printMsg(LOG_DEBUG,"InfoService: Successfully sent Status information.\n");
 				}
 				else
 				{
+					statusSentErrorBurst++;
 					CAMsg::printMsg(LOG_DEBUG,"InfoService: Could not send Status information.\n");
 				}
 					
@@ -157,7 +161,7 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 			currentTime=time(NULL);
 			//@TODO BUGGy -- because it assumes knowledge about update times, which are configurable in StdAfx.hpp
 			// wait CAInfoService::SEND_LOOP_SLEEP seconds at most
-			temp = (currentTime - lastStatusUpdate);
+			/*temp = (currentTime - lastStatusUpdate);
 			if (bOneUpdateDone && temp > 0)
 			{
 					if (temp <= CAInfoService::SEND_LOOP_SLEEP)
@@ -180,6 +184,20 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 			else
 			{ 
 				bPreventLoop = false;
+				nextUpdate = CAInfoService::SEND_LOOP_SLEEP;
+			}*/
+			
+			/* Not the optimal solution; would be best, if infoservice send 
+			 * routines can be called by other threads if certain events occur, i.e. 
+			 * cascade reconnection, etc. 
+			 */ 
+			if ( bOneUpdateDone && (statusSentErrorBurst > 0) )
+			{
+				//TODO: handle case when status sent error burst exceeds an upper limit */
+				nextUpdate = CAInfoService::REPEAT_ON_STATUS_SENT_ERROR;
+			}
+			else
+			{
 				nextUpdate = CAInfoService::SEND_LOOP_SLEEP;
 			}
 #ifdef DYNAMIC_MIX
@@ -457,6 +475,13 @@ SINT32 CAInfoService::sendStatus(bool bIncludeCerts)
 		return E_SUCCESS;
 	}
 	
+	
+	if( !(m_pMix->isConnected()) && !bIncludeCerts )
+	{
+		CAMsg::printMsg(LOG_INFO, "Mix not connected. Skipping status\n");
+		return E_UNKNOWN;
+	}
+	
 	UINT32 len;
 	SINT32 ret;
 	UINT8* strStatusXML=getStatusXMLAsString(bIncludeCerts,len);
@@ -513,6 +538,7 @@ UINT8* CAInfoService::getStatusXMLAsString(bool bIncludeCerts,UINT32& len)
 				
 		UINT32 buffLen=8192;
 		UINT8* buff=new UINT8[buffLen];
+		memset(buff, 0, buffLen);
 		UINT8 tmpBuff[1024];
 		UINT8 buffMixedPackets[50];
 		print64(buffMixedPackets,tmpPackets);
@@ -875,6 +901,12 @@ SINT32 CAInfoService::sendCascadeHelo()
 	UINT8* strCascadeHeloXML=getCascadeHeloXMLAsString(len);
 	if(strCascadeHeloXML==NULL)
 	{
+		return E_UNKNOWN;
+	}
+	
+	if( !(m_pMix->isConnected()) )
+	{
+		CAMsg::printMsg(LOG_INFO, "not connected: skipping cascade helo.\n");
 		return E_UNKNOWN;
 	}
 	

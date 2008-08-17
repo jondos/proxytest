@@ -106,6 +106,10 @@ class CAMix
 				{
 					return m_pMuxOutControlChannelDispatcher;
 				}
+			bool isConnected()
+			{
+				return m_bConnected;
+			}
 		protected:
 #ifdef DYNAMIC_MIX
 			virtual void stopCascade() =0;
@@ -140,8 +144,8 @@ class CAMix
 			UINT32 m_u32KeepAliveRecvInterval;
 			UINT32 m_u32KeepAliveSendInterval;
 
-	    bool m_acceptReconfiguration;
-
+			bool m_acceptReconfiguration;
+			volatile bool m_bConnected;
 			// added by ronin <ronin2@web.de>
 			XERCES_CPP_NAMESPACE::DOMDocument* m_docMixCascadeInfo;
 

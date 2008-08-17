@@ -47,6 +47,7 @@ CAMix::CAMix()
 		m_u32KeepAliveRecvInterval=0;//zero means --> do not use
 		m_bShutDown = false;
 		m_docMixCascadeInfo=NULL;
+		m_bConnected = false;
 #ifdef DYNAMIC_MIX
 		/* LERNGRUPPE: Run by default */
 		m_bLoop = true;
@@ -125,12 +126,15 @@ SINT32 CAMix::start()
 			initStatus = init();
 	        if(initStatus == E_SUCCESS)
 	        {
-				CAMsg::printMsg(LOG_DEBUG, "CAMix main: init() returned success\n");
+	        	m_bConnected = true;
+	        	CAMsg::printMsg(LOG_DEBUG, "CAMix main: init() returned success\n");
 	            if(m_pInfoService != NULL)
 	            {
 	                m_pInfoService->setConfiguring(false);
 	                if( ! m_pInfoService->isRunning())
-	                    m_pInfoService->start();
+	                {
+	                	m_pInfoService->start();
+	                }
 	            }
 	
 	            CAMsg::printMsg(LOG_INFO, "The mix is now on-line.\n");
@@ -173,11 +177,11 @@ SKIP:
 				if(pglobalOptions->acceptReconfiguration() && m_bLoop)
 #endif
                 	m_pInfoService->setConfiguring(true);
-	            else
+	            /*else
 				{
 					CAMsg::printMsg(LOG_DEBUG, "CAMix main: stopping InfoService\n");
 	                m_pInfoService->stop();
-				}
+				}*/
 	            // maybe Cascade information (e.g. certificate validity) will change on next connection
 	            UINT64 currentMillis;
 	            if (getcurrentTimeMillis(currentMillis) != E_SUCCESS)
@@ -186,6 +190,7 @@ SKIP:
 	            }
 	            m_pInfoService->setSerial(currentMillis);            
 	        }
+	        m_bConnected = false;
 			CAMsg::printMsg(LOG_DEBUG, "CAMix main: before clean()\n");
 			clean();
 			CAMsg::printMsg(LOG_DEBUG, "CAMix main: after clean()\n");
