@@ -1112,7 +1112,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 	{	
 		INIT_STACK;
 		BEGIN_STACK("CAFirstMix::doUserLogin");
-		
+		SINT32 ai_ret;
 		#ifdef _DEBUG
 			int ret=((CASocket*)pNewUser)->setKeepAlive(true);
 			if(ret!=E_SUCCESS)
@@ -1413,6 +1413,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		{
 			if(pNewUser->receive(paymentLoginPacket, AI_LOGIN_SO_TIMEOUT) != MIXPACKET_SIZE)
 			{
+				CAMsg::printMsg(LOG_DEBUG,"AI login: client receive timeout.");
 				aiLoginStatus = AUTH_LOGIN_FAILED;
 				break;
 			}
@@ -1427,10 +1428,17 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 				while(tmpQueue->getSize()>0)
 				{
 					tmpQueue->get((UINT8*)aiAnswerQueueEntry,&qlen); 
-					if(pNewUser->send(&(aiAnswerQueueEntry->packet)) != MIXPACKET_SIZE)
+					pNewUser->prepareForSend(&(aiAnswerQueueEntry->packet));
+					ai_ret = ((CASocket*)pNewUser)->
+						sendFullyTimeOut(((UINT8*)&(aiAnswerQueueEntry->packet)), MIXPACKET_SIZE, 3*(AI_LOGIN_SO_TIMEOUT), AI_LOGIN_SO_TIMEOUT);
+					if (ai_ret != E_SUCCESS)
 					{
+						if(ai_ret == E_TIMEDOUT )
+						{
+							CAMsg::printMsg(LOG_DEBUG,"timeout occured during AI login.");
+						}
 						aiLoginStatus = AUTH_LOGIN_FAILED;
-						break;
+						goto loop_break;
 					}
 				}
 				if(aiLoginStatus == AUTH_LOGIN_FAILED)
@@ -1449,7 +1457,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 			}
 			aiLoginStatus = CAAccountingInstance::loginProcessStatus(pHashEntry);
 		}
-		
+loop_break:		
 		SAVE_STACK("CAFirstMix::doUserLogin", "AI login packages exchanged.");
 		/* We have exchanged all AI login packets:
 		 * 1. AccountCert
@@ -1474,13 +1482,6 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 //#endif
 		}
 		
-		/* A client timeout may occur while settling */
-		/*if( ((CASocket*)pNewUser)->isClosed() )
-		{
-			CAMsg::printMsg(LOG_DEBUG,"A client timeout has likely occured while settling\n");
-			aiLoginStatus |= AUTH_LOGIN_FAILED;
-		}*/
-		
 		if(!(aiLoginStatus & AUTH_LOGIN_FAILED)) 
 		{
 			aiLoginStatus = CAAccountingInstance::finishLoginProcess(pHashEntry);
@@ -1489,9 +1490,15 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 				while(tmpQueue->getSize()>0)
 				{
 					tmpQueue->get((UINT8*)aiAnswerQueueEntry,&qlen); 
-					if(pNewUser->send(&(aiAnswerQueueEntry->packet)) != MIXPACKET_SIZE)
+					pNewUser->prepareForSend(&(aiAnswerQueueEntry->packet));
+					ai_ret = ((CASocket*)pNewUser)->
+							sendFullyTimeOut(((UINT8*)&(aiAnswerQueueEntry->packet)), MIXPACKET_SIZE, 3*(AI_LOGIN_SO_TIMEOUT), AI_LOGIN_SO_TIMEOUT);
+					if (ai_ret != E_SUCCESS)
 					{
-						CAMsg::printMsg(LOG_INFO,"A client timeout has likely occured while settling\n");
+						if (ai_ret == E_TIMEDOUT )
+						{
+							CAMsg::printMsg(LOG_INFO,"AI login: client timeout occured after settling.\n");
+						}
 						aiLoginStatus |= AUTH_LOGIN_FAILED;
 						break;
 					}
@@ -1513,13 +1520,18 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		
 		if((aiLoginStatus & AUTH_LOGIN_FAILED))
 		{
-			CAMsg::printMsg(LOG_INFO,"User AI login failed\n");
+			CAMsg::printMsg(LOG_INFO,"User AI login failed: deleting socket %x\n", pNewUser);
 			m_pChannelList->remove(pNewUser);
 			delete pNewUser;
 			pNewUser = NULL;
 			m_pIPList->removeIP(peerIP);
 			return E_UNKNOWN;
 		}
+		/* Hot fix: push timeout entry only if login was succesful, otherwise
+		 * socket may be deleted due to timeout, login fails and the socket will be deleted 
+		 * for second time causing a segfault. 
+		 */
+		m_pChannelList->pushTimeoutEntry(pHashEntry);
 		CAMsg::printMsg(LOG_INFO,"User AI login successful\n");
 #endif
 		

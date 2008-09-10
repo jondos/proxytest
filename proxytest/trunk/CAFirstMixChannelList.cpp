@@ -96,7 +96,7 @@ CAFirstMixChannelList::~CAFirstMixChannelList()
 		delete []m_HashTableOutChannels;
 		m_HashTableOutChannels = NULL;		
 	}
-		
+
 /** Adds a new TCP/IP connection (a new user) to the channel list.
 	* @param pMuxSocket the new connection (from a user)
 	* @param peerIP the IP of the user, so that we can remove it later from the CAIPList
@@ -190,7 +190,10 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 		// insert in timeout list; entries are added to the foot of the list
 #ifdef PAYMENT
 		pHashTableEntry->bRecoverTimeout = true;
-		pushTimeoutEntry_internal(pHashTableEntry);
+		/* Hot fix: push timeout entry explicitly to avoid
+		 * confusion, when timeout occurs during AI login
+		 */
+		//pushTimeoutEntry_internal(pHashTableEntry);
 #endif		
 		m_Mutex.unlock();
 		
@@ -630,10 +633,12 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 #endif
 				pEntry=pTmpEntry;
 			}
+/* already done by pHashTableEntry->pControlChannelDispatcher->deleteAllControlChannels();
 #ifdef PAYMENT
 		// cleanup accounting information
 		CAAccountingInstance::cleanupTableEntry(pHashTableEntry);
 #endif
+*/
 #ifdef LOG_DIALOG
 		delete[] pHashTableEntry->strDialog;
 		pHashTableEntry->strDialog = NULL;
