@@ -478,7 +478,9 @@ SINT32 CAInfoService::sendStatus(bool bIncludeCerts)
 	
 	if( !(m_pMix->isConnected()) && !bIncludeCerts )
 	{
+#ifdef DEBUG		
 		CAMsg::printMsg(LOG_INFO, "Mix not connected. Skipping status\n");
+#endif
 		return E_UNKNOWN;
 	}
 	
@@ -906,7 +908,9 @@ SINT32 CAInfoService::sendCascadeHelo()
 	
 	if( !(m_pMix->isConnected()) )
 	{
+#ifdef DEBUG
 		CAMsg::printMsg(LOG_INFO, "not connected: skipping cascade helo.\n");
+#endif
 		return E_UNKNOWN;
 	}
 	
