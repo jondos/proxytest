@@ -2268,7 +2268,7 @@ UINT32 CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* 
 	if (pAccInfo->confirmedBytes >= pAccInfo->bytesToConfirm)
 	{
 		// the user confirmed everything we wanted; if a timeout has been set, it should be reset
-		pAccInfo->authFlags ~= AUTH_HARD_LIMIT_REACHED;
+		pAccInfo->authFlags &= ~AUTH_HARD_LIMIT_REACHED;
 		pAccInfo->lastHardLimitSeconds = time(NULL);		
 	}
 	else
