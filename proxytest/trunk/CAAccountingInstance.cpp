@@ -613,11 +613,10 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 #endif				
 				return returnPrepareKickout(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_BAD_SIGNATURE, (UINT8*)"Your account certificate is invalid"));
 			}
-			/*
 			else if (pAccInfo->authFlags & AUTH_MULTIPLE_LOGIN)
 			{
 				return returnPrepareKickout(pAccInfo, new CAXMLErrorMessage(CAXMLErrorMessage::ERR_MULTIPLE_LOGIN, (UINT8*)"Only one login per account is allowed!"));
-			}*/
+			}
 			if( !(pAccInfo->authFlags & AUTH_ACCOUNT_OK) )
 			{
 				// we did not yet receive the response to the challenge...
@@ -1853,7 +1852,7 @@ UINT32 CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo*
 		 					Kicking out this user!\n", 
 		 					loginEntry->count, accountNrAsString);
 		 	bSendCCRequest = false; // not needed...
-		 	//pAccInfo->authFlags |= AUTH_MULTIPLE_LOGIN;
+		 	pAccInfo->authFlags |= AUTH_MULTIPLE_LOGIN;
 		}
 	}
 	
@@ -2269,7 +2268,8 @@ UINT32 CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* 
 	if (pAccInfo->confirmedBytes >= pAccInfo->bytesToConfirm)
 	{
 		// the user confirmed everything we wanted; if a timeout has been set, it should be reset
-		pAccInfo->lastHardLimitSeconds = time(NULL);
+		pAccInfo->authFlags ~= AUTH_HARD_LIMIT_REACHED;
+		pAccInfo->lastHardLimitSeconds = time(NULL);		
 	}
 	else
 	{
