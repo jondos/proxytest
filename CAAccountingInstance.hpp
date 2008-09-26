@@ -54,9 +54,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 // the number of seconds that may pass between a pay request
 // and the jap sending its answer
-#define CHALLENGE_TIMEOUT 10
-#define HARD_LIMIT_TIMEOUT 15
-#define AUTH_TIMEOUT 10
+#define CHALLENGE_TIMEOUT 15
+#define HARD_LIMIT_TIMEOUT 30
+#define AUTH_TIMEOUT 15
 #define CRITICAL_SUBSEQUENT_BI_CONN_ERRORS 5
 
 struct AccountLoginHashEntry
