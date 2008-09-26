@@ -1413,7 +1413,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		{
 			if(pNewUser->receive(paymentLoginPacket, AI_LOGIN_SO_TIMEOUT) != MIXPACKET_SIZE)
 			{
-				CAMsg::printMsg(LOG_DEBUG,"AI login: client receive timeout.");
+				CAMsg::printMsg(LOG_DEBUG,"AI login: client receive timeout.\n");
 				aiLoginStatus = AUTH_LOGIN_FAILED;
 				break;
 			}
