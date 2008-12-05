@@ -287,7 +287,7 @@ SINT32 CACertificate::removeColons(UINT8* a_cSkid, UINT32 a_cSkidLen, UINT8 *&r_
         r_ski[i-j] = a_cSkid[i];
     }
     r_ski[i-j] = 0;
-    *r_skiLen = i-j-1;
+    *r_skiLen = i-j;
     return E_SUCCESS;
 }
 

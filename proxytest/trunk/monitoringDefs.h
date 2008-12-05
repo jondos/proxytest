@@ -1,5 +1,36 @@
+/*
+Copyright (c) The JAP-Team, JonDos GmbH
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright notice,
+       this list of conditions and the following disclaimer in the documentation and/or
+       other materials provided with the distribution.
+    * Neither the name of the University of Technology Dresden, Germany, nor the name of
+       the JonDos GmbH, nor the names of their contributors may be used to endorse or
+       promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 #ifndef MONITORING_DEFS_H_
 #define MONITORING_DEFS_H_
+
+/**
+ * All state and transition definitions can be found here
+ */
 
 /* How many different status types exist*/
 #ifdef PAYMENT
@@ -9,9 +40,9 @@
 	#define NR_PAYMENT_STATES 9
 	#define NR_PAYMENT_EVENTS 7
 #else
-	#define NR_STATUS_TYPES 2	
+	#define NR_STATUS_TYPES 2
 #endif
-	
+
 #define NETWORKING_STATUS_NAME "NetworkingStatus"
 #define NR_NETWORKING_STATES 11
 #define NR_NETWORKING_EVENTS 11
@@ -39,35 +70,35 @@
 
 #define XML_STATUS_MESSAGE_START "<StatusMessage>"
 #define HTTP_ANSWER_PREFIX_FORMAT "HTTP/1.1 200 OK\nContent-Length: %u\nConnection: close\nContent-Type: text/xml; charset=UTF-8\n\n"
-			
+
 #define HTTP_ANSWER_PREFIX_MAX_LENGTH 100
 
 #define EVER 1
 
 static const int EVENT_COUNT[NR_STATUS_TYPES] =
 {
-		NR_NETWORKING_EVENTS, 
+		NR_NETWORKING_EVENTS,
 #ifdef PAYMENT
-		NR_PAYMENT_EVENTS, 
+		NR_PAYMENT_EVENTS,
 #endif
 		NR_SYSTEM_EVENTS
 };
 
 static const int STATE_COUNT[NR_STATUS_TYPES] =
 {
-		NR_NETWORKING_STATES, 
+		NR_NETWORKING_STATES,
 #ifdef PAYMENT
-		NR_PAYMENT_STATES, 
+		NR_PAYMENT_STATES,
 #endif
 		NR_SYSTEM_STATES
 };
 
 static const char *STATUS_NAMES[NR_STATUS_TYPES] =
 {
-		NETWORKING_STATUS_NAME, 
+		NETWORKING_STATUS_NAME,
 #ifdef PAYMENT
-		PAYMENT_STATUS_NAME, 
-#endif		
+		PAYMENT_STATUS_NAME,
+#endif
 		SYSTEM_STATUS_NAME
 };
 
@@ -81,19 +112,19 @@ enum state_type
 	st_ignore = -1,
 	/* networking states */
 	st_net_entry = 0,
-	st_net_firstMixInit, st_net_firstMixConnectedToNext, st_net_firstMixOnline , 
-	st_net_middleMixInit, st_net_middleMixConnectedToPrev, 
+	st_net_firstMixInit, st_net_firstMixConnectedToNext, st_net_firstMixOnline ,
+	st_net_middleMixInit, st_net_middleMixConnectedToPrev,
 	st_net_middleMixConnectedToNext, st_net_middleMixOnline,
 	st_net_lastMixInit, st_net_lastMixConnectedToPrev, st_net_lastMixOnline,
 #ifdef PAYMENT
 	/* payment states */
-	st_pay_entry = 0, 
+	st_pay_entry = 0,
 	st_pay_aiInit, st_pay_aiShutdown,
 	st_pay_biAvailable, st_pay_biUnreachable, st_pay_biPermanentlyUnreachable,
 	st_pay_dbError, st_pay_dbErrorBiUnreachable, st_pay_dbErrorBiPermanentlyUnreachable,
 #endif
 	/* system states */
-	st_sys_entry = 0, 
+	st_sys_entry = 0,
 	st_sys_initializing, st_sys_operating, st_sys_restarting,
 	st_sys_shuttingDown, st_sys_ShuttingDownAfterSegFault
 };
@@ -101,9 +132,9 @@ enum state_type
 enum status_type
 {
 	stat_undef = -1,
-	stat_networking = 0, 
+	stat_networking = 0,
 #ifdef PAYMENT
-	stat_payment, 
+	stat_payment,
 #endif
 	stat_system,
 	stat_all
@@ -113,13 +144,13 @@ enum event_type
 {
 	/* networking events */
 	ev_net_firstMixInited = 0, ev_net_middleMixInited , ev_net_lastMixInited,
-	ev_net_prevConnected, ev_net_nextConnected, 
+	ev_net_prevConnected, ev_net_nextConnected,
 	ev_net_prevConnectionClosed, ev_net_nextConnectionClosed,
 	ev_net_keyExchangePrevSuccessful, ev_net_keyExchangeNextSuccessful,
 	ev_net_keyExchangePrevFailed, ev_net_keyExchangeNextFailed,
-#ifdef PAYMENT	
+#ifdef PAYMENT
 	/* payment events */
-	ev_pay_aiInited = 0, ev_pay_aiShutdown, 
+	ev_pay_aiInited = 0, ev_pay_aiShutdown,
 	ev_pay_biConnectionSuccess, ev_pay_biConnectionFailure, ev_pay_biConnectionCriticalSubseqFailures,
 	ev_pay_dbConnectionSuccess, ev_pay_dbConnectionFailure,
 #endif
@@ -173,8 +204,8 @@ typedef struct event event_t;
 			FINISH_PAYMENT_EVENT_DEFINITIONS(event_array) \
 			FINISH_SYSTEM_EVENT_DEFINITIONS(event_array)
 
-/* networking states description and transition assignment 
- * new networking state definitions can be appended here 
+/* networking states description and transition assignment
+ * new networking state definitions can be appended here
  * (after being declared as networking enum state_type)
  */
 #define FINISH_NETWORKING_STATE_DEFINITIONS(state_array) \
@@ -210,7 +241,7 @@ typedef struct event event_t;
 		  			TRANS_NET_LAST_MIX_CONNECTED_TO_PREV, stl_warning) \
 		  	NET_STATE_DEF(state_array, st_net_lastMixOnline, \
 		  			"last mix online", \
-					TRANS_NET_LAST_MIX_ONLINE, stl_ok) 
+					TRANS_NET_LAST_MIX_ONLINE, stl_ok)
 
 /* networking events descriptions */
 #define FINISH_NETWORKING_EVENT_DEFINITIONS(event_array) \
@@ -236,10 +267,10 @@ typedef struct event event_t;
 					"connection to previous mix closed") \
 			NET_EVENT_DEF(event_array, ev_net_nextConnectionClosed, \
 					"connection to next mix closed")
-		
+
 #ifdef PAYMENT
-	/* payment states description and transition assignment 
-	 * new payment state definitions can be appended here 
+	/* payment states description and transition assignment
+	 * new payment state definitions can be appended here
 	 * (after being declared as payment enum state_type)
 	 */
 	#define FINISH_PAYMENT_STATE_DEFINITIONS(state_array) \
@@ -288,12 +319,12 @@ typedef struct event event_t;
 				PAY_EVENT_DEF(event_array, ev_pay_dbConnectionFailure, \
   						"pay DB access failed")
 #else
-	#define FINISH_PAYMENT_STATE_DEFINITIONS(state_array) 
+	#define FINISH_PAYMENT_STATE_DEFINITIONS(state_array)
 	#define FINISH_PAYMENT_EVENT_DEFINITIONS(event_array)
 #endif /* PAYMENT */
 
-/* system states description and transition assignment 
- * new system state definitions can be appended here 
+/* system states description and transition assignment
+ * new system state definitions can be appended here
  * (after being declared as system enum state_type)
  */
 #define FINISH_SYSTEM_STATE_DEFINITIONS(state_array) \
@@ -330,7 +361,7 @@ typedef struct event event_t;
 					"mix caught SIG_INT") \
 			SYS_EVENT_DEF(event_array, ev_sys_sigSegV, \
 					"mix caught SIG_SEGV")
-					
+
 /* conveinience macros for special status state and event definitions */
 #define NET_STATE_DEF(state_array, state_type, description, transitions, stateLevel) \
 			STATE_DEF(state_array, stat_networking, state_type, description, transitions, stateLevel)
@@ -341,7 +372,7 @@ typedef struct event event_t;
 #ifdef PAYMENT
 	#define PAY_STATE_DEF(state_array, state_type, description, transitions, stateLevel) \
 				STATE_DEF(state_array, stat_payment, state_type, description, transitions, stateLevel)
-	
+
 	#define PAY_EVENT_DEF(event_array, event_type, description) \
 				EVENT_DEF(event_array, stat_payment, event_type, description)
 #else
@@ -355,26 +386,26 @@ typedef struct event event_t;
 #define SYS_EVENT_DEF(event_array, event_type, description) \
 			EVENT_DEF(event_array, stat_system, event_type, description)
 
-/* This macro is used for assigning state description and state transitions 
+/* This macro is used for assigning state description and state transitions
  * to the initialized states in fucnction initStates
  */
 #define STATE_DEF(state_array, status_type, state_type, description, transitions, stateLevel) \
 			state_array[status_type][state_type]->st_description = description; \
 			state_array[status_type][state_type]->st_transitions = transitions; \
 			state_array[status_type][state_type]->st_stateLevel = stateLevel;
-/* Same for events description assignment */ 
+/* Same for events description assignment */
 #define EVENT_DEF(event_array, status_type, event_type, description) \
 			event_array[status_type][event_type]->ev_description  = description;
 
 /**
  * a conveinience function for easily defining state transitions
- * @param s_type the status type of the state for which the transitions 
+ * @param s_type the status type of the state for which the transitions
  * 		  are to be defined
  * @param transitionCount the number of transitions to define
- * @param ... an event_type (of type event_type_t) followed by a 
- * 		  state transition (of type transition_t) 
+ * @param ... an event_type (of type event_type_t) followed by a
+ * 		  state transition (of type transition_t)
  * 		  IMPORTANT: an event type MUST be followed by a state transition!
- * @return pointer to the array where the transitions are stored, (which of course 
+ * @return pointer to the array where the transitions are stored, (which of course
  * 			has to be disposed by delete[] when reference is not needed anymore)!
  */
 transition_t *defineTransitions(status_type_t s_type, int transitionCount, ...);
@@ -393,7 +424,7 @@ transition_t *defineTransitions(status_type_t s_type, int transitionCount, ...);
 	(defineTransitions(stat_networking, 1, \
 			ev_net_nextConnected, st_net_firstMixConnectedToNext))
 
-/* transitions for st_net_firstMixConnectedToNext: */							
+/* transitions for st_net_firstMixConnectedToNext: */
 #define TRANS_NET_FIRST_MIX_CONNECTED_TO_NEXT \
 	(defineTransitions(stat_networking, 2, \
 			ev_net_keyExchangeNextSuccessful, st_net_firstMixOnline, \
@@ -428,7 +459,7 @@ transition_t *defineTransitions(status_type_t s_type, int transitionCount, ...);
 	(defineTransitions(stat_networking, 2, \
 			ev_net_prevConnectionClosed, st_net_middleMixInit, \
 			ev_net_nextConnectionClosed, st_net_middleMixInit))
-			
+
 /* transitions for st_net_lastMixInit: */
 #define TRANS_NET_LAST_MIX_INIT \
 	(defineTransitions(stat_networking, 1, \
@@ -439,8 +470,8 @@ transition_t *defineTransitions(status_type_t s_type, int transitionCount, ...);
 	(defineTransitions(stat_networking, 2, \
 			ev_net_keyExchangePrevFailed, st_net_lastMixInit, \
 			ev_net_keyExchangePrevSuccessful, st_net_lastMixOnline))
-			
-			
+
+
 /* transitions for st_net_lastMixOnline: */
 #define TRANS_NET_LAST_MIX_ONLINE \
 	(defineTransitions(stat_networking, 1, \
@@ -495,19 +526,19 @@ transition_t *defineTransitions(status_type_t s_type, int transitionCount, ...);
 	(defineTransitions(stat_payment, 2, \
 			ev_pay_aiShutdown, st_pay_aiShutdown, \
 			ev_pay_dbConnectionSuccess, st_pay_aiInit))
-			
+
 /* transitions for st_pay_dbErrorBiUnreachable */
 #define TRANS_PAY_DB_ERROR_BI_UNREACHABLE \
 	(defineTransitions(stat_payment, 2, \
 			ev_pay_aiShutdown, st_pay_aiShutdown, \
 			ev_pay_dbConnectionSuccess, st_pay_biUnreachable))
-			
+
 /* transitions for st_pay_dbErrorBiPermanentlyUnreachable */
 #define TRANS_PAY_DB_ERROR_BI_PERMANENTLY_UNREACHABLE \
 	(defineTransitions(stat_payment, 2, \
 			ev_pay_aiShutdown, st_pay_aiShutdown, \
 			ev_pay_dbConnectionSuccess, st_pay_biPermanentlyUnreachable))
-			
+
 #endif /* PAYMENT */
 
 /** SYSTEM STATE TRANSITIONS **/

@@ -37,53 +37,53 @@ class CASocket:public CAClientSocket
 		CASocket(bool bIsReserved=false);
 			~CASocket(){close();}
 
-			SINT32 create();						
-		    SINT32 create(bool a_bShowTypicalError);
-			SINT32 create(int type);
+			virtual SINT32 create();						
+			virtual SINT32 create(bool a_bShowTypicalError);
+			virtual SINT32 create(int type);
 
-			SINT32 listen(const CASocketAddr& psa);
-			SINT32 listen(UINT16 port);
-			SINT32 accept(CASocket &s);
+			virtual SINT32 listen(const CASocketAddr& psa);
+			virtual SINT32 listen(UINT16 port);
+			virtual SINT32 accept(CASocket &s);
 			
-			SINT32 connect(const CASocketAddr& psa)
+			virtual SINT32 connect(const CASocketAddr& psa)
 			{
 				return connect(psa,1,0);
 			}
-			SINT32 connect(const CASocketAddr& psa,UINT32 retry,UINT32 sWaitTime);
-			SINT32 connect(const CASocketAddr& psa,UINT32 msTimeOut);
+			virtual SINT32 connect(const CASocketAddr& psa,UINT32 retry,UINT32 sWaitTime);
+			virtual SINT32 connect(const CASocketAddr& psa,UINT32 msTimeOut);
 			
-			SINT32 close();
+			virtual SINT32 close();
 /* it seems that this function is not used:
-			SINT32 close(UINT32 mode);*/
-			SINT32 send(const UINT8* buff,UINT32 len);
-			SINT32 sendFully(const UINT8* buff,UINT32 len);
-			SINT32 sendFullyTimeOut(const UINT8* buff,UINT32 len, UINT32 msTimeOut, UINT32 msTimeOutSingleSend);
-			SINT32 sendTimeOut(const UINT8* buff,UINT32 len,UINT32 msTimeOut);
-			SINT32 receive(UINT8* buff,UINT32 len);
-			SINT32 receiveFullyT(UINT8* buff,UINT32 len,UINT32 msTimeOut);
-			SINT32 receiveLine(UINT8* line, UINT32 maxLen, UINT32 msTimeOut);
+			virtual SINT32 close(UINT32 mode);*/
+			virtual SINT32 send(const UINT8* buff,UINT32 len);
+			virtual SINT32 sendFully(const UINT8* buff,UINT32 len);
+			virtual SINT32 sendFullyTimeOut(const UINT8* buff,UINT32 len, UINT32 msTimeOut, UINT32 msTimeOutSingleSend);
+			virtual SINT32 sendTimeOut(const UINT8* buff,UINT32 len,UINT32 msTimeOut);
+			virtual SINT32 receive(UINT8* buff,UINT32 len);
+			virtual SINT32 receiveFullyT(UINT8* buff,UINT32 len,UINT32 msTimeOut);
+			virtual SINT32 receiveLine(UINT8* line, UINT32 maxLen, UINT32 msTimeOut);
 			/** Returns the number of the Socket used. Which will be always the same number,
 				* even after close(), until the Socket
 				* is recreated using create()
 				* @return number of the associated socket
 			**/
 			operator SOCKET(){return m_Socket;}
-			SINT32 getLocalPort();
-			SINT32 getPeerIP(UINT8 ip[4]);
-			SINT32 setReuseAddr(bool b);
+			virtual SINT32 getLocalPort();
+			virtual SINT32 getPeerIP(UINT8 ip[4]);
+			virtual SINT32 setReuseAddr(bool b);
 			//SINT32 setRecvLowWat(UINT32 r);
 			//SINT32 setSendLowWat(UINT32 r);
 			//SINT32 getSendLowWat();
-			SINT32 setSendTimeOut(UINT32 msTimeOut);
-			SINT32 getSendTimeOut();
-			SINT32 setRecvBuff(UINT32 r);
-			SINT32 getRecvBuff();
-			SINT32 setSendBuff(SINT32 r);
-			SINT32 getSendBuff();
-			SINT32 setKeepAlive(bool b);
-			SINT32 setKeepAlive(UINT32 sec);
-			SINT32 setNonBlocking(bool b);
-			SINT32 getNonBlocking(bool* b);
+			virtual SINT32 setSendTimeOut(UINT32 msTimeOut);
+			virtual SINT32 getSendTimeOut();
+			virtual SINT32 setRecvBuff(UINT32 r);
+			virtual SINT32 getRecvBuff();
+			virtual SINT32 setSendBuff(SINT32 r);
+			virtual SINT32 getSendBuff();
+			virtual SINT32 setKeepAlive(bool b);
+			virtual SINT32 setKeepAlive(UINT32 sec);
+			virtual SINT32 setNonBlocking(bool b);
+			virtual SINT32 getNonBlocking(bool* b);
 			
 			/** Sets the max number of allowed "normal" sockets.
 				* @retval E_SUCCESS if call was successful
@@ -101,11 +101,11 @@ class CASocket:public CAClientSocket
 				*@retval E_UNKNOWN in case of some unexpected error
 			*/
 			static SINT32 getMaxOpenSockets();
-			bool isClosed()
+			virtual bool isClosed()
 			{
 				return m_bSocketIsClosed;
 			}
-			SINT32 getLocalIP(UINT32* r_Ip);
+			virtual SINT32 getLocalIP(UINT32* r_Ip);
 			
 		protected:
 	///check	

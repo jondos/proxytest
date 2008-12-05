@@ -28,7 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CAHTTPCLIENT_HPP
 #define __CAHTTPCLIENT_HPP
 
-#include "CAClientSocket.hpp"
+#include "CASocket.hpp"
 #include "CAMsg.hpp"
 
 /**
@@ -43,7 +43,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 class CAHttpClient
 {
 public:
-	CAHttpClient(CAClientSocket * pSocket)
+	CAHttpClient(CASocket * pSocket)
 		{
 			m_pSocket = pSocket;
 		}
@@ -55,7 +55,7 @@ public:
 
 	~CAHttpClient() {}
 	
-	SINT32 setSocket(CAClientSocket* pSocket)
+	SINT32 setSocket(CASocket* pSocket)
 		{
 			m_pSocket = pSocket;
 			return E_SUCCESS;
@@ -91,7 +91,7 @@ public:
 	 * @retval E_UNKNOWN if the server returned a http errorcode
 	 * TODO: Verify that "HTTP/1.1 200 OK" must be the first line!
 	 */
-	SINT32 parseHTTPHeader(UINT32* contentLength, UINT32 * statusCode=NULL);
+	SINT32 parseHTTPHeader(UINT32* contentLength, UINT32 * statusCode=NULL, UINT32 msTimeOut=3000);
 	
 	/** Retruns the content of the response*/
 	SINT32 getContent(UINT8* a_pContent, UINT32* a_pLength);
@@ -99,7 +99,7 @@ public:
 private:
 
 	/** the socket connection to the http server */
-	CAClientSocket * m_pSocket;
+	CASocket * m_pSocket;
 };
 
 #endif

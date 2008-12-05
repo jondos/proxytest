@@ -38,14 +38,16 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMix.hpp"
 #include "CAListenerInterface.hpp"
 #include "CAXMLBI.hpp"
-#include "CAXMLPriceCert.hpp"  
-#ifdef LOG_CRIME
+#include "CAXMLPriceCert.hpp"
+//#ifdef LOG_CRIME
 	#include "tre/regex.h"
-#endif
+//#endif
 
+#define TMP_BUFF_SIZE 255
+#define REGEXP_BUFF_SIZE 4096
 
-#define TARGET_MIX					1
-#define TARGET_HTTP_PROXY		2
+#define TARGET_MIX			1
+#define TARGET_HTTP_PROXY	2
 #define TARGET_SOCKS_PROXY	3
 
 // LERNGRUPPE moved this define from CACmdLnOptions.cpp
@@ -53,6 +55,154 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define DEFAULT_CONFIG_FILE "default.xml"
 #define MIN_INFOSERVICES 1
 // END LERNGRUPPE
+
+#define WITH_SUBTREE true
+#define WITHOUT_SUBTREE (!(WITHSUBTREE))
+
+
+/* General Option definitions */
+#define OPTIONS_NODE_GENERAL "General"
+
+#define OPTIONS_NODE_MIX_TYPE "MixType"
+#define OPTIONS_NODE_MIX_NAME "MixName"
+#define OPTIONS_NODE_MIX_ID	"MixID"
+#define OPTIONS_NODE_DYNAMIC_MIX "Dynamic"
+#define OPTIONS_NODE_MIN_CASCADE_LENGTH "MinCascadeLength"
+#define OPTIONS_NODE_CASCADE_NAME "CascadeName"
+#define OPTIONS_NODE_USER_ID "UserID"
+#define OPTIONS_NODE_FD_NR "NrOfFileDescriptors"
+#define OPTIONS_NODE_DAEMON "Daemon"
+#define OPTIONS_NODE_MAX_USERS "MaxUsers"
+#define OPTIONS_NODE_LOGGING "Logging"
+#define OPTIONS_NODE_LOGGING_FILE "File"
+#define OPTIONS_ATTRIBUTE_LOGGING_MAXFILESIZE "MaxFileSize"
+#define OPTIONS_NODE_SYSLOG "Syslog"
+#define OPTIONS_NODE_ENCRYPTED_LOG "EncryptedLog"
+#define OPTIONS_NODE_LOGGING_KEYINFO "KeyInfo"
+#define OPTIONS_NODE_DESCRIPTION "Description"
+#define OPTIONS_ATTRIBUTE_NAME_FOR_CASCADE "forCascade"
+
+/* values for the operator OPTIONS_NODE_MIX_NAME */
+#define OPTIONS_VALUE_OPERATOR_NAME "Operator"
+#define OPTIONS_VALUE_MIX_NAME "Mix"
+#define OPTIONS_VALUE_NAMETYPE_DEFAULT OPTIONS_VALUE_MIX_NAME
+
+/* Certificate Option definitions */
+#define OPTIONS_NODE_CERTIFICATE_LIST "Certificates"
+
+#define OPTIONS_NODE_OWN_CERTIFICATE "OwnCertificate"
+#define OPTIONS_NODE_OWN_OPERATOR_CERTIFICATE "OperatorOwnCertificate"
+#define OPTIONS_NODE_ELEMENT_X509CERT "X509Certificate"
+#define OPTIONS_NODE_NEXT_MIX_CERTIFICATE "NextMixCertificate"
+#define OPTIONS_NODE_NEXT_OPERATOR_CERTIFICATE "NextOperatorCertificate"
+#define OPTIONS_NODE_PREV_MIX_CERTIFICATE "PrevMixCertificate"
+#define OPTIONS_NODE_PREV_OPERATOR_CERTIFICATE "PrevOperatorCertificate"
+#define OPTIONS_NODE_X509DATA "X509Data"
+#define OPTIONS_NODE_SIGNATURE "Signature"
+
+
+/* Accounting Option definitions */
+#define OPTIONS_NODE_ACCOUNTING "Accounting"
+
+#define OPTIONS_NODE_PRICE_CERTIFICATE "PriceCertificate"
+#define OPTIONS_NODE_PAYMENT_INSTANCE CAXMLBI::getXMLElementName()
+#define OPTIONS_NODE_AI_SOFT_LIMIT "SoftLimit"
+#define OPTIONS_NODE_AI_HARD_LIMIT "HardLimit"
+#define OPTIONS_NODE_SETTLE_IVAL "SettleInterval"
+#define OPTIONS_NODE_PREPAID_IVAL "PrepaidInterval"
+#define OPTIONS_NODE_PREPAID_IVAL_KB "PrepaidIntervalKbytes"
+#define OPTIONS_NODE_AI_DB "Database"
+#define OPTIONS_NODE_AI_DB_HOST "Host"
+#define OPTIONS_NODE_AI_DB_PORT "Port"
+#define OPTIONS_NODE_AI_DB_NAME "DBName"
+#define OPTIONS_NODE_AI_DB_USER "Username"
+#define OPTIONS_NODE_AI_DB_PASSW "Password"
+
+#define OPTIONS_DEFAULT_PREPAID_IVAL 3000000 //3 MB as safe default if not explicitly set in config file
+
+#define OPTIONS_NODE_NETWORK "Network"
+
+#define OPTIONS_NODE_INFOSERVICE_LIST "InfoServices"
+#define OPTIONS_NODE_INFOSERVICE "InfoService"
+#define OPTIONS_NODE_ALLOW_AUTO_CONF "AllowAutoConfiguration"
+#define OPTIONS_NODE_LISTENER_INTERFACES CAListenerInterface::XML_ELEMENT_CONTAINER_NAME
+#define OPTIONS_NODE_NEXT_MIX "NextMix"
+#define OPTIONS_NODE_NETWORK_PROTOCOL "NetworkProtocol"
+#define OPTIONS_NODE_IP "IP"
+#define OPTIONS_NODE_PROXY_LIST "Proxies"
+#define OPTIONS_NODE_PROXY "Proxy"
+#define OPTIONS_NODE_PROXY_TYPE "ProxyType"
+#define OPTIONS_NODE_SERVER_MONITORING "ServerMonitoring"
+#define OPTIONS_NODE_VISIBLE_ADDRESS_LIST "VisibleAddresses"
+#define OPTIONS_NODE_VISIBLE_ADDRESS "VisibleAddress"
+#define OPTIONS_NODE_LISTENER_INTERFACE_LIST CAListenerInterface::XML_ELEMENT_CONTAINER_NAME
+#define OPTIONS_NODE_LISTENER_INTERFACE CAListenerInterface::XML_ELEMENT_NAME
+#define OPTIONS_NODE_KEEP_ALIVE "KeepAlive"
+#define OPTIONS_NODE_KEEP_ALIVE_SEND_IVAL "SendInterval"
+#define OPTIONS_NODE_KEEP_ALIVE_RECV_IVAL "ReceiveInterval"
+#define OPTIONS_NODE_IP "IP"
+#define OPTIONS_NODE_HOST "Host"
+#define OPTIONS_NODE_PORT "Port"
+#define OPTIONS_NODE_FILE "File"
+#define OPTIONS_NODE_PERFORMANCE_TEST "PerformanceTest"
+#define OPTIONS_ATTRIBUTE_PERFTEST_ENABLED "enabled"
+
+#define OPTIONS_NODE_RESSOURCES "Ressources"
+
+#define OPTIONS_NODE_UNLIMIT_TRAFFIC "UnlimitTraffic"
+#define OPTIONS_NODE_BYTES_PER_IVAL "BytesPerIntervall"
+#define OPTIONS_NODE_DELAY_IVAL "Intervall"
+#define OPTIONS_NODE_LATENCY "Latency"
+
+#define OPTION_NODE_TNCS_LIST "TermsAndConditionsList"
+#define OPTION_NODE_TNCS "TermsAndConditions"
+#define OPTION_ATTRIBUTE_TNC_DATE "date"
+#define OPTION_ATTRIBUTE_TNC_SERIAL "serial"
+#define OPTION_ATTRIBUTE_TNC_LOCALE "locale"
+#define OPTION_ATTRIBUTE_TNC_ID "id"
+
+#define OPTIONS_NODE_CRIME_DETECTION "CrimeDetection"
+
+#define OPTIONS_NODE_CRIME_REGEXP_URL "RegExpURL"
+#define OPTIONS_NODE_CRIME_REGEXP_PAYLOAD "RegExpPayload"
+
+#define MIXINFO_NODE_PARENT "Mix"
+#define MIXINFO_NODE_MIX_NAME "Name"
+#define MIXINFO_NODE_SOFTWARE "Software"
+#define MIXINFO_NODE_VERSION "Version"
+
+#define MIXINFO_ATTRIBUTE_MIX_ID "id"
+
+#define LOG_NODE_NOT_FOUND(Nodename) \
+	CAMsg::printMsg(LOG_CRIT,"No \"%s\" node found in configuration file!\n", (Nodename))
+
+#define LOG_NODE_EMPTY_OR_INVALID(Nodename) \
+	CAMsg::printMsg(LOG_CRIT,"Node \"%s\" is empty or has invalid content!\n", (Nodename))
+
+#define LOG_NODE_WRONG_PARENT(Parentname, Childname) \
+	CAMsg::printMsg(LOG_CRIT,"\"%s\" is the wrong parent for Node \"%s\"\n", (Parentname), (Childname))
+
+
+#define ASSERT_PARENT_NODE_NAME(Parentname, NameToMatch, Childname) 	\
+	if(!equals((Parentname), (NameToMatch) )) 			\
+	{											 		\
+		char *parentName = XMLString::transcode(Parentname); \
+		LOG_NODE_WRONG_PARENT(parentName, Childname);	\
+		XMLString::release(&parentName);				\
+		return E_UNKNOWN;								\
+	}
+
+#define ASSERT_GENERAL_OPTIONS_PARENT(Parentname, Childname) \
+	ASSERT_PARENT_NODE_NAME(Parentname, OPTIONS_NODE_GENERAL, Childname)
+
+#define ASSERT_CERTIFICATES_OPTIONS_PARENT(Parentname, Childname) \
+	ASSERT_PARENT_NODE_NAME(Parentname, OPTIONS_NODE_CERTIFICATE_LIST, Childname)
+
+#define ASSERT_ACCOUNTING_OPTIONS_PARENT(Parentname, Childname) \
+	ASSERT_PARENT_NODE_NAME(Parentname, OPTIONS_NODE_ACCOUNTING, Childname)
+
+#define ASSERT_NETWORK_OPTIONS_PARENT(Parentname, Childname) \
+	ASSERT_PARENT_NODE_NAME(Parentname, OPTIONS_NODE_NETWORK, Childname)
 
 struct t_TargetInterface
 	{
@@ -64,6 +214,9 @@ struct t_TargetInterface
 typedef struct t_TargetInterface TargetInterface;
 
 THREAD_RETURN threadReConfigure(void *param);
+
+class CACmdLnOptions;
+typedef SINT32 (CACmdLnOptions::*optionSetter_pt)(DOMElement *);
 
 class CACmdLnOptions
     {
@@ -177,33 +330,28 @@ class CACmdLnOptions
 				if(m_pPriceCertificate != NULL)
 				{
 					return m_pPriceCertificate;
-				}	
+				}
 				return NULL;
 			}
-#endif				
-				
+#endif
+
 #ifdef COUNTRY_STATS
 			SINT32 getCountryStatsDBConnectionLoginData(char** db_host,char**db_user,char**db_passwd);
 #endif
-			/** Returns a COPY of the Operator Certificate that mix.
+			/** Returns a COPY of the Operator Certificate of that mix.
 				* @return opCerts
 				*/
-			CACertificate** getOpCertificates(UINT32& r_length) const
+			CACertificate* getOpCertificate() const
 			{
-				if(m_OpCerts!=NULL && m_OpCertsLength > 0)
+				if( m_OpCert != NULL )
 				{
-					CACertificate** opCerts = new CACertificate*[m_OpCertsLength];
-					for (UINT32 i = 0; i < m_OpCertsLength; i++)
-					{
-						opCerts[i] = m_OpCerts[i]->clone();
-					}
-					r_length = m_OpCertsLength;
-					return opCerts;
+					return m_OpCert->clone();
 				}
-				r_length = 0;
 				return NULL;
 			}
-
+			
+			SINT32 getOperatorSubjectKeyIdentifier(UINT8 *buffer, UINT32 *length);
+			
 			bool hasPrevMixTestCertificate()
 				{
 					return m_pPrevMixCertificate!=NULL;
@@ -237,7 +385,7 @@ class CACmdLnOptions
 			{
 				return m_bSyslog;
 			}
-			
+
 			/** Set to true if the encrpyted log could/should be used**/
 			SINT32 enableEncryptedLog(bool b)
 			{
@@ -259,7 +407,7 @@ class CACmdLnOptions
 			}
 
 			SINT32 getCascadeName(UINT8* name,UINT32 len) const;
-    
+
 			// added by ronin <ronin2@web.de>
 			SINT32 setCascadeName(const UINT8* name)
 			{
@@ -277,7 +425,9 @@ class CACmdLnOptions
 		/** Get the XML describing the Mix. this is not a string!*/
 			//SINT32 getMixXml(UINT8* strxml,UINT32* len);
 			SINT32 getMixXml(XERCES_CPP_NAMESPACE::DOMDocument* & docMixInfo);
-			
+
+			XERCES_CPP_NAMESPACE::DOMElement *getTermsAndConditions();
+
 			UINT32 getKeepAliveSendInterval()
 				{
 				return m_u32KeepAliveSendInterval;
@@ -290,8 +440,8 @@ class CACmdLnOptions
 			bool isInfoServiceEnabled()
 				{
 					return (m_addrInfoServicesSize>0);
-				}			
-#endif //ONLY_LOCAL_PROXY			
+				}
+#endif //ONLY_LOCAL_PROXY
 			bool getCompressLogs()
 				{
 					return m_bCompressedLogs;
@@ -305,20 +455,23 @@ class CACmdLnOptions
 
 			SINT32 getUser(UINT8* user,UINT32 len);
 			SINT32 getPidFile(UINT8* pidfile,UINT32 len);
-
+			
 #ifdef SERVER_MONITORING
 			char *getMonitoringListenerHost();
 			UINT16 getMonitoringListenerPort();
 #endif /* SERVER_MONITORING */
-					
+
 			bool isLocalProxy();
 			bool isFirstMix();
 			bool isMiddleMix();
 			bool isLastMix();
+			
+			bool isPerformanceTestEnabled();
+			
 			bool isSock5sSupported()
 			{
 				return m_bSocksSupport;
-			}				
+			}
 
 
 			bool getAutoReconnect()
@@ -336,7 +489,7 @@ class CACmdLnOptions
 				*len=m_nCrimeRegExpsURL;
 				return m_arCrimeRegExpsURL;
 			}
-			
+
 			regex_t* getCrimeRegExpsPayload(UINT32* len)
 			{
 				*len=m_nCrimeRegExpsPayload;
@@ -346,29 +499,29 @@ class CACmdLnOptions
 
 #if defined(DELAY_CHANNELS)||defined(DELAY_USERS)
 			UINT32 getDelayChannelUnlimitTraffic()
-				{
-					return m_u32DelayChannelUnlimitTraffic;
-				}	
+			{
+				return m_u32DelayChannelUnlimitTraffic;
+			}
 			UINT32 getDelayChannelBucketGrow()
-				{
-					return m_u32DelayChannelBucketGrow;
-				}
+			{
+				return m_u32DelayChannelBucketGrow;
+			}
 			UINT32 getDelayChannelBucketGrowIntervall()
-				{
-					return m_u32DelayChannelBucketGrowIntervall;
-				}
+			{
+				return m_u32DelayChannelBucketGrowIntervall;
+			}
 #endif
 
 #if defined(DELAY_CHANNELS_LATENCY)
 				/** Channel Latency in ms*/
 			UINT32 getDelayChannelLatency()
-				{
-					return m_u32DelayChannelLatency;
-				}	
+			{
+				return m_u32DelayChannelLatency;
+			}
 #endif
 
 
-#ifdef PAYMENT	
+#ifdef PAYMENT
 			// accounting database
 			SINT32 getDatabaseHost(UINT8 * host, UINT32 len);
 			UINT16 getDatabasePort();
@@ -379,9 +532,9 @@ class CACmdLnOptions
 			CAXMLBI* getBI();
 			SINT32 getPaymentHardLimit(UINT32 *pHardLimit);
 			SINT32 getPaymentSoftLimit(UINT32 *pSoftLimit);
-			SINT32 getPrepaidInterval(UINT32 *pPrepaidInterval); 
+			SINT32 getPrepaidInterval(UINT32 *pPrepaidInterval);
 			SINT32 getPaymentSettleInterval(UINT32 *pInterval);
-#endif	
+#endif
 
 
 #ifndef ONLY_LOCAL_PROXY
@@ -392,7 +545,7 @@ class CACmdLnOptions
 			bool acceptReconfiguration() { return m_bAcceptReconfiguration; }
 
 			friend THREAD_RETURN threadReConfigure(void *param);
-			
+
 			/** Writes a default configuration file into the file named by filename*/
 			static SINT32 createMixOnCDConfiguration(const UINT8* strFileName);
 		static SINT32 saveToFile(XERCES_CPP_NAMESPACE::DOMDocument* a_doc, const UINT8* a_strFileName);
@@ -475,13 +628,13 @@ class CACmdLnOptions
 			CAXMLPriceCert*	m_pPriceCertificate;
 #endif
 
-			CACertificate** m_OpCerts;
-			UINT32 m_OpCertsLength;
+			CACertificate* m_OpCert;
+			//UINT32 m_OpCertsLength;
 
 			CACertificate*	m_pPrevMixCertificate;
 			CACertificate*	m_pNextMixCertificate;
 			CACertificate*	m_pLogEncryptionCertificate;
-			
+
 			UINT32 m_maxNrOfUsers;
 
 			// added by ronin <ronin2@web.de>
@@ -489,9 +642,12 @@ class CACmdLnOptions
 			bool m_bAcceptReconfiguration;
 			XERCES_CPP_NAMESPACE::DOMDocument* m_docMixInfo;
 			XERCES_CPP_NAMESPACE::DOMDocument* m_docMixXml;
-			
+			DOMDocument* m_docOpTnCs;
+
 			UINT32 m_u32KeepAliveSendInterval;
 			UINT32 m_u32KeepAliveRecvInterval;
+			
+			bool m_perfTestEnabled;
 #endif //ONLY_LOCAL_PROXY
 
 			bool		m_bLocalProxy,m_bFirstMix,m_bMiddleMix,m_bLastMix;
@@ -507,9 +663,10 @@ class CACmdLnOptions
 			char*		m_strUser;
 			char*		m_strPidFile;
 			SINT32	m_nrOfOpenFiles; //How many open files (sockets) should we use
-    
+
 			//char*		m_strMixXml;
 			char*		m_strMixID;
+			char*		m_strMixName;
 
 			bool m_bIsEncryptedLogEnabled;
 
@@ -519,7 +676,7 @@ class CACmdLnOptions
 			UINT32								m_cnListenerInterfaces;
 			UINT8**								m_arStrVisibleAddresses;
 			UINT32								m_cnVisibleAddresses;
-	
+
 
 #ifdef LOG_CRIME
 			regex_t* m_arCrimeRegExpsURL;
@@ -528,13 +685,13 @@ class CACmdLnOptions
 			UINT32 m_nCrimeRegExpsPayload;
 #endif
 #if defined (DELAY_CHANNELS) ||defined(DELAY_USERS)
-		UINT32 m_u32DelayChannelUnlimitTraffic;	
-		UINT32 m_u32DelayChannelBucketGrow;	
-		UINT32 m_u32DelayChannelBucketGrowIntervall;	
+		UINT32 m_u32DelayChannelUnlimitTraffic;
+		UINT32 m_u32DelayChannelBucketGrow;
+		UINT32 m_u32DelayChannelBucketGrowIntervall;
 #endif
 
 #if defined (DELAY_CHANNELS_LATENCY)
-		UINT32 m_u32DelayChannelLatency;	
+		UINT32 m_u32DelayChannelLatency;
 #endif
 
 #ifdef PAYMENT
@@ -550,15 +707,24 @@ class CACmdLnOptions
 			UINT16 m_iDatabasePort;
 			UINT32 m_iPaymentHardLimit;
 			UINT32 m_iPaymentSoftLimit;
-			UINT32 m_iPrepaidInterval; 
+			UINT32 m_iPrepaidInterval;
 			UINT32 m_iPaymentSettleInterval;
+
+
 #endif
+			optionSetter_pt *mainOptionSetters;
+			optionSetter_pt *generalOptionSetters;
+			optionSetter_pt *certificateOptionSetters;
+			optionSetter_pt *accountingOptionSetters;
+			optionSetter_pt *networkOptionSetters;
+			optionSetter_pt *crimeDetectionOptionSetters;
+
 #ifdef SERVER_MONITORING
 		private:
 			char *m_strMonitoringListenerHost;
 			UINT16 m_iMonitoringListenerPort;
 #endif
-	
+
 		private:
 			SINT32 setNewValues(CACmdLnOptions& newOptions);
 #ifndef ONLY_LOCAL_PROXY
@@ -575,5 +741,83 @@ class CACmdLnOptions
 #endif //ONLY_LOCAL_PROXY
 			SINT32 clearTargetInterfaces();
 			SINT32 clearListenerInterfaces();
+
+
+
+/* NR of all Option types, i.e. General, Certificates, Networking, etc. (excluding *mainOptionSetters)
+ * these options are all direct children of <MixConfiguration>*/
+#define MAIN_OPTION_SETTERS_NR 8
+			SINT32 setGeneralOptions(DOMElement* elemRoot);
+			SINT32 setMixDescription(DOMElement* elemRoot); /* mix decription for the mix info */
+			SINT32 setCertificateOptions(DOMElement* elemRoot);
+			SINT32 setAccountingOptions(DOMElement *elemRoot);
+			SINT32 setNetworkOptions(DOMElement *elemRoot);
+			SINT32 setRessourceOptions(DOMElement *elemRoot);
+			SINT32 setTermsAndConditions(DOMElement *elemRoot);
+			SINT32 setCrimeDetectionOptions(DOMElement *elemRoot);
+
+			/* General Options */
+#define GENERAL_OPTIONS_NR 11
+			SINT32 setMixType(DOMElement* elemGeneral);
+			SINT32 setMixName(DOMElement* elemGeneral);
+			SINT32 setMixID(DOMElement* elemGeneral);
+			SINT32 setDynamicMix(DOMElement* elemGeneral);
+			SINT32 setMinCascadeLength(DOMElement* elemGeneral);
+			SINT32 setCascadeNameFromOptions(DOMElement* elemGeneral);
+			SINT32 setUserID(DOMElement* elemGeneral);
+			SINT32 setNrOfFileDescriptors(DOMElement* elemGeneral);
+			SINT32 setDaemonMode(DOMElement* elemGeneral);
+			SINT32 setMaxUsers(DOMElement* elemGeneral);
+			SINT32 setLoggingOptions(DOMElement* elemGeneral);
+
+			/* Certificate Options */
+#define CERTIFICATE_OPTIONS_NR 4
+			SINT32 setOwnCertificate(DOMElement *elemCertificates);
+			SINT32 setOwnOperatorCertificate(DOMElement *elemCertificates);
+			SINT32 setNextMixCertificate(DOMElement *elemCertificates);
+			SINT32 setPrevMixCertificate(DOMElement *elemCertificates);
+
+			/* Payment Options */
+#define ACCOUNTING_OPTIONS_NR 7
+			SINT32 setPriceCertificate(DOMElement *elemAccounting);
+			SINT32 setPaymentInstance(DOMElement *elemAccounting);
+			SINT32 setAccountingSoftLimit(DOMElement *elemAccounting);
+			SINT32 setAccountingHardLimit(DOMElement *elemAccounting);
+			SINT32 setPrepaidInterval(DOMElement *elemAccounting);
+			SINT32 setSettleInterval(DOMElement *elemAccounting);
+			SINT32 setAccountingDatabase(DOMElement *elemAccounting);
+
+			/* Network Options */
+#define NETWORK_OPTIONS_NR 6
+			SINT32 setInfoServices(DOMElement *elemNetwork);
+			SINT32 setListenerInterfaces(DOMElement *elemNetwork);
+			SINT32 setTargetInterfaces(DOMElement *elemNetwork);
+			SINT32 setServerMonitoring(DOMElement *elemNetwork);
+			SINT32 setKeepAliveTraffic(DOMElement *elemNetwork);
+			SINT32 setPerformanceTestEnabled(DOMElement *elemNetwork);
+			
+			/* Crime Logging Options */
+#define CRIME_DETECTION_OPTIONS_NR 2
+			SINT32 setCrimeURLRegExp(DOMElement *elemCrimeDetection);
+			SINT32 setCrimePayloadRegExp(DOMElement *elemCrimeDetection);
+
+			SINT32 appendMixInfo_internal(DOMNode* a_node, bool with_subtree);
+			inline SINT32 addMixIdToMixInfo();
+
+			SINT32 invokeOptionSetters
+					(optionSetter_pt *optionsSetters, DOMElement* target, SINT32 optionsSettersLength);
+
+			void initMainOptionSetters();
+			void initGeneralOptionSetters();
+			void initMixDescriptionSetters();
+			void initCertificateOptionSetters();
+			void initAccountingOptionSetters();
+			void initNetworkOptionSetters();
+			void initCrimeDetectionOptionSetters();
 	};
+
+SINT32 setRegExpressions(DOMElement *rootElement, const char* const childElementName,
+		regex_t **regExContainer, UINT32* regExNr);
+
 #endif
+

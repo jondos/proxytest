@@ -587,7 +587,7 @@ SINT32 CALastMixA::loop()
 
 
 //ERR:
-		CAMsg::printMsg(LOG_CRIT,"Seams that we are restarting now!!\n");
+		CAMsg::printMsg(LOG_CRIT,"Seems that we are restarting now!!\n");
 		m_bRunLog=false;		
 		//clean();
 

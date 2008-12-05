@@ -42,13 +42,14 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
  *  @author Bastian Voigt
  * @remark This class is not thread safe!
  */
-class CATLSClientSocket:public CAClientSocket
+class CATLSClientSocket:public CASocket
 {
 
 public: 
 	CATLSClientSocket();
 	~CATLSClientSocket();
 	SINT32 sendFully(const UINT8* buff,UINT32 len);
+	SINT32 send(const UINT8* buff,UINT32 len);
 	SINT32 receive(UINT8* buff,UINT32 len);
 	SINT32 close();
 
@@ -69,17 +70,17 @@ public:
 
 protected:
 
-	CASocket* getSocket()
+	/*CASocket* getSocket()
 	{
 		return m_pSocket;
-	}		
+	}*/		
 
 private:
 	SINT32 doTLSConnect(CASocketAddr &psa);
 	
 	SSL*						m_pSSL;
 	SSL_CTX*				m_pCtx;
-	CASocket*				m_pSocket;
+	//CASocket*				m_pSocket;
 	CACertificate*	m_pRootCert;
 	/** is the TLS layer established ? */
 	bool m_bConnectedTLS;

@@ -40,15 +40,16 @@ CATLSClientSocket::CATLSClientSocket()
 		m_pCtx = SSL_CTX_new( meth );
 		m_pSSL = NULL;
 		m_pRootCert=NULL;
-		m_pSocket=new CASocket();
+		//m_pSocket=new CASocket();
+		
 	}
 
 CATLSClientSocket::~CATLSClientSocket()
 	{
 		close();
 		SSL_CTX_free(m_pCtx);
-		delete m_pSocket;
-		m_pSocket = NULL;
+		//delete m_pSocket;
+		//m_pSocket = NULL;
 		delete m_pRootCert;
 		m_pRootCert = NULL;
 	}
@@ -69,7 +70,7 @@ SINT32 CATLSClientSocket::close()
 				SSL_free(m_pSSL);
 			}
 		m_pSSL=NULL;
-		return m_pSocket->close();
+		return CASocket::close();
 	}
 
 
@@ -99,15 +100,15 @@ SINT32 CATLSClientSocket::doTLSConnect(CASocketAddr &psa)
 			return E_UNKNOWN;
 
 		m_pSSL=SSL_new(m_pCtx);
-		// do the standard part of the ssl handshake	
-		int s=(SOCKET)*m_pSocket;
+		// do the standard part of the ssl handshake
 		#ifdef DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"my set fd socket is %i\n",s);
 		#endif
-		SSL_set_fd( m_pSSL, s );
+		SSL_set_fd( m_pSSL, m_Socket );
 		if((status = SSL_connect( m_pSSL )) != 1) 
 			{
-				CAMsg::printMsg(LOG_INFO,"CATLSClientSocket::doTLSConnect() failed! Reason: %i\n", status);
+				int err = SSL_get_error(m_pSSL, status);
+				CAMsg::printMsg(LOG_INFO,"CATLSClientSocket::doTLSConnect() failed! Reason: %i\n", err);
 				SSL_shutdown(m_pSSL);
 				close();
 				m_bConnectedTLS = false;
@@ -168,15 +169,47 @@ SINT32 CATLSClientSocket::connect(CASocketAddr & psa, UINT32 msTimeout)
 	{
 		SINT32 rc;
 		// call base class connect function
-		if( (rc=m_pSocket->connect(psa, msTimeout)) != E_SUCCESS)
+		if( (rc=CASocket::connect(psa, msTimeout)) != E_SUCCESS)
 		{
-			m_pSocket->close();
+			CASocket::close();
 			return rc;
 		}
 		// do our own connection initialisation (TLS handshake)
-		return doTLSConnect(psa);
+		rc = doTLSConnect(psa);
+		return rc;
 	}
 
+/** Sends all data over the network. This may block, until all data was sent.
+	@param buff the buffer of data to send
+	@param len content length
+	@retval E_UNKNOWN if an error occured
+	@retval E_SUCCESS if successfull
+*/
+SINT32 CATLSClientSocket::send(const UINT8* buff,UINT32 len)
+{
+	if(len==0)
+	{
+		return E_SUCCESS; //nothing to send
+	}
+	SINT32 ret=::SSL_write(m_pSSL,(char*)buff,len);
+	if(ret<0)
+	{	
+	  	int err = SSL_get_error(m_pSSL, ret);	
+		if ( (SSL_ERROR_WANT_READ == err) ||
+			 (SSL_ERROR_WANT_WRITE == err) )
+  		{
+  			return E_AGAIN;
+  		}
+		
+		if( (err == SSL_ERROR_SYSCALL) && (ret == -1) )
+		{
+			int errnum = errno;
+			CAMsg::printMsg(LOG_ERR, "TLS-Socket: send I/O error occured: %s\n", strerror(errnum));
+		}
+		return SOCKET_ERROR;
+	}
+	return ret;
+}
 
 /** Sends all data over the network. This may block, until all data was sent.
 	@param buff the buffer of data to send
@@ -211,10 +244,18 @@ SINT32 CATLSClientSocket::receive(UINT8* buff,UINT32 len)
 	SINT32 ret=::SSL_read(m_pSSL,(char*)buff,len);
 	if(ret<0)
   	{	
-  		if (SSL_ERROR_WANT_READ == SSL_get_error(m_pSSL, ret))
+  		int err = SSL_get_error(m_pSSL, ret);
+		if ( (SSL_ERROR_WANT_READ == err) ||
+			 (SSL_ERROR_WANT_WRITE == err) )
   		{
   			return E_AGAIN;
   		}
+		
+		if( (err == SSL_ERROR_SYSCALL) && (ret == -1) )
+		{
+			int errnum = errno;
+			CAMsg::printMsg(LOG_ERR, "TLS-Socket: receive I/O error occured: %s\n", strerror(errnum));
+		}
 		return SOCKET_ERROR;
   	}
 	return ret;

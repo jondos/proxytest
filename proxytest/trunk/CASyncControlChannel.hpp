@@ -47,7 +47,7 @@ class CASyncControlChannel : public CAAbstractControlChannel
 					m_aktIndex=0;
 					m_MsgBytesLeft=0;
 				}
-
+		 virtual  ~CASyncControlChannel();
 		/**Override this method to receive a XML Message.
 			* Note: The DOMDocument reference is valid only within this call, i.e. will be delete afterwards form the caller!
 			* If you need to store it for later processing, make a copy of

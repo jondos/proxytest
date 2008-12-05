@@ -28,3 +28,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #include "StdAfx.h"
 #include "CASyncControlChannel.hpp"
+
+CASyncControlChannel::~CASyncControlChannel()
+{
+	delete[] m_MsgBuff;
+	m_MsgBuff = NULL;	
+}

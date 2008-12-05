@@ -56,7 +56,7 @@ SINT32 CAHttpClient::sendGetRequest(const UINT8 * url)
 		#endif
 		
 		// send it
-		SINT32 ret = m_pSocket->sendFully(requestS,len);
+		SINT32 ret = m_pSocket->sendFullyTimeOut(requestS,len, 1000, 1000);
 		delete[] requestS;
 		requestS = NULL;
 		if(ret != E_SUCCESS)
@@ -97,14 +97,16 @@ SINT32 CAHttpClient::sendPostRequest(const UINT8 * url, const UINT8 * data, cons
 		#ifdef DEBUG
 			CAMsg::printMsg(LOG_DEBUG, "HttpClient now sending: %s\n", requestS);
 		#endif
-		SINT32 ret=m_pSocket->sendFully(requestS,len);
+		SINT32 ret=m_pSocket->sendFullyTimeOut(requestS,len, 1000, 1000);
+		//SINT32 ret=m_pSocket->sendFully(requestS,len);
 		delete[] requestS;
 		requestS = NULL;
 		if(ret!=E_SUCCESS)
 			{
 				return E_UNKNOWN;
 			}
-		ret=m_pSocket->sendFully(data,dataLen);
+		ret=m_pSocket->sendFullyTimeOut(data,dataLen, 2000, 1000);
+		//ret=m_pSocket->sendFully(data,dataLen);
 		if(ret != E_SUCCESS)
 			{ // socket error
 				return E_UNKNOWN;
@@ -116,13 +118,14 @@ SINT32 CAHttpClient::sendPostRequest(const UINT8 * url, const UINT8 * data, cons
 	* Receives the HTTP header and parses the content length 
 	* @param contentLength receives the parsed content length
 	* @param statusCode if set, receives the http statuscode (200, 403, 404, ...)
+	* @param msTimeOut time in ms for receiving the HTTPHeader (<=0 means no timeout)
 	* @retval E_SUCCESS if all is OK
 	* @retval E_NOT_CONNECTED if the connection to the Web-Server was lost 
 	* @retval E_UNKNOWN if the server returned a http errorcode, in this case statusCode is set to 0 and contentLength is set to 0
 	* @todo: Verify that "HTTP/1.1 200 OK" must be the first line!
 	* @todo: Maybe set an other statusCode in case of an error ?
 	*/
-SINT32 CAHttpClient::parseHTTPHeader(UINT32* contentLength, UINT32 * statusCode)
+SINT32 CAHttpClient::parseHTTPHeader(UINT32* contentLength, UINT32 * statusCode, UINT32 msTimeOut)
 	{
 		if(contentLength!=NULL)
 			*contentLength=0;
@@ -131,56 +134,92 @@ SINT32 CAHttpClient::parseHTTPHeader(UINT32* contentLength, UINT32 * statusCode)
 		char *line = new char[255];
 		SINT32 ret = 0;
 		SINT32 ret2 = E_UNKNOWN;
+		
+		UINT64 currentTime = 0, endTime = 0;
+		bool nbl = false;
+		
+		getcurrentTimeMillis(currentTime);
+		set64(endTime,currentTime);
+		add64(endTime,msTimeOut);
+		
+		if(msTimeOut > 0)
+		{
+			m_pSocket->getNonBlocking(&nbl);
+			m_pSocket->setNonBlocking(true);
+		}
+		
 		if(!m_pSocket)
 		{
 			return E_NOT_CONNECTED;
 		}
 		do
+		{
+			int i=0;
+			UINT8 byte = 0;
+			do//Read a line from the WebServer
 			{
-				int i=0;
-				UINT8 byte = 0;
-				do//Read a line from the WebServer
+				
+receiving:				
+				ret = m_pSocket->receive(&byte, 1); //bytewise? ugh!
+				if( (ret == E_AGAIN) && (msTimeOut > 0) )
+				{
+					getcurrentTimeMillis(currentTime);
+					if(!isLesser64(currentTime,endTime))
 					{
-						ret = m_pSocket->receive(&byte, 1);
-						if(byte == '\r' || byte == '\n')
-							{
-								line[i++] = 0;
-							}
-						else
-							{
-								line[i++] = byte;
-							}
+						CAMsg::printMsg(LOG_ERR, "HTTP-Client parseHeader: timeout!\n");
+						ret = E_TIMEDOUT;
+						ret2 = E_TIMEDOUT;
+						break;
 					}
-				while(byte != '\n' && i<255 && ret > 0);
-	
-				if(ret < 0||i>=255)
-					break;
-		
-				if(strncmp(line, "HTTP", 4) == 0)
-					{
-						if(statusCode!=NULL && strlen(line)>9) // parse statusCode
-							{
-								*statusCode = atoi(line+9);
-							}
-						if(strstr(line, "200 OK") == NULL)
-							{
-								CAMsg::printMsg(LOG_CRIT,"HttpClient: Error: Server returned: '%s'.\n",line);
-								break;
-							}
-						else
-							ret2=E_SUCCESS;
-					}
-				/// TODO: do it better (case insensitive compare!)
-				else if( (strncmp(line, "Content-length: ", 16) == 0) ||
-										(strncmp(line, "Content-Length: ", 16) == 0))
-					{
-						*contentLength = (UINT32) atol(line+16);
-					}
-				#ifdef DEBUG
-					CAMsg::printMsg(LOG_DEBUG,"Server returned: '%s'.\n",line);
-				#endif	
-			} 
+					msTimeOut=diff64(endTime,currentTime);
+					msSleep(50);
+					goto receiving;
+				}
+				if(byte == '\r' || byte == '\n')
+				{
+					line[i++] = 0;
+				}
+				else
+				{
+					line[i++] = byte;
+				}
+			}
+			while(byte != '\n' && i<255 && ret > 0 );
+
+			if(ret < 0||i>=255)
+			{
+				CAMsg::printMsg(LOG_CRIT,"HttpClient: Error return code: %i.\n",ret);
+				break;
+			}
+			if(strncmp(line, "HTTP", 4) == 0)
+				{
+					if(statusCode!=NULL && strlen(line)>9) // parse statusCode
+						{
+							*statusCode = atoi(line+9);
+						}
+					if(strstr(line, "200 OK") == NULL)
+						{
+							CAMsg::printMsg(LOG_CRIT,"HttpClient: Error: Server returned: '%s'.\n",line);
+							break;
+						}
+					else
+						ret2=E_SUCCESS;
+				}
+			/// TODO: do it better (case insensitive compare!)
+			else if( (strncmp(line, "Content-length: ", 16) == 0) ||
+									(strncmp(line, "Content-Length: ", 16) == 0))
+				{
+					*contentLength = (UINT32) atol(line+16);
+				}
+			#ifdef DEBUG
+				CAMsg::printMsg(LOG_DEBUG,"Server returned: '%s'.\n",line);
+			#endif	
+		} 
 		while(strlen(line) > 0);//Stop reading of response lines, if an empty line was reveived...
+		if(msTimeOut > 0)
+		{
+			m_pSocket->setNonBlocking(nbl);
+		}
 		delete[] line;
 		line = NULL;
 		return ret2;

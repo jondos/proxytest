@@ -582,16 +582,32 @@ DOMText* createDOMText(XERCES_CPP_NAMESPACE::DOMDocument* pOwnerDoc,const char *
 	}
 
 SINT32 setDOMElementAttribute(DOMNode* pElem,const char* attrName,const UINT8* value)
-	{
-		if(pElem==NULL||pElem->getNodeType()!=DOMNode::ELEMENT_NODE||attrName==NULL||value==NULL)
+{
+	if(pElem==NULL||pElem->getNodeType()!=DOMNode::ELEMENT_NODE||attrName==NULL||value==NULL)
+		return E_UNKNOWN;
+	XMLCh* name=XMLString::transcode(attrName);
+	XMLCh* val=XMLString::transcode((const char*)value);
+	((DOMElement*)pElem)->setAttribute(name,val);
+	XMLString::release(&name);
+	XMLString::release(&val);
+	return E_SUCCESS;
+}
+
+SINT32 setCurrentTimeMilliesAsDOMAttribute(DOMNode *pElem)
+{
+		if( pElem == NULL || pElem->getNodeType() != DOMNode::ELEMENT_NODE )
+		{
 			return E_UNKNOWN;
-		XMLCh* name=XMLString::transcode(attrName);
-		XMLCh* val=XMLString::transcode((const char*)value);
-		((DOMElement*)pElem)->setAttribute(name,val);
-		XMLString::release(&name);
-		XMLString::release(&val);
+		}
+		UINT64 currentMillis;
+		getcurrentTimeMillis(currentMillis);
+		UINT8 tmpStrCurrentMillis[50];
+		print64(tmpStrCurrentMillis,currentMillis);
+		setDOMElementAttribute
+			(pElem,UNIVERSAL_ATTRIBUTE_LAST_UPDATE, tmpStrCurrentMillis );
 		return E_SUCCESS;
-	}
+
+}
 
 #ifndef ONLY_LOCAL_PROXY
 DOMNodeList* getElementsByTagName(DOMElement* pElem,const char* const name)
@@ -652,135 +668,161 @@ SINT32 setDOMElementValue(DOMElement* pElem,const UINT8* value)
 		//Remove all "old" text Elements...
 		DOMNode* pChild=pElem->getFirstChild();
 		while(pChild!=NULL)
-			{
-				if(pChild->getNodeType()==DOMNode::TEXT_NODE)
+		{
+			if(pChild->getNodeType()==DOMNode::TEXT_NODE)
+				{
+					DOMNode* n=pElem->removeChild(pChild);
+					if (n != NULL)
 					{
-						DOMNode* n=pElem->removeChild(pChild);
-						if (n != NULL)
-						{
-							n->release();
-							n = NULL;
-						}
+						n->release();
+						n = NULL;
 					}
-				pChild=pChild->getNextSibling();
-			}
+				}
+			pChild=pChild->getNextSibling();
+		}
 		pElem->appendChild(pText);
 		return E_SUCCESS;
 	}
 
-SINT32 setDOMElementAttribute(DOMNode* pElem,const char* attrName,SINT32 value)
-	{
-		UINT8 tmp[10];
-		sprintf((char*)tmp,"%i",value);
-		return setDOMElementAttribute(pElem,attrName,tmp);
-	}
+SINT32 setDOMElementAttribute(DOMNode* pElem, const char* attrName, UINT64 value)
+{
+	UINT8 tmp[50];
+	print64(tmp, value);
+	return setDOMElementAttribute(pElem, attrName, tmp);
+}
+
+SINT32 setDOMElementAttribute(DOMNode* pElem,const char* attrName, SINT32 value)
+{
+	UINT8 tmp[10];
+	sprintf((char*)tmp, "%i", value);
+	return setDOMElementAttribute(pElem, attrName, tmp);
+}
+
+SINT32 setDOMElementAttribute(DOMNode* pElem,const char* attrName, UINT32 value)
+{
+	UINT8 tmp[10];
+	sprintf((char*)tmp, "%u", value);
+	return setDOMElementAttribute(pElem, attrName, tmp);
+}
+
+SINT32 setDOMElementAttribute(DOMNode* pElem, const char* attrName, bool value)
+{
+	return setDOMElementAttribute(pElem, attrName, 
+			((UINT8*) (value ? STR_VALUE_TRUE : STR_VALUE_FALSE)));
+}
 
 SINT32 getDOMElementAttribute(const DOMNode * const elem,const char* attrName,SINT64& value)
+{
+	UINT8 val[50];
+	UINT32 len=50;
+	if(getDOMElementAttribute(elem,attrName,val,&len)!=E_SUCCESS)
 	{
-		UINT8 val[50];
-		UINT32 len=50;
-		if(getDOMElementAttribute(elem,attrName,val,&len)!=E_SUCCESS)
-			return E_UNKNOWN;
-		if(parseS64(val,value)!=E_SUCCESS)
-			return E_UNKNOWN;
-		return E_SUCCESS;
+		return E_UNKNOWN;
 	}
+	if(parseS64(val,value)!=E_SUCCESS)
+	{
+		return E_UNKNOWN;
+	}
+	return E_SUCCESS;
+}
 
 SINT32 getDOMElementAttribute(const DOMNode * const elem,const char* attrName,UINT32& value)
-	{
-		UINT8 val[50];
-		UINT32 len=50;
-		if(getDOMElementAttribute(elem,attrName,val,&len)!=E_SUCCESS)
-			return E_UNKNOWN;
-		long l=atol((char*)val);
-		if(l<0)
-			return E_UNKNOWN;
-		value=(UINT32)l;
-		return E_SUCCESS;
-	}
+{
+	UINT8 val[50];
+	UINT32 len=50;
+	if(getDOMElementAttribute(elem,attrName,val,&len)!=E_SUCCESS)
+		return E_UNKNOWN;
+	long l=atol((char*)val);
+	if(l<0)
+		return E_UNKNOWN;
+	value=(UINT32)l;
+	return E_SUCCESS;
+}
 
 SINT32 getDOMElementAttribute(const DOMNode * const elem,const char* attrName,bool& value)
+{
+	UINT8 val[50];
+	UINT32 len=50;
+	if(getDOMElementAttribute(elem,attrName,val,&len) != E_SUCCESS)
 	{
-		UINT8 val[50];
-		UINT32 len=50;
-		if(getDOMElementAttribute(elem,attrName,val,&len)!=E_SUCCESS)
-			return E_UNKNOWN;
-		SINT32 ret=E_UNSPECIFIED;
-		if(stricmp((char*)val,"true")==0)
-			{
-				value=true;
-				ret=E_SUCCESS;
-			}
-		else if(stricmp((char*)val,"false")==0)
-			{
-				value=false;
-				ret=E_SUCCESS;
-			}
-		return ret;
+		return E_UNKNOWN;
 	}
+	SINT32 ret = E_UNSPECIFIED;
+	if(strncasecmp((char*)val, STR_VALUE_TRUE, strlen(STR_VALUE_TRUE)) == 0)
+	{
+		value = true;
+		ret = E_SUCCESS;
+	}
+	else if(strncasecmp((char*)val, STR_VALUE_FALSE, strlen(STR_VALUE_FALSE)) == 0)
+	{
+		value = false;
+		ret = E_SUCCESS;
+	}
+	return ret;
+}
 
 
 
 SINT32 getLastDOMChildByName(const DOMNode* pNode,const char* const name,DOMNode* & a_child)
-	{
-		a_child=NULL;
-		if(pNode==NULL)
-			return E_UNKNOWN;
-		XMLCh* tmpName=XMLString::transcode((const char * const)name);
-		SINT32 ret=getLastDOMChildByName(pNode,tmpName,a_child);
-		XMLString::release(&tmpName);
-		return ret;
-	}
+{
+	a_child=NULL;
+	if(pNode==NULL)
+		return E_UNKNOWN;
+	XMLCh* tmpName=XMLString::transcode((const char * const)name);
+	SINT32 ret=getLastDOMChildByName(pNode,tmpName,a_child);
+	XMLString::release(&tmpName);
+	return ret;
+}
 
 SINT32 getLastDOMChildByName(const DOMNode* pNode,const XMLCh* const name,DOMNode* & a_child)
-	{
-		a_child=NULL;
-		if(pNode==NULL)
-			{
-				return E_UNKNOWN;
-			}
-		DOMNode* pChild;
-		pChild=pNode->getLastChild();
-		while(pChild!=NULL)
-			{
-				if(XMLString::equals(pChild->getNodeName(),name))
-					{
-						a_child = pChild; // found a child
-						return E_SUCCESS;
-					}
-				pChild=pChild->getPreviousSibling();
-			}
-		return E_UNKNOWN;
-	}
+{
+	a_child=NULL;
+	if(pNode==NULL)
+		{
+			return E_UNKNOWN;
+		}
+	DOMNode* pChild;
+	pChild=pNode->getLastChild();
+	while(pChild!=NULL)
+		{
+			if(XMLString::equals(pChild->getNodeName(),name))
+				{
+					a_child = pChild; // found a child
+					return E_SUCCESS;
+				}
+			pChild=pChild->getPreviousSibling();
+		}
+	return E_UNKNOWN;
+}
 
 
 
 
 SINT32 getDOMElementValue(const DOMElement* const pElem,UINT32* value)
-	{
-		ASSERT(value!=NULL,"Value is null");
-		ASSERT(pElem!=NULL,"Element is NULL");
-		UINT8 buff[255];
-		UINT32 buffLen=255;
-		if(getDOMElementValue(pElem,buff,&buffLen)!=E_SUCCESS)
-			return E_UNKNOWN;
-		*value=atol((char*)buff);
-		
-		return E_SUCCESS;
-	}
+{
+	ASSERT(value!=NULL,"Value is null");
+	ASSERT(pElem!=NULL,"Element is NULL");
+	UINT8 buff[255];
+	UINT32 buffLen=255;
+	if(getDOMElementValue(pElem,buff,&buffLen)!=E_SUCCESS)
+		return E_UNKNOWN;
+	*value=atol((char*)buff);
+	
+	return E_SUCCESS;
+}
 	
 SINT32 getDOMElementValue(const DOMElement* const pElem,double* value)
-	{
-		ASSERT(value!=NULL,"Value is null");
-		ASSERT(pElem!=NULL,"Element is NULL");
-		UINT8 buff[255];
-		UINT32 buffLen=255;
-		if(getDOMElementValue(pElem,buff,&buffLen)!=E_SUCCESS)
-			return E_UNKNOWN;
-		*value=atof((char*)buff);
-		
-		return E_SUCCESS;
-	}
+{
+	ASSERT(value!=NULL,"Value is null");
+	ASSERT(pElem!=NULL,"Element is NULL");
+	UINT8 buff[255];
+	UINT32 buffLen=255;
+	if(getDOMElementValue(pElem,buff,&buffLen)!=E_SUCCESS)
+		return E_UNKNOWN;
+	*value=atof((char*)buff);
+	
+	return E_SUCCESS;
+}
 	
 	
 SINT32 getDOMElementValue(const DOMElement* pElem,UINT32& value, UINT32 defaultValue)
@@ -814,104 +856,104 @@ SINT32 getDOMElementValue(const DOMElement* pElem, UINT64 &value)
 
 
 SINT32 getDOMElementValue(const DOMElement* pElem,UINT16* value)
-	{
-		UINT32 tmp;
-		if(getDOMElementValue(pElem,&tmp)!=E_SUCCESS)
-			return E_UNKNOWN;
-		if(tmp>0xFFFF)
-			return E_UNKNOWN;
-		*value=(UINT16)tmp;
-		return E_SUCCESS;
-	}
+{
+	UINT32 tmp;
+	if(getDOMElementValue(pElem,&tmp)!=E_SUCCESS)
+		return E_UNKNOWN;
+	if(tmp>0xFFFF)
+		return E_UNKNOWN;
+	*value=(UINT16)tmp;
+	return E_SUCCESS;
+}
 
 
 void __encryptKey(UINT8* key,UINT32 keylen,UINT8* outBuff,UINT32* outLen,CAASymCipher* pRSA)
-	{
-		UINT8 tmpBuff[1024];
-		memset(tmpBuff,0,sizeof(tmpBuff));
-		memcpy(tmpBuff+128-keylen,key,keylen);
-		pRSA->encrypt(tmpBuff,tmpBuff);
-		CABase64::encode(tmpBuff,128,outBuff,outLen);
-		outBuff[*outLen]=0;
-	}
+{
+	UINT8 tmpBuff[1024];
+	memset(tmpBuff,0,sizeof(tmpBuff));
+	memcpy(tmpBuff+128-keylen,key,keylen);
+	pRSA->encrypt(tmpBuff,tmpBuff);
+	CABase64::encode(tmpBuff,128,outBuff,outLen);
+	outBuff[*outLen]=0;
+}
 
 SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, UINT8* xml, UINT32* xmllen,CAASymCipher* pRSA)
-	{
+{
 #define XML_ENCODE_KEY_TEMPLATE "<EncryptedKey><EncryptionMethod Algorithm=\"RSA\"/><CipherData><CipherValue>%s</CipherValue></CipherData></EncryptedKey>"
-		UINT8 tmpBuff[1024];
-		UINT32 len=1024;
-		__encryptKey(key,keylen,tmpBuff,&len,pRSA);
-		sprintf((char*)xml,XML_ENCODE_KEY_TEMPLATE,tmpBuff);
-		*xmllen=strlen((char*)xml);
-		return E_SUCCESS;
-	}
+	UINT8 tmpBuff[1024];
+	UINT32 len=1024;
+	__encryptKey(key,keylen,tmpBuff,&len,pRSA);
+	sprintf((char*)xml,XML_ENCODE_KEY_TEMPLATE,tmpBuff);
+	*xmllen=strlen((char*)xml);
+	return E_SUCCESS;
+}
 
 SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, DOMElement* & elemRootEncodedKey,XERCES_CPP_NAMESPACE::DOMDocument* docOwner,CAASymCipher* pRSA)
-	{
-		elemRootEncodedKey=createDOMElement(docOwner,"EncryptedKey");
-		DOMElement* elem1=createDOMElement(docOwner,"EncryptionMethod");
-		setDOMElementAttribute(elem1,"Algorithm",(UINT8*)"RSA");
-		elemRootEncodedKey->appendChild(elem1);
-		DOMElement* elem2=createDOMElement(docOwner,"CipherData");
-		elem1->appendChild(elem2);
-		elem1=createDOMElement(docOwner,"CipherValue");
-		elem2->appendChild(elem1);
-		UINT8 tmpBuff[1024];
-		UINT32 tmpLen=1024;
-		__encryptKey(key,keylen,tmpBuff,&tmpLen,pRSA);
-		setDOMElementValue(elem1,tmpBuff);
-		return E_SUCCESS;
-	}
+{
+	elemRootEncodedKey=createDOMElement(docOwner,"EncryptedKey");
+	DOMElement* elem1=createDOMElement(docOwner,"EncryptionMethod");
+	setDOMElementAttribute(elem1,"Algorithm",(UINT8*)"RSA");
+	elemRootEncodedKey->appendChild(elem1);
+	DOMElement* elem2=createDOMElement(docOwner,"CipherData");
+	elem1->appendChild(elem2);
+	elem1=createDOMElement(docOwner,"CipherValue");
+	elem2->appendChild(elem1);
+	UINT8 tmpBuff[1024];
+	UINT32 tmpLen=1024;
+	__encryptKey(key,keylen,tmpBuff,&tmpLen,pRSA);
+	setDOMElementValue(elem1,tmpBuff);
+	return E_SUCCESS;
+}
 
 
 		
 	
 
 SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, const UINT8* const xml, UINT32 xmllen,CAASymCipher* pRSA)
+{
+	XERCES_CPP_NAMESPACE::DOMDocument* pDoc=parseDOMDocument(xml,xmllen);
+	if(pDoc == NULL)
 	{
-		XERCES_CPP_NAMESPACE::DOMDocument* pDoc=parseDOMDocument(xml,xmllen);
-		if(pDoc == NULL)
-		{
-			return E_UNKNOWN;
-		}
-		DOMElement* root=pDoc->getDocumentElement();
-		if(root == NULL)
-		{
-			return E_UNKNOWN;
-		}
-		SINT32 ret=decodeXMLEncryptedKey(key,keylen,root,pRSA);
-		if (pDoc != NULL)
-		{
-			pDoc->release();
-			pDoc = NULL;
-		}
-		return ret;
+		return E_UNKNOWN;
 	}
+	DOMElement* root=pDoc->getDocumentElement();
+	if(root == NULL)
+	{
+		return E_UNKNOWN;
+	}
+	SINT32 ret=decodeXMLEncryptedKey(key,keylen,root,pRSA);
+	if (pDoc != NULL)
+	{
+		pDoc->release();
+		pDoc = NULL;
+	}
+	return ret;
+}
 
 SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen,const DOMNode* root,CAASymCipher* pRSA)
-	{
-		DOMNode* elemCipherValue=NULL;
-		if(getDOMChildByName(root,"CipherValue",elemCipherValue,true)!=E_SUCCESS)
-			return E_UNKNOWN;
-		UINT8 buff[2048];
-		UINT32 bufflen=2048;
-		if(getDOMElementValue(elemCipherValue,buff,&bufflen)!=E_SUCCESS)
-			return E_UNKNOWN;
-		CABase64::decode(buff,bufflen,buff,&bufflen);
-		pRSA->decrypt(buff,buff);
-		for(SINT32 i=127;i>=0;i--)
-			{
-				if(buff[i]!=0)
-					if(i>32)
-						*keylen=64;
-					else if(i>16)
-						*keylen=32;
-					else 
-						*keylen=16;
-			}
-		memcpy(key,buff+128-(*keylen),(*keylen));
-		return E_SUCCESS;
-	}
+{
+	DOMNode* elemCipherValue=NULL;
+	if(getDOMChildByName(root,"CipherValue",elemCipherValue,true)!=E_SUCCESS)
+		return E_UNKNOWN;
+	UINT8 buff[2048];
+	UINT32 bufflen=2048;
+	if(getDOMElementValue(elemCipherValue,buff,&bufflen)!=E_SUCCESS)
+		return E_UNKNOWN;
+	CABase64::decode(buff,bufflen,buff,&bufflen);
+	pRSA->decrypt(buff,buff);
+	for(SINT32 i=127;i>=0;i--)
+		{
+			if(buff[i]!=0)
+				if(i>32)
+					*keylen=64;
+				else if(i>16)
+					*keylen=32;
+				else 
+					*keylen=16;
+		}
+	memcpy(key,buff+128-(*keylen),(*keylen));
+	return E_SUCCESS;
+}
 
 /** The resulting encrypted xml struct is as follows:
 @verbatim
@@ -932,86 +974,86 @@ SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen,const DOMNode* root,CAASy
 	*@endverbatim
 	*/
 SINT32 encryptXMLElement(DOMNode* node, CAASymCipher* pRSA)
-	{
-		XERCES_CPP_NAMESPACE::DOMDocument* doc=NULL;
-		DOMNode* parent=NULL;
-		if(node->getNodeType()==DOMNode::DOCUMENT_NODE)
+{
+	XERCES_CPP_NAMESPACE::DOMDocument* doc=NULL;
+	DOMNode* parent=NULL;
+	if(node->getNodeType()==DOMNode::DOCUMENT_NODE)
+		{
+			doc=(XERCES_CPP_NAMESPACE::DOMDocument*)node;
+			parent=doc;
+			node=doc->getDocumentElement();
+		}
+	else
+		{
+			doc=node->getOwnerDocument();
+			parent=node->getParentNode();
+		}
+	DOMElement* elemRoot=createDOMElement(doc,"EncryptedData");
+	DOMElement* elemKeyInfo=createDOMElement(doc,"ds:KeyInfo");
+	elemRoot->appendChild(elemKeyInfo);
+	DOMElement* elemEncKey=createDOMElement(doc,"EncryptedKey");
+	elemKeyInfo->appendChild(elemEncKey);
+	DOMElement* elemCipherData=createDOMElement(doc,"CipherData");
+	elemEncKey->appendChild(elemCipherData);
+	DOMElement* elemCipherValue=createDOMElement(doc,"CipherValue");
+	elemCipherData->appendChild(elemCipherValue);
+	UINT8 key[32];
+	getRandom(key,32);
+	UINT8* pBuff=new UINT8[1000];
+	UINT32 bufflen=255;
+	pRSA->encryptOAEP(key,32,pBuff,&bufflen);
+	UINT8* pOutBuff=new UINT8[1000];
+	UINT32 outbufflen=255;
+	CABase64::encode(pBuff,bufflen,pOutBuff,&outbufflen);
+	pOutBuff[outbufflen]=0;
+	setDOMElementValue(elemCipherValue,pOutBuff);
+	delete[] pOutBuff;
+	pOutBuff = NULL;
+	delete[] pBuff;
+	pBuff = NULL;
+	CASymCipher *pSymCipher=new CASymCipher();
+	pSymCipher->setKey(key,true);
+	pSymCipher->setIVs(key+16);
+	elemCipherData=createDOMElement(doc,"CipherData");
+	elemRoot->appendChild(elemCipherData);
+	elemCipherValue=createDOMElement(doc,"CipherValue");
+	elemCipherData->appendChild(elemCipherValue);
+	UINT8* b=DOM_Output::dumpToMem(node,&bufflen);
+	outbufflen=bufflen+1000;
+	pOutBuff=new UINT8[outbufflen];
+	pSymCipher->encrypt1CBCwithPKCS7(b,bufflen,pOutBuff,&outbufflen);
+	delete[] b;
+	b = NULL;
+	bufflen=outbufflen*3/2+1000;
+	pBuff=new UINT8[bufflen];
+	CABase64::encode(pOutBuff,outbufflen,pBuff,&bufflen);
+	pBuff[bufflen]=0;
+	setDOMElementValue(elemCipherValue,pBuff);
+	delete[] pOutBuff;
+	pOutBuff = NULL;
+	delete[] pBuff;
+	pBuff = NULL;
+	if(parent->getNodeType()==DOMNode::DOCUMENT_NODE)
+		{
+			DOMNode* n=parent->removeChild(node);
+			if (n != NULL)
 			{
-				doc=(XERCES_CPP_NAMESPACE::DOMDocument*)node;
-				parent=doc;
-				node=doc->getDocumentElement();
+				n->release();
+				n = NULL;
 			}
-		else
+			parent->appendChild(elemRoot);
+		}
+	else
+		{
+			DOMNode* n=parent->replaceChild(elemRoot,node);
+			if (n != NULL)
 			{
-				doc=node->getOwnerDocument();
-				parent=node->getParentNode();
+				n->release();
+				n = NULL;
 			}
-		DOMElement* elemRoot=createDOMElement(doc,"EncryptedData");
-		DOMElement* elemKeyInfo=createDOMElement(doc,"ds:KeyInfo");
-		elemRoot->appendChild(elemKeyInfo);
-		DOMElement* elemEncKey=createDOMElement(doc,"EncryptedKey");
-		elemKeyInfo->appendChild(elemEncKey);
-		DOMElement* elemCipherData=createDOMElement(doc,"CipherData");
-		elemEncKey->appendChild(elemCipherData);
-		DOMElement* elemCipherValue=createDOMElement(doc,"CipherValue");
-		elemCipherData->appendChild(elemCipherValue);
-		UINT8 key[32];
-		getRandom(key,32);
-		UINT8* pBuff=new UINT8[1000];
-		UINT32 bufflen=255;
-		pRSA->encryptOAEP(key,32,pBuff,&bufflen);
-		UINT8* pOutBuff=new UINT8[1000];
-		UINT32 outbufflen=255;
-		CABase64::encode(pBuff,bufflen,pOutBuff,&outbufflen);
-		pOutBuff[outbufflen]=0;
-		setDOMElementValue(elemCipherValue,pOutBuff);
-		delete[] pOutBuff;
-		pOutBuff = NULL;
-		delete[] pBuff;
-		pBuff = NULL;
-		CASymCipher *pSymCipher=new CASymCipher();
-		pSymCipher->setKey(key,true);
-		pSymCipher->setIVs(key+16);
-		elemCipherData=createDOMElement(doc,"CipherData");
-		elemRoot->appendChild(elemCipherData);
-		elemCipherValue=createDOMElement(doc,"CipherValue");
-		elemCipherData->appendChild(elemCipherValue);
-		UINT8* b=DOM_Output::dumpToMem(node,&bufflen);
-		outbufflen=bufflen+1000;
-		pOutBuff=new UINT8[outbufflen];
-		pSymCipher->encrypt1CBCwithPKCS7(b,bufflen,pOutBuff,&outbufflen);
-		delete[] b;
-		b = NULL;
-		bufflen=outbufflen*3/2+1000;
-		pBuff=new UINT8[bufflen];
-		CABase64::encode(pOutBuff,outbufflen,pBuff,&bufflen);
-		pBuff[bufflen]=0;
-		setDOMElementValue(elemCipherValue,pBuff);
-		delete[] pOutBuff;
-		pOutBuff = NULL;
-		delete[] pBuff;
-		pBuff = NULL;
-		if(parent->getNodeType()==DOMNode::DOCUMENT_NODE)
-			{
-				DOMNode* n=parent->removeChild(node);
-				if (n != NULL)
-				{
-					n->release();
-					n = NULL;
-				}
-				parent->appendChild(elemRoot);
-			}
-		else
-			{
-				DOMNode* n=parent->replaceChild(elemRoot,node);
-				if (n != NULL)
-				{
-					n->release();
-					n = NULL;
-				}
-			}
-		return E_SUCCESS;
-	}
+		}
+	return E_SUCCESS;
+}
 #endif //ONLY_LOCAL_PROXY
 
 /** Encrypts an XML-Element by wrapping it with:
@@ -1034,158 +1076,158 @@ SINT32 encryptXMLElement(DOMNode* node, CAASymCipher* pRSA)
 	@return a buffer with the encyrpted element (the caller is responsible for freeing it), or NULL
 */
 UINT8* encryptXMLElement(UINT8* inbuff,UINT32 inlen,UINT32& outlen,CAASymCipher* pRSA)
-	{
-		const char* XML_ENC_TEMPLATE="<EncryptedData><ds:KeyInfo><EncryptedKey><CipherData><CipherValue>%s</CipherValue></CipherData></EncryptedKey></ds:KeyInfo><CipherData><CipherValue>%s</CipherValue></CipherData></EncryptedData>";
-		UINT8 key[32];
-		getRandom(key,32);
-		UINT8 buff[1000];
-		UINT32 bufflen=255;
-		pRSA->encryptOAEP(key,32,buff,&bufflen);
-		UINT8 keyoutbuff[1000];
-		UINT32 keyoutbufflen=255;
-		CABase64::encode(buff,bufflen,keyoutbuff,&keyoutbufflen);
-		keyoutbuff[keyoutbufflen]=0;
-		CASymCipher* pSymCipher=new CASymCipher();
-		pSymCipher->setKey(key,true);
-		pSymCipher->setIVs(key+16);
-		UINT32 msgoutbufflen=inlen+1000;
-		UINT8* msgoutbuff=new UINT8[msgoutbufflen];
-		pSymCipher->encrypt1CBCwithPKCS7(inbuff,inlen,msgoutbuff,&msgoutbufflen);
-		delete pSymCipher;
-		pSymCipher = NULL;
-		UINT32 encmsgoutbufflen=msgoutbufflen*3/2+1000;
-		UINT8* encmsgoutbuff=new UINT8[encmsgoutbufflen];
-		CABase64::encode(msgoutbuff,msgoutbufflen,encmsgoutbuff,&encmsgoutbufflen);
-		delete[] msgoutbuff;
-		msgoutbuff = NULL;
-		encmsgoutbuff[encmsgoutbufflen]=0;
-		msgoutbufflen=encmsgoutbufflen+1000;
-		msgoutbuff=new UINT8[msgoutbufflen];
-		sprintf((char*)msgoutbuff,XML_ENC_TEMPLATE,keyoutbuff,encmsgoutbuff);
-		outlen=strlen((char*)msgoutbuff);
-		delete[] encmsgoutbuff;
-		encmsgoutbuff = NULL;
-		return msgoutbuff;
-	}
+{
+	const char* XML_ENC_TEMPLATE="<EncryptedData><ds:KeyInfo><EncryptedKey><CipherData><CipherValue>%s</CipherValue></CipherData></EncryptedKey></ds:KeyInfo><CipherData><CipherValue>%s</CipherValue></CipherData></EncryptedData>";
+	UINT8 key[32];
+	getRandom(key,32);
+	UINT8 buff[1000];
+	UINT32 bufflen=255;
+	pRSA->encryptOAEP(key,32,buff,&bufflen);
+	UINT8 keyoutbuff[1000];
+	UINT32 keyoutbufflen=255;
+	CABase64::encode(buff,bufflen,keyoutbuff,&keyoutbufflen);
+	keyoutbuff[keyoutbufflen]=0;
+	CASymCipher* pSymCipher=new CASymCipher();
+	pSymCipher->setKey(key,true);
+	pSymCipher->setIVs(key+16);
+	UINT32 msgoutbufflen=inlen+1000;
+	UINT8* msgoutbuff=new UINT8[msgoutbufflen];
+	pSymCipher->encrypt1CBCwithPKCS7(inbuff,inlen,msgoutbuff,&msgoutbufflen);
+	delete pSymCipher;
+	pSymCipher = NULL;
+	UINT32 encmsgoutbufflen=msgoutbufflen*3/2+1000;
+	UINT8* encmsgoutbuff=new UINT8[encmsgoutbufflen];
+	CABase64::encode(msgoutbuff,msgoutbufflen,encmsgoutbuff,&encmsgoutbufflen);
+	delete[] msgoutbuff;
+	msgoutbuff = NULL;
+	encmsgoutbuff[encmsgoutbufflen]=0;
+	msgoutbufflen=encmsgoutbufflen+1000;
+	msgoutbuff=new UINT8[msgoutbufflen];
+	sprintf((char*)msgoutbuff,XML_ENC_TEMPLATE,keyoutbuff,encmsgoutbuff);
+	outlen=strlen((char*)msgoutbuff);
+	delete[] encmsgoutbuff;
+	encmsgoutbuff = NULL;
+	return msgoutbuff;
+}
 
 #ifndef ONLY_LOCAL_PROXY
 SINT32 decryptXMLElement(DOMNode* node, CAASymCipher* pRSA)
+{
+	XERCES_CPP_NAMESPACE::DOMDocument* doc=node->getOwnerDocument();
+	if(! equals(node->getNodeName(),"EncryptedData"))
+		return E_UNKNOWN;
+	DOMNode* elemKeyInfo=NULL;
+	getDOMChildByName(node,"ds:KeyInfo",elemKeyInfo,false);
+	DOMNode* elemEncKey=NULL;
+	getDOMChildByName(elemKeyInfo,"EncryptedKey",elemEncKey,false);
+	DOMNode* elemCipherValue=NULL;
+	getDOMChildByName(elemEncKey,"CipherValue",elemCipherValue,true);
+	UINT8* cipherValue=new UINT8[1000];
+	UINT32 len=1000;
+	if(getDOMElementValue(elemCipherValue,cipherValue,&len)!=E_SUCCESS)
 	{
-		XERCES_CPP_NAMESPACE::DOMDocument* doc=node->getOwnerDocument();
-		if(! equals(node->getNodeName(),"EncryptedData"))
-			return E_UNKNOWN;
-		DOMNode* elemKeyInfo=NULL;
-		getDOMChildByName(node,"ds:KeyInfo",elemKeyInfo,false);
-		DOMNode* elemEncKey=NULL;
-		getDOMChildByName(elemKeyInfo,"EncryptedKey",elemEncKey,false);
-		DOMNode* elemCipherValue=NULL;
-		getDOMChildByName(elemEncKey,"CipherValue",elemCipherValue,true);
-		UINT8* cipherValue=new UINT8[1000];
-		UINT32 len=1000;
-		if(getDOMElementValue(elemCipherValue,cipherValue,&len)!=E_SUCCESS)
-		{
-			delete[] cipherValue;
-			cipherValue = NULL;
-			return E_UNKNOWN;
-		}
-		CABase64::decode(cipherValue,len,cipherValue,&len);
-		if(	pRSA->decryptOAEP(cipherValue,cipherValue,&len)!=E_SUCCESS||
-				len!=32)
-		{
-			delete[] cipherValue;
-			cipherValue = NULL;
-			return E_UNKNOWN;
-		}
-		CASymCipher *pSymCipher=new CASymCipher();
-		pSymCipher->setKey(cipherValue,false);
-		pSymCipher->setIVs(cipherValue+16);
-
-		DOMNode* elemCipherData=NULL;
-		getDOMChildByName(node,"CipherData",elemCipherData,false);
-		getDOMChildByName(elemCipherData,"CipherValue",elemCipherValue,false);
-		len=1000;
-		if(getDOMElementValue(elemCipherValue,cipherValue,&len)!=E_SUCCESS)
-			{
-				delete pSymCipher;
-				pSymCipher = NULL;
-				delete[] cipherValue;
-				cipherValue = NULL;
-				return E_UNKNOWN;
-			}
-		if(CABase64::decode(cipherValue,len,cipherValue,&len)!=E_SUCCESS)
-			{
-				delete pSymCipher;
-				pSymCipher = NULL;
-				delete[] cipherValue;
-				cipherValue = NULL;
-				return E_UNKNOWN;
-			}
-		SINT32 ret=pSymCipher->decrypt1CBCwithPKCS7(cipherValue,cipherValue,&len);
-		delete pSymCipher;
-		pSymCipher = NULL;
-		if(ret!=E_SUCCESS)
-			{
-				delete[] cipherValue;
-				cipherValue = NULL;
-				return E_UNKNOWN;
-			}
-		//now the need to parse the plaintext...
-		XERCES_CPP_NAMESPACE::DOMDocument* docPlain=parseDOMDocument(cipherValue,len);
-		delete[] cipherValue;	
-		cipherValue = NULL;	
-		DOMNode* elemPlainRoot=NULL;
-		if(docPlain==NULL)
-			return E_UNKNOWN;
-		if((elemPlainRoot=docPlain->getDocumentElement())==NULL)
-			{
-				if (docPlain != NULL)
-				{
-					docPlain->release();
-					docPlain = NULL;
-				}
-				return E_UNKNOWN;
-			}
-		elemPlainRoot=doc->importNode(elemPlainRoot,true);	
-		DOMNode* parent=node->getParentNode();
-		if(parent->getNodeType()==DOMNode::DOCUMENT_NODE)
-			{
-				DOMNode* n=parent->removeChild(node);
-				if (n != NULL)
-				{
-					n->release();
-					n = NULL;
-				}
-				parent->appendChild(elemPlainRoot);
-			}
-		else	
-			{
-				DOMNode* n=parent->replaceChild(elemPlainRoot,node);
-				if (n != NULL)
-				{	
-					n->release();
-					n = NULL;
-				}
-			}
-		if (docPlain != NULL)
-		{	
-			docPlain->release();
-			docPlain = NULL;
-		}
-		return E_SUCCESS;
+		delete[] cipherValue;
+		cipherValue = NULL;
+		return E_UNKNOWN;
 	}
+	CABase64::decode(cipherValue,len,cipherValue,&len);
+	if(	pRSA->decryptOAEP(cipherValue,cipherValue,&len)!=E_SUCCESS||
+			len!=32)
+	{
+		delete[] cipherValue;
+		cipherValue = NULL;
+		return E_UNKNOWN;
+	}
+	CASymCipher *pSymCipher=new CASymCipher();
+	pSymCipher->setKey(cipherValue,false);
+	pSymCipher->setIVs(cipherValue+16);
+
+	DOMNode* elemCipherData=NULL;
+	getDOMChildByName(node,"CipherData",elemCipherData,false);
+	getDOMChildByName(elemCipherData,"CipherValue",elemCipherValue,false);
+	len=1000;
+	if(getDOMElementValue(elemCipherValue,cipherValue,&len)!=E_SUCCESS)
+		{
+			delete pSymCipher;
+			pSymCipher = NULL;
+			delete[] cipherValue;
+			cipherValue = NULL;
+			return E_UNKNOWN;
+		}
+	if(CABase64::decode(cipherValue,len,cipherValue,&len)!=E_SUCCESS)
+		{
+			delete pSymCipher;
+			pSymCipher = NULL;
+			delete[] cipherValue;
+			cipherValue = NULL;
+			return E_UNKNOWN;
+		}
+	SINT32 ret=pSymCipher->decrypt1CBCwithPKCS7(cipherValue,cipherValue,&len);
+	delete pSymCipher;
+	pSymCipher = NULL;
+	if(ret!=E_SUCCESS)
+		{
+			delete[] cipherValue;
+			cipherValue = NULL;
+			return E_UNKNOWN;
+		}
+	//now the need to parse the plaintext...
+	XERCES_CPP_NAMESPACE::DOMDocument* docPlain=parseDOMDocument(cipherValue,len);
+	delete[] cipherValue;	
+	cipherValue = NULL;	
+	DOMNode* elemPlainRoot=NULL;
+	if(docPlain==NULL)
+		return E_UNKNOWN;
+	if((elemPlainRoot=docPlain->getDocumentElement())==NULL)
+		{
+			if (docPlain != NULL)
+			{
+				docPlain->release();
+				docPlain = NULL;
+			}
+			return E_UNKNOWN;
+		}
+	elemPlainRoot=doc->importNode(elemPlainRoot,true);	
+	DOMNode* parent=node->getParentNode();
+	if(parent->getNodeType()==DOMNode::DOCUMENT_NODE)
+		{
+			DOMNode* n=parent->removeChild(node);
+			if (n != NULL)
+			{
+				n->release();
+				n = NULL;
+			}
+			parent->appendChild(elemPlainRoot);
+		}
+	else	
+		{
+			DOMNode* n=parent->replaceChild(elemPlainRoot,node);
+			if (n != NULL)
+			{	
+				n->release();
+				n = NULL;
+			}
+		}
+	if (docPlain != NULL)
+	{	
+		docPlain->release();
+		docPlain = NULL;
+	}
+	return E_SUCCESS;
+}
 #endif //ONLY_LOCAL_PROXY
 
 UINT8* readFile(UINT8* name,UINT32* size)
-	{
-		int handle=open((char*)name,O_BINARY|O_RDONLY);
-		if(handle<0)
-			return NULL;
-		*size=filesize32(handle);
-		UINT8* buff=new UINT8[*size];
-		read(handle,buff,*size);
-		close(handle);
-		return buff;
-	}
+{
+	int handle=open((char*)name,O_BINARY|O_RDONLY);
+	if(handle<0)
+		return NULL;
+	*size=filesize32(handle);
+	UINT8* buff=new UINT8[*size];
+	read(handle,buff,*size);
+	close(handle);
+	return buff;
+}
 
 /**
  * Parses a 64bit unsigned integer.
@@ -1269,45 +1311,45 @@ SINT32 parseS64(const UINT8 * str, SINT64& value)
 }
 
 SINT32 readPasswd(UINT8* buff,UINT32 len)
-	{
-		if(len==0)
-			return E_SUCCESS;
-
-#ifndef _WIN32
-		termios tmpTermios;
-		UINT32 flags;
-		bool bRestore=true;
-		if(tcgetattr(STDIN_FILENO,&tmpTermios)!=0)
-			{
-				bRestore=false;
-			}
-		flags=tmpTermios.c_lflag;
-		tmpTermios.c_lflag&=~(ECHO);
-		if(bRestore)
-			tcsetattr(STDIN_FILENO,TCSAFLUSH,&tmpTermios);
-#endif
-
-		UINT32 i=0;
-		for(i=0;i<len-1;i++)
-			{
-#ifdef _WIN32
-				int c=::getch();
-#else
-				int c=getchar();
-#endif
-				if(c<=0||c=='\r'||c=='\n')
-					break;
-				buff[i]=c;
-			}
-		buff[i]=0;
-
-#ifndef _WIN32
-		tmpTermios.c_lflag=flags;
-		if(bRestore)
-			tcsetattr(STDIN_FILENO,TCSAFLUSH,&tmpTermios);
-#endif
+{
+	if(len==0)
 		return E_SUCCESS;
-	}	
+
+#ifndef _WIN32
+	termios tmpTermios;
+	UINT32 flags;
+	bool bRestore=true;
+	if(tcgetattr(STDIN_FILENO,&tmpTermios)!=0)
+		{
+			bRestore=false;
+		}
+	flags=tmpTermios.c_lflag;
+	tmpTermios.c_lflag&=~(ECHO);
+	if(bRestore)
+		tcsetattr(STDIN_FILENO,TCSAFLUSH,&tmpTermios);
+#endif
+
+	UINT32 i=0;
+	for(i=0;i<len-1;i++)
+		{
+#ifdef _WIN32
+			int c=::getch();
+#else
+			int c=getchar();
+#endif
+			if(c<=0||c=='\r'||c=='\n')
+				break;
+			buff[i]=c;
+		}
+	buff[i]=0;
+
+#ifndef _WIN32
+	tmpTermios.c_lflag=flags;
+	if(bRestore)
+		tcsetattr(STDIN_FILENO,TCSAFLUSH,&tmpTermios);
+#endif
+	return E_SUCCESS;
+}	
 
 /**
  * Parses a timestamp in JDBC timestamp escape format (as it comes from the BI)

@@ -68,10 +68,10 @@ SINT32 CAMix::start()
 			CAMsg::printMsg(LOG_DEBUG, "CAMix start: creating InfoService object\n");
 			m_pInfoService=new CAInfoService(this);
         
-			UINT32 opCertLength;
-			CACertificate** opCerts = pglobalOptions->getOpCertificates(opCertLength);
+			//UINT32 opCertLength;
+			CACertificate* opCert = pglobalOptions->getOpCertificate();
 			CACertificate* pOwnCert=pglobalOptions->getOwnCertificate();
-			m_pInfoService->setSignature(m_pSignature, pOwnCert, opCerts, opCertLength);
+			m_pInfoService->setSignature(m_pSignature, pOwnCert, opCert);
 			delete pOwnCert;
 			pOwnCert = NULL;
 			UINT64 currentMillis;
@@ -81,17 +81,9 @@ SINT32 CAMix::start()
 			}
 			m_pInfoService->setSerial(currentMillis);
 			
-			if(opCerts!=NULL)
-				{
-					for(UINT32 i=0;i<opCertLength;i++)
-					{
-						delete opCerts[i];
-						opCerts[i] = NULL;
-					}
-					delete[] opCerts;
-					opCerts = NULL;
-				}
-	
+			delete opCert;	
+			opCert = NULL;
+				
 	        bool allowReconf = pglobalOptions->acceptReconfiguration();
 	        bool needReconf = needAutoConfig();
 	
@@ -270,6 +262,9 @@ SINT32 CAMix::initMixCascadeInfo(DOMElement* mixes)
     	{
     		setDOMElementAttribute(elemRoot,"maxUsers", maxUsers);
     	}
+#ifdef MANIOQ
+    	setDOMElementAttribute(elemRoot,"context", (UINT8*) "org.manioq");
+#endif
     }
     
     UINT8 id[50];
@@ -277,21 +272,31 @@ SINT32 CAMix::initMixCascadeInfo(DOMElement* mixes)
     pglobalOptions->getMixId(id,50);
 
     UINT8 name[255];
-    if(pglobalOptions->getCascadeName(name,255)!=E_SUCCESS)
+    m_docMixCascadeInfo->appendChild(elemRoot);
+    DOMElement* elem = NULL;
+    
+    if(pglobalOptions->getCascadeName(name,255) == E_SUCCESS)
+    {
+    	elem = createDOMElement(m_docMixCascadeInfo,"Name");
+    	setDOMElementValue(elem,name);
+    	elemRoot->appendChild(elem);
+	}
+    else
     {
     	CAMsg::printMsg(LOG_ERR,"No cascade name given!\n");
-			return E_UNKNOWN;
-		}
-    m_docMixCascadeInfo->appendChild(elemRoot);
-    DOMElement* elem=createDOMElement(m_docMixCascadeInfo,"Name");
-		setDOMElementValue(elem,name);
-    elemRoot->appendChild(elem);
-
+    }
+    
     elem=createDOMElement(m_docMixCascadeInfo,"Network");
     elemRoot->appendChild(elem);
     DOMElement* elemListenerInterfaces=createDOMElement(m_docMixCascadeInfo,"ListenerInterfaces");
     elem->appendChild(elemListenerInterfaces);
-
+    
+    DOMElement *perfTest = createDOMElement(m_docMixCascadeInfo, OPTIONS_NODE_PERFORMANCE_TEST);
+    setDOMElementAttribute(perfTest, 
+    		OPTIONS_ATTRIBUTE_PERFTEST_ENABLED,
+    		pglobalOptions->isPerformanceTestEnabled());
+    elemRoot->appendChild(perfTest);
+    
     for(UINT32 i=1;i<=pglobalOptions->getListenerInterfaceCount();i++)
     {
         CAListenerInterface* pListener=pglobalOptions->getListenerInterface(i);
@@ -361,20 +366,7 @@ SINT32 CAMix::initMixCascadeInfo(DOMElement* mixes)
     if(cascadeID != NULL)
 				setDOMElementAttribute(elemRoot,"id",cascadeID);
     setDOMElementAttribute(elemMixesDocCascade,"count",count);
-    
-    DOMElement* elemPerf = NULL;
-    if(getDOMChildByName(elemMixesDocCascade, "PerformanceServer", elemPerf, true) == E_SUCCESS && elemPerf != NULL)
-    {
-    	elemPerf = createDOMElement(m_docMixCascadeInfo, "PerformanceServer");    	
-    	setDOMElementValue(elemPerf, (UINT8*) "true");
-    }
-    else
-    {
-    	elemPerf = createDOMElement(m_docMixCascadeInfo, "PerformanceServer");   	
-    	setDOMElementValue(elemPerf, (UINT8*) "false");
-    }
-	elemRoot->appendChild(elemPerf);
-    
+     
   DOMNode* elemPayment=createDOMElement(m_docMixCascadeInfo,"Payment");
 	elemRoot->appendChild(elemPayment);
 #ifdef PAYMENT
@@ -422,36 +414,28 @@ SINT32 CAMix::signXML(DOMNode* a_element)
 			}
     
     // Operator Certificates
-    UINT32 opCertsLength;
-    CACertificate** opCert=pglobalOptions->getOpCertificates(opCertsLength);
+    CACertificate* opCert = pglobalOptions->getOpCertificate();
     if(opCert==NULL)
-			{
+	{
         CAMsg::printMsg(LOG_DEBUG,"Op Test Cert is NULL!\n");
-			}
-		else
-			{
-				// Own  Mix Certificates first, then Operator Certificates
-				for(SINT32 i = opCertsLength - 1;  i >=0; i--)
-					{
-						tmpCertStore->add(opCert[i]); 	
-					}
-				}
+	}
+	else
+	{
+		// Own  Mix Certificates first, then Operator Certificates
+		tmpCertStore->add(opCert); 		
+	}
     tmpCertStore->add(ownCert);
     
     if(m_pSignature->signXML(a_element, tmpCertStore)!=E_SUCCESS)
-			{
-				return E_UNKNOWN;
-			}
+	{
+		return E_UNKNOWN;
+	}
     delete ownCert;
     ownCert = NULL;
     
-	for(UINT32 i=0;i<opCertsLength;i++)
-	{
-		delete opCert[i];
-		opCert[i] = NULL;
-	}
-	delete[] opCert;
+	delete opCert;
 	opCert = NULL;
+	
     delete tmpCertStore;	
     tmpCertStore = NULL;
     
