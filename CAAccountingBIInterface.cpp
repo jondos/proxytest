@@ -218,6 +218,7 @@ CAXMLErrorMessage * CAAccountingBIInterface::settle(CAXMLCostConfirmation &cc)
 	UINT8 * pStrCC=NULL;
 	UINT8* response=NULL;
 	UINT32 contentLen=0, status=0;
+	UINT32 ret = 0;
 	CAXMLErrorMessage *pErrMsg;
 	
 	//m_pPiInterfaceMutex->lock();
@@ -233,11 +234,19 @@ CAXMLErrorMessage * CAAccountingBIInterface::settle(CAXMLCostConfirmation &cc)
 	pStrCC = NULL;
 	contentLen=0;
 	status=0;
-
-	if(m_phttpClient->parseHTTPHeader(&contentLen, &status)!=E_SUCCESS ||
-		(status!=200) || (contentLen==0))
+	
+	m_pSocket->setNonBlocking(true);
+	ret = m_phttpClient->parseHTTPHeader(&contentLen, &status, 3000);
+	if( ret !=E_SUCCESS || (status!=200) || (contentLen==0))
 	{
-		CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface::settle: response fehlerhaft!\n");
+		if(ret == E_TIMEDOUT)
+		{
+			CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface::settle: timeout while receiving response!\n");
+		}
+		else
+		{
+			CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface::settle: received bad response from PI!\n");
+		}
 		//m_pPiInterfaceMutex->unlock();
 		return NULL;
 	}
@@ -245,8 +254,18 @@ CAXMLErrorMessage * CAAccountingBIInterface::settle(CAXMLCostConfirmation &cc)
 	CAMsg::printMsg(LOG_DEBUG, "CAAccountingBIInterface::settle: got response header [Status,content-Lenght]=[%i,%i]!\n",status,contentLen);
 #endif		
 	response = new UINT8[contentLen+1];
-	if(m_pSocket->receiveFully(response, contentLen)!=E_SUCCESS)
+	
+	ret = m_pSocket->receiveFullyT(response, contentLen, 3000);
+	if(ret !=E_SUCCESS)
 		{
+			if(ret == E_TIMEDOUT)
+			{
+				CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface::settle: timeout while receiving settle message!\n");
+			}
+			else
+			{
+				CAMsg::printMsg(LOG_DEBUG, "CAAccountingBIInterface::settle: error\n");
+			}
 			delete[] response;
 			response = NULL;
 			//m_pPiInterfaceMutex->unlock();

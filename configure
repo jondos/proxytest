@@ -1341,6 +1341,7 @@ Optional Features:
   --enable-crime-detection
                           Enable crime detection mode
   --enable-tests          Build also some functional tests
+  --enable-manioq         Switch for Manioq provider mixes
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -13535,6 +13536,20 @@ if test "${enable_tests+set}" = set; then
 
 
 fi
+
+
+# Check whether --enable-manioq was given.
+if test "${enable_manioq+set}" = set; then
+  enableval=$enable_manioq;
+	    if test "x$enableval" != "xno" ; then
+		PAYMENT=""
+		CFLAGS="$CFLAGS -DMANIOQ"
+		CXXFLAGS="$CXXFLAGS -DMANIOQ"
+	    fi
+
+
+fi
+
 
 if test "x$DOTHETEST" != "xyes" ; then
     LIBCPPUNIT=cppunit

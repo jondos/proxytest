@@ -29,6 +29,14 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define __CA_UTIL__
 #include "CAASymCipher.hpp"
 
+#define UNIVERSAL_ATTRIBUTE_LAST_UPDATE LAST_UPDATE
+#define UNIVERSAL_NODE_LAST_UPDATE LAST_UPDATE
+
+#define LAST_UPDATE "LastUpdate"
+
+#define STR_VALUE_TRUE "true"
+#define STR_VALUE_FALSE "false"
+
 UINT32 strtrim(UINT8*);
 
 SINT32 memtrim(UINT8* out,const UINT8* in,UINT32 len);
@@ -158,7 +166,11 @@ SINT32 setDOMElementValue(DOMElement* pElem,const UINT8* value);
 
 SINT32 getDOMElementValue(const DOMElement * const pElem,double* value);
 
-SINT32 setDOMElementAttribute(DOMNode* pElem,const char* attrName,SINT32 value);
+SINT32 setDOMElementAttribute(DOMNode* pElem,const char* attrName, bool value);
+SINT32 setDOMElementAttribute(DOMNode* pElem,const char* attrName, SINT32 value);
+SINT32 setDOMElementAttribute(DOMNode* pElem,const char* attrName, UINT32 value);
+SINT32 setDOMElementAttribute(DOMNode* pElem, const char* attrName, UINT64 value);
+
 SINT32 setDOMElementValue(DOMElement* pElem,double floatValue);
 
 SINT32 getDOMElementAttribute(const DOMNode * const pElem,const char* attrName,SINT64& value);
@@ -172,6 +184,7 @@ SINT32 getLastDOMChildByName(const DOMNode* pNode,const XMLCh* const name,DOMNod
 SINT32 getLastDOMChildByName(const DOMNode* pNode,const char * const name,DOMNode* & a_child);
 SINT32 getLastDOMChildByName(const DOMNode* pNode,const char * const name,DOMElement* & a_child);
 
+SINT32 setCurrentTimeMilliesAsDOMAttribute(DOMNode *pElem);
 
 SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, UINT8* xml, UINT32* xmllen,CAASymCipher* pRSA);
 SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, DOMElement* & elemRootEncodedKey,XERCES_CPP_NAMESPACE::DOMDocument* docOwner,CAASymCipher* pRSA);

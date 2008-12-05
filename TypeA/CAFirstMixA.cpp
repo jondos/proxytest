@@ -480,6 +480,7 @@ SINT32 CAFirstMixA::loop()
 										countRead--;
 #endif																				
 /*#ifdef DELAY_USERS
+ * Don't delay upstream
 								if( m_pChannelList->hasDelayBuckets(pHashEntry->delayBucketID) )
 								{
 #endif*/			
@@ -582,9 +583,10 @@ SINT32 CAFirstMixA::loop()
 															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
 														#endif
 														m_pQueueSendToMix->add(pQueueEntry, sizeof(tQueueEntry));
+														/* Don't delay upstream
 														#ifdef DELAY_USERS
 														m_pChannelList->decDelayBuckets(pHashEntry->delayBucketID);
-														#endif
+														#endif*/
 														#ifdef LOG_CHANNEL
 															//pEntry->packetsInFromUser++;
 															getcurrentTimeMicros(current_time);
@@ -620,9 +622,10 @@ SINT32 CAFirstMixA::loop()
 														#endif
 							
 														m_pQueueSendToMix->add(pQueueEntry, sizeof(tQueueEntry));
+														/* Don't delay upstream
 														#ifdef DELAY_USERS
 														m_pChannelList->decDelayBuckets(pHashEntry->delayBucketID);
-														#endif
+														#endif*/
 														incMixedPackets();
 														#ifdef LOG_CHANNEL
 															pEntry->packetsInFromUser++;
@@ -667,9 +670,10 @@ SINT32 CAFirstMixA::loop()
 																set64(pTmpEntry->timeCreated,pQueueEntry->timestamp_proccessing_start);
 															#endif
 															m_pQueueSendToMix->add(pQueueEntry, sizeof(tQueueEntry));
+															/* Don't delay upstream
 															#ifdef DELAY_USERS
 															m_pChannelList->decDelayBuckets(pHashEntry->delayBucketID);
-															#endif
+															#endif*/
 															incMixedPackets();
 															#ifdef _DEBUG
 //																			CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",pMixPacket->channel);

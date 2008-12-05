@@ -758,7 +758,11 @@ SINT32 CASocket::setKeepAlive(bool b)
 		int val=0;
 		if(b) val=1;
 		if(setsockopt(m_Socket,SOL_SOCKET,SO_KEEPALIVE,(char*)&val,sizeof(val))==SOCKET_ERROR)
+		{
+			int errnum = errno;
+			CAMsg::printMsg(LOG_ERR, "Could not set KEEP_ALIVE options, cause: %s\n", strerror(errnum));
 			return E_UNKNOWN;
+		}
 		return E_SUCCESS;
 	}
 
