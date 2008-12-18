@@ -1712,50 +1712,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\TypeA\CAFirstMixA.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PrecompiledHeaderThrough="../stdafx.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="proxytest-only-local-debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PrecompiledHeaderThrough="../stdafx.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug-with-payment|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PrecompiledHeaderThrough="../stdafx.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug-with-Mini-XML|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PrecompiledHeaderThrough="../stdafx.h"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="CAFirstMixChannelList.cpp"
 				>
 				<FileConfiguration
@@ -5048,6 +5004,50 @@
 			<Filter
 				Name="TypeA"
 				>
+				<File
+					RelativePath=".\TypeA\CAFirstMixA.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							PrecompiledHeaderThrough="../stdafx.h"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="proxytest-only-local-debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							PrecompiledHeaderThrough="../stdafx.h"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug-with-payment|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							PrecompiledHeaderThrough="../stdafx.h"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug-with-Mini-XML|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							PrecompiledHeaderThrough="../stdafx.h"
+						/>
+					</FileConfiguration>
+				</File>
 				<File
 					RelativePath=".\TypeA\CALastMixA.cpp"
 					>
