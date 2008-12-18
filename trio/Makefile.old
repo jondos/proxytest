@@ -1,0 +1,9 @@
+libtrio.a: trio.cpp triostr.cpp trionan.cpp
+	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) trio.cpp -o trio.o
+	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) triostr.cpp -o triostr.o
+	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) trionan.cpp -o trionan.o
+	ar -rcs libtrio.a trio.o triostr.o trionan.o 
+
+clean:
+	rm -f *.o
+	rm -f libtrio.a
