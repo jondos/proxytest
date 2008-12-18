@@ -5833,6 +5833,34 @@
 					</Filter>
 				</Filter>
 			</Filter>
+			<Filter
+				Name="gcm"
+				>
+				<File
+					RelativePath=".\gcm\gcm.cpp"
+					>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\gcm\prp.cpp"
+					>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header-Dateien"
@@ -6253,6 +6281,18 @@
 						</File>
 					</Filter>
 				</Filter>
+			</Filter>
+			<Filter
+				Name="gcm"
+				>
+				<File
+					RelativePath=".\gcm\gcm.h"
+					>
+				</File>
+				<File
+					RelativePath=".\gcm\prp.h"
+					>
+				</File>
 			</Filter>
 		</Filter>
 	</Files>
