@@ -1756,7 +1756,7 @@ SINT32 CACmdLnOptions::invokeOptionSetters
 	/* Only warn when we have a null DOM Element */
 	if( optionsSource == NULL )
 	{
-		CAMsg::printMsg(LOG_WARNING, "Found NULL DOM element. "
+		CAMsg::printMsg(LOG_INFO, "Found NULL DOM element. "
 				"NULL element handling is delegated to the specified setter method!\n");
 	}
 

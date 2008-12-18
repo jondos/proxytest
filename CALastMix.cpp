@@ -193,7 +193,7 @@ SINT32 CALastMix::processKeyExchange()
 	{
 		XERCES_CPP_NAMESPACE::DOMDocument* doc=createDOMDocument();
 		DOMElement* elemMixes=createDOMElement(doc,"Mixes");
-		setDOMElementAttribute(elemMixes,"count",1);
+		setDOMElementAttribute(elemMixes,"count",(UINT32)1);
     //UINT8 cName[128];
     //pglobalOptions->getCascadeName(cName,128);
     //setDOMElementAttribute(elemMixes,"cascadeName",cName);
