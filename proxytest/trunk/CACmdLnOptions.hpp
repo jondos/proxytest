@@ -642,7 +642,7 @@ class CACmdLnOptions
 			bool m_bAcceptReconfiguration;
 			XERCES_CPP_NAMESPACE::DOMDocument* m_docMixInfo;
 			XERCES_CPP_NAMESPACE::DOMDocument* m_docMixXml;
-			DOMDocument* m_docOpTnCs;
+			XERCES_CPP_NAMESPACE::DOMDocument* m_docOpTnCs;
 
 			UINT32 m_u32KeepAliveSendInterval;
 			UINT32 m_u32KeepAliveRecvInterval;

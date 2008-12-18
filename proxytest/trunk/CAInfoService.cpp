@@ -745,8 +745,8 @@ UINT8 **CAInfoService::getOperatorTnCsAsStrings(UINT32 **lengths, XMLSize_t *nrO
 	}
 	
 	UINT32 locale_len = 3;
-	UINT8 id[tmpOpSKILen+locale_len+1];
-	UINT8 locale[locale_len];
+	UINT8* id=new UINT8[tmpOpSKILen+locale_len+1];
+	UINT8* locale=new UINT8[locale_len];
 	
 	locale[locale_len-1]=0;
 	
@@ -794,6 +794,8 @@ UINT8 **CAInfoService::getOperatorTnCsAsStrings(UINT32 **lengths, XMLSize_t *nrO
 		setCurrentTimeMilliesAsDOMAttribute(iterator);
 		elementList[i] = xmlDocToStringWithSignature(iterator, (*lengths)[i], m_pcertstoreOwnCerts);
 	}
+	delete[] id;
+	delete[] locale;
 	return elementList;
 	
 }

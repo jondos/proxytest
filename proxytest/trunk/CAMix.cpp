@@ -249,7 +249,7 @@ bool CAMix::needAutoConfig()
 */
 SINT32 CAMix::initMixCascadeInfo(DOMElement* mixes)
 {
-    int count;
+    UINT32 count;
     m_docMixCascadeInfo=createDOMDocument();
     DOMElement* elemRoot=createDOMElement(m_docMixCascadeInfo,"MixCascade");
 #ifdef LOG_DIALOG
@@ -257,7 +257,7 @@ SINT32 CAMix::initMixCascadeInfo(DOMElement* mixes)
 #endif
     if(pglobalOptions->isFirstMix())
     {
-    	int maxUsers = pglobalOptions->getMaxNrOfUsers();
+    	UINT32 maxUsers = pglobalOptions->getMaxNrOfUsers();
     	if(maxUsers > 0)
     	{
     		setDOMElementAttribute(elemRoot,"maxUsers", maxUsers);
