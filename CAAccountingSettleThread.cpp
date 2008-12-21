@@ -93,7 +93,8 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 		INIT_STACK;
 		BEGIN_STACK("CAAccountingSettleThread::mainLoop");
 		
-		UINT32 sleepInterval, settlement_status;
+		UINT32 settlement_status;
+		UINT32 sleepInterval = pglobalOptions->getPaymentSettleInterval();
 		
 		CAAccountingSettleThread* m_pAccountingSettleThread=(CAAccountingSettleThread*)pParam;
 		/*CAAccountingBIInterface *biConn = new CAAccountingBIInterface();
@@ -120,9 +121,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 		}
 		//biAddr.setAddr(pBI->getHostName(), (UINT16)pBI->getPortNumber());
 		biConn->setPIServerConfiguration(pBI);*/
-		
-		pglobalOptions->getPaymentSettleInterval(&sleepInterval);
-
+	
 		CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread: Start loop...\n");
 		
 		while(m_pAccountingSettleThread->m_bRun) {

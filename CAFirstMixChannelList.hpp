@@ -49,6 +49,8 @@ struct t_fmhashtableentry
 		public:
 			CAMuxSocket*	pMuxSocket;
 			CAQueue*		pQueueSend;
+			/* Separate handling of control messages allows to assign control messages a higher priority. */
+			CAQueue*		pControlMessageQueue; 
 			CAControlChannelDispatcher* pControlChannelDispatcher;
 			SINT32			uAlreadySendPacketSize;
 			tQueueEntry		oQueueEntry;
@@ -98,9 +100,10 @@ struct t_fmhashtableentry
 			} list_TimeoutHashEntries;
 #endif
 		friend class CAFirstMixChannelList;
-#ifdef PAYMENT
+
 		public:
 			bool bCountPacket;
+#ifdef PAYMENT
  		private:
 			tAiAccountingInfo* pAccountingInfo;
 		friend class CAAccountingInstance;

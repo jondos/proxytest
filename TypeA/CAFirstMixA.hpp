@@ -39,8 +39,15 @@ class CAFirstMixA:public CAFirstMix
 
 		protected:
 			SINT32 loop();	
-			SINT32 closeConnection(fmHashTableEntry* pHashEntry);	
-			
+			SINT32 closeConnection(fmHashTableEntry* pHashEntry);
+		private:
+			bool sendToUsers();
+			SINT32 accountTrafficDownstream(fmHashTableEntry* pfmHashEntry);
+			void resumeAllUserChannels(fmHashTableEntry* pfmHashEntry);
+			void notifyAllUserChannels(fmHashTableEntry *pfmHashEntry, UINT16 flags);
+#ifdef SSL_HACK
+			void finishPacket(fmHashTableEntry *pfmHashEntry);
+#endif
 };
 
 #endif

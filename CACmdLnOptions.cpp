@@ -1423,29 +1423,25 @@ SINT32 CACmdLnOptions::getAiID(UINT8 * id, UINT32 len)
 		return E_SUCCESS;
 	}
 
-SINT32 CACmdLnOptions::getPaymentHardLimit(UINT32 *pHardLimit)
-	{
-		*pHardLimit = m_iPaymentHardLimit;
-		return E_SUCCESS;
-	}
+UINT32 CACmdLnOptions::getPaymentHardLimit()
+{
+	return m_iPaymentHardLimit;
+}
 
-SINT32 CACmdLnOptions::getPrepaidInterval(UINT32 *pPrepaidInterval)
-	{
-		*pPrepaidInterval = m_iPrepaidInterval;
-		return E_SUCCESS;
-	}
+UINT32 CACmdLnOptions::getPrepaidInterval()
+{
+	return m_iPrepaidInterval;
+}
 
-SINT32 CACmdLnOptions::getPaymentSoftLimit(UINT32 *pSoftLimit)
-	{
-		*pSoftLimit = m_iPaymentSoftLimit;
-		return E_SUCCESS;
-	}
+UINT32 CACmdLnOptions::getPaymentSoftLimit()
+{
+	return m_iPaymentSoftLimit;
+}
 
-SINT32 CACmdLnOptions::getPaymentSettleInterval(UINT32 *pInterval)
-	{
-		*pInterval = m_iPaymentSettleInterval;
-		return E_SUCCESS;
-	}
+UINT32 CACmdLnOptions::getPaymentSettleInterval()
+{
+	return m_iPaymentSettleInterval;
+}
 
 #endif /* ifdef PAYMENT */
 
@@ -1756,7 +1752,7 @@ SINT32 CACmdLnOptions::invokeOptionSetters
 	/* Only warn when we have a null DOM Element */
 	if( optionsSource == NULL )
 	{
-		CAMsg::printMsg(LOG_INFO, "Found NULL DOM element. "
+		CAMsg::printMsg(LOG_WARNING, "Found NULL DOM element. "
 				"NULL element handling is delegated to the specified setter method!\n");
 	}
 

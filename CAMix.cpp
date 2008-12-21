@@ -372,9 +372,7 @@ SINT32 CAMix::initMixCascadeInfo(DOMElement* mixes)
 #ifdef PAYMENT
 	setDOMElementAttribute(elemPayment,"required",(UINT8*)"true");
 	setDOMElementAttribute(elemPayment,"version",(UINT8*)PAYMENT_VERSION);
-	UINT32 prepaidInterval;
-	pglobalOptions->getPrepaidInterval(&prepaidInterval);
-	setDOMElementAttribute(elemPayment,"prepaidInterval", prepaidInterval);
+	setDOMElementAttribute(elemPayment,"prepaidInterval", pglobalOptions->getPrepaidInterval());
 	setDOMElementAttribute(elemPayment,"piid", pglobalOptions->getBI()->getID());
 #else
 	setDOMElementAttribute(elemPayment,"required",(UINT8*)"false");

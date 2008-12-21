@@ -140,8 +140,9 @@ XERCES_CPP_NAMESPACE::DOMDocument* createDOMDocument();
 DOMText* createDOMText(XERCES_CPP_NAMESPACE::DOMDocument* pOwnerDoc,const char * const text);
 
 
-SINT32 setDOMElementValue(DOMElement* pElem,UINT32 value);
+SINT32 setDOMElementValue(DOMElement* pElem, UINT32 value);
 
+SINT32 setDOMElementValue(DOMElement* pElem, SINT32 value);
 /**
  * Returns the content of the text node under elem
  * as 64bit unsigned integer.
