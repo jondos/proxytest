@@ -792,9 +792,9 @@ THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 									pPool->pool(pPoolEntry);
 								#endif
 								if((pMixPacket->flags&CHANNEL_CLOSE)!=0)
-									{//Channel close received -->remove channel form channellist
-										pMix->m_pMiddleMixChannelList->remove(pMixPacket->channel);
-									}
+								{//Channel close received -->remove channel form channellist
+									pMix->m_pMiddleMixChannelList->remove(pMixPacket->channel);
+								}
 								pMixPacket->channel=channelOut;
 
 								pQueue->add(pPoolEntry,sizeof(tPoolEntry));

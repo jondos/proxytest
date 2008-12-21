@@ -879,7 +879,7 @@ SINT32 CAAccountingDBInterface::__storeAccountStatus(UINT64 accountNumber, UINT3
 	delete[] finalQuery;
 	finalQuery = NULL;
 	PQclear(result);
-	CAMsg::printMsg(LOG_DEBUG, "Stored status code %u and expire date %s, for account nr. %s \n",statuscode, expires, tmp); 
+	CAMsg::printMsg(LOG_DEBUG, "Stored status code %u and expire date %s, for account nr. %s \n",statuscode, "none", tmp); 
 	return E_SUCCESS;	 	
 }
 	

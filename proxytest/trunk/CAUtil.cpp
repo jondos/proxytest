@@ -629,14 +629,21 @@ XERCES_CPP_NAMESPACE::DOMDocument* createDOMDocument()
 		return pImpl->createDocument();
 	}
 
-SINT32 setDOMElementValue(DOMElement* pElem,UINT32 text)
+SINT32 setDOMElementValue(DOMElement* pElem, UINT32 value)
 	{
 		UINT8 tmp[10];
-		sprintf((char*)tmp,"%u",text);
+		sprintf((char*)tmp,"%u", value);
 		setDOMElementValue(pElem,tmp);
 		return E_SUCCESS;
 	}
 
+SINT32 setDOMElementValue(DOMElement* pElem, SINT32 value)
+	{
+		UINT8 tmp[10];
+		sprintf((char*)tmp,"%i", value);
+		setDOMElementValue(pElem,tmp);
+		return E_SUCCESS;
+	}
 	
 SINT32 setDOMElementValue(DOMElement* pElem,double floatValue)
 	{

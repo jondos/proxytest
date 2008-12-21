@@ -137,7 +137,8 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 		
 		pHashTableEntry->pMuxSocket=pMuxSocket;
 		pHashTableEntry->pQueueSend=pQueueSend;
-		pHashTableEntry->pControlChannelDispatcher=new CAControlChannelDispatcher(pQueueSend);
+		pHashTableEntry->pControlMessageQueue = new CAQueue();
+		pHashTableEntry->pControlChannelDispatcher = new CAControlChannelDispatcher(pHashTableEntry->pControlMessageQueue);
 		pHashTableEntry->uAlreadySendPacketSize=-1;
 		pHashTableEntry->cNumberOfChannels=0;
 #ifdef LOG_TRAFFIC_PER_USER
@@ -500,7 +501,7 @@ SINT32 CAFirstMixChannelList::removeFromTimeoutList(fmHashTableEntry* pHashTable
 			//it is a simple middle element
 			if (pHashTableEntry->list_TimeoutHashEntries.prev == NULL)
 			{
-				CAMsg::printMsg(LOG_CRIT, "CAFirstMixCahnelList:removeFromTimeoutList: No previous element!!\n");
+				CAMsg::printMsg(LOG_CRIT, "CAFirstMixChannelList:removeFromTimeoutList: No previous element!!\n");
 			}
 			else
 			{
@@ -550,7 +551,9 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 	#endif
 		pHashTableEntry->pControlChannelDispatcher->deleteAllControlChannels();
 		delete pHashTableEntry->pControlChannelDispatcher; //deletes the dispatcher and all associated control channels
+		delete pHashTableEntry->pControlMessageQueue;
 		pHashTableEntry->pControlChannelDispatcher = NULL;
+		pHashTableEntry->pControlMessageQueue = NULL;
 		if(m_listHashTableNext==pHashTableEntry) //adjust the enumeration over all connections (@see getNext())
 			m_listHashTableNext=pHashTableEntry->list_HashEntries.next;
 		

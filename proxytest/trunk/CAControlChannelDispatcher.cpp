@@ -66,7 +66,7 @@ void CAControlChannelDispatcher::deleteAllControlChannels()
 	
 bool CAControlChannelDispatcher::proccessMixPacket(const MIXPACKET* pPacket)
 	{
-		if(pPacket->channel<256&&pPacket->channel>0)
+		if(pPacket->channel < 256 && pPacket->channel > 0)
 			{
 				CAAbstractControlChannel* pControlChannel=m_arControlChannels[pPacket->channel];
 				if(pControlChannel!=NULL)
@@ -95,20 +95,20 @@ SINT32 CAControlChannelDispatcher::sendMessages(UINT32 id,bool m_bIsEncrypted,co
 		m_pMixPacket->channel=id;
 		UINT32 aktIndex=0;
 		while(msglen>0)
+		{
+			if(msglen>DATA_SIZE)
 			{
-				if(msglen>DATA_SIZE)
-					{
-						m_pMixPacket->flags=DATA_SIZE;
-					}
-				else
-					{
-						m_pMixPacket->flags=(UINT16)msglen;
-					}
-				memcpy(m_pMixPacket->data,msg+aktIndex,m_pMixPacket->flags);
-				m_pSendQueue->add(m_pQueueEntry,sizeof(tQueueEntry));
-				aktIndex+=m_pMixPacket->flags;
-				msglen-=m_pMixPacket->flags;
+				m_pMixPacket->flags=DATA_SIZE;
 			}
+			else
+			{
+				m_pMixPacket->flags=(UINT16)msglen;
+			}
+			memcpy(m_pMixPacket->data,msg+aktIndex,m_pMixPacket->flags);
+			m_pSendQueue->add(m_pQueueEntry,sizeof(tQueueEntry));
+			aktIndex+=m_pMixPacket->flags;
+			msglen-=m_pMixPacket->flags;
+		}
 		m_pcsSendMsg->unlock();	
 		return E_SUCCESS;
 	}

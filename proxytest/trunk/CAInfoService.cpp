@@ -735,13 +735,33 @@ UINT8 **CAInfoService::getOperatorTnCsAsStrings(UINT32 **lengths, XMLSize_t *nrO
 		return NULL;
 	}
 	
-	UINT8 tmpSerial[TMP_BUFF_SIZE];
-	UINT32 tmpSerialLen = TMP_BUFF_SIZE;
+	UINT8 tmpDate[TMP_BUFF_SIZE];
+	UINT32 tmpDateLen = TMP_BUFF_SIZE;
 	
-	getDOMElementAttribute(tnCs, OPTION_ATTRIBUTE_TNC_DATE, tmpSerial, &tmpSerialLen);
-	if(tmpSerialLen == 0)
+	getDOMElementAttribute(tnCs, OPTION_ATTRIBUTE_TNC_DATE, tmpDate, &tmpDateLen);
+	if(tmpDateLen == 0)
 	{
 		return NULL;
+	}
+	
+	UINT8 tmpVersion[TMP_BUFF_SIZE];
+	UINT32 tmpVersionLen = TMP_BUFF_SIZE;
+	
+	UINT8* serial = NULL;
+	
+	getDOMElementAttribute(tnCs, OPTION_ATTRIBUTE_TNC_VERSION, tmpVersion, &tmpVersionLen);
+	if(tmpVersionLen > 0)
+	{
+		serial = new UINT8[tmpDateLen+tmpVersionLen+1];
+		memcpy(serial, tmpDate, tmpDateLen);
+		memcpy(serial + tmpDateLen, tmpVersion, tmpVersionLen);
+		serial[tmpDateLen + tmpVersionLen] = 0;
+	}
+	else
+	{
+		serial = new UINT8[tmpDateLen+1];
+		memcpy(serial, tmpDate, tmpDateLen);
+		serial[tmpDateLen] = 0;
 	}
 	
 	UINT32 locale_len = 3;
@@ -786,7 +806,12 @@ UINT8 **CAInfoService::getOperatorTnCsAsStrings(UINT32 **lengths, XMLSize_t *nrO
 			elementList[i] = NULL;
 			continue;
 		}
-		if(setDOMElementAttribute(iterator, OPTION_ATTRIBUTE_TNC_SERIAL, tmpSerial) != E_SUCCESS)
+		if(setDOMElementAttribute(iterator, OPTION_ATTRIBUTE_TNC_DATE, tmpDate) != E_SUCCESS)
+		{
+			elementList[i] = NULL;
+			continue;
+		}
+		if(setDOMElementAttribute(iterator, OPTION_ATTRIBUTE_TNC_SERIAL, serial) != E_SUCCESS)
 		{
 			elementList[i] = NULL;
 			continue;

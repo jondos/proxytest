@@ -33,27 +33,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 /* How many different status types exist*/
-#ifdef PAYMENT
-	#define NR_STATUS_TYPES 3
-
-	#define PAYMENT_STATUS_NAME "PaymentStatus"
-	#define NR_PAYMENT_STATES 9
-	#define NR_PAYMENT_EVENTS 7
-#else
-	#define NR_STATUS_TYPES 2
-#endif
-
-#define NETWORKING_STATUS_NAME "NetworkingStatus"
-#define NR_NETWORKING_STATES 11
-#define NR_NETWORKING_EVENTS 11
-
-#define SYSTEM_STATUS_NAME "SystemStatus"
-#define NR_SYSTEM_STATES 6
-#define NR_SYSTEM_EVENTS 6
 
 #define STATUS_FLAG(status_type) (1<<(unsigned int)status_type)
-
-#define NR_STATE_LEVELS 4
 
 #define FIRST_STATUS 0
 #define FIRST_EVENT 0
@@ -75,6 +56,90 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define EVER 1
 
+enum status_type
+{
+	stat_undef = -1,
+	stat_networking = 0,
+#ifdef PAYMENT
+	stat_payment,
+#endif
+	stat_system,
+	stat_all
+};
+
+#define NR_STATUS_TYPES stat_all
+
+enum state_type
+{
+	st_ignore = -1,
+	/* networking states */
+	st_net_entry = 0,
+	st_net_firstMixInit, st_net_firstMixConnectedToNext, st_net_firstMixOnline ,
+	st_net_middleMixInit, st_net_middleMixConnectedToPrev,
+	st_net_middleMixConnectedToNext, st_net_middleMixOnline,
+	st_net_lastMixInit, st_net_lastMixConnectedToPrev, st_net_lastMixOnline,
+	st_net_overall, /* only represents the number all network states */
+#ifdef PAYMENT
+	/* payment states */
+	st_pay_entry = 0,
+	st_pay_aiInit, st_pay_aiShutdown,
+	st_pay_biAvailable, st_pay_biUnreachable, st_pay_biPermanentlyUnreachable,
+	st_pay_dbError, st_pay_dbErrorBiUnreachable, st_pay_dbErrorBiPermanentlyUnreachable,
+	st_pay_overall, /* only represents the number all payment states */
+#endif
+	/* system states */
+	st_sys_entry = 0,
+	st_sys_initializing, st_sys_operating, st_sys_restarting,
+	st_sys_shuttingDown, st_sys_ShuttingDownAfterSegFault,
+	st_sys_overall /* only represents the number all system states */
+};
+
+enum event_type
+{
+	/* networking events */
+	ev_net_firstMixInited = 0, ev_net_middleMixInited , ev_net_lastMixInited,
+	ev_net_prevConnected, ev_net_nextConnected,
+	ev_net_prevConnectionClosed, ev_net_nextConnectionClosed,
+	ev_net_keyExchangePrevSuccessful, ev_net_keyExchangeNextSuccessful,
+	ev_net_keyExchangePrevFailed, ev_net_keyExchangeNextFailed,
+	ev_net_overall, /* only represents the number all network events */
+#ifdef PAYMENT
+	/* payment events */
+	ev_pay_aiInited = 0, ev_pay_aiShutdown,
+	ev_pay_biConnectionSuccess, ev_pay_biConnectionFailure, ev_pay_biConnectionCriticalSubseqFailures,
+	ev_pay_dbConnectionSuccess, ev_pay_dbConnectionFailure,
+	ev_pay_overall,  /* only represents the number all payment events */
+#endif
+	/* system events */
+	ev_sys_start = 0,
+	ev_sys_enterMainLoop, ev_sys_leavingMainLoop,
+	ev_sys_sigTerm, ev_sys_sigInt, ev_sys_sigSegV,
+	ev_sys_overall  /* only represents the number all system events */
+};
+
+#ifdef PAYMENT
+	#define PAYMENT_STATUS_NAME "PaymentStatus"
+	#define NR_PAYMENT_STATES st_pay_overall
+	#define NR_PAYMENT_EVENTS ev_pay_overall
+#endif
+
+#define NETWORKING_STATUS_NAME "NetworkingStatus"
+#define NR_NETWORKING_STATES st_net_overall
+#define NR_NETWORKING_EVENTS ev_net_overall
+
+#define SYSTEM_STATUS_NAME "SystemStatus"
+#define NR_SYSTEM_STATES st_sys_overall
+#define NR_SYSTEM_EVENTS ev_sys_overall
+
+static const char *STATUS_NAMES[NR_STATUS_TYPES] =
+{
+		NETWORKING_STATUS_NAME,
+#ifdef PAYMENT
+		PAYMENT_STATUS_NAME,
+#endif
+		SYSTEM_STATUS_NAME
+};
+
 static const int EVENT_COUNT[NR_STATUS_TYPES] =
 {
 		NR_NETWORKING_EVENTS,
@@ -93,77 +158,18 @@ static const int STATE_COUNT[NR_STATUS_TYPES] =
 		NR_SYSTEM_STATES
 };
 
-static const char *STATUS_NAMES[NR_STATUS_TYPES] =
-{
-		NETWORKING_STATUS_NAME,
-#ifdef PAYMENT
-		PAYMENT_STATUS_NAME,
-#endif
-		SYSTEM_STATUS_NAME
-};
-
-static const char *STATUS_LEVEL_NAMES[NR_STATE_LEVELS] =
-{
-		"OK", "WARNING", "CRITICAL", "UNKNOWN"
-};
-
-enum state_type
-{
-	st_ignore = -1,
-	/* networking states */
-	st_net_entry = 0,
-	st_net_firstMixInit, st_net_firstMixConnectedToNext, st_net_firstMixOnline ,
-	st_net_middleMixInit, st_net_middleMixConnectedToPrev,
-	st_net_middleMixConnectedToNext, st_net_middleMixOnline,
-	st_net_lastMixInit, st_net_lastMixConnectedToPrev, st_net_lastMixOnline,
-#ifdef PAYMENT
-	/* payment states */
-	st_pay_entry = 0,
-	st_pay_aiInit, st_pay_aiShutdown,
-	st_pay_biAvailable, st_pay_biUnreachable, st_pay_biPermanentlyUnreachable,
-	st_pay_dbError, st_pay_dbErrorBiUnreachable, st_pay_dbErrorBiPermanentlyUnreachable,
-#endif
-	/* system states */
-	st_sys_entry = 0,
-	st_sys_initializing, st_sys_operating, st_sys_restarting,
-	st_sys_shuttingDown, st_sys_ShuttingDownAfterSegFault
-};
-
-enum status_type
-{
-	stat_undef = -1,
-	stat_networking = 0,
-#ifdef PAYMENT
-	stat_payment,
-#endif
-	stat_system,
-	stat_all
-};
-
-enum event_type
-{
-	/* networking events */
-	ev_net_firstMixInited = 0, ev_net_middleMixInited , ev_net_lastMixInited,
-	ev_net_prevConnected, ev_net_nextConnected,
-	ev_net_prevConnectionClosed, ev_net_nextConnectionClosed,
-	ev_net_keyExchangePrevSuccessful, ev_net_keyExchangeNextSuccessful,
-	ev_net_keyExchangePrevFailed, ev_net_keyExchangeNextFailed,
-#ifdef PAYMENT
-	/* payment events */
-	ev_pay_aiInited = 0, ev_pay_aiShutdown,
-	ev_pay_biConnectionSuccess, ev_pay_biConnectionFailure, ev_pay_biConnectionCriticalSubseqFailures,
-	ev_pay_dbConnectionSuccess, ev_pay_dbConnectionFailure,
-#endif
-	/* system events */
-	ev_sys_start = 0,
-	ev_sys_enterMainLoop, ev_sys_leavingMainLoop,
-	ev_sys_sigTerm, ev_sys_sigInt, ev_sys_sigSegV
-};
 
 /* indices must correspond to strings in STATUS_LEVEL_NAMES */
 enum state_level
 {
-	stl_ok = 0, stl_warning, stl_critical, stl_unknown
+	stl_ok = 0, stl_warning, stl_critical, stl_unknown, stl_all
+};
+
+#define NR_STATE_LEVELS stl_all
+
+static const char *STATUS_LEVEL_NAMES[NR_STATE_LEVELS] =
+{
+		"OK", "WARNING", "CRITICAL", "UNKNOWN"
 };
 
 typedef enum state_type state_type_t;

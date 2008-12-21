@@ -39,236 +39,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include "../CASocketGroupEpoll.hpp"
 #endif
 extern CACmdLnOptions* pglobalOptions;
-/* Cleanup order: 
-		 * 1. stop threads.
-		 * 2. close connections
-		 * 3. close sockets
-		 */
-/*SINT32 CAFirstMixA::clean()
-	{
-		#ifdef _DEBUG
-			CAMsg::printMsg(LOG_DEBUG,"CAFirstMixA::clean() start\n");
-		#endif
-		m_bRunLog=false;
-		m_bRestart=true;
-		MONITORING_FIRE_NET_EVENT(ev_net_nextConnectionClosed);
-		
-		
-		if(m_pthreadAcceptUsers!=NULL)
-		{
-			CAMsg::printMsg(LOG_CRIT,"Wait for LoopAcceptUsers!\n");
-			m_pthreadAcceptUsers->join();
-			delete m_pthreadAcceptUsers;
-		}
-		m_pthreadAcceptUsers=NULL;
-		
-		CAMsg::printMsg(LOG_DEBUG,"Cleaning up login threads\n");
-		if(m_pthreadsLogin!=NULL)
-		{
-			delete m_pthreadsLogin;
-			m_pthreadsLogin=NULL;
-		}
-		
-		//writing some bytes to the queue...
-		if(m_pQueueSendToMix!=NULL)
-		{
-			UINT8 b[sizeof(tQueueEntry)+1];
-			m_pQueueSendToMix->add(b,sizeof(tQueueEntry)+1);
-		}
-		
-		if(m_pthreadSendToMix!=NULL)
-		{
-			CAMsg::printMsg(LOG_CRIT,"Wait for LoopSendToMix!\n");
-			m_pthreadSendToMix->join();
-			delete m_pthreadSendToMix;
-		}
-		m_pthreadSendToMix=NULL;
-		
-		if(m_pthreadReadFromMix!=NULL)
-		{
-			CAMsg::printMsg(LOG_CRIT,"Wait for LoopReadFromMix!\n");
-			m_pthreadReadFromMix->join();
-			delete m_pthreadReadFromMix;
-		}
-		m_pthreadReadFromMix=NULL;
-		
-		
-#ifdef PAYMENT
-			UINT32 connectionsClosed = 0;
-			fmHashTableEntry* timeoutHashEntry;
-			
-			if(m_pInfoService != NULL)
-			{
-				CAMsg::printMsg(LOG_DEBUG,"Shutting down infoservice.\n");		
-				m_pInfoService->stop();
-			}
-			
-			if(m_pChannelList!=NULL) // may happen if mixes did not yet connect to each other
-			{
-				while ((timeoutHashEntry = m_pChannelList->popTimeoutEntry(true)) != NULL)
-				{			
-					CAMsg::printMsg(LOG_DEBUG,"Shutting down, closing client connection.\n");					
-					connectionsClosed++;
-					closeConnection(timeoutHashEntry);
-				}	
-				CAMsg::printMsg(LOG_DEBUG,"Closed %i client connections.\n", connectionsClosed);
-			}
-#endif
-		
-		if(m_pMuxOut!=NULL)
-			{
-				m_pMuxOut->close();
-			}
-		if(m_arrSocketsIn!=NULL)
-			{
-				for(UINT32 i=0;i<m_nSocketsIn;i++)
-					m_arrSocketsIn[i].close();
-			}
-		
-		
-
-		
-		
-    //     if(m_pInfoService!=NULL)
-    //     {
-    //         CAMsg::printMsg(LOG_CRIT,"Stopping InfoService....\n");
-    //         CAMsg::printMsg	(LOG_CRIT,"Memory usage before: %u\n",getMemoryUsage());
-    //         m_pInfoService->stop();
-    //         CAMsg::printMsg	(LOG_CRIT,"Memory usage after: %u\n",getMemoryUsage());
-    //         CAMsg::printMsg(LOG_CRIT,"Stopped InfoService!\n");
-    //         delete m_pInfoService;
-    //     }
-    //     m_pInfoService=NULL;
-
-#ifdef LOG_PACKET_TIMES
-		if(m_pLogPacketStats!=NULL)
-			{
-				CAMsg::printMsg(LOG_CRIT,"Wait for LoopLogPacketStats to terminate!\n");
-				m_pLogPacketStats->stop();
-				delete m_pLogPacketStats;
-			}
-		m_pLogPacketStats=NULL;
-#endif
-		if(m_arrSocketsIn!=NULL)
-			delete[] m_arrSocketsIn;
-		m_arrSocketsIn=NULL;
-#ifdef REPLAY_DETECTION
-		if(m_pReplayMsgProc!=NULL)
-			{
-				delete m_pReplayMsgProc;
-			}
-		m_pReplayMsgProc=NULL;
-#endif
-
-		if(m_pMuxOutControlChannelDispatcher!=NULL)
-		{
-			delete m_pMuxOutControlChannelDispatcher;
-		}
-		m_pMuxOutControlChannelDispatcher=NULL;
-
-		if(m_pMuxOut!=NULL)
-			{
-				m_pMuxOut->close();
-				delete m_pMuxOut;
-			}
-		m_pMuxOut=NULL;
-#ifdef COUNTRY_STATS
-		deleteCountryStats();
-#endif		
-		if(m_pIPList!=NULL)
-		{
-			delete m_pIPList;
-			m_pIPList = NULL;
-		}
-		m_pIPList=NULL;
-		if(m_pQueueSendToMix!=NULL)
-		{
-			delete m_pQueueSendToMix;
-			m_pQueueSendToMix = NULL;
-		}
-		m_pQueueSendToMix=NULL;
-		if(m_pQueueReadFromMix!=NULL)
-		{
-			delete m_pQueueReadFromMix;
-			m_pQueueReadFromMix = NULL;
-		}
-		m_pQueueReadFromMix=NULL;
-
-		if(m_pChannelList!=NULL)
-			{
-				CAMsg::printMsg(LOG_CRIT,"Before deleting CAFirstMixChannelList()!\n");
-				CAMsg::printMsg	(LOG_CRIT,"Memory usage before: %u\n",getMemoryUsage());	
-				fmHashTableEntry* pHashEntry=m_pChannelList->getFirst();
-				while(pHashEntry!=NULL)
-					{
-						CAMuxSocket * pMuxSocket=pHashEntry->pMuxSocket;
-						delete pHashEntry->pQueueSend;
-						pHashEntry->pQueueSend = NULL;
-						delete pHashEntry->pSymCipher; 
-						pHashEntry->pSymCipher = NULL;
-
-						fmChannelListEntry* pEntry=m_pChannelList->getFirstChannelForSocket(pHashEntry->pMuxSocket);
-						while(pEntry!=NULL)
-							{
-								delete pEntry->pCipher;
-								pEntry->pCipher = NULL;
-								pEntry=m_pChannelList->getNextChannel(pEntry);
-							}
-						m_pChannelList->remove(pHashEntry->pMuxSocket);
-						//CAMsg::printMsg	(LOG_CRIT,"pMuxSocket ref %0x%x\n", (UINT32) pMuxSocket);	
-						pMuxSocket->close();
-						delete pMuxSocket;
-						pMuxSocket = NULL;
-						pHashEntry->pMuxSocket = NULL;
-						pHashEntry=m_pChannelList->getNext();
-					}
-			}
-		if(m_pChannelList!=NULL)
-		{
-			delete m_pChannelList;
-			m_pChannelList=NULL;
-		}
-		
-		CAMsg::printMsg	(LOG_CRIT,"Memory usage after: %u\n",getMemoryUsage());	
-
-#ifdef PAYMENT
-	CAAccountingInstance::clean();
-	CAAccountingDBInterface::cleanup();
-#endif
-		
-		delete m_psocketgroupUsersRead;
-		m_psocketgroupUsersRead = NULL;
-		
-		delete m_psocketgroupUsersWrite;
-		m_psocketgroupUsersWrite=NULL;
-		
-		delete m_pRSA;
-		m_pRSA=NULL;
-		
-
-		delete[] m_xmlKeyInfoBuff;
-		m_xmlKeyInfoBuff=NULL;
-		
-		m_docMixCascadeInfo=NULL;
-		if(m_arMixParameters!=NULL)
-			{
-				for(UINT32 i=0;i<m_u32MixCount-1;i++)
-					{
-						delete[] m_arMixParameters[i].m_strMixID;
-						m_arMixParameters[i].m_strMixID = NULL;
-					}
-				delete[] m_arMixParameters;
-			}
-		m_arMixParameters=NULL;
-		m_u32MixCount=0;
-		m_nMixedPackets=0; //reset to zero after each restart (at the moment neccessary for infoservice)
-		m_nUser=0;
-
-#ifdef _DEBUG
-		CAMsg::printMsg(LOG_DEBUG,"CAFirstMixA::clean() finished\n");
-#endif
-		return E_SUCCESS;
-	}*/
 
 void CAFirstMixA::shutDown()
 {
@@ -815,6 +585,9 @@ NEXT_USER:
 											getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
 										#endif
 										pEntry->pHead->pQueueSend->add(pQueueEntry, sizeof(tQueueEntry));
+										/*CAMsg::printMsg(
+												LOG_INFO,"adding data packet to queue: %x, queue size: %u bytes\n", 
+												pEntry->pHead->pQueueSend, pEntry->pHead->pQueueSend->getSize());*/
 										#ifdef LOG_TRAFFIC_PER_USER
 											pEntry->pHead->trafficOut++;
 										#endif
@@ -858,8 +631,8 @@ NEXT_USER:
 											&& !pEntry->bIsSuspended)
 												
 											{
-												pMixPacket->channel=pEntry->channelOut;
-												pMixPacket->flags=CHANNEL_SUSPEND;
+												pMixPacket->channel = pEntry->channelOut;
+												pMixPacket->flags = CHANNEL_SUSPEND;
 												#ifdef _DEBUG
 													CAMsg::printMsg(LOG_INFO,"Sending suspend for channel: %u\n",pMixPacket->channel);
 												#endif												
@@ -890,162 +663,10 @@ NEXT_USER:
 							}
 					}
 
-//Step 5 
-//Writing to users...
-				countRead=m_psocketgroupUsersWrite->select(/*true,*/0);
-#ifdef HAVE_EPOLL		
-				fmHashTableEntry* pfmHashEntry=(fmHashTableEntry*)m_psocketgroupUsersWrite->getFirstSignaledSocketData();
-				while(pfmHashEntry!=NULL)
-					{
-#else
-				fmHashTableEntry* pfmHashEntry=m_pChannelList->getFirst();
-				while(countRead>0&&pfmHashEntry!=NULL)
-					{
-						if(m_psocketgroupUsersWrite->isSignaled(*pfmHashEntry->pMuxSocket))
-							{
-								countRead--;
-#endif
+////Step 5 
+////Writing to users...
 
-									
-								if(pfmHashEntry->pQueueSend->getSize()>0)
-								{	
-									UINT32 len=sizeof(tQueueEntry);
-#ifdef DELAY_USERS								
-									pfmHashEntry->pQueueSend->peek((UINT8*)&pfmHashEntry->oQueueEntry,&len);
-									HCHANNEL packetChannel = pfmHashEntry->oQueueEntry.packet.channel;
-									//delete pfmHashEntry->oQueueEntry;
-									len=sizeof(tQueueEntry);
-									
-									if( m_pChannelList->hasDelayBuckets(pfmHashEntry->delayBucketID) || 
-											(packetChannel>0 && packetChannel<256) )
-									{
-#endif
-									bAktiv=true;
-								
-									if(pfmHashEntry->uAlreadySendPacketSize==-1)
-									{
-										pfmHashEntry->pQueueSend->get((UINT8*)&pfmHashEntry->oQueueEntry,&len); 
-										
-										/* Hack for SSL BUG */
-#ifdef SSL_HACK
-										fmChannelList* cListEntry=m_pChannelList->get(pfmHashEntry->oQueueEntry.packet.channel);
-										if(cListEntry != NULL)
-										{
-											pfmHashEntry->oQueueEntry.packet.channel = cListEntry->channelIn;
-											cListEntry->downStreamBytes -= len;
-#ifdef DEBUG
-											CAMsg::printMsg(LOG_DEBUG, "CAFirstMixA: channels of current packet, in: %u, out: %u, count: %u, flags: 0x%x\n", 
-													cListEntry->channelIn, cListEntry->channelOut, cListEntry->downStreamBytes,
-													pfmHashEntry->oQueueEntry.packet.flags);
-#endif
-											if(pfmHashEntry->oQueueEntry.packet.flags == CHANNEL_CLOSE)
-											{
-												delete cListEntry->pCipher;
-												cListEntry->pCipher = NULL;
-												m_pChannelList->removeChannel(pfmHashEntry->pMuxSocket, cListEntry->channelIn); 
-											}
-										}
-#endif //SSL_HACK
-										/* end hack */
-										#ifdef PAYMENT
-											//do not count control channel packets!
-											if(pfmHashEntry->oQueueEntry.packet.channel>0&&pfmHashEntry->oQueueEntry.packet.channel<256)
-												pfmHashEntry->bCountPacket=false;
-											else
-												pfmHashEntry->bCountPacket=true;
-										#endif
-										pfmHashEntry->pMuxSocket->prepareForSend(&(pfmHashEntry->oQueueEntry.packet));
-										pfmHashEntry->uAlreadySendPacketSize=0;
-									}
-									
-								len=MIXPACKET_SIZE-pfmHashEntry->uAlreadySendPacketSize;
-								ret=((CASocket*)pfmHashEntry->pMuxSocket)->send(((UINT8*)&(pfmHashEntry->oQueueEntry))+pfmHashEntry->uAlreadySendPacketSize,len);
-								if(ret>0)
-									{
-										pfmHashEntry->uAlreadySendPacketSize+=ret;
-										if(pfmHashEntry->uAlreadySendPacketSize==MIXPACKET_SIZE)
-											{
-												#ifdef PAYMENT
-												//if(pfmHashEntry->bCountPacket)
-												{
-													// count packet for payment
-													SINT32 ret = CAAccountingInstance::handleJapPacket(pfmHashEntry, !(pfmHashEntry->bCountPacket), true);
-													if (ret==CAAccountingInstance::HANDLE_PACKET_CONNECTION_OK)
-													{
-														// renew the timeout
-														pfmHashEntry->bRecoverTimeout = true;														
-														m_pChannelList->pushTimeoutEntry(pfmHashEntry);	
-													}
-													else if (ret==CAAccountingInstance::HANDLE_PACKET_HOLD_CONNECTION ||
-															ret==CAAccountingInstance::HANDLE_PACKET_PREPARE_FOR_CLOSING_CONNECTION )
-													{
-														// the next timeout might be deadly for this connection...
-														pfmHashEntry->bRecoverTimeout = false;	
-													}
-													else if (ret==CAAccountingInstance::HANDLE_PACKET_CLOSE_CONNECTION )
-													{
-														CAMsg::printMsg(LOG_DEBUG, "CAFirstMixA: Closing JAP connection due to illegal payment status!\n", ret);														
-														closeConnection(pfmHashEntry);
-goto NEXT_USER_WRITING;
-													}
-												}
-												#endif
-												#ifdef DELAY_USERS
-												m_pChannelList->decDelayBuckets(pfmHashEntry->delayBucketID);
-												#endif
-												pfmHashEntry->uAlreadySendPacketSize=-1;
-												#ifdef LOG_PACKET_TIMES
-													if(!isZero64(pfmHashEntry->oQueueEntry.timestamp_proccessing_start))
-														{
-															getcurrentTimeMicros(pfmHashEntry->oQueueEntry.timestamp_proccessing_end);
-															m_pLogPacketStats->addToTimeingStats(pfmHashEntry->oQueueEntry,CHANNEL_DATA,false);
-														}
-												#endif
-											}
-
-										if( pfmHashEntry->cSuspend > 0 &&
-												pfmHashEntry->pQueueSend->getSize() < USER_SEND_BUFFER_RESUME)
-											{
-												
-												fmChannelListEntry* pEntry;
-												pEntry=m_pChannelList->getFirstChannelForSocket(pfmHashEntry->pMuxSocket);
-												while(pEntry!=NULL)
-												{
-													if(pEntry->bIsSuspended)
-													{
-														pMixPacket->flags=CHANNEL_RESUME;
-														pMixPacket->channel=pEntry->channelOut;
-														//m_pMuxOut->send(pMixPacket,tmpBuff);
-														#ifdef LOG_PACKET_TIMES
-															setZero64(pQueueEntry->timestamp_proccessing_start);
-														#endif
-														#ifdef _DEBUG
-															CAMsg::printMsg(LOG_INFO,"Sending resume for channel: %u\n",pMixPacket->channel);
-														#endif												
-														m_pQueueSendToMix->add(pQueueEntry, sizeof(tQueueEntry));
-														pEntry->bIsSuspended=false;	
-													}
-													
-													pEntry=m_pChannelList->getNextChannel(pEntry);
-												}
-												pfmHashEntry->cSuspend=0;
-											}
-									}
-#ifdef DELAY_USERS
-								}
-#endif								
-								}								
-									//todo error handling
-#ifdef HAVE_EPOLL
-NEXT_USER_WRITING:
-						pfmHashEntry=(fmHashTableEntry*)m_psocketgroupUsersWrite->getNextSignaledSocketData();
-						
-#else
-							}//if is socket signaled					
-NEXT_USER_WRITING:							
-						pfmHashEntry=m_pChannelList->getNext();
-#endif
-					}
+				bAktiv = sendToUsers();
 				
 				if(!bAktiv)
 				  msSleep(100);
@@ -1069,3 +690,225 @@ NEXT_USER_WRITING:
 	}
 #endif //ONLY_LOCAL_PROXY
 
+/* last part of the main loop:
+ * return true if the loop when at least one packet was sent 
+ * or false otherwise.
+ */
+bool CAFirstMixA::sendToUsers()
+{
+	SINT32 countRead = m_psocketgroupUsersWrite->select(/*true,*/0);
+	tQueueEntry *packetToSend = NULL; //tQueueEntry is just another word for MIXPACKET 
+	SINT32 packetSize = sizeof(tQueueEntry);
+	CAQueue *controlMessageUserQueue = NULL;
+	CAQueue *dataMessageUserQueue = NULL;
+	
+	CAQueue *processedQueue = NULL; /* one the above queues that should be used for processing*/
+	UINT32 extractSize = 0;
+	bool bAktiv = false;
+	
+/* Cyclic polling: gets all open sockets that will not block when invoking send()
+ * but will only send at most one packet. After that control is returned to loop() 
+ */
+#ifdef HAVE_EPOLL
+	fmHashTableEntry* pfmHashEntry=
+		(fmHashTableEntry*) m_psocketgroupUsersWrite->getFirstSignaledSocketData();
+	
+	while(pfmHashEntry != NULL)
+	{
+		
+#else
+	fmHashTableEntry* pfmHashEntry=m_pChannelList->getFirst();
+	while( (countRead > 0) && (pfmHashEntry != NULL) )
+	{
+		if(m_psocketgroupUsersWrite->isSignaled(*pfmHashEntry->pMuxSocket))
+		{
+			countRead--;
+#endif
+			/* loop turn init */
+			extractSize = 0;
+			processedQueue = NULL;
+			packetToSend = &(pfmHashEntry->oQueueEntry);
+			controlMessageUserQueue = pfmHashEntry->pControlMessageQueue;
+			dataMessageUserQueue = pfmHashEntry->pQueueSend;
+			
+			//Control messages have a higher priority.
+			if(controlMessageUserQueue->getSize() > 0)
+			{
+				processedQueue = controlMessageUserQueue;
+				pfmHashEntry->bCountPacket = false;
+			}
+			else if( (dataMessageUserQueue->getSize() > 0) 
+#ifdef DELAY_USERS
+					&& m_pChannelList->hasDelayBuckets(pfmHashEntry->delayBucketID)
+#endif
+			)
+			{ 
+				processedQueue = dataMessageUserQueue;
+				pfmHashEntry->bCountPacket = true;
+			}
+			
+			if(processedQueue != NULL)
+			{
+				extractSize = packetSize;
+				bAktiv=true;
+			
+				if(pfmHashEntry->uAlreadySendPacketSize == -1)
+				{
+					processedQueue->get((UINT8*) packetToSend, &extractSize); 
+					
+					/* Hack for SSL BUG */
+#ifdef SSL_HACK
+					finishPacket(pfmHashEntry);
+#endif //SSL_HACK
+					pfmHashEntry->pMuxSocket->prepareForSend(&(packetToSend->packet));
+					pfmHashEntry->uAlreadySendPacketSize = 0;
+				}
+			}
+			
+			if( (extractSize > 0) || (pfmHashEntry->uAlreadySendPacketSize > 0) )
+			{
+				SINT32 len = (pfmHashEntry->uAlreadySendPacketSize > 0) ? 
+					(packetSize - pfmHashEntry->uAlreadySendPacketSize) : extractSize;
+				UINT8* packetToSendOffset = 
+					((UINT8*)packetToSend) + pfmHashEntry->uAlreadySendPacketSize;
+				CASocket *clientSocket = (CASocket*)pfmHashEntry->pMuxSocket;
+				
+				SINT32 ret = clientSocket->send(packetToSendOffset, len);
+				
+				if(ret > 0)
+				{
+					SINT32 accounting = E_SUCCESS;
+					pfmHashEntry->uAlreadySendPacketSize += ret;
+					
+					if(pfmHashEntry->uAlreadySendPacketSize == MIXPACKET_SIZE)
+					{
+						#ifdef DELAY_USERS
+						if(processedQueue != controlMessageUserQueue)
+						{
+							m_pChannelList->decDelayBuckets(pfmHashEntry->delayBucketID);
+						}
+						#endif
+									
+						#ifdef LOG_PACKET_TIMES
+							if(!isZero64(pfmHashEntry->oQueueEntry.timestamp_proccessing_start))
+								{
+									getcurrentTimeMicros(pfmHashEntry->oQueueEntry.timestamp_proccessing_end);
+									m_pLogPacketStats->addToTimeingStats(pfmHashEntry->oQueueEntry,CHANNEL_DATA,false);
+								}
+						#endif
+						pfmHashEntry->uAlreadySendPacketSize=-1;
+						/* count this packet for accounting */
+						accounting = accountTrafficDownstream(pfmHashEntry);	
+					}
+					
+					if(accounting == E_SUCCESS)
+					{
+						if( (pfmHashEntry->cSuspend > 0) &&
+							(dataMessageUserQueue->getSize() < USER_SEND_BUFFER_RESUME) )
+						{
+							resumeAllUserChannels(pfmHashEntry);
+						}
+					}
+				}			
+			}								
+			//todo error handling
+#ifdef HAVE_EPOLL
+		pfmHashEntry=(fmHashTableEntry*)m_psocketgroupUsersWrite->getNextSignaledSocketData();
+	}
+#else
+		}//if is socket signaled											
+		pfmHashEntry=m_pChannelList->getNext();
+	}
+#endif
+	return bAktiv;
+}
+
+
+SINT32 CAFirstMixA::accountTrafficDownstream(fmHashTableEntry* pfmHashEntry)
+{
+#ifdef PAYMENT
+	// count packet for payment
+	SINT32 ret = CAAccountingInstance::handleJapPacket(pfmHashEntry, !(pfmHashEntry->bCountPacket), true);
+	if (ret == CAAccountingInstance::HANDLE_PACKET_CONNECTION_OK)
+	{
+		// renew the timeout
+		pfmHashEntry->bRecoverTimeout = true;														
+		m_pChannelList->pushTimeoutEntry(pfmHashEntry);	
+	}
+	else if (ret == CAAccountingInstance::HANDLE_PACKET_HOLD_CONNECTION ||
+			ret == CAAccountingInstance::HANDLE_PACKET_PREPARE_FOR_CLOSING_CONNECTION )
+	{
+		// the next timeout might be deadly for this connection...
+		//NOTE: this will close no client connection. A "real" kickout will occur 
+		//ONLY IF the AccountingInfo flag AUTH_FATAL_ERROR is set AND one control message
+		//packet is handled by this method. Theses conditions hold when using the method 
+		//returnPrepareKickout.
+		pfmHashEntry->bRecoverTimeout = false;	
+	}
+	else if (ret == CAAccountingInstance::HANDLE_PACKET_CLOSE_CONNECTION )
+	{
+		CAMsg::printMsg(LOG_DEBUG, "CAFirstMixA: Closing JAP connection due to illegal payment status!\n", ret);														
+		closeConnection(pfmHashEntry);
+		return ERR_INTERN_SOCKET_CLOSED;
+	}
+#endif
+	return E_SUCCESS;
+}
+
+void CAFirstMixA::resumeAllUserChannels(fmHashTableEntry *pfmHashEntry)
+{
+	notifyAllUserChannels(pfmHashEntry, CHANNEL_RESUME);
+}
+
+void CAFirstMixA::notifyAllUserChannels(fmHashTableEntry *pfmHashEntry, UINT16 flags)
+{
+	if(pfmHashEntry == NULL) return;
+	fmChannelListEntry* pEntry = m_pChannelList->getFirstChannelForSocket(pfmHashEntry->pMuxSocket);
+	MIXPACKET *notifyPacket = new MIXPACKET;
+	memset(notifyPacket, 0, sizeof(MIXPACKET));
+	
+	notifyPacket->flags = flags;
+	while(pEntry != NULL)
+	{
+		if(pEntry->bIsSuspended)
+		{
+			notifyPacket->channel = pEntry->channelOut;	
+#ifdef _DEBUG
+			CAMsg::printMsg(LOG_INFO,"Sent flags %u for channel: %u\n", flags, notifyPacket->channel);
+#endif	
+			m_pQueueSendToMix->add(notifyPacket, sizeof(MIXPACKET));
+			pEntry->bIsSuspended = false;	
+		}
+		pEntry=m_pChannelList->getNextChannel(pEntry);
+	}
+	pfmHashEntry->cSuspend=0;
+	delete notifyPacket;
+}
+
+//@todo: not a reliable solution. Still have to find the bug that causes SSL connections to be resetted
+//while large downloads are performed by the same user (only occurs in cascades with more than two mixes)
+#ifdef SSL_HACK
+
+void CAFirstMixA::finishPacket(fmHashTableEntry *pfmHashEntry)
+{
+	tQueueEntry *packetToSend = &(pfmHashEntry->oQueueEntry);
+	fmChannelList* cListEntry=m_pChannelList->get(packetToSend->packet.channel);
+	if(cListEntry != NULL)
+	{
+		packetToSend->packet.channel = cListEntry->channelIn;
+		cListEntry->downStreamBytes -= sizeof(tQueueEntry);
+#ifdef DEBUG
+		CAMsg::printMsg(LOG_DEBUG, "CAFirstMixA: channels of current packet, in: %u, out: %u, count: %u, flags: 0x%x\n", 
+				cListEntry->channelIn, cListEntry->channelOut, cListEntry->downStreamBytes,
+				packetToSend->packet.flags);
+#endif
+		if(packetToSend->packet.flags == CHANNEL_CLOSE)
+		{
+			delete cListEntry->pCipher;
+			cListEntry->pCipher = NULL;
+			m_pChannelList->removeChannel(pfmHashEntry->pMuxSocket, cListEntry->channelIn); 
+		}
+	}
+}
+
+#endif //SSL_HACK
