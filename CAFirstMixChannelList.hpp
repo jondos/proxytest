@@ -127,11 +127,17 @@ struct t_firstmixchannellist
 			CASymCipher* pCipher;
 			bool bIsSuspended;
 
+#ifdef DATA_RETENTION_LOG
+			UINT32 timeChannelOpenIn;
+			UINT32 timeChannelOpenOut;
+#endif
+
 #ifdef LOG_CHANNEL
 			UINT32				packetsInFromUser;
 			UINT64				timeCreated;
 			UINT32				packetsOutToUser;
 #endif
+
 #ifdef SSL_HACK
 			UINT32				downStreamBytes; /* a hack to solve the SSL problem */
 #endif

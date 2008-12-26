@@ -90,6 +90,7 @@ SINT32 CAFirstMix::initOnce()
 				CAMsg::printMsg(LOG_CRIT,"No useable ListenerInterfaces specified (maybe wrong values or all are 'virtual'!\n");
 				return E_UNKNOWN;
 			}
+
 		CAMsg::printMsg(LOG_DEBUG,"Starting FirstMix InitOnce - finished\n");
 		return E_SUCCESS;
 	}
@@ -658,6 +659,10 @@ THREAD_RETURN fm_loopSendToMix(void* param)
 		UINT32 len;
 		SINT32 ret;
 
+#ifdef DATA_RETENTION_LOG
+		t_dataretentionLogEntry* pDataRetentionLogEntry=new t_dataretentionLogEntry;
+#endif
+
 #ifndef USE_POOL
 		tQueueEntry* pQueueEntry=new tQueueEntry;
 		MIXPACKET* pMixPacket=&pQueueEntry->packet;
@@ -684,11 +689,21 @@ THREAD_RETURN fm_loopSendToMix(void* param)
 						CAMsg::printMsg(LOG_ERR,"CAFirstMix::lm_loopSendToMix - Error in sending MixPaket\n");
 						break;
 					}
-#ifdef LOG_PACKET_TIMES
+#if defined (LOG_PACKET_TIMES)
  				if(!isZero64(pQueueEntry->timestamp_proccessing_start))
 					{
 						getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
 						pFirstMix->m_pLogPacketStats->addToTimeingStats(*pQueueEntry,pMixPacket->flags,true);
+					}
+#endif
+#ifdef DATA_RETENTION_LOG
+				if(pQueueEntry->packet.flags&CHANNEL_OPEN!=0)
+					{
+						pDataRetentionLogEntry->t_out=time(NULL);
+						fmChannelListEntry* entry=pFirstMix->m_pChannelList->get(pQueueEntry->packet.channel);
+						pDataRetentionLogEntry->t_in=pQueueEntry->t_in;
+						pDataRetentionLogEntry->entity.first.channelid=entry->channelOut;
+						pFirstMix->m_pDataRetentionLog->log(pDataRetentionLogEntry);
 					}
 #endif
 			}
@@ -735,6 +750,11 @@ THREAD_RETURN fm_loopSendToMix(void* param)
 		delete pPool;
 		pPool = NULL;
 #endif
+
+#ifdef DATA_RETENTION_LOG
+		delete pDataRetentionLogEntry;
+#endif
+
 		FINISH_STACK("CAFirstMix::fm_loopSendToMix");
 
 		CAMsg::printMsg(LOG_DEBUG,"Exiting Thread SendToMix\n");
