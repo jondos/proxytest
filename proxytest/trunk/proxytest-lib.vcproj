@@ -1609,6 +1609,14 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\CADataRetentionLog.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\CADataRetentionLogFile.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\CADynamicCascadeConfigurator.cpp"
 				>
 			</File>

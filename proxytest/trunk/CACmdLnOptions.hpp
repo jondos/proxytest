@@ -537,6 +537,9 @@ class CACmdLnOptions
 			UINT32 getPaymentSettleInterval();
 #endif
 
+#ifdef DATA_RETENTION_LOG
+		SINT32 getDataRetentionLogDir(UINT8* strLogDir,UINT32 len);
+#endif
 
 #ifndef ONLY_LOCAL_PROXY
 			// added by ronin <ronin2@web.de>

@@ -35,6 +35,9 @@ class CAInfoService;
 //class DOM_Element;
 class CAControlChannelDispatcher;
 
+#ifdef DATA_RETENTION_LOG
+	#include "CADataRetentionLog.hpp"
+#endif
 
 class CAMix
 	{
@@ -120,7 +123,7 @@ class CAMix
 			bool m_bReconfiguring;
 			volatile bool m_bShutDown;
 			virtual SINT32 clean()=0;
-			virtual SINT32 initOnce(){return E_SUCCESS;}
+			virtual SINT32 initOnce();
 			virtual SINT32 init()=0;
 			virtual SINT32 loop()=0;
 
@@ -151,6 +154,11 @@ class CAMix
 
 			CAControlChannelDispatcher* m_pMuxOutControlChannelDispatcher;
 			CAControlChannelDispatcher* m_pMuxInControlChannelDispatcher;
+
+#ifdef DATA_RETENTION_LOG
+			CADataRetentionLog* m_pDataRetentionLog;
+#endif
+
 		private:
 			// added by ronin <ronin2@web.de>
 			bool needAutoConfig();

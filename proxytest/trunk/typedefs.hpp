@@ -109,12 +109,15 @@ typedef t_MixPacket MIXPACKET;
 struct t_queue_entry
 	{
 		MIXPACKET packet;
+		#if defined(DATA_RETENTION_LOG)
+			UINT32 t_in;
+		#endif
 		#if defined  (LOG_PACKET_TIMES) || defined (LOG_CHANNEL)
 			UINT64 timestamp_proccessing_start;
 			UINT64 timestamp_proccessing_start_OP;
 			UINT64 timestamp_proccessing_end;
 		#endif
-		#if defined  (LOG_PACKET_TIMES)
+		#if defined  (LOG_PACKET_TIMES) 
 			//without send/receive or queueing times
 			UINT64 timestamp_proccessing_end_OP;
 			#ifdef USE_POOL
