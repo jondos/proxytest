@@ -3606,6 +3606,8 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 				memcpy(m_strDataRetentionLogDir,log_dir,log_dir_len);
 				m_strDataRetentionLogDir[log_dir_len]=0;
 			}
+		CAMsg::printMsg(LOG_CRIT,"Data retention log dir in config file: %s\n",log_dir);
+  
 #endif //DATA_RETENTION_LOG
 
     return E_SUCCESS;
