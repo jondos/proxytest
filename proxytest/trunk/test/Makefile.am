@@ -12,10 +12,4 @@ test_proxytest_LDADD =-l @LIBCPPUNIT@ $(top_srcdir)/libproxytest.a $(top_srcdir)
 	
 TESTS = test.proxytest
                                                      
-#mix_LDADD = $(top_srcdir)/libproxytest.a \                                                     
-#             \                                                       
-#			            $(top_srcdir)/trio/libtrio.a \                                                     
-##				                $(top_srcdir)/tre/libtre.a \                                                       
-#						            $(top_srcdir)/TypeA/libmixa.a
 includes = @INCLUDES@
-
