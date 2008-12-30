@@ -25,7 +25,7 @@ SINT32 CADataRetentionLogFile::openLog(UINT8* strLogDir,UINT32 date)
 		m_Month=theTime->tm_mon+1;
 		m_Year=theTime->tm_year+1900;
 		snprintf((char*)strFileName,4096,"%s/dataretentionlog_%s",strLogDir,strDate);
-		m_hLogFile=open((char*)strFileName,O_APPEND|O_CREAT|O_WRONLY|O_BLOCK|O_LARGEFILE|O_SYNC,S_IREAD|S_IWRITE);
+		m_hLogFile=open((char*)strFileName,O_APPEND|O_CREAT|O_WRONLY|O_SYNC|O_LARGEFILE|O_SYNC,S_IREAD|S_IWRITE);
 		delete [] strFileName; 
 		if(m_hLogFile<=0)
 			return E_UNKNOWN;
