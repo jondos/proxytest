@@ -56,7 +56,9 @@ extern CACmdLnOptions* pglobalOptions;
 
 SINT32 CALastMix::initOnce()
 	{
-		CAMix::initOnce();
+		SINT32 ret=CAMix::initOnce();
+		if(ret!=E_SUCCESS)
+			return ret;
 		if(setTargets()!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Could not set Targets (proxies)!\n");

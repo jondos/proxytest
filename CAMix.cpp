@@ -62,10 +62,11 @@ SINT32 CAMix::initOnce()
 #ifdef DATA_RETENTION_LOG
 		m_pDataRetentionLog=new CADataRetentionLog();
 		UINT8 strDir[4096];
+		strDir[0]=0;
 		if(pglobalOptions->getDataRetentionLogDir(strDir,4096)!=E_SUCCESS ||
 			 m_pDataRetentionLog->setLogDir(strDir)!=E_SUCCESS)
 			{
-				CAMsg::printMsg(LOG_ERR,"Data Retention Error: Could not set log dir!\n");
+				CAMsg::printMsg(LOG_ERR,"Data Retention Error: Could not set log dir to %s!\n",strDir);
 				return E_UNKNOWN;
 			}
 		else
