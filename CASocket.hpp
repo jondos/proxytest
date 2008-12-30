@@ -68,8 +68,10 @@ class CASocket:public CAClientSocket
 				* @return number of the associated socket
 			**/
 			operator SOCKET(){return m_Socket;}
+			virtual SINT32 getLocalIP(UINT8 r_Ip[4]);
 			virtual SINT32 getLocalPort();
 			virtual SINT32 getPeerIP(UINT8 ip[4]);
+			virtual SINT32 getPeerPort();
 			virtual SINT32 setReuseAddr(bool b);
 			//SINT32 setRecvLowWat(UINT32 r);
 			//SINT32 setSendLowWat(UINT32 r);
@@ -105,8 +107,7 @@ class CASocket:public CAClientSocket
 			{
 				return m_bSocketIsClosed;
 			}
-			virtual SINT32 getLocalIP(UINT32* r_Ip);
-			
+		
 		protected:
 	///check	
 /*			CASocket* getSocket()

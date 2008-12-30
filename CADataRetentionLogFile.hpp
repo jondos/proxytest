@@ -1,28 +1,6 @@
 #ifndef __CA_DATA_RETENTION_LOG_FILE
 #define __CA_DATA_RETENTION_LOG_FILE
 
-struct __t__data_retention_log_entry
-	{
-		UINT32 t_in;
-		UINT32 t_out;
-		union t_union_entity
-		{
-			struct t_first_mix_data_retention_log_entry 
-				{
-					HCHANNEL channelid;
-					UINT32 ip_in;
-					UINT16 port_in;
-				} first;
-			struct last
-				{
-					HCHANNEL channelid;
-					UINT32 ip_out;
-					UINT16 port_out;
-				};
-		} entity;
-	};
-
-typedef struct __t__data_retention_log_entry t_dataretentionLogEntry;
 
 struct  __t__data_retention_log_file_header
 	{

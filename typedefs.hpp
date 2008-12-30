@@ -104,13 +104,40 @@ typedef UINT32 HCHANNEL;
 
 typedef t_MixPacket MIXPACKET;
 
+#ifdef DATA_RETENTION_LOG
+struct __t__data_retention_log_entry
+	{
+		UINT32 t_in;
+		UINT32 t_out;
+		union t_union_entity
+		{
+			struct t_first_mix_data_retention_log_entry 
+				{
+					HCHANNEL channelid;
+					UINT8 ip_in[4];
+					UINT16 port_in;
+				} first;
+			struct t_last_mix_data_retention_log_entry
+				{
+					HCHANNEL channelid;
+					UINT8 ip_out[4];
+					UINT16 port_out;
+				} last;
+		} entity;
+	};
+
+typedef struct __t__data_retention_log_entry t_dataretentionLogEntry;
+#endif //DATA_RETENION_LOG
+
+
+
 //For that we store in our packet queue...
 //normally this is just the packet
 struct t_queue_entry
 	{
 		MIXPACKET packet;
 		#if defined(DATA_RETENTION_LOG)
-			UINT32 t_in;
+			t_dataretentionLogEntry dataRetentionLogEntry;
 		#endif
 		#if defined  (LOG_PACKET_TIMES) || defined (LOG_CHANNEL)
 			UINT64 timestamp_proccessing_start;

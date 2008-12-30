@@ -1,4 +1,5 @@
 #include "StdAfx.h"
+#ifdef DATA_RETENTION_LOG
 #include "CADataRetentionLogFile.hpp"
 #include "CAMsg.hpp"
 #include "CACmdLnOptions.hpp"
@@ -91,3 +92,4 @@ SINT32 CADataRetentionLogFile::log(t_dataretentionLogEntry* logEntry)
 			}
 		return ret;
 	}
+#endif //DATA_RETENTION_LOG

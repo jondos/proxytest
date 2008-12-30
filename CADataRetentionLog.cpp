@@ -2,6 +2,11 @@
 #ifdef DATA_RETENTION_LOG
 #include "CADataRetentionLog.hpp"
 
+CADataRetentionLog::CADataRetentionLog()
+	{
+		m_pLogFile=NULL;
+	}
+
 SINT32 CADataRetentionLog::setLogDir(UINT8* strDir)
 	{
 		m_pLogFile=new CADataRetentionLogFile();

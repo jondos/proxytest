@@ -107,8 +107,9 @@
 #define HAVE_TOWUPPER 1
 
 /* Define if you want to disable debug assertions. */
-#define NDEBUG 
-
+#ifndef NDEBUG
+#define NDEBUG 1
+#endif
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
