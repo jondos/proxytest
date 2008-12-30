@@ -67,6 +67,7 @@ bool CAFirstMix::isShuttingDown()
 
 SINT32 CAFirstMix::initOnce()
 	{
+		CAMix::initOnce();
 		CAMsg::printMsg(LOG_DEBUG,"Starting FirstMix InitOnce\n");
 		m_pSignature=pglobalOptions->getSignKey();
 		if(m_pSignature==NULL)
