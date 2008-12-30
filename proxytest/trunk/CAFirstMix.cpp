@@ -697,7 +697,7 @@ THREAD_RETURN fm_loopSendToMix(void* param)
 					}
 #endif
 #ifdef DATA_RETENTION_LOG
-				if(pQueueEntry->packet.flags&CHANNEL_OPEN!=0)
+				if((pQueueEntry->packet.flags&CHANNEL_OPEN)!=0)
 					{
 						pQueueEntry->dataRetentionLogEntry.t_out=time(NULL);
 						pFirstMix->m_pDataRetentionLog->log(&pQueueEntry->dataRetentionLogEntry);

@@ -756,7 +756,6 @@ RESTART_MIX:
 		CAMsg::printMsg(LOG_INFO,"Anon proxy started!\n");
 		CAMsg::printMsg(LOG_INFO,MIX_VERSION_INFO);
 
-
 #ifndef _WIN32
 	#ifdef _DEBUG
 			signal(SIGPIPE,signal_broken_pipe);
