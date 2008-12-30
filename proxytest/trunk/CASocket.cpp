@@ -667,6 +667,25 @@ SINT32 CASocket::receiveLine(UINT8* line, UINT32 maxLen, UINT32 msTimeOut)
 	return ret;
 }
 
+/**
+ * LERNGRUPPE
+ * Returns the source address of the socket
+ * @return r_Ip the source IP address
+ * @retval E_SUCCESS upon success
+ * @retval SOCKET_ERROR otherwise
+ *
+ * @todo: Question: Correct for Unix domain sockets?
+ */
+SINT32 CASocket::getLocalIP(UINT8 r_Ip[4])
+{
+      struct sockaddr_in addr;
+      socklen_t namelen=sizeof(struct sockaddr_in);
+      if(getsockname(m_Socket,(struct sockaddr*)&addr,&namelen)==SOCKET_ERROR)
+         return SOCKET_ERROR;
+			memcpy(r_Ip,&addr.sin_addr,4);
+      return E_SUCCESS;
+}
+
 SINT32 CASocket::getLocalPort()
 	{
 		struct sockaddr_in addr;
@@ -684,6 +703,15 @@ SINT32 CASocket::getPeerIP(UINT8 ip[4])
 			return SOCKET_ERROR;
 		memcpy(ip,&addr.sin_addr,4);
 		return E_SUCCESS;
+	}
+
+SINT32 CASocket::getPeerPort()
+	{
+		struct sockaddr_in addr;
+		socklen_t namelen=sizeof(struct sockaddr_in);
+		if(getpeername(m_Socket,(struct sockaddr*)&addr,&namelen)==SOCKET_ERROR)
+			return SOCKET_ERROR;
+		return ntohs(addr.sin_port);
 	}
 
 SINT32 CASocket::setReuseAddr(bool b)
@@ -848,21 +876,3 @@ SINT32 CASocket::getMaxOpenSockets()
 	return maxSocket;
 }
 
-/**
- * LERNGRUPPE
- * Returns the source address of the socket
- * @return r_Ip the source IP address
- * @retval E_SUCCESS upon success
- * @retval SOCKET_ERROR otherwise
- *
- * @todo: Question: Correct for Unix domain sockets?
- */
-SINT32 CASocket::getLocalIP(UINT32* r_Ip)
-{
-      struct sockaddr_in addr;
-      socklen_t namelen=sizeof(struct sockaddr_in);
-      if(getsockname(m_Socket,(struct sockaddr*)&addr,&namelen)==SOCKET_ERROR)
-              return SOCKET_ERROR;
-      *r_Ip =  addr.sin_addr.s_addr;
-      return E_SUCCESS;
-}

@@ -659,10 +659,10 @@ THREAD_RETURN fm_loopSendToMix(void* param)
 		UINT32 len;
 		SINT32 ret;
 
-#ifdef DATA_RETENTION_LOG
+/*#ifdef DATA_RETENTION_LOG
 		t_dataretentionLogEntry* pDataRetentionLogEntry=new t_dataretentionLogEntry;
 #endif
-
+*/
 #ifndef USE_POOL
 		tQueueEntry* pQueueEntry=new tQueueEntry;
 		MIXPACKET* pMixPacket=&pQueueEntry->packet;
@@ -699,11 +699,8 @@ THREAD_RETURN fm_loopSendToMix(void* param)
 #ifdef DATA_RETENTION_LOG
 				if(pQueueEntry->packet.flags&CHANNEL_OPEN!=0)
 					{
-						pDataRetentionLogEntry->t_out=time(NULL);
-						fmChannelListEntry* entry=pFirstMix->m_pChannelList->get(pQueueEntry->packet.channel);
-						pDataRetentionLogEntry->t_in=pQueueEntry->t_in;
-						pDataRetentionLogEntry->entity.first.channelid=entry->channelOut;
-						pFirstMix->m_pDataRetentionLog->log(pDataRetentionLogEntry);
+						pQueueEntry->dataRetentionLogEntry.t_out=time(NULL);
+						pFirstMix->m_pDataRetentionLog->log(&pQueueEntry->dataRetentionLogEntry);
 					}
 #endif
 			}
@@ -751,10 +748,10 @@ THREAD_RETURN fm_loopSendToMix(void* param)
 		pPool = NULL;
 #endif
 
-#ifdef DATA_RETENTION_LOG
+/*#ifdef DATA_RETENTION_LOG
 		delete pDataRetentionLogEntry;
 #endif
-
+*/
 		FINISH_STACK("CAFirstMix::fm_loopSendToMix");
 
 		CAMsg::printMsg(LOG_DEBUG,"Exiting Thread SendToMix\n");
@@ -1377,10 +1374,10 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		CAQueue* tmpQueue=new CAQueue(sizeof(tQueueEntry));
 		
 		SAVE_STACK("CAFirstMix::doUserLogin", "Adding user to connection list...");
-#ifndef LOG_DIALOG
-		fmHashTableEntry* pHashEntry=m_pChannelList->add(pNewUser,peerIP,tmpQueue);
-#else
+#ifdef LOG_DIALOG
 		fmHashTableEntry* pHashEntry=m_pChannelList->add(pNewUser,peerIP,tmpQueue,strDialog);
+#else
+		fmHashTableEntry* pHashEntry=m_pChannelList->add(pNewUser,peerIP,tmpQueue);
 #endif
 		if( (pHashEntry == NULL) || 
 			(pHashEntry->pControlMessageQueue == NULL) )// adding user connection to mix->JAP channel list (stefan: sollte das nicht connection list sein? --> es handelt sich um eine Datenstruktu fr Connections/Channels ).

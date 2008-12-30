@@ -688,6 +688,11 @@ class CACmdLnOptions
 			regex_t* m_arCrimeRegExpsPayload;
 			UINT32 m_nCrimeRegExpsPayload;
 #endif
+
+#ifdef DATA_RETENTION_LOG
+		UINT8*	m_strDataRetentionLogDir;
+#endif
+
 #if defined (DELAY_CHANNELS) ||defined(DELAY_USERS)
 		UINT32 m_u32DelayChannelUnlimitTraffic;
 		UINT32 m_u32DelayChannelBucketGrow;

@@ -255,6 +255,13 @@ SINT32 CALastMixA::loop()
 																		getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
 																		m_pLogPacketStats->addToTimeingStats(*pQueueEntry,CHANNEL_OPEN,true);
 																	#endif
+																	#ifdef DATA_RETENTION_LOG
+																		pQueueEntry->dataRetentionLogEntry.t_out=time(NULL);
+																		pQueueEntry->dataRetentionLogEntry.entity.last.port_out=tmpSocket->getLocalPort();
+																		tmpSocket->getLocalIP(pQueueEntry->dataRetentionLogEntry.entity.last.ip_out);
+																		m_pDataRetentionLog->log(&pQueueEntry->dataRetentionLogEntry);
+																	#endif
+
 																}
 														}
 											}
