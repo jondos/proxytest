@@ -446,7 +446,7 @@ SINT32 CAFirstMixA::loop()
 																pQueueEntry->dataRetentionLogEntry.entity.first.channelid=pMixPacket->channel;
 																pQueueEntry->dataRetentionLogEntry.entity.first.t_in=time(NULL);
 																//fmChannelListEntry* pTmpEntry1=m_pChannelList->get(pMuxSocket,tmpC);
-																/memcpy(pQueueEntry->dataRetentionLogEntry.entity.first.ip_in,pTmpEntry1->pHead->peerIP,4);
+																//memcpy(pQueueEntry->dataRetentionLogEntry.entity.first.ip_in,pTmpEntry1->pHead->peerIP,4);
 																//pQueueEntry->dataRetentionLogEntry.entity.first.port_in=pTmpEntry1->pHead->peerPort;
 															#endif
 															m_pQueueSendToMix->add(pQueueEntry, sizeof(tQueueEntry));
