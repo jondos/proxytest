@@ -72,6 +72,7 @@ SINT32 CAMix::initOnce()
 		else
 			{
 				CAMsg::printMsg(LOG_INFO,"Data Retention: Set log dir to: %s\n",strDir);
+				CAMsg::printMsg(LOG_INFO,"Data Retention: tQueueEntry size is: %u\n",sizeof(tQueueEntry));
 			}
 
 #endif
