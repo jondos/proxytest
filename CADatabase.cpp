@@ -120,7 +120,7 @@ SINT32 CADatabase::insert(UINT8 key[16],UINT64 timestamp)
 			nextDB=NULL;
 			}
 
-		UINT64 hashkey=key[2]<<56+key[3]<<48+key[4]<<40+key[5]<<32+key[6]<<24+key[7]<<16+key[8]<<8+key[9];
+		UINT64 hashkey=(key[2]<<56)+(key[3]<<48)+(key[4]<<40)+(key[5]<<32)+(key[6]<<24)+(key[7]<<16)+(key[8]<<8)+key[9];
 
 // insert
 		if (prevDB!=NULL){

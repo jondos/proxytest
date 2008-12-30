@@ -105,7 +105,7 @@ class CALastMix:public
 #endif
 			virtual SINT32 loop()=0;
 			SINT32 init();
-			SINT32 initOnce();
+			virtual SINT32 initOnce();
 			SINT32 clean();
       #ifdef NEW_MIX_TYPE // TypeB mixes
         virtual void reconfigureMix();
