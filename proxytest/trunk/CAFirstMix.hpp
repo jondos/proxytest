@@ -176,7 +176,7 @@ protected:
 			bool isShuttingDown();
 			SINT32 init();
 			SINT32 clean();
-			SINT32 initOnce();
+			virtual SINT32 initOnce();
 #ifdef DYNAMIC_MIX
 			void stopCascade()
 			{
