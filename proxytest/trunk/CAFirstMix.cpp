@@ -703,7 +703,7 @@ THREAD_RETURN fm_loopSendToMix(void* param)
 				if((pQueueEntry->packet.flags&CHANNEL_OPEN)!=0)
 					{
 						pQueueEntry->dataRetentionLogEntry.t_out=time(NULL);
-						pFirstMix->m_pDataRetentionLog->log(&pQueueEntry->dataRetentionLogEntry);
+						//pFirstMix->m_pDataRetentionLog->log(&pQueueEntry->dataRetentionLogEntry);
 					}
 #endif
 			}
