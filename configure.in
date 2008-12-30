@@ -632,6 +632,18 @@ AC_ARG_ENABLE(debug-output,
 	    fi
 	]
 )
+
+AC_ARG_ENABLE(dataretentionlog,
+	AS_HELP_STRING([--enable-dataretentionlog],[Enable log messages according to German data retention]),
+	[
+	    if test "x$enableval" != "xno" ; then
+		CFLAGS="$CFLAGS -DDATA_RETENTION_LOG"
+		CXXFLAGS="$CXXFLAGS -DDATA_RETENTION_LOG"
+	    fi
+	]
+)
+
+
 CRIME=""
 AC_ARG_ENABLE(crime-detection,
 	AS_HELP_STRING([--enable-crime-detection],[Enable crime detection mode]),
@@ -651,6 +663,7 @@ AC_ARG_ENABLE(tests,
 	    fi	
 	]
 )
+
 
 AC_ARG_ENABLE(manioq,
 	AS_HELP_STRING([--enable-manioq],[Switch for Manioq provider mixes]),

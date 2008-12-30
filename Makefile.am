@@ -27,6 +27,8 @@ libproxytest_a_SOURCES = CAAbstractControlChannel.cpp\
 		    CAControlChannelTest.cpp\
 		    CADatabase.cpp\
 		    CADatagramSocket.cpp \
+		    CADataRetentionLog.cpp\
+		    CADataRetentionLogFile.cpp\
 		    CADynaNetworking.cpp \
 		    CADynamicCascadeConfigurator.cpp \
 		    CAFirstMix.cpp \
@@ -96,6 +98,8 @@ libproxytest_a_SOURCES = CAAbstractControlChannel.cpp\
 		    CACmdLnOptions.hpp \
 		    CADatabase.hpp\
 		    CADatagramSocket.hpp\
+		    CADataRetentionLog.hpp\
+		    CADataRetentionLogFile.hpp\
 		    CADynaNetworking.hpp \
 		    CADynamicCascadeConfigurator.hpp \
 		    CAFirstMix.hpp \
@@ -147,8 +151,8 @@ libproxytest_a_SOURCES = CAAbstractControlChannel.cpp\
 		    CAXMLErrorMessage.hpp\
 		    CAXMLPriceCert.hpp\
 		    Hashtable.hpp\
-		    packetintro.h
-		    StdAfx.h \		    		   
+		    packetintro.h\
+		    StdAfx.h\
 		    basetypedefs.h
 
 mix_SOURCES = proxytest.cpp
