@@ -581,7 +581,13 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define PAYMENT_VERSION_INFO
 #endif
 
-#define MIX_VERSION_INFO "Mix-Version: " MIX_VERSION PAYMENT_VERSION_INFO "\nUsing: " OPENSSL_VERSION_TEXT "\nUsing Xerces-C: " MY_XERCES_VERSION "\n"
+#ifdef DATA_RETENTION_LOG
+	#define DATA_RETENTION_LOG_INFO " (with data retention log)"
+#else
+	#define DATA_RETENTION_LOG_INFO 
+#endif
+
+#define MIX_VERSION_INFO "Mix-Version: " MIX_VERSION PAYMENT_VERSION_INFO DATA_RETENTION_LOG_INFO "\nUsing: " OPENSSL_VERSION_TEXT "\nUsing Xerces-C: " MY_XERCES_VERSION "\n"
 
 #include "errorcodes.hpp"
 #include "typedefs.hpp"

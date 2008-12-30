@@ -68,6 +68,11 @@ SINT32 CAMix::initOnce()
 				CAMsg::printMsg(LOG_ERR,"Data Retention Error: Could not set log dir!\n");
 				return E_UNKNOWN;
 			}
+		else
+			{
+				CAMsg::printMsg(LOG_INFO,"Data Retention: Set log dir to: %s\n",strDir);
+			}
+
 #endif
 		return E_SUCCESS;
 	}
