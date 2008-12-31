@@ -43,10 +43,10 @@ SINT32 CADataRetentionLogFile::writeHeader(CAASymCipher* pPublicKey)
 		memset(&oHeader,0,sizeof(oHeader));
 		oHeader.day=m_Day;
 		oHeader.month=m_Month;
-		oHeader.year=m_Year;
+		oHeader.year=htons(m_Year);
 		oHeader.entriesPerBlock=m_nLogEntriesPerBlock;
 		oHeader.keys=1;
-		oHeader.loggedFields=0;//DATARETETION_LOGGED_FIELD_T_IN|DATARETETION_LOGGED_FIELD_T_OUT
+		oHeader.loggedFields=0x00FF;//DATARETETION_LOGGED_FIELD_T_IN|DATARETETION_LOGGED_FIELD_T_OUT
 		if(pglobalOptions->isFirstMix())
 			{
 				oHeader.entity=DATARETENTION_ENTITY_FIRST_MIX;
@@ -63,17 +63,36 @@ SINT32 CADataRetentionLogFile::writeHeader(CAASymCipher* pPublicKey)
 			return E_UNKNOWN;
 
 //Generate sym key and write it to header
-		UINT8 key[16];
-		getRandom(key,16);
-		gcm_init_64k(m_pGCMCtx,key,128);
+		UINT8 keybuff[256];
+		getRandom(keybuff,16);
+		gcm_init_64k(m_pGCMCtx,keybuff,128);
 		UINT8 encKey[2048];
 		UINT32 encKeyLen=2048;
-		pPublicKey->encryptOAEP(key,16,encKey,&encKeyLen);
-		memset(key,0,16);	
+//Set date
+		keybuff[16]=m_Day;
+		keybuff[17]=m_Month;
+		UINT16 tmpS=htons(m_Year);
+		keybuff[18]=tmpS>>8;
+		keybuff[19]=(tmpS&0x00FF);
+//Calculate MAC
+		UINT8 nonce[16];
+		memset(nonce,0,16);
+		::gcm_encrypt_64k(m_pGCMCtx, nonce, 16, keybuff,20,
+												NULL,0,keybuff+128,keybuff+20);
+		
+		memcpy(encKey,keyBuff,256);
+		encKeyLen=256;
+//		pPublicKey->encryptPKCS1(keybuff,36,encKey,&encKeyLen);
+
+//Calculate the symmetric key
+//		SHA512
+
+		memset(keybuff,0,256);
 		
 		if(write(m_hLogFile,encKey,encKeyLen)!=encKeyLen)
 			return E_UNKNOWN;
-		
+
+
 		return E_SUCCESS;
 	}
 
