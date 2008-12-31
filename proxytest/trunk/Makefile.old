@@ -9,7 +9,7 @@ XERCESC_LIB=/usr/lib/
 #### I believe you do not need to change anything behind this....
 INCLUDE = -I. -I${OPENSSL_INC} -I${XERCESC_INC} -I${XERCESC_INC}/xercesc 
 LIBDIR= -L${OPENSSL_LIB} -L/usr/local/lib -L${XERCESC_LIB} 
-LIBS	= ./popt/libpopt.a ./xml/libxml.a ./trio/libtrio.a ./tre/libtre.a ./TypeA/libmixa.a -lcrypto -lssl -lm -lxerces-c
+LIBS	= ./popt/libpopt.a ./gcm/libgcm.a ./xml/libxml.a ./trio/libtrio.a ./tre/libtre.a ./TypeA/libmixa.a -lcrypto -lssl -lm -lxerces-c
 LIBS_PURIFY	= ./popt/libpopt.a ./xml/libxml.a ./trio/libtrio.a ./tre/libtre.a ./TypeA/libmixa.a -lcrypto -lssl -lm -lxerces-c -lxerces-depdom
 IRIX_INCLUDE=-I${HOME}/openssl64-0.9.7d/include -I${HOME}/xercesc/include/xercesc
 IRIX_LIBDIR=-L${HOME}/openssl64-0.9.7d/lib -L${HOME}/xercesc/lib
