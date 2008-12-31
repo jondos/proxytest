@@ -80,7 +80,7 @@ SINT32 CADataRetentionLogFile::writeHeader(CAASymCipher* pPublicKey)
 		::gcm_encrypt_64k(m_pGCMCtx, nonce, 16, keybuff,20,
 												NULL,0,keybuff+128,keybuff+20);
 		
-		memcpy(encKey,keyBuff,256);
+		memcpy(encKey,keybuff,256);
 		encKeyLen=256;
 //		pPublicKey->encryptPKCS1(keybuff,36,encKey,&encKeyLen);
 
