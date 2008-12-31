@@ -1,6 +1,7 @@
 #ifndef __CA_DATA_RETENTION_LOG_FILE
 #define __CA_DATA_RETENTION_LOG_FILE
-
+#include "CAASymCipher.hpp"
+#include "gcm/gcm.h"
 
 struct  __t__data_retention_log_file_header
 	{
@@ -27,22 +28,26 @@ class CADataRetentionLogFile
 	{
 		public:
 			CADataRetentionLogFile();
-			SINT32 openLog(UINT8* strLogDir,UINT32 date);
+			SINT32 openLog(UINT8* strLogDir,UINT32 date,CAASymCipher* pPublicKey);
 			SINT32 closeLog();
 			SINT32 log(t_dataretentionLogEntry*);
 		
 		private:
-			SINT32 writeHeader();
+			SINT32 writeHeader(CAASymCipher* pPublicKey);
 			SINT32 writeFooter();
+
+			gcm_ctx_64k* m_pGCMCtx;
 
 			int    m_hLogFile;
 			UINT8  m_Day;
 			UINT8  m_Month;
 			UINT16 m_Year;
 			UINT8* m_arOneBlock;
+			UINT8* m_encBlock;
 			UINT32 m_nLogEntriesPerBlock;
 			UINT32 m_nBytesPerLogEntry;
 			UINT32 m_nCurrentLogEntriesInBlock;
+			UINT32 m_nCurrentBlockNumber;
 	};
 
 #endif //__CA_DATA_RETENTION_LOG_FILE

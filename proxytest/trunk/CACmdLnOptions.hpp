@@ -539,6 +539,11 @@ class CACmdLnOptions
 
 #ifdef DATA_RETENTION_LOG
 		SINT32 getDataRetentionLogDir(UINT8* strLogDir,UINT32 len);
+		SINT32 getDataRetentionPublicEncryptionKey(CAASymCipher** pKey)
+			{
+				*pKey=m_pDataRetentionPublicEncryptionKey;
+				return E_SUCCESS;
+			}
 #endif
 
 #ifndef ONLY_LOCAL_PROXY
@@ -690,7 +695,8 @@ class CACmdLnOptions
 #endif
 
 #ifdef DATA_RETENTION_LOG
-		UINT8*	m_strDataRetentionLogDir;
+		UINT8*				m_strDataRetentionLogDir;
+		CAASymCipher* m_pDataRetentionPublicEncryptionKey;
 #endif
 
 #if defined (DELAY_CHANNELS) ||defined(DELAY_USERS)
