@@ -6,7 +6,7 @@
 AUTOMAKE_OPTIONS = foreign
 
 noinst_LIBRARIES = libgcm.a
-libpopt_a_SOURCES = gcm.cpp prp.cpp  \
+libgcm_a_SOURCES = gcm.cpp prp.cpp  \
 		    gcm.h prp.h
 		    
 includes = @INCLUDES@
