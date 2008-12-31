@@ -41,6 +41,7 @@ class CAASymCipher
 			SINT32 decryptOAEP(const UINT8* from,UINT8* to,UINT32* len);
 			SINT32 encrypt(const UINT8* from,UINT8* to);
 			SINT32 encryptOAEP(const UINT8* from,UINT32 fromlen,UINT8* to,UINT32* len);
+			SINT32 encryptPKCS1(const UINT8* from,UINT32 fromlen,UINT8* to,UINT32* len);
 			SINT32 generateKeyPair(UINT32 size);
 			//SINT32 getPublicKey(UINT8* buff,UINT32 *len);
 #ifndef ONLY_LOCAL_PROXY

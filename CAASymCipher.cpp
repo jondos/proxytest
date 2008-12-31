@@ -108,6 +108,25 @@ SINT32 CAASymCipher::encryptOAEP(const UINT8* from,UINT32 fromlen,UINT8* to,UINT
 		*len=ret;
 		return E_SUCCESS;
 	}
+
+/** Encrypts one block of plain text using PKCS1 padding. 
+	*@param from pointer to one block of plain text
+	*@param fromlen size of the plain text
+	*@param to the OAEP encoded cipher text
+	*@param len on return contains the size of the ciphertext
+	*@retval E_UNKNOWN in case of an error
+	*@retval E_SUCCESS otherwise
+	* Temporarly will be removed soon.
+	*/
+SINT32 CAASymCipher::encryptPKCS1(const UINT8* from,UINT32 fromlen,UINT8* to,UINT32* len)
+	{
+		SINT32 ret=RSA_public_encrypt(fromlen,from,to,m_pRSA,RSA_PKCS1_PADDING);
+		if(ret<0)
+			return E_UNKNOWN;
+		*len=ret;
+		return E_SUCCESS;
+	}
+
 /** Encrypts exactly one block which is stored in @c from. 
  *The result of the encrpytion is stored in @c to.
 	*@param from one block of plain text
