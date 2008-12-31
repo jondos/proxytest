@@ -99,10 +99,11 @@ SINT32 CADataRetentionLogFile::log(t_dataretentionLogEntry* logEntry)
 		SINT32 ret=E_SUCCESS;
 		memcpy(m_arOneBlock+m_nBytesPerLogEntry*m_nCurrentLogEntriesInBlock,logEntry,m_nBytesPerLogEntry);
 		m_nCurrentLogEntriesInBlock++;
+		
 		if(m_nCurrentLogEntriesInBlock>=m_nLogEntriesPerBlock)
 			{//Block is full -->encrypt and write them
 				UINT32 nonce=htonl(m_nCurrentBlockNumber);
-				gcm_encrypt_64k(m_pGCMCtx, (UINT8*)&nonce, 4, m_arOneBlock,m_nLogEntriesPerBlock*m_nBytesPerLogEntry,
+				::gcm_encrypt_64k(m_pGCMCtx, (UINT8*)&nonce, 4, m_arOneBlock,m_nLogEntriesPerBlock*m_nBytesPerLogEntry,
 												NULL,0,m_encBlock,m_encBlock+m_nLogEntriesPerBlock*m_nBytesPerLogEntry);
 
 				if(write(m_hLogFile,m_encBlock,m_nLogEntriesPerBlock*m_nBytesPerLogEntry+16)!=m_nLogEntriesPerBlock*m_nBytesPerLogEntry+16)

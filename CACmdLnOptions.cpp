@@ -3612,7 +3612,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 		DOMElement* elemDataRetentionPublicKey=NULL;
 		getDOMChildByName(elemDataRetention,"PublicEncryptionKey",elemDataRetentionPublicKey,false);
 		DOMElement* elemDataRetentionPublicRSAKey=NULL;
-		getDOMChildByName(elemDataRetention,"RSAKeyValue",elemDataRetentionPublicRSAKey,false);
+		getDOMChildByName(elemDataRetentionPublicKey,"RSAKeyValue",elemDataRetentionPublicRSAKey,false);
 		m_pDataRetentionPublicEncryptionKey->setPublicKeyAsDOMNode(elemDataRetentionPublicRSAKey);
 
 #endif //DATA_RETENTION_LOG
