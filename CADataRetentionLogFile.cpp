@@ -25,7 +25,7 @@ SINT32 CADataRetentionLogFile::openLog(UINT8* strLogDir,UINT32 date,CAASymCipher
 		struct tm* theTime;
 		time_t t=date;
 		theTime=gmtime(&t);
-		strftime((char*) strDate,255,"%Y%m%d",theTime);
+		strftime((char*) strDate,255,"%Y%m%d-%H%M",theTime);
 		m_Day=theTime->tm_mday;
 		m_Month=theTime->tm_mon+1;
 		m_Year=theTime->tm_year+1900;
