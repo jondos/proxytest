@@ -685,5 +685,5 @@ CXXFLAGS="$CXXFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THR
 LIBS="$LIBS $PAYMENT_LIB $MYSQL_LIB"
 
 AM_CONDITIONAL([DOTESTS], [test x$DOTHETESTS = xyes])
-AC_CONFIG_FILES([Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile test/Makefile])
+AC_CONFIG_FILES([Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile test/Makefile gcm/Makefile])
 AC_OUTPUT
