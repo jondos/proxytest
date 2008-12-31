@@ -9,7 +9,7 @@ XERCESC_LIB=/usr/lib/
 #### I believe you do not need to change anything behind this....
 INCLUDE = -I. -I${OPENSSL_INC} -I${XERCESC_INC} -I${XERCESC_INC}/xercesc 
 LIBDIR= -L${OPENSSL_LIB} -L/usr/local/lib -L${XERCESC_LIB} 
-LIBS	= ./popt/libpopt.a ./xml/libxml.a ./trio/libtrio.a ./tre/libtre.a ./TypeA/libmixa.a -lcrypto -lssl -lm -lxerces-c -lxerces-depdom -lmysqlclient_r
+LIBS	= ./popt/libpopt.a ./xml/libxml.a ./trio/libtrio.a ./tre/libtre.a ./TypeA/libmixa.a -lcrypto -lssl -lm -lxerces-c
 LIBS_PURIFY	= ./popt/libpopt.a ./xml/libxml.a ./trio/libtrio.a ./tre/libtre.a ./TypeA/libmixa.a -lcrypto -lssl -lm -lxerces-c -lxerces-depdom
 IRIX_INCLUDE=-I${HOME}/openssl64-0.9.7d/include -I${HOME}/xercesc/include/xercesc
 IRIX_LIBDIR=-L${HOME}/openssl64-0.9.7d/lib -L${HOME}/xercesc/lib
@@ -83,6 +83,9 @@ all:
 linux-x86-gcc:
 	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -finline-functions -fomit-frame-pointer -O3 --param large-function-growth=300 --param max-inline-insns-single=700 --param max-inline-insns-auto=600' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
 
+linux-x86-gcc-debug:
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -O0 -ggdb' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
+
 linux-x86-gcc-static:
 	$(MAKE) 'CC=gcc' 'CPPFLAGS=-static -D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -finline-functions -fomit-frame-pointer -O3 --param large-function-growth=300' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
 
@@ -93,7 +96,7 @@ linux-pentium3-gcc:
 	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -finline-functions -fomit-frame-pointer -march=pentium3 -O3 --param large-function-growth=300 --param max-inline-insns-single=700 --param max-inline-insns-auto=600 --param inline-unit-growth=200' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
 
 linux-xeon64-gcc:
-	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -finline-functions -fomit-frame-pointer -march=nocona -m64 -O3' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -finline-functions -fomit-frame-pointer -march=nocona -m64 -O3 -g0' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
 
 linux-pentium3-gcc3:
 	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -finline-functions -fomit-frame-pointer -march=pentium3 -O3 --param max-inline-insns-single=700 --param max-inline-insns-auto=600' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
@@ -158,13 +161,13 @@ linux-x86-gcc-webdeploy:
 linux-x86-purify:
 	$(MAKE) 'CC=g++' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -O0 -g' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes_purify 
 
-_all_aes: $(OBJS) libpopt.a libxml.a libtrio.a libtre.a libmixa.a
+_all_aes: $(OBJS) libpopt.a libxml.a libtrio.a libtre.a libmixa.a libgcm.a
 	$(CC) -o proxytest $(DEBUG) $(CPPFLAGS) $(OBJS) $(LIBDIR) $(LIBS)
 
 _all_aes_newglibc: $(OBJS) libpopt.a libxml.a libtrio.a libtre.a libmixa.a
-	$(CC) -o proxytest $(DEBUG) $(CPPFLAGS) $(OBJS) $(LDFLAGS)
+	$(CC) -o proxytest $(DEBUG) $(CPPFLAGS) $(OBJS) $(LDFLAGS) libgcm.a
 
-_all_aes_purify: $(OBJS) libpopt.a libxml.a libtrio.a libtre.a libmixa.a
+_all_aes_purify: $(OBJS) libpopt.a libxml.a libtrio.a libtre.a libmixa.a libgcm.a
 	$(PURIFY) g++ $(OBJS) $(LIBS_PURIFY)
 
 libpopt.a:
@@ -179,6 +182,9 @@ libtre.a:
 libxml.a: 
 	cd xml;$(MAKE) 'CC=$(CC)' 'DEBUG=$(DEBUG)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)';
 
+libgcm.a: 
+	cd gcm;$(MAKE) 'CC=$(CC)' 'DEBUG=$(DEBUG)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)';
+
 libmixa.a: 
 	cd TypeA;$(MAKE) 'CC=$(CC)' 'DEBUG=$(DEBUG)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)';
 
@@ -188,5 +194,6 @@ clean:
 	cd trio;$(MAKE) clean;
 	cd tre;$(MAKE) clean;
 	cd xml;$(MAKE) clean;
+	cd gcm;$(MAKE) clean;
 	cd TypeA;$(MAKE) clean;
 	rm -f proxytest
