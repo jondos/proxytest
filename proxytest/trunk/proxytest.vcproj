@@ -78,11 +78,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="proxytest-lib.lib ws2_32.lib ssleay32.lib libeay32.lib pthreadVC2.lib xerces-c_2D.lib libmysql.lib $(NOINHERIT)"
+				AdditionalDependencies="proxytest-lib.lib ws2_32.lib ssleay32.lib libeay32.lib pthreadVC2.lib xerces-c_2D.lib $(NOINHERIT)"
 				OutputFile="$(OutDir)\proxytest.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="&quot;.\proxytest-lib\Debug&quot;;&quot;$(LIB_XERCES_C_DEBUG)&quot;;&quot;$(LIB_OPENSSL)&quot;;&quot;$(LIB_PTHREADS)&quot;;&quot;$(LIB_ZLIB)&quot;;&quot;$(LIB_POSTGRES)&quot;;&quot;$(LIB_MYSQL_DEBUG)&quot;"
+				AdditionalLibraryDirectories="&quot;.\proxytest-lib\Debug&quot;;&quot;$(LIB_XERCES_C_DEBUG)&quot;;&quot;$(LIB_OPENSSL)&quot;;&quot;$(LIB_PTHREADS)&quot;"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)\proxytest.pdb"
 				GenerateMapFile="true"

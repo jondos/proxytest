@@ -4187,7 +4187,7 @@ SINT32 CACmdLnOptions::getCountryStatsDBConnectionLoginData(char** db_host,char*
 #ifdef DATA_RETENTION_LOG
 SINT32 CACmdLnOptions::getDataRetentionLogDir(UINT8* strLogDir,UINT32 len)
 	{
-		if(m_strLogDir==NULL||m_strDataRetentionLogDir==NULL)
+		if(strLogDir==NULL||m_strDataRetentionLogDir==NULL)
 			return E_UNKNOWN;
 		if(len<=(UINT32)strlen((char*)m_strDataRetentionLogDir))
 				{
