@@ -61,6 +61,10 @@ SINT32 CAMix::initOnce()
 	{
 #ifdef DATA_RETENTION_LOG
 		m_pDataRetentionLog=new CADataRetentionLog();
+		CAASymCipher* pKey=NULL;
+		pglobalOptions->getDataRetentionPublicEncryptionKey(&pKey);
+		if(m_pDataRetentionLog->setPublicEncryptionKey(pKey)!=E_SUCCESS)
+			return E_UNKNOWN;
 		UINT8 strDir[4096];
 		strDir[0]=0;
 		if(pglobalOptions->getDataRetentionLogDir(strDir,4096)!=E_SUCCESS ||
