@@ -3607,7 +3607,14 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 				m_strDataRetentionLogDir[log_dir_len]=0;
 			}
 		CAMsg::printMsg(LOG_CRIT,"Data retention log dir in config file: %s\n",log_dir);
-  
+		
+		this->m_pDataRetentionPublicEncryptionKey=new CAASymCipher();
+		DOMElement* elemDataRetentionPublicKey=NULL;
+		getDOMChildByName(elemDataRetention,"PublicEncryptionKey",elemDataRetentionPublicKey,false);
+		DOMElement* elemDataRetentionPublicRSAKey=NULL;
+		getDOMChildByName(elemDataRetention,"RSAKeyValue",elemDataRetentionPublicRSAKey,false);
+		m_pDataRetentionPublicEncryptionKey->setPublicKeyAsDOMNode(elemDataRetentionPublicRSAKey);
+
 #endif //DATA_RETENTION_LOG
 
     return E_SUCCESS;

@@ -338,7 +338,6 @@ SINT32 CAASymCipher::setPublicKeyAsXML(const UINT8* key,UINT32 len)
 
 #endif //ONLY_LOCAL_PROXY
 
-//Bugy!! Changes node!!!		
 SINT32 CAASymCipher::setPublicKeyAsDOMNode(DOMNode* node)
 	{	
 		DOMNode* root=node;
