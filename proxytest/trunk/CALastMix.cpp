@@ -651,7 +651,7 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 						getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_start);
 					#endif
 					#ifdef DATA_RETENTION_LOG
-						pQueueEntry->dataRetentionLogEntry.t_in=time(NULL);
+						pQueueEntry->dataRetentionLogEntry.t_in=htonl(time(NULL));
 					#endif
 					if(ret!=MIXPACKET_SIZE)
 					{//something goes wrong...
