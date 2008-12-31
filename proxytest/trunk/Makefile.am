@@ -162,6 +162,7 @@ mix_LDADD = $(top_srcdir)/libproxytest.a \
 	    $(top_srcdir)/popt/libpopt.a \
 	    $(top_srcdir)/trio/libtrio.a \
 	    $(top_srcdir)/tre/libtre.a \
+	    $(top_srcdir)/gcm/libgcm.a \
 	    $(top_srcdir)/TypeA/libmixa.a
 
 EXTRA_DIST = README proxytest.doxy proxytest.dsp proxytest.dsw

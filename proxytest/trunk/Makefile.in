@@ -106,7 +106,7 @@ mix_OBJECTS = $(am_mix_OBJECTS)
 mix_DEPENDENCIES = $(top_srcdir)/libproxytest.a \
 	$(top_srcdir)/xml/libxml.a $(top_srcdir)/popt/libpopt.a \
 	$(top_srcdir)/trio/libtrio.a $(top_srcdir)/tre/libtre.a \
-	$(top_srcdir)/TypeA/libmixa.a
+	$(top_srcdir)/gcm/libgcm.a $(top_srcdir)/TypeA/libmixa.a
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -322,6 +322,7 @@ mix_LDADD = $(top_srcdir)/libproxytest.a \
 	    $(top_srcdir)/popt/libpopt.a \
 	    $(top_srcdir)/trio/libtrio.a \
 	    $(top_srcdir)/tre/libtre.a \
+	    $(top_srcdir)/gcm/libgcm.a \
 	    $(top_srcdir)/TypeA/libmixa.a
 
 EXTRA_DIST = README proxytest.doxy proxytest.dsp proxytest.dsw
