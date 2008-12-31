@@ -261,7 +261,7 @@ SINT32 CAFirstMixA::loop()
 											set64(pQueueEntry->timestamp_proccessing_start_OP,pQueueEntry->timestamp_proccessing_start);
 										#endif
 										#ifdef DATA_RETENTION_LOG
-											pQueueEntry->dataRetentionLogEntry.t_in=time(NULL);
+											pQueueEntry->dataRetentionLogEntry.t_in=htonl(time(NULL));
 										#endif	
 										if(ret==SOCKET_ERROR/*||pHashEntry->accessUntil<time()*/) 
 										{	
@@ -443,10 +443,11 @@ SINT32 CAFirstMixA::loop()
 																set64(pTmpEntry->timeCreated,pQueueEntry->timestamp_proccessing_start);
 															#endif
 															#ifdef DATA_RETENTION_LOG
-																pQueueEntry->dataRetentionLogEntry.entity.first.channelid=pMixPacket->channel;
+																pQueueEntry->dataRetentionLogEntry.entity.first.channelid=htonl(pMixPacket->channel);
 																fmChannelListEntry* pTmpEntry1=m_pChannelList->get(pMuxSocket,tmpC);
 																memcpy(pQueueEntry->dataRetentionLogEntry.entity.first.ip_in,pTmpEntry1->pHead->peerIP,4);
-																pQueueEntry->dataRetentionLogEntry.entity.first.port_in=pTmpEntry1->pHead->peerPort;
+																pQueueEntry->dataRetentionLogEntry.entity.first.port_in=(UINT16)pTmpEntry1->pHead->peerPort;
+																pQueueEntry->dataRetentionLogEntry.entity.first.port_in=htons(pQueueEntry->dataRetentionLogEntry.entity.first.port_in);
 															#endif
 															m_pQueueSendToMix->add(pQueueEntry, sizeof(tQueueEntry));
 															/* Don't delay upstream
