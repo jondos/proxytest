@@ -62,6 +62,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_bIsEncryptedLogEnabled=false;
 		m_docMixInfo= createDOMDocument();
 		m_docMixXml=NULL;
+		m_pCascadeXML=NULL;
 		m_docOpTnCs=NULL; //Operator Terms and Conditions (if any)
 		m_bAcceptReconfiguration=false;
 		m_maxNrOfUsers = 0;
