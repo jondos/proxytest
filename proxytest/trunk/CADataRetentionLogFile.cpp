@@ -17,6 +17,11 @@ CADataRetentionLogFile::CADataRetentionLogFile()
 		m_nonceBuffForLogEntries=new UINT8[12];
 	}	
 
+CADataRetentionLogFile::~CADataRetentionLogFile()
+	{
+		closeLog();
+	}
+
 SINT32 CADataRetentionLogFile::openLog(UINT8* strLogDir,UINT32 date,CAASymCipher* pPublicKey)
 	{
 		m_nCurrentLogEntriesInBlock=0;
@@ -30,6 +35,14 @@ SINT32 CADataRetentionLogFile::openLog(UINT8* strLogDir,UINT32 date,CAASymCipher
 		m_Day=theTime->tm_mday;
 		m_Month=theTime->tm_mon+1;
 		m_Year=theTime->tm_year+1900;
+		
+		theTime->tm_hour=0;
+		theTime->tm_min=0;
+		theTime->tm_sec=0;
+		m_nMaxLogTime=_mkgmtime(theTime)+24*3600-1;
+		
+		m_nMaxLogTime=date+60;
+
 		snprintf((char*)strFileName,4096,"%s/dataretentionlog_%s",strLogDir,strDate);
 		m_hLogFile=open((char*)strFileName,O_APPEND|O_CREAT|O_WRONLY|O_SYNC|O_LARGEFILE|O_BINARY|O_SYNC,S_IREAD|S_IWRITE);
 		delete [] strFileName; 
@@ -93,7 +106,7 @@ SINT32 CADataRetentionLogFile::writeHeader(CAASymCipher* pPublicKey)
 		if(write(m_hLogFile,encKey,encKeyLen)!=encKeyLen)
 			return E_UNKNOWN;
 
-		//Calaculate Auth tag and writ it..
+		//Calculate Auth tag and writ it..
 		if(write(m_hLogFile,keybuff,16)!=16)
 			return E_UNKNOWN;
 
@@ -103,13 +116,45 @@ SINT32 CADataRetentionLogFile::writeHeader(CAASymCipher* pPublicKey)
 		return E_SUCCESS;
 	}
 
+SINT32 CADataRetentionLogFile::flushLogEntries()
+{
+	if(m_nCurrentLogEntriesInBlock>0)
+		{//Writte remaining log entries
+			UINT32 nonce=htonl(m_nCurrentBlockNumber);
+			memcpy(m_nonceBuffForLogEntries+12,&nonce,4);
+			::gcm_encrypt_4k(m_pGCMCtx, m_nonceBuffForLogEntries ,12, m_arOneBlock,m_nCurrentLogEntriesInBlock*m_nBytesPerLogEntry,
+												NULL,0,m_encBlock,m_encBlock+m_nCurrentLogEntriesInBlock*m_nBytesPerLogEntry);
+			if(write(m_hLogFile,m_encBlock,m_nCurrentLogEntriesInBlock*m_nBytesPerLogEntry+16)!=m_nCurrentLogEntriesInBlock*m_nBytesPerLogEntry+16)
+				{
+					CAMsg::printMsg(LOG_ERR,"Error: data retention log entry was not fully written to disk!\n");
+					return E_UNKNOWN;
+				}
+		}
+	return E_SUCCESS;
+}
+
 SINT32 CADataRetentionLogFile::writeFooter()
 	{
+		SINT32 ret=flushLogEntries();
+		if(ret!=E_SUCCESS)
+			return E_UNKNOWN;
+		UINT32 u=htonl(m_nCurrentLogEntriesInBlock+m_nCurrentBlockNumber*m_nLogEntriesPerBlock);
+		if(write(m_hLogFile,&u,4)!=4)
+			return E_UNKNOWN;
+		UINT8 nonce[12];
+		memset(nonce,0,12);
+		UINT8 out[32];
+		::gcm_encrypt_4k(m_pGCMCtx, nonce ,12,(UINT8*) &u,4,
+												NULL,0,out,out+16);
+		if(write(m_hLogFile,out,32)!=32)
+			return E_UNKNOWN;
 		return E_SUCCESS;
 	}
 
 SINT32 CADataRetentionLogFile::closeLog()
 	{
+		if(m_hLogFile==-1)
+			return E_SUCCESS;
 		SINT32 ret=writeFooter();
 		if(ret!=E_SUCCESS)
 			return ret;
