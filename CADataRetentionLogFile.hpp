@@ -28,12 +28,18 @@ class CADataRetentionLogFile
 	{
 		public:
 			CADataRetentionLogFile();
+			~CADataRetentionLogFile();
 			SINT32 openLog(UINT8* strLogDir,UINT32 date,CAASymCipher* pPublicKey);
 			SINT32 closeLog();
 			SINT32 log(t_dataretentionLogEntry*);
-		
+			UINT32 getMaxLogTime()
+				{
+					return m_nMaxLogTime;
+				};
+
 		private:
 			SINT32 writeHeader(CAASymCipher* pPublicKey);
+			SINT32 flushLogEntries();
 			SINT32 writeFooter();
 
 			gcm_ctx_4k* m_pGCMCtx;
@@ -49,6 +55,7 @@ class CADataRetentionLogFile
 			UINT32 m_nBytesPerLogEntry;
 			UINT32 m_nCurrentLogEntriesInBlock;
 			UINT32 m_nCurrentBlockNumber;
+			UINT32 m_nMaxLogTime;
 
 	};
 
