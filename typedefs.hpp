@@ -64,6 +64,13 @@ typedef UINT32 HCHANNEL;
 #define PAYLOAD_SIZE 		989
 
 #if (defined(WIN32) ||defined(__sgi))&&!defined(__GNUC__)
+	#define DO_PACKED 
+#else
+	#define DO_PACKED __attribute__ ((__packed__))
+#endif
+
+
+#if (defined(WIN32) ||defined(__sgi))&&!defined(__GNUC__)
 		#pragma pack( push, t_MixPacket )
 		#pragma pack(1)
 		struct t_MixPacketPayload
@@ -120,20 +127,20 @@ struct __t__data_retention_log_entry
 					HCHANNEL channelid;
 					UINT8 ip_in[4];
 					UINT16 port_in;
-				} first;
+				} DO_PACKED first;
 			struct t_last_mix_data_retention_log_entry
 				{
 					HCHANNEL channelid;
 					UINT8 ip_out[4];
 					UINT16 port_out;
-				} last;
-		} entity;
+				} DO_PACKED last;
+		} DO_PACKED entity;
 	}
 #if (defined(WIN32) ||defined(__sgi))&&!defined(__GNUC__)
 	;
 	#pragma pack( pop, t_DataRetentionLogEntry )
 #else
-	__attribute__ ((__packed__));
+	DO_PACKED ;
 #endif
 
 typedef struct __t__data_retention_log_entry t_dataretentionLogEntry;
