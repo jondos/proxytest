@@ -340,7 +340,7 @@ SINT32 CAMix::initMixCascadeInfo(DOMElement* mixes)
     }	
     
     DOMNode* elemMixesDocCascade=createDOMElement(m_docMixCascadeInfo,"Mixes");
-    DOMElement* elemMix;
+    DOMElement* elemMix=NULL;
     count=1;
     if(pglobalOptions->isFirstMix())
     {

@@ -571,6 +571,14 @@ int main(int argc, const char* argv[])
 //			testTre();
 #endif
 
+#ifdef DATA_RETENTION_LOG
+		if(sizeof(t_dataretentionLogEntry)!=18)
+		{
+				CAMsg::printMsg(LOG_CRIT,"sizeof(tDataRetentionLogEntry) [%u] != 18 --> maybe a compiler (optimization) problem!\n",sizeof(t_dataretentionLogEntry));
+				exit(EXIT_FAILURE);
+		}	
+#endif
+
 #ifdef _DEBUG
 			UINT32 start;
 #endif
