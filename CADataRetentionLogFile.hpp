@@ -36,7 +36,7 @@ class CADataRetentionLogFile
 			SINT32 writeHeader(CAASymCipher* pPublicKey);
 			SINT32 writeFooter();
 
-			gcm_ctx_64k* m_pGCMCtx;
+			gcm_ctx_4k* m_pGCMCtx;
 
 			int    m_hLogFile;
 			UINT8  m_Day;
@@ -44,10 +44,12 @@ class CADataRetentionLogFile
 			UINT16 m_Year;
 			UINT8* m_arOneBlock;
 			UINT8* m_encBlock;
+			UINT8* m_nonceBuffForLogEntries;
 			UINT32 m_nLogEntriesPerBlock;
 			UINT32 m_nBytesPerLogEntry;
 			UINT32 m_nCurrentLogEntriesInBlock;
 			UINT32 m_nCurrentBlockNumber;
+
 	};
 
 #endif //__CA_DATA_RETENTION_LOG_FILE

@@ -105,6 +105,10 @@ typedef UINT32 HCHANNEL;
 typedef t_MixPacket MIXPACKET;
 
 #ifdef DATA_RETENTION_LOG
+#if (defined(WIN32) ||defined(__sgi))&&!defined(__GNUC__)
+		#pragma pack( push, t_DataRetentionLogEntry )
+		#pragma pack(1)
+#endif
 struct __t__data_retention_log_entry
 	{
 		UINT32 t_in;
@@ -124,7 +128,13 @@ struct __t__data_retention_log_entry
 					UINT16 port_out;
 				} last;
 		} entity;
-	};
+	}
+#if (defined(WIN32) ||defined(__sgi))&&!defined(__GNUC__)
+	;
+	#pragma pack( pop, t_DataRetentionLogEntry )
+#else
+	__attribute__ ((__packed__));
+#endif
 
 typedef struct __t__data_retention_log_entry t_dataretentionLogEntry;
 #endif //DATA_RETENION_LOG

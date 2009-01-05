@@ -13,7 +13,8 @@ CADataRetentionLogFile::CADataRetentionLogFile()
 		m_nLogEntriesPerBlock=32;
 		m_arOneBlock=new UINT8[m_nLogEntriesPerBlock*m_nBytesPerLogEntry];
 		m_encBlock=new UINT8[m_nLogEntriesPerBlock*m_nBytesPerLogEntry+1024];
-		m_pGCMCtx=new gcm_ctx_64k;
+		m_pGCMCtx=new gcm_ctx_4k;
+		m_nonceBuffForLogEntries=new UINT8[12];
 	}	
 
 SINT32 CADataRetentionLogFile::openLog(UINT8* strLogDir,UINT32 date,CAASymCipher* pPublicKey)
@@ -25,12 +26,12 @@ SINT32 CADataRetentionLogFile::openLog(UINT8* strLogDir,UINT32 date,CAASymCipher
 		struct tm* theTime;
 		time_t t=date;
 		theTime=gmtime(&t);
-		strftime((char*) strDate,255,"%Y%m%d-%H%M",theTime);
+		strftime((char*) strDate,255,"%Y%m%d-%H%M%S",theTime);
 		m_Day=theTime->tm_mday;
 		m_Month=theTime->tm_mon+1;
 		m_Year=theTime->tm_year+1900;
 		snprintf((char*)strFileName,4096,"%s/dataretentionlog_%s",strLogDir,strDate);
-		m_hLogFile=open((char*)strFileName,O_APPEND|O_CREAT|O_WRONLY|O_SYNC|O_LARGEFILE|O_SYNC,S_IREAD|S_IWRITE);
+		m_hLogFile=open((char*)strFileName,O_APPEND|O_CREAT|O_WRONLY|O_SYNC|O_LARGEFILE|O_BINARY|O_SYNC,S_IREAD|S_IWRITE);
 		delete [] strFileName; 
 		if(m_hLogFile<=0)
 			return E_UNKNOWN;
@@ -65,7 +66,7 @@ SINT32 CADataRetentionLogFile::writeHeader(CAASymCipher* pPublicKey)
 //Generate sym key and write it to header
 		UINT8 keybuff[256];
 		getRandom(keybuff,16);
-		gcm_init_64k(m_pGCMCtx,keybuff,128);
+		gcm_init_4k(m_pGCMCtx,keybuff,128);
 		UINT8 encKey[2048];
 		UINT32 encKeyLen=2048;
 //Set date
@@ -75,9 +76,9 @@ SINT32 CADataRetentionLogFile::writeHeader(CAASymCipher* pPublicKey)
 		keybuff[18]=tmpS>>8;
 		keybuff[19]=(tmpS&0x00FF);
 //Calculate MAC
-		UINT8 nonce[16];
-		memset(nonce,0,16);
-		::gcm_encrypt_64k(m_pGCMCtx, nonce, 16, keybuff,20,
+		UINT8 nonce[12];
+		memset(nonce,0,12);
+		::gcm_encrypt_4k(m_pGCMCtx, nonce, 12, keybuff,20,
 												NULL,0,keybuff+128,keybuff+20);
 		
 		memcpy(encKey,keybuff,256);
@@ -91,6 +92,12 @@ SINT32 CADataRetentionLogFile::writeHeader(CAASymCipher* pPublicKey)
 		
 		if(write(m_hLogFile,encKey,encKeyLen)!=encKeyLen)
 			return E_UNKNOWN;
+
+		//Calaculate Auth tag and writ it..
+		if(write(m_hLogFile,keybuff,16)!=16)
+			return E_UNKNOWN;
+
+		memset(m_nonceBuffForLogEntries,0,12);
 
 
 		return E_SUCCESS;
@@ -122,9 +129,9 @@ SINT32 CADataRetentionLogFile::log(t_dataretentionLogEntry* logEntry)
 		if(m_nCurrentLogEntriesInBlock>=m_nLogEntriesPerBlock)
 			{//Block is full -->encrypt and write them
 				UINT32 nonce=htonl(m_nCurrentBlockNumber);
-				::gcm_encrypt_64k(m_pGCMCtx, (UINT8*)&nonce, 4, m_arOneBlock,m_nLogEntriesPerBlock*m_nBytesPerLogEntry,
+				memcpy(m_nonceBuffForLogEntries+12,&nonce,4);
+				::gcm_encrypt_4k(m_pGCMCtx, m_nonceBuffForLogEntries ,12, m_arOneBlock,m_nLogEntriesPerBlock*m_nBytesPerLogEntry,
 												NULL,0,m_encBlock,m_encBlock+m_nLogEntriesPerBlock*m_nBytesPerLogEntry);
-
 				if(write(m_hLogFile,m_encBlock,m_nLogEntriesPerBlock*m_nBytesPerLogEntry+16)!=m_nLogEntriesPerBlock*m_nBytesPerLogEntry+16)
 					{
 						CAMsg::printMsg(LOG_ERR,"Error: data retention log entry was not fully written to disk!\n");
