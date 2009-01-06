@@ -171,4 +171,4 @@ if DOTESTS
     MAYBE_tests=test
 endif    
 
-SUBDIRS = popt xml trio tre TypeA $(MAYBE_tests)
+SUBDIRS = popt xml trio tre TypeA gcm $(MAYBE_tests)

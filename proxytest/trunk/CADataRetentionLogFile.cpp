@@ -41,7 +41,7 @@ SINT32 CADataRetentionLogFile::openLog(UINT8* strLogDir,UINT32 date,CAASymCipher
 		theTime->tm_sec=0;
 		m_nMaxLogTime=_mkgmtime(theTime)+24*3600-1;
 		
-		m_nMaxLogTime=date+60;
+//		m_nMaxLogTime=date+60;
 
 		snprintf((char*)strFileName,4096,"%s/dataretentionlog_%s",strLogDir,strDate);
 		m_hLogFile=open((char*)strFileName,O_APPEND|O_CREAT|O_WRONLY|O_SYNC|O_LARGEFILE|O_BINARY|O_SYNC,S_IREAD|S_IWRITE);
@@ -85,18 +85,17 @@ SINT32 CADataRetentionLogFile::writeHeader(CAASymCipher* pPublicKey)
 //Set date
 		keybuff[16]=m_Day;
 		keybuff[17]=m_Month;
-		UINT16 tmpS=htons(m_Year);
-		keybuff[18]=tmpS>>8;
-		keybuff[19]=(tmpS&0x00FF);
+		keybuff[18]=m_Year>>8;
+		keybuff[19]=(m_Year&0x00FF);
 //Calculate MAC
-		UINT8 nonce[12];
-		memset(nonce,0,12);
-		::gcm_encrypt_4k(m_pGCMCtx, nonce, 12, keybuff,20,
-												NULL,0,keybuff+128,keybuff+20);
+		UINT8 nonce[16];
+		memset(nonce,0,16);
+		::gcm_encrypt_4k(m_pGCMCtx, nonce, 16, keybuff,20,
+												NULL,0,encKey,keybuff+20);
 		
-		memcpy(encKey,keybuff,256);
+		//memcpy(encKey,keybuff,256);
 		encKeyLen=256;
-//		pPublicKey->encryptPKCS1(keybuff,36,encKey,&encKeyLen);
+		pPublicKey->encryptPKCS1(keybuff,36,encKey,&encKeyLen);
 
 //Calculate the symmetric key
 //		SHA512
@@ -121,7 +120,7 @@ SINT32 CADataRetentionLogFile::flushLogEntries()
 	if(m_nCurrentLogEntriesInBlock>0)
 		{//Writte remaining log entries
 			UINT32 nonce=htonl(m_nCurrentBlockNumber);
-			memcpy(m_nonceBuffForLogEntries+12,&nonce,4);
+			memcpy(m_nonceBuffForLogEntries+8,&nonce,4);
 			::gcm_encrypt_4k(m_pGCMCtx, m_nonceBuffForLogEntries ,12, m_arOneBlock,m_nCurrentLogEntriesInBlock*m_nBytesPerLogEntry,
 												NULL,0,m_encBlock,m_encBlock+m_nCurrentLogEntriesInBlock*m_nBytesPerLogEntry);
 			if(write(m_hLogFile,m_encBlock,m_nCurrentLogEntriesInBlock*m_nBytesPerLogEntry+16)!=m_nCurrentLogEntriesInBlock*m_nBytesPerLogEntry+16)
@@ -139,14 +138,12 @@ SINT32 CADataRetentionLogFile::writeFooter()
 		if(ret!=E_SUCCESS)
 			return E_UNKNOWN;
 		UINT32 u=htonl(m_nCurrentLogEntriesInBlock+m_nCurrentBlockNumber*m_nLogEntriesPerBlock);
-		if(write(m_hLogFile,&u,4)!=4)
-			return E_UNKNOWN;
-		UINT8 nonce[12];
-		memset(nonce,0,12);
 		UINT8 out[32];
+		UINT8 nonce[12];
+		memset(nonce,0xFF,12);
 		::gcm_encrypt_4k(m_pGCMCtx, nonce ,12,(UINT8*) &u,4,
-												NULL,0,out,out+16);
-		if(write(m_hLogFile,out,32)!=32)
+												NULL,0,out,out+4);
+		if(write(m_hLogFile,out,20)!=20)
 			return E_UNKNOWN;
 		return E_SUCCESS;
 	}
@@ -174,7 +171,7 @@ SINT32 CADataRetentionLogFile::log(t_dataretentionLogEntry* logEntry)
 		if(m_nCurrentLogEntriesInBlock>=m_nLogEntriesPerBlock)
 			{//Block is full -->encrypt and write them
 				UINT32 nonce=htonl(m_nCurrentBlockNumber);
-				memcpy(m_nonceBuffForLogEntries+12,&nonce,4);
+				memcpy(m_nonceBuffForLogEntries+8,&nonce,4);
 				::gcm_encrypt_4k(m_pGCMCtx, m_nonceBuffForLogEntries ,12, m_arOneBlock,m_nLogEntriesPerBlock*m_nBytesPerLogEntry,
 												NULL,0,m_encBlock,m_encBlock+m_nLogEntriesPerBlock*m_nBytesPerLogEntry);
 				if(write(m_hLogFile,m_encBlock,m_nLogEntriesPerBlock*m_nBytesPerLogEntry+16)!=m_nLogEntriesPerBlock*m_nBytesPerLogEntry+16)
