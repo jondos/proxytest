@@ -39,12 +39,13 @@ SINT32 CADataRetentionLogFile::openLog(UINT8* strLogDir,UINT32 date,CAASymCipher
 		theTime->tm_hour=0;
 		theTime->tm_min=0;
 		theTime->tm_sec=0;
-		m_nMaxLogTime=_mkgmtime(theTime)+24*3600-1;
-		
+		m_nMaxLogTime=date-theTime->tm_min*60-theTime->tm_hour*3600-theTime->tm_sec+24*3600-1;
+	
 //		m_nMaxLogTime=date+60;
 
 		snprintf((char*)strFileName,4096,"%s/dataretentionlog_%s",strLogDir,strDate);
-		m_hLogFile=open((char*)strFileName,O_APPEND|O_CREAT|O_WRONLY|O_SYNC|O_LARGEFILE|O_BINARY|O_SYNC,S_IREAD|S_IWRITE);
+		//!! DO NOT USE O_SYNC - it is _terrible_ slow!!!!
+		m_hLogFile=open((char*)strFileName,O_APPEND|O_CREAT|O_WRONLY|O_LARGEFILE|O_BINARY,S_IREAD|S_IWRITE);
 		delete [] strFileName; 
 		if(m_hLogFile<=0)
 			return E_UNKNOWN;
