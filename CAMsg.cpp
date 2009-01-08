@@ -246,13 +246,15 @@ SINT32 CAMsg::openLog(UINT32 type)
 					{
 						currtime=time(NULL);
 						strftime(m_strLogFile+strlen(m_strLogFile),1024-strlen(m_strLogFile),"%Y%m%d-%H%M%S",localtime(&currtime));
-						m_hFileInfo=open(m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE|O_SYNC,S_IREAD|S_IWRITE);
+						//!! DO NOT USE O_SYNC - it is _terrible_ slow!!!!
+						m_hFileInfo=open(m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE,S_IREAD|S_IWRITE);
 						setMaxLogFileSize(pglobalOptions->getMaxLogFileSize());
 						m_NrOfWrites=0;
 					}
 					else
 					{
-						m_hFileInfo=open(m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE|O_SYNC,S_IREAD|S_IWRITE);
+						//!! DO NOT USE O_SYNC - it is _terrible_ slow!!!!
+						m_hFileInfo=open(m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE,S_IREAD|S_IWRITE);
 					}
 				break;
 #ifdef COMPRESSED_LOGS
