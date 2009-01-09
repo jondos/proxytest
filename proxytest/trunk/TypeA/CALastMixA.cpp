@@ -257,6 +257,7 @@ SINT32 CALastMixA::loop()
 																	#endif
 																	#ifdef DATA_RETENTION_LOG
 																		pQueueEntry->dataRetentionLogEntry.t_out=htonl(time(NULL));
+																		pQueueEntry->dataRetentionLogEntry.entity.last.channelid=htonl(pMixPacket->channel);
 																		pQueueEntry->dataRetentionLogEntry.entity.last.port_out=tmpSocket->getLocalPort();
 																		pQueueEntry->dataRetentionLogEntry.entity.last.port_out=htons(pQueueEntry->dataRetentionLogEntry.entity.last.port_out);
 																		tmpSocket->getLocalIP(pQueueEntry->dataRetentionLogEntry.entity.last.ip_out);
