@@ -89,17 +89,24 @@ SINT32 CADataRetentionLogFile::writeHeader(CAASymCipher* pPublicKey)
 		keybuff[18]=m_Year>>8;
 		keybuff[19]=(m_Year&0x00FF);
 //Calculate MAC
-		UINT8 nonce[16];
-		memset(nonce,0,16);
-		::gcm_encrypt_4k(m_pGCMCtx, nonce, 16, keybuff,20,
+		UINT8 nonce[12];
+		memset(nonce,0xFF,12);
+		nonce[11]=0xFE;
+		::gcm_encrypt_4k(m_pGCMCtx, nonce, 12, keybuff,20,
 												NULL,0,encKey,keybuff+20);
 		
-		//memcpy(encKey,keybuff,256);
 		encKeyLen=256;
 		pPublicKey->encryptPKCS1(keybuff,36,encKey,&encKeyLen);
 
 //Calculate the symmetric key
-//		SHA512
+		UINT8 md[SHA512_DIGEST_LENGTH];
+		SHA512(keybuff+16,4,md);
+		for(UINT32 i=0;i<16;i++)
+			{
+				keybuff[i]^=md[i];
+			}
+		gcm_destroy_4k(m_pGCMCtx);
+		gcm_init_4k(m_pGCMCtx,keybuff,128);
 
 		memset(keybuff,0,256);
 		
@@ -107,6 +114,13 @@ SINT32 CADataRetentionLogFile::writeHeader(CAASymCipher* pPublicKey)
 			return E_UNKNOWN;
 
 		//Calculate Auth tag and writ it..
+		UINT8 tmpBuff[2048];
+		nonce[11]=0xFD;
+		memcpy(tmpBuff,&oHeader,sizeof(oHeader));
+		memcpy(tmpBuff+sizeof(oHeader),encKey,encKeyLen);
+		::gcm_encrypt_4k(m_pGCMCtx, nonce, 12, tmpBuff,sizeof(oHeader)+encKeyLen,
+												NULL,0,tmpBuff+1024,keybuff);
+
 		if(write(m_hLogFile,keybuff,16)!=16)
 			return E_UNKNOWN;
 
