@@ -36,9 +36,6 @@ SINT32 CADataRetentionLogFile::openLog(UINT8* strLogDir,UINT32 date,CAASymCipher
 		m_Month=theTime->tm_mon+1;
 		m_Year=theTime->tm_year+1900;
 		
-		theTime->tm_hour=0;
-		theTime->tm_min=0;
-		theTime->tm_sec=0;
 		m_nMaxLogTime=date-theTime->tm_min*60-theTime->tm_hour*3600-theTime->tm_sec+24*3600-1;
 	
 //		m_nMaxLogTime=date+60;
