@@ -128,7 +128,7 @@ RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = popt xml trio tre TypeA test
+DIST_SUBDIRS = popt xml trio tre TypeA gcm test
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -327,7 +327,7 @@ mix_LDADD = $(top_srcdir)/libproxytest.a \
 
 EXTRA_DIST = README proxytest.doxy proxytest.dsp proxytest.dsw
 @DOTESTS_TRUE@MAYBE_tests = test
-SUBDIRS = popt xml trio tre TypeA $(MAYBE_tests)
+SUBDIRS = popt xml trio tre TypeA gcm $(MAYBE_tests)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
