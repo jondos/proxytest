@@ -12221,8 +12221,9 @@ fi
 $as_echo "$ac_cv_c_bigendian" >&6; }
  case $ac_cv_c_bigendian in #(
    yes)
-     cat >>confdefs.h <<\_ACEOF
-#define WORDS_BIGENDIAN 1
+
+cat >>confdefs.h <<\_ACEOF
+#define BYTE_ORDER_BIG_ENDIAN /**/
 _ACEOF
 ;; #(
    no)
