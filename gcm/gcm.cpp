@@ -53,7 +53,7 @@ static void build_hash_table_64k(gcm_ctx_64k *c, UINT32 hkey[4]) {
   }
 }
 
-#if BYTE_ORDER == BIG_ENDIAN
+#ifdef  BYTE_ORDER_BIG_ENDIAN
 #define GMULWI64K(e,t,i,s) \
   e = (UINT32 *)t[i][s>>24]; t0 = e[0]; t1 = e[1]; t2 = e[2]; t3 = e[3];\
   e = (UINT32 *)t[i+1][(s>>16)&0xff]; t0 ^= e[0]; t1 ^= e[1]; t2 ^= e[2]; t3 ^= e[3];\

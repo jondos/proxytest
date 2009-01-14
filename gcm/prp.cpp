@@ -351,7 +351,7 @@ static const UINT32 rcon[] = {
 #define GETUINT32(p) SWAP(*((UINT32 *)(p)))
 #define PUTUINT32(ct, st) { *((UINT32 *)(ct)) = SWAP((st)); }
 #else
-#if  BYTE_ORDER == LITTLE_ENDIAN
+#ifdef  BYTE_ORDER_LITTLE_ENDIAN
 #define GETUINT32(pt) (((UINT32)(pt)[0] << 24) ^ ((UINT32)(pt)[1] << 16) ^ ((UINT32)(pt)[2] <<  8) ^ ((UINT32)(pt)[3]))
 #define PUTUINT32(ct, st) { (ct)[0] = (UINT8)((st) >> 24); (ct)[1] = (UINT8)((st) >> 16); (ct)[2] = (UINT8)((st) >>  8); (ct)[3] = (UINT8)(st); }
 #else

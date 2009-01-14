@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.08.44"
+#define MIX_VERSION "00.08.45"
 
 #include "doxygen.h"
 
@@ -275,6 +275,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define HAVE_PTHREAD_MUTEX_INIT
 	#define HAVE_PTHREAD_COND_INIT
 	#define HAVE_SEM_INIT
+	#define BYTE_ORDER_LITTLE_ENDIAN
 #else
 	//__linux is not defined on power pc so we define our own __linux if __linux__ is defined
 	#if defined(__linux__) && !defined(__linux)
@@ -332,6 +333,15 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
     	#include <sys/filio.h>
     	#define MSG_NOSIGNAL 0
     #endif
+		#ifndef BYTE_ORDER
+			#error "You MUST define either BYTE_ORDER_BIG_ENDIAN or BYTE_ORDER_LITTLE_ENDIAN"
+		#else
+			#if BYTE_ORDER == BIG_ENDIAN
+				#define BYTE_ORDER_BIG_ENDIAN
+			#else
+				#define BYTE_ORDER_LITTLE_ENDIAN
+			#endif
+		#endif // BYTE_ORDER
 	#endif //Have config.h
 
 	#ifdef HAVE_FILIO
