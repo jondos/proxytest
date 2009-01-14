@@ -12229,7 +12229,7 @@ _ACEOF
    no)
 
 cat >>confdefs.h <<\_ACEOF
-#define BYTE_ORDER_BIG_ENDIAN /**/
+#define BYTE_ORDER_LITTLE_ENDIAN /**/
 _ACEOF
  ;; #(
    universal)
