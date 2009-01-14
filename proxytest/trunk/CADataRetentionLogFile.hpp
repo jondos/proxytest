@@ -36,13 +36,14 @@ class CADataRetentionLogFile
 				{
 					return m_nMaxLogTime;
 				};
-
+			
+			static SINT32 doCheckAndPerformanceTest();
 		private:
 			SINT32 writeHeader(CAASymCipher* pPublicKey);
 			SINT32 flushLogEntries();
 			SINT32 writeFooter();
 
-			gcm_ctx_4k* m_pGCMCtx;
+			gcm_ctx_64k* m_pGCMCtx;
 
 			int    m_hLogFile;
 			UINT8  m_Day;
