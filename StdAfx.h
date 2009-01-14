@@ -344,6 +344,19 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#endif // BYTE_ORDER
 	#endif //Have config.h
 
+	//Byte order defines
+	#if !defined(BYTE_ORDER_LITTLE_ENDIAN) && ! defined(BYTE_ORDER_BIG_ENDIAN)
+		#ifndef BYTE_ORDER
+			#error "You MUST define either BYTE_ORDER_BIG_ENDIAN or BYTE_ORDER_LITTLE_ENDIAN"
+		#else
+			#if BYTE_ORDER == BIG_ENDIAN
+				#define BYTE_ORDER_BIG_ENDIAN
+			#else
+				#define BYTE_ORDER_LITTLE_ENDIAN
+			#endif
+		#endif // BYTE_ORDER
+	#endif //not byte order given
+
 	#ifdef HAVE_FILIO
 		#include <sys/filio.h>
 	#endif
