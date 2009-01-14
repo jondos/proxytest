@@ -321,7 +321,8 @@ AC_CHECK_SIZEOF(signed long)
 AC_CHECK_SIZEOF(unsigned long long)
 AC_CHECK_SIZEOF(__uint64_t)
 
-
+dnl Check Endian
+AC_C_BIGENDIAN ( [AC_DEFINE(BYTE_ORDER_BIG_ENDIAN,,[Define if you run the code on a big endian machine])], [AC_DEFINE(BYTE_ORDER_LITTLE_ENDIAN,,[Define if you run the code on a little endian machine]),,)
 
 dnl Checks for libraries.
 
