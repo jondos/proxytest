@@ -483,7 +483,7 @@ SINT32 CALastMixA::loop()
 										if(true
 										#endif
 												#ifdef DELAY_CHANNELS
-													&&(bucektSize=m_pChannelList->getDelayBuckets(pChannelListEntry->delayBucketID))>0 )
+													&&(bucketSize=m_pChannelList->getDelayBuckets(pChannelListEntry->delayBucketID))>0 )
 												#endif
 												#ifdef DELAY_CHANNELS_LATENCY
 													&&(isGreater64(current_time_millis,pChannelListEntry->timeLatency))

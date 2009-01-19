@@ -66,7 +66,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 //#define PRINT_THREAD_STACK_TRACE //Usefull for debugging output of stack trace if mix dies...
 
-#define DATA_RETENTION_LOG //define if you need to store logs according to German data retention
+//#define DATA_RETENTION_LOG //define if you need to store logs according to German data retention
 
 #if !defined(PRINT_THREAD_STACK_TRACE) && defined (DEBUG)&& ! defined(ONLY_LOCAL_PROXY)
 	#define PRINT_THREAD_STACK_TRACE
