@@ -653,7 +653,7 @@ NEXT_USER:
 												pEntry->bIsSuspended=true;
 												pEntry->pHead->cSuspend++;
 											}
-#endif
+#endif //NO_PARKING
 										incMixedPackets();
 									}
 								else
