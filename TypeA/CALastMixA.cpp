@@ -554,7 +554,7 @@ SINT32 CALastMixA::loop()
 														if(pChannelListEntry->sendmeCounter==FLOW_CONTROL_SENDME_SOFT_LIMIT)
 															{
 																pMixPacket->payload.len=htons((UINT16)ret|NEW_FLOW_CONTROL_FLAG);
-																CAMsg::printMsg(LOG_DEBUG,"Send sendme request\n");
+																//CAMsg::printMsg(LOG_DEBUG,"Send sendme request\n");
 															}
 														else
 															pMixPacket->payload.len=htons((UINT16)ret);															
