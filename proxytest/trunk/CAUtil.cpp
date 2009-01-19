@@ -951,12 +951,14 @@ SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen,const DOMNode* root,CAASy
 	for(SINT32 i=127;i>=0;i--)
 		{
 			if(buff[i]!=0)
-				if(i>32)
-					*keylen=64;
-				else if(i>16)
-					*keylen=32;
-				else 
-					*keylen=16;
+				{
+					if(i>32)
+						*keylen=64;
+					else if(i>16)
+						*keylen=32;
+					else 
+						*keylen=16;
+				}	
 		}
 	memcpy(key,buff+128-(*keylen),(*keylen));
 	return E_SUCCESS;

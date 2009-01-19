@@ -508,7 +508,7 @@ SINT32 CALastMixA::loop()
 													getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_start);
 													set64(pQueueEntry->timestamp_proccessing_start_OP,pQueueEntry->timestamp_proccessing_start);
 												#endif
-												bAktive=true;
+												bAktiv=true;
 												if(ret==SOCKET_ERROR||ret==0)
 													{
 														psocketgroupCacheRead->remove(*(pChannelListEntry->pSocket));
