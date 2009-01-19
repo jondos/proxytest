@@ -298,7 +298,7 @@ SINT32 CALastMixChannelList::test()
 	{
 		bool ret = false;
 		m_pMutexDelayChannel->lock();
-		/if(delayBucketID < MAX_POLLFD)
+		//if(delayBucketID < MAX_POLLFD)
 		//{
 			//if(m_pDelayBuckets[delayBucketID] != NULL)
 			//{
