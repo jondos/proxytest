@@ -272,16 +272,16 @@ SINT32 CALastMixChannelList::test()
 	void CALastMixChannelList::reduceDelayBuckets(UINT32 delayBucketID, UINT32 amount)
 	{
 		m_pMutexDelayChannel->lock();
-		if(delayBucketID < MAX_POLLFD)
-		{
-			if(m_pDelayBuckets[delayBucketID] != NULL)
-			{
+		//if(delayBucketID < MAX_POLLFD)
+		//{
+			//if(m_pDelayBuckets[delayBucketID] != NULL)
+			//{
 				*(m_pDelayBuckets[delayBucketID]) -= ( (*(m_pDelayBuckets[delayBucketID])) > amount ) 
 															? amount : (*(m_pDelayBuckets[delayBucketID]));
-			}
+			//}
 			/*CAMsg::printMsg(LOG_DEBUG,"DelayBuckets decrementing ID %u downto %u\n", 
 								delayBucketID, (*(m_pDelayBuckets[delayBucketID])) );*/
-		}
+		//}
 		m_pMutexDelayChannel->unlock();
 	}
 	
@@ -298,13 +298,13 @@ SINT32 CALastMixChannelList::test()
 	{
 		bool ret = false;
 		m_pMutexDelayChannel->lock();
-		if(delayBucketID < MAX_POLLFD)
-		{
-			if(m_pDelayBuckets[delayBucketID] != NULL)
-			{
+		/if(delayBucketID < MAX_POLLFD)
+		//{
+			//if(m_pDelayBuckets[delayBucketID] != NULL)
+			//{
 				ret = ( (*(m_pDelayBuckets[delayBucketID])) > 0 );
-			}
-		}
+			//}
+		//}
 		m_pMutexDelayChannel->unlock();
 		return ret;
 	}

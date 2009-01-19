@@ -463,7 +463,6 @@ SINT32 CALastMixA::loop()
 #endif
 				if(countRead>0&&m_pQueueSendToMix->getSize()<MAX_MIXIN_SEND_QUEUE_SIZE)
 					{
-						bAktiv=true;
 #ifdef HAVE_EPOLL
 						pChannelListEntry=(lmChannelListEntry*)psocketgroupCacheRead->getFirstSignaledSocketData();
 						while(pChannelListEntry!=NULL)
@@ -477,13 +476,14 @@ SINT32 CALastMixA::loop()
 										countRead--;
 #endif
 #if defined(DELAY_CHANNELS)||defined(DELAY_CHANNELS_LATENCY)||defined(NEW_FLOW_CONTROL)
+	UINT32 bucketSize;
 	#define NEED_IF_12
 #endif
 										#ifdef NEED_IF_12
 										if(true
 										#endif
 												#ifdef DELAY_CHANNELS
-													&&(m_pChannelList->hasDelayBuckets(pChannelListEntry->delayBucketID) )
+													&&(bucektSize=m_pChannelList->getDelayBuckets(pChannelListEntry->delayBucketID))>0 )
 												#endif
 												#ifdef DELAY_CHANNELS_LATENCY
 													&&(isGreater64(current_time_millis,pChannelListEntry->timeLatency))
@@ -500,7 +500,7 @@ SINT32 CALastMixA::loop()
 												#else
 													UINT32 readLen=
 																min(
-																	m_pChannelList->getDelayBuckets(pChannelListEntry->delayBucketID),
+																	/*m_pChannelList->getDelayBuckets(pChannelListEntry->delayBucketID)*/bucketSize,
 																	PAYLOAD_SIZE);
 													ret=pChannelListEntry->pSocket->receive(pMixPacket->payload.data,readLen);
 												#endif
@@ -508,6 +508,7 @@ SINT32 CALastMixA::loop()
 													getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_start);
 													set64(pQueueEntry->timestamp_proccessing_start_OP,pQueueEntry->timestamp_proccessing_start);
 												#endif
+												bAktive=true;
 												if(ret==SOCKET_ERROR||ret==0)
 													{
 														psocketgroupCacheRead->remove(*(pChannelListEntry->pSocket));
