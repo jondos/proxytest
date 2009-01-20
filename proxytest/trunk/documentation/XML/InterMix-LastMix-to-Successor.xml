@@ -3,7 +3,11 @@
 	<!-- <Mixes> contains an ordered list of the Mixes of the cascade --> 
 	<!-- count gives the number of <Mix> elements -->
   <Mix id="..."> <!-- describes a single Mix -->
-    <MixProtocolVersion>0.3</MixProtocolVersion>
+    <MixProtocolVersion>
+      0.3|0.5
+      <!-- Protocal Version / features of this Mix-->
+     <!-- 0.3 is the normal "old" protocal; 0.4 wsa used only for testing; 0.5 indicates new flow control-->
+    </MixProtocolVersion> 
     <RSAKeyValue> <!-- The public encryption key used by that Mix -->
       <Modulus></Modulus>
       <Exponent></Exponent>
@@ -24,5 +28,14 @@
         ...
       </ReceiveInterval>
     </KeepAlive>
+    <FlowControl>
+      <!-- Information related to new flow control-->
+      <UpstreamSendMe>
+        <!-- Number of packets send in upstram direction which could be sent without wating of a SENDME-message from last mix-->
+      </UpstreamSendMe>
+      <DownstreamSendMe>
+        <!-- Number of packets the last Mix will sent, before  he wait for a SENDME-message from JAP-->
+      </DownstreamSendMe>
+    </FlowControl>
   </Mix>
 </Mixes>

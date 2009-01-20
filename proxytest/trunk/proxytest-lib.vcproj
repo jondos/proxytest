@@ -6329,6 +6329,42 @@
 				</File>
 			</Filter>
 		</Filter>
+		<Filter
+			Name="XML-Structures"
+			>
+			<File
+				RelativePath=".\documentation\XML\FirstMixToInfoService.xml"
+				>
+			</File>
+			<File
+				RelativePath=".\documentation\XML\FirstMixToJAP.xml"
+				>
+			</File>
+			<File
+				RelativePath=".\documentation\XML\InterMix-KeyExchange-Answer.xml"
+				>
+			</File>
+			<File
+				RelativePath=".\documentation\XML\InterMix-LastMix-to-Successor.xml"
+				>
+			</File>
+			<File
+				RelativePath=".\documentation\XML\MixCascadeStatus.xml"
+				>
+			</File>
+			<File
+				RelativePath=".\documentation\XML\MixHELO.xml"
+				>
+			</File>
+			<File
+				RelativePath=".\documentation\XML\xmldoc.template"
+				>
+			</File>
+			<File
+				RelativePath=".\documentation\XML\XMLSignature.xml"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>
