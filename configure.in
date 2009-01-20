@@ -645,6 +645,15 @@ AC_ARG_ENABLE(dataretentionlog,
 	]
 )
 
+AC_ARG_ENABLE(new-flow-control,
+	AS_HELP_STRING([--enable-new-flow-control],[Enable new flow control protocol]),
+	[
+	    if test "x$enableval" != "xno" ; then
+		CFLAGS="$CFLAGS -DNEW_FLOW_CONTROL"
+		CXXFLAGS="$CXXFLAGS -DNEW_FLOW_CONTROL"
+	    fi
+	]
+)
 
 CRIME=""
 AC_ARG_ENABLE(crime-detection,
