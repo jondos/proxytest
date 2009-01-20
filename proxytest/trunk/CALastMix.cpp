@@ -233,8 +233,8 @@ SINT32 CALastMix::processKeyExchange()
 				DOMElement* elemUpstreamSendMe=createDOMElement(doc,"UpstreamSendMe");
 				DOMElement* elemDownstreamSendMe=createDOMElement(doc,"DownstreamSendMe");
 				elemMix->appendChild(elemFlowControl);
-				elmFlowControl->appendChild(elemUpstreamSendMe);
-				elmFlowControl->appendChild(elemDownstreamSendMe);
+				elemFlowControl->appendChild(elemUpstreamSendMe);
+				elemFlowControl->appendChild(elemDownstreamSendMe);
 				setDOMElementValue(elemUpstreamSendMe,FLOW_CONTROL_SENDME_SOFT_LIMIT);
 				setDOMElementValue(elemDownstreamSendMe,FLOW_CONTROL_SENDME_SOFT_LIMIT);
       #else    
