@@ -227,7 +227,7 @@ SINT32 CALastMix::processKeyExchange()
       elemMixProtocolVersion.appendChild(elemChainTimeout);
     #else
       #ifdef NEW_FLOW_CONTROL
-		setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.5");
+		setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.6");
       #else    
 		setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.3");
       #endif
