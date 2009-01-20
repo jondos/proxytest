@@ -208,8 +208,9 @@ SINT32 CALastMix::processKeyExchange()
 
 		//Inserting MixProtocol Version 
 		// Version 0.3  - "normal", initial mix protocol
-		// Version 0.4  - with new flow control
+		// Version 0.4  - with new flow control [was only used for tests]
     // Version 0.5  - end-to-end 1:n channels (only between client and last mix)
+		// Version 0.6  - with new flow control [productive]
 		DOMElement* elemMixProtocolVersion=createDOMElement(doc,"MixProtocolVersion");
 		elemMix->appendChild(elemMixProtocolVersion);
     #ifdef NEW_MIX_TYPE // TypeB mixes
@@ -227,9 +228,17 @@ SINT32 CALastMix::processKeyExchange()
       elemMixProtocolVersion.appendChild(elemChainTimeout);
     #else
       #ifdef NEW_FLOW_CONTROL
-		setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.6");
+				setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.6");
+				DOMElement* elemFlowControl=createDOMElement(doc,"FlowControl");
+				DOMElement* elemUpstreamSendMe=createDOMElement(doc,"UpstreamSendMe");
+				DOMElement* elemDownstreamSendMe=createDOMElement(doc,"DownstreamSendMe");
+				elemMix->appendChild(elemFlowControl);
+				elmFlowControl->appendChild(elemUpstreamSendMe);
+				elmFlowControl->appendChild(elemDownstreamSendMe);
+				setDOMElementValue(elemUpstreamSendMe,FLOW_CONTROL_SENDME_SOFT_LIMIT);
+				setDOMElementValue(elemDownstreamSendMe,FLOW_CONTROL_SENDME_SOFT_LIMIT);
       #else    
-		setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.3");
+				setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.3");
       #endif
     #endif
 		//Inserting RSA-Key
