@@ -550,17 +550,17 @@ SINT32 CALastMixA::loop()
 														pMixPacket->channel=pChannelListEntry->channelIn;
 														pMixPacket->flags=CHANNEL_DATA;
 														pMixPacket->payload.type=0;
-														#ifdef NEW_FLOW_CONTROL
-														if(pChannelListEntry->sendmeCounter==FLOW_CONTROL_SENDME_SOFT_LIMIT)
-															{
-																pMixPacket->payload.len=htons((UINT16)ret|NEW_FLOW_CONTROL_FLAG);
+														//#ifdef NEW_FLOW_CONTROL
+														//if(pChannelListEntry->sendmeCounter==FLOW_CONTROL_SENDME_SOFT_LIMIT)
+														//	{
+														//		pMixPacket->payload.len=htons((UINT16)ret|NEW_FLOW_CONTROL_FLAG);
 																//CAMsg::printMsg(LOG_DEBUG,"Send sendme request\n");
-															}
-														else
-															pMixPacket->payload.len=htons((UINT16)ret);															
-														#else
-															pMixPacket->payload.len=htons((UINT16)ret);
-														#endif
+														//	}
+														//else
+														//	pMixPacket->payload.len=htons((UINT16)ret);															
+														//#else
+														pMixPacket->payload.len=htons((UINT16)ret);
+														//#endif
 														pChannelListEntry->pCipher->crypt2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 														#ifdef LOG_PACKET_TIMES
 															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
