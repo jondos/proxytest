@@ -4,9 +4,9 @@
 	<!-- count gives the number of <Mix> elements -->
   <Mix id="..."> <!-- describes a single Mix -->
     <MixProtocolVersion>
-      0.3|0.5
+      0.3|0.5|0.6
       <!-- Protocal Version / features of this Mix-->
-     <!-- 0.3 is the normal "old" protocal; 0.4 wsa used only for testing; 0.5 indicates new flow control-->
+     <!-- 0.3 is the normal "old" protocal; 0.4 was used only for testing; 0.5  simulated 1:n channels;0.6 indicates new flow control-->
     </MixProtocolVersion> 
     <RSAKeyValue> <!-- The public encryption key used by that Mix -->
       <Modulus></Modulus>
