@@ -1,28 +1,28 @@
 /*
-Copyright (c) 2000, The JAP-Team 
+Copyright (c) 2000, The JAP-Team
 All rights reserved.
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-	- Redistributions of source code must retain the above copyright notice, 
+	- Redistributions of source code must retain the above copyright notice,
 	  this list of conditions and the following disclaimer.
 
-	- Redistributions in binary form must reproduce the above copyright notice, 
-	  this list of conditions and the following disclaimer in the documentation and/or 
+	- Redistributions in binary form must reproduce the above copyright notice,
+	  this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
-	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors 
-	  may be used to endorse or promote products derived from this software without specific 
-		prior written permission. 
+	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
+	  may be used to endorse or promote products derived from this software without specific
+		prior written permission.
 
-	
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS 
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
 AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
 BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
-OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #ifndef __TYEDEFS__
@@ -30,7 +30,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 enum NetworkType {UNKNOWN_NETWORKTYPE,RAW_TCP,RAW_UNIX,SSL_TCP,SSL_UNIX, HTTP_TCP};
 
 typedef UINT32 HCHANNEL;
-#define MIX_PAYLOAD_HTTP  0 
+#define MIX_PAYLOAD_HTTP  0
 #define MIX_PAYLOAD_SOCKS 1
 
 
@@ -57,14 +57,14 @@ typedef UINT32 HCHANNEL;
 #ifdef NEW_FLOW_CONTROL
 	#define NEW_FLOW_CONTROL_FLAG 0x8000
 #endif
-	
+
 #define CONNECTION_ERROR_FLAG 0x01
 
 #define DATA_SIZE 			992
 #define PAYLOAD_SIZE 		989
 
 #if (defined(WIN32) ||defined(__sgi))&&!defined(__GNUC__)
-	#define DO_PACKED 
+	#define DO_PACKED
 #else
 	#define DO_PACKED __attribute__ ((__packed__))
 #endif
@@ -107,7 +107,7 @@ typedef UINT32 HCHANNEL;
 						struct t_MixPacketPayload payload;
 					};
 			} __attribute__ ((__packed__)); // MUXPACKET __attribute__ ((__packed__));
-#endif //WIN32 
+#endif //WIN32
 
 typedef t_MixPacket MIXPACKET;
 
@@ -122,7 +122,7 @@ struct __t__data_retention_log_entry
 		UINT32 t_out;
 		union t_union_entity
 		{
-			struct t_first_mix_data_retention_log_entry 
+			struct t_first_mix_data_retention_log_entry
 				{
 					HCHANNEL channelid;
 					UINT8 ip_in[4];
@@ -161,7 +161,7 @@ struct t_queue_entry
 			UINT64 timestamp_proccessing_start_OP;
 			UINT64 timestamp_proccessing_end;
 		#endif
-		#if defined  (LOG_PACKET_TIMES) 
+		#if defined  (LOG_PACKET_TIMES)
 			//without send/receive or queueing times
 			UINT64 timestamp_proccessing_end_OP;
 			#ifdef USE_POOL
@@ -174,7 +174,7 @@ typedef struct t_queue_entry tQueueEntry;
 
 //for that we store in our pool
 //normaly this is just the packet
-typedef tQueueEntry tPoolEntry; 	
+typedef tQueueEntry tPoolEntry;
 
 ///the Replaytimestamp type
 /*
@@ -190,19 +190,25 @@ struct t_mix_parameters
 	{
 		//stores the mix id of the mix
 		UINT8* m_strMixID;
-		/// stores the local time in seconds since epoch for interval '0' for this mix
+		// stores the local time in seconds since epoch for interval '0' for this mix
 		UINT32 m_u32ReplayOffset;
 		UINT16 m_u32ReplayBase;
 	};
 typedef struct t_mix_parameters tMixParameters;
 
-
+typedef struct
+{
+	UINT8 *tnc_id; /* id of the Terms & Conditions is the operator ski */
+	/*UINT8 *tnc_date;  the date when the terms andCondtions became valid */
+	DOMNode *tnc_customized; /* the operator specific Terms & Conditions definitions */
+	DOMNode *tnc_template; /* the template needed to render the whole Terms and Conditions */
+} termsAndConditions_t;
 
 /**
  * These flags are used to represent the state
  * of the payment
  */
- 
+
 /** new user, not yet authenticated */
 #define AUTH_NEW 0x0
 
@@ -247,60 +253,62 @@ typedef struct t_mix_parameters tMixParameters;
 #define AUTH_INVALID_ACCOUNT 0x8000
 
 // AI is waiting for a necessary message from JAP (e.g. response to challenge)
-#define AUTH_TIMEOUT_STARTED 0x10000 
+#define AUTH_TIMEOUT_STARTED 0x10000
 
-#define AUTH_MULTIPLE_LOGIN 0x20000 
+#define AUTH_MULTIPLE_LOGIN 0x20000
 
-#define AUTH_UNKNOWN 0x40000 
+#define AUTH_UNKNOWN 0x40000
 
-/* 
- * The user corresponding to this entry has closed the connection. 
+/*
+ * The user corresponding to this entry has closed the connection.
  * Delete the entry as soon as possible.
  */
-#define AUTH_DELETE_ENTRY 0x80000 
+#define AUTH_DELETE_ENTRY 0x80000
 
-#define AUTH_LOGIN_NOT_FINISHED 0x100000 
-#define AUTH_LOGIN_FAILED 0x200000 
-#define AUTH_LOGIN_SKIP_SETTLEMENT 0x400000 
+#define AUTH_LOGIN_NOT_FINISHED 0x100000
+#define AUTH_LOGIN_FAILED 0x200000
+#define AUTH_LOGIN_SKIP_SETTLEMENT 0x400000
 
 class CASignature;
 class CAAccountingControlChannel;
 class CAMutex;
+struct t_fmhashtableentry;
 /**
  * Structure that holds all per-user payment information
  * Included in CAFirstMixChannelList (struct fmHashTableEntry)
  */
 struct t_accountinginfo
 {
-	CAMutex* mutex;	
-	
+	CAMutex* mutex;
+
 	/** we store the challenge here to verify the response later */
 	UINT8 * pChallenge;
-	
+
 	/** the signature verifying instance for this user */
 	CASignature * pPublicKey;
-	
+
 	/** The number of packets transfered. */
 	UINT64 sessionPackets;
-	
+
 	/** the number of bytes that was transferred (as counted by the AI)  Elmar: since last CC, or in total? */
 	UINT64 transferredBytes;
-	
+
 	/** the number of bytes that was confirmed by the account user */
 	UINT64 confirmedBytes;
-	
+
 	/** The bytes the user could confirm in the last CC sent to him.  */
 	UINT64 bytesToConfirm;
-	
+
 	/** the user's account number */
 	UINT64 accountNumber;
-	
+
 	/** The same value as in fmHashTableEntry. */
 	UINT64 userID;
 
+	struct t_fmhashtableentry *ownerRef;
 	/** a pointer to the user-specific control channel object */
 	CAAccountingControlChannel* pControlChannel;
-	
+
 	/** Flags, see above AUTH_* */
 	UINT32 authFlags;
 
@@ -309,15 +317,18 @@ struct t_accountinginfo
 
 	/** timestamp when last PayRequest was sent */
 	SINT32 challengeSentSeconds;
-	
+
 	/** ID of payment instance belongig to this account */
 	UINT8* pstrBIID;
-	
+
 	//time at which the timeout for waiting for the account certificate has been started
 	SINT32 authTimeoutStartSeconds;
-	
+
 	// the number of references to this entry in the ai queue
 	UINT32 nrInQueue;
+
+	// new JonDo clients will send their version number as during challenge-response.
+	UINT8* clientVersion;
 };
 typedef struct t_accountinginfo tAiAccountingInfo;
 

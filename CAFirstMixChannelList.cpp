@@ -1,28 +1,28 @@
 /*
-Copyright (c) 2000, The JAP-Team 
+Copyright (c) 2000, The JAP-Team
 All rights reserved.
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-	- Redistributions of source code must retain the above copyright notice, 
+	- Redistributions of source code must retain the above copyright notice,
 	  this list of conditions and the following disclaimer.
 
-	- Redistributions in binary form must reproduce the above copyright notice, 
-	  this list of conditions and the following disclaimer in the documentation and/or 
+	- Redistributions in binary form must reproduce the above copyright notice,
+	  this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
-	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors 
-	  may be used to endorse or promote products derived from this software without specific 
-		prior written permission. 
+	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
+	  may be used to endorse or promote products derived from this software without specific
+		prior written permission.
 
-	
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS 
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
 AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
 BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
-OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
@@ -94,7 +94,7 @@ CAFirstMixChannelList::~CAFirstMixChannelList()
 		delete []m_HashTable;
 		m_HashTable = NULL;
 		delete []m_HashTableOutChannels;
-		m_HashTableOutChannels = NULL;		
+		m_HashTableOutChannels = NULL;
 	}
 
 /** Adds a new TCP/IP connection (a new user) to the channel list.
@@ -112,7 +112,7 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 	{
 		INIT_STACK;
 		BEGIN_STACK("CAFirstMixChannelList::add");
-		
+
 		if(pMuxSocket==NULL)
 		{
 			FINISH_STACK("CAFirstMixChannelList::add (null socket)");
@@ -132,9 +132,9 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 			m_Mutex.unlock();
 			return NULL;
 		}
-		
+
 		//SAVE_STACK("CAFirstMixChannelList::add", "initialising table entry");
-		
+
 		pHashTableEntry->pMuxSocket=pMuxSocket;
 		pHashTableEntry->pQueueSend=pQueueSend;
 		pHashTableEntry->pControlMessageQueue = new CAQueue();
@@ -150,12 +150,13 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 		pHashTableEntry->strDialog=new UINT8[strlen((char*)strDialog)+1];
 		strcpy((char*)pHashTableEntry->strDialog,(char*)strDialog);
 #endif
+		// TODO Collisions? Is the id still used somewhere?
 		getRandom(&(pHashTableEntry->id));
 
 #ifdef PAYMENT
 		pHashTableEntry->pAccountingInfo=NULL;
 #endif
-		
+
 		SAVE_STACK("CAFirstMixChannelList::add", "copying peer IP");
 		memcpy(pHashTableEntry->peerIP,peerIP,4);
 #ifdef DATA_RETENTION_LOG
@@ -180,16 +181,16 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 		//now insert the new connection in the list of all open connections
 		if(m_listHashTableHead==NULL) //if first one
 		{
-			pHashTableEntry->list_HashEntries.next=NULL;			
+			pHashTableEntry->list_HashEntries.next=NULL;
 		}
 		else
 		{//add to the head of the double linked list
-			pHashTableEntry->list_HashEntries.next=m_listHashTableHead;			
-			m_listHashTableHead->list_HashEntries.prev=pHashTableEntry;			
+			pHashTableEntry->list_HashEntries.next=m_listHashTableHead;
+			m_listHashTableHead->list_HashEntries.prev=pHashTableEntry;
 		}
 		pHashTableEntry->list_HashEntries.prev=NULL;
-		m_listHashTableHead=pHashTableEntry;	
-		
+		m_listHashTableHead=pHashTableEntry;
+
 		SAVE_STACK("CAFirstMixChannelList::add", "inserting in timout list");
 		// insert in timeout list; entries are added to the foot of the list
 #ifdef PAYMENT
@@ -198,18 +199,18 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 		 * confusion, when timeout occurs during AI login
 		 */
 		//pushTimeoutEntry_internal(pHashTableEntry);
-#endif		
+#endif
 		m_Mutex.unlock();
-		
+
 		FINISH_STACK("CAFirstMixChannelList::add");
-		
+
 		return pHashTableEntry;
 	}
 
 ///The maximum number of channels allowed per connection
 #define MAX_NUMBER_OF_CHANNELS CHANNELS_PER_CLIENT
 
-/** Adds a new channel for a given connection to the channel list. 
+/** Adds a new channel for a given connection to the channel list.
 	* Also a new out-channel id is generated and returned.
 	* @param pMuxSocket the connection from the user
 	* @param channelIn the channel, which should be added
@@ -242,8 +243,8 @@ SINT32 CAFirstMixChannelList::addChannel(CAMuxSocket* pMuxSocket,HCHANNEL channe
 #endif
 		memset(pNewEntry,0,sizeof(fmChannelListEntry));
 		pNewEntry->pCipher=pCipher;
-		pNewEntry->channelIn=channelIn;	
-		
+		pNewEntry->channelIn=channelIn;
+
 		do
 			{
 				getRandom(channelOut); //get new Random OUT-CHANNEL-ID
@@ -259,14 +260,14 @@ SINT32 CAFirstMixChannelList::addChannel(CAMuxSocket* pMuxSocket,HCHANNEL channe
 #ifdef SSL_HACK
 		pNewEntry->downStreamBytes = 0;
 #endif
-		
-		
-		
+
+
+
 		//add to the channel list for the given connection
 		if(pEntry==NULL) //First Entry to the channel list
 		{
 			pNewEntry->list_InChannelPerSocket.next=NULL;
-			pNewEntry->list_InChannelPerSocket.prev=NULL;				
+			pNewEntry->list_InChannelPerSocket.prev=NULL;
 		}
 		else
 		{
@@ -275,7 +276,7 @@ SINT32 CAFirstMixChannelList::addChannel(CAMuxSocket* pMuxSocket,HCHANNEL channe
 			pEntry->list_InChannelPerSocket.prev=pNewEntry;
 		}
 		pHashTableEntry->pChannelList=pNewEntry;
-		
+
 		//add to the out-channel list
 		hashkey=(*channelOut)&0x0000FFFF;
 		pEntry=m_HashTableOutChannels[hashkey];
@@ -336,63 +337,133 @@ fmChannelListEntry* CAFirstMixChannelList::get(CAMuxSocket* pMuxSocket,HCHANNEL 
 				pEntry=pEntry->list_InChannelPerSocket.next;
 			}
 		m_Mutex.unlock();
-		return NULL;		
+		return NULL;
 	}
-#ifdef PAYMENT	
+#ifdef PAYMENT
 
-fmHashTableEntry* CAFirstMixChannelList::popTimeoutEntry()
+inline fmHashTableEntry* CAFirstMixChannelList::popTimeoutEntry()
 {
 	return popTimeoutEntry(false);
-}	
-	
-fmHashTableEntry* CAFirstMixChannelList::popTimeoutEntry(bool a_bForce)	
+}
+
+fmHashTableEntry* CAFirstMixChannelList::popTimeoutEntry(bool a_bForce)
 {
 	fmHashTableEntry* ret;
-	
+
 	m_Mutex.lock();
 	ret = popTimeoutEntry_internal(a_bForce);
 	m_Mutex.unlock();
-	
+
 	return ret;
 }
-	
+
+bool CAFirstMixChannelList::isTimedOut(fmHashTableEntry* pHashTableEntry)
+{
+	bool ret = false;
+
+	m_Mutex.lock();
+	ret = isTimedOut_internal(pHashTableEntry);
+	m_Mutex.unlock();
+
+	return ret;
+}
+
+bool CAFirstMixChannelList::isKickoutForced(fmHashTableEntry* pHashTableEntry)
+{
+	bool ret = false;
+	m_Mutex.lock();
+	ret = isKickoutForced_internal(pHashTableEntry);
+	m_Mutex.unlock();
+	return ret;
+}
+void CAFirstMixChannelList::setKickoutForced(fmHashTableEntry* pHashTableEntry, bool kickoutForced)
+{
+	m_Mutex.lock();
+	setKickoutForced_internal(pHashTableEntry, kickoutForced);
+	m_Mutex.unlock();
+}
+
+#ifdef PAYMENT
+/**
+ * forces a kickout for this entry if the entry is still valid and sends an errorMessage via the
+ * control channel belonging to the entry.
+ * returns true if pHashTableEntry is still valid, false otherwise
+ */
+bool CAFirstMixChannelList::forceKickout(fmHashTableEntry* pHashTableEntry, const XERCES_CPP_NAMESPACE::DOMDocument *pErrDoc)
+{
+	bool ret = false;
+	m_Mutex.lock();
+	ret = (pHashTableEntry->pMuxSocket != NULL);
+	if(ret)
+	{
+		if(pErrDoc != NULL)
+		{
+			//NOTE: accessing the control channel in this case works without further locking,
+			//because the control channel is only deleted when the Dispatcher deletes all channels.
+			//This happens when the table entry is removed by CAFirstMixChannelList::remove
+			//which locks over m_Mutex.
+			pHashTableEntry->pAccountingInfo->pControlChannel->sendXMLMessage(pErrDoc);
+		}
+		setKickoutForced_internal(pHashTableEntry, KICKOUT_FORCED);
+	}
+	m_Mutex.unlock();
+	return ret;
+}
+#endif
+
+//be careful: has no locking and parameter checks
+inline bool CAFirstMixChannelList::isTimedOut_internal(fmHashTableEntry* pHashTableEntry)
+{
+	return (pHashTableEntry->list_TimeoutHashEntries.timoutSecs <= time(NULL));
+}
+
+inline bool CAFirstMixChannelList::isKickoutForced_internal(fmHashTableEntry* pHashTableEntry)
+{
+	return !(pHashTableEntry->bRecoverTimeout);
+}
+
+void CAFirstMixChannelList::setKickoutForced_internal(fmHashTableEntry* pHashTableEntry, bool kickoutForced)
+{
+	pHashTableEntry->bRecoverTimeout = !kickoutForced;
+}
+
 fmHashTableEntry* CAFirstMixChannelList::popTimeoutEntry_internal(bool a_bForce)
 {
 	fmHashTableEntry* pHashTableEntry;
-	
+
 	if (m_listTimoutHead == NULL)
 	{
 		// there are not entries in the list
 		return NULL;
 	}
-	
+
 	pHashTableEntry = m_listTimoutHead;
-	if (a_bForce || pHashTableEntry->list_TimeoutHashEntries.timoutSecs <= time(NULL))
+	if (a_bForce || isTimedOut_internal(pHashTableEntry))
 	{
 		if (removeFromTimeoutList(pHashTableEntry) == E_SUCCESS)
-		{			
+		{
 			return pHashTableEntry;
 		}
 		else
 		{
 			CAMsg::printMsg(LOG_CRIT,
-				"CAFirstMixChannelList:popTimeoutEntry_internal: Could not remove expired entry from timeout list!\n");	
+				"CAFirstMixChannelList:popTimeoutEntry_internal: Could not remove expired entry from timeout list!\n");
 		}
 	}
-	
+
 	return NULL;
 }
-#endif			
+#endif
 
 #ifdef PAYMENT
-SINT32 CAFirstMixChannelList::pushTimeoutEntry(fmHashTableEntry* pHashTableEntry)
+SINT32 CAFirstMixChannelList::pushTimeoutEntry(fmHashTableEntry* pHashTableEntry, bool kickoutForced)
 {
 	SINT32 ret;
-	
+
 	m_Mutex.lock();
-	ret = pushTimeoutEntry_internal(pHashTableEntry);
+	ret = pushTimeoutEntry_internal(pHashTableEntry, kickoutForced);
 	m_Mutex.unlock();
-	
+
 	return ret;
 }
 
@@ -402,36 +473,46 @@ UINT32 CAFirstMixChannelList::countTimeoutEntries()
 	fmHashTableEntry* pHashTableEntry;
 	UINT32 count = 0;
 
-	for (pHashTableEntry = m_listTimoutHead; pHashTableEntry != NULL; 
+	for (pHashTableEntry = m_listTimoutHead; pHashTableEntry != NULL;
 		count++, pHashTableEntry = pHashTableEntry->list_TimeoutHashEntries.next);
 
 	return count;
 }
 #endif
 
-#ifdef PAYMENT		
-SINT32 CAFirstMixChannelList::pushTimeoutEntry_internal(fmHashTableEntry* pHashTableEntry)
-{	
+#ifdef PAYMENT
+/**
+ * renews the timestamp for the timeout list
+ * does not affect forced kickouts.
+ */
+SINT32 CAFirstMixChannelList::pushTimeoutEntry_internal(fmHashTableEntry* pHashTableEntry, bool kickoutForced)
+{
 	if (pHashTableEntry == NULL)
 	{
 		return E_UNKNOWN;
 	}
-	
+
+
+	/*if(isKickoutForced_internal(pHashTableEntry))
+	{
+		return E_SUCCESS;
+	}*/
+
 	INIT_STACK;
 	BEGIN_STACK("CAFirstMixChannelList::pushTimeoutEntry_internal");
-	
+
 	//CAMsg::printMsg(LOG_DEBUG,"Entries in timeout list before push: %d\n", countTimeoutEntries());
-	
+
 	pHashTableEntry->list_TimeoutHashEntries.timoutSecs = time(NULL) + EXPIRATION_TIME_SECS;
-	
+
 	//SAVE_STACK("CAFirstMixChannelList::pushTimeoutEntry_internal", "removing from timeout list");
-	// remove from timeout list if needed before adding it to the end	
+	// remove from timeout list if needed before adding it to the end
 	removeFromTimeoutList(pHashTableEntry);
-	
+	setKickoutForced_internal(pHashTableEntry, kickoutForced);
 	if (m_listTimoutFoot == NULL)
 	{
 		//SAVE_STACK("CAFirstMixChannelList::pushTimeoutEntry_internal", "new first entry");
-		
+
 		// this is the first entry in the list
 		pHashTableEntry->list_TimeoutHashEntries.prev = NULL;
 		m_listTimoutHead = pHashTableEntry;
@@ -445,13 +526,13 @@ SINT32 CAFirstMixChannelList::pushTimeoutEntry_internal(fmHashTableEntry* pHashT
 	}
 	pHashTableEntry->list_TimeoutHashEntries.next = NULL;
 	m_listTimoutFoot = pHashTableEntry;
-	
+
 	//CAMsg::printMsg(LOG_DEBUG,"Entries in timeout list after push: %d\n", countTimeoutEntries());
-	
+
 	FINISH_STACK("CAFirstMixChannelList::pushTimeoutEntry_internal");
-	
+	//CAMsg::printMsg(LOG_DEBUG, "CAFirstMixA: pushed entry %x!\n", pHashTableEntry);
 	return E_SUCCESS;
-	
+
 }
 #endif
 
@@ -462,33 +543,35 @@ SINT32 CAFirstMixChannelList::removeFromTimeoutList(fmHashTableEntry* pHashTable
 	{
 		return E_UNKNOWN;
 	}
-	
+
+	//CAMsg::printMsg(LOG_DEBUG, "CAFirstMixA: removing entry %x!\n", pHashTableEntry);
+
 	if (m_listTimoutHead == NULL || m_listTimoutFoot == NULL)
 	{
 		// there is no entry in the list; therefore this entry does not need to be removed
 		return E_SUCCESS;
 	}
-	
-	if (pHashTableEntry->list_TimeoutHashEntries.prev == NULL && 
+
+	if (pHashTableEntry->list_TimeoutHashEntries.prev == NULL &&
 		pHashTableEntry->list_TimeoutHashEntries.next == NULL &&
 		m_listTimoutHead != pHashTableEntry)
 	{
 		// this entry is not in the list; it does not need to be removed
 		return E_SUCCESS;
-	}		
-	
+	}
+
 	if(m_listTimoutHead == pHashTableEntry) //if entry is the head of the connection list
 	{
 		if(m_listTimoutFoot == pHashTableEntry) //if entry is also the last (so the only one in the list..)
 		{
 			//list is now empty
-			m_listTimoutHead = NULL; 
+			m_listTimoutHead = NULL;
 			m_listTimoutFoot = NULL;
 		}
 		else
 		{
 			//remove the head of the list
-			m_listTimoutHead = pHashTableEntry->list_TimeoutHashEntries.next; 
+			m_listTimoutHead = pHashTableEntry->list_TimeoutHashEntries.next;
 		}
 	}
 	else
@@ -512,22 +595,22 @@ SINT32 CAFirstMixChannelList::removeFromTimeoutList(fmHashTableEntry* pHashTable
 			}
 			if (pHashTableEntry->list_TimeoutHashEntries.next == NULL)
 			{
-				CAMsg::printMsg(LOG_CRIT, "CAFirstMixCahnelList:removeFromTimeoutList: No next element!!\n");
+				CAMsg::printMsg(LOG_CRIT, "CAFirstMixChanelList:removeFromTimeoutList: No next element!!\n");
 			}
 			else
 			{
-				pHashTableEntry->list_TimeoutHashEntries.next->list_TimeoutHashEntries.prev = pHashTableEntry->list_TimeoutHashEntries.prev;			
+				pHashTableEntry->list_TimeoutHashEntries.next->list_TimeoutHashEntries.prev = pHashTableEntry->list_TimeoutHashEntries.prev;
 			}
 		}
-	}	
+	}
 	pHashTableEntry->list_TimeoutHashEntries.prev = NULL;
 	pHashTableEntry->list_TimeoutHashEntries.next = NULL;
-			
-	return E_SUCCESS;
-}	
-#endif	
 
-/** Removes all channels, which belongs to the given connection and 
+	return E_SUCCESS;
+}
+#endif
+
+/** Removes all channels, which belongs to the given connection and
 	* the connection itself from the list.
 	* @param pMuxSocket the connection from the user
 	* @retval E_SUCCESS if successful
@@ -559,7 +642,7 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 		pHashTableEntry->pControlMessageQueue = NULL;
 		if(m_listHashTableNext==pHashTableEntry) //adjust the enumeration over all connections (@see getNext())
 			m_listHashTableNext=pHashTableEntry->list_HashEntries.next;
-		
+
 		if(pHashTableEntry->list_HashEntries.prev==NULL) //if entry is the head of the connection list
 		{
 			if(pHashTableEntry->list_HashEntries.next==NULL) //if entry is also the last (so the only one in the list..)
@@ -568,7 +651,7 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 			}
 			else
 			{//remove the head of the list
-				m_listHashTableHead=pHashTableEntry->list_HashEntries.next; 
+				m_listHashTableHead=pHashTableEntry->list_HashEntries.next;
 				m_listHashTableHead->list_HashEntries.prev=NULL;
 			}
 		}
@@ -584,12 +667,12 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 				pHashTableEntry->list_HashEntries.next->list_HashEntries.prev=pHashTableEntry->list_HashEntries.prev;
 			}
 		}
-		
-		
-#ifdef PAYMENT		
+
+
+#ifdef PAYMENT
 		removeFromTimeoutList(pHashTableEntry);
-#endif		
-		
+#endif
+
 		fmChannelListEntry* pEntry=pHashTableEntry->pChannelList;
 		fmChannelListEntry* pTmpEntry;
 		while(pEntry!=NULL)//for all channels....
@@ -608,7 +691,7 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 												m_HashTableOutChannels[hashkey]=NULL; //empty this hash bucket
 											}
 										else
-											{												
+											{
 												pTmpEntry->list_OutChannelHashTable.next->list_OutChannelHashTable.prev=NULL;
 												m_HashTableOutChannels[hashkey]=pTmpEntry->list_OutChannelHashTable.next;
 											}
@@ -631,7 +714,7 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 				}
 
 				pTmpEntry=pEntry->list_InChannelPerSocket.next;
-#ifndef DO_TRACE				
+#ifndef DO_TRACE
 				delete pEntry;
 				pEntry = NULL;
 #else
@@ -649,7 +732,7 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 		delete[] pHashTableEntry->strDialog;
 		pHashTableEntry->strDialog = NULL;
 #endif
-		memset(pHashTableEntry,0,sizeof(fmHashTableEntry)); //'delete' the connection from the connection hash table 
+		memset(pHashTableEntry,0,sizeof(fmHashTableEntry)); //'delete' the connection from the connection hash table
 		m_Mutex.unlock();
 		return E_SUCCESS;
 	}
@@ -658,8 +741,8 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 #ifdef NEW_MIX_TYPE
 /* some additional methods for TypeB first mixes */
 
-/** 
- * Removes all channels, which belongs to the given connection and 
+/**
+ * Removes all channels, which belongs to the given connection and
  * the connection itself from the list but keeps the outgoing channels.
  * @param pMuxSocket the connection from the user
  * @retval E_SUCCESS if successful
@@ -689,7 +772,7 @@ SINT32 CAFirstMixChannelList::removeClientPart(CAMuxSocket* pMuxSocket)
     pHashTableEntry->pControlChannelDispatcher = NULL;
     if(m_listHashTableNext==pHashTableEntry) //adjust the enumeration over all connections (@see getNext())
       m_listHashTableNext=pHashTableEntry->list_HashEntries.next;
-    
+
     if(pHashTableEntry->list_HashEntries.prev==NULL) //if entry is the head of the connection list
       {
         if(pHashTableEntry->list_HashEntries.next==NULL) //if entry is also the last (so the only one in the list..)
@@ -698,7 +781,7 @@ SINT32 CAFirstMixChannelList::removeClientPart(CAMuxSocket* pMuxSocket)
           }
         else
           {//remove the head of the list
-            m_listHashTableHead=pHashTableEntry->list_HashEntries.next; 
+            m_listHashTableHead=pHashTableEntry->list_HashEntries.next;
             m_listHashTableHead->list_HashEntries.prev=NULL;
           }
       }
@@ -714,10 +797,10 @@ SINT32 CAFirstMixChannelList::removeClientPart(CAMuxSocket* pMuxSocket)
             pHashTableEntry->list_HashEntries.next->list_HashEntries.prev=pHashTableEntry->list_HashEntries.prev;
           }
       }
-      
-		removeFromTimeoutList(pHashTableEntry);      
-      
-      
+
+		removeFromTimeoutList(pHashTableEntry);
+
+
     fmChannelListEntry* pEntry=pHashTableEntry->pChannelList;
     while(pEntry!=NULL)//for all channels....
       {
@@ -733,7 +816,7 @@ SINT32 CAFirstMixChannelList::removeClientPart(CAMuxSocket* pMuxSocket)
       // cleanup accounting information
       CAAccountingInstance::cleanupTableEntry(pHashTableEntry);
     #endif
-    memset(pHashTableEntry,0,sizeof(fmHashTableEntry)); //'delete' the connection from the connection hash table 
+    memset(pHashTableEntry,0,sizeof(fmHashTableEntry)); //'delete' the connection from the connection hash table
     m_Mutex.unlock();
     return E_SUCCESS;
   }
@@ -755,7 +838,7 @@ void CAFirstMixChannelList::removeVacantOutChannel(fmChannelListEntry* pEntry) {
       while (pTmpEntry != NULL) {
         if (pTmpEntry->channelOut == pEntry->channelOut) {
           //we have found the entry
-          if (pTmpEntry->list_OutChannelHashTable.prev==NULL) { //it's the head      
+          if (pTmpEntry->list_OutChannelHashTable.prev==NULL) { //it's the head
             if (pTmpEntry->list_OutChannelHashTable.next==NULL) {
               //it's also the last Element
               m_HashTableOutChannels[hashkey] = NULL; //empty this hash bucket
@@ -782,7 +865,7 @@ void CAFirstMixChannelList::removeVacantOutChannel(fmChannelListEntry* pEntry) {
         pTmpEntry=pTmpEntry->list_OutChannelHashTable.next;
       }
       /* entry is not in the table any more */
-      #ifndef DO_TRACE        
+      #ifndef DO_TRACE
         delete pEntry;
         pEntry = NULL;
       #else
@@ -805,7 +888,7 @@ void CAFirstMixChannelList::cleanVacantOutChannels() {
     while (pTmpEntry != NULL) {
       if (pTmpEntry->pHead == NULL) {
         /* we have found a vacant channel */
-        if (pTmpEntry->list_OutChannelHashTable.prev==NULL) { //it's the head      
+        if (pTmpEntry->list_OutChannelHashTable.prev==NULL) { //it's the head
           if (pTmpEntry->list_OutChannelHashTable.next==NULL) {
             //it's also the last Element
             m_HashTableOutChannels[hashkey] = NULL; //empty this hash bucket
@@ -833,7 +916,7 @@ void CAFirstMixChannelList::cleanVacantOutChannels() {
         fmChannelListEntry* pRemoveEntry = pTmpEntry;
         pTmpEntry = pTmpEntry->list_OutChannelHashTable.next;
         /* delete the entry */
-        #ifndef DO_TRACE        
+        #ifndef DO_TRACE
           delete pRemoveEntry;
           pRemoveEntry = NULL;
         #else
@@ -895,7 +978,7 @@ SINT32 CAFirstMixChannelList::removeChannel(CAMuxSocket* pMuxSocket,HCHANNEL cha
 													}
 												else
 													{
-														
+
 														pTmpEntry->list_OutChannelHashTable.next->list_OutChannelHashTable.prev=NULL;
 														m_HashTableOutChannels[hashkey]=pTmpEntry->list_OutChannelHashTable.next;
 													}
@@ -942,7 +1025,7 @@ SINT32 CAFirstMixChannelList::removeChannel(CAMuxSocket* pMuxSocket,HCHANNEL cha
 										pEntry->list_InChannelPerSocket.next->list_InChannelPerSocket.prev=pEntry->list_InChannelPerSocket.prev;
 									}
 							}
-						#ifndef DO_TRACE				
+						#ifndef DO_TRACE
 							delete pEntry;
 							pEntry = NULL;
 						#else
@@ -1044,7 +1127,7 @@ SINT32 CAFirstMixChannelList::test()
 		if ( _CrtMemDifference( &s3, &s1, &s2 ) )
       _CrtMemDumpStatistics( &s3 );
 #endif
-		
+
 		pList->remove(pMuxSocket);
 		delete pMuxSocket;
 		pMuxSocket = NULL;
@@ -1052,13 +1135,13 @@ SINT32 CAFirstMixChannelList::test()
 		pList = NULL;
 		return E_SUCCESS;
 	}
-	
+
 #ifdef DELAY_USERS
 	THREAD_RETURN fml_loopDelayBuckets(void* param)
 		{
 			INIT_STACK;
 			BEGIN_STACK("CAFirstMixChannelList::fml_loopDelayBuckets");
-			
+
 			CAFirstMixChannelList* pChannelList=(CAFirstMixChannelList*)param;
 			volatile UINT32** pDelayBuckets=pChannelList->m_pDelayBuckets;
 			while(pChannelList->m_bDelayBucketsLoopRun)
@@ -1073,15 +1156,15 @@ SINT32 CAFirstMixChannelList::test()
 								*(pDelayBuckets[i])+=u32BucketGrow;
 							}
 						}
-					pChannelList->m_pMutexDelayChannel->unlock();		
+					pChannelList->m_pMutexDelayChannel->unlock();
 					msSleep(pChannelList->m_u32DelayChannelBucketGrowIntervall);
 				}
-			
-			FINISH_STACK("CAFirstMixChannelList::fml_loopDelayBuckets");	
-				
+
+			FINISH_STACK("CAFirstMixChannelList::fml_loopDelayBuckets");
+
 			THREAD_RETURN_SUCCESS;
 		}
-	
+
 	void CAFirstMixChannelList::decDelayBuckets(UINT32 delayBucketID)
 	{
 		m_pMutexDelayChannel->lock();
@@ -1091,12 +1174,12 @@ SINT32 CAFirstMixChannelList::test()
 			{
 				*(m_pDelayBuckets[delayBucketID]) -= ( (*(m_pDelayBuckets[delayBucketID])) > 0 ) ? 1 : 0;
 			}
-			/*CAMsg::printMsg(LOG_DEBUG,"DelayBuckets decrementing ID %u downto %u\n", 
+			/*CAMsg::printMsg(LOG_DEBUG,"DelayBuckets decrementing ID %u downto %u\n",
 								delayBucketID, (*(m_pDelayBuckets[delayBucketID])) );*/
 		}
 		m_pMutexDelayChannel->unlock();
 	}
-	
+
 	bool CAFirstMixChannelList::hasDelayBuckets(UINT32 delayBucketID)
 	{
 		bool ret = false;
@@ -1111,7 +1194,7 @@ SINT32 CAFirstMixChannelList::test()
 		m_pMutexDelayChannel->unlock();
 		return ret;
 	}
-	
+
 	void CAFirstMixChannelList::setDelayParameters(UINT32 unlimitTraffic,UINT32 bucketGrow,UINT32 intervall)
 		{
 			m_pMutexDelayChannel->lock();
@@ -1123,8 +1206,8 @@ SINT32 CAFirstMixChannelList::test()
 			for(UINT32 i=0;i<MAX_POLLFD;i++)
 				if(m_pDelayBuckets[i]!=NULL)
 					*(m_pDelayBuckets[i])=m_u32DelayChannelUnlimitTraffic;
-			m_pMutexDelayChannel->unlock();		
-		}																												
-		
-#endif	
+			m_pMutexDelayChannel->unlock();
+		}
+
+#endif
 #endif //ONLY_LOCAL_PROXY

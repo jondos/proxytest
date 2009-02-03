@@ -1,28 +1,28 @@
 /*
-Copyright (c) 2000, The JAP-Team 
+Copyright (c) 2000, The JAP-Team
 All rights reserved.
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-	- Redistributions of source code must retain the above copyright notice, 
+	- Redistributions of source code must retain the above copyright notice,
 	  this list of conditions and the following disclaimer.
 
-	- Redistributions in binary form must reproduce the above copyright notice, 
-	  this list of conditions and the following disclaimer in the documentation and/or 
+	- Redistributions in binary form must reproduce the above copyright notice,
+	  this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
-	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors 
-	  may be used to endorse or promote products derived from this software without specific 
-		prior written permission. 
+	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
+	  may be used to endorse or promote products derived from this software without specific
+		prior written permission.
 
-	
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS 
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
 AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
 BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
-OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
@@ -42,7 +42,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 *	Removes leading and ending whitespaces (chars<=32) from a zero terminated string.
 *		@param s input string (null terminated)
 *		@return new size of string
-*		@retval 0 means, that either s was NULL or that the new string has a zero length 
+*		@retval 0 means, that either s was NULL or that the new string has a zero length
 *											(that means, that the old string only contains whitespaces)
 */
 UINT32 strtrim(UINT8* s)
@@ -171,8 +171,8 @@ void logMemoryUsage()
 		CAMsg::printMsg(LOG_DEBUG,"\t Size of the top-most releasable chunk that normally borders the end of the heap: %i\n",malli.keepcost);
 #endif
 	}
-	
-/** Gets the current Systemtime in milli seconds. 
+
+/** Gets the current Systemtime in milli seconds.
 	* @param bnTime - Big Number, in which the current time is placed
 	* @retval E_UNSPECIFIED, if bnTime was NULL
 	* @retval E_UNKNOWN, if an error occurs
@@ -222,7 +222,7 @@ SINT32 getcurrentTime(timespec& t)
 	  #endif
 	}
 
-/** Gets the current Systemtime in milli seconds. 
+/** Gets the current Systemtime in milli seconds.
 	* @param u64Time - 64 bit Integer, in which the current time is placed
 	* @retval E_UNKNOWN, if an error occurs
 	*	@retval	E_SUCCESS, otherwise
@@ -250,7 +250,7 @@ SINT32 getcurrentTimeMillis(UINT64& u64Time)
 	}
 
 /** Gets the current Systemtime in micros seconds. Depending on the operating system,
-  * the time may not be so accurat. 
+  * the time may not be so accurat.
 	* @param u64Time - 64 bit Integer, in which the current time is placed
 	* @retval E_UNKNOWN, if an error occurs
 	*	@retval	E_SUCCESS, otherwise
@@ -291,9 +291,9 @@ SINT32 initRandom()
 		return E_SUCCESS;
 	}
 
-/* 
+/*
  * compares date1 with date2. Note: only the date is compared, not the time
- * returns: 
+ * returns:
  * 	-1 if date1 < date2
  *   0 if date1 == date2
  * 	 1 if date1 > date2
@@ -303,15 +303,15 @@ SINT32 compDate(struct tm *date1, struct tm *date2)
 	//year
 	if(date1->tm_year != date2->tm_year)
 	{
-		return (date1->tm_year < date2->tm_year) ? -1 : 1; 
+		return (date1->tm_year < date2->tm_year) ? -1 : 1;
 	}
 	if(date1->tm_mon != date2->tm_mon)
 	{
-		return (date1->tm_mon < date2->tm_mon) ? -1 : 1; 
+		return (date1->tm_mon < date2->tm_mon) ? -1 : 1;
 	}
 	if(date1->tm_mday != date2->tm_mday)
 	{
-		return (date1->tm_mday < date2->tm_mday) ? -1 : 1; 
+		return (date1->tm_mday < date2->tm_mday) ? -1 : 1;
 	}
 	return 0;
 }
@@ -329,7 +329,7 @@ SINT32 getRandom(UINT32* val)
 				return E_UNKNOWN;
 		return E_SUCCESS;
 	}
-	
+
 SINT32 getRandom(UINT64* val)
 	{
 		ASSERT(val!=NULL,"VAL should be not NULL");
@@ -337,7 +337,7 @@ SINT32 getRandom(UINT64* val)
 			 RAND_pseudo_bytes((UINT8*)val,sizeof(UINT64))<0)
 				return E_UNKNOWN;
 		return E_SUCCESS;
-	}	
+	}
 
 /** Gets some random bytes.
 	@param buff - buff which is filled with randomness
@@ -348,7 +348,7 @@ SINT32 getRandom(UINT64* val)
 SINT32 getRandom(UINT8* buff,UINT32 len)
 	{
 		ASSERT(buff!=NULL,"BUFF should be not NULL")
-		if(RAND_bytes(buff,len)!=1&&		
+		if(RAND_bytes(buff,len)!=1&&
 			 RAND_pseudo_bytes(buff,len)<0)
 			return E_UNKNOWN;
 		return E_SUCCESS;
@@ -454,19 +454,18 @@ bool equals(const XMLCh* const e1,const char* const e2)
 	}
 
 XercesDOMParser* theDOMParser=NULL;
-CAMutex* theParseDOMDocumentLock=NULL;
+CAMutex* theParseDOMDocumentLock = NULL;
+
+void initDOMParser()
+{
+	theParseDOMDocumentLock = new CAMutex();
+	theDOMParser = new XercesDOMParser();
+}
 
 XERCES_CPP_NAMESPACE::DOMDocument* parseDOMDocument(const UINT8* const buff, UINT32 len)
 	{
-		if(theDOMParser==NULL)
-			{
-				theParseDOMDocumentLock=new CAMutex();
-				theParseDOMDocumentLock->lock();
-				theDOMParser=new XercesDOMParser();
-			}
-		else
-			theParseDOMDocumentLock->lock();
-	  MemBufInputSource in(buff,len,"tmpBuff");
+		theParseDOMDocumentLock->lock();
+		MemBufInputSource in(buff,len,"tmpBuff");
 		theDOMParser->parse(in);
 		XERCES_CPP_NAMESPACE::DOMDocument* ret=NULL;
 		if(theDOMParser->getErrorCount()==0)
@@ -474,6 +473,23 @@ XERCES_CPP_NAMESPACE::DOMDocument* parseDOMDocument(const UINT8* const buff, UIN
 		theParseDOMDocumentLock->unlock();
 		return ret;
 	}
+
+/**
+ * parses a file via path or URL
+ */
+XERCES_CPP_NAMESPACE::DOMDocument* parseDOMDocument(const UINT8* const pathOrURL)
+{
+	theParseDOMDocumentLock->lock();
+
+	theDOMParser->parse((const char *const) pathOrURL);
+	XERCES_CPP_NAMESPACE::DOMDocument* ret=NULL;
+	if(theDOMParser->getErrorCount()==0)
+	{
+		ret=theDOMParser->adoptDocument();
+	}
+	theParseDOMDocumentLock->unlock();
+	return ret;
+}
 
 void releaseDOMParser()
 	{
@@ -488,11 +504,11 @@ void releaseDOMParser()
 			}
 	}
 
-/** 
+/**
  * Returns the content of the text node(s) under elem
  * as null-terminated C String. If there is no text node
  * len is set to 0.
- * 
+ *
  * TODO: Why is elem a DOM_Node and not a DOM_Element here?
  * @param elem the element which has a text node under it
  * @param value a buffer that gets the text value
@@ -519,7 +535,7 @@ SINT32 getDOMElementValue(const DOMNode * const pElem,UINT8* value,UINT32* value
 						char* tmpStr=XMLString::transcode(str);
 						UINT32 tmpStrLen=strlen(tmpStr);
 						if(tmpStrLen>=spaceLeft)
-							{							
+							{
 								*valuelen=tmpStrLen+1;
 								XMLString::release(&tmpStr);
 								return E_SPACE;
@@ -644,7 +660,7 @@ SINT32 setDOMElementValue(DOMElement* pElem, SINT32 value)
 		setDOMElementValue(pElem,tmp);
 		return E_SUCCESS;
 	}
-	
+
 SINT32 setDOMElementValue(DOMElement* pElem,double floatValue)
 	{
 		UINT8 tmp[10];
@@ -652,7 +668,7 @@ SINT32 setDOMElementValue(DOMElement* pElem,double floatValue)
 		setDOMElementValue(pElem,tmp);
 		return E_SUCCESS;
 	}
-	
+
 
 /**
  * Sets the decimal text representation of a 64bit integer as node value
@@ -714,7 +730,7 @@ SINT32 setDOMElementAttribute(DOMNode* pElem,const char* attrName, UINT32 value)
 
 SINT32 setDOMElementAttribute(DOMNode* pElem, const char* attrName, bool value)
 {
-	return setDOMElementAttribute(pElem, attrName, 
+	return setDOMElementAttribute(pElem, attrName,
 			((UINT8*) (value ? STR_VALUE_TRUE : STR_VALUE_FALSE)));
 }
 
@@ -814,10 +830,10 @@ SINT32 getDOMElementValue(const DOMElement* const pElem,UINT32* value)
 	if(getDOMElementValue(pElem,buff,&buffLen)!=E_SUCCESS)
 		return E_UNKNOWN;
 	*value=atol((char*)buff);
-	
+
 	return E_SUCCESS;
 }
-	
+
 SINT32 getDOMElementValue(const DOMElement* const pElem,double* value)
 {
 	ASSERT(value!=NULL,"Value is null");
@@ -827,11 +843,11 @@ SINT32 getDOMElementValue(const DOMElement* const pElem,double* value)
 	if(getDOMElementValue(pElem,buff,&buffLen)!=E_SUCCESS)
 		return E_UNKNOWN;
 	*value=atof((char*)buff);
-	
+
 	return E_SUCCESS;
 }
-	
-	
+
+
 SINT32 getDOMElementValue(const DOMElement* pElem,UINT32& value, UINT32 defaultValue)
 {
 	UINT32 v;
@@ -840,7 +856,7 @@ SINT32 getDOMElementValue(const DOMElement* pElem,UINT32& value, UINT32 defaultV
 		value=defaultValue;
 		}
 	else
-		value=v;	
+		value=v;
 	return E_SUCCESS;
 }
 
@@ -857,7 +873,7 @@ SINT32 getDOMElementValue(const DOMElement* pElem, UINT64 &value)
 	{
 		return E_UNKNOWN;
 	}
-	
+
 	return E_SUCCESS;
 }
 
@@ -913,8 +929,8 @@ SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, DOMElement* & elemRootEnc
 }
 
 
-		
-	
+
+
 
 SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, const UINT8* const xml, UINT32 xmllen,CAASymCipher* pRSA)
 {
@@ -972,7 +988,7 @@ SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen,const DOMNode* root,CAASy
 	*			<EncryptedKey>
 	*				<EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"/>
 	*				<CipherData>
-	*					<CipherValue>...</CipherValue>					
+	*					<CipherValue>...</CipherValue>
 	*				</CipherData>
 	*			</EncryptedKey>
 	*		</ds:KeyInfo>
@@ -1073,7 +1089,7 @@ SINT32 encryptXMLElement(DOMNode* node, CAASymCipher* pRSA)
 	*			\<EncryptedKey>
 	*				\<EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"/>
 	*				\<CipherData\>
-	*					\<CipherValue>...\</CipherValue>					
+	*					\<CipherValue>...\</CipherValue>
 	*				\</CipherData>
 	*			\</EncryptedKey>
 	*		\</ds:KeyInfo>
@@ -1182,8 +1198,8 @@ SINT32 decryptXMLElement(DOMNode* node, CAASymCipher* pRSA)
 		}
 	//now the need to parse the plaintext...
 	XERCES_CPP_NAMESPACE::DOMDocument* docPlain=parseDOMDocument(cipherValue,len);
-	delete[] cipherValue;	
-	cipherValue = NULL;	
+	delete[] cipherValue;
+	cipherValue = NULL;
 	DOMNode* elemPlainRoot=NULL;
 	if(docPlain==NULL)
 		return E_UNKNOWN;
@@ -1196,7 +1212,7 @@ SINT32 decryptXMLElement(DOMNode* node, CAASymCipher* pRSA)
 			}
 			return E_UNKNOWN;
 		}
-	elemPlainRoot=doc->importNode(elemPlainRoot,true);	
+	elemPlainRoot=doc->importNode(elemPlainRoot,true);
 	DOMNode* parent=node->getParentNode();
 	if(parent->getNodeType()==DOMNode::DOCUMENT_NODE)
 		{
@@ -1208,17 +1224,17 @@ SINT32 decryptXMLElement(DOMNode* node, CAASymCipher* pRSA)
 			}
 			parent->appendChild(elemPlainRoot);
 		}
-	else	
+	else
 		{
 			DOMNode* n=parent->replaceChild(elemPlainRoot,node);
 			if (n != NULL)
-			{	
+			{
 				n->release();
 				n = NULL;
 			}
 		}
 	if (docPlain != NULL)
-	{	
+	{
 		docPlain->release();
 		docPlain = NULL;
 	}
@@ -1358,7 +1374,7 @@ SINT32 readPasswd(UINT8* buff,UINT32 len)
 		tcsetattr(STDIN_FILENO,TCSAFLUSH,&tmpTermios);
 #endif
 	return E_SUCCESS;
-}	
+}
 
 /**
  * Parses a timestamp in JDBC timestamp escape format (as it comes from the BI)
@@ -1366,27 +1382,27 @@ SINT32 readPasswd(UINT8* buff,UINT32 len)
  *
  * @param strTimestamp the string containing the timestamp
  * @param seconds an integer variable that gets the seconds value.
- * @todo think about timezone handling 
+ * @todo think about timezone handling
  */
 /*SINT32 parseJdbcTimestamp(const UINT8 * strTimestamp, SINT32& seconds)
 {
 	struct tm time;
 	SINT32 rc;
-	
+
 	// parse the formatted string
-	rc = sscanf((const char*)strTimestamp, "%d-%d-%d %d:%d:%d", 
-			&time.tm_year, &time.tm_mon, &time.tm_mday, &time.tm_hour, 
+	rc = sscanf((const char*)strTimestamp, "%d-%d-%d %d:%d:%d",
+			&time.tm_year, &time.tm_mon, &time.tm_mday, &time.tm_hour,
 			&time.tm_min, &time.tm_sec);
 	if(rc!=6) return E_UNKNOWN; // parsing error
-	
+
 	// convert values to struct tm semantic
-	if(time.tm_year<1970) return E_UNKNOWN;	
+	if(time.tm_year<1970) return E_UNKNOWN;
 	time.tm_year-=1900;
 	if(time.tm_mon<1 || time.tm_mon>12) return E_UNKNOWN;
 	time.tm_mon-=1;
 	seconds = (UINT32)mktime(&time);
 	if(seconds<0) return E_UNKNOWN;
-	
+
 	return E_SUCCESS;
 }*/
 
@@ -1405,7 +1421,7 @@ SINT32 readPasswd(UINT8* buff,UINT32 len)
 	time = localtime((time_t *) (&seconds));
 	// without this line, there are problems on 64 BIT machines!!
 	CAMsg::printMsg( LOG_DEBUG, "Year: %d Month: %d\n", time->tm_year, time->tm_mon);
-	
+
 	if(strftime((char *)strTimestamp, len, "%Y-%m-%d %H:%M:%S", time) == 0)
 	{
 		return E_SPACE;
