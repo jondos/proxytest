@@ -1,28 +1,28 @@
 /*
-Copyright (c) 2000, The JAP-Team 
+Copyright (c) 2000, The JAP-Team
 All rights reserved.
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-	- Redistributions of source code must retain the above copyright notice, 
+	- Redistributions of source code must retain the above copyright notice,
 	  this list of conditions and the following disclaimer.
 
-	- Redistributions in binary form must reproduce the above copyright notice, 
-	  this list of conditions and the following disclaimer in the documentation and/or 
+	- Redistributions in binary form must reproduce the above copyright notice,
+	  this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
-	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors 
-	  may be used to endorse or promote products derived from this software without specific 
-		prior written permission. 
+	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
+	  may be used to endorse or promote products derived from this software without specific
+		prior written permission.
 
-	
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS 
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
 AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
 BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
-OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 
@@ -35,15 +35,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAASymCipher.hpp"
 #include "CASignature.hpp"
 #include "CAFirstMixChannelList.hpp"
-#include "CAIPList.hpp" 
+#include "CAIPList.hpp"
 #include "CASocketGroup.hpp"
 #include "CAQueue.hpp"
 #include "CAUtil.hpp"
 #include "CAThread.hpp"
 #include "CAThreadPool.hpp"
-#ifdef PAYMENT
-#include "CAAccountingInstance.hpp"
-#endif
 #include "CALogPacketStats.hpp"
 #ifdef HAVE_EPOLL
 	#include "CASocketGroupEpoll.hpp"
@@ -96,7 +93,7 @@ class tUINT32withLock
 	};
 #endif
 
-class CAFirstMix:public 
+class CAFirstMix:public
 #ifdef REPLAY_DETECTION
 	CAMixWithReplayDB
 #else
@@ -129,6 +126,7 @@ public:
 					m_pthreadReadFromMix=NULL;
 					m_pthreadAcceptUsers=NULL;
 					m_pthreadsLogin=NULL;
+					m_tnCDefs = NULL;
 					m_bIsShuttingDown=false;
 #ifdef LOG_PACKET_TIMES
 					m_pLogPacketStats=NULL;
@@ -147,12 +145,12 @@ public:
 
     	/*virtual ~CAFirstMix()
 			{
-				delete m_pmutexNewConnections;				
+				delete m_pmutexNewConnections;
 				m_pmutexNewConnections = NULL;
 			}*/
     	virtual ~CAFirstMix()
 		{
-			clean();
+			//clean(); // speeds up shutdown
 			delete m_pmutexUser;
 			m_pmutexUser = NULL;
 			delete m_pmutexMixedPackets;
@@ -160,11 +158,14 @@ public:
 			delete m_pmutexLoginThreads;
 			m_pmutexLoginThreads = NULL;
 		}
-    
+
 		tMixType getType() const
 			{
 				return CAMix::FIRST_MIX;
 			}
+#ifdef PAYMENT
+		bool forceKickout(fmHashTableEntry* pHashTableEntry, const XERCES_CPP_NAMESPACE::DOMDocument *pErrDoc=NULL);
+#endif
 
 #ifdef DYNAMIC_MIX
 private:
@@ -185,35 +186,16 @@ protected:
 #endif
     //added by ronin <ronin2@web.de>
     virtual SINT32 processKeyExchange();
-    
+
 		/** Initialises the MixParameters info for each mix form the \<Mixes\> element received from the second mix.*/
     SINT32 initMixParameters(DOMElement* elemMixes);
-    
-    
+
+
 public:
-			SINT32 getMixedPackets(UINT64& ppackets) const
-				{
-					set64(ppackets,m_nMixedPackets);
-					return E_SUCCESS;
-				}
+		SINT32 getMixedPackets(UINT64& ppackets);
+		UINT32 getNrOfUsers();
+		SINT32 getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic);
 
-			UINT32 getNrOfUsers() const
-			{
-				#ifdef PAYMENT
-				return CAAccountingInstance::getNrOfUsers();
-				#else
-				return m_nUser;
-				#endif	
-			}
-
-			SINT32 getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic) const
-				{
-					*puser=(SINT32)getNrOfUsers();
-					*prisk=-1;
-					*ptraffic=-1;
-					return E_SUCCESS;
-				}
-			
 		friend THREAD_RETURN fm_loopSendToMix(void*);
 		friend THREAD_RETURN fm_loopReadFromMix(void*);
 		friend THREAD_RETURN fm_loopAcceptUsers(void*);
@@ -225,7 +207,7 @@ public:
 			{
 				return m_u32MixCount;
 			}
-		///Returns the ordered list of the mix parameters from the first mix to the last mix. 
+		///Returns the ordered list of the mix parameters from the first mix to the last mix.
 		tMixParameters *getMixParameters()
 			{
 				return m_arMixParameters;
@@ -235,6 +217,9 @@ public:
 			* to the stored parameters of the mixes of this cascade.
 			*/
 		SINT32 setMixParameters(const tMixParameters& params);
+
+		SINT32 handleKeyInfoExtensions(DOMElement *root);
+		SINT32 handleTermsAndConditionsExtension(DOMElement *extensionRoot);
 
 #ifdef REPLAY_DETECTION
 		UINT64 m_u64LastTimestampReceived;
@@ -255,7 +240,7 @@ protected:
 					m_pmutexUser->unlock();
 					return E_SUCCESS;
 				}
-			
+
 #ifndef COUNTRY_STATS
 			SINT32 decUsers()
 #else
@@ -266,7 +251,7 @@ protected:
 					m_nUser--;
 					#ifdef COUNTRY_STATS
 						updateCountryStats(NULL,pHashEntry->countryID,true);
-					#endif					
+					#endif
 					m_pmutexUser->unlock();
 					return E_SUCCESS;
 				}
@@ -284,11 +269,11 @@ protected:
 					return m_bRestart;
 				}*/
 			SINT32 doUserLogin(CAMuxSocket* pNewUSer,UINT8 perrIP[4]);
-			
+
 #ifdef DELAY_USERS
 			SINT32 reconfigure();
 #endif
-			
+
 protected:
 			CAIPList* m_pIPList;
 			CAQueue* m_pQueueSendToMix;
@@ -305,7 +290,7 @@ protected:
 			CASocket* m_arrSocketsIn;
 			//how many mixes are in the cascade?
 			UINT32	m_u32MixCount;
-			//stores the mix parameters for each mix 
+			//stores the mix parameters for each mix
 			tMixParameters* m_arMixParameters;
 
 #ifdef HAVE_EPOLL
@@ -320,7 +305,7 @@ protected:
     // moved to CAMix
     //CAInfoService* m_pInfoService;
 			CAMuxSocket* m_pMuxOut;
-	
+
 			UINT8* m_xmlKeyInfoBuff;
 			UINT16 m_xmlKeyInfoSize;
 
@@ -338,17 +323,19 @@ protected:
 			CAThread* m_pthreadSendToMix;
 			CAThread* m_pthreadReadFromMix;
 
+			termsAndConditions_t *m_tnCDefs;
+
 #ifdef COUNTRY_STATS
 		private:
-			SINT32 initCountryStats(char* db_host,char* db_user,char*db_passwd);			
+			SINT32 initCountryStats(char* db_host,char* db_user,char*db_passwd);
 			SINT32 updateCountryStats(const UINT8 ip[4],UINT32 a_countryID,bool bRemove);
 			volatile bool m_bRunLogCountries;
 			volatile UINT32* m_CountryStats;
-		protected:	
+		protected:
 		    SINT32 deleteCountryStats();
 			tUINT32withLock* m_PacketsPerCountryIN;
 			tUINT32withLock* m_PacketsPerCountryOUT;
-		private:	
+		private:
 			CAThread* m_threadLogLoop;
 			MYSQL* m_mysqlCon;
 			friend THREAD_RETURN iplist_loopDoLogCountries(void* param);
@@ -367,7 +354,7 @@ protected:
 private:
 	SINT32 doUserLogin_internal(CAMuxSocket* pNewUSer,UINT8 perrIP[4]);
 	SINT32 isAllowedToPassRestrictions(CASocket* pNewMuxSocket);
-	
+
 	static const UINT32 MAX_CONCURRENT_NEW_CONNECTIONS;
 
 	volatile UINT32 m_newConnections;

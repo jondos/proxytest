@@ -103,6 +103,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_strMonitoringListenerHost = NULL;
 		m_iMonitoringListenerPort = 0xFFFF;
 #endif
+		m_termsAndConditionsTemplates = NULL;
 
 #ifdef LOG_CRIME
 		m_arCrimeRegExpsURL=NULL;
@@ -152,6 +153,7 @@ CACmdLnOptions::CACmdLnOptions()
 		initCertificateOptionSetters();
 		initAccountingOptionSetters();
 		initNetworkOptionSetters();
+		initTermsAndConditionsOptionSetters();
 		initCrimeDetectionOptionSetters();
  }
 
@@ -265,6 +267,18 @@ void CACmdLnOptions::initNetworkOptionSetters()
 		&CACmdLnOptions::setKeepAliveTraffic;
 	networkOptionSetters[++count]=
 		&CACmdLnOptions::setPerformanceTestEnabled;
+}
+
+void CACmdLnOptions::initTermsAndConditionsOptionSetters()
+{
+
+	termsAndConditionsOptionSetters = new optionSetter_pt[TERMS_AND_CONDITIONS_OPTIONS_NR];
+	int count = -1;
+
+	termsAndConditionsOptionSetters[++count]=
+			&CACmdLnOptions::setTermsAndConditionsTemplates;
+	termsAndConditionsOptionSetters[++count]=
+				&CACmdLnOptions::setTermsAndConditionsList;
 }
 
 void CACmdLnOptions::initCrimeDetectionOptionSetters()
@@ -474,8 +488,8 @@ void CACmdLnOptions::clean()
 
 		delete m_pOwnCertificate;
 		m_pOwnCertificate=NULL;
-		
-		delete m_OpCert;	
+
+		delete m_OpCert;
 		m_OpCert=NULL;
 
 		delete m_pNextMixCertificate;
@@ -1463,7 +1477,7 @@ SINT32 CACmdLnOptions::getOperatorSubjectKeyIdentifier(UINT8 *buffer, UINT32 *le
 		return E_UNKNOWN;
 	}
 	return m_OpCert->getSubjectKeyIdentifier(buffer, length);
-	
+
 }
 
 #ifndef ONLY_LOCAL_PROXY
@@ -1623,7 +1637,7 @@ SINT32 CACmdLnOptions::getMixXml(XERCES_CPP_NAMESPACE::DOMDocument* & docMixInfo
 XERCES_CPP_NAMESPACE::DOMElement* CACmdLnOptions::getTermsAndConditions()
 {
 	//DOMElement *docElement = NULL;
-	if(m_docOpTnCs == NULL) 
+	if(m_docOpTnCs == NULL)
 	{
 		return NULL;
 	}
@@ -1849,9 +1863,9 @@ SINT32 CACmdLnOptions::setMixName(DOMElement* elemGeneral)
 	DOMElement *elemMixName = NULL, *elemMixInfoName = NULL;
 	UINT8 tmpBuff[TMP_BUFF_SIZE];
 	UINT32 tmpLen = TMP_BUFF_SIZE;
-	UINT8 *typeValue = NULL;  //(UINT8 *) OPTIONS_VALUE_NAMETYPE_DEFAULT; 
-	//uncomment the above line to enable a default name type 
-	
+	UINT8 *typeValue = NULL;  //(UINT8 *) OPTIONS_VALUE_NAMETYPE_DEFAULT;
+	//uncomment the above line to enable a default name type
+
 	if(elemGeneral == NULL) return E_UNKNOWN;
 	ASSERT_GENERAL_OPTIONS_PARENT
 		(elemGeneral->getNodeName(), OPTIONS_NODE_MIX_NAME);
@@ -1874,30 +1888,30 @@ SINT32 CACmdLnOptions::setMixName(DOMElement* elemGeneral)
 		tmpLen = 0;
 		m_strMixName = NULL;
 	}
-	
-	/* now append the values to the mix info 
-	 * conditions: 
+
+	/* now append the values to the mix info
+	 * conditions:
 	 * - if name is set, m_strMixname points to it.
 	 * - if name type is set then it is in tmpBuff.
 	 */
 	elemMixInfoName = createDOMElement(m_docMixInfo, MIXINFO_NODE_MIX_NAME);
-	
+
 	/* if name is set */
 	if(m_strMixName != NULL)
 	{
 		setDOMElementValue(elemMixInfoName, (UINT8*) m_strMixName);
 	}
-	
+
 	if( tmpLen != 0 ) /* if name type is set */
 	{
-		if( strncasecmp( ((char *)tmpBuff), 
-					OPTIONS_VALUE_OPERATOR_NAME, 
+		if( strncasecmp( ((char *)tmpBuff),
+					OPTIONS_VALUE_OPERATOR_NAME,
 					strlen(OPTIONS_VALUE_OPERATOR_NAME)) == 0 ) /* type is operator name*/
 		{
 			typeValue = (UINT8 *) OPTIONS_VALUE_OPERATOR_NAME;
 		}
-		else if( strncasecmp( ((char *)tmpBuff), 
-					OPTIONS_VALUE_MIX_NAME, 
+		else if( strncasecmp( ((char *)tmpBuff),
+					OPTIONS_VALUE_MIX_NAME,
 					strlen(OPTIONS_VALUE_MIX_NAME)) == 0 ) /* type is mix name*/
 		{
 			typeValue = (UINT8 *) OPTIONS_VALUE_MIX_NAME;
@@ -1905,10 +1919,10 @@ SINT32 CACmdLnOptions::setMixName(DOMElement* elemGeneral)
 	}
 	if(typeValue != NULL)
 	{
-		setDOMElementAttribute(elemMixInfoName, 
+		setDOMElementAttribute(elemMixInfoName,
 			OPTIONS_ATTRIBUTE_NAME_FOR_CASCADE, typeValue);
 	}
-	
+
 	if(m_docMixInfo->getDocumentElement() != NULL)
 	{
 		m_docMixInfo->getDocumentElement()->appendChild(elemMixInfoName);
@@ -2315,7 +2329,7 @@ SINT32 CACmdLnOptions::setOwnOperatorCertificate(DOMElement *elemCertificates)
 {
 	DOMElement* elemOpCert = NULL;
 	DOMElement *opCertX509 = NULL;
-	
+
 	if(elemCertificates == NULL) return E_UNKNOWN;
 	ASSERT_CERTIFICATES_OPTIONS_PARENT
 		(elemCertificates->getNodeName(), OPTIONS_NODE_OWN_OPERATOR_CERTIFICATE);
@@ -3259,15 +3273,15 @@ SINT32 CACmdLnOptions::setPerformanceTestEnabled(DOMElement *elemNetwork)
 	if(elemNetwork == NULL) return E_UNKNOWN;
 	ASSERT_NETWORK_OPTIONS_PARENT
 		(elemNetwork->getNodeName(), OPTIONS_NODE_PERFORMANCE_TEST);
-	
+
 	getDOMChildByName(elemNetwork, OPTIONS_NODE_PERFORMANCE_TEST, elemTestEnabled, false);
 	if(elemTestEnabled != NULL)
 	{
 		getDOMElementAttribute(elemTestEnabled, OPTIONS_ATTRIBUTE_PERFTEST_ENABLED, m_perfTestEnabled);
 	}
-	
+
 	CAMsg::printMsg(LOG_INFO,"Performance test is%s enabled.\n", (m_perfTestEnabled ? "" : " not") );
-	
+
 	return E_SUCCESS;
 }
 
@@ -3339,22 +3353,82 @@ SINT32 CACmdLnOptions::setTermsAndConditions(DOMElement *elemRoot)
 {
 	SINT32 ret = E_SUCCESS;
 	DOMElement *elemTnCs = NULL;
-	//DOMNode *elemTnCsImported = NULL;
+
 	if(elemRoot == NULL)
 	{
 		return E_UNKNOWN;
 	}
-	ret = getDOMChildByName(elemRoot, OPTION_NODE_TNCS_LIST, elemTnCs, true);
+
+	ret = getDOMChildByName(elemRoot, OPTIONS_NODE_TNCS_OPTS, elemTnCs, true);
 	if(elemTnCs != NULL)
 	{
-		if(elemTnCs == NULL)
-		{
-			CAMsg::printMsg(LOG_CRIT,"Could not create the terms and conditions framework document.\n");
-			return E_UNKNOWN;
-		}
-		m_docOpTnCs = createDOMDocument();
-		m_docOpTnCs->appendChild(m_docOpTnCs->importNode(elemTnCs, WITH_SUBTREE));
+		return invokeOptionSetters
+			(termsAndConditionsOptionSetters, elemTnCs, TERMS_AND_CONDITIONS_OPTIONS_NR);
 	}
+	else
+	{
+		CAMsg::printMsg(LOG_WARNING,"No Terms & Conditions for Operator specified!\n");
+		return E_SUCCESS;
+	}
+}
+
+SINT32 CACmdLnOptions::setTermsAndConditionsTemplates(DOMElement *elemTnCs)
+{
+	if(elemTnCs == NULL)
+	{
+		CAMsg::printMsg(LOG_CRIT,"Terms And Conditions root element is null!\n");
+		return E_UNKNOWN;
+	}
+	DOMElement *elemTnCsTemplates = NULL;
+	DOMNodeList *templateList = NULL;
+	bool nothingFound = true;
+	getDOMChildByName(elemTnCs, OPTIONS_NODE_TNCS_TEMPLATES, elemTnCsTemplates);
+	if(elemTnCsTemplates != NULL)
+	{
+		templateList = getElementsByTagName(elemTnCsTemplates, OPTIONS_NODE_TNCS_TEMPLATE);
+		if(templateList->getLength() > 0)
+		{
+			nothingFound = false;
+			m_termsAndConditionsTemplates = new DOMNode*[templateList->getLength()];
+			UINT8 currentTemplateURL[TMP_BUFF_SIZE];
+			UINT32 len = TMP_BUFF_SIZE;
+			memset(currentTemplateURL, 0, len);
+
+			for (int i = 0; i < templateList->getLength(); i++)
+			{
+				getDOMElementValue(templateList->item(i), currentTemplateURL, &len);
+				m_termsAndConditionsTemplates[i] = parseDOMDocument(currentTemplateURL);
+				if(m_termsAndConditionsTemplates[i] == NULL)
+				{
+					CAMsg::printMsg(LOG_WARNING, "Cannot load Terms And Conditions template '%s'.\n",
+							currentTemplateURL);
+				}
+				len = TMP_BUFF_SIZE;
+				//memset(currentTemplateURL, 0, len);
+			}
+		}
+	}
+
+	if(nothingFound)
+	{
+		CAMsg::printMsg(LOG_INFO,"No Terms And Conditions templates found.\n");
+	}
+
+	return E_SUCCESS;
+}
+SINT32 CACmdLnOptions::setTermsAndConditionsList(DOMElement *elemTnCs)
+{
+	if(elemTnCs == NULL)
+	{
+		CAMsg::printMsg(LOG_CRIT,"Terms And Conditions root element is null!\n");
+		return E_UNKNOWN;
+	}
+	DOMElement *elemTnCsList = NULL;
+	getDOMChildByName(elemTnCs, OPTIONS_NODE_TNCS_LIST, elemTnCsList);
+
+	m_docOpTnCs = createDOMDocument();
+	m_docOpTnCs->appendChild(m_docOpTnCs->importNode(elemTnCsList, WITH_SUBTREE));
+
 	return E_SUCCESS;
 }
 
@@ -3608,7 +3682,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 				m_strDataRetentionLogDir[log_dir_len]=0;
 			}
 		CAMsg::printMsg(LOG_CRIT,"Data retention log dir in config file: %s\n",log_dir);
-		
+
 		this->m_pDataRetentionPublicEncryptionKey=new CAASymCipher();
 		DOMElement* elemDataRetentionPublicKey=NULL;
 		getDOMChildByName(elemDataRetention,"PublicEncryptionKey",elemDataRetentionPublicKey,false);

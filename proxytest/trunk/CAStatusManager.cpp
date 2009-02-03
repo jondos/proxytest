@@ -136,9 +136,8 @@ CAStatusManager::CAStatusManager()
 	m_pStatusLock = new CAMutex();
 	m_pStatusSocket = new CASocket();
 	ret = initSocket();
-	if( (ret == E_SUCCESS) || (ret == EADDRINUSE) )
+	if( (ret == E_SUCCESS))
 	{
-		m_bTryListen = (ret == EADDRINUSE);
 		m_pMonitoringThread = new CAThread((UINT8*)"Monitoring Thread");
 		m_pMonitoringThread->setMainLoop(serveMonitoringRequests);
 		m_pMonitoringThread->start(this);
@@ -239,6 +238,7 @@ SINT32 CAStatusManager::initSocket()
 				"StatusManager: could not create server monitoring socket.\n");
 		return ret;
 	}
+	m_pStatusSocket->setReuseAddr(true);
 	/* listen to default server address, if nothing is specified:
 	 * localhost:8080
 	 */
@@ -306,12 +306,6 @@ SINT32 CAStatusManager::initSocket()
 					hostname, port,
 					((ret == E_SOCKET_BIND) ? "Bind" : "Listen"),
 					 GET_NET_ERROR_STR(errnum));
-			if( errnum == EADDRINUSE )
-			{
-				CAMsg::printMsg(LOG_INFO, "retry socket listening later\n");
-				return errnum;
-				//it's safer to avoid reuseaddr in this case
-			}
 		}
 		return ret;
 	}
@@ -462,7 +456,7 @@ THREAD_RETURN serveMonitoringRequests(void* param)
 
 		if(statusManager->m_pStatusSocket != NULL)
 		{
-			if(statusManager->m_bTryListen)
+			/*if(statusManager->m_bTryListen)
 			{
 				sleep(10);
 
@@ -496,7 +490,7 @@ THREAD_RETURN serveMonitoringRequests(void* param)
 				}
 #endif
 				continue;
-			}
+			}*/
 			if(statusManager->m_pStatusSocket->isClosed())
 			{
 				CAMsg::printMsg(LOG_INFO,
@@ -548,8 +542,16 @@ THREAD_RETURN serveMonitoringRequests(void* param)
 		}
 		else
 		{
+			SINT32 errnum = GET_NET_ERROR;
 			CAMsg::printMsg(LOG_ERR,
-					"StatusManager: error: could not process monitoring request.\n");
+					"StatusManager: error: could not process monitoring request: %s\n", GET_NET_ERROR_STR(errnum));
+			switch (errnum)
+			{
+				//case ECONNABORTED:
+				case EBADF:
+				case EINVAL:
+					THREAD_RETURN_ERROR;
+			}
 		}
 	}
 }

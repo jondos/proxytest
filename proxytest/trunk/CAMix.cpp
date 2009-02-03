@@ -1,28 +1,28 @@
 /*
-Copyright (c) 2000, The JAP-Team 
+Copyright (c) 2000, The JAP-Team
 All rights reserved.
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-	- Redistributions of source code must retain the above copyright notice, 
+	- Redistributions of source code must retain the above copyright notice,
 	  this list of conditions and the following disclaimer.
 
-	- Redistributions in binary form must reproduce the above copyright notice, 
-	  this list of conditions and the following disclaimer in the documentation and/or 
+	- Redistributions in binary form must reproduce the above copyright notice,
+	  this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
-	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors 
-	  may be used to endorse or promote products derived from this software without specific 
-		prior written permission. 
+	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
+	  may be used to endorse or promote products derived from this software without specific
+		prior written permission.
 
-	
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS 
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
 AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
 BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
-OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
@@ -35,7 +35,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 extern CACmdLnOptions* pglobalOptions;
 
- 
+
 CAMix::CAMix()
 {
     m_acceptReconfiguration = pglobalOptions->acceptReconfiguration();
@@ -86,14 +86,14 @@ SINT32 CAMix::initOnce()
 SINT32 CAMix::start()
 	{
 		SINT32 initStatus;
-		
+
 		if(initOnce()!=E_SUCCESS)
 			return E_UNKNOWN;
 		if(m_pSignature != NULL && pglobalOptions->isInfoServiceEnabled())
 		{
 			CAMsg::printMsg(LOG_DEBUG, "CAMix start: creating InfoService object\n");
 			m_pInfoService=new CAInfoService(this);
-        
+
 			//UINT32 opCertLength;
 			CACertificate* opCert = pglobalOptions->getOpCertificate();
 			CACertificate* pOwnCert=pglobalOptions->getOwnCertificate();
@@ -106,13 +106,13 @@ SINT32 CAMix::start()
 				currentMillis = 0;
 			}
 			m_pInfoService->setSerial(currentMillis);
-			
-			delete opCert;	
+
+			delete opCert;
 			opCert = NULL;
-				
+
 	        bool allowReconf = pglobalOptions->acceptReconfiguration();
 	        bool needReconf = needAutoConfig();
-	
+
 	        m_pInfoService->setConfiguring(allowReconf && needReconf);
 			CAMsg::printMsg(LOG_DEBUG, "CAMix start: starting InfoService\n");
 			m_pInfoService->start();
@@ -154,7 +154,7 @@ SINT32 CAMix::start()
 	                	m_pInfoService->start();
 	                }
 	            }
-	
+
 	            CAMsg::printMsg(LOG_INFO, "The mix is now on-line.\n");
 #ifdef DYNAMIC_MIX
 							m_bReconfiguring = false;
@@ -206,7 +206,7 @@ SKIP:
 	            {
 	            	currentMillis = 0;
 	            }
-	            m_pInfoService->setSerial(currentMillis);            
+	            m_pInfoService->setSerial(currentMillis);
 	        }
 	        m_bConnected = false;
 			CAMsg::printMsg(LOG_DEBUG, "CAMix main: before clean()\n");
@@ -292,7 +292,7 @@ SINT32 CAMix::initMixCascadeInfo(DOMElement* mixes)
     	setDOMElementAttribute(elemRoot,"context", (UINT8*) "org.manioq");
 #endif
     }
-    
+
     UINT8 id[50];
 		UINT8* cascadeID=NULL;
     pglobalOptions->getMixId(id,50);
@@ -300,7 +300,7 @@ SINT32 CAMix::initMixCascadeInfo(DOMElement* mixes)
     UINT8 name[255];
     m_docMixCascadeInfo->appendChild(elemRoot);
     DOMElement* elem = NULL;
-    
+
     if(pglobalOptions->getCascadeName(name,255) == E_SUCCESS)
     {
     	elem = createDOMElement(m_docMixCascadeInfo,"Name");
@@ -311,18 +311,18 @@ SINT32 CAMix::initMixCascadeInfo(DOMElement* mixes)
     {
     	CAMsg::printMsg(LOG_ERR,"No cascade name given!\n");
     }
-    
+
     elem=createDOMElement(m_docMixCascadeInfo,"Network");
     elemRoot->appendChild(elem);
     DOMElement* elemListenerInterfaces=createDOMElement(m_docMixCascadeInfo,"ListenerInterfaces");
     elem->appendChild(elemListenerInterfaces);
-    
+
     DOMElement *perfTest = createDOMElement(m_docMixCascadeInfo, OPTIONS_NODE_PERFORMANCE_TEST);
-    setDOMElementAttribute(perfTest, 
+    setDOMElementAttribute(perfTest,
     		OPTIONS_ATTRIBUTE_PERFTEST_ENABLED,
     		pglobalOptions->isPerformanceTestEnabled());
     elemRoot->appendChild(perfTest);
-    
+
     for(UINT32 i=1;i<=pglobalOptions->getListenerInterfaceCount();i++)
     {
         CAListenerInterface* pListener=pglobalOptions->getListenerInterface(i);
@@ -337,8 +337,8 @@ SINT32 CAMix::initMixCascadeInfo(DOMElement* mixes)
         }
         delete pListener;
         pListener = NULL;
-    }	
-    
+    }
+
     DOMNode* elemMixesDocCascade=createDOMElement(m_docMixCascadeInfo,"Mixes");
     DOMElement* elemMix=NULL;
     count=1;
@@ -352,7 +352,7 @@ SINT32 CAMix::initMixCascadeInfo(DOMElement* mixes)
 			CAMsg::printMsg(LOG_DEBUG,"Could not sign KeyInfo sent to users...\n");
 		}
     	//if(m_pSignature->signXML(docMixInfo,m_pcertstoreOwnCerts)!=E_SUCCESS)
-		//m_pSignature, pglobalOptions->getOwnCertificate()    	
+		//m_pSignature, pglobalOptions->getOwnCertificate()
 		/*
         elemMixesDocCascade.appendChild(elemThisMix);*/
     }
@@ -392,7 +392,7 @@ SINT32 CAMix::initMixCascadeInfo(DOMElement* mixes)
     if(cascadeID != NULL)
 				setDOMElementAttribute(elemRoot,"id",cascadeID);
     setDOMElementAttribute(elemMixesDocCascade,"count",count);
-     
+
   DOMNode* elemPayment=createDOMElement(m_docMixCascadeInfo,"Payment");
 	elemRoot->appendChild(elemPayment);
 #ifdef PAYMENT
@@ -427,16 +427,111 @@ SINT32 CAMix::addMixInfo(DOMNode* a_element, bool a_bForceFirstNode)
 	return E_SUCCESS;
 }
 
+DOMNode *CAMix::appendTermsAndConditionsExtension(XERCES_CPP_NAMESPACE::DOMDocument *ownerDoc,
+		DOMElement *root)
+{
+	if(pglobalOptions->getTermsAndConditions() != NULL)
+	{
+
+		if( (root == NULL) || (ownerDoc == NULL) )
+		{
+			return NULL;
+		}
+
+		DOMElement *elemTnCExtension = NULL, *elemExtensions = NULL;
+		/* Tag for Nodes that can be removed without destroying the signature.
+		 * To be appended to the "mixes"-node so older mix versions won't get confused.
+		 */
+		getDOMChildByName(root, KEYINFO_NODE_EXTENSIONS, elemExtensions);
+		if(elemExtensions == NULL)
+		{
+			elemExtensions = createDOMElement(ownerDoc, KEYINFO_NODE_EXTENSIONS);
+			root->appendChild(elemExtensions);
+		}
+		else
+		{
+			getDOMChildByName(elemExtensions, KEYINFO_NODE_TNC_EXTENSION, elemTnCExtension);
+		}
+
+		if(elemTnCExtension == NULL)
+		{
+			elemTnCExtension = createDOMElement(ownerDoc, KEYINFO_NODE_TNC_EXTENSION);
+			elemExtensions->appendChild(elemTnCExtension);
+		}
+
+		DOMNode* elemTnCs = ownerDoc->importNode(pglobalOptions->getTermsAndConditions(), true);
+		UINT8 tmpOpSKIBuff[TMP_BUFF_SIZE];
+		UINT32 tmpOpSKILen = TMP_BUFF_SIZE;
+		memset(tmpOpSKIBuff, 0, tmpOpSKILen);
+		pglobalOptions->getOperatorSubjectKeyIdentifier(tmpOpSKIBuff, &tmpOpSKILen);
+		setDOMElementAttribute(elemTnCs, OPTIONS_ATTRIBUTE_TNC_ID, tmpOpSKIBuff);
+		signXML(elemTnCs);
+		elemTnCExtension->appendChild(elemTnCs);
+		return elemTnCExtension;
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
+DOMNode *CAMix::termsAndConditionsInfoNode(XERCES_CPP_NAMESPACE::DOMDocument *ownerDoc)
+{
+	if(pglobalOptions->getTermsAndConditions() != NULL)
+	{
+		DOMElement *elemTnCInfos = createDOMElement(ownerDoc, KEYINFO_NODE_TNC_INFOS);
+		UINT8 tmpBuff[TMP_BUFF_SIZE];
+		UINT32 tmpLen = TMP_BUFF_SIZE;
+		memset(tmpBuff, 0, tmpLen);
+
+		DOMNodeList *list = getElementsByTagName(pglobalOptions->getTermsAndConditions(), OPTIONS_NODE_TNCS);
+		DOMElement *iterator = NULL;
+		DOMElement *currentInfoNode = NULL;
+		for (int i = 0; i < list->getLength(); i++)
+		{
+			iterator = (DOMElement *) list->item(i);
+			currentInfoNode = createDOMElement(ownerDoc, KEYINFO_NODE_TNC_INFO);
+
+			getDOMElementAttribute(iterator, OPTIONS_ATTRIBUTE_TNC_LOCALE, tmpBuff, &tmpLen);
+			setDOMElementAttribute(currentInfoNode, OPTIONS_ATTRIBUTE_TNC_LOCALE, tmpBuff);
+			tmpLen = TMP_BUFF_SIZE;
+			//memset(tmpBuff, 0, tmpLen);
+
+			getDOMElementAttribute(iterator, OPTIONS_ATTRIBUTE_TNC_TEMPLATE_REFID, tmpBuff, &tmpLen);
+			setDOMElementAttribute(currentInfoNode, OPTIONS_ATTRIBUTE_TNC_TEMPLATE_REFID, tmpBuff);
+			tmpLen = TMP_BUFF_SIZE;
+			//memset(tmpBuff, 0, tmpLen);
+
+			elemTnCInfos->appendChild(currentInfoNode);
+		}
+
+		getDOMElementAttribute(pglobalOptions->getTermsAndConditions(), OPTIONS_ATTRIBUTE_TNC_DATE, tmpBuff, &tmpLen);
+		setDOMElementAttribute(elemTnCInfos, OPTIONS_ATTRIBUTE_TNC_DATE, tmpBuff);
+
+		tmpLen = TMP_BUFF_SIZE;
+		//memset(tmpBuff, 0, tmpLen);
+
+		pglobalOptions->getOperatorSubjectKeyIdentifier(tmpBuff, &tmpLen);
+		setDOMElementAttribute(elemTnCInfos, OPTIONS_ATTRIBUTE_TNC_ID, tmpBuff);
+		return elemTnCInfos;
+	}
+	else
+	{
+		return NULL;
+	}
+
+}
+
 SINT32 CAMix::signXML(DOMNode* a_element)
 	{
     CACertStore* tmpCertStore=new CACertStore();
-    
+
     CACertificate* ownCert=pglobalOptions->getOwnCertificate();
     if(ownCert==NULL)
 			{
         CAMsg::printMsg(LOG_DEBUG,"Own Test Cert is NULL!\n");
 			}
-    
+
     // Operator Certificates
     CACertificate* opCert = pglobalOptions->getOpCertificate();
     if(opCert==NULL)
@@ -446,23 +541,23 @@ SINT32 CAMix::signXML(DOMNode* a_element)
 	else
 	{
 		// Own  Mix Certificates first, then Operator Certificates
-		tmpCertStore->add(opCert); 		
+		tmpCertStore->add(opCert);
 	}
     tmpCertStore->add(ownCert);
-    
+
     if(m_pSignature->signXML(a_element, tmpCertStore)!=E_SUCCESS)
 	{
 		return E_UNKNOWN;
 	}
     delete ownCert;
     ownCert = NULL;
-    
+
 	delete opCert;
 	opCert = NULL;
-	
-    delete tmpCertStore;	
+
+    delete tmpCertStore;
     tmpCertStore = NULL;
-    
+
     return E_SUCCESS;
 }
 #ifdef DYNAMIC_MIX
@@ -482,14 +577,14 @@ SINT32 CAMix::dynaReconfigure(bool a_bChangeMixType)
 	SINT32 ret = E_UNKNOWN;
 	CASocket tmpSock;
 	const CASocketAddr* pAddr=NULL;
-	
+
 	m_bReconfigured = true;
 	m_bLoop = !a_bChangeMixType;
 
 	if(m_bCascadeEstablished)
 		stopCascade();
 	m_docMixCascadeInfo = NULL;
-	
+
 	/** @todo Break a middle mix out of its init. That doesn't look really nice, maybe there is a better way to do this?
    	*/
 	CAListenerInterface* pListener=NULL;
@@ -508,16 +603,16 @@ SINT32 CAMix::dynaReconfigure(bool a_bChangeMixType)
 		CAMsg::printMsg(LOG_CRIT,"Reason: no useable (non virtual) interface found!\n");
 		goto EXIT;
 	}
-	
+
 	pAddr=pListener->getAddr();
 	delete pListener;
 	pListener = NULL;
-	
+
 	tmpSock.connect(*pAddr);
 	delete pAddr;
 	pAddr = NULL;
 	tmpSock.close();
-	
+
 	ret = E_SUCCESS;
 EXIT:
 	CAMsg::printMsg(LOG_DEBUG, "Mix has been reconfigured!\n");

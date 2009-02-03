@@ -1,28 +1,28 @@
 /*
-Copyright (c) 2000, The JAP-Team 
+Copyright (c) 2000, The JAP-Team
 All rights reserved.
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-	- Redistributions of source code must retain the above copyright notice, 
+	- Redistributions of source code must retain the above copyright notice,
 	  this list of conditions and the following disclaimer.
 
-	- Redistributions in binary form must reproduce the above copyright notice, 
-	  this list of conditions and the following disclaimer in the documentation and/or 
+	- Redistributions in binary form must reproduce the above copyright notice,
+	  this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
-	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors 
-	  may be used to endorse or promote products derived from this software without specific 
-		prior written permission. 
+	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
+	  may be used to endorse or promote products derived from this software without specific
+		prior written permission.
 
-	
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS 
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
 AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
 BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
-OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
@@ -47,7 +47,7 @@ UINT32 CASocket::m_u32MaxNormalSockets=0xFFFFFFFF; //how many "normal" sockets a
 
 
 CASocket::CASocket(bool bIsReservedSocket)
-	{			
+	{
 		m_Socket=0;
 		m_bSocketIsClosed=true;
 		m_bIsReservedSocket=bIsReservedSocket;
@@ -79,7 +79,7 @@ SINT32 CASocket::create(int type, bool a_bShowTypicalError)
 			}
 			else
 			{
-				CAMsg::printMsg(LOG_CRIT,"Could not create a new normal Socket -- allowed number of normal sockets exeded!\n");
+				CAMsg::printMsg(LOG_CRIT,"Could not create a new normal Socket -- allowed number of normal sockets exceeded!\n");
 				return SOCKET_ERROR;
 			}
 		}
@@ -91,8 +91,8 @@ SINT32 CASocket::create(int type, bool a_bShowTypicalError)
 				if (a_bShowTypicalError)
 				{
 					if(er==EMFILE)
-					{  
-						CAMsg::printMsg(LOG_CRIT,"Could not create a new Socket!\n");	
+					{
+						CAMsg::printMsg(LOG_CRIT,"Could not create a new Socket!\n");
 					}
 					else
 					{
@@ -105,7 +105,7 @@ SINT32 CASocket::create(int type, bool a_bShowTypicalError)
 		m_csClose.lock();
 		if(!m_bIsReservedSocket)
 		{
-			m_u32NormalSocketsOpen++;			
+			m_u32NormalSocketsOpen++;
 		}
 		m_csClose.unlock();
 		return E_SUCCESS;
@@ -136,7 +136,7 @@ SINT32 CASocket::listen(const CASocketAddr& psa)
 						path = NULL;
 					}
 			}
-#endif			
+#endif
 		if(::bind(m_Socket,psa.LPSOCKADDR(),psa.getSize())==SOCKET_ERROR)
 			{
 				close();
@@ -149,7 +149,7 @@ SINT32 CASocket::listen(const CASocketAddr& psa)
 			}
 		return E_SUCCESS;
 	}
-			
+
 SINT32 CASocket::listen(UINT16 port)
 	{
 		CASocketAddrINet oSocketAddrINet(port);
@@ -184,9 +184,9 @@ SINT32 CASocket::accept(CASocket &s)
 		s.m_csClose.lock();
 		m_u32NormalSocketsOpen++;
 		s.m_bSocketIsClosed=false;
-		
+
 		s.m_csClose.unlock();
-		
+
 		return E_SUCCESS;
 	}
 
@@ -195,7 +195,7 @@ SINT32 CASocket::accept(CASocket &s)
 	* @param psa - peer
 	* @param retry - number of retries
 	* @param time - time between retries in seconds
-	*/			
+	*/
 SINT32 CASocket::connect(const CASocketAddr & psa,UINT32 retry,UINT32 time)
 	{
 //		CAMsg::printMsg(LOG_DEBUG,"Socket:connect\n");
@@ -215,7 +215,7 @@ SINT32 CASocket::connect(const CASocketAddr & psa,UINT32 retry,UINT32 time)
 				err=::connect(m_Socket,addr,addr_len);
 //				CAMsg::printMsg(LOG_DEBUG,"Socket:connect-connect-finished err: %i\n",err);
 				if(err!=0)
-					{  
+					{
 						err=GET_NET_ERROR;
 						#ifdef _DEBUG
 						 CAMsg::printMsg(LOG_DEBUG,"Con-Error: %i\n",err);
@@ -224,7 +224,7 @@ SINT32 CASocket::connect(const CASocketAddr & psa,UINT32 retry,UINT32 time)
 							return E_UNKNOWN; //Should be better.....
 						#ifdef _DEBUG
 							CAMsg::printMsg(LOG_DEBUG,"Cannot connect... retrying\n");
-						#endif						
+						#endif
 						sSleep((UINT16)time);
 					}
 				else
@@ -232,7 +232,7 @@ SINT32 CASocket::connect(const CASocketAddr & psa,UINT32 retry,UINT32 time)
 			}
 		return err;
 	}
-	
+
 
 /** Tries to connect to peer psa.
 	*
@@ -254,7 +254,7 @@ SINT32 CASocket::connect(const CASocketAddr & psa,UINT32 msTimeOut)
 		int err=0;
 		const LPSOCKADDR addr=(const LPSOCKADDR)psa.LPSOCKADDR();
 		int addr_len=psa.getSize();
-		
+
 		err=::connect(m_Socket,addr,addr_len);
 		if(err==0)
 			return E_SUCCESS;
@@ -285,7 +285,7 @@ SINT32 CASocket::connect(const CASocketAddr & psa,UINT32 msTimeOut)
 		opollfd.fd=m_Socket;
 		opollfd.events=POLLIN|POLLOUT;
 		err=::poll(&opollfd,1,msTimeOut);
-#endif		
+#endif
 		if(err!=1) //timeout or error
 			{
 				close();
@@ -299,18 +299,18 @@ SINT32 CASocket::connect(const CASocketAddr & psa,UINT32 msTimeOut)
 				return E_UNKNOWN;
 			}
 		setNonBlocking(bWasNonBlocking);
-		return E_SUCCESS;	
+		return E_SUCCESS;
 	}
-			
+
 SINT32 CASocket::close()
 	{
 		UINT32 ret;
-		
+
 		if(m_bSocketIsClosed)
 		{
 			return E_SUCCESS;
 		}
-		
+
 		ret = m_csClose.lock();
 		if (ret != E_SUCCESS)
 		{
@@ -318,7 +318,7 @@ SINT32 CASocket::close()
 				"Could not get lock for closing socket! Error code: %d\n", ret);
 			return ret;
 		}
-		
+
 		if (!m_bSocketIsClosed)
 		{
 			ret=::closesocket(m_Socket);
@@ -327,9 +327,9 @@ SINT32 CASocket::close()
 				m_u32NormalSocketsOpen--;
 			}
 			//CAMsg::printMsg(LOG_DEBUG,"Open Sockets: %d\n", m_u32NormalSocketsOpen);
-			m_bSocketIsClosed=true;			
+			m_bSocketIsClosed=true;
 		}
-		
+
 		if (ret != E_SUCCESS)
 		{
 			ret = GET_NET_ERROR;
@@ -338,8 +338,8 @@ SINT32 CASocket::close()
 		m_csClose.unlock();
 		return ret;
 	}
-			
-/** Sends some data over the network. This may block, 
+
+/** Sends some data over the network. This may block,
 	* if socket is in blocking mode.
 	* @param buff the buffer of data to send
 	* @param len content length
@@ -351,7 +351,7 @@ SINT32 CASocket::send(const UINT8* buff,UINT32 len)
 	{
 	  if(len==0)
 			return 0; //nothing to send
-		int ret;	
+		int ret;
 		SINT32 ef=0;
 		do
 			{
@@ -376,10 +376,10 @@ SINT32 CASocket::send(const UINT8* buff,UINT32 len)
 				#endif
 				return E_UNKNOWN;
 			}
-	  return ret;	    	    
+	  return ret;
 	}
 
-/** Sends some data over the network. Using a Timeout if socket is in blocking mode. 
+/** Sends some data over the network. Using a Timeout if socket is in blocking mode.
 	Otherwise E_AGAIN may returned
 	@param buff the buffer to send
 	@param len content length
@@ -392,12 +392,12 @@ SINT32 CASocket::send(const UINT8* buff,UINT32 len)
 SINT32 CASocket::sendTimeOut(const UINT8* buff,UINT32 len,UINT32 msTimeOut)
 {
 	SINT32 ret;
-	SINT32 aktTimeOut=0;	
+	SINT32 aktTimeOut=0;
 	bool bWasNonBlocking;
 	getNonBlocking(&bWasNonBlocking);
 	if(bWasNonBlocking) //we are in non-blocking mode
 	{
-		ret=send(buff,len);				
+		ret=send(buff,len);
 	}
 	else
 	{
@@ -424,7 +424,7 @@ SINT32 CASocket::sendTimeOut(const UINT8* buff,UINT32 len,UINT32 msTimeOut)
 			setSendTimeOut(aktTimeOut);
 		}
 	}
-	return ret;	    	    
+	return ret;
 }
 
 
@@ -441,22 +441,22 @@ SINT32 CASocket::sendFullyTimeOut(const UINT8* buff,UINT32 len, UINT32 msTimeOut
 	{
 		return E_SUCCESS; //nothing to send
 	}
-	
+
 	SINT32 ret;
-	SINT32 aktTimeOut=0;	
+	SINT32 aktTimeOut=0;
 	UINT64 startupTime, currentMillis;
-	
-	
+
+
 	bool bWasNonBlocking;
 	getNonBlocking(&bWasNonBlocking);
 	aktTimeOut=getSendTimeOut();
 	getcurrentTimeMillis(startupTime);
-	
-	if(bWasNonBlocking) 
+
+	if(bWasNonBlocking)
 	{
 		//we are in non-blocking mode
 		return sendFully(buff, len);
-	}	
+	}
 	else if (setSendTimeOut(msTimeOutSingleSend)!=E_SUCCESS)
 	{
 		// it is not possible to set the socket timeout
@@ -464,7 +464,7 @@ SINT32 CASocket::sendFullyTimeOut(const UINT8* buff,UINT32 len, UINT32 msTimeOut
 		return sendFully(buff, len);
 	}
 	else
-	{	
+	{
 		for(;;)
 		{
 			getcurrentTimeMillis(currentMillis);
@@ -476,7 +476,7 @@ SINT32 CASocket::sendFullyTimeOut(const UINT8* buff,UINT32 len, UINT32 msTimeOut
 				setSendTimeOut(aktTimeOut);
 				return E_TIMEDOUT;
 			}
-			
+
 			ret=send(buff,len);
 			if((UINT32)ret==len)
 			{
@@ -556,14 +556,14 @@ SINT32 CASocket::sendFully(const UINT8* buff,UINT32 len)
 	* @param buff the buffer which get the received data
 	* @param len size of buff
 	*	@return SOCKET_ERROR if an error occured
-	* @retval E_AGAIN, if socket was in non-blocking mode and 
+	* @retval E_AGAIN, if socket was in non-blocking mode and
 	*                  receive would block or a timeout was reached
 	* @retval 0 if socket was gracefully closed
 	* @return the number of bytes received (always >0)
 ***/
 SINT32 CASocket::receive(UINT8* buff,UINT32 len)
 	{
-		int ret;	
+		int ret;
 	  int ef=0;
 	  do
 			{
@@ -579,13 +579,13 @@ SINT32 CASocket::receive(UINT8* buff,UINT32 len)
 		if(ret==SOCKET_ERROR)
 	      CAMsg::printMsg(LOG_DEBUG,"CASocket Receive error %d (%s)\n",ef,GET_NET_ERROR_STR(ef));
 #endif
-	  return ret;	    	    
+	  return ret;
 	}
 
-/** Trys to receive all bytes. If after the timeout value has elapsed, 
+/** Trys to receive all bytes. If after the timeout value has elapsed,
 	* not all bytes are received
 	* the error E_TIMEDOUT is returned.
-	*	@param buff byte array, where the received bytes would be stored 
+	*	@param buff byte array, where the received bytes would be stored
 	*	@param len	on input holds the number of bytes which should be read,
 	*	@param msTimeOut the timout in milli seconds
 	* @retval E_TIMEDOUT if not all byts could be read
@@ -663,7 +663,7 @@ SINT32 CASocket::receiveLine(UINT8* line, UINT32 maxLen, UINT32 msTimeOut)
 		msTimeOut=diff64(endTime,currentTime);
 	}
 	while(byte != '\n' && i<maxLen && ret > 0);
-	
+
 	return ret;
 }
 
@@ -724,7 +724,7 @@ SINT32 CASocket::setReuseAddr(bool b)
 SINT32 CASocket::setRecvBuff(UINT32 r)
 	{
 		int val=r;
-		return setsockopt(m_Socket,SOL_SOCKET,SO_RCVBUF,(char*)&val,sizeof(val));	
+		return setsockopt(m_Socket,SOL_SOCKET,SO_RCVBUF,(char*)&val,sizeof(val));
 	}
 
 SINT32 CASocket::getRecvBuff()
@@ -742,7 +742,7 @@ SINT32 CASocket::setSendBuff(SINT32 r)
 		if(r<0)
 			return E_UNKNOWN;
 		SINT32 val=r;
-		SINT32 ret=setsockopt(m_Socket,SOL_SOCKET,SO_SNDBUF,(char*)&val,sizeof(val));	
+		SINT32 ret=setsockopt(m_Socket,SOL_SOCKET,SO_SNDBUF,(char*)&val,sizeof(val));
 		if(ret!=0)
 			return E_UNKNOWN;
 		return getSendBuff();
@@ -763,7 +763,7 @@ SINT32 CASocket::setSendTimeOut(UINT32 msTimeOut)
 		timeval t;
 		t.tv_sec=msTimeOut/1000;
 		t.tv_usec=(msTimeOut%1000)*1000;
-		return setsockopt(m_Socket,SOL_SOCKET,SO_SNDTIMEO,(char*)&t,sizeof(t));	
+		return setsockopt(m_Socket,SOL_SOCKET,SO_SNDTIMEO,(char*)&t,sizeof(t));
 	}
 
 SINT32 CASocket::getSendTimeOut()
@@ -805,7 +805,7 @@ SINT32 CASocket::setKeepAlive(UINT32 sec)
 		{
 			return E_UNKNOWN;
 		}
-		
+
 #ifdef HAVE_TCP_KEEPALIVE
 		int val=sec;
 		if(setsockopt(m_Socket,IPPROTO_TCP,TCP_KEEPALIVE,(char*)&val,sizeof(val))==SOCKET_ERROR)

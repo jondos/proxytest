@@ -1,28 +1,28 @@
 /*
-Copyright (c) 2000, The JAP-Team 
+Copyright (c) 2000, The JAP-Team
 All rights reserved.
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-	- Redistributions of source code must retain the above copyright notice, 
+	- Redistributions of source code must retain the above copyright notice,
 	  this list of conditions and the following disclaimer.
 
-	- Redistributions in binary form must reproduce the above copyright notice, 
-	  this list of conditions and the following disclaimer in the documentation and/or 
+	- Redistributions in binary form must reproduce the above copyright notice,
+	  this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
-	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors 
-	  may be used to endorse or promote products derived from this software without specific 
-		prior written permission. 
+	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
+	  may be used to endorse or promote products derived from this software without specific
+		prior written permission.
 
-	
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS 
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
 AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
 BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
-OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
@@ -80,13 +80,13 @@ SINT32 CALastMix::initOnce()
 
 SINT32 CALastMix::init()
 	{
-		m_pRSA=new CAASymCipher();	
+		m_pRSA=new CAASymCipher();
 		if(m_pRSA->generateKeyPair(1024)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Could not generate a valid key pair\n");
 				return E_UNKNOWN;
 			}
-		
+
 		CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...\n");
 		CAListenerInterface*  pListener=NULL;
 		UINT32 interfaces=pglobalOptions->getListenerInterfaceCount();
@@ -115,7 +115,7 @@ SINT32 CALastMix::init()
 		if(ret!=E_SUCCESS)
 		    {
 					CAMsg::printMsg(LOG_CRIT," failed!\n");
-					CAMsg::printMsg(LOG_CRIT,"Reason: call to accept() faild with error code: %i\n",ret); 
+					CAMsg::printMsg(LOG_CRIT,"Reason: call to accept() faild with error code: %i\n",ret);
 					return E_UNKNOWN;
 		    }
 		// connected to previous mix
@@ -135,7 +135,7 @@ SINT32 CALastMix::init()
 		m_pCrimeRegExpsURL=pglobalOptions->getCrimeRegExpsURL(&m_nCrimeRegExpsURL);
 		m_nCrimeRegExpsPayload = 0;
 		m_pCrimeRegExpsPayload = pglobalOptions->getCrimeRegExpsPayload(&m_nCrimeRegExpsPayload);
-#endif	
+#endif
 		ret=processKeyExchange();
 		if(ret!=E_SUCCESS)
 		{
@@ -147,7 +147,7 @@ SINT32 CALastMix::init()
 #ifdef REPLAY_DETECTION
 		m_pReplayDB=new CADatabase();
 		m_pReplayDB->start();
-#endif		
+#endif
 		m_pQueueSendToMix=new CAQueue(sizeof(tQueueEntry));
 		m_pQueueReadFromMix=new CAQueue(sizeof(tQueueEntry));
 
@@ -163,8 +163,8 @@ SINT32 CALastMix::init()
 		m_pthreadReadFromMix=new CAThread((UINT8*)"CALastMix - ReadFromMix");
 		m_pthreadReadFromMix->setMainLoop(lm_loopReadFromMix);
 		m_pthreadReadFromMix->start(this);
-		
-		//Starting thread for Step 4		
+
+		//Starting thread for Step 4
 		m_pthreadSendToMix=new CAThread((UINT8*)"CALastMix - SendToMix");
 		m_pthreadSendToMix->setMainLoop(lm_loopSendToMix);
 		m_pthreadSendToMix->start(this);
@@ -174,7 +174,7 @@ SINT32 CALastMix::init()
 		m_pLogPacketStats=new CALogPacketStats();
 		m_pLogPacketStats->setLogIntervallInMinutes(LM_PACKET_STATS_LOG_INTERVALL);
 		m_pLogPacketStats->start();
-#endif		
+#endif
     #ifndef NEW_MIX_TYPE // not TypeB mixes
       /* TypeB mixes are using an own implementation */
 		m_pChannelList=new CALastMixChannelList;
@@ -184,11 +184,11 @@ SINT32 CALastMix::init()
 
 /** Processes the startup communication with the preceeding mix.
 	* \li Step 1: Mix \e n-1 open a TCP/IP Connection\n
-	* \li Step 2: LastMix sends XML struct describing itself, 
-	*					containing PubKey of LastMix, signed by LastMix 
+	* \li Step 2: LastMix sends XML struct describing itself,
+	*					containing PubKey of LastMix, signed by LastMix
 	*					(see \ref XMLInterMixInitSendFromLast "XML structs")\n
-	* \li Step 3: Mix \e n-1 sends XML struct containing encrpyted (with PubKey) 
-	*					Symetric Key used for	interlink encryption between 
+	* \li Step 3: Mix \e n-1 sends XML struct containing encrpyted (with PubKey)
+	*					Symetric Key used for	interlink encryption between
 	*         Mix \e n-1 <---> LastMix, signed by Mix \e n-1
 	*					(see \ref XMLInterMixInitAnswer "XML structs")\n
 	*/
@@ -201,12 +201,12 @@ SINT32 CALastMix::processKeyExchange()
     //pglobalOptions->getCascadeName(cName,128);
     //setDOMElementAttribute(elemMixes,"cascadeName",cName);
 		doc->appendChild(elemMixes);
-		
+
 		addMixInfo(elemMixes, false);
 		DOMElement* elemMix=NULL;
 		getDOMChildByName(elemMixes, "Mix", elemMix, false);
 
-		//Inserting MixProtocol Version 
+		//Inserting MixProtocol Version
 		// Version 0.3  - "normal", initial mix protocol
 		// Version 0.4  - with new flow control [was only used for tests]
     // Version 0.5  - end-to-end 1:n channels (only between client and last mix)
@@ -255,9 +255,9 @@ SINT32 CALastMix::processKeyExchange()
 		tmpBuff[tmpLen]=0;
 		setDOMElementValue(elemNonce,tmpBuff);
 		elemMix->appendChild(elemNonce);
-		
-    
-		
+
+
+
 // Add Info about KeepAlive traffic
 		DOMElement* elemKeepAlive=NULL;
 		UINT32 u32KeepAliveSendInterval=pglobalOptions->getKeepAliveSendInterval();
@@ -272,8 +272,19 @@ SINT32 CALastMix::processKeyExchange()
 		setDOMElementValue(elemKeepAliveSendInterval,u32KeepAliveSendInterval);
 		setDOMElementValue(elemKeepAliveRecvInterval,u32KeepAliveRecvInterval);
 		elemMix->appendChild(elemKeepAlive);
-		CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Offering -- SendInterval %u -- Receive Interval %u\n",u32KeepAliveSendInterval,u32KeepAliveRecvInterval);		
-		
+
+		CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Offering -- SendInterval %u -- Receive Interval %u\n",u32KeepAliveSendInterval,u32KeepAliveRecvInterval);
+
+		/* append the terms and conditions, if there are any, to the KeyInfo
+		 * Extensions, (nodes that can be removed from the KeyInfo without
+		 * destroying the signature of the "Mix"-node).
+		 */
+		if(pglobalOptions->getTermsAndConditions() != NULL)
+		{
+			appendTermsAndConditionsExtension(doc, elemMixes);
+			elemMix->appendChild(termsAndConditionsInfoNode(doc));
+		}
+
 		// create signature
 		if (signXML(elemMix) != E_SUCCESS)
 		{
@@ -289,7 +300,7 @@ SINT32 CALastMix::processKeyExchange()
 		}
 		UINT16 tmp=htons((UINT16)len);
 		CAMsg::printMsg(LOG_INFO,"Sending Infos (chain length and RSA-Key, Message-Size %u)\n",len);
-		
+
 		if(	((CASocket*)*m_pMuxIn)->send((UINT8*)&tmp,2)!=2 ||
 				((CASocket*)*m_pMuxIn)->send(messageBuff,len)!=(SINT32)len)
 			{
@@ -300,7 +311,7 @@ SINT32 CALastMix::processKeyExchange()
 			}
 		delete[] messageBuff;
 		messageBuff = NULL;
-		
+
 		//Now receiving the symmetric key
 		CAMsg::printMsg(LOG_INFO,"Waiting for len of Symmetric Key from previous Mix...\n");
 		if(((CASocket*)*m_pMuxIn)->receiveFully((UINT8*)&tmp,2)!=E_SUCCESS)
@@ -321,7 +332,7 @@ SINT32 CALastMix::processKeyExchange()
 			}
 		messageBuff[len]=0;
 		CAMsg::printMsg(LOG_INFO,"Symmetric Key Info received is:\n");
-		CAMsg::printMsg(LOG_INFO,"%s\n",(char*)messageBuff);		
+		CAMsg::printMsg(LOG_INFO,"%s\n",(char*)messageBuff);
 		//verify signature
 		CASignature oSig;
 		CACertificate* pCert=pglobalOptions->getPrevMixTestCertificate();
@@ -330,7 +341,7 @@ SINT32 CALastMix::processKeyExchange()
 		pCert = NULL;
 		if(oSig.verifyXML(messageBuff,len)!=E_SUCCESS)
 			{
-				CAMsg::printMsg(LOG_CRIT,"Could not verify the symmetric key!\n");		
+				CAMsg::printMsg(LOG_CRIT,"Could not verify the symmetric key!\n");
 				delete []messageBuff;
 				messageBuff = NULL;
 				return E_UNKNOWN;
@@ -367,9 +378,9 @@ SINT32 CALastMix::processKeyExchange()
 			memcmp(SHA1(arNonce,16,NULL),tmpBuff,SHA_DIGEST_LENGTH)!=0
 			)
 			{
-				CAMsg::printMsg(LOG_CRIT,"Could not verify the Nonce!\n");	
+				CAMsg::printMsg(LOG_CRIT,"Could not verify the Nonce!\n");
 				if (doc != NULL)
-				{	
+				{
 					doc->release();
 					doc = NULL;
 				}
@@ -377,8 +388,8 @@ SINT32 CALastMix::processKeyExchange()
 				messageBuff = NULL;
 				return E_UNKNOWN;
 			}
-		CAMsg::printMsg(LOG_INFO,"Verified the symetric key!\n");		
-		
+		CAMsg::printMsg(LOG_INFO,"Verified the symetric key!\n");
+
 		UINT8 key[150];
 		UINT32 keySize=150;
 		SINT32 ret=decodeXMLEncryptedKey(key,&keySize,messageBuff,len,m_pRSA);
@@ -391,7 +402,7 @@ SINT32 CALastMix::processKeyExchange()
 					doc->release();
 					doc = NULL;
 				}
-				CAMsg::printMsg(LOG_CRIT,"Couldt not decrypt the symetric key!\n");		
+				CAMsg::printMsg(LOG_CRIT,"Couldt not decrypt the symetric key!\n");
 				return E_UNKNOWN;
 			}
 		if(m_pMuxIn->setReceiveKey(key,32)!=E_SUCCESS||m_pMuxIn->setSendKey(key+32,32)!=E_SUCCESS)
@@ -401,7 +412,7 @@ SINT32 CALastMix::processKeyExchange()
 					doc->release();
 					doc = NULL;
 				}
-				CAMsg::printMsg(LOG_CRIT,"Couldt not set the symetric key to be used by the MuxSocket!\n");		
+				CAMsg::printMsg(LOG_CRIT,"Couldt not set the symetric key to be used by the MuxSocket!\n");
 				return E_UNKNOWN;
 			}
 		m_pMuxIn->setCrypt(true);
@@ -415,7 +426,7 @@ SINT32 CALastMix::processKeyExchange()
 		UINT32 tmpSendInterval,tmpRecvInterval;
 		getDOMElementValue(elemKeepAliveSendInterval,tmpSendInterval,0xFFFFFFFF); //if now send interval was given set it to "infinite"
 		getDOMElementValue(elemKeepAliveRecvInterval,tmpRecvInterval,0xFFFFFFFF); //if no recv interval was given --> set it to "infinite"
-		CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Getting offer -- SendInterval %u -- Receive Interval %u\n",tmpSendInterval,tmpRecvInterval);		
+		CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Getting offer -- SendInterval %u -- Receive Interval %u\n",tmpSendInterval,tmpRecvInterval);
 		m_u32KeepAliveSendInterval=max(u32KeepAliveSendInterval,tmpRecvInterval);
 		if(m_u32KeepAliveSendInterval>10000)
 			m_u32KeepAliveSendInterval-=10000; //make the send interval a little bit smaller than the related receive intervall
@@ -425,7 +436,7 @@ SINT32 CALastMix::processKeyExchange()
 			doc->release();
 			doc = NULL;
 		}
-		CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Calculated -- SendInterval %u -- Receive Interval %u\n",m_u32KeepAliveSendInterval,m_u32KeepAliveRecvInterval);		
+		CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Calculated -- SendInterval %u -- Receive Interval %u\n",m_u32KeepAliveSendInterval,m_u32KeepAliveRecvInterval);
 		return E_SUCCESS;
 	}
 
@@ -535,7 +546,7 @@ THREAD_RETURN lm_loopSendToMix(void* param)
 						getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
 						pLastMix->m_pLogPacketStats->addToTimeingStats(*pQueueEntry,CHANNEL_DATA,false);
 					}
-#endif					
+#endif
 			}
 		delete pQueueEntry;
 		pQueueEntry = NULL;
@@ -575,7 +586,7 @@ THREAD_RETURN lm_loopSendToMix(void* param)
 						getcurrentTimeMicros(pPoolEntry->timestamp_proccessing_end);
 						pLastMix->m_pLogPacketStats->addToTimeingStats(*pPoolEntry,CHANNEL_DATA,false);
 					}
-#endif					
+#endif
 			}
 		delete pPoolEntry;
 		pPoolEntry = NULL;
@@ -589,7 +600,7 @@ THREAD_RETURN lm_loopSendToMix(void* param)
 
 /* How to end this thread:
  * 1. set m_brestart=true
- */  	
+ */
 THREAD_RETURN lm_loopReadFromMix(void *pParam)
 	{
 		CALastMix* pLastMix=(CALastMix*)pParam;
@@ -609,7 +620,7 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 			{
 				if(pQueue->getSize()>MAX_READ_FROM_PREV_MIX_QUEUE_SIZE)
 					{
-#ifdef DEBUG						
+#ifdef DEBUG
 						CAMsg::printMsg(LOG_DEBUG,"CAFirstMix::Queue is full!\n");
 #endif
 						msSleep(200);
@@ -629,7 +640,7 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 				SINT32 ret=pSocketGroup->select(MIX_POOL_TIMEOUT);
 				if(ret < 0)
 					{
-						if (ret == E_TIMEDOUT) 
+						if (ret == E_TIMEDOUT)
 							{
 								#ifdef USE_POOL
 									pMixPacket->flags=CHANNEL_DUMMY;
@@ -639,10 +650,10 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 										setZero64(pQueueEntry->timestamp_proccessing_start);
 									#endif
 								#else
-									continue;	
-								#endif	
+									continue;
+								#endif
 							}
-						else 
+						else
 							{
 								/* another error occured (happens sometimes while debugging because
 								 * of interruption, if a breakpoint is reached -> poll() returns
@@ -689,13 +700,13 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 		#ifdef USE_POOL
 			delete pPool;
 			pPool = NULL;
-		#endif			
+		#endif
 		THREAD_RETURN_SUCCESS;
 	}
 
 #ifdef LOG_CRIME
 	bool CALastMix::checkCrime(const UINT8* payLoad,UINT32 payLen)
-	{ 
+	{
 		//Lots of TODO!!!!
 		//DNS Lookup may block if Host does not exists!!!!!
 		//so we use regexp....
@@ -715,14 +726,14 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 				return false;
 			}
 			startOfUrl++;
-			//search for first space after start of URL 
-			endOfUrl = (UINT8*)memchr(startOfUrl, 32 , payLen - (startOfUrl - payLoad)); 
+			//search for first space after start of URL
+			endOfUrl = (UINT8*)memchr(startOfUrl, 32 , payLen - (startOfUrl - payLoad));
 			if(endOfUrl==NULL)
 			{
 				return false;
 			}
 			strLen = endOfUrl-startOfUrl;
-	
+
 			for(UINT32 i = 0; i < m_nCrimeRegExpsURL; i++)
 			{
 				if(regnexec(&m_pCrimeRegExpsURL[i],(char*)startOfUrl,strLen,0,NULL,0)==0)
@@ -737,7 +748,7 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 				// there are no regular expressions for Payload
 				return false;
 			}
-		
+
 		for(UINT32 i = 0; i < m_nCrimeRegExpsPayload; i++)
 		{
 			if (regnexec(&m_pCrimeRegExpsPayload[i],(const char*)payLoad ,payLen,0,NULL,0)==0)
@@ -745,7 +756,7 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 				return true;
 			}
 		}
-		return false;			
+		return false;
 	}
 #endif
 
@@ -793,7 +804,7 @@ SINT32 CALastMix::setTargets()
 				CAMsg::printMsg(LOG_DEBUG,"%u. SOCKS Proxy's Address: %u.%u.%u.%u:%u\n",i+1,ip[0],ip[1],ip[2],ip[3],port);
 			}
 		return E_SUCCESS;
-	}			
+	}
 
 SINT32 CALastMix::clean()
 {
@@ -834,7 +845,7 @@ SINT32 CALastMix::clean()
 				delete m_pthreadSendToMix;
 				m_pthreadSendToMix = NULL;
 			}
-		m_pthreadSendToMix=NULL;	
+		m_pthreadSendToMix=NULL;
 		if(m_pthreadReadFromMix!=NULL)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Wait for LoopReadFromMix!\n");
@@ -842,8 +853,8 @@ SINT32 CALastMix::clean()
 				delete m_pthreadReadFromMix;
 				m_pthreadReadFromMix = NULL;
 			}
-		m_pthreadReadFromMix=NULL;	
-	
+		m_pthreadReadFromMix=NULL;
+
 #ifdef LOG_PACKET_TIMES
 			CAMsg::printMsg(LOG_CRIT,"Wait for LoopLogPacketStats to terminate!\n");
 			if(m_pLogPacketStats!=NULL)
@@ -853,7 +864,7 @@ SINT32 CALastMix::clean()
 					m_pLogPacketStats = NULL;
 				}
 			m_pLogPacketStats=NULL;
-#endif	
+#endif
 		if(m_pChannelList!=NULL)
 			{
 				lmChannelListEntry* pChannelListEntry=m_pChannelList->getFirstSocket();
@@ -871,11 +882,11 @@ SINT32 CALastMix::clean()
 						}
 						pChannelListEntry=m_pChannelList->getNextSocket();
 					}
-			}	
+			}
 		delete m_pQueueReadFromMix;
 		m_pQueueReadFromMix = NULL;
 		delete m_pQueueSendToMix;
-		m_pQueueSendToMix = NULL;	
+		m_pQueueSendToMix = NULL;
     #ifndef NEW_MIX_TYPE // not TypeB mixes
       /* TypeB mixes are using an own implementation */
 		delete m_pChannelList;
@@ -886,7 +897,7 @@ SINT32 CALastMix::clean()
 			delete m_pMuxIn;
 			m_pMuxIn=NULL;
 		}
-		
+
 		delete m_pRSA;
 		m_pRSA = NULL;
     #endif

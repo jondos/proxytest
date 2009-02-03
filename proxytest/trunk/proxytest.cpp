@@ -128,6 +128,7 @@ void init()
 	{
 #ifndef ONLY_LOCAL_PROXY
 		XMLPlatformUtils::Initialize();
+		initDOMParser();
 #endif
 		OpenSSL_add_all_algorithms();
 		pOpenSSLMutexes=new CAMutex[CRYPTO_num_locks()];
@@ -154,7 +155,7 @@ void init()
 
 /**do necessary cleanups of libraries etc.*/
 void cleanup()
-	{		
+	{
 //		delete pRTT;
 #ifndef ONLY_LOCAL_PROXY
 		if(pMix!=NULL)
@@ -200,18 +201,18 @@ void cleanup()
 #endif
 
 		CAMsg::cleanup();
-		
+
 	}
 
 ///Remark: terminate() might be already defined by the c lib -- do not use this name...
 void my_terminate(void)
-{	
+{
 	if(!bTriedTermination)
 	{
 		bTriedTermination = true;
 #ifndef ONLY_LOCAL_PROXY
 		if(pMix!=NULL)
-		{			
+		{
 			pMix->shutDown();
 			for (UINT32 i = 0; i < 20 && !(pMix->isShutDown()); i++)
 			{
@@ -226,10 +227,10 @@ void my_terminate(void)
 }
 
 
-void signal_segv( int ) 
+void signal_segv( int )
 {
 	signal(SIGSEGV,SIG_DFL); //otherwise we might end up in endless loops...
-	
+
 	MONITORING_FIRE_SYS_EVENT(ev_sys_sigSegV);
 	CAMsg::printMsg(LOG_CRIT,"Oops ... caught SIG_SEGV! Exiting ...\n");
 #ifdef PRINT_THREAD_STACK_TRACE
@@ -237,13 +238,13 @@ void signal_segv( int )
 	if (stack != NULL)
 	{
 		CAMsg::printMsg( LOG_CRIT, "Stack trace: %s, \"%s\"\n", stack->strMethodName, stack->strPosition);
-		
+
 	}
 	else
 	{
 		CAMsg::printMsg( LOG_CRIT, "Stack trace: none available\n");
 	}
-#endif	
+#endif
 	// my_terminate();  temporarily disabled
 	exit(1);
 }
@@ -252,7 +253,7 @@ void signal_segv( int )
 
 
 void signal_term( int )
-	{ 
+	{
 		MONITORING_FIRE_SYS_EVENT(ev_sys_sigTerm);
 		CAMsg::printMsg(LOG_INFO,"Hm.. Signal SIG_TERM received... exiting!\n");
 		my_terminate();
@@ -542,7 +543,7 @@ int main(int argc, const char* argv[])
 		cleanup();
 		exit(0);
 		*/
-	
+
 		checkSizesOfBaseTypes();
 #ifndef NEW_MIX_TYPE
 		if(MIXPACKET_SIZE!=sizeof(MIXPACKET))
@@ -575,7 +576,7 @@ int main(int argc, const char* argv[])
 		{
 				CAMsg::printMsg(LOG_CRIT,"sizeof(tDataRetentionLogEntry) [%u] != 18 --> maybe a compiler (optimization) problem!\n",sizeof(t_dataretentionLogEntry));
 				exit(EXIT_FAILURE);
-		}	
+		}
 #endif
 //		CADataRetentionLogFile::doCheckAndPerformanceTest();
 //		getch();
@@ -593,7 +594,7 @@ int main(int argc, const char* argv[])
 		printf("try connect\n");
 		ssl.connect(addr,1,0);
 		ssl.receiveFully(pt,3);
-		
+
 		exit(0);
 */
 		if(pglobalOptions->parse(argc,argv) != E_SUCCESS)
@@ -615,7 +616,7 @@ int main(int argc, const char* argv[])
 			exit(0);
 #endif
 
-	
+
 
 
 		UINT8 buff[255];
@@ -635,10 +636,10 @@ int main(int argc, const char* argv[])
 					chdir("/");
 					umask(0);
 				#endif
-			 // Close out the standard file descriptors 
+			 // Close out the standard file descriptors
         close(STDIN_FILENO);
         close(STDOUT_FILENO);
-        close(STDERR_FILENO);			
+        close(STDERR_FILENO);
 			}
 		if(pglobalOptions->getDaemon()||pglobalOptions->getAutoRestart()) //if Autorestart is requested, when we fork a controlling process
 			                              //which is only responsible for restarting the Mix if it dies
@@ -661,33 +662,33 @@ RESTART_MIX:
 						if(ret==pid&&status!=0) //if unexpectly died --> restart
 							goto RESTART_MIX;
 						exit(EXIT_SUCCESS);
-					}		
+					}
 				CAMsg::printMsg(LOG_DEBUG,"child after fork...\n");
 				setsid();
 				#ifndef DO_TRACE
 					chdir("/");
 					umask(0);
 				#endif
-			 // Close out the standard file descriptors 
+			 // Close out the standard file descriptors
         close(STDIN_FILENO);
         close(STDOUT_FILENO);
-        close(STDERR_FILENO);			
+        close(STDERR_FILENO);
 			}
 #endif
 #ifdef SERVER_MONITORING
 		CAStatusManager::init();
 #endif
-			
+
 #ifndef WIN32
 		maxFiles=pglobalOptions->getMaxOpenFiles();
-		
+
 		struct rlimit coreLimit;
 		coreLimit.rlim_cur = coreLimit.rlim_max = RLIM_INFINITY;
 		if (setrlimit(RLIMIT_CORE, &coreLimit) != 0)
 		{
 			CAMsg::printMsg(LOG_CRIT,"Could not set RLIMIT_CORE (max core file size) to unlimited size. -- Core dumps might not be generated!\n",maxFiles);
-		}	
-		
+		}
+
 		if(maxFiles>0)
 			{
 				struct rlimit lim;
@@ -706,8 +707,8 @@ RESTART_MIX:
 					CAMsg::printMsg(LOG_ERR,"Could not switch to effective user %s!\n",buff);
 				else
 					CAMsg::printMsg(LOG_INFO,"Switched to effective user %s!\n",buff);
-			}		
-			
+			}
+
 		if(geteuid()==0)
 			CAMsg::printMsg(LOG_INFO,"Warning - Running as root!\n");
 #endif
@@ -741,7 +742,7 @@ RESTART_MIX:
 			}
 #endif
 
-	
+
 
 #if defined (_DEBUG) &&!defined(ONLY_LOCAL_PROXY)
 		//		CADatabase::test();
@@ -861,13 +862,13 @@ RESTART_MIX:
 						pMix=new CAFirstMixA();
 					#else
 						pMix=new CAFirstMixB();
-					#endif					
+					#endif
 					MONITORING_FIRE_NET_EVENT(ev_net_firstMixInited);
 				}
 				else if(pglobalOptions->isMiddleMix())
 				{
 					CAMsg::printMsg(LOG_INFO,"I am a Middle MIX..\n");
-					pMix=new CAMiddleMix();				
+					pMix=new CAMiddleMix();
 					MONITORING_FIRE_NET_EVENT(ev_net_middleMixInited);
 				}
 				else
@@ -876,7 +877,7 @@ RESTART_MIX:
 							pMix=new CALastMixA();
 						#else
 							pMix=new CALastMixB();
-						#endif				
+						#endif
 						MONITORING_FIRE_NET_EVENT(ev_net_lastMixInited);
 				}
 #else
@@ -891,7 +892,7 @@ RESTART_MIX:
 			CAMsg::printMsg(LOG_CRIT,"Error during MIX-Startup!\n");
 #else
     /* LERNGRUPPE */
-while(true) 
+while(true)
 {
 	CAMsg::printMsg(LOG_INFO,"Starting MIX...\n");
 	if(pMix->start()!=E_SUCCESS)

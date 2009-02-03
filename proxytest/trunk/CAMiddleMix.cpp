@@ -1,28 +1,28 @@
 /*
-Copyright (c) 2000, The JAP-Team 
+Copyright (c) 2000, The JAP-Team
 All rights reserved.
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-	- Redistributions of source code must retain the above copyright notice, 
+	- Redistributions of source code must retain the above copyright notice,
 	  this list of conditions and the following disclaimer.
 
-	- Redistributions in binary form must reproduce the above copyright notice, 
-	  this list of conditions and the following disclaimer in the documentation and/or 
+	- Redistributions in binary form must reproduce the above copyright notice,
+	  this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
-	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors 
-	  may be used to endorse or promote products derived from this software without specific 
-		prior written permission. 
+	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
+	  may be used to endorse or promote products derived from this software without specific
+		prior written permission.
 
-	
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS 
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
 AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
 BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
-OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 
@@ -64,15 +64,15 @@ SINT32 CAMiddleMix::initOnce()
 
 /** Processes key exchange with Mix \e n+1 and Mix \e n-1.
 	* \li Step 1: Opens TCP/IP-Connection to Mix \e n+1. \n
-	* \li Step 2: Receives info about Mix \e n+1 .. LastMix as XML struct 
+	* \li Step 2: Receives info about Mix \e n+1 .. LastMix as XML struct
 	*         (see \ref  XMLInterMixInitSendFromLast "XML struct") \n
   * \li Step 3: Verfies signature, generates symetric Keys used for link encryption
 	*         with Mix \n+1. \n
 	* \li Step 4: Sends symetric Key to Mix \e n+1, encrypted with PubKey of Mix \e n+1
 	*         (see \ref XMLInterMixInitAnswer "XML struct") \n
-	* \li Step 5: Sends info about Mix \e n .. LastMix as XML struct 
+	* \li Step 5: Sends info about Mix \e n .. LastMix as XML struct
 	*         (see \ref  XMLInterMixInitSendFromLast "XML struct")to Mix \e n-1 \n
-	* \li Step 6: Recevies symetric Key used for link encrpytion with Mix \e n-1 
+	* \li Step 6: Recevies symetric Key used for link encrpytion with Mix \e n-1
 	*					(see \ref XMLInterMixInitAnswer "XML struct") \n
 	*
 	* @retval E_SUCCESS if KeyExchange with Mix \e n+1 and Mix \e n-1 was succesful
@@ -80,13 +80,13 @@ SINT32 CAMiddleMix::initOnce()
 	*/
 SINT32 CAMiddleMix::processKeyExchange()
 	{
-		UINT8* recvBuff=NULL;		
+		UINT8* recvBuff=NULL;
 		UINT16 len;
 		SINT32 ret;
 
 		if(((CASocket*)*m_pMuxOut)->receiveFully((UINT8*)&len,2)!=E_SUCCESS)
 			{
-				CAMsg::printMsg(LOG_INFO,"Error receiving Key Info lenght from Mix n+1!\n");	
+				CAMsg::printMsg(LOG_INFO,"Error receiving Key Info lenght from Mix n+1!\n");
 				MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextFailed);
 				return E_UNKNOWN;
 			}
@@ -106,7 +106,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 		recvBuff[len]=0; //make a string
 		CAMsg::printMsg(LOG_INFO,"Received Key Info...\n");
 		CAMsg::printMsg(LOG_INFO,"%s\n",recvBuff);
-		
+
 		//Parsing KeyInfo received from Mix n+1
 		XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(recvBuff,len);
 		delete []recvBuff;
@@ -119,7 +119,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 			}
 
 		DOMElement* root=doc->getDocumentElement();
-		
+
 		//Finding first <Mix> entry and sending symetric key...
 		bool bFoundNextMix=false;
 		DOMNode* child=root->getFirstChild();
@@ -147,7 +147,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 						UINT8 arNonce[1024];
 						UINT32 tmpLen=1024;
 						if(elemNonce==NULL)
-							{	
+							{
 								MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextFailed);
 								CAMsg::printMsg(LOG_INFO,"No nonce found in Key Info from Mix n+1!\n");
 								return E_UNKNOWN;
@@ -159,7 +159,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 						CABase64::encode(SHA1(arNonce,lenNonce,NULL),SHA_DIGEST_LENGTH,
 																	arNonce,&tmpLen);
 						arNonce[tmpLen]=0;
-						
+
 						//Extracting PubKey of Mix n+1, generating SymKey for link encryption
 						//with Mix n+1, encrypt and send them
 						DOMNode* rsaKey=child->getFirstChild();
@@ -172,7 +172,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 						encodeXMLEncryptedKey(key,64,elemRoot,docSymKey,&oRSA);
 						docSymKey->appendChild(elemRoot);
 						DOMElement* elemNonceHash=createDOMElement(docSymKey,"Nonce");
-						setDOMElementValue(elemNonceHash,arNonce);						
+						setDOMElementValue(elemNonceHash,arNonce);
 						elemRoot->appendChild(elemNonceHash);
 
 						///Getting the KeepAlive Traffice...
@@ -197,12 +197,12 @@ SINT32 CAMiddleMix::processKeyExchange()
 						setDOMElementValue(elemKeepAliveSendInterval,u32KeepAliveSendInterval);
 						setDOMElementValue(elemKeepAliveRecvInterval,u32KeepAliveRecvInterval);
 						elemRoot->appendChild(elemKeepAlive);
-						CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Offering -- SendInterval %u -- Receive Interval %u\n",u32KeepAliveSendInterval,u32KeepAliveRecvInterval);		
+						CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Offering -- SendInterval %u -- Receive Interval %u\n",u32KeepAliveSendInterval,u32KeepAliveRecvInterval);
 						m_u32KeepAliveSendInterval2=max(u32KeepAliveSendInterval,tmpRecvInterval);
 						if(m_u32KeepAliveSendInterval>10000)
 							m_u32KeepAliveSendInterval2-=10000; //make the send interval a little bit smaller than the related receive intervall
 						m_u32KeepAliveRecvInterval2=max(u32KeepAliveRecvInterval,tmpSendInterval);
-						CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Calculated -- SendInterval %u -- Receive Interval %u\n",m_u32KeepAliveSendInterval2,m_u32KeepAliveRecvInterval2);		
+						CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Calculated -- SendInterval %u -- Receive Interval %u\n",m_u32KeepAliveSendInterval2,m_u32KeepAliveRecvInterval2);
 
 						m_pSignature->signXML(elemRoot);
 						m_pMuxOut->setSendKey(key,32);
@@ -232,7 +232,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 			}
 		// -----------------------------------------
 		// ---- Start exchange with Mix n-1 --------
-		// -----------------------------------------		
+		// -----------------------------------------
 		//Inserting own (key) info
 		UINT32 count=0;
 		if(getDOMElementAttribute(root,"count",count)!=E_SUCCESS)
@@ -242,12 +242,12 @@ SINT32 CAMiddleMix::processKeyExchange()
 			}
 		count++;
 		setDOMElementAttribute(root,"count",count);
-		
+
 		addMixInfo(root, true);
 		DOMElement* mixNode;
 		getDOMChildByName(root, "Mix", mixNode, false);
-		
-		
+
+
 		UINT8 tmpBuff[50];
 		pglobalOptions->getMixId(tmpBuff,50); //the mix id...
 		setDOMElementAttribute(mixNode,"id",tmpBuff);
@@ -283,15 +283,25 @@ SINT32 CAMiddleMix::processKeyExchange()
 		setDOMElementValue(elemKeepAliveSendInterval,u32KeepAliveSendInterval);
 		setDOMElementValue(elemKeepAliveRecvInterval,u32KeepAliveRecvInterval);
 		mixNode->appendChild(elemKeepAlive);
-		CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Offering -- SendInterval %u -- Receive Interval %u\n",u32KeepAliveSendInterval,u32KeepAliveRecvInterval);		
+		CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Offering -- SendInterval %u -- Receive Interval %u\n",u32KeepAliveSendInterval,u32KeepAliveRecvInterval);
+
+		/* append the terms and conditions, if there are any, to the KeyInfo
+		 * Extensions, (nodes that can be removed from the KeyInfo without
+		 * destroying the signature of the "Mix"-node).
+		 */
+		if(pglobalOptions->getTermsAndConditions() != NULL)
+		{
+			appendTermsAndConditionsExtension(doc, root);
+			mixNode->appendChild(termsAndConditionsInfoNode(doc));
+		}
 
 		// create signature
 		if(signXML(mixNode)!=E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_DEBUG,"Could not sign KeyInfo send to users...\n");
 		}
-		
-		
+
+
 
 		UINT8* out=new UINT8[0xFFFF];
 		memset(out, 0, (sizeof(UINT8)*0xFFFF));
@@ -310,7 +320,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 			CAMsg::printMsg(LOG_DEBUG,"Error sending new New Key Info\n");
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextFailed);
 			return E_UNKNOWN;
-		}	
+		}
 		MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextSuccessful);
 		CAMsg::printMsg(LOG_DEBUG,"Sending new New Key Info succeded\n");
 
@@ -329,13 +339,13 @@ SINT32 CAMiddleMix::processKeyExchange()
 		}
 		recvBuff[len]=0;
 		CAMsg::printMsg(LOG_INFO,"Symmetric Key Info received is:\n");
-		CAMsg::printMsg(LOG_INFO,"%s\n",(char*)recvBuff);		
+		CAMsg::printMsg(LOG_INFO,"%s\n",(char*)recvBuff);
 		//Parsing doc received
 		doc=parseDOMDocument(recvBuff,len);
 		delete[] recvBuff;
 		recvBuff = NULL;
 		if(doc==NULL)
-		{	
+		{
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangePrevFailed);
 			CAMsg::printMsg(LOG_INFO,"Error parsing Key Info from Mix n-1!\n");
 			return E_UNKNOWN;
@@ -350,7 +360,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 		if(oSig.verifyXML(elemRoot)!=E_SUCCESS)
 		{
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangePrevFailed);
-			CAMsg::printMsg(LOG_CRIT,"Could not verify the symetric key form Mix n-1!\n");		
+			CAMsg::printMsg(LOG_CRIT,"Could not verify the symetric key form Mix n-1!\n");
 			return E_UNKNOWN;
 		}
 		//Verifying nonce
@@ -365,19 +375,19 @@ SINT32 CAMiddleMix::processKeyExchange()
 			)
 		{
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangePrevFailed);
-			CAMsg::printMsg(LOG_CRIT,"Could not verify the Nonce!\n");		
+			CAMsg::printMsg(LOG_CRIT,"Could not verify the Nonce!\n");
 			return E_UNKNOWN;
 		}
-		CAMsg::printMsg(LOG_INFO,"Verified the symmetric key!\n");		
+		CAMsg::printMsg(LOG_INFO,"Verified the symmetric key!\n");
 
 		UINT8 key[150];
 		UINT32 keySize=150;
-	
+
 		ret=decodeXMLEncryptedKey(key,&keySize,elemRoot,m_pRSA);
 		if(ret!=E_SUCCESS||keySize!=64)
 		{
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangePrevFailed);
-			CAMsg::printMsg(LOG_CRIT,"Could not set the symmetric key to be used by the MuxSocket!\n");		
+			CAMsg::printMsg(LOG_CRIT,"Could not set the symmetric key to be used by the MuxSocket!\n");
 			return E_UNKNOWN;
 		}
 		MONITORING_FIRE_NET_EVENT(ev_net_keyExchangePrevSuccessful);
@@ -394,18 +404,18 @@ SINT32 CAMiddleMix::processKeyExchange()
 		UINT32 tmpSendInterval,tmpRecvInterval;
 		getDOMElementValue(elemKeepAliveSendInterval,tmpSendInterval,0xFFFFFFFF); //if now send interval was given set it to "infinite"
 		getDOMElementValue(elemKeepAliveRecvInterval,tmpRecvInterval,0xFFFFFFFF); //if no recv interval was given --> set it to "infinite"
-		CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Getting offer -- SendInterval %u -- Receive Interval %u\n",tmpSendInterval,tmpRecvInterval);		
+		CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Getting offer -- SendInterval %u -- Receive Interval %u\n",tmpSendInterval,tmpRecvInterval);
 		m_u32KeepAliveSendInterval=max(u32KeepAliveSendInterval,tmpRecvInterval);
 		if(m_u32KeepAliveSendInterval>10000)
 			m_u32KeepAliveSendInterval-=10000; //make the send interval a little bit smaller than the related receive intervall
 		m_u32KeepAliveRecvInterval=max(u32KeepAliveRecvInterval,tmpSendInterval);
-		CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Calculated -- SendInterval %u -- Receive Interval %u\n",m_u32KeepAliveSendInterval,m_u32KeepAliveRecvInterval);		
+		CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Calculated -- SendInterval %u -- Receive Interval %u\n",m_u32KeepAliveSendInterval,m_u32KeepAliveRecvInterval);
 
 		return E_SUCCESS;
 	}
 
 SINT32 CAMiddleMix::init()
-	{		
+	{
 #ifdef DYNAMIC_MIX
 		m_bBreakNeeded = m_bReconfigured;
 #endif
@@ -415,10 +425,10 @@ SINT32 CAMiddleMix::init()
 		if(m_pRSA->generateKeyPair(1024)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Init: Error generating Key-Pair...\n");
-				return E_UNKNOWN;		
+				return E_UNKNOWN;
 			}
-		
-    // connect to next mix    
+
+    // connect to next mix
 		CASocketAddr* pAddrNext=NULL;
 		for(UINT32 i=0;i<pglobalOptions->getTargetInterfaceCount();i++)
 			{
@@ -437,7 +447,7 @@ SINT32 CAMiddleMix::init()
 				CAMsg::printMsg(LOG_CRIT,"No next Mix specified!\n");
 				return E_UNKNOWN;
 			}
-	
+
 		m_pMuxOut=new CAMuxSocket();
 
 		if(((CASocket*)*m_pMuxOut)->create(pAddrNext->getType())!=E_SUCCESS)
@@ -448,8 +458,8 @@ SINT32 CAMiddleMix::init()
 		((CASocket*)*m_pMuxOut)->setRecvBuff(50*MIXPACKET_SIZE);
 		((CASocket*)*m_pMuxOut)->setSendBuff(50*MIXPACKET_SIZE);
 
-		
-    CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...\n");    
+
+    CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...\n");
 		CAListenerInterface* pListener=NULL;
 		UINT32 interfaces=pglobalOptions->getListenerInterfaceCount();
 		for(UINT32 i=1;i<=interfaces;i++)
@@ -483,7 +493,7 @@ SINT32 CAMiddleMix::init()
 		pAddr = NULL;
 		if(ret!=E_SUCCESS)
 			{
-				CAMsg::printMsg(LOG_CRIT,"Error waiting for previous Mix... -- Exiting!\n");				
+				CAMsg::printMsg(LOG_CRIT,"Error waiting for previous Mix... -- Exiting!\n");
 				return E_UNKNOWN;
 			}
 		CAMsg::printMsg(LOG_INFO," connected!\n");
@@ -497,7 +507,7 @@ SINT32 CAMiddleMix::init()
 				if(((CASocket*)*m_pMuxIn)->setKeepAlive(true)!=E_SUCCESS)
 					CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
 			}
-		
+
 		/** Connect to next mix */
 		if(connectToNextMix(pAddrNext) != E_SUCCESS)
 		{
@@ -510,7 +520,7 @@ SINT32 CAMiddleMix::init()
 		delete pAddrNext;
 		pAddrNext = NULL;
 
-//		mSocketGroup.add(muxOut);	
+//		mSocketGroup.add(muxOut);
 		MONITORING_FIRE_NET_EVENT(ev_net_nextConnected);
 		CAMsg::printMsg(LOG_INFO," connected!\n");
 
@@ -540,7 +550,7 @@ SINT32 CAMiddleMix::init()
 		m_u64ReferenceTime=time(NULL);
 #endif
 		m_pMiddleMixChannelList=new CAMiddleMixChannelList();
-		
+
 		return E_SUCCESS;
 	}
 
@@ -549,7 +559,7 @@ THREAD_RETURN mm_loopSendToMixAfter(void* param)
 	{
 		INIT_STACK;
 		BEGIN_STACK("CAFirstMix::fm_loopSendToMixAfter");
-		
+
 		CAMiddleMix* pMiddleMix=(CAMiddleMix*)param;
 		CAQueue* pQueue=((CAMiddleMix*)param)->m_pQueueSendToMixAfter;
 		CAMuxSocket* pMuxSocket=pMiddleMix->m_pMuxOut;
@@ -610,7 +620,7 @@ THREAD_RETURN mm_loopSendToMixBefore(void* param)
 	{
 		INIT_STACK;
 		BEGIN_STACK("CAFirstMix::fm_loopSendToMixBefore");
-		
+
 		CAMiddleMix* pMiddleMix=(CAMiddleMix*)param;
 		CAQueue* pQueue=((CAMiddleMix*)param)->m_pQueueSendToMixBefore;
 		CAMuxSocket* pMuxSocket=pMiddleMix->m_pMuxIn;
@@ -643,7 +653,7 @@ THREAD_RETURN mm_loopSendToMixBefore(void* param)
 						break;
 					}
 				if((pMuxSocket->send(pMixPacket)!=MIXPACKET_SIZE))
-					{	
+					{
 						MONITORING_FIRE_NET_EVENT(ev_net_prevConnectionClosed);
 						CAMsg::printMsg(LOG_ERR,"CAFirstMix::lm_loopSendToMixBefore - Error in sending MixPaket\n");
 						break;
@@ -680,7 +690,7 @@ THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 		CASingleSocketGroup oSocketGroup(false);
 		oSocketGroup.add(*(pMix->m_pMuxIn));
 
-		#ifdef USE_POOL		
+		#ifdef USE_POOL
 			CAPool* pPool=new CAPool(MIX_POOL_SIZE);
 		#endif
 
@@ -690,11 +700,11 @@ THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 				{
 #ifdef DEBUG
 					CAMsg::printMsg(LOG_DEBUG,"CAFirstMix::Queue prev is full!\n");
-#endif				
+#endif
 					msSleep(200);
 					continue;
 				}
-				#ifndef USE_POOL			
+				#ifndef USE_POOL
 					ret=oSocketGroup.select(1000);
 				#else
 					ret=oSocketGroup.select(MIX_POOL_TIMEOUT);
@@ -711,7 +721,7 @@ THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 									getRandom(pMixPacket->data,DATA_SIZE);
 									pPool->pool(pPoolEntry);
 									if(m_pMuxOut->send(pMixPacket)==SOCKET_ERROR)
-										pMix->m_bRun=false;								
+										pMix->m_bRun=false;
 								#endif
 							}
 						else
@@ -733,19 +743,19 @@ THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 
 						if(ret==SOCKET_ERROR)
 							{
-								
+
 								CAMsg::printMsg(LOG_CRIT,"Fehler beim Empfangen -- Exiting!\n");
 								pMix->m_bRun=false;
 								MONITORING_FIRE_NET_EVENT(ev_net_prevConnectionClosed);
 							}
-						#ifdef USE_POOL	
+						#ifdef USE_POOL
 						else if(pMixPacket->channel==DUMMY_CHANNEL)
 							{
 								pMixPacket->flags=CHANNEL_DUMMY;
 								getRandom(pMixPacket->data,DATA_SIZE);
 								pPool->pool(pPoolEntry);
 								if(pMix->m_pMuxOut->send(pMixPacket)==SOCKET_ERROR)
-									pMix->m_bRun=false;								
+									pMix->m_bRun=false;
 								}
 						#endif
 						else if(pMix->m_pMiddleMixChannelList->getInToOut(pMixPacket->channel,&channelOut,&pCipher)!=E_SUCCESS)
@@ -840,15 +850,15 @@ THREAD_RETURN mm_loopReadFromMixAfter(void* param)
 		oSocketGroup.add(*(pMix->m_pMuxOut));
 
 		CAQueue* pQueue=pMix->m_pQueueSendToMixBefore;
-		
-#ifdef USE_POOL		
+
+#ifdef USE_POOL
 		CAPool* pPool=new CAPool(MIX_POOL_SIZE);
 #endif
 		while(pMix->m_bRun)
 			{
 				if(pQueue->getSize()>MAX_READ_FROM_NEXT_MIX_QUEUE_SIZE)
 				{
-#ifdef DEBUG				
+#ifdef DEBUG
 					CAMsg::printMsg(LOG_DEBUG,"CAFirstMix::Queue next is full!\n");
 #endif
 					msSleep(200);
@@ -877,7 +887,7 @@ THREAD_RETURN mm_loopReadFromMixAfter(void* param)
 						else
 							{
 								CAMsg::printMsg(LOG_CRIT,"loopReadFromMixAfter -- Fehler bei select() -- goto ERR!\n");
-								pMix->m_bRun=false;	
+								pMix->m_bRun=false;
 								MONITORING_FIRE_NET_EVENT(ev_net_nextConnectionClosed);
 							}
 					}
@@ -896,7 +906,7 @@ THREAD_RETURN mm_loopReadFromMixAfter(void* param)
 								pMix->m_bRun=false;
 								MONITORING_FIRE_NET_EVENT(ev_net_nextConnectionClosed);
 							}
-						#ifdef USE_POOL	
+						#ifdef USE_POOL
 						else if(pMixPacket->channel==DUMMY_CHANNEL)
 							{
 								pMixPacket->flags=CHANNEL_DUMMY;
@@ -953,7 +963,7 @@ THREAD_RETURN mm_loopReadFromMixAfter(void* param)
 			pPool = NULL;
 		#endif
 		CAMsg::printMsg(LOG_CRIT,"loopReadFromMixAfter -- Now Exiting!\n");
-		THREAD_RETURN_SUCCESS;		
+		THREAD_RETURN_SUCCESS;
 	}
 
 SINT32 CAMiddleMix::connectToNextMix(CASocketAddr* a_pAddrNext)
@@ -984,7 +994,7 @@ SINT32 CAMiddleMix::connectToNextMix(CASocketAddr* a_pAddrNext)
 					break;
 #ifdef _DEBUG
 				CAMsg::printMsg(LOG_DEBUG,"Cannot connect... retrying\n");
-#endif				
+#endif
 				sSleep(RETRYTIME);
 			}
 			else
@@ -1039,10 +1049,10 @@ SINT32 CAMiddleMix::loop()
 	}
 SINT32 CAMiddleMix::clean()
 {
-		delete m_pQueueSendToMixBefore;	
+		delete m_pQueueSendToMixBefore;
 		m_pQueueSendToMixBefore=NULL;
 
-		delete m_pQueueSendToMixAfter;	
+		delete m_pQueueSendToMixAfter;
 		m_pQueueSendToMixAfter=NULL;
 
 #ifdef REPLAY_DETECTION
@@ -1055,17 +1065,17 @@ SINT32 CAMiddleMix::clean()
 			delete m_pMuxIn;
 			m_pMuxIn=NULL;
 		}
-		
+
 		if(m_pMuxOut!=NULL)
 		{
 			m_pMuxOut->close();
 			delete m_pMuxOut;
 			m_pMuxOut=NULL;
 		}
-		
+
 		delete m_pRSA;
 		m_pRSA=NULL;
-		
+
 		delete m_pMiddleMixChannelList;
 		m_pMiddleMixChannelList=NULL;
 		return E_SUCCESS;

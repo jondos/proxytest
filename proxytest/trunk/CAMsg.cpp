@@ -1,28 +1,28 @@
 /*
-Copyright (c) 2000, The JAP-Team 
+Copyright (c) 2000, The JAP-Team
 All rights reserved.
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-	- Redistributions of source code must retain the above copyright notice, 
+	- Redistributions of source code must retain the above copyright notice,
 	  this list of conditions and the following disclaimer.
 
-	- Redistributions in binary form must reproduce the above copyright notice, 
-	  this list of conditions and the following disclaimer in the documentation and/or 
+	- Redistributions in binary form must reproduce the above copyright notice,
+	  this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
-	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors 
-	  may be used to endorse or promote products derived from this software without specific 
-		prior written permission. 
+	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
+	  may be used to endorse or promote products derived from this software without specific
+		prior written permission.
 
-	
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS 
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
 AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
 BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
-OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
@@ -41,7 +41,7 @@ extern CACmdLnOptions* pglobalOptions;
 
 CAMsg* CAMsg::pMsg=NULL;
 
-const char* const CAMsg::m_strMsgTypes[5]={", error   ] ",", critical] ",", info    ] ",", debug   ] ",", special ] "}; //all same size!
+const char* const CAMsg::m_strMsgTypes[6]={", error   ] ",", critical] ",", info    ] ",", debug   ] ",", special ] ",", warning ] "}; //all same size!
 #define STRMSGTYPES_SIZE 12
 
 CAMsg::CAMsg()
@@ -67,13 +67,13 @@ CAMsg::~CAMsg()
 			closeEncryptedLog();
 #endif
 			delete[] m_strMsgBuff;
-			m_strMsgBuff = NULL; 
+			m_strMsgBuff = NULL;
 			delete[] m_strLogFile;
 			m_strLogFile = NULL;
 			delete m_pcsPrint;
 			m_pcsPrint = NULL;
 		}
-    
+
 SINT32 CAMsg::setLogOptions(UINT32 opt)
     {
 			if(pMsg->m_uLogType==opt)
@@ -89,14 +89,14 @@ SINT32 CAMsg::setLogOptions(UINT32 opt)
 
 SINT32 CAMsg::printMsg(UINT32 type,const char* format,...)
 	{
-		if(pMsg != NULL) 
+		if(pMsg != NULL)
 		{
 			pMsg->m_pcsPrint->lock();
 			va_list ap;
 			va_start(ap,format);
 			SINT32 ret=E_SUCCESS;
-	
-			//Date is: yyyy/mm/dd-hh:mm:ss   -- the size is: 19 
+
+			//Date is: yyyy/mm/dd-hh:mm:ss   -- the size is: 19
 			time_t currtime=time(NULL);
 			strftime(pMsg->m_strMsgBuff+1,255,"%Y/%m/%d-%H:%M:%S",localtime(&currtime));
 			switch(type)
@@ -115,6 +115,9 @@ SINT32 CAMsg::printMsg(UINT32 type,const char* format,...)
 					break;
 					case LOG_ENCRYPTED:
 						strcat(pMsg->m_strMsgBuff,pMsg->m_strMsgTypes[4]);
+					break;
+					case LOG_WARNING:
+						strcat(pMsg->m_strMsgBuff,pMsg->m_strMsgTypes[5]);
 					break;
 					default:
 						va_end(ap);
@@ -144,21 +147,21 @@ SINT32 CAMsg::printMsg(UINT32 type,const char* format,...)
 															&(pMsg->m_pCipher->iv_off));
 					if(write(pMsg->m_hFileEncrypted,bp,ret)!=ret)
 						ret=E_UNKNOWN;
-			 	}	
+			 	}
 			}
 			else
 				{
 					switch(pMsg->m_uLogType)
 						{
 							case MSG_LOG:
-	#ifndef _WIN32				
+	#ifndef _WIN32
 						syslog(type,pMsg->m_strMsgBuff);
 	#endif
 							break;
 							case MSG_FILE:
 /*								if(pMsg->m_hFileInfo==-1)
 									{
-										pMsg->m_hFileInfo=open(pMsg->m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE|O_SYNC,S_IREAD|S_IWRITE);																	
+										pMsg->m_hFileInfo=open(pMsg->m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE|O_SYNC,S_IREAD|S_IWRITE);
 									}
 *///								if(pMsg->m_hFileInfo!=-1)
 //									{
@@ -208,7 +211,7 @@ SINT32 CAMsg::closeLog()
 		switch(m_uLogType)
 			{
 				case MSG_LOG:
-#ifndef _WIN32		
+#ifndef _WIN32
 					::closelog();
 #endif
 				break;
@@ -307,7 +310,7 @@ SINT32 CAMsg::openLog(UINT32 type)
 			if(pglobalOptions->getLogDir(buff,1024)!=E_SUCCESS)
 				return E_UNKNOWN;
 		strcat((char*)buff,FILENAME_ENCRYPTEDLOG);
-		pMsg->m_hFileEncrypted=open((char*)buff,O_APPEND|O_CREAT|O_WRONLY|O_LARGEFILE|O_BINARY,S_IREAD|S_IWRITE);										
+		pMsg->m_hFileEncrypted=open((char*)buff,O_APPEND|O_CREAT|O_WRONLY|O_LARGEFILE|O_BINARY,S_IREAD|S_IWRITE);
 		if(pMsg->m_hFileEncrypted<=0)
 			{
 				pMsg->m_hFileEncrypted=-1;

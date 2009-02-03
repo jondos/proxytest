@@ -154,13 +154,17 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define OPTIONS_NODE_DELAY_IVAL "Intervall"
 #define OPTIONS_NODE_LATENCY "Latency"
 
-#define OPTION_NODE_TNCS_LIST "TermsAndConditionsList"
-#define OPTION_NODE_TNCS "TermsAndConditions"
-#define OPTION_ATTRIBUTE_TNC_DATE "date"
-#define OPTION_ATTRIBUTE_TNC_SERIAL "serial"
-#define OPTION_ATTRIBUTE_TNC_VERSION "version"
-#define OPTION_ATTRIBUTE_TNC_LOCALE "locale"
-#define OPTION_ATTRIBUTE_TNC_ID "id"
+#define OPTIONS_NODE_TNCS_OPTS "TermsAndConditionsOptions"
+#define OPTIONS_NODE_TNCS_TEMPLATES "Templates"
+#define OPTIONS_NODE_TNCS_TEMPLATE "Template"
+#define OPTIONS_NODE_TNCS_LIST "TermsAndConditionsList"
+#define OPTIONS_NODE_TNCS "TermsAndConditions"
+#define OPTIONS_ATTRIBUTE_TNC_DATE "date"
+#define OPTIONS_ATTRIBUTE_TNC_SERIAL "serial"
+#define OPTIONS_ATTRIBUTE_TNC_VERSION "version"
+#define OPTIONS_ATTRIBUTE_TNC_LOCALE "locale"
+#define OPTIONS_ATTRIBUTE_TNC_ID "id"
+#define OPTIONS_ATTRIBUTE_TNC_TEMPLATE_REFID "referenceId"
 
 #define OPTIONS_NODE_CRIME_DETECTION "CrimeDetection"
 
@@ -350,9 +354,9 @@ class CACmdLnOptions
 				}
 				return NULL;
 			}
-			
+
 			SINT32 getOperatorSubjectKeyIdentifier(UINT8 *buffer, UINT32 *length);
-			
+
 			bool hasPrevMixTestCertificate()
 				{
 					return m_pPrevMixCertificate!=NULL;
@@ -456,7 +460,7 @@ class CACmdLnOptions
 
 			SINT32 getUser(UINT8* user,UINT32 len);
 			SINT32 getPidFile(UINT8* pidfile,UINT32 len);
-			
+
 #ifdef SERVER_MONITORING
 			char *getMonitoringListenerHost();
 			UINT16 getMonitoringListenerPort();
@@ -466,9 +470,9 @@ class CACmdLnOptions
 			bool isFirstMix();
 			bool isMiddleMix();
 			bool isLastMix();
-			
+
 			bool isPerformanceTestEnabled();
-			
+
 			bool isSock5sSupported()
 			{
 				return m_bSocksSupport;
@@ -603,6 +607,7 @@ class CACmdLnOptions
 			}
 
 #endif // DYNAMIC_MIX
+			DOMNode **m_termsAndConditionsTemplates;
 		private:
 #ifdef DYNAMIC_MIX
 			UINT8* m_strLastCascadeProposal;
@@ -655,7 +660,7 @@ class CACmdLnOptions
 
 			UINT32 m_u32KeepAliveSendInterval;
 			UINT32 m_u32KeepAliveRecvInterval;
-			
+
 			bool m_perfTestEnabled;
 #endif //ONLY_LOCAL_PROXY
 
@@ -732,6 +737,7 @@ class CACmdLnOptions
 			optionSetter_pt *certificateOptionSetters;
 			optionSetter_pt *accountingOptionSetters;
 			optionSetter_pt *networkOptionSetters;
+			optionSetter_pt *termsAndConditionsOptionSetters;
 			optionSetter_pt *crimeDetectionOptionSetters;
 
 #ifdef SERVER_MONITORING
@@ -810,7 +816,12 @@ class CACmdLnOptions
 			SINT32 setServerMonitoring(DOMElement *elemNetwork);
 			SINT32 setKeepAliveTraffic(DOMElement *elemNetwork);
 			SINT32 setPerformanceTestEnabled(DOMElement *elemNetwork);
-			
+
+			/* Terms & Conditions options */
+#define TERMS_AND_CONDITIONS_OPTIONS_NR 2
+			SINT32 setTermsAndConditionsTemplates(DOMElement *elemTnCs);
+			SINT32 setTermsAndConditionsList(DOMElement *elemTnCs);
+
 			/* Crime Logging Options */
 #define CRIME_DETECTION_OPTIONS_NR 2
 			SINT32 setCrimeURLRegExp(DOMElement *elemCrimeDetection);
@@ -828,6 +839,7 @@ class CACmdLnOptions
 			void initCertificateOptionSetters();
 			void initAccountingOptionSetters();
 			void initNetworkOptionSetters();
+			void initTermsAndConditionsOptionSetters();
 			void initCrimeDetectionOptionSetters();
 	};
 
