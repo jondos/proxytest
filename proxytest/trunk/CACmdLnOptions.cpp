@@ -3367,7 +3367,7 @@ SINT32 CACmdLnOptions::setTermsAndConditions(DOMElement *elemRoot)
 	}
 	else
 	{
-		CAMsg::printMsg(LOG_WARNING,"No Terms & Conditions for Operator specified!\n");
+		CAMsg::printMsg(LOG_DEBUG,"No Terms & Conditions for Operator specified!\n");
 		return E_SUCCESS;
 	}
 }
