@@ -139,7 +139,11 @@ SINT32 CAFirstMixA::closeConnection(fmHashTableEntry* pHashEntry)
 	return E_SUCCESS;
 }
 
-
+#ifdef NEW_CHANNEL_ENCRYPTION
+	#define FIRST_MIX_SIZE_OF_SYMMETRIC_KEYS 2*KEY_SIZE
+#else
+	#define FIRST_MIX_SIZE_OF_SYMMETRIC_KEYS KEY_SIZE
+#endif
 
 SINT32 CAFirstMixA::loop()
 	{
@@ -367,7 +371,7 @@ SINT32 CAFirstMixA::loop()
 													else if(pEntry==NULL&&pMixPacket->flags==CHANNEL_OPEN)  // open a new mix channel
 													{ // stefan: muesste das nicht vor die behandlung von CHANNEL_DATA? oder gilt OPEN => !DATA ?
 														//es gilt: open -> data
-														pHashEntry->pSymCipher->crypt1(pMixPacket->data,rsaBuff,KEY_SIZE);
+														pHashEntry->pSymCipher->crypt1(pMixPacket->data,rsaBuff,FIRST_MIX_SIZE_OF_SYMMETRIC_KEYS);
 														#ifdef REPLAY_DETECTION
 														// replace time(NULL) with the real timestamp ()
 														// packet-timestamp*REPLAY_BASE + m_u64ReferenceTime
@@ -378,12 +382,12 @@ SINT32 CAFirstMixA::loop()
 															}
 														#endif
 														pCipher= new CASymCipher();
-														pCipher->setKey(rsaBuff);
+														pCipher->setKeys(rsaBuff,FIRST_MIX_SIZE_OF_SYMMETRIC_KEYS);
 														for(int i=0;i<16;i++)
 															rsaBuff[i]=0xFF;
 														pCipher->setIV2(rsaBuff);
-														pCipher->crypt1(pMixPacket->data+KEY_SIZE,pMixPacket->data,DATA_SIZE-KEY_SIZE);
-														getRandom(pMixPacket->data+DATA_SIZE-KEY_SIZE,KEY_SIZE);
+														pCipher->crypt1(pMixPacket->data+FIRST_MIX_SIZE_OF_SYMMETRIC_KEYS,pMixPacket->data,DATA_SIZE-FIRST_MIX_SIZE_OF_SYMMETRIC_KEYS);
+														getRandom(pMixPacket->data+DATA_SIZE-FIRST_MIX_SIZE_OF_SYMMETRIC_KEYS,FIRST_MIX_SIZE_OF_SYMMETRIC_KEYS);
 														#if defined (LOG_CHANNEL) ||defined(DATA_RETENTION_LOG)
 															HCHANNEL tmpC=pMixPacket->channel;
 														#endif

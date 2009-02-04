@@ -177,6 +177,7 @@ SINT32 setDOMElementAttribute(DOMNode* pElem,const char* attrName, UINT32 value)
 SINT32 setDOMElementAttribute(DOMNode* pElem, const char* attrName, UINT64 value);
 
 SINT32 setDOMElementValue(DOMElement* pElem,double floatValue);
+SINT32 setDOMElementValue(DOMElement* pElem, bool value);
 
 SINT32 getDOMElementAttribute(const DOMNode * const pElem,const char* attrName,SINT64& value);
 SINT32 getDOMElementAttribute(const DOMNode * const pElem,const char* attrName,UINT32& value);

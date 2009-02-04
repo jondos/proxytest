@@ -675,6 +675,12 @@ THREAD_RETURN mm_loopSendToMixBefore(void* param)
 		THREAD_RETURN_SUCCESS;
 	}
 
+#ifdef NEW_CHANNEL_ENCRYPTION
+	#define MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS 2*KEY_SIZE
+#else
+	#define MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS KEY_SIZE
+#endif
+
 THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 	{
 		CAMiddleMix* pMix=(CAMiddleMix*)param;
@@ -779,12 +785,12 @@ THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 										#endif
 
 										pCipher=new CASymCipher();
-										pCipher->setKey(tmpRSABuff);
+										pCipher->setKeys(tmpRSABuff,MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS);
 										pCipher->crypt1(pMixPacket->data+RSA_SIZE,
-													pMixPacket->data+RSA_SIZE-KEY_SIZE,
+													pMixPacket->data+RSA_SIZE-MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS,
 													DATA_SIZE-RSA_SIZE);
-										memcpy(pMixPacket->data,tmpRSABuff+KEY_SIZE,RSA_SIZE-KEY_SIZE);
-										getRandom(pMixPacket->data+DATA_SIZE-KEY_SIZE,KEY_SIZE);
+										memcpy(pMixPacket->data,tmpRSABuff+MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS,RSA_SIZE-MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS);
+										getRandom(pMixPacket->data+DATA_SIZE-KEY_SIZE,MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS);
 										pMix->m_pMiddleMixChannelList->add(pMixPacket->channel,pCipher,&channelOut);
 										pMixPacket->channel=channelOut;
 										#ifdef USE_POOL

@@ -29,7 +29,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASymCipher.hpp"
 //AES
 
-/** Sets the key used for encryption/decryption. Also resets the IV to zero!
+/** Sets the key1 and key2 used for encryption/decryption. Also resets the IVs to zero!
 	* @param key 16 random bytes used as key 
 	* @retval E_SUCCESS
 	*/
@@ -38,7 +38,7 @@ SINT32 CASymCipher::setKey(const UINT8* key)
 		return setKey(key,true);
 	}
 
-/** Sets the key used for encryption/decryption. Also resets the IV to zero!
+/** Sets the key1 and key2 used for encryption/decryption. Also resets the IVs to zero!
 	* @param key 16 random bytes used as key
 	* @param bEncrypt if true, the key should be used for encryption (otherwise it will be used for decryption)
 	* @retval E_SUCCESS
@@ -46,16 +46,22 @@ SINT32 CASymCipher::setKey(const UINT8* key)
 SINT32 CASymCipher::setKey(const UINT8* key,bool bEncrypt)
 	{
 		if(bEncrypt)
-			AES_set_encrypt_key(key,128,m_keyAES);
+			{
+				AES_set_encrypt_key(key,128,m_keyAES1);
+				AES_set_encrypt_key(key,128,m_keyAES2);
+			}
 		else
-			AES_set_decrypt_key(key,128,m_keyAES);
+			{
+				AES_set_decrypt_key(key,128,m_keyAES1);
+				AES_set_decrypt_key(key,128,m_keyAES2);
+			}
 		memset(m_iv1,0,16);
 		memset(m_iv2,0,16);
 		m_bKeySet=true;
 		return E_SUCCESS;
 	}
 
-/** Encryptes/Decrpytes in to out using iv1. AES is used for encryption and the encryption
+/** Encryptes/Decrpytes in to out using iv1 and key1. AES is used for encryption and the encryption
 	* is done with a special
 	* 128bit-OFB mode: In the case that (len mod 16 !=0) the unused cipher
 	* output bits are discarded and NOT used next time encryptAES() is called.
@@ -72,8 +78,7 @@ SINT32 CASymCipher::crypt1(const UINT8* in,UINT8* out,UINT32 len)
 		UINT32 i=0;
     while(i+15<len)
     	{
-			//rijndaelEncrypt (m_iv1, m_iv1, *m_keyAES);
-				AES_encrypt(m_iv1,m_iv1,m_keyAES);
+				AES_encrypt(m_iv1,m_iv1,m_keyAES1);
 				out[i]=in[i]^m_iv1[0];
 				i++;
 				out[i]=in[i]^m_iv1[1];
@@ -109,8 +114,7 @@ SINT32 CASymCipher::crypt1(const UINT8* in,UINT8* out,UINT32 len)
 			}
 		if(i<len) //In this case len-i<16 !
 			{
-				//rijndaelEncrypt (m_iv1, m_iv1, *m_keyAES);
-				AES_encrypt(m_iv1,m_iv1,m_keyAES);
+				AES_encrypt(m_iv1,m_iv1,m_keyAES1);
 				len-=i;
 				for(UINT32 k=0;k<len;k++)
 				 {
@@ -121,7 +125,7 @@ SINT32 CASymCipher::crypt1(const UINT8* in,UINT8* out,UINT32 len)
 		return E_SUCCESS;
 	}
 
-/** Decryptes in to out using iv2.
+/** Decryptes in to out using iv2 and key2.
 	* @param in input (encrypted) bytes
 	* @param out output (decrpyted) bytes
 	* @param len len of input. because the cipher preserves the size, 
@@ -133,8 +137,7 @@ SINT32 CASymCipher::crypt2(const UINT8* in,UINT8* out,UINT32 len)
 		UINT32 i=0;
 		while(i+15<len)
 			{
-				//rijndaelEncrypt (m_iv2, m_iv2, *m_keyAES);
-				AES_encrypt(m_iv2,m_iv2,m_keyAES);
+				AES_encrypt(m_iv2,m_iv2,m_keyAES2);
 				out[i]=in[i]^m_iv2[0];
 				i++;
 				out[i]=in[i]^m_iv2[1];
@@ -170,8 +173,7 @@ SINT32 CASymCipher::crypt2(const UINT8* in,UINT8* out,UINT32 len)
 			}
 		if(i<len)
 			{
-				AES_encrypt(m_iv2,m_iv2,m_keyAES);
-				//rijndaelEncrypt (m_iv2, m_iv2, *m_keyAES);
+				AES_encrypt(m_iv2,m_iv2,m_keyAES2);
 				len-=i;
 				for(UINT32 k=0;k<len;k++)
 				 {
@@ -182,7 +184,7 @@ SINT32 CASymCipher::crypt2(const UINT8* in,UINT8* out,UINT32 len)
 		return E_SUCCESS;
 	}
 
-/** En-/Decryptes in to out using iv1. AES is used for en-/dcryption and the cryption
+/** En-/Decryptes in to out using iv1 and key1. AES is used for en-/dcryption and the cryption
 	* is done with CBC mode and PKCS7 padding.
 	* @param in input (plain or ciphertext) bytes
 	* @param out output (plain or ciphertext) bytes
@@ -195,7 +197,7 @@ SINT32 CASymCipher::decrypt1CBCwithPKCS7(const UINT8* in,UINT8* out,UINT32* len)
 	{
 		if(in==NULL||out==NULL||len==NULL||*len==0)
 			return E_UNKNOWN;
-		AES_cbc_encrypt(in,out,*len,m_keyAES,m_iv1,AES_DECRYPT);
+		AES_cbc_encrypt(in,out,*len,m_keyAES1,m_iv1,AES_DECRYPT);
 		//Now remove padding
 		UINT32 pad=out[*len-1];
 		if(pad>16||pad>*len)
@@ -207,7 +209,7 @@ SINT32 CASymCipher::decrypt1CBCwithPKCS7(const UINT8* in,UINT8* out,UINT32* len)
 		return E_SUCCESS;
 	}
 
-/** En-/Decryptes in to out using IV1. AES is used for en-/decryption and the cryption
+/** En-/Decryptes in to out using IV1 nad key1. AES is used for en-/decryption and the cryption
 	* is done with CBC mode and PKCS7 padding.
 	* @param in input (plain or ciphertext) bytes
 	* @param inlen size of the input buffer
@@ -229,64 +231,9 @@ SINT32 CASymCipher::encrypt1CBCwithPKCS7(const UINT8* in,UINT32 inlen,UINT8* out
 			{
 				tmp[i]=(UINT8)padlen;
 			}
-		AES_cbc_encrypt(tmp,out,inlen+padlen,m_keyAES,m_iv1,AES_ENCRYPT);
+		AES_cbc_encrypt(tmp,out,inlen+padlen,m_keyAES1,m_iv1,AES_ENCRYPT);
 		delete[] tmp;
 		tmp = NULL;
 		*len=inlen+padlen;			
 		return E_SUCCESS;
 	}	
-
-/*
-SINT32 CASymCipher::encrypt1(const UINT8* in,UINT8* out,UINT32 len)
-	{
-		UINT32 i=0;
-		while(i+15<len)
-			{
-				rijndaelEncrypt (m_iv1, m_iv1, *m_keyAES);
-
-				out[i]=in[i]^m_iv1[0];
-				i++;
-				out[i]=in[i]^m_iv1[1];
-				i++;
-				out[i]=in[i]^m_iv1[2];
-				i++;
-				out[i]=in[i]^m_iv1[3];
-				i++;
-				out[i]=in[i]^m_iv1[4];
-				i++;
-				out[i]=in[i]^m_iv1[5];
-				i++;
-				out[i]=in[i]^m_iv1[6];
-				i++;
-				out[i]=in[i]^m_iv1[7];
-				i++;
-				out[i]=in[i]^m_iv1[8];
-				i++;
-				out[i]=in[i]^m_iv1[9];
-				i++;
-				out[i]=in[i]^m_iv1[10];
-				i++;
-				out[i]=in[i]^m_iv1[11];
-				i++;
-				out[i]=in[i]^m_iv1[12];
-				i++;
-				out[i]=in[i]^m_iv1[13];
-				i++;
-				out[i]=in[i]^m_iv1[14];
-				i++;
-				out[i]=in[i]^m_iv1[15];
-				i++;
-			}
-		if(i<len)
-			{
-				rijndaelEncrypt (m_iv1, m_iv1, *m_keyAES);
-				len-=i;
-				for(UINT32 k=0;k<len;k++)
-				 {
-					 out[i]=in[i]^m_iv1[k];
-					 i++;
-					}
-			}
-		return E_SUCCESS;
-	}
-*/

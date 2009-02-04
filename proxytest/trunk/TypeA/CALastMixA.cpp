@@ -48,6 +48,13 @@ extern CACmdLnOptions* pglobalOptions;
 #define MACRO_DO_LOG_CHANNEL_CLOSE_FROM_MIX MACRO_DO_LOG_CHANNEL(2)
 #endif
 
+#ifdef NEW_CHANNEL_ENCRYPTION
+	#define LAST_MIX_SIZE_OF_SYMMETRIC_KEYS 2*KEY_SIZE
+#else
+	#define LAST_MIX_SIZE_OF_SYMMETRIC_KEYS KEY_SIZE
+#endif
+
+
 SINT32 CALastMixA::loop()
 	{
 #ifndef NEW_MIX_TYPE
@@ -135,12 +142,12 @@ SINT32 CALastMixA::loop()
 														}
 												#endif
 												CASymCipher* newCipher=new CASymCipher();
-												newCipher->setKey(rsaBuff);
+												newCipher->setKey(rsaBuff,LAST_MIX_SIZE_OF_SYMMETRIC_KEYS);
 												newCipher->crypt1(pMixPacket->data+RSA_SIZE,
-																							pMixPacket->data+RSA_SIZE-KEY_SIZE,
+																							pMixPacket->data+RSA_SIZE-LAST_MIX_SIZE_OF_SYMMETRIC_KEYS,
 																							DATA_SIZE-RSA_SIZE);
-												memcpy(	pMixPacket->data,rsaBuff+KEY_SIZE,
-																RSA_SIZE-KEY_SIZE);
+												memcpy(	pMixPacket->data,rsaBuff+LAST_MIX_SIZE_OF_SYMMETRIC_KEYS,
+																RSA_SIZE-LAST_MIX_SIZE_OF_SYMMETRIC_KEYS);
 												#ifdef LOG_PACKET_TIMES
 													getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
 												#endif
