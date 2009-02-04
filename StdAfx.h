@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.08.50"
+#define MIX_VERSION "00.08.51"
 
 #include "doxygen.h"
 
@@ -63,8 +63,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define SDTFA // specific logic needed by SDTFA, http://www.sdtfa.com
 
 //#define LASTMIX_CHECK_MEMORY // only for internal debugging purpose
-
 //#define PRINT_THREAD_STACK_TRACE //Usefull for debugging output of stack trace if mix dies...
+//#define ENABLE_GPERFTOOLS_CPU_PROFILER //Enables the usage of the Goggle GPerfTools CPU Profiler for profiling the operation of the Mix 
 
 //#define DATA_RETENTION_LOG //define if you need to store logs according to German data retention
 
@@ -596,6 +596,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #else
 	#define MY_XERCES_VERSION "unknown"
 #endif
+
+#ifdef ENABLE_GPERFTOOLS_CPU_PROFILER
+	#include <goggle/profiler.h>
+#endif
+
 
 #ifdef PAYMENT
 	#define PAYMENT_VERSION_INFO " (payment)"
