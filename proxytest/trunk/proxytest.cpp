@@ -126,6 +126,9 @@ void removePidFile()
 /**do necessary initialisations of libraries etc.*/
 void init()
 	{
+#ifdef ENABLE_GPERFTOOLS_CPU_PROFILER
+		ProfilerStart("gperf.cpuprofiler.data");
+#endif
 #ifndef ONLY_LOCAL_PROXY
 		XMLPlatformUtils::Initialize();
 		initDOMParser();
@@ -156,6 +159,10 @@ void init()
 /**do necessary cleanups of libraries etc.*/
 void cleanup()
 	{
+#ifdef ENABLE_GPERFTOOLS_CPU_PROFILER
+		ProfilerFlush();
+		ProfilerStop();
+#endif
 //		delete pRTT;
 #ifndef ONLY_LOCAL_PROXY
 		if(pMix!=NULL)
