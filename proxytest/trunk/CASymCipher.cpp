@@ -61,6 +61,24 @@ SINT32 CASymCipher::setKey(const UINT8* key,bool bEncrypt)
 		return E_SUCCESS;
 	}
 
+SINT32 CASymCipher::setKeys(const UINT8* key,UINT32 keysize)
+	{
+		if(keysize==KEY_SIZE)
+			{
+				return setKey(key);
+			}
+		else if(keysize==2*KEY_SIZE)
+			{
+				AES_set_encrypt_key(key,128,m_keyAES1);
+				AES_set_encrypt_key(key+KEY_SIZE,128,m_keyAES2);
+				memset(m_iv1,0,16);
+				memset(m_iv2,0,16);
+				m_bKeySet=true;
+				return E_SUCCESS;
+			}
+		return E_UNKNOWN;
+	}
+
 /** Encryptes/Decrpytes in to out using iv1 and key1. AES is used for encryption and the encryption
 	* is done with a special
 	* 128bit-OFB mode: In the case that (len mod 16 !=0) the unused cipher
