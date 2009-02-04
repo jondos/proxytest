@@ -660,7 +660,7 @@ AC_ARG_ENABLE(new-channel-encryption,
 	[
 	    if test "x$enableval" != "xno" ; then
 		CFLAGS="$CFLAGS -DNEW_CHANNEL_ENCRYPTION"
-		CXXFLAGS="$CXXFLAGS -DNEW_FLOW_ENCRYPTION"
+		CXXFLAGS="$CXXFLAGS -DNEW_CHANNEL_ENCRYPTION"
 	    fi
 	]
 )
