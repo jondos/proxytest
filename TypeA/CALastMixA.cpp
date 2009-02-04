@@ -142,7 +142,7 @@ SINT32 CALastMixA::loop()
 														}
 												#endif
 												CASymCipher* newCipher=new CASymCipher();
-												newCipher->setKey(rsaBuff,LAST_MIX_SIZE_OF_SYMMETRIC_KEYS);
+												newCipher->setKeys(rsaBuff,LAST_MIX_SIZE_OF_SYMMETRIC_KEYS);
 												newCipher->crypt1(pMixPacket->data+RSA_SIZE,
 																							pMixPacket->data+RSA_SIZE-LAST_MIX_SIZE_OF_SYMMETRIC_KEYS,
 																							DATA_SIZE-RSA_SIZE);
