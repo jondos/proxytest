@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.08.49"
+#define MIX_VERSION "00.08.50"
 
 #include "doxygen.h"
 
@@ -135,6 +135,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define NEW_MIX_TYPE // to enable the new 1:x mix protocol
 //#define WITH_CONTROL_CHANNELS_TEST //enable a Test control Channel
 //#define NEW_FLOW_CONTROL //enable for the new flow control mechanism
+//#define NEW_CHANNEL_ENCRYPTION //enable the new protcol version which uses ECDH for key transport and two keys for upstream/downstream channel cryption
 
 //#define REPLAY_DETECTION // enable to prevent replay of mix packets
 #define REPLAY_TIMESTAMP_PROPAGATION_INTERVALL 1 //How often (in minutes) should the current replay timestamps be propagate
@@ -213,19 +214,22 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define LM_PACKET_STATS_LOG_INTERVALL 1 //Intervall in Minutes for loggin packet stats for the last Mix
 
 
+#define MIX_CASCADE_PROTOCOL_VERSION_0_1_0 10  //with new channel encryption  
 //#define MIX_CASCADE_PROTOCOL_VERSION_0_9 9  //with new payment protocol
 #define MIX_CASCADE_PROTOCOL_VERSION_0_8 8  //with replay detection + control channels + first mix symmetric
 #define MIX_CASCADE_PROTOCOL_VERSION_0_7 7  //with replay detection + control channels (obsolete)
-#define MIX_CASCADE_PROTOCOL_VERSION_0_6 6  //with new flow control
+//#define MIX_CASCADE_PROTOCOL_VERSION_0_6 6  //with new flow control (not used, because flow control is a last Mix only issue)
 #define MIX_CASCADE_PROTOCOL_VERSION_0_5 5  //with control channels (obsolte - allway with control channels)
 #define MIX_CASCADE_PROTOCOL_VERSION_0_4 4  //symmetric communication to first mix -> new default protocol
 #define MIX_CASCADE_PROTOCOL_VERSION_0_3 3 //with reply detection [deprecated - not in use anymore!]
-#define MIX_CASCADE_PROTOCOL_VERSION_0_2 2 //old normal protocol
+#define MIX_CASCADE_PROTOCOL_VERSION_0_2 2 //old normal protocol [deprecated - not in use anymore!]
 
 #ifdef REPLAY_DETECTION
 	#define MIX_CASCADE_PROTOCOL_VERSION "0.81"
 //#elif defined(PAYMENT)
 	//#define MIX_CASCADE_PROTOCOL_VERSION "0.9"
+#elif defined (NEW_CHANNEL_ENCRYPTION)
+	#define MIX_CASCADE_PROTOCOL_VERSION "0.10"
 #else
 	#define MIX_CASCADE_PROTOCOL_VERSION "0.4"
 #endif

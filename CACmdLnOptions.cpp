@@ -3690,6 +3690,38 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 		getDOMChildByName(elemDataRetentionPublicKey,"RSAKeyValue",elemDataRetentionPublicRSAKey,false);
 		m_pDataRetentionPublicEncryptionKey->setPublicKeyAsDOMNode(elemDataRetentionPublicRSAKey);
 
+		//Add info to MixInfo structure...
+		elemDataRetention=createDOMElement(m_docMixInfo, "DataRetention");
+		elemMix->appendChild(elemDataRetention);
+		DOMElement* elemLoggedElements=createDOMElement(m_docMixInfo,"LoggedElements");
+		elemDataRetention->appendChild(elemLoggedElements);
+		DOMElement* elemTemp=createDOMElement(m_docMixInfo,"InputTime");
+		elemLoggedElements->appendChild(elemTemp);
+		setDOMElementValue(elemTemp,true);
+		elemTemp=createDOMElement(m_docMixInfo,"OutputTime");
+		elemLoggedElements->appendChild(elemTemp);
+		setDOMElementValue(elemTemp,true);
+		elemTemp=createDOMElement(m_docMixInfo,"InputChannelID");
+		elemLoggedElements->appendChild(elemTemp);
+		setDOMElementValue(elemTemp,true);
+		elemTemp=createDOMElement(m_docMixInfo,"OutputChannelID");
+		elemLoggedElements->appendChild(elemTemp);
+		setDOMElementValue(elemTemp,true);
+		elemTemp=createDOMElement(m_docMixInfo,"InputSourceIPAddress");
+		elemLoggedElements->appendChild(elemTemp);
+		setDOMElementValue(elemTemp,true);
+		elemTemp=createDOMElement(m_docMixInfo,"OutputSourceIPAddress");
+		elemLoggedElements->appendChild(elemTemp);
+		setDOMElementValue(elemTemp,true);
+		elemTemp=createDOMElement(m_docMixInfo,"InputSourceIPPort");
+		elemLoggedElements->appendChild(elemTemp);
+		setDOMElementValue(elemTemp,true);
+		elemTemp=createDOMElement(m_docMixInfo,"OutputSourceIPPort");
+		elemLoggedElements->appendChild(elemTemp);
+		setDOMElementValue(elemTemp,true);
+		elemTemp=createDOMElement(m_docMixInfo,"RetentionPeriod");
+		elemDataRetention->appendChild(elemTemp);
+		setDOMElementValue(elemDataRetention,(UINT8*)"P6M");
 #endif //DATA_RETENTION_LOG
 
     return E_SUCCESS;

@@ -734,6 +734,11 @@ SINT32 setDOMElementAttribute(DOMNode* pElem, const char* attrName, bool value)
 			((UINT8*) (value ? STR_VALUE_TRUE : STR_VALUE_FALSE)));
 }
 
+SINT32 setDOMElementValue(DOMNode* pElem, bool value)
+{
+	return setDOMElementValue(pElem,((UINT8*) (value ? STR_VALUE_TRUE : STR_VALUE_FALSE)));
+}
+
 SINT32 getDOMElementAttribute(const DOMNode * const elem,const char* attrName,SINT64& value)
 {
 	UINT8 val[50];

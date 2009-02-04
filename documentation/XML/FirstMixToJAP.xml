@@ -9,7 +9,10 @@
 	</MixProtocolVersion>
 	<Mixes count="..">
 		<Mix id="..">
-			<MixProtocolVersion>...</MixProtocolVersion>
+			<MixProtocolVersion>
+        <!-- spezifies which sub protocol this Mix uses, if ther is a difference to the gerneral cascade protocol-->
+        ...
+      </MixProtocolVersion>
 			<RSAKeyValue>
 				<!--- PubKey of FirstMix -->
 				...
@@ -25,16 +28,10 @@
 				</ReplayTimestamp>
 			</Replay>
 		</Mix>
-		<Mix id=".">
-			<RSAKeyValue>
-				<!--- PubKey of FirstMix -->
+		<Mix id="..">
 				...
-			</RSAKeyValue>
-			<Signature>
-				<!--- from the Mix -->
-				...
-			</Signature>
 		</Mix>
+    ...
 	</Mixes>
 	<Payment required="true|false">
 		<!-- Since Version 0.2 -->
