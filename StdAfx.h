@@ -598,7 +598,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #endif
 
 #ifdef ENABLE_GPERFTOOLS_CPU_PROFILER
-	#include <goggle/profiler.h>
+	#include <google/profiler.h>
 #endif
 
 
