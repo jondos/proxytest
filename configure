@@ -766,6 +766,7 @@ enable_debug
 enable_debug_output
 enable_dataretentionlog
 enable_new_flow_control
+enable_new_channel_encryption
 enable_crime_detection
 enable_tests
 enable_manioq
@@ -1445,6 +1446,8 @@ Optional Features:
                           retention
   --enable-new-flow-control
                           Enable new flow control protocol
+  --enable-new-channel-encryption
+                          Enable enhanced channel encryption
   --enable-crime-detection
                           Enable crime detection mode
   --enable-tests          Build also some functional tests
@@ -13868,6 +13871,18 @@ if test "${enable_new_flow_control+set}" = set; then
 	    if test "x$enableval" != "xno" ; then
 		CFLAGS="$CFLAGS -DNEW_FLOW_CONTROL"
 		CXXFLAGS="$CXXFLAGS -DNEW_FLOW_CONTROL"
+	    fi
+
+
+fi
+
+
+# Check whether --enable-new-channel-encryption was given.
+if test "${enable_new_channel_encryption+set}" = set; then
+  enableval=$enable_new_channel_encryption;
+	    if test "x$enableval" != "xno" ; then
+		CFLAGS="$CFLAGS -DNEW_CHANNEL_ENCRYPTION"
+		CXXFLAGS="$CXXFLAGS -DNEW_FLOW_ENCRYPTION"
 	    fi
 
 

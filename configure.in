@@ -655,6 +655,16 @@ AC_ARG_ENABLE(new-flow-control,
 	]
 )
 
+AC_ARG_ENABLE(new-channel-encryption,
+	AS_HELP_STRING([--enable-new-channel-encryption],[Enable enhanced channel encryption]),
+	[
+	    if test "x$enableval" != "xno" ; then
+		CFLAGS="$CFLAGS -DNEW_CHANNEL_ENCRYPTION"
+		CXXFLAGS="$CXXFLAGS -DNEW_FLOW_ENCRYPTION"
+	    fi
+	]
+)
+
 CRIME=""
 AC_ARG_ENABLE(crime-detection,
 	AS_HELP_STRING([--enable-crime-detection],[Enable crime detection mode]),
