@@ -126,9 +126,6 @@ void removePidFile()
 /**do necessary initialisations of libraries etc.*/
 void init()
 	{
-#ifdef ENABLE_GPERFTOOLS_CPU_PROFILER
-		ProfilerStart("gperf.cpuprofiler.data");
-#endif
 #ifndef ONLY_LOCAL_PROXY
 		XMLPlatformUtils::Initialize();
 		initDOMParser();
@@ -777,6 +774,10 @@ RESTART_MIX:
 
 		CAMsg::printMsg(LOG_INFO,"Anon proxy started!\n");
 		CAMsg::printMsg(LOG_INFO,MIX_VERSION_INFO);
+
+#ifdef ENABLE_GPERFTOOLS_CPU_PROFILER
+		ProfilerStart("gperf.cpuprofiler.data");
+#endif
 
 #ifndef _WIN32
 	#ifdef _DEBUG
