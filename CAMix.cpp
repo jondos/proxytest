@@ -55,6 +55,21 @@ CAMix::CAMix()
 		m_bCascadeEstablished = false;
 		m_bReconfigured = false;
 #endif
+#ifdef DATA_RETENTION_LOG
+		m_pDataRetentionLog=NULL;
+#endif
+	}
+
+virtual CAMix::~CAMix()
+	{
+#ifdef DATA_RETENTION_LOG
+		if(m_pDataRetentionLog!=NULL)
+			{
+				delete m_pDataRetentionLog;
+				m_pDataRetentionLog=NULL;
+			}
+#endif
+
 	}
 
 SINT32 CAMix::initOnce()
