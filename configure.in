@@ -665,6 +665,17 @@ AC_ARG_ENABLE(new-channel-encryption,
 	]
 )
 
+AC_ARG_ENABLE(google-cpuprofiler,
+	AS_HELP_STRING([--enable-google-cpuprofiler],[Enable CPU profiling using Googles Perftools]),
+	[
+	    if test "x$enableval" != "xno" ; then
+		CFLAGS="$CFLAGS -DENABLE_GPERFTOOLS_CPU_PROFILER"
+		CXXFLAGS="$CXXFLAGS -DENABLE_GPERFTOOLS_CPU_PROFILER"
+		LIBS="$LIBS -lprofiler"
+	    fi
+	]
+)
+
 CRIME=""
 AC_ARG_ENABLE(crime-detection,
 	AS_HELP_STRING([--enable-crime-detection],[Enable crime detection mode]),
