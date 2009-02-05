@@ -60,7 +60,7 @@ CAMix::CAMix()
 #endif
 	}
 
-virtual CAMix::~CAMix()
+CAMix::~CAMix()
 	{
 #ifdef DATA_RETENTION_LOG
 		if(m_pDataRetentionLog!=NULL)

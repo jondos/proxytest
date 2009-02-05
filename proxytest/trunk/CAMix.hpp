@@ -58,7 +58,7 @@ class CAMix
 
 		public:
 			CAMix();
-			virtual ~CAMix(){}
+			virtual ~CAMix();
 			SINT32 start();
 			virtual SINT32 reconfigure(){return E_SUCCESS;}
 			virtual tMixType getType() const =0;
