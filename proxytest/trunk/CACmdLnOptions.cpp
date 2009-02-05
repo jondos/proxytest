@@ -3721,7 +3721,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 		setDOMElementValue(elemTemp,true);
 		elemTemp=createDOMElement(m_docMixInfo,"RetentionPeriod");
 		elemDataRetention->appendChild(elemTemp);
-		setDOMElementValue(elemDataRetention,(UINT8*)"P6M");
+		setDOMElementValue(elemTemp,(UINT8*)"P6M");
 #endif //DATA_RETENTION_LOG
 
     return E_SUCCESS;
