@@ -36,9 +36,9 @@ SINT32 CADataRetentionLogFile::openLog(UINT8* strLogDir,UINT32 date,CAASymCipher
 		m_Month=theTime->tm_mon+1;
 		m_Year=theTime->tm_year+1900;
 		
-//		m_nMaxLogTime=date-theTime->tm_min*60-theTime->tm_hour*3600-theTime->tm_sec+24*3600-1;
+		m_nMaxLogTime=date-theTime->tm_min*60-theTime->tm_hour*3600-theTime->tm_sec+24*3600-1;
 	
-		m_nMaxLogTime=date+60;
+//		m_nMaxLogTime=date+60;
 
 		snprintf((char*)strFileName,4096,"%s/dataretentionlog_%s",strLogDir,strDate);
 		//!! DO NOT USE O_SYNC - it is _terrible_ slow!!!!
