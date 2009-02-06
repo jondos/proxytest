@@ -66,9 +66,14 @@ class CASymCipher
 #ifndef ONLY_LOCAL_PROXY
 					waitForDestroy();
 #endif
+#ifdef INTEL_IPP_CRYPTO
+					delete[] (UINT8*)m_keyAES1;
+					delete[] (UINT8*)m_keyAES2;
+#else
 					delete m_keyAES1;
-					m_keyAES1 = NULL;
 					delete m_keyAES2;
+#endif
+					m_keyAES1 = NULL;
 					m_keyAES2 = NULL;
 					delete[] m_iv1;
 					m_iv1 = NULL;
