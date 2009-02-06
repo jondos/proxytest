@@ -48,8 +48,15 @@ class CASymCipher
 			CASymCipher()
 				{
 					m_bKeySet=false;
+#ifdef INTEL_IPP_CRYPTO
+					int size=0;
+					ippsRijndael128GetSize(&size);
+					m_keyAES1=(IppsRijndael128Spec*)new UINT8[size];
+					m_keyAES2=(IppsRijndael128Spec*)new UINT8[size];
+#else
 					m_keyAES1=new AES_KEY;
 					m_keyAES2=new AES_KEY;
+#endif
 					m_iv1=new UINT8[16];
 					m_iv2=new UINT8[16];
 				}
@@ -107,9 +114,17 @@ class CASymCipher
 			SINT32 crypt2(const UINT8* in,UINT8* out,UINT32 len);
 			SINT32 decrypt1CBCwithPKCS7(const UINT8* in,UINT8* out,UINT32* len);
 			SINT32 encrypt1CBCwithPKCS7(const UINT8* in,UINT32 inlen,UINT8* out,UINT32* len);
+			static SINT32 testSpeed();
 		protected:
+
+#ifdef INTEL_IPP_CRYPTO
+			IppsRijndael128Spec* m_keyAES1;
+			IppsRijndael128Spec* m_keyAES2;
+#else
 			AES_KEY* m_keyAES1;
 			AES_KEY* m_keyAES2;
+#endif
+
 			UINT8* m_iv1;
 			UINT8* m_iv2;
 			bool m_bKeySet;
