@@ -38,13 +38,17 @@ SINT32 CASymCipher::setKey(const UINT8* key)
 		return setKey(key,true);
 	}
 
-/** Sets the key1 and key2 used for encryption/decryption. Also resets the IVs to zero!
+/** Sets the key1 and key2 used for encryption/decryption to the same value of key. Also resets the IVs to zero!
 	* @param key 16 random bytes used as key
 	* @param bEncrypt if true, the key should be used for encryption (otherwise it will be used for decryption)
 	* @retval E_SUCCESS
 	*/
 SINT32 CASymCipher::setKey(const UINT8* key,bool bEncrypt)
 	{
+#ifdef INTEL_IPP_CRYPTO
+		ippsRijndael128Init(key, IppsRijndaelKey128,m_keyAES1);
+		ippsRijndael128Init(key, IppsRijndaelKey128,m_keyAES2);
+#else
 		if(bEncrypt)
 			{
 				AES_set_encrypt_key(key,128,m_keyAES1);
@@ -55,6 +59,7 @@ SINT32 CASymCipher::setKey(const UINT8* key,bool bEncrypt)
 				AES_set_decrypt_key(key,128,m_keyAES1);
 				AES_set_decrypt_key(key,128,m_keyAES2);
 			}
+#endif
 		memset(m_iv1,0,16);
 		memset(m_iv2,0,16);
 		m_bKeySet=true;
@@ -69,8 +74,13 @@ SINT32 CASymCipher::setKeys(const UINT8* key,UINT32 keysize)
 			}
 		else if(keysize==2*KEY_SIZE)
 			{
+#ifdef INTEL_IPP_CRYPTO
+				ippsRijndael128Init(key, IppsRijndaelKey128,m_keyAES1);
+				ippsRijndael128Init(key+KEY_SIZE, IppsRijndaelKey128,m_keyAES2);
+#else
 				AES_set_encrypt_key(key,128,m_keyAES1);
 				AES_set_encrypt_key(key+KEY_SIZE,128,m_keyAES2);
+#endif
 				memset(m_iv1,0,16);
 				memset(m_iv2,0,16);
 				m_bKeySet=true;
@@ -93,10 +103,18 @@ SINT32 CASymCipher::setKeys(const UINT8* key,UINT32 keysize)
 	*/
 SINT32 CASymCipher::crypt1(const UINT8* in,UINT8* out,UINT32 len)
 	{
+#ifdef INTEL_IPP_CRYPTO
+				ippsRijndael128EncryptOFB(in,out,len,16, m_keyAES1,m_iv1);
+				return E_SUCCESS;
+#endif
 		UINT32 i=0;
     while(i+15<len)
     	{
+#ifdef INTEL_IPP_CRYPTO
+				ippsRijndael128EncryptECB(m_iv1,m_iv1,KEY_SIZE, m_keyAES1, IppsCPPaddingNONE);
+#else
 				AES_encrypt(m_iv1,m_iv1,m_keyAES1);
+#endif
 				out[i]=in[i]^m_iv1[0];
 				i++;
 				out[i]=in[i]^m_iv1[1];
@@ -132,7 +150,11 @@ SINT32 CASymCipher::crypt1(const UINT8* in,UINT8* out,UINT32 len)
 			}
 		if(i<len) //In this case len-i<16 !
 			{
+#ifdef INTEL_IPP_CRYPTO
+				ippsRijndael128EncryptECB(m_iv1,m_iv1,KEY_SIZE, m_keyAES1, IppsCPPaddingNONE);
+#else
 				AES_encrypt(m_iv1,m_iv1,m_keyAES1);
+#endif
 				len-=i;
 				for(UINT32 k=0;k<len;k++)
 				 {
@@ -155,7 +177,11 @@ SINT32 CASymCipher::crypt2(const UINT8* in,UINT8* out,UINT32 len)
 		UINT32 i=0;
 		while(i+15<len)
 			{
+#ifdef INTEL_IPP_CRYPTO
+				ippsRijndael128EncryptECB(m_iv1,m_iv1,KEY_SIZE, m_keyAES2, IppsCPPaddingNONE);
+#else
 				AES_encrypt(m_iv2,m_iv2,m_keyAES2);
+#endif
 				out[i]=in[i]^m_iv2[0];
 				i++;
 				out[i]=in[i]^m_iv2[1];
@@ -191,7 +217,11 @@ SINT32 CASymCipher::crypt2(const UINT8* in,UINT8* out,UINT32 len)
 			}
 		if(i<len)
 			{
+#ifdef INTEL_IPP_CRYPTO
+				ippsRijndael128EncryptECB(m_iv1,m_iv1,KEY_SIZE, m_keyAES2, IppsCPPaddingNONE);
+#else
 				AES_encrypt(m_iv2,m_iv2,m_keyAES2);
+#endif
 				len-=i;
 				for(UINT32 k=0;k<len;k++)
 				 {
@@ -215,6 +245,8 @@ SINT32 CASymCipher::decrypt1CBCwithPKCS7(const UINT8* in,UINT8* out,UINT32* len)
 	{
 		if(in==NULL||out==NULL||len==NULL||*len==0)
 			return E_UNKNOWN;
+#ifdef INTEL_IPP_CRYPTO
+#else
 		AES_cbc_encrypt(in,out,*len,m_keyAES1,m_iv1,AES_DECRYPT);
 		//Now remove padding
 		UINT32 pad=out[*len-1];
@@ -223,11 +255,12 @@ SINT32 CASymCipher::decrypt1CBCwithPKCS7(const UINT8* in,UINT8* out,UINT32* len)
 		for(UINT32 i=*len-pad;i<*len-1;i++)
 				if(out[i]!=pad)
 					return E_UNKNOWN;
-		*len-=pad;			
+		*len-=pad;
+#endif
 		return E_SUCCESS;
 	}
 
-/** En-/Decryptes in to out using IV1 nad key1. AES is used for en-/decryption and the cryption
+/** En-/Decryptes in to out using IV1 and key1. AES is used for en-/decryption and the cryption
 	* is done with CBC mode and PKCS7 padding.
 	* @param in input (plain or ciphertext) bytes
 	* @param inlen size of the input buffer
@@ -238,6 +271,8 @@ SINT32 CASymCipher::decrypt1CBCwithPKCS7(const UINT8* in,UINT8* out,UINT32* len)
 	*/
 SINT32 CASymCipher::encrypt1CBCwithPKCS7(const UINT8* in,UINT32 inlen,UINT8* out,UINT32* len)
 	{
+#ifdef INTEL_IPP_CRYPTO
+#else
 		UINT32 padlen=16-(inlen%16);
 		if(inlen+padlen>(*len))
 			{
@@ -252,6 +287,28 @@ SINT32 CASymCipher::encrypt1CBCwithPKCS7(const UINT8* in,UINT32 inlen,UINT8* out
 		AES_cbc_encrypt(tmp,out,inlen+padlen,m_keyAES1,m_iv1,AES_ENCRYPT);
 		delete[] tmp;
 		tmp = NULL;
-		*len=inlen+padlen;			
+		*len=inlen+padlen;
+#endif
 		return E_SUCCESS;
 	}	
+
+SINT32 CASymCipher::testSpeed()
+	{
+		const UINT32 runs=1000000;
+		CASymCipher* pCipher=new CASymCipher();
+		UINT8 key[16];
+		UINT8* inBuff=new UINT8[1024];
+		getRandom(key,16);
+		getRandom(inBuff,1024);
+		pCipher->setKey(key);
+		UINT64 start,end;
+		getcurrentTimeMillis(start);
+		for(UINT32 i=0;i<runs;i++)
+			{
+				pCipher->crypt1(inBuff,inBuff,1024);
+			}
+		getcurrentTimeMillis(end);
+		UINT32 d=diff64(end,start);
+		printf("CASymCiper::testSpeed() takes %u ms for %u * 1024 Bytes!\n",d,runs);
+		return E_SUCCESS;
+	}

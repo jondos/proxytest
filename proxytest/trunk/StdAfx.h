@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.08.51"
+#define MIX_VERSION "00.08.52"
 
 #include "doxygen.h"
 
@@ -67,7 +67,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define ENABLE_GPERFTOOLS_CPU_PROFILER //Enables the usage of the Goggle GPerfTools CPU Profiler for profiling the operation of the Mix 
 
 //#define DATA_RETENTION_LOG //define if you need to store logs according to German data retention
-
+//#define INTEL_IPP_CRYPTO //define if you want to use the crypto routines of the Intel Performance Primitives 
 #if !defined(PRINT_THREAD_STACK_TRACE) && defined (DEBUG)&& ! defined(ONLY_LOCAL_PROXY)
 	#define PRINT_THREAD_STACK_TRACE
 #endif
@@ -601,6 +601,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include <google/profiler.h>
 #endif
 
+#ifdef INTEL_IPP_CRYPTO
+	#include <ippcp.h>
+#endif
 
 #ifdef PAYMENT
 	#define PAYMENT_VERSION_INFO " (payment)"
