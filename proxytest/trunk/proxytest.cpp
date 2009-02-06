@@ -767,9 +767,9 @@ RESTART_MIX:
 		//end Testin msSleep
 #endif
 
-		CASymCipher::testSpeed();
-		getch();
-		exit(0);
+//		CASymCipher::testSpeed();
+//		getch();
+//		exit(0);
 
 //			CAMsg::printMsg(LOG_ENCRYPTED,"Test: Anon proxy started!\n");
 //			CAMsg::printMsg(LOG_ENCRYPTED,"Test2: Anon proxy started!\n");
