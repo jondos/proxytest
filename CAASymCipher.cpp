@@ -461,7 +461,7 @@ SINT32 CAASymCipher::setPublicKey(const UINT8* m,UINT32 mlen,const UINT8* e,UINT
 	}
 
 #ifdef INTEL_IPP_CRYPTO
-IppStatus __stdcall myIppBitSupplier(Ipp32u* pData, int nBits,void* pEbsParams)
+IppStatus __STDCALL myIppBitSupplier(Ipp32u* pData, int nBits,void* pEbsParams)
 	{
 		getRandom((UINT8*)pData,(nBits+7)/8);
 		return ippStsNoErr;
@@ -479,13 +479,28 @@ SINT32 CAASymCipher::testSpeed()
 		int size=0;
 		ippsRSAGetSize(1024, 512, IppRSAprivate, &size);
 		IppsRSAState* pCtx=(IppsRSAState*)new UINT8[size];
-		ippsRSAInit(1024, 512, IppRSAprivate,pCtx);
+		IppStatus ret=ippsRSAInit(1024, 512, IppRSAprivate,pCtx);
+		if(ret!=ippStsNoErr)
+			{
+				printf("Error in RSA init!\n");
+				return E_UNKNOWN;
+			}
 		ippsBigNumGetSize(1, &size);
 		IppsBigNumState* pE = (IppsBigNumState*)( new UINT8 [size] );
 		ippsBigNumInit(1, pE);
 		UINT32 pEValue[]= {0x010001};
-		ippsSet_BN(IppsBigNumPOS, 1, pEValue, pE);
+		ret=ippsSet_BN(IppsBigNumPOS, 1, pEValue, pE);
+		if(ret!=ippStsNoErr)
+			{
+				printf("Error in setBN(e)!\n");
+				return E_UNKNOWN;
+			}
 		ippsRSAGenerate(pE,1024,512,1024,pCtx, myIppBitSupplier, NULL);
+		if(ret!=ippStsNoErr)
+			{
+				printf("Error in RSA generate key!\n");
+				return E_UNKNOWN;
+			}
 
 		ippsBigNumGetSize(32, &size);
 		IppsBigNumState* pY = (IppsBigNumState*)( new UINT8 [size] );
@@ -510,7 +525,7 @@ SINT32 CAASymCipher::testSpeed()
 				IppStatus ret=ippsRSADecrypt(pX,pY,pCtx);
 				if(ret!=ippStsNoErr)
 				{
-					printf("Error!\n");
+					printf("Error in RSADEcrypt %i!\n",ret);
 					return E_UNKNOWN;
 				}
 #else

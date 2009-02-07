@@ -61,6 +61,9 @@ Global
 		Release|Any CPU = Release|Any CPU
 		Release|Mixed Platforms = Release|Mixed Platforms
 		Release|Win32 = Release|Win32
+		Release-IntelCrypto|Any CPU = Release-IntelCrypto|Any CPU
+		Release-IntelCrypto|Mixed Platforms = Release-IntelCrypto|Mixed Platforms
+		Release-IntelCrypto|Win32 = Release-IntelCrypto|Win32
 		VTune|Any CPU = VTune|Any CPU
 		VTune|Mixed Platforms = VTune|Mixed Platforms
 		VTune|Win32 = VTune|Win32
@@ -101,6 +104,11 @@ Global
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Release|Mixed Platforms.Build.0 = Release|Win32
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Release|Win32.ActiveCfg = Release|Win32
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Release|Win32.Build.0 = Release|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Release-IntelCrypto|Any CPU.ActiveCfg = Release-IntelCrypto|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Release-IntelCrypto|Mixed Platforms.ActiveCfg = Release-IntelCrypto|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Release-IntelCrypto|Mixed Platforms.Build.0 = Release-IntelCrypto|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Release-IntelCrypto|Win32.ActiveCfg = Release-IntelCrypto|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Release-IntelCrypto|Win32.Build.0 = Release-IntelCrypto|Win32
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.VTune|Any CPU.ActiveCfg = VTune|Win32
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.VTune|Mixed Platforms.ActiveCfg = VTune|Win32
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.VTune|Mixed Platforms.Build.0 = VTune|Win32
@@ -134,6 +142,11 @@ Global
 		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.Release|Mixed Platforms.ActiveCfg = Release|Win32
 		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.Release|Mixed Platforms.Build.0 = Release|Win32
 		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.Release|Win32.ActiveCfg = Release|Win32
+		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.Release-IntelCrypto|Any CPU.ActiveCfg = Release|Win32
+		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.Release-IntelCrypto|Mixed Platforms.ActiveCfg = Release|Win32
+		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.Release-IntelCrypto|Mixed Platforms.Build.0 = Release|Win32
+		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.Release-IntelCrypto|Win32.ActiveCfg = Release-IntelCrypto|Win32
+		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.Release-IntelCrypto|Win32.Build.0 = Release-IntelCrypto|Win32
 		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.VTune|Any CPU.ActiveCfg = VTune|Win32
 		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.VTune|Mixed Platforms.ActiveCfg = VTune|Win32
 		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.VTune|Mixed Platforms.Build.0 = VTune|Win32
@@ -171,6 +184,9 @@ Global
 		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Release|Mixed Platforms.Build.0 = Release|Win32
 		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Release|Win32.ActiveCfg = Release|Win32
 		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Release|Win32.Build.0 = Release|Win32
+		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Release-IntelCrypto|Any CPU.ActiveCfg = Release|Win32
+		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Release-IntelCrypto|Mixed Platforms.ActiveCfg = Release|Win32
+		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Release-IntelCrypto|Win32.ActiveCfg = Release|Win32
 		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.VTune|Any CPU.ActiveCfg = proxytest-only-local-debug|Win32
 		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.VTune|Mixed Platforms.ActiveCfg = proxytest-only-local-debug|Win32
 		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.VTune|Mixed Platforms.Build.0 = proxytest-only-local-debug|Win32
@@ -209,6 +225,9 @@ Global
 		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Release|Mixed Platforms.Build.0 = Release|Win32
 		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Release|Win32.ActiveCfg = Release|Win32
 		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Release|Win32.Build.0 = Release|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Release-IntelCrypto|Any CPU.ActiveCfg = Release|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Release-IntelCrypto|Mixed Platforms.ActiveCfg = Release|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Release-IntelCrypto|Win32.ActiveCfg = Release|Win32
 		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.VTune|Any CPU.ActiveCfg = proxytest-only-local-debug|Win32
 		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.VTune|Mixed Platforms.ActiveCfg = proxytest-only-local-debug|Win32
 		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.VTune|Mixed Platforms.Build.0 = proxytest-only-local-debug|Win32
@@ -247,6 +266,9 @@ Global
 		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Release|Mixed Platforms.Build.0 = Release|Win32
 		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Release|Win32.ActiveCfg = Release|Win32
 		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Release|Win32.Build.0 = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Release-IntelCrypto|Any CPU.ActiveCfg = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Release-IntelCrypto|Mixed Platforms.ActiveCfg = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Release-IntelCrypto|Win32.ActiveCfg = Release|Win32
 		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.VTune|Any CPU.ActiveCfg = proxytest-only-local-debug|Win32
 		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.VTune|Mixed Platforms.ActiveCfg = proxytest-only-local-debug|Win32
 		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.VTune|Mixed Platforms.Build.0 = proxytest-only-local-debug|Win32
@@ -280,6 +302,9 @@ Global
 		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.Release|Mixed Platforms.ActiveCfg = Release|Win32
 		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.Release|Mixed Platforms.Build.0 = Release|Win32
 		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.Release|Win32.ActiveCfg = Release|Win32
+		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.Release-IntelCrypto|Any CPU.ActiveCfg = Release|Win32
+		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.Release-IntelCrypto|Mixed Platforms.ActiveCfg = Release|Win32
+		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.Release-IntelCrypto|Win32.ActiveCfg = Release|Win32
 		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.VTune|Any CPU.ActiveCfg = proxytest-only-local-debug|Win32
 		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.VTune|Mixed Platforms.ActiveCfg = proxytest-only-local-debug|Win32
 		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.VTune|Mixed Platforms.Build.0 = proxytest-only-local-debug|Win32
@@ -312,6 +337,9 @@ Global
 		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.Release|Mixed Platforms.ActiveCfg = Release|Win32
 		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.Release|Mixed Platforms.Build.0 = Release|Win32
 		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.Release|Win32.ActiveCfg = Release|Win32
+		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.Release-IntelCrypto|Any CPU.ActiveCfg = Release|Win32
+		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.Release-IntelCrypto|Mixed Platforms.ActiveCfg = Release|Win32
+		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.Release-IntelCrypto|Win32.ActiveCfg = Release|Win32
 		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.VTune|Any CPU.ActiveCfg = proxytest-only-local-debug|Win32
 		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.VTune|Mixed Platforms.ActiveCfg = proxytest-only-local-debug|Win32
 		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.VTune|Mixed Platforms.Build.0 = proxytest-only-local-debug|Win32
