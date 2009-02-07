@@ -601,6 +601,12 @@ int main(int argc, const char* argv[])
 
 		exit(0);
 */
+#ifdef INTEL_IPP_CRYPTO
+		CAASymCipher::testSpeed();
+		getch();
+		exit(0);
+#endif
+
 		if(pglobalOptions->parse(argc,argv) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_CRIT,"Error: Cannot parse configuration file!\n");
@@ -767,9 +773,6 @@ RESTART_MIX:
 		//end Testin msSleep
 #endif
 
-//		CASymCipher::testSpeed();
-//		getch();
-//		exit(0);
 
 //			CAMsg::printMsg(LOG_ENCRYPTED,"Test: Anon proxy started!\n");
 //			CAMsg::printMsg(LOG_ENCRYPTED,"Test2: Anon proxy started!\n");
