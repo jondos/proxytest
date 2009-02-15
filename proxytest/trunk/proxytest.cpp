@@ -601,11 +601,11 @@ int main(int argc, const char* argv[])
 
 		exit(0);
 */
-#ifdef INTEL_IPP_CRYPTO
-		CAASymCipher::testSpeed();
-		getch();
-		exit(0);
-#endif
+//#ifdef INTEL_IPP_CRYPTO
+//		CAASymCipher::testSpeed();
+//		getch();
+//		exit(0);
+//#endif
 
 		if(pglobalOptions->parse(argc,argv) != E_SUCCESS)
 		{

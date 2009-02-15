@@ -80,6 +80,7 @@ SINT32 CALastMixA::loop()
 		SINT32 countRead;
 		lmChannelListEntry* pChannelListEntry;
 		UINT8 rsaBuff[RSA_SIZE];
+		UINT32 rsaOutLen=RSA_SIZE;
 		UINT8* tmpBuff=new UINT8[MIXPACKET_SIZE];
 		bool bAktiv;
 		m_logUploadedPackets=m_logDownloadedPackets=0;
@@ -128,8 +129,12 @@ SINT32 CALastMixA::loop()
 												#if defined(_DEBUG) 
 													CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
 												#endif
-												
+
+#ifdef NEW_CHANNEL_ENCRYPTION
+												m_pRSA->decryptOAEP(pMixPacket->data,rsaBuff,&rsaOutLen);
+#else
 												m_pRSA->decrypt(pMixPacket->data,rsaBuff);
+#endif
 												#ifdef REPLAY_DETECTION
 													// replace time(NULL) with the real timestamp ()
 													// packet-timestamp + m_u64ReferenceTime
@@ -144,10 +149,10 @@ SINT32 CALastMixA::loop()
 												CASymCipher* newCipher=new CASymCipher();
 												newCipher->setKeys(rsaBuff,LAST_MIX_SIZE_OF_SYMMETRIC_KEYS);
 												newCipher->crypt1(pMixPacket->data+RSA_SIZE,
-																							pMixPacket->data+RSA_SIZE-LAST_MIX_SIZE_OF_SYMMETRIC_KEYS,
+																							pMixPacket->data+rsaOutLen-LAST_MIX_SIZE_OF_SYMMETRIC_KEYS,
 																							DATA_SIZE-RSA_SIZE);
 												memcpy(	pMixPacket->data,rsaBuff+LAST_MIX_SIZE_OF_SYMMETRIC_KEYS,
-																RSA_SIZE-LAST_MIX_SIZE_OF_SYMMETRIC_KEYS);
+																rsaOutLen-LAST_MIX_SIZE_OF_SYMMETRIC_KEYS);
 												#ifdef LOG_PACKET_TIMES
 													getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
 												#endif
