@@ -677,8 +677,10 @@ THREAD_RETURN mm_loopSendToMixBefore(void* param)
 
 #ifdef NEW_CHANNEL_ENCRYPTION
 	#define MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS 2*KEY_SIZE
+	#define MIDDLE_MIX_ASYM_PADDING_SIZE 42
 #else
 	#define MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS KEY_SIZE
+	#define MIDDLE_MIX_ASYM_PADDING_SIZE 0
 #endif
 
 THREAD_RETURN mm_loopReadFromMixBefore(void* param)
@@ -693,6 +695,7 @@ THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 		CASymCipher* pCipher;
 		SINT32 ret;
 		UINT8* tmpRSABuff=new UINT8[RSA_SIZE];
+		UINT32 rsaOutLen=RSA_SIZE;
 		CASingleSocketGroup oSocketGroup(false);
 		oSocketGroup.add(*(pMix->m_pMuxIn));
 
@@ -771,7 +774,11 @@ THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 										#ifdef _DEBUG
 											CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
 										#endif
-										pMix->m_pRSA->decrypt(pMixPacket->data,tmpRSABuff);
+										#ifdef NEW_CHANNEL_ENCRYPTION		
+											pMix->m_pRSA->decryptOAEP(pMixPacket->data,tmpRSABuff,&rsaOutLen);
+										#else
+											pMix->m_pRSA->decrypt(pMixPacket->data,tmpRSABuff);
+										#endif
 										#ifdef REPLAY_DETECTION
 											// replace time(NULL) with the real timestamp ()
 											// packet-timestamp + m_u64ReferenceTime
@@ -787,10 +794,10 @@ THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 										pCipher=new CASymCipher();
 										pCipher->setKeys(tmpRSABuff,MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS);
 										pCipher->crypt1(pMixPacket->data+RSA_SIZE,
-													pMixPacket->data+RSA_SIZE-MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS,
+													pMixPacket->data+rsaOutLen-MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS,
 													DATA_SIZE-RSA_SIZE);
-										memcpy(pMixPacket->data,tmpRSABuff+MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS,RSA_SIZE-MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS);
-										getRandom(pMixPacket->data+DATA_SIZE-KEY_SIZE,MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS);
+										memcpy(pMixPacket->data,tmpRSABuff+MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS,rsaOutLen-MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS);
+										getRandom(pMixPacket->data+DATA_SIZE-MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS-MIDDLE_MIX_ASYM_PADDING_SIZE,MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS+MIDDLE_MIX_ASYM_PADDING_SIZE);
 										pMix->m_pMiddleMixChannelList->add(pMixPacket->channel,pCipher,&channelOut);
 										pMixPacket->channel=channelOut;
 										#ifdef USE_POOL
