@@ -516,6 +516,8 @@ SINT32 CAASymCipher::testSpeed()
 #else
 		CAASymCipher* pCipher=new CAASymCipher();
 		pCipher->generateKeyPair(1024);
+		UINT32 iLen=128;
+		pCipher->encryptOAEP(inBuff,86,inBuff,&iLen);
 #endif
 		UINT64 start,end;
 		getcurrentTimeMillis(start);
@@ -529,7 +531,8 @@ SINT32 CAASymCipher::testSpeed()
 					return E_UNKNOWN;
 				}
 #else
-				pCipher->decrypt(inBuff,outBuff);
+				pCipher->decryptOAEP(inBuff,outBuff,&iLen);
+//				pCipher->decrypt(inBuff,outBuff);
 #endif
 			}
 		getcurrentTimeMillis(end);

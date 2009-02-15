@@ -104,7 +104,12 @@ SINT32 CASymCipher::setKeys(const UINT8* key,UINT32 keysize)
 SINT32 CASymCipher::crypt1(const UINT8* in,UINT8* out,UINT32 len)
 	{
 #ifdef INTEL_IPP_CRYPTO
-				ippsRijndael128EncryptOFB(in,out,len,16, m_keyAES1,m_iv1);
+				UINT32 k=len&0xFFFFFFF0;
+				ippsRijndael128EncryptOFB(in,out,k,16, m_keyAES1,m_iv1);
+//				if((len%16)!=0)
+//					{
+						ippsRijndael128EncryptOFB(in+k,out+k,len%16,len%16, m_keyAES1,m_iv1);
+//					}
 				return E_SUCCESS;
 #endif
 		UINT32 i=0;
@@ -305,10 +310,10 @@ SINT32 CASymCipher::testSpeed()
 		getcurrentTimeMillis(start);
 		for(UINT32 i=0;i<runs;i++)
 			{
-				pCipher->crypt1(inBuff,inBuff,1024);
+				pCipher->crypt1(inBuff,inBuff,1023);
 			}
 		getcurrentTimeMillis(end);
 		UINT32 d=diff64(end,start);
-		printf("CASymCiper::testSpeed() takes %u ms for %u * 1024 Bytes!\n",d,runs);
+		printf("CASymCiper::testSpeed() takes %u ms for %u * 1023 Bytes!\n",d,runs);
 		return E_SUCCESS;
 	}
