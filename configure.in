@@ -688,6 +688,18 @@ AC_ARG_ENABLE(google-cpuprofiler,
 	]
 )
 
+AC_ARG_ENABLE(google-heapchecker,
+	AS_HELP_STRING([--enable-google-heapchecker],[Enable heap checking using Googles Perftools]),
+	[
+	    if test "x$enableval" != "xno" ; then
+		CFLAGS="$CFLAGS -DENABLE_GPERFTOOLS_HEAP_CHECKER"
+		CXXFLAGS="$CXXFLAGS -DENABLE_GPERFTOOLS_HEAP_CHECKER"
+		LIBS="$LIBS -ltcmalloc"
+	    fi
+	]
+)
+
+
 CRIME=""
 AC_ARG_ENABLE(crime-detection,
 	AS_HELP_STRING([--enable-crime-detection],[Enable crime detection mode]),
