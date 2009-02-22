@@ -44,7 +44,7 @@ class CASignature
 			SINT32 setSignKey(const DOMNode* node,UINT32 type,const char* passwd=NULL);
 			/** Gets the secret sign key as XML encode PKCS#12 struct*/
 			SINT32 getSignKey(DOMElement* & node,XERCES_CPP_NAMESPACE::DOMDocument* doc);
-			SINT32 sign(UINT8* in,UINT32 inlen,UINT8* sig,UINT32* siglen);
+			SINT32 sign(const UINT8* const in,UINT32 inlen,UINT8* sig,UINT32* siglen) const;
 			SINT32 signXML(DOMNode* node,CACertStore* pIncludeCerts=NULL);
 			SINT32 signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen,CACertStore* pIncludeCerts=NULL);
 			SINT32 setVerifyKey(CACertificate* pCert);
@@ -60,7 +60,7 @@ class CASignature
 			SINT32 verifyXML(const UINT8* const in,UINT32 inlen);
 			SINT32 verifyXML(DOMNode* node,CACertStore* pTrustedCerts=NULL);
 			SINT32 getSignatureSize();
-			SINT32 encodeRS(UINT8* out,UINT32* outLen,DSA_SIG* pdsaSig);
+			SINT32 encodeRS(UINT8* out,UINT32* outLen,const DSA_SIG* const pdsaSig) const;
 			
 			/**
 			* Converts a DSA signature from the XML Signature format to the
@@ -72,8 +72,8 @@ class CASignature
 			* @retval E_SUCCESS if succesful
 			* @retval E_UNKNOWN otherwise
 			*/
-			SINT32 decodeRS(const UINT8* in, const UINT32 inLen, DSA_SIG* pDsaSig);
-			SINT32 verify(UINT8* in,UINT32 inlen,DSA_SIG* dsaSig);
+			SINT32 decodeRS(const UINT8* const in, const UINT32 inLen, DSA_SIG* pDsaSig) const;
+			SINT32 verify(const UINT8* const in,UINT32 inlen,DSA_SIG* const dsaSig) const;
 			
 			/**
 			* Verifies an ASN.1 DER encoded SHA1-DSA signature.
@@ -93,7 +93,7 @@ class CASignature
 			DSA* getDSA(){return m_pDSA;}
 			DSA* m_pDSA;
 			SINT32 parseSignKeyXML(const UINT8* buff,UINT32 len);
-			SINT32 sign(UINT8* in,UINT32 inlen,DSA_SIG** dsaSig);
+			SINT32 sign(const UINT8* const in,UINT32 inlen,DSA_SIG** dsaSig) const;
 
 			
 	};

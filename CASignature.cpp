@@ -256,7 +256,7 @@ SINT32 CASignature::parseSignKeyXML(const UINT8* buff,UINT32 len)
 	}
 
 
-SINT32 CASignature::sign(UINT8* in,UINT32 inlen,UINT8* sig,UINT32* siglen)
+SINT32 CASignature::sign(const UINT8* in,UINT32 inlen,UINT8* sig,UINT32* siglen) const
 	{
 		DSA_SIG* signature=NULL;
 		if(	sign(in,inlen,&signature)!=E_SUCCESS)
@@ -270,11 +270,12 @@ SINT32 CASignature::sign(UINT8* in,UINT32 inlen,UINT8* sig,UINT32* siglen)
 		return E_SUCCESS;
 	}
 
-SINT32 CASignature::sign(UINT8* in,UINT32 inlen,DSA_SIG** pdsaSig)
+SINT32 CASignature::sign(const UINT8* in,UINT32 inlen,DSA_SIG** pdsaSig) const
 	{
-		UINT8 dgst[SHA_DIGEST_LENGTH];
+		UINT8* dgst=new UINT8[SHA_DIGEST_LENGTH];
 		SHA1(in,inlen,dgst);
 		*pdsaSig=DSA_do_sign(dgst,SHA_DIGEST_LENGTH,m_pDSA);
+		delete []dgst;
 		if(*pdsaSig!=NULL)
 		 return E_SUCCESS;
 		return E_UNKNOWN;
@@ -645,15 +646,19 @@ SINT32 CASignature::setVerifyKey(const DOMElement* xmlKey)
 }
 
 
-SINT32 CASignature::verify(UINT8* in,UINT32 inlen,DSA_SIG* dsaSig)
+SINT32 CASignature::verify(const UINT8* const in,UINT32 inlen,DSA_SIG* const dsaSig) const
 	{
 		if(m_pDSA==NULL||dsaSig==NULL||dsaSig->r==NULL||dsaSig->s==NULL)
 			return E_UNKNOWN;
-		UINT8 dgst[SHA_DIGEST_LENGTH];
+		SINT32 ret=E_UNKNOWN;
+		UINT8* dgst=new UINT8[SHA_DIGEST_LENGTH];
 		SHA1(in,inlen,dgst);
 		if(DSA_do_verify(dgst,SHA_DIGEST_LENGTH,dsaSig,m_pDSA)==1)
-		 return E_SUCCESS;
-		return E_UNKNOWN;
+			{
+				ret=E_SUCCESS;
+			}
+		delete [] dgst;
+		return ret;
 	}
 
 	
@@ -804,7 +809,7 @@ SINT32 CASignature::verifyXML(DOMNode* root,CACertStore* trustedCerts)
 		return E_SUCCESS;
 	}
 
-SINT32 CASignature::encodeRS(UINT8* out,UINT32* outLen,DSA_SIG* pdsaSig)
+SINT32 CASignature::encodeRS(UINT8* out,UINT32* outLen,const DSA_SIG* const pdsaSig) const
 	{
 		UINT32 rSize, sSize;
 		memset(out,0,40); //make first 40 bytes '0' --> if r or s is less then 20 bytes long! 
@@ -818,7 +823,7 @@ SINT32 CASignature::encodeRS(UINT8* out,UINT32* outLen,DSA_SIG* pdsaSig)
 	}
 
 	
-SINT32 CASignature::decodeRS(const UINT8* in, const UINT32 inLen, DSA_SIG* pDsaSig)
+SINT32 CASignature::decodeRS(const UINT8* const in, const UINT32 inLen, DSA_SIG* pDsaSig) const
 {
 	ASSERT(pDsaSig!=NULL, "DSA_SIG is null");
 	ASSERT(inLen>20, "Inbuffer is <=20 bytes");
