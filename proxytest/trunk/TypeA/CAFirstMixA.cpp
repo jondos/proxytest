@@ -521,7 +521,9 @@ NEXT_USER:
 									}
 									else
 									{
-										CAMsg::printMsg(LOG_DEBUG, "CAFirstMixA: close channel -> client but channel does not exist.\n");
+										#ifdef DEBUG
+											CAMsg::printMsg(LOG_DEBUG, "CAFirstMixA: close channel -> client but channel does not exist.\n");
+										#endif
 									}
 
 							}
