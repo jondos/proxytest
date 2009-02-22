@@ -1336,7 +1336,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		//Sending Signature....
 		xml_buff[0]=(UINT8)(xml_len>>8);
 		xml_buff[1]=(UINT8)(xml_len&0xFF);
-		UINT8 sig[255];
+		UINT8* sig=new UINT8[255];
 		UINT32 siglen=255;
 		m_pSignature->sign(xml_buff,xml_len+2,sig,&siglen);
 		XERCES_CPP_NAMESPACE::DOMDocument* docSig=createDOMDocument();
@@ -1410,6 +1410,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		CABase64::encode(sig,u32,sig,&siglen);
 		sig[siglen]=0;
 		setDOMElementValue(elemSigValue,sig);
+		delete[] sig;
 		u32=xml_len;
 		DOM_Output::dumpToMem(docSig,xml_buff+2,&u32);
 		if (docSig != NULL)
