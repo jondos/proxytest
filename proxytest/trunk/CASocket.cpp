@@ -303,7 +303,7 @@ SINT32 CASocket::connect(const CASocketAddr & psa,UINT32 msTimeOut)
 
 SINT32 CASocket::close()
 	{
-		UINT32 ret;
+		SINT32 ret;
 
 		if(m_bSocketIsClosed)
 		{
