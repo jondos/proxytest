@@ -1094,19 +1094,19 @@ SINT32 CAInfoService::sendCascadeHelo()
 		return E_SUCCESS;
   	}
 
-	UINT32 len;
-	SINT32 ret;
-	UINT8* strCascadeHeloXML=getCascadeHeloXMLAsString(len);
-	if(strCascadeHeloXML==NULL)
-	{
-		return E_UNKNOWN;
-	}
-
 	if( !(m_pMix->isConnected()) )
 	{
 #ifdef DEBUG
 		CAMsg::printMsg(LOG_INFO, "not connected: skipping cascade helo.\n");
 #endif
+		return E_UNKNOWN;
+	}
+
+	UINT32 len;
+	SINT32 ret;
+	UINT8* strCascadeHeloXML=getCascadeHeloXMLAsString(len);
+	if(strCascadeHeloXML==NULL)
+	{
 		return E_UNKNOWN;
 	}
 
