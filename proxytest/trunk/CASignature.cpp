@@ -307,9 +307,17 @@ SINT32 CASignature::signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen,CAC
 		if(doc==NULL)
 			return E_UNKNOWN;
 		DOMElement* root=doc->getDocumentElement();
-		if(signXML(root,pIncludeCerts)!=E_SUCCESS)
-			return E_UNKNOWN;
-		return DOM_Output::dumpToMem(root,out,outlen);
+		SINT32 ret=signXML(root,pIncludeCerts);
+		if(ret!=E_SUCCESS)
+			{
+				doc->release();
+				delete doc;
+				return E_UNKNOWN;
+			}
+		ret=DOM_Output::dumpToMem(root,out,outlen);
+		doc->release();
+		delete doc;
+		return ret;
 	}
 
 /** Signs a DOM Node. The XML Signature is include in the XML Tree as a Child of the Node.
