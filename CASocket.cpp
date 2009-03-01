@@ -184,7 +184,6 @@ SINT32 CASocket::accept(CASocket &s)
 		s.m_csClose.lock();
 		m_u32NormalSocketsOpen++;
 		s.m_bSocketIsClosed=false;
-
 		s.m_csClose.unlock();
 
 		return E_SUCCESS;

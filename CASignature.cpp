@@ -311,12 +311,10 @@ SINT32 CASignature::signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen,CAC
 		if(ret!=E_SUCCESS)
 			{
 				doc->release();
-				delete doc;
 				return E_UNKNOWN;
 			}
 		ret=DOM_Output::dumpToMem(root,out,outlen);
 		doc->release();
-		delete doc;
 		return ret;
 	}
 
