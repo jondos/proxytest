@@ -874,6 +874,8 @@ SINT32 CACmdLnOptions::setNewValues(CACmdLnOptions& newOptions)
 		//Copy ressources limitation
 		m_u32DelayChannelLatency=newOptions.getDelayChannelLatency();
 #endif
+		if(newOptions.getMaxNrOfUsers()>0)
+			m_maxNrOfUsers=newOptions.getMaxNrOfUsers();
 		return E_SUCCESS;
 }
 
