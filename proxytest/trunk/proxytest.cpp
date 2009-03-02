@@ -100,6 +100,18 @@ void openssl_locking_callback(int mode, int type, char * /*file*/, int /*line*/)
 				pOpenSSLMutexes[type].unlock();
 			}
 	}
+
+/** Callback used by openssl to identify a thread*/
+///TODO: Move this to CAThread !
+unsigned long openssl_get_thread_id(void)
+	{
+#ifdef _WIN32
+		return (unsigned long) pthread_self().p;
+#else
+		return (unsigned long) pthread_self();
+#endif
+}
+
 /// Removes the stored PID (file)
 void removePidFile()
 	{
@@ -130,13 +142,13 @@ void init()
 		XMLPlatformUtils::Initialize();
 		initDOMParser();
 #endif
-		OpenSSL_add_all_algorithms();
-		pOpenSSLMutexes=new CAMutex[CRYPTO_num_locks()];
-		CRYPTO_set_locking_callback((void (*)(int,int,const char *,int))openssl_locking_callback);
-
 #ifndef ONLY_LOCAL_PROXY
 		SSL_library_init();
 #endif
+		OpenSSL_add_all_algorithms();
+		pOpenSSLMutexes=new CAMutex[CRYPTO_num_locks()];
+		CRYPTO_set_locking_callback((void (*)(int,int,const char *,int))openssl_locking_callback);
+		CRYPTO_set_id_callback(openssl_get_thread_id);
 #if defined _DEBUG && ! defined (ONLY_LOCAL_PROXY)
 		pThreadList=new CAThreadList();
 		CAThread::setThreadList(pThreadList);
