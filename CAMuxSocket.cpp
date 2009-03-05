@@ -34,11 +34,29 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASingleSocketGroup.hpp"
 #include "CAUtil.hpp"
 
+t_hashkeylistEntry* CAMuxSocket::ms_phashkeylistAvailableHashKeys=NULL;
+SINT32 CAMuxSocket::ms_nMaxHashKeyValue=0;
+CAMutex* CAMuxSocket::ms_pcsHashKeyList=new CAMutex();
+
 CAMuxSocket::CAMuxSocket()
 	{
 		m_Buff=new UINT8[MIXPACKET_SIZE];
 		m_aktBuffPos=0;
 		m_bIsCrypted=false;
+		ms_pcsHashKeyList->lock();
+		if(ms_phashkeylistAvailableHashKeys==NULL)
+			{//generate new hash keys
+				for(UINT i=0;i<512;i++)
+					{
+						m_pHashKeyEntry=new t_hashkeylistEntry;
+						m_pHashKeyEntry->next=ms_phashkeylistAvailableHashKeys;
+						m_pHashKeyEntry->hashkey=ms_nMaxHashKeyValue++;
+						ms_phashkeylistAvailableHashKeys=m_pHashKeyEntry;
+					}
+			}
+		m_pHashKeyEntry=ms_phashkeylistAvailableHashKeys;
+		ms_phashkeylistAvailableHashKeys=m_pHashKeyEntry->next;
+		ms_pcsHashKeyList->unlock();
 	}
 	
 CAMuxSocket::~CAMuxSocket()
@@ -46,6 +64,10 @@ CAMuxSocket::~CAMuxSocket()
 		close();
 		delete []m_Buff;
 		m_Buff = NULL;
+		ms_pcsHashKeyList->lock();
+		m_pHashKeyEntry->next=ms_phashkeylistAvailableHashKeys;
+		ms_phashkeylistAvailableHashKeys=m_pHashKeyEntry;
+		ms_pcsHashKeyList->unlock();
 	}	
 
 SINT32 CAMuxSocket::setCrypt(bool b)
