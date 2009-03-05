@@ -33,11 +33,27 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMutex.hpp"
 #include "CATLSClientSocket.hpp"
 
+struct __t_hash_key_entry__
+	{
+		struct __t_hash_key_entry__* next;
+		SINT32 hashkey;
+	};
+
+typedef struct __t_hash_key_entry__ t_hashkeylistEntry;
+
+
 class CAMuxSocket
 	{
 		public:
 			CAMuxSocket();
 			~CAMuxSocket();
+
+			/** Returns a Hashkey which uniquely identifies this socket*/
+			SINT32 getHashKey()
+				{
+					return m_pHashKeyEntry->hashkey;
+				}
+
 			SINT32 accept(UINT16 port);
 			SINT32 accept(const CASocketAddr& oAddr);
 			SINT32 connect(CASocketAddr& psa);
@@ -138,5 +154,11 @@ class CAMuxSocket
 				bool			m_bIsCrypted;
 				CAMutex			m_csSend;
 				CAMutex			m_csReceive;
+				t_hashkeylistEntry*			m_pHashKeyEntry;
+
+				static t_hashkeylistEntry* ms_phashkeylistAvailableHashKeys; //stores he avilalbe hashkeys -> if this list is empty new entires are create on the fly
+				static SINT32 ms_nMaxHashKeyValue; // the maximum value of a hash key
+				static CAMutex* ms_pcsHashKeyList;
+
 	};
 #endif

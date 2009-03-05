@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 class CASocket:public CAClientSocket
 	{
 		public:
-		CASocket(bool bIsReserved=false);
+			CASocket(bool bIsReserved=false);
 			~CASocket(){close();}
 
 			virtual SINT32 create();						

@@ -118,7 +118,7 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 			FINISH_STACK("CAFirstMixChannelList::add (null socket)");
 			return NULL;
 		}
-		SINT32 hashkey=pMuxSocket->getSocket();
+		SINT32 hashkey=pMuxSocket->getHashKey();
 		if(hashkey>MAX_HASH_KEY-1||hashkey<0)
 		{
 			FINISH_STACK("CAFirstMixChannelList::add (invalid hash key)");
@@ -224,7 +224,7 @@ SINT32 CAFirstMixChannelList::addChannel(CAMuxSocket* pMuxSocket,HCHANNEL channe
 	{
 		if(pMuxSocket==NULL||channelOut==NULL)
 			return E_UNKNOWN;
-		SINT32 hashkey=pMuxSocket->getSocket();
+		SINT32 hashkey=pMuxSocket->getHashKey();
 		if(hashkey>MAX_HASH_KEY-1||hashkey<0)
 			return E_UNKNOWN;
 		m_Mutex.lock();
@@ -302,7 +302,7 @@ fmHashTableEntry* CAFirstMixChannelList::get(CAMuxSocket* pMuxSocket)
 	{
 		if(pMuxSocket==NULL)
 			return NULL;
-		SINT32 hashkey=pMuxSocket->getSocket();
+		SINT32 hashkey=pMuxSocket->getHashKey();
 		if(hashkey>MAX_HASH_KEY-1||hashkey<0)
 			return NULL;
 		m_Mutex.lock();
@@ -321,7 +321,7 @@ fmChannelListEntry* CAFirstMixChannelList::get(CAMuxSocket* pMuxSocket,HCHANNEL 
 	{
 		if(pMuxSocket==NULL)
 			return NULL;
-		SINT32 hashkey=pMuxSocket->getSocket();
+		SINT32 hashkey=pMuxSocket->getHashKey();
 		if(hashkey>MAX_HASH_KEY-1||hashkey<0)
 			return NULL;
 		m_Mutex.lock();
@@ -620,7 +620,7 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 	{
 		if(pMuxSocket==NULL)
 			return E_UNKNOWN;
-		SINT32 hashkey=pMuxSocket->getSocket();
+		SINT32 hashkey=pMuxSocket->getHashKey();
 		if(hashkey>MAX_HASH_KEY-1||hashkey<0)
 			return E_UNKNOWN;
 		m_Mutex.lock();
@@ -949,7 +949,7 @@ SINT32 CAFirstMixChannelList::removeChannel(CAMuxSocket* pMuxSocket,HCHANNEL cha
 	{
 		if(pMuxSocket==NULL)
 			return E_UNKNOWN;
-		SINT32 hashkey=pMuxSocket->getSocket();
+		SINT32 hashkey=pMuxSocket->getHashKey();
 		if(hashkey>MAX_HASH_KEY-1||hashkey<0)
 			return E_UNKNOWN;
 		m_Mutex.lock();
@@ -1082,7 +1082,7 @@ fmChannelListEntry* CAFirstMixChannelList::getFirstChannelForSocket(CAMuxSocket*
 	{
 		if(pMuxSocket==NULL)
 			return NULL;
-		SINT32 hashkey=pMuxSocket->getSocket();
+		SINT32 hashkey=pMuxSocket->getHashKey();
 		if(hashkey>MAX_HASH_KEY-1||hashkey<0)
 			return NULL;
 		fmHashTableEntry* pHashTableEntry=m_HashTable[hashkey];
