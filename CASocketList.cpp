@@ -142,7 +142,8 @@ SINT32 CASocketList::add(CASocket* pSocket,CASymCipher* pCiphers)
 		m_Connections=tmp;
 		m_Connections->pSocket=pSocket;
 		m_Connections->pCiphers=pCiphers;
-
+		m_Connections->currentSendMeCounter=0;
+		m_Connections->upstreamBytes=0;
 		for(;;)
 			{
 SELECT_RANDOM_CHANNEL_ID:
@@ -180,6 +181,28 @@ SINT32 CASocketList::get(HCHANNEL in,CONNECTION* out)
 				if(tmp->outChannel==in)
 					{
 						memcpy(out,tmp,sizeof(CONNECTION));
+						if(m_bThreadSafe)
+							cs.unlock();
+						return E_SUCCESS;
+					}
+				tmp=tmp->next;
+			}
+		if(m_bThreadSafe)
+			cs.unlock();
+		return E_UNKNOWN;
+	}
+
+SINT32 CASocketList::addSendMeCounter(HCHANNEL in,SINT32 value)
+	{
+		if(m_bThreadSafe)
+			cs.lock();
+		CONNECTIONLIST* tmp;
+		tmp=m_Connections;
+		while(tmp!=NULL)
+			{
+				if(tmp->outChannel==in)
+					{
+						tmp->currentSendMeCounter+=value;
 						if(m_bThreadSafe)
 							cs.unlock();
 						return E_SUCCESS;

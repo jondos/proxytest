@@ -159,10 +159,10 @@ SINT32 getDOMElementValue(const DOMElement * const pElem, UINT64 &value);
  */
 SINT32 setDOMElementValue(DOMElement* pElem, const UINT64 text);
 
-SINT32 getDOMElementValue(const DOMElement * const pElem,UINT32* value);
+SINT32 getDOMElementValue(const DOMNode * const pElem,UINT32* value);
 /** Gets the value from an DOM-Element as UINT32. If an error occurs, the default value is returned.
 */
-SINT32 getDOMElementValue(const DOMElement * const pElem,UINT32& value,UINT32 defaultValue);
+SINT32 getDOMElementValue(const DOMNode * const pElem,UINT32& value,UINT32 defaultValue);
 
 SINT32 getDOMElementValue(const DOMElement * const pElem,UINT16* value);
 

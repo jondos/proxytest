@@ -255,13 +255,18 @@ SINT32 CAQueue::getOrWait(UINT8* pbuff,UINT32* psize,UINT32 msTimeout)
 	*/
 SINT32 CAQueue::peek(UINT8* pbuff,UINT32* psize)
 	{
-		if(m_Queue==NULL||pbuff==NULL||psize==NULL)
+		if(pbuff==NULL||psize==NULL)
 			return E_UNKNOWN;
 		if(*psize==0)
 			return E_SUCCESS;
 		m_pcsQueue->lock();
 		UINT32 space=*psize;
 		*psize=0;
+		if(m_Queue==NULL)
+			{
+				m_pcsQueue->unlock();
+				return E_SUCCESS;
+			}
 		QUEUE* tmpQueue=m_Queue;
 		while(space>=tmpQueue->size)
 			{

@@ -114,7 +114,8 @@ SINT32 CALocalProxy::initOnce()
 SINT32 CALocalProxy::init()
 	{
 		CAListenerInterface* pListener;
-		
+		m_nFlowControlDownstreamSendMe=FLOW_CONTROL_SENDME_SOFT_LIMIT;
+		m_bWithNewFlowControl=false;
 		m_socketIn.create();
 		m_socketIn.setReuseAddr(true);
 		pListener=pglobalOptions->getListenerInterface(1);
@@ -349,10 +350,33 @@ SINT32 CALocalProxy::loop()
 										{
 											for(UINT32 c=0;c<m_chainlen;c++)
 												oConnection.pCiphers[c].crypt2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+											UINT32 truelen=ntohs(pMixPacket->payload.len);
+											truelen=truelen&PAYLOAD_LEN_MASK;
+											oConnection.pSocket->send(pMixPacket->payload.data,truelen);
 											#ifdef _DEBUG
-												CAMsg::printMsg(LOG_DEBUG,"Sending Data to Browser!\n");
+												CAMsg::printMsg(LOG_DEBUG,"Sending Data to Browser (%u bytes)!\n",truelen);
 											#endif
-											oConnection.pSocket->send(pMixPacket->payload.data,ntohs(pMixPacket->payload.len));
+											if(m_bWithNewFlowControl)
+											{
+												if(oConnection.currentSendMeCounter+1>=m_nFlowControlDownstreamSendMe)
+													{
+														//send a SEND_ME MixPacket
+														pMixPacket->flags=CHANNEL_DATA;
+														pMixPacket->channel=oConnection.outChannel;
+														getRandom(pMixPacket->data,DATA_SIZE);
+														pMixPacket->payload.len=htons(NEW_FLOW_CONTROL_FLAG);
+														pMixPacket->payload.type=MIX_PAYLOAD_HTTP;
+														for(UINT32 c=0;c<m_chainlen;c++)
+															oConnection.pCiphers[c].crypt1(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+														m_muxOut.send(pMixPacket);
+														CAMsg::printMsg(LOG_DEBUG,"sent sendme!\n");
+														oSocketList.addSendMeCounter(oConnection.outChannel,-(m_nFlowControlDownstreamSendMe-1));
+													}
+													else
+													{
+														oSocketList.addSendMeCounter(oConnection.outChannel,1);
+													}
+											}
 										}
 								}
 						}
@@ -390,6 +414,8 @@ SINT32 CALocalProxy::loop()
 										else 
 											{
 												pMixPacket->channel=tmpCon->outChannel;
+												tmpCon->upstreamBytes+=len;
+												//CAMsg::printMsg(LOG_DEBUG,"Send upstrem one channe total: %u\n",tmpCon->upstreamBytes);
 												pMixPacket->payload.len=htons((UINT16)len);
 												if(bHaveSocks&&tmpCon->pSocket->getLocalPort()==socksPort)
 													{
@@ -594,6 +620,7 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 		UINT32 i=0;
 		m_arRSA=new CAASymCipher[m_chainlen];
 		DOMNode* child=elemMixes->getLastChild();
+		bool bIsLast=true;
 		while(child!= NULL&&chainlen>0)
 			{
 				if(equals(child->getNodeName(),"Mix"))
@@ -606,6 +633,31 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 								return E_UNKNOWN;
 #endif
 							}
+						if(bIsLast)
+						{
+							DOMNode* tmpNode=NULL;
+							getDOMChildByName(child,"MixProtocolVersion",tmpNode);
+							UINT8 tmpBuff[255];
+							UINT32 tmpBuffLen=255;
+							if(getDOMElementValue(tmpNode,tmpBuff,&tmpBuffLen)==E_SUCCESS)
+							{
+								CAMsg::printMsg(LOG_DEBUG,"Last Mix Protcol Version %s\n",tmpBuff);
+								if(strcmp("0.6",(char*)tmpBuff)==0)
+								{
+									m_bWithNewFlowControl=true;
+									CAMsg::printMsg(LOG_DEBUG,"Last Mix uses new flow control\n");
+								}
+							}
+							if(m_bWithNewFlowControl)
+							{
+								getDOMChildByName(child,"FlowControl",tmpNode);
+								DOMNode* nodeDownstreamSendMe=NULL;
+								getDOMChildByName(tmpNode,"DownstreamSendMe",nodeDownstreamSendMe);
+								getDOMElementValue(nodeDownstreamSendMe,m_nFlowControlDownstreamSendMe,m_nFlowControlDownstreamSendMe);
+								CAMsg::printMsg(LOG_DEBUG,"Last Mix new flow control downstream sewnd me: %u\n",m_nFlowControlDownstreamSendMe);
+							}
+							bIsLast=false;
+						}
 						chainlen--;
 					}
 				child=child->getPreviousSibling();
