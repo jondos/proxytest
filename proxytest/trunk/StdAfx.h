@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.08.57"
+#define MIX_VERSION "00.08.58"
 
 #include "doxygen.h"
 
@@ -129,7 +129,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #endif
 //#define LOG_CRIME
 //#define PAYMENT //to enable payment support, now use configure --enable-payment..
-//#define NO_PARKING //to disable control flow
+//#define NO_PARKING //to disable old control flow
 //#define NO_LOOPACCEPTUSER //to disable user accept thread for First Mix
 
 //#define USE_POOL
@@ -233,6 +233,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define MIX_CASCADE_PROTOCOL_VERSION "0.10"
 #else
 	#define MIX_CASCADE_PROTOCOL_VERSION "0.4"
+#endif
+
+#if defined(NEW_FLOW_CONTROL) && !defined(NO_PARKING)
+	#define NO_PARKING
 #endif
 
 #define PAYMENT_VERSION "2.0"

@@ -335,10 +335,11 @@ SINT32 CALastMixA::loop()
 												#ifdef NEW_FLOW_CONTROL
 												if(ret&NEW_FLOW_CONTROL_FLAG)
 													{
+														//CAMsg::printMsg(LOG_DEBUG,"got send me\n");
 														pChannelListEntry->sendmeCounter=max(0,pChannelListEntry->sendmeCounter-FLOW_CONTROL_SENDME_SOFT_LIMIT);
-														ret&=(!NEW_FLOW_CONTROL_FLAG);
 													}
 												#endif
+												ret&=PAYLOAD_LEN_MASK;
 												if(ret>=0&&ret<=PAYLOAD_SIZE)
 													{
 														#ifdef LOG_CHANNEL
@@ -415,7 +416,7 @@ SINT32 CALastMixA::loop()
 										SINT32 len=MIXPACKET_SIZE;
 										pChannelListEntry->pQueueSend->peek(tmpBuff,(UINT32*)&len);
 										len=pChannelListEntry->pSocket->send(tmpBuff,len);
-										if(len>0)
+										if(len>=0)
 											{
 												add64((UINT64&)m_logUploadedBytes,len);
 												pChannelListEntry->pQueueSend->remove((UINT32*)&len);
@@ -571,6 +572,7 @@ SINT32 CALastMixA::loop()
 														//else
 														//	pMixPacket->payload.len=htons((UINT16)ret);															
 														//#else
+														//CAMsg::printMsg(LOG_DEBUG,"send packet with payload size: %u\n",ret);
 														pMixPacket->payload.len=htons((UINT16)ret);
 														//#endif
 														pChannelListEntry->pCipher->crypt2(pMixPacket->data,pMixPacket->data,DATA_SIZE);

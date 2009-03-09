@@ -826,7 +826,7 @@ SINT32 getLastDOMChildByName(const DOMNode* pNode,const XMLCh* const name,DOMNod
 
 
 
-SINT32 getDOMElementValue(const DOMElement* const pElem,UINT32* value)
+SINT32 getDOMElementValue(const DOMNode * const pElem,UINT32* value)
 {
 	ASSERT(value!=NULL,"Value is null");
 	ASSERT(pElem!=NULL,"Element is NULL");
@@ -853,7 +853,7 @@ SINT32 getDOMElementValue(const DOMElement* const pElem,double* value)
 }
 
 
-SINT32 getDOMElementValue(const DOMElement* pElem,UINT32& value, UINT32 defaultValue)
+SINT32 getDOMElementValue(const DOMNode * const pElem,UINT32& value, UINT32 defaultValue)
 {
 	UINT32 v;
 	if(getDOMElementValue(pElem,&v)!=E_SUCCESS)
