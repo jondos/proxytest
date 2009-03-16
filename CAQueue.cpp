@@ -251,6 +251,7 @@ SINT32 CAQueue::getOrWait(UINT8* pbuff,UINT32* psize,UINT32 msTimeout)
 	* @param psize on call contains the size of pbuff, 
 	*							 on return contains the size of returned data
 	* @retval E_SUCCESS if succesful
+	* @retval E_CLOSED if the queue is closed (Note: you might still get some remaining data back)
 	* @retval E_UNKNOWN in case of an error
 	*/
 SINT32 CAQueue::peek(UINT8* pbuff,UINT32* psize)
@@ -264,8 +265,11 @@ SINT32 CAQueue::peek(UINT8* pbuff,UINT32* psize)
 		*psize=0;
 		if(m_Queue==NULL)
 			{
+				SINT32 ret=E_SUCCESS;
+				if(m_bClosed)
+					ret=E_CLOSED;
 				m_pcsQueue->unlock();
-				return E_SUCCESS;
+				return ret;
 			}
 		QUEUE* tmpQueue=m_Queue;
 		while(space>=tmpQueue->size)

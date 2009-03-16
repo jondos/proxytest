@@ -116,6 +116,8 @@ SINT32 CALocalProxy::init()
 		CAListenerInterface* pListener;
 		m_nFlowControlDownstreamSendMe=FLOW_CONTROL_SENDME_SOFT_LIMIT;
 		m_bWithNewFlowControl=false;
+		m_bWithEnhancedChannelEncryption=false;
+		m_bWithFirstMixSymmetric=false;
 		m_socketIn.create();
 		m_socketIn.setReuseAddr(true);
 		pListener=pglobalOptions->getListenerInterface(1);
@@ -307,6 +309,7 @@ SINT32 CALocalProxy::loop()
 								oSocketGroup.add(*newSocket);
 							}
 					}
+				//Recevie from next Mix
 				if(oSocketGroup.isSignaled(m_muxOut))
 						{
 							countRead--;	
@@ -369,7 +372,9 @@ SINT32 CALocalProxy::loop()
 														for(UINT32 c=0;c<m_chainlen;c++)
 															oConnection.pCiphers[c].crypt1(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 														m_muxOut.send(pMixPacket);
-														CAMsg::printMsg(LOG_DEBUG,"sent sendme!\n");
+														#ifdef _DEBUG
+															CAMsg::printMsg(LOG_DEBUG,"sent sendme!\n");
+														#endif
 														oSocketList.addSendMeCounter(oConnection.outChannel,-(m_nFlowControlDownstreamSendMe-1));
 													}
 													else
@@ -391,31 +396,31 @@ SINT32 CALocalProxy::loop()
 										countRead--;
 										getRandom(pMixPacket->payload.data,PAYLOAD_SIZE);
 										if(!tmpCon->pCiphers[0].isKeyValid())
-											len=tmpCon->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE-m_chainlen*KEY_SIZE);
+											len=tmpCon->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE-m_chainlen*m_SymChannelEncryptedKeySize);
 										else
 											len=tmpCon->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE);
 										if(len==SOCKET_ERROR||len==0)
 											{
+												CAMsg::printMsg(LOG_DEBUG,"client side close channel - upstream sent: %u\n",tmpCon->upstreamBytes);
 												CASocket* tmpSocket=oSocketList.remove(tmpCon->outChannel);
 												if(tmpSocket!=NULL)
 													{
-														oSocketGroup.remove(*tmpSocket);
+														//oSocketGroup.remove(*tmpSocket);
 														pMixPacket->flags=CHANNEL_CLOSE;
 														pMixPacket->channel=tmpCon->outChannel;
 														getRandom(pMixPacket->data,DATA_SIZE);
-														m_muxOut.send(pMixPacket);
-														tmpSocket->close();
-														delete tmpSocket;
-														tmpSocket = NULL;
-														delete [] tmpCon->pCiphers;
-														tmpCon->pCiphers = NULL;
+														//m_muxOut.send(pMixPacket);
+														//tmpSocket->close();
+														//delete tmpSocket;
+														//tmpSocket = NULL;
+														//delete [] tmpCon->pCiphers;
+														//tmpCon->pCiphers = NULL;
 													}
 											}
 										else 
 											{
 												pMixPacket->channel=tmpCon->outChannel;
 												tmpCon->upstreamBytes+=len;
-												//CAMsg::printMsg(LOG_DEBUG,"Send upstrem one channe total: %u\n",tmpCon->upstreamBytes);
 												pMixPacket->payload.len=htons((UINT16)len);
 												if(bHaveSocks&&tmpCon->pSocket->getLocalPort()==socksPort)
 													{
@@ -433,9 +438,9 @@ SINT32 CALocalProxy::loop()
 														//tmpCon->pCipher->generateEncryptionKey(); //generate Key
 														for(UINT32 c=0;c<m_chainlen;c++)
 															{
-																getRandom(buff,KEY_SIZE);
+																getRandom(buff,m_SymChannelKeySize);
 																buff[0]&=0x7F; // Hack for RSA to ensure m < n !!!!!
-																tmpCon->pCiphers[c].setKey(buff);
+																tmpCon->pCiphers[c].setKeys(buff,m_SymChannelKeySize);
 																/*
 																	PROTOCOL CHANGE:
 																	This is a change in the protocol between JAP and the mixes:
@@ -449,20 +454,32 @@ SINT32 CALocalProxy::loop()
 																	//TODO insert timesampt
 																	//currentTimestamp(buff+KEY_SIZE,true);
 																#endif
-																memcpy(buff+KEY_SIZE,pMixPacket->data,DATA_SIZE-KEY_SIZE);
-																if(m_MixCascadeProtocolVersion==MIX_CASCADE_PROTOCOL_VERSION_0_4&&c==m_chainlen-1)
+																if(m_bWithFirstMixSymmetric&&c==m_chainlen-1)
 																	{
-																		m_pSymCipher->crypt1(buff,buff,KEY_SIZE);
+																		memcpy(buff+m_SymChannelKeySize,pMixPacket->data,DATA_SIZE-m_SymChannelKeySize);
+																		m_pSymCipher->crypt1(buff,buff,m_SymChannelKeySize);
 																		UINT8 iv[16];
 																		memset(iv,0xFF,16);
 																		tmpCon->pCiphers[c].setIV2(iv);
-																		tmpCon->pCiphers[c].crypt1(buff+KEY_SIZE,buff+KEY_SIZE,DATA_SIZE-KEY_SIZE);
+																		tmpCon->pCiphers[c].crypt1(buff+m_SymChannelKeySize,buff+m_SymChannelKeySize,DATA_SIZE-m_SymChannelKeySize);
 																	}
 																else
 																	{
-																		m_arRSA[c].encrypt(buff,buff);
+																		memcpy(buff+m_SymChannelKeySize,pMixPacket->data,DATA_SIZE-m_SymChannelEncryptedKeySize);
+																		if(m_bWithEnhancedChannelEncryption)
+																		{
+																			UINT8 tmpBuff[1000];
+																			UINT32 lk=1000;
+																			m_arRSA[c].encryptOAEP(buff,128-42,tmpBuff,&lk);
+																			tmpCon->pCiphers[c].crypt1(buff+RSA_SIZE-42,tmpBuff+RSA_SIZE,DATA_SIZE-RSA_SIZE);
+																			memcpy(buff,tmpBuff,DATA_SIZE);
+																		}
+																		else
+																		{
+																			m_arRSA[c].encrypt(buff,buff);
+																			tmpCon->pCiphers[c].crypt1(buff+RSA_SIZE,buff+RSA_SIZE,DATA_SIZE-RSA_SIZE);
+																		}
 																		// Does RSA_SIZE need to be increased by RSA_SIZE/KEY_SIZE*TIMESTAMP_SIZE?
-																		tmpCon->pCiphers[c].crypt1(buff+RSA_SIZE,buff+RSA_SIZE,DATA_SIZE-RSA_SIZE);
 																	}	
 																memcpy(pMixPacket->data,buff,DATA_SIZE);
 																//size-=KEY_SIZE;
@@ -548,6 +565,8 @@ SINT32 CALocalProxy::clean()
 
 SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 	{
+		m_SymChannelEncryptedKeySize=16;
+		m_SymChannelKeySize=16;
 		CAMsg::printMsg(LOG_INFO,"Login process and key exchange started...\n");
 		//Parsing KeyInfo received from Mix n+1
 		XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(buff,len);
@@ -563,25 +582,35 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 		getDOMChildByName(root,"MixProtocolVersion",elemVersion,false);
 		UINT8 strVersion[255];
 		UINT32 tmpLen=255;
-		if(getDOMElementValue(elemVersion,strVersion,&tmpLen)==E_SUCCESS&&tmpLen==3)
+		if(getDOMElementValue(elemVersion,strVersion,&tmpLen)==E_SUCCESS)
 			{
 #ifdef _DEBUG
 				CAMsg::printMsg(LOG_INFO,"XML MixProtocolVersion value:%s\n",strVersion);
 #endif
-				if(memcmp(strVersion,"0.4",3)==0)
+				if(tmpLen==3&&memcmp(strVersion,"0.4",3)==0)
 					{
 						CAMsg::printMsg(LOG_INFO,"MixCascadeProtocolVersion: 0.4\n");
 						m_MixCascadeProtocolVersion=MIX_CASCADE_PROTOCOL_VERSION_0_4;
+						m_bWithFirstMixSymmetric=true;
 					}	
-				else if(memcmp(strVersion,"0.3",3)==0)
+				else if(tmpLen==3&&memcmp(strVersion,"0.3",3)==0)
 					{
 						CAMsg::printMsg(LOG_INFO,"MixCascadeProtocolVersion: 0.3\n");
 						m_MixCascadeProtocolVersion=MIX_CASCADE_PROTOCOL_VERSION_0_3;
 					}
-				else if(memcmp(strVersion,"0.2",3)==0)
+				else if(tmpLen==3&&memcmp(strVersion,"0.2",3)==0)
 					{
 						CAMsg::printMsg(LOG_INFO,"MixCascadeProtocolVersion: 0.2\n");
 						m_MixCascadeProtocolVersion=MIX_CASCADE_PROTOCOL_VERSION_0_2;
+					}
+				else if(tmpLen==4&&memcmp(strVersion,"0.10",4)==0)
+					{
+						CAMsg::printMsg(LOG_INFO,"MixCascadeProtocolVersion: 0.10\n");
+						m_MixCascadeProtocolVersion=MIX_CASCADE_PROTOCOL_VERSION_0_1_0;
+						m_bWithEnhancedChannelEncryption=true;
+						m_SymChannelKeySize=32;
+						m_SymChannelEncryptedKeySize=m_SymChannelKeySize+42;
+						m_bWithFirstMixSymmetric=true;
 					}
 				else
 					{
