@@ -405,16 +405,16 @@ SINT32 CALocalProxy::loop()
 												CASocket* tmpSocket=oSocketList.remove(tmpCon->outChannel);
 												if(tmpSocket!=NULL)
 													{
-														//oSocketGroup.remove(*tmpSocket);
+														oSocketGroup.remove(*tmpSocket);
 														pMixPacket->flags=CHANNEL_CLOSE;
 														pMixPacket->channel=tmpCon->outChannel;
 														getRandom(pMixPacket->data,DATA_SIZE);
-														//m_muxOut.send(pMixPacket);
-														//tmpSocket->close();
-														//delete tmpSocket;
-														//tmpSocket = NULL;
-														//delete [] tmpCon->pCiphers;
-														//tmpCon->pCiphers = NULL;
+														m_muxOut.send(pMixPacket);
+														tmpSocket->close();
+														delete tmpSocket;
+														tmpSocket = NULL;
+														delete [] tmpCon->pCiphers;
+														tmpCon->pCiphers = NULL;
 													}
 											}
 										else 
