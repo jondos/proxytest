@@ -298,8 +298,11 @@ SINT32 CALastMixA::loop()
 												pChannelListEntry->pQueueSend = NULL;
 												*/
 												pChannelListEntry->pQueueSend->close();
+#ifdef HAVE_EPOLL
+												psocketgroupCacheWrite->add(*(pChannelListEntry->pSocket),pChannelListEntry);
+#else
 												psocketgroupCacheWrite->add(*(pChannelListEntry->pSocket));
-
+#endif
 												#if defined (LOG_PACKET_TIMES) ||defined (LOG_CHANNEL)
 													getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
 												#endif
