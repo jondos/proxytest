@@ -113,6 +113,15 @@ class CAQueue
 					return (m_Queue==NULL);
 				}
 
+			/** Returns true, if the Queue is closed
+				* @retval true, if Queue is closed
+				* @retval false, otherwise
+				*/
+			bool isClosed()
+				{
+					return m_bClosed;
+				}
+
 			/** Method to test the Queue
 				* @retval E_SUCCESS, if Queue implementation seams to be ok
 				*/

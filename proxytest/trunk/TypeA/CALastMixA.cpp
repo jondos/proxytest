@@ -285,7 +285,7 @@ SINT32 CALastMixA::loop()
 										if(pMixPacket->flags==CHANNEL_CLOSE)
 											{
 												/** Do not realy close the connection - just inform the Queue that it is closed,
-												so that the remaining data wil lbe sent to the server*/
+												so that the remaining data will be sent to the server*/
 												/*
 												psocketgroupCacheRead->remove(*(pChannelListEntry->pSocket));
 												psocketgroupCacheWrite->remove(*(pChannelListEntry->pSocket));
@@ -430,22 +430,25 @@ SINT32 CALastMixA::loop()
 											{
 												add64((UINT64&)m_logUploadedBytes,len);
 												pChannelListEntry->pQueueSend->remove((UINT32*)&len);
-												if(ret==E_CLOSED) //channel was closed by user
+												if(pChannelListEntry->pQueueSend->isEmpty())
 													{
-														psocketgroupCacheRead->remove(*(pChannelListEntry->pSocket));
-														psocketgroupCacheWrite->remove(*(pChannelListEntry->pSocket));
-														pChannelListEntry->pSocket->close();
-														delete pChannelListEntry->pSocket;
-														pChannelListEntry->pSocket = NULL;
-														delete pChannelListEntry->pCipher;
-														pChannelListEntry->pCipher = NULL;
-														delete pChannelListEntry->pQueueSend;	
-														pChannelListEntry->pQueueSend = NULL;
-														m_pChannelList->removeChannel(pChannelListEntry->channelIn);														
-													}
-												else if(pChannelListEntry->pQueueSend->isEmpty())
-													{
-														psocketgroupCacheWrite->remove(*(pChannelListEntry->pSocket));
+														if(pChannelListEntry->pQueueSend->isClosed()) //channel was closed by user // Queue: EMPTY + CLOSED
+															{
+																psocketgroupCacheRead->remove(*(pChannelListEntry->pSocket));
+																psocketgroupCacheWrite->remove(*(pChannelListEntry->pSocket));
+																pChannelListEntry->pSocket->close();
+																delete pChannelListEntry->pSocket;
+																pChannelListEntry->pSocket = NULL;
+																delete pChannelListEntry->pCipher;
+																pChannelListEntry->pCipher = NULL;
+																delete pChannelListEntry->pQueueSend;	
+																pChannelListEntry->pQueueSend = NULL;
+																m_pChannelList->removeChannel(pChannelListEntry->channelIn);														
+															}
+														else //Queue: EMPTY+!CLOSED
+															{//nothing more to write at the moment...
+																psocketgroupCacheWrite->remove(*(pChannelListEntry->pSocket));
+															}
 													}
 											}
 										else
