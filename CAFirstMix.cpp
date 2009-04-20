@@ -444,7 +444,7 @@ SINT32 CAFirstMix::processKeyExchange()
     {
     	elemOwnMix->appendChild(termsAndConditionsInfoNode(docXmlKeyInfo));
     }
-#ifdef ENCRYPTED_CONTROL_CHANNELS
+#ifdef ENCRYPT_CONTROL_CHANNELS
 		///Temp workaround - to be removed soon
 		elemOwnMix->appendChild(docXmlKeyInfo->createElement("SupportsEncrypedControlChannels"));
 #endif
