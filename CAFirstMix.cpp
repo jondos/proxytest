@@ -1344,12 +1344,14 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		getDOMChildByName(elemRoot,"ControlChannelEncryption",elemControlChannelEnc,false);
 		UINT8 controlchannelKey[255];
 		UINT32 controlchannelKeyLen=255;
-		bool bEncryptControlChannels=false;
+		UINT8* controlchannelRecvKey=NULL;
+		UINT8* controlchannelSentKey=NULL;
 		if(	getDOMElementValue(elemControlChannelEnc,controlchannelKey,&controlchannelKeyLen)==E_SUCCESS&&
 				CABase64::decode(controlchannelKey,controlchannelKeyLen,controlchannelKey,&controlchannelKeyLen)==E_SUCCESS&&
 				controlchannelKeyLen==32)
 			{
-				bEncryptControlChannels=true;
+				controlchannelRecvKey=controlchannelKey;
+				controlchannelSentKey=controlchannelKey+16;
 			}
 
 		//Sending Signature....
@@ -1473,7 +1475,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 #ifdef LOG_DIALOG
 		fmHashTableEntry* pHashEntry=m_pChannelList->add(pNewUser,peerIP,tmpQueue,strDialog);
 #else
-		fmHashTableEntry* pHashEntry=m_pChannelList->add(pNewUser,peerIP,tmpQueue,controlchannelKey,controlchannelKey+16);
+		fmHashTableEntry* pHashEntry=m_pChannelList->add(pNewUser,peerIP,tmpQueue,controlchannelSentKey,controlchannelRecvKey);
 #endif
 		if( (pHashEntry == NULL) ||
 			(pHashEntry->pControlMessageQueue == NULL) )// adding user connection to mix->JAP channel list (stefan: sollte das nicht connection list sein? --> es handelt sich um eine Datenstruktu fr Connections/Channels ).
