@@ -43,7 +43,7 @@ public:
 	{
 		if(doc==NULL)
 			return E_UNKNOWN;
-		return sendXMLMessage(*doc);
+		return sendXMLMessage(doc);
 	}
 };
 #endif
