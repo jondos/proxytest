@@ -39,18 +39,11 @@ public:
 	virtual ~CAControlChannelTest(void);
 
 	/** Reflects the incoming message back to the sender*/
-	SINT32 processXMLMessage(DOM_Document& doc)
+	SINT32 processXMLMessage(const XERCES_CPP_NAMESPACE::DOMDocument* doc)
 	{
 		if(doc==NULL)
 			return E_UNKNOWN;
-		DOM_Element elemRoot=doc.getDocumentElement();
-		if(elemRoot==NULL)
-			return E_UNKNOWN;
-		//Hm, I am to stupid to do it better...
-		DOM_Document* myDoc=new DOM_Document;
-		*myDoc=DOM_Document::createDocument();
-		myDoc->appendChild(myDoc->importNode(elemRoot,true));
-		return sendXMLMessage(*myDoc);
+		return sendXMLMessage(*doc);
 	}
 };
 #endif
