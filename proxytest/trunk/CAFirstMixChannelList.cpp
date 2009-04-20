@@ -105,7 +105,7 @@ CAFirstMixChannelList::~CAFirstMixChannelList()
 	* @retval NULL if an error occured
 	*/
 #ifndef LOG_DIALOG
-fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8 peerIP[4],CAQueue* pQueueSend,UINT8* controlChannelKeyRecv,UINT8* controlChannelKeySent)
+fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8 peerIP[4],CAQueue* pQueueSend,UINT8* controlChannelKeySent,UINT8* controlChannelKeyRecv)
 #else
 fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8 peerIP[4],CAQueue* pQueueSend,UINT8* strDialog)
 #endif
