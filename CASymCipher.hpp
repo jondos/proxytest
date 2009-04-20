@@ -119,6 +119,7 @@ class CASymCipher
 			SINT32 crypt2(const UINT8* in,UINT8* out,UINT32 len);
 			SINT32 decrypt1CBCwithPKCS7(const UINT8* in,UINT8* out,UINT32* len);
 			SINT32 encrypt1CBCwithPKCS7(const UINT8* in,UINT32 inlen,UINT8* out,UINT32* len);
+	
 			static SINT32 testSpeed();
 		protected:
 

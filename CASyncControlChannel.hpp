@@ -43,7 +43,7 @@ class CASyncControlChannel : public CAAbstractControlChannel
 		  CASyncControlChannel(UINT8 id, bool bIsEncrypted):  
 					CAAbstractControlChannel(id,bIsEncrypted)
 				{
-					m_MsgBuff=new UINT8[0xFFFF];
+					m_MsgBuff=new UINT8[0xFFFF+32];
 					m_aktIndex=0;
 					m_MsgBytesLeft=0;
 				}
@@ -66,6 +66,10 @@ class CASyncControlChannel : public CAAbstractControlChannel
 						if(msglen<2)//this should never happen...
 							return E_UNKNOWN;
 						m_MsgBytesLeft=(msg[0]<<8)|msg[1];
+						if(m_bIsEncrypted && m_pDispatcher->isKeySet()) // note: the second check is just a workaround for the time the encryption is not support by all JAPs/Mixes
+							{
+								m_MsgBytesLeft+=32;//auth tag + IV
+							}
 						#ifdef DEBUG
 							CAMsg::printMsg(LOG_DEBUG,"CASyncControlChannel::proccessMessage - start of a new msg of len=%u\n",m_MsgBytesLeft);
 						#endif
@@ -83,6 +87,10 @@ class CASyncControlChannel : public CAAbstractControlChannel
 					}
 				if(m_MsgBytesLeft==0)
 					{//whole msg receveid
+						if(m_bIsEncrypted)
+							{
+								m_pDispatcher->decryptMessage(m_MsgBuff,m_aktIndex,m_MsgBuff,&m_aktIndex);
+							}
 						return proccessMessageComplete();
 					}
 				return E_SUCCESS;

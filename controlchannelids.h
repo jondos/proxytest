@@ -27,4 +27,4 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #define ACCOUNT_CONTROL_CHANNEL_ID	2 //For the payment
 #define REPLAY_CONTROL_CHANNEL_ID		3 //for replay detection
-#define TEST_CONTROL_CHANNEL_ID		255 //the 'ech' test control channel
+#define TEST_CONTROL_CHANNEL_ID		255 //the 'echo' test control channel

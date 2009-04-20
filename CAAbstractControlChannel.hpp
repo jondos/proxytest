@@ -61,16 +61,16 @@ class CAAbstractControlChannel
 			*/
 		SINT32 sendXMLMessage(const XERCES_CPP_NAMESPACE::DOMDocument* pDocMsg) const
 			{
-				UINT32 tlen=0xFFFF+2;
-				UINT8 tmpB[0xFFFF+2];
-				if(DOM_Output::dumpToMem(pDocMsg,tmpB+2,&tlen)!=E_SUCCESS||
-					tlen>0xFFFF)
+				UINT32 tlen=0xFFFF;
+				UINT8* tmpB=new UINT8[tlen];
+				if(DOM_Output::dumpToMem(pDocMsg,tmpB,&tlen)!=E_SUCCESS || tlen>0xFFFF)
 					{
+						delete[]tmpB;
 						return E_SPACE;
 					}
-				tmpB[0]=(UINT8)(tlen>>8);
-				tmpB[1]=(UINT8)(tlen&0xFF);
-				return m_pDispatcher->sendMessages(m_ID,m_bIsEncrypted,tmpB,tlen+2);
+				SINT32 ret=sendXMLMessage(tmpB,tlen);
+				delete[] tmpB;
+				return ret;
 			}
 
 	/** Call to send a XML message via this control channel.
@@ -88,11 +88,22 @@ class CAAbstractControlChannel
 					{
 						return E_SPACE;
 					}
-				UINT8 tmpB[0xFFFF+2];
-				memcpy(tmpB+2,msgXML,msgLen);
+				UINT32 tmpBLen=msgLen+2+16+16; //2for msg len, 16 for IV and 16 for auth tag
+				UINT8* tmpB=new UINT8[tmpBLen];
+				if(m_bIsEncrypted)
+					{
+						m_pDispatcher->encryptMessage(msgXML,msgLen,tmpB+2,&tmpBLen);
+					}
+				else
+					{
+						memcpy(tmpB+2,msgXML,msgLen);
+						tmpBLen=msgLen;
+					}
 				tmpB[0]=(UINT8)(msgLen>>8);
 				tmpB[1]=(UINT8)(msgLen&0xFF);
-				return m_pDispatcher->sendMessages(m_ID,m_bIsEncrypted,tmpB,msgLen+2);
+				SINT32 ret=m_pDispatcher->sendMessages(m_ID,tmpB,tmpBLen+2);
+				delete[] tmpB;
+				return ret;
 			}
 
 		/** Returns the id of this control channel.
@@ -103,7 +114,7 @@ class CAAbstractControlChannel
 				return m_ID;
 			}
 
-    bool isEncrypted();
+//    bool isEncrypted();
 
   protected:
 		/** Processes some bytes of a message we got
@@ -116,14 +127,14 @@ class CAAbstractControlChannel
 		virtual SINT32 proccessMessageComplete()=0;
 
 		/** Sets the Dispatcher*/
-		SINT32 setDispatcher(const CAControlChannelDispatcher* pDispatcher)
+		SINT32 setDispatcher(CAControlChannelDispatcher* pDispatcher)
 			{
 				m_pDispatcher=pDispatcher;
 				return E_SUCCESS;
 			}
 
 		friend class CAControlChannelDispatcher;
-		const CAControlChannelDispatcher* m_pDispatcher;
+		CAControlChannelDispatcher* m_pDispatcher;
 		bool m_bIsEncrypted;
     UINT32 m_ID;
 };

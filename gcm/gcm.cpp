@@ -106,8 +106,8 @@ MODIFIERS void gcm_init_64k(gcm_ctx_64k *c, UINT8 key[], size_t keylen) {
   build_hash_table_64k(c, hkey);
 }
 
-MODIFIERS void /*inline*/ gcm_encrypt_64k(gcm_ctx_64k *c, UINT8 *nonce, size_t nlen, 
-				      UINT8 *data, size_t dlen, UINT8 *adata, 
+MODIFIERS void /*inline*/ gcm_encrypt_64k(gcm_ctx_64k *c, const UINT8 *nonce, size_t nlen, 
+				      const UINT8 *data, size_t dlen, UINT8 *adata, 
 				      size_t alen, UINT8 *out, UINT8 *tag) {
   UINT32 tmp[8] = {0, 0, 0, 0, 0, htonl(alen << 3), 0, htonl(dlen << 3)};
   UINT32 ctr[4];
@@ -194,8 +194,8 @@ MODIFIERS void /*inline*/ gcm_encrypt_64k(gcm_ctx_64k *c, UINT8 *nonce, size_t n
   ((UINT32 *)tag)[3] ^= s3;
 }
 
-MODIFIERS int gcm_decrypt_64k(gcm_ctx_64k *c, UINT8 *nonce, size_t nlen, UINT8 *ct,
-			      size_t ctlen, UINT8 *tag, size_t taglen, UINT8 *adata,
+MODIFIERS int gcm_decrypt_64k(gcm_ctx_64k *c, const UINT8 *nonce, size_t nlen, const UINT8 *ct,
+			      size_t ctlen,const UINT8 *tag, size_t taglen, UINT8 *adata,
 			      size_t alen, UINT8 *pt) {
   UINT32 tmp[8] = {0, 0, 0, 0, htonl(alen >> 29), htonl(alen << 3), htonl(ctlen >> 29), htonl(ctlen << 3)};
   UINT32 ctr[4];

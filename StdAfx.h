@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.08.60"
+#define MIX_VERSION "00.08.61"
 
 #include "doxygen.h"
 
@@ -137,6 +137,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define WITH_CONTROL_CHANNELS_TEST //enable a Test control Channel
 //#define NEW_FLOW_CONTROL //enable for the new flow control mechanism
 //#define NEW_CHANNEL_ENCRYPTION //enable the new protcol version which uses ECDH for key transport and two keys for upstream/downstream channel cryption
+//#define ENCRYPT_CONTROL_CHANNELS //enable if control channels should be encrypted (soon to become default)
 
 //#define REPLAY_DETECTION // enable to prevent replay of mix packets
 #define REPLAY_TIMESTAMP_PROPAGATION_INTERVALL 1 //How often (in minutes) should the current replay timestamps be propagate
@@ -639,5 +640,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "errorcodes.hpp"
 #include "typedefs.hpp"
 #include "controlchannelids.h"
+#include "gcm/gcm.h"
 
 #endif // !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)

@@ -540,7 +540,7 @@ SINT32 CAMiddleMix::init()
 		m_pQueueSendToMixBefore=new CAQueue(sizeof(tQueueEntry));
 		m_pQueueSendToMixAfter=new CAQueue(sizeof(tQueueEntry));
 
-		m_pMuxInControlChannelDispatcher=new CAControlChannelDispatcher(m_pQueueSendToMixBefore);
+		m_pMuxInControlChannelDispatcher=new CAControlChannelDispatcher(m_pQueueSendToMixBefore,NULL,0);
 
 #ifdef REPLAY_DETECTION
 		m_pReplayDB=new CADatabase();

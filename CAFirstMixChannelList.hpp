@@ -218,7 +218,8 @@ class CAFirstMixChannelList
 			~CAFirstMixChannelList();
 
 #ifndef LOG_DIALOG
-			fmHashTableEntry* add(CAMuxSocket* pMuxSocket,const UINT8 peerIP[4],CAQueue* pQueueSend);
+			fmHashTableEntry* add(CAMuxSocket* pMuxSocket,const UINT8 peerIP[4],CAQueue* pQueueSend,
+				UINT8* controlChannelKeyRecv,UINT8* controlChannelKeySent);
 #else
 			fmHashTableEntry* add(CAMuxSocket* pMuxSocket,const UINT8 peerIP[4],CAQueue* pQueueSend,UINT8* strDialog);
 #endif
