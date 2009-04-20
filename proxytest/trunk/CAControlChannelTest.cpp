@@ -30,7 +30,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAControlChannelTest.hpp"
 
 CAControlChannelTest::CAControlChannelTest(void)
-	:CASyncControlChannel(TEST_CONTROL_CHANNEL_ID,false)
+	:CASyncControlChannel(TEST_CONTROL_CHANNEL_ID,true)
 	{
 	}
 

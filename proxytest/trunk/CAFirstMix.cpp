@@ -248,7 +248,7 @@ SINT32 CAFirstMix::init()
 		m_psocketgroupUsersWrite=new CASocketGroup(true);
 #endif
 
-		m_pMuxOutControlChannelDispatcher=new CAControlChannelDispatcher(m_pQueueSendToMix);
+		m_pMuxOutControlChannelDispatcher=new CAControlChannelDispatcher(m_pQueueSendToMix,NULL,NULL);
 #ifdef REPLAY_DETECTION
 		m_pReplayDB=new CADatabase();
 		m_pReplayDB->start();
@@ -444,6 +444,10 @@ SINT32 CAFirstMix::processKeyExchange()
     {
     	elemOwnMix->appendChild(termsAndConditionsInfoNode(docXmlKeyInfo));
     }
+#ifdef ENCRYPTED_CONTROL_CHANNELS
+		///Temp workaround - to be removed soon
+		elemOwnMix->appendChild(docXmlKeyInfo->createElement("SupportsEncrypedControlChannels"));
+#endif
     if (signXML(elemOwnMix) != E_SUCCESS)
 	{
 		CAMsg::printMsg(LOG_DEBUG,"Could not sign MixInfo sent to users...\n");
@@ -1110,6 +1114,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 							if(pthreadsLogin->addRequest(fm_loopDoUserLogin,d)!=E_SUCCESS)
 							{
 								CAMsg::printMsg(LOG_ERR,"Could not add an login request to the login thread pool!\n");
+								ret=E_UNKNOWN;
 							}
 						}
 
@@ -1333,6 +1338,20 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 				m_pIPList->removeIP(peerIP);
 				return E_UNKNOWN;
 			}
+		//Getting control channel keys if available 
+		///TODO: move to the if-staement above
+		DOMElement* elemControlChannelEnc=NULL;
+		getDOMChildByName(elemRoot,"ControlChannelEncryption",elemControlChannelEnc,false);
+		UINT8 controlchannelKey[255];
+		UINT32 controlchannelKeyLen=255;
+		bool bEncryptControlChannels=false;
+		if(	getDOMElementValue(elemControlChannelEnc,controlchannelKey,&controlchannelKeyLen)==E_SUCCESS&&
+				CABase64::decode(controlchannelKey,controlchannelKeyLen,controlchannelKey,&controlchannelKeyLen)==E_SUCCESS&&
+				controlchannelKeyLen==32)
+			{
+				bEncryptControlChannels=true;
+			}
+
 		//Sending Signature....
 		xml_buff[0]=(UINT8)(xml_len>>8);
 		xml_buff[1]=(UINT8)(xml_len&0xFF);
@@ -1454,7 +1473,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 #ifdef LOG_DIALOG
 		fmHashTableEntry* pHashEntry=m_pChannelList->add(pNewUser,peerIP,tmpQueue,strDialog);
 #else
-		fmHashTableEntry* pHashEntry=m_pChannelList->add(pNewUser,peerIP,tmpQueue);
+		fmHashTableEntry* pHashEntry=m_pChannelList->add(pNewUser,peerIP,tmpQueue,controlchannelKey,controlchannelKey+16);
 #endif
 		if( (pHashEntry == NULL) ||
 			(pHashEntry->pControlMessageQueue == NULL) )// adding user connection to mix->JAP channel list (stefan: sollte das nicht connection list sein? --> es handelt sich um eine Datenstruktu fr Connections/Channels ).

@@ -105,7 +105,7 @@ CAFirstMixChannelList::~CAFirstMixChannelList()
 	* @retval NULL if an error occured
 	*/
 #ifndef LOG_DIALOG
-fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8 peerIP[4],CAQueue* pQueueSend)
+fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8 peerIP[4],CAQueue* pQueueSend,UINT8* controlChannelKeyRecv,UINT8* controlChannelKeySent)
 #else
 fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8 peerIP[4],CAQueue* pQueueSend,UINT8* strDialog)
 #endif
@@ -138,7 +138,7 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 		pHashTableEntry->pMuxSocket=pMuxSocket;
 		pHashTableEntry->pQueueSend=pQueueSend;
 		pHashTableEntry->pControlMessageQueue = new CAQueue();
-		pHashTableEntry->pControlChannelDispatcher = new CAControlChannelDispatcher(pHashTableEntry->pControlMessageQueue);
+		pHashTableEntry->pControlChannelDispatcher = new CAControlChannelDispatcher(pHashTableEntry->pControlMessageQueue,controlChannelKeyRecv,controlChannelKeySent);
 		pHashTableEntry->uAlreadySendPacketSize=-1;
 		pHashTableEntry->cNumberOfChannels=0;
 #ifdef LOG_TRAFFIC_PER_USER
@@ -1109,7 +1109,7 @@ SINT32 CAFirstMixChannelList::test()
 		((CASocket*)pMuxSocket)->create();
 		UINT8 peerIP[4];
 #ifndef LOG_DIALOG
-		pList->add(pMuxSocket,peerIP,NULL);
+		pList->add(pMuxSocket,peerIP,NULL,NULL,NULL);
 #else
 		pList->add(pMuxSocket,peerIP,NULL,(UINT8*)"1");
 #endif

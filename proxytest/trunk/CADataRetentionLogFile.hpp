@@ -1,7 +1,6 @@
 #ifndef __CA_DATA_RETENTION_LOG_FILE
 #define __CA_DATA_RETENTION_LOG_FILE
 #include "CAASymCipher.hpp"
-#include "gcm/gcm.h"
 
 struct  __t__data_retention_log_file_header
 	{
