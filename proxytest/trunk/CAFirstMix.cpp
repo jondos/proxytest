@@ -444,10 +444,7 @@ SINT32 CAFirstMix::processKeyExchange()
     {
     	elemOwnMix->appendChild(termsAndConditionsInfoNode(docXmlKeyInfo));
     }
-#ifdef ENCRYPT_CONTROL_CHANNELS
-		///Temp workaround - to be removed soon
 		elemOwnMix->appendChild(createDOMElement(docXmlKeyInfo,"SupportsEncrypedControlChannels"));
-#endif
     if (signXML(elemOwnMix) != E_SUCCESS)
 	{
 		CAMsg::printMsg(LOG_DEBUG,"Could not sign MixInfo sent to users...\n");

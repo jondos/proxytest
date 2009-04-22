@@ -88,16 +88,14 @@ bool CAControlChannelDispatcher::proccessMixPacket(const MIXPACKET* pPacket)
 
 SINT32 CAControlChannelDispatcher::encryptMessage(const UINT8* in,UINT32 inlen, UINT8* out,UINT32* outlen)
 	{
-#ifdef ENCRYPT_CONTROL_CHANNELS
 		if(m_pGCMCtxEnc!=NULL)
 		{
 			m_pcsEnc->lock();
 			UINT32 iv=htonl(m_nEncMsgCounter);
 			m_nEncMsgCounter++;
 			memcpy(m_pEncMsgIV+8,&iv,4);
-			::gcm_encrypt_64k(m_pGCMCtxEnc, m_pEncMsgIV ,12, in,inlen,NULL,0,out+12,out+inlen+12);
-			memcpy(out,m_pEncMsgIV,12);
-			*outlen=inlen+16+12;
+			::gcm_encrypt_64k(m_pGCMCtxEnc, m_pEncMsgIV ,12, in,inlen,NULL,0,out,out+inlen);
+			*outlen=inlen+16;
 			m_pcsEnc->unlock();
 		}
 		else
@@ -106,20 +104,19 @@ SINT32 CAControlChannelDispatcher::encryptMessage(const UINT8* in,UINT32 inlen, 
 			*outlen=inlen;
 		}
 			return E_SUCCESS;
-#else
-		memcpy(out,in,inlen);
-		*outlen=inlen;
-		return E_SUCCESS;
-#endif
 	}
 
 SINT32 CAControlChannelDispatcher::decryptMessage(const UINT8* in,UINT32 inlen, UINT8* out,UINT32* outlen)
 	{
-#ifdef ENCRYPT_CONTROL_CHANNELS
 		if(m_pGCMCtxDec!=NULL)
 			{
-				::gcm_decrypt_64k(m_pGCMCtxDec, in ,12, in+12,inlen-16-12,in+inlen-16,16,NULL,0,out);
-				*outlen=inlen-16-12;
+				m_pcsDec->lock();
+				UINT32 iv=htonl(m_nDecMsgCounter);
+				m_nDecMsgCounter++;
+				memcpy(m_pDecMsgIV+8,&iv,4);
+				::gcm_decrypt_64k(m_pGCMCtxDec, m_pDecMsgIV ,12, in,inlen-16,in+inlen-16,16,NULL,0,out);
+				*outlen=inlen-16;
+				m_pcsDec->unlock();
 			}
 		else
 		{
@@ -127,11 +124,6 @@ SINT32 CAControlChannelDispatcher::decryptMessage(const UINT8* in,UINT32 inlen, 
 			*outlen=inlen;
 		}
 			return E_SUCCESS;
-#else
-		memcpy(out,in,inlen);
-		*outlen=inlen;
-		return E_SUCCESS;
-#endif
 	}
 
 SINT32 CAControlChannelDispatcher::sendMessages(UINT32 id,const UINT8* msg,UINT32 msglen)

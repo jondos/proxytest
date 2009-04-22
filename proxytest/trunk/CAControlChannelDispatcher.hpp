@@ -51,9 +51,13 @@ class CAControlChannelDispatcher
 				m_pcsSendMsg=new CAMutex();
 				m_pcsRegisterChannel=new CAMutex();
 				m_pcsEnc=new CAMutex();
+				m_pcsDec=new CAMutex();
 				m_nEncMsgCounter=0;
 				m_pEncMsgIV=new UINT8[12];
 				memset(m_pEncMsgIV,0,12);
+				m_nDecMsgCounter=0;
+				m_pDecMsgIV=new UINT8[12];
+				memset(m_pDecMsgIV,0,12);
 				if(keySent!=NULL)
 				{
 					m_pGCMCtxEnc=new gcm_ctx_64k;
@@ -84,6 +88,8 @@ class CAControlChannelDispatcher
 					delete m_pGCMCtxDec;
 				delete []m_pEncMsgIV;
 				delete m_pcsEnc;
+				delete []m_pDecMsgIV;
+				delete m_pcsDec;
 			}
 			
 		void deleteAllControlChannels(void);
@@ -96,13 +102,11 @@ class CAControlChannelDispatcher
 		SINT32 sendMessages(UINT32 id,const UINT8* msg,UINT32 msglen);
   
 		/** Encrypts a control channel message. The output format is:
-			IV - 16 bytes
 			cipher text
 			auth tag - 16 bytes
 			*/
 		SINT32 encryptMessage(const UINT8* in,UINT32 inlen, UINT8* out,UINT32* outlen);
 		/** Decrypts a control channel message, which has to be of form:
-			IV - 16 bytes
 			cipher text
 			auth tag - 16 bytes
 			*/
@@ -121,10 +125,13 @@ class CAControlChannelDispatcher
 		CAMutex* m_pcsSendMsg;
 		CAMutex* m_pcsRegisterChannel;
 		CAMutex* m_pcsEnc;
+		CAMutex* m_pcsDec;
 
 		gcm_ctx_64k* m_pGCMCtxEnc;
 		gcm_ctx_64k* m_pGCMCtxDec;
 		UINT32 m_nEncMsgCounter;
 		UINT8* m_pEncMsgIV;
+		UINT32 m_nDecMsgCounter;
+		UINT8* m_pDecMsgIV;
 };
 #endif
