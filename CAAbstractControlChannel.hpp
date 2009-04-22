@@ -88,7 +88,7 @@ class CAAbstractControlChannel
 					{
 						return E_SPACE;
 					}
-				UINT32 tmpBLen=msgLen+2+16+16; //2for msg len, 16 for IV and 16 for auth tag
+				UINT32 tmpBLen=msgLen+2+16; //2for msg len and 16 for auth tag
 				UINT8* tmpB=new UINT8[tmpBLen];
 				if(m_bIsEncrypted)
 					{

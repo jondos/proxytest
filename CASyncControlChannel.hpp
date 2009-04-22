@@ -68,7 +68,7 @@ class CASyncControlChannel : public CAAbstractControlChannel
 						m_MsgBytesLeft=(msg[0]<<8)|msg[1];
 						if(m_bIsEncrypted && m_pDispatcher->isKeySet()) // note: the second check is just a workaround for the time the encryption is not support by all JAPs/Mixes
 							{
-								m_MsgBytesLeft+=16+12;//auth tag + IV
+								m_MsgBytesLeft+=16;//auth tag 
 							}
 						#ifdef DEBUG
 							CAMsg::printMsg(LOG_DEBUG,"CASyncControlChannel::proccessMessage - start of a new msg of len=%u\n",m_MsgBytesLeft);
