@@ -42,7 +42,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define CLOSE_RECEIVE 0x02
 #define CLOSE_BOTH		0x03
 
-UINT32 CASocket::m_u32NormalSocketsOpen=0; //how many "normal" sockets are open
+volatile UINT32 CASocket::m_u32NormalSocketsOpen=0; //how many "normal" sockets are open
 UINT32 CASocket::m_u32MaxNormalSockets=0xFFFFFFFF; //how many "normal" sockets are allowed at max
 
 

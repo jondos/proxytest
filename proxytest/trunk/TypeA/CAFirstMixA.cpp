@@ -129,7 +129,7 @@ SINT32 CAFirstMixA::closeConnection(fmHashTableEntry* pHashEntry)
 	m_pChannelList->remove(pHashEntry->pMuxSocket);
 	delete pMuxSocket;
 	pMuxSocket = NULL;
-	pHashEntry->pMuxSocket = NULL; // not needed now, but maybe in the future...
+	//pHashEntry->pMuxSocket = NULL; // not needed now, but maybe in the future...
 
 	delete pQueueEntry;
 	pQueueEntry = NULL;
@@ -251,7 +251,7 @@ SINT32 CAFirstMixA::loop()
 										#ifdef DATA_RETENTION_LOG
 											pQueueEntry->dataRetentionLogEntry.t_in=htonl(time(NULL));
 										#endif
-										if(ret==SOCKET_ERROR/*||pHashEntry->accessUntil<time()*/)
+										if(ret<0&&ret!=E_AGAIN/*||pHashEntry->accessUntil<time()*/)
 										{
 											// remove dead connections
 											closeConnection(pHashEntry);

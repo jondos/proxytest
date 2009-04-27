@@ -129,7 +129,7 @@ class CASocket:public CAClientSocket
 			///The following two variables are use to realise "reserved" sockets. The rational behind is to ensure
 			///that we could allway crate "reserved" socket why we may fail to create normal sockets because of to many open files related restrictions
 			volatile static UINT32 m_u32NormalSocketsOpen; //how many "normal" sockets are open
-			volatile static UINT32 m_u32MaxNormalSockets; //how many "normal" sockets are allowed at max
+			static UINT32 m_u32MaxNormalSockets; //how many "normal" sockets are allowed at max
 			bool m_bIsReservedSocket; ///Normal or reserved socket?
 	};
 #endif
