@@ -87,6 +87,7 @@ SINT32 CASocket::create(int type, bool a_bShowTypicalError)
 			return E_UNKNOWN;
 		if(m_Socket==INVALID_SOCKET)
 			{
+				m_Socket=0;
 				int er=GET_NET_ERROR;
 				if (a_bShowTypicalError)
 				{
@@ -320,6 +321,8 @@ SINT32 CASocket::close()
 
 		if (!m_bSocketIsClosed)
 		{
+			shutdown(m_Socket,SHUT_RDWR); //call shutdown here because some OSes seems to ned it to
+			//wakeup other threads which block in read() or write()
 			ret=::closesocket(m_Socket);
 			if(!m_bIsReservedSocket)
 			{

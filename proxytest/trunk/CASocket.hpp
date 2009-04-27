@@ -116,7 +116,7 @@ class CASocket:public CAClientSocket
 			}
 */		
 ///end check	
-			bool m_bSocketIsClosed; //this is a flag, which shows, if the m_Socket is valid
+			volatile bool m_bSocketIsClosed; //this is a flag, which shows, if the m_Socket is valid
 													//we should not set m_Socket to -1 or so after close,
 													//because the Socket value ist needed sometimes even after close!!!
 													// (because it is used as a Key in lookups for instance as a HashValue etc.)
@@ -128,8 +128,8 @@ class CASocket:public CAClientSocket
 			CAMutex m_csClose;
 			///The following two variables are use to realise "reserved" sockets. The rational behind is to ensure
 			///that we could allway crate "reserved" socket why we may fail to create normal sockets because of to many open files related restrictions
-			static UINT32 m_u32NormalSocketsOpen; //how many "normal" sockets are open
-			static UINT32 m_u32MaxNormalSockets; //how many "normal" sockets are allowed at max
+			volatile static UINT32 m_u32NormalSocketsOpen; //how many "normal" sockets are open
+			volatile static UINT32 m_u32MaxNormalSockets; //how many "normal" sockets are allowed at max
 			bool m_bIsReservedSocket; ///Normal or reserved socket?
 	};
 #endif
