@@ -285,9 +285,9 @@ SINT32 CAFirstMixA::loop()
 														goto NEXT_USER;
 													}
 												}
-
+#ifdef PAYMENT
 												if(accountTrafficUpstream(pHashEntry) != E_SUCCESS) goto NEXT_USER;
-
+#endif
 												if(pMixPacket->flags==CHANNEL_DUMMY) // just a dummy to keep the connection alife in e.g. NAT gateways
 												{
 													CAMsg::printMsg(LOG_DEBUG,"received dummy traffic\n");
@@ -744,7 +744,7 @@ bool CAFirstMixA::sendToUsers()
 			{
 				SINT32 len =  MIXPACKET_SIZE - pfmHashEntry->uAlreadySendPacketSize;
 				UINT8* packetToSendOffset = ((UINT8*)&(packetToSend->packet)) + pfmHashEntry->uAlreadySendPacketSize;
-				CASocket *clientSocket = (CASocket*)pfmHashEntry->pMuxSocket;
+				CASocket* clientSocket = (CASocket*)pfmHashEntry->pMuxSocket;
 
 				SINT32 ret = clientSocket->send(packetToSendOffset, len);
 
@@ -770,8 +770,10 @@ bool CAFirstMixA::sendToUsers()
 								}
 						#endif
 						pfmHashEntry->uAlreadySendPacketSize=-1;
+#ifdef PAYMENT
 						/* count this packet for accounting */
 						accounting = accountTrafficDownstream(pfmHashEntry);
+#endif
 					}
 
 					if(accounting == E_SUCCESS)
@@ -782,6 +784,10 @@ bool CAFirstMixA::sendToUsers()
 							resumeAllUserChannels(pfmHashEntry);
 						}
 					}
+				}
+				else if(ret<0&&ret!=E_AGAIN)
+				{
+					CAMsg::printMsg(LOG_DEBUG,"CAFirstMixA::sendtoUser() - send error on socket: %u\n",(SOCKET)clientSocket);
 				}
 				//TODO error handling
 			}
@@ -797,11 +803,11 @@ bool CAFirstMixA::sendToUsers()
 	return bAktiv;
 }
 
+#ifdef PAYMENT
 SINT32 CAFirstMixA::accountTrafficUpstream(fmHashTableEntry* pHashEntry)
 {
 	SINT32 ret = E_SUCCESS;
 
-#ifdef PAYMENT
 	SINT32 handleResult = CAAccountingInstance::handleJapPacket(pHashEntry, false, false);
 
 	if (CAAccountingInstance::HANDLE_PACKET_CONNECTION_OK == handleResult)
@@ -826,13 +832,13 @@ SINT32 CAFirstMixA::accountTrafficUpstream(fmHashTableEntry* pHashEntry)
 		closeConnection(pHashEntry);
 		ret = E_UNKNOWN;
 	}
-#endif
 	return ret;
 }
+#endif
 
+#ifdef PAYMENT
 SINT32 CAFirstMixA::accountTrafficDownstream(fmHashTableEntry* pfmHashEntry)
 {
-#ifdef PAYMENT
 	// count packet for payment
 	SINT32 ret = CAAccountingInstance::handleJapPacket(pfmHashEntry, !(pfmHashEntry->bCountPacket), true);
 	if (ret == CAAccountingInstance::HANDLE_PACKET_CONNECTION_OK )
@@ -855,9 +861,10 @@ SINT32 CAFirstMixA::accountTrafficDownstream(fmHashTableEntry* pfmHashEntry)
 		closeConnection(pfmHashEntry);
 		return ERR_INTERN_SOCKET_CLOSED;
 	}
-#endif
 	return E_SUCCESS;
 }
+#endif
+
 
 void CAFirstMixA::resumeAllUserChannels(fmHashTableEntry *pfmHashEntry)
 {
@@ -919,9 +926,9 @@ void CAFirstMixA::finishPacket(fmHashTableEntry *pfmHashEntry)
 
 #endif //SSL_HACK
 
+#ifdef PAYMENT
 void CAFirstMixA::checkUserConnections()
 {
-#ifdef PAYMENT
 	// check the timeout for all connections
 	fmHashTableEntry* timeoutHashEntry;
 	fmHashTableEntry* firstIteratorEntry = NULL;
@@ -978,5 +985,5 @@ void CAFirstMixA::checkUserConnections()
 		}
 		m_pChannelList->pushTimeoutEntry(timeoutHashEntry);
 	}
-#endif
 }
+#endif
