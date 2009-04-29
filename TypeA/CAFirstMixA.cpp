@@ -438,6 +438,10 @@ NEXT_USER:
 									pHashEntry=m_pChannelList->getNext();
 								#endif
 							}
+							if(countRead>0)
+							{
+								CAMsg::printMsg(LOG_DEBUG,"CAFirstMixA::loop() - read from user --> countRead >0 after processing all connections!\n");
+							}
 					}
 //Third step
 //Sending to next mix
