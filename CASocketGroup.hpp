@@ -59,9 +59,11 @@ class CASocketGroup
 						FD_SET((SOCKET)s,&m_fdset);
 						#pragma warning( pop )
 					#else
-						m_pollfd[(SOCKET)s].fd=(SOCKET)s;
-						if(m_max<((SOCKET)s)+1)
-							m_max=((SOCKET)s)+1;
+						SINT sock=(SOCKET)s;
+						m_pollfd[sock].fd=sock;
+						m_pollfd[sock].revents=0;
+						if(m_max<(sock+1))
+							m_max=sock+1;
 					#endif
 					m_csFD_SET.unlock();
 					return E_SUCCESS;
@@ -80,9 +82,11 @@ class CASocketGroup
 						FD_SET(s.getSocket(),&m_fdset);
 						#pragma warning( pop )
 					#else
-					m_pollfd[s.getSocket()].fd=s.getSocket();
-					if(m_max<(s.getSocket())+1)
-						m_max=(s.getSocket())+1;
+						SINT sock=s.getSocket();
+						m_pollfd[sock].fd=sock;
+						m_pollfd[sock].revents=0;
+						if(m_max<(sock+1))
+							m_max=sock+1;
 					#endif
 					m_csFD_SET.unlock();
 					return E_SUCCESS;

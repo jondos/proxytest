@@ -1674,8 +1674,14 @@ loop_break:
 		m_psocketgroupUsersRead->add(*pNewUser,m_pChannelList->get(pNewUser)); // add user socket to the established ones that we read data from.
 		m_psocketgroupUsersWrite->add(*pNewUser,m_pChannelList->get(pNewUser));
 #else
-		m_psocketgroupUsersRead->add(*pNewUser); // add user socket to the established ones that we read data from.
-		m_psocketgroupUsersWrite->add(*pNewUser);
+		if(m_psocketgroupUsersRead->add(*pNewUser)!=E_SUCCESS)// add user socket to the established ones that we read data from.
+		{
+			CAMsg::printMsg(LOG_DEBUG,"User login: Adding to m_psocketgroupUsersRead failed!\n");
+		}
+		if(	m_psocketgroupUsersWrite->add(*pNewUser)!=E_SUCCESS)
+		{
+			CAMsg::printMsg(LOG_DEBUG,"User login: Adding to m_psocketgroupUsersWrite failed!\n");
+		}
 #endif
 
 #ifndef LOG_DIALOG
