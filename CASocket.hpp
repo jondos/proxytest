@@ -67,13 +67,6 @@ class CASocket:public CAClientSocket
 				* is recreated using create()
 				* @return number of the associated socket
 			**/
-			operator SOCKET()
-				{
-					if(m_internal_check_Socket!=m_Socket)
-						CAMsg::printMsg(LOG_DEBUG,"Fatal: m_Socket!=m_internal_cehck_Socket -- this programm has a Bug!\n");
-					return m_Socket;
-				}
-			
 			SOCKET getSocket()
 				{
 					if(m_internal_check_Socket!=m_Socket)
