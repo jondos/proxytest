@@ -73,6 +73,15 @@ class CASocket:public CAClientSocket
 						CAMsg::printMsg(LOG_DEBUG,"Fatal: m_Socket!=m_internal_cehck_Socket -- this programm has a Bug!\n");
 					return m_Socket;
 				}
+			
+			SOCKET getSocket()
+				{
+					if(m_internal_check_Socket!=m_Socket)
+						CAMsg::printMsg(LOG_DEBUG,"Fatal: m_Socket!=m_internal_cehck_Socket -- this programm has a Bug!\n");
+					return m_Socket;
+				}
+
+
 			virtual SINT32 getLocalIP(UINT8 r_Ip[4]);
 			virtual SINT32 getLocalPort();
 			virtual SINT32 getPeerIP(UINT8 ip[4]);
