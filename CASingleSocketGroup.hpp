@@ -46,7 +46,7 @@ class CASingleSocketGroup:public CASocketGroup
 					FD_ZERO(&fdset);
 					#pragma warning( push )
 					#pragma warning( disable : 4127 ) //Disable: Bedingter Ausdruck ist konstant
-					FD_SET((SOCKET)s,&fdset);
+					FD_SET(s.getSocket(),&fdset);
 					#pragma warning( pop )
 
 					SINT32 ret;

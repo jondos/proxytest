@@ -75,9 +75,8 @@ class CAMuxSocket
 #ifdef LOG_CRIME
 			UINT32 sigCrime(HCHANNEL channel_id,MIXPACKET* sigPacket);
 #endif
-			operator CASocket*(){return &m_Socket;}
-			operator SOCKET(){return (SOCKET)m_Socket;}
-			SOCKET getSocket(){return (SOCKET)m_Socket;}
+			CASocket* getCASocket(){return &m_Socket;}
+			SOCKET getSocket(){return m_Socket.getSocket();}
 
 			SINT32 setCrypt(bool b);
 			bool getIsEncrypted()
@@ -151,7 +150,7 @@ class CAMuxSocket
 				UINT8*			m_Buff;
 				CASymCipher		m_oCipherIn;
 				CASymCipher		m_oCipherOut;
-				bool			m_bIsCrypted;
+				bool				m_bIsCrypted;
 				CAMutex			m_csSend;
 				CAMutex			m_csReceive;
 				t_hashkeylistEntry*			m_pHashKeyEntry;
