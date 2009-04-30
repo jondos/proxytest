@@ -49,6 +49,7 @@ UINT32 CASocket::m_u32MaxNormalSockets=0xFFFFFFFF; //how many "normal" sockets a
 CASocket::CASocket(bool bIsReservedSocket)
 	{
 		m_Socket=0;
+		m_internal_check_Socket=0;
 		m_bSocketIsClosed=true;
 		m_bIsReservedSocket=bIsReservedSocket;
 	}
@@ -76,6 +77,7 @@ SINT32 CASocket::create(int type, bool a_bShowTypicalError)
 			if(m_bIsReservedSocket||m_u32NormalSocketsOpen<m_u32MaxNormalSockets)
 			{
 				m_Socket=socket(type,SOCK_STREAM,0);
+				m_internal_check_Socket=m_Socket;
 			}
 			else
 			{
@@ -88,6 +90,7 @@ SINT32 CASocket::create(int type, bool a_bShowTypicalError)
 		if(m_Socket==INVALID_SOCKET)
 			{
 				m_Socket=0;
+				m_internal_check_Socket=0;
 				int er=GET_NET_ERROR;
 				if (a_bShowTypicalError)
 				{
@@ -175,9 +178,11 @@ SINT32 CASocket::accept(CASocket &s)
 				return E_SOCKET_LIMIT;
 			}
 		s.m_Socket=::accept(m_Socket,NULL,NULL);
+		s.m_internal_check_Socket=s.m_Socket;
 		if(s.m_Socket==SOCKET_ERROR)
 			{
 				s.m_Socket=0;
+				s.m_internal_check_Socket=0;
 				if(GET_NET_ERROR==ERR_INTERN_SOCKET_CLOSED)
 					return E_SOCKETCLOSED;
 				return E_UNKNOWN;

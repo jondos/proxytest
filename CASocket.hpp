@@ -30,7 +30,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocketAddr.hpp"
 #include "CAClientSocket.hpp"
 #include "CAMutex.hpp"
-
+#include "CAMsg.hpp"
 class CASocket:public CAClientSocket
 	{
 		public:
@@ -67,7 +67,12 @@ class CASocket:public CAClientSocket
 				* is recreated using create()
 				* @return number of the associated socket
 			**/
-			operator SOCKET(){return m_Socket;}
+			operator SOCKET()
+				{
+					if(m_internal_check_Socket!=m_Socket)
+						CAMsg::printMsg(LOG_DEBUG,"Fatal: m_Socket!=m_internal_cehck_Socket -- this programm has a Bug!\n");
+					return m_Socket;
+				}
 			virtual SINT32 getLocalIP(UINT8 r_Ip[4]);
 			virtual SINT32 getLocalPort();
 			virtual SINT32 getPeerIP(UINT8 ip[4]);
@@ -131,5 +136,8 @@ class CASocket:public CAClientSocket
 			volatile static UINT32 m_u32NormalSocketsOpen; //how many "normal" sockets are open
 			static UINT32 m_u32MaxNormalSockets; //how many "normal" sockets are allowed at max
 			bool m_bIsReservedSocket; ///Normal or reserved socket?
+
+	protected:
+			SOCKET m_internal_check_Socket;
 	};
 #endif
