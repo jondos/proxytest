@@ -791,7 +791,8 @@ bool CAFirstMixA::sendToUsers()
 				}
 				else if(ret<0&&ret!=E_AGAIN)
 				{
-					CAMsg::printMsg(LOG_DEBUG,"CAFirstMixA::sendtoUser() - send error on socket: %u\n",(SOCKET)clientSocket);
+					SOCKET sock=(SOCKET)clientSocket;
+					CAMsg::printMsg(LOG_DEBUG,"CAFirstMixA::sendtoUser() - send error on socket: %i\n",sock);
 					//closeConnection(pfmHashEntry);
 				}
 				//TODO error handling
