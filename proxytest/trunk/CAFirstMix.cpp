@@ -183,17 +183,17 @@ SINT32 CAFirstMix::init()
 				return E_UNKNOWN;
 			}
 		m_pMuxOut=new CAMuxSocket();
-		if(((CASocket*)(*m_pMuxOut))->create(pAddrNext->getType())!=E_SUCCESS)
+		if(m_pMuxOut->getCASocket()->create(pAddrNext->getType())!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Cannot create SOCKET for connection to next Mix!\n");
 				return E_UNKNOWN;
 			}
-		((CASocket*)(*m_pMuxOut))->setSendBuff(500*MIXPACKET_SIZE);
-		((CASocket*)(*m_pMuxOut))->setRecvBuff(500*MIXPACKET_SIZE);
+		m_pMuxOut->getCASocket()->setSendBuff(500*MIXPACKET_SIZE);
+		m_pMuxOut->getCASocket()->setRecvBuff(500*MIXPACKET_SIZE);
 		//if(((CASocket*)(*m_pMuxOut))->setSendLowWat(MIXPACKET_SIZE)!=E_SUCCESS)
 		//	CAMsg::printMsg(LOG_INFO,"SOCKET Option SENDLOWWAT not set!\n");
-		CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET RecvBuffSize: %i\n",((CASocket*)(*m_pMuxOut))->getRecvBuff());
-		CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET SendBuffSize: %i\n",((CASocket*)(*m_pMuxOut))->getSendBuff());
+		CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET RecvBuffSize: %i\n",m_pMuxOut->getCASocket()->getRecvBuff());
+		CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET SendBuffSize: %i\n",m_pMuxOut->getCASocket()->getSendBuff());
 		//CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET SendLowWatSize: %i\n",((CASocket*)(*m_pMuxOut))->getSendLowWat());
 
 		/** Connect to the next mix */
@@ -208,10 +208,10 @@ SINT32 CAFirstMix::init()
 		pAddrNext = NULL;
 		MONITORING_FIRE_NET_EVENT(ev_net_nextConnected);
 		CAMsg::printMsg(LOG_INFO," connected!\n");
-		if(((CASocket*)(*m_pMuxOut))->setKeepAlive((UINT32)1800)!=E_SUCCESS)
+		if(m_pMuxOut->getCASocket()->setKeepAlive((UINT32)1800)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_INFO,"Socket option TCP-KEEP-ALIVE returned an error - so not set!\n");
-				if(((CASocket*)(*m_pMuxOut))->setKeepAlive(true)!=E_SUCCESS)
+				if(m_pMuxOut->getCASocket()->setKeepAlive(true)!=E_SUCCESS)
 					CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
 			}
 

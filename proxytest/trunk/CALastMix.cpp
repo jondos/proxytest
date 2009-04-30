@@ -119,12 +119,12 @@ SINT32 CALastMix::init()
 					return E_UNKNOWN;
 		    }
 		// connected to previous mix
-		((CASocket*)*m_pMuxIn)->setRecvBuff(500*MIXPACKET_SIZE);
-		((CASocket*)*m_pMuxIn)->setSendBuff(500*MIXPACKET_SIZE);
-		if(((CASocket*)*m_pMuxIn)->setKeepAlive((UINT32)1800)!=E_SUCCESS)
+		m_pMuxIn->getCASocket()->setRecvBuff(500*MIXPACKET_SIZE);
+		m_pMuxIn->getCASocket()->setSendBuff(500*MIXPACKET_SIZE);
+		if(m_pMuxIn->getCASocket()->setKeepAlive((UINT32)1800)!=E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_INFO,"Socket option TCP-KEEP-ALIVE returned an error - so not set!\n");
-			if(((CASocket*)*m_pMuxIn)->setKeepAlive(true)!=E_SUCCESS)
+			if(m_pMuxIn->getCASocket()->setKeepAlive(true)!=E_SUCCESS)
 				CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
 		}
 		MONITORING_FIRE_NET_EVENT(ev_net_prevConnected);
@@ -301,8 +301,8 @@ SINT32 CALastMix::processKeyExchange()
 		UINT16 tmp=htons((UINT16)len);
 		CAMsg::printMsg(LOG_INFO,"Sending Infos (chain length and RSA-Key, Message-Size %u)\n",len);
 
-		if(	((CASocket*)*m_pMuxIn)->send((UINT8*)&tmp,2)!=2 ||
-				((CASocket*)*m_pMuxIn)->send(messageBuff,len)!=(SINT32)len)
+		if(	m_pMuxIn->getCASocket()->send((UINT8*)&tmp,2)!=2 ||
+				m_pMuxIn->getCASocket()->send(messageBuff,len)!=(SINT32)len)
 			{
 				CAMsg::printMsg(LOG_ERR,"Error sending Key-Info!\n");
 				delete []messageBuff;
@@ -314,7 +314,7 @@ SINT32 CALastMix::processKeyExchange()
 
 		//Now receiving the symmetric key
 		CAMsg::printMsg(LOG_INFO,"Waiting for len of Symmetric Key from previous Mix...\n");
-		if(((CASocket*)*m_pMuxIn)->receiveFully((UINT8*)&tmp,2)!=E_SUCCESS)
+		if(m_pMuxIn->getCASocket()->receiveFully((UINT8*)&tmp,2)!=E_SUCCESS)
 			{
         CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info lenght!\n");
         return E_UNKNOWN;
@@ -323,7 +323,7 @@ SINT32 CALastMix::processKeyExchange()
 		messageBuff=new UINT8[len+1]; //+1 for the closing Zero
 		CAMsg::printMsg(LOG_INFO,"Got it - Len of Symmetric Key is: %i\n",len);
 		CAMsg::printMsg(LOG_INFO,"Waiting for Symmetric Key from previous Mix...\n");
-		if(((CASocket*)*m_pMuxIn)->receiveFully(messageBuff,len)!=E_SUCCESS)
+		if(m_pMuxIn->getCASocket()->receiveFully(messageBuff,len)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_ERR,"Error receiving symmetric key!\n");
 				delete []messageBuff;

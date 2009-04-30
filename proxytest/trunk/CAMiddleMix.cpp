@@ -84,7 +84,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 		UINT16 len;
 		SINT32 ret;
 
-		if(((CASocket*)*m_pMuxOut)->receiveFully((UINT8*)&len,2)!=E_SUCCESS)
+		if(m_pMuxOut->getCASocket()->receiveFully((UINT8*)&len,2)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_INFO,"Error receiving Key Info lenght from Mix n+1!\n");
 				MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextFailed);
@@ -95,7 +95,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 		recvBuff=new UINT8[len+1]; //for the \0 at the end
 		if(recvBuff==NULL)
 			return E_UNKNOWN;
-		if(((CASocket*)*m_pMuxOut)->receiveFully(recvBuff,len)!=E_SUCCESS)
+		if(m_pMuxOut->getCASocket()->receiveFully(recvBuff,len)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_INFO,"Error receiving Key Info from Mix n+1!\n");
 				MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextFailed);
@@ -312,7 +312,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 #endif
 		len=htons((UINT16)outlen);
 		memcpy(out,&len,2);
-		ret=((CASocket*)*m_pMuxIn)->send(out,outlen+2);
+		ret=m_pMuxIn->getCASocket()->send(out,outlen+2);
 		delete[] out;
 		out = NULL;
 		if(ret<0||(UINT32)ret!=outlen+2)
@@ -325,10 +325,10 @@ SINT32 CAMiddleMix::processKeyExchange()
 		CAMsg::printMsg(LOG_DEBUG,"Sending new New Key Info succeded\n");
 
 		//Now receiving the symmetric key form Mix n-1
-		((CASocket*)*m_pMuxIn)->receive((UINT8*)&len,2);
+		m_pMuxIn->getCASocket()->receive((UINT8*)&len,2);
 		len=ntohs(len);
 		recvBuff=new UINT8[len+1]; //for \0 at the end
-		if(((CASocket*)*m_pMuxIn)->receive(recvBuff,len)!=len)
+		if(m_pMuxIn->getCASocket()->receive(recvBuff,len)!=len)
 		{
 
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangePrevFailed);
@@ -450,13 +450,13 @@ SINT32 CAMiddleMix::init()
 
 		m_pMuxOut=new CAMuxSocket();
 
-		if(((CASocket*)*m_pMuxOut)->create(pAddrNext->getType())!=E_SUCCESS)
+		if(m_pMuxOut->getCASocket()->create(pAddrNext->getType())!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Init: Cannot create SOCKET for outgoing conncetion...\n");
 				return E_UNKNOWN;
 			}
-		((CASocket*)*m_pMuxOut)->setRecvBuff(50*MIXPACKET_SIZE);
-		((CASocket*)*m_pMuxOut)->setSendBuff(50*MIXPACKET_SIZE);
+		m_pMuxOut->getCASocket()->setRecvBuff(50*MIXPACKET_SIZE);
+		m_pMuxOut->getCASocket()->setSendBuff(50*MIXPACKET_SIZE);
 
 
     CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...\n");
@@ -499,12 +499,12 @@ SINT32 CAMiddleMix::init()
 		CAMsg::printMsg(LOG_INFO," connected!\n");
 		MONITORING_FIRE_NET_EVENT(ev_net_prevConnected);
 
-		((CASocket*)*m_pMuxIn)->setRecvBuff(50*MIXPACKET_SIZE);
-		((CASocket*)*m_pMuxIn)->setSendBuff(50*MIXPACKET_SIZE);
-		if(((CASocket*)*m_pMuxIn)->setKeepAlive((UINT32)1800)!=E_SUCCESS)
+		m_pMuxIn->getCASocket()->setRecvBuff(50*MIXPACKET_SIZE);
+		m_pMuxIn->getCASocket()->setSendBuff(50*MIXPACKET_SIZE);
+		if(m_pMuxIn->getCASocket()->setKeepAlive((UINT32)1800)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_INFO,"Socket option TCP-KEEP-ALIVE returned an error - so not set!\n");
-				if(((CASocket*)*m_pMuxIn)->setKeepAlive(true)!=E_SUCCESS)
+				if(m_pMuxIn->getCASocket()->setKeepAlive(true)!=E_SUCCESS)
 					CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
 			}
 
@@ -524,10 +524,10 @@ SINT32 CAMiddleMix::init()
 		MONITORING_FIRE_NET_EVENT(ev_net_nextConnected);
 		CAMsg::printMsg(LOG_INFO," connected!\n");
 
-		if(((CASocket*)*m_pMuxOut)->setKeepAlive((UINT32)1800)!=E_SUCCESS)
+		if(m_pMuxOut->getCASocket()->setKeepAlive((UINT32)1800)!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_INFO,"Socket option TCP-KEEP-ALIVE returned an error - so not set!\n");
-				if(((CASocket*)*m_pMuxOut)->setKeepAlive(true)!=E_SUCCESS)
+				if(m_pMuxOut->getCASocket()->setKeepAlive(true)!=E_SUCCESS)
 					CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
 			}
 

@@ -157,16 +157,16 @@ SINT32 CALocalProxy::init()
 		addrNext.setAddr(strTarget,pglobalOptions->getMixPort());
 		CAMsg::printMsg(LOG_INFO,"Try connecting to next Mix...\n");
 
-		((CASocket*)m_muxOut)->create();
-		((CASocket*)m_muxOut)->setSendBuff(MIXPACKET_SIZE*50);
-		((CASocket*)m_muxOut)->setRecvBuff(MIXPACKET_SIZE*50);
+		m_muxOut.getCASocket()->create();
+		m_muxOut.getCASocket()->setSendBuff(MIXPACKET_SIZE*50);
+		m_muxOut.getCASocket()->setRecvBuff(MIXPACKET_SIZE*50);
 		if(m_muxOut.connect(addrNext)==E_SUCCESS)
 			{				
 				CAMsg::printMsg(LOG_INFO," connected!\n");
 				UINT16 size;
 				UINT8 byte;
-				((CASocket*)m_muxOut)->receiveFully((UINT8*)&size,2);
-				((CASocket*)m_muxOut)->receiveFully((UINT8*)&byte,1);
+				m_muxOut.getCASocket()->receiveFully((UINT8*)&size,2);
+				m_muxOut.getCASocket()->receiveFully((UINT8*)&byte,1);
 				CAMsg::printMsg(LOG_INFO,"Received Key Info!\n");
 				size=ntohs(size);
 #ifdef _DEBUG
@@ -179,7 +179,7 @@ SINT32 CALocalProxy::init()
 #endif
 						UINT8* buff=new UINT8[size+1];
 						buff[0]=byte;
-						((CASocket*)m_muxOut)->receiveFully(buff+1,size-1);
+						m_muxOut.getCASocket()->receiveFully(buff+1,size-1);
 						buff[size]=0;
 #ifdef _DEBUG
 						CAMsg::printMsg(LOG_INFO,"Key Info is:\n");
