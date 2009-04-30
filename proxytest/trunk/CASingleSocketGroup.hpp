@@ -84,13 +84,13 @@ class CASingleSocketGroup
 			
 			SINT32 add(CASocket&s)
 				{
-					m_pollfd->fd=(SOCKET)s;
+					m_pollfd->fd=s.getSocket();
 					return E_SUCCESS;
 				}
 
 			SINT32 add(CAMuxSocket&s)
 				{
-					m_pollfd->fd=(SOCKET)s;
+					m_pollfd->fd=s.getSocket();
 					return E_SUCCESS;
 				}
 
@@ -136,7 +136,7 @@ class CASingleSocketGroup
 							pollfd.events=POLLOUT;
 						else
 							pollfd.events=POLLIN;
-						pollfd.fd=(SOCKET)s;
+						pollfd.fd=s.getSocket();
 						SINT32 ret=::poll(&pollfd,1,time_ms);
 						if(ret==1)
 							return ret;
@@ -165,7 +165,7 @@ class CASingleSocketGroup
 			
 			SINT32 add(CAMuxSocket&s)
 				{
-					if(epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,(SOCKET)s,&m_pollAdd)!=0)
+					if(epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,s.getSocket(),&m_pollAdd)!=0)
 						return E_UNKNOWN;
 					return E_SUCCESS;
 				}
@@ -214,7 +214,7 @@ class CASingleSocketGroup
 						events.events=POLLOUT|POLLERR|POLLHUP;
 					else
 						events.events=POLLIN|POLLERR|POLLHUP;
-					epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,(SOCKET)s,&events);
+					epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,s.getSocket(),&events);
 					SINT32 ret=::epoll_wait(m_hEPFD,&events,1,time_ms);
 					if(ret==1)
 						return ret;
