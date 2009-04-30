@@ -678,7 +678,7 @@ SINT32 CAInfoService::sendOperatorTnCData()
 */
 SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param)
 {
-	UINT32 len, tncLen;
+	UINT32 len;
 	SINT32 ret;
 	UINT8* strMixHeloXML=getMixHeloXMLAsString(len);
 

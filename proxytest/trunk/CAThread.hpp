@@ -198,6 +198,7 @@ class CAThread
 #endif
 		private:
 #ifdef PRINT_THREAD_STACK_TRACE
+			static void destroyValue(void* a_stack);
 			static void initKey();
 		
 		
