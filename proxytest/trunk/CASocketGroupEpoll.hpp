@@ -48,7 +48,7 @@ class CASocketGroupEpoll
 				{
 					SINT32 ret=E_SUCCESS;
 					m_csFD_SET.lock();
-					SOCKET socket=(SOCKET)s;
+					SOCKET socket=s.getSocket();
 					m_pEpollEvent->data.ptr=datapointer;
 					
 					//if(epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,socket,m_pEpollEvent)!=0)
@@ -77,7 +77,7 @@ class CASocketGroupEpoll
 				{
 					SINT32 ret=E_SUCCESS;
 					m_csFD_SET.lock();
-					if(epoll_ctl(m_hEPFD,EPOLL_CTL_DEL,(SOCKET)s,m_pEpollEvent)!=0)
+					if(epoll_ctl(m_hEPFD,EPOLL_CTL_DEL,s.getSocket(),m_pEpollEvent)!=0)
 						ret=E_UNKNOWN;
 					ASSERT(ret==E_SUCCESS,"Error in Epoll socket group remove")
 					m_csFD_SET.unlock();
@@ -138,7 +138,7 @@ class CASocketGroupEpoll
 	*/
 		/*	bool isSignaled(CASocket&s)
 				{
-					SINT32 socket=(SOCKET)s;
+				SINT32 socket=s.getSocket();
 					for(SINT32 i=0;i<m_iNumOfReadyFD;i++)
 						{
 							if(socket==m_pEvents->data.fd)
@@ -149,7 +149,7 @@ class CASocketGroupEpoll
 
 			bool isSignaled(CASocket*ps)
 				{
-					SINT32 socket=(SOCKET)*ps;
+				SINT32 socket=ps->getSocket();
 					for(SINT32 i=0;i<m_iNumOfReadyFD;i++)
 						{
 							if(socket==m_pEvents->data.fd)

@@ -210,8 +210,8 @@ SINT32 CAMiddleMix::processKeyExchange()
 						UINT32 outlen=0;
 						UINT8* out=DOM_Output::dumpToMem(docSymKey,&outlen);
 						UINT16 size=htons((UINT16)outlen);
-						((CASocket*)m_pMuxOut)->send((UINT8*)&size,2);
-						((CASocket*)m_pMuxOut)->send(out,outlen);
+						m_pMuxOut->getCASocket()->send((UINT8*)&size,2);
+						m_pMuxOut->getCASocket()->send(out,outlen);
 						if (docSymKey != NULL)
 						{
 							docSymKey->release();

@@ -131,8 +131,8 @@ SINT32 CAFirstMixB::loop()
                         #else
                           m_pIPList->removeIP(pHashEntry->peerIP);
                         #endif
-                        m_psocketgroupUsersRead->remove(*(CASocket*)pMuxSocket);
-                        m_psocketgroupUsersWrite->remove(*(CASocket*)pMuxSocket);
+                        m_psocketgroupUsersRead->remove(pMuxSocket->getSocket());
+                        m_psocketgroupUsersWrite->remove(pMuxSocket->getSocket());
                         ASSERT(pHashEntry->pQueueSend!=NULL,"Send queue is NULL");
                         delete pHashEntry->pQueueSend;
                         pHashEntry->pQueueSend = NULL;
@@ -204,8 +204,8 @@ SINT32 CAFirstMixB::loop()
                                 pEntry=m_pChannelList->getNextChannel(pEntry);
                               }
                             m_pIPList->removeIP(pHashEntry->peerIP);
-                            m_psocketgroupUsersRead->remove(*(CASocket*)pMuxSocket);
-                            m_psocketgroupUsersWrite->remove(*(CASocket*)pMuxSocket);
+                            m_psocketgroupUsersRead->remove(pMuxSocket->getSocket());
+                            m_psocketgroupUsersWrite->remove(pMuxSocket->getSocket());
                             delete pHashEntry->pQueueSend;
                             pHashEntry->pQueueSend = NULL;
                             delete pHashEntry->pSymCipher;
@@ -493,7 +493,7 @@ NEXT_USER:
                     pfmHashEntry->uAlreadySendPacketSize=0;
                   }
                 len=MIXPACKET_SIZE-pfmHashEntry->uAlreadySendPacketSize;
-                ret=((CASocket*)pfmHashEntry->pMuxSocket)->send(((UINT8*)&(pfmHashEntry->oQueueEntry))+pfmHashEntry->uAlreadySendPacketSize,len);
+                ret=pfmHashEntry->pMuxSocket->getCASocket()->send(((UINT8*)&(pfmHashEntry->oQueueEntry))+pfmHashEntry->uAlreadySendPacketSize,len);
                 if(ret>0)
                   {
                     pfmHashEntry->uAlreadySendPacketSize+=ret;

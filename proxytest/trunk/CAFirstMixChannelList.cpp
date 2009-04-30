@@ -162,7 +162,7 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 		SAVE_STACK("CAFirstMixChannelList::add", "copying peer IP");
 		memcpy(pHashTableEntry->peerIP,peerIP,4);
 #ifdef DATA_RETENTION_LOG
-		pHashTableEntry->peerPort=((CASocket*)pMuxSocket)->getPeerPort();
+		pHashTableEntry->peerPort=pMuxSocket->getCASocket()->getPeerPort();
 #endif
 #ifdef DELAY_USERS
 		m_pMutexDelayChannel->lock();
@@ -1108,7 +1108,7 @@ SINT32 CAFirstMixChannelList::test()
 	{
 		CAFirstMixChannelList* pList=new CAFirstMixChannelList();
 		CAMuxSocket *pMuxSocket=new CAMuxSocket();
-		((CASocket*)pMuxSocket)->create();
+		pMuxSocket->getCASocket()->create();
 		UINT8 peerIP[4];
 #ifndef LOG_DIALOG
 		pList->add(pMuxSocket,peerIP,NULL,NULL,NULL);
