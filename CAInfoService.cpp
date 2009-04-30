@@ -69,8 +69,6 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 		UINT32 lastStatusUpdate;
 		UINT32 lastMixInfoUpdate;
 		UINT32 nextUpdate;
-		bool bPreventLoop = false;
-		UINT32 temp;
 #ifdef DYNAMIC_MIX
 		UINT32 loops = 4;
 		UINT32 interval = 0;
