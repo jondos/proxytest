@@ -78,6 +78,7 @@ SINT32 CASocket::create(int type, bool a_bShowTypicalError)
 			{
 				m_Socket=socket(type,SOCK_STREAM,0);
 				m_internal_check_Socket=m_Socket;
+				//CAMsg::printMsg(LOG_DEBUG,"Opened socket: %d\n", m_Socket);
 			}
 			else
 			{
@@ -191,6 +192,7 @@ SINT32 CASocket::accept(CASocket &s)
 		m_u32NormalSocketsOpen++;
 		s.m_bSocketIsClosed=false;
 		s.m_csClose.unlock();
+		//CAMsg::printMsg(LOG_DEBUG,"Opensed socket: %d\n", s.m_Socket);
 
 		return E_SUCCESS;
 	}
@@ -334,6 +336,9 @@ SINT32 CASocket::close()
 				m_u32NormalSocketsOpen--;
 			}
 			//CAMsg::printMsg(LOG_DEBUG,"Open Sockets: %d\n", m_u32NormalSocketsOpen);
+			//CAMsg::printMsg(LOG_DEBUG,"Closed socket: %d\n", m_Socket);
+			m_Socket=0;
+			m_internal_check_Socket=0;
 			m_bSocketIsClosed=true;
 		}
 

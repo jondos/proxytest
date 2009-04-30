@@ -151,6 +151,8 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 		strcpy((char*)pHashTableEntry->strDialog,(char*)strDialog);
 #endif
 		// TODO Collisions? Is the id still used somewhere?
+		//Yes it is --> for logging to match login /logout
+		//collisions in a hard seens are an issue, but are very unlikely; and because it is only for logging it does not really matter...
 		getRandom(&(pHashTableEntry->id));
 
 #ifdef PAYMENT
