@@ -44,7 +44,7 @@ class CADatagramSocket
 			SINT32 bind(UINT16 port);
 			SINT32 send(UINT8* buff,UINT32 len,CASocketAddr& to);
 			SINT32 receive(UINT8* buff,UINT32 len,CASocketAddr* from);
-			operator SOCKET(){return m_Socket;}
+			SOCKET getSocket(){return m_Socket;}
 //			SINT32 getLocalPort();
 /*			int setReuseAddr(bool b);
 			int setRecvLowWat(UINT32 r);

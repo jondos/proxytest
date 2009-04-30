@@ -95,8 +95,8 @@ SINT32 CAFirstMixA::closeConnection(fmHashTableEntry* pHashEntry)
 	#endif
 	m_pIPList->removeIP(pHashEntry->peerIP);
 
-	m_psocketgroupUsersRead->remove(*(CASocket*)pHashEntry->pMuxSocket);
-	m_psocketgroupUsersWrite->remove(*(CASocket*)pHashEntry->pMuxSocket);
+	m_psocketgroupUsersRead->remove(*(pHashEntry->pMuxSocket));
+	m_psocketgroupUsersWrite->remove(*(pHashEntry->pMuxSocket));
 	pEntry = m_pChannelList->getFirstChannelForSocket(pHashEntry->pMuxSocket);
 
 	while(pEntry!=NULL)
@@ -748,7 +748,7 @@ bool CAFirstMixA::sendToUsers()
 			{
 				SINT32 len =  MIXPACKET_SIZE - pfmHashEntry->uAlreadySendPacketSize;
 				UINT8* packetToSendOffset = ((UINT8*)&(packetToSend->packet)) + pfmHashEntry->uAlreadySendPacketSize;
-				CASocket* clientSocket = (CASocket*)pfmHashEntry->pMuxSocket;
+				CASocket* clientSocket = pfmHashEntry->pMuxSocket->getCASocket();
 
 				SINT32 ret = clientSocket->send(packetToSendOffset, len);
 
@@ -791,7 +791,7 @@ bool CAFirstMixA::sendToUsers()
 				}
 				else if(ret<0&&ret!=E_AGAIN)
 				{
-					SOCKET sock=(SOCKET)clientSocket;
+					SOCKET sock=clientSocket->getSocket();
 					CAMsg::printMsg(LOG_DEBUG,"CAFirstMixA::sendtoUser() - send error on socket: %d\n",sock);
 					//closeConnection(pfmHashEntry);
 				}

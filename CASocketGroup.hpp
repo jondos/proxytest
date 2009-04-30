@@ -51,8 +51,8 @@ class CASocketGroup
 					m_csFD_SET.lock();
 					#ifndef HAVE_POLL
 						#ifndef _WIN32
-								if(m_max<((SOCKET)s)+1)
-							m_max=((SOCKET)s)+1;
+								if(m_max<(s.getSocket())+1)
+							m_max=(s.getSocket())+1;
 						#endif
 						#pragma warning( push )
 						#pragma warning( disable : 4127 ) //Disable: Bedingter Ausdruck ist konstant

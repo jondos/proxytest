@@ -750,18 +750,18 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 				UINT32 encbufflen;
 				UINT8* encbuff=encryptXMLElement(buff,strlen((char*)buff),encbufflen,&m_arRSA[m_chainlen-1]);
 				UINT16 size2=htons((UINT16)(encbufflen+XML_HEADER_SIZE));
-				SINT32 ret=((CASocket*)&m_muxOut)->send((UINT8*)&size2,2);
-				ret=((CASocket*)&m_muxOut)->send((UINT8*)XML_HEADER,XML_HEADER_SIZE);
-				ret=((CASocket*)&m_muxOut)->send(encbuff,encbufflen);
+				SINT32 ret=m_muxOut.getCASocket()->send((UINT8*)&size2,2);
+				ret=m_muxOut.getCASocket()->send((UINT8*)XML_HEADER,XML_HEADER_SIZE);
+				ret=m_muxOut.getCASocket()->send(encbuff,encbufflen);
 				delete[] encbuff;
 				encbuff = NULL;
 				delete[] buff;
 				buff = NULL;
 				// Checking Signature send from Mix
-				ret=((CASocket*)&m_muxOut)->receiveFully((UINT8*)&size2,2);
+				ret=m_muxOut.getCASocket()->receiveFully((UINT8*)&size2,2);
 				size2=ntohs(size2);
 				UINT8* xmlbuff=new UINT8[size2];
-				ret=((CASocket*)&m_muxOut)->receiveFully(xmlbuff,size2);
+				ret=m_muxOut.getCASocket()->receiveFully(xmlbuff,size2);
 				delete[] xmlbuff;
 				xmlbuff = NULL;
 				m_muxOut.setSendKey(linkKeys,32);

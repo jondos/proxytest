@@ -86,7 +86,7 @@ SINT32 CASocketGroup::remove(CASocket&s)
 			FD_CLR(s.getSocket(),&m_fdset);
 			#pragma warning (pop)
 		#else
-			m_pollfd[(SOCKET)s].fd=-1;			
+			m_pollfd[s.getSocket()].fd=-1;			
 		#endif
 		m_csFD_SET.unlock();
 		return E_SUCCESS;
@@ -101,7 +101,7 @@ SINT32 CASocketGroup::remove(CAMuxSocket&s)
 			FD_CLR(s.getSocket(),&m_fdset);
 			#pragma warning (pop)
 		#else
-			m_pollfd[(SOCKET)s].fd=-1;
+			m_pollfd[s.getSocket()].fd=-1;
 		#endif
 		m_csFD_SET.unlock();
 		return E_SUCCESS;
