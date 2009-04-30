@@ -87,6 +87,12 @@ CAThread::CAThread(const UINT8* strName)
 		ms_LastId++;
 	}
 #ifdef PRINT_THREAD_STACK_TRACE	
+void CAThread::destroyValue(void* a_value) 
+{ 
+	delete a_value;
+	a_value = NULL; 
+}
+
 void CAThread::initKey() 
 { 
 	pthread_key_create(&ms_threadKey, destroyValue); 
