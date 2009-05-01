@@ -87,6 +87,7 @@ SINT32 CASocketGroup::remove(CASocket&s)
 			#pragma warning (pop)
 		#else
 			m_pollfd[s.getSocket()].fd=-1;			
+			CAMsg::printMsg(LOG_DEBUG,"CASocketGroup::remove() - socket: %d\n",s.getSocket());
 		#endif
 		m_csFD_SET.unlock();
 		return E_SUCCESS;
@@ -102,6 +103,7 @@ SINT32 CASocketGroup::remove(CAMuxSocket&s)
 			#pragma warning (pop)
 		#else
 			m_pollfd[s.getSocket()].fd=-1;
+			CAMsg::printMsg(LOG_DEBUG,"CASocketGroup::remove() - socket: %d\n",s.getSocket());
 		#endif
 		m_csFD_SET.unlock();
 		return E_SUCCESS;
