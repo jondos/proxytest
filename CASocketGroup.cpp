@@ -86,8 +86,9 @@ SINT32 CASocketGroup::remove(CASocket&s)
 			FD_CLR(s.getSocket(),&m_fdset);
 			#pragma warning (pop)
 		#else
-			m_pollfd[s.getSocket()].fd=-1;			
-			CAMsg::printMsg(LOG_DEBUG,"CASocketGroup::remove() - socket: %d\n",s.getSocket());
+			SINT sock=s.getSocket();
+			m_pollfd[sock].fd=-1;			
+			CAMsg::printMsg(LOG_DEBUG,"CASocketGroup::remove() - socket: %d\n",sock);
 		#endif
 		m_csFD_SET.unlock();
 		return E_SUCCESS;
@@ -102,8 +103,9 @@ SINT32 CASocketGroup::remove(CAMuxSocket&s)
 			FD_CLR(s.getSocket(),&m_fdset);
 			#pragma warning (pop)
 		#else
-			m_pollfd[s.getSocket()].fd=-1;
-			CAMsg::printMsg(LOG_DEBUG,"CASocketGroup::remove() - socket: %d\n",s.getSocket());
+			SINT sock=s.getSocket();
+			m_pollfd[sock].fd=-1;			
+			CAMsg::printMsg(LOG_DEBUG,"CASocketGroup::remove() - socket: %d\n",sock);
 		#endif
 		m_csFD_SET.unlock();
 		return E_SUCCESS;
@@ -134,7 +136,10 @@ SINT32 CASocketGroup::select()
 				#endif			    
 			#endif
 		#else
-			return ::poll(m_pollfd,m_max,-1);
+				m_csFD_SET.lock();
+				SINT32 ret=::poll(m_pollfd,m_max,-1);
+				m_csFD_SET.unlock();
+				return ret;
 		#endif
 	}
 
@@ -168,7 +173,9 @@ SINT32 CASocketGroup::select(UINT32 time_ms)
 					ret=::select(m_max,m_set_read,m_set_write,NULL,&ti);
 			#endif
 		#else
+			m_csFD_SET.lock();
 			ret=::poll(m_pollfd,m_max,time_ms);
+			m_csFD_SET.unlock();
 		#endif
 		if(ret==0)
 			{
