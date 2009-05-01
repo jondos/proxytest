@@ -44,7 +44,7 @@ CASocketGroup::CASocketGroup(bool bWrite)
 			#endif
 		#else
 			m_pollfd=new struct pollfd[MAX_POLLFD];
-			memset(m_pollfd,0,sizeof(struct pollfd)*MAX_POLLFD);
+			memset((void*)m_pollfd,0,sizeof(struct pollfd)*MAX_POLLFD);
 			m_max=0;
 		#endif
 		setPoolForWrite(bWrite);
@@ -137,7 +137,7 @@ SINT32 CASocketGroup::select()
 			#endif
 		#else
 				m_csFD_SET.lock();
-				SINT32 ret=::poll(m_pollfd,m_max,-1);
+				SINT32 ret=::poll((struct pollfd*)m_pollfd,m_max,-1);
 				m_csFD_SET.unlock();
 				return ret;
 		#endif
@@ -174,7 +174,7 @@ SINT32 CASocketGroup::select(UINT32 time_ms)
 			#endif
 		#else
 			m_csFD_SET.lock();
-			ret=::poll(m_pollfd,m_max,time_ms);
+			ret=::poll((struct pollfd*)m_pollfd,m_max,time_ms);
 			m_csFD_SET.unlock();
 		#endif
 		if(ret==0)
