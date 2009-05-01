@@ -64,6 +64,7 @@ class CASocketGroup
 						m_pollfd[sock].revents=0;
 						if(m_max<(sock+1))
 							m_max=sock+1;
+						CAMsg::printMsg(LOG_DEBUG,"CASocketGroup::add() - socket: %d\n",sock);
 					#endif
 					m_csFD_SET.unlock();
 					return E_SUCCESS;
@@ -87,6 +88,7 @@ class CASocketGroup
 						m_pollfd[sock].revents=0;
 						if(m_max<(sock+1))
 							m_max=sock+1;
+						CAMsg::printMsg(LOG_DEBUG,"CASocketGroup::add() - socket: %d\n",sock);
 					#endif
 					m_csFD_SET.unlock();
 					return E_SUCCESS;

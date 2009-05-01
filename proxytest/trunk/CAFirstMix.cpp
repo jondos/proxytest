@@ -1483,6 +1483,8 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 				doc = NULL;
 			}
 			CAMsg::printMsg(LOG_ERR,"User login: Could not add new socket to connection list!\n");
+			if(pHashEntry!=NULL)
+				m_pChannelList->remove(pNewUser);
 			m_pIPList->removeIP(peerIP);
 			delete tmpQueue;
 			tmpQueue = NULL;
