@@ -56,7 +56,7 @@ case "$host" in
 	DEFAULTLIBS="$LIBS -L/usr/local/lib -liconv -lpthread";
 	CFLAGS="$CFLAGS";
 	CXXFLAGS="$CXXFLAGS";
-	OFLAGS="-O0"
+	OFLAGS="-O3"
 	;;
 *-*-netbsd*)
 	DEFAULTLIBS="$LIBS -L/usr/pkg/lib -liconv -lpthread"
