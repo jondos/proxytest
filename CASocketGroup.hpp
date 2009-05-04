@@ -135,7 +135,7 @@ class CASocketGroup
 					SINT32 m_max;
 				#endif
 			#else
-				volatile struct pollfd* volatile m_pollfd;
+				volatile struct pollfd* m_pollfd;
 				volatile SINT32 m_max;
 			#endif
 			CAMutex m_csFD_SET;
