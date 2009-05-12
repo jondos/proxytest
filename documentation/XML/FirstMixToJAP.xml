@@ -10,7 +10,7 @@
 	<Mixes count="..">
 		<Mix id="..">
 			<MixProtocolVersion>
-        <!-- spezifies which sub protocol this Mix uses, if ther is a difference to the gerneral cascade protocol-->
+        <!-- specifies which sub protocol this Mix uses, if ther is a difference to the gerneral cascade protocol-->
         ...
       </MixProtocolVersion>
 			<RSAKeyValue>

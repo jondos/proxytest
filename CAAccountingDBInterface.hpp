@@ -41,6 +41,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define PREPARED_STMT_QUERY_STORE_CC \
 	"UPDATE COSTCONFIRMATIONS SET BYTES = $1::bigint, XMLCC = $2::varchar(2000), SETTLED = $3::integer WHERE ACCOUNTNUMBER = $4::bigint AND CASCADE = $5::varchar(200)"
 #define PREPARED_STMT_PARAMS_STORE_CC 5
+
+#define STMT_CLEAR_ACCOUNT_STATUS "DELETE FROM ACCOUNTSTATUS WHERE ACCOUNTNUMBER = '%llu'"
+
 /**
   * @author Bastian Voigt
   *
@@ -87,8 +90,9 @@ class CAAccountingDBInterface
 		SINT32 storePrepaidAmount(UINT64 accountNumber, SINT32 prepaidBytes, UINT8* cascadeId);
 		SINT32 getPrepaidAmount(UINT64 accountNumber, UINT8* cascadeId, bool a_bDelete);
 
-		SINT32 storeAccountStatus(UINT64 a_accountNumber, UINT32 a_statusCode, char *expires);
-		SINT32 getAccountStatus(UINT64 a_accountNumber, UINT32& a_statusCode, char *expires);
+		SINT32 storeAccountStatus(UINT64 a_accountNumber, UINT32 a_statusCode);
+		SINT32 getAccountStatus(UINT64 a_accountNumber, UINT32& a_statusCode);
+		SINT32 clearAccountStatus(UINT64 a_accountNumber);
 
 		/**
 		 * Takes and executes a query that counts databae records and tests if the result
@@ -138,8 +142,9 @@ class CAAccountingDBInterface
 			SINT32 __storePrepaidAmount(UINT64 accountNumber, SINT32 prepaidBytes, UINT8* cascadeId);
 			SINT32 __getPrepaidAmount(UINT64 accountNumber, UINT8* cascadeId, bool a_bDelete);
 
-			SINT32 __storeAccountStatus(UINT64 a_accountNumber, UINT32 a_statusCode, char *expires);
-			SINT32 __getAccountStatus(UINT64 a_accountNumber, UINT32& a_statusCode, char *expires);
+			SINT32 __storeAccountStatus(UINT64 a_accountNumber, UINT32 a_statusCode);
+			SINT32 __getAccountStatus(UINT64 a_accountNumber, UINT32& a_statusCode);
+			SINT32 __clearAccountStatus(UINT64 a_accountNumber);
 
 			SINT32 __checkCountAllQuery(UINT8* a_query, UINT32& r_count);
 

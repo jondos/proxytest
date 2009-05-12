@@ -35,6 +35,21 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define STR_VALUE_TRUE "true"
 #define STR_VALUE_FALSE "false"
 
+#define TMP_BUFF_SIZE 255
+#define TMP_LOCALE_SIZE 3
+#define TMP_DATE_SIZE 9
+
+#define TEMPLATE_REFID_MAXLEN ((TMP_BUFF_SIZE) + (TMP_LOCALE_SIZE) + (TMP_DATE_SIZE) + 2)
+
+#if _XERCES_VERSION >= 30001
+	#define INTEGRATE_NOT_ALLOWED_POSITIONS \
+		(DOMNode::DOCUMENT_POSITION_CONTAINED_BY | DOMNode::DOCUMENT_POSITION_CONTAINS )
+#else
+	#define INTEGRATE_NOT_ALLOWED_POSITIONS \
+		(DOMNode::TREE_POSITION_ANCESTOR   | DOMNode::TREE_POSITION_DESCENDANT | \
+		DOMNode::TREE_POSITION_EQUIVALENT | DOMNode::TREE_POSITION_SAME_NODE )
+#endif
+
 UINT32 strtrim(UINT8*);
 
 SINT32 memtrim(UINT8* out,const UINT8* in,UINT32 len);
@@ -151,18 +166,21 @@ SINT32 setDOMElementValue(DOMElement* pElem, SINT32 value);
  * Returns the content of the text node under elem
  * as 64bit unsigned integer.
  */
-SINT32 getDOMElementValue(const DOMElement * const pElem, UINT64 &value);
 
 /**
  * Sets the decimal text representation of a 64bit integer as node value
  * TODO: implement this for non-64bit platforms
  */
 SINT32 setDOMElementValue(DOMElement* pElem, const UINT64 text);
+SINT32 setDOMElementValue(DOMElement* pElem, const SINT64 text);
 
-SINT32 getDOMElementValue(const DOMNode * const pElem,UINT32* value);
+SINT32 getDOMElementValue(const DOMElement * const pElem, UINT64 &value);
+SINT32 getDOMElementValue(const DOMElement * const pElem, SINT64 &value);
+
+SINT32 getDOMElementValue(const DOMElement * const pElem,UINT32* value);
 /** Gets the value from an DOM-Element as UINT32. If an error occurs, the default value is returned.
 */
-SINT32 getDOMElementValue(const DOMNode * const pElem,UINT32& value,UINT32 defaultValue);
+SINT32 getDOMElementValue(const DOMElement * const pElem,UINT32& value,UINT32 defaultValue);
 
 SINT32 getDOMElementValue(const DOMElement * const pElem,UINT16* value);
 
@@ -175,6 +193,7 @@ SINT32 setDOMElementAttribute(DOMNode* pElem,const char* attrName, bool value);
 SINT32 setDOMElementAttribute(DOMNode* pElem,const char* attrName, SINT32 value);
 SINT32 setDOMElementAttribute(DOMNode* pElem,const char* attrName, UINT32 value);
 SINT32 setDOMElementAttribute(DOMNode* pElem, const char* attrName, UINT64 value);
+SINT32 setDOMElementAttribute(DOMNode* pElem, const char* attrName, SINT64 value);
 
 SINT32 setDOMElementValue(DOMElement* pElem,double floatValue);
 SINT32 setDOMElementValue(DOMElement* pElem, bool value);
@@ -192,10 +211,15 @@ SINT32 getLastDOMChildByName(const DOMNode* pNode,const char * const name,DOMEle
 
 SINT32 setCurrentTimeMilliesAsDOMAttribute(DOMNode *pElem);
 
+//if not null the returned char pointer must be explicitely freed by the caller with 'delete []'
+UINT8 *getTermsAndConditionsTemplateRefId(DOMNode *tcTemplateRoot);
+
 SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, UINT8* xml, UINT32* xmllen,CAASymCipher* pRSA);
 SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, DOMElement* & elemRootEncodedKey,XERCES_CPP_NAMESPACE::DOMDocument* docOwner,CAASymCipher* pRSA);
 SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, const UINT8* const xml, UINT32 xmllen,CAASymCipher* pRSA);
 SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, const DOMNode* pRoot,CAASymCipher* pRSA);
+
+SINT32 integrateDOMNode(const DOMNode *srcNode, DOMNode *dstNode, bool recursive, bool replace);
 
 /** Replaces a DOM element with an encrypted version of this element*/
 SINT32 encryptXMLElement(DOMNode* pElem , CAASymCipher* pRSA);

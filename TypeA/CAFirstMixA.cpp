@@ -49,6 +49,17 @@ void CAFirstMixA::shutDown()
 	UINT32 connectionsClosed = 0;
 	fmHashTableEntry* timeoutHashEntry;
 
+
+	/* make sure no reconnect is possible when shutting down */
+	if(m_pthreadAcceptUsers!=NULL)
+	{
+		CAMsg::printMsg(LOG_CRIT,"Wait for LoopAcceptUsers!\n");
+		m_bRestart=true;
+		m_pthreadAcceptUsers->join();
+		delete m_pthreadAcceptUsers;
+	}
+	m_pthreadAcceptUsers=NULL;
+
 	if(m_pInfoService != NULL)
 	{
 		CAMsg::printMsg(LOG_DEBUG,"Shutting down infoservice.\n");
@@ -111,6 +122,11 @@ SINT32 CAFirstMixA::closeConnection(fmHashTableEntry* pHashEntry)
 		delete pEntry->pCipher;
 		pEntry->pCipher = NULL;
 		pEntry=m_pChannelList->getNextChannel(pEntry);
+#ifdef CH_LOG_STUDY
+		nrOfChOpMutex->lock();
+		currentOpenedChannels--;
+		nrOfChOpMutex->unlock();
+#endif //CH_LOG_STUDY
 	}
 	ASSERT(pHashEntry->pQueueSend!=NULL,"Send queue is NULL");
 	delete pHashEntry->pQueueSend;
@@ -200,7 +216,6 @@ SINT32 CAFirstMixA::loop()
 				// while checking if there are connections to close: synch with login threads
 				loginCV->lock();
 				checkUserConnections();
-				loginCV->broadcast();
 				loginCV->unlock();
 #endif
 //First Step
@@ -335,6 +350,12 @@ SINT32 CAFirstMixA::loop()
 														delete pEntry->pCipher;              // forget the symetric key of this connection
 														pEntry->pCipher = NULL;
 														m_pChannelList->removeChannel(pMuxSocket,pEntry->channelIn);
+
+														#ifdef CH_LOG_STUDY
+														nrOfChOpMutex->lock();
+														currentOpenedChannels--;
+														nrOfChOpMutex->unlock();
+														#endif //CH_LOG_STUDY
 													}
 													#ifdef _DEBUG
 													else
@@ -398,6 +419,19 @@ SINT32 CAFirstMixA::loop()
 														}
 														else
 														{
+															#ifdef CH_LOG_STUDY
+															nrOfChOpMutex->lock();
+															if(pHashEntry->channelOpenedLastIntervalTS !=
+																lastLogTime)
+															{
+																pHashEntry->channelOpenedLastIntervalTS =
+																	lastLogTime;
+																nrOfOpenedChannels++;
+															}
+															currentOpenedChannels++;
+															nrOfChOpMutex->unlock();
+															#endif //CH_LOG_STUDY
+
 															#ifdef LOG_PACKET_TIMES
 																getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
 															#endif
@@ -517,6 +551,11 @@ NEXT_USER:
 											delete pEntry->pCipher;              // forget the symetric key of this connection
 											pEntry->pCipher = NULL;
 											m_pChannelList->removeChannel(pEntry->pHead->pMuxSocket, pEntry->channelIn);
+										#ifdef CH_LOG_STUDY
+											nrOfChOpMutex->lock();
+											currentOpenedChannels--;
+											nrOfChOpMutex->unlock();
+										#endif
 										/* a hack to solve the SSL problem:
 										 * remove channel after the close packet is enqueued
 										 * from pEntry->pQueueSend
@@ -835,9 +874,17 @@ SINT32 CAFirstMixA::accountTrafficUpstream(fmHashTableEntry* pHashEntry)
 	else if (CAAccountingInstance::HANDLE_PACKET_CLOSE_CONNECTION == handleResult)
 	{
 		// kickout this user - he deserves it...
+		CAMsg::printMsg(LOG_DEBUG, "CAFirstMixA: kickout upstream!\n");
 		closeConnection(pHashEntry);
 		ret = E_UNKNOWN;
 	}
+	//please remember that these values also may be returned even though they do not require
+	//any further processing
+	/*else if ( (ret == CAAccountingInstance::HANDLE_PACKET_CONNECTION_UNCHECKED) &&
+				(ret == CAAccountingInstance::HANDLE_PACKET_HOLD_CONNECTION) )
+	{
+
+	}*/
 	return ret;
 }
 #endif
@@ -867,10 +914,16 @@ SINT32 CAFirstMixA::accountTrafficDownstream(fmHashTableEntry* pfmHashEntry)
 		closeConnection(pfmHashEntry);
 		return ERR_INTERN_SOCKET_CLOSED;
 	}
+	//please remember that these values also may be returned even though they do not require
+	//any further processing
+	/*else if ( (ret == CAAccountingInstance::HANDLE_PACKET_CONNECTION_UNCHECKED) &&
+				(ret == CAAccountingInstance::HANDLE_PACKET_HOLD_CONNECTION) )
+	{
+
+	}*/
 	return E_SUCCESS;
 }
 #endif
-
 
 void CAFirstMixA::resumeAllUserChannels(fmHashTableEntry *pfmHashEntry)
 {
@@ -926,6 +979,11 @@ void CAFirstMixA::finishPacket(fmHashTableEntry *pfmHashEntry)
 			delete cListEntry->pCipher;
 			cListEntry->pCipher = NULL;
 			m_pChannelList->removeChannel(pfmHashEntry->pMuxSocket, cListEntry->channelIn);
+#ifdef CH_LOG_STUDY
+			nrOfChOpMutex->lock();
+			currentOpenedChannels--;
+			nrOfChOpMutex->unlock();
+#endif //CH_LOG_STUDY
 		}
 	}
 }
@@ -938,16 +996,20 @@ void CAFirstMixA::checkUserConnections()
 	// check the timeout for all connections
 	fmHashTableEntry* timeoutHashEntry;
 	fmHashTableEntry* firstIteratorEntry = NULL;
+	bool currentEntryKickoutForced = false;
 	/* this check also includes forced kickouts which have not bRecoverTimeout set. */
 	while ( (timeoutHashEntry = m_pChannelList->popTimeoutEntry(true)) != NULL )
 	{
+		currentEntryKickoutForced = m_pChannelList->isKickoutForced(timeoutHashEntry);
 		if(firstIteratorEntry == timeoutHashEntry)
 		{
-			m_pChannelList->pushTimeoutEntry(timeoutHashEntry);
+			m_pChannelList->pushTimeoutEntry(timeoutHashEntry, currentEntryKickoutForced);
 			break;
 		}
-		if (timeoutHashEntry->bRecoverTimeout)
+
+		if (!currentEntryKickoutForced)
 		{
+			//CAMsg::printMsg(LOG_ERR, "%p\n, ", timeoutHashEntry);
 			if(m_pChannelList->isTimedOut(timeoutHashEntry) )
 			{
 				CAMsg::printMsg(LOG_DEBUG,"Client connection closed due to timeout.\n");
@@ -957,10 +1019,11 @@ void CAFirstMixA::checkUserConnections()
 		}
 		else
 		{
-			//A user to be kicked out: empty his data downstream data queue.
+			//A user to be kicked out: empty his downstream data queue.
 			timeoutHashEntry->pQueueSend->clean();
 
-			if(timeoutHashEntry->pControlMessageQueue->getSize() == 0)
+			if( (timeoutHashEntry->pControlMessageQueue->getSize() == 0) ||
+				(timeoutHashEntry->kickoutSendRetries <= 0) )
 			{
 				CAMsg::printMsg(LOG_ERR, "Kickout immediately owner %x!\n", timeoutHashEntry);
 				UINT32 authFlags = CAAccountingInstance::getAuthFlags(timeoutHashEntry);
@@ -978,7 +1041,12 @@ void CAFirstMixA::checkUserConnections()
 			}
 			else
 			{
-				CAMsg::printMsg(LOG_ERR, "In Queue: %u\n", timeoutHashEntry->pControlMessageQueue->getSize());
+				//Note this counter initialized by calling CAFirstMixChannelList::add
+				//and accessed by this thread, both do never run concurrently.
+				//So we can avoid locking.
+				timeoutHashEntry->kickoutSendRetries--;
+				CAMsg::printMsg(LOG_ERR, "In Queue: %u, retries %d.\n",
+						timeoutHashEntry->pControlMessageQueue->getSize(), timeoutHashEntry->kickoutSendRetries);
 			}
 			// Let the client obtain all his remaining control message packets
 			//(which in most cases contain the error message with the kickout reason.
@@ -989,7 +1057,7 @@ void CAFirstMixA::checkUserConnections()
 		{
 			firstIteratorEntry = timeoutHashEntry;
 		}
-		m_pChannelList->pushTimeoutEntry(timeoutHashEntry);
+		m_pChannelList->pushTimeoutEntry(timeoutHashEntry, currentEntryKickoutForced);
 	}
 }
 #endif

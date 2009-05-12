@@ -43,7 +43,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include "tre/regex.h"
 //#endif
 
-#define TMP_BUFF_SIZE 255
 #define REGEXP_BUFF_SIZE 4096
 
 #define TARGET_MIX			1
@@ -157,14 +156,19 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define OPTIONS_NODE_TNCS_OPTS "TermsAndConditionsOptions"
 #define OPTIONS_NODE_TNCS_TEMPLATES "Templates"
 #define OPTIONS_NODE_TNCS_TEMPLATE "Template"
-#define OPTIONS_NODE_TNCS_LIST "TermsAndConditionsList"
 #define OPTIONS_NODE_TNCS "TermsAndConditions"
+#define OPTIONS_NODE_TNCS_TRANSLATION "TCTranslation"
+#define OPTIONS_NODE_TNCS_TRANSLATION_IMPORTS "TCTranslationImports"
+#define OPTIONS_NODE_TNCS_OPERATOR "Operator"
 #define OPTIONS_ATTRIBUTE_TNC_DATE "date"
 #define OPTIONS_ATTRIBUTE_TNC_SERIAL "serial"
 #define OPTIONS_ATTRIBUTE_TNC_VERSION "version"
 #define OPTIONS_ATTRIBUTE_TNC_LOCALE "locale"
+#define OPTIONS_ATTRIBUTE_TNC_TEMPLATE_TYPE "type"
 #define OPTIONS_ATTRIBUTE_TNC_ID "id"
 #define OPTIONS_ATTRIBUTE_TNC_TEMPLATE_REFID "referenceId"
+#define OPTIONS_ATTRIBUTE_TNC_DEFAULT_LANG_DEFINED "default"
+#define OPTIONS_ATTRIBUTE_TNC_DEFAULT_LANG "defaultLang"
 
 #define OPTIONS_NODE_CRIME_DETECTION "CrimeDetection"
 
@@ -431,6 +435,8 @@ class CACmdLnOptions
 			//SINT32 getMixXml(UINT8* strxml,UINT32* len);
 			SINT32 getMixXml(XERCES_CPP_NAMESPACE::DOMDocument* & docMixInfo);
 
+			UINT32 getNumberOfTermsAndConditionsTemplates();
+			XERCES_CPP_NAMESPACE::DOMDocument **getAllTermsAndConditionsTemplates();
 			XERCES_CPP_NAMESPACE::DOMElement *getTermsAndConditions();
 
 			UINT32 getKeepAliveSendInterval()
@@ -607,7 +613,8 @@ class CACmdLnOptions
 			}
 
 #endif // DYNAMIC_MIX
-			DOMNode **m_termsAndConditionsTemplates;
+			DOMDocument **m_termsAndConditionsTemplates;
+			UINT32 m_nrOfTermsAndConditionsTemplates;
 		private:
 #ifdef DYNAMIC_MIX
 			UINT8* m_strLastCascadeProposal;

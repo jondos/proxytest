@@ -304,7 +304,14 @@ SINT32 CAMix::initMixCascadeInfo(DOMElement* mixes)
     		setDOMElementAttribute(elemRoot,"maxUsers", maxUsers);
     	}
 #ifdef MANIOQ
-    	setDOMElementAttribute(elemRoot,"context", (UINT8*) "org.manioq");
+    	setDOMElementAttribute(elemRoot,"context", (UINT8*) "jondonym.business");
+#else
+
+#ifdef PAYMENT
+    	setDOMElementAttribute(elemRoot,"context", (UINT8*) "jondonym.premium");
+#else
+    	setDOMElementAttribute(elemRoot,"context", (UINT8*) "jondonym");
+#endif
 #endif
     }
 
@@ -447,13 +454,13 @@ DOMNode *CAMix::appendTermsAndConditionsExtension(XERCES_CPP_NAMESPACE::DOMDocum
 {
 	if(pglobalOptions->getTermsAndConditions() != NULL)
 	{
-
 		if( (root == NULL) || (ownerDoc == NULL) )
 		{
 			return NULL;
 		}
 
-		DOMElement *elemTnCExtension = NULL, *elemExtensions = NULL;
+		DOMElement *elemTnCExtension = NULL, *elemExtensions = NULL,
+					*elemTemplates = NULL;
 		/* Tag for Nodes that can be removed without destroying the signature.
 		 * To be appended to the "mixes"-node so older mix versions won't get confused.
 		 */
@@ -474,13 +481,88 @@ DOMNode *CAMix::appendTermsAndConditionsExtension(XERCES_CPP_NAMESPACE::DOMDocum
 			elemExtensions->appendChild(elemTnCExtension);
 		}
 
+		//First add templates if there are any
+		UINT32 nrOfTemplates = pglobalOptions->getNumberOfTermsAndConditionsTemplates();
+
+		if(nrOfTemplates > 0)
+		{
+			UINT32 nrOfSentTemplates = 0;
+			UINT8 **sentTemplatesRefIds = NULL;
+			getDOMChildByName(elemTnCExtension, OPTIONS_NODE_TNCS_TEMPLATES, elemTemplates);
+			if(elemTemplates == NULL)
+			{
+				elemTemplates = createDOMElement(ownerDoc, OPTIONS_NODE_TNCS_TEMPLATES);
+				elemTnCExtension->appendChild(elemTemplates);
+			}
+			else
+			{
+				DOMNodeList *nl = getElementsByTagName(elemTemplates, "TermsAndConditionsTemplate");
+				nrOfSentTemplates = nl->getLength();
+				if(nrOfSentTemplates > 0)
+				{
+					sentTemplatesRefIds = new UINT8*[nrOfSentTemplates];
+					for (UINT32 i = 0; i < nrOfSentTemplates; i++)
+					{
+						sentTemplatesRefIds[i] = getTermsAndConditionsTemplateRefId(nl->item(i));
+					}
+				}
+			}
+
+			XERCES_CPP_NAMESPACE::DOMDocument **allTemplates = pglobalOptions->getAllTermsAndConditionsTemplates();
+			UINT8 *currentTemplateRefId = NULL;
+			bool duplicate = false;
+			for(UINT32 i = 0; i < nrOfTemplates; i++)
+			{
+				currentTemplateRefId =
+					getTermsAndConditionsTemplateRefId(allTemplates[i]->getDocumentElement());
+				duplicate = false;
+				if(currentTemplateRefId != NULL)
+				{
+					for(UINT32 j=0; j < nrOfSentTemplates; j++)
+					{
+						if(strncmp((char *)currentTemplateRefId, (char *)sentTemplatesRefIds[j], TEMPLATE_REFID_MAXLEN) == 0)
+						{
+							duplicate = true;
+							break;
+						}
+					}
+					if(!duplicate)
+					{
+						//TODO: avoid duplicates.
+						elemTemplates->appendChild(ownerDoc->importNode(
+								allTemplates[i]->getDocumentElement(), true));
+						CAMsg::printMsg(LOG_DEBUG,"appended a tc template node!\n");
+					}
+					else
+					{
+						CAMsg::printMsg(LOG_DEBUG,"template '%s' already sent.\n", currentTemplateRefId);
+					}
+					delete [] currentTemplateRefId;
+					currentTemplateRefId = NULL;
+				}
+			}
+
+			for(UINT32 i = 0; i < nrOfSentTemplates; i++)
+			{
+				delete [] sentTemplatesRefIds[i];
+				sentTemplatesRefIds[i] = NULL;
+			}
+			delete [] sentTemplatesRefIds;
+			sentTemplatesRefIds = NULL;
+		}
+
 		DOMNode* elemTnCs = ownerDoc->importNode(pglobalOptions->getTermsAndConditions(), true);
 		UINT8 tmpOpSKIBuff[TMP_BUFF_SIZE];
 		UINT32 tmpOpSKILen = TMP_BUFF_SIZE;
 		memset(tmpOpSKIBuff, 0, tmpOpSKILen);
 		pglobalOptions->getOperatorSubjectKeyIdentifier(tmpOpSKIBuff, &tmpOpSKILen);
 		setDOMElementAttribute(elemTnCs, OPTIONS_ATTRIBUTE_TNC_ID, tmpOpSKIBuff);
-		signXML(elemTnCs);
+
+		DOMNodeList *tncDefEntryList = getElementsByTagName((DOMElement *)elemTnCs, OPTIONS_NODE_TNCS_TRANSLATION);
+		for (XMLSize_t i = 0; i < tncDefEntryList->getLength(); i++)
+		{
+			m_pSignature->signXML((DOMElement *)tncDefEntryList->item(i));
+		}
 		elemTnCExtension->appendChild(elemTnCs);
 		return elemTnCExtension;
 	}
@@ -499,23 +581,28 @@ DOMNode *CAMix::termsAndConditionsInfoNode(XERCES_CPP_NAMESPACE::DOMDocument *ow
 		UINT32 tmpLen = TMP_BUFF_SIZE;
 		memset(tmpBuff, 0, tmpLen);
 
-		DOMNodeList *list = getElementsByTagName(pglobalOptions->getTermsAndConditions(), OPTIONS_NODE_TNCS);
+		DOMNodeList *list = getElementsByTagName(pglobalOptions->getTermsAndConditions(), OPTIONS_NODE_TNCS_TRANSLATION);
 		DOMElement *iterator = NULL;
 		DOMElement *currentInfoNode = NULL;
-		for (int i = 0; i < list->getLength(); i++)
+		bool defaultLangDefined = false;
+		for (XMLSize_t i = 0; i < list->getLength(); i++)
 		{
 			iterator = (DOMElement *) list->item(i);
 			currentInfoNode = createDOMElement(ownerDoc, KEYINFO_NODE_TNC_INFO);
 
 			getDOMElementAttribute(iterator, OPTIONS_ATTRIBUTE_TNC_LOCALE, tmpBuff, &tmpLen);
 			setDOMElementAttribute(currentInfoNode, OPTIONS_ATTRIBUTE_TNC_LOCALE, tmpBuff);
+			getDOMElementAttribute(iterator, OPTIONS_ATTRIBUTE_TNC_DEFAULT_LANG_DEFINED, defaultLangDefined);
+			if(defaultLangDefined)
+			{
+				setDOMElementAttribute(elemTnCInfos, OPTIONS_ATTRIBUTE_TNC_DEFAULT_LANG, tmpBuff);
+			}
+			defaultLangDefined = false;
 			tmpLen = TMP_BUFF_SIZE;
-			//memset(tmpBuff, 0, tmpLen);
 
 			getDOMElementAttribute(iterator, OPTIONS_ATTRIBUTE_TNC_TEMPLATE_REFID, tmpBuff, &tmpLen);
 			setDOMElementAttribute(currentInfoNode, OPTIONS_ATTRIBUTE_TNC_TEMPLATE_REFID, tmpBuff);
 			tmpLen = TMP_BUFF_SIZE;
-			//memset(tmpBuff, 0, tmpLen);
 
 			elemTnCInfos->appendChild(currentInfoNode);
 		}

@@ -434,7 +434,6 @@ SINT32 getDOMChildByName(const DOMNode* pNode,const XMLCh* const name,DOMNode* &
 		return E_UNKNOWN;
 	}
 
-
 SINT32 getDOMChildByName(const DOMNode* pNode,const char* const name,DOMNode* & a_child,bool deep)
 	{
 		a_child=NULL;
@@ -445,6 +444,122 @@ SINT32 getDOMChildByName(const DOMNode* pNode,const char* const name,DOMNode* & 
 		XMLString::release(&tmpName);
 		return ret;
 	}
+/**
+ * integrates the source node in the destination Node.
+ *  TODO 1. test for XERCES >= 3.0.1
+ *  	 2. specification
+ */
+SINT32 integrateDOMNode(const DOMNode *srcNode, DOMNode *dstNode, bool recursive, bool replace)
+{
+	if( (srcNode->getNodeType() != DOMNode::ELEMENT_NODE) ||
+		(dstNode->getNodeType() != DOMNode::ELEMENT_NODE) )
+	{
+		return E_UNKNOWN;
+	}
+
+	DOMNodeList *srcList = srcNode->getChildNodes();
+	XERCES_CPP_NAMESPACE::DOMDocument *srcOwnerDoc = srcNode->getOwnerDocument();
+	XERCES_CPP_NAMESPACE::DOMDocument *dstOwnerDoc = dstNode->getOwnerDocument();
+
+	short int pos =
+#if _XERCES_VERSION >= 30001
+		srcNode->compareDocumentPosition(dstNode);
+#else
+		srcNode->compareTreePosition(dstNode);
+#endif
+	if( (pos & INTEGRATE_NOT_ALLOWED_POSITIONS)  )
+	{
+		CAMsg::printMsg(LOG_ERR,"integrate impossible due to illegal tree positions, (pos: 0x%x)\n", pos);
+		return E_UNKNOWN;
+	}
+
+	if(srcList->getLength() == 0)
+	{
+		return E_SUCCESS;
+	}
+
+	DOMElement *srcElem = (DOMElement *) srcNode;
+	DOMElement *dstElem = (DOMElement *) dstNode;
+
+	DOMNode *currSrcChild = NULL;
+	XMLCh *nodeNames[srcList->getLength()];
+	UINT32 nodeNamesIndex = 0;
+	XMLCh *currSrcChildName = NULL;
+
+	DOMNodeList *currSrcChildren = NULL;
+	DOMNodeList *currDstChildren = NULL;
+	bool nodeAlreadyFinished = false;
+
+	for(XMLSize_t i = 0; i < srcList->getLength(); i++)
+	{
+		currSrcChild = srcList->item(i);
+		if( currSrcChild->getNodeType() == DOMNode::ELEMENT_NODE )
+		{
+			nodeAlreadyFinished = false;
+			currSrcChildName = (XMLCh *) ((DOMElement *) currSrcChild)->getTagName();
+			/*UINT8 *tn = (UINT8 *) XMLString::transcode(currSrcChildName);
+			CAMsg::printMsg(LOG_DEBUG,"handle %s\n", tn);
+			XMLString::release(&tn);*/
+			for(UINT32 i = 0; i < nodeNamesIndex; i++ )
+			{
+				if(XMLString::equals(currSrcChildName, nodeNames[i]))
+				{
+					nodeAlreadyFinished = true;
+					break;
+				}
+			}
+
+			if(nodeAlreadyFinished)
+			{
+				continue;
+			}
+			currDstChildren = dstElem->getElementsByTagName(currSrcChildName);
+			currSrcChildren = srcElem->getElementsByTagName(currSrcChildName);
+
+			for(XMLSize_t j = 0;
+				j < currSrcChildren->getLength(); j++ )
+			{
+				if(j >= currDstChildren->getLength())
+				{
+					if( (dstOwnerDoc != NULL) && (srcOwnerDoc != dstOwnerDoc) )
+					{
+						dstNode->appendChild(dstOwnerDoc->importNode(currSrcChildren->item(j), true));
+					}
+					else
+					{
+						dstNode->appendChild(currSrcChildren->item(j)->cloneNode(true));
+					}
+				}
+				else if(replace)
+				{
+					if( (dstOwnerDoc != NULL) && (srcOwnerDoc != dstOwnerDoc) )
+					{
+						dstElem->replaceChild(
+							dstOwnerDoc->importNode(currSrcChildren->item(j),true),
+							currDstChildren->item(j));
+					}
+					else
+					{
+						dstElem->replaceChild(
+							dstOwnerDoc->cloneNode(currSrcChildren->item(j)),
+							currDstChildren->item(j));
+					}
+					continue;
+				}
+				else if(recursive)
+				{
+					if(currSrcChildren->item(j)->hasChildNodes() )
+					{
+						integrateDOMNode(currSrcChildren->item(j), currDstChildren->item(j), true, false);
+					}
+				}
+				nodeNames[nodeNamesIndex++] = currSrcChildName;
+			}
+		}
+	}
+	return E_SUCCESS;
+}
+
 bool equals(const XMLCh* const e1,const char* const e2)
 	{
 		XMLCh* e3=XMLString::transcode(e2);
@@ -625,6 +740,50 @@ SINT32 setCurrentTimeMilliesAsDOMAttribute(DOMNode *pElem)
 
 }
 
+//if not null the returned char pointer must be explicitely freed by the caller with 'delete []'
+UINT8 *getTermsAndConditionsTemplateRefId(DOMNode *tcTemplateRoot)
+{
+	UINT32 tmpTypeLen = TMP_BUFF_SIZE;
+	UINT8 tmpType[tmpTypeLen];
+
+	UINT32 tmpLocaleLen = TMP_LOCALE_SIZE;
+	UINT8 tmpLocale[tmpLocaleLen];
+
+	UINT32 tmpDateLen = TMP_DATE_SIZE;
+	UINT8 tmpDate[tmpDateLen];
+	memset(tmpDate, 0, TMP_DATE_SIZE);
+	memset(tmpLocale, 0, TMP_LOCALE_SIZE);
+	memset(tmpType, 0, TMP_BUFF_SIZE);
+
+	//TODO replace magic strings
+	if(getDOMElementAttribute(tcTemplateRoot, "type", tmpType, &tmpTypeLen) != E_SUCCESS)
+	{
+		return NULL;
+	}
+	else if(getDOMElementAttribute(tcTemplateRoot, "locale", tmpLocale, &tmpLocaleLen) != E_SUCCESS)
+	{
+		return NULL;
+	}
+	else if(getDOMElementAttribute(tcTemplateRoot, "date", tmpDate, &tmpDateLen) != E_SUCCESS)
+	{
+		return NULL;
+	}
+	if( (tmpTypeLen == 0) ||
+		(tmpLocaleLen == 0) ||
+		(tmpDateLen) == 0)
+	{
+		return NULL;
+	}
+	//reserve 2 more chars for the both underlines between the fields ...
+	size_t templateRefIdLen = tmpTypeLen+tmpLocaleLen+tmpDateLen+2;
+	//... and 1 more for zero termination.
+	char *templateRefId = new char[templateRefIdLen+1];
+	memset(templateRefId, 0, templateRefIdLen+1);
+	snprintf(templateRefId, templateRefIdLen+1, "%s_%s_%s", (char *) tmpType, (char *) tmpLocale, (char *) tmpDate);
+
+	return (UINT8 *) templateRefId;
+}
+
 #ifndef ONLY_LOCAL_PROXY
 DOMNodeList* getElementsByTagName(DOMElement* pElem,const char* const name)
 	{
@@ -647,25 +806,30 @@ XERCES_CPP_NAMESPACE::DOMDocument* createDOMDocument()
 
 SINT32 setDOMElementValue(DOMElement* pElem, UINT32 value)
 	{
-		UINT8 tmp[10];
-		sprintf((char*)tmp,"%u", value);
+		UINT8 tmp[11];
+		memset(tmp, 0, 11);
+		snprintf((char*)tmp, 10, "%u", value);
 		setDOMElementValue(pElem,tmp);
 		return E_SUCCESS;
 	}
 
 SINT32 setDOMElementValue(DOMElement* pElem, SINT32 value)
 	{
-		UINT8 tmp[10];
-		sprintf((char*)tmp,"%i", value);
+		//One more char for the sign of negative numbers
+		UINT8 tmp[12];
+		memset(tmp, 0, 12);
+		snprintf((char*)tmp, 11, "%d", value);
 		setDOMElementValue(pElem,tmp);
 		return E_SUCCESS;
 	}
 
 SINT32 setDOMElementValue(DOMElement* pElem,double floatValue)
 	{
-		UINT8 tmp[10];
-		sprintf((char*)tmp,"%.2f",floatValue);
-		setDOMElementValue(pElem,tmp);
+		char *tmp = NULL;
+		asprintf(&tmp, "%.2f", floatValue);
+		setDOMElementValue(pElem,(UINT8 *)tmp);
+		//NOTE: asprintf allocates with malloc
+		free(tmp);
 		return E_SUCCESS;
 	}
 
@@ -677,6 +841,7 @@ SINT32 setDOMElementValue(DOMElement* pElem,double floatValue)
 SINT32 setDOMElementValue(DOMElement* pElem, const UINT64 text)
 	{
 		UINT8 tmp[32];
+		memset(tmp, 0, 32);
 		print64(tmp,text);
 		setDOMElementValue(pElem,tmp);
 		return E_SUCCESS;
@@ -714,6 +879,14 @@ SINT32 setDOMElementAttribute(DOMNode* pElem, const char* attrName, UINT64 value
 	return setDOMElementAttribute(pElem, attrName, tmp);
 }
 
+SINT32 setDOMElementAttribute(DOMNode* pElem, const char* attrName, SINT64 value)
+{
+	UINT8 tmp[50];
+	memset(tmp, 0, 50);
+	snprintf((char *) tmp, 50, "%lld", value);
+	return setDOMElementAttribute(pElem, attrName, tmp);
+}
+
 SINT32 setDOMElementAttribute(DOMNode* pElem,const char* attrName, SINT32 value)
 {
 	UINT8 tmp[10];
@@ -748,6 +921,21 @@ SINT32 getDOMElementAttribute(const DOMNode * const elem,const char* attrName,SI
 		return E_UNKNOWN;
 	}
 	if(parseS64(val,value)!=E_SUCCESS)
+	{
+		return E_UNKNOWN;
+	}
+	return E_SUCCESS;
+}
+
+SINT32 getDOMElementAttribute(const DOMNode * const elem,const char* attrName, UINT64& value)
+{
+	UINT8 val[50];
+	UINT32 len=50;
+	if(getDOMElementAttribute(elem,attrName,val,&len)!=E_SUCCESS)
+	{
+		return E_UNKNOWN;
+	}
+	if(parseU64(val,value)!=E_SUCCESS)
 	{
 		return E_UNKNOWN;
 	}
@@ -826,7 +1014,7 @@ SINT32 getLastDOMChildByName(const DOMNode* pNode,const XMLCh* const name,DOMNod
 
 
 
-SINT32 getDOMElementValue(const DOMNode * const pElem,UINT32* value)
+SINT32 getDOMElementValue(const DOMElement* const pElem,UINT32* value)
 {
 	ASSERT(value!=NULL,"Value is null");
 	ASSERT(pElem!=NULL,"Element is NULL");
@@ -853,7 +1041,7 @@ SINT32 getDOMElementValue(const DOMElement* const pElem,double* value)
 }
 
 
-SINT32 getDOMElementValue(const DOMNode * const pElem,UINT32& value, UINT32 defaultValue)
+SINT32 getDOMElementValue(const DOMElement* pElem,UINT32& value, UINT32 defaultValue)
 {
 	UINT32 v;
 	if(getDOMElementValue(pElem,&v)!=E_SUCCESS)
@@ -882,8 +1070,24 @@ SINT32 getDOMElementValue(const DOMElement* pElem, UINT64 &value)
 	return E_SUCCESS;
 }
 
+SINT32 getDOMElementValue(const DOMElement* const pElem, SINT64 &value)
+{
+	ASSERT(pElem!=NULL, "Element is NULL");
+	UINT8 buf[256];
+	UINT32 bufLen = 256;
+	if(getDOMElementValue(pElem,buf,&bufLen)!=E_SUCCESS)
+	{
+		return E_UNKNOWN;
+	}
+	if(parseS64(buf, value)!=E_SUCCESS)
+	{
+		return E_UNKNOWN;
+	}
+	return E_SUCCESS;
+}
 
-SINT32 getDOMElementValue(const DOMElement* pElem,UINT16* value)
+
+SINT32 getDOMElementValue(const DOMElement* const pElem,UINT16* value)
 {
 	UINT32 tmp;
 	if(getDOMElementValue(pElem,&tmp)!=E_SUCCESS)
@@ -977,9 +1181,9 @@ SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen,const DOMNode* root,CAASy
 						*keylen=64;
 					else if(i>16)
 						*keylen=32;
-					else 
+					else
 						*keylen=16;
-				}	
+				}
 		}
 	memcpy(key,buff+128-(*keylen),(*keylen));
 	return E_SUCCESS;
@@ -1265,36 +1469,41 @@ UINT8* readFile(UINT8* name,UINT32* size)
  */
 SINT32 parseU64(const UINT8 * str, UINT64& value)
 {
-	#ifdef HAVE_NATIVE_UINT64
-			if (str == NULL)
-			{
-				return E_UNKNOWN;
-			}
-			UINT32 len=strlen((char*)str);
-			if (len < 1)
-			{
-				return E_UNKNOWN;
-			}
-			UINT64 u64 = 0;
-			for (UINT32 i = 0; i < len; i++)
-			{
-				UINT8 c=str[i];
-				if (c >= '0' && c <= '9')
-				{
-					u64 *= 10;
-					u64 += c - '0';
-				}
-				else if (i != 0 || str[i] != '+')
+	#ifdef	HAVE_STRTOULL
+		value = strtoull((const char *) str, NULL, 0);
+		return E_SUCCESS;
+	#else
+		#ifdef HAVE_NATIVE_UINT64
+				if (str == NULL)
 				{
 					return E_UNKNOWN;
 				}
-			}
-			value = u64;
-			return E_SUCCESS;
-	#else
-		#warning parseU64() is not implemented for platforms without native UINT64 support!!!
-		///@todo code if we do not have native UINT64
-		return E_UNKNOWN;
+				UINT32 len=strlen((char*)str);
+				if (len < 1)
+				{
+					return E_UNKNOWN;
+				}
+				UINT64 u64 = 0;
+				for (UINT32 i = 0; i < len; i++)
+				{
+					UINT8 c=str[i];
+					if (c >= '0' && c <= '9')
+					{
+						u64 *= 10;
+						u64 += c - '0';
+					}
+					else if (i != 0 || str[i] != '+')
+					{
+						return E_UNKNOWN;
+					}
+				}
+				value = u64;
+				return E_SUCCESS;
+		#else
+			#warning parseU64() is not implemented for platforms without native UINT64 support!!!
+			///@todo code if we do not have native UINT64
+			return E_UNKNOWN;
+		#endif
 	#endif
 }
 
@@ -1304,39 +1513,44 @@ SINT32 parseU64(const UINT8 * str, UINT64& value)
  */
 SINT32 parseS64(const UINT8 * str, SINT64& value)
 {
-	#ifdef HAVE_NATIVE_UINT64
-			if (str == NULL)
-			{
-				return E_UNKNOWN;
-			}
-			UINT32 len=strlen((char*)str);
-			if (len < 1)
-			{
-				return E_UNKNOWN;
-			}
-			SINT64 s64 = 0;
-			for (UINT32 i = 0; i < len; i++)
-			{
-				UINT8 c=str[i];
-				if (c >= '0' && c <= '9')
-				{
-					s64 *= 10;
-					s64 += c - '0';
-				}
-				else if (i != 0 || str[i] != '+'||str[i]!='-')
+	#ifdef	HAVE_ATOLL
+		value = atoll((const char *) str);
+		return E_SUCCESS;
+	#else
+		#ifdef HAVE_NATIVE_UINT64
+				if (str == NULL)
 				{
 					return E_UNKNOWN;
 				}
-			}
-			if(str[0]=='-')
-				value=-s64;
-			else
-				value = s64;
-			return E_SUCCESS;
-	#else
-		#warning parseS64() is not implemented for platforms without native INT64 support!!!
-		///@todo code if we do not have native UINT64
-		return E_UNKNOWN;
+				UINT32 len=strlen((char*)str);
+				if (len < 1)
+				{
+					return E_UNKNOWN;
+				}
+				SINT64 s64 = 0;
+				for (UINT32 i = 0; i < len; i++)
+				{
+					UINT8 c=str[i];
+					if (c >= '0' && c <= '9')
+					{
+						s64 *= 10;
+						s64 += c - '0';
+					}
+					else if (i != 0 || str[i] != '+'||str[i]!='-')
+					{
+						return E_UNKNOWN;
+					}
+				}
+				if(str[0]=='-')
+					value=-s64;
+				else
+					value = s64;
+				return E_SUCCESS;
+		#else
+			#warning parseS64() is not implemented for platforms without native INT64 support!!!
+			///@todo code if we do not have native UINT64
+			return E_UNKNOWN;
+		#endif
 	#endif
 }
 

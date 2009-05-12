@@ -45,6 +45,7 @@ class CAAccountingControlChannel;
 #endif
 
 #define KICKOUT_FORCED true
+#define MAX_KICKOUT_RETRIES 4
 
 struct t_fmhashtableentry
 	{
@@ -57,6 +58,10 @@ struct t_fmhashtableentry
 			SINT32			uAlreadySendPacketSize;
 			tQueueEntry		oQueueEntry;
 			UINT32				cSuspend;
+#ifdef CH_LOG_STUDY
+			time_t channelOpenedLastIntervalTS;
+#endif
+
 #ifdef LOG_TRAFFIC_PER_USER
 			UINT32				trafficIn;
 			UINT32				trafficOut;
@@ -83,7 +88,7 @@ struct t_fmhashtableentry
 #endif
 			// if false, the entry should be deleted the next time it is read from the queue
 			bool bRecoverTimeout;
-
+			SINT32 kickoutSendRetries;
 		private:
 			UINT32				cNumberOfChannels;
 			struct t_firstmixchannellist* pChannelList;
@@ -103,6 +108,8 @@ struct t_fmhashtableentry
 				struct t_fmhashtableentry* next;
 				SINT32 timoutSecs;
 			} list_TimeoutHashEntries;
+
+			CAConditionVariable *cleanupNotifier;
 #endif
 		friend class CAFirstMixChannelList;
 

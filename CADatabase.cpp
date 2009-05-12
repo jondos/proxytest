@@ -1,28 +1,28 @@
 /*
-Copyright (c) 2000, The JAP-Team 
+Copyright (c) 2000, The JAP-Team
 All rights reserved.
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-	- Redistributions of source code must retain the above copyright notice, 
+	- Redistributions of source code must retain the above copyright notice,
 	  this list of conditions and the following disclaimer.
 
-	- Redistributions in binary form must reproduce the above copyright notice, 
-	  this list of conditions and the following disclaimer in the documentation and/or 
+	- Redistributions in binary form must reproduce the above copyright notice,
+	  this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
-	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors 
-	  may be used to endorse or promote products derived from this software without specific 
-		prior written permission. 
+	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
+	  may be used to endorse or promote products derived from this software without specific
+		prior written permission.
 
-	
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS 
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
 AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
 BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
-OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
@@ -48,7 +48,7 @@ t_databaseInfo* CADatabase::createDBInfo()
 		memset(pInfo,NULL,sizeof(t_databaseInfo));
 		return pInfo;
 	}
-	
+
 CADatabase::~CADatabase()
 	{
 		m_pMutex->lock();
@@ -85,14 +85,14 @@ SINT32 CADatabase::deleteDB(t_databaseInfo*& pDBInfo)
 		pDBInfo=NULL;
 		return E_SUCCESS;
 	}
-	
+
 /** Inserts this key in the replay DB.*/
 SINT32 CADatabase::insert(UINT8 key[16],UINT64 timestamp)
 	{
 	// insert hash if timestamp valid in prevDB currDB nextDB
 		m_pMutex->lock();
 
-		
+
 		// return E_UNKNOWN if the timestamp is too old or is too far in the future
 		if ((timestamp<(m_lastSwitch-SECONDS_PER_INTERVALL))||(timestamp>(time(NULL)+FUTURE_TOLERANCE))) {
 			// timestamp not valid!!
@@ -120,7 +120,14 @@ SINT32 CADatabase::insert(UINT8 key[16],UINT64 timestamp)
 			nextDB=NULL;
 			}
 
-		UINT64 hashkey=(key[2]<<56)+(key[3]<<48)+(key[4]<<40)+(key[5]<<32)+(key[6]<<24)+(key[7]<<16)+(key[8]<<8)+key[9];
+		UINT64 hashkey=	(((UINT64)key[2])<<56)+
+						(((UINT64)key[3])<<48)+
+						(((UINT64)key[4])<<40)+
+						(((UINT64)key[5])<<32)+
+						(((UINT64)key[6])<<24)+
+						(((UINT64)key[7])<<16)+
+						(((UINT64)key[8])<<8)+
+						((UINT64)key[9]);
 
 // insert
 		if (prevDB!=NULL){
@@ -217,7 +224,7 @@ THREAD_RETURN db_loopMaintenance(void *param)
 	{
 		INIT_STACK;
 		BEGIN_STACK("CADatabase::db_loopMaintenance");
-		
+
 		CADatabase* pDatabase=(CADatabase*)param;
 		while(pDatabase->m_bRun)
 			{
@@ -226,9 +233,9 @@ THREAD_RETURN db_loopMaintenance(void *param)
 					pDatabase->nextClock();
 					}
 			}
-			
+
 		FINISH_STACK("CADatabase::db_loopMaintenance");
-			
+
 		THREAD_RETURN_SUCCESS;
 	}
 
@@ -381,7 +388,7 @@ SINT32 CADatabase::simulateInsert(UINT8 key[16])
 								m_pMutex->unlock();
 								return E_UNKNOWN;
 							}
-						before=hashList;	
+						before=hashList;
 						if(hashList->key<ret)
 							{
 								hashList=hashList->right;
@@ -393,7 +400,7 @@ SINT32 CADatabase::simulateInsert(UINT8 key[16])
 					} while(hashList!=NULL);
 //				LP_databaseEntry newEntry=getNewDBEntry(aktDB);
 //				newEntry->left=newEntry->right=NULL;
-				//memcpy(newEntry->key,key,6);				
+				//memcpy(newEntry->key,key,6);
 //				newEntry->key=ret;
 //				if(before->key<ret)
 //					{
@@ -404,7 +411,7 @@ SINT32 CADatabase::simulateInsert(UINT8 key[16])
 						//before->left=newEntry;
 //					}
 			}
-		aktDB->m_u32Size++;	
+		aktDB->m_u32Size++;
 		m_pMutex->unlock();
 		return E_SUCCESS;	*/
 	}

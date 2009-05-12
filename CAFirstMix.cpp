@@ -59,7 +59,7 @@ extern CACmdLnOptions* pglobalOptions;
 #include "CAStatusManager.hpp"
 
 const UINT32 CAFirstMix::MAX_CONCURRENT_NEW_CONNECTIONS = NUM_LOGIN_WORKER_TRHEADS * 2;
-CAConditionVariable *loginCV = new CAConditionVariable();
+CAMutex *loginCV = new CAConditionVariable();
 
 bool CAFirstMix::isShuttingDown()
 {
@@ -116,6 +116,8 @@ SINT32 CAFirstMix::init()
 		m_bRestart=false;
 		//Establishing all Listeners
 		m_arrSocketsIn=new CASocket[m_nSocketsIn];
+		//initiate ownerDocument for tc templates
+		m_templatesOwner = createDOMDocument();
 		UINT32 i,aktSocket=0;
 		for(i=1;i<=pglobalOptions->getListenerInterfaceCount();i++)
 			{
@@ -281,7 +283,12 @@ SINT32 CAFirstMix::init()
 		m_pthreadReadFromMix=new CAThread((UINT8*)"CAFirstMix - ReadFromMix");
 		m_pthreadReadFromMix->setMainLoop(fm_loopReadFromMix);
 		m_pthreadReadFromMix->start(this);
-
+#ifdef CH_LOG_STUDY
+		nrOfChThread = new CAThread((UINT8*)"CAFirstMix - Channel open logging thread");
+		nrOfChThread->setMainLoop(fm_loopLogChannelsOpened);
+		nrOfChThread->start(this);
+		currentOpenedChannels = 0;
+#endif //CH_LOG_STUDY
 		//Starting thread for logging
 #ifdef LOG_PACKET_TIMES
 		m_pLogPacketStats=new CALogPacketStats();
@@ -362,8 +369,9 @@ SINT32 CAFirstMix::processKeyExchange()
     //get the Keys from the other mixes (and the Mix-Id's...!)
     CAMsg::printMsg(LOG_INFO,"Received Key Info...\n");
     CAMsg::printMsg(LOG_DEBUG,"%s\n",recvBuff);
-
+    CAMsg::printMsg(LOG_INFO,"before parsing...\n");
     XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(recvBuff,len);
+    CAMsg::printMsg(LOG_INFO,"after parsing...%p\n",doc);
     delete []recvBuff;
     recvBuff = NULL;
     DOMElement* elemMixes=doc->getDocumentElement();
@@ -374,6 +382,7 @@ SINT32 CAFirstMix::processKeyExchange()
 			doc->release();
 			doc = NULL;
 		}
+		CAMsg::printMsg(LOG_INFO,"before returning...\n");
 		return E_UNKNOWN;
     }
 		SINT32 count=0;
@@ -397,7 +406,23 @@ SINT32 CAFirstMix::processKeyExchange()
         return E_UNKNOWN;
     pglobalOptions->setCascadeName(cascadeName);
 */
+    CAMsg::printMsg(LOG_INFO,"before append T&Cs...\n");
+    if(pglobalOptions->getTermsAndConditions() != NULL)
+    {
+    	appendTermsAndConditionsExtension(doc, elemMixes);
+    }
+    CAMsg::printMsg(LOG_INFO,"before append T&Cs...\n");
     SINT32 extRet = handleKeyInfoExtensions(elemMixes);
+    CAMsg::printMsg(LOG_INFO,"after handleKeyInfoExt...\n");
+    if(extRet != E_SUCCESS)
+    {
+    	if(doc != NULL)
+		{
+			doc->release();
+			doc = NULL;
+		}
+		return E_UNKNOWN;
+    }
 
     m_pRSA=new CAASymCipher;
     m_pRSA->generateKeyPair(1024);
@@ -440,12 +465,15 @@ SINT32 CAFirstMix::processKeyExchange()
     DOMElement* elemOwnMix=NULL;
     getDOMChildByName(elemMixesKey, "Mix", elemOwnMix, false);
     elemOwnMix->appendChild(elemKey);
+    CAMsg::printMsg(LOG_INFO,"before T&Cs1...\n");
     if(pglobalOptions->getTermsAndConditions() != NULL)
     {
     	elemOwnMix->appendChild(termsAndConditionsInfoNode(docXmlKeyInfo));
     }
+    CAMsg::printMsg(LOG_INFO,"after T&Cs1...\n");
 		elemOwnMix->appendChild(createDOMElement(docXmlKeyInfo,"SupportsEncrypedControlChannels"));
-    if (signXML(elemOwnMix) != E_SUCCESS)
+	CAMsg::printMsg(LOG_INFO,"after SupportEncChannels...\n");
+	if (signXML(elemOwnMix) != E_SUCCESS)
 	{
 		CAMsg::printMsg(LOG_DEBUG,"Could not sign MixInfo sent to users...\n");
 	}
@@ -666,12 +694,10 @@ SINT32 CAFirstMix::handleKeyInfoExtensions(DOMElement *root)
 	if(extensionRoot != NULL)
 	{
 		extensionRoot = (DOMElement *) root->removeChild(extensionRoot);
-		//handle all extension:
-		//TODO: a bit more generic, i.e. register extension handler functions and stuff
 		ret = handleTermsAndConditionsExtension(extensionRoot);
 		extensionRoot->release();
 	}
-	return E_SUCCESS;
+	return ret;
 }
 
 SINT32 CAFirstMix::handleTermsAndConditionsExtension(DOMElement *extensionsRoot)
@@ -682,41 +708,144 @@ SINT32 CAFirstMix::handleTermsAndConditionsExtension(DOMElement *extensionsRoot)
 	}
 
 	DOMElement *tncDefs = NULL;
+	DOMElement *tncTemplates = NULL;
 	getDOMChildByName(extensionsRoot, KEYINFO_NODE_TNC_EXTENSION, tncDefs);
+	if(tncDefs == NULL)
+	{
+		CAMsg::printMsg(LOG_CRIT,"No TNCs in TNC extension found.\n");
+		return E_UNKNOWN;
+	}
+	getDOMChildByName(tncDefs, OPTIONS_NODE_TNCS_TEMPLATES, tncTemplates);
+
 	UINT8 currentTnC_id[TMP_BUFF_SIZE];
 	UINT32 currentTnC_id_len = TMP_BUFF_SIZE;
 
 	UINT8 currentTnCEntry_templateRefid[TMP_BUFF_SIZE];
 	UINT32 currentTnCEntry_templateRefid_len = TMP_BUFF_SIZE;
 
+	UINT8 currentTnCEntry_locale[TMP_LOCALE_SIZE];
+	UINT32 currentTnCEntry_locale_len = TMP_LOCALE_SIZE;
+
 	DOMElement *currentTnCList = NULL;
 	DOMElement *currentTnCEntry = NULL;
 	memset(currentTnC_id, 0, TMP_BUFF_SIZE);
 	memset(currentTnCEntry_templateRefid, 0, TMP_BUFF_SIZE);
 
-	if(tncDefs != NULL)
+	if(tncTemplates != NULL)
 	{
-		DOMNodeList *tncDefList = getElementsByTagName(tncDefs, OPTIONS_NODE_TNCS_LIST);
-		for (int i = 0; i < tncDefList->getLength(); i++)
+		DOMNodeList *tncTemplateList = getElementsByTagName(tncDefs, TNC_TEMPLATE_ROOT_ELEMENT);
+		m_nrOfTermsAndConditionsTemplates = tncTemplateList->getLength();
+		CAMsg::printMsg(LOG_INFO, "Storing %u TC Templates.\n", m_nrOfTermsAndConditionsTemplates);
+		if(m_nrOfTermsAndConditionsTemplates > 0)
 		{
-			currentTnCList = (DOMElement *) tncDefList->item(i);
-			DOMNodeList *tncDefEntryList = getElementsByTagName(currentTnCList, OPTIONS_NODE_TNCS);
-			getDOMElementAttribute(currentTnCList, OPTIONS_ATTRIBUTE_TNC_ID, currentTnC_id, &currentTnC_id_len);
-
-			for (int j = 0; j < tncDefEntryList->getLength(); j++)
+			m_tcTemplates = new DOMNode *[m_nrOfTermsAndConditionsTemplates];
+			for (UINT32 i = 0; i < m_nrOfTermsAndConditionsTemplates; i++)
 			{
-				currentTnCEntry = (DOMElement *) tncDefEntryList->item(j);
-				getDOMElementAttribute(currentTnCEntry, OPTIONS_ATTRIBUTE_TNC_TEMPLATE_REFID,
-						currentTnCEntry_templateRefid, &currentTnCEntry_templateRefid_len);
-
-				//CAMsg::printMsg(LOG_DEBUG,"TODO: create entry for %s, [template %s]\n", currentTnC_id, currentTnCEntry_templateRefid);
-				currentTnCEntry_templateRefid_len = TMP_BUFF_SIZE;
+				m_tcTemplates[i] = m_templatesOwner->importNode(tncTemplateList->item(i), true);
 			}
-			//TODO: create entries.
-			currentTnC_id_len = TMP_BUFF_SIZE;
+		}
+		else
+		{
+			CAMsg::printMsg(LOG_ERR, "Not a single TC Template specified! the Cascade is not properly configured.\n");
+			return E_UNKNOWN;
 		}
 	}
+	else
+	{
+		CAMsg::printMsg(LOG_ERR, "No TC Template node found! Cascade is not properly configured.\n");
+		return E_UNKNOWN;
+	}
+
+	DOMNodeList *tncDefList = getElementsByTagName(tncDefs, OPTIONS_NODE_TNCS);
+	if(tncDefList->getLength() == 0)
+	{
+		CAMsg::printMsg(LOG_CRIT, "No TNCs definitions found.\n");
+		return E_UNKNOWN;
+	}
+
+	m_nrOfTermsAndConditionsDefs = tncDefList->getLength();
+	m_tnCDefs = new TermsAndConditions *[m_nrOfTermsAndConditionsDefs];
+	memset(m_tnCDefs, 0, (sizeof(TermsAndConditions*)*m_nrOfTermsAndConditionsDefs) );
+
+	for (XMLSize_t i = 0; i < m_nrOfTermsAndConditionsDefs; i++)
+	{
+		currentTnCList = (DOMElement *) tncDefList->item(i);
+		DOMNodeList *tncDefEntryList = getElementsByTagName(currentTnCList, OPTIONS_NODE_TNCS_TRANSLATION);
+		getDOMElementAttribute(currentTnCList, OPTIONS_ATTRIBUTE_TNC_ID, currentTnC_id, &currentTnC_id_len);
+
+		m_tnCDefs[i] = new TermsAndConditions(currentTnC_id, tncDefEntryList->getLength());
+
+		for (XMLSize_t j = 0; j < tncDefEntryList->getLength(); j++)
+		{
+			currentTnCEntry = (DOMElement *) tncDefEntryList->item(j);
+
+			getDOMElementAttribute(currentTnCEntry, OPTIONS_ATTRIBUTE_TNC_TEMPLATE_REFID,
+					currentTnCEntry_templateRefid, &currentTnCEntry_templateRefid_len);
+			getDOMElementAttribute(currentTnCEntry, OPTIONS_ATTRIBUTE_TNC_LOCALE,
+					currentTnCEntry_locale, &currentTnCEntry_locale_len);
+
+			DOMNode *templateNode = getTermsAndConditionsTemplate(currentTnCEntry_templateRefid);
+			if(templateNode != NULL)
+			{
+				//m_tnCDefs[i]->synchLock->lock();
+				m_tnCDefs[i]->addTranslation(currentTnCEntry_locale, currentTnCEntry, templateNode);
+				//m_tnCDefs[i]->synchLock->unlock();
+			}
+			else
+			{
+				CAMsg::printMsg(LOG_CRIT,"Could not find template %s for T&C %s.\n", currentTnCEntry_templateRefid, currentTnC_id);
+				return E_UNKNOWN;
+			}
+			memset(currentTnCEntry_templateRefid, 0, TMP_BUFF_SIZE);
+			currentTnCEntry_templateRefid_len = TMP_BUFF_SIZE;
+			memset(currentTnCEntry_locale, 0, TMP_LOCALE_SIZE);
+			currentTnCEntry_locale_len = TMP_LOCALE_SIZE;
+		}
+		memset(currentTnC_id, 0, TMP_BUFF_SIZE);
+		currentTnC_id_len = TMP_BUFF_SIZE;
+	}
 	return E_SUCCESS;
+}
+
+TermsAndConditions *CAFirstMix::getTermsAndConditions(const UINT8 *opSki)
+{
+	if( (m_tnCDefs == NULL) || (opSki == NULL) )
+	{
+		return NULL;
+	}
+	for(UINT32 i = 0; i < m_nrOfTermsAndConditionsDefs; i++)
+	{
+		if(m_tnCDefs[i] != NULL)
+		{
+			if(strncasecmp((char *) m_tnCDefs[i]->getID(),
+							(const char *) opSki,
+							strlen((char *) m_tnCDefs[i]->getID())) == 0)
+			{
+				return m_tnCDefs[i];
+			}
+		}
+	}
+	return NULL;
+}
+
+DOMNode *CAFirstMix::getTermsAndConditionsTemplate(UINT8 *templateRefID)
+{
+	UINT8 *currentRefId = NULL;
+	bool match = false;
+
+	for (UINT32 i = 0; i < m_nrOfTermsAndConditionsTemplates; i++)
+	{
+		currentRefId = getTermsAndConditionsTemplateRefId(m_tcTemplates[i]);
+		match = (currentRefId != NULL) &&
+				 (strncmp((char *)templateRefID, (char *)currentRefId, TEMPLATE_REFID_MAXLEN ) == 0);
+		delete [] currentRefId;
+		currentRefId = NULL;
+		if(match)
+		{
+			return m_tcTemplates[i];
+		}
+	}
+	return NULL;
 }
 
 /**How to end this thread:
@@ -1164,6 +1293,42 @@ THREAD_RETURN fm_loopLog(void* param)
 		THREAD_RETURN_SUCCESS;
 	}
 
+#ifdef CH_LOG_STUDY
+THREAD_RETURN fm_loopLogChannelsOpened(void* param)
+	{
+		CAFirstMix* pFirstMix=(CAFirstMix*)param;
+		pFirstMix->m_bRunLog=true;
+		UINT32 countLog= 10;
+		UINT32 value = 0;
+		UINT32 total = 0;
+		time_t newIvalTS = 0, ival = 0;
+
+		pFirstMix->nrOfChOpMutex->lock();
+		pFirstMix->lastLogTime = time(NULL);
+		pFirstMix->nrOfChOpMutex->unlock();
+
+		while(pFirstMix->m_bRunLog)
+		{
+			if(countLog == 0)
+			{
+				pFirstMix->nrOfChOpMutex->lock();
+				value = pFirstMix->nrOfOpenedChannels;
+				total = pFirstMix->currentOpenedChannels;
+				pFirstMix->nrOfOpenedChannels = 0;
+				newIvalTS = time(NULL);
+				ival = newIvalTS - pFirstMix->lastLogTime;
+				pFirstMix->lastLogTime = newIvalTS;
+				pFirstMix->nrOfChOpMutex->unlock();
+				CAMsg::printMsg(LOG_INFO,"Analyzing channels: Opened channels for %u JonDo connections in the last %u seconds, overall open channels: %u, users online: %u\n",
+						value, ival, total, pFirstMix->getNrOfUsers() );
+				countLog = 10;
+			}
+			sSleep(1);
+			countLog--;
+		}
+		THREAD_RETURN_SUCCESS;
+	}
+#endif //CH_LOG_STUDY
 
 THREAD_RETURN fm_loopDoUserLogin(void* param)
 	{
@@ -1188,6 +1353,175 @@ THREAD_RETURN fm_loopDoUserLogin(void* param)
 
 		THREAD_RETURN_SUCCESS;
 	}
+
+termsAndConditionMixAnswer_t *CAFirstMix::handleTermsAndConditionsLogin(XERCES_CPP_NAMESPACE::DOMDocument* request)
+{
+	termsAndConditionMixAnswer_t *answer =
+		new termsAndConditionMixAnswer_t;
+
+	const XMLCh* reqName = request->getDocumentElement()->getTagName();
+
+	//Client requests lacking T&C resources.
+	if(XMLString::equals(reqName, TNC_REQUEST))
+	{
+		answer->result = TC_UNFINISHED;
+		CAMsg::printMsg(LOG_DEBUG,"Handling TC request.\n");
+		XERCES_CPP_NAMESPACE::DOMDocument *response = createDOMDocument();
+		DOMElement *responseRoot = createDOMElement(response, TNC_RESPONSE);
+		response->appendChild(responseRoot);
+		//All elements with tag name 'Resources' (direct children of 'TermsAndConditionsRequest')
+		DOMNodeList *requestedResources = getElementsByTagName(request->getDocumentElement(), TNC_RESOURCES);
+		//All elements with tag name 'Translation' (direct children of 'Resources')
+		DOMNodeList *requestedResourceItems = NULL;
+
+		DOMNode *currentNode = NULL;
+		DOMNode *currentAnswerNode = NULL;
+		DOMNode *currentAnswerResourceNode = NULL;
+
+		UINT32 idLen = TMP_BUFF_SIZE;
+		UINT8 id[idLen];
+		memset(id, 0, idLen);
+
+		UINT32 localeLen = TMP_LOCALE_SIZE;
+		UINT8 locale[localeLen];
+		memset(locale, 0, localeLen);
+
+		bool resourceError = false;
+
+		if(requestedResources->getLength() == 0)
+		{
+			response->release();
+			response = createDOMDocument();
+			response->appendChild(createDOMElement(response, TNC_RESPONSE_INVALID_REQUEST));
+			answer->result = TC_FAILED;
+		}
+
+		for (XMLSize_t i = 0; i < requestedResources->getLength(); i++)
+		{
+			idLen = TMP_BUFF_SIZE;
+			localeLen = TMP_LOCALE_SIZE;
+			bool validResource = false;
+
+			currentNode = requestedResources->item(i);
+			//check validity of the T&C resource request. attributes "id" and locale must be proper set.
+			if( (getDOMElementAttribute(currentNode, OPTIONS_ATTRIBUTE_TNC_ID, id, &idLen) != E_SUCCESS) ||
+				(strlen((char *)id) < 1)  )
+			{
+				CAMsg::printMsg(LOG_DEBUG,"Error: invalid id.\n");
+				resourceError = true;
+			}
+
+			if(!currentNode->hasChildNodes())
+			{
+				//Empty Resource node is invalid!
+				CAMsg::printMsg(LOG_DEBUG,"Error: No children.\n");
+				resourceError = true;
+			}
+
+			if(!resourceError)
+			{
+
+				TermsAndConditions *requestedTnC = getTermsAndConditions(id);
+				if(requestedTnC != NULL)
+				{
+					requestedResourceItems = getElementsByTagName((DOMElement *)currentNode, TNC_REQ_TRANSLATION);
+					for(XMLSize_t j = 0; j < requestedResourceItems->getLength(); j++)
+					{
+						validResource = false;
+						localeLen = TMP_LOCALE_SIZE;
+						if( (getDOMElementAttribute(requestedResourceItems->item(j),
+								OPTIONS_ATTRIBUTE_TNC_LOCALE,
+								locale, &localeLen) != E_SUCCESS) ||
+							(strlen((char *)locale) != ((TMP_LOCALE_SIZE) - 1) ) )
+						{
+							CAMsg::printMsg(LOG_DEBUG,"Error: Invalid locale for tnc %s\n", id);
+							break;
+						}
+
+						const termsAndConditionsTranslation_t *requestedTranslation =
+								requestedTnC->getTranslation(locale);
+						//NOTE: No need to lock while working with the TC translation
+						//because the translation containers are only modified during
+						//inter-mix-keyexchange and cleanup.
+						//Both must never run concurrently to this method
+						if(requestedTranslation != NULL)
+						{
+
+							currentAnswerNode = response->importNode(currentNode, false);
+							responseRoot->appendChild(currentAnswerNode);
+							if( getDOMChildByName(requestedResourceItems->item(j), TNC_RESOURCE_TEMPLATE,
+									currentAnswerResourceNode, false) == E_SUCCESS)
+							{
+								currentAnswerResourceNode = response->importNode(currentAnswerResourceNode, true);
+								currentAnswerResourceNode->appendChild(
+										response->importNode(requestedTranslation->tnc_template, true));
+								currentAnswerNode->appendChild(currentAnswerResourceNode);
+								validResource = true;
+							}
+
+							if( getDOMChildByName(requestedResourceItems->item(j), TNC_RESOURCE_CUSTOMIZED_SECT,
+													currentAnswerResourceNode, false) == E_SUCCESS)
+							{
+								currentAnswerResourceNode = response->importNode(currentAnswerResourceNode, true);
+								currentAnswerResourceNode->appendChild(
+										response->importNode(requestedTranslation->tnc_customized, true));
+								currentAnswerNode->appendChild(currentAnswerResourceNode);
+								validResource = true;
+							}
+						}
+						else
+						{
+							CAMsg::printMsg(LOG_DEBUG,"Error: no translation def found.\n");
+							break;
+						}
+					}
+				}
+				else
+				{
+					CAMsg::printMsg(LOG_DEBUG,"Error: no tc def found.\n");
+				}
+			}
+
+			if(!validResource)
+			{
+				//only a manipulated client sends an invalid T&C resource request.
+				//Manipulation is interpreted as a rejection of the terms & conditions,
+				//so abort login immediately.
+				response->release();
+				response = createDOMDocument();
+				response->appendChild(createDOMElement(response, TNC_RESPONSE_INVALID_REQUEST));
+				answer->result = TC_FAILED;
+				break;
+			}
+		}
+		answer->xmlAnswer = response;
+	}
+	//Client accepts/rejects the T&Cs.
+	else if(XMLString::equals(reqName, TNC_CONFIRM))
+	{
+		CAMsg::printMsg(LOG_DEBUG,"handling TC confirm.\n");
+		bool tcAccepted = false;
+		getDOMElementAttribute(request->getDocumentElement(), "accepted", tcAccepted);
+		CAMsg::printMsg(LOG_DEBUG,"Client has%s accepted the T&Cs.\n", (tcAccepted ? "" : " not")  );
+
+		answer->xmlAnswer = NULL;
+		answer->result = tcAccepted ? TC_CONFIRMED : TC_FAILED;
+	}
+	//stops the message exchange (if client needs time for showing the T & Cs, etc.)
+	else if(XMLString::equals(reqName, TNC_INTERRUPT))
+	{
+		CAMsg::printMsg(LOG_DEBUG,"client requested interrupting the tc login.\n");
+		answer->xmlAnswer = NULL;
+		answer->result = TC_FAILED;
+	}
+	//Client sends an invalid message
+	else
+	{
+		answer->xmlAnswer = NULL; //TODO: set errorMessage here
+		answer->result = TC_FAILED;
+	}
+	return answer;
+}
 
 SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 {
@@ -1335,7 +1669,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 				m_pIPList->removeIP(peerIP);
 				return E_UNKNOWN;
 			}
-		//Getting control channel keys if available 
+		//Getting control channel keys if available
 		///TODO: move to the if-staement above
 		DOMElement* elemControlChannelEnc=NULL;
 		getDOMChildByName(elemRoot,"ControlChannelEncryption",elemControlChannelEnc,false);
@@ -1460,7 +1794,104 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		#endif
 		delete[] xml_buff;
 		xml_buff = NULL;
+#if 0 //terms and conditions sending disabled.
+		/* handle Terms And Conditions */
+		bool loginFailed = false;
+		bool tcProcedureFinished = false;
 
+		while( !(tcProcedureFinished || loginFailed) )
+		{
+			UINT16 tcRequestDataLen = 0;
+			if (pNewUser->getCASocket()->isClosed() ||
+				pNewUser->getCASocket()->receiveFullyT((UINT8*)&tcRequestDataLen, 2, 10000) != E_SUCCESS)
+			{
+				loginFailed = true;
+				CAMsg::printMsg(LOG_ERR,"User login: Receiving t&c protocol data size has been interrupted!\n");
+				break;
+			}
+
+			tcRequestDataLen = ntohs(tcRequestDataLen);
+			//CAMsg::printMsg(LOG_DEBUG,"User login: expecting %u bytes!\n", tcRequestDataLen);
+			UINT8 tcDataBuf[tcRequestDataLen+1];
+			tcDataBuf[tcRequestDataLen] = 0;
+			if (pNewUser->getCASocket()->isClosed() ||
+				pNewUser->getCASocket()->receiveFullyT(tcDataBuf, tcRequestDataLen, 10000) != E_SUCCESS)
+			{
+				loginFailed = true;
+				CAMsg::printMsg(LOG_ERR,"User login: Receiving t&c protocol data has been interrupted!\n");
+				break;
+			}
+
+			XERCES_CPP_NAMESPACE::DOMDocument *tcData = parseDOMDocument(tcDataBuf, tcRequestDataLen);
+			if( (tcData == NULL) || (tcData->getDocumentElement() == NULL) )
+			{
+				CAMsg::printMsg(LOG_ERR,"Could not parse tc data!\n");
+				loginFailed = true;
+				break;
+			}
+
+			termsAndConditionMixAnswer_t *answer = handleTermsAndConditionsLogin(tcData);
+			if(answer == NULL)
+			{
+				loginFailed = true;
+				tcData->release();
+				tcData = NULL;
+				break;
+			}
+
+			if( (answer->xmlAnswer != NULL) )
+			{
+				UINT32 size = 0;
+				UINT8 *answerBuff = DOM_Output::dumpToMem(answer->xmlAnswer, &size);
+				if(answerBuff != NULL)
+				{
+					//CAMsg::printMsg(LOG_DEBUG,"User login: answer %s\n", answerBuff);
+
+					UINT32 netSize = htonl(size);
+
+					if (pNewUser->getCASocket()->isClosed() ||
+						pNewUser->getCASocket()->sendFullyTimeOut((UINT8 *) &netSize, 4, 30000, 10000) != E_SUCCESS)
+					{
+						CAMsg::printMsg(LOG_DEBUG,"User login: sending t&c protocol data size has been interrupted!\n");
+						loginFailed = true;
+					}
+					else if (pNewUser->getCASocket()->isClosed() ||
+						pNewUser->getCASocket()->sendFullyTimeOut(answerBuff, size, 30000, 10000) != E_SUCCESS)
+					{
+						CAMsg::printMsg(LOG_DEBUG,"User login: Sending t&c protocol data has been interrupted!\n");
+						loginFailed = true;
+					}
+					delete [] answerBuff;
+				}
+			}
+			tcProcedureFinished = (answer->result != TC_UNFINISHED);
+			loginFailed = (answer->result == TC_FAILED);
+			cleanupTnCMixAnswer(answer);
+			delete answer;
+			answer = NULL;
+			tcData->release();
+			tcData = NULL;
+		}
+
+		//Only if a positive confirm message was received, the client may pass!
+
+		if(loginFailed)
+		{
+			if (doc != NULL)
+			{
+				doc->release();
+				doc = NULL;
+			}
+			CAMsg::printMsg(LOG_DEBUG,"User login: failed!\n");
+			delete[] xml_buff;
+			xml_buff = NULL;
+			delete pNewUser;
+			pNewUser = NULL;
+			m_pIPList->removeIP(peerIP);
+			return E_UNKNOWN;
+		}
+		/* end Terms And Conditions negotiation */
+#endif
 		SAVE_STACK("CAFirstMix::doUserLogin", "sent key exchange signature");
 
 		pNewUser->getCASocket()->setNonBlocking(true);
@@ -1588,7 +2019,10 @@ loop_break:
 //#ifdef DEBUG
 				CAMsg::printMsg(LOG_DEBUG,"AI login messages successfully exchanged: now starting settlement for user account balancing check\n");
 //#endif
-				aiLoginStatus = CAAccountingInstance::settlementTransaction();
+				if(CAAccountingInstance::settlementTransaction() != E_SUCCESS)
+				{
+					aiLoginStatus |= AUTH_LOGIN_FAILED;
+				}
 			}
 //#ifdef DEBUG
 			else
@@ -1894,6 +2328,14 @@ SINT32 CAFirstMix::clean()
 		}
 	m_pthreadReadFromMix=NULL;
 
+#ifdef CH_LOG_STUDY
+	if(nrOfChThread != NULL)
+	{
+		nrOfChThread->join();
+		delete nrOfChThread;
+		nrOfChThread = NULL;
+	}
+#endif
 
 #ifdef LOG_PACKET_TIMES
 		if(m_pLogPacketStats!=NULL)
@@ -2001,10 +2443,36 @@ SINT32 CAFirstMix::clean()
 		m_u32MixCount=0;
 		m_nMixedPackets=0; //reset to zero after each restart (at the moment neccessary for infoservice)
 		m_nUser=0;
+
+		CAMsg::printMsg	(LOG_CRIT,"before tc cleanup\n");
+		for (int i = 0; i < m_nrOfTermsAndConditionsDefs; i++)
+		{
+			delete m_tnCDefs[i];
+			m_tnCDefs[i] = NULL;
+		}
+		delete [] m_tnCDefs;
+		m_tnCDefs = NULL;
+		m_nrOfTermsAndConditionsDefs = 0;
+		CAMsg::printMsg	(LOG_CRIT,"before template cleanup\n");
+		for(UINT32 i = 0; i < m_nrOfTermsAndConditionsTemplates; i++)
+		{
+			m_tcTemplates[i]->release();
+			m_tcTemplates[i] = NULL;
+		}
+		delete [] m_tcTemplates;
+		m_tcTemplates = NULL;
+		CAMsg::printMsg	(LOG_CRIT,"before template owner release\n");
+		if(m_templatesOwner != NULL)
+		{
+			m_templatesOwner->release();
+			m_templatesOwner = NULL;
+		}
+		CAMsg::printMsg	(LOG_CRIT,"after template owner release\n");
+		m_nrOfTermsAndConditionsTemplates = 0;
 		//#ifdef _DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"CAFirstMix::clean() finished\n");
 		//#endif
-		delete [] m_tnCDefs;
+
 		return E_SUCCESS;
 	}
 
