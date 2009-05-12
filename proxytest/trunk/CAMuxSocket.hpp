@@ -150,7 +150,7 @@ class CAMuxSocket
 				UINT8*			m_Buff;
 				CASymCipher		m_oCipherIn;
 				CASymCipher		m_oCipherOut;
-				bool				m_bIsCrypted;
+				bool			m_bIsCrypted;
 				CAMutex			m_csSend;
 				CAMutex			m_csReceive;
 				t_hashkeylistEntry*			m_pHashKeyEntry;

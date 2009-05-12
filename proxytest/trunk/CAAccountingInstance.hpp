@@ -65,6 +65,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define CLIENT_VERSION_STR_LEN 20
 #define PREPAID_PROTO_CLIENT_VERSION "00.10.057"
 
+#define CRITICAL_SETTLE_FLAGS \
+	(AUTH_INVALID_ACCOUNT | AUTH_ACCOUNT_EMPTY | AUTH_BLOCKED | AUTH_UNKNOWN)
+
 struct t_fmhashtableentry;
 
 struct AccountLoginHashEntry
@@ -88,6 +91,7 @@ struct SettleEntry
 	UINT64 confirmedBytes;
 	UINT64 diffBytes;
 	SettleEntry* nextEntry;
+	SINT32 storedStatus;
 };
 
 bool testAndSetLoginOwner(struct AccountLoginHashEntry *loginEntry, struct t_fmhashtableentry *ownerRef);

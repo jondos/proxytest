@@ -48,6 +48,9 @@ CAFirstMixChannelList::CAFirstMixChannelList()
 			{
 				m_HashTable[i]=new fmHashTableEntry;
 				memset(m_HashTable[i],0,sizeof(fmHashTableEntry));
+#ifdef PAYMENT
+				m_HashTable[i]->cleanupNotifier = new CAConditionVariable();
+#endif
 			}
 		m_listHashTableHead=NULL;
 		m_listHashTableNext=NULL;
@@ -88,6 +91,11 @@ CAFirstMixChannelList::~CAFirstMixChannelList()
 #endif
 		for(int i=0;i<MAX_HASH_KEY;i++)
 				{
+
+#ifdef PAYMENT
+					delete m_HashTable[i]->cleanupNotifier;
+					m_HashTable[i]->cleanupNotifier = NULL;
+#endif
 					delete m_HashTable[i];
 					m_HashTable[i] = NULL;
 				}
@@ -134,7 +142,9 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 		}
 
 		//SAVE_STACK("CAFirstMixChannelList::add", "initialising table entry");
-
+#ifdef CH_LOG_STUDY
+		pHashTableEntry->channelOpenedLastIntervalTS = 0;
+#endif
 		pHashTableEntry->pMuxSocket=pMuxSocket;
 		pHashTableEntry->pQueueSend=pQueueSend;
 		pHashTableEntry->pControlMessageQueue = new CAQueue();
@@ -197,6 +207,7 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 		// insert in timeout list; entries are added to the foot of the list
 #ifdef PAYMENT
 		pHashTableEntry->bRecoverTimeout = true;
+		pHashTableEntry->kickoutSendRetries = MAX_KICKOUT_RETRIES;
 		/* Hot fix: push timeout entry explicitly to avoid
 		 * confusion, when timeout occurs during AI login
 		 */
@@ -426,7 +437,15 @@ inline bool CAFirstMixChannelList::isKickoutForced_internal(fmHashTableEntry* pH
 
 void CAFirstMixChannelList::setKickoutForced_internal(fmHashTableEntry* pHashTableEntry, bool kickoutForced)
 {
-	pHashTableEntry->bRecoverTimeout = !kickoutForced;
+	if(!pHashTableEntry->bRecoverTimeout && !kickoutForced )
+	{
+		CAMsg::printMsg(LOG_WARNING, "Try to switch back from forced kickout. A forced kickout cannot be undone!\n");
+	}
+	else
+	{
+		pHashTableEntry->bRecoverTimeout = !kickoutForced;
+	}
+
 }
 
 fmHashTableEntry* CAFirstMixChannelList::popTimeoutEntry_internal(bool a_bForce)
@@ -734,7 +753,18 @@ SINT32 CAFirstMixChannelList::remove(CAMuxSocket* pMuxSocket)
 		delete[] pHashTableEntry->strDialog;
 		pHashTableEntry->strDialog = NULL;
 #endif
+#ifdef PAYMENT
+		CAConditionVariable *rescue = pHashTableEntry->cleanupNotifier;
+#endif
+		//TODO: a bit more precise reference cleanup
 		memset(pHashTableEntry,0,sizeof(fmHashTableEntry)); //'delete' the connection from the connection hash table
+
+#ifdef PAYMENT
+		pHashTableEntry->cleanupNotifier = rescue;
+		pHashTableEntry->cleanupNotifier->lock();
+		pHashTableEntry->cleanupNotifier->signal();
+		pHashTableEntry->cleanupNotifier->unlock();
+#endif
 		m_Mutex.unlock();
 		return E_SUCCESS;
 	}

@@ -136,6 +136,9 @@ SINT32 CAControlChannelDispatcher::sendMessages(UINT32 id,const UINT8* msg,UINT3
 		m_pcsSendMsg->lock();
 		m_pMixPacket->channel=id;
 		UINT32 aktIndex=0;
+
+		//prevent data garbage from old messages to be transmitted again
+		memset(m_pMixPacket->data, 0, DATA_SIZE);
 		while(msglen>0)
 		{
 			if(msglen>DATA_SIZE)

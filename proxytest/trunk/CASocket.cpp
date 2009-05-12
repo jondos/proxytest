@@ -187,7 +187,7 @@ SINT32 CASocket::accept(CASocket &s)
 		m_u32NormalSocketsOpen++;
 		s.m_bSocketIsClosed=false;
 		s.m_csClose.unlock();
-		//CAMsg::printMsg(LOG_DEBUG,"Opensed socket: %d\n", s.m_Socket);
+		//CAMsg::printMsg(LOG_DEBUG,"Opened socket: %d\n", s.m_Socket);
 
 		return E_SUCCESS;
 	}

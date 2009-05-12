@@ -143,7 +143,7 @@ class CAQueue
 			//QUEUE* m_pHeap;
 			CAMutex* m_pcsQueue;
 			CAConditionVariable* m_pconvarSize;
-			
+
 #ifdef QUEUE_SIZE_LOG
 			UINT32 m_nLogSize;
 #endif

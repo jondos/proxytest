@@ -1,28 +1,28 @@
 /*
-Copyright (c) 2000, The JAP-Team 
+Copyright (c) 2000, The JAP-Team
 All rights reserved.
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-	- Redistributions of source code must retain the above copyright notice, 
+	- Redistributions of source code must retain the above copyright notice,
 	  this list of conditions and the following disclaimer.
 
-	- Redistributions in binary form must reproduce the above copyright notice, 
-	  this list of conditions and the following disclaimer in the documentation and/or 
+	- Redistributions in binary form must reproduce the above copyright notice,
+	  this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
-	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors 
-	  may be used to endorse or promote products derived from this software without specific 
-		prior written permission. 
+	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
+	  may be used to endorse or promote products derived from this software without specific
+		prior written permission.
 
-	
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS 
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
 AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
 BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
-OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
@@ -161,7 +161,7 @@ SINT32 CALocalProxy::init()
 		m_muxOut.getCASocket()->setSendBuff(MIXPACKET_SIZE*50);
 		m_muxOut.getCASocket()->setRecvBuff(MIXPACKET_SIZE*50);
 		if(m_muxOut.connect(addrNext)==E_SUCCESS)
-			{				
+			{
 				CAMsg::printMsg(LOG_INFO," connected!\n");
 				UINT16 size;
 				UINT8 byte;
@@ -312,11 +312,11 @@ SINT32 CALocalProxy::loop()
 				//Recevie from next Mix
 				if(oSocketGroup.isSignaled(m_muxOut))
 						{
-							countRead--;	
+							countRead--;
 							ret=m_muxOut.receive(pMixPacket);
 							if(ret==SOCKET_ERROR)
 								{
-									CAMsg::printMsg(LOG_CRIT,"Mux-Channel Receiving Data Error - Exiting!\n");									
+									CAMsg::printMsg(LOG_CRIT,"Mux-Channel Receiving Data Error - Exiting!\n");
 									ret=E_UNKNOWN;
 									goto MIX_CONNECTION_ERROR;
 								}
@@ -417,7 +417,7 @@ SINT32 CALocalProxy::loop()
 														tmpCon->pCiphers = NULL;
 													}
 											}
-										else 
+										else
 											{
 												pMixPacket->channel=tmpCon->outChannel;
 												tmpCon->upstreamBytes+=len;
@@ -480,7 +480,7 @@ SINT32 CALocalProxy::loop()
 																			tmpCon->pCiphers[c].crypt1(buff+RSA_SIZE,buff+RSA_SIZE,DATA_SIZE-RSA_SIZE);
 																		}
 																		// Does RSA_SIZE need to be increased by RSA_SIZE/KEY_SIZE*TIMESTAMP_SIZE?
-																	}	
+																	}
 																memcpy(pMixPacket->data,buff,DATA_SIZE);
 																//size-=KEY_SIZE;
 																//len+=KEY_SIZE;
@@ -517,7 +517,7 @@ SINT32 CALocalProxy::loop()
 
 												if(m_muxOut.send(pMixPacket)==SOCKET_ERROR)
 													{
-														CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Exiting!\n");									
+														CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Exiting!\n");
 														ret=E_UNKNOWN;
 														goto MIX_CONNECTION_ERROR;
 													}
@@ -553,13 +553,13 @@ SINT32 CALocalProxy::clean()
 		m_socketIn.close();
 		m_socketSOCKSIn.close();
 		m_muxOut.close();
-	
+
 		delete[] m_arRSA;
 		m_arRSA=NULL;
-		
+
 		delete m_pSymCipher;
 		m_pSymCipher=NULL;
-		
+
 		return E_SUCCESS;
 	}
 
@@ -592,7 +592,7 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 						CAMsg::printMsg(LOG_INFO,"MixCascadeProtocolVersion: 0.4\n");
 						m_MixCascadeProtocolVersion=MIX_CASCADE_PROTOCOL_VERSION_0_4;
 						m_bWithFirstMixSymmetric=true;
-					}	
+					}
 				else if(tmpLen==3&&memcmp(strVersion,"0.3",3)==0)
 					{
 						CAMsg::printMsg(LOG_INFO,"MixCascadeProtocolVersion: 0.3\n");
@@ -680,7 +680,7 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 							if(m_bWithNewFlowControl)
 							{
 								getDOMChildByName(child,"FlowControl",tmpNode);
-								DOMNode* nodeDownstreamSendMe=NULL;
+								DOMElement* nodeDownstreamSendMe=NULL;
 								getDOMChildByName(tmpNode,"DownstreamSendMe",nodeDownstreamSendMe);
 								getDOMElementValue(nodeDownstreamSendMe,m_nFlowControlDownstreamSendMe,m_nFlowControlDownstreamSendMe);
 								CAMsg::printMsg(LOG_DEBUG,"Last Mix new flow control downstream sewnd me: %u\n",m_nFlowControlDownstreamSendMe);
@@ -773,7 +773,7 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 			doc->release();
 			doc = NULL;
 		}
-		CAMsg::printMsg(LOG_INFO,"Login process and key exchange finished!\n");		
+		CAMsg::printMsg(LOG_INFO,"Login process and key exchange finished!\n");
 		return E_SUCCESS;
 	}
 #endif //!NEW_MIX_TYPE

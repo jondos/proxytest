@@ -109,7 +109,7 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 					CAMsg::printMsg(LOG_DEBUG,"InfoService: Could not send Status information.\n");
 				}
 				/* send terms and conditions */
-				pInfoService->sendOperatorTnCData();
+				//pInfoService->sendOperatorTnCData();
 			}
 
 			// check every minute if configuring, every 10 minutes otherwise
@@ -714,7 +714,7 @@ UINT8 **CAInfoService::getOperatorTnCsAsStrings(UINT32 **lengths, XMLSize_t *nrO
 	}
 
 	XERCES_CPP_NAMESPACE::DOMNodeList *docTnCsList =
-		getElementsByTagName(tnCs, OPTIONS_NODE_TNCS);
+		getElementsByTagName(tnCs, OPTIONS_NODE_TNCS_TRANSLATION);
 
 	if(docTnCsList == NULL)
 	{
@@ -1065,6 +1065,7 @@ SINT32 CAInfoService::sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN (*a_
 	{
 		if (threads[i]->join() == E_SUCCESS)
 		{
+			CAMsg::printMsg(LOG_DEBUG,"InfoService: helo thread %u joined.\n", i);
 			returnValue = E_SUCCESS;
 		}
 		delete messages[i]->addr;
@@ -1074,7 +1075,9 @@ SINT32 CAInfoService::sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN (*a_
 		delete threads[i];
 		threads[i] = NULL;
 	}
-
+	//Message looks senseless but please keep it because Rolf reported a helo thread deadlock.
+	//Perhaps there is a problem when the threads are joined.
+	CAMsg::printMsg(LOG_DEBUG,"InfoService: all helo threads joined. continue.\n");
 	delete[] messages;
 	messages = NULL;
 	delete[] threads;
@@ -1092,19 +1095,19 @@ SINT32 CAInfoService::sendCascadeHelo()
 		return E_SUCCESS;
   	}
 
-	if( !(m_pMix->isConnected()) )
-	{
-#ifdef DEBUG
-		CAMsg::printMsg(LOG_INFO, "not connected: skipping cascade helo.\n");
-#endif
-		return E_UNKNOWN;
-	}
-
 	UINT32 len;
 	SINT32 ret;
 	UINT8* strCascadeHeloXML=getCascadeHeloXMLAsString(len);
 	if(strCascadeHeloXML==NULL)
 	{
+		return E_UNKNOWN;
+	}
+
+	if( !(m_pMix->isConnected()) )
+	{
+#ifdef DEBUG
+		CAMsg::printMsg(LOG_INFO, "not connected: skipping cascade helo.\n");
+#endif
 		return E_UNKNOWN;
 	}
 

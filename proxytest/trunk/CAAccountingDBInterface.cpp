@@ -798,11 +798,11 @@ SINT32 CAAccountingDBInterface::__getPrepaidAmount(UINT64 accountNumber, UINT8* 
 		return nrOfBytes;
 	}
 
-SINT32 CAAccountingDBInterface::storeAccountStatus(UINT64 a_accountNumber, UINT32 a_statusCode, char *expires)
+SINT32 CAAccountingDBInterface::storeAccountStatus(UINT64 a_accountNumber, UINT32 a_statusCode)
 {
 	if(checkOwner())
 	{
-		return __storeAccountStatus(a_accountNumber, a_statusCode, expires);
+		return __storeAccountStatus(a_accountNumber, a_statusCode);
 	}
 	else
 	{
@@ -812,7 +812,7 @@ SINT32 CAAccountingDBInterface::storeAccountStatus(UINT64 a_accountNumber, UINT3
 /* upon receiving an ErrorMesage from the jpi, save the account status to the database table accountstatus
  * uses the same error codes defined in CAXMLErrorMessage
  */
-SINT32 CAAccountingDBInterface::__storeAccountStatus(UINT64 accountNumber, UINT32 statuscode, char *expires)
+SINT32 CAAccountingDBInterface::__storeAccountStatus(UINT64 accountNumber, UINT32 statuscode)
 {
 	const char* previousStatusQuery = "SELECT COUNT(*) FROM ACCOUNTSTATUS WHERE ACCOUNTNUMBER='%s' ";
 	//reverse order of columns, so insertQuery and updateQuery can be used with the same sprintf parameters
@@ -879,16 +879,58 @@ SINT32 CAAccountingDBInterface::__storeAccountStatus(UINT64 accountNumber, UINT3
 	delete[] finalQuery;
 	finalQuery = NULL;
 	PQclear(result);
-	CAMsg::printMsg(LOG_DEBUG, "Stored status code %u and expire date %s, for account nr. %s \n",statuscode, "none", tmp);
+	CAMsg::printMsg(LOG_DEBUG, "Stored status code %u for account nr. %s \n",statuscode, tmp);
 	return E_SUCCESS;
 }
 
-
-	SINT32 CAAccountingDBInterface::getAccountStatus(UINT64 a_accountNumber, UINT32& a_statusCode, char *expires)
+	SINT32 CAAccountingDBInterface::clearAccountStatus(UINT64 a_accountNumber)
 	{
 		if(checkOwner())
 		{
-			return __getAccountStatus(a_accountNumber, a_statusCode, expires);
+			return __clearAccountStatus(a_accountNumber);
+		}
+		else
+		{
+			return E_UNKNOWN;
+		}
+	}
+
+	SINT32 CAAccountingDBInterface::__clearAccountStatus(UINT64 a_accountNumber)
+	{
+		SINT32 ret = E_SUCCESS;
+		PGresult* result = NULL;
+		size_t queryMaxLen = strlen(STMT_CLEAR_ACCOUNT_STATUS) + ACCOUNT_NUMBER_SIZE; //accountnumber has exactly 12 digits
+		char clearAccountStatusStmt[queryMaxLen+1];
+		memset(clearAccountStatusStmt, 0, queryMaxLen+1);
+
+		if( (a_accountNumber > MAX_ACCOUNTNUMBER) &&
+			(a_accountNumber < MIN_ACCOUNTNUMBER) )
+		{
+			CAMsg::printMsg(LOG_DEBUG, "Cannot clear account status: accountnumber &llu is invalid.\n",
+					a_accountNumber);
+			return E_UNKNOWN;
+		}
+		snprintf(clearAccountStatusStmt, queryMaxLen, STMT_CLEAR_ACCOUNT_STATUS, a_accountNumber);
+		result = monitored_PQexec(m_dbConn, clearAccountStatusStmt);
+		if(result != NULL)
+		{
+			if (PQresultStatus(result) != PGRES_COMMAND_OK)
+			{
+				CAMsg::printMsg(LOG_DEBUG, "Clearing accountstatus for account %llu failed.\n", a_accountNumber);
+				ret = E_UNKNOWN;
+			}
+			PQclear(result);
+			return ret;
+		}
+		CAMsg::printMsg(LOG_DEBUG, "Clearing accountstatus for account %llu failed.\n", a_accountNumber);
+		return E_UNKNOWN;
+	}
+
+	SINT32 CAAccountingDBInterface::getAccountStatus(UINT64 a_accountNumber, UINT32& a_statusCode)
+	{
+		if(checkOwner())
+		{
+			return __getAccountStatus(a_accountNumber, a_statusCode);
 		}
 		else
 		{
@@ -899,7 +941,7 @@ SINT32 CAAccountingDBInterface::__storeAccountStatus(UINT64 accountNumber, UINT3
 	/* retrieve account status, e.g. to see if the user's account is empty
 	 * will return 0 if everything is OK (0 is defined as status ERR_OK, but is also returned if no entry is found for this account)
 	 */
-	SINT32 CAAccountingDBInterface::__getAccountStatus(UINT64 accountNumber, UINT32& a_statusCode, char *expires)
+	SINT32 CAAccountingDBInterface::__getAccountStatus(UINT64 accountNumber, UINT32& a_statusCode)
 	{
 		const char* selectQuery = "SELECT STATUSCODE FROM ACCOUNTSTATUS WHERE ACCOUNTNUMBER = %s";
 		PGresult* result;

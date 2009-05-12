@@ -251,7 +251,7 @@ SINT32 CAQueue::getOrWait(UINT8* pbuff,UINT32* psize,UINT32 msTimeout)
 	* @param psize on call contains the size of pbuff, 
 	*							 on return contains the size of returned data
 	* @retval E_SUCCESS if succesful
-	* @retval E_CLOSED if the queue is allready empty AND closed
+	* @retval E_CLOSED if the queue is already empty AND closed
 	* @retval E_UNKNOWN in case of an error
 	*/
 SINT32 CAQueue::peek(UINT8* pbuff,UINT32* psize)

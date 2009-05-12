@@ -41,6 +41,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAUtil.hpp"
 #include "CAThread.hpp"
 #include "CAThreadPool.hpp"
+#include "TermsAndConditions.hpp"
 #include "CALogPacketStats.hpp"
 #ifdef HAVE_EPOLL
 	#include "CASocketGroupEpoll.hpp"
@@ -53,6 +54,18 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include "CAMutex.hpp"
 #endif
 
+#define TNC_SREQUEST "TermsAndConditionsRequest"
+#define TNC_RESPONSE "TermsAndConditionsResponse"
+#define TNC_SINTERRUPT "TermsAndConditionsInterrupt"
+#define TNC_REQ_TRANSLATION "Translation"
+#define TNC_RESOURCES "Resources"
+#define TNC_RESOURCE_TEMPLATE "Template"
+#define TNC_TEMPLATE_ROOT_ELEMENT "TermsAndConditionsTemplate"
+#define TNC_RESOURCE_CUSTOMIZED_SECT "CustomizedSections"
+
+#define TNC_RESPONSE_INVALID_REQUEST "InvalidTermsAndConditionsRequest"
+#define TNC_CONFIRM_REQ "TermsAndConditionsConfirm"
+
 class CAInfoService;
 
 THREAD_RETURN fm_loopSendToMix(void*);
@@ -60,6 +73,9 @@ THREAD_RETURN fm_loopReadFromMix(void*);
 THREAD_RETURN fm_loopAcceptUsers(void*);
 THREAD_RETURN fm_loopReadFromUsers(void*);
 THREAD_RETURN fm_loopDoUserLogin(void* param);
+#ifdef CH_LOG_STUDY
+THREAD_RETURN fm_loopLogChannelsOpened(void* param);
+#endif //CH_LOG_STUDY
 THREAD_RETURN	fm_loopLog(void*);
 
 #ifdef COUNTRY_STATS
@@ -107,6 +123,14 @@ public:
 					m_pmutexMixedPackets=new CAMutex();
 					m_pmutexLoginThreads=new CAMutex();
 					m_pmutexNewConnections=new CAMutex();
+#ifdef CH_LOG_STUDY
+					//log nr of opened channels per minute
+					nrOfChOpMutex = new CAMutex();
+					nrOfChThread = NULL;
+					nrOfOpenedChannels = 0;
+					currentOpenedChannels = 0;
+					lastLogTime = 0;
+#endif //CH_LOG_STUDY
 					m_nMixedPackets=0;
 					m_nUser=0;
 					m_nSocketsIn=0;
@@ -126,7 +150,11 @@ public:
 					m_pthreadReadFromMix=NULL;
 					m_pthreadAcceptUsers=NULL;
 					m_pthreadsLogin=NULL;
+					m_nrOfTermsAndConditionsDefs = 0;
 					m_tnCDefs = NULL;
+					m_nrOfTermsAndConditionsTemplates = 0;
+					m_templatesOwner = NULL;
+					m_tcTemplates = NULL;
 					m_bIsShuttingDown=false;
 #ifdef LOG_PACKET_TIMES
 					m_pLogPacketStats=NULL;
@@ -141,6 +169,9 @@ public:
 #ifdef DYNAMIC_MIX
 					m_bBreakNeeded = false;
 #endif
+					TNC_REQUEST = XMLString::transcode(TNC_SREQUEST);
+					TNC_CONFIRM = XMLString::transcode(TNC_CONFIRM_REQ);
+					TNC_INTERRUPT =  XMLString::transcode(TNC_SINTERRUPT);
 				}
 
     	/*virtual ~CAFirstMix()
@@ -196,11 +227,18 @@ public:
 		UINT32 getNrOfUsers();
 		SINT32 getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic);
 
+		TermsAndConditions *getTermsAndConditions(const UINT8 *opSki);
+		DOMNode *getTermsAndConditionsTemplate(UINT8 *templateRefID);
+
 		friend THREAD_RETURN fm_loopSendToMix(void*);
 		friend THREAD_RETURN fm_loopReadFromMix(void*);
 		friend THREAD_RETURN fm_loopAcceptUsers(void*);
 		friend THREAD_RETURN fm_loopReadFromUsers(void*);
 		friend THREAD_RETURN fm_loopDoUserLogin(void* param);
+#ifdef CH_LOG_STUDY
+		friend THREAD_RETURN fm_loopLogChannelsOpened(void* param);
+#endif //CH_LOG_STUDY
+
 
 		//How many mixes are in the cascade?
 		SINT32 getMixCount()
@@ -323,7 +361,24 @@ protected:
 			CAThread* m_pthreadSendToMix;
 			CAThread* m_pthreadReadFromMix;
 
-			termsAndConditions_t *m_tnCDefs;
+			UINT32 m_nrOfTermsAndConditionsDefs;
+			TermsAndConditions **m_tnCDefs;
+			UINT32 m_nrOfTermsAndConditionsTemplates;
+			DOMNode **m_tcTemplates;
+			XERCES_CPP_NAMESPACE::DOMDocument *m_templatesOwner; //owner for the TC templates stored in tcTemplates
+
+			/* constants for the XML root tags received from the client */
+			const XMLCh *TNC_REQUEST;
+			const XMLCh *TNC_CONFIRM;
+			const XMLCh *TNC_INTERRUPT;
+#ifdef CH_LOG_STUDY
+protected:
+			CAMutex *nrOfChOpMutex;
+			UINT32 nrOfOpenedChannels;
+			UINT32 currentOpenedChannels;
+			CAThread *nrOfChThread;
+			time_t lastLogTime;
+#endif //CH_LOG_STUDY
 
 #ifdef COUNTRY_STATS
 		private:
@@ -354,6 +409,10 @@ protected:
 private:
 	SINT32 doUserLogin_internal(CAMuxSocket* pNewUSer,UINT8 perrIP[4]);
 	SINT32 isAllowedToPassRestrictions(CASocket* pNewMuxSocket);
+
+
+	/* handlerFunction for Terms And Conditions invoked during user Login */
+	termsAndConditionMixAnswer_t *handleTermsAndConditionsLogin(XERCES_CPP_NAMESPACE::DOMDocument *request);
 
 	static const UINT32 MAX_CONCURRENT_NEW_CONNECTIONS;
 
