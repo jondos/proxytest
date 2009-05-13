@@ -827,10 +827,11 @@ SINT32 setDOMElementValue(DOMElement* pElem, SINT32 value)
 
 SINT32 setDOMElementValue(DOMElement* pElem,double floatValue)
 	{
-		UINT8 tmp[40];
-		memset(tmp, 0, 40);
-		snprintf((char*)tmp,40, "%.2f", floatValue);
-		setDOMElementValue(pElem,tmp);
+		char *tmp = NULL;
+		asprintf(&tmp, "%.2f", floatValue);
+		setDOMElementValue(pElem,(UINT8 *)tmp);
+		//NOTE: asprintf allocates with malloc
+		free(tmp);
 		return E_SUCCESS;
 	}
 
