@@ -279,7 +279,7 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 msTimeout)
 		UINT32 dt=msTimeout;
 		CASingleSocketGroup oSocketGroup(false);
 		oSocketGroup.add(*this);
-		while (true)
+		for(;;)
 			{
 				if (m_Socket.isClosed())
 				{

@@ -171,7 +171,7 @@ SINT32 CAFirstMixA::loop()
 #endif
 
 	//	CASingleSocketGroup osocketgroupMixOut;
-		SINT32 countRead;
+		SINT32 countRead=0;
 		//#ifdef LOG_PACKET_TIMES
 		//	tPoolEntry* pPoolEntry=new tPoolEntry;
 		//	MIXPACKET* pMixPacket=&pPoolEntry->mixpacket;
@@ -233,9 +233,9 @@ SINT32 CAFirstMixA::loop()
 						if(countRead>0)
 							bAktiv=true;
 #ifdef HAVE_EPOLL
-						//if we have epool we do not need to search the whole list
+						//if we have epoll we do not need to search the whole list
 						//of connected JAPs to find the ones who have sent data
-						//as epool will return ONLY these connections.
+						//as epoll will return ONLY these connections.
 						fmHashTableEntry* pHashEntry=(fmHashTableEntry*)m_psocketgroupUsersRead->getFirstSignaledSocketData();
 						while(pHashEntry!=NULL)
 							{
@@ -250,13 +250,13 @@ SINT32 CAFirstMixA::loop()
 								CAMuxSocket* pMuxSocket=pHashEntry->pMuxSocket;
 								if(m_psocketgroupUsersRead->isSignaled(*pMuxSocket))	// if this one seems to have data
 									{
-										countRead--;
 #endif
 /*#ifdef DELAY_USERS
  * Don't delay upstream
 								if( m_pChannelList->hasDelayBuckets(pHashEntry->delayBucketID) )
 								{
 #endif*/
+										countRead--;
 										ret=pMuxSocket->receive(pMixPacket,0);
 
 										#if defined LOG_PACKET_TIMES||defined(LOG_CHANNEL)

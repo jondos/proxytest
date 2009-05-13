@@ -482,7 +482,8 @@ SINT32 integrateDOMNode(const DOMNode *srcNode, DOMNode *dstNode, bool recursive
 	DOMElement *dstElem = (DOMElement *) dstNode;
 
 	DOMNode *currSrcChild = NULL;
-	XMLCh *nodeNames[srcList->getLength()];
+	XMLCh** nodeNames=new XMLCh*[srcList->getLength()];
+	memset(nodeNames,0,sizeof(XMLCh*)*srcList->getLength());
 	UINT32 nodeNamesIndex = 0;
 	XMLCh *currSrcChildName = NULL;
 
@@ -557,6 +558,7 @@ SINT32 integrateDOMNode(const DOMNode *srcNode, DOMNode *dstNode, bool recursive
 			}
 		}
 	}
+	delete[] nodeNames;
 	return E_SUCCESS;
 }
 
@@ -744,13 +746,13 @@ SINT32 setCurrentTimeMilliesAsDOMAttribute(DOMNode *pElem)
 UINT8 *getTermsAndConditionsTemplateRefId(DOMNode *tcTemplateRoot)
 {
 	UINT32 tmpTypeLen = TMP_BUFF_SIZE;
-	UINT8 tmpType[tmpTypeLen];
+	UINT8 tmpType[TMP_BUFF_SIZE];
 
 	UINT32 tmpLocaleLen = TMP_LOCALE_SIZE;
-	UINT8 tmpLocale[tmpLocaleLen];
+	UINT8 tmpLocale[TMP_LOCALE_SIZE];
 
 	UINT32 tmpDateLen = TMP_DATE_SIZE;
-	UINT8 tmpDate[tmpDateLen];
+	UINT8 tmpDate[TMP_DATE_SIZE];
 	memset(tmpDate, 0, TMP_DATE_SIZE);
 	memset(tmpLocale, 0, TMP_LOCALE_SIZE);
 	memset(tmpType, 0, TMP_BUFF_SIZE);
@@ -825,11 +827,10 @@ SINT32 setDOMElementValue(DOMElement* pElem, SINT32 value)
 
 SINT32 setDOMElementValue(DOMElement* pElem,double floatValue)
 	{
-		char *tmp = NULL;
-		asprintf(&tmp, "%.2f", floatValue);
-		setDOMElementValue(pElem,(UINT8 *)tmp);
-		//NOTE: asprintf allocates with malloc
-		free(tmp);
+		UINT8 tmp[40];
+		memset(tmp, 0, 40);
+		snprintf((char*)tmp,40, "%.2f", floatValue);
+		setDOMElementValue(pElem,tmp);
 		return E_SUCCESS;
 	}
 
@@ -1583,7 +1584,7 @@ SINT32 readPasswd(UINT8* buff,UINT32 len)
 #endif
 			if(c<=0||c=='\r'||c=='\n')
 				break;
-			buff[i]=c;
+			buff[i]=(UINT8)c;
 		}
 	buff[i]=0;
 

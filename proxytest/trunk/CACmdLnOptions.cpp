@@ -1758,12 +1758,8 @@ inline SINT32 CACmdLnOptions::addMixIdToMixInfo()
 		return setDOMElementAttribute
 				(m_docMixInfo->getDocumentElement(), MIXINFO_ATTRIBUTE_MIX_ID, (UINT8*) m_strMixID);
 	}
-	else
-	{
-		CAMsg::printMsg(LOG_CRIT,"No mixinfo document initialized!\n");
-		return E_UNKNOWN;
-	}
-	return E_SUCCESS;
+	CAMsg::printMsg(LOG_CRIT,"No mixinfo document initialized!\n");
+	return E_UNKNOWN;
 }
 
 
@@ -3411,7 +3407,7 @@ SINT32 CACmdLnOptions::setTermsAndConditionsTemplates(DOMElement *elemTnCs)
 		{
 			nothingFound = false;
 			m_nrOfTermsAndConditionsTemplates = templateList->getLength();
-			m_termsAndConditionsTemplates = new DOMDocument*[m_nrOfTermsAndConditionsTemplates];
+			m_termsAndConditionsTemplates = new XERCES_CPP_NAMESPACE::DOMDocument*[m_nrOfTermsAndConditionsTemplates];
 			loadedTemplateRefIds = new UINT8*[m_nrOfTermsAndConditionsTemplates];
 			memset(loadedTemplateRefIds, 0, (sizeof(UINT8*)*m_nrOfTermsAndConditionsTemplates) );
 
@@ -3501,15 +3497,15 @@ SINT32 CACmdLnOptions::setTermsAndConditionsList(DOMElement *elemTnCs)
 	}
 
 	UINT32 attrCheckLen = TMP_BUFF_SIZE;
-	UINT8 attrCheck[attrCheckLen];
+	UINT8 attrCheck[TMP_BUFF_SIZE];
 	memset(attrCheck, 0, attrCheckLen);
 
 	UINT32 localeLen = TMP_LOCALE_SIZE;
-	UINT8 locale[localeLen];
+	UINT8 locale[TMP_LOCALE_SIZE];
 	memset(locale, 0, localeLen);
 
 	UINT32 dateLen = TMP_DATE_SIZE;
-	UINT8 date[dateLen];
+	UINT8 date[TMP_DATE_SIZE];
 	memset(date, 0, dateLen);
 
 	if( (getDOMElementAttribute(elemTnCsList, OPTIONS_ATTRIBUTE_TNC_DATE, date, &dateLen) != E_SUCCESS) ||

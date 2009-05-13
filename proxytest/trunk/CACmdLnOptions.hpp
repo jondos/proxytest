@@ -613,7 +613,7 @@ class CACmdLnOptions
 			}
 
 #endif // DYNAMIC_MIX
-			DOMDocument **m_termsAndConditionsTemplates;
+			XERCES_CPP_NAMESPACE::DOMDocument **m_termsAndConditionsTemplates;
 			UINT32 m_nrOfTermsAndConditionsTemplates;
 		private:
 #ifdef DYNAMIC_MIX

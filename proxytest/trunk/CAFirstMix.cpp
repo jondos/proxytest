@@ -1379,11 +1379,11 @@ termsAndConditionMixAnswer_t *CAFirstMix::handleTermsAndConditionsLogin(XERCES_C
 		DOMNode *currentAnswerResourceNode = NULL;
 
 		UINT32 idLen = TMP_BUFF_SIZE;
-		UINT8 id[idLen];
+		UINT8 id[TMP_BUFF_SIZE];
 		memset(id, 0, idLen);
 
 		UINT32 localeLen = TMP_LOCALE_SIZE;
-		UINT8 locale[localeLen];
+		UINT8 locale[TMP_LOCALE_SIZE];
 		memset(locale, 0, localeLen);
 
 		bool resourceError = false;
