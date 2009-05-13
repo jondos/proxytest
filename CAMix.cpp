@@ -141,7 +141,7 @@ SINT32 CAMix::start()
 		/* LERNGRUPPE: We might want to break out of this loop if the mix-type changes */
 		while(m_bLoop)
 #else
-    	while(true)
+    	for(;;)
 #endif
 	    {
 	    	if (m_pInfoService != NULL)
