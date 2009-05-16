@@ -155,7 +155,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define NO_PARKING // disable old control flow
 #endif
 
-//#define DATABASE_PERFORMANCE_TEST //to performe a performance test of the replay db
+//#define REPLAY_DATABASE_PERFORMANCE_TEST //to performe a performance test of the replay db
 //Some constants
 #define MAX_POLLFD 8192 //How many sockets to support at max
 

@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B1C58C540FBEDE0600DC5B2E /* CAReplayDatabase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1C58C530FBEDE0600DC5B2E /* CAReplayDatabase.cpp */; };
+		B1C58C6F0FBEE11000DC5B2E /* TermsAndConditions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1C58C6E0FBEE11000DC5B2E /* TermsAndConditions.cpp */; };
+		B1C58C800FBEE17600DC5B2E /* gcm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1C58C7E0FBEE17600DC5B2E /* gcm.cpp */; };
+		B1C58C810FBEE17600DC5B2E /* prp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1C58C7F0FBEE17600DC5B2E /* prp.cpp */; };
 		B1E1DE760F8611CB00BD2AD2 /* CAAbstractControlChannel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1E1DE750F8611CB00BD2AD2 /* CAAbstractControlChannel.cpp */; };
 		B1E1DE820F86123400BD2AD2 /* CAAbstractXMLEncodable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1E1DE780F86123400BD2AD2 /* CAAbstractXMLEncodable.cpp */; };
 		B1E1DE830F86123400BD2AD2 /* CAAbstractXMLSignable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1E1DE790F86123400BD2AD2 /* CAAbstractXMLSignable.cpp */; };
@@ -97,6 +101,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		B1C58C530FBEDE0600DC5B2E /* CAReplayDatabase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CAReplayDatabase.cpp; path = ../../CAReplayDatabase.cpp; sourceTree = SOURCE_ROOT; };
+		B1C58C6E0FBEE11000DC5B2E /* TermsAndConditions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TermsAndConditions.cpp; path = ../../TermsAndConditions.cpp; sourceTree = SOURCE_ROOT; };
+		B1C58C7E0FBEE17600DC5B2E /* gcm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gcm.cpp; sourceTree = "<group>"; };
+		B1C58C7F0FBEE17600DC5B2E /* prp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = prp.cpp; sourceTree = "<group>"; };
+		B1C58C870FBEE24700DC5B2E /* CAReplayDatabase.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = CAReplayDatabase.hpp; path = ../../CAReplayDatabase.hpp; sourceTree = SOURCE_ROOT; };
 		B1E1DE6F0F86117D00BD2AD2 /* proxytest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = proxytest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B1E1DE750F8611CB00BD2AD2 /* CAAbstractControlChannel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CAAbstractControlChannel.cpp; path = ../../CAAbstractControlChannel.cpp; sourceTree = SOURCE_ROOT; };
 		B1E1DE780F86123400BD2AD2 /* CAAbstractXMLEncodable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CAAbstractXMLEncodable.cpp; path = ../../CAAbstractXMLEncodable.cpp; sourceTree = SOURCE_ROOT; };
@@ -203,67 +212,9 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				B1E1DFA90F8623B400BD2AD2 /* CACertStore.cpp */,
-				B1E1DFAA0F8623B400BD2AD2 /* CASocketList.cpp */,
-				B1E1DFAB0F8623B400BD2AD2 /* CAXMLPriceCert.cpp */,
-				B1E1DFA10F86236600BD2AD2 /* popt */,
-				B1E1DF9E0F86235800BD2AD2 /* CALastMix.cpp */,
-				B1E1DF980F86230C00BD2AD2 /* TypeA */,
-				B1E1DF950F8622FB00BD2AD2 /* proxytest.cpp */,
-				B1E1DF930F8622D000BD2AD2 /* xml */,
-				B1E1DF830F86228100BD2AD2 /* CACertificate.cpp */,
-				B1E1DF840F86228100BD2AD2 /* CAClientSocket.cpp */,
-				B1E1DF850F86228100BD2AD2 /* CACmdLnOptions.cpp */,
-				B1E1DF860F86228100BD2AD2 /* CAConditionVariable.cpp */,
-				B1E1DF7C0F86225E00BD2AD2 /* CASocketGroup.cpp */,
-				B1E1DF7D0F86225E00BD2AD2 /* CAThreadPool.cpp */,
-				B1E1DF7E0F86225E00BD2AD2 /* CATLSClientSocket.cpp */,
-				B1E1DF5F0F86222600BD2AD2 /* CAControlChannelDispatcher.cpp */,
-				B1E1DF600F86222600BD2AD2 /* CAControlChannelTest.cpp */,
-				B1E1DF610F86222600BD2AD2 /* CADatagramSocket.cpp */,
-				B1E1DF620F86222600BD2AD2 /* CAReplayControlChannel.cpp */,
-				B1E1DF630F86222600BD2AD2 /* CAReplayCtrlChannelMsgProc.cpp */,
-				B1E1DF640F86222600BD2AD2 /* CASemaphore.cpp */,
-				B1E1DF650F86222600BD2AD2 /* CASocketAddrINet.cpp */,
-				B1E1DF660F86222600BD2AD2 /* CASocketAddrUnix.cpp */,
-				B1E1DF670F86222600BD2AD2 /* CASocketGroupEpoll.cpp */,
-				B1E1DF680F86222600BD2AD2 /* CAStatusManager.cpp */,
-				B1E1DF690F86222600BD2AD2 /* CATempIPBlockList.cpp */,
-				B1E1DF6A0F86222600BD2AD2 /* CAThread.cpp */,
-				B1E1DF6B0F86222600BD2AD2 /* CAThreadList.cpp */,
-				B1E1DF6C0F86222600BD2AD2 /* CAUtil.cpp */,
-				B1E1DF3C0F8621D300BD2AD2 /* CAFirstMix.cpp */,
-				B1E1DF3D0F8621D300BD2AD2 /* CAFirstMixChannelList.cpp */,
-				B1E1DF3E0F8621D300BD2AD2 /* CAHttpClient.cpp */,
-				B1E1DF3F0F8621D300BD2AD2 /* CAInfoService.cpp */,
-				B1E1DF400F8621D300BD2AD2 /* CAInfoServiceAware.cpp */,
-				B1E1DF410F8621D300BD2AD2 /* CAIPList.cpp */,
-				B1E1DF420F8621D300BD2AD2 /* CALastMixChannelList.cpp */,
-				B1E1DF430F8621D300BD2AD2 /* CAListenerInterface.cpp */,
-				B1E1DF440F8621D300BD2AD2 /* CALocalProxy.cpp */,
-				B1E1DF450F8621D300BD2AD2 /* CALogPacketStats.cpp */,
-				B1E1DF460F8621D300BD2AD2 /* CAMiddleMix.cpp */,
-				B1E1DF470F8621D300BD2AD2 /* CAMiddleMixChannelList.cpp */,
-				B1E1DF480F8621D300BD2AD2 /* CAMix.cpp */,
-				B1E1DF490F8621D300BD2AD2 /* CAMixWithReplayDB.cpp */,
-				B1E1DF4A0F8621D300BD2AD2 /* CAMsg.cpp */,
-				B1E1DF4B0F8621D300BD2AD2 /* CAMuxSocket.cpp */,
-				B1E1DF4C0F8621D300BD2AD2 /* CAPool.cpp */,
-				B1E1DF1D0F86191C00BD2AD2 /* CADataRetentionLog.cpp */,
-				B1E1DF1E0F86191C00BD2AD2 /* CADataRetentionLogFile.cpp */,
-				B1E1DF1F0F86191C00BD2AD2 /* CADynamicCascadeConfigurator.cpp */,
-				B1E1DF200F86191C00BD2AD2 /* CADynaNetworking.cpp */,
-				B1E1DF210F86191C00BD2AD2 /* CAMutex.cpp */,
-				B1E1DF220F86191C00BD2AD2 /* CAPriceInfo.cpp */,
-				B1E1DF230F86191C00BD2AD2 /* CAQueue.cpp */,
-				B1E1DF240F86191C00BD2AD2 /* CASignature.cpp */,
-				B1E1DF250F86191C00BD2AD2 /* CASingleSocketGroup.cpp */,
-				B1E1DF260F86191C00BD2AD2 /* CASocket.cpp */,
-				B1E1DF270F86191C00BD2AD2 /* CASymCipher.cpp */,
-				B1E1DF280F86191C00BD2AD2 /* CASyncControlChannel.cpp */,
-				B1E1DF290F86191C00BD2AD2 /* CAXMLBI.cpp */,
-				B1E1DF2A0F86191C00BD2AD2 /* CAXMLCostConfirmation.cpp */,
-				B1E1DF2B0F86191C00BD2AD2 /* CAXMLErrorMessage.cpp */,
+				B1C58C7D0FBEE13400DC5B2E /* gcm */,
+				B1C58C6E0FBEE11000DC5B2E /* TermsAndConditions.cpp */,
+				B1E1DE750F8611CB00BD2AD2 /* CAAbstractControlChannel.cpp */,
 				B1E1DE780F86123400BD2AD2 /* CAAbstractXMLEncodable.cpp */,
 				B1E1DE790F86123400BD2AD2 /* CAAbstractXMLSignable.cpp */,
 				B1E1DE7A0F86123400BD2AD2 /* CAAccountingControlChannel.cpp */,
@@ -274,7 +225,68 @@
 				B1E1DE7F0F86123400BD2AD2 /* CAASyncControlChannel.cpp */,
 				B1E1DE800F86123400BD2AD2 /* CABase64.cpp */,
 				B1E1DE810F86123400BD2AD2 /* CACacheLoadBalancing.cpp */,
-				B1E1DE750F8611CB00BD2AD2 /* CAAbstractControlChannel.cpp */,
+				B1E1DF830F86228100BD2AD2 /* CACertificate.cpp */,
+				B1E1DFA90F8623B400BD2AD2 /* CACertStore.cpp */,
+				B1E1DF840F86228100BD2AD2 /* CAClientSocket.cpp */,
+				B1E1DF850F86228100BD2AD2 /* CACmdLnOptions.cpp */,
+				B1E1DF860F86228100BD2AD2 /* CAConditionVariable.cpp */,
+				B1E1DF5F0F86222600BD2AD2 /* CAControlChannelDispatcher.cpp */,
+				B1E1DF600F86222600BD2AD2 /* CAControlChannelTest.cpp */,
+				B1E1DF610F86222600BD2AD2 /* CADatagramSocket.cpp */,
+				B1E1DF1D0F86191C00BD2AD2 /* CADataRetentionLog.cpp */,
+				B1E1DF1E0F86191C00BD2AD2 /* CADataRetentionLogFile.cpp */,
+				B1E1DF1F0F86191C00BD2AD2 /* CADynamicCascadeConfigurator.cpp */,
+				B1E1DF200F86191C00BD2AD2 /* CADynaNetworking.cpp */,
+				B1E1DF3C0F8621D300BD2AD2 /* CAFirstMix.cpp */,
+				B1E1DF3D0F8621D300BD2AD2 /* CAFirstMixChannelList.cpp */,
+				B1E1DF3E0F8621D300BD2AD2 /* CAHttpClient.cpp */,
+				B1E1DF3F0F8621D300BD2AD2 /* CAInfoService.cpp */,
+				B1E1DF400F8621D300BD2AD2 /* CAInfoServiceAware.cpp */,
+				B1E1DF410F8621D300BD2AD2 /* CAIPList.cpp */,
+				B1E1DF9E0F86235800BD2AD2 /* CALastMix.cpp */,
+				B1E1DF420F8621D300BD2AD2 /* CALastMixChannelList.cpp */,
+				B1E1DF430F8621D300BD2AD2 /* CAListenerInterface.cpp */,
+				B1E1DF440F8621D300BD2AD2 /* CALocalProxy.cpp */,
+				B1E1DF450F8621D300BD2AD2 /* CALogPacketStats.cpp */,
+				B1E1DF460F8621D300BD2AD2 /* CAMiddleMix.cpp */,
+				B1E1DF470F8621D300BD2AD2 /* CAMiddleMixChannelList.cpp */,
+				B1E1DF480F8621D300BD2AD2 /* CAMix.cpp */,
+				B1E1DF490F8621D300BD2AD2 /* CAMixWithReplayDB.cpp */,
+				B1E1DF4A0F8621D300BD2AD2 /* CAMsg.cpp */,
+				B1E1DF210F86191C00BD2AD2 /* CAMutex.cpp */,
+				B1E1DF4B0F8621D300BD2AD2 /* CAMuxSocket.cpp */,
+				B1E1DF4C0F8621D300BD2AD2 /* CAPool.cpp */,
+				B1E1DF220F86191C00BD2AD2 /* CAPriceInfo.cpp */,
+				B1E1DF230F86191C00BD2AD2 /* CAQueue.cpp */,
+				B1E1DF620F86222600BD2AD2 /* CAReplayControlChannel.cpp */,
+				B1E1DF630F86222600BD2AD2 /* CAReplayCtrlChannelMsgProc.cpp */,
+				B1C58C530FBEDE0600DC5B2E /* CAReplayDatabase.cpp */,
+				B1E1DF640F86222600BD2AD2 /* CASemaphore.cpp */,
+				B1E1DF240F86191C00BD2AD2 /* CASignature.cpp */,
+				B1E1DF250F86191C00BD2AD2 /* CASingleSocketGroup.cpp */,
+				B1E1DF260F86191C00BD2AD2 /* CASocket.cpp */,
+				B1E1DF650F86222600BD2AD2 /* CASocketAddrINet.cpp */,
+				B1E1DF660F86222600BD2AD2 /* CASocketAddrUnix.cpp */,
+				B1E1DF7C0F86225E00BD2AD2 /* CASocketGroup.cpp */,
+				B1E1DF670F86222600BD2AD2 /* CASocketGroupEpoll.cpp */,
+				B1E1DFAA0F8623B400BD2AD2 /* CASocketList.cpp */,
+				B1E1DF680F86222600BD2AD2 /* CAStatusManager.cpp */,
+				B1E1DF270F86191C00BD2AD2 /* CASymCipher.cpp */,
+				B1E1DF280F86191C00BD2AD2 /* CASyncControlChannel.cpp */,
+				B1E1DF690F86222600BD2AD2 /* CATempIPBlockList.cpp */,
+				B1E1DF6A0F86222600BD2AD2 /* CAThread.cpp */,
+				B1E1DF6B0F86222600BD2AD2 /* CAThreadList.cpp */,
+				B1E1DF7D0F86225E00BD2AD2 /* CAThreadPool.cpp */,
+				B1E1DF7E0F86225E00BD2AD2 /* CATLSClientSocket.cpp */,
+				B1E1DF6C0F86222600BD2AD2 /* CAUtil.cpp */,
+				B1E1DF290F86191C00BD2AD2 /* CAXMLBI.cpp */,
+				B1E1DF2A0F86191C00BD2AD2 /* CAXMLCostConfirmation.cpp */,
+				B1E1DF2B0F86191C00BD2AD2 /* CAXMLErrorMessage.cpp */,
+				B1E1DFAB0F8623B400BD2AD2 /* CAXMLPriceCert.cpp */,
+				B1E1DFA10F86236600BD2AD2 /* popt */,
+				B1E1DF950F8622FB00BD2AD2 /* proxytest.cpp */,
+				B1E1DF980F86230C00BD2AD2 /* TypeA */,
+				B1E1DF930F8622D000BD2AD2 /* xml */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -287,9 +299,20 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		B1C58C7D0FBEE13400DC5B2E /* gcm */ = {
+			isa = PBXGroup;
+			children = (
+				B1C58C7E0FBEE17600DC5B2E /* gcm.cpp */,
+				B1C58C7F0FBEE17600DC5B2E /* prp.cpp */,
+			);
+			name = gcm;
+			path = ../../gcm;
+			sourceTree = "<group>";
+		};
 		B1E1DE770F8611D500BD2AD2 /* Header */ = {
 			isa = PBXGroup;
 			children = (
+				B1C58C870FBEE24700DC5B2E /* CAReplayDatabase.hpp */,
 				B1E1DEA10F86140800BD2AD2 /* basetypedefs.h */,
 				B1E1DEA20F86140800BD2AD2 /* StdAfx.h */,
 				B1E1DEA30F86140800BD2AD2 /* typedefs.hpp */,
@@ -362,7 +385,7 @@
 			hasScannedForEncodings = 1;
 			mainGroup = 08FB7794FE84155DC02AAC07 /* proxytest */;
 			projectDirPath = "";
-			projectRoot = "";
+			projectRoot = ../..;
 			targets = (
 				8DD76F620486A84900D96B5E /* proxytest */,
 			);
@@ -449,6 +472,10 @@
 				B1E1DFAC0F8623B400BD2AD2 /* CACertStore.cpp in Sources */,
 				B1E1DFAD0F8623B400BD2AD2 /* CASocketList.cpp in Sources */,
 				B1E1DFAE0F8623B400BD2AD2 /* CAXMLPriceCert.cpp in Sources */,
+				B1C58C540FBEDE0600DC5B2E /* CAReplayDatabase.cpp in Sources */,
+				B1C58C6F0FBEE11000DC5B2E /* TermsAndConditions.cpp in Sources */,
+				B1C58C800FBEE17600DC5B2E /* gcm.cpp in Sources */,
+				B1C58C810FBEE17600DC5B2E /* prp.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -459,12 +486,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
+				GCC_ENABLE_SSE3_EXTENSIONS = YES;
+				GCC_ENABLE_SUPPLEMENTAL_SSE3_INSTRUCTIONS = YES;
+				GCC_MODEL_TUNING = "";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = HAVE_CONFIG_H;
+				GCC_VERSION = 4.2;
 				INSTALL_PATH = /usr/local/bin;
 				OTHER_LDFLAGS = (
 					"-lxerces-c",
@@ -472,6 +503,7 @@
 					"-lcrypto",
 				);
 				PRODUCT_NAME = proxytest;
+				VALID_ARCHS = "i386 x86_64";
 			};
 			name = Debug;
 		};
@@ -479,16 +511,27 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_MODEL_TUNING = G5;
+				GCC_ENABLE_CPP_EXCEPTIONS = YES;
+				GCC_ENABLE_CPP_RTTI = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = NO;
+				GCC_ENABLE_SSE3_EXTENSIONS = YES;
+				GCC_ENABLE_SUPPLEMENTAL_SSE3_INSTRUCTIONS = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = "";
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = HAVE_CONFIG_H;
+				GCC_VERSION = 4.2;
 				INSTALL_PATH = /usr/local/bin;
+				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-lxerces-c",
 					"-lssl",
 					"-lcrypto",
 				);
 				PRODUCT_NAME = proxytest;
+				VALID_ARCHS = "i386 x86_64";
 			};
 			name = Release;
 		};
@@ -517,7 +560,15 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_ENABLE_CPP_RTTI = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = NO;
+				GCC_ENABLE_SSE3_EXTENSIONS = YES;
+				GCC_ENABLE_SUPPLEMENTAL_SSE3_INSTRUCTIONS = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = "";
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = HAVE_CONFIG_H;
+				GCC_VERSION = 4.2;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
@@ -525,8 +576,10 @@
 					/opt/local/include,
 				);
 				LIBRARY_SEARCH_PATHS = /opt/local/lib;
+				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
 				SDKROOT = macosx10.5;
+				VALID_ARCHS = "i386 x86_64";
 			};
 			name = Release;
 		};

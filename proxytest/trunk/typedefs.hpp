@@ -176,7 +176,6 @@ typedef struct t_queue_entry tQueueEntry;
 typedef tQueueEntry tPoolEntry;
 
 ///the Replaytimestamp type
-/*
 struct t_replay_timestamp
 	{
 		UINT interval; //the current interval number
@@ -184,7 +183,7 @@ struct t_replay_timestamp
 	};
 
 typedef struct t_replay_timestamp tReplayTimestamp;
-*/
+
 struct t_mix_parameters
 	{
 		//stores the mix id of the mix

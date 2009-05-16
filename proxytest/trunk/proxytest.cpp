@@ -59,6 +59,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include "CALogPacketStats.hpp"
 	#include "CATLSClientSocket.hpp"
 
+#ifdef REPLAY_DATABASE_PERFORMANCE_TEST
+  #include "CAReplayDatabase.hpp"
+#endif
 // The Mix....
 CAMix* pMix=NULL;
 #endif
@@ -587,6 +590,12 @@ int main(int argc, const char* argv[])
 //			testTre();
 #endif
 
+#ifdef REPLAY_DATABASE_PERFORMANCE_TEST
+		CAReplayDatabase::measurePerformance((UINT8*)"dbperformace.log",1,10000001,500000,10,100000);
+		exit(0);
+#endif
+		
+
 #ifdef DATA_RETENTION_LOG
 		if(sizeof(t_dataretentionLogEntry)!=18)
 		{
@@ -632,14 +641,6 @@ int main(int argc, const char* argv[])
 				CAMsg::printMsg(LOG_CRIT,"Exiting...\n");
 				goto EXIT;
 			}
-
-#ifdef DATABASE_PERFORMANCE_TEST
-			CADatabase::measurePerformance((UINT8*)"dbperformace.log",1,10000001,500000,10,100000);
-			exit(0);
-#endif
-
-
-
 
 		UINT8 buff[255];
 #ifndef _WIN32
