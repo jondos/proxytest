@@ -241,7 +241,13 @@ SINT32 CALastMixA::loop()
  																}
 															else
 																{
-																	tmpSocket->setNonBlocking(true);
+																	SINT32 retb=tmpSocket->setNonBlocking(true);
+																	#ifdef DEBUG
+																		if(retb!=E_SUCCESS)
+																			{
+																				CAMsg::printMsg(LOG_WARNING,"CALastMixTypeA - could not set non blocking mode for socket to cache!\n");
+																			}
+																	#endif
 																	#if defined (DELAY_CHANNELS_LATENCY)
 																		UINT64 u64temp;
 																		getcurrentTimeMillis(u64temp);
@@ -453,7 +459,7 @@ SINT32 CALastMixA::loop()
 											}
 										else
 											{
-												if(len==SOCKET_ERROR)
+												if(len==E_UNKNOWN)
 													{ //do something if send error
 														psocketgroupCacheRead->remove(*(pChannelListEntry->pSocket));
 														psocketgroupCacheWrite->remove(*(pChannelListEntry->pSocket));

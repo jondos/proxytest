@@ -276,7 +276,7 @@ SINT32 CAReplayDatabase::measurePerformance(	UINT8* strLogFile,
 		SINT32 file=open((char*)strLogFile,O_CREAT|O_WRONLY|O_LARGEFILE|O_TRUNC,S_IREAD|S_IWRITE);
 		char buff[255];
 		const char* atemplate="%u,%u,%u\n";
-		const char* header="The format is as follows: Number of Entries in DB, Number of Inserts done, Total time for Inserts (in micro seconds)\n";
+		const char* header="#The format is as follows: Number of Entries in DB, Number of Inserts done, Total time for Inserts (in micro seconds)\n";
 		write(file,header,strlen(header));
 		while(aktNrOfEntries<=upperBoundEntries)
 			{
@@ -284,9 +284,18 @@ SINT32 CAReplayDatabase::measurePerformance(	UINT8* strLogFile,
 				for(UINT32 i=0;i<meassuresPerStep;i++)
 					{
 						pDatabase=new CAReplayDatabase();
+						pDatabase->m_currentClock=0;
 						pDatabase->fill(aktNrOfEntries);
 						UINT64 startTime,endTime;
 						getRandom(key,insertsPerMeasure*16);
+						aktKey=key+14;
+						for(UINT32 j=0;j<insertsPerMeasure;j++)
+							{
+								*aktKey=0;
+								aktKey++;
+								*aktKey=0;
+								aktKey+=15;
+							}
 						aktKey=key;
 						getcurrentTimeMicros(startTime);
 						for(UINT32 j=0;j<insertsPerMeasure;j++)
@@ -330,17 +339,17 @@ SINT32 CAReplayDatabase::simulateInsert(UINT8 key[16])
 		UINT16 timestamp=(key[14]<<8)|key[15];
 		if(timestamp<m_currentClock-1||timestamp>m_currentClock+1)
 			{
-				//m_pMutex->unlock();
-				//return E_UNKNOWN;
+				m_pMutex->unlock();
+				return E_UNKNOWN;
 			}
 		t_replay_databaseInfo* aktDB=m_currDatabase;
 		if(timestamp>m_currentClock)
 			{
-				//aktDB=m_nextDatabase;
+				aktDB=m_nextDatabase;
 			}
 		else if(timestamp<m_currentClock)
 			{
-				//aktDB=m_prevDatabase;
+				aktDB=m_prevDatabase;
 			}
 		UINT16 hashKey=(key[8]<<8)|key[9];
 		LP_replay_databaseEntry hashList=aktDB->m_pHashTable[hashKey];
@@ -350,7 +359,7 @@ SINT32 CAReplayDatabase::simulateInsert(UINT8 key[16])
 				newEntry->left=NULL;
 				newEntry->right=NULL;
 				newEntry->key=key[0]<<24|key[1]<<16|key[2]<<8|key[3];
-				//aktDB->m_pHashTable[hashKey]=newEntry;
+				m_nextDatabase->m_pHashTable[hashKey]=newEntry; //we simply use the 'next' Database to simulate insert while not inserting anythign in the current db
 				aktDB->m_u32Size++;
 				m_pMutex->unlock();
 				return E_SUCCESS;
@@ -383,11 +392,11 @@ SINT32 CAReplayDatabase::simulateInsert(UINT8 key[16])
 				newEntry->key=ret;
 				if(before->key<ret)
 					{
-						//before->right=newEntry;
+						newEntry->right=newEntry; //do the pointer operation without actually changing the DB
 					}
 				else
 					{
-						//before->left=newEntry;
+						newEntry->left=newEntry; //do the pointer operation without actually changing the DB
 					}
 			}
 		aktDB->m_u32Size++;	

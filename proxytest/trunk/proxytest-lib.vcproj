@@ -3665,6 +3665,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CAReplayDatabase.cpp"
+				>
+			</File>
+			<File
 				RelativePath="CASemaphore.cpp"
 				>
 				<FileConfiguration
@@ -5123,6 +5127,10 @@
 						BrowseInformation="1"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\TermsAndConditions.cpp"
+				>
 			</File>
 			<Filter
 				Name="popt"
@@ -7516,6 +7524,10 @@
 			</File>
 			<File
 				RelativePath=".\CAReplayCtrlChannelMsgProc.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\CAReplayDatabase.hpp"
 				>
 			</File>
 			<File

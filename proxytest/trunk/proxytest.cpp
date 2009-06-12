@@ -41,6 +41,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	const char* _malloc_options="AX";
 #endif
 
+#ifdef REPLAY_DATABASE_PERFORMANCE_TEST
+#include "CAReplayDatabase.hpp"
+#endif
+
 #ifndef ONLY_LOCAL_PROXY
 	#include "xml/DOM_Output.hpp"
 	#include "CAMix.hpp"
