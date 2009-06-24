@@ -1,0 +1,15 @@
+libtre.a: regexec.cpp regcomp.cpp tre-mem.cpp tre-match-backtrack.cpp tre-match-parallel.cpp
+	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) regexec.cpp -o regexec.o
+	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) regcomp.cpp -o regcomp.o
+	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) tre-compile.cpp -o tre-compile.o
+	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) tre-stack.cpp -o tre-stack.o
+	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) tre-ast.cpp -o tre-ast.o
+	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) tre-parse.cpp -o tre-parse.o
+	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) tre-mem.cpp -o tre-mem.o
+	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG)	tre-match-backtrack.cpp -o tre-match-backtrack.o
+	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG)	tre-match-parallel.cpp -o tre-match-parallel.o
+	ar -rcs libtre.a regexec.o regcomp.o tre-mem.o tre-parse.o tre-ast.o tre-match-backtrack.o tre-match-parallel.o tre-compile.o tre-stack.o
+
+clean:
+	rm -f *.o
+	rm -f libtre.a
