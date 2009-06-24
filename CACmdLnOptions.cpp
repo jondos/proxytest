@@ -3643,7 +3643,7 @@ SINT32 CACmdLnOptions::setCrimeURLRegExp(DOMElement *elemCrimeDetection)
 #ifdef LOG_CRIME
 	if(elemCrimeDetection == NULL) return E_UNKNOWN;
 	ASSERT_NETWORK_OPTIONS_PARENT
-		(elemCrimeDetection->getNodeName(), OPTIONS_NODE_CRIME_REGEXP_URL);
+		(elemCrimeDetection->getNodeName(), OPTIONS_NODE_CRIME);
 
 	return setRegExpressions(elemCrimeDetection, OPTIONS_NODE_CRIME_REGEXP_URL,
 				&m_arCrimeRegExpsURL, &m_nCrimeRegExpsURL);
@@ -3678,7 +3678,7 @@ SINT32 CACmdLnOptions::setCrimePayloadRegExp(DOMElement *elemCrimeDetection)
 #ifdef LOG_CRIME
 	if(elemCrimeDetection == NULL) return E_UNKNOWN;
 	ASSERT_NETWORK_OPTIONS_PARENT
-		(elemCrimeDetection->getNodeName(), OPTIONS_NODE_CRIME_REGEXP_PAYLOAD);
+		(elemCrimeDetection->getNodeName(), OPTIONS_NODE_CRIME);
 
 	return setRegExpressions(elemCrimeDetection, OPTIONS_NODE_CRIME_REGEXP_PAYLOAD,
 			&m_arCrimeRegExpsPayload, &m_nCrimeRegExpsPayload);
