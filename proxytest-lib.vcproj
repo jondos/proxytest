@@ -7003,7 +7003,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="trio\triostr.h"
+					RelativePath=".\trio\triostr.hpp"
 					>
 				</File>
 			</Filter>

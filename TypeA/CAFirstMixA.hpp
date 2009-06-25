@@ -30,6 +30,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define __CAFIRSTMIXA__
 #ifndef ONLY_LOCAL_PROXY
 #include "../CAFirstMix.hpp"
+#include "../CASocketAddrINet.hpp"
 
 class CAFirstMixA:public CAFirstMix
 {
@@ -53,7 +54,7 @@ class CAFirstMixA:public CAFirstMix
 			SINT32 accountTrafficDownstream(fmHashTableEntry* pfmHashEntry);
 #endif
 	#ifdef LOG_CRIME
-			void crimeSurveillance(in_addr_t *surveillanceIPs, UINT32 nrOfSureveillanceIPs,
+			void crimeSurveillance(CASocketAddrINet *surveillanceIPs, UINT32 nrOfSureveillanceIPs,
 					UINT8 *peerIP, MIXPACKET *pMixPacket);
 	#endif
 
