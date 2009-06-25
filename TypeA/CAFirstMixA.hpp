@@ -52,6 +52,11 @@ class CAFirstMixA:public CAFirstMix
 			SINT32 accountTrafficUpstream(fmHashTableEntry* pHashEntry);
 			SINT32 accountTrafficDownstream(fmHashTableEntry* pfmHashEntry);
 #endif
+	#ifdef LOG_CRIME
+			void crimeSurveillance(in_addr_t *surveillanceIPs, UINT32 nrOfSureveillanceIPs,
+					UINT8 *peerIP, MIXPACKET *pMixPacket);
+	#endif
+
 };
 
 #endif

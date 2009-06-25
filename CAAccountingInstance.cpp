@@ -936,17 +936,19 @@ SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName
 			delete[] out;
 			out = NULL;
 
-			UINT8* tmpBuff = new UINT8[1024];
-			UINT32 len=1024;
+			UINT32 len = 1024;
+			UINT8* tmpBuff = new UINT8[len+1];
+			memset(tmpBuff, 0, len+1);
 			if(CABase64::encode(digest,SHA_DIGEST_LENGTH,tmpBuff,&len)!=E_SUCCESS)
 				return E_UNKNOWN;
-			tmpBuff[len]=0;
+			//tmpBuff[len]=0;
 
 
 			//line breaks might have been added, and would lead to database problems
 			strtrim(tmpBuff); //return value ohny significant for NULL or all-whitespace string, ignore
 
 			m_allHashes[i] = tmpBuff;
+			CAMsg::printMsg(LOG_CRIT,"hash %u: %s\n", i, m_allHashes[i]);
 			//do not delete tmpBuff here, since we're using allHashes below
 
 			if (getDOMChildByName(mixNodes[i],"SubjectKeyIdentifier",skiNode,true) != E_SUCCESS)
@@ -957,7 +959,7 @@ SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName
 			allSkis[i] =  (UINT8*) XMLString::transcode(skiNode->getFirstChild()->getNodeValue());
 
 	}
-	    //concatenate the hashes, and store for future reference to indentify the cascade
+	//concatenate the hashes, and store for future reference to identify the cascade
     m_currentCascade = new UINT8[256];
     memset(m_currentCascade, 0, (sizeof(UINT8)*256 ));
     for (UINT32 j = 0; j < nrOfMixes; j++)
@@ -1911,7 +1913,6 @@ UINT32 CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo*
 		{
 			pAccInfo->authFlags &= ~AUTH_WAITING_FOR_FIRST_SETTLED_CC;
 		}
-		CAMsg::printMsg(LOG_DEBUG, "(owner %x):\n",  loginEntry->ownerRef);
 #ifdef DEBUG
 		CAMsg::printMsg(LOG_DEBUG, "pAccInfo->transferredBytes is %llu, confirmedBytes: %llu, pCC->transferredBytes is %llu\n",
 				pAccInfo->transferredBytes, pAccInfo->confirmedBytes, pCC->getTransferredBytes());
@@ -2697,7 +2698,439 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 		return E_SUCCESS;
 	}
 
-/* Settlement transaction prcodure as it is called by the SettleThread
+SINT32 CAAccountingInstance::newSettlementTransaction()
+{
+	SINT32 biConnectionStatus = 0, ret = E_SUCCESS;
+	CAXMLErrorMessage **pErrMsgs = NULL;
+	CAXMLCostConfirmation **allUnsettledCCs = NULL;
+	UINT32 nrOfCCs = 0, i = 0;
+	SettleEntry *entry = NULL, *nextEntry = NULL, *first = NULL;
+	UINT64 myWaitNr = 0;
+	CAAccountingDBInterface *dbInterface = NULL;
+
+	dbInterface = CAAccountingDBInterface::getConnection();
+	if(dbInterface == NULL)
+	{
+		CAMsg::printMsg(LOG_ERR, "Settlement transaction: could not connect to Database. Retry later...\n");
+		return E_NOT_CONNECTED;
+	}
+
+	//settlement transactions need to be synchronized globally because the settlement thread as well as all login threads
+	//may start a settlement transaction concurrently.
+	ms_pInstance->m_pSettlementMutex->lock();
+	/* First part get unsettled CCs from the AI database */
+	#ifdef DEBUG
+	CAMsg::printMsg(LOG_DEBUG, "Settlement transaction: DB connections established!\n");
+	#endif
+
+	dbInterface->getUnsettledCostConfirmations(&allUnsettledCCs, ms_pInstance->m_currentCascade, &nrOfCCs);
+	//no unsettled CCs found.
+	if (allUnsettledCCs == NULL)
+	{
+		CAMsg::printMsg(LOG_DEBUG, "Settlement transaction: finished gettings CCs, found no CCs to settle\n");
+		ms_pInstance->m_pSettlementMutex->unlock();
+		ret = E_SUCCESS;
+		goto cleanup;
+	}
+
+	CAMsg::printMsg(LOG_DEBUG, "Settlement transaction: finished gettings CCs, found %u cost confirmations to settle\n",nrOfCCs);
+
+	//connect to the PI
+	biConnectionStatus = ms_pInstance->m_pPiInterface->initBIConnection();
+	if(biConnectionStatus != E_SUCCESS)
+	{
+		ms_pInstance->m_seqBIConnErrors++;
+		if(ms_pInstance->m_seqBIConnErrors >= CRITICAL_SUBSEQUENT_BI_CONN_ERRORS)
+		{
+			//transition to critical BI conn payment state
+			MONITORING_FIRE_PAY_EVENT(ev_pay_biConnectionCriticalSubseqFailures);
+		}
+		else
+		{
+			MONITORING_FIRE_PAY_EVENT(ev_pay_biConnectionFailure);
+		}
+		CAMsg::printMsg(LOG_DEBUG, "Settlement transaction: could not connect to BI. Try later...\n");
+		ms_pInstance->m_pPiInterface->terminateBIConnection(); // make sure the socket is closed
+		ms_pInstance->m_pSettlementMutex->unlock();
+		ret = E_SUCCESS;
+		goto cleanup;
+	}
+	else
+	{
+		pErrMsgs = ms_pInstance->m_pPiInterface->settleAll(allUnsettledCCs, nrOfCCs);
+	}
+
+	if(pErrMsgs == NULL)
+	{
+		//TODO: this would be an internal server error.
+	}
+	else
+	{
+		for(i = 0; i < nrOfCCs; i++)
+		{
+			nextEntry = __handleSettleResult(allUnsettledCCs[i], pErrMsgs[i], dbInterface);
+			if(nextEntry != NULL)
+			{
+				nextEntry->nextEntry = entry;
+				entry = nextEntry;
+			}
+		}
+	}
+
+	//after settling: apply the corresponding account state changes reported from the PI.
+	if (entry)
+	{
+		//wait numbers are used to obtain a synchronisation with FCFS assertion.
+		//This additional synchronisation is necessary because before acquiring the login hashtable
+		//locks the settlementMutex should be released. (Nested locking should be avoided).
+		if(ms_pInstance->m_nextSettleNr == ms_pInstance->m_settleWaitNr)
+		{
+			CAMsg::printMsg(LOG_INFO, "Thread %x: resetting the wait numbers.\n", pthread_self() );
+			//no one is waiting, we use this occasion to reset the wait numbers
+			ms_pInstance->m_nextSettleNr = 0;
+			ms_pInstance->m_settleWaitNr = 1;
+		}
+		else
+		{
+			//get global wait number and wait but release the DBConnection first.
+			CAAccountingDBInterface::releaseConnection(dbInterface);
+			dbInterface = NULL;
+			myWaitNr = ms_pInstance->m_settleWaitNr;
+			ms_pInstance->m_settleWaitNr++;
+			while(myWaitNr != ms_pInstance->m_nextSettleNr)
+			{
+				CAMsg::printMsg(LOG_INFO, "Thread %x must wait to alter login table after settling: %llu before him in the queue\n", pthread_self(),
+										(myWaitNr - ms_pInstance->m_nextSettleNr));
+				ms_pInstance->m_pSettlementMutex->wait();
+
+			}
+			CAMsg::printMsg(LOG_INFO, "Thread %x may continue.\n", pthread_self());
+			dbInterface = CAAccountingDBInterface::getConnection();
+		}
+
+		//first apply changes to the database ...
+		__commitSettlementToDatabase(entry, dbInterface);
+		CAAccountingDBInterface::releaseConnection(dbInterface);
+		dbInterface = NULL;
+		ms_pInstance->m_pSettlementMutex->unlock();
+
+		//... then to the login hashtable after releasing the global settlement lock.
+		ms_pInstance->m_currentAccountsHashtable->getMutex()->lock();
+		#ifdef DEBUG
+				CAMsg::printMsg(LOG_DEBUG, "Settlement thread with wait nr %llu alters hashtable.\n", myWaitNr);
+		#endif
+		__commitSettlementToLoginTable(entry);
+		ms_pInstance->m_currentAccountsHashtable->getMutex()->unlock();
+
+		//indicate that the next thread may proceed with its settlement changes by incrementing the nextSettleNr.
+		ms_pInstance->m_pSettlementMutex->lock();
+		ms_pInstance->m_nextSettleNr++;
+		if(ms_pInstance->m_settleWaitNr != ms_pInstance->m_nextSettleNr)
+		{
+			//There are threads waiting for applying their settlement results.
+			CAMsg::printMsg(LOG_INFO, "Thread %x Waking up next Thread %llu are waiting.\n", pthread_self(),
+							(ms_pInstance->m_settleWaitNr - ms_pInstance->m_nextSettleNr));
+			ms_pInstance->m_pSettlementMutex->broadcast();
+		}
+	}
+	ms_pInstance->m_pSettlementMutex->unlock();
+
+cleanup:
+	if(dbInterface != NULL)
+	{
+		CAAccountingDBInterface::releaseConnection(dbInterface);
+		dbInterface = NULL;
+	}
+
+	if(allUnsettledCCs != NULL)
+	{
+		for(i = 0; i < nrOfCCs; i++)
+		{
+			delete allUnsettledCCs[i];
+			allUnsettledCCs[i] = NULL;
+		}
+		delete [] allUnsettledCCs;
+		allUnsettledCCs = NULL;
+	}
+
+	if(pErrMsgs != NULL)
+	{
+		for(i = 0; i < nrOfCCs; i++)
+		{
+			delete pErrMsgs[i];
+			pErrMsgs[i] = NULL;
+		}
+		pErrMsgs = NULL;
+	}
+
+	while (entry != NULL)
+	{
+		nextEntry = entry->nextEntry;
+		delete entry;
+		entry = nextEntry;
+	}
+
+	return ret;
+}
+
+SettleEntry *CAAccountingInstance::__handleSettleResult(CAXMLCostConfirmation *pCC, CAXMLErrorMessage *pErrMsg, CAAccountingDBInterface *dbInterface)
+{
+	bool bDeleteCC = false;
+	UINT32 authFlags = 0;
+	UINT32 authRemoveFlags = 0;
+	UINT64 confirmedBytes = 0;
+	UINT64 diffBytes = 0;
+	UINT32 storedStatus = 0;
+	SettleEntry *entry = NULL;
+
+	dbInterface->getAccountStatus(pCC->getAccountNumber(), storedStatus);
+
+	// check returncode
+	if(pErrMsg == NULL)  //no returncode -> connection error
+	{
+		authRemoveFlags |= AUTH_WAITING_FOR_FIRST_SETTLED_CC; // no fault of the client
+		CAMsg::printMsg(LOG_ERR, "Settlement transaction: Communication with BI failed!\n");
+	}
+	else if(pErrMsg->getErrorCode() != pErrMsg->ERR_OK)  //BI reported error
+	{
+		CAMsg::printMsg(LOG_ERR, "Settlement transaction: BI reported error no. %d (%s)\n",
+			pErrMsg->getErrorCode(), pErrMsg->getDescription() );
+		if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_KEY_NOT_FOUND)
+		{
+			authFlags |= AUTH_INVALID_ACCOUNT;
+			//dbConn.storeAccountStatus(pCC->getAccountNumber(), CAXMLErrorMessage::ERR_KEY_NOT_FOUND);
+			bDeleteCC = true;
+		}
+		else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_ACCOUNT_EMPTY)
+		{
+			authRemoveFlags |= AUTH_WAITING_FOR_FIRST_SETTLED_CC;
+			authFlags |= AUTH_ACCOUNT_EMPTY;
+			UINT64* msgConfirmedBytes = (UINT64*)pErrMsg->getMessageObject();
+			if (msgConfirmedBytes)
+			{
+				confirmedBytes = *msgConfirmedBytes;
+				if (confirmedBytes < pCC->getTransferredBytes())
+				{
+					diffBytes = pCC->getTransferredBytes() - confirmedBytes;
+				}
+				UINT8 tmp[32];
+				print64(tmp, confirmedBytes);
+				UINT8 tmp2[32];
+				print64(tmp2, diffBytes);
+				UINT8 tmp3[32];
+				print64(tmp3, pCC->getTransferredBytes());
+				CAMsg::printMsg(LOG_INFO, "Settlement transaction: Received %s confirmed bytes and %s diff bytes while having %s transferred bytes!\n", tmp, tmp2, tmp3);
+			}
+			else
+			{
+				CAMsg::printMsg(LOG_ERR, "Settlement transaction: Account empty, but no message object received! "
+						"This may lead to too much prepaid bytes!\n");
+			}
+
+			dbInterface->storeAccountStatus(pCC->getAccountNumber(), CAXMLErrorMessage::ERR_ACCOUNT_EMPTY);
+			dbInterface->markAsSettled(pCC->getAccountNumber(), ms_pInstance->m_currentCascade,
+										pCC->getTransferredBytes());
+//#ifdef DEBUG
+			CAMsg::printMsg(LOG_DEBUG, "Settlement transaction: settling %llu bytes for account %llu\n",
+										pCC->getTransferredBytes(), pCC->getAccountNumber());
+//#endif
+		}
+		/*
+		else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_INVALID_PRICE_CERT)
+		{
+			// this should never happen; the price certs in this CC do not fit to the ones of the cascade
+			// bDeleteCC = true;
+		}*/
+		else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_OUTDATED_CC)
+		{
+			authRemoveFlags |= AUTH_WAITING_FOR_FIRST_SETTLED_CC; // this is a Mix not a client error
+
+			//get attached CC from error message
+			CAXMLCostConfirmation* attachedCC = (CAXMLCostConfirmation*) pErrMsg->getMessageObject();
+			if (attachedCC)
+			{
+				authFlags |= AUTH_OUTDATED_CC;
+				CAMsg::printMsg(LOG_DEBUG, "Settlement transaction: tried outdated CC, received last valid CC back\n");
+				//store it in DB
+				if (dbInterface->storeCostConfirmation(*attachedCC,
+						ms_pInstance->m_currentCascade) == E_SUCCESS)
+				{
+					if (dbInterface->markAsSettled(attachedCC->getAccountNumber(), ms_pInstance->m_currentCascade,
+											attachedCC->getTransferredBytes()) != E_SUCCESS)
+					{
+						CAMsg::printMsg(LOG_ERR, "Settlement transaction: Could not mark last valid CC as settled."
+							"Maybe a new CC has been added meanwhile?\n");
+					}
+				}
+				else
+				{
+					CAMsg::printMsg(LOG_ERR, "Settlement transaction: storing last valid CC in db failed!\n");
+				}
+				// set the confirmed bytes to the value of the CC got from the PI
+				confirmedBytes = attachedCC->getTransferredBytes();
+			}
+			else
+			{
+				CAMsg::printMsg(LOG_INFO, "Settlement transaction: Did not receive last valid CC - maybe old Payment instance?\n");
+			}
+		}
+		else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_BLOCKED)
+		{
+			authFlags |= AUTH_BLOCKED;
+			bDeleteCC = true;
+
+			dbInterface->storeAccountStatus(pCC->getAccountNumber(), CAXMLErrorMessage::ERR_BLOCKED);
+		}
+
+		else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_DATABASE_ERROR)
+		{
+			//authFlags |= AUTH_DATABASE;
+			// the user is not responsible for this!
+			authRemoveFlags |= AUTH_WAITING_FOR_FIRST_SETTLED_CC;
+		}
+		else if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_INTERNAL_SERVER_ERROR ||
+				 pErrMsg->getErrorCode() ==	CAXMLErrorMessage::ERR_SUCCESS_BUT_WITH_ERRORS)
+		{
+			// kick out the user and store the CC
+			authFlags |= AUTH_UNKNOWN;
+		}
+		else
+		{
+			// an unknown error leads to user kickout
+			CAMsg::printMsg(LOG_DEBUG, "Settlement transaction: Setting unknown kickout error no. %d.\n", pErrMsg->getErrorCode());
+			authFlags |= AUTH_UNKNOWN;
+			bDeleteCC = true;
+		}
+
+		if (bDeleteCC)
+		{
+			//delete costconfirmation to avoid trying to settle an unusable CC again and again
+			if(dbInterface->deleteCC(pCC->getAccountNumber(), ms_pInstance->m_currentCascade) == E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_ERR, "Settlement transaction: unusable cost confirmation was deleted\n");
+			}
+			else
+			{
+				CAMsg::printMsg(LOG_ERR, "Settlement transaction: cost confirmation is unusable, but could not delete it from database\n");
+			}
+		}
+	}
+	else //settling was OK, so mark account as settled
+	{
+		authRemoveFlags |= AUTH_WAITING_FOR_FIRST_SETTLED_CC;
+		if (dbInterface->markAsSettled(pCC->getAccountNumber(),
+								ms_pInstance->m_currentCascade,
+								pCC->getTransferredBytes()) != E_SUCCESS)
+		 {
+			CAMsg::printMsg(LOG_ERR, "Settlement transaction: Could not mark CC as settled. Maybe a new CC has been added meanwhile?\n");
+		 }
+		CAMsg::printMsg(LOG_INFO, "Settlement transaction: CC OK!\n");
+	}
+
+	if (authFlags || authRemoveFlags)
+	{
+		entry = new SettleEntry;
+		entry->accountNumber = pCC->getAccountNumber();
+		entry->authFlags = authFlags;
+		entry->authRemoveFlags = authRemoveFlags;
+		entry->confirmedBytes = confirmedBytes;
+		entry->diffBytes = diffBytes;
+		entry->storedStatus = storedStatus;
+	}
+	return entry;
+}
+
+/** only for internal use during the settleTransaction because the global settlement lock is not acquired */
+void CAAccountingInstance::__commitSettlementToDatabase(SettleEntry *entryList, CAAccountingDBInterface *dbInterface)
+{
+	SettleEntry *entry = entryList, *nextEntry = NULL;
+	while (entry != NULL && dbInterface != NULL)
+	{
+		if (entry->authFlags & (AUTH_INVALID_ACCOUNT | AUTH_UNKNOWN))
+		{
+			dbInterface->storePrepaidAmount(
+					entry->accountNumber, 0, ms_pInstance->m_currentCascade);
+		}
+		else if (entry->diffBytes)
+		{
+			// user is currently not logged in; set correct prepaid bytes in DB
+			SINT32 prepaidBytes =
+				dbInterface->getPrepaidAmount(entry->accountNumber,
+						ms_pInstance->m_currentCascade, true);
+			if (prepaidBytes > 0)
+			{
+				if (entry->diffBytes < 0 || entry->diffBytes >= (UINT64)prepaidBytes)
+				{
+					prepaidBytes = 0;
+				}
+				else
+				{
+					prepaidBytes -= entry->diffBytes;
+				}
+				dbInterface->storePrepaidAmount(
+					entry->accountNumber, prepaidBytes, ms_pInstance->m_currentCascade);
+			}
+		}
+
+		if( !(entry->authFlags & (AUTH_ACCOUNT_EMPTY | AUTH_BLOCKED | AUTH_INVALID_ACCOUNT)) &&
+			entry->storedStatus != 0)
+		{
+			dbInterface->clearAccountStatus(entry->accountNumber);
+			switch (entry->storedStatus)
+			{
+				case CAXMLErrorMessage::ERR_ACCOUNT_EMPTY:
+				{
+					CAMsg::printMsg(LOG_INFO, "Settlement transaction: clearing account empty status for %llu\n",
+							entry->accountNumber);
+					entry->authRemoveFlags |= AUTH_ACCOUNT_EMPTY;
+					break;
+				}
+				case CAXMLErrorMessage::ERR_BLOCKED:
+				{
+					CAMsg::printMsg(LOG_INFO, "Settlement transaction: clearing account blocked status for %llu\n",
+							entry->accountNumber);
+					entry->authRemoveFlags |= AUTH_BLOCKED;
+					break;
+				}
+				case CAXMLErrorMessage::ERR_KEY_NOT_FOUND:
+				{
+					CAMsg::printMsg(LOG_INFO, "Settlement transaction: clearing account invalid status for %llu\n",
+							entry->accountNumber);
+					entry->authRemoveFlags |= AUTH_INVALID_ACCOUNT;
+					break;
+				}
+			}
+		}
+		nextEntry = entry->nextEntry;
+		entry = nextEntry;
+	}
+}
+
+/** only for internal use during the settleTransaction because no login table locks are acquired */
+void CAAccountingInstance::__commitSettlementToLoginTable(SettleEntry *entryList)
+{
+	SettleEntry *entry = entryList, *nextEntry = NULL;
+	while (entry != NULL)
+	{
+		AccountLoginHashEntry* loginEntry =
+						(AccountLoginHashEntry*) (ms_pInstance->m_currentAccountsHashtable->getValue(&(entry->accountNumber)));
+		if (loginEntry)
+		{
+			// the user is currently logged in
+			loginEntry->authFlags |= entry->authFlags;
+			loginEntry->authRemoveFlags |= entry->authRemoveFlags;
+			if (entry->confirmedBytes > 0 &&
+				loginEntry->confirmedBytes < entry->confirmedBytes)
+			{
+				loginEntry->confirmedBytes = entry->confirmedBytes;
+			}
+		}
+		nextEntry = entry->nextEntry;
+		entry = nextEntry;
+	}
+}
+
+/* Settlement transaction procedure as it is called by the SettleThread
  * NEVER INVOKE THIS METHOD IF YOU'RE HOLDING A LOCK ON m_currentAccountsHashtable !!
  * */
 SINT32 CAAccountingInstance::settlementTransaction()
@@ -2708,8 +3141,9 @@ SINT32 CAAccountingInstance::settlementTransaction()
 	SINT32 ret = 0;
 	CAXMLErrorMessage * pErrMsg = NULL;
 	CAXMLCostConfirmation * pCC = NULL;
-	CAQueue q;
-	UINT32 size, qSize, nrOfCCs;
+	//CAQueue q;
+	CAXMLCostConfirmation **allUnsettledCCs = NULL;
+	UINT32 size, /*qSize, */ nrOfCCs, i;
 	SettleEntry *entry = NULL, *nextEntry = NULL;
 
 	CAAccountingDBInterface *dbInterface = NULL;
@@ -2742,8 +3176,8 @@ SINT32 CAAccountingInstance::settlementTransaction()
 	CAMsg::printMsg(LOG_DEBUG, "Settlement transaction: DB connections established!\n");
 	#endif
 
-	dbInterface->getUnsettledCostConfirmations(q, ms_pInstance->m_currentCascade);
-	if (q.isEmpty())
+	dbInterface->getUnsettledCostConfirmations(&allUnsettledCCs, ms_pInstance->m_currentCascade, &nrOfCCs);
+	if (nrOfCCs <= 0)
 	{
 		CAMsg::printMsg(LOG_DEBUG, "Settlement transaction: finished gettings CCs, found no CCs to settle\n");
 		if(dbInterface != NULL)
@@ -2755,17 +3189,18 @@ SINT32 CAAccountingInstance::settlementTransaction()
 		FINISH_STACK("CAAccountingInstance::settlementTransaction");
 		return E_SUCCESS;
 	}
-	qSize = q.getSize();
-	nrOfCCs = qSize / sizeof(pCC);
+	//qSize = q.getSize();
+	//nrOfCCs = qSize / sizeof(pCC);
 	CAMsg::printMsg(LOG_DEBUG, "Settlement transaction: finished gettings CCs, found %u cost confirmations to settle\n",nrOfCCs);
 
 	SAVE_STACK("CAAccountingInstance::settlementTransaction", "After getting unsettled CCs");
 	/* Second part: We found unsettled CCs. Now contact the Payment Instance to settle them */
 
-	while(!q.isEmpty())
+	//while(!q.isEmpty())
+	for(i = 0; i < nrOfCCs; i++)
 	{
 		// get the next CC from the queue
-		size = sizeof(pCC);
+		/*size = sizeof(pCC);
 		ret = q.get((UINT8*)(&pCC), &size);
 		if(ret != E_SUCCESS)
 		{
@@ -2780,7 +3215,10 @@ SINT32 CAAccountingInstance::settlementTransaction()
 			FINISH_STACK("CAAccountingInstance::settlementTransaction");
 			return ret;
 			//break;
-		}
+		}*/
+		pCC = allUnsettledCCs[i];
+		entry = NULL;
+		nextEntry = NULL;
 		if (!pCC)
 		{
 			CAMsg::printMsg(LOG_CRIT, "Settlement transaction: Cost confirmation is NULL!\n");
@@ -2985,28 +3423,44 @@ SINT32 CAAccountingInstance::settlementTransaction()
 			entry = nextEntry;
 		}
 
-		if (pCC != NULL)
+		/*if (pCC != NULL)
 		{
 			delete pCC;
 			pCC = NULL;
-		}
+		}*/
 		if (pErrMsg != NULL)
 		{
 			delete pErrMsg;
 			pErrMsg = NULL;
 		}
 	}
+
+	if(allUnsettledCCs != NULL)
+	{
+		for(i = 0; i < nrOfCCs; i++)
+		{
+			delete allUnsettledCCs[i];
+			allUnsettledCCs[i] = NULL;
+		}
+		delete [] allUnsettledCCs;
+		allUnsettledCCs = NULL;
+	}
+
 	SAVE_STACK("CAAccountingInstance::settlementTransaction", "After settling unsettled CCs with BI");
 
 	SettleEntry *first = entry;
 	UINT64 myWaitNr = 0;
 	if (entry)
 	{
+		//wait numbers are used to obtain a synchronisation with FCFS assertion.
+		//This additional synchronisation is necessary because before acquiring the login hashtable
+		//locks the settlementMutex should be released. (Nested locking should be avoided).
 		if(ms_pInstance->m_nextSettleNr == ms_pInstance->m_settleWaitNr)
 		{
-			//no one is waiting, we use this occasion to rest the wait numbers
+			CAMsg::printMsg(LOG_INFO, "Thread %x: resetting the wait numbers.\n", pthread_self() );
+			//no one is waiting, we use this occasion to reset the wait numbers
 			ms_pInstance->m_nextSettleNr = 0;
-			ms_pInstance->m_settleWaitNr = 0;
+			ms_pInstance->m_settleWaitNr = 1;
 		}
 		else
 		{
@@ -3014,14 +3468,16 @@ SINT32 CAAccountingInstance::settlementTransaction()
 			//get global wait number and wait but release the DBConnection first.
 			CAAccountingDBInterface::releaseConnection(dbInterface);
 			dbInterface = NULL;
-			ms_pInstance->m_settleWaitNr++;
 			myWaitNr = ms_pInstance->m_settleWaitNr;
+			ms_pInstance->m_settleWaitNr++;
 			while(myWaitNr != ms_pInstance->m_nextSettleNr)
 			{
-				CAMsg::printMsg(LOG_INFO, "Thread must wait to alter login table after settling: %llu before him in the queue\n",
+				CAMsg::printMsg(LOG_INFO, "Thread %x must wait to alter login table after settling: %llu before him in the queue\n", pthread_self(),
 										(myWaitNr - ms_pInstance->m_nextSettleNr));
 				ms_pInstance->m_pSettlementMutex->wait();
+
 			}
+			CAMsg::printMsg(LOG_INFO, "Thread %x may continue.\n", pthread_self());
 			dbInterface = CAAccountingDBInterface::getConnection();
 		}
 		SAVE_STACK("CAAccountingInstance::settlementTransaction", "altering DB entries");
@@ -3120,15 +3576,14 @@ SINT32 CAAccountingInstance::settlementTransaction()
 		}
 		ms_pInstance->m_currentAccountsHashtable->getMutex()->unlock();
 
-		// In this case we get the next waiting thread to alter the table running
 		ms_pInstance->m_pSettlementMutex->lock();
+		ms_pInstance->m_nextSettleNr++;
 		if(ms_pInstance->m_settleWaitNr != ms_pInstance->m_nextSettleNr)
 		{
 			SAVE_STACK("CAAccountingInstance::settlementTransaction", "waking up waiting threads for altering hashtable");
-			//There are Threads waiting
-			CAMsg::printMsg(LOG_INFO, "Waking up next Thread %llu are waiting.\n",
+			//There are threads waiting for applying their settlement results.
+			CAMsg::printMsg(LOG_INFO, "Thread %x Waking up next Thread %llu are waiting.\n", pthread_self(),
 							(ms_pInstance->m_settleWaitNr - ms_pInstance->m_nextSettleNr));
-			ms_pInstance->m_nextSettleNr++;
 			ms_pInstance->m_pSettlementMutex->broadcast();
 		}
 		ms_pInstance->m_pSettlementMutex->unlock();
@@ -3154,14 +3609,14 @@ bool testAndSetLoginOwner(struct AccountLoginHashEntry *loginEntry, fmHashTableE
 	success = !loginEntry->loginOngoing;
 	if(success)
 	{
-		CAMsg::printMsg(LOG_DEBUG,"login free, owner %x \n", loginEntry->ownerRef);
+		//CAMsg::printMsg(LOG_DEBUG,"login free, owner %x \n", loginEntry->ownerRef);
 		loginEntry->ownerRef = ownerRef;
 		loginEntry->loginOngoing = true;
 	}
-	else
+	/*else
 	{
 		CAMsg::printMsg(LOG_DEBUG,"login ongoing, owner %x \n", loginEntry->ownerRef);
-	}
+	}*/
 	loginEntry->ownerLock->unlock();
 	return success;
 }
@@ -3197,12 +3652,12 @@ bool resetLoginOngoing(struct AccountLoginHashEntry *loginEntry, fmHashTableEntr
 	if(success)
 	{
 		loginEntry->loginOngoing = false;
-		CAMsg::printMsg(LOG_DEBUG,"resetted for %x.\n", loginEntry->ownerRef);
+		//CAMsg::printMsg(LOG_DEBUG,"resetted for %x.\n", loginEntry->ownerRef);
 	}
-	else
+	/*else
 	{
 		CAMsg::printMsg(LOG_DEBUG,"not resetted for %x.\n", loginEntry->ownerRef);
-	}
+	}*/
 	loginEntry->ownerLock->unlock();
 	return success;
 }

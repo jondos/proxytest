@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.08.69"
+#define MIX_VERSION "00.08.71"
 
 #include "doxygen.h"
 
@@ -64,11 +64,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 //#define LASTMIX_CHECK_MEMORY // only for internal debugging purpose
 //#define PRINT_THREAD_STACK_TRACE //Usefull for debugging output of stack trace if mix dies...
-//#define ENABLE_GPERFTOOLS_CPU_PROFILER //Enables the usage of the Goggle GPerfTools CPU Profiler for profiling the operation of the Mix 
+//#define ENABLE_GPERFTOOLS_CPU_PROFILER //Enables the usage of the Goggle GPerfTools CPU Profiler for profiling the operation of the Mix
 //#define ENABLE_GPERFTOOLS_HEAP_CHECKER //Enables the usage of the Goggle GPerfTools heap chekcer for detecting memory leaks
 
 //#define DATA_RETENTION_LOG //define if you need to store logs according to German data retention
-//#define INTEL_IPP_CRYPTO //define if you want to use the crypto routines of the Intel Performance Primitives 
+//#define INTEL_IPP_CRYPTO //define if you want to use the crypto routines of the Intel Performance Primitives
 #if !defined(PRINT_THREAD_STACK_TRACE) && defined (DEBUG)&& ! defined(ONLY_LOCAL_PROXY)
 	#define PRINT_THREAD_STACK_TRACE
 #endif
@@ -215,7 +215,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define LM_PACKET_STATS_LOG_INTERVALL 1 //Intervall in Minutes for loggin packet stats for the last Mix
 
 
-#define MIX_CASCADE_PROTOCOL_VERSION_0_1_0 10  //with new channel encryption  
+#define MIX_CASCADE_PROTOCOL_VERSION_0_1_0 10  //with new channel encryption
 //#define MIX_CASCADE_PROTOCOL_VERSION_0_9 9  //with new payment protocol
 #define MIX_CASCADE_PROTOCOL_VERSION_0_8 8  //with replay detection + control channels + first mix symmetric
 #define MIX_CASCADE_PROTOCOL_VERSION_0_7 7  //with replay detection + control channels (obsolete)
@@ -230,7 +230,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#elif defined(PAYMENT)
 	//#define MIX_CASCADE_PROTOCOL_VERSION "0.9"
 #elif defined (NEW_CHANNEL_ENCRYPTION)
-	#define MIX_CASCADE_PROTOCOL_VERSION "0.10"
+	#define MIX_CASCADE_PROTOCOL_VERSION "0.10" //"0.10tc"
 #else
 	#define MIX_CASCADE_PROTOCOL_VERSION "0.4" //"0.4tc"
 #endif
@@ -274,7 +274,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define MSG_DONTWAIT 0
 	#define O_NONBLOCK 0
 	#define O_BLOCK 0
-	#define SHUT_RDWR SD_BOTH 
+	#define SHUT_RDWR SD_BOTH
 	#define HAVE_VSNPRINTF
 	#define HAVE_SNPRINTF
 	#if _MSC_VER <1500
@@ -542,12 +542,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 //The min() macro
 #ifndef min
-	#define min(a,b) ((a<b)?(a):(b))
+	#define min(a,b) (( (a) < (b) ) ? (a):(b) )
 #endif
 
 //The max() macro
 #ifndef max
-	#define max(a,b) ((a>b)?(a):(b))
+	#define max(a,b) (((a) > (b) ) ? (a):(b))
 #endif
 
 //For MySQL

@@ -177,15 +177,18 @@ public:
 	* what type of message we have and sends the appropriate handle...()
 	* function to the ai thread.
 	*/
-	SINT32 static processJapMessage(fmHashTableEntry * pHashEntry,const  XERCES_CPP_NAMESPACE::DOMDocument* a_DomDoc);
-
-	UINT32 static getNrOfUsers();
+	static SINT32 processJapMessage(fmHashTableEntry * pHashEntry,const  XERCES_CPP_NAMESPACE::DOMDocument* a_DomDoc);
+	static UINT32 getNrOfUsers();
 
 	static SINT32 loginProcessStatus(fmHashTableEntry *pHashEntry);
 	static SINT32 finishLoginProcess(fmHashTableEntry *pHashEntry);
 	//static void forcedSettle();
 
 	static SINT32 settlementTransaction();
+	static SettleEntry *__handleSettleResult(CAXMLCostConfirmation *pCC, CAXMLErrorMessage *pErrMsg, CAAccountingDBInterface *dbInterface);
+	static void __commitSettlementToDatabase(SettleEntry *entryList, CAAccountingDBInterface *dbInterface);
+	static void __commitSettlementToLoginTable(SettleEntry *entryList);
+	static SINT32 newSettlementTransaction();
 
 	static const SINT32 HANDLE_PACKET_CONNECTION_OK; // this packet has been checked and is OK
 	static const SINT32 HANDLE_PACKET_CONNECTION_UNCHECKED; // the packet might be OK (is it not checked)

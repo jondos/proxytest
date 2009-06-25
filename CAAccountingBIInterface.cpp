@@ -1,28 +1,28 @@
 /*
-Copyright (c) 2000, The JAP-Team 
+Copyright (c) 2000, The JAP-Team
 All rights reserved.
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
- 
-	- Redistributions of source code must retain the above copyright notice, 
+
+	- Redistributions of source code must retain the above copyright notice,
 		this list of conditions and the following disclaimer.
- 
-	- Redistributions in binary form must reproduce the above copyright notice, 
-		this list of conditions and the following disclaimer in the documentation and/or 
+
+	- Redistributions in binary form must reproduce the above copyright notice,
+		this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
- 
-	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors 
-		may be used to endorse or promote products derived from this software without specific 
-		prior written permission. 
- 
-	
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS 
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
+
+	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
+		may be used to endorse or promote products derived from this software without specific
+		prior written permission.
+
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
 AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
 BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
-OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
@@ -85,20 +85,20 @@ SINT32 CAAccountingBIInterface::setPIServerConfiguration(CAXMLBI* pPiServerConfi
 	UINT8 *pPiName = NULL;
 	UINT16 piPort = 0;
 	CACertificate *pPiCert = NULL;
-	
+
 	//m_pPiInterfaceMutex->lock();
-		
+
 	if(pPiServerConfig==NULL)
 	{
 		CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface: could not configure PI interface: no proper configuration given.\n");
 		//m_pPiInterfaceMutex->unlock();
 		return E_UNKNOWN;
 	}
-	
+
 	pPiName = pPiServerConfig->getHostName();
 	pPiCert = pPiServerConfig->getCertificate();
 	piPort = (UINT16)pPiServerConfig->getPortNumber();
-	
+
 	if(pPiName==NULL)
 	{
 		CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface: could not configure PI interface: no PI name specified.\n");
@@ -111,7 +111,7 @@ SINT32 CAAccountingBIInterface::setPIServerConfiguration(CAXMLBI* pPiServerConfi
 		//m_pPiInterfaceMutex->unlock();
 		return E_UNKNOWN;
 	}
-	
+
 	if(m_pPiServerAddress == NULL)
 	{
 		//Should never happen
@@ -121,7 +121,7 @@ SINT32 CAAccountingBIInterface::setPIServerConfiguration(CAXMLBI* pPiServerConfi
 		m_pPiServerAddress = new CASocketAddrINet();
 	}
 	m_pPiServerAddress->setAddr(pPiName, piPort);
-	m_pPiServerCertificate = pPiCert; 
+	m_pPiServerCertificate = pPiCert;
 	//m_pPiInterfaceMutex->unlock();
 	return E_SUCCESS;
 }
@@ -133,9 +133,9 @@ SINT32 CAAccountingBIInterface::initBIConnection()
 {
 	SINT32 rc;
 	UINT8 buf[64];
-	
+
 	memset(buf,0,64);
-	
+
 	//m_pPiInterfaceMutex->lock();
 	if(m_pPiServerAddress == NULL)
 	{
@@ -146,7 +146,7 @@ SINT32 CAAccountingBIInterface::initBIConnection()
 		//m_pPiInterfaceMutex->unlock();
 		return E_UNKNOWN;
 	}
-			
+
 	if(m_pSocket == NULL)
 	{
 		//Should never happen
@@ -155,13 +155,13 @@ SINT32 CAAccountingBIInterface::initBIConnection()
 		#endif
 		m_pSocket = new CATLSClientSocket();
 	}
-	
+
 	if(m_pPiServerCertificate == NULL)
 	{
 		CAMsg::printMsg(LOG_ERR,"CAAccountingBIInterface: no PI server certificate specified. Connect aborted.\n");
 		//m_pPiInterfaceMutex->unlock();
 		return E_UNKNOWN;
-	}			
+	}
 	// connect
 	m_pSocket->setServerCertificate(m_pPiServerCertificate);
 	rc=m_pSocket->connect(*m_pPiServerAddress, PI_CONNECT_TIMEOUT);
@@ -169,8 +169,8 @@ SINT32 CAAccountingBIInterface::initBIConnection()
 	{
 		m_pPiServerAddress->getHostName(buf, 64);
 		CAMsg::printMsg(
-				LOG_ERR, 
-				"CAAccountingBIInterface: Could not connect to BI at %s:%i. Reason: %i\n", 
+				LOG_ERR,
+				"CAAccountingBIInterface: Could not connect to BI at %s:%i. Reason: %i\n",
 				buf, m_pPiServerAddress->getPort(), rc
 				//pBI->getHostName(), pBI->getPortNumber(), rc
 			);
@@ -207,8 +207,118 @@ SINT32 CAAccountingBIInterface::terminateBIConnection()
 	return E_SUCCESS;
 }
 
+//TODO: not finished yet
+CAXMLErrorMessage **CAAccountingBIInterface::settleAll(CAXMLCostConfirmation **ccs, UINT32 nrOfCCs)
+{
+	XERCES_CPP_NAMESPACE::DOMDocument *allCCsEnvelopeDoc = createDOMDocument();
+	DOMElement *allCCsEnvelope = createDOMElement(allCCsEnvelopeDoc, XML_ELEMENT_CCS);
+	CAXMLErrorMessage **resultMessages = NULL;
+	DOMNodeList *errorMsgList = NULL;
+	UINT8 *allCCsAsString = NULL, *response = NULL;
+	UINT32 contentLength = 0, nrOfErrorMessages = 0, i = 0;
+	UINT32 status = 0;
+	SINT32 transmitStatus = 0;
 
+	if(nrOfCCs <= 0)
+	{
+		return NULL;
+	}
 
+	allCCsEnvelopeDoc->appendChild(allCCsEnvelope);
+	resultMessages = new CAXMLErrorMessage *[nrOfCCs];
+
+	for (i = 0; i < nrOfCCs; i++)
+	{
+		allCCsEnvelope->appendChild(allCCsEnvelopeDoc->importNode(
+			ccs[i]->getXMLDocument()->getDocumentElement(), true));
+	}
+
+	allCCsAsString = DOM_Output::dumpToMem(allCCsEnvelopeDoc, &contentLength);
+	transmitStatus = (allCCsAsString != NULL) ?
+		m_phttpClient->sendPostRequest((UINT8*) POST_CMD_SETTLEALL,
+			allCCsAsString, contentLength) : E_UNKNOWN;
+
+	allCCsEnvelopeDoc->release();
+	allCCsEnvelopeDoc = NULL;
+	allCCsEnvelope = NULL;
+
+	delete [] allCCsAsString;
+	allCCsAsString = NULL;
+
+	if( transmitStatus != E_SUCCESS )
+	{
+		return NULL;
+	}
+
+	m_pSocket->setNonBlocking(true);
+	transmitStatus = m_phttpClient->parseHTTPHeader(&contentLength, &status, 3000);
+	if( (transmitStatus != E_SUCCESS) || (status != 200) || (contentLength == 0))
+	{
+		if(transmitStatus == E_TIMEDOUT)
+		{
+			CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface::settle: timeout while receiving response!\n");
+		}
+		else
+		{
+			CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface::settle: received bad response from PI!\n");
+		}
+		return NULL;
+	}
+	#ifdef DEBUG
+		CAMsg::printMsg(LOG_DEBUG, "CAAccountingBIInterface::settle: got response header [Status,content-Lenght]=[%i,%i]!\n",status,contentLen);
+	#endif
+	response = new UINT8[contentLength+1];
+
+	transmitStatus = m_pSocket->receiveFullyT(response, contentLength, 3000);
+	if(transmitStatus !=E_SUCCESS)
+	{
+		if(transmitStatus == E_TIMEDOUT)
+		{
+			CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface::settle: timeout while receiving settle message!\n");
+		}
+		else
+		{
+			CAMsg::printMsg(LOG_DEBUG, "CAAccountingBIInterface::settle: error\n");
+		}
+		delete[] response;
+		response = NULL;
+		return NULL;
+	}
+
+	#ifdef DEBUG
+		CAMsg::printMsg(LOG_DEBUG, "CAAccountingBIInterface::settle: response body received!\n");
+	#endif
+	response[contentLength]='\0';
+	CAMsg::printMsg(LOG_DEBUG, "CAAccountingBIInterface::settle: got response %s\n", response);
+	allCCsEnvelopeDoc = parseDOMDocument(response, contentLength);
+	if(allCCsEnvelopeDoc  != NULL)
+	{
+		errorMsgList = getElementsByTagName(allCCsEnvelopeDoc->getDocumentElement(), XML_ELEMENT_ERROR_MSG);
+		nrOfErrorMessages = errorMsgList->getLength();
+		if(nrOfErrorMessages == nrOfCCs)
+		{
+			for (i = 0; i < nrOfErrorMessages; i++)
+			{
+				resultMessages[i] = new CAXMLErrorMessage((DOMElement *) errorMsgList->item(i));
+			}
+		}
+		else
+		{
+			//This would be a bug.
+			for (i = 0; i < nrOfErrorMessages; i++)
+			{
+				resultMessages[i] =
+					new CAXMLErrorMessage(CAXMLErrorMessage::ERR_INTERNAL_SERVER_ERROR);
+			}
+			CAMsg::printMsg(LOG_WARNING, "CAAccountingBIInterface::settle: BUG: number of messages != number of cost confirmations!\n");
+		}
+	}
+	//pErrMsg = new CAXMLErrorMessage(response);
+	delete[] response;
+	response = NULL;
+
+	return resultMessages;
+}
 /**
  * Send a cost confirmation to the JPI
  * TODO: Error handling
@@ -218,9 +328,9 @@ CAXMLErrorMessage * CAAccountingBIInterface::settle(CAXMLCostConfirmation &cc)
 	UINT8 * pStrCC=NULL;
 	UINT8* response=NULL;
 	UINT32 contentLen=0, status=0;
-	UINT32 ret = 0;
+	SINT32 ret = 0;
 	CAXMLErrorMessage *pErrMsg;
-	
+
 	//m_pPiInterfaceMutex->lock();
 	pStrCC = cc.dumpToMem(&contentLen);
 	if(	pStrCC==NULL || m_phttpClient->sendPostRequest((UINT8*)"/settle", pStrCC,contentLen)!= E_SUCCESS)
@@ -234,7 +344,7 @@ CAXMLErrorMessage * CAAccountingBIInterface::settle(CAXMLCostConfirmation &cc)
 	pStrCC = NULL;
 	contentLen=0;
 	status=0;
-	
+
 	m_pSocket->setNonBlocking(true);
 	ret = m_phttpClient->parseHTTPHeader(&contentLen, &status, 3000);
 	if( ret !=E_SUCCESS || (status!=200) || (contentLen==0))
@@ -250,11 +360,11 @@ CAXMLErrorMessage * CAAccountingBIInterface::settle(CAXMLCostConfirmation &cc)
 		//m_pPiInterfaceMutex->unlock();
 		return NULL;
 	}
-#ifdef DEBUG			
+#ifdef DEBUG
 	CAMsg::printMsg(LOG_DEBUG, "CAAccountingBIInterface::settle: got response header [Status,content-Lenght]=[%i,%i]!\n",status,contentLen);
-#endif		
+#endif
 	response = new UINT8[contentLen+1];
-	
+
 	ret = m_pSocket->receiveFullyT(response, contentLen, 3000);
 	if(ret !=E_SUCCESS)
 		{
@@ -271,9 +381,9 @@ CAXMLErrorMessage * CAAccountingBIInterface::settle(CAXMLCostConfirmation &cc)
 			//m_pPiInterfaceMutex->unlock();
 			return NULL;
 		}
-#ifdef DEBUG			
+#ifdef DEBUG
 	CAMsg::printMsg(LOG_DEBUG, "CAAccountingBIInterface::settle: response body received!\n");
-#endif		
+#endif
 	response[contentLen]='\0';
 	pErrMsg = new CAXMLErrorMessage(response);
 	delete[] response;
@@ -303,13 +413,13 @@ CAXMLErrorMessage * CAAccountingBIInterface::settle(CAXMLCostConfirmation &cc)
 			return NULL;
 		}
 	}
-	else 
+	else
 	{
 		CAMsg::printMsg(LOG_DEBUG, "CAAccountingBIInterface:: PI Interface already running!\n");
 	}
 	m_pPiInterfaceMutex->unlock();
 	return m_pPiInterfaceSingleton;
-	
+
 }*/
 
 /*

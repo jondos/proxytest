@@ -91,7 +91,10 @@ class CAMsg
 			UINT32 m_NrOfWrites;
 			SINT32 openLog(UINT32 type);
 			SINT32 closeLog();
+			SINT32 rotateLog();
 			UINT32 m_uLogType;
+			UINT32 m_lastLogFileNumber;
+			bool m_alreadyOpened;
 			int m_hFileEncrypted;
 			int m_hFileInfo;
 			char *m_strMsgBuff;

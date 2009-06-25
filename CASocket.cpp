@@ -834,8 +834,7 @@ SINT32 CASocket::setNonBlocking(bool b)
 						fcntl(m_Socket,F_SETFL,flags|O_NONBLOCK);
 				#else
 						unsigned long flags=1;
-						if(ioctlsocket(m_Socket,FIONBIO,&flags)<0)
-							return E_UNKNOWN;
+						ioctlsocket(m_Socket,FIONBIO,&flags);
 				#endif
 			}
 		else
@@ -845,8 +844,7 @@ SINT32 CASocket::setNonBlocking(bool b)
 						fcntl(m_Socket,F_SETFL,flags&~O_NONBLOCK);
 				#else
 						unsigned long flags=0;
-						if(ioctlsocket(m_Socket,FIONBIO,&flags)<0)
-							return E_UNKNOWN;
+						ioctlsocket(m_Socket,FIONBIO,&flags);
 				#endif
 			}
 		return E_SUCCESS;

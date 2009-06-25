@@ -449,11 +449,12 @@ SINT32 CAAccountingDBInterface::__storeCostConfirmation( CAXMLCostConfirmation &
 		return E_SUCCESS;
 	}
 
-SINT32 CAAccountingDBInterface::getUnsettledCostConfirmations(CAQueue &q, UINT8* cascadeId)
+//SINT32 CAAccountingDBInterface::getUnsettledCostConfirmations(CAQueue &q, UINT8* cascadeId)
+SINT32 CAAccountingDBInterface::getUnsettledCostConfirmations(CAXMLCostConfirmation ***resultCCs, UINT8* cascadeId, UINT32 *nrOfCCs)
 {
 	if(checkOwner())
 	{
-		return __getUnsettledCostConfirmations(q, cascadeId);
+		return __getUnsettledCostConfirmations(resultCCs, cascadeId, nrOfCCs);
 	}
 	else
 	{
@@ -468,7 +469,7 @@ SINT32 CAAccountingDBInterface::getUnsettledCostConfirmations(CAQueue &q, UINT8*
 	* Param: cascadeId : String identifier of a cascade for which to return the cost confirmations (concatenated hashes of all the cascade's mixes' price certs)
 	*
 	*/
-SINT32 CAAccountingDBInterface::__getUnsettledCostConfirmations(CAQueue& q, UINT8* cascadeId)
+SINT32 CAAccountingDBInterface::__getUnsettledCostConfirmations(CAXMLCostConfirmation ***resultCCs, UINT8* cascadeId, UINT32 *nrOfCCs)
 	{
 		const char* query= "SELECT XMLCC FROM COSTCONFIRMATIONS WHERE SETTLED=0 AND CASCADE = '%s' ";
 		UINT8* finalQuery;
@@ -502,13 +503,28 @@ SINT32 CAAccountingDBInterface::__getUnsettledCostConfirmations(CAQueue& q, UINT
 			return E_UNKNOWN;
 		}
 		numTuples = PQntuples(result);
-		for(i=0; i<numTuples; i++)
+		*nrOfCCs = numTuples;
+
+		if(numTuples > 0)
 		{
-			pTmpStr = (UINT8*)PQgetvalue(result, i, 0);
-			if( (pTmpStr!=NULL)&&
-					( (pCC = CAXMLCostConfirmation::getInstance(pTmpStr,strlen((char*)pTmpStr)) )!=NULL))
+
+			*resultCCs = new CAXMLCostConfirmation *[numTuples];
+			i = 0;
+			while(i < *nrOfCCs)
 			{
-				q.add(&pCC, sizeof(CAXMLCostConfirmation *));
+				pTmpStr = (UINT8*) PQgetvalue(result, i, 0);
+				if( (pTmpStr!=NULL)&&
+						( (pCC = CAXMLCostConfirmation::getInstance(pTmpStr,strlen((char*)pTmpStr)) )!=NULL))
+				{
+					(*resultCCs)[i] = pCC;
+					i++;
+				}
+				else
+				{
+					//ok, in this case we reserved a bit too much memory, but it is very unlikely and if it would happen
+					//there is no need to worry about it.
+					(*nrOfCCs)--;
+				}
 			}
 		}
 		PQclear(result);

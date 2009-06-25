@@ -597,6 +597,7 @@ SINT32 CAInfoService::sendStatus(const UINT8* a_strStatusXML,UINT32 a_len, const
 
 		if(oSocket.connect(*a_pSocketAddress, MIX_TO_INFOSERVICE_TIMEOUT)!=E_SUCCESS)
 		{
+			CAMsg::printMsg(LOG_DEBUG, "InfoService: Could not connect to InfoService.\n");
 			return E_UNKNOWN;
 		}
 
@@ -618,6 +619,7 @@ SINT32 CAInfoService::sendStatus(const UINT8* a_strStatusXML,UINT32 a_len, const
 		{
 			return E_SUCCESS;
 		}
+		CAMsg::printMsg(LOG_DEBUG, "InfoService: Sending status failed, ret: %d \n", ret);
 		return E_UNKNOWN;
 	}
 

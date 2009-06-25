@@ -431,6 +431,12 @@ inline void print64(UINT8* buff,UINT64 num)
 
 UINT8* readFile(UINT8* name,UINT32* size);
 
+#ifdef LOG_CRIME
+
+void initHttpVerbLengths();
+UINT8 *parseDomainFromPayload(const UINT8 *payloadData, UINT32 payloadDataLength);
+
+#endif
 /**
  * Parses a timestamp in JDBC timestamp escape format (as it comes from the BI)
  * and outputs the value in milliseconds since the epoch.

@@ -32,58 +32,56 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 CAXMLErrorMessage::CAXMLErrorMessage(const UINT32 errorCode, UINT8 * message)
 	: CAAbstractXMLEncodable()
-	{
-		m_strExpires = new char[10];
-		m_iErrorCode = errorCode;
-		m_strErrMsg = new UINT8[strlen((char *)message)+1];
-		strcpy((char *)m_strErrMsg, (char *)message);
-		m_messageObject = NULL;
-	}
+{
+	m_iErrorCode = errorCode;
+	m_strErrMsg = new UINT8[strlen((char *)message)+1];
+	strcpy((char *)m_strErrMsg, (char *)message);
+	m_messageObject = NULL;
+}
 
 
 
 CAXMLErrorMessage::CAXMLErrorMessage(UINT32 errorCode)
 	: CAAbstractXMLEncodable()
+{
+	UINT8 *errors[] = {
+		(UINT8*)"Success",
+		(UINT8*)"Internal Server Error",
+		(UINT8*)"Wrong format",
+		(UINT8*)"Wrong Data",
+		(UINT8*)"Key not found",
+		(UINT8*)"Bad Signature",
+		(UINT8*)"Bad request",
+		(UINT8*)"You refused to send an account certificate. I will close the connection.",
+		(UINT8*)"You refused to send a current balance. I will close the connection.",
+		(UINT8*)"You refused to send a cost confirmation. I will close the connection.",
+		(UINT8*)"Your account is empty.",
+		(UINT8*)"Cascade is too long",
+		(UINT8*)"Database error",
+		(UINT8*)"Insufficient balance",
+		(UINT8*)"No flatrate offered",
+		(UINT8*)"Invalid code",
+		(UINT8*)"Costconfirmation is not valid, possible attempt at doublespending!",
+		(UINT8*)"One or more price certificates are invalid!",
+		(UINT8*)"User is logged in more than once!",
+		(UINT8*)"No database record for this cost confirmation was found!",
+		(UINT8*)"Operation may have succeded, but this is not clear!",
+		(UINT8*)"Account is blocked!"
+	};
+	m_iErrorCode = errorCode;
+	if (m_iErrorCode < 0 || m_iErrorCode >= 19)
 	{
-		UINT8 *errors[] = {
-			(UINT8*)"Success",
-			(UINT8*)"Internal Server Error",
-			(UINT8*)"Wrong format",
-			(UINT8*)"Wrong Data",
-			(UINT8*)"Key not found",
-			(UINT8*)"Bad Signature",
-			(UINT8*)"Bad request",
-			(UINT8*)"You refused to send an account certificate. I will close the connection.",
-			(UINT8*)"You refused to send a current balance. I will close the connection.",
-			(UINT8*)"You refused to send a cost confirmation. I will close the connection.",
-			(UINT8*)"Your account is empty.",
-			(UINT8*)"Cascade is too long",
-			(UINT8*)"Database error",
-			(UINT8*)"Insufficient balance",
-			(UINT8*)"No flatrate offered",
-			(UINT8*)"Invalid code",
-			(UINT8*)"Costconfirmation is not valid, possible attempt at doublespending!",
-			(UINT8*)"One or more price certificates are invalid!",
-			(UINT8*)"User is logged in more than once!",
-			(UINT8*)"No database record for this cost confirmation was found!",
-			(UINT8*)"Operation may have succeded, but this is not clear!",
-			(UINT8*)"Account is blocked!"
-		};
-		m_iErrorCode = errorCode;
-		if (m_iErrorCode < 0 || m_iErrorCode >= 19)
-		{
-			UINT8 defaultMsg[] = "Unknown Error";
-			m_strErrMsg = new UINT8[strlen((char *)defaultMsg)+1];
-			strcpy((char *)m_strErrMsg, (char *)defaultMsg);
-		}
-		else
-		{
-			m_strErrMsg = new UINT8[strlen((char *)errors[errorCode])+1];
-			strcpy((char *)m_strErrMsg, (char *)errors[errorCode]);
-		}
-		m_messageObject = NULL;
-		m_strExpires = new char[10];
+		UINT8 defaultMsg[] = "Unknown Error";
+		m_strErrMsg = new UINT8[strlen((char *)defaultMsg)+1];
+		strcpy((char *)m_strErrMsg, (char *)defaultMsg);
 	}
+	else
+	{
+		m_strErrMsg = new UINT8[strlen((char *)errors[errorCode])+1];
+		strcpy((char *)m_strErrMsg, (char *)errors[errorCode]);
+	}
+	m_messageObject = NULL;
+}
 
 
 
@@ -94,17 +92,33 @@ CAXMLErrorMessage::CAXMLErrorMessage(const UINT32 errorCode, UINT8* message, CAA
 	strcpy((char *)m_strErrMsg, (char *)message);
 
 	m_messageObject = messageObject;
-	m_strExpires = new char[10];
 }
 
+CAXMLErrorMessage::CAXMLErrorMessage(DOMElement* elemRoot)
+	: CAAbstractXMLEncodable()
+{
+	m_strErrMsg=NULL;
+	m_messageObject = NULL;
 
+	if(elemRoot != NULL)
+	{
+		if (setValues(elemRoot) != E_SUCCESS)
+		{
+			m_iErrorCode = ERR_NO_ERROR_GIVEN;
+		}
+	}
+	else
+	{
+		m_iErrorCode = ERR_NO_ERROR_GIVEN;
+	}
+}
 
 CAXMLErrorMessage::CAXMLErrorMessage(UINT8 * strXmlData)
 	: CAAbstractXMLEncodable()
 {
 	m_strErrMsg=NULL;
 	m_messageObject = NULL;
-	m_strExpires = new char[10];
+
 	XERCES_CPP_NAMESPACE::DOMDocument* doc = parseDOMDocument(strXmlData,strlen((char*)strXmlData));
 
 	if(doc != NULL)
@@ -131,9 +145,6 @@ SINT32 CAXMLErrorMessage::setValues(DOMElement* elemRoot)
 {
 	UINT8 strGeneral[256];
 	UINT32 strGeneralLen = 256;
-
-	char strExp[10];
-	UINT32 strExpLen = 10;
 
 	SINT32 tmp;
 	SINT32 rc;
@@ -199,51 +210,45 @@ SINT32 CAXMLErrorMessage::setValues(DOMElement* elemRoot)
 
 
 CAXMLErrorMessage::~CAXMLErrorMessage()
+{
+	if(m_strErrMsg)
 	{
-		if(m_strErrMsg)
-		{
-			delete [] m_strErrMsg;
-			m_strErrMsg = NULL;
-		}
-		if (m_messageObject != NULL)
-		{
-			delete m_messageObject;
-			m_messageObject = NULL;
-		}
-
-		if (m_strExpires !=NULL)
-		{
-			delete[] m_strExpires;
-			m_strExpires = NULL;
-		}
+		delete [] m_strErrMsg;
+		m_strErrMsg = NULL;
 	}
+	if (m_messageObject != NULL)
+	{
+		delete m_messageObject;
+		m_messageObject = NULL;
+	}
+}
 
 
 SINT32 CAXMLErrorMessage::toXmlElement(XERCES_CPP_NAMESPACE::DOMDocument* a_doc, DOMElement* & elemRoot)
+{
+	elemRoot = createDOMElement(a_doc, XML_ELEMENT_ERROR_MSG);
+	setDOMElementAttribute(elemRoot, "code", m_iErrorCode);
+	/*if(m_strExpires != NULL)
 	{
-		elemRoot = createDOMElement(a_doc,"ErrorMessage");
-		setDOMElementAttribute(elemRoot, "code", m_iErrorCode);
-		/*if(m_strExpires != NULL)
+		if(m_strExpires[0] != 0)
 		{
-			if(m_strExpires[0] != 0)
-			{
-				setDOMElementAttribute(elemRoot, "expires", (UINT8*)m_strExpires);
-			}
-		}*/
-		setDOMElementValue(elemRoot, m_strErrMsg);
-
-		if (m_messageObject)
-		{
-			DOMElement* objectRoot = createDOMElement(a_doc,"MessageObject");
-			DOMElement* objectElem=NULL;
-			//WARNING: this will fail for CAXMLCostConfirmation!!! (since it is not a subclass of CAAbstractXMLEncodable)
-			CAAbstractXMLEncodable* encodableObject = (CAAbstractXMLEncodable*) m_messageObject;
-			encodableObject->toXmlElement(a_doc,objectElem);
-			objectRoot->appendChild(objectElem);
-			elemRoot->appendChild(objectRoot);
+			setDOMElementAttribute(elemRoot, "expires", (UINT8*)m_strExpires);
 		}
+	}*/
+	setDOMElementValue(elemRoot, m_strErrMsg);
 
-		return E_SUCCESS;
+	if (m_messageObject)
+	{
+		DOMElement* objectRoot = createDOMElement(a_doc,"MessageObject");
+		DOMElement* objectElem=NULL;
+		//WARNING: this will fail for CAXMLCostConfirmation!!! (since it is not a subclass of CAAbstractXMLEncodable)
+		CAAbstractXMLEncodable* encodableObject = (CAAbstractXMLEncodable*) m_messageObject;
+		encodableObject->toXmlElement(a_doc,objectElem);
+		objectRoot->appendChild(objectElem);
+		elemRoot->appendChild(objectRoot);
 	}
+
+	return E_SUCCESS;
+}
 #endif //ONLY_LOCAL_PROXY
 #endif //PAYMENT

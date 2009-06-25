@@ -456,41 +456,6 @@ THREAD_RETURN serveMonitoringRequests(void* param)
 
 		if(statusManager->m_pStatusSocket != NULL)
 		{
-			/*if(statusManager->m_bTryListen)
-			{
-				sleep(10);
-
-				if(statusManager->m_pListenAddr == NULL)
-				{
-					CAMsg::printMsg(LOG_ERR,
-								"Monitoring Thread: bind error, leaving loop.\n");
-					THREAD_RETURN_ERROR;
-				}
-				ret = statusManager-> m_pStatusSocket->listen(*(statusManager->m_pListenAddr));
-
-				if(ret == E_UNKNOWN)
-				{
-					CAMsg::printMsg(LOG_ERR,
-							"Monitoring Thread: bind error, leaving loop.\n");
-							THREAD_RETURN_ERROR;
-				}
-				statusManager->m_bTryListen = (ret != E_SUCCESS);
-#ifdef DEBUG
-				if(statusManager->m_bTryListen)
-				{
-
-						CAMsg::printMsg(LOG_DEBUG,
-							"Monitoring Thread: wait again for listen: %s\n",
-							GET_NET_ERROR_STR(GET_NET_ERROR));
-				}
-				else
-				{
-					CAMsg::printMsg(LOG_DEBUG,
-								"Monitoring Thread: socket listening again\n");
-				}
-#endif
-				continue;
-			}*/
 			if(statusManager->m_pStatusSocket->isClosed())
 			{
 				CAMsg::printMsg(LOG_INFO,
@@ -586,7 +551,6 @@ void CAStatusManager::deleteStates()
 
 	for(i = FIRST_STATUS; i < NR_STATUS_TYPES; i++)
 	{
-		//m_pCurrentStates[i] = NULL;
 		for(j = ENTRY_STATE; j < STATE_COUNT[i]; j++)
 		{
 			if(ms_pAllStates[i][j] != NULL)
@@ -596,7 +560,6 @@ void CAStatusManager::deleteStates()
 					delete[] ms_pAllStates[i][j]->st_transitions;
 					ms_pAllStates[i][j]->st_transitions = NULL;
 				}
-				//todo: delete state descriptions ?
 				delete ms_pAllStates[i][j];
 				ms_pAllStates[i][j] = NULL;
 			}
@@ -634,7 +597,6 @@ void CAStatusManager::deleteEvents()
 	{
 		for(j = FIRST_EVENT; j < EVENT_COUNT[i]; j++)
 		{
-			//todo: delete event descriptions ?
 			delete ms_pAllEvents[i][j];
 			ms_pAllEvents[i][j] = NULL;
 		}
@@ -697,10 +659,7 @@ transition_t *defineTransitions(status_type_t s_type, SINT32 transitionCount, ..
 		}
 		transitions[specifiedEventTypes[i]] = specifiedTransitions[i];
 	}
-	/*for(i=0; i < (EVENT_COUNT[s_type]); i++)
-	{
-		CAMsg::printMsg(LOG_DEBUG, "transitions %d: %d\n", i, transitions[i]);
-	}*/
+
 	return transitions;
 
 }

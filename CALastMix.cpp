@@ -237,7 +237,7 @@ SINT32 CALastMix::processKeyExchange()
 				elemFlowControl->appendChild(elemDownstreamSendMe);
 				setDOMElementValue(elemUpstreamSendMe,(UINT32)FLOW_CONTROL_SENDME_SOFT_LIMIT);
 				setDOMElementValue(elemDownstreamSendMe,(UINT32)FLOW_CONTROL_SENDME_SOFT_LIMIT);
-      #else    
+      #else
 				setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.3");
       #endif
     #endif
@@ -298,38 +298,38 @@ SINT32 CALastMix::processKeyExchange()
 			doc->release();
 			doc = NULL;
 		}
-		UINT16 tmp=htons((UINT16)len);
+		UINT32 tmp = htonl(len);
 		CAMsg::printMsg(LOG_INFO,"Sending Infos (chain length and RSA-Key, Message-Size %u)\n",len);
 
-		if(	m_pMuxIn->getCASocket()->send((UINT8*)&tmp,2)!=2 ||
+		if(	(m_pMuxIn->getCASocket()->send((UINT8*)&tmp, sizeof(tmp)) != sizeof(tmp)) ||
 				m_pMuxIn->getCASocket()->send(messageBuff,len)!=(SINT32)len)
-			{
-				CAMsg::printMsg(LOG_ERR,"Error sending Key-Info!\n");
-				delete []messageBuff;
-				messageBuff = NULL;
-				return E_UNKNOWN;
-			}
+		{
+			CAMsg::printMsg(LOG_ERR,"Error sending Key-Info!\n");
+			delete []messageBuff;
+			messageBuff = NULL;
+			return E_UNKNOWN;
+		}
 		delete[] messageBuff;
 		messageBuff = NULL;
 
 		//Now receiving the symmetric key
-		CAMsg::printMsg(LOG_INFO,"Waiting for len of Symmetric Key from previous Mix...\n");
-		if(m_pMuxIn->getCASocket()->receiveFully((UINT8*)&tmp,2)!=E_SUCCESS)
-			{
-        CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info lenght!\n");
-        return E_UNKNOWN;
-			}
-		len=ntohs(tmp);
+		CAMsg::printMsg(LOG_INFO,"Waiting for length of symmetric key from previous Mix...\n");
+		if(m_pMuxIn->getCASocket()->receiveFully((UINT8*) &tmp, sizeof(tmp)) != E_SUCCESS)
+		{
+			CAMsg::printMsg(LOG_CRIT,"Error receiving key info length!\n");
+			return E_UNKNOWN;
+		}
+		len = ntohl(tmp);
 		messageBuff=new UINT8[len+1]; //+1 for the closing Zero
-		CAMsg::printMsg(LOG_INFO,"Got it - Len of Symmetric Key is: %i\n",len);
-		CAMsg::printMsg(LOG_INFO,"Waiting for Symmetric Key from previous Mix...\n");
-		if(m_pMuxIn->getCASocket()->receiveFully(messageBuff,len)!=E_SUCCESS)
-			{
-				CAMsg::printMsg(LOG_ERR,"Error receiving symmetric key!\n");
-				delete []messageBuff;
-				messageBuff = NULL;
-				return E_UNKNOWN;
-			}
+		CAMsg::printMsg(LOG_INFO,"Got it - length of symmetric key is: %i\n",len);
+		CAMsg::printMsg(LOG_INFO,"Waiting for symmetric key from previous Mix...\n");
+		if(m_pMuxIn->getCASocket()->receiveFully(messageBuff, len) != E_SUCCESS)
+		{
+			CAMsg::printMsg(LOG_ERR,"Error receiving symmetric key!\n");
+			delete []messageBuff;
+			messageBuff = NULL;
+			return E_UNKNOWN;
+		}
 		messageBuff[len]=0;
 		CAMsg::printMsg(LOG_INFO,"Symmetric Key Info received is:\n");
 		CAMsg::printMsg(LOG_INFO,"%s\n",(char*)messageBuff);
@@ -340,12 +340,12 @@ SINT32 CALastMix::processKeyExchange()
 		delete pCert;
 		pCert = NULL;
 		if(oSig.verifyXML(messageBuff,len)!=E_SUCCESS)
-			{
-				CAMsg::printMsg(LOG_CRIT,"Could not verify the symmetric key!\n");
-				delete []messageBuff;
-				messageBuff = NULL;
-				return E_UNKNOWN;
-			}
+		{
+			CAMsg::printMsg(LOG_CRIT,"Could not verify the symmetric key!\n");
+			delete []messageBuff;
+			messageBuff = NULL;
+			return E_UNKNOWN;
+		}
 		//Verifying nonce!
 		doc=parseDOMDocument(messageBuff,len);
 		if(doc == NULL)
@@ -377,18 +377,18 @@ SINT32 CALastMix::processKeyExchange()
 			tmpLen!=SHA_DIGEST_LENGTH ||
 			memcmp(SHA1(arNonce,16,NULL),tmpBuff,SHA_DIGEST_LENGTH)!=0
 			)
+		{
+			CAMsg::printMsg(LOG_CRIT,"Could not verify the nonce!\n");
+			if (doc != NULL)
 			{
-				CAMsg::printMsg(LOG_CRIT,"Could not verify the Nonce!\n");
-				if (doc != NULL)
-				{
-					doc->release();
-					doc = NULL;
-				}
-				delete []messageBuff;
-				messageBuff = NULL;
-				return E_UNKNOWN;
+				doc->release();
+				doc = NULL;
 			}
-		CAMsg::printMsg(LOG_INFO,"Verified the symetric key!\n");
+			delete []messageBuff;
+			messageBuff = NULL;
+			return E_UNKNOWN;
+		}
+		CAMsg::printMsg(LOG_INFO,"Verified the symmetric key!\n");
 
 		UINT8 key[150];
 		UINT32 keySize=150;
@@ -396,25 +396,25 @@ SINT32 CALastMix::processKeyExchange()
 		delete []messageBuff;
 		messageBuff = NULL;
 		if(ret!=E_SUCCESS||keySize!=64)
+		{
+			if (doc != NULL)
 			{
-				if (doc != NULL)
-				{
-					doc->release();
-					doc = NULL;
-				}
-				CAMsg::printMsg(LOG_CRIT,"Couldt not decrypt the symetric key!\n");
-				return E_UNKNOWN;
+				doc->release();
+				doc = NULL;
 			}
+			CAMsg::printMsg(LOG_CRIT,"Could not decrypt the symmetric key!\n");
+			return E_UNKNOWN;
+		}
 		if(m_pMuxIn->setReceiveKey(key,32)!=E_SUCCESS||m_pMuxIn->setSendKey(key+32,32)!=E_SUCCESS)
+		{
+			if (doc != NULL)
 			{
-				if (doc != NULL)
-				{
-					doc->release();
-					doc = NULL;
-				}
-				CAMsg::printMsg(LOG_CRIT,"Couldt not set the symetric key to be used by the MuxSocket!\n");
-				return E_UNKNOWN;
+				doc->release();
+				doc = NULL;
 			}
+			CAMsg::printMsg(LOG_CRIT,"Could not set the symmetric key to be used by the MuxSocket!\n");
+			return E_UNKNOWN;
+		}
 		m_pMuxIn->setCrypt(true);
 		///Getting and calculating the KeepAlive Traffice...
 		elemKeepAlive=NULL;
@@ -453,7 +453,7 @@ SINT32 CALastMix::reconfigure()
 			CAMsg::printMsg(LOG_DEBUG,"Could not set new cache proxies\n");
     #ifndef NEW_MIX_TYPE // not TypeB mixes
       #if defined (DELAY_CHANNELS)||defined (DELAY_CHANNELS_LATENCY)
-		CAMsg::printMsg(LOG_DEBUG,"Set new ressources limitation parameters\n");
+		CAMsg::printMsg(LOG_DEBUG,"Set new resources limitation parameters\n");
         if(m_pChannelList!=NULL) {
 		#if defined (DELAY_CHANNELS)
 			m_pChannelList->setDelayParameters(	pglobalOptions->getDelayChannelUnlimitTraffic(),
@@ -711,16 +711,18 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 		//DNS Lookup may block if Host does not exists!!!!!
 		//so we use regexp....
 
-		UINT8 *startOfUrl, *endOfUrl;
-		UINT32 strLen;
+		UINT8 *startOfUrl =
+			parseDomainFromPayload(payLoad, payLen);
+		UINT32 strLen = (startOfUrl != NULL) ? strlen((char *)startOfUrl) : 0;
 		if(payLen<3)
 		{
+			delete [] startOfUrl;
 			return false;
 		}
 
-		if (m_nCrimeRegExpsURL > 0)
+		if ( (m_nCrimeRegExpsURL > 0) && (startOfUrl != NULL) )
 		{
-			startOfUrl = (UINT8*)memchr(payLoad,32,payLen-1); //search for first space...
+			/*startOfUrl = (UINT8*)memchr(payLoad,32,payLen-1); //search for first space...
 			if(startOfUrl==NULL)
 			{
 				return false;
@@ -732,30 +734,34 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 			{
 				return false;
 			}
-			strLen = endOfUrl-startOfUrl;
+			strLen = endOfUrl-startOfUrl;*/
 
 			for(UINT32 i = 0; i < m_nCrimeRegExpsURL; i++)
 			{
 				if(regnexec(&m_pCrimeRegExpsURL[i],(char*)startOfUrl,strLen,0,NULL,0)==0)
 				{
+					delete [] startOfUrl;
 					return true;
 				}
 			}
 		}
 
 		if (m_nCrimeRegExpsPayload == 0)
-			{
-				// there are no regular expressions for Payload
-				return false;
-			}
+		{
+			// there are no regular expressions for Payload
+			delete [] startOfUrl;
+			return false;
+		}
 
 		for(UINT32 i = 0; i < m_nCrimeRegExpsPayload; i++)
 		{
 			if (regnexec(&m_pCrimeRegExpsPayload[i],(const char*)payLoad ,payLen,0,NULL,0)==0)
 			{
+				delete [] startOfUrl;
 				return true;
 			}
 		}
+		delete [] startOfUrl;
 		return false;
 	}
 #endif
