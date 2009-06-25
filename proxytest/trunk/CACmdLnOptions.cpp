@@ -3750,7 +3750,7 @@ SINT32 CACmdLnOptions::setCrimeSurveillanceIP(DOMElement *elemCrimeDetection)
 		(elemCrimeDetection->getNodeName(), OPTIONS_NODE_CRIME_SURVEILLANCE_IP);
 
 	UINT32 ipBuffSize = TMP_BUFF_SIZE;
-	UINT8 ipBuff[ipBuffSize];
+	UINT8 ipBuff[TMP_BUFF_SIZE];
 
 	DOMNodeList *surveillanceIPNodes =
 		getElementsByTagName(elemCrimeDetection, OPTIONS_NODE_CRIME_SURVEILLANCE_IP);
@@ -3762,13 +3762,13 @@ SINT32 CACmdLnOptions::setCrimeSurveillanceIP(DOMElement *elemCrimeDetection)
 		return E_SUCCESS;
 	}
 
-	m_surveillanceIPs = new in_addr_t[m_nrOfSurveillanceIPs];
+	m_surveillanceIPs = new CASocketAddrINet[m_nrOfSurveillanceIPs];
 	for (UINT32 i = 0; i < m_nrOfSurveillanceIPs; i++)
 	{
 		ipBuffSize = TMP_BUFF_SIZE;
 		if(getDOMElementValue(surveillanceIPNodes->item(i), ipBuff,&ipBuffSize) == E_SUCCESS )
 		{
-			m_surveillanceIPs[i] = inet_addr((char *)ipBuff);
+			m_surveillanceIPs[i].setAddr(ipBuff,0);
 			CAMsg::printMsg(LOG_INFO,"Found Surveillance IP %s\n", ipBuff);
 		}
 	}
