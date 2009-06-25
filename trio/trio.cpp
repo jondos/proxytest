@@ -47,7 +47,7 @@
 #include "triodef.h"
 #include "trio.hpp"
 #include "triop.h"
-#include "triostr.h"
+#include "triostr.hpp"
 #include "trionan.h"
 
 /*
