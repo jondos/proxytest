@@ -121,7 +121,7 @@ class CALastMix:public
 
 			SINT32 setTargets();
 #ifdef LOG_CRIME
-			bool	 checkCrime(const UINT8* payLoad,UINT32 payLen);
+			bool	 checkCrime(const UINT8* payLoad,UINT32 payLen,bool bURLCheck);
 #endif
 
 		protected:
