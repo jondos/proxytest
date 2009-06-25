@@ -26,7 +26,7 @@ static const char rcsid[] = "@(#)$Id$";
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
-#include "triostr.h"
+#include "triostr.hpp"
 
 /*************************************************************************
  * Definitions
