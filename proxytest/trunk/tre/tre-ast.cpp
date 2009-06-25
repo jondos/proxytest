@@ -1,21 +1,8 @@
 /*
   tre-ast.c - Abstract syntax tree (AST) routines
 
-  Copyright (c) 2001-2006 Ville Laurikari <vl@iki.fi>
-
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
-
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+  This software is released under a BSD-style license.
+  See the file LICENSE for details and copyright.
 
 */
 
@@ -32,7 +19,7 @@ tre_ast_new_node(tre_mem_t mem, tre_ast_type_t type, size_t size)
 {
   tre_ast_node_t *node;
 
-  node =(tre_ast_node_t*) tre_mem_calloc(mem, sizeof(*node));
+  node = ( tre_ast_node_t *)tre_mem_calloc(mem, sizeof(*node));
   if (!node)
     return NULL;
   node->obj = tre_mem_calloc(mem, size);
@@ -72,7 +59,7 @@ tre_ast_new_iter(tre_mem_t mem, tre_ast_node_t *arg, int min, int max,
   node = tre_ast_new_node(mem, ITERATION, sizeof(tre_iteration_t));
   if (!node)
     return NULL;
-  iter =(tre_iteration_t*) node->obj;
+  iter = (tre_iteration_t*)node->obj;
   iter->arg = arg;
   iter->min = min;
   iter->max = max;

@@ -1,21 +1,8 @@
 /*
   tre-stack.c - Simple stack implementation
 
-  Copyright (c) 2001-2006 Ville Laurikari <vl@iki.fi>
-
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
-
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+  This software is released under a BSD-style license.
+  See the file LICENSE for details and copyright.
 
 */
 
@@ -48,10 +35,10 @@ tre_stack_new(int size, int max_size, int increment)
 {
   tre_stack_t *s;
 
-  s = (tre_stack_t*)xmalloc(sizeof(*s));
+  s = (tre_stack_t *)xmalloc(sizeof(*s));
   if (s != NULL)
     {
-      s->stack =(tre_stack_item*) xmalloc(sizeof(*s->stack) * size);
+      s->stack = (tre_stack_item *)xmalloc(sizeof(*s->stack) * size);
       if (s->stack == NULL)
 	{
 	  xfree(s);

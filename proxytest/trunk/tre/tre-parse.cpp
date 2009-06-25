@@ -1,21 +1,8 @@
 /*
   tre-parse.c - Regexp parser
 
-  Copyright (c) 2001-2006 Ville Laurikari <vl@iki.fi>
-
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
-
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+  This software is released under a BSD-style license.
+  See the file LICENSE for details and copyright.
 
 */
 
@@ -135,7 +122,7 @@ tre_new_item(tre_mem_t mem, int min, int max, int *i, int *max_i,
 
 /* Expands a character class to character ranges. */
 static reg_errcode_t
-tre_expand_ctype(tre_mem_t mem, tre_ctype_t tre_class, tre_ast_node_t ***items,
+tre_expand_ctype(tre_mem_t mem, tre_ctype_t my_class, tre_ast_node_t ***items,
 		 int *i, int *max_i, int cflags)
 {
   reg_errcode_t status = REG_OK;
@@ -147,10 +134,10 @@ tre_expand_ctype(tre_mem_t mem, tre_ctype_t tre_class, tre_ast_node_t ***items,
   for (j = 0; (j < 256) && (status == REG_OK); j++)
     {
       c = j;
-      if (tre_isctype(c, tre_class)
+      if (tre_isctype(c, my_class)
 	  || ((cflags & REG_ICASE)
-	      && (tre_isctype(tre_tolower(c), tre_class)
-		  || tre_isctype(tre_toupper(c), tre_class))))
+	      && (tre_isctype(tre_tolower(c), my_class)
+		  || tre_isctype(tre_toupper(c), my_class))))
 {
 	  if (min < 0)
 	    min = c;
@@ -172,9 +159,9 @@ tre_expand_ctype(tre_mem_t mem, tre_ctype_t tre_class, tre_ast_node_t ***items,
 static int
 tre_compare_items(const void *a, const void *b)
 {
-  tre_ast_node_t *node_a = *(tre_ast_node_t **)a;
-  tre_ast_node_t *node_b = *(tre_ast_node_t **)b;
-  tre_literal_t *l_a = (tre_literal_t*)node_a->obj, *l_b =(tre_literal_t*) node_b->obj;
+  const tre_ast_node_t *node_a = *(tre_ast_node_t * const *)a;
+  const tre_ast_node_t *node_b = *(tre_ast_node_t * const *)b;
+  tre_literal_t *l_a = (tre_literal_t *)node_a->obj, *l_b = (tre_literal_t *)node_b->obj;
   int a_min = l_a->code_min, b_min = l_b->code_min;
 
   if (a_min < b_min)
@@ -266,7 +253,7 @@ tre_parse_bracket_items(tre_parse_ctx_t *ctx, int negate,
 {
   const tre_char_t *re = ctx->re;
   reg_errcode_t status = REG_OK;
-  tre_ctype_t tre_class = (tre_ctype_t)0;
+  tre_ctype_t my_class = (tre_ctype_t)0;
   int i = *num_items;
   int max_i = *items_size;
   int skip;
@@ -289,7 +276,7 @@ tre_parse_bracket_items(tre_parse_ctx_t *ctx, int negate,
 	{
 	  tre_cint_t min = 0, max = 0;
 
-	  tre_class = (tre_ctype_t)0;
+	  my_class = (tre_ctype_t)0;
 	  if (re + 2 < ctx->re_end
 	      && *(re + 1) == CHAR_MINUS && *(re + 2) != CHAR_RBRACKET)
 	    {
@@ -323,7 +310,7 @@ tre_parse_bracket_items(tre_parse_ctx_t *ctx, int negate,
 #ifdef TRE_WCHAR
 		  {
 		    tre_char_t tmp_wcs[64];
-		    wcsncpy(tmp_wcs, re + 2, len);
+		    wcsncpy(tmp_wcs, re + 2, (size_t)len);
 		    tmp_wcs[len] = L'\0';
 #if defined HAVE_WCSRTOMBS
 		    {
@@ -341,15 +328,15 @@ tre_parse_bracket_items(tre_parse_ctx_t *ctx, int negate,
 #endif /* !TRE_WCHAR */
 		  tmp_str[len] = '\0';
 		  DPRINT(("  class name: %s\n", tmp_str));
-		  tre_class = tre_ctype(tmp_str);
-		  if (!tre_class)
+		  my_class = tre_ctype(tmp_str);
+		  if (!my_class)
 		    status = REG_ECTYPE;
 		  /* Optimize character classes for 8 bit character sets. */
 		  if (status == REG_OK && TRE_MB_CUR_MAX == 1)
 		    {
-		      status = tre_expand_ctype(ctx->mem, tre_class, items,
+		      status = tre_expand_ctype(ctx->mem, my_class, items,
 						&i, &max_i, ctx->cflags);
-		      tre_class = (tre_ctype_t)0;
+		      my_class = (tre_ctype_t)0;
 		      skip = 1;
 		    }
 		  re = endptr + 2;
@@ -372,24 +359,24 @@ tre_parse_bracket_items(tre_parse_ctx_t *ctx, int negate,
 	  if (status != REG_OK)
 	    break;
 
-	  if (tre_class && negate)
+	  if (my_class && negate)
 	    if (*num_neg_classes >= MAX_NEG_CLASSES)
 	      status = REG_ESPACE;
 	    else
-	      neg_classes[(*num_neg_classes)++] = tre_class;
+	      neg_classes[(*num_neg_classes)++] = my_class;
 	  else if (!skip)
 	    {
 	      status = tre_new_item(ctx->mem, min, max, &i, &max_i, items);
 	      if (status != REG_OK)
 		break;
-	      ((tre_literal_t*)((*items)[i-1])->obj)->u.tre_class = tre_class;
+	      ((tre_literal_t*)((*items)[i-1])->obj)->u.my_class = my_class;
 	    }
 
 	  /* Add opposite-case counterpoints if REG_ICASE is present.
 	     This is broken if there are more than two "same" characters. */
-	  if (ctx->cflags & REG_ICASE && !tre_class && status == REG_OK && !skip)
+	  if (ctx->cflags & REG_ICASE && !my_class && status == REG_OK && !skip)
 	    {
-	      int cmin, ccurr;
+	      tre_cint_t cmin, ccurr;
 
 	      DPRINT(("adding opposite-case counterpoints\n"));
 	      while (min <= max)
@@ -439,7 +426,7 @@ tre_parse_bracket(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
   int num_neg_classes = 0;
 
   /* Start off with an array of `max_i' elements. */
-  items =(tre_ast_node_t **) xmalloc(sizeof(*items) * max_i);
+  items =(tre_ast_node_t**) xmalloc(sizeof(*items) * max_i);
   if (items == NULL)
     return REG_ESPACE;
 
@@ -458,14 +445,14 @@ tre_parse_bracket(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
 
   /* Sort the array if we need to negate it. */
   if (negate)
-    qsort(items, i, sizeof(*items), tre_compare_items);
+    qsort(items, (unsigned)i, sizeof(*items), tre_compare_items);
 
   curr_max = curr_min = 0;
   /* Build a union of the items in the array, negated if necessary. */
   for (j = 0; j < i && status == REG_OK; j++)
     {
       int min, max;
-      tre_literal_t *l = (tre_literal_t*)items[j]->obj;
+      tre_literal_t *l =(tre_literal_t *) items[j]->obj;
       min = l->code_min;
       max = l->code_max;
 
@@ -545,7 +532,7 @@ tre_parse_bracket(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
 	status = REG_ESPACE;
       else
 	{
-	  tre_literal_t *l =(tre_literal_t*) n->obj;
+	  tre_literal_t *l =(tre_literal_t *) n->obj;
 	  if (num_neg_classes > 0)
 	    {
 	      l->neg_classes =(tre_ctype_t*) tre_mem_alloc(ctx->mem,
@@ -825,10 +812,18 @@ tre_parse_bound(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
 
 
   /* Parse trailing '?' marking minimal repetition. */
-  if (r < ctx->re_end && *r == CHAR_QUESTIONMARK)
+  if (r < ctx->re_end)
     {
-      minimal = !(ctx->cflags & REG_UNGREEDY);
-      r++;
+      if (*r == CHAR_QUESTIONMARK)
+	{
+	  minimal = !(ctx->cflags & REG_UNGREEDY);
+	  r++;
+	}
+      else if (*r == CHAR_STAR || *r == CHAR_PLUS)
+	{
+	  /* These are reserved for future extensions. */
+	  return REG_BADRPT;
+	}
     }
 
   /* Create the AST node(s). */
@@ -853,7 +848,7 @@ tre_parse_bound(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
       if (approx || costs_set || counts_set)
 	{
 	  int *params;
-	  tre_iteration_t *iter = (tre_iteration_t*)(*result)->obj;
+	  tre_iteration_t *iter =(tre_iteration_t *) (*result)->obj;
 
 	  if (costs_set || counts_set)
 	    {
@@ -946,7 +941,6 @@ tre_parse(tre_parse_ctx_t *ctx)
 
   if (!ctx->nofirstsub)
     {
-      STACK_PUSH(stack, voidptr, (void*)ctx->re);
       STACK_PUSH(stack, int, ctx->submatch_id);
       STACK_PUSH(stack, int, PARSE_MARK_FOR_SUBMATCH);
       ctx->submatch_id++;
@@ -964,7 +958,7 @@ tre_parse(tre_parse_ctx_t *ctx)
     {
       if (status != REG_OK)
 	break;
-      symbol =(tre_parse_re_stack_symbol_t) tre_stack_pop_int(stack);
+      symbol = (tre_parse_re_stack_symbol_t)tre_stack_pop_int(stack);
       switch (symbol)
 	{
 	case PARSE_RE:
@@ -1050,7 +1044,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 
 	case PARSE_POST_CATENATION:
 	  {
-	    tre_ast_node_t *tree = (tre_ast_node_t *)tre_stack_pop_voidptr(stack);
+	    tre_ast_node_t *tree = (tre_ast_node_t*)tre_stack_pop_voidptr(stack);
 	    tre_ast_node_t *tmp_node;
 	    tmp_node = tre_ast_new_catenation(ctx->mem, tree, result);
 	    if (!tmp_node)
@@ -1090,7 +1084,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 	case PARSE_POST_UNION:
 	  {
 	    tre_ast_node_t *tmp_node;
-	    tre_ast_node_t *tree = (tre_ast_node_t *)tre_stack_pop_voidptr(stack);
+	    tre_ast_node_t *tree = (tre_ast_node_t*)tre_stack_pop_voidptr(stack);
 	    tmp_node = tre_ast_new_union(ctx->mem, tree, result);
 	    if (!tmp_node)
 	      return REG_ESPACE;
@@ -1108,27 +1102,42 @@ tre_parse(tre_parse_ctx_t *ctx)
 #endif /* REG_LITERAL */
 	  switch (*ctx->re)
 	    {
-	    case CHAR_STAR:
 	    case CHAR_PLUS:
 	    case CHAR_QUESTIONMARK:
+	      if (!(ctx->cflags & REG_EXTENDED))
+		break;
+		/*FALLTHROUGH*/
+	    case CHAR_STAR:
 	      {
 		tre_ast_node_t *tmp_node;
 		int minimal = (ctx->cflags & REG_UNGREEDY) ? 1 : 0;
 		int rep_min = 0;
 		int rep_max = -1;
+#ifdef TRE_DEBUG
 		const tre_char_t *tmp_re;
+#endif
 
 		if (*ctx->re == CHAR_PLUS)
 		  rep_min = 1;
 		if (*ctx->re == CHAR_QUESTIONMARK)
 		  rep_max = 1;
+#ifdef TRE_DEBUG
 		tmp_re = ctx->re;
+#endif
 
-		if (ctx->re + 1 < ctx->re_end
-		    && *(ctx->re + 1) == CHAR_QUESTIONMARK)
+		if (ctx->re + 1 < ctx->re_end)
 		  {
-		    minimal = !(ctx->cflags & REG_UNGREEDY);
-		    ctx->re++;
+		    if (*(ctx->re + 1) == CHAR_QUESTIONMARK)
+		      {
+			minimal = !(ctx->cflags & REG_UNGREEDY);
+			ctx->re++;
+		      }
+		    else if (*(ctx->re + 1) == CHAR_STAR
+			     || *(ctx->re + 1) == CHAR_PLUS)
+		      {
+			/* These are reserved for future extensions. */
+			return REG_BADRPT;
+		      }
 		  }
 
 		DPRINT(("tre_parse: %s star: '%.*" STRF "'\n",
@@ -1140,8 +1149,8 @@ tre_parse(tre_parse_ctx_t *ctx)
 		  return REG_ESPACE;
 		result = tmp_node;
 		STACK_PUSHX(stack, int, PARSE_POSTFIX);
-		break;
 	      }
+	      break;
 
 	    case CHAR_BACKSLASH:
 	      /* "\{" is special without REG_EXTENDED */
@@ -1201,7 +1210,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 		  DPRINT(("tre_parse:	extension: '%.*" STRF "\n",
 			  REST(ctx->re)));
 		  ctx->re += 2;
-		  while (1)
+		  while (/*CONSTCOND*/1)
 		    {
 		      if (*ctx->re == L'i')
 			{
@@ -1457,8 +1466,8 @@ tre_parse(tre_parse_ctx_t *ctx)
 			  ctx->re++;
 			}
 		      val = strtol(tmp, NULL, 16);
-		      result = tre_ast_new_literal(ctx->mem, val, val,
-						   ctx->position);
+		      result = tre_ast_new_literal(ctx->mem, (int)val,
+						   (int)val, ctx->position);
 		      ctx->position++;
 		      break;
 		    }
@@ -1485,11 +1494,12 @@ tre_parse(tre_parse_ctx_t *ctx)
 		      ctx->re++;
 		      tmp[i] = 0;
 		      val = strtol(tmp, NULL, 16);
-		      result = tre_ast_new_literal(ctx->mem, val, val,
+		      result = tre_ast_new_literal(ctx->mem, (int)val, (int)val,
 						   ctx->position);
 		      ctx->position++;
 		      break;
 		    }
+		  /*FALLTHROUGH*/
 
 		default:
 		  if (tre_isdigit(*ctx->re))
@@ -1708,6 +1718,10 @@ tre_parse(tre_parse_ctx_t *ctx)
 
 	case PARSE_RESTORE_CFLAGS:
 	  ctx->cflags = tre_stack_pop_int(stack);
+	  break;
+
+	default:
+	  assert(0);
 	  break;
 	}
     }
