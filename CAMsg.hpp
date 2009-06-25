@@ -82,6 +82,8 @@ class CAMsg
 				}
 
 			static SINT32 printMsg(UINT32 typ,const char* format,...);
+			//static SINT32 printBytes(UINT32 typ,const char* msg,const UINT8* bytes,UINT32 bytesLen);
+
 #ifndef ONLY_LOCAL_PROXY
 			static SINT32 openEncryptedLog();
 			static SINT32 closeEncryptedLog();
@@ -91,7 +93,6 @@ class CAMsg
 			UINT32 m_NrOfWrites;
 			SINT32 openLog(UINT32 type);
 			SINT32 closeLog();
-			SINT32 rotateLog();
 			UINT32 m_uLogType;
 			UINT32 m_lastLogFileNumber;
 			bool m_alreadyOpened;
