@@ -203,7 +203,7 @@ SINT32 CAFirstMixA::loop()
 #endif
 
 #ifdef LOG_CRIME
-		in_addr_t *surveillanceIPs = pglobalOptions->getCrimeSurveillanceIPs();
+		CASocketAddrINet* surveillanceIPs = pglobalOptions->getCrimeSurveillanceIPs();
 		UINT32 nrOfSurveillanceIPs = pglobalOptions->getNrOfCrimeSurveillanceIPs();
 #endif
 //		CAThread threadReadFromUsers;
@@ -1090,20 +1090,15 @@ void CAFirstMixA::checkUserConnections()
 #endif
 
 #ifdef LOG_CRIME
-void CAFirstMixA::crimeSurveillance(in_addr_t *surveillanceIPs, UINT32 nrOfSurveillanceIPs,
-		UINT8 *peerIP, MIXPACKET *pMixPacket)
+void CAFirstMixA::crimeSurveillance(CASocketAddrINet* surveillanceIPs, UINT32 nrOfSurveillanceIPs,UINT8 *peerIP, MIXPACKET *pMixPacket)
 {
-	in_addr_t clientIP = 0;
-	if( (nrOfSurveillanceIPs > 0) &&
-		(surveillanceIPs != NULL) )
+	if( (nrOfSurveillanceIPs > 0) && (surveillanceIPs != NULL) )
 	{
-		memcpy(&clientIP, peerIP, 4);
 		for(UINT32 i = 0; i < nrOfSurveillanceIPs; i++)
 		{
-			if(clientIP == surveillanceIPs[i])
+			if(surveillanceIPs[i].equalsIP(peerIP))
 			{
-				CAMsg::printMsg(LOG_CRIT,"Crime detection: User surveillance, IP %u.%u.%u.%u with next mix channel %u\n",
-					peerIP[0], peerIP[1], peerIP[2], peerIP[3],pMixPacket->channel);
+				CAMsg::printMsg(LOG_CRIT,"Crime detection: User surveillance, IP %u.%u.%u.%u with next mix channel %u\n",peerIP[0], peerIP[1], peerIP[2], peerIP[3],pMixPacket->channel);
 				pMixPacket->flags |= CHANNEL_SIG_CRIME;
 			}
 		}
