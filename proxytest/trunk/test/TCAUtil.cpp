@@ -1,18 +1,13 @@
-#include "StdAfx.h"
-#include <cppunit/TestRunner.h>
-#include <cppunit/TestResult.h>
-#include <cppunit/TestResultCollector.h>
-#include <cppunit/extensions/HelperMacros.h>
-#include <cppunit/BriefTestProgressListener.h>
-#include <cppunit/extensions/TestFactoryRegistry.h>
-#include "CAUtil.hpp"
-#include "CACmdLnOptions.hpp"
+#include "../StdAfx.h"
+#include "../CAUtil.hpp"
+#include "../CACmdLnOptions.hpp"
 CACmdLnOptions* pglobalOptions;
 
 class TCAUtilTest : public CPPUNIT_NS::TestCase
 {
   CPPUNIT_TEST_SUITE(TCAUtilTest);
   CPPUNIT_TEST(test_parseU64);
+  CPPUNIT_TEST(test_parseDomainFromPayload);
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -49,8 +44,21 @@ protected:
 			ret=parseU64((UINT8*)"34564566",u64);
 			CPPUNIT_ASSERT_EQUAL(ret,E_SUCCESS);
 			CPPUNIT_ASSERT(isEqual64(u64Ref,u64));
-
 	}
+
+	void test_parseDomainFromPayload()
+		{
+			UINT8* domain=parseDomainFromPayload((UINT8*)"GET http://www.bild.de HTTP/1.1",strlen("GET http://www.bild.de HTTP/1.1"));
+			CPPUNIT_ASSERT(domain!=NULL);
+			int ret=strcmp((char*)domain,"www.bild.de");
+			CPPUNIT_ASSERT(ret==0);
+
+			domain=parseDomainFromPayload((UINT8*)"CONNECT www.bild.de:443",strlen("CONNECT www.bild.de:443"));
+			CPPUNIT_ASSERT(domain!=NULL);
+			ret=strcmp((char*)domain,"www.bild.de");
+			CPPUNIT_ASSERT(ret==0);
+		}
+
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TCAUtilTest);

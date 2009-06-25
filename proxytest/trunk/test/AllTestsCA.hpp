@@ -28,9 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __ALLTESTSCA__
 #define __ALLTESTSCA__
 
-#include <cppunit/extensions/HelperMacros.h>
-#include <cppunit/TestFixture.h>
-
+#include "../StdAfx.h"
 /**
 * This class integrates all tests of the CA classes into one suite.
 */
