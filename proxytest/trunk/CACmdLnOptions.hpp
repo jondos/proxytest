@@ -519,7 +519,7 @@ class CACmdLnOptions
 				return m_arCrimeRegExpsPayload;
 			}
 
-			in_addr_t *getCrimeSurveillanceIPs()
+			CASocketAddrINet* getCrimeSurveillanceIPs()
 			{
 				return m_surveillanceIPs;
 			}
@@ -734,7 +734,7 @@ class CACmdLnOptions
 			regex_t* m_arCrimeRegExpsPayload;
 			UINT32 m_nCrimeRegExpsPayload;
 			UINT32 m_nrOfSurveillanceIPs;
-			in_addr_t *m_surveillanceIPs;
+			CASocketAddrINet* m_surveillanceIPs;
 #endif
 
 #ifdef DATA_RETENTION_LOG
