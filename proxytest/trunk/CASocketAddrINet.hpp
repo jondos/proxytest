@@ -90,6 +90,12 @@ class CASocketAddrINet:private sockaddr_in,public CASocketAddr
 				{
 					return sin_addr.s_addr==INADDR_ANY;
 				}
+			
+			bool equalsIP(UINT8 ip[4]) const
+				{
+					return (memcmp(ip,&sin_addr.s_addr,4)==0);
+				}
+			
 			static SINT32 getLocalHostName(UINT8* buff,UINT32 len);
 			static SINT32 getLocalHostIP(UINT8 ip[4]);
 //			operator LPSOCKADDR(){return (::LPSOCKADDR)m_pAddr;}
