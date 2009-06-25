@@ -38,6 +38,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	char* internal_sbrk_start=(char*)sbrk(0);
 #endif
 
+#ifdef LOG_CRIME
+	#include "tre/regex.h"
+#endif
 	/**
 *	Removes leading and ending whitespaces (chars<=32) from a zero terminated string.
 *		@param s input string (null terminated)
@@ -827,9 +830,11 @@ SINT32 setDOMElementValue(DOMElement* pElem, SINT32 value)
 
 SINT32 setDOMElementValue(DOMElement* pElem,double floatValue)
 	{
-		char tmp[400];
-		snprintf(tmp,400, "%.2f", floatValue);
+		char *tmp = NULL;
+		asprintf(&tmp, "%.2f", floatValue);
 		setDOMElementValue(pElem,(UINT8 *)tmp);
+		//NOTE: asprintf allocates with malloc
+		free(tmp);
 		return E_SUCCESS;
 	}
 
@@ -1595,6 +1600,154 @@ SINT32 readPasswd(UINT8* buff,UINT32 len)
 	return E_SUCCESS;
 }
 
+#ifdef LOG_CRIME
+
+#define NR_OF_HTTP_VERBS 8
+#define MAX_VERB_PARSE_LENGTH 17 //the maximum length to parse for a http verb: 10 + 7 (10 maximum whitespaces + 7 which is the length of the longest http verb)
+#define CONNECT_INDEX 2 //index of the verb "CONNECT" in the array HTTP_VERBS
+regex_t *httpVerbRegExps = NULL;
+const char *HTTP_VERBS[] = {"GET", "POST", "CONNECT", "HEAD" , "PUT", "OPTIONS", "DELETE", "TRACE"};
+
+UINT32 *HTTP_VERBS_LENGTH = new UINT32[NR_OF_HTTP_VERBS];
+
+void initHttpVerbLengths()
+{
+	httpVerbRegExps = new regex_t[NR_OF_HTTP_VERBS];
+
+	for(int i=0; i < NR_OF_HTTP_VERBS; i++)
+	{
+		HTTP_VERBS_LENGTH[i] = strlen(HTTP_VERBS[i]);
+		//regcomp(&httpVerbRegExps[i], HTTP_VERBS[i], ( REG_EXTENDED | REG_ICASE | REG_NOSUB));
+	}
+}
+
+
+
+//Assuming we have aligned HTTP or SOCKS protocolData
+
+UINT8 *parseDomainFromPayload(const UINT8 *payloadData, UINT32 payloadDataLength)
+{
+	if( (payloadDataLength < 5) ||
+		(payloadDataLength > PAYLOAD_SIZE) )
+	{
+		return NULL;
+	}
+
+	if( (payloadData[0] == 0x05) &&
+		(payloadData[1] & 0x03) )
+	{
+		//in this case we have a SOCKS message
+		UINT32 tempUrlLength = 0, urlStartOffset = 0;
+		//of which address type is the dst address?
+		switch(payloadData[3])
+		{
+			case 0x01: //IPv4_Address
+			{
+				tempUrlLength = 4;
+				urlStartOffset = 4;
+				break;
+			}
+
+			case 0x03: //Domain name
+			{
+				tempUrlLength = payloadData[4];
+				urlStartOffset = 5;
+				//CAMsg::printMsg(LOG_ERR,"SOCKS v5 domain name length %u.\n", tempUrlLength);
+				break;
+			}
+
+			case 0x4: //IPv6 address
+			{
+				tempUrlLength = 16;
+				urlStartOffset = 4;
+				break;
+			}
+
+			default:
+			{
+				return NULL;
+			}
+		}
+		if(payloadDataLength < (urlStartOffset + tempUrlLength) )
+		{
+			return NULL;
+		}
+		UINT8 *address = new UINT8[tempUrlLength+1];
+		memcpy(address, payloadData+urlStartOffset, tempUrlLength);
+		address[tempUrlLength] = 0;
+		//CAMsg::printMsg(LOG_ERR,"SOCKS v5 found with address %s.\n", address);
+		return address;
+	}
+	else
+	{
+		//In this case the message is handled as a common HTTP request
+		UINT8 *firstNewLine = (UINT8*) memchr(payloadData, 10 ,payloadDataLength);
+		UINT32 firstNewLineIx = (firstNewLine != NULL) ? (UINT32) (firstNewLine - payloadData + 1) : payloadDataLength;
+		//Make sure the parsing will not exceed the first line of the message.
+		UINT32 maxParseLength = min(firstNewLineIx, MAX_VERB_PARSE_LENGTH);
+		UINT8 *httpVerb = NULL;
+		for(int i=0; i < NR_OF_HTTP_VERBS; i++)
+		{
+#ifdef HAVE_STRNSTR
+			httpVerb = (UINT8*) strnstr((const char*) payloadData, HTTP_VERBS[i], maxParseLength);
+#else
+			httpVerb = (UINT8*) memmem((const char*) payloadData, maxParseLength,
+									HTTP_VERBS[i], strlen(HTTP_VERBS[i]));
+#endif
+			if(httpVerb != NULL)
+			{
+				//Domain names have a maximum length of 255 bytes.
+				UINT32 maxURLParseLength = min(255, (UINT32) ((firstNewLineIx - ((UINT32) (httpVerb - payloadData)) - HTTP_VERBS_LENGTH[i] ) + 1) );
+				UINT8 *tempOut = new UINT8[maxURLParseLength+1];
+				UINT8* oldtempOut = tempOut;
+				UINT8 *token = NULL, *domainName = NULL;
+				memset(tempOut, 0, maxURLParseLength+1);
+				memcpy(tempOut, (httpVerb+HTTP_VERBS_LENGTH[i]), maxURLParseLength);
+
+				if(i != CONNECT_INDEX) // means the request method is not CONNECT
+				{
+					token = (UINT8 *) strsep((char **) &tempOut, "/");
+					//make sure there is something like a protocol prefix in front of the domain name
+					if( (token != NULL) && (strstr((char *)token, ":") != NULL) )
+					{
+						for(int j = 0; (j < 2) && (token != NULL); j++) //j < 2 means: after the second '/' token
+						{
+							token = (UINT8 *) strsep((char **) &tempOut, "/");
+						}
+					}
+					else if(token != NULL)
+					{
+						token = NULL;
+					}
+
+				}
+				else
+				{
+					//in case we have a CONNECT request which only contains the domain name
+					//so simply cut of after the following sequence of whitespaces...
+					UINT8 *dNameptr = tempOut + strspn((char *)tempOut, " ");
+					//... and don't forget the trailing HTTP/*.* sequence
+					token = (UINT8 *) strsep((char **) &dNameptr, " ");
+
+				}
+
+				if(token != NULL)
+				{
+					UINT32 strlenToken = strlen((char *)token);
+					domainName = new UINT8[strlenToken+1];
+					memcpy(domainName, token, strlenToken);
+					domainName[strlenToken]=0;
+				}
+				delete [] oldtempOut;
+				//CAMsg::printMsg(LOG_ERR,"URL out: %s\n", domainName);
+				return domainName;
+			}
+		}
+	}
+	return NULL;
+}
+
+#endif
 /**
  * Parses a timestamp in JDBC timestamp escape format (as it comes from the BI)
  * and outputs the value in seconds since the epoch.

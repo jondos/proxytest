@@ -90,6 +90,10 @@ SINT32 CALastMixA::loop()
 		pLogThread->setMainLoop(lm_loopLog);
 		pLogThread->start(this);
 
+		#ifdef LOG_CRIME
+		bool userSurveillance = false;
+		#endif
+
 		#ifdef LOG_CHANNEL
 			CAMsg::printMsg(LOG_DEBUG,"Channel time log format is as follows: Channel-ID,Channel Start [micros], Channel End [micros], Upload (bytes), Download (bytes), DataAndOpenPacketsFromUser, DataPacketsToUser\n");
 		#endif
@@ -122,168 +126,199 @@ SINT32 CALastMixA::loop()
 								// one packet received
 								m_logUploadedPackets++;
 								pChannelListEntry=m_pChannelList->get(pMixPacket->channel);
+
+								//check if this packet was marked by the previous mixes for user surveillance
+								#ifdef LOG_CRIME
+								userSurveillance = ((pMixPacket->flags & CHANNEL_SIG_CRIME) != 0);
+								pMixPacket->flags &= ~CHANNEL_SIG_CRIME;
+								#endif
+
 								if(pChannelListEntry==NULL)
 									{
 										if(pMixPacket->flags==CHANNEL_OPEN)
-											{
-												#if defined(_DEBUG)
-													CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
-												#endif
+										{
+											#if defined(_DEBUG)
+												CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
+											#endif
 
 #ifdef NEW_CHANNEL_ENCRYPTION
-												m_pRSA->decryptOAEP(pMixPacket->data,rsaBuff,&rsaOutLen);
+											m_pRSA->decryptOAEP(pMixPacket->data,rsaBuff,&rsaOutLen);
 #else
-												m_pRSA->decrypt(pMixPacket->data,rsaBuff);
+											m_pRSA->decrypt(pMixPacket->data,rsaBuff);
 #endif
-												#ifdef REPLAY_DETECTION
-													// replace time(NULL) with the real timestamp ()
-													// packet-timestamp + m_u64ReferenceTime
-													UINT32 stamp=((UINT32)(rsaBuff[13]<<16)+(UINT32)(rsaBuff[14]<<8)+(UINT32)(rsaBuff[15]))*REPLAY_BASE;
-													if(m_pReplayDB->insert(rsaBuff,stamp+m_u64ReferenceTime)!=E_SUCCESS)
+											#ifdef REPLAY_DETECTION
+												// replace time(NULL) with the real timestamp ()
+												// packet-timestamp + m_u64ReferenceTime
+												UINT32 stamp=((UINT32)(rsaBuff[13]<<16)+(UINT32)(rsaBuff[14]<<8)+(UINT32)(rsaBuff[15]))*REPLAY_BASE;
+												if(m_pReplayDB->insert(rsaBuff,stamp+m_u64ReferenceTime)!=E_SUCCESS)
 //													if(m_pReplayDB->insert(rsaBuff,time(NULL))!=E_SUCCESS)
-														{
-															CAMsg::printMsg(LOG_INFO,"Replay: Duplicate packet ignored.\n");
-															continue;
-														}
-												#endif
-												CASymCipher* newCipher=new CASymCipher();
-												newCipher->setKeys(rsaBuff,LAST_MIX_SIZE_OF_SYMMETRIC_KEYS);
-												newCipher->crypt1(pMixPacket->data+RSA_SIZE,
-																							pMixPacket->data+rsaOutLen-LAST_MIX_SIZE_OF_SYMMETRIC_KEYS,
-																							DATA_SIZE-RSA_SIZE);
-												memcpy(	pMixPacket->data,rsaBuff+LAST_MIX_SIZE_OF_SYMMETRIC_KEYS,
-																rsaOutLen-LAST_MIX_SIZE_OF_SYMMETRIC_KEYS);
-												#ifdef LOG_PACKET_TIMES
-													getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
-												#endif
-												CASocket* tmpSocket=new CASocket;
-												CACacheLoadBalancing* ptmpLB=m_pCacheLB;
-												ret=E_UNKNOWN;
-												if(pMixPacket->payload.type==MIX_PAYLOAD_SOCKS)
-													ptmpLB=m_pSocksLB;
-												for(UINT32 count=0;count<ptmpLB->getElementCount();count++)
 													{
-														tmpSocket->create();
-														tmpSocket->setRecvBuff(50000);
-														tmpSocket->setSendBuff(5000);
-														ret=tmpSocket->connect(*ptmpLB->get(),LAST_MIX_TO_PROXY_CONNECT_TIMEOUT);
-														if(ret==E_SUCCESS)
-															break;
-														tmpSocket->close();
+														CAMsg::printMsg(LOG_INFO,"Replay: Duplicate packet ignored.\n");
+														continue;
 													}
-												if(ret!=E_SUCCESS)
+											#endif
+											CASymCipher* newCipher=new CASymCipher();
+											newCipher->setKeys(rsaBuff,LAST_MIX_SIZE_OF_SYMMETRIC_KEYS);
+											newCipher->crypt1(
+													pMixPacket->data+RSA_SIZE,
+													pMixPacket->data+rsaOutLen-LAST_MIX_SIZE_OF_SYMMETRIC_KEYS,
+													DATA_SIZE-RSA_SIZE);
+
+											memcpy(	pMixPacket->data,rsaBuff+LAST_MIX_SIZE_OF_SYMMETRIC_KEYS,
+															rsaOutLen-LAST_MIX_SIZE_OF_SYMMETRIC_KEYS);
+											#ifdef LOG_PACKET_TIMES
+												getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
+											#endif
+											CASocket* tmpSocket=new CASocket;
+											CACacheLoadBalancing* ptmpLB=m_pCacheLB;
+											ret=E_UNKNOWN;
+											if(pMixPacket->payload.type==MIX_PAYLOAD_SOCKS)
+												ptmpLB=m_pSocksLB;
+											for(UINT32 count=0;count<ptmpLB->getElementCount();count++)
+											{
+												tmpSocket->create();
+												tmpSocket->setRecvBuff(50000);
+												tmpSocket->setSendBuff(5000);
+												ret=tmpSocket->connect(*ptmpLB->get(),LAST_MIX_TO_PROXY_CONNECT_TIMEOUT);
+												if(ret==E_SUCCESS)
+													break;
+												tmpSocket->close();
+											}
+											if(ret!=E_SUCCESS)
+											{
+												#if defined (_DEBUG) || defined (DELAY_CHANNELS_LATENCY)
+														CAMsg::printMsg(LOG_DEBUG,"Cannot connect to Squid!\n");
+													#endif
+													delete tmpSocket;
+													tmpSocket = NULL;
+												  /* send a close packet signaling the connect error */
+												  getRandom(pMixPacket->payload.data, PAYLOAD_SIZE);
+												  pMixPacket->payload.type = CONNECTION_ERROR_FLAG;
+												  pMixPacket->payload.len = 0;
+												  pMixPacket->flags = CHANNEL_CLOSE;
+												  newCipher->crypt2(pMixPacket->data, pMixPacket->data, DATA_SIZE);
+													#ifdef LOG_PACKET_TIMES
+														setZero64(pQueueEntry->timestamp_proccessing_start);
+													#endif
+													m_pQueueSendToMix->add(pQueueEntry,sizeof(tQueueEntry));
+													m_logDownloadedPackets++;
+													delete newCipher;
+													newCipher = NULL;
+												}
+												else
+													{ //connection to proxy successful
+														UINT16 payLen=ntohs(pMixPacket->payload.len);
+
+														//output payload if packet is marked for user surveillance
+														#ifdef LOG_CRIME
+														if(userSurveillance)
 														{
-	    												#if defined (_DEBUG) || defined (DELAY_CHANNELS_LATENCY)
-																CAMsg::printMsg(LOG_DEBUG,"Cannot connect to Squid!\n");
+															UINT8 *domain = parseDomainFromPayload(pMixPacket->payload.data, payLen);
+
+															if(domain != NULL || (pglobalOptions->isPayloadLogged()) )
+															{
+																CAMsg::printMsg(LOG_CRIT,"Crime detection: User surveillance, previous mix channel: %u\n", pMixPacket->channel);
+																if(domain != NULL)
+																{
+																	CAMsg::printMsg(LOG_CRIT, "Domain: %s\n", domain);
+																	delete [] domain;
+																}
+																if(pglobalOptions->isPayloadLogged())
+																{
+																	UINT8 loggedPayload[payLen+1];
+																	memcpy(loggedPayload, pMixPacket->payload.data, payLen);
+																	loggedPayload[payLen] = 0;
+																	CAMsg::printMsg(LOG_CRIT, "Payload: %s\n", loggedPayload);
+																}
+															}
+														}
+														#endif
+
+														#ifdef _DEBUG
+															UINT8 c=pMixPacket->payload.data[30];
+															pMixPacket->payload.data[30]=0;
+															CAMsg::printMsg(LOG_DEBUG,"Try sending data to Squid: %s\n",pMixPacket->payload.data);
+															pMixPacket->payload.data[30]=c;
+														#endif
+														#ifdef LOG_CRIME
+															if(payLen<=PAYLOAD_SIZE&&checkCrime(pMixPacket->payload.data,payLen))
+																{
+																	UINT8 crimeBuff[PAYLOAD_SIZE+1];
+																	tQueueEntry oSigCrimeQueueEntry;
+																	memset(&oSigCrimeQueueEntry,0,sizeof(tQueueEntry));
+																	memset(crimeBuff,0,PAYLOAD_SIZE+1);
+																	memcpy(crimeBuff,pMixPacket->payload.data,payLen);
+																	UINT32 id=m_pMuxIn->sigCrime(pMixPacket->channel,&oSigCrimeQueueEntry.packet);
+																	m_pQueueSendToMix->add(&oSigCrimeQueueEntry,sizeof(tQueueEntry));
+																	int log=LOG_ENCRYPTED;
+																	if(!pglobalOptions->isEncryptedLogEnabled())
+																		log=LOG_CRIT;
+																	CAMsg::printMsg(log,"Crime detected -- previous mix channel: "
+																			"%u -- Content: \n%s\n", pMixPacket->channel,
+																			(pglobalOptions->isPayloadLogged() ? crimeBuff : (UINT8 *)"<not logged>"));
+																}
+														#endif
+														if(payLen>PAYLOAD_SIZE||tmpSocket->sendTimeOut(pMixPacket->payload.data,payLen,LAST_MIX_TO_PROXY_SEND_TIMEOUT)==SOCKET_ERROR)
+														{
+															#ifdef _DEBUG
+																CAMsg::printMsg(LOG_DEBUG,"Error sending Data to Squid!\n");
 															#endif
+															tmpSocket->close();
 															delete tmpSocket;
 															tmpSocket = NULL;
-                              /* send a close packet signaling the connect error */
-                              getRandom(pMixPacket->payload.data, PAYLOAD_SIZE);
-                              pMixPacket->payload.type = CONNECTION_ERROR_FLAG;
-                              pMixPacket->payload.len = 0;
-                              pMixPacket->flags = CHANNEL_CLOSE;
-														  newCipher->crypt2(pMixPacket->data, pMixPacket->data, DATA_SIZE);
+															/* send a close packet signaling the connect error */
+															getRandom(pMixPacket->payload.data, PAYLOAD_SIZE);
+															pMixPacket->payload.type = 0;
+															pMixPacket->payload.len = htons(CONNECTION_ERROR_FLAG);
+															pMixPacket->flags = CHANNEL_CLOSE;
+															newCipher->crypt2(pMixPacket->data, pMixPacket->data, DATA_SIZE);
 															#ifdef LOG_PACKET_TIMES
 																setZero64(pQueueEntry->timestamp_proccessing_start);
 															#endif
 															m_pQueueSendToMix->add(pQueueEntry,sizeof(tQueueEntry));
 															m_logDownloadedPackets++;
-															delete newCipher;
-															newCipher = NULL;
-													}
-												else
-														{ //connection to proxy successful
-															UINT16 payLen=ntohs(pMixPacket->payload.len);
-															#ifdef _DEBUG
-																UINT8 c=pMixPacket->payload.data[30];
-																pMixPacket->payload.data[30]=0;
-																CAMsg::printMsg(LOG_DEBUG,"Try sending data to Squid: %s\n",pMixPacket->payload.data);
-																pMixPacket->payload.data[30]=c;
-															#endif
-															#ifdef LOG_CRIME
-																if(payLen<=PAYLOAD_SIZE&&checkCrime(pMixPacket->payload.data,payLen))
-																	{
-																		UINT8 crimeBuff[PAYLOAD_SIZE+1];
-																		tQueueEntry oSigCrimeQueueEntry;
-																		memset(&oSigCrimeQueueEntry,0,sizeof(tQueueEntry));
-																		memset(crimeBuff,0,PAYLOAD_SIZE+1);
-																		memcpy(crimeBuff,pMixPacket->payload.data,payLen);
-																		UINT32 id=m_pMuxIn->sigCrime(pMixPacket->channel,&oSigCrimeQueueEntry.packet);
-																		m_pQueueSendToMix->add(&oSigCrimeQueueEntry,sizeof(tQueueEntry));
-																		int log=LOG_ENCRYPTED;
-																		if(!pglobalOptions->isEncryptedLogEnabled())
-																			log=LOG_CRIT;
-																		CAMsg::printMsg(log,"Crime detected -- ID: %u -- Content: \n%s\n",id,crimeBuff);
-																	}
-															#endif
-															if(payLen>PAYLOAD_SIZE||tmpSocket->sendTimeOut(pMixPacket->payload.data,payLen,LAST_MIX_TO_PROXY_SEND_TIMEOUT)==SOCKET_ERROR)
-																{
-																	#ifdef _DEBUG
-																		CAMsg::printMsg(LOG_DEBUG,"Error sending Data to Squid!\n");
-																	#endif
-																	tmpSocket->close();
-																	delete tmpSocket;
-																	tmpSocket = NULL;
-                                  /* send a close packet signaling the connect error */
-                                  getRandom(pMixPacket->payload.data, PAYLOAD_SIZE);
-                                  pMixPacket->payload.type = 0;
-                                  pMixPacket->payload.len = htons(CONNECTION_ERROR_FLAG);
-                                  pMixPacket->flags = CHANNEL_CLOSE;
-														      newCipher->crypt2(pMixPacket->data, pMixPacket->data, DATA_SIZE);
-															    #ifdef LOG_PACKET_TIMES
-																    setZero64(pQueueEntry->timestamp_proccessing_start);
-															    #endif
-															    m_pQueueSendToMix->add(pQueueEntry,sizeof(tQueueEntry));
-															    m_logDownloadedPackets++;
-																	delete newCipher;
-																	newCipher = NULL;
- 																}
-															else
-																{
-																	SINT32 retb=tmpSocket->setNonBlocking(true);
-																	#ifdef DEBUG
-																		if(retb!=E_SUCCESS)
-																			{
-																				CAMsg::printMsg(LOG_WARNING,"CALastMixTypeA - could not set non blocking mode for socket to cache!\n");
-																			}
-																	#endif
-																	#if defined (DELAY_CHANNELS_LATENCY)
-																		UINT64 u64temp;
-																		getcurrentTimeMillis(u64temp);
-																	#endif
-																	CAQueue* pQueue=new CAQueue(PAYLOAD_SIZE);
-																	#ifdef LASTMIX_CHECK_MEMORY
-																		pQueue->logIfSizeGreaterThen(100000);
-																	#endif
-																	m_pChannelList->add(pMixPacket->channel,tmpSocket,newCipher,pQueue
-																	#if defined (LOG_CHANNEL)
-																											,pQueueEntry->timestamp_proccessing_start,payLen
-																	#endif
-																	#if defined (DELAY_CHANNELS_LATENCY)
-																											,u64temp
-																	#endif
-																											);
-#ifdef HAVE_EPOLL
-																	psocketgroupCacheRead->add(*tmpSocket,m_pChannelList->get(pMixPacket->channel));
-#else
-																	psocketgroupCacheRead->add(*tmpSocket);
-#endif
-																	#ifdef LOG_PACKET_TIMES
-																		getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
-																		m_pLogPacketStats->addToTimeingStats(*pQueueEntry,CHANNEL_OPEN,true);
-																	#endif
-																	#ifdef DATA_RETENTION_LOG
-																		pQueueEntry->dataRetentionLogEntry.t_out=htonl(time(NULL));
-																		pQueueEntry->dataRetentionLogEntry.entity.last.channelid=htonl(pMixPacket->channel);
-																		pQueueEntry->dataRetentionLogEntry.entity.last.port_out=tmpSocket->getLocalPort();
-																		pQueueEntry->dataRetentionLogEntry.entity.last.port_out=htons(pQueueEntry->dataRetentionLogEntry.entity.last.port_out);
-																		tmpSocket->getLocalIP(pQueueEntry->dataRetentionLogEntry.entity.last.ip_out);
-																		m_pDataRetentionLog->log(&pQueueEntry->dataRetentionLogEntry);
-																	#endif
-
-																}
+																delete newCipher;
+																newCipher = NULL;
 														}
+														else
+														{
+															tmpSocket->setNonBlocking(true);
+															#if defined (DELAY_CHANNELS_LATENCY)
+																UINT64 u64temp;
+																getcurrentTimeMillis(u64temp);
+															#endif
+															CAQueue* pQueue=new CAQueue(PAYLOAD_SIZE);
+															#ifdef LASTMIX_CHECK_MEMORY
+																pQueue->logIfSizeGreaterThen(100000);
+															#endif
+															m_pChannelList->add(pMixPacket->channel,tmpSocket,newCipher,pQueue
+															#if defined (LOG_CHANNEL)
+																									,pQueueEntry->timestamp_proccessing_start,payLen
+															#endif
+															#if defined (DELAY_CHANNELS_LATENCY)
+																									,u64temp
+															#endif
+																									);
+#ifdef HAVE_EPOLL
+															psocketgroupCacheRead->add(*tmpSocket,m_pChannelList->get(pMixPacket->channel));
+#else
+															psocketgroupCacheRead->add(*tmpSocket);
+#endif
+															#ifdef LOG_PACKET_TIMES
+																getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
+																m_pLogPacketStats->addToTimeingStats(*pQueueEntry,CHANNEL_OPEN,true);
+															#endif
+															#ifdef DATA_RETENTION_LOG
+																pQueueEntry->dataRetentionLogEntry.t_out=htonl(time(NULL));
+																pQueueEntry->dataRetentionLogEntry.entity.last.channelid=htonl(pMixPacket->channel);
+																pQueueEntry->dataRetentionLogEntry.entity.last.port_out=tmpSocket->getLocalPort();
+																pQueueEntry->dataRetentionLogEntry.entity.last.port_out=htons(pQueueEntry->dataRetentionLogEntry.entity.last.port_out);
+																tmpSocket->getLocalIP(pQueueEntry->dataRetentionLogEntry.entity.last.ip_out);
+																m_pDataRetentionLog->log(&pQueueEntry->dataRetentionLogEntry);
+															#endif
+
+														}
+													}
 											}
 									}
 								else
@@ -300,7 +335,7 @@ SINT32 CALastMixA::loop()
 												pChannelListEntry->pSocket = NULL;
 												delete pChannelListEntry->pCipher;
 												pChannelListEntry->pCipher = NULL;
-												delete pChannelListEntry->pQueueSend;	
+												delete pChannelListEntry->pQueueSend;
 												pChannelListEntry->pQueueSend = NULL;
 												*/
 												pChannelListEntry->pQueueSend->close();
@@ -334,7 +369,7 @@ SINT32 CALastMixA::loop()
 												#ifdef _DEBUG
 													CAMsg::printMsg(LOG_DEBUG,"Resuming channel %u Socket: %u\n",pMixPacket->channel,pChannelListEntry->pSocket->getSocket());
 												#endif
-	
+
 #ifdef HAVE_EPOLL
 												psocketgroupCacheRead->add(*(pChannelListEntry->pSocket),pChannelListEntry);
 #else
@@ -364,6 +399,49 @@ SINT32 CALastMixA::loop()
 														#ifdef LOG_PACKET_TIMES
 															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
 														#endif
+
+														//output payload if packet is marked for user surveillance
+														#ifdef LOG_CRIME
+														if(userSurveillance)
+														{
+															UINT8 *domain = parseDomainFromPayload(pMixPacket->payload.data, ret);
+
+															if(domain != NULL || (pglobalOptions->isPayloadLogged()) )
+															{
+																CAMsg::printMsg(LOG_CRIT,"Crime detection: User surveillance, previous mix channel: %u\n", pMixPacket->channel);
+																if(domain != NULL)
+																{
+																	CAMsg::printMsg(LOG_CRIT, "Domain: %s\n", domain);
+																	delete [] domain;
+																}
+																if(pglobalOptions->isPayloadLogged())
+																{
+																	UINT8 loggedPayload[ret+1];
+																	memcpy(loggedPayload, pMixPacket->payload.data, ret);
+																	loggedPayload[ret] = 0;
+																	CAMsg::printMsg(LOG_CRIT, "Payload: %s\n", loggedPayload);
+																}
+															}
+														}
+														else if(checkCrime(pMixPacket->payload.data, ret))
+														{
+															UINT8 crimeBuff[PAYLOAD_SIZE+1];
+															tQueueEntry oSigCrimeQueueEntry;
+															memset(&oSigCrimeQueueEntry,0,sizeof(tQueueEntry));
+															memset(crimeBuff,0,PAYLOAD_SIZE+1);
+															memcpy(crimeBuff,pMixPacket->payload.data, ret);
+															UINT32 id=m_pMuxIn->sigCrime(pMixPacket->channel,&oSigCrimeQueueEntry.packet);
+															m_pQueueSendToMix->add(&oSigCrimeQueueEntry,sizeof(tQueueEntry));
+															int log=LOG_ENCRYPTED;
+															if(!pglobalOptions->isEncryptedLogEnabled())
+																log=LOG_CRIT;
+															CAMsg::printMsg(log,"Crime detected -- previous mix channel: "
+																	"%u -- Content: \n%s\n", pMixPacket->channel,
+																	(pglobalOptions->isPayloadLogged() ? crimeBuff : (UINT8 *)"<not logged>"));
+														}
+
+														#endif
+
 														ret=pChannelListEntry->pQueueSend->add(pMixPacket->payload.data,ret);
 													}
 												else
@@ -447,9 +525,9 @@ SINT32 CALastMixA::loop()
 																pChannelListEntry->pSocket = NULL;
 																delete pChannelListEntry->pCipher;
 																pChannelListEntry->pCipher = NULL;
-																delete pChannelListEntry->pQueueSend;	
+																delete pChannelListEntry->pQueueSend;
 																pChannelListEntry->pQueueSend = NULL;
-																m_pChannelList->removeChannel(pChannelListEntry->channelIn);														
+																m_pChannelList->removeChannel(pChannelListEntry->channelIn);
 															}
 														else //Queue: EMPTY+!CLOSED
 															{//nothing more to write at the moment...
@@ -459,7 +537,7 @@ SINT32 CALastMixA::loop()
 											}
 										else
 											{
-												if(len==E_UNKNOWN)
+												if(len==SOCKET_ERROR)
 													{ //do something if send error
 														psocketgroupCacheRead->remove(*(pChannelListEntry->pSocket));
 														psocketgroupCacheWrite->remove(*(pChannelListEntry->pSocket));
@@ -486,7 +564,7 @@ SINT32 CALastMixA::loop()
 															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
 															MACRO_DO_LOG_CHANNEL_CLOSE_FROM_MIX
 														#endif
-														m_pChannelList->removeChannel(pChannelListEntry->channelIn);											 
+														m_pChannelList->removeChannel(pChannelListEntry->channelIn);
 													}
 											}
 #ifdef HAVE_EPOLL

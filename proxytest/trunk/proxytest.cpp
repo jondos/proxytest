@@ -598,7 +598,7 @@ int main(int argc, const char* argv[])
 		CAReplayDatabase::measurePerformance((UINT8*)"dbperformace.log",1,10000001,500000,10,100000);
 		exit(0);
 #endif
-		
+
 
 #ifdef DATA_RETENTION_LOG
 		if(sizeof(t_dataretentionLogEntry)!=18)
@@ -704,6 +704,10 @@ RESTART_MIX:
 #endif
 #ifdef SERVER_MONITORING
 		CAStatusManager::init();
+#endif
+
+#ifdef LOG_CRIME
+		initHttpVerbLengths();
 #endif
 
 #ifndef WIN32

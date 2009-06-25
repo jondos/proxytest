@@ -30,6 +30,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /**
  * All state and transition definitions can be found here
+ * The server monitoring observes different states for multiple status types.
+ * The status types are currently:
+ *
+ * 	1. "Network" which contains informations about the connection of the current mix to the others
+ * 	2. "Payment" refers to the current state of the mixes accounting instance module.
+ *  3. "System" reflects general information about the actual state of the mix process.
+ *
+ * A state has a level that shows if the current state of a mix is ok, unknown or critical.
+ * To realize a state machine events can be defined here. The events can be linked with states
+ * to realize transitions from one state to another if an event is fired.
+ *
+ *  Several macros can be found here for the definition of status types, states
+ *  and events. Transitions can also be realized via macros.
+ *
  */
 
 /* How many different status types exist*/
@@ -56,6 +70,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define EVER 1
 
+//all status types
 enum status_type
 {
 	stat_undef = -1,
@@ -69,6 +84,7 @@ enum status_type
 
 #define NR_STATUS_TYPES stat_all
 
+//enum type for the id of a state
 enum state_type
 {
 	st_ignore = -1,
@@ -94,6 +110,7 @@ enum state_type
 	st_sys_overall /* only represents the number all system states */
 };
 
+//enum type for the id of an event
 enum event_type
 {
 	/* networking events */
@@ -178,22 +195,23 @@ typedef enum state_type transition_t;
 typedef enum event_type event_type_t;
 typedef enum state_level state_level_t;
 
+//struct representing an event
 struct event
 {
-	event_type_t ev_type;
-	status_type_t ev_statusType;
-	char *ev_description;
+	event_type_t ev_type; //id of the event
+	status_type_t ev_statusType; //status to which the event belongs
+	char *ev_description; //text description of this event.
 };
 
 struct state
 {
-	state_type_t st_type;
-	status_type_t st_statusType;
-	state_level_t st_stateLevel;
-	char *st_description;
+	state_type_t st_type; //id of the state
+	status_type_t st_statusType; //status to which the state belongs
+	state_level_t st_stateLevel; //level of the state (e.g "ok", "critical")
+	char *st_description; //text description of this state.
 	struct event *st_cause;
 	struct state *st_prev;
-	transition_t *st_transitions;
+	transition_t *st_transitions; //pointer to the transitions which leads from this state to other states
 };
 
 typedef struct state state_t;
@@ -368,7 +386,7 @@ typedef struct event event_t;
 			SYS_EVENT_DEF(event_array, ev_sys_sigSegV, \
 					"mix caught SIG_SEGV")
 
-/* conveinience macros for special status state and event definitions */
+/* convenience macros for special status state and event definitions */
 #define NET_STATE_DEF(state_array, state_type, description, transitions, stateLevel) \
 			STATE_DEF(state_array, stat_networking, state_type, description, transitions, stateLevel)
 
@@ -393,18 +411,18 @@ typedef struct event event_t;
 			EVENT_DEF(event_array, stat_system, event_type, description)
 
 /* This macro is used for assigning state description and state transitions
- * to the initialized states in fucnction initStates
+ * to the initialized states in the function "initStates()"
  */
 #define STATE_DEF(state_array, status_type, state_type, description, transitions, stateLevel) \
-			state_array[status_type][state_type]->st_description = description; \
+			state_array[status_type][state_type]->st_description = (char *) description; \
 			state_array[status_type][state_type]->st_transitions = transitions; \
 			state_array[status_type][state_type]->st_stateLevel = stateLevel;
 /* Same for events description assignment */
 #define EVENT_DEF(event_array, status_type, event_type, description) \
-			event_array[status_type][event_type]->ev_description  = description;
+			event_array[status_type][event_type]->ev_description  = (char *) description;
 
 /**
- * a conveinience function for easily defining state transitions
+ * a convenience function for easily defining state transitions
  * @param s_type the status type of the state for which the transitions
  * 		  are to be defined
  * @param transitionCount the number of transitions to define

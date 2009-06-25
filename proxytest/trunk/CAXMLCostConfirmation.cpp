@@ -31,7 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAXMLCostConfirmation.hpp"
 #include "CAUtil.hpp"
 #include "CAMsg.hpp"
-#include "CAPriceInfo.hpp" 
+#include "CAPriceInfo.hpp"
 
 const char* const CAXMLCostConfirmation::ms_pStrElemName="CC";
 
@@ -51,10 +51,10 @@ CAXMLCostConfirmation* CAXMLCostConfirmation::getInstance(UINT8 * strXmlData,UIN
 		CAXMLCostConfirmation* pCC=new CAXMLCostConfirmation();
 		pCC->m_domDocument = parseDOMDocument(strXmlData, strXmlDataLen);
 		if(pCC->setValues()!=E_SUCCESS)
-			{
-				delete pCC;
-				pCC = NULL;
-			}
+		{
+			delete pCC;
+			pCC = NULL;
+		}
 		return pCC;
 	}
 
@@ -66,10 +66,10 @@ CAXMLCostConfirmation* CAXMLCostConfirmation::getInstance(DOMElement* elemRoot)
 		pCC->m_domDocument=createDOMDocument();
 		pCC->m_domDocument->appendChild(pCC->m_domDocument->importNode(elemRoot,true));
 		if(pCC->setValues()!=E_SUCCESS)
-			{
-				delete pCC;
-				pCC = NULL;
-			}
+		{
+			delete pCC;
+			pCC = NULL;
+		}
 		return pCC;
 	}
 
@@ -80,16 +80,16 @@ CAXMLCostConfirmation::~CAXMLCostConfirmation()
 
 		delete[] m_pStrPIID;
 		m_pStrPIID = NULL;
-		
-		
+
+
 		if (m_priceCerts != NULL)
 		{
 			for (UINT32 i = 0; i < m_priceCertsLen; i++)
 			{
 				if (m_priceCerts[i])
 				{
-					delete m_priceCerts[i];	
-					m_priceCerts[i] = NULL;			
+					delete m_priceCerts[i];
+					m_priceCerts[i] = NULL;
 				}
 			}
 			delete[] m_priceCerts;
@@ -99,7 +99,7 @@ CAXMLCostConfirmation::~CAXMLCostConfirmation()
 		{
 			m_domDocument->release();
 			m_domDocument=NULL;
-		}		
+		}
 	}
 
 
@@ -112,7 +112,7 @@ SINT32 CAXMLCostConfirmation::setValues()
 		{
 			return E_UNKNOWN;
 		}
-		
+
 		DOMElement* elem=NULL;
 
 
@@ -146,67 +146,67 @@ SINT32 CAXMLCostConfirmation::setValues()
 		else
 		{
 			return E_UNKNOWN;
-		}			
-			
+		}
+
 
 /** we do not use the price cert hashes for anything in the AI
  * except storing them as part of the xml string in the db
- * 
+ *
  * if you need them, make sure the destructor deletes them
- * (and initialize certArray with new(), otherwise it, and m_priceCerts with it, 
+ * (and initialize certArray with new(), otherwise it, and m_priceCerts with it,
  *  will be gone by the end of this method!!!)
- * 
+ *
  */
- 
+
  	//CAMsg::printMsg(LOG_DEBUG, "Parsing PriceCertificates\n");
- 
-		//parse PriceCertHash elements 
+
+		//parse PriceCertHash elements
 		//currently does not check syntax, e.g. whether <PriceCertHash> is within <PriceCertificates>
 		if (getDOMChildByName(elemRoot, "PriceCertificates", elem, false) != E_SUCCESS)
 		{
 			return E_UNKNOWN;
-		}		
-		
+		}
+
 		//CAMsg::printMsg(LOG_DEBUG, "Looking for PriceCertHash\n");
-		
-		// one last test if the tag is really in the right XML layer; throw away elemRoot here...		
+
+		// one last test if the tag is really in the right XML layer; throw away elemRoot here...
 		if (getDOMChildByName(elem, "PriceCertHash", elemRoot, false) != E_SUCCESS)
 		{
 			return E_UNKNOWN;
 		}
-		
+
 		//CAMsg::printMsg(LOG_DEBUG, "Parsing PriceCertHash\n");
-		
+
 		DOMNodeList* theNodes = getElementsByTagName(elem,"PriceCertHash");
 		if (theNodes->getLength() <= 0)
 		{
 			return E_UNKNOWN;
 		}
-		
+
 		//determine size and build array
 		m_priceCertsLen = theNodes->getLength();
 		m_priceCerts = new CAPriceInfo*[m_priceCertsLen];
-		
+
 		//loop through nodes
 		const DOMNode* curNode=NULL;
 		UINT8* curId;
 		UINT8* curHash;
 		UINT32 len;
 		SINT32 curPosition;
-		
+
 		for (UINT32 i = 0; i < m_priceCertsLen; i++ )
 		{
 			m_priceCerts[i] = NULL;
 		}
-		
+
 		for (UINT32 i = 0; i < m_priceCertsLen; i++ )
 		{
 			//get single node
 			curNode = theNodes->item(i);
-			
-			
+
+
 			//CAMsg::printMsg(LOG_DEBUG, "Parsing id\n");
-			
+
 			//extract strings for mixid and pricecerthash, and check isAI attribute
 			curId = new UINT8[100];
 			len = 100;
@@ -216,7 +216,7 @@ SINT32 CAXMLCostConfirmation::setValues()
 				curId = NULL;
 				return E_UNKNOWN;
 			}
-		
+
 
 			//CAMsg::printMsg(LOG_DEBUG, "Parsing hash\n");
 			curHash = new UINT8[100];
@@ -229,19 +229,19 @@ SINT32 CAXMLCostConfirmation::setValues()
 				curHash = NULL;
 				return E_UNKNOWN;
 			}
-			
+
 			//CAMsg::printMsg(LOG_DEBUG, "Parsing position\n");
 			if (getDOMElementAttribute(curNode, "position", &curPosition) != E_SUCCESS)
 			{
 				curPosition = -1;
 			}
-			
+
 			//CAMsg::printMsg(LOG_DEBUG, "Adding cert info\n");
-			m_priceCerts[i] = new CAPriceInfo(curId, curHash, curPosition);	
+			m_priceCerts[i] = new CAPriceInfo(curId, curHash, curPosition);
 		}
 
-		
-			
+
+
 		return E_SUCCESS;
 	}
 #endif //ONLY_LOCAL_PROXY

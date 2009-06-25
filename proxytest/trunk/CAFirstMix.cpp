@@ -347,18 +347,18 @@ SINT32 CAFirstMix::connectToNextMix(CASocketAddr* a_pAddrNext)
 SINT32 CAFirstMix::processKeyExchange()
 {
     UINT8* recvBuff=NULL;
-    UINT16 len;
+    UINT32 len;
 	CAMsg::printMsg(LOG_INFO, "Try to read the Key Info length from next Mix...\n");
-    if(m_pMuxOut->receiveFully((UINT8*)&len,2)!=E_SUCCESS)
+    if(m_pMuxOut->receiveFully((UINT8*) &len, sizeof(len) ) != E_SUCCESS)
     {
         CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info length!\n");
         return E_UNKNOWN;
     }
-    len=ntohs(len);
+    len=ntohl(len);
     CAMsg::printMsg(LOG_INFO, "Received Key Info length %u\n",len);
     recvBuff=new UINT8[len+1];
 
-    if(m_pMuxOut->receiveFully(recvBuff,len)!=E_SUCCESS)
+    if(m_pMuxOut->receiveFully(recvBuff, len) != E_SUCCESS)
     {
         CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info!\n");
         delete []recvBuff;
@@ -369,13 +369,12 @@ SINT32 CAFirstMix::processKeyExchange()
     //get the Keys from the other mixes (and the Mix-Id's...!)
     CAMsg::printMsg(LOG_INFO,"Received Key Info...\n");
     CAMsg::printMsg(LOG_DEBUG,"%s\n",recvBuff);
-    CAMsg::printMsg(LOG_INFO,"before parsing...\n");
-    XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(recvBuff,len);
-    CAMsg::printMsg(LOG_INFO,"after parsing...%p\n",doc);
+
+    XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(recvBuff, len);
     delete []recvBuff;
     recvBuff = NULL;
     DOMElement* elemMixes=doc->getDocumentElement();
-    if(elemMixes==NULL)
+    if(elemMixes == NULL)
     {
 		if(doc != NULL)
 		{
@@ -406,14 +405,12 @@ SINT32 CAFirstMix::processKeyExchange()
         return E_UNKNOWN;
     pglobalOptions->setCascadeName(cascadeName);
 */
-    CAMsg::printMsg(LOG_INFO,"before append T&Cs...\n");
     if(pglobalOptions->getTermsAndConditions() != NULL)
     {
     	appendTermsAndConditionsExtension(doc, elemMixes);
     }
-    CAMsg::printMsg(LOG_INFO,"before append T&Cs...\n");
+
     SINT32 extRet = handleKeyInfoExtensions(elemMixes);
-    CAMsg::printMsg(LOG_INFO,"after handleKeyInfoExt...\n");
     if(extRet != E_SUCCESS)
     {
     	if(doc != NULL)
@@ -499,18 +496,32 @@ SINT32 CAFirstMix::processKeyExchange()
 		CAMsg::printMsg(LOG_DEBUG,"Could not sign KeyInfo sent to users...\n");
 	}
 
-	UINT32 tlen=0;
-    UINT8* tmpB=DOM_Output::dumpToMem(docXmlKeyInfo,&tlen);
+
+	UINT32 tmp32Len = 0;
+    UINT8* tmpB=DOM_Output::dumpToMem(docXmlKeyInfo, &tmp32Len);
     if (docXmlKeyInfo != NULL)
     {
     	docXmlKeyInfo->release();
     	docXmlKeyInfo = NULL;
     }
-    m_xmlKeyInfoBuff=new UINT8[tlen+2];
-    memcpy(m_xmlKeyInfoBuff+2,tmpB,tlen);
-    UINT16 s=htons((UINT16)tlen);
-    memcpy(	m_xmlKeyInfoBuff,&s,2);
-    m_xmlKeyInfoSize=(UINT16)tlen+2;
+
+    if(tmp32Len > 0xFFFD) //too bytes are reserved for the length
+    {
+		CAMsg::printMsg(LOG_CRIT, "The key info size of %u bytes is too large for the clients. (maximum is %u)\n", 0xFFFD);
+		if (doc != NULL)
+		{
+			doc->release();
+			doc = NULL;
+		}
+		return E_UNKNOWN;
+    }
+
+    UINT16 tlen = (UINT16) tmp32Len;
+    m_xmlKeyInfoBuff = new UINT8[tlen+sizeof(tlen)];
+    memcpy(m_xmlKeyInfoBuff+sizeof(tlen), tmpB, tlen);
+    UINT16 s = htons(tlen);
+    memcpy(m_xmlKeyInfoBuff, &s, sizeof(s));
+    m_xmlKeyInfoSize=tlen + sizeof(tlen);
     delete []tmpB;
     tmpB = NULL;
 
@@ -613,10 +624,10 @@ SINT32 CAFirstMix::processKeyExchange()
             }
 			m_pMuxOut->setSendKey(key,32);
             m_pMuxOut->setReceiveKey(key+32,32);
-            UINT16 size=htons((UINT16)outlen);
-            CAMsg::printMsg(LOG_DEBUG,"Sending symmetric key to next Mix! Size: %i\n",outlen);
-            m_pMuxOut->getCASocket()->send((UINT8*)&size,2);
-            m_pMuxOut->getCASocket()->send(out,outlen);
+            UINT32 size = htonl(outlen);
+            CAMsg::printMsg(LOG_DEBUG,"Sending symmetric key to next Mix! Size: %i\n", outlen);
+            m_pMuxOut->getCASocket()->send((UINT8*) &size, sizeof(size));
+            m_pMuxOut->getCASocket()->send(out, outlen);
             m_pMuxOut->setCrypt(true);
             delete[] out;
             out = NULL;
@@ -649,7 +660,7 @@ SINT32 CAFirstMix::processKeyExchange()
         if(m_pInfoService != NULL)
             m_pInfoService->sendCascadeHelo();
     }*/
-    CAMsg::printMsg(LOG_DEBUG,"Keyexchange finished!\n");
+    CAMsg::printMsg(LOG_DEBUG,"Key exchange finished!\n");
     if (doc != NULL)
     {
     	doc->release();
@@ -1213,7 +1224,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 #endif
 							ret = E_UNKNOWN;
 						}
-#ifndef PAYMENT
+//#ifndef PAYMENT
 						else if ((ret = pNewMuxSocket->getCASocket()->getPeerIP(peerIP)) != E_SUCCESS ||
 								pIPList->insertIP(peerIP)<0)
 						{
@@ -1227,7 +1238,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 								CAMsg::printMsg(LOG_DEBUG,"CAFirstMix Flooding protection: Could not insert IP address!\n");
 							}
 						}
-#endif
+//#endif
 						else
 						{
 							t_UserLoginData* d=new t_UserLoginData;

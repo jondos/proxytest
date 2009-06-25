@@ -1,28 +1,28 @@
 /*
-Copyright (c) 2000, The JAP-Team 
+Copyright (c) 2000, The JAP-Team
 All rights reserved.
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-	- Redistributions of source code must retain the above copyright notice, 
+	- Redistributions of source code must retain the above copyright notice,
 	  this list of conditions and the following disclaimer.
 
-	- Redistributions in binary form must reproduce the above copyright notice, 
-	  this list of conditions and the following disclaimer in the documentation and/or 
+	- Redistributions in binary form must reproduce the above copyright notice,
+	  this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
-	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors 
-	  may be used to endorse or promote products derived from this software without specific 
-		prior written permission. 
+	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
+	  may be used to endorse or promote products derived from this software without specific
+		prior written permission.
 
-	
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS 
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
 AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
 BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
-OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #ifndef __CAXMLERRORMESSAGE__
@@ -32,9 +32,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAAbstractXMLEncodable.hpp"
 #include "CAXMLCostConfirmation.hpp"
 
+#define XML_ELEMENT_ERROR_MSG "ErrorMessage"
+#define XML_ELEMENT_ERROR_MSG_ENVELOPE "ErrorMessages"
+
 /**
  * This class encapsulates an error or success message.
- * In order to be indipendent from the HTTP protocol on the higher layer,
+ * In order to be independent from the HTTP protocol on the higher layer,
  * this is now used instead of http errorcodes.
  *
  * @author Bastian Voigt, Elmar Schraml
@@ -66,8 +69,8 @@ class CAXMLErrorMessage : public CAAbstractXMLEncodable
 			static const UINT32 ERR_SUCCESS_BUT_WITH_ERRORS = 20;
 			static const UINT32 ERR_BLOCKED = 21;
 			static const UINT32 ERR_NO_ERROR_GIVEN = 100;
-			
-		
+
+
 			/**
 			* Creates an errorMessage object. The errorcode should be one of the
 			* above ERR_* constants.
@@ -81,46 +84,42 @@ class CAXMLErrorMessage : public CAAbstractXMLEncodable
 			* @param errorCode UINT32
 			*/
 			CAXMLErrorMessage(UINT32 errorCode);
-		
-		
+
+
 			/**
-			 * attaches an object to the error message 
+			 * attaches an object to the error message
 			*/
 			CAXMLErrorMessage(const UINT32 errorCode, UINT8* message, CAAbstractXMLEncodable* messageObject);
 
-		
+
 			/**
 			* Parses the string XML representation
 			*/
 			CAXMLErrorMessage(UINT8 * strXmlData);
-		
+
+			CAXMLErrorMessage(DOMElement* elemRoot);
+
 			~CAXMLErrorMessage();
-			
+
 			SINT32 toXmlElement( XERCES_CPP_NAMESPACE::DOMDocument* a_doc, DOMElement* &elemRoot);
-			UINT32 getErrorCode() 
-				{
-					return m_iErrorCode;
-				}
-			
+			UINT32 getErrorCode()
+			{
+				return m_iErrorCode;
+			}
+
 			UINT8* getDescription()
-				{
-					return m_strErrMsg;
-				}
-			
-			char* getExpTimeString()
-				{
-					return m_strExpires;
-				}
-			
+			{
+				return m_strErrMsg;
+			}
+
 			void* getMessageObject()
 			{
 				return m_messageObject;
 			}
 
-		private: 
+		private:
 			SINT32 setValues(DOMElement* elemRoot);
 			UINT32 m_iErrorCode;
-			char *m_strExpires;
 			UINT8 *m_strErrMsg;
 			void* m_messageObject;
 	};

@@ -1,28 +1,28 @@
 /*
-Copyright (c) 2000, The JAP-Team 
+Copyright (c) 2000, The JAP-Team
 All rights reserved.
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-	- Redistributions of source code must retain the above copyright notice, 
+	- Redistributions of source code must retain the above copyright notice,
 	  this list of conditions and the following disclaimer.
 
-	- Redistributions in binary form must reproduce the above copyright notice, 
-	  this list of conditions and the following disclaimer in the documentation and/or 
+	- Redistributions in binary form must reproduce the above copyright notice,
+	  this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
-	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors 
-	  may be used to endorse or promote products derived from this software without specific 
-		prior written permission. 
+	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
+	  may be used to endorse or promote products derived from this software without specific
+		prior written permission.
 
-	
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS 
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
 AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
 BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
-OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
@@ -77,7 +77,7 @@ SINT32 CASignature::getSignKey(DOMElement* & elem,XERCES_CPP_NAMESPACE::DOMDocum
 		CACertificate* pCert=NULL;
 		getVerifyKey(&pCert);
 		EVP_PKEY* pPKey=EVP_PKEY_new();
-		EVP_PKEY_set1_DSA(pPKey,m_pDSA);		
+		EVP_PKEY_set1_DSA(pPKey,m_pDSA);
 		PKCS12* pPKCS12=PKCS12_create(NULL,NULL, pPKey,pCert->m_pCert,NULL,0,0,0,0,0);
 		delete pCert;
 		pCert = NULL;
@@ -96,7 +96,7 @@ SINT32 CASignature::getSignKey(DOMElement* & elem,XERCES_CPP_NAMESPACE::DOMDocum
 
 SINT32 CASignature::setSignKey(const DOMNode* n,UINT32 type,const char* passwd)
 	{
-		const DOMNode* node=n; 
+		const DOMNode* node=n;
 		switch(type)
 		{
 			case SIGKEY_PKCS12:
@@ -139,9 +139,9 @@ SINT32 CASignature::setSignKey(const UINT8* buff,UINT32 len,UINT32 type,const ch
 
 				case SIGKEY_PKCS12:
 					#if OPENSSL_VERSION_NUMBER	> 0x009070CfL
-						PKCS12* tmpPKCS12=d2i_PKCS12(NULL,(const UINT8**)&buff,len);	
+						PKCS12* tmpPKCS12=d2i_PKCS12(NULL,(const UINT8**)&buff,len);
 					#else
-						PKCS12* tmpPKCS12=d2i_PKCS12(NULL,(UINT8**)&buff,len);	
+						PKCS12* tmpPKCS12=d2i_PKCS12(NULL,(UINT8**)&buff,len);
 					#endif
 					EVP_PKEY* key=NULL;
 //					X509* cert=NULL;
@@ -149,7 +149,7 @@ SINT32 CASignature::setSignKey(const UINT8* buff,UINT32 len,UINT32 type,const ch
 							{
 								PKCS12_free(tmpPKCS12);
 								return E_UNKNOWN;
-							}	
+							}
 					PKCS12_free(tmpPKCS12);
 	//				X509_free(cert);
 					if(EVP_PKEY_type(key->type)!=EVP_PKEY_DSA)
@@ -248,7 +248,7 @@ SINT32 CASignature::parseSignKeyXML(const UINT8* buff,UINT32 len)
 			{
 				DSA_free(tmpDSA);
 				return E_UNKNOWN;
-			}		
+			}
 		if(m_pDSA!=NULL)
 			DSA_free(m_pDSA);
 		m_pDSA=tmpDSA;
@@ -291,8 +291,8 @@ SINT32 CASignature::getSignatureSize()
 	* @param inlen size of the source byte array
 	* @param out destination byte array which on return contains the XML Document including the XML Signature
 	* @param outlen size of destination byte array, on return contains the len of the signed XML document
-	* @param pIncludeCerts points to a CACertStore, which holds CACertificates, 
-	*					which should be included in the XML Signature for easy verification; if NULL 
+	* @param pIncludeCerts points to a CACertStore, which holds CACertificates,
+	*					which should be included in the XML Signature for easy verification; if NULL
 	*					no Certs will be included
 	*	@retval E_SUCCESS, if the Signature could be successful created
 	* @retval E_SPACE, if the destination byte array is to small for the signed XML Document
@@ -302,7 +302,7 @@ SINT32 CASignature::signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen,CAC
 	{
 		if(in==NULL||inlen<1||out==NULL||outlen==NULL)
 			return E_UNKNOWN;
-		
+
 		XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(in,inlen);
 		if(doc==NULL)
 			return E_UNKNOWN;
@@ -320,15 +320,15 @@ SINT32 CASignature::signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen,CAC
 
 /** Signs a DOM Node. The XML Signature is include in the XML Tree as a Child of the Node.
 	* If ther is already a Signature is is removed first.
-	* @param node Node which should be signed 
-	* @param pIncludeCerts points to a CACertStore, which holds CACertificates, 
+	* @param node Node which should be signed
+	* @param pIncludeCerts points to a CACertStore, which holds CACertificates,
 	*					which should be included in the XML Signature for easy verification;
 	*					if null no certificates will be included
 	*	@retval E_SUCCESS, if the Signature could be successful created
 	* @retval E_UNKNOWN, otherwise
 */
 SINT32 CASignature::signXML(DOMNode* node,CACertStore* pIncludeCerts)
-	{	
+	{
 		//getting the Document an the Node to sign
 		XERCES_CPP_NAMESPACE::DOMDocument* doc=NULL;
 		DOMNode* elemRoot=NULL;
@@ -387,9 +387,9 @@ SINT32 CASignature::signXML(DOMNode* node,CACertStore* pIncludeCerts)
 		canonicalBuff=DOM_Output::makeCanonical(elemSignedInfo,&len);
 		if(canonicalBuff==NULL)
 			return E_UNKNOWN;
-		
+
 		DSA_SIG* pdsaSig=NULL;
-		
+
 		SINT32 ret=sign(canonicalBuff,len,&pdsaSig);
 		delete[] canonicalBuff;
 		canonicalBuff = NULL;
@@ -401,11 +401,11 @@ SINT32 CASignature::signXML(DOMNode* node,CACertStore* pIncludeCerts)
 			}
 		len=1024;
 		encodeRS(tmpBuff,&len,pdsaSig);
-		//memset(tmpBuff,0,40); //make first 40 bytes '0' --> if r or s is less then 20 bytes long! 
-													//(Due to be compatible to the standarad r and s must be 20 bytes each) 
+		//memset(tmpBuff,0,40); //make first 40 bytes '0' --> if r or s is less then 20 bytes long!
+													//(Due to be compatible to the standarad r and s must be 20 bytes each)
 		//BN_bn2bin(pdsaSig->r,tmpBuff+20-BN_num_bytes(pdsaSig->r)); //so r is 20 bytes with leading '0'...
 		//BN_bn2bin(pdsaSig->s,tmpBuff+40-BN_num_bytes(pdsaSig->s));
-		
+
 		DSA_SIG_free(pdsaSig);
 
 		UINT sigSize=255;
@@ -420,7 +420,7 @@ SINT32 CASignature::signXML(DOMNode* node,CACertStore* pIncludeCerts)
 		setDOMElementValue(elemSignatureValue,sig);
 		elemSignature->appendChild(elemSignedInfo);
 		elemSignature->appendChild(elemSignatureValue);
-	
+
 		if(pIncludeCerts!=NULL)
 			{
 				//Making KeyInfo-Block
@@ -444,7 +444,7 @@ SINT32 CASignature::getVerifyKey(CACertificate** ppCert)
 		EVP_PKEY_set1_DSA(pPKey,m_pDSA);
 		*ppCert=new CACertificate();
 		(*ppCert)->m_pCert=X509_new();
-    // LERNGRUPPE 
+    // LERNGRUPPE
     // We nned to use Version 3 to use extensions
 // 		X509_set_version((*ppCert)->m_pCert,2);
  		X509_set_version((*ppCert)->m_pCert,3);
@@ -453,7 +453,7 @@ SINT32 CASignature::getVerifyKey(CACertificate** ppCert)
 		X509_set_notBefore((*ppCert)->m_pCert,pTime);
 		X509_set_notAfter((*ppCert)->m_pCert,pTime);
 		X509_set_pubkey((*ppCert)->m_pCert,pPKey);
-// LERNGRUPPE 
+// LERNGRUPPE
 // Add the subjectKeyIdentifier-Extension to the certificate
                 if( (*ppCert)->setSubjectKeyIdentifier() != E_SUCCESS )
                 {
@@ -504,7 +504,7 @@ SINT32 CASignature::setVerifyKey(CACertificate* pCert)
 		m_pDSA=tmpDSA;
 		return E_SUCCESS;
 	}
-	
+
 /**
  * Parses the XML representation of a DSA public key
  */
@@ -514,7 +514,7 @@ SINT32 CASignature::setVerifyKey(const DOMElement* xmlKey)
 	UINT32 len = 4096;
 	UINT32 encodedLen = 0;
 	DSA * tmpDSA = NULL;
-	
+
 	if(xmlKey==NULL)
 	{
 		DSA_free(m_pDSA);
@@ -530,26 +530,26 @@ SINT32 CASignature::setVerifyKey(const DOMElement* xmlKey)
 	}
 
 	decodeBuffer[0]=0;
-	if( getDOMElementAttribute(xmlKey,"version",decodeBuffer,&len)!=E_SUCCESS || 
+	if( getDOMElementAttribute(xmlKey,"version",decodeBuffer,&len)!=E_SUCCESS ||
 		strcmp((char*)decodeBuffer, "1.0")!=0 )
 	{
-		CAMsg::printMsg(LOG_DEBUG, 
+		CAMsg::printMsg(LOG_DEBUG,
 				"CASignature::setVerifyKey(): JapPublicKey has unknown version %s. "
 				"Version 1.0 expected!",decodeBuffer);
 		return E_UNKNOWN;
 	}
-	
+
 	DOMNode* elemDsaKey;
 	if(getDOMChildByName(xmlKey, "DSAKeyValue", elemDsaKey, false)
 			!=E_SUCCESS)
 		{
-			CAMsg::printMsg(LOG_DEBUG, 
+			CAMsg::printMsg(LOG_DEBUG,
 					"CASignature::setVerifyKey(): DSAKeyValue not found!");
 			return E_UNKNOWN;
 		}
-	
+
 	tmpDSA=DSA_new();
-	
+
 	// parse "Y"
 	DOMNode* elem;
 	if(getDOMChildByName(elemDsaKey, "Y", elem, false)
@@ -592,8 +592,8 @@ SINT32 CASignature::setVerifyKey(const DOMElement* xmlKey)
 		return E_UNKNOWN;
 	}
 	tmpDSA->g=BN_bin2bn(decodeBuffer,len,NULL);
-		
-	
+
+
 	// parse "P"
 	len = 4096;
 	if(getDOMChildByName(elemDsaKey,"P", elem, false)
@@ -629,7 +629,7 @@ SINT32 CASignature::setVerifyKey(const DOMElement* xmlKey)
 		DSA_free(tmpDSA);
 		return E_UNKNOWN;
 	}
-	encodedLen = len; 
+	encodedLen = len;
 	len = 1024;
 	if(CABase64::decode(decodeBuffer, encodedLen, decodeBuffer, &len)!=E_SUCCESS)
 	{
@@ -637,10 +637,10 @@ SINT32 CASignature::setVerifyKey(const DOMElement* xmlKey)
 		return E_UNKNOWN;
 	}
 	tmpDSA->q=BN_bin2bn(decodeBuffer,len,NULL);
-	
+
 	if( tmpDSA->pub_key!=NULL && tmpDSA->g!=NULL && tmpDSA->p!=NULL && tmpDSA->q!=NULL)
 	{
-		if(m_pDSA!=NULL) 
+		if(m_pDSA!=NULL)
 		{
 			DSA_free(m_pDSA);
 		}
@@ -667,7 +667,7 @@ SINT32 CASignature::verify(const UINT8* const in,UINT32 inlen,DSA_SIG* const dsa
 		return ret;
 	}
 
-	
+
 /**
  * Verifies an ASN.1 DER encoded SHA1-DSA signature
  *
@@ -676,8 +676,8 @@ SINT32 CASignature::verify(const UINT8* const in,UINT32 inlen,DSA_SIG* const dsa
  * @param inlen, the document length
  * @param dsaSig the DER encoded signature
  * @param sigLen the signature length (normally 46 bytes)
- * @return E_SUCCESS if the signature is valid, 
- * 		E_UNKNOWN if an error occurs, 
+ * @return E_SUCCESS if the signature is valid,
+ * 		E_UNKNOWN if an error occurs,
  * 		E_INVALID if the signature is invalid
  */
 SINT32 CASignature::verifyDER(UINT8* in, UINT32 inlen, const UINT8 * dsaSig, const UINT32 sigLen)
@@ -810,7 +810,7 @@ SINT32 CASignature::verifyXML(DOMNode* root,CACertStore* trustedCerts)
 		for(int i=0;i<SHA_DIGEST_LENGTH;i++)
 			{
 				if(dgst1[i]!=dgst[i])
-					return E_UNKNOWN;	
+					return E_UNKNOWN;
 			}
 		return E_SUCCESS;
 	}
@@ -818,8 +818,8 @@ SINT32 CASignature::verifyXML(DOMNode* root,CACertStore* trustedCerts)
 SINT32 CASignature::encodeRS(UINT8* out,UINT32* outLen,const DSA_SIG* const pdsaSig) const
 	{
 		UINT32 rSize, sSize;
-		memset(out,0,40); //make first 40 bytes '0' --> if r or s is less then 20 bytes long! 
-											//(Due to be compatible to the standarad r and s must be 20 bytes each) 
+		memset(out,0,40); //make first 40 bytes '0' --> if r or s is less then 20 bytes long!
+											//(Due to be compatible to the standarad r and s must be 20 bytes each)
 		rSize = BN_num_bytes(pdsaSig->r);
 		sSize = BN_num_bytes(pdsaSig->s);
 		BN_bn2bin(pdsaSig->r,out+20-rSize); //so r is 20 bytes with leading '0'...
@@ -828,7 +828,7 @@ SINT32 CASignature::encodeRS(UINT8* out,UINT32* outLen,const DSA_SIG* const pdsa
 		return E_SUCCESS;
 	}
 
-	
+
 SINT32 CASignature::decodeRS(const UINT8* const in, const UINT32 inLen, DSA_SIG* pDsaSig) const
 {
 	ASSERT(pDsaSig!=NULL, "DSA_SIG is null");

@@ -75,6 +75,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define OPTIONS_NODE_LOGGING "Logging"
 #define OPTIONS_NODE_LOGGING_FILE "File"
 #define OPTIONS_ATTRIBUTE_LOGGING_MAXFILESIZE "MaxFileSize"
+#define OPTIONS_ATTRIBUTE_LOGGING_MAXFILES "MaxFiles"
+#define LOGGING_MAXFILES_DEFAULT 10
 #define OPTIONS_NODE_SYSLOG "Syslog"
 #define OPTIONS_NODE_ENCRYPTED_LOG "EncryptedLog"
 #define OPTIONS_NODE_LOGGING_KEYINFO "KeyInfo"
@@ -174,6 +176,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #define OPTIONS_NODE_CRIME_REGEXP_URL "RegExpURL"
 #define OPTIONS_NODE_CRIME_REGEXP_PAYLOAD "RegExpPayload"
+#define OPTIONS_NODE_CRIME_SURVEILLANCE_IP "SurveillanceIP"
+#define OPTIONS_ATTRIBUTE_LOG_PAYLOAD "logPayload"
 
 #define MIXINFO_NODE_PARENT "Mix"
 #define MIXINFO_NODE_MIX_NAME "Name"
@@ -212,6 +216,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #define ASSERT_NETWORK_OPTIONS_PARENT(Parentname, Childname) \
 	ASSERT_PARENT_NODE_NAME(Parentname, OPTIONS_NODE_NETWORK, Childname)
+
+#define ASSERT_CRIME_DETECTION_OPTIONS_PARENT(Parentname, Childname) \
+	ASSERT_PARENT_NODE_NAME(Parentname, OPTIONS_NODE_CRIME_DETECTION, Childname)
 
 struct t_TargetInterface
 	{
@@ -464,6 +471,11 @@ class CACmdLnOptions
 					return m_maxLogFileSize;
 				}
 
+			UINT32 getMaxLogFiles()
+			{
+				return m_maxLogFiles;
+			}
+
 			SINT32 getUser(UINT8* user,UINT32 len);
 			SINT32 getPidFile(UINT8* pidfile,UINT32 len);
 
@@ -505,6 +517,21 @@ class CACmdLnOptions
 			{
 				*len=m_nCrimeRegExpsPayload;
 				return m_arCrimeRegExpsPayload;
+			}
+
+			in_addr_t *getCrimeSurveillanceIPs()
+			{
+				return m_surveillanceIPs;
+			}
+
+			UINT32 getNrOfCrimeSurveillanceIPs()
+			{
+				return m_nrOfSurveillanceIPs;
+			}
+
+			bool isPayloadLogged()
+			{
+				return m_logPayload;
 			}
 #endif
 
@@ -677,6 +704,7 @@ class CACmdLnOptions
 			UINT8*	m_strCascadeName;
 			char*		m_strLogDir;
 			SINT64	m_maxLogFileSize;
+			UINT32	m_maxLogFiles; //how many log files can be created before starting again with the first one
 			char*		m_strEncryptedLogDir;
 			bool		m_bCompressedLogs;
 			bool 		m_bSocksSupport;
@@ -700,10 +728,13 @@ class CACmdLnOptions
 
 
 #ifdef LOG_CRIME
+			bool m_logPayload;
 			regex_t* m_arCrimeRegExpsURL;
 			UINT32 m_nCrimeRegExpsURL;
 			regex_t* m_arCrimeRegExpsPayload;
 			UINT32 m_nCrimeRegExpsPayload;
+			UINT32 m_nrOfSurveillanceIPs;
+			in_addr_t *m_surveillanceIPs;
 #endif
 
 #ifdef DATA_RETENTION_LOG
@@ -830,9 +861,10 @@ class CACmdLnOptions
 			SINT32 setTermsAndConditionsList(DOMElement *elemTnCs);
 
 			/* Crime Logging Options */
-#define CRIME_DETECTION_OPTIONS_NR 2
+#define CRIME_DETECTION_OPTIONS_NR 3
 			SINT32 setCrimeURLRegExp(DOMElement *elemCrimeDetection);
 			SINT32 setCrimePayloadRegExp(DOMElement *elemCrimeDetection);
+			SINT32 setCrimeSurveillanceIP(DOMElement *elemCrimeDetection);
 
 			SINT32 appendMixInfo_internal(DOMNode* a_node, bool with_subtree);
 			inline SINT32 addMixIdToMixInfo();

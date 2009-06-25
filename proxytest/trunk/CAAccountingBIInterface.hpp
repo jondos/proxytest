@@ -37,33 +37,39 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #define PI_CONNECT_TIMEOUT 5000
 
+#define XML_ELEMENT_CCS "CCs"
+#define XML_ELEMENT_ERROR_MESSAGE "CCs"
+
+#define POST_CMD_SETTLEALL "/settleAll"
+
 /**
  * This class encapsulates the connection to the JPI
  *
  * @author Bastian Voigt
  */
-class CAAccountingBIInterface 
+class CAAccountingBIInterface
 {
 
-public: 
-	
+public:
+
 	//SINT32 setPIServerAddress(UINT8* pPiServerName, UINT16 piServerPort);
 	//SINT32 setPIServerCertificate(CACertificate * pPiServerCertificate);
 	CAAccountingBIInterface();
 	~CAAccountingBIInterface();
 	SINT32 setPIServerConfiguration(CAXMLBI* pPiServerConfig);
-	
+
 	SINT32 initBIConnection();
 	SINT32 terminateBIConnection();
-	
+
 	//static CAAccountingBIInterface *getInstance(CAXMLBI *pPiServerConfig);
 	//static SINT32 cleanup();
-	
+
 	/**
 	 * Send a cost confirmation to the JPI
 	 */
-	CAXMLErrorMessage * settle(CAXMLCostConfirmation &cc);
-	
+	CAXMLErrorMessage *settle(CAXMLCostConfirmation &cc);
+	CAXMLErrorMessage **settleAll(CAXMLCostConfirmation **CCs, UINT32 nrOfCCs);
+
 /*	**
 	 * Request a new Balance certificate from the JPI
 	 *
@@ -74,19 +80,20 @@ public:
 	SINT32 update(UINT8 *balanceCert, UINT8 * response, UINT32 *responseLen);*/
 
 private:
-	
+
 	//CAAccountingBIInterface();
 	//~CAAccountingBIInterface();
-	
-	
+
+
 	CATLSClientSocket *m_pSocket;
 	CAHttpClient	 *m_phttpClient;
 	CASocketAddrINet *m_pPiServerAddress;
 	CACertificate *m_pPiServerCertificate;
-	
+
 	//static CAAccountingBIInterface *m_pPiInterfaceSingleton;
 	//CAMutex *m_pPiInterfaceMutex;
 	//friend class CAAccountingInstance;
 };
+
 
 #endif
