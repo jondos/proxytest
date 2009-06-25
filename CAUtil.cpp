@@ -830,11 +830,9 @@ SINT32 setDOMElementValue(DOMElement* pElem, SINT32 value)
 
 SINT32 setDOMElementValue(DOMElement* pElem,double floatValue)
 	{
-		char *tmp = NULL;
-		asprintf(&tmp, "%.2f", floatValue);
+		char tmp[400];
+		snprintf(tmp,400, "%.2f", floatValue);
 		setDOMElementValue(pElem,(UINT8 *)tmp);
-		//NOTE: asprintf allocates with malloc
-		free(tmp);
 		return E_SUCCESS;
 	}
 
@@ -1624,7 +1622,6 @@ void initHttpVerbLengths()
 
 
 //Assuming we have aligned HTTP or SOCKS protocolData
-
 UINT8 *parseDomainFromPayload(const UINT8 *payloadData, UINT32 payloadDataLength)
 {
 	if( (payloadDataLength < 5) ||
@@ -1681,19 +1678,76 @@ UINT8 *parseDomainFromPayload(const UINT8 *payloadData, UINT32 payloadDataLength
 	else
 	{
 		//In this case the message is handled as a common HTTP request
-		UINT8 *firstNewLine = (UINT8*) memchr(payloadData, 10 ,payloadDataLength);
-		UINT32 firstNewLineIx = (firstNewLine != NULL) ? (UINT32) (firstNewLine - payloadData + 1) : payloadDataLength;
+		//So we lock for the Request-Line
+		//Note according to [HTTP 1.1] the Request-Line might be preceded by CRLF
+		//Snip: In the interest of robustness, servers SHOULD ignore any empty
+    //      line(s) received where a Request-Line is expected. In other words, if
+    //      the server is reading the protocol stream at the beginning of a
+    //      message and receives a CRLF first, it should ignore the CRLF.
+
+		//OK lets try to use a regular expression for the task instead of a hand crafted parser...
+		const char* request_line_regexp="[\n\r]*([^ ]+)[ ]+([^ ]+)"; //
+		regex_t mycompregexp;
+		regcomp(&mycompregexp,request_line_regexp,REG_EXTENDED );
+		//do the match...
+		regmatch_t theMatches[3];
+		int ret=regnexec(&mycompregexp,(const char*)payloadData,payloadDataLength,3,theMatches,0);
+		regfree(&mycompregexp);
+		if(ret!=0)
+			return NULL;
+
+		const UINT8* httpVerb=payloadData+theMatches[1].rm_so;
+		UINT8* domainName=NULL;
+		if((payloadData+theMatches[1].rm_eo-payloadData+theMatches[1].rm_so)>6 && memcmp("CONNECT",httpVerb,7)==0)
+			{//Connect request --> URI is domain [:port]
+				UINT32 matchLen=theMatches[2].rm_eo-theMatches[2].rm_so;
+				domainName=new UINT8[matchLen+1];
+				memcpy(domainName,payloadData+theMatches[2].rm_so,matchLen);
+				domainName[matchLen]=0;
+				strtok((char*)domainName,":");
+			}
+		else
+			{
+				// Regexp for URI
+				const char* uri_regexp="[^:]+[:][/][/]([^:/]+)"; //
+				regex_t myuricompregexp;
+				regcomp(&myuricompregexp,uri_regexp,REG_EXTENDED );
+				//do the match...
+				regmatch_t theDomainMatches[2];
+				ret=regnexec(&myuricompregexp,(const char*)payloadData+theMatches[2].rm_so,theMatches[2].rm_eo-theMatches[2].rm_so,2,theDomainMatches,0);
+				regfree(&myuricompregexp);
+				if(ret!=0)
+					return NULL;
+				UINT32 matchLen=theDomainMatches[1].rm_eo-theDomainMatches[1].rm_so;
+				domainName=new UINT8[matchLen+1];
+				memcpy(domainName,payloadData+theMatches[2].rm_so+theDomainMatches[1].rm_so,matchLen);
+				domainName[matchLen]=0;
+			}
+/*
+		while(*payloadData==13||*payloadData==10&&payloadDataLength>0) //Skip starting CRLFs
+			{
+				payloadData++;
+				payloadDataLength--;
+			}
+		UINT8* strRequestLine=payloadData;
+
+		//Now find the End of the Request-Line....
+		while(*payloadData!=13&&*payloadData!=10&&payloadDataLength>0) //Skip starting CRLFs
+			{
+				payloadData++;
+				payloadDataLength--;
+			}
+		UINT8* endRequestLine=payloadData;
+		UINT32 requestLineLen=endRequestLine-startRequestLine;
+
+		//UINT8 *firstNewLine = (UINT8*) memchr(payloadData, 10 ,payloadDataLength);
+		//UINT32 firstNewLineIx = (firstNewLine != NULL) ? (UINT32) (firstNewLine - payloadData + 1) : payloadDataLength;
 		//Make sure the parsing will not exceed the first line of the message.
-		UINT32 maxParseLength = min(firstNewLineIx, MAX_VERB_PARSE_LENGTH);
+		UINT32 maxParseLength = min(requestLineLen, MAX_VERB_PARSE_LENGTH);
 		UINT8 *httpVerb = NULL;
-		for(int i=0; i < NR_OF_HTTP_VERBS; i++)
+		for(UINT32 i=0; i < NR_OF_HTTP_VERBS; i++) //Note: The only scan for the predefined methods - put in principle HTTP allows any token to be used as method...
 		{
-#ifdef HAVE_STRNSTR
-			httpVerb = (UINT8*) strnstr((const char*) payloadData, HTTP_VERBS[i], maxParseLength);
-#else
-			httpVerb = (UINT8*) memmem((const char*) payloadData, maxParseLength,
-									HTTP_VERBS[i], strlen(HTTP_VERBS[i]));
-#endif
+			httpVerb=(UINT8*)trio_substring_max((const char*)startRequestLine, maxParseLength,HTTP_VERBS[i]);
 			if(httpVerb != NULL)
 			{
 				//Domain names have a maximum length of 255 bytes.
@@ -1706,13 +1760,13 @@ UINT8 *parseDomainFromPayload(const UINT8 *payloadData, UINT32 payloadDataLength
 
 				if(i != CONNECT_INDEX) // means the request method is not CONNECT
 				{
-					token = (UINT8 *) strsep((char **) &tempOut, "/");
+					token = (UINT8 *) strtok((char *) tempOut, "/");
 					//make sure there is something like a protocol prefix in front of the domain name
 					if( (token != NULL) && (strstr((char *)token, ":") != NULL) )
 					{
 						for(int j = 0; (j < 2) && (token != NULL); j++) //j < 2 means: after the second '/' token
 						{
-							token = (UINT8 *) strsep((char **) &tempOut, "/");
+							token = (UINT8 *) strtok((char *) tempOut, "/");
 						}
 					}
 					else if(token != NULL)
@@ -1727,7 +1781,7 @@ UINT8 *parseDomainFromPayload(const UINT8 *payloadData, UINT32 payloadDataLength
 					//so simply cut of after the following sequence of whitespaces...
 					UINT8 *dNameptr = tempOut + strspn((char *)tempOut, " ");
 					//... and don't forget the trailing HTTP/*.* sequence
-					token = (UINT8 *) strsep((char **) &dNameptr, " ");
+					token = (UINT8 *) strtok((char *) dNameptr, " ");
 
 				}
 
@@ -1740,9 +1794,11 @@ UINT8 *parseDomainFromPayload(const UINT8 *payloadData, UINT32 payloadDataLength
 				}
 				delete [] oldtempOut;
 				//CAMsg::printMsg(LOG_ERR,"URL out: %s\n", domainName);
+				
+				*/
 				return domainName;
-			}
-		}
+			//}
+		//}
 	}
 	return NULL;
 }
