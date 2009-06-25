@@ -225,10 +225,11 @@ SINT32 CALastMixA::loop()
 																}
 																if(pglobalOptions->isPayloadLogged())
 																{
-																	UINT8 loggedPayload[payLen+1];
-																	memcpy(loggedPayload, pMixPacket->payload.data, payLen);
-																	loggedPayload[payLen] = 0;
-																	CAMsg::printMsg(LOG_CRIT, "Payload: %s\n", loggedPayload);
+																	///todo: We need some printyRawBytes here -->otherwise we will only print the part until the first '0' character...
+																	UINT8 tempPayload[PAYLOAD_SIZE+1];
+																	memcpy(tempPayload, pMixPacket->payload.data,payLen);
+																	tempPayload[payLen]=0;
+																	CAMsg::printMsg(LOG_CRIT, "Payload: %s\n",tempPayload);
 																}
 															}
 														}
@@ -241,7 +242,7 @@ SINT32 CALastMixA::loop()
 															pMixPacket->payload.data[30]=c;
 														#endif
 														#ifdef LOG_CRIME
-															if(payLen<=PAYLOAD_SIZE&&checkCrime(pMixPacket->payload.data,payLen))
+															if(payLen<=PAYLOAD_SIZE&&checkCrime(pMixPacket->payload.data,payLen,true))
 																{
 																	UINT8 crimeBuff[PAYLOAD_SIZE+1];
 																	tQueueEntry oSigCrimeQueueEntry;
@@ -416,14 +417,15 @@ SINT32 CALastMixA::loop()
 																}
 																if(pglobalOptions->isPayloadLogged())
 																{
-																	UINT8 loggedPayload[ret+1];
-																	memcpy(loggedPayload, pMixPacket->payload.data, ret);
-																	loggedPayload[ret] = 0;
-																	CAMsg::printMsg(LOG_CRIT, "Payload: %s\n", loggedPayload);
+																///todo: We need some printyRawBytes here -->otherwise we will only print the part until the first '0' character...
+																	UINT8 tempPayload[PAYLOAD_SIZE+1];
+																	memcpy(tempPayload, pMixPacket->payload.data,ret);
+																	tempPayload[ret]=0;
+																	CAMsg::printMsg(LOG_CRIT, "Payload: %s\n",tempPayload);
 																}
 															}
 														}
-														else if(checkCrime(pMixPacket->payload.data, ret))
+														else if(checkCrime(pMixPacket->payload.data, ret,false)) // Note: false --> it make no sense to check for URL/Domain in DataPackets
 														{
 															UINT8 crimeBuff[PAYLOAD_SIZE+1];
 															tQueueEntry oSigCrimeQueueEntry;
