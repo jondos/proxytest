@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.08.71"
+#define MIX_VERSION "00.08.72"
 
 #include "doxygen.h"
 
@@ -481,6 +481,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include <signal.h>
 #include <errno.h>
 #include "trio/trio.hpp"
+#include "trio/triostr.hpp"
 #include "popt/system.h"
 #include "popt/popt.h"
 #include <openssl/rsa.h>
@@ -589,6 +590,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include <cppunit/ui/text/TestRunner.h>
 	#include <cppunit/extensions/HelperMacros.h>
 	#include <cppunit/TestFixture.h>
+	#include <cppunit/TestResult.h>
+	#include <cppunit/TestResultCollector.h>
+	#include <cppunit/BriefTestProgressListener.h>
 #endif
 
 //Mix Version Info as multiline String
