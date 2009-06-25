@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;L:\Programme\Microsoft SDKs\Windows\v6.0A\include&quot;;&quot;$(INCLUDE_CPPUNIT)&quot;;&quot;$(INCLUDE_CPPUNIT)\cppunit&quot;;&quot;$(INCLUDE_XERCES_C)&quot;;&quot;$(INCLUDE_XERCES_C)\xercesc&quot;;&quot;$(INCLUDE_OPENSSL)&quot;;&quot;$(INCLUDE_PTHREADS)&quot;"
+				AdditionalIncludeDirectories="&quot;$(INCLUDE_CPPUNIT)&quot;;&quot;$(INCLUDE_XERCES_C)&quot;;&quot;$(INCLUDE_XERCES_C)\xercesc&quot;;&quot;$(INCLUDE_OPENSSL)&quot;;&quot;$(INCLUDE_PTHREADS)&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;__UNIT_TEST__"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -63,10 +63,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="cppunitd_dll.lib proxytest-lib.lib ws2_32.lib ssleay32.lib libeay32.lib pthreadVC.lib xerces-c_2D.lib xerces-depdom_2D.lib zlib.lib"
+				AdditionalDependencies="cppunitd_dll.lib proxytest-lib.lib ws2_32.lib ssleay32.lib libeay32.lib pthreadVC2.lib xerces-c_2D.lib xerces-depdom_2D.lib"
 				OutputFile="$(OutDir)/AllTest.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;L:\Programme\Microsoft SDKs\Windows\v6.0A\Lib&quot;;&quot;.\proxytest-lib\Debug&quot;;&quot;$(LIB_CPPUNIT)&quot;;&quot;$(LIB_XERCES_C_DEBUG)&quot;;&quot;$(LIB_OPENSSL)&quot;;&quot;$(LIB_PTHREADS)&quot;;&quot;$(LIB_ZLIB)&quot;"
+				AdditionalLibraryDirectories="&quot;.\proxytest-lib\Debug&quot;;&quot;$(LIB_CPPUNIT)&quot;;&quot;$(LIB_XERCES_C_DEBUG)&quot;;&quot;$(LIB_OPENSSL)&quot;;&quot;$(LIB_PTHREADS)&quot;"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/AllTest.pdb"
 				SubSystem="1"
@@ -434,7 +434,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\TCAUtil.cpp"
+				RelativePath=".\test\TCAUtil.cpp"
 				>
 			</File>
 		</Filter>
