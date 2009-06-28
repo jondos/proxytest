@@ -36,8 +36,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAXMLCostConfirmation.hpp"
 #include "CAXMLErrorMessage.hpp"
 #include "Hashtable.hpp"
-
-extern CACmdLnOptions* pglobalOptions;
+#include "CALibProxytest.hpp"
 
 CAAccountingSettleThread::CAAccountingSettleThread(Hashtable* a_accountingHashtable, 
 													UINT8* currentCascade)/*,
@@ -94,7 +93,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 		BEGIN_STACK("CAAccountingSettleThread::mainLoop");
 		
 		UINT32 settlement_status;
-		UINT32 sleepInterval = pglobalOptions->getPaymentSettleInterval();
+		UINT32 sleepInterval = CALibProxytest::getOptions()->getPaymentSettleInterval();
 		
 		CAAccountingSettleThread* m_pAccountingSettleThread=(CAAccountingSettleThread*)pParam;
 		/*CAAccountingBIInterface *biConn = new CAAccountingBIInterface();
@@ -113,7 +112,7 @@ THREAD_RETURN CAAccountingSettleThread::mainLoop(void * pParam)
 		m_pAccountingSettleThread->m_bSleep = false;
 	
 	
-		CAXMLBI* pBI = pglobalOptions->getBI();
+		CAXMLBI* pBI = CALibProxytest::getOptions()->getBI();
 		if(pBI==NULL)
 		{
 			CAMsg::printMsg(LOG_DEBUG, "AccountingSettleThread; Uuupss.. No BI given --> dying!\n");

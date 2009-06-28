@@ -37,7 +37,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef HAVE_EPOLL
   #include "../CASocketGroupEpoll.hpp"
 #endif
-extern CACmdLnOptions* pglobalOptions;
 
 SINT32 CAFirstMixB::loop()
   {

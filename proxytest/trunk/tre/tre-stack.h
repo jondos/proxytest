@@ -1,21 +1,8 @@
 /*
   tre-stack.h: Stack definitions
 
-  Copyright (c) 2001-2006 Ville Laurikari <vl@iki.fi>
-
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
-
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+  This software is released under a BSD-style license.
+  See the file LICENSE for details and copyright.
 
 */
 
@@ -63,11 +50,9 @@ declare_popf(int, int);
 
 /* Just to save some typing. */
 #define STACK_PUSH(s, typetag, value)					      \
-  do									      \
     {									      \
       status = tre_stack_push_ ## typetag(s, value);			      \
-    }									      \
-  while (0)
+    }
 
 #define STACK_PUSHX(s, typetag, value)					      \
   {									      \
@@ -78,10 +63,10 @@ declare_popf(int, int);
 
 #define STACK_PUSHR(s, typetag, value)					      \
   {									      \
-    reg_errcode_t status;						      \
-    status = tre_stack_push_ ## typetag(s, value);			      \
-    if (status != REG_OK)						      \
-      return status;							      \
+    reg_errcode_t _status;						      \
+    _status = tre_stack_push_ ## typetag(s, value);			      \
+    if (_status != REG_OK)						      \
+      return _status;							      \
   }
 
 #endif /* TRE_STACK_H */

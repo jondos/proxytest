@@ -39,9 +39,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAHttpClient.hpp"
 #include "CACertificate.hpp"
 #include "CAXMLBI.hpp"
+#include "CALibProxytest.hpp"
 #include "CADynamicCascadeConfigurator.hpp"
-
-extern CACmdLnOptions* pglobalOptions;
 
 const char * STRINGS_REQUEST_TYPES[NR_REQUEST_TYPES]={"POST","GET"};
 const char * STRINGS_REQUEST_COMMANDS[NR_REQUEST_COMMANDS]={"configure","helo","mixinfo/", "dynacascade", "cascade", "feedback", "tc"};
@@ -116,7 +115,7 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 			currentTime=time(NULL);
 		    if (currentTime >= (lastCascadeUpdate + CAInfoService::SEND_CASCADE_INFO_WAIT) || pInfoService->isConfiguring())
 			{
-				if (pglobalOptions->isFirstMix() || (pglobalOptions->isLastMix() && pInfoService->isConfiguring()))
+				if (CALibProxytest::getOptions()->isFirstMix() || (CALibProxytest::getOptions()->isLastMix() && pInfoService->isConfiguring()))
 				{
 					if(pInfoService->sendCascadeHelo()!=E_SUCCESS)
 					{
@@ -152,7 +151,7 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 				* Note that increasing the delay might cause problems in CAMix::start (MiddleMixes entering
 				*::init and so on
 				*/
-			if( pglobalOptions->isDynamic() )
+			if( CALibProxytest::getOptions()->isDynamic() )
 			{
 				pInfoService->dynamicCascadeConfiguration();
 			}
@@ -291,9 +290,9 @@ bool CAInfoService::newCascadeAvailable()
 	UINT8 buff[255];
 	UINT8 bufMixId[60];
 	UINT32 mixIdLen = 60;
-	pglobalOptions->getMixId( bufMixId, mixIdLen );
+	CALibProxytest::getOptions()->getMixId( bufMixId, mixIdLen );
 	sprintf((char*)buff, "/newcascadeinformationavailable/%s",bufMixId );
-	if( pglobalOptions->getRandomInfoService(address) != E_SUCCESS)
+	if( CALibProxytest::getOptions()->getRandomInfoService(address) != E_SUCCESS)
 	{
 		CAMsg::printMsg( LOG_ERR, "Unable to get a random InfoService - This will cause problems! Check your configuration!\n");
 		return false;
@@ -344,9 +343,9 @@ SINT32 CAInfoService::dynamicCascadeConfiguration()
 	/** @todo Is this really safe? State of configuration is unknown here, reset should work though */
 	if(ret != E_SUCCESS)
 	{
-		pglobalOptions->resetNextMix();
-		pglobalOptions->resetPrevMix();
-		pglobalOptions->setCascadeProposal(NULL, 0);
+		CALibProxytest::getOptions()->resetNextMix();
+		CALibProxytest::getOptions()->resetPrevMix();
+		CALibProxytest::getOptions()->setCascadeProposal(NULL, 0);
 		m_pMix->dynaReconfigure(false);
 	}
 	m_bReconfig = false;
@@ -424,14 +423,14 @@ SINT32 CAInfoService::setSignature(CASignature* pSig, CACertificate* pOwnCert,
 
 SINT32 CAInfoService::getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic)
 {
-    if(m_pMix!=NULL && pglobalOptions->isFirstMix())
+    if(m_pMix!=NULL && CALibProxytest::getOptions()->isFirstMix())
         return ((CAFirstMix*)m_pMix)->getLevel(puser,prisk,ptraffic);
     return E_UNKNOWN;
 }
 
 SINT32 CAInfoService::getMixedPackets(UINT64& ppackets)
 	{
-		if(m_pMix!=NULL && pglobalOptions->isFirstMix())
+		if(m_pMix!=NULL && CALibProxytest::getOptions()->isFirstMix())
 			return ((CAFirstMix*)m_pMix)->getMixedPackets(ppackets);
 		return E_UNKNOWN;
 	}
@@ -468,7 +467,7 @@ SINT32 CAInfoService::stop()
 
 SINT32 CAInfoService::sendStatus(bool bIncludeCerts)
 {
-	if(!pglobalOptions->isFirstMix())
+	if(!CALibProxytest::getOptions()->isFirstMix())
 	{
 		return E_SUCCESS;
 	}
@@ -506,7 +505,7 @@ UINT8* CAInfoService::getStatusXMLAsString(bool bIncludeCerts,UINT32& len)
 
 		//httpClient.setSocket(&oSocket);
 		UINT8 strMixId[255];
-		pglobalOptions->getMixId(strMixId,255);
+		CALibProxytest::getOptions()->getMixId(strMixId,255);
 
 		tmpUser=tmpTraffic=tmpRisk=-1;
 		set64(tmpPackets,(UINT32)-1);
@@ -585,7 +584,7 @@ SINT32 CAInfoService::sendStatus(const UINT8* a_strStatusXML,UINT32 a_len, const
 		#ifdef DEBUG
 			CAMsg::printMsg(LOG_DEBUG, "CAInfoService::sendStatus()\n");
 		#endif
-		if(!pglobalOptions->isFirstMix())
+		if(!CALibProxytest::getOptions()->isFirstMix())
 		{
 			return E_SUCCESS;
 		}
@@ -709,7 +708,7 @@ SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param)
 UINT8 **CAInfoService::getOperatorTnCsAsStrings(UINT32 **lengths, XMLSize_t *nrOfTnCs)
 {
 
-	XERCES_CPP_NAMESPACE::DOMElement *tnCs = pglobalOptions->getTermsAndConditions();
+	XERCES_CPP_NAMESPACE::DOMElement *tnCs = CALibProxytest::getOptions()->getTermsAndConditions();
 	if(tnCs == NULL)
 	{
 		return NULL;
@@ -730,7 +729,7 @@ UINT8 **CAInfoService::getOperatorTnCsAsStrings(UINT32 **lengths, XMLSize_t *nrO
 	UINT8 tmpOpSKIBuff[TMP_BUFF_SIZE];
 	UINT32 tmpOpSKILen = TMP_BUFF_SIZE;
 
-	pglobalOptions->getOperatorSubjectKeyIdentifier(tmpOpSKIBuff, &tmpOpSKILen);
+	CALibProxytest::getOptions()->getOperatorSubjectKeyIdentifier(tmpOpSKIBuff, &tmpOpSKILen);
 	if( tmpOpSKILen == 0 )
 	{
 		return NULL;
@@ -833,7 +832,7 @@ UINT8* CAInfoService::getMixHeloXMLAsString(UINT32& a_len)
 	XERCES_CPP_NAMESPACE::DOMDocument* docMixInfo = NULL;
 	XERCES_CPP_NAMESPACE::DOMElement* mixInfoRoot = NULL;
 
-	if( (pglobalOptions->getMixXml(docMixInfo) != E_SUCCESS) ||
+	if( (CALibProxytest::getOptions()->getMixXml(docMixInfo) != E_SUCCESS) ||
 		(docMixInfo == NULL) )
 	{
 		return NULL;
@@ -1009,7 +1008,7 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
                         CAMsg::printMsg(LOG_DEBUG,"InfoService: Setting new previous mix: %s\n",tmpStr);
 												XMLString::release(&tmpStr);
 												XMLString::release(&id);
-                        pglobalOptions->setPrevMix(doc);
+                        CALibProxytest::getOptions()->setPrevMix(doc);
 					}
                     else if(m_expectedMixRelPos > 0)
 					{
@@ -1018,7 +1017,7 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
                         CAMsg::printMsg(LOG_DEBUG,"InfoService: Setting new next mix: %s\n",tmpStr);
 												XMLString::release(&id);
 												XMLString::release(&tmpStr);
-                        pglobalOptions->setNextMix(doc);
+                        CALibProxytest::getOptions()->setNextMix(doc);
 					}
                 }
                 CAMsg::printMsg(LOG_DEBUG,"InfoService::sendMixHelo(): XML infoservice doc 0x%x not needed anymore.\n",
@@ -1045,7 +1044,7 @@ SINT32 CAInfoService::sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN (*a_
 {
 	SINT32 returnValue = E_UNKNOWN;
 	UINT32 nrAddresses;
-	CAListenerInterface** socketAddresses = pglobalOptions->getInfoServices(nrAddresses);
+	CAListenerInterface** socketAddresses = CALibProxytest::getOptions()->getInfoServices(nrAddresses);
 	CAThread** threads = new CAThread*[nrAddresses];
 	InfoServiceHeloMsg** messages = new InfoServiceHeloMsg*[nrAddresses];
 
@@ -1092,7 +1091,7 @@ SINT32 CAInfoService::sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN (*a_
 
 SINT32 CAInfoService::sendCascadeHelo()
 {
-	if(pglobalOptions->isMiddleMix())
+	if(CALibProxytest::getOptions()->isMiddleMix())
   	{
 		return E_SUCCESS;
   	}
@@ -1180,7 +1179,7 @@ ERR:
 	*/
 SINT32 CAInfoService::sendCascadeHelo(const UINT8* a_strCascadeHeloXML,UINT32 a_len,const CASocketAddrINet* a_pSocketAddress) const
 {
-	if(pglobalOptions->isMiddleMix() || (pglobalOptions->isLastMix() && !m_bConfiguring))
+	if(CALibProxytest::getOptions()->isMiddleMix() || (CALibProxytest::getOptions()->isLastMix() && !m_bConfiguring))
 	{
 		return E_SUCCESS;
 	}
@@ -1201,7 +1200,7 @@ SINT32 CAInfoService::sendCascadeHelo(const UINT8* a_strCascadeHeloXML,UINT32 a_
 	}
 	if(oSocket.connect(*a_pSocketAddress, MIX_TO_INFOSERVICE_TIMEOUT)==E_SUCCESS)
 	{
-	    if(pglobalOptions->isFirstMix())
+	    if(CALibProxytest::getOptions()->isFirstMix())
 		{
             CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending cascade helo to InfoService %s:%d.\r\n", hostname, a_pSocketAddress->getPort());
 		}
@@ -1212,7 +1211,7 @@ SINT32 CAInfoService::sendCascadeHelo(const UINT8* a_strCascadeHeloXML,UINT32 a_
         // LERNGRUPPE
         // Semi-dynamic cascades are temporary cascades, not yet established! InfoService can cope with them now
         // using the /dynacascade command
-	    if( pglobalOptions->isLastMix() && m_bConfiguring )
+	    if( CALibProxytest::getOptions()->isLastMix() && m_bConfiguring )
 		{
 			sprintf((char*)buffHeader,"POST /dynacascade HTTP/1.0\r\nContent-Length: %u\r\n\r\n",a_len);
 		}
@@ -1268,7 +1267,7 @@ SINT32 CAInfoService::handleConfigEvent(XERCES_CPP_NAMESPACE::DOMDocument* doc) 
     char* myPrevMixId = NULL;
     bool bFoundMix = false;
     UINT8 myMixId[64];
-    pglobalOptions->getMixId(myMixId,64);
+    CALibProxytest::getOptions()->getMixId(myMixId,64);
     DOM_Node child = mixesElement.getFirstChild();
     while(child!=NULL)
     {
@@ -1337,7 +1336,7 @@ SINT32 CAInfoService::getPaymentInstance(const UINT8* a_pstrPIID,CAXMLBI** a_pXM
 	SINT32 returnValue = E_UNKNOWN;
 	SINT32 currentValue;
 	UINT32 nrAddresses;
-	CAListenerInterface** socketAddresses = pglobalOptions->getInfoServices(nrAddresses);
+	CAListenerInterface** socketAddresses = CALibProxytest::getOptions()->getInfoServices(nrAddresses);
 	for (UINT32 i = 0; i < nrAddresses; i++)
 	{
 		currentValue = getPaymentInstance(a_pstrPIID, a_pXMLBI,

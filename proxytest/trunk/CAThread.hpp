@@ -66,6 +66,9 @@ class CAThreadList;
 	**/
 typedef THREAD_RETURN(*THREAD_MAIN_TYP)(void *);
 
+///Type of an ID for a thread which can be used to identify the current and other threads
+typedef unsigned long thread_id_t;
+
 /** @defgroup threading Classes for multithreaded programming
 	*
 	* There exists several classes to support multi-threading. Some of these classes deal with creating and executing
@@ -190,6 +193,15 @@ class CAThread
 			UINT32 getID() const
 				{
 					return m_Id;
+				}
+
+			static thread_id_t getSelfID()
+				{
+					#ifdef _WIN32
+						return (unsigned long) pthread_self().p;
+					#else
+							return (unsigned long) pthread_self();
+					#endif
 				}
 
 #ifdef PRINT_THREAD_STACK_TRACE

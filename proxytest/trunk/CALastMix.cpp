@@ -34,6 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
   /* TypeB mixes doesn't use the default-implementation */
   #include "CALastMixChannelList.hpp"
 #endif
+#include "CALibProxytest.hpp"
 #include "CASocketGroup.hpp"
 #include "CASingleSocketGroup.hpp"
 #include "CAMsg.hpp"
@@ -46,9 +47,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAPool.hpp"
 #include "xml/DOM_Output.hpp"
 #include "CAStatusManager.hpp"
-
-extern CACmdLnOptions* pglobalOptions;
-
 /*******************************************************************************/
 // ----------START NEW VERSION -----------------------
 //---------------------------------------------------------
@@ -65,16 +63,16 @@ SINT32 CALastMix::initOnce()
 				return E_UNKNOWN;
 			}
 
-		m_pSignature=pglobalOptions->getSignKey();
+		m_pSignature=CALibProxytest::getOptions()->getSignKey();
 		if(m_pSignature==NULL)
 			return E_UNKNOWN;
-		if(pglobalOptions->getListenerInterfaceCount()<1)
+		if(CALibProxytest::getOptions()->getListenerInterfaceCount()<1)
 			{
 				CAMsg::printMsg(LOG_CRIT,"No ListenerInterfaces specified!\n");
 				return E_UNKNOWN;
 			}
-    if(pglobalOptions->getCascadeXML() != NULL)
-    	initMixCascadeInfo(pglobalOptions->getCascadeXML());
+    if(CALibProxytest::getOptions()->getCascadeXML() != NULL)
+    	initMixCascadeInfo(CALibProxytest::getOptions()->getCascadeXML());
 		return E_SUCCESS;
 	}
 
@@ -89,10 +87,10 @@ SINT32 CALastMix::init()
 
 		CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...\n");
 		CAListenerInterface*  pListener=NULL;
-		UINT32 interfaces=pglobalOptions->getListenerInterfaceCount();
+		UINT32 interfaces=CALibProxytest::getOptions()->getListenerInterfaceCount();
 		for(UINT32 i=1;i<=interfaces;i++)
 			{
-				pListener=pglobalOptions->getListenerInterface(i);
+				pListener=CALibProxytest::getOptions()->getListenerInterface(i);
 				if(!pListener->isVirtual())
 					break;
 				delete pListener;
@@ -132,9 +130,9 @@ SINT32 CALastMix::init()
 
 #ifdef LOG_CRIME
 		m_nCrimeRegExpsURL=0;
-		m_pCrimeRegExpsURL=pglobalOptions->getCrimeRegExpsURL(&m_nCrimeRegExpsURL);
+		m_pCrimeRegExpsURL=CALibProxytest::getOptions()->getCrimeRegExpsURL(&m_nCrimeRegExpsURL);
 		m_nCrimeRegExpsPayload = 0;
-		m_pCrimeRegExpsPayload = pglobalOptions->getCrimeRegExpsPayload(&m_nCrimeRegExpsPayload);
+		m_pCrimeRegExpsPayload = CALibProxytest::getOptions()->getCrimeRegExpsPayload(&m_nCrimeRegExpsPayload);
 #endif
 		ret=processKeyExchange();
 		if(ret!=E_SUCCESS)
@@ -198,7 +196,7 @@ SINT32 CALastMix::processKeyExchange()
 		DOMElement* elemMixes=createDOMElement(doc,"Mixes");
 		setDOMElementAttribute(elemMixes,"count",(UINT32)1);
     //UINT8 cName[128];
-    //pglobalOptions->getCascadeName(cName,128);
+    //CALibProxytest::getOptions()->getCascadeName(cName,128);
     //setDOMElementAttribute(elemMixes,"cascadeName",cName);
 		doc->appendChild(elemMixes);
 
@@ -260,8 +258,8 @@ SINT32 CALastMix::processKeyExchange()
 
 // Add Info about KeepAlive traffic
 		DOMElement* elemKeepAlive=NULL;
-		UINT32 u32KeepAliveSendInterval=pglobalOptions->getKeepAliveSendInterval();
-		UINT32 u32KeepAliveRecvInterval=pglobalOptions->getKeepAliveRecvInterval();
+		UINT32 u32KeepAliveSendInterval=CALibProxytest::getOptions()->getKeepAliveSendInterval();
+		UINT32 u32KeepAliveRecvInterval=CALibProxytest::getOptions()->getKeepAliveRecvInterval();
 		elemKeepAlive=createDOMElement(doc,"KeepAlive");
 		DOMElement* elemKeepAliveSendInterval=NULL;
 		DOMElement* elemKeepAliveRecvInterval=NULL;
@@ -279,7 +277,7 @@ SINT32 CALastMix::processKeyExchange()
 		 * Extensions, (nodes that can be removed from the KeyInfo without
 		 * destroying the signature of the "Mix"-node).
 		 */
-		if(pglobalOptions->getTermsAndConditions() != NULL)
+		if(CALibProxytest::getOptions()->getTermsAndConditions() != NULL)
 		{
 			appendTermsAndConditionsExtension(doc, elemMixes);
 			elemMix->appendChild(termsAndConditionsInfoNode(doc));
@@ -335,7 +333,7 @@ SINT32 CALastMix::processKeyExchange()
 		CAMsg::printMsg(LOG_INFO,"%s\n",(char*)messageBuff);
 		//verify signature
 		CASignature oSig;
-		CACertificate* pCert=pglobalOptions->getPrevMixTestCertificate();
+		CACertificate* pCert=CALibProxytest::getOptions()->getPrevMixTestCertificate();
 		oSig.setVerifyKey(pCert);
 		delete pCert;
 		pCert = NULL;
@@ -456,12 +454,12 @@ SINT32 CALastMix::reconfigure()
 		CAMsg::printMsg(LOG_DEBUG,"Set new resources limitation parameters\n");
         if(m_pChannelList!=NULL) {
 		#if defined (DELAY_CHANNELS)
-			m_pChannelList->setDelayParameters(	pglobalOptions->getDelayChannelUnlimitTraffic(),
-																					pglobalOptions->getDelayChannelBucketGrow(),
-																					pglobalOptions->getDelayChannelBucketGrowIntervall());
+			m_pChannelList->setDelayParameters(	CALibProxytest::getOptions()->getDelayChannelUnlimitTraffic(),
+																					CALibProxytest::getOptions()->getDelayChannelBucketGrow(),
+																					CALibProxytest::getOptions()->getDelayChannelBucketGrowIntervall());
 		#endif
 		#if defined (DELAY_CHANNELS_LATENCY)
-			UINT32 utemp=pglobalOptions->getDelayChannelLatency();
+			UINT32 utemp=CALibProxytest::getOptions()->getDelayChannelLatency();
 			m_pChannelList->setDelayLatencyParameters(	utemp);
 		#endif
 		}
@@ -705,6 +703,111 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 	}
 
 #ifdef LOG_CRIME
+//Assuming we have aligned HTTP or SOCKS protocolData
+	UINT8* CALastMix::parseDomainFromPayload(const UINT8 *payloadData, UINT32 payloadDataLength)
+	{
+		if( (payloadDataLength < 5) ||
+			(payloadDataLength > PAYLOAD_SIZE) )
+		{
+			return NULL;
+		}
+
+		if( (payloadData[0] == 0x05) && (payloadData[1] & 0x03) )
+		{
+			//in this case we have a SOCKS message
+			UINT32 tempUrlLength = 0, urlStartOffset = 0;
+			//of which address type is the dst address?
+			switch(payloadData[3])
+			{
+				case 0x01: //IPv4_Address
+				{
+					tempUrlLength = 4;
+					urlStartOffset = 4;
+					break;
+				}
+
+				case 0x03: //Domain name
+				{
+					tempUrlLength = payloadData[4];
+					urlStartOffset = 5;
+					//CAMsg::printMsg(LOG_ERR,"SOCKS v5 domain name length %u.\n", tempUrlLength);
+					break;
+				}
+
+				case 0x4: //IPv6 address
+				{
+					tempUrlLength = 16;
+					urlStartOffset = 4;
+					break;
+				}
+
+				default:
+				{
+					return NULL;
+				}
+			}
+			if(payloadDataLength < (urlStartOffset + tempUrlLength) )
+			{
+				return NULL;
+			}
+			UINT8 *address = new UINT8[tempUrlLength+1];
+			memcpy(address, payloadData+urlStartOffset, tempUrlLength);
+			address[tempUrlLength] = 0;
+			//CAMsg::printMsg(LOG_ERR,"SOCKS v5 found with address %s.\n", address);
+			return address;
+		}
+		else
+		{
+			//In this case the message is handled as a common HTTP request
+			//So we lock for the Request-Line
+			//Note according to [HTTP 1.1] the Request-Line might be preceded by CRLF
+			//Snip: In the interest of robustness, servers SHOULD ignore any empty
+			//      line(s) received where a Request-Line is expected. In other words, if
+			//      the server is reading the protocol stream at the beginning of a
+			//      message and receives a CRLF first, it should ignore the CRLF.
+
+			//OK lets try to use a regular expression for the task instead of a hand crafted parser...
+			const char* request_line_regexp="[\n\r]*([^ ]+)[ ]+([^ ]+)"; //
+			regex_t mycompregexp;
+			regcomp(&mycompregexp,request_line_regexp,REG_EXTENDED );
+			//do the match...
+			regmatch_t theMatches[3];
+			int ret=regnexec(&mycompregexp,(const char*)payloadData,payloadDataLength,3,theMatches,0);
+			regfree(&mycompregexp);
+			if(ret!=0)
+				return NULL;
+
+			const UINT8* httpVerb=payloadData+theMatches[1].rm_so;
+			UINT8* domainName=NULL;
+			if((payloadData+theMatches[1].rm_eo-payloadData+theMatches[1].rm_so)>6 && memcmp("CONNECT",httpVerb,7)==0)
+				{//Connect request --> URI is domain [:port]
+					UINT32 matchLen=theMatches[2].rm_eo-theMatches[2].rm_so;
+					domainName=new UINT8[matchLen+1];
+					memcpy(domainName,payloadData+theMatches[2].rm_so,matchLen);
+					domainName[matchLen]=0;
+					strtok((char*)domainName,":");
+				}
+			else
+				{
+					// Regexp for URI
+					const char* uri_regexp="[^:]+[:][/][/]([^:/]+)"; //
+					regex_t myuricompregexp;
+					regcomp(&myuricompregexp,uri_regexp,REG_EXTENDED );
+					//do the match...
+					regmatch_t theDomainMatches[2];
+					ret=regnexec(&myuricompregexp,(const char*)payloadData+theMatches[2].rm_so,theMatches[2].rm_eo-theMatches[2].rm_so,2,theDomainMatches,0);
+					regfree(&myuricompregexp);
+					if(ret!=0)
+						return NULL;
+					UINT32 matchLen=theDomainMatches[1].rm_eo-theDomainMatches[1].rm_so;
+					domainName=new UINT8[matchLen+1];
+					memcpy(domainName,payloadData+theMatches[2].rm_so+theDomainMatches[1].rm_so,matchLen);
+					domainName[matchLen]=0;
+				}
+			return domainName;
+		}
+	}
+
 	bool CALastMix::checkCrime(const UINT8* payLoad,UINT32 payLen,bool bURLCheck)
 	{
 		//Lots of TODO!!!!
@@ -744,7 +847,7 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 	*/
 SINT32 CALastMix::setTargets()
 	{
-		UINT32 cntTargets=pglobalOptions->getTargetInterfaceCount();
+		UINT32 cntTargets=CALibProxytest::getOptions()->getTargetInterfaceCount();
 		if(cntTargets==0)
 			{
 				CAMsg::printMsg(LOG_CRIT,"No Targets (proxies) specified!\n");
@@ -756,7 +859,7 @@ SINT32 CALastMix::setTargets()
 		for(i=1;i<=cntTargets;i++)
 			{
 				TargetInterface oTargetInterface;
-				pglobalOptions->getTargetInterface(oTargetInterface,i);
+				CALibProxytest::getOptions()->getTargetInterface(oTargetInterface,i);
 				if(oTargetInterface.target_type==TARGET_HTTP_PROXY)
 					m_pCacheLB->add(oTargetInterface.addr);
 				else if(oTargetInterface.target_type==TARGET_SOCKS_PROXY)

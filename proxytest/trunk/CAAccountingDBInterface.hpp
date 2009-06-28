@@ -31,6 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef PAYMENT
 #include "CAQueue.hpp"
 #include "CAXMLCostConfirmation.hpp"
+#include "CAThread.hpp"
 
 #define MAX_DB_CONNECTIONS 3
 #define PG_PROTOCOL_VERSION_3 3
@@ -187,7 +188,7 @@ class CAAccountingDBInterface
 			bool m_bConnected;
 
 			/* The owner of the connection */
-			volatile pthread_t m_owner;
+			volatile thread_id_t m_owner;
 			/* indicates wether this connection is not owned by a thread.
 			 * (There is no reliable value of m_owner to indicate this).
 			 */

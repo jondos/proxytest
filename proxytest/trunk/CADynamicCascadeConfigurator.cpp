@@ -37,8 +37,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CACertificate.hpp"
 #include "CAMsg.hpp"
 
-extern CACmdLnOptions* pglobalOptions;
-
 /**
   * LERNGRUPPE
   * Creates a new CADynamicCascadeConfigurator with the given signature key for the given mix

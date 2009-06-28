@@ -1544,7 +1544,7 @@ SINT32 CACmdLnOptions::setLogDir(const UINT8* name,UINT32 len)
 		return E_SUCCESS;
 	}
 
-SINT32 CACmdLnOptions::getPidFile(UINT8* pidfile,UINT32 len)
+SINT32 CACmdLnOptions::getPidFile(UINT8* pidfile,UINT32 len) const
   {
 		if(m_strPidFile==NULL||pidfile==NULL)
 				return E_UNKNOWN;

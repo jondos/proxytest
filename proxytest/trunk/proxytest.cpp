@@ -36,6 +36,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAQueue.hpp"
 #include "CAThreadList.hpp"
 #include "CAStatusManager.hpp"
+#include "CALibProxytest.hpp"
 
 #ifdef _DEBUG //For FreeBSD memory checking functionality
 	const char* _malloc_options="AX";
@@ -69,12 +70,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 // The Mix....
 CAMix* pMix=NULL;
 #endif
-CACmdLnOptions* pglobalOptions=NULL;
-#if defined (_DEBUG) && ! defined (ONLY_LOCAL_PROXY)
-CAThreadList *pThreadList = NULL;
-#endif
-//Global Locks required by OpenSSL-Library
-CAMutex* pOpenSSLMutexes=NULL;
 
 bool bTriedTermination = false;
 
@@ -95,39 +90,16 @@ typedef struct
 	#endif
 #endif
 
-///Callbackfunction for locking required by OpenSSL
-void openssl_locking_callback(int mode, int type, char * /*file*/, int /*line*/)
-	{
-		if (mode & CRYPTO_LOCK)
-			{
-				pOpenSSLMutexes[type].lock();
-			}
-		else
-			{
-				pOpenSSLMutexes[type].unlock();
-			}
-	}
-
-/** Callback used by openssl to identify a thread*/
-///TODO: Move this to CAThread !
-unsigned long openssl_get_thread_id(void)
-	{
-#ifdef _WIN32
-		return (unsigned long) pthread_self().p;
-#else
-		return (unsigned long) pthread_self();
-#endif
-}
 
 /// Removes the stored PID (file)
 void removePidFile()
 	{
-		if(pglobalOptions==NULL)
+		if(CALibProxytest::getOptions()==NULL)
 			{
 				return;
 			}
 		UINT8 strPidFile[512];
-		if(pglobalOptions->getPidFile(strPidFile,512)==E_SUCCESS)
+		if(CALibProxytest::getOptions()->getPidFile(strPidFile,512)==E_SUCCESS)
 			{
 				if(::remove((char*)strPidFile)!=0)
 					{
@@ -145,32 +117,8 @@ void removePidFile()
 /**do necessary initialisations of libraries etc.*/
 void init()
 	{
-#ifndef ONLY_LOCAL_PROXY
-		XMLPlatformUtils::Initialize();
-		initDOMParser();
-#endif
-#ifndef ONLY_LOCAL_PROXY
-		SSL_library_init();
-#endif
-		OpenSSL_add_all_algorithms();
-		pOpenSSLMutexes=new CAMutex[CRYPTO_num_locks()];
-		CRYPTO_set_locking_callback((void (*)(int,int,const char *,int))openssl_locking_callback);
-		CRYPTO_set_id_callback(openssl_get_thread_id);
-#if defined _DEBUG && ! defined (ONLY_LOCAL_PROXY)
-		pThreadList=new CAThreadList();
-		CAThread::setThreadList(pThreadList);
-#endif
-		CAMsg::init();
-		CASocketAddrINet::init();
-		//startup
-		#ifdef _WIN32
-			int err=0;
-			WSADATA wsadata;
-			err=WSAStartup(0x0202,&wsadata);
-		#endif
-		initRandom();
-		pglobalOptions=new CACmdLnOptions();
-}
+		CALibProxytest::init();
+	}
 
 /**do necessary cleanups of libraries etc.*/
 void cleanup()
@@ -186,45 +134,8 @@ void cleanup()
 		pMix=NULL;
 #endif
 		CAMsg::printMsg(LOG_CRIT,"Terminating Programm!\n");
-		CASocketAddrINet::cleanup();
-		#ifdef _WIN32
-			WSACleanup();
-		#endif
 		removePidFile();
-		delete pglobalOptions;
-		pglobalOptions=NULL;
-
-	//OpenSSL Cleanup
-		CRYPTO_set_locking_callback(NULL);
-		delete []pOpenSSLMutexes;
-		pOpenSSLMutexes=NULL;
-		//XML Cleanup
-		//Note: We have to destroy all XML Objects and all objects that uses XML Objects BEFORE
-		//we terminate the XML lib!
-#ifdef SERVER_MONITORING
-		CAStatusManager::cleanup();
-#endif
-		releaseDOMParser();
-#ifndef ONLY_LOCAL_PROXY
-		XMLPlatformUtils::Terminate();
-#endif
-
-#if defined _DEBUG && ! defined (ONLY_LOCAL_PROXY)
-			if(pThreadList != NULL)
-			{
-				int nrOfThreads = pThreadList->getSize();
-				CAMsg::printMsg(LOG_INFO,"After cleanup %d threads listed.\n", nrOfThreads);
-				if(nrOfThreads > 0)
-				{
-					pThreadList->showAll();
-				}
-				delete pThreadList;
-				pThreadList = NULL;
-			}
-#endif
-
-		CAMsg::cleanup();
-
+		CALibProxytest::cleanup();
 	}
 
 ///Remark: terminate() might be already defined by the c lib -- do not use this name...
@@ -288,8 +199,8 @@ void signal_interrupt( int)
 		MONITORING_FIRE_SYS_EVENT(ev_sys_sigInt);
 		CAMsg::printMsg(LOG_INFO,"Hm.. Strg+C pressed... exiting!\n");
 #if defined _DEBUG && ! defined (ONLY_LOCAL_PROXY)
-		CAMsg::printMsg(LOG_INFO,"%d threads listed.\n",pThreadList->getSize());
-		pThreadList->showAll();
+		CAMsg::printMsg(LOG_INFO,"%d threads listed.\n",CALibProxytest::getThreadList()->getSize());
+		CALibProxytest::getThreadList()->showAll();
 #endif
 		my_terminate();
 		exit(0);
@@ -298,7 +209,7 @@ void signal_interrupt( int)
 #ifndef ONLY_LOCAL_PROXY
 void signal_hup(int)
 	{
-		pglobalOptions->reread(pMix);
+		CALibProxytest::getOptions()->reread(pMix);
 	}
 #endif
 
@@ -632,12 +543,15 @@ int main(int argc, const char* argv[])
 //		exit(0);
 //#endif
 
-		if(pglobalOptions->parse(argc,argv) != E_SUCCESS)
+		if(CALibProxytest::getOptions()->parse(argc,argv) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_CRIT,"Error: Cannot parse configuration file!\n");
 			goto EXIT;
 		}
-		if(!(pglobalOptions->isFirstMix()||pglobalOptions->isMiddleMix()||pglobalOptions->isLastMix()||pglobalOptions->isLocalProxy()))
+		if(!(	CALibProxytest::getOptions()->isFirstMix()||
+					CALibProxytest::getOptions()->isMiddleMix()||
+					CALibProxytest::getOptions()->isLastMix()||
+					CALibProxytest::getOptions()->isLocalProxy()))
 			{
 				CAMsg::printMsg(LOG_CRIT,"You must specifiy, which kind of Mix you want to run!\n");
 				CAMsg::printMsg(LOG_CRIT,"Use -j or -c\n");
@@ -706,10 +620,10 @@ RESTART_MIX:
 		CAStatusManager::init();
 #endif
 
-#ifdef LOG_CRIME
+/*#ifdef LOG_CRIME
 		initHttpVerbLengths();
 #endif
-
+*/
 #ifndef WIN32
 		maxFiles=pglobalOptions->getMaxOpenFiles();
 
@@ -745,14 +659,14 @@ RESTART_MIX:
 #endif
 
 #ifndef ONLY_LOCAL_PROXY
-		if(pglobalOptions->isSyslogEnabled())
+		if(CALibProxytest::getOptions()->isSyslogEnabled())
 		{
 			CAMsg::setLogOptions(MSG_LOG);
 		}
 #endif
-		if(pglobalOptions->getLogDir((UINT8*)buff,255)==E_SUCCESS)
+		if(CALibProxytest::getOptions()->getLogDir((UINT8*)buff,255)==E_SUCCESS)
 			{
-				if(pglobalOptions->getCompressLogs())
+				if(CALibProxytest::getOptions()->getCompressLogs())
 					CAMsg::setLogOptions(MSG_COMPRESSED_FILE);
 				else
 					CAMsg::setLogOptions(MSG_FILE);
@@ -763,13 +677,13 @@ RESTART_MIX:
 #ifdef LOG_CRIME
 		if(ret!=E_SUCCESS)
 			{
-				if(pglobalOptions->isEncryptedLogEnabled())
+				if(CALibProxytest::getOptions()->isEncryptedLogEnabled())
 					{
 						CAMsg::printMsg(LOG_ERR,"Could not open encrypted log - exiting!\n");
 						exit(EXIT_FAILURE);
 					}
 				else
-					pglobalOptions->enableEncryptedLog(false);
+					CALibProxytest::getOptions()->enableEncryptedLog(false);
 			}
 #endif
 
@@ -827,7 +741,7 @@ RESTART_MIX:
 #endif
 		//Try to write pidfile....
 		UINT8 strPidFile[512];
-		if(pglobalOptions->getPidFile(strPidFile,512)==E_SUCCESS)
+		if(CALibProxytest::getOptions()->getPidFile(strPidFile,512)==E_SUCCESS)
 			{
 				#ifndef _WIN32
 					int old_uid=geteuid(); //old uid... stored if we have to switch to root
@@ -858,7 +772,7 @@ RESTART_MIX:
 			}
 
 //		CARoundTripTime* pRTT=NULL;
-		if(pglobalOptions->isLocalProxy())
+		if(CALibProxytest::getOptions()->isLocalProxy())
 			{
 				#ifndef NEW_MIX_TYPE
 					CALocalProxy* pProxy=new CALocalProxy();
@@ -890,7 +804,7 @@ RESTART_MIX:
 				CASocket::setMaxNormalSockets(s32MaxSockets-10);
 				}
 				MONITORING_FIRE_SYS_EVENT(ev_sys_start);
-				if(pglobalOptions->isFirstMix())
+				if(CALibProxytest::getOptions()->isFirstMix())
 				{
 					CAMsg::printMsg(LOG_INFO,"I am the First MIX..\n");
 					#if !defined(NEW_MIX_TYPE)
@@ -900,7 +814,7 @@ RESTART_MIX:
 					#endif
 					MONITORING_FIRE_NET_EVENT(ev_net_firstMixInited);
 				}
-				else if(pglobalOptions->isMiddleMix())
+				else if(CALibProxytest::getOptions()->isMiddleMix())
 				{
 					CAMsg::printMsg(LOG_INFO,"I am a Middle MIX..\n");
 					pMix=new CAMiddleMix();

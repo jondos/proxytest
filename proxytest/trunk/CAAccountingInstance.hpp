@@ -118,7 +118,7 @@ public:
 	/**
 	 * Returns a reference to the Singleton instance
 	 */
-	static SINT32 init(CAMix* callingMix)
+	static SINT32 init(CAFirstMix* callingMix)
 		{
 				ms_pInstance = new CAAccountingInstance(callingMix);
 				MONITORING_FIRE_PAY_EVENT(ev_pay_aiInited);
@@ -199,7 +199,7 @@ public:
 
 private:
 
-	CAAccountingInstance(CAMix* callingMix); //Singleton!
+	CAAccountingInstance(CAFirstMix* callingMix); //Singleton!
 	~CAAccountingInstance();
 
 	struct t_aiqueueitem

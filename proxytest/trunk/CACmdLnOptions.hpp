@@ -477,7 +477,7 @@ class CACmdLnOptions
 			}
 
 			SINT32 getUser(UINT8* user,UINT32 len);
-			SINT32 getPidFile(UINT8* pidfile,UINT32 len);
+			SINT32 getPidFile(UINT8* pidfile,UINT32 len) const;
 
 #ifdef SERVER_MONITORING
 			char *getMonitoringListenerHost();

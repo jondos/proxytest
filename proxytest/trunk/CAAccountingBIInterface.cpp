@@ -265,7 +265,7 @@ CAXMLErrorMessage **CAAccountingBIInterface::settleAll(CAXMLCostConfirmation **c
 		return NULL;
 	}
 	#ifdef DEBUG
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingBIInterface::settle: got response header [Status,content-Lenght]=[%i,%i]!\n",status,contentLen);
+		CAMsg::printMsg(LOG_DEBUG, "CAAccountingBIInterface::settle: got response header [Status,content-Lenght]=[%i,%i]!\n",status,contentLength);
 	#endif
 	response = new UINT8[contentLength+1];
 

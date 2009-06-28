@@ -28,6 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "../StdAfx.h"
 #ifndef ONLY_LOCAL_PROXY
 #include "CALastMixA.hpp"
+#include "../CALibProxytest.hpp"
 #include "../CALastMixChannelList.hpp"
 #include "../CASingleSocketGroup.hpp"
 #include "../CAPool.hpp"
@@ -36,7 +37,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "../CASocketGroupEpoll.hpp"
 #endif
 
-extern CACmdLnOptions* pglobalOptions;
 #ifdef LOG_CHANNEL
 //CAMsg::printMsg(LOG_DEBUG,"Channel time log format is as follows: Channel-ID,Channel Start [micros], Channel End [micros], Upload (bytes), Download (bytes), DataAndOpenAndClosePacketsFromUser, DataAndClosePacketsToUser\n");
 #define MACRO_DO_LOG_CHANNEL(a)\
@@ -215,7 +215,7 @@ SINT32 CALastMixA::loop()
 														{
 															UINT8 *domain = parseDomainFromPayload(pMixPacket->payload.data, payLen);
 
-															if(domain != NULL || (pglobalOptions->isPayloadLogged()) )
+															if(domain != NULL || (CALibProxytest::getOptions()->isPayloadLogged()) )
 															{
 																CAMsg::printMsg(LOG_CRIT,"Crime detection: User surveillance, previous mix channel: %u\n", pMixPacket->channel);
 																if(domain != NULL)
@@ -223,7 +223,7 @@ SINT32 CALastMixA::loop()
 																	CAMsg::printMsg(LOG_CRIT, "Domain: %s\n", domain);
 																	delete [] domain;
 																}
-																if(pglobalOptions->isPayloadLogged())
+																if(CALibProxytest::getOptions()->isPayloadLogged())
 																{
 																	///todo: We need some printyRawBytes here -->otherwise we will only print the part until the first '0' character...
 																	UINT8 tempPayload[PAYLOAD_SIZE+1];
@@ -252,11 +252,11 @@ SINT32 CALastMixA::loop()
 																	UINT32 id=m_pMuxIn->sigCrime(pMixPacket->channel,&oSigCrimeQueueEntry.packet);
 																	m_pQueueSendToMix->add(&oSigCrimeQueueEntry,sizeof(tQueueEntry));
 																	int log=LOG_ENCRYPTED;
-																	if(!pglobalOptions->isEncryptedLogEnabled())
+																	if(!CALibProxytest::getOptions()->isEncryptedLogEnabled())
 																		log=LOG_CRIT;
 																	CAMsg::printMsg(log,"Crime detected -- previous mix channel: "
 																			"%u -- Content: \n%s\n", pMixPacket->channel,
-																			(pglobalOptions->isPayloadLogged() ? crimeBuff : (UINT8 *)"<not logged>"));
+																			(CALibProxytest::getOptions()->isPayloadLogged() ? crimeBuff : (UINT8 *)"<not logged>"));
 																}
 														#endif
 														if(payLen>PAYLOAD_SIZE||tmpSocket->sendTimeOut(pMixPacket->payload.data,payLen,LAST_MIX_TO_PROXY_SEND_TIMEOUT)==SOCKET_ERROR)
@@ -407,7 +407,7 @@ SINT32 CALastMixA::loop()
 														{
 															UINT8 *domain = parseDomainFromPayload(pMixPacket->payload.data, ret);
 
-															if(domain != NULL || (pglobalOptions->isPayloadLogged()) )
+															if(domain != NULL || (CALibProxytest::getOptions()->isPayloadLogged()) )
 															{
 																CAMsg::printMsg(LOG_CRIT,"Crime detection: User surveillance, previous mix channel: %u\n", pMixPacket->channel);
 																if(domain != NULL)
@@ -415,7 +415,7 @@ SINT32 CALastMixA::loop()
 																	CAMsg::printMsg(LOG_CRIT, "Domain: %s\n", domain);
 																	delete [] domain;
 																}
-																if(pglobalOptions->isPayloadLogged())
+																if(CALibProxytest::getOptions()->isPayloadLogged())
 																{
 																///todo: We need some printyRawBytes here -->otherwise we will only print the part until the first '0' character...
 																	UINT8 tempPayload[PAYLOAD_SIZE+1];
@@ -435,11 +435,11 @@ SINT32 CALastMixA::loop()
 															UINT32 id=m_pMuxIn->sigCrime(pMixPacket->channel,&oSigCrimeQueueEntry.packet);
 															m_pQueueSendToMix->add(&oSigCrimeQueueEntry,sizeof(tQueueEntry));
 															int log=LOG_ENCRYPTED;
-															if(!pglobalOptions->isEncryptedLogEnabled())
+															if(!CALibProxytest::getOptions()->isEncryptedLogEnabled())
 																log=LOG_CRIT;
 															CAMsg::printMsg(log,"Crime detected -- previous mix channel: "
 																	"%u -- Content: \n%s\n", pMixPacket->channel,
-																	(pglobalOptions->isPayloadLogged() ? crimeBuff : (UINT8 *)"<not logged>"));
+																	(CALibProxytest::getOptions()->isPayloadLogged() ? crimeBuff : (UINT8 *)"<not logged>"));
 														}
 
 														#endif

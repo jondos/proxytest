@@ -3,7 +3,6 @@
 #include "CADataRetentionLogFile.hpp"
 #include "CAMsg.hpp"
 #include "CACmdLnOptions.hpp"
-extern CACmdLnOptions* pglobalOptions;
 
 CADataRetentionLogFile::CADataRetentionLogFile()
 	{

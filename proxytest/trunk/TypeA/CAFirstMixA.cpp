@@ -28,6 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "../StdAfx.h"
 #ifndef ONLY_LOCAL_PROXY
 #include "CAFirstMixA.hpp"
+#include "../CALibProxytest.hpp"
 #include "../CAThread.hpp"
 #include "../CASingleSocketGroup.hpp"
 #include "../CAInfoService.hpp"
@@ -38,8 +39,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef HAVE_EPOLL
 	#include "../CASocketGroupEpoll.hpp"
 #endif
-extern CACmdLnOptions* pglobalOptions;
-extern CAConditionVariable *loginCV;
 
 void CAFirstMixA::shutDown()
 {
@@ -76,7 +75,6 @@ void CAFirstMixA::shutDown()
 		}
 		CAMsg::printMsg(LOG_DEBUG,"Closed %i client connections.\n", connectionsClosed);
 	}
-	delete loginCV;
 #endif
 	m_bRestart = true;
 	m_bIsShuttingDown = false;
@@ -203,8 +201,8 @@ SINT32 CAFirstMixA::loop()
 #endif
 
 #ifdef LOG_CRIME
-		CASocketAddrINet* surveillanceIPs = pglobalOptions->getCrimeSurveillanceIPs();
-		UINT32 nrOfSurveillanceIPs = pglobalOptions->getNrOfCrimeSurveillanceIPs();
+		CASocketAddrINet* surveillanceIPs = CALibProxytest::getOptions()->getCrimeSurveillanceIPs();
+		UINT32 nrOfSurveillanceIPs = CALibProxytest::getOptions()->getNrOfCrimeSurveillanceIPs();
 #endif
 //		CAThread threadReadFromUsers;
 //		threadReadFromUsers.setMainLoop(loopReadFromUsers);
@@ -218,9 +216,9 @@ SINT32 CAFirstMixA::loop()
 //LOOP_START:
 #ifdef PAYMENT
 				// while checking if there are connections to close: synch with login threads
-				loginCV->lock();
+				m_pmutexLogin->lock();
 				checkUserConnections();
-				loginCV->unlock();
+				m_pmutexLogin->unlock();
 #endif
 //First Step
 //Checking for new connections
@@ -604,9 +602,9 @@ NEXT_USER:
 										#ifdef LOG_CRIME
 											if((pMixPacket->flags&CHANNEL_SIG_CRIME)==CHANNEL_SIG_CRIME)
 												{
-													UINT32 id=(pMixPacket->flags>>8)&0x000000FF;
+													//UINT32 id=(pMixPacket->flags>>8)&0x000000FF;
 													int log=LOG_ENCRYPTED;
-													if(!pglobalOptions->isEncryptedLogEnabled())
+													if(!CALibProxytest::getOptions()->isEncryptedLogEnabled())
 														log=LOG_CRIT;
 													CAMsg::printMsg(log,"Detecting crime activity - next mix channel: %u -- "
 															"In-IP is: %u.%u.%u.%u \n", pMixPacket->channel,

@@ -108,7 +108,7 @@ SINT32 CATLSClientSocket::doTLSConnect(CASocketAddr &psa, time_t sTimeout)
 		m_pSSL=SSL_new(m_pCtx);
 		// do the standard part of the ssl handshake
 		#ifdef DEBUG
-			CAMsg::printMsg(LOG_DEBUG,"my set fd socket is %i\n",s);
+			CAMsg::printMsg(LOG_DEBUG,"my set fd socket is %i\n",m_Socket);
 		#endif
 		SSL_set_fd( m_pSSL, m_Socket );
 
@@ -130,7 +130,7 @@ SINT32 CATLSClientSocket::doTLSConnect(CASocketAddr &psa, time_t sTimeout)
 					break;
 				}
 				CAMsg::printMsg(LOG_INFO,"CATLSClientSocket::doTLSConnect() another try to do the tls handshake.\n");
-				sleep(1);
+				sSleep(1);
 			}
 		} while(status != 1);
 
