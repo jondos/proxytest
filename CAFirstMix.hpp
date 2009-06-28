@@ -43,6 +43,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAThreadPool.hpp"
 #include "TermsAndConditions.hpp"
 #include "CALogPacketStats.hpp"
+#include "CAConditionVariable.hpp"
 #ifdef HAVE_EPOLL
 	#include "CASocketGroupEpoll.hpp"
 #endif
@@ -172,6 +173,9 @@ public:
 					TNC_REQUEST = XMLString::transcode(TNC_SREQUEST);
 					TNC_CONFIRM = XMLString::transcode(TNC_CONFIRM_REQ);
 					TNC_INTERRUPT =  XMLString::transcode(TNC_SINTERRUPT);
+#ifdef PAYMENT
+					m_pmutexLogin=new CAMutex();
+#endif
 				}
 
     	/*virtual ~CAFirstMix()
@@ -188,6 +192,9 @@ public:
 			m_pmutexMixedPackets = NULL;
 			delete m_pmutexLoginThreads;
 			m_pmutexLoginThreads = NULL;
+#ifdef PAYMENT
+			delete m_pmutexLogin;
+#endif
 		}
 
 		tMixType getType() const
@@ -196,6 +203,10 @@ public:
 			}
 #ifdef PAYMENT
 		bool forceKickout(fmHashTableEntry* pHashTableEntry, const XERCES_CPP_NAMESPACE::DOMDocument *pErrDoc=NULL);
+		CAMutex* getLoginMutex()
+			{
+				return m_pmutexLogin;
+			}
 #endif
 
 #ifdef DYNAMIC_MIX
@@ -405,6 +416,10 @@ protected:
 	bool m_bIsShuttingDown;
 	friend THREAD_RETURN	fm_loopLog(void*);
 	volatile bool					m_bRunLog;
+
+#ifdef PAYMENT
+	CAMutex* m_pmutexLogin;
+#endif
 
 private:
 	SINT32 doUserLogin_internal(CAMuxSocket* pNewUSer,UINT8 perrIP[4]);

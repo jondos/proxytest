@@ -120,8 +120,10 @@ class CALastMix:public
 
 
 			SINT32 setTargets();
+
 #ifdef LOG_CRIME
 			bool	 checkCrime(const UINT8* payLoad,UINT32 payLen,bool bURLCheck);
+			UINT8 *parseDomainFromPayload(const UINT8 *payloadData, UINT32 payloadDataLength);
 #endif
 
 		protected:

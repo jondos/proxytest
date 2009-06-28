@@ -1836,13 +1836,10 @@ tre_ast_to_tnfa(tre_ast_node_t *node, tre_tnfa_transition_t *transitions,
 
 
 #define ERROR_EXIT(err)		  \
-  do				  \
     {				  \
       errcode = err;		  \
-      if (/*CONSTCOND*/1)	  \
       	goto error_exit;	  \
-    }				  \
- while (/*CONSTCOND*/0)
+    }
 
 
 int

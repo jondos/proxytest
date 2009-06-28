@@ -32,8 +32,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAUtil.hpp"
 #include "CACmdLnOptions.hpp"
 
-extern CACmdLnOptions* pglobalOptions;
-
 ///TODO: Fix LOG_TRAFFIC output which is not done anymore, as per default no log message are ommited...
 
 /** Constructs an empty CAIPList. 

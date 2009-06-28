@@ -32,8 +32,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAXMLErrorMessage.hpp"
 #include "CAMsg.hpp"
 #include "CAStatusManager.hpp"
-
-extern CACmdLnOptions* pglobalOptions;
+#include "CALibProxytest.hpp"
 
 CAConditionVariable *CAAccountingDBInterface::ms_pConnectionAvailable = NULL;
 volatile UINT64 CAAccountingDBInterface::ms_threadWaitNr = 0;
@@ -85,26 +84,26 @@ SINT32 CAAccountingDBInterface::initDBConnection()
 
 		// Get database connection info from configfile and/or commandline
 		UINT8 host[255];
-		if(pglobalOptions->getDatabaseHost(host, 255) != E_SUCCESS)
+		if(CALibProxytest::getOptions()->getDatabaseHost(host, 255) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Error, no Database Host!\n");
 			return E_UNKNOWN;
 		}
-		UINT32 tcp_port = pglobalOptions->getDatabasePort();
+		UINT32 tcp_port = CALibProxytest::getOptions()->getDatabasePort();
 		UINT8 dbName[255];
-		if(pglobalOptions->getDatabaseName(dbName, 255) != E_SUCCESS)
+		if(CALibProxytest::getOptions()->getDatabaseName(dbName, 255) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Error, no Database Name!\n");
 			return E_UNKNOWN;
 		}
 		UINT8 userName[255];
-		if(pglobalOptions->getDatabaseUsername(userName, 255) != E_SUCCESS)
+		if(CALibProxytest::getOptions()->getDatabaseUsername(userName, 255) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Error, no Database Username!\n");
 			return E_UNKNOWN;
 		}
 		UINT8 password[255];
-		if(pglobalOptions->getDatabasePassword(password, 255) != E_SUCCESS)
+		if(CALibProxytest::getOptions()->getDatabasePassword(password, 255) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: Error, no Database Password!\n");
 			return E_UNKNOWN;
@@ -183,13 +182,13 @@ SINT32 CAAccountingDBInterface::terminateDBConnection()
 bool CAAccountingDBInterface::checkOwner()
 {
 	bool isFree = false;
-	pthread_t owner = 0;
+	thread_id_t owner = 0;
 	m_pConnectionMutex->lock();
 	owner = m_owner;
 	isFree = m_free;
 	m_pConnectionMutex->unlock();
 
-	return ( (owner==pthread_self()) && !isFree);
+	return ( (owner==CAThread::getSelfID()) && !isFree);
 }
 
 /* Thread safe DB Query method */
@@ -916,7 +915,7 @@ SINT32 CAAccountingDBInterface::__storeAccountStatus(UINT64 accountNumber, UINT3
 		SINT32 ret = E_SUCCESS;
 		PGresult* result = NULL;
 		size_t queryMaxLen = strlen(STMT_CLEAR_ACCOUNT_STATUS) + ACCOUNT_NUMBER_SIZE; //accountnumber has exactly 12 digits
-		char clearAccountStatusStmt[queryMaxLen+1];
+		char* clearAccountStatusStmt=new char[queryMaxLen+1];
 		memset(clearAccountStatusStmt, 0, queryMaxLen+1);
 
 		if( (a_accountNumber > MAX_ACCOUNTNUMBER) &&
@@ -924,6 +923,7 @@ SINT32 CAAccountingDBInterface::__storeAccountStatus(UINT64 accountNumber, UINT3
 		{
 			CAMsg::printMsg(LOG_DEBUG, "Cannot clear account status: accountnumber &llu is invalid.\n",
 					a_accountNumber);
+			delete[] clearAccountStatusStmt;
 			return E_UNKNOWN;
 		}
 		snprintf(clearAccountStatusStmt, queryMaxLen, STMT_CLEAR_ACCOUNT_STATUS, a_accountNumber);
@@ -936,8 +936,10 @@ SINT32 CAAccountingDBInterface::__storeAccountStatus(UINT64 accountNumber, UINT3
 				ret = E_UNKNOWN;
 			}
 			PQclear(result);
+			delete[] clearAccountStatusStmt;
 			return ret;
 		}
+		delete[] clearAccountStatusStmt;
 		CAMsg::printMsg(LOG_DEBUG, "Clearing accountstatus for account %llu failed.\n", a_accountNumber);
 		return E_UNKNOWN;
 	}
@@ -1148,7 +1150,7 @@ bool CAAccountingDBInterface::testAndSetOwner()
 	if(m_free)
 	{
 		m_free = false;
-		m_owner = pthread_self();
+		m_owner = CAThread::getSelfID();
 		success = true;
 	}
 	m_pConnectionMutex->unlock();
@@ -1159,7 +1161,7 @@ bool CAAccountingDBInterface::testAndResetOwner()
 {
 	bool success = false;
 	m_pConnectionMutex->lock();
-	if(!m_free && (m_owner == pthread_self()))
+	if(!m_free && (m_owner == CAThread::getSelfID()))
 	{
 		m_free = true;
 		m_owner = 0;

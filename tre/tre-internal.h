@@ -24,7 +24,7 @@
 #include <stdio.h>
 #define DPRINT(msg) do {printf msg; fflush(stdout);} while(/*CONSTCOND*/0)
 #else /* !TRE_DEBUG */
-#define DPRINT(msg) do { } while(/*CONSTCOND*/0)
+#define DPRINT(msg) //do { } while(/*CONSTCOND*/0)
 #endif /* !TRE_DEBUG */
 
 #define elementsof(x)	( sizeof(x) / sizeof(x[0]) )

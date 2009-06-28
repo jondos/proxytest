@@ -43,9 +43,6 @@
   #include "../CASocketGroupEpoll.hpp"
 #endif
 
-extern CACmdLnOptions* pglobalOptions;
-
-
 CALastMixB::CALastMixB() {
   m_pChainTable = NULL;
   m_pChannelTable = NULL;

@@ -2701,6 +2701,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\CALibProxytest.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\CAListenerInterface.cpp"
 				>
 			</File>
@@ -7460,6 +7464,10 @@
 			</File>
 			<File
 				RelativePath="CALastMixChannelList.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\CALibProxytest.hpp"
 				>
 			</File>
 			<File

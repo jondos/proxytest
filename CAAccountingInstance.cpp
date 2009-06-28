@@ -43,11 +43,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 #include "CAXMLErrorMessage.hpp"
 #include "Hashtable.hpp"
 #include "packetintro.h"
+#include "CALibProxytest.hpp"
 
 //for testing purposes only
 #define JAP_DIGEST_LENGTH 28
-
-extern CACmdLnOptions* pglobalOptions;
 
 XERCES_CPP_NAMESPACE::DOMDocument* CAAccountingInstance::m_preparedCCRequest;
 
@@ -69,11 +68,10 @@ const UINT64 CAAccountingInstance::PACKETS_BEFORE_NEXT_CHECK = 100;
 
 const UINT32 CAAccountingInstance::MAX_TOLERATED_MULTIPLE_LOGINS = 10;
 
-extern CAConditionVariable *loginCV;
 /**
  * private Constructor
  */
-CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
+CAAccountingInstance::CAAccountingInstance(CAFirstMix* callingMix)
 	{
 		CAMsg::printMsg( LOG_DEBUG, "AccountingInstance initialising\n" );
 		m_seqBIConnErrors = 0;
@@ -87,7 +85,7 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
 		// initialize Database connection
 		//m_dbInterface = new CAAccountingDBInterface();
 		m_pPiInterface = new CAAccountingBIInterface();
-		m_mix = (CAFirstMix *) callingMix;
+		m_mix = callingMix;
 		/*if(m_dbInterface->initDBConnection() != E_SUCCESS)
 		{
 			CAMsg::printMsg( LOG_ERR, "**************** AccountingInstance: Could not connect to DB!\n");
@@ -96,14 +94,14 @@ CAAccountingInstance::CAAccountingInstance(CAMix* callingMix)
 
 		// initialize JPI signature tester
 		m_AiName = new UINT8[256];
-		pglobalOptions->getAiID(m_AiName, 256);
-		if (pglobalOptions->getBI() != NULL)
+		CALibProxytest::getOptions()->getAiID(m_AiName, 256);
+		if (CALibProxytest::getOptions()->getBI() != NULL)
 		{
-			m_pJpiVerifyingInstance = pglobalOptions->getBI()->getVerifier();
-			m_pPiInterface->setPIServerConfiguration(pglobalOptions->getBI());
+			m_pJpiVerifyingInstance = CALibProxytest::getOptions()->getBI()->getVerifier();
+			m_pPiInterface->setPIServerConfiguration(CALibProxytest::getOptions()->getBI());
 		}
-		m_iHardLimitBytes = pglobalOptions->getPaymentHardLimit();
-		m_iSoftLimitBytes = pglobalOptions->getPaymentSoftLimit();
+		m_iHardLimitBytes = CALibProxytest::getOptions()->getPaymentHardLimit();
+		m_iSoftLimitBytes = CALibProxytest::getOptions()->getPaymentSoftLimit();
 
 		prepareCCRequest(callingMix, m_AiName);
 
@@ -584,7 +582,7 @@ SINT32 CAAccountingInstance::handleJapPacket_internal(fmHashTableEntry *pHashEnt
 
 		if (prepaidBytes < 0 ||  prepaidBytes <= (SINT32) ms_pInstance->m_iHardLimitBytes)
 		{
-			UINT32 prepaidInterval = pglobalOptions->getPrepaidInterval();
+			UINT32 prepaidInterval = CALibProxytest::getOptions()->getPrepaidInterval();
 
 			if ((pAccInfo->authFlags & AUTH_HARD_LIMIT_REACHED) == 0)
 			{
@@ -693,7 +691,7 @@ SINT32 CAAccountingInstance::getPrepaidBytes(tAiAccountingInfo* pAccInfo)
 
 			CAMsg::printMsg(LOG_CRIT, "PrepaidBytes are way to high! Maybe a hacker attack? Or CC did get lost?\n");
 			CAMsg::printMsg(LOG_INFO, "TransferredBytes: %s  ConfirmedBytes: %s\n", tmp, tmp2);
-			UINT32 prepaidInterval = pglobalOptions->getPrepaidInterval();
+			UINT32 prepaidInterval = CALibProxytest::getOptions()->getPrepaidInterval();
 			prepaidBytes = (SINT32)prepaidInterval;
 			pAccInfo->transferredBytes = pAccInfo->confirmedBytes - prepaidInterval;
 		}
@@ -801,7 +799,7 @@ SINT32 CAAccountingInstance::sendCCRequest(tAiAccountingInfo* pAccInfo)
 	BEGIN_STACK("CAAccountingInstance::sendCCRequest");
 
 	XERCES_CPP_NAMESPACE::DOMDocument* doc=NULL;
-    UINT32 prepaidInterval = pglobalOptions->getPrepaidInterval();
+    UINT32 prepaidInterval = CALibProxytest::getOptions()->getPrepaidInterval();
 
     pAccInfo->authFlags |= AUTH_SENT_CC_REQUEST;
 
@@ -1644,7 +1642,7 @@ UINT32 CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo
 	}
 
 
-	SINT32 prepaidIvalLowerBound = 0; //(-1*(SINT32)pglobalOptions->getPrepaidInterval()); /* EXPERIMENTAL: transmit negative prepaid bytes (but not less than -PREPAID_BYTES) */
+	SINT32 prepaidIvalLowerBound = 0; //(-1*(SINT32)CALibProxytest::getOptions()->getPrepaidInterval()); /* EXPERIMENTAL: transmit negative prepaid bytes (but not less than -PREPAID_BYTES) */
 	if (prepaidAmount <  prepaidIvalLowerBound)
 	{
 		prepaidAmount = prepaidIvalLowerBound;
@@ -1813,7 +1811,7 @@ UINT32 CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo*
 				return CAXMLErrorMessage::ERR_MULTIPLE_LOGIN;
 			}
 			//...if the former login is finished and the connection is in use: force the previous login-connection to be kicked out.
-			loginCV->lock();
+			m_mix->getLoginMutex()->lock();
 			CAXMLErrorMessage kickoutMsg(CAXMLErrorMessage::ERR_MULTIPLE_LOGIN);
 			XERCES_CPP_NAMESPACE::DOMDocument* errDoc=NULL;
 			kickoutMsg.toXmlDocument(errDoc);
@@ -1829,13 +1827,13 @@ UINT32 CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo*
 				//the signal from cleanupNotifier. This can't happen if the main thread that
 				//peforms the cleanup is still blokced by loginCV before it can acquire cleanupNotifier during the cleanup.
 				ownerRef->cleanupNotifier->lock();
-				loginCV->unlock();
+				m_mix->getLoginMutex()->unlock();
 				ownerRef->cleanupNotifier->wait();
 				ownerRef->cleanupNotifier->unlock();
 			}
 			else
 			{
-				loginCV->unlock();
+				m_mix->getLoginMutex()->unlock();
 				//if the forceKickout returns false the ownerRef was already cleared.
 				//no need to wait any further.
 				CAMsg::printMsg(LOG_INFO, "ownerRef %p of account %llu already kicked out.\n", ownerRef, pAccInfo->accountNumber);
@@ -2097,7 +2095,7 @@ UINT32 CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo*
 			 * because the new login protocol doesn't permit JAPs
 			 * to exchange data before login is finished.
 			 */
-			UINT32 prepaidIval = pglobalOptions->getPrepaidInterval();
+			UINT32 prepaidIval = CALibProxytest::getOptions()->getPrepaidInterval();
 			pAccInfo->bytesToConfirm = (prepaidIval - prepaidAmount) + pCC->getTransferredBytes();
 #ifdef DEBUG
 			CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: before CC request, bytesToConfirm: %llu, prepaidIval: %u, "
@@ -2320,12 +2318,12 @@ UINT32 CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* 
 			pAccInfo->transferredBytes);
 #endif
 
-	if(pCC->getTransferredBytes() > (pAccInfo->transferredBytes+pglobalOptions->getPrepaidInterval()) )
+	if(pCC->getTransferredBytes() > (pAccInfo->transferredBytes+CALibProxytest::getOptions()->getPrepaidInterval()) )
 	{
 		CAMsg::printMsg( LOG_ERR, "Warning: ignoring this CC for account %llu "
 				"because it tries to confirm %lld prepaid bytes where only %u prepaid bytes are allowed (cc->tranferredbytes: %llu, accInfo->tranferredBytes: %llu)\n",
 				pAccInfo->accountNumber, (pCC->getTransferredBytes() - pAccInfo->transferredBytes),
-				pglobalOptions->getPrepaidInterval(),
+				CALibProxytest::getOptions()->getPrepaidInterval(),
 				pCC->getTransferredBytes(), pAccInfo->transferredBytes);
 
 		CAXMLErrorMessage err(CAXMLErrorMessage::ERR_WRONG_DATA,
@@ -2521,7 +2519,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 		tAiAccountingInfo* pAccInfo = pHashEntry->pAccountingInfo;
 		AccountLoginHashEntry* loginEntry;
 		SINT32 prepaidBytes = 0;
-		SINT32 prepaidInterval = pglobalOptions->getPrepaidInterval();
+		SINT32 prepaidInterval = CALibProxytest::getOptions()->getPrepaidInterval();
 
 		if (pAccInfo == NULL)
 		{

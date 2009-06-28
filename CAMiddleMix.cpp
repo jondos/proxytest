@@ -43,18 +43,17 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAPool.hpp"
 #include "xml/DOM_Output.hpp"
 #include "CAStatusManager.hpp"
-
-extern CACmdLnOptions* pglobalOptions;
+#include "CALibProxytest.hpp"
 
 SINT32 CAMiddleMix::initOnce()
 	{
 		CAMsg::printMsg(LOG_DEBUG,"Starting MiddleMix InitOnce\n");
-		m_pSignature=pglobalOptions->getSignKey();
+		m_pSignature=CALibProxytest::getOptions()->getSignKey();
 		if(m_pSignature==NULL)
 			{
 				return E_UNKNOWN;
 			}
-		if(pglobalOptions->getListenerInterfaceCount()<1)
+		if(CALibProxytest::getOptions()->getListenerInterfaceCount()<1)
 			{
 				CAMsg::printMsg(LOG_CRIT,"No ListenerInterfaces specified!\n");
 				return E_UNKNOWN;
@@ -129,7 +128,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 					{
 						//check Signature....
 						CASignature oSig;
-						CACertificate* nextCert=pglobalOptions->getNextMixTestCertificate();
+						CACertificate* nextCert=CALibProxytest::getOptions()->getNextMixTestCertificate();
 						oSig.setVerifyKey(nextCert);
 						ret=oSig.verifyXML(child,NULL);
 						delete nextCert;
@@ -187,8 +186,8 @@ SINT32 CAMiddleMix::processKeyExchange()
 						getDOMElementValue(elemKeepAliveRecvInterval,tmpRecvInterval,0xFFFFFFFF); //if no recv interval was given --> set it to "infinite"
 						CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Getting offer -- SendInterval %u -- ReceiveInterval %u\n",tmpSendInterval,tmpRecvInterval);
 						// Add Info about KeepAlive traffic
-						UINT32 u32KeepAliveSendInterval=pglobalOptions->getKeepAliveSendInterval();
-						UINT32 u32KeepAliveRecvInterval=pglobalOptions->getKeepAliveRecvInterval();
+						UINT32 u32KeepAliveSendInterval=CALibProxytest::getOptions()->getKeepAliveSendInterval();
+						UINT32 u32KeepAliveRecvInterval=CALibProxytest::getOptions()->getKeepAliveRecvInterval();
 						elemKeepAlive=createDOMElement(docSymKey,"KeepAlive");
 						elemKeepAliveSendInterval=createDOMElement(docSymKey,"SendInterval");
 						elemKeepAliveRecvInterval=createDOMElement(docSymKey,"ReceiveInterval");
@@ -250,7 +249,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 
 
 		UINT8 tmpBuff[50];
-		pglobalOptions->getMixId(tmpBuff,50); //the mix id...
+		CALibProxytest::getOptions()->getMixId(tmpBuff,50); //the mix id...
 		setDOMElementAttribute(mixNode,"id",tmpBuff);
 		//Supported Mix Protocol -->currently "0.3"
 		DOMElement* elemMixProtocolVersion=createDOMElement(doc,"MixProtocolVersion");
@@ -272,8 +271,8 @@ SINT32 CAMiddleMix::processKeyExchange()
 
 // Add Info about KeepAlive traffic
 		DOMElement* elemKeepAlive;
-		UINT32 u32KeepAliveSendInterval=pglobalOptions->getKeepAliveSendInterval();
-		UINT32 u32KeepAliveRecvInterval=pglobalOptions->getKeepAliveRecvInterval();
+		UINT32 u32KeepAliveSendInterval=CALibProxytest::getOptions()->getKeepAliveSendInterval();
+		UINT32 u32KeepAliveRecvInterval=CALibProxytest::getOptions()->getKeepAliveRecvInterval();
 		elemKeepAlive=createDOMElement(doc,"KeepAlive");
 		DOMElement* elemKeepAliveSendInterval;
 		DOMElement* elemKeepAliveRecvInterval;
@@ -290,7 +289,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 		 * Extensions, (nodes that can be removed from the KeyInfo without
 		 * destroying the signature of the "Mix"-node).
 		 */
-		if(pglobalOptions->getTermsAndConditions() != NULL)
+		if(CALibProxytest::getOptions()->getTermsAndConditions() != NULL)
 		{
 			appendTermsAndConditionsExtension(doc, root);
 			mixNode->appendChild(termsAndConditionsInfoNode(doc));
@@ -357,7 +356,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 		DOMElement* elemRoot=doc->getDocumentElement();
 		//verify signature
 		CASignature oSig;
-		CACertificate* pCert=pglobalOptions->getPrevMixTestCertificate();
+		CACertificate* pCert=CALibProxytest::getOptions()->getPrevMixTestCertificate();
 		oSig.setVerifyKey(pCert);
 		delete pCert;
 		pCert = NULL;
@@ -434,10 +433,10 @@ SINT32 CAMiddleMix::init()
 
     // connect to next mix
 		CASocketAddr* pAddrNext=NULL;
-		for(UINT32 i=0;i<pglobalOptions->getTargetInterfaceCount();i++)
+		for(UINT32 i=0;i<CALibProxytest::getOptions()->getTargetInterfaceCount();i++)
 			{
 				TargetInterface oNextMix;
-				pglobalOptions->getTargetInterface(oNextMix,i+1);
+				CALibProxytest::getOptions()->getTargetInterface(oNextMix,i+1);
 				if(oNextMix.target_type==TARGET_MIX)
 					{
 						pAddrNext=oNextMix.addr;
@@ -465,10 +464,10 @@ SINT32 CAMiddleMix::init()
 
     CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...\n");
 		CAListenerInterface* pListener=NULL;
-		UINT32 interfaces=pglobalOptions->getListenerInterfaceCount();
+		UINT32 interfaces=CALibProxytest::getOptions()->getListenerInterfaceCount();
 		for(UINT32 i=1;i<=interfaces;i++)
 			{
-				pListener=pglobalOptions->getListenerInterface(i);
+				pListener=CALibProxytest::getOptions()->getListenerInterface(i);
 				if(!pListener->isVirtual())
 					break;
 				delete pListener;

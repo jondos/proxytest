@@ -35,12 +35,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 class CAFirstMixA:public CAFirstMix
 {
 		public:
-
-		virtual void shutDown();
+			virtual void shutDown();
 
 		protected:
 			SINT32 loop();
 			SINT32 closeConnection(fmHashTableEntry* pHashEntry);
+		
 		private:
 			bool sendToUsers();
 			void resumeAllUserChannels(fmHashTableEntry* pfmHashEntry);

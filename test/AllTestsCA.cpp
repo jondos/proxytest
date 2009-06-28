@@ -27,16 +27,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 
 #include "AllTestsCA.hpp"
-#include <cppunit/extensions/HelperMacros.h>
-#include <cppunit/TestFixture.h>
-/* Include your tests here. */
-#include "SampleTest.hpp"
 
 CppUnit::Test* AllTestsCA::suite()
 {
 		CppUnit::TestSuite* suiteOfTests = new CppUnit::TestSuite("AllTestsCA");
 		/* Add your tests and test suites here. */
-		suiteOfTests->addTest(SampleTest::suite());
+		//suiteOfTests->addTest(SampleTest::suite());
 		return suiteOfTests;
 }
 

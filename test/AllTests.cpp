@@ -26,7 +26,6 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "../StdAfx.h"
-#include <cppunit/ui/text/TestRunner.h>
 #include "../CACmdLnOptions.hpp"
 #include "AllTestsCA.hpp"
 

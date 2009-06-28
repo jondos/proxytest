@@ -1,7 +1,25 @@
 #include "../StdAfx.h"
 #include "../CAUtil.hpp"
 #include "../CACmdLnOptions.hpp"
-CACmdLnOptions* pglobalOptions;
+#include "../TypeA/CALastMixA.hpp"
+#include "../CALibProxytest.hpp"
+
+class CparseDomainFromPayloadHelper :public CALastMix
+	{
+		public:
+			CparseDomainFromPayloadHelper(char* payload,char* expectedDomain)
+				{
+					m_payload=(UINT8*)payload;
+					m_expectedDomain=(UINT8*)expectedDomain;
+				}
+
+			void doTest();
+			virtual SINT32 loop(){return 0;}
+	private:
+		UINT8* m_payload;
+		UINT8* m_expectedDomain;
+		
+	};
 
 class TCAUtilTest : public CPPUNIT_NS::TestCase
 {
@@ -11,8 +29,8 @@ class TCAUtilTest : public CPPUNIT_NS::TestCase
   CPPUNIT_TEST_SUITE_END();
 
 public:
-  void setUp(void) {}
-  void tearDown(void) {} 
+	void setUp(void) {CALibProxytest::init();}
+  void tearDown(void) {CALibProxytest::cleanup();} 
 
 protected:
   void test_parseU64(void) 
@@ -48,15 +66,14 @@ protected:
 
 	void test_parseDomainFromPayload()
 		{
-			UINT8* domain=parseDomainFromPayload((UINT8*)"GET http://www.bild.de HTTP/1.1",strlen("GET http://www.bild.de HTTP/1.1"));
-			CPPUNIT_ASSERT(domain!=NULL);
-			int ret=strcmp((char*)domain,"www.bild.de");
-			CPPUNIT_ASSERT(ret==0);
-
-			domain=parseDomainFromPayload((UINT8*)"CONNECT www.bild.de:443",strlen("CONNECT www.bild.de:443"));
-			CPPUNIT_ASSERT(domain!=NULL);
-			ret=strcmp((char*)domain,"www.bild.de");
-			CPPUNIT_ASSERT(ret==0);
+			CparseDomainFromPayloadHelper arTest[]=
+			{
+				CparseDomainFromPayloadHelper("GET http://www.bild.de HTTP/1.1","www.bild.de"),
+				CparseDomainFromPayloadHelper("GET http://www.bild.de","www.bild.de"),
+				CparseDomainFromPayloadHelper("CONNECT www.bild.de:443","www.bild.de")
+			};
+			for(UINT32 i=0;i<sizeof(arTest)/sizeof(CparseDomainFromPayloadHelper);i++)
+				arTest[i].doTest();
 		}
 
 };
@@ -83,3 +100,14 @@ int main( int ac, char **av )
 
   return result.wasSuccessful() ? 0 : 1;
 }
+
+void CparseDomainFromPayloadHelper::doTest()
+	{
+		UINT8* domain=parseDomainFromPayload(m_payload,strlen((char*)m_payload));
+		CPPUNIT_ASSERT(domain!=NULL);
+		if(domain!=NULL)
+			{
+				int ret=strcmp((char*)domain,(char*)m_expectedDomain);
+				CPPUNIT_ASSERT(ret==0);
+			}
+	}

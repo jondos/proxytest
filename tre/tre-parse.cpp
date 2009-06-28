@@ -1210,8 +1210,8 @@ tre_parse(tre_parse_ctx_t *ctx)
 		  DPRINT(("tre_parse:	extension: '%.*" STRF "\n",
 			  REST(ctx->re)));
 		  ctx->re += 2;
-		  while (/*CONSTCOND*/1)
-		    {
+		  //while (/*CONSTCOND*/1)
+		  //  {
 		      if (*ctx->re == L'i')
 			{
 			  DPRINT(("tre_parse:	    icase: '%.*" STRF "\n",
@@ -1295,7 +1295,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 			}
 		      else
 			return REG_BADPAT;
-		    }
+		    //}
 
 		  /* Turn on the cflags changes for the rest of the
 		     enclosing group. */
