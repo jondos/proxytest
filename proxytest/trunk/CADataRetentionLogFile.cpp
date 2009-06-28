@@ -3,7 +3,7 @@
 #include "CADataRetentionLogFile.hpp"
 #include "CAMsg.hpp"
 #include "CACmdLnOptions.hpp"
-
+#include "CALibProxytest.hpp"
 CADataRetentionLogFile::CADataRetentionLogFile()
 	{
 		m_nCurrentLogEntriesInBlock=0;
@@ -58,15 +58,15 @@ SINT32 CADataRetentionLogFile::writeHeader(CAASymCipher* pPublicKey)
 		oHeader.entriesPerBlock=m_nLogEntriesPerBlock;
 		oHeader.keys=1;
 		oHeader.loggedFields=0x00FF;//DATARETETION_LOGGED_FIELD_T_IN|DATARETETION_LOGGED_FIELD_T_OUT
-		if(pglobalOptions->isFirstMix())
+		if(CALibProxytest::getOptions()->isFirstMix())
 			{
 				oHeader.entity=DATARETENTION_ENTITY_FIRST_MIX;
 			}
-		else if(pglobalOptions->isMiddleMix())
+		else if(CALibProxytest::getOptions()->isMiddleMix())
 			{
 				oHeader.entity=DATARETENTION_ENTITY_MIDDLE_MIX;
 			}
-		else if(pglobalOptions->isLastMix())
+		else if(CALibProxytest::getOptions()->isLastMix())
 			{
 				oHeader.entity=DATARETENTION_ENTITY_LAST_MIX;
 			}
