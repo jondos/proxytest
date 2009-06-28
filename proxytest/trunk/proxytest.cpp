@@ -562,7 +562,7 @@ int main(int argc, const char* argv[])
 
 		UINT8 buff[255];
 #ifndef _WIN32
-		if(pglobalOptions->getDaemon()&&pglobalOptions->getAutoRestart()) //we need two forks...
+		if(CALibProxytest::getOptions()->getDaemon()&&CALibProxytest::getOptions()->getAutoRestart()) //we need two forks...
 			{
 				pid_t pid;
 				CAMsg::printMsg(LOG_DEBUG,"daemon - before fork()\n");
@@ -582,7 +582,7 @@ int main(int argc, const char* argv[])
         close(STDOUT_FILENO);
         close(STDERR_FILENO);
 			}
-		if(pglobalOptions->getDaemon()||pglobalOptions->getAutoRestart()) //if Autorestart is requested, when we fork a controlling process
+		if(CALibProxytest::getOptions()->getDaemon()||CALibProxytest::getOptions()->getAutoRestart()) //if Autorestart is requested, when we fork a controlling process
 			                              //which is only responsible for restarting the Mix if it dies
 																		//unexpectly
 			{
@@ -593,7 +593,7 @@ RESTART_MIX:
 				pid=fork();
 				if(pid!=0)
 					{
-						if(!pglobalOptions->getAutoRestart())
+						if(!CALibProxytest::getOptions()->getAutoRestart())
 							{
 								CAMsg::printMsg(LOG_DEBUG,"Exiting parent!\n");
 								exit(EXIT_SUCCESS);
@@ -625,7 +625,7 @@ RESTART_MIX:
 #endif
 */
 #ifndef WIN32
-		maxFiles=pglobalOptions->getMaxOpenFiles();
+		maxFiles=CALibProxytest::getOptions()->getMaxOpenFiles();
 
 		struct rlimit coreLimit;
 		coreLimit.rlim_cur = coreLimit.rlim_max = RLIM_INFINITY;
@@ -645,7 +645,7 @@ RESTART_MIX:
 					exit(EXIT_FAILURE);
 				}
 			}
-		if(pglobalOptions->getUser(buff,255)==E_SUCCESS) //switching user
+		if(CALibProxytest::getOptions()->getUser(buff,255)==E_SUCCESS) //switching user
 			{
 				struct passwd* pwd=getpwnam((char*)buff);
 				if(pwd==NULL||seteuid(pwd->pw_uid)==-1)
@@ -855,7 +855,7 @@ while(true)
 	delete pMix;
 	pMix = NULL;
 
-	if(pglobalOptions->isFirstMix())
+	if(CALibProxytest::getOptions()->isFirstMix())
 	{
 		CAMsg::printMsg(LOG_INFO,"I am now the First MIX..\n");
 #if !defined(NEW_MIX_TYPE)
@@ -864,7 +864,7 @@ while(true)
             pMix=new CAFirstMixB();
 #endif
 	}
-	else if(pglobalOptions->isMiddleMix())
+	else if(CALibProxytest::getOptions()->isMiddleMix())
 	{
 		CAMsg::printMsg(LOG_INFO,"I am now a Middle MIX..\n");
 		pMix=new CAMiddleMix();
