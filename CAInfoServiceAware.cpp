@@ -33,8 +33,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAHttpClient.hpp"
 #include "CACmdLnOptions.hpp"
 
-extern CACmdLnOptions pglobalOptions;
-
 /**
   * LERNGRUPPE
   * Sends a request to the InfoService at the given CASocketAddrINet. The result should be a XML structure which is returned by r_elemRoot
