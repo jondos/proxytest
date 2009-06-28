@@ -163,9 +163,9 @@ SINT32 CAFirstMixA::loop()
 	{
 #ifndef NEW_MIX_TYPE
 #ifdef DELAY_USERS
-		m_pChannelList->setDelayParameters(	pglobalOptions->getDelayChannelUnlimitTraffic(),
-																			pglobalOptions->getDelayChannelBucketGrow(),
-																			pglobalOptions->getDelayChannelBucketGrowIntervall());
+		m_pChannelList->setDelayParameters(	CALibProxytest::getOptions()->getDelayChannelUnlimitTraffic(),
+																			CALibProxytest::getOptions()->getDelayChannelBucketGrow(),
+																			CALibProxytest::getOptions()->getDelayChannelBucketGrowIntervall());
 #endif
 
 	//	CASingleSocketGroup osocketgroupMixOut;
