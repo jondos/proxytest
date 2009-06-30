@@ -80,6 +80,16 @@ class CALastMix:public
 					#ifdef LOG_PACKET_STATS
 						m_pLogPacketStats=NULL;
 					#endif
+					#ifdef LOG_CRIME
+					//OK lets try to use a regular expression for the task instead of a hand crafted parser...
+						const char* request_line_regexp="[\n\r]*([^ ]+)[ ]+([^ ]+)"; //
+						m_pregexpRequestLine=new regex_t;
+						regcomp(m_pregexpRequestLine,request_line_regexp,REG_EXTENDED );	
+						// Regexp for Domain of URI
+						const char* uri_regexp="[^:]+[:][/][/]([^:/]+)"; //
+						m_pregexpDomainOfURI=new regex_t;
+						regcomp(m_pregexpDomainOfURI,uri_regexp,REG_EXTENDED );
+					#endif
 				}
 
 			virtual ~CALastMix()
@@ -89,6 +99,12 @@ class CALastMix:public
 					m_pCacheLB = NULL;
 					delete m_pSocksLB;
 					m_pSocksLB = NULL;
+#ifdef LOG_CRIME
+					regfree(m_pregexpRequestLine);
+					delete m_pregexpRequestLine;
+					regfree(m_pregexpDomainOfURI);
+					delete m_pregexpDomainOfURI;
+#endif
 				}
 
 			SINT32 reconfigure();
@@ -145,6 +161,8 @@ class CALastMix:public
       #endif
 
 #ifdef LOG_CRIME
+			regex_t*							m_pregexpRequestLine; //Regexp used to find the URI of a request line
+			regex_t*							m_pregexpDomainOfURI; //Regexp to find Domain of URI
 			regex_t*							m_pCrimeRegExpsURL;
 			UINT32								m_nCrimeRegExpsURL;
 			regex_t*							m_pCrimeRegExpsPayload;
