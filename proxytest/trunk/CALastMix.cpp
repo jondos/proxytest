@@ -767,13 +767,9 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 			//      message and receives a CRLF first, it should ignore the CRLF.
 
 			//OK lets try to use a regular expression for the task instead of a hand crafted parser...
-			const char* request_line_regexp="[\n\r]*([^ ]+)[ ]+([^ ]+)"; //
-			regex_t mycompregexp;
-			regcomp(&mycompregexp,request_line_regexp,REG_EXTENDED );
 			//do the match...
 			regmatch_t theMatches[3];
-			int ret=regnexec(&mycompregexp,(const char*)payloadData,payloadDataLength,3,theMatches,0);
-			regfree(&mycompregexp);
+			int ret=regnexec(m_pregexpRequestLine,(const char*)payloadData,payloadDataLength,3,theMatches,0);
 			if(ret!=0)
 				return NULL;
 
@@ -789,14 +785,9 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 				}
 			else
 				{
-					// Regexp for URI
-					const char* uri_regexp="[^:]+[:][/][/]([^:/]+)"; //
-					regex_t myuricompregexp;
-					regcomp(&myuricompregexp,uri_regexp,REG_EXTENDED );
 					//do the match...
 					regmatch_t theDomainMatches[2];
-					ret=regnexec(&myuricompregexp,(const char*)payloadData+theMatches[2].rm_so,theMatches[2].rm_eo-theMatches[2].rm_so,2,theDomainMatches,0);
-					regfree(&myuricompregexp);
+					ret=regnexec(m_pregexpDomainOfURI,(const char*)payloadData+theMatches[2].rm_so,theMatches[2].rm_eo-theMatches[2].rm_so,2,theDomainMatches,0);
 					if(ret!=0)
 						return NULL;
 					UINT32 matchLen=theDomainMatches[1].rm_eo-theDomainMatches[1].rm_so;
