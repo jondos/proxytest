@@ -60,12 +60,12 @@ SINT32 CALastMixA::loop()
 #ifndef NEW_MIX_TYPE
 		//CASocketList  oSocketList;
 #ifdef DELAY_CHANNELS
-		m_pChannelList->setDelayParameters(	pglobalOptions->getDelayChannelUnlimitTraffic(),
-																			pglobalOptions->getDelayChannelBucketGrow(),
-																			pglobalOptions->getDelayChannelBucketGrowIntervall());
+		m_pChannelList->setDelayParameters(	CALibProxytest::getOptions()->getDelayChannelUnlimitTraffic(),
+																			CALibProxytest::getOptions()->getDelayChannelBucketGrow(),
+																			CALibProxytest::getOptions()->getDelayChannelBucketGrowIntervall());
 #endif
 #ifdef DELAY_CHANNELS_LATENCY
-		m_pChannelList->setDelayLatencyParameters(	pglobalOptions->getDelayChannelLatency());
+		m_pChannelList->setDelayLatencyParameters(	CALibProxytest::getOptions()->getDelayChannelLatency());
 #endif
 #ifdef HAVE_EPOLL
 		CASocketGroupEpoll* psocketgroupCacheRead=new CASocketGroupEpoll(false);
