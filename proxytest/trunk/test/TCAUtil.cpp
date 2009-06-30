@@ -26,7 +26,8 @@ class TCAUtilTest : public CPPUNIT_NS::TestCase
   CPPUNIT_TEST_SUITE(TCAUtilTest);
   CPPUNIT_TEST(test_parseU64);
   CPPUNIT_TEST(test_parseDomainFromPayload);
-  CPPUNIT_TEST_SUITE_END();
+  CPPUNIT_TEST(test_regexp_payload);
+	CPPUNIT_TEST_SUITE_END();
 
 public:
 	void setUp(void) {CALibProxytest::init();}
@@ -74,6 +75,15 @@ protected:
 			};
 			for(UINT32 i=0;i<sizeof(arTest)/sizeof(CparseDomainFromPayloadHelper);i++)
 				arTest[i].doTest();
+		}
+
+	void test_regexp_payload()
+		{
+			regex_t regex;
+			regcomp(&regex,"HALLO",REG_EXTENDED|REG_ICASE|REG_NOSUB);
+			int ret=regexec(&regex,"dfdsfdsf\n\rdsfdsfdsf\nfgfdgdfgfdg\r\ndfdfdfdsfHaLlofdsfdsf",0,NULL,0);
+			CPPUNIT_ASSERT_EQUAL(ret,0);
+			regfree(&regex);
 		}
 
 };
