@@ -63,8 +63,9 @@ SINT32 CALastMix::initOnce()
 				return E_UNKNOWN;
 			}
 
-		m_pSignature=CALibProxytest::getOptions()->getSignKey();
-		if(m_pSignature==NULL)
+		//m_pSignature=CALibProxytest::getOptions()->getSignKey();
+		m_pMultiSignature=CALibProxytest::getOptions()->getMultiSigner();
+		if(m_pMultiSignature==NULL)
 			return E_UNKNOWN;
 		if(CALibProxytest::getOptions()->getListenerInterfaceCount()<1)
 			{
@@ -332,12 +333,14 @@ SINT32 CALastMix::processKeyExchange()
 		CAMsg::printMsg(LOG_INFO,"Symmetric Key Info received is:\n");
 		CAMsg::printMsg(LOG_INFO,"%s\n",(char*)messageBuff);
 		//verify signature
-		CASignature oSig;
+		//CASignature oSig;
 		CACertificate* pCert=CALibProxytest::getOptions()->getPrevMixTestCertificate();
-		oSig.setVerifyKey(pCert);
+		SINT32 result = CAMultiSignature::verifyXML(messageBuff, len, pCert);
+		//oSig.setVerifyKey(pCert);
 		delete pCert;
 		pCert = NULL;
-		if(oSig.verifyXML(messageBuff,len)!=E_SUCCESS)
+		//if(oSig.verifyXML(messageBuff,len)!=E_SUCCESS)
+		if(result != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_CRIT,"Could not verify the symmetric key!\n");
 			delete []messageBuff;

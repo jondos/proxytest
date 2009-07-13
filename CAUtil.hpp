@@ -470,8 +470,9 @@ void logMemoryUsage();
 
 
 #ifndef ONLY_LOCAL_PROXY
-/** Clones an OpenSSL DSA structure
-	*/
+/**
+ * Clones an OpenSSL DSA structure
+ */
 inline DSA* DSA_clone(DSA* dsa)
 	{
 		if(dsa==NULL)
@@ -485,5 +486,45 @@ inline DSA* DSA_clone(DSA* dsa)
 			tmpDSA->priv_key=BN_dup(dsa->priv_key);
 		return tmpDSA;
 	}
+
+/**
+ * Clones an OpenSSL RSA structure
+ */
+inline RSA* RSA_clone(RSA* rsa)
+	{
+		if(rsa == NULL)
+		{
+			return NULL;
+		}
+		RSA* tmpRSA = RSA_new();
+		tmpRSA->n = BN_dup(rsa->n);
+		tmpRSA->e = BN_dup(rsa->e);
+		if(rsa->d != NULL)
+		{ //we have a private key
+			tmpRSA->d = BN_dup(rsa->d);
+			if(tmpRSA->p != NULL)
+			{
+				tmpRSA->p = BN_dup(rsa->p);
+			}
+			if(tmpRSA->q != NULL)
+			{
+				tmpRSA->q = BN_dup(rsa->q);
+			}
+		}
+		if(tmpRSA->dmp1 != NULL)
+		{
+			tmpRSA->dmp1 = BN_dup(rsa->dmp1);
+		}
+		if(tmpRSA->dmq1 != NULL)
+		{
+			tmpRSA->dmq1 = BN_dup(rsa->dmq1);
+		}
+		if(tmpRSA->iqmp != NULL)
+		{
+			tmpRSA->iqmp = BN_dup(rsa->iqmp);
+		}
+		return tmpRSA;
+	}
+
 #endif //ONLY_LOCAL_PROXY
 #endif

@@ -48,8 +48,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 SINT32 CAMiddleMix::initOnce()
 	{
 		CAMsg::printMsg(LOG_DEBUG,"Starting MiddleMix InitOnce\n");
-		m_pSignature=CALibProxytest::getOptions()->getSignKey();
-		if(m_pSignature==NULL)
+		//m_pSignature=CALibProxytest::getOptions()->getSignKey();
+		m_pMultiSignature=CALibProxytest::getOptions()->getMultiSigner();
+		if(m_pMultiSignature==NULL)
 			{
 				return E_UNKNOWN;
 			}
@@ -127,10 +128,11 @@ SINT32 CAMiddleMix::processKeyExchange()
 				if(equals(child->getNodeName(),"Mix"))
 					{
 						//check Signature....
-						CASignature oSig;
+						//CASignature oSig;
 						CACertificate* nextCert=CALibProxytest::getOptions()->getNextMixTestCertificate();
-						oSig.setVerifyKey(nextCert);
-						ret=oSig.verifyXML(child,NULL);
+						//oSig.setVerifyKey(nextCert);
+						ret = CAMultiSignature::verifyXML(child, nextCert);
+						//ret=oSig.verifyXML(child,NULL);
 						delete nextCert;
 						nextCert = NULL;
 						if(ret!=E_SUCCESS)
@@ -203,7 +205,8 @@ SINT32 CAMiddleMix::processKeyExchange()
 						m_u32KeepAliveRecvInterval2=max(u32KeepAliveRecvInterval,tmpSendInterval);
 						CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Calculated -- SendInterval %u -- Receive Interval %u\n",m_u32KeepAliveSendInterval2,m_u32KeepAliveRecvInterval2);
 
-						m_pSignature->signXML(elemRoot);
+						//m_pSignature->signXML(elemRoot);
+						m_pMultiSignature->signXML(elemRoot, false);
 						m_pMuxOut->setSendKey(key,32);
 						m_pMuxOut->setReceiveKey(key+32,32);
 						UINT32 outlen=0;
@@ -355,12 +358,14 @@ SINT32 CAMiddleMix::processKeyExchange()
 		}
 		DOMElement* elemRoot=doc->getDocumentElement();
 		//verify signature
-		CASignature oSig;
+		//CASignature oSig;
 		CACertificate* pCert=CALibProxytest::getOptions()->getPrevMixTestCertificate();
-		oSig.setVerifyKey(pCert);
+		//oSig.setVerifyKey(pCert);
+		SINT32 result = CAMultiSignature::verifyXML(elemRoot, pCert);
 		delete pCert;
 		pCert = NULL;
-		if(oSig.verifyXML(elemRoot)!=E_SUCCESS)
+		//if(oSig.verifyXML(elemRoot)!=E_SUCCESS)
+		if(result != E_SUCCESS)
 		{
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangePrevFailed);
 			CAMsg::printMsg(LOG_CRIT,"Could not verify the symmetric key from Mix n-1!\n");

@@ -10,7 +10,7 @@
 #include "xml/DOM_Output.hpp"
 
 /**
- * An abstract base class for signable XML structures. 
+ * An abstract base class for signable XML structures.
  *
  * @author Bastian Voigt
  */
@@ -21,8 +21,8 @@ public:
 	{
 		m_pSignature = NULL;
 	}
-	
-	virtual ~CAAbstractXMLSignable() 
+
+	virtual ~CAAbstractXMLSignable()
 	{
 		if(m_pSignature!=NULL)
 		{
@@ -30,7 +30,7 @@ public:
 			m_pSignature = NULL;
 		}
 	}
-	
+
 	/** TODO: implement */
 	SINT32 sign(CASignature &signer)
 		{
@@ -40,7 +40,7 @@ public:
 	/**
 	 * Verifies the signature. Returns E_SUCCESS if the signature is valid.
 	 */
-	SINT32 verifySignature(CASignature &verifier)
+	/*SINT32 verifySignature(CASignature &verifier)
 		{
 			//ASSERT(verifier!=NULL, "sigVerifier is NULL");
 			XERCES_CPP_NAMESPACE::DOMDocument* pDoc=NULL;
@@ -52,10 +52,10 @@ public:
 				pDoc->release();
 			}
 			return rc;
-		}
+		}*/
 
-	/** 
-	 * sets the internal signature representation. 
+	/**
+	 * sets the internal signature representation.
 	 * Should be called from derived class constructors.
 	 */
 	SINT32 setSignature(DOMElement* elemSig)

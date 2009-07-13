@@ -207,7 +207,8 @@ SINT32 CAAccountingBIInterface::terminateBIConnection()
 }
 
 //TODO: not finished yet
-CAXMLErrorMessage **CAAccountingBIInterface::settleAll(CAXMLCostConfirmation **ccs, UINT32 nrOfCCs)
+CAXMLErrorMessage **CAAccountingBIInterface::settleAll(CAXMLCostConfirmation **ccs, UINT32 nrOfCCs,
+		CAXMLErrorMessage **settleException)
 {
 	XERCES_CPP_NAMESPACE::DOMDocument *allCCsEnvelopeDoc = createDOMDocument();
 	DOMElement *allCCsEnvelope = createDOMElement(allCCsEnvelopeDoc, XML_ELEMENT_CCS);
@@ -216,7 +217,9 @@ CAXMLErrorMessage **CAAccountingBIInterface::settleAll(CAXMLCostConfirmation **c
 	UINT8 *allCCsAsString = NULL, *response = NULL;
 	UINT32 contentLength = 0, nrOfErrorMessages = 0, i = 0;
 	UINT32 status = 0;
-	SINT32 transmitStatus = 0;
+	SINT32 transmitStatus = 0, domStatus;
+	bool settleSuccessful = false;
+
 
 	if(nrOfCCs <= 0)
 	{
@@ -224,7 +227,6 @@ CAXMLErrorMessage **CAAccountingBIInterface::settleAll(CAXMLCostConfirmation **c
 	}
 
 	allCCsEnvelopeDoc->appendChild(allCCsEnvelope);
-	resultMessages = new CAXMLErrorMessage *[nrOfCCs];
 
 	for (i = 0; i < nrOfCCs; i++)
 	{
@@ -259,13 +261,14 @@ CAXMLErrorMessage **CAAccountingBIInterface::settleAll(CAXMLCostConfirmation **c
 		}
 		else
 		{
-			CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface::settle: received bad response from PI!\n");
+			CAMsg::printMsg(LOG_ERR, "CAAccountingBIInterface::settle: received bad response from PI: %u!\n", status);
 		}
 		return NULL;
 	}
-	#ifdef DEBUG
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingBIInterface::settle: got response header [Status,content-Lenght]=[%i,%i]!\n",status,contentLength);
-	#endif
+#ifdef DEBUG
+	CAMsg::printMsg(LOG_DEBUG, "CAAccountingBIInterface::settle: got response header [Status,content-Length]=[%i,%i]!\n",
+			status, contentLength);
+#endif
 	response = new UINT8[contentLength+1];
 
 	transmitStatus = m_pSocket->receiveFullyT(response, contentLength, 3000);
@@ -279,44 +282,70 @@ CAXMLErrorMessage **CAAccountingBIInterface::settleAll(CAXMLCostConfirmation **c
 		{
 			CAMsg::printMsg(LOG_DEBUG, "CAAccountingBIInterface::settle: error\n");
 		}
-		delete[] response;
+		delete [] response;
 		response = NULL;
 		return NULL;
 	}
 
-	#ifdef DEBUG
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingBIInterface::settle: response body received!\n");
-	#endif
+
+
 	response[contentLength]='\0';
-	CAMsg::printMsg(LOG_DEBUG, "CAAccountingBIInterface::settle: got response %s\n", response);
+#ifdef DEBUG
+	CAMsg::printMsg(LOG_DEBUG, "CAAccountingBIInterface::settle: response body received: %s\n", response);
+#endif
+
 	allCCsEnvelopeDoc = parseDOMDocument(response, contentLength);
-	if(allCCsEnvelopeDoc  != NULL)
+	if(allCCsEnvelopeDoc != NULL)
 	{
-		errorMsgList = getElementsByTagName(allCCsEnvelopeDoc->getDocumentElement(), XML_ELEMENT_ERROR_MSG);
-		nrOfErrorMessages = errorMsgList->getLength();
-		if(nrOfErrorMessages == nrOfCCs)
+		errorMsgList = getElementsByTagName(allCCsEnvelopeDoc->getDocumentElement(),
+				XML_ELEMENT_ERROR_MSG);
+		domStatus =
+			getDOMElementAttribute(allCCsEnvelopeDoc->getDocumentElement(), XML_ATTR_SETTLE_SUCCESSFUL, settleSuccessful);
+		if(domStatus != E_SUCCESS)
 		{
-			for (i = 0; i < nrOfErrorMessages; i++)
+			settleSuccessful = false;
+		}
+
+		nrOfErrorMessages = errorMsgList->getLength();
+		if(settleSuccessful)
+		{
+			if(nrOfErrorMessages == nrOfCCs)
 			{
-				resultMessages[i] = new CAXMLErrorMessage((DOMElement *) errorMsgList->item(i));
+				resultMessages = new CAXMLErrorMessage *[nrOfCCs];
+				for (i = 0; i < nrOfErrorMessages; i++)
+				{
+					resultMessages[i] = new CAXMLErrorMessage((DOMElement *) errorMsgList->item(i));
+				}
+			}
+			else
+			{
+				CAMsg::printMsg(LOG_WARNING, "CAAccountingBIInterface::settle: BUG: number of messages != number of cost confirmations!\n");
+				//This would be a bug.
+				*settleException =
+					new CAXMLErrorMessage(CAXMLErrorMessage::ERR_INTERNAL_SERVER_ERROR);
+
+
 			}
 		}
 		else
 		{
-			//This would be a bug.
-			for (i = 0; i < nrOfErrorMessages; i++)
-			{
-				resultMessages[i] =
-					new CAXMLErrorMessage(CAXMLErrorMessage::ERR_INTERNAL_SERVER_ERROR);
-			}
-			CAMsg::printMsg(LOG_WARNING, "CAAccountingBIInterface::settle: BUG: number of messages != number of cost confirmations!\n");
+			CAMsg::printMsg(LOG_WARNING, "CAAccountingBIInterface::settle: PI exception raised.\n");
+			*settleException = (nrOfErrorMessages > 0) ?
+				new CAXMLErrorMessage((DOMElement *) errorMsgList->item(0)) :
+				new CAXMLErrorMessage(CAXMLErrorMessage::ERR_INTERNAL_SERVER_ERROR);
 		}
 	}
-	//pErrMsg = new CAXMLErrorMessage(response);
-	delete[] response;
+
+	delete [] response;
 	response = NULL;
 
-	return resultMessages;
+	if(allCCsEnvelopeDoc != NULL)
+	{
+		allCCsEnvelopeDoc->release();
+		allCCsEnvelopeDoc = NULL;
+	}
+
+	return (settleException != NULL) ? resultMessages : NULL;
 }
 /**
  * Send a cost confirmation to the JPI

@@ -30,7 +30,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #ifndef ONLY_LOCAL_PROXY
 
-class CASignature;
+class CAMultiSignature;
 class CAInfoService;
 //class DOM_Element;
 class CAControlChannelDispatcher;
@@ -161,7 +161,8 @@ class CAMix
 
 			SINT32 signXML(DOMNode* a_element);
 
-			CASignature* m_pSignature;
+			//CASignature* m_pSignature;
+			CAMultiSignature* m_pMultiSignature;
 			CAInfoService* m_pInfoService;
 
 			UINT32 m_u32KeepAliveRecvInterval;

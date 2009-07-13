@@ -317,7 +317,7 @@ private:
 	 * Signature verifying instance for BI signatures
 	 * @todo initialize this member
 	 */
-	CASignature * m_pJpiVerifyingInstance;
+	//CASignature * m_pJpiVerifyingInstance;
 
 	/** this thread sends cost confirmations to the BI in regular intervals */
 	CAAccountingSettleThread * m_pSettleThread;

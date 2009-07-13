@@ -32,7 +32,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMuxSocket.hpp"
 #include "CAASymCipher.hpp"
 #include "CAMiddleMixChannelList.hpp"
-#include "CASignature.hpp"
+//#include "CASignature.hpp"
 #include "CAInfoService.hpp"
 #include "CAMixWithReplayDB.hpp"
 
@@ -47,7 +47,9 @@ class CAMiddleMix:public
 			CAMiddleMix()
 				{
 					m_pMiddleMixChannelList=NULL;
-					m_pMuxOut=NULL;m_pMuxIn=NULL;m_pRSA=NULL;m_pSignature=NULL;
+					m_pMuxOut=NULL;m_pMuxIn=NULL;m_pRSA=NULL;
+					//m_pSignature=NULL;
+					m_pMultiSignature=NULL;
 					m_pInfoService=NULL;
 					m_pQueueSendToMixBefore=m_pQueueSendToMixAfter=NULL;
 #ifdef DYNAMIC_MIX

@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAASymCipher.hpp"
 #include "CASocketAddrINet.hpp"
 #include "CACacheLoadBalancing.hpp"
-#include "CASignature.hpp"
+//#include "CASignature.hpp"
 #include "CAUtil.hpp"
 #include "CAQueue.hpp"
 #include "CAInfoService.hpp"
@@ -65,7 +65,8 @@ class CALastMix:public
 			CALastMix()
 				{
 					m_pMuxIn=NULL;
-					m_pSignature=NULL;
+					//m_pSignature=NULL;
+					m_pMultiSignature=NULL;
 					m_pRSA=NULL;
 					m_pInfoService=NULL;
           #ifndef NEW_MIX_TYPE // not TypeB mixes
@@ -136,7 +137,6 @@ class CALastMix:public
 
 
 			SINT32 setTargets();
-
 #ifdef LOG_CRIME
 			bool	 checkCrime(const UINT8* payLoad,UINT32 payLen,bool bURLCheck);
 			UINT8 *parseDomainFromPayload(const UINT8 *payloadData, UINT32 payloadDataLength);
