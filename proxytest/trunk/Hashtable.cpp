@@ -433,7 +433,7 @@ bool Hashtable::rehash()
 
 
 /** Gibt den zu einem Schlssel passenden Eintrag eines Hashtables
- *  zurck.
+ *  zurueck.
  *
  *  @param key der zu suchende Schlssel
  *  @return entry der gefundene Eintrag oder NULL

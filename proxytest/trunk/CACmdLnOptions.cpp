@@ -52,9 +52,10 @@ CACmdLnOptions::CACmdLnOptions()
 		m_addrInfoServices = NULL;
 		m_addrInfoServicesSize=0;
 		m_pcsReConfigure=new CAMutex();
-		m_pSignKey=NULL;
-		m_pOwnCertificate=NULL;
+		//m_pSignKey=NULL;
+		//m_pOwnCertificate=NULL;
 		m_OpCert=NULL;
+		m_pMultiSignature=NULL;
 		m_pPrevMixCertificate=NULL;
 		m_pNextMixCertificate=NULL;
 		m_bCompressedLogs=false;
@@ -224,9 +225,9 @@ void CACmdLnOptions::initCertificateOptionSetters()
 	int count = -1;
 
 	certificateOptionSetters[++count]=
-		&CACmdLnOptions::setOwnCertificate;
-	certificateOptionSetters[++count]=
 		&CACmdLnOptions::setOwnOperatorCertificate;
+	certificateOptionSetters[++count]=
+		&CACmdLnOptions::setOwnCertificate;
 	certificateOptionSetters[++count]=
 		&CACmdLnOptions::setNextMixCertificate;
 	certificateOptionSetters[++count]=
@@ -489,11 +490,14 @@ void CACmdLnOptions::clean()
 			m_docMixInfo=NULL;
 		clearVisibleAddresses();
 
-		delete m_pSignKey;
-		m_pSignKey=NULL;
+		//delete m_pSignKey;
+		//m_pSignKey=NULL;
 
-		delete m_pOwnCertificate;
-		m_pOwnCertificate=NULL;
+		//delete m_pOwnCertificate;
+		//m_pOwnCertificate=NULL;
+
+		delete m_pMultiSignature;
+		m_pMultiSignature = NULL;
 
 		delete m_OpCert;
 		m_OpCert=NULL;
@@ -1544,7 +1548,7 @@ SINT32 CACmdLnOptions::setLogDir(const UINT8* name,UINT32 len)
 		return E_SUCCESS;
 	}
 
-SINT32 CACmdLnOptions::getPidFile(UINT8* pidfile,UINT32 len) const
+SINT32 CACmdLnOptions::getPidFile(UINT8* pidfile,UINT32 len)
   {
 		if(m_strPidFile==NULL||pidfile==NULL)
 				return E_UNKNOWN;
@@ -2298,7 +2302,7 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 		return E_UNKNOWN;
 	}
 
-	m_pSignKey = new CASignature();
+	/*m_pSignKey = new CASignature();
 
 	if(m_pSignKey->setSignKey
 			(elemOwnCert->getFirstChild(), SIGKEY_PKCS12) != E_SUCCESS)
@@ -2315,20 +2319,124 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 			delete m_pSignKey;
 			m_pSignKey=NULL;
 		}
-	}
+	}*/
 
-	m_pOwnCertificate =
+	/*m_pOwnCertificate =
 		CACertificate::decode(elemOwnCert->getFirstChild(), CERT_PKCS12, (char*)passwd);
 	if (m_pOwnCertificate == NULL)
 	{
 		CAMsg::printMsg(LOG_CRIT, "Could not decode mix certificate!\n");
 		return E_UNKNOWN;
+	}*/
+
+	// new
+	//m_ownCertsLength = 0;
+	//m_opCertsLength = 0;
+
+	//decode OpCerts
+	UINT32 opCertsLen = m_opCertList->getLength();
+	CACertificate* opCerts[opCertsLen];
+	for(UINT32 j=0; j<opCertsLen; j++)
+	{
+		DOMNode* a_opCert = m_opCertList->item(j);
+		opCerts[j] = CACertificate::decode(a_opCert,CERT_X509CERTIFICATE);
+		if(opCerts[j] == NULL)
+		{
+			CAMsg::printMsg(LOG_CRIT, "Error while decoding operator certificates!");
+			return E_UNKNOWN;
+		}
 	}
 
-	if ( (m_pOwnCertificate->getSubjectKeyIdentifier(tmpBuff, &tmpLen) != E_SUCCESS) &&
-			(m_strMixID == NULL))
+	DOMNodeList* ownCertList = getElementsByTagName(elemOwnCert,"X509PKCS12");
+
+	m_pMultiSignature = new CAMultiSignature();
+	for (UINT32 i=0; i<ownCertList->getLength(); i++)
+	{
+		DOMNode* a_cert = ownCertList->item(i);
+		CASignature* signature = new CASignature();
+		CACertStore* certs = new CACertStore();
+
+		//try to get signature key from ownCert
+		if(signature->setSignKey(a_cert, SIGKEY_PKCS12, (char*)passwd) != E_SUCCESS)
+		{
+			//Read password if necessary
+			printf("I need a password for the sign key %d: ", i+1);
+			fflush(stdout);
+			readPasswd(passwd,500);
+			if(signature->setSignKey(a_cert, SIGKEY_PKCS12, (char*)passwd) != E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Unable to load sign key %d!\n", i+1);
+				delete signature;
+				signature = NULL;
+				return E_UNKNOWN;
+			}
+		}
+		//decode own certifciate
+		CACertificate* tmpCert = CACertificate::decode(a_cert, CERT_PKCS12, (char*)passwd);
+		//get SKI
+		UINT32 tmpSKIlen = 255;
+		UINT8 tmpSKI[tmpSKIlen];
+		if(tmpCert->getSubjectKeyIdentifier(tmpSKI, &tmpSKIlen) != E_SUCCESS)
+		{
+			CAMsg::printMsg(LOG_CRIT, "Error while getting SKI of own certificate %d!\n", i+1);
+			return E_UNKNOWN;
+		}
+		CAMsg::printMsg(LOG_DEBUG, "SKI of own cert %d is: %s\n", i+1, tmpSKI);
+		//get AKI
+		UINT32 tmpAKIlen = 255;
+		UINT8 tmpAKI[tmpAKIlen];
+		if(tmpCert->getAuthorityKeyIdentifier(tmpAKI, &tmpAKIlen) != E_SUCCESS)
+		{
+			CAMsg::printMsg(LOG_WARNING, "Error while getting AKI of own certificate!\n");
+		}
+		else
+		{
+			CAMsg::printMsg(LOG_DEBUG, "AKI of own cert %d is: %s\n", i+1, tmpAKI);
+		}
+		//try to find right opCert
+		for(UINT32 j=0; j<opCertsLen; j++)
+		{
+			if(tmpCert->verify(opCerts[j]) == E_SUCCESS)
+			{
+				//found right operator cert -> add it to store
+				CAMsg::printMsg(LOG_DEBUG, "Found operator cert for sign key %d!\n", i+1);
+				certs->add(opCerts[j]);
+				break;
+			}
+		}
+		if(certs->getNumber() == 0)
+		{
+			CAMsg::printMsg(LOG_WARNING, "Could not find an operator cert for sign key %d!\n", i+1);
+		}
+		//add own cert to store
+		certs->add(tmpCert);
+		//get Raw SKI
+		UINT32 tmpRawSKIlen = 255;
+		UINT8 tmpRawSKI[tmpRawSKIlen];
+		if(tmpCert->getRawSubjectKeyIdentifier(tmpRawSKI, &tmpRawSKIlen) != E_SUCCESS)
+		{
+			return E_UNKNOWN;
+		}
+		CAMsg::printMsg(LOG_DEBUG, "Adding Sign-Key %d with %d certificate(s).\n", i+1, certs->getNumber());
+		m_pMultiSignature->addSignature(signature, certs, tmpRawSKI, tmpRawSKIlen);
+	}
+	if (m_pMultiSignature->getSignatureCount() == 0)
+	{
+		CAMsg::printMsg(LOG_CRIT, "Could not set a signature key for MultiCert!\n");
+		delete m_pMultiSignature;
+		m_pMultiSignature = NULL;
+		return E_UNKNOWN;
+	}
+	//end new
+	/*if ( (m_pOwnCertificate->getSubjectKeyIdentifier(tmpBuff, &tmpLen) != E_SUCCESS) &&
+				(m_strMixID == NULL))
 	{
 		LOG_NODE_NOT_FOUND(OPTIONS_NODE_MIX_ID);
+		return E_UNKNOWN;
+	}*/
+	//check Mix-ID
+	if(m_pMultiSignature->getXORofSKIs(tmpBuff, tmpLen) != E_SUCCESS)
+	{
 		return E_UNKNOWN;
 	}
 	strtrim(tmpBuff);
@@ -2337,7 +2445,7 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 	{
 		if(strncmp(m_strMixID, (char*)tmpBuff, strlen((char*)tmpBuff) ) != 0)
 		{
-			CAMsg::printMsg(LOG_CRIT,"Error, two different MixIDs specified!\n");
+			CAMsg::printMsg(LOG_CRIT,"Error, two different MixIDs specified (%s and %s)!\n", m_strMixID, tmpBuff);
 			return E_UNKNOWN;
 		}
 	}
@@ -2348,7 +2456,6 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 		strcpy(m_strMixID,(char*) tmpBuff);
 		return addMixIdToMixInfo();
 	}
-
 #ifdef DYNAMIC_MIX
 		/* LERNGRUPPE: Dynamic Mixes must have a cascade name, as MiddleMixes may be reconfigured to be FirstMixes */
 	if(bNeedCascadeNameFromMixID)
@@ -2382,6 +2489,8 @@ SINT32 CACmdLnOptions::setOwnOperatorCertificate(DOMElement *elemCertificates)
 
 	if (elemOpCert != NULL)
 	{
+		m_opCertList = getElementsByTagName(elemOpCert, "X509Certificate");
+
 		getDOMChildByName(elemOpCert, OPTIONS_NODE_ELEMENT_X509CERT, opCertX509, true);
 		if( opCertX509 != NULL)
 		{
@@ -2481,6 +2590,25 @@ SINT32 CACmdLnOptions::setPriceCertificate(DOMElement *elemAccounting)
 	}
 	else
 	{
+		/*UINT8 digest[SHA_DIGEST_LENGTH];
+		UINT8* out=new UINT8[5000];
+		UINT32 outlen=5000;
+
+		DOM_Output::makeCanonical(elemPriceCert,out,&outlen);
+		out[outlen] = 0;
+//#ifdef DEBUG
+		CAMsg::printMsg(LOG_DEBUG, "price cert (%u bytes) to be hashed: %s\n",outlen, out);
+//#endif
+		SHA1(out,outlen,digest);
+		delete[] out;
+		out = NULL;
+
+		UINT32 len2 = 1024;
+		UINT8* tmpBuff2 = new UINT8[len2+1];
+		memset(tmpBuff2, 0, len2+1);
+		CABase64::encode(digest,SHA_DIGEST_LENGTH, tmpBuff2, &len2);
+		CAMsg::printMsg(LOG_CRIT,"hash: %s\n", tmpBuff2);
+		exit(0);*/
 		m_pPriceCertificate = CAXMLPriceCert::getInstance(elemPriceCert);
 		if (m_pPriceCertificate == NULL) {
 			CAMsg::printMsg(LOG_DEBUG, "PRICECERT PROCESSED, BUT STILL NULL");
@@ -3750,7 +3878,7 @@ SINT32 CACmdLnOptions::setCrimeSurveillanceIP(DOMElement *elemCrimeDetection)
 		(elemCrimeDetection->getNodeName(), OPTIONS_NODE_CRIME_SURVEILLANCE_IP);
 
 	UINT32 ipBuffSize = TMP_BUFF_SIZE;
-	UINT8 ipBuff[TMP_BUFF_SIZE];
+	UINT8 ipBuff[ipBuffSize];
 
 	DOMNodeList *surveillanceIPNodes =
 		getElementsByTagName(elemCrimeDetection, OPTIONS_NODE_CRIME_SURVEILLANCE_IP);

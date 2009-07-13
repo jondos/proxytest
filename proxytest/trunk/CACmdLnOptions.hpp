@@ -33,6 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include "CASocketAddrUnix.hpp"
 #endif
 #include "CASignature.hpp"
+#include "CAMultiSignature.hpp"
 #include "CACertificate.hpp"
 #include "CAThread.hpp"
 #include "CAMix.hpp"
@@ -322,24 +323,37 @@ class CACmdLnOptions
 
 
 #ifndef ONLY_LOCAL_PROXY
-			CASignature* getSignKey()
+			//TODO maybe clone MultiSignature object!
+			CAMultiSignature* getMultiSigner(){ return m_pMultiSignature; }
+			/*CASignature* getSignKey()
 				{
 					if(m_pSignKey!=NULL)
 						return m_pSignKey->clone();
 					return NULL;
-				}
+				}*/
 			/** Returns a COPY of the public test certifcate for that mix.
-				* @retval a COPY of the mix test certifcate.
-				*/
-			CACertificate* getOwnCertificate() const
+			 * @retval a COPY of the mix test certifcate.
+			 */
+			/*CACertificate* getOwnCertificate() const
 				{
 					if(m_pOwnCertificate!=NULL)
 					{
 						return m_pOwnCertificate->clone();
 					}
 					return NULL;
+				}*/
+			/** Returns a COPY of the Operator Certificate of that mix.
+			 * @return opCerts
+			 */
+			/*CACertificate* getOpCertificate() const
+			{
+				if( m_OpCert != NULL )
+				{
+					return m_OpCert->clone();
 				}
-
+				return NULL;
+			}*/
+			SINT32 getOperatorSubjectKeyIdentifier(UINT8 *buffer, UINT32 *length);
 #ifdef PAYMENT
 			CAXMLPriceCert* getPriceCertificate() const
 			{
@@ -354,20 +368,6 @@ class CACmdLnOptions
 #ifdef COUNTRY_STATS
 			SINT32 getCountryStatsDBConnectionLoginData(char** db_host,char**db_user,char**db_passwd);
 #endif
-			/** Returns a COPY of the Operator Certificate of that mix.
-				* @return opCerts
-				*/
-			CACertificate* getOpCertificate() const
-			{
-				if( m_OpCert != NULL )
-				{
-					return m_OpCert->clone();
-				}
-				return NULL;
-			}
-
-			SINT32 getOperatorSubjectKeyIdentifier(UINT8 *buffer, UINT32 *length);
-
 			bool hasPrevMixTestCertificate()
 				{
 					return m_pPrevMixCertificate!=NULL;
@@ -477,7 +477,7 @@ class CACmdLnOptions
 			}
 
 			SINT32 getUser(UINT8* user,UINT32 len);
-			SINT32 getPidFile(UINT8* pidfile,UINT32 len) const;
+			SINT32 getPidFile(UINT8* pidfile,UINT32 len);
 
 #ifdef SERVER_MONITORING
 			char *getMonitoringListenerHost();
@@ -638,7 +638,6 @@ class CACmdLnOptions
 				}
 				return E_UNKNOWN;
 			}
-
 #endif // DYNAMIC_MIX
 			XERCES_CPP_NAMESPACE::DOMDocument **m_termsAndConditionsTemplates;
 			UINT32 m_nrOfTermsAndConditionsTemplates;
@@ -670,14 +669,19 @@ class CACmdLnOptions
 	    CAListenerInterface**	m_addrInfoServices;
 			UINT32 m_addrInfoServicesSize;
 
-			CASignature*		m_pSignKey;
-			CACertificate*	m_pOwnCertificate;
+			//CASignature*		m_pSignKey;
+			//CACertificate*		m_pOwnCertificate;
+			CAMultiSignature* 	m_pMultiSignature;
+			//CACertificate** 	m_ownCerts;
+			//UINT32 				m_ownCertsLength;
 #ifdef PAYMENT
-			CAXMLPriceCert*	m_pPriceCertificate;
+			CAXMLPriceCert*		m_pPriceCertificate;
 #endif
 
-			CACertificate* m_OpCert;
-			//UINT32 m_OpCertsLength;
+			CACertificate* 		m_OpCert;
+			//CACertificate** 	m_opCerts;
+			//UINT32 				m_opCertsLength;
+			DOMNodeList*		m_opCertList;
 
 			CACertificate*	m_pPrevMixCertificate;
 			CACertificate*	m_pNextMixCertificate;

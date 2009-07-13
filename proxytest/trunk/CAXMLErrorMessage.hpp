@@ -33,7 +33,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAXMLCostConfirmation.hpp"
 
 #define XML_ELEMENT_ERROR_MSG "ErrorMessage"
-#define XML_ELEMENT_ERROR_MSG_ENVELOPE "ErrorMessages"
 
 /**
  * This class encapsulates an error or success message.

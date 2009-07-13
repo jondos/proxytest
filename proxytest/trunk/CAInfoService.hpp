@@ -28,7 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CAINFOSERVICE__
 #define __CAINFOSERVICE__
 #ifndef ONLY_LOCAL_PROXY
-#include "CASignature.hpp"
+//#include "CAMultiSignature.hpp"
 #include "CAFirstMix.hpp"
 #include "CAThread.hpp"
 #include "CAMutex.hpp"
@@ -79,8 +79,10 @@ class CAInfoService
 				{
 					return m_bRun;
 				}
-			SINT32 setSignature(CASignature* pSignature, CACertificate* a_ownCert,
-								CACertificate* a_opCert);
+			//remove me
+			/*SINT32 setSignature(CASignature* pSignature, CACertificate* a_ownCert,
+								CACertificate* a_opCert);*/
+			SINT32 setMultiSignature(CAMultiSignature* pMultiSignature);
 
 			// added by ronin <ronin2@web.de>
 			bool isConfiguring()
@@ -136,8 +138,9 @@ class CAInfoService
 
 			struct InfoServiceHeloMsg;
 			volatile bool m_bRun;
-			CASignature*	m_pSignature;
-			CACertStore*	m_pcertstoreOwnCerts;
+			//CASignature*		m_pSignature;
+			CAMultiSignature* 	m_pMultiSignature;
+			CACertStore*		m_pcertstoreOwnCerts;
 			CAMix*				m_pMix;
 			CAThread*			m_pthreadRunLoop;
 			CAConditionVariable *	m_pLoopCV;

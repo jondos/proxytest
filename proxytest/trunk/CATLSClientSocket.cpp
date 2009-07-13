@@ -129,7 +129,6 @@ SINT32 CATLSClientSocket::doTLSConnect(CASocketAddr &psa, time_t sTimeout)
 					status = E_TIMEDOUT;
 					break;
 				}
-				CAMsg::printMsg(LOG_INFO,"CATLSClientSocket::doTLSConnect() another try to do the tls handshake.\n");
 				sSleep(1);
 			}
 		} while(status != 1);

@@ -34,13 +34,28 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 CASignature::CASignature()
 	{
-		m_pDSA=NULL;
+		m_pDSA = NULL;
+		m_pRSA = NULL;
+		m_pEC = NULL;
 	}
 
 CASignature::~CASignature()
 	{
-		if(m_pDSA!=NULL)
+		if(m_pDSA != NULL)
+		{
 			DSA_free(m_pDSA);
+			m_pDSA = NULL;
+		}
+		if(m_pRSA != NULL)
+		{
+			RSA_free(m_pRSA);
+			m_pRSA = NULL;
+		}
+		if(m_pEC != NULL)
+		{
+			EC_KEY_free(m_pEC);
+			m_pEC = NULL;
+		}
 	}
 
 
@@ -48,10 +63,20 @@ CASignature* CASignature::clone()
 	{
 		CASignature* tmpSig=new CASignature();
 		if(m_pDSA!=NULL)
-			{
-				DSA* tmpDSA=DSA_clone(m_pDSA);
-				tmpSig->m_pDSA=tmpDSA;
-			}
+		{
+			DSA* tmpDSA=DSA_clone(m_pDSA);
+			tmpSig->m_pDSA=tmpDSA;
+		}
+		else if(m_pRSA != NULL)
+		{
+			RSA* tmpRSA = RSA_clone(m_pRSA);
+			tmpSig->m_pRSA = tmpRSA;
+		}
+		else if(m_pEC != NULL)
+		{
+			EC_KEY* tmpEC = EC_KEY_dup(m_pEC);
+			tmpSig->m_pEC = tmpEC;
+		}
 		return tmpSig;
 	}
 
@@ -131,44 +156,76 @@ SINT32 CASignature::setSignKey(const DOMNode* n,UINT32 type,const char* passwd)
 SINT32 CASignature::setSignKey(const UINT8* buff,UINT32 len,UINT32 type,const char* passwd)
 	{
 		if(buff==NULL||len<1)
+		{
 			return E_UNKNOWN;
+		}
 		switch (type)
-			{
-				case SIGKEY_XML:
-					return parseSignKeyXML(buff,len);
+		{
+			case SIGKEY_XML:
+				return parseSignKeyXML(buff,len);
 
-				case SIGKEY_PKCS12:
-					#if OPENSSL_VERSION_NUMBER	> 0x009070CfL
-						PKCS12* tmpPKCS12=d2i_PKCS12(NULL,(const UINT8**)&buff,len);
-					#else
-						PKCS12* tmpPKCS12=d2i_PKCS12(NULL,(UINT8**)&buff,len);
-					#endif
-					EVP_PKEY* key=NULL;
-//					X509* cert=NULL;
-					if(PKCS12_parse(tmpPKCS12,passwd,&key,NULL,NULL)!=1)
-							{
-								PKCS12_free(tmpPKCS12);
-								return E_UNKNOWN;
-							}
+			case SIGKEY_PKCS12:
+				#if OPENSSL_VERSION_NUMBER	> 0x009070CfL
+					PKCS12* tmpPKCS12=d2i_PKCS12(NULL,(const UINT8**)&buff,len);
+				#else
+					PKCS12* tmpPKCS12=d2i_PKCS12(NULL,(UINT8**)&buff,len);
+				#endif
+
+				EVP_PKEY* key=NULL;
+				if(PKCS12_parse(tmpPKCS12,passwd,&key,NULL,NULL)!=1)
+				{
 					PKCS12_free(tmpPKCS12);
-	//				X509_free(cert);
-					if(EVP_PKEY_type(key->type)!=EVP_PKEY_DSA)
-						{
-							EVP_PKEY_free(key);
-							return E_UNKNOWN;
-						}
-					DSA* tmpDSA=DSA_clone(key->pkey.dsa);
+					return E_UNKNOWN;
+				}
+				PKCS12_free(tmpPKCS12);
+				if(EVP_PKEY_type(key->type) == EVP_PKEY_DSA)
+				{
+					// found DSA key
+					DSA* tmpDSA = DSA_clone(key->pkey.dsa);
 					EVP_PKEY_free(key);
 					if(DSA_sign_setup(tmpDSA,NULL,&tmpDSA->kinv,&tmpDSA->r)!=1)
-						{
-							DSA_free(tmpDSA);
-							return E_UNKNOWN;
-						}
+					{
+						DSA_free(tmpDSA);
+						return E_UNKNOWN;
+					}
 					DSA_free(m_pDSA);
-					m_pDSA=tmpDSA;
+					m_pDSA = tmpDSA;
 					return E_SUCCESS;
+				}
+				else if(EVP_PKEY_type(key->type) == EVP_PKEY_RSA)
+				{
+					// found RSA key
+					RSA* tmpRSA = RSA_clone(key->pkey.rsa);
+					EVP_PKEY_free(key);
+					key = NULL;
+					tmpRSA->flags |= RSA_FLAG_THREAD_SAFE;
+					tmpRSA->flags |= RSA_FLAG_SIGN_VER;
+					#ifdef RSA_FLAG_NO_BLINDING
+						tmpRSA->flags |= RSA_FLAG_NO_BLINDING;
+					#endif
+					#if OPENSSL_VERSION_NUMBER	> 0x0090707fL
+						tmpRSA->flags |= RSA_FLAG_NO_EXP_CONSTTIME;
+					#endif
+					RSA_free(m_pRSA);
+					m_pRSA=tmpRSA;
+					return E_SUCCESS;
+				}
+				else if(EVP_PKEY_type(key->type) == EVP_PKEY_EC)
+				{
+					// found EC key
+					EC_KEY* tmpECKey = EC_KEY_dup(key->pkey.ec);
+					EVP_PKEY_free(key);
+					key = NULL;
+					EC_KEY_free(m_pEC);
+					m_pEC = tmpECKey;
+					return E_SUCCESS;
+				}
+				else
+				{
+					EVP_PKEY_free(key);
+				}
 			}
-		return E_UNKNOWN;
+			return E_UNKNOWN;
 	}
 
 
@@ -255,21 +312,43 @@ SINT32 CASignature::parseSignKeyXML(const UINT8* buff,UINT32 len)
 		return E_SUCCESS;
 	}
 
-
+/**
+ * Perform Signature with either DSA, RSA or ECDSA
+ */
 SINT32 CASignature::sign(const UINT8* in,UINT32 inlen,UINT8* sig,UINT32* siglen) const
 	{
-		DSA_SIG* signature=NULL;
-		if(	sign(in,inlen,&signature)!=E_SUCCESS)
-			return E_UNKNOWN;
-		if(encodeRS(sig,siglen,signature)!=E_SUCCESS)
+		if(m_pDSA != NULL)
+		{
+			DSA_SIG* signature = NULL;
+			if(	sign(in,inlen,&signature) != E_SUCCESS)
+			{
+				return E_UNKNOWN;
+			}
+			if(encodeRS(sig,siglen,signature) != E_SUCCESS)
 			{
 				DSA_SIG_free(signature);
 				return E_UNKNOWN;
 			}
-		DSA_SIG_free(signature);
-		return E_SUCCESS;
+			DSA_SIG_free(signature);
+			return E_SUCCESS;
+		}
+		else if(m_pRSA != NULL || m_pEC != NULL)
+		{
+			UINT8 dgst[SHA_DIGEST_LENGTH];
+			SHA1(in,inlen,dgst);
+			if(m_pRSA != NULL) //either RSA or EC is set
+			{
+				return signRSA(dgst, SHA_DIGEST_LENGTH, sig, siglen);
+			}
+			else //(isECDSA())
+			{
+				return signECDSA(dgst, SHA_DIGEST_LENGTH, sig, siglen);
+			}
+		}
+		return E_UNKNOWN;
 	}
 
+// TODO integrate this function to the one above!
 SINT32 CASignature::sign(const UINT8* in,UINT32 inlen,DSA_SIG** pdsaSig) const
 	{
 		UINT8* dgst=new UINT8[SHA_DIGEST_LENGTH];
@@ -281,9 +360,27 @@ SINT32 CASignature::sign(const UINT8* in,UINT32 inlen,DSA_SIG** pdsaSig) const
 		return E_UNKNOWN;
 	}
 
-SINT32 CASignature::getSignatureSize()
+SINT32 CASignature::getSignatureSize() const
 	{
-		return DSA_size(m_pDSA);
+		if(isDSA())
+		{
+			return DSA_size(m_pDSA);
+		}
+		if(isRSA())
+		{
+			return RSA_size(m_pRSA);
+		}
+		if(isECDSA())
+		{
+			const EC_GROUP* tmpGroup = EC_KEY_get0_group(m_pEC);
+
+			BIGNUM* order = BN_new();
+			EC_GROUP_get_order(tmpGroup, order, NULL);
+			SINT32 size = BN_num_bytes(order) * 2;
+			//CAMsg::printMsg(LOG_DEBUG, "ECDSA-Signature size: %d\n", size);
+			return size;
+		}
+		return E_UNKNOWN;
 	}
 
 /** Signs an XML Document.
@@ -298,7 +395,7 @@ SINT32 CASignature::getSignatureSize()
 	* @retval E_SPACE, if the destination byte array is to small for the signed XML Document
 	* @retval E_UNKNOWN, otherwise
 */
-SINT32 CASignature::signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen,CACertStore* pIncludeCerts)
+/*SINT32 CASignature::signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen,CACertStore* pIncludeCerts)
 	{
 		if(in==NULL||inlen<1||out==NULL||outlen==NULL)
 			return E_UNKNOWN;
@@ -317,7 +414,7 @@ SINT32 CASignature::signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen,CAC
 		doc->release();
 		return ret;
 	}
-
+*/
 /** Signs a DOM Node. The XML Signature is include in the XML Tree as a Child of the Node.
 	* If ther is already a Signature is is removed first.
 	* @param node Node which should be signed
@@ -327,7 +424,7 @@ SINT32 CASignature::signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen,CAC
 	*	@retval E_SUCCESS, if the Signature could be successful created
 	* @retval E_UNKNOWN, otherwise
 */
-SINT32 CASignature::signXML(DOMNode* node,CACertStore* pIncludeCerts)
+/*SINT32 CASignature::signXML(DOMNode* node,CACertStore* pIncludeCerts)
 	{
 		//getting the Document an the Node to sign
 		XERCES_CPP_NAMESPACE::DOMDocument* doc=NULL;
@@ -375,39 +472,75 @@ SINT32 CASignature::signXML(DOMNode* node,CACertStore* pIncludeCerts)
 
 		//Creating the Sig-InfoBlock....
 		DOMElement* elemSignedInfo=createDOMElement(doc,"SignedInfo");
+		DOMElement* elemCanonicalizationMethod=createDOMElement(doc,"CanonicalizationMethod");
+		DOMElement* elemSignatureMethod=createDOMElement(doc,"SignatureMethod");
+		if(isDSA())
+		{
+			setDOMElementAttribute(elemSignatureMethod, "Algorithm", (UINT8*)DSA_SHA1_REFERENCE);
+		}
+		else if(isRSA())
+		{
+			setDOMElementAttribute(elemSignatureMethod, "Algorithm", (UINT8*)RSA_SHA1_REFERENCE);
+		}
+		else if(isECDSA())
+		{
+			setDOMElementAttribute(elemSignatureMethod, "Algorithm", (UINT8*)ECDSA_SHA1_REFERENCE);
+		}
 		DOMElement* elemReference=createDOMElement(doc,"Reference");
-		setDOMElementAttribute(elemReference,"URI",(UINT8*)"");
+		//setDOMElementAttribute(elemReference,"URI",(UINT8*)"");
+		DOMElement* elemDigestMethod=createDOMElement(doc, "DigestMethod");
+		setDOMElementAttribute(elemDigestMethod, "Algorithm", (UINT8*)SHA1_REFERENCE);
 		DOMElement* elemDigestValue=createDOMElement(doc,"DigestValue");
 		setDOMElementValue(elemDigestValue,tmpBuff);
+
+		elemSignedInfo->appendChild(elemCanonicalizationMethod);
+		elemSignedInfo->appendChild(elemSignatureMethod);
 		elemSignedInfo->appendChild(elemReference);
+		elemReference->appendChild(elemDigestMethod);
 		elemReference->appendChild(elemDigestValue);
 
 		// Signing the SignInfo block....
-
 		canonicalBuff=DOM_Output::makeCanonical(elemSignedInfo,&len);
 		if(canonicalBuff==NULL)
+		{
 			return E_UNKNOWN;
-
-		DSA_SIG* pdsaSig=NULL;
-
-		SINT32 ret=sign(canonicalBuff,len,&pdsaSig);
-		delete[] canonicalBuff;
-		canonicalBuff = NULL;
-
-		if(ret!=E_SUCCESS)
+		}
+		if(isDSA())
+		{
+			DSA_SIG* pdsaSig=NULL;
+			SINT32 ret=sign(canonicalBuff,len,&pdsaSig);
+			delete[] canonicalBuff;
+			canonicalBuff = NULL;
+			if(ret!=E_SUCCESS)
 			{
 				DSA_SIG_free(pdsaSig);
 				return E_UNKNOWN;
 			}
-		len=1024;
-		encodeRS(tmpBuff,&len,pdsaSig);
-		//memset(tmpBuff,0,40); //make first 40 bytes '0' --> if r or s is less then 20 bytes long!
+			len=1024;
+			encodeRS(tmpBuff,&len,pdsaSig);
+			//memset(tmpBuff,0,40); //make first 40 bytes '0' --> if r or s is less then 20 bytes long!
 													//(Due to be compatible to the standarad r and s must be 20 bytes each)
-		//BN_bn2bin(pdsaSig->r,tmpBuff+20-BN_num_bytes(pdsaSig->r)); //so r is 20 bytes with leading '0'...
-		//BN_bn2bin(pdsaSig->s,tmpBuff+40-BN_num_bytes(pdsaSig->s));
+			//BN_bn2bin(pdsaSig->r,tmpBuff+20-BN_num_bytes(pdsaSig->r)); //so r is 20 bytes with leading '0'...
+			//BN_bn2bin(pdsaSig->s,tmpBuff+40-BN_num_bytes(pdsaSig->s));
+			DSA_SIG_free(pdsaSig);
+		}
+		else if(isRSA() || isECDSA())
+		{
+			UINT32 sigLen = getSignatureSize();
+			SINT32 ret = sign(canonicalBuff, len, tmpBuff, &sigLen);
+			delete[] canonicalBuff;
+			canonicalBuff = NULL;
 
-		DSA_SIG_free(pdsaSig);
-
+			if(ret != E_SUCCESS)
+			{
+				return E_UNKNOWN;
+			}
+			len = sigLen;
+		}
+		else
+		{
+			return E_UNKNOWN;
+		}
 		UINT sigSize=255;
 		UINT8 sig[255];
 		if(CABase64::encode(tmpBuff,len,sig,&sigSize)!=E_SUCCESS)
@@ -434,7 +567,7 @@ SINT32 CASignature::signXML(DOMNode* node,CACertStore* pIncludeCerts)
 			}
 		elemRoot->appendChild(elemSignature);
 		return E_SUCCESS;
-	}
+	}*/
 
 
 SINT32 CASignature::getVerifyKey(CACertificate** ppCert)
@@ -487,22 +620,54 @@ SINT32 CASignature::getVerifyKeyHash(UINT8* buff,UINT32* len)
 SINT32 CASignature::setVerifyKey(CACertificate* pCert)
 	{
 		if(pCert==NULL)
+		{
+			if(isDSA())
 			{
 				DSA_free(m_pDSA);
-				m_pDSA=NULL;
-				return E_SUCCESS;
+				m_pDSA = NULL;
 			}
-		EVP_PKEY *key=X509_get_pubkey(pCert->m_pCert);
-		if(EVP_PKEY_type(key->type)!=EVP_PKEY_DSA)
+			else if (isRSA())
 			{
-				EVP_PKEY_free(key);
-				return E_UNKNOWN;
+				RSA_free(m_pRSA);
+				m_pRSA = NULL;
 			}
-		DSA* tmpDSA=DSA_clone(key->pkey.dsa);
+			else if (isECDSA());
+			{
+				EC_KEY_free(m_pEC);
+				m_pEC = NULL;
+			}
+			return E_SUCCESS;
+		}
+
+		EVP_PKEY *key=X509_get_pubkey(pCert->m_pCert);
+		if(EVP_PKEY_type(key->type) == EVP_PKEY_DSA)
+		{
+			DSA* tmpDSA=DSA_clone(key->pkey.dsa);
+			EVP_PKEY_free(key);
+			DSA_free(m_pDSA);
+			m_pDSA=tmpDSA;
+			return E_SUCCESS;
+		}
+		if(EVP_PKEY_type(key->type) == EVP_PKEY_RSA)
+		{
+			RSA* tmpRSA = RSA_clone(key->pkey.rsa);
+			EVP_PKEY_free(key);
+			RSA_free(m_pRSA);
+			m_pRSA = tmpRSA;
+			return E_SUCCESS;
+		}
+		if(EVP_PKEY_type(key->type) == EVP_PKEY_EC)
+		{
+			CAMsg::printMsg(LOG_DEBUG, "Found ECDSA Key\n");
+			EC_KEY* tmpEC = EC_KEY_dup(key->pkey.ec);
+			EVP_PKEY_free(key);
+			EC_KEY_free(m_pEC);
+			m_pEC = tmpEC;
+			return E_SUCCESS;
+		}
+		//key-type is unknown
 		EVP_PKEY_free(key);
-		DSA_free(m_pDSA);
-		m_pDSA=tmpDSA;
-		return E_SUCCESS;
+		return E_UNKNOWN;
 	}
 
 /**
@@ -696,7 +861,7 @@ SINT32 CASignature::verifyDER(UINT8* in, UINT32 inlen, const UINT8 * dsaSig, con
 	}
 
 
-SINT32 CASignature::verifyXML(const UINT8* const in,UINT32 inlen)
+/*SINT32 CASignature::verifyXML(const UINT8* const in,UINT32 inlen)
 	{
 		XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(in,inlen);
 		if(doc == NULL)
@@ -711,7 +876,7 @@ SINT32 CASignature::verifyXML(const UINT8* const in,UINT32 inlen)
 		//CAMsg::printMsg(LOG_DEBUG,"verified document 0x%x doesn't clean up itself!\n",
 							//doc);
 		return verifyXML(root,NULL);
-	}
+	}*/
 
 
 /** Verifies a XML Signature under node root.*/
@@ -752,53 +917,57 @@ SINT32 CASignature::verifyXML(DOMNode* root,CACertStore* trustedCerts)
 			return E_UNKNOWN;
 		if(CABase64::decode(tmpSig,tmpSiglen,tmpSig,&tmpSiglen)!=E_SUCCESS)
 			return E_UNKNOWN;
-		if(tmpSiglen!=40)
-			return E_UNKNOWN;
-		//extract r and s and make the ASN.1 sequenz
-			//Making DER-Encoding of r and s.....
-            // ASN.1 Notation:
-            //  sequence
-            //    {
-            //          integer r
-            //          integer s
-            //    }
-            //--> Der-Encoding
-            // 0x30 //Sequence
-            // 46 // len in bytes
-            // 0x02 // integer
-            // 21? // len in bytes of r
-					  // 0x00  // fir a '0' to mark this value as positiv integer
-            // ....   //value of r
-            // 0x02 //integer
-            // 21 //len of s
-					  // 0x00  // first a '0' to mark this value as positiv integer
-						// ... value of s
-		/*UINT8 sig[48];
-		sig[0]=0x30;
-		sig[1]=46;
-		sig[2]=0x02;
-		sig[3]=21;
-		sig[4]=0;
-		memcpy(sig+5,tmpSig,20);
-		sig[25]=0x02;
-		sig[26]=21;
-		sig[27]=0;
-		memcpy(sig+28,tmpSig+20,20);
-*/
-		DSA_SIG* dsaSig=DSA_SIG_new();
-		dsaSig->r=BN_bin2bn(tmpSig,20,dsaSig->r);
-		dsaSig->s=BN_bin2bn(tmpSig+20,20,dsaSig->s);
+
 		UINT8* out=new UINT8[5000];
 		UINT32 outlen=5000;
-		if(DOM_Output::makeCanonical(elemSigInfo,out,&outlen)!=E_SUCCESS||
-				verify(out,outlen,dsaSig)!=E_SUCCESS)
+		if(DOM_Output::makeCanonical(elemSigInfo, out, &outlen) != E_SUCCESS)
+		{
+			delete[] out;
+			out = NULL;
+			return E_UNKNOWN;
+		}
+		if(isDSA())
+		{
+			if(tmpSiglen!=40)
+			{
+				delete[] out;
+				out = NULL;
+				return E_UNKNOWN;
+			}
+			DSA_SIG* dsaSig=DSA_SIG_new();
+	   		dsaSig->r=BN_bin2bn(tmpSig,20,dsaSig->r);
+			dsaSig->s=BN_bin2bn(tmpSig+20,20,dsaSig->s);
+			if(verify(out,outlen,dsaSig)!=E_SUCCESS)
 			{
 				DSA_SIG_free(dsaSig);
 				delete[] out;
 				out = NULL;
 				return E_UNKNOWN;
 			}
-		DSA_SIG_free(dsaSig);
+			DSA_SIG_free(dsaSig);
+		}
+		else if(isRSA() || isECDSA())
+		{
+			UINT8 sha1[SHA_DIGEST_LENGTH];
+			SHA1(out, outlen, sha1);
+			SINT32 ret;
+			if(m_pRSA != NULL)
+			{
+				ret = RSA_verify(NID_sha1, sha1, SHA_DIGEST_LENGTH, tmpSig, tmpSiglen, m_pRSA);
+			}
+			else
+			{
+				CAMsg::printMsg(LOG_DEBUG, "Verifying ECDSA Signature!\n");
+				ret = ECDSA_verify(NID_sha1, sha1, SHA_DIGEST_LENGTH, tmpSig, tmpSiglen, m_pEC);
+			}
+			if(ret != 1)
+			{
+				delete[] out;
+				out = NULL;
+				return E_UNKNOWN;
+			}
+		}
+
 		DOMNode* tmpNode=root->removeChild(elemSignature);
 		outlen=5000;
 		DOM_Output::makeCanonical(root,out,&outlen);
@@ -809,6 +978,7 @@ SINT32 CASignature::verifyXML(DOMNode* root,CACertStore* trustedCerts)
 		out = NULL;
 		for(int i=0;i<SHA_DIGEST_LENGTH;i++)
 			{
+				//CAMsg::printMsg(LOG_DEBUG, "Checking Digest!\n");
 				if(dgst1[i]!=dgst[i])
 					return E_UNKNOWN;
 			}
@@ -838,7 +1008,179 @@ SINT32 CASignature::decodeRS(const UINT8* const in, const UINT32 inLen, DSA_SIG*
 	return E_SUCCESS;
 }
 
+SINT32 CASignature::signRSA(const UINT8* dgst, UINT32 dgstLen, UINT8* sig, UINT32* sigLen) const
+{
+	if(RSA_sign(NID_sha1, dgst, dgstLen, sig, sigLen, m_pRSA) != 1)
+	{
+		return E_UNKNOWN;
+	}
 
+	return E_SUCCESS;
+}
 
+SINT32 CASignature::signECDSA(const UINT8* dgst, UINT32 dgstLen, UINT8* sig, UINT32* sigLen) const
+{
+	//CAMsg::printMsg(LOG_DEBUG, "sigLen = %d\n", *sigLen);
+	UINT32 len = getSignatureSize();
+	//CAMsg::printMsg(LOG_DEBUG, "len = %d\n", len);
+	if(len > *sigLen)
+	{
+		return E_UNKNOWN;
+	}
+	ECDSA_SIG* ecdsaSig = ECDSA_do_sign(dgst, dgstLen, m_pEC);
+	if(ecdsaSig == NULL)
+	{
+		return E_UNKNOWN;
+	}
+	memset(sig, 0, *sigLen);
+	UINT32 rSize, sSize;
+	rSize = BN_num_bytes(ecdsaSig->r);
+	sSize = BN_num_bytes(ecdsaSig->s);
+
+	UINT32 rPos = (len/2)-rSize;
+	UINT32 sPos = len-sSize;
+
+	CAMsg::printMsg(LOG_DEBUG, "Sig-Positions r: %d(size=%d), s: %d(size=%d)\n", rPos, rSize, sPos, sSize);
+
+	BN_bn2bin(ecdsaSig->r, sig + rPos);
+	BN_bn2bin(ecdsaSig->s, sig + sPos);
+
+	CAMsg::printMsg(LOG_DEBUG, "sigLen = %d\n", *sigLen);
+	CAMsg::printMsg(LOG_DEBUG, "len = %d\n", len);
+	*sigLen = len;
+	CAMsg::printMsg(LOG_DEBUG, "sigLen = %d\n", *sigLen);
+
+	/*SINT32 len = *sigLen;
+	ECDSA_SIG* ecdsaSig2 = ECDSA_SIG_new();
+	ecdsaSig2->r = BN_bin2bn(sig, len, ecdsaSig->r);
+	ecdsaSig2->s = BN_bin2bn(sig+len, len, ecdsaSig->s);
+
+	if(BN_cmp(ecdsaSig->r, ecdsaSig2->r) == 0)
+		CAMsg::printMsg(LOG_DEBUG, "r identic\n");
+	if(BN_cmp(ecdsaSig->s, ecdsaSig2->s) == 0)
+			CAMsg::printMsg(LOG_DEBUG, "s identic\n");*/
+	//ECDSA_SIG_free(ecdsaSig2);
+	UINT32 tmplen = 255;
+	UINT8 tmpbuff[tmplen];
+	CABase64::encode(sig, *sigLen, tmpbuff, &tmplen);
+	CAMsg::printMsg(LOG_DEBUG, "ECDSA-Signatur: %s (Raw: %d bytes)\n", tmpbuff, *sigLen);
+
+	//CAMsg::printMsg(LOG_DEBUG, "ECDSA-Signatur r: %s\n", BN_, *sigLen);
+	ECDSA_SIG_free(ecdsaSig);
+
+	return E_SUCCESS;
+}
+
+SINT32 CASignature::verify(UINT8* in, UINT32 inLen, UINT8* sig, const UINT32 sigLen)
+{
+	UINT8 sha1[SHA_DIGEST_LENGTH];
+	SHA1(in, inLen, sha1);
+	SINT32 ret = -1;
+	if(isDSA())
+	{
+		ret = verifyDSA(sha1, SHA_DIGEST_LENGTH, sig, sigLen);
+	}
+	else if(isRSA())
+	{
+		ret = verifyRSA(sha1, SHA_DIGEST_LENGTH, sig, sigLen);
+	}
+	else if(isECDSA())
+	{
+		ret = verifyECDSA(sha1, SHA_DIGEST_LENGTH, sig, sigLen);
+	}
+	if(ret == 1)
+	{
+		return E_SUCCESS;
+	}
+	return E_UNKNOWN;
+}
+
+SINT32 CASignature::verifyRSA(const UINT8* dgst, const UINT32 dgstLen, UINT8* sig, UINT32 sigLen) const
+{
+	if(sigLen != (UINT32)getSignatureSize())
+	{
+		return E_UNKNOWN;
+	}
+	return RSA_verify(NID_sha1, dgst, dgstLen, sig, sigLen, m_pRSA);
+}
+
+SINT32 CASignature::verifyDSA(const UINT8* dgst, const UINT32 dgstLen, UINT8* sig, UINT32 sigLen) const
+{
+	if(sigLen != 40)
+	{
+		return E_UNKNOWN;
+	}
+	DSA_SIG* dsaSig = DSA_SIG_new();
+	dsaSig->r = BN_bin2bn(sig, 20, dsaSig->r);
+	dsaSig->s = BN_bin2bn(sig+20, 20, dsaSig->s);
+
+	SINT32 ret = DSA_do_verify(dgst, dgstLen, dsaSig, m_pDSA);
+	DSA_SIG_free(dsaSig);
+
+	return ret;
+}
+
+SINT32 CASignature::verifyECDSA(const UINT8* dgst, const UINT32 dgstLen, UINT8* sig, UINT32 sigLen) const
+{
+	SINT32 len = sigLen / 2;
+	CAMsg::printMsg(LOG_DEBUG, "recieved ECDSA-Signature size : %d\n", sigLen);
+	ECDSA_SIG* ecdsaSig = ECDSA_SIG_new();
+	ecdsaSig->r = BN_bin2bn(sig, len, ecdsaSig->r);
+	ecdsaSig->s = BN_bin2bn(sig+len, len, ecdsaSig->s);
+
+	SINT32 ret = ECDSA_do_verify(dgst, dgstLen, ecdsaSig, m_pEC);
+	ECDSA_SIG_free(ecdsaSig);
+
+	return ret;
+}
+
+bool CASignature::isDSA() const
+{
+	if(m_pDSA != NULL)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool CASignature::isRSA() const
+{
+	if(m_pRSA != NULL)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool CASignature::isECDSA() const
+{
+	if(m_pEC != NULL)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool CASignature::isSet() const
+{
+	return (isDSA() || isRSA() || isECDSA());
+}
+
+UINT8* CASignature::getSignatureMethod()
+{
+	if(m_pDSA != NULL)
+	{
+		return (UINT8*)DSA_SHA1_REFERENCE;
+	}
+	if(m_pRSA != NULL)
+	{
+		return (UINT8*)RSA_SHA1_REFERENCE;
+	}
+	if(m_pEC != NULL)
+	{
+		return (UINT8*)ECDSA_SHA1_REFERENCE;
+	}
+	return NULL;
+}
 
 #endif //ONLY_LOCAL_PROXY

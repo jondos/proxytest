@@ -70,8 +70,10 @@ SINT32 CAFirstMix::initOnce()
 		if(ret!=E_SUCCESS)
 			return ret;
 		CAMsg::printMsg(LOG_DEBUG,"Starting FirstMix InitOnce\n");
-		m_pSignature=CALibProxytest::getOptions()->getSignKey();
-		if(m_pSignature==NULL)
+		/*m_pSignature=CALibProxytest::getOptions()->getSignKey();
+		if(m_pSignature==NULL)*/
+		m_pMultiSignature = CALibProxytest::getOptions()->getMultiSigner();
+		if(m_pMultiSignature == NULL)
 			return E_UNKNOWN;
 		//Try to find out how many (real) ListenerInterfaces are specified
 		UINT32 tmpSocketsIn=CALibProxytest::getOptions()->getListenerInterfaceCount();
@@ -531,13 +533,14 @@ SINT32 CAFirstMix::processKeyExchange()
         {
             //check Signature....
             CAMsg::printMsg(LOG_DEBUG,"Try to verify next mix signature...\n");
-            CASignature oSig;
+            //CASignature oSig;
             CACertificate* nextCert=CALibProxytest::getOptions()->getNextMixTestCertificate();
-            oSig.setVerifyKey(nextCert);
-            SINT32 ret=oSig.verifyXML(child,NULL);
+            /*oSig.setVerifyKey(nextCert);
+            SINT32 ret=oSig.verifyXML(child,NULL);*/
+            SINT32 result = CAMultiSignature::verifyXML(child, nextCert);
             delete nextCert;
             nextCert = NULL;
-            if(ret!=E_SUCCESS)
+            if(result != E_SUCCESS)
             {
                 CAMsg::printMsg(LOG_DEBUG,"failed!\n");
                 if (doc != NULL)
@@ -613,8 +616,9 @@ SINT32 CAFirstMix::processKeyExchange()
 			m_u32KeepAliveRecvInterval=max(u32KeepAliveRecvInterval,tmpSendInterval);
 			CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Calculated -- SendInterval %u -- Receive Interval %u\n",m_u32KeepAliveSendInterval,m_u32KeepAliveRecvInterval);
 
-            m_pSignature->signXML(elemRoot);
-            DOM_Output::dumpToMem(docSymKey,out,&outlen);
+            //m_pSignature->signXML(elemRoot);
+            m_pMultiSignature->signXML(elemRoot, false);
+			DOM_Output::dumpToMem(docSymKey,out,&outlen);
             if (docSymKey != NULL)
             {
 				docSymKey->release();
@@ -1201,7 +1205,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 							// may return E_SOCKETCLOSED or E_SOCKET_LIMIT
 							CAMsg::printMsg(LOG_ERR,"Accept Error %u - direct Connection from Client!\n",GET_NET_ERROR);
 						}
-						else if( (CALibProxytest::getOptions()->getMaxNrOfUsers() > 0 && 
+						else if( (CALibProxytest::getOptions()->getMaxNrOfUsers() > 0 &&
 								pFirstMix->getNrOfUsers() >= CALibProxytest::getOptions()->getMaxNrOfUsers())
 								&& (isAllowedToPassRestrictions(pNewMuxSocket->getCASocket()) != E_SUCCESS)
 
@@ -1679,7 +1683,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 				return E_UNKNOWN;
 			}
 		//Getting control channel keys if available
-		///TODO: move to the if-staement above
+		///TODO: move to the if-statement above
 		DOMElement* elemControlChannelEnc=NULL;
 		getDOMChildByName(elemRoot,"ControlChannelEncryption",elemControlChannelEnc,false);
 		UINT8 controlchannelKey[255];
@@ -1699,7 +1703,9 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		xml_buff[1]=(UINT8)(xml_len&0xFF);
 		UINT8* sig=new UINT8[255];
 		UINT32 siglen=255;
-		m_pSignature->sign(xml_buff,xml_len+2,sig,&siglen);
+		//TODO change me to fully support MultiSig
+		//m_pSignature->sign(xml_buff,xml_len+2,sig,&siglen);
+		m_pMultiSignature->sign(xml_buff,xml_len+2,sig,&siglen);
 		XERCES_CPP_NAMESPACE::DOMDocument* docSig=createDOMDocument();
 
 		DOMElement *elemSig=NULL;
@@ -1834,7 +1840,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 			XERCES_CPP_NAMESPACE::DOMDocument *tcData = parseDOMDocument(tcDataBuf, tcRequestDataLen);
 			if( (tcData == NULL) || (tcData->getDocumentElement() == NULL) )
 			{
-				CAMsg::printMsg(LOG_ERR,"Could not parse tc data!\n");
+				CAMsg::printMsg(LOG_ERR,"Could not parse t&c data!\n");
 				loginFailed = true;
 				break;
 			}
@@ -1970,7 +1976,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		{
 			if(pNewUser->receive(paymentLoginPacket, AI_LOGIN_SO_TIMEOUT) != MIXPACKET_SIZE)
 			{
-				CAMsg::printMsg(LOG_WARNING,"AI login: client receive timeout.\n");
+				CAMsg::printMsg(LOG_NOTICE,"AI login: client receive timeout.\n");
 				aiLoginStatus = AUTH_LOGIN_FAILED;
 				break;
 			}
@@ -1992,7 +1998,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 					{
 						if(ai_ret == E_TIMEDOUT )
 						{
-							CAMsg::printMsg(LOG_WARNING,"timeout occured during AI login.");
+							CAMsg::printMsg(LOG_NOTICE,"timeout occurred during AI login.");
 						}
 						aiLoginStatus = AUTH_LOGIN_FAILED;
 						goto loop_break;
@@ -2002,15 +2008,6 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 				{
 					break;
 				}
-			}
-			else
-			{
-				/*
-				 * User sends data channel mix packets instead of ai control channel packets
-				 * and thus violates our ai login protocol. May be an attacker or an old JAP which is
-				 * not aware that ai login has to be finished before sending data channel packets.
-				 * @todo: kick user out or buffer his packets?
-				 */
 			}
 			aiLoginStatus = CAAccountingInstance::loginProcessStatus(pHashEntry);
 		}
@@ -2029,7 +2026,7 @@ loop_break:
 //#ifdef DEBUG
 				CAMsg::printMsg(LOG_DEBUG,"AI login messages successfully exchanged: now starting settlement for user account balancing check\n");
 //#endif
-				if(CAAccountingInstance::settlementTransaction() != E_SUCCESS)
+				if(CAAccountingInstance::newSettlementTransaction() != E_SUCCESS)
 				{
 					aiLoginStatus |= AUTH_LOGIN_FAILED;
 				}

@@ -59,6 +59,8 @@ CAMsg::CAMsg()
 			m_gzFileInfo=NULL;
 #endif
 			m_pCipher=NULL;
+			m_lastLogFileNumber = 0;
+			m_alreadyOpened = false;
 		}
 
 CAMsg::~CAMsg()
@@ -174,7 +176,9 @@ SINT32 CAMsg::printMsg(UINT32 type,const char* format,...)
 										if(write(pMsg->m_hFileInfo,pMsg->m_strMsgBuff,strlen(pMsg->m_strMsgBuff))==-1)
 											ret=E_UNKNOWN;
 										pMsg->m_NrOfWrites++;
-										if(pMsg->m_NrOfWrites>10000&&!isZero64(pMsg->m_maxLogFileSize)&&isGreater64(filesize64(pMsg->m_hFileInfo),pMsg->m_maxLogFileSize))
+										if( //(pMsg->m_NrOfWrites > 10000) &&
+											!isZero64(pMsg->m_maxLogFileSize) &&
+											isGreater64(filesize64(pMsg->m_hFileInfo), pMsg->m_maxLogFileSize))
 											{
 												pMsg->closeLog();
 												pMsg->openLog(pMsg->m_uLogType);
@@ -231,6 +235,29 @@ SINT32 CAMsg::closeLog()
 		return E_SUCCESS;
 	}
 
+SINT32 CAMsg::rotateLog()
+{
+	switch(m_uLogType)
+	{
+		case MSG_FILE:
+
+			char logFileSaveName[1026];
+			memset(logFileSaveName, 0, 1026);
+			//memcpy(logFileSave, m_strMsgBuff, 1024);
+			snprintf(logFileSaveName, 1025, "%s%u", m_strLogFile, m_lastLogFileNumber);
+			m_lastLogFileNumber = (m_lastLogFileNumber+1) % CALibProxytest::getOptions()->getMaxLogFiles();
+			rename(m_strLogFile, logFileSaveName);
+			/*if(m_hFileInfo!=-1)
+				close(m_hFileInfo);
+			m_hFileInfo=-1;*/
+			break;
+		default:
+			break;
+	}
+
+	return E_SUCCESS;
+}
+
 SINT32 CAMsg::openLog(UINT32 type)
 	{
 //		int tmpHandle=-1;
@@ -248,18 +275,17 @@ SINT32 CAMsg::openLog(UINT32 type)
 					strcat(m_strLogFile,FILENAME_INFOLOG);
 					if(CALibProxytest::getOptions()->getMaxLogFileSize()>0)
 					{
-						currtime=time(NULL);
-						strftime(m_strLogFile+strlen(m_strLogFile),1024-strlen(m_strLogFile),"%Y%m%d-%H%M%S",localtime(&currtime));
-						//!! DO NOT USE O_SYNC - it is _terrible_ slow!!!!
-						m_hFileInfo=open(m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE,S_IREAD|S_IWRITE);
+						if(m_alreadyOpened)
+						{
+							rotateLog();
+						}
+
 						setMaxLogFileSize(CALibProxytest::getOptions()->getMaxLogFileSize());
-						m_NrOfWrites=0;
+						m_alreadyOpened = true;
 					}
-					else
-					{
-						//!! DO NOT USE O_SYNC - it is _terrible_ slow!!!!
-						m_hFileInfo=open(m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE,S_IREAD|S_IWRITE);
-					}
+					m_NrOfWrites=0;
+					m_hFileInfo=open(m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE,S_IREAD|S_IWRITE);
+
 				break;
 #ifdef COMPRESSED_LOGS
 				case MSG_COMPRESSED_FILE:

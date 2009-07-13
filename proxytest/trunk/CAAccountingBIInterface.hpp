@@ -38,7 +38,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define PI_CONNECT_TIMEOUT 5000
 
 #define XML_ELEMENT_CCS "CCs"
-#define XML_ELEMENT_ERROR_MESSAGE "CCs"
+#define XML_ELEMENT_SETTLE_RESULT "SettleResult"
+#define XML_ATTR_SETTLE_SUCCESSFUL "successful"
 
 #define POST_CMD_SETTLEALL "/settleAll"
 
@@ -68,7 +69,7 @@ public:
 	 * Send a cost confirmation to the JPI
 	 */
 	CAXMLErrorMessage *settle(CAXMLCostConfirmation &cc);
-	CAXMLErrorMessage **settleAll(CAXMLCostConfirmation **CCs, UINT32 nrOfCCs);
+	CAXMLErrorMessage **settleAll(CAXMLCostConfirmation **CCs, UINT32 nrOfCCs, CAXMLErrorMessage **settleException);
 
 /*	**
 	 * Request a new Balance certificate from the JPI

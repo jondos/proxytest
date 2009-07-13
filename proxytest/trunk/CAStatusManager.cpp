@@ -34,7 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CAMutex.hpp"
 #include "CAUtil.hpp"
 #include "xml/DOM_Output.hpp"
-#include "CACmdLnOptions.hpp"
+#include "CALibProxytest.hpp"
 #include "monitoringDefs.h"
 
 /**
@@ -46,7 +46,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 CAStatusManager *CAStatusManager::ms_pStatusManager = NULL;
 state_t ***CAStatusManager::ms_pAllStates = NULL;
 event_t ***CAStatusManager::ms_pAllEvents = NULL;
-extern CACmdLnOptions* pglobalOptions;
 
 void CAStatusManager::init()
 {
@@ -245,19 +244,18 @@ SINT32 CAStatusManager::initSocket()
 	char *hostname = "localhost";
 	UINT16 port = MONITORING_SERVER_PORT;
 	bool userdefined = false;
-	if(pglobalOptions != NULL)
+
+	if(CALibProxytest::getOptions()->getMonitoringListenerHost()!= NULL)
 	{
-		if(pglobalOptions->getMonitoringListenerHost()!= NULL)
-		{
-			hostname = pglobalOptions->getMonitoringListenerHost();
-			userdefined = true;
-		}
-		if(pglobalOptions->getMonitoringListenerPort()!= 0xFFFF)
-		{
-			port = pglobalOptions->getMonitoringListenerPort();
-			userdefined = true;
-		}
+		hostname = CALibProxytest::getOptions()->getMonitoringListenerHost();
+		userdefined = true;
 	}
+	if(CALibProxytest::getOptions()->getMonitoringListenerPort()!= 0xFFFF)
+	{
+		port = CALibProxytest::getOptions()->getMonitoringListenerPort();
+		userdefined = true;
+	}
+
 	m_pListenAddr = new CASocketAddrINet();
 	ret = m_pListenAddr->setAddr((UINT8 *) hostname, port);
 	if(ret != E_SUCCESS)

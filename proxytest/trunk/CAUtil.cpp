@@ -980,8 +980,6 @@ SINT32 getDOMElementAttribute(const DOMNode * const elem,const char* attrName,bo
 	return ret;
 }
 
-
-
 SINT32 getLastDOMChildByName(const DOMNode* pNode,const char* const name,DOMNode* & a_child)
 {
 	a_child=NULL;

@@ -1,6 +1,8 @@
 #include "StdAfx.h"
 #include "CALibProxytest.hpp"
-
+#ifdef SERVER_MONITORING
+	#include "CAStatusManager.hpp"
+#endif
 CACmdLnOptions* CALibProxytest::m_pglobalOptions;
 CAMutex* CALibProxytest::m_pOpenSSLMutexes;
 #if defined _DEBUG && ! defined (ONLY_LOCAL_PROXY)
