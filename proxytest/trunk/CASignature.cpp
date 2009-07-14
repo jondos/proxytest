@@ -377,7 +377,6 @@ SINT32 CASignature::getSignatureSize() const
 			BIGNUM* order = BN_new();
 			EC_GROUP_get_order(tmpGroup, order, NULL);
 			SINT32 size = BN_num_bytes(order) * 2;
-			//CAMsg::printMsg(LOG_DEBUG, "ECDSA-Signature size: %d\n", size);
 			return size;
 		}
 		return E_UNKNOWN;
@@ -658,7 +657,6 @@ SINT32 CASignature::setVerifyKey(CACertificate* pCert)
 		}
 		if(EVP_PKEY_type(key->type) == EVP_PKEY_EC)
 		{
-			CAMsg::printMsg(LOG_DEBUG, "Found ECDSA Key\n");
 			EC_KEY* tmpEC = EC_KEY_dup(key->pkey.ec);
 			EVP_PKEY_free(key);
 			EC_KEY_free(m_pEC);
@@ -957,7 +955,6 @@ SINT32 CASignature::verifyXML(DOMNode* root,CACertStore* trustedCerts)
 			}
 			else
 			{
-				CAMsg::printMsg(LOG_DEBUG, "Verifying ECDSA Signature!\n");
 				ret = ECDSA_verify(NID_sha1, sha1, SHA_DIGEST_LENGTH, tmpSig, tmpSiglen, m_pEC);
 			}
 			if(ret != 1)
@@ -977,11 +974,12 @@ SINT32 CASignature::verifyXML(DOMNode* root,CACertStore* trustedCerts)
 		delete[] out;
 		out = NULL;
 		for(int i=0;i<SHA_DIGEST_LENGTH;i++)
+		{
+			if(dgst1[i]!=dgst[i])
 			{
-				//CAMsg::printMsg(LOG_DEBUG, "Checking Digest!\n");
-				if(dgst1[i]!=dgst[i])
-					return E_UNKNOWN;
+				return E_UNKNOWN;
 			}
+		}
 		return E_SUCCESS;
 	}
 
@@ -1020,9 +1018,7 @@ SINT32 CASignature::signRSA(const UINT8* dgst, UINT32 dgstLen, UINT8* sig, UINT3
 
 SINT32 CASignature::signECDSA(const UINT8* dgst, UINT32 dgstLen, UINT8* sig, UINT32* sigLen) const
 {
-	//CAMsg::printMsg(LOG_DEBUG, "sigLen = %d\n", *sigLen);
 	UINT32 len = getSignatureSize();
-	//CAMsg::printMsg(LOG_DEBUG, "len = %d\n", len);
 	if(len > *sigLen)
 	{
 		return E_UNKNOWN;
@@ -1040,32 +1036,14 @@ SINT32 CASignature::signECDSA(const UINT8* dgst, UINT32 dgstLen, UINT8* sig, UIN
 	UINT32 rPos = (len/2)-rSize;
 	UINT32 sPos = len-sSize;
 
-	CAMsg::printMsg(LOG_DEBUG, "Sig-Positions r: %d(size=%d), s: %d(size=%d)\n", rPos, rSize, sPos, sSize);
-
+	//CAMsg::printMsg(LOG_DEBUG, "Sig-Positions r: %d(size=%d), s: %d(size=%d)\n", rPos, rSize, sPos, sSize);
 	BN_bn2bin(ecdsaSig->r, sig + rPos);
 	BN_bn2bin(ecdsaSig->s, sig + sPos);
-
-	CAMsg::printMsg(LOG_DEBUG, "sigLen = %d\n", *sigLen);
-	CAMsg::printMsg(LOG_DEBUG, "len = %d\n", len);
 	*sigLen = len;
-	CAMsg::printMsg(LOG_DEBUG, "sigLen = %d\n", *sigLen);
 
-	/*SINT32 len = *sigLen;
-	ECDSA_SIG* ecdsaSig2 = ECDSA_SIG_new();
-	ecdsaSig2->r = BN_bin2bn(sig, len, ecdsaSig->r);
-	ecdsaSig2->s = BN_bin2bn(sig+len, len, ecdsaSig->s);
-
-	if(BN_cmp(ecdsaSig->r, ecdsaSig2->r) == 0)
-		CAMsg::printMsg(LOG_DEBUG, "r identic\n");
-	if(BN_cmp(ecdsaSig->s, ecdsaSig2->s) == 0)
-			CAMsg::printMsg(LOG_DEBUG, "s identic\n");*/
-	//ECDSA_SIG_free(ecdsaSig2);
 	UINT32 tmplen = 255;
 	UINT8 tmpbuff[tmplen];
 	CABase64::encode(sig, *sigLen, tmpbuff, &tmplen);
-	CAMsg::printMsg(LOG_DEBUG, "ECDSA-Signatur: %s (Raw: %d bytes)\n", tmpbuff, *sigLen);
-
-	//CAMsg::printMsg(LOG_DEBUG, "ECDSA-Signatur r: %s\n", BN_, *sigLen);
 	ECDSA_SIG_free(ecdsaSig);
 
 	return E_SUCCESS;
@@ -1123,7 +1101,6 @@ SINT32 CASignature::verifyDSA(const UINT8* dgst, const UINT32 dgstLen, UINT8* si
 SINT32 CASignature::verifyECDSA(const UINT8* dgst, const UINT32 dgstLen, UINT8* sig, UINT32 sigLen) const
 {
 	SINT32 len = sigLen / 2;
-	CAMsg::printMsg(LOG_DEBUG, "recieved ECDSA-Signature size : %d\n", sigLen);
 	ECDSA_SIG* ecdsaSig = ECDSA_SIG_new();
 	ecdsaSig->r = BN_bin2bn(sig, len, ecdsaSig->r);
 	ecdsaSig->s = BN_bin2bn(sig+len, len, ecdsaSig->s);
