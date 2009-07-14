@@ -80,6 +80,7 @@ SINT32 CAMultiSignature::signXML(DOMNode* node, bool appendCerts)
 		CAMsg::printMsg(LOG_ERR, "Trying to sign a document with no signature-keys set!");
 		return E_UNKNOWN;
 	}
+
 	//getting the Document an the Node to sign
 	XERCES_CPP_NAMESPACE::DOMDocument* doc = NULL;
 	DOMNode* elemRoot = NULL;
@@ -98,8 +99,6 @@ SINT32 CAMultiSignature::signXML(DOMNode* node, bool appendCerts)
 	DOMNode* tmpSignature = NULL;
 	while(getDOMChildByName(elemRoot, "Signature", tmpSignature, false) == E_SUCCESS)
 	{
-		//CAMsg::printMsg(LOG_DEBUG, "Removing a signature from document (Parent-Node is <%s>)!\n",
-			//										XMLString::transcode(tmpSignature->getParentNode()->getNodeName()));
 		DOMNode* n = elemRoot->removeChild(tmpSignature);
 		if (n != NULL)
 		{
@@ -174,12 +173,14 @@ SINT32 CAMultiSignature::signXML(DOMNode* node, bool appendCerts)
 		canonicalBuff = NULL;
 		if(ret != E_SUCCESS)
 		{
+			currentSignature = currentSignature->next;
 			continue;
 		}
 		UINT sigSize = 255;
 		UINT8 sig[255];
 		if(CABase64::encode(sigBuff, sigLen, sig, &sigSize) != E_SUCCESS)
 		{
+			currentSignature = currentSignature->next;
 			continue;
 		}
 
@@ -203,10 +204,11 @@ SINT32 CAMultiSignature::signXML(DOMNode* node, bool appendCerts)
 			}
 		}
 		elemRoot->appendChild(elemSignature);
+		sigCount++;
 
 		//goto next Signature
-		currentSignature = m_signatures->next;
-		sigCount++;
+		currentSignature = currentSignature->next;
+
 	}
 	if(sigCount > 0)
 	{
@@ -275,7 +277,7 @@ SINT32 CAMultiSignature::verifyXML(DOMNode* root, CACertificate* a_cert)
 		DOMNode* elemSigMethod;
 		getDOMChildByName(elemSigInfo, "SignatureMethod", elemSigMethod);
 		UINT32 algLen = 255;
-		UINT8* algorithm = new UINT8[255];
+		UINT8 algorithm[255];
 		getDOMElementAttribute(elemSigMethod, (const char*)"Algorithm", algorithm, &algLen);
 		//if signatureMethod is set check if its equal
 		if(signatureMethod != NULL &&
@@ -356,12 +358,10 @@ SINT32 CAMultiSignature::verifyXML(DOMNode* root, CACertificate* a_cert)
 
 		for(UINT32 i=0; i<signatureElementsCount; i++)
 		{
-			//CAMsg::printMsg(LOG_DEBUG, "Removing element %d of %d from Root-Node\n", i+1, signatureElementsCount);
-			//CAMsg::printMsg(LOG_DEBUG, "Parent-Node of removed Element was <%s>\n", XMLString::transcode(signatureToRemove->getParentNode()->getNodeName()));
 			removedSignatures[i] = root->removeChild(signatureElements[i]);
 			if(removedSignatures[i] == NULL)
 			{
-				//TODO do what?
+				//TODO do what? Verification will most likely fail, so just log the error for the moment
 				CAMsg::printMsg(LOG_ERR, "Error removing signature-element %d of %d from Root-Node\n", i+1, signatureElementsCount);
 			}
 		}
@@ -424,7 +424,6 @@ SINT32 CAMultiSignature::getSignatureElements(DOMNode* parent, DOMNode** signatu
 
 	while(child != NULL)
 	{
-		//CAMsg::printMsg(LOG_DEBUG, "Node-Name is %s\n", XMLString::transcode(child->getNodeName()));
 		if(XMLString::equals(child->getNodeName(), XMLString::transcode("Signature")))
 		{
 			if(count < *length)
