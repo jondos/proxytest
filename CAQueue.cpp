@@ -35,14 +35,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 /** Deletes this Queue and all stored data*/
 CAQueue::~CAQueue()
 	{
-		if (m_pconvarSize)
-		{
-			clean();
-			delete m_pcsQueue;
-			m_pcsQueue = NULL;
-			delete m_pconvarSize;
-			m_pconvarSize = NULL;
-		}
+		clean();
+		delete m_pcsQueue;
+		m_pcsQueue = NULL;
+		delete m_pconvarSize;
+		m_pconvarSize = NULL;
 	}
 
 /** Removes any stored data from the Queue.
@@ -57,7 +54,6 @@ SINT32 CAQueue::clean()
 				m_lastElem=m_Queue;
 				m_Queue=m_Queue->next;
 				delete m_lastElem;
-				m_lastElem = NULL;
 			}
 /*		while(m_pHeap!=NULL)
 			{
@@ -178,7 +174,6 @@ SINT32 CAQueue::get(UINT8* pbuff,UINT32* psize)
 				delete[] tmp->pBuff;
 				tmp->pBuff = NULL;
 				delete tmp;
-				tmp = NULL;
 				if(m_Queue==NULL)
 					{
 						m_pcsQueue->unlock();
@@ -319,7 +314,6 @@ SINT32 CAQueue::remove(UINT32* psize)
 				delete[] tmp->pBuff;
 				tmp->pBuff = NULL;
 				delete tmp;
-				tmp = NULL;
 				if(m_Queue==NULL)
 					{
 						m_pcsQueue->unlock();
