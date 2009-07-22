@@ -31,7 +31,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
-//#ifdef PAYMENT
+#ifdef PAYMENT
 
 #include "CAAccountingInstance.hpp"
 #include "CAAccountingControlChannel.hpp"
@@ -3713,4 +3713,4 @@ inline bool testLoginEntryOwner_internal(struct AccountLoginHashEntry *loginEntr
 {
 	return (loginEntry->ownerRef == ownerRef);
 }
-//#endif /* ifdef PAYMENT */
+#endif /* ifdef PAYMENT */
