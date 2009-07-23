@@ -648,7 +648,7 @@ RESTART_MIX:
 		if(CALibProxytest::getOptions()->getUser(buff,255)==E_SUCCESS) //switching user
 			{
 				struct passwd* pwd=getpwnam((char*)buff);
-				if(pwd==NULL||seteuid(pwd->pw_uid)==-1)
+				if(pwd==NULL || (setegid(pwd->pw_gid)==-1) || (seteuid(pwd->pw_uid)==-1) )
 					CAMsg::printMsg(LOG_ERR,"Could not switch to effective user %s!\n",buff);
 				else
 					CAMsg::printMsg(LOG_INFO,"Switched to effective user %s!\n",buff);
