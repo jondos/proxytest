@@ -470,7 +470,7 @@ SINT32 CAAccountingDBInterface::getUnsettledCostConfirmations(CAXMLCostConfirmat
 	*/
 SINT32 CAAccountingDBInterface::__getUnsettledCostConfirmations(CAXMLCostConfirmation ***resultCCs, UINT8* cascadeId, UINT32 *nrOfCCs)
 	{
-		const char* query= "SELECT XMLCC FROM COSTCONFIRMATIONS WHERE SETTLED=0 AND CASCADE = '%s' ";
+		const char* query= "SELECT XMLCC FROM COSTCONFIRMATIONS WHERE SETTLED=0 AND CASCADE = '%s' LIMIT 0, 30";
 		UINT8* finalQuery;
 		PGresult* result;
 		SINT32 numTuples, i;
