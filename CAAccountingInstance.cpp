@@ -2699,6 +2699,16 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 
 SINT32 CAAccountingInstance::newSettlementTransaction()
 {
+	UINT32 settledCCs = 0;
+	do
+	{
+		__newSettlementTransaction(&settledCCs);
+	}
+	while(settledCCs >= 10);
+}
+
+SINT32 CAAccountingInstance::__newSettlementTransaction(UINT32 *nrOfSettledCCs)
+{
 
 	CAXMLErrorMessage **pErrMsgs = NULL, *settleException = NULL;
 	CAXMLCostConfirmation **allUnsettledCCs = NULL;
@@ -2724,44 +2734,45 @@ SINT32 CAAccountingInstance::newSettlementTransaction()
 	CAMsg::printMsg(LOG_DEBUG, "Settlement transaction: DB connections established!\n");
 	#endif
 
-	dbInterface->getUnsettledCostConfirmations(&allUnsettledCCs, ms_pInstance->m_currentCascade, &nrOfCCs);
-	//no unsettled CCs found.
-	if (allUnsettledCCs == NULL)
-	{
-		CAMsg::printMsg(LOG_DEBUG, "Settlement transaction: finished gettings CCs, found no CCs to settle\n");
-		ms_pInstance->m_pSettlementMutex->unlock();
-		ret = E_SUCCESS;
-		goto cleanup;
-	}
-
-	CAMsg::printMsg(LOG_DEBUG, "Settlement transaction: finished gettings CCs, found %u cost confirmations to settle\n",nrOfCCs);
-
-	//connect to the PI
-	biConnectionStatus = ms_pInstance->m_pPiInterface->initBIConnection();
-	if(biConnectionStatus != E_SUCCESS)
-	{
-		ms_pInstance->m_seqBIConnErrors++;
-		if(ms_pInstance->m_seqBIConnErrors >= CRITICAL_SUBSEQUENT_BI_CONN_ERRORS)
+		dbInterface->getUnsettledCostConfirmations(&allUnsettledCCs, ms_pInstance->m_currentCascade, &nrOfCCs);
+		*nrOfSettledCCs = nrOfCCs;
+		//no unsettled CCs found.
+		if (allUnsettledCCs == NULL)
 		{
-			//transition to critical BI conn payment state
-			MONITORING_FIRE_PAY_EVENT(ev_pay_biConnectionCriticalSubseqFailures);
+			CAMsg::printMsg(LOG_DEBUG, "Settlement transaction: finished gettings CCs, found no CCs to settle\n");
+			ms_pInstance->m_pSettlementMutex->unlock();
+			ret = E_SUCCESS;
+			goto cleanup;
+		}
+
+		CAMsg::printMsg(LOG_DEBUG, "Settlement transaction: finished gettings CCs, found %u cost confirmations to settle\n",nrOfCCs);
+
+		//connect to the PI
+		biConnectionStatus = ms_pInstance->m_pPiInterface->initBIConnection();
+		if(biConnectionStatus != E_SUCCESS)
+		{
+			ms_pInstance->m_seqBIConnErrors++;
+			if(ms_pInstance->m_seqBIConnErrors >= CRITICAL_SUBSEQUENT_BI_CONN_ERRORS)
+			{
+				//transition to critical BI conn payment state
+				MONITORING_FIRE_PAY_EVENT(ev_pay_biConnectionCriticalSubseqFailures);
+			}
+			else
+			{
+				MONITORING_FIRE_PAY_EVENT(ev_pay_biConnectionFailure);
+			}
+			ms_pInstance->m_pPiInterface->terminateBIConnection(); // make sure the socket is closed
+			ms_pInstance->m_pSettlementMutex->unlock();
+
+			CAMsg::printMsg(LOG_WARNING, "Settlement transaction: could not connect to BI. Try later...\n");
+			ret = E_SUCCESS;
+			goto cleanup;
 		}
 		else
 		{
-			MONITORING_FIRE_PAY_EVENT(ev_pay_biConnectionFailure);
+			pErrMsgs = ms_pInstance->m_pPiInterface->settleAll(allUnsettledCCs, nrOfCCs, &settleException);
+			ms_pInstance->m_pPiInterface->terminateBIConnection();
 		}
-		ms_pInstance->m_pPiInterface->terminateBIConnection(); // make sure the socket is closed
-		ms_pInstance->m_pSettlementMutex->unlock();
-
-		CAMsg::printMsg(LOG_WARNING, "Settlement transaction: could not connect to BI. Try later...\n");
-		ret = E_SUCCESS;
-		goto cleanup;
-	}
-	else
-	{
-		pErrMsgs = ms_pInstance->m_pPiInterface->settleAll(allUnsettledCCs, nrOfCCs, &settleException);
-		ms_pInstance->m_pPiInterface->terminateBIConnection();
-	}
 
 	//workaround because usage of exceptions is not allowed!
 	if(settleException != NULL)
