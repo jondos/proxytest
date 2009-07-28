@@ -189,7 +189,7 @@ public:
 	static void __commitSettlementToDatabase(SettleEntry *entryList, CAAccountingDBInterface *dbInterface);
 	static void __commitSettlementToLoginTable(SettleEntry *entryList);
 	static SINT32 newSettlementTransaction();
-	static SINT32 CAAccountingInstance::__newSettlementTransaction(UINT32 *nrOfSettledCCs);
+	static SINT32 __newSettlementTransaction(UINT32 *nrOfSettledCCs);
 
 
 	static const SINT32 HANDLE_PACKET_CONNECTION_OK; // this packet has been checked and is OK
