@@ -29,6 +29,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define __DOM_OUTPUT__
 #ifndef ONLY_LOCAL_PROXY
 #include "../CAQueue.hpp"
+
+	enum OUTPUT_FORMAT { OF_DEFAULT, OF_NULL_TERMINATED, OF_NEWLINE };
+
 class MemFormatTarget: public XMLFormatTarget
 	{
 #define MEM_FORMART_TARGET_SPACE 1024
@@ -96,10 +99,11 @@ class MemFormatTarget: public XMLFormatTarget
 
 			/** Returns a Copy of the XML-chars.
 				* @param size on return contains the number of XML-Chars copied
+				* @param a_outputFormat defines an output format for the generated character array
 				* @return a pointer to a newls allocated buff, which must be delete[] by the caller
 				* @return NULL if an error occurs
 				*/
-			UINT8* dumpMem(UINT32* size)
+			UINT8* dumpMem(UINT32* size, OUTPUT_FORMAT a_outputFormat)
 				{
 					if(size==NULL)
 						return NULL;
@@ -107,12 +111,29 @@ class MemFormatTarget: public XMLFormatTarget
 						return NULL;
 					m_aktIndex=0;
 					*size=m_pQueue->getSize();
+					if (OF_NULL_TERMINATED == a_outputFormat)
+					{
+						*size += 1;
+					}
+					else if (OF_NEWLINE == a_outputFormat)
+					{
+						*size += 2;
+					}
 					UINT8* tmp=new UINT8[*size];
 					if(m_pQueue->peek(tmp,size)!=E_SUCCESS)
 						{
 							delete[] tmp;
 							tmp = NULL;
 						}
+					if (OF_NULL_TERMINATED == a_outputFormat)
+					{
+						tmp[*size] = NULL;
+					}
+					if (OF_NEWLINE == a_outputFormat)
+					{
+						tmp[*size+1] = NULL;
+						tmp[*size] = '\n';
+					}
 					return tmp;
 				}
 
@@ -152,10 +173,29 @@ class DOM_Output
 				*/
 			static UINT8* dumpToMem(const DOMNode* node,UINT32* size)
 				{
-					DOM_Output out;
-					if(	out.dumpNode(node,false)!=E_SUCCESS)
-						return NULL;
-					return out.m_pFormatTarget->dumpMem(size);
+					return dumpToMem(node, size, OF_DEFAULT);
+				}
+
+
+
+			/** Dumps the Node an returns a pointer to a null terminated string.
+				* @param node Node to dump
+				* @param a_bAddNewLine true if a new line should be added to the end of the string;
+				* false otherwise
+				* @return a pointer to a newls allocated buff, which must be delete[] by the caller
+				* @return NULL if an error occurs
+				*/
+			static UINT8* dumpToString(const DOMNode* node, bool a_bAddNewLine)
+				{
+					UINT32 dummy;
+					if (a_bAddNewLine)
+					{
+						return dumpToMem(node, &dummy, OF_NEWLINE);
+					}
+					else
+					{
+						return dumpToMem(node, &dummy, OF_NULL_TERMINATED);
+					}
 				}
 
 			
@@ -187,7 +227,7 @@ class DOM_Output
 					DOM_Output out;
 					if(	out.dumpNode(node,true)!=E_SUCCESS)
 						return NULL;
-					return out.m_pFormatTarget->dumpMem(size);
+					return out.m_pFormatTarget->dumpMem(size, OF_DEFAULT);
 				}
 
 		private:
@@ -209,6 +249,23 @@ class DOM_Output
 					delete m_pFormatter;
 					m_pFormatter = NULL;
 				}
+
+
+			/** Dumps the Node an returns a pointer to the memory.
+				* @param node Node to dump
+				* @param size on return contains the number of XML-Chars copied
+				* @param a_outputFormat the output format of the string, e.g. with null termination
+				* @return a pointer to a newls allocated buff, which must be delete[] by the caller
+				* @return NULL if an error occurs
+				*/
+			static UINT8* dumpToMem(const DOMNode* node,UINT32* size, OUTPUT_FORMAT a_outputFormat)
+				{
+					DOM_Output out;
+					if(	out.dumpNode(node,false)!=E_SUCCESS)
+						return NULL;
+					return out.m_pFormatTarget->dumpMem(size, a_outputFormat);
+				}
+
 
 			SINT32 dumpNode(const DOMNode* toWrite,bool bCanonical);
 			XMLFormatter*				m_pFormatter;
