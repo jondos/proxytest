@@ -2957,8 +2957,7 @@ SettleEntry *CAAccountingInstance::__handleSettleResult(CAXMLCostConfirmation *p
 			}
 			else
 			{
-				CAMsg::printMsg(LOG_ERR, "Settlement transaction: Account empty, but no message object received! "
-						"This may lead to too much prepaid bytes!\n");
+				CAMsg::printMsg(LOG_INFO, "Settlement transaction: Account empty, no message object received. User will be kicked out.\n");
 			}
 
 			dbInterface->storeAccountStatus(pCC->getAccountNumber(), CAXMLErrorMessage::ERR_ACCOUNT_EMPTY);
