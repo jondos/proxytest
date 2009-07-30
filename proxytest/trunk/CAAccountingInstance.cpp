@@ -2700,11 +2700,13 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 SINT32 CAAccountingInstance::newSettlementTransaction()
 {
 	UINT32 settledCCs = 0;
+	SINT32 retVal;
 	do
 	{
-		__newSettlementTransaction(&settledCCs);
+		retVal = __newSettlementTransaction(&settledCCs);
 	}
-	while(settledCCs >= 10);
+	while(settledCCs >= 10 && retVal == E_SUCCESS);
+	return retVal;
 }
 
 SINT32 CAAccountingInstance::__newSettlementTransaction(UINT32 *nrOfSettledCCs)
@@ -2765,7 +2767,8 @@ SINT32 CAAccountingInstance::__newSettlementTransaction(UINT32 *nrOfSettledCCs)
 			ms_pInstance->m_pSettlementMutex->unlock();
 
 			CAMsg::printMsg(LOG_WARNING, "Settlement transaction: could not connect to BI. Try later...\n");
-			ret = E_SUCCESS;
+			//ret = E_SUCCESS;
+			ret = E_NOT_CONNECTED;
 			goto cleanup;
 		}
 		else
