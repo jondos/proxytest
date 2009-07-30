@@ -2706,7 +2706,7 @@ SINT32 CAAccountingInstance::newSettlementTransaction()
 		retVal = __newSettlementTransaction(&settledCCs);
 	}
 	while(settledCCs >= 10 && retVal == E_SUCCESS);
-	return retVal;
+	return E_SUCCESS; // change to retVal if you want to block new users on failure; but remember this is not sufficient because prepaid bytes are stored even on failure!
 }
 
 SINT32 CAAccountingInstance::__newSettlementTransaction(UINT32 *nrOfSettledCCs)
