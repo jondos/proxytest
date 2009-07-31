@@ -38,6 +38,7 @@ CATLSClientSocket::CATLSClientSocket()
 		SSL_METHOD* meth;
 		meth = TLSv1_client_method();
 		m_pCtx = SSL_CTX_new( meth );
+		SSL_CTX_set_options(m_pCtx, SSL_OP_ALL|SSL_OP_NO_TICKET);
 		m_pSSL = NULL;
 		m_pRootCert=NULL;
 		//m_pSocket=new CASocket();
@@ -141,7 +142,31 @@ SINT32 CATLSClientSocket::doTLSConnect(CASocketAddr &psa, time_t sTimeout)
 			}
 			else
 			{
-				CAMsg::printMsg(LOG_INFO,"CATLSClientSocket::doTLSConnect() failed! Reason: %i\n", err);
+				const char* msgError;
+        switch (err)
+        {
+						case SSL_ERROR_SSL:
+						msgError = "SSL_ERROR_SSL";
+						break;
+
+						case SSL_ERROR_SYSCALL:
+						msgError = "SSL_ERROR_SYSCALL";
+						break;
+
+						case SSL_ERROR_ZERO_RETURN:
+						msgError = "SSL_ERROR_ZERO_RETURN";
+						break;
+
+						case SSL_ERROR_WANT_CONNECT:
+						msgError = "SSL_ERROR_WANT_CONNECT";
+						break;
+
+						default:
+						msgError = "unknown";
+        }
+
+        CAMsg::printMsg(LOG_INFO,"CATLSClientSocket::doTLSConnect() failed! Reason: %i, %s\n", err, msgError);
+
 			}
 			SSL_shutdown(m_pSSL);
 			close();
