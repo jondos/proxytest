@@ -145,10 +145,12 @@ SINT32 CAMultiSignature::signXML(DOMNode* node, bool appendCerts)
 		{
 			setDOMElementAttribute(elemSignatureMethod, "Algorithm", (UINT8*)RSA_SHA1_REFERENCE);
 		}
+#ifdef ECC
 		else if(currentSignature->pSig->isECDSA())
 		{
 			setDOMElementAttribute(elemSignatureMethod, "Algorithm", (UINT8*)ECDSA_SHA1_REFERENCE);
 		}
+#endif //ECC
 		setDOMElementAttribute(elemDigestMethod, "Algorithm", (UINT8*)SHA1_REFERENCE);
 		DOMElement* elemDigestValue = createDOMElement(doc, "DigestValue");
 		setDOMElementValue(elemDigestValue, digestValue);
