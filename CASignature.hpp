@@ -96,8 +96,9 @@ class CASignature
 			SINT32 verify(UINT8* in, UINT32 inLen, UINT8* sig, const UINT32 sigLen);
 			bool isDSA() const;
 			bool isRSA() const;
+#ifdef ECC
 			bool isECDSA() const;
-			bool isSet() const;
+#endif //ECC
 			UINT8* getSignatureMethod();
 
 			friend class CASSLContext;
@@ -106,8 +107,6 @@ class CASignature
 			DSA* getDSA(){return m_pDSA;}
 			RSA* m_pRSA;
 			RSA* getRSA(){ return m_pRSA; }
-			EC_KEY* m_pEC;
-			EC_KEY* getECKey(){ return m_pEC; }
 
 			SINT32 parseSignKeyXML(const UINT8* buff,UINT32 len);
 			SINT32 sign(const UINT8* const in,UINT32 inlen,DSA_SIG** dsaSig) const;
@@ -115,11 +114,15 @@ class CASignature
 			//MultiCert
 			//friend class CAMultiSignature;
 			SINT32 signRSA(const UINT8* dgst, const UINT32 dgstLen, UINT8* sig, UINT32* sigLen) const;
-			SINT32 signECDSA(const UINT8* dgst, const UINT32 dgstLen, UINT8* sig, UINT32* sigLen) const;
 			SINT32 verifyRSA(const UINT8* dgst, const UINT32 dgstLen, UINT8* sig, UINT32 sigLen) const;
 			SINT32 verifyDSA(const UINT8* dgst, const UINT32 dgstLen, UINT8* sig, UINT32 sigLen) const;
+#ifdef ECC
+			EC_KEY* m_pEC;
+			EC_KEY* getECKey(){ return m_pEC; }
+			SINT32 signECDSA(const UINT8* dgst, const UINT32 dgstLen, UINT8* sig, UINT32* sigLen) const;
 			SINT32 verifyECDSA(const UINT8* dgst, const UINT32 dgstLen, UINT8* sig, UINT32 sigLen) const;
 
+#endif //ECC
 
 	};
 #endif
