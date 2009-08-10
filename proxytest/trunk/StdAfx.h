@@ -145,8 +145,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 																							       //before we believe that the connection is broken (in ms)
 #define KEEP_ALIVE_TRAFFIC_SEND_WAIT_TIME 60000 //How long to wait before we sent a dummy a Keep-Alive-Traffic
 
-#define ECC
-
 //#define SSL_HACK //???
 
 #if defined(PAYMENT) && ! defined(SSL_HACK)

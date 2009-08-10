@@ -266,8 +266,12 @@ AC_CHECK_HEADERS(sys/filio.h)
 AC_CHECK_HEADERS(sys/epoll.h)
 AC_CHECK_HEADERS(malloc.h)
 
+
 dnl Check for some "standard" libraries
 AC_CHECK_LIB(epoll,epoll_ctl)
+AC_SEARCH_LIBS([EC_KEY_free], [crypto ssl],
+[AC_DEFINE([ECC],[],[Elliptic curve cryptography support])],
+[AC_MSG_WARN([Elliptic curve cryptography disabled])])
 
 dnl Checks for library functions.
 AC_FUNC_ALLOCA
@@ -284,6 +288,7 @@ AC_CHECK_FUNCS([sbrk])
 AC_CHECK_FUNCS([mallinfo])
 AC_CHECK_FUNCS([atoll])
 AC_CHECK_FUNCS([strtoull])
+
 
 dnl even if epoll exist it may be unfunctional...
 if test "x$USE_EPOLL" != "x0" ; then
