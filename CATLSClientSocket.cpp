@@ -38,7 +38,12 @@ CATLSClientSocket::CATLSClientSocket()
 		SSL_METHOD* meth;
 		meth = TLSv1_client_method();
 		m_pCtx = SSL_CTX_new( meth );
+#ifdef SSL_OP_NO_TICKET
+		// disable buggy TLS client extensions, as otherwise we will get no connection to a Java TLS server; the bug is fixes in OpenSSL > 0.9.8g
 		SSL_CTX_set_options(m_pCtx, SSL_OP_ALL|SSL_OP_NO_TICKET);
+#else
+		SSL_CTX_set_options(m_pCtx, SSL_OP_ALL);
+#endif
 		m_pSSL = NULL;
 		m_pRootCert=NULL;
 		//m_pSocket=new CASocket();
