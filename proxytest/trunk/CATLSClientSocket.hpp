@@ -79,7 +79,7 @@ protected:
 	}*/
 
 private:
-	SINT32 doTLSConnect(CASocketAddr &psa, time_t sTimeout=DEFAULT_HANDSHAKE_TIMEOUT);
+	SINT32 doTLSConnect(CASocketAddr &psa);
 
 	SSL *m_pSSL;
 	SSL_CTX *m_pCtx;
