@@ -96,15 +96,9 @@ SINT32 CATLSClientSocket::setServerCertificate(CACertificate* pCert)
  * Does the TLS handshake. The TCP Connection must be established first
  * and openSSL library must be initialized
  */
-SINT32 CATLSClientSocket::doTLSConnect(CASocketAddr &psa, time_t sTimeout)
+SINT32 CATLSClientSocket::doTLSConnect(CASocketAddr &psa)
 	{
 		SINT32 status;
-		int err = 0;
-		time_t abortTime = time(NULL) + ((sTimeout > 0) ? sTimeout : DEFAULT_HANDSHAKE_TIMEOUT);
-
-		//force non blocking handshake!
-		setNonBlocking(true);
-
 		#ifdef DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"starting tls connect\n");
 		#endif
@@ -113,66 +107,12 @@ SINT32 CATLSClientSocket::doTLSConnect(CASocketAddr &psa, time_t sTimeout)
 
 		m_pSSL=SSL_new(m_pCtx);
 		// do the standard part of the ssl handshake
-		#ifdef DEBUG
-			CAMsg::printMsg(LOG_DEBUG,"my set fd socket is %i\n",m_Socket);
-		#endif
+		
 		SSL_set_fd( m_pSSL, m_Socket );
-
-		do
+		if((status = SSL_connect( m_pSSL )) != 1) 
 		{
-			status = SSL_connect( m_pSSL );
-			if(status != 1)
-			{
-				err = SSL_get_error(m_pSSL, status);
-				if( (err != SSL_ERROR_WANT_READ) &&
-					(err != SSL_ERROR_WANT_WRITE) )
-				{
-					break;
-				}
-				//Look if timeout is exceeded.
-				if( (time(NULL) > abortTime) )
-				{
-					status = E_TIMEDOUT;
-					break;
-				}
-				sSleep(1);
-			}
-		} while(status != 1);
-
-		if(status != 1)
-		{
-			if(status == E_TIMEDOUT)
-			{
-				CAMsg::printMsg(LOG_INFO,"CATLSClientSocket::doTLSConnect() failed due to timeout.\n");
-			}
-			else
-			{
-				const char* msgError;
-        switch (err)
-        {
-						case SSL_ERROR_SSL:
-						msgError = "SSL_ERROR_SSL";
-						break;
-
-						case SSL_ERROR_SYSCALL:
-						msgError = "SSL_ERROR_SYSCALL";
-						break;
-
-						case SSL_ERROR_ZERO_RETURN:
-						msgError = "SSL_ERROR_ZERO_RETURN";
-						break;
-
-						case SSL_ERROR_WANT_CONNECT:
-						msgError = "SSL_ERROR_WANT_CONNECT";
-						break;
-
-						default:
-						msgError = "unknown";
-        }
-
-        CAMsg::printMsg(LOG_INFO,"CATLSClientSocket::doTLSConnect() failed! Reason: %i, %s\n", err, msgError);
-
-			}
+				int err = SSL_get_error(m_pSSL, status);
+				CAMsg::printMsg(LOG_INFO,"CATLSClientSocket::doTLSConnect() failed! Reason: %i\n", err);
 			SSL_shutdown(m_pSSL);
 			close();
 			m_bConnectedTLS = false;
@@ -233,7 +173,7 @@ SINT32 CATLSClientSocket::connect(CASocketAddr & psa, UINT32 msTimeout)
 	{
 		SINT32 rc;
 		// call base class connect function
-		if( (rc=CASocket::connect(psa)) != E_SUCCESS)
+		if( (rc=CASocket::connect(psa, msTimeout)) != E_SUCCESS)
 		{
 			CASocket::close();
 			return rc;
