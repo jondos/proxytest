@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.08.77"
+#define MIX_VERSION "00.08.78"
 
 #include "doxygen.h"
 
@@ -141,9 +141,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define REPLAY_DETECTION // enable to prevent replay of mix packets
 #define REPLAY_TIMESTAMP_PROPAGATION_INTERVALL 1 //How often (in minutes) should the current replay timestamps be propagate
 
-#define KEEP_ALIVE_TRAFFIC_RECV_WAIT_TIME  75000 //How long to wait for a Keep-Alive (or any other packet)
+#define KEEP_ALIVE_TRAFFIC_RECV_WAIT_TIME  90000 //How long to wait for a Keep-Alive (or any other packet)
 																							       //before we believe that the connection is broken (in ms)
-#define KEEP_ALIVE_TRAFFIC_SEND_WAIT_TIME 60000 //How long to wait before we sent a dummy a Keep-Alive-Traffic
+#define KEEP_ALIVE_TRAFFIC_SEND_WAIT_TIME 30000 //How long to wait before we sent a dummy a Keep-Alive-Traffic
 
 //#define SSL_HACK //???
 
