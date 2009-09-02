@@ -36,7 +36,7 @@ CAMultiSignature::~CAMultiSignature()
 		tmp = m_signatures;
 		//go to next signature
 		m_signatures = m_signatures->next;
-		//delete currten signature
+		//delete current signature
 		delete tmp;
 		tmp = NULL;
 	}
@@ -214,7 +214,7 @@ SINT32 CAMultiSignature::signXML(DOMNode* node, bool appendCerts)
 	}
 	if(sigCount > 0)
 	{
-		CAMsg::printMsg(LOG_DEBUG, "Appended %d Signature(s) to XML-Structure\n", sigCount);
+		//CAMsg::printMsg(LOG_DEBUG, "Appended %d Signature(s) to XML-Structure\n", sigCount);
 		return E_SUCCESS;
 	}
 	return E_UNKNOWN;
@@ -342,12 +342,12 @@ SINT32 CAMultiSignature::verifyXML(DOMNode* root, CACertificate* a_cert)
 		{
 			if(sigVerifier->verify(out, outlen, tmpSig, tmpSiglen) == E_SUCCESS)
 			{
-				CAMsg::printMsg(LOG_DEBUG, "Signature Verification successful!\n");
+				CAMsg::printMsg(LOG_DEBUG, "Signature verification successful!\n");
 				verified = true;
 				break;
 			}
 		}
-		CAMsg::printMsg(LOG_WARNING, "Signature Verification not successful!\n");
+		CAMsg::printMsg(LOG_WARNING, "Signature verification not successful!\n");
 		delete[] out;
 		out = NULL;
 		continue;
@@ -411,36 +411,5 @@ SINT32 CAMultiSignature::getXORofSKIs(UINT8* in, UINT32 inlen)
 {
 	UINT8* tmp = (UINT8*) hex_to_string(m_xoredID, SHA_DIGEST_LENGTH);
 	CACertificate::removeColons(tmp, strlen((const char*)tmp), in, &inlen);
-	return E_SUCCESS;
-}
-
-SINT32 CAMultiSignature::getSignatureElements(DOMNode* parent, DOMNode** signatureNodes, UINT32* length)
-{
-	if(parent == NULL)
-	{
-		return E_UNKNOWN;
-	}
-
-	DOMNode* child = parent->getFirstChild();
-	UINT32 count = 0;
-
-	while(child != NULL)
-	{
-		if(XMLString::equals(child->getNodeName(), XMLString::transcode("Signature")))
-		{
-			if(count < *length)
-			{
-				signatureNodes[count] = child;
-				count++;
-			}
-			else
-			{
-				return E_UNKNOWN;
-			}
-		}
-		child = child->getNextSibling();
-	}
-	*length = count;
-
 	return E_SUCCESS;
 }

@@ -531,6 +531,21 @@ SINT32 CAFirstMix::processKeyExchange()
     {
     	if(equals(child->getNodeName(),"Mix"))
         {
+    		//verify certificate from next mix if enabled
+    		if(CALibProxytest::getOptions()->verifyMixCertificates())
+    		{
+    			CACertificate* nextMixCert = CALibProxytest::getOptions()->getTrustedCertificateStore()->verifyMixCert(child);
+    			if(nextMixCert != NULL)
+    			{
+    				CAMsg::printMsg(LOG_DEBUG, "Next mix certificate was verified by a trusted root CA.\n");
+    				CALibProxytest::getOptions()->setNextMixTestCertificate(nextMixCert);
+    			}
+    			else
+    			{
+    				CAMsg::printMsg(LOG_ERR, "Could not verify certificate received from next mix!\n");
+    				return E_UNKNOWN;
+    			}
+    		}
             //check Signature....
             CAMsg::printMsg(LOG_DEBUG,"Try to verify next mix signature...\n");
             //CASignature oSig;
@@ -542,7 +557,7 @@ SINT32 CAFirstMix::processKeyExchange()
             nextCert = NULL;
             if(result != E_SUCCESS)
             {
-                CAMsg::printMsg(LOG_DEBUG,"failed!\n");
+                //CAMsg::printMsg(LOG_DEBUG,"failed!\n");
                 if (doc != NULL)
                 {
                 	doc->release();
@@ -550,7 +565,7 @@ SINT32 CAFirstMix::processKeyExchange()
                 }
                 return E_UNKNOWN;
             }
-            CAMsg::printMsg(LOG_DEBUG,"success!\n");
+            //CAMsg::printMsg(LOG_DEBUG,"success!\n");
             DOMNode* rsaKey=child->getFirstChild();
             CAASymCipher oRSA;
             oRSA.setPublicKeyAsDOMNode(rsaKey);
@@ -583,9 +598,7 @@ SINT32 CAFirstMix::processKeyExchange()
                 setDOMElementValue(elemNonceHash,arNonce);
                 elemRoot->appendChild(elemNonceHash);
             }
-            UINT32 outlen=5000;
-            UINT8* out=new UINT8[outlen];
-						///Getting the KeepAlive Traffice...
+            //Getting the KeepAlive Traffice...
 			DOMElement* elemKeepAlive=NULL;
 			DOMElement* elemKeepAliveSendInterval=NULL;
 			DOMElement* elemKeepAliveRecvInterval=NULL;
@@ -617,8 +630,9 @@ SINT32 CAFirstMix::processKeyExchange()
 			CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Calculated -- SendInterval %u -- Receive Interval %u\n",m_u32KeepAliveSendInterval,m_u32KeepAliveRecvInterval);
 
             //m_pSignature->signXML(elemRoot);
-            m_pMultiSignature->signXML(elemRoot, false);
-			DOM_Output::dumpToMem(docSymKey,out,&outlen);
+            m_pMultiSignature->signXML(elemRoot, true);
+            UINT32 outlen=0;
+            UINT8* out=DOM_Output::dumpToMem(docSymKey,&outlen);
             if (docSymKey != NULL)
             {
 				docSymKey->release();
