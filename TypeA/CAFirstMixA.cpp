@@ -748,6 +748,7 @@ bool CAFirstMixA::sendToUsers()
 	CAQueue *processedQueue = NULL; /* one the above queues that should be used for processing*/
 	UINT32 extractSize = 0;
 	bool bAktiv = false;
+	UINT32 iSocketErrors = 0;
 
 /* Cyclic polling: gets all open sockets that will not block when invoking send()
  * but will only send at most one packet. After that control is returned to loop()
@@ -855,8 +856,12 @@ bool CAFirstMixA::sendToUsers()
 				}
 				else if(ret<0&&ret!=E_AGAIN)
 				{
-					SOCKET sock=clientSocket->getSocket();
-					CAMsg::printMsg(LOG_DEBUG,"CAFirstMixA::sendtoUser() - send error on socket: %d\n",sock);
+					iSocketErrors++;
+					if (iSocketErrors == 1) // show debug message only at the first error; otherwise, the log may get huge
+					{
+						SOCKET sock=clientSocket->getSocket();
+						CAMsg::printMsg(LOG_DEBUG,"CAFirstMixA::sendtoUser() - send error on socket: %d\n",sock);
+					}
 					//closeConnection(pfmHashEntry);
 				}
 				//TODO error handling
@@ -870,6 +875,11 @@ bool CAFirstMixA::sendToUsers()
 		pfmHashEntry=m_pChannelList->getNext();
 	}
 #endif
+	if (iSocketErrors > 1)
+	{
+		CAMsg::printMsg(LOG_ERR, "CAFirstMixA::sendtoUser() - %d send errors on a socket occured!\n", iSocketErrors);
+	}
+	
 	return bAktiv;
 }
 
