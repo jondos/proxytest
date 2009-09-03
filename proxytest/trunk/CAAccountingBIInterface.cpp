@@ -252,7 +252,7 @@ CAXMLErrorMessage **CAAccountingBIInterface::settleAll(CAXMLCostConfirmation **c
 	}
 
 	m_pSocket->setNonBlocking(true);
-	transmitStatus = m_phttpClient->parseHTTPHeader(&contentLength, &status, 3000);
+	transmitStatus = m_phttpClient->parseHTTPHeader(&contentLength, &status, 20000);
 	if( (transmitStatus != E_SUCCESS) || (status != 200) || (contentLength == 0))
 	{
 		if(transmitStatus == E_TIMEDOUT)
@@ -374,7 +374,7 @@ CAXMLErrorMessage * CAAccountingBIInterface::settle(CAXMLCostConfirmation &cc)
 	status=0;
 
 	m_pSocket->setNonBlocking(true);
-	ret = m_phttpClient->parseHTTPHeader(&contentLen, &status, 3000);
+	ret = m_phttpClient->parseHTTPHeader(&contentLen, &status, 20000);
 	if( ret !=E_SUCCESS || (status!=200) || (contentLen==0))
 	{
 		if(ret == E_TIMEDOUT)
