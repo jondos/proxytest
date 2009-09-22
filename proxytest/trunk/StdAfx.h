@@ -145,6 +145,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 																							       //before we believe that the connection is broken (in ms)
 #define KEEP_ALIVE_TRAFFIC_SEND_WAIT_TIME 60000 //How long to wait before we sent a dummy a Keep-Alive-Traffic
 
+//#define ECC
 //#define SSL_HACK //???
 
 #if defined(PAYMENT) && ! defined(SSL_HACK)
@@ -243,6 +244,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	//For Borland C++    #if defined(__BCPLUSPLUS__)
 	#define _CRT_SECURE_NO_DEPRECATE
 	#define _CRT_SECURE_NO_WARNINGS
+	#define WIN32_LEAN_AND_MEAN
 	#if _MSC_VER > 1000
 		#pragma once
 	#endif // _MSC_VER > 1000
