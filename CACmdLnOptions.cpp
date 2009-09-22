@@ -2341,7 +2341,7 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 
 	//decode OpCerts
 	UINT32 opCertsLen = m_opCertList->getLength();
-	CACertificate* opCerts[opCertsLen];
+	CACertificate** opCerts=new CACertificate*[opCertsLen];
 	for(UINT32 j=0; j<opCertsLen; j++)
 	{
 		DOMNode* a_opCert = m_opCertList->item(j);
@@ -2349,6 +2349,7 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 		if(opCerts[j] == NULL)
 		{
 			CAMsg::printMsg(LOG_CRIT, "Error while decoding operator certificates!");
+			delete[] opCerts; 
 			return E_UNKNOWN;
 		}
 	}
@@ -2373,6 +2374,7 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Unable to load sign key %d!\n", i+1);
 				delete signature;
+				delete[] opCerts; 
 				signature = NULL;
 				return E_UNKNOWN;
 			}
@@ -2381,16 +2383,17 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 		CACertificate* tmpCert = CACertificate::decode(a_cert, CERT_PKCS12, (char*)passwd);
 		//get SKI
 		UINT32 tmpSKIlen = 255;
-		UINT8 tmpSKI[tmpSKIlen];
+		UINT8 tmpSKI[255];
 		if(tmpCert->getSubjectKeyIdentifier(tmpSKI, &tmpSKIlen) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_CRIT, "Error while getting SKI of own certificate %d!\n", i+1);
+			delete[] opCerts; 
 			return E_UNKNOWN;
 		}
 		//CAMsg::printMsg(LOG_DEBUG, "SKI of own cert %d is: %s\n", i+1, tmpSKI);
 		//get AKI
 		UINT32 tmpAKIlen = 255;
-		UINT8 tmpAKI[tmpAKIlen];
+		UINT8 tmpAKI[255];
 		if(tmpCert->getAuthorityKeyIdentifier(tmpAKI, &tmpAKIlen) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_WARNING, "Error while getting AKI of own certificate!\n");
@@ -2418,9 +2421,10 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 		certs->add(tmpCert);
 		//get Raw SKI
 		UINT32 tmpRawSKIlen = 255;
-		UINT8 tmpRawSKI[tmpRawSKIlen];
+		UINT8 tmpRawSKI[255];
 		if(tmpCert->getRawSubjectKeyIdentifier(tmpRawSKI, &tmpRawSKIlen) != E_SUCCESS)
 		{
+			delete[] opCerts; 
 			return E_UNKNOWN;
 		}
 		CAMsg::printMsg(LOG_DEBUG, "Adding Sign-Key %d with %d certificate(s).\n", i+1, certs->getNumber());
@@ -2431,6 +2435,7 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 		CAMsg::printMsg(LOG_CRIT, "Could not set a signature key for MultiCert!\n");
 		delete m_pMultiSignature;
 		m_pMultiSignature = NULL;
+		delete[] opCerts; 
 		return E_UNKNOWN;
 	}
 	//end new
@@ -2443,6 +2448,7 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 	//check Mix-ID
 	if(m_pMultiSignature->getXORofSKIs(tmpBuff, tmpLen) != E_SUCCESS)
 	{
+		delete[] opCerts; 
 		return E_UNKNOWN;
 	}
 	strtrim(tmpBuff);
@@ -2452,6 +2458,7 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 		if(strncmp(m_strMixID, (char*)tmpBuff, strlen((char*)tmpBuff) ) != 0)
 		{
 			CAMsg::printMsg(LOG_CRIT,"Error, two different MixIDs specified (%s and %s)!\n", m_strMixID, tmpBuff);
+			delete[] opCerts; 
 			return E_UNKNOWN;
 		}
 	}
@@ -2460,6 +2467,7 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 		m_strMixID=new char[strlen((char*)tmpBuff)+1];
 		m_strMixID[strlen((char*)tmpBuff)]= (char) 0;
 		strcpy(m_strMixID,(char*) tmpBuff);
+		delete[] opCerts; 
 		return addMixIdToMixInfo();
 	}
 #ifdef DYNAMIC_MIX
@@ -2471,7 +2479,7 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 		strncpy(m_strCascadeName, m_strMixID, strlen(m_strMixID)+1);
 	}
 #endif
-
+	delete[] opCerts; 
 	return E_SUCCESS;
 }
 
