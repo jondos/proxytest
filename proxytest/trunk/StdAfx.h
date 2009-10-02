@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.08.82"
+#define MIX_VERSION "00.08.83"
 
 #include "doxygen.h"
 
@@ -156,7 +156,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define NO_PARKING // disable old control flow
 #endif
 
-//#define REPLAY_DATABASE_PERFORMANCE_TEST //to performe a performance test of the replay db
+//#define REPLAY_DATABASE_PERFORMANCE_TEST //to perform a performance test of the replay db
 //Some constants
 #define MAX_POLLFD 8192 //How many sockets to support at max
 
@@ -185,6 +185,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define PAYMENT_ACCOUNT_CERT_TIMEOUT 180 //Timeout for receiving the Payment certificate in seconds
 #define CLEANUP_THREAD_SLEEP_INTERVAL 60 //sleep interval for payment blocked ip list
 #define BALANCE_REQUEST_TIMEOUT 60 //Timeout for Balance requests
+
+#define MAX_SIGNATURE_ELEMENTS 10  // maximum of interpreted XML signature elements
 
 #define FLOW_CONTROL_SENDME_HARD_LIMIT 95 //last mix stops sending after this unack packets
 #define FLOW_CONTROL_SENDME_SOFT_LIMIT 80 //last mix sends request for 'SENDME' after this unack packets
