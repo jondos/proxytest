@@ -116,8 +116,8 @@ class CASingleSocketGroup
 			SINT32 select(UINT32 time_ms)
 				{
 					SINT32 ret=::poll(m_pollfd,1,time_ms);
-					if(ret==1)
-						return ret;
+					if(ret>=1)
+						return 1;
 					else if(ret==0)
 						{
 							return E_TIMEDOUT;
@@ -138,8 +138,8 @@ class CASingleSocketGroup
 							pollfd.events=POLLIN;
 						pollfd.fd=s.getSocket();
 						SINT32 ret=::poll(&pollfd,1,time_ms);
-						if(ret==1)
-							return ret;
+						if(ret>=1)
+							return 1;
 						else if(ret==0)
 							return E_TIMEDOUT;
 						return E_UNKNOWN;							
@@ -194,8 +194,8 @@ class CASingleSocketGroup
 			SINT32 select(UINT32 time_ms)
 				{
 					SINT32 ret=::epoll_wait(m_hEPFD,&m_Events,1,time_ms);
-					if(ret==1)
-						return ret;
+					if(ret>=1)
+						return 1;
 					else if(ret==0)
 						{
 							return E_TIMEDOUT;
@@ -216,8 +216,8 @@ class CASingleSocketGroup
 						events.events=POLLIN|POLLERR|POLLHUP;
 					epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,s.getSocket(),&events);
 					SINT32 ret=::epoll_wait(m_hEPFD,&events,1,time_ms);
-					if(ret==1)
-						return ret;
+					if(ret>=1)
+						return 1;
 					else if(ret==0)
 						{
 							return E_TIMEDOUT;
