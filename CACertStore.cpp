@@ -110,7 +110,7 @@ CACertificate* CACertStore::getNext()
 CACertificate* CACertStore::verifyMixCert(DOMNode* mixNode)
 {
 	UINT32 signatureElementsCount = MAX_SIGNATURE_ELEMENTS;
-	DOMNode* signatureElements[signatureElementsCount];
+	DOMNode* signatureElements[MAX_SIGNATURE_ELEMENTS];
 	DOMNode* x509Data;
 	CACertStore* certPath;
 	CACertificate* trustedCert;
