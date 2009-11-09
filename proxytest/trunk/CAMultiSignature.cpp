@@ -207,7 +207,7 @@ SINT32 CAMultiSignature::signXML(DOMNode* node, bool appendCerts)
 			continue;
 		}
 		UINT sigSize = 255;
-		UINT8 sig[sigSize];
+		UINT8 sig[255];
 		if(CABase64::encode(sigBuff, sigLen, sig, &sigSize) != E_SUCCESS)
 		{
 			currentSignature = currentSignature->next;
@@ -275,7 +275,7 @@ SINT32 CAMultiSignature::verifyXML(DOMNode* root, CACertificate* a_cert)
 	UINT8* signatureMethod = sigVerifier->getSignatureMethod();
 
 	UINT32 signatureElementsCount = MAX_SIGNATURE_ELEMENTS;
-	DOMNode* signatureElements[signatureElementsCount];
+	DOMNode* signatureElements[MAX_SIGNATURE_ELEMENTS];
 
 	getSignatureElements((DOMElement*)root, signatureElements, &signatureElementsCount);
 	CAMsg::printMsg(LOG_DEBUG, "Found %d Signature(s) in XML-Structure\n", signatureElementsCount);
@@ -354,7 +354,7 @@ SINT32 CAMultiSignature::verifyXML(DOMNode* root, CACertificate* a_cert)
 			continue;
 		}
 		UINT32 tmpSiglen = 255;
-		UINT8 tmpSig[tmpSiglen];
+		UINT8 tmpSig[255];
 		if(getDOMElementValue(elemSigValue,tmpSig,&tmpSiglen)!=E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_DEBUG, "Error: could not get signature value from XML\n");
@@ -385,7 +385,7 @@ SINT32 CAMultiSignature::verifyXML(DOMNode* root, CACertificate* a_cert)
 	{
 		//the signature could be verified, now check digestValue
 		//first remove Signature-nodes from root and store them
-		DOMNode* removedSignatures[signatureElementsCount];
+		DOMNode* removedSignatures[MAX_SIGNATURE_ELEMENTS];
 
 		for(UINT32 i=0; i<signatureElementsCount; i++)
 		{
