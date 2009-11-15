@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8" ?> 
-<MixCascadeStatus id=".." 
-                  currentRisk=".."
-                  mixedPackets=".."
-                  nrOfActiveUsers=".."
-                  trafficSituation=".."
-                  LastUpdate="..">
-  <Signature>..</Signature>                  
-</MixCascadeStatus>

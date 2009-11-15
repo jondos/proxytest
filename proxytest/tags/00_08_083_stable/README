@@ -1,9 +1,0 @@
- For Crime Prevention use:
- 
- <CrimeDetection>
-  	<RegExp>...</RegExp>
-  	<RegExp>...</RegExp>
-  	.
-  	.
-  	.
- </CrimeDetection>	

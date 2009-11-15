@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--Projektgruppe-->
-<projectgroup>
-  <project path="proxytest.cbx"/>
-  <project path="AllTests.cbx"/>
-  <project path="proxytest_lib.cbx"/>
-</projectgroup>
