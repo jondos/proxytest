@@ -1,0 +1,9 @@
+libgcm.a: gcm.cpp gcm.h prp.h prp.cpp
+	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) prp.cpp -o prp.o
+	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) gcm.cpp -o gcm.o
+	ar -rcs libgcm.a *.o 
+
+clean:
+	rm -f *.o
+	rm -f libgcm.a
+

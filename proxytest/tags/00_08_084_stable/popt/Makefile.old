@@ -1,0 +1,9 @@
+libpopt.a: popt.cpp poptparse.cpp popthelp.cpp
+	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) -DHAVE_STRERROR popt.cpp -o popt.o
+	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) -DHAVE_STRERROR poptparse.cpp -o poptparse.o
+	$(CC) -c  $(CPPFLAGS) $(INCLUDE) $(DEBUG) -DHAVE_STRERROR popthelp.cpp -o popthelp.o
+	ar -rcs libpopt.a popt.o poptparse.o popthelp.o 
+
+clean:
+	rm -f *.o
+	rm -f libpopt.a
