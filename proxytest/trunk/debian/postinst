@@ -1,0 +1,8 @@
+#!/bin/sh -e
+
+chown mix:adm /var/log/mix
+chmod 0750 /var/log/mix
+
+#DEBHELPER#
+
+exit 0

@@ -1,89 +1,62 @@
-#! /bin/sh
+#!/bin/sh
 #
-# skeleton	example file to build /etc/init.d/ scripts.
-#		This file should be used to construct scripts for /etc/init.d.
-#
-#		Written by Miquel van Smoorenburg <miquels@cistron.nl>.
-#		Modified for Debian 
-#		by Ian Murdock <imurdock@gnu.ai.mit.edu>.
-#
-# Version:	@(#)skeleton  1.9  26-Feb-2001  miquels@cistron.nl
-#
+# Start/Stop the jondonym mix server
 
-PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-DAEMON=/usr/sbin/mix
-NAME=mix
-DESC=mix
-MIXCONFDIR=/etc/mix
+### BEGIN INIT INFO
+# Provides: mix
+# Required-Start: $network
+# Required-Stop: $network
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# Short-Description: jondonym mix server
 
-test -x $DAEMON || exit 0
+### END INIT INFO
 
-# Include mix defaults if available
-if [ -f /etc/default/mix ] ; then
-	. /etc/default/mix
-fi
 
 set -e
 
-case "$1" in
+DESC="JonDonym mix server"
+NAME="mix"
+DAEMON="/usr/sbin/mix"
+PIDFILE="/var/run/mix.pid"
+MIXCONF="/etc/mix/config.xml"
+MAX_FILEDESCRIPTORS=32768
+
+
+case $1 in
   start)
-	echo -n "Starting $DESC with: "
-	FOUND=""
-	for CONF in $MIXCONFDIR/*
-	do
-	    if [ -r $CONF ]; then
-		FOUND="true"
-		DAEMON_OPTS="-c $CONF"
-		CONFFILE="`basename $CONF`"
-		DAEMON_OPTS="$DAEMON_OPTS --pidfile /var/run/$NAME-$CONFFILE.pid"
-		start-stop-daemon --start --quiet --exec $DAEMON -- $DAEMON_OPTS
-		echo -n "$CONF;"
-	    fi
-	done
-	echo ""
-	if [ -z $FOUND ]; then
-	    echo "Warning: No Mix started, because no readable configuration file found in $MIXCONFDIR !" 
-	fi    
+	if [ -f $CONF ] ; then
+	  echo -n "Raising maximum number of filedescriptors to $MAX_FILEDESCRIPTORS"
+	  if ulimit -n "$MAX_FILEDESCRIPTORS" ; then
+		echo "."
+	  else
+		echo ": FAILED."
+	  fi
+	  echo -n "Starting $DESC..." 
+	  start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON -- -c $MIXCONF --pidfile=$PIDFILE
+	  echo "done."
+	else
+	  echo "Mix config not found! Do not start mix server."
 	;;
+
   stop)
-	echo -n "Stopping $DESC with: "
-	for CONF in /var/run/$NAME-*	
-	do
-	    if [ -r $CONF ]; then
-		start-stop-daemon --stop --quiet --oknodo --pidfile $CONF \
-		--exec $DAEMON
-		echo -n "$CONF;"
-	    fi	
-	done
-	echo ""
+	echo "Stopping $DESC: $NAME"
+	start-stop-daemon --stop --pidfile $PIDFILE --exec $DAEMON
 	;;
-  #reload)
-	#
-	#	If the daemon can reload its config files on the fly
-	#	for example by sending it SIGHUP, do it here.
-	#
-	#	If the daemon responds to changes in its config file
-	#	directly anyway, make this a do-nothing entry.
-	#
-	# echo "Reloading $DESC configuration files."
-	# start-stop-daemon --stop --signal 1 --quiet --pidfile \
-	#	/var/run/$NAME.pid --exec $DAEMON
-  #;;
-  restart)
-	#
-	#	If the "reload" option is implemented, move the "force-reload"
-	#	option to the "reload" entry above. If not, "force-reload" is
-	#	just the same as "restart".
-	#
-	echo "Restarting $DESC: "
-	/etc/init.d/$NAME stop
+
+  status)
+	ret=0
+	status_of_proc -p $PIDFILE $DAEMON 2>/dev/null || ret=$?
+	;;
+
+  reload|force-reload|restart)
+	$0 stop
 	sleep 1
-	/etc/init.d/$NAME start
+	$0 start
 	;;
+
   *)
-	N=/etc/init.d/$NAME
-	# echo "Usage: $N {start|stop|restart|reload|force-reload}" >&2
-	echo "Usage: $N {start|stop|restart}" >&2
+	echo "Usage: $0 (start|stop|reload|force-reload|restart|status)" >&2
 	exit 1
 	;;
 esac
