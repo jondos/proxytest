@@ -121,10 +121,9 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;$(INCLUDE_CPPUNIT)&quot;;&quot;$(INCLUDE_XERCES_C)&quot;;&quot;$(INCLUDE_XERCES_C)\xercesc&quot;;&quot;$(INCLUDE_OPENSSL)&quot;;&quot;$(INCLUDE_PTHREADS)&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;__UNIT_TEST__"
-				RuntimeLibrary="2"
-				UsePrecompiledHeader="0"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				RuntimeLibrary="0"
+				UsePrecompiledHeader="2"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
@@ -140,10 +139,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="cppunitd_dll.lib proxytest-lib.lib ws2_32.lib ssleay32.lib libeay32.lib pthreadVC2.lib xerces-c_2D.lib xerces-depdom_2D.lib"
 				OutputFile="$(OutDir)/AllTest.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;.\proxytest-lib\Release&quot;;&quot;$(LIB_CPPUNIT)&quot;;&quot;$(LIB_XERCES_C_DEBUG)&quot;;&quot;$(LIB_OPENSSL)&quot;;&quot;$(LIB_PTHREADS)&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"

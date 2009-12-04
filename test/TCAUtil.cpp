@@ -25,10 +25,8 @@ class TCAUtilTest : public CPPUNIT_NS::TestCase
 {
   CPPUNIT_TEST_SUITE(TCAUtilTest);
   CPPUNIT_TEST(test_parseU64);
-#ifdef LOG_CRIME
   CPPUNIT_TEST(test_parseDomainFromPayload);
-#endif
-	CPPUNIT_TEST(test_regexp_payload);
+  CPPUNIT_TEST(test_regexp_payload);
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -113,7 +111,6 @@ int main( int ac, char **av )
   return result.wasSuccessful() ? 0 : 1;
 }
 
-#ifdef LOG_CRIME
 void CparseDomainFromPayloadHelper::doTest()
 	{
 		UINT8* domain=parseDomainFromPayload(m_payload,strlen((char*)m_payload));
@@ -124,4 +121,3 @@ void CparseDomainFromPayloadHelper::doTest()
 				CPPUNIT_ASSERT(ret==0);
 			}
 	}
-#endif

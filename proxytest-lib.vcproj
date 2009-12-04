@@ -3302,10 +3302,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\CAMultiSignature.cpp"
-				>
-			</File>
-			<File
 				RelativePath="CAMutex.cpp"
 				>
 				<FileConfiguration
@@ -7508,10 +7504,6 @@
 			</File>
 			<File
 				RelativePath="CAMsg.hpp"
-				>
-			</File>
-			<File
-				RelativePath=".\CAMultiSignature.hpp"
 				>
 			</File>
 			<File

@@ -130,9 +130,9 @@ SINT32 CALastMix::init()
 		CAMsg::printMsg(LOG_INFO,"connected!\n");
 
 #ifdef LOG_CRIME
-		m_nCrimeRegExpsURL=NULL;
+		m_nCrimeRegExpsURL=0;
 		m_pCrimeRegExpsURL=CALibProxytest::getOptions()->getCrimeRegExpsURL(&m_nCrimeRegExpsURL);
-		m_nCrimeRegExpsPayload = NULL;
+		m_nCrimeRegExpsPayload = 0;
 		m_pCrimeRegExpsPayload = CALibProxytest::getOptions()->getCrimeRegExpsPayload(&m_nCrimeRegExpsPayload);
 #endif
 		ret=processKeyExchange();
