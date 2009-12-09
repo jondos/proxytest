@@ -129,7 +129,7 @@ class CAInfoService
 			SINT32 sendOperatorTnCData();
 
 			UINT8 *getMixHeloXMLAsString(UINT32& len);
-			UINT8 *xmlDocToStringWithSignature(DOMNode *a_node, UINT32& a_len, CACertStore* pIncludeCerts);
+			UINT8 *xmlDocToStringWithSignature(DOMNode *a_node, UINT32& a_len, bool bIncludeCerts);
 
 			SINT32 sendMixHelo(const UINT8* strMixHeloXML,UINT32 len,SINT32 requestCommand,const UINT8* param,
 								const CASocketAddrINet* a_socketAddress);
@@ -140,7 +140,6 @@ class CAInfoService
 			volatile bool m_bRun;
 			//CASignature*		m_pSignature;
 			CAMultiSignature* 	m_pMultiSignature;
-			CACertStore*		m_pcertstoreOwnCerts;
 			CAMix*				m_pMix;
 			CAThread*			m_pthreadRunLoop;
 			CAConditionVariable *	m_pLoopCV;

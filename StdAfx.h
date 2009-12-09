@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.08.84"
+#define MIX_VERSION "00.08.85"
 
 #include "doxygen.h"
 
@@ -45,7 +45,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #endif
 
 //#define LOG_TRAFFIC_PER_USER //Log detail for traffic per user
-//#define LOG_CHANNEL //Log detail for traffic per cahnnel
+//#define LOG_CHANNEL //Log detail for traffic per channel
 //#define LOG_PACKET_TIMES //computes statistics about the processing time each packet needs
 //#define LOG_DIALOG
 //#define COMPRESSED_LOGS
