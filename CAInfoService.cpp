@@ -228,6 +228,7 @@ struct CAInfoService::InfoServiceHeloMsg
 	CAInfoService* is;
 	SINT32 requestCommand;
 	const UINT8* param;
+	SINT32 retVal;
 };
 
 THREAD_RETURN CAInfoService::TCascadeHelo(void *p)
@@ -236,11 +237,7 @@ THREAD_RETURN CAInfoService::TCascadeHelo(void *p)
 	BEGIN_STACK("CAInfoService::TCascadeHelo");
 
 	InfoServiceHeloMsg* message = (InfoServiceHeloMsg*)p;
-	if (message->is->sendCascadeHelo(message->strXML, message->len, message->addr) == E_SUCCESS)
-	{
-		FINISH_STACK("CAInfoService::TCascadeHelo");
-		THREAD_RETURN_SUCCESS;
-	}
+	message->retVal = message->is->sendCascadeHelo(message->strXML, message->len, message->addr);
 	FINISH_STACK("CAInfoService::TCascadeHelo");
 	THREAD_RETURN_SUCCESS;
 }
@@ -251,11 +248,8 @@ THREAD_RETURN CAInfoService::TCascadeStatus(void *p)
 	BEGIN_STACK("CAInfoService::TCascadeStatus");
 
 	InfoServiceHeloMsg* message = (InfoServiceHeloMsg*)p;
-	if (message->is->sendStatus(message->strXML, message->len, message->addr) == E_SUCCESS)
-	{
-		FINISH_STACK("CAInfoService::TCascadeStatus");
-		THREAD_RETURN_SUCCESS;
-	}
+	message->retVal = message->is->sendStatus(message->strXML, message->len, message->addr);
+
 	FINISH_STACK("CAInfoService::TCascadeStatus");
 	THREAD_RETURN_SUCCESS;
 }
@@ -266,11 +260,8 @@ THREAD_RETURN CAInfoService::TMixHelo(void *p)
 	BEGIN_STACK("CAInfoService::TMixHelo");
 
 	InfoServiceHeloMsg* message = (InfoServiceHeloMsg*)p;
-	if (message->is->sendMixHelo(message->strXML, message->len, message->requestCommand, message->param, message->addr) == E_SUCCESS)
-	{
-		FINISH_STACK("CAInfoService::TMixHelo");
-		THREAD_RETURN_SUCCESS;
-	}
+	message->retVal = message->is->sendMixHelo(message->strXML, message->len, message->requestCommand, message->param, message->addr);
+
 	FINISH_STACK("CAInfoService::TMixHelo");
 	THREAD_RETURN_SUCCESS;
 }
@@ -1058,7 +1049,10 @@ SINT32 CAInfoService::sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN (*a_
 		if (threads[i]->join() == E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_DEBUG,"InfoService: helo thread %u joined.\n", i);
-			returnValue = E_SUCCESS;
+			if (messages[i]->retVal == E_SUCCESS)
+			{
+				returnValue = E_SUCCESS;
+			}
 		}
 		delete messages[i]->addr;
 		messages[i]->addr = NULL;
