@@ -476,7 +476,15 @@ SINT32 CAInfoService::sendStatus(bool bIncludeCerts)
 		return E_UNKNOWN;
 	}
 
-	ret = sendHelo(strStatusXML, len, TCascadeStatus, (UINT8*)"Status Thread", REQUEST_COMMAND_STATUS);
+	if( !(m_pMix->isConnected()))
+	{
+		CAMsg::printMsg(LOG_INFO, "Mix not connected. Skip sending already created status message\n");
+	}
+	else
+	{
+		ret = sendHelo(strStatusXML, len, TCascadeStatus, (UINT8*)"Status Thread", REQUEST_COMMAND_STATUS);
+	}
+
 	delete[] strStatusXML;
 	strStatusXML = NULL;
 	return ret;
