@@ -12,16 +12,16 @@ static void displayArgs(poptContext con,
 		struct poptOption * key, 
 		/*@unused@*/ const char * arg, /*@unused@*/ void * data) {
     if (key->shortName== '?')
-	poptPrintHelp(con, stdout, 0);
+        poptPrintHelp(con, stdout, 0);
     else
-	poptPrintUsage(con, stdout, 0);
+        poptPrintUsage(con, stdout, 0);
     exit(0);
 }
 
 struct poptOption poptHelpOptions[] = {
     { NULL, '\0', POPT_ARG_CALLBACK, (void *)&displayArgs, '\0', NULL, NULL },
     { "help", '?', 0, NULL, '?', N_("Show this help message"), NULL },
-    { "usage", '\0', 0, NULL, 'u', N_("Display brief usage message"), NULL },
+    { "usage", 'u', 0, NULL, 'u', N_("Display brief usage message"), NULL },
     { NULL, '\0', 0, NULL, 0, NULL, NULL }
 } ;
 
@@ -54,57 +54,57 @@ getArgDescrip(const struct poptOption * opt, const char *translation_domain)
 }
 
 static void singleOptionHelp(FILE * f, int maxLeftCol, 
-			     const struct poptOption * opt,
-			     const char *translation_domain) {
+                             const struct poptOption * opt,
+                             const char *translation_domain) {
     int indentLength = maxLeftCol + 5;
     int lineLength = 79 - indentLength;
     const char * help = D_(translation_domain, opt->descrip);
     int helpLength;
     const char * ch;
-    char format[10];
+    char format[130];
     char * left;
     const char * argDescrip = getArgDescrip(opt, translation_domain);
-
+    
     left = (char*)malloc(maxLeftCol + 1);
     *left = '\0';
-
+    
     if (opt->longName && opt->shortName)
-	sprintf(left, "-%c, --%s", opt->shortName, opt->longName);
+        sprintf(left, "-%c, --%s", opt->shortName, opt->longName);
     else if (opt->shortName) 
-	sprintf(left, "-%c", opt->shortName);
+        sprintf(left, "-%c", opt->shortName);
     else if (opt->longName)
-	sprintf(left, "--%s", opt->longName);
+        sprintf(left, "--%s", opt->longName);
     if (!*left) return ;
     if (argDescrip) {
-	strcat(left, "=");
-	strcat(left, argDescrip);
+        strcat(left, "=");
+        strcat(left, argDescrip);
     }
-
+    
     if (help)
-	fprintf(f,"  %-*s   ", maxLeftCol, left);
+        fprintf(f,"  %-*s   ", maxLeftCol, left);
     else {
-	fprintf(f,"  %s\n", left); 
-	goto out;
+        fprintf(f,"  %s\n", left); 
+        goto out;
     }
-
+    
     helpLength = strlen(help);
     while (helpLength > lineLength) {
-	ch = help + lineLength - 1;
-	while (ch > help && !isspace(*ch)) ch--;
-	if (ch == help) break;		/* give up */
-	while (ch > (help + 1) && isspace(*ch)) ch--;
-	ch++;
-
-	sprintf(format, "%%.%ds\n%%%ds", (int) (ch - help), indentLength);
-	fprintf(f, format, help, " ");
-	help = ch;
-	while (isspace(*help) && *help) help++;
-	helpLength = strlen(help);
+        ch = help + lineLength - 1;
+        while (ch > help && !isspace(*ch)) ch--;
+        if (ch == help) break;		/* give up */
+            while (ch > (help + 1) && isspace(*ch)) ch--;
+            ch++;
+        
+        sprintf(format, "%%.%ds\n%%%ds", (int) (ch - help), indentLength);
+        fprintf(f, format, help, " ");
+        help = ch;
+        while (isspace(*help) && *help) help++;
+        helpLength = strlen(help);
     }
-
+    
     if (helpLength) fprintf(f, "%s\n", help);
-
-out:
+    
+    out:
     free(left);
 }
 
@@ -138,33 +138,34 @@ static int maxArgWidth(const struct poptOption * opt,
 }
 
 static void singleTableHelp(FILE * f, const struct poptOption * table, 
-			    int left,
-			    const char *translation_domain) {
+                            int left,
+                            const char *translation_domain) {
     const struct poptOption * opt;
     const char *sub_transdom;
-
+    
     opt = table;
     while (opt->longName || opt->shortName || opt->arg) {
-	if ((opt->longName || opt->shortName) && 
-	    !(opt->argInfo & POPT_ARGFLAG_DOC_HIDDEN))
-	    singleOptionHelp(f, left, opt, translation_domain);
-	opt++;
+        if ((opt->longName || opt->shortName) && 
+            !(opt->argInfo & POPT_ARGFLAG_DOC_HIDDEN))
+            singleOptionHelp(f, left, opt, translation_domain);
+        opt++;
     }
-
+    
     opt = table;
     while (opt->longName || opt->shortName || opt->arg) {
-	if ((opt->argInfo & POPT_ARG_MASK) == POPT_ARG_INCLUDE_TABLE) {
-	    sub_transdom = getTableTranslationDomain((struct poptOption*)opt->arg);
-	    if(!sub_transdom)
-		sub_transdom = translation_domain;
-	    
-	    if (opt->descrip)
-		fprintf(f, "\n%s\n", D_(sub_transdom, opt->descrip));
+    if ((opt->argInfo & POPT_ARG_MASK) == POPT_ARG_INCLUDE_TABLE) {
+        sub_transdom = getTableTranslationDomain((struct poptOption*)opt->arg);
+        if(!sub_transdom)
+        sub_transdom = translation_domain;
+        
+        if (opt->descrip)
+        fprintf(f, "\n%s\n", D_(sub_transdom, opt->descrip));
 
-	    singleTableHelp(f, (struct poptOption*)opt->arg, left, sub_transdom);
-	}
-	opt++;
+        singleTableHelp(f, (struct poptOption*)opt->arg, left, sub_transdom);
     }
+    opt++;
+    }
+    
 }
 
 static int showHelpIntro(poptContext con, FILE * f) {
@@ -184,13 +185,13 @@ static int showHelpIntro(poptContext con, FILE * f) {
 
 void poptPrintHelp(poptContext con, FILE * f, /*@unused@*/ int flags) {
     int leftColWidth;
-
+    
     showHelpIntro(con, f);
     if (con->otherHelp)
-	fprintf(f, " %s\n", con->otherHelp);
+        fprintf(f, " %s\n", con->otherHelp);
     else
-	fprintf(f, " %s\n", POPT_("[OPTION...]"));
-
+        fprintf(f, " %s\n", POPT_("[OPTION...]"));
+    
     leftColWidth = maxArgWidth(con->options, NULL);
     singleTableHelp(f, con->options, leftColWidth, NULL);
 }
