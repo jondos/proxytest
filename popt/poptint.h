@@ -74,13 +74,13 @@ struct poptContext_s {
 #define _(foo) (foo)
 #endif
 
-#if defined(HAVE_DGETTEXT) && !defined(__LCLINT__)
-#define D_(dom, str) dgettext(dom, str)
-#define POPT_(foo) D_("popt", foo)
-#else
+// #if defined(HAVE_DGETTEXT) && !defined(__LCLINT__)
+// #define D_(dom, str) dgettext(dom, str)
+// #define POPT_(foo) D_("popt", foo)
+// #else
 #define POPT_(foo) (foo)
 #define D_(dom, str) (str)
-#endif
+// #endif
 
 #define N_(foo) (foo)
 
