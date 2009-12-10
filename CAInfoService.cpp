@@ -1019,9 +1019,9 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
 	}
 ERR:
 
-	CAMsg::printMsg(LOG_ERR,"InfoService: Closing socket to  %s:%d due to error...\n", hostname, a_pSocketAddress->getPort());
+	CAMsg::printMsg(LOG_ERR,"InfoService: Closing socket to %s:%d due to error...\n", hostname, a_pSocketAddress->getPort());
 	oSocket.close();
-	CAMsg::printMsg(LOG_ERR,"InfoService: Socket closed to  %s:%d due to error.\n", hostname, a_pSocketAddress->getPort());
+	CAMsg::printMsg(LOG_ERR,"InfoService: Socket closed to %s:%d due to error.\n", hostname, a_pSocketAddress->getPort());
 	return E_UNKNOWN;
 }
 
