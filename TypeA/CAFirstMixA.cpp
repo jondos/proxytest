@@ -860,7 +860,7 @@ bool CAFirstMixA::sendToUsers()
 					if (iSocketErrors == 1) // show debug message only at the first error; otherwise, the log may get huge
 					{
 						SOCKET sock=clientSocket->getSocket();
-						CAMsg::printMsg(LOG_DEBUG,"CAFirstMixA::sendtoUser() - send error on socket: %d\n",sock);
+						CAMsg::printMsg(LOG_DEBUG,"CAFirstMixA::sendtoUser() - send error %d on socket: %d\n", ret, sock);
 					}
 					//closeConnection(pfmHashEntry);
 				}
