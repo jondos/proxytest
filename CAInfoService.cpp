@@ -965,6 +965,7 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
         }
         oSocket.close();
 
+        /* REMOVED by Rolf Wendolsky on 2009-12-11 becuase this looks  dangerous: each InfoService may reconfigure the Mix! Without verificaton!
         if(recvBuff != NULL)
         {
             XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(recvBuff,len);
@@ -1009,7 +1010,7 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
             {
                 CAMsg::printMsg(LOG_CRIT,"InfoService: Error parsing answer from InfoService!\n");
             }
-        }
+        }*/
 		return E_SUCCESS;
 	}
 	else
@@ -1017,7 +1018,10 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
     	CAMsg::printMsg(LOG_DEBUG,"InfoService: sendMixHelo() connecting to InfoService %s:%d failed!\n", hostname, a_pSocketAddress->getPort());
 	}
 ERR:
+
+	CAMsg::printMsg(LOG_ERR,"InfoService: Closing socket to  %s:%d due to error...\n", hostname, a_pSocketAddress->getPort());
 	oSocket.close();
+	CAMsg::printMsg(LOG_ERR,"InfoService: Socket closed to  %s:%d due to error.\n", hostname, a_pSocketAddress->getPort());
 	return E_UNKNOWN;
 }
 
