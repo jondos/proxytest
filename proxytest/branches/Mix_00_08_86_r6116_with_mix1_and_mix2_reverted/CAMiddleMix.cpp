@@ -127,21 +127,6 @@ SINT32 CAMiddleMix::processKeyExchange()
 			{
 				if(equals(child->getNodeName(),"Mix"))
 					{
-						//verify certificate from next mix if enabled
-						if(CALibProxytest::getOptions()->verifyMixCertificates())
-						{
-							CACertificate* nextMixCert = CALibProxytest::getOptions()->getTrustedCertificateStore()->verifyMixCert(child);
-							if(nextMixCert != NULL)
-							{
-								CAMsg::printMsg(LOG_DEBUG, "Next mix certificate was verified by a trusted root CA.\n");
-								CALibProxytest::getOptions()->setNextMixTestCertificate(nextMixCert);
-							}
-							else
-							{
-								CAMsg::printMsg(LOG_ERR, "Could not verify certificate received from next mix!\n");
-								return E_UNKNOWN;
-							}
-						}
 						//check Signature....
 						//CASignature oSig;
 						CACertificate* nextCert=CALibProxytest::getOptions()->getNextMixTestCertificate();
@@ -221,7 +206,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 						CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Calculated -- SendInterval %u -- Receive Interval %u\n",m_u32KeepAliveSendInterval2,m_u32KeepAliveRecvInterval2);
 
 						//m_pSignature->signXML(elemRoot);
-						m_pMultiSignature->signXML(elemRoot, true);
+						m_pMultiSignature->signXML(elemRoot, false);
 						m_pMuxOut->setSendKey(key,32);
 						m_pMuxOut->setReceiveKey(key+32,32);
 						UINT32 outlen=0;
@@ -351,6 +336,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 		recvBuff = new UINT8[len+1]; //for \0 at the end
 		if(m_pMuxIn->getCASocket()->receive(recvBuff, len) != len)
 		{
+
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangePrevFailed);
 			CAMsg::printMsg(LOG_ERR,"Error receiving symmetric key from Mix n-1!\n");
 			delete []recvBuff;
@@ -371,21 +357,6 @@ SINT32 CAMiddleMix::processKeyExchange()
 			return E_UNKNOWN;
 		}
 		DOMElement* elemRoot=doc->getDocumentElement();
-		//verify certificate from previous mix if enabled
-		if(CALibProxytest::getOptions()->verifyMixCertificates())
-		{
-			CACertificate* prevMixCert = CALibProxytest::getOptions()->getTrustedCertificateStore()->verifyMixCert(elemRoot);
-			if(prevMixCert != NULL)
-			{
-				CAMsg::printMsg(LOG_DEBUG, "Previous mix certificate was verified by a trusted root CA.\n");
-				CALibProxytest::getOptions()->setPrevMixTestCertificate(prevMixCert);
-			}
-			else
-			{
-				CAMsg::printMsg(LOG_ERR, "Could not verify certificate received from previous mix!\n");
-				return E_UNKNOWN;
-			}
-		}
 		//verify signature
 		//CASignature oSig;
 		CACertificate* pCert=CALibProxytest::getOptions()->getPrevMixTestCertificate();
