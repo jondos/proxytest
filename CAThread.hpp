@@ -223,7 +223,7 @@ class CAThread
 #else	
 	 		pthread_t* m_pThread;
 #endif
-			UINT8* m_strName; //< a name mostly for debugging purpose...
+			UINT8* m_strName; //< a name mostly for debuging purpose...
 			UINT32 m_Id; // some unique identifier
 			static UINT32 ms_LastId;
 #if defined _DEBUG && ! defined(ONLY_LOCAL_PROXY)

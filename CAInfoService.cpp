@@ -228,7 +228,6 @@ struct CAInfoService::InfoServiceHeloMsg
 	CAInfoService* is;
 	SINT32 requestCommand;
 	const UINT8* param;
-	SINT32 retVal;
 };
 
 THREAD_RETURN CAInfoService::TCascadeHelo(void *p)
@@ -237,7 +236,11 @@ THREAD_RETURN CAInfoService::TCascadeHelo(void *p)
 	BEGIN_STACK("CAInfoService::TCascadeHelo");
 
 	InfoServiceHeloMsg* message = (InfoServiceHeloMsg*)p;
-	message->retVal = message->is->sendCascadeHelo(message->strXML, message->len, message->addr);
+	if (message->is->sendCascadeHelo(message->strXML, message->len, message->addr) == E_SUCCESS)
+	{
+		FINISH_STACK("CAInfoService::TCascadeHelo");
+		THREAD_RETURN_SUCCESS;
+	}
 	FINISH_STACK("CAInfoService::TCascadeHelo");
 	THREAD_RETURN_SUCCESS;
 }
@@ -248,8 +251,11 @@ THREAD_RETURN CAInfoService::TCascadeStatus(void *p)
 	BEGIN_STACK("CAInfoService::TCascadeStatus");
 
 	InfoServiceHeloMsg* message = (InfoServiceHeloMsg*)p;
-	message->retVal = message->is->sendStatus(message->strXML, message->len, message->addr);
-
+	if (message->is->sendStatus(message->strXML, message->len, message->addr) == E_SUCCESS)
+	{
+		FINISH_STACK("CAInfoService::TCascadeStatus");
+		THREAD_RETURN_SUCCESS;
+	}
 	FINISH_STACK("CAInfoService::TCascadeStatus");
 	THREAD_RETURN_SUCCESS;
 }
@@ -260,8 +266,11 @@ THREAD_RETURN CAInfoService::TMixHelo(void *p)
 	BEGIN_STACK("CAInfoService::TMixHelo");
 
 	InfoServiceHeloMsg* message = (InfoServiceHeloMsg*)p;
-	message->retVal = message->is->sendMixHelo(message->strXML, message->len, message->requestCommand, message->param, message->addr);
-
+	if (message->is->sendMixHelo(message->strXML, message->len, message->requestCommand, message->param, message->addr) == E_SUCCESS)
+	{
+		FINISH_STACK("CAInfoService::TMixHelo");
+		THREAD_RETURN_SUCCESS;
+	}
 	FINISH_STACK("CAInfoService::TMixHelo");
 	THREAD_RETURN_SUCCESS;
 }
@@ -353,6 +362,7 @@ CAInfoService::CAInfoService()
 		m_bRun=false;
 		//m_pSignature=NULL;
 		m_pMultiSignature=NULL;
+		m_pcertstoreOwnCerts=NULL;
 		m_minuts=0;
 		m_lastMixedPackets=0;
 		m_expectedMixRelPos = 0;
@@ -369,6 +379,7 @@ CAInfoService::CAInfoService(CAMix* pMix)
 		m_bRun=false;
 		//m_pSignature=NULL;
 		m_pMultiSignature=NULL;
+		m_pcertstoreOwnCerts=NULL;
 		m_minuts=0;
 		m_lastMixedPackets=0;
     m_expectedMixRelPos = 0;
@@ -385,10 +396,32 @@ CAInfoService::~CAInfoService()
 		stop();
 		delete m_pLoopCV;
 		m_pLoopCV = NULL;
+		delete m_pcertstoreOwnCerts;
+		m_pcertstoreOwnCerts = NULL;
 		delete m_pthreadRunLoop;
 		m_pthreadRunLoop = NULL;
 	}
+/** Sets the signature used to sign the messages send to Infoservice.
+	* If pOwnCert!=NULL this Certifcate is included in the Signature
+	*/
+/*SINT32 CAInfoService::setSignature(CASignature* pSig, CACertificate* pOwnCert,
+								CACertificate* a_opCert)
+	{
+		m_pSignature=pSig;
 
+		delete m_pcertstoreOwnCerts;
+		m_pcertstoreOwnCerts=new CACertStore();
+
+		if (a_opCert != NULL ) //&& a_opCertsLength > 0)
+		{
+			m_pcertstoreOwnCerts->add(a_opCert);
+		}
+		if(pOwnCert!=NULL)
+		{
+			m_pcertstoreOwnCerts->add(pOwnCert);
+		}
+		return E_SUCCESS;
+	}*/
 
 SINT32 CAInfoService::setMultiSignature(CAMultiSignature* pMultiSig)
 {
@@ -450,7 +483,7 @@ SINT32 CAInfoService::sendStatus(bool bIncludeCerts)
 	}
 
 
-	if( !(m_pMix->isConnected())) // && !bIncludeCerts )
+	if( !(m_pMix->isConnected()) && !bIncludeCerts )
 	{
 #ifdef DEBUG
 		CAMsg::printMsg(LOG_INFO, "Mix not connected. Skipping status\n");
@@ -467,15 +500,7 @@ SINT32 CAInfoService::sendStatus(bool bIncludeCerts)
 		return E_UNKNOWN;
 	}
 
-	if( !(m_pMix->isConnected()))
-	{
-		CAMsg::printMsg(LOG_INFO, "Mix not connected. Skip sending already created status message\n");
-	}
-	else
-	{
-		ret = sendHelo(strStatusXML, len, TCascadeStatus, (UINT8*)"Status Thread", REQUEST_COMMAND_STATUS);
-	}
-
+	ret = sendHelo(strStatusXML, len, TCascadeStatus, (UINT8*)"Status Thread", REQUEST_COMMAND_STATUS);
 	delete[] strStatusXML;
 	strStatusXML = NULL;
 	return ret;
@@ -534,7 +559,12 @@ UINT8* CAInfoService::getStatusXMLAsString(bool bIncludeCerts,UINT32& len)
 			tmpStrCurrentMillis[0]=0;
 		sprintf((char*)tmpBuff,XML_MIX_CASCADE_STATUS,tmpStrCurrentMillis,tmpRisk,strMixId,buffMixedPackets,tmpUser,tmpTraffic);
 
-
+		/*CACertStore* ptmpCertStore=m_pcertstoreOwnCerts;
+		if(!bIncludeCerts)
+		{
+			ptmpCertStore=NULL;
+		}
+		if(m_pSignature->signXML(tmpBuff,strlen((char*)tmpBuff),buff,&buffLen,ptmpCertStore)!=E_SUCCESS)*/
 		if(m_pMultiSignature->signXML(tmpBuff, strlen((char*)tmpBuff), buff, &buffLen, bIncludeCerts) != E_SUCCESS)
 		{
 			delete[] buff;
@@ -799,7 +829,7 @@ UINT8 **CAInfoService::getOperatorTnCsAsStrings(UINT32 **lengths, XMLSize_t *nrO
 			continue;
 		}
 		setCurrentTimeMilliesAsDOMAttribute(iterator);
-		elementList[i] = xmlDocToStringWithSignature(iterator, (*lengths)[i], true);
+		elementList[i] = xmlDocToStringWithSignature(iterator, (*lengths)[i], m_pcertstoreOwnCerts);
 	}
 
 	delete[] serial;
@@ -828,10 +858,10 @@ UINT8* CAInfoService::getMixHeloXMLAsString(UINT32& a_len)
 			setDOMElementAttribute(mixInfoRoot, ATTRIBUTE_SERIAL, m_serial);
 		}
 	}
-	return xmlDocToStringWithSignature(docMixInfo, a_len, true);
+	return xmlDocToStringWithSignature(docMixInfo, a_len, m_pcertstoreOwnCerts);
 }
 
-UINT8* CAInfoService::xmlDocToStringWithSignature(DOMNode *a_node, UINT32& a_len, bool bIncludeCerts)
+UINT8* CAInfoService::xmlDocToStringWithSignature(DOMNode *a_node, UINT32& a_len, CACertStore* pIncludeCerts)
 {
 	a_len = 0;
 
@@ -842,7 +872,7 @@ UINT8* CAInfoService::xmlDocToStringWithSignature(DOMNode *a_node, UINT32& a_len
 	{
 		return NULL;
 	}
-	if(m_pMultiSignature->signXML(a_node, bIncludeCerts) != E_SUCCESS)
+	if(m_pMultiSignature->signXML(a_node, pIncludeCerts) != E_SUCCESS)
 	{
 		return NULL;
 	}
@@ -965,7 +995,6 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
         }
         oSocket.close();
 
-        /* REMOVED by Rolf Wendolsky on 2009-12-11 becuase this looks  dangerous: each InfoService may reconfigure the Mix! Without verificaton!
         if(recvBuff != NULL)
         {
             XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(recvBuff,len);
@@ -1010,7 +1039,7 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
             {
                 CAMsg::printMsg(LOG_CRIT,"InfoService: Error parsing answer from InfoService!\n");
             }
-        }*/
+        }
 		return E_SUCCESS;
 	}
 	else
@@ -1018,10 +1047,7 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
     	CAMsg::printMsg(LOG_DEBUG,"InfoService: sendMixHelo() connecting to InfoService %s:%d failed!\n", hostname, a_pSocketAddress->getPort());
 	}
 ERR:
-
-	CAMsg::printMsg(LOG_ERR,"InfoService: Closing socket to %s:%d due to error...\n", hostname, a_pSocketAddress->getPort());
 	oSocket.close();
-	CAMsg::printMsg(LOG_ERR,"InfoService: Socket closed to %s:%d due to error.\n", hostname, a_pSocketAddress->getPort());
 	return E_UNKNOWN;
 }
 
@@ -1053,10 +1079,7 @@ SINT32 CAInfoService::sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN (*a_
 		if (threads[i]->join() == E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_DEBUG,"InfoService: helo thread %u joined.\n", i);
-			if (messages[i]->retVal == E_SUCCESS)
-			{
-				returnValue = E_SUCCESS;
-			}
+			returnValue = E_SUCCESS;
 		}
 		delete messages[i]->addr;
 		messages[i]->addr = NULL;
@@ -1141,7 +1164,7 @@ UINT8* CAInfoService::getCascadeHeloXMLAsString(UINT32& a_len)
 			setDOMElementAttribute(elemRoot, ATTRIBUTE_SERIAL, tmpStrCurrentMillis);
 		}
 
-		if(m_pMultiSignature->signXML(docMixInfo, true)!=E_SUCCESS)
+		if(m_pMultiSignature->signXML(docMixInfo, true /*m_pcertstoreOwnCerts*/ )!=E_SUCCESS)
 		{
 			goto ERR;
 		}

@@ -122,7 +122,6 @@ void releaseDOMParser();
 SINT32 getDOMChildByName(const DOMNode* pNode,const XMLCh* const name,DOMNode* & child,bool deep=false);
 SINT32 getDOMChildByName(const DOMNode* pNode,const char * const name,DOMNode* & child,bool deep=false);
 SINT32 getDOMChildByName(const DOMNode* pNode,const char * const name,DOMElement* & child,bool deep=false);
-SINT32 getSignatureElements(DOMNode* parent, DOMNode** signatureNodes, UINT32* length);
 
 /**
  * Returns the content of the text node(s) under elem

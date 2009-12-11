@@ -269,6 +269,9 @@ AC_CHECK_HEADERS(malloc.h)
 
 dnl Check for some "standard" libraries
 AC_CHECK_LIB(epoll,epoll_ctl)
+AC_SEARCH_LIBS([EC_KEY_free], [crypto ssl],
+[AC_DEFINE([ECC],[],[Elliptic curve cryptography support])],
+[AC_MSG_WARN([Elliptic curve cryptography disabled])])
 
 dnl Checks for library functions.
 AC_FUNC_ALLOCA
@@ -433,11 +436,6 @@ if (test ! -z "$ac_cv_openssldir" && test "x$ac_cv_openssldir" != "x(system)") ;
 fi
 LIBS="-lcrypto -lssl $saved_LIBS"
 
-#dnl check if ECC crypto is available
-	AC_LINK_IFELSE([AC_LANG_PROGRAM([
-		#include "openssl/ec.h"
-		], [EC_KEY_free(0);])],[AC_DEFINE([ECC],[],[Elliptic curve cryptography supported])],
-		[AC_MSG_WARN([Elliptic curve cryptography disabled])],[AC_MSG_RESULT([skip ECC test because of cross compiling])])
 
 AC_MSG_NOTICE([Xerces-C tests])
 

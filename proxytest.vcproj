@@ -1121,6 +1121,10 @@
 				</FileConfiguration>
 			</File>
 		</Filter>
+		<File
+			RelativePath=".\proxytest.hpp"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
