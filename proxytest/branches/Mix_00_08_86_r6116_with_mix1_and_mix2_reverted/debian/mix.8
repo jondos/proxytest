@@ -1,0 +1,74 @@
+.\"     Title: mix
+.\"    Author: 
+.\" Generator: DocBook XSL Stylesheets v1.73.2 <http://docbook.sf.net/>
+.\"      Date: 08/14/2009
+.\"    Manual: 
+.\"    Source: 
+.\"
+.TH "MIX" "8" "08/14/2009" "" ""
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.SH "NAME"
+mix \- proxy server for the JonDonym anonymous webservice
+.SH "SYNOPSIS"
+.HP 4
+\fBmix\fR [OPTION\ value]
+.HP 11
+\fBmix \-\-help\fR
+.SH "DESCRIPTION"
+mix is the proxy server for JonDonym anonymous webservice\&. JonDonym (the name is derived from John Doe and Anonymous) protects your privacy on the internet and makes truely anonymous using of webservices possible\&.
+.SH "OPTIONS"
+\fB\-?\fR, \fB\-\-help\fR
+.RS 4
+Display a short help message and exit\&.
+.RE
+\fB\-\-usage\fR
+.RS 4
+Display brief usage message and exit\&.
+.RE
+\fB\-c\fR, \fB\-\-config\fR=FILE
+.RS 4
+Use this config file for a real Mix in a cascade\&.
+.RE
+\fB\-s\fR, \fB\-\-socksport\fR=PORT
+.RS 4
+Listening port for socks\&.
+.RE
+\fB\-r\fR, \fB\-\-pidfile\fR=FILE
+.RS 4
+File where the PID will be stored\&.
+.RE
+\fB\-v\fR, \fB\-\-version\fR
+.RS 4
+Display mix version and exit\&.
+.RE
+.SH "OPTIONS FOR A LOCAL PROXY"
+These options are only available for local proxy:
+\fB\-j, \-\-localproxy\fR
+.RS 4
+act as local proxy
+.RE
+\fB\-d\fR, \fB\-\-daemon\fR
+.RS 4
+start as daemon (only for local proxy)
+.RE
+\fB\-n\fR, \fB\-\-next\fR=IP:PORT
+.RS 4
+first mix of cascade (only for local proxy)
+.RE
+\fB\-a\fR, \fB\-\-autoreconnect\fR
+.RS 4
+auto reconnects if connection to first mix was lost (only for local proxy)
+.RE
+\fB\-p\fR, \fB\-\-port\fR [HOST:]PORT|PATH
+.RS 4
+listening on [host:]port|path (only for local proxy)
+.RE
+\fB\-l\fR, \fB\-\-logdir\fR=DIR
+.RS 4
+directory where log files go to (only for local proxy)
+.RE
+.SH "SEE ALSO"
+https://www\&.jondos\&.de

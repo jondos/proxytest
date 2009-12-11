@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Mix id="...">
+  <Name>..</Name>
+  <Location>
+  ...
+  </Location>
+  <Proxies> <!-- Only for the Last Mix -->
+    <Proxy>
+      <VisibleAddresses> <!-- Describes the visible addresses from the 'outside world' -->
+        <VisibleAddress>
+          <Host> <!-- Host or IP -->
+          </Host>
+        </VisibleAddress>
+      </VisibleAddresses>
+    </Proxy>
+  </Proxies>
+  <Operator>
+    <Organisation>..</Organisation>
+    <URL>..</URL>
+  </Operator>
+  <Software>
+    <Version>..</Version>
+  </Software>
+  <LastUpdate>..</LastUpdate>
+  <DataRetention>
+    <!--Data retention related information. this element is given, iff the Mix supports data retention-->
+    <LoggedElements>
+      <!--Describes which elements are logged-->
+      <InputTime>TRUE|FALSE</InputTime> <!--If TRUE, the time of packet arrival is logged-->
+      <OutputTime>TRUE|FALSE</OutputTime> <!--If TRUE, the time of packet sending / connetcion establishment is logged-->
+      <InputChannelID>TRUE|FALSE</InputChannelID>  <!--If TRUE, the cahnnel id of incoming packet is logged-->
+      <OutputChannelID>TRUE|FALSE</OutputChannelID> <!--If TRUE, the cahnnel id of outgoing packet is logged-->
+      <InputSourceIPAddress>TRUE|FALSE</InputSourceIPAddress><!--If TRUE, the source IP address of incoming connection is logged-->
+      <InputSourceIPPort>TRUE|FALSE</InputSourceIPPort> <!--If TRUE, the source IP port of incoming connection is logged-->
+      <OutputSourceIPAddress>TRUE|FALSE</OutputSourceIPAddress> <!--If TRUE, the source IP address of outgoing connection is logged-->
+      <OutputSourceIPPort>TRUE|FALSE</OutputSourceIPPort>    <!--If TRUE, the source IP port of outgoing connection is logged-->
+    </LoggedElements>
+    <RetentionPeriod>
+      <!-- The periof od time the log are retained;
+      given as xs:duration (see: http://www.w3.org/TR/xmlschema-2/#duration)
+      -->
+    </RetentionPeriod>
+    <Description lang="LANGID"><!--Contains information about dat retention -->
+      <URL></URL><!--URL of a Web-Site with information about data retention-->
+    </Description>
+  </DataRetention>
+  <Signature>..</Signature>
+</Mix>
