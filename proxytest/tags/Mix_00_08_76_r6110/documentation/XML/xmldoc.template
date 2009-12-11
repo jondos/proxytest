@@ -1,0 +1,36 @@
+/**  \page XMLStructs XML structs
+	
+This is the index of all XML structs used in the project.
+
+\par \anchor XMLInterMixInitSendFromLast	
+1. XML Message send from LastMix to Mix \e n-1 during cascade init
+	\verbinclude InterMix-LastMix-to-Successor.xml
+
+\par \anchor XMLInterMixInitAnswer
+2. Answer send from Mix \e n-1 to Mix \e n during cascade init
+	\verbinclude InterMix-KeyExchange-Answer.xml
+
+\par \anchor XMLFirstMixToInfoService
+3. Mix-Cascade info (and info about the FirstMix) send from the
+FirstMix to the InfoService.
+\verbinclude FirstMixToInfoService.xml 
+
+\par \anchor XMLMixCascadeStatus
+4. Mix-Cascade status send from the
+FirstMix to the InfoService.
+\verbinclude MixCascadeStatus.xml 
+
+\par \anchor XMLMixHELO
+5. Mix-HELO send from the
+Middle- or LastMix to the InfoService to announce itself.
+\verbinclude MixHELO.xml 
+
+\par \anchor XMLMixKeyInfo
+6. Mix-KeyInfo send from the
+FirstMix to the JAP.
+\verbinclude FirstMixToJAP.xml 
+
+\par \anchor XMLSignature
+7. Signature Element
+\verbinclude XMLSignature.xml
+*/

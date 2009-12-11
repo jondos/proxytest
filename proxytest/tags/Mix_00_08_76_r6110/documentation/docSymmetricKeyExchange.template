@@ -1,0 +1,117 @@
+/**
+\if singledocument
+@latexonly
+\documentclass[a4paper,german]{article}
+\usepackage{babel}
+\usepackage{amsmath}
+\usepackage[pdftitle={Schl"usselaustausch f"ur symmetrische Verschl"usselung im ersten Mix},pdfauthor={Stefan K"opsell},
+pdfsubject={Effiziente und skalierbare Realisierung von unbeobachtbarer und anonymer Kommunikation im Internet}
+ ]{hyperref}
+\usepackage{array} 
+\def\sig{\mathop{\rm Sig}\nolimits}
+\def\hash{\mathop{\rm H}\nolimits}
+\def\enc{\mathop{\rm E}\nolimits}
+\def\dec{\mathop{\rm D}\nolimits}
+\def\xor{\oplus}
+\begin{document}
+\title{Schl"usselaustausch f"ur symmetrische Verschl"usselung im ersten Mix\\V 0.5}
+\author{Stefan K"opsell}
+\maketitle
+@endlatexonly
+\endif
+
+\page pageSymKeyExchange Schlüsselaustausch für symmetrische Verschlüsselung im ersten Mix --- V 0.5
+\section secGoals Ziel und Annahmen
+Das bisherige Mix-Protokoll unterscheidet bzgl. der Verschlüsselung nicht zwischen ersten, mittleren und letzten Mixen. Die Aufbaunachricht
+für einen Kanal ist in jedem Fall asymmetrisch verschlüsselt.
+
+Aus Performance-Sicht ist es natürlich sinnvoll, die Kanalaufbaunachrichten 
+für den ersten Mix symmetrisch zu verschlüsseln. Der dafür notwendige Schlüsselaustausch (oder genauer: Geheimnistransport) soll beim Anmelden des Nutzers an der Mix-Kaskade erfolgen.
+Folgende Anforderungen soll das Schlüsselaustauschprotokoll erfüllen:
+
+-# Zwischen einem Nutzer <var>U</var> und dem ersten Mix soll ein Geheimnis ausgetauscht werden, das nur der Nutzer und der erste
+Mix kennen.
+-# Das Protokoll soll aus möglichst wenigen Nachrichten bestehen.
+-# Der Rechenaufwand für den Mix soll möglichst gering sein.
+-# Synchronität von Uhren oder Zählern etc. zwischen Nutzer und Mix soll keine Voraussetzung sein.
+-# Die erste Nachricht soll vom Mix zum Nutzer gesendet werden. Dem Nutzer können so zusätzliche Informationen übermittelt werden,
+die den weiteren Protokollablauf beeinflussen (Berücksichtigung von Unterschieden verschiedener Protokollversionen etc.)
+-# \anchor z1 Um "Denial Of Service"-Angriffe nicht zu erleichtern, sollte diese erste Nachricht keinen signifikanten Ressourcenverbrauch 
+(Rechenzeit, Speicher etc.) beim ersten Mix verursachen .
+
+Dem Schlüsselaustauschprotokoll liegen dabei folgende Annahmen (auch bzgl. Angreifermodell) zugrunde:
+
+-# Der Nutzer kennt den öffentlichen Signatur-Testschlüssel <var>t</var><sub>Mix</sub> des ersten Mixes.
+-# Der Angreifer kann wie üblich alle Nachrichten abhören und verändern.
+-# Der Angreifer kennt nicht den geheimen Signatur-Schlüssel <var>s</var><sub>Mix</sub> des ersten Mixes.
+-# Der Angreifer kennt alle bisher ausgetauschten Geheimnisse.
+-# \anchor a1 Der Angreifer kennt außer dem aktuell gültigen alle geheimen Entschlüsselungschlüssel des ersten Mixes.
+
+
+\section secProto Protokoll
+Das Protokoll zum Transport eines Geheimnisses SEC vom Nutzer <var>U</var> zum ersten Mix besteht aus sechs Schritten, wobei bei drei Schritten Nachrichten übertragen werden. Der Ablauf ist wie folgt (alternative Darstellung siehe Abschnitt \ref figKeyTransport):
+
+<table border="0">
+<tr><td>1.</td><td><var>U</var></td><td>: erzeugt Geheimnis SEC</td></tr>
+<tr><td>2.</td><td>Mix ---> <var>U</var></td><td>: <var>m</var><sub>1</sub>=<var>c</var><sub>Mix</sub>,Sig<sub>Mix</sub>(<var>c</var><sub>Mix</sub>)</td></tr>
+<tr><td>3.</td><td><var>U</var> ---> Mix</td><td>: <var>m</var><sub>2</sub>=E<sub>c<sub>Mix</sub></sub>(SEC)</td></tr>
+<tr><td>\anchor checkDec 4.</td><td>Mix</td><td>: überprüft ob D<sub><var>d</var><sub>Mix</sub></sub>(<var>m</var>)?=(.,true)</td></tr>
+<tr><td>5.</td><td>Mix ---> <var>U</var></td><td>: <var>m</var><sub>3</sub>=Sig<sub>Mix</sub>(<var>m</var><sub>2</sub>)</td></tr>
+<tr><td>\anchor checkSig 6.</td><td><var>U</var></td><td>: überprüft ob <var>m</var><sub>3</sub>?=Sig<sub>Mix</sub>(<var>m</var><sub>2</sub>)</td></tr>
+</table>
+
+\remark Der Nutzer überprüft nach Erhalt von <var>m</var><sub>3</sub> die Signatur  
+(gemäß der Nachricht <var>m</var><sub>2</sub>, die der Nutzer gesendet hat).
+
+Die erste Nachricht dient zur Übermittlung des aktuell gültigen öffentlichen Verschlüsselungsschlüssels des ersten Mixes. 
+Da diese Nachricht unabhängig vom Nutzer <var>U</var> ist, kann sie voraus berechnet werden (Erfüllung von Anforderung \ref z1 "6"). 
+Allerdings könnte es sich um einen Replay einer älteren Nachricht <var>m'</var><sub>1</sub> durch den Angreifer handeln. Gemäß Annahme \ref a1 "5" kennt der Angreifer
+in diesem Fall den zugehörigen Entschlüsselungsschlüssel.
+
+Mit der zweiten Nachricht wird das Geheimnis an den Mix übermittelt. 
+
+Die dritte Nachricht dient dazu, die Aktualität des ausgetauschten Geheimnisses zu garantieren. 
+Hat der Angreifer im ersten Schritt die Nachricht <var>m</var><sub>1</sub> durch eine ältere Nachricht <var>m'</var><sub>1</sub> ersetzt, 
+so kann er die Nachricht <var>m</var><sub>2</sub> entschlüsseln und erfährt somit das Geheimnis. Allerdings muß er eine neue Nachricht <var>m'</var><sub>2</sub> mit dem 
+aktuellen <var>c</var><sub>Mix</sub> erzeugen, damit der Mix sie akzeptiert (Schritt \ref checkDec). Dies wird dann durch den Nutzer in Schritt \ref checkSig "6" bemerkt, da der signierte Wert nicht dem berechneten entspricht. 
+
+\section appendix Anhang
+\section secAlg Algorithmen und Notation
+
+<table border="0">
+<tr>
+<td>E<sub><var>c</var></sub>(<var>m</var>)</td><td>Verschlüsselung von <var>m</var> mittels OAEP-RSA mit dem öffentlichen Schlüssel <var>c</var></td></tr>
+<tr>
+<td>D<sub><var>d</var></sub>(<var>m</var>)</td><td>Entschlüsselung von <var>m</var> mit dem geheimen Schlüssel <var>d</var>; wobei
+											entweder D<sub><var>d</var></sub>(<var>m</var>)=(<var>m</var>,true) oder D<sub><var>d</var></sub>(<var>m</var>)=(.,false)<td></tr>
+<tr>
+<td>
+Sig<sub>Mix</sub>(<var>m</var>)</td><td>Signatur geleistet vom ersten Mix unter die Nachricht <var>m</var></td></tr>
+</table>
+
+\section figKeyTransport Protokoll für den Transport eines Geheimnisses vom Nutzer zum ersten Mix
+<table border="0">
+<tr>
+<td></td><td align="center">Mix</td><td></td><td align="center">Nutzer</td></tr>
+<tr>
+<td colspan="4"><hr></td>
+</tr>
+<tr>
+<td>1.</td><td></td></td><td></td><td>erzeugt Geheimnis SEC</td></tr>
+<tr>
+<td>2.</td><td></td><td align="center">\f$ m_1=c_\text{Mix},\mathop{\rm Sig}\nolimits_\text{Mix}(c_\text{Mix})\f$<br>\f$\overrightarrow{\hspace{5cm}}\f$</td></tr>
+<tr>
+<td>
+3.</td><td></td><td align="center">\f$ m_2=\mathop{\rm E}\nolimits_{c_\text{Mix}}(\text{SEC})\f$ <br>
+\f$\overleftarrow{\hspace{5cm}}\f$ </td></tr>
+<tr>
+<td>4.</td><td align="center">überprüft ob<br> \f$\mathop{\rm D}\nolimits_{d_\text{Mix}}(m)\overset{?}{=}\left(\cdot,\text{true}\right)\f$</td></tr>
+<tr>
+<td>5.</td><td></td><td align="center">\f$ m_3=\mathop{\rm Sig}\nolimits_\text{Mix}(m_2)\f$ <br>
+\f$\overrightarrow{\hspace{5cm}}\f$ </td></tr>
+<tr>
+<td>6.</td><td></td><td></td><td align="center">überprüft ob <br>\f$ m_3\overset{?}{=}\mathop{\rm Sig}\nolimits_\text{Mix}(m_2)\f$<td></tr>
+</table>
+
+
+*/
