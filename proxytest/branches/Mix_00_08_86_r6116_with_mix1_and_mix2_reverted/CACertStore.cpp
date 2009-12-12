@@ -35,7 +35,6 @@ CACertStore::CACertStore()
 	{
 		m_pCertList=NULL;
 		m_cCerts=0;
-		m_pCurrent=NULL;
 	}
 
 CACertStore::~CACertStore()
@@ -70,128 +69,6 @@ SINT32 CACertStore::add(CACertificate* cert)
 		m_cCerts++;
 		return E_SUCCESS;
 	}
-
-CACertificate* CACertStore::getFirst()
-{
-	m_pCurrent = m_pCertList;
-	return m_pCurrent->pCert;
-}
-
-CACertificate* CACertStore::getNext()
-{
-	if(m_pCurrent != NULL)
-	{
-		m_pCurrent = m_pCurrent->next;
-		if(m_pCurrent != NULL && m_pCurrent != m_pCertList)
-		{
-			return m_pCurrent->pCert;
-		}
-	}
-	return NULL;
-}
-
-/**
- * This function parses the certificates from a <Mix>-node and
- * tries to build a certPath to the trusted root certificates
- * loaded from the config file. The certificates are parsed
- * from any <Signature>-node that is a direct child of <Mix>
- * (MultiSignature compatible).
- * The function will return a certificate in the following cases:
- * - The certificate is signed by a root CA and there is no other
- *   certificate in the <Signature>-element.
- * - The certificate is signed by another ceritificate of the same
- * 	 <Signature>-element which itself was issued by a root CA.
- *
- * @param mixNode - a <Mix>-Node containing one or more signatures
- * @return the first end certificate that has a certPath to a
- * 		   trusted root certificate or NULL if no cert was found
- * 		   (or something went wrong)
- */
-CACertificate* CACertStore::verifyMixCert(DOMNode* mixNode)
-{
-	UINT32 signatureElementsCount = MAX_SIGNATURE_ELEMENTS;
-	DOMNode* signatureElements[MAX_SIGNATURE_ELEMENTS];
-	DOMNode* x509Data;
-	CACertStore* certPath;
-	CACertificate* trustedCert;
-	CACertificate* cert;
-	CACertificate* mixCert;
-
-	//try to decode the certificates from the Signature elements
-	if(mixNode == NULL || m_pCertList == NULL)
-	{
-		CAMsg::printMsg(LOG_DEBUG , "Error initializing verification.\n");
-		return NULL;
-	}
-	getSignatureElements((DOMElement*)mixNode, signatureElements, &signatureElementsCount);
-	if(signatureElementsCount < 1)
-	{
-		CAMsg::printMsg(LOG_DEBUG , "Error no Signature-Node found!\n");
-		return NULL;
-	}
-	//try to find a valid cert in one of the signature Elements
-	for(UINT32 i=0; i<signatureElementsCount; i++)
-	{
-		getDOMChildByName(signatureElements[i], "X509Data", x509Data, true);
-		if(x509Data == NULL)
-		{
-			CAMsg::printMsg(LOG_DEBUG , "Error X509Data-Node is NULL!\n");
-			continue;
-		}
-		certPath = CACertStore::decode(x509Data, XML_X509DATA);
-		if(certPath == NULL)
-		{
-			continue;
-		}
-
-		//now try to find a cert that was signed by a trusted CA
-		trustedCert = getFirst();
-
-		while(trustedCert != NULL)
-		{
-			cert = certPath->getFirst();
-			while(cert != NULL)
-			{
-				if(cert->verify(trustedCert) == E_SUCCESS)
-				{
-					break;
-				}
-				cert = certPath->getNext();
-			}
-			if(cert != NULL)
-			{
-				break;
-			}
-			trustedCert = getNext();
-		}
-		if(trustedCert != NULL && cert != NULL)
-		{
-			//we found a verified cert
-			if(certPath->m_cCerts > 1)
-			{
-				//try to build a longer certPath
-				mixCert = certPath->getFirst();
-				while(mixCert != NULL)
-				{
-					if(mixCert->verify(cert) == E_SUCCESS)
-					{
-						break;
-					}
-					mixCert = certPath->getNext();
-				}
-				if(mixCert != NULL)
-				{
-					return mixCert;
-				}
-			}
-			else //tricky because there might be a longer certPath in another Signature Element
-			{
-				return cert;
-			}
-		}
-	}
-	return NULL;
-}
 
 SINT32 CACertStore::encode(UINT8* buff,UINT32* bufflen,UINT32 type)
 	{
@@ -241,25 +118,4 @@ SINT32 CACertStore::encode(DOMElement* & elemRoot,XERCES_CPP_NAMESPACE::DOMDocum
 			}
 		return E_SUCCESS;
 	}
-
-CACertStore* CACertStore::decode(const DOMNode* node, UINT32 type)
-{
-	switch(type)
-	{
-		case XML_X509DATA:
-			CACertStore* store = new CACertStore();
-			DOMNodeList* certs = getElementsByTagName((DOMElement*)node, "X509Certificate");
-
-			for(UINT32 i=0; i<certs->getLength(); i++)
-			{
-				CACertificate* cert = CACertificate::decode(certs->item(i), CERT_X509CERTIFICATE);
-				if(cert != NULL)
-				{
-					store->add(cert);
-				}
-			}
-			return store;
-	}
-	return NULL;
-}
 #endif //ONLY_LOCAL_PROXY
