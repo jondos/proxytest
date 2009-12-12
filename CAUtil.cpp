@@ -447,38 +447,6 @@ SINT32 getDOMChildByName(const DOMNode* pNode,const char* const name,DOMNode* & 
 		XMLString::release(&tmpName);
 		return ret;
 	}
-
-SINT32 getSignatureElements(DOMNode* parent, DOMNode** signatureNodes, UINT32* length)
-{
-	if(parent == NULL)
-	{
-		return E_UNKNOWN;
-	}
-
-	DOMNode* child = parent->getFirstChild();
-	UINT32 count = 0;
-
-	while(child != NULL)
-	{
-		if(XMLString::equals(child->getNodeName(), XMLString::transcode("Signature")))
-		{
-			if(count < *length)
-			{
-				signatureNodes[count] = child;
-				count++;
-			}
-			else
-			{
-				return E_UNKNOWN;
-			}
-		}
-		child = child->getNextSibling();
-	}
-	*length = count;
-
-	return E_SUCCESS;
-}
-
 /**
  * integrates the source node in the destination Node.
  *  TODO 1. test for XERCES >= 3.0.1
