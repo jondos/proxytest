@@ -928,7 +928,7 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
 			goto ERR;
 		}
 
-		CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending XML data...");
+		CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending XML data...\n");
 		getcurrentTimeMillis(currentMillis);
 		currentTimeout -= (currentMillis - startupTime);
 		if (currentTimeout <= 0 ||
@@ -939,7 +939,7 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
 
 		if(receiveAnswer)
 		{
-			CAMsg::printMsg(LOG_DEBUG,"InfoService: Receiving answer...");
+			CAMsg::printMsg(LOG_DEBUG,"InfoService: Receiving answer...\n");
 			getcurrentTimeMillis(currentMillis);
 			currentTimeout -= (currentMillis - startupTime);
 			if(currentTimeout <= 0 || httpClient.parseHTTPHeader(&len) != E_SUCCESS)
