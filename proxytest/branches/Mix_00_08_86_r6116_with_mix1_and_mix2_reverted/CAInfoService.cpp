@@ -965,6 +965,11 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
         }
         oSocket.close();
 
+	      if(recvBuff != NULL)
+        {
+            delete[] recvBuff;
+            recvBuff=NULL;
+        }
         /* REMOVED by Rolf Wendolsky on 2009-12-11 becuase this looks  dangerous: each InfoService may reconfigure the Mix! Without verificaton!
         if(recvBuff != NULL)
         {
