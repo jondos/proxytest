@@ -669,6 +669,7 @@ SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param)
 		return E_UNKNOWN;
 	}
 
+  CAMsg::printMsg(LOG_DEBUG,"InfoService:sendMixHelo(): Initialising helo thread...\n");
 	ret = sendHelo(strMixHeloXML, len, TMixHelo, (UINT8*)"Mix Helo Thread", requestCommand, param);
 
 
@@ -927,6 +928,7 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
 			goto ERR;
 		}
 
+		CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending XML data...");
 		getcurrentTimeMillis(currentMillis);
 		currentTimeout -= (currentMillis - startupTime);
 		if (currentTimeout <= 0 ||
@@ -937,6 +939,7 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
 
 		if(receiveAnswer)
 		{
+			CAMsg::printMsg(LOG_DEBUG,"InfoService: Receiving answer...");
 			getcurrentTimeMillis(currentMillis);
 			currentTimeout -= (currentMillis - startupTime);
 			if(currentTimeout <= 0 || httpClient.parseHTTPHeader(&len) != E_SUCCESS)
