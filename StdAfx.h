@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.08.86"
+#define MIX_VERSION "00.08.89"
 
 #include "doxygen.h"
 
@@ -267,6 +267,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define timeb _timeb
 	#endif
 	#include <malloc.h>
+	#define SET_NET_ERROR(x)
 	#define GET_NET_ERROR (WSAGetLastError())
 	#define GET_NET_ERROR_STR(x) ("Unknown error")
 	#define RESETERROR errno=0;
@@ -407,6 +408,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
   #define SD_SEND 1
   #define SD_BOTH 2
   #define GET_NET_ERROR (errno)
+	#define SET_NET_ERROR(x) (errno = x)
 	#define GET_NET_ERROR_STR(x) (strerror(x))
 	#define RESETERROR errno=0;
 	#define GETERROR (errno)

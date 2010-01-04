@@ -44,6 +44,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "TermsAndConditions.hpp"
 #include "CALogPacketStats.hpp"
 #include "CAConditionVariable.hpp"
+#include "CATempIPBlockList.hpp"
 #ifdef HAVE_EPOLL
 	#include "CASocketGroupEpoll.hpp"
 #endif
@@ -325,6 +326,7 @@ protected:
 
 protected:
 			CAIPList* m_pIPList;
+			CATempIPBlockList* m_pIPBlockList;
 			CAQueue* m_pQueueSendToMix;
 			CAQueue* m_pQueueReadFromMix;
 #ifdef LOG_PACKET_TIMES
@@ -336,7 +338,7 @@ protected:
 			volatile UINT32 m_nUser;
 			UINT32 m_nSocketsIn; //number of usable ListenerInterface (non 'virtual')
 			volatile bool m_bRestart;
-			CASocket* m_arrSocketsIn;
+			CASocket** m_arrSocketsIn;
 			//how many mixes are in the cascade?
 			UINT32	m_u32MixCount;
 			//stores the mix parameters for each mix
@@ -429,6 +431,7 @@ private:
 	/* handlerFunction for Terms And Conditions invoked during user Login */
 	termsAndConditionMixAnswer_t *handleTermsAndConditionsLogin(XERCES_CPP_NAMESPACE::DOMDocument *request);
 
+	SINT32 createSockets(bool a_bPrintMessages);
 	static const UINT32 MAX_CONCURRENT_NEW_CONNECTIONS;
 
 	volatile UINT32 m_newConnections;

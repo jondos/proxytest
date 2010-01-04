@@ -167,7 +167,8 @@ SINT32 CAMix::start()
 	                {
 	                	m_pInfoService->start();
 	                }
-	            }
+					m_pInfoService->signal();
+	           }
 
 	            CAMsg::printMsg(LOG_INFO, "The mix is now on-line.\n");
 #ifdef DYNAMIC_MIX
@@ -338,11 +339,6 @@ SINT32 CAMix::initMixCascadeInfo(DOMElement* mixes)
     DOMElement* elemListenerInterfaces=createDOMElement(m_docMixCascadeInfo,"ListenerInterfaces");
     elem->appendChild(elemListenerInterfaces);
 
-    DOMElement *perfTest = createDOMElement(m_docMixCascadeInfo, OPTIONS_NODE_PERFORMANCE_TEST);
-    setDOMElementAttribute(perfTest,
-    		OPTIONS_ATTRIBUTE_PERFTEST_ENABLED,
-    		CALibProxytest::getOptions()->isPerformanceTestEnabled());
-    elemRoot->appendChild(perfTest);
 
     for(UINT32 i=1;i<=CALibProxytest::getOptions()->getListenerInterfaceCount();i++)
     {

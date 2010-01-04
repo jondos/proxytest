@@ -78,7 +78,6 @@ CACmdLnOptions::CACmdLnOptions()
 		m_strUser=NULL;
 		m_strCascadeName=NULL;
 		m_strLogDir=NULL;
-		m_perfTestEnabled=true;
 		setZero64(m_maxLogFileSize);
 		m_strEncryptedLogDir=NULL;
 		m_arTargetInterfaces=NULL;
@@ -276,8 +275,6 @@ void CACmdLnOptions::initNetworkOptionSetters()
 		&CACmdLnOptions::setServerMonitoring;
 	networkOptionSetters[++count]=
 		&CACmdLnOptions::setKeepAliveTraffic;
-	networkOptionSetters[++count]=
-		&CACmdLnOptions::setPerformanceTestEnabled;
 }
 
 void CACmdLnOptions::initTermsAndConditionsOptionSetters()
@@ -1601,10 +1598,6 @@ bool CACmdLnOptions::isLocalProxy()
 		return m_bLocalProxy;
 }
 
-bool CACmdLnOptions::isPerformanceTestEnabled()
-{
-	return m_perfTestEnabled;
-}
 
 #ifdef SERVER_MONITORING
 char *CACmdLnOptions::getMonitoringListenerHost()
@@ -2408,14 +2401,15 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 			if(tmpCert->verify(opCerts[j]) == E_SUCCESS)
 			{
 				//found right operator cert -> add it to store
-				//CAMsg::printMsg(LOG_DEBUG, "Found operator cert for sign key %d!\n", i+1);
+				// CAMsg::printMsg(LOG_DEBUG, "Found operator cert for sign key %d!\n", i+1);
 				certs->add(opCerts[j]);
 				break;
 			}
 		}
 		if(certs->getNumber() == 0)
 		{
-			CAMsg::printMsg(LOG_WARNING, "Could not find an operator cert for sign key %d!\n", i+1);
+			CAMsg::printMsg(LOG_CRIT, "Could not find operator cert for sign key %d! Please check your configuration. Exiting...\n", i+1);
+			exit(EXIT_FAILURE);
 		}
 		//add own cert to store
 		certs->add(tmpCert);
@@ -2426,6 +2420,11 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 		{
 			delete[] opCerts; 
 			return E_UNKNOWN;
+		}
+		if (certs->getNumber() < 2)
+		{
+			CAMsg::printMsg(LOG_CRIT, "We have less than two certificates (only %d). There must be something wrong with the cert store. Exiting...\n", certs->getNumber());
+			exit(EXIT_FAILURE);
 		}
 		CAMsg::printMsg(LOG_DEBUG, "Adding Sign-Key %d with %d certificate(s).\n", i+1, certs->getNumber());
 		m_pMultiSignature->addSignature(signature, certs, tmpRawSKI, tmpRawSKIlen);
@@ -3521,23 +3520,6 @@ SINT32 CACmdLnOptions::setKeepAliveTraffic(DOMElement *elemNetwork)
 	return E_SUCCESS;
 }
 
-SINT32 CACmdLnOptions::setPerformanceTestEnabled(DOMElement *elemNetwork)
-{
-	DOMElement *elemTestEnabled = NULL;
-	if(elemNetwork == NULL) return E_UNKNOWN;
-	ASSERT_NETWORK_OPTIONS_PARENT
-		(elemNetwork->getNodeName(), OPTIONS_NODE_PERFORMANCE_TEST);
-
-	getDOMChildByName(elemNetwork, OPTIONS_NODE_PERFORMANCE_TEST, elemTestEnabled, false);
-	if(elemTestEnabled != NULL)
-	{
-		getDOMElementAttribute(elemTestEnabled, OPTIONS_ATTRIBUTE_PERFTEST_ENABLED, m_perfTestEnabled);
-	}
-
-	CAMsg::printMsg(LOG_INFO,"Performance test is%s enabled.\n", (m_perfTestEnabled ? "" : " not") );
-
-	return E_SUCCESS;
-}
 
 /***************************************
  * ressource option setter function(s) *
@@ -3554,7 +3536,7 @@ SINT32 CACmdLnOptions::setRessourceOptions(DOMElement *elemRoot)
 		//<Intervall></Intervall>  #duration of one intervall in ms
 		//<Latency></Latency> #minimum Latency per channel in ms
 		//</Ressources>
-		CAMsg::printMsg(LOG_INFO,"Loading Parameters for Resources limitation....\n");
+		CAMsg::printMsg(LOG_INFO,"Loading Parameters for traffic shaping / resource limitation....\n");
 		UINT32 u32 = 0;
 		DOMElement *elemRessources=NULL;
 		DOMElement *elem = NULL;

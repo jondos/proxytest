@@ -79,6 +79,12 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 		lastStatusUpdate -= CAInfoService::SEND_STATUS_INFO_WAIT;
 		UINT32 statusSentErrorBurst = 0;
 
+
+			pInfoService->m_pLoopCV->lock();
+			pInfoService->m_pLoopCV->wait(CAInfoService::SEND_LOOP_SLEEP * 1000);
+			pInfoService->m_pLoopCV->unlock();
+
+
     while(pInfoService->isRunning())
 		{
 #ifdef DYNAMIC_MIX
@@ -426,6 +432,14 @@ SINT32 CAInfoService::start()
 
 		return m_pthreadRunLoop->start(this);
 	}
+
+
+SINT32 CAInfoService::signal()
+{
+	m_pLoopCV->lock();
+	m_pLoopCV->signal();
+	m_pLoopCV->unlock();
+}
 
 SINT32 CAInfoService::stop()
 	{

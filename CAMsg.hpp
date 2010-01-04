@@ -94,6 +94,7 @@ class CAMsg
 			SINT32 openLog(UINT32 type);
 			SINT32 closeLog();
 			SINT32 rotateLog();
+			char* createLogFileMessage(UINT32 opt);
 			UINT32 m_uLogType;
 			UINT32 m_lastLogFileNumber;
 			bool m_alreadyOpened;

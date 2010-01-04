@@ -86,7 +86,7 @@ SINT32 CALastMix::init()
 				return E_UNKNOWN;
 			}
 
-		CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...\n");
+		CAMsg::printMsg(LOG_INFO,"Waiting for connection from previous Mix...\n");
 		CAListenerInterface*  pListener=NULL;
 		UINT32 interfaces=CALibProxytest::getOptions()->getListenerInterfaceCount();
 		for(UINT32 i=1;i<=interfaces;i++)
@@ -99,8 +99,7 @@ SINT32 CALastMix::init()
 			}
 		if(pListener==NULL)
 			{
-				CAMsg::printMsg(LOG_CRIT," failed!\n");
-				CAMsg::printMsg(LOG_CRIT,"Reason: no useable (non virtual) interface found!\n");
+				CAMsg::printMsg(LOG_CRIT,"Initialization failed! Reason: No useable (non virtual) interface was found! Hint: Virtual interfaces only needed if you are behind a NAT/network address translation, and therefore have to publish other external IP addresses to the InfoServices than your internal/hidden IP addresses.\n");
 				return E_UNKNOWN;
 			}
 		const CASocketAddr* pAddr=NULL;
@@ -113,9 +112,9 @@ SINT32 CALastMix::init()
 		pAddr = NULL;
 		if(ret!=E_SUCCESS)
 		    {
-					CAMsg::printMsg(LOG_CRIT," failed!\n");
-					CAMsg::printMsg(LOG_CRIT,"Reason: call to accept() faild with error code: %i\n",ret);
-					return E_UNKNOWN;
+				CAMsg::printMsg(LOG_CRIT,"Initialization failed! Reason: Call to accept() failed with error '%s' (%i)\n", 
+					GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
+				return ret;
 		    }
 		// connected to previous mix
 		m_pMuxIn->getCASocket()->setRecvBuff(500*MIXPACKET_SIZE);

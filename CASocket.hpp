@@ -108,6 +108,10 @@ class CASocket:public CAClientSocket
 				*@retval E_UNKNOWN in case of some unexpected error
 			*/
 			static SINT32 getMaxOpenSockets();
+			static UINT32 countOpenSockets()
+			{
+				return m_u32NormalSocketsOpen;
+			}
 			virtual bool isClosed()
 			{
 				return m_bSocketIsClosed;
