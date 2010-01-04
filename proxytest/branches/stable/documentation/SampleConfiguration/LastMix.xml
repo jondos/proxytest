@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MixConfiguration version="0.4">
+    <General>
+        <MixID>mixTwo</MixID>
+        <MixType>LastMix</MixType>
+        <MixName>LastMix</MixName>
+        <CascadeName>TestCascade</CascadeName>
+        <Daemon>False</Daemon>
+    </General>
+    <Network>
+        <ListenerInterfaces>
+            <ListenerInterface>
+                <NetworkProtocol>RAW/TCP</NetworkProtocol>
+                <Host>localhost</Host>
+                <IP>127.0.0.1</IP>
+                <Port>3002</Port>
+            </ListenerInterface>
+        </ListenerInterfaces>
+        <Proxies>
+            <Proxy>
+                <ProxyType>HTTP</ProxyType>
+                <NetworkProtocol>RAW/TCP</NetworkProtocol>
+                <Host>localhost</Host>
+                <IP>127.0.0.1</IP>
+                <Port>3128</Port>
+            </Proxy>
+        </Proxies>
+	<InfoServices>
+        <InfoService>
+	<ListenerInterfaces>
+	<ListenerInterface>
+            <Host>localhost</Host>
+            <IP>127.0.0.1</IP>
+            <Port>3000</Port>
+	    </ListenerInterface>
+	    </ListenerInterfaces>
+        </InfoService>
+	</InfoServices>
+    </Network>
+    <Certificates>
+        <OwnCertificate>
+            <X509PKCS12 xml:space="preserve">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</X509PKCS12>
+            <X509Certificate xml:space="preserve">MIICZzCCAiegAwIBAgIBATAJBgcqhkjOOAQDMBsxGTAXBgNVBAMTEDxNaXggaWQ9bWl4VHdvLz4w
+HhcNMDQwNDAxMDQxODIyWhcNMDUwNDAxMDQxODIyWjAbMRkwFwYDVQQDExA8TWl4IGlkPW1peFR3
+by8+MIIBtjCCASsGByqGSM44BAEwggEeAoGBAIEn46rGKeeoshD9+sc090M36u4n/TKWEdDCFGVG
+aPpodanucy8IbxbsYZ1CsVgHyobuGS7SjkN6XyirQ/poFmogQwn4q0QUjwLmJ+QWPBC+yfvT73ZK
+yVzGU4aZeeEw8X1I0UY0NWVeeFLL6n/4YHonaZ+YcEKD9oYKlNbkxTv/AhUAg/fwuEDNIfuwWBCA
+0g+uxy4EPt8CgYByoAbI8zrXAnQKJ1OvX/Tm5MTutZ89VpOdLWCBiK5TDIbf/Jx4YLqENcfGlExO
+y5WJgnLbrWJHUwsy5qdaiR9qLA4O8wHO8g/uGEwuz+wUBUDVgbof6CtWkV1HuD43lJx9/SHXk/kP
+yIaEVlgid9DF0eEKRyacUnepzlXRgfFu0wOBhAACgYBfL1mZoyZF9rqpmFq3AUnsjNpEx/N4M4xO
+fx2SYR6JZE1V44Xrs+bIVnDYEDC1SnLqzpqhWL7YtoTpR0nmmyV4yDod+PB98Neort91YlvOHzkw
+Yoea8EqMXakF0mjOaA8getMgBPatoD/VzZElAW4XF9V1bQZCapN9/Rex0IlTgDAJBgcqhkjOOAQD
+Ay8AMCwCFGXH1m2gLqk9Z9+I5CKOqY3mglfIAhQlEKmuOC7F98lQefPzSG/pxoCP8w==</X509Certificate>
+        </OwnCertificate>
+        <PrevMixCertificate>
+            <X509Certificate xml:space="preserve">MIICaDCCAiigAwIBAgIBATAJBgcqhkjOOAQDMBsxGTAXBgNVBAMTEDxNaXggaWQ9bWl4T25lLz4w
+HhcNMDQwNDAxMDQxNDI4WhcNMDUwNDAxMDQxNDI4WjAbMRkwFwYDVQQDExA8TWl4IGlkPW1peE9u
+ZS8+MIIBtzCCASwGByqGSM44BAEwggEfAoGBAJh4h92mCHN/BXehkFEzCLYe2PBkRmnUYPyeE+74
+mHmeJo0KPMOC0BwBJ47OLvTrKVi8uw3/mYMeiAWXK963UpRAdLjKFH2AD8oJNlCnTGA2Wag/ceBS
+GwiCm5GrJNUWBwACcEsBlytAiL7+28Gx+Hs80WYjxFXba1mqaJtam0yVAhUA2ZJrDDC/pNN8r9xV
+660ztocG808CgYEAgvWRM/gSDvQQbtkPfSzUaVGI6GzNkHzzgsDl5GZISNlfhRVJH2ue1TBhI8tn
+9IC4lJFKQQEJQxqkBUXLsG++KwCu9edhFp1a/uUD/juJn5GE+gpEnnEXVYDzywxeeMxke9MrDsRA
+JLOqO4ayDf472VxuWWDpJ2VCPrqdaANHrAgDgYQAAoGAKxdoifoOuL9N528lu52BeeBPytD51Fke
++1pDjRELZ+CqXceMay6eHs7HqkpJzRCWJi85gEuMWGwEm/MvJJEBxCYYGt8IP4fBIeHOn0e1rOt/
+Do38OiJIXhqgLcFPYSOifwFcudYgU1FikxqTG4lCfb7vA+TuS/gx8Q8WaJd77hgwCQYHKoZIzjgE
+AwMvADAsAhRFHuthu41ylPvmihHlQB7J1kJ2bgIUF7PL5kprHZrs+atUZXgTHlWdCKk=</X509Certificate>
+        </PrevMixCertificate>
+    </Certificates>
+    <Description>
+        <Location>
+            <City/>
+            <Country/>
+            <Position>
+                <Geo>
+                    <Longitude/>
+                    <Latitude/>
+                </Geo>
+            </Position>
+        </Location>
+        <Operator>
+            <Organisation/>
+            <URL/>
+        </Operator>
+    </Description>
+</MixConfiguration>

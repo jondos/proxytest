@@ -1,0 +1,28 @@
+<?xml version="1.0" ?>
+<MixCascade id="...">
+  <Name>...</Name>
+  <Network>
+    <ListenerInterfaces>
+      <ListenerInterface>
+        <Type>RAW/TCP</Type>
+        <Port>..</Port>
+        <Host>..</Host>
+        <IP>..</IP>
+      </ListenerInterface>
+    </ListenerInterfaces>
+  </Network>
+  <Mixes count="..">
+    <Mix id=".." />
+    <!--- all the Information about the FirstMix -->
+    <Mix id="." />
+    <!-- only the id's of all other mixes of the cascade -->
+  </Mixes>
+  <LastUpdate>..</LastUpdate>
+  <Payment required="true|false">
+    <!--Gives payment related information to the JAP
+      if required=="true" payment is required
+      if required=="false" no paymetn is required
+    -->
+  </Payment>
+  <Signature>..</Signature>
+</MixCascade>

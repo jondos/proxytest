@@ -1,0 +1,23 @@
+Source: jondonym-mix
+Section: net
+Priority: optional
+Maintainer: JAP-Team <jap@inf.tu-dresden.de>
+Build-Depends: debhelper (>= 4.0.0), libssl-dev (>=0.9.7), libxerces-c2-dev
+Standards-Version: 3.7.2
+
+Package: mix-free-entry
+Architecture: any
+Depends: libssl, libxerces-c28 | libxerces28
+Description: mix server for JonDonym (free mix cascade, entry mix)
+ JonDonym (the name is derived from John Doe and Anonymous) protects your privacy on the internet and makes truely anonymous websurfing possible. It consists of the following components:
+    * Mixes Anonymizing intermediaries (proxies) which multiply encrypt, mix and forward data streams of several users.
+    * Mix Cascades Chains of Mixes run by various independent operators. They typically consist of three Mixes: one first Mix (IN) which receives requests from the users, one middle Mix (MIDDLE) which only forwards traffic to other Mixes, and a last Mix (OUT) which sends the real outgoing requests to internet resources.
+    * InfoService A separate service which provides information about the available mixes and mix cascades, thenumber of users currently using the mix cascades, and their current workload.
+    * JonDo Client program installed on the user's computer. Its primary use is to establish encrypted connections to anonymising Mix Cascades. The users are called JonDonauts (resembling the term "astronauts").
+ In this form, the system protects from observation by
+    * the visited web server,
+    * your internet access provider (internet cafe, WLAN, AOL, T-Online, ...),
+    * other eavesdroppers on the connections (ECHELON,...),
+    * any data retention (by international distribution) and
+    * the JonDonym service itself.
+ .

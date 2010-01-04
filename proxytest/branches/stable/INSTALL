@@ -1,0 +1,9 @@
+For installation and configuration instructions see:
+
+http://anon.inf.tu-dresden.de/develop/howtooperateamix.html
+-----------------------------------------------------------------------------------------
+CVS: Developers with CVS write access should run doAutoReconf.sh whenever
+they check in changes to any of the automake/autoconf related files.
+Otherwise the timestamps of related files in the CVS repository will not be
+updated and a normal "make" will try run autoheader and automake.
+-----------------------------------------------------------------------------------------
