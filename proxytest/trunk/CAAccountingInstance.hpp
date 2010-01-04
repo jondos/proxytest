@@ -185,7 +185,8 @@ public:
 	//static void forcedSettle();
 
 	static SINT32 settlementTransaction();
-	static SettleEntry *__handleSettleResult(CAXMLCostConfirmation *pCC, CAXMLErrorMessage *pErrMsg, CAAccountingDBInterface *dbInterface);
+	static SettleEntry *__handleSettleResult(CAXMLCostConfirmation *pCC, CAXMLErrorMessage *pErrMsg, CAAccountingDBInterface *dbInterface,
+		UINT64 a_iSettlementTransactionNr);
 	static void __commitSettlementToDatabase(SettleEntry *entryList, CAAccountingDBInterface *dbInterface);
 	static void __commitSettlementToLoginTable(SettleEntry *entryList);
 	static SINT32 newSettlementTransaction();
@@ -199,6 +200,7 @@ public:
 	static const SINT32 HANDLE_PACKET_CLOSE_CONNECTION; // this connection should be closed immediatly
 
 
+	static const UINT32 MAX_SETTLED_CCS; // do not settle more that X cost confirmations in one settle connection
 private:
 
 	CAAccountingInstance(CAFirstMix* callingMix); //Singleton!
@@ -336,6 +338,8 @@ private:
 	CAConditionVariable *m_pSettlementMutex;
 
 	volatile UINT32 m_seqBIConnErrors;
+
+	static volatile UINT64 m_iCurrentSettleTransactionNr;
 };
 
 

@@ -256,6 +256,9 @@ typedef struct t_mix_parameters tMixParameters;
 
 #define AUTH_UNKNOWN 0x40000
 
+// we settled at least one CC for this account in this session
+#define AUTH_SETTLED_ONCE 0x80000
+
 /*
  * The user corresponding to this entry has closed the connection.
  * Delete the entry as soon as possible.

@@ -77,17 +77,102 @@ CAMsg::~CAMsg()
 			m_pcsPrint = NULL;
 		}
 
+char* CAMsg::createLogFileMessage(UINT32 opt)
+{
+	char* strLogAtPath = " at path '%s'";
+	char* strLogFile = NULL;
+	
+	
+	if (opt == MSG_FILE || opt == MSG_COMPRESSED_FILE)
+	{
+		if (pMsg->m_strLogFile != NULL)
+		{
+			strLogFile = new char[strlen(strLogAtPath) + strlen(pMsg->m_strLogFile) + 1];
+			sprintf(strLogFile, strLogAtPath, pMsg->m_strLogFile);
+		}
+	}
+	if (strLogFile == NULL)
+	{
+		strLogFile = new char[1];
+		strLogFile[0] = '\0';
+	}
+	return strLogFile;
+}
+
+
 SINT32 CAMsg::setLogOptions(UINT32 opt)
     {
+			SINT32 ret; 
+			char* strLogOpened = "Opened message log%s%s.\n";
+			char* strLogErrorMsg = "Could not open message log%s%s!%s Do you have write permission?\n";	
+			char* strReasonMsg = " Reason: %s (%u)";
+			char* strLogFile = NULL;
+			char* strReason = NULL;
+			char* strBuff;
+			char* strLogType = "";
+	
+			if (opt == MSG_LOG)
+			{
+				strLogType = " as Syslog";
+			}
+			else if (opt == MSG_FILE)
+			{
+				strLogType = " as file";
+			}
+			else if (opt == MSG_COMPRESSED_FILE)
+			{
+				strLogType = " as compressed file";
+			}
+			
+
 			if(pMsg->m_uLogType==opt)
+			{
 					return E_SUCCESS;
-			if(pMsg->openLog(opt)==E_SUCCESS)
-				{
-					pMsg->closeLog(); //closes the OLD Log!
-					pMsg->m_uLogType=opt;
-					return E_SUCCESS;
-				}
-			return E_UNKNOWN;
+			}
+
+
+
+			if((ret = pMsg->openLog(opt))==E_SUCCESS)
+			{
+				strLogFile = pMsg->createLogFileMessage(opt);
+				strBuff = new char[strlen(strLogOpened) + strlen(strLogType) + strlen(strLogFile) + 1];
+				sprintf(strBuff, strLogOpened, strLogType, strLogFile);
+				delete[] strLogFile;
+				printMsg(LOG_DEBUG, strBuff);
+				delete[] strBuff;
+
+				pMsg->closeLog(); //closes the OLD Log!
+				pMsg->m_uLogType=opt;
+
+
+				return E_SUCCESS;
+			}
+			
+
+			strLogFile = pMsg->createLogFileMessage(opt);
+			
+			if (ret == E_FILE_OPEN)
+			{
+				strReason = new char[strlen(strReasonMsg) + strlen(GET_NET_ERROR_STR(GET_NET_ERROR)) + 5 + 1];
+				sprintf(strReason, strReasonMsg, GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
+			}
+			else
+			{
+				strReason = new char[1];
+				strReason[0] = '\0';
+			}
+
+			strBuff = new char[strlen(strLogErrorMsg) + strlen(strLogType) + strlen(strLogFile) + strlen(strReason) + 1];
+		
+			sprintf(strBuff, strLogErrorMsg, strLogType, strLogFile, strReason);
+			//snprintf(strBuff, strlen(strLogErrorMsg) + strlen(strLogFile) + strlen(strReason) + 1,  strLogErrorMsg, strLogFile, strReason);
+			delete[] strLogFile;
+			delete[] strReason;
+
+			printMsg(LOG_CRIT, strBuff);
+
+			delete[] strBuff;
+			return ret;
     }
 
 SINT32 CAMsg::printMsg(UINT32 type,const char* format,...)
@@ -285,6 +370,10 @@ SINT32 CAMsg::openLog(UINT32 type)
 					}
 					m_NrOfWrites=0;
 					m_hFileInfo=open(m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE,S_IREAD|S_IWRITE);
+					if (m_hFileInfo == -1)
+					{
+						return E_FILE_OPEN;
+					}
 
 				break;
 #ifdef COMPRESSED_LOGS
@@ -296,9 +385,18 @@ SINT32 CAMsg::openLog(UINT32 type)
 			strcpy(buff,logdir);
 			strcat(buff,FILENAME_INFOLOG_GZ);
 			tmpHandle=open(buff,O_APPEND|O_CREAT|O_WRONLY,S_IREAD|S_IWRITE);
+			if (tmpHandle == -1)
+			{
+				return E_FILE_OPEN;
+			}
 			m_gzFileInfo=gzdopen(tmpHandle,"wb9");
 			if(m_gzFileInfo==NULL)
-				return E_UNKNOWN;
+			{
+				SINT32 iError = GET_NET_ERROR;
+				close(tmpHandle);
+				SET_NET_ERROR(iError);
+				return E_FILE_OPEN;
+			}
 				break;
 #endif
 				default:

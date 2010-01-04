@@ -43,6 +43,10 @@ class CAThreadPool
 				 */ 
 			SINT32 destroy(bool bWaitForFinish);
 			SINT32 addRequest(THREAD_MAIN_TYP, void *args);
+			UINT32 countRequests()
+			{
+				return m_CurQueueSize;
+			}
 			friend THREAD_RETURN worker_thread_main_loop(void *args);
 		private:
 			/* pool characteristics */

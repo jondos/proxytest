@@ -9,10 +9,11 @@ const SINT32 E_SUCCESS=0;
 #define E_AGAIN -300 //If something was'nt completed und should request again later..
 #define E_TIMEDOUT -301 //An opertion has timed out
 #define E_SOCKETCLOSED -302 //An operation which required an open socket uses a closed socket
+#define E_SOCKET_CREATE -307 // could not create a new socket
 #define E_SOCKET_LISTEN -303 //An error occured during listen
 #define E_SOCKET_ACCEPT -304 //An error occured during accept
 #define E_SOCKET_BIND -305 //An error occured during bind
-#define E_SOCKET_LIMIT -306 //An error occurde because we run out of available sockets
+#define E_SOCKET_LIMIT -306 //An error occured because we run out of available sockets
 #define E_UNKNOWN_HOST -400 // A hostname could not be resolved
 #define E_FILE_OPEN -500 //Error in opening a file
 #define E_FILE_READ -501 //Error in opening a file

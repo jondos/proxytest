@@ -449,11 +449,11 @@ SINT32 CAAccountingDBInterface::__storeCostConfirmation( CAXMLCostConfirmation &
 	}
 
 //SINT32 CAAccountingDBInterface::getUnsettledCostConfirmations(CAQueue &q, UINT8* cascadeId)
-SINT32 CAAccountingDBInterface::getUnsettledCostConfirmations(CAXMLCostConfirmation ***resultCCs, UINT8* cascadeId, UINT32 *nrOfCCs)
+SINT32 CAAccountingDBInterface::getUnsettledCostConfirmations(CAXMLCostConfirmation ***resultCCs, UINT8* cascadeId, UINT32 *nrOfCCs, UINT32 a_maxCCs)
 {
 	if(checkOwner())
 	{
-		return __getUnsettledCostConfirmations(resultCCs, cascadeId, nrOfCCs);
+		return __getUnsettledCostConfirmations(resultCCs, cascadeId, nrOfCCs, a_maxCCs);
 	}
 	else
 	{
@@ -468,9 +468,9 @@ SINT32 CAAccountingDBInterface::getUnsettledCostConfirmations(CAXMLCostConfirmat
 	* Param: cascadeId : String identifier of a cascade for which to return the cost confirmations (concatenated hashes of all the cascade's mixes' price certs)
 	*
 	*/
-SINT32 CAAccountingDBInterface::__getUnsettledCostConfirmations(CAXMLCostConfirmation ***resultCCs, UINT8* cascadeId, UINT32 *nrOfCCs)
+SINT32 CAAccountingDBInterface::__getUnsettledCostConfirmations(CAXMLCostConfirmation ***resultCCs, UINT8* cascadeId, UINT32 *nrOfCCs, UINT32 a_maxCCs)
 	{
-		const char* query= "SELECT XMLCC FROM COSTCONFIRMATIONS WHERE SETTLED=0 AND CASCADE = '%s' LIMIT 10";
+		const char* query= "SELECT XMLCC FROM COSTCONFIRMATIONS WHERE SETTLED=0 AND CASCADE = '%s' LIMIT %u";
 		UINT8* finalQuery;
 		PGresult* result;
 		SINT32 numTuples, i;
@@ -485,7 +485,7 @@ SINT32 CAAccountingDBInterface::__getUnsettledCostConfirmations(CAXMLCostConfirm
 		MONITORING_FIRE_PAY_EVENT(ev_pay_dbConnectionSuccess);
 
 		finalQuery = new UINT8[strlen(query)+strlen((char*)cascadeId)];
-		sprintf( (char*)finalQuery, query, cascadeId);
+		sprintf( (char*)finalQuery, query, cascadeId, a_maxCCs);
 
 #ifdef DEBUG
 		CAMsg::printMsg(LOG_DEBUG, "Getting Cost confirmations for cascade: ");

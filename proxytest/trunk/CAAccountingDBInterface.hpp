@@ -75,7 +75,7 @@ class CAAccountingDBInterface
 		*
 		*/
 		//SINT32 getUnsettledCostConfirmations(CAQueue &q, UINT8* cascadeId);
-		SINT32 getUnsettledCostConfirmations(CAXMLCostConfirmation ***resultCCs, UINT8* cascadeId, UINT32 *nrOfCCs);
+		SINT32 getUnsettledCostConfirmations(CAXMLCostConfirmation ***resultCCs, UINT8* cascadeId, UINT32 *nrOfCCs, UINT32 a_maxCCs);
 
 		/**
 		* Marks this account as settled.
@@ -137,7 +137,7 @@ class CAAccountingDBInterface
 			SINT32 __getCostConfirmation(UINT64 accountNumber, UINT8* cascadeId, CAXMLCostConfirmation **pCC, bool& a_bSettled);
 
 			//SINT32 __getUnsettledCostConfirmations(CAQueue &q, UINT8* cascadeId);
-			SINT32 __getUnsettledCostConfirmations(CAXMLCostConfirmation ***resultCCs, UINT8* cascadeId, UINT32 *nrOfCCs);
+			SINT32 __getUnsettledCostConfirmations(CAXMLCostConfirmation ***resultCCs, UINT8* cascadeId, UINT32 *nrOfCCs, UINT32 a_maxCCs);
 
 			SINT32 __markAsSettled(UINT64 accountNumber, UINT8* cascadeId, UINT64 a_transferredBytes);
 			SINT32 __deleteCC(UINT64 accountNumber, UINT8* cascadeId);

@@ -81,7 +81,7 @@ SINT32 CASocket::create(int type, bool a_bShowTypicalError)
 			else
 			{
 				CAMsg::printMsg(LOG_CRIT,"Could not create a new normal Socket -- allowed number of normal sockets exceeded!\n");
-				return SOCKET_ERROR;
+				return E_SOCKET_LIMIT;
 			}
 		}
 		else
@@ -98,10 +98,11 @@ SINT32 CASocket::create(int type, bool a_bShowTypicalError)
 					}
 					else
 					{
-						CAMsg::printMsg(LOG_CRIT,"Could not create a new Socket! - Error: %i\n",er);
+						CAMsg::printMsg(LOG_CRIT,"Could not create a new Socket! - Error: %s (%i)\n",
+							GET_NET_ERROR_STR(er), er);
 					}
 				}
-				return SOCKET_ERROR;
+				return E_SOCKET_CREATE;
 			}
 		m_bSocketIsClosed=false;
 		m_csClose.lock();
@@ -121,6 +122,7 @@ SINT32 CASocket::create(int type, bool a_bShowTypicalError)
 	*/
 SINT32 CASocket::listen(const CASocketAddr& psa)
 	{
+		UINT32 iError;
 		SINT32 type=psa.getType();
 		if(m_bSocketIsClosed&&create(type)!=E_SUCCESS)
 			return E_UNKNOWN;
@@ -141,12 +143,16 @@ SINT32 CASocket::listen(const CASocketAddr& psa)
 #endif
 		if(::bind(m_Socket,psa.LPSOCKADDR(),psa.getSize())==SOCKET_ERROR)
 			{
+				iError = GET_NET_ERROR;
 				close();
+				SET_NET_ERROR(iError);
 				return E_SOCKET_BIND;
 			}
 		if(::listen(m_Socket,SOMAXCONN)==SOCKET_ERROR)
 			{
+				iError = GET_NET_ERROR;
 				close();
+				SET_NET_ERROR(iError);
 				return E_SOCKET_LISTEN;
 			}
 		return E_SUCCESS;
