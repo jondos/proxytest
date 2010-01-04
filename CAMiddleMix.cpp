@@ -127,21 +127,6 @@ SINT32 CAMiddleMix::processKeyExchange()
 			{
 				if(equals(child->getNodeName(),"Mix"))
 					{
-						//verify certificate from next mix if enabled
-						if(CALibProxytest::getOptions()->verifyMixCertificates())
-						{
-							CACertificate* nextMixCert = CALibProxytest::getOptions()->getTrustedCertificateStore()->verifyMixCert(child);
-							if(nextMixCert != NULL)
-							{
-								CAMsg::printMsg(LOG_DEBUG, "Next mix certificate was verified by a trusted root CA.\n");
-								CALibProxytest::getOptions()->setNextMixTestCertificate(nextMixCert);
-							}
-							else
-							{
-								CAMsg::printMsg(LOG_ERR, "Could not verify certificate received from next mix!\n");
-								return E_UNKNOWN;
-							}
-						}
 						//check Signature....
 						//CASignature oSig;
 						CACertificate* nextCert=CALibProxytest::getOptions()->getNextMixTestCertificate();
@@ -371,21 +356,6 @@ SINT32 CAMiddleMix::processKeyExchange()
 			return E_UNKNOWN;
 		}
 		DOMElement* elemRoot=doc->getDocumentElement();
-		//verify certificate from previous mix if enabled
-		if(CALibProxytest::getOptions()->verifyMixCertificates())
-		{
-			CACertificate* prevMixCert = CALibProxytest::getOptions()->getTrustedCertificateStore()->verifyMixCert(elemRoot);
-			if(prevMixCert != NULL)
-			{
-				CAMsg::printMsg(LOG_DEBUG, "Previous mix certificate was verified by a trusted root CA.\n");
-				CALibProxytest::getOptions()->setPrevMixTestCertificate(prevMixCert);
-			}
-			else
-			{
-				CAMsg::printMsg(LOG_ERR, "Could not verify certificate received from previous mix!\n");
-				return E_UNKNOWN;
-			}
-		}
 		//verify signature
 		//CASignature oSig;
 		CACertificate* pCert=CALibProxytest::getOptions()->getPrevMixTestCertificate();

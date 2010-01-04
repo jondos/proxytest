@@ -331,6 +331,21 @@ SINT32 CALastMix::processKeyExchange()
 		messageBuff[len]=0;
 		CAMsg::printMsg(LOG_INFO,"Symmetric Key Info received is:\n");
 		CAMsg::printMsg(LOG_INFO,"%s\n",(char*)messageBuff);
+		//verify signature
+		//CASignature oSig;
+		CACertificate* pCert=CALibProxytest::getOptions()->getPrevMixTestCertificate();
+		SINT32 result = CAMultiSignature::verifyXML(messageBuff, len, pCert);
+		//oSig.setVerifyKey(pCert);
+		delete pCert;
+		pCert = NULL;
+		//if(oSig.verifyXML(messageBuff,len)!=E_SUCCESS)
+		if(result != E_SUCCESS)
+		{
+			CAMsg::printMsg(LOG_CRIT,"Could not verify the symmetric key!\n");
+			delete []messageBuff;
+			messageBuff = NULL;
+			return E_UNKNOWN;
+		}
 		//get document
 		doc=parseDOMDocument(messageBuff,len);
 		if(doc == NULL)
@@ -349,36 +364,6 @@ SINT32 CALastMix::processKeyExchange()
 				doc->release();
 				doc = NULL;
 			}
-			delete []messageBuff;
-			messageBuff = NULL;
-			return E_UNKNOWN;
-		}
-		//verify certificate from previous mix if enabled
-		if(CALibProxytest::getOptions()->verifyMixCertificates())
-		{
-			CACertificate* prevMixCert = CALibProxytest::getOptions()->getTrustedCertificateStore()->verifyMixCert(elemRoot);
-			if(prevMixCert != NULL)
-			{
-				CAMsg::printMsg(LOG_DEBUG, "Previous mix certificate was verified by a trusted root CA.\n");
-				CALibProxytest::getOptions()->setPrevMixTestCertificate(prevMixCert);
-			}
-			else
-			{
-				CAMsg::printMsg(LOG_ERR, "Could not verify certificate received from previous mix!\n");
-				return E_UNKNOWN;
-			}
-		}
-		//verify signature
-		//CASignature oSig;
-		CACertificate* pCert=CALibProxytest::getOptions()->getPrevMixTestCertificate();
-		SINT32 result = CAMultiSignature::verifyXML(messageBuff, len, pCert);
-		//oSig.setVerifyKey(pCert);
-		delete pCert;
-		pCert = NULL;
-		//if(oSig.verifyXML(messageBuff,len)!=E_SUCCESS)
-		if(result != E_SUCCESS)
-		{
-			CAMsg::printMsg(LOG_CRIT,"Could not verify the symmetric key!\n");
 			delete []messageBuff;
 			messageBuff = NULL;
 			return E_UNKNOWN;
