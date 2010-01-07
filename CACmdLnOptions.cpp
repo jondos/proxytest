@@ -2068,6 +2068,23 @@ SINT32 CACmdLnOptions::setUserID(DOMElement* elemGeneral)
 		memcpy(m_strUser,tmpBuff,tmpLen);
 		m_strUser[tmpLen]=0;
 	}
+	
+#ifndef WIN32
+		if(getUser(buff,255)==E_SUCCESS) //switching user
+			{
+				struct passwd* pwd=getpwnam((char*)buff);
+				if(pwd==NULL || (setegid(pwd->pw_gid)==-1) || (seteuid(pwd->pw_uid)==-1) )
+					CAMsg::printMsg(LOG_ERR,"Could not switch to effective user %s!\n",buff);
+				else
+					CAMsg::printMsg(LOG_INFO,"Switched to effective user %s!\n",buff);
+			}
+
+		if(geteuid()==0)
+			CAMsg::printMsg(LOG_INFO,"Warning - Running as root!\n");
+#endif
+	
+	
+	
 	return E_SUCCESS;
 }
 
@@ -2087,6 +2104,29 @@ SINT32 CACmdLnOptions::setNrOfFileDescriptors(DOMElement* elemGeneral)
 	{
 		m_nrOfOpenFiles=tmp;
 	}
+	
+#ifndef WIN32
+
+		struct rlimit coreLimit;
+		coreLimit.rlim_cur = coreLimit.rlim_max = RLIM_INFINITY;
+		if (setrlimit(RLIMIT_CORE, &coreLimit) != 0)
+		{
+			CAMsg::printMsg(LOG_CRIT,"Could not set RLIMIT_CORE (max core file size) to unlimited size. -- Core dumps might not be generated!\n",m_nrOfOpenFiles);
+		}
+		
+		if(m_nrOfOpenFiles>0)
+			{
+				struct rlimit lim;
+				// Set the new MAX open files limit
+				lim.rlim_cur = lim.rlim_max = maxFiles;
+				if (setrlimit(RLIMIT_NOFILE, &lim) != 0)
+				{
+					CAMsg::printMsg(LOG_CRIT,"Could not set MAX open files to: %u -- Exiting!\n",m_nrOfOpenFiles);
+					exit(EXIT_FAILURE);
+				}
+			}
+#endif	
+	
 	return E_SUCCESS;
 }
 

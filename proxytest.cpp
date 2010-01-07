@@ -545,7 +545,7 @@ int main(int argc, const char* argv[])
 
 		if(CALibProxytest::getOptions()->parse(argc,argv) != E_SUCCESS)
 		{
-			CAMsg::printMsg(LOG_CRIT,"Error: Cannot parse configuration file!\n");
+			CAMsg::printMsg(LOG_CRIT,"An error occured before we could finish parsing the configuration file.\n");
 			goto EXIT;
 		}
 		if(!(	CALibProxytest::getOptions()->isFirstMix()||
@@ -566,39 +566,6 @@ int main(int argc, const char* argv[])
 		initHttpVerbLengths();
 #endif
 */
-#ifndef WIN32
-		maxFiles=CALibProxytest::getOptions()->getMaxOpenFiles();
-
-		struct rlimit coreLimit;
-		coreLimit.rlim_cur = coreLimit.rlim_max = RLIM_INFINITY;
-		if (setrlimit(RLIMIT_CORE, &coreLimit) != 0)
-		{
-			CAMsg::printMsg(LOG_CRIT,"Could not set RLIMIT_CORE (max core file size) to unlimited size. -- Core dumps might not be generated!\n",maxFiles);
-		}
-
-		if(maxFiles>0)
-			{
-				struct rlimit lim;
-				// Set the new MAX open files limit
-				lim.rlim_cur = lim.rlim_max = maxFiles;
-				if (setrlimit(RLIMIT_NOFILE, &lim) != 0)
-				{
-					CAMsg::printMsg(LOG_CRIT,"Could not set MAX open files to: %u -- Exiting!\n",maxFiles);
-					exit(EXIT_FAILURE);
-				}
-			}
-		if(CALibProxytest::getOptions()->getUser(buff,255)==E_SUCCESS) //switching user
-			{
-				struct passwd* pwd=getpwnam((char*)buff);
-				if(pwd==NULL || (setegid(pwd->pw_gid)==-1) || (seteuid(pwd->pw_uid)==-1) )
-					CAMsg::printMsg(LOG_ERR,"Could not switch to effective user %s!\n",buff);
-				else
-					CAMsg::printMsg(LOG_INFO,"Switched to effective user %s!\n",buff);
-			}
-
-		if(geteuid()==0)
-			CAMsg::printMsg(LOG_INFO,"Warning - Running as root!\n");
-#endif
 
 
 #ifndef _WIN32
