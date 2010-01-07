@@ -636,11 +636,6 @@ int main(int argc, const char* argv[])
 #ifdef SERVER_MONITORING
 		CAStatusManager::init();
 #endif
-		
-
-#ifdef SERVER_MONITORING
-		CAStatusManager::init();
-#endif
 
 
 #if defined (_DEBUG) &&!defined(ONLY_LOCAL_PROXY)
