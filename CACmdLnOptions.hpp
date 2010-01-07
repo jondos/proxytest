@@ -74,6 +74,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define OPTIONS_NODE_DAEMON "Daemon"
 #define OPTIONS_NODE_MAX_USERS "MaxUsers"
 #define OPTIONS_NODE_LOGGING "Logging"
+#define OPTIONS_NODE_LOGGING_CONSOLE "Console"
 #define OPTIONS_NODE_LOGGING_FILE "File"
 #define OPTIONS_ATTRIBUTE_LOGGING_MAXFILESIZE "MaxFileSize"
 #define OPTIONS_ATTRIBUTE_LOGGING_MAXFILES "MaxFiles"
@@ -241,6 +242,7 @@ class CACmdLnOptions
 		SINT32 cleanup();
 		void clean();
 		SINT32 parse(int argc,const char** arg);
+		SINT32 initLogging();
 		bool getDaemon();
 		//bool getProxySupport();
 
@@ -499,10 +501,6 @@ class CACmdLnOptions
 			return m_bAutoReconnect;
 		}
 
-		bool getAutoRestart()
-		{
-			return m_bAutoRestart;
-		}
 #ifdef LOG_CRIME
 		regex_t* getCrimeRegExpsURL(UINT32* len)
 		{
@@ -701,7 +699,6 @@ class CACmdLnOptions
 
 		bool		m_bLocalProxy,m_bFirstMix,m_bMiddleMix,m_bLastMix;
 		bool		m_bAutoReconnect; //auto reconnect if connection to first mix lost ??
-		bool		m_bAutoRestart; //auto restart if Mix dies unexpectly?
 		UINT8*	m_strCascadeName;
 		char*		m_strLogDir;
 		SINT64	m_maxLogFileSize;
@@ -710,6 +707,7 @@ class CACmdLnOptions
 		bool		m_bCompressedLogs;
 		bool 		m_bSocksSupport;
 		bool		m_bSyslog;
+		bool		m_bLogConsole;
 		char*		m_strUser;
 		char*		m_strPidFile;
 		SINT32	m_nrOfOpenFiles; //How many open files (sockets) should we use

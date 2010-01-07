@@ -30,10 +30,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CAMSG__
 #define __CAMSG__
 
-#define MSG_STDOUT						0x00
-#define MSG_LOG								0x01
-#define MSG_FILE							0x02
-#define MSG_COMPRESSED_FILE		0x03
+#define MSG_STDOUT						0x01
+#define MSG_LOG								0x02
+#define MSG_FILE							0x04
+#define MSG_COMPRESSED_FILE		0x08
 
 #ifdef _WIN32
 	#define LOG_ERR		0
@@ -63,9 +63,20 @@ class CAMsg
 			static CAMsg* pMsg;
 		public:
 			~CAMsg();
-			static SINT32 init(){pMsg=new CAMsg();return E_SUCCESS;}
+			static SINT32 init()
+			{
+					if (pMsg == NULL)
+					{
+						pMsg=new CAMsg();
+					}
+					return E_SUCCESS;
+			}
 			static SINT32 cleanup()
 			{
+				if (pMsg != NULL)
+				{
+					pMsg->closeLog();
+				}
 				delete pMsg;
 				pMsg = NULL;
 				return E_SUCCESS;
