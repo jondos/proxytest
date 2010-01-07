@@ -2054,6 +2054,7 @@ SINT32 CACmdLnOptions::setUserID(DOMElement* elemGeneral)
 	DOMElement* elemUID=NULL;
 	UINT8 tmpBuff[TMP_BUFF_SIZE];
 	UINT32 tmpLen = TMP_BUFF_SIZE;
+	UINT8 buff[255];
 
 	if(elemGeneral == NULL) return E_UNKNOWN;
 	ASSERT_GENERAL_OPTIONS_PARENT
@@ -2118,7 +2119,7 @@ SINT32 CACmdLnOptions::setNrOfFileDescriptors(DOMElement* elemGeneral)
 			{
 				struct rlimit lim;
 				// Set the new MAX open files limit
-				lim.rlim_cur = lim.rlim_max = maxFiles;
+				lim.rlim_cur = lim.rlim_max = m_nrOfOpenFiles;
 				if (setrlimit(RLIMIT_NOFILE, &lim) != 0)
 				{
 					CAMsg::printMsg(LOG_CRIT,"Could not set MAX open files to: %u -- Exiting!\n",m_nrOfOpenFiles);
