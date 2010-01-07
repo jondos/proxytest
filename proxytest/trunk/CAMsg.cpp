@@ -83,7 +83,7 @@ char* CAMsg::createLogFileMessage(UINT32 opt)
 	char* strLogFile = NULL;
 	
 	
-	if (opt == MSG_FILE || opt == MSG_COMPRESSED_FILE)
+	if ((opt & MSG_FILE) == MSG_FILE || (opt & MSG_COMPRESSED_FILE) == MSG_COMPRESSED_FILE)
 	{
 		if (pMsg->m_strLogFile != NULL)
 		{
@@ -103,7 +103,7 @@ char* CAMsg::createLogFileMessage(UINT32 opt)
 SINT32 CAMsg::setLogOptions(UINT32 opt)
     {
 			SINT32 ret; 
-			char* strLogOpened = "Opened message log%s%s.\n";
+			char* strLogOpened = "Message log opened%s%s.\n";
 			char* strLogErrorMsg = "Could not open message log%s%s!%s Do you have write permission?\n";	
 			char* strReasonMsg = " Reason: %s (%u)";
 			char* strLogFile = NULL;
@@ -111,19 +111,6 @@ SINT32 CAMsg::setLogOptions(UINT32 opt)
 			char* strBuff;
 			char* strLogType = "";
 	
-			if (opt == MSG_LOG)
-			{
-				strLogType = " as Syslog";
-			}
-			else if (opt == MSG_FILE)
-			{
-				strLogType = " as file";
-			}
-			else if (opt == MSG_COMPRESSED_FILE)
-			{
-				strLogType = " as compressed file";
-			}
-			
 
 			if(pMsg->m_uLogType==opt)
 			{
@@ -131,6 +118,25 @@ SINT32 CAMsg::setLogOptions(UINT32 opt)
 			}
 
 
+			if (opt == MSG_LOG)
+			{
+				strLogType = " as Syslog";
+			}
+			else if ((opt & MSG_LOG) == MSG_LOG)
+			{
+				strLogType = " as Syslog and";
+			}
+
+			if ((opt & MSG_FILE) == MSG_FILE)
+			{
+				strLogType = " as file";
+			}
+			else if ((opt & MSG_COMPRESSED_FILE) == MSG_COMPRESSED_FILE)
+			{
+				strLogType = " as compressed file";
+			}
+			
+			
 
 			if((ret = pMsg->openLog(opt))==E_SUCCESS)
 			{
@@ -144,7 +150,7 @@ SINT32 CAMsg::setLogOptions(UINT32 opt)
 				pMsg->closeLog(); //closes the OLD Log!
 				pMsg->m_uLogType=opt;
 
-
+				
 				return E_SUCCESS;
 			}
 			
@@ -239,14 +245,24 @@ SINT32 CAMsg::printMsg(UINT32 type,const char* format,...)
 			}
 			else
 				{
-					switch(pMsg->m_uLogType)
-						{
-							case MSG_LOG:
+							if ((pMsg->m_uLogType & MSG_LOG) == MSG_LOG)
+							{
 	#ifndef _WIN32
 						syslog(type,pMsg->m_strMsgBuff);
 	#endif
-							break;
-							case MSG_FILE:
+							}
+	#ifdef COMPRESSED_LOGS
+							if ((pMsg->m_uLogType & MSG_COMPRESSED_FILE) == MSG_COMPRESSED_FILE)
+							{
+								if(pMsg->m_gzFileInfo!=NULL)
+								{
+									if(gzwrite(pMsg->m_gzFileInfo,pMsg->m_strMsgBuff,strlen(pMsg->m_strMsgBuff))==-1)
+										ret=E_UNKNOWN;
+								}
+							}
+	#endif
+							else if ((pMsg->m_uLogType & MSG_FILE) == MSG_FILE)
+							{
 /*								if(pMsg->m_hFileInfo==-1)
 									{
 										pMsg->m_hFileInfo=open(pMsg->m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE|O_SYNC,S_IREAD|S_IWRITE);
@@ -269,22 +285,11 @@ SINT32 CAMsg::printMsg(UINT32 type,const char* format,...)
 												pMsg->openLog(pMsg->m_uLogType);
 											}
 //									}
-							break;
-	#ifdef COMPRESSED_LOGS
-							case MSG_COMPRESSED_FILE:
-								if(pMsg->m_gzFileInfo!=NULL)
-								{
-									if(gzwrite(pMsg->m_gzFileInfo,pMsg->m_strMsgBuff,strlen(pMsg->m_strMsgBuff))==-1)
-										ret=E_UNKNOWN;
-								}
-							break;
-	#endif
-							case MSG_STDOUT:
+							}
+							if ((pMsg->m_uLogType & MSG_STDOUT) == MSG_STDOUT)
+							{
 								printf("%s",pMsg->m_strMsgBuff);
-							break;
-							default:
-							ret=E_UNKNOWN;
-						}
+							}
 				}
 			pMsg->m_pcsPrint->unlock();
 			return ret;
@@ -298,33 +303,37 @@ SINT32 CAMsg::printMsg(UINT32 type,const char* format,...)
 
 SINT32 CAMsg::closeLog()
 	{
-		switch(m_uLogType)
-			{
-				case MSG_LOG:
+				if ((pMsg->m_uLogType & MSG_LOG) == MSG_LOG)
+				{
 #ifndef _WIN32
 					::closelog();
 #endif
-				break;
-				case MSG_FILE:
-					if(m_hFileInfo!=-1)
-						close(m_hFileInfo);
-					m_hFileInfo=-1;
+				}
 #ifdef COMPRESSED_LOGS
-				case MSG_COMPRESSED_FILE:
+				if ((pMsg->m_uLogType & MSG_COMPRESSED_FILE) == MSG_COMPRESSED_FILE)
+				{
 					if(m_gzFileInfo!=NULL)
 						gzclose(m_gzFileInfo);
 					m_gzFileInfo=NULL;
-				break;
+				}
 #endif
-		}
+				else if ((pMsg->m_uLogType & MSG_FILE) == MSG_FILE)
+				{
+					if(m_hFileInfo!=-1)
+						close(m_hFileInfo);
+					m_hFileInfo=-1;
+				}
 		return E_SUCCESS;
 	}
 
 SINT32 CAMsg::rotateLog()
 {
-	switch(m_uLogType)
-	{
-		case MSG_FILE:
+		if ((pMsg->m_uLogType & MSG_COMPRESSED_FILE) == MSG_COMPRESSED_FILE)
+		{
+			// TODO
+		}
+		else if ((pMsg->m_uLogType & MSG_FILE) == MSG_FILE)
+		{
 
 			char logFileSaveName[1026];
 			memset(logFileSaveName, 0, 1026);
@@ -335,10 +344,7 @@ SINT32 CAMsg::rotateLog()
 			/*if(m_hFileInfo!=-1)
 				close(m_hFileInfo);
 			m_hFileInfo=-1;*/
-			break;
-		default:
-			break;
-	}
+		}
 
 	return E_SUCCESS;
 }
@@ -347,37 +353,15 @@ SINT32 CAMsg::openLog(UINT32 type)
 	{
 //		int tmpHandle=-1;
 		time_t currtime=0;
-		switch(type)
-			{
-				case MSG_LOG:
+				if ((type & MSG_LOG) == MSG_LOG)
+				{
 #ifndef _WIN32
 			openlog("AnonMix",0,LOG_USER);
 #endif
-				break;
-				case MSG_FILE:
-					if(CALibProxytest::getOptions()->getLogDir((UINT8*)m_strLogFile,1024)!=E_SUCCESS)
-						return E_UNKNOWN;
-					strcat(m_strLogFile,FILENAME_INFOLOG);
-					if(CALibProxytest::getOptions()->getMaxLogFileSize()>0)
-					{
-						if(m_alreadyOpened)
-						{
-							rotateLog();
-						}
-
-						setMaxLogFileSize(CALibProxytest::getOptions()->getMaxLogFileSize());
-						m_alreadyOpened = true;
-					}
-					m_NrOfWrites=0;
-					m_hFileInfo=open(m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE,S_IREAD|S_IWRITE);
-					if (m_hFileInfo == -1)
-					{
-						return E_FILE_OPEN;
-					}
-
-				break;
+				}
 #ifdef COMPRESSED_LOGS
-				case MSG_COMPRESSED_FILE:
+				if ((type & MSG_COMPRESSED_FILE) == MSG_COMPRESSED_FILE)
+				{
 			char logdir[255];
 			char buff[1024];
 			if(CALibProxytest::getOptions()->getLogDir((UINT8*)logdir,255)!=E_SUCCESS)
@@ -397,11 +381,30 @@ SINT32 CAMsg::openLog(UINT32 type)
 				SET_NET_ERROR(iError);
 				return E_FILE_OPEN;
 			}
-				break;
+			}
 #endif
-				default:
-					return E_UNKNOWN;
-		}
+		else if ((type & MSG_FILE) == MSG_FILE)
+				{
+					if(CALibProxytest::getOptions()->getLogDir((UINT8*)m_strLogFile,1024)!=E_SUCCESS)
+						return E_UNKNOWN;
+					strcat(m_strLogFile,FILENAME_INFOLOG);
+					if(CALibProxytest::getOptions()->getMaxLogFileSize()>0)
+					{
+						if(m_alreadyOpened)
+						{
+							rotateLog();
+						}
+
+						setMaxLogFileSize(CALibProxytest::getOptions()->getMaxLogFileSize());
+						m_alreadyOpened = true;
+					}
+					m_NrOfWrites=0;
+					m_hFileInfo=open(m_strLogFile,O_APPEND|O_CREAT|O_WRONLY|O_NONBLOCK|O_LARGEFILE,S_IREAD|S_IWRITE);
+					if (m_hFileInfo == -1)
+					{
+						return E_FILE_OPEN;
+					}
+				}
 		return E_SUCCESS;
 	}
 
