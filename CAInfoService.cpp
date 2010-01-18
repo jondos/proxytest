@@ -108,10 +108,10 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 					statusSentErrorBurst = 0;
 					CAMsg::printMsg(LOG_DEBUG,"InfoService: Successfully sent Status information.\n");
 				}
-				else
+				else if (pInfoService->m_pMix->isConnected())
 				{
 					statusSentErrorBurst++;
-					CAMsg::printMsg(LOG_DEBUG,"InfoService: Could not send Status information.\n");
+					CAMsg::printMsg(LOG_WARNING,"InfoService: Could not send Status information.\n");
 				}
 				/* send terms and conditions */
 				//pInfoService->sendOperatorTnCData();
@@ -123,15 +123,15 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 			{
 				if (CALibProxytest::getOptions()->isFirstMix() || (CALibProxytest::getOptions()->isLastMix() && pInfoService->isConfiguring()))
 				{
-					if(pInfoService->sendCascadeHelo()!=E_SUCCESS)
-					{
-						CAMsg::printMsg(LOG_ERR,"InfoService: Could not send Cascade information.\n");
-					}
-					else
+					if(pInfoService->sendCascadeHelo() == E_SUCCESS)
 					{
 						lastCascadeUpdate=time(NULL);
 						bOneUpdateDone = true;
 						CAMsg::printMsg(LOG_DEBUG,"InfoService: Successfully sent Cascade information.\n");
+					}
+					else if (pInfoService->m_pMix->isConnected())
+					{
+						CAMsg::printMsg(LOG_WARNING,"InfoService: Could not send Cascade information.\n");
 					}
 				}
 				currentTime=time(NULL);
@@ -139,7 +139,7 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 				{
 					if (pInfoService->sendMixHelo() != E_SUCCESS)
 					{
-						CAMsg::printMsg(LOG_ERR,"InfoService: Could not send MixInfo information.\n");
+						CAMsg::printMsg(LOG_WARNING,"InfoService: Could not send MixInfo information.\n");
 					}
 					else
 					{
@@ -1142,7 +1142,7 @@ UINT8* CAInfoService::getCascadeHeloXMLAsString(UINT32& a_len)
 
 		if(m_pMix->getMixCascadeInfo(docMixInfo)!=E_SUCCESS)
 		{
-	    CAMsg::printMsg(LOG_INFO,"InfoService: Cascade not yet configured.\n");
+			// CAMsg::printMsg(LOG_INFO,"InfoService: Cascade not yet configured.\n");
 			goto ERR;
 		}
 		//insert (or update) the Timestamp

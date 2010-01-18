@@ -140,10 +140,10 @@ SINT32 CAFirstMix::init()
 				TargetInterface oNextMix;
 				CALibProxytest::getOptions()->getTargetInterface(oNextMix,i+1);
 				if(oNextMix.target_type==TARGET_MIX)
-					{
-						pAddrNext=oNextMix.addr;
-						break;
-					}
+				{
+					pAddrNext=oNextMix.addr;
+					break;
+				}
 				delete oNextMix.addr;
 				oNextMix.addr = NULL;
 			}
@@ -167,13 +167,13 @@ SINT32 CAFirstMix::init()
 		//CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET SendLowWatSize: %i\n",((*m_pMuxOut))->getSendLowWat());
 
 		/** Connect to the next mix */
-		if(connectToNextMix(pAddrNext) != E_SUCCESS)
-			{
-				delete pAddrNext;
-				pAddrNext = NULL;
-			CAMsg::printMsg(LOG_DEBUG, "CAFirstMix::init - Unable to connect to next mix\n");
-				return E_UNKNOWN;
-			}
+		if((retSockets = connectToNextMix(pAddrNext)) != E_SUCCESS)
+		{
+			delete pAddrNext;
+			pAddrNext = NULL;
+			CAMsg::printMsg(LOG_DEBUG, "CAFirstMix::init - Unable to connect to next mix. Reason: %s (%i)\n", GET_NET_ERROR_STR(retSockets), retSockets);				
+			return E_UNKNOWN;
+		}
 		delete pAddrNext;
 		pAddrNext = NULL;
 		MONITORING_FIRE_NET_EVENT(ev_net_nextConnected);
@@ -267,7 +267,7 @@ SINT32 CAFirstMix::init()
 #ifdef REPLAY_DETECTION
 //		sendReplayTimestampRequestsToAllMixes();
 #endif
-		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix init() succeded\n");
+		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix init() succeeded\n");
 		MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextSuccessful);
 		return E_SUCCESS;
 }
@@ -278,6 +278,8 @@ SINT32 CAFirstMix::connectToNextMix(CASocketAddr* a_pAddrNext)
 	a_pAddrNext->toString(buff,255);
 	CAMsg::printMsg(LOG_INFO,"Try to connect to next Mix on %s ...\n",buff);
 	SINT32 err = E_UNKNOWN;
+	SINT32 errLast = E_SUCCESS;
+	
 	for(UINT32 i=0; i < 100; i++)
 	{
 #ifdef DYNAMIC_MIX
@@ -292,14 +294,22 @@ SINT32 CAFirstMix::connectToNextMix(CASocketAddr* a_pAddrNext)
 		if(err != E_SUCCESS)
 		{
 			err=GET_NET_ERROR;
-#ifdef _DEBUG
-		 	CAMsg::printMsg(LOG_DEBUG,"Con-Error: %i\n",err);
-#endif
+			
 			if(err!=ERR_INTERN_TIMEDOUT&&err!=ERR_INTERN_CONNREFUSED)
 				break;
+				
+			if (errLast != err || i % 10 == 0)
+			{
+				CAMsg::printMsg(LOG_ERR, "Cannot connect to next Mix on %s. Reason: %s (%i). Retrying...\n",
+					buff, GET_NET_ERROR_STR(err), err);
+				errLast = err;
+			}
+			else
+			{
 #ifdef _DEBUG
-			CAMsg::printMsg(LOG_DEBUG,"Cannot connect... retrying\n");
+				CAMsg::printMsg(LOG_DEBUG,"Cannot connect... retrying\n");
 #endif
+			}
 			sSleep(10);
 		}
 		else
