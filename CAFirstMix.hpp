@@ -431,7 +431,6 @@ private:
 	/* handlerFunction for Terms And Conditions invoked during user Login */
 	termsAndConditionMixAnswer_t *handleTermsAndConditionsLogin(XERCES_CPP_NAMESPACE::DOMDocument *request);
 
-	SINT32 createSockets(bool a_bPrintMessages);
 	static const UINT32 MAX_CONCURRENT_NEW_CONNECTIONS;
 
 	volatile UINT32 m_newConnections;

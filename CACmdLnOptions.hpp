@@ -33,6 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include "CASocketAddrUnix.hpp"
 #endif
 #include "CASignature.hpp"
+#include "CASocket.hpp"
 #include "CAMultiSignature.hpp"
 #include "CACertificate.hpp"
 #include "CAThread.hpp"
@@ -257,6 +258,7 @@ class CACmdLnOptions
 		UINT16 getSOCKSServerPort();
 
 
+		SINT32 createSockets(bool a_bPrintMessages, CASocket** a_sockets, UINT32 a_socketsLen);
 		UINT32 getListenerInterfaceCount(){return m_cnListenerInterfaces;}
 		CAListenerInterface* getListenerInterface(UINT32 nr)
 		{

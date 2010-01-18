@@ -100,64 +100,7 @@ SINT32 CAFirstMix::initOnce()
 		return E_SUCCESS;
 	}
 
-SINT32 CAFirstMix::createSockets(bool a_bMessages)
-{
-		UINT32 aktSocket;
-		UINT8 buff[255];
-		for(aktSocket=0;aktSocket < CALibProxytest::getOptions()->getListenerInterfaceCount(); aktSocket++)
-			{
-				CAListenerInterface* pListener=NULL;
-				pListener=CALibProxytest::getOptions()->getListenerInterface(aktSocket+1);
-				if(pListener==NULL)
-					{
-            CAMsg::printMsg(LOG_CRIT,"Error: Listener interface invalid.\n");
-						return E_UNKNOWN;
-					}
-				if(pListener->isVirtual())
-					{
-						delete pListener;
-						pListener = NULL;
-						continue;
-					}
-				m_arrSocketsIn[aktSocket] = new CASocket();
-				m_arrSocketsIn[aktSocket]->create();
-				m_arrSocketsIn[aktSocket]->setReuseAddr(true);
-				CASocketAddr* pAddr=pListener->getAddr();
-				pAddr->toString(buff,255);
-				if (a_bMessages)
-				{
-					CAMsg::printMsg(LOG_DEBUG,"Listening on Interface: %s\n",buff);
-				}
-				delete pListener;
-				pListener = NULL;
-#ifndef _WIN32
-				//we have to be a temporaly superuser if port <1024...
-				int old_uid=geteuid();
-				if(pAddr->getType()==AF_INET&&((CASocketAddrINet*)pAddr)->getPort()<1024)
-					{
-						if(seteuid(0)==-1) //changing to root
-							CAMsg::printMsg(LOG_CRIT,"Setuid failed! You must start the mix as root in order to use listener ports lower than 1024!\n");
-					}
-#endif
-				SINT32 ret=m_arrSocketsIn[aktSocket]->listen(*pAddr);
-				delete pAddr;
-				pAddr = NULL;
-#ifndef _WIN32
-				seteuid(old_uid);
-#endif
-				if(ret!=E_SUCCESS)
-					{
-            CAMsg::printMsg(LOG_CRIT,"Socket error while listening on interface %d\n",aktSocket+1);
-						return E_UNKNOWN;
-					}
-			}
 
-		if (a_bMessages)
-		{
-			CAMsg::printMsg(LOG_DEBUG,"FirstMix Init - listening on all interfaces\n");
-		}
-		return E_SUCCESS;
-}
 
 SINT32 CAFirstMix::init()
 	{
@@ -174,13 +117,18 @@ SINT32 CAFirstMix::init()
 		m_nMixedPackets=0; //reset to zero after each restart (at the moment neccessary for infoservice)
 		m_bRestart=false;
 		//Establishing all Listeners
+		UINT32 i;
 		m_arrSocketsIn=new CASocket*[m_nSocketsIn];
+		for (i = 0; i < m_nSocketsIn; i++)
+		{
+			m_arrSocketsIn[i] = NULL;
+		}
 		//initiate ownerDocument for tc templates
 		m_templatesOwner = createDOMDocument();
 
-		SINT32 retSockets = createSockets(true);
+		SINT32 retSockets = CALibProxytest::getOptions()->createSockets(true, m_arrSocketsIn, m_nSocketsIn);
 
-		UINT32 i;
+
 		if (retSockets != E_SUCCESS)
 		{
 			return retSockets;
@@ -1189,7 +1137,10 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 					sSleep(1);
 				}
 		}
-		pFirstMix->createSockets(false);
+		if (CALibProxytest::getOptions()->createSockets(false,pFirstMix-> m_arrSocketsIn, pFirstMix->m_nSocketsIn) != E_SUCCESS)
+		{
+			goto END_THREAD;
+		}
 		for(i=0;i<nSocketsIn;i++)
 		{
 			psocketgroupAccept->add(*socketsIn[i]);
@@ -1222,7 +1173,11 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 						}
 					}
 	
-					pFirstMix->createSockets(false);
+					if (CALibProxytest::getOptions()->createSockets(false,pFirstMix-> m_arrSocketsIn, pFirstMix->m_nSocketsIn) != E_SUCCESS)
+					{
+						// could not listen
+						goto END_THREAD;
+					}
 					for(i=0;i<nSocketsIn;i++)
 					{
 						psocketgroupAccept->add(*socketsIn[i]);
@@ -2419,9 +2374,12 @@ SINT32 CAFirstMix::clean()
 			{
 				for(UINT32 i=0;i<m_nSocketsIn;i++)
 				{
-					m_arrSocketsIn[i]->close();
-					delete m_arrSocketsIn[i];
-					m_arrSocketsIn[i] = NULL;
+					if (m_arrSocketsIn[i] != NULL)
+					{
+						m_arrSocketsIn[i]->close();
+						delete m_arrSocketsIn[i];
+						m_arrSocketsIn[i] = NULL;
+					}
 				}
 				delete[] m_arrSocketsIn;
 			}

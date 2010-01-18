@@ -2069,15 +2069,27 @@ SINT32 CACmdLnOptions::setUserID(DOMElement* elemGeneral)
 		memcpy(m_strUser,tmpBuff,tmpLen);
 		m_strUser[tmpLen]=0;
 	}
-	
+
 #ifndef WIN32
 		if(getUser(buff,255)==E_SUCCESS) //switching user
 			{
 				struct passwd* pwd=getpwnam((char*)buff);
 				if(pwd==NULL || (setegid(pwd->pw_gid)==-1) || (seteuid(pwd->pw_uid)==-1) )
-					CAMsg::printMsg(LOG_ERR,"Could not switch to effective user %s!\n",buff);
+				{
+					if (pwd==NULL)
+					{
+						CAMsg::printMsg(LOG_ERR,
+								"Could not switch to effective user '%s'! Reason: User '%s' does not exist on this system. Create this user first.\n",
+														buff, buff);
+					}
+					else
+					{
+						CAMsg::printMsg(LOG_ERR,"Could not switch to effective user '%s'! Reason: '%s' (%i)\n",
+								buff, GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
+					}
+				}
 				else
-					CAMsg::printMsg(LOG_INFO,"Switched to effective user %s!\n",buff);
+					CAMsg::printMsg(LOG_INFO,"Switched to effective user '%s'!\n",buff);
 			}
 
 		if(geteuid()==0)
@@ -2085,7 +2097,7 @@ SINT32 CACmdLnOptions::setUserID(DOMElement* elemGeneral)
 #endif
 	
 	
-	
+
 	return E_SUCCESS;
 }
 
@@ -2122,7 +2134,8 @@ SINT32 CACmdLnOptions::setNrOfFileDescriptors(DOMElement* elemGeneral)
 				lim.rlim_cur = lim.rlim_max = m_nrOfOpenFiles;
 				if (setrlimit(RLIMIT_NOFILE, &lim) != 0)
 				{
-					CAMsg::printMsg(LOG_CRIT,"Could not set MAX open files to: %u -- Exiting!\n",m_nrOfOpenFiles);
+					CAMsg::printMsg(LOG_CRIT,"Could not set MAX open files to: %u Reason: '%s' (%i) \nYou might have insufficient user rights. If so, switch to a privileged user or do not set the number of file descriptors. -- Exiting!\n",
+							m_nrOfOpenFiles, GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
 					exit(EXIT_FAILURE);
 				}
 			}
@@ -2182,7 +2195,7 @@ SINT32 CACmdLnOptions::initLogging()
 	
 	CAMsg::init();
 			
-		
+
 #ifndef ONLY_LOCAL_PROXY
 	if(isSyslogEnabled())
 	{
@@ -2201,7 +2214,7 @@ SINT32 CACmdLnOptions::initLogging()
 	if (m_bLogConsole || iLogOptions == 0)
 	{
 		iLogOptions |= MSG_STDOUT;
-	}	
+	}
 	ret = CAMsg::setLogOptions(iLogOptions);
 	if(isEncryptedLogEnabled())
 	{
@@ -2221,7 +2234,7 @@ SINT32 CACmdLnOptions::initLogging()
 				CAMsg::printMsg(LOG_CRIT, "We need a log file in daemon mode in order to get any messages! Exiting...\n");
 				return ret;
 			}
-	}		
+	}
 	
 	return E_SUCCESS;
 }
@@ -2321,7 +2334,14 @@ SINT32 CACmdLnOptions::setLoggingOptions(DOMElement* elemGeneral)
 		}
 		
 	}
-	return initLogging();
+
+	SINT32 ret = initLogging();
+	if (ret == E_SUCCESS)
+	{
+		CAMsg::printMsg(LOG_INFO,MIX_VERSION_INFO);
+	}
+
+	return ret;
 }
 
 /* append the mix description to the mix info DOM structure
@@ -2475,7 +2495,7 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 		UINT8 tmpAKI[tmpAKIlen];
 		if(tmpCert->getAuthorityKeyIdentifier(tmpAKI, &tmpAKIlen) != E_SUCCESS)
 		{
-			CAMsg::printMsg(LOG_WARNING, "Could not get AKI of own certificate.\n");
+			CAMsg::printMsg(LOG_WARNING, "Could not get AKI of own certificate. This is not a critical problem, but you should create a new Mix certificate as soon as possible.\n");
 		}
 		else
 		{
@@ -2539,7 +2559,7 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 	{
 		if(strncmp(m_strMixID, (char*)tmpBuff, strlen((char*)tmpBuff) ) != 0)
 		{
-			CAMsg::printMsg(LOG_CRIT,"Error, two different MixIDs specified (%s and %s)!\n", m_strMixID, tmpBuff);
+			CAMsg::printMsg(LOG_CRIT,"The configuration file seems inconsistent: it contains another Mix ID (%s) than calculated from the Mix certificate(s), which is %s. Please re-import you mix certificate in the configuration tool, or set the correct mix ID manually by editing the configuration file.\n", m_strMixID, tmpBuff);
 			return E_UNKNOWN;
 		}
 	}
@@ -3129,8 +3149,122 @@ SINT32 CACmdLnOptions::setListenerInterfaces(DOMElement *elemNetwork)
 	    // -- inserted by ronin <ronin2@web.de> 2004-08-16
 		appendMixInfo_internal(elemListenerInterfaces, WITH_SUBTREE);
     }
-	return E_SUCCESS;
+
+	UINT32 i;
+	SINT32 ret;
+	CASocket** arrSocketsIn=new CASocket*[getListenerInterfaceCount()];
+	for (i = 0; i < getListenerInterfaceCount(); i++)
+	{
+		arrSocketsIn[i] = NULL;
+	}
+
+	ret = createSockets(false, arrSocketsIn, getListenerInterfaceCount());
+
+	for(i=0;i<getListenerInterfaceCount();i++)
+	{
+		if (arrSocketsIn[i] != NULL)
+		{
+			arrSocketsIn[i]->close();
+			delete arrSocketsIn[i];
+			arrSocketsIn[i] = NULL;
+		}
+	}
+	delete[] arrSocketsIn;
+	arrSocketsIn=NULL;
+
+	if (ret != E_SUCCESS)
+	{
+		CAMsg::printMsg(LOG_CRIT, "Could not listen on at least one of the specified interfaces!\n");
+	}
+
+	return ret;
 }
+
+
+SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UINT32 a_socketsLen)
+{
+		UINT32 aktSocket;
+		UINT8 buff[255];
+		SINT32 ret = E_UNKNOWN;
+
+		if (a_socketsLen != getListenerInterfaceCount())
+		{
+			CAMsg::printMsg(LOG_CRIT,"Could not create sockets, as number of listener interfaces differs from the size of the given socket array!\n");
+
+			return E_SPACE;
+		}
+
+		for(aktSocket=0;aktSocket < getListenerInterfaceCount(); aktSocket++)
+			{
+				CAListenerInterface* pListener=NULL;
+				pListener=getListenerInterface(aktSocket+1);
+				if(pListener==NULL)
+					{
+            CAMsg::printMsg(LOG_CRIT,"Error: Listener interface %d is invalid.\n", aktSocket+1);
+						return E_UNKNOWN;
+					}
+				if(pListener->isVirtual())
+					{
+						delete pListener;
+						pListener = NULL;
+						continue;
+					}
+				ret = E_SUCCESS;
+				a_sockets[aktSocket] = new CASocket();
+				a_sockets[aktSocket]->create();
+				a_sockets[aktSocket]->setReuseAddr(true);
+				CASocketAddr* pAddr=pListener->getAddr();
+				pAddr->toString(buff,255);
+
+				delete pListener;
+				pListener = NULL;
+#ifndef _WIN32
+				//we have to be a temporary superuser if port <1024...
+				int old_uid=geteuid();
+				if(pAddr->getType()==AF_INET&&((CASocketAddrINet*)pAddr)->getPort()<1024)
+				{
+					if(seteuid(0)==-1) //changing to root
+						CAMsg::printMsg(LOG_CRIT,"Setuid failed! Cannot listen on interface %d (%s). Reason: You must start the mix as root in order to use listener ports lower than 1024!\n",
+								aktSocket+1, buff);
+				}
+#endif
+				ret=a_sockets[aktSocket]->listen(*pAddr);
+				delete pAddr;
+				pAddr = NULL;
+
+				if(ret!=E_SUCCESS)
+				{
+					CAMsg::printMsg(LOG_CRIT,"Socket error while listening on interface %d (%s). Reason: '%s' (%i)\n",aktSocket+1, buff,
+							GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
+				}
+
+#ifndef _WIN32
+				seteuid(old_uid);
+#endif
+				if(ret!=E_SUCCESS)
+				{
+						return E_UNKNOWN;
+				}
+
+				if (a_bMessages)
+				{
+						CAMsg::printMsg(LOG_DEBUG,"Listening on Interface: %s\n",buff);
+				}
+			}
+
+		if (ret != E_SUCCESS)
+		{
+			CAMsg::printMsg(LOG_CRIT,"Could not find any valid (non-virtual) listener interface!\n");
+		}
+		else if (a_bMessages)
+		{
+			CAMsg::printMsg(LOG_DEBUG,"Listening on all interfaces.\n");
+		}
+
+
+		return ret;
+}
+
 
 /* Proxy settings and next mix settings */
 SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
@@ -4023,7 +4157,6 @@ SINT32 setRegExpressions(DOMElement *rootElement, const char* const childElement
 #endif
 	return E_SUCCESS;
 }
-
 
 
 
