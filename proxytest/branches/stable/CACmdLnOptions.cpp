@@ -3186,21 +3186,16 @@ SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UIN
 		UINT32 aktSocket;
 		UINT8 buff[255];
 		SINT32 ret = E_UNKNOWN;
+		UINT32 currentInterface;
 
-		if (a_socketsLen != getListenerInterfaceCount())
-		{
-			CAMsg::printMsg(LOG_CRIT,"Could not create sockets, as number of listener interfaces differs from the size of the given socket array!\n");
-
-			return E_SPACE;
-		}
-
-		for(aktSocket=0;aktSocket < getListenerInterfaceCount(); aktSocket++)
+		aktSocket = -1;
+		for(currentInterface=0;currentInterface < getListenerInterfaceCount(); currentInterface++)
 			{
 				CAListenerInterface* pListener=NULL;
-				pListener=getListenerInterface(aktSocket+1);
+				pListener=getListenerInterface(currentInterface+1);
 				if(pListener==NULL)
 					{
-            CAMsg::printMsg(LOG_CRIT,"Error: Listener interface %d is invalid.\n", aktSocket+1);
+            CAMsg::printMsg(LOG_CRIT,"Error: Listener interface %d is invalid.\n", currentInterface+1);
 						return E_UNKNOWN;
 					}
 				if(pListener->isVirtual())
@@ -3209,6 +3204,16 @@ SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UIN
 						pListener = NULL;
 						continue;
 					}
+				aktSocket++;
+				
+				if (a_socketsLen < (aktSocket + 1))
+				{
+					CAMsg::printMsg(LOG_CRIT, "Found %d listener sockets, but we have only reserved space for %d sockets!\n", (aktSocket + 1), a_socketsLen);
+
+					ret = E_SPACE;
+					break;
+				}
+				
 				ret = E_SUCCESS;
 				a_sockets[aktSocket] = new CASocket();
 				a_sockets[aktSocket]->create();
@@ -3225,7 +3230,7 @@ SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UIN
 				{
 					if(seteuid(0)==-1) //changing to root
 						CAMsg::printMsg(LOG_CRIT,"Setuid failed! Cannot listen on interface %d (%s). Reason: You must start the mix as root in order to use listener ports lower than 1024!\n",
-								aktSocket+1, buff);
+								currentInterface+1, buff);
 				}
 #endif
 				ret=a_sockets[aktSocket]->listen(*pAddr);
@@ -3234,7 +3239,7 @@ SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UIN
 
 				if(ret!=E_SUCCESS)
 				{
-					CAMsg::printMsg(LOG_CRIT,"Socket error while listening on interface %d (%s). Reason: '%s' (%i)\n",aktSocket+1, buff,
+					CAMsg::printMsg(LOG_CRIT,"Socket error while listening on interface %d (%s). Reason: '%s' (%i)\n",currentInterface+1, buff,
 							GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
 				}
 
@@ -3252,15 +3257,22 @@ SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UIN
 				}
 			}
 
-		if (ret != E_SUCCESS)
+		if (ret == E_UNKNOWN)
 		{
 			CAMsg::printMsg(LOG_CRIT,"Could not find any valid (non-virtual) listener interface!\n");
 		}
-		else if (a_bMessages)
+		else if (ret == E_SUCCESS)
 		{
-			CAMsg::printMsg(LOG_DEBUG,"Listening on all interfaces.\n");
+			if (a_socketsLen > aktSocket + 1)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Requested %d listener sockets, but found only %d valid listeners!\n", a_socketsLen, (aktSocket + 1));
+				ret = E_SPACE;
+			}
+			else if (a_bMessages)
+			{
+				CAMsg::printMsg(LOG_DEBUG,"Listening on all interfaces.\n");
+			}
 		}
-
 
 		return ret;
 }
