@@ -459,7 +459,7 @@ SINT32 CAMiddleMix::init()
 
 		if(m_pMuxOut->getCASocket()->create(pAddrNext->getType())!=E_SUCCESS)
 			{
-				CAMsg::printMsg(LOG_CRIT,"Init: Cannot create SOCKET for outgoing conncetion...\n");
+				CAMsg::printMsg(LOG_CRIT,"Init: Cannot create SOCKET for outgoing connection...\n");
 				return E_UNKNOWN;
 			}
 		m_pMuxOut->getCASocket()->setRecvBuff(50*MIXPACKET_SIZE);
@@ -480,7 +480,7 @@ SINT32 CAMiddleMix::init()
 		if(pListener==NULL)
 			{
 				CAMsg::printMsg(LOG_CRIT," failed!\n");
-				CAMsg::printMsg(LOG_CRIT,"Reason: no useable (non virtual) interface found!\n");
+				CAMsg::printMsg(LOG_CRIT,"Reason: no usable (non virtual) interface found!\n");
 				return E_UNKNOWN;
 			}
 		const CASocketAddr* pAddr=NULL;
