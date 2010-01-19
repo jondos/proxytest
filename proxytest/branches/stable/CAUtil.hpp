@@ -174,6 +174,8 @@ SINT32 setDOMElementValue(DOMElement* pElem, SINT32 value);
 SINT32 setDOMElementValue(DOMElement* pElem, const UINT64 text);
 SINT32 setDOMElementValue(DOMElement* pElem, const SINT64 text);
 
+SINT32 getNodeName(const DOMNode * const pElem, UINT8* value,UINT32* valuelen);
+
 SINT32 getDOMElementValue(const DOMElement * const pElem, UINT64 &value);
 SINT32 getDOMElementValue(const DOMElement * const pElem, SINT64 &value);
 
