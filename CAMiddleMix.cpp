@@ -124,6 +124,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 		bool bFoundNextMix=false;
 		DOMNode* child=root->getFirstChild();
 		SINT32 result;
+		SINT32 resultCompatibility = E_SUCCESS;
 		while(child!=NULL)
 			{
 				if(equals(child->getNodeName(),"Mix"))
@@ -142,15 +143,10 @@ SINT32 CAMiddleMix::processKeyExchange()
 								CAMsg::printMsg(LOG_INFO,"Could not verify Key Info from next Mix!\n");
 								return E_UNKNOWN;
 							}
-
-						 if ((result = checkCompatibility(child, "next")) != E_SUCCESS)
+						
+						if (resultCompatibility == E_SUCCESS)
 						{
-							if (doc != NULL)
-							{
-								doc->release();
-								doc = NULL;
-							}
-							return result;
+							resultCompatibility = checkCompatibility(child, "next");
 						}
 
 						//extracting Nonce and computing Hash of them
@@ -247,6 +243,8 @@ SINT32 CAMiddleMix::processKeyExchange()
 					}
 				child=child->getNextSibling();
 			}
+			
+			
 		if(!bFoundNextMix)
 			{
 				CAMsg::printMsg(LOG_INFO,"Error -- no Key Info from Mix n+1 found!\n");
@@ -419,14 +417,17 @@ SINT32 CAMiddleMix::processKeyExchange()
 			return E_UNKNOWN;
 		}
 
-		 if ((result = checkCompatibility(elemRoot, "previous")) != E_SUCCESS)
-			{
+			
+			
+		 if (resultCompatibility != E_SUCCESS ||
+			(resultCompatibility = checkCompatibility(elemRoot, "previous")) != E_SUCCESS)
+		 {
 				if (doc != NULL)
 				{
 					doc->release();
 					doc = NULL;
 				}
-				return result;
+				return resultCompatibility;
 			}
 
 		//Verifying nonce

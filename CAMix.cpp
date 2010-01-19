@@ -689,7 +689,7 @@ SINT32 CAMix::checkCompatibility(DOMNode* a_parent, const char* a_mixPosition)
 	}
 	else if (iCompare < 0)
 	{
-		strComment = (UINT8*)" Our version (" MIX_VERSION ") is older. If the connection fails for an unknown reason, you should think about an update.";
+		strComment = (UINT8*)" Our version (" MIX_VERSION ") might be too old. If the connection fails for an unknown reason, you should think about an update.";
 		iLogLevel = LOG_WARNING;
 	}
 	else
@@ -703,7 +703,7 @@ SINT32 CAMix::checkCompatibility(DOMNode* a_parent, const char* a_mixPosition)
 		}
 		else
 		{
-			strComment = (UINT8*)" We have a newer version (" MIX_VERSION "), but both should work together.";
+			strComment = (UINT8*)" We have a newer version (" MIX_VERSION "), but both are known to work fine together.";
 		}
 	}
 
