@@ -178,12 +178,8 @@ SINT32 CAFirstMix::init()
 		pAddrNext = NULL;
 		MONITORING_FIRE_NET_EVENT(ev_net_nextConnected);
 		CAMsg::printMsg(LOG_INFO," connected!\n");
-		if(m_pMuxOut->getCASocket()->setKeepAlive((UINT32)1800)!=E_SUCCESS)
-			{
-				CAMsg::printMsg(LOG_INFO,"Socket option TCP-KEEP-ALIVE returned an error - so not set!\n");
-				if(m_pMuxOut->getCASocket()->setKeepAlive(true)!=E_SUCCESS)
-					CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
-			}
+		m_pMuxOut->getCASocket()->setKeepAlive((UINT32)1800);
+
 
     if(processKeyExchange()!=E_SUCCESS)
     {
@@ -504,7 +500,7 @@ SINT32 CAFirstMix::processKeyExchange()
     delete []tmpB;
     tmpB = NULL;
 
-    //Sending symetric key...
+    //Sending symmetric key...
     child=elemMixes->getFirstChild();
     while(child!=NULL)
     {
@@ -530,6 +526,17 @@ SINT32 CAFirstMix::processKeyExchange()
                 return E_UNKNOWN;
             }
             CAMsg::printMsg(LOG_DEBUG,"Successfully verified XML signature of next mix!\n");
+
+            if ((result = checkCompatibility(child, "next")) != E_SUCCESS)
+            {
+				if (doc != NULL)
+				{
+					doc->release();
+					doc = NULL;
+				}
+				return result;
+            }
+
             DOMNode* rsaKey=child->getFirstChild();
             CAASymCipher oRSA;
             oRSA.setPublicKeyAsDOMNode(rsaKey);
@@ -562,8 +569,9 @@ SINT32 CAFirstMix::processKeyExchange()
                 setDOMElementValue(elemNonceHash,arNonce);
                 elemRoot->appendChild(elemNonceHash);
             }
-            UINT32 outlen=5000;
-            UINT8* out=new UINT8[outlen];
+
+            appendCompatibilityInfo(elemRoot);
+
 			///Getting the KeepAlive Traffic...
 			DOMElement* elemKeepAlive=NULL;
 			DOMElement* elemKeepAliveSendInterval=NULL;
@@ -572,7 +580,7 @@ SINT32 CAFirstMix::processKeyExchange()
 			getDOMChildByName(elemKeepAlive,"SendInterval",elemKeepAliveSendInterval,false);
 			getDOMChildByName(elemKeepAlive,"ReceiveInterval",elemKeepAliveRecvInterval,false);
 			UINT32 tmpSendInterval,tmpRecvInterval;
-			getDOMElementValue(elemKeepAliveSendInterval,tmpSendInterval,0xFFFFFFFF); //if now send interval was given set it to "infinite"
+			getDOMElementValue(elemKeepAliveSendInterval,tmpSendInterval,0xFFFFFFFF); //if no send interval was given set it to "infinite"
 			getDOMElementValue(elemKeepAliveRecvInterval,tmpRecvInterval,0xFFFFFFFF); //if no recv interval was given --> set it to "infinite"
 			CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Getting offer -- SendInterval %u -- ReceiveInterval %u\n",tmpSendInterval,tmpRecvInterval);
 			// Add Info about KeepAlive traffic
@@ -597,6 +605,9 @@ SINT32 CAFirstMix::processKeyExchange()
 
             //m_pSignature->signXML(elemRoot);
             m_pMultiSignature->signXML(elemRoot, false);
+
+			UINT32 outlen=5000;
+			UINT8* out=new UINT8[outlen];
 			DOM_Output::dumpToMem(docSymKey,out,&outlen);
             if (docSymKey != NULL)
             {
@@ -2159,9 +2170,9 @@ loop_break:
 #endif
 
 #ifndef LOG_DIALOG
-		CAMsg::printMsg(LOG_DEBUG,"User login: finished\n");
+		CAMsg::printMsg(LOG_INFO,"User login: finished\n");
 #else
-		CAMsg::printMsg(LOG_DEBUG,"User login: finished -- connection-ID: %Lu -- country-id: %u -- dialog: %s\n",pHashEntry->id,pHashEntry->countryID,pHashEntry->strDialog);
+		CAMsg::printMsg(LOG_INFO,"User login: finished -- connection-ID: %Lu -- country-id: %u -- dialog: %s\n",pHashEntry->id,pHashEntry->countryID,pHashEntry->strDialog);
 #endif
 		return E_SUCCESS;
 	}

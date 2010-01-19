@@ -119,12 +119,8 @@ SINT32 CALastMix::init()
 		// connected to previous mix
 		m_pMuxIn->getCASocket()->setRecvBuff(500*MIXPACKET_SIZE);
 		m_pMuxIn->getCASocket()->setSendBuff(500*MIXPACKET_SIZE);
-		if(m_pMuxIn->getCASocket()->setKeepAlive((UINT32)1800)!=E_SUCCESS)
-		{
-			CAMsg::printMsg(LOG_INFO,"Socket option TCP-KEEP-ALIVE returned an error - so not set!\n");
-			if(m_pMuxIn->getCASocket()->setKeepAlive(true)!=E_SUCCESS)
-				CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
-		}
+		m_pMuxIn->getCASocket()->setKeepAlive((UINT32)1800);
+
 		MONITORING_FIRE_NET_EVENT(ev_net_prevConnected);
 		CAMsg::printMsg(LOG_INFO,"connected!\n");
 
@@ -243,6 +239,9 @@ SINT32 CALastMix::processKeyExchange()
 		DOMElement* nodeRsaKey=NULL;
 		m_pRSA->getPublicKeyAsDOMElement(nodeRsaKey,doc);
 		elemMix->appendChild(nodeRsaKey);
+
+		appendCompatibilityInfo(elemMix);
+
 		//inserting Nonce
 		DOMElement* elemNonce=createDOMElement(doc,"Nonce");
 		UINT8 arNonce[16];
@@ -314,16 +313,16 @@ SINT32 CALastMix::processKeyExchange()
 		CAMsg::printMsg(LOG_INFO,"Waiting for length of symmetric key from previous Mix...\n");
 		if(m_pMuxIn->getCASocket()->receiveFully((UINT8*) &tmp, sizeof(tmp)) != E_SUCCESS)
 		{
-			CAMsg::printMsg(LOG_CRIT,"Error receiving key info length!\n");
+			CAMsg::printMsg(LOG_CRIT,"Error receiving symmetric key info length!\n");
 			return E_UNKNOWN;
 		}
 		len = ntohl(tmp);
 		messageBuff=new UINT8[len+1]; //+1 for the closing Zero
-		CAMsg::printMsg(LOG_INFO,"Got it - length of symmetric key is: %i\n",len);
-		CAMsg::printMsg(LOG_INFO,"Waiting for symmetric key from previous Mix...\n");
+		CAMsg::printMsg(LOG_INFO,"Waiting for symmetric key from previous Mix with length %i...\n", len);
 		if(m_pMuxIn->getCASocket()->receiveFully(messageBuff, len) != E_SUCCESS)
 		{
-			CAMsg::printMsg(LOG_ERR,"Error receiving symmetric key!\n");
+			CAMsg::printMsg(LOG_ERR,"Socket error occurred while receiving the symmetric key of the previous mix! Reason: '%s' (%i)\n",
+					GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
 			delete []messageBuff;
 			messageBuff = NULL;
 			return E_UNKNOWN;
@@ -358,16 +357,28 @@ SINT32 CALastMix::processKeyExchange()
 		DOMElement* elemRoot=doc->getDocumentElement();
 		if(elemRoot == NULL)
 		{
-			CAMsg::printMsg(LOG_CRIT,"Symmetric key XML is invalid!\n");
+			CAMsg::printMsg(LOG_CRIT,"Symmetric key XML structure is invalid!\n");
+			delete []messageBuff;
+			messageBuff = NULL;
 			if (doc != NULL)
 			{
 				doc->release();
 				doc = NULL;
 			}
-			delete []messageBuff;
-			messageBuff = NULL;
 			return E_UNKNOWN;
 		}
+
+		 if ((result = checkCompatibility(elemRoot, "previous")) != E_SUCCESS)
+		{
+			if (doc != NULL)
+			{
+				doc->release();
+				doc = NULL;
+			}
+			return result;
+		}
+
+
 		elemNonce=NULL;
 		getDOMChildByName(elemRoot,"Nonce",elemNonce,false);
 		tmpLen=50;
@@ -379,13 +390,13 @@ SINT32 CALastMix::processKeyExchange()
 			)
 		{
 			CAMsg::printMsg(LOG_CRIT,"Could not verify the nonce!\n");
+			delete []messageBuff;
+			messageBuff = NULL;
 			if (doc != NULL)
 			{
 				doc->release();
 				doc = NULL;
 			}
-			delete []messageBuff;
-			messageBuff = NULL;
 			return E_UNKNOWN;
 		}
 		CAMsg::printMsg(LOG_INFO,"Verified the symmetric key!\n");
@@ -397,22 +408,22 @@ SINT32 CALastMix::processKeyExchange()
 		messageBuff = NULL;
 		if(ret!=E_SUCCESS||keySize!=64)
 		{
+			CAMsg::printMsg(LOG_CRIT,"Could not decrypt the symmetric key!\n");
 			if (doc != NULL)
 			{
 				doc->release();
 				doc = NULL;
 			}
-			CAMsg::printMsg(LOG_CRIT,"Could not decrypt the symmetric key!\n");
 			return E_UNKNOWN;
 		}
 		if(m_pMuxIn->setReceiveKey(key,32)!=E_SUCCESS||m_pMuxIn->setSendKey(key+32,32)!=E_SUCCESS)
 		{
+			CAMsg::printMsg(LOG_CRIT,"Could not set the symmetric key to be used by the MuxSocket!\n");
 			if (doc != NULL)
 			{
 				doc->release();
 				doc = NULL;
 			}
-			CAMsg::printMsg(LOG_CRIT,"Could not set the symmetric key to be used by the MuxSocket!\n");
 			return E_UNKNOWN;
 		}
 		m_pMuxIn->setCrypt(true);
@@ -431,12 +442,14 @@ SINT32 CALastMix::processKeyExchange()
 		if(m_u32KeepAliveSendInterval>10000)
 			m_u32KeepAliveSendInterval-=10000; //make the send interval a little bit smaller than the related receive intervall
 		m_u32KeepAliveRecvInterval=max(u32KeepAliveRecvInterval,tmpSendInterval);
+		CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Calculated -- SendInterval %u -- Receive Interval %u\n",m_u32KeepAliveSendInterval,m_u32KeepAliveRecvInterval);
+
 		if (doc != NULL)
 		{
 			doc->release();
 			doc = NULL;
 		}
-		CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Calculated -- SendInterval %u -- Receive Interval %u\n",m_u32KeepAliveSendInterval,m_u32KeepAliveRecvInterval);
+
 		return E_SUCCESS;
 	}
 

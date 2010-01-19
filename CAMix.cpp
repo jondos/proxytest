@@ -620,6 +620,175 @@ DOMNode *CAMix::termsAndConditionsInfoNode(XERCES_CPP_NAMESPACE::DOMDocument *ow
 
 }
 
+
+SINT32 CAMix::appendCompatibilityInfo(DOMNode* a_parent)
+{
+	DOMElement* elemCompatibility=createDOMElement(a_parent->getOwnerDocument(),"Compatibility");
+	setDOMElementAttribute(elemCompatibility,"version",(UINT8*)MIX_VERSION);
+	a_parent->appendChild(elemCompatibility);
+
+	DOMElement* elemFlags;
+	DOMElement* elemFlag;
+
+	elemFlags = createDOMElement(a_parent->getOwnerDocument(), "Flags");
+	elemCompatibility->appendChild(elemFlags);
+
+	/** EDIT HERE FOR INTRODUCING NEW FLAGS! */
+#ifdef PAYMENT
+	elemFlag = createDOMElement(a_parent->getOwnerDocument(), PAYMENT_COMPATIBILITY);
+	//setDOMElementValue(elemFlag,(UINT8*)"true"); // you might add a version number here for a protocol etc.
+	elemFlags->appendChild(elemFlag);
+#endif
+
+#ifdef NEW_FLOW_CONTROL
+	elemFlag = createDOMElement(a_parent->getOwnerDocument(), NEW_FLOW_CONTROL_COMPATIBILITY);
+	//setDOMElementValue(elemFlag,(UINT8*)"true");
+	elemFlags->appendChild(elemFlag);
+#endif
+
+#ifdef NEW_CHANNEL_ENCRYPTION
+	elemFlag = createDOMElement(a_parent->getOwnerDocument(), NEW_CHANNEL_ENCRYPTION_COMPATIBILITY);
+	//setDOMElementValue(elemFlag,(UINT8*)"true");
+	elemFlags->appendChild(elemFlag);
+#endif
+
+	return E_SUCCESS;
+}
+
+SINT32 CAMix::checkCompatibility(DOMNode* a_parent, const char* a_mixPosition)
+{
+	// get compatibility info
+	DOMElement* elemCompatibility=NULL;
+	DOMElement* elemFlags=NULL;
+	DOMElement* elemDummy;
+	UINT8 strAllFlags[500];
+	UINT32 lenAllFlags;
+	UINT8 strNodeName[50];
+	UINT32 lenNodeName=50;
+	UINT8 strVersion[50];
+	UINT32 len=50;
+	SINT32 iCompare;
+	UINT8* strComment;
+	UINT32 iCountFlags = 0;
+	UINT32 iLogLevel = LOG_INFO;
+	bool bCompatible = true;
+	bool bCompatibleFlags = true;
+
+	if (getDOMChildByName(a_parent,"Compatibility",elemCompatibility,false) != E_SUCCESS ||
+		getDOMElementAttribute(elemCompatibility, "version", strVersion, &len) != E_SUCCESS)
+	{
+		CAMsg::printMsg(LOG_WARNING,"Could not get any compatibility information from the %s mix. It may or may not be compatible. If the connection fails for an unknown reason, the %s mix should be updated.\n", a_mixPosition, a_mixPosition);
+		return E_SUCCESS;
+	}
+
+	iCompare = strncmp (MIX_VERSION, (char*)strVersion, len);
+
+	if (iCompare == 0)
+	{
+		strComment = (UINT8*)" We have the same version.";
+	}
+	else if (iCompare < 0)
+	{
+		strComment = (UINT8*)" Our version (" MIX_VERSION ") is older. If the connection fails for an unknown reason, you should think about an update.";
+		iLogLevel = LOG_WARNING;
+	}
+	else
+	{
+		/** EDIT HERE FOR ADDING INCOMPATIBLE VERSIONS! */
+		if (strncmp ("00.08.71", (char*)strVersion, len) > 0)
+		{
+			strComment = (UINT8*)" This version is NOT COMPATIBLE with our version (" MIX_VERSION ")! The mixes will not work together in a cascade.";
+			bCompatible = false;
+			iLogLevel = LOG_CRIT;
+		}
+		else
+		{
+			strComment = (UINT8*)" We have a newer version (" MIX_VERSION "), but both should work together.";
+		}
+	}
+
+	CAMsg::printMsg(iLogLevel,"The software version of the %s mix is %s.%s\n", a_mixPosition, strVersion, strComment);
+
+	/** EDIT HERE FOR INTRODUCING NEW FLAGS! */
+#ifdef PAYMENT
+	iCountFlags++;
+#endif
+
+#ifdef NEW_FLOW_CONTROL
+	iCountFlags++;
+#endif
+
+#ifdef NEW_CHANNEL_ENCRYPTION
+	iCountFlags++;
+#endif
+
+	if (getDOMChildByName(elemCompatibility, "Flags", elemFlags, false) == E_SUCCESS)
+	{
+		DOMNodeList* flags = elemFlags->getChildNodes();
+		if (flags->getLength() != iCountFlags)
+		{
+			bCompatibleFlags = false;
+		}
+
+		/** EDIT HERE FOR INTRODUCING NEW FLAGS! */
+		// Hint: We might also check for a version of the compile flags if available; it should be set in the content of each tag instead of 'true'.
+#ifdef PAYMENT
+		if (getDOMChildByName(elemFlags, PAYMENT_COMPATIBILITY, elemDummy, false) != E_SUCCESS)
+		{
+			bCompatibleFlags = false;
+		}
+#endif
+#ifdef NEW_FLOW_CONTROL
+		if (getDOMChildByName(elemFlags, NEW_FLOW_CONTROL_COMPATIBILITY, elemDummy, false) != E_SUCCESS)
+		{
+			bCompatibleFlags = false;
+		}
+#endif
+#ifdef NEW_CHANNEL_ENCRYPTION
+		if (getDOMChildByName(elemFlags, NEW_CHANNEL_ENCRYPTION_COMPATIBILITY, elemDummy, false) != E_SUCCESS)
+		{
+			bCompatibleFlags = false;
+		}
+#endif
+
+		if (!bCompatibleFlags)
+		{
+			// get the flags of the other mix
+			strAllFlags[0] = 0;
+			lenAllFlags = 1;
+			for (UINT32 i = 0; i < flags->getLength(); i++)
+			{
+				if (getNodeName(flags->item(i), strNodeName, &lenNodeName) == E_SUCCESS)
+				{
+
+					lenAllFlags += strlen((char*)strNodeName) + 1;
+					if (lenAllFlags > 500)
+					{
+						break;
+					}
+					strcat((char*)strAllFlags, " ");
+					strcat((char*)strAllFlags, (char*)strNodeName);
+				}
+
+				lenNodeName = 50;
+			}
+
+			CAMsg::printMsg(LOG_CRIT, "The compile flags of the %s mix are NOT COMPATIBLE with our flags. We have: %s They have: %s  --> The mixes won't run together.\n", a_mixPosition, MIX_VERSION_COMPATIBILITY, strAllFlags);
+			return E_UNKNOWN;
+
+		}
+	}
+
+
+	if (!bCompatible)
+	{
+		return E_UNKNOWN;
+	}
+
+	return E_SUCCESS;
+}
+
+
 SINT32 CAMix::signXML(DOMNode* a_element)
 	{
 		return m_pMultiSignature->signXML(a_element, true);

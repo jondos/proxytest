@@ -624,6 +624,32 @@ void releaseDOMParser()
 			}
 	}
 
+SINT32 getNodeName(const DOMNode * const pElem, UINT8* value,UINT32* valuelen)
+{
+	ASSERT(value!=NULL,"Value is null");
+	ASSERT(valuelen!=NULL,"ValueLen is null");
+	ASSERT(pElem!=NULL,"Element is NULL");
+	if(pElem==NULL)
+		return E_UNKNOWN;
+
+	UINT32 spaceLeft=*valuelen;
+	*valuelen=0;
+	const XMLCh* str=pElem->getNodeName();
+	char* tmpStr=XMLString::transcode(str);
+	UINT32 tmpStrLen=strlen(tmpStr);
+	if(tmpStrLen>=spaceLeft)
+		{
+			*valuelen=tmpStrLen+1;
+			XMLString::release(&tmpStr);
+			return E_SPACE;
+		}
+	memcpy(value+(*valuelen),tmpStr,tmpStrLen);
+	*valuelen+=tmpStrLen;
+	XMLString::release(&tmpStr);
+	value[*valuelen] = 0;
+	return E_SUCCESS;
+}
+
 /**
  * Returns the content of the text node(s) under elem
  * as null-terminated C String. If there is no text node
