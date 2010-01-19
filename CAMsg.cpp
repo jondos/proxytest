@@ -104,7 +104,7 @@ SINT32 CAMsg::setLogOptions(UINT32 opt)
     {
 			SINT32 ret; 
 			char* strLogOpened = "Message log opened%s%s.\n";
-			char* strLogErrorMsg = "Could not open message log%s%s!%s Do you have write permission?\n";	
+			char* strLogErrorMsg = "Could not open message log%s%s!%s Do you have write permissions?\n";
 			char* strReasonMsg = " Reason: %s (%u)";
 			char* strLogFile = NULL;
 			char* strReason = NULL;

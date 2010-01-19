@@ -123,6 +123,8 @@ SINT32 CAMiddleMix::processKeyExchange()
 		//Finding first <Mix> entry and sending symetric key...
 		bool bFoundNextMix=false;
 		DOMNode* child=root->getFirstChild();
+		SINT32 result;
+		SINT32 resultCompatibility = E_SUCCESS;
 		while(child!=NULL)
 			{
 				if(equals(child->getNodeName(),"Mix"))
@@ -153,9 +155,15 @@ SINT32 CAMiddleMix::processKeyExchange()
 						if(ret!=E_SUCCESS)
 							{
 								MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextFailed);
-								CAMsg::printMsg(LOG_INFO,"Could not verify Key Info from Mix n+1!\n");
+								CAMsg::printMsg(LOG_INFO,"Could not verify Key Info from next Mix!\n");
 								return E_UNKNOWN;
 							}
+						
+						if (resultCompatibility == E_SUCCESS)
+						{
+							resultCompatibility = checkCompatibility(child, "next");
+						}
+
 						//extracting Nonce and computing Hash of them
 						DOMElement* elemNonce;
 						getDOMChildByName(child,"Nonce",elemNonce,false);
@@ -165,7 +173,12 @@ SINT32 CAMiddleMix::processKeyExchange()
 						if(elemNonce==NULL)
 							{
 								MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextFailed);
-								CAMsg::printMsg(LOG_INFO,"No nonce found in Key Info from Mix n+1!\n");
+								CAMsg::printMsg(LOG_INFO,"No nonce found in Key Info from next Mix!\n");
+								if (doc != NULL)
+								{
+									doc->release();
+									doc = NULL;
+								}
 								return E_UNKNOWN;
 							}
 						getDOMElementValue(elemNonce,arNonce,&lenNonce);
@@ -187,6 +200,9 @@ SINT32 CAMiddleMix::processKeyExchange()
 						DOMElement* elemRoot=NULL;
 						encodeXMLEncryptedKey(key,64,elemRoot,docSymKey,&oRSA);
 						docSymKey->appendChild(elemRoot);
+
+						appendCompatibilityInfo(elemRoot);
+
 						DOMElement* elemNonceHash=createDOMElement(docSymKey,"Nonce");
 						setDOMElementValue(elemNonceHash,arNonce);
 						elemRoot->appendChild(elemNonceHash);
@@ -242,10 +258,17 @@ SINT32 CAMiddleMix::processKeyExchange()
 					}
 				child=child->getNextSibling();
 			}
+			
+			
 		if(!bFoundNextMix)
 			{
 				CAMsg::printMsg(LOG_INFO,"Error -- no Key Info from Mix n+1 found!\n");
 				MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextFailed);
+				if (doc != NULL)
+				{
+					doc->release();
+					doc = NULL;
+				}
 				return E_UNKNOWN;
 			}
 		// -----------------------------------------
@@ -256,6 +279,11 @@ SINT32 CAMiddleMix::processKeyExchange()
 		if(getDOMElementAttribute(root,"count",count)!=E_SUCCESS)
 			{
 				MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextFailed);
+				if (doc != NULL)
+				{
+					doc->release();
+					doc = NULL;
+				}
 				return E_UNKNOWN;
 			}
 		count++;
@@ -277,6 +305,9 @@ SINT32 CAMiddleMix::processKeyExchange()
 		DOMElement* elemKey=NULL;
 		m_pRSA->getPublicKeyAsDOMElement(elemKey,doc); //the key
 		mixNode->appendChild(elemKey);
+
+		appendCompatibilityInfo(mixNode);
+
 		//inserting Nonce
 		DOMElement* elemNonce=createDOMElement(doc,"Nonce");
 		UINT8 arNonce[16];
@@ -340,6 +371,11 @@ SINT32 CAMiddleMix::processKeyExchange()
 		{
 			CAMsg::printMsg(LOG_DEBUG,"Error sending new New Key Info\n");
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextFailed);
+			if (doc != NULL)
+			{
+				doc->release();
+				doc = NULL;
+			}
 			return E_UNKNOWN;
 		}
 		MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextSuccessful);
@@ -355,6 +391,11 @@ SINT32 CAMiddleMix::processKeyExchange()
 			CAMsg::printMsg(LOG_ERR,"Error receiving symmetric key from Mix n-1!\n");
 			delete []recvBuff;
 			recvBuff = NULL;
+			if (doc != NULL)
+			{
+				doc->release();
+				doc = NULL;
+			}
 			return E_UNKNOWN;
 		}
 		recvBuff[len]=0;
@@ -367,7 +408,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 		if(doc==NULL)
 		{
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangePrevFailed);
-			CAMsg::printMsg(LOG_INFO,"Error parsing Key Info from Mix n-1!\n");
+			CAMsg::printMsg(LOG_INFO,"Error parsing Key Info from previous Mix!\n");
 			return E_UNKNOWN;
 		}
 		DOMElement* elemRoot=doc->getDocumentElement();
@@ -390,16 +431,35 @@ SINT32 CAMiddleMix::processKeyExchange()
 		//CASignature oSig;
 		CACertificate* pCert=CALibProxytest::getOptions()->getPrevMixTestCertificate();
 		//oSig.setVerifyKey(pCert);
-		SINT32 result = CAMultiSignature::verifyXML(elemRoot, pCert);
+		result = CAMultiSignature::verifyXML(elemRoot, pCert);
 		delete pCert;
 		pCert = NULL;
 		//if(oSig.verifyXML(elemRoot)!=E_SUCCESS)
 		if(result != E_SUCCESS)
 		{
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangePrevFailed);
-			CAMsg::printMsg(LOG_CRIT,"Could not verify the symmetric key from Mix n-1!\n");
+			CAMsg::printMsg(LOG_CRIT,"Could not verify the symmetric key from previous Mix!\n");
+			if (doc != NULL)
+			{
+				doc->release();
+				doc = NULL;
+			}
 			return E_UNKNOWN;
 		}
+
+			
+			
+		 if (resultCompatibility != E_SUCCESS ||
+			(resultCompatibility = checkCompatibility(elemRoot, "previous")) != E_SUCCESS)
+		 {
+				if (doc != NULL)
+				{
+					doc->release();
+					doc = NULL;
+				}
+				return resultCompatibility;
+			}
+
 		//Verifying nonce
 		elemNonce=NULL;
 		getDOMChildByName(elemRoot,"Nonce",elemNonce,false);
@@ -413,6 +473,11 @@ SINT32 CAMiddleMix::processKeyExchange()
 		{
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangePrevFailed);
 			CAMsg::printMsg(LOG_CRIT,"Could not verify the Nonce!\n");
+			if (doc != NULL)
+			{
+				doc->release();
+				doc = NULL;
+			}
 			return E_UNKNOWN;
 		}
 		CAMsg::printMsg(LOG_INFO,"Verified the symmetric key!\n");
@@ -425,6 +490,11 @@ SINT32 CAMiddleMix::processKeyExchange()
 		{
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangePrevFailed);
 			CAMsg::printMsg(LOG_CRIT,"Could not set the symmetric key to be used by the MuxSocket!\n");
+			if (doc != NULL)
+			{
+				doc->release();
+				doc = NULL;
+			}
 			return E_UNKNOWN;
 		}
 		MONITORING_FIRE_NET_EVENT(ev_net_keyExchangePrevSuccessful);
@@ -447,6 +517,12 @@ SINT32 CAMiddleMix::processKeyExchange()
 			m_u32KeepAliveSendInterval-=10000; //make the send interval a little bit smaller than the related receive intervall
 		m_u32KeepAliveRecvInterval=max(u32KeepAliveRecvInterval,tmpSendInterval);
 		CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Calculated -- SendInterval %u -- Receive Interval %u\n",m_u32KeepAliveSendInterval,m_u32KeepAliveRecvInterval);
+
+		if (doc != NULL)
+		{
+			doc->release();
+			doc = NULL;
+		}
 
 		return E_SUCCESS;
 	}
@@ -489,7 +565,7 @@ SINT32 CAMiddleMix::init()
 
 		if(m_pMuxOut->getCASocket()->create(pAddrNext->getType())!=E_SUCCESS)
 			{
-				CAMsg::printMsg(LOG_CRIT,"Init: Cannot create SOCKET for outgoing conncetion...\n");
+				CAMsg::printMsg(LOG_CRIT,"Init: Cannot create SOCKET for outgoing connection...\n");
 				return E_UNKNOWN;
 			}
 		m_pMuxOut->getCASocket()->setRecvBuff(50*MIXPACKET_SIZE);
@@ -510,7 +586,7 @@ SINT32 CAMiddleMix::init()
 		if(pListener==NULL)
 			{
 				CAMsg::printMsg(LOG_CRIT," failed!\n");
-				CAMsg::printMsg(LOG_CRIT,"Reason: no useable (non virtual) interface found!\n");
+				CAMsg::printMsg(LOG_CRIT,"Reason: no usable (non virtual) interface found!\n");
 				return E_UNKNOWN;
 			}
 		const CASocketAddr* pAddr=NULL;
@@ -538,12 +614,8 @@ SINT32 CAMiddleMix::init()
 
 		m_pMuxIn->getCASocket()->setRecvBuff(50*MIXPACKET_SIZE);
 		m_pMuxIn->getCASocket()->setSendBuff(50*MIXPACKET_SIZE);
-		if(m_pMuxIn->getCASocket()->setKeepAlive((UINT32)1800)!=E_SUCCESS)
-			{
-				CAMsg::printMsg(LOG_INFO,"Socket option TCP-KEEP-ALIVE returned an error - so not set!\n");
-				if(m_pMuxIn->getCASocket()->setKeepAlive(true)!=E_SUCCESS)
-					CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
-			}
+		m_pMuxIn->getCASocket()->setKeepAlive((UINT32)1800);
+
 
 		/** Connect to next mix */
 		if(connectToNextMix(pAddrNext) != E_SUCCESS)
@@ -561,12 +633,8 @@ SINT32 CAMiddleMix::init()
 		MONITORING_FIRE_NET_EVENT(ev_net_nextConnected);
 		CAMsg::printMsg(LOG_INFO," connected!\n");
 
-		if(m_pMuxOut->getCASocket()->setKeepAlive((UINT32)1800)!=E_SUCCESS)
-			{
-				CAMsg::printMsg(LOG_INFO,"Socket option TCP-KEEP-ALIVE returned an error - so not set!\n");
-				if(m_pMuxOut->getCASocket()->setKeepAlive(true)!=E_SUCCESS)
-					CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
-			}
+		m_pMuxOut->getCASocket()->setKeepAlive((UINT32)1800);
+
 
 	    if((ret = processKeyExchange())!=E_SUCCESS)
 		{

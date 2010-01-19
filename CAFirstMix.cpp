@@ -101,66 +101,6 @@ SINT32 CAFirstMix::initOnce()
 	}
 
 
-SINT32 CAFirstMix::createSockets(bool a_bMessages)
-{
-		UINT32 aktSocket;
-		UINT8 buff[255];
-		for(aktSocket=0;aktSocket < CALibProxytest::getOptions()->getListenerInterfaceCount(); aktSocket++)
-			{
-				CAListenerInterface* pListener=NULL;
-				pListener=CALibProxytest::getOptions()->getListenerInterface(aktSocket+1);
-				if(pListener==NULL)
-					{
-            CAMsg::printMsg(LOG_CRIT,"Error: Listener interface invalid.\n");
-						return E_UNKNOWN;
-					}
-				if(pListener->isVirtual())
-					{
-						delete pListener;
-						pListener = NULL;
-						continue;
-					}
-				m_arrSocketsIn[aktSocket] = new CASocket();
-				m_arrSocketsIn[aktSocket]->create();
-				m_arrSocketsIn[aktSocket]->setReuseAddr(true);
-				CASocketAddr* pAddr=pListener->getAddr();
-				pAddr->toString(buff,255);
-				if (a_bMessages)
-				{
-					CAMsg::printMsg(LOG_DEBUG,"Listening on Interface: %s\n",buff);
-				}
-				delete pListener;
-				pListener = NULL;
-#ifndef _WIN32
-				//we have to be a temporaly superuser if port <1024...
-				int old_uid=geteuid();
-				if(pAddr->getType()==AF_INET&&((CASocketAddrINet*)pAddr)->getPort()<1024)
-					{
-						if(seteuid(0)==-1) //changing to root
-							CAMsg::printMsg(LOG_CRIT,"Setuid failed! You must start the mix as root in order to use listener ports lower than 1024!\n");
-					}
-#endif
-				SINT32 ret=m_arrSocketsIn[aktSocket]->listen(*pAddr);
-				delete pAddr;
-				pAddr = NULL;
-#ifndef _WIN32
-				seteuid(old_uid);
-#endif
-				if(ret!=E_SUCCESS)
-					{
-            CAMsg::printMsg(LOG_CRIT,"Socket error while listening on interface %d\n",aktSocket+1);
-						return E_UNKNOWN;
-					}
-			}
-
-		if (a_bMessages)
-		{
-			CAMsg::printMsg(LOG_DEBUG,"FirstMix Init - listening on all interfaces\n");
-		}
-		return E_SUCCESS;
-}
-
-
 
 SINT32 CAFirstMix::init()
 	{
@@ -177,29 +117,33 @@ SINT32 CAFirstMix::init()
 		m_nMixedPackets=0; //reset to zero after each restart (at the moment neccessary for infoservice)
 		m_bRestart=false;
 		//Establishing all Listeners
+		UINT32 i;
 		m_arrSocketsIn=new CASocket*[m_nSocketsIn];
+		for (i = 0; i < m_nSocketsIn; i++)
+		{
+			m_arrSocketsIn[i] = NULL;
+		}
 		//initiate ownerDocument for tc templates
 		m_templatesOwner = createDOMDocument();
 
-		SINT32 retSockets = createSockets(true);
+		SINT32 retSockets = CALibProxytest::getOptions()->createSockets(true, m_arrSocketsIn, m_nSocketsIn);
 
-		UINT32 i;
+
 		if (retSockets != E_SUCCESS)
 		{
 			return retSockets;
 		}
 
 		CASocketAddr* pAddrNext=NULL;
-
 		for(i=0;i<CALibProxytest::getOptions()->getTargetInterfaceCount();i++)
 			{
 				TargetInterface oNextMix;
 				CALibProxytest::getOptions()->getTargetInterface(oNextMix,i+1);
 				if(oNextMix.target_type==TARGET_MIX)
-					{
-						pAddrNext=oNextMix.addr;
-						break;
-					}
+				{
+					pAddrNext=oNextMix.addr;
+					break;
+				}
 				delete oNextMix.addr;
 				oNextMix.addr = NULL;
 			}
@@ -223,23 +167,19 @@ SINT32 CAFirstMix::init()
 		//CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET SendLowWatSize: %i\n",((*m_pMuxOut))->getSendLowWat());
 
 		/** Connect to the next mix */
-		if(connectToNextMix(pAddrNext) != E_SUCCESS)
-			{
-				delete pAddrNext;
-				pAddrNext = NULL;
-			CAMsg::printMsg(LOG_DEBUG, "CAFirstMix::init - Unable to connect to next mix\n");
-				return E_UNKNOWN;
-			}
+		if((retSockets = connectToNextMix(pAddrNext)) != E_SUCCESS)
+		{
+			delete pAddrNext;
+			pAddrNext = NULL;
+			CAMsg::printMsg(LOG_DEBUG, "CAFirstMix::init - Unable to connect to next mix. Reason: %s (%i)\n", GET_NET_ERROR_STR(retSockets), retSockets);				
+			return E_UNKNOWN;
+		}
 		delete pAddrNext;
 		pAddrNext = NULL;
 		MONITORING_FIRE_NET_EVENT(ev_net_nextConnected);
 		CAMsg::printMsg(LOG_INFO," connected!\n");
-		if(m_pMuxOut->getCASocket()->setKeepAlive((UINT32)1800)!=E_SUCCESS)
-			{
-				CAMsg::printMsg(LOG_INFO,"Socket option TCP-KEEP-ALIVE returned an error - so not set!\n");
-				if(m_pMuxOut->getCASocket()->setKeepAlive(true)!=E_SUCCESS)
-					CAMsg::printMsg(LOG_INFO,"Socket option KEEP-ALIVE returned an error - so also not set!\n");
-			}
+		m_pMuxOut->getCASocket()->setKeepAlive((UINT32)1800);
+
 
     if(processKeyExchange()!=E_SUCCESS)
     {
@@ -292,9 +232,6 @@ SINT32 CAFirstMix::init()
 		CAAccountingInstance::init(this);
 #endif
 
-
-
-
 		m_pthreadsLogin=new CAThreadPool(NUM_LOGIN_WORKER_TRHEADS,MAX_LOGIN_QUEUE,false);
 
 		//Starting thread for Step 1
@@ -326,7 +263,7 @@ SINT32 CAFirstMix::init()
 #ifdef REPLAY_DETECTION
 //		sendReplayTimestampRequestsToAllMixes();
 #endif
-		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix init() succeded\n");
+		CAMsg::printMsg(LOG_DEBUG,"CAFirstMix init() succeeded\n");
 		MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextSuccessful);
 		return E_SUCCESS;
 }
@@ -337,6 +274,8 @@ SINT32 CAFirstMix::connectToNextMix(CASocketAddr* a_pAddrNext)
 	a_pAddrNext->toString(buff,255);
 	CAMsg::printMsg(LOG_INFO,"Try to connect to next Mix on %s ...\n",buff);
 	SINT32 err = E_UNKNOWN;
+	SINT32 errLast = E_SUCCESS;
+	
 	for(UINT32 i=0; i < 100; i++)
 	{
 #ifdef DYNAMIC_MIX
@@ -351,14 +290,22 @@ SINT32 CAFirstMix::connectToNextMix(CASocketAddr* a_pAddrNext)
 		if(err != E_SUCCESS)
 		{
 			err=GET_NET_ERROR;
-#ifdef _DEBUG
-		 	CAMsg::printMsg(LOG_DEBUG,"Con-Error: %i\n",err);
-#endif
+			
 			if(err!=ERR_INTERN_TIMEDOUT&&err!=ERR_INTERN_CONNREFUSED)
 				break;
+				
+			if (errLast != err || i % 10 == 0)
+			{
+				CAMsg::printMsg(LOG_ERR, "Cannot connect to next Mix on %s. Reason: %s (%i). Retrying...\n",
+					buff, GET_NET_ERROR_STR(err), err);
+				errLast = err;
+			}
+			else
+			{
 #ifdef _DEBUG
-			CAMsg::printMsg(LOG_DEBUG,"Cannot connect... retrying\n");
+				CAMsg::printMsg(LOG_DEBUG,"Cannot connect... retrying\n");
 #endif
+			}
 			sSleep(10);
 		}
 		else
@@ -552,8 +499,9 @@ SINT32 CAFirstMix::processKeyExchange()
     m_xmlKeyInfoSize=tlen + sizeof(tlen);
     delete []tmpB;
     tmpB = NULL;
+    SINT32 result;
 
-    //Sending symetric key...
+    //Sending symmetric key...
     child=elemMixes->getFirstChild();
     while(child!=NULL)
     {
@@ -580,7 +528,7 @@ SINT32 CAFirstMix::processKeyExchange()
             CACertificate* nextCert=CALibProxytest::getOptions()->getNextMixTestCertificate();
             /*oSig.setVerifyKey(nextCert);
             SINT32 ret=oSig.verifyXML(child,NULL);*/
-            SINT32 result = CAMultiSignature::verifyXML(child, nextCert);
+            result = CAMultiSignature::verifyXML(child, nextCert);
             delete nextCert;
             nextCert = NULL;
             if(result != E_SUCCESS)
@@ -594,6 +542,10 @@ SINT32 CAFirstMix::processKeyExchange()
                 return E_UNKNOWN;
             }
             CAMsg::printMsg(LOG_DEBUG,"Successfully verified XML signature of next mix!\n");
+
+            result = checkCompatibility(child, "next");
+          
+
             DOMNode* rsaKey=child->getFirstChild();
             CAASymCipher oRSA;
             oRSA.setPublicKeyAsDOMNode(rsaKey);
@@ -626,7 +578,10 @@ SINT32 CAFirstMix::processKeyExchange()
                 setDOMElementValue(elemNonceHash,arNonce);
                 elemRoot->appendChild(elemNonceHash);
             }
-            //Getting the KeepAlive Traffice...
+
+            appendCompatibilityInfo(elemRoot);
+
+			///Getting the KeepAlive Traffic...
 			DOMElement* elemKeepAlive=NULL;
 			DOMElement* elemKeepAliveSendInterval=NULL;
 			DOMElement* elemKeepAliveRecvInterval=NULL;
@@ -634,7 +589,7 @@ SINT32 CAFirstMix::processKeyExchange()
 			getDOMChildByName(elemKeepAlive,"SendInterval",elemKeepAliveSendInterval,false);
 			getDOMChildByName(elemKeepAlive,"ReceiveInterval",elemKeepAliveRecvInterval,false);
 			UINT32 tmpSendInterval,tmpRecvInterval;
-			getDOMElementValue(elemKeepAliveSendInterval,tmpSendInterval,0xFFFFFFFF); //if now send interval was given set it to "infinite"
+			getDOMElementValue(elemKeepAliveSendInterval,tmpSendInterval,0xFFFFFFFF); //if no send interval was given set it to "infinite"
 			getDOMElementValue(elemKeepAliveRecvInterval,tmpRecvInterval,0xFFFFFFFF); //if no recv interval was given --> set it to "infinite"
 			CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Getting offer -- SendInterval %u -- ReceiveInterval %u\n",tmpSendInterval,tmpRecvInterval);
 			// Add Info about KeepAlive traffic
@@ -679,6 +634,18 @@ SINT32 CAFirstMix::processKeyExchange()
         }
         child=child->getNextSibling();
     }
+	
+	 if (result != E_SUCCESS)
+	{
+		if (doc != NULL)
+		{
+			doc->release();
+			doc = NULL;
+		}
+		return result;
+	}
+	
+	
 		///initialises MixParameters struct
 	if(initMixParameters(elemMixes)!=E_SUCCESS)
 	{
@@ -1210,7 +1177,10 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 					sSleep(1);
 				}
 		}
-		pFirstMix->createSockets(false);
+		if (CALibProxytest::getOptions()->createSockets(false,pFirstMix-> m_arrSocketsIn, pFirstMix->m_nSocketsIn) != E_SUCCESS)
+		{
+			goto END_THREAD;
+		}
 		for(i=0;i<nSocketsIn;i++)
 		{
 			psocketgroupAccept->add(*socketsIn[i]);
@@ -1243,7 +1213,11 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 						}
 					}
 	
-					pFirstMix->createSockets(false);
+					if (CALibProxytest::getOptions()->createSockets(false,pFirstMix-> m_arrSocketsIn, pFirstMix->m_nSocketsIn) != E_SUCCESS)
+					{
+						// could not listen
+						goto END_THREAD;
+					}
 					for(i=0;i<nSocketsIn;i++)
 					{
 						psocketgroupAccept->add(*socketsIn[i]);
@@ -2215,9 +2189,9 @@ loop_break:
 #endif
 
 #ifndef LOG_DIALOG
-		CAMsg::printMsg(LOG_DEBUG,"User login: finished\n");
+		CAMsg::printMsg(LOG_INFO,"User login: finished\n");
 #else
-		CAMsg::printMsg(LOG_DEBUG,"User login: finished -- connection-ID: %Lu -- country-id: %u -- dialog: %s\n",pHashEntry->id,pHashEntry->countryID,pHashEntry->strDialog);
+		CAMsg::printMsg(LOG_INFO,"User login: finished -- connection-ID: %Lu -- country-id: %u -- dialog: %s\n",pHashEntry->id,pHashEntry->countryID,pHashEntry->strDialog);
 #endif
 		return E_SUCCESS;
 	}
@@ -2440,9 +2414,12 @@ SINT32 CAFirstMix::clean()
 			{
 				for(UINT32 i=0;i<m_nSocketsIn;i++)
 				{
-					m_arrSocketsIn[i]->close();
-					delete m_arrSocketsIn[i];
-					m_arrSocketsIn[i] = NULL;
+					if (m_arrSocketsIn[i] != NULL)
+					{
+						m_arrSocketsIn[i]->close();
+						delete m_arrSocketsIn[i];
+						m_arrSocketsIn[i] = NULL;
+					}
 				}
 				delete[] m_arrSocketsIn;
 			}

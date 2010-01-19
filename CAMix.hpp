@@ -133,6 +133,8 @@ class CAMix
 			virtual SINT32 init()=0;
 			virtual SINT32 loop()=0;
 
+			SINT32 checkCompatibility(DOMNode* a_parent, const char* a_mixPosition);
+			SINT32 appendCompatibilityInfo(DOMNode* a_parent);
 			SINT32 addMixInfo(DOMNode* a_element, bool a_bForceFirstNode);
 
 			/**

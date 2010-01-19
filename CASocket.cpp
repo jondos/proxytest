@@ -800,7 +800,7 @@ SINT32 CASocket::setKeepAlive(bool b)
 		if(setsockopt(m_Socket,SOL_SOCKET,SO_KEEPALIVE,(char*)&val,sizeof(val))==SOCKET_ERROR)
 		{
 			int errnum = errno;
-			CAMsg::printMsg(LOG_ERR, "Could not set KEEP_ALIVE options, cause: %s\n", strerror(errnum));
+			CAMsg::printMsg(LOG_ERR, "Could not set KEEP_ALIVE options. Reason: %s (%i)\n", GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
 			return E_UNKNOWN;
 		}
 		return E_SUCCESS;
@@ -822,10 +822,13 @@ SINT32 CASocket::setKeepAlive(UINT32 sec)
 		int val=sec;
 		if(setsockopt(m_Socket,IPPROTO_TCP,TCP_KEEPALIVE,(char*)&val,sizeof(val))==SOCKET_ERROR)
 		{
+			CAMsg::printMsg(LOG_ERR,"Socket option TCP-KEEP-ALIVE was not set! Reason: %s (%i)\n",
+					GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
 			return E_UNKNOWN;
 		}
 		return E_SUCCESS;
 #else
+		CAMsg::printMsg(LOG_INFO,"Socket option TCP-KEEP-ALIVE was not set as it is not available on this machine.\n");
 		return E_UNKNOWN;
 #endif
 	}
