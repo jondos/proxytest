@@ -307,7 +307,7 @@ SINT32 CACertificate::removeColons(UINT8* a_cSkid, UINT32 a_cSkidLen, UINT8 *&r_
     UINT32 tmp = (2*a_cSkidLen)/3 + 2;
     if(*r_skiLen < tmp)
     {
-        CAMsg::printMsg( LOG_ERR, "Unable to copy SKI to target array, size must at least be %i but is only %i!\n", tmp, *r_skiLen);
+        CAMsg::printMsg( LOG_ERR, "CACertificate::removeColons: Unable to copy SKI to target array, size must at least be %i but is only %i!\n", tmp, *r_skiLen);
         return E_UNKNOWN;
     }
     for(i = 0; i < a_cSkidLen; i++)

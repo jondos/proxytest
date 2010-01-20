@@ -83,7 +83,7 @@ class CAAbstractControlChannel
 			*/
 		SINT32 sendXMLMessage(const UINT8* msgXML,UINT32 msgLen) const
 			{
-				CAMsg::printMsg(LOG_DEBUG,"Will sent xml msg over control channel\n");
+				//CAMsg::printMsg(LOG_DEBUG,"Will send xml msg over control channel\n");
 				if(msgLen>0xFFFF)
 					{
 						return E_SPACE;

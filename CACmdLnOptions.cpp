@@ -37,6 +37,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "xml/DOM_Output.hpp"
 #include "CABase64.hpp"
 #include "CADynaNetworking.hpp"
+#ifdef PAYMENT
+#include "CAAccountingDBInterface.hpp"
+#endif
 //#ifdef LOG_CRIME
 	#include "tre/regex.h"
 //#endif
@@ -242,9 +245,9 @@ void CACmdLnOptions::initAccountingOptionSetters()
 	int count = -1;
 
 	accountingOptionSetters[++count]=
-			&CACmdLnOptions::setPriceCertificate;
-	accountingOptionSetters[++count]=
 		&CACmdLnOptions::setPaymentInstance;
+	accountingOptionSetters[++count]=
+			&CACmdLnOptions::setPriceCertificate;
 	accountingOptionSetters[++count]=
 		&CACmdLnOptions::setAccountingSoftLimit;
 	accountingOptionSetters[++count]=
@@ -1734,6 +1737,16 @@ SINT32 CACmdLnOptions::appendMixInfo_internal(DOMNode* a_node, bool with_subtree
 
 	if(importedNode != NULL)
 	{
+		/** Here we remove any given e-mail address to reduce the spam problem. */
+		if (importedNode->getNodeType() == DOMNode::ELEMENT_NODE)
+		{
+			DOMNodeList* nodesMail = getElementsByTagName((DOMElement*)importedNode, "EMail");
+			for (UINT32 i = 0; i < nodesMail->getLength (); i++)
+			{
+				nodesMail->item(i)->getParentNode()->removeChild(nodesMail->item(i));
+			}
+		}
+		
 		appendedNode = m_docMixInfo->getDocumentElement()->appendChild(importedNode);
 		if( appendedNode != NULL )
 		{
@@ -2086,7 +2099,7 @@ SINT32 CACmdLnOptions::setUserID(DOMElement* elemGeneral)
 					}
 					else
 					{
-						CAMsg::printMsg(LOG_ERR,"Could not switch to effective user '%s'! Reason: '%s' (%i)\n",
+						CAMsg::printMsg(LOG_ERR,"Could not switch to effective user '%s'! Reason: %s (%i)\n",
 								buff, GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
 					}
 				}
@@ -2136,7 +2149,7 @@ SINT32 CACmdLnOptions::setNrOfFileDescriptors(DOMElement* elemGeneral)
 				lim.rlim_cur = lim.rlim_max = m_nrOfOpenFiles;
 				if (setrlimit(RLIMIT_NOFILE, &lim) != 0)
 				{
-					CAMsg::printMsg(LOG_CRIT,"Could not set MAX open files to: %u Reason: '%s' (%i) \nYou might have insufficient user rights. If so, switch to a privileged user or do not set the number of file descriptors. -- Exiting!\n",
+					CAMsg::printMsg(LOG_CRIT,"Could not set MAX open files to: %u Reason: %s (%i) \nYou might have insufficient user rights. If so, switch to a privileged user or do not set the number of file descriptors. -- Exiting!\n",
 							m_nrOfOpenFiles, GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
 					exit(EXIT_FAILURE);
 				}
@@ -2500,7 +2513,7 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 		UINT8 tmpAKI[255];
 		if(tmpCert->getAuthorityKeyIdentifier(tmpAKI, &tmpAKIlen) != E_SUCCESS)
 		{
-			CAMsg::printMsg(LOG_WARNING, "Error while getting AKI of own certificate!\n");
+			CAMsg::printMsg(LOG_WARNING, "Could not get AKI of own certificate. This is not a critical problem, but you have a very old mix certificate. Create a new one as soon as possible.\n");
 		}
 		else
 		{
@@ -2534,7 +2547,7 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 		}
 		if (certs->getNumber() < 2)
 		{
-			CAMsg::printMsg(LOG_CRIT, "We have less than two certificates (only %d). There must be something wrong with the cert store. Exiting...\n", certs->getNumber());
+			CAMsg::printMsg(LOG_CRIT, "We have less than two certificates (only %d), but we need at least one mix and one operator certificate. There must be something wrong with the cert store. Exiting...\n", certs->getNumber());
 			exit(EXIT_FAILURE);
 		}
 		CAMsg::printMsg(LOG_DEBUG, "Adding Sign-Key %d with %d certificate(s).\n", i+1, certs->getNumber());
@@ -2561,13 +2574,12 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 		delete[] opCerts; 
 		return E_UNKNOWN;
 	}
-	strtrim(tmpBuff);
 
 	if(m_strMixID != NULL )
 	{
 		if(strncmp(m_strMixID, (char*)tmpBuff, strlen((char*)tmpBuff) ) != 0)
 		{
-			CAMsg::printMsg(LOG_CRIT,"Error, two different MixIDs specified (%s and %s)!\n", m_strMixID, tmpBuff);
+			CAMsg::printMsg(LOG_CRIT,"The configuration file seems inconsistent: it contains another Mix ID (%s) than calculated from the Mix certificate(s), which is %s. Please re-import you mix certificate in the configuration tool, or set the correct mix ID manually by editing the configuration file.\n", m_strMixID, tmpBuff);
 			delete[] opCerts; 
 			return E_UNKNOWN;
 		}
@@ -2580,6 +2592,14 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 		delete[] opCerts; 
 		return addMixIdToMixInfo();
 	}
+	
+#ifdef PAYMENT
+	if (m_strAiID != NULL && m_pMultiSignature->findSKI(m_strAiID) != E_SUCCESS)
+	{
+		CAMsg::printMsg(LOG_CRIT, "Your price certificate does not fit to your mix certificate(s). Please import the proper price certificate or mix certificate.\n");
+	}
+#endif
+	
 #ifdef DYNAMIC_MIX
 		/* LERNGRUPPE: Dynamic Mixes must have a cascade name, as MiddleMixes may be reconfigured to be FirstMixes */
 	if(bNeedCascadeNameFromMixID)
@@ -2809,11 +2829,32 @@ SINT32 CACmdLnOptions::setPriceCertificate(DOMElement *elemAccounting)
 		CAMsg::printMsg(LOG_CRIT,"hash: %s\n", tmpBuff2);
 		exit(0);*/
 		m_pPriceCertificate = CAXMLPriceCert::getInstance(elemPriceCert);
-		if (m_pPriceCertificate == NULL) {
-			CAMsg::printMsg(LOG_DEBUG, "PRICECERT PROCESSED, BUT STILL NULL");
+		if (m_pPriceCertificate == NULL) 
+		{
+			CAMsg::printMsg(LOG_CRIT, "Could not parse price certificate!");
 			return E_UNKNOWN;
 		}
 		m_strAiID = m_pPriceCertificate->getSubjectKeyIdentifier();
+		
+		if (m_pMultiSignature != NULL && m_pMultiSignature->findSKI(m_strAiID) != E_SUCCESS)
+		{
+				CAMsg::printMsg(LOG_CRIT,"Your price certificate does not fit to your mix certificate(s). Please import the proper price certificate or mix certificate.\n");
+				return E_UNKNOWN;
+		}
+
+		if (m_pBI == NULL)
+		{
+			CAMsg::printMsg(LOG_CRIT,"Could not verify price certificate, as no payment instance was found!\n");
+			return E_UNKNOWN;
+		}
+
+
+		if (CAMultiSignature::verifyXML(elemPriceCert, m_pBI->getCertificate()) != E_SUCCESS)
+		{
+			CAMsg::printMsg(LOG_CRIT,"Signature of price certificate is invalid! It may be damaged, or maybe you are using the wrong payment instance certificate?\n");
+			return E_UNKNOWN;
+		}
+
 	}
 
 	//insert price certificate
@@ -3133,7 +3174,15 @@ SINT32 CACmdLnOptions::setAccountingDatabase(DOMElement *elemAccounting)
 		m_strDatabasePassword = new UINT8[strlen((char*)tmpBuff)+1];
 		strcpy((char *)m_strDatabasePassword, (char *) tmpBuff);
 	}
-	CAMsg::printMsg(LOG_DEBUG, "Accounting values parsed OK.\n");
+	CAMsg::printMsg(LOG_DEBUG, "Accounting database information parsed successfully.\n");
+	
+	// just for testing the connection to the database
+	if(CAAccountingDBInterface::init() != E_SUCCESS)
+	{
+		exit(EXIT_FAILURE);
+	}
+	CAAccountingDBInterface::cleanup();
+	
 #endif
 	return E_SUCCESS;
 }
@@ -3325,7 +3374,7 @@ SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UIN
 
 				if(ret!=E_SUCCESS)
 				{
-					CAMsg::printMsg(LOG_CRIT,"Socket error while listening on interface %d (%s). Reason: '%s' (%i)\n",currentInterface+1, buff,
+					CAMsg::printMsg(LOG_CRIT,"Socket error while listening on interface %d (%s). Reason: %s (%i)\n",currentInterface+1, buff,
 							GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
 				}
 
