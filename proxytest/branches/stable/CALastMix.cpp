@@ -375,6 +375,8 @@ SINT32 CALastMix::processKeyExchange()
 
 		 if ((result = checkCompatibility(elemRoot, "previous")) != E_SUCCESS)
 		{
+			delete []messageBuff;
+			messageBuff = NULL;
 			if (doc != NULL)
 			{
 				doc->release();
