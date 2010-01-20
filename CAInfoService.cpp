@@ -921,7 +921,7 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
 	}
 
     oSocket.setRecvBuff(255);
-	if(oSocket.connect(*a_pSocketAddress, MIX_TO_INFOSERVICE_TIMEOUT)==E_SUCCESS)
+	if((ret = oSocket.connect(*a_pSocketAddress, MIX_TO_INFOSERVICE_TIMEOUT))==E_SUCCESS)
 	{
 		httpClient.setSocket(&oSocket);
 		const char* strRequestCommand=STRINGS_REQUEST_COMMANDS[requestCommand];
@@ -1039,7 +1039,16 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
 	}
 	else
 	{
-    	CAMsg::printMsg(LOG_DEBUG,"InfoService: sendMixHelo() connecting to InfoService %s:%d failed!\n", hostname, a_pSocketAddress->getPort());
+		if (ret != E_UNKNOWN)
+		{
+			CAMsg::printMsg(LOG_DEBUG,"InfoService: sendMixHelo() connecting to InfoService %s:%d failed for reason: %s (%i)\n",
+					hostname, a_pSocketAddress->getPort(), GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
+		}
+		else
+		{
+			CAMsg::printMsg(LOG_DEBUG,"InfoService: sendMixHelo() connecting to InfoService %s:%d failed!\n",
+								hostname, a_pSocketAddress->getPort());
+		}
 	}
 ERR:
 

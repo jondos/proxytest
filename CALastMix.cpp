@@ -86,7 +86,6 @@ SINT32 CALastMix::init()
 				return E_UNKNOWN;
 			}
 
-		CAMsg::printMsg(LOG_INFO,"Waiting for connection from previous Mix...\n");
 		CAListenerInterface*  pListener=NULL;
 		UINT32 interfaces=CALibProxytest::getOptions()->getListenerInterfaceCount();
 		for(UINT32 i=1;i<=interfaces;i++)
@@ -99,13 +98,19 @@ SINT32 CALastMix::init()
 			}
 		if(pListener==NULL)
 			{
-				CAMsg::printMsg(LOG_CRIT,"Initialization failed! Reason: No useable (non virtual) interface was found! Hint: Virtual interfaces only needed if you are behind a NAT/network address translation, and therefore have to publish other external IP addresses to the InfoServices than your internal/hidden IP addresses.\n");
+				CAMsg::printMsg(LOG_CRIT,"Initialization failed! Reason: No usable (non virtual) interface was found! Hint: Virtual interfaces only needed if you are behind a NAT/network address translation, and therefore have to publish other external IP addresses to the InfoServices than your internal/hidden IP addresses.\n");
 				return E_UNKNOWN;
 			}
+
 		const CASocketAddr* pAddr=NULL;
 		pAddr=pListener->getAddr();
 		delete pListener;
 		pListener = NULL;
+		UINT8 buff[255];
+		pAddr->toString(buff,255);
+
+		CAMsg::printMsg(LOG_INFO,"Waiting for connection from previous Mix on %s...\n", buff);
+
 		m_pMuxIn=new CAMuxSocket();
 		SINT32 ret=m_pMuxIn->accept(*pAddr);
 		delete pAddr;
@@ -370,8 +375,6 @@ SINT32 CALastMix::processKeyExchange()
 
 		 if ((result = checkCompatibility(elemRoot, "previous")) != E_SUCCESS)
 		{
-			delete []messageBuff;
-			messageBuff = NULL;
 			if (doc != NULL)
 			{
 				doc->release();

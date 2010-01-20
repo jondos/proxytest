@@ -542,7 +542,6 @@ SINT32 CAMiddleMix::init()
 		m_pMuxOut->getCASocket()->setSendBuff(50*MIXPACKET_SIZE);
 
 
-    CAMsg::printMsg(LOG_INFO,"Waiting for Connection from previous Mix...\n");
 		CAListenerInterface* pListener=NULL;
 		UINT32 interfaces=CALibProxytest::getOptions()->getListenerInterfaceCount();
 		for(UINT32 i=1;i<=interfaces;i++)
@@ -555,14 +554,18 @@ SINT32 CAMiddleMix::init()
 			}
 		if(pListener==NULL)
 			{
-				CAMsg::printMsg(LOG_CRIT," failed!\n");
-				CAMsg::printMsg(LOG_CRIT,"Reason: no usable (non virtual) interface found!\n");
+				CAMsg::printMsg(LOG_CRIT,"Failed to initialize socket for previous mix! Reason: no usable (non virtual) listener interface found!\n");
 				return E_UNKNOWN;
 			}
 		const CASocketAddr* pAddr=NULL;
 		pAddr=pListener->getAddr();
 		delete pListener;
 		pListener = NULL;
+
+		UINT8 buff[255];
+		pAddr->toString(buff,255);
+		CAMsg::printMsg(LOG_INFO,"Waiting for connection from previous Mix on %s...\n", buff);
+
 		m_pMuxIn=new CAMuxSocket();
 #ifdef DYNAMIC_MIX
 		// LERNGRUPPE Do not block if we are currently reconfiguring
@@ -576,7 +579,7 @@ SINT32 CAMiddleMix::init()
 		pAddr = NULL;
 		if(ret!=E_SUCCESS)
 			{
-				CAMsg::printMsg(LOG_CRIT,"Error waiting for previous Mix... -- Exiting!\n");
+				CAMsg::printMsg(LOG_CRIT,"Error waiting for previous Mix... -- restart!\n");
 				return E_UNKNOWN;
 			}
 		CAMsg::printMsg(LOG_INFO," connected!\n");
@@ -586,6 +589,9 @@ SINT32 CAMiddleMix::init()
 		m_pMuxIn->getCASocket()->setSendBuff(50*MIXPACKET_SIZE);
 		m_pMuxIn->getCASocket()->setKeepAlive((UINT32)1800);
 
+
+		pAddrNext->toString(buff,255);
+		CAMsg::printMsg(LOG_INFO,"Waiting for connection from previous Mix on %s...\n", buff);
 
 		/** Connect to next mix */
 		if(connectToNextMix(pAddrNext) != E_SUCCESS)
