@@ -1195,7 +1195,7 @@ SINT32 CAAccountingDBInterface::init()
 
 			if(dbConnStatus != E_SUCCESS)
 			{
-				CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: DBConnection initialization: "
+				CAMsg::printMsg(LOG_CRIT, "CAAccountingDBInterface: DBConnection initialization: "
 						"could not connect to Database.\n");
 				return E_UNKNOWN;
 			}
@@ -1203,7 +1203,7 @@ SINT32 CAAccountingDBInterface::init()
 	}
 	else
 	{ //should never happen
-		CAMsg::printMsg(LOG_ERR, "CAAccountingDBInterface: DBConnection initialization failed.\n");
+		CAMsg::printMsg(LOG_CRIT, "CAAccountingDBInterface: DBConnection initialization failed.\n");
 		return E_UNKNOWN;
 	}
 	return E_SUCCESS;

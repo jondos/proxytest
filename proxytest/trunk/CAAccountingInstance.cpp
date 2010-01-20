@@ -2792,7 +2792,7 @@ SINT32 CAAccountingInstance::__newSettlementTransaction(UINT32 *nrOfSettledCCs)
 		//no unsettled CCs found.
 		if (allUnsettledCCs == NULL)
 		{
-			CAMsg::printMsg(LOG_DEBUG, "Settlement transaction %llu: looked for unsettled CCs, found no CCs to settle\n", iCurrentSettleTransactionNr);
+			CAMsg::printMsg(LOG_INFO, "Settlement transaction %llu: looked for unsettled CCs, found no CCs to settle\n", iCurrentSettleTransactionNr);
 			ms_pInstance->m_pSettlementMutex->unlock();
 			ret = E_SUCCESS;
 			goto cleanup;
@@ -2960,7 +2960,7 @@ cleanup:
 	settleException = NULL;
 
 	
-	CAMsg::printMsg(LOG_DEBUG, "Settlement transaction %llu finished.\n", iCurrentSettleTransactionNr);
+	CAMsg::printMsg(LOG_INFO, "Settlement transaction %llu finished.\n", iCurrentSettleTransactionNr);
 
 	return ret;
 }
