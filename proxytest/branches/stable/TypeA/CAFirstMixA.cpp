@@ -857,12 +857,13 @@ bool CAFirstMixA::sendToUsers()
 				else if(ret<0&&ret!=E_AGAIN)
 				{
 					iSocketErrors++;
-					if (iSocketErrors == 1) // show debug message only at the first error; otherwise, the log may get huge
+					// if (iSocketErrors == 1) // show debug message only at the first error; otherwise, the log may get huge
 					{
 						SOCKET sock=clientSocket->getSocket();
 						CAMsg::printMsg(LOG_DEBUG,"CAFirstMixA::sendtoUser() - send error %d on socket: %d\n", ret, sock);
 					}
-					//closeConnection(pfmHashEntry);
+					// kick the user out - these only happens in extreme situations...
+					closeConnection(pfmHashEntry);
 				}
 				//TODO error handling
 			}

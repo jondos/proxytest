@@ -59,6 +59,8 @@ CAMultiSignature::~CAMultiSignature()
 		delete m_signatures->pCerts;
 		m_signatures->pCerts = NULL;
 		m_signatures->pSig = NULL;
+		delete[] m_signatures->pSKI;
+		m_signatures->pSKI = NULL;
 		//store current pointer
 		tmp = m_signatures;
 		//go to next signature
@@ -67,6 +69,36 @@ CAMultiSignature::~CAMultiSignature()
 		delete tmp;
 		tmp = NULL;
 	}
+}
+
+
+SINT32 CAMultiSignature::findSKI(const UINT8* a_strSKI)
+{
+	SIGNATURE* tmp = m_signatures;
+	UINT8 tmpSKI[200];
+	
+	if (tmp == NULL)
+	{
+		return E_UNKNOWN;
+	}
+	
+	while(tmp != NULL)
+	{
+		if (getSKI(tmpSKI, 200, tmp->pSKI) == E_SUCCESS &&
+			strncmp((char*)a_strSKI, (char*)tmpSKI, strlen((char*)tmpSKI) ) == 0)
+		{
+			return E_SUCCESS;
+		}
+		tmp = tmp->next;
+	}
+	
+	if (getSKI(tmpSKI, 200, m_xoredID) == E_SUCCESS &&
+		strncmp((char*)a_strSKI, (char*)tmpSKI, strlen((char*)tmpSKI) ) == 0)
+	{
+		return E_SUCCESS;
+	}
+	
+	return E_NOT_FOUND;
 }
 
 SINT32 CAMultiSignature::addSignature(CASignature* a_signature, CACertStore* a_certs, UINT8* a_ski, UINT32 a_skiLen)
@@ -80,6 +112,8 @@ SINT32 CAMultiSignature::addSignature(CASignature* a_signature, CACertStore* a_c
 	SIGNATURE* newSignature = new SIGNATURE;
 	newSignature->pSig = a_signature;
 	newSignature->pCerts = a_certs;
+	newSignature->pSKI = new UINT8[a_skiLen];
+	memcpy(newSignature->pSKI, a_ski, a_skiLen);
 	newSignature->next = m_signatures;
 	m_signatures = newSignature;
 	m_sigCount++;
@@ -434,11 +468,22 @@ SINT32 CAMultiSignature::sign(UINT8* in,UINT32 inlen,UINT8* sig,UINT32* siglen)
 	return m_signatures->pSig->sign(in, inlen, sig, siglen);
 }
 
+SINT32 CAMultiSignature::getSKI(UINT8* in, UINT32 inlen, UINT8* a_ski)
+{
+	UINT8* tmp = (UINT8*) hex_to_string(a_ski, SHA_DIGEST_LENGTH);
+	if (CACertificate::removeColons(tmp, strlen((const char*)tmp), in, &inlen) != E_SUCCESS)
+	{
+		delete tmp;
+		return E_UNKNOWN;
+	}
+	delete tmp;
+	strtrim(in);
+	return E_SUCCESS;
+}
+
 SINT32 CAMultiSignature::getXORofSKIs(UINT8* in, UINT32 inlen)
 {
-	UINT8* tmp = (UINT8*) hex_to_string(m_xoredID, SHA_DIGEST_LENGTH);
-	CACertificate::removeColons(tmp, strlen((const char*)tmp), in, &inlen);
-	return E_SUCCESS;
+	return getSKI(in, inlen, m_xoredID);
 }
 
 SINT32 CAMultiSignature::getSignatureElements(DOMNode* parent, DOMNode** signatureNodes, UINT32* length)

@@ -92,7 +92,7 @@ SINT32 CAFirstMix::initOnce()
 			}
 		if(m_nSocketsIn<1)
 			{
-				CAMsg::printMsg(LOG_CRIT,"No useable ListenerInterfaces specified (maybe wrong values or all are 'virtual'!\n");
+				CAMsg::printMsg(LOG_CRIT,"No usable ListenerInterfaces specified (maybe wrong values or all are 'virtual'!\n");
 				return E_UNKNOWN;
 			}
 
@@ -225,9 +225,9 @@ SINT32 CAFirstMix::init()
 #endif
 
 #ifdef PAYMENT
-		if(CAAccountingDBInterface::init() != E_SUCCESS)
+		if (CAAccountingDBInterface::init() != E_SUCCESS)
 		{
-			exit(1);
+			return E_UNKNOWN;
 		}
 		CAAccountingInstance::init(this);
 #endif

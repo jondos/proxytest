@@ -269,10 +269,12 @@ SINT32 CASocket::connect(const CASocketAddr & psa,UINT32 msTimeOut)
 		err=GET_NET_ERROR;
 #ifdef _WIN32
 		if(err!=WSAEWOULDBLOCK)
-			return E_UNKNOWN;
+			return E_SOCKET_CONNECT;
 #else
 		if(err!=EINPROGRESS)
-			return E_UNKNOWN;
+		{
+			return E_SOCKET_CONNECT;
+		}
 #endif
 
 #ifndef HAVE_POLL
@@ -295,17 +297,21 @@ SINT32 CASocket::connect(const CASocketAddr & psa,UINT32 msTimeOut)
 		err=::poll(&opollfd,1,msTimeOut);
 #endif
 		if(err<1) //timeout or error Note: we do not check for !=1 here because for some strange reasons FreeBSD 8.0-rc2 returns: 2 - Why?
-			{
-				close();
-				return E_UNKNOWN;
-			}
+		{
+			//err = GET_NET_ERROR;
+			close();
+			SET_NET_ERROR(err);
+			return E_SOCKET_CONNECT;
+		}
 		socklen_t len=sizeof(err);
 		err=0;
 		if(::getsockopt(m_Socket,SOL_SOCKET,SO_ERROR,(char*)&err,&len)<0||err!=0) //error by connect
-			{
-				close();
-				return E_UNKNOWN;
-			}
+		{
+			//err = GET_NET_ERROR;
+			close();
+			SET_NET_ERROR(err);
+			return E_SOCKET_CONNECT;
+		}
 		setNonBlocking(bWasNonBlocking);
 		return E_SUCCESS;
 	}
