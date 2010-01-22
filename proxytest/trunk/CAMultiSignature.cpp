@@ -487,5 +487,3 @@ SINT32 CAMultiSignature::getXORofSKIs(UINT8* in, UINT32 inlen)
 {
 	return getSKI(in, inlen, m_xoredID);
 }
-	return E_SUCCESS;
-}
