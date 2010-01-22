@@ -549,7 +549,7 @@ int main(int argc, const char* argv[])
 
 		if(CALibProxytest::getOptions()->parse(argc,argv) != E_SUCCESS)
 		{
-			CAMsg::printMsg(LOG_CRIT,"An error occured before we could finish parsing the configuration file.\n");
+			CAMsg::printMsg(LOG_CRIT,"An error occurred before we could finish parsing the configuration file. Exiting...\n");
 			goto EXIT;
 		}
 		if(!(	CALibProxytest::getOptions()->isFirstMix()||
@@ -557,7 +557,7 @@ int main(int argc, const char* argv[])
 					CALibProxytest::getOptions()->isLastMix()||
 					CALibProxytest::getOptions()->isLocalProxy()))
 			{
-				CAMsg::printMsg(LOG_CRIT,"You must specifiy, which kind of Mix you want to run!\n");
+				CAMsg::printMsg(LOG_CRIT,"You must specify which kind of Mix you want to run!\n");
 				CAMsg::printMsg(LOG_CRIT,"Use -j or -c\n");
 				CAMsg::printMsg(LOG_CRIT,"Or try --help for more options.\n");
 				CAMsg::printMsg(LOG_CRIT,"Exiting...\n");
@@ -582,7 +582,7 @@ int main(int argc, const char* argv[])
 				pid=fork();
 				if(pid!=0)
 					{
-						CAMsg::printMsg(LOG_DEBUG,"Exiting parent shell process...\n");
+						CAMsg::printMsg(LOG_INFO,"Exiting parent shell process...\n");
 						exit(EXIT_SUCCESS);
 					}
 				setsid();
@@ -750,7 +750,7 @@ int main(int argc, const char* argv[])
 					MONITORING_FIRE_NET_EVENT(ev_net_lastMixInited);
 				}
 #else
-				CAMsg::printMsg(LOG_ERR,"this Mix is compile to work only as local proxy!\n");
+				CAMsg::printMsg(LOG_ERR,"this Mix is compiled to work only as local proxy!\n");
 				goto EXIT;
 #endif
 			}
@@ -758,7 +758,10 @@ int main(int argc, const char* argv[])
 #ifndef DYNAMIC_MIX
 	  CAMsg::printMsg(LOG_INFO,"Starting MIX...\n");
 		if(pMix->start()!=E_SUCCESS)
+		{
 			CAMsg::printMsg(LOG_CRIT,"Error during MIX-Startup!\n");
+			exit(EXIT_FAILURE);
+		}
 #else
     /* LERNGRUPPE */
 while(true)

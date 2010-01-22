@@ -1148,7 +1148,7 @@ SINT32 CAAccountingInstance::processJapMessage(fmHashTableEntry * pHashEntry,con
 				else*/
 				if(hf_ret == (SINT32) CAXMLErrorMessage::ERR_OK)
 				{
-					CAMsg::printMsg( LOG_DEBUG, "Prepaid bytes are: %d\n", getPrepaidBytes(pHashEntry->pAccountingInfo));
+					//CAMsg::printMsg( LOG_DEBUG, "Prepaid bytes are: %d\n", getPrepaidBytes(pHashEntry->pAccountingInfo));
 
 					if( (getPrepaidBytes(pHashEntry->pAccountingInfo) > 0) &&
 						!(pHashEntry->pAccountingInfo->authFlags &
@@ -1690,7 +1690,7 @@ UINT32 CAAccountingInstance::handleAccountCertificate_internal(tAiAccountingInfo
 	{
 		prepaidAmount = prepaidIvalLowerBound;
 	}
-	CAMsg::printMsg( LOG_INFO, "handleAccountCertificate read %i prepaid bytes\n", prepaidAmount);
+	//CAMsg::printMsg( LOG_DEBUG, "handleAccountCertificate read %i prepaid bytes\n", prepaidAmount);
 	setDOMElementValue( elemPrepaid, prepaidAmount);
 
 	// send XML struct to Jap & set auth flags
@@ -2046,7 +2046,7 @@ UINT32 CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo*
 	print64(tmp,pAccInfo->accountNumber);
 	if (prepaidAmount > 0)
 	{
-		CAMsg::printMsg(LOG_DEBUG, "CAAccountingInstance: Got %d prepaid bytes for account nr. %s.\n",prepaidAmount, tmp);
+		CAMsg::printMsg(LOG_INFO, "CAAccountingInstance: Got %d prepaid bytes for account nr. %s.\n",prepaidAmount, tmp);
 
 		//pAccInfo->authFlags &= ~AUTH_WAITING_FOR_FIRST_SETTLED_CC;
 
@@ -2410,7 +2410,7 @@ UINT32 CAAccountingInstance::handleCostConfirmation_internal(tAiAccountingInfo* 
 		err.toXmlDocument(errDoc);
 		pAccInfo->pControlChannel->sendXMLMessage(errDoc);*/
 	}
-	else if (pCC->getTransferredBytes() == pAccInfo->confirmedBytes)
+	else if (pCC->getTransferredBytes() == pAccInfo->confirmedBytes && getPrepaidBytes(pAccInfo) != CALibProxytest::getOptions()->getPrepaidInterval())
 	{
 		CAMsg::printMsg(LOG_WARNING, "Received CostConfirmation for account %llu has no difference in bytes to current CC (%llu bytes).\n", 
 			pAccInfo->accountNumber, pCC->getTransferredBytes());
@@ -2871,7 +2871,7 @@ SINT32 CAAccountingInstance::__newSettlementTransaction(UINT32 *nrOfSettledCCs)
 		//locks the settlementMutex should be released. (Nested locking should be avoided).
 		if(ms_pInstance->m_nextSettleNr == ms_pInstance->m_settleWaitNr)
 		{
-			CAMsg::printMsg(LOG_INFO, "Thread %x: resetting the wait numbers.\n", pthread_self() );
+			//CAMsg::printMsg(LOG_INFO, "Thread %x: resetting the wait numbers.\n", pthread_self() );
 			//no one is waiting, we use this occasion to reset the wait numbers
 			ms_pInstance->m_nextSettleNr = 0;
 			ms_pInstance->m_settleWaitNr = 1;
@@ -3558,7 +3558,7 @@ SINT32 CAAccountingInstance::settlementTransaction()
 		//locks the settlementMutex should be released. (Nested locking should be avoided).
 		if(ms_pInstance->m_nextSettleNr == ms_pInstance->m_settleWaitNr)
 		{
-			CAMsg::printMsg(LOG_INFO, "Thread %x: resetting the wait numbers.\n", pthread_self() );
+			//CAMsg::printMsg(LOG_INFO, "Thread %x: resetting the wait numbers.\n", pthread_self() );
 			//no one is waiting, we use this occasion to reset the wait numbers
 			ms_pInstance->m_nextSettleNr = 0;
 			ms_pInstance->m_settleWaitNr = 1;
