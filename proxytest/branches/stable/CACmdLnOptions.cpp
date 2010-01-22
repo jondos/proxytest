@@ -3739,7 +3739,7 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 
 			if (!bHttpProxyFound)
 			{
-				CAMsg::printMsg(LOG_WARNING, "No valid HTTP proxy was specified! Please install and configure an HTTP proxy like Squid before starting the mix.\n");
+				CAMsg::printMsg(LOG_CRIT, "No valid HTTP proxy was specified! Please install and configure an HTTP proxy like Squid before starting the mix.\n");
 				for (UINT32 i = 0; i < aktInterface; i++)
 				{
 					delete m_arTargetInterfaces[aktInterface].addr;
