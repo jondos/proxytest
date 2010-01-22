@@ -127,7 +127,7 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 					{
 						lastCascadeUpdate=time(NULL);
 						bOneUpdateDone = true;
-						CAMsg::printMsg(LOG_DEBUG,"InfoService: Successfully sent Cascade information.\n");
+						CAMsg::printMsg(LOG_INFO,"InfoService: Successfully sent Cascade information.\n");
 					}
 					else if (pInfoService->m_pMix->isConnected())
 					{
@@ -145,7 +145,7 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 					{
 						lastMixInfoUpdate=time(NULL);
 						bOneUpdateDone = true;
-						CAMsg::printMsg(LOG_DEBUG,"InfoService: Successfully sent MixInfo information.\n");
+						CAMsg::printMsg(LOG_INFO,"InfoService: Successfully sent MixInfo information.\n");
 					}
 				}
 			}
@@ -683,7 +683,7 @@ SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param)
 		return E_UNKNOWN;
 	}
 
-  CAMsg::printMsg(LOG_DEBUG,"InfoService:sendMixHelo(): Initialising helo thread...\n");
+  // CAMsg::printMsg(LOG_DEBUG,"InfoService:sendMixHelo(): Initialising helo thread...\n");
 	ret = sendHelo(strMixHeloXML, len, TMixHelo, (UINT8*)"Mix Helo Thread", requestCommand, param);
   CAMsg::printMsg(LOG_DEBUG,"InfoService:sendMixHelo(): Finished helo thread!\n");
 
@@ -776,7 +776,7 @@ UINT8 **CAInfoService::getOperatorTnCsAsStrings(UINT32 **lengths, XMLSize_t *nrO
 	(*lengths) = new UINT32[(*nrOfTnCs)];
 	for (; i < (*nrOfTnCs); i++)
 	{
-		//after every loop turn locale is exlicitely reset to 3 because ...
+		//after every loop turn locale is explicitly reset to 3 because ...
 		locale_len = 3;
 		iterator = docTnCsList->item(i);
 		//... it is modified by getDOMElementAttribute
@@ -1041,20 +1041,20 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
 	{
 		if (ret != E_UNKNOWN)
 		{
-			CAMsg::printMsg(LOG_DEBUG,"InfoService: sendMixHelo() connecting to InfoService %s:%d failed for reason: %s (%i)\n",
+			CAMsg::printMsg(LOG_ERR,"InfoService: sendMixHelo() connecting to InfoService %s:%d failed for reason: %s (%i)\n",
 					hostname, a_pSocketAddress->getPort(), GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
 		}
 		else
 		{
-			CAMsg::printMsg(LOG_DEBUG,"InfoService: sendMixHelo() connecting to InfoService %s:%d failed!\n",
+			CAMsg::printMsg(LOG_ERR,"InfoService: sendMixHelo() connecting to InfoService %s:%d failed!\n",
 								hostname, a_pSocketAddress->getPort());
 		}
 	}
 ERR:
 
-	CAMsg::printMsg(LOG_ERR,"InfoService: Closing socket to %s:%d due to error...\n", hostname, a_pSocketAddress->getPort());
+	//CAMsg::printMsg(LOG_DEBUG,"InfoService: Closing socket to %s:%d due to error...\n", hostname, a_pSocketAddress->getPort());
 	oSocket.close();
-	CAMsg::printMsg(LOG_ERR,"InfoService: Socket closed to %s:%d due to error.\n", hostname, a_pSocketAddress->getPort());
+	//CAMsg::printMsg(LOG_DEBUG,"InfoService: Socket closed to %s:%d due to error.\n", hostname, a_pSocketAddress->getPort());
 	return E_UNKNOWN;
 }
 

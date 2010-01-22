@@ -874,21 +874,25 @@ SINT32 CALastMix::setTargets()
 				TargetInterface oTargetInterface;
 				CALibProxytest::getOptions()->getTargetInterface(oTargetInterface,i);
 				if(oTargetInterface.target_type==TARGET_HTTP_PROXY)
+				{
 					m_pCacheLB->add(oTargetInterface.addr);
+				}
 				else if(oTargetInterface.target_type==TARGET_SOCKS_PROXY)
+				{
 					m_pSocksLB->add(oTargetInterface.addr);
+				}
 				delete oTargetInterface.addr;
 				oTargetInterface.addr = NULL;
 			}
 		CAMsg::printMsg(LOG_DEBUG,"This mix will use the following proxies:\n");
 		for(i=0;i<m_pCacheLB->getElementCount();i++)
-			{
-				CASocketAddrINet* pAddr=m_pCacheLB->get();
-				UINT8 ip[4];
-				pAddr->getIP(ip);
-				UINT32 port=pAddr->getPort();
-				CAMsg::printMsg(LOG_DEBUG,"%u. HTTP Proxy's Address: %u.%u.%u.%u:%u\n",i+1,ip[0],ip[1],ip[2],ip[3],port);
-			}
+		{
+			CASocketAddrINet* pAddr=m_pCacheLB->get();
+			UINT8 ip[4];
+			pAddr->getIP(ip);
+			UINT32 port=pAddr->getPort();
+			CAMsg::printMsg(LOG_DEBUG,"%u. HTTP Proxy's Address: %u.%u.%u.%u:%u\n",i+1,ip[0],ip[1],ip[2],ip[3],port);
+		}
 		for(i=0;i<m_pSocksLB->getElementCount();i++)
 			{
 				CASocketAddrINet* pAddr=m_pSocksLB->get();
@@ -897,6 +901,8 @@ SINT32 CALastMix::setTargets()
 				UINT32 port=pAddr->getPort();
 				CAMsg::printMsg(LOG_DEBUG,"%u. SOCKS Proxy's Address: %u.%u.%u.%u:%u\n",i+1,ip[0],ip[1],ip[2],ip[3],port);
 			}
+
+
 		return E_SUCCESS;
 	}
 

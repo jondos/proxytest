@@ -2229,6 +2229,24 @@ SINT32 CACmdLnOptions::initLogging()
 		iLogOptions |= MSG_STDOUT;
 	}
 	ret = CAMsg::setLogOptions(iLogOptions);
+	
+	if (strcmp(m_strLogLevel,"info") == 0)
+	{
+		CAMsg::setLogLevel(LOG_INFO);
+	}
+	else if (strcmp(m_strLogLevel,"warning") == 0)
+	{
+		CAMsg::setLogLevel(LOG_WARNING);
+	}
+	else if (strcmp(m_strLogLevel,"error") == 0)
+	{
+		CAMsg::setLogLevel(LOG_ERR);
+	}
+	else if (strcmp(m_strLogLevel,"critical") == 0)
+	{
+		CAMsg::setLogLevel(LOG_CRIT);
+	}
+	
 	if(isEncryptedLogEnabled())
 	{
 		SINT32 retEncr;
@@ -2240,13 +2258,10 @@ SINT32 CACmdLnOptions::initLogging()
 	}
 #endif
 
-	if(getDaemon()) 
+	if(getDaemon() && ret != E_SUCCESS) 
 	{
-			if (ret != E_SUCCESS)
-			{
-				CAMsg::printMsg(LOG_CRIT, "We need a log file in daemon mode in order to get any messages! Exiting...\n");
-				return ret;
-			}
+		CAMsg::printMsg(LOG_CRIT, "We need a log file in daemon mode in order to get any messages! Exiting...\n");
+		return ret;
 	}
 	
 	return E_SUCCESS;
@@ -2270,7 +2285,17 @@ SINT32 CACmdLnOptions::setLoggingOptions(DOMElement* elemGeneral)
 	getDOMChildByName(elemGeneral, OPTIONS_NODE_LOGGING, elemLogging, false);
 	if(elemLogging != NULL)
 	{
+		if (getDOMElementAttribute(elemLogging, "level", tmpBuff, &tmpLen) == E_SUCCESS)
+		{
+			strtrim(tmpBuff);
+			toLower(tmpBuff);
+			m_strLogLevel = new char[strlen((char*)tmpBuff)+1];
+			strcpy(m_strLogLevel, (char*)tmpBuff);
+		}
+		
+		
 		getDOMChildByName(elemLogging, OPTIONS_NODE_LOGGING_FILE, elem, false);
+		tmpLen = TMP_BUFF_SIZE;
 		if(getDOMElementValue(elem, tmpBuff, &tmpLen) == E_SUCCESS)
 		{
 			strtrim(tmpBuff);
@@ -3448,7 +3473,85 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 		addr = NULL;
 	}
 
+
+
+	/*
+	 *
+	 *
+	 *
+	 * 		UINT32 i;
+		SINT32 ret;
+		UINT8 buff[255];
+		UINT32 buffLen = 255;
+		CASocket* tmpSocket;
+		for(i=1;i<=cntTargets;i++)
+			{
+				TargetInterface oTargetInterface;
+				CALibProxytest::getOptions()->getTargetInterface(oTargetInterface,i);
+
+				tmpSocket = new CASocket;
+				tmpSocket->setRecvBuff(50000);
+				tmpSocket->setSendBuff(5000);
+				ret = tmpSocket->connect(*oTargetInterface.addr,LAST_MIX_TO_PROXY_CONNECT_TIMEOUT);
+				if (ret != E_SUCCESS)
+				{
+					if (oTargetInterface.addr->toString(buff, buffLen) != E_SUCCESS)
+					{
+						buff[0] = 0;
+					}
+					if (ret != E_UNKNOWN)
+					{
+						CAMsg::printMsg(LOG_WARNING, "Could not connect to proxy %s! Reason: %s (%i) Please check if the proxy is running.\n",
+								buff, GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
+					}
+					else
+					{
+						CAMsg::printMsg(LOG_WARNING, "Could not connect to proxy %s! Please check if the proxy is running.\n", buff);
+					}
+					tmpSocket->close();
+					delete tmpSocket;
+					continue;
+				}
+
+
+				if(oTargetInterface.target_type==TARGET_HTTP_PROXY)
+				{
+					// TODO: we should not send an HTTP request to a non-existing address, for example to test:9999; if squid runs, we will get an HTTP error response
+					//if(tmpSocket->sendTimeOut(pMixPacket->payload.data,payLen,LAST_MIX_TO_PROXY_SEND_TIMEOUT)==SOCKET_ERROR) ...
+					// else ... tmpSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE);
+
+					m_pCacheLB->add(oTargetInterface.addr);
+				}
+				else if(oTargetInterface.target_type==TARGET_SOCKS_PROXY)
+				{
+					// TODO maybe there is also a possibility to check the response of the SOCKS proxy?
+					m_pSocksLB->add(oTargetInterface.addr);
+				}
+				delete oTargetInterface.addr;
+				oTargetInterface.addr = NULL;
+
+				tmpSocket->close();
+				delete tmpSocket;
+			}
+
+		if (m_pCacheLB->getElementCount() == 0)
+		{
+			CAMsg::printMsg(LOG_WARNING, "No valid HTTP proxy was specified! Please install and configure an HTTP proxy like Squid before starting the mix.\n");
+			return E_UNKNOWN;
+		}
+	 *
+	 *
+	 *
+	 */
+
+
+
 	//Next Proxies and visible adresses
+	SINT32 ret;
+	UINT8 buff[255];
+	UINT32 buffLen = 255;
+	CASocket* tmpSocket;
+
 	clearVisibleAddresses();
 	getDOMChildByName(elemNetwork, OPTIONS_NODE_PROXY_LIST, elemProxies, false);
 	if(elemProxies != NULL)
@@ -3465,6 +3568,7 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 			UINT32 proxy_type=0;
 			CASocketAddr* addr=NULL;
 			UINT16 port;
+			bool bHttpProxyFound = false;
 			for(UINT32 i=0; i < nlTargetInterfaces->getLength(); i++)
 			{
 				delete addr;
@@ -3508,7 +3612,6 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 				strtrim(tmpBuff);
 				if(strcmp((char*)tmpBuff,"SOCKS")==0)
 				{
-					m_bSocksSupport = true;
 					proxy_type=TARGET_SOCKS_PROXY;
 				}
 				else if(strcmp((char*)tmpBuff,"HTTP")==0)
@@ -3573,14 +3676,79 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 #else
 					continue;
 #endif
-				addVisibleAddresses(elemTargetInterface);
-				m_arTargetInterfaces[aktInterface].net_type=type;
-				m_arTargetInterfaces[aktInterface].target_type=proxy_type;
-				m_arTargetInterfaces[aktInterface].addr=addr->clone();
+
+
+
+				// check connection to proxy
+				tmpSocket = new CASocket;
+				tmpSocket->setRecvBuff(50000);
+				tmpSocket->setSendBuff(5000);
+				ret = tmpSocket->connect(*addr,LAST_MIX_TO_PROXY_CONNECT_TIMEOUT);
+				if (ret != E_SUCCESS)
+				{
+					if (addr->toString(buff, buffLen) != E_SUCCESS)
+					{
+						buff[0] = 0;
+					}
+					if (ret != E_UNKNOWN)
+					{
+						CAMsg::printMsg(LOG_WARNING, "Could not connect to proxy %s! Reason: %s (%i) Please check if the proxy is running.\n",
+								buff, GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
+					}
+					else
+					{
+						CAMsg::printMsg(LOG_WARNING, "Could not connect to proxy %s! Please check if the proxy is running.\n", buff);
+					}
+				}
+
+				if (ret == E_SUCCESS)
+				{
+					if (proxy_type == TARGET_HTTP_PROXY)
+					{
+						// TODO: we should not send an HTTP request to a non-existing address, for example to test:9999; if squid runs, we will get an HTTP error response
+						//if(tmpSocket->sendTimeOut(pMixPacket->payload.data,payLen,LAST_MIX_TO_PROXY_SEND_TIMEOUT)==SOCKET_ERROR) ...
+						// else ... tmpSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE);
+						// if we get no response or an invalid response, we set ret = E_UNKNOWN
+
+						bHttpProxyFound = true;
+					}
+					else if (proxy_type == TARGET_SOCKS_PROXY)
+					{
+						// TODO maybe there is also a possibility to check the response of the SOCKS proxy?
+						m_bSocksSupport = true;
+					}
+				}
+
+				tmpSocket->close();
+				delete tmpSocket;
+
+
+				if (ret == E_SUCCESS)
+				{
+					addVisibleAddresses(elemTargetInterface);
+					m_arTargetInterfaces[aktInterface].net_type=type;
+					m_arTargetInterfaces[aktInterface].target_type=proxy_type;
+					m_arTargetInterfaces[aktInterface].addr=addr->clone();
+					aktInterface++;
+				}
+
+
 				delete addr;
 				addr=NULL;
-				aktInterface++;
 			}
+
+			if (!bHttpProxyFound)
+			{
+				CAMsg::printMsg(LOG_WARNING, "No valid HTTP proxy was specified! Please install and configure an HTTP proxy like Squid before starting the mix.\n");
+				for (UINT32 i = 0; i < aktInterface; i++)
+				{
+					delete m_arTargetInterfaces[aktInterface].addr;
+				}
+
+
+				return E_UNKNOWN;
+			}
+
 			m_cnTargets=aktInterface;
 		}
 	} //end if elemProxies!=null

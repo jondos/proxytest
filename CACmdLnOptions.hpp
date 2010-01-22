@@ -703,6 +703,7 @@ class CACmdLnOptions
 		bool		m_bAutoReconnect; //auto reconnect if connection to first mix lost ??
 		UINT8*	m_strCascadeName;
 		char*		m_strLogDir;
+		char* 		m_strLogLevel;
 		SINT64	m_maxLogFileSize;
 		UINT32	m_maxLogFiles; //how many log files can be created before starting again with the first one
 		char*		m_strEncryptedLogDir;

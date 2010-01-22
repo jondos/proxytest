@@ -48,6 +48,7 @@ const char* const CAMsg::m_strMsgTypes[6]={", error   ] ",", critical] ",", info
 CAMsg::CAMsg()
     {
 			m_pcsPrint=new CAMutex();
+			m_logLevel = LOG_DEBUG;
 			setZero64(m_maxLogFileSize);
 			m_strMsgBuff=new char[MAX_MSG_SIZE+1+20+STRMSGTYPES_SIZE];
 			m_uLogType=MSG_STDOUT;
@@ -99,14 +100,51 @@ char* CAMsg::createLogFileMessage(UINT32 opt)
 	return strLogFile;
 }
 
+char* CAMsg::createLogDirMessage(UINT32 opt)
+{
+	char* strLogAtPath = " Please also check if the directory '%s' exists and create or change it if it does not.";
+	char* strLogFile = NULL;
+
+
+	if ((opt & MSG_FILE) == MSG_FILE || (opt & MSG_COMPRESSED_FILE) == MSG_COMPRESSED_FILE)
+	{
+		if (pMsg->m_strLogDir != NULL)
+		{
+			strLogFile = new char[strlen(strLogAtPath) + strlen(pMsg->m_strLogDir) + 1];
+			sprintf(strLogFile, strLogAtPath, pMsg->m_strLogDir);
+		}
+	}
+	if (strLogFile == NULL)
+	{
+		strLogFile = new char[1];
+		strLogFile[0] = '\0';
+	}
+	return strLogFile;
+}
+
+
+SINT32 CAMsg::setLogLevel(UINT32 a_logLevel)
+{
+	if (a_logLevel == LOG_DEBUG ||
+		a_logLevel == LOG_INFO ||
+		a_logLevel == LOG_WARNING ||
+		a_logLevel == LOG_ERR ||
+		a_logLevel == LOG_CRIT)
+	{
+		pMsg->m_logLevel = a_logLevel;
+		return E_SUCCESS;
+	}
+	return E_UNKNOWN;
+}
 
 SINT32 CAMsg::setLogOptions(UINT32 opt)
     {
 			SINT32 ret; 
 			char* strLogOpened = "Message log opened%s%s.\n";
-			char* strLogErrorMsg = "Could not open message log%s%s!%s Do you have write permissions?\n";
+			char* strLogErrorMsg = "Could not open message log%s%s!%s Do you have write permissions?%s\n";
 			char* strReasonMsg = " Reason: %s (%u)";
 			char* strLogFile = NULL;
+			char* strLogDir = NULL;
 			char* strReason = NULL;
 			char* strBuff;
 			char* strLogType = "";
@@ -157,6 +195,8 @@ SINT32 CAMsg::setLogOptions(UINT32 opt)
 
 			strLogFile = pMsg->createLogFileMessage(opt);
 			
+			strLogDir = pMsg->createLogDirMessage(opt);
+
 			if (ret == E_FILE_OPEN)
 			{
 				strReason = new char[strlen(strReasonMsg) + strlen(GET_NET_ERROR_STR(GET_NET_ERROR)) + 5 + 1];
@@ -168,9 +208,9 @@ SINT32 CAMsg::setLogOptions(UINT32 opt)
 				strReason[0] = '\0';
 			}
 
-			strBuff = new char[strlen(strLogErrorMsg) + strlen(strLogType) + strlen(strLogFile) + strlen(strReason) + 1];
+			strBuff = new char[strlen(strLogErrorMsg) + strlen(strLogType) + strlen(strLogFile) + strlen(strReason) + strlen(strLogDir) + 1];
 		
-			sprintf(strBuff, strLogErrorMsg, strLogType, strLogFile, strReason);
+			sprintf(strBuff, strLogErrorMsg, strLogType, strLogFile, strReason, strLogDir);
 			//snprintf(strBuff, strlen(strLogErrorMsg) + strlen(strLogFile) + strlen(strReason) + 1,  strLogErrorMsg, strLogFile, strReason);
 			delete[] strLogFile;
 			delete[] strReason;
@@ -189,28 +229,44 @@ SINT32 CAMsg::printMsg(UINT32 type,const char* format,...)
 			va_list ap;
 			va_start(ap,format);
 			SINT32 ret=E_SUCCESS;
-
+			
 			//Date is: yyyy/mm/dd-hh:mm:ss   -- the size is: 19
 			time_t currtime=time(NULL);
 			strftime(pMsg->m_strMsgBuff+1,255,"%Y/%m/%d-%H:%M:%S",localtime(&currtime));
 			switch(type)
 				{
 					case LOG_DEBUG:
+						if (pMsg->m_logLevel != LOG_DEBUG)
+						{
+							ret = E_UNKNOWN;
+						}
 						strcat(pMsg->m_strMsgBuff,pMsg->m_strMsgTypes[3]);
 					break;
 					case LOG_INFO:
+						if (pMsg->m_logLevel == LOG_WARNING || pMsg->m_logLevel == LOG_ERR || pMsg->m_logLevel == LOG_CRIT)
+						{
+							ret = E_UNKNOWN;
+						}
 						strcat(pMsg->m_strMsgBuff,pMsg->m_strMsgTypes[2]);
 					break;
 					case LOG_CRIT:
 						strcat(pMsg->m_strMsgBuff,pMsg->m_strMsgTypes[1]);
 					break;
 					case LOG_ERR:
+						if (pMsg->m_logLevel == LOG_CRIT)
+						{
+							ret = E_UNKNOWN;
+						}
 						strcat(pMsg->m_strMsgBuff,pMsg->m_strMsgTypes[0]);
 					break;
 					case LOG_ENCRYPTED:
 						strcat(pMsg->m_strMsgBuff,pMsg->m_strMsgTypes[4]);
 					break;
 					case LOG_WARNING:
+						if (pMsg->m_logLevel == LOG_ERR || pMsg->m_logLevel == LOG_CRIT)
+						{
+							ret = E_UNKNOWN;
+						}
 						strcat(pMsg->m_strMsgBuff,pMsg->m_strMsgTypes[5]);
 					break;
 					default:
@@ -224,6 +280,11 @@ SINT32 CAMsg::printMsg(UINT32 type,const char* format,...)
 		  trio_vsnprintf(pMsg->m_strMsgBuff+20+STRMSGTYPES_SIZE,MAX_MSG_SIZE,format,ap);
 	#endif
 			va_end(ap);
+			if (ret != E_SUCCESS)
+			{
+				pMsg->m_pcsPrint->unlock();
+				return ret;
+			}
 			if(type==LOG_ENCRYPTED)
 			{
 				ret=strlen(pMsg->m_strMsgBuff);
@@ -386,7 +447,11 @@ SINT32 CAMsg::openLog(UINT32 type)
 		else if ((type & MSG_FILE) == MSG_FILE)
 				{
 					if(CALibProxytest::getOptions()->getLogDir((UINT8*)m_strLogFile,1024)!=E_SUCCESS)
+					{
 						return E_UNKNOWN;
+					}
+					m_strLogDir = new char[strlen(m_strLogFile) + 1];
+					strcpy(m_strLogDir, m_strLogFile);
 					strcat(m_strLogFile,FILENAME_INFOLOG);
 					if(CALibProxytest::getOptions()->getMaxLogFileSize()>0)
 					{
