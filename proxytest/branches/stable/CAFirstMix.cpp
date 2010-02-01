@@ -292,7 +292,11 @@ SINT32 CAFirstMix::connectToNextMix(CASocketAddr* a_pAddrNext)
 			err=GET_NET_ERROR;
 			
 			if(err!=ERR_INTERN_TIMEDOUT&&err!=ERR_INTERN_CONNREFUSED)
+			{
+				CAMsg::printMsg(LOG_ERR, "Cannot connect to next Mix on %s. Reason: %s (%i)\n",
+					buff, GET_NET_ERROR_STR(err), err);
 				break;
+			}
 				
 			if (errLast != err || i % 10 == 0)
 			{

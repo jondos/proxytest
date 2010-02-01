@@ -590,8 +590,8 @@ SINT32 CAMiddleMix::init()
 		m_pMuxIn->getCASocket()->setKeepAlive((UINT32)1800);
 
 
-		pAddrNext->toString(buff,255);
-		CAMsg::printMsg(LOG_INFO,"Waiting for connection from previous Mix on %s...\n", buff);
+		//pAddrNext->toString(buff,255);
+		//CAMsg::printMsg(LOG_INFO,"Connecting to next Mix on %s...\n", buff);
 
 		/** Connect to next mix */
 		if(connectToNextMix(pAddrNext) != E_SUCCESS)
@@ -1078,10 +1078,13 @@ THREAD_RETURN mm_loopReadFromMixAfter(void* param)
 SINT32 CAMiddleMix::connectToNextMix(CASocketAddr* a_pAddrNext)
 {
 #define RETRIES 100
-#define RETRYTIME 30
-		CAMsg::printMsg(LOG_INFO,"Init: Try to connect to next Mix...\n");
+#define RETRYTIME 10
+		UINT8 buff[255];
+		a_pAddrNext->toString(buff,255);
+		CAMsg::printMsg(LOG_INFO,"Try to connect to next Mix on %s ...\n",buff);
 		UINT32 i = 0;
 		SINT32 err = E_UNKNOWN;
+		SINT32 errLast = E_SUCCESS;
 		for(i=0; i < RETRIES; i++)
 		{
 #ifdef DYNAMIC_MIX
@@ -1100,10 +1103,24 @@ SINT32 CAMiddleMix::connectToNextMix(CASocketAddr* a_pAddrNext)
 			 	CAMsg::printMsg(LOG_DEBUG,"Con-Error: %i\n",err);
 #endif
 				if(err!=ERR_INTERN_TIMEDOUT&&err!=ERR_INTERN_CONNREFUSED)
+				{
+					CAMsg::printMsg(LOG_ERR, "Cannot connect to next Mix on %s. Reason: %s (%i)\n",
+						buff, GET_NET_ERROR_STR(err), err);
 					break;
-#ifdef _DEBUG
-				CAMsg::printMsg(LOG_DEBUG,"Cannot connect... retrying\n");
-#endif
+				}
+					
+				if (errLast != err || i % 10 == 0)
+				{
+					CAMsg::printMsg(LOG_ERR, "Cannot connect to next Mix on %s. Reason: %s (%i). Retrying...\n",
+						buff, GET_NET_ERROR_STR(err), err);
+					errLast = err;
+				}
+				else
+				{
+	#ifdef _DEBUG
+					CAMsg::printMsg(LOG_DEBUG,"Cannot connect... retrying\n");
+	#endif
+				}					
 				sSleep(RETRYTIME);
 			}
 			else

@@ -106,7 +106,7 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 					bIsFirst=false;
 					bOneUpdateDone = true;
 					statusSentErrorBurst = 0;
-					CAMsg::printMsg(LOG_DEBUG,"InfoService: Successfully sent Status information.\n");
+					//CAMsg::printMsg(LOG_DEBUG,"InfoService: Successfully sent Status information.\n");
 				}
 				else if (pInfoService->m_pMix->isConnected())
 				{
