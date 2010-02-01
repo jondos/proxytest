@@ -303,11 +303,11 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 msTimeout)
 				{
 					if (m_Socket.isClosed())
 					{
-						CAMsg::printMsg(LOG_ERR "Error while receiving from socket. Socket is closed! Receive returned: %i Reason: %s (%i)\n", ret, GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
+						CAMsg::printMsg(LOG_ERR, "Error while receiving from socket. Socket is closed! Receive returned: %i Reason: %s (%i)\n", ret, GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
 					}
 					else
 					{
-						CAMsg::printMsg(LOG_ERR "Error while receiving from socket. Receive returned: %i Reason: %s (%i)\n", ret, GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
+						CAMsg::printMsg(LOG_ERR, "Error while receiving from socket. Receive returned: %i Reason: %s (%i)\n", ret, GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
 					}
 					m_csReceive.unlock();
 					return E_UNKNOWN;
