@@ -591,7 +591,7 @@ SINT32 CAMiddleMix::init()
 
 
 		pAddrNext->toString(buff,255);
-		CAMsg::printMsg(LOG_INFO,"Waiting for connection from previous Mix on %s...\n", buff);
+		CAMsg::printMsg(LOG_INFO,"Connecting to next Mix on %s...\n", buff);
 
 		/** Connect to next mix */
 		if(connectToNextMix(pAddrNext) != E_SUCCESS)
