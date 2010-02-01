@@ -1084,6 +1084,7 @@ SINT32 CAMiddleMix::connectToNextMix(CASocketAddr* a_pAddrNext)
 		CAMsg::printMsg(LOG_INFO,"Try to connect to next Mix on %s ...\n",buff);
 		UINT32 i = 0;
 		SINT32 err = E_UNKNOWN;
+		SINT32 errLast = E_SUCCESS;
 		for(i=0; i < RETRIES; i++)
 		{
 #ifdef DYNAMIC_MIX
