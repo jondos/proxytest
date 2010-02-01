@@ -190,7 +190,7 @@ SINT32 CAXMLErrorMessage::setValues(DOMElement* elemRoot)
 	{
 		if (objectRootElem != NULL)
 		{
-			CAMsg::printMsg(LOG_ERR, "Message object found...\n");
+			CAMsg::printMsg(LOG_INFO, "XMLErrorMessage: appended object found...\n");
 			UINT8* buff = DOM_Output::dumpToString(objectRootElem, true);
 			CAMsg::printMsg(LOG_DEBUG,(char*)buff);
 			delete[] buff;
