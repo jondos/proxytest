@@ -603,10 +603,6 @@ int main(int argc, const char* argv[])
 				exit(EXIT_FAILURE);
 		}
 		
-		
-#ifdef SERVER_MONITORING
-		CAStatusManager::init();
-#endif
 
 
 #if defined (_DEBUG) &&!defined(ONLY_LOCAL_PROXY)
@@ -718,6 +714,11 @@ int main(int argc, const char* argv[])
 #ifndef ONLY_LOCAL_PROXY
 			SINT32 s32MaxSockets=CASocket::getMaxOpenSockets();
 			CAMsg::printMsg(LOG_INFO,"Max Number of sockets we can open: %i\n",s32MaxSockets);
+			
+#ifdef SERVER_MONITORING
+			CAStatusManager::init();
+#endif
+			
 			if(s32MaxSockets>100&&s32MaxSockets<10000)
 				{
 				CASocket::setMaxNormalSockets(s32MaxSockets-10);
