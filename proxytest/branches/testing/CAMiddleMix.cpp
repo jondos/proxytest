@@ -590,8 +590,8 @@ SINT32 CAMiddleMix::init()
 		m_pMuxIn->getCASocket()->setKeepAlive((UINT32)1800);
 
 
-		pAddrNext->toString(buff,255);
-		CAMsg::printMsg(LOG_INFO,"Connecting to next Mix on %s...\n", buff);
+		//pAddrNext->toString(buff,255);
+		//CAMsg::printMsg(LOG_INFO,"Connecting to next Mix on %s...\n", buff);
 
 		/** Connect to next mix */
 		if(connectToNextMix(pAddrNext) != E_SUCCESS)
