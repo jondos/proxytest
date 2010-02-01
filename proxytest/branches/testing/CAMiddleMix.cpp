@@ -1079,7 +1079,9 @@ SINT32 CAMiddleMix::connectToNextMix(CASocketAddr* a_pAddrNext)
 {
 #define RETRIES 100
 #define RETRYTIME 30
-		CAMsg::printMsg(LOG_INFO,"Init: Try to connect to next Mix...\n");
+		UINT8 buff[255];
+		a_pAddrNext->toString(buff,255);
+		CAMsg::printMsg(LOG_INFO,"Try to connect to next Mix on %s ...\n",buff);
 		UINT32 i = 0;
 		SINT32 err = E_UNKNOWN;
 		for(i=0; i < RETRIES; i++)
