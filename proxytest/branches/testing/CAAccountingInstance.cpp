@@ -2986,7 +2986,7 @@ SettleEntry *CAAccountingInstance::__handleSettleResult(CAXMLCostConfirmation *p
 	}
 	else if(pErrMsg->getErrorCode() != pErrMsg->ERR_OK)  //BI reported error
 	{
-		CAMsg::printMsg(LOG_ERR, "Settlement transaction: BI reported error no. %d (%s)\n",
+		CAMsg::printMsg(LOG_WARNING, "Settlement transaction: BI reported error no. %d (%s)\n",
 			pErrMsg->getErrorCode(), pErrMsg->getDescription() );
 		if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_KEY_NOT_FOUND)
 		{
@@ -3373,7 +3373,7 @@ SINT32 CAAccountingInstance::settlementTransaction()
 		}
 		else if(pErrMsg->getErrorCode() != pErrMsg->ERR_OK)  //BI reported error
 		{
-			CAMsg::printMsg(LOG_ERR, "Settlement transaction: BI reported error no. %d (%s)\n",
+			CAMsg::printMsg(LOG_WARNING, "Settlement transaction: BI reported error no. %d (%s)\n",
 				pErrMsg->getErrorCode(), pErrMsg->getDescription() );
 			if (pErrMsg->getErrorCode() == CAXMLErrorMessage::ERR_KEY_NOT_FOUND)
 			{
