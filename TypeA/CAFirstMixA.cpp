@@ -1065,11 +1065,11 @@ void CAFirstMixA::checkUserConnections()
 				UINT32 authFlags = CAAccountingInstance::getAuthFlags(timeoutHashEntry);
 				if (authFlags > 0)
 				{
-					CAMsg::printMsg(LOG_ERR,"Client connection closed due to forced timeout! Payment auth flags: %u\n", authFlags);
+					CAMsg::printMsg(LOG_WARNING,"Client connection closed due to forced timeout. Payment auth flags: %u\n", authFlags);
 				}
 				else
 				{
-					CAMsg::printMsg(LOG_ERR,"Client connection closed due to forced timeout!\n");
+					CAMsg::printMsg(LOG_WARNING,"Client connection closed due to forced timeout.\n");
 				}
 				//CAAccountingInstance::setPrepaidBytesToZero(timeoutHashEntry->pAccountingInfo);
 				closeConnection(timeoutHashEntry);
@@ -1086,7 +1086,7 @@ void CAFirstMixA::checkUserConnections()
 			}
 			// Let the client obtain all his remaining control message packets
 			//(which in most cases contain the error message with the kickout reason.
-			CAMsg::printMsg(LOG_ERR,"A kickout is supposed to happen bit let him get his %u message bytes!\n",
+			CAMsg::printMsg(LOG_INFO,"A kickout is supposed to happen. Wait for it until the user gets his %u message bytes...\n",
 					timeoutHashEntry->pControlMessageQueue->getSize());
 		}
 		if(firstIteratorEntry == NULL)

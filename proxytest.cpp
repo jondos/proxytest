@@ -717,7 +717,7 @@ int main(int argc, const char* argv[])
 				//else
 #ifndef ONLY_LOCAL_PROXY
 			SINT32 s32MaxSockets=CASocket::getMaxOpenSockets();
-			CAMsg::printMsg(LOG_CRIT,"Max Number of sockets we can open: %i\n",s32MaxSockets);
+			CAMsg::printMsg(LOG_INFO,"Max Number of sockets we can open: %i\n",s32MaxSockets);
 			if(s32MaxSockets>100&&s32MaxSockets<10000)
 				{
 				CASocket::setMaxNormalSockets(s32MaxSockets-10);
