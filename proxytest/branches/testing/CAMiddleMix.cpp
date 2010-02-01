@@ -1100,10 +1100,24 @@ SINT32 CAMiddleMix::connectToNextMix(CASocketAddr* a_pAddrNext)
 			 	CAMsg::printMsg(LOG_DEBUG,"Con-Error: %i\n",err);
 #endif
 				if(err!=ERR_INTERN_TIMEDOUT&&err!=ERR_INTERN_CONNREFUSED)
+				{
+					CAMsg::printMsg(LOG_ERR, "Cannot connect to next Mix on %s. Reason: %s (%i)\n",
+						buff, GET_NET_ERROR_STR(err), err);
 					break;
-#ifdef _DEBUG
-				CAMsg::printMsg(LOG_DEBUG,"Cannot connect... retrying\n");
-#endif
+				}
+					
+				if (errLast != err || i % 10 == 0)
+				{
+					CAMsg::printMsg(LOG_ERR, "Cannot connect to next Mix on %s. Reason: %s (%i). Retrying...\n",
+						buff, GET_NET_ERROR_STR(err), err);
+					errLast = err;
+				}
+				else
+				{
+	#ifdef _DEBUG
+					CAMsg::printMsg(LOG_DEBUG,"Cannot connect... retrying\n");
+	#endif
+				}					
 				sSleep(RETRYTIME);
 			}
 			else
