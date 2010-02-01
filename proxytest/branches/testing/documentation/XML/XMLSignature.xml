@@ -1,0 +1,18 @@
+﻿<Signature>
+  <SignedInfo>
+    <Reference URI=""> <!--what is signed ?-->
+      <DigestValue>.....</DigestValue> <!--base64 SHA1 digest -->
+    </Reference>
+  </SignedInfo>
+  <SignatureValue>
+    <!--base64 of r,s of DSA signature -->
+  </SignatureValue>
+  <KeyInfo>
+    <!-- info abnout the key used -->
+    <X509Data>
+      <X509Certificate>
+        <!-- base64 cert of the public test key for the signature -->
+      </X509Certificate>
+    </X509Data>
+  </KeyInfo>
+</Signature>
