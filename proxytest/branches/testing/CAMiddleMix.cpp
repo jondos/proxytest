@@ -1078,7 +1078,7 @@ THREAD_RETURN mm_loopReadFromMixAfter(void* param)
 SINT32 CAMiddleMix::connectToNextMix(CASocketAddr* a_pAddrNext)
 {
 #define RETRIES 100
-#define RETRYTIME 30
+#define RETRYTIME 10
 		UINT8 buff[255];
 		a_pAddrNext->toString(buff,255);
 		CAMsg::printMsg(LOG_INFO,"Try to connect to next Mix on %s ...\n",buff);
