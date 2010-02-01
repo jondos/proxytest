@@ -1888,7 +1888,7 @@ UINT32 CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo*
 			if(loginEntry != NULL)
 			{
 				//When login ownership was obtained: cleanup the former entry.
-				CAMsg::printMsg(LOG_CRIT, "finally cleaning up loginEntry %p for former owner %p of account %llu\n",
+				CAMsg::printMsg(LOG_INFO, "finally cleaning up loginEntry %p for former owner %p of account %llu\n",
 													loginEntry, loginEntry->ownerRef, pAccInfo->accountNumber);
 				ms_pInstance->m_currentAccountsHashtable->remove(&(pAccInfo->accountNumber));
 				delete loginEntry->ownerLock;
