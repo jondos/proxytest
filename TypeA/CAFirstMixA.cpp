@@ -1061,15 +1061,15 @@ void CAFirstMixA::checkUserConnections()
 			if( (timeoutHashEntry->pControlMessageQueue->getSize() == 0) ||
 				(timeoutHashEntry->kickoutSendRetries <= 0) )
 			{
-				CAMsg::printMsg(LOG_ERR, "Kickout immediately owner %x!\n", timeoutHashEntry);
+				CAMsg::printMsg(LOG_WARNING, "Kickout immediately owner %x!\n", timeoutHashEntry);
 				UINT32 authFlags = CAAccountingInstance::getAuthFlags(timeoutHashEntry);
 				if (authFlags > 0)
 				{
-					CAMsg::printMsg(LOG_ERR,"Client connection closed due to forced timeout! Payment auth flags: %u\n", authFlags);
+					CAMsg::printMsg(LOG_WARNING,"Client connection closed due to forced timeout! Payment auth flags: %u\n", authFlags);
 				}
 				else
 				{
-					CAMsg::printMsg(LOG_ERR,"Client connection closed due to forced timeout!\n");
+					CAMsg::printMsg(LOG_WARNING,"Client connection closed due to forced timeout!\n");
 				}
 				//CAAccountingInstance::setPrepaidBytesToZero(timeoutHashEntry->pAccountingInfo);
 				closeConnection(timeoutHashEntry);
@@ -1081,12 +1081,12 @@ void CAFirstMixA::checkUserConnections()
 				//and accessed by this thread, both do never run concurrently.
 				//So we can avoid locking.
 				timeoutHashEntry->kickoutSendRetries--;
-				CAMsg::printMsg(LOG_ERR, "In Queue: %u, retries %d.\n",
+				CAMsg::printMsg(LOG_INFO, "Size of control message queue for user to be kicked out: %u bytes, retries %d.\n",
 						timeoutHashEntry->pControlMessageQueue->getSize(), timeoutHashEntry->kickoutSendRetries);
 			}
 			// Let the client obtain all his remaining control message packets
 			//(which in most cases contain the error message with the kickout reason.
-			CAMsg::printMsg(LOG_ERR,"A kickout is supposed to happen bit let him get his %u message bytes!\n",
+			CAMsg::printMsg(LOG_WARNING,"A kickout is supposed to happen. Let the user get his %u control message bytes before...\n",
 					timeoutHashEntry->pControlMessageQueue->getSize());
 		}
 		if(firstIteratorEntry == NULL)
