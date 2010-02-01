@@ -507,21 +507,6 @@ SINT32 CAFirstMix::processKeyExchange()
     {
     	if(equals(child->getNodeName(),"Mix"))
         {
-    		//verify certificate from next mix if enabled
-    		if(CALibProxytest::getOptions()->verifyMixCertificates())
-    		{
-    			CACertificate* nextMixCert = CALibProxytest::getOptions()->getTrustedCertificateStore()->verifyMixCert(child);
-    			if(nextMixCert != NULL)
-    			{
-    				CAMsg::printMsg(LOG_DEBUG, "Next mix certificate was verified by a trusted root CA.\n");
-    				CALibProxytest::getOptions()->setNextMixTestCertificate(nextMixCert);
-    			}
-    			else
-    			{
-    				CAMsg::printMsg(LOG_ERR, "Could not verify certificate received from next mix!\n");
-    				return E_UNKNOWN;
-    			}
-    		}
             //check Signature....
             CAMsg::printMsg(LOG_DEBUG,"Try to verify next mix signature...\n");
             //CASignature oSig;
@@ -613,9 +598,11 @@ SINT32 CAFirstMix::processKeyExchange()
 			CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Calculated -- SendInterval %u -- Receive Interval %u\n",m_u32KeepAliveSendInterval,m_u32KeepAliveRecvInterval);
 
             //m_pSignature->signXML(elemRoot);
-            m_pMultiSignature->signXML(elemRoot, true);
-            UINT32 outlen=0;
-            UINT8* out=DOM_Output::dumpToMem(docSymKey,&outlen);
+            m_pMultiSignature->signXML(elemRoot, false);
+
+			UINT32 outlen=5000;
+			UINT8* out=new UINT8[outlen];
+			DOM_Output::dumpToMem(docSymKey,out,&outlen);
             if (docSymKey != NULL)
             {
 				docSymKey->release();

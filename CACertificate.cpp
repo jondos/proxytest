@@ -390,25 +390,19 @@ SINT32 CACertificate::getRawSubjectKeyIdentifier(UINT8* r_ski, UINT32* r_skiLen)
 	return E_SUCCESS;
 }
 
-SINT32 CACertificate::verify(const CACertificate* a_cert)
+SINT32 CACertificate::verify(CACertificate* a_cert)
 {
 	if(a_cert == NULL || a_cert->m_pCert == NULL || m_pCert == NULL)
 	{
 		return E_UNKNOWN;
 	}
-	//check validity
-	if(!isValid())
-	{
-		CAMsg::printMsg(LOG_ERR, "Verification Error: Certificate is not valid!\n");
-		return E_UNKNOWN;
-	}
-	//namechaining...
+	//Namechaining...
 	if(X509_NAME_cmp(X509_get_issuer_name(m_pCert), X509_get_subject_name(a_cert->m_pCert)) != 0)
 	{
 		CAMsg::printMsg(LOG_ERR, "Verification Error: Names do not match!\n");
 		return E_UNKNOWN;
 	}
-	//keychaining... (only if available)
+	//Keychaining... (only if available)
 	if(m_pAKI != NULL && a_cert->m_pSKI != NULL)
 	{
 		if(ASN1_OCTET_STRING_cmp(m_pAKI->keyid, a_cert->m_pSKI) != 0)
@@ -446,33 +440,11 @@ SINT32 CACertificate::verify(const CACertificate* a_cert)
 	return E_UNKNOWN;
 }
 
-bool CACertificate::isValid()
+bool CACertificate::isValid(time_t* ttiq)
 {
-	if(X509_cmp_current_time(X509_get_notBefore(m_pCert)) == -1
-			&& X509_cmp_current_time(X509_get_notAfter(m_pCert)) == 1)
+	if(X509_cmp_time(X509_get_notBefore(m_pCert), ttiq) == -1
+			&& X509_cmp_time(X509_get_notAfter(m_pCert), ttiq) == 1)
 	{
-		return true;
-	}
-	//check if certificate is valid within grace period of one month
-	time_t now = time(NULL); 		//get current time;
-	tm* time = new tm;
-	time = gmtime_r(&now, time);	//convert time to modifiable format
-	if(time->tm_mon < 2)			//go back two month in time
-	{
-		time->tm_mon = time->tm_mon+10;
-		time->tm_year = time->tm_year-1;
-	}
-	else
-	{
-		time->tm_mon = time->tm_mon-2;
-	}
-	time_t ttiq  = mktime(time);  	//convert time back to time_t and check again
-	delete time;
-	time = NULL;
-	if(X509_cmp_time(X509_get_notBefore(m_pCert), &ttiq) == -1
-			&& X509_cmp_time(X509_get_notAfter(m_pCert), &ttiq) == 1)
-	{
-		CAMsg::printMsg(LOG_WARNING, "Certificate is only valid within grace period of two month!\n");
 		return true;
 	}
 	return false;

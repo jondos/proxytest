@@ -65,6 +65,7 @@ class CAMultiSignature
 		SIGNATURE* m_signatures;
 		UINT32 m_sigCount;
 		UINT8* m_xoredID;
+		static SINT32 getSignatureElements(DOMNode* parent, DOMNode** signatureNodes, UINT32* length);
 		SINT32 getSKI(UINT8* in, UINT32 inlen, UINT8* a_ski);
 };
 
