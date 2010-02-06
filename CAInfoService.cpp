@@ -685,7 +685,7 @@ SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand,const UINT8* param)
 
   // CAMsg::printMsg(LOG_DEBUG,"InfoService:sendMixHelo(): Initialising helo thread...\n");
 	ret = sendHelo(strMixHeloXML, len, TMixHelo, (UINT8*)"Mix Helo Thread", requestCommand, param);
-  CAMsg::printMsg(LOG_DEBUG,"InfoService:sendMixHelo(): Finished helo thread!\n");
+  // CAMsg::printMsg(LOG_DEBUG,"InfoService:sendMixHelo(): Finished helo thread!\n");
 
 	delete[] strMixHeloXML;
 	strMixHeloXML = NULL;
@@ -942,7 +942,7 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
 			goto ERR;
 		}
 
-		CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending XML data...\n");
+		// CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending XML data...\n");
 		getcurrentTimeMillis(currentMillis);
 		currentTimeout -= (currentMillis - startupTime);
 		if (currentTimeout <= 0 ||
@@ -953,14 +953,14 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
 
 		if(receiveAnswer)
 		{
-			CAMsg::printMsg(LOG_DEBUG,"InfoService: Parsing header...\n");
+			// CAMsg::printMsg(LOG_DEBUG,"InfoService: Parsing header...\n");
 			getcurrentTimeMillis(currentMillis);
 			currentTimeout -= (currentMillis - startupTime);
 			if(currentTimeout <= 0 || httpClient.parseHTTPHeader(&len) != E_SUCCESS)
 			{
 				goto ERR;
 			}
-			CAMsg::printMsg(LOG_DEBUG,"InfoService: Header parsed!\n");
+			// CAMsg::printMsg(LOG_DEBUG,"InfoService: Header parsed!\n");
 
 			if(len > 0)
 			{
@@ -1085,7 +1085,7 @@ SINT32 CAInfoService::sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN (*a_
 	{
 		if (threads[i]->join() == E_SUCCESS)
 		{
-			CAMsg::printMsg(LOG_DEBUG,"InfoService: helo thread %u joined.\n", i);
+			// CAMsg::printMsg(LOG_DEBUG,"InfoService: helo thread %u joined.\n", i);
 			if (messages[i]->retVal == E_SUCCESS)
 			{
 				returnValue = E_SUCCESS;
@@ -1100,7 +1100,7 @@ SINT32 CAInfoService::sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN (*a_
 	}
 	//Message looks senseless but please keep it because Rolf reported a helo thread deadlock.
 	//Perhaps there is a problem when the threads are joined.
-	CAMsg::printMsg(LOG_DEBUG,"InfoService: all helo threads joined. continue.\n");
+	// CAMsg::printMsg(LOG_DEBUG,"InfoService: all helo threads joined. continue.\n");
 	delete[] messages;
 	messages = NULL;
 	delete[] threads;

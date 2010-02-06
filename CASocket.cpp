@@ -298,7 +298,7 @@ SINT32 CASocket::connect(const CASocketAddr & psa,UINT32 msTimeOut)
 #endif
 		if(err<1) //timeout or error Note: we do not check for !=1 here because for some strange reasons FreeBSD 8.0-rc2 returns: 2 - Why?
 		{
-			//err = GET_NET_ERROR;
+			err = GET_NET_ERROR;
 			close();
 			SET_NET_ERROR(err);
 			return E_SOCKET_CONNECT;
@@ -307,7 +307,7 @@ SINT32 CASocket::connect(const CASocketAddr & psa,UINT32 msTimeOut)
 		err=0;
 		if(::getsockopt(m_Socket,SOL_SOCKET,SO_ERROR,(char*)&err,&len)<0||err!=0) //error by connect
 		{
-			//err = GET_NET_ERROR;
+			err = GET_NET_ERROR;
 			close();
 			SET_NET_ERROR(err);
 			return E_SOCKET_CONNECT;
