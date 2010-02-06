@@ -2506,12 +2506,13 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 		if(signature->setSignKey(a_cert, SIGKEY_PKCS12, (char*)passwd) != E_SUCCESS)
 		{
 			//Read password if necessary
-			printf("I need a password for the sign key %d: ", i+1);
+			printf("I need a password for the private Mix certificate nr. %d: ", i+1);
 			fflush(stdout);
 			readPasswd(passwd,500);
+			printf("\n");
 			if(signature->setSignKey(a_cert, SIGKEY_PKCS12, (char*)passwd) != E_SUCCESS)
 			{
-				CAMsg::printMsg(LOG_CRIT,"Unable to load sign key %d!\n", i+1);
+				CAMsg::printMsg(LOG_CRIT,"Unable to load private Mix certificate nr. %d! Please check your password.\n", i+1);
 				delete signature;
 				signature = NULL;
 				return E_UNKNOWN;

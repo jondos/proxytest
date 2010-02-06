@@ -550,7 +550,7 @@ int main(int argc, const char* argv[])
 		if(CALibProxytest::getOptions()->parse(argc,argv) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_CRIT,"An error occurred before we could finish parsing the configuration file. Exiting...\n");
-			goto EXIT;
+			exit(EXIT_FAILURE);
 		}
 		if(!(	CALibProxytest::getOptions()->isFirstMix()||
 					CALibProxytest::getOptions()->isMiddleMix()||
@@ -561,7 +561,7 @@ int main(int argc, const char* argv[])
 				CAMsg::printMsg(LOG_CRIT,"Use -j or -c\n");
 				CAMsg::printMsg(LOG_CRIT,"Or try --help for more options.\n");
 				CAMsg::printMsg(LOG_CRIT,"Exiting...\n");
-				goto EXIT;
+				exit(EXIT_FAILURE);
 			}
 
 		UINT8 buff[255];
@@ -698,7 +698,7 @@ int main(int argc, const char* argv[])
 					pProxy = NULL;
 				#else
 					CAMsg::printMsg(LOG_CRIT,"Compiled without LocalProxy support!\n");
-					goto EXIT;
+					exit(EXIT_FAILURE);
 				#endif
 			}
 		else
@@ -752,7 +752,7 @@ int main(int argc, const char* argv[])
 				}
 #else
 				CAMsg::printMsg(LOG_ERR,"this Mix is compiled to work only as local proxy!\n");
-				goto EXIT;
+				exit(EXIT_FAILURE);
 #endif
 			}
 #ifndef ONLY_LOCAL_PROXY
@@ -772,7 +772,7 @@ while(true)
 	{
 		/** @todo Hmm, maybe we could remain running, but that may well result in an endless running loop eating the cpu */
 		CAMsg::printMsg(LOG_CRIT,"Error during MIX-Startup!\n");
-		goto EXIT;
+		exit(EXIT_FAILURE);
 	}
 
 	/* If we got here, the mix should already be reconfigured, so we only need a new instance */
@@ -797,7 +797,7 @@ while(true)
 	{
 		/* Reconfiguration of a last mix?! Not really...*/
 		CAMsg::printMsg( LOG_ERR, "Tried to reconfigure a former first/middle-Mix to a LastMix -> impossible!\n");
-		goto EXIT;
+		exit(EXIT_FAILURE);
 	}
 }
 #endif //DYNAMIC_MIX
