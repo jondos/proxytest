@@ -1207,7 +1207,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 			{
 				if (pIPBlockList->count()>40)
 				{
-					CAMsg::printMsg(LOG_DEBUG,"UserAcceptLoop: login timeout list counts %d. We have %d open sockets and %d new connections. Restarting server sockets...\n",pIPBlockList->count(), CASocket::countOpenSockets(), pFirstMix->m_newConnections);
+					CAMsg::printMsg(LOG_DEBUG,"UserAcceptLoop: login timeout list counts %d. We have %d users, %d open sockets and %d new connections. Restarting server sockets...\n",pIPBlockList->count(), pFirstMix->getNrOfUsers() ,CASocket::countOpenSockets(), pFirstMix->m_newConnections);
 					for(i=0;i<nSocketsIn;i++)
 					{
 						psocketgroupAccept->remove(*socketsIn[i]);
