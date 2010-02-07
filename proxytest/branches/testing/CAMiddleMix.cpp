@@ -370,10 +370,13 @@ SINT32 CAMiddleMix::processKeyExchange()
 		m_pMuxIn->getCASocket()->receive((UINT8*) &len, sizeof(len));
 		len = ntohl(len);
 		recvBuff = new UINT8[len+1]; //for \0 at the end
-		if(m_pMuxIn->getCASocket()->receive(recvBuff, len) != len)
+		
+		if(m_pMuxIn->getCASocket()->receiveFully(recvBuff, len) != E_SUCCESS)
+		//if((recLen = m_pMuxIn->getCASocket()->receive(recvBuff, len)) != len)
 		{
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangePrevFailed);
-			CAMsg::printMsg(LOG_ERR,"Error receiving symmetric key from Mix n-1!\n");
+			CAMsg::printMsg(LOG_ERR,"Socket error occurred while receiving the symmetric key from the previous mix! Reason: '%s' (%i)\n",
+					GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
 			delete []recvBuff;
 			recvBuff = NULL;
 			if (doc != NULL)
