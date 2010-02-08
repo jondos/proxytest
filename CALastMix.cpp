@@ -326,7 +326,7 @@ SINT32 CALastMix::processKeyExchange()
 		CAMsg::printMsg(LOG_INFO,"Waiting for symmetric key from previous Mix with length %i...\n", len);
 		if(m_pMuxIn->getCASocket()->receiveFully(messageBuff, len) != E_SUCCESS)
 		{
-			CAMsg::printMsg(LOG_ERR,"Socket error occurred while receiving the symmetric key of the previous mix! Reason: '%s' (%i)\n",
+			CAMsg::printMsg(LOG_ERR,"Socket error occurred while receiving the symmetric key from the previous mix! Reason: '%s' (%i) The previous mix might be unable to verify your certificate and therefore closed the connection. Please ask the operator for the log.\n",
 					GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
 			delete []messageBuff;
 			messageBuff = NULL;
