@@ -86,7 +86,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 
 		if(m_pMuxOut->getCASocket()->receiveFully((UINT8*)&len, sizeof(len))!=E_SUCCESS)
 			{
-				CAMsg::printMsg(LOG_INFO,"Error receiving Key Info length from Mix n+1!\n");
+				CAMsg::printMsg(LOG_INFO,"Error receiving Key Info length from next Mix!\n");
 				MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextFailed);
 				return E_UNKNOWN;
 			}
@@ -97,7 +97,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 			return E_UNKNOWN;
 		if(m_pMuxOut->getCASocket()->receiveFully(recvBuff,len)!=E_SUCCESS)
 			{
-				CAMsg::printMsg(LOG_INFO,"Error receiving Key Info from Mix n+1!\n");
+				CAMsg::printMsg(LOG_INFO,"Error receiving Key Info from next Mix!\n");
 				MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextFailed);
 				delete []recvBuff;
 				recvBuff = NULL;
@@ -113,7 +113,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 		recvBuff = NULL;
 		if(doc==NULL)
 			{
-				CAMsg::printMsg(LOG_INFO,"Error parsing Key Info from Mix n+1!\n");
+				CAMsg::printMsg(LOG_INFO,"Error parsing Key Info from next Mix!\n");
 				MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextFailed);
 				return E_UNKNOWN;
 			}
@@ -155,7 +155,8 @@ SINT32 CAMiddleMix::processKeyExchange()
 						if(ret!=E_SUCCESS)
 							{
 								MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextFailed);
-								CAMsg::printMsg(LOG_INFO,"Could not verify Key Info from next Mix!\n");
+								//CAMsg::printMsg(LOG_CRIT,"Could not verify the symmetric key from next mix! The operator of the next mix has to send you his current mix certificate, and you will have to import it in your configuration. Alternatively, you might import the proper root certification authority for verifying the certificate.\n");
+								CAMsg::printMsg(LOG_CRIT,"Could not verify the symmetric key from next mix! The operator of the next mix has to send you his current mix certificate, and you will have to import it in your configuration.\n");
 								return E_UNKNOWN;
 							}
 						
@@ -262,7 +263,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 			
 		if(!bFoundNextMix)
 			{
-				CAMsg::printMsg(LOG_INFO,"Error -- no Key Info from Mix n+1 found!\n");
+				CAMsg::printMsg(LOG_INFO,"Error -- no Key Info found for next Mix!\n");
 				MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextFailed);
 				if (doc != NULL)
 				{
@@ -385,10 +386,13 @@ SINT32 CAMiddleMix::processKeyExchange()
 		m_pMuxIn->getCASocket()->receive((UINT8*) &len, sizeof(len));
 		len = ntohl(len);
 		recvBuff = new UINT8[len+1]; //for \0 at the end
-		if(m_pMuxIn->getCASocket()->receive(recvBuff, len) != len)
+		
+		if(m_pMuxIn->getCASocket()->receiveFully(recvBuff, len) != E_SUCCESS)
+		//if((recLen = m_pMuxIn->getCASocket()->receive(recvBuff, len)) != len)
 		{
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangePrevFailed);
-			CAMsg::printMsg(LOG_ERR,"Error receiving symmetric key from Mix n-1!\n");
+			CAMsg::printMsg(LOG_ERR,"Socket error occurred while receiving the symmetric key from the previous mix! Reason: '%s' (%i) The previous mix might be unable to verify our Mix certificate(s) and therefore closed the connection. Please ask the operator for the log, and exchange your certificates if necessary.\n",
+					GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
 			delete []recvBuff;
 			recvBuff = NULL;
 			if (doc != NULL)
@@ -438,7 +442,8 @@ SINT32 CAMiddleMix::processKeyExchange()
 		if(result != E_SUCCESS)
 		{
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangePrevFailed);
-			CAMsg::printMsg(LOG_CRIT,"Could not verify the symmetric key from previous Mix!\n");
+			//CAMsg::printMsg(LOG_CRIT,"Could not verify the symmetric key from previous mix! The operator of the previous mix has to send you his current mix certificate, and you will have to import it in your configuration. Alternatively, you might import the proper root certification authority for verifying the certificate.\n");
+			CAMsg::printMsg(LOG_CRIT,"Could not verify the symmetric key from previous mix! The operator of the previous mix has to send you his current mix certificate, and you will have to import it in your configuration.\n");
 			if (doc != NULL)
 			{
 				doc->release();
@@ -472,7 +477,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 			)
 		{
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangePrevFailed);
-			CAMsg::printMsg(LOG_CRIT,"Could not verify the Nonce!\n");
+			CAMsg::printMsg(LOG_CRIT,"Could not verify the Nonce from previous mix!\n");
 			if (doc != NULL)
 			{
 				doc->release();
@@ -480,7 +485,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 			}
 			return E_UNKNOWN;
 		}
-		CAMsg::printMsg(LOG_INFO,"Verified the symmetric key!\n");
+		CAMsg::printMsg(LOG_INFO,"Verified the symmetric key of the previous mix!\n");
 
 		UINT8 key[150];
 		UINT32 keySize=150;
@@ -489,7 +494,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 		if(ret!=E_SUCCESS||keySize!=64)
 		{
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangePrevFailed);
-			CAMsg::printMsg(LOG_CRIT,"Could not set the symmetric key to be used by the MuxSocket!\n");
+			CAMsg::printMsg(LOG_CRIT,"Could not set the symmetric key from previous mix to be used by the MuxSocket!\n");
 			if (doc != NULL)
 			{
 				doc->release();

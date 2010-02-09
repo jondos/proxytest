@@ -33,7 +33,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.09.00"
+#define MIX_VERSION "00.09.02"
+
+// set to "true" if this is a testing/development version which is not meant for prodictive use
+#define MIX_VERSION_TESTING true
+
+#define MIX_VERSION_TESTING_TEXT "This is a testing/development version. Please do not expect it to work in a productive environment, and don't be surprised if you get unpredictive results or segmentation faults. If you don't like experiments, go and get the stable code.\n"
 
 #include "doxygen.h"
 
