@@ -38,7 +38,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 // set to "true" if this is a testing/development version which is not meant for prodictive use
 #define MIX_VERSION_TESTING true
 
-#define MIX_VERSION_TESTING_TEXT "This is a testing/development version. Please do not expect it to work in a productive environment, and don't be surprised if you get unpredictive results or segmentation faults.\n"
+#define MIX_VERSION_TESTING_TEXT "This is a testing/development version. Please do not expect it to work in a productive environment, and don't be surprised if you get unpredictive results or segmentation faults. If you don't like experiments, go and get the stable code.\n"
 
 #include "doxygen.h"
 
