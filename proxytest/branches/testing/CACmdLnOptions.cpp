@@ -154,6 +154,11 @@ CACmdLnOptions::CACmdLnOptions()
 		m_u32DelayChannelLatency = DELAY_CHANNEL_LATENCY;
 #endif
 
+		if (MIX_VERSION_TESTING)
+		{
+			CAMsg::printMsg(LOG_WARNING, MIX_VERSION_TESTING_TEXT);
+		}
+
 		/* initialize pointer to option setter functions */
 		initMainOptionSetters();
 		initGeneralOptionSetters();
@@ -2377,6 +2382,10 @@ SINT32 CACmdLnOptions::setLoggingOptions(DOMElement* elemGeneral)
 	if (ret == E_SUCCESS)
 	{
 		CAMsg::printMsg(LOG_INFO,MIX_VERSION_INFO);
+		if (MIX_VERSION_TESTING)
+		{
+			CAMsg::printMsg(LOG_WARNING, MIX_VERSION_TESTING_TEXT);
+		}
 	}
 
 	return ret;

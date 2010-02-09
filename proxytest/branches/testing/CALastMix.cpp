@@ -326,14 +326,14 @@ SINT32 CALastMix::processKeyExchange()
 		CAMsg::printMsg(LOG_INFO,"Waiting for symmetric key from previous Mix with length %i...\n", len);
 		if(m_pMuxIn->getCASocket()->receiveFully(messageBuff, len) != E_SUCCESS)
 		{
-			CAMsg::printMsg(LOG_ERR,"Socket error occurred while receiving the symmetric key from the previous mix! Reason: '%s' (%i)\n",
+			CAMsg::printMsg(LOG_ERR,"Socket error occurred while receiving the symmetric key from the previous mix! Reason: '%s' (%i) The previous mix might be unable to verify our Mix certificate(s) and therefore closed the connection. Please ask the operator for the log, and exchange your certificates if necessary.\n",
 					GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
 			delete []messageBuff;
 			messageBuff = NULL;
 			return E_UNKNOWN;
 		}
 		messageBuff[len]=0;
-		CAMsg::printMsg(LOG_INFO,"Symmetric Key Info received is:\n");
+		CAMsg::printMsg(LOG_INFO,"Symmetric Key Info received from previous mix is:\n");
 		CAMsg::printMsg(LOG_INFO,"%s\n",(char*)messageBuff);
 		//verify signature
 		//CASignature oSig;
@@ -345,7 +345,8 @@ SINT32 CALastMix::processKeyExchange()
 		//if(oSig.verifyXML(messageBuff,len)!=E_SUCCESS)
 		if(result != E_SUCCESS)
 		{
-			CAMsg::printMsg(LOG_CRIT,"Could not verify the symmetric key!\n");
+			//CAMsg::printMsg(LOG_CRIT,"Could not verify the symmetric key from previous mix! The operator of the previous mix has to send you his current mix certificate, and you will have to import it in your configuration. Alternatively, you might import the proper root certification authority for verifying the certificate.\n");
+			CAMsg::printMsg(LOG_CRIT,"Could not verify the symmetric key from previous mix! The operator of the previous mix has to send you his current mix certificate, and you will have to import it in your configuration.\n");
 			delete []messageBuff;
 			messageBuff = NULL;
 			return E_UNKNOWN;
@@ -354,7 +355,7 @@ SINT32 CALastMix::processKeyExchange()
 		doc=parseDOMDocument(messageBuff,len);
 		if(doc == NULL)
 		{
-			CAMsg::printMsg(LOG_CRIT,"Could not parse symmetric key !\n");
+			CAMsg::printMsg(LOG_CRIT,"Could not parse symmetric key of the previous mix!\n");
 			delete []messageBuff;
 			messageBuff = NULL;
 			return E_UNKNOWN;
@@ -362,7 +363,7 @@ SINT32 CALastMix::processKeyExchange()
 		DOMElement* elemRoot=doc->getDocumentElement();
 		if(elemRoot == NULL)
 		{
-			CAMsg::printMsg(LOG_CRIT,"Symmetric key XML structure is invalid!\n");
+			CAMsg::printMsg(LOG_CRIT,"Symmetric key XML structure of previous mix is invalid!\n");
 			delete []messageBuff;
 			messageBuff = NULL;
 			if (doc != NULL)
@@ -396,7 +397,7 @@ SINT32 CALastMix::processKeyExchange()
 			memcmp(SHA1(arNonce,16,NULL),tmpBuff,SHA_DIGEST_LENGTH)!=0
 			)
 		{
-			CAMsg::printMsg(LOG_CRIT,"Could not verify the nonce!\n");
+			CAMsg::printMsg(LOG_CRIT,"Could not verify the nonce from previous mix!\n");
 			delete []messageBuff;
 			messageBuff = NULL;
 			if (doc != NULL)
@@ -406,7 +407,7 @@ SINT32 CALastMix::processKeyExchange()
 			}
 			return E_UNKNOWN;
 		}
-		CAMsg::printMsg(LOG_INFO,"Verified the symmetric key!\n");
+		CAMsg::printMsg(LOG_INFO,"Verified the symmetric key from previous mix!\n");
 
 		UINT8 key[150];
 		UINT32 keySize=150;
@@ -415,7 +416,7 @@ SINT32 CALastMix::processKeyExchange()
 		messageBuff = NULL;
 		if(ret!=E_SUCCESS||keySize!=64)
 		{
-			CAMsg::printMsg(LOG_CRIT,"Could not decrypt the symmetric key!\n");
+			CAMsg::printMsg(LOG_CRIT,"Could not decrypt the symmetric key from previous mix!\n");
 			if (doc != NULL)
 			{
 				doc->release();
