@@ -154,6 +154,11 @@ CACmdLnOptions::CACmdLnOptions()
 		m_u32DelayChannelLatency = DELAY_CHANNEL_LATENCY;
 #endif
 
+		if (MIX_VERSION_TESTING)
+		{
+			CAMsg::printMsg(LOG_WARNING, MIX_VERSION_TESTING_TEXT);
+		}
+
 		/* initialize pointer to option setter functions */
 		initMainOptionSetters();
 		initGeneralOptionSetters();
@@ -1700,7 +1705,10 @@ SINT32 CACmdLnOptions::readXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument* &
 {
 		docConfig=parseDOMDocument(buf,len);
 		if(docConfig==NULL)
+		{
+			CAMsg::printMsg(LOG_CRIT, "Your configuration is not a valid XML document and therefore could not be parsed. Please repair the configuration structure or create a new configuration.\n");
 			return E_UNKNOWN;
+		}
 		return E_SUCCESS;
 }
 
@@ -2377,6 +2385,10 @@ SINT32 CACmdLnOptions::setLoggingOptions(DOMElement* elemGeneral)
 	if (ret == E_SUCCESS)
 	{
 		CAMsg::printMsg(LOG_INFO,MIX_VERSION_INFO);
+		if (MIX_VERSION_TESTING)
+		{
+			CAMsg::printMsg(LOG_WARNING, MIX_VERSION_TESTING_TEXT);
+		}
 	}
 
 	return ret;
@@ -4329,7 +4341,9 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 {
 	SINT32 ret = E_SUCCESS;
 	if(docConfig==NULL)
+	{
 		return E_UNKNOWN;
+	}
 	DOMElement* elemRoot=docConfig->getDocumentElement();
 
 	/* Initialize Mixinfo DOM structure so that neccessary

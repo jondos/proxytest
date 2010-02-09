@@ -100,6 +100,7 @@ SINT32 CAMix::initOnce()
 SINT32 CAMix::start()
 	{
 		SINT32 initStatus;
+		m_bConnected = false;
 
 		if(initOnce()!=E_SUCCESS)
 			return E_UNKNOWN;
