@@ -1705,7 +1705,10 @@ SINT32 CACmdLnOptions::readXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument* &
 {
 		docConfig=parseDOMDocument(buf,len);
 		if(docConfig==NULL)
+		{
+			CAMsg::printMsg(LOG_CRIT, "Your configuration is not a valid XML document and therefore could not be parsed. Please repair the configuration structure or create a new configuration.\n");
 			return E_UNKNOWN;
+		}
 		return E_SUCCESS;
 }
 
@@ -4338,7 +4341,9 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 {
 	SINT32 ret = E_SUCCESS;
 	if(docConfig==NULL)
+	{
 		return E_UNKNOWN;
+	}
 	DOMElement* elemRoot=docConfig->getDocumentElement();
 
 	/* Initialize Mixinfo DOM structure so that neccessary
