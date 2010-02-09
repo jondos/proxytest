@@ -330,23 +330,23 @@ SINT32 CAFirstMix::processKeyExchange()
 	CAMsg::printMsg(LOG_INFO, "Try to read the Key Info length from next Mix...\n");
     if(m_pMuxOut->receiveFully((UINT8*) &len, sizeof(len) ) != E_SUCCESS)
     {
-        CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info length!\n");
+        CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info length from next mix!\n");
         return E_UNKNOWN;
     }
     len=ntohl(len);
-    CAMsg::printMsg(LOG_INFO, "Received Key Info length %u\n",len);
+    CAMsg::printMsg(LOG_INFO, "Received next mix Key Info length %u\n",len);
     recvBuff=new UINT8[len+1];
 
     if(m_pMuxOut->receiveFully(recvBuff, len) != E_SUCCESS)
     {
-        CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info!\n");
+        CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info from next mix!\n");
         delete []recvBuff;
         recvBuff = NULL;
         return E_UNKNOWN;
     }
     recvBuff[len]=0;
     //get the Keys from the other mixes (and the Mix-Id's...!)
-    CAMsg::printMsg(LOG_INFO,"Received Key Info...\n");
+    CAMsg::printMsg(LOG_INFO,"Received Key Info from next mix...\n");
     CAMsg::printMsg(LOG_DEBUG,"%s\n",recvBuff);
 
     XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(recvBuff, len);
@@ -521,8 +521,9 @@ SINT32 CAFirstMix::processKeyExchange()
             delete nextCert;
             nextCert = NULL;
             if(result != E_SUCCESS)
-            {
-                CAMsg::printMsg(LOG_DEBUG,"Failed to verify XML signature of next mix!\n");
+            {			
+                //CAMsg::printMsg(LOG_CRIT,"Could not verify the symmetric key from next mix! The operator of the next mix has to send you his current mix certificate, and you will have to import it in your configuration. Alternatively, you might import the proper root certification authority for verifying the certificate.\n");
+								CAMsg::printMsg(LOG_CRIT,"Could not verify the symmetric key from next mix! The operator of the next mix has to send you his current mix certificate, and you will have to import it in your configuration.\n");
                 if (doc != NULL)
                 {
                 	doc->release();
