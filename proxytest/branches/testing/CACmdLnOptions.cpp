@@ -3269,7 +3269,7 @@ SINT32 CACmdLnOptions::setListenerInterfaces(DOMElement *elemNetwork)
 
 	if (ret != E_SUCCESS)
 	{
-		CAMsg::printMsg(LOG_CRIT, "Could not listen on at least one of the specified interfaces. Please check if another running mix or server process is blocking the listen addresses.\n");
+		CAMsg::printMsg(LOG_CRIT, "Could not listen on at least one of the specified interfaces. Please check if another running mix or server process is blocking the listen addresses, and if you have sufficient system rights.\n");
 	}
 
 	return ret;
