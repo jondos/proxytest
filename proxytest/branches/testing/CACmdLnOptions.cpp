@@ -2299,13 +2299,15 @@ SINT32 CACmdLnOptions::setLoggingOptions(DOMElement* elemGeneral)
 		{
 			strtrim(tmpBuff);
 			toLower(tmpBuff);
+			m_strLogLevel = new char[strlen((char*)tmpBuff)+1];
+			strcpy(m_strLogLevel, (char*)tmpBuff);
 		}
 		else
 		{
-			tmpBuff = "debug";
+			m_strLogLevel = new char[strlen("debug")+1];
+			strcpy(m_strLogLevel, "debug");
 		}
-		m_strLogLevel = new char[strlen((char*)tmpBuff)+1];
-		strcpy(m_strLogLevel, (char*)tmpBuff);
+		
 		
 		
 		getDOMChildByName(elemLogging, OPTIONS_NODE_LOGGING_FILE, elem, false);
