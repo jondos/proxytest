@@ -2225,13 +2225,13 @@ SINT32 CACmdLnOptions::initLogging()
 		iLogOptions |= MSG_LOG; 
 	}
 #endif
-		if(getLogDir((UINT8*)buff,2000)==E_SUCCESS)
-		{
-			if(getCompressLogs())
-				iLogOptions = MSG_COMPRESSED_FILE;
-			else
-				iLogOptions = MSG_FILE;
-		}
+	if(getLogDir((UINT8*)buff,2000)==E_SUCCESS)
+	{
+		if(getCompressLogs())
+			iLogOptions |= MSG_COMPRESSED_FILE;
+		else
+			iLogOptions |= MSG_FILE;
+	}
 #ifndef ONLY_LOCAL_PROXY
 
 	if (m_bLogConsole || iLogOptions == 0)
