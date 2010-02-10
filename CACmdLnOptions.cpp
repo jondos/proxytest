@@ -2114,7 +2114,7 @@ SINT32 CACmdLnOptions::setUserID(DOMElement* elemGeneral)
 			}
 
 		if(geteuid()==0)
-			CAMsg::printMsg(LOG_INFO,"Warning - Running as root!\n");
+			CAMsg::printMsg(LOG_WARNING,"Mix is running as root/superuser!\n");
 #endif
 	
 	
@@ -2214,6 +2214,8 @@ SINT32 CACmdLnOptions::initLogging()
 	UINT8 buff[2000];
 	UINT32 iLogOptions = 0;
 	
+	CAMsg::printMsg(LOG_DEBUG,"Initializing logging...\n");
+	
 	CAMsg::init();
 			
 
@@ -2297,9 +2299,13 @@ SINT32 CACmdLnOptions::setLoggingOptions(DOMElement* elemGeneral)
 		{
 			strtrim(tmpBuff);
 			toLower(tmpBuff);
-			m_strLogLevel = new char[strlen((char*)tmpBuff)+1];
-			strcpy(m_strLogLevel, (char*)tmpBuff);
 		}
+		else
+		{
+			tmpBuff = "debug";
+		}
+		m_strLogLevel = new char[strlen((char*)tmpBuff)+1];
+		strcpy(m_strLogLevel, (char*)tmpBuff);
 		
 		
 		getDOMChildByName(elemLogging, OPTIONS_NODE_LOGGING_FILE, elem, false);
@@ -2380,7 +2386,7 @@ SINT32 CACmdLnOptions::setLoggingOptions(DOMElement* elemGeneral)
 		}
 		
 	}
-
+	
 	SINT32 ret = initLogging();
 	if (ret == E_SUCCESS)
 	{
