@@ -156,11 +156,6 @@ CACmdLnOptions::CACmdLnOptions()
 		m_u32DelayChannelLatency = DELAY_CHANNEL_LATENCY;
 #endif
 
-		if (MIX_VERSION_TESTING)
-		{
-			CAMsg::printMsg(LOG_WARNING, MIX_VERSION_TESTING_TEXT);
-		}
-
 		/* initialize pointer to option setter functions */
 		initMainOptionSetters();
 		initGeneralOptionSetters();
@@ -627,6 +622,12 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 			printf("Max open sockets: >10000\n");
 			exit(0);
 		}
+		
+		if (MIX_VERSION_TESTING)
+		{
+			CAMsg::printMsg(LOG_WARNING, MIX_VERSION_TESTING_TEXT);
+		}
+		
 #ifndef ONLY_LOCAL_PROXY
 	if(strCreateConf!=NULL)
 		{
@@ -2116,7 +2117,7 @@ SINT32 CACmdLnOptions::setUserID(DOMElement* elemGeneral)
 			}
 
 		if(geteuid()==0)
-			CAMsg::printMsg(LOG_INFO,"Warning - Running as root!\n");
+			CAMsg::printMsg(LOG_WARNING,"Mix is running as root/superuser!\n");
 #endif
 	
 	
@@ -2225,13 +2226,13 @@ SINT32 CACmdLnOptions::initLogging()
 		iLogOptions |= MSG_LOG; 
 	}
 #endif
-		if(getLogDir((UINT8*)buff,2000)==E_SUCCESS)
-		{
-			if(getCompressLogs())
-				iLogOptions = MSG_COMPRESSED_FILE;
-			else
-				iLogOptions = MSG_FILE;
-		}
+	if(getLogDir((UINT8*)buff,2000)==E_SUCCESS)
+	{
+		if(getCompressLogs())
+			iLogOptions |= MSG_COMPRESSED_FILE;
+		else
+			iLogOptions |= MSG_FILE;
+	}
 #ifndef ONLY_LOCAL_PROXY
 
 	if (m_bLogConsole || iLogOptions == 0)
@@ -2302,6 +2303,12 @@ SINT32 CACmdLnOptions::setLoggingOptions(DOMElement* elemGeneral)
 			m_strLogLevel = new char[strlen((char*)tmpBuff)+1];
 			strcpy(m_strLogLevel, (char*)tmpBuff);
 		}
+		else
+		{
+			m_strLogLevel = new char[strlen("debug")+1];
+			strcpy(m_strLogLevel, "debug");
+		}
+		
 		
 		
 		getDOMChildByName(elemLogging, OPTIONS_NODE_LOGGING_FILE, elem, false);
@@ -2382,7 +2389,7 @@ SINT32 CACmdLnOptions::setLoggingOptions(DOMElement* elemGeneral)
 		}
 		
 	}
-
+	
 	SINT32 ret = initLogging();
 	if (ret == E_SUCCESS)
 	{
@@ -3347,7 +3354,7 @@ SINT32 CACmdLnOptions::setListenerInterfaces(DOMElement *elemNetwork)
 
 	if (ret != E_SUCCESS)
 	{
-		CAMsg::printMsg(LOG_CRIT, "Could not listen on at least one of the specified interfaces!\n");
+		CAMsg::printMsg(LOG_CRIT, "Could not listen on at least one of the specified interfaces. Please check if another running mix or server process is blocking the listen addresses, and if you have sufficient system rights.\n");
 	}
 
 	return ret;
