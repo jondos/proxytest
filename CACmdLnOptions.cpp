@@ -154,11 +154,6 @@ CACmdLnOptions::CACmdLnOptions()
 		m_u32DelayChannelLatency = DELAY_CHANNEL_LATENCY;
 #endif
 
-		if (MIX_VERSION_TESTING)
-		{
-			CAMsg::printMsg(LOG_WARNING, MIX_VERSION_TESTING_TEXT);
-		}
-
 		/* initialize pointer to option setter functions */
 		initMainOptionSetters();
 		initGeneralOptionSetters();
@@ -625,6 +620,12 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 			printf("Max open sockets: >10000\n");
 			exit(0);
 		}
+		
+		if (MIX_VERSION_TESTING)
+		{
+			CAMsg::printMsg(LOG_WARNING, MIX_VERSION_TESTING_TEXT);
+		}
+		
 #ifndef ONLY_LOCAL_PROXY
 	if(strCreateConf!=NULL)
 		{
