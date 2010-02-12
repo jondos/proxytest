@@ -2910,6 +2910,7 @@ SINT32 CAAccountingInstance::__newSettlementTransaction(UINT32 *nrOfSettledCCs)
 		//indicate that the next thread may proceed with its settlement changes by incrementing the nextSettleNr.
 		ms_pInstance->m_pSettlementMutex->lock();
 		ms_pInstance->m_nextSettleNr++;
+// TODO: seems to be a bug; if this "if" is set, some locks are never released
 //if(ms_pInstance->m_settleWaitNr != ms_pInstance->m_nextSettleNr)
 		{
 			//There are threads waiting for applying their settlement results.
@@ -3678,6 +3679,7 @@ SINT32 CAAccountingInstance::settlementTransaction()
 
 		ms_pInstance->m_pSettlementMutex->lock();
 		ms_pInstance->m_nextSettleNr++;
+// TODO: seems to be a bug; if this "if" is set, some locks are never released
 //if(ms_pInstance->m_settleWaitNr != ms_pInstance->m_nextSettleNr)
 		{
 			SAVE_STACK("CAAccountingInstance::settlementTransaction", "waking up waiting threads for altering hashtable");

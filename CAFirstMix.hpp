@@ -158,6 +158,7 @@ public:
 					m_templatesOwner = NULL;
 					m_tcTemplates = NULL;
 					m_bIsShuttingDown=false;
+					m_pIPBlockList = NULL;
 #ifdef LOG_PACKET_TIMES
 					m_pLogPacketStats=NULL;
 #endif

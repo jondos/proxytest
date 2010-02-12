@@ -55,7 +55,7 @@ CATempIPBlockList::CATempIPBlockList(UINT64 validTimeMillis)
 
 CATempIPBlockList::~CATempIPBlockList()
 	{
-		CAMsg::printMsg(LOG_DEBUG, "CATmpIPBlockList terminating..\n");
+		CAMsg::printMsg(LOG_DEBUG, "CATmpIPBlockList terminating...\n");
 		//Now stop the cleanup thread...
 		m_bRunCleanupThread=false;
 		m_pCleanupThread->join(); //wait for cleanupthread to wakeup and exit
