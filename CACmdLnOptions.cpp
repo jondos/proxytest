@@ -2215,8 +2215,6 @@ SINT32 CACmdLnOptions::initLogging()
 	UINT8 buff[2000];
 	UINT32 iLogOptions = 0;
 	
-	CAMsg::printMsg(LOG_DEBUG,"Initializing logging...\n");
-	
 	CAMsg::init();
 			
 
