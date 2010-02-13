@@ -2885,12 +2885,11 @@ SINT32 CAAccountingInstance::__newSettlementTransaction(UINT32 *nrOfSettledCCs)
 			ms_pInstance->m_settleWaitNr++;
 			while(myWaitNr != ms_pInstance->m_nextSettleNr)
 			{
-				CAMsg::printMsg(LOG_INFO, "Thread %x must wait to alter login table after settling: %llu before him in the queue\n", pthread_self(),
+				CAMsg::printMsg(LOG_INFO, "Thread %x must wait to alter login table after settling (1): %llu before him in the queue\n", pthread_self(),
 										(myWaitNr - ms_pInstance->m_nextSettleNr));
 				ms_pInstance->m_pSettlementMutex->wait();
-
 			}
-			CAMsg::printMsg(LOG_INFO, "Thread %x may continue.\n", pthread_self());
+			CAMsg::printMsg(LOG_INFO, "Thread %x may continue (1).\n", pthread_self());
 			dbInterface = CAAccountingDBInterface::getConnection();
 		}
 
@@ -2911,10 +2910,12 @@ SINT32 CAAccountingInstance::__newSettlementTransaction(UINT32 *nrOfSettledCCs)
 		//indicate that the next thread may proceed with its settlement changes by incrementing the nextSettleNr.
 		ms_pInstance->m_pSettlementMutex->lock();
 		ms_pInstance->m_nextSettleNr++;
-		if(ms_pInstance->m_settleWaitNr != ms_pInstance->m_nextSettleNr)
+// TODO: seems to be a bug; if this "if" is set, some locks are never released
+//if(ms_pInstance->m_settleWaitNr != ms_pInstance->m_nextSettleNr)
 		{
 			//There are threads waiting for applying their settlement results.
-			CAMsg::printMsg(LOG_INFO, "Thread %x Waking up next Thread %llu are waiting.\n", pthread_self(),
+			if(ms_pInstance->m_settleWaitNr != ms_pInstance->m_nextSettleNr)
+			CAMsg::printMsg(LOG_INFO, "Thread %x waking up next Thread. %llu are still waiting.\n", pthread_self(),
 							(ms_pInstance->m_settleWaitNr - ms_pInstance->m_nextSettleNr));
 			ms_pInstance->m_pSettlementMutex->broadcast();
 		}
@@ -3573,12 +3574,11 @@ SINT32 CAAccountingInstance::settlementTransaction()
 			ms_pInstance->m_settleWaitNr++;
 			while(myWaitNr != ms_pInstance->m_nextSettleNr)
 			{
-				CAMsg::printMsg(LOG_INFO, "Thread %x must wait to alter login table after settling: %llu before him in the queue\n", pthread_self(),
+				CAMsg::printMsg(LOG_INFO, "Thread %x must wait to alter login table after settling (2): %llu before him in the queue\n", pthread_self(),
 										(myWaitNr - ms_pInstance->m_nextSettleNr));
 				ms_pInstance->m_pSettlementMutex->wait();
-
 			}
-			CAMsg::printMsg(LOG_INFO, "Thread %x may continue.\n", pthread_self());
+			CAMsg::printMsg(LOG_INFO, "Thread %x may continue (2).\n", pthread_self());
 			dbInterface = CAAccountingDBInterface::getConnection();
 		}
 		SAVE_STACK("CAAccountingInstance::settlementTransaction", "altering DB entries");
@@ -3679,12 +3679,14 @@ SINT32 CAAccountingInstance::settlementTransaction()
 
 		ms_pInstance->m_pSettlementMutex->lock();
 		ms_pInstance->m_nextSettleNr++;
-		if(ms_pInstance->m_settleWaitNr != ms_pInstance->m_nextSettleNr)
+// TODO: seems to be a bug; if this "if" is set, some locks are never released
+//if(ms_pInstance->m_settleWaitNr != ms_pInstance->m_nextSettleNr)
 		{
 			SAVE_STACK("CAAccountingInstance::settlementTransaction", "waking up waiting threads for altering hashtable");
 			//There are threads waiting for applying their settlement results.
+			if(ms_pInstance->m_settleWaitNr != ms_pInstance->m_nextSettleNr)
 			CAMsg::printMsg(LOG_INFO, "Thread %x Waking up next Thread %llu are waiting.\n", pthread_self(),
-							(ms_pInstance->m_settleWaitNr - ms_pInstance->m_nextSettleNr));
+							(ms_pInstance->m_settleWaitNr - ms_pInstance->m_nextSettleNr));		
 			ms_pInstance->m_pSettlementMutex->broadcast();
 		}
 		ms_pInstance->m_pSettlementMutex->unlock();
