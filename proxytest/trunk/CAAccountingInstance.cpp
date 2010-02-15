@@ -31,6 +31,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
+#define PAYMENT
 #ifdef PAYMENT
 
 #include "CAAccountingInstance.hpp"
@@ -2768,17 +2769,20 @@ SINT32 CAAccountingInstance::__newSettlementTransaction(UINT32 *nrOfSettledCCs)
 	SINT32 biConnectionStatus = 0, ret = E_SUCCESS;
 	UINT64 myWaitNr = 0;
 
-	dbInterface = CAAccountingDBInterface::getConnection();
-	if(dbInterface == NULL)
-	{
-		CAMsg::printMsg(LOG_ERR, "Settlement transaction: could not connect to Database. Retry later...\n");
-		return E_NOT_CONNECTED;
-	}
+
+
 
 	//settlement transactions need to be synchronized globally because the settlement thread as well as all login threads
 	//may start a settlement transaction concurrently.
 	ms_pInstance->m_pSettlementMutex->lock();
-
+	dbInterface = CAAccountingDBInterface::getConnection();
+	if(dbInterface == NULL)
+	{
+		ms_pInstance->m_pSettlementMutex->unlock();
+		CAMsg::printMsg(LOG_ERR, "Settlement transaction: could not connect to Database. Retry later...\n");
+		ret = E_NOT_CONNECTED;
+		goto cleanup;
+	}
 	
 	UINT64 iCurrentSettleTransactionNr = (++m_iCurrentSettleTransactionNr) % 50;
 
