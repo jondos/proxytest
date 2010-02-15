@@ -2908,7 +2908,7 @@ SINT32 CAAccountingInstance::__newSettlementTransaction(UINT32 *nrOfSettledCCs)
 		
 		bool debugWarn = false;
 		if (iCurrentSettleTransactionNr != (m_iCurrentSettleTransactionNr % 50) ||
-			(ms_pInstance->m_settleWaitNr - ms_pInstance->m_nextSettleNr) > 0)
+			(ms_pInstance->m_settleWaitNr - ms_pInstance->m_nextSettleNr + 1) > 0)
 		{
 			debugWarn = true;
 			// Write debug message in order to find deadlock...
@@ -2921,7 +2921,7 @@ SINT32 CAAccountingInstance::__newSettlementTransaction(UINT32 *nrOfSettledCCs)
 		dbInterface = NULL;
 		
 		
-		if (debugWarn || (ms_pInstance->m_settleWaitNr - ms_pInstance->m_nextSettleNr) > 0)
+		if (debugWarn || (ms_pInstance->m_settleWaitNr - ms_pInstance->m_nextSettleNr + 1) > 0)
 		{
 			// Write debug message in order to find deadlock...
 			CAMsg::printMsg(LOG_WARNING, "Settlement transaction %llu: Removing settlement mutex lock. Other settlement transactions seem to wait...\n", iCurrentSettleTransactionNr);
@@ -2930,7 +2930,7 @@ SINT32 CAAccountingInstance::__newSettlementTransaction(UINT32 *nrOfSettledCCs)
 		ms_pInstance->m_pSettlementMutex->unlock();
 		
 		
-		if (debugWarn || (ms_pInstance->m_settleWaitNr - ms_pInstance->m_nextSettleNr) > 0)
+		if (debugWarn || (ms_pInstance->m_settleWaitNr - ms_pInstance->m_nextSettleNr + 1) > 0)
 		{
 			// Write debug message in order to find deadlock...
 			CAMsg::printMsg(LOG_WARNING, "Settlement transaction %llu: Entering login hashtable. Other settlement transactions seem to wait...\n", iCurrentSettleTransactionNr);		
@@ -2942,7 +2942,7 @@ SINT32 CAAccountingInstance::__newSettlementTransaction(UINT32 *nrOfSettledCCs)
 		__commitSettlementToLoginTable(entry);
 		ms_pInstance->m_currentAccountsHashtable->getMutex()->unlock();
 
-		if (debugWarn || (ms_pInstance->m_settleWaitNr - ms_pInstance->m_nextSettleNr) > 0)
+		if (debugWarn || (ms_pInstance->m_settleWaitNr - ms_pInstance->m_nextSettleNr + 1) > 0)
 		{
 			// Write debug message in order to find deadlock...
 			CAMsg::printMsg(LOG_WARNING, "Settlement transaction %llu: After commiting to login hashtable, before last lock. Other settlement transactions seem to wait...\n", iCurrentSettleTransactionNr);		
