@@ -2792,14 +2792,14 @@ SINT32 CAAccountingInstance::__newSettlementTransaction(UINT32 *nrOfSettledCCs)
 		//no unsettled CCs found.
 		if (allUnsettledCCs == NULL)
 		{
-			CAMsg::printMsg(LOG_INFO, "Settlement transaction %llu: looked for unsettled CCs, found no CCs to settle\n", iCurrentSettleTransactionNr);
+			CAMsg::printMsg(LOG_INFO, "Settlement transaction %llu: thread looked %x for unsettled CCs, found no CCs to settle\n", iCurrentSettleTransactionNr, pthread_self());
 			ms_pInstance->m_pSettlementMutex->unlock();
 			ret = E_SUCCESS;
 			goto cleanup;
 		}
 
 
-		CAMsg::printMsg(LOG_DEBUG, "Settlement transaction %llu: looked for unsettled CCs, found %u cost confirmations to settle\n", iCurrentSettleTransactionNr,  nrOfCCs);
+		CAMsg::printMsg(LOG_DEBUG, "Settlement transaction %llu: thread looked %x for unsettled CCs, found %u cost confirmations to settle\n", iCurrentSettleTransactionNr, pthread_self(), nrOfCCs);
 
 		//connect to the PI
 		biConnectionStatus = ms_pInstance->m_pPiInterface->initBIConnection();
@@ -2885,28 +2885,60 @@ SINT32 CAAccountingInstance::__newSettlementTransaction(UINT32 *nrOfSettledCCs)
 			ms_pInstance->m_settleWaitNr++;
 			while(myWaitNr != ms_pInstance->m_nextSettleNr)
 			{
-				CAMsg::printMsg(LOG_INFO, "Thread %x must wait to alter login table after settling (1): %llu before him in the queue\n", pthread_self(),
-										(myWaitNr - ms_pInstance->m_nextSettleNr));
+				CAMsg::printMsg(LOG_INFO, "Settlement transaction %llu: Thread %x must wait to alter login table after settling (1): %llu before him in the queue\n", 
+						iCurrentSettleTransactionNr, pthread_self(), (myWaitNr - ms_pInstance->m_nextSettleNr));
 				ms_pInstance->m_pSettlementMutex->wait();
 			}
-			CAMsg::printMsg(LOG_INFO, "Thread %x may continue (1).\n", pthread_self());
+			
+			CAMsg::printMsg(LOG_INFO, "Settlement transaction %llu: Thread %x may continue (1).\n", iCurrentSettleTransactionNr, pthread_self());
 			dbInterface = CAAccountingDBInterface::getConnection();
+		}
+		
+		UINT64 warnCurrentSettleTransactionNr = 0;
+		if (iCurrentSettleTransactionNr < m_iCurrentSettleTransactionNr)
+		{
+			warnCurrentSettleTransactionNr = m_iCurrentSettleTransactionNr - iCurrentSettleTransactionNr;
+			// Write debug message in order to find deadlock...
+			CAMsg::printMsg(LOG_WARNING, "Settlement transaction %llu: Apply changes to database. %llu other settlement transactions seem to be waiting...\n", 
+				iCurrentSettleTransactionNr, (m_iCurrentSettleTransactionNr - iCurrentSettleTransactionNr));
 		}
 
 		//first apply changes to the database ...
 		__commitSettlementToDatabase(entry, dbInterface);
 		CAAccountingDBInterface::releaseConnection(dbInterface);
 		dbInterface = NULL;
+		
+		
+		if (warnCurrentSettleTransactionNr > 0)
+		{
+			// Write debug message in order to find deadlock...
+			CAMsg::printMsg(LOG_WARNING, "Settlement transaction %llu: Removing settlement mutex lock. %llu other settlement transactions seem to be waiting...\n", 
+				iCurrentSettleTransactionNr, (m_iCurrentSettleTransactionNr - iCurrentSettleTransactionNr));
+		}
+		
 		ms_pInstance->m_pSettlementMutex->unlock();
+		
+		
+		if (warnCurrentSettleTransactionNr > 0)
+		{
+			// Write debug message in order to find deadlock...
+			CAMsg::printMsg(LOG_WARNING, "Settlement transaction %llu: Entering login hashtable. %llu other settlement transactions seem to be waiting...\n", 
+				iCurrentSettleTransactionNr, (m_iCurrentSettleTransactionNr - iCurrentSettleTransactionNr));		
+		}
 
 		//... then to the login hashtable after releasing the global settlement lock.
 		ms_pInstance->m_currentAccountsHashtable->getMutex()->lock();
-		#ifdef DEBUG
-				CAMsg::printMsg(LOG_DEBUG, "Settlement thread with wait nr %llu alters hashtable.\n", myWaitNr);
-		#endif
+		CAMsg::printMsg(LOG_DEBUG, "Settlement transaction %llu: thread %x with wait nr %llu alters hashtable.\n", iCurrentSettleTransactionNr, pthread_self(), myWaitNr);
 		__commitSettlementToLoginTable(entry);
 		ms_pInstance->m_currentAccountsHashtable->getMutex()->unlock();
 
+		if (warnCurrentSettleTransactionNr > 0)
+		{
+			// Write debug message in order to find deadlock...
+			CAMsg::printMsg(LOG_WARNING, "Settlement transaction %llu: After commiting to login hashtable, before last lock. %llu other settlement transactions seem to be waiting...\n", 
+				iCurrentSettleTransactionNr, (m_iCurrentSettleTransactionNr - iCurrentSettleTransactionNr));		
+		}
+		
 		//indicate that the next thread may proceed with its settlement changes by incrementing the nextSettleNr.
 		ms_pInstance->m_pSettlementMutex->lock();
 		ms_pInstance->m_nextSettleNr++;
