@@ -2769,9 +2769,6 @@ SINT32 CAAccountingInstance::__newSettlementTransaction(UINT32 *nrOfSettledCCs)
 	SINT32 biConnectionStatus = 0, ret = E_SUCCESS;
 	UINT64 myWaitNr = 0;
 
-
-
-
 	//settlement transactions need to be synchronized globally because the settlement thread as well as all login threads
 	//may start a settlement transaction concurrently.
 	ms_pInstance->m_pSettlementMutex->lock();
@@ -2905,9 +2902,9 @@ SINT32 CAAccountingInstance::__newSettlementTransaction(UINT32 *nrOfSettledCCs)
 
 		//... then to the login hashtable after releasing the global settlement lock.
 		ms_pInstance->m_currentAccountsHashtable->getMutex()->lock();
-		#ifdef DEBUG
+		//#ifdef DEBUG
 				CAMsg::printMsg(LOG_DEBUG, "Settlement thread with wait nr %llu alters hashtable.\n", myWaitNr);
-		#endif
+		//#endif
 		__commitSettlementToLoginTable(entry);
 		ms_pInstance->m_currentAccountsHashtable->getMutex()->unlock();
 
@@ -3147,6 +3144,7 @@ SettleEntry *CAAccountingInstance::__handleSettleResult(CAXMLCostConfirmation *p
 void CAAccountingInstance::__commitSettlementToDatabase(SettleEntry *entryList, CAAccountingDBInterface *dbInterface)
 {
 	SettleEntry *entry = entryList, *nextEntry = NULL;
+	CAMsg::printMsg(LOG_INFO, "Doing __commitSettlementToDatabase\n");
 	while (entry != NULL && dbInterface != NULL)
 	{
 		if (entry->authFlags & (AUTH_INVALID_ACCOUNT | AUTH_UNKNOWN))
