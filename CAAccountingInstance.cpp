@@ -2957,7 +2957,7 @@ SINT32 CAAccountingInstance::__newSettlementTransaction(UINT32 *nrOfSettledCCs)
 			if(ms_pInstance->m_settleWaitNr != ms_pInstance->m_nextSettleNr)
 			CAMsg::printMsg(LOG_INFO, "Thread %x waking up next Thread. %llu are still waiting.\n", pthread_self(),
 							(ms_pInstance->m_settleWaitNr - ms_pInstance->m_nextSettleNr));
-			ms_pInstance->m_pSettlementMutex->broadcast();
+			ms_pInstance->m_pSettlementMutex->signal();
 		}
 	}
 	ms_pInstance->m_pSettlementMutex->unlock();
@@ -3727,7 +3727,7 @@ SINT32 CAAccountingInstance::settlementTransaction()
 			if(ms_pInstance->m_settleWaitNr != ms_pInstance->m_nextSettleNr)
 			CAMsg::printMsg(LOG_INFO, "Thread %x Waking up next Thread %llu are waiting.\n", pthread_self(),
 							(ms_pInstance->m_settleWaitNr - ms_pInstance->m_nextSettleNr));		
-			ms_pInstance->m_pSettlementMutex->broadcast();
+			ms_pInstance->m_pSettlementMutex->signal();
 		}
 		ms_pInstance->m_pSettlementMutex->unlock();
 	}
