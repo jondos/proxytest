@@ -1,0 +1,47 @@
+#!/usr/bin/make -f
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp
+	dh_clean
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_prep
+	dh_installdirs
+
+	
+	# install the squid config for free mixes
+	install -m 0644 squid.conf.free debian/mix-free-squidconf/usr/share/doc/mix-free-squidconf/conf/squid.conf
+	install -m 0644 squid-block.acl debian/mix-free-squidconf/usr/share/doc/mix-free-squidconf/conf/squid-block.acl
+	
+	# install the squid config for premium mixes
+	install -m 0644 squid.conf.premium debian/mix-premium-squidconf/usr/share/doc/mix-premium-squidconf/conf/squid.conf
+	install -m 0644 squid-block.acl debian/mix-premium-squidconf/usr/share/doc/mix-premium-squidconf/conf/squid-block.acl
+
+        # install the dante config for primium mixes
+	install -m 0644 danted.conf.template debian/mix-danteconf/usr/share/doc/mix-danteconf/conf/danted.conf.template
+
+
+binary-arch: build install
+
+binary-indep: build install
+	dh_testdir
+	dh_testroot
+	dh_installdocs -A debian/copyright
+	dh_installchangelogs
+	dh_compress --exclude=squid --exclude=dante
+	dh_fixperms
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install

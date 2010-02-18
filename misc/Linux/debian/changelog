@@ -1,0 +1,12 @@
+mix-squidconf (10.02.18) unstable; urgency=low
+
+  * added webanzeigen.xxxx.de
+
+ -- JonDos GmbH <info@jondos.de>  Thu, 18 Feb 2010 10:17:23 +0200
+
+
+mix-squidconf (10.01.18) unstable; urgency=low
+
+  * initial debian version
+
+ -- JonDos GmbH <info@jondos.de>  Wed, 20 Jan 2010 11:17:23 +0200

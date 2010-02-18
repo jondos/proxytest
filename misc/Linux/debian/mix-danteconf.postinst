@@ -1,0 +1,35 @@
+#!/bin/bash -e
+
+if [[ $1 = configure ]]; then
+  . /usr/share/debconf/confmodule
+  
+  db_get mix-danteconf/extip || true
+  EXT_IP=$RET
+  
+  tpage --define extip=$EXT_IP /usr/share/doc/mix-danteconf/conf/danted.conf.template > /usr/share/doc/mix-danteconf/conf/danted.conf
+fi
+
+# Stop dante
+if [ -x "`which invoke-rc.d 2>/dev/null`" ]; then
+	invoke-rc.d danted stop || exit $?
+else
+	/etc/init.d/danted stop || exit $?
+fi
+
+# Backup old danted configuration
+if [ ! -e /usr/share/doc/mix-danteconf/conf/danted.conf.orig ]; then
+  mv /etc/danted.conf /usr/share/doc/mix-danteconf/conf/danted.conf.orig
+fi
+  
+# Install the new configuration
+cp -f /usr/share/doc/mix-danteconf/conf/danted.conf /etc/danted.conf
+
+
+# Start danted
+if [ -x "`which invoke-rc.d 2>/dev/null`" ]; then
+	invoke-rc.d danted start || exit $?
+else
+	/etc/init.d/danted start || exit $?
+fi
+
+exit 0
