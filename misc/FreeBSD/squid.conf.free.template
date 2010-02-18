@@ -21,6 +21,8 @@ acl SSL_ports port 443
 
 acl CONNECT method CONNECT
 
+acl bad url_regex -i "/usr/local/etc/squid/squid-block.acl" 
+
 http_access deny to_localhost
 http_access deny !localhost
 http_access allow manager localhost
