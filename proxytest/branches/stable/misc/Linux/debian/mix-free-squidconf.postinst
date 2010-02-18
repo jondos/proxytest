@@ -1,0 +1,30 @@
+#!/bin/sh -e
+
+# Stop squid
+if [ -x "`which invoke-rc.d 2>/dev/null`" ]; then
+	invoke-rc.d squid stop || exit $?
+else
+	/etc/init.d/squid stop || exit $?
+fi
+
+# Backup old squid configuration
+if [ ! -e /usr/share/doc/mix-free-squidconf/conf/squid.conf.orig ]
+then
+  mv /etc/squid/squid.conf /usr/share/doc/mix-free-squidconf/conf/squid.conf.orig
+fi
+
+# Install new squid configuration
+cp -f /usr/share/doc/mix-free-squidconf/conf/squid.conf /etc/squid/squid.conf
+cp -f /usr/share/doc/mix-free-squidconf/conf/squid-block.acl /etc/squid/squid-block.acl
+
+# Create cache directories
+squid -z -d -3
+
+# Start squid
+if [ -x "`which invoke-rc.d 2>/dev/null`" ]; then
+	invoke-rc.d squid start || exit $?
+else
+	/etc/init.d/squid start || exit $?
+fi
+
+exit 0
