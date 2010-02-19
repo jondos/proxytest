@@ -648,7 +648,7 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 						getcurrentTimeMillis(keepaliveLast);
 						continue;
 					}
-				//check if the connection is broken because we did not received a Keep_alive-Message
+				//check if the connection is broken because we did not receive a Keep_alive-Message
 				getcurrentTimeMillis(keepaliveNow);
 				UINT32 keepaliveDiff=diff64(keepaliveNow,keepaliveLast);
 				if(keepaliveDiff>u32KeepAliveRecvInterval)
