@@ -152,7 +152,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #define KEEP_ALIVE_TRAFFIC_RECV_WAIT_TIME  75000 //How long to wait for a Keep-Alive (or any other packet)
 																							       //before we believe that the connection is broken (in ms)
-#define KEEP_ALIVE_TRAFFIC_SEND_WAIT_TIME 30000 //How long to wait before we sent a dummy a Keep-Alive-Traffic
+#define KEEP_ALIVE_TRAFFIC_SEND_WAIT_TIME 65000 //How long to wait before we sent a dummy a Keep-Alive-Traffic
 
 //#define ECC
 //#define SSL_HACK //???
