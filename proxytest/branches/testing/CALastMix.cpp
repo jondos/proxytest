@@ -446,10 +446,14 @@ SINT32 CALastMix::processKeyExchange()
 		getDOMElementValue(elemKeepAliveSendInterval,tmpSendInterval,0xFFFFFFFF); //if now send interval was given set it to "infinite"
 		getDOMElementValue(elemKeepAliveRecvInterval,tmpRecvInterval,0xFFFFFFFF); //if no recv interval was given --> set it to "infinite"
 		CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Getting offer -- SendInterval %u -- Receive Interval %u\n",tmpSendInterval,tmpRecvInterval);
-		m_u32KeepAliveSendInterval=max(u32KeepAliveSendInterval,tmpRecvInterval);
-		if(m_u32KeepAliveSendInterval>10000)
-			m_u32KeepAliveSendInterval-=10000; //make the send interval a little bit smaller than the related receive intervall
+		m_u32KeepAliveSendInterval = u32KeepAliveSendInterval;
+		if (m_u32KeepAliveSendInterval > tmpRecvInterval - 10000)
+			m_u32KeepAliveSendInterval-=10000; //make the send interval a little bit smaller than the related receive interval
 		m_u32KeepAliveRecvInterval=max(u32KeepAliveRecvInterval,tmpSendInterval);
+		if (m_u32KeepAliveRecvInterval - 10000 < tmpSendInterval)
+		{
+			m_u32KeepAliveRecvInterval += 10000;
+		}
 		CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Calculated -- SendInterval %u -- Receive Interval %u\n",m_u32KeepAliveSendInterval,m_u32KeepAliveRecvInterval);
 
 		if (doc != NULL)
