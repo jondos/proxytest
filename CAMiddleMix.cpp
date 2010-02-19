@@ -220,6 +220,16 @@ SINT32 CAMiddleMix::processKeyExchange()
 						if(m_u32KeepAliveSendInterval>10000)
 							m_u32KeepAliveSendInterval2-=10000; //make the send interval a little bit smaller than the related receive intervall
 						m_u32KeepAliveRecvInterval2=max(u32KeepAliveRecvInterval,tmpSendInterval);
+						
+						m_u32KeepAliveSendInterval2 = u32KeepAliveSendInterval;
+						if (m_u32KeepAliveSendInterval2 > tmpRecvInterval - 10000)
+							m_u32KeepAliveSendInterval2-=10000; //make the send interval a little bit smaller than the related receive interval
+						m_u32KeepAliveRecvInterval2=max(u32KeepAliveRecvInterval,tmpSendInterval);
+						if (m_u32KeepAliveRecvInterval2 - 10000 < tmpSendInterval)
+						{
+							m_u32KeepAliveRecvInterval2 += 10000;
+						}
+						
 						CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Calculated -- SendInterval %u -- Receive Interval %u\n",m_u32KeepAliveSendInterval2,m_u32KeepAliveRecvInterval2);
 
 						//m_pSignature->signXML(elemRoot);
