@@ -595,11 +595,13 @@ SINT32 CAInfoService::sendStatus(const UINT8* a_strStatusXML,UINT32 a_len, const
 		{
 			if(a_pSocketAddress->getIPAsStr(hostname, 255) == E_SUCCESS)
 			{
-				CAMsg::printMsg(LOG_DEBUG, "InfoService: Could not connect to InfoService %s:%d. Reason: %s (%i)\n", hostname, a_pSocketAddress->getPort(), GET_NET_ERROR_STR(err), err);
+				CAMsg::printMsg(LOG_DEBUG, "InfoService: Could not connect to InfoService %s:%d. Reason: %s (%i)\n", 
+					hostname, a_pSocketAddress->getPort(), GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
 			}
 			else
 			{
-				CAMsg::printMsg(LOG_DEBUG, "InfoService: Could not connect to InfoService (host unknown) at port %d. Reason: %s (%i)\n", a_pSocketAddress->getPort(), GET_NET_ERROR_STR(err), err);
+				CAMsg::printMsg(LOG_DEBUG, "InfoService: Could not connect to InfoService (host unknown) at port %d. Reason: %s (%i)\n", 
+					a_pSocketAddress->getPort(), GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
 			}
 			return E_UNKNOWN;
 		}
