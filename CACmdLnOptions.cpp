@@ -4606,7 +4606,6 @@ SINT32 CACmdLnOptions::parseInfoServices(DOMElement* a_infoServiceNode)
 	m_addrInfoServices=NULL;
 
 	UINT32 nrListenerInterfaces;
-	m_addrInfoServicesSize = 0;
 	m_addrInfoServices = new CAListenerInterface*[isList->getLength()];
 	CAListenerInterface** isListenerInterfaces;
 	for (UINT32 i = 0; i < isList->getLength(); i++)
