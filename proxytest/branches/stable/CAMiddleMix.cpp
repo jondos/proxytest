@@ -220,6 +220,16 @@ SINT32 CAMiddleMix::processKeyExchange()
 						if(m_u32KeepAliveSendInterval>10000)
 							m_u32KeepAliveSendInterval2-=10000; //make the send interval a little bit smaller than the related receive intervall
 						m_u32KeepAliveRecvInterval2=max(u32KeepAliveRecvInterval,tmpSendInterval);
+						
+						m_u32KeepAliveSendInterval2 = u32KeepAliveSendInterval;
+						if (m_u32KeepAliveSendInterval2 > tmpRecvInterval - 10000)
+							m_u32KeepAliveSendInterval2-=10000; //make the send interval a little bit smaller than the related receive interval
+						m_u32KeepAliveRecvInterval2=max(u32KeepAliveRecvInterval,tmpSendInterval);
+						if (m_u32KeepAliveRecvInterval2 - 10000 < tmpSendInterval)
+						{
+							m_u32KeepAliveRecvInterval2 += 10000;
+						}
+						
 						CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Calculated -- SendInterval %u -- Receive Interval %u\n",m_u32KeepAliveSendInterval2,m_u32KeepAliveRecvInterval2);
 
 						//m_pSignature->signXML(elemRoot);
@@ -484,13 +494,17 @@ SINT32 CAMiddleMix::processKeyExchange()
 		getDOMChildByName(elemKeepAlive,"SendInterval",elemKeepAliveSendInterval);
 		getDOMChildByName(elemKeepAlive,"ReceiveInterval",elemKeepAliveRecvInterval);
 		UINT32 tmpSendInterval,tmpRecvInterval;
-		getDOMElementValue(elemKeepAliveSendInterval,tmpSendInterval,0xFFFFFFFF); //if now send interval was given set it to "infinite"
+		getDOMElementValue(elemKeepAliveSendInterval,tmpSendInterval,0xFFFFFFFF); //if no send interval was given set it to "infinite"
 		getDOMElementValue(elemKeepAliveRecvInterval,tmpRecvInterval,0xFFFFFFFF); //if no recv interval was given --> set it to "infinite"
 		CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Getting offer -- SendInterval %u -- Receive Interval %u\n",tmpSendInterval,tmpRecvInterval);
-		m_u32KeepAliveSendInterval=max(u32KeepAliveSendInterval,tmpRecvInterval);
-		if(m_u32KeepAliveSendInterval>10000)
-			m_u32KeepAliveSendInterval-=10000; //make the send interval a little bit smaller than the related receive intervall
+		m_u32KeepAliveSendInterval = u32KeepAliveSendInterval;
+		if (m_u32KeepAliveSendInterval > tmpRecvInterval - 10000)
+			m_u32KeepAliveSendInterval-=10000; //make the send interval a little bit smaller than the related receive interval
 		m_u32KeepAliveRecvInterval=max(u32KeepAliveRecvInterval,tmpSendInterval);
+		if (m_u32KeepAliveRecvInterval - 10000 < tmpSendInterval)
+		{
+			m_u32KeepAliveRecvInterval += 10000;
+		}
 		CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Calculated -- SendInterval %u -- Receive Interval %u\n",m_u32KeepAliveSendInterval,m_u32KeepAliveRecvInterval);
 
 		if (doc != NULL)
