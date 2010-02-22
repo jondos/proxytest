@@ -467,7 +467,7 @@ SINT32 CAInfoService::sendStatus(bool bIncludeCerts)
 	if( !(m_pMix->isConnected())) // && !bIncludeCerts )
 	{
 #ifdef DEBUG
-		CAMsg::printMsg(LOG_INFO, "Mix not connected. Skipping status\n");
+		CAMsg::printMsg(LOG_INFO, "Mix not connected. Skipping status.\n");
 #endif
 		return E_UNKNOWN;
 	}
@@ -483,7 +483,7 @@ SINT32 CAInfoService::sendStatus(bool bIncludeCerts)
 
 	if( !(m_pMix->isConnected()))
 	{
-		CAMsg::printMsg(LOG_INFO, "Mix not connected. Skip sending already created status message\n");
+		CAMsg::printMsg(LOG_INFO, "Mix not connected. Skip sending already created status message.\n");
 	}
 	else
 	{
@@ -590,9 +590,17 @@ SINT32 CAInfoService::sendStatus(const UINT8* a_strStatusXML,UINT32 a_len, const
 			return E_UNKNOWN;
 		}
 
+		
 		if(oSocket.connect(*a_pSocketAddress, MIX_TO_INFOSERVICE_TIMEOUT)!=E_SUCCESS)
 		{
-			CAMsg::printMsg(LOG_DEBUG, "InfoService: Could not connect to InfoService %s:%d.\n", hostname, a_pSocketAddress->getPort());
+			if(a_pSocketAddress->getIPAsStr(hostname, 255) == E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_DEBUG, "InfoService: Could not connect to InfoService %s:%d. Reason: %s (%i)\n", hostname, a_pSocketAddress->getPort(), GET_NET_ERROR_STR(err), err);
+			}
+			else
+			{
+				CAMsg::printMsg(LOG_DEBUG, "InfoService: Could not connect to InfoService (host unknown) at port %d. Reason: %s (%i)\n", a_pSocketAddress->getPort(), GET_NET_ERROR_STR(err), err);
+			}
 			return E_UNKNOWN;
 		}
 
