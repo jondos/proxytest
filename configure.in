@@ -188,18 +188,6 @@ AC_ARG_ENABLE(payment,
 	]
 )
 
-dnl delay users ??
-DELAY_USERS=""
-AC_ARG_ENABLE(user-bandwidth-limitation,
-	AS_HELP_STRING([--enable-user-bandwidth-limitation],
-			[Specify if to build with bandwith limitation for users (first mix). The limitation parameters can be specified in the mix configuration file.]),
-	[
-		if test "x$enableval" != "xno" ; then
-		    DELAY_USERS="-DDELAY_USERS"
-		fi
-	]
-)
-
 dnl server monitoring ??
 SERVER_MONITORING=""
 AC_ARG_ENABLE(server_monitoring,
