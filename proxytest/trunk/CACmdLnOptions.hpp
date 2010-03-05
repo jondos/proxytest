@@ -864,7 +864,8 @@ class CACmdLnOptions
 		SINT32 setLoggingOptions(DOMElement* elemGeneral);
 
 		/* Certificate Options */
-#define CERTIFICATE_OPTIONS_NR 6
+#define MAX_CERTIFICATE_OPTIONS_NR 6
+		UINT32 m_nCertificateOptionsSetters;
 		SINT32 setOwnCertificate(DOMElement *elemCertificates);
 		SINT32 setOwnOperatorCertificate(DOMElement *elemCertificates);
 		SINT32 setMixCertificateVerification(DOMElement *elemCertificates);
@@ -904,8 +905,7 @@ class CACmdLnOptions
 		SINT32 appendMixInfo_internal(DOMNode* a_node, bool with_subtree);
 		inline SINT32 addMixIdToMixInfo();
 
-		SINT32 invokeOptionSetters
-		(optionSetter_pt *optionsSetters, DOMElement* target, SINT32 optionsSettersLength);
+		SINT32 invokeOptionSetters(const optionSetter_pt *optionsSetters, DOMElement* target, SINT32 optionsSettersLength);
 
 		void initMainOptionSetters();
 		void initGeneralOptionSetters();

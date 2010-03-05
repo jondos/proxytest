@@ -301,7 +301,7 @@ SINT32 CACertificate::getAuthorityKeyIdentifier(UINT8* r_aki, UINT32* r_akiLen)
   * @retval E_SUCCESS upon successful removal
   * @retval E_UNKNOWN otherwise
   */
-SINT32 CACertificate::removeColons(UINT8* a_cSkid, UINT32 a_cSkidLen, UINT8 *&r_ski, UINT32 *r_skiLen)
+SINT32 CACertificate::removeColons(const UINT8* a_cSkid, UINT32 a_cSkidLen, UINT8 *&r_ski, UINT32 *r_skiLen)
 {
     UINT32 i = 0, j = 0;
     UINT32 tmp = (2*a_cSkidLen)/3 + 2;

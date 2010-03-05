@@ -1,0 +1,263 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="CAAbstractControlChannel.cpp" />
+    <ClCompile Include="CAAbstractXMLEncodable.cpp" />
+    <ClCompile Include="CAAbstractXMLSignable.cpp" />
+    <ClCompile Include="CAAccountingBIInterface.cpp" />
+    <ClCompile Include="CAAccountingControlChannel.cpp" />
+    <ClCompile Include="CAAccountingDBInterface.cpp" />
+    <ClCompile Include="CAAccountingInstance.cpp" />
+    <ClCompile Include="CAAccountingSettleThread.cpp" />
+    <ClCompile Include="CAASymCipher.cpp" />
+    <ClCompile Include="CAASyncControlChannel.cpp" />
+    <ClCompile Include="CABase64.cpp" />
+    <ClCompile Include="CACacheLoadBalancing.cpp" />
+    <ClCompile Include="CACertificate.cpp" />
+    <ClCompile Include="CACertStore.cpp" />
+    <ClCompile Include="CACmdLnOptions.cpp" />
+    <ClCompile Include="CAConditionVariable.cpp" />
+    <ClCompile Include="CAControlChannelDispatcher.cpp" />
+    <ClCompile Include="CAControlChannelTest.cpp" />
+    <ClCompile Include="CADatabase.cpp" />
+    <ClCompile Include="CADatagramSocket.cpp" />
+    <ClCompile Include="CADataRetentionLog.cpp" />
+    <ClCompile Include="CADataRetentionLogFile.cpp" />
+    <ClCompile Include="CADynamicCascadeConfigurator.cpp" />
+    <ClCompile Include="CADynaNetworking.cpp" />
+    <ClCompile Include="CAFirstMix.cpp" />
+    <ClCompile Include="CAFirstMixChannelList.cpp" />
+    <ClCompile Include="CAHttpClient.cpp" />
+    <ClCompile Include="CAInfoService.cpp" />
+    <ClCompile Include="CAInfoServiceAware.cpp" />
+    <ClCompile Include="CAIPList.cpp" />
+    <ClCompile Include="CALastMix.cpp" />
+    <ClCompile Include="CALastMixChannelList.cpp" />
+    <ClCompile Include="CAListenerInterface.cpp" />
+    <ClCompile Include="CALocalProxy.cpp" />
+    <ClCompile Include="CALogPacketStats.cpp" />
+    <ClCompile Include="CAMiddleMix.cpp" />
+    <ClCompile Include="CAMiddleMixChannelList.cpp" />
+    <ClCompile Include="CAMix.cpp" />
+    <ClCompile Include="CAMixWithReplayDB.cpp" />
+    <ClCompile Include="CAMsg.cpp" />
+    <ClCompile Include="CAMultiSignature.cpp" />
+    <ClCompile Include="CAMutex.cpp" />
+    <ClCompile Include="CAMuxSocket.cpp" />
+    <ClCompile Include="CAPool.cpp" />
+    <ClCompile Include="CAPriceInfo.cpp" />
+    <ClCompile Include="CAQueue.cpp" />
+    <ClCompile Include="CAReplayControlChannel.cpp" />
+    <ClCompile Include="CAReplayCtrlChannelMsgProc.cpp" />
+    <ClCompile Include="CAReplayDatabase.cpp" />
+    <ClCompile Include="CASemaphore.cpp" />
+    <ClCompile Include="CASignature.cpp" />
+    <ClCompile Include="CASingleSocketGroup.cpp" />
+    <ClCompile Include="CASocket.cpp" />
+    <ClCompile Include="CASocketAddrINet.cpp" />
+    <ClCompile Include="CASocketAddrUnix.cpp" />
+    <ClCompile Include="CASocketGroup.cpp" />
+    <ClCompile Include="CASocketGroupEpoll.cpp" />
+    <ClCompile Include="CASocketList.cpp" />
+    <ClCompile Include="CASymCipher.cpp" />
+    <ClCompile Include="CASyncControlChannel.cpp" />
+    <ClCompile Include="CATempIPBlockList.cpp" />
+    <ClCompile Include="CAThread.cpp" />
+    <ClCompile Include="CAThreadList.cpp" />
+    <ClCompile Include="CAThreadPool.cpp" />
+    <ClCompile Include="CATLSClientSocket.cpp" />
+    <ClCompile Include="CAUtil.cpp" />
+    <ClCompile Include="CAXMLBI.cpp" />
+    <ClCompile Include="CAXMLCostConfirmation.cpp" />
+    <ClCompile Include="CAXMLErrorMessage.cpp" />
+    <ClCompile Include="CAXMLPriceCert.cpp" />
+    <ClCompile Include="gcm\gcm.cpp" />
+    <ClCompile Include="gcm\prp.cpp" />
+    <ClCompile Include="Hashtable.cpp" />
+    <ClCompile Include="popt\popt.cpp" />
+    <ClCompile Include="popt\popthelp.cpp" />
+    <ClCompile Include="popt\poptparse.cpp" />
+    <ClCompile Include="StdAfx.cpp" />
+    <ClCompile Include="TermsAndConditions.cpp" />
+    <ClCompile Include="tre\regcomp.cpp" />
+    <ClCompile Include="tre\regexec.cpp" />
+    <ClCompile Include="tre\tre-ast.cpp" />
+    <ClCompile Include="tre\tre-compile.cpp" />
+    <ClCompile Include="tre\tre-match-backtrack.cpp" />
+    <ClCompile Include="tre\tre-match-parallel.cpp" />
+    <ClCompile Include="tre\tre-mem.cpp" />
+    <ClCompile Include="tre\tre-parse.cpp" />
+    <ClCompile Include="tre\tre-stack.cpp" />
+    <ClCompile Include="trio\trio.cpp" />
+    <ClCompile Include="trio\trionan.cpp" />
+    <ClCompile Include="trio\triostr.cpp" />
+    <ClCompile Include="TypeA\CAFirstMixA.cpp" />
+    <ClCompile Include="TypeA\CALastMixA.cpp" />
+    <ClCompile Include="TypeB\CAChain.cpp" />
+    <ClCompile Include="TypeB\CAChainTable.cpp" />
+    <ClCompile Include="TypeB\CAFirstMixB.cpp" />
+    <ClCompile Include="TypeB\CALastMixB.cpp" />
+    <ClCompile Include="TypeB\CALastMixBChannelList.cpp" />
+    <ClCompile Include="xml\dom\mxml\mxmlDOMDocument.cpp" />
+    <ClCompile Include="xml\dom\mxml\mxmlXercesDOMParser.cpp" />
+    <ClCompile Include="xml\DOM_Output.cpp" />
+    <ClCompile Include="CALibProxytest.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CABase64.hpp" />
+    <ClInclude Include="CACertificate.hpp" />
+    <ClInclude Include="CACertStore.hpp" />
+    <ClInclude Include="CAClientSocket.hpp" />
+    <ClInclude Include="CACmdLnOptions.hpp" />
+    <ClInclude Include="CAConditionVariable.hpp" />
+    <ClInclude Include="CAControlChannelDispatcher.hpp" />
+    <ClInclude Include="CAControlChannelTest.hpp" />
+    <ClInclude Include="CADatabase.hpp" />
+    <ClInclude Include="CADatagramSocket.hpp" />
+    <ClInclude Include="CADataRetentionLog.hpp" />
+    <ClInclude Include="CADataRetentionLogFile.hpp" />
+    <ClInclude Include="CADynaNetworking.hpp" />
+    <ClInclude Include="CAFirstMix.hpp" />
+    <ClInclude Include="CAFirstMixChannelList.hpp" />
+    <ClInclude Include="CAHttpClient.hpp" />
+    <ClInclude Include="CAInfoService.hpp" />
+    <ClInclude Include="CAIPList.hpp" />
+    <ClInclude Include="CALastMix.hpp" />
+    <ClInclude Include="CALastMixChannelList.hpp" />
+    <ClInclude Include="CAListenerInterface.hpp" />
+    <ClInclude Include="CALocalProxy.hpp" />
+    <ClInclude Include="CALockAble.hpp" />
+    <ClInclude Include="CALogPacketStats.hpp" />
+    <ClInclude Include="CAMiddleMix.hpp" />
+    <ClInclude Include="CAMiddleMixChannelList.hpp" />
+    <ClInclude Include="CAMix.hpp" />
+    <ClInclude Include="CAMixWithReplayDB.hpp" />
+    <ClInclude Include="CAMsg.hpp" />
+    <ClInclude Include="CAMutex.hpp" />
+    <ClInclude Include="CAMuxSocket.hpp" />
+    <ClInclude Include="CAPool.hpp" />
+    <ClInclude Include="CAPriceInfo.hpp" />
+    <ClInclude Include="CAQueue.hpp" />
+    <ClInclude Include="CAReplayControlChannel.hpp" />
+    <ClInclude Include="CAReplayCtrlChannelMsgProc.hpp" />
+    <ClInclude Include="CAReplayDatabase.hpp" />
+    <ClInclude Include="CASemaphore.hpp" />
+    <ClInclude Include="CASignature.hpp" />
+    <ClInclude Include="CASingleSocketGroup.hpp" />
+    <ClInclude Include="CASocket.hpp" />
+    <ClInclude Include="CASocketAddr.hpp" />
+    <ClInclude Include="CASocketAddrINet.hpp" />
+    <ClInclude Include="CASocketAddrUnix.hpp" />
+    <ClInclude Include="CASocketGroup.hpp" />
+    <ClInclude Include="CASocketGroupEpoll.hpp" />
+    <ClInclude Include="CASocketList.hpp" />
+    <ClInclude Include="CASymCipher.hpp" />
+    <ClInclude Include="CASyncControlChannel.hpp" />
+    <ClInclude Include="CATempIPBlockList.hpp" />
+    <ClInclude Include="CAThread.hpp" />
+    <ClInclude Include="CAThreadList.hpp" />
+    <ClInclude Include="CAThreadPool.hpp" />
+    <ClInclude Include="CATLSClientSocket.hpp" />
+    <ClInclude Include="CAUtil.hpp" />
+    <ClInclude Include="CAXMLBI.hpp" />
+    <ClInclude Include="CAXMLCostConfirmation.hpp" />
+    <ClInclude Include="CAXMLErrorMessage.hpp" />
+    <ClInclude Include="controlchannelids.h" />
+    <ClInclude Include="doxygen.h" />
+    <ClInclude Include="errorcodes.hpp" />
+    <ClInclude Include="gcm\gcm.h" />
+    <ClInclude Include="gcm\prp.h" />
+    <ClInclude Include="Hashtable.hpp" />
+    <ClInclude Include="popt\popt.h" />
+    <ClInclude Include="popt\poptint.h" />
+    <ClInclude Include="popt\system.h" />
+    <ClInclude Include="StdAfx.h" />
+    <ClInclude Include="tre\regex.h" />
+    <ClInclude Include="tre\tre-config.h" />
+    <ClInclude Include="tre\tre-internal.h" />
+    <ClInclude Include="tre\tre-match-utils.h" />
+    <ClInclude Include="tre\tre-mem.h" />
+    <ClInclude Include="tre\xmalloc.h" />
+    <ClInclude Include="trio\trio.hpp" />
+    <ClInclude Include="trio\triodef.h" />
+    <ClInclude Include="trio\trionan.h" />
+    <ClInclude Include="trio\triop.h" />
+    <ClInclude Include="TypeA\CAFirstMixA.hpp" />
+    <ClInclude Include="TypeA\CALastMixA.hpp" />
+    <ClInclude Include="TypeB\CAChain.hpp" />
+    <ClInclude Include="TypeB\CAChainTable.hpp" />
+    <ClInclude Include="TypeB\CAFirstMixB.hpp" />
+    <ClInclude Include="TypeB\CALastMixB.hpp" />
+    <ClInclude Include="TypeB\CALastMixBChannelList.hpp" />
+    <ClInclude Include="typedefs.hpp" />
+    <ClInclude Include="xml\dom\mxml\mxmlDOM.hpp" />
+    <ClInclude Include="xml\dom\mxml\mxmlDOMAttr.hpp" />
+    <ClInclude Include="xml\dom\mxml\mxmlDOMDocument.hpp" />
+    <ClInclude Include="xml\dom\mxml\mxmlDOMDocumentFragment.hpp" />
+    <ClInclude Include="xml\dom\mxml\mxmlDOMElement.hpp" />
+    <ClInclude Include="xml\dom\mxml\mxmlDOMImplementation.hpp" />
+    <ClInclude Include="xml\dom\mxml\mxmlDOMNamedNodeMap.hpp" />
+    <ClInclude Include="xml\dom\mxml\mxmlDOMNode.hpp" />
+    <ClInclude Include="xml\dom\mxml\mxmlDOMNodeList.hpp" />
+    <ClInclude Include="xml\dom\mxml\mxmlDOMText.hpp" />
+    <ClInclude Include="xml\dom\mxml\mxmlDOMTypeDef.hpp" />
+    <ClInclude Include="xml\dom\mxml\mxmlInputSource.hpp" />
+    <ClInclude Include="xml\dom\mxml\mxmlMemBufInputSource.hpp" />
+    <ClInclude Include="xml\dom\mxml\mxmlXercesDOMParser.hpp" />
+    <ClInclude Include="xml\dom\mxml\mxmlXMLFormatTarget.hpp" />
+    <ClInclude Include="xml\dom\mxml\mxmlXMLFormatter.hpp" />
+    <ClInclude Include="xml\dom\mxml\mxmlXMLString.hpp" />
+    <ClInclude Include="xml\DOM_Output.hpp" />
+    <ClInclude Include="basetypedefs.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="CAAbstractControlChannel.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="CAAbstractXMLEncodable.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="CAAbstractXMLSignable.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="CAAccountingBIInterface.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="CAAccountingControlChannel.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="CAAccountingDBInterface.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="CAAccountingSettleThread.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="CAAccountingInstance.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="CAASymCipher.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="CAASyncControlChannel.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="CACacheLoadBalancing.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="documentation\XML\FirstMixToInfoService.xml" />
+    <None Include="documentation\XML\FirstMixToJAP.xml" />
+    <None Include="documentation\XML\InterMix-KeyExchange-Answer.xml" />
+    <None Include="documentation\XML\InterMix-LastMix-to-Successor.xml" />
+    <None Include="documentation\XML\MixCascadeStatus.xml" />
+    <None Include="documentation\XML\MixHELO.xml" />
+    <None Include="documentation\XML\xmldoc.template" />
+    <None Include="documentation\XML\XMLSignature.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{42ea10e5-95b5-49e5-893e-cdc3f2d122a0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
