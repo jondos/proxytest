@@ -226,17 +226,13 @@ void CACmdLnOptions::initGeneralOptionSetters()
 
 void CACmdLnOptions::initCertificateOptionSetters()
 {
-	certificateOptionSetters = new optionSetter_pt[CERTIFICATE_OPTIONS_NR];
-	int count = -1;
+	certificateOptionSetters = new optionSetter_pt[MAX_CERTIFICATE_OPTIONS_NR];
+	m_nCertificateOptionsSetters = 0;
 
-	certificateOptionSetters[++count]=
-		&CACmdLnOptions::setOwnOperatorCertificate;
-	certificateOptionSetters[++count]=
-		&CACmdLnOptions::setOwnCertificate;
-	certificateOptionSetters[++count]=
-		&CACmdLnOptions::setNextMixCertificate;
-	certificateOptionSetters[++count]=
-		&CACmdLnOptions::setPrevMixCertificate;
+	certificateOptionSetters[m_nCertificateOptionsSetters++]=&CACmdLnOptions::setOwnOperatorCertificate;
+	certificateOptionSetters[m_nCertificateOptionsSetters++]=&CACmdLnOptions::setOwnCertificate;
+	certificateOptionSetters[m_nCertificateOptionsSetters++]=&CACmdLnOptions::setNextMixCertificate;
+	certificateOptionSetters[m_nCertificateOptionsSetters++]=&CACmdLnOptions::setPrevMixCertificate;
 }
 
 void CACmdLnOptions::initAccountingOptionSetters()
@@ -1786,8 +1782,7 @@ inline SINT32 CACmdLnOptions::addMixIdToMixInfo()
  * Used by functions that handle a certain type of options, i.e.
  * general settings, account setting, etc.
  */
-SINT32 CACmdLnOptions::invokeOptionSetters
-		(optionSetter_pt *optionsSetters, DOMElement* optionsSource, SINT32 optionsSettersLength)
+SINT32 CACmdLnOptions::invokeOptionSetters (const optionSetter_pt *optionsSetters, DOMElement* optionsSource, SINT32 optionsSettersLength)
 {
 	SINT32 i = 0;
 	SINT32 ret = E_SUCCESS;
@@ -1811,7 +1806,7 @@ SINT32 CACmdLnOptions::invokeOptionSetters
 				"NULL element handling is delegated to the specified setter method!\n");
 	}
 
-	for(; i < optionsSettersLength; i++ )
+	for(i=0; i < optionsSettersLength; i++ )
 	{
 		ret = (this->*(optionsSetters[i]))(optionsSource);
 		if(ret != E_SUCCESS)
@@ -2444,8 +2439,7 @@ SINT32 CACmdLnOptions::setCertificateOptions(DOMElement* elemRoot)
 		return E_UNKNOWN;
 	}
 
-	return invokeOptionSetters
-			(certificateOptionSetters, elemCertificates, CERTIFICATE_OPTIONS_NR);
+	return invokeOptionSetters(certificateOptionSetters, elemCertificates, m_nCertificateOptionsSetters);
 }
 
 SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)

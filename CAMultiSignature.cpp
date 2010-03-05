@@ -470,20 +470,21 @@ SINT32 CAMultiSignature::sign(UINT8* in,UINT32 inlen,UINT8* sig,UINT32* siglen)
 	return m_signatures->pSig->sign(in, inlen, sig, siglen);
 }
 
-SINT32 CAMultiSignature::getSKI(UINT8* in, UINT32 inlen, UINT8* a_ski)
+SINT32 CAMultiSignature::getSKI(UINT8* out, UINT32 outlen, const UINT8* a_ski)
 {
-	UINT8* tmp = (UINT8*) hex_to_string(a_ski, SHA_DIGEST_LENGTH);
-	if (CACertificate::removeColons(tmp, strlen((const char*)tmp), in, &inlen) != E_SUCCESS)
+	UINT8* tmp = (UINT8*) hex_to_string((unsigned char*)a_ski, SHA_DIGEST_LENGTH);
+	UINT32 len=outlen;
+	if (CACertificate::removeColons(tmp, strlen((const char*)tmp), out, &len) != E_SUCCESS)
 	{
-		delete tmp;
+		OPENSSL_free(tmp);
 		return E_UNKNOWN;
 	}
-	delete tmp;
-	strtrim(in);
+	OPENSSL_free(tmp);
+	strtrim(out);
 	return E_SUCCESS;
 }
 
-SINT32 CAMultiSignature::getXORofSKIs(UINT8* in, UINT32 inlen)
+SINT32 CAMultiSignature::getXORofSKIs(UINT8* out, UINT32 outlen)
 {
-	return getSKI(in, inlen, m_xoredID);
+	return getSKI(out, outlen, m_xoredID);
 }
