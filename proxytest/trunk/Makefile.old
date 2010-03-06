@@ -54,6 +54,7 @@ OBJS_ALL=CASocket.o\
 	CAMutex.o\
 	CAConditionVariable.o\
 	CAMiddleMixChannelList.o\
+	CAMultiSignature.o\
 	CADatabase.o\
 	CACertificate.o\
 	CACertStore.o\
@@ -71,6 +72,7 @@ OBJS_ALL=CASocket.o\
 	CAReplayDatabase.o\
 	TermsAndConditions.o\
 	CALibProxytest.o\
+	CATempIPBlockList.o\
 	proxytest.o
 
 OBJS=$(OBJS_ALL)
