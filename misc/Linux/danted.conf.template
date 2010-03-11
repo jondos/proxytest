@@ -302,7 +302,17 @@ block {
 }
 
 block {
-        from: 127.0.0.1/32 to: .webanzeigen.np-coburg.de
+        from: 127.0.0.1/32 to: .webanzeigen.freies-wort.de
+        log: connect error
+}
+
+block {
+        from: 127.0.0.1/32 to: .jesus.ch
+        log: connect error
+}
+
+block {
+        from: 127.0.0.1/32 to: .livenet.ch
         log: connect error
 }
 

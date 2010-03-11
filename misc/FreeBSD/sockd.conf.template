@@ -492,7 +492,25 @@ block {
         log: connect error
 }
 block {
-        from: [% extIP %]/32 to: .webanzeigen.np-coburg.d
+        from: [% extIP %]/32 to: .webanzeigen.np-coburg.de
+        log: connect error
+}
+
+block {
+        from: 127.0.0.1/32 to: .jesus.ch
+        log: connect error
+}
+block {
+        from: [% extIP %]/32 to: .jesus.ch
+        log: connect error
+}
+
+block {
+        from: 127.0.0.1/32 to: .livenet.ch
+        log: connect error
+}
+block {
+        from: [% extIP %]/32 to: .livenet.ch
         log: connect error
 }
 

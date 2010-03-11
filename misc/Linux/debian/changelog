@@ -1,3 +1,10 @@
+mix-squidconf (10.03.13) unstable; urgency=low
+
+  * added jesus.ch and livenet.ch
+
+ -- JonDos GmbH <info@jondos.de>  Tue, 11 Mar 2010 10:17:23 +0200
+ 
+
 mix-squidconf (10.02.18) unstable; urgency=low
 
   * added webanzeigen.xxxx.de
