@@ -72,7 +72,6 @@ UINT32 strtrim(UINT8* s)
 	
 UINT32 toLower(UINT8* a_string)
 {
-	{	
 	int differ = 'A'-'a';
 	char ch;
 	int ii = strlen((char*)a_string);
@@ -85,8 +84,7 @@ UINT32 toLower(UINT8* a_string)
 			memcpy(a_string+i,&ch,1);
 		}
 	}
-}
-
+	return E_SUCCESS;
 }
 
 UINT8* bytes2hex(const void* bytes,UINT32 len)
