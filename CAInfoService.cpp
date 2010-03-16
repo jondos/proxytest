@@ -587,6 +587,7 @@ SINT32 CAInfoService::sendStatus(const UINT8* a_strStatusXML,UINT32 a_len, const
 		CASocket oSocket(true);
 		if (a_pSocketAddress == NULL)
 		{
+			oSocket.close();
 			return E_UNKNOWN;
 		}
 
@@ -603,6 +604,7 @@ SINT32 CAInfoService::sendStatus(const UINT8* a_strStatusXML,UINT32 a_len, const
 				CAMsg::printMsg(LOG_DEBUG, "InfoService: Could not connect to InfoService (host unknown) at port %d. Reason: %s (%i)\n", 
 					a_pSocketAddress->getPort(), GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
 			}
+			oSocket.close();
 			return E_UNKNOWN;
 		}
 
@@ -903,7 +905,7 @@ SINT32 CAInfoService::sendMixHelo(const UINT8* a_strMixHeloXML,UINT32 a_len,SINT
 
 		if (a_pSocketAddress == NULL)
 		{
-			return E_UNKNOWN;
+			goto ERR;
 		}
 
     if(requestCommand<0)
@@ -1141,6 +1143,8 @@ SINT32 CAInfoService::sendCascadeHelo()
 #ifdef DEBUG
 		CAMsg::printMsg(LOG_INFO, "not connected: skipping cascade helo.\n");
 #endif
+		delete[] strCascadeHeloXML;
+		strCascadeHeloXML = NULL;
 		return E_UNKNOWN;
 	}
 
@@ -1223,7 +1227,7 @@ SINT32 CAInfoService::sendCascadeHelo(const UINT8* a_strCascadeHeloXML,UINT32 a_
 
 	if (a_pSocketAddress == NULL)
 	{
-		return E_UNKNOWN;
+		goto ERR;
 	}
 
 	if(a_pSocketAddress->getIPAsStr(hostname, 255)!=E_SUCCESS)
@@ -1403,17 +1407,21 @@ SINT32 CAInfoService::getPaymentInstance(const UINT8* a_pstrPIID,CAXMLBI** a_pXM
 		//Connect to InfoService
 		if(a_socketAddress->getIPAsStr(hostname, 255)!=E_SUCCESS)
 		{
+			socket.close();
 			return E_UNKNOWN;
 		}
 
 		address.setAddr(hostname,a_socketAddress->getPort());
 
 		if(socket.connect(address)!=E_SUCCESS)
+		{
+			socket.close();
 			return E_UNKNOWN;
+		}
 
-		#ifdef DEBUG
+		//#ifdef DEBUG
 			CAMsg::printMsg(LOG_DEBUG, "CAInfoService::getPaymentInstance() - connected to InfoService %s:%d\n",hostname, a_socketAddress->getPort());
-		#endif
+		//#endif
 
 		//Send request
 		httpClient.setSocket(&socket);
@@ -1425,6 +1433,7 @@ SINT32 CAInfoService::getPaymentInstance(const UINT8* a_pstrPIID,CAXMLBI** a_pXM
 		#endif
 		if(status!=200||contentLength>0x00FFFF)
 			{
+				socket.close();
 				return E_UNKNOWN;
 			}
 
@@ -1433,6 +1442,7 @@ SINT32 CAInfoService::getPaymentInstance(const UINT8* a_pstrPIID,CAXMLBI** a_pXM
 			{
 				delete []content;
 				content = NULL;
+				socket.close();
 				return E_UNKNOWN;
 			}
 		socket.close();
