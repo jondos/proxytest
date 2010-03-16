@@ -439,6 +439,7 @@ SINT32 CAInfoService::signal()
 	m_pLoopCV->lock();
 	m_pLoopCV->signal();
 	m_pLoopCV->unlock();
+	return E_SUCCESS;
 }
 
 SINT32 CAInfoService::stop()
