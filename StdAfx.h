@@ -49,9 +49,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define _DEBUG
 #endif
 
-#ifndef PAYMENT
-	#define DELAY_USERS
+#ifndef DELAY_USERS
+	#ifndef PAYMENT
+		#define DELAY_USERS
+	#endif
 #endif
+
 
 //#define LOG_TRAFFIC_PER_USER //Log detail for traffic per user
 //#define LOG_CHANNEL //Log detail for traffic per channel
