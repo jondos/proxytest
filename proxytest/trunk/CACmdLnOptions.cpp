@@ -3389,10 +3389,10 @@ SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UIN
 				}
 				
 				ret = E_SUCCESS;
-				a_sockets[aktSocket] = new CASocket();
-				a_sockets[aktSocket]->create();
-				a_sockets[aktSocket]->setReuseAddr(true);
 				CASocketAddr* pAddr=pListener->getAddr();
+				a_sockets[aktSocket] = new CASocket();
+				a_sockets[aktSocket]->create(pAddr->getType());
+				a_sockets[aktSocket]->setReuseAddr(true);
 				pAddr->toString(buff,255);
 
 				delete pListener;
