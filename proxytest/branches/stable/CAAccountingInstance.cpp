@@ -949,7 +949,7 @@ SINT32 CAAccountingInstance::prepareCCRequest(CAMix* callingMix, UINT8* a_AiName
 			strtrim(tmpBuff); //return value ohny significant for NULL or all-whitespace string, ignore
 
 			m_allHashes[i] = tmpBuff;
-			CAMsg::printMsg(LOG_CRIT,"hash %u: %s\n", i, m_allHashes[i]);
+			CAMsg::printMsg(LOG_DEBUG,"Price certificate hash of Mix %u is: %s\n", i, m_allHashes[i]);
 			//do not delete tmpBuff here, since we're using allHashes below
 
 			if (getDOMChildByName(mixNodes[i],"SubjectKeyIdentifier",skiNode,true) != E_SUCCESS)

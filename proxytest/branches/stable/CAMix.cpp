@@ -47,6 +47,7 @@ CAMix::CAMix()
 		m_bShutDown = false;
 		m_docMixCascadeInfo=NULL;
 		m_bConnected = false;
+		m_lLastConnectionTime = 0;
 #ifdef DYNAMIC_MIX
 		/* LERNGRUPPE: Run by default */
 		m_bLoop = true;
@@ -101,6 +102,7 @@ SINT32 CAMix::start()
 	{
 		SINT32 initStatus;
 		m_bConnected = false;
+		m_lLastConnectionTime = 0;
 
 		if(initOnce()!=E_SUCCESS)
 			return E_UNKNOWN;
@@ -159,6 +161,7 @@ SINT32 CAMix::start()
 			initStatus = init();
 	        if(initStatus == E_SUCCESS)
 	        {
+				m_lLastConnectionTime = time(NULL);
 	        	m_bConnected = true;
 	        	CAMsg::printMsg(LOG_DEBUG, "CAMix main: init() returned success\n");
 	            if(m_pInfoService != NULL)
@@ -225,6 +228,7 @@ SKIP:
 	            m_pInfoService->setSerial(currentMillis);
 	        }
 	        m_bConnected = false;
+			m_lLastConnectionTime = 0;
 			CAMsg::printMsg(LOG_DEBUG, "CAMix main: before clean()\n");
 			clean();
 			CAMsg::printMsg(LOG_DEBUG, "CAMix main: after clean()\n");

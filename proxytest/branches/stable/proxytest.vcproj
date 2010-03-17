@@ -1120,6 +1120,10 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath=".\Quelle1.cpp"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>
