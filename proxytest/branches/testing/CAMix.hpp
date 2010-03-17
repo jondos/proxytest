@@ -115,6 +115,12 @@ class CAMix
 				{
 					return m_pMuxOutControlChannelDispatcher;
 				}
+			
+			UINT32 getLastConnectionTime()
+			{
+				m_lLastConnectionTime;
+			}
+				
 			bool isConnected()
 			{
 				return m_bConnected;
@@ -172,6 +178,7 @@ class CAMix
 
 			bool m_acceptReconfiguration;
 			volatile bool m_bConnected;
+			volatile UINT32 m_lLastConnectionTime;
 			// added by ronin <ronin2@web.de>
 			XERCES_CPP_NAMESPACE::DOMDocument* m_docMixCascadeInfo;
 

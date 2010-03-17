@@ -99,8 +99,7 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 			currentTime=time(NULL);
 			if (currentTime >= (lastStatusUpdate + CAInfoService::SEND_STATUS_INFO_WAIT))
 			{
-				if(pInfoService->sendStatus(bIsFirst)==E_SUCCESS)
-				//if(pInfoService->sendStatus(true)==E_SUCCESS)
+				if(pInfoService->m_pMix->isConnected() && pInfoService->sendStatus(bIsFirst)==E_SUCCESS)
 				{
 					lastStatusUpdate=time(NULL);
 					bIsFirst=false;
@@ -108,7 +107,7 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 					statusSentErrorBurst = 0;
 					//CAMsg::printMsg(LOG_DEBUG,"InfoService: Successfully sent Status information.\n");
 				}
-				else if (pInfoService->m_pMix->isConnected())
+				else if (pInfoService->m_pMix->isConnected() && pInfoService->m_pMix->getLastConnectionTime() < (currentTime - 30))
 				{
 					statusSentErrorBurst++;
 					CAMsg::printMsg(LOG_WARNING,"InfoService: Could not send Status information.\n");
@@ -123,13 +122,13 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 			{
 				if (CALibProxytest::getOptions()->isFirstMix() || (CALibProxytest::getOptions()->isLastMix() && pInfoService->isConfiguring()))
 				{
-					if(pInfoService->sendCascadeHelo() == E_SUCCESS)
+					if(pInfoService->m_pMix->isConnected() && pInfoService->sendCascadeHelo() == E_SUCCESS)
 					{
 						lastCascadeUpdate=time(NULL);
 						bOneUpdateDone = true;
 						CAMsg::printMsg(LOG_INFO,"InfoService: Successfully sent Cascade information.\n");
 					}
-					else if (pInfoService->m_pMix->isConnected())
+					else if (pInfoService->m_pMix->isConnected() && pInfoService->m_pMix->getLastConnectionTime() < (currentTime - 30))
 					{
 						CAMsg::printMsg(LOG_WARNING,"InfoService: Could not send Cascade information.\n");
 					}
