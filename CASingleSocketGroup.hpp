@@ -60,7 +60,10 @@ class CASingleSocketGroup:public CASocketGroup
 					if(ret>0)
 						return ret;
 					else if(ret==0)
+					{
+						SET_NET_ERROR(E_TIMEDOUT);
 						return E_TIMEDOUT;
+					}
 					return E_UNKNOWN;
 				}
 	};
@@ -119,9 +122,10 @@ class CASingleSocketGroup
 					if(ret>=1)
 						return 1;
 					else if(ret==0)
-						{
-							return E_TIMEDOUT;
-						}
+					{
+						SET_NET_ERROR(E_TIMEDOUT);
+						return E_TIMEDOUT;
+					}
 					#ifdef _DEBUG
 						ret=GET_NET_ERROR;
 						CAMsg::printMsg(LOG_DEBUG,"SocketGroup Select-Fehler: %i\n",ret);
@@ -141,7 +145,10 @@ class CASingleSocketGroup
 						if(ret>=1)
 							return 1;
 						else if(ret==0)
+						{
+							SET_NET_ERROR(E_TIMEDOUT);
 							return E_TIMEDOUT;
+						}
 						return E_UNKNOWN;							
 					}
 
@@ -197,9 +204,10 @@ class CASingleSocketGroup
 					if(ret>=1)
 						return 1;
 					else if(ret==0)
-						{
-							return E_TIMEDOUT;
-						}
+					{
+						SET_NET_ERROR(E_TIMEDOUT);
+						return E_TIMEDOUT;
+					}
 					#ifdef _DEBUG
 						ret=GET_NET_ERROR;
 						CAMsg::printMsg(LOG_DEBUG,"SocketGroup Select-Fehler: %i\n",ret);
@@ -219,9 +227,10 @@ class CASingleSocketGroup
 					if(ret>=1)
 						return 1;
 					else if(ret==0)
-						{
-							return E_TIMEDOUT;
-						}
+					{
+						SET_NET_ERROR(E_TIMEDOUT);
+						return E_TIMEDOUT;
+					}
 					return E_UNKNOWN;
 				}
 
