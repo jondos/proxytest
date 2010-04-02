@@ -303,6 +303,11 @@ SINT32 CALastMix::processKeyExchange()
 		UINT32 tmp = htonl(len);
 		CAMsg::printMsg(LOG_INFO,"Sending Infos (chain length and RSA-Key, Message-Size %u)\n",len);
 
+		if (len > 100000)
+		{
+			CAMsg::printMsg(LOG_WARNING,"Unrealistic length for key info: %u We might not be able to get a connection.\n",len);
+		}
+		
 		if(	(m_pMuxIn->getCASocket()->send((UINT8*)&tmp, sizeof(tmp)) != sizeof(tmp)) ||
 				m_pMuxIn->getCASocket()->send(messageBuff,len)!=(SINT32)len)
 		{
@@ -314,23 +319,45 @@ SINT32 CALastMix::processKeyExchange()
 		delete[] messageBuff;
 		messageBuff = NULL;
 
+		SINT32 ret;
 		//Now receiving the symmetric key
 		CAMsg::printMsg(LOG_INFO,"Waiting for length of symmetric key from previous Mix...\n");
-		if(m_pMuxIn->getCASocket()->receiveFully((UINT8*) &tmp, sizeof(tmp)) != E_SUCCESS)
+		if((ret = m_pMuxIn->receiveFully((UINT8*) &tmp, sizeof(tmp), TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT)) != E_SUCCESS)
 		{
-			CAMsg::printMsg(LOG_CRIT,"Error receiving symmetric key info length!\n");
-			return E_UNKNOWN;
+			if (ret != E_UNKNOWN)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Error receiving symmetric key info length! Reason: '%s' (%i)\n",
+					GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
+			}
+			else
+			{
+				CAMsg::printMsg(LOG_CRIT,"Error receiving symmetric key info length!\n");
+			}
+			return ret;
 		}
 		len = ntohl(tmp);
+		
+		if (len > 100000)
+		{
+			CAMsg::printMsg(LOG_WARNING,"Unrealistic length for key info: %u We might not be able to get a connection.\n",len);
+		}
+		
 		messageBuff=new UINT8[len+1]; //+1 for the closing Zero
 		CAMsg::printMsg(LOG_INFO,"Waiting for symmetric key from previous Mix with length %i...\n", len);
-		if(m_pMuxIn->getCASocket()->receiveFully(messageBuff, len) != E_SUCCESS)
+		if((ret = m_pMuxIn->receiveFully(messageBuff, len, TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT)) != E_SUCCESS)
 		{
-			CAMsg::printMsg(LOG_ERR,"Socket error occurred while receiving the symmetric key from the previous mix! Reason: '%s' (%i) The previous mix might be unable to verify our Mix certificate(s) and therefore closed the connection. Please ask the operator for the log, and exchange your certificates if necessary.\n",
-					GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
+			if (ret != E_UNKNOWN)
+			{
+				CAMsg::printMsg(LOG_ERR,"Socket error occurred while receiving the symmetric key from the previous mix! Reason: '%s' (%i) The previous mix might be unable to verify our Mix certificate(s) and therefore closed the connection. Please ask the operator for the log, and exchange your certificates if necessary.\n",
+						GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
+			}
+			else
+			{
+				CAMsg::printMsg(LOG_ERR,"Socket error occurred while receiving the symmetric key from the previous mix! The previous mix might be unable to verify our Mix certificate(s) and therefore closed the connection. Please ask the operator for the log, and exchange your certificates if necessary.\n");
+			}
 			delete []messageBuff;
 			messageBuff = NULL;
-			return E_UNKNOWN;
+			return ret;
 		}
 		messageBuff[len]=0;
 		CAMsg::printMsg(LOG_INFO,"Symmetric Key Info received from previous mix is:\n");
@@ -411,7 +438,7 @@ SINT32 CALastMix::processKeyExchange()
 
 		UINT8 key[150];
 		UINT32 keySize=150;
-		SINT32 ret=decodeXMLEncryptedKey(key,&keySize,messageBuff,len,m_pRSA);
+		ret=decodeXMLEncryptedKey(key,&keySize,messageBuff,len,m_pRSA);
 		delete []messageBuff;
 		messageBuff = NULL;
 		if(ret!=E_SUCCESS||keySize!=64)
