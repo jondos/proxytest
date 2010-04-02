@@ -34,6 +34,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAStatusManager.hpp"
 #include "CALibProxytest.hpp"
 
+const UINT32 CAMix::TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT = 10000;
+
 CAMix::CAMix()
 {
     m_acceptReconfiguration = CALibProxytest::getOptions()->acceptReconfiguration();

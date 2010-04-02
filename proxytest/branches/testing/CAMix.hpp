@@ -55,6 +55,8 @@ class CAMix
 					LAST_MIX,
 					JAP
 				};
+				
+			static const UINT32 TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT;
 
 		public:
 			CAMix();
