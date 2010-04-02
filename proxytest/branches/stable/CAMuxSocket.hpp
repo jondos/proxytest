@@ -65,18 +65,11 @@ class CAMuxSocket
 			SINT32 receive(MIXPACKET *pPacket);
 			SINT32 receive(MIXPACKET *pPacket,UINT32 timeout);
 			
-			/** Receives some "plain" bytes from the underlying socket - just a convenient function...*/
+			/** Receives some "plain" bytes from the underlying socket - just a convinient function...*/
 			SINT32 receiveFully(UINT8* buff,UINT32 len)
-			{
-				return m_Socket.receiveFully(buff,len);
-			}
-				
-			SINT32 receiveFully(UINT8* buff,UINT32 len, UINT32 msTimeOut)
-			{
-				return m_Socket.receiveFully(buff,len, msTimeOut);
-			}
-				
-				virtual SINT32 receiveFullyT(UINT8* buff,UINT32 len,UINT32 msTimeOut);
+				{
+					return m_Socket.receiveFully(buff,len);
+				}
 			//int close(HCHANNEL channel_id);
 			//int close(HCHANNEL channel_id,UINT8* buff);
 #ifdef LOG_CRIME

@@ -318,8 +318,7 @@ SINT32 CALastMix::processKeyExchange()
 		CAMsg::printMsg(LOG_INFO,"Waiting for length of symmetric key from previous Mix...\n");
 		if(m_pMuxIn->getCASocket()->receiveFully((UINT8*) &tmp, sizeof(tmp)) != E_SUCCESS)
 		{
-			CAMsg::printMsg(LOG_CRIT,"Error receiving symmetric key info length! Reason: '%s' (%i)\n",
-				GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
+			CAMsg::printMsg(LOG_CRIT,"Error receiving symmetric key info length!\n");
 			return E_UNKNOWN;
 		}
 		len = ntohl(tmp);
