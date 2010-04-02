@@ -427,7 +427,7 @@ SINT32 CALastMix::processKeyExchange()
 
 		UINT8 key[150];
 		UINT32 keySize=150;
-		SINT32 ret=decodeXMLEncryptedKey(key,&keySize,messageBuff,len,m_pRSA);
+		ret=decodeXMLEncryptedKey(key,&keySize,messageBuff,len,m_pRSA);
 		delete []messageBuff;
 		messageBuff = NULL;
 		if(ret!=E_SUCCESS||keySize!=64)
