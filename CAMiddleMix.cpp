@@ -391,7 +391,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 		len = ntohl(len);
 		recvBuff = new UINT8[len+1]; //for \0 at the end
 		
-		if(m_pMuxIn->getCASocket()->receiveFully(recvBuff, len, TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT) != E_SUCCESS)
+		if(m_pMuxIn->receiveFully(recvBuff, len, TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT) != E_SUCCESS)
 		//if((recLen = m_pMuxIn->getCASocket()->receive(recvBuff, len)) != len)
 		{
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangePrevFailed);

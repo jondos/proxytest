@@ -120,7 +120,7 @@ class CAMix
 			
 			UINT32 getLastConnectionTime()
 			{
-				m_lLastConnectionTime;
+				return m_lLastConnectionTime;
 			}
 				
 			bool isConnected()
