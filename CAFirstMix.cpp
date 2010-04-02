@@ -349,6 +349,12 @@ SINT32 CAFirstMix::processKeyExchange()
     }
     len=ntohl(len);
     CAMsg::printMsg(LOG_INFO, "Received next mix Key Info length %u\n",len);
+	
+	if (len > 100000)
+	{
+		CAMsg::printMsg(LOG_WARNING,"Unrealistic length for key info: %u We might not be able to get a connection.\n",len);
+	}
+	
     recvBuff=new UINT8[len+1];
 
     if ((ret =m_pMuxOut->receiveFully(recvBuff, len, TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT)) != E_SUCCESS)

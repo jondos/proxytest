@@ -303,6 +303,11 @@ SINT32 CALastMix::processKeyExchange()
 		UINT32 tmp = htonl(len);
 		CAMsg::printMsg(LOG_INFO,"Sending Infos (chain length and RSA-Key, Message-Size %u)\n",len);
 
+		if (len > 100000)
+		{
+			CAMsg::printMsg(LOG_WARNING,"Unrealistic length for key info: %u We might not be able to get a connection.\n",len);
+		}
+		
 		if(	(m_pMuxIn->getCASocket()->send((UINT8*)&tmp, sizeof(tmp)) != sizeof(tmp)) ||
 				m_pMuxIn->getCASocket()->send(messageBuff,len)!=(SINT32)len)
 		{
@@ -331,6 +336,12 @@ SINT32 CALastMix::processKeyExchange()
 			return ret;
 		}
 		len = ntohl(tmp);
+		
+		if (len > 100000)
+		{
+			CAMsg::printMsg(LOG_WARNING,"Unrealistic length for key info: %u We might not be able to get a connection.\n",len);
+		}
+		
 		messageBuff=new UINT8[len+1]; //+1 for the closing Zero
 		CAMsg::printMsg(LOG_INFO,"Waiting for symmetric key from previous Mix with length %i...\n", len);
 		if((ret = m_pMuxIn->receiveFully(messageBuff, len, TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT)) != E_SUCCESS)

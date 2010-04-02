@@ -98,8 +98,14 @@ SINT32 CAMiddleMix::processKeyExchange()
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextFailed);
 			return E_UNKNOWN;
 		}
-		len=ntohl(len);
+		len=ntohl(len);		
 		CAMsg::printMsg(LOG_INFO,"Received Key Info length %u\n",len);
+		
+		if (len > 100000)
+		{
+			CAMsg::printMsg(LOG_WARNING,"Unrealistic length for key info: %u We might not be able to get a connection.\n",len);
+		}
+		
 		recvBuff=new UINT8[len+1]; //for the \0 at the end
 		if(recvBuff==NULL)
 			return E_UNKNOWN;
@@ -410,6 +416,13 @@ SINT32 CAMiddleMix::processKeyExchange()
 		}
 		
 		len = ntohl(len);
+		
+		if (len > 100000)
+		{
+			CAMsg::printMsg(LOG_WARNING,"Unrealistic length for key info: %u We might not be able to get a connection.\n",len);
+		}
+		
+		
 		recvBuff = new UINT8[len+1]; //for \0 at the end
 		
 		if((ret = m_pMuxIn->receiveFully(recvBuff, len, TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT)) != E_SUCCESS)
