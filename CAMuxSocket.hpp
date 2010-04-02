@@ -73,7 +73,7 @@ class CAMuxSocket
 				
 			SINT32 receiveFully(UINT8* buff,UINT32 len, UINT32 msTimeOut)
 			{
-				return m_Socket.receiveFully(buff,len, msTimeOut);
+				return m_Socket.receiveFullyT(buff,len, msTimeOut);
 			}
 				
 				virtual SINT32 receiveFullyT(UINT8* buff,UINT32 len,UINT32 msTimeOut);
