@@ -504,6 +504,7 @@ SINT32 CASocket::sendFullyTimeOut(const UINT8* buff,UINT32 len, UINT32 msTimeOut
 				CAMsg::printMsg(LOG_DEBUG,"CASocket::sendFullyTimeOut() - timed out!\n");
 				#endif
 				setSendTimeOut(aktTimeOut);
+				SET_NET_ERROR(E_TIMEDOUT);
 				return E_TIMEDOUT;
 			}
 
@@ -645,12 +646,17 @@ SINT32 CASocket::receiveFullyT(UINT8* buff,UINT32 len,UINT32 msTimeOut)
 						len-=ret;
 					}
 				else if(ret==E_TIMEDOUT)
+				{
 					return E_TIMEDOUT;
+				}
 				if(len==0)
 					return E_SUCCESS;
 				getcurrentTimeMillis(currentTime);
 				if(!isLesser64(currentTime,endTime))
+				{
+					SET_NET_ERROR(E_TIMEDOUT);
 					return E_TIMEDOUT;
+				}
 				msTimeOut=diff64(endTime,currentTime);
 			}
 	}
@@ -688,6 +694,7 @@ SINT32 CASocket::receiveLine(UINT8* line, UINT32 maxLen, UINT32 msTimeOut)
 		getcurrentTimeMillis(currentTime);
 		if(!isLesser64(currentTime,endTime))
 		{
+			SET_NET_ERROR(E_TIMEDOUT);
 			return E_TIMEDOUT;
 		}
 		msTimeOut=diff64(endTime,currentTime);

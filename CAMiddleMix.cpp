@@ -84,27 +84,41 @@ SINT32 CAMiddleMix::processKeyExchange()
 		UINT32 len;
 		SINT32 ret;
 
-		if(m_pMuxOut->receiveFully((UINT8*)&len, sizeof(len), TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT)!=E_SUCCESS)
+		if((ret = m_pMuxOut->receiveFully((UINT8*)&len, sizeof(len), TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT)) != E_SUCCESS)
+		{
+			if (ret != E_UNKNOWN)
 			{
 				CAMsg::printMsg(LOG_INFO,"Error receiving Key Info length from next Mix. Reason: '%s' (%i)\n",
 					GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
-				MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextFailed);
-				return E_UNKNOWN;
 			}
+			else
+			{
+				CAMsg::printMsg(LOG_INFO,"Error receiving Key Info length from next Mix.");
+			}
+			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextFailed);
+			return E_UNKNOWN;
+		}
 		len=ntohl(len);
 		CAMsg::printMsg(LOG_INFO,"Received Key Info length %u\n",len);
 		recvBuff=new UINT8[len+1]; //for the \0 at the end
 		if(recvBuff==NULL)
 			return E_UNKNOWN;
-		if(m_pMuxOut->receiveFully(recvBuff,len, TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT)!=E_SUCCESS)
+		if((ret = m_pMuxOut->receiveFully(recvBuff,len, TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT)) != E_SUCCESS)
+		{
+			if (ret != E_UNKNOWN)
 			{
 				CAMsg::printMsg(LOG_INFO,"Error receiving Key Info from next Mix. Reason: '%s' (%i)\n",
 					GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
-				MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextFailed);
-				delete []recvBuff;
-				recvBuff = NULL;
-				return E_UNKNOWN;
 			}
+			else
+			{
+				CAMsg::printMsg(LOG_INFO,"Error receiving Key Info from next Mix.");
+			}
+			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextFailed);
+			delete []recvBuff;
+			recvBuff = NULL;
+			return E_UNKNOWN;
+		}
 		recvBuff[len]=0; //make a string
 		CAMsg::printMsg(LOG_INFO,"Received Key Info...\n");
 		CAMsg::printMsg(LOG_INFO,"%s\n",recvBuff);
@@ -381,22 +395,36 @@ SINT32 CAMiddleMix::processKeyExchange()
 		
 		CAMsg::printMsg(LOG_INFO,"Waiting for length of symmetric key from previous Mix...\n");
 		//Now receiving the symmetric key form Mix n-1
-		if(m_pMuxIn->receiveFully((UINT8*) &len, sizeof(len), TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT) != E_SUCCESS)
+		if((ret = m_pMuxIn->receiveFully((UINT8*) &len, sizeof(len), TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT)) != E_SUCCESS)
 		{
-			CAMsg::printMsg(LOG_CRIT,"Error receiving symmetric key info length from the previous mix! Reason: '%s' (%i)\n",
-				GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
+			if (ret != E_UNKNOWN)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Error receiving symmetric key info length from the previous mix! Reason: '%s' (%i)\n",
+					GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
+			}
+			else
+			{
+				CAMsg::printMsg(LOG_CRIT,"Error receiving symmetric key info length from the previous mix!");
+			}
 			return E_UNKNOWN;
 		}
 		
 		len = ntohl(len);
 		recvBuff = new UINT8[len+1]; //for \0 at the end
 		
-		if(m_pMuxIn->receiveFully(recvBuff, len, TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT) != E_SUCCESS)
+		if((ret = m_pMuxIn->receiveFully(recvBuff, len, TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT)) != E_SUCCESS)
 		//if((recLen = m_pMuxIn->getCASocket()->receive(recvBuff, len)) != len)
-		{
+		{		
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangePrevFailed);
-			CAMsg::printMsg(LOG_ERR,"Socket error occurred while receiving the symmetric key from the previous mix! Reason: '%s' (%i) The previous mix might be unable to verify our Mix certificate(s) and therefore closed the connection. Please ask the operator for the log, and exchange your certificates if necessary.\n",
-					GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
+			if (ret != E_UNKNOWN)
+			{
+				CAMsg::printMsg(LOG_ERR,"Socket error occurred while receiving the symmetric key from the previous mix! Reason: '%s' (%i) The previous mix might be unable to verify our Mix certificate(s) and therefore closed the connection. Please ask the operator for the log, and exchange your certificates if necessary.\n",
+						GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
+			}
+			else
+			{
+				CAMsg::printMsg(LOG_ERR,"Socket error occurred while receiving the symmetric key from the previous mix! The previous mix might be unable to verify our Mix certificate(s) and therefore closed the connection. Please ask the operator for the log, and exchange your certificates if necessary.\n");
+			}
 			delete []recvBuff;
 			recvBuff = NULL;
 			if (doc != NULL)

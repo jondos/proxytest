@@ -332,21 +332,37 @@ SINT32 CAFirstMix::processKeyExchange()
 {
     UINT8* recvBuff=NULL;
     UINT32 len;
+	SINT32 ret;
 	CAMsg::printMsg(LOG_INFO, "Try to read the Key Info length from next Mix...\n");
-    if(m_pMuxOut->receiveFully((UINT8*) &len, sizeof(len), TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT) != E_SUCCESS)
+    if((ret = m_pMuxOut->receiveFully((UINT8*) &len, sizeof(len), TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT)) != E_SUCCESS)
     {
-        CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info length from next mix! Reason: '%s' (%i)\n",
-			GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
-        return E_UNKNOWN;
+		if (ret != E_UNKNOWN)
+		{
+			CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info length from next mix! Reason: '%s' (%i)\n",
+				GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
+		}
+		else
+		{
+			CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info length from next mix!\n");
+		}
+        return ret;
     }
     len=ntohl(len);
     CAMsg::printMsg(LOG_INFO, "Received next mix Key Info length %u\n",len);
     recvBuff=new UINT8[len+1];
 
-    if(m_pMuxOut->receiveFully(recvBuff, len) != E_SUCCESS, TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT)
+    if ((ret =m_pMuxOut->receiveFully(recvBuff, len, TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT)) != E_SUCCESS)
     {
-        CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info from next mix! Reason: '%s' (%i)\n",
-			GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
+		if (ret != E_UNKNOWN)
+		{
+			CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info from next mix! Reason: '%s' (%i)\n",
+				GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
+		}
+		else
+		{
+			CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info from next mix!\n");
+		}
+        return ret;
         delete []recvBuff;
         recvBuff = NULL;
         return E_UNKNOWN;
@@ -1607,6 +1623,8 @@ SINT32 CAFirstMix::doUserLogin(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 ***/
 SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 	{
+		SINT32 ret;
+	
 		INIT_STACK;
 		BEGIN_STACK("CAFirstMix::doUserLogin");
 			int ret=pNewUser->getCASocket()->setKeepAlive(true);
@@ -1620,11 +1638,18 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		SAVE_STACK("CAFirstMix::doUserLogin", "after setting keep alive");
 
 		// send the mix-keys to JAP
-		if (pNewUser->getCASocket()->sendFullyTimeOut(m_xmlKeyInfoBuff,m_xmlKeyInfoSize, 40000, 10000) != E_SUCCESS)
+		if ((ret = pNewUser->getCASocket()->sendFullyTimeOut(m_xmlKeyInfoBuff,m_xmlKeyInfoSize, 40000, 10000)) != E_SUCCESS)
 		{
-// #ifdef _DEBUG
-			CAMsg::printMsg(LOG_DEBUG,"User login: Sending login data to client %u.%u.x.x has been interrupted!\n", peerIP[0],peerIP[1]);
-// #endif
+			if (ret != E_UNKNOWN)
+			{
+				CAMsg::printMsg(LOG_DEBUG,"User login: Sending login data to client %u.%u.x.x has been interrupted! Reason: '%s' (%i)\n", 
+					peerIP[0],peerIP[1], GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
+			}
+			else
+			{
+				CAMsg::printMsg(LOG_DEBUG,"User login: Sending login data to client %u.%u.x.x has been interrupted!\n", peerIP[0],peerIP[1]);
+			}
+
 			m_pIPBlockList->insertIP(peerIP);
 
 			delete pNewUser;
@@ -1646,12 +1671,18 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		{
 			CAMsg::printMsg(LOG_DEBUG,"User login: Socket was closed while waiting for first symmetric key from client!\n");
 		}
-		else if (pNewUser->getCASocket()->receiveFullyT((UINT8*)&xml_len,2,FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT)!=E_SUCCESS)
+		else if ((ret = pNewUser->getCASocket()->receiveFullyT((UINT8*)&xml_len,2,FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT)) != E_SUCCESS)
 		{
-//			#ifdef DEBUG
+			if (ret != E_UNKNOWN)
+			{
 				CAMsg::printMsg(LOG_DEBUG,"User login: Waiting for first symmetric key from client %u.%u.x.x! failed for reason: '%s' (%i)\n", 
 				peerIP[0], peerIP[1], GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
-//			#endif
+			}
+			else
+			{
+				CAMsg::printMsg(LOG_DEBUG,"User login: Waiting for first symmetric key from client %u.%u.x.x! failed.\n", 
+					peerIP[0], peerIP[1]);
+			}
 			m_pIPBlockList->insertIP(peerIP);
 			
 			delete pNewUser;
@@ -1667,12 +1698,24 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		xml_len=ntohs(xml_len);
 		UINT8* xml_buff=new UINT8[xml_len+2]; //+2 for size...
 		if(pNewUser->getCASocket()->isClosed() ||
-		   pNewUser->getCASocket()->receiveFullyT(xml_buff+2,xml_len,FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT)!=E_SUCCESS)
+		   (ret = pNewUser->getCASocket()->receiveFullyT(xml_buff+2,xml_len,FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT)) !=E_SUCCESS)
 		{
-#ifdef _DEBUG
-			CAMsg::printMsg(LOG_DEBUG,"User login: Waiting for second symmetric key from client failed for reason: '%s' (%i)\n", 
-				GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
-#endif
+			if (pNewUser->getCASocket()->isClosed())
+			{
+				SET_NET_ERROR(E_SOCKETCLOSED);
+			}
+		
+
+			if (ret != E_UNKNOWN)
+			{
+				CAMsg::printMsg(LOG_DEBUG,"User login: Waiting for second symmetric key from client failed for reason: '%s' (%i)\n", 
+					GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
+			}
+			else
+			{
+				CAMsg::printMsg(LOG_DEBUG,"User login: Waiting for second symmetric key from client failed.\n");
+			}
+
 			m_pIPBlockList->insertIP(peerIP);
 
 			delete pNewUser;
@@ -1882,11 +1925,23 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		{
 			UINT16 tcRequestDataLen = 0;
 			if (pNewUser->getCASocket()->isClosed() ||
-				pNewUser->getCASocket()->receiveFullyT((UINT8*)&tcRequestDataLen, 2, 10000) != E_SUCCESS)
+				(ret = pNewUser->getCASocket()->receiveFullyT((UINT8*)&tcRequestDataLen, 2, 10000)) != E_SUCCESS)
 			{
+				if (pNewUser->getCASocket()->isClosed())
+				{
+					SET_NET_ERROR(E_SOCKETCLOSED);
+				}
+			
 				loginFailed = true;
-				CAMsg::printMsg(LOG_ERR,"User login: Receiving t&c protocol data size has been interrupted for reason: '%s' (%i)\n",
-					GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
+				if (ret != E_UNKNOWN)
+				{
+					CAMsg::printMsg(LOG_ERR,"User login: Receiving t&c protocol data size has been interrupted. Reason: '%s' (%i)\n",
+						GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
+				}
+				else
+				{
+					CAMsg::printMsg(LOG_ERR,"User login: Receiving t&c protocol data size has been interrupted.\n");
+				}
 				break;
 			}
 
@@ -1895,11 +1950,24 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 			UINT8 tcDataBuf[tcRequestDataLen+1];
 			tcDataBuf[tcRequestDataLen] = 0;
 			if (pNewUser->getCASocket()->isClosed() ||
-				pNewUser->getCASocket()->receiveFullyT(tcDataBuf, tcRequestDataLen, 10000) != E_SUCCESS)
+				(ret = pNewUser->getCASocket()->receiveFullyT(tcDataBuf, tcRequestDataLen, 10000)) != E_SUCCESS)
 			{
+				if (pNewUser->getCASocket()->isClosed())
+				{
+					SET_NET_ERROR(E_SOCKETCLOSED);
+				}
+				
 				loginFailed = true;
-				CAMsg::printMsg(LOG_ERR,"User login: Receiving t&c protocol data has been interrupted reason: '%s' (%i)\n",
-					GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR));
+				
+				if (ret != E_UNKNOWN)
+				{
+					CAMsg::printMsg(LOG_ERR,"User login: Receiving t&c protocol data has been interrupted. Reason: '%s' (%i)\n",
+						GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
+				}
+				else
+				{
+					CAMsg::printMsg(LOG_ERR,"User login: Receiving t&c protocol data has been interrupted.\n");
+				}
 				break;
 			}
 

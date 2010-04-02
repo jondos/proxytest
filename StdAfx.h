@@ -421,7 +421,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
   #define SD_BOTH 2
   #define GET_NET_ERROR (errno)
 	#define SET_NET_ERROR(x) (errno = x)
-	#define GET_NET_ERROR_STR(x) (strerror(x))
+	#define GET_NET_ERROR_STR(x) (errno == E_TIMEDOUT ? "Connection timed out." : (errno == E_SOCKETCLOSED ? "Socket is closed." : strerror(x)))
 	#define RESETERROR errno=0;
 	#define GETERROR (errno)
 	#define ERR_INTERN_TIMEDOUT ETIMEDOUT
