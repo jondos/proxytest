@@ -84,9 +84,10 @@ SINT32 CAMiddleMix::processKeyExchange()
 		UINT32 len;
 		SINT32 ret;
 
-		if(m_pMuxOut->getCASocket()->receiveFully((UINT8*)&len, sizeof(len))!=E_SUCCESS)
+		if(m_pMuxOut->receiveFully((UINT8*)&len, sizeof(len), TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT)!=E_SUCCESS)
 			{
-				CAMsg::printMsg(LOG_INFO,"Error receiving Key Info length from next Mix!\n");
+				CAMsg::printMsg(LOG_INFO,"Error receiving Key Info length from next Mix. Reason: '%s' (%i)\n",
+					GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
 				MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextFailed);
 				return E_UNKNOWN;
 			}
@@ -95,9 +96,10 @@ SINT32 CAMiddleMix::processKeyExchange()
 		recvBuff=new UINT8[len+1]; //for the \0 at the end
 		if(recvBuff==NULL)
 			return E_UNKNOWN;
-		if(m_pMuxOut->getCASocket()->receiveFully(recvBuff,len)!=E_SUCCESS)
+		if(m_pMuxOut->receiveFully(recvBuff,len, TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT)!=E_SUCCESS)
 			{
-				CAMsg::printMsg(LOG_INFO,"Error receiving Key Info from next Mix!\n");
+				CAMsg::printMsg(LOG_INFO,"Error receiving Key Info from next Mix. Reason: '%s' (%i)\n",
+					GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
 				MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextFailed);
 				delete []recvBuff;
 				recvBuff = NULL;
@@ -376,13 +378,20 @@ SINT32 CAMiddleMix::processKeyExchange()
 		}
 		MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextSuccessful);
 		CAMsg::printMsg(LOG_DEBUG,"Sending new key info succeeded\n");
-
+		
+		CAMsg::printMsg(LOG_INFO,"Waiting for length of symmetric key from previous Mix...\n");
 		//Now receiving the symmetric key form Mix n-1
-		m_pMuxIn->getCASocket()->receive((UINT8*) &len, sizeof(len));
+		if(m_pMuxIn->receiveFully((UINT8*) &len, sizeof(len), TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT) != E_SUCCESS)
+		{
+			CAMsg::printMsg(LOG_CRIT,"Error receiving symmetric key info length from the previous mix! Reason: '%s' (%i)\n",
+				GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
+			return E_UNKNOWN;
+		}
+		
 		len = ntohl(len);
 		recvBuff = new UINT8[len+1]; //for \0 at the end
 		
-		if(m_pMuxIn->getCASocket()->receiveFully(recvBuff, len) != E_SUCCESS)
+		if(m_pMuxIn->getCASocket()->receiveFully(recvBuff, len, TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT) != E_SUCCESS)
 		//if((recLen = m_pMuxIn->getCASocket()->receive(recvBuff, len)) != len)
 		{
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangePrevFailed);
