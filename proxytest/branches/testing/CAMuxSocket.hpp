@@ -76,7 +76,6 @@ class CAMuxSocket
 				return m_Socket.receiveFullyT(buff,len, msTimeOut);
 			}
 				
-				virtual SINT32 receiveFullyT(UINT8* buff,UINT32 len,UINT32 msTimeOut);
 			//int close(HCHANNEL channel_id);
 			//int close(HCHANNEL channel_id,UINT8* buff);
 #ifdef LOG_CRIME
