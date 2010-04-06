@@ -123,7 +123,8 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 			{
 				if (CALibProxytest::getOptions()->isFirstMix() || (CALibProxytest::getOptions()->isLastMix() && pInfoService->isConfiguring()))
 				{
-					if(pInfoService->m_pMix->isConnected() && pInfoService->sendCascadeHelo() == E_SUCCESS)
+					if(pInfoService->m_pMix->isConnected() && pInfoService->m_pMix->getLastConnectionTime() < (currentTime - (SEND_LOOP_SLEEP / 2)) 
+						&& pInfoService->sendCascadeHelo() == E_SUCCESS)
 					{
 						lastCascadeUpdate=time(NULL);
 						bOneUpdateDone = true;
@@ -135,7 +136,8 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 					}
 				}
 				currentTime=time(NULL);
-				if (currentTime >= (lastMixInfoUpdate + CAInfoService::SEND_MIX_INFO_WAIT) || pInfoService->isConfiguring())
+				if (currentTime >= (lastMixInfoUpdate + CAInfoService::SEND_MIX_INFO_WAIT) || pInfoService->isConfiguring() &&
+					pInfoService->m_pMix->getLastConnectionTime() < (currentTime - (SEND_LOOP_SLEEP / 2)))
 				{
 					if (pInfoService->sendMixHelo() != E_SUCCESS)
 					{
