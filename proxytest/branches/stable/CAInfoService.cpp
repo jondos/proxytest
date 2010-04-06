@@ -136,8 +136,8 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 					}
 				}
 				currentTime=time(NULL);
-				if (currentTime >= (lastMixInfoUpdate + CAInfoService::SEND_MIX_INFO_WAIT) || pInfoService->isConfiguring() &&
-					pInfoService->m_pMix->getLastConnectionTime() < (currentTime - (SEND_LOOP_SLEEP / 2)))
+				if ((currentTime >= (lastMixInfoUpdate + CAInfoService::SEND_MIX_INFO_WAIT) &&
+					pInfoService->m_pMix->getLastConnectionTime() < (currentTime - (SEND_LOOP_SLEEP / 2))) || pInfoService->isConfiguring())
 				{
 					if (pInfoService->sendMixHelo() != E_SUCCESS)
 					{
