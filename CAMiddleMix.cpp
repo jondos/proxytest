@@ -1031,7 +1031,7 @@ THREAD_RETURN mm_loopReadFromMixAfter(void* param)
 				if(pQueue->getSize()>MAX_READ_FROM_NEXT_MIX_QUEUE_SIZE)
 				{
 #ifdef DEBUG
-					CAMsg::printMsg(LOG_DEBUG,"CAFirstMix::Queue next is full!\n");
+					CAMsg::printMsg(LOG_DEBUG,"CAMiddleMix::Queue next is full!\n");
 #endif
 					msSleep(200);
 					continue;
@@ -1057,11 +1057,11 @@ THREAD_RETURN mm_loopReadFromMixAfter(void* param)
 								#endif
 							}
 						else
-							{
-								CAMsg::printMsg(LOG_CRIT,"loopReadFromMixAfter -- Fehler bei select() -- goto ERR!\n");
-								pMix->m_bRun=false;
-								MONITORING_FIRE_NET_EVENT(ev_net_nextConnectionClosed);
-							}
+						{
+							CAMsg::printMsg(LOG_CRIT,"loopReadFromMixAfter -- Error on select() while waiting for data from next mix -- goto ERR!\n");
+							pMix->m_bRun=false;
+							MONITORING_FIRE_NET_EVENT(ev_net_nextConnectionClosed);
+						}
 					}
 				else
 					{
@@ -1074,7 +1074,8 @@ THREAD_RETURN mm_loopReadFromMixAfter(void* param)
 							}
 						if(ret==SOCKET_ERROR)
 							{
-								CAMsg::printMsg(LOG_CRIT,"loopReadFromMixAfter -- Fehler bei receive() -- goto ERR!\n");
+								CAMsg::printMsg(LOG_CRIT,"loopReadFromMixAfter -- Error while receiving data from next mix. Reason: %s (%i)\n",
+									GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
 								pMix->m_bRun=false;
 								MONITORING_FIRE_NET_EVENT(ev_net_nextConnectionClosed);
 							}
