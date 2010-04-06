@@ -1,0 +1,60 @@
+# /usr/local/etc/squid/squid.conf
+# Please note: For use on FreeBSD systems (hosts or jails) only !
+#
+# Replace [% extIP %] by the IP address of your own system/jail
+
+acl all src all
+acl manager proto cache_object
+
+acl localhost src 127.0.0.1/32
+acl localhost src [% extIP %]
+
+acl to_localhost dst 127.0.0.0/8
+acl to_localhost dst [% extIP %]
+
+acl localnet src 10.0.0.0/8     # RFC1918 possible internal network
+acl localnet src 172.16.0.0/12  # RFC1918 possible internal network
+acl localnet src 192.168.0.0/16 # RFC1918 possible internal network
+
+acl Safe_ports port 80 443	# http, https
+acl SSL_ports port 443 
+
+acl CONNECT method CONNECT
+
+acl bad url_regex -i "/usr/local/etc/squid/squid-block.acl" 
+
+http_access deny to_localhost
+http_access deny !localhost
+http_access allow manager localhost
+http_access deny manager
+http_access deny !Safe_ports
+http_access deny CONNECT !SSL_ports
+
+http_access allow all
+
+icp_access allow localnet
+icp_access deny all
+
+http_port localhost:3128
+
+hierarchy_stoplist cgi-bin ?
+
+pid_filename /usr/local/squid/logs/squid.pid
+
+refresh_pattern ^ftp:           1440    20%     10080
+refresh_pattern ^gopher:        1440    0%      1440
+refresh_pattern -i (/cgi-bin/|\?) 0     0%      0
+refresh_pattern .               0       20%     4320
+
+acl shoutcast rep_header X-HTTP09-First-Line ^ICY.[0-9]
+upgrade_http0.9 deny shoutcast
+
+acl apache rep_header Server ^Apache
+broken_vary_encoding allow apache
+
+coredump_dir /usr/local/squid/cache
+
+header_access Via deny all
+header_access Cache-Control deny all
+forwarded_for off
+
