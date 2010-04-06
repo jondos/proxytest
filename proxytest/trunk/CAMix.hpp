@@ -55,6 +55,8 @@ class CAMix
 					LAST_MIX,
 					JAP
 				};
+				
+			static const UINT32 TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT;
 
 		public:
 			CAMix();
@@ -118,7 +120,7 @@ class CAMix
 			
 			UINT32 getLastConnectionTime()
 			{
-				m_lLastConnectionTime;
+				return m_lLastConnectionTime;
 			}
 				
 			bool isConnected()
