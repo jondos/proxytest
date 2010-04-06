@@ -1075,7 +1075,7 @@ THREAD_RETURN mm_loopReadFromMixAfter(void* param)
 						if(ret==SOCKET_ERROR)
 							{
 								CAMsg::printMsg(LOG_CRIT,"loopReadFromMixAfter -- Error while receiving data from next mix. Reason: %s (%i)\n",
-									GET_NET_ERROR_STR(err), err);
+									GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
 								pMix->m_bRun=false;
 								MONITORING_FIRE_NET_EVENT(ev_net_nextConnectionClosed);
 							}
