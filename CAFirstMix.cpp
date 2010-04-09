@@ -128,7 +128,7 @@ SINT32 CAFirstMix::init()
 		//initiate ownerDocument for tc templates
 		m_templatesOwner = createDOMDocument();
 
-		SINT32 retSockets = CALibProxytest::getOptions()->createSockets(true, m_arrSocketsIn, m_nSocketsIn);
+		SINT32 retSockets = CALibProxytest::getOptions()->createSockets(true, m_arrSocketsIn, &m_nSocketsIn);
 
 
 		if (retSockets != E_SUCCESS)
@@ -1202,7 +1202,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 					sSleep(1);
 				}
 		}
-		if (CALibProxytest::getOptions()->createSockets(false,pFirstMix-> m_arrSocketsIn, pFirstMix->m_nSocketsIn) != E_SUCCESS)
+		if (CALibProxytest::getOptions()->createSockets(false,pFirstMix-> m_arrSocketsIn, &(pFirstMix->m_nSocketsIn)) != E_SUCCESS)
 		{
 			goto END_THREAD;
 		}
