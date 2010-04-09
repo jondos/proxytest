@@ -3252,8 +3252,7 @@ SINT32 CACmdLnOptions::setListenerInterfaces(DOMElement *elemNetwork)
 		arrSocketsIn[i] = NULL;
 	}
 
-	i = getListenerInterfaceCount();
-	ret = createSockets(false, arrSocketsIn,i);
+	ret = createSockets(false, arrSocketsIn, getListenerInterfaceCount());
 
 	for(i=0;i<getListenerInterfaceCount();i++)
 	{
@@ -3333,9 +3332,10 @@ SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UIN
 				{
 					delete pListener;
 					pListener = NULL;
+					delete pAddr;
+					pAddr = NULL;
 					continue;
 				}
-	
 				aktSocket++;
 				
 				if (a_socketsLen < (aktSocket + 1))
@@ -3346,6 +3346,7 @@ SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UIN
 
 					delete[] arrayVirtualPorts;
 					delete[] arrayHiddenPorts;
+					delete pAddr;
 					
 					return E_SPACE;
 				}
