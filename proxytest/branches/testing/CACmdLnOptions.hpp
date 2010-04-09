@@ -258,7 +258,7 @@ class CACmdLnOptions
 		UINT16 getSOCKSServerPort();
 
 
-		SINT32 createSockets(bool a_bPrintMessages, CASocket** a_sockets, UINT32* a_socketsLen);
+		SINT32 createSockets(bool a_bPrintMessages, CASocket** a_sockets, UINT32& a_socketsLen);
 		UINT32 getListenerInterfaceCount(){return m_cnListenerInterfaces;}
 		CAListenerInterface* getListenerInterface(UINT32 nr)
 		{
