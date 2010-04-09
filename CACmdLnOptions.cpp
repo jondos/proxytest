@@ -3279,6 +3279,13 @@ SINT32 CACmdLnOptions::setListenerInterfaces(DOMElement *elemNetwork)
 
 SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UINT32& a_socketsLen)
 {
+		if (a_socketsLen <= 0)
+		{
+			CAMsg::printMsg(LOG_CRIT,"Could not create any listener sockets as we have no space reserved for them. This seems to be an implementation bug.");
+			return E_SPACE;
+		}
+
+
 		UINT32 aktSocket;
 		UINT8 buff[255];
 		SINT32 ret = E_UNKNOWN;
@@ -3337,8 +3344,10 @@ SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UIN
 						"Found %d listener sockets, but we have only reserved memory for %d sockets. This seems to be an implementation error in the code.\n", 
 						(aktSocket + 1), a_socketsLen);
 
-					ret = E_SPACE;
-					break;
+					delete[] arrayVirtualPorts;
+					delete[] arrayHiddenPorts;
+					
+					return E_SPACE;
 				}
 				
 				ret = E_SUCCESS;
