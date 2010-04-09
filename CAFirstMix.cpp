@@ -80,21 +80,23 @@ SINT32 CAFirstMix::initOnce()
 		UINT32 tmpSocketsIn=CALibProxytest::getOptions()->getListenerInterfaceCount();
 		m_nSocketsIn=0;
 		for(UINT32 i=1;i<=tmpSocketsIn;i++)
+		{
+			CAListenerInterface* pListener=NULL;
+			pListener=CALibProxytest::getOptions()->getListenerInterface(i);
+			if(pListener==NULL)
+				continue;
+			if(!pListener->isVirtual())
 			{
-				CAListenerInterface* pListener=NULL;
-				pListener=CALibProxytest::getOptions()->getListenerInterface(i);
-				if(pListener==NULL)
-					continue;
-				if(!pListener->isVirtual())
-					m_nSocketsIn++;
-				delete pListener;
-				pListener = NULL;
+				m_nSocketsIn++;
 			}
+			delete pListener;
+			pListener = NULL;
+		}
 		if(m_nSocketsIn<1)
-			{
-				CAMsg::printMsg(LOG_CRIT,"No usable ListenerInterfaces specified (maybe wrong values or all are 'virtual'!\n");
-				return E_UNKNOWN;
-			}
+		{
+			CAMsg::printMsg(LOG_CRIT,"No usable ListenerInterfaces specified (maybe wrong values or all are 'virtual'!\n");
+			return E_UNKNOWN;
+		}
 
 		CAMsg::printMsg(LOG_DEBUG,"Starting FirstMix InitOnce - finished\n");
 		return E_SUCCESS;

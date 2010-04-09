@@ -96,6 +96,8 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 				continue;
 			}
 #endif
+	// TODO: the "pInfoService->m_pMix->getLastConnectionTime() < (currentTime - (SEND_LOOP_SLEEP / 2))" is just a work-around until we have a proper synchronization with the xml nodes...
+
 			currentTime=time(NULL);
 			if (currentTime >= (lastStatusUpdate + CAInfoService::SEND_STATUS_INFO_WAIT))
 			{
