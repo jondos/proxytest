@@ -3290,7 +3290,6 @@ SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UIN
 		
 
 		aktSocket = -1;
-		iVirtualSockets = 0;
 		for(currentInterface=0;currentInterface < getListenerInterfaceCount(); currentInterface++)
 			{
 				CAListenerInterface* pListener=NULL;
