@@ -3267,7 +3267,8 @@ SINT32 CACmdLnOptions::setListenerInterfaces(DOMElement *elemNetwork)
 	delete[] arrSocketsIn;
 	arrSocketsIn=NULL;
 
-	if (ret != E_SUCCESS)
+	
+	if (ret != E_SUCCESS && ret != E_UNSPECIFIED && ret != E_SPACE)
 	{
 		CAMsg::printMsg(LOG_CRIT, "Could not listen on at least one of the specified interfaces. Please check if another running mix or server process is blocking the listen addresses, and if you have sufficient system rights.\n");
 	}
@@ -3393,22 +3394,33 @@ SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UIN
 		{
 			for (UINT32 iHiddenPort = 0; iHiddenPort < iHiddenPortsLen; iHiddenPort++)
 			{
+				bool bVirtualFound = false;
 				for (UINT32 iVirtualPort = 0; iVirtualPort < iVirtualPortsLen; iVirtualPort++)
 				{
 					if (arrayHiddenPorts[iHiddenPort] == arrayVirtualPorts[iVirtualPort])
 					{
+						bVirtualFound = true;
 						arrayVirtualPorts[iVirtualPort] = 0;
 					}
 				}
-			}
-			
-			for (UINT32 iVirtualPort = 0; iVirtualPort < iVirtualPortsLen; iVirtualPort++)
-			{
-				if (arrayVirtualPorts[iVirtualPort] != 0)
+				if (!bVirtualFound)
 				{
-					CAMsg::printMsg(LOG_CRIT,"No hidden listener interface found for the virtual interface %d with port %d. Please remove the virtual interface, add the corresponding hidden interface or remove the 'virtual' attribute from the interface.\n", iVirtualPort, arrayVirtualPorts[iVirtualPort]);
+					CAMsg::printMsg(LOG_CRIT,"No virtuel listener interface found for the hidden interface %d with port %d. Please remove the hidden interface, add the corresponding virtual interface or remove the 'hidden' attribute from the interface.\n", iHiddenPort, arrayHiddenPorts[iHiddenPort]);
 					ret = E_UNSPECIFIED;
 					break;
+				}
+			}
+			
+			if (ret == E_SUCCESS)
+			{
+				for (UINT32 iVirtualPort = 0; iVirtualPort < iVirtualPortsLen; iVirtualPort++)
+				{
+					if (arrayVirtualPorts[iVirtualPort] != 0)
+					{
+						CAMsg::printMsg(LOG_CRIT,"No hidden listener interface found for the virtual interface %d with port %d. Please remove the virtual interface, add the corresponding hidden interface or remove the 'virtual' attribute from the interface.\n", iVirtualPort, arrayVirtualPorts[iVirtualPort]);
+						ret = E_UNSPECIFIED;
+						break;
+					}
 				}
 			}
 		}
