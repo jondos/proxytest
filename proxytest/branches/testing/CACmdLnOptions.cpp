@@ -3288,21 +3288,23 @@ SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UIN
 				CAListenerInterface* pListener=NULL;
 				pListener=getListenerInterface(currentInterface+1);
 				if(pListener==NULL)
-					{
-            CAMsg::printMsg(LOG_CRIT,"Error: Listener interface %d is invalid.\n", currentInterface+1);
-						return E_UNKNOWN;
-					}
+				{
+					CAMsg::printMsg(LOG_CRIT,"Error: Listener interface %d is invalid.\n", currentInterface+1);
+					return E_UNKNOWN;
+				}
 				if(pListener->isVirtual())
-					{
-						delete pListener;
-						pListener = NULL;
-						continue;
-					}
+				{
+					delete pListener;
+					pListener = NULL;
+					continue;
+				}
 				aktSocket++;
 				
 				if (a_socketsLen < (aktSocket + 1))
 				{
-					CAMsg::printMsg(LOG_CRIT, "Found %d listener sockets, but we have only reserved space for %d sockets!\n", (aktSocket + 1), a_socketsLen);
+					CAMsg::printMsg(LOG_CRIT, 
+						"Found %d listener sockets, but we have only reserved memory for %d sockets. This seems to be an implementation error in the code.\n", 
+						(aktSocket + 1), a_socketsLen);
 
 					ret = E_SPACE;
 					break;
@@ -3360,7 +3362,7 @@ SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UIN
 			if (a_socketsLen > aktSocket + 1)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Requested %d listener sockets, but found only %d valid listeners!\n", a_socketsLen, (aktSocket + 1));
-				ret = E_SPACE;
+				ret = E_UNSPECIFIED;
 			}
 			else if (a_bMessages)
 			{
