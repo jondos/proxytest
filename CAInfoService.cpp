@@ -96,6 +96,8 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 				continue;
 			}
 #endif
+	// TODO: the "pInfoService->m_pMix->getLastConnectionTime() < (currentTime - (SEND_LOOP_SLEEP / 2))" is just a work-around until we have a proper synchronization with the xml nodes...
+
 			currentTime=time(NULL);
 			if (currentTime >= (lastStatusUpdate + CAInfoService::SEND_STATUS_INFO_WAIT))
 			{
@@ -123,7 +125,8 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 			{
 				if (CALibProxytest::getOptions()->isFirstMix() || (CALibProxytest::getOptions()->isLastMix() && pInfoService->isConfiguring()))
 				{
-					if(pInfoService->m_pMix->isConnected() && pInfoService->sendCascadeHelo() == E_SUCCESS)
+					if(pInfoService->m_pMix->isConnected() && pInfoService->m_pMix->getLastConnectionTime() < (currentTime - (SEND_LOOP_SLEEP / 2)) 
+						&& pInfoService->sendCascadeHelo() == E_SUCCESS)
 					{
 						lastCascadeUpdate=time(NULL);
 						bOneUpdateDone = true;
@@ -135,7 +138,8 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 					}
 				}
 				currentTime=time(NULL);
-				if (currentTime >= (lastMixInfoUpdate + CAInfoService::SEND_MIX_INFO_WAIT) || pInfoService->isConfiguring())
+				if ((currentTime >= (lastMixInfoUpdate + CAInfoService::SEND_MIX_INFO_WAIT) &&
+					pInfoService->m_pMix->getLastConnectionTime() < (currentTime - (SEND_LOOP_SLEEP / 2))) || pInfoService->isConfiguring())
 				{
 					if (pInfoService->sendMixHelo() != E_SUCCESS)
 					{
