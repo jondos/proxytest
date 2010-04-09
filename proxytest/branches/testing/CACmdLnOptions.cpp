@@ -3253,7 +3253,7 @@ SINT32 CACmdLnOptions::setListenerInterfaces(DOMElement *elemNetwork)
 	}
 
 	i = getListenerInterfaceCount();
-	ret = createSockets(false, arrSocketsIn,&i);
+	ret = createSockets(false, arrSocketsIn,i);
 
 	for(i=0;i<getListenerInterfaceCount();i++)
 	{
@@ -3277,17 +3277,17 @@ SINT32 CACmdLnOptions::setListenerInterfaces(DOMElement *elemNetwork)
 }
 
 
-SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UINT32* a_socketsLen)
+SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UINT32& a_socketsLen)
 {
 		UINT32 aktSocket;
 		UINT8 buff[255];
 		SINT32 ret = E_UNKNOWN;
 		UINT32 currentInterface;
 		CASocketAddr* pAddr;
-		UINT32* arrayVirtualPorts = new UINT32[*a_socketsLen];
+		UINT32* arrayVirtualPorts = new UINT32[a_socketsLen];
 		UINT32 iVirtualPortsLen = 0;
 		UINT32 iHiddenPortsLen = 0;
-		UINT32* arrayHiddenPorts = new UINT32[*a_socketsLen];
+		UINT32* arrayHiddenPorts = new UINT32[a_socketsLen];
 		
 
 		aktSocket = -1;
@@ -3331,11 +3331,11 @@ SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UIN
 	
 				aktSocket++;
 				
-				if (*a_socketsLen < (aktSocket + 1))
+				if (a_socketsLen < (aktSocket + 1))
 				{
 					CAMsg::printMsg(LOG_CRIT, 
 						"Found %d listener sockets, but we have only reserved memory for %d sockets. This seems to be an implementation error in the code.\n", 
-						(aktSocket + 1), *a_socketsLen);
+						(aktSocket + 1), a_socketsLen);
 
 					ret = E_SPACE;
 					break;
@@ -3434,7 +3434,7 @@ SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UIN
 		delete[] arrayHiddenPorts;
 		arrayVirtualPorts = NULL;
 		
-		*a_socketsLen = aktSocket;
+		a_socketsLen = aktSocket;
 
 		return ret;
 }
