@@ -3252,7 +3252,8 @@ SINT32 CACmdLnOptions::setListenerInterfaces(DOMElement *elemNetwork)
 		arrSocketsIn[i] = NULL;
 	}
 
-	ret = createSockets(false, arrSocketsIn, getListenerInterfaceCount());
+	i = getListenerInterfaceCount();
+	ret = createSockets(false, arrSocketsIn,&i);
 
 	for(i=0;i<getListenerInterfaceCount();i++)
 	{
@@ -3275,14 +3276,21 @@ SINT32 CACmdLnOptions::setListenerInterfaces(DOMElement *elemNetwork)
 }
 
 
-SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UINT32 a_socketsLen)
+SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UINT32* a_socketsLen)
 {
 		UINT32 aktSocket;
 		UINT8 buff[255];
 		SINT32 ret = E_UNKNOWN;
 		UINT32 currentInterface;
+		CASocketAddr* pAddr;
+		UINT32* arrayVirtualPorts = new UINT32[a_socketsLen];
+		UINT32 iVirtualPortsLen = 0;
+		UINT32 iHiddenPortsLen = 0;
+		UINT32* arrayHiddenPorts = new UINT32[a_socketsLen];
+		
 
 		aktSocket = -1;
+		iVirtualSockets = 0;
 		for(currentInterface=0;currentInterface < getListenerInterfaceCount(); currentInterface++)
 			{
 				CAListenerInterface* pListener=NULL;
@@ -3290,21 +3298,45 @@ SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UIN
 				if(pListener==NULL)
 				{
 					CAMsg::printMsg(LOG_CRIT,"Error: Listener interface %d is invalid.\n", currentInterface+1);
+					
+					delete[] arrayVirtualPorts;
+					delete[] arrayHiddenPorts;
+					
 					return E_UNKNOWN;
 				}
+				
+				pAddr=pListener->getAddr();
+				pAddr->toString(buff,255);
+				
+				if(pAddr->getType()==AF_INET)
+				{
+					if (pListener->isVirtual())
+					{
+						arrayVirtualPorts[iVirtualPortsLen] = ((CASocketAddrINet*)pAddr)->getPort();
+						iVirtualPortsLen++;
+					}
+					else if (pListener->isHidden())
+					{
+						arrayHiddenPorts[iHiddenPortsLen] = ((CASocketAddrINet*)pAddr)->getPort();
+						iHiddenPortsLen++;
+					}
+				}
+				
 				if(pListener->isVirtual())
 				{
 					delete pListener;
 					pListener = NULL;
+					iVirtualSockets++;
 					continue;
 				}
+	
 				aktSocket++;
 				
-				if (a_socketsLen < (aktSocket + 1))
+				if (*a_socketsLen < (aktSocket + 1))
 				{
 					CAMsg::printMsg(LOG_CRIT, 
 						"Found %d listener sockets, but we have only reserved memory for %d sockets. This seems to be an implementation error in the code.\n", 
-						(aktSocket + 1), a_socketsLen);
+						(aktSocket + 1), *a_socketsLen);
 
 					ret = E_SPACE;
 					break;
@@ -3314,9 +3346,7 @@ SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UIN
 				a_sockets[aktSocket] = new CASocket();
 				a_sockets[aktSocket]->create();
 				a_sockets[aktSocket]->setReuseAddr(true);
-				CASocketAddr* pAddr=pListener->getAddr();
-				pAddr->toString(buff,255);
-
+				
 				delete pListener;
 				pListener = NULL;
 #ifndef _WIN32
@@ -3325,8 +3355,10 @@ SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UIN
 				if(pAddr->getType()==AF_INET&&((CASocketAddrINet*)pAddr)->getPort()<1024)
 				{
 					if(seteuid(0)==-1) //changing to root
-						CAMsg::printMsg(LOG_CRIT,"Setuid failed! Cannot listen on interface %d (%s). Reason: You must start the mix as root in order to use listener ports lower than 1024!\n",
+					{
+						CAMsg::printMsg(LOG_CRIT,"Setuid failed! We might not be able to listen on interface %d (%s) as we cannot change to the root user.\n",
 								currentInterface+1, buff);
+					}
 				}
 #endif
 				ret=a_sockets[aktSocket]->listen(*pAddr);
@@ -3344,6 +3376,8 @@ SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UIN
 #endif
 				if(ret!=E_SUCCESS)
 				{
+						delete[] arrayVirtualPorts;
+						delete[] arrayHiddenPorts;
 						return E_UNKNOWN;
 				}
 
@@ -3359,16 +3393,38 @@ SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UIN
 		}
 		else if (ret == E_SUCCESS)
 		{
-			if (a_socketsLen > aktSocket + 1)
+			for (UINT32 iHiddenPort = 0; iHiddenPort < iHiddenPortsLen; iHiddenPort++)
 			{
-				CAMsg::printMsg(LOG_CRIT,"Requested %d listener sockets, but found only %d valid listeners!\n", a_socketsLen, (aktSocket + 1));
-				ret = E_UNSPECIFIED;
+				for (UINT32 iVirtualPort = 0; iVirtualPort < iVirtualPortsLen; iVirtualPort++)
+				{
+					if (arrayHiddenPorts[iHiddenPort] == arrayVirtualPorts[iVirtualPort])
+					{
+						arrayVirtualPorts[iVirtualPort] = 0;
+					}
+				}
 			}
-			else if (a_bMessages)
+			
+			for (UINT32 iVirtualPort = 0; iVirtualPort < iVirtualPortsLen; iVirtualPort++)
 			{
-				CAMsg::printMsg(LOG_DEBUG,"Listening on all interfaces.\n");
+				if (arrayVirtualPorts[iVirtualPort] != 0)
+				{
+					CAMsg::printMsg(LOG_CRIT,"No hidden listener interface found for the virtual interface %d with port %d. Please remove the virtual interface, add the corresponding hidden interface or remove the 'virtual' attribute from the interface.\n", iVirtualPort, arrayVirtualPorts[iVirtualPort]);
+					ret = E_UNSPECIFIED;
+					break;
+				}
 			}
 		}
+		
+		if (ret == E_SUCCESS && a_bMessages)
+		{
+			CAMsg::printMsg(LOG_DEBUG,"Listening on all interfaces.\n");
+		}
+		
+		delete[] arrayVirtualPorts;
+		delete[] arrayHiddenPorts;
+		arrayVirtualPorts = NULL;
+		
+		*a_socketsLen = aktSocket;
 
 		return ret;
 }
