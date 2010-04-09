@@ -3325,7 +3325,6 @@ SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UIN
 				{
 					delete pListener;
 					pListener = NULL;
-					iVirtualSockets++;
 					continue;
 				}
 	
