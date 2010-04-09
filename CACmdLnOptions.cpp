@@ -3283,10 +3283,10 @@ SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UIN
 		SINT32 ret = E_UNKNOWN;
 		UINT32 currentInterface;
 		CASocketAddr* pAddr;
-		UINT32* arrayVirtualPorts = new UINT32[a_socketsLen];
+		UINT32* arrayVirtualPorts = new UINT32[*a_socketsLen];
 		UINT32 iVirtualPortsLen = 0;
 		UINT32 iHiddenPortsLen = 0;
-		UINT32* arrayHiddenPorts = new UINT32[a_socketsLen];
+		UINT32* arrayHiddenPorts = new UINT32[*a_socketsLen];
 		
 
 		aktSocket = -1;
