@@ -2646,7 +2646,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 						}
 						else
 						{
-							CAMsg::printMsg(LOG_CRIT, "cleaning: Leaving loginEntry %x cleanup of owner %x to the next owner.\n",
+							CAMsg::printMsg(LOG_INFO, "Cleaning: Leaving loginEntry %x cleanup of owner %x to the next owner due to double-login of a user.\n",
 									loginEntry, loginEntry->ownerRef);
 						}
 					}
