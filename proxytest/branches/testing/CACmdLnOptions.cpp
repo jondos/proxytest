@@ -1809,7 +1809,7 @@ SINT32 CACmdLnOptions::invokeOptionSetters
 				"NULL element handling is delegated to the specified setter method!\n");
 	}
 
-	for(; i < optionsSettersLength; i++ )
+	for(i=0; i < optionsSettersLength; i++ )
 	{
 		ret = (this->*(optionsSetters[i]))(optionsSource);
 		if(ret != E_SUCCESS)
@@ -2763,6 +2763,7 @@ SINT32 CACmdLnOptions::setPriceCertificate(DOMElement *elemAccounting)
 		(elemAccounting, OPTIONS_NODE_PRICE_CERTIFICATE, elemPriceCert, false);
 	if (elemPriceCert == NULL)
 	{
+		CAMsg::printMsg(LOG_CRIT, "Did you really want to compile the mix with payment support?");
 		LOG_NODE_NOT_FOUND(OPTIONS_NODE_PRICE_CERTIFICATE);
 		return E_UNKNOWN;
 	}
@@ -2839,7 +2840,7 @@ SINT32 CACmdLnOptions::setPaymentInstance(DOMElement *elemAccounting)
 	m_pBI = CAXMLBI::getInstance(elemJPI);
 	if (m_pBI == NULL)
 	{
-		CAMsg::printMsg(LOG_CRIT,"Could not instantiate payment instance interface!\n");
+		CAMsg::printMsg(LOG_CRIT,"Could not instantiate payment instance interface. Did you really want to compile the mix with payment support?\n");
 		return E_UNKNOWN;
 	}
 #endif
@@ -3353,7 +3354,7 @@ SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UIN
 				
 				ret = E_SUCCESS;
 				a_sockets[aktSocket] = new CASocket();
-				a_sockets[aktSocket]->create();
+				a_sockets[aktSocket]->create(pAddr->getType());
 				a_sockets[aktSocket]->setReuseAddr(true);
 				
 				delete pListener;
