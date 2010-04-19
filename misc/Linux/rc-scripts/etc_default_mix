@@ -1,0 +1,23 @@
+
+
+# options for check out the mix from svn
+SOURCE_PATH="/home/mix/"
+SVN_URL="https://svn.jondos.de/svn/proxytest/proxytest/branches/stable"
+
+# options for compiling the mix
+INSTALL_PREFIX="/usr/local"
+
+##############################################
+# enable one of the following compile options
+##############################################
+
+# compile optins for free mixes
+# COMPILE_OPTIONS="--enable-new-flow-control --enable-new-channel-encryption --enable-server_monitoring"
+
+# compile options for premium mixes
+# COMPILE_OPTIONS="--enable-new-flow-control --enable-new-channel-encryption --enable-server_monitoring --enable-payment"
+
+
+# option for running the mix
+MIXCONF="/etc/mix/config.xml"
+MAXFILEDESCRIPTORS=32768
