@@ -1,5 +1,0 @@
-Template: mix-danteconf/extip
-Type: string
-Description: Your external IP address?
- The configuration template for dante SOCKS server needs 
- the external IP address of your server for outgoing traffic.
