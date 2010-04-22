@@ -1,0 +1,284 @@
+#!/bin/sh
+#
+# Start/Stop the jondonym mix server
+
+### BEGIN INIT INFO
+# Provides: mix
+# Required-Start: $network
+# Required-Stop: $network
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# Short-Description: jondonym mix server
+
+### END INIT INFO
+
+
+set -e
+
+DESC="JonDonym mix server"
+NAME="mix"
+PIDFILE="/var/run/mix.pid"
+MIXCONF="/etc/mix/config.xml"
+MAXFILEDESCRIPTORS=32768
+INSTALL_PREFIX="/usr/local"
+
+# Load init helper functions for Redhat
+if [ -e /etc/init.d/functions ] ; then
+   . /etc/init.d/functions
+fi
+
+# Load init helper functions for Debian/Ubuntu
+if [ -e /lib/lsb/init-functions ] ; then
+   . /lib/lsb/init-functions
+fi
+
+
+# Include the config values from default file for mix
+if [ -e /etc/default/mix ] ; then
+  . /etc/default/mix
+fi
+
+if [ ! -x /sbin/start-stop-daemon ] ; then
+	rc_reset
+fi
+
+DAEMON="$INSTALL_PREFIX/sbin/mix"
+
+case $1 in
+  start)
+	if [ -x $DAEMON ] ; then
+		if [ -f $MIXCONF ] ; then
+			echo -n "Raising maximum number of filedescriptors to $MAXFILEDESCRIPTORS"
+			if ulimit -SHn $MAXFILEDESCRIPTORS ; then
+				echo "."
+		
+				if [ -x /sbin/start-stop-daemon ] ; then
+					# use the Debian/Ubuntu version
+					start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON -- -c $MIXCONF --pidfile=$PIDFILE
+				else
+					# Start the mix server by self
+					echo "Starting $DESC: $NAME" 
+					$DAEMON -c $MIXCONF --pidfile=$PIDFILE
+					if [ ! "`$0 process`" ] ; then
+						rc_failed 1
+					fi
+				fi
+		
+			else
+				echo "failed!"
+				if [ ! -x /sbin/start-stop-daemon ] ; then
+					rc_failed 1
+				fi
+			fi
+		else
+			echo "Mix config not found at $MIXCONF ! Do not start the mix server."
+		fi
+	else
+		echo "Mix software not installed in $DAEMON !"
+	fi
+	if [ ! -x /sbin/start-stop-daemon ] ; then
+		rc_status -v
+	fi
+	;;
+
+  stop)
+	echo "Stopping $DESC: $NAME"
+	if [ -x /sbin/start-stop-daemon ] ; then
+		start-stop-daemon --stop --oknodo --pidfile $PIDFILE --exec $DAEMON
+	else
+		killproc -p $PIDFILE -TERM $DAEMON
+		rc_status -v
+	fi
+	;;
+
+  status)
+	ret=0
+	if [ -x /sbin/start-stop-daemon ] ; then
+		status_of_proc -p $PIDFILE $DAEMON $NAME 2>/dev/null || ret=$?
+	else
+		checkproc -p $PIDFILE $DAEMON
+		rc_status -v
+	fi
+	;;
+	
+  process)
+	ps auxww | grep --regexp="$DAEMON" | grep -v grep
+	;;
+	
+  reload|force-reload|restart)
+	$0 stop
+	sleep 6
+	$0 start
+	;;
+	
+  version)
+	$DAEMON --version | grep -i version
+	;;
+
+  log)
+	cat $LOGFILE
+	;;
+	
+  svn)
+	DO_UPDATE=0
+
+	if [ $# -gt 1 ]
+	then
+	  if [ "$2" = "-update" ]
+	  then
+	    DO_UPDATE=1
+	    shift 1
+	  fi
+	fi
+	
+	if [ ! -d $SOURCE_PATH ]
+	then
+	  install -d $SOURCE_PATH
+	fi
+	
+	cd $SOURCE_PATH
+	if [ ! -d stable ]
+	then
+	  DO_UPDATE=0
+	fi
+
+	if [ $DO_UPDATE -eq 0 ]
+	then
+	  svn checkout $SVN_URL
+	else
+	  svn update $SVN_MODULE
+	fi
+	;;	
+	  
+  compile)
+	if [ ! -e $SOURCE_PATH/stable/configure ]
+	then
+	  echo "No mix source found! Please run \"$0 svn\"."
+	  exit 1
+	fi
+	
+	cd $SOURCE_PATH/stable
+	if [ -e Makefile ]
+	then
+	  make distclean
+	fi  
+	./configure --prefix=$INSTALL_PREFIX $COMPILE_OPTIONS && make
+	;;
+  
+  install)
+	if [ ! -e $SOURCE_PATH/stable/mix ]
+	then
+	  echo "No new version found! Please run \"$0 compile\"."
+	  exit 1
+	fi
+	
+	cd $SOURCE_PATH/stable
+	make install
+	;;
+	
+  update)
+	if [ ! -e $DAEMON ]
+	then
+	  echo "No old version found! Please run $0 install."
+	  exit 1
+	fi
+	
+	if [ ! -e $SOURCE_PATH/stable/mix ]
+	then
+	  echo "No new version found! Please run \"$0 compile\"."
+	  exit 1
+	fi
+	
+	OLD_VERSION_OPTION=`$DAEMON --version | grep -i version`
+	NEW_VERSION_OPTION=`$SOURCE_PATH/svn/proxytest/mix --version | grep -i version`
+	
+	echo "OLD_VERSION_OPTION: $OLD_VERSION_OPTION"
+	echo "NEW_VERSION_OPTION: $NEW_VERSION_OPTION"
+
+        if [ $# -gt 1 ]
+	then
+	  if [ "$2" = "-force" ]
+	  then
+	    OLD_VERSION_OPTION=00.01.01
+	    shift 1
+	  fi
+	fi
+
+	if [ "$NEW_VERSION_OPTION" \>  "$OLD_VERSION_OPTION" ]
+	  then
+	    if [ ! -d $SOURCE_PATH/backup ]
+	    then
+	      mkdir $SOURCE_PATH/backup
+	    fi
+
+	    if [ -e $DAEMON ]
+	    then
+	      VERSION_COUNT=1
+	      while [ -e "$SOURCE_PATH/backup/mix~$VERSION_COUNT" ]
+	      do
+		VERSION_COUNT=`expr $VERSION_COUNT + 1`
+	      done
+				
+	      mv $DAEMON "$SOURCE_PATH/backup/mix~$VERSION_COUNT"
+	    fi
+	    cd $SOURCE_PATH/stable
+	    make install || exit 1
+	    echo "Update complete! Please run $0 restart ."
+	else
+	    echo "The current mix is up-to-date. No update needed."
+	fi
+	;;
+	
+  restore)
+	if [ ! -e $SOURCE_PATH/backup/mix~1 ]
+	then
+	  echo "No backup version found!"
+	else
+	  VERSION_COUNT=1
+	  while [ -e "$SOURCE_PATH/backup/mix~$VERSION_COUNT" ]
+	  do
+	    VERSION_COUNT=`expr $VERSION_COUNT + 1`
+	  done
+	  VERSION_COUNT=`expr $VERSION_COUNT - 1`
+	  mv "$SOURCE_PATH/backup/mix~$VERSION_COUNT"  $DAEMON || exit 1
+	  echo "Revert complete! Please run $0 restart ."
+	fi
+	;;
+	
+  upgrade)
+	if [ $# -gt 1 ]
+	then
+	  if [ "$2" = "-force" ]
+	  then
+	    $0 svn -update && $0 compile && $0 update -force
+	    shift 1
+	  fi
+	else
+	  $0 svn -update && $0 compile && $0 update
+	fi
+	;;
+	
+  *)
+	echo " " >&2
+	echo "Simple usage: $0 (start|stop|reload|force-reload|restart|status|version)" >&2
+	echo " "  >&2
+	echo "Get the source:" >&2
+	echo "    $0 svn            checkout the mix source from repository" >&2
+	echo "    $0 svn -update    update the mix source from repository" >&2
+	echo " " >&2
+	echo "Helper funcions:" >&2
+	echo "    $0 compile        build/rebuild the mix" >&2
+	echo "    $0 install        install the mix" >&2
+	echo "    $0 update         install the mix and keep a backup of the old version" >&2
+	echo "    $0 update -force  update, even if the version did not change" >&2
+	echo "    $0 restore        restore the last version from backup" >&2
+	echo " "  >&2
+	echo "Maintenance:" >&2
+	echo "    $0 upgrade        full clean upgrade: svn -update, compile, update" >&2
+	echo "    $0 upgrade -force upgrate, even if the version did not change" >&2
+	echo " " >&2
+	exit 1
+	;;
+esac
+
+exit 0
