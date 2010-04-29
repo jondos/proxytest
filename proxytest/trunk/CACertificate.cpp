@@ -118,6 +118,8 @@ CACertificate* CACertificate::decode(const UINT8* buff,UINT32 bufflen,UINT32 typ
 		if(buff==NULL)
 			return NULL;
 		X509* tmpCert=NULL;
+		EVP_PKEY* tmpKey=NULL;
+		SINT32 ret=-1;
 		const UINT8* tmp;
 		switch(type)
 			{
@@ -136,12 +138,15 @@ CACertificate* CACertificate::decode(const UINT8* buff,UINT32 bufflen,UINT32 typ
 					#else
 						tmpPKCS12=d2i_PKCS12(NULL,(UINT8**)&buff,bufflen);
 					#endif
-					if(PKCS12_parse(tmpPKCS12,passwd,NULL,&tmpCert,NULL)!=1)
+					/*Note: Basically we are not interested in the private keys here - but still we need cannot supply
+					 *NULL for that parameter, as OpenSSL 1.0.0. would not work in that case*/
+					ret=PKCS12_parse(tmpPKCS12,passwd,&tmpKey,&tmpCert,NULL);
+					PKCS12_free(tmpPKCS12);
+					EVP_PKEY_free(tmpKey);
+					if(ret!=1)
 						{
-							PKCS12_free(tmpPKCS12);
 							return NULL;
 						}
-					PKCS12_free(tmpPKCS12);
 				break;
 				case CERT_XML_X509CERTIFICATE:
 					XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(buff,bufflen);
