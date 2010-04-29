@@ -25,10 +25,6 @@ install: build
 	install -m 0644 squid.conf.premium debian/mix-premium-squidconf/usr/share/doc/mix-premium-squidconf/conf/squid.conf
 	install -m 0644 squid-block.acl debian/mix-premium-squidconf/usr/share/doc/mix-premium-squidconf/conf/squid-block.acl
 
-        # install the dante config for primium mixes
-	install -m 0644 danted.conf.template debian/mix-danteconf/usr/share/doc/mix-danteconf/conf/danted.conf.template
-
-
 binary-arch: build install
 
 binary-indep: build install
