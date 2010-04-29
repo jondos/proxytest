@@ -833,7 +833,7 @@ class CACmdLnOptions
 		SINT32 setLoggingOptions(DOMElement* elemGeneral);
 
 		/* Certificate Options */
-#define CERTIFICATE_OPTIONS_NR 4
+#define MAX_CERTIFICATE_OPTIONS_NR 4
 		UINT32 m_nCertificateOptionsSetters;
 		SINT32 setOwnCertificate(DOMElement *elemCertificates);
 		SINT32 setOwnOperatorCertificate(DOMElement *elemCertificates);
