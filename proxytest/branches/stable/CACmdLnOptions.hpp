@@ -101,7 +101,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define OPTIONS_NODE_PREV_MIX_CERTIFICATE "PrevMixCertificate"
 #define OPTIONS_NODE_PREV_OPERATOR_CERTIFICATE "PrevOperatorCertificate"
 #define OPTIONS_NODE_X509DATA "X509Data"
-#define OPTIONS_NODE_ELEMENT_X509CERT "X509Certificate"
+#define OPTIONS_NODE_X509_CERTIFICATE "X509Certificate"
+#define OPTIONS_NODE_X509_PKCS12 "X509PKCS12"
 #define OPTIONS_NODE_SIGNATURE "Signature"
 
 
@@ -832,7 +833,8 @@ class CACmdLnOptions
 		SINT32 setLoggingOptions(DOMElement* elemGeneral);
 
 		/* Certificate Options */
-#define CERTIFICATE_OPTIONS_NR 4
+#define MAX_CERTIFICATE_OPTIONS_NR 4
+		UINT32 m_nCertificateOptionsSetters;
 		SINT32 setOwnCertificate(DOMElement *elemCertificates);
 		SINT32 setOwnOperatorCertificate(DOMElement *elemCertificates);
 		SINT32 setNextMixCertificate(DOMElement *elemCertificates);
@@ -870,8 +872,7 @@ class CACmdLnOptions
 		SINT32 appendMixInfo_internal(DOMNode* a_node, bool with_subtree);
 		inline SINT32 addMixIdToMixInfo();
 
-		SINT32 invokeOptionSetters
-		(optionSetter_pt *optionsSetters, DOMElement* target, SINT32 optionsSettersLength);
+		SINT32 invokeOptionSetters(const optionSetter_pt *optionsSetters, DOMElement* target, SINT32 optionsSettersLength);
 
 		void initMainOptionSetters();
 		void initGeneralOptionSetters();
