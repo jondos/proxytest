@@ -35,8 +35,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 CATLSClientSocket::CATLSClientSocket()
 	{
 		m_bConnectedTLS = false;
-		SSL_METHOD* meth;
-		meth = TLSv1_client_method();
+		const SSL_METHOD* meth= TLSv1_client_method();
 		m_pCtx = SSL_CTX_new( meth );
 #ifdef SSL_OP_NO_TICKET
 		// disable buggy TLS client extensions, as otherwise we will get no connection to a Java TLS server; the bug is fixes in OpenSSL > 0.9.8g
