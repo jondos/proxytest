@@ -22,10 +22,3 @@ Conflicts: mix-free-squidconf
 Description: squid configuration for JonDonym premium mixes
  The package contains an optimized squid configuration für JonDonym premium exit mixes.
 Homepage: https://www.jondos.de
-
-Package: mix-danteconf
-Architecture: all
-Depends: dante-server, libtemplate-perl
-Description: dante server configuration for JonDonym premium mixes
- The package contains the dante configuration für JonDonym premium exit mixes.
-Homepage: https://www.jondos.de

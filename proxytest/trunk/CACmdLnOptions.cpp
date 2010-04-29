@@ -2850,6 +2850,7 @@ SINT32 CACmdLnOptions::setPriceCertificate(DOMElement *elemAccounting)
 		(elemAccounting, OPTIONS_NODE_PRICE_CERTIFICATE, elemPriceCert, false);
 	if (elemPriceCert == NULL)
 	{
+		CAMsg::printMsg(LOG_CRIT, "Did you really want to compile the mix with payment support?\n");
 		LOG_NODE_NOT_FOUND(OPTIONS_NODE_PRICE_CERTIFICATE);
 		return E_UNKNOWN;
 	}
@@ -2926,7 +2927,7 @@ SINT32 CACmdLnOptions::setPaymentInstance(DOMElement *elemAccounting)
 	m_pBI = CAXMLBI::getInstance(elemJPI);
 	if (m_pBI == NULL)
 	{
-		CAMsg::printMsg(LOG_CRIT,"Could not instantiate payment instance interface!\n");
+		CAMsg::printMsg(LOG_CRIT,"Could not instantiate payment instance interface. Did you really want to compile the mix with payment support?\n");
 		return E_UNKNOWN;
 	}
 #endif
