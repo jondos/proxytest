@@ -636,11 +636,9 @@ SINT32 CAFirstMix::processKeyExchange()
 			CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Calculated -- SendInterval %u -- Receive Interval %u\n",m_u32KeepAliveSendInterval,m_u32KeepAliveRecvInterval);
 
             //m_pSignature->signXML(elemRoot);
-            m_pMultiSignature->signXML(elemRoot, false);
-
-			UINT32 outlen=5000;
-			UINT8* out=new UINT8[outlen];
-			DOM_Output::dumpToMem(docSymKey,out,&outlen);
+            m_pMultiSignature->signXML(elemRoot, true);
+            UINT32 outlen=0;
+            UINT8* out=DOM_Output::dumpToMem(docSymKey,&outlen);
             if (docSymKey != NULL)
             {
 				docSymKey->release();
