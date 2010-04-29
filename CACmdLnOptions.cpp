@@ -2537,6 +2537,13 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 		}
 		//decode own certifciate
 		CACertificate* tmpCert = CACertificate::decode(a_cert, CERT_PKCS12, (char*)passwd);
+		if(tmpCert== NULL)
+		{
+			CAMsg::printMsg(LOG_CRIT, "Error while getting own certificate %d!\n", i+1);
+			delete[] opCerts; 
+			return E_UNKNOWN;
+		}
+
 		//get SKI
 		UINT32 tmpSKIlen = 255;
 		UINT8 tmpSKI[255];
