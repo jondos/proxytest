@@ -224,17 +224,13 @@ void CACmdLnOptions::initGeneralOptionSetters()
 
 void CACmdLnOptions::initCertificateOptionSetters()
 {
-	certificateOptionSetters = new optionSetter_pt[CERTIFICATE_OPTIONS_NR];
-	int count = -1;
+	certificateOptionSetters = new optionSetter_pt[MAX_CERTIFICATE_OPTIONS_NR];
+	m_nCertificateOptionsSetters = 0;
 
-	certificateOptionSetters[++count]=
-		&CACmdLnOptions::setOwnOperatorCertificate;
-	certificateOptionSetters[++count]=
-		&CACmdLnOptions::setOwnCertificate;
-	certificateOptionSetters[++count]=
-		&CACmdLnOptions::setNextMixCertificate;
-	certificateOptionSetters[++count]=
-		&CACmdLnOptions::setPrevMixCertificate;
+	certificateOptionSetters[m_nCertificateOptionsSetters++]=&CACmdLnOptions::setOwnOperatorCertificate;
+	certificateOptionSetters[m_nCertificateOptionsSetters++]=&CACmdLnOptions::setOwnCertificate;
+	certificateOptionSetters[m_nCertificateOptionsSetters++]=&CACmdLnOptions::setNextMixCertificate;
+	certificateOptionSetters[m_nCertificateOptionsSetters++]=&CACmdLnOptions::setPrevMixCertificate;
 }
 
 void CACmdLnOptions::initAccountingOptionSetters()
@@ -1156,7 +1152,7 @@ SINT32 CACmdLnOptions::setPrevMix(XERCES_CPP_NAMESPACE::DOMDocument* doc)
             elemOptionsCerts->appendChild(elemOptionsPrevMixCert);
   					CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - try to import the one we got from infoservice\n");
 						getDOMChildByName
-							(elemCert, OPTIONS_NODE_ELEMENT_X509CERT, elemCert, false);
+							(elemCert, OPTIONS_NODE_X509_CERTIFICATE, elemCert, false);
 
 						CAMsg::printMsg(LOG_DEBUG,"setPrevMix() - Cert to be imported:\n");
 						UINT8 buff[8192];
@@ -1784,8 +1780,7 @@ inline SINT32 CACmdLnOptions::addMixIdToMixInfo()
  * Used by functions that handle a certain type of options, i.e.
  * general settings, account setting, etc.
  */
-SINT32 CACmdLnOptions::invokeOptionSetters
-		(optionSetter_pt *optionsSetters, DOMElement* optionsSource, SINT32 optionsSettersLength)
+SINT32 CACmdLnOptions::invokeOptionSetters (const optionSetter_pt *optionsSetters, DOMElement* optionsSource, SINT32 optionsSettersLength)
 {
 	SINT32 i = 0;
 	SINT32 ret = E_SUCCESS;
@@ -2442,8 +2437,7 @@ SINT32 CACmdLnOptions::setCertificateOptions(DOMElement* elemRoot)
 		return E_UNKNOWN;
 	}
 
-	return invokeOptionSetters
-			(certificateOptionSetters, elemCertificates, CERTIFICATE_OPTIONS_NR);
+	return invokeOptionSetters(certificateOptionSetters, elemCertificates, m_nCertificateOptionsSetters);
 }
 
 SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
@@ -2500,7 +2494,7 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 
 	//decode OpCerts
 	UINT32 opCertsLen = m_opCertList->getLength();
-	CACertificate* opCerts[opCertsLen];
+	CACertificate** opCerts=new CACertificate*[opCertsLen];
 	for(UINT32 j=0; j<opCertsLen; j++)
 	{
 		DOMNode* a_opCert = m_opCertList->item(j);
@@ -2508,11 +2502,12 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 		if(opCerts[j] == NULL)
 		{
 			CAMsg::printMsg(LOG_CRIT, "Error while decoding operator certificates!");
+			delete[] opCerts; 
 			return E_UNKNOWN;
 		}
 	}
 
-	DOMNodeList* ownCertList = getElementsByTagName(elemOwnCert,"X509PKCS12");
+	DOMNodeList* ownCertList = getElementsByTagName(elemOwnCert, OPTIONS_NODE_X509_PKCS12);
 
 	m_pMultiSignature = new CAMultiSignature();
 	for (UINT32 i=0; i<ownCertList->getLength(); i++)
@@ -2533,24 +2528,33 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Unable to load private Mix certificate nr. %d! Please check your password.\n", i+1);
 				delete signature;
+				delete[] opCerts; 
 				signature = NULL;
 				return E_UNKNOWN;
 			}
 		}
 		//decode own certifciate
 		CACertificate* tmpCert = CACertificate::decode(a_cert, CERT_PKCS12, (char*)passwd);
+		if(tmpCert== NULL)
+		{
+			CAMsg::printMsg(LOG_CRIT, "Error while getting own certificate %d!\n", i+1);
+			delete[] opCerts; 
+			return E_UNKNOWN;
+		}
+
 		//get SKI
 		UINT32 tmpSKIlen = 255;
-		UINT8 tmpSKI[tmpSKIlen];
+		UINT8 tmpSKI[255];
 		if(tmpCert->getSubjectKeyIdentifier(tmpSKI, &tmpSKIlen) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_CRIT, "Error while getting SKI of own certificate %d!\n", i+1);
+			delete[] opCerts; 
 			return E_UNKNOWN;
 		}
 		//CAMsg::printMsg(LOG_DEBUG, "SKI of own cert %d is: %s\n", i+1, tmpSKI);
 		//get AKI
 		UINT32 tmpAKIlen = 255;
-		UINT8 tmpAKI[tmpAKIlen];
+		UINT8 tmpAKI[255];
 		if(tmpCert->getAuthorityKeyIdentifier(tmpAKI, &tmpAKIlen) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_WARNING, "Could not get AKI of own certificate. This is not a critical problem, but you have a very old mix certificate. Create a new one as soon as possible.\n");
@@ -2579,9 +2583,10 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 		certs->add(tmpCert);
 		//get Raw SKI
 		UINT32 tmpRawSKIlen = 255;
-		UINT8 tmpRawSKI[tmpRawSKIlen];
+		UINT8 tmpRawSKI[255];
 		if(tmpCert->getRawSubjectKeyIdentifier(tmpRawSKI, &tmpRawSKIlen) != E_SUCCESS)
 		{
+			delete[] opCerts; 
 			return E_UNKNOWN;
 		}
 		if (certs->getNumber() < 2)
@@ -2597,6 +2602,7 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 		CAMsg::printMsg(LOG_CRIT, "Could not set a signature key for MultiCert!\n");
 		delete m_pMultiSignature;
 		m_pMultiSignature = NULL;
+		delete[] opCerts; 
 		return E_UNKNOWN;
 	}
 	//end new
@@ -2609,6 +2615,7 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 	//check Mix-ID
 	if(m_pMultiSignature->getXORofSKIs(tmpBuff, tmpLen) != E_SUCCESS)
 	{
+		delete[] opCerts; 
 		return E_UNKNOWN;
 	}
 
@@ -2617,6 +2624,7 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 		if(strncmp(m_strMixID, (char*)tmpBuff, strlen((char*)tmpBuff) ) != 0)
 		{
 			CAMsg::printMsg(LOG_CRIT,"The configuration file seems inconsistent: it contains another Mix ID (%s) than calculated from the Mix certificate(s), which is %s. Please re-import you mix certificate in the configuration tool, or set the correct mix ID manually by editing the configuration file.\n", m_strMixID, tmpBuff);
+			delete[] opCerts; 
 			return E_UNKNOWN;
 		}
 	}
@@ -2625,6 +2633,7 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 		m_strMixID=new char[strlen((char*)tmpBuff)+1];
 		m_strMixID[strlen((char*)tmpBuff)]= (char) 0;
 		strcpy(m_strMixID,(char*) tmpBuff);
+		delete[] opCerts; 
 		return addMixIdToMixInfo();
 	}
 	
@@ -2644,7 +2653,7 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 		strncpy(m_strCascadeName, m_strMixID, strlen(m_strMixID)+1);
 	}
 #endif
-
+	delete[] opCerts; 
 	return E_SUCCESS;
 }
 
@@ -2670,14 +2679,14 @@ SINT32 CACmdLnOptions::setOwnOperatorCertificate(DOMElement *elemCertificates)
 	{
 		m_opCertList = getElementsByTagName(elemOpCert, "X509Certificate");
 
-		getDOMChildByName(elemOpCert, OPTIONS_NODE_ELEMENT_X509CERT, opCertX509, true);
+		getDOMChildByName(elemOpCert, OPTIONS_NODE_X509_CERTIFICATE, opCertX509, true);
 		if( opCertX509 != NULL)
 		{
 			m_OpCert = CACertificate::decode(opCertX509, CERT_X509CERTIFICATE);
 		}
 		else
 		{
-			LOG_NODE_NOT_FOUND(OPTIONS_NODE_ELEMENT_X509CERT);
+			LOG_NODE_NOT_FOUND(OPTIONS_NODE_X509_CERTIFICATE);
 			return E_UNKNOWN;
 		}
 	}
@@ -2763,7 +2772,7 @@ SINT32 CACmdLnOptions::setPriceCertificate(DOMElement *elemAccounting)
 		(elemAccounting, OPTIONS_NODE_PRICE_CERTIFICATE, elemPriceCert, false);
 	if (elemPriceCert == NULL)
 	{
-		CAMsg::printMsg(LOG_CRIT, "Did you really want to compile the mix with payment support?");
+		CAMsg::printMsg(LOG_CRIT, "Did you really want to compile the mix with payment support?\n");
 		LOG_NODE_NOT_FOUND(OPTIONS_NODE_PRICE_CERTIFICATE);
 		return E_UNKNOWN;
 	}
