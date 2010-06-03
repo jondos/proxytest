@@ -1,0 +1,15 @@
+#!/bin/sh -e
+
+if [ ! -e /etc/squid/squid-block.acl.local ]; then
+  touch /etc/squid/squid-block.acl.local
+fi
+
+if [ -e /var/run/squid.pid ]; then
+  # Reload squid
+  if [ -x "`which invoke-rc.d 2>/dev/null`" ]; then
+	invoke-rc.d squid reload || exit $?
+  else
+	/etc/init.d/squid reload || exit $?
+  fi
+fi
+exit 0
