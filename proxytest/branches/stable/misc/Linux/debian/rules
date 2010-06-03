@@ -19,11 +19,15 @@ install: build
 	
 	# install the squid config for free mixes
 	install -m 0644 squid.conf.free debian/mix-free-squidconf/usr/share/doc/mix-free-squidconf/conf/squid.conf
-	install -m 0644 squid-block.acl debian/mix-free-squidconf/usr/share/doc/mix-free-squidconf/conf/squid-block.acl
 	
 	# install the squid config for premium mixes
 	install -m 0644 squid.conf.premium debian/mix-premium-squidconf/usr/share/doc/mix-premium-squidconf/conf/squid.conf
-	install -m 0644 squid-block.acl debian/mix-premium-squidconf/usr/share/doc/mix-premium-squidconf/conf/squid-block.acl
+	
+	# install the squid blocklist
+	install -m 0644 squid-block.acl debian/mix-squidblocklist/etc/squid/squid-block.acl
+	
+	# install the squid messages
+	cp -f ../squid-messages/* debian/mix-squidmessages/usr/share/mix-squidmessages/
 
 binary-arch: build install
 

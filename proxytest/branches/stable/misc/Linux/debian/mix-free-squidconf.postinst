@@ -2,9 +2,9 @@
 
 # Stop squid
 if [ -x "`which invoke-rc.d 2>/dev/null`" ]; then
-	invoke-rc.d squid stop || exit $?
+	invoke-rc.d squid stop
 else
-	/etc/init.d/squid stop || exit $?
+	/etc/init.d/squid stop
 fi
 
 # Backup old squid configuration
@@ -15,7 +15,6 @@ fi
 
 # Install new squid configuration
 cp -f /usr/share/doc/mix-free-squidconf/conf/squid.conf /etc/squid/squid.conf
-cp -f /usr/share/doc/mix-free-squidconf/conf/squid-block.acl /etc/squid/squid-block.acl
 
 # Create cache directories
 squid -z -d -3

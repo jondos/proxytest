@@ -11,6 +11,10 @@ acl localhost src [% extIP %]
 acl to_localhost dst 127.0.0.0/8
 acl to_localhost dst [% extIP %]
 
+
+# Replace by correct path to your squid messages
+error_directory /home/mix/stable/misc/squid-messages
+
 acl localnet src 10.0.0.0/8     # RFC1918 possible internal network
 acl localnet src 172.16.0.0/12  # RFC1918 possible internal network
 acl localnet src 192.168.0.0/16 # RFC1918 possible internal network
@@ -21,7 +25,10 @@ acl SSL_ports port 1-65535
 acl CONNECT method CONNECT
 
 acl bad url_regex -i "/usr/local/etc/squid/squid-block.acl" 
+acl badlocal url_regex -i "/usr/local/etc/squid/squid-block.acl.local" 
 
+http_access deny bad
+http_access deny badlocal
 http_access deny to_localhost
 http_access deny !localhost
 http_access allow manager localhost
