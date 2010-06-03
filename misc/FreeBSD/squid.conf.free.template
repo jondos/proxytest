@@ -3,14 +3,19 @@
 #
 # Replace [% extIP %] by the IP address of your own system/jail
 
-acl all src all
-acl manager proto cache_object
-
 acl localhost src 127.0.0.1/32
 acl localhost src [% extIP %]
 
 acl to_localhost dst 127.0.0.0/8
 acl to_localhost dst [% extIP %]
+
+
+# Replace by correct path to your squid messages
+error_directory /home/mix/stable/misc/squid-messages
+
+
+acl all src all
+acl manager proto cache_object
 
 acl localnet src 10.0.0.0/8     # RFC1918 possible internal network
 acl localnet src 172.16.0.0/12  # RFC1918 possible internal network
@@ -21,7 +26,14 @@ acl SSL_ports port 443
 
 acl CONNECT method CONNECT
 
-acl bad url_regex -i "/usr/local/etc/squid/squid-block.acl" 
+acl bad url_regex -i "/usr/local/etc/squid/squid-block.acl"
+acl badlocal url_regex -i "/usr/local/etc/squid/squid-block.acl.local" 
+
+
+acl directip dstdom_regex [0-9]+\.[0-9]+\.[0-9]+\.[0-9]+
+deny_info ERR_IP_URL directip
+acl robot browser -i bot
+deny_info ERR_ROBOT robot
 
 http_access deny to_localhost
 http_access deny !localhost
@@ -29,6 +41,10 @@ http_access allow manager localhost
 http_access deny manager
 http_access deny !Safe_ports
 http_access deny CONNECT !SSL_ports
+
+http_access deny bad
+http_access deny directip
+http_access deny robot
 
 http_access allow all
 
