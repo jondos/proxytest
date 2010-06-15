@@ -28,7 +28,7 @@ acl CONNECT method CONNECT
 
 acl bad url_regex -i "/usr/local/etc/squid/squid-block.acl"
 acl badlocal url_regex -i "/usr/local/etc/squid/squid-block.acl.local" 
-
+deny_info ERR_ACCESS_DENIED_HERE badlocal
 
 acl directip dstdom_regex [0-9]+\.[0-9]+\.[0-9]+\.[0-9]+
 deny_info ERR_IP_URL directip
