@@ -5,12 +5,10 @@
 error_directory /home/mix/stable/misc/squid-messages
 
 
-
 # Set the outgiong IP address, if your server have more
 # than one IP addresses
 
 # tcp_outgoing_address 123.123.123.123
-
 
 
 http_port 127.0.0.1:3128
@@ -53,6 +51,7 @@ acl CONNECT method CONNECT
 
 acl bad url_regex -i "/etc/squid/squid-block.acl" 
 acl badlocal url_regex -i "/etc/squid/squid-block.acl.local"
+deny_info ERR_ACCESS_DENIED_HERE badlocal
 
 http_access allow manager localhost
 http_access deny manager

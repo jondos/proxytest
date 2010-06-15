@@ -58,6 +58,7 @@ acl CONNECT method CONNECT
 
 acl bad url_regex -i "/etc/squid/squid-block.acl" 
 acl badlocal url_regex -i "/etc/squid/squid-block.acl.local"
+deny_info ERR_ACCESS_DENIED_HERE badlocal
 
 http_access allow manager localhost
 http_access deny manager
