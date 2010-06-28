@@ -43,6 +43,7 @@ http_access deny !Safe_ports
 http_access deny CONNECT !SSL_ports
 
 http_access deny bad
+http_access deny badlocal
 http_access deny directip
 http_access deny robot
 
