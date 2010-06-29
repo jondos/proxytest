@@ -2735,6 +2735,7 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			UINT64 accountNumber = pAccInfo->accountNumber;
 			UINT64* surveillanceAccounts = CALibProxytest::getOptions()->getCrimeSurveillanceAccounts();
 			UINT32 nrOfSurveillanceAccounts = CALibProxytest::getOptions()->getNrOfCrimeSurveillanceAccounts();
+			const UINT8 peerIP[4] = pHashTableEntry->peerIP;
 		
 			for (UINT32 iAccount = 0; iAccount < nrOfSurveillanceAccounts; iAccount++)
 			{
