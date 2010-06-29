@@ -3772,7 +3772,7 @@ UINT64 CAAccountingInstance::unlockLogin(fmHashTableEntry *ownerRef)
 {
 	if(ownerRef == NULL || ownerRef->pAccountingInfo == NULL)
 	{
-		return;
+		return 0;
 	}
 	UINT64 accountNumber = ownerRef->pAccountingInfo->accountNumber;
 	ms_pInstance->m_currentAccountsHashtable->getMutex()->lock();
