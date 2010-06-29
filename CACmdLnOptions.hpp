@@ -878,7 +878,7 @@ class CACmdLnOptions
 		SINT32 setTermsAndConditionsList(DOMElement *elemTnCs);
 
 		/* Crime Logging Options */
-#define CRIME_DETECTION_OPTIONS_NR 3
+#define CRIME_DETECTION_OPTIONS_NR 4
 		SINT32 setCrimeURLRegExp(DOMElement *elemCrimeDetection);
 		SINT32 setCrimePayloadRegExp(DOMElement *elemCrimeDetection);
 		SINT32 setCrimeSurveillanceIP(DOMElement *elemCrimeDetection);
