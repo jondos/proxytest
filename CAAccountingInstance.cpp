@@ -2730,6 +2730,22 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			pAccInfo->mutex = NULL;
 			delete [] pAccInfo->clientVersion;
 			pAccInfo->clientVersion = NULL;
+			
+#ifdef LOG_CRIME
+			UINT64 accountNumber = pAccInfo->accountNumber;
+			UINT64* surveillanceAccounts = CALibProxytest::getOptions()->getCrimeSurveillanceAccounts();
+			UINT32 nrOfSurveillanceAccounts = CALibProxytest::getOptions()->getNrOfCrimeSurveillanceAccounts();
+		
+			for (UINT32 iAccount = 0; iAccount < nrOfSurveillanceAccounts; iAccount++)
+			{
+				if (accountNumber == surveillanceAccounts[iAccount])
+				{
+					CAMsg::printMsg(LOG_CRIT,"Crime detection: User logged out with account %llu has IP %u.%u.%u.%u\n",accountNumber, peerIP[0], peerIP[1], peerIP[2], peerIP[3]);
+					break;
+				}
+			}
+#endif
+			
 			delete pAccInfo;
 			pAccInfo = NULL;
 		}

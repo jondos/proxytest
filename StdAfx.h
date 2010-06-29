@@ -35,7 +35,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #define MIX_VERSION "00.09.15"
 
-// set to "true" if this is a testing/development version which is not meant for prodictive use
+// set to "true" if this is a testing/development version which is not meant for productive use
 #define MIX_VERSION_TESTING true
 
 #define MIX_VERSION_TESTING_TEXT "This is a testing/development version. Please do not expect it to work in a productive environment, and don't be surprised if you get unpredictive results or segmentation faults. If you don't like experiments, go and get the stable code.\n"
