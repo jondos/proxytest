@@ -750,7 +750,7 @@ class CACmdLnOptions
 		UINT32 m_nCrimeRegExpsPayload;
 		UINT32 m_nrOfSurveillanceIPs;
 		CASocketAddrINet* m_surveillanceIPs;
-		UINT64* m_surveillanceAccounts
+		UINT64* m_surveillanceAccounts;
 		UINT32 m_nrOfSurveillanceAccounts;
 #endif
 
