@@ -179,6 +179,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define OPTIONS_NODE_CRIME_REGEXP_URL "RegExpURL"
 #define OPTIONS_NODE_CRIME_REGEXP_PAYLOAD "RegExpPayload"
 #define OPTIONS_NODE_CRIME_SURVEILLANCE_IP "SurveillanceIP"
+#define OPTIONS_NODE_CRIME_SURVEILLANCE_ACCOUNT "PayAccountNumber"
 #define OPTIONS_ATTRIBUTE_LOG_PAYLOAD "logPayload"
 
 #define MIXINFO_NODE_PARENT "Mix"
@@ -517,6 +518,17 @@ class CACmdLnOptions
 			return m_arCrimeRegExpsPayload;
 		}
 
+		UNIT64* getCrimeSurveillanceAccounts()
+		{
+			return m_surveillanceAccounts;
+		}
+
+		UINT32 getNrOfCrimeSurveillanceAccounts()
+		{
+			return m_nrOfSurveillanceAccounts;
+		}
+		
+		
 		CASocketAddrINet* getCrimeSurveillanceIPs()
 		{
 			return m_surveillanceIPs;
@@ -738,6 +750,8 @@ class CACmdLnOptions
 		UINT32 m_nCrimeRegExpsPayload;
 		UINT32 m_nrOfSurveillanceIPs;
 		CASocketAddrINet* m_surveillanceIPs;
+		UINT64* m_surveillanceAccounts
+		UINT32 m_nrOfSurveillanceAccounts;
 #endif
 
 #ifdef DATA_RETENTION_LOG

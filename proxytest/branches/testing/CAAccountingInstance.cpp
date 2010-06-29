@@ -3768,7 +3768,7 @@ bool testAndSetLoginOwner(struct AccountLoginHashEntry *loginEntry, fmHashTableE
  * release login (particularly for use in error case)
  * this function is thread-safe.
  */
-void CAAccountingInstance::unlockLogin(fmHashTableEntry *ownerRef)
+UINT64 CAAccountingInstance::unlockLogin(fmHashTableEntry *ownerRef)
 {
 	if(ownerRef == NULL || ownerRef->pAccountingInfo == NULL)
 	{
@@ -3782,6 +3782,7 @@ void CAAccountingInstance::unlockLogin(fmHashTableEntry *ownerRef)
 		resetLoginOngoing(loginEntry, ownerRef);
 	}
 	ms_pInstance->m_currentAccountsHashtable->getMutex()->unlock();
+	return accountNumber;
 }
 
 /**
