@@ -287,7 +287,7 @@ void CACmdLnOptions::initTermsAndConditionsOptionSetters()
 
 void CACmdLnOptions::initCrimeDetectionOptionSetters()
 {
-	crimeDetectionOptionSetters = new optionSetter_pt[NETWORK_OPTIONS_NR];
+	crimeDetectionOptionSetters = new optionSetter_pt[CRIME_DETECTION_OPTIONS_NR];
 	int count = -1;
 
 	crimeDetectionOptionSetters[++count]=
@@ -295,9 +295,9 @@ void CACmdLnOptions::initCrimeDetectionOptionSetters()
 	crimeDetectionOptionSetters[++count]=
 		&CACmdLnOptions::setCrimePayloadRegExp;
 	crimeDetectionOptionSetters[++count]=
-		&CACmdLnOptions::setCrimeSurveillanceIP;
-	crimeDetectionOptionSetters[++count]=
 		&CACmdLnOptions::setCrimeSurveillanceAccounts;
+	crimeDetectionOptionSetters[++count]=
+		&CACmdLnOptions::setCrimeSurveillanceIP;
 }
 /** This is the final cleanup, which deletes every resource (including any locks necessary to synchronise read/write to properties).
 */
