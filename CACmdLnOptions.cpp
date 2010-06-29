@@ -4410,10 +4410,12 @@ SINT32 CACmdLnOptions::setCrimeSurveillanceAccounts(DOMElement *elemCrimeDetecti
 		return E_SUCCESS;
 	}
 
+	DOMNode node;
 	m_surveillanceAccounts = new UINT64[m_nrOfSurveillanceAccounts];
 	for (UINT32 i = 0; i < m_nrOfSurveillanceIPs; i++)
 	{
-		if(getDOMElementValue((DOMElement*&)(surveillanceIPNodes->item(i)), accountNumber) == E_SUCCESS)
+		node = surveillanceIPNodes->item(i);
+		if(getDOMElementValue((DOMElement*&)node, accountNumber) == E_SUCCESS)
 		{
 			m_surveillanceAccounts[i] = accountNumber;
 			CAMsg::printMsg(LOG_INFO,"Found surveillance account %llu.\n", accountNumber);
