@@ -4419,7 +4419,7 @@ CAMsg::printMsg(LOG_INFO,"Before check 0 surveillance accounts.\n");
 
 	DOMNode* node;
 	m_surveillanceAccounts = new UINT64[m_nrOfSurveillanceAccounts];
-	for (UINT32 i = 0; i < m_nrOfSurveillanceIPs; i++)
+	for (UINT32 i = 0; i < m_nrOfSurveillanceAccounts; i++)
 	{
 		node = surveillanceIPNodes->item(i);
 		if(getDOMElementValue((DOMElement*&)node, accountNumber) == E_SUCCESS)
