@@ -4392,24 +4392,19 @@ SINT32 CACmdLnOptions::setCrimeSurveillanceIP(DOMElement *elemCrimeDetection)
 
 SINT32 CACmdLnOptions::setCrimeSurveillanceAccounts(DOMElement *elemCrimeDetection)
 {
-CAMsg::printMsg(LOG_INFO,"Entered surveillance accounts.\n");
 
 #ifdef LOG_CRIME
 	if(elemCrimeDetection == NULL) return E_UNKNOWN;
-	CAMsg::printMsg(LOG_INFO,"Before assert surveillance accounts.\n");
 	
 	ASSERT_CRIME_DETECTION_OPTIONS_PARENT
 		(elemCrimeDetection->getNodeName(), OPTIONS_NODE_CRIME_SURVEILLANCE_ACCOUNT);
 
-		CAMsg::printMsg(LOG_INFO,"After assert surveillance accounts.\n");
 		
 	UINT64 accountNumber;
 
 	DOMNodeList *surveillanceIPNodes =
 		getElementsByTagName(elemCrimeDetection, OPTIONS_NODE_CRIME_SURVEILLANCE_ACCOUNT);
 	m_nrOfSurveillanceAccounts = (UINT32) surveillanceIPNodes->getLength();
-	
-CAMsg::printMsg(LOG_INFO,"Before check 0 surveillance accounts.\n");
 	
 	if (m_nrOfSurveillanceAccounts == 0)
 	{
