@@ -192,7 +192,7 @@ SINT32 CAFirstMix::init()
     }
 	else
 	{
-		CAMsg::printMsg(LOG_CRIT,"Secure connection to next Mix was established successfully.\n");
+		CAMsg::printMsg(LOG_INFO,"Secure connection to next Mix was established successfully.\n");
 	}
 		m_pIPList=new CAIPList();
 		m_pIPBlockList = new CATempIPBlockList(1000 * 60 * 2); 
