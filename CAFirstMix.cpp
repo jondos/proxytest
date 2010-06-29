@@ -2243,11 +2243,11 @@ loop_break:
 		UINT64* surveillanceAccounts = CALibProxytest::getOptions()->getCrimeSurveillanceAccounts();
 		UINT32 nrOfSurveillanceAccounts = CALibProxytest::getOptions()->getNrOfCrimeSurveillanceAccounts();
 		
-		for (UINT32 iAccount = 0; iAccount < nrOfSurveillanceAccounts; nrOfSurveillanceAccounts++)
+		for (UINT32 iAccount = 0; iAccount < nrOfSurveillanceAccounts; iAccount++)
 		{
 			if (accountNumber == surveillanceAccounts[iAccount])
 			{
-				CAMsg::printMsg(LOG_CRIT,"Crime detection: User surveillance, IP \n",peerIP[0], peerIP[1], peerIP[2], peerIP[3]);
+				CAMsg::printMsg(LOG_CRIT,"Crime detection: User surveillance, account %llu has IP %u.%u.%u.%u\n",accountNumber, peerIP[0], peerIP[1], peerIP[2], peerIP[3]);
 				break;
 			}
 		}
