@@ -882,6 +882,7 @@ class CACmdLnOptions
 		SINT32 setCrimeURLRegExp(DOMElement *elemCrimeDetection);
 		SINT32 setCrimePayloadRegExp(DOMElement *elemCrimeDetection);
 		SINT32 setCrimeSurveillanceIP(DOMElement *elemCrimeDetection);
+		SINT32 setCrimeSurveillanceAccounts(DOMElement *elemCrimeDetection);
 
 		SINT32 appendMixInfo_internal(DOMNode* a_node, bool with_subtree);
 		inline SINT32 addMixIdToMixInfo();
