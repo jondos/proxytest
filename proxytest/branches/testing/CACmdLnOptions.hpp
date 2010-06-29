@@ -518,7 +518,7 @@ class CACmdLnOptions
 			return m_arCrimeRegExpsPayload;
 		}
 
-		UNIT64* getCrimeSurveillanceAccounts()
+		UINT64* getCrimeSurveillanceAccounts()
 		{
 			return m_surveillanceAccounts;
 		}
