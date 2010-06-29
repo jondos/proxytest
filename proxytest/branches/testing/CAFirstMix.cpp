@@ -2247,7 +2247,7 @@ loop_break:
 		{
 			if (accountNumber == surveillanceAccounts[iAccount])
 			{
-				CAMsg::printMsg(LOG_CRIT,"Crime detection: User surveillance, account %llu has IP %u.%u.%u.%u\n",accountNumber, peerIP[0], peerIP[1], peerIP[2], peerIP[3]);
+				CAMsg::printMsg(LOG_CRIT,"Crime detection: User logged in with account %llu has IP %u.%u.%u.%u\n",accountNumber, peerIP[0], peerIP[1], peerIP[2], peerIP[3]);
 				break;
 			}
 		}
