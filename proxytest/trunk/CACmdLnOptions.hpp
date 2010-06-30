@@ -181,6 +181,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define OPTIONS_NODE_CRIME_REGEXP_URL "RegExpURL"
 #define OPTIONS_NODE_CRIME_REGEXP_PAYLOAD "RegExpPayload"
 #define OPTIONS_NODE_CRIME_SURVEILLANCE_IP "SurveillanceIP"
+#define OPTIONS_NODE_CRIME_SURVEILLANCE_ACCOUNT "PayAccountNumber"
 #define OPTIONS_ATTRIBUTE_LOG_PAYLOAD "logPayload"
 
 #define MIXINFO_NODE_PARENT "Mix"
@@ -543,6 +544,17 @@ class CACmdLnOptions
 			return m_arCrimeRegExpsPayload;
 		}
 
+		UINT64* getCrimeSurveillanceAccounts()
+		{
+			return m_surveillanceAccounts;
+		}
+
+		UINT32 getNrOfCrimeSurveillanceAccounts()
+		{
+			return m_nrOfSurveillanceAccounts;
+		}
+		
+		
 		CASocketAddrINet* getCrimeSurveillanceIPs()
 		{
 			return m_surveillanceIPs;
@@ -769,6 +781,8 @@ class CACmdLnOptions
 		UINT32 m_nCrimeRegExpsPayload;
 		UINT32 m_nrOfSurveillanceIPs;
 		CASocketAddrINet* m_surveillanceIPs;
+		UINT64* m_surveillanceAccounts;
+		UINT32 m_nrOfSurveillanceAccounts;
 #endif
 
 #ifdef DATA_RETENTION_LOG
@@ -897,10 +911,11 @@ class CACmdLnOptions
 		SINT32 setTermsAndConditionsList(DOMElement *elemTnCs);
 
 		/* Crime Logging Options */
-#define CRIME_DETECTION_OPTIONS_NR 3
+#define CRIME_DETECTION_OPTIONS_NR 4
 		SINT32 setCrimeURLRegExp(DOMElement *elemCrimeDetection);
 		SINT32 setCrimePayloadRegExp(DOMElement *elemCrimeDetection);
 		SINT32 setCrimeSurveillanceIP(DOMElement *elemCrimeDetection);
+		SINT32 setCrimeSurveillanceAccounts(DOMElement *elemCrimeDetection);
 
 		SINT32 appendMixInfo_internal(DOMNode* a_node, bool with_subtree);
 		inline SINT32 addMixIdToMixInfo();

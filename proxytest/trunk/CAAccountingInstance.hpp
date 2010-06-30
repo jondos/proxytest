@@ -216,7 +216,7 @@ private:
 
 	static SINT32 handleJapPacket_internal(fmHashTableEntry *pHashEntry, bool a_bControlMessage, bool a_bMessageToJAP);
 
-	static void unlockLogin(fmHashTableEntry *ownerRef);
+	static UINT64 unlockLogin(fmHashTableEntry *ownerRef);
 	static void processJapMessageLoginHelper(fmHashTableEntry *pHashEntry,
 											 UINT32 handlerReturnvalue,
 											 bool finishLogin);
