@@ -35,12 +35,22 @@ deny_info ERR_IP_URL directip
 acl robot browser -i bot
 deny_info ERR_ROBOT robot
 
+acl infoserviceA dst 87.230.56.74
+acl infoserviceB dst 72.55.137.241
+acl infoserviceC dst 78.129.146.44
+acl infoserviceD dst 141.76.45.37
+
 http_access deny to_localhost
 http_access deny !localhost
 http_access allow manager localhost
 http_access deny manager
 http_access deny !Safe_ports
 http_access deny CONNECT !SSL_ports
+
+http_access allow infoserviceA
+http_access allow infoserviceB
+http_access allow infoserviceC
+http_access allow infoserviceD
 
 http_access deny bad
 http_access deny badlocal
