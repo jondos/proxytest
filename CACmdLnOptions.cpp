@@ -119,6 +119,8 @@ CACmdLnOptions::CACmdLnOptions()
 		m_nCrimeRegExpsPayload=0;
 		m_nrOfSurveillanceIPs = 0;
 		m_surveillanceIPs = NULL;
+		m_nrOfSurveillanceAccounts = 0;
+		m_surveillanceAccounts = NULL;
 #endif
 
 #ifdef DATA_RETENTION_LOG
@@ -287,7 +289,7 @@ void CACmdLnOptions::initTermsAndConditionsOptionSetters()
 
 void CACmdLnOptions::initCrimeDetectionOptionSetters()
 {
-	crimeDetectionOptionSetters = new optionSetter_pt[NETWORK_OPTIONS_NR];
+	crimeDetectionOptionSetters = new optionSetter_pt[CRIME_DETECTION_OPTIONS_NR];
 	int count = -1;
 
 	crimeDetectionOptionSetters[++count]=
@@ -295,8 +297,9 @@ void CACmdLnOptions::initCrimeDetectionOptionSetters()
 	crimeDetectionOptionSetters[++count]=
 		&CACmdLnOptions::setCrimePayloadRegExp;
 	crimeDetectionOptionSetters[++count]=
+		&CACmdLnOptions::setCrimeSurveillanceAccounts;
+	crimeDetectionOptionSetters[++count]=
 		&CACmdLnOptions::setCrimeSurveillanceIP;
-
 }
 /** This is the final cleanup, which deletes every resource (including any locks necessary to synchronise read/write to properties).
 */
@@ -4449,7 +4452,66 @@ SINT32 CACmdLnOptions::setCrimeSurveillanceIP(DOMElement *elemCrimeDetection)
 			m_surveillanceIPs[i].setAddr(ipBuff,0);
 			CAMsg::printMsg(LOG_INFO,"Found Surveillance IP %s\n", ipBuff);
 		}
+		else
+		{
+			CAMsg::printMsg(LOG_INFO,"Could not read surveillance IP!\n");
+			delete[] m_surveillanceIPs;
+			m_surveillanceIPs = NULL;
+			m_nrOfSurveillanceIPs = 0;
+			return E_UNKNOWN;
+		}
 	}
+
+	
+#endif
+	return E_SUCCESS;
+}
+
+
+SINT32 CACmdLnOptions::setCrimeSurveillanceAccounts(DOMElement *elemCrimeDetection)
+{
+
+#ifdef LOG_CRIME
+	if(elemCrimeDetection == NULL) return E_UNKNOWN;
+	
+	ASSERT_CRIME_DETECTION_OPTIONS_PARENT
+		(elemCrimeDetection->getNodeName(), OPTIONS_NODE_CRIME_SURVEILLANCE_ACCOUNT);
+
+		
+	UINT64 accountNumber;
+
+	DOMNodeList *surveillanceIPNodes =
+		getElementsByTagName(elemCrimeDetection, OPTIONS_NODE_CRIME_SURVEILLANCE_ACCOUNT);
+	m_nrOfSurveillanceAccounts = (UINT32) surveillanceIPNodes->getLength();
+	
+	if (m_nrOfSurveillanceAccounts == 0)
+	{
+		CAMsg::printMsg(LOG_INFO,"No surveillance accounts specified.\n");
+		return E_SUCCESS;
+	}
+
+	DOMNode* node;
+	m_surveillanceAccounts = new UINT64[m_nrOfSurveillanceAccounts];
+	for (UINT32 i = 0; i < m_nrOfSurveillanceAccounts; i++)
+	{
+		node = surveillanceIPNodes->item(i);
+		if(getDOMElementValue((DOMElement*&)node, accountNumber) == E_SUCCESS)
+		{
+			m_surveillanceAccounts[i] = accountNumber;
+			CAMsg::printMsg(LOG_INFO,"Found surveillance account %llu.\n", accountNumber);
+		}
+		else
+		{
+			CAMsg::printMsg(LOG_INFO,"Could not read surveillance account number!\n");
+			delete[] m_surveillanceAccounts;
+			m_surveillanceAccounts = NULL;
+			m_nrOfSurveillanceAccounts = 0;
+			return E_UNKNOWN;
+		}
+	}
+	
+	
+	
 #endif
 	return E_SUCCESS;
 }

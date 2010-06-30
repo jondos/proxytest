@@ -458,11 +458,11 @@ bool CACertificate::isValid()
 	{
 		return true;
 	}
-	//check if certificate is valid within grace period of one month
+	//check if certificate is valid within grace period of two months
 	time_t now = time(NULL); 		//get current time;
 	tm* time = new tm;
 	time = gmtime_r(&now, time);	//convert time to modifiable format
-	if(time->tm_mon < 2)			//go back two month in time
+	if(time->tm_mon < 2)			//go back two months in time
 	{
 		time->tm_mon = time->tm_mon+10;
 		time->tm_year = time->tm_year-1;
@@ -477,7 +477,7 @@ bool CACertificate::isValid()
 	if(X509_cmp_time(X509_get_notBefore(m_pCert), &ttiq) == -1
 			&& X509_cmp_time(X509_get_notAfter(m_pCert), &ttiq) == 1)
 	{
-		CAMsg::printMsg(LOG_WARNING, "Certificate is only valid within grace period of two month!\n");
+		CAMsg::printMsg(LOG_WARNING, "Certificate is only valid within grace period of two months!\n");
 		return true;
 	}
 	return false;
