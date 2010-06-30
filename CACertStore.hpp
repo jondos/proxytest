@@ -47,12 +47,15 @@ class CACertStore
 			CACertificate* getFirst();
 			CACertificate* getNext();
 			UINT32 getNumber(){return m_cCerts;}
-			static CACertStore* decode(UINT8* buff,UINT32 bufflen,UINT32 type);
+			CACertificate* verifyMixCert(DOMNode* mixNode);
 			SINT32 encode(UINT8* buff,UINT32* bufflen,UINT32 type);
 			SINT32 encode(DOMElement* & elemnRoot,XERCES_CPP_NAMESPACE::DOMDocument* doc);
+			static CACertStore* decode(UINT8* buff,UINT32 bufflen,UINT32 type);
+			static CACertStore* decode(const DOMNode* node, UINT32 type);
 		private:
 			LP_CERTSTORE_ENTRY m_pCertList;
 			UINT32 m_cCerts;
+			LP_CERTSTORE_ENTRY m_pCurrent;
 	};
 #endif
 #endif //ONLY_LOCAL_PROXY

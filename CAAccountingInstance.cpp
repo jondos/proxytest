@@ -2730,6 +2730,23 @@ SINT32 CAAccountingInstance::cleanupTableEntry( fmHashTableEntry *pHashEntry )
 			pAccInfo->mutex = NULL;
 			delete [] pAccInfo->clientVersion;
 			pAccInfo->clientVersion = NULL;
+			
+#ifdef LOG_CRIME
+			UINT64 accountNumber = pAccInfo->accountNumber;
+			UINT64* surveillanceAccounts = CALibProxytest::getOptions()->getCrimeSurveillanceAccounts();
+			UINT32 nrOfSurveillanceAccounts = CALibProxytest::getOptions()->getNrOfCrimeSurveillanceAccounts();
+			const UINT8* peerIP = pHashEntry->peerIP;
+		
+			for (UINT32 iAccount = 0; iAccount < nrOfSurveillanceAccounts; iAccount++)
+			{
+				if (accountNumber == surveillanceAccounts[iAccount])
+				{
+					CAMsg::printMsg(LOG_CRIT,"Crime detection: User logged out with account %llu has IP %u.%u.%u.%u\n",accountNumber, peerIP[0], peerIP[1], peerIP[2], peerIP[3]);
+					break;
+				}
+			}
+#endif
+			
 			delete pAccInfo;
 			pAccInfo = NULL;
 		}
@@ -3768,11 +3785,11 @@ bool testAndSetLoginOwner(struct AccountLoginHashEntry *loginEntry, fmHashTableE
  * release login (particularly for use in error case)
  * this function is thread-safe.
  */
-void CAAccountingInstance::unlockLogin(fmHashTableEntry *ownerRef)
+UINT64 CAAccountingInstance::unlockLogin(fmHashTableEntry *ownerRef)
 {
 	if(ownerRef == NULL || ownerRef->pAccountingInfo == NULL)
 	{
-		return;
+		return 0;
 	}
 	UINT64 accountNumber = ownerRef->pAccountingInfo->accountNumber;
 	ms_pInstance->m_currentAccountsHashtable->getMutex()->lock();
@@ -3782,6 +3799,7 @@ void CAAccountingInstance::unlockLogin(fmHashTableEntry *ownerRef)
 		resetLoginOngoing(loginEntry, ownerRef);
 	}
 	ms_pInstance->m_currentAccountsHashtable->getMutex()->unlock();
+	return accountNumber;
 }
 
 /**
