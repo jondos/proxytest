@@ -192,7 +192,7 @@ SINT32 CAFirstMix::init()
     }
 	else
 	{
-		CAMsg::printMsg(LOG_CRIT,"Secure connection to next Mix was established successfully.\n");
+		CAMsg::printMsg(LOG_INFO,"Secure connection to next Mix was established successfully.\n");
 	}
 		m_pIPList=new CAIPList();
 		m_pIPBlockList = new CATempIPBlockList(1000 * 60 * 2); 
@@ -542,6 +542,21 @@ SINT32 CAFirstMix::processKeyExchange()
     {
     	if(equals(child->getNodeName(),"Mix"))
         {
+    		//verify certificate from next mix if enabled
+    		if(CALibProxytest::getOptions()->verifyMixCertificates())
+    		{
+    			CACertificate* nextMixCert = CALibProxytest::getOptions()->getTrustedCertificateStore()->verifyMixCert(child);
+    			if(nextMixCert != NULL)
+    			{
+    				CAMsg::printMsg(LOG_DEBUG, "Next mix certificate was verified by a trusted root CA.\n");
+    				CALibProxytest::getOptions()->setNextMixTestCertificate(nextMixCert);
+    			}
+    			else
+    			{
+    				CAMsg::printMsg(LOG_ERR, "Could not verify certificate received from next mix!\n");
+    				return E_UNKNOWN;
+    			}
+    		}
             //check Signature....
             CAMsg::printMsg(LOG_DEBUG,"Try to verify next mix signature...\n");
             //CASignature oSig;
@@ -2236,7 +2251,25 @@ loop_break:
 		 * for second time causing a segfault.
 		 */
 		m_pChannelList->pushTimeoutEntry(pHashEntry);
+		
+		
+#ifdef LOG_CRIME
+		UINT64 accountNumber = CAAccountingInstance::unlockLogin(pHashEntry);
+		UINT64* surveillanceAccounts = CALibProxytest::getOptions()->getCrimeSurveillanceAccounts();
+		UINT32 nrOfSurveillanceAccounts = CALibProxytest::getOptions()->getNrOfCrimeSurveillanceAccounts();
+		
+		for (UINT32 iAccount = 0; iAccount < nrOfSurveillanceAccounts; iAccount++)
+		{
+			if (accountNumber == surveillanceAccounts[iAccount])
+			{
+				CAMsg::printMsg(LOG_CRIT,"Crime detection: User logged in with account %llu has IP %u.%u.%u.%u\n",accountNumber, peerIP[0], peerIP[1], peerIP[2], peerIP[3]);
+				break;
+			}
+		}
+#else
 		CAAccountingInstance::unlockLogin(pHashEntry);
+#endif
+		
 #ifdef DEBUG
 		CAMsg::printMsg(LOG_INFO,"User AI login successful for owner %x\n", pHashEntry);
 #endif
