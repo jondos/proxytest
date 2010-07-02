@@ -59,13 +59,14 @@ class CAMultiSignature
 		static SINT32 verifyXML(DOMNode* a_node, CACertificate* a_cert);
 		UINT32 getSignatureCount(){ return m_sigCount; }
 		SINT32 sign(UINT8* in,UINT32 inlen,UINT8* sig,UINT32* siglen);
-		SINT32 getXORofSKIs(UINT8* out, UINT32 outlen);
+		SINT32 getXORofSKIs(UINT8* in, UINT32 inlen);
 		SINT32 findSKI(const UINT8* a_strSKI);
 	private:
 		SIGNATURE* m_signatures;
 		UINT32 m_sigCount;
 		UINT8* m_xoredID;
-		SINT32 getSKI(UINT8* in, UINT32 inlen, const UINT8* a_ski);
+		static SINT32 getSignatureElements(DOMNode* parent, DOMNode** signatureNodes, UINT32* length);
+		SINT32 getSKI(UINT8* in, UINT32 inlen, UINT8* a_ski);
 };
 
 #endif /* CAMULTISIGNATURE_HPP_ */
