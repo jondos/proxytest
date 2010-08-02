@@ -25,6 +25,7 @@ acl SSL_ports port 1-65535
 acl CONNECT method CONNECT
 
 acl bad url_regex -i "/usr/local/etc/squid/squid-block.acl" 
+deny_info ERR_ACCESS_DENIED_BAD bad
 acl badlocal url_regex -i "/usr/local/etc/squid/squid-block.acl.local" 
 deny_info ERR_ACCESS_DENIED_HERE badlocal
 

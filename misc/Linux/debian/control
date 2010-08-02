@@ -9,7 +9,7 @@ Homepage: https://www.jondos.de
 
 Package: mix-free-squidconf
 Architecture: all
-Depends: squid, mix-squidblocklist, mix-squidmessages
+Depends: squid, mix-squidblocklist, mix-squidmessages (>10.08.01)
 Conflicts: mix-premium-squidconf
 Description: squid configuration for JonDonym free mixes
  The package contains an optimized squid configuration für JonDonym free exit mixes.

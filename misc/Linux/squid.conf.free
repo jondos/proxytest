@@ -2,9 +2,7 @@
 # Set the path to your error message directory
 # or cemment out to use the default squid messages
 
-
 error_directory /home/mix/stable/misc/squid-messages
-
 
 # Set the outgiong IP address, if your server have more
 # than one IP addresses
@@ -48,23 +46,35 @@ acl to_localhost dst 127.0.0.0/8
 acl directip dstdom_regex [0-9]+\.[0-9]+\.[0-9]+\.[0-9]+
 deny_info ERR_IP_URL directip
 
+# for free cascades only
 acl robot browser -i bot
 deny_info ERR_ROBOT robot
 
+# for free cascades only
 acl Safe_ports port 80 443	# http, https
+deny_info ERR_NOT_SAFE_PORT !Safe_ports
+
+# for free cascades only
 acl SSL_ports port 443 
 
 acl purge method PURGE
 acl CONNECT method CONNECT
 
 acl bad url_regex -i "/etc/squid/squid-block.acl" 
+deny_info ERR_ACCESS_DENIED_BAD bad
 acl badlocal url_regex -i "/etc/squid/squid-block.acl.local"
 deny_info ERR_ACCESS_DENIED_HERE badlocal
 
+# for free cascades only
 acl infoserviceA dst 87.230.56.74
 acl infoserviceB dst 72.55.137.241
 acl infoserviceC dst 78.129.146.44
 acl infoserviceD dst 141.76.45.37
+acl infoserviceE dst 87.230.20.188
+acl paymentA dst 91.184.37.82
+acl paymentB dst 91.184.37.83
+acl paymentC dst 87.230.101.54
+acl upgradeserver dst 141.76.45.41
 
 http_access allow manager localhost
 http_access deny manager
@@ -73,17 +83,23 @@ http_access deny purge
 http_access deny !Safe_ports
 http_access deny CONNECT !SSL_ports
 
+# for free cascades only
 http_access allow infoserviceA
 http_access allow infoserviceB
 http_access allow infoserviceC
 http_access allow infoserviceD
+http_access allow infoserviceE
+http_access allow paymentA
+http_access allow paymentB
+http_access allow paymentC
+http_access allow upgradeserver
 
 http_access deny bad
 http_access deny badlocal
 http_access deny directip
 http_access deny robot
-http_access allow localhost
 
+http_access allow localhost
 http_access deny all
 
 http_reply_access allow all

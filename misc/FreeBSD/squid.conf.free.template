@@ -24,9 +24,11 @@ acl localnet src 192.168.0.0/16 # RFC1918 possible internal network
 acl Safe_ports port 80 443	# http, https
 acl SSL_ports port 443 
 
+acl purge method PURGE
 acl CONNECT method CONNECT
 
 acl bad url_regex -i "/usr/local/etc/squid/squid-block.acl"
+deny_info ERR_ACCESS_DENIED_BAD bad
 acl badlocal url_regex -i "/usr/local/etc/squid/squid-block.acl.local" 
 deny_info ERR_ACCESS_DENIED_HERE badlocal
 
@@ -39,18 +41,27 @@ acl infoserviceA dst 87.230.56.74
 acl infoserviceB dst 72.55.137.241
 acl infoserviceC dst 78.129.146.44
 acl infoserviceD dst 141.76.45.37
+acl infoserviceE dst 87.230.20.188
+acl paymentA dst 91.184.37.82
+acl paymentB dst 91.184.37.83
+acl paymentC dst 87.230.101.54
+acl upgradeserver dst 141.76.45.41
 
 http_access deny to_localhost
 http_access deny !localhost
 http_access allow manager localhost
 http_access deny manager
-http_access deny !Safe_ports
 http_access deny CONNECT !SSL_ports
 
 http_access allow infoserviceA
 http_access allow infoserviceB
 http_access allow infoserviceC
 http_access allow infoserviceD
+http_access allow infoserviceE
+http_access allow paymentA
+http_access allow paymentB
+http_access allow paymentC
+http_access allow upgradeserver
 
 http_access deny bad
 http_access deny badlocal
