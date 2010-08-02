@@ -1,3 +1,11 @@
+mix-squidconf (10.08.02) unstable; urgency=low
+
+  * allow direct IP connection for payment und update
+  * fixes some squid error messages
+
+ -- JonDos GmbH <info@jondos.de>  Mon, 2 Aug 2010 12:17:23 +0200
+
+
 mix-squidconf (10.06.30) unstable; urgency=low
 
   * allow direct IP connection for Infoservice

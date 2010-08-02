@@ -2,7 +2,7 @@
 <html>
 <head> 
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
-<title>ERROR: The requested URL could not be retrieved</title> 
+<title>ERROR: Access Denied.</title> 
 <style type="text/css">
   H1 { color: blue; font-size: 22px; font-weight:bold; }
   H2 { color: black; font-size: 18px; font-weight:bold; }
@@ -22,7 +22,8 @@
  </div> 
  <div id="content" align="center"> 
  <p>The requested URL contains an IP address and is blocked on free cascades.<br>
- Please use <b>JonDonym premium services</b> to avoid this limit.</p>
+ Please use <a href="https://anonymous-proxy-servers.net/en/jondo/rates_and_prices">JonDonym premium services</a> 
+ to avoid this limit.</p>
 <!-- %c  %s --> 
 </div>
  </body>
