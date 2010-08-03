@@ -4,7 +4,6 @@
 
 error_directory /home/mix/stable/misc/squid-messages
 
-
 # Set the outgiong IP address, if your server have more
 # than one IP addresses
 
