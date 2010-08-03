@@ -1,3 +1,10 @@
+mix-squidconf (10.08.03) unstable; urgency=low
+
+  * allow direct IP connection for yap infoservice
+
+ -- JonDos GmbH <info@jondos.de>  Mon, 2 Aug 2010 22:17:23 +0200
+ 
+
 mix-squidconf (10.08.02) unstable; urgency=low
 
   * allow direct IP connection for payment und update
