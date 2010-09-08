@@ -108,7 +108,6 @@
     <ClInclude Include="CACertificate.hpp" />
     <ClInclude Include="CACertStore.hpp" />
     <ClInclude Include="CAClientSocket.hpp" />
-    <ClInclude Include="CACmdLnOptions.hpp" />
     <ClInclude Include="CAConditionVariable.hpp" />
     <ClInclude Include="CAControlChannelDispatcher.hpp" />
     <ClInclude Include="CAControlChannelTest.hpp" />
@@ -242,6 +241,9 @@
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="CACacheLoadBalancing.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="CACmdLnOptions.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>

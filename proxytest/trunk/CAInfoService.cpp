@@ -1093,13 +1093,22 @@ SINT32 CAInfoService::sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN (*a_
 		messages[i]->is = this;
 		messages[i]->requestCommand = requestCommand;
 		messages[i]->param = param;
+#if !defined(NO_INFOSERVICE_TRHEADS) 
 		threads[i] = new CAThread(a_strThreadName);
 		threads[i]->setMainLoop((THREAD_RETURN (*)(void *))a_thread);
 		threads[i]->start((void*)(messages[i]), false, true);
+#else
+		(*a_thread)(messages[i]);
+			if (messages[i]->retVal == E_SUCCESS)
+			{
+				returnValue = E_SUCCESS;
+			}
+#endif
 	}
 
 	for (UINT32 i = 0; i < nrAddresses; i++)
 	{
+#if !defined(NO_INFOSERVICE_TRHEADS)
 		if (threads[i]->join() == E_SUCCESS)
 		{
 			// CAMsg::printMsg(LOG_DEBUG,"InfoService: helo thread %u joined.\n", i);
@@ -1108,12 +1117,13 @@ SINT32 CAInfoService::sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN (*a_
 				returnValue = E_SUCCESS;
 			}
 		}
+		delete threads[i];
+		threads[i] = NULL;
+#endif
 		delete messages[i]->addr;
 		messages[i]->addr = NULL;
 		delete messages[i];
 		messages[i] = NULL;
-		delete threads[i];
-		threads[i] = NULL;
 	}
 	//Message looks senseless but please keep it because Rolf reported a helo thread deadlock.
 	//Perhaps there is a problem when the threads are joined.
