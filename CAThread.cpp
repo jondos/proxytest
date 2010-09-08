@@ -159,10 +159,10 @@ SINT32 CAThread::start(void* param,bool bDaemon,bool bSilent)
 			CAMsg::printMsg(LOG_DEBUG, "CAThread::start() - Warning no thread list found\n");
 		}
 #endif
-		#ifdef DEBUG
-			if(!bSilent)
+#ifdef DEBUG
+		if(!bSilent)
 				CAMsg::printMsg(LOG_DEBUG, "CAThread::start() - thread created sucessful\n");
-		#endif
+#endif
 
 		#ifdef OS_TUDOS
 

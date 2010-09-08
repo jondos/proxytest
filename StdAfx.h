@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.09.16"
+#define MIX_VERSION "00.09.17"
 
 // set to "true" if this is a testing/development version which is not meant for prodictive use
 #define MIX_VERSION_TESTING true
@@ -73,6 +73,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 /* LERNGRUPPE: define this to get dynamic mixes */
 //#define DYNAMIC_MIX
 //#define SDTFA // specific logic needed by SDTFA, http://www.sdtfa.com
+//#define NO_INFOSERVICE_TRHEADS //define as a workaround for the bug in threaded communication to IS.
 
 //#define LASTMIX_CHECK_MEMORY // only for internal debugging purpose
 //#define PRINT_THREAD_STACK_TRACE //Usefull for debugging output of stack trace if mix dies...
