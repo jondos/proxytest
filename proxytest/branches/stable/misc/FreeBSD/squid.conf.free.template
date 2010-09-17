@@ -47,6 +47,7 @@ acl paymentA dst 91.184.37.82
 acl paymentB dst 91.184.37.83
 acl paymentC dst 87.230.101.54
 acl upgradeserver dst 141.76.45.41
+acl anontest dst 78.129.167.165
 
 http_access deny to_localhost
 http_access deny !localhost
@@ -64,6 +65,7 @@ http_access allow paymentA
 http_access allow paymentB
 http_access allow paymentC
 http_access allow upgradeserver
+http_access allow anontest
 
 http_access deny bad
 http_access deny badlocal
