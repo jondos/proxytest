@@ -1,0 +1,35 @@
+//
+// Do any local configuration here
+//
+
+// Consider adding the 1918 zones here, if they are not used in your
+// organization
+// include "/etc/bind/zones.rfc1918";
+
+
+// New nations project
+zone "ti" {
+	type slave;
+	file "cache.db.ti";
+	masters { 88.84.130.20; 194.50.176.206; };
+};
+
+zone "te" {
+        type slave;
+        file "cache.db.te";
+        masters { 88.84.130.20; 194.50.176.206; };
+};
+
+zone "uu" {
+        type slave;
+        file "cache.db.uu";
+        masters { 88.84.130.20; 194.50.176.206; };
+};
+
+// OpenNIC
+zone "." IN {
+type slave;
+file "cache.db.opennic";
+masters {66.244.95.20;207.192.69.155;};
+notify no;
+};
