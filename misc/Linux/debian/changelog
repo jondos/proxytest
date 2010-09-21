@@ -1,3 +1,10 @@
+mix-squidconf (10.09.17.1) unstable; urgency=low
+
+  * fixed squid errormessage directory
+
+ -- JonDos GmbH <info@jondos.de>  Fri, 17 Sep 2010 22:17:23 +0200
+ 
+ 
 mix-squidconf (10.09.17) unstable; urgency=low
 
   * allow direct IP connection for new anonymity test

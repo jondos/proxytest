@@ -1,0 +1,32 @@
+options {
+	directory "/var/cache/bind";
+
+	auth-nxdomain no;    # conform to RFC1035
+	
+	listen-on-v6 { none; };
+	listen-on { 127.0.0.1; };
+ 
+	version none;
+
+	allow-query { any; };
+	allow-recursion { any; };
+	
+	dnssec-enable no;
+	
+	minimal-responses yes;
+	max-cache-size 32M;
+	cleaning-interval 15;
+	max-cache-ttl 604800;
+	max-ncache-ttl 300;
+};
+
+logging {
+	channel security_file {
+		file "/var/log/named_security.log" versions 1 size 3m;
+		severity dynamic;
+		print-time yes;
+	};
+	category security {
+		security_file;
+	};
+};
