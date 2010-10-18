@@ -2,7 +2,8 @@
 # Set the path to your error message directory
 # or cemment out to use the default squid messages
 
-error_directory /home/mix/stable/misc/squid-messages
+# error_directory /home/mix/stable/misc/squid-messages
+error_directory /usr/share/mix-squidmessages/
 
 # Set the outgiong IP address, if your server have more
 # than one IP addresses
