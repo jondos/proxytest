@@ -8,7 +8,6 @@ options {
 	
         dnssec-enable yes;
         dnssec-validation yes;
-        
         dnssec-lookaside "." trust-anchor "dlv.isc.org";
 	
 	minimal-responses yes;
@@ -16,15 +15,4 @@ options {
 	cleaning-interval 15;
 	max-cache-ttl 604800;
 	max-ncache-ttl 300;
-};
-
-logging {
-	channel security_file {
-		file "/var/log/named_security.log" versions 1 size 3m;
-		severity dynamic;
-		print-time yes;
-	};
-	category security {
-		security_file;
-	};
 };
