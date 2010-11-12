@@ -15,6 +15,12 @@ acl to_localhost dst [% extIP %]
 # Replace by correct path to your squid messages
 error_directory /home/mix/stable/misc/squid-messages
 
+
+cache_mem 128 MB
+cache_store_log none
+cache_access_log none 
+max_filedescriptors 16384
+
 acl localnet src 10.0.0.0/8     # RFC1918 possible internal network
 acl localnet src 172.16.0.0/12  # RFC1918 possible internal network
 acl localnet src 192.168.0.0/16 # RFC1918 possible internal network
