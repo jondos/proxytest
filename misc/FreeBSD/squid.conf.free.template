@@ -13,6 +13,10 @@ acl to_localhost dst [% extIP %]
 # Replace by correct path to your squid messages
 error_directory /home/mix/stable/misc/squid-messages
 
+cache_mem 128 MB
+cache_store_log none
+cache_access_log none
+max_filedescriptors 16384
 
 acl all src all
 acl manager proto cache_object

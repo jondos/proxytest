@@ -13,6 +13,8 @@ error_directory /home/mix/stable/misc/squid-messages
 http_port 127.0.0.1:3128
 icp_port 0
 
+max_filedescriptors 16384
+
 cache_mem 128 MB
 
 hierarchy_stoplist cgi-bin ?
@@ -24,10 +26,11 @@ cache_dir coss /var/spool/squid/coss1 2048 max-size=100000
 cache_dir coss /var/spool/squid/coss2 2048 max-size=200000
 cache_dir coss /var/spool/squid/coss3 2048 max-size=500000
 
-cache_access_log none 
 cache_log /var/log/squid/cache.log
-cache_store_log none
 cache_swap_log /var/spool/squid/
+
+cache_store_log none
+cache_access_log none 
 
 hosts_file /etc/hosts
 
