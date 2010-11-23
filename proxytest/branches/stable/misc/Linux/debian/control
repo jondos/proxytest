@@ -34,3 +34,13 @@ Architecture: all
 Description: squid error messages for JonDonym 
  The package contains squid error messages for JonDonym exit mixes
 Homepage: https://www.jondos.de
+
+Package: mix-bind9conf
+Architecture: all
+Depends: bind9 (>= 9.7), resolvconf
+Conflicts: unbound, pdnsd
+Description: bind9 configuration for JonDonym 
+ The package contains the bind9 configuration for JonDonym.
+ DNSSEC is enabled and it supports the ICANN in dependend 
+ toplevel domains of OpenNIC and "free nations".
+Homepage: https://www.jondos.de

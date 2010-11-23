@@ -1,0 +1,33 @@
+#!/bin/bash
+set -e
+
+if [ -x "`which invoke-rc.d 2>/dev/null`" ]; then
+	invoke-rc.d bind9 stop
+else
+	/etc/init.d/bind9 stop
+fi
+
+rm /etc/bind/named.conf.options
+rm /etc/bind/named.conf.keys
+rm /etc/bind/named.conf.local
+
+# restore the backup of bind configuration
+mv -f /usr/share/doc/mix-bind9conf/conf/named.conf.orig /etc/bind/named.conf
+
+if [ -e /usr/share/doc/mix-bind9conf/conf/named.conf.options.orig ]
+  then
+  mv /usr/share/doc/mix-bind9conf/conf/named.conf.options.orig /etc/bind/named.conf.options
+fi
+
+if [ -e /usr/share/doc/mix-bind9conf/conf/named.conf.keys.orig ]
+  then
+  mv /usr/share/doc/mix-bind9conf/conf/named.conf.keys.orig /etc/bind/named.conf.keys
+fi
+
+if [ -e /usr/share/doc/mix-bind9conf/conf/named.conf.local.orig ]
+  then
+  mv /usr/share/doc/mix-bind9conf/conf/named.conf.local.orig /etc/bind/named.conf
+fi
+
+exit 0
+
