@@ -28,6 +28,13 @@ install: build
 	
 	# install the squid messages
 	cp -f ../squid-messages/* debian/mix-squidmessages/usr/share/mix-squidmessages/
+	
+	# install the bind9 config
+	install -m 0644 named.conf.keys debian/mix-bind9conf/usr/share/doc/mix-bind9conf/conf/named.conf.keys
+	install -m 0644 named.conf.local debian/mix-bind9conf/usr/share/doc/mix-bind9conf/conf/named.conf.local
+	install -m 0644 named.conf.options debian/mix-bind9conf/usr/share/doc/mix-bind9conf/conf/named.conf.options
+	install -m 0644 debian/named.conf debian/mix-bind9conf/usr/share/doc/mix-bind9conf/conf/named.conf
+	
 
 binary-arch: build install
 
