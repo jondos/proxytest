@@ -1,0 +1,69 @@
+#!/usr/bin/perl
+
+use strict;
+use Nagios::Plugin;
+use Nagios::Plugin::Getopt;
+use XML::Simple;
+use LWP::UserAgent;
+
+my $np= Nagios::Plugin->new(shortname => 'MIXSERVER');
+my $ng = Nagios::Plugin::Getopt->new(
+			     usage => "Usage: %s -H|--hostname <host> [-p|--port <port>] [ -v|--verbose ] [-t <timeout>] ",
+			     version => '0.1'
+);
+
+$ng->arg( spec => 'hostname|H=s', help => "-H, --hostname=HOSTNAME\n   Hostname or IP address of the mix server (required)", required => 1);
+$ng->arg( spec => 'port|p=i', help => "-p, --port=INTEGER\n   Monitoring port of your mix server (default: 8080)", default => 8080);
+
+$ng->getopts;
+
+my $host= $ng->get('hostname');
+my $port= $ng->get('port');
+my $timeout= $ng->get('timeout');
+
+# get the status page
+my $ua= LWP::UserAgent->new();
+$ua->timeout(5);
+
+my $response = $ua->get("http://$host:$port/");
+if( $response->is_error() ) { 
+  $np->nagios_exit( Nagios::Plugin::UNKNOWN, " An error occured while trying to connect to mix $host:$port."); 
+}
+
+my $xs = XML::Simple->new();
+my $ref = $xs->XMLin( $response->content() );
+
+# no XML Format
+if(! defined($ref)) {
+  $np->nagios_exit( Nagios::Plugin::UNKNOWN, " An error occured while processing mix status message.");
+}
+
+# ceck mix server status
+
+my $sys_level= $ref->{'SystemStatus'}->{'StateLevel'};
+my $net_level= $ref->{'NetworkingStatus'}->{'StateLevel'};
+
+#my $pay_level= $ref->{'PaymentStatus'}->{'StateLevel'};
+
+my @critical;
+my @warning;
+my @ok;
+
+if ($sys_level eq 'OK') { push @ok, $ref->{'SystemStatus'}->{'StateDescription'}; }
+elsif ($sys_level eq 'CRITICAL') { push @critical, $ref->{'SystemStatus'}->{'StateDescription'}; }
+else { push @warning, $ref->{'SystemStatus'}->{'StateDescription'}; }
+
+if ($net_level eq 'OK') { push @ok, $ref->{'NetworkingStatus'}->{'StateDescription'}; }
+elsif ($net_level eq 'CRITICAL') { push @critical, $ref->{'NetworkingStatus'}->{'StateDescription'}; }
+else { push @warning, $ref->{'NetworkingStatus'}->{'StateDescription'}; }
+
+# if (defined($pay_level)) {
+#   if ($net_level eq 'OK') { push @ok, $ref->{'PaymentStatus'}->{'StateDescription'}; }
+#   elsif ($net_level eq 'CRITICAL') { push @critical, $ref->{'PaymentStatus'}->{'StateDescription'}; }
+#  else { push @warning, $ref->{'PaymentStatus'}->{'StateDescription'};  }
+# }
+
+# exit the plugin
+if (@critical) { $np->nagios_exit( Nagios::Plugin::CRITICAL, join(', ', @critical) ); } 
+elsif (@warning) { $np->nagios_exit( Nagios::Plugin::WARNING, join(', ', @warning) ) }
+else { $np->nagios_exit( Nagios::Plugin::OK, join(', ', @ok) ); }
