@@ -1,3 +1,17 @@
+mix-squidconf (10.12.7) unstable; urgency=low
+
+  * remove direct IP blocking for free exit mixes 
+
+ -- JonDos GmbH <info@jondos.de>  Tue, 07 Dec 2010 08:17:23 +0200
+
+
+mix-squidconf (10.11.25) unstable; urgency=low
+
+  * update URLs in squid error messages
+
+ -- JonDos GmbH <info@jondos.de>  Thu, 25 Nov 2010 08:17:23 +0200
+
+
 mix-squidconf (10.09.17.1) unstable; urgency=low
 
   * fixed squid errormessage directory
