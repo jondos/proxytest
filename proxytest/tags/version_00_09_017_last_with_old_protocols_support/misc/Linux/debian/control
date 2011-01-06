@@ -1,0 +1,24 @@
+Source: mix-squidconf
+Section: net
+Priority: optional
+Maintainer: JonDos GmbH <info@jondos.de>
+Build-Depends: debhelper (>= 4.0.0)
+Standards-Version: 5.0
+Homepage: https://www.jondos.de
+
+
+Package: mix-free-squidconf
+Architecture: all
+Depends: squid
+Conflicts: mix-premium-squidconf
+Description: squid configuration for JonDonym free mixes
+ The package contains an optimized squid configuration für JonDonym free exit mixes.
+Homepage: https://www.jondos.de
+
+Package: mix-premium-squidconf
+Architecture: all
+Depends: squid
+Conflicts: mix-free-squidconf
+Description: squid configuration for JonDonym premium mixes
+ The package contains an optimized squid configuration für JonDonym premium exit mixes.
+Homepage: https://www.jondos.de

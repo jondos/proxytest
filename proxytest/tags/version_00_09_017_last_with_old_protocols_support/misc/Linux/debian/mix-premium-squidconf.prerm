@@ -1,0 +1,14 @@
+#!/bin/sh
+set -e
+
+if [ -x "`which invoke-rc.d 2>/dev/null`" ]; then
+	invoke-rc.d squid stop || exit $?
+else
+	/etc/init.d/squid stop || exit $?
+fi
+sleep 3
+
+# restore the backup of squid configuration
+cp -f /usr/share/doc/mix-premium-squidconf/conf/squid.conf.orig /etc/squid/squid.conf
+rm /etc/squid/squid-block.acl
+
