@@ -62,10 +62,17 @@ typedef UINT32 HCHANNEL;
 
 #define NEW_FLOW_CONTROL_FLAG 0x8000
 
+#define INTEGRITY_ERROR_FLAG  0x4000
+
 #define CONNECTION_ERROR_FLAG 0x01
 
 #define DATA_SIZE 			992
-#define PAYLOAD_SIZE 		989
+#ifdef WITH_INTEGRITY_CHECK
+	#define PAYLOAD_SIZE 	973
+#else
+	#define PAYLOAD_SIZE 	989
+#endif
+#define GCM_MAC_SIZE		16
 #define PAYLOAD_LEN_MASK 0x03FF;
 
 #if (defined(WIN32) ||defined(__sgi))&&!defined(__GNUC__)
