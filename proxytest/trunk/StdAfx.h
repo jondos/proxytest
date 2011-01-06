@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.09.17"
+#define MIX_VERSION "00.10.01"
 
 // set to "true" if this is a testing/development version which is not meant for prodictive use
 #define MIX_VERSION_TESTING true
@@ -150,6 +150,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define WITH_CONTROL_CHANNELS_TEST //enable a Test control Channel
 //#define NEW_FLOW_CONTROL //enable for the new flow control mechanism
 //#define NEW_CHANNEL_ENCRYPTION //enable the new protcol version which uses ECDH for key transport and two keys for upstream/downstream channel cryption
+#define WITH_INTEGRITY_CHECK //enable AES-GCM encryption for data channels
 
 //#define REPLAY_DETECTION // enable to prevent replay of mix packets
 #define REPLAY_TIMESTAMP_PROPAGATION_INTERVALL 1 //How often (in minutes) should the current replay timestamps be propagate
@@ -167,6 +168,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #if defined (NEW_FLOW_CONTROL) && !defined(NO_PARKING)
 	#define NO_PARKING // disable old control flow
+#endif
+
+#if defined (WITH_INTEGRITY_CHECK) && !defined(NEW_CHANNEL_ENCRYPTION)
+	#define NEW_CHANNEL_ENCRYPTION
 #endif
 
 //#define REPLAY_DATABASE_PERFORMANCE_TEST //to perform a performance test of the replay db
@@ -231,6 +236,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define LM_PACKET_STATS_LOG_INTERVALL 1 //Intervall in Minutes for loggin packet stats for the last Mix
 
 
+#define MIX_CASCADE_PROTOCOL_VERSION_0_1_1 11  //with integrity check and new channel encryption
 #define MIX_CASCADE_PROTOCOL_VERSION_0_1_0 10  //with new channel encryption
 //#define MIX_CASCADE_PROTOCOL_VERSION_0_9 9  //with new payment protocol
 #define MIX_CASCADE_PROTOCOL_VERSION_0_8 8  //with replay detection + control channels + first mix symmetric
@@ -245,6 +251,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define MIX_CASCADE_PROTOCOL_VERSION "0.81"
 //#elif defined(PAYMENT)
 	//#define MIX_CASCADE_PROTOCOL_VERSION "0.9"
+#elif defined (WITH_INTEGRITY_CHECK)
+	#define MIX_CASCADE_PROTOCOL_VERSION "0.11"
 #elif defined (NEW_CHANNEL_ENCRYPTION)
 	#define MIX_CASCADE_PROTOCOL_VERSION "0.10" //"0.10tc"
 #else
@@ -661,8 +669,16 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define NEW_CHANNEL_ENCRYPTION_COMPATIBILITY
 #endif
 
-#define MIX_VERSION_INFO "Mix-Version: " MIX_VERSION PAYMENT_VERSION_INFO DATA_RETENTION_LOG_INFO NEW_FLOW_CONTROL_INFO NEW_CHANNEL_ENCRYPTION_INFO "\nUsing: " OPENSSL_VERSION_TEXT "\nUsing Xerces-C: " MY_XERCES_VERSION "\n"
-#define MIX_VERSION_COMPATIBILITY PAYMENT_COMPATIBILITY " " NEW_FLOW_CONTROL_COMPATIBILITY " " NEW_CHANNEL_ENCRYPTION_COMPATIBILITY
+#ifdef WITH_INTEGRITY_CHECK
+	#define WITH_INTEGRITY_CHECK_INFO " (with integrity check for data channels)"
+	#define WITH_INTEGRITY_CHECK_COMPATIBILITY "WithIntegrityCheck"
+#else
+	#define WITH_INTEGRITY_CHECK_INFO
+	#define WITH_INTEGRITY_CHECK_COMPATIBILITY
+#endif
+
+#define MIX_VERSION_INFO "Mix-Version: " MIX_VERSION PAYMENT_VERSION_INFO DATA_RETENTION_LOG_INFO NEW_FLOW_CONTROL_INFO NEW_CHANNEL_ENCRYPTION_INFO WITH_INTEGRITY_CHECK_INFO "\nUsing: " OPENSSL_VERSION_TEXT "\nUsing Xerces-C: " MY_XERCES_VERSION "\n"
+#define MIX_VERSION_COMPATIBILITY PAYMENT_COMPATIBILITY " " NEW_FLOW_CONTROL_COMPATIBILITY " " NEW_CHANNEL_ENCRYPTION_COMPATIBILITY " " WITH_INTEGRITY_CHECK_COMPATIBILITY
 
 #include "errorcodes.hpp"
 #include "typedefs.hpp"
