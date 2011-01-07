@@ -31,9 +31,9 @@ acl SSL_ports port 443
 acl purge method PURGE
 acl CONNECT method CONNECT
 
-acl bad url_regex -i "/usr/local/etc/squid/squid-block.acl"
+acl bad dstdom_regex "/usr/local/etc/squid/squid-block.acl"
 deny_info ERR_ACCESS_DENIED_BAD bad
-acl badlocal url_regex -i "/usr/local/etc/squid/squid-block.acl.local" 
+acl badlocal dstdom_regex "/usr/local/etc/squid/squid-block.acl.local" 
 deny_info ERR_ACCESS_DENIED_HERE badlocal
 
 acl robot browser -i bot
@@ -66,14 +66,10 @@ refresh_pattern ^gopher:        1440    0%      1440
 refresh_pattern -i (/cgi-bin/|\?) 0     0%      0
 refresh_pattern .               0       20%     4320
 
-acl shoutcast rep_header X-HTTP09-First-Line ^ICY.[0-9]
-upgrade_http0.9 deny shoutcast
-
-acl apache rep_header Server ^Apache
-broken_vary_encoding allow apache
 
 coredump_dir /usr/local/squid/cache
 
+visible_hostname none
 header_access Via deny all
 header_access Cache-Control deny all
 forwarded_for off
