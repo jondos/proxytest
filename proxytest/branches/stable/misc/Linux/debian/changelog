@@ -1,8 +1,15 @@
+mix-squidconf (11.01.07) unstable; urgency=low
+
+  * cleaned blacklist
+
+ -- JonDos GmbH <info@jondos.de>  Fri, 07 Jan 2011 10:17:23 +0200
+
+
 mix-squidconf (10.12.10) unstable; urgency=low
 
   * added firestorm.ch to blacklist
 
- -- JonDos GmbH <info@jondos.de>  Tue, 10 Dec 2010 08:17:23 +0200
+ -- JonDos GmbH <info@jondos.de>  Fri, 10 Dec 2010 08:17:23 +0200
 
 
 mix-squidconf (10.12.7) unstable; urgency=low
