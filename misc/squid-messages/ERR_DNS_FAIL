@@ -22,8 +22,8 @@
  </div> 
  <div id="content" align="center"> 
 <p>The DNS server returned: %z </p>  
-<p>This means that the cache was not able to resolve the hostname<br> 
-presented in the URL. Check if the address is correct.</p>
+<p>This means that the DNS server was not able to resolve the hostname.<br> 
+Check if the address is correct. May be, you have to add "www."</p>
 <!-- %c  %s --> 
 </div>
  </body>
