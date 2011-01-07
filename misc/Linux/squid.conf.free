@@ -63,11 +63,10 @@ acl SSL_ports port 443
 acl purge method PURGE
 acl CONNECT method CONNECT
 
-acl bad url_regex -i "/etc/squid/squid-block.acl" 
+acl bad dstdom_regex "/usr/local/etc/squid/squid-block.acl"
 deny_info ERR_ACCESS_DENIED_BAD bad
-acl badlocal url_regex -i "/etc/squid/squid-block.acl.local"
+acl badlocal dstdom_regex "/usr/local/etc/squid/squid-block.acl.local" 
 deny_info ERR_ACCESS_DENIED_HERE badlocal
-
 
 http_access allow manager localhost
 http_access deny manager
