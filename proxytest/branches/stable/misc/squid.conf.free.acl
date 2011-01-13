@@ -1,47 +1,6 @@
-
-# Set the path to your error message directory
-# or cemment out to use the default squid messages
-
-error_directory /home/mix/stable/misc/squid-messages
-
-# Set the outgiong IP address, if your server have more
-# than one IP addresses
-
-# tcp_outgoing_address 123.123.123.123
-
-
-http_port 127.0.0.1:3128
-icp_port 0
-
-max_filedescriptors 16384
-
-cache_mem 128 MB
-
-hierarchy_stoplist cgi-bin ?
-acl QUERY urlpath_regex cgi-bin \?
-no_cache deny QUERY
-
-
-cache_dir coss /var/spool/squid/coss1 2048 max-size=100000
-cache_dir coss /var/spool/squid/coss2 2048 max-size=200000
-cache_dir coss /var/spool/squid/coss3 2048 max-size=500000
-
-maximum_object_size 16384 KB
- 
-cache_log /var/log/squid/cache.log
-cache_swap_log /var/spool/squid/
-
-cache_store_log none
-cache_access_log none
-
-
-hosts_file /etc/hosts
-
-refresh_pattern ^ftp:		1440	20%	10080
-refresh_pattern ^gopher:	1440	0%	1440
-refresh_pattern .		0	20%	4320
-
-half_closed_clients off
+############################################
+# ACLs and privacy option for JonDonym mixes
+############################################
 
 acl all src 0.0.0.0/0.0.0.0
 acl manager proto cache_object
@@ -85,15 +44,7 @@ http_reply_access allow all
 
 icp_access allow all
 
-cache_effective_user proxy
-cache_effective_group proxy
-
 visible_hostname none
 forwarded_for off
 header_access Via deny all
 header_access Cache-Control deny all
-
-coredump_dir /var/spool/squid
-
-
-
