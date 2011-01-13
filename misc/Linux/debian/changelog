@@ -1,3 +1,10 @@
+mix-squidconf (11.01.11) unstable; urgency=low
+
+  * bugfix for squid.conf
+
+ -- JonDos GmbH <info@jondos.de>  Mon, 10 Jan 2011 09:17:23 +0200
+
+
 mix-squidconf (11.01.07) unstable; urgency=low
 
   * cleaned blacklist
