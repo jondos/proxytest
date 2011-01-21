@@ -4,6 +4,9 @@
 
 error_directory /home/mix/stable/misc/squid-messages
 
+# For Debian package
+# error_directory /usr/share/mix-squidmessages
+
 # Set the outgiong IP address, if your server have more
 # than one IP addresses
 
@@ -51,9 +54,9 @@ acl SSL_ports port 1-65535
 acl purge method PURGE
 acl CONNECT method CONNECT
 
-acl bad dstdom_regex "/usr/local/etc/squid/squid-block.acl"
+acl bad dstdom_regex "/etc/squid/squid-block.acl"
 deny_info ERR_ACCESS_DENIED_BAD bad
-acl badlocal dstdom_regex "/usr/local/etc/squid/squid-block.acl.local" 
+acl badlocal dstdom_regex "/etc/squid/squid-block.acl.local" 
 deny_info ERR_ACCESS_DENIED_HERE badlocal
 
 http_access allow manager localhost
