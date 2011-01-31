@@ -188,6 +188,16 @@ typedef struct t_queue_entry tQueueEntry;
 //normaly this is just the packet
 typedef tQueueEntry tPoolEntry;
 
+/*
+struct t_proxytest_log
+{
+	UINT16 len;
+	time_t time;
+};
+
+typedef struct t_proxytest_log tProxytestLog;
+*/
+
 ///the Replaytimestamp type
 struct t_replay_timestamp
 	{
