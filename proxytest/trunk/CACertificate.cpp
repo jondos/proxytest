@@ -45,11 +45,13 @@ CACertificate::CACertificate()
 CACertificate::CACertificate(X509* x)
 	{
 		m_pCert = x;
+		m_pSKI = NULL;
+		m_pAKI = NULL;
 		if(m_pCert != NULL)
-		{
-			m_pSKI = (ASN1_OCTET_STRING*) X509_get_ext_d2i(m_pCert, NID_subject_key_identifier, NULL, NULL);
-			m_pAKI = (AUTHORITY_KEYID*) X509_get_ext_d2i (m_pCert, NID_authority_key_identifier, NULL, NULL);
-		}
+			{
+				m_pSKI = (ASN1_OCTET_STRING*) X509_get_ext_d2i(m_pCert, NID_subject_key_identifier, NULL, NULL);
+				m_pAKI = (AUTHORITY_KEYID*) X509_get_ext_d2i (m_pCert, NID_authority_key_identifier, NULL, NULL);
+			}
 	}
 
 CACertificate* CACertificate::decode(const DOMNode* n,UINT32 type,const char* passwd)
@@ -64,6 +66,7 @@ CACertificate* CACertificate::decode(const DOMNode* n,UINT32 type,const char* pa
 								{
 									UINT32 strLen=4096;
 									UINT8* tmpStr=new UINT8[strLen];
+									CACertificate* cert=NULL;
 									if(getDOMElementValue(node,tmpStr,&strLen)!=E_SUCCESS)
 										{
 											delete[] tmpStr;
@@ -72,10 +75,13 @@ CACertificate* CACertificate::decode(const DOMNode* n,UINT32 type,const char* pa
 										}
 									UINT32 decLen=4096;
 									UINT8* decBuff=new UINT8[decLen];
-									CABase64::decode((UINT8*)tmpStr,strLen,decBuff,&decLen);
+									SINT32 ret=CABase64::decode((UINT8*)tmpStr,strLen,decBuff,&decLen);
 									delete[] tmpStr;
 									tmpStr = NULL;
-									CACertificate* cert=decode(decBuff,decLen,CERT_PKCS12,passwd);
+									if(ret==E_SUCCESS)
+										{
+											cert=decode(decBuff,decLen,CERT_PKCS12,passwd);
+										}
 									delete[] decBuff;
 									decBuff = NULL;
 									return cert;
@@ -90,6 +96,7 @@ CACertificate* CACertificate::decode(const DOMNode* n,UINT32 type,const char* pa
 								{
 									UINT32 strLen=4096;
 									UINT8* tmpStr=new UINT8[strLen];
+									CACertificate* cert=NULL;
 									if(getDOMElementValue(node,tmpStr,&strLen)!=E_SUCCESS)
 										{
 											delete[] tmpStr;
@@ -98,10 +105,13 @@ CACertificate* CACertificate::decode(const DOMNode* n,UINT32 type,const char* pa
 										}
 									UINT32 decLen=4096;
 									UINT8* decBuff=new UINT8[decLen];
-									CABase64::decode((UINT8*)tmpStr,strLen,decBuff,&decLen);
+									SINT32 ret=CABase64::decode((UINT8*)tmpStr,strLen,decBuff,&decLen);
 									delete[] tmpStr;
 									tmpStr = NULL;
-									CACertificate* cert=decode(decBuff,decLen,CERT_DER);
+									if(ret==E_SUCCESS)
+										{
+											cert=decode(decBuff,decLen,CERT_DER);
+										}
 									delete[] decBuff;
 									decBuff = NULL;
 									return cert;
@@ -113,14 +123,14 @@ CACertificate* CACertificate::decode(const DOMNode* n,UINT32 type,const char* pa
 		return NULL;
 	}
 
-CACertificate* CACertificate::decode(const UINT8* buff,UINT32 bufflen,UINT32 type,const char* passwd)
+CACertificate* CACertificate::decode(const UINT8* const buff,UINT32 bufflen,UINT32 type,const char* const passwd)
 	{
 		if(buff==NULL)
 			return NULL;
 		X509* tmpCert=NULL;
 		EVP_PKEY* tmpKey=NULL;
 		SINT32 ret=-1;
-		const UINT8* tmp;
+		const UINT8* tmp=NULL;
 		switch(type)
 			{
 				case CERT_DER:
@@ -134,9 +144,9 @@ CACertificate* CACertificate::decode(const UINT8* buff,UINT32 bufflen,UINT32 typ
 				case CERT_PKCS12:
 					PKCS12* tmpPKCS12;
 					#if OPENSSL_VERSION_NUMBER	> 0x009070CfL
-						tmpPKCS12=d2i_PKCS12(NULL,&buff,bufflen);
+						tmpPKCS12=d2i_PKCS12(NULL,&tmp,bufflen);
 					#else
-						tmpPKCS12=d2i_PKCS12(NULL,(UINT8**)&buff,bufflen);
+						tmpPKCS12=d2i_PKCS12(NULL,(UINT8**)&tmp,bufflen);
 					#endif
 					/*Note: Basically we are not interested in the private keys here - but still we need cannot supply
 					 *NULL for that parameter, as OpenSSL 1.0.0. would not work in that case*/
@@ -161,14 +171,19 @@ CACertificate* CACertificate::decode(const UINT8* buff,UINT32 bufflen,UINT32 typ
 					}
 					UINT8* tmpBuff=new UINT8[bufflen];
 					UINT32 tmpBuffSize=bufflen;
-					getDOMElementValue(root,tmpBuff,&tmpBuffSize);
-					CABase64::decode(tmpBuff,tmpBuffSize,tmpBuff,&tmpBuffSize);
+					if(getDOMElementValue(root,tmpBuff,&tmpBuffSize)==E_SUCCESS)
+						{
+							ret=CABase64::decode(tmpBuff,tmpBuffSize,tmpBuff,&tmpBuffSize);
+						}
 					tmp=tmpBuff;
-					#if OPENSSL_VERSION_NUMBER	> 0x009070CfL
-						tmpCert=d2i_X509(NULL,&tmp,tmpBuffSize);
-					#else
-						tmpCert=d2i_X509(NULL,(UINT8**)&tmp,tmpBuffSize);
-					#endif
+					if(ret==E_SUCCESS)
+						{
+							#if OPENSSL_VERSION_NUMBER	> 0x009070CfL
+								tmpCert=d2i_X509(NULL,&tmp,tmpBuffSize);
+							#else
+								tmpCert=d2i_X509(NULL,(UINT8**)&tmp,tmpBuffSize);
+							#endif
+						}
 					delete[] tmpBuff;
 					tmpBuff = NULL;
 					break;
