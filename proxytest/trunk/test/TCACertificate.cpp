@@ -35,7 +35,7 @@ protected:
 						if(cert!=NULL)
 							printf("ok\n");
 						else
-							printf("fialed!\n");
+							printf("failed!\n");
 
       } while( _findnext( hFile, &c_file ) == 0 );
       _findclose( hFile );	
