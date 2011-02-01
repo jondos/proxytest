@@ -17,10 +17,29 @@ public:
 protected:
   void test_decodeCerts(void) 
 		{
-			UINT32 certInBuffLen=0;
-			UINT8* certInBuff=readFile((UINT8*)"test/certs/test.cer",&certInBuffLen);
-			CACertificate* cert=CACertificate::decode(certInBuff,certInBuffLen,CERT_DER);
-			CPPUNIT_ASSERT_MESSAGE("Failed reading test.cer\n",cert!=NULL);
+			struct _finddata_t c_file;
+			intptr_t hFile;
+			UINT8 filename[4096];
+			strcpy((char*)filename,CERT_DIR);
+			strcat((char*)filename,"*.cer");
+			printf("\nTesting certs in %s:\n",CERT_DIR);
+			hFile = _findfirst( (char*)filename, &c_file );
+		   do {
+						strcpy((char*)filename,CERT_DIR);
+						strcat((char*)filename,c_file.name);
+						printf("Testing cert: %s -- ",filename);
+						UINT32 certInBuffLen=0;
+						UINT8* certInBuff=readFile(filename,&certInBuffLen);
+						CACertificate* cert=CACertificate::decode(certInBuff,certInBuffLen,CERT_DER);
+						CPPUNIT_ASSERT_MESSAGE((char*)filename,cert!=NULL);
+						if(cert!=NULL)
+							printf("ok\n");
+						else
+							printf("fialed!\n");
+
+      } while( _findnext( hFile, &c_file ) == 0 );
+      _findclose( hFile );	
+			
 		}
 
 
