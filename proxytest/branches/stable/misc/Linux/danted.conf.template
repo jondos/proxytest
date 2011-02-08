@@ -22,7 +22,7 @@ user.notprivileged: nobody
 
 # If you compiled with libwrap support, what userid should it use
 # when executing your libwrap commands?  "libwrap".
-user.libwrap: nobody
+# user.libwrap: nobody
 
 
 # the "client" rules.  All our clients come from the localhost 127.0.0.1.
