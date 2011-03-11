@@ -21,7 +21,8 @@
  <h2>Socket Failure</h2> 
  </div> 
  <div id="content" align="center"> 
- <p>Squid is unable to create a TCP socket,<br>presumably due to excessive load.<br>Please retry your request.</p>
+ <p>Unable to create a TCP socket, presumably due to excessive load.<br>
+ Please retry your request or use an other mix cascade.</p>
 <!-- %c  %s --> 
 </div>
  </body>
