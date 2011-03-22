@@ -130,7 +130,7 @@ CACertificate* CACertificate::decode(const UINT8* const buff,UINT32 bufflen,UINT
 		X509* tmpCert=NULL;
 		EVP_PKEY* tmpKey=NULL;
 		SINT32 ret=-1;
-		const UINT8* tmp=NULL;
+		const UINT8* tmp=buff;
 		switch(type)
 			{
 				case CERT_DER:
