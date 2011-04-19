@@ -475,11 +475,11 @@ SINT32 CALastMixA::loop()
 												#endif
 												ret=ntohs(pMixPacket->payload.len);
 												#ifdef NEW_FLOW_CONTROL
-												if(ret&NEW_FLOW_CONTROL_FLAG)
-													{
-														//CAMsg::printMsg(LOG_DEBUG,"got send me\n");
-														pChannelListEntry->sendmeCounter=max(0,pChannelListEntry->sendmeCounter-FLOW_CONTROL_SENDME_SOFT_LIMIT);
-													}
+													if(ret&NEW_FLOW_CONTROL_FLAG)
+														{
+															//CAMsg::printMsg(LOG_DEBUG,"got send me\n");
+															pChannelListEntry->sendmeCounterDownstream=max(0,pChannelListEntry->sendmeCounterDownstream-FLOW_CONTROL_SENDME_SOFT_LIMIT);
+														}
 												#endif
 												ret&=PAYLOAD_LEN_MASK;
 												if(ret>=0&&ret<=PAYLOAD_SIZE)
@@ -572,6 +572,32 @@ SINT32 CALastMixA::loop()
 													}
 												else
 													{
+#ifdef NEW_FLOW_CONTROL
+														//count this packet as Upstream packet...
+														pChannelListEntry->sendmeCounterUpstream++;
+														if(pChannelListEntry->sendmeCounterUpstream>=FLOW_CONTROL_SENDME_SOFT_LIMIT) //we need to sent the SENDME ack down to the client...
+														{
+															getRandom(pMixPacket->data, DATA_SIZE);
+															pMixPacket->flags = CHANNEL_DATA;
+															pMixPacket->payload.len = htons(NEW_FLOW_CONTROL_FLAG); //signal the SENDME
+															pMixPacket->payload.type = 0;
+															#ifdef WITH_INTEGRITY_CHECK
+																pChannelListEntry->pCipher->encryptMessage(pMixPacket->data, 3, ciphertextBuff);
+																memcpy(pMixPacket->data, ciphertextBuff, 3 + GCM_MAC_SIZE);
+															#endif
+ 															#ifdef LOG_CHANNEL
+																pChannelListEntry->packetsDataOutToUser++;
+																getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
+																MACRO_DO_LOG_CHANNEL_CLOSE_FROM_MIX
+															#endif
+															#ifdef LOG_PACKET_TIMES
+																setZero64(pQueueEntry->timestamp_proccessing_start);
+															#endif
+															m_pQueueSendToMix->add(pQueueEntry,sizeof(tQueueEntry));
+															m_logDownloadedPackets++;
+															pChannelListEntry->sendmeCounterUpstream-=FLOW_CONTROL_SENDME_SOFT_LIMIT;
+														}
+#endif
 #ifdef HAVE_EPOLL
 														psocketgroupCacheWrite->add(*(pChannelListEntry->pSocket),pChannelListEntry);
 #else
@@ -719,7 +745,7 @@ SINT32 CALastMixA::loop()
 													&&(isGreater64(current_time_millis,pChannelListEntry->timeLatency))
 												#endif
 												#ifdef NEW_FLOW_CONTROL
-													&&(pChannelListEntry->sendmeCounter<FLOW_CONTROL_SENDME_HARD_LIMIT)
+													&&(pChannelListEntry->sendmeCounterDownstream<FLOW_CONTROL_SENDME_HARD_LIMIT)
 												#endif
 											#ifdef NEED_IF_12
 											)
@@ -786,16 +812,6 @@ SINT32 CALastMixA::loop()
 														pMixPacket->channel=pChannelListEntry->channelIn;
 														pMixPacket->flags=CHANNEL_DATA;
 														pMixPacket->payload.type=0;
-														//#ifdef NEW_FLOW_CONTROL
-														//if(pChannelListEntry->sendmeCounter==FLOW_CONTROL_SENDME_SOFT_LIMIT)
-														//	{
-														//		pMixPacket->payload.len=htons((UINT16)ret|NEW_FLOW_CONTROL_FLAG);
-																//CAMsg::printMsg(LOG_DEBUG,"Send sendme request\n");
-														//	}
-														//else
-														//	pMixPacket->payload.len=htons((UINT16)ret);
-														//#else
-														//CAMsg::printMsg(LOG_DEBUG,"send packet with payload size: %u\n",ret);
 														pMixPacket->payload.len=htons((UINT16)ret);
 														//#endif
 														#ifdef WITH_INTEGRITY_CHECK
@@ -814,7 +830,7 @@ SINT32 CALastMixA::loop()
 															pChannelListEntry->packetsDataOutToUser++;
 														#endif
 														#ifdef NEW_FLOW_CONTROL
-															pChannelListEntry->sendmeCounter++;
+															pChannelListEntry->sendmeCounterDownstream++;
 														#endif
 													}
 											}
