@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.10.03"
+#define MIX_VERSION "00.10.04"
 
 // set to "true" if this is a testing/development version which is not meant for prodictive use
 #define MIX_VERSION_TESTING true
@@ -208,8 +208,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #define MAX_SIGNATURE_ELEMENTS 10  // maximum of interpreted XML signature elements
 
-#define FLOW_CONTROL_SENDME_HARD_LIMIT 95 //last mix stops sending after this unack packets
-#define FLOW_CONTROL_SENDME_SOFT_LIMIT 80 //last mix sends request for 'SENDME' after this unack packets
+#define FLOW_CONTROL_SENDME_HARD_LIMIT 160 //last mix stops sending after this unacked packets
+#define FLOW_CONTROL_SENDME_SOFT_LIMIT 80 //last mix expect to get a 'SENDME' after this unacked packets
 
 #if defined(PAYMENT) || defined(MANIOQ)
 	#define MAX_READ_FROM_PREV_MIX_QUEUE_SIZE 10000000
