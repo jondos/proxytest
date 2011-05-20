@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.10.04"
+#define MIX_VERSION "00.10.05"
 
 // set to "true" if this is a testing/development version which is not meant for prodictive use
 #define MIX_VERSION_TESTING true
@@ -554,6 +554,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if (_XERCES_VERSION >= 20200)
     XERCES_CPP_NAMESPACE_USE
 #endif
+
+#if (XERCES_VERSION_MAJOR <3)
+	typedef unsigned int XMLSize_t; 
+#endif
+
 #endif //wich DOM-Implementation to use?
 
 //For large file support
