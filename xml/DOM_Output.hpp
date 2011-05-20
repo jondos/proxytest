@@ -30,7 +30,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef ONLY_LOCAL_PROXY
 #include "../CAQueue.hpp"
 
-	enum OUTPUT_FORMAT { OF_DEFAULT, OF_NULL_TERMINATED, OF_NEWLINE };
+enum OUTPUT_FORMAT { OF_DEFAULT, OF_NULL_TERMINATED, OF_NEWLINE };
 
 class MemFormatTarget: public XMLFormatTarget
 	{
@@ -51,7 +51,7 @@ class MemFormatTarget: public XMLFormatTarget
 					m_Buff = NULL;
 				}
 
-			virtual void writeChars(const XMLByte* const toWrite, const unsigned int count,
+			virtual void writeChars(const XMLByte* const toWrite, const XMLSize_t count,
 															XMLFormatter* const /*formatter*/)
 				{
 					const XMLByte* write=toWrite;
@@ -129,7 +129,7 @@ class MemFormatTarget: public XMLFormatTarget
 					{
 						tmp[*size] = NULL;
 					}
-					if (OF_NEWLINE == a_outputFormat)
+					else if (OF_NEWLINE == a_outputFormat)
 					{
 						tmp[*size+1] = NULL;
 						tmp[*size] = '\n';
