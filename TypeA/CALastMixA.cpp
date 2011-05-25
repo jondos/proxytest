@@ -593,6 +593,7 @@ SINT32 CALastMixA::loop()
 															#ifdef LOG_PACKET_TIMES
 																setZero64(pQueueEntry->timestamp_proccessing_start);
 															#endif
+															CAMsg::printMsg(LOG_DEBUG,"sent send me\n");
 															m_pQueueSendToMix->add(pQueueEntry,sizeof(tQueueEntry));
 															m_logDownloadedPackets++;
 															pChannelListEntry->sendmeCounterUpstream-=FLOW_CONTROL_SENDME_SOFT_LIMIT;
