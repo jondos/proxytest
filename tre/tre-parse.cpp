@@ -201,7 +201,7 @@ int tre_isupper_func(tre_cint_t c) { return tre_isupper(c); }
 int tre_isxdigit_func(tre_cint_t c) { return tre_isxdigit(c); }
 
 typedef struct {
-  char *name;
+  const char *name;
   int (*func)(tre_cint_t);
 } tre_ctype_map_t;
 
