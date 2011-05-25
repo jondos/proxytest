@@ -141,14 +141,14 @@ SINT32 CAMsg::setLogLevel(UINT32 a_logLevel)
 SINT32 CAMsg::setLogOptions(UINT32 opt)
     {
 			SINT32 ret; 
-			char* strLogOpened = "Message log opened%s%s.\n";
-			char* strLogErrorMsg = "Could not open message log%s%s!%s Do you have write permissions?%s\n";
-			char* strReasonMsg = " Reason: %s (%u)";
+			const char* strLogOpened = "Message log opened%s%s.\n";
+			const char* strLogErrorMsg = "Could not open message log%s%s!%s Do you have write permissions?%s\n";
+			const char* strReasonMsg = " Reason: %s (%u)";
 			char* strLogFile = NULL;
 			char* strLogDir = NULL;
 			char* strReason = NULL;
 			char* strBuff;
-			char* strLogType = "";
+			const char* strLogType = "";
 	
 
 			if(pMsg->m_uLogType==opt)
