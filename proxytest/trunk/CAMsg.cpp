@@ -45,6 +45,7 @@ CAMsg* CAMsg::pMsg=NULL;
 const char* const CAMsg::m_strMsgTypes[6]={", error   ] ",", critical] ",", info    ] ",", debug   ] ",", special ] ",", warning ] "}; //all same size!
 #define STRMSGTYPES_SIZE 12
 
+
 CAMsg::CAMsg()
     {
 			m_pcsPrint=new CAMutex();
@@ -412,8 +413,6 @@ SINT32 CAMsg::rotateLog()
 
 SINT32 CAMsg::openLog(UINT32 type)
 	{
-//		int tmpHandle=-1;
-		time_t currtime=0;
 				if ((type & MSG_LOG) == MSG_LOG)
 				{
 #ifndef _WIN32
