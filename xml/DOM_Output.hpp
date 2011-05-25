@@ -51,8 +51,11 @@ class MemFormatTarget: public XMLFormatTarget
 					m_Buff = NULL;
 				}
 
-			virtual void writeChars(const XMLByte* const toWrite, const XMLSize_t count,
-															XMLFormatter* const /*formatter*/)
+#if (XERCES_VERSION_MAJOR <3)
+			virtual void writeChars(const XMLByte* const toWrite, const unsigned int count, XMLFormatter* const /*formatter*/)
+#else
+			virtual void writeChars(const XMLByte* const toWrite, const XMLSize_t count, XMLFormatter* const /*formatter*/)
+#endif
 				{
 					const XMLByte* write=toWrite;
 					UINT32 c=count;

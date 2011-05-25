@@ -555,10 +555,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
     XERCES_CPP_NAMESPACE_USE
 #endif
 
-#if (XERCES_VERSION_MAJOR <3)
-	typedef unsigned int XMLSize_t; 
-#endif
-
 #endif //wich DOM-Implementation to use?
 
 //For large file support
