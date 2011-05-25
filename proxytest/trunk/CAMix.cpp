@@ -634,8 +634,8 @@ SINT32 CAMix::appendCompatibilityInfo(DOMNode* a_parent)
 	setDOMElementAttribute(elemCompatibility,"version",(UINT8*)MIX_VERSION);
 	a_parent->appendChild(elemCompatibility);
 
-	DOMElement* elemFlags;
-	DOMElement* elemFlag;
+	DOMElement* elemFlags=NULL;
+	DOMElement* elemFlag=NULL;
 
 	elemFlags = createDOMElement(a_parent->getOwnerDocument(), "Flags");
 	elemCompatibility->appendChild(elemFlags);
@@ -673,7 +673,7 @@ SINT32 CAMix::checkCompatibility(DOMNode* a_parent, const char* a_mixPosition)
 	// get compatibility info
 	DOMElement* elemCompatibility=NULL;
 	DOMElement* elemFlags=NULL;
-	DOMElement* elemDummy;
+	DOMElement* elemDummy=NULL;
 	UINT8 strAllFlags[500];
 	UINT32 lenAllFlags;
 	UINT8 strNodeName[50];
