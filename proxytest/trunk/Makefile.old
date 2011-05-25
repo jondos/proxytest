@@ -18,6 +18,8 @@ MAKE=make -f Makefile.old
 
 ICC=/opt/intel/Compiler/11.0/074/bin/intel64/icc
 
+MixVersion=$(shell fgrep "define MIX_VERSION " StdAfx.h | cut -d '"' -f 2)
+
 .SUFFIXES:
 .SUFFIXES: .o .cpp	
 
@@ -208,6 +210,12 @@ libgcm.a:
 libmixa.a: 
 	cd TypeA;$(MAKE) 'CC=$(CC)' 'DEBUG=$(DEBUG)' 'INCLUDE=$(INCLUDE)' 'CPPFLAGS=$(CPPFLAGS)';
 
+src:
+	$(MAKE) clean;
+	tar -cf mix.src.tar --exclude mix.src.tar --exclude-vcs .;
+	gzip -f mix.src.tar;
+	mv mix.src.tar.gz mix_V$(MixVersion).src.tgz;
+	
 clean:
 	rm -f $(OBJS)
 	cd popt; $(MAKE) clean;
@@ -217,3 +225,4 @@ clean:
 	cd gcm;$(MAKE) clean;
 	cd TypeA;$(MAKE) clean;
 	rm -f proxytest
+	rm -f mix_*.src.tgz
