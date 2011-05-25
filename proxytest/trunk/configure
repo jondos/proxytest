@@ -4920,6 +4920,9 @@ case "$host" in
 	CXXFLAGS="$CXXFLAGS";
 	OFLAGS="-O3"
 	;;
+*-*-kfreebsd*)
+	DEFAULTLIBS="$LIBS -lpthread";
+	;;
 *-*-netbsd*)
 	DEFAULTLIBS="$LIBS -L/usr/pkg/lib -liconv -lpthread"
 	;;
