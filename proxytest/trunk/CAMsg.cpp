@@ -81,7 +81,7 @@ CAMsg::~CAMsg()
 
 char* CAMsg::createLogFileMessage(UINT32 opt)
 {
-	char* strLogAtPath = " at path '%s'";
+	const char* strLogAtPath = " at path '%s'";
 	char* strLogFile = NULL;
 	
 	
@@ -103,7 +103,7 @@ char* CAMsg::createLogFileMessage(UINT32 opt)
 
 char* CAMsg::createLogDirMessage(UINT32 opt)
 {
-	char* strLogAtPath = " Please also check if the directory '%s' exists and create or change it if it does not.";
+	const char* strLogAtPath = " Please also check if the directory '%s' exists and create or change it if it does not.";
 	char* strLogFile = NULL;
 
 
