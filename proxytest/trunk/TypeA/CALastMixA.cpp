@@ -584,6 +584,8 @@ SINT32 CALastMixA::loop()
 															#ifdef WITH_INTEGRITY_CHECK
 																pChannelListEntry->pCipher->encryptMessage(pMixPacket->data, 3, ciphertextBuff);
 																memcpy(pMixPacket->data, ciphertextBuff, 3 + GCM_MAC_SIZE);
+															#else
+																pChannelListEntry->pCipher->crypt2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 															#endif
  															#ifdef LOG_CHANNEL
 																pChannelListEntry->packetsDataOutToUser++;
