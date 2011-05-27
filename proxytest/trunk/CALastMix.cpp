@@ -237,6 +237,7 @@ SINT32 CALastMix::processKeyExchange()
 				elemFlowControl->appendChild(elemDownstreamSendMe);
 				setDOMElementValue(elemUpstreamSendMe,(UINT32)FLOW_CONTROL_SENDME_SOFT_LIMIT);
 				setDOMElementValue(elemDownstreamSendMe,(UINT32)FLOW_CONTROL_SENDME_SOFT_LIMIT);
+				setDOMElementAttribute(elemFlowControl,"withUpstreamFlowControl",true);
       #else
 				setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.3");
       #endif
