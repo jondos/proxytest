@@ -26,10 +26,3 @@ zone "uu" {
         masters { 88.84.130.20; 194.50.176.206; };
 };
 
-// OpenNIC
-zone "." IN {
-type slave;
-file "cache.db.opennic";
-masters {66.244.95.20;207.192.69.155;};
-notify no;
-};
