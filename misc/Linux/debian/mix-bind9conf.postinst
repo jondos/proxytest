@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# Stop bind9
+if [ -x "`which invoke-rc.d 2>/dev/null`" ]; then
+	invoke-rc.d bind9 stop
+else
+	/etc/init.d/bind9 stop
+fi
+
+# Backup old bind configuration
+if [ ! -e /usr/share/doc/mix-bind9conf/conf/named.conf.orig ]
+then
+  mv /etc/bind/named.conf /usr/share/doc/mix-bind9conf/conf/named.conf.orig
+  
+  if [ -e /etc/bind/named.conf.local ]
+    then
+    mv /etc/bind/named.conf.local /usr/share/doc/mix-bind9conf/conf/named.conf.local.orig
+  fi
+  
+  if [ -e /etc/bind/named.conf.options ]
+    then
+    mv /etc/bind/named.conf.options /usr/share/doc/mix-bind9conf/conf/named.conf.options.orig
+  fi
+  
+   if [ -e /etc/bind/named.conf.keys ]
+    then
+    mv /etc/bind/named.conf.keys /usr/share/doc/mix-bind9conf/conf/named.conf.keys.orig
+  fi
+fi
+
+
+# Install new squid configuration
+cp -f /usr/share/doc/mix-bind9conf/conf/named.conf.keys /etc/bind/named.conf.keys
+cp -f /usr/share/doc/mix-bind9conf/conf/named.conf.local /etc/bind/named.conf.local
+cp -f /usr/share/doc/mix-bind9conf/conf/named.conf.options /etc/bind/named.conf.options
+cp -f /usr/share/doc/mix-bind9conf/conf/named.conf /etc/bind/named.conf
+
+# Start bind9
+if [ -x "`which invoke-rc.d 2>/dev/null`" ]; then
+	invoke-rc.d bind9 start || exit $?
+else
+	/etc/init.d/bind9 start || exit $?
+fi
+
+exit 0
