@@ -1,0 +1,30 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head> 
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+<title>ERROR: Access Denied.</title> 
+<style type="text/css">
+  H1 { color: blue; font-size: 22px; font-weight:bold; }
+  H2 { color: black; font-size: 18px; font-weight:bold; }
+  H3 { color: black; font-size: 16px; font-weight:bold; }
+  P { color: black; font-size: 16px; font-weight:normal; }
+  A:link { color: #00C; text-decoration:none; }
+  A:visited { color: #00C; text-decoration:none;}
+  A:hover { color: #00C; text-decoration:underline;}
+  A:active { color: #00C; text-decoration:underline;}
+  A:focus { color: #00C; text-decoration:none;}
+ </style> 
+ </head>
+ <body> 
+ <div id="titles" align="center"> 
+ <h1>JonDonym Error Message</h1> 
+ <h2>You can connect only to ports 80 and 443.</h2> 
+ </div> 
+ <div id="content" align="center"> 
+ <p>Free cascades you can only use for HTTP (port: 80) and HTTPS (port: 443).<br>
+ Please use <a href="http://anonymous-proxy-servers.net/en/payment.html">JonDonym premium services</a> 
+ to avoid this limit.</p>
+<!-- %c  %s --> 
+</div>
+ </body>
+ </html> 

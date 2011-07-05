@@ -1,0 +1,18 @@
+options {
+	directory "/var/cache/bind";
+
+	auth-nxdomain no;    # conform to RFC1035
+	
+	listen-on-v6 { none; };
+	listen-on { 127.0.0.1; };
+	
+        dnssec-enable yes;
+        dnssec-validation yes;
+        dnssec-lookaside "." trust-anchor "dlv.isc.org";
+	
+	minimal-responses yes;
+	max-cache-size 32M;
+	cleaning-interval 15;
+	max-cache-ttl 604800;
+	max-ncache-ttl 300;
+};

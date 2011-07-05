@@ -1,22 +1,43 @@
 
+# Set the path to your error message directory
+# or cemment out to use the default squid messages
+
+# for src code from svn
+# error_directory /home/mix/stable/misc/squid-messages
+
+# for Debian package installation
+error_directory /usr/share/mix-squidmessages
+
+# Set the outgiong IP address, if your server have more
+# than one IP addresses
+
+# tcp_outgoing_address 123.123.123.123
+
+
 http_port 127.0.0.1:3128
 icp_port 0
 
+max_filedescriptors 16384
+
+cache_mem 128 MB
 
 hierarchy_stoplist cgi-bin ?
 acl QUERY urlpath_regex cgi-bin \?
 no_cache deny QUERY
 
-cache_mem 128 MB
 
 cache_dir coss /var/spool/squid/coss1 2048 max-size=100000
 cache_dir coss /var/spool/squid/coss2 2048 max-size=200000
 cache_dir coss /var/spool/squid/coss3 2048 max-size=500000
 
-cache_access_log none 
+maximum_object_size 16384 KB
+ 
 cache_log /var/log/squid/cache.log
-cache_store_log none
 cache_swap_log /var/spool/squid/
+
+cache_store_log none
+cache_access_log none
+
 
 hosts_file /etc/hosts
 
@@ -31,14 +52,24 @@ acl manager proto cache_object
 acl localhost src 127.0.0.1/255.255.255.255
 acl to_localhost dst 127.0.0.0/8
 
+# for free cascades only
+acl robot browser -i bot
+deny_info ERR_ROBOT robot
+
+# for free cascades only
 acl Safe_ports port 80 443	# http, https
+deny_info ERR_NOT_SAFE_PORT !Safe_ports
+
+# for free cascades only
 acl SSL_ports port 443 
 
 acl purge method PURGE
 acl CONNECT method CONNECT
 
-acl bad url_regex -i "/etc/squid/squid-block.acl" 
-
+acl bad dstdom_regex "/etc/squid/squid-block.acl"
+deny_info ERR_ACCESS_DENIED_BAD bad
+acl badlocal dstdom_regex "/etc/squid/squid-block.acl.local" 
+deny_info ERR_ACCESS_DENIED_HERE badlocal
 
 http_access allow manager localhost
 http_access deny manager
@@ -48,24 +79,21 @@ http_access deny !Safe_ports
 http_access deny CONNECT !SSL_ports
 
 http_access deny bad
+http_access deny badlocal
+http_access deny robot
 
 http_access allow localhost
-
 http_access deny all
 
 http_reply_access allow all
 
 icp_access allow all
 
-
-
 cache_effective_user proxy
 cache_effective_group proxy
 
 visible_hostname none
-
 forwarded_for off
-
 header_access Via deny all
 header_access Cache-Control deny all
 

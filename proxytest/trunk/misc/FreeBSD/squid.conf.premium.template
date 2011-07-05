@@ -11,6 +11,16 @@ acl localhost src [% extIP %]
 acl to_localhost dst 127.0.0.0/8
 acl to_localhost dst [% extIP %]
 
+
+# Replace by correct path to your squid messages
+error_directory /home/mix/stable/misc/squid-messages
+
+
+cache_mem 128 MB
+cache_store_log none
+cache_access_log none 
+max_filedescriptors 16384
+
 acl localnet src 10.0.0.0/8     # RFC1918 possible internal network
 acl localnet src 172.16.0.0/12  # RFC1918 possible internal network
 acl localnet src 192.168.0.0/16 # RFC1918 possible internal network
@@ -20,8 +30,13 @@ acl SSL_ports port 1-65535
 
 acl CONNECT method CONNECT
 
-acl bad url_regex -i "/usr/local/etc/squid/squid-block.acl" 
+acl bad dstdom_regex "/usr/local/etc/squid/squid-block.acl"
+deny_info ERR_ACCESS_DENIED_BAD bad
+acl badlocal dstdom_regex "/usr/local/etc/squid/squid-block.acl.local" 
+deny_info ERR_ACCESS_DENIED_HERE badlocal
 
+http_access deny bad
+http_access deny badlocal
 http_access deny to_localhost
 http_access deny !localhost
 http_access allow manager localhost
@@ -45,15 +60,9 @@ refresh_pattern ^gopher:        1440    0%      1440
 refresh_pattern -i (/cgi-bin/|\?) 0     0%      0
 refresh_pattern .               0       20%     4320
 
-acl shoutcast rep_header X-HTTP09-First-Line ^ICY.[0-9]
-upgrade_http0.9 deny shoutcast
-
-acl apache rep_header Server ^Apache
-broken_vary_encoding allow apache
-
 coredump_dir /usr/local/squid/cache
 
 header_access Via deny all
 header_access Cache-Control deny all
 forwarded_for off
-
+visible_hostname none

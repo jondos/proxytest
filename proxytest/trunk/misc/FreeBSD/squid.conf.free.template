@@ -3,14 +3,22 @@
 #
 # Replace [% extIP %] by the IP address of your own system/jail
 
-acl all src all
-acl manager proto cache_object
-
 acl localhost src 127.0.0.1/32
 acl localhost src [% extIP %]
 
 acl to_localhost dst 127.0.0.0/8
 acl to_localhost dst [% extIP %]
+
+# Replace by correct path to your squid messages
+error_directory /home/mix/stable/misc/squid-messages
+
+cache_mem 128 MB
+cache_store_log none
+cache_access_log none
+max_filedescriptors 16384
+
+acl all src all
+acl manager proto cache_object
 
 acl localnet src 10.0.0.0/8     # RFC1918 possible internal network
 acl localnet src 172.16.0.0/12  # RFC1918 possible internal network
@@ -19,16 +27,27 @@ acl localnet src 192.168.0.0/16 # RFC1918 possible internal network
 acl Safe_ports port 80 443	# http, https
 acl SSL_ports port 443 
 
+acl purge method PURGE
 acl CONNECT method CONNECT
 
-acl bad url_regex -i "/usr/local/etc/squid/squid-block.acl" 
+acl bad dstdom_regex "/usr/local/etc/squid/squid-block.acl"
+deny_info ERR_ACCESS_DENIED_BAD bad
+acl badlocal dstdom_regex "/usr/local/etc/squid/squid-block.acl.local" 
+deny_info ERR_ACCESS_DENIED_HERE badlocal
+
+acl robot browser -i bot
+deny_info ERR_ROBOT robot
+
 
 http_access deny to_localhost
 http_access deny !localhost
 http_access allow manager localhost
 http_access deny manager
-http_access deny !Safe_ports
 http_access deny CONNECT !SSL_ports
+
+http_access deny bad
+http_access deny badlocal
+http_access deny robot
 
 http_access allow all
 
@@ -38,6 +57,9 @@ icp_access deny all
 http_port localhost:3128
 
 hierarchy_stoplist cgi-bin ?
+acl QUERY urlpath_regex cgi-bin \?
+no_cache deny QUERY
+
 
 pid_filename /usr/local/squid/logs/squid.pid
 
@@ -46,14 +68,10 @@ refresh_pattern ^gopher:        1440    0%      1440
 refresh_pattern -i (/cgi-bin/|\?) 0     0%      0
 refresh_pattern .               0       20%     4320
 
-acl shoutcast rep_header X-HTTP09-First-Line ^ICY.[0-9]
-upgrade_http0.9 deny shoutcast
-
-acl apache rep_header Server ^Apache
-broken_vary_encoding allow apache
 
 coredump_dir /usr/local/squid/cache
 
+visible_hostname none
 header_access Via deny all
 header_access Cache-Control deny all
 forwarded_for off

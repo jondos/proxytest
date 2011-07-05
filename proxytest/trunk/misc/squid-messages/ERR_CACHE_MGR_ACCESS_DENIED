@@ -1,0 +1,27 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head> 
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+<title>ERROR: Cache Manager Access Denied.</title> 
+<style type="text/css">
+  H1 { color: blue; font-size: 22px; font-weight:bold; }
+  H2 { color: black; font-size: 18px; font-weight:bold; }
+  H3 { color: black; font-size: 16px; font-weight:bold; }
+  P { color: black; font-size: 16px; font-weight:normal; }
+  A:link { color: #00C; text-decoration:none; }
+  A:visited { color: #00C; text-decoration:none;}
+  A:hover { color: #00C; text-decoration:underline;}
+  A:active { color: #00C; text-decoration:underline;}
+  A:focus { color: #00C; text-decoration:none;}
+ </style> 
+ </head>
+ <body> 
+ <div id="titles" align="center"> 
+ <h1>JonDonym Error Message</h1> 
+ <h2>Cache Manager Access Denied.</h2> 
+ </div> 
+ <div id="content" align="center"> <p>Sorry, you are not currently allowed to request %U from this cache manager until you have authenticated yourself.</p>  
+<!-- %c  %s --> 
+</div>
+ </body>
+ </html> 
