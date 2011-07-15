@@ -9,7 +9,6 @@ acl localhost src [% extIP %]
 acl to_localhost dst 127.0.0.0/8
 acl to_localhost dst [% extIP %]
 
-
 # Replace by correct path to your squid messages
 error_directory /home/mix/stable/misc/squid-messages
 
@@ -58,6 +57,9 @@ icp_access deny all
 http_port localhost:3128
 
 hierarchy_stoplist cgi-bin ?
+acl QUERY urlpath_regex cgi-bin \?
+no_cache deny QUERY
+
 
 pid_filename /usr/local/squid/logs/squid.pid
 
