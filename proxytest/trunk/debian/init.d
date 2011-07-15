@@ -54,9 +54,14 @@ case $1 in
 	sleep 1
 	$0 start
 	;;
+	
+  version)
+	$DAEMON --version | grep -i version
+	;;
+
 
   *)
-	echo "Usage: $0 (start|stop|reload|force-reload|restart|status)" >&2
+	echo "Usage: $0 (start|stop|reload|force-reload|restart|status|version)" >&2
 	exit 1
 	;;
 esac
