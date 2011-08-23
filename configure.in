@@ -58,6 +58,9 @@ case "$host" in
 	CXXFLAGS="$CXXFLAGS";
 	OFLAGS="-O3"
 	;;
+*-*-kfreebsd*)
+	DEFAULTLIBS="$LIBS -lpthread";
+	;;
 *-*-netbsd*)
 	DEFAULTLIBS="$LIBS -L/usr/pkg/lib -liconv -lpthread"
 	;;
@@ -671,6 +674,16 @@ AC_ARG_ENABLE(new-channel-encryption,
 	    if test "x$enableval" != "xno" ; then
 		CFLAGS="$CFLAGS -DNEW_CHANNEL_ENCRYPTION"
 		CXXFLAGS="$CXXFLAGS -DNEW_CHANNEL_ENCRYPTION"
+	    fi
+	]
+)
+
+AC_ARG_ENABLE(with-integrity-check,
+	AS_HELP_STRING([--enable-with-integrity-check],[Enable integrity check for data channels]),
+	[
+	    if test "x$enableval" != "xno" ; then
+		CFLAGS="$CFLAGS -DWITH_INTEGRITY_CHECK"
+		CXXFLAGS="$CXXFLAGS -DWITH_INTEGRITY_CHECK"
 	    fi
 	]
 )

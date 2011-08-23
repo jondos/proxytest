@@ -51,20 +51,24 @@ SINT32 CABase64::decode(const UINT8*in, UINT32 inlen, UINT8*out, UINT32*outlen)
 	EVP_DecodeInit(&oCTX);
 	int len=0;
 	*outlen=0;
+	SINT32 ret=-1;
 	//ensure that in and out are disjunct - otherwise copy in
 	if(((out>=in)&&(in+inlen>out))||((out<in)&&(out+*outlen>in)))
 	{
 		UINT8*tmpIn=new UINT8[inlen];
 		memcpy(tmpIn, in, inlen);
-		EVP_DecodeUpdate(&oCTX, out, (int*) outlen, tmpIn, (int)inlen);
+		ret=EVP_DecodeUpdate(&oCTX, out, (int*) outlen, tmpIn, (int)inlen);
 		delete[] tmpIn;
 		tmpIn = NULL;
 	}
 	else
 	{
-		EVP_DecodeUpdate(&oCTX, out, (int*) outlen, (unsigned char*) in, (int)inlen);
+		ret=EVP_DecodeUpdate(&oCTX, out, (int*) outlen, (unsigned char*) in, (int)inlen);
 	}
-	EVP_DecodeFinal(&oCTX, out+(*outlen), &len);
+	if(ret<0||EVP_DecodeFinal(&oCTX, out+(*outlen), &len)<0)
+		{
+			return E_UNKNOWN;
+		}
 	(*outlen)+=len;
 	return E_SUCCESS;
 }
@@ -94,7 +98,7 @@ SINT32 CABase64::encode(const UINT8*in, UINT32 inlen, UINT8*out, UINT32*outlen)
 
 	EVP_ENCODE_CTX oCTX;
 	EVP_EncodeInit(&oCTX);
-	UINT32 len;
+	UINT32 len=0;
 	*outlen=0;
 
 	//ensure that in and out are disjunct - otherwise copy in

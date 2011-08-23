@@ -2015,8 +2015,7 @@ UINT32 CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo*
 //		{
 //			// There is now more than one user logged in with this account; kick out the other users!
 //			CAMsg::printMsg(LOG_INFO,
-//							"CAAccountingInstance: Multiple logins (%d) of user with account %s detected! \
-//							Kicking out other users with this account...\n",
+//							"CAAccountingInstance: Multiple logins (%d) of user with account %s detected! Kicking out other users with this account...\n",
 //							loginEntry->count, accountNrAsString);
 //			loginEntry->userID = pAccInfo->userID; // this is the current user; kick out the others
 //		}
@@ -2028,8 +2027,7 @@ UINT32 CAAccountingInstance::handleChallengeResponse_internal(tAiAccountingInfo*
 //		 	 * the old login will be deleted.
 //		 	 */
 //		 	CAMsg::printMsg(LOG_INFO,
-//		 					"CAAccountingInstance: Maximum of multiple logins exceeded (%d) for user with account %s! \
-//		 					Kicking out this user!\n",
+//		 					"CAAccountingInstance: Maximum of multiple logins exceeded (%d) for user with account %s! Kicking out this user!\n",
 //		 					loginEntry->count, accountNrAsString);
 //		 	bSendCCRequest = false; // not needed...
 //		 	pAccInfo->authFlags |= AUTH_MULTIPLE_LOGIN;

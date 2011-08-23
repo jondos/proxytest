@@ -82,6 +82,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_strUser=NULL;
 		m_strCascadeName=NULL;
 		m_strLogDir=NULL;
+		m_strLogLevel=NULL;
 		setZero64(m_maxLogFileSize);
 		m_strEncryptedLogDir=NULL;
 		m_arTargetInterfaces=NULL;
@@ -469,6 +470,9 @@ void CACmdLnOptions::clean()
 
 		delete[] m_strLogDir;
 		m_strLogDir=NULL;
+
+		delete[] m_strLogLevel;
+		m_strLogLevel=NULL;
 
 		delete[] m_strPidFile;
 		m_strPidFile=NULL;
@@ -2239,23 +2243,25 @@ SINT32 CACmdLnOptions::initLogging()
 	}
 	ret = CAMsg::setLogOptions(iLogOptions);
 	
-	if (strcmp(m_strLogLevel,"info") == 0)
+	if(m_strLogLevel!=NULL)
 	{
-		CAMsg::setLogLevel(LOG_INFO);
-	}
-	else if (strcmp(m_strLogLevel,"warning") == 0)
-	{
-		CAMsg::setLogLevel(LOG_WARNING);
-	}
-	else if (strcmp(m_strLogLevel,"error") == 0)
-	{
-		CAMsg::setLogLevel(LOG_ERR);
-	}
-	else if (strcmp(m_strLogLevel,"critical") == 0)
-	{
-		CAMsg::setLogLevel(LOG_CRIT);
-	}
-	
+		if (strcmp(m_strLogLevel,"info") == 0)
+		{
+			CAMsg::setLogLevel(LOG_INFO);
+		}
+		else if (strcmp(m_strLogLevel,"warning") == 0)
+		{
+			CAMsg::setLogLevel(LOG_WARNING);
+		}
+		else if (strcmp(m_strLogLevel,"error") == 0)
+		{
+			CAMsg::setLogLevel(LOG_ERR);
+		}
+		else if (strcmp(m_strLogLevel,"critical") == 0)
+		{
+			CAMsg::setLogLevel(LOG_CRIT);
+		}
+	}	
 	if(isEncryptedLogEnabled())
 	{
 		SINT32 retEncr;

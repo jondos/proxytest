@@ -59,6 +59,19 @@ class CASymCipher
 #endif
 					m_iv1=new UINT8[16];
 					m_iv2=new UINT8[16];
+
+					m_nEncMsgCounter = 0;
+					m_pEncMsgIV = new UINT8[12];
+					memset(m_pEncMsgIV, 0, 12);
+					m_nDecMsgCounter = 0;
+					m_pDecMsgIV = new UINT8[12];
+					memset(m_pDecMsgIV, 0, 12);
+
+					m_pGCMCtxEnc = NULL;
+					m_pGCMCtxDec = NULL;
+
+					m_pcsEnc = new CAMutex();
+					m_pcsDec = new CAMutex();
 				}
 
 			~CASymCipher()
@@ -79,6 +92,22 @@ class CASymCipher
 					m_iv1 = NULL;
 					delete[] m_iv2;
 					m_iv2 = NULL;
+
+					delete [] m_pEncMsgIV;
+					m_pEncMsgIV = NULL;
+					delete [] m_pDecMsgIV;
+					m_pDecMsgIV = NULL;
+
+					delete m_pGCMCtxEnc;
+					m_pGCMCtxEnc = NULL;
+
+					delete m_pGCMCtxDec;
+					m_pGCMCtxDec = NULL;
+
+					delete m_pcsEnc;
+					m_pcsEnc = NULL;
+					delete m_pcsDec;
+					m_pcsDec = NULL;
 				}
 			bool isKeyValid()
 				{
@@ -119,8 +148,23 @@ class CASymCipher
 			SINT32 crypt2(const UINT8* in,UINT8* out,UINT32 len);
 			SINT32 decrypt1CBCwithPKCS7(const UINT8* in,UINT8* out,UINT32* len);
 			SINT32 encrypt1CBCwithPKCS7(const UINT8* in,UINT32 inlen,UINT8* out,UINT32* len);
-	
+
+			void setGCMKeys(UINT8* keyRecv, UINT8* keySend);
+			SINT32 encryptMessage(const UINT8* in, UINT32 inlen, UINT8* out);
+			SINT32 decryptMessage(const UINT8* in, UINT32 inlen, UINT8* out, bool integrityCheck);
+
 			static SINT32 testSpeed();
+
+		private:
+			CAMutex* m_pcsEnc;
+			CAMutex* m_pcsDec;
+			gcm_ctx_64k* m_pGCMCtxEnc;
+			gcm_ctx_64k* m_pGCMCtxDec;
+			UINT32 m_nEncMsgCounter;
+			UINT8* m_pEncMsgIV;
+			UINT32 m_nDecMsgCounter;
+			UINT8* m_pDecMsgIV;
+
 		protected:
 
 #ifdef INTEL_IPP_CRYPTO

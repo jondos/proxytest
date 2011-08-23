@@ -73,13 +73,6 @@ CAMix* pMix=NULL;
 
 bool bTriedTermination = false;
 
-
-typedef struct
-{
-	unsigned short len;
-	time_t time;
-} log;
-
 #ifndef _WIN32
 	#ifdef _DEBUG
 		void signal_broken_pipe( int sig)
