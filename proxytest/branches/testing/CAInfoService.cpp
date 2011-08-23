@@ -59,6 +59,7 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 		BEGIN_STACK("CAInfoService::InfoLoop");
 
 		CAMsg::printMsg(LOG_DEBUG, "CAInfoService - InfoLoop() started\n");
+		CAMsg::printMsg(LOG_DEBUG, "CAInfoService - InfoLoop() PID: %i\n",getpid());
 		CAInfoService* pInfoService=(CAInfoService*)p;
 		bool bIsFirst=true; //send our own certifcate only the first time
 		bool bOneUpdateDone = false;
@@ -79,11 +80,9 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 		lastStatusUpdate -= CAInfoService::SEND_STATUS_INFO_WAIT;
 		UINT32 statusSentErrorBurst = 0;
 
-
-			pInfoService->m_pLoopCV->lock();
-			pInfoService->m_pLoopCV->wait(CAInfoService::SEND_LOOP_SLEEP * 1000);
-			pInfoService->m_pLoopCV->unlock();
-
+		pInfoService->m_pLoopCV->lock();
+		pInfoService->m_pLoopCV->wait(CAInfoService::SEND_LOOP_SLEEP * 1000);
+		pInfoService->m_pLoopCV->unlock();
 
     while(pInfoService->isRunning())
 		{
@@ -121,7 +120,7 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 
 			// check every minute if configuring, every 10 minutes otherwise
 			currentTime=time(NULL);
-		    if (currentTime >= (lastCascadeUpdate + CAInfoService::SEND_CASCADE_INFO_WAIT) || pInfoService->isConfiguring())
+		  if (currentTime >= (lastCascadeUpdate + CAInfoService::SEND_CASCADE_INFO_WAIT) || pInfoService->isConfiguring())
 			{
 				if (CALibProxytest::getOptions()->isFirstMix() || (CALibProxytest::getOptions()->isLastMix() && pInfoService->isConfiguring()))
 				{
@@ -225,6 +224,7 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 			//sSleep(nextUpdate);
 #endif
 		}
+		CAMsg::printMsg(LOG_DEBUG, "CAInfoService - InfoLoop() exited\n");
 		FINISH_STACK("CAInfoService::InfoLoop");
 		THREAD_RETURN_SUCCESS;
 	}
@@ -1093,13 +1093,22 @@ SINT32 CAInfoService::sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN (*a_
 		messages[i]->is = this;
 		messages[i]->requestCommand = requestCommand;
 		messages[i]->param = param;
+#if !defined(NO_INFOSERVICE_TRHEADS) 
 		threads[i] = new CAThread(a_strThreadName);
 		threads[i]->setMainLoop((THREAD_RETURN (*)(void *))a_thread);
 		threads[i]->start((void*)(messages[i]), false, true);
+#else
+		(*a_thread)(messages[i]);
+			if (messages[i]->retVal == E_SUCCESS)
+			{
+				returnValue = E_SUCCESS;
+			}
+#endif
 	}
 
 	for (UINT32 i = 0; i < nrAddresses; i++)
 	{
+#if !defined(NO_INFOSERVICE_TRHEADS)
 		if (threads[i]->join() == E_SUCCESS)
 		{
 			// CAMsg::printMsg(LOG_DEBUG,"InfoService: helo thread %u joined.\n", i);
@@ -1108,12 +1117,13 @@ SINT32 CAInfoService::sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN (*a_
 				returnValue = E_SUCCESS;
 			}
 		}
+		delete threads[i];
+		threads[i] = NULL;
+#endif
 		delete messages[i]->addr;
 		messages[i]->addr = NULL;
 		delete messages[i];
 		messages[i] = NULL;
-		delete threads[i];
-		threads[i] = NULL;
 	}
 	//Message looks senseless but please keep it because Rolf reported a helo thread deadlock.
 	//Perhaps there is a problem when the threads are joined.
@@ -1241,7 +1251,7 @@ SINT32 CAInfoService::sendCascadeHelo(const UINT8* a_strCascadeHeloXML,UINT32 a_
 	}
 	if(oSocket.connect(*a_pSocketAddress, MIX_TO_INFOSERVICE_TIMEOUT)==E_SUCCESS)
 	{
-	    if(CALibProxytest::getOptions()->isFirstMix())
+	   if(CALibProxytest::getOptions()->isFirstMix())
 		{
             CAMsg::printMsg(LOG_DEBUG,"InfoService: Sending cascade helo to InfoService %s:%d.\r\n", hostname, a_pSocketAddress->getPort());
 		}
@@ -1252,11 +1262,11 @@ SINT32 CAInfoService::sendCascadeHelo(const UINT8* a_strCascadeHeloXML,UINT32 a_
         // LERNGRUPPE
         // Semi-dynamic cascades are temporary cascades, not yet established! InfoService can cope with them now
         // using the /dynacascade command
-	    if( CALibProxytest::getOptions()->isLastMix() && m_bConfiguring )
+	  if( CALibProxytest::getOptions()->isLastMix() && m_bConfiguring )
 		{
 			sprintf((char*)buffHeader,"POST /dynacascade HTTP/1.0\r\nContent-Length: %u\r\n\r\n",a_len);
 		}
-	    else
+	  else
 		{
 			sprintf((char*)buffHeader,"POST /cascade HTTP/1.0\r\nContent-Length: %u\r\n\r\n",a_len);
 		}

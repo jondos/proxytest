@@ -209,7 +209,8 @@ SINT32 CALastMix::processKeyExchange()
 		// Version 0.3  - "normal", initial mix protocol
 		// Version 0.4  - with new flow control [was only used for tests]
     // Version 0.5  - end-to-end 1:n channels (only between client and last mix)
-		// Version 0.6  - with new flow control [productive]
+		// Version 0.6  - with new flow control for downstream [productive]
+		// Version 0.7  - with new flow control for downstream AND upstream
 		DOMElement* elemMixProtocolVersion=createDOMElement(doc,"MixProtocolVersion");
 		elemMix->appendChild(elemMixProtocolVersion);
     #ifdef NEW_MIX_TYPE // TypeB mixes
@@ -236,6 +237,7 @@ SINT32 CALastMix::processKeyExchange()
 				elemFlowControl->appendChild(elemDownstreamSendMe);
 				setDOMElementValue(elemUpstreamSendMe,(UINT32)FLOW_CONTROL_SENDME_SOFT_LIMIT);
 				setDOMElementValue(elemDownstreamSendMe,(UINT32)FLOW_CONTROL_SENDME_SOFT_LIMIT);
+				setDOMElementAttribute(elemFlowControl,"withUpstreamFlowControl",true);
       #else
 				setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.3");
       #endif

@@ -156,7 +156,7 @@ SINT32 CAFirstMixB::loop()
                           pHashEntry->trafficIn++;
                         #endif
                         #ifdef COUNTRY_STATS
-                          m_PacketsPerCountryIN[pHashEntry->countryID]++;
+                          m_PacketsPerCountryIN[pHashEntry->countryID].inc();
                         #endif  
                         //New control channel code...!
 						SINT32 ret = 0;
@@ -335,7 +335,7 @@ NEXT_USER:
                         pEntry->pHead->trafficOut++;
                       #endif
                       #ifdef COUNTRY_STATS
-                        m_PacketsPerCountryOUT[pEntry->pHead->countryID]++;
+                        m_PacketsPerCountryOUT[pEntry->pHead->countryID].inc();
                       #endif  
                       #ifdef LOG_CHANNEL  
                         //pEntry->packetsOutToUser++;
@@ -400,7 +400,7 @@ NEXT_USER:
                       pEntry->pHead->trafficOut++;
                     #endif
                     #ifdef COUNTRY_STATS
-                      m_PacketsPerCountryOUT[pEntry->pHead->countryID]++;
+                      m_PacketsPerCountryOUT[pEntry->pHead->countryID].inc();
                     #endif  
                     #ifdef LOG_CGANNEL  
                       pEntry->packetsOutToUser++;

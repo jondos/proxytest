@@ -8,9 +8,9 @@
 #include "poptint.h"
 
 static void displayArgs(poptContext con,
-		/*@unused@*/ enum poptCallbackReason foo,
+		/*@unused@*/ enum poptCallbackReason /*foo*/,
 		struct poptOption * key, 
-		/*@unused@*/ const char * arg, /*@unused@*/ void * data) {
+		/*@unused@*/ const char * /*arg*/, /*@unused@*/ void * /*data*/) {
     if (key->shortName== '?')
         poptPrintHelp(con, stdout, 0);
     else
@@ -183,7 +183,7 @@ static int showHelpIntro(poptContext con, FILE * f) {
     return len;
 }
 
-void poptPrintHelp(poptContext con, FILE * f, /*@unused@*/ int flags) {
+void poptPrintHelp(poptContext con, FILE * f, /*@unused@*/ int /*flags*/) {
     int leftColWidth;
     
     showHelpIntro(con, f);
@@ -280,7 +280,7 @@ static int showShortOptions(const struct poptOption * opt, FILE * f,
     return strlen(s) + 4;
 }
 
-void poptPrintUsage(poptContext con, FILE * f, /*@unused@*/ int flags) {
+void poptPrintUsage(poptContext con, FILE * f, /*@unused@*/ int /*flags*/) {
     int cursor;
 
     cursor = showHelpIntro(con, f);
