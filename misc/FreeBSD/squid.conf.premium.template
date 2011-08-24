@@ -3,6 +3,9 @@
 #
 # Replace [% extIP %] by the IP address of your own system/jail
 
+# Please set a link to your website
+err_html_text  unknown
+
 acl all src all
 acl manager proto cache_object
 acl localhost src 127.0.0.1/32
