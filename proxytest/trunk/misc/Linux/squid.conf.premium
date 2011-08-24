@@ -1,4 +1,7 @@
 
+# Please set a link to your website
+err_html_text  unknown
+
 # Set the path to your error message directory
 # or cemment out to use the default squid messages
 

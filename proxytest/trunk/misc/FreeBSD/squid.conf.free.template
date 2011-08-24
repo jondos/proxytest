@@ -3,6 +3,9 @@
 #
 # Replace [% extIP %] by the IP address of your own system/jail
 
+# Please set a link to your website
+err_html_text  unknown
+
 acl localhost src 127.0.0.1/32
 acl localhost src [% extIP %]
 
@@ -44,6 +47,12 @@ http_access deny !localhost
 http_access allow manager localhost
 http_access deny manager
 http_access deny CONNECT !SSL_ports
+
+acl jondonym1 dstdomain www.anonym-surfen.de
+acl jondonym2 dstdomain anonymous-proxy-servers.net
+acl anon1 dstdomain anon.inf.tu-dresden.de
+acl anon2 dst 141.76.45.41
+reply_body_max_size 2097152 deny all !jondonym1 !jondonym2 !anon1 !anon2
 
 http_access deny bad
 http_access deny badlocal
