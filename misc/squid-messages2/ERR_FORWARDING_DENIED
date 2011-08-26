@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head> 
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+<title>ERROR: The requested URL could not be retrieved</title> 
+<style type="text/css">
+  H1 { color: red; font-size: 22px; font-weight:bold; margin-top: 50px; margin-bottom: 0; padding: 0; }
+  H2 { font-size: 1.4em; font-weight: bold; color:#3F7FBF; padding: 0px; margin: 1em 0px 0.5em 0px; }
+  H3 { color: black; font-size: 16px; font-weight:bold; }
+  P { color: black; font-size: 16px; font-weight:normal; }
+  A:link { color: #00C; text-decoration:none; }
+  A:visited { color: #00C; text-decoration:none;}
+  A:hover { color: #00C; text-decoration:underline;}
+  A:active { color: #00C; text-decoration:underline;}
+  A:focus { color: #00C; text-decoration:none;}
+
+  td { padding: 5px; text-align: left;}
+
+  #navigation { position: absolute; top: 0px; left: 0px; width: 100%; margin: 0; padding: 0; border: 0; 
+               background-color: #004080; padding: 0; margin: 0; border: 0; line-height: 26px;
+  }
+
+  #navigation UL { display: inline; margin:0px; padding: 0px; background-color: #004080; list-style-image: none; font-size: 16px;  } 
+  #navigation ul li{ float:left;
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+        border-top: 0px;
+	border-right: 2px #fff solid; 
+	border-bottom: 0px;
+	border-left: 0px;
+    }
+  #navigation ul li a { 
+        color:#fff;
+	background-color: #004080;
+	font-weight: bold;
+	margin: 0px; 
+	padding: 4px;
+	text-decoration:none;
+  }
+  #navigation ul li a:focus, #navigation ul li a:hover, #navigation ul li a:active { 
+      background:#cde; color:#333; text-decoration:none; padding: 4px; }
+      
+  #navigation ul li#current { background:#3F7FBF; }
+  #navigation ul li#current a, #navigation ul li#current a:focus, #navigation ul li#current a:hover, #navigation ul li#current a:active 
+     { color:#fff; background:#3F7FBF; padding: 4px;}
+
+ </style> 
+ </head>
+ <body> 
+ <div id="navigation">
+   <ul>
+	<li><a href="https://anonymous-proxy-servers.net" title="anonymous proxy servers [1]" tabindex="1" accesskey="1">&nbsp;JonDonym&nbsp;</a></li>
+        <li><a href="https://anonymous-proxy-servers.net/en/software.html" title="Download the ip changer JonDo and JonDoFox for anonymous surfing [2]" tabindex="2" accesskey="2">&nbsp;Downloads&nbsp;</a></li>
+        <li><a href="https://anonymous-proxy-servers.net/en/payment.html" title="Payment for premium services [3]" tabindex="3" accesskey="3">&nbsp;Payment&nbsp;</a></li>
+        <li><a href="https://anonymous-proxy-servers.net/en/help/index.html" title="Documentation [4]" tabindex="4" accesskey="4">&nbsp;Help&nbsp;</a></li>
+        <li><a href="https://anonymous-proxy-servers.net/forum/" title="The forum serves as open discussion platform about online and offline anonymity. [5]" tabindex="5" accesskey="5">&nbsp;Forum&nbsp;</a></li>
+        <li><a href="https://anonymous-proxy-servers.net/wiki/" title="A wiki with additional informations about anonymous surfing and more. [6]" tabindex="6" accesskey="6">&nbsp;Wiki&nbsp;</a></li>
+        <li><a href="https://anonymous-proxy-servers.net/blog/index.php?user_language=en" title="JonDonym News Center [7]" tabindex="7"  accesskey="7">&nbsp;Blog&nbsp;</a></li>
+        <li><a href="http://ip-check.info/?lang=en" title="Make an ip check to figure out how secure you are in the net. [8]" tabindex="8" accesskey="8">&nbsp;Anonymity Test&nbsp;</a></li>
+   </ul> <br>
+</div>
+ <div id="titles" align="center"> 
+ <h1>Exit Mix Error Message</h1> 
+ <p style="margin: 0; font-size: smaller;">Operator of the exit mix is: %L</p>
+ <h2>Forwarding Denied.</h2> 
+ </div> 
+ <div id="content" align="center"> 
+ <p>This cache will not forward your request because it is trying to enforce a sibling relationship. <br>
+ Perhaps the client at %i is a cache which has been misconfigured.</p>
+<!-- %c  %s --> 
+</div>
+ </body>
+ </html> 

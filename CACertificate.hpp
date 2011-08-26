@@ -58,7 +58,7 @@ class CACertificate
 				}
 
 			/** Extracts a certificate from an encoded (DER,XML) form.*/
-			static CACertificate* decode(const UINT8* buff,UINT32 bufflen,UINT32 type,const char* passwd=NULL);
+			static CACertificate* decode(const UINT8* const buff,UINT32 bufflen,UINT32 type,const char* const passwd=NULL);
 			static CACertificate* decode(const DOMNode* node,UINT32 type,const char* passwd=NULL);
 			SINT32 encode(UINT8* buff,UINT32* bufflen,UINT32 type);
 			SINT32 encode(DOMElement* & elemRoot,XERCES_CPP_NAMESPACE::DOMDocument* doc);
@@ -82,8 +82,8 @@ class CACertificate
             SINT32 setSubjectKeyIdentifier( UINT8* a_value, UINT32 a_valueLen );
             SINT32 setSubjectKeyIdentifier();
             static SINT32 removeColons(const UINT8* a_cSki, UINT32 a_cSkiLen, UINT8 *&r_ski, UINT32 *r_skiLen);
-            SINT32 verify(CACertificate* a_cert);
-            bool isValid(time_t* ttiq);
+            SINT32 verify(const CACertificate* a_cert);
+            bool isValid();
 		private:
 			CACertificate();
 			CACertificate(X509* x);

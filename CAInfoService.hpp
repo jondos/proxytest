@@ -148,7 +148,7 @@ class CAInfoService
 			UINT64				m_serial;
 			UINT32				m_minuts;
 			SINT32				m_expectedMixRelPos;
-			bool				m_bConfiguring;
+			bool					m_bConfiguring;
 #ifdef DYNAMIC_MIX
 			bool m_bReconfig;
 #endif

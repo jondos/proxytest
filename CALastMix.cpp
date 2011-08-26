@@ -209,7 +209,8 @@ SINT32 CALastMix::processKeyExchange()
 		// Version 0.3  - "normal", initial mix protocol
 		// Version 0.4  - with new flow control [was only used for tests]
     // Version 0.5  - end-to-end 1:n channels (only between client and last mix)
-		// Version 0.6  - with new flow control [productive]
+		// Version 0.6  - with new flow control for downstream [productive]
+		// Version 0.7  - with new flow control for downstream AND upstream
 		DOMElement* elemMixProtocolVersion=createDOMElement(doc,"MixProtocolVersion");
 		elemMix->appendChild(elemMixProtocolVersion);
     #ifdef NEW_MIX_TYPE // TypeB mixes
@@ -236,6 +237,7 @@ SINT32 CALastMix::processKeyExchange()
 				elemFlowControl->appendChild(elemDownstreamSendMe);
 				setDOMElementValue(elemUpstreamSendMe,(UINT32)FLOW_CONTROL_SENDME_SOFT_LIMIT);
 				setDOMElementValue(elemDownstreamSendMe,(UINT32)FLOW_CONTROL_SENDME_SOFT_LIMIT);
+				setDOMElementAttribute(elemFlowControl,"withUpstreamFlowControl",true);
       #else
 				setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.3");
       #endif
@@ -362,22 +364,6 @@ SINT32 CALastMix::processKeyExchange()
 		messageBuff[len]=0;
 		CAMsg::printMsg(LOG_INFO,"Symmetric Key Info received from previous mix is:\n");
 		CAMsg::printMsg(LOG_INFO,"%s\n",(char*)messageBuff);
-		//verify signature
-		//CASignature oSig;
-		CACertificate* pCert=CALibProxytest::getOptions()->getPrevMixTestCertificate();
-		SINT32 result = CAMultiSignature::verifyXML(messageBuff, len, pCert);
-		//oSig.setVerifyKey(pCert);
-		delete pCert;
-		pCert = NULL;
-		//if(oSig.verifyXML(messageBuff,len)!=E_SUCCESS)
-		if(result != E_SUCCESS)
-		{
-			//CAMsg::printMsg(LOG_CRIT,"Could not verify the symmetric key from previous mix! The operator of the previous mix has to send you his current mix certificate, and you will have to import it in your configuration. Alternatively, you might import the proper root certification authority for verifying the certificate.\n");
-			CAMsg::printMsg(LOG_CRIT,"Could not verify the symmetric key from previous mix! The operator of the previous mix has to send you his current mix certificate, and you will have to import it in your configuration.\n");
-			delete []messageBuff;
-			messageBuff = NULL;
-			return E_UNKNOWN;
-		}
 		//get document
 		doc=parseDOMDocument(messageBuff,len);
 		if(doc == NULL)
@@ -398,6 +384,36 @@ SINT32 CALastMix::processKeyExchange()
 				doc->release();
 				doc = NULL;
 			}
+			return E_UNKNOWN;
+		}
+		//verify certificate from previous mix if enabled
+		if(CALibProxytest::getOptions()->verifyMixCertificates())
+		{
+			CACertificate* prevMixCert = CALibProxytest::getOptions()->getTrustedCertificateStore()->verifyMixCert(elemRoot);
+			if(prevMixCert != NULL)
+			{
+				CAMsg::printMsg(LOG_DEBUG, "Previous mix certificate was verified by a trusted root CA.\n");
+				CALibProxytest::getOptions()->setPrevMixTestCertificate(prevMixCert);
+			}
+			else
+			{
+				CAMsg::printMsg(LOG_ERR, "Could not verify certificate received from previous mix!\n");
+				return E_UNKNOWN;
+			}
+		}
+		//verify signature
+		//CASignature oSig;
+		CACertificate* pCert=CALibProxytest::getOptions()->getPrevMixTestCertificate();
+		SINT32 result = CAMultiSignature::verifyXML(messageBuff, len, pCert);
+		//oSig.setVerifyKey(pCert);
+		delete pCert;
+		pCert = NULL;
+		//if(oSig.verifyXML(messageBuff,len)!=E_SUCCESS)
+		if(result != E_SUCCESS)
+		{
+			CAMsg::printMsg(LOG_CRIT,"Could not verify the symmetric key!\n");
+			delete []messageBuff;
+			messageBuff = NULL;
 			return E_UNKNOWN;
 		}
 

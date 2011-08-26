@@ -542,6 +542,21 @@ SINT32 CAFirstMix::processKeyExchange()
     {
     	if(equals(child->getNodeName(),"Mix"))
         {
+    		//verify certificate from next mix if enabled
+    		if(CALibProxytest::getOptions()->verifyMixCertificates())
+    		{
+    			CACertificate* nextMixCert = CALibProxytest::getOptions()->getTrustedCertificateStore()->verifyMixCert(child);
+    			if(nextMixCert != NULL)
+    			{
+    				CAMsg::printMsg(LOG_DEBUG, "Next mix certificate was verified by a trusted root CA.\n");
+    				CALibProxytest::getOptions()->setNextMixTestCertificate(nextMixCert);
+    			}
+    			else
+    			{
+    				CAMsg::printMsg(LOG_ERR, "Could not verify certificate received from next mix!\n");
+    				return E_UNKNOWN;
+    			}
+    		}
             //check Signature....
             CAMsg::printMsg(LOG_DEBUG,"Try to verify next mix signature...\n");
             //CASignature oSig;
