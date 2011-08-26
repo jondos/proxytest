@@ -191,14 +191,14 @@ AC_ARG_ENABLE(payment,
 	]
 )
 
-dnl infoserviceserial ??
-INFOSERVICESERIAL=""
-AC_ARG_ENABLE(infoserviceserial,
-	AS_HELP_STRING([--infoservice-serial],
-			[Use serial communication with infoservices]),
+dnl noinfoservicethreads ??
+NOINFOSERVICETHREADS=""
+AC_ARG_ENABLE(noinfoservicethreads,
+	AS_HELP_STRING([--no-infoservice-threads],
+			[Do not use threads for communication with infoservices]),
 	[
 		if test "x$enableval" != "xno" ; then
-		    INFOSERVICESERIAL="-DINFOSERVICESERIAL"
+		    NOINFOSERVICETHREADS="-DNO_INFOSERVICE_TRHEADS"
 		fi
 	]
 )
@@ -670,25 +670,10 @@ AC_ARG_ENABLE(dataretentionlog,
 	]
 )
 
-AC_ARG_ENABLE(new-flow-control,
-	AS_HELP_STRING([--enable-new-flow-control],[Enable new flow control protocol]),
-	[
-	    if test "x$enableval" != "xno" ; then
-		CFLAGS="$CFLAGS -DNEW_FLOW_CONTROL"
-		CXXFLAGS="$CXXFLAGS -DNEW_FLOW_CONTROL"
-	    fi
-	]
-)
 
-AC_ARG_ENABLE(new-channel-encryption,
-	AS_HELP_STRING([--enable-new-channel-encryption],[Enable enhanced channel encryption]),
-	[
-	    if test "x$enableval" != "xno" ; then
-		CFLAGS="$CFLAGS -DNEW_CHANNEL_ENCRYPTION"
-		CXXFLAGS="$CXXFLAGS -DNEW_CHANNEL_ENCRYPTION"
-	    fi
-	]
-)
+CFLAGS="$CFLAGS -DNEW_FLOW_CONTROL -DNEW_CHANNEL_ENCRYPTION"
+CXXFLAGS="$CXXFLAGS -DNEW_FLOW_CONTROL -DNEW_CHANNEL_ENCRYPTION"
+
 
 AC_ARG_ENABLE(with-integrity-check,
 	AS_HELP_STRING([--enable-with-integrity-check],[Enable integrity check for data channels]),
@@ -759,8 +744,8 @@ if test "x$DOTHETEST" != "xyes" ; then
     AC_SUBST(LIBCPPUNIT,cppunit)
 fi
 
-CFLAGS="$CFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $DELAY_USERS $PAYMENT $INFOSERVICESERIAL $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS"
-CXXFLAGS="$CXXFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $DELAY_USERS $PAYMENT $INFOSERVICESERIAL $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS"
+CFLAGS="$CFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $DELAY_USERS $PAYMENT $NOINFOSERVICETHREADS $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS"
+CXXFLAGS="$CXXFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $DELAY_USERS $PAYMENT $NOINFOSERVICETHREADS $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS"
 LIBS="$LIBS $PAYMENT_LIB $MYSQL_LIB"
 
 AM_CONDITIONAL([DOTESTS], [test x$DOTHETESTS = xyes])
