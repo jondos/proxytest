@@ -194,7 +194,7 @@ AC_ARG_ENABLE(payment,
 dnl noinfoservicethreads ??
 NOINFOSERVICETHREADS=""
 AC_ARG_ENABLE(noinfoservicethreads,
-	AS_HELP_STRING([--no-infoservice-threads],
+	AS_HELP_STRING([--enable-infoservice-no-threads],
 			[Do not use threads for communication with infoservices]),
 	[
 		if test "x$enableval" != "xno" ; then

@@ -732,7 +732,7 @@ with_xml_lib
 enable_debug
 enable_debug_output
 enable_dataretentionlog
-no_infoservice_threads
+enable_infoservice_no_threads
 enable_with_integrity_check
 enable_google_cpuprofiler
 enable_google_heapchecker
@@ -1399,7 +1399,7 @@ Optional Features:
   --enable-dataretentionlog
                           Enable log messages according to German data
                           retention
-  --no-infoservice-threads
+  --enable-infoservice-no-threads
                           Do not use threads for communication with infoservices
   --enable-with-integrity-check
                           Enable integrity check for data channels
@@ -7188,8 +7188,8 @@ fi
 
 
 # Check whether --no-infoservice-threads was given.
-if test "${no_infoservice_threads+set}" = set; then :
-  enableval=$no_infoservice_threads;
+if test "${enable_infoservice_no_threads+set}" = set; then :
+  enableval=$enable_infoservice_no_threads;
 	    if test "x$enableval" != "xno" ; then
 		CFLAGS="$CFLAGS -DNO_INFOSERVICE_TRHEADS"
 		CXXFLAGS="$CXXFLAGS -DNO_INFOSERVICE_TRHEADS"
