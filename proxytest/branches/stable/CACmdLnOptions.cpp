@@ -62,6 +62,8 @@ CACmdLnOptions::CACmdLnOptions()
 		m_pMultiSignature=NULL;
 		m_pPrevMixCertificate=NULL;
 		m_pNextMixCertificate=NULL;
+		m_pTrustedRootCertificates=NULL;
+		m_bVerifyMixCerts=false;
 		m_bCompressedLogs=false;
 		m_pLogEncryptionCertificate=NULL;
 		m_bIsEncryptedLogEnabled=false;
@@ -80,6 +82,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_strUser=NULL;
 		m_strCascadeName=NULL;
 		m_strLogDir=NULL;
+		m_strLogLevel=NULL;
 		setZero64(m_maxLogFileSize);
 		m_strEncryptedLogDir=NULL;
 		m_arTargetInterfaces=NULL;
@@ -467,6 +470,9 @@ void CACmdLnOptions::clean()
 
 		delete[] m_strLogDir;
 		m_strLogDir=NULL;
+
+		delete[] m_strLogLevel;
+		m_strLogLevel=NULL;
 
 		delete[] m_strPidFile;
 		m_strPidFile=NULL;
@@ -2237,23 +2243,25 @@ SINT32 CACmdLnOptions::initLogging()
 	}
 	ret = CAMsg::setLogOptions(iLogOptions);
 	
-	if (strcmp(m_strLogLevel,"info") == 0)
+	if(m_strLogLevel!=NULL)
 	{
-		CAMsg::setLogLevel(LOG_INFO);
-	}
-	else if (strcmp(m_strLogLevel,"warning") == 0)
-	{
-		CAMsg::setLogLevel(LOG_WARNING);
-	}
-	else if (strcmp(m_strLogLevel,"error") == 0)
-	{
-		CAMsg::setLogLevel(LOG_ERR);
-	}
-	else if (strcmp(m_strLogLevel,"critical") == 0)
-	{
-		CAMsg::setLogLevel(LOG_CRIT);
-	}
-	
+		if (strcmp(m_strLogLevel,"info") == 0)
+		{
+			CAMsg::setLogLevel(LOG_INFO);
+		}
+		else if (strcmp(m_strLogLevel,"warning") == 0)
+		{
+			CAMsg::setLogLevel(LOG_WARNING);
+		}
+		else if (strcmp(m_strLogLevel,"error") == 0)
+		{
+			CAMsg::setLogLevel(LOG_ERR);
+		}
+		else if (strcmp(m_strLogLevel,"critical") == 0)
+		{
+			CAMsg::setLogLevel(LOG_CRIT);
+		}
+	}	
 	if(isEncryptedLogEnabled())
 	{
 		SINT32 retEncr;
@@ -2696,24 +2704,51 @@ SINT32 CACmdLnOptions::setOwnOperatorCertificate(DOMElement *elemCertificates)
 	return E_SUCCESS;
 }
 
+SINT32 CACmdLnOptions::setMixCertificateVerification(DOMElement *elemCertificates)
+{
+	DOMElement *elemMixVerify;
+	UINT8 tmpBuff[TMP_BUFF_SIZE];
+	UINT32 tmpLen = TMP_BUFF_SIZE;
+
+	if(elemCertificates == NULL) return E_UNKNOWN;
+		ASSERT_CERTIFICATES_OPTIONS_PARENT
+			(elemCertificates->getNodeName(), OPTIONS_NODE_MIX_CERTIFICATE_VERIFICATION);
+
+	getDOMChildByName(elemCertificates, OPTIONS_NODE_MIX_CERTIFICATE_VERIFICATION, elemMixVerify, false);
+	if(elemMixVerify != NULL)
+	{
+		if(getDOMElementValue(elemMixVerify, tmpBuff, &tmpLen) == E_SUCCESS &&
+				memcmp(tmpBuff,"True",4)==0)
+		{
+			m_bVerifyMixCerts = true;
+			m_pTrustedRootCertificates = new CACertStore();
+			CAMsg::printMsg(LOG_INFO, "Mix certificate verification is enabled.\n");
+		}
+	}
+	return E_SUCCESS;
+}
+
 SINT32 CACmdLnOptions::setNextMixCertificate(DOMElement *elemCertificates)
 {
 	DOMElement* elemNextCert = NULL;
 
-	if(elemCertificates == NULL) return E_UNKNOWN;
-	ASSERT_CERTIFICATES_OPTIONS_PARENT
-		(elemCertificates->getNodeName(), OPTIONS_NODE_NEXT_MIX_CERTIFICATE);
-
-	//nextMixCertificate if given
-	getDOMChildByName(elemCertificates, OPTIONS_NODE_NEXT_MIX_CERTIFICATE, elemNextCert,false);
-	if(elemNextCert!=NULL)
+	if(!m_bVerifyMixCerts)
 	{
-		m_pNextMixCertificate=
-			CACertificate::decode(elemNextCert->getFirstChild(),CERT_X509CERTIFICATE);
-		if(m_pNextMixCertificate == NULL)
+		if(elemCertificates == NULL) return E_UNKNOWN;
+		ASSERT_CERTIFICATES_OPTIONS_PARENT
+			(elemCertificates->getNodeName(), OPTIONS_NODE_NEXT_MIX_CERTIFICATE);
+
+		//nextMixCertificate if given
+		getDOMChildByName(elemCertificates, OPTIONS_NODE_NEXT_MIX_CERTIFICATE, elemNextCert,false);
+		if(elemNextCert!=NULL)
 		{
-			CAMsg::printMsg(LOG_CRIT,"Could not decode the certificate of the next mix!\n");
-			return E_UNKNOWN;
+			m_pNextMixCertificate=
+				CACertificate::decode(elemNextCert->getFirstChild(),CERT_X509CERTIFICATE);
+			if(m_pNextMixCertificate == NULL)
+			{
+				CAMsg::printMsg(LOG_CRIT,"Could not decode the certificate of the next mix!\n");
+				return E_UNKNOWN;
+			}
 		}
 	}
 	return E_SUCCESS;
@@ -2725,15 +2760,64 @@ SINT32 CACmdLnOptions::setPrevMixCertificate(DOMElement *elemCertificates)
 	//prevMixCertificate if given
 	DOMElement* elemPrevCert=NULL;
 
-	if(elemCertificates == NULL) return E_UNKNOWN;
-	ASSERT_CERTIFICATES_OPTIONS_PARENT
-		(elemCertificates->getNodeName(), OPTIONS_NODE_PREV_MIX_CERTIFICATE);
-
-	getDOMChildByName(elemCertificates, OPTIONS_NODE_PREV_MIX_CERTIFICATE, elemPrevCert, false);
-	if(elemPrevCert!=NULL)
+	if(!m_bVerifyMixCerts)
 	{
-		m_pPrevMixCertificate=
-			CACertificate::decode(elemPrevCert->getFirstChild(),CERT_X509CERTIFICATE);
+		if(elemCertificates == NULL) return E_UNKNOWN;
+		ASSERT_CERTIFICATES_OPTIONS_PARENT
+			(elemCertificates->getNodeName(), OPTIONS_NODE_PREV_MIX_CERTIFICATE);
+
+		getDOMChildByName(elemCertificates, OPTIONS_NODE_PREV_MIX_CERTIFICATE, elemPrevCert, false);
+		if(elemPrevCert!=NULL)
+		{
+			m_pPrevMixCertificate=
+				CACertificate::decode(elemPrevCert->getFirstChild(),CERT_X509CERTIFICATE);
+		}
+	}
+	return E_SUCCESS;
+
+}
+
+SINT32 CACmdLnOptions::setTrustedRootCertificates(DOMElement *elemCertificates)
+{
+	DOMElement* elemTrustedCerts=NULL;
+	DOMNodeList* trustedCerts=NULL;
+	CACertificate* cert;
+
+	if(m_bVerifyMixCerts)
+	{
+		if(elemCertificates == NULL) return E_UNKNOWN;
+			ASSERT_CERTIFICATES_OPTIONS_PARENT
+				(elemCertificates->getNodeName(), OPTIONS_NODE_TRUSTED_ROOT_CERTIFICATES);
+
+		getDOMChildByName(elemCertificates, OPTIONS_NODE_TRUSTED_ROOT_CERTIFICATES, elemTrustedCerts, false);
+		if(elemTrustedCerts!=NULL)
+		{
+			trustedCerts = getElementsByTagName(elemTrustedCerts, OPTIONS_NODE_X509_CERTIFICATE);
+
+			for(UINT32 i=0; i<trustedCerts->getLength(); i++)
+			{
+				cert = CACertificate::decode(trustedCerts->item(i), CERT_X509CERTIFICATE);
+				if(cert != NULL)
+				{
+					m_pTrustedRootCertificates->add(cert);
+				}
+				else
+				{
+					CAMsg::printMsg(LOG_WARNING, "Root certificate could not be decoded\n");
+				}
+			}
+		}
+		else
+		{
+			LOG_NODE_NOT_FOUND(OPTIONS_NODE_TRUSTED_ROOT_CERTIFICATES);
+			return E_UNKNOWN;
+		}
+		if(m_pTrustedRootCertificates->getNumber() == 0)
+		{
+			CAMsg::printMsg(LOG_CRIT, "No trusted root certificates found.\n");
+			return E_UNKNOWN;
+		}
+		CAMsg::printMsg(LOG_INFO, "Loaded %d trusted root certificates.\n", m_pTrustedRootCertificates->getNumber());
 	}
 	return E_SUCCESS;
 }
@@ -4556,7 +4640,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 
 #ifndef DYNAMIC_MIX
     /* LERNGRUPPE: This is no error in the fully dynamic model */
-    if(isLastMix() && haveCascade != E_SUCCESS && !hasPrevMixTestCertificate())
+    if(isLastMix() && haveCascade != E_SUCCESS && !hasPrevMixTestCertificate() && !verifyMixCertificates())
     {
         CAMsg::printMsg(LOG_CRIT,"Error in configuration: You must either specify cascade info or the previous mix's certificate.\n");
         return E_UNKNOWN;

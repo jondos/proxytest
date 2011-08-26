@@ -45,6 +45,7 @@ CAMsg* CAMsg::pMsg=NULL;
 const char* const CAMsg::m_strMsgTypes[6]={", error   ] ",", critical] ",", info    ] ",", debug   ] ",", special ] ",", warning ] "}; //all same size!
 #define STRMSGTYPES_SIZE 12
 
+
 CAMsg::CAMsg()
     {
 			m_pcsPrint=new CAMutex();
@@ -80,7 +81,7 @@ CAMsg::~CAMsg()
 
 char* CAMsg::createLogFileMessage(UINT32 opt)
 {
-	char* strLogAtPath = " at path '%s'";
+	const char* strLogAtPath = " at path '%s'";
 	char* strLogFile = NULL;
 	
 	
@@ -102,7 +103,7 @@ char* CAMsg::createLogFileMessage(UINT32 opt)
 
 char* CAMsg::createLogDirMessage(UINT32 opt)
 {
-	char* strLogAtPath = " Please also check if the directory '%s' exists and create or change it if it does not.";
+	const char* strLogAtPath = " Please also check if the directory '%s' exists and create or change it if it does not.";
 	char* strLogFile = NULL;
 
 
@@ -140,14 +141,14 @@ SINT32 CAMsg::setLogLevel(UINT32 a_logLevel)
 SINT32 CAMsg::setLogOptions(UINT32 opt)
     {
 			SINT32 ret; 
-			char* strLogOpened = "Message log opened%s%s.\n";
-			char* strLogErrorMsg = "Could not open message log%s%s!%s Do you have write permissions?%s\n";
-			char* strReasonMsg = " Reason: %s (%u)";
+			const char* strLogOpened = "Message log opened%s%s.\n";
+			const char* strLogErrorMsg = "Could not open message log%s%s!%s Do you have write permissions?%s\n";
+			const char* strReasonMsg = " Reason: %s (%u)";
 			char* strLogFile = NULL;
 			char* strLogDir = NULL;
 			char* strReason = NULL;
 			char* strBuff;
-			char* strLogType = "";
+			const char* strLogType = "";
 	
 
 			if(pMsg->m_uLogType==opt)
@@ -412,8 +413,6 @@ SINT32 CAMsg::rotateLog()
 
 SINT32 CAMsg::openLog(UINT32 type)
 	{
-//		int tmpHandle=-1;
-		time_t currtime=0;
 				if ((type & MSG_LOG) == MSG_LOG)
 				{
 #ifndef _WIN32

@@ -45,11 +45,13 @@ CACertificate::CACertificate()
 CACertificate::CACertificate(X509* x)
 	{
 		m_pCert = x;
+		m_pSKI = NULL;
+		m_pAKI = NULL;
 		if(m_pCert != NULL)
-		{
-			m_pSKI = (ASN1_OCTET_STRING*) X509_get_ext_d2i(m_pCert, NID_subject_key_identifier, NULL, NULL);
-			m_pAKI = (AUTHORITY_KEYID*) X509_get_ext_d2i (m_pCert, NID_authority_key_identifier, NULL, NULL);
-		}
+			{
+				m_pSKI = (ASN1_OCTET_STRING*) X509_get_ext_d2i(m_pCert, NID_subject_key_identifier, NULL, NULL);
+				m_pAKI = (AUTHORITY_KEYID*) X509_get_ext_d2i (m_pCert, NID_authority_key_identifier, NULL, NULL);
+			}
 	}
 
 CACertificate* CACertificate::decode(const DOMNode* n,UINT32 type,const char* passwd)
@@ -64,6 +66,7 @@ CACertificate* CACertificate::decode(const DOMNode* n,UINT32 type,const char* pa
 								{
 									UINT32 strLen=4096;
 									UINT8* tmpStr=new UINT8[strLen];
+									CACertificate* cert=NULL;
 									if(getDOMElementValue(node,tmpStr,&strLen)!=E_SUCCESS)
 										{
 											delete[] tmpStr;
@@ -72,10 +75,13 @@ CACertificate* CACertificate::decode(const DOMNode* n,UINT32 type,const char* pa
 										}
 									UINT32 decLen=4096;
 									UINT8* decBuff=new UINT8[decLen];
-									CABase64::decode((UINT8*)tmpStr,strLen,decBuff,&decLen);
+									SINT32 ret=CABase64::decode((UINT8*)tmpStr,strLen,decBuff,&decLen);
 									delete[] tmpStr;
 									tmpStr = NULL;
-									CACertificate* cert=decode(decBuff,decLen,CERT_PKCS12,passwd);
+									if(ret==E_SUCCESS)
+										{
+											cert=decode(decBuff,decLen,CERT_PKCS12,passwd);
+										}
 									delete[] decBuff;
 									decBuff = NULL;
 									return cert;
@@ -90,6 +96,7 @@ CACertificate* CACertificate::decode(const DOMNode* n,UINT32 type,const char* pa
 								{
 									UINT32 strLen=4096;
 									UINT8* tmpStr=new UINT8[strLen];
+									CACertificate* cert=NULL;
 									if(getDOMElementValue(node,tmpStr,&strLen)!=E_SUCCESS)
 										{
 											delete[] tmpStr;
@@ -98,10 +105,13 @@ CACertificate* CACertificate::decode(const DOMNode* n,UINT32 type,const char* pa
 										}
 									UINT32 decLen=4096;
 									UINT8* decBuff=new UINT8[decLen];
-									CABase64::decode((UINT8*)tmpStr,strLen,decBuff,&decLen);
+									SINT32 ret=CABase64::decode((UINT8*)tmpStr,strLen,decBuff,&decLen);
 									delete[] tmpStr;
 									tmpStr = NULL;
-									CACertificate* cert=decode(decBuff,decLen,CERT_DER);
+									if(ret==E_SUCCESS)
+										{
+											cert=decode(decBuff,decLen,CERT_DER);
+										}
 									delete[] decBuff;
 									decBuff = NULL;
 									return cert;
@@ -113,14 +123,14 @@ CACertificate* CACertificate::decode(const DOMNode* n,UINT32 type,const char* pa
 		return NULL;
 	}
 
-CACertificate* CACertificate::decode(const UINT8* buff,UINT32 bufflen,UINT32 type,const char* passwd)
+CACertificate* CACertificate::decode(const UINT8* const buff,UINT32 bufflen,UINT32 type,const char* const passwd)
 	{
 		if(buff==NULL)
 			return NULL;
 		X509* tmpCert=NULL;
 		EVP_PKEY* tmpKey=NULL;
 		SINT32 ret=-1;
-		const UINT8* tmp;
+		const UINT8* tmp=buff;
 		switch(type)
 			{
 				case CERT_DER:
@@ -134,9 +144,9 @@ CACertificate* CACertificate::decode(const UINT8* buff,UINT32 bufflen,UINT32 typ
 				case CERT_PKCS12:
 					PKCS12* tmpPKCS12;
 					#if OPENSSL_VERSION_NUMBER	> 0x009070CfL
-						tmpPKCS12=d2i_PKCS12(NULL,&buff,bufflen);
+						tmpPKCS12=d2i_PKCS12(NULL,&tmp,bufflen);
 					#else
-						tmpPKCS12=d2i_PKCS12(NULL,(UINT8**)&buff,bufflen);
+						tmpPKCS12=d2i_PKCS12(NULL,(UINT8**)&tmp,bufflen);
 					#endif
 					/*Note: Basically we are not interested in the private keys here - but still we need cannot supply
 					 *NULL for that parameter, as OpenSSL 1.0.0. would not work in that case*/
@@ -161,14 +171,19 @@ CACertificate* CACertificate::decode(const UINT8* buff,UINT32 bufflen,UINT32 typ
 					}
 					UINT8* tmpBuff=new UINT8[bufflen];
 					UINT32 tmpBuffSize=bufflen;
-					getDOMElementValue(root,tmpBuff,&tmpBuffSize);
-					CABase64::decode(tmpBuff,tmpBuffSize,tmpBuff,&tmpBuffSize);
+					if(getDOMElementValue(root,tmpBuff,&tmpBuffSize)==E_SUCCESS)
+						{
+							ret=CABase64::decode(tmpBuff,tmpBuffSize,tmpBuff,&tmpBuffSize);
+						}
 					tmp=tmpBuff;
-					#if OPENSSL_VERSION_NUMBER	> 0x009070CfL
-						tmpCert=d2i_X509(NULL,&tmp,tmpBuffSize);
-					#else
-						tmpCert=d2i_X509(NULL,(UINT8**)&tmp,tmpBuffSize);
-					#endif
+					if(ret==E_SUCCESS)
+						{
+							#if OPENSSL_VERSION_NUMBER	> 0x009070CfL
+								tmpCert=d2i_X509(NULL,&tmp,tmpBuffSize);
+							#else
+								tmpCert=d2i_X509(NULL,(UINT8**)&tmp,tmpBuffSize);
+							#endif
+						}
 					delete[] tmpBuff;
 					tmpBuff = NULL;
 					break;
@@ -395,13 +410,19 @@ SINT32 CACertificate::getRawSubjectKeyIdentifier(UINT8* r_ski, UINT32* r_skiLen)
 	return E_SUCCESS;
 }
 
-SINT32 CACertificate::verify(CACertificate* a_cert)
+SINT32 CACertificate::verify(const CACertificate* a_cert)
 {
 	if(a_cert == NULL || a_cert->m_pCert == NULL || m_pCert == NULL)
 	{
 		return E_UNKNOWN;
 	}
-	//Namechaining...
+	//check validity
+	if(!isValid())
+	{
+		CAMsg::printMsg(LOG_ERR, "Verification Error: Certificate is not valid!\n");
+		return E_UNKNOWN;
+	}
+	//namechaining...
 	if(X509_NAME_cmp(X509_get_issuer_name(m_pCert), X509_get_subject_name(a_cert->m_pCert)) != 0)
 	{
 		CAMsg::printMsg(LOG_ERR, "Verification Error: Names do not match!\n");
@@ -445,11 +466,33 @@ SINT32 CACertificate::verify(CACertificate* a_cert)
 	return E_UNKNOWN;
 }
 
-bool CACertificate::isValid(time_t* ttiq)
+bool CACertificate::isValid()
 {
-	if(X509_cmp_time(X509_get_notBefore(m_pCert), ttiq) == -1
-			&& X509_cmp_time(X509_get_notAfter(m_pCert), ttiq) == 1)
+	if(X509_cmp_current_time(X509_get_notBefore(m_pCert)) == -1
+			&& X509_cmp_current_time(X509_get_notAfter(m_pCert)) == 1)
 	{
+		return true;
+	}
+	//check if certificate is valid within grace period of two months
+	time_t now = time(NULL); 		//get current time;
+	tm* time = new tm;
+	time = gmtime_r(&now, time);	//convert time to modifiable format
+	if(time->tm_mon < 2)			//go back two months in time
+	{
+		time->tm_mon = time->tm_mon+10;
+		time->tm_year = time->tm_year-1;
+	}
+	else
+	{
+		time->tm_mon = time->tm_mon-2;
+	}
+	time_t ttiq  = mktime(time);  	//convert time back to time_t and check again
+	delete time;
+	time = NULL;
+	if(X509_cmp_time(X509_get_notBefore(m_pCert), &ttiq) == -1
+			&& X509_cmp_time(X509_get_notAfter(m_pCert), &ttiq) == 1)
+	{
+		CAMsg::printMsg(LOG_WARNING, "Certificate is only valid within grace period of two months!\n");
 		return true;
 	}
 	return false;

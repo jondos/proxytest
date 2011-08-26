@@ -1,0 +1,123 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head> 
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+<title>ERROR: Access Denied.</title> 
+<style type="text/css">
+  H1 { color: red; font-size: 22px; font-weight:bold; margin-top: 40px; margin-bottom: 0; padding: 0; }
+  H2 { font-size: 1.4em; font-weight: bold; color:#3F7FBF; padding: 0px; margin: 1em 0px 0.5em 0px; }
+  H3 { color: black; font-size: 16px; font-weight:bold; }
+  P { color: black; font-size: 16px; font-weight:normal; }
+  A:link { color: #00C; text-decoration:none; }
+  A:visited { color: #00C; text-decoration:none;}
+  A:hover { color: #00C; text-decoration:underline;}
+  A:active { color: #00C; text-decoration:underline;}
+  A:focus { color: #00C; text-decoration:none;}
+
+  td { padding: 5px; text-align: left;}
+
+  #navigation { position: absolute; top: 0px; left: 0px; width: 100%; margin: 0; padding: 0; border: 0; 
+               background-color: #004080; padding: 0; margin: 0; border: 0; line-height: 26px;
+  }
+
+  #navigation UL { display: inline; margin:0px; padding: 0px; background-color: #004080; list-style-image: none; font-size: 16px;  } 
+  #navigation ul li{ float:left;
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+        border-top: 0px;
+	border-right: 2px #fff solid; 
+	border-bottom: 0px;
+	border-left: 0px;
+    }
+  #navigation ul li a { 
+        color:#fff;
+	background-color: #004080;
+	font-weight: bold;
+	margin: 0px; 
+	padding: 4px;
+	text-decoration:none;
+  }
+  #navigation ul li a:focus, #navigation ul li a:hover, #navigation ul li a:active { 
+      background:#cde; color:#333; text-decoration:none; padding: 4px; }
+      
+  #navigation ul li#current { background:#3F7FBF; }
+  #navigation ul li#current a, #navigation ul li#current a:focus, #navigation ul li#current a:hover, #navigation ul li#current a:active 
+     { color:#fff; background:#3F7FBF; padding: 4px;}
+
+ </style> 
+ </head>
+ <body> 
+ <h1>Exit Mix Error Message</h1> 
+<p style="margin: 0; font-size: smaller;">Operator of the exit mix is: %L</p>
+ <h2>User agent string looks like a spider</h2> 
+ </div> 
+ <div id="content" align="center"> 
+ <p>It seems you are a spider bot. Free services are for testing purposes only and limited in several ways. You may use <u>JonDonym premium services</u> to avoid these limit.</p>
+<p style="text-align: center;"><a href="https://anonymous-proxy-servers.net/en/payment.html" style="font-weight: bold;">Please, buy a premium account to support JonDonym.</a></p>
+<p><span class="coupons">If you did not test the Premium services yet, <a href="https://shop.anonymous-proxy-servers.net/bin/testcoupon">you may get a FREE TRIAL CODE here</a>.<br></span>For technical problems or questions you may use the <a href="https://anonymous-proxy-servers.net/forum/">forum of JonDonym</a> or <a href="https://anonymous-proxy-servers.net/bin/contact?lang=en">contact the support of JonDos GmbH</a>.</p>
+</td></tr>
+<tr>
+<td valign="bottom" style="text-align: left; border: 0px; background-color: #088dce;
+   color: #FFF; font-weight: bold; font-size: 16px;">&nbsp;Function&nbsp;</td>
+<td style="text-align: center; border: 0px; background-color: #088dce;
+   color: #FFF; font-weight: bold; font-size: 16px;">Free services</td>
+<td style="text-align: center; border: 0px; background-color: #088dce;
+   color: #FFF; font-weight: bold; font-size: 16px;">Premium services</td>
+</tr>
+<tr>
+<td style="background: #e4e4e4;">Speed</td>
+<td style="background: #d8e2eb; text-align:center;">30-50&thinsp;kBit/s</td>
+<td style="background: #d2edff; text-align:center;">unlimited*</td>
+</tr>
+<tr>
+<td>Available ports</td>
+<td style="background: #e8f1f8; text-align:center;">HTTP/HTTPS</td>
+<td style="background: #c3e5fe; text-align:center;"> all**</td>
+</tr>
+<tr>
+<td style="background: #e4e4e4;">Maximum number of users</td>
+<td style="background: #d8e2eb; text-align:center;">limited</td>
+<td style="background: #d2edff; text-align:center;">unlimited</td>
+</tr>
+<tr>
+<td>Maximum file size for downloads</td>
+<td style="background: #e8f1f8; text-align:center;">2 MB</td>
+<td style="background: #c3e5fe; text-align:center;">unlimited</td>
+</tr>
+<tr>
+<td style="background: #e4e4e4;">Number of different countries</td>
+<td style="background: #d8e2eb; text-align:center;">usually 1</td>
+<td style="background: #d2edff; text-align:center;">2-3</td>
+</tr>
+<tr>
+<td >Number of mixes (proxies)</td>
+<td style="background: #e8f1f8; text-align:center;">2</td>
+<td style="background: #c3e5fe; text-align:center;">3</td>
+</tr>
+<tr>
+<td style="background: #e4e4e4;">Availability</td>
+<td style="background: #d8e2eb; text-align:center;">no guarantee</td>
+<td style="background: #d2edff; text-align:center;">99&#037;</td>
+</tr>
+<tr>
+<tr>
+<td>SOCKS5 (may anonymize Java and Flash)</td>
+<td style="background: #e8f1f8; text-align:center;">No</td>
+<td style="background: #c3e5fe; text-align:center;">Yes</td>
+</tr>
+<td style="font-weight:bold; border-top: 1px #A9B8C2 solid; background: #e4e4e4;">Costs</td>
+<td style="background: #d8e2eb; text-align:center; font-weight:bold; border-top: 1px #A9B8C2 solid;">free of charge</td>
+<td style="background: #d2edff; text-align:center; font-weight:bold; border-top: 1px #A9B8C2 solid;">from 5.00&thinsp;&euro;</td>
+</tr>
+<tr><td colspan="3" style="border-top: 1px #A9B8C2 solid; border-bottom: 1px #A9B8C2 solid; font-size: smaller;">
+*&nbsp;&nbsp; more than 600 kBit/s guaranteed, usually available: 1.000 - 1.500 kBit/s<br>
+** SMTP-Port 25 is blocked on all cascades because of spam misuses.</td></tr>
+<tr><td colspan="3" style="border-bottom: 1px #A9B8C2 solid; font-size: smaller;"><a href="https://anonymous-proxy-servers.net/en/help/premium.html">Learn more about the Premium services
+advantages...</a></td></tr>
+<tr><td colspan="3" style="font-size: smaller;">&nbsp;</td></tr>
+</table>
+<!-- %c  %s --> 
+</div>
+ </body>
+ </html> 

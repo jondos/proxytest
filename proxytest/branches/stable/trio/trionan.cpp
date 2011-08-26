@@ -173,6 +173,7 @@ static TRIO_CONST unsigned char ieee_754_qnan_array[] = {
 /*
  * trio_make_double
  */
+
 TRIO_PRIVATE double
 trio_make_double(TRIO_CONST unsigned char *values)
 {

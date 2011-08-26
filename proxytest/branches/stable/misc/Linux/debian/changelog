@@ -1,3 +1,11 @@
+mix-squidconf (11.08.26) unstable; urgency=low
+
+  * update for new squid.conf
+  * update for squid error messages
+
+ -- JonDos GmbH <info@jondos.de>  Fri, 26 Aug 2011 10:17:23 +0200
+
+
 mix-squidconf (11.06.21) unstable; urgency=low
 
   * update for blacklist and named.conf.local
@@ -110,7 +118,7 @@ mix-squidconf (10.02.18) unstable; urgency=low
 
   * added webanzeigen.xxxx.de
 
--- JonDos GmbH <info@jondos.de>  Thu, 18 Feb 2010 10:17:23 +0200
+ -- JonDos GmbH <info@jondos.de>  Thu, 18 Feb 2010 10:17:23 +0200
 
 
 mix-squidconf (10.01.18) unstable; urgency=low

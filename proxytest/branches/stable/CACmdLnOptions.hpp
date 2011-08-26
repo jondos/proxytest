@@ -100,6 +100,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define OPTIONS_NODE_NEXT_OPERATOR_CERTIFICATE "NextOperatorCertificate"
 #define OPTIONS_NODE_PREV_MIX_CERTIFICATE "PrevMixCertificate"
 #define OPTIONS_NODE_PREV_OPERATOR_CERTIFICATE "PrevOperatorCertificate"
+#define OPTIONS_NODE_TRUSTED_ROOT_CERTIFICATES "TrustedRootCertificates"
+#define OPTIONS_NODE_MIX_CERTIFICATE_VERIFICATION "MixCertificateVerification"
 #define OPTIONS_NODE_X509DATA "X509Data"
 #define OPTIONS_NODE_X509_CERTIFICATE "X509Certificate"
 #define OPTIONS_NODE_X509_PKCS12 "X509PKCS12"
@@ -384,6 +386,15 @@ class CACmdLnOptions
 			return NULL;
 		}
 
+		SINT32 setPrevMixTestCertificate(CACertificate* cert)
+		{
+			if(cert != NULL)
+			{
+				m_pPrevMixCertificate = cert->clone();
+				return E_SUCCESS;
+			}
+            return E_UNKNOWN;
+        }
 
 		bool hasNextMixTestCertificate()
 		{
@@ -396,6 +407,21 @@ class CACmdLnOptions
 				return m_pNextMixCertificate->clone();
 			return NULL;
 		}
+        
+        SINT32 setNextMixTestCertificate(CACertificate* cert)
+        {
+            if(cert != NULL)
+            {
+                m_pNextMixCertificate = cert->clone();
+                return E_SUCCESS;
+            }
+            return E_UNKNOWN;
+        }
+        CACertStore* getTrustedCertificateStore()
+        {
+            return m_pTrustedRootCertificates;
+        }
+
 		/** Returns if the encrpyted Log could/should be used**/
 		bool isEncryptedLogEnabled()
 		{
@@ -651,6 +677,7 @@ class CACmdLnOptions
 #endif // DYNAMIC_MIX
 		XERCES_CPP_NAMESPACE::DOMDocument **m_termsAndConditionsTemplates;
 		UINT32 m_nrOfTermsAndConditionsTemplates;
+        bool verifyMixCertificates() {return m_bVerifyMixCerts;}
 	private:
 #ifdef DYNAMIC_MIX
 		UINT8* m_strLastCascadeProposal;
@@ -692,6 +719,10 @@ class CACmdLnOptions
 		//CACertificate** 	m_opCerts;
 		//UINT32 				m_opCertsLength;
 		DOMNodeList*		m_opCertList;
+
+		/* for mix certificate verification */
+		bool				m_bVerifyMixCerts;
+		CACertStore*		m_pTrustedRootCertificates;
 
 		CACertificate*	m_pPrevMixCertificate;
 		CACertificate*	m_pNextMixCertificate;
@@ -847,12 +878,14 @@ class CACmdLnOptions
 		SINT32 setLoggingOptions(DOMElement* elemGeneral);
 
 		/* Certificate Options */
-#define MAX_CERTIFICATE_OPTIONS_NR 4
+#define MAX_CERTIFICATE_OPTIONS_NR 6
 		UINT32 m_nCertificateOptionsSetters;
 		SINT32 setOwnCertificate(DOMElement *elemCertificates);
 		SINT32 setOwnOperatorCertificate(DOMElement *elemCertificates);
+		SINT32 setMixCertificateVerification(DOMElement *elemCertificates);
 		SINT32 setNextMixCertificate(DOMElement *elemCertificates);
 		SINT32 setPrevMixCertificate(DOMElement *elemCertificates);
+		SINT32 setTrustedRootCertificates(DOMElement *elemCertificates);
 
 		/* Payment Options */
 #define ACCOUNTING_OPTIONS_NR 7
