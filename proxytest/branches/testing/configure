@@ -732,8 +732,7 @@ with_xml_lib
 enable_debug
 enable_debug_output
 enable_dataretentionlog
-enable_new_flow_control
-enable_new_channel_encryption
+no-infoservice-threads
 enable_with_integrity_check
 enable_google_cpuprofiler
 enable_google_heapchecker
@@ -1400,10 +1399,8 @@ Optional Features:
   --enable-dataretentionlog
                           Enable log messages according to German data
                           retention
-  --enable-new-flow-control
-                          Enable new flow control protocol
-  --enable-new-channel-encryption
-                          Enable enhanced channel encryption
+  --no-infoservice-threads
+                          Do not use threads for communication with infoservices
   --enable-with-integrity-check
                           Enable integrity check for data channels
   --enable-google-cpuprofiler
@@ -7190,28 +7187,19 @@ if test "${enable_dataretentionlog+set}" = set; then :
 fi
 
 
-# Check whether --enable-new-flow-control was given.
-if test "${enable_new_flow_control+set}" = set; then :
-  enableval=$enable_new_flow_control;
+# Check whether --no-infoservice-threads was given.
+if test "${no_infoservice_threads+set}" = set; then :
+  enableval=$no_infoservice_threads;
 	    if test "x$enableval" != "xno" ; then
-		CFLAGS="$CFLAGS -DNEW_FLOW_CONTROL"
-		CXXFLAGS="$CXXFLAGS -DNEW_FLOW_CONTROL"
+		CFLAGS="$CFLAGS -DNO_INFOSERVICE_TRHEADS"
+		CXXFLAGS="$CXXFLAGS -DNO_INFOSERVICE_TRHEADS"
 	    fi
 
 
 fi
 
-
-# Check whether --enable-new-channel-encryption was given.
-if test "${enable_new_channel_encryption+set}" = set; then :
-  enableval=$enable_new_channel_encryption;
-	    if test "x$enableval" != "xno" ; then
-		CFLAGS="$CFLAGS -DNEW_CHANNEL_ENCRYPTION"
-		CXXFLAGS="$CXXFLAGS -DNEW_CHANNEL_ENCRYPTION"
-	    fi
-
-
-fi
+CFLAGS="$CFLAGS -DNEW_FLOW_CONTROL -DNEW_CHANNEL_ENCRYPTION"
+CXXFLAGS="$CXXFLAGS -DNEW_FLOW_CONTROL -DNEW_CHANNEL_ENCRYPTION"
 
 
 # Check whether --enable-with-integrity-check was given.
