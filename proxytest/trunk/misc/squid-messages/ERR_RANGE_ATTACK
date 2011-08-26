@@ -2,7 +2,7 @@
 <html>
 <head> 
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
-<title>ERROR: Access Denied.</title> 
+<title>ERROR: Range attack.</title> 
 <style type="text/css">
   H1 { color: red; font-size: 22px; font-weight:bold; margin-top: 50px; margin-bottom: 0; padding: 0; }
   H2 { font-size: 1.4em; font-weight: bold; color:#3F7FBF; padding: 0px; margin: 1em 0px 0.5em 0px; }
@@ -63,11 +63,10 @@
  <div id="titles" align="center"> 
  <h1>Exit Mix Error Message</h1> 
  <p style="margin: 0; font-size: smaller;">Operator of the exit mix is: %L</p>
- <h2>Access Denied.</h2> 
+ <h2>Apache Range Attack detected.</h2> 
  </div> 
- <div id="content" align="center"> <p>Access to <em>%U</em> is denied.</p>
- <p>The webmaster asked for blocking anonymous requests.<br>
- Please <a href="https://anonymous-proxy-servers.net/bin/contact?lang=en&amp;reci=11">contact JonDonym</a> if you feel this is incorrect.</p>  
+ <div id="content" align="center"> <p>It seems you try an apache range attack. Your request was blocked.<br>
+ May be, some download manager are affected too. Please, do not use a download manager.</p>  
 <!-- %c  %s --> 
 </div>
  </body>

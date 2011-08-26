@@ -73,7 +73,7 @@
 
 <table cellspacing="0" style="margin: 0px 0px 1em 0px; " width="650">
 <tr><td colspan="3">
-<p>You are trying to download a file with a size of more than 2 MB using a free service. JonDonym free services are for testing purposes only and limited in several ways. You may use <u>JonDonym premium services</u> to avoid this limit.</p>
+<p>You are trying to download or upload a file with a size of more than 2 MB using a free service. JonDonym free services are for testing purposes only and limited in several ways. You may use <u>JonDonym premium services</u> to avoid this limit.</p>
 <p style="text-align: center;"><a href="https://anonymous-proxy-servers.net/en/payment.html" style="font-weight: bold;">Please, buy a premium account to support JonDonym.</a></p>
 <p><span class="coupons">If you did not test the Premium services yet, <a href="https://shop.anonymous-proxy-servers.net/bin/testcoupon">you may get a FREE TRIAL CODE here</a>.<br></span>For technical problems or questions you may use the <a href="https://anonymous-proxy-servers.net/forum/">forum of JonDonym</a> or <a href="https://anonymous-proxy-servers.net/bin/contact?lang=en">contact the support of JonDos GmbH</a>.</p>
 </td></tr>
@@ -128,7 +128,8 @@
 </tr>
 <td style="font-weight:bold; border-top: 1px #A9B8C2 solid; background: #e4e4e4;">Costs</td>
 <td style="background: #d8e2eb; text-align:center; font-weight:bold; border-top: 1px #A9B8C2 solid;">free of charge</td>
-<td style="background: #d2edff; text-align:center; font-weight:bold; border-top: 1px #A9B8C2 solid;">from 5.00&thinsp;&euro;</td>
+<td style="background: #d2edff; text-align:center;border-top: 1px #A9B8C2 solid;"><span style="font-weight: bold;">from 5.00&thinsp;&euro;</span><br><span class="coupons"><a href="https://shop.anonymous-proxy-servers.net/bin/testcoupon">Get free trial code!</a></span>
+</td>
 </tr>
 <tr><td colspan="3" style="border-top: 1px #A9B8C2 solid; border-bottom: 1px #A9B8C2 solid; font-size: smaller;">
 *&nbsp;&nbsp; more than 600 kBit/s guaranteed, usually available: 1.000 - 1.500 kBit/s<br>
