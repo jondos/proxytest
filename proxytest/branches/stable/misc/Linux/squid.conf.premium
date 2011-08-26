@@ -5,13 +5,13 @@ err_html_text  not configured
 
 
 # Set the path to your error message directory
-# or cemment out to use the default squid messages
+# or comment out to use the default squid messages
 
 # for src code from svn
-# error_directory /home/mix/stable/misc/squid-messages
+error_directory /home/mix/stable/misc/squid-messages
 
 # For Debian package
-error_directory /usr/share/mix-squidmessages
+# error_directory /usr/share/mix-squidmessages
 
 
 # Set the outgiong IP address, if your server have more
