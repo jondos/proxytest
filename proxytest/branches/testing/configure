@@ -732,7 +732,7 @@ with_xml_lib
 enable_debug
 enable_debug_output
 enable_dataretentionlog
-no-infoservice-threads
+no_infoservice_threads
 enable_with_integrity_check
 enable_google_cpuprofiler
 enable_google_heapchecker
