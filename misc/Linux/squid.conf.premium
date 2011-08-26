@@ -60,8 +60,7 @@ acl CONNECT method CONNECT
 
 acl bad dstdom_regex "/etc/squid/squid-block.acl"
 deny_info ERR_ACCESS_DENIED_BAD bad
-acl badlocal dstdom_regex "/etc/squid/squid-block.acl.local" 
-deny_info ERR_ACCESS_DENIED_HERE badlocal
+
 
 http_access allow manager localhost
 http_access deny manager
@@ -71,7 +70,6 @@ http_access deny !Safe_ports
 http_access deny CONNECT !SSL_ports
 
 http_access deny bad
-http_access deny badlocal
 http_access allow localhost
 
 http_access deny all

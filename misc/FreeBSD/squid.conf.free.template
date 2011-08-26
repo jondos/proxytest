@@ -3,8 +3,11 @@
 #
 # Replace [% extIP %] by the IP address of your own system/jail
 
+
 # Please set a link to your website
-err_html_text  unknown
+# <a href="http://server.tld">Operator name</a>
+err_html_text  not configured
+
 
 acl localhost src 127.0.0.1/32
 acl localhost src [% extIP %]
@@ -12,8 +15,10 @@ acl localhost src [% extIP %]
 acl to_localhost dst 127.0.0.0/8
 acl to_localhost dst [% extIP %]
 
-# Replace by correct path to your squid messages
+
+# Replace by correct path to your squid messages directory
 error_directory /home/mix/stable/misc/squid-messages
+
 
 cache_mem 128 MB
 cache_store_log none
@@ -35,8 +40,7 @@ acl CONNECT method CONNECT
 
 acl bad dstdom_regex "/usr/local/etc/squid/squid-block.acl"
 deny_info ERR_ACCESS_DENIED_BAD bad
-acl badlocal dstdom_regex "/usr/local/etc/squid/squid-block.acl.local" 
-deny_info ERR_ACCESS_DENIED_HERE badlocal
+
 
 acl robot browser -i bot
 deny_info ERR_ROBOT robot
@@ -53,9 +57,9 @@ acl jondonym2 dstdomain anonymous-proxy-servers.net
 acl anon1 dstdomain anon.inf.tu-dresden.de
 acl anon2 dst 141.76.45.41
 reply_body_max_size 2097152 deny all !jondonym1 !jondonym2 !anon1 !anon2
+request_body_max_size 2048 KB
 
 http_access deny bad
-http_access deny badlocal
 http_access deny robot
 
 http_access allow all

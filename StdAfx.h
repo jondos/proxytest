@@ -73,7 +73,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 /* LERNGRUPPE: define this to get dynamic mixes */
 //#define DYNAMIC_MIX
 //#define SDTFA // specific logic needed by SDTFA, http://www.sdtfa.com
-//#define NO_INFOSERVICE_TRHEADS //define as a workaround for the bug in threaded communication to IS.
+
+
+#define NO_INFOSERVICE_TRHEADS
 
 //#define LASTMIX_CHECK_MEMORY // only for internal debugging purpose
 //#define PRINT_THREAD_STACK_TRACE //Usefull for debugging output of stack trace if mix dies...
