@@ -67,7 +67,7 @@
  </div> 
  <div id="content" align="center"> <p>Access to <em>%U</em> is denied.</p>
  <p>The webmaster asked for blocking anonymous requests.<br>
- Please <a href="https://anonymous-proxy-servers.net/bin/contact.pl?lang=en&amp;reci=11">contact JonDonym</a> if you feel this is incorrect.</p>  
+ Please <a href="https://anonymous-proxy-servers.net/bin/contact?lang=en&amp;reci=11">contact JonDonym</a> if you feel this is incorrect.</p>  
 <!-- %c  %s --> 
 </div>
  </body>
