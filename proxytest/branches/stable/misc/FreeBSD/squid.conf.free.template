@@ -41,12 +41,6 @@ acl CONNECT method CONNECT
 acl bad dstdom_regex "/usr/local/etc/squid/squid-block.acl"
 deny_info ERR_ACCESS_DENIED_BAD bad
 
-acl badlocal dstdom_regex "/usr/local/etc/squid/squid-block.acl.local" 
-deny_info ERR_ACCESS_DENIED_HERE badlocal
-
-acl rangeattack req_header Range ([0-9]*-[0-9]*\s*,\s*[0-9]*-[0-9]*\s*,\s*[0-9]*-[0-9]*\s*,\s*[0-9]*-[0-9]*)(\s*,\s*[0-9]*-[0-9]*)+
-deny_info ERR_RANGE_ATTACK rangeattac
-
 acl robot browser -i bot
 deny_info ERR_ROBOT robot
 
@@ -65,9 +59,7 @@ reply_body_max_size 2097152 deny all !jondonym1 !jondonym2 !anon1 !anon2
 request_body_max_size 2048 KB
 
 http_access deny bad
-http_access deny badlocal
 http_access deny robot
-http_access deny rangeattack
 
 http_access allow all
 
