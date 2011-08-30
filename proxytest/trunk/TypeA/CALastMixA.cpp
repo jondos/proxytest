@@ -48,11 +48,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define MACRO_DO_LOG_CHANNEL_CLOSE_FROM_MIX MACRO_DO_LOG_CHANNEL(2)
 #endif
 
-#ifdef NEW_CHANNEL_ENCRYPTION
-	#define LAST_MIX_SIZE_OF_SYMMETRIC_KEYS 2*KEY_SIZE
-#else
-	#define LAST_MIX_SIZE_OF_SYMMETRIC_KEYS KEY_SIZE
-#endif
+#define LAST_MIX_SIZE_OF_SYMMETRIC_KEYS 2*KEY_SIZE
 
 
 SINT32 CALastMixA::loop()
@@ -146,11 +142,7 @@ SINT32 CALastMixA::loop()
 												CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
 											#endif
 
-#ifdef NEW_CHANNEL_ENCRYPTION
 											m_pRSA->decryptOAEP(pMixPacket->data,rsaBuff,&rsaOutLen);
-#else
-											m_pRSA->decrypt(pMixPacket->data,rsaBuff);
-#endif
 											#ifdef REPLAY_DETECTION
 												// replace time(NULL) with the real timestamp ()
 												// packet-timestamp + m_u64ReferenceTime
@@ -405,25 +397,6 @@ SINT32 CALastMixA::loop()
 												#endif
 												//m_pChannelList->removeChannel(pMixPacket->channel);
 											}
-										else if(pMixPacket->flags==CHANNEL_SUSPEND)
-											{
-												#ifdef _DEBUG
-												CAMsg::printMsg(LOG_DEBUG,"Suspending channel %u Socket: %u\n",pMixPacket->channel,pChannelListEntry->pSocket->getSocket());
-												#endif
-												psocketgroupCacheRead->remove(*(pChannelListEntry->pSocket));
-											}
-										else if(pMixPacket->flags==CHANNEL_RESUME)
-											{
-												#ifdef _DEBUG
-													CAMsg::printMsg(LOG_DEBUG,"Resuming channel %u Socket: %u\n",pMixPacket->channel,pChannelListEntry->pSocket->getSocket());
-												#endif
-
-#ifdef HAVE_EPOLL
-												psocketgroupCacheRead->add(*(pChannelListEntry->pSocket),pChannelListEntry);
-#else
-												psocketgroupCacheRead->add(*(pChannelListEntry->pSocket));
-#endif
-											}
 										else if(pMixPacket->flags==CHANNEL_DATA)
 											{
 												#ifdef LOG_CHANNEL
@@ -474,13 +447,11 @@ SINT32 CALastMixA::loop()
 													pChannelListEntry->pCipher->crypt1(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 												#endif
 												ret=ntohs(pMixPacket->payload.len);
-												#ifdef NEW_FLOW_CONTROL
-													if(ret&NEW_FLOW_CONTROL_FLAG)
-														{
-															//CAMsg::printMsg(LOG_DEBUG,"got send me\n");
-															pChannelListEntry->sendmeCounterDownstream=max(0,pChannelListEntry->sendmeCounterDownstream-FLOW_CONTROL_SENDME_SOFT_LIMIT);
-														}
-												#endif
+												if(ret&NEW_FLOW_CONTROL_FLAG)
+													{
+														//CAMsg::printMsg(LOG_DEBUG,"got send me\n");
+														pChannelListEntry->sendmeCounterDownstream=max(0,pChannelListEntry->sendmeCounterDownstream-FLOW_CONTROL_SENDME_SOFT_LIMIT);
+													}
 												ret&=PAYLOAD_LEN_MASK;
 												if(ret>=0&&ret<=PAYLOAD_SIZE)
 													{
@@ -572,7 +543,6 @@ SINT32 CALastMixA::loop()
 													}
 												else
 													{
-#ifdef NEW_FLOW_CONTROL
 														//count this packet as Upstream packet...
 														pChannelListEntry->sendmeCounterUpstream++;
 														if(pChannelListEntry->sendmeCounterUpstream>=FLOW_CONTROL_SENDME_SOFT_LIMIT) //we need to sent the SENDME ack down to the client...
@@ -600,7 +570,6 @@ SINT32 CALastMixA::loop()
 															m_logDownloadedPackets++;
 															pChannelListEntry->sendmeCounterUpstream-=FLOW_CONTROL_SENDME_SOFT_LIMIT;
 														}
-#endif
 #ifdef HAVE_EPOLL
 														psocketgroupCacheWrite->add(*(pChannelListEntry->pSocket),pChannelListEntry);
 #else
@@ -734,25 +703,15 @@ SINT32 CALastMixA::loop()
 									{
 										countRead--;
 #endif
-#if defined(DELAY_CHANNELS)||defined(DELAY_CHANNELS_LATENCY)||defined(NEW_FLOW_CONTROL)
-	UINT32 bucketSize;
-	#define NEED_IF_12
-#endif
-										#ifdef NEED_IF_12
-										if(true
-										#endif
+										UINT32 bucketSize;
+										if((pChannelListEntry->sendmeCounterDownstream<FLOW_CONTROL_SENDME_HARD_LIMIT)
 												#ifdef DELAY_CHANNELS
 													&&((bucketSize=m_pChannelList->getDelayBuckets(pChannelListEntry->delayBucketID))>0 )
 												#endif
 												#ifdef DELAY_CHANNELS_LATENCY
 													&&(isGreater64(current_time_millis,pChannelListEntry->timeLatency))
 												#endif
-												#ifdef NEW_FLOW_CONTROL
-													&&(pChannelListEntry->sendmeCounterDownstream<FLOW_CONTROL_SENDME_HARD_LIMIT)
-												#endif
-											#ifdef NEED_IF_12
 											)
-											#endif
 											{
 												#ifndef DELAY_CHANNELS
 													ret=pChannelListEntry->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE);
@@ -832,9 +791,7 @@ SINT32 CALastMixA::loop()
 														#if defined(LOG_CHANNEL)
 															pChannelListEntry->packetsDataOutToUser++;
 														#endif
-														#ifdef NEW_FLOW_CONTROL
-															pChannelListEntry->sendmeCounterDownstream++;
-														#endif
+														pChannelListEntry->sendmeCounterDownstream++;
 													}
 											}
 #ifdef HAVE_EPOLL

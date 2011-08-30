@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.10.07"
+#define MIX_VERSION "00.11.01"
 
 // set to "true" if this is a testing/development version which is not meant for prodictive use
 #define MIX_VERSION_TESTING true
@@ -146,14 +146,13 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #endif
 //#define LOG_CRIME
 //#define PAYMENT //to enable payment support, now use configure --enable-payment..
-//#define NO_PARKING //to disable old control flow
 //#define NO_LOOPACCEPTUSER //to disable user accept thread for First Mix
 
 //#define USE_POOL
 //#define NEW_MIX_TYPE // to enable the new 1:x mix protocol
 //#define WITH_CONTROL_CHANNELS_TEST //enable a Test control Channel
-//#define NEW_FLOW_CONTROL //enable for the new flow control mechanism
-//#define NEW_CHANNEL_ENCRYPTION //enable the new protcol version which uses ECDH for key transport and two keys for upstream/downstream channel cryption
+//#define NEW_FLOW_CONTROL //enable for the new flow control mechanism --> now enabled by default (i.e. can not be disbaled anymore!)
+//#define NEW_CHANNEL_ENCRYPTION //enable the new protcol version which uses RSA-OAEP for key transport and two keys for upstream/downstream channel cryption (--> now enabled by default (i.e. can not be disbaled anymore!)
 //#define WITH_INTEGRITY_CHECK //enable AES-GCM encryption for data channels
 
 //#define REPLAY_DETECTION // enable to prevent replay of mix packets
@@ -168,14 +167,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #if defined(PAYMENT) && ! defined(SSL_HACK)
 	#define SSL_HACK
-#endif
-
-#if defined (NEW_FLOW_CONTROL) && !defined(NO_PARKING)
-	#define NO_PARKING // disable old control flow
-#endif
-
-#if defined (WITH_INTEGRITY_CHECK) && !defined(NEW_CHANNEL_ENCRYPTION)
-	#define NEW_CHANNEL_ENCRYPTION
 #endif
 
 //#define REPLAY_DATABASE_PERFORMANCE_TEST //to perform a performance test of the replay db
@@ -257,10 +248,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	//#define MIX_CASCADE_PROTOCOL_VERSION "0.9"
 #elif defined (WITH_INTEGRITY_CHECK)
 	#define MIX_CASCADE_PROTOCOL_VERSION "0.11"
-#elif defined (NEW_CHANNEL_ENCRYPTION)
-	#define MIX_CASCADE_PROTOCOL_VERSION "0.10" //"0.10tc"
 #else
-	#define MIX_CASCADE_PROTOCOL_VERSION "0.4" //"0.4tc"
+	#define MIX_CASCADE_PROTOCOL_VERSION "0.10" //"0.10tc"
 #endif
 
 
@@ -659,21 +648,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define DATA_RETENTION_LOG_INFO
 #endif
 
-#ifdef NEW_FLOW_CONTROL
-	#define NEW_FLOW_CONTROL_INFO " (with new flow control)"
-	#define NEW_FLOW_CONTROL_COMPATIBILITY "NewFlowControl"
-#else
-	#define NEW_FLOW_CONTROL_INFO
-	#define NEW_FLOW_CONTROL_COMPATIBILITY
-#endif
+#define NEW_FLOW_CONTROL_INFO " (with new flow control)"
+#define NEW_FLOW_CONTROL_COMPATIBILITY "NewFlowControl"
 
-#ifdef NEW_CHANNEL_ENCRYPTION
-	#define NEW_CHANNEL_ENCRYPTION_INFO " (with enhanced channel encryption)"
-	#define NEW_CHANNEL_ENCRYPTION_COMPATIBILITY "NewChannelEncryption"
-#else
-	#define NEW_CHANNEL_ENCRYPTION_INFO
-	#define NEW_CHANNEL_ENCRYPTION_COMPATIBILITY
-#endif
+#define NEW_CHANNEL_ENCRYPTION_INFO " (with enhanced channel encryption)"
+#define NEW_CHANNEL_ENCRYPTION_COMPATIBILITY "NewChannelEncryption"
 
 #ifdef WITH_INTEGRITY_CHECK
 	#define WITH_INTEGRITY_CHECK_INFO " (with integrity check for data channels)"
