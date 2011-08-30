@@ -227,20 +227,16 @@ SINT32 CALastMix::processKeyExchange()
       setDOMElementValue(elemChainTimeout, (UINT32)(CHAIN_TIMEOUT - 5));
       elemMixProtocolVersion.appendChild(elemChainTimeout);
     #else
-      #ifdef NEW_FLOW_CONTROL
-				setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.6");
-				DOMElement* elemFlowControl=createDOMElement(doc,"FlowControl");
-				DOMElement* elemUpstreamSendMe=createDOMElement(doc,"UpstreamSendMe");
-				DOMElement* elemDownstreamSendMe=createDOMElement(doc,"DownstreamSendMe");
-				elemMix->appendChild(elemFlowControl);
-				elemFlowControl->appendChild(elemUpstreamSendMe);
-				elemFlowControl->appendChild(elemDownstreamSendMe);
-				setDOMElementValue(elemUpstreamSendMe,(UINT32)FLOW_CONTROL_SENDME_SOFT_LIMIT);
-				setDOMElementValue(elemDownstreamSendMe,(UINT32)FLOW_CONTROL_SENDME_SOFT_LIMIT);
-				setDOMElementAttribute(elemFlowControl,"withUpstreamFlowControl",true);
-      #else
-				setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.3");
-      #endif
+ 			setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.6");
+			DOMElement* elemFlowControl=createDOMElement(doc,"FlowControl");
+			DOMElement* elemUpstreamSendMe=createDOMElement(doc,"UpstreamSendMe");
+			DOMElement* elemDownstreamSendMe=createDOMElement(doc,"DownstreamSendMe");
+			elemMix->appendChild(elemFlowControl);
+			elemFlowControl->appendChild(elemUpstreamSendMe);
+			elemFlowControl->appendChild(elemDownstreamSendMe);
+			setDOMElementValue(elemUpstreamSendMe,(UINT32)FLOW_CONTROL_SENDME_SOFT_LIMIT);
+			setDOMElementValue(elemDownstreamSendMe,(UINT32)FLOW_CONTROL_SENDME_SOFT_LIMIT);
+			setDOMElementAttribute(elemFlowControl,"withUpstreamFlowControl",true);
     #endif
 		//Inserting RSA-Key
 		DOMElement* nodeRsaKey=NULL;

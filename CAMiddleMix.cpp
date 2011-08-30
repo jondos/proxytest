@@ -855,13 +855,8 @@ THREAD_RETURN mm_loopSendToMixBefore(void* param)
 		THREAD_RETURN_SUCCESS;
 	}
 
-#ifdef NEW_CHANNEL_ENCRYPTION
-	#define MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS 2*KEY_SIZE
-	#define MIDDLE_MIX_ASYM_PADDING_SIZE 42
-#else
-	#define MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS KEY_SIZE
-	#define MIDDLE_MIX_ASYM_PADDING_SIZE 0
-#endif
+#define MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS 2*KEY_SIZE
+#define MIDDLE_MIX_ASYM_PADDING_SIZE 42
 
 THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 	{
@@ -958,11 +953,7 @@ THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 									#ifdef _DEBUG
 										CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
 									#endif
-									#ifdef NEW_CHANNEL_ENCRYPTION
-										pMix->m_pRSA->decryptOAEP(pMixPacket->data,tmpRSABuff,&rsaOutLen);
-									#else
-										pMix->m_pRSA->decrypt(pMixPacket->data,tmpRSABuff);
-									#endif
+									pMix->m_pRSA->decryptOAEP(pMixPacket->data,tmpRSABuff,&rsaOutLen);
 									#ifdef REPLAY_DETECTION
 										// replace time(NULL) with the real timestamp ()
 										// packet-timestamp + m_u64ReferenceTime

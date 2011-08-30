@@ -647,17 +647,13 @@ SINT32 CAMix::appendCompatibilityInfo(DOMNode* a_parent)
 	elemFlags->appendChild(elemFlag);
 #endif
 
-#ifdef NEW_FLOW_CONTROL
 	elemFlag = createDOMElement(a_parent->getOwnerDocument(), NEW_FLOW_CONTROL_COMPATIBILITY);
 	//setDOMElementValue(elemFlag,(UINT8*)"true");
 	elemFlags->appendChild(elemFlag);
-#endif
 
-#ifdef NEW_CHANNEL_ENCRYPTION
 	elemFlag = createDOMElement(a_parent->getOwnerDocument(), NEW_CHANNEL_ENCRYPTION_COMPATIBILITY);
 	//setDOMElementValue(elemFlag,(UINT8*)"true");
 	elemFlags->appendChild(elemFlag);
-#endif
 
 #ifdef WITH_INTEGRITY_CHECK
 	elemFlag = createDOMElement(a_parent->getOwnerDocument(), WITH_INTEGRITY_CHECK_COMPATIBILITY);
@@ -727,13 +723,9 @@ SINT32 CAMix::checkCompatibility(DOMNode* a_parent, const char* a_mixPosition)
 	iCountFlags++;
 #endif
 
-#ifdef NEW_FLOW_CONTROL
 	iCountFlags++;
-#endif
 
-#ifdef NEW_CHANNEL_ENCRYPTION
 	iCountFlags++;
-#endif
 
 #ifdef WITH_INTEGRITY_CHECK
 	iCountFlags++;
@@ -755,18 +747,14 @@ SINT32 CAMix::checkCompatibility(DOMNode* a_parent, const char* a_mixPosition)
 			bCompatibleFlags = false;
 		}
 #endif
-#ifdef NEW_FLOW_CONTROL
 		if (getDOMChildByName(elemFlags, NEW_FLOW_CONTROL_COMPATIBILITY, elemDummy, false) != E_SUCCESS)
 		{
 			bCompatibleFlags = false;
 		}
-#endif
-#ifdef NEW_CHANNEL_ENCRYPTION
 		if (getDOMChildByName(elemFlags, NEW_CHANNEL_ENCRYPTION_COMPATIBILITY, elemDummy, false) != E_SUCCESS)
 		{
 			bCompatibleFlags = false;
 		}
-#endif
 #ifdef WITH_INTEGRITY_CHECK
 		if (getDOMChildByName(elemFlags, WITH_INTEGRITY_CHECK_COMPATIBILITY, elemDummy, false) != E_SUCCESS)
 		{
