@@ -477,8 +477,8 @@ SINT32 CAInfoService::sendStatus(bool bIncludeCerts)
 		return E_UNKNOWN;
 	}
 
-	UINT32 len;
-	SINT32 ret;
+	UINT32 len=0;
+	SINT32 ret=E_UNKNOWN;
 	UINT8* strStatusXML=getStatusXMLAsString(bIncludeCerts,len);
 
 	if(strStatusXML==NULL)
