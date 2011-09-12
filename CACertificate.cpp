@@ -195,7 +195,7 @@ CACertificate* CACertificate::decode(const UINT8* const buff,UINT32 bufflen,UINT
 		return new CACertificate(tmpCert);
 	}
 
-SINT32 CACertificate::encode(UINT8* buff,UINT32* bufflen,UINT32 type)
+SINT32 CACertificate::encode(UINT8* buff,UINT32* bufflen,UINT32 type) const
 	{
 		if(m_pCert==NULL||buff==NULL||bufflen==NULL)
 			return E_UNKNOWN;
@@ -228,7 +228,7 @@ SINT32 CACertificate::encode(UINT8* buff,UINT32* bufflen,UINT32 type)
 		return E_SUCCESS;
 	}
 
-SINT32 CACertificate::encode(DOMElement* & elemRoot,XERCES_CPP_NAMESPACE::DOMDocument* doc)
+SINT32 CACertificate::encode(DOMElement* & elemRoot,XERCES_CPP_NAMESPACE::DOMDocument* doc) const
 	{
 		elemRoot=createDOMElement(doc,"X509Certificate");
 		UINT8 buff[2048]; //TODO: Very bad --> looks like easy buffer overflow... [donn't care at the moment...]
@@ -284,7 +284,7 @@ SINT32 CACertificate::getSubjectKeyIdentifier(UINT8* r_ski, UINT32 *r_skiLen)
     return E_SUCCESS;
 }
 
-SINT32 CACertificate::getAuthorityKeyIdentifier(UINT8* r_aki, UINT32* r_akiLen)
+SINT32 CACertificate::getAuthorityKeyIdentifier(UINT8* r_aki, UINT32* r_akiLen) const
 {
 	if(m_pAKI == NULL)
 	{
@@ -410,7 +410,7 @@ SINT32 CACertificate::getRawSubjectKeyIdentifier(UINT8* r_ski, UINT32* r_skiLen)
 	return E_SUCCESS;
 }
 
-SINT32 CACertificate::verify(const CACertificate* a_cert)
+SINT32 CACertificate::verify(const CACertificate* a_cert) const
 {
 	if(a_cert == NULL || a_cert->m_pCert == NULL || m_pCert == NULL)
 	{
@@ -466,7 +466,7 @@ SINT32 CACertificate::verify(const CACertificate* a_cert)
 	return E_UNKNOWN;
 }
 
-bool CACertificate::isValid()
+bool CACertificate::isValid() const
 {
 	if(X509_cmp_current_time(X509_get_notBefore(m_pCert)) == -1
 			&& X509_cmp_current_time(X509_get_notAfter(m_pCert)) == 1)
