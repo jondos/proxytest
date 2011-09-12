@@ -3565,7 +3565,7 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 		(elemNetwork, OPTIONS_NODE_NEXT_MIX, elemNextMix, false);
 	if(elemNextMix != NULL)
 	{
-		NetworkType type;
+		NetworkType type=RAW_TCP;
 		CASocketAddr* addr = NULL;
 		DOMElement* elemType = NULL;
 		getDOMChildByName
