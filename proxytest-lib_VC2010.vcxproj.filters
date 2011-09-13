@@ -246,6 +246,7 @@
     <ClInclude Include="CACmdLnOptions.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
+    <ClInclude Include="CATargetInterface.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="documentation\XML\FirstMixToInfoService.xml" />

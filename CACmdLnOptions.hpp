@@ -39,6 +39,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAThread.hpp"
 #include "CAMix.hpp"
 #include "CAListenerInterface.hpp"
+#include "CATargetInterface.hpp"
 #include "CAXMLBI.hpp"
 #include "CAXMLPriceCert.hpp"
 //#ifdef LOG_CRIME
@@ -46,10 +47,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#endif
 
 #define REGEXP_BUFF_SIZE 4096
-
-#define TARGET_MIX			1
-#define TARGET_HTTP_PROXY	2
-#define TARGET_SOCKS_PROXY	3
 
 // LERNGRUPPE moved this define from CACmdLnOptions.cpp
 #define DEFAULT_TARGET_PORT 6544
@@ -225,15 +222,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define ASSERT_CRIME_DETECTION_OPTIONS_PARENT(Parentname, Childname) \
 	ASSERT_PARENT_NODE_NAME(Parentname, OPTIONS_NODE_CRIME_DETECTION, Childname)
 
-struct t_TargetInterface
-{
-	UINT32 target_type;
-	NetworkType net_type;
-	CASocketAddr* addr;
-};
-
-typedef struct t_TargetInterface TargetInterface;
-
 THREAD_RETURN threadReConfigure(void *param);
 
 class CACmdLnOptions;
@@ -290,14 +278,11 @@ class CACmdLnOptions
 		 * @retval E_SUCCESS if successful
 		 * @retval E_UNKNOWN if \c nr is out of range
 		*/
-		SINT32 getTargetInterface(TargetInterface& oTargetInterface, UINT32 nr)
+		SINT32 getTargetInterface(CATargetInterface& oTargetInterface, UINT32 nr)
 		{
 			if(nr>0&&nr<=m_cnTargets)
 			{
-				oTargetInterface.net_type=m_arTargetInterfaces[nr-1].net_type;
-				oTargetInterface.target_type=m_arTargetInterfaces[nr-1].target_type;
-				oTargetInterface.addr=m_arTargetInterfaces[nr-1].addr->clone();
-				return E_SUCCESS;
+				return m_arTargetInterfaces[nr-1].cloneInto(oTargetInterface);
 			}
 			else
 				return E_UNKNOWN;
@@ -765,7 +750,7 @@ class CACmdLnOptions
 
 		bool m_bIsEncryptedLogEnabled;
 
-		TargetInterface*			m_arTargetInterfaces;
+		CATargetInterface*		m_arTargetInterfaces;
 		UINT32								m_cnTargets;
 		CAListenerInterface**	m_arListenerInterfaces;
 		UINT32								m_cnListenerInterfaces;
