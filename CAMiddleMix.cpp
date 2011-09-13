@@ -400,7 +400,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 		ret=m_pMuxIn->getCASocket()->send(out, outlen);
 		delete[] out;
 		out = NULL;
-		if( (ret < 0) || (ret != outlen) )
+		if( (ret < 0) || (ret != (SINT32)outlen) )
 		{
 			CAMsg::printMsg(LOG_DEBUG,"Error sending new New Key Info\n");
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextFailed);
