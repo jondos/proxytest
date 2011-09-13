@@ -915,18 +915,17 @@ SINT32 CALastMix::setTargets()
 		UINT32 i;
 		for(i=1;i<=cntTargets;i++)
 			{
-				TargetInterface oTargetInterface;
+				CATargetInterface oTargetInterface;
 				CALibProxytest::getOptions()->getTargetInterface(oTargetInterface,i);
-				if(oTargetInterface.target_type==TARGET_HTTP_PROXY)
+				if(oTargetInterface.getTargetType()==TARGET_HTTP_PROXY)
 				{
-					m_pCacheLB->add(oTargetInterface.addr);
+					m_pCacheLB->add(oTargetInterface.getAddr());
 				}
-				else if(oTargetInterface.target_type==TARGET_SOCKS_PROXY)
+				else if(oTargetInterface.getTargetType()==TARGET_SOCKS_PROXY)
 				{
-					m_pSocksLB->add(oTargetInterface.addr);
+					m_pSocksLB->add(oTargetInterface.getAddr());
 				}
-				delete oTargetInterface.addr;
-				oTargetInterface.addr = NULL;
+				oTargetInterface.cleanAddr();
 			}
 		CAMsg::printMsg(LOG_DEBUG,"This mix will use the following proxies:\n");
 		for(i=0;i<m_pCacheLB->getElementCount();i++)

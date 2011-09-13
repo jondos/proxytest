@@ -614,15 +614,14 @@ SINT32 CAMiddleMix::init()
 		CASocketAddr* pAddrNext=NULL;
 		for(UINT32 i=0;i<CALibProxytest::getOptions()->getTargetInterfaceCount();i++)
 			{
-				TargetInterface oNextMix;
+				CATargetInterface oNextMix;
 				CALibProxytest::getOptions()->getTargetInterface(oNextMix,i+1);
-				if(oNextMix.target_type==TARGET_MIX)
+				if(oNextMix.getTargetType()==TARGET_MIX)
 					{
-						pAddrNext=oNextMix.addr;
+						pAddrNext=oNextMix.getAddr();
 						break;
 					}
-				delete oNextMix.addr;
-				oNextMix.addr = NULL;
+				oNextMix.cleanAddr();
 			}
 		if(pAddrNext==NULL)
 			{
