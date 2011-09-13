@@ -3680,8 +3680,8 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 		{
 			m_arTargetInterfaces=new CATargetInterface[m_cnTargets];
 			UINT32 aktInterface=0;
-			NetworkType type=NetworkType::UNKNOWN_NETWORKTYPE;
-			TargetType proxy_type=TargetType::TARGET_UNKNOWN;
+			NetworkType type=UNKNOWN_NETWORKTYPE;
+			TargetType proxy_type=TARGET_UNKNOWN;
 			CASocketAddr* addr=NULL;
 			UINT16 port;
 			bool bHttpProxyFound = false;
