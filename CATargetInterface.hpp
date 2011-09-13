@@ -36,8 +36,8 @@ class CATargetInterface
 
 			CATargetInterface()
 				{
-					target_type=TargetType::TARGET_UNKNOWN;
-					net_type=NetworkType::UNKNOWN_NETWORKTYPE;
+					target_type=TARGET_UNKNOWN;
+					net_type=UNKNOWN_NETWORKTYPE;
 					addr=NULL;
 				}
 
