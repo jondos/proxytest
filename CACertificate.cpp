@@ -470,8 +470,6 @@ bool CACertificate::isValid() const
 {
 	ASN1_TIME* pValidNotBefore=X509_get_notBefore(m_pCert);
 	ASN1_TIME* pValidNotAfter=X509_get_notAfter(m_pCert);
-	SINT32 c1=X509_cmp_current_time( pValidNotBefore);
-	SINT32 c2=X509_cmp_current_time(pValidNotAfter);
 	if(X509_cmp_current_time( pValidNotBefore) <0 
 			&& X509_cmp_current_time(pValidNotAfter) >0)
 	{
