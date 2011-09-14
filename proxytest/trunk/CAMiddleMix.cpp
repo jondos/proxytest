@@ -1117,18 +1117,20 @@ THREAD_RETURN mm_loopReadFromMixAfter(void* param)
 						#endif
 						else if(pMix->m_pMiddleMixChannelList->getOutToIn(&channelIn,pMixPacket->channel,&pCipher)==E_SUCCESS)
 							{//connection found
+#ifdef LOG_CRIME
 								HCHANNEL channelOut = pMixPacket->channel;
+#endif
 								pMixPacket->channel=channelIn;
-								#ifdef LOG_CRIME
+#ifdef LOG_CRIME
 								if((pMixPacket->flags&CHANNEL_SIG_CRIME)==CHANNEL_SIG_CRIME)
-								{
-									getRandom(pMixPacket->data,DATA_SIZE);
-									//Log in and out channel number, to allow
-									CAMsg::printMsg(LOG_CRIT,"Detecting crime activity - previous mix channel: %u, "
-											"next mix channel: %u\n", channelIn, channelOut);
-								}
+									{
+										getRandom(pMixPacket->data,DATA_SIZE);
+										//Log in and out channel number, to allow
+										CAMsg::printMsg(LOG_CRIT,"Detecting crime activity - previous mix channel: %u, "
+												"next mix channel: %u\n", channelIn, channelOut);
+									}
 								else
-								#endif
+#endif
 								pCipher->crypt2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 								pCipher->unlock();
 								#ifdef USE_POOL
