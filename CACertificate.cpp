@@ -468,8 +468,8 @@ SINT32 CACertificate::verify(const CACertificate* a_cert)
 
 bool CACertificate::isValid()
 {
-	if(X509_cmp_current_time(X509_get_notBefore(m_pCert)) == -1
-			&& X509_cmp_current_time(X509_get_notAfter(m_pCert)) == 1)
+	if(X509_cmp_current_time(X509_get_notBefore(m_pCert)) < 0
+			&& X509_cmp_current_time(X509_get_notAfter(m_pCert)) > 0)
 	{
 		return true;
 	}
@@ -489,8 +489,8 @@ bool CACertificate::isValid()
 	time_t ttiq  = mktime(time);  	//convert time back to time_t and check again
 	delete time;
 	time = NULL;
-	if(X509_cmp_time(X509_get_notBefore(m_pCert), &ttiq) == -1
-			&& X509_cmp_time(X509_get_notAfter(m_pCert), &ttiq) == 1)
+	if(X509_cmp_time(X509_get_notBefore(m_pCert), &ttiq) < 0
+			&& X509_cmp_time(X509_get_notAfter(m_pCert), &ttiq) > 0)
 	{
 		CAMsg::printMsg(LOG_WARNING, "Certificate is only valid within grace period of two months!\n");
 		return true;
