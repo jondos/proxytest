@@ -1,6 +1,13 @@
+mix-squidconf (11.08.26.2) unstable; urgency=low
+
+  * bugfix for squid config
+
+ -- JonDos GmbH <info@jondos.de>  Fri, 28 Aug 2011 10:17:23 +0200
+
+
 mix-squidconf (11.08.26.1) unstable; urgency=low
 
-  * bugfix for squir error message
+  * bugfix for squid error message
 
  -- JonDos GmbH <info@jondos.de>  Fri, 26 Aug 2011 10:17:23 +0200
 
