@@ -3299,6 +3299,7 @@
     <ClInclude Include="CASocketList.hpp" />
     <ClInclude Include="CASymCipher.hpp" />
     <ClInclude Include="CASyncControlChannel.hpp" />
+    <ClInclude Include="CATargetInterface.hpp" />
     <ClInclude Include="CATempIPBlockList.hpp" />
     <ClInclude Include="CAThread.hpp" />
     <ClInclude Include="CAThreadList.hpp" />

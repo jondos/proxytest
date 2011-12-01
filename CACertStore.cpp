@@ -141,7 +141,6 @@ CACertificate* CACertStore::verifyMixCert(DOMNode* mixNode)
 		certPath = CACertStore::decode(x509Data, XML_X509DATA);
 		if(certPath == NULL)
 		{
-			CAMsg::printMsg(LOG_DEBUG , "Error X509data decode!\n");
 			continue;
 		}
 

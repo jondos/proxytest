@@ -139,15 +139,14 @@ SINT32 CAFirstMix::init()
 		CASocketAddr* pAddrNext=NULL;
 		for(i=0;i<CALibProxytest::getOptions()->getTargetInterfaceCount();i++)
 			{
-				TargetInterface oNextMix;
+				CATargetInterface oNextMix;
 				CALibProxytest::getOptions()->getTargetInterface(oNextMix,i+1);
-				if(oNextMix.target_type==TARGET_MIX)
+				if(oNextMix.getTargetType()==TARGET_MIX)
 				{
-					pAddrNext=oNextMix.addr;
+					pAddrNext=oNextMix.getAddr();
 					break;
 				}
-				delete oNextMix.addr;
-				oNextMix.addr = NULL;
+				oNextMix.cleanAddr();
 			}
 		if(pAddrNext==NULL)
 			{
@@ -2131,7 +2130,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		{
 			if(pNewUser->receive(paymentLoginPacket, AI_LOGIN_SO_TIMEOUT) != MIXPACKET_SIZE)
 			{
-				CAMsg::printMsg(LOG_NOTICE,"AI login: client receive timeout.\n");
+				CAMsg::printMsg(LOG_INFO,"AI login: client receive timeout.\n");
 				aiLoginStatus = AUTH_LOGIN_FAILED;
 				break;
 			}
@@ -2153,7 +2152,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 					{
 						if(ai_ret == E_TIMEDOUT )
 						{
-							CAMsg::printMsg(LOG_NOTICE,"timeout occurred during AI login.");
+							CAMsg::printMsg(LOG_INFO,"timeout occurred during AI login.");
 						}
 						aiLoginStatus = AUTH_LOGIN_FAILED;
 						goto loop_break;

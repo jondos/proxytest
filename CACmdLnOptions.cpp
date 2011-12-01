@@ -51,6 +51,9 @@ CACmdLnOptions::CACmdLnOptions()
 		m_bLogConsole = false;
 		m_bSocksSupport = false;
 		m_bLocalProxy=m_bFirstMix=m_bLastMix=m_bMiddleMix=false;
+		
+		m_PaymentReminderProbability= 100;
+		
 #ifndef ONLY_LOCAL_PROXY
 		m_bIsRunReConfigure=false;
 		m_addrInfoServices = NULL;
@@ -222,9 +225,9 @@ void CACmdLnOptions::initGeneralOptionSetters()
 		&CACmdLnOptions::setMinCascadeLength;
 	generalOptionSetters[++count]=
 		&CACmdLnOptions::setCascadeNameFromOptions;
-
 	generalOptionSetters[++count]=
 		&CACmdLnOptions::setMaxUsers;
+		
 }
 
 void CACmdLnOptions::initCertificateOptionSetters()
@@ -322,8 +325,7 @@ SINT32 CACmdLnOptions::clearTargetInterfaces()
 			{
 				for(UINT32 i=0;i<m_cnTargets;i++)
 				{
-					delete m_arTargetInterfaces[i].addr;
-					m_arTargetInterfaces[i].addr = NULL;
+					m_arTargetInterfaces[i].cleanAddr();
 				}
 				delete[] m_arTargetInterfaces;
 				m_arTargetInterfaces = NULL;
@@ -873,7 +875,7 @@ SINT32 CACmdLnOptions::setNewValues(CACmdLnOptions& newOptions)
 			{
 				clearTargetInterfaces();
 				m_cnTargets=newOptions.getTargetInterfaceCount();
-				m_arTargetInterfaces=new TargetInterface[m_cnTargets];
+				m_arTargetInterfaces=new CATargetInterface[m_cnTargets];
 				for(UINT32 i=0;i<m_cnTargets;i++)
 					newOptions.getTargetInterface(m_arTargetInterfaces[i],i+1);
 			}
@@ -2207,6 +2209,29 @@ SINT32 CACmdLnOptions::setMaxUsers(DOMElement* elemGeneral)
 		if(getDOMElementValue(elemMaxUsers, &tmp)==E_SUCCESS)
 		{
 			m_maxNrOfUsers = tmp;
+		}
+	}
+	return E_SUCCESS;
+}
+
+SINT32 CACmdLnOptions::setPaymentReminder(DOMElement* elemGeneral)
+{
+	DOMElement* elemPaymentReminder=NULL;
+	UINT32 tmp = 0;
+
+	if(elemGeneral == NULL) return E_UNKNOWN;
+	ASSERT_GENERAL_OPTIONS_PARENT
+		(elemGeneral->getNodeName(), OPTIONS_NODE_PAYMENT_REMINDER);
+
+	// get max users
+	getDOMChildByName(elemGeneral, OPTIONS_NODE_PAYMENT_REMINDER, elemPaymentReminder, false);
+	if(elemPaymentReminder!=NULL)
+	{
+		if(getDOMElementValue(elemPaymentReminder, &tmp)==E_SUCCESS)
+		{
+			m_PaymentReminderProbability = tmp;
+			if(m_PaymentReminderProbability > 100) { m_PaymentReminderProbability= 100; }
+			if(m_PaymentReminderProbability < -1) { m_PaymentReminderProbability= -1; }
 		}
 	}
 	return E_SUCCESS;
@@ -3552,7 +3577,7 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 	UINT32 tmpLen = TMP_BUFF_SIZE;
 	DOMElement* elemNextMix = NULL;
 	DOMElement* elemProxies=NULL;
-	TargetInterface* targetInterfaceNextMix = NULL;
+	CATargetInterface* targetInterfaceNextMix = NULL;
 	//get TargetInterfaces
 	m_cnTargets=0;
 
@@ -3565,7 +3590,7 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 		(elemNetwork, OPTIONS_NODE_NEXT_MIX, elemNextMix, false);
 	if(elemNextMix != NULL)
 	{
-		NetworkType type;
+		NetworkType type=RAW_TCP;
 		CASocketAddr* addr = NULL;
 		DOMElement* elemType = NULL;
 		getDOMChildByName
@@ -3655,10 +3680,7 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 
 		if(bAddrIsSet)
 		{
-			targetInterfaceNextMix=new TargetInterface;
-			targetInterfaceNextMix->target_type=TARGET_MIX;
-			targetInterfaceNextMix->net_type=type;
-			targetInterfaceNextMix->addr=addr->clone();
+			targetInterfaceNextMix=new CATargetInterface(TARGET_MIX,type,addr->clone());
 			m_cnTargets=1;
 		}
 
@@ -3682,10 +3704,10 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 
 		if(nlTargetInterfaces->getLength()>0)
 		{
-			m_arTargetInterfaces=new TargetInterface[m_cnTargets];
+			m_arTargetInterfaces=new CATargetInterface[m_cnTargets];
 			UINT32 aktInterface=0;
 			NetworkType type=UNKNOWN_NETWORKTYPE;
-			UINT32 proxy_type=0;
+			TargetType proxy_type=TARGET_UNKNOWN;
 			CASocketAddr* addr=NULL;
 			UINT16 port;
 			bool bHttpProxyFound = false;
@@ -3846,9 +3868,7 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 				if (ret == E_SUCCESS)
 				{
 					addVisibleAddresses(elemTargetInterface);
-					m_arTargetInterfaces[aktInterface].net_type=type;
-					m_arTargetInterfaces[aktInterface].target_type=proxy_type;
-					m_arTargetInterfaces[aktInterface].addr=addr->clone();
+					m_arTargetInterfaces[aktInterface].set(proxy_type,type,addr->clone());
 					aktInterface++;
 				}
 
@@ -3862,7 +3882,7 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 				CAMsg::printMsg(LOG_CRIT, "No valid HTTP proxy was specified! Please install and configure an HTTP proxy like Squid before starting the mix.\n");
 				for (UINT32 i = 0; i < aktInterface; i++)
 				{
-					delete m_arTargetInterfaces[aktInterface].addr;
+					m_arTargetInterfaces[aktInterface].cleanAddr();
 				}
 
 
@@ -3878,11 +3898,9 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 		if(m_arTargetInterfaces == NULL)
 		{
 			m_cnTargets=0;
-			m_arTargetInterfaces=new TargetInterface[1];
+			m_arTargetInterfaces=new CATargetInterface[1];
 		}
-		m_arTargetInterfaces[m_cnTargets].net_type=targetInterfaceNextMix->net_type;
-		m_arTargetInterfaces[m_cnTargets].target_type=targetInterfaceNextMix->target_type;
-		m_arTargetInterfaces[m_cnTargets++].addr=targetInterfaceNextMix->addr;
+		m_arTargetInterfaces[m_cnTargets++].set(targetInterfaceNextMix);
 		delete targetInterfaceNextMix;
 		targetInterfaceNextMix = NULL;
 	}
@@ -4607,6 +4625,11 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 	setDOMElementValue(elemVersion,(UINT8*)MIX_VERSION);
 	elemSoftware->appendChild(elemVersion);
 	elemMix->appendChild(elemSoftware);
+	
+	/* Add the payment reminder */
+	DOMElement* elemPaymentReminder=createDOMElement(m_docMixInfo, MIXINFO_NODE_PAYMENTREMINDER);
+	setDOMElementValue(elemPaymentReminder, m_PaymentReminderProbability);
+	elemMix->appendChild(elemPaymentReminder);
 
 #ifdef COUNTRY_STATS
 		DOMElement* elemCountryStats=NULL;

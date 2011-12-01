@@ -400,7 +400,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 		ret=m_pMuxIn->getCASocket()->send(out, outlen);
 		delete[] out;
 		out = NULL;
-		if( (ret < 0) || (ret != outlen) )
+		if( (ret < 0) || (ret != (SINT32)outlen) )
 		{
 			CAMsg::printMsg(LOG_DEBUG,"Error sending new New Key Info\n");
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextFailed);
@@ -614,15 +614,14 @@ SINT32 CAMiddleMix::init()
 		CASocketAddr* pAddrNext=NULL;
 		for(UINT32 i=0;i<CALibProxytest::getOptions()->getTargetInterfaceCount();i++)
 			{
-				TargetInterface oNextMix;
+				CATargetInterface oNextMix;
 				CALibProxytest::getOptions()->getTargetInterface(oNextMix,i+1);
-				if(oNextMix.target_type==TARGET_MIX)
+				if(oNextMix.getTargetType()==TARGET_MIX)
 					{
-						pAddrNext=oNextMix.addr;
+						pAddrNext=oNextMix.getAddr();
 						break;
 					}
-				delete oNextMix.addr;
-				oNextMix.addr = NULL;
+				oNextMix.cleanAddr();
 			}
 		if(pAddrNext==NULL)
 			{
@@ -855,13 +854,8 @@ THREAD_RETURN mm_loopSendToMixBefore(void* param)
 		THREAD_RETURN_SUCCESS;
 	}
 
-#ifdef NEW_CHANNEL_ENCRYPTION
-	#define MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS 2*KEY_SIZE
-	#define MIDDLE_MIX_ASYM_PADDING_SIZE 42
-#else
-	#define MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS KEY_SIZE
-	#define MIDDLE_MIX_ASYM_PADDING_SIZE 0
-#endif
+#define MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS 2*KEY_SIZE
+#define MIDDLE_MIX_ASYM_PADDING_SIZE 42
 
 THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 	{
@@ -958,11 +952,7 @@ THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 									#ifdef _DEBUG
 										CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
 									#endif
-									#ifdef NEW_CHANNEL_ENCRYPTION
-										pMix->m_pRSA->decryptOAEP(pMixPacket->data,tmpRSABuff,&rsaOutLen);
-									#else
-										pMix->m_pRSA->decrypt(pMixPacket->data,tmpRSABuff);
-									#endif
+									pMix->m_pRSA->decryptOAEP(pMixPacket->data,tmpRSABuff,&rsaOutLen);
 									#ifdef REPLAY_DETECTION
 										// replace time(NULL) with the real timestamp ()
 										// packet-timestamp + m_u64ReferenceTime
@@ -1127,18 +1117,20 @@ THREAD_RETURN mm_loopReadFromMixAfter(void* param)
 						#endif
 						else if(pMix->m_pMiddleMixChannelList->getOutToIn(&channelIn,pMixPacket->channel,&pCipher)==E_SUCCESS)
 							{//connection found
+#ifdef LOG_CRIME
 								HCHANNEL channelOut = pMixPacket->channel;
+#endif
 								pMixPacket->channel=channelIn;
-								#ifdef LOG_CRIME
+#ifdef LOG_CRIME
 								if((pMixPacket->flags&CHANNEL_SIG_CRIME)==CHANNEL_SIG_CRIME)
-								{
-									getRandom(pMixPacket->data,DATA_SIZE);
-									//Log in and out channel number, to allow
-									CAMsg::printMsg(LOG_CRIT,"Detecting crime activity - previous mix channel: %u, "
-											"next mix channel: %u\n", channelIn, channelOut);
-								}
+									{
+										getRandom(pMixPacket->data,DATA_SIZE);
+										//Log in and out channel number, to allow
+										CAMsg::printMsg(LOG_CRIT,"Detecting crime activity - previous mix channel: %u, "
+												"next mix channel: %u\n", channelIn, channelOut);
+									}
 								else
-								#endif
+#endif
 								pCipher->crypt2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 								pCipher->unlock();
 								#ifdef USE_POOL
