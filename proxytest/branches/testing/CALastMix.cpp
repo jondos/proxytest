@@ -227,20 +227,16 @@ SINT32 CALastMix::processKeyExchange()
       setDOMElementValue(elemChainTimeout, (UINT32)(CHAIN_TIMEOUT - 5));
       elemMixProtocolVersion.appendChild(elemChainTimeout);
     #else
-      #ifdef NEW_FLOW_CONTROL
-				setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.6");
-				DOMElement* elemFlowControl=createDOMElement(doc,"FlowControl");
-				DOMElement* elemUpstreamSendMe=createDOMElement(doc,"UpstreamSendMe");
-				DOMElement* elemDownstreamSendMe=createDOMElement(doc,"DownstreamSendMe");
-				elemMix->appendChild(elemFlowControl);
-				elemFlowControl->appendChild(elemUpstreamSendMe);
-				elemFlowControl->appendChild(elemDownstreamSendMe);
-				setDOMElementValue(elemUpstreamSendMe,(UINT32)FLOW_CONTROL_SENDME_SOFT_LIMIT);
-				setDOMElementValue(elemDownstreamSendMe,(UINT32)FLOW_CONTROL_SENDME_SOFT_LIMIT);
-				setDOMElementAttribute(elemFlowControl,"withUpstreamFlowControl",true);
-      #else
-				setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.3");
-      #endif
+ 			setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.6");
+			DOMElement* elemFlowControl=createDOMElement(doc,"FlowControl");
+			DOMElement* elemUpstreamSendMe=createDOMElement(doc,"UpstreamSendMe");
+			DOMElement* elemDownstreamSendMe=createDOMElement(doc,"DownstreamSendMe");
+			elemMix->appendChild(elemFlowControl);
+			elemFlowControl->appendChild(elemUpstreamSendMe);
+			elemFlowControl->appendChild(elemDownstreamSendMe);
+			setDOMElementValue(elemUpstreamSendMe,(UINT32)FLOW_CONTROL_SENDME_SOFT_LIMIT);
+			setDOMElementValue(elemDownstreamSendMe,(UINT32)FLOW_CONTROL_SENDME_SOFT_LIMIT);
+			setDOMElementAttribute(elemFlowControl,"withUpstreamFlowControl",true);
     #endif
 		//Inserting RSA-Key
 		DOMElement* nodeRsaKey=NULL;
@@ -919,18 +915,17 @@ SINT32 CALastMix::setTargets()
 		UINT32 i;
 		for(i=1;i<=cntTargets;i++)
 			{
-				TargetInterface oTargetInterface;
+				CATargetInterface oTargetInterface;
 				CALibProxytest::getOptions()->getTargetInterface(oTargetInterface,i);
-				if(oTargetInterface.target_type==TARGET_HTTP_PROXY)
+				if(oTargetInterface.getTargetType()==TARGET_HTTP_PROXY)
 				{
-					m_pCacheLB->add(oTargetInterface.addr);
+					m_pCacheLB->add(oTargetInterface.getAddr());
 				}
-				else if(oTargetInterface.target_type==TARGET_SOCKS_PROXY)
+				else if(oTargetInterface.getTargetType()==TARGET_SOCKS_PROXY)
 				{
-					m_pSocksLB->add(oTargetInterface.addr);
+					m_pSocksLB->add(oTargetInterface.getAddr());
 				}
-				delete oTargetInterface.addr;
-				oTargetInterface.addr = NULL;
+				oTargetInterface.cleanAddr();
 			}
 		CAMsg::printMsg(LOG_DEBUG,"This mix will use the following proxies:\n");
 		for(i=0;i<m_pCacheLB->getElementCount();i++)
