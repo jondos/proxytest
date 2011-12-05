@@ -264,6 +264,20 @@ _ERROR:
 */
 
 #ifndef ONLY_LOCAL_PROXY
+SINT32 CAASymCipher::addKeyPart(DOMElement* elemRoot,XERCES_CPP_NAMESPACE::DOMDocument* docOwner,const char* partName,BIGNUM* part)
+	{
+		DOMElement* node=createDOMElement(docOwner,partName);
+		elemRoot->appendChild(node);
+		UINT8 tmpBuff[256];
+		UINT32 size=256;
+		BN_bn2bin(part,tmpBuff);
+		CABase64::encode(tmpBuff,BN_num_bytes(part),tmpBuff,&size);
+		tmpBuff[size]=0;
+		DOMText* tmpTextNode=createDOMText(docOwner,(const char* const)tmpBuff);
+		node->appendChild(tmpTextNode);
+		return E_SUCCESS;
+	}
+
 /** Stores the public key in \c buff as XML. The format is as follows:
 	*
 	* \verbatim
@@ -306,28 +320,172 @@ SINT32 CAASymCipher::getPublicKeyAsDOMElement(DOMElement* & elemRoot,XERCES_CPP_
 			return E_UNKNOWN;
 		elemRoot=createDOMElement(docOwner,"RSAKeyValue");
 		
-		DOMElement* nodeModulus=createDOMElement(docOwner,"Modulus");
-		elemRoot->appendChild(nodeModulus);
-		UINT8 tmpBuff[256];
-		UINT32 size=256;
-		BN_bn2bin(m_pRSA->n,tmpBuff);
-		CABase64::encode(tmpBuff,BN_num_bytes(m_pRSA->n),tmpBuff,&size);
-		tmpBuff[size]=0;
-		DOMText* tmpTextNode=createDOMText(docOwner,(const char* const)tmpBuff);
-		nodeModulus->appendChild(tmpTextNode);
+		addKeyPart(elemRoot,docOwner,"Modulus",m_pRSA->n);
+		addKeyPart(elemRoot,docOwner,"P",m_pRSA->p);
 
-		DOMElement* nodeExponent=createDOMElement(docOwner,"Exponent");
-		BN_bn2bin(m_pRSA->e,tmpBuff);
-		size=256;
-		CABase64::encode(tmpBuff,BN_num_bytes(m_pRSA->e),tmpBuff,&size);
-		tmpBuff[size]=0;
-		
-		tmpTextNode=createDOMText(docOwner,(const char* const)tmpBuff);
-		nodeExponent->appendChild(tmpTextNode);
-
-		elemRoot->appendChild(nodeExponent);
 		return E_SUCCESS;
 	}
+
+#ifdef EXPORT_ASYM_PRIVATE_KEY
+/** Stores the private key in \c buff as XML. The format is as follows (see also: XML Key Management Specification [8.2.1]):
+	*
+	* \verbatim
+	<RSAKeyPair>
+	  <Modulus>
+	    the modulus of the Key as ds::CryptoBinary
+	  </Modulus>
+	  <Exponent>
+	    the exponent of the key as ds::CryptoBinary
+	  </Exponent>
+	 <P>
+	    first factor of n as ds::CryptoBinary
+	  </P>
+	 <Q>
+	    second factor of n as ds::CryptoBinary
+	 </Q>
+	 <DP>
+	    DP ds::CryptoBinary
+	 </DP>
+	 <DQ>
+	    DQ ds::CryptoBinary
+	 </DQ>
+	 <InverseQ>
+	    ds::CryptoBinary
+	 </InverseQ>
+	 <D>
+	    private exponent d as ds::CryptoBinary
+	 </D>
+	<RSAKeyPair>\endverbatim
+	*There is NO \\0 at the end.
+	*@param buff byte array in which the public key should be stored
+	*@param len on input holds the size of \c buff, on return it contains the number 
+	*           of bytes needed to store the public key
+	*@retval E_UNKNOWN in case of an error
+	*@retval E_SUCCESS otherwise
+	*
+	*@see setPrivateKeyAsXML()
+	*/
+SINT32 CAASymCipher::getPrivateKeyAsXML(UINT8* buff,UINT32 *len)
+	{
+		if(m_pRSA==NULL||buff==NULL)
+			return E_UNKNOWN;
+		XERCES_CPP_NAMESPACE::DOMDocument* pDoc=createDOMDocument();
+		DOMElement* elemRoot=NULL;
+		getPrivateKeyAsDOMElement(elemRoot,pDoc);
+		DOM_Output::dumpToMem(elemRoot,buff,len);
+		if (pDoc != NULL)
+			{
+				pDoc->release();
+				pDoc = NULL;
+			}
+		return E_SUCCESS;
+	}
+
+SINT32 CAASymCipher::getPrivateKeyAsDOMElement(DOMElement* & elemRoot,XERCES_CPP_NAMESPACE::DOMDocument* docOwner)
+	{
+		if(m_pRSA==NULL)
+			return E_UNKNOWN;
+		elemRoot=createDOMElement(docOwner,"RSAKeyPair");
+		
+		addKeyPart(elemRoot,docOwner,"Modulus",m_pRSA->n);
+		addKeyPart(elemRoot,docOwner,"P",m_pRSA->p);
+		addKeyPart(elemRoot,docOwner,"Q",m_pRSA->q);
+		addKeyPart(elemRoot,docOwner,"DP",m_pRSA->dmp1);
+		addKeyPart(elemRoot,docOwner,"DQ",m_pRSA->dmq1);
+		addKeyPart(elemRoot,docOwner,"InverseQ",m_pRSA->iqmp);
+		addKeyPart(elemRoot,docOwner,"D",m_pRSA->d);
+
+
+		return E_SUCCESS;
+	}
+/** Sets the private key to the values stored in \c key. 
+	* The format must match the format XML described for getPrivateKeyAsXML(). 
+	*@param key byte array which holds the new public key
+	*@param len on input,size of key byte array, on successful return number of bytes 'consumed'
+	*@retval E_UNKNOWN in case of an error, the cipher is the uninitialized (no key is set)
+	*@retval E_SUCCESS otherwise
+	*@see getPrivateKeyAsXML
+	*/
+SINT32 CAASymCipher::setPrivateKeyAsXML(const UINT8* key,UINT32 len)
+	{
+		if(key==NULL)
+			return E_UNKNOWN;
+
+		XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(key,len);
+		if(doc == NULL)
+		{
+			return E_UNKNOWN;
+		}
+		DOMElement* root=doc->getDocumentElement();
+		if(root == NULL)
+		{
+			return E_UNKNOWN;
+		}
+		return setPrivateKeyAsDOMNode(root);
+	}		
+
+SINT32 CAASymCipher::setPrivateKeyAsDOMNode(DOMNode* node)
+	{
+		DOMNode* root=node;
+		while(root!=NULL)
+			{	
+				if(equals(root->getNodeName(),"RSAKeyPair"))
+					{
+						RSA* tmpRSA=RSA_new();
+						DOMNode* child=root->getFirstChild();
+						while(child!=NULL)
+							{
+								if(equals(child->getNodeName(),"Modulus"))
+									{
+										getKeyPart(&tmpRSA->n,child);
+									}
+								else if(equals(child->getNodeName(),"Exponent"))
+									{
+										getKeyPart(&tmpRSA->e,child);
+									}
+								else if(equals(child->getNodeName(),"P"))
+									{
+										getKeyPart(&tmpRSA->p,child);
+									}
+								else if(equals(child->getNodeName(),"Q"))
+									{
+										getKeyPart(&tmpRSA->q,child);
+									}
+								else if(equals(child->getNodeName(),"DP"))
+									{
+										getKeyPart(&tmpRSA->dmp1,child);
+									}
+								else if(equals(child->getNodeName(),"DQ"))
+									{
+										getKeyPart(&tmpRSA->dmq1,child);
+									}
+								else if(equals(child->getNodeName(),"InverseQ"))
+									{
+										getKeyPart(&tmpRSA->iqmp,child);
+									}
+								else if(equals(child->getNodeName(),"D"))
+									{
+										getKeyPart(&tmpRSA->d,child);
+									}
+								child=child->getNextSibling();
+							}
+						if(tmpRSA->n!=NULL&&tmpRSA->e!=NULL&&tmpRSA->e!=NULL&&tmpRSA->p!=NULL&&tmpRSA->q!=NULL&&tmpRSA->d!=NULL&&tmpRSA->iqmp!=NULL&&tmpRSA->dmp1!=NULL&&tmpRSA->dmq1!=NULL)
+							{
+								if(m_pRSA!=NULL)
+									RSA_free(m_pRSA);
+								m_pRSA=tmpRSA;
+								setRSAFlags(m_pRSA);
+								return E_SUCCESS;
+							}
+						RSA_free(tmpRSA);
+						return E_UNKNOWN;
+					}
+				root=root->getNextSibling();		
+			}
+		return E_UNKNOWN;
+	}
+#endif //EXPORT_ASYM_PRIVATE_KEY
+
 
 /** Sets the public key to the values stored in \c key. 
 	* The format must match the format XML described for getPublicKeyAsXML(). 
@@ -355,7 +513,24 @@ SINT32 CAASymCipher::setPublicKeyAsXML(const UINT8* key,UINT32 len)
 		return setPublicKeyAsDOMNode(root);
 	}		
 
+
 #endif //ONLY_LOCAL_PROXY
+
+SINT32 CAASymCipher::getKeyPart(BIGNUM** part,DOMNode* node)
+	{
+		if(*part!=NULL)
+			BN_free(*part);
+		UINT8* tmpStr=new UINT8[4096];
+		UINT32 tmpStrLen=4096;
+		getDOMElementValue(node,tmpStr,&tmpStrLen);
+		UINT8 decBuff[4096];
+		UINT32 decLen=4096;
+		CABase64::decode(tmpStr,tmpStrLen,decBuff,&decLen);
+		delete []tmpStr;
+		tmpStr = NULL;
+		*part=BN_bin2bn(decBuff,decLen,NULL);
+		return E_SUCCESS;
+	}
 
 SINT32 CAASymCipher::setPublicKeyAsDOMNode(DOMNode* node)
 	{	
@@ -372,29 +547,11 @@ SINT32 CAASymCipher::setPublicKeyAsDOMNode(DOMNode* node)
 							{
 								if(equals(child->getNodeName(),"Modulus"))
 									{
-										if(tmpRSA->n!=NULL)
-											BN_free(tmpRSA->n);
-										UINT8* tmpStr=new UINT8[4096];
-										UINT32 tmpStrLen=4096;
-										getDOMElementValue(child,tmpStr,&tmpStrLen);
-										decLen=4096;
-										CABase64::decode(tmpStr,tmpStrLen,decBuff,&decLen);
-										delete []tmpStr;
-										tmpStr = NULL;
-										tmpRSA->n=BN_bin2bn(decBuff,decLen,NULL);
+										getKeyPart(&tmpRSA->n,child);
 									}
 								else if(equals(child->getNodeName(),"Exponent"))
 									{
-										if(tmpRSA->e!=NULL)
-											BN_free(tmpRSA->e);
-										UINT8* tmpStr=new UINT8[4096];
-										UINT32 tmpStrLen=4096;
-										getDOMElementValue(child,tmpStr,&tmpStrLen);
-										decLen=4096;
-										CABase64::decode(tmpStr,tmpStrLen,decBuff,&decLen);
-										delete []tmpStr;
-										tmpStr = NULL;
-										tmpRSA->e=BN_bin2bn(decBuff,decLen,NULL);
+										getKeyPart(&tmpRSA->e,child);
 									}
 								child=child->getNextSibling();
 							}
