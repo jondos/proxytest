@@ -1,7 +1,7 @@
 # Makefile.am
 # Automake file for AN.ON wireshark plugin
 
-lib_LIBRARIES=libanon.a
+plugin_LTLIBRARIES=anon.la
 
-libanon_a_SOURCES=plugin_entry.c packet-anon.cpp packet-anon.hpp
-libanon_a_LDFLAGS = -module -avoid-version
+anon_la_SOURCES=plugin_entry.c packet-anon.cpp packet-anon.hpp
+anon_la_LDFLAGS = -module -avoid-version
