@@ -12,8 +12,8 @@ AC_CONFIG_HEADERS([config.h])
 AC_CANONICAL_HOST
 
 # Require PKG_CHECK_MODULES macro
-m4_ifndef([PKG_CHECK_MODULES],
-          [m4_fatal([must install pkg-config before running autoconf])])
+#m4_ifndef([PKG_CHECK_MODULES],
+#          [m4_fatal([must install pkg-config before running autoconf])])
 
 dnl Checks for programs.
 AC_PROG_CC
