@@ -16,6 +16,9 @@
 extern "C"
 {
 #endif
+#ifndef _WIN32
+ #include <wireshark/config.h>
+#endif
 #include <epan/packet.h>
 #include <epan/prefs.h>
 #include <epan/address.h>
