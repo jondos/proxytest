@@ -39,6 +39,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FlashMixUser", "FlashMix\Fl
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BulletinBoard", "FlashMix\BulletinBoard_VC2010.vcxproj", "{9DB252A3-2EE3-440F-AC14-E961994FCE7A}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WireSharkANONPlugin", "wireshark\WireSharkANONPlugin_VC2010.vcxproj", "{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}"
+	ProjectSection(ProjectDependencies) = postProject
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81} = {150377B0-CA8F-4031-A0B8-45A3001F4F81}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_with_unit_tests|Any CPU = Debug_with_unit_tests|Any CPU
@@ -405,6 +410,61 @@ Global
 		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.VTune|Mixed Platforms.ActiveCfg = proxytest-only-local-debug|Win32
 		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.VTune|Mixed Platforms.Build.0 = proxytest-only-local-debug|Win32
 		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.VTune|Win32.ActiveCfg = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug_with_unit_tests|Any CPU.ActiveCfg = Debug|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug_with_unit_tests|Mixed Platforms.ActiveCfg = Debug|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug_with_unit_tests|Mixed Platforms.Build.0 = Debug|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug_with_unit_tests|Win32.ActiveCfg = Debug|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug_with_unit_tests|Win32.Build.0 = Debug|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug|Win32.ActiveCfg = Debug|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug|Win32.Build.0 = Debug|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug-IntelCrypto|Any CPU.ActiveCfg = Debug|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug-IntelCrypto|Mixed Platforms.ActiveCfg = Debug|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug-IntelCrypto|Mixed Platforms.Build.0 = Debug|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug-IntelCrypto|Win32.ActiveCfg = Debug|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug-IntelCrypto|Win32.Build.0 = Debug|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug-with-Mini-XML|Any CPU.ActiveCfg = Debug|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug-with-Mini-XML|Mixed Platforms.ActiveCfg = Debug|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug-with-Mini-XML|Mixed Platforms.Build.0 = Debug|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug-with-Mini-XML|Win32.ActiveCfg = Debug|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug-with-Mini-XML|Win32.Build.0 = Debug|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug-with-payment|Any CPU.ActiveCfg = Debug|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug-with-payment|Mixed Platforms.ActiveCfg = Debug|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug-with-payment|Mixed Platforms.Build.0 = Debug|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug-with-payment|Win32.ActiveCfg = Debug|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug-with-payment|Win32.Build.0 = Debug|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Mit Xerces 2.0.0|Any CPU.ActiveCfg = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Mit Xerces 2.0.0|Mixed Platforms.ActiveCfg = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Mit Xerces 2.0.0|Mixed Platforms.Build.0 = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Mit Xerces 2.0.0|Win32.ActiveCfg = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Mit Xerces 2.0.0|Win32.Build.0 = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Mit Xerces 2.3 dev|Any CPU.ActiveCfg = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Mit Xerces 2.3 dev|Mixed Platforms.ActiveCfg = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Mit Xerces 2.3 dev|Mixed Platforms.Build.0 = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Mit Xerces 2.3 dev|Win32.ActiveCfg = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Mit Xerces 2.3 dev|Win32.Build.0 = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.proxytest-only-local-debug|Any CPU.ActiveCfg = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.proxytest-only-local-debug|Mixed Platforms.ActiveCfg = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.proxytest-only-local-debug|Mixed Platforms.Build.0 = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.proxytest-only-local-debug|Win32.ActiveCfg = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.proxytest-only-local-debug|Win32.Build.0 = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Release|Any CPU.ActiveCfg = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Release|Win32.ActiveCfg = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Release|Win32.Build.0 = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Release-IntelCrypto|Any CPU.ActiveCfg = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Release-IntelCrypto|Mixed Platforms.ActiveCfg = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Release-IntelCrypto|Mixed Platforms.Build.0 = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Release-IntelCrypto|Win32.ActiveCfg = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Release-IntelCrypto|Win32.Build.0 = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.VTune|Any CPU.ActiveCfg = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.VTune|Mixed Platforms.ActiveCfg = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.VTune|Mixed Platforms.Build.0 = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.VTune|Win32.ActiveCfg = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.VTune|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
