@@ -17,7 +17,7 @@ extern "C"
 {
 #endif
 #if defined HAVE_CONFIG_H && !defined _WIN32
-#include <wireshark/packet.h>
+#include <wireshark/epan/packet.h>
 #include <wireshark/prefs.h>
 #include <wireshark/address.h>
 #include <wireshark/packet-tcp.h>
