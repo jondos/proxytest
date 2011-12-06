@@ -17,7 +17,7 @@ m4_ifndef([PKG_CHECK_MODULES],
 
 dnl Checks for programs.
 AC_PROG_CC
-AC_PROG_LIBTOOL
+LT_INIT
 
 dnl avoid the default flags "-g -o2"
 SAVEDCXXFLAGS=$CXXFLAGS
