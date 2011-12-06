@@ -1,7 +1,7 @@
 # Makefile.am
 # Automake file for AN.ON wireshark plugin
 
-lib_LTLIBRARIES=anon.la
+lib_LIBRARIES=anon.a
 
-anon_la_SOURCES=plugin_entry.c packet-anon.cpp packet-anon.hpp
-anon_la_LDFLAGS = -module -avoid-version
+anon_a_SOURCES=plugin_entry.c packet-anon.cpp packet-anon.hpp
+anon_a_LDFLAGS = -module -avoid-version

@@ -19,7 +19,7 @@ dnl Checks for programs.
 #LT_INIT([dlopen])
 #AC_DISABLE_SHARED
 AC_PROG_CC
-AC_PROG_LIBTOOL
+#AC_PROG_LIBTOOL
 
 dnl avoid the default flags "-g -o2"
 SAVEDCXXFLAGS=$CXXFLAGS
@@ -388,7 +388,7 @@ AC_CACHE_CHECK([for OpenSSL directory], ac_cv_openssldir, [
 			LDFLAGS="$saved_LDFLAGS"
 		fi
 
-		LIBS="$saved_LIBS -lcrypto -ldl"
+		LIBS="$saved_LIBS -lcrypto"
 
 		# Basic test to check for compatible version and correct 
                 # linking, *does not* test for RSA - that comes later.
