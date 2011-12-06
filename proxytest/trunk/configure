@@ -7309,7 +7309,7 @@ else
   DOTESTS_FALSE=
 fi
 
- if wireshark x$DOWITHWIRESHARK = xyes; then
+ if test x$DOWITHWIRESHARK = xyes; then
   DOWIRESHARK_TRUE=
   DOWIRESHARK_FALSE='#'
 else
