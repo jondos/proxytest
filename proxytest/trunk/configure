@@ -606,6 +606,8 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+DOWIRESHARK_FALSE
+DOWIRESHARK_TRUE
 DOTESTS_FALSE
 DOTESTS_TRUE
 LIBCPPUNIT
@@ -738,6 +740,7 @@ enable_google_cpuprofiler
 enable_google_heapchecker
 enable_crime_detection
 enable_tests
+enable_wireshark
 enable_manioq
 '
       ac_precious_vars='build_alias
@@ -1409,6 +1412,7 @@ Optional Features:
   --enable-crime-detection
                           Enable crime detection mode
   --enable-tests          Build also some functional tests
+  --enable-wireshark      Build also the Wireshark AN.On protocol dissector
   --enable-manioq         Switch for Manioq provider mixes
 
 Optional Packages:
@@ -7262,6 +7266,18 @@ if test "${enable_tests+set}" = set; then :
 fi
 
 
+DOWITHWIRESHARK=""
+# Check whether --enable-wireshark was given.
+if test "${enable_wireshark+set}" = set; then :
+  enableval=$enable_wireshark;
+	    if test "x$enableval" != "xno" ; then
+		DOWITHWIRESHARK="yes"
+	    fi
+
+
+fi
+
+
 
 # Check whether --enable-manioq was given.
 if test "${enable_manioq+set}" = set; then :
@@ -7293,7 +7309,15 @@ else
   DOTESTS_FALSE=
 fi
 
-ac_config_files="$ac_config_files Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile test/Makefile gcm/Makefile"
+ if test x$DOWITHWIRESHARK = xyes; then
+  DOWIRESHARK_TRUE=
+  DOWIRESHARK_FALSE='#'
+else
+  DOWIRESHARK_TRUE='#'
+  DOWIRESHARK_FALSE=
+fi
+
+ac_config_files="$ac_config_files Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile test/Makefile gcm/Makefile wireshark/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -7431,6 +7455,10 @@ fi
 
 if test -z "${DOTESTS_TRUE}" && test -z "${DOTESTS_FALSE}"; then
   as_fn_error $? "conditional \"DOTESTS\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${DOWIRESHARK_TRUE}" && test -z "${DOWIRESHARK_FALSE}"; then
+  as_fn_error $? "conditional \"DOWIRESHARK\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 
@@ -8048,6 +8076,7 @@ do
     "TypeB/Makefile") CONFIG_FILES="$CONFIG_FILES TypeB/Makefile" ;;
     "test/Makefile") CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;
     "gcm/Makefile") CONFIG_FILES="$CONFIG_FILES gcm/Makefile" ;;
+    "wireshark/Makefile") CONFIG_FILES="$CONFIG_FILES wireshark/Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
