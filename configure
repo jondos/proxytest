@@ -7524,7 +7524,7 @@ else
 	GLIB_LIBS=$pkg_cv_GLIB_LIBS
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-	WIRESHARK_CFLAGS"=$GLIB_CFLAGS -I/usr/include/wireshark"
+	WIRESHARK_CFLAGS="$GLIB_CFLAGS -I/usr/include/wireshark"
 fi
 
 fi
