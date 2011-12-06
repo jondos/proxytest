@@ -4,7 +4,6 @@
 #
 
 AUTOMAKE_OPTIONS = foreign
-ACLOCAL_AMFLAGS = -I m4
 noinst_LIBRARIES = libproxytest.a
 sbin_PROGRAMS = mix
 
