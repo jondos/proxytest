@@ -136,7 +136,7 @@ AM_RECURSIVE_TARGETS = $(RECURSIVE_TARGETS:-recursive=) \
 	distdir dist dist-all distcheck
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = popt xml trio tre TypeA gcm test
+DIST_SUBDIRS = popt xml trio tre TypeA gcm test wireshark
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -364,7 +364,8 @@ mix_LDADD = $(top_srcdir)/libproxytest.a \
 
 EXTRA_DIST = README proxytest.doxy proxytest.dsp proxytest.dsw
 @DOTESTS_TRUE@MAYBE_tests = test
-SUBDIRS = popt xml trio tre TypeA gcm $(MAYBE_tests)
+@DOWIRESHARK_TRUE@MAYBE_wireshark = wireshark
+SUBDIRS = popt xml trio tre TypeA gcm $(MAYBE_tests) $(MAYBE_wireshark)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 

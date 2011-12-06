@@ -1412,7 +1412,7 @@ Optional Features:
   --enable-crime-detection
                           Enable crime detection mode
   --enable-tests          Build also some functional tests
-  --enable-wireshark      Build also the Wireshark AN.On protocol dissector
+  --enable-wireshark      Build also the Wireshark AN.ON protocol dissector
   --enable-manioq         Switch for Manioq provider mixes
 
 Optional Packages:
@@ -7309,7 +7309,7 @@ else
   DOTESTS_FALSE=
 fi
 
- if test x$DOWITHWIRESHARK = xyes; then
+ if wireshark x$DOWITHWIRESHARK = xyes; then
   DOWIRESHARK_TRUE=
   DOWIRESHARK_FALSE='#'
 else
