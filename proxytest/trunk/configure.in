@@ -17,7 +17,7 @@ m4_ifndef([PKG_CHECK_MODULES],
 
 dnl Checks for programs.
 AC_PROG_CC
-LT_INIT
+LT_INIT[dlopen]
 
 dnl avoid the default flags "-g -o2"
 SAVEDCXXFLAGS=$CXXFLAGS
@@ -29,7 +29,8 @@ AC_PROG_INSTALL
 AC_PROG_RANLIB
 
 AC_LANG_PUSH(C++)
-AC_REQUIRE_CPP
+AC_REQUIRE_CPPmore config.log
+
 AC_COMPILE_IFELSE([int main(){return 0;}],[],[AC_MSG_ERROR([Could not run C++ compiler])])
 AC_LANG_POP(C++)
 
