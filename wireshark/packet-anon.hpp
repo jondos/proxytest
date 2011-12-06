@@ -16,12 +16,19 @@
 extern "C"
 {
 #endif
+#if defined HAVE_CONFIG_H && !defined _WIN32
+#include <wireshark/packet.h>
+#include <wireshark/prefs.h>
+#include <wireshark/address.h>
+#include <wireshark/packet-tcp.h>
+#include <wireshark/packet-xml.h>
+#else
 #include <epan/packet.h>
 #include <epan/prefs.h>
 #include <epan/address.h>
 #include <epan/dissectors/packet-tcp.h>
 #include <epan/dissectors/packet-xml.h>
-
+#endif
 /* Start the functions we need for the plugin stuff */
 
 void proto_register_anon (void);
