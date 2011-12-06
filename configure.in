@@ -16,8 +16,10 @@ m4_ifndef([PKG_CHECK_MODULES],
           [m4_fatal([must install pkg-config before running autoconf])])
 
 dnl Checks for programs.
+LT_INIT([dlopen])
+AC_DISABLE_SHARED
 AC_PROG_CC
-LT_INIT([dlopen,disable-shared])
+
 
 dnl avoid the default flags "-g -o2"
 SAVEDCXXFLAGS=$CXXFLAGS
