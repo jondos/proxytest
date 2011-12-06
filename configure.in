@@ -4,7 +4,6 @@ dnl Konrad Rieck <kr@r0q.cx>
 dnl
 
 AC_INIT([AN.ON Mix],[00.11.001],[sk13@inf.tu-dresden.de],[mix])
-AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE
 AM_MAINTAINER_MODE
 AC_PREREQ(2.59)
