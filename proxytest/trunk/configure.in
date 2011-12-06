@@ -726,7 +726,7 @@ AC_ARG_ENABLE(tests,
 
 DOWITHWIRESHARK=""
 AC_ARG_ENABLE(wireshark,
-	AS_HELP_STRING([--enable-wireshark],[Build also the Wireshark AN.On protocol dissector]),
+	AS_HELP_STRING([--enable-wireshark],[Build also the Wireshark AN.ON protocol dissector]),
 	[
 	    if test "x$enableval" != "xno" ; then
 		DOWITHWIRESHARK="yes"
@@ -755,6 +755,6 @@ CXXFLAGS="$CXXFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THR
 LIBS="$LIBS $PAYMENT_LIB $MYSQL_LIB"
 
 AM_CONDITIONAL([DOTESTS], [test x$DOTHETESTS = xyes])
-AM_CONDITIONAL([DOWIRESHARK], [test x$DOWITHWIRESHARK = xyes])
+AM_CONDITIONAL([DOWIRESHARK], [wireshark x$DOWITHWIRESHARK = xyes])
 AC_CONFIG_FILES([Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile test/Makefile gcm/Makefile wireshark/Makefile])
 AC_OUTPUT
