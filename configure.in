@@ -388,7 +388,7 @@ AC_CACHE_CHECK([for OpenSSL directory], ac_cv_openssldir, [
 			LDFLAGS="$saved_LDFLAGS"
 		fi
 
-		LIBS="$saved_LIBS -lcrypto"
+		LIBS="$saved_LIBS -lcrypto -ldl"
 
 		# Basic test to check for compatible version and correct 
                 # linking, *does not* test for RSA - that comes later.
