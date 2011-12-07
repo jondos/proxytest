@@ -17858,11 +17858,11 @@ $as_echo "yes" >&6; }
 fi
    savedCFLAGS="$CFLAGS"
    CFLAGS="$CFLAGS $WIRESHARK_CFLAGS"
-   ac_fn_c_check_header_mongrel "$LINENO" "epan/packet.h" "ac_cv_header_epan_packet_h" "$ac_includes_default"
-if test "x$ac_cv_header_epan_packet_h" = xyes; then :
+   ac_fn_c_check_header_mongrel "$LINENO" "epan/emem.h" "ac_cv_header_epan_emem_h" "$ac_includes_default"
+if test "x$ac_cv_header_epan_emem_h" = xyes; then :
 
 else
-  as_fn_error $? "Wireshark development header files not found! Symlink /usr/include/wireshark to you wireshark source code directory could solve this problem!" "$LINENO" 5
+  as_fn_error $? "Wireshark development header files not found! Symlink /usr/include/wireshark to your wireshark source code directory could solve this problem!" "$LINENO" 5
 fi
 
 
