@@ -758,7 +758,7 @@ AS_IF([test "x$DOWITHWIRESHARK" = "xyes"], [
    PKG_CHECK_MODULES([GLIB], [glib-2.0],[WIRESHARK_CFLAGS="$GLIB_CFLAGS -I/usr/include/wireshark"],[AC_MSG_ERROR([You need glib-2.0 in order to compile the wireshark plugin!])])
    savedCFLAGS="$CFLAGS"
    CFLAGS="$CFLAGS $WIRESHARK_CFLAGS"
-   AC_CHECK_HEADER([epan/emem.h],[],[AC_MSG_ERROR([Wireshark development header files not found! Symlink /usr/include/wireshark to your wireshark source code directory could solve this problem!])])
+   AC_CHECK_HEADER([wiretap/wtap.h],[],[AC_MSG_ERROR([Wireshark development header files not found! Symlink /usr/include/wireshark to your wireshark source code directory could solve this problem!])])
    CFLAGS="$savedCFLAGS"
 ])
 
