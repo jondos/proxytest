@@ -15560,14 +15560,14 @@ DEFAULTLIBS="$LIBS" #-L/usr/lib -L/usr/local/lib"
 
 case "$host" in
 *-*-solaris*)
-        DEFAULTLIBS="$LIBS -lnsl -lsocket -lposix4"
-        ;;
+		DEFAULTLIBS="$LIBS -lnsl -lsocket -lposix4"
+		;;
 *-*-linux*)
-        DEFAULTLIBS="$LIBS -lpthread"
+		DEFAULTLIBS="$LIBS -lpthread"
 	;;
 *-*-irix*)
-        CFLAGS="$CFLAGS "
-        ;;
+		CFLAGS="$CFLAGS "
+		;;
 *-*-freebsd*)
 	DEFAULTLIBS="$LIBS -L/usr/local/lib -liconv -lpthread";
 	CFLAGS="$CFLAGS";
@@ -15593,11 +15593,11 @@ alpha*)
 	CXXFLAGS="$CXXFLAGS -mieee"
 	;;
 m68k*)
-        OFLAGS="-O0"
-        ;;
+		OFLAGS="-O0"
+		;;
 *)
 	if test "x$OFLAGS" == "x" ; then
-	    OFLAGS="-O3"
+		OFLAGS="-O3"
 	fi
 	;;
 esac
@@ -15628,11 +15628,11 @@ fi
 
 
 if test -z "$MARCH"; then
-    case "$host_cpu" in
+	case "$host_cpu" in
 	i686)
-	    MARCH="-march=i686"
+		MARCH="-march=i686"
 	;;
-    esac
+	esac
 fi
 OFLAGS="$OFLAGS $MARCH"
 
@@ -15640,8 +15640,8 @@ OFLAGS="$OFLAGS $MARCH"
 if test "${enable_static+set}" = set; then :
   enableval=$enable_static;
 		if test "x$enableval" != "xno" ; then
-		    CFLAGS="$CFLAGS -static"
-	    	    CXXFLAGS="$CXXFLAGS -static"
+			CFLAGS="$CFLAGS -static"
+				CXXFLAGS="$CXXFLAGS -static"
 		fi
 
 fi
@@ -15652,7 +15652,7 @@ USE_EPOLL=1
 if test "${enable_epoll+set}" = set; then :
   enableval=$enable_epoll;
 		if test "x$enableval" == "xno" ; then
-		    USE_EPOLL=0
+			USE_EPOLL=0
 		fi
 
 fi
@@ -15662,10 +15662,10 @@ POOL=""
 if test "${enable_pool+set}" = set; then :
   enableval=$enable_pool;
 		if test "x$enableval" != "xno" ; then
-		    POOL="-DUSE_POOL"
-		    if test "x$enableval" != "xyes" ; then
+			POOL="-DUSE_POOL"
+			if test "x$enableval" != "xyes" ; then
 			POOL="$POOL -DMIX_POOL_SIZE=$enableval"
-		    fi
+			fi
 		fi
 
 
@@ -15677,7 +15677,7 @@ BANDWIDTH_LIMIT=""
 if test "${enable_bandwidth_limitation+set}" = set; then :
   enableval=$enable_bandwidth_limitation;
 		if test "x$enableval" != "xno" ; then
-		    BANDWIDTH_LIMIT="-DDELAY_CHANNELS"
+			BANDWIDTH_LIMIT="-DDELAY_CHANNELS"
 		fi
 
 
@@ -15690,7 +15690,7 @@ PAYMENT=""
 if test "${enable_payment+set}" = set; then :
   enableval=$enable_payment;
 		if test "x$enableval" != "xno" ; then
-		    PAYMENT="-DPAYMENT"
+			PAYMENT="-DPAYMENT"
 		fi
 
 
@@ -15702,7 +15702,7 @@ INFOSERVICESERIAL=""
 if test "${enable_infoserviceserial+set}" = set; then :
   enableval=$enable_infoserviceserial;
 		if test "x$enableval" != "xno" ; then
-		    INFOSERVICESERIAL="-DINFOSERVICESERIAL"
+			INFOSERVICESERIAL="-DINFOSERVICESERIAL"
 		fi
 
 
@@ -15714,7 +15714,7 @@ SERVER_MONITORING=""
 if test "${enable_server_monitoring+set}" = set; then :
   enableval=$enable_server_monitoring;
 		if test "x$enableval" != "xno" ; then
-		    SERVER_MONITORING="-DSERVER_MONITORING"
+			SERVER_MONITORING="-DSERVER_MONITORING"
 		fi
 
 
@@ -15726,7 +15726,7 @@ REPLAY_DETECTION=""
 if test "${enable_replay_detection+set}" = set; then :
   enableval=$enable_replay_detection;
 		if test "x$enableval" != "xno" ; then
-		    REPLAY_DETECTION="-DREPLAY_DETECTION"
+			REPLAY_DETECTION="-DREPLAY_DETECTION"
 		fi
 
 
@@ -15738,7 +15738,7 @@ NEW_MIX_TYPE=""
 if test "${enable_new_mix_type+set}" = set; then :
   enableval=$enable_new_mix_type;
 		if test "x$enableval" != "xno" ; then
-		    NEW_MIX_TYPE="-DNEW_MIX_TYPE"
+			NEW_MIX_TYPE="-DNEW_MIX_TYPE"
 		fi
 
 
@@ -15750,7 +15750,7 @@ DYNAMIC=""
 if test "${enable_dynamic+set}" = set; then :
   enableval=$enable_dynamic;
 		if test "x$enableval" != "xno" ; then
-		    DYNAMIC="-DDYNAMIC_MIX"
+			DYNAMIC="-DDYNAMIC_MIX"
 		fi
 
 
@@ -15762,7 +15762,7 @@ DIALOG=""
 if test "${enable_dialog+set}" = set; then :
   enableval=$enable_dialog;
 		if test "x$enableval" != "xno" ; then
-		    DIALOG="-DLOG_DIALOG"
+			DIALOG="-DLOG_DIALOG"
 		fi
 
 
@@ -16316,10 +16316,10 @@ done
 
 
 if test "x$USE_EPOLL" != "x0" ; then
-    ac_fn_c_check_func "$LINENO" "epoll_wait" "ac_cv_func_epoll_wait"
+	ac_fn_c_check_func "$LINENO" "epoll_wait" "ac_cv_func_epoll_wait"
 if test "x$ac_cv_func_epoll_wait" = xyes; then :
 
-	    if test "$cross_compiling" = yes; then :
+		if test "$cross_compiling" = yes; then :
   echo "skip epoll run test because of cross compiling"
 else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -17025,8 +17025,8 @@ $as_echo "#define AC_APPLE_UNIVERSAL_BUILD 1" >>confdefs.h
 
 
 tryssldir="/usr/local/openssl /usr/lib/openssl \
-                         /usr/local/ssl /usr/lib/ssl /usr/local /usr/pkg \
-                         /opt /opt/openssl $HOME/ssl $HOME/openssl"
+						 /usr/local/ssl /usr/lib/ssl /usr/local /usr/pkg \
+						 /opt /opt/openssl $HOME/ssl $HOME/openssl"
 
 # Check whether --with-ssl-dir was given.
 if test "${with_ssl_dir+set}" = set; then :
@@ -17066,7 +17066,7 @@ else
 		LIBS="$saved_LIBS -lcrypto"
 
 		# Basic test to check for compatible version and correct
-                # linking, *does not* test for RSA - that comes later.
+				# linking, *does not* test for RSA - that comes later.
 		if test "$cross_compiling" = yes; then :
 
 			if test -f "$ssldir/libssl.a" && test -f "$ssldir/libcrypto.a"; then
@@ -17216,11 +17216,11 @@ $as_echo "found in $xmldir" >&6; }
 
 else
   if test -f "$xmldir/xercesc/util/XMLString.hpp"; then
-			  	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: found in $xmldir" >&5
+				{ $as_echo "$as_me:${as_lineno-$LINENO}: result: found in $xmldir" >&5
 $as_echo "found in $xmldir" >&6; }
-			  	found_xmldir=1
-			  	break;
-              fi
+				found_xmldir=1
+				break;
+			  fi
 
 fi
 rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
@@ -17263,7 +17263,7 @@ for xmllibdir in "" $tryxmllibdir ; do
 		#include "util/XercesDefs.hpp"
 		#include "util/PlatformUtils.hpp"
 		#if (_XERCES_VERSION >= 20200)
- 		   XERCES_CPP_NAMESPACE_USE
+		   XERCES_CPP_NAMESPACE_USE
 		#endif
 
 int
@@ -17299,9 +17299,9 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 if test "x$PAYMENT" != "x" ; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: PostgreSQL tests" >&5
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: PostgreSQL tests" >&5
 $as_echo "$as_me: PostgreSQL tests" >&6;}
-        for ac_header in postgresql/libpq-fe.h
+		for ac_header in postgresql/libpq-fe.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "postgresql/libpq-fe.h" "ac_cv_header_postgresql_libpq_fe_h" "$ac_includes_default"
 if test "x$ac_cv_header_postgresql_libpq_fe_h" = xyes; then :
@@ -17350,12 +17350,12 @@ fi
 
 done
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for PostgreSQL libs" >&5
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for PostgreSQL libs" >&5
 $as_echo_n "checking for PostgreSQL libs... " >&6; }
-    saved_LIBS="$LIBS"
-    PAYMENT_LIB="-lpq"
-    LIBS="$LIBS $PAYMENT_LIB"
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+	saved_LIBS="$LIBS"
+	PAYMENT_LIB="-lpq"
+	LIBS="$LIBS $PAYMENT_LIB"
+	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 				#ifdef HAVE_POSTGRESQL_LIBPQ_FE_H
@@ -17379,9 +17379,9 @@ if ac_fn_c_try_link "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: libpq found" >&5
 $as_echo "libpq found" >&6; }
 else
-  				    PAYMENT_LIB="-lpq++"
-				    LIBS="$saved_LIBS $PAYMENT_LIB"
-				    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+  					PAYMENT_LIB="-lpq++"
+					LIBS="$saved_LIBS $PAYMENT_LIB"
+					cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 					#ifdef HAVE_POSTGRESQL_LIBPQ_FE_H
@@ -17419,9 +17419,9 @@ fi
 
 
 if test "x$DIALOG" != "x" ; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: Mysql tests" >&5
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: Mysql tests" >&5
 $as_echo "$as_me: Mysql tests" >&6;}
-    for ac_header in mysql/mysql.h
+	for ac_header in mysql/mysql.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "mysql/mysql.h" "ac_cv_header_mysql_mysql_h" "$ac_includes_default"
 if test "x$ac_cv_header_mysql_mysql_h" = xyes; then :
@@ -17470,14 +17470,14 @@ fi
 
 done
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Mysql libs" >&5
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Mysql libs" >&5
 $as_echo_n "checking for Mysql libs... " >&6; }
-    trymysqllibdir="/usr/lib /usr/local/lib /usr/lib/mysql /usr/local/lib/mysql"
-    saved_LIBS="$LIBS"
-    saved_LDFLAGS="$LDFLAGS"
-    MYSQL_LIB="-lmysqlclient_r"
-    LIBS="$LIBS $MYSQL_LIB"
-    for mysqllibdir in "" $trymysqllibdir ; do
+	trymysqllibdir="/usr/lib /usr/local/lib /usr/lib/mysql /usr/local/lib/mysql"
+	saved_LIBS="$LIBS"
+	saved_LDFLAGS="$LDFLAGS"
+	MYSQL_LIB="-lmysqlclient_r"
+	LIBS="$LIBS $MYSQL_LIB"
+	for mysqllibdir in "" $trymysqllibdir ; do
 	LDFLAGS="$saved_LDFLAGS -L$mysqllibdir"
 	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
@@ -17508,11 +17508,11 @@ rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	done
 	if test -z "$found_mysqllib"; then
-	    as_fn_error $? "mysql libs NOT found - please use --with-mysql-lib" "$LINENO" 5
+		as_fn_error $? "mysql libs NOT found - please use --with-mysql-lib" "$LINENO" 5
 	fi
 
-    ac_fn_c_check_decl "$LINENO" "MYSQL_OPT_RECONNECT" "ac_cv_have_decl_MYSQL_OPT_RECONNECT" "
-    				#ifdef HAVE_MYSQL_MYSQL_H
+	ac_fn_c_check_decl "$LINENO" "MYSQL_OPT_RECONNECT" "ac_cv_have_decl_MYSQL_OPT_RECONNECT" "
+					#ifdef HAVE_MYSQL_MYSQL_H
 				#include <mysql/mysql.h>
 				#elif defined(HAVE_MYSQL_H)
 				#include <mysql.h>
@@ -17525,7 +17525,7 @@ $as_echo "#define HAVE_MYSQL_OPT_RECONNECT /**/" >>confdefs.h
 
 fi
 
-    LIBS="$saved_LIBS"
+	LIBS="$saved_LIBS"
 fi
 
 
@@ -17533,14 +17533,14 @@ fi
 # Check whether --enable-debug was given.
 if test "${enable_debug+set}" = set; then :
   enableval=$enable_debug;
-	    if test "x$enableval" != "xno" ; then
+		if test "x$enableval" != "xno" ; then
 		CFLAGS="$CFLAGS -ggdb3 -DNO_SIGSEV_CATCH -fno-inline -fno-default-inline"
 		CXXFLAGS="$CXXFLAGS -ggdb3 -DNO_SIGSEV_CATCH -fno-inline -fno-default-inline"
 		OFLAGS="-O0"
-	    else
+		else
 		CFLAGS="$CFLAGS -g0"
 		CXXFLAGS="$CXXFLAGS -g0"
-	    fi
+		fi
 
 
 fi
@@ -17549,10 +17549,10 @@ fi
 # Check whether --enable-debug-output was given.
 if test "${enable_debug_output+set}" = set; then :
   enableval=$enable_debug_output;
-	    if test "x$enableval" != "xno" ; then
+		if test "x$enableval" != "xno" ; then
 		CFLAGS="$CFLAGS -D_DEBUG"
 		CXXFLAGS="$CXXFLAGS -D_DEBUG"
-	    fi
+		fi
 
 
 fi
@@ -17561,10 +17561,10 @@ fi
 # Check whether --enable-dataretentionlog was given.
 if test "${enable_dataretentionlog+set}" = set; then :
   enableval=$enable_dataretentionlog;
-	    if test "x$enableval" != "xno" ; then
+		if test "x$enableval" != "xno" ; then
 		CFLAGS="$CFLAGS -DDATA_RETENTION_LOG"
 		CXXFLAGS="$CXXFLAGS -DDATA_RETENTION_LOG"
-	    fi
+		fi
 
 
 fi
@@ -17574,10 +17574,10 @@ fi
 # Check whether --enable-with-integrity-check was given.
 if test "${enable_with_integrity_check+set}" = set; then :
   enableval=$enable_with_integrity_check;
-	    if test "x$enableval" != "xno" ; then
+		if test "x$enableval" != "xno" ; then
 		CFLAGS="$CFLAGS -DWITH_INTEGRITY_CHECK"
 		CXXFLAGS="$CXXFLAGS -DWITH_INTEGRITY_CHECK"
-	    fi
+		fi
 
 
 fi
@@ -17586,11 +17586,11 @@ fi
 # Check whether --enable-google-cpuprofiler was given.
 if test "${enable_google_cpuprofiler+set}" = set; then :
   enableval=$enable_google_cpuprofiler;
-	    if test "x$enableval" != "xno" ; then
+		if test "x$enableval" != "xno" ; then
 		CFLAGS="$CFLAGS -DENABLE_GPERFTOOLS_CPU_PROFILER"
 		CXXFLAGS="$CXXFLAGS -DENABLE_GPERFTOOLS_CPU_PROFILER"
 		LIBS="$LIBS -lprofiler"
-	    fi
+		fi
 
 
 fi
@@ -17599,11 +17599,11 @@ fi
 # Check whether --enable-google-heapchecker was given.
 if test "${enable_google_heapchecker+set}" = set; then :
   enableval=$enable_google_heapchecker;
-	    if test "x$enableval" != "xno" ; then
+		if test "x$enableval" != "xno" ; then
 		CFLAGS="$CFLAGS -DENABLE_GPERFTOOLS_HEAP_CHECKER"
 		CXXFLAGS="$CXXFLAGS -DENABLE_GPERFTOOLS_HEAP_CHECKER"
 		LIBS="$LIBS -ltcmalloc"
-	    fi
+		fi
 
 
 fi
@@ -17614,9 +17614,9 @@ CRIME=""
 # Check whether --enable-crime-detection was given.
 if test "${enable_crime_detection+set}" = set; then :
   enableval=$enable_crime_detection;
-	    if test "x$enableval" != "xno" ; then
+		if test "x$enableval" != "xno" ; then
 		CRIME="-DLOG_CRIME"
-	    fi
+		fi
 
 
 fi
@@ -17626,9 +17626,9 @@ DOTHETESTS=""
 # Check whether --enable-tests was given.
 if test "${enable_tests+set}" = set; then :
   enableval=$enable_tests;
-	    if test "x$enableval" != "xno" ; then
+		if test "x$enableval" != "xno" ; then
 		DOTHETESTS="yes"
-	    fi
+		fi
 
 
 fi
@@ -17638,9 +17638,9 @@ DOWITHWIRESHARK=""
 # Check whether --enable-wireshark was given.
 if test "${enable_wireshark+set}" = set; then :
   enableval=$enable_wireshark;
-	    if test "x$enableval" != "xno" ; then
+		if test "x$enableval" != "xno" ; then
 		DOWITHWIRESHARK="yes"
-	    fi
+		fi
 
 
 fi
@@ -17650,18 +17650,18 @@ fi
 # Check whether --enable-manioq was given.
 if test "${enable_manioq+set}" = set; then :
   enableval=$enable_manioq;
-	    if test "x$enableval" != "xno" ; then
+		if test "x$enableval" != "xno" ; then
 		PAYMENT=""
 		CFLAGS="$CFLAGS -DMANIOQ"
 		CXXFLAGS="$CXXFLAGS -DMANIOQ"
-	    fi
+		fi
 
 
 fi
 
 
 if test "x$DOTHETEST" != "xyes" ; then
-    LIBCPPUNIT=cppunit
+	LIBCPPUNIT=cppunit
 
 fi
 
@@ -17844,31 +17844,11 @@ fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$GLIB_PKG_ERRORS" >&5
 
-	as_fn_error $? "Package requirements (glib-2.0) were not met:
-
-$GLIB_PKG_ERRORS
-
-Consider adjusting the PKG_CONFIG_PATH environment variable if you
-installed software in a non-standard prefix.
-
-Alternatively, you may set the environment variables GLIB_CFLAGS
-and GLIB_LIBS to avoid the need to call pkg-config.
-See the pkg-config man page for more details." "$LINENO" 5
+	as_fn_error $? "You need glib-2.0 in order to compile the wireshark plugin!" "$LINENO" 5
 elif test $pkg_failed = untried; then
      	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "The pkg-config script could not be found or is too old.  Make sure it
-is in your PATH or set the PKG_CONFIG environment variable to the full
-path to pkg-config.
-
-Alternatively, you may set the environment variables GLIB_CFLAGS
-and GLIB_LIBS to avoid the need to call pkg-config.
-See the pkg-config man page for more details.
-
-To get pkg-config, see <http://pkg-config.freedesktop.org/>.
-See \`config.log' for more details" "$LINENO" 5; }
+	as_fn_error $? "You need glib-2.0 in order to compile the wireshark plugin!" "$LINENO" 5
 else
 	GLIB_CFLAGS=$pkg_cv_GLIB_CFLAGS
 	GLIB_LIBS=$pkg_cv_GLIB_LIBS
@@ -17876,6 +17856,17 @@ else
 $as_echo "yes" >&6; }
 	WIRESHARK_CFLAGS="$GLIB_CFLAGS -I/usr/include/wireshark"
 fi
+   savedCFLAGS="$CFLAGS"
+   CFLAGS="$CFLAGS $WIRESHARK_CFLAGS"
+   ac_fn_c_check_header_mongrel "$LINENO" "epan/packet.h" "ac_cv_header_epan_packet_h" "$ac_includes_default"
+if test "x$ac_cv_header_epan_packet_h" = xyes; then :
+
+else
+  as_fn_error $? "Wireshark development header files not found! Symlink /usr/include/wireshark to you wireshark source code directory could solve this problem!" "$LINENO" 5
+fi
+
+
+   CFLAGS="$savedCFLAGS"
 
 fi
 
