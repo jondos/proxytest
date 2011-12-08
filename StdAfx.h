@@ -5,14 +5,14 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
 	- Redistributions of source code must retain the above copyright notice,
-	  this list of conditions and the following disclaimer.
+		this list of conditions and the following disclaimer.
 
 	- Redistributions in binary form must reproduce the above copyright notice,
-	  this list of conditions and the following disclaimer in the documentation and/or
+		this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
 	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
-	  may be used to endorse or promote products derived from this software without specific
+		may be used to endorse or promote products derived from this software without specific
 		prior written permission.
 
 
@@ -161,7 +161,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define REPLAY_TIMESTAMP_PROPAGATION_INTERVALL 1 //How often (in minutes) should the current replay timestamps be propagate
 
 #define KEEP_ALIVE_TRAFFIC_RECV_WAIT_TIME  75000 //How long to wait for a Keep-Alive (or any other packet)
-																							       //before we believe that the connection is broken (in ms)
+																										 //before we believe that the connection is broken (in ms)
 #define KEEP_ALIVE_TRAFFIC_SEND_WAIT_TIME 65000 //How long to wait before we sent a dummy a Keep-Alive-Traffic
 
 //#define ECC
@@ -274,7 +274,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#endif
 	#define socklen_t int
 	#define MSG_NOSIGNAL 0
-    #include <io.h>
+		#include <io.h>
 	#include <conio.h>
 	#include <sys/timeb.h>
 	#include <process.h>
@@ -314,11 +314,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define __linux
 	#endif
 	#if defined(CWDEBUG)
-	  #include <libcw/sysd.h>
-	  #include <libcw/debug.h>
+		#include <libcw/sysd.h>
+		#include <libcw/debug.h>
 	#endif
 
-  #ifdef HAVE_CONFIG_H
+	#ifdef HAVE_CONFIG_H
 		#include "config.h"
 		#ifndef HAVE_SOCKLEN_T
 			typedef int socklen_t;
@@ -348,23 +348,23 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 			#define MSG_DONTWAIT 0
 		#endif
 		#if !defined(__FreeBSD__)&&!defined(__linux)
-    	typedef int socklen_t;
+			typedef int socklen_t;
 		#endif
-    #ifndef O_BINARY
+		#ifndef O_BINARY
 			#define O_BINARY 0
-    #endif
-    #ifndef MAX_PATH
+		#endif
+		#ifndef MAX_PATH
 			#define MAX_PATH 4096
-    #endif
+		#endif
 		#ifdef __sgi
 			#undef HAVE_VSNPRINTF
 			#undef HAVE_SNPRINTF
 			#include <alloca.h>
 		#endif
-    #if !defined( __linux) &&!defined(__CYGWIN__)
-    	#include <sys/filio.h>
-    	#define MSG_NOSIGNAL 0
-    #endif
+		#if !defined( __linux) &&!defined(__CYGWIN__)
+			#include <sys/filio.h>
+			#define MSG_NOSIGNAL 0
+		#endif
 	#endif //Have config.h
 
 	//Byte order defines
@@ -390,7 +390,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#include <sys/epoll.h>
 	#endif
 	#ifdef HAVE_MALLOC_H
-	    #include <malloc.h>
+			#include <malloc.h>
 	#endif
 	#include <sys/ioctl.h>
 	#include <sys/types.h>
@@ -412,18 +412,18 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include <termios.h>
 
 	#include <ctype.h>
-    typedef struct sockaddr SOCKADDR;
-  typedef SOCKADDR* LPSOCKADDR;
-  #define SOCKET int
-  typedef struct hostent HOSTENT;
+		typedef struct sockaddr SOCKADDR;
+	typedef SOCKADDR* LPSOCKADDR;
+	#define SOCKET int
+	typedef struct hostent HOSTENT;
 	#define ioctlsocket(a,b,c) ioctl(a,b,c)
-  #define closesocket(s) close(s)
-  #define SOCKET_ERROR -1
-  #define INVALID_SOCKET -1
-  #define SD_RECEIVE 0
-  #define SD_SEND 1
-  #define SD_BOTH 2
-  #define GET_NET_ERROR (errno)
+	#define closesocket(s) close(s)
+	#define SOCKET_ERROR -1
+	#define INVALID_SOCKET -1
+	#define SD_RECEIVE 0
+	#define SD_SEND 1
+	#define SD_BOTH 2
+	#define GET_NET_ERROR (errno)
 	#define SET_NET_ERROR(x) (errno = x)
 	#define GET_NET_ERROR_STR(x) (errno == E_TIMEDOUT ? "Connection timed out." : (errno == E_SOCKETCLOSED ? "Socket is closed." : strerror(x)))
 	#define RESETERROR errno=0;
@@ -435,9 +435,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#ifndef INADDR_NONE
 		#define INADDR_NONE -1
 	#endif
-  #ifndef AF_LOCAL
+	#ifndef AF_LOCAL
 		#define AF_LOCAL AF_UNIX
-  #endif
+	#endif
 	#if !defined(HAVE_MSG_DONTWAIT)&&!defined(MSG_DONTWAIT)
 		#define MSG_DONTWAIT 0
 	#endif
@@ -545,7 +545,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include <parsers/XercesDOMParser.hpp>
 
 #if (_XERCES_VERSION >= 20200)
-    XERCES_CPP_NAMESPACE_USE
+		XERCES_CPP_NAMESPACE_USE
 #endif
 
 #endif //wich DOM-Implementation to use?
@@ -576,32 +576,32 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 //For MySQL
 #if defined(COUNTRY_STATS)
-    #ifdef HAVE_CONFIG_H
+		#ifdef HAVE_CONFIG_H
 	#ifdef HAVE_MYSQL_MYSQL_H
-	    #include <mysql/mysql.h>
+			#include <mysql/mysql.h>
 	#else
-	    #include <mysql.h>
+			#include <mysql.h>
 	#endif
-    #else //HAVE_CONFIG_H
+		#else //HAVE_CONFIG_H
 	#include <mysql/mysql.h>
-    #endif
+		#endif
 #endif
 
 //For Payment
 #ifdef PAYMENT
 	#ifdef HAVE_CONFIG_H
 		#ifdef HAVE_POSTGRESQL_LIBPQ_FE_H
-	    #include <postgresql/libpq-fe.h>
+			#include <postgresql/libpq-fe.h>
 		#elif defined(HAVE_PGSQL_LIBPQ_FE_H)
-	    #include <pgsql/libpq-fe.h>
+			#include <pgsql/libpq-fe.h>
 		#else
-	    #include <libpq-fe.h>
+			#include <libpq-fe.h>
 		#endif
-  #elif defined(__FreeBSD__) ||defined (_WIN32)
+	#elif defined(__FreeBSD__) ||defined (_WIN32)
 		#include <libpq-fe.h>
 			#else
 		#include <postgresql/libpq-fe.h>
-  #endif
+	#endif
 #endif
 //Compressed Logs
 #ifdef COMPRESSED_LOGS
