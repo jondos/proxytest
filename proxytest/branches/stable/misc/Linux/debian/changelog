@@ -4,6 +4,12 @@ mix-squidconf (11.08.26.2) unstable; urgency=low
 
  -- JonDos GmbH <info@jondos.de>  Fri, 28 Aug 2011 10:17:23 +0200
 
+mix-squidconf (11.12.08) unstable; urgency=low
+
+  * new squid error messages
+
+ -- JonDos GmbH <info@jondos.de>  Thu, 08 Dec 2011 14:17:23 +0200
+
 
 mix-squidconf (11.08.26.1) unstable; urgency=low
 
