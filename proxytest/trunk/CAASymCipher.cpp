@@ -321,7 +321,7 @@ SINT32 CAASymCipher::getPublicKeyAsDOMElement(DOMElement* & elemRoot,XERCES_CPP_
 		elemRoot=createDOMElement(docOwner,"RSAKeyValue");
 		
 		addKeyPart(elemRoot,docOwner,"Modulus",m_pRSA->n);
-		addKeyPart(elemRoot,docOwner,"P",m_pRSA->p);
+		addKeyPart(elemRoot,docOwner,"Exponent",m_pRSA->e);
 
 		return E_SUCCESS;
 	}

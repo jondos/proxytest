@@ -76,12 +76,12 @@ SINT32 CALastMixA::loop()
 		SINT32 retval;
 		SINT32 countRead;
 		lmChannelListEntry* pChannelListEntry;
-		UINT8 rsaBuff[RSA_SIZE];
+		UINT8* rsaBuff=new UINT8[RSA_SIZE];
 		UINT32 rsaOutLen=RSA_SIZE;
 		UINT8* tmpBuff=new UINT8[MIXPACKET_SIZE];
-		UINT8 ciphertextBuff[DATA_SIZE];
-		UINT8 plaintextBuff[DATA_SIZE - GCM_MAC_SIZE];
-		UINT8 lengthAndFlagsField[2];
+		UINT8* ciphertextBuff=new UINT8[DATA_SIZE];
+		UINT8* plaintextBuff=new UINT8[DATA_SIZE - GCM_MAC_SIZE];
+		UINT16 lengthAndFlagsField;
 		UINT16 payloadLen;
 		bool bAktiv;
 		m_logUploadedPackets=m_logDownloadedPackets=0;
@@ -159,9 +159,10 @@ SINT32 CALastMixA::loop()
 												newCipher->setGCMKeys(rsaBuff, rsaBuff + LAST_MIX_SIZE_OF_SYMMETRIC_KEYS - KEY_SIZE);
 												payloadLen = ntohs(*((UINT16*)(rsaBuff + LAST_MIX_SIZE_OF_SYMMETRIC_KEYS)));
 												payloadLen &= PAYLOAD_LEN_MASK;
-												if (payloadLen < 0) payloadLen = 0;
-												if (payloadLen > PAYLOAD_SIZE) payloadLen = PAYLOAD_SIZE;
-												retval = 1;
+												if (payloadLen < 0)
+													payloadLen = 0;
+												if (payloadLen > PAYLOAD_SIZE)
+													payloadLen = PAYLOAD_SIZE;
 												retval = newCipher->decryptMessage(pMixPacket->data + RSA_SIZE, LAST_MIX_SIZE_OF_SYMMETRIC_KEYS + 3 + payloadLen + GCM_MAC_SIZE - rsaOutLen, pMixPacket->data + rsaOutLen - LAST_MIX_SIZE_OF_SYMMETRIC_KEYS, true);
 											#else
 												newCipher->setKeys(rsaBuff,LAST_MIX_SIZE_OF_SYMMETRIC_KEYS);
@@ -177,7 +178,8 @@ SINT32 CALastMixA::loop()
 												getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
 											#endif
 											#ifdef WITH_INTEGRITY_CHECK
-												if (retval == 0) {
+												if (retval == 0)
+													{
 													/* invalid MAC -> send channel close packet with integrity error flag */
 													getRandom(pMixPacket->data, DATA_SIZE);
 													pMixPacket->flags = CHANNEL_CLOSE;
@@ -404,12 +406,11 @@ SINT32 CALastMixA::loop()
 												#endif
 												#ifdef WITH_INTEGRITY_CHECK
 													/* decrypt only the first 2 bytes to get the payload length */
-													pChannelListEntry->pCipher->decryptMessage(pMixPacket->data, 2, lengthAndFlagsField, false);
-													payloadLen = ntohs(*((UINT16*)(lengthAndFlagsField)));
+													pChannelListEntry->pCipher->decryptMessage(pMixPacket->data, 2, &lengthAndFlagsField, false);
+													payloadLen = ntohs(lengthAndFlagsField);
 													payloadLen &= PAYLOAD_LEN_MASK;
 													if (payloadLen < 0) payloadLen = 0;
 													if (payloadLen > PAYLOAD_SIZE) payloadLen = PAYLOAD_SIZE;
-													retval = 1;
 													retval = pChannelListEntry->pCipher->decryptMessage(pMixPacket->data, payloadLen + 3 + GCM_MAC_SIZE, plaintextBuff, true);
 													memcpy(pMixPacket->data, plaintextBuff, payloadLen + 3);
 
@@ -822,6 +823,12 @@ SINT32 CALastMixA::loop()
 
 		delete []tmpBuff;
 		tmpBuff = NULL;
+		delete []rsaBuff;
+		rsaBuff = NULL;
+		delete []ciphertextBuff;
+		ciphertextBuff = NULL;
+		delete []plaintextBuff;
+		plaintextBuff = NULL;
 		delete pQueueEntry;
 		pQueueEntry = NULL;
 		pLogThread->join();
