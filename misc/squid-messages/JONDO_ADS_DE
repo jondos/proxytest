@@ -1,0 +1,156 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head> 
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+<meta name="viewport" content="width=device-width">
+<title>Bitte nutzen Sie auch die Premium-Dienste von JonDonym</title> 
+<style type="text/css">
+  H1 { color: #ff3112; font-size: 1.4em; font-weight:bold; margin-top: 50px; margin-bottom: 0; padding: 0; }
+  H2 { font-size: 1.2em; font-weight: bold; color:#3F7FBF; padding: 0px; margin: 1em 0px 0.25em 0px; }
+  P { color: black; font-weight:normal; margin: 0.5em 0 0.5em 0; }
+  A:link { color: #00C; text-decoration:none; }
+  A:visited { color: #00C; text-decoration:none;}
+  A:hover { color: #00C; text-decoration:underline;}
+  A:active { color: #00C; text-decoration:underline;}
+  A:focus { color: #00C; text-decoration:none;}
+
+  td { padding: 5px; text-align: left;}
+
+  .navigation { position: absolute; top: 0px; left: 0px; width: 100%; margin: 0; padding: 0; border: 0; 
+                padding: 0; margin: 0; border: 0; line-height: 26px; 
+  }
+
+  .navigation UL { display: inline; margin:0px; padding: 0px;  list-style-image: none; font-size: 16px; background-color: #ECECEC; } 
+  .navigation ul li{ float:left;
+	list-style-type: none;
+        background-color: #ECECEC;
+	margin: 0;
+	padding: 0;
+        border-top: 0px;
+	
+	border-bottom: 0px;
+	border-left: 0px;
+    }
+  .navigation ul li a { 
+        color:#105090;
+	font-weight: bold;
+	margin: 0px; 
+	padding: 4px 6px 4px 6px;
+	text-decoration:none;
+  }
+  .navigation ul li a:focus, .navigation ul li a:hover, .navigation ul li a:active { 
+      background:#cde; color:#333; text-decoration:none; padding: 4px 6px 4px 6px; }
+      
+  .navigation ul li#current { background:#3F7FBF; }
+  .navigation ul li#current a, .navigation ul li#current a:focus, .navigation ul li#current a:hover, .navigation ul li#current a:active 
+     { color:#fff; background:#3F7FBF; padding: 4px 6px 4px 6px;}
+
+   .klein { visibility: hidden; }
+
+ @media screen and (max-width: 750px) {
+  .gross { display: none; }
+  .klein { visibility: visible; }
+  H1 { font-size: 1.2em; margin-top: 0.5em; }
+  H2 { margin: 0.2em; }
+ }
+ </style> 
+ </head>
+
+ <body> 
+<div id="navigation gross">
+   <ul>
+	<li><a href="https://www.anonym-surfen.de" title="Anonym surfen [1]" tabindex="1" accesskey="1">JonDonym</a></li>
+        <li><a href="https://www.anonym-surfen.de/software.html" title="Download [2]" tabindex="2" accesskey="2">Downloads</a></li>
+        <li><a href="https://shop.anonymous-proxy-servers.net/bin/payment?lang=de" title="Bezahlung f&uuml;r Premium Dienst [3]" tabindex="3" accesskey="3">Bezahlung</a></li>
+        <li><a href="https://www.anonym-surfen.de/hilfe.html" title="Documentation [4]" tabindex="4" accesskey="4">Hilfe</a></li>
+        <li><a href="https://anonymous-proxy-servers.net/forum/" title="Diskussionsforum [5]" tabindex="5" accesskey="5">Forum</a></li>
+        <li><a href="https://anonymous-proxy-servers.net/blog/index.php?user_language=de" title="JonDonym News Center [6]" tabindex="6"  accesskey="6">Blog</a></li>
+        <li><a href="http://ip-check.info/?lang=ede" title="IP Test. [7]" tabindex="7" accesskey="7">Anonymit&auml;tstest</a></li>
+        <li><a href="https://storage.anonymous-proxy-servers.net" title="Anonym Dateien tauschen [8]" tabindex="8" accesskey="1">Dateispeicher</a></li>
+   </ul> <br>
+</div>
+
+ <div id="titles" align="center"> 
+ 
+ <h2>Sie nutzen kostenfreie Dienste von JonDonym.</h2> 
+ </div> 
+ <div align="center"> 
+<table cellspacing="0" style="margin: 0px 0px 1em 0px; " width="600" class="gross">
+<tr><td colspan="3">
+<p style="text-align: center;">Sie nutzen kostenfreie Dienste von JonDonym. Die kostenfreie Dienste sind<br>zum Testen von JonDonym gedacht und in einigen Punkten eingeschr&auml;nkt.<br>Sie k&ouml;nnen die <u>Premium Dienste</u> nutzen, um diese Limits zu umgehen.</p>
+
+<p style="text-align: center;"><a href="https://shop.anonymous-proxy-servers.net/bin/payment" style="font-weight: bold;">Bitte kaufen Sie einen Premium Account, um JonDonym zu unterst&uuml;tzen.</a></p>
+<p style="text-align: center; font-size: x-large;"><a href="https://shop.anonymous-proxy-servers.net/bin/payment?lang=de" style="font-weight: bold;">Hier klicken!</a></p>
+</td></tr>
+<tr>
+<td valign="bottom" style="text-align: left; border: 0px; background-color: #088dce;
+   color: #FFF; font-weight: bold; font-size: 16px;">&nbsp;Funktion&nbsp;</td>
+<td style="text-align: center; border: 0px; background-color: #088dce;
+   color: #FFF; font-weight: bold; font-size: 16px;">Kostenfrei</td>
+<td style="text-align: center; border: 0px; background-color: #088dce;
+   color: #FFF; font-weight: bold; font-size: 16px;">Premium</td>
+</tr>
+<tr>
+<td style="background: #e4e4e4;">Geschwindigkeit</td>
+<td style="background: #d8e2eb; text-align:center;">30-50&thinsp;kBit/s</td>
+<td style="background: #d2edff; text-align:center;">unbegrenzt*</td>
+</tr>
+<tr>
+<td>Offene Ports</td>
+<td style="background: #e8f1f8; text-align:center;">HTTP/HTTPS</td>
+<td style="background: #c3e5fe; text-align:center;"> alle**</td>
+</tr>
+<tr>
+<td style="background: #e4e4e4;">Maximale Nutzerzahlen</td>
+<td style="background: #d8e2eb; text-align:center;">limitiert</td>
+<td style="background: #d2edff; text-align:center;">unbegrenzt</td>
+</tr>
+<tr>
+<td>Maximale Dateigröße f&uml;r Up- und Downloads</td>
+<td style="background: #e8f1f8; text-align:center;">2 MB</td>
+<td style="background: #c3e5fe; text-align:center;">unbegrenzt</td>
+</tr>
+<tr>
+<td style="background: #e4e4e4;">Unterschiedliche L&auml;nder</td>
+<td style="background: #d8e2eb; text-align:center;">in der Regel 1</td>
+<td style="background: #d2edff; text-align:center;">2-3</td>
+</tr>
+<tr>
+<td >Anzahl der Mixe (Proxies)</td>
+<td style="background: #e8f1f8; text-align:center;">2</td>
+<td style="background: #c3e5fe; text-align:center;">3</td>
+</tr>
+<tr>
+<td style="background: #e4e4e4;">Verf&uuml;gbarkeit</td>
+<td style="background: #d8e2eb; text-align:center;">no guarantee</td>
+<td style="background: #d2edff; text-align:center;">99&#037;</td>
+</tr>
+<tr>
+<tr>
+<td>SOCKS5 Support</td>
+<td style="background: #e8f1f8; text-align:center;">Nein</td>
+<td style="background: #c3e5fe; text-align:center;">Ja</td>
+</tr>
+<tr>
+<td style="background: #e4e4e4;">JonDonym Dateispeicher nutzen</td>
+<td style="background: #d8e2eb; text-align:center;">Nein</td>
+<td style="background: #d2edff; text-align:center;">Ja</td>
+</tr>
+<td style="font-weight:bold; border-top: 1px #A9B8C2 solid;">Kosten</td>
+<td style="background: #e8f1f8; text-align:center; font-weight:bold; border-top: 1px #A9B8C2 solid;">kostenfrei</td>
+<td style="background: #c3e5fe; text-align:center;border-top: 1px #A9B8C2 solid;"><span style="font-weight: bold;">ab 5.00&thinsp;&euro;</span>
+</td>
+</tr>
+<tr><td colspan="3" style="border-top: 1px #A9B8C2 solid; border-bottom: 1px #A9B8C2 solid; font-size: smaller;">
+*&nbsp;&nbsp; mehr als 600 kBit/s garantiert, &uuml;blicherweise verf&uuml;gbar: 1.000 - 1.500 kBit/s<br>
+** SMTP-Port 25 ist aus Gründen des Spam-Schutzes auf allen Kaskaden gesperrt.</td></tr>
+<tr><td colspan="3" style="border-bottom: 1px #A9B8C2 solid; font-size: smaller;"><a href="https://www.anonym-surfen.de/help/help/premium.html">Lernen Sie die Vorteile der Premium-Dienste kennen...</a></td></tr>
+<tr><td colspan="3" style="font-size: smaller;">&nbsp;</td></tr>
+</table>
+<p class="klein" style="text-align: left;">Sie nutzen kostenfreie Dienste von JonDonym. Die kostenfreie Dienste sind zum Testen von JonDonym gedacht und in einigen Punkten eingeschr&auml;nkt</p>
+<p style="text-align: center;" class="klein"><a href="https://shop.anonymous-proxy-servers.net/bin/payment" style="font-weight: bold;">Bitte kaufen Sie einen Premium Account, um JonDonym zu unterst&uuml;tzen.</a></p>
+<p style="text-align: center; font-size: x-large;" class="klein"><a href="https://shop.anonymous-proxy-servers.net/bin/payment" style="font-weight: bold;">Hier klicken!</a></p>
+<!-- %c  %s --> 
+</div>
+ </body>
+ </html> 
