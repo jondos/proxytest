@@ -81,7 +81,6 @@ SINT32 CALastMixA::loop()
 		UINT8* tmpBuff=new UINT8[MIXPACKET_SIZE];
 		UINT8* ciphertextBuff=new UINT8[DATA_SIZE];
 		UINT8* plaintextBuff=new UINT8[DATA_SIZE - GCM_MAC_SIZE];
-		UINT16 lengthAndFlagsField;
 		UINT16 payloadLen;
 		bool bAktiv;
 		m_logUploadedPackets=m_logDownloadedPackets=0;
@@ -406,6 +405,7 @@ SINT32 CALastMixA::loop()
 												#endif
 												#ifdef WITH_INTEGRITY_CHECK
 													/* decrypt only the first 2 bytes to get the payload length */
+													UINT16 lengthAndFlagsField;
 													pChannelListEntry->pCipher->decryptMessage(pMixPacket->data, 2, &lengthAndFlagsField, false);
 													payloadLen = ntohs(lengthAndFlagsField);
 													payloadLen &= PAYLOAD_LEN_MASK;

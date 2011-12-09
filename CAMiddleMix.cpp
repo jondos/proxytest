@@ -5,14 +5,14 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
 	- Redistributions of source code must retain the above copyright notice,
-	  this list of conditions and the following disclaimer.
+		this list of conditions and the following disclaimer.
 
 	- Redistributions in binary form must reproduce the above copyright notice,
-	  this list of conditions and the following disclaimer in the documentation and/or
+		this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
 	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
-	  may be used to endorse or promote products derived from this software without specific
+		may be used to endorse or promote products derived from this software without specific
 		prior written permission.
 
 
@@ -66,7 +66,7 @@ SINT32 CAMiddleMix::initOnce()
 	* \li Step 1: Opens TCP/IP-Connection to Mix \e n+1. \n
 	* \li Step 2: Receives info about Mix \e n+1 .. LastMix as XML struct
 	*         (see \ref  XMLInterMixInitSendFromLast "XML struct") \n
-  * \li Step 3: Verfies signature, generates symetric Keys used for link encryption
+	* \li Step 3: Verfies signature, generates symetric Keys used for link encryption
 	*         with Mix \n+1. \n
 	* \li Step 4: Sends symetric Key to Mix \e n+1, encrypted with PubKey of Mix \e n+1
 	*         (see \ref XMLInterMixInitAnswer "XML struct") \n
@@ -604,13 +604,41 @@ SINT32 CAMiddleMix::init()
 
 		CAMsg::printMsg(LOG_INFO,"Creating Key...\n");
 		m_pRSA=new CAASymCipher();
-		if(m_pRSA->generateKeyPair(1024)!=E_SUCCESS)
+#ifdef EXPORT_ASYM_PRIVATE_KEY
+		if(CALibProxytest::getOptions()->isImportKey())
 			{
-				CAMsg::printMsg(LOG_CRIT,"Init: Error generating Key-Pair...\n");
-				return E_UNKNOWN;
+				UINT32 keyFileBuffLen=8096;
+				UINT8* keyFileBuff=new UINT8[keyFileBuffLen];
+				CALibProxytest::getOptions()->getEncryptionKeyImportFile(keyFileBuff,keyFileBuffLen);
+				UINT8* keyBuff=readFile(keyFileBuff,&keyFileBuffLen);
+				m_pRSA->setPrivateKeyAsXML(keyBuff,keyFileBuffLen);
+				delete[] keyFileBuff;
+				delete[] keyBuff;
 			}
+		else
+#endif
+			{
+				if(m_pRSA->generateKeyPair(1024)!=E_SUCCESS)
+					{
+						CAMsg::printMsg(LOG_CRIT,"Could not generate a valid key pair\n");
+						return E_UNKNOWN;
+					}
+			}
+#ifdef EXPORT_ASYM_PRIVATE_KEY
+		if(CALibProxytest::getOptions()->isExportKey())
+			{
+				UINT32 keyFileBuffLen=8096;
+				UINT8* keyFileBuff=new UINT8[keyFileBuffLen];
+				UINT8* keyBuff=new UINT8[keyFileBuffLen];
+				CALibProxytest::getOptions()->getEncryptionKeyExportFile(keyFileBuff,keyFileBuffLen);
+				m_pRSA->getPrivateKeyAsXML(keyBuff,&keyFileBuffLen);
+				saveFile(keyFileBuff,keyBuff,keyFileBuffLen);
+				delete[] keyFileBuff;
+				delete[] keyBuff;
+			}
+#endif
 
-    // connect to next mix
+		// connect to next mix
 		CASocketAddr* pAddrNext=NULL;
 		for(UINT32 i=0;i<CALibProxytest::getOptions()->getTargetInterfaceCount();i++)
 			{
@@ -710,7 +738,7 @@ SINT32 CAMiddleMix::init()
 		m_pMuxOut->getCASocket()->setKeepAlive((UINT32)1800);
 
 
-	    if((ret = processKeyExchange())!=E_SUCCESS)
+			if((ret = processKeyExchange())!=E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_CRIT,"Error in proccessKeyExchange()!\n");
 				return ret;
@@ -778,7 +806,7 @@ THREAD_RETURN mm_loopSendToMixAfter(void* param)
 						break;
 					}
 #ifdef LOG_PACKET_TIMES
- 				if(!isZero64(pPoolEntry->timestamp_proccessing_start))
+				if(!isZero64(pPoolEntry->timestamp_proccessing_start))
 					{
 						getcurrentTimeMicros(pPoolEntry->timestamp_proccessing_end);
 						pFirstMix->m_pLogPacketStats->addToTimeingStats(*pPoolEntry,pMixPacket->flags,true);
@@ -838,7 +866,7 @@ THREAD_RETURN mm_loopSendToMixBefore(void* param)
 						break;
 					}
 #ifdef LOG_PACKET_TIMES
- 				if(!isZero64(pPoolEntry->timestamp_proccessing_start))
+				if(!isZero64(pPoolEntry->timestamp_proccessing_start))
 					{
 						getcurrentTimeMicros(pPoolEntry->timestamp_proccessing_end);
 						pFirstMix->m_pLogPacketStats->addToTimeingStats(*pPoolEntry,pMixPacket->flags,true);
@@ -1192,7 +1220,7 @@ SINT32 CAMiddleMix::connectToNextMix(CASocketAddr* a_pAddrNext)
 			{
 				err=GET_NET_ERROR;
 #ifdef _DEBUG
-			 	CAMsg::printMsg(LOG_DEBUG,"Con-Error: %i\n",err);
+				CAMsg::printMsg(LOG_DEBUG,"Con-Error: %i\n",err);
 #endif
 				if(err!=ERR_INTERN_TIMEDOUT&&err!=ERR_INTERN_CONNREFUSED)
 				{

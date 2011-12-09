@@ -5,14 +5,14 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
 	- Redistributions of source code must retain the above copyright notice,
-	  this list of conditions and the following disclaimer.
+		this list of conditions and the following disclaimer.
 
 	- Redistributions in binary form must reproduce the above copyright notice,
-	  this list of conditions and the following disclaimer in the documentation and/or
+		this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
 	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
-	  may be used to endorse or promote products derived from this software without specific
+		may be used to endorse or promote products derived from this software without specific
 		prior written permission.
 
 
@@ -211,7 +211,7 @@ void logMemoryUsage()
 			BN_add_word(bnTime,timebuffer.millitm);
 			// end of hack..
 			return E_SUCCESS;
-	  #else //we dont use ftime due to a bug in glibc2.0
+		#else //we dont use ftime due to a bug in glibc2.0
 		//we use gettimeofday() in order to get the millis...
 			struct timeval tv;
 			gettimeofday(&tv,NULL); //getting millis...
@@ -219,7 +219,7 @@ void logMemoryUsage()
 			BN_mul_word(bnTime,1000);
 			BN_add_word(bnTime,tv.tv_usec/1000);
 			return E_SUCCESS;
-	  #endif
+		#endif
 	}*/
 
 SINT32 getcurrentTime(timespec& t)
@@ -232,14 +232,14 @@ SINT32 getcurrentTime(timespec& t)
 			t.tv_nsec=timebuffer.millitm*1000000;
 			/* end of hack..*/
 			return E_SUCCESS;
-	  #else //we dont use ftime due to a bug in glibc2.0
+		#else //we dont use ftime due to a bug in glibc2.0
 		//we use gettimeofday() in order to get the millis...
 			struct timeval tv;
 			gettimeofday(&tv,NULL); //getting millis...
 			t.tv_sec=tv.tv_sec;
 			t.tv_nsec=tv.tv_usec*1000;
 			return E_SUCCESS;
-	  #endif
+		#endif
 	}
 
 /** Gets the current Systemtime in milli seconds.
@@ -256,7 +256,7 @@ SINT32 getcurrentTimeMillis(UINT64& u64Time)
 			u64Time=((UINT64)timebuffer.time)*1000+((UINT64)timebuffer.millitm);
 			/* end of hack..*/
 			return E_SUCCESS;
-	  #else //we dont use ftime due to a bug in glibc2.0
+		#else //we dont use ftime due to a bug in glibc2.0
 		//we use gettimeofday() in order to get the millis...
 			struct timeval tv;
 			gettimeofday(&tv,NULL); //getting millis...
@@ -266,11 +266,11 @@ SINT32 getcurrentTimeMillis(UINT64& u64Time)
 			#else
 				return E_UNKNOWN;
 			#endif
-	  #endif
+		#endif
 	}
 
 /** Gets the current Systemtime in micros seconds. Depending on the operating system,
-  * the time may not be so accurat.
+	* the time may not be so accurat.
 	* @param u64Time - 64 bit Integer, in which the current time is placed
 	* @retval E_UNKNOWN, if an error occurs
 	*	@retval	E_SUCCESS, otherwise
@@ -284,7 +284,7 @@ SINT32 getcurrentTimeMicros(UINT64& u64Time)
 			u64Time=((UINT64)timebuffer.time)*1000000+((UINT64)timebuffer.millitm)*1000;
 			/* end of hack..*/
 			return E_SUCCESS;
-	  #else //we dont use ftime due to a bug in glibc2.0
+		#else //we dont use ftime due to a bug in glibc2.0
 		//we use gettimeofday() in order to get the millis...
 			struct timeval tv;
 			gettimeofday(&tv,NULL); //getting millis...
@@ -294,7 +294,7 @@ SINT32 getcurrentTimeMicros(UINT64& u64Time)
 			#else
 				return E_UNKNOWN;
 			#endif
-	  #endif
+		#endif
 	}
 
 SINT32 initRandom()
@@ -1527,7 +1527,7 @@ SINT32 decryptXMLElement(DOMNode* node, CAASymCipher* pRSA)
 }
 #endif //ONLY_LOCAL_PROXY
 
-UINT8* readFile(UINT8* name,UINT32* size)
+UINT8* readFile(const UINT8* const name,UINT32* size)
 {
 	int handle=open((char*)name,O_BINARY|O_RDONLY);
 	if(handle<0)
@@ -1537,6 +1537,20 @@ UINT8* readFile(UINT8* name,UINT32* size)
 	read(handle,buff,*size);
 	close(handle);
 	return buff;
+}
+
+SINT32 saveFile(const UINT8* const name,const UINT8* const buff,UINT32 buffSize)
+{
+	int handle=open((char*)name,O_BINARY|O_WRONLY|O_CREAT);
+	if(handle<0)
+		return E_UNKNOWN;
+	if(write(handle,buff,buffSize)!=buffSize)
+		{
+			close(handle);
+			return E_UNKNOWN;
+	}
+	close(handle);
+	return E_SUCCESS;
 }
 
 /**

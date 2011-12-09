@@ -105,29 +105,30 @@ SINT32 CATempIPBlockList::insertIP(const UINT8 ip[4])
 		m_hashTable[hashvalue] = newEntry;
 		m_iEntries++;
 	}
-	else {
-		PTEMPIPBLOCKLIST temp = m_hashTable[hashvalue];
-		do {
-			if(memcmp(temp->ip,ip,2)==0) 
-			{
-				// we have found the entry
-				delete newEntry;
-				m_pMutex->unlock();
-				return E_UNKNOWN;
-			}
-			if (temp->next)
-			{
-				temp = temp->next;
-			}
-			else
-			{
-				temp->next = newEntry;
-				m_iEntries++;
-				break;
-			}
+	else 
+		{
+			PTEMPIPBLOCKLIST temp = m_hashTable[hashvalue];
+			for(;;) 
+				{
+					if(memcmp(temp->ip,ip,2)==0) 
+						{
+							// we have found the entry
+							delete newEntry;
+							m_pMutex->unlock();
+							return E_UNKNOWN;
+						}
+					if (temp->next)
+						{
+							temp = temp->next;
+						}
+					else
+						{
+							temp->next = newEntry;
+							m_iEntries++;
+							break;
+						}
+				}
 		}
-		while(true);
-	}
 	m_pMutex->unlock();	
 	return E_SUCCESS;
 }
