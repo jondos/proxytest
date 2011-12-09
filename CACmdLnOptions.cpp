@@ -634,8 +634,8 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 		{"pidfile",'r',POPT_ARG_STRING,&strPidFile,0,"file where the PID will be stored","<file>"},
 		{"createConf",0,POPT_ARG_STRING,&strCreateConf,0,"creates a generic configuration for MixOnCD","[<file>]"},
 #ifdef EXPORT_ASYM_PRIVATE_KEY
-		{"exportKey",0,POPT_ARG_STRING,&strExportKey,0,"export private encryption key from file","[<file>]"},
-		{"importKey",0,POPT_ARG_STRING,&strImportKey,0,"import private encryption key to file","[<file>]"},
+		{"exportKey",0,POPT_ARG_STRING,&strExportKey,0,"export private encryption key from file","<file>"},
+		{"importKey",0,POPT_ARG_STRING,&strImportKey,0,"import private encryption key to file","<file>"},
 #endif
 		POPT_AUTOHELP
 		{NULL,0,0,
