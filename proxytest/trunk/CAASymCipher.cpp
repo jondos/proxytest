@@ -540,8 +540,6 @@ SINT32 CAASymCipher::setPublicKeyAsDOMNode(DOMNode* node)
 				if(equals(root->getNodeName(),"RSAKeyValue"))
 					{
 						RSA* tmpRSA=RSA_new();
-						UINT32 decLen=4096;
-						UINT8 decBuff[4096];
 						DOMNode* child=root->getFirstChild();
 						while(child!=NULL)
 							{

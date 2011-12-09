@@ -433,7 +433,8 @@ inline void print64(UINT8* buff,UINT64 num)
 	}
 
 
-UINT8* readFile(UINT8* name,UINT32* size);
+UINT8* readFile(const UINT8* const name,UINT32* size);
+SINT32 saveFile(const UINT8* const name,const UINT8* const buff,UINT32 buffSize);
 
 /**
  * Parses a timestamp in JDBC timestamp escape format (as it comes from the BI)

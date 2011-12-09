@@ -5,14 +5,14 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
 	- Redistributions of source code must retain the above copyright notice,
-	  this list of conditions and the following disclaimer.
+		this list of conditions and the following disclaimer.
 
 	- Redistributions in binary form must reproduce the above copyright notice,
-	  this list of conditions and the following disclaimer in the documentation and/or
+		this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
 	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
-	  may be used to endorse or promote products derived from this software without specific
+		may be used to endorse or promote products derived from this software without specific
 		prior written permission.
 
 
@@ -84,11 +84,11 @@ class CAMix
 #endif
 
 			/** Returns the Mix-Cascade info which should be send to the InfoService.
-    		* This is NOT a copy!
-    		*
-    		* @param docMixCascadeInfo where the XML struct would be stored
-    		* @retval E_SUCCESS
-    		*/
+				* This is NOT a copy!
+				*
+				* @param docMixCascadeInfo where the XML struct would be stored
+				* @retval E_SUCCESS
+				*/
 			SINT32 getMixCascadeInfo(XERCES_CPP_NAMESPACE::DOMDocument* & docMixCascadeInfo)
 			{
 					if(m_docMixCascadeInfo != NULL)
@@ -161,10 +161,10 @@ class CAMix
 			DOMNode *termsAndConditionsInfoNode(XERCES_CPP_NAMESPACE::DOMDocument *ownerDoc);
 
 			// added by ronin <ronin2@web.de>
-			virtual SINT32 processKeyExchange()
-			{
+			virtual SINT32 processKeyExchange()=0;
+			/*{
 					return E_SUCCESS;
-			}
+			}*/
 
 			// added by ronin <ronin2@web.de>
 			virtual SINT32 initMixCascadeInfo(DOMElement* elemMixes);

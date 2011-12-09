@@ -5,14 +5,14 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
 	- Redistributions of source code must retain the above copyright notice,
-	  this list of conditions and the following disclaimer.
+		this list of conditions and the following disclaimer.
 
 	- Redistributions in binary form must reproduce the above copyright notice,
-	  this list of conditions and the following disclaimer in the documentation and/or
+		this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
 	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
-	  may be used to endorse or promote products derived from this software without specific
+		may be used to endorse or promote products derived from this software without specific
 		prior written permission.
 
 
@@ -379,8 +379,8 @@ class CACmdLnOptions
 				m_pPrevMixCertificate = cert->clone();
 				return E_SUCCESS;
 			}
-            return E_UNKNOWN;
-        }
+						return E_UNKNOWN;
+				}
 
 		bool hasNextMixTestCertificate()
 		{
@@ -393,20 +393,20 @@ class CACmdLnOptions
 				return m_pNextMixCertificate->clone();
 			return NULL;
 		}
-        
-        SINT32 setNextMixTestCertificate(CACertificate* cert)
-        {
-            if(cert != NULL)
-            {
-                m_pNextMixCertificate = cert->clone();
-                return E_SUCCESS;
-            }
-            return E_UNKNOWN;
-        }
-        CACertStore* getTrustedCertificateStore()
-        {
-            return m_pTrustedRootCertificates;
-        }
+				
+				SINT32 setNextMixTestCertificate(CACertificate* cert)
+				{
+						if(cert != NULL)
+						{
+								m_pNextMixCertificate = cert->clone();
+								return E_SUCCESS;
+						}
+						return E_UNKNOWN;
+				}
+				CACertStore* getTrustedCertificateStore()
+				{
+						return m_pTrustedRootCertificates;
+				}
 
 		/** Returns if the encrpyted Log could/should be used**/
 		bool isEncryptedLogEnabled()
@@ -605,6 +605,40 @@ class CACmdLnOptions
 		}
 #endif
 
+#ifdef EXPORT_ASYM_PRIVATE_KEY
+		SINT32 getEncryptionKeyImportFile(const UINT8* strFile,UINT32 len)
+			{
+				if(m_strImportKeyFile==NULL)
+					return E_UNKNOWN;
+				if(len<=(UINT32)strlen((char*)m_strImportKeyFile))
+					{
+						return E_SPACE;
+					}
+				strcpy((char*)strFile,(char*)m_strImportKeyFile);
+				return E_SUCCESS;
+			}
+		SINT32 getEncryptionKeyExportFile(const UINT8* strFile,UINT32 len)
+			{
+				if(m_strExportKeyFile==NULL)
+					return E_UNKNOWN;
+				if(len<=(UINT32)strlen((char*)m_strExportKeyFile))
+					{
+						return E_SPACE;
+					}
+				strcpy((char*)strFile,(char*)m_strExportKeyFile);
+				return E_SUCCESS;
+			}
+		bool isImportKey()
+			{
+				return m_strImportKeyFile!=NULL;
+			}
+		bool isExportKey()
+			{
+				return m_strExportKeyFile!=NULL;
+			}
+#endif
+
+
 #ifndef ONLY_LOCAL_PROXY
 		// added by ronin <ronin2@web.de>
 		// needed for autoconfiguration
@@ -663,7 +697,7 @@ class CACmdLnOptions
 #endif // DYNAMIC_MIX
 		XERCES_CPP_NAMESPACE::DOMDocument **m_termsAndConditionsTemplates;
 		UINT32 m_nrOfTermsAndConditionsTemplates;
-        bool verifyMixCertificates() {return m_bVerifyMixCerts;}
+				bool verifyMixCertificates() {return m_bVerifyMixCerts;}
 	private:
 #ifdef DYNAMIC_MIX
 		UINT8* m_strLastCascadeProposal;
@@ -769,12 +803,27 @@ class CACmdLnOptions
 		CASocketAddrINet* m_surveillanceIPs;
 		UINT64* m_surveillanceAccounts;
 		UINT32 m_nrOfSurveillanceAccounts;
+		/* Crime Logging Options */
+		#define CRIME_DETECTION_OPTIONS_NR 4
+		optionSetter_pt *crimeDetectionOptionSetters;
+		SINT32 setCrimeURLRegExp(DOMElement *elemCrimeDetection);
+		SINT32 setCrimePayloadRegExp(DOMElement *elemCrimeDetection);
+		SINT32 setCrimeSurveillanceIP(DOMElement *elemCrimeDetection);
+		SINT32 setCrimeSurveillanceAccounts(DOMElement *elemCrimeDetection);
+		void initCrimeDetectionOptionSetters();
+		SINT32 setCrimeDetectionOptions(DOMElement *elemRoot);
 #endif
 
 #ifdef DATA_RETENTION_LOG
 		UINT8*				m_strDataRetentionLogDir;
 		CAASymCipher* m_pDataRetentionPublicEncryptionKey;
 #endif
+
+#ifdef EXPORT_ASYM_PRIVATE_KEY
+		UINT8* m_strImportKeyFile;
+		UINT8* m_strExportKeyFile;
+#endif
+
 
 #if defined (DELAY_CHANNELS) ||defined(DELAY_USERS)
 		UINT32 m_u32DelayChannelUnlimitTraffic;
@@ -801,16 +850,13 @@ class CACmdLnOptions
 		UINT32 m_iPaymentSoftLimit;
 		UINT32 m_iPrepaidInterval;
 		UINT32 m_iPaymentSettleInterval;
-
-
+		optionSetter_pt *accountingOptionSetters;
 #endif
 		optionSetter_pt *mainOptionSetters;
 		optionSetter_pt *generalOptionSetters;
 		optionSetter_pt *certificateOptionSetters;
-		optionSetter_pt *accountingOptionSetters;
 		optionSetter_pt *networkOptionSetters;
 		optionSetter_pt *termsAndConditionsOptionSetters;
-		optionSetter_pt *crimeDetectionOptionSetters;
 
 #ifdef SERVER_MONITORING
 	private:
@@ -843,11 +889,9 @@ class CACmdLnOptions
 		SINT32 setGeneralOptions(DOMElement* elemRoot);
 		SINT32 setMixDescription(DOMElement* elemRoot); /* mix decription for the mix info */
 		SINT32 setCertificateOptions(DOMElement* elemRoot);
-		SINT32 setAccountingOptions(DOMElement *elemRoot);
 		SINT32 setNetworkOptions(DOMElement *elemRoot);
 		SINT32 setRessourceOptions(DOMElement *elemRoot);
 		SINT32 setTermsAndConditions(DOMElement *elemRoot);
-		SINT32 setCrimeDetectionOptions(DOMElement *elemRoot);
 
 		/* General Options */
 #define GENERAL_OPTIONS_NR 11
@@ -873,6 +917,7 @@ class CACmdLnOptions
 		SINT32 setPrevMixCertificate(DOMElement *elemCertificates);
 		SINT32 setTrustedRootCertificates(DOMElement *elemCertificates);
 
+#ifdef PAYMENT
 		/* Payment Options */
 #define ACCOUNTING_OPTIONS_NR 7
 		SINT32 setPriceCertificate(DOMElement *elemAccounting);
@@ -882,7 +927,9 @@ class CACmdLnOptions
 		SINT32 setPrepaidInterval(DOMElement *elemAccounting);
 		SINT32 setSettleInterval(DOMElement *elemAccounting);
 		SINT32 setAccountingDatabase(DOMElement *elemAccounting);
-
+		void initAccountingOptionSetters();
+		SINT32 setAccountingOptions(DOMElement *elemRoot);
+#endif
 		/* Network Options */
 #define NETWORK_OPTIONS_NR 5
 		SINT32 setInfoServices(DOMElement *elemNetwork);
@@ -896,12 +943,6 @@ class CACmdLnOptions
 		SINT32 setTermsAndConditionsTemplates(DOMElement *elemTnCs);
 		SINT32 setTermsAndConditionsList(DOMElement *elemTnCs);
 
-		/* Crime Logging Options */
-#define CRIME_DETECTION_OPTIONS_NR 4
-		SINT32 setCrimeURLRegExp(DOMElement *elemCrimeDetection);
-		SINT32 setCrimePayloadRegExp(DOMElement *elemCrimeDetection);
-		SINT32 setCrimeSurveillanceIP(DOMElement *elemCrimeDetection);
-		SINT32 setCrimeSurveillanceAccounts(DOMElement *elemCrimeDetection);
 
 		SINT32 appendMixInfo_internal(DOMNode* a_node, bool with_subtree);
 		inline SINT32 addMixIdToMixInfo();
@@ -912,10 +953,8 @@ class CACmdLnOptions
 		void initGeneralOptionSetters();
 		void initMixDescriptionSetters();
 		void initCertificateOptionSetters();
-		void initAccountingOptionSetters();
 		void initNetworkOptionSetters();
 		void initTermsAndConditionsOptionSetters();
-		void initCrimeDetectionOptionSetters();
 };
 
 SINT32 setRegExpressions(DOMElement *rootElement, const char* const childElementName,
