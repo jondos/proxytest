@@ -2133,7 +2133,6 @@ SINT32 CACmdLnOptions::setUserID(DOMElement* elemGeneral)
 	DOMElement* elemUID=NULL;
 	UINT8 tmpBuff[TMP_BUFF_SIZE];
 	UINT32 tmpLen = TMP_BUFF_SIZE;
-	UINT8 buff[255];
 
 	if(elemGeneral == NULL) return E_UNKNOWN;
 	ASSERT_GENERAL_OPTIONS_PARENT
@@ -2150,6 +2149,7 @@ SINT32 CACmdLnOptions::setUserID(DOMElement* elemGeneral)
 	}
 
 #ifndef WIN32
+		UINT8 buff[255];
 		if(getUser(buff,255)==E_SUCCESS) //switching user
 			{
 				struct passwd* pwd=getpwnam((char*)buff);
@@ -2174,9 +2174,6 @@ SINT32 CACmdLnOptions::setUserID(DOMElement* elemGeneral)
 		if(geteuid()==0)
 			CAMsg::printMsg(LOG_WARNING,"Mix is running as root/superuser!\n");
 #endif
-	
-	
-
 	return E_SUCCESS;
 }
 
