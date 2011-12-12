@@ -406,7 +406,7 @@ SINT32 CALastMixA::loop()
 												#ifdef WITH_INTEGRITY_CHECK
 													/* decrypt only the first 2 bytes to get the payload length */
 													UINT16 lengthAndFlagsField;
-													pChannelListEntry->pCipher->decryptMessage(pMixPacket->data, 2, &lengthAndFlagsField, false);
+													pChannelListEntry->pCipher->decryptMessage(pMixPacket->data, 2,(UINT8*) &lengthAndFlagsField, false);
 													payloadLen = ntohs(lengthAndFlagsField);
 													payloadLen &= PAYLOAD_LEN_MASK;
 													if (payloadLen < 0) payloadLen = 0;
