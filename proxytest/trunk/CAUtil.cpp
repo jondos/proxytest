@@ -375,7 +375,7 @@ SINT32 getRandom(UINT8* buff,UINT32 len)
 	}
 
 /** Sleeps ms milliseconds*/
-SINT32 msSleep(UINT16 ms)
+SINT32 msSleep(UINT32 ms)
 	{//Do not us usleep for this --> because it doesnt seam to work on irix, multithreaded
 		#ifdef _WIN32
 			Sleep(ms);
@@ -394,7 +394,7 @@ SINT32 msSleep(UINT16 ms)
 	}
 
 /** Sleeps sec Seconds*/
-SINT32 sSleep(UINT16 sec)
+SINT32 sSleep(UINT32 sec)
 	{
 		#ifdef _WIN32
 			Sleep(sec*1000);

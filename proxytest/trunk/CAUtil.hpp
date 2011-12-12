@@ -74,9 +74,9 @@ SINT32 getRandom(UINT32* val);
 
 SINT32 getRandom(UINT64* val);
 
-SINT32 msSleep(UINT16 ms);
+SINT32 msSleep(UINT32 ms);
 
-SINT32 sSleep(UINT16 sec);
+SINT32 sSleep(UINT32 sec);
 
 UINT32 getMemoryUsage();
 
