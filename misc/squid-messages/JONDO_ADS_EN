@@ -6,7 +6,7 @@
 <title>Please, use JonDonym premium services</title> 
 <style type="text/css">
   H1 { color: #ff3112; font-size: 1.4em; font-weight:bold; margin-top: 50px; margin-bottom: 0; padding: 0; }
-  H2 { font-size: 1.2em; font-weight: bold; color:#3F7FBF; padding: 0px; margin: 1em 0px 0.25em 0px; }
+  H2 { font-size: 1.2em; font-weight: bold; color:#3F7FBF; padding: 0px; margin: 50px 0px 0.25em 0px; }
   P { color: black; font-weight:normal; margin: 0.5em 0 0.5em 0; }
   A:link { color: #00C; text-decoration:none; }
   A:visited { color: #00C; text-decoration:none;}
@@ -77,9 +77,10 @@
  <div align="center"> 
 <table cellspacing="0" style="margin: 0px 0px 1em 0px; " width="600" class="gross">
 <tr><td colspan="3">
-<p style="text-align: center;">You are using JonDonym free services. Free services are for<br>trial and research purposes only and limited in several ways.<br>You may use <u>premium services</u> to avoid these limits.</p>
+<p style="text-align: center;">Free services are for trial and research purposes only and limited in<br>several ways. You may use <u>premium services</u> to avoid these limits.</p>
 <p style="text-align: center;"><a href="https://shop.anonymous-proxy-servers.net/bin/payment" style="font-weight: bold;">Please, buy a premium account and support JonDonym.</a></p>
 <p style="text-align: center; font-size: x-large;"><a href="https://shop.anonymous-proxy-servers.net/bin/payment" style="font-weight: bold;">Click here!</a></p>
+<p style="text-align: center; font-size: smaller; padding-bottom: 20px;">In order to proceed surfing please go back one page and access the website again.</p>
 </td></tr>
 <tr>
 <td valign="bottom" style="text-align: left; border: 0px; background-color: #088dce;
@@ -147,6 +148,10 @@
 advantages...</a></td></tr>
 <tr><td colspan="3" style="font-size: smaller;">&nbsp;</td></tr>
 </table>
+<p class="klein" style="text-align: left;">Free services are for trial and research purposes only and limited in several ways. You may use <u>premium services</u> to avoid these limits.</p>
+<p style="text-align: center;" class="klein"><a href="https://shop.anonymous-proxy-servers.net/bin/payment" style="font-weight: bold;">Please, buy a premium account and support JonDonym.</a></p>
+<p style="text-align: center; font-size: x-large;" class="klein"><a href="https://shop.anonymous-proxy-servers.net/bin/payment" style="font-weight: bold;">Click here!</a></p>
+<p style="text-align: center; font-size: smaller;" class="klein">In order to proceed surfing please go back one page and access the website again.</p>
 <!-- %c  %s --> 
 </div>
  </body>

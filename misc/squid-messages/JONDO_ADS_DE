@@ -6,7 +6,7 @@
 <title>Bitte nutzen Sie auch die Premium-Dienste von JonDonym</title> 
 <style type="text/css">
   H1 { color: #ff3112; font-size: 1.4em; font-weight:bold; margin-top: 50px; margin-bottom: 0; padding: 0; }
-  H2 { font-size: 1.2em; font-weight: bold; color:#3F7FBF; padding: 0px; margin: 1em 0px 0.25em 0px; }
+  H2 { font-size: 1.2em; font-weight: bold; color:#3F7FBF; padding: 0px; margin: 50px 0px 0.25em 0px; }
   P { color: black; font-weight:normal; margin: 0.5em 0 0.5em 0; }
   A:link { color: #00C; text-decoration:none; }
   A:visited { color: #00C; text-decoration:none;}
@@ -57,7 +57,7 @@
  </head>
 
  <body> 
-<div id="navigation gross">
+<div class="navigation gross">
    <ul>
 	<li><a href="https://www.anonym-surfen.de" title="Anonym surfen [1]" tabindex="1" accesskey="1">JonDonym</a></li>
         <li><a href="https://www.anonym-surfen.de/software.html" title="Download [2]" tabindex="2" accesskey="2">Downloads</a></li>
@@ -75,12 +75,13 @@
  <h2>Sie nutzen kostenfreie Dienste von JonDonym.</h2> 
  </div> 
  <div align="center"> 
-<table cellspacing="0" style="margin: 0px 0px 1em 0px; " width="600" class="gross">
+<table cellspacing="0" style="margin: 0px 0px 1em 0px; " width="650" class="gross">
 <tr><td colspan="3">
-<p style="text-align: center;">Sie nutzen kostenfreie Dienste von JonDonym. Die kostenfreie Dienste sind<br>zum Testen von JonDonym gedacht und in einigen Punkten eingeschr&auml;nkt.<br>Sie k&ouml;nnen die <u>Premium Dienste</u> nutzen, um diese Limits zu umgehen.</p>
+<p style="text-align: center;">Die kostenfreie Dienste sind zum Testen gedacht und in einigen Punkten ein-<br>geschr&auml;nkt. Sie k&ouml;nnen <u>Premium Dienste</u> nutzen, um die Limits zu umgehen.</p>
 
 <p style="text-align: center;"><a href="https://shop.anonymous-proxy-servers.net/bin/payment" style="font-weight: bold;">Bitte kaufen Sie einen Premium Account, um JonDonym zu unterst&uuml;tzen.</a></p>
 <p style="text-align: center; font-size: x-large;"><a href="https://shop.anonymous-proxy-servers.net/bin/payment?lang=de" style="font-weight: bold;">Hier klicken!</a></p>
+<p style="text-align: center; font-size: smaller; padding-bottom: 20px;">Um weiter zu Surfen gehen Sie bitte einen Schritt zur&uuml;ck<br>und rufen Sie die gew&uuml;nschte Webseite erneut auf.</p>
 </td></tr>
 <tr>
 <td valign="bottom" style="text-align: left; border: 0px; background-color: #088dce;
@@ -106,7 +107,7 @@
 <td style="background: #d2edff; text-align:center;">unbegrenzt</td>
 </tr>
 <tr>
-<td>Maximale Dateigröße f&uml;r Up- und Downloads</td>
+<td>Maximale Dateigröße f&uuml;r Up- und Downloads</td>
 <td style="background: #e8f1f8; text-align:center;">2 MB</td>
 <td style="background: #c3e5fe; text-align:center;">unbegrenzt</td>
 </tr>
@@ -147,9 +148,10 @@
 <tr><td colspan="3" style="border-bottom: 1px #A9B8C2 solid; font-size: smaller;"><a href="https://www.anonym-surfen.de/help/help/premium.html">Lernen Sie die Vorteile der Premium-Dienste kennen...</a></td></tr>
 <tr><td colspan="3" style="font-size: smaller;">&nbsp;</td></tr>
 </table>
-<p class="klein" style="text-align: left;">Sie nutzen kostenfreie Dienste von JonDonym. Die kostenfreie Dienste sind zum Testen von JonDonym gedacht und in einigen Punkten eingeschr&auml;nkt</p>
+<p class="klein" style="text-align: left;">Die kostenfreie Dienste sind zum Testen von JonDonym gedacht und in einigen Punkten eingeschr&auml;nkt.</p>
 <p style="text-align: center;" class="klein"><a href="https://shop.anonymous-proxy-servers.net/bin/payment" style="font-weight: bold;">Bitte kaufen Sie einen Premium Account, um JonDonym zu unterst&uuml;tzen.</a></p>
 <p style="text-align: center; font-size: x-large;" class="klein"><a href="https://shop.anonymous-proxy-servers.net/bin/payment" style="font-weight: bold;">Hier klicken!</a></p>
+<p style="text-align: center; font-size: smaller;" class="klein">Um weiter zu Surfen gehen Sie bitte einen Schritt zur&uuml;ck und rufen Sie die gew&uuml;nschte Webseite erneut auf.</p>
 <!-- %c  %s --> 
 </div>
  </body>
