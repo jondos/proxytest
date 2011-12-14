@@ -65,7 +65,7 @@
         <li><a href="https://www.anonym-surfen.de/hilfe.html" title="Documentation [4]" tabindex="4" accesskey="4">Hilfe</a></li>
         <li><a href="https://anonymous-proxy-servers.net/forum/" title="Diskussionsforum [5]" tabindex="5" accesskey="5">Forum</a></li>
         <li><a href="https://anonymous-proxy-servers.net/blog/index.php?user_language=de" title="JonDonym News Center [6]" tabindex="6"  accesskey="6">Blog</a></li>
-        <li><a href="http://ip-check.info/?lang=ede" title="IP Test. [7]" tabindex="7" accesskey="7">Anonymit&auml;tstest</a></li>
+        <li><a href="http://ip-check.info/?lang=de" title="IP Test. [7]" tabindex="7" accesskey="7">Anonymit&auml;tstest</a></li>
         <li><a href="https://storage.anonymous-proxy-servers.net" title="Anonym Dateien tauschen [8]" tabindex="8" accesskey="1">Dateispeicher</a></li>
    </ul> <br>
 </div>
@@ -77,9 +77,9 @@
  <div align="center"> 
 <table cellspacing="0" style="margin: 0px 0px 1em 0px; " width="650" class="gross">
 <tr><td colspan="3">
-<p style="text-align: center;">Die kostenfreie Dienste sind zum Testen gedacht und in einigen Punkten ein-<br>geschr&auml;nkt. Sie k&ouml;nnen <u>Premium Dienste</u> nutzen, um die Limits zu umgehen.</p>
+<p style="text-align: center;">Die kostenfreie Dienste sind zum Testen gedacht und in einigen Punkten ein-<br>geschr&auml;nkt. Sie k&ouml;nnen <u>Premium-Dienste</u> nutzen, um die Limits zu umgehen.</p>
 
-<p style="text-align: center;"><a href="https://shop.anonymous-proxy-servers.net/bin/payment" style="font-weight: bold;">Bitte kaufen Sie einen Premium Account, um JonDonym zu unterst&uuml;tzen.</a></p>
+<p style="text-align: center;"><a href="https://shop.anonymous-proxy-servers.net/bin/payment?lang=de" style="font-weight: bold;">Bitte kaufen Sie einen Premium Konto, um JonDonym zu unterst&uuml;tzen.</a></p>
 <p style="text-align: center; font-size: x-large;"><a href="https://shop.anonymous-proxy-servers.net/bin/payment?lang=de" style="font-weight: bold;">Hier klicken!</a></p>
 <p style="text-align: center; font-size: smaller; padding-bottom: 20px;">Um weiter zu Surfen gehen Sie bitte einen Schritt zur&uuml;ck<br>und rufen Sie die gew&uuml;nschte Webseite erneut auf.</p>
 </td></tr>
@@ -145,12 +145,12 @@
 <tr><td colspan="3" style="border-top: 1px #A9B8C2 solid; border-bottom: 1px #A9B8C2 solid; font-size: smaller;">
 *&nbsp;&nbsp; mehr als 600 kBit/s garantiert, &uuml;blicherweise verf&uuml;gbar: 1.000 - 1.500 kBit/s<br>
 ** SMTP-Port 25 ist aus Gründen des Spam-Schutzes auf allen Kaskaden gesperrt.</td></tr>
-<tr><td colspan="3" style="border-bottom: 1px #A9B8C2 solid; font-size: smaller;"><a href="https://www.anonym-surfen.de/help/help/premium.html">Lernen Sie die Vorteile der Premium-Dienste kennen...</a></td></tr>
+<tr><td colspan="3" style="border-bottom: 1px #A9B8C2 solid; font-size: smaller;"><a href="https://www.anonym-surfen.de/help/premium.html">Lernen Sie die Vorteile der Premium-Dienste kennen...</a></td></tr>
 <tr><td colspan="3" style="font-size: smaller;">&nbsp;</td></tr>
 </table>
 <p class="klein" style="text-align: left;">Die kostenfreie Dienste sind zum Testen von JonDonym gedacht und in einigen Punkten eingeschr&auml;nkt.</p>
-<p style="text-align: center;" class="klein"><a href="https://shop.anonymous-proxy-servers.net/bin/payment" style="font-weight: bold;">Bitte kaufen Sie einen Premium Account, um JonDonym zu unterst&uuml;tzen.</a></p>
-<p style="text-align: center; font-size: x-large;" class="klein"><a href="https://shop.anonymous-proxy-servers.net/bin/payment" style="font-weight: bold;">Hier klicken!</a></p>
+<p style="text-align: center;" class="klein"><a href="https://shop.anonymous-proxy-servers.net/bin/payment?lang=de" style="font-weight: bold;">Bitte kaufen Sie einen Premium Account, um JonDonym zu unterst&uuml;tzen.</a></p>
+<p style="text-align: center; font-size: x-large;" class="klein"><a href="https://shop.anonymous-proxy-servers.net/bin/payment?lang=de" style="font-weight: bold;">Hier klicken!</a></p>
 <p style="text-align: center; font-size: smaller;" class="klein">Um weiter zu Surfen gehen Sie bitte einen Schritt zur&uuml;ck und rufen Sie die gew&uuml;nschte Webseite erneut auf.</p>
 <!-- %c  %s --> 
 </div>
