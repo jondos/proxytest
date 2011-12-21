@@ -388,6 +388,7 @@ SINT32 CAASymCipher::getPrivateKeyAsDOMElement(DOMElement* & elemRoot,XERCES_CPP
 		elemRoot=createDOMElement(docOwner,"RSAKeyPair");
 		
 		addKeyPart(elemRoot,docOwner,"Modulus",m_pRSA->n);
+		addKeyPart(elemRoot,docOwner,"Exponent",m_pRSA->e);
 		addKeyPart(elemRoot,docOwner,"P",m_pRSA->p);
 		addKeyPart(elemRoot,docOwner,"Q",m_pRSA->q);
 		addKeyPart(elemRoot,docOwner,"DP",m_pRSA->dmp1);
