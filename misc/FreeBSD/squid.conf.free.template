@@ -20,7 +20,6 @@ acl to_localhost dst [% extIP %]
 error_directory /home/mix/stable/misc/squid-messages
 
 
-cache_mem 128 MB
 cache_store_log none
 cache_access_log none
 max_filedescriptors 16384
@@ -51,6 +50,16 @@ http_access allow manager localhost
 http_access deny manager
 http_access deny CONNECT !SSL_ports
 
+# for payment reminder
+acl adsde dstdomain premium-de
+deny_info JONDO_ADS_DE adsde
+acl adsen dstdomain premium-en
+deny_info JONDO_ADS_EN adsen
+
+http_access deny adsde
+http_access deny adsen
+
+# limit the up- and download to 2 MB
 acl jondonym1 dstdomain www.anonym-surfen.de
 acl jondonym2 dstdomain anonymous-proxy-servers.net
 acl anon1 dstdomain anon.inf.tu-dresden.de
