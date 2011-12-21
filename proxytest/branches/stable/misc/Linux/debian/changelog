@@ -1,21 +1,15 @@
-mix-squidconf (11.12.08) unstable; urgency=low
+mix-squidconf (11.12.14) unstable; urgency=low
 
-  * bugfix for squid config
+  * new payment reminder messages for squid
 
- -- JonDos GmbH <info@jondos.de>  Fri, 28 Aug 2011 10:17:23 +0200
+ -- JonDos GmbH <info@jondos.de>  Wed, 14 Dec 2011 10:17:23 +0200
+
 
 mix-squidconf (11.08.26.2) unstable; urgency=low
 
   * new squid error messages
 
  -- JonDos GmbH <info@jondos.de>  Thu, 08 Dec 2011 14:17:23 +0200
-
-
-mix-squidconf (11.08.26.1) unstable; urgency=low
-
-  * bugfix for squid error message
-
- -- JonDos GmbH <info@jondos.de>  Fri, 26 Aug 2011 10:17:23 +0200
 
 
 mix-squidconf (11.08.26) unstable; urgency=low

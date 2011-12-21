@@ -73,6 +73,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_docOpTnCs=NULL; //Operator Terms and Conditions (if any)
 		m_bAcceptReconfiguration=false;
 		m_maxNrOfUsers = 0;
+		m_PaymentReminderProbability= 0;
 #ifdef COUNTRY_STATS
 		m_dbCountryStatsHost=m_dbCountryStatsPasswd=m_dbCountryStatsUser=NULL;
 #endif
@@ -4607,6 +4608,13 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 	setDOMElementValue(elemVersion,(UINT8*)MIX_VERSION);
 	elemSoftware->appendChild(elemVersion);
 	elemMix->appendChild(elemSoftware);
+
+#ifndef PAYMENT	
+	/* Add the payment reminder */
+	DOMElement* elemPaymentReminder=createDOMElement(m_docMixInfo, MIXINFO_NODE_PAYMENTREMINDER);
+	setDOMElementValue(elemPaymentReminder, m_PaymentReminderProbability);
+	elemMix->appendChild(elemPaymentReminder);
+#endif
 
 #ifdef COUNTRY_STATS
 		DOMElement* elemCountryStats=NULL;
