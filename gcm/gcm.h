@@ -184,9 +184,8 @@ typedef struct {
 
 MODIFIERS void gcm_init_64k(gcm_ctx_64k *c, UINT8 key[], size_t keylen);
 MODIFIERS void gcm_encrypt_64k(gcm_ctx_64k *c, const UINT32 *nonce, const UINT8 *pt, size_t ptlen, UINT8 *ct, UINT32 *tag);
-MODIFIERS int gcm_decrypt_64k(gcm_ctx_64k *c, const UINT8 *nonce, size_t nlen, const UINT8 *ct, 
-			      size_t ctlen, const UINT8 *tag, size_t taglen, UINT8 *adata, 
-			      size_t alen, UINT8 *pt);
+MODIFIERS int gcm_decrypt_64k(gcm_ctx_64k *c, const UINT32 *nonce, const UINT8 *ct, size_t ctlen, const UINT8 *tag, UINT8 *pt);
+MODIFIERS int gcm_decrypt_64k(gcm_ctx_64k *c, const UINT32 *nonce, const UINT8 *ct, size_t ctlen, UINT8 *pt);
 MODIFIERS void gcm_destroy_64k(gcm_ctx_64k *c);
 
 #endif /* _GCM_H */

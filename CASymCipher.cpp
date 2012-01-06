@@ -339,17 +339,15 @@ SINT32 CASymCipher::decryptMessage(const UINT8* in, UINT32 inlen, UINT8* out, bo
 	{
 		SINT32 ret = 0;
 		//m_pcsDec->lock();
-		UINT32 iv = htonl(m_nDecMsgCounter);
-		if (integrityCheck)
-			m_nDecMsgCounter++;
-		memcpy(m_pDecMsgIV + 8, &iv, 4);
+		m_pDecMsgIV[2] = htonl(m_nDecMsgCounter);
 		if (integrityCheck)
 			{
-				ret = ::gcm_decrypt_64k(m_pGCMCtxDec, m_pDecMsgIV, 12, in, inlen - 16, in + inlen - 16, 16, NULL, 0, out);
+				m_nDecMsgCounter++;
+				ret = ::gcm_decrypt_64k(m_pGCMCtxDec, m_pDecMsgIV, in, inlen - 16, in + inlen - 16, out);
 			}
 		else
 			{
-				ret = ::gcm_decrypt_64k(m_pGCMCtxDec, m_pDecMsgIV, 12, in, inlen, NULL, 0, NULL, 0, out);
+				ret = ::gcm_decrypt_64k(m_pGCMCtxDec, m_pDecMsgIV, in, inlen, out);
 			}
 		//m_pcsDec->unlock();
 		return ret;
