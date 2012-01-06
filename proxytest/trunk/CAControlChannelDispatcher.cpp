@@ -91,10 +91,9 @@ SINT32 CAControlChannelDispatcher::encryptMessage(const UINT8* in,UINT32 inlen, 
 		if(m_pGCMCtxEnc!=NULL)
 		{
 			m_pcsEnc->lock();
-			UINT32 iv=htonl(m_nEncMsgCounter);
+			m_pEncMsgIV[2]=htonl(m_nEncMsgCounter);
 			m_nEncMsgCounter++;
-			memcpy(m_pEncMsgIV+8,&iv,4);
-			::gcm_encrypt_64k(m_pGCMCtxEnc, m_pEncMsgIV ,12, in,inlen,NULL,0,out,out+inlen);
+			::gcm_encrypt_64k(m_pGCMCtxEnc, m_pEncMsgIV , in,inlen,out,(UINT32*)(out+inlen));
 			*outlen=inlen+16;
 			m_pcsEnc->unlock();
 		}
