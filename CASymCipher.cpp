@@ -327,47 +327,30 @@ void CASymCipher::setGCMKeys(UINT8* keyRecv, UINT8* keySend) {
 
 SINT32 CASymCipher::encryptMessage(const UINT8* in, UINT32 inlen, UINT8* out)
 	{
-		if (m_pGCMCtxEnc != NULL)
-			{
-				m_pcsEnc->lock();
-				UINT32 iv = htonl(m_nEncMsgCounter);
-				m_nEncMsgCounter++;
-				memcpy(m_pEncMsgIV + 8, &iv, 4);
-				::gcm_encrypt_64k(m_pGCMCtxEnc, m_pEncMsgIV, 12, in, inlen, NULL, 0, out, out + inlen);
-				m_pcsEnc->unlock();
-			return E_SUCCESS;
-			}
-		else
-			{
-				memcpy(out, in, inlen);
-				return -1;
-			}
+		//m_pcsEnc->lock();
+		m_pEncMsgIV[2] = htonl(m_nEncMsgCounter);
+		m_nEncMsgCounter++;
+		gcm_encrypt_64k(m_pGCMCtxEnc, m_pEncMsgIV, in, inlen, out, (UINT32*)(out + inlen));
+		//m_pcsEnc->unlock();
+		return E_SUCCESS;
 	}
 
 SINT32 CASymCipher::decryptMessage(const UINT8* in, UINT32 inlen, UINT8* out, bool integrityCheck) 
 	{
 		SINT32 ret = 0;
-		if (m_pGCMCtxDec != NULL)
+		//m_pcsDec->lock();
+		UINT32 iv = htonl(m_nDecMsgCounter);
+		if (integrityCheck)
+			m_nDecMsgCounter++;
+		memcpy(m_pDecMsgIV + 8, &iv, 4);
+		if (integrityCheck)
 			{
-				m_pcsDec->lock();
-				UINT32 iv = htonl(m_nDecMsgCounter);
-				if (integrityCheck)
-					m_nDecMsgCounter++;
-				memcpy(m_pDecMsgIV + 8, &iv, 4);
-				if (integrityCheck)
-					{
-						ret = ::gcm_decrypt_64k(m_pGCMCtxDec, m_pDecMsgIV, 12, in, inlen - 16, in + inlen - 16, 16, NULL, 0, out);
-					}
-				else
-					{
-						ret = ::gcm_decrypt_64k(m_pGCMCtxDec, m_pDecMsgIV, 12, in, inlen, NULL, 0, NULL, 0, out);
-					}
-				m_pcsDec->unlock();
-				return ret;
+				ret = ::gcm_decrypt_64k(m_pGCMCtxDec, m_pDecMsgIV, 12, in, inlen - 16, in + inlen - 16, 16, NULL, 0, out);
 			}
 		else
 			{
-				memcpy(out, in, inlen);
-				return -1;
+				ret = ::gcm_decrypt_64k(m_pGCMCtxDec, m_pDecMsgIV, 12, in, inlen, NULL, 0, NULL, 0, out);
 			}
+		//m_pcsDec->unlock();
+		return ret;
 	}

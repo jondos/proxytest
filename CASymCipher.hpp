@@ -61,7 +61,7 @@ class CASymCipher
 					m_iv2=new UINT8[16];
 
 					m_nEncMsgCounter = 0;
-					m_pEncMsgIV = new UINT8[12];
+					m_pEncMsgIV = new UINT32[3];
 					memset(m_pEncMsgIV, 0, 12);
 					m_nDecMsgCounter = 0;
 					m_pDecMsgIV = new UINT8[12];
@@ -161,7 +161,7 @@ class CASymCipher
 			gcm_ctx_64k* m_pGCMCtxEnc;
 			gcm_ctx_64k* m_pGCMCtxDec;
 			UINT32 m_nEncMsgCounter;
-			UINT8* m_pEncMsgIV;
+			UINT32* m_pEncMsgIV;
 			UINT32 m_nDecMsgCounter;
 			UINT8* m_pDecMsgIV;
 
