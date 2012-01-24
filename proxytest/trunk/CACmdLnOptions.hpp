@@ -72,6 +72,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define OPTIONS_NODE_FD_NR "NrOfFileDescriptors"
 #define OPTIONS_NODE_DAEMON "Daemon"
 #define OPTIONS_NODE_MAX_USERS "MaxUsers"
+#define OPTIONS_NODE_PAYMENT_REMINDER "PaymentReminderProbability"
 #define OPTIONS_NODE_LOGGING "Logging"
 #define OPTIONS_NODE_LOGGING_CONSOLE "Console"
 #define OPTIONS_NODE_LOGGING_FILE "File"
@@ -186,6 +187,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define MIXINFO_NODE_MIX_NAME "Name"
 #define MIXINFO_NODE_SOFTWARE "Software"
 #define MIXINFO_NODE_VERSION "Version"
+
+#define MIXINFO_NODE_PAYMENTREMINDER "PaymentReminderProbability"
 
 #define MIXINFO_ATTRIBUTE_MIX_ID "id"
 
@@ -748,7 +751,9 @@ class CACmdLnOptions
 		CACertificate*	m_pNextMixCertificate;
 		CACertificate*	m_pLogEncryptionCertificate;
 
-		UINT32 m_maxNrOfUsers;
+		UINT32	m_maxNrOfUsers;
+		
+		SINT32	m_PaymentReminderProbability;
 
 		// added by ronin <ronin2@web.de>
 		DOMElement* m_pCascadeXML;
@@ -894,7 +899,7 @@ class CACmdLnOptions
 		SINT32 setTermsAndConditions(DOMElement *elemRoot);
 
 		/* General Options */
-#define GENERAL_OPTIONS_NR 11
+#define GENERAL_OPTIONS_NR 12
 		SINT32 setMixType(DOMElement* elemGeneral);
 		SINT32 setMixName(DOMElement* elemGeneral);
 		SINT32 setMixID(DOMElement* elemGeneral);
@@ -906,6 +911,7 @@ class CACmdLnOptions
 		SINT32 setDaemonMode(DOMElement* elemGeneral);
 		SINT32 setMaxUsers(DOMElement* elemGeneral);
 		SINT32 setLoggingOptions(DOMElement* elemGeneral);
+		SINT32 setPaymentReminder(DOMElement* elemGeneral);
 
 		/* Certificate Options */
 #define MAX_CERTIFICATE_OPTIONS_NR 6
