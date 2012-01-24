@@ -51,6 +51,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_bLogConsole = false;
 		m_bSocksSupport = false;
 		m_bLocalProxy=m_bFirstMix=m_bLastMix=m_bMiddleMix=false;
+		
 #ifndef ONLY_LOCAL_PROXY
 		m_bIsRunReConfigure=false;
 		m_addrInfoServices = NULL;
@@ -73,6 +74,13 @@ CACmdLnOptions::CACmdLnOptions()
 		m_docOpTnCs=NULL; //Operator Terms and Conditions (if any)
 		m_bAcceptReconfiguration=false;
 		m_maxNrOfUsers = 0;
+		
+#ifdef PAYMENT		
+		m_PaymentReminderProbability= -1;
+#else
+		m_PaymentReminderProbability= 0;
+#endif
+		
 #ifdef COUNTRY_STATS
 		m_dbCountryStatsHost=m_dbCountryStatsPasswd=m_dbCountryStatsUser=NULL;
 #endif
@@ -2261,6 +2269,30 @@ SINT32 CACmdLnOptions::setMaxUsers(DOMElement* elemGeneral)
 	}
 	return E_SUCCESS;
 }
+
+SINT32 CACmdLnOptions::setPaymentReminder(DOMElement* elemGeneral)
+{
+	DOMElement* elemPaymentReminder=NULL;
+	UINT32 tmp = 0;
+
+	if(elemGeneral == NULL) return E_UNKNOWN;
+	ASSERT_GENERAL_OPTIONS_PARENT
+		(elemGeneral->getNodeName(), OPTIONS_NODE_PAYMENT_REMINDER);
+
+	// get payment reminder probabilty
+	getDOMChildByName(elemGeneral, OPTIONS_NODE_PAYMENT_REMINDER, elemPaymentReminder, false);
+	if(elemPaymentReminder!=NULL)
+	{
+		if(getDOMElementValue(elemPaymentReminder, &tmp)==E_SUCCESS)
+		{
+			m_PaymentReminderProbability = tmp;
+			if(tmp > 100) { m_PaymentReminderProbability= -1; }
+			else { m_PaymentReminderProbability = tmp; }
+		}
+	}
+	return E_SUCCESS;
+}
+
 
 
 SINT32 CACmdLnOptions::initLogging()
@@ -4625,6 +4657,11 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 	setDOMElementValue(elemVersion,(UINT8*)MIX_VERSION);
 	elemSoftware->appendChild(elemVersion);
 	elemMix->appendChild(elemSoftware);
+	
+	/* Add the payment reminder */
+	DOMElement* elemPaymentReminder=createDOMElement(m_docMixInfo, MIXINFO_NODE_PAYMENTREMINDER);
+	setDOMElementValue(elemPaymentReminder, m_PaymentReminderProbability);
+	elemMix->appendChild(elemPaymentReminder);
 
 #ifdef COUNTRY_STATS
 		DOMElement* elemCountryStats=NULL;
