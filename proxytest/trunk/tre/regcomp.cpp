@@ -16,7 +16,7 @@
 
 #include "regex.h"
 #include "tre-internal.h"
-#include "xmalloc.h"
+#include "malloc.h"
 
 int
 regncomp(regex_t *preg, const char *regex, size_t n, int cflags)
