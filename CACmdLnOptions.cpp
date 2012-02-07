@@ -2274,6 +2274,10 @@ SINT32 CACmdLnOptions::setPaymentReminder(DOMElement* elemGeneral)
 {
 	DOMElement* elemPaymentReminder=NULL;
 	UINT32 tmp = 0;
+	
+	UINT8 tmpBuff[TMP_BUFF_SIZE];
+	UINT32 tmpLen = TMP_BUFF_SIZE;
+	char sztrue[] = "true";
 
 	if(elemGeneral == NULL) return E_UNKNOWN;
 	ASSERT_GENERAL_OPTIONS_PARENT
@@ -2283,11 +2287,19 @@ SINT32 CACmdLnOptions::setPaymentReminder(DOMElement* elemGeneral)
 	getDOMChildByName(elemGeneral, OPTIONS_NODE_PAYMENT_REMINDER, elemPaymentReminder, false);
 	if(elemPaymentReminder!=NULL)
 	{
-		if(getDOMElementValue(elemPaymentReminder, &tmp)==E_SUCCESS)
+		if (getDOMElementAttribute(elemPaymentReminder, "enable", tmpBuff, &tmpLen) == E_SUCCESS)
 		{
-			m_PaymentReminderProbability = tmp;
-			if(tmp > 100) { m_PaymentReminderProbability= -1; }
-			else { m_PaymentReminderProbability = tmp; }
+			strtrim(tmpBuff);
+			toLower(tmpBuff);
+			if ( strcmp (sztrue, (char*)tmpBuff) != 0) 
+			{
+				m_PaymentReminderProbability = -1;
+			} else {
+				if(getDOMElementValue(elemPaymentReminder, &tmp)==E_SUCCESS)
+				{
+				      m_PaymentReminderProbability = tmp;
+				}
+			}
 		}
 	}
 	return E_SUCCESS;
