@@ -1,9 +1,4 @@
 
-# Please set a link to your website
-# <a href="http://server.tld">Operator name</a>
-err_html_text  not configured
-
-
 # Set the path to your error message directory
 # or comment out to use the default squid messages
 
@@ -24,7 +19,6 @@ icp_port 0
 
 max_filedescriptors 16384
 
-cache_mem 128 MB
 
 hierarchy_stoplist cgi-bin ?
 acl QUERY urlpath_regex cgi-bin \?

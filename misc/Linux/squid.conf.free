@@ -1,9 +1,4 @@
 
-# Please set a link to your website
-# <a href="http://server.tld">Operator name</a>
-err_html_text  not configured
-
-
 # Set the path to your error message directory
 # or comment out to use the default squid messages
 
