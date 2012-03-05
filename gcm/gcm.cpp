@@ -163,9 +163,9 @@ MODIFIERS int gcm_decrypt_64k(gcm_ctx_64k *c, const UINT32 *nonce, const UINT8 *
 	register UINT32 s0 = 0, s1 = 0, s2 = 0, s3 = 0;
 
 	
-		ctr[0] = ((UINT32 *)nonce)[0];
-		ctr[1] = ((UINT32 *)nonce)[1];
-		ctr[2] = ((UINT32 *)nonce)[2];
+		ctr[0] = nonce[0];
+		ctr[1] = nonce[1];
+		ctr[2] = nonce[2];
 		ctr[3] = 1;
 	CTR_INIT(&(c->ck), ctr, ctr + 3, chksm, c->keylen);
 	for (i=0;i<16;i++) 
