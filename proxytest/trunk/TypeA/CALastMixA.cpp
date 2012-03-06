@@ -178,7 +178,10 @@ SINT32 CALastMixA::loop()
 													retval=E_UNKNOWN;
 												else
 													{
-														retval = newCipher->decryptMessage(pMixPacket->data + RSA_SIZE,  payloadLen+ GCM_MAC_SIZE+ LAST_MIX_SIZE_OF_SYMMETRIC_KEYS + 3 - rsaOutLen , pMixPacket->data + rsaOutLen - LAST_MIX_SIZE_OF_SYMMETRIC_KEYS, true);
+														if( payloadLen+ GCM_MAC_SIZE+ LAST_MIX_SIZE_OF_SYMMETRIC_KEYS + 3>rsaOutLen)
+															retval = newCipher->decryptMessage(pMixPacket->data + RSA_SIZE,  payloadLen+ GCM_MAC_SIZE+ LAST_MIX_SIZE_OF_SYMMETRIC_KEYS + 3 - rsaOutLen , pMixPacket->data + rsaOutLen - LAST_MIX_SIZE_OF_SYMMETRIC_KEYS, true);
+														else
+															retval=E_SUCCESS;
 													}
 											#else
 												newCipher->setKeys(rsaBuff,LAST_MIX_SIZE_OF_SYMMETRIC_KEYS);
