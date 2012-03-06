@@ -5,14 +5,14 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
 	- Redistributions of source code must retain the above copyright notice,
-	  this list of conditions and the following disclaimer.
+		this list of conditions and the following disclaimer.
 
 	- Redistributions in binary form must reproduce the above copyright notice,
-	  this list of conditions and the following disclaimer in the documentation and/or
+		this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
 	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
-	  may be used to endorse or promote products derived from this software without specific
+		may be used to endorse or promote products derived from this software without specific
 		prior written permission.
 
 
@@ -178,7 +178,7 @@ SINT32 CALastMixA::loop()
 													retval=E_UNKNOWN;
 												else
 													{
-														retval = newCipher->decryptMessage(pMixPacket->data + RSA_SIZE,  payloadLen+ GCM_MAC_SIZE - rsaOutLen + LAST_MIX_SIZE_OF_SYMMETRIC_KEYS + 3, pMixPacket->data + rsaOutLen - LAST_MIX_SIZE_OF_SYMMETRIC_KEYS, true);
+														retval = newCipher->decryptMessage(pMixPacket->data + RSA_SIZE,  payloadLen+ GCM_MAC_SIZE+ LAST_MIX_SIZE_OF_SYMMETRIC_KEYS + 3 - rsaOutLen , pMixPacket->data + rsaOutLen - LAST_MIX_SIZE_OF_SYMMETRIC_KEYS, true);
 													}
 											#else
 												newCipher->setKeys(rsaBuff,LAST_MIX_SIZE_OF_SYMMETRIC_KEYS);
@@ -448,20 +448,20 @@ SINT32 CALastMixA::loop()
 														pMixPacket->payload.type = 0;
 														pChannelListEntry->pCipher->encryptMessage(pMixPacket->data, 3, ciphertextBuff);
 														memcpy(pMixPacket->data, ciphertextBuff, 3 + GCM_MAC_SIZE);
-	                        	delete pChannelListEntry->pCipher;
-	                        	pChannelListEntry->pCipher = NULL;
+														delete pChannelListEntry->pCipher;
+														pChannelListEntry->pCipher = NULL;
 														#ifdef LOG_CHANNEL
-	                        								pChannelListEntry->packetsDataOutToUser++;
+																					pChannelListEntry->packetsDataOutToUser++;
 															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
 															MACRO_DO_LOG_CHANNEL_CLOSE_FROM_MIX
 														#endif
-	                        							m_pChannelList->removeChannel(pMixPacket->channel);
+																				m_pChannelList->removeChannel(pMixPacket->channel);
 														#ifdef LOG_PACKET_TIMES
 															setZero64(pQueueEntry->timestamp_proccessing_start);
 														#endif
 														m_pQueueSendToMix->add(pQueueEntry,sizeof(tQueueEntry));
 														m_logDownloadedPackets++;
-	                        							CAMsg::printMsg(LOG_ERR, "Integrity check failed in data packet!\n");
+																				CAMsg::printMsg(LOG_ERR, "Integrity check failed in data packet!\n");
 													} else {
 														memcpy(pMixPacket->data, plaintextBuff, payloadLen + 3);
 												#else
@@ -548,8 +548,8 @@ SINT32 CALastMixA::loop()
 															pChannelListEntry->pCipher->encryptMessage(pMixPacket->data, 3, ciphertextBuff);
 															memcpy(pMixPacket->data, ciphertextBuff, 3 + GCM_MAC_SIZE);
 														#endif
-                            							delete pChannelListEntry->pCipher;
-                            							pChannelListEntry->pCipher = NULL;
+																					delete pChannelListEntry->pCipher;
+																					pChannelListEntry->pCipher = NULL;
 														#ifdef LOG_CHANNEL
 															pChannelListEntry->packetsDataOutToUser++;
 															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
@@ -578,7 +578,7 @@ SINT32 CALastMixA::loop()
 															#else
 																pChannelListEntry->pCipher->crypt2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 															#endif
- 															#ifdef LOG_CHANNEL
+															#ifdef LOG_CHANNEL
 																pChannelListEntry->packetsDataOutToUser++;
 																getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
 																MACRO_DO_LOG_CHANNEL_CLOSE_FROM_MIX
@@ -673,8 +673,8 @@ SINT32 CALastMixA::loop()
 															pChannelListEntry->pCipher->encryptMessage(pMixPacket->data, 3, ciphertextBuff);
 															memcpy(pMixPacket->data, ciphertextBuff, 3 + GCM_MAC_SIZE);
 														#endif
-							                            delete pChannelListEntry->pCipher;
-							                            pChannelListEntry->pCipher = NULL;
+																					delete pChannelListEntry->pCipher;
+																					pChannelListEntry->pCipher = NULL;
 														delete pChannelListEntry->pQueueSend;
 														pChannelListEntry->pQueueSend = NULL;
 														pMixPacket->channel=pChannelListEntry->channelIn;
