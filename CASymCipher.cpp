@@ -337,7 +337,7 @@ SINT32 CASymCipher::encryptMessage(const UINT8* in, UINT32 inlen, UINT8* out)
 
 SINT32 CASymCipher::decryptMessage(const UINT8* in, UINT32 inlen, UINT8* out, bool integrityCheck) 
 	{
-		SINT32 ret = 0;
+		SINT32 ret = E_UNKNOWN;
 		//m_pcsDec->lock();
 		m_pDecMsgIV[2] = htonl(m_nDecMsgCounter);
 		if (integrityCheck)
@@ -350,5 +350,7 @@ SINT32 CASymCipher::decryptMessage(const UINT8* in, UINT32 inlen, UINT8* out, bo
 				ret = ::gcm_decrypt_64k(m_pGCMCtxDec, m_pDecMsgIV, in, inlen, out);
 			}
 		//m_pcsDec->unlock();
-		return ret;
+		if(ret==0)
+			return E_UNKNOWN;
+		return E_SUCCESS;
 	}

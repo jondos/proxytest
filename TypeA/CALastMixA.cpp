@@ -155,14 +155,31 @@ SINT32 CALastMixA::loop()
 											#endif
 											CASymCipher* newCipher = new CASymCipher();
 											#ifdef WITH_INTEGRITY_CHECK
-												newCipher->setGCMKeys(rsaBuff, rsaBuff + LAST_MIX_SIZE_OF_SYMMETRIC_KEYS - KEY_SIZE);
+												newCipher->setGCMKeys(rsaBuff, rsaBuff + KEY_SIZE);
 												payloadLen = ntohs(*((UINT16*)(rsaBuff + LAST_MIX_SIZE_OF_SYMMETRIC_KEYS)));
 												payloadLen &= PAYLOAD_LEN_MASK;
-												if (payloadLen < 0)
-													payloadLen = 0;
-												if (payloadLen > PAYLOAD_SIZE)
-													payloadLen = PAYLOAD_SIZE;
-												retval = newCipher->decryptMessage(pMixPacket->data + RSA_SIZE, LAST_MIX_SIZE_OF_SYMMETRIC_KEYS + 3 + payloadLen + GCM_MAC_SIZE - rsaOutLen, pMixPacket->data + rsaOutLen - LAST_MIX_SIZE_OF_SYMMETRIC_KEYS, true);
+												/*
+												it must hold that:
+												payloadLen+ GCM_MAC_SIZE - rsaOutLen + LAST_MIX_SIZE_OF_SYMMETRIC_KEYS + 3 > DATA_SIZE-RSA_SIZE
+
+												it holds that:
+												PAYLOAD_SIZE=DATA_SIZE-GCM_MAC_SIZE-3
+
+												this gives:
+
+												payloadLen- rsaOutLen + LAST_MIX_SIZE_OF_SYMMETRIC_KEYS  >  DATA_SIZE-RSA_SIZE-GCM_MAC_SIZE-3
+												payloadLen- rsaOutLen + LAST_MIX_SIZE_OF_SYMMETRIC_KEYS  >  PAYLOADSIZE-RSA_SIZE
+												payloadLen- rsaOutLen   >  PAYLOADSIZE-RSA_SIZE-LAST_MIX_SIZE_OF_SYMMETRIC_KEYS
+												payloadLen >  PAYLOADSIZE-RSA_SIZE-LAST_MIX_SIZE_OF_SYMMETRIC_KEYS+rsaOutLen
+
+												*/
+
+												if (payloadLen > (PAYLOAD_SIZE-LAST_MIX_SIZE_OF_SYMMETRIC_KEYS-RSA_SIZE+rsaOutLen))
+													retval=E_UNKNOWN;
+												else
+													{
+														retval = newCipher->decryptMessage(pMixPacket->data + RSA_SIZE,  payloadLen+ GCM_MAC_SIZE - rsaOutLen + LAST_MIX_SIZE_OF_SYMMETRIC_KEYS + 3, pMixPacket->data + rsaOutLen - LAST_MIX_SIZE_OF_SYMMETRIC_KEYS, true);
+													}
 											#else
 												newCipher->setKeys(rsaBuff,LAST_MIX_SIZE_OF_SYMMETRIC_KEYS);
 												newCipher->crypt1(
@@ -171,13 +188,11 @@ SINT32 CALastMixA::loop()
 														DATA_SIZE-RSA_SIZE);
 											#endif
 
-											memcpy(	pMixPacket->data,rsaBuff+LAST_MIX_SIZE_OF_SYMMETRIC_KEYS,
-															rsaOutLen-LAST_MIX_SIZE_OF_SYMMETRIC_KEYS);
 											#ifdef LOG_PACKET_TIMES
 												getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
 											#endif
 											#ifdef WITH_INTEGRITY_CHECK
-												if (retval == 0)
+												if (retval != E_SUCCESS)
 													{
 													/* invalid MAC -> send channel close packet with integrity error flag */
 													getRandom(pMixPacket->data, DATA_SIZE);
@@ -196,6 +211,9 @@ SINT32 CALastMixA::loop()
 													CAMsg::printMsg(LOG_ERR, "Integrity check failed in channel-open packet!\n");
 												} else {
 											#endif
+											memcpy(	pMixPacket->data,rsaBuff+LAST_MIX_SIZE_OF_SYMMETRIC_KEYS,
+															rsaOutLen-LAST_MIX_SIZE_OF_SYMMETRIC_KEYS);
+
 											CASocket* tmpSocket=new CASocket;
 											CACacheLoadBalancing* ptmpLB=m_pCacheLB;
 											ret=E_UNKNOWN;
@@ -405,16 +423,17 @@ SINT32 CALastMixA::loop()
 												#endif
 												#ifdef WITH_INTEGRITY_CHECK
 													/* decrypt only the first 2 bytes to get the payload length */
-													UINT16 lengthAndFlagsField;
+													UINT16 lengthAndFlagsField=0;
 													pChannelListEntry->pCipher->decryptMessage(pMixPacket->data, 2,(UINT8*) &lengthAndFlagsField, false);
 													payloadLen = ntohs(lengthAndFlagsField);
 													payloadLen &= PAYLOAD_LEN_MASK;
-													if (payloadLen < 0) payloadLen = 0;
-													if (payloadLen > PAYLOAD_SIZE) payloadLen = PAYLOAD_SIZE;
-													retval = pChannelListEntry->pCipher->decryptMessage(pMixPacket->data, payloadLen + 3 + GCM_MAC_SIZE, plaintextBuff, true);
-													memcpy(pMixPacket->data, plaintextBuff, payloadLen + 3);
-
-													if (retval == 0) {
+													if (payloadLen > PAYLOAD_SIZE)
+														retval=E_UNKNOWN;
+													else
+														{
+															retval = pChannelListEntry->pCipher->decryptMessage(pMixPacket->data, payloadLen + 3 + GCM_MAC_SIZE, plaintextBuff, true);
+														}
+													if (retval != E_SUCCESS) {
 														/* invalid MAC -> send channel close packet with integrity error flag */
 														psocketgroupCacheRead->remove(*(pChannelListEntry->pSocket));
 														psocketgroupCacheWrite->remove(*(pChannelListEntry->pSocket));
@@ -429,8 +448,8 @@ SINT32 CALastMixA::loop()
 														pMixPacket->payload.type = 0;
 														pChannelListEntry->pCipher->encryptMessage(pMixPacket->data, 3, ciphertextBuff);
 														memcpy(pMixPacket->data, ciphertextBuff, 3 + GCM_MAC_SIZE);
-	                        							delete pChannelListEntry->pCipher;
-	                        							pChannelListEntry->pCipher = NULL;
+	                        	delete pChannelListEntry->pCipher;
+	                        	pChannelListEntry->pCipher = NULL;
 														#ifdef LOG_CHANNEL
 	                        								pChannelListEntry->packetsDataOutToUser++;
 															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
@@ -444,6 +463,7 @@ SINT32 CALastMixA::loop()
 														m_logDownloadedPackets++;
 	                        							CAMsg::printMsg(LOG_ERR, "Integrity check failed in data packet!\n");
 													} else {
+														memcpy(pMixPacket->data, plaintextBuff, payloadLen + 3);
 												#else
 													pChannelListEntry->pCipher->crypt1(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 												#endif
