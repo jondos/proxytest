@@ -70,6 +70,9 @@ typedef UINT32 HCHANNEL;
 #else
 	#define PAYLOAD_SIZE 	989
 #endif
+
+#define PAYLOAD_HEADER_SIZE 3
+
 #define GCM_MAC_SIZE		16
 #define PAYLOAD_LEN_MASK 0x03FF;
 
