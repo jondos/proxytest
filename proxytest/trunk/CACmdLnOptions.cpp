@@ -222,6 +222,7 @@ void CACmdLnOptions::initMainOptionSetters()
 void CACmdLnOptions::initGeneralOptionSetters()
 {
 	generalOptionSetters = new optionSetter_pt[GENERAL_OPTIONS_NR];
+	memset(generalOptionSetters,0,sizeof(optionSetter_pt)*GENERAL_OPTIONS_NR);
 	int count = -1;
 
 	generalOptionSetters[++count]=

@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.11.05"
+#define MIX_VERSION "00.11.06"
 
 // set to "true" if this is a testing/development version which is not meant for prodictive use
 #define MIX_VERSION_TESTING true
@@ -232,8 +232,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define FM_PACKET_STATS_LOG_INTERVALL 1 //Intervall in Minutes for loggin packet stats for the first Mix
 #define LM_PACKET_STATS_LOG_INTERVALL 1 //Intervall in Minutes for loggin packet stats for the last Mix
 
-
-#define MIX_CASCADE_PROTOCOL_VERSION_0_1_1 11  //with integrity check and new channel encryption
+#define MIX_CASCADE_PROTOCOL_VERSION_0_1_2 12  //with integrity check and new channel encryption 
+#define MIX_CASCADE_PROTOCOL_VERSION_0_1_1 11  //with integrity check and new channel encryption --> never works correctly
 #define MIX_CASCADE_PROTOCOL_VERSION_0_1_0 10  //with new channel encryption
 //#define MIX_CASCADE_PROTOCOL_VERSION_0_9 9  //with new payment protocol
 #define MIX_CASCADE_PROTOCOL_VERSION_0_8 8  //with replay detection + control channels + first mix symmetric
@@ -249,7 +249,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#elif defined(PAYMENT)
 	//#define MIX_CASCADE_PROTOCOL_VERSION "0.9"
 #elif defined (WITH_INTEGRITY_CHECK)
-	#define MIX_CASCADE_PROTOCOL_VERSION "0.11"
+	#define MIX_CASCADE_PROTOCOL_VERSION "0.12"
 #else
 	#define MIX_CASCADE_PROTOCOL_VERSION "0.10" //"0.10tc"
 #endif

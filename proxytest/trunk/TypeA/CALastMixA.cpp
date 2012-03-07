@@ -156,32 +156,20 @@ SINT32 CALastMixA::loop()
 											CASymCipher* newCipher = new CASymCipher();
 											#ifdef WITH_INTEGRITY_CHECK
 												newCipher->setGCMKeys(rsaBuff, rsaBuff + KEY_SIZE);
-												payloadLen = ntohs(*((UINT16*)(rsaBuff + LAST_MIX_SIZE_OF_SYMMETRIC_KEYS)));
+
+												//Decrypt only the first two bytes to get the payload length
+												UINT16 lengthAndFlagsField=0;
+												newCipher->decryptMessage(rsaBuff + LAST_MIX_SIZE_OF_SYMMETRIC_KEYS, 2,(UINT8*) &lengthAndFlagsField, false);
+												payloadLen = ntohs(lengthAndFlagsField);
 												payloadLen &= PAYLOAD_LEN_MASK;
-												/*
-												it must hold that:
-												payloadLen+ GCM_MAC_SIZE - rsaOutLen + LAST_MIX_SIZE_OF_SYMMETRIC_KEYS + 3 > DATA_SIZE-RSA_SIZE
-
-												it holds that:
-												PAYLOAD_SIZE=DATA_SIZE-GCM_MAC_SIZE-3
-
-												this gives:
-
-												payloadLen- rsaOutLen + LAST_MIX_SIZE_OF_SYMMETRIC_KEYS  >  DATA_SIZE-RSA_SIZE-GCM_MAC_SIZE-3
-												payloadLen- rsaOutLen + LAST_MIX_SIZE_OF_SYMMETRIC_KEYS  >  PAYLOADSIZE-RSA_SIZE
-												payloadLen- rsaOutLen   >  PAYLOADSIZE-RSA_SIZE-LAST_MIX_SIZE_OF_SYMMETRIC_KEYS
-												payloadLen >  PAYLOADSIZE-RSA_SIZE-LAST_MIX_SIZE_OF_SYMMETRIC_KEYS+rsaOutLen
-
-												*/
-
-												if (payloadLen > (PAYLOAD_SIZE-LAST_MIX_SIZE_OF_SYMMETRIC_KEYS-RSA_SIZE+rsaOutLen))
+												if (payloadLen > (PAYLOAD_SIZE-LAST_MIX_SIZE_OF_SYMMETRIC_KEYS-RSA_SIZE-GCM_MAC_SIZE - PAYLOAD_HEADER_SIZE+rsaOutLen))
 													retval=E_UNKNOWN;
 												else
 													{
-														if( payloadLen+ LAST_MIX_SIZE_OF_SYMMETRIC_KEYS + 3>=rsaOutLen)
-															retval = newCipher->decryptMessage(pMixPacket->data + RSA_SIZE,  payloadLen+ GCM_MAC_SIZE+ LAST_MIX_SIZE_OF_SYMMETRIC_KEYS + 3 - rsaOutLen , pMixPacket->data + rsaOutLen - LAST_MIX_SIZE_OF_SYMMETRIC_KEYS, true);
-														else
-															retval=E_SUCCESS;
+														//prepend the asym decrypted sym encrypted part of teh Mix packet to the sym only encrypted part of the mix packet
+														memcpy(pMixPacket->data+RSA_SIZE-rsaOutLen+LAST_MIX_SIZE_OF_SYMMETRIC_KEYS,rsaBuff + LAST_MIX_SIZE_OF_SYMMETRIC_KEYS,rsaOutLen-LAST_MIX_SIZE_OF_SYMMETRIC_KEYS);
+														//now decrpyt the whole sym encrypted part
+														retval = newCipher->decryptMessage(pMixPacket->data +RSA_SIZE-rsaOutLen+LAST_MIX_SIZE_OF_SYMMETRIC_KEYS,  payloadLen+ GCM_MAC_SIZE + PAYLOAD_HEADER_SIZE , pMixPacket->data, true);
 													}
 											#else
 												newCipher->setKeys(rsaBuff,LAST_MIX_SIZE_OF_SYMMETRIC_KEYS);
@@ -189,6 +177,8 @@ SINT32 CALastMixA::loop()
 														pMixPacket->data+RSA_SIZE,
 														pMixPacket->data+rsaOutLen-LAST_MIX_SIZE_OF_SYMMETRIC_KEYS,
 														DATA_SIZE-RSA_SIZE);
+												memcpy(	pMixPacket->data,rsaBuff+LAST_MIX_SIZE_OF_SYMMETRIC_KEYS,
+															rsaOutLen-LAST_MIX_SIZE_OF_SYMMETRIC_KEYS);
 											#endif
 
 											#ifdef LOG_PACKET_TIMES
@@ -214,8 +204,6 @@ SINT32 CALastMixA::loop()
 													CAMsg::printMsg(LOG_ERR, "Integrity check failed in channel-open packet!\n");
 												} else {
 											#endif
-											memcpy(	pMixPacket->data,rsaBuff+LAST_MIX_SIZE_OF_SYMMETRIC_KEYS,
-															rsaOutLen-LAST_MIX_SIZE_OF_SYMMETRIC_KEYS);
 
 											CASocket* tmpSocket=new CASocket;
 											CACacheLoadBalancing* ptmpLB=m_pCacheLB;
