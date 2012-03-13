@@ -72,15 +72,16 @@
 
  <div id="titles" align="center"> 
  
- <h2>You are using JonDonym free services.</h2> 
+ <h2>You are using JonDonym free services</h2> 
  </div> 
  <div align="center"> 
 <table cellspacing="0" style="margin: 0px 0px 1em 0px; " width="600" class="gross">
 <tr><td colspan="3">
-<p style="text-align: center;">Free services are for trial and research purposes only and limited in<br>several ways. You may use <u>premium services</u> to avoid these limits.</p>
+<p>Hint from the JonDonym/JAP Team: The free services are meant as a basic supply for the community and are limited in some ways. However, you may use the Premium services in order to avoid these limits.</p>
 <p style="text-align: center;"><a href="https://shop.anonymous-proxy-servers.net/bin/payment" style="font-weight: bold;">Please, buy a premium account and support JonDonym.</a></p>
 <p style="text-align: center; font-size: x-large;"><a href="https://shop.anonymous-proxy-servers.net/bin/payment" style="font-weight: bold;">Click here!</a></p>
-<p style="text-align: center; font-size: smaller; padding-bottom: 5px;">In order to proceed surfing please go back one page and access the website again.</p>
+<p>The revenues from the Premium services are necesary in torder to ensure the existence and development of JonDonym.</p>
+<p style="text-align: center; font-size: smaller; padding-bottom: 5px; padding-top: 10px;">In order to proceed surfing please go back one page and access the website again.</p>
 <p style="text-align: center; font-size: smaller; padding-bottom: 20px;">If moving back one page does not work, you might have consumed your free surfing<br>volume. Please switch to premium services or restart JonDo to reset the counter.</p>
 </td></tr>
 <tr>
