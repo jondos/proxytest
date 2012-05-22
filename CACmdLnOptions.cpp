@@ -245,9 +245,10 @@ void CACmdLnOptions::initGeneralOptionSetters()
 		&CACmdLnOptions::setMinCascadeLength;
 	generalOptionSetters[++count]=
 		&CACmdLnOptions::setCascadeNameFromOptions;
-
 	generalOptionSetters[++count]=
 		&CACmdLnOptions::setMaxUsers;
+	generalOptionSetters[++count]=
+		&CACmdLnOptions::setPaymentReminder;
 }
 
 void CACmdLnOptions::initCertificateOptionSetters()
