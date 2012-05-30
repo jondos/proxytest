@@ -78,7 +78,7 @@ CACmdLnOptions::CACmdLnOptions()
 #ifdef PAYMENT		
 		m_PaymentReminderProbability= -1;
 #else
-		m_PaymentReminderProbability= 0;
+		m_PaymentReminderProbability= -1;
 #endif
 		
 #ifdef COUNTRY_STATS
@@ -2275,7 +2275,7 @@ SINT32 CACmdLnOptions::setMaxUsers(DOMElement* elemGeneral)
 SINT32 CACmdLnOptions::setPaymentReminder(DOMElement* elemGeneral)
 {
 	DOMElement* elemPaymentReminder=NULL;
-	m_PaymentReminderProbability = 0;
+	m_PaymentReminderProbability = -1;
 		
 	if(elemGeneral == NULL) 
 		return E_UNKNOWN;
@@ -2287,7 +2287,7 @@ SINT32 CACmdLnOptions::setPaymentReminder(DOMElement* elemGeneral)
 	getDOMElementAttribute(elemPaymentReminder, "enable", bEnabled);
 	if (!bEnabled) 
 		{
-				m_PaymentReminderProbability = -1;
+			m_PaymentReminderProbability = -1;
 		}
 	else
 		{
