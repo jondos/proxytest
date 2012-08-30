@@ -452,7 +452,7 @@ SINT32 CALastMixA::loop()
 														#endif
 														m_pQueueSendToMix->add(pQueueEntry,sizeof(tQueueEntry));
 														m_logDownloadedPackets++;
-																				CAMsg::printMsg(LOG_ERR, "Integrity check failed in data packet!\n");
+														CAMsg::printMsg(LOG_ERR, "Integrity check failed in data packet!\n");
 													} else {
 														memcpy(pMixPacket->data, plaintextBuff, payloadLen + 3);
 												#else
