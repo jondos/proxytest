@@ -311,8 +311,8 @@ SINT32 CALastMixA::loop()
 															/* send a close packet signaling the connect error */
 															getRandom(pMixPacket->data, DATA_SIZE);
 															pMixPacket->flags = CHANNEL_CLOSE;
-															pMixPacket->payload.len = htons(CONNECTION_ERROR_FLAG);
-															pMixPacket->payload.type = 0;
+															pMixPacket->payload.len = 0;
+															pMixPacket->payload.type = CONNECTION_ERROR_FLAG;
 															#ifdef WITH_INTEGRITY_CHECK
 																newCipher->encryptMessage(pMixPacket->data, 3, ciphertextBuff);
 																memcpy(pMixPacket->data, ciphertextBuff, 3 + GCM_MAC_SIZE);
