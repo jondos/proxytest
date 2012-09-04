@@ -177,4 +177,8 @@ if DOTESTS
     MAYBE_tests=test
 endif    
 
-SUBDIRS = popt xml trio tre TypeA gcm $(MAYBE_tests)
+if DOWIRESHARK
+    MAYBE_wireshark=wireshark
+endif    
+
+SUBDIRS = popt xml trio tre TypeA gcm $(MAYBE_tests) $(MAYBE_wireshark)

@@ -60,8 +60,8 @@ class CACertificate
 			/** Extracts a certificate from an encoded (DER,XML) form.*/
 			static CACertificate* decode(const UINT8* const buff,UINT32 bufflen,UINT32 type,const char* const passwd=NULL);
 			static CACertificate* decode(const DOMNode* node,UINT32 type,const char* passwd=NULL);
-			SINT32 encode(UINT8* buff,UINT32* bufflen,UINT32 type);
-			SINT32 encode(DOMElement* & elemRoot,XERCES_CPP_NAMESPACE::DOMDocument* doc);
+			SINT32 encode(UINT8* buff,UINT32* bufflen,UINT32 type) const;
+			SINT32 encode(DOMElement* & elemRoot,XERCES_CPP_NAMESPACE::DOMDocument* doc) const;
 
 			static UINT8 * getXmlElementName()
 				{
@@ -75,25 +75,28 @@ class CACertificate
 				}
 
 			SINT32 getRawSubjectKeyIdentifier(UINT8* r_ski, UINT32* r_skiLen);
-			SINT32 getAuthorityKeyIdentifier(UINT8* r_aki, UINT32* r_akiLen);
+			SINT32 getAuthorityKeyIdentifier(UINT8* r_aki, UINT32* r_akiLen) const;
             /* LERNGRUPPE */
             /* SubjectKeyIdentifier Extension handling */
 			SINT32 getSubjectKeyIdentifier(UINT8* r_ski, UINT32 *r_skiLen);
-            SINT32 setSubjectKeyIdentifier( UINT8* a_value, UINT32 a_valueLen );
-            SINT32 setSubjectKeyIdentifier();
-            static SINT32 removeColons(const UINT8* a_cSki, UINT32 a_cSkiLen, UINT8 *&r_ski, UINT32 *r_skiLen);
-            SINT32 verify(const CACertificate* a_cert);
-            bool isValid();
+      SINT32 setSubjectKeyIdentifier( UINT8* a_value, UINT32 a_valueLen );
+      SINT32 setSubjectKeyIdentifier();
+      static SINT32 removeColons(const UINT8* a_cSki, UINT32 a_cSkiLen, UINT8 *&r_ski, UINT32 *r_skiLen);
+			SINT32 verify(const CACertificate* a_cert) const;
+      bool isValid() const;
+		
 		private:
 			CACertificate();
 			CACertificate(X509* x);
-		private:
 			static X509* decode(const UINT8** derX509, UINT32 derX509Len);
-			X509* getX509(){return m_pCert;}
+			X509* getX509() const
+				{
+					return m_pCert;
+				}
 			X509* m_pCert;
 			ASN1_OCTET_STRING* m_pSKI;
 			AUTHORITY_KEYID* m_pAKI;
-		static UINT8 * m_spXmlElementName;
+			static UINT8 * m_spXmlElementName;
 	};
 #endif
 #endif //ONLY_LOCAL_PROXY

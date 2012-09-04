@@ -5,14 +5,14 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
 	- Redistributions of source code must retain the above copyright notice,
-	  this list of conditions and the following disclaimer.
+		this list of conditions and the following disclaimer.
 
 	- Redistributions in binary form must reproduce the above copyright notice,
-	  this list of conditions and the following disclaimer in the documentation and/or
+		this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
 	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
-	  may be used to endorse or promote products derived from this software without specific
+		may be used to endorse or promote products derived from this software without specific
 		prior written permission.
 
 
@@ -139,15 +139,14 @@ SINT32 CAFirstMix::init()
 		CASocketAddr* pAddrNext=NULL;
 		for(i=0;i<CALibProxytest::getOptions()->getTargetInterfaceCount();i++)
 			{
-				TargetInterface oNextMix;
+				CATargetInterface oNextMix;
 				CALibProxytest::getOptions()->getTargetInterface(oNextMix,i+1);
-				if(oNextMix.target_type==TARGET_MIX)
+				if(oNextMix.getTargetType()==TARGET_MIX)
 				{
-					pAddrNext=oNextMix.addr;
+					pAddrNext=oNextMix.getAddr();
 					break;
 				}
-				delete oNextMix.addr;
-				oNextMix.addr = NULL;
+				oNextMix.cleanAddr();
 			}
 		if(pAddrNext==NULL)
 			{
@@ -184,12 +183,12 @@ SINT32 CAFirstMix::init()
 		m_pMuxOut->getCASocket()->setKeepAlive((UINT32)1800);
 
 
-    if(processKeyExchange()!=E_SUCCESS)
-    {
-    	MONITORING_FIRE_NET_EVENT(ev_net_nextConnectionClosed);
-    	CAMsg::printMsg(LOG_CRIT,"Error in establishing secure communication with next Mix. Disconnecting...\n");
-        return E_UNKNOWN;
-    }
+		if(processKeyExchange()!=E_SUCCESS)
+		{
+			MONITORING_FIRE_NET_EVENT(ev_net_nextConnectionClosed);
+			CAMsg::printMsg(LOG_CRIT,"Error in establishing secure communication with next Mix. Disconnecting...\n");
+				return E_UNKNOWN;
+		}
 	else
 	{
 		CAMsg::printMsg(LOG_INFO,"Secure connection to next Mix was established successfully.\n");
@@ -331,61 +330,58 @@ SINT32 CAFirstMix::connectToNextMix(CASocketAddr* a_pAddrNext)
 *@DOCME
 */
 SINT32 CAFirstMix::processKeyExchange()
-{
-    UINT8* recvBuff=NULL;
-    UINT32 len;
-	SINT32 ret;
-	CAMsg::printMsg(LOG_INFO, "Try to read the Key Info length from next Mix...\n");
-    if((ret = m_pMuxOut->receiveFully((UINT8*) &len, sizeof(len), TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT)) != E_SUCCESS)
-    {
-		if (ret != E_UNKNOWN)
-		{
-			CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info length from next mix! Reason: '%s' (%i)\n",
-				GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
-		}
-		else
-		{
-			CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info length from next mix!\n");
-		}
-        return ret;
-    }
-    len=ntohl(len);
-    CAMsg::printMsg(LOG_INFO, "Received next mix Key Info length %u\n",len);
-	
-	if (len > 100000)
 	{
-		CAMsg::printMsg(LOG_WARNING,"Unrealistic length for key info: %u We might not be able to get a connection.\n",len);
-	}
+		UINT8* recvBuff=NULL;
+		UINT32 len;
+		SINT32 ret;
+		CAMsg::printMsg(LOG_INFO, "Try to read the Key Info length from next Mix...\n");
+		if((ret = m_pMuxOut->receiveFully((UINT8*) &len, sizeof(len), TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT)) != E_SUCCESS)
+			{
+				if (ret != E_UNKNOWN)
+					{
+						CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info length from next mix! Reason: '%s' (%i)\n",GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
+					}
+				else
+					{
+						CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info length from next mix!\n");
+					}
+				return ret;
+			}
+		len=ntohl(len);
+		CAMsg::printMsg(LOG_INFO, "Received next mix Key Info length %u\n",len);
 	
-    recvBuff=new UINT8[len+1];
+		if (len > 100000)
+			{
+				CAMsg::printMsg(LOG_WARNING,"Unrealistic length for key info: %u We might not be able to get a connection.\n",len);
+			}
+	
+		recvBuff=new UINT8[len+1];
 
-    if ((ret =m_pMuxOut->receiveFully(recvBuff, len, TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT)) != E_SUCCESS)
-    {
-		if (ret != E_UNKNOWN)
-		{
-			CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info from next mix! Reason: '%s' (%i)\n",
-				GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
-		}
-		else
-		{
-			CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info from next mix!\n");
-		}
-        return ret;
-        delete []recvBuff;
-        recvBuff = NULL;
-        return E_UNKNOWN;
-    }
-    recvBuff[len]=0;
-    //get the Keys from the other mixes (and the Mix-Id's...!)
-    CAMsg::printMsg(LOG_INFO,"Received Key Info from next mix...\n");
-    CAMsg::printMsg(LOG_DEBUG,"%s\n",recvBuff);
+		if ((ret =m_pMuxOut->receiveFully(recvBuff, len, TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT)) != E_SUCCESS)
+			{
+				if (ret != E_UNKNOWN)
+					{
+						CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info from next mix! Reason: '%s' (%i)\n",GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
+					}
+				else
+					{
+						CAMsg::printMsg(LOG_CRIT,"Error receiving Key Info from next mix!\n");
+					}
+				delete []recvBuff;
+				recvBuff = NULL;
+				return E_UNKNOWN;
+			}
+		recvBuff[len]=0;
+		//get the Keys from the other mixes (and the Mix-Id's...!)
+		CAMsg::printMsg(LOG_INFO,"Received Key Info from next mix...\n");
+		CAMsg::printMsg(LOG_DEBUG,"%s\n",recvBuff);
 
-    XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(recvBuff, len);
-    delete []recvBuff;
-    recvBuff = NULL;
-    DOMElement* elemMixes=doc->getDocumentElement();
-    if(elemMixes == NULL)
-    {
+		XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(recvBuff, len);
+		delete []recvBuff;
+		recvBuff = NULL;
+		DOMElement* elemMixes=doc->getDocumentElement();
+		if(elemMixes == NULL)
+		{
 		if(doc != NULL)
 		{
 			doc->release();
@@ -393,91 +389,118 @@ SINT32 CAFirstMix::processKeyExchange()
 		}
 		CAMsg::printMsg(LOG_INFO,"before returning...\n");
 		return E_UNKNOWN;
-    }
+		}
 		SINT32 count=0;
-    if(getDOMElementAttribute(elemMixes,"count",&count)!=E_SUCCESS)
-    {
-    	if(doc != NULL)
+		if(getDOMElementAttribute(elemMixes,"count",&count)!=E_SUCCESS)
+		{
+			if(doc != NULL)
 		{
 			doc->release();
 			doc = NULL;
 		}
-        return E_UNKNOWN;
-    }
+				return E_UNKNOWN;
+		}
  /*
 		@todo Do not know why we do this here - probably it has something todo with the
 		dynamic mix config, but makes not sense at all for me...
 
 		getDOMElementAttribute(elemMixescascadeNaem
 		char *cascadeName;
-    cascadeName = elemMixes.getAttribute("cascadeName").transcode();
-    if(cascadeName == NULL)
-        return E_UNKNOWN;
-    CALibProxytest::getOptions()->setCascadeName(cascadeName);
+		cascadeName = elemMixes.getAttribute("cascadeName").transcode();
+		if(cascadeName == NULL)
+				return E_UNKNOWN;
+		CALibProxytest::getOptions()->setCascadeName(cascadeName);
 */
-    if(CALibProxytest::getOptions()->getTermsAndConditions() != NULL)
-    {
-    	appendTermsAndConditionsExtension(doc, elemMixes);
-    }
+		if(CALibProxytest::getOptions()->getTermsAndConditions() != NULL)
+		{
+			appendTermsAndConditionsExtension(doc, elemMixes);
+		}
 
-    SINT32 extRet = handleKeyInfoExtensions(elemMixes);
-    if(extRet != E_SUCCESS)
-    {
-    	if(doc != NULL)
+		SINT32 extRet = handleKeyInfoExtensions(elemMixes);
+		if(extRet != E_SUCCESS)
+		{
+			if(doc != NULL)
 		{
 			doc->release();
 			doc = NULL;
 		}
 		return E_UNKNOWN;
-    }
+		}
+		m_pRSA=new CAASymCipher;
 
-    m_pRSA=new CAASymCipher;
-    m_pRSA->generateKeyPair(1024);
-
-    DOMNode* child=elemMixes->getLastChild();
-
-    //tmp XML-Structure for constructing the XML which is sent to each user
-    XERCES_CPP_NAMESPACE::DOMDocument* docXmlKeyInfo=createDOMDocument();
-    DOMElement* elemRootKey=createDOMElement(docXmlKeyInfo,"MixCascade");
-    setDOMElementAttribute(elemRootKey,"version",(UINT8*)"0.2"); //set the Version of the XML to 0.2
-#ifdef LOG_DIALOG
-    setDOMElementAttribute(elemRootKey,"study",(UINT8*)"true");
+#ifdef EXPORT_ASYM_PRIVATE_KEY
+		if(CALibProxytest::getOptions()->isImportKey())
+			{
+				UINT32 keyFileBuffLen=8096;
+				UINT8* keyFileBuff=new UINT8[keyFileBuffLen];
+				CALibProxytest::getOptions()->getEncryptionKeyImportFile(keyFileBuff,keyFileBuffLen);
+				UINT8* keyBuff=readFile(keyFileBuff,&keyFileBuffLen);
+				m_pRSA->setPrivateKeyAsXML(keyBuff,keyFileBuffLen);
+				delete[] keyFileBuff;
+				delete[] keyBuff;
+			}
+		else
 #endif
-    docXmlKeyInfo->appendChild(elemRootKey);
-    DOMElement* elemMixProtocolVersion=createDOMElement(docXmlKeyInfo,"MixProtocolVersion");
-    setDOMElementValue(elemMixProtocolVersion,(UINT8*)MIX_CASCADE_PROTOCOL_VERSION);
-    elemRootKey->appendChild(elemMixProtocolVersion);
-    DOMNode* elemMixesKey=docXmlKeyInfo->importNode(elemMixes,true);
-    elemRootKey->appendChild(elemMixesKey);
+			{
+				m_pRSA->generateKeyPair(1024);
+			}
+#ifdef EXPORT_ASYM_PRIVATE_KEY
+		if(CALibProxytest::getOptions()->isExportKey())
+			{
+				UINT32 keyFileBuffLen=8096;
+				UINT8* keyFileBuff=new UINT8[keyFileBuffLen];
+				UINT8* keyBuff=new UINT8[keyFileBuffLen];
+				CALibProxytest::getOptions()->getEncryptionKeyExportFile(keyFileBuff,keyFileBuffLen);
+				m_pRSA->getPrivateKeyAsXML(keyBuff,&keyFileBuffLen);
+				saveFile(keyFileBuff,keyBuff,keyFileBuffLen);
+				delete[] keyFileBuff;
+				delete[] keyBuff;
+			}
+#endif
+		DOMNode* child=elemMixes->getLastChild();
 
-    //UINT32 tlen;
-    /* //remove because it seems to be useless...
+		//tmp XML-Structure for constructing the XML which is sent to each user
+		XERCES_CPP_NAMESPACE::DOMDocument* docXmlKeyInfo=createDOMDocument();
+		DOMElement* elemRootKey=createDOMElement(docXmlKeyInfo,"MixCascade");
+		setDOMElementAttribute(elemRootKey,"version",(UINT8*)"0.2"); //set the Version of the XML to 0.2
+#ifdef LOG_DIALOG
+		setDOMElementAttribute(elemRootKey,"study",(UINT8*)"true");
+#endif
+		docXmlKeyInfo->appendChild(elemRootKey);
+		DOMElement* elemMixProtocolVersion=createDOMElement(docXmlKeyInfo,"MixProtocolVersion");
+		setDOMElementValue(elemMixProtocolVersion,(UINT8*)MIX_CASCADE_PROTOCOL_VERSION);
+		elemRootKey->appendChild(elemMixProtocolVersion);
+		DOMNode* elemMixesKey=docXmlKeyInfo->importNode(elemMixes,true);
+		elemRootKey->appendChild(elemMixesKey);
+
+		//UINT32 tlen;
+		/* //remove because it seems to be useless...
 		while(child!=NULL)
-    {
-        if(child.getNodeName().equals("Mix"))
-        {
-            DOM_Node rsaKey=child.getFirstChild();
-            CAASymCipher oRSA;
-            oRSA.setPublicKeyAsDOMNode(rsaKey);
-            tlen=256;
-        }
-        child=child.getPreviousSibling();
-    }*/
-    //tlen=256;
+		{
+				if(child.getNodeName().equals("Mix"))
+				{
+						DOM_Node rsaKey=child.getFirstChild();
+						CAASymCipher oRSA;
+						oRSA.setPublicKeyAsDOMNode(rsaKey);
+						tlen=256;
+				}
+				child=child.getPreviousSibling();
+		}*/
+		//tlen=256;
 
-    //Inserting own Key in XML-Key struct
-    DOMElement* elemKey=NULL;
-    m_pRSA->getPublicKeyAsDOMElement(elemKey,docXmlKeyInfo);
-    addMixInfo(elemMixesKey, true);
-    DOMElement* elemOwnMix=NULL;
-    getDOMChildByName(elemMixesKey, "Mix", elemOwnMix, false);
-    elemOwnMix->appendChild(elemKey);
-    CAMsg::printMsg(LOG_INFO,"before T&Cs1...\n");
-    if(CALibProxytest::getOptions()->getTermsAndConditions() != NULL)
-    {
-    	elemOwnMix->appendChild(termsAndConditionsInfoNode(docXmlKeyInfo));
-    }
-    CAMsg::printMsg(LOG_INFO,"after T&Cs1...\n");
+		//Inserting own Key in XML-Key struct
+		DOMElement* elemKey=NULL;
+		m_pRSA->getPublicKeyAsDOMElement(elemKey,docXmlKeyInfo);
+		addMixInfo(elemMixesKey, true);
+		DOMElement* elemOwnMix=NULL;
+		getDOMChildByName(elemMixesKey, "Mix", elemOwnMix, false);
+		elemOwnMix->appendChild(elemKey);
+		CAMsg::printMsg(LOG_INFO,"before T&Cs1...\n");
+		if(CALibProxytest::getOptions()->getTermsAndConditions() != NULL)
+		{
+			elemOwnMix->appendChild(termsAndConditionsInfoNode(docXmlKeyInfo));
+		}
+		CAMsg::printMsg(LOG_INFO,"after T&Cs1...\n");
 		elemOwnMix->appendChild(createDOMElement(docXmlKeyInfo,"SupportsEncrypedControlChannels"));
 	CAMsg::printMsg(LOG_INFO,"after SupportEncChannels...\n");
 	if (signXML(elemOwnMix) != E_SUCCESS)
@@ -502,21 +525,21 @@ SINT32 CAFirstMix::processKeyExchange()
 
 	// create signature
 	if (signXML(elemRootKey) != E_SUCCESS)
-    {
+		{
 		CAMsg::printMsg(LOG_DEBUG,"Could not sign KeyInfo sent to users...\n");
 	}
 
 
 	UINT32 tmp32Len = 0;
-    UINT8* tmpB=DOM_Output::dumpToMem(docXmlKeyInfo, &tmp32Len);
-    if (docXmlKeyInfo != NULL)
-    {
-    	docXmlKeyInfo->release();
-    	docXmlKeyInfo = NULL;
-    }
+		UINT8* tmpB=DOM_Output::dumpToMem(docXmlKeyInfo, &tmp32Len);
+		if (docXmlKeyInfo != NULL)
+		{
+			docXmlKeyInfo->release();
+			docXmlKeyInfo = NULL;
+		}
 
-    if(tmp32Len > 0xFFFD) //too bytes are reserved for the length
-    {
+		if(tmp32Len > 0xFFFD) //too bytes are reserved for the length
+		{
 		CAMsg::printMsg(LOG_CRIT, "The key info size of %u bytes is too large for the clients. (maximum is %u)\n", 0xFFFD);
 		if (doc != NULL)
 		{
@@ -524,98 +547,98 @@ SINT32 CAFirstMix::processKeyExchange()
 			doc = NULL;
 		}
 		return E_UNKNOWN;
-    }
+		}
 
-    UINT16 tlen = (UINT16) tmp32Len;
-    m_xmlKeyInfoBuff = new UINT8[tlen+sizeof(tlen)];
-    memcpy(m_xmlKeyInfoBuff+sizeof(tlen), tmpB, tlen);
-    UINT16 s = htons(tlen);
-    memcpy(m_xmlKeyInfoBuff, &s, sizeof(s));
-    m_xmlKeyInfoSize=tlen + sizeof(tlen);
-    delete []tmpB;
-    tmpB = NULL;
-    SINT32 result;
+		UINT16 tlen = (UINT16) tmp32Len;
+		m_xmlKeyInfoBuff = new UINT8[tlen+sizeof(tlen)];
+		memcpy(m_xmlKeyInfoBuff+sizeof(tlen), tmpB, tlen);
+		UINT16 s = htons(tlen);
+		memcpy(m_xmlKeyInfoBuff, &s, sizeof(s));
+		m_xmlKeyInfoSize=tlen + sizeof(tlen);
+		delete []tmpB;
+		tmpB = NULL;
+		SINT32 result=E_UNKNOWN;
 
-    //Sending symmetric key...
-    child=elemMixes->getFirstChild();
-    while(child!=NULL)
-    {
-    	if(equals(child->getNodeName(),"Mix"))
-        {
-    		//verify certificate from next mix if enabled
-    		if(CALibProxytest::getOptions()->verifyMixCertificates())
-    		{
-    			CACertificate* nextMixCert = CALibProxytest::getOptions()->getTrustedCertificateStore()->verifyMixCert(child);
-    			if(nextMixCert != NULL)
-    			{
-    				CAMsg::printMsg(LOG_DEBUG, "Next mix certificate was verified by a trusted root CA.\n");
-    				CALibProxytest::getOptions()->setNextMixTestCertificate(nextMixCert);
-    			}
-    			else
-    			{
-    				CAMsg::printMsg(LOG_ERR, "Could not verify certificate received from next mix!\n");
-    				return E_UNKNOWN;
-    			}
-    		}
-            //check Signature....
-            CAMsg::printMsg(LOG_DEBUG,"Try to verify next mix signature...\n");
-            //CASignature oSig;
-            CACertificate* nextCert=CALibProxytest::getOptions()->getNextMixTestCertificate();
-            /*oSig.setVerifyKey(nextCert);
-            SINT32 ret=oSig.verifyXML(child,NULL);*/
-            result = CAMultiSignature::verifyXML(child, nextCert);
-            delete nextCert;
-            nextCert = NULL;
-            if(result != E_SUCCESS)
-            {			
-                //CAMsg::printMsg(LOG_CRIT,"Could not verify the symmetric key from next mix! The operator of the next mix has to send you his current mix certificate, and you will have to import it in your configuration. Alternatively, you might import the proper root certification authority for verifying the certificate.\n");
+		//Sending symmetric key...
+		child=elemMixes->getFirstChild();
+		while(child!=NULL)
+		{
+			if(equals(child->getNodeName(),"Mix"))
+				{
+				//verify certificate from next mix if enabled
+				if(CALibProxytest::getOptions()->verifyMixCertificates())
+				{
+					CACertificate* nextMixCert = CALibProxytest::getOptions()->getTrustedCertificateStore()->verifyMixCert(child);
+					if(nextMixCert != NULL)
+					{
+						CAMsg::printMsg(LOG_DEBUG, "Next mix certificate was verified by a trusted root CA.\n");
+						CALibProxytest::getOptions()->setNextMixTestCertificate(nextMixCert);
+					}
+					else
+					{
+						CAMsg::printMsg(LOG_ERR, "Could not verify certificate received from next mix!\n");
+						return E_UNKNOWN;
+					}
+				}
+						//check Signature....
+						CAMsg::printMsg(LOG_DEBUG,"Try to verify next mix signature...\n");
+						//CASignature oSig;
+						CACertificate* nextCert=CALibProxytest::getOptions()->getNextMixTestCertificate();
+						/*oSig.setVerifyKey(nextCert);
+						SINT32 ret=oSig.verifyXML(child,NULL);*/
+						result = CAMultiSignature::verifyXML(child, nextCert);
+						delete nextCert;
+						nextCert = NULL;
+						if(result != E_SUCCESS)
+						{			
+								//CAMsg::printMsg(LOG_CRIT,"Could not verify the symmetric key from next mix! The operator of the next mix has to send you his current mix certificate, and you will have to import it in your configuration. Alternatively, you might import the proper root certification authority for verifying the certificate.\n");
 								CAMsg::printMsg(LOG_CRIT,"Could not verify the symmetric key from next mix! The operator of the next mix has to send you his current mix certificate, and you will have to import it in your configuration.\n");
-                if (doc != NULL)
-                {
-                	doc->release();
-                	doc = NULL;
-                }
-                return E_UNKNOWN;
-            }
-            CAMsg::printMsg(LOG_DEBUG,"Successfully verified XML signature of next mix!\n");
+								if (doc != NULL)
+								{
+									doc->release();
+									doc = NULL;
+								}
+								return E_UNKNOWN;
+						}
+						CAMsg::printMsg(LOG_DEBUG,"Successfully verified XML signature of next mix!\n");
 
-            result = checkCompatibility(child, "next");
-          
+						result = checkCompatibility(child, "next");
+					
 
-            DOMNode* rsaKey=child->getFirstChild();
-            CAASymCipher oRSA;
-            oRSA.setPublicKeyAsDOMNode(rsaKey);
-            DOMElement* elemNonce=NULL;
-            getDOMChildByName(child,"Nonce",elemNonce,false);
-            UINT8 arNonce[1024];
-            if(elemNonce!=NULL)
-            {
-                UINT32 lenNonce=1024;
-                UINT32 tmpLen=1024;
-                getDOMElementValue(elemNonce,arNonce,&lenNonce);
-                CABase64::decode(arNonce,lenNonce,arNonce,&tmpLen);
-                lenNonce=tmpLen;
-                tmpLen=1024;
-                CABase64::encode(SHA1(arNonce,lenNonce,NULL),SHA_DIGEST_LENGTH,
-                                 arNonce,&tmpLen);
-                arNonce[tmpLen]=0;
-            }
-            UINT8 key[64];
-            getRandom(key,64);
-            //UINT8 buff[400];
-            //UINT32 bufflen=400;
-            XERCES_CPP_NAMESPACE::DOMDocument* docSymKey=createDOMDocument();
-            DOMElement* elemRoot=NULL;
-           	encodeXMLEncryptedKey(key,64,elemRoot,docSymKey,&oRSA);
-           	docSymKey->appendChild(elemRoot);
-            if(elemNonce!=NULL)
-            {
-                DOMElement* elemNonceHash=createDOMElement(docSymKey,"Nonce");
-                setDOMElementValue(elemNonceHash,arNonce);
-                elemRoot->appendChild(elemNonceHash);
-            }
+						DOMNode* rsaKey=child->getFirstChild();
+						CAASymCipher oRSA;
+						oRSA.setPublicKeyAsDOMNode(rsaKey);
+						DOMElement* elemNonce=NULL;
+						getDOMChildByName(child,"Nonce",elemNonce,false);
+						UINT8 arNonce[1024];
+						if(elemNonce!=NULL)
+						{
+								UINT32 lenNonce=1024;
+								UINT32 tmpLen=1024;
+								getDOMElementValue(elemNonce,arNonce,&lenNonce);
+								CABase64::decode(arNonce,lenNonce,arNonce,&tmpLen);
+								lenNonce=tmpLen;
+								tmpLen=1024;
+								CABase64::encode(SHA1(arNonce,lenNonce,NULL),SHA_DIGEST_LENGTH,
+																 arNonce,&tmpLen);
+								arNonce[tmpLen]=0;
+						}
+						UINT8 key[64];
+						getRandom(key,64);
+						//UINT8 buff[400];
+						//UINT32 bufflen=400;
+						XERCES_CPP_NAMESPACE::DOMDocument* docSymKey=createDOMDocument();
+						DOMElement* elemRoot=NULL;
+						encodeXMLEncryptedKey(key,64,elemRoot,docSymKey,&oRSA);
+						docSymKey->appendChild(elemRoot);
+						if(elemNonce!=NULL)
+						{
+								DOMElement* elemNonceHash=createDOMElement(docSymKey,"Nonce");
+								setDOMElementValue(elemNonceHash,arNonce);
+								elemRoot->appendChild(elemNonceHash);
+						}
 
-            appendCompatibilityInfo(elemRoot);
+						appendCompatibilityInfo(elemRoot);
 
 			///Getting the KeepAlive Traffic...
 			DOMElement* elemKeepAlive=NULL;
@@ -645,33 +668,33 @@ SINT32 CAFirstMix::processKeyExchange()
 				m_u32KeepAliveSendInterval-=10000; //make the send interval a little bit smaller than the related receive interval
 			m_u32KeepAliveRecvInterval=max(u32KeepAliveRecvInterval,tmpSendInterval);
 			if (m_u32KeepAliveRecvInterval - 10000 < tmpSendInterval)
-			{
-				m_u32KeepAliveRecvInterval += 10000;
-			}
+				{
+					m_u32KeepAliveRecvInterval += 10000;
+				}
 			CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Calculated -- SendInterval %u -- Receive Interval %u\n",m_u32KeepAliveSendInterval,m_u32KeepAliveRecvInterval);
 
-            //m_pSignature->signXML(elemRoot);
-            m_pMultiSignature->signXML(elemRoot, true);
-            UINT32 outlen=0;
-            UINT8* out=DOM_Output::dumpToMem(docSymKey,&outlen);
-            if (docSymKey != NULL)
-            {
-				docSymKey->release();
-				docSymKey = NULL;
-            }
+			//m_pSignature->signXML(elemRoot);
+			m_pMultiSignature->signXML(elemRoot, true);
+			UINT32 outlen=0;
+			UINT8* out=DOM_Output::dumpToMem(docSymKey,&outlen);
+			if (docSymKey != NULL)
+				{
+					docSymKey->release();
+					docSymKey = NULL;
+				}
 			m_pMuxOut->setSendKey(key,32);
-            m_pMuxOut->setReceiveKey(key+32,32);
-            UINT32 size = htonl(outlen);
-            CAMsg::printMsg(LOG_DEBUG,"Sending symmetric key to next Mix! Size: %i\n", outlen);
-            m_pMuxOut->getCASocket()->send((UINT8*) &size, sizeof(size));
-            m_pMuxOut->getCASocket()->send(out, outlen);
-            m_pMuxOut->setCrypt(true);
-            delete[] out;
-            out = NULL;
-            break;
-        }
-        child=child->getNextSibling();
-    }
+			m_pMuxOut->setReceiveKey(key+32,32);
+			UINT32 size = htonl(outlen);
+			CAMsg::printMsg(LOG_DEBUG,"Sending symmetric key to next Mix! Size: %i\n", outlen);
+			m_pMuxOut->getCASocket()->send((UINT8*) &size, sizeof(size));
+			m_pMuxOut->getCASocket()->send(out, outlen);
+			m_pMuxOut->setCrypt(true);
+			delete[] out;
+			out = NULL;
+			break;
+				}
+				child=child->getNextSibling();
+		}
 	
 	 if (result != E_SUCCESS)
 	{
@@ -694,28 +717,28 @@ SINT32 CAFirstMix::processKeyExchange()
 		}
 		return E_UNKNOWN;
 	}
-    if(initMixCascadeInfo(elemMixes)!=E_SUCCESS)
-    {
-    	if (doc != NULL)
-    	{
-    		doc->release();
-    		doc = NULL;
-    	}
-    	CAMsg::printMsg(LOG_CRIT,"Error initializing cascade info.\n");
-        return E_UNKNOWN;
-    }
+		if(initMixCascadeInfo(elemMixes)!=E_SUCCESS)
+		{
+			if (doc != NULL)
+			{
+				doc->release();
+				doc = NULL;
+			}
+			CAMsg::printMsg(LOG_CRIT,"Error initializing cascade info.\n");
+				return E_UNKNOWN;
+		}
 /*    else
-    {
-        if(m_pInfoService != NULL)
-            m_pInfoService->sendCascadeHelo();
-    }*/
-    CAMsg::printMsg(LOG_DEBUG,"Key exchange finished!\n");
-    if (doc != NULL)
-    {
-    	doc->release();
-    	doc = NULL;
-    }
-    return E_SUCCESS;
+		{
+				if(m_pInfoService != NULL)
+						m_pInfoService->sendCascadeHelo();
+		}*/
+		CAMsg::printMsg(LOG_DEBUG,"Key exchange finished!\n");
+		if (doc != NULL)
+		{
+			doc->release();
+			doc = NULL;
+		}
+		return E_SUCCESS;
 }
 
 
@@ -956,7 +979,7 @@ THREAD_RETURN fm_loopSendToMix(void* param)
 						break;
 					}
 #if defined (LOG_PACKET_TIMES)
- 				if(!isZero64(pQueueEntry->timestamp_proccessing_start))
+				if(!isZero64(pQueueEntry->timestamp_proccessing_start))
 					{
 						getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
 						pFirstMix->m_pLogPacketStats->addToTimeingStats(*pQueueEntry,pMixPacket->flags,true);
@@ -1687,7 +1710,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		// es kann nicht blockieren unter der Annahme das der TCP-Sendbuffer > m_xmlKeyInfoSize ist....
 
 		//wait for keys from user
-		UINT16 xml_len;
+		UINT16 xml_len=0;
 		if(pNewUser->getCASocket()->isClosed())
 		{
 			CAMsg::printMsg(LOG_DEBUG,"User login: Socket was closed while waiting for first symmetric key from client!\n");
@@ -1719,7 +1742,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		xml_len=ntohs(xml_len);
 		UINT8* xml_buff=new UINT8[xml_len+2]; //+2 for size...
 		if(pNewUser->getCASocket()->isClosed() ||
-		   (ret = pNewUser->getCASocket()->receiveFullyT(xml_buff+2,xml_len,FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT)) !=E_SUCCESS)
+			 (ret = pNewUser->getCASocket()->receiveFullyT(xml_buff+2,xml_len,FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT)) !=E_SUCCESS)
 		{
 			if (pNewUser->getCASocket()->isClosed())
 			{
@@ -1915,7 +1938,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		xml_buff[1]=(UINT8)(u32&0xFF);
 
 		if (pNewUser->getCASocket()->isClosed() ||
-		    pNewUser->getCASocket()->sendFullyTimeOut(xml_buff,u32+2, 30000, 10000) != E_SUCCESS)
+				pNewUser->getCASocket()->sendFullyTimeOut(xml_buff,u32+2, 30000, 10000) != E_SUCCESS)
 		{
 			if (doc != NULL)
 			{
@@ -2131,7 +2154,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		{
 			if(pNewUser->receive(paymentLoginPacket, AI_LOGIN_SO_TIMEOUT) != MIXPACKET_SIZE)
 			{
-				CAMsg::printMsg(LOG_NOTICE,"AI login: client receive timeout.\n");
+				CAMsg::printMsg(LOG_INFO,"AI login: client receive timeout.\n");
 				aiLoginStatus = AUTH_LOGIN_FAILED;
 				break;
 			}
@@ -2153,7 +2176,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 					{
 						if(ai_ret == E_TIMEDOUT )
 						{
-							CAMsg::printMsg(LOG_NOTICE,"timeout occurred during AI login.");
+							CAMsg::printMsg(LOG_INFO,"timeout occurred during AI login.");
 						}
 						aiLoginStatus = AUTH_LOGIN_FAILED;
 						goto loop_break;
@@ -2478,16 +2501,16 @@ SINT32 CAFirstMix::clean()
 		if(m_pthreadsLogin!=NULL)
 			delete m_pthreadsLogin;
 		m_pthreadsLogin=NULL;
-    //     if(m_pInfoService!=NULL)
-    //     {
-    //         CAMsg::printMsg(LOG_CRIT,"Stopping InfoService....\n");
-    //         CAMsg::printMsg	(LOG_CRIT,"Memory usage before: %u\n",getMemoryUsage());
-    //         m_pInfoService->stop();
-    //         CAMsg::printMsg	(LOG_CRIT,"Memory usage after: %u\n",getMemoryUsage());
-    //         CAMsg::printMsg(LOG_CRIT,"Stopped InfoService!\n");
-    //         delete m_pInfoService;
-    //     }
-    //     m_pInfoService=NULL;
+		//     if(m_pInfoService!=NULL)
+		//     {
+		//         CAMsg::printMsg(LOG_CRIT,"Stopping InfoService....\n");
+		//         CAMsg::printMsg	(LOG_CRIT,"Memory usage before: %u\n",getMemoryUsage());
+		//         m_pInfoService->stop();
+		//         CAMsg::printMsg	(LOG_CRIT,"Memory usage after: %u\n",getMemoryUsage());
+		//         CAMsg::printMsg(LOG_CRIT,"Stopped InfoService!\n");
+		//         delete m_pInfoService;
+		//     }
+		//     m_pInfoService=NULL;
 
 	if(m_pthreadSendToMix!=NULL)
 		{
@@ -2833,7 +2856,7 @@ SINT32 CAFirstMix::deleteCountryStats()
 	*        if also must be set to the country the user comes from. In case ip!=NULL if holdes the default country id, if no country for the ip could be found
 	* @param ip the ip the user comes from. this ip is looked up in the databse to find the corresponding country. it is only used if bRemove==false. If no country for
 	*         that ip could be found a_countryID is used as default value
-  * @return the countryID which was asigned  to the user. This may be the default value a_countryID, if no country could be found.
+	* @return the countryID which was asigned  to the user. This may be the default value a_countryID, if no country could be found.
 **/
 SINT32 CAFirstMix::updateCountryStats(const UINT8 ip[4],UINT32 a_countryID,bool bRemove)
 	{

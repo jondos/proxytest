@@ -1,18 +1,18 @@
-/*
+ /*
 Copyright (c) 2000, The JAP-Team
 All rights reserved.
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
 	- Redistributions of source code must retain the above copyright notice,
-	  this list of conditions and the following disclaimer.
+		this list of conditions and the following disclaimer.
 
 	- Redistributions in binary form must reproduce the above copyright notice,
-	  this list of conditions and the following disclaimer in the documentation and/or
+		this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
 	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
-	  may be used to endorse or promote products derived from this software without specific
+		may be used to endorse or promote products derived from this software without specific
 		prior written permission.
 
 
@@ -33,10 +33,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.10.07.2"
+#define MIX_VERSION "00.11.06"
 
 // set to "true" if this is a testing/development version which is not meant for prodictive use
-#define MIX_VERSION_TESTING false
+#define MIX_VERSION_TESTING true
 
 #define MIX_VERSION_TESTING_TEXT "This is a testing/development version. Please do not expect it to work in a productive environment, and don't be surprised if you get unpredictive results or segmentation faults. If you don't like experiments, go and get the stable code.\n"
 
@@ -74,6 +74,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define DYNAMIC_MIX
 //#define SDTFA // specific logic needed by SDTFA, http://www.sdtfa.com
 
+
+#define NO_INFOSERVICE_TRHEADS
+
 //#define LASTMIX_CHECK_MEMORY // only for internal debugging purpose
 //#define PRINT_THREAD_STACK_TRACE //Usefull for debugging output of stack trace if mix dies...
 //#define ENABLE_GPERFTOOLS_CPU_PROFILER //Enables the usage of the Goggle GPerfTools CPU Profiler for profiling the operation of the Mix
@@ -82,6 +85,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define DATA_RETENTION_LOG //define if you need to store logs according to German data retention
 //#define INTEL_IPP_CRYPTO //define if you want to use the crypto routines of the Intel Performance Primitives
 //#define __UNIT_TEST__ //define if you want to compile the unit tests
+//#define EXPORT_ASYM_PRIVATE_KEY //define if you want to be able to export the private key of an assymetric key (only used for debugging purposes..)
+
 
 #if !defined(PRINT_THREAD_STACK_TRACE) && defined (DEBUG)&& ! defined(ONLY_LOCAL_PROXY)
 	#define PRINT_THREAD_STACK_TRACE
@@ -143,21 +148,20 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #endif
 //#define LOG_CRIME
 //#define PAYMENT //to enable payment support, now use configure --enable-payment..
-//#define NO_PARKING //to disable old control flow
 //#define NO_LOOPACCEPTUSER //to disable user accept thread for First Mix
 
 //#define USE_POOL
 //#define NEW_MIX_TYPE // to enable the new 1:x mix protocol
 //#define WITH_CONTROL_CHANNELS_TEST //enable a Test control Channel
-//#define NEW_FLOW_CONTROL //enable for the new flow control mechanism
-//#define NEW_CHANNEL_ENCRYPTION //enable the new protcol version which uses ECDH for key transport and two keys for upstream/downstream channel cryption
+//#define NEW_FLOW_CONTROL //enable for the new flow control mechanism --> now enabled by default (i.e. can not be disbaled anymore!)
+//#define NEW_CHANNEL_ENCRYPTION //enable the new protcol version which uses RSA-OAEP for key transport and two keys for upstream/downstream channel cryption (--> now enabled by default (i.e. can not be disbaled anymore!)
 //#define WITH_INTEGRITY_CHECK //enable AES-GCM encryption for data channels
 
 //#define REPLAY_DETECTION // enable to prevent replay of mix packets
 #define REPLAY_TIMESTAMP_PROPAGATION_INTERVALL 1 //How often (in minutes) should the current replay timestamps be propagate
 
 #define KEEP_ALIVE_TRAFFIC_RECV_WAIT_TIME  75000 //How long to wait for a Keep-Alive (or any other packet)
-																							       //before we believe that the connection is broken (in ms)
+																										 //before we believe that the connection is broken (in ms)
 #define KEEP_ALIVE_TRAFFIC_SEND_WAIT_TIME 65000 //How long to wait before we sent a dummy a Keep-Alive-Traffic
 
 //#define ECC
@@ -165,14 +169,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #if defined(PAYMENT) && ! defined(SSL_HACK)
 	#define SSL_HACK
-#endif
-
-#if defined (NEW_FLOW_CONTROL) && !defined(NO_PARKING)
-	#define NO_PARKING // disable old control flow
-#endif
-
-#if defined (WITH_INTEGRITY_CHECK) && !defined(NEW_CHANNEL_ENCRYPTION)
-	#define NEW_CHANNEL_ENCRYPTION
 #endif
 
 //#define REPLAY_DATABASE_PERFORMANCE_TEST //to perform a performance test of the replay db
@@ -236,8 +232,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define FM_PACKET_STATS_LOG_INTERVALL 1 //Intervall in Minutes for loggin packet stats for the first Mix
 #define LM_PACKET_STATS_LOG_INTERVALL 1 //Intervall in Minutes for loggin packet stats for the last Mix
 
-
-#define MIX_CASCADE_PROTOCOL_VERSION_0_1_1 11  //with integrity check and new channel encryption
+#define MIX_CASCADE_PROTOCOL_VERSION_0_1_2 12  //with integrity check and new channel encryption 
+#define MIX_CASCADE_PROTOCOL_VERSION_0_1_1 11  //with integrity check and new channel encryption --> never works correctly
 #define MIX_CASCADE_PROTOCOL_VERSION_0_1_0 10  //with new channel encryption
 //#define MIX_CASCADE_PROTOCOL_VERSION_0_9 9  //with new payment protocol
 #define MIX_CASCADE_PROTOCOL_VERSION_0_8 8  //with replay detection + control channels + first mix symmetric
@@ -253,11 +249,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#elif defined(PAYMENT)
 	//#define MIX_CASCADE_PROTOCOL_VERSION "0.9"
 #elif defined (WITH_INTEGRITY_CHECK)
-	#define MIX_CASCADE_PROTOCOL_VERSION "0.11"
-#elif defined (NEW_CHANNEL_ENCRYPTION)
-	#define MIX_CASCADE_PROTOCOL_VERSION "0.10" //"0.10tc"
+	#define MIX_CASCADE_PROTOCOL_VERSION "0.12"
 #else
-	#define MIX_CASCADE_PROTOCOL_VERSION "0.4" //"0.4tc"
+	#define MIX_CASCADE_PROTOCOL_VERSION "0.10" //"0.10tc"
 #endif
 
 
@@ -280,7 +274,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#endif
 	#define socklen_t int
 	#define MSG_NOSIGNAL 0
-    #include <io.h>
+		#include <io.h>
 	#include <conio.h>
 	#include <sys/timeb.h>
 	#include <process.h>
@@ -320,11 +314,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define __linux
 	#endif
 	#if defined(CWDEBUG)
-	  #include <libcw/sysd.h>
-	  #include <libcw/debug.h>
+		#include <libcw/sysd.h>
+		#include <libcw/debug.h>
 	#endif
 
-  #ifdef HAVE_CONFIG_H
+	#ifdef HAVE_CONFIG_H
 		#include "config.h"
 		#ifndef HAVE_SOCKLEN_T
 			typedef int socklen_t;
@@ -354,23 +348,23 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 			#define MSG_DONTWAIT 0
 		#endif
 		#if !defined(__FreeBSD__)&&!defined(__linux)
-    	typedef int socklen_t;
+			typedef int socklen_t;
 		#endif
-    #ifndef O_BINARY
+		#ifndef O_BINARY
 			#define O_BINARY 0
-    #endif
-    #ifndef MAX_PATH
+		#endif
+		#ifndef MAX_PATH
 			#define MAX_PATH 4096
-    #endif
+		#endif
 		#ifdef __sgi
 			#undef HAVE_VSNPRINTF
 			#undef HAVE_SNPRINTF
 			#include <alloca.h>
 		#endif
-    #if !defined( __linux) &&!defined(__CYGWIN__)
-    	#include <sys/filio.h>
-    	#define MSG_NOSIGNAL 0
-    #endif
+		#if !defined( __linux) &&!defined(__CYGWIN__)
+			#include <sys/filio.h>
+			#define MSG_NOSIGNAL 0
+		#endif
 	#endif //Have config.h
 
 	//Byte order defines
@@ -396,7 +390,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#include <sys/epoll.h>
 	#endif
 	#ifdef HAVE_MALLOC_H
-	    #include <malloc.h>
+			#include <malloc.h>
 	#endif
 	#include <sys/ioctl.h>
 	#include <sys/types.h>
@@ -418,18 +412,18 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include <termios.h>
 
 	#include <ctype.h>
-    typedef struct sockaddr SOCKADDR;
-  typedef SOCKADDR* LPSOCKADDR;
-  #define SOCKET int
-  typedef struct hostent HOSTENT;
+		typedef struct sockaddr SOCKADDR;
+	typedef SOCKADDR* LPSOCKADDR;
+	#define SOCKET int
+	typedef struct hostent HOSTENT;
 	#define ioctlsocket(a,b,c) ioctl(a,b,c)
-  #define closesocket(s) close(s)
-  #define SOCKET_ERROR -1
-  #define INVALID_SOCKET -1
-  #define SD_RECEIVE 0
-  #define SD_SEND 1
-  #define SD_BOTH 2
-  #define GET_NET_ERROR (errno)
+	#define closesocket(s) close(s)
+	#define SOCKET_ERROR -1
+	#define INVALID_SOCKET -1
+	#define SD_RECEIVE 0
+	#define SD_SEND 1
+	#define SD_BOTH 2
+	#define GET_NET_ERROR (errno)
 	#define SET_NET_ERROR(x) (errno = x)
 	#define GET_NET_ERROR_STR(x) (errno == E_TIMEDOUT ? "Connection timed out." : (errno == E_SOCKETCLOSED ? "Socket is closed." : strerror(x)))
 	#define RESETERROR errno=0;
@@ -441,9 +435,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#ifndef INADDR_NONE
 		#define INADDR_NONE -1
 	#endif
-  #ifndef AF_LOCAL
+	#ifndef AF_LOCAL
 		#define AF_LOCAL AF_UNIX
-  #endif
+	#endif
 	#if !defined(HAVE_MSG_DONTWAIT)&&!defined(MSG_DONTWAIT)
 		#define MSG_DONTWAIT 0
 	#endif
@@ -551,7 +545,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include <parsers/XercesDOMParser.hpp>
 
 #if (_XERCES_VERSION >= 20200)
-    XERCES_CPP_NAMESPACE_USE
+		XERCES_CPP_NAMESPACE_USE
 #endif
 
 #endif //wich DOM-Implementation to use?
@@ -582,32 +576,32 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 //For MySQL
 #if defined(COUNTRY_STATS)
-    #ifdef HAVE_CONFIG_H
+		#ifdef HAVE_CONFIG_H
 	#ifdef HAVE_MYSQL_MYSQL_H
-	    #include <mysql/mysql.h>
+			#include <mysql/mysql.h>
 	#else
-	    #include <mysql.h>
+			#include <mysql.h>
 	#endif
-    #else //HAVE_CONFIG_H
+		#else //HAVE_CONFIG_H
 	#include <mysql/mysql.h>
-    #endif
+		#endif
 #endif
 
 //For Payment
 #ifdef PAYMENT
 	#ifdef HAVE_CONFIG_H
 		#ifdef HAVE_POSTGRESQL_LIBPQ_FE_H
-	    #include <postgresql/libpq-fe.h>
+			#include <postgresql/libpq-fe.h>
 		#elif defined(HAVE_PGSQL_LIBPQ_FE_H)
-	    #include <pgsql/libpq-fe.h>
+			#include <pgsql/libpq-fe.h>
 		#else
-	    #include <libpq-fe.h>
+			#include <libpq-fe.h>
 		#endif
-  #elif defined(__FreeBSD__) ||defined (_WIN32)
+	#elif defined(__FreeBSD__) ||defined (_WIN32)
 		#include <libpq-fe.h>
 			#else
 		#include <postgresql/libpq-fe.h>
-  #endif
+	#endif
 #endif
 //Compressed Logs
 #ifdef COMPRESSED_LOGS
@@ -656,21 +650,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define DATA_RETENTION_LOG_INFO
 #endif
 
-#ifdef NEW_FLOW_CONTROL
-	#define NEW_FLOW_CONTROL_INFO " (with new flow control)"
-	#define NEW_FLOW_CONTROL_COMPATIBILITY "NewFlowControl"
-#else
-	#define NEW_FLOW_CONTROL_INFO
-	#define NEW_FLOW_CONTROL_COMPATIBILITY
-#endif
+#define NEW_FLOW_CONTROL_INFO " (with new flow control)"
+#define NEW_FLOW_CONTROL_COMPATIBILITY "NewFlowControl"
 
-#ifdef NEW_CHANNEL_ENCRYPTION
-	#define NEW_CHANNEL_ENCRYPTION_INFO " (with enhanced channel encryption)"
-	#define NEW_CHANNEL_ENCRYPTION_COMPATIBILITY "NewChannelEncryption"
-#else
-	#define NEW_CHANNEL_ENCRYPTION_INFO
-	#define NEW_CHANNEL_ENCRYPTION_COMPATIBILITY
-#endif
+#define NEW_CHANNEL_ENCRYPTION_INFO " (with enhanced channel encryption)"
+#define NEW_CHANNEL_ENCRYPTION_COMPATIBILITY "NewChannelEncryption"
 
 #ifdef WITH_INTEGRITY_CHECK
 	#define WITH_INTEGRITY_CHECK_INFO " (with integrity check for data channels)"
@@ -680,13 +664,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define WITH_INTEGRITY_CHECK_COMPATIBILITY
 #endif
 
-#ifdef NO_INFOSERVICE_TRHEADS
-	#define NO_INFOSERVICE_TRHEADS_INFO " (no infoservice threads)"
-#else
-	#define NO_INFOSERVICE_TRHEADS_INFO
-#endif
-
-#define MIX_VERSION_INFO "Mix-Version: " MIX_VERSION PAYMENT_VERSION_INFO DATA_RETENTION_LOG_INFO NEW_FLOW_CONTROL_INFO NEW_CHANNEL_ENCRYPTION_INFO WITH_INTEGRITY_CHECK_INFO NO_INFOSERVICE_TRHEADS_INFO "\nUsing: " OPENSSL_VERSION_TEXT "\nUsing Xerces-C: " MY_XERCES_VERSION "\n"
+#define MIX_VERSION_INFO "Mix-Version: " MIX_VERSION PAYMENT_VERSION_INFO DATA_RETENTION_LOG_INFO NEW_FLOW_CONTROL_INFO NEW_CHANNEL_ENCRYPTION_INFO WITH_INTEGRITY_CHECK_INFO "\nUsing: " OPENSSL_VERSION_TEXT "\nUsing Xerces-C: " MY_XERCES_VERSION "\n"
 #define MIX_VERSION_COMPATIBILITY PAYMENT_COMPATIBILITY " " NEW_FLOW_CONTROL_COMPATIBILITY " " NEW_CHANNEL_ENCRYPTION_COMPATIBILITY " " WITH_INTEGRITY_CHECK_COMPATIBILITY
 
 #include "errorcodes.hpp"
