@@ -5,14 +5,14 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
 	- Redistributions of source code must retain the above copyright notice,
-	  this list of conditions and the following disclaimer.
+		this list of conditions and the following disclaimer.
 
 	- Redistributions in binary form must reproduce the above copyright notice,
-	  this list of conditions and the following disclaimer in the documentation and/or
+		this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
 	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
-	  may be used to endorse or promote products derived from this software without specific
+		may be used to endorse or promote products derived from this software without specific
 		prior written permission.
 
 
@@ -48,11 +48,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define MACRO_DO_LOG_CHANNEL_CLOSE_FROM_MIX MACRO_DO_LOG_CHANNEL(2)
 #endif
 
-#ifdef NEW_CHANNEL_ENCRYPTION
-	#define LAST_MIX_SIZE_OF_SYMMETRIC_KEYS 2*KEY_SIZE
-#else
-	#define LAST_MIX_SIZE_OF_SYMMETRIC_KEYS KEY_SIZE
-#endif
+#define LAST_MIX_SIZE_OF_SYMMETRIC_KEYS 2*KEY_SIZE
 
 
 SINT32 CALastMixA::loop()
@@ -80,12 +76,11 @@ SINT32 CALastMixA::loop()
 		SINT32 retval;
 		SINT32 countRead;
 		lmChannelListEntry* pChannelListEntry;
-		UINT8 rsaBuff[RSA_SIZE];
+		UINT8* rsaBuff=new UINT8[RSA_SIZE];
 		UINT32 rsaOutLen=RSA_SIZE;
 		UINT8* tmpBuff=new UINT8[MIXPACKET_SIZE];
-		UINT8 ciphertextBuff[DATA_SIZE];
-		UINT8 plaintextBuff[DATA_SIZE - GCM_MAC_SIZE];
-		UINT8 lengthAndFlagsField[2];
+		UINT8* ciphertextBuff=new UINT8[DATA_SIZE];
+		UINT8* plaintextBuff=new UINT8[DATA_SIZE - GCM_MAC_SIZE];
 		UINT16 payloadLen;
 		bool bAktiv;
 		m_logUploadedPackets=m_logDownloadedPackets=0;
@@ -146,11 +141,7 @@ SINT32 CALastMixA::loop()
 												CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
 											#endif
 
-#ifdef NEW_CHANNEL_ENCRYPTION
 											m_pRSA->decryptOAEP(pMixPacket->data,rsaBuff,&rsaOutLen);
-#else
-											m_pRSA->decrypt(pMixPacket->data,rsaBuff);
-#endif
 											#ifdef REPLAY_DETECTION
 												// replace time(NULL) with the real timestamp ()
 												// packet-timestamp + m_u64ReferenceTime
@@ -164,28 +155,38 @@ SINT32 CALastMixA::loop()
 											#endif
 											CASymCipher* newCipher = new CASymCipher();
 											#ifdef WITH_INTEGRITY_CHECK
-												newCipher->setGCMKeys(rsaBuff, rsaBuff + LAST_MIX_SIZE_OF_SYMMETRIC_KEYS - KEY_SIZE);
-												payloadLen = ntohs(*((UINT16*)(rsaBuff + LAST_MIX_SIZE_OF_SYMMETRIC_KEYS)));
+												newCipher->setGCMKeys(rsaBuff, rsaBuff + KEY_SIZE);
+
+												//Decrypt only the first two bytes to get the payload length
+												UINT16 lengthAndFlagsField=0;
+												newCipher->decryptMessage(rsaBuff + LAST_MIX_SIZE_OF_SYMMETRIC_KEYS, 2,(UINT8*) &lengthAndFlagsField, false);
+												payloadLen = ntohs(lengthAndFlagsField);
 												payloadLen &= PAYLOAD_LEN_MASK;
-												if (payloadLen < 0) payloadLen = 0;
-												if (payloadLen > PAYLOAD_SIZE) payloadLen = PAYLOAD_SIZE;
-												retval = 1;
-												retval = newCipher->decryptMessage(pMixPacket->data + RSA_SIZE, LAST_MIX_SIZE_OF_SYMMETRIC_KEYS + 3 + payloadLen + GCM_MAC_SIZE - rsaOutLen, pMixPacket->data + rsaOutLen - LAST_MIX_SIZE_OF_SYMMETRIC_KEYS, true);
+												if (payloadLen > (PAYLOAD_SIZE-LAST_MIX_SIZE_OF_SYMMETRIC_KEYS-RSA_SIZE-GCM_MAC_SIZE - PAYLOAD_HEADER_SIZE+rsaOutLen))
+													retval=E_UNKNOWN;
+												else
+													{
+														//prepend the asym decrypted sym encrypted part of teh Mix packet to the sym only encrypted part of the mix packet
+														memcpy(pMixPacket->data+RSA_SIZE-rsaOutLen+LAST_MIX_SIZE_OF_SYMMETRIC_KEYS,rsaBuff + LAST_MIX_SIZE_OF_SYMMETRIC_KEYS,rsaOutLen-LAST_MIX_SIZE_OF_SYMMETRIC_KEYS);
+														//now decrpyt the whole sym encrypted part
+														retval = newCipher->decryptMessage(pMixPacket->data +RSA_SIZE-rsaOutLen+LAST_MIX_SIZE_OF_SYMMETRIC_KEYS,  payloadLen+ GCM_MAC_SIZE + PAYLOAD_HEADER_SIZE , pMixPacket->data, true);
+													}
 											#else
 												newCipher->setKeys(rsaBuff,LAST_MIX_SIZE_OF_SYMMETRIC_KEYS);
 												newCipher->crypt1(
 														pMixPacket->data+RSA_SIZE,
 														pMixPacket->data+rsaOutLen-LAST_MIX_SIZE_OF_SYMMETRIC_KEYS,
 														DATA_SIZE-RSA_SIZE);
+												memcpy(	pMixPacket->data,rsaBuff+LAST_MIX_SIZE_OF_SYMMETRIC_KEYS,
+															rsaOutLen-LAST_MIX_SIZE_OF_SYMMETRIC_KEYS);
 											#endif
 
-											memcpy(	pMixPacket->data,rsaBuff+LAST_MIX_SIZE_OF_SYMMETRIC_KEYS,
-															rsaOutLen-LAST_MIX_SIZE_OF_SYMMETRIC_KEYS);
 											#ifdef LOG_PACKET_TIMES
 												getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
 											#endif
 											#ifdef WITH_INTEGRITY_CHECK
-												if (retval == 0) {
+												if (retval != E_SUCCESS)
+													{
 													/* invalid MAC -> send channel close packet with integrity error flag */
 													getRandom(pMixPacket->data, DATA_SIZE);
 													pMixPacket->flags = CHANNEL_CLOSE;
@@ -203,6 +204,7 @@ SINT32 CALastMixA::loop()
 													CAMsg::printMsg(LOG_ERR, "Integrity check failed in channel-open packet!\n");
 												} else {
 											#endif
+
 											CASocket* tmpSocket=new CASocket;
 											CACacheLoadBalancing* ptmpLB=m_pCacheLB;
 											ret=E_UNKNOWN;
@@ -309,8 +311,8 @@ SINT32 CALastMixA::loop()
 															/* send a close packet signaling the connect error */
 															getRandom(pMixPacket->data, DATA_SIZE);
 															pMixPacket->flags = CHANNEL_CLOSE;
-															pMixPacket->payload.len = htons(CONNECTION_ERROR_FLAG);
-															pMixPacket->payload.type = 0;
+															pMixPacket->payload.len = 0;
+															pMixPacket->payload.type = CONNECTION_ERROR_FLAG;
 															#ifdef WITH_INTEGRITY_CHECK
 																newCipher->encryptMessage(pMixPacket->data, 3, ciphertextBuff);
 																memcpy(pMixPacket->data, ciphertextBuff, 3 + GCM_MAC_SIZE);
@@ -405,25 +407,6 @@ SINT32 CALastMixA::loop()
 												#endif
 												//m_pChannelList->removeChannel(pMixPacket->channel);
 											}
-										else if(pMixPacket->flags==CHANNEL_SUSPEND)
-											{
-												#ifdef _DEBUG
-												CAMsg::printMsg(LOG_DEBUG,"Suspending channel %u Socket: %u\n",pMixPacket->channel,pChannelListEntry->pSocket->getSocket());
-												#endif
-												psocketgroupCacheRead->remove(*(pChannelListEntry->pSocket));
-											}
-										else if(pMixPacket->flags==CHANNEL_RESUME)
-											{
-												#ifdef _DEBUG
-													CAMsg::printMsg(LOG_DEBUG,"Resuming channel %u Socket: %u\n",pMixPacket->channel,pChannelListEntry->pSocket->getSocket());
-												#endif
-
-#ifdef HAVE_EPOLL
-												psocketgroupCacheRead->add(*(pChannelListEntry->pSocket),pChannelListEntry);
-#else
-												psocketgroupCacheRead->add(*(pChannelListEntry->pSocket));
-#endif
-											}
 										else if(pMixPacket->flags==CHANNEL_DATA)
 											{
 												#ifdef LOG_CHANNEL
@@ -431,16 +414,17 @@ SINT32 CALastMixA::loop()
 												#endif
 												#ifdef WITH_INTEGRITY_CHECK
 													/* decrypt only the first 2 bytes to get the payload length */
-													pChannelListEntry->pCipher->decryptMessage(pMixPacket->data, 2, lengthAndFlagsField, false);
-													payloadLen = ntohs(*((UINT16*)(lengthAndFlagsField)));
+													UINT16 lengthAndFlagsField=0;
+													pChannelListEntry->pCipher->decryptMessage(pMixPacket->data, 2,(UINT8*) &lengthAndFlagsField, false);
+													payloadLen = ntohs(lengthAndFlagsField);
 													payloadLen &= PAYLOAD_LEN_MASK;
-													if (payloadLen < 0) payloadLen = 0;
-													if (payloadLen > PAYLOAD_SIZE) payloadLen = PAYLOAD_SIZE;
-													retval = 1;
-													retval = pChannelListEntry->pCipher->decryptMessage(pMixPacket->data, payloadLen + 3 + GCM_MAC_SIZE, plaintextBuff, true);
-													memcpy(pMixPacket->data, plaintextBuff, payloadLen + 3);
-
-													if (retval == 0) {
+													if (payloadLen > PAYLOAD_SIZE)
+														retval=E_UNKNOWN;
+													else
+														{
+															retval = pChannelListEntry->pCipher->decryptMessage(pMixPacket->data, payloadLen + 3 + GCM_MAC_SIZE, plaintextBuff, true);
+														}
+													if (retval != E_SUCCESS) {
 														/* invalid MAC -> send channel close packet with integrity error flag */
 														psocketgroupCacheRead->remove(*(pChannelListEntry->pSocket));
 														psocketgroupCacheWrite->remove(*(pChannelListEntry->pSocket));
@@ -455,32 +439,31 @@ SINT32 CALastMixA::loop()
 														pMixPacket->payload.type = 0;
 														pChannelListEntry->pCipher->encryptMessage(pMixPacket->data, 3, ciphertextBuff);
 														memcpy(pMixPacket->data, ciphertextBuff, 3 + GCM_MAC_SIZE);
-	                        							delete pChannelListEntry->pCipher;
-	                        							pChannelListEntry->pCipher = NULL;
+														delete pChannelListEntry->pCipher;
+														pChannelListEntry->pCipher = NULL;
 														#ifdef LOG_CHANNEL
-	                        								pChannelListEntry->packetsDataOutToUser++;
+																					pChannelListEntry->packetsDataOutToUser++;
 															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
 															MACRO_DO_LOG_CHANNEL_CLOSE_FROM_MIX
 														#endif
-	                        							m_pChannelList->removeChannel(pMixPacket->channel);
+																				m_pChannelList->removeChannel(pMixPacket->channel);
 														#ifdef LOG_PACKET_TIMES
 															setZero64(pQueueEntry->timestamp_proccessing_start);
 														#endif
 														m_pQueueSendToMix->add(pQueueEntry,sizeof(tQueueEntry));
 														m_logDownloadedPackets++;
-	                        							CAMsg::printMsg(LOG_ERR, "Integrity check failed in data packet!\n");
+														CAMsg::printMsg(LOG_ERR, "Integrity check failed in data packet!\n");
 													} else {
+														memcpy(pMixPacket->data, plaintextBuff, payloadLen + 3);
 												#else
 													pChannelListEntry->pCipher->crypt1(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 												#endif
 												ret=ntohs(pMixPacket->payload.len);
-												#ifdef NEW_FLOW_CONTROL
-													if(ret&NEW_FLOW_CONTROL_FLAG)
-														{
-															//CAMsg::printMsg(LOG_DEBUG,"got send me\n");
-															pChannelListEntry->sendmeCounterDownstream=max(0,pChannelListEntry->sendmeCounterDownstream-FLOW_CONTROL_SENDME_SOFT_LIMIT);
-														}
-												#endif
+												if(ret&NEW_FLOW_CONTROL_FLAG)
+													{
+														//CAMsg::printMsg(LOG_DEBUG,"got send me\n");
+														pChannelListEntry->sendmeCounterDownstream=max(0,pChannelListEntry->sendmeCounterDownstream-FLOW_CONTROL_SENDME_SOFT_LIMIT);
+													}
 												ret&=PAYLOAD_LEN_MASK;
 												if(ret>=0&&ret<=PAYLOAD_SIZE)
 													{
@@ -556,8 +539,8 @@ SINT32 CALastMixA::loop()
 															pChannelListEntry->pCipher->encryptMessage(pMixPacket->data, 3, ciphertextBuff);
 															memcpy(pMixPacket->data, ciphertextBuff, 3 + GCM_MAC_SIZE);
 														#endif
-                            							delete pChannelListEntry->pCipher;
-                            							pChannelListEntry->pCipher = NULL;
+																					delete pChannelListEntry->pCipher;
+																					pChannelListEntry->pCipher = NULL;
 														#ifdef LOG_CHANNEL
 															pChannelListEntry->packetsDataOutToUser++;
 															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
@@ -572,7 +555,6 @@ SINT32 CALastMixA::loop()
 													}
 												else
 													{
-#ifdef NEW_FLOW_CONTROL
 														//count this packet as Upstream packet...
 														pChannelListEntry->sendmeCounterUpstream++;
 														if(pChannelListEntry->sendmeCounterUpstream>=FLOW_CONTROL_SENDME_SOFT_LIMIT) //we need to sent the SENDME ack down to the client...
@@ -587,7 +569,7 @@ SINT32 CALastMixA::loop()
 															#else
 																pChannelListEntry->pCipher->crypt2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 															#endif
- 															#ifdef LOG_CHANNEL
+															#ifdef LOG_CHANNEL
 																pChannelListEntry->packetsDataOutToUser++;
 																getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
 																MACRO_DO_LOG_CHANNEL_CLOSE_FROM_MIX
@@ -595,12 +577,11 @@ SINT32 CALastMixA::loop()
 															#ifdef LOG_PACKET_TIMES
 																setZero64(pQueueEntry->timestamp_proccessing_start);
 															#endif
-															CAMsg::printMsg(LOG_DEBUG,"sent send me\n");
+															//CAMsg::printMsg(LOG_DEBUG,"sent send me\n");
 															m_pQueueSendToMix->add(pQueueEntry,sizeof(tQueueEntry));
 															m_logDownloadedPackets++;
 															pChannelListEntry->sendmeCounterUpstream-=FLOW_CONTROL_SENDME_SOFT_LIMIT;
 														}
-#endif
 #ifdef HAVE_EPOLL
 														psocketgroupCacheWrite->add(*(pChannelListEntry->pSocket),pChannelListEntry);
 #else
@@ -683,8 +664,8 @@ SINT32 CALastMixA::loop()
 															pChannelListEntry->pCipher->encryptMessage(pMixPacket->data, 3, ciphertextBuff);
 															memcpy(pMixPacket->data, ciphertextBuff, 3 + GCM_MAC_SIZE);
 														#endif
-							                            delete pChannelListEntry->pCipher;
-							                            pChannelListEntry->pCipher = NULL;
+																					delete pChannelListEntry->pCipher;
+																					pChannelListEntry->pCipher = NULL;
 														delete pChannelListEntry->pQueueSend;
 														pChannelListEntry->pQueueSend = NULL;
 														pMixPacket->channel=pChannelListEntry->channelIn;
@@ -734,25 +715,15 @@ SINT32 CALastMixA::loop()
 									{
 										countRead--;
 #endif
-#if defined(DELAY_CHANNELS)||defined(DELAY_CHANNELS_LATENCY)||defined(NEW_FLOW_CONTROL)
-	UINT32 bucketSize;
-	#define NEED_IF_12
-#endif
-										#ifdef NEED_IF_12
-										if(true
-										#endif
+										UINT32 bucketSize;
+										if((pChannelListEntry->sendmeCounterDownstream<FLOW_CONTROL_SENDME_HARD_LIMIT)
 												#ifdef DELAY_CHANNELS
 													&&((bucketSize=m_pChannelList->getDelayBuckets(pChannelListEntry->delayBucketID))>0 )
 												#endif
 												#ifdef DELAY_CHANNELS_LATENCY
 													&&(isGreater64(current_time_millis,pChannelListEntry->timeLatency))
 												#endif
-												#ifdef NEW_FLOW_CONTROL
-													&&(pChannelListEntry->sendmeCounterDownstream<FLOW_CONTROL_SENDME_HARD_LIMIT)
-												#endif
-											#ifdef NEED_IF_12
 											)
-											#endif
 											{
 												#ifndef DELAY_CHANNELS
 													ret=pChannelListEntry->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE);
@@ -832,9 +803,7 @@ SINT32 CALastMixA::loop()
 														#if defined(LOG_CHANNEL)
 															pChannelListEntry->packetsDataOutToUser++;
 														#endif
-														#ifdef NEW_FLOW_CONTROL
-															pChannelListEntry->sendmeCounterDownstream++;
-														#endif
+														pChannelListEntry->sendmeCounterDownstream++;
 													}
 											}
 #ifdef HAVE_EPOLL
@@ -865,6 +834,12 @@ SINT32 CALastMixA::loop()
 
 		delete []tmpBuff;
 		tmpBuff = NULL;
+		delete []rsaBuff;
+		rsaBuff = NULL;
+		delete []ciphertextBuff;
+		ciphertextBuff = NULL;
+		delete []plaintextBuff;
+		plaintextBuff = NULL;
 		delete pQueueEntry;
 		pQueueEntry = NULL;
 		pLogThread->join();

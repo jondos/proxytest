@@ -21,7 +21,7 @@
 
 #include "tre-internal.h"
 #include "tre-mem.h"
-#include "xmalloc.h"
+#include "malloc.h"
 
 
 /* Returns a new memory allocator or NULL if out of memory. */
@@ -35,7 +35,7 @@ tre_mem_new_impl(int provided, void *provided_block)
       memset(mem, 0, sizeof(*mem));
     }
   else
-    mem = (tre_mem_t)xcalloc(1, sizeof(*mem));
+    mem = (tre_mem_t)calloc(1, sizeof(*mem));
   if (mem == NULL)
     return NULL;
   return mem;
@@ -50,12 +50,12 @@ tre_mem_destroy(tre_mem_t mem)
 
   while (l != NULL)
     {
-      xfree(l->data);
+      free(l->data);
       tmp = l->next;
-      xfree(l);
+      free(l);
       l = tmp;
     }
-  xfree(mem);
+  free(mem);
 }
 
 
@@ -113,16 +113,16 @@ tre_mem_alloc_impl(tre_mem_t mem, int provided, void *provided_block,
 	    block_size = TRE_MEM_BLOCK_SIZE;
 	  DPRINT(("tre_mem_alloc: allocating new %d byte block\n",
 		  block_size));
-	  l = (tre_list_t*)xmalloc(sizeof(*l));
+	  l = (tre_list_t*)malloc(sizeof(*l));
 	  if (l == NULL)
 	    {
 	      mem->failed = 1;
 	      return NULL;
 	    }
-	  l->data = xmalloc(block_size);
+	  l->data = malloc(block_size);
 	  if (l->data == NULL)
 	    {
-	      xfree(l);
+	      free(l);
 	      mem->failed = 1;
 	      return NULL;
 	    }

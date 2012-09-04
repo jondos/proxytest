@@ -477,8 +477,8 @@ SINT32 CAInfoService::sendStatus(bool bIncludeCerts)
 		return E_UNKNOWN;
 	}
 
-	UINT32 len;
-	SINT32 ret;
+	UINT32 len=0;
+	SINT32 ret=E_UNKNOWN;
 	UINT8* strStatusXML=getStatusXMLAsString(bIncludeCerts,len);
 
 	if(strStatusXML==NULL)
@@ -578,7 +578,7 @@ SINT32 CAInfoService::sendStatus(const UINT8* a_strStatusXML,UINT32 a_len, const
 		UINT8 buffHeader[512];
 		SINT32 ret = E_UNKNOWN;
 		UINT8 hostname[255];
-		UINT64 currentTimeout = MIX_TO_INFOSERVICE_TIMEOUT;
+		UINT32 currentTimeout = MIX_TO_INFOSERVICE_TIMEOUT;
 		UINT64 startupTime, currentMillis;
 
 

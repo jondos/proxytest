@@ -5,14 +5,14 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
 	- Redistributions of source code must retain the above copyright notice, 
-	  this list of conditions and the following disclaimer.
+		this list of conditions and the following disclaimer.
 
 	- Redistributions in binary form must reproduce the above copyright notice, 
-	  this list of conditions and the following disclaimer in the documentation and/or 
+		this list of conditions and the following disclaimer in the documentation and/or 
 		other materials provided with the distribution.
 
 	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors 
-	  may be used to endorse or promote products derived from this software without specific 
+		may be used to endorse or promote products derived from this software without specific 
 		prior written permission. 
 
 	
@@ -113,8 +113,8 @@ SINT32 CASymCipher::crypt1(const UINT8* in,UINT8* out,UINT32 len)
 				return E_SUCCESS;
 #endif
 		UINT32 i=0;
-    while(i+15<len)
-    	{
+		while(i+15<len)
+			{
 #ifdef INTEL_IPP_CRYPTO
 				ippsRijndael128EncryptECB(m_iv1,m_iv1,KEY_SIZE, m_keyAES1, IppsCPPaddingNONE);
 #else
@@ -325,37 +325,32 @@ void CASymCipher::setGCMKeys(UINT8* keyRecv, UINT8* keySend) {
 	gcm_init_64k(m_pGCMCtxDec, keyRecv, 128);
 }
 
-SINT32 CASymCipher::encryptMessage(const UINT8* in, UINT32 inlen, UINT8* out) {
-	if (m_pGCMCtxEnc != NULL) {
-		m_pcsEnc->lock();
-		UINT32 iv = htonl(m_nEncMsgCounter);
+SINT32 CASymCipher::encryptMessage(const UINT8* in, UINT32 inlen, UINT8* out)
+	{
+		//m_pcsEnc->lock();
+		m_pEncMsgIV[2] = htonl(m_nEncMsgCounter);
 		m_nEncMsgCounter++;
-		memcpy(m_pEncMsgIV + 8, &iv, 4);
-		::gcm_encrypt_64k(m_pGCMCtxEnc, m_pEncMsgIV, 12, in, inlen, NULL, 0, out, out + inlen);
-		m_pcsEnc->unlock();
+		gcm_encrypt_64k(m_pGCMCtxEnc, m_pEncMsgIV, in, inlen, out, (UINT32*)(out + inlen));
+		//m_pcsEnc->unlock();
 		return E_SUCCESS;
-	} else {
-		memcpy(out, in, inlen);
-		return -1;
 	}
-}
 
-SINT32 CASymCipher::decryptMessage(const UINT8* in, UINT32 inlen, UINT8* out, bool integrityCheck) {
-	SINT32 ret = 0;
-	if (m_pGCMCtxDec != NULL) {
-		m_pcsDec->lock();
-		UINT32 iv = htonl(m_nDecMsgCounter);
-		if (integrityCheck) m_nDecMsgCounter++;
-		memcpy(m_pDecMsgIV + 8, &iv, 4);
-		if (integrityCheck) {
-			ret = ::gcm_decrypt_64k(m_pGCMCtxDec, m_pDecMsgIV, 12, in, inlen - 16, in + inlen - 16, 16, NULL, 0, out);
-		} else {
-			ret = ::gcm_decrypt_64k(m_pGCMCtxDec, m_pDecMsgIV, 12, in, inlen, NULL, 0, NULL, 0, out);
-		}
-		m_pcsDec->unlock();
-		return ret;
-	} else {
-		memcpy(out, in, inlen);
-		return -1;
+SINT32 CASymCipher::decryptMessage(const UINT8* in, UINT32 inlen, UINT8* out, bool integrityCheck) 
+	{
+		SINT32 ret = E_UNKNOWN;
+		//m_pcsDec->lock();
+		m_pDecMsgIV[2] = htonl(m_nDecMsgCounter);
+		if (integrityCheck)
+			{
+				m_nDecMsgCounter++;
+				ret = ::gcm_decrypt_64k(m_pGCMCtxDec, m_pDecMsgIV, in, inlen - 16, in + inlen - 16, out);
+			}
+		else
+			{
+				ret = ::gcm_decrypt_64k(m_pGCMCtxDec, m_pDecMsgIV, in, inlen, out);
+			}
+		//m_pcsDec->unlock();
+		if(ret==0)
+			return E_UNKNOWN;
+		return E_SUCCESS;
 	}
-}

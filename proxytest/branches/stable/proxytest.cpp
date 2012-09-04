@@ -543,7 +543,7 @@ int main(int argc, const char* argv[])
 		if(CALibProxytest::getOptions()->parse(argc,argv) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_CRIT,"An error occurred before we could finish parsing the configuration file. Exiting...\n");
-			exit(EXIT_FAILURE);
+ 			exit(EXIT_FAILURE);
 		}
 		if(!(	CALibProxytest::getOptions()->isFirstMix()||
 					CALibProxytest::getOptions()->isMiddleMix()||

@@ -14,7 +14,6 @@
 
 #include "tre-internal.h"
 #include "tre-stack.h"
-#include "xmalloc.h"
 
 union tre_stack_item {
   void *voidptr_value;
@@ -35,13 +34,13 @@ tre_stack_new(int size, int max_size, int increment)
 {
   tre_stack_t *s;
 
-  s = (tre_stack_t *)xmalloc(sizeof(*s));
+  s = (tre_stack_t *)malloc(sizeof(*s));
   if (s != NULL)
     {
-      s->stack = (tre_stack_item *)xmalloc(sizeof(*s->stack) * size);
+      s->stack = (tre_stack_item *)malloc(sizeof(*s->stack) * size);
       if (s->stack == NULL)
 	{
-	  xfree(s);
+	  free(s);
 	  return NULL;
 	}
       s->size = size;
@@ -55,8 +54,8 @@ tre_stack_new(int size, int max_size, int increment)
 void
 tre_stack_destroy(tre_stack_t *s)
 {
-  xfree(s->stack);
-  xfree(s);
+  free(s->stack);
+  free(s);
 }
 
 int
@@ -88,7 +87,7 @@ tre_stack_push(tre_stack_t *s, union tre_stack_item value)
 	  new_size = s->size + s->increment;
 	  if (new_size > s->max_size)
 	    new_size = s->max_size;
-	  new_buffer = (tre_stack_item*)xrealloc(s->stack, sizeof(*new_buffer) * new_size);
+	  new_buffer = (tre_stack_item*)realloc(s->stack, sizeof(*new_buffer) * new_size);
 	  if (new_buffer == NULL)
 	    {
 	      DPRINT(("tre_stack_push: realloc failed.\n"));

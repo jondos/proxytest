@@ -110,10 +110,8 @@ SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCip
 		pNewEntry->packetsDataOutToUser=0;
 		pNewEntry->trafficOutToUser=0;
 #endif
-#ifdef NEW_FLOW_CONTROL
 		pNewEntry->sendmeCounterDownstream=0;
 		pNewEntry->sendmeCounterUpstream=0;
-#endif		
 #ifdef DELAY_CHANNELS
 		pNewEntry->delayBucket=m_u32DelayChannelUnlimitTraffic; //can always send some first packets
 		for(UINT32 i=0;i<MAX_POLLFD;i++)

@@ -45,13 +45,25 @@ class CAASymCipher
 			SINT32 generateKeyPair(UINT32 size);
 			//SINT32 getPublicKey(UINT8* buff,UINT32 *len);
 #ifndef ONLY_LOCAL_PROXY
+	private:
+		SINT32 addKeyPart(DOMElement* elemRoot,XERCES_CPP_NAMESPACE::DOMDocument* docOwner,const char* partName,BIGNUM* part);
+	public:
 			SINT32 getPublicKeyAsXML(UINT8* buff,UINT32* len);
 			SINT32 getPublicKeyAsDOMElement(DOMElement* & elemRoot,XERCES_CPP_NAMESPACE::DOMDocument* docOwner);
+#ifdef EXPORT_ASYM_PRIVATE_KEY
+			SINT32 getPrivateKeyAsXML(UINT8* buff,UINT32* len);
+			SINT32 getPrivateKeyAsDOMElement(DOMElement* & elemRoot,XERCES_CPP_NAMESPACE::DOMDocument* docOwner);
+			SINT32 setPrivateKeyAsXML(const UINT8* buff,UINT32 len);
+			SINT32 setPrivateKeyAsDOMNode(DOMNode* node);
+#endif
 			//SINT32 getPublicKeySize();
 			//SINT32 setPublicKey(UINT8* buff,UINT32* len);
 			SINT32 setPublicKey(const CACertificate* pCert);
 			SINT32 setPublicKeyAsXML(const UINT8* buff,UINT32 len);
 #endif
+	private:
+		SINT32 getKeyPart(BIGNUM** part,DOMNode* node);
+	public:
 			SINT32 setPublicKeyAsDOMNode(DOMNode* node);
 
 			//Set the public key from a Base64 encodes exponent and modulus

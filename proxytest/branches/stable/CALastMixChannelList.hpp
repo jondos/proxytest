@@ -48,6 +48,8 @@ struct t_lastmixchannellist
 			CASymCipher*  pCipher;
 			CASocket*			pSocket;
 			CAQueue*			pQueueSend;
+			SINT32				sendmeCounterDownstream; //this counts how many packets are sent to the user without an ack recevied yet.
+			SINT32				sendmeCounterUpstream; //this counts how many packets are recieved from the user without sending an ack yet.
 #ifdef DELAY_CHANNELS
 			UINT32				delayBucket;
 			UINT32				delayBucketID;
@@ -63,10 +65,6 @@ struct t_lastmixchannellist
 			UINT32				packetsDataOutToUser;
 			UINT32				packetsDataInFromUser;
 			UINT32				trafficOutToUser;
-#endif
-#ifdef NEW_FLOW_CONTROL
-			SINT32				sendmeCounterDownstream; //this counts how many packets are sent to the user without an ack recevied yet.
-			SINT32				sendmeCounterUpstream; //this counts how many packets are recieved from the user without sending an ack yet.
 #endif
 		private:
 			struct
