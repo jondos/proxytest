@@ -432,6 +432,7 @@ See \ref XMLMixCascadeStatus "[XML]" for a description of the XML struct send.
 
 */
 
+
 int main(int argc, const char* argv[])
 	{
 #ifndef ONLY_LOCAL_PROXY
@@ -539,6 +540,69 @@ int main(int argc, const char* argv[])
 //		getch();
 //		exit(0);
 //#endif
+
+// AES GCM test //
+/*
+UINT8 key[16];
+memset(key,0,16);
+UINT8 in[256];
+memset(in,0,256);
+UINT8 out[256+16];
+memset(out,1,256+16);
+UINT8 out2[256+16];
+memset(out2,1,256+16);
+
+UINT8 iv[12];
+memset(iv,0,12);
+UINT8 tag[16];
+UINT8 tag2[16];
+AES_KEY* aeskey=new AES_KEY;
+AES_set_encrypt_key(key,128,aeskey);
+GCM128_CONTEXT * gcmCtxt=NULL;
+gcmCtxt=CRYPTO_gcm128_new(aeskey,(block128_f)AES_encrypt);
+CRYPTO_gcm128_setiv(gcmCtxt,iv,12);
+CRYPTO_gcm128_encrypt(gcmCtxt,in,out,256);
+CRYPTO_gcm128_tag(gcmCtxt,tag,16);
+
+CASymCipher* myAes=new CASymCipher();
+myAes->setGCMKeys(key,key);
+myAes->encryptMessage(in,256,out2);
+
+int rtz1=memcmp(out,out2,256);
+int rtz2=memcmp(tag,out2+256,16);
+
+CRYPTO_gcm128_setiv(gcmCtxt,iv,12);
+memset(in,1,256);
+CRYPTO_gcm128_decrypt(gcmCtxt,out,in,256);
+int rtz=CRYPTO_gcm128_finish(gcmCtxt,tag,16);
+printf("Result: %i\n",rtz);
+printf("Result: %i\n",rtz1);
+printf("Result: %i\n",rtz2);
+
+myAes->setGCMKeys(key,key);
+myAes->encryptMessage(in,256,out);
+
+CASymCipher* myAes1=new CASymCipher();
+myAes1->setGCMKeys(key,key);
+myAes1->encryptMessage(in,256,out2);
+
+myAes->encryptMessage(in,256,out2);
+
+
+CRYPTO_gcm128_setiv(gcmCtxt,iv,12);
+memset(in,1,256);
+CRYPTO_gcm128_decrypt(gcmCtxt,out,in,256);
+memset(in,1,256);
+iv[11]=1;
+CRYPTO_gcm128_setiv(gcmCtxt,iv,12);
+CRYPTO_gcm128_decrypt(gcmCtxt,out2,in,256);
+
+
+
+exit(0);
+*/
+//End AEs GCM Test
+
 
 		if(CALibProxytest::getOptions()->parse(argc,argv) != E_SUCCESS)
 		{

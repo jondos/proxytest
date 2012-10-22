@@ -270,11 +270,15 @@
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <CompileAs>Default</CompileAs>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0407</Culture>
     </ResourceCompile>
+    <Lib>
+      <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='VTune|Win32'">
     <Midl>
@@ -2175,7 +2179,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Level4</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Level3</WarningLevel>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='VTune|Win32'">Full</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='VTune|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Mit Xerces 2.0.0|Win32'">Disabled</Optimization>
@@ -3160,6 +3164,7 @@
       </PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug-IntelCrypto|Win32'">
       </PrecompiledHeader>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</WholeProgramOptimization>
     </ClCompile>
     <ClCompile Include="xml\dom\mxml\mxmlXercesDOMParser.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -3176,6 +3181,7 @@
       </PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug-IntelCrypto|Win32'">
       </PrecompiledHeader>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</WholeProgramOptimization>
     </ClCompile>
     <ClCompile Include="xml\DOM_Output.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
@@ -3246,6 +3252,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug-IntelCrypto|Win32'">
       </PrecompiledHeader>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug-IntelCrypto|Win32'">true</BrowseInformation>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</WholeProgramOptimization>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

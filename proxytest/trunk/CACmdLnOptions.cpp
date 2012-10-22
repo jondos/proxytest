@@ -423,7 +423,7 @@ SINT32 CACmdLnOptions::addVisibleAddresses(DOMNode* nodeProxy)
 			{
 				if(equals(elemVisAddress->getNodeName(), OPTIONS_NODE_VISIBLE_ADDRESS))
 					{
-						DOMElement* elemHost;
+						DOMElement* elemHost=NULL;
 						if(getDOMChildByName(elemVisAddress, OPTIONS_NODE_HOST ,elemHost)==E_SUCCESS)
 							{
 								UINT8 tmp[TMP_BUFF_SIZE];

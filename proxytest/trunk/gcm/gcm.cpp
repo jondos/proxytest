@@ -1,6 +1,10 @@
 #include "../StdAfx.h"
 #include "gcm.h"
 
+//#ifndef USE_OPENSSL_GCM
+#ifdef  _GCM_H
+
+
 static void mul_alpha(UINT32 *z) {
 	int carry = z[3] & 1;
 
@@ -106,7 +110,7 @@ MODIFIERS void gcm_init_64k(gcm_ctx_64k *c, UINT8 key[], size_t keylen) {
 	build_hash_table_64k(c, hkey);
 }
 MODIFIERS void /*inline*/ gcm_encrypt_64k(gcm_ctx_64k *c, const UINT32 *nonce, 
-							const UINT8 *data, size_t dlen, UINT8 *out, UINT32 *tag) {
+							const UINT8 * data, size_t dlen, UINT8 *out, UINT32 *tag) {
 	UINT32 tmp[8] = {0, 0, 0, 0, 0, 0, 0, htonl(dlen << 3)};
 	UINT32 ctr[4];
 	size_t b, l, i;
@@ -284,3 +288,5 @@ MODIFIERS int gcm_decrypt_64k(gcm_ctx_64k *c, const UINT32 *nonce, const UINT8 *
 MODIFIERS void gcm_destroy_64k(gcm_ctx_64k *c) {
 	memset(c, '0', sizeof(gcm_ctx_64k));
 }
+
+#endif //USE_OPENSSL_GCM
