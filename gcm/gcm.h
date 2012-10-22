@@ -1,6 +1,9 @@
 #ifndef _GCM_H
 #define _GCM_H
 
+//#ifndef USE_OPENSSL_GCM
+#ifdef  _GCM_H
+
 #define MODIFIERS
 
 #define GHASH_BLK_SZ (16)
@@ -187,5 +190,7 @@ MODIFIERS void gcm_encrypt_64k(gcm_ctx_64k *c, const UINT32 *nonce, const UINT8 
 MODIFIERS int gcm_decrypt_64k(gcm_ctx_64k *c, const UINT32 *nonce, const UINT8 *ct, size_t ctlen, const UINT8 *tag, UINT8 *pt);
 MODIFIERS int gcm_decrypt_64k(gcm_ctx_64k *c, const UINT32 *nonce, const UINT8 *ct, size_t ctlen, UINT8 *pt);
 MODIFIERS void gcm_destroy_64k(gcm_ctx_64k *c);
+
+#endif //USE_OPENSSL_GCM
 
 #endif /* _GCM_H */

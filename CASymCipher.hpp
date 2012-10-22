@@ -98,10 +98,15 @@ class CASymCipher
 					delete [] m_pDecMsgIV;
 					m_pDecMsgIV = NULL;
 
+#ifndef USE_OPENSSL_GCM
 					delete m_pGCMCtxEnc;
-					m_pGCMCtxEnc = NULL;
-
 					delete m_pGCMCtxDec;
+#else
+					CRYPTO_gcm128_release(m_pGCMCtxEnc);
+					CRYPTO_gcm128_release(m_pGCMCtxDec);
+#endif
+
+					m_pGCMCtxEnc = NULL;
 					m_pGCMCtxDec = NULL;
 
 					delete m_pcsEnc;
@@ -158,8 +163,13 @@ class CASymCipher
 		private:
 			CAMutex* m_pcsEnc;
 			CAMutex* m_pcsDec;
+#ifndef USE_OPENSSL_GCM
 			gcm_ctx_64k* m_pGCMCtxEnc;
 			gcm_ctx_64k* m_pGCMCtxDec;
+#else
+			GCM128_CONTEXT* m_pGCMCtxEnc;
+			GCM128_CONTEXT* m_pGCMCtxDec;
+#endif
 			UINT32 m_nEncMsgCounter;
 			UINT32* m_pEncMsgIV;
 			UINT32 m_nDecMsgCounter;

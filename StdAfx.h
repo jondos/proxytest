@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.11.06"
+#define MIX_VERSION "00.11.07"
 
 // set to "true" if this is a testing/development version which is not meant for prodictive use
 #define MIX_VERSION_TESTING true
@@ -73,7 +73,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 /* LERNGRUPPE: define this to get dynamic mixes */
 //#define DYNAMIC_MIX
 //#define SDTFA // specific logic needed by SDTFA, http://www.sdtfa.com
-
+//#define USE_OPENSSL_GCM //defin if you wnat to use the GCM implementation provided by OpenSSL (>=1.0.1)
 
 #define NO_INFOSERVICE_TRHEADS
 
@@ -153,9 +153,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define USE_POOL
 //#define NEW_MIX_TYPE // to enable the new 1:x mix protocol
 //#define WITH_CONTROL_CHANNELS_TEST //enable a Test control Channel
-//#define NEW_FLOW_CONTROL //enable for the new flow control mechanism --> now enabled by default (i.e. can not be disbaled anymore!)
-//#define NEW_CHANNEL_ENCRYPTION //enable the new protcol version which uses RSA-OAEP for key transport and two keys for upstream/downstream channel cryption (--> now enabled by default (i.e. can not be disbaled anymore!)
-//#define WITH_INTEGRITY_CHECK //enable AES-GCM encryption for data channels
+#define NEW_FLOW_CONTROL //enable for the new flow control mechanism --> now enabled by default (i.e. can not be disbaled anymore!)
+#define NEW_CHANNEL_ENCRYPTION //enable the new protcol version which uses RSA-OAEP for key transport and two keys for upstream/downstream channel cryption (--> now enabled by default (i.e. can not be disbaled anymore!)
+#define WITH_INTEGRITY_CHECK //enable AES-GCM encryption for data channels
 
 //#define REPLAY_DETECTION // enable to prevent replay of mix packets
 #define REPLAY_TIMESTAMP_PROPAGATION_INTERVALL 1 //How often (in minutes) should the current replay timestamps be propagate
@@ -233,7 +233,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define LM_PACKET_STATS_LOG_INTERVALL 1 //Intervall in Minutes for loggin packet stats for the last Mix
 
 #define MIX_CASCADE_PROTOCOL_VERSION_0_1_2 12  //with integrity check and new channel encryption 
-#define MIX_CASCADE_PROTOCOL_VERSION_0_1_1 11  //with integrity check and new channel encryption --> never works correctly
+#define MIX_CASCADE_PROTOCOL_VERSION_0_1_1 11  //with integrity check and new channel encryption --> never worked correctly
 #define MIX_CASCADE_PROTOCOL_VERSION_0_1_0 10  //with new channel encryption
 //#define MIX_CASCADE_PROTOCOL_VERSION_0_9 9  //with new payment protocol
 #define MIX_CASCADE_PROTOCOL_VERSION_0_8 8  //with replay detection + control channels + first mix symmetric
@@ -510,6 +510,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include <openssl/aes.h>
 #include <openssl/rand.h>
 #include <openssl/evp.h>
+#ifdef USE_OPENSSL_GCM
+	extern "C"
+		{
+			#include <openssl/modes.h>
+		}
+#endif
 #ifndef ONLY_LOCAL_PROXY
 	#include <openssl/asn1.h>
 	#include <openssl/pkcs12.h>
