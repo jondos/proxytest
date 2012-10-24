@@ -397,7 +397,7 @@ SINT32 CASymCipher::decryptMessage(const UINT8* in, UINT32 inlen, UINT8* out, bo
 			ret = ::gcm_decrypt_64k(m_pGCMCtxDec, m_pDecMsgIV, in, inlen, out);
 #else
 			CRYPTO_gcm128_setiv(m_pGCMCtxDec,(UINT8*)m_pDecMsgIV,12);
-			ret=CRYPTO_gcm128_decrypt(m_pGCMCtxDec,in,out,inlen-16);
+			ret=CRYPTO_gcm128_decrypt(m_pGCMCtxDec,in,out,inlen);
 #endif
 		}
 	//m_pcsDec->unlock();
