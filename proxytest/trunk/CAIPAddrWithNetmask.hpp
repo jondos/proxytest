@@ -11,8 +11,8 @@ class CAIPAddrWithNetmask
 
 			CAIPAddrWithNetmask(const UINT8* strIPAddr,const UINT8* strNetmask)
 				{
-					m_nIPAddr=inet_addr((const char*)strIPAddr);
-					m_nNetmask=inet_addr((const char*)strNetmask);
+					m_nIPAddr=htonl(inet_addr((const char*)strIPAddr));
+					m_nNetmask=htonl(inet_addr((const char*)strNetmask));
 					m_nIPAddrAndNetmask=m_nIPAddr&m_nNetmask;
 				}
 
@@ -20,18 +20,19 @@ class CAIPAddrWithNetmask
 
 			SINT32 setAddr(const UINT8* strIPAddr)
 				{
-					m_nIPAddr=inet_addr((const char*)strIPAddr);
-					m_nIPAddrAndNetmask=m_nIPAddr&m_nNetmask;
+					m_nIPAddr=htonl(inet_addr((const char*)strIPAddr));
+					m_nIPAddrAndNetmask=(m_nIPAddr&m_nNetmask);
 					return E_SUCCESS;
 				}
 
 			SINT32 setNetmask(const UINT8* strNetmask)
 				{
-					m_nNetmask=inet_addr((const char*)strNetmask);
-					m_nIPAddrAndNetmask=m_nIPAddr&m_nNetmask;
+					m_nNetmask=htonl(inet_addr((const char*)strNetmask));
+					m_nIPAddrAndNetmask=(m_nIPAddr&m_nNetmask);
 					return E_SUCCESS;
 				}
 		
+			//Note IP-Addr must be in network byte order!
 			bool equals(UINT32 nIPAddr) const
 				{
 					return m_nIPAddrAndNetmask==(nIPAddr&m_nNetmask); 
@@ -53,8 +54,10 @@ class CAIPAddrWithNetmask
 				{
 					UINT8 strIP[255];
 					UINT8 strNetmask[255];
-					strcpy((char*)strIP,inet_ntoa(*(struct in_addr *)&m_nIPAddr));
-					strcpy((char*)strNetmask,inet_ntoa(*(struct in_addr *)&m_nNetmask));
+					UINT32 i=ntohl(m_nIPAddr);
+					strcpy((char*)strIP,inet_ntoa(*(struct in_addr *)&i));
+					i=ntohl(m_nNetmask);
+					strcpy((char*)strNetmask,inet_ntoa(*(struct in_addr *)&i));
 					SINT32 ret=snprintf((char*)buff,*buffLen,"%s/%s",strIP,strNetmask);
 					if(ret>=*buffLen)
 						{
