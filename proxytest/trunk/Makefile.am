@@ -37,6 +37,7 @@ libproxytest_a_SOURCES = CAAbstractControlChannel.cpp\
 		    CAInfoService.cpp \
 		    CAInfoServiceAware.cpp \
 		    CAIPList.cpp \
+			CAIPAddrWithNetmask.cpp \
 		    CALastMix.cpp \
 		    CALastMixChannelList.cpp\
 		    CAListenerInterface.cpp\
@@ -111,6 +112,7 @@ libproxytest_a_SOURCES = CAAbstractControlChannel.cpp\
 		    CAInfoService.hpp \
 		    CAInfoServiceAware.hpp \
 		    CAIPList.hpp \
+			CAIPAddrWithNetmask.hpp \
 		    CALastMix.hpp \
 		    CALastMixChannelList.hpp\
 		    CAListenerInterface.hpp\
