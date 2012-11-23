@@ -171,7 +171,7 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 
 		SAVE_STACK("CAFirstMixChannelList::add", "copying peer IP");
 		memcpy(pHashTableEntry->peerIP,peerIP,4);
-#ifdef DATA_RETENTION_LOG
+#ifdef DATA_RETENTION_LOG | LOG_CRIME
 		pHashTableEntry->peerPort=pMuxSocket->getCASocket()->getPeerPort();
 #endif
 #ifdef DELAY_USERS

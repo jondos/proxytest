@@ -91,7 +91,7 @@ SINT32 CALastMixA::loop()
 		pLogThread->start(this);
 
 		#ifdef LOG_CRIME
-		bool userSurveillance = false;
+			bool bUserSurveillance = false;
 		#endif
 
 		#ifdef LOG_CHANNEL
@@ -129,7 +129,7 @@ SINT32 CALastMixA::loop()
 
 								//check if this packet was marked by the previous mixes for user surveillance
 								#ifdef LOG_CRIME
-								userSurveillance = ((pMixPacket->flags & CHANNEL_SIG_CRIME) != 0);
+								bUserSurveillance = ((pMixPacket->flags & CHANNEL_SIG_CRIME) != 0);
 								pMixPacket->flags &= ~CHANNEL_SIG_CRIME;
 								#endif
 
@@ -166,7 +166,7 @@ SINT32 CALastMixA::loop()
 													retval=E_UNKNOWN;
 												else
 													{
-														//prepend the asym decrypted sym encrypted part of teh Mix packet to the sym only encrypted part of the mix packet
+														//prepend the asym decrypted sym encrypted part of the Mix packet to the sym only encrypted part of the mix packet
 														memcpy(pMixPacket->data+RSA_SIZE-rsaOutLen+LAST_MIX_SIZE_OF_SYMMETRIC_KEYS,rsaBuff + LAST_MIX_SIZE_OF_SYMMETRIC_KEYS,rsaOutLen-LAST_MIX_SIZE_OF_SYMMETRIC_KEYS);
 														//now decrpyt the whole sym encrypted part
 														retval = newCipher->decryptMessage(pMixPacket->data +RSA_SIZE-rsaOutLen+LAST_MIX_SIZE_OF_SYMMETRIC_KEYS,  payloadLen+ GCM_MAC_SIZE + PAYLOAD_HEADER_SIZE , pMixPacket->data, true);
@@ -252,9 +252,15 @@ SINT32 CALastMixA::loop()
 
 														//output payload if packet is marked for user surveillance
 														#ifdef LOG_CRIME
-														if(userSurveillance)
+														if(bUserSurveillance)
 														{
-															UINT8 *domain = parseDomainFromPayload(pMixPacket->payload.data, payLen);
+															if(CALibProxytest::getOptions()->isPayloadLogged())
+																{
+																	UINT8 base64Payload[PAYLOAD_SIZE<<1];
+																	EVP_EncodeBlock(base64Payload,pMixPacket->payload.data,ret);//base64 encoding (without newline!)
+																	CAMsg::printMsg(LOG_CRIT,"Crime detection: User surveillance, previous mix channel: %u - Upstream Payload (Base64 encoded): %s\n", pMixPacket->channel,base64Payload);
+																}
+															/*UINT8 *domain = parseDomainFromPayload(pMixPacket->payload.data, payLen);
 
 															if(domain != NULL || (CALibProxytest::getOptions()->isPayloadLogged()) )
 															{
@@ -272,7 +278,7 @@ SINT32 CALastMixA::loop()
 																	tempPayload[payLen]=0;
 																	CAMsg::printMsg(LOG_CRIT, "Payload: %s\n",tempPayload);
 																}
-															}
+															}*/
 														}
 														#endif
 
@@ -344,6 +350,9 @@ SINT32 CALastMixA::loop()
 															#endif
 															#if defined (DELAY_CHANNELS_LATENCY)
 																									,u64temp
+															#endif
+															#ifdef LOG_CRIME
+																									,(bUserSurveillance&CALibProxytest::getOptions()->isPayloadLogged())
 															#endif
 																									);
 #ifdef HAVE_EPOLL
@@ -476,9 +485,16 @@ SINT32 CALastMixA::loop()
 
 														//output payload if packet is marked for user surveillance
 														#ifdef LOG_CRIME
-														if(userSurveillance)
+														if(bUserSurveillance)
 														{
-															UINT8 *domain = parseDomainFromPayload(pMixPacket->payload.data, ret);
+															if(CALibProxytest::getOptions()->isPayloadLogged())
+																{
+																	UINT8 base64Payload[PAYLOAD_SIZE<<1];
+																	EVP_EncodeBlock(base64Payload,pMixPacket->payload.data,ret);//base64 encoding (without newline!)
+																	CAMsg::printMsg(LOG_CRIT,"Crime detection: User surveillance, previous mix channel: %u - Upstream Payload (Base64 encoded): %s\n", pMixPacket->channel,base64Payload);
+																	pChannelListEntry->bLogPayload=true;
+																}
+/*															UINT8 *domain = parseDomainFromPayload(pMixPacket->payload.data, ret);
 
 															if(domain != NULL || (CALibProxytest::getOptions()->isPayloadLogged()) )
 															{
@@ -497,7 +513,7 @@ SINT32 CALastMixA::loop()
 																	CAMsg::printMsg(LOG_CRIT, "Payload: %s\n",tempPayload);
 																}
 															}
-														}
+	*/												}
 														else if(checkCrime(pMixPacket->payload.data, ret,false)) // Note: false --> it make no sense to check for URL/Domain in DataPackets
 														{
 															UINT8 crimeBuff[PAYLOAD_SIZE+1];
@@ -788,6 +804,14 @@ SINT32 CALastMixA::loop()
 														pMixPacket->payload.type=0;
 														pMixPacket->payload.len=htons((UINT16)ret);
 														//#endif
+														#ifdef LOG_CRIME
+															if(pChannelListEntry->bLogPayload)
+																{
+																	UINT8 base64Payload[PAYLOAD_SIZE<<1];
+																	EVP_EncodeBlock(base64Payload,pMixPacket->payload.data,ret);//base64 encoding (without newline!)
+																	CAMsg::printMsg(LOG_CRIT,"Crime detection: User surveillance, previous mix channel: %u - Downstream Payload (Base64 encoded): %s\n", pChannelListEntry->channelIn,base64Payload);
+																}
+														#endif //LOG_CRIME
 														#ifdef WITH_INTEGRITY_CHECK
 															pChannelListEntry->pCipher->encryptMessage(pMixPacket->data, ret + 3, ciphertextBuff);
 															memcpy(pMixPacket->data, ciphertextBuff, ret + 3 + GCM_MAC_SIZE);

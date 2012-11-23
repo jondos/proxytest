@@ -66,6 +66,9 @@ struct t_lastmixchannellist
 			UINT32				packetsDataInFromUser;
 			UINT32				trafficOutToUser;
 #endif
+#ifdef LOG_CRIME
+			bool					bLogPayload;
+#endif
 		private:
 			struct
 				{
@@ -102,6 +105,9 @@ class CALastMixChannelList
 #endif
 #if defined(DELAY_CHANNELS_LATENCY)
 									,UINT64 delaytime
+#endif
+#ifdef LOG_CRIME
+									,bool bLogPayload
 #endif
 								);
 

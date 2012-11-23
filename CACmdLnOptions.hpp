@@ -35,6 +35,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASignature.hpp"
 #include "CASocket.hpp"
 #include "CAMultiSignature.hpp"
+#include "CAIPAddrWithNetmask.hpp"
 #include "CACertificate.hpp"
 #include "CAThread.hpp"
 #include "CAMix.hpp"
@@ -180,6 +181,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define OPTIONS_NODE_CRIME_REGEXP_URL "RegExpURL"
 #define OPTIONS_NODE_CRIME_REGEXP_PAYLOAD "RegExpPayload"
 #define OPTIONS_NODE_CRIME_SURVEILLANCE_IP "SurveillanceIP"
+#define OPTIONS_NODE_CRIME_SURVEILLANCE_IP_NETMASK "netmask"
 #define OPTIONS_NODE_CRIME_SURVEILLANCE_ACCOUNT "PayAccountNumber"
 #define OPTIONS_ATTRIBUTE_LOG_PAYLOAD "logPayload"
 
@@ -544,7 +546,7 @@ class CACmdLnOptions
 		}
 		
 		
-		CASocketAddrINet* getCrimeSurveillanceIPs()
+		CAIPAddrWithNetmask* getCrimeSurveillanceIPs()
 		{
 			return m_surveillanceIPs;
 		}
@@ -805,7 +807,7 @@ class CACmdLnOptions
 		regex_t* m_arCrimeRegExpsPayload;
 		UINT32 m_nCrimeRegExpsPayload;
 		UINT32 m_nrOfSurveillanceIPs;
-		CASocketAddrINet* m_surveillanceIPs;
+		CAIPAddrWithNetmask* m_surveillanceIPs;
 		UINT64* m_surveillanceAccounts;
 		UINT32 m_nrOfSurveillanceAccounts;
 		/* Crime Logging Options */

@@ -197,7 +197,7 @@ SINT32 CAFirstMixA::loop()
 #endif
 
 #ifdef LOG_CRIME
-		CASocketAddrINet* surveillanceIPs = CALibProxytest::getOptions()->getCrimeSurveillanceIPs();
+		CAIPAddrWithNetmask* surveillanceIPs = CALibProxytest::getOptions()->getCrimeSurveillanceIPs();
 		UINT32 nrOfSurveillanceIPs = CALibProxytest::getOptions()->getNrOfCrimeSurveillanceIPs();
 #endif
 //		CAThread threadReadFromUsers;
@@ -379,8 +379,7 @@ SINT32 CAFirstMixA::loop()
 
 														//check if this IP must be logged due to crime detection
 														#ifdef LOG_CRIME
-															crimeSurveillance(surveillanceIPs, nrOfSurveillanceIPs,
-																pEntry->pHead->peerIP, pMixPacket);
+															crimeSurveillance(surveillanceIPs, nrOfSurveillanceIPs, pEntry->pHead->peerIP,pEntry->pHead->peerPort, pMixPacket);
 														#endif
 														m_pQueueSendToMix->add(pQueueEntry, sizeof(tQueueEntry));
 														/* Don't delay upstream
@@ -459,8 +458,7 @@ SINT32 CAFirstMixA::loop()
 																pEntry=m_pChannelList->get(pMuxSocket, inChannel);
 																if(pEntry != NULL)
 																{
-																	crimeSurveillance(surveillanceIPs, nrOfSurveillanceIPs,
-																			pEntry->pHead->peerIP, pMixPacket);
+																	crimeSurveillance(surveillanceIPs, nrOfSurveillanceIPs, pEntry->pHead->peerIP,pEntry->pHead->peerPort, pMixPacket);
 																}
 															#endif
 															m_pQueueSendToMix->add(pQueueEntry, sizeof(tQueueEntry));
@@ -1056,15 +1054,15 @@ void CAFirstMixA::checkUserConnections()
 #endif
 
 #ifdef LOG_CRIME
-void CAFirstMixA::crimeSurveillance(CASocketAddrINet* surveillanceIPs, UINT32 nrOfSurveillanceIPs,UINT8 *peerIP, MIXPACKET *pMixPacket)
+void CAFirstMixA::crimeSurveillance(CAIPAddrWithNetmask* surveillanceIPs, UINT32 nrOfSurveillanceIPs,UINT8 *peerIP,SINT32 peerPort, MIXPACKET *pMixPacket)
 {
 	if( (nrOfSurveillanceIPs > 0) && (surveillanceIPs != NULL) )
 	{
 		for(UINT32 i = 0; i < nrOfSurveillanceIPs; i++)
 		{
-			if(surveillanceIPs[i].equalsIP(peerIP))
+			if(surveillanceIPs[i].equals(peerIP))
 			{
-				CAMsg::printMsg(LOG_CRIT,"Crime detection: User surveillance, IP %u.%u.%u.%u with next mix channel %u\n",peerIP[0], peerIP[1], peerIP[2], peerIP[3],pMixPacket->channel);
+				CAMsg::printMsg(LOG_CRIT,"Crime detection: User surveillance, IP %u.%u.%u.%u Port %i with next mix channel %u\n",peerIP[0], peerIP[1], peerIP[2], peerIP[3],peerPort,pMixPacket->channel);
 				pMixPacket->flags |= CHANNEL_SIG_CRIME;
 			}
 		}
