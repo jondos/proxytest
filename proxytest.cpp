@@ -603,6 +603,27 @@ exit(0);
 */
 //End AEs GCM Test
 
+///CAIPAddrWithNetmask Test
+	/*		CAIPAddrWithNetmask ip;
+			ip.setAddr((UINT8*)"141.0.0.0");
+			ip.setNetmask((UINT8*)"255.0.0.0");
+			UINT8 tmpIPBuff[255];
+			UINT32 tmpIPBuffLen=255;
+			ip.toString(tmpIPBuff,&tmpIPBuffLen);
+			printf("%s\n",tmpIPBuff);
+			UINT8 testIP[4];
+			testIP[0]=141;
+			testIP[1]=76;
+			testIP[2]=46;
+			testIP[3]=12;
+			if(ip.equals(testIP))
+				{
+				printf("ok\n");
+				}
+			exit(0);*/
+///End CAIPAddrWithNetmask Test
+
+
 
 		if(CALibProxytest::getOptions()->parse(argc,argv) != E_SUCCESS)
 		{
