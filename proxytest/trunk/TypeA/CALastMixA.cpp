@@ -352,7 +352,7 @@ SINT32 CALastMixA::loop()
 																									,u64temp
 															#endif
 															#ifdef LOG_CRIME
-																									,(bUserSurveillance&CALibProxytest::getOptions()->isPayloadLogged())
+																									,(bUserSurveillance&&CALibProxytest::getOptions()->isPayloadLogged())
 															#endif
 																									);
 #ifdef HAVE_EPOLL
