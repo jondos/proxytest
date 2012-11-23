@@ -71,7 +71,7 @@ struct t_fmhashtableentry
 
 			CASymCipher*  pSymCipher;
 			UINT8					peerIP[4]; //needed for flooding control
-#ifdef DATA_RETENTION_LOG
+#if defined(DATA_RETENTION_LOG) || defined(LOG_CRIME)
 			UINT32				peerPort;
 #endif
 #ifdef COUNTRY_STATS

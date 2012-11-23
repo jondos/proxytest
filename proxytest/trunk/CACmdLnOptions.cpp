@@ -32,6 +32,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMix.hpp"
 #include "CAMsg.hpp"
 #include "CASocketAddrINet.hpp"
+#include "CAIPAddrWithNetmask.hpp"
 #include "CASocket.hpp"
 #include "CAXMLBI.hpp"
 #include "xml/DOM_Output.hpp"
@@ -4490,14 +4491,12 @@ SINT32 CACmdLnOptions::setCrimePayloadRegExp(DOMElement *elemCrimeDetection)
 SINT32 CACmdLnOptions::setCrimeSurveillanceIP(DOMElement *elemCrimeDetection)
 {
 	if(elemCrimeDetection == NULL) return E_UNKNOWN;
-	ASSERT_CRIME_DETECTION_OPTIONS_PARENT
-		(elemCrimeDetection->getNodeName(), OPTIONS_NODE_CRIME_SURVEILLANCE_IP);
+	ASSERT_CRIME_DETECTION_OPTIONS_PARENT	(elemCrimeDetection->getNodeName(), OPTIONS_NODE_CRIME_SURVEILLANCE_IP);
 
-	UINT32 ipBuffSize = TMP_BUFF_SIZE;
-	UINT8 ipBuff[ipBuffSize];
+	UINT8 ipBuff[TMP_BUFF_SIZE];
+	UINT8 netmaskBuff[TMP_BUFF_SIZE];
 
-	DOMNodeList *surveillanceIPNodes =
-		getElementsByTagName(elemCrimeDetection, OPTIONS_NODE_CRIME_SURVEILLANCE_IP);
+	DOMNodeList *surveillanceIPNodes =getElementsByTagName(elemCrimeDetection, OPTIONS_NODE_CRIME_SURVEILLANCE_IP);
 	m_nrOfSurveillanceIPs = (UINT32) surveillanceIPNodes->getLength();
 
 	if (m_nrOfSurveillanceIPs == 0)
@@ -4506,13 +4505,21 @@ SINT32 CACmdLnOptions::setCrimeSurveillanceIP(DOMElement *elemCrimeDetection)
 		return E_SUCCESS;
 	}
 
-	m_surveillanceIPs = new CASocketAddrINet[m_nrOfSurveillanceIPs];
+	m_surveillanceIPs = new CAIPAddrWithNetmask[m_nrOfSurveillanceIPs];
 	for (UINT32 i = 0; i < m_nrOfSurveillanceIPs; i++)
 	{
-		ipBuffSize = TMP_BUFF_SIZE;
-		if(getDOMElementValue(surveillanceIPNodes->item(i), ipBuff,&ipBuffSize) == E_SUCCESS )
+		UINT32 ipBuffSize = TMP_BUFF_SIZE;
+		DOMNode* pelemCurrentIP=surveillanceIPNodes->item(i);
+		if(getDOMElementValue(pelemCurrentIP, ipBuff,&ipBuffSize) == E_SUCCESS )
 		{
-			m_surveillanceIPs[i].setAddr(ipBuff,0);
+			m_surveillanceIPs[i].setAddr(ipBuff);
+			ipBuffSize = TMP_BUFF_SIZE;
+			if(getDOMElementAttribute(pelemCurrentIP,OPTIONS_NODE_CRIME_SURVEILLANCE_IP_NETMASK,ipBuff,&ipBuffSize)==E_SUCCESS)
+				{
+					m_surveillanceIPs[i].setNetmask(ipBuff);
+				}
+			ipBuffSize = TMP_BUFF_SIZE;
+			m_surveillanceIPs[i].toString(ipBuff,&ipBuffSize);
 			CAMsg::printMsg(LOG_INFO,"Found Surveillance IP %s\n", ipBuff);
 		}
 		else

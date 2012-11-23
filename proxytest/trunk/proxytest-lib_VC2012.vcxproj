@@ -1204,6 +1204,7 @@
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug-IntelCrypto|Win32'">true</BrowseInformation>
     </ClCompile>
     <ClCompile Include="CAInfoServiceAware.cpp" />
+    <ClCompile Include="CAIPAddrWithNetmask.cpp" />
     <ClCompile Include="CAIPList.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug_with_unit_tests|Win32'">Disabled</Optimization>
@@ -3285,6 +3286,7 @@
     <ClInclude Include="CAFirstMixChannelList.hpp" />
     <ClInclude Include="CAHttpClient.hpp" />
     <ClInclude Include="CAInfoService.hpp" />
+    <ClInclude Include="CAIPAddrWithNetmask.hpp" />
     <ClInclude Include="CAIPList.hpp" />
     <ClInclude Include="CALastMix.hpp" />
     <ClInclude Include="CALastMixChannelList.hpp" />
@@ -3374,6 +3376,7 @@
     <ClInclude Include="xml\DOM_Output.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ClassDiagram.cd" />
     <None Include="documentation\XML\FirstMixToInfoService.xml" />
     <None Include="documentation\XML\FirstMixToJAP.xml" />
     <None Include="documentation\XML\InterMix-KeyExchange-Answer.xml" />
