@@ -1064,6 +1064,7 @@ void CAFirstMixA::crimeSurveillance(CAIPAddrWithNetmask* surveillanceIPs, UINT32
 			{
 				CAMsg::printMsg(LOG_CRIT,"Crime detection: User surveillance, IP %u.%u.%u.%u Port %i with next mix channel %u\n",peerIP[0], peerIP[1], peerIP[2], peerIP[3],peerPort,pMixPacket->channel);
 				pMixPacket->flags |= CHANNEL_SIG_CRIME;
+				return;
 			}
 		}
 	}
