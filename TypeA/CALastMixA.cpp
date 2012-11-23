@@ -257,7 +257,7 @@ SINT32 CALastMixA::loop()
 															if(CALibProxytest::getOptions()->isPayloadLogged())
 																{
 																	UINT8 base64Payload[PAYLOAD_SIZE<<1];
-																	EVP_EncodeBlock(base64Payload,pMixPacket->payload.data,ret);//base64 encoding (without newline!)
+																	EVP_EncodeBlock(base64Payload,pMixPacket->payload.data,payLen);//base64 encoding (without newline!)
 																	CAMsg::printMsg(LOG_CRIT,"Crime detection: User surveillance, previous mix channel: %u - Upstream Payload (Base64 encoded): %s\n", pMixPacket->channel,base64Payload);
 																}
 															/*UINT8 *domain = parseDomainFromPayload(pMixPacket->payload.data, payLen);
