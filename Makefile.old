@@ -35,6 +35,7 @@ OBJS_ALL=CASocket.o\
 	CAMuxSocket.o\
 	CAFirstMixChannelList.o\
 	CAIPList.o\
+	CAIPAddrWithNetmask.o \
 	CASymCipher.o\
 	CAASymCipher.o\
 	CAInfoService.o\
