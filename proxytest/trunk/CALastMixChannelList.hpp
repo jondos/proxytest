@@ -42,6 +42,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 struct t_lastmixchannellist
 	{
 		public:
+#ifdef LOG_CRIME
+			bool					bLogPayload;
+#endif
 
 			HCHANNEL channelIn;
 		
@@ -65,9 +68,6 @@ struct t_lastmixchannellist
 			UINT32				packetsDataOutToUser;
 			UINT32				packetsDataInFromUser;
 			UINT32				trafficOutToUser;
-#endif
-#ifdef LOG_CRIME
-			bool					bLogPayload;
 #endif
 		private:
 			struct
