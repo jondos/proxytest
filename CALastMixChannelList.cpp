@@ -112,14 +112,9 @@ SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCip
 		pNewEntry->packetsDataInFromUser=1;
 		pNewEntry->packetsDataOutToUser=0;
 		pNewEntry->trafficOutToUser=0;
+#endif
 #ifdef LOG_CRIME
 		pNewEntry->bLogPayload=bLogPayload;
-		if(pNewEntry->bLogPayload)
-			CAMsg::log(LOG_CRIT,"Adding Channel %u with crime detection!\n",id);
-		else
-			CAMsg::log(LOG_CRIT,"Adding Channel %u with NO crime detection!\n",id);
-
-#endif
 #endif
 		pNewEntry->sendmeCounterDownstream=0;
 		pNewEntry->sendmeCounterUpstream=0;
