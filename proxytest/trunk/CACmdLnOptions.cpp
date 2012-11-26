@@ -4494,8 +4494,7 @@ SINT32 CACmdLnOptions::setCrimeSurveillanceIP(DOMElement *elemCrimeDetection)
 	ASSERT_CRIME_DETECTION_OPTIONS_PARENT	(elemCrimeDetection->getNodeName(), OPTIONS_NODE_CRIME_SURVEILLANCE_IP);
 
 	UINT8 ipBuff[TMP_BUFF_SIZE];
-	UINT8 netmaskBuff[TMP_BUFF_SIZE];
-
+	
 	DOMNodeList *surveillanceIPNodes =getElementsByTagName(elemCrimeDetection, OPTIONS_NODE_CRIME_SURVEILLANCE_IP);
 	m_nrOfSurveillanceIPs = (UINT32) surveillanceIPNodes->getLength();
 
@@ -4548,8 +4547,7 @@ SINT32 CACmdLnOptions::setCrimeSurveillanceAccounts(DOMElement *elemCrimeDetecti
 		
 	UINT64 accountNumber;
 
-	DOMNodeList *surveillanceIPNodes =
-		getElementsByTagName(elemCrimeDetection, OPTIONS_NODE_CRIME_SURVEILLANCE_ACCOUNT);
+	DOMNodeList *surveillanceIPNodes =getElementsByTagName(elemCrimeDetection, OPTIONS_NODE_CRIME_SURVEILLANCE_ACCOUNT);
 	m_nrOfSurveillanceAccounts = (UINT32) surveillanceIPNodes->getLength();
 	
 	if (m_nrOfSurveillanceAccounts == 0)
@@ -4558,7 +4556,7 @@ SINT32 CACmdLnOptions::setCrimeSurveillanceAccounts(DOMElement *elemCrimeDetecti
 		return E_SUCCESS;
 	}
 
-	DOMNode* node;
+	DOMNode* node=NULL;
 	m_surveillanceAccounts = new UINT64[m_nrOfSurveillanceAccounts];
 	for (UINT32 i = 0; i < m_nrOfSurveillanceAccounts; i++)
 	{

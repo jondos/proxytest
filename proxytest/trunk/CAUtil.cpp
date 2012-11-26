@@ -1142,7 +1142,7 @@ SINT32 getDOMElementValue(const DOMElement* pElem,UINT32& value, UINT32 defaultV
 	return E_SUCCESS;
 }
 
-SINT32 getDOMElementValue(const DOMElement* pElem, UINT64 &value)
+SINT32 getDOMElementValue(const DOMNode* const pElem, UINT64 &value)
 {
 	ASSERT(pElem!=NULL, "Element is NULL");
 	UINT8 buf[256];
