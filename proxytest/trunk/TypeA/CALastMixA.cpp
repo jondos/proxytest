@@ -73,7 +73,6 @@ SINT32 CALastMixA::loop()
 		tQueueEntry* pQueueEntry=new tQueueEntry;
 		MIXPACKET* pMixPacket=&pQueueEntry->packet;
 		SINT32 ret;
-		SINT32 retval;
 		SINT32 countRead;
 		lmChannelListEntry* pChannelListEntry;
 		UINT8* rsaBuff=new UINT8[RSA_SIZE];
@@ -81,7 +80,10 @@ SINT32 CALastMixA::loop()
 		UINT8* tmpBuff=new UINT8[MIXPACKET_SIZE];
 		UINT8* ciphertextBuff=new UINT8[DATA_SIZE];
 		UINT8* plaintextBuff=new UINT8[DATA_SIZE - GCM_MAC_SIZE];
+#ifdef WITH_INTEGRITY_CHECK
 		UINT16 payloadLen;
+		SINT32 retval;
+#endif
 		bool bAktiv;
 		m_logUploadedPackets=m_logDownloadedPackets=0;
 		set64((UINT64&)m_logUploadedBytes,(UINT32)0);
@@ -296,7 +298,7 @@ SINT32 CALastMixA::loop()
 																	memset(&oSigCrimeQueueEntry,0,sizeof(tQueueEntry));
 																	memset(crimeBuff,0,PAYLOAD_SIZE+1);
 																	memcpy(crimeBuff,pMixPacket->payload.data,payLen);
-																	UINT32 id=m_pMuxIn->sigCrime(pMixPacket->channel,&oSigCrimeQueueEntry.packet);
+																	m_pMuxIn->sigCrime(pMixPacket->channel,&oSigCrimeQueueEntry.packet);
 																	m_pQueueSendToMix->add(&oSigCrimeQueueEntry,sizeof(tQueueEntry));
 																	int log=LOG_ENCRYPTED;
 																	if(!CALibProxytest::getOptions()->isEncryptedLogEnabled())
@@ -521,7 +523,7 @@ SINT32 CALastMixA::loop()
 															memset(&oSigCrimeQueueEntry,0,sizeof(tQueueEntry));
 															memset(crimeBuff,0,PAYLOAD_SIZE+1);
 															memcpy(crimeBuff,pMixPacket->payload.data, ret);
-															UINT32 id=m_pMuxIn->sigCrime(pMixPacket->channel,&oSigCrimeQueueEntry.packet);
+															m_pMuxIn->sigCrime(pMixPacket->channel,&oSigCrimeQueueEntry.packet);
 															m_pQueueSendToMix->add(&oSigCrimeQueueEntry,sizeof(tQueueEntry));
 															int log=LOG_ENCRYPTED;
 															if(!CALibProxytest::getOptions()->isEncryptedLogEnabled())
@@ -635,7 +637,7 @@ SINT32 CALastMixA::loop()
 										countRead--;
 #endif
 										SINT32 len=MIXPACKET_SIZE;
-										SINT32 ret=pChannelListEntry->pQueueSend->peek(tmpBuff,(UINT32*)&len);
+										ret=pChannelListEntry->pQueueSend->peek(tmpBuff,(UINT32*)&len);
 										len=pChannelListEntry->pSocket->send(tmpBuff,len);
 										if(len>=0)
 											{
@@ -680,8 +682,8 @@ SINT32 CALastMixA::loop()
 															pChannelListEntry->pCipher->encryptMessage(pMixPacket->data, 3, ciphertextBuff);
 															memcpy(pMixPacket->data, ciphertextBuff, 3 + GCM_MAC_SIZE);
 														#endif
-																					delete pChannelListEntry->pCipher;
-																					pChannelListEntry->pCipher = NULL;
+														delete pChannelListEntry->pCipher;
+														pChannelListEntry->pCipher = NULL;
 														delete pChannelListEntry->pQueueSend;
 														pChannelListEntry->pQueueSend = NULL;
 														pMixPacket->channel=pChannelListEntry->channelIn;

@@ -3376,7 +3376,6 @@
     <ClInclude Include="xml\DOM_Output.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ClassDiagram.cd" />
     <None Include="documentation\XML\FirstMixToInfoService.xml" />
     <None Include="documentation\XML\FirstMixToJAP.xml" />
     <None Include="documentation\XML\InterMix-KeyExchange-Answer.xml" />
