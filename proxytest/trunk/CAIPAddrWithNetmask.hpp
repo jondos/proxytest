@@ -59,7 +59,7 @@ class CAIPAddrWithNetmask
 					i=ntohl(m_nNetmask);
 					strcpy((char*)strNetmask,inet_ntoa(*(struct in_addr *)&i));
 					SINT32 ret=snprintf((char*)buff,*buffLen,"%s/%s",strIP,strNetmask);
-					if(ret>=*buffLen)
+					if(ret<=0||((UINT32)ret)>=*buffLen)
 						{
 							buff[0]=0;
 							*buffLen=0;
