@@ -94,7 +94,8 @@ SINT32 CADatabase::insert(UINT8 key[16],UINT64 timestamp)
 
 
 		// return E_UNKNOWN if the timestamp is too old or is too far in the future
-		if ((timestamp<(m_lastSwitch-SECONDS_PER_INTERVALL))||(timestamp>(time(NULL)+FUTURE_TOLERANCE))) {
+		UINT32 currentTime=(UINT32)time(NULL);
+		if ((timestamp<(m_lastSwitch-SECONDS_PER_INTERVALL))||(timestamp>(currentTime+FUTURE_TOLERANCE))) {
 			// timestamp not valid!!
 			m_pMutex->unlock();
 			return E_UNKNOWN;
@@ -229,8 +230,10 @@ THREAD_RETURN db_loopMaintenance(void *param)
 		while(pDatabase->m_bRun)
 			{
 				sSleep(10);
-				if (pDatabase->m_lastSwitch+SECONDS_PER_INTERVALL<=time(NULL)) {
-					pDatabase->nextClock();
+				UINT32 currentTime=(UINT32)time(NULL);
+				if (pDatabase->m_lastSwitch+SECONDS_PER_INTERVALL<=currentTime) 
+					{
+						pDatabase->nextClock();
 					}
 			}
 
