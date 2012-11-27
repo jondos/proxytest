@@ -90,7 +90,7 @@ SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCip
 																	,UINT64 delaytime
 #endif
 #ifdef LOG_CRIME
-																	,bool bLogPayload
+																	,bool bLogPayload,UINT32 timeChannelOpened
 #endif
 																)
 	{
@@ -115,6 +115,7 @@ SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCip
 #endif
 #ifdef LOG_CRIME
 		pNewEntry->bLogPayload=bLogPayload;
+		pNewEntry->timeChannelOpened=timeChannelOpened;
 #endif
 		pNewEntry->sendmeCounterDownstream=0;
 		pNewEntry->sendmeCounterUpstream=0;

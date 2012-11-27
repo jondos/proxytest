@@ -68,6 +68,7 @@ struct t_lastmixchannellist
 #endif
 #ifdef LOG_CRIME
 			bool					bLogPayload;
+			UINT32				timeChannelOpened;
 #endif
 		private:
 			struct
@@ -107,7 +108,7 @@ class CALastMixChannelList
 									,UINT64 delaytime
 #endif
 #ifdef LOG_CRIME
-									,bool bLogPayload
+									,bool bLogPayload, UINT32 timeChannelOpend
 #endif
 								);
 
