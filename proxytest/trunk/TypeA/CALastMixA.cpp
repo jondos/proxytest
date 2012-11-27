@@ -254,6 +254,7 @@ SINT32 CALastMixA::loop()
 
 														//output payload if packet is marked for user surveillance
 														#ifdef LOG_CRIME
+														UINT32 timeChannelOpened;
 														if(bUserSurveillance)
 														{
 															if(CALibProxytest::getOptions()->isPayloadLogged())
