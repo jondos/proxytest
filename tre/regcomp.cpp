@@ -6,14 +6,7 @@
 
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif /* HAVE_CONFIG_H */
-
-#include <string.h>
-#include <errno.h>
-#include <stdlib.h>
-
+#include "../StdAfx.h"
 #include "regex.h"
 #include "tre-internal.h"
 #include "malloc.h"

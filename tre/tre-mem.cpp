@@ -13,12 +13,7 @@
   allocators, though.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif /* HAVE_CONFIG_H */
-#include <stdlib.h>
-#include <string.h>
-
+#include "../StdAfx.h"
 #include "tre-internal.h"
 #include "tre-mem.h"
 #include "malloc.h"
