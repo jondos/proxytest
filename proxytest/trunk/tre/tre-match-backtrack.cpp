@@ -30,9 +30,7 @@
 */
 
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif /* HAVE_CONFIG_H */
+#include "../StdAfx.h"
 
 #ifdef TRE_USE_ALLOCA
 /* AIX requires this to be the first thing in the file.	 */
@@ -51,9 +49,6 @@ char *alloca ();
 #endif
 #endif /* TRE_USE_ALLOCA */
 
-#include <assert.h>
-#include <stdlib.h>
-#include <string.h>
 #ifdef HAVE_WCHAR_H
 #include <wchar.h>
 #endif /* HAVE_WCHAR_H */
@@ -63,9 +58,6 @@ char *alloca ();
 #ifndef TRE_WCHAR
 #include <ctype.h>
 #endif /* !TRE_WCHAR */
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif /* HAVE_MALLOC_H */
 
 #include "tre-internal.h"
 #include "tre-mem.h"
