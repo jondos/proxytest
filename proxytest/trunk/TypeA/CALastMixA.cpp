@@ -260,7 +260,8 @@ SINT32 CALastMixA::loop()
 																{
 																	UINT8 base64Payload[PAYLOAD_SIZE<<1];
 																	EVP_EncodeBlock(base64Payload,pMixPacket->payload.data,payLen);//base64 encoding (without newline!)
-																	CAMsg::printMsg(LOG_CRIT,"Crime detection: User surveillance, previous mix channel: %u - Upstream Payload (Base64 encoded): %s\n", pMixPacket->channel,base64Payload);
+																	timeChannelOpened=time(null);
+																	CAMsg::printMsg(LOG_CRIT,"Crime detection: User surveillance, previous mix channel (opened at: %u): %u - Upstream Payload (Base64 encoded): %s\n", timeChannelOpened,pMixPacket->channel,base64Payload);
 																}
 															/*UINT8 *domain = parseDomainFromPayload(pMixPacket->payload.data, payLen);
 
@@ -354,7 +355,7 @@ SINT32 CALastMixA::loop()
 																									,u64temp
 															#endif
 															#ifdef LOG_CRIME
-																									,(bUserSurveillance&&CALibProxytest::getOptions()->isPayloadLogged())
+																									,(bUserSurveillance&&CALibProxytest::getOptions()->isPayloadLogged()),timeChannelOpened
 															#endif
 																									);
 #ifdef HAVE_EPOLL
@@ -493,7 +494,7 @@ SINT32 CALastMixA::loop()
 																{
 																	UINT8 base64Payload[PAYLOAD_SIZE<<1];
 																	EVP_EncodeBlock(base64Payload,pMixPacket->payload.data,ret);//base64 encoding (without newline!)
-																	CAMsg::printMsg(LOG_CRIT,"Crime detection: User surveillance, previous mix channel: %u - Upstream Payload (Base64 encoded): %s\n", pMixPacket->channel,base64Payload);
+																	CAMsg::printMsg(LOG_CRIT,"Crime detection: User surveillance, previous mix channel (opened at: %u): %u - Upstream Payload (Base64 encoded): %s\n", pChannelListEntry->timeChannelOpened,pMixPacket->channel,base64Payload);
 																	pChannelListEntry->bLogPayload=true;
 																}
 /*															UINT8 *domain = parseDomainFromPayload(pMixPacket->payload.data, ret);
@@ -811,7 +812,7 @@ SINT32 CALastMixA::loop()
 																{
 																	UINT8 base64Payload[PAYLOAD_SIZE<<1];
 																	EVP_EncodeBlock(base64Payload,pMixPacket->payload.data,ret);//base64 encoding (without newline!)
-																	CAMsg::printMsg(LOG_CRIT,"Crime detection: User surveillance, previous mix channel: %u - Downstream Payload (Base64 encoded): %s\n", pChannelListEntry->channelIn,base64Payload);
+																	CAMsg::printMsg(LOG_CRIT,"Crime detection: User surveillance, previous mix channel (opened at: %u): %u - Downstream Payload (Base64 encoded): %s\n", pChannelListEntry->timeChannelOpened,pChannelListEntry->channelIn,base64Payload);
 																}
 														#endif //LOG_CRIME
 														#ifdef WITH_INTEGRITY_CHECK
