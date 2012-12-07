@@ -79,6 +79,10 @@ int main(void) {
 	CPPUNIT_NS::CompilerOutputter outputter( &result, std::cerr );
   outputter.write();
 	getch();
+	//CPPUNIT_NS::QtTestRunner runner;
+  //runner.addTest( CPPUNIT_NS::TestFactoryRegistry::getRegistry().makeTest() );
+  //runner.run( );
+	
 	return result.wasSuccessful() ? 0 : 1;
 }
 	/*
