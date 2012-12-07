@@ -141,6 +141,9 @@ SINT32 CALastMixA::loop()
 										{
 											#if defined(_DEBUG)
 												CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
+												//keep a copy of whol packet and output it, if something with integrity check went wrong...
+												UINT8 tmpPacket[DATA_SIZE];
+												memcpy(tmpPacket,pMixPacket->data,DATA_SIZE);
 											#endif
 
 											m_pRSA->decryptOAEP(pMixPacket->data,rsaBuff,&rsaOutLen);
@@ -203,7 +206,14 @@ SINT32 CALastMixA::loop()
 													#endif
 													m_pQueueSendToMix->add(pQueueEntry,sizeof(tQueueEntry));
 													m_logDownloadedPackets++;
-													CAMsg::printMsg(LOG_ERR, "Integrity check failed in channel-open packet!\n");
+													#if defined(_DEBUG)
+														UINT8 tmpPacketBase64[DATA_SIZE<<1];
+														EVP_EncodeBlock(tmpPacketBase64,tmpPacket,DATA_SIZE);
+														CAMsg::printMsg(LOG_ERR, "Integrity check failed in channel-open packet: %s\n",tmpPacketBase64);
+													#else
+														CAMsg::printMsg(LOG_ERR, "Integrity check failed in channel-open packet!\n");
+													#endif
+
 												} else {
 											#endif
 
