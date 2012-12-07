@@ -96,7 +96,7 @@ linux-x86-gcc:
 	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -finline-functions -fomit-frame-pointer -O3 --param large-function-growth=300 --param max-inline-insns-single=700 --param max-inline-insns-auto=600' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
 
 linux-x86-gcc-debug:
-	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -Wall -Wcast-align -O0 -ggdb3' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++ -ldl' 'LIBDIR=$(LIBDIR)' _all_aes 
+	$(MAKE) 'CC=gcc' 'CPPFLAGS=-D_ASYNC -D_REENTRANT -DDEBUG -D_DEBUG -Wall -Wcast-align -O0 -ggdb3' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++ -ldl' 'LIBDIR=$(LIBDIR)' _all_aes 
 
 linux-x86-gcc-static:
 	$(MAKE) 'CC=gcc' 'CPPFLAGS=-static -D_ASYNC -D_REENTRANT -Wall -Wcast-align -Winline -finline-functions -fomit-frame-pointer -O3 --param large-function-growth=300' 'INCLUDE=$(INCLUDE)' 'LIBS=$(LIBS) -lpthread -lstdc++' 'LIBDIR=$(LIBDIR)' _all_aes 
