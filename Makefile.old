@@ -53,6 +53,7 @@ OBJS_ALL=CASocket.o\
 	CACacheLoadBalancing.o\
 	CAThread.o\
 	CAThreadPool.o\
+	CAThreaList.o \
 	CASemaphore.o\
 	CAMutex.o\
 	CAConditionVariable.o\
