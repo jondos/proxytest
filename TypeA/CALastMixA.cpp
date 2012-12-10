@@ -215,8 +215,13 @@ SINT32 CALastMixA::loop()
 													#endif
 
 												} else {
+													#if defined(_DEBUG)
+														UINT8 tmpPacketBase64[DATA_SIZE<<1];
+														EVP_EncodeBlock(tmpPacketBase64,tmpPacket,DATA_SIZE);
+														CAMsg::printMsg(LOG_ERR, "Integrity check ok in channel-open packet: %s\n",tmpPacketBase64);
+													#endif
 											#endif
-
+													
 											CASocket* tmpSocket=new CASocket;
 											CACacheLoadBalancing* ptmpLB=m_pCacheLB;
 											ret=E_UNKNOWN;
