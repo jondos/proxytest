@@ -146,7 +146,14 @@ SINT32 CALastMixA::loop()
 												memcpy(tmpPacket,pMixPacket->data,DATA_SIZE);
 											#endif
 
-											m_pRSA->decryptOAEP(pMixPacket->data,rsaBuff,&rsaOutLen);
+											
+											SINT32 retAsymDecryption=m_pRSA->decryptOAEP(pMixPacket->data,rsaBuff,&rsaOutLen);
+											#ifdef _DEBUG
+												if(retAsymDecryption==E_UNKNOWN)
+													{
+														CAMsg::printMsg(LOG_DEBUG,"Error in channel open asym decryption - channel!\n");
+													}
+											#endif
 											#ifdef REPLAY_DETECTION
 												// replace time(NULL) with the real timestamp ()
 												// packet-timestamp + m_u64ReferenceTime
