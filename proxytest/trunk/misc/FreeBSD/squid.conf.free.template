@@ -67,6 +67,7 @@ http_access allow all
 icp_access allow localnet
 icp_access deny all
 
+
 http_port localhost:3128
 
 hierarchy_stoplist cgi-bin ?
