@@ -1,8 +1,4 @@
 
-# Please set a link to your website like:
-# <a href="http://server.tld">Operator name</a>
-err_html_text  not configured
-
 # Set the path to your error message directory
 # or cemment out to use the default squid messages
 
@@ -60,17 +56,12 @@ acl to_localhost dst 127.0.0.0/8
 acl bad dstdom_regex "/etc/squid/squid-block.acl"
 deny_info ERR_ACCESS_DENIED_BAD bad
 
-
-
-
-
 http_access deny bad
-
-
 http_access deny all
-
-
 icp_access allow all
+
+acl websocket url_regex [-i] ^ws://
+cache deny websocket
 
 cache_effective_user proxy
 cache_effective_group proxy

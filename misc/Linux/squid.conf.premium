@@ -1,7 +1,4 @@
 
-# Please set a link to your website
-err_html_text  unknown
-
 # Set the path to your error message directory
 # or cemment out to use the default squid messages
 
@@ -80,6 +77,7 @@ icp_access allow all
 
 cache_effective_user proxy
 cache_effective_group proxy
+
 
 visible_hostname none
 forwarded_for off

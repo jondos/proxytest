@@ -55,6 +55,7 @@ icp_access deny all
 
 http_port localhost:3128
 
+
 hierarchy_stoplist cgi-bin ?
 
 pid_filename /usr/local/squid/logs/squid.pid
