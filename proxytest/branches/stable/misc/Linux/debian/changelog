@@ -1,3 +1,10 @@
+mix-squidconf (13.02.11) unstable; urgency=low
+
+  * update blocklist
+
+ -- JonDos GmbH <info@jondos.de>  Mon, 11 Jan 2013 08:17:23 +0200
+
+
 mix-squidconf (12.03.14) unstable; urgency=low
 
   * update for new payment reminder messages for squid
