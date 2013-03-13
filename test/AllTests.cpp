@@ -78,7 +78,6 @@ int main(void) {
   runner.run( controller );
 	CPPUNIT_NS::CompilerOutputter outputter( &result, std::cerr );
   outputter.write();
-	getch();
 	return result.wasSuccessful() ? 0 : 1;
 }
 	/*

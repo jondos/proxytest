@@ -74,9 +74,9 @@ SINT32 getRandom(UINT32* val);
 
 SINT32 getRandom(UINT64* val);
 
-SINT32 msSleep(UINT32 ms);
+SINT32 msSleep(UINT16 ms);
 
-SINT32 sSleep(UINT32 sec);
+SINT32 sSleep(UINT16 sec);
 
 UINT32 getMemoryUsage();
 
@@ -182,7 +182,6 @@ SINT32 getDOMElementValue(const DOMElement * const pElem, UINT64 &value);
 SINT32 getDOMElementValue(const DOMElement * const pElem, SINT64 &value);
 
 SINT32 getDOMElementValue(const DOMElement * const pElem,UINT32* value);
-SINT32 getDOMElementValue(const DOMElement * const pElem,SINT32* value);
 /** Gets the value from an DOM-Element as UINT32. If an error occurs, the default value is returned.
 */
 SINT32 getDOMElementValue(const DOMElement * const pElem,UINT32& value,UINT32 defaultValue);
@@ -434,8 +433,7 @@ inline void print64(UINT8* buff,UINT64 num)
 	}
 
 
-UINT8* readFile(const UINT8* const name,UINT32* size);
-SINT32 saveFile(const UINT8* const name,const UINT8* const buff,UINT32 buffSize);
+UINT8* readFile(UINT8* name,UINT32* size);
 
 /**
  * Parses a timestamp in JDBC timestamp escape format (as it comes from the BI)

@@ -21,7 +21,7 @@
 #include "tre-parse.h"
 #include "tre-compile.h"
 #include "regex.h"
-
+#include "xmalloc.h"
 
 /*
   Algorithms to setup tags so that submatch addressing can be done.
@@ -161,25 +161,25 @@ tre_add_tags(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree,
       tnfa->minimal_tags[0] = -1;
     }
 
-  regset = (int*)malloc(sizeof(*regset) * ((tnfa->num_submatches + 1) * 2));
+  regset = (int*)xmalloc(sizeof(*regset) * ((tnfa->num_submatches + 1) * 2));
   if (regset == NULL)
     return REG_ESPACE;
   regset[0] = -1;
   orig_regset = regset;
 
-  parents = (int*)malloc(sizeof(*parents) * (tnfa->num_submatches + 1));
+  parents = (int*)xmalloc(sizeof(*parents) * (tnfa->num_submatches + 1));
   if (parents == NULL)
     {
-      free(regset);
+      xfree(regset);
       return REG_ESPACE;
     }
   parents[0] = -1;
 
-  saved_states =(tre_tag_states_t *) malloc(sizeof(*saved_states) * (tnfa->num_submatches + 1));
+  saved_states =(tre_tag_states_t *) xmalloc(sizeof(*saved_states) * (tnfa->num_submatches + 1));
   if (saved_states == NULL)
     {
-      free(regset);
-      free(parents);
+      xfree(regset);
+      xfree(parents);
       return REG_ESPACE;
     }
   else
@@ -237,7 +237,7 @@ tre_add_tags(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree,
 		  tnfa->submatch_data[id].parents = NULL;
 		  if (i > 0)
 		    {
-		      int *p = (int*)malloc(sizeof(*p) * (i + 1));
+		      int *p = (int*)xmalloc(sizeof(*p) * (i + 1));
 		      if (p == NULL)
 			{
 			  status = REG_ESPACE;
@@ -627,9 +627,9 @@ tre_add_tags(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree,
   tnfa->end_tag = num_tags;
   tnfa->num_tags = num_tags;
   tnfa->num_minimals = num_minimals;
-  free(orig_regset);
-  free(parents);
-  free(saved_states);
+  xfree(orig_regset);
+  xfree(parents);
+  xfree(saved_states);
   return status;
 }
 
@@ -1461,7 +1461,7 @@ tre_compute_nfl(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree)
 		if (status != REG_OK)
 		  return status;
 		/* Allocate arrays for the tags and parameters. */
-		tags =(int*) malloc(sizeof(*tags) * (num_tags + 1));
+		tags =(int*) xmalloc(sizeof(*tags) * (num_tags + 1));
 		if (!tags)
 		  return REG_ESPACE;
 		tags[0] = -1;
@@ -1473,7 +1473,7 @@ tre_compute_nfl(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree)
 					   * TRE_PARAM_LAST);
 		    if (!params)
 		      {
-			free(tags);
+			xfree(tags);
 			return REG_ESPACE;
 		      }
 		  }
@@ -1483,13 +1483,13 @@ tre_compute_nfl(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree)
 					 &assertions, params, NULL, NULL);
 		if (status != REG_OK)
 		  {
-		    free(tags);
+		    xfree(tags);
 		    return status;
 		  }
 		node->firstpos =
 		  tre_set_union(mem, cat->right->firstpos, cat->left->firstpos,
 				tags, assertions, params);
-		free(tags);
+		xfree(tags);
 		if (!node->firstpos)
 		  return REG_ESPACE;
 	      }
@@ -1510,7 +1510,7 @@ tre_compute_nfl(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree)
 		if (status != REG_OK)
 		  return status;
 		/* Allocate arrays for the tags and parameters. */
-		tags = (int*)malloc(sizeof(int) * (num_tags + 1));
+		tags = (int*)xmalloc(sizeof(int) * (num_tags + 1));
 		if (!tags)
 		  return REG_ESPACE;
 		tags[0] = -1;
@@ -1522,7 +1522,7 @@ tre_compute_nfl(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree)
 					   * TRE_PARAM_LAST);
 		    if (!params)
 		      {
-			free(tags);
+			xfree(tags);
 			return REG_ESPACE;
 		      }
 		  }
@@ -1532,13 +1532,13 @@ tre_compute_nfl(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree)
 					 &assertions, params, NULL, NULL);
 		if (status != REG_OK)
 		  {
-		    free(tags);
+		    xfree(tags);
 		    return status;
 		  }
 		node->lastpos =
 		  tre_set_union(mem, cat->left->lastpos, cat->right->lastpos,
 				tags, assertions, params);
-		free(tags);
+		xfree(tags);
 		if (!node->lastpos)
 		  return REG_ESPACE;
 	      }
@@ -1633,7 +1633,7 @@ tre_make_trans(tre_pos_and_tags_t *p1, tre_pos_and_tags_t *p2,
 	      {
 		for (i = 0; p1->neg_classes[i] != (tre_ctype_t)0; i++);
 		trans->neg_classes =(tre_ctype_t*)
-		  malloc(sizeof(*trans->neg_classes) * (i + 1));
+		  xmalloc(sizeof(*trans->neg_classes) * (i + 1));
 		if (trans->neg_classes == NULL)
 		  return REG_ESPACE;
 		for (i = 0; p1->neg_classes[i] != (tre_ctype_t)0; i++)
@@ -1655,13 +1655,13 @@ tre_make_trans(tre_pos_and_tags_t *p1, tre_pos_and_tags_t *p2,
 
 	    /* If we are overwriting a transition, free the old tag array. */
 	    if (trans->tags != NULL)
-	      free(trans->tags);
+	      xfree(trans->tags);
 	    trans->tags = NULL;
 
 	    /* If there were any tags, allocate an array and fill it. */
 	    if (i + j > 0)
 	      {
-		trans->tags = (int*)malloc(sizeof(*trans->tags) * (i + j + 1));
+		trans->tags = (int*)xmalloc(sizeof(*trans->tags) * (i + j + 1));
 		if (!trans->tags)
 		  return REG_ESPACE;
 		i = 0;
@@ -1696,7 +1696,7 @@ tre_make_trans(tre_pos_and_tags_t *p1, tre_pos_and_tags_t *p2,
 	    if (p1->params || p2->params)
 	      {
 		if (!trans->params)
-		  trans->params =(int*) malloc(sizeof(*trans->params)
+		  trans->params =(int*) xmalloc(sizeof(*trans->params)
 					  * TRE_PARAM_LAST);
 		if (!trans->params)
 		  return REG_ESPACE;
@@ -1712,7 +1712,7 @@ tre_make_trans(tre_pos_and_tags_t *p1, tre_pos_and_tags_t *p2,
 	    else
 	      {
 		if (trans->params)
-		  free(trans->params);
+		  xfree(trans->params);
 		trans->params = NULL;
 	      }
 
@@ -1902,7 +1902,7 @@ tre_compile(regex_t *preg, const tre_char_t *regex, size_t n, int cflags)
     ERROR_EXIT(REG_ESUBREG);
 
   /* Allocate the TNFA struct. */
-  tnfa = (tre_tnfa_t*)calloc(1, sizeof(tre_tnfa_t));
+  tnfa = (tre_tnfa_t*)xcalloc(1, sizeof(tre_tnfa_t));
   if (tnfa == NULL)
     ERROR_EXIT(REG_ESPACE);
   tnfa->have_backrefs = parse_ctx.max_backref >= 0;
@@ -1925,7 +1925,7 @@ tre_compile(regex_t *preg, const tre_char_t *regex, size_t n, int cflags)
 
       if (tnfa->num_tags > 0)
 	{
-	  tag_directions = (tre_tag_direction_t*)malloc(sizeof(*tag_directions)
+	  tag_directions = (tre_tag_direction_t*)xmalloc(sizeof(*tag_directions)
 				   * (tnfa->num_tags + 1));
 	  if (tag_directions == NULL)
 	    ERROR_EXIT(REG_ESPACE);
@@ -1933,12 +1933,12 @@ tre_compile(regex_t *preg, const tre_char_t *regex, size_t n, int cflags)
 	  memset(tag_directions, -1,
 		 sizeof(*tag_directions) * (tnfa->num_tags + 1));
 	}
-      tnfa->minimal_tags =(int*) calloc((unsigned)tnfa->num_tags * 2 + 1,
+      tnfa->minimal_tags =(int*) xcalloc((unsigned)tnfa->num_tags * 2 + 1,
 				   sizeof(tnfa->minimal_tags));
       if (tnfa->minimal_tags == NULL)
 	ERROR_EXIT(REG_ESPACE);
 
-      submatch_data =(tre_submatch_data_t*) calloc((unsigned)parse_ctx.submatch_id,
+      submatch_data =(tre_submatch_data_t*) xcalloc((unsigned)parse_ctx.submatch_id,
 			      sizeof(*submatch_data));
       if (submatch_data == NULL)
 	ERROR_EXIT(REG_ESPACE);
@@ -1987,11 +1987,11 @@ tre_compile(regex_t *preg, const tre_char_t *regex, size_t n, int cflags)
   if (errcode != REG_OK)
     ERROR_EXIT(errcode);
 
-  counts =(int*) malloc(sizeof(int) * parse_ctx.position);
+  counts =(int*) xmalloc(sizeof(int) * parse_ctx.position);
   if (counts == NULL)
     ERROR_EXIT(REG_ESPACE);
 
-  offs =(int*) malloc(sizeof(int) * parse_ctx.position);
+  offs =(int*) xmalloc(sizeof(int) * parse_ctx.position);
   if (offs == NULL)
     ERROR_EXIT(REG_ESPACE);
 
@@ -2006,7 +2006,7 @@ tre_compile(regex_t *preg, const tre_char_t *regex, size_t n, int cflags)
       add += counts[i] + 1;
       counts[i] = 0;
     }
-  transitions =(tre_tnfa_transition_t*) calloc((unsigned)add + 1, sizeof(*transitions));
+  transitions =(tre_tnfa_transition_t*) xcalloc((unsigned)add + 1, sizeof(*transitions));
   if (transitions == NULL)
     ERROR_EXIT(REG_ESPACE);
   tnfa->transitions = transitions;
@@ -2025,7 +2025,7 @@ tre_compile(regex_t *preg, const tre_char_t *regex, size_t n, int cflags)
       int count = 0;
       tre_cint_t k;
       DPRINT(("Characters that can start a match:"));
-      tnfa->firstpos_chars =(char*) calloc(256, sizeof(char));
+      tnfa->firstpos_chars =(char*) xcalloc(256, sizeof(char));
       if (tnfa->firstpos_chars == NULL)
 	ERROR_EXIT(REG_ESPACE);
       for (p = tree->firstpos; p->position >= 0; p++)
@@ -2052,7 +2052,7 @@ tre_compile(regex_t *preg, const tre_char_t *regex, size_t n, int cflags)
 	      {
 		DPRINT(("first char must be %d\n", k));
 		tnfa->first_char = k;
-		free(tnfa->firstpos_chars);
+		xfree(tnfa->firstpos_chars);
 		tnfa->firstpos_chars = NULL;
 		break;
 	      }
@@ -2100,7 +2100,7 @@ tre_compile(regex_t *preg, const tre_char_t *regex, size_t n, int cflags)
       p++;
     }
 
-  initial = (tre_tnfa_transition_t*)calloc((unsigned)i + 1, sizeof(tre_tnfa_transition_t));
+  initial = (tre_tnfa_transition_t*)xcalloc((unsigned)i + 1, sizeof(tre_tnfa_transition_t));
   if (initial == NULL)
     ERROR_EXIT(REG_ESPACE);
   tnfa->initial = initial;
@@ -2117,7 +2117,7 @@ tre_compile(regex_t *preg, const tre_char_t *regex, size_t n, int cflags)
 	{
 	  int j;
 	  for (j = 0; p->tags[j] >= 0; j++);
-	  initial[i].tags =(int*) malloc(sizeof(*p->tags) * (j + 1));
+	  initial[i].tags =(int*) xmalloc(sizeof(*p->tags) * (j + 1));
 	  if (!initial[i].tags)
 	    ERROR_EXIT(REG_ESPACE);
 	  memcpy(initial[i].tags, p->tags, sizeof(*p->tags) * (j + 1));
@@ -2125,7 +2125,7 @@ tre_compile(regex_t *preg, const tre_char_t *regex, size_t n, int cflags)
       initial[i].params = NULL;
       if (p->params)
 	{
-	  initial[i].params = (int*)malloc(sizeof(*p->params) * TRE_PARAM_LAST);
+	  initial[i].params = (int*)xmalloc(sizeof(*p->params) * TRE_PARAM_LAST);
 	  if (!initial[i].params)
 	    ERROR_EXIT(REG_ESPACE);
 	  memcpy(initial[i].params, p->params,
@@ -2145,8 +2145,8 @@ tre_compile(regex_t *preg, const tre_char_t *regex, size_t n, int cflags)
 
   tre_mem_destroy(mem);
   tre_stack_destroy(stack);
-  free(counts);
-  free(offs);
+  xfree(counts);
+  xfree(offs);
 
   preg->TRE_REGEX_T_FIELD = (void *)tnfa;
   return REG_OK;
@@ -2157,9 +2157,9 @@ tre_compile(regex_t *preg, const tre_char_t *regex, size_t n, int cflags)
   if (stack != NULL)
     tre_stack_destroy(stack);
   if (counts != NULL)
-    free(counts);
+    xfree(counts);
   if (offs != NULL)
-    free(offs);
+    xfree(offs);
   preg->TRE_REGEX_T_FIELD = (void *)tnfa;
   tre_free(preg);
   return errcode;
@@ -2183,42 +2183,42 @@ tre_free(regex_t *preg)
     if (tnfa->transitions[i].state)
       {
 	if (tnfa->transitions[i].tags)
-	  free(tnfa->transitions[i].tags);
+	  xfree(tnfa->transitions[i].tags);
 	if (tnfa->transitions[i].neg_classes)
-	  free(tnfa->transitions[i].neg_classes);
+	  xfree(tnfa->transitions[i].neg_classes);
 	if (tnfa->transitions[i].params)
-	  free(tnfa->transitions[i].params);
+	  xfree(tnfa->transitions[i].params);
       }
   if (tnfa->transitions)
-    free(tnfa->transitions);
+    xfree(tnfa->transitions);
 
   if (tnfa->initial)
     {
       for (trans = tnfa->initial; trans->state; trans++)
 	{
 	  if (trans->tags)
-	    free(trans->tags);
+	    xfree(trans->tags);
 	  if (trans->params)
-	    free(trans->params);
+	    xfree(trans->params);
 	}
-      free(tnfa->initial);
+      xfree(tnfa->initial);
     }
 
   if (tnfa->submatch_data)
     {
       for (i = 0; i < tnfa->num_submatches; i++)
 	if (tnfa->submatch_data[i].parents)
-	  free(tnfa->submatch_data[i].parents);
-      free(tnfa->submatch_data);
+	  xfree(tnfa->submatch_data[i].parents);
+      xfree(tnfa->submatch_data);
     }
 
   if (tnfa->tag_directions)
-    free(tnfa->tag_directions);
+    xfree(tnfa->tag_directions);
   if (tnfa->firstpos_chars)
-    free(tnfa->firstpos_chars);
+    xfree(tnfa->firstpos_chars);
   if (tnfa->minimal_tags)
-    free(tnfa->minimal_tags);
-  free(tnfa);
+    xfree(tnfa->minimal_tags);
+  xfree(tnfa);
 }
 
 char *

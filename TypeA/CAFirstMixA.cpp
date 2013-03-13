@@ -153,7 +153,11 @@ SINT32 CAFirstMixA::closeConnection(fmHashTableEntry* pHashEntry)
 	return E_SUCCESS;
 }
 
-#define FIRST_MIX_SIZE_OF_SYMMETRIC_KEYS 2*KEY_SIZE
+#ifdef NEW_CHANNEL_ENCRYPTION
+	#define FIRST_MIX_SIZE_OF_SYMMETRIC_KEYS 2*KEY_SIZE
+#else
+	#define FIRST_MIX_SIZE_OF_SYMMETRIC_KEYS KEY_SIZE
+#endif
 
 SINT32 CAFirstMixA::loop()
 	{
@@ -655,6 +659,35 @@ NEXT_USER:
 											m_psocketgroupUsersWrite->add(*pEntry->pHead->pMuxSocket);
 										#endif
 
+#ifndef NO_PARKING
+//										UINT32 uQueueSize=pEntry->pHead->pQueueSend->getSize();
+//										if(uQueueSize>200000)
+//											CAMsg::printMsg(LOG_INFO,"User Send Queue size is now %u\n",uQueueSize);
+										if(
+											#ifndef SSL_HACK
+											pEntry->pHead->pQueueSend->getSize() > MAX_USER_SEND_QUEUE
+											#else
+											/* a hack to solve the SSL problem:
+											 * only suspend channels with > MAX_DATA_PER_CHANNEL bytes
+											 */
+											pEntry->downStreamBytes > MAX_DATA_PER_CHANNEL
+											#endif
+											&& !pEntry->bIsSuspended)
+
+											{
+												pMixPacket->channel = pEntry->channelOut;
+												pMixPacket->flags = CHANNEL_SUSPEND;
+												#ifdef _DEBUG
+													CAMsg::printMsg(LOG_INFO,"Sending suspend for channel: %u\n",pMixPacket->channel);
+												#endif
+												#ifdef LOG_PACKET_TIMES
+													setZero64(pQueueEntry->timestamp_proccessing_start);
+												#endif
+												m_pQueueSendToMix->add(pQueueEntry, sizeof(tQueueEntry));
+												pEntry->bIsSuspended=true;
+												pEntry->pHead->cSuspend++;
+											}
+#endif
 										incMixedPackets();
 									}
 								else
@@ -786,9 +819,7 @@ bool CAFirstMixA::sendToUsers()
 
 				if(ret > 0)
 				{
-#ifdef PAYMENT
 					SINT32 accounting = E_SUCCESS;
-#endif
 					pfmHashEntry->uAlreadySendPacketSize += ret;
 
 					if(pfmHashEntry->uAlreadySendPacketSize == MIXPACKET_SIZE)
@@ -814,6 +845,14 @@ bool CAFirstMixA::sendToUsers()
 #endif
 					}
 
+					if(accounting == E_SUCCESS)
+					{
+						if( (pfmHashEntry->cSuspend > 0) &&
+							(dataMessageUserQueue->getSize() < USER_SEND_BUFFER_RESUME) )
+						{
+							resumeAllUserChannels(pfmHashEntry);
+						}
+					}
 				}
 				else if(ret<0&&ret!=E_AGAIN)
 				{
@@ -922,10 +961,14 @@ SINT32 CAFirstMixA::accountTrafficDownstream(fmHashTableEntry* pfmHashEntry)
 }
 #endif
 
+void CAFirstMixA::resumeAllUserChannels(fmHashTableEntry *pfmHashEntry)
+{
+	notifyAllUserChannels(pfmHashEntry, CHANNEL_RESUME);
+}
+
 void CAFirstMixA::notifyAllUserChannels(fmHashTableEntry *pfmHashEntry, UINT16 flags)
 {
-	if(pfmHashEntry == NULL) 
-		return;
+	if(pfmHashEntry == NULL) return;
 	fmChannelListEntry* pEntry = m_pChannelList->getFirstChannelForSocket(pfmHashEntry->pMuxSocket);
 	tQueueEntry* pQueueEntry=new tQueueEntry;
 	MIXPACKET *notifyPacket = &(pQueueEntry->packet);

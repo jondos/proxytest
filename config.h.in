@@ -30,9 +30,6 @@
 /* Define to 1 if you have the `atoll' function. */
 #undef HAVE_ATOLL
 
-/* Define to 1 if you have the <dlfcn.h> header file. */
-#undef HAVE_DLFCN_H
-
 /* Define if your OS support the epoll() syscall */
 #undef HAVE_EPOLL
 
@@ -154,10 +151,6 @@
 /* This is the value, which is returned from inet_addr(), in case of an error
    */
 #undef INADDR_NONE
-
-/* Define to the sub-directory in which libtool stores uninstalled libraries.
-   */
-#undef LT_OBJDIR
 
 /* This is the maximum length of a file system path */
 #undef MAX_PATH

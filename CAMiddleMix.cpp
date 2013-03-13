@@ -5,14 +5,14 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
 	- Redistributions of source code must retain the above copyright notice,
-		this list of conditions and the following disclaimer.
+	  this list of conditions and the following disclaimer.
 
 	- Redistributions in binary form must reproduce the above copyright notice,
-		this list of conditions and the following disclaimer in the documentation and/or
+	  this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
 	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
-		may be used to endorse or promote products derived from this software without specific
+	  may be used to endorse or promote products derived from this software without specific
 		prior written permission.
 
 
@@ -66,7 +66,7 @@ SINT32 CAMiddleMix::initOnce()
 	* \li Step 1: Opens TCP/IP-Connection to Mix \e n+1. \n
 	* \li Step 2: Receives info about Mix \e n+1 .. LastMix as XML struct
 	*         (see \ref  XMLInterMixInitSendFromLast "XML struct") \n
-	* \li Step 3: Verfies signature, generates symetric Keys used for link encryption
+  * \li Step 3: Verfies signature, generates symetric Keys used for link encryption
 	*         with Mix \n+1. \n
 	* \li Step 4: Sends symetric Key to Mix \e n+1, encrypted with PubKey of Mix \e n+1
 	*         (see \ref XMLInterMixInitAnswer "XML struct") \n
@@ -400,7 +400,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 		ret=m_pMuxIn->getCASocket()->send(out, outlen);
 		delete[] out;
 		out = NULL;
-		if( (ret < 0) || (ret != (SINT32)outlen) )
+		if( (ret < 0) || (ret != outlen) )
 		{
 			CAMsg::printMsg(LOG_DEBUG,"Error sending new New Key Info\n");
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextFailed);
@@ -604,52 +604,25 @@ SINT32 CAMiddleMix::init()
 
 		CAMsg::printMsg(LOG_INFO,"Creating Key...\n");
 		m_pRSA=new CAASymCipher();
-#ifdef EXPORT_ASYM_PRIVATE_KEY
-		if(CALibProxytest::getOptions()->isImportKey())
+		if(m_pRSA->generateKeyPair(1024)!=E_SUCCESS)
 			{
-				UINT32 keyFileBuffLen=8096;
-				UINT8* keyFileBuff=new UINT8[keyFileBuffLen];
-				CALibProxytest::getOptions()->getEncryptionKeyImportFile(keyFileBuff,keyFileBuffLen);
-				UINT8* keyBuff=readFile(keyFileBuff,&keyFileBuffLen);
-				m_pRSA->setPrivateKeyAsXML(keyBuff,keyFileBuffLen);
-				delete[] keyFileBuff;
-				delete[] keyBuff;
+				CAMsg::printMsg(LOG_CRIT,"Init: Error generating Key-Pair...\n");
+				return E_UNKNOWN;
 			}
-		else
-#endif
-			{
-				if(m_pRSA->generateKeyPair(1024)!=E_SUCCESS)
-					{
-						CAMsg::printMsg(LOG_CRIT,"Could not generate a valid key pair\n");
-						return E_UNKNOWN;
-					}
-			}
-#ifdef EXPORT_ASYM_PRIVATE_KEY
-		if(CALibProxytest::getOptions()->isExportKey())
-			{
-				UINT32 keyFileBuffLen=8096;
-				UINT8* keyFileBuff=new UINT8[keyFileBuffLen];
-				UINT8* keyBuff=new UINT8[keyFileBuffLen];
-				CALibProxytest::getOptions()->getEncryptionKeyExportFile(keyFileBuff,keyFileBuffLen);
-				m_pRSA->getPrivateKeyAsXML(keyBuff,&keyFileBuffLen);
-				saveFile(keyFileBuff,keyBuff,keyFileBuffLen);
-				delete[] keyFileBuff;
-				delete[] keyBuff;
-			}
-#endif
 
-		// connect to next mix
+    // connect to next mix
 		CASocketAddr* pAddrNext=NULL;
 		for(UINT32 i=0;i<CALibProxytest::getOptions()->getTargetInterfaceCount();i++)
 			{
-				CATargetInterface oNextMix;
+				TargetInterface oNextMix;
 				CALibProxytest::getOptions()->getTargetInterface(oNextMix,i+1);
-				if(oNextMix.getTargetType()==TARGET_MIX)
+				if(oNextMix.target_type==TARGET_MIX)
 					{
-						pAddrNext=oNextMix.getAddr();
+						pAddrNext=oNextMix.addr;
 						break;
 					}
-				oNextMix.cleanAddr();
+				delete oNextMix.addr;
+				oNextMix.addr = NULL;
 			}
 		if(pAddrNext==NULL)
 			{
@@ -738,7 +711,7 @@ SINT32 CAMiddleMix::init()
 		m_pMuxOut->getCASocket()->setKeepAlive((UINT32)1800);
 
 
-			if((ret = processKeyExchange())!=E_SUCCESS)
+	    if((ret = processKeyExchange())!=E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_CRIT,"Error in proccessKeyExchange()!\n");
 				return ret;
@@ -806,7 +779,7 @@ THREAD_RETURN mm_loopSendToMixAfter(void* param)
 						break;
 					}
 #ifdef LOG_PACKET_TIMES
-				if(!isZero64(pPoolEntry->timestamp_proccessing_start))
+ 				if(!isZero64(pPoolEntry->timestamp_proccessing_start))
 					{
 						getcurrentTimeMicros(pPoolEntry->timestamp_proccessing_end);
 						pFirstMix->m_pLogPacketStats->addToTimeingStats(*pPoolEntry,pMixPacket->flags,true);
@@ -866,7 +839,7 @@ THREAD_RETURN mm_loopSendToMixBefore(void* param)
 						break;
 					}
 #ifdef LOG_PACKET_TIMES
-				if(!isZero64(pPoolEntry->timestamp_proccessing_start))
+ 				if(!isZero64(pPoolEntry->timestamp_proccessing_start))
 					{
 						getcurrentTimeMicros(pPoolEntry->timestamp_proccessing_end);
 						pFirstMix->m_pLogPacketStats->addToTimeingStats(*pPoolEntry,pMixPacket->flags,true);
@@ -882,8 +855,13 @@ THREAD_RETURN mm_loopSendToMixBefore(void* param)
 		THREAD_RETURN_SUCCESS;
 	}
 
-#define MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS 2*KEY_SIZE
-#define MIDDLE_MIX_ASYM_PADDING_SIZE 42
+#ifdef NEW_CHANNEL_ENCRYPTION
+	#define MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS 2*KEY_SIZE
+	#define MIDDLE_MIX_ASYM_PADDING_SIZE 42
+#else
+	#define MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS KEY_SIZE
+	#define MIDDLE_MIX_ASYM_PADDING_SIZE 0
+#endif
 
 THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 	{
@@ -980,7 +958,11 @@ THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 									#ifdef _DEBUG
 										CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
 									#endif
-									pMix->m_pRSA->decryptOAEP(pMixPacket->data,tmpRSABuff,&rsaOutLen);
+									#ifdef NEW_CHANNEL_ENCRYPTION
+										pMix->m_pRSA->decryptOAEP(pMixPacket->data,tmpRSABuff,&rsaOutLen);
+									#else
+										pMix->m_pRSA->decrypt(pMixPacket->data,tmpRSABuff);
+									#endif
 									#ifdef REPLAY_DETECTION
 										// replace time(NULL) with the real timestamp ()
 										// packet-timestamp + m_u64ReferenceTime
@@ -1145,20 +1127,18 @@ THREAD_RETURN mm_loopReadFromMixAfter(void* param)
 						#endif
 						else if(pMix->m_pMiddleMixChannelList->getOutToIn(&channelIn,pMixPacket->channel,&pCipher)==E_SUCCESS)
 							{//connection found
-#ifdef LOG_CRIME
 								HCHANNEL channelOut = pMixPacket->channel;
-#endif
 								pMixPacket->channel=channelIn;
-#ifdef LOG_CRIME
+								#ifdef LOG_CRIME
 								if((pMixPacket->flags&CHANNEL_SIG_CRIME)==CHANNEL_SIG_CRIME)
-									{
-										getRandom(pMixPacket->data,DATA_SIZE);
-										//Log in and out channel number, to allow
-										CAMsg::printMsg(LOG_CRIT,"Detecting crime activity - previous mix channel: %u, "
-												"next mix channel: %u\n", channelIn, channelOut);
-									}
+								{
+									getRandom(pMixPacket->data,DATA_SIZE);
+									//Log in and out channel number, to allow
+									CAMsg::printMsg(LOG_CRIT,"Detecting crime activity - previous mix channel: %u, "
+											"next mix channel: %u\n", channelIn, channelOut);
+								}
 								else
-#endif
+								#endif
 								pCipher->crypt2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 								pCipher->unlock();
 								#ifdef USE_POOL
@@ -1220,7 +1200,7 @@ SINT32 CAMiddleMix::connectToNextMix(CASocketAddr* a_pAddrNext)
 			{
 				err=GET_NET_ERROR;
 #ifdef _DEBUG
-				CAMsg::printMsg(LOG_DEBUG,"Con-Error: %i\n",err);
+			 	CAMsg::printMsg(LOG_DEBUG,"Con-Error: %i\n",err);
 #endif
 				if(err!=ERR_INTERN_TIMEDOUT&&err!=ERR_INTERN_CONNREFUSED)
 				{
