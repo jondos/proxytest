@@ -182,10 +182,43 @@ typedef struct {
   UINT32    keylen;
 } gcm_ctx_64k;
 
+typedef struct {
+  UINT32    table[256][4];
+  KEY_SCHED ck;
+  int       keylen;
+} gcm_ctx_4k;
+
+typedef struct {
+  UINT32    table[16][4];
+  KEY_SCHED ck;
+  int       keylen;
+} gcm_ctx_256b;
+
 MODIFIERS void gcm_init_64k(gcm_ctx_64k *c, UINT8 key[], size_t keylen);
-MODIFIERS void gcm_encrypt_64k(gcm_ctx_64k *c, const UINT32 *nonce, const UINT8 *pt, size_t ptlen, UINT8 *ct, UINT32 *tag);
-MODIFIERS int gcm_decrypt_64k(gcm_ctx_64k *c, const UINT32 *nonce, const UINT8 *ct, size_t ctlen, const UINT8 *tag, UINT8 *pt);
-MODIFIERS int gcm_decrypt_64k(gcm_ctx_64k *c, const UINT32 *nonce, const UINT8 *ct, size_t ctlen, UINT8 *pt);
+MODIFIERS void gcm_encrypt_64k(gcm_ctx_64k *c, const UINT8 *nonce, size_t nlen, const UINT8 *pt, 
+			       size_t ptlen, UINT8 *adata, size_t alen, UINT8 *ct, 
+			       UINT8 *tag);
+MODIFIERS int gcm_decrypt_64k(gcm_ctx_64k *c, const UINT8 *nonce, size_t nlen, const UINT8 *ct, 
+			      size_t ctlen, const UINT8 *tag, size_t taglen, UINT8 *adata, 
+			      size_t alen, UINT8 *pt);
 MODIFIERS void gcm_destroy_64k(gcm_ctx_64k *c);
+
+MODIFIERS void gcm_init_4k(gcm_ctx_4k *c, UINT8 key[], size_t keylen);
+MODIFIERS void gcm_encrypt_4k(gcm_ctx_4k *c, UINT8 *nonce, size_t nlen, UINT8 *pt, 
+			      size_t ptlen, UINT8 *adata, size_t alen, UINT8 *ct, 
+			      UINT8 *tag);
+MODIFIERS int gcm_decrypt_4k(gcm_ctx_4k *c, UINT8 *nonce, size_t nlen, UINT8 *ct, 
+			     size_t ctlen, UINT8 *tag, size_t taglen, UINT8 *adata, 
+			     size_t alen, UINT8 *pt);
+MODIFIERS void gcm_destroy_4k(gcm_ctx_4k *c);
+
+MODIFIERS void gcm_init_256b(gcm_ctx_256b *c, UINT8 key[], size_t keylen);
+MODIFIERS void gcm_encrypt_256b(gcm_ctx_256b *c, UINT8 *nonce, size_t nlen, 
+				UINT8 *pt, size_t ptlen, UINT8 *adata, size_t alen, 
+				UINT8 *ct, UINT8 *tag);
+MODIFIERS int gcm_decrypt_256b(gcm_ctx_256b *c, UINT8 *nonce, size_t nlen, UINT8 *ct, 
+			       size_t ctlen, UINT8 *tag, size_t taglen, UINT8 *adata, 
+			       size_t alen, UINT8 *pt);
+MODIFIERS void gcm_destroy_256b(gcm_ctx_256b *c);
 
 #endif /* _GCM_H */

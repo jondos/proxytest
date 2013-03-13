@@ -195,7 +195,7 @@ CACertificate* CACertificate::decode(const UINT8* const buff,UINT32 bufflen,UINT
 		return new CACertificate(tmpCert);
 	}
 
-SINT32 CACertificate::encode(UINT8* buff,UINT32* bufflen,UINT32 type) const
+SINT32 CACertificate::encode(UINT8* buff,UINT32* bufflen,UINT32 type)
 	{
 		if(m_pCert==NULL||buff==NULL||bufflen==NULL)
 			return E_UNKNOWN;
@@ -228,7 +228,7 @@ SINT32 CACertificate::encode(UINT8* buff,UINT32* bufflen,UINT32 type) const
 		return E_SUCCESS;
 	}
 
-SINT32 CACertificate::encode(DOMElement* & elemRoot,XERCES_CPP_NAMESPACE::DOMDocument* doc) const
+SINT32 CACertificate::encode(DOMElement* & elemRoot,XERCES_CPP_NAMESPACE::DOMDocument* doc)
 	{
 		elemRoot=createDOMElement(doc,"X509Certificate");
 		UINT8 buff[2048]; //TODO: Very bad --> looks like easy buffer overflow... [donn't care at the moment...]
@@ -284,7 +284,7 @@ SINT32 CACertificate::getSubjectKeyIdentifier(UINT8* r_ski, UINT32 *r_skiLen)
     return E_SUCCESS;
 }
 
-SINT32 CACertificate::getAuthorityKeyIdentifier(UINT8* r_aki, UINT32* r_akiLen) const
+SINT32 CACertificate::getAuthorityKeyIdentifier(UINT8* r_aki, UINT32* r_akiLen)
 {
 	if(m_pAKI == NULL)
 	{
@@ -410,7 +410,7 @@ SINT32 CACertificate::getRawSubjectKeyIdentifier(UINT8* r_ski, UINT32* r_skiLen)
 	return E_SUCCESS;
 }
 
-SINT32 CACertificate::verify(const CACertificate* a_cert) const
+SINT32 CACertificate::verify(const CACertificate* a_cert)
 {
 	if(a_cert == NULL || a_cert->m_pCert == NULL || m_pCert == NULL)
 	{
@@ -466,12 +466,10 @@ SINT32 CACertificate::verify(const CACertificate* a_cert) const
 	return E_UNKNOWN;
 }
 
-bool CACertificate::isValid() const
+bool CACertificate::isValid()
 {
-	ASN1_TIME* pValidNotBefore=X509_get_notBefore(m_pCert);
-	ASN1_TIME* pValidNotAfter=X509_get_notAfter(m_pCert);
-	if(X509_cmp_current_time( pValidNotBefore) <0 
-			&& X509_cmp_current_time(pValidNotAfter) >0)
+	if(X509_cmp_current_time(X509_get_notBefore(m_pCert)) < 0
+			&& X509_cmp_current_time(X509_get_notAfter(m_pCert)) > 0)
 	{
 		return true;
 	}
@@ -491,8 +489,8 @@ bool CACertificate::isValid() const
 	time_t ttiq  = mktime(time);  	//convert time back to time_t and check again
 	delete time;
 	time = NULL;
-	if(X509_cmp_time( pValidNotBefore, &ttiq) <0
-			&& X509_cmp_time(pValidNotAfter, &ttiq) >0)
+	if(X509_cmp_time(X509_get_notBefore(m_pCert), &ttiq) < 0
+			&& X509_cmp_time(X509_get_notAfter(m_pCert), &ttiq) > 0)
 	{
 		CAMsg::printMsg(LOG_WARNING, "Certificate is only valid within grace period of two months!\n");
 		return true;

@@ -32,7 +32,7 @@ public:
 	}
 
 	/** TODO: implement */
-	SINT32 sign(CASignature &)
+	SINT32 sign(CASignature &signer)
 		{
 			return E_UNKNOWN;
 		}

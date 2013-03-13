@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <limits.h>
 
+#include "xmalloc.h"
 #include "tre-mem.h"
 #include "tre-ast.h"
 #include "tre-stack.h"
@@ -107,7 +108,7 @@ tre_new_item(tre_mem_t mem, int min, int max, int *i, int *max_i,
       if (*max_i > 1024)
 	return REG_ESPACE;
       *max_i *= 2;
-      new_items =(tre_ast_node_t**) realloc(array, sizeof(*items) * *max_i);
+      new_items =(tre_ast_node_t**) xrealloc(array, sizeof(*items) * *max_i);
       if (new_items == NULL)
 	return REG_ESPACE;
       *items = array = new_items;
@@ -428,7 +429,7 @@ tre_parse_bracket(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
   int num_neg_classes = 0;
 
   /* Start off with an array of `max_i' elements. */
-  items =(tre_ast_node_t**) malloc(sizeof(*items) * max_i);
+  items =(tre_ast_node_t**) xmalloc(sizeof(*items) * max_i);
   if (items == NULL)
     return REG_ESPACE;
 
@@ -571,7 +572,7 @@ tre_parse_bracket(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
 #endif /* TRE_DEBUG */
 
  parse_bracket_done:
-  free(items);
+  xfree(items);
   ctx->position++;
   *result = node;
   return status;

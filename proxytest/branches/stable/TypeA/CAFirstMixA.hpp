@@ -43,6 +43,7 @@ class CAFirstMixA:public CAFirstMix
 		
 		private:
 			bool sendToUsers();
+			void resumeAllUserChannels(fmHashTableEntry* pfmHashEntry);
 			void notifyAllUserChannels(fmHashTableEntry *pfmHashEntry, UINT16 flags);
 #ifdef SSL_HACK
 			void finishPacket(fmHashTableEntry *pfmHashEntry);
