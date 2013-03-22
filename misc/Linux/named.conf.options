@@ -6,9 +6,14 @@ options {
 	listen-on-v6 { none; };
 	listen-on { 127.0.0.1; };
 	
-        dnssec-enable yes;
-        dnssec-validation yes;
-        dnssec-lookaside "." trust-anchor "dlv.isc.org";
+    dnssec-enable yes;
+    dnssec-validation yes;
+    dnssec-lookaside "." trust-anchor "dlv.isc.org";
+
+    version none;
+
+    allow-query { any; };
+    allow-recursion { any; };
 	
 	minimal-responses yes;
 	max-cache-size 32M;
