@@ -101,7 +101,7 @@ visible_hostname none
 forwarded_for delete
 via off
 
-
+dns_v4_first on
 
 
 
