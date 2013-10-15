@@ -89,8 +89,7 @@ CAThread::CAThread(const UINT8* strName)
 #ifdef PRINT_THREAD_STACK_TRACE	
 void CAThread::destroyValue(void* a_value) 
 { 
-	delete a_value;
-	a_value = NULL; 
+	delete (METHOD_STACK* )a_value;
 }
 
 void CAThread::initKey() 
@@ -101,14 +100,12 @@ void CAThread::initKey()
 void CAThread::setCurrentStack(METHOD_STACK* a_value)
 {
 	pthread_once(&ms_threadKeyInit, initKey); 
-	void *value = pthread_getspecific(ms_threadKey); 
-
+	METHOD_STACK* value = (METHOD_STACK*)pthread_getspecific(ms_threadKey); 
 	delete value;
-	value = a_value; 
-	pthread_setspecific(ms_threadKey, value); 
+	pthread_setspecific(ms_threadKey, a_value); 
 }
 
-CAThread::METHOD_STACK* CAThread::getCurrentStack()
+METHOD_STACK* CAThread::getCurrentStack()
 {
 	pthread_once(&ms_threadKeyInit, initKey); 
 	return (METHOD_STACK*)pthread_getspecific(ms_threadKey); 

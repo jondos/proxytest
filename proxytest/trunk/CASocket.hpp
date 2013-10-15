@@ -39,7 +39,7 @@ class CASocket:public CAClientSocket
 
 			virtual SINT32 create();						
 			virtual SINT32 create(bool a_bShowTypicalError);
-			virtual SINT32 create(int type);
+			virtual SINT32 create(SINT32 type);
 
 			virtual SINT32 listen(const CASocketAddr& psa);
 			virtual SINT32 listen(UINT16 port);
@@ -132,7 +132,7 @@ class CASocket:public CAClientSocket
 
 			SOCKET m_Socket;
 		private:			
-			SINT32 create(int type, bool a_bShowTypicalError);
+			SINT32 create(SINT32 type, bool a_bShowTypicalError);
 		
 			CAMutex m_csClose;
 			///The following two variables are use to realise "reserved" sockets. The rational behind is to ensure

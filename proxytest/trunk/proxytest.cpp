@@ -165,7 +165,7 @@ void signal_segv( int )
 	sSleep(1);
 
 #ifdef PRINT_THREAD_STACK_TRACE
-	CAThread::METHOD_STACK* stack = CAThread::getCurrentStack();
+	METHOD_STACK* stack = CAThread::getCurrentStack();
 	if (stack != NULL)
 	{
 		CAMsg::printMsg( LOG_CRIT, "Stack trace: %s, \"%s\"\n", stack->strMethodName, stack->strPosition);
@@ -623,7 +623,21 @@ exit(0);
 			exit(0);*/
 ///End CAIPAddrWithNetmask Test
 
-
+//Test CAAsymCrypto
+/*CAASymCipher oRSA;
+oRSA.generateKeyPair(1024);
+UINT32 outlen=128;
+UINT8 in[200];
+for(int i=0;i<200;i++)
+	in[i]=i;
+UINT8 out[228];
+oRSA.encryptOAEP(in,80,out,&outlen);
+memset(in,0,200);
+out[outlen-1]+=1;//manipulate...
+oRSA.decryptOAEP(out,in,&outlen);
+exit(0);
+*/
+//End Test CAAsymCrypto
 
 		if(CALibProxytest::getOptions()->parse(argc,argv) != E_SUCCESS)
 		{
