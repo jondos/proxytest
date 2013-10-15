@@ -57,7 +57,7 @@ public:
 	SINT32 close();
 
 	/** Establishes the actual TCP/IP connection and performs the TLS handshake */
-	SINT32 connect(CASocketAddr & psa, UINT32 msTimeout);
+	SINT32 connect(const CASocketAddr & psa, UINT32 msTimeout);
 
 	/*
 	SINT32 connect(CASocketAddr & psa)

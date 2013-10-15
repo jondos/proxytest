@@ -863,7 +863,7 @@ class CACmdLnOptions
 		optionSetter_pt *generalOptionSetters;
 		optionSetter_pt *certificateOptionSetters;
 		optionSetter_pt *networkOptionSetters;
-		optionSetter_pt *termsAndConditionsOptionSetters;
+		optionSetter_pt * m_arpTermsAndConditionsOptionSetters;
 
 #ifdef SERVER_MONITORING
 	private:

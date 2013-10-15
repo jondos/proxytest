@@ -167,7 +167,7 @@ SINT32 CATLSClientSocket::doTLSConnect(CASocketAddr &psa)
 	* Establishes the TCP/IP connection, performs the TLS handshake and
 	* checks the server certificate validity
 	*/
-SINT32 CATLSClientSocket::connect(CASocketAddr & psa, UINT32 msTimeout)
+SINT32 CATLSClientSocket::connect(const CASocketAddr & psa, UINT32 msTimeout)
 	{
 		SINT32 rc;
 		// call base class connect function

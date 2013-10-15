@@ -274,7 +274,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#endif
 	#define socklen_t int
 	#define MSG_NOSIGNAL 0
-		#include <io.h>
+	#include <io.h>
 	#include <conio.h>
 	#include <sys/timeb.h>
 	#include <process.h>
@@ -304,6 +304,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define snprintf _snprintf
 	#define getpid _getpid
 	#define strncasecmp _strnicmp
+	#define open _open
+	#define write _write
+	#define close _close
+	#define read _read
+	#define access _access
+	#define getch _getch
 	#define HAVE_PTHREAD_MUTEX_INIT
 	#define HAVE_PTHREAD_COND_INIT
 	#define HAVE_SEM_INIT

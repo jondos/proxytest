@@ -48,6 +48,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WireSharkANONPlugin", "wire
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug with LLVM|Any CPU = Debug with LLVM|Any CPU
+		Debug with LLVM|Mixed Platforms = Debug with LLVM|Mixed Platforms
+		Debug with LLVM|Win32 = Debug with LLVM|Win32
 		Debug_with_unit_tests|Any CPU = Debug_with_unit_tests|Any CPU
 		Debug_with_unit_tests|Mixed Platforms = Debug_with_unit_tests|Mixed Platforms
 		Debug_with_unit_tests|Win32 = Debug_with_unit_tests|Win32
@@ -83,6 +86,11 @@ Global
 		VTune|Win32 = VTune|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Debug with LLVM|Any CPU.ActiveCfg = Debug with LLVM|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Debug with LLVM|Mixed Platforms.ActiveCfg = Debug with LLVM|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Debug with LLVM|Mixed Platforms.Build.0 = Debug with LLVM|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Debug with LLVM|Win32.ActiveCfg = Debug with LLVM|Win32
+		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Debug with LLVM|Win32.Build.0 = Debug with LLVM|Win32
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Debug_with_unit_tests|Any CPU.ActiveCfg = Debug_with_unit_tests|Win32
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Debug_with_unit_tests|Mixed Platforms.ActiveCfg = Debug_with_unit_tests|Win32
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.Debug_with_unit_tests|Mixed Platforms.Build.0 = Debug_with_unit_tests|Win32
@@ -138,6 +146,11 @@ Global
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.VTune|Mixed Platforms.Build.0 = VTune|Win32
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.VTune|Win32.ActiveCfg = VTune|Win32
 		{150377B0-CA8F-4031-A0B8-45A3001F4F81}.VTune|Win32.Build.0 = VTune|Win32
+		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.Debug with LLVM|Any CPU.ActiveCfg = Debug with LLVM|Win32
+		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.Debug with LLVM|Mixed Platforms.ActiveCfg = Debug with LLVM|Win32
+		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.Debug with LLVM|Mixed Platforms.Build.0 = Debug with LLVM|Win32
+		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.Debug with LLVM|Win32.ActiveCfg = Debug with LLVM|Win32
+		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.Debug with LLVM|Win32.Build.0 = Debug with LLVM|Win32
 		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.Debug_with_unit_tests|Any CPU.ActiveCfg = Debug_with_unit_tests|Win32
 		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.Debug_with_unit_tests|Mixed Platforms.ActiveCfg = Debug_with_unit_tests|Win32
 		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.Debug_with_unit_tests|Mixed Platforms.Build.0 = Debug_with_unit_tests|Win32
@@ -187,6 +200,11 @@ Global
 		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.VTune|Mixed Platforms.ActiveCfg = VTune|Win32
 		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.VTune|Mixed Platforms.Build.0 = VTune|Win32
 		{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}.VTune|Win32.ActiveCfg = VTune|Win32
+		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Debug with LLVM|Any CPU.ActiveCfg = Debug with LLVM|Win32
+		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Debug with LLVM|Mixed Platforms.ActiveCfg = Debug with LLVM|Win32
+		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Debug with LLVM|Mixed Platforms.Build.0 = Debug with LLVM|Win32
+		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Debug with LLVM|Win32.ActiveCfg = Debug with LLVM|Win32
+		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Debug with LLVM|Win32.Build.0 = Debug with LLVM|Win32
 		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Debug_with_unit_tests|Any CPU.ActiveCfg = Debug_with_unit_tests|Win32
 		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Debug_with_unit_tests|Mixed Platforms.ActiveCfg = Debug_with_unit_tests|Win32
 		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.Debug_with_unit_tests|Mixed Platforms.Build.0 = Debug_with_unit_tests|Win32
@@ -234,6 +252,11 @@ Global
 		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.VTune|Mixed Platforms.Build.0 = proxytest-only-local-debug|Win32
 		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.VTune|Win32.ActiveCfg = Release|Win32
 		{1DE75B05-314A-4E97-B281-5D1075F7CF2D}.VTune|Win32.Build.0 = Release|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Debug with LLVM|Any CPU.ActiveCfg = Debug with LLVM|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Debug with LLVM|Mixed Platforms.ActiveCfg = Debug with LLVM|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Debug with LLVM|Mixed Platforms.Build.0 = Debug with LLVM|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Debug with LLVM|Win32.ActiveCfg = Debug with LLVM|Win32
+		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Debug with LLVM|Win32.Build.0 = Debug with LLVM|Win32
 		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Debug_with_unit_tests|Any CPU.ActiveCfg = Debug-with-Mini-XML|Win32
 		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Debug_with_unit_tests|Mixed Platforms.ActiveCfg = Debug-with-Mini-XML|Win32
 		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.Debug_with_unit_tests|Mixed Platforms.Build.0 = Debug-with-Mini-XML|Win32
@@ -282,6 +305,11 @@ Global
 		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.VTune|Mixed Platforms.Build.0 = proxytest-only-local-debug|Win32
 		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.VTune|Win32.ActiveCfg = Release|Win32
 		{6408FBC7-C4FB-45FB-8276-25093DD9BD0E}.VTune|Win32.Build.0 = Release|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Debug with LLVM|Any CPU.ActiveCfg = Debug with LLVM|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Debug with LLVM|Mixed Platforms.ActiveCfg = Debug with LLVM|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Debug with LLVM|Mixed Platforms.Build.0 = Debug with LLVM|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Debug with LLVM|Win32.ActiveCfg = Debug with LLVM|Win32
+		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Debug with LLVM|Win32.Build.0 = Debug with LLVM|Win32
 		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Debug_with_unit_tests|Any CPU.ActiveCfg = Debug-with-Mini-XML|Win32
 		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Debug_with_unit_tests|Mixed Platforms.ActiveCfg = Debug-with-Mini-XML|Win32
 		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.Debug_with_unit_tests|Mixed Platforms.Build.0 = Debug-with-Mini-XML|Win32
@@ -330,6 +358,11 @@ Global
 		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.VTune|Mixed Platforms.Build.0 = proxytest-only-local-debug|Win32
 		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.VTune|Win32.ActiveCfg = Release|Win32
 		{17916053-4B43-46CF-ABB3-709AE4E3DA78}.VTune|Win32.Build.0 = Release|Win32
+		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.Debug with LLVM|Any CPU.ActiveCfg = Debug with LLVM|Win32
+		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.Debug with LLVM|Mixed Platforms.ActiveCfg = Debug with LLVM|Win32
+		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.Debug with LLVM|Mixed Platforms.Build.0 = Debug with LLVM|Win32
+		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.Debug with LLVM|Win32.ActiveCfg = Debug with LLVM|Win32
+		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.Debug with LLVM|Win32.Build.0 = Debug with LLVM|Win32
 		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.Debug_with_unit_tests|Any CPU.ActiveCfg = Debug-with-Mini-XML|Win32
 		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.Debug_with_unit_tests|Mixed Platforms.ActiveCfg = Debug-with-Mini-XML|Win32
 		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.Debug_with_unit_tests|Mixed Platforms.Build.0 = Debug-with-Mini-XML|Win32
@@ -373,6 +406,11 @@ Global
 		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.VTune|Mixed Platforms.ActiveCfg = proxytest-only-local-debug|Win32
 		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.VTune|Mixed Platforms.Build.0 = proxytest-only-local-debug|Win32
 		{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}.VTune|Win32.ActiveCfg = Release|Win32
+		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.Debug with LLVM|Any CPU.ActiveCfg = Debug with LLVM|Win32
+		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.Debug with LLVM|Mixed Platforms.ActiveCfg = Debug with LLVM|Win32
+		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.Debug with LLVM|Mixed Platforms.Build.0 = Debug with LLVM|Win32
+		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.Debug with LLVM|Win32.ActiveCfg = Debug with LLVM|Win32
+		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.Debug with LLVM|Win32.Build.0 = Debug with LLVM|Win32
 		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.Debug_with_unit_tests|Any CPU.ActiveCfg = Debug-with-Mini-XML|Win32
 		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.Debug_with_unit_tests|Mixed Platforms.ActiveCfg = Debug-with-Mini-XML|Win32
 		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.Debug_with_unit_tests|Mixed Platforms.Build.0 = Debug-with-Mini-XML|Win32
@@ -416,6 +454,11 @@ Global
 		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.VTune|Mixed Platforms.ActiveCfg = proxytest-only-local-debug|Win32
 		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.VTune|Mixed Platforms.Build.0 = proxytest-only-local-debug|Win32
 		{9DB252A3-2EE3-440F-AC14-E961994FCE7A}.VTune|Win32.ActiveCfg = Release|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug with LLVM|Any CPU.ActiveCfg = Debug with LLVM|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug with LLVM|Mixed Platforms.ActiveCfg = Debug with LLVM|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug with LLVM|Mixed Platforms.Build.0 = Debug with LLVM|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug with LLVM|Win32.ActiveCfg = Debug with LLVM|Win32
+		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug with LLVM|Win32.Build.0 = Debug with LLVM|Win32
 		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug_with_unit_tests|Any CPU.ActiveCfg = Debug|Win32
 		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug_with_unit_tests|Mixed Platforms.ActiveCfg = Debug|Win32
 		{AAEF6135-AF46-4182-81AC-B9BC6A94DF11}.Debug_with_unit_tests|Mixed Platforms.Build.0 = Debug|Win32

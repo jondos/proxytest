@@ -58,7 +58,7 @@ SINT32 CASocket::create()
 		return create(AF_INET, true);
 	}
 
-SINT32 CASocket::create(int type)
+SINT32 CASocket::create(SINT32 type)
 {
 	return create(type, true);
 }
@@ -69,13 +69,13 @@ SINT32 CASocket::create(bool a_bShowTypicalError)
 }
 
 ///@todo Not thread safe!
-SINT32 CASocket::create(int type, bool a_bShowTypicalError)
+SINT32 CASocket::create(SINT32 type, bool a_bShowTypicalError)
 	{
 		if(m_bSocketIsClosed)
 		{
 			if(m_bIsReservedSocket||m_u32NormalSocketsOpen<m_u32MaxNormalSockets)
 			{
-				m_Socket=socket(type,SOCK_STREAM,0);
+				m_Socket=::socket(type,SOCK_STREAM,0);
 				//CAMsg::printMsg(LOG_DEBUG,"Opened socket: %d\n", m_Socket);
 			}
 			else

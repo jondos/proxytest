@@ -45,6 +45,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include "tre/regex.h"
 //#endif
 
+
 CACmdLnOptions::CACmdLnOptions()
 	{
 		m_bDaemon=false;
@@ -173,7 +174,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_u32DelayChannelLatency = DELAY_CHANNEL_LATENCY;
 #endif
 
-		/* initialize pointer to option setter functions */
+		// initialize pointer to option setter functions 
 		initMainOptionSetters();
 		initGeneralOptionSetters();
 		initCertificateOptionSetters();
@@ -187,6 +188,7 @@ CACmdLnOptions::CACmdLnOptions()
 #endif
  }
 
+ 
 CACmdLnOptions::~CACmdLnOptions()
 	{
 		cleanup();
@@ -305,13 +307,11 @@ void CACmdLnOptions::initNetworkOptionSetters()
 void CACmdLnOptions::initTermsAndConditionsOptionSetters()
 {
 
-	termsAndConditionsOptionSetters = new optionSetter_pt[TERMS_AND_CONDITIONS_OPTIONS_NR];
+	m_arpTermsAndConditionsOptionSetters = new optionSetter_pt [TERMS_AND_CONDITIONS_OPTIONS_NR];
 	int count = -1;
 
-	termsAndConditionsOptionSetters[++count]=
-			&CACmdLnOptions::setTermsAndConditionsTemplates;
-	termsAndConditionsOptionSetters[++count]=
-				&CACmdLnOptions::setTermsAndConditionsList;
+	m_arpTermsAndConditionsOptionSetters[++count]=& CACmdLnOptions::setTermsAndConditionsTemplates;
+	m_arpTermsAndConditionsOptionSetters[++count]=	&CACmdLnOptions::setTermsAndConditionsList;
 }
 
 #ifdef LOG_CRIME
@@ -330,8 +330,8 @@ void CACmdLnOptions::initCrimeDetectionOptionSetters()
 		&CACmdLnOptions::setCrimeSurveillanceIP;
 }
 #endif
-/** This is the final cleanup, which deletes every resource (including any locks necessary to synchronise read/write to properties).
-*/
+// This is the final cleanup, which deletes every resource (including any locks necessary to synchronise read/write to properties).
+//
 SINT32 CACmdLnOptions::cleanup()
 	{
 		clean();
@@ -342,8 +342,8 @@ SINT32 CACmdLnOptions::cleanup()
 		return E_SUCCESS;
 	}
 
-/** Deletes all information about the target interfaces.
-	*/
+// Deletes all information about the target interfaces.
+	//
 SINT32 CACmdLnOptions::clearTargetInterfaces()
 	{
 		if(m_arTargetInterfaces!=NULL)
@@ -360,8 +360,8 @@ SINT32 CACmdLnOptions::clearTargetInterfaces()
 		return E_SUCCESS;
 	}
 
-/** Deletes all information about the listener interfaces.
-	*/
+// Deletes all information about the listener interfaces.
+	//
 SINT32 CACmdLnOptions::clearListenerInterfaces()
 	{
 		if(m_arListenerInterfaces!=NULL)
@@ -379,8 +379,8 @@ SINT32 CACmdLnOptions::clearListenerInterfaces()
 	}
 
 #ifndef ONLY_LOCAL_PROXY
-/** Deletes all information about the visible addresses.
-	*/
+// Deletes all information about the visible addresses.
+	//
 SINT32 CACmdLnOptions::clearVisibleAddresses()
 	{
 		if(m_arStrVisibleAddresses!=NULL)
@@ -397,20 +397,20 @@ SINT32 CACmdLnOptions::clearVisibleAddresses()
 		return E_SUCCESS;
 	}
 
-/** Add all the visible addresses to the list of visible addresses found in the XML description of the \<Proxy\> element given.
-	* The structur is as follows:
-	*@verbatim
-	* <Proxy>
-	*      <VisibleAddresses> <!-- Describes the visible addresses from the 'outside world' -->
- *       <VisibleAddress>
-	*        <Host> <!-- Host or IP -->
-	 *       </Host>
-	 *     </VisibleAddress>
-	 *   </VisibleAddresses>
-*
-	* </Proxy>
-	@endverbatim
-	*/
+/// ** Add all the visible addresses to the list of visible addresses found in the XML description of the \<Proxy\> element given.
+//	* The structur is as follows:
+//	*@verbatim
+//	* <Proxy>
+//	*      <VisibleAddresses> <!-- Describes the visible addresses from the 'outside world' -->
+// *       <VisibleAddress>
+//	*        <Host> <!-- Host or IP -->
+//	 *       </Host>
+//	 *     </VisibleAddress>
+//	 *   </VisibleAddresses>
+// *
+//	* </Proxy>
+//	@endverbatim
+//	
 SINT32 CACmdLnOptions::addVisibleAddresses(DOMNode* nodeProxy)
 	{
 		if(nodeProxy==NULL) return E_UNKNOWN;
@@ -464,6 +464,8 @@ SINT32 CACmdLnOptions::getVisibleAddress(UINT8* strAddressBuff, UINT32 len,UINT3
 		return E_SUCCESS;
 	}
 #endif //ONLY_LOCAL_PROXY
+
+
 
 /** Deletes all resssource allocated by objects of this class EXPECT the locks necessary to controll access to the properties of this class*/
 void CACmdLnOptions::clean()
@@ -673,11 +675,10 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 			exit(0);
 		}
 		
-		if (MIX_VERSION_TESTING)
-		{
-			CAMsg::printMsg(LOG_WARNING, MIX_VERSION_TESTING_TEXT);
-		}
-		
+#ifdef MIX_VERSION_TESTING
+		CAMsg::printMsg(LOG_WARNING, MIX_VERSION_TESTING_TEXT);
+#endif
+
 #ifndef ONLY_LOCAL_PROXY
 	if(strCreateConf!=NULL)
 		{
@@ -879,6 +880,8 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 			DOMElement* elemIs=infoservices->getDocumentElement();
 			parseInfoServices(elemIs);
 		}
+
+
 
 #ifdef DYNAMIC_MIX
 		/*  Ok, at this point we should make sure that we have a minimal configuration.
@@ -2484,10 +2487,9 @@ SINT32 CACmdLnOptions::setLoggingOptions(DOMElement* elemGeneral)
 	if (ret == E_SUCCESS)
 	{
 		CAMsg::printMsg(LOG_INFO,MIX_VERSION_INFO);
-		if (MIX_VERSION_TESTING)
-		{
-			CAMsg::printMsg(LOG_WARNING, MIX_VERSION_TESTING_TEXT);
-		}
+#ifdef MIX_VERSION_TESTING
+		CAMsg::printMsg(LOG_WARNING, MIX_VERSION_TESTING_TEXT);
+#endif
 	}
 
 	return ret;
@@ -2519,9 +2521,10 @@ SINT32  CACmdLnOptions::setMixDescription(DOMElement* elemRoot)
 	return ret;
 }
 
-/***************************************
- * certificate option setter functions *
- ***************************************/
+
+// ***************************************
+// * certificate option setter functions *
+// ***************************************
 SINT32 CACmdLnOptions::setCertificateOptions(DOMElement* elemRoot)
 {
 
@@ -2558,32 +2561,32 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 		return E_UNKNOWN;
 	}
 
-	/*m_pSignKey = new CASignature();
+	/// m_pSignKey = new CASignature();
 
-	if(m_pSignKey->setSignKey
-			(elemOwnCert->getFirstChild(), SIGKEY_PKCS12) != E_SUCCESS)
-	{
-		//Maybe not an empty passwd
-		printf("I need a passwd for the SignKey: ");
-		fflush(stdout);
-		readPasswd(passwd, 500);
-		if(m_pSignKey->setSignKey
-				(elemOwnCert->getFirstChild(),
-				 SIGKEY_PKCS12,(char*)passwd) != E_SUCCESS)
-		{
-			CAMsg::printMsg(LOG_CRIT,"Could not read own signature key!\n");
-			delete m_pSignKey;
-			m_pSignKey=NULL;
-		}
-	}*/
+	//if(m_pSignKey->setSignKey
+	//		(elemOwnCert->getFirstChild(), SIGKEY_PKCS12) != E_SUCCESS)
+	//{
+	//	//Maybe not an empty passwd
+	//	printf("I need a passwd for the SignKey: ");
+	//	fflush(stdout);
+	//	readPasswd(passwd, 500);
+	//	if(m_pSignKey->setSignKey
+	//			(elemOwnCert->getFirstChild(),
+	//			 SIGKEY_PKCS12,(char*)passwd) != E_SUCCESS)
+	//	{
+	//		CAMsg::printMsg(LOG_CRIT,"Could not read own signature key!\n");
+	//		delete m_pSignKey;
+	//		m_pSignKey=NULL;
+	//	}
+	//}
 
-	/*m_pOwnCertificate =
-		CACertificate::decode(elemOwnCert->getFirstChild(), CERT_PKCS12, (char*)passwd);
-	if (m_pOwnCertificate == NULL)
-	{
-		CAMsg::printMsg(LOG_CRIT, "Could not decode mix certificate!\n");
-		return E_UNKNOWN;
-	}*/
+	/// m_pOwnCertificate =
+	//	CACertificate::decode(elemOwnCert->getFirstChild(), CERT_PKCS12, (char*)passwd);
+	//if (m_pOwnCertificate == NULL)
+	//{
+	//	CAMsg::printMsg(LOG_CRIT, "Could not decode mix certificate!\n");
+	//	return E_UNKNOWN;
+	//}
 
 	// new
 	//m_ownCertsLength = 0;
@@ -2703,12 +2706,12 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 		return E_UNKNOWN;
 	}
 	//end new
-	/*if ( (m_pOwnCertificate->getSubjectKeyIdentifier(tmpBuff, &tmpLen) != E_SUCCESS) &&
-				(m_strMixID == NULL))
-	{
-		LOG_NODE_NOT_FOUND(OPTIONS_NODE_MIX_ID);
-		return E_UNKNOWN;
-	}*/
+	/// if ( (m_pOwnCertificate->getSubjectKeyIdentifier(tmpBuff, &tmpLen) != E_SUCCESS) &&
+	//			(m_strMixID == NULL))
+	//{
+	//	LOG_NODE_NOT_FOUND(OPTIONS_NODE_MIX_ID);
+	//	return E_UNKNOWN;
+	//}
 	//check Mix-ID
 	if(m_pMultiSignature->getXORofSKIs(tmpBuff, tmpLen) != E_SUCCESS)
 	{
@@ -2742,7 +2745,7 @@ SINT32 CACmdLnOptions::setOwnCertificate(DOMElement *elemCertificates)
 #endif
 	
 #ifdef DYNAMIC_MIX
-		/* LERNGRUPPE: Dynamic Mixes must have a cascade name, as MiddleMixes may be reconfigured to be FirstMixes */
+		// LERNGRUPPE: Dynamic Mixes must have a cascade name, as MiddleMixes may be reconfigured to be FirstMixes 
 	if(bNeedCascadeNameFromMixID)
 	{
 		m_strCascadeName = new char[strlen(m_strMixID) + 1];
@@ -2908,9 +2911,9 @@ SINT32 CACmdLnOptions::setTrustedRootCertificates(DOMElement *elemCertificates)
 	return E_SUCCESS;
 }
 
-/**************************************
- * accounting option setter functions *
- **************************************/
+// **************************************
+// accounting option setter functions *
+// *************************************
 #ifdef PAYMENT
 SINT32 CACmdLnOptions::setAccountingOptions(DOMElement *elemRoot)
 {
@@ -2949,25 +2952,25 @@ SINT32 CACmdLnOptions::setPriceCertificate(DOMElement *elemAccounting)
 	}
 	else
 	{
-		/*UINT8 digest[SHA_DIGEST_LENGTH];
-		UINT8* out=new UINT8[5000];
-		UINT32 outlen=5000;
-
-		DOM_Output::makeCanonical(elemPriceCert,out,&outlen);
-		out[outlen] = 0;
-//#ifdef DEBUG
-		CAMsg::printMsg(LOG_DEBUG, "price cert (%u bytes) to be hashed: %s\n",outlen, out);
-//#endif
-		SHA1(out,outlen,digest);
-		delete[] out;
-		out = NULL;
-
-		UINT32 len2 = 1024;
-		UINT8* tmpBuff2 = new UINT8[len2+1];
-		memset(tmpBuff2, 0, len2+1);
-		CABase64::encode(digest,SHA_DIGEST_LENGTH, tmpBuff2, &len2);
-		CAMsg::printMsg(LOG_CRIT,"hash: %s\n", tmpBuff2);
-		exit(0);*/
+//		UINT8 digest[SHA_DIGEST_LENGTH];
+//		UINT8* out=new UINT8[5000];
+//		UINT32 outlen=5000;
+//
+//		DOM_Output::makeCanonical(elemPriceCert,out,&outlen);
+//		out[outlen] = 0;
+////#ifdef DEBUG
+//		CAMsg::printMsg(LOG_DEBUG, "price cert (%u bytes) to be hashed: %s\n",outlen, out);
+////#endif
+//		SHA1(out,outlen,digest);
+//		delete[] out;
+//		out = NULL;
+//
+//		UINT32 len2 = 1024;
+//		UINT8* tmpBuff2 = new UINT8[len2+1];
+//		memset(tmpBuff2, 0, len2+1);
+//		CABase64::encode(digest,SHA_DIGEST_LENGTH, tmpBuff2, &len2);
+//		CAMsg::printMsg(LOG_CRIT,"hash: %s\n", tmpBuff2);
+//		exit(0);
 		m_pPriceCertificate = CAXMLPriceCert::getInstance(elemPriceCert);
 		if (m_pPriceCertificate == NULL) 
 		{
@@ -3137,7 +3140,7 @@ SINT32 CACmdLnOptions::setPrepaidInterval(DOMElement *elemAccounting)
 	//insert prepaid interval
 	DOMElement* elemInterval = createDOMElement(m_docMixInfo, OPTIONS_NODE_PREPAID_IVAL_KB);
 	setDOMElementValue(elemInterval, (m_iPrepaidInterval / 1000) );
-	//TODO: handle exceptional cases */
+	//TODO: handle exceptional cases 
 	m_docMixInfo->getDocumentElement()->appendChild(elemInterval);
 	return E_SUCCESS;
 }
@@ -3180,7 +3183,7 @@ SINT32 CACmdLnOptions::setAccountingDatabase(DOMElement *elemAccounting)
 	UINT8 tmpBuff[TMP_BUFF_SIZE];
 	UINT32 tmpLen = TMP_BUFF_SIZE, tmp = 0;
 
-	/* DDB is only configured for first payment mix */
+	// DDB is only configured for first payment mix 
 	if (!m_bFirstMix)
 	{
 		return E_SUCCESS;
@@ -3314,9 +3317,9 @@ SINT32 CACmdLnOptions::setAccountingDatabase(DOMElement *elemAccounting)
 	return E_SUCCESS;
 }
 #endif //PAYMENT
-/***********************************
- * network option setter functions *
- ***********************************/
+// ***********************************
+// network option setter functions *
+// ***********************************
 SINT32 CACmdLnOptions::setNetworkOptions(DOMElement *elemRoot)
 {
 	DOMElement* elemNetwork = NULL;
@@ -3353,7 +3356,7 @@ SINT32 CACmdLnOptions::setInfoServices(DOMElement *elemNetwork)
 		{
 			LOG_NODE_NOT_FOUND(OPTIONS_NODE_INFOSERVICE);
 		}
-		/* LERNGRUPPE: There might not be any InfoService configuration in the file, but in infoservices.xml, so check this */
+		// LERNGRUPPE: There might not be any InfoService configuration in the file, but in infoservices.xml, so check this 
 		if(elemInfoService != NULL)
 		{
 			getDOMChildByName
@@ -3398,7 +3401,7 @@ SINT32 CACmdLnOptions::setListenerInterfaces(DOMElement *elemNetwork)
 		elemListenerInterfaces, m_cnListenerInterfaces);
 
 #ifndef DYNAMIC_MIX
-		/* LERNGRUPPE: ListenerInterfaces may be configured dynamically */
+		// LERNGRUPPE: ListenerInterfaces may be configured dynamically 
 	if (m_cnListenerInterfaces == 0)
 	{
 		CAMsg::printMsg(LOG_CRIT, "No listener interfaces found!\n");
@@ -3616,7 +3619,7 @@ SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UIN
 }
 
 
-/* Proxy settings and next mix settings */
+// Proxy settings and next mix settings 
 SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 {
 	UINT8 tmpBuff[TMP_BUFF_SIZE];
@@ -3680,10 +3683,10 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 					//bool bAddrIsSet=false;
 					getDOMChildByName
 						(elemNextMix, OPTIONS_NODE_HOST, elemHost, false);
-					/* The rules for <Host> and <IP> are as follows:
-						* 1. if <Host> is given and not empty take the <Host> value for the address of the next mix; if not go to 2
-						* 2. if <IP> if given and not empty take <IP> value for the address of the next mix; if not goto 3.
-						* 3. this entry for the next mix is invalid!*/
+					// The rules for <Host> and <IP> are as follows:
+					//	* 1. if <Host> is given and not empty take the <Host> value for the address of the next mix; if not go to 2
+					//	* 2. if <IP> if given and not empty take <IP> value for the address of the next mix; if not goto 3.
+					//	* 3. this entry for the next mix is invalid!
 					if(elemHost != NULL)
 					{
 						if(getDOMElementValue(elemHost,buffHost,&buffHostLen)==E_SUCCESS &&
@@ -4034,7 +4037,7 @@ SINT32 CACmdLnOptions::setServerMonitoring(DOMElement *elemNetwork)
 			}
 		}
 
-		/* only non-local ListnerInterfaces are showed in Mix status info */
+		// only non-local ListnerInterfaces are showed in Mix status info 
 			if( (elemServerMonitoringRoot != NULL) &&
 				(m_strMonitoringListenerHost != NULL))
 			{
@@ -4049,11 +4052,11 @@ SINT32 CACmdLnOptions::setServerMonitoring(DOMElement *elemNetwork)
 	{
 		CAMsg::printMsg(LOG_DEBUG, "Server Monitoring Config not found\n");
 	}
-#endif /* SERVER_MONITORING */
+#endif // SERVER_MONITORING 
 	return E_SUCCESS;
 }
 
-/* Read Configuration of KeepAliveTraffic */
+// Read Configuration of KeepAliveTraffic 
 SINT32 CACmdLnOptions::setKeepAliveTraffic(DOMElement *elemNetwork)
 {
 	DOMElement* elemKeepAlive = NULL;
@@ -4073,10 +4076,11 @@ SINT32 CACmdLnOptions::setKeepAliveTraffic(DOMElement *elemNetwork)
 }
 
 
-/***************************************
- * ressource option setter function(s) *
- *         (delay options)             *
- ***************************************/
+// ***************************************
+// * ressource option setter function(s) *
+// *         (delay options)             *
+// ***************************************
+
 SINT32 CACmdLnOptions::setRessourceOptions(DOMElement *elemRoot)
 {
 #if defined (DELAY_CHANNELS) ||defined(DELAY_USERS)||defined(DELAY_CHANNELS_LATENCY)
@@ -4134,9 +4138,9 @@ SINT32 CACmdLnOptions::setRessourceOptions(DOMElement *elemRoot)
 	return E_SUCCESS;
 }
 
-/*************************************************
- * terms and condition option setter function(s) *
- *************************************************/
+// *************************************************
+// * terms and condition option setter function(s) *
+// *************************************************
 SINT32 CACmdLnOptions::setTermsAndConditions(DOMElement *elemRoot)
 {
 	SINT32 ret = E_SUCCESS;
@@ -4151,7 +4155,7 @@ SINT32 CACmdLnOptions::setTermsAndConditions(DOMElement *elemRoot)
 	if(elemTnCs != NULL)
 	{
 		return invokeOptionSetters
-			(termsAndConditionsOptionSetters, elemTnCs, TERMS_AND_CONDITIONS_OPTIONS_NR);
+			(m_arpTermsAndConditionsOptionSetters, elemTnCs, TERMS_AND_CONDITIONS_OPTIONS_NR);
 	}
 	else
 	{
@@ -4313,9 +4317,9 @@ SINT32 CACmdLnOptions::setTermsAndConditionsList(DOMElement *elemTnCs)
 	bool defaultLangFound = false;
 	bool operatorImportNodeFound = (tncOperatorNode != NULL);
 
-	/* validity check for every definition: are all necessary attributes set (referenceId, locale), length ok
-	 * and is there EXACTLY ONE default language specified?
-	 */
+	// validity check for every definition: are all necessary attributes set (referenceId, locale), length ok
+	// * and is there EXACTLY ONE default language specified?
+	//
 	for (XMLSize_t j = 0; j < tncDefEntryList->getLength(); j++)
 	{
 		attrCheckLen = TMP_BUFF_SIZE;
@@ -4387,9 +4391,9 @@ SINT32 CACmdLnOptions::setTermsAndConditionsList(DOMElement *elemTnCs)
 	return E_SUCCESS;
 }
 
-/*******************************************
- * crime detection option setter functions *
- *******************************************/
+// *******************************************
+// * crime detection option setter functions *
+// *******************************************
 #ifdef LOG_CRIME
 SINT32 CACmdLnOptions::setCrimeDetectionOptions(DOMElement *elemRoot)
 {
@@ -4426,25 +4430,25 @@ SINT32 CACmdLnOptions::setCrimeURLRegExp(DOMElement *elemCrimeDetection)
 	return setRegExpressions(elemCrimeDetection, OPTIONS_NODE_CRIME_REGEXP_URL,
 				&m_arCrimeRegExpsURL, &m_nCrimeRegExpsURL);
 
-	/*DOM_NodeList nlRegExp = elemCrimeDetection.getElementsByTagName("RegExpURL");
-	m_arCrimeRegExpsURL=new regex_t[nlRegExp.getLength()];
-	for(UINT32 i=0;i<nlRegExp.getLength();i++)
-	{
-		DOM_Node tmpChild=nlRegExp.item(i);
-		UINT32 lenRegExp=4096;
-		UINT8 buffRegExp[4096];
-		if(getDOMElementValue(tmpChild,buffRegExp,&lenRegExp)==E_SUCCESS)
-		{
-			if(regcomp(&m_arCrimeRegExpsURL[m_nCrimeRegExpsURL],(char*)buffRegExp,REG_EXTENDED|REG_ICASE|REG_NOSUB)!=0)
-			{
-				CAMsg::printMsg(LOG_CRIT,"Could not compile URL regexp: %s\n",buffRegExp);
-				exit(-1);
-			}
-			CAMsg::printMsg(LOG_DEBUG,"Looking for crime URL RegExp: %s\n",buffRegExp);
+	///DOM_NodeList nlRegExp = elemCrimeDetection.getElementsByTagName("RegExpURL");
+	//m_arCrimeRegExpsURL=new regex_t[nlRegExp.getLength()];
+	//for(UINT32 i=0;i<nlRegExp.getLength();i++)
+	//{
+	//	DOM_Node tmpChild=nlRegExp.item(i);
+	//	UINT32 lenRegExp=4096;
+	//	UINT8 buffRegExp[4096];
+	//	if(getDOMElementValue(tmpChild,buffRegExp,&lenRegExp)==E_SUCCESS)
+	//	{
+	//		if(regcomp(&m_arCrimeRegExpsURL[m_nCrimeRegExpsURL],(char*)buffRegExp,REG_EXTENDED|REG_ICASE|REG_NOSUB)!=0)
+	//		{
+	//			CAMsg::printMsg(LOG_CRIT,"Could not compile URL regexp: %s\n",buffRegExp);
+	//			exit(-1);
+	//		}
+	//		CAMsg::printMsg(LOG_DEBUG,"Looking for crime URL RegExp: %s\n",buffRegExp);
 
-			m_nCrimeRegExpsURL++;
-		}
-	}*/
+	//		m_nCrimeRegExpsURL++;
+	//	}
+	//}
 
 	return E_SUCCESS;
 }
@@ -4459,32 +4463,32 @@ SINT32 CACmdLnOptions::setCrimePayloadRegExp(DOMElement *elemCrimeDetection)
 	return setRegExpressions(elemCrimeDetection, OPTIONS_NODE_CRIME_REGEXP_PAYLOAD,
 			&m_arCrimeRegExpsPayload, &m_nCrimeRegExpsPayload);
 
-	/*DOMNodeList *nlRegExp =
-		getElementsByTagName(elemCrimeDetection, OPTIONS_NODE_CRIME_REGEXP_PAYLOAD);
+	///DOMNodeList *nlRegExp =
+	//	getElementsByTagName(elemCrimeDetection, OPTIONS_NODE_CRIME_REGEXP_PAYLOAD);
 
-	if(nlRegExp != NULL)
-	{
-		m_arCrimeRegExpsPayload = new regex_t[nlRegExp->getLength()];
-		for(UINT32 i = 0; i < nlRegExp->getLength(); i++)
-		{
-			DOMNode *tmpChild = nlRegExp->item(i);
+	//if(nlRegExp != NULL)
+	//{
+	//	m_arCrimeRegExpsPayload = new regex_t[nlRegExp->getLength()];
+	//	for(UINT32 i = 0; i < nlRegExp->getLength(); i++)
+	//	{
+	//		DOMNode *tmpChild = nlRegExp->item(i);
 
-			UINT32 lenRegExp = REGEXP_BUFF_SIZE;
-			UINT8 buffRegExp[REGEXP_BUFF_SIZE];
+	//		UINT32 lenRegExp = REGEXP_BUFF_SIZE;
+	//		UINT8 buffRegExp[REGEXP_BUFF_SIZE];
 
-			if(getDOMElementValue(tmpChild, buffRegExp, &lenRegExp)==E_SUCCESS)
-			{
-				if(regcomp(&m_arCrimeRegExpsPayload[m_nCrimeRegExpsPayload],(char*)buffRegExp,REG_EXTENDED|REG_ICASE|REG_NOSUB)!=0)
-				{
-					CAMsg::printMsg(LOG_CRIT,"Could not compile payload regexp: %s\n",buffRegExp);
-					exit(-1);
-				}
-				CAMsg::printMsg(LOG_DEBUG,"Looking for crime Payload RegExp: %s\n",buffRegExp);
+	//		if(getDOMElementValue(tmpChild, buffRegExp, &lenRegExp)==E_SUCCESS)
+	//		{
+	//			if(regcomp(&m_arCrimeRegExpsPayload[m_nCrimeRegExpsPayload],(char*)buffRegExp,REG_EXTENDED|REG_ICASE|REG_NOSUB)!=0)
+	//			{
+	//				CAMsg::printMsg(LOG_CRIT,"Could not compile payload regexp: %s\n",buffRegExp);
+	//				exit(-1);
+	//			}
+	//			CAMsg::printMsg(LOG_DEBUG,"Looking for crime Payload RegExp: %s\n",buffRegExp);
 
-				m_nCrimeRegExpsPayload++;
-			}
-		}
-	}*/
+	//			m_nCrimeRegExpsPayload++;
+	//		}
+	//	}
+	//}
 	return E_SUCCESS;
 }
 
@@ -4627,13 +4631,13 @@ SINT32 setRegExpressions(DOMElement *rootElement, const char* const childElement
 
 
 
-/** Processes a XML configuration document. This sets the values of the
-	* options to the values found in the XML document.
-	* Note that only the values are changed, which are given in the XML document!
-	* @param docConfig the configuration as XML document
-	* @retval E_UNKNOWN if an error occurs
-	* @retval E_SUCCESS otherwise
-	*/
+// ** Processes a XML configuration document. This sets the values of the
+//	* options to the values found in the XML document.
+//	* Note that only the values are changed, which are given in the XML document!
+//	* @param docConfig the configuration as XML document
+//	* @retval E_UNKNOWN if an error occurs
+//	* @retval E_SUCCESS otherwise
+//	
 SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument* docConfig)
 {
 	SINT32 ret = E_SUCCESS;
@@ -4643,16 +4647,16 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 	}
 	DOMElement* elemRoot=docConfig->getDocumentElement();
 
-	/* Initialize Mixinfo DOM structure so that neccessary
-	 * option can be appended to it.
-	 */
+	// * Initialize Mixinfo DOM structure so that neccessary
+	// * option can be appended to it.
+	// 
 	DOMElement* elemMix=createDOMElement(m_docMixInfo, MIXINFO_NODE_PARENT);
 	m_docMixInfo->appendChild(elemMix);
 
-	/* invoke all main option setters
-	 * which then invoke their own specific
-	 * option setters
-	 */
+	// * invoke all main option setters
+	// * which then invoke their own specific
+	// * option setters
+	// 
 	ret = invokeOptionSetters(mainOptionSetters, elemRoot, MAIN_OPTION_SETTERS_NR);
 	if(ret != E_SUCCESS)
 	{
@@ -4666,7 +4670,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 	elemSoftware->appendChild(elemVersion);
 	elemMix->appendChild(elemSoftware);
 	
-	/* Add the payment reminder */
+	// Add the payment reminder 
 	DOMElement* elemPaymentReminder=createDOMElement(m_docMixInfo, MIXINFO_NODE_PAYMENTREMINDER);
 	setDOMElementValue(elemPaymentReminder, m_PaymentReminderProbability);
 	elemMix->appendChild(elemPaymentReminder);
@@ -4702,7 +4706,7 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 		SINT32 haveCascade = getDOMChildByName(elemRoot,"MixCascade",elemCascade,false);
 
 #ifndef DYNAMIC_MIX
-		/* LERNGRUPPE: This is no error in the fully dynamic model */
+		// LERNGRUPPE: This is no error in the fully dynamic model 
 		if(isLastMix() && haveCascade != E_SUCCESS && !hasPrevMixTestCertificate() && !verifyMixCertificates())
 		{
 				CAMsg::printMsg(LOG_CRIT,"Error in configuration: You must either specify cascade info or the previous mix's certificate.\n");
@@ -4783,25 +4787,25 @@ SINT32 CACmdLnOptions::processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument
 
 #ifndef ONLY_LOCAL_PROXY
 
-/**
-	* LERNGRUPPE
-	* Parses the \c InfoServices Node in a) a mix configuration or b) out of \c infoservices.xml
-	* (Code refactored from CACmdLnOptions::processXmlConfiguration
-	* @param a_infoServiceNode The \c InfoServices Element
-	* @retval E_SUCCESS
-	*/
+/// **
+//	* LERNGRUPPE
+//	* Parses the \c InfoServices Node in a) a mix configuration or b) out of \c infoservices.xml
+//	* (Code refactored from CACmdLnOptions::processXmlConfiguration
+//	* @param a_infoServiceNode The \c InfoServices Element
+//	* @retval E_SUCCESS
+//	
 SINT32 CACmdLnOptions::parseInfoServices(DOMElement* a_infoServiceNode)
 {
 	DOMElement* elemAllowReconfig;
 	getDOMChildByName(a_infoServiceNode, OPTIONS_NODE_ALLOW_AUTO_CONF, elemAllowReconfig, false);
 	DOMNodeList* isList = getElementsByTagName(a_infoServiceNode, OPTIONS_NODE_INFOSERVICE);
-	/* If there are no InfoServices in the file, keep the (hopefully) previously configured InfoServices */
+	// If there are no InfoServices in the file, keep the (hopefully) previously configured InfoServices 
 	if(isList->getLength() == 0)
 	{
 		return E_SUCCESS;
 	}
-	/* If there are already InfoServices, delete them */
-	/** @todo merge could be better... */
+	// If there are already InfoServices, delete them 
+	// ** @todo merge could be better... 
 	if(m_addrInfoServices!=NULL)
 	{
 		for(UINT32 i=0;i<m_addrInfoServicesSize;i++)
@@ -4825,7 +4829,7 @@ SINT32 CACmdLnOptions::parseInfoServices(DOMElement* a_infoServiceNode)
 		isListenerInterfaces = CAListenerInterface::getInstance(elemListenerInterfaces, nrListenerInterfaces);
 		if (nrListenerInterfaces > 0)
 		{
-			/** @todo Take more than one listener interface for a given IS... */
+			// @todo Take more than one listener interface for a given IS... 
 			m_addrInfoServices[m_addrInfoServicesSize] = isListenerInterfaces[0];
 			m_addrInfoServicesSize++;
 			for (UINT32 j = 1; j < nrListenerInterfaces; j++)
@@ -4845,6 +4849,9 @@ SINT32 CACmdLnOptions::parseInfoServices(DOMElement* a_infoServiceNode)
 
 	return E_SUCCESS;
 }
+
+
+
 
 
 /** Builds a default Configuration
