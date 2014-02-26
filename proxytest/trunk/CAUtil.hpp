@@ -407,7 +407,6 @@ inline void print64(UINT8* buff,UINT64 num)
 					return;
 				}
 			UINT64 mask=10000000000000000000ULL;
-			UINT digit;
 			UINT32 index=0;
 			bool bprintZero=false;
 			if(num>=mask)
@@ -419,7 +418,7 @@ inline void print64(UINT8* buff,UINT64 num)
 			while(mask>1)
 				{
 					mask/=10;
-					digit=(UINT)(num/mask);
+					UINT digit=(UINT)(num/mask);
 					if(digit>0||bprintZero)
 						{
 							buff[index++]=(UINT8)(digit+'0');

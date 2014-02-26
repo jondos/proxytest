@@ -141,7 +141,7 @@ SINT32 CALastMixA::loop()
 										{
 											#if defined(_DEBUG)
 												CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
-												//keep a copy of whol packet and output it, if something with integrity check went wrong...
+												//keep a copy of whole packet and output it, if something with integrity check went wrong...
 												UINT8 tmpPacket[DATA_SIZE];
 												memcpy(tmpPacket,pMixPacket->data,DATA_SIZE);
 											#endif
@@ -880,7 +880,7 @@ SINT32 CALastMixA::loop()
 //ERR:
 		CAMsg::printMsg(LOG_CRIT,"Seems that we are restarting now!!\n");
 		m_bRunLog=false;
-		//clean();
+		clean();
 
 		delete []tmpBuff;
 		tmpBuff = NULL;

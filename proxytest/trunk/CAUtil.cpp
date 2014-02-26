@@ -72,16 +72,15 @@ UINT32 strtrim(UINT8* s)
 	
 UINT32 toLower(UINT8* a_string)
 {
-	int differ = 'A'-'a';
-	char ch;
+	const UINT8 differ =(UINT8) ('A'-'a');
 	int ii = strlen((char*)a_string);
 	for (int i=0; i <ii;i++)
 	{
-		strncpy(&ch,(char*)a_string+i,1);
+		UINT8 ch=a_string[i];
 		if (ch>='A' && ch<='Z')
 		{
 			ch = ch-differ;
-			memcpy(a_string+i,&ch,1);
+			a_string[i]=ch;
 		}
 	}
 	return E_SUCCESS;
@@ -587,15 +586,11 @@ SINT32 integrateDOMNode(const DOMNode *srcNode, DOMNode *dstNode, bool recursive
 				{
 					if( (dstOwnerDoc != NULL) && (srcOwnerDoc != dstOwnerDoc) )
 					{
-						dstElem->replaceChild(
-							dstOwnerDoc->importNode(currSrcChildren->item(j),true),
-							currDstChildren->item(j));
+						dstElem->replaceChild(dstOwnerDoc->importNode(currSrcChildren->item(j),true),currDstChildren->item(j));
 					}
 					else
 					{
-						dstElem->replaceChild(
-							dstOwnerDoc->cloneNode(currSrcChildren->item(j)),
-							currDstChildren->item(j));
+						dstElem->replaceChild(dstOwnerDoc->cloneNode(currSrcChildren->item(j)),currDstChildren->item(j));
 					}
 					continue;
 				}
@@ -1547,7 +1542,13 @@ UINT8* readFile(const UINT8* const name,UINT32* size)
 		return NULL;
 	*size=filesize32(handle);
 	UINT8* buff=new UINT8[*size];
-	read(handle,buff,*size);
+	if (buff == NULL)
+		return NULL;
+	if (read(handle, buff, *size) != *size)
+		{
+			delete[] buff;
+			return NULL;
+		}
 	close(handle);
 	return buff;
 }

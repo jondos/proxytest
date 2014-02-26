@@ -37,39 +37,40 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 const UINT32 CAMix::TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT = 60000;
 
 CAMix::CAMix()
-{
-		m_acceptReconfiguration = CALibProxytest::getOptions()->acceptReconfiguration();
-		//m_pSignature=NULL;
-		m_pMultiSignature=NULL;
-		m_pInfoService=NULL;
-		m_pMuxOutControlChannelDispatcher=NULL;
-		m_pMuxInControlChannelDispatcher=NULL;
-		m_u32KeepAliveSendInterval=0;//zero means --> do not use
-		m_u32KeepAliveRecvInterval=0;//zero means --> do not use
-		m_bShutDown = false;
-		m_docMixCascadeInfo=NULL;
-		m_bConnected = false;
-		m_lLastConnectionTime = 0;
+	{
+	m_acceptReconfiguration = CALibProxytest::getOptions()->acceptReconfiguration();
+	//m_pSignature=NULL;
+	m_pMultiSignature=NULL;
+	m_pInfoService=NULL;
+	m_pMuxOutControlChannelDispatcher=NULL;
+	m_pMuxInControlChannelDispatcher=NULL;
+	m_u32KeepAliveSendInterval=0;//zero means --> do not use
+	m_u32KeepAliveRecvInterval=0;//zero means --> do not use
+	m_bShutDown = false;
+	m_docMixCascadeInfo=NULL;
+	m_bConnected = false;
+	m_lLastConnectionTime = 0;
+//#ifdef DYNAMIC_MIX
+	/* LERNGRUPPE: Run by default */
+	m_bLoop = true;
 #ifdef DYNAMIC_MIX
-		/* LERNGRUPPE: Run by default */
-		m_bLoop = true;
-		m_bReconfiguring = false;
-		m_bCascadeEstablished = false;
-		m_bReconfigured = false;
+	m_bReconfiguring = false;
+	m_bCascadeEstablished = false;
+	m_bReconfigured = false;
 #endif
 #ifdef DATA_RETENTION_LOG
-		m_pDataRetentionLog=NULL;
+	m_pDataRetentionLog=NULL;
 #endif
 	}
 
 CAMix::~CAMix()
 	{
 #ifdef DATA_RETENTION_LOG
-		if(m_pDataRetentionLog!=NULL)
-			{
-				delete m_pDataRetentionLog;
-				m_pDataRetentionLog=NULL;
-			}
+	if(m_pDataRetentionLog!=NULL)
+		{
+		delete m_pDataRetentionLog;
+		m_pDataRetentionLog=NULL;
+		}
 #endif
 
 	}
@@ -77,176 +78,177 @@ CAMix::~CAMix()
 SINT32 CAMix::initOnce()
 	{
 #ifdef DATA_RETENTION_LOG
-		m_pDataRetentionLog=new CADataRetentionLog();
-		CAASymCipher* pKey=NULL;
-		CALibProxytest::getOptions()->getDataRetentionPublicEncryptionKey(&pKey);
-		if(m_pDataRetentionLog->setPublicEncryptionKey(pKey)!=E_SUCCESS)
-			return E_UNKNOWN;
-		UINT8 strDir[4096];
-		strDir[0]=0;
-		if(CALibProxytest::getOptions()->getDataRetentionLogDir(strDir,4096)!=E_SUCCESS ||
-			 m_pDataRetentionLog->setLogDir(strDir)!=E_SUCCESS)
-			{
-				CAMsg::printMsg(LOG_ERR,"Data Retention Error: Could not set log dir to %s!\n",strDir);
-				return E_UNKNOWN;
-			}
-		else
-			{
-				CAMsg::printMsg(LOG_INFO,"Data Retention: Set log dir to: %s\n",strDir);
-				CAMsg::printMsg(LOG_INFO,"Data Retention: tQueueEntry size is: %u\n",sizeof(tQueueEntry));
-			}
+	m_pDataRetentionLog=new CADataRetentionLog();
+	CAASymCipher* pKey=NULL;
+	CALibProxytest::getOptions()->getDataRetentionPublicEncryptionKey(&pKey);
+	if(m_pDataRetentionLog->setPublicEncryptionKey(pKey)!=E_SUCCESS)
+		{ return E_UNKNOWN; }
+	UINT8 strDir[4096];
+	strDir[0]=0;
+	if(CALibProxytest::getOptions()->getDataRetentionLogDir(strDir,4096)!=E_SUCCESS ||
+	    m_pDataRetentionLog->setLogDir(strDir)!=E_SUCCESS)
+		{
+		CAMsg::printMsg(LOG_ERR,"Data Retention Error: Could not set log dir to %s!\n",strDir);
+		return E_UNKNOWN;
+		}
+	else
+		{
+		CAMsg::printMsg(LOG_INFO,"Data Retention: Set log dir to: %s\n",strDir);
+		CAMsg::printMsg(LOG_INFO,"Data Retention: tQueueEntry size is: %u\n",sizeof(tQueueEntry));
+		}
 
 #endif
-		return E_SUCCESS;
+	return E_SUCCESS;
 	}
 
 SINT32 CAMix::start()
 	{
-		SINT32 initStatus;
-		m_bConnected = false;
-		m_lLastConnectionTime = 0;
+	SINT32 initStatus;
+	m_bConnected = false;
+	m_lLastConnectionTime = 0;
+	m_bLoop=true;
 
-		if(initOnce()!=E_SUCCESS)
-			return E_UNKNOWN;
-		if(m_pMultiSignature != NULL && CALibProxytest::getOptions()->isInfoServiceEnabled())
+	if(initOnce()!=E_SUCCESS)
+		{ return E_UNKNOWN; }
+	if(m_pMultiSignature != NULL && CALibProxytest::getOptions()->isInfoServiceEnabled())
 		{
-			CAMsg::printMsg(LOG_DEBUG, "CAMix start: creating InfoService object\n");
-			m_pInfoService=new CAInfoService(this);
+		CAMsg::printMsg(LOG_DEBUG, "CAMix start: creating InfoService object\n");
+		m_pInfoService=new CAInfoService(this);
 
-			//UINT32 opCertLength;
-			//CACertificate* opCert = CALibProxytest::getOptions()->getOpCertificate();
-			//CACertificate* pOwnCert=CALibProxytest::getOptions()->getOwnCertificate();
-			m_pInfoService->setMultiSignature(m_pMultiSignature);
-			//delete pOwnCert;
-			//pOwnCert = NULL;
+		//UINT32 opCertLength;
+		//CACertificate* opCert = CALibProxytest::getOptions()->getOpCertificate();
+		//CACertificate* pOwnCert=CALibProxytest::getOptions()->getOwnCertificate();
+		m_pInfoService->setMultiSignature(m_pMultiSignature);
+		//delete pOwnCert;
+		//pOwnCert = NULL;
+		UINT64 currentMillis;
+		if (getcurrentTimeMillis(currentMillis) != E_SUCCESS)
+			{
+			currentMillis = 0;
+			}
+		m_pInfoService->setSerial(currentMillis);
+
+		//delete opCert;
+		//opCert = NULL;
+
+		bool allowReconf = CALibProxytest::getOptions()->acceptReconfiguration();
+		bool needReconf = needAutoConfig();
+
+		m_pInfoService->setConfiguring(allowReconf && needReconf);
+		CAMsg::printMsg(LOG_DEBUG, "CAMix start: starting InfoService\n");
+		m_pInfoService->start();
+		}
+	else
+		{
+		m_pInfoService = NULL;
+		}
+	bool allowReconf = CALibProxytest::getOptions()->acceptReconfiguration();
+//#ifdef DYNAMIC_MIX
+	/* LERNGRUPPE: We might want to break out of this loop if the mix-type changes */
+	while(m_bLoop)
+//#else
+//	for(;;)
+//#endif
+		{
+		if (m_pInfoService != NULL)
+			{ m_pInfoService->setConfiguring(allowReconf && needAutoConfig()); }
+		while(allowReconf && (needAutoConfig() || m_bReconfiguring))
+			{
+			CAMsg::printMsg(LOG_DEBUG, "Not configured -> sleeping\n");
+			sSleep(20);
+			}
+//#ifdef DYNAMIC_MIX
+		// if we change the mix type, we must not enter init!
+		if(!m_bLoop) { goto SKIP; }
+//#endif
+		CAMsg::printMsg(LOG_DEBUG, "CAMix main: before init()\n");
+		initStatus = init();
+		if(initStatus == E_SUCCESS)
+			{
+			m_lLastConnectionTime = time(NULL);
+			m_bConnected = true;
+			CAMsg::printMsg(LOG_DEBUG, "CAMix main: init() returned success\n");
+			if(m_pInfoService != NULL)
+				{
+				m_pInfoService->setConfiguring(false);
+				if( ! m_pInfoService->isRunning())
+					{
+					m_pInfoService->start();
+					}
+				m_pInfoService->signal();
+				}
+
+			CAMsg::printMsg(LOG_INFO, "The mix is now on-line.\n");
+#ifdef DYNAMIC_MIX
+			m_bReconfiguring = false;
+			m_bCascadeEstablished = true;
+			m_bReconfigured = false;
+			if(CALibProxytest::getOptions()->isFirstMix() && CALibProxytest::getOptions()->isDynamic())
+				{ m_pInfoService->sendCascadeHelo(); }
+#endif
+			MONITORING_FIRE_SYS_EVENT(ev_sys_enterMainLoop);
+			loop();
+			MONITORING_FIRE_SYS_EVENT(ev_sys_leavingMainLoop);
+#ifdef DYNAMIC_MIX
+			m_bCascadeEstablished = false;
+			/** If the cascade breaks down, some mix might have been reconfigured. Let's have a look if there is new information */
+			if(!m_bReconfiguring)
+				{ m_pInfoService->dynamicCascadeConfiguration(); }
+#endif
+			CAMsg::printMsg(LOG_DEBUG, "CAMix main: loop() returned, maybe connection lost.\n");
+			}
+		else if (initStatus == E_SHUTDOWN)
+			{
+			CAMsg::printMsg(LOG_DEBUG, "Mix has been stopped. Waiting for shutdown...\n");
+			//break;
+			}
+		else
+			{
+			CAMsg::printMsg(LOG_DEBUG, "init() failed, maybe no connection.\n");
+			}
+//#ifdef DYNAMIC_MIX
+SKIP:
+//#endif
+		if(m_pInfoService != NULL)
+			{
+//#ifndef DYNAMIC_MIX
+//			if(CALibProxytest::getOptions()->acceptReconfiguration())
+//#else
+			// Only keep the InfoService alive if the Mix-Type doesn't change
+			if(CALibProxytest::getOptions()->acceptReconfiguration() && m_bLoop)
+//#endif
+				m_pInfoService->setConfiguring(true);
+			/*else
+			{
+			CAMsg::printMsg(LOG_DEBUG, "CAMix main: stopping InfoService\n");
+					m_pInfoService->stop();
+			}*/
+			// maybe Cascade information (e.g. certificate validity) will change on next connection
 			UINT64 currentMillis;
 			if (getcurrentTimeMillis(currentMillis) != E_SUCCESS)
-			{
+				{
 				currentMillis = 0;
-			}
+				}
 			m_pInfoService->setSerial(currentMillis);
-
-			//delete opCert;
-			//opCert = NULL;
-
-					bool allowReconf = CALibProxytest::getOptions()->acceptReconfiguration();
-					bool needReconf = needAutoConfig();
-
-					m_pInfoService->setConfiguring(allowReconf && needReconf);
-			CAMsg::printMsg(LOG_DEBUG, "CAMix start: starting InfoService\n");
-			m_pInfoService->start();
-		}
-		else
-		{
-			m_pInfoService = NULL;
-		}
-		bool allowReconf = CALibProxytest::getOptions()->acceptReconfiguration();
-#ifdef DYNAMIC_MIX
-		/* LERNGRUPPE: We might want to break out of this loop if the mix-type changes */
-		while(m_bLoop)
-#else
-		for(;;)
-#endif
-			{
-				if (m_pInfoService != NULL)
-					m_pInfoService->setConfiguring(allowReconf && needAutoConfig());
-			while(allowReconf && (needAutoConfig() || m_bReconfiguring))
-			{
-				CAMsg::printMsg(LOG_DEBUG, "Not configured -> sleeping\n");
-							sSleep(20);
-					}
-#ifdef DYNAMIC_MIX
-			// if we change the mix type, we must not enter init!
-			if(!m_bLoop) goto SKIP;
-#endif
-			CAMsg::printMsg(LOG_DEBUG, "CAMix main: before init()\n");
-			initStatus = init();
-			if(initStatus == E_SUCCESS)
-				{
-					m_lLastConnectionTime = time(NULL);
-					m_bConnected = true;
-					CAMsg::printMsg(LOG_DEBUG, "CAMix main: init() returned success\n");
-					if(m_pInfoService != NULL)
-						{
-							m_pInfoService->setConfiguring(false);
-							if( ! m_pInfoService->isRunning())
-								{
-									m_pInfoService->start();
-								}
-							m_pInfoService->signal();
-						}
-
-					CAMsg::printMsg(LOG_INFO, "The mix is now on-line.\n");
-#ifdef DYNAMIC_MIX
-					m_bReconfiguring = false;
-					m_bCascadeEstablished = true;
-					m_bReconfigured = false;
-					if(CALibProxytest::getOptions()->isFirstMix() && CALibProxytest::getOptions()->isDynamic())
-						m_pInfoService->sendCascadeHelo();
-#endif
-					MONITORING_FIRE_SYS_EVENT(ev_sys_enterMainLoop);
-					loop();
-					MONITORING_FIRE_SYS_EVENT(ev_sys_leavingMainLoop);
-#ifdef DYNAMIC_MIX
-					m_bCascadeEstablished = false;
-					/** If the cascade breaks down, some mix might have been reconfigured. Let's have a look if there is new information */
-					if(!m_bReconfiguring)
-						m_pInfoService->dynamicCascadeConfiguration();
-#endif
-					CAMsg::printMsg(LOG_DEBUG, "CAMix main: loop() returned, maybe connection lost.\n");
-				}
-			else if (initStatus == E_SHUTDOWN)
-				{
-					CAMsg::printMsg(LOG_DEBUG, "Mix has been stopped. Waiting for shutdown...\n");
-				//break;
-				}
-			else
-				{
-					CAMsg::printMsg(LOG_DEBUG, "init() failed, maybe no connection.\n");
-				}
-#ifdef DYNAMIC_MIX
-SKIP:
-#endif
-				if(m_pInfoService != NULL)
-					{
-#ifndef DYNAMIC_MIX
-							if(CALibProxytest::getOptions()->acceptReconfiguration())
-#else
-				// Only keep the InfoService alive if the Mix-Type doesn't change
-				if(CALibProxytest::getOptions()->acceptReconfiguration() && m_bLoop)
-#endif
-									m_pInfoService->setConfiguring(true);
-							/*else
-				{
-					CAMsg::printMsg(LOG_DEBUG, "CAMix main: stopping InfoService\n");
-									m_pInfoService->stop();
-				}*/
-							// maybe Cascade information (e.g. certificate validity) will change on next connection
-							UINT64 currentMillis;
-							if (getcurrentTimeMillis(currentMillis) != E_SUCCESS)
-							{
-								currentMillis = 0;
-							}
-							m_pInfoService->setSerial(currentMillis);
-					}
-					m_bConnected = false;
-			m_lLastConnectionTime = 0;
-			CAMsg::printMsg(LOG_DEBUG, "CAMix main: before clean()\n");
-			clean();
-			CAMsg::printMsg(LOG_DEBUG, "CAMix main: after clean()\n");
-#ifdef DYNAMIC_MIX
-			if(m_bLoop)
-#endif
+			}
+		m_bConnected = false;
+		m_lLastConnectionTime = 0;
+		CAMsg::printMsg(LOG_DEBUG, "CAMix main: before clean()\n");
+		clean();
+		CAMsg::printMsg(LOG_DEBUG, "CAMix main: after clean()\n");
+//#ifdef DYNAMIC_MIX
+		if(m_bLoop)
+//#endif
 			sSleep(10);
 		}// Big loop....
-		if(m_pInfoService != NULL)
+	if(m_pInfoService != NULL)
 		{
-			m_pInfoService->stop();
-			delete m_pInfoService;
-			m_pInfoService = NULL;
+		m_pInfoService->stop();
+		delete m_pInfoService;
+		m_pInfoService = NULL;
 		}
-		m_pInfoService=NULL;
-		return E_SUCCESS;
+	m_pInfoService=NULL;
+	return E_SUCCESS;
 	}
 
 
@@ -259,34 +261,34 @@ SKIP:
 * @retval true if config file contains no target interface info and InfoService is unavailable
 */
 bool CAMix::needAutoConfig()
-{
-		bool ret = false;
+	{
+	bool ret = false;
 
-		if(!CALibProxytest::getOptions()->isLastMix())
+	if(!CALibProxytest::getOptions()->isLastMix())
 		{
-				ret = true;
+		ret = true;
 
-				// look for usable target interfaces
-				for(UINT32 i=0;i<CALibProxytest::getOptions()->getTargetInterfaceCount();i++)
+		// look for usable target interfaces
+		for(UINT32 i=0; i<CALibProxytest::getOptions()->getTargetInterfaceCount(); i++)
+			{
+			CATargetInterface oNextMix;
+			CALibProxytest::getOptions()->getTargetInterface(oNextMix,i+1);
+			if(oNextMix.getTargetType()==TARGET_MIX)
 				{
-						CATargetInterface oNextMix;
-						CALibProxytest::getOptions()->getTargetInterface(oNextMix,i+1);
-						if(oNextMix.getTargetType()==TARGET_MIX)
-						{
-								ret = false;
-						}
-						oNextMix.cleanAddr();
+				ret = false;
 				}
+			oNextMix.cleanAddr();
+			}
 
-				if(!CALibProxytest::getOptions()->hasNextMixTestCertificate())
-						ret = true;
+		if(!CALibProxytest::getOptions()->hasNextMixTestCertificate())
+			{ ret = true; }
 		}
 
-		if(!CALibProxytest::getOptions()->isFirstMix() && !CALibProxytest::getOptions()->hasPrevMixTestCertificate())
-				ret = true;
+	if(!CALibProxytest::getOptions()->isFirstMix() && !CALibProxytest::getOptions()->hasPrevMixTestCertificate())
+		{ ret = true; }
 
-		return ret;
-}
+	return ret;
+	}
 
 /** This will initialize the XML Cascade Info struct @ref XMLFirstMixToInfoService that is sent to the InfoService
 * in \c CAInfoService::sendCascadeHelo()
@@ -295,126 +297,127 @@ bool CAMix::needAutoConfig()
 * @retval E_SUCCESS otherwise
 */
 SINT32 CAMix::initMixCascadeInfo(DOMElement* mixes)
-{
-		UINT32 count;
-		m_docMixCascadeInfo=createDOMDocument();
-		DOMElement* elemRoot=createDOMElement(m_docMixCascadeInfo,"MixCascade");
+	{
+	UINT32 count;
+	m_docMixCascadeInfo=createDOMDocument();
+	DOMElement* elemRoot=createDOMElement(m_docMixCascadeInfo,"MixCascade");
 #ifdef LOG_DIALOG
-		setDOMElementAttribute(elemRoot,"study",(UINT8*)"true");
+	setDOMElementAttribute(elemRoot,"study",(UINT8*)"true");
 #endif
-		if(CALibProxytest::getOptions()->isFirstMix())
+	if(CALibProxytest::getOptions()->isFirstMix())
 		{
-			UINT32 maxUsers = CALibProxytest::getOptions()->getMaxNrOfUsers();
-			if(maxUsers > 0)
+		UINT32 maxUsers = CALibProxytest::getOptions()->getMaxNrOfUsers();
+		if(maxUsers > 0)
 			{
-				setDOMElementAttribute(elemRoot,"maxUsers", maxUsers);
+			setDOMElementAttribute(elemRoot,"maxUsers", maxUsers);
 			}
 #ifdef MANIOQ
-			setDOMElementAttribute(elemRoot,"context", (UINT8*) "jondonym.business");
+		setDOMElementAttribute(elemRoot,"context", (UINT8*) "jondonym.business");
 #else
 
 #ifdef PAYMENT
-			setDOMElementAttribute(elemRoot,"context", (UINT8*) "jondonym.premium");
+		setDOMElementAttribute(elemRoot,"context", (UINT8*) "jondonym.premium");
 #else
-			setDOMElementAttribute(elemRoot,"context", (UINT8*) "jondonym");
+		setDOMElementAttribute(elemRoot,"context", (UINT8*) "jondonym");
 #endif
 #endif
 		}
 
-		UINT8 id[50];
-		UINT8* cascadeID=NULL;
-		CALibProxytest::getOptions()->getMixId(id,50);
+	UINT8 id[50];
+	UINT8* cascadeID=NULL;
+	CALibProxytest::getOptions()->getMixId(id,50);
 
-		UINT8 name[255];
-		m_docMixCascadeInfo->appendChild(elemRoot);
-		DOMElement* elem = NULL;
+	UINT8 name[255];
+	m_docMixCascadeInfo->appendChild(elemRoot);
+	DOMElement* elem = NULL;
 
-		if(CALibProxytest::getOptions()->getCascadeName(name,255) == E_SUCCESS)
+	if(CALibProxytest::getOptions()->getCascadeName(name,255) == E_SUCCESS)
 		{
-			elem = createDOMElement(m_docMixCascadeInfo,"Name");
-			setDOMElementValue(elem,name);
-			elemRoot->appendChild(elem);
-	}
-		else
-		{
-			CAMsg::printMsg(LOG_ERR,"No cascade name given!\n");
-		}
-
-		elem=createDOMElement(m_docMixCascadeInfo,"Network");
+		elem = createDOMElement(m_docMixCascadeInfo,"Name");
+		setDOMElementValue(elem,name);
 		elemRoot->appendChild(elem);
-		DOMElement* elemListenerInterfaces=createDOMElement(m_docMixCascadeInfo,"ListenerInterfaces");
-		elem->appendChild(elemListenerInterfaces);
-
-
-		for(UINT32 i=1;i<=CALibProxytest::getOptions()->getListenerInterfaceCount();i++)
+		}
+	else
 		{
-				CAListenerInterface* pListener=CALibProxytest::getOptions()->getListenerInterface(i);
-				if(pListener->isHidden())
-				{//do nothing
-				}
-				else if(pListener->getType()==RAW_TCP)
-				{
-						DOMElement* elemTmpLI=NULL;
-						pListener->toDOMElement(elemTmpLI,m_docMixCascadeInfo);
-						elemListenerInterfaces->appendChild(elemTmpLI);
-				}
-				delete pListener;
-				pListener = NULL;
+		CAMsg::printMsg(LOG_ERR,"No cascade name given!\n");
 		}
 
-		DOMNode* elemMixesDocCascade=createDOMElement(m_docMixCascadeInfo,"Mixes");
-		DOMElement* elemMix=NULL;
-		count=1;
-		if(CALibProxytest::getOptions()->isFirstMix())
+	elem=createDOMElement(m_docMixCascadeInfo,"Network");
+	elemRoot->appendChild(elem);
+	DOMElement* elemListenerInterfaces=createDOMElement(m_docMixCascadeInfo,"ListenerInterfaces");
+	elem->appendChild(elemListenerInterfaces);
+
+
+	for(UINT32 i=1; i<=CALibProxytest::getOptions()->getListenerInterfaceCount(); i++)
 		{
-			addMixInfo(elemMixesDocCascade, false);
+		CAListenerInterface* pListener=CALibProxytest::getOptions()->getListenerInterface(i);
+		if(pListener->isHidden())
+			{
+			//do nothing
+			}
+		else if(pListener->getType()==RAW_TCP)
+			{
+			DOMElement* elemTmpLI=NULL;
+			pListener->toDOMElement(elemTmpLI,m_docMixCascadeInfo);
+			elemListenerInterfaces->appendChild(elemTmpLI);
+			}
+		delete pListener;
+		pListener = NULL;
+		}
+
+	DOMNode* elemMixesDocCascade=createDOMElement(m_docMixCascadeInfo,"Mixes");
+	DOMElement* elemMix=NULL;
+	count=1;
+	if(CALibProxytest::getOptions()->isFirstMix())
+		{
+		addMixInfo(elemMixesDocCascade, false);
 		getDOMChildByName(elemMixesDocCascade, "Mix", elemMix, false);
-			// create signature
+		// create signature
 		if (signXML(elemMix) != E_SUCCESS)
-		{
+			{
 			CAMsg::printMsg(LOG_DEBUG,"Could not sign KeyInfo sent to users...\n");
-		}
-			//if(m_pSignature->signXML(docMixInfo,m_pcertstoreOwnCerts)!=E_SUCCESS)
+			}
+		//if(m_pSignature->signXML(docMixInfo,m_pcertstoreOwnCerts)!=E_SUCCESS)
 		//m_pSignature, CALibProxytest::getOptions()->getOwnCertificate()
 		/*
 				elemMixesDocCascade.appendChild(elemThisMix);*/
 		}
-		elemRoot->appendChild(elemMixesDocCascade);
+	elemRoot->appendChild(elemMixesDocCascade);
 
 //    UINT8 cascadeId[255];
 //		UINT32 cascadeIdLen=255;
 
-		DOMNode* node=mixes->getFirstChild();
-		while(node!=NULL)
+	DOMNode* node=mixes->getFirstChild();
+	while(node!=NULL)
 		{
-				if(node->getNodeType()==DOMNode::ELEMENT_NODE&&equals(node->getNodeName(),"Mix"))
-				{
-						elemMixesDocCascade->appendChild(m_docMixCascadeInfo->importNode(node,true));
-						count++;
- //           cascadeId = static_cast<const DOM_Element&>(node).getAttribute("id").transcode();
-				}
-				node=node->getNextSibling();
+		if(node->getNodeType()==DOMNode::ELEMENT_NODE&&equals(node->getNodeName(),"Mix"))
+			{
+			elemMixesDocCascade->appendChild(m_docMixCascadeInfo->importNode(node,true));
+			count++;
+//           cascadeId = static_cast<const DOM_Element&>(node).getAttribute("id").transcode();
+			}
+		node=node->getNextSibling();
 		}
 
-		if(CALibProxytest::getOptions()->isLastMix())
+	if(CALibProxytest::getOptions()->isLastMix())
 		{
-			addMixInfo(elemMixesDocCascade, false);
-			getLastDOMChildByName(elemMixesDocCascade, "Mix", elemMix);
-			// create signature
+		addMixInfo(elemMixesDocCascade, false);
+		getLastDOMChildByName(elemMixesDocCascade, "Mix", elemMix);
+		// create signature
 		if (signXML(elemMix) != E_SUCCESS)
-		{
+			{
 			CAMsg::printMsg(LOG_DEBUG,"Could not sign KeyInfo sent to users...\n");
+			}
+		cascadeID = id;
 		}
-				cascadeID = id;
-		}
-		else if(CALibProxytest::getOptions()->isFirstMix())
+	else if(CALibProxytest::getOptions()->isFirstMix())
 		{
-				cascadeID = id;
+		cascadeID = id;
 		}
 
-		if(cascadeID != NULL)
-				setDOMElementAttribute(elemRoot,"id",cascadeID);
-		setDOMElementAttribute(elemMixesDocCascade,"count",count);
+	if(cascadeID != NULL)
+		{ setDOMElementAttribute(elemRoot,"id",cascadeID); }
+	setDOMElementAttribute(elemMixesDocCascade,"count",count);
 
 	DOMNode* elemPayment=createDOMElement(m_docMixCascadeInfo,"Payment");
 	elemRoot->appendChild(elemPayment);
@@ -426,131 +429,131 @@ SINT32 CAMix::initMixCascadeInfo(DOMElement* mixes)
 #else
 	setDOMElementAttribute(elemPayment,"required",(UINT8*)"false");
 #endif
-		return E_SUCCESS;
-}
+	return E_SUCCESS;
+	}
 
 SINT32 CAMix::addMixInfo(DOMNode* a_element, bool a_bForceFirstNode)
-{
+	{
 	// this is a complete mixinfo node to be sent to the InfoService
 	XERCES_CPP_NAMESPACE::DOMDocument* docMixInfo=NULL;
 	if(CALibProxytest::getOptions()->getMixXml(docMixInfo)!=E_SUCCESS)
-	{
+		{
 		return E_UNKNOWN;
-	}
+		}
 	DOMNode* nodeMixInfo = a_element->getOwnerDocument()->importNode(
-		docMixInfo->getDocumentElement(), true);
+	                         docMixInfo->getDocumentElement(), true);
 	if (a_bForceFirstNode && a_element->hasChildNodes())
-	{
+		{
 		a_element->insertBefore(nodeMixInfo, a_element->getFirstChild());
-	}
+		}
 	else
-	{
+		{
 		a_element->appendChild(nodeMixInfo);
-	}
+		}
 	return E_SUCCESS;
-}
+	}
 
 DOMNode *CAMix::appendTermsAndConditionsExtension(XERCES_CPP_NAMESPACE::DOMDocument *ownerDoc,
-		DOMElement *root)
-{
-	if(CALibProxytest::getOptions()->getTermsAndConditions() != NULL)
+    DOMElement *root)
 	{
-		if( (root == NULL) || (ownerDoc == NULL) )
+	if(CALibProxytest::getOptions()->getTermsAndConditions() != NULL)
 		{
+		if( (root == NULL) || (ownerDoc == NULL) )
+			{
 			return NULL;
-		}
+			}
 
 		DOMElement *elemTnCExtension = NULL, *elemExtensions = NULL,
-					*elemTemplates = NULL;
+		            *elemTemplates = NULL;
 		/* Tag for Nodes that can be removed without destroying the signature.
 		 * To be appended to the "mixes"-node so older mix versions won't get confused.
 		 */
 		getDOMChildByName(root, KEYINFO_NODE_EXTENSIONS, elemExtensions);
 		if(elemExtensions == NULL)
-		{
+			{
 			elemExtensions = createDOMElement(ownerDoc, KEYINFO_NODE_EXTENSIONS);
 			root->appendChild(elemExtensions);
-		}
+			}
 		else
-		{
+			{
 			getDOMChildByName(elemExtensions, KEYINFO_NODE_TNC_EXTENSION, elemTnCExtension);
-		}
+			}
 
 		if(elemTnCExtension == NULL)
-		{
+			{
 			elemTnCExtension = createDOMElement(ownerDoc, KEYINFO_NODE_TNC_EXTENSION);
 			elemExtensions->appendChild(elemTnCExtension);
-		}
+			}
 
 		//First add templates if there are any
 		UINT32 nrOfTemplates = CALibProxytest::getOptions()->getNumberOfTermsAndConditionsTemplates();
 
 		if(nrOfTemplates > 0)
-		{
+			{
 			UINT32 nrOfSentTemplates = 0;
 			UINT8 **sentTemplatesRefIds = NULL;
 			getDOMChildByName(elemTnCExtension, OPTIONS_NODE_TNCS_TEMPLATES, elemTemplates);
 			if(elemTemplates == NULL)
-			{
+				{
 				elemTemplates = createDOMElement(ownerDoc, OPTIONS_NODE_TNCS_TEMPLATES);
 				elemTnCExtension->appendChild(elemTemplates);
-			}
+				}
 			else
-			{
+				{
 				DOMNodeList *nl = getElementsByTagName(elemTemplates, "TermsAndConditionsTemplate");
 				nrOfSentTemplates = nl->getLength();
 				if(nrOfSentTemplates > 0)
-				{
+					{
 					sentTemplatesRefIds = new UINT8*[nrOfSentTemplates];
 					for (UINT32 i = 0; i < nrOfSentTemplates; i++)
-					{
+						{
 						sentTemplatesRefIds[i] = getTermsAndConditionsTemplateRefId(nl->item(i));
+						}
 					}
 				}
-			}
 
 			XERCES_CPP_NAMESPACE::DOMDocument **allTemplates = CALibProxytest::getOptions()->getAllTermsAndConditionsTemplates();
 			UINT8 *currentTemplateRefId = NULL;
 			bool duplicate = false;
 			for(UINT32 i = 0; i < nrOfTemplates; i++)
-			{
+				{
 				currentTemplateRefId =
-					getTermsAndConditionsTemplateRefId(allTemplates[i]->getDocumentElement());
+				  getTermsAndConditionsTemplateRefId(allTemplates[i]->getDocumentElement());
 				duplicate = false;
 				if(currentTemplateRefId != NULL)
-				{
-					for(UINT32 j=0; j < nrOfSentTemplates; j++)
 					{
-						if(strncmp((char *)currentTemplateRefId, (char *)sentTemplatesRefIds[j], TEMPLATE_REFID_MAXLEN) == 0)
+					for(UINT32 j=0; j < nrOfSentTemplates; j++)
 						{
+						if(strncmp((char *)currentTemplateRefId, (char *)sentTemplatesRefIds[j], TEMPLATE_REFID_MAXLEN) == 0)
+							{
 							duplicate = true;
 							break;
+							}
 						}
-					}
 					if(!duplicate)
-					{
+						{
 						//TODO: avoid duplicates.
 						elemTemplates->appendChild(ownerDoc->importNode(
-								allTemplates[i]->getDocumentElement(), true));
+						                             allTemplates[i]->getDocumentElement(), true));
 						CAMsg::printMsg(LOG_DEBUG,"appended a tc template node!\n");
-					}
+						}
 					else
-					{
+						{
 						CAMsg::printMsg(LOG_DEBUG,"template '%s' already sent.\n", currentTemplateRefId);
-					}
+						}
 					delete [] currentTemplateRefId;
 					currentTemplateRefId = NULL;
+					}
 				}
-			}
 
 			for(UINT32 i = 0; i < nrOfSentTemplates; i++)
-			{
+				{
 				delete [] sentTemplatesRefIds[i];
 				sentTemplatesRefIds[i] = NULL;
-			}
+				}
 			delete [] sentTemplatesRefIds;
 			sentTemplatesRefIds = NULL;
-		}
+			}
 
 		DOMNode* elemTnCs = ownerDoc->importNode(CALibProxytest::getOptions()->getTermsAndConditions(), true);
 		UINT8 tmpOpSKIBuff[TMP_BUFF_SIZE];
@@ -561,23 +564,23 @@ DOMNode *CAMix::appendTermsAndConditionsExtension(XERCES_CPP_NAMESPACE::DOMDocum
 
 		DOMNodeList *tncDefEntryList = getElementsByTagName((DOMElement *)elemTnCs, OPTIONS_NODE_TNCS_TRANSLATION);
 		for (XMLSize_t i = 0; i < tncDefEntryList->getLength(); i++)
-		{
+			{
 			//TODO don't know if to include certs here
 			m_pMultiSignature->signXML((DOMElement *)tncDefEntryList->item(i), false);
-		}
+			}
 		elemTnCExtension->appendChild(elemTnCs);
 		return elemTnCExtension;
-	}
+		}
 	else
-	{
+		{
 		return NULL;
+		}
 	}
-}
 
 DOMNode *CAMix::termsAndConditionsInfoNode(XERCES_CPP_NAMESPACE::DOMDocument *ownerDoc)
-{
-	if(CALibProxytest::getOptions()->getTermsAndConditions() != NULL)
 	{
+	if(CALibProxytest::getOptions()->getTermsAndConditions() != NULL)
+		{
 		DOMElement *elemTnCInfos = createDOMElement(ownerDoc, KEYINFO_NODE_TNC_INFOS);
 		UINT8 tmpBuff[TMP_BUFF_SIZE];
 		UINT32 tmpLen = TMP_BUFF_SIZE;
@@ -588,7 +591,7 @@ DOMNode *CAMix::termsAndConditionsInfoNode(XERCES_CPP_NAMESPACE::DOMDocument *ow
 		DOMElement *currentInfoNode = NULL;
 		bool defaultLangDefined = false;
 		for (XMLSize_t i = 0; i < list->getLength(); i++)
-		{
+			{
 			iterator = (DOMElement *) list->item(i);
 			currentInfoNode = createDOMElement(ownerDoc, KEYINFO_NODE_TNC_INFO);
 
@@ -596,9 +599,9 @@ DOMNode *CAMix::termsAndConditionsInfoNode(XERCES_CPP_NAMESPACE::DOMDocument *ow
 			setDOMElementAttribute(currentInfoNode, OPTIONS_ATTRIBUTE_TNC_LOCALE, tmpBuff);
 			getDOMElementAttribute(iterator, OPTIONS_ATTRIBUTE_TNC_DEFAULT_LANG_DEFINED, defaultLangDefined);
 			if(defaultLangDefined)
-			{
+				{
 				setDOMElementAttribute(elemTnCInfos, OPTIONS_ATTRIBUTE_TNC_DEFAULT_LANG, tmpBuff);
-			}
+				}
 			defaultLangDefined = false;
 			tmpLen = TMP_BUFF_SIZE;
 
@@ -607,7 +610,7 @@ DOMNode *CAMix::termsAndConditionsInfoNode(XERCES_CPP_NAMESPACE::DOMDocument *ow
 			tmpLen = TMP_BUFF_SIZE;
 
 			elemTnCInfos->appendChild(currentInfoNode);
-		}
+			}
 
 		getDOMElementAttribute(CALibProxytest::getOptions()->getTermsAndConditions(), OPTIONS_ATTRIBUTE_TNC_DATE, tmpBuff, &tmpLen);
 		setDOMElementAttribute(elemTnCInfos, OPTIONS_ATTRIBUTE_TNC_DATE, tmpBuff);
@@ -618,17 +621,17 @@ DOMNode *CAMix::termsAndConditionsInfoNode(XERCES_CPP_NAMESPACE::DOMDocument *ow
 		CALibProxytest::getOptions()->getOperatorSubjectKeyIdentifier(tmpBuff, &tmpLen);
 		setDOMElementAttribute(elemTnCInfos, OPTIONS_ATTRIBUTE_TNC_ID, tmpBuff);
 		return elemTnCInfos;
-	}
+		}
 	else
-	{
+		{
 		return NULL;
-	}
+		}
 
-}
+	}
 
 
 SINT32 CAMix::appendCompatibilityInfo(DOMNode* a_parent)
-{
+	{
 	DOMElement* elemCompatibility=createDOMElement(a_parent->getOwnerDocument(),"Compatibility");
 	setDOMElementAttribute(elemCompatibility,"version",(UINT8*)MIX_VERSION);
 	a_parent->appendChild(elemCompatibility);
@@ -661,10 +664,10 @@ SINT32 CAMix::appendCompatibilityInfo(DOMNode* a_parent)
 #endif
 
 	return E_SUCCESS;
-}
+	}
 
 SINT32 CAMix::checkCompatibility(DOMNode* a_parent, const char* a_mixPosition)
-{
+	{
 	// get compatibility info
 	DOMElement* elemCompatibility=NULL;
 	DOMElement* elemFlags=NULL;
@@ -683,37 +686,37 @@ SINT32 CAMix::checkCompatibility(DOMNode* a_parent, const char* a_mixPosition)
 	bool bCompatibleFlags = true;
 
 	if (getDOMChildByName(a_parent,"Compatibility",elemCompatibility,false) != E_SUCCESS ||
-		getDOMElementAttribute(elemCompatibility, "version", strVersion, &len) != E_SUCCESS)
-	{
+	    getDOMElementAttribute(elemCompatibility, "version", strVersion, &len) != E_SUCCESS)
+		{
 		CAMsg::printMsg(LOG_WARNING,"Could not get any compatibility information from the %s mix. It may or may not be compatible. If the connection fails for an unknown reason, the %s mix should be updated.\n", a_mixPosition, a_mixPosition);
 		return E_SUCCESS;
-	}
+		}
 
 	iCompare = strncmp (MIX_VERSION, (char*)strVersion, len);
 
 	if (iCompare == 0)
-	{
+		{
 		strComment = (UINT8*)" We have the same version.";
-	}
+		}
 	else if (iCompare < 0)
-	{
+		{
 		strComment = (UINT8*)" Our version (" MIX_VERSION ") might be too old. If the connection fails for an unknown reason, you should think about an update.";
 		iLogLevel = LOG_WARNING;
-	}
+		}
 	else
-	{
+		{
 		/** EDIT HERE FOR ADDING INCOMPATIBLE VERSIONS! */
 		if (strncmp ("00.08.71", (char*)strVersion, len) > 0)
-		{
+			{
 			strComment = (UINT8*)" This version is NOT COMPATIBLE with our version (" MIX_VERSION ")! The mixes will not work together in a cascade.";
 			bCompatible = false;
 			iLogLevel = LOG_CRIT;
-		}
+			}
 		else
-		{
+			{
 			strComment = (UINT8*)" We have a newer version (" MIX_VERSION "), but both are known to work fine together.";
+			}
 		}
-	}
 
 	CAMsg::printMsg(iLogLevel,"The software version of the %s mix is %s.%s\n", a_mixPosition, strVersion, strComment);
 
@@ -731,101 +734,101 @@ SINT32 CAMix::checkCompatibility(DOMNode* a_parent, const char* a_mixPosition)
 #endif
 
 	if (getDOMChildByName(elemCompatibility, "Flags", elemFlags, false) == E_SUCCESS)
-	{
+		{
 		DOMNodeList* flags = elemFlags->getChildNodes();
 		if (flags->getLength() != iCountFlags)
-		{
+			{
 			bCompatibleFlags = false;
-		}
+			}
 
 		/** EDIT HERE FOR INTRODUCING NEW FLAGS! */
 		// Hint: We might also check for a version of the compile flags if available; it should be set in the content of each tag instead of 'true'.
 #ifdef PAYMENT
 		if (getDOMChildByName(elemFlags, PAYMENT_COMPATIBILITY, elemDummy, false) != E_SUCCESS)
-		{
+			{
 			bCompatibleFlags = false;
-		}
+			}
 #endif
 		if (getDOMChildByName(elemFlags, NEW_FLOW_CONTROL_COMPATIBILITY, elemDummy, false) != E_SUCCESS)
-		{
+			{
 			bCompatibleFlags = false;
-		}
+			}
 		if (getDOMChildByName(elemFlags, NEW_CHANNEL_ENCRYPTION_COMPATIBILITY, elemDummy, false) != E_SUCCESS)
-		{
+			{
 			bCompatibleFlags = false;
-		}
+			}
 #ifdef WITH_INTEGRITY_CHECK
 		if (getDOMChildByName(elemFlags, WITH_INTEGRITY_CHECK_COMPATIBILITY, elemDummy, false) != E_SUCCESS)
-		{
+			{
 			bCompatibleFlags = false;
-		}
+			}
 #endif
 
 		if (!bCompatibleFlags)
-		{
+			{
 			// get the flags of the other mix
 			strAllFlags[0] = 0;
 			lenAllFlags = 1;
 			for (UINT32 i = 0; i < flags->getLength(); i++)
-			{
-				if (getNodeName(flags->item(i), strNodeName, &lenNodeName) == E_SUCCESS)
 				{
+				if (getNodeName(flags->item(i), strNodeName, &lenNodeName) == E_SUCCESS)
+					{
 
 					lenAllFlags += strlen((char*)strNodeName) + 1;
 					if (lenAllFlags > 500)
-					{
+						{
 						break;
-					}
+						}
 					strcat((char*)strAllFlags, " ");
 					strcat((char*)strAllFlags, (char*)strNodeName);
-				}
+					}
 
 				lenNodeName = 50;
-			}
+				}
 
 			CAMsg::printMsg(LOG_CRIT, "The compile flags of the %s mix are NOT COMPATIBLE with our flags. We have: %s They have: %s  --> The mixes won't run together.\n", a_mixPosition, MIX_VERSION_COMPATIBILITY, strAllFlags);
 			return E_UNKNOWN;
 
+			}
 		}
-	}
 
 
 	if (!bCompatible)
-	{
+		{
 		return E_UNKNOWN;
-	}
+		}
 
 	return E_SUCCESS;
-}
+	}
 
 
 SINT32 CAMix::signXML(DOMNode* a_element)
 	{
-		return m_pMultiSignature->signXML(a_element, true);
-		/*CACertStore* tmpCertStore=new CACertStore();
+	return m_pMultiSignature->signXML(a_element, true);
+	/*CACertStore* tmpCertStore=new CACertStore();
 
-		CACertificate* ownCert=CALibProxytest::getOptions()->getOwnCertificate();
-		if(ownCert==NULL)
-			{
-				CAMsg::printMsg(LOG_DEBUG,"Own Test Cert is NULL!\n");
-			}
+	CACertificate* ownCert=CALibProxytest::getOptions()->getOwnCertificate();
+	if(ownCert==NULL)
+		{
+			CAMsg::printMsg(LOG_DEBUG,"Own Test Cert is NULL!\n");
+		}
 
-		// Operator Certificates
-		CACertificate* opCert = CALibProxytest::getOptions()->getOpCertificate();
-		if(opCert==NULL)
+	// Operator Certificates
+	CACertificate* opCert = CALibProxytest::getOptions()->getOpCertificate();
+	if(opCert==NULL)
 	{
-				CAMsg::printMsg(LOG_DEBUG,"Op Test Cert is NULL!\n");
+			CAMsg::printMsg(LOG_DEBUG,"Op Test Cert is NULL!\n");
 	}
 	else
 	{
-		// Own  Mix Certificates first, then Operator Certificates
-		tmpCertStore->add(opCert);
+	// Own  Mix Certificates first, then Operator Certificates
+	tmpCertStore->add(opCert);
 	}
-		tmpCertStore->add(ownCert);
+	tmpCertStore->add(ownCert);
 
-		if(m_pSignature->signXML(a_element, tmpCertStore)!=E_SUCCESS)
+	if(m_pSignature->signXML(a_element, tmpCertStore)!=E_SUCCESS)
 	{
-		return E_UNKNOWN;
+	return E_UNKNOWN;
 	}
 
 	CASignature* test = new CASignature();
@@ -833,26 +836,26 @@ SINT32 CAMix::signXML(DOMNode* a_element)
 
 	if(test->verifyXML(a_element) != E_SUCCESS)
 	{
-		CAMsg::printMsg(LOG_DEBUG, "Error verifying own Signature!!\n");
-		m_pSignature->signXML(a_element, tmpCertStore);
+	CAMsg::printMsg(LOG_DEBUG, "Error verifying own Signature!!\n");
+	m_pSignature->signXML(a_element, tmpCertStore);
 	}
 	else
 	{
-		CAMsg::printMsg(LOG_DEBUG, "Own Signature looks ok!\n");
+	CAMsg::printMsg(LOG_DEBUG, "Own Signature looks ok!\n");
 	}
 
 
-		delete ownCert;
-		ownCert = NULL;
+	delete ownCert;
+	ownCert = NULL;
 
 	delete opCert;
 	opCert = NULL;
 
-		delete tmpCertStore;
-		tmpCertStore = NULL;
+	delete tmpCertStore;
+	tmpCertStore = NULL;
 
-		return E_SUCCESS;*/
-}
+	return E_SUCCESS;*/
+	}
 #ifdef DYNAMIC_MIX
 /**
  * LERNGRUPPE
@@ -866,7 +869,7 @@ SINT32 CAMix::signXML(DOMNode* a_element)
  * @retval E_SUCCESS
  */
 SINT32 CAMix::dynaReconfigure(bool a_bChangeMixType)
-{
+	{
 	SINT32 ret = E_UNKNOWN;
 	CASocket tmpSock;
 	const CASocketAddr* pAddr=NULL;
@@ -875,27 +878,27 @@ SINT32 CAMix::dynaReconfigure(bool a_bChangeMixType)
 	m_bLoop = !a_bChangeMixType;
 
 	if(m_bCascadeEstablished)
-		stopCascade();
+		{ stopCascade(); }
 	m_docMixCascadeInfo = NULL;
 
 	/** @todo Break a middle mix out of its init. That doesn't look really nice, maybe there is a better way to do this?
 		*/
 	CAListenerInterface* pListener=NULL;
 	UINT32 interfaces=CALibProxytest::getOptions()->getListenerInterfaceCount();
-	for(UINT32 i=1;i<=interfaces;i++)
-	{
+	for(UINT32 i=1; i<=interfaces; i++)
+		{
 		pListener=CALibProxytest::getOptions()->getListenerInterface(i);
 		if(!pListener->isVirtual())
-			break;
+			{ break; }
 		delete pListener;
 		pListener=NULL;
-	}
+		}
 	if(pListener==NULL)
-	{
+		{
 		CAMsg::printMsg(LOG_CRIT," failed!\n");
 		CAMsg::printMsg(LOG_CRIT,"Reason: no useable (non virtual) interface found!\n");
 		goto EXIT;
-	}
+		}
 
 	pAddr=pListener->getAddr();
 	delete pListener;
@@ -911,6 +914,6 @@ EXIT:
 	CAMsg::printMsg(LOG_DEBUG, "Mix has been reconfigured!\n");
 	m_bReconfiguring = false;
 	return ret;
-}
+	}
 #endif //DYNAMIC_MIX
 #endif //ONLY_LOCAL_PROXY

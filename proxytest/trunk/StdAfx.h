@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.11.08"
+#define MIX_VERSION "00.11.09"
 
 // set to "true" if this is a testing/development version which is not meant for prodictive use
 #define MIX_VERSION_TESTING true
@@ -73,14 +73,14 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 /* LERNGRUPPE: define this to get dynamic mixes */
 //#define DYNAMIC_MIX
 //#define SDTFA // specific logic needed by SDTFA, http://www.sdtfa.com
-//#define USE_OPENSSL_GCM //defin if you wnat to use the GCM implementation provided by OpenSSL (>=1.0.1)
+//#define USE_OPENSSL_GCM //define if you wnat to use the GCM implementation provided by OpenSSL (>=1.0.1)
 
 #define NO_INFOSERVICE_TRHEADS
 
 //#define LASTMIX_CHECK_MEMORY // only for internal debugging purpose
 //#define PRINT_THREAD_STACK_TRACE //Usefull for debugging output of stack trace if mix dies...
 //#define ENABLE_GPERFTOOLS_CPU_PROFILER //Enables the usage of the Goggle GPerfTools CPU Profiler for profiling the operation of the Mix
-//#define ENABLE_GPERFTOOLS_HEAP_CHECKER //Enables the usage of the Goggle GPerfTools heap chekcer for detecting memory leaks
+//#define ENABLE_GPERFTOOLS_HEAP_CHECKER //Enables the usage of the Goggle GPerfTools heap checker for detecting memory leaks
 
 //#define DATA_RETENTION_LOG //define if you need to store logs according to German data retention
 //#define INTEL_IPP_CRYPTO //define if you want to use the crypto routines of the Intel Performance Primitives
@@ -155,7 +155,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define WITH_CONTROL_CHANNELS_TEST //enable a Test control Channel
 #define NEW_FLOW_CONTROL //enable for the new flow control mechanism --> now enabled by default (i.e. can not be disbaled anymore!)
 #define NEW_CHANNEL_ENCRYPTION //enable the new protcol version which uses RSA-OAEP for key transport and two keys for upstream/downstream channel cryption (--> now enabled by default (i.e. can not be disbaled anymore!)
-//#define WITH_INTEGRITY_CHECK //enable AES-GCM encryption for data channels
+#define WITH_INTEGRITY_CHECK //enable AES-GCM encryption for data channels
 
 //#define REPLAY_DETECTION // enable to prevent replay of mix packets
 #define REPLAY_TIMESTAMP_PROPAGATION_INTERVALL 1 //How often (in minutes) should the current replay timestamps be propagate
@@ -268,10 +268,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#endif // _MSC_VER > 1000
 	#define _WIN32_WINDOWS 0x0410
 	#include <winsock2.h>
-	#if defined(_MSC_VER) &&defined (_DEBUG)
-		#include <crtdbg.h>
-		#define HAVE_CRTDBG
-	#endif
+	//#if defined(_MSC_VER) &&defined (_DEBUG)
+	//	#include <crtdbg.h>
+	//	#define HAVE_CRTDBG
+	//#endif
 	#define socklen_t int
 	#define MSG_NOSIGNAL 0
 	#include <io.h>
@@ -690,4 +690,5 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define ACCOUNT_NUMBER_SIZE 12
 #endif
 
+//#include <vld.h>
 #endif // !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)

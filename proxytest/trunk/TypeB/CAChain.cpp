@@ -65,7 +65,7 @@ CAChain::CAChain(UINT8* a_chainId, CAMutex* a_delayBucketMutex, SINT32* a_delayB
   #endif
 }
 
-CAChain::~CAChain(void) {  
+CAChain::~CAChain(void) {
   if (m_socket != NULL) {
     removeFromAllSocketGroupsInternal();
     m_socket->close();
@@ -118,7 +118,7 @@ CAChain::~CAChain(void) {
     *m_pDelayBucket = -1;
     m_pDelayBucketMutex->unlock();
   #endif
-}
+  }
 
 UINT8* CAChain::getChainId() {
   return m_chainId;

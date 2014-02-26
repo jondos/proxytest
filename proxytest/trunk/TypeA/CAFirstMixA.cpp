@@ -43,11 +43,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 void CAFirstMixA::shutDown()
 {
 	m_bIsShuttingDown = true;
-
-#ifdef PAYMENT
+	m_bLoop=false;
+//#ifdef PAYMENT
 	UINT32 connectionsClosed = 0;
 	fmHashTableEntry* timeoutHashEntry;
 
+#ifdef PAYMENT
 
 	/* make sure no reconnect is possible when shutting down */
 	if(m_pthreadAcceptUsers!=NULL)
@@ -64,7 +65,6 @@ void CAFirstMixA::shutDown()
 		CAMsg::printMsg(LOG_DEBUG,"Shutting down infoservice.\n");
 		m_pInfoService->stop();
 	}
-
 	if(m_pChannelList!=NULL) // may happen if mixes did not yet connect to each other
 	{
 		while ((timeoutHashEntry = m_pChannelList->popTimeoutEntry(true)) != NULL)
@@ -682,7 +682,7 @@ NEXT_USER:
 //ERR:
 		CAMsg::printMsg(LOG_CRIT,"Seems that we are restarting now!!\n");
 		m_bRunLog=false;
-		//clean();
+		clean();
 		delete pQueueEntry;
 		pQueueEntry = NULL;
 		delete []tmpBuff;

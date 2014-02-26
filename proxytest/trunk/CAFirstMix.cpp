@@ -1237,6 +1237,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 				{
 					sSleep(1);
 				}
+				delete socketsIn[i];
 		}
 		if (CALibProxytest::getOptions()->createSockets(false,pFirstMix-> m_arrSocketsIn, pFirstMix->m_nSocketsIn) != E_SUCCESS)
 		{
@@ -2501,15 +2502,15 @@ SINT32 CAFirstMix::clean()
 		if(m_pthreadsLogin!=NULL)
 			delete m_pthreadsLogin;
 		m_pthreadsLogin=NULL;
-		//     if(m_pInfoService!=NULL)
-		//     {
-		//         CAMsg::printMsg(LOG_CRIT,"Stopping InfoService....\n");
-		//         CAMsg::printMsg	(LOG_CRIT,"Memory usage before: %u\n",getMemoryUsage());
-		//         m_pInfoService->stop();
-		//         CAMsg::printMsg	(LOG_CRIT,"Memory usage after: %u\n",getMemoryUsage());
-		//         CAMsg::printMsg(LOG_CRIT,"Stopped InfoService!\n");
+		if(m_pInfoService!=NULL)
+		    {
+		        CAMsg::printMsg(LOG_CRIT,"Stopping InfoService....\n");
+		        CAMsg::printMsg	(LOG_CRIT,"Memory usage before: %u\n",getMemoryUsage());
+		        m_pInfoService->stop();
+		        CAMsg::printMsg	(LOG_CRIT,"Memory usage after: %u\n",getMemoryUsage());
+		        CAMsg::printMsg(LOG_CRIT,"Stopped InfoService!\n");
 		//         delete m_pInfoService;
-		//     }
+		    }
 		//     m_pInfoService=NULL;
 
 	if(m_pthreadSendToMix!=NULL)
@@ -2716,7 +2717,7 @@ SINT32 CAFirstMix::initMixParameters(DOMElement*  elemMixes)
 		CALibProxytest::getOptions()->getMixId(buff,255);
 		UINT32 len=strlen((char*)buff)+1;
 		UINT32 aktMix=0;
-		for(UINT32 i=0;i<nl->getLength();i++)
+		for (UINT32 i = 0; i<m_u32MixCount; i++)
 		{
 			DOMNode* child=nl->item(i);
 			len=255;

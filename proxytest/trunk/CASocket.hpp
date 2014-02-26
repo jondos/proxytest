@@ -37,6 +37,19 @@ class CASocket:public CAClientSocket
 			CASocket(bool bIsReserved=false);
 			~CASocket(){close();}
 
+			static SINT32 init()
+				{
+					m_pcsClose=new CAMutex();
+					return E_SUCCESS;
+				}
+
+			static SINT32 cleanup()
+				{
+					delete m_pcsClose;
+					m_pcsClose=NULL;
+					return E_SUCCESS;
+				}
+
 			virtual SINT32 create();						
 			virtual SINT32 create(bool a_bShowTypicalError);
 			virtual SINT32 create(SINT32 type);
@@ -131,10 +144,12 @@ class CASocket:public CAClientSocket
 													// (because it is used as a Key in lookups for instance as a HashValue etc.)
 
 			SOCKET m_Socket;
+
+
 		private:			
 			SINT32 create(SINT32 type, bool a_bShowTypicalError);
 		
-			CAMutex m_csClose;
+			static CAMutex* m_pcsClose;
 			///The following two variables are use to realise "reserved" sockets. The rational behind is to ensure
 			///that we could allway crate "reserved" socket why we may fail to create normal sockets because of to many open files related restrictions
 			volatile static UINT32 m_u32NormalSocketsOpen; //how many "normal" sockets are open
