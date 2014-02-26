@@ -29,6 +29,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef _CACONTROLCHANNELDISPATCHER_H_HEADER_
 #define _CACONTROLCHANNELDISPATCHER_H_HEADER_
 #include "CAQueue.hpp"
+#include "gcm/gcm.h"
 class CAAbstractControlChannel;
 
 /** This class "dispatches" messages which it receives via proccessMixPacket()

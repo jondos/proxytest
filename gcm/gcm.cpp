@@ -2,7 +2,7 @@
 #include "gcm.h"
 
 //#ifndef USE_OPENSSL_GCM
-#ifdef  _GCM_H
+#ifdef _GCM_H //We still need this GCM implementation because of the controll channels...!
 
 
 static void mul_alpha(UINT32 *z) {

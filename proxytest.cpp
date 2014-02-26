@@ -73,6 +73,11 @@ CAMix* pMix=NULL;
 
 bool bTriedTermination = false;
 
+#if defined(HAVE_CRTDBG)
+		_CrtMemState* s1;
+		_CrtMemState s2, s3;
+#endif
+
 #ifndef _WIN32
 	#ifdef _DEBUG
 		void signal_broken_pipe( int sig)
@@ -129,6 +134,19 @@ void cleanup()
 		CAMsg::printMsg(LOG_CRIT,"Terminating Programm!\n");
 		removePidFile();
 		CALibProxytest::cleanup();
+#if defined(HAVE_CRTDBG)
+		_CrtMemCheckpoint( &s2 );
+		if ( _CrtMemDifference( &s3, s1, &s2 ) )
+      _CrtMemDumpStatistics( &s3 );
+		else
+			{
+				printf("Memory leak check clean!\n");
+			}
+		delete s1;
+#endif
+#ifdef CWDEBUG
+		Debug(list_allocations_on(libcw_do));
+#endif
 	}
 
 ///Remark: terminate() might be already defined by the c lib -- do not use this name...
@@ -141,9 +159,9 @@ void my_terminate(void)
 		if(pMix!=NULL)
 		{
 			pMix->shutDown();
-			for (UINT32 i = 0; i < 20 && !(pMix->isShutDown()); i++)
+			for (UINT32 i = 0; i < 200 && !(pMix->isShutDown()); i++)
 			{
-				msSleep(100);
+				msSleep(1000);
 			}
 			delete pMix;
 			pMix=NULL;
@@ -432,9 +450,9 @@ See \ref XMLMixCascadeStatus "[XML]" for a description of the XML struct send.
 
 */
 
-
 int main(int argc, const char* argv[])
 	{
+		SINT32 exitCode=0;
 #ifndef ONLY_LOCAL_PROXY
 		pMix=NULL;
 #endif
@@ -442,18 +460,18 @@ int main(int argc, const char* argv[])
 		SINT32 maxFiles,ret;
 #if defined(HAVE_CRTDBG)
 //			_CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_FILE );
-//			_CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDOUT );
+			_CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDOUT );
 //			_CrtSetReportMode( _CRT_ERROR, _CRTDBG_MODE_FILE );
-//			_CrtSetReportFile( _CRT_ERROR, _CRTDBG_FILE_STDOUT );
+			_CrtSetReportFile( _CRT_ERROR, _CRTDBG_FILE_STDOUT );
 //			_CrtSetReportMode( _CRT_ASSERT, _CRTDBG_MODE_FILE );
-//			_CrtSetReportFile( _CRT_ASSERT, _CRTDBG_FILE_STDOUT );
+			_CrtSetReportFile( _CRT_ASSERT, _CRTDBG_FILE_STDOUT );
 
 		UINT32 tmpDbgFlag = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
 		tmpDbgFlag |= _CRTDBG_ALLOC_MEM_DF;
 		tmpDbgFlag |=_CRTDBG_LEAK_CHECK_DF;
 		_CrtSetDbgFlag(tmpDbgFlag);
-		_CrtMemState s1, s2, s3;
-		_CrtMemCheckpoint( &s1 );
+		s1=new _CrtMemState;
+		_CrtMemCheckpoint( s1 );
 #endif
 //Switch on debug infos
 #ifdef CWDEBUG
@@ -642,7 +660,8 @@ exit(0);
 		if(CALibProxytest::getOptions()->parse(argc,argv) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_CRIT,"An error occurred before we could finish parsing the configuration file. Exiting...\n");
- 			exit(EXIT_FAILURE);
+ 			exitCode=EXIT_FAILURE;
+			goto EXIT;
 		}
 		if(!(	CALibProxytest::getOptions()->isFirstMix()||
 					CALibProxytest::getOptions()->isMiddleMix()||
@@ -653,7 +672,8 @@ exit(0);
 				CAMsg::printMsg(LOG_CRIT,"Use -j or -c\n");
 				CAMsg::printMsg(LOG_CRIT,"Or try --help for more options.\n");
 				CAMsg::printMsg(LOG_CRIT,"Exiting...\n");
-				exit(EXIT_FAILURE);
+	 			exitCode=EXIT_FAILURE;
+				goto EXIT;
 			}
 
 		UINT8 buff[255];
@@ -692,7 +712,8 @@ exit(0);
 
 		if (CALibProxytest::getOptions()->initLogging() != E_SUCCESS)
 		{
-				exit(EXIT_FAILURE);
+ 			exitCode=EXIT_FAILURE;
+			goto EXIT;
 		}
 		
 
@@ -770,7 +791,8 @@ exit(0);
 										seteuid(old_uid);
 						#endif
 						CAMsg::printMsg(LOG_CRIT,"Could not write pidfile - exiting!\n");
-						exit(EXIT_FAILURE);
+			 			exitCode=EXIT_FAILURE;
+						goto EXIT;
 					}
 				close(hFile);
 #ifndef _WIN32
@@ -853,7 +875,8 @@ exit(0);
 		if(pMix->start()!=E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_CRIT,"Error during MIX-Startup!\n");
-			exit(EXIT_FAILURE);
+ 			exitCode=EXIT_FAILURE;
+			goto EXIT;
 		}
 #else
     /* LERNGRUPPE */
@@ -896,13 +919,6 @@ while(true)
 #endif //ONLY_LOCAL_PROXY
 EXIT:
 		cleanup();
-#if defined(HAVE_CRTDBG)
-		_CrtMemCheckpoint( &s2 );
-		if ( _CrtMemDifference( &s3, &s1, &s2 ) )
-      _CrtMemDumpStatistics( &s3 );
-#endif
-#ifdef CWDEBUG
-		Debug(list_allocations_on(libcw_do));
-#endif
-		return 0;
+
+		return exitCode;
 	}

@@ -1,5 +1,7 @@
 #include "StdAfx.h"
 #include "CALibProxytest.hpp"
+#include "CAMuxSocket.hpp"
+
 #ifdef SERVER_MONITORING
 	#include "CAStatusManager.hpp"
 #endif
@@ -50,6 +52,8 @@ SINT32 CALibProxytest::init()
 #endif
 		CAMsg::init();
 		CASocketAddrINet::init();
+		CASocket::init();
+		CAMuxSocket::init();
 		//startup
 		#ifdef _WIN32
 			int err=0;
@@ -99,6 +103,8 @@ SINT32 CALibProxytest::cleanup()
 				m_pThreadList = NULL;
 			}
 #endif
+		CAMuxSocket::cleanup();
+		CASocket::cleanup();
 		CAMsg::cleanup();
 		return E_SUCCESS;
 	}

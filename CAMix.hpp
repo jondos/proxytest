@@ -71,6 +71,7 @@ class CAMix
 		virtual void shutDown()
 			{
 				m_bShutDown = true;
+				m_bLoop=false;
 			}
 
 		virtual bool isShutDown()
@@ -131,6 +132,8 @@ class CAMix
 				return m_bConnected;
 			}
 	protected:
+		volatile bool m_bLoop;
+
 #ifdef DYNAMIC_MIX
 		virtual void stopCascade() =0;
 		bool m_bLoop;

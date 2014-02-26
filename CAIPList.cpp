@@ -79,7 +79,7 @@ CAIPList::~CAIPList()
 						tmpEntry = NULL;
 					}
 			}
-#ifdef _DEUBG
+#ifdef _DEBUG
 		delete[] m_Random;
 		m_Random = NULL;
 #endif

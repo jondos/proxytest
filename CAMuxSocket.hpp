@@ -150,6 +150,25 @@ class CAMuxSocket
 				return E_SUCCESS;
 			}
 
+			static SINT32 init()
+					{
+						ms_pcsHashKeyList=new CAMutex();
+						return E_SUCCESS;
+					}
+
+			static SINT32 cleanup()
+					{
+						while(ms_phashkeylistAvailableHashKeys!=NULL)
+							{
+								t_hashkeylistEntry* tmpEntry = ms_phashkeylistAvailableHashKeys;
+								ms_phashkeylistAvailableHashKeys=ms_phashkeylistAvailableHashKeys->next;
+								delete tmpEntry;
+							}
+						delete ms_pcsHashKeyList;
+						ms_pcsHashKeyList=NULL;
+						return E_SUCCESS;
+					}
+
 		private:
 				CASocket		m_Socket;
 				UINT32			m_aktBuffPos;

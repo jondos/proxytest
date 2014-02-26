@@ -767,8 +767,8 @@ THREAD_RETURN mm_loopSendToMixAfter(void* param)
 		INIT_STACK;
 		BEGIN_STACK("CAFirstMix::fm_loopSendToMixAfter");
 
-		CAMiddleMix* pMiddleMix=(CAMiddleMix*)param;
-		CAQueue* pQueue=((CAMiddleMix*)param)->m_pQueueSendToMixAfter;
+		CAMiddleMix* pMiddleMix = static_cast<CAMiddleMix*>(param);
+		CAQueue* pQueue = pMiddleMix->m_pQueueSendToMixAfter;
 		CAMuxSocket* pMuxSocket=pMiddleMix->m_pMuxOut;
 
 		UINT32 len;
@@ -828,8 +828,8 @@ THREAD_RETURN mm_loopSendToMixBefore(void* param)
 		INIT_STACK;
 		BEGIN_STACK("CAFirstMix::fm_loopSendToMixBefore");
 
-		CAMiddleMix* pMiddleMix=(CAMiddleMix*)param;
-		CAQueue* pQueue=((CAMiddleMix*)param)->m_pQueueSendToMixBefore;
+		CAMiddleMix* pMiddleMix = static_cast<CAMiddleMix*>(param);
+		CAQueue* pQueue=pMiddleMix->m_pQueueSendToMixBefore;
 		CAMuxSocket* pMuxSocket=pMiddleMix->m_pMuxIn;
 
 		UINT32 len;
@@ -1044,7 +1044,7 @@ THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 		{
 			pMix->m_pQueueSendToMixAfter->add(b,sizeof(tQueueEntry)+1);
 		}
-		delete tmpRSABuff;
+		delete[] tmpRSABuff;
 		tmpRSABuff = NULL;
 		delete pPoolEntry;
 		pPoolEntry = NULL;
@@ -1058,7 +1058,7 @@ THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 
 THREAD_RETURN mm_loopReadFromMixAfter(void* param)
 	{
-		CAMiddleMix* pMix=(CAMiddleMix*)param;
+	CAMiddleMix* pMix = static_cast<CAMiddleMix*>(param);
 		HCHANNEL channelIn;
 		CASymCipher* pCipher;
 

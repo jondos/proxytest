@@ -43,10 +43,7 @@ CAMultiSignature::CAMultiSignature()
 	m_signatures = NULL;
 	m_sigCount = 0;
 	m_xoredID = new UINT8[SHA_DIGEST_LENGTH];
-	for(SINT32 i = 0; i<SHA_DIGEST_LENGTH; i++)
-	{
-		m_xoredID[i] = 0;
-	}
+	memset(m_xoredID,0,SHA_DIGEST_LENGTH);
 }
 
 CAMultiSignature::~CAMultiSignature()
@@ -69,6 +66,7 @@ CAMultiSignature::~CAMultiSignature()
 		delete tmp;
 		tmp = NULL;
 	}
+	delete[] m_xoredID;
 }
 
 
@@ -304,6 +302,7 @@ SINT32 CAMultiSignature::verifyXML(DOMNode* root, CACertificate* a_cert)
 	if(sigVerifier->setVerifyKey(a_cert) != E_SUCCESS)
 	{
 		CAMsg::printMsg(LOG_ERR, "Failed to set verify Key!");
+		delete sigVerifier;
 		return E_UNKNOWN;
 	}
 	UINT8* signatureMethod = sigVerifier->getSignatureMethod();
@@ -415,6 +414,8 @@ SINT32 CAMultiSignature::verifyXML(DOMNode* root, CACertificate* a_cert)
 		out = NULL;
 		continue;
 	}
+	delete sigVerifier;
+
 	if(verified)
 	{
 		//the signature could be verified, now check digestValue

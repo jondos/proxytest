@@ -59,6 +59,8 @@ CATempIPBlockList::~CATempIPBlockList()
 		//Now stop the cleanup thread...
 		m_bRunCleanupThread=false;
 		m_pCleanupThread->join(); //wait for cleanupthread to wakeup and exit
+		delete m_pCleanupThread;
+		m_pCleanupThread=NULL;
 		m_pMutex->lock();
 		//its safe to delete it because we have the lock...
 		for(UINT32 i=0;i<=0xFFFF;i++) 

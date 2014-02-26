@@ -566,7 +566,7 @@ SINT32 CALastMix::reconfigure()
 
 THREAD_RETURN lm_loopLog(void* param)
 	{
-		CALastMix* pLastMix=(CALastMix*)param;
+		CALastMix* pLastMix=static_cast<CALastMix*>(param);
 		pLastMix->m_bRunLog=true;
 		UINT32 countLog=0;
 		UINT8 buff[256];
@@ -599,7 +599,7 @@ THREAD_RETURN lm_loopLog(void* param)
 */
 THREAD_RETURN lm_loopSendToMix(void* param)
 	{
-		CALastMix* pLastMix=(CALastMix*)param;
+	CALastMix* pLastMix = static_cast<CALastMix*>(param);
 		CAQueue* pQueue=pLastMix->m_pQueueSendToMix;
 		CAMuxSocket* pMuxSocket=pLastMix->m_pMuxIn;
 		SINT32 ret;
@@ -695,7 +695,7 @@ THREAD_RETURN lm_loopSendToMix(void* param)
  */
 THREAD_RETURN lm_loopReadFromMix(void *pParam)
 	{
-		CALastMix* pLastMix=(CALastMix*)pParam;
+	CALastMix* pLastMix = static_cast<CALastMix*>(pParam);
 		CAMuxSocket* pMuxSocket=pLastMix->m_pMuxIn;
 		CAQueue* pQueue=pLastMix->m_pQueueReadFromMix;
 		tQueueEntry* pQueueEntry=new tQueueEntry;
