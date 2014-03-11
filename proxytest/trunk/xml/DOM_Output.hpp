@@ -130,12 +130,12 @@ class MemFormatTarget: public XMLFormatTarget
 						}
 					if (OF_NULL_TERMINATED == a_outputFormat)
 					{
-						tmp[*size] = NULL;
+						tmp[*size] =0;
 					}
 					else if (OF_NEWLINE == a_outputFormat)
 					{
-						tmp[*size+1] = NULL;
 						tmp[*size] = '\n';
+						tmp[*size+1] = 0;						
 					}
 					return tmp;
 				}
