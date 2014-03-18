@@ -541,12 +541,12 @@ if test "x$useminixml" == "xtrue" ; then
 					AC_MSG_RESULT([found in $xmldir])
 					found_xmldir=1
 					break;
-				],[if test -f "$xmldir/mxml.h"; then
+				],[],[if test -f "$xmldir/mxml.h"; then
 					AC_MSG_RESULT([found in $xmldir])
 					found_xmldir=1
 					break;
 				  fi
-				],[])
+				])
 	done
 else
 	AC_MSG_CHECKING([for xerces-c includes])
@@ -565,12 +565,12 @@ else
 					AC_MSG_RESULT([found in $xmldir])
 					found_xmldir=1
 					break;
-				],[if test -f "$xmldir/xercesc/util/XMLString.hpp"; then
+				],[],[if test -f "$xmldir/xercesc/util/XMLString.hpp"; then
 					AC_MSG_RESULT([found in $xmldir])
 					found_xmldir=1
 					break;
 				  fi
-				],[])
+				])
 	done
 fi	
 if test -z "$found_xmldir"; then
