@@ -504,6 +504,7 @@ AC_ARG_WITH(minixml,
 	]
 )
 
+AM_CONDITIONAL([USE_MINIXML], [test x$useminixml = xtrue])
 		
 AC_MSG_NOTICE([Mini-XML/Xerces-C tests])
 
