@@ -16472,7 +16472,7 @@ case "$host" in
 		;;
 *-*-android*)
 	DEFAULTLIBS="$LIBS -pthread"
-	CXXFLAGS="$CXXFLAGS -fno-rtti"
+	CXXFLAGS="$CXXFLAGS -fno-rtti -fno-exceptions"
 	;;
 *-*-linux*)
 	DEFAULTLIBS="$LIBS -lpthread"
