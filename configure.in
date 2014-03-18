@@ -49,8 +49,11 @@ case "$host" in
 *-*-solaris*)
 		DEFAULTLIBS="$LIBS -lnsl -lsocket -lposix4"
 		;;
+*-*-*-android*)
+	DEFAULTLIBS="$LIBS -pthread"
+	;;
 *-*-linux*)
-		DEFAULTLIBS="$LIBS -lpthread"
+	DEFAULTLIBS="$LIBS -lpthread"
 	;;
 *-*-irix*)
 		CFLAGS="$CFLAGS "
@@ -68,10 +71,6 @@ case "$host" in
 	DEFAULTLIBS="$LIBS -L/usr/pkg/lib -liconv -lpthread"
 	;;
 *-*-drops*)
-	CFLAGS="$CFLAGS -DOS_TUDOS"
-	CXXFLAGS="$CXXFLAGS -DOS_TUDOS";
-	;;
-*-*-android*)
 	CFLAGS="$CFLAGS -DOS_TUDOS"
 	CXXFLAGS="$CXXFLAGS -DOS_TUDOS";
 	;;
