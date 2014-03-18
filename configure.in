@@ -51,6 +51,7 @@ case "$host" in
 		;;
 *-*-android*)
 	DEFAULTLIBS="$LIBS -pthread"
+	CXXFLAGS="$CXXFLAGS -fno-rtti"
 	;;
 *-*-linux*)
 	DEFAULTLIBS="$LIBS -lpthread"
