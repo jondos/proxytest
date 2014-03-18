@@ -1509,7 +1509,7 @@ Optional Packages:
                           Specify architecure for optimisation
   --with-bits=32|64       Generate code for a 32-bit or 64-bit environment
   --with-ssl-dir=PATH     Specify path to OpenSSL installation
-  --with-minixxml         Use Mini-XML instead of XERCES-C
+  --with-minixml          Use Mini-XML instead of XERCES-C
   --with-xml-include=PATH Specify path to Mini-XML/XERCES-C include files
                           (without a trailing '/xercesc')
   --with-xml-lib=PATH     Specify path to XERCES-C library files
@@ -16470,12 +16470,15 @@ case "$host" in
 *-*-solaris*)
 		DEFAULTLIBS="$LIBS -lnsl -lsocket -lposix4"
 		;;
+*-*-android*)
+	DEFAULTLIBS="$LIBS -pthread"
+	;;
 *-*-linux*)
-		DEFAULTLIBS="$LIBS -lpthread"
+	DEFAULTLIBS="$LIBS -lpthread"
 	;;
 *-*-irix*)
-		CFLAGS="$CFLAGS "
-		;;
+	CFLAGS="$CFLAGS "
+	;;
 *-*-freebsd*)
 	DEFAULTLIBS="$LIBS -L/usr/local/lib -liconv -lpthread";
 	CFLAGS="$CFLAGS";
@@ -16489,10 +16492,6 @@ case "$host" in
 	DEFAULTLIBS="$LIBS -L/usr/pkg/lib -liconv -lpthread"
 	;;
 *-*-drops*)
-	CFLAGS="$CFLAGS -DOS_TUDOS"
-	CXXFLAGS="$CXXFLAGS -DOS_TUDOS";
-	;;
-*-*-android*)
 	CFLAGS="$CFLAGS -DOS_TUDOS"
 	CXXFLAGS="$CXXFLAGS -DOS_TUDOS";
 	;;
