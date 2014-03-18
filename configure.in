@@ -578,44 +578,64 @@ if test -z "$found_xmldir"; then
 fi
 
 dnl Check for XML libs
-AC_MSG_CHECKING([for libxerces-c])
 saved_LIBS="$LIBS"
 saved_LDFLAGS="$LDFLAGS"
-
 tryxmllibdir="/usr/local/lib /usr/lib"
-
 AC_ARG_WITH(xml-lib,
-	AS_HELP_STRING([--with-xml-lib=PATH],[Specify path to XERCES-C library files]),
+	AS_HELP_STRING([--with-xml-lib=PATH],[Specify path to Mini-XML/XERCES-C library files]),
 	[
 		if test "x$withval" != "xno" ; then
 			tryxmllibdir=$withval
 		fi
 	]
 )
-
 if test "x$prefix" != "xNONE" ; then
 	tryxmllibdir="$tryxmllibdir $prefix"
 fi
-dnl Note: the order is import for compiling on TUDOS
-LIBS="-lxerces-c $saved_LIBS"
-for xmllibdir in "" $tryxmllibdir ; do
-	LDFLAGS="$saved_LDFLAGS -L$xmllibdir"
-	AC_LINK_IFELSE([AC_LANG_PROGRAM([
-		#include "util/XercesDefs.hpp"
-		#include "util/PlatformUtils.hpp"
-		#if (_XERCES_VERSION >= 20200)
-		   XERCES_CPP_NAMESPACE_USE
-		#endif
-		], [XMLPlatformUtils::Initialize()
-])],[
-AC_MSG_RESULT([found in $xmllibdir])
-found_xmllib=1 break;
-],[],[found_xmllib=1
-			AC_MSG_RESULT([skip xml lib run test because of cross compiling])
-			])
-done
+
+if test "x$useminixml" == "xtrue" ; then
+	AC_MSG_CHECKING([for libminixml])
+	LIBS="-lmxml $saved_LIBS"
+	for xmllibdir in "" $tryxmllibdir ; do
+		LDFLAGS="$saved_LDFLAGS -L$xmllibdir"
+		AC_LINK_IFELSE([AC_LANG_PROGRAM([
+			#include <mxml.h>
+			], [mxmlDelete(NULL)
+	])],[
+	AC_MSG_RESULT([found in $xmllibdir])
+	found_xmllib=1 break;
+	],[],[found_xmllib=1
+				AC_MSG_RESULT([skip xml lib run test because of cross compiling])
+				])
+	done
+
+else
+
+	AC_MSG_CHECKING([for libxerces-c])
+
+
+
+	dnl Note: the order is import for compiling on TUDOS
+	LIBS="-lxerces-c $saved_LIBS"
+	for xmllibdir in "" $tryxmllibdir ; do
+		LDFLAGS="$saved_LDFLAGS -L$xmllibdir"
+		AC_LINK_IFELSE([AC_LANG_PROGRAM([
+			#include "util/XercesDefs.hpp"
+			#include "util/PlatformUtils.hpp"
+			#if (_XERCES_VERSION >= 20200)
+			   XERCES_CPP_NAMESPACE_USE
+			#endif
+			], [XMLPlatformUtils::Initialize()
+	])],[
+	AC_MSG_RESULT([found in $xmllibdir])
+	found_xmllib=1 break;
+	],[],[found_xmllib=1
+				AC_MSG_RESULT([skip xml lib run test because of cross compiling])
+				])
+	done
+fi
 if test -z "$found_xmllib"; then
-	AC_MSG_ERROR([Xerces-C libs NOT found - please use --with-xml-lib])
+	AC_MSG_ERROR([Mini-XML/Xerces-C libs NOT found - please use --with-xml-lib])
 fi
 
 
