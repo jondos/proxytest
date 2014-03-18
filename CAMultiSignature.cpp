@@ -32,6 +32,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
  *      Author: zenoxx
  */
 #include "StdAfx.h"
+#ifndef ONLY_LOCAL_PROXY
 #include "CABase64.hpp"
 #include "CAUtil.hpp"
 #include "xml/DOM_Output.hpp"
@@ -489,3 +490,4 @@ SINT32 CAMultiSignature::getXORofSKIs(UINT8* out, UINT32 outlen)
 {
 	return getSKI(out, outlen, m_xoredID);
 }
+#endif //ONLY_LOCAL_PROXY

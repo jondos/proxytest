@@ -86,6 +86,8 @@ CACmdLnOptions::CACmdLnOptions()
 #ifdef COUNTRY_STATS
 		m_dbCountryStatsHost=m_dbCountryStatsPasswd=m_dbCountryStatsUser=NULL;
 #endif
+		m_termsAndConditionsTemplates = NULL;
+		m_nrOfTermsAndConditionsTemplates = 0;
 #endif //ONLY_LOCAL_PROXY
 		m_iTargetPort=m_iSOCKSPort=m_iSOCKSServerPort=0xFFFF;
 		m_strTargetHost=m_strSOCKSHost=NULL;
@@ -119,8 +121,6 @@ CACmdLnOptions::CACmdLnOptions()
 		m_strMonitoringListenerHost = NULL;
 		m_iMonitoringListenerPort = 0xFFFF;
 #endif
-		m_termsAndConditionsTemplates = NULL;
-		m_nrOfTermsAndConditionsTemplates = 0;
 
 #ifdef LOG_CRIME
 		m_logPayload = false;
@@ -174,6 +174,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_u32DelayChannelLatency = DELAY_CHANNEL_LATENCY;
 #endif
 
+#ifndef ONLY_LOCAL_PROXY
 		// initialize pointer to option setter functions 
 		initMainOptionSetters();
 		initGeneralOptionSetters();
@@ -186,6 +187,8 @@ CACmdLnOptions::CACmdLnOptions()
 #ifdef LOG_CRIME
 		initCrimeDetectionOptionSetters();
 #endif
+#endif //ONLY_LOCAL_PROXY
+
  }
 
  
@@ -193,6 +196,8 @@ CACmdLnOptions::~CACmdLnOptions()
 	{
 		cleanup();
 	}
+
+#ifndef ONLY_LOCAL_PROXY
 
 void CACmdLnOptions::initMainOptionSetters()
 {
@@ -330,6 +335,9 @@ void CACmdLnOptions::initCrimeDetectionOptionSetters()
 		&CACmdLnOptions::setCrimeSurveillanceIP;
 }
 #endif
+
+#endif //ONLY_LOCAL_PROXY
+
 // This is the final cleanup, which deletes every resource (including any locks necessary to synchronise read/write to properties).
 //
 SINT32 CACmdLnOptions::cleanup()
@@ -923,7 +931,6 @@ struct t_CMNDLN_REREAD_PARAMS
 		CACmdLnOptions* pCmdLnOptions;
 		CAMix* pMix;
 	};
-#endif //ONLY_LOCAL_PROXY
 
 /** Copies options from \c newOptions. Only those options which are specified
 	* in \c newOptions are copied. The others are left untouched!
@@ -957,6 +964,7 @@ SINT32 CACmdLnOptions::setNewValues(CACmdLnOptions& newOptions)
 			m_maxNrOfUsers=newOptions.getMaxNrOfUsers();
 		return E_SUCCESS;
 }
+#endif //ONLY_LOCAL_PROXY
 
 #ifndef ONLY_LOCAL_PROXY
 /** Modifies the next mix settings (target interface and certificate) according to
@@ -1550,6 +1558,7 @@ UINT32 CACmdLnOptions::getPaymentSettleInterval()
 
 #endif /* ifdef PAYMENT */
 
+#ifndef ONLY_LOCAL_PROXY
 SINT32 CACmdLnOptions::getOperatorSubjectKeyIdentifier(UINT8 *buffer, UINT32 *length)
 {
 	if(m_OpCert == NULL)
@@ -1561,7 +1570,6 @@ SINT32 CACmdLnOptions::getOperatorSubjectKeyIdentifier(UINT8 *buffer, UINT32 *le
 
 }
 
-#ifndef ONLY_LOCAL_PROXY
 CAListenerInterface** CACmdLnOptions::getInfoServices(UINT32& r_size)
  {
 		r_size = m_addrInfoServicesSize;
@@ -1677,7 +1685,203 @@ UINT16 CACmdLnOptions::getMonitoringListenerPort()
 }
 #endif /* SERVER_MONITORING */
 
+SINT32 CACmdLnOptions::initLogging()
+	{
+	SINT32 ret = E_SUCCESS;
+	UINT8 buff[2000];
+	UINT32 iLogOptions = 0;
+
+	CAMsg::init();
+
+
 #ifndef ONLY_LOCAL_PROXY
+	if(isSyslogEnabled())
+		{
+		iLogOptions |= MSG_LOG; 
+		}
+#endif
+	if(getLogDir((UINT8*)buff,2000)==E_SUCCESS)
+		{
+		if(getCompressLogs())
+			iLogOptions |= MSG_COMPRESSED_FILE;
+		else
+			iLogOptions |= MSG_FILE;
+		}
+#ifndef ONLY_LOCAL_PROXY
+
+	if (m_bLogConsole || iLogOptions == 0)
+		{
+		iLogOptions |= MSG_STDOUT;
+		}
+	ret = CAMsg::setLogOptions(iLogOptions);
+
+	if(m_strLogLevel!=NULL)
+		{
+		if (strcmp(m_strLogLevel,"info") == 0)
+			{
+			CAMsg::setLogLevel(LOG_INFO);
+			}
+		else if (strcmp(m_strLogLevel,"warning") == 0)
+			{
+			CAMsg::setLogLevel(LOG_WARNING);
+			}
+		else if (strcmp(m_strLogLevel,"error") == 0)
+			{
+			CAMsg::setLogLevel(LOG_ERR);
+			}
+		else if (strcmp(m_strLogLevel,"critical") == 0)
+			{
+			CAMsg::setLogLevel(LOG_CRIT);
+			}
+		}	
+	if(isEncryptedLogEnabled())
+		{
+		SINT32 retEncr;
+		if ((retEncr = CAMsg::openEncryptedLog()) != E_SUCCESS)
+			{
+			CAMsg::printMsg(LOG_ERR,"Could not open encrypted log - exiting!\n");
+			return retEncr;
+			}
+		}
+#endif
+
+	if(getDaemon() && ret != E_SUCCESS) 
+		{
+		CAMsg::printMsg(LOG_CRIT, "We need a log file in daemon mode in order to get any messages! Exiting...\n");
+		return ret;
+		}
+
+	return E_SUCCESS;
+	}
+
+
+#ifndef ONLY_LOCAL_PROXY
+
+SINT32 CACmdLnOptions::setLoggingOptions(DOMElement* elemGeneral)
+	{
+	//get Logging
+	DOMElement* elemLogging=NULL;
+	DOMElement* elemEncLog=NULL;
+	DOMElement* elem=NULL;
+
+	UINT8 tmpBuff[TMP_BUFF_SIZE];
+	UINT32 tmpLen = TMP_BUFF_SIZE;
+
+	SINT32 maxLogFilesTemp = 0;
+	if(elemGeneral == NULL) return E_UNKNOWN;
+	ASSERT_GENERAL_OPTIONS_PARENT
+		(elemGeneral->getNodeName(), OPTIONS_NODE_LOGGING);
+
+	getDOMChildByName(elemGeneral, OPTIONS_NODE_LOGGING, elemLogging, false);
+	if(elemLogging != NULL)
+		{
+		if (getDOMElementAttribute(elemLogging, "level", tmpBuff, &tmpLen) == E_SUCCESS)
+			{
+			strtrim(tmpBuff);
+			toLower(tmpBuff);
+			m_strLogLevel = new char[strlen((char*)tmpBuff)+1];
+			strcpy(m_strLogLevel, (char*)tmpBuff);
+			}
+		else
+			{
+			m_strLogLevel = new char[strlen("debug")+1];
+			strcpy(m_strLogLevel, "debug");
+			}
+
+
+
+		getDOMChildByName(elemLogging, OPTIONS_NODE_LOGGING_FILE, elem, false);
+		tmpLen = TMP_BUFF_SIZE;
+		if(getDOMElementValue(elem, tmpBuff, &tmpLen) == E_SUCCESS)
+			{
+			strtrim(tmpBuff);
+			m_strLogDir = new char[strlen((char*)tmpBuff)+1];
+			strcpy(m_strLogDir, (char*)tmpBuff);
+			getDOMElementAttribute
+				(elem, OPTIONS_ATTRIBUTE_LOGGING_MAXFILESIZE, m_maxLogFileSize);
+			//Set maximum number of logging files
+			//CAMsg::printMsg(LOG_ERR,"!!!!!!!!\n");
+			if((getDOMElementAttribute
+				(elem, OPTIONS_ATTRIBUTE_LOGGING_MAXFILES, &maxLogFilesTemp) != E_SUCCESS) ||
+				(maxLogFilesTemp == 0) )
+				{
+				m_maxLogFiles = LOGGING_MAXFILES_DEFAULT;
+				}
+			else
+				{
+				if(maxLogFilesTemp < 0)
+					{
+					//CAMsg::printMsg(LOG_ERR,"Negative number of log files specified.\n");
+					return E_UNKNOWN;
+					}
+				m_maxLogFiles = (UINT32) maxLogFilesTemp;
+				//CAMsg::printMsg(LOG_ERR,"Max log files are %u\n", m_maxLogFiles);
+				}
+			}
+		getDOMChildByName(elemLogging, OPTIONS_NODE_SYSLOG, elem, false);
+		tmpLen = TMP_BUFF_SIZE;
+		memset(tmpBuff, 0, tmpLen);
+		if( (getDOMElementValue(elem, tmpBuff, &tmpLen) == E_SUCCESS) &&
+			 (memcmp(tmpBuff,"True",4) == 0) )
+			{
+			m_bSyslog = true;
+			}
+
+		getDOMChildByName(elemLogging, OPTIONS_NODE_LOGGING_CONSOLE, elem, false);
+		tmpLen = TMP_BUFF_SIZE;
+		memset(tmpBuff, 0, tmpLen);
+		if( (getDOMElementValue(elem, tmpBuff, &tmpLen) == E_SUCCESS) &&
+			 (memcmp(tmpBuff,"True",4) == 0) )
+			{
+			m_bLogConsole = true;
+			}
+
+		//get Encrypted Log Info
+		if( getDOMChildByName
+			 (elemLogging, OPTIONS_NODE_ENCRYPTED_LOG, elemEncLog,false) == E_SUCCESS )
+			{
+			m_bIsEncryptedLogEnabled = true;
+			getDOMChildByName(elemEncLog, OPTIONS_NODE_LOGGING_FILE, elem, false);
+
+			tmpLen = TMP_BUFF_SIZE;
+			memset(tmpBuff, 0, tmpLen);
+			if( getDOMElementValue(elem, tmpBuff, &tmpLen) == E_SUCCESS )
+				{
+				strtrim(tmpBuff);
+				m_strEncryptedLogDir = new char[strlen((char*)tmpBuff)+1];
+				strcpy(m_strEncryptedLogDir, (char*)tmpBuff);
+				}
+			DOMElement* elemKeyInfo;
+			DOMElement* elemX509Data;
+			if(getDOMChildByName
+				 (elemEncLog, OPTIONS_NODE_LOGGING_KEYINFO, elemKeyInfo, false) == E_SUCCESS &&
+				 getDOMChildByName
+				 (elemKeyInfo, OPTIONS_NODE_X509DATA, elemX509Data, false) == E_SUCCESS )
+				{
+				m_pLogEncryptionCertificate =
+					CACertificate::decode(elemX509Data->getFirstChild(), CERT_X509CERTIFICATE);
+				}
+			}
+		else
+			{
+			m_bIsEncryptedLogEnabled=false;
+			}
+
+		}
+
+	SINT32 ret = initLogging();
+	if (ret == E_SUCCESS)
+		{
+		CAMsg::printMsg(LOG_INFO,MIX_VERSION_INFO);
+#ifdef MIX_VERSION_TESTING
+		CAMsg::printMsg(LOG_WARNING, MIX_VERSION_TESTING_TEXT);
+#endif
+		}
+
+	return ret;
+	}
+
+
 
 /** Returns the XML tree describing the Mix . This is NOT a copy!
 	* @param docMixInfo destination for the XML tree
@@ -2304,198 +2508,6 @@ SINT32 CACmdLnOptions::setPaymentReminder(DOMElement* elemGeneral)
 
 
 
-SINT32 CACmdLnOptions::initLogging()
-{
-	SINT32 ret = E_SUCCESS;
-	UINT8 buff[2000];
-	UINT32 iLogOptions = 0;
-	
-	CAMsg::init();
-			
-
-#ifndef ONLY_LOCAL_PROXY
-	if(isSyslogEnabled())
-	{
-		iLogOptions |= MSG_LOG; 
-	}
-#endif
-	if(getLogDir((UINT8*)buff,2000)==E_SUCCESS)
-	{
-		if(getCompressLogs())
-			iLogOptions |= MSG_COMPRESSED_FILE;
-		else
-			iLogOptions |= MSG_FILE;
-	}
-#ifndef ONLY_LOCAL_PROXY
-
-	if (m_bLogConsole || iLogOptions == 0)
-	{
-		iLogOptions |= MSG_STDOUT;
-	}
-	ret = CAMsg::setLogOptions(iLogOptions);
-	
-	if(m_strLogLevel!=NULL)
-	{
-		if (strcmp(m_strLogLevel,"info") == 0)
-		{
-			CAMsg::setLogLevel(LOG_INFO);
-		}
-		else if (strcmp(m_strLogLevel,"warning") == 0)
-		{
-			CAMsg::setLogLevel(LOG_WARNING);
-		}
-		else if (strcmp(m_strLogLevel,"error") == 0)
-		{
-			CAMsg::setLogLevel(LOG_ERR);
-		}
-		else if (strcmp(m_strLogLevel,"critical") == 0)
-		{
-			CAMsg::setLogLevel(LOG_CRIT);
-		}
-	}	
-	if(isEncryptedLogEnabled())
-	{
-		SINT32 retEncr;
-		if ((retEncr = CAMsg::openEncryptedLog()) != E_SUCCESS)
-		{
-			CAMsg::printMsg(LOG_ERR,"Could not open encrypted log - exiting!\n");
-			return retEncr;
-		}
-	}
-#endif
-
-	if(getDaemon() && ret != E_SUCCESS) 
-	{
-		CAMsg::printMsg(LOG_CRIT, "We need a log file in daemon mode in order to get any messages! Exiting...\n");
-		return ret;
-	}
-	
-	return E_SUCCESS;
-}
-
-SINT32 CACmdLnOptions::setLoggingOptions(DOMElement* elemGeneral)
-{
-	//get Logging
-	DOMElement* elemLogging=NULL;
-	DOMElement* elemEncLog=NULL;
-	DOMElement* elem=NULL;
-
-	UINT8 tmpBuff[TMP_BUFF_SIZE];
-	UINT32 tmpLen = TMP_BUFF_SIZE;
-
-	SINT32 maxLogFilesTemp = 0;
-	if(elemGeneral == NULL) return E_UNKNOWN;
-	ASSERT_GENERAL_OPTIONS_PARENT
-		(elemGeneral->getNodeName(), OPTIONS_NODE_LOGGING);
-
-	getDOMChildByName(elemGeneral, OPTIONS_NODE_LOGGING, elemLogging, false);
-	if(elemLogging != NULL)
-	{
-		if (getDOMElementAttribute(elemLogging, "level", tmpBuff, &tmpLen) == E_SUCCESS)
-		{
-			strtrim(tmpBuff);
-			toLower(tmpBuff);
-			m_strLogLevel = new char[strlen((char*)tmpBuff)+1];
-			strcpy(m_strLogLevel, (char*)tmpBuff);
-		}
-		else
-		{
-			m_strLogLevel = new char[strlen("debug")+1];
-			strcpy(m_strLogLevel, "debug");
-		}
-		
-		
-		
-		getDOMChildByName(elemLogging, OPTIONS_NODE_LOGGING_FILE, elem, false);
-		tmpLen = TMP_BUFF_SIZE;
-		if(getDOMElementValue(elem, tmpBuff, &tmpLen) == E_SUCCESS)
-		{
-			strtrim(tmpBuff);
-			m_strLogDir = new char[strlen((char*)tmpBuff)+1];
-			strcpy(m_strLogDir, (char*)tmpBuff);
-			getDOMElementAttribute
-				(elem, OPTIONS_ATTRIBUTE_LOGGING_MAXFILESIZE, m_maxLogFileSize);
-			//Set maximum number of logging files
-			//CAMsg::printMsg(LOG_ERR,"!!!!!!!!\n");
-			if((getDOMElementAttribute
-					(elem, OPTIONS_ATTRIBUTE_LOGGING_MAXFILES, &maxLogFilesTemp) != E_SUCCESS) ||
-				(maxLogFilesTemp == 0) )
-			{
-				m_maxLogFiles = LOGGING_MAXFILES_DEFAULT;
-			}
-			else
-			{
-				if(maxLogFilesTemp < 0)
-				{
-					//CAMsg::printMsg(LOG_ERR,"Negative number of log files specified.\n");
-					return E_UNKNOWN;
-				}
-				m_maxLogFiles = (UINT32) maxLogFilesTemp;
-				//CAMsg::printMsg(LOG_ERR,"Max log files are %u\n", m_maxLogFiles);
-			}
-		}
-		getDOMChildByName(elemLogging, OPTIONS_NODE_SYSLOG, elem, false);
-		tmpLen = TMP_BUFF_SIZE;
-		memset(tmpBuff, 0, tmpLen);
-		if( (getDOMElementValue(elem, tmpBuff, &tmpLen) == E_SUCCESS) &&
-			(memcmp(tmpBuff,"True",4) == 0) )
-		{
-			m_bSyslog = true;
-		}
-
-		getDOMChildByName(elemLogging, OPTIONS_NODE_LOGGING_CONSOLE, elem, false);
-		tmpLen = TMP_BUFF_SIZE;
-		memset(tmpBuff, 0, tmpLen);
-		if( (getDOMElementValue(elem, tmpBuff, &tmpLen) == E_SUCCESS) &&
-			(memcmp(tmpBuff,"True",4) == 0) )
-		{
-			m_bLogConsole = true;
-		}
-
-		//get Encrypted Log Info
-		if( getDOMChildByName
-				(elemLogging, OPTIONS_NODE_ENCRYPTED_LOG, elemEncLog,false) == E_SUCCESS )
-		{
-			m_bIsEncryptedLogEnabled = true;
-			getDOMChildByName(elemEncLog, OPTIONS_NODE_LOGGING_FILE, elem, false);
-
-			tmpLen = TMP_BUFF_SIZE;
-			memset(tmpBuff, 0, tmpLen);
-			if( getDOMElementValue(elem, tmpBuff, &tmpLen) == E_SUCCESS )
-				{
-					strtrim(tmpBuff);
-					m_strEncryptedLogDir = new char[strlen((char*)tmpBuff)+1];
-					strcpy(m_strEncryptedLogDir, (char*)tmpBuff);
-				}
-			DOMElement* elemKeyInfo;
-			DOMElement* elemX509Data;
-			if(getDOMChildByName
-					(elemEncLog, OPTIONS_NODE_LOGGING_KEYINFO, elemKeyInfo, false) == E_SUCCESS &&
-				 getDOMChildByName
-					(elemKeyInfo, OPTIONS_NODE_X509DATA, elemX509Data, false) == E_SUCCESS )
-			{
-				m_pLogEncryptionCertificate =
-					CACertificate::decode(elemX509Data->getFirstChild(), CERT_X509CERTIFICATE);
-			}
-		}
-		else
-		{
-			m_bIsEncryptedLogEnabled=false;
-		}
-		
-	}
-	
-	SINT32 ret = initLogging();
-	if (ret == E_SUCCESS)
-	{
-		CAMsg::printMsg(LOG_INFO,MIX_VERSION_INFO);
-#ifdef MIX_VERSION_TESTING
-		CAMsg::printMsg(LOG_WARNING, MIX_VERSION_TESTING_TEXT);
-#endif
-	}
-
-	return ret;
-}
 
 /* append the mix description to the mix info DOM structure
  * this is a main option (child of <MixConfiguration>)

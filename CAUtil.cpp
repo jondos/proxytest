@@ -28,9 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "StdAfx.h"
 #include "CAUtil.hpp"
 #include "CABase64.hpp"
-#ifdef DEBUG
-	#include "CAMsg.hpp"
-#endif
+#include "CAMsg.hpp"
 #include "xml/DOM_Output.hpp"
 #include "CASymCipher.hpp"
 
@@ -500,6 +498,7 @@ SINT32 getSignatureElements(DOMNode* parent, DOMNode** signatureNodes, UINT32* l
  *  TODO 1. test for XERCES >= 3.0.1
  *  	 2. specification
  */
+#ifndef ONLY_LOCAL_PROXY
 SINT32 integrateDOMNode(const DOMNode *srcNode, DOMNode *dstNode, bool recursive, bool replace)
 {
 	if( (srcNode->getNodeType() != DOMNode::ELEMENT_NODE) ||
@@ -608,6 +607,7 @@ SINT32 integrateDOMNode(const DOMNode *srcNode, DOMNode *dstNode, bool recursive
 	delete[] nodeNames;
 	return E_SUCCESS;
 }
+#endif //ONLY_LOCAL_PROXY
 
 bool equals(const XMLCh* const e1,const char* const e2)
 	{
@@ -626,6 +626,7 @@ void initDOMParser()
 	theDOMParser = new XercesDOMParser();
 }
 
+
 XERCES_CPP_NAMESPACE::DOMDocument* parseDOMDocument(const UINT8* const buff, UINT32 len)
 	{
 		theParseDOMDocumentLock->lock();
@@ -641,6 +642,7 @@ XERCES_CPP_NAMESPACE::DOMDocument* parseDOMDocument(const UINT8* const buff, UIN
 /**
  * parses a file via path or URL
  */
+#ifndef ONLY_LOCAL_PROXY
 XERCES_CPP_NAMESPACE::DOMDocument* parseDOMDocument(const UINT8* const pathOrURL)
 {
 	theParseDOMDocumentLock->lock();
@@ -654,6 +656,7 @@ XERCES_CPP_NAMESPACE::DOMDocument* parseDOMDocument(const UINT8* const pathOrURL
 	theParseDOMDocumentLock->unlock();
 	return ret;
 }
+#endif //ONLY_LOCAL_PROXY
 
 void releaseDOMParser()
 	{
@@ -858,6 +861,31 @@ UINT8 *getTermsAndConditionsTemplateRefId(DOMNode *tcTemplateRoot)
 
 	return (UINT8 *) templateRefId;
 }
+
+SINT32 getDOMElementValue(const DOMElement* pElem, UINT32& value, UINT32 defaultValue)
+	{
+	UINT32 v;
+	if(getDOMElementValue(pElem,&v)!=E_SUCCESS)
+		{
+		value=defaultValue;
+		}
+	else
+		value=v;
+	return E_SUCCESS;
+	}
+
+SINT32 getDOMElementValue(const DOMElement* const pElem, UINT32* value)
+	{
+	ASSERT(value!=NULL,"Value is null");
+	ASSERT(pElem!=NULL,"Element is NULL");
+	UINT8 buff[255];
+	UINT32 buffLen=255;
+	if(getDOMElementValue(pElem,buff,&buffLen)!=E_SUCCESS)
+		return E_UNKNOWN;
+	*value=atol((char*)buff);
+
+	return E_SUCCESS;
+	}
 
 #ifndef ONLY_LOCAL_PROXY
 DOMNodeList* getElementsByTagName(DOMElement* pElem,const char* const name)
@@ -1121,19 +1149,6 @@ SINT32 getDOMElementValue(const DOMElement* const pElem,double* value)
 		return E_UNKNOWN;
 	*value=atof((char*)buff);
 
-	return E_SUCCESS;
-}
-
-
-SINT32 getDOMElementValue(const DOMElement* pElem,UINT32& value, UINT32 defaultValue)
-{
-	UINT32 v;
-	if(getDOMElementValue(pElem,&v)!=E_SUCCESS)
-		{
-		value=defaultValue;
-		}
-	else
-		value=v;
 	return E_SUCCESS;
 }
 

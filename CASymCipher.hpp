@@ -31,7 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define KEY_SIZE 16
 
 #include "CALockAble.hpp"
-
+#include "CAMutex.hpp"
 /** This class could be used for encryption/decryption of data (streams) with
 	* AES using 128bit OFB mode. Because of the OFB mode technical encryption
 	* and decrpytion are the same (depending on the kind of input). Therefore

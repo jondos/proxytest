@@ -1,3 +1,5 @@
+#include "../StdAfx.h"
+#ifndef WITHOUT_TRIO
 /*************************************************************************
  *
  * $Id$
@@ -4654,3 +4656,4 @@ TrioReadDouble(trio_class_t *self,
   return TRUE;
 }
 */
+#endif //WITHOUT_TRIO

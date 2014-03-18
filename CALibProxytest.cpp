@@ -28,7 +28,11 @@ void CALibProxytest::openssl_locking_callback(int mode, int type, char * /*file*
 ///TODO: Move this to CAThread !
 unsigned long openssl_get_thread_id(void)
 	{
+#ifndef ONLY_LOCAL_PROXY
 		return CAThread::getSelfID();
+#else
+		return 1;
+#endif
 	}
 
 
@@ -37,8 +41,8 @@ SINT32 CALibProxytest::init()
 	{
 #ifndef ONLY_LOCAL_PROXY
 		XMLPlatformUtils::Initialize();
-		initDOMParser();
 #endif
+		initDOMParser();
 #ifndef ONLY_LOCAL_PROXY
 		SSL_library_init();
 #endif

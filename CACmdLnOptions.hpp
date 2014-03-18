@@ -889,7 +889,7 @@ class CACmdLnOptions
 		SINT32 clearListenerInterfaces();
 
 
-
+#ifndef ONLY_LOCAL_PROXY
 		/* NR of all Option types, i.e. General, Certificates, Networking, etc. (excluding *mainOptionSetters)
 		 * these options are all direct children of <MixConfiguration>*/
 #define MAIN_OPTION_SETTERS_NR 8
@@ -963,6 +963,8 @@ class CACmdLnOptions
 		void initCertificateOptionSetters();
 		void initNetworkOptionSetters();
 		void initTermsAndConditionsOptionSetters();
+#endif //ONLY_LOCAL_PROXY
+
 };
 
 SINT32 setRegExpressions(DOMElement *rootElement, const char* const childElementName,
