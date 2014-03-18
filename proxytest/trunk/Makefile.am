@@ -7,6 +7,7 @@ AUTOMAKE_OPTIONS = foreign
 
 if ONLY_LIB
 lib_LTLIBRARIES = libmix.la			
+libmix_la_CPPFLAGS = -DSOMEFLAG
 libmix_la_SOURCES = CAAbstractControlChannel.cpp\
 		    CAAbstractXMLEncodable.cpp\
 		    CAAbstractXMLSignable.cpp\
@@ -167,7 +168,7 @@ else
 
 noinst_LIBRARIES = libproxytest.a
 sbin_PROGRAMS = mix
-
+libproxytest_a_CPPFLAGS = -DSOMEFLAG
 libproxytest_a_SOURCES = CAAbstractControlChannel.cpp\
 		    CAAbstractXMLEncodable.cpp\
 		    CAAbstractXMLSignable.cpp\
