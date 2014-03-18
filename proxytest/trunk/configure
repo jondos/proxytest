@@ -795,6 +795,7 @@ enable_new_mix_type
 enable_dynamic
 enable_dialog
 with_ssl_dir
+with_minixml
 with_xml_include
 with_xml_lib
 enable_debug
@@ -1508,8 +1509,9 @@ Optional Packages:
                           Specify architecure for optimisation
   --with-bits=32|64       Generate code for a 32-bit or 64-bit environment
   --with-ssl-dir=PATH     Specify path to OpenSSL installation
-  --with-xml-include=PATH Specify path to XERCES-C include files (without a
-                          trailing '/xercesc')
+  --with-minixxml         Use Mini-XML instead of XERCES-C
+  --with-xml-include=PATH Specify path to Mini-XML/XERCES-C include files
+                          (without a trailing '/xercesc')
   --with-xml-lib=PATH     Specify path to XERCES-C library files
 
 Some influential environment variables:
@@ -16468,11 +16470,8 @@ case "$host" in
 *-*-solaris*)
 		DEFAULTLIBS="$LIBS -lnsl -lsocket -lposix4"
 		;;
-*-*-*-android*)
-	DEFAULTLIBS="$LIBS -pthread"
-	;;
 *-*-linux*)
-	DEFAULTLIBS="$LIBS -lpthread"
+		DEFAULTLIBS="$LIBS -lpthread"
 	;;
 *-*-irix*)
 		CFLAGS="$CFLAGS "
@@ -16490,6 +16489,10 @@ case "$host" in
 	DEFAULTLIBS="$LIBS -L/usr/pkg/lib -liconv -lpthread"
 	;;
 *-*-drops*)
+	CFLAGS="$CFLAGS -DOS_TUDOS"
+	CXXFLAGS="$CXXFLAGS -DOS_TUDOS";
+	;;
+*-*-android*)
 	CFLAGS="$CFLAGS -DOS_TUDOS"
 	CXXFLAGS="$CXXFLAGS -DOS_TUDOS";
 	;;
@@ -18065,8 +18068,26 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: Xerces-C tests" >&5
-$as_echo "$as_me: Xerces-C tests" >&6;}
+
+
+useminixml="false"
+USE_MINIXML=""
+
+# Check whether --with-minixml was given.
+if test "${with_minixml+set}" = set; then :
+  withval=$with_minixml;
+		if test "x$withval" != "xno" ; then
+			useminixml="true"
+			USE_MINIXML="-DMXML_DOM"
+		fi
+
+
+fi
+
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: Mini-XML/Xerces-C tests" >&5
+$as_echo "$as_me: Mini-XML/Xerces-C tests" >&6;}
 
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -18094,13 +18115,14 @@ if test "x$prefix" != "xNONE" ; then
 	tryxmlincludedir="$tryxmlincludedir $prefix"
 fi
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for xerces-c includes" >&5
-$as_echo_n "checking for xerces-c includes... " >&6; }
+if test "x$useminixml" == "xtrue" ; then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Mini-XML includes" >&5
+$as_echo_n "checking for Mini-XML includes... " >&6; }
 
-for xmldir in "" $tryxmlincludedir ; do
-	CFLAGS="$saved_CFLAGS -I$xmldir -I$xmldir/xercesc"
-	CXXFLAGS="$saved_CXXFLAGS -I$xmldir -I$xmldir/xercesc"
-	if test "$cross_compiling" = yes; then :
+	for xmldir in "" $tryxmlincludedir ; do
+		CFLAGS="$saved_CFLAGS -I$xmldir -I$xmldir/xercesc"
+		CXXFLAGS="$saved_CXXFLAGS -I$xmldir -I$xmldir/xercesc"
+		if test "$cross_compiling" = yes; then :
   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error $? "cannot run test program while cross compiling
@@ -18109,36 +18131,81 @@ else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-				#include <dom/DOM.hpp>
-				int main(void)
-				{
-					return 0;
-				}
+					#include <mxml.h>
+					int main(void)
+					{
+						return 0;
+					}
 
 _ACEOF
 if ac_fn_cxx_try_run "$LINENO"; then :
 
-				{ $as_echo "$as_me:${as_lineno-$LINENO}: result: found in $xmldir" >&5
+					{ $as_echo "$as_me:${as_lineno-$LINENO}: result: found in $xmldir" >&5
 $as_echo "found in $xmldir" >&6; }
-				found_xmldir=1
-				break;
+					found_xmldir=1
+					break;
 
 else
-  if test -f "$xmldir/xercesc/util/XMLString.hpp"; then
-				{ $as_echo "$as_me:${as_lineno-$LINENO}: result: found in $xmldir" >&5
+  if test -f "$xmldir/mxml.h"; then
+					{ $as_echo "$as_me:${as_lineno-$LINENO}: result: found in $xmldir" >&5
 $as_echo "found in $xmldir" >&6; }
-				found_xmldir=1
-				break;
-			  fi
+					found_xmldir=1
+					break;
+				  fi
 
 fi
 rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
   conftest.$ac_objext conftest.beam conftest.$ac_ext
 fi
 
-done
+	done
+else
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for xerces-c includes" >&5
+$as_echo_n "checking for xerces-c includes... " >&6; }
+
+	for xmldir in "" $tryxmlincludedir ; do
+		CFLAGS="$saved_CFLAGS -I$xmldir -I$xmldir/xercesc"
+		CXXFLAGS="$saved_CXXFLAGS -I$xmldir -I$xmldir/xercesc"
+		if test "$cross_compiling" = yes; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "cannot run test program while cross compiling
+See \`config.log' for more details" "$LINENO" 5; }
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+					#include <dom/DOM.hpp>
+					int main(void)
+					{
+						return 0;
+					}
+
+_ACEOF
+if ac_fn_cxx_try_run "$LINENO"; then :
+
+					{ $as_echo "$as_me:${as_lineno-$LINENO}: result: found in $xmldir" >&5
+$as_echo "found in $xmldir" >&6; }
+					found_xmldir=1
+					break;
+
+else
+  if test -f "$xmldir/xercesc/util/XMLString.hpp"; then
+					{ $as_echo "$as_me:${as_lineno-$LINENO}: result: found in $xmldir" >&5
+$as_echo "found in $xmldir" >&6; }
+					found_xmldir=1
+					break;
+				  fi
+
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+	done
+fi
 if test -z "$found_xmldir"; then
-	as_fn_error $? "Xerces-C includes NOT found - please use --with-xml-include" "$LINENO" 5
+	as_fn_error $? "Mini-XML/Xerces-C includes NOT found - please use --with-xml-include" "$LINENO" 5
 fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for libxerces-c" >&5
@@ -18793,8 +18860,8 @@ fi
 
 fi
 
-CFLAGS="$CFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $DELAY_USERS $PAYMENT $INFOSERVICESERIAL $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS $WIRESHARK_CFLAGS"
-CXXFLAGS="$CXXFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $DELAY_USERS $PAYMENT $INFOSERVICESERIAL $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS $WIRESHARK_CFLAGS"
+CFLAGS="$CFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $DELAY_USERS $PAYMENT $INFOSERVICESERIAL $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $USE_MINIXML $OFLAGS $WIRESHARK_CFLAGS"
+CXXFLAGS="$CXXFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $DELAY_USERS $PAYMENT $INFOSERVICESERIAL $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $USE_MINIXML $OFLAGS $WIRESHARK_CFLAGS"
 LIBS="$LIBS $PAYMENT_LIB $MYSQL_LIB"
 
  if test x$DOTHETESTS = xyes; then
