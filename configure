@@ -636,6 +636,8 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+ONLY_LIB_FALSE
+ONLY_LIB_TRUE
 DOWIRESHARK_FALSE
 DOWIRESHARK_TRUE
 DOTESTS_FALSE
@@ -811,6 +813,7 @@ enable_crime_detection
 enable_tests
 enable_wireshark
 enable_manioq
+enable_build_only_lib
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1498,6 +1501,7 @@ Optional Features:
   --enable-tests          Build also some functional tests
   --enable-wireshark      Build also the Wireshark AN.ON protocol dissector
   --enable-manioq         Switch for Manioq provider mixes
+  --enable-build-only-lib Build just the library, but not the executable
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -18685,6 +18689,19 @@ if test "${enable_manioq+set}" = set; then :
 fi
 
 
+onlylib="false"
+# Check whether --enable-build-only-lib was given.
+if test "${enable_build_only_lib+set}" = set; then :
+  enableval=$enable_build_only_lib;
+		if test "x$enableval" != "xno" ; then
+			onlylib="true"
+		fi
+
+
+fi
+
+
+
 if test "x$DOTHETEST" != "xyes" ; then
 	LIBCPPUNIT=cppunit
 
@@ -18918,6 +18935,15 @@ else
   DOWIRESHARK_FALSE=
 fi
 
+ if test x$onlylib = xtrue; then
+  ONLY_LIB_TRUE=
+  ONLY_LIB_FALSE='#'
+else
+  ONLY_LIB_TRUE='#'
+  ONLY_LIB_FALSE=
+fi
+
+
 ac_config_files="$ac_config_files Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile test/Makefile gcm/Makefile wireshark/Makefile"
 
 cat >confcache <<\_ACEOF
@@ -19076,6 +19102,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${DOWIRESHARK_TRUE}" && test -z "${DOWIRESHARK_FALSE}"; then
   as_fn_error $? "conditional \"DOWIRESHARK\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${ONLY_LIB_TRUE}" && test -z "${ONLY_LIB_FALSE}"; then
+  as_fn_error $? "conditional \"ONLY_LIB\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 
