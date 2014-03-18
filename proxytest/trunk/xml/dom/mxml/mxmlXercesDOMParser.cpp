@@ -1,5 +1,5 @@
-#ifdef MXML_DOM
 #include "../../../StdAfx.h"
+#ifdef MXML_DOM
 #include "../../../CAUtil.hpp"
 
 int xercesdomparser_custom_load_callback( mxml_node_t * node, const char * text)

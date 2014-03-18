@@ -21,6 +21,12 @@ class XercesDOMParser
 					return m_uParseErrors;
 				}
 
+			///TODO: Check if the need to do something more
+			XERCES_CPP_NAMESPACE::DOMDocument*  adoptDocument()
+				{
+					return m_Doc;
+				}
+
 			XERCES_CPP_NAMESPACE::DOMDocument* getDocument()
 				{
 					return m_Doc;

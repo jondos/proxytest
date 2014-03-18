@@ -696,7 +696,6 @@ NEXT_USER:
 #endif//NEW_MIX_TYPE
 		return E_UNKNOWN;
 	}
-#endif //ONLY_LOCAL_PROXY
 
 /* last part of the main loop:
  * return true if the loop when at least one packet was sent
@@ -1070,3 +1069,5 @@ void CAFirstMixA::crimeSurveillance(CAIPAddrWithNetmask* surveillanceIPs, UINT32
 	}
 }
 #endif
+
+#endif //ONLY_LOCAL_PROXY

@@ -297,6 +297,7 @@ SINT32 CASymCipher::encrypt1CBCwithPKCS7(const UINT8* in,UINT32 inlen,UINT8* out
 	return E_SUCCESS;
 }
 
+#ifndef ONLY_LOCAL_PROXY
 SINT32 CASymCipher::testSpeed()
 {
 	const UINT32 runs=1000000;
@@ -317,6 +318,7 @@ SINT32 CASymCipher::testSpeed()
 	printf("CASymCiper::testSpeed() takes %u ms for %u * 1023 Bytes!\n",d,runs);
 	return E_SUCCESS;
 }
+#endif
 
 void CASymCipher::setGCMKeys(UINT8* keyRecv, UINT8* keySend)
 {

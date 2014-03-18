@@ -26,6 +26,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "StdAfx.h"
+#ifndef ONLY_LOCAL_PROXY
 #include "TermsAndConditions.hpp"
 #include "CAMsg.hpp"
 #include "CACmdLnOptions.hpp"
@@ -262,3 +263,5 @@ void TermsAndConditions::setIndexToNextEmptySlot()
 	/* Nothing is free */
 	currentTranslationIndex = translations;
 }
+#endif //ONLY_LOCAL_PROXY
+

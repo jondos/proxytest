@@ -252,7 +252,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>C:\data\vld\;$(INCLUDE_XERCES_C);$(INCLUDE_INTEL_IPP_CRYPTO);$(INCLUDE_XERCES_C)\xercesc;$(INCLUDE_OPENSSL);$(INCLUDE_PTHREADS);$(INCLUDE_ZLIB);$(INCLUDE_MYSQL);$(INCLUDE_POSTGRES_CLIENT_LIB)\postgresql;$(INCLUDE_POSTGRES_CLIENT_LIB);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\data\vld\;$(INCLUDE_XERCES_C);$(INCLUDE_INTEL_IPP_CRYPTO);$(INCLUDE_XERCES_C)\xercesc;$(INCLUDE_OPENSSL);$(INCLUDE_PTHREADS);$(INCLUDE_ZLIB);$(INCLUDE_MYSQL);$(INCLUDE_POSTGRES_CLIENT_LIB)\postgresql;$(INCLUDE_POSTGRES_CLIENT_LIB);$(INCLUDE_MXML);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_CONSOLE;_DEBUG;_REENTRANT;__MIX_TEST;__CLEANUP_C;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -279,9 +279,9 @@
       <Culture>0x0407</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>proxytest-lib.lib;ws2_32.lib;ssleay32.lib;libeay32.lib;pthreadVC2.lib;xerces-c_3D.lib</AdditionalDependencies>
+      <AdditionalDependencies>proxytest-lib.lib;ws2_32.lib;ssleay32.lib;libeay32.lib;pthreadVC2.lib;xerces-c_3D.lib;mxml1.lib</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>C:\data\vld\bin\Win32\Debug;.\proxytest-lib\Debug;$(LIB_XERCES_C_DEBUG);$(LIB_OPENSSL);$(LIB_PTHREADS);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\data\vld\bin\Win32\Debug;.\proxytest-lib\Debug;$(LIB_XERCES_C_DEBUG);$(LIB_OPENSSL);$(LIB_PTHREADS);$(LIB_MXML);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)proxytest.pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>

@@ -69,7 +69,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define HAVE_EPOLL //define if you have epoll support on your (Linux) system
 //#define MXML_DOM //define this if you wnat to use the Mix-XML library (www.minixml.org) instead of the default Xerces-C library
 //#define COUNTRY_STATS //collect stats about countries users come from
-//#define ONLY_LOCAL_PROXY //define to build only the local proxy (aka JAP)
+#define ONLY_LOCAL_PROXY //define to build only the local proxy (aka JAP)
 /* LERNGRUPPE: define this to get dynamic mixes */
 //#define DYNAMIC_MIX
 //#define SDTFA // specific logic needed by SDTFA, http://www.sdtfa.com
@@ -447,6 +447,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#if !defined(HAVE_MSG_DONTWAIT)&&!defined(MSG_DONTWAIT)
 		#define MSG_DONTWAIT 0
 	#endif
+	#ifndef S_IREAD
+		#define S_IREAD S_IRUSR
+	#endif
+	#ifndef S_IWRITE
+		#define S_IWRITE S_IWUSR
+	#endif
 #endif //WIn32 ?
 
 #include "basetypedefs.h"
@@ -499,6 +505,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define ASSERT(cond,msg) {if(!(cond)){CAMsg::printMsg(LOG_DEBUG,"ASSERT: %s (File: %s, Line: %u)\n",msg,__FILE__,__LINE__);}}
 #endif
 
+#if defined(HAVE_VSNPRINTF) && defined(HAVE_SNPRINTF)
+#define WITHOUT_TRIO  //we do not need trio, if we have native versions of (v)snprintf
+#endif
+
 
 #include <stdio.h>
 #include <time.h>
@@ -531,6 +541,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include <openssl/sha.h>
 	#include <openssl/md5.h>
 #endif
+
+#include "errorcodes.hpp"
+#include "typedefs.hpp"
+
 
 //For DOM
 #ifdef MXML_DOM
@@ -680,8 +694,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define MIX_VERSION_INFO "Mix-Version: " MIX_VERSION PAYMENT_VERSION_INFO DATA_RETENTION_LOG_INFO NEW_FLOW_CONTROL_INFO NEW_CHANNEL_ENCRYPTION_INFO WITH_INTEGRITY_CHECK_INFO "\nUsing: " OPENSSL_VERSION_TEXT "\nUsing Xerces-C: " MY_XERCES_VERSION "\n"
 #define MIX_VERSION_COMPATIBILITY PAYMENT_COMPATIBILITY " " NEW_FLOW_CONTROL_COMPATIBILITY " " NEW_CHANNEL_ENCRYPTION_COMPATIBILITY " " WITH_INTEGRITY_CHECK_COMPATIBILITY
 
-#include "errorcodes.hpp"
-#include "typedefs.hpp"
 #include "controlchannelids.h"
 #include "gcm/gcm.h"
 #ifdef PAYMENT

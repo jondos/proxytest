@@ -56,6 +56,7 @@ class DOMElement:public DOMNode
 				{
 					DOMNodeList* list=new DOMNodeList();
 					addElementsByTagName(list,name);
+					return list;
 				}
 
 	private:
@@ -70,7 +71,6 @@ class DOMElement:public DOMNode
 					for(UINT32 i=0;i<m_pAttrs->getLength();i++)
 						{
 							delete m_pAttrs->item(i);
-							m_pAttrs->item(i) = NULL;
 						}
 					delete m_pAttrs;
 					m_pAttrs = NULL;

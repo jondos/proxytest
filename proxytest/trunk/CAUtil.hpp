@@ -151,6 +151,12 @@ DOMElement* createDOMElement(XERCES_CPP_NAMESPACE::DOMDocument* pOwnerDoc,const 
 **/
 DOMText* createDOMText(XERCES_CPP_NAMESPACE::DOMDocument* pOwnerDoc,const char * const text);
 
+/** Gets the value from an DOM-Element as UINT32. If an error occurs, the default value is returned.
+*/
+SINT32 getDOMElementValue(const DOMElement * const pElem, UINT32& value, UINT32 defaultValue);
+
+SINT32 getDOMElementValue(const DOMElement * const pElem, UINT32* value);
+
 #ifndef ONLY_LOCAL_PROXY
 /** Creates an empty DOM DOcument.
 	*/
@@ -181,11 +187,7 @@ SINT32 getNodeName(const DOMNode * const pElem, UINT8* value,UINT32* valuelen);
 SINT32 getDOMElementValue(const DOMNode * const pElem, UINT64 &value);
 SINT32 getDOMElementValue(const DOMElement * const pElem, SINT64 &value);
 
-SINT32 getDOMElementValue(const DOMElement * const pElem,UINT32* value);
 SINT32 getDOMElementValue(const DOMElement * const pElem,SINT32* value);
-/** Gets the value from an DOM-Element as UINT32. If an error occurs, the default value is returned.
-*/
-SINT32 getDOMElementValue(const DOMElement * const pElem,UINT32& value,UINT32 defaultValue);
 
 SINT32 getDOMElementValue(const DOMElement * const pElem,UINT16* value);
 
