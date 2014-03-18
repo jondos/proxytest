@@ -8,5 +8,9 @@ AUTOMAKE_OPTIONS = foreign
 noinst_LIBRARIES = libxml.a
 libxml_a_SOURCES = DOM_Output.cpp DOM_Output.hpp
 
+if USE_MINIXML
+libxml_a_SOURCES += mxmlDOM.hpp mxmlDOMDocument.cpp mxmlXercesDOMParser.cpp
+endif
+
 includes = @INCLUDES@
 
